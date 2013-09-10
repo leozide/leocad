@@ -12,8 +12,13 @@ struct lcObjectSection;
 enum lcActionType
 {
 	LC_ACTION_CREATE_CAMERA,
-	LC_ACTION_MOVE_OBJECTS
-//	LC_NUM_ACTIONS
+	LC_ACTION_MOVE_OBJECTS,
+	LC_ACTION_ZOOM_CAMERA,
+	LC_ACTION_PAN_CAMERA,
+	LC_ACTION_ORBIT_CAMERA,
+	LC_ACTION_ROLL_CAMERA,
+	LC_ACTION_ZOOM_EXTENTS,
+	LC_ACTION_ZOOM_REGION
 };
 
 class lcModel
@@ -32,6 +37,8 @@ public:
 		return mSelectedObjects;
 	}
 
+	lcCamera* GetCamera(int CameraIndex);
+	void GetCameras(lcArray<lcCamera*>& Cameras);
 
 	void RenderBackground(View* View) const;
 	void RenderObjects(View* View) const;
@@ -50,21 +57,38 @@ public:
 	void SetCurrentTime(lcTime Time);
 
 	void BeginCameraTool(const lcVector3& Position, const lcVector3& TargetPosition, const lcVector3& UpVector);
-	void UpdateCameraTool(const lcVector3& Distance);
+	void UpdateCameraTool(const lcVector3& Distance, lcTime Time, bool AddKeys);
 	void EndCameraTool(bool Accept);
 
-	void BeginMoveTool(lcTime Time, bool AddKeys);
-	void UpdateMoveTool(const lcVector3& Distance);
+	void BeginMoveTool();
+	void UpdateMoveTool(const lcVector3& Distance, lcTime Time, bool AddKeys);
 	void EndMoveTool(bool Accept);
 
-//	void MoveSelectedObjects(const lcVector3& Distance);
+	void BeginZoomTool();
+	void UpdateZoomTool(float Distance, lcTime Time, bool AddKeys);
+	void EndZoomTool(bool Accept);
+
+	void BeginPanTool();
+	void UpdatePanTool(float DistanceX, float DistanceY, lcTime Time, bool AddKeys);
+	void EndPanTool(bool Accept);
+
+	void BeginOrbitTool(const lcVector3& Center);
+	void UpdateOrbitTool(float AngleX, float AngleY, lcTime Time, bool AddKeys);
+	void EndOrbitTool(bool Accept);
+
+	void BeginRollTool();
+	void UpdateRollTool(float Angle, lcTime Time, bool AddKeys);
+	void EndRollTool(bool Accept);
+
+	void ZoomExtents(View* View, const lcVector3& Center, const lcVector3* Points, lcTime Time, bool AddKeys);
+	void ZoomRegion(View* View, float Left, float Right, float Bottom, float Top, lcTime Time, bool AddKeys);
 
 protected:
 	void DeleteContents();
 	void Update(lcTime Time);
 
-	void BeginCheckpoint(const char* Name);
-	void EndCheckpoint(bool Accept);
+	void BeginCheckpoint(lcActionType ActionType);
+	void EndCheckpoint(bool Accept, bool SaveCheckpoint);
 	void ApplyCheckpoint(lcCheckpoint* Checkpoint);
 	void RevertCheckpoint(lcCheckpoint* Checkpoint);
 

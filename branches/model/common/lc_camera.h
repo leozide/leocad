@@ -17,6 +17,17 @@
 #define LC_CAMERA_SELECTION_MASK	(LC_CAMERA_POSITION_SELECTED | LC_CAMERA_TARGET_SELECTED | LC_CAMERA_UPVECTOR_SELECTED)
 #define LC_CAMERA_FOCUS_MASK		(LC_CAMERA_POSITION_FOCUSED | LC_CAMERA_TARGET_FOCUSED | LC_CAMERA_UPVECTOR_FOCUSED)
 
+enum lcViewpoint
+{
+	LC_VIEWPOINT_FRONT,
+	LC_VIEWPOINT_BACK,
+	LC_VIEWPOINT_TOP,
+	LC_VIEWPOINT_BOTTOM,
+	LC_VIEWPOINT_LEFT,
+	LC_VIEWPOINT_RIGHT,
+	LC_VIEWPOINT_HOME
+};
+
 enum lcCameraSection
 {
 	LC_CAMERA_POSITION,
@@ -208,7 +219,23 @@ public:
 //	virtual void GetRenderMeshes(View* View, bool PartsOnly, lcArray<lcRenderMesh>& OpaqueMeshes, lcArray<lcRenderMesh>& TranslucentMeshes) const;
 	virtual void RenderExtra(View* View) const;
 
-	virtual void Move(lcTime Time, bool AddKeys, const lcVector3& Distance);
+	virtual void Move(const lcVector3& Distance, lcTime Time, bool AddKey);
+
+	void Zoom(float Distance, lcTime Time, bool AddKeys);
+	void Pan(float DistanceX, float DistanceY, lcTime Time, bool AddKeys);
+	void Orbit(float AngleX, float AngleY, const lcVector3& Center, lcTime Time, bool AddKeys);
+	void Roll(float Angle, lcTime Time, bool AddKeys);
+	void ZoomExtents(View* View, const lcVector3& Center, const lcVector3* Points, lcTime Time, bool AddKeys);
+	void ZoomRegion(View* View, float Left, float Right, float Bottom, float Top, lcTime Time, bool AddKeys);
+
+	void CopySettings(const lcCamera* Camera);
+
+	void SetViewpoint(lcViewpoint Viewpoint);
+	void LoadProjection(float Aspect);
+
+	void StartTiledRendering(int tw, int th, int iw, int ih, float fAspect);
+	void GetTileInfo(int* row, int* col, int* width, int* height);
+	bool EndTile();
 
 	lcMatrix44 mWorldView;
 	lcVector3 mPosition;
@@ -223,11 +250,11 @@ public:
 	char mName[81];
 
 protected:
-	lcMesh* mMesh;
-
 	lcArray<lcObjectVector3Key> mPositionKeys;
 	lcArray<lcObjectVector3Key> mTargetPositionKeys;
 	lcArray<lcObjectVector3Key> mUpVectorKeys;
+
+	class TiledRender* mTR; // TODO: move tiled render to view class and remove tr.cpp
 };
 
 

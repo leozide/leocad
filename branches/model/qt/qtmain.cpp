@@ -478,6 +478,10 @@ void lcMainWindow::UpdateFocusObject()
 
 void lcMainWindow::UpdateCameraMenu()
 {
+	lcQMainWindow* window = (lcQMainWindow*)mHandle;
+
+	if (window)
+		window->updateCameraMenu();
 }
 
 
@@ -559,24 +563,6 @@ void lcMainWindow::UpdateTransformType(int NewType)
 
 	if (window)
 		window->updateTransformType(NewType);
-}
-
-void lcMainWindow::UpdateCameraMenu(const lcArray<Camera*>& Cameras)
-{
-	lcQMainWindow* window = (lcQMainWindow*)mHandle;
-
-	Camera* CurrentCamera = mActiveView ? mActiveView->mCamera : NULL;
-
-	if (window)
-		window->updateCameraMenu(Cameras, CurrentCamera);
-}
-
-void lcMainWindow::UpdateCurrentCamera(int CameraIndex)
-{
-	lcQMainWindow* window = (lcQMainWindow*)mHandle;
-
-	if (window)
-		window->updateCurrentCamera(CameraIndex);
 }
 
 void lcMainWindow::UpdateCategories()

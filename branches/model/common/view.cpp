@@ -2,7 +2,7 @@
 #include "view.h"
 #include "lc_mainwindow.h"
 #include "project.h"
-#include "camera.h"
+#include "lc_camera.h"
 #include "system.h"
 
 View::View(Project *project)
@@ -34,30 +34,30 @@ View::~View()
 		delete mCamera;
 }
 
-void View::SetCamera(Camera* camera, bool ForceCopy)
+void View::SetCamera(lcCamera* Camera, bool ForceCopy)
 {
-	if (camera->IsSimple() || ForceCopy)
+	if (Camera->IsSimple() || ForceCopy)
 	{
 		if (!mCamera || !mCamera->IsSimple())
-			mCamera = new Camera(true);
+			mCamera = new lcCamera(true);
 
-		mCamera->CopyPosition(camera);
+		mCamera->CopySettings(Camera);
 	}
 	else
 	{
 		if (mCamera && mCamera->IsSimple())
 			delete mCamera;
 
-		mCamera = camera;
+		mCamera = Camera;
 	}
 }
 
 void View::SetDefaultCamera()
 {
 	if (!mCamera || !mCamera->IsSimple())
-		mCamera = new Camera(true);
+		mCamera = new lcCamera(true);
 
-	mCamera->SetViewpoint(LC_VIEWPOINT_HOME, 1, false, false);
+	mCamera->SetViewpoint(LC_VIEWPOINT_HOME);
 }
 
 LC_CURSOR_TYPE View::GetCursor() const

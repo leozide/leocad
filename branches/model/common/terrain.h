@@ -1,8 +1,6 @@
 #ifndef _TERRAIN_H_
 #define _TERRAIN_H_
 
-class Camera;
-
 #define LC_TERRAIN_FLAT			0x01	// Flat terrain
 #define LC_TERRAIN_TEXTURE		0x02	// Use texture
 #define LC_TERRAIN_SMOOTH		0x04	// Smooth shading
@@ -40,7 +38,7 @@ public:
 	Terrain& operator=(const Terrain& source);
 
 	void LoadTexture();
-	void Render(Camera* pCam, float aspect);
+	void Render(lcCamera* pCam, float aspect);
 	void LoadDefaults(bool bLinear);
 	void SetSize(float uSize, float vSize);
 	void GetSize(float *uSize, float *vSize);
@@ -65,7 +63,7 @@ public:
 
 protected:
 	void FreeMemory();
-	void FindVisiblePatches(Camera* pCam, float aspect);
+	void FindVisiblePatches(lcCamera* pCam, float aspect);
 
 	float** m_pControl;
 	TerrainPatch** m_Patches;

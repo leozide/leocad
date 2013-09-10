@@ -9,9 +9,10 @@
 #include "lc_application.h"
 #include "pieceinf.h"
 #include "project.h"
+#include "lc_model.h"
 #include "preview.h"
 #include "piece.h"
-#include "camera.h"
+#include "lc_camera.h"
 #include "view.h"
 #include "lc_qpartstree.h"
 #include "lc_qcolorlist.h"
@@ -836,7 +837,7 @@ void lcQMainWindow::print(QPrinter *printer)
 						{
 							lcuint8* imageBuffer = (lcuint8*)malloc(stepWidth * stepHeight * 4);
 
-							Camera* camera = view.mCamera;
+							lcCamera* camera = view.mCamera;
 							camera->StartTiledRendering(tileWidth, tileHeight, stepWidth, stepHeight, aspectRatio);
 							do 
 							{
@@ -1207,11 +1208,15 @@ void lcQMainWindow::updateTransformType(int newType)
 	actions[LC_EDIT_TRANSFORM]->setIcon(QIcon(iconNames[newType]));
 }
 
-void lcQMainWindow::updateCameraMenu(const lcArray<Camera*>& cameras, Camera* currentCamera)
+void lcQMainWindow::updateCameraMenu()
 {
-	int actionIdx, currentIndex = -1;
+	lcCamera* currentCamera = gMainWindow->mActiveView ? gMainWindow->mActiveView->mCamera : NULL;
+	int currentIndex = -1;
 
-	for (actionIdx = LC_VIEW_CAMERA_FIRST; actionIdx <= LC_VIEW_CAMERA_LAST; actionIdx++)
+	lcArray<lcCamera*> cameras;
+	lcGetActiveProject()->mActiveModel->GetCameras(cameras);
+
+	for (int actionIdx = LC_VIEW_CAMERA_FIRST; actionIdx <= LC_VIEW_CAMERA_LAST; actionIdx++)
 	{
 		QAction* action = actions[actionIdx];
 		int cameraIdx = actionIdx - LC_VIEW_CAMERA_FIRST;
@@ -1221,19 +1226,14 @@ void lcQMainWindow::updateCameraMenu(const lcArray<Camera*>& cameras, Camera* cu
 			if (currentCamera == cameras[cameraIdx])
 				currentIndex = cameraIdx;
 
-			action->setText(cameras[cameraIdx]->GetName());
+			action->setText(cameras[cameraIdx]->mName);
 			action->setVisible(true);
 		}
 		else
 			action->setVisible(false);
 	}
 
-	updateCurrentCamera(currentIndex);
-}
-
-void lcQMainWindow::updateCurrentCamera(int cameraIndex)
-{
-	int actionIndex = LC_VIEW_CAMERA_FIRST + cameraIndex;
+	int actionIndex = LC_VIEW_CAMERA_FIRST + currentIndex;
 
 	if (actionIndex < LC_VIEW_CAMERA_FIRST || actionIndex > LC_VIEW_CAMERA_LAST)
 		actionIndex = LC_VIEW_CAMERA_NONE;

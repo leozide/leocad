@@ -17,17 +17,6 @@ class CameraTarget;
 class TiledRender;
 class View;
 
-enum LC_VIEWPOINT
-{
-	LC_VIEWPOINT_FRONT,
-	LC_VIEWPOINT_BACK,
-	LC_VIEWPOINT_TOP,
-	LC_VIEWPOINT_BOTTOM,
-	LC_VIEWPOINT_LEFT,
-	LC_VIEWPOINT_RIGHT,
-	LC_VIEWPOINT_HOME
-};
-
 typedef enum
 {
 	LC_CAMERA_FRONT,LC_CAMERA_BACK,
@@ -152,7 +141,6 @@ public:
 	void DoRotate(int dx, int dy, int mouse, unsigned short nTime, bool bAnimation, bool bAddKey, float* center);
 	void DoRoll(int dx, int mouse, unsigned short nTime, bool bAnimation, bool bAddKey);
 	void Move(unsigned short nTime, bool bAnimation, bool bAddKey, float x, float y, float z);
-	void SetViewpoint(LC_VIEWPOINT Viewpoint, unsigned short nTime, bool bAnimation, bool bAddKey);
 
 	void StartTiledRendering(int tw, int th, int iw, int ih, float fAspect);
 	void GetTileInfo(int* row, int* col, int* width, int* height);

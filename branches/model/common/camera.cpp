@@ -810,44 +810,6 @@ void Camera::DoRoll(int dx, int mouse, unsigned short nTime, bool bAnimation, bo
 	UpdatePosition(nTime, bAnimation);
 }
 
-void Camera::SetViewpoint(LC_VIEWPOINT Viewpoint, unsigned short nTime, bool bAnimation, bool bAddKey)
-{
-	lcVector3 Positions[] =
-	{
-		lcVector3(  0.0f, -50.0f,   0.0f), // LC_VIEWPOINT_FRONT
-		lcVector3(  0.0f,  50.0f,   0.0f), // LC_VIEWPOINT_BACK
-		lcVector3(  0.0f,   0.0f,  50.0f), // LC_VIEWPOINT_TOP
-		lcVector3(  0.0f,   0.0f, -50.0f), // LC_VIEWPOINT_BOTTOM
-		lcVector3( 50.0f,   0.0f,   0.0f), // LC_VIEWPOINT_LEFT
-		lcVector3(-50.0f,   0.0f,   0.0f), // LC_VIEWPOINT_RIGHT
-		lcVector3(-15.0f, -15.0f,   7.5f)  // LC_VIEWPOINT_HOME
-	};
-
-	lcVector3 Ups[] =
-	{
-		lcVector3( 0.0f, 0.0f, 1.0f),
-		lcVector3( 0.0f, 0.0f, 1.0f),
-		lcVector3( 0.0f, 1.0f, 0.0f),
-		lcVector3( 0.0f,-1.0f, 0.0f),
-		lcVector3( 0.0f, 0.0f, 1.0f),
-		lcVector3( 0.0f, 0.0f, 1.0f),
-		lcVector3(-0.2357f, -0.2357f, 0.94281f)
-	};
-
-	mPosition = Positions[Viewpoint];
-	mTargetPosition = lcVector3(0, 0, 0);
-	mUpVector = Ups[Viewpoint];
-
-	if (!IsSimple())
-	{
-		ChangeKey(nTime, bAnimation, bAddKey, mPosition, LC_CK_EYE);
-		ChangeKey(nTime, bAnimation, bAddKey, mTargetPosition, LC_CK_TARGET);
-		ChangeKey(nTime, bAnimation, bAddKey, mUpVector, LC_CK_UP);
-	}
-
-	UpdatePosition(nTime, bAnimation);
-}
-
 void Camera::StartTiledRendering(int tw, int th, int iw, int ih, float fAspect)
 {
 	m_pTR = new TiledRender();

@@ -82,7 +82,7 @@ public:
 //	virtual void GetRenderMeshes(View* View, bool PartsOnly, lcArray<lcRenderMesh>& OpaqueMeshes, lcArray<lcRenderMesh>& TranslucentMeshes) const = 0;
 	virtual void RenderExtra(View* View) const = 0;
 
-	virtual void Move(lcTime Time, bool AddKeys, const lcVector3& Distance) = 0;
+	virtual void Move(const lcVector3& Distance, lcTime Time, bool AddKeys) = 0;
 
 protected:
 	template<typename T>
@@ -102,27 +102,59 @@ protected:
 	}
 
 	template<typename T>
-	void AddKey(lcArray< lcObjectKey<T> >& Keys, lcTime Time, const T& Value)
+	void ChangeKey(lcArray< lcObjectKey<T> >& Keys, const T& Value, lcTime Time, bool AddKey)
 	{
-		lcObjectKey<T>* Key = &Keys[0];
+		lcObjectKey<T>* Key;
 
 		for (int KeyIdx = 0; KeyIdx < Keys.GetSize(); KeyIdx++)
 		{
-			if (Keys[KeyIdx].Time == Time)
+			Key = &Keys[KeyIdx];
+
+			if (Key->Time == Time)
 			{
-				Key = &Keys[KeyIdx];
-				break;
+				Key->Value = Value;
+
+				return;
 			}
 
-			if (Keys[KeyIdx].Time > Time)
+			if (Key->Time > Time)
 			{
-				Key = &Keys.InsertAt(KeyIdx);
-				break;
+				if (AddKey)
+				{
+					Key = &Keys.InsertAt(KeyIdx);
+
+					Key->Time = Time;
+					Key->Value = Value;
+				}
+				else if (KeyIdx)
+				{
+					Key = &Keys[KeyIdx - 1];
+
+					Key->Value = Value;
+				}
+				else
+				{
+					Key->Time = Time;
+					Key->Value = Value;
+				}
+
+				return;
 			}
 		}
 
-		Key->Time = Time;
-		Key->Value = Value;
+		if (AddKey || Keys.GetSize() == 0)
+		{
+			Key = &Keys.Add();
+
+			Key->Time = Time;
+			Key->Value = Value;
+		}
+		else
+		{
+			Key = &Keys[Keys.GetSize() - 1];
+
+			Key->Value = Value;
+		}
 	}
 
 	lcObjectType mObjectType;

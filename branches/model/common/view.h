@@ -3,7 +3,6 @@
 
 #include "lc_glwidget.h"
 
-class Camera;
 class Project;
 
 class View : public lcGLWidget
@@ -25,13 +24,13 @@ public:
 	void OnMouseMove();
 	void OnMouseWheel(float Direction);
 
-	void SetCamera(Camera* camera, bool ForceCopy);
+	void SetCamera(lcCamera* Camera, bool ForceCopy);
 	void SetDefaultCamera();
 
 	LC_CURSOR_TYPE GetCursor() const;
 
 	Project* m_Project;
-	Camera* mCamera;
+	lcCamera* mCamera;
 	float m_OverlayScale;
 };
 

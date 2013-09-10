@@ -1,6 +1,3 @@
-// Terrain: a Bezier surface.
-//
-
 #include "lc_global.h"
 #include <math.h>
 #include <stdlib.h>
@@ -9,7 +6,7 @@
 #include "opengl.h"
 #include "terrain.h"
 #include "lc_file.h"
-#include "camera.h"
+#include "lc_camera.h"
 #include "system.h"
 #include "lc_texture.h"
 #include "lc_profile.h"
@@ -571,14 +568,14 @@ void Terrain::Tesselate()
 	}
 }
 
-void Terrain::Render(Camera* pCam, float aspect)
+void Terrain::Render(lcCamera* pCam, float aspect)
 {
 	if (m_nOptions & LC_TERRAIN_FLAT)
 	{
 		const lcVector3& eye = pCam->mPosition;
 		glPushMatrix();
 		glTranslatef(eye[0], eye[1], 0);
-		glScalef(pCam->m_zFar, pCam->m_zFar, 1);
+		glScalef(pCam->mFar, pCam->mFar, 1);
 
 		if (m_nOptions & LC_TERRAIN_TEXTURE)
 		{
@@ -591,8 +588,8 @@ float tw = 15.0f, th = 15.0f;
 //	th = 2*pCam->m_zFar/m_nBackgroundSize;
 
 float tx, ty;
-tx = (tw*eye[0])/(2*pCam->m_zFar);
-ty = (th*eye[1])/(2*pCam->m_zFar);
+tx = (tw*eye[0])/(2*pCam->mFar);
+ty = (th*eye[1])/(2*pCam->mFar);
 
 			glEnableClientState(GL_VERTEX_ARRAY);
 			glEnableClientState(GL_TEXTURE_COORD_ARRAY);
@@ -684,14 +681,14 @@ ty = (th*eye[1])/(2*pCam->m_zFar);
 	}
 }
 
-void Terrain::FindVisiblePatches(Camera* pCam, float aspect)
+void Terrain::FindVisiblePatches(lcCamera* pCam, float aspect)
 {
 	// Get camera position information.
 	const lcVector3& eye = pCam->mPosition;
 
 	// Get perspective information.
-	float alpha = pCam->m_fovy / 2.0f * LC_DTOR;
-	float halfFovY = pCam->m_fovy / 2.0f * LC_DTOR;
+	float alpha = pCam->mFOV / 2.0f * LC_DTOR;
+	float halfFovY = pCam->mFOV / 2.0f * LC_DTOR;
 	float halfFovX = (float)atan(tan(halfFovY) * aspect);
 	float beta = 2.0f * halfFovX;
 
@@ -738,7 +735,7 @@ void Terrain::FindVisiblePatches(Camera* pCam, float aspect)
 	float nearD = eye[0]*-nearNormal[0] + eye[1]*-nearNormal[1] + eye[2]*-nearNormal[2];
 	
 	// For the far plane, find the point farDist away from the eye along the front vector.
-	float farDist = pCam->m_zFar;
+	float farDist = pCam->mFar;
 	float farPt[3] = { front[0], front[1], front[2] };
 	float invR = farDist/(float)sqrt(farPt[0]*farPt[0]+farPt[1]*farPt[1]+farPt[2]*farPt[2]);
 	farPt[0] = farPt[0]*invR;

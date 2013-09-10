@@ -4,6 +4,8 @@
 #include "lc_colors.h"
 #include "lc_application.h"
 #include "project.h"
+#include "view.h"
+#include "tr.h"
 
 lcCamera::lcCamera(bool Simple) :
 	lcObject(LC_OBJECT_TYPE_CAMERA)
@@ -15,11 +17,26 @@ lcCamera::lcCamera(bool Simple) :
 	mState = Simple ? LC_CAMERA_SIMPLE : 0;
 	mName[0] = 0;
 
-	mMesh = NULL;
+	mTR = NULL;
 }
 
 lcCamera::~lcCamera()
 {
+}
+
+void lcCamera::CopySettings(const lcCamera* Camera)
+{
+	LC_ASSERT(IsSimple());
+
+	mFOV = Camera->mFOV;
+	mNear = Camera->mNear;
+	mFar = Camera->mFar;
+
+	mPosition = Camera->mPosition;
+	mTargetPosition = Camera->mTargetPosition;
+	mUpVector = Camera->mUpVector;
+
+	Update();
 }
 
 void lcCamera::Save(lcFile& File)
@@ -306,22 +323,22 @@ void lcCamera::RenderExtra(View* View) const
 	}
 }
 
-void lcCamera::Move(lcTime Time, bool AddKeys, const lcVector3& Distance)
+void lcCamera::Move(const lcVector3& Distance, lcTime Time, bool AddKeys)
 {
 	if (mState & LC_CAMERA_POSITION_SELECTED)
 	{
 		mPosition += Distance;
 
-		if (!IsSimple() && AddKeys)
-			AddKey(mPositionKeys, Time, mPosition);
+		if (!IsSimple())
+			ChangeKey(mPositionKeys, mPosition, Time, AddKeys);
 	}
 
 	if (mState & LC_CAMERA_TARGET_SELECTED)
 	{
 		mTargetPosition += Distance;
 
-		if (!IsSimple() && AddKeys)
-			AddKey(mTargetPositionKeys, Time, mTargetPosition);
+		if (!IsSimple())
+			ChangeKey(mTargetPositionKeys, mTargetPosition, Time, AddKeys);
 	}
 
 	if (mState & LC_CAMERA_UPVECTOR_SELECTED)
@@ -329,8 +346,8 @@ void lcCamera::Move(lcTime Time, bool AddKeys, const lcVector3& Distance)
 		mUpVector += Distance;
 		mUpVector.Normalize();
 
-		if (!IsSimple() && AddKeys)
-			AddKey(mUpVectorKeys, Time, mUpVector);
+		if (!IsSimple())
+			ChangeKey(mUpVectorKeys, mUpVector, Time, AddKeys);
 	}
 
 	lcVector3 FrontVector(lcNormalize(mTargetPosition - mPosition));
@@ -343,8 +360,216 @@ void lcCamera::Move(lcTime Time, bool AddKeys, const lcVector3& Distance)
 	mUpVector.Normalize();
 }
 
+void lcCamera::Zoom(float Distance, lcTime Time, bool AddKeys)
+{
+	lcVector3 FrontVector(mTargetPosition - mPosition);
+	FrontVector.Normalize();
+	FrontVector *= Distance;
 
+	// TODO: option to move eye, target or both
+	mPosition += FrontVector;
+	mTargetPosition += FrontVector;
 
+	if (!IsSimple())
+	{
+		ChangeKey(mPositionKeys, mPosition, Time, AddKeys);
+		ChangeKey(mTargetPositionKeys, mTargetPosition, Time, AddKeys);
+	}
+}
+
+void lcCamera::Pan(float DistanceX, float DistanceY, lcTime Time, bool AddKeys)
+{
+	lcVector3 FrontVector(mTargetPosition - mPosition);
+	lcVector3 SideVector = lcNormalize(lcCross(mUpVector, FrontVector));
+
+	lcVector3 MoveVec = (SideVector * DistanceX) + (mUpVector * DistanceY);
+	mPosition += MoveVec;
+	mTargetPosition += MoveVec;
+
+	if (!IsSimple())
+	{
+		ChangeKey(mPositionKeys, mPosition, Time, AddKeys);
+		ChangeKey(mTargetPositionKeys, mTargetPosition, Time, AddKeys);
+	}
+}
+
+void lcCamera::Orbit(float AngleX, float AngleY, const lcVector3& Center, lcTime Time, bool AddKeys)
+{
+	lcVector3 FrontVector(mTargetPosition - mPosition);
+
+	lcVector3 Z(lcNormalize(lcVector3(FrontVector[0], FrontVector[1], 0)));
+	if (isnan(Z[0]) || isnan(Z[1]))
+		Z = lcNormalize(lcVector3(mUpVector[0], mUpVector[1], 0));
+
+	if (mUpVector[2] < 0)
+	{
+		Z[0] = -Z[0];
+		Z[1] = -Z[1];
+		AngleX = -AngleX;
+	}
+
+	lcMatrix44 YRot(lcVector4(Z[0], Z[1], 0.0f, 0.0f), lcVector4(-Z[1], Z[0], 0.0f, 0.0f), lcVector4(0.0f, 0.0f, 1.0f, 0.0f), lcVector4(0.0f, 0.0f, 0.0f, 1.0f));
+	lcMatrix44 transform = lcMul(lcMul(lcMul(lcMatrix44AffineInverse(YRot), lcMatrix44RotationY(AngleY)), YRot), lcMatrix44RotationZ(AngleX));
+
+	mPosition = lcMul31(mPosition - Center, transform) + Center;
+	mTargetPosition = lcMul31(mTargetPosition - Center, transform) + Center;
+	mUpVector = lcMul31(mUpVector, transform);
+
+	if (!IsSimple())
+	{
+		ChangeKey(mPositionKeys, mPosition, Time, AddKeys);
+		ChangeKey(mUpVectorKeys, mUpVector, Time, AddKeys);
+	}
+}
+
+void lcCamera::Roll(float Angle, lcTime Time, bool AddKeys)
+{
+	lcVector3 FrontVector(mTargetPosition - mPosition);
+	lcMatrix44 Rotation = lcMatrix44FromAxisAngle(FrontVector, Angle);
+
+	mUpVector = lcMul30(mUpVector, Rotation);
+
+	if (!IsSimple())
+		ChangeKey(mUpVectorKeys, mUpVector, Time, AddKeys);
+}
+
+void lcCamera::ZoomExtents(View* View, const lcVector3& Center, const lcVector3* Points, lcTime Time, bool AddKeys)
+{
+	int Viewport[4] = { 0, 0, View->mWidth, View->mHeight };
+	float Aspect = (float)Viewport[2]/(float)Viewport[3];
+
+	lcVector3 Position(mPosition + Center - mTargetPosition);
+
+	lcMatrix44 Projection = lcMatrix44Perspective(mFOV, Aspect, mNear, mFar);
+
+	mPosition = lcZoomExtents(Position, mWorldView, Projection, Points, 8);
+	mTargetPosition = Center;
+
+	if (!IsSimple())
+	{
+		ChangeKey(mPositionKeys, mPosition, Time, AddKeys);
+		ChangeKey(mTargetPositionKeys, mTargetPosition, Time, AddKeys);
+	}
+}
+
+void lcCamera::ZoomRegion(View* View, float Left, float Right, float Bottom, float Top, lcTime Time, bool AddKeys)
+{
+	int Viewport[4] = { 0, 0, View->mWidth, View->mHeight };
+	float Aspect = (float)Viewport[2]/(float)Viewport[3];
+
+	const lcMatrix44& ModelView = mWorldView;
+	lcMatrix44 Projection = lcMatrix44Perspective(mFOV, Aspect, mNear, mFar);
+
+	// Unproject screen points to world space.
+	lcVector3 Points[3] =
+	{
+		lcVector3((Left + Right) / 2, (Top + Bottom) / 2, 0.9f),
+		lcVector3((float)Viewport[2] / 2.0f, (float)Viewport[3] / 2.0f, 0.9f),
+		lcVector3((float)Viewport[2] / 2.0f, (float)Viewport[3] / 2.0f, 0.1f),
+	};
+
+	lcUnprojectPoints(Points, 3, ModelView, Projection, Viewport);
+
+	lcVector3 Eye = mPosition;
+	Eye = Eye + (Points[0] - Points[1]);
+
+	lcVector3 Target = mTargetPosition;
+	Target = Target + (Points[0] - Points[1]);
+
+	float RatioX = (Right - Left) / Viewport[2];
+	float RatioY = (Top - Bottom) / Viewport[3];
+	float ZoomFactor = -lcMax(RatioX, RatioY) + 0.75f;
+
+	lcVector3 Dir = Points[1] - Points[2];
+	mPosition = Eye + Dir * ZoomFactor;
+	mTargetPosition = Target + Dir * ZoomFactor;
+
+	if (!IsSimple())
+	{
+		ChangeKey(mPositionKeys, mPosition, Time, AddKeys);
+		ChangeKey(mTargetPositionKeys, mTargetPosition, Time, AddKeys);
+	}
+}
+
+void lcCamera::SetViewpoint(lcViewpoint Viewpoint)
+{
+	lcVector3 Positions[] =
+	{
+		lcVector3(  0.0f, -50.0f,   0.0f), // LC_VIEWPOINT_FRONT
+		lcVector3(  0.0f,  50.0f,   0.0f), // LC_VIEWPOINT_BACK
+		lcVector3(  0.0f,   0.0f,  50.0f), // LC_VIEWPOINT_TOP
+		lcVector3(  0.0f,   0.0f, -50.0f), // LC_VIEWPOINT_BOTTOM
+		lcVector3( 50.0f,   0.0f,   0.0f), // LC_VIEWPOINT_LEFT
+		lcVector3(-50.0f,   0.0f,   0.0f), // LC_VIEWPOINT_RIGHT
+		lcVector3(-10.0f, -10.0f,   5.0f)  // LC_VIEWPOINT_HOME
+	};
+
+	lcVector3 Ups[] =
+	{
+		lcVector3( 0.0f, 0.0f, 1.0f),
+		lcVector3( 0.0f, 0.0f, 1.0f),
+		lcVector3( 0.0f, 1.0f, 0.0f),
+		lcVector3( 0.0f,-1.0f, 0.0f),
+		lcVector3( 0.0f, 0.0f, 1.0f),
+		lcVector3( 0.0f, 0.0f, 1.0f),
+		lcVector3(-0.2357f, -0.2357f, 0.94281f)
+	};
+
+	LC_ASSERT(IsSimple());
+
+	mPosition = Positions[Viewpoint];
+	mTargetPosition = lcVector3(0, 0, 0);
+	mUpVector = Ups[Viewpoint];
+
+	Update();
+}
+
+void lcCamera::LoadProjection(float Aspect)
+{
+	if (mTR != NULL)
+		mTR->BeginTile();
+	else
+	{
+		glMatrixMode(GL_PROJECTION);
+		glLoadMatrixf(lcMatrix44Perspective(mFOV, Aspect, mNear, mFar));
+	}
+
+	glMatrixMode(GL_MODELVIEW);
+	glLoadMatrixf(mWorldView);
+}
+
+void lcCamera::StartTiledRendering(int tw, int th, int iw, int ih, float fAspect)
+{
+	mTR = new TiledRender();
+	mTR->TileSize(tw, th, 0);
+	mTR->ImageSize(iw, ih);
+	mTR->Perspective(mFOV, fAspect, mNear, mFar);
+}
+
+void lcCamera::GetTileInfo(int* row, int* col, int* width, int* height)
+{
+	if (mTR != NULL)
+	{
+		*row = mTR->m_Rows - mTR->m_CurrentRow - 1;
+		*col = mTR->m_CurrentColumn;
+		*width = mTR->m_CurrentTileWidth;
+		*height = mTR->m_CurrentTileHeight;
+	}
+}
+
+bool lcCamera::EndTile()
+{
+	if (mTR != NULL)
+	{
+		if (mTR->EndTile())
+			return true;
+
+		delete mTR;
+		mTR = NULL;
+	}
+
+	return false;
+}
 /*
 Camera::Camera(bool Simple)
 	: Object(LC_OBJECT_CAMERA)
@@ -601,87 +826,6 @@ void Camera::FileSave(lcFile& file) const
 /////////////////////////////////////////////////////////////////////////////
 // Camera operations
 
-void Camera::Move(unsigned short nTime, bool bAnimation, bool bAddKey, float dx, float dy, float dz)
-{
-	lcVector3 MoveVec(dx, dy, dz);
-
-	if (IsEyeSelected())
-	{
-		mPosition += MoveVec;
-
-		if (!IsSimple())
-			ChangeKey(nTime, bAnimation, bAddKey, mPosition, LC_CK_EYE);
-	}
-
-	if (IsTargetSelected())
-	{
-		mTargetPosition += MoveVec;
-
-		if (!IsSimple())
-			ChangeKey(nTime, bAnimation, bAddKey, mTargetPosition, LC_CK_TARGET);
-	}
-
-	// Fix the up vector
-	lcVector3 FrontVector(mTargetPosition - mPosition);
-	lcVector3 SideVector = lcCross(FrontVector, mUpVector);
-	mUpVector = lcNormalize(lcCross(SideVector, FrontVector));
-
-	if (!IsSimple())
-		ChangeKey(nTime, bAnimation, bAddKey, mUpVector, LC_CK_UP);
-}
-
-void Camera::Select(bool bSelecting, bool bFocus, bool bMultiple)
-{
-	if (bSelecting == true)
-	{
-		if (bFocus == true)
-		{
-			m_nState |= (LC_CAMERA_FOCUSED|LC_CAMERA_SELECTED);
-
-			m_pTarget->Select(false, true, bMultiple);
-		}
-		else
-			m_nState |= LC_CAMERA_SELECTED;
-
-		if (bMultiple == false)
-			m_pTarget->Select(false, false, bMultiple);
-	}
-	else
-	{
-		if (bFocus == true)
-			m_nState &= ~(LC_CAMERA_FOCUSED);
-		else
-			m_nState &= ~(LC_CAMERA_SELECTED|LC_CAMERA_FOCUSED);
-	}
-}
-
-void Camera::SelectTarget(bool bSelecting, bool bFocus, bool bMultiple)
-{
-	// FIXME: the target should handle this
-
-	if (bSelecting == true)
-	{
-		if (bFocus == true)
-		{
-			m_nState |= (LC_CAMERA_TARGET_FOCUSED|LC_CAMERA_TARGET_SELECTED);
-
-			Select(false, true, bMultiple);
-		}
-		else
-			m_nState |= LC_CAMERA_TARGET_SELECTED;
-
-		if (bMultiple == false)
-			Select(false, false, bMultiple);
-	}
-	else
-	{
-		if (bFocus == true)
-			m_nState &= ~(LC_CAMERA_TARGET_FOCUSED);
-		else
-			m_nState &= ~(LC_CAMERA_TARGET_SELECTED|LC_CAMERA_TARGET_FOCUSED);
-	}
-}
-
 void Camera::UpdatePosition(unsigned short nTime, bool bAnimation)
 {
 	if (!IsSimple())
@@ -692,45 +836,6 @@ void Camera::UpdatePosition(unsigned short nTime, bool bAnimation)
 	mUpVector = lcNormalize(lcCross(SideVector, FrontVector));
 
 	mWorldView = lcMatrix44LookAt(mPosition, mTargetPosition, mUpVector);
-}
-
-void Camera::CopyPosition(const Camera* camera)
-{
-	m_fovy = camera->m_fovy;
-	m_zNear = camera->m_zNear;
-	m_zFar = camera->m_zFar;
-
-	mWorldView = camera->mWorldView;
-	mPosition = camera->mPosition;
-	mTargetPosition = camera->mTargetPosition;
-	mUpVector = camera->mUpVector;
-}
-
-bool Camera::IntersectsVolume(const lcVector4 Planes[6]) const
-{
-}
-
-void Camera::LoadProjection(float fAspect)
-{
-	if (m_pTR != NULL)
-		m_pTR->BeginTile();
-	else
-	{
-		glMatrixMode(GL_PROJECTION);
-		glLoadMatrixf(lcMatrix44Perspective(m_fovy, fAspect, m_zNear, m_zFar));
-#if 0
-		ymax = 10;//(m_zFar-m_zNear)*tan(DTOR*m_fovy)/3;
-		ymin = -ymax;
-		xmin = ymin * fAspect;
-		xmax = ymax * fAspect;
-		znear = -60;
-		zfar = 60;
-		glOrtho(xmin, xmax, ymin, ymax, znear, zfar);
-#endif
-	}
-
-	glMatrixMode(GL_MODELVIEW);
-	glLoadMatrixf(mWorldView);
 }
 
 void Camera::ZoomExtents(View* view, const lcVector3& Center, const lcVector3* Points, int NumPoints, unsigned short nTime, bool bAnimation, bool bAddKey)
@@ -753,202 +858,5 @@ void Camera::ZoomExtents(View* view, const lcVector3& Center, const lcVector3* P
 	}
 
 	UpdatePosition(nTime, bAnimation);
-}
-
-void Camera::ZoomRegion(View* view, float Left, float Right, float Bottom, float Top, unsigned short nTime, bool bAnimation, bool bAddKey)
-{
-	int Viewport[4] = { 0, 0, view->mWidth, view->mHeight };
-	float Aspect = (float)Viewport[2]/(float)Viewport[3];
-
-	const lcMatrix44& ModelView = mWorldView;
-	lcMatrix44 Projection = lcMatrix44Perspective(m_fovy, Aspect, m_zNear, m_zFar);
-
-	// Unproject screen points to world space.
-	lcVector3 Points[3] =
-	{
-		lcVector3((Left + Right) / 2, (Top + Bottom) / 2, 0.9f),
-		lcVector3((float)Viewport[2] / 2.0f, (float)Viewport[3] / 2.0f, 0.9f),
-		lcVector3((float)Viewport[2] / 2.0f, (float)Viewport[3] / 2.0f, 0.1f),
-	};
-
-	lcUnprojectPoints(Points, 3, ModelView, Projection, Viewport);
-
-	// Center camera.
-	lcVector3 Eye = mPosition;
-	Eye = Eye + (Points[0] - Points[1]);
-
-	lcVector3 Target = mTargetPosition;
-	Target = Target + (Points[0] - Points[1]);
-
-	// Zoom in/out.
-	float RatioX = (Right - Left) / Viewport[2];
-	float RatioY = (Top - Bottom) / Viewport[3];
-	float ZoomFactor = -lcMax(RatioX, RatioY) + 0.75f;
-
-	lcVector3 Dir = Points[1] - Points[2];
-	mPosition = Eye + Dir * ZoomFactor;
-	mTargetPosition = Target + Dir * ZoomFactor;
-
-	// Change the camera and redraw.
-	if (!IsSimple())
-	{
-		ChangeKey(nTime, bAnimation, bAddKey, mPosition, LC_CK_EYE);
-		ChangeKey(nTime, bAnimation, bAddKey, mTargetPosition, LC_CK_TARGET);
-	}
-
-	UpdatePosition(nTime, bAnimation);
-}
-
-void Camera::DoZoom(int dy, int mouse, unsigned short nTime, bool bAnimation, bool bAddKey)
-{
-	lcVector3 FrontVector(mPosition - mTargetPosition);
-	FrontVector.Normalize();
-	FrontVector *= -2.0f * dy / (21 - mouse);
-
-	// TODO: option to move eye, target or both
-	mPosition += FrontVector;
-	mTargetPosition += FrontVector;
-
-	if (!IsSimple())
-	{
-		ChangeKey(nTime, bAnimation, bAddKey, mPosition, LC_CK_EYE);
-		ChangeKey(nTime, bAnimation, bAddKey, mTargetPosition, LC_CK_TARGET);
-	}
-
-	UpdatePosition(nTime, bAnimation);
-}
-
-void Camera::DoPan(int dx, int dy, int mouse, unsigned short nTime, bool bAnimation, bool bAddKey)
-{
-	lcVector3 FrontVector(mPosition - mTargetPosition);
-	lcVector3 SideVector = lcNormalize(lcCross(FrontVector, mUpVector));
-
-	lcVector3 MoveVec = (SideVector * (2.0f * dx / (21 - mouse))) + (mUpVector * (-2.0f * dy / (21 - mouse)));
-	mPosition += MoveVec;
-	mTargetPosition += MoveVec;
-
-	if (!IsSimple())
-	{
-		ChangeKey(nTime, bAnimation, bAddKey, mPosition, LC_CK_EYE);
-		ChangeKey(nTime, bAnimation, bAddKey, mTargetPosition, LC_CK_TARGET);
-	}
-
-	UpdatePosition(nTime, bAnimation);
-}
-
-void Camera::DoRotate(int dx, int dy, int mouse, unsigned short nTime, bool bAnimation, bool bAddKey, float* center)
-{
-	lcVector3 FrontVector(mPosition - mTargetPosition);
-	lcVector3 CenterPosition(center[0], center[1], center[2]);
-
-	lcVector3 Z(lcNormalize(lcVector3(FrontVector[0], FrontVector[1], 0)));
-	if (isnan(Z[0]) || isnan(Z[1]))
-		Z = lcNormalize(lcVector3(mUpVector[0], mUpVector[1], 0));
-
-	if (mUpVector[2] < 0)
-	{
-		Z[0] = -Z[0];
-		Z[1] = -Z[1];
-		dx = -dx;
-	}
-
-	lcMatrix44 YRot(lcVector4(Z[0], Z[1], 0.0f, 0.0f), lcVector4(-Z[1], Z[0], 0.0f, 0.0f), lcVector4(0.0f, 0.0f, 1.0f, 0.0f), lcVector4(0.0f, 0.0f, 0.0f, 1.0f));
-	lcMatrix44 transform = lcMul(lcMul(lcMul(lcMatrix44AffineInverse(YRot), lcMatrix44RotationY(0.1f * dy / (21 - mouse))), YRot), lcMatrix44RotationZ(-0.1f * dx / (21 - mouse)));
-
-	mPosition = lcMul31(mPosition - CenterPosition, transform) + CenterPosition;
-	mTargetPosition = lcMul31(mTargetPosition - CenterPosition, transform) + CenterPosition;
-	mUpVector = lcMul31(mUpVector, transform);
-
-	if (!IsSimple())
-	{
-		ChangeKey(nTime, bAnimation, bAddKey, mPosition, LC_CK_EYE);
-		ChangeKey(nTime, bAnimation, bAddKey, mUpVector, LC_CK_UP);
-	}
-
-	UpdatePosition(nTime, bAnimation);
-}
-
-void Camera::DoRoll(int dx, int mouse, unsigned short nTime, bool bAnimation, bool bAddKey)
-{
-	lcVector3 FrontVector(mPosition - mTargetPosition);
-	lcMatrix44 Rotation = lcMatrix44FromAxisAngle(FrontVector, 2.0f * dx / (21 - mouse) * LC_DTOR);
-
-	mUpVector = lcMul30(mUpVector, Rotation);
-
-	if (!IsSimple())
-		ChangeKey(nTime, bAnimation, bAddKey, mUpVector, LC_CK_UP);
-
-	UpdatePosition(nTime, bAnimation);
-}
-
-void Camera::SetViewpoint(LC_VIEWPOINT Viewpoint, unsigned short nTime, bool bAnimation, bool bAddKey)
-{
-	lcVector3 Positions[] =
-	{
-		lcVector3(  0.0f, -50.0f,   0.0f), // LC_VIEWPOINT_FRONT
-		lcVector3(  0.0f,  50.0f,   0.0f), // LC_VIEWPOINT_BACK
-		lcVector3(  0.0f,   0.0f,  50.0f), // LC_VIEWPOINT_TOP
-		lcVector3(  0.0f,   0.0f, -50.0f), // LC_VIEWPOINT_BOTTOM
-		lcVector3( 50.0f,   0.0f,   0.0f), // LC_VIEWPOINT_LEFT
-		lcVector3(-50.0f,   0.0f,   0.0f), // LC_VIEWPOINT_RIGHT
-		lcVector3(-10.0f, -10.0f,   5.0f)  // LC_VIEWPOINT_HOME
-	};
-
-	lcVector3 Ups[] =
-	{
-		lcVector3( 0.0f, 0.0f, 1.0f),
-		lcVector3( 0.0f, 0.0f, 1.0f),
-		lcVector3( 0.0f, 1.0f, 0.0f),
-		lcVector3( 0.0f,-1.0f, 0.0f),
-		lcVector3( 0.0f, 0.0f, 1.0f),
-		lcVector3( 0.0f, 0.0f, 1.0f),
-		lcVector3(-0.2357f, -0.2357f, 0.94281f)
-	};
-
-	mPosition = Positions[Viewpoint];
-	mTargetPosition = lcVector3(0, 0, 0);
-	mUpVector = Ups[Viewpoint];
-
-	if (!IsSimple())
-	{
-		ChangeKey(nTime, bAnimation, bAddKey, mPosition, LC_CK_EYE);
-		ChangeKey(nTime, bAnimation, bAddKey, mTargetPosition, LC_CK_TARGET);
-		ChangeKey(nTime, bAnimation, bAddKey, mUpVector, LC_CK_UP);
-	}
-
-	UpdatePosition(nTime, bAnimation);
-}
-
-void Camera::StartTiledRendering(int tw, int th, int iw, int ih, float fAspect)
-{
-	m_pTR = new TiledRender();
-	m_pTR->TileSize(tw, th, 0);
-	m_pTR->ImageSize(iw, ih);
-	m_pTR->Perspective(m_fovy, fAspect, m_zNear, m_zFar);
-}
-
-void Camera::GetTileInfo(int* row, int* col, int* width, int* height)
-{
-	if (m_pTR != NULL)
-	{
-		*row = m_pTR->m_Rows - m_pTR->m_CurrentRow - 1;
-		*col = m_pTR->m_CurrentColumn;
-		*width = m_pTR->m_CurrentTileWidth;
-		*height = m_pTR->m_CurrentTileHeight;
-	}
-}
-
-bool Camera::EndTile()
-{
-	if (m_pTR != NULL)
-	{
-		if (m_pTR->EndTile())
-			return true;
-
-		delete m_pTR;
-		m_pTR = NULL;
-	}
-
-	return false;
 }
   */

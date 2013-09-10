@@ -41,8 +41,7 @@ public:
 	void updateSnap();
 	void updateUndoRedo(const char* undoText, const char* redoText);
 	void updateTransformType(int newType);
-	void updateCameraMenu(const lcArray<Camera*>& cameras, Camera* currentCamera);
-	void updateCurrentCamera(int cameraIndex);
+	void updateCameraMenu();
 	void updateCategories();
 	void updateTitle(const char* title, bool modified);
 	void updateModified(bool modified);

@@ -32,7 +32,8 @@ void lcMainWindow::SetActiveView(View* ActiveView)
 		return;
 
 	mActiveView = ActiveView;
-//todo:	UpdateCameraMenu();
+
+	UpdateCameraMenu();
 }
 
 void lcMainWindow::UpdateAllViews()

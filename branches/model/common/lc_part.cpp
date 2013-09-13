@@ -2,6 +2,4 @@
 
 lcPart::lcPart()
 {
-	mParent = NULL;
-	mPartInfo = NULL;
 }

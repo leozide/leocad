@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include "opengl.h"
 #include "lc_math.h"
+#include "lc_array.h"
 
 #define LC_MESH_FILE_ID      LC_FOURCC('M', 'E', 'S', 'H')
 #define LC_MESH_FILE_VERSION 0x0100
@@ -165,13 +166,18 @@ public:
 	int mNumTexturedVertices;
 	int mIndexType;
 };
-/*
+
 struct lcRenderMesh
 {
-	lcMatrix44 ModelWorld;
+	lcMatrix44* ModelWorld;
 	lcMesh* Mesh;
-	int DefaultColorIndex;
+	int ColorIndex;
 	float Distance;
 };
-*/
+
+int lcTranslucentRenderMeshCompare(const lcRenderMesh& a, const lcRenderMesh& b);
+int lcOpaqueRenderMeshCompare(const lcRenderMesh& a, const lcRenderMesh& b);
+void lcRenderOpaqueMeshes(lcArray<lcRenderMesh>& OpaqueMeshes);
+void lcRenderTranslucentMeshes(lcArray<lcRenderMesh>& TranslucentMeshes);
+
 #endif // _LC_MESH_H_

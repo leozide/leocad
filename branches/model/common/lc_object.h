@@ -5,11 +5,11 @@
 #include "lc_math.h"
 
 class View;
-//class lcRenderMesh;
+struct lcRenderMesh;
 
 enum lcObjectType
 {
-	LC_OBJECT_TYPE_PART,
+	LC_OBJECT_TYPE_PIECE,
 	LC_OBJECT_TYPE_CAMERA,
 	LC_OBJECT_TYPE_LIGHT
 };
@@ -46,19 +46,9 @@ public:
 	lcObject(lcObjectType Type);
 	virtual ~lcObject();
 
-	bool IsPart() const
-	{
-		return mObjectType == LC_OBJECT_TYPE_PART;
-	}
-
 	bool IsCamera() const
 	{
 		return mObjectType == LC_OBJECT_TYPE_CAMERA;
-	}
-
-	bool IsLight() const
-	{
-		return mObjectType == LC_OBJECT_TYPE_LIGHT;
 	}
 
 	virtual bool IsSelected() const = 0;
@@ -70,7 +60,6 @@ public:
 	virtual void SetSelection(lcuint32 Section, bool Selection) = 0;
 	virtual void SetFocus(lcuint32 Section, bool Focus) = 0;
 	virtual void ToggleSelection(lcuint32 Section) = 0;
-	virtual void SaveSelectionState(lcMemFile& File) const = 0;
 
 	virtual void Save(lcFile& File) = 0;
 	virtual void Load(lcFile& File) = 0;
@@ -79,8 +68,8 @@ public:
 	virtual void ClosestHitTest(lcObjectHitTest& HitTest) = 0;
 	virtual void BoxTest(const lcVector4* BoxPlanes, lcArray<lcObjectSection>& ObjectSections) = 0;
 
-//	virtual void GetRenderMeshes(View* View, bool PartsOnly, lcArray<lcRenderMesh>& OpaqueMeshes, lcArray<lcRenderMesh>& TranslucentMeshes) const = 0;
-	virtual void RenderExtra(View* View) const = 0;
+	virtual void GetRenderMeshes(View* View, lcArray<lcRenderMesh>& OpaqueMeshes, lcArray<lcRenderMesh>& TranslucentMeshes, lcArray<lcObject*> InterfaceObjects) = 0;
+	virtual void RenderInterface(View* View) const = 0;
 
 	virtual void Move(const lcVector3& Distance, lcTime Time, bool AddKeys) = 0;
 

@@ -467,3 +467,268 @@ void lcMesh::FileSave(lcFile& File)
 	else
 		File.WriteU32((lcuint32*)mIndexBuffer.mData, mIndexBuffer.mSize / 4);
 }
+
+int lcTranslucentRenderMeshCompare(const lcRenderMesh& a, const lcRenderMesh& b)
+{
+	if (a.Distance > b.Distance)
+		return 1;
+	else
+		return -1;
+}
+
+int lcOpaqueRenderMeshCompare(const lcRenderMesh& a, const lcRenderMesh& b)
+{
+	if (a.Mesh > b.Mesh)
+		return 1;
+	else
+		return -1;
+}
+
+void lcRenderOpaqueMeshes(lcArray<lcRenderMesh>& OpaqueMeshes)
+{
+	lcMesh* PreviousMesh = NULL;
+	lcTexture* PreviousTexture = NULL;
+	char* ElementsOffset = NULL;
+	char* BaseBufferOffset = NULL;
+	char* PreviousOffset = (char*)(~0);
+
+	for (int MeshIdx = 0; MeshIdx < OpaqueMeshes.GetSize(); MeshIdx++)
+	{
+		lcRenderMesh& RenderMesh = OpaqueMeshes[MeshIdx];
+		lcMesh* Mesh = RenderMesh.Mesh;
+
+		glPushMatrix();
+		glMultMatrixf(*RenderMesh.ModelWorld);
+
+		if (PreviousMesh != Mesh)
+		{
+			if (GL_HasVertexBufferObject())
+			{
+				glBindBuffer(GL_ARRAY_BUFFER_ARB, Mesh->mVertexBuffer.mBuffer);
+				BaseBufferOffset = NULL;
+				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER_ARB, Mesh->mIndexBuffer.mBuffer);
+				ElementsOffset = NULL;
+			}
+			else
+			{
+				BaseBufferOffset = (char*)Mesh->mVertexBuffer.mData;
+				ElementsOffset = (char*)Mesh->mIndexBuffer.mData;
+			}
+
+			PreviousMesh = Mesh;
+			PreviousOffset = (char*)(~0);
+		}
+
+		for (int SectionIdx = 0; SectionIdx < Mesh->mNumSections; SectionIdx++)
+		{
+			lcMeshSection* Section = &Mesh->mSections[SectionIdx];
+			int ColorIndex = Section->ColorIndex;
+
+			if (Section->PrimitiveType == GL_TRIANGLES)
+			{
+				if (ColorIndex == gDefaultColor)
+					ColorIndex = RenderMesh.ColorIndex;
+
+				if (lcIsColorTranslucent(ColorIndex))
+					continue;
+
+				lcSetColor(ColorIndex);
+			}
+			else
+			{
+				if (ColorIndex == gEdgeColor)
+					lcSetEdgeColor(RenderMesh.ColorIndex);
+				else
+					lcSetColor(ColorIndex);
+			}
+
+			char* BufferOffset = BaseBufferOffset;
+			lcTexture* Texture = Section->Texture;
+
+			if (!Texture)
+			{
+				if (PreviousTexture)
+				{
+					glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+					glDisable(GL_TEXTURE_2D);
+				}
+			}
+			else
+			{
+				BufferOffset += Mesh->mNumVertices * sizeof(lcVertex);
+
+				if (Texture != PreviousTexture)
+				{
+					glBindTexture(GL_TEXTURE_2D, Section->Texture->mTexture);
+
+					if (!PreviousTexture)
+					{
+						glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+						glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
+						glEnable(GL_TEXTURE_2D);
+					}
+				}
+			}
+
+			PreviousTexture = Texture;
+
+			if (PreviousOffset != BufferOffset)
+			{
+				if (!Texture)
+					glVertexPointer(3, GL_FLOAT, 0, BufferOffset);
+				else
+				{
+					glVertexPointer(3, GL_FLOAT, sizeof(lcVertexTextured), BufferOffset);
+					glTexCoordPointer(2, GL_FLOAT, sizeof(lcVertexTextured), BufferOffset + sizeof(lcVector3));
+				}
+
+				PreviousOffset = BufferOffset;
+			}
+
+			glDrawElements(Section->PrimitiveType, Section->NumIndices, Mesh->mIndexType, ElementsOffset + Section->IndexOffset);
+		}
+
+		glPopMatrix();
+	}
+
+	if (PreviousTexture)
+	{
+		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+		glDisable(GL_TEXTURE_2D);
+	}
+
+	if (GL_HasVertexBufferObject())
+	{
+		glBindBuffer(GL_ARRAY_BUFFER_ARB, 0);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
+	}
+
+	glVertexPointer(3, GL_FLOAT, 0, NULL);
+	glTexCoordPointer(2, GL_FLOAT, 0, NULL);
+}
+
+void lcRenderTranslucentMeshes(lcArray<lcRenderMesh>& TranslucentMeshes)
+{
+	lcMesh* PreviousMesh = NULL;
+	lcTexture* PreviousTexture = NULL;
+	char* ElementsOffset = NULL;
+	char* BaseBufferOffset = NULL;
+	char* PreviousOffset = (char*)(~0);
+
+	if (!TranslucentMeshes.GetSize())
+		return;
+
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_BLEND);
+	glDepthMask(GL_FALSE);
+
+	for (int MeshIdx = 0; MeshIdx < TranslucentMeshes.GetSize(); MeshIdx++)
+	{
+		lcRenderMesh& RenderMesh = TranslucentMeshes[MeshIdx];
+		lcMesh* Mesh = RenderMesh.Mesh;
+
+		glPushMatrix();
+		glMultMatrixf(*RenderMesh.ModelWorld);
+
+		if (PreviousMesh != Mesh)
+		{
+			if (GL_HasVertexBufferObject())
+			{
+				glBindBuffer(GL_ARRAY_BUFFER_ARB, Mesh->mVertexBuffer.mBuffer);
+				BaseBufferOffset = NULL;
+				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER_ARB, Mesh->mIndexBuffer.mBuffer);
+				ElementsOffset = NULL;
+			}
+			else
+			{
+				BaseBufferOffset = (char*)Mesh->mVertexBuffer.mData;
+				ElementsOffset = (char*)Mesh->mIndexBuffer.mData;
+			}
+
+			PreviousMesh = Mesh;
+			PreviousOffset = (char*)(~0);
+		}
+
+		for (int SectionIdx = 0; SectionIdx < Mesh->mNumSections; SectionIdx++)
+		{
+			lcMeshSection* Section = &Mesh->mSections[SectionIdx];
+			int ColorIndex = Section->ColorIndex;
+
+			if (Section->PrimitiveType != GL_TRIANGLES)
+				continue;
+
+			if (ColorIndex == gDefaultColor)
+				ColorIndex = RenderMesh.ColorIndex;
+
+			if (!lcIsColorTranslucent(ColorIndex))
+				continue;
+
+			lcSetColor(ColorIndex);
+
+			char* BufferOffset = BaseBufferOffset;
+			lcTexture* Texture = Section->Texture;
+
+			if (!Texture)
+			{
+				if (PreviousTexture)
+				{
+					glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+					glDisable(GL_TEXTURE_2D);
+				}
+			}
+			else
+			{
+				BufferOffset += Mesh->mNumVertices * sizeof(lcVertex);
+
+				if (Texture != PreviousTexture)
+				{
+					glBindTexture(GL_TEXTURE_2D, Section->Texture->mTexture);
+
+					if (!PreviousTexture)
+					{
+						glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+						glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
+						glEnable(GL_TEXTURE_2D);
+					}
+				}
+			}
+
+			PreviousTexture = Texture;
+
+			if (PreviousOffset != BufferOffset)
+			{
+				if (!Texture)
+					glVertexPointer(3, GL_FLOAT, 0, BufferOffset);
+				else
+				{
+					glVertexPointer(3, GL_FLOAT, sizeof(lcVertexTextured), BufferOffset);
+					glTexCoordPointer(2, GL_FLOAT, sizeof(lcVertexTextured), BufferOffset + sizeof(lcVector3));
+				}
+
+				PreviousOffset = BufferOffset;
+			}
+
+			glDrawElements(Section->PrimitiveType, Section->NumIndices, Mesh->mIndexType, ElementsOffset + Section->IndexOffset);
+		}
+
+		glPopMatrix();
+	}
+
+	glDepthMask(GL_TRUE);
+	glDisable(GL_BLEND);
+
+	if (PreviousTexture)
+	{
+		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+		glDisable(GL_TEXTURE_2D);
+	}
+
+	if (GL_HasVertexBufferObject())
+	{
+		glBindBuffer(GL_ARRAY_BUFFER_ARB, 0);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
+	}
+
+	glVertexPointer(3, GL_FLOAT, 0, NULL);
+	glTexCoordPointer(2, GL_FLOAT, 0, NULL);
+}

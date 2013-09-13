@@ -31,7 +31,7 @@
 #include "lc_application.h"
 #include "lc_profile.h"
 #include "lc_model.h"
-#include "lc_part.h"
+#include "lc_piece.h"
 #include "lc_camera.h"
 #include "lc_light.h"
 
@@ -1468,7 +1468,6 @@ void Project::CheckPoint (const char* text)
 /////////////////////////////////////////////////////////////////////////////
 // Project rendering
 
-// Only this function should be called.
 void Project::Render(View* View, bool ToMemory)
 {
 	glViewport(0, 0, View->mWidth, View->mHeight);
@@ -1476,9 +1475,11 @@ void Project::Render(View* View, bool ToMemory)
 
 	mActiveModel->RenderBackground(View);
 
-	// Setup the projection and camera matrices.
-	float ratio = (float)View->mWidth / (float)View->mHeight;
-	View->mCamera->LoadProjection(ratio);
+	float AspectRatio = (float)View->mWidth / (float)View->mHeight;
+	View->mCamera->LoadProjection(AspectRatio);
+
+	mActiveModel->RenderScene(View, !ToMemory);
+
 /*
 	if (ToMemory)
 		RenderScenePieces(view);
@@ -1488,17 +1489,15 @@ void Project::Render(View* View, bool ToMemory)
 			RenderSceneBoxes(view);
 		else
 			RenderScenePieces(view);
-*/
+
 		mActiveModel->RenderObjects(View);
-/*
+
 		if (m_OverlayActive || ((m_nCurAction == LC_TOOL_SELECT) && (m_nTracking == LC_TRACK_LEFT) && (gMainWindow->mActiveView == view)))
 			RenderOverlays(view);
 
 		RenderViewports(view);
 	}
 	*/
-
-	glDisableClientState(GL_VERTEX_ARRAY);
 }
 
 void Project::RenderBackground(View* view)
@@ -3144,8 +3143,6 @@ void Project::RemovePiece(Piece* pPiece)
 
 void Project::CalculateStep()
 {
-	mActiveModel->SetCurrentTime(m_nCurStep);
-
 	Piece* pPiece;
 	Light* pLight;
 
@@ -8698,6 +8695,19 @@ void Project::OnLeftButtonDown(View* view)
 
 	switch (Action)
 	{
+	case LC_TOOL_INSERT:
+		{
+			lcVector3 Position;
+			lcVector4 AxisAngle;
+
+			GetPieceInsertPosition(view, x, y, Position, AxisAngle);
+			mActiveModel->AddPiece(m_pCurPiece, gMainWindow->mColorIndex, Position, AxisAngle, m_bAnimation ? m_nCurFrame : m_nCurStep);
+
+			if (!Control)
+				SetAction(LC_TOOL_SELECT);
+		}
+		break;
+
 	case LC_TOOL_SELECT:
 		{
 			lcObjectSection ObjectSection = FindClosestObject(view, x, y);
@@ -8784,7 +8794,6 @@ void Project::OnLeftButtonDown(View* view)
 			}
 		} break;
 		*/
-	case LC_TOOL_INSERT:
 	case LC_TOOL_LIGHT:
 		{
 			if (Action == LC_TOOL_INSERT)

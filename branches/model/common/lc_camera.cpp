@@ -166,11 +166,16 @@ void lcCamera::BoxTest(const lcVector4* BoxPlanes, lcArray<lcObjectSection>& Obj
 	}
 }
 
-void lcCamera::RenderExtra(View* View) const
+void lcCamera::GetRenderMeshes(View* View, lcArray<lcRenderMesh>& OpaqueMeshes, lcArray<lcRenderMesh>& TranslucentMeshes, lcArray<lcObject*> InterfaceObjects)
 {
-//		if ((Camera == View->mCamera) || !Camera->IsVisible())
-//			continue;
+	if ((View->mCamera == this) || !IsVisible())
+		return;
 
+	InterfaceObjects.Add(this);
+}
+
+void lcCamera::RenderInterface(View* View) const
+{
 	lcMatrix44 ViewWorld = lcMatrix44AffineInverse(mWorldView);
 	lcVector3 UpVectorPosition = lcMul31(lcVector3(0, 1, 0), ViewWorld);
 

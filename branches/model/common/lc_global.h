@@ -4,9 +4,9 @@
 #include "lc_config.h"
 
 #define LC_VERSION_MAJOR 0
-#define LC_VERSION_MINOR 80
-#define LC_VERSION_PATCH 1
-#define LC_VERSION_TEXT "0.80.1"
+#define LC_VERSION_MINOR 81
+#define LC_VERSION_PATCH 0
+#define LC_VERSION_TEXT "0.81.0"
 
 typedef lcuint32 lcTime;
 
@@ -24,9 +24,9 @@ class lcDiskFile;
 
 class lcModel;
 class lcObject;
-class lcPart;
+class lcPiece;
 class lcCamera;
 class lcLight;
-class lcPartInfo;
+class lcPart;
 
 #endif // _LC_GLOBAL_H_

@@ -139,7 +139,8 @@ SOURCES += common/view.cpp \
     common/lc_model.cpp \
     common/lc_object.cpp \
     common/lc_camera.cpp \
-    common/lc_light.cpp
+    common/lc_light.cpp \
+    common/lc_piece.cpp
 HEADERS += \
     common/view.h \
     common/tr.h \
@@ -203,7 +204,8 @@ HEADERS += \
     common/lc_model.h \
     common/lc_object.h \
     common/lc_camera.h \
-    common/lc_light.h
+    common/lc_light.h \
+    common/lc_piece.h
 FORMS += \ 
     qt/lc_qpovraydialog.ui \
     qt/lc_qarraydialog.ui \

@@ -14,8 +14,8 @@
 #define LC_CAMERA_UPVECTOR_SELECTED 0x0100
 #define LC_CAMERA_UPVECTOR_FOCUSED  0x0200
 
-#define LC_CAMERA_SELECTION_MASK	(LC_CAMERA_POSITION_SELECTED | LC_CAMERA_TARGET_SELECTED | LC_CAMERA_UPVECTOR_SELECTED)
-#define LC_CAMERA_FOCUS_MASK		(LC_CAMERA_POSITION_FOCUSED | LC_CAMERA_TARGET_FOCUSED | LC_CAMERA_UPVECTOR_FOCUSED)
+#define LC_CAMERA_SELECTION_MASK    (LC_CAMERA_POSITION_SELECTED | LC_CAMERA_TARGET_SELECTED | LC_CAMERA_UPVECTOR_SELECTED)
+#define LC_CAMERA_FOCUS_MASK        (LC_CAMERA_POSITION_FOCUSED | LC_CAMERA_TARGET_FOCUSED | LC_CAMERA_UPVECTOR_FOCUSED)
 
 enum lcViewpoint
 {
@@ -190,11 +190,6 @@ public:
 		}
 	}
 
-	virtual void SaveSelectionState(lcMemFile& File) const
-	{
-		File.WriteU32(mState & (LC_CAMERA_SELECTION_MASK | LC_CAMERA_FOCUS_MASK));
-	}
-
 	virtual void SetCurrentTime(lcTime Time)
 	{
 		if (mPositionKeys.GetSize())
@@ -216,8 +211,8 @@ public:
 	virtual void ClosestHitTest(lcObjectHitTest& HitTest);
 	virtual void BoxTest(const lcVector4* BoxPlanes, lcArray<lcObjectSection>& ObjectSections);
 
-//	virtual void GetRenderMeshes(View* View, bool PartsOnly, lcArray<lcRenderMesh>& OpaqueMeshes, lcArray<lcRenderMesh>& TranslucentMeshes) const;
-	virtual void RenderExtra(View* View) const;
+	virtual void GetRenderMeshes(View* View, lcArray<lcRenderMesh>& OpaqueMeshes, lcArray<lcRenderMesh>& TranslucentMeshes, lcArray<lcObject*> InterfaceObjects);
+	virtual void RenderInterface(View* View) const;
 
 	virtual void Move(const lcVector3& Distance, lcTime Time, bool AddKey);
 

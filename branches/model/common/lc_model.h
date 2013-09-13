@@ -5,12 +5,15 @@
 #include "lc_math.h"
 
 class View;
+class PieceInfo;
 class lcCheckpoint;
 struct lcObjectHitTest;
 struct lcObjectSection;
+struct lcRenderMesh;
 
 enum lcActionType
 {
+	LC_ACTION_CREATE_PIECE,
 	LC_ACTION_CREATE_CAMERA,
 	LC_ACTION_MOVE_OBJECTS,
 	LC_ACTION_ZOOM_CAMERA,
@@ -41,9 +44,8 @@ public:
 	void GetCameras(lcArray<lcCamera*>& Cameras);
 
 	void RenderBackground(View* View) const;
-	void RenderObjects(View* View) const;
-
-	//	void GetRenderMeshes(View* View, bool PartsOnly, lcArray<lcRenderMesh>& OpaqueMeshes, lcArray<lcRenderMesh>& TranslucentMeshes) const;
+	void RenderScene(View* View, bool RenderInterface) const;
+	void GetRenderMeshes(View* View, lcArray<lcRenderMesh>& OpaqueMeshes, lcArray<lcRenderMesh>& TranslucentMeshes, lcArray<lcObject*> InterfaceObjects) const;
 
 	void ToggleSelection(const lcObjectSection& ObjectSection);
 	void AddToSelection(const lcArray<lcObjectSection>& ObjectSections);
@@ -54,7 +56,7 @@ public:
 	void FindClosestObject(lcObjectHitTest& HitTest) const;
 	void FindObjectsInBox(const lcVector4* BoxPlanes, lcArray<lcObjectSection>& ObjectSections) const;
 
-	void SetCurrentTime(lcTime Time);
+	void AddPiece(PieceInfo* Part, int ColorIndex, const lcVector3& Position, const lcVector4& AxisAngle, lcTime Time);
 
 	void BeginCameraTool(const lcVector3& Position, const lcVector3& TargetPosition, const lcVector3& UpVector);
 	void UpdateCameraTool(const lcVector3& Distance, lcTime Time, bool AddKeys);
@@ -100,10 +102,6 @@ protected:
 	lcArray<lcObject*> mSelectedObjects;
 
 	lcArray<lcObject*> mObjects;
-
-//	lcArray<lcPart*> mParts;
-//	lcArray<lcCamera*> mCameras;
-//	lcArray<lcLight*> mLights;
 };
 
 #endif // LC_MODEL_H

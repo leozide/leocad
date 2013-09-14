@@ -166,7 +166,7 @@ void lcCamera::BoxTest(const lcVector4* BoxPlanes, lcArray<lcObjectSection>& Obj
 	}
 }
 
-void lcCamera::GetRenderMeshes(View* View, lcArray<lcRenderMesh>& OpaqueMeshes, lcArray<lcRenderMesh>& TranslucentMeshes, lcArray<lcObject*> InterfaceObjects)
+void lcCamera::GetRenderMeshes(View* View, lcArray<lcRenderMesh>& OpaqueMeshes, lcArray<lcRenderMesh>& TranslucentMeshes, lcArray<lcObject*>& InterfaceObjects)
 {
 	if ((View->mCamera == this) || !IsVisible())
 		return;

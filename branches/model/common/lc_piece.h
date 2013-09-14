@@ -15,6 +15,7 @@ class PieceInfo;
 class lcPiece : public lcObject
 {
 public:
+	lcPiece();
 	lcPiece(PieceInfo* Part, int ColorIndex, const lcVector3& Position, const lcVector4& AxisAngle, lcTime Time);
 	virtual ~lcPiece();
 
@@ -59,12 +60,20 @@ public:
 	virtual void SetFocus(lcuint32 Section, bool Focus)
 	{
 		if (Focus)
-			mState |= LC_PIECE_POSITION_FOCUSED;
+			mState |= LC_PIECE_POSITION_SELECTED | LC_PIECE_POSITION_FOCUSED;
 		else
 			mState &= ~LC_PIECE_FOCUS_MASK;
 	}
 
-	virtual void ToggleSelection(lcuint32 Section)
+	virtual void InvertSelection()
+	{
+		if (mState & (LC_PIECE_POSITION_SELECTED | LC_PIECE_POSITION_FOCUSED))
+			mState &= ~(LC_PIECE_POSITION_SELECTED | LC_PIECE_POSITION_FOCUSED);
+		else
+			mState |= LC_PIECE_POSITION_SELECTED;
+	}
+
+	virtual void InvertSelection(lcuint32 Section)
 	{
 		if (mState & (LC_PIECE_POSITION_SELECTED | LC_PIECE_POSITION_FOCUSED))
 			mState &= ~(LC_PIECE_POSITION_SELECTED | LC_PIECE_POSITION_FOCUSED);
@@ -88,7 +97,7 @@ public:
 	virtual void ClosestHitTest(lcObjectHitTest& HitTest);
 	virtual void BoxTest(const lcVector4* BoxPlanes, lcArray<lcObjectSection>& ObjectSections);
 
-	virtual void GetRenderMeshes(View* View, lcArray<lcRenderMesh>& OpaqueMeshes, lcArray<lcRenderMesh>& TranslucentMeshes, lcArray<lcObject*> InterfaceObjects);
+	virtual void GetRenderMeshes(View* View, lcArray<lcRenderMesh>& OpaqueMeshes, lcArray<lcRenderMesh>& TranslucentMeshes, lcArray<lcObject*>& InterfaceObjects);
 	virtual void RenderInterface(View* View) const;
 
 	virtual void Move(const lcVector3& Distance, lcTime Time, bool AddKey);

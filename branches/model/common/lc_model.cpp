@@ -90,6 +90,7 @@ void lcModel::EndCheckpoint(bool Accept, bool SaveCheckpoint)
 	{
 		mUndoCheckpoints.Add(mCurrentCheckpoint);
 		mRedoCheckpoints.DeleteAll();
+//		gMainWindow->UpdateUndoRedo(m_pUndoList->pNext ? m_pUndoList->strText : NULL, NULL);
 	}
 	else
 	{
@@ -101,7 +102,31 @@ void lcModel::EndCheckpoint(bool Accept, bool SaveCheckpoint)
 	mCurrentCheckpoint = NULL;
 }
 
-void lcModel::ToggleSelection(const lcObjectSection& ObjectSection)
+void lcModel::InvertSelection()
+{
+	mSelectedObjects.RemoveAll();
+
+	if (mFocusObject)
+	{
+		mFocusObject->ClearFocus();
+		mFocusObject = NULL;
+	}
+
+	for (int ObjectIdx = 0; ObjectIdx < mObjects.GetSize(); ObjectIdx++)
+	{
+		lcObject* Object = mObjects[ObjectIdx];
+		Object->InvertSelection();
+
+		if (Object->IsSelected())
+			mSelectedObjects.Add(Object);
+	}
+
+	gMainWindow->UpdateAllViews();
+	gMainWindow->UpdateSelection();
+	gMainWindow->UpdateFocusObject();
+}
+
+void lcModel::InvertSelection(const lcObjectSection& ObjectSection)
 {
 	lcObject* Object = ObjectSection.Object;
 	lcuint32 Section = ObjectSection.Section;
@@ -111,7 +136,7 @@ void lcModel::ToggleSelection(const lcObjectSection& ObjectSection)
 
 	bool WasSelected = Object->IsSelected();
 
-	Object->ToggleSelection(Section);
+	Object->InvertSelection(Section);
 
 	if (mFocusObject && !mFocusObject->IsFocused())
 		mFocusObject = NULL;
@@ -161,7 +186,7 @@ void lcModel::SetSelection(const lcArray<lcObjectSection>& ObjectSections)
 	}
 }
 
-void lcModel::ToggleFocus(const lcObjectSection& ObjectSection)
+void lcModel::ClearSelectionOrSetFocus(const lcObjectSection& ObjectSection)
 {
 	lcObject* Object = ObjectSection.Object;
 	lcuint32 Section = ObjectSection.Section;
@@ -171,12 +196,7 @@ void lcModel::ToggleFocus(const lcObjectSection& ObjectSection)
 
 	bool WasSelected = Object->IsSelected();
 
-	if (Object->IsFocused(Section))
-	{
-		Object->SetFocus(Section, false);
-		mFocusObject = NULL;
-	}
-	else
+	if (!Object->IsFocused(Section))
 	{
 		if (mFocusObject)
 			mFocusObject->ClearFocus();
@@ -184,11 +204,15 @@ void lcModel::ToggleFocus(const lcObjectSection& ObjectSection)
 		Object->SetFocus(Section, true);
 		mFocusObject = Object;
 	}
+	else
+		Object->SetSelection(Section, false);
 
 	bool IsSelected = Object->IsSelected();
 
 	if (!WasSelected && IsSelected)
 		mSelectedObjects.Add(Object);
+	else if (WasSelected && !IsSelected)
+		mSelectedObjects.Remove(Object);
 
 	gMainWindow->UpdateAllViews();
 	gMainWindow->UpdateSelection();
@@ -759,6 +783,15 @@ void lcModel::ApplyCheckpoint(lcCheckpoint* Checkpoint)
 
 	switch (ActionType)
 	{
+	case LC_ACTION_CREATE_PIECE:
+		{
+			lcPiece* Piece = new lcPiece();
+			Piece->Load(Apply);
+
+			gMainWindow->UpdateAllViews();
+		}
+		break;
+
 	case LC_ACTION_CREATE_CAMERA:
 		{
 			lcCamera* Camera = new lcCamera(false);
@@ -815,9 +848,10 @@ void lcModel::RevertCheckpoint(lcCheckpoint* Checkpoint)
 
 	switch (ActionType)
 	{
+	case LC_ACTION_CREATE_PIECE:
 	case LC_ACTION_CREATE_CAMERA:
 		{
-			lcCamera* Camera = (lcCamera*)mObjects[mObjects.GetSize() - 1];
+			lcObject* Camera = mObjects[mObjects.GetSize() - 1];
 
 			if (mFocusObject == Camera)
 			{
@@ -831,7 +865,7 @@ void lcModel::RevertCheckpoint(lcCheckpoint* Checkpoint)
 				mSelectedObjects.RemoveIndex(SelectedIndex);
 				gMainWindow->UpdateSelection();
 			}
-
+// if view camera remove
 			delete Camera;
 			mObjects.RemoveIndex(mObjects.GetSize() - 1);
 
@@ -982,13 +1016,10 @@ void lcModel::RenderBackground(View* View) const
 	*/
 }
 
-void lcModel::GetRenderMeshes(View* View, lcArray<lcRenderMesh>& OpaqueMeshes, lcArray<lcRenderMesh>& TranslucentMeshes, lcArray<lcObject*> InterfaceObjects) const
+void lcModel::GetRenderMeshes(View* View, lcArray<lcRenderMesh>& OpaqueMeshes, lcArray<lcRenderMesh>& TranslucentMeshes, lcArray<lcObject*>& InterfaceObjects) const
 {
 	for (int ObjectIdx = 0; ObjectIdx < mObjects.GetSize(); ObjectIdx++)
-	{
-// if visible
 		mObjects[ObjectIdx]->GetRenderMeshes(View, OpaqueMeshes, TranslucentMeshes, InterfaceObjects);
-	}
 }
 
 void lcModel::RenderScene(View* View, bool RenderInterface) const
@@ -1045,9 +1076,11 @@ void lcModel::RenderScene(View* View, bool RenderInterface) const
 
 	lcRenderOpaqueMeshes(OpaqueMeshes);
 
+	if (!InterfaceObjects.GetSize())
+		RenderInterface = false;
+
 	if (RenderInterface)
-	{
-		/*
+	{/*
 		if (m_nDetail & LC_DET_LIGHTING)
 		{
 			glDisable(GL_LIGHTING);
@@ -1057,9 +1090,22 @@ void lcModel::RenderScene(View* View, bool RenderInterface) const
 
 		if (m_nScene & LC_SCENE_FOG)
 			glDisable(GL_FOG);
-		*/
+*/
+		for (int ObjectIdx = 0; ObjectIdx < InterfaceObjects.GetSize(); ObjectIdx++)
+			InterfaceObjects[ObjectIdx]->RenderInterface(View);
 
 // render grid
+/*
+		if (m_nDetail & LC_DET_LIGHTING)
+		{
+			glEnable(GL_LIGHTING);
+			glEnable(GL_COLOR_MATERIAL);
+			glShadeModel(GL_SMOOTH);
+		}
+
+		if (m_nScene & LC_SCENE_FOG)
+			glEnable(GL_FOG);
+			*/
 	}
 
 	lcRenderTranslucentMeshes(TranslucentMeshes);

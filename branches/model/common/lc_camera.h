@@ -163,26 +163,44 @@ public:
 		}
 	}
 
-	virtual void ToggleSelection(lcuint32 Section)
+	virtual void InvertSelection()
+	{
+		if (mState & LC_CAMERA_POSITION_SELECTED)
+			mState &= ~(LC_CAMERA_POSITION_SELECTED | LC_CAMERA_POSITION_FOCUSED);
+		else
+			mState |= LC_CAMERA_POSITION_SELECTED;
+
+		if (mState & LC_CAMERA_TARGET_SELECTED)
+			mState &= ~(LC_CAMERA_TARGET_SELECTED | LC_CAMERA_TARGET_FOCUSED);
+		else
+			mState |= LC_CAMERA_TARGET_SELECTED;
+
+		if (mState & LC_CAMERA_UPVECTOR_SELECTED)
+			mState &= ~(LC_CAMERA_UPVECTOR_SELECTED | LC_CAMERA_UPVECTOR_FOCUSED);
+		else
+			mState |= LC_CAMERA_UPVECTOR_SELECTED;
+	}
+
+	virtual void InvertSelection(lcuint32 Section)
 	{
 		switch (Section)
 		{
 		case LC_CAMERA_POSITION:
-			if (mState & (LC_CAMERA_POSITION_SELECTED | LC_CAMERA_POSITION_FOCUSED))
+			if (mState & LC_CAMERA_POSITION_SELECTED)
 				mState &= ~(LC_CAMERA_POSITION_SELECTED | LC_CAMERA_POSITION_FOCUSED);
 			else
 				mState |= LC_CAMERA_POSITION_SELECTED;
 			break;
 
 		case LC_CAMERA_TARGET:
-			if (mState & (LC_CAMERA_TARGET_SELECTED | LC_CAMERA_TARGET_FOCUSED))
+			if (mState & LC_CAMERA_TARGET_SELECTED)
 				mState &= ~(LC_CAMERA_TARGET_SELECTED | LC_CAMERA_TARGET_FOCUSED);
 			else
 				mState |= LC_CAMERA_TARGET_SELECTED;
 			break;
 
 		case LC_CAMERA_UPVECTOR:
-			if (mState & (LC_CAMERA_UPVECTOR_SELECTED | LC_CAMERA_UPVECTOR_FOCUSED))
+			if (mState & LC_CAMERA_UPVECTOR_SELECTED)
 				mState &= ~(LC_CAMERA_UPVECTOR_SELECTED | LC_CAMERA_UPVECTOR_FOCUSED);
 			else
 				mState |= LC_CAMERA_UPVECTOR_SELECTED;
@@ -211,7 +229,7 @@ public:
 	virtual void ClosestHitTest(lcObjectHitTest& HitTest);
 	virtual void BoxTest(const lcVector4* BoxPlanes, lcArray<lcObjectSection>& ObjectSections);
 
-	virtual void GetRenderMeshes(View* View, lcArray<lcRenderMesh>& OpaqueMeshes, lcArray<lcRenderMesh>& TranslucentMeshes, lcArray<lcObject*> InterfaceObjects);
+	virtual void GetRenderMeshes(View* View, lcArray<lcRenderMesh>& OpaqueMeshes, lcArray<lcRenderMesh>& TranslucentMeshes, lcArray<lcObject*>& InterfaceObjects);
 	virtual void RenderInterface(View* View) const;
 
 	virtual void Move(const lcVector3& Distance, lcTime Time, bool AddKey);

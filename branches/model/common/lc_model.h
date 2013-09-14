@@ -45,12 +45,13 @@ public:
 
 	void RenderBackground(View* View) const;
 	void RenderScene(View* View, bool RenderInterface) const;
-	void GetRenderMeshes(View* View, lcArray<lcRenderMesh>& OpaqueMeshes, lcArray<lcRenderMesh>& TranslucentMeshes, lcArray<lcObject*> InterfaceObjects) const;
+	void GetRenderMeshes(View* View, lcArray<lcRenderMesh>& OpaqueMeshes, lcArray<lcRenderMesh>& TranslucentMeshes, lcArray<lcObject*>& InterfaceObjects) const;
 
-	void ToggleSelection(const lcObjectSection& ObjectSection);
+	void InvertSelection();
+	void InvertSelection(const lcObjectSection& ObjectSection);
 	void AddToSelection(const lcArray<lcObjectSection>& ObjectSections);
 	void SetSelection(const lcArray<lcObjectSection>& ObjectSections);
-	void ToggleFocus(const lcObjectSection& ObjectSection);
+	void ClearSelectionOrSetFocus(const lcObjectSection& ObjectSection);
 	void SetFocus(const lcObjectSection& ObjectSection);
 
 	void FindClosestObject(lcObjectHitTest& HitTest) const;

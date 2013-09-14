@@ -59,7 +59,8 @@ public:
 	virtual void ClearFocus() = 0;
 	virtual void SetSelection(lcuint32 Section, bool Selection) = 0;
 	virtual void SetFocus(lcuint32 Section, bool Focus) = 0;
-	virtual void ToggleSelection(lcuint32 Section) = 0;
+	virtual void InvertSelection() = 0;
+	virtual void InvertSelection(lcuint32 Section) = 0;
 
 	virtual void Save(lcFile& File) = 0;
 	virtual void Load(lcFile& File) = 0;
@@ -68,7 +69,7 @@ public:
 	virtual void ClosestHitTest(lcObjectHitTest& HitTest) = 0;
 	virtual void BoxTest(const lcVector4* BoxPlanes, lcArray<lcObjectSection>& ObjectSections) = 0;
 
-	virtual void GetRenderMeshes(View* View, lcArray<lcRenderMesh>& OpaqueMeshes, lcArray<lcRenderMesh>& TranslucentMeshes, lcArray<lcObject*> InterfaceObjects) = 0;
+	virtual void GetRenderMeshes(View* View, lcArray<lcRenderMesh>& OpaqueMeshes, lcArray<lcRenderMesh>& TranslucentMeshes, lcArray<lcObject*>& InterfaceObjects) = 0;
 	virtual void RenderInterface(View* View) const = 0;
 
 	virtual void Move(const lcVector3& Distance, lcTime Time, bool AddKeys) = 0;

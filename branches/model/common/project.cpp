@@ -5468,30 +5468,13 @@ void Project::HandleCommand(LC_COMMANDS id)
 			gMainWindow->UpdateAllViews();
 		} break;
 
-		case LC_EDIT_SELECT_NONE:
-		{
-			SelectAndFocusNone(false);
-			gMainWindow->UpdateFocusObject(NULL);
-			UpdateSelection();
-			gMainWindow->UpdateAllViews();
-		} break;
+	case LC_EDIT_SELECT_NONE:
+		mActiveModel->SetSelection(lcArray<lcObjectSection>());
+		break;
 
-		case LC_EDIT_SELECT_INVERT:
-		{
-			Piece* pPiece;
-			for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-				if (pPiece->IsVisible(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation))
-				{
-                                  if (pPiece->IsSelected())
-                                    pPiece->Select(false, false, false);
-                                  else
-                                    pPiece->Select(true, false, false);
-				}
-
-			gMainWindow->UpdateFocusObject(GetFocusObject());
-			UpdateSelection();
-			gMainWindow->UpdateAllViews();
-		} break;
+	case LC_EDIT_SELECT_INVERT:
+		mActiveModel->InvertSelection();
+		break;
 
 		case LC_EDIT_SELECT_BY_NAME:
 		{
@@ -8713,7 +8696,7 @@ void Project::OnLeftButtonDown(View* view)
 			lcObjectSection ObjectSection = FindClosestObject(view, x, y);
 
 			if (Control)
-				mActiveModel->ToggleFocus(ObjectSection);
+				mActiveModel->ClearSelectionOrSetFocus(ObjectSection);
 			else
 				mActiveModel->SetFocus(ObjectSection);
 

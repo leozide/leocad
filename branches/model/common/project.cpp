@@ -2077,7 +2077,7 @@ void Project::RenderSceneObjects(View* view)
 		MaxX = lcMax(MaxX, 2);
 		MaxY = lcMax(MaxY, 2);
 
-		if (mGridLines)
+		if (mGridStuds)
 		{
 			float Left = MinX * 0.8f * Spacing;
 			float Right = MaxX * 0.8f * Spacing;
@@ -2117,7 +2117,6 @@ void Project::RenderSceneObjects(View* view)
 			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 			glBindTexture(GL_TEXTURE_2D, mGridTexture->mTexture);
 			glEnable(GL_TEXTURE_2D);
-			glEnable(GL_ALPHA_TEST);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			glEnable(GL_BLEND);
 
@@ -2135,7 +2134,6 @@ void Project::RenderSceneObjects(View* view)
 
 			glDisable(GL_TEXTURE_2D);
 			glDisable(GL_BLEND);
-			glDisable(GL_ALPHA_TEST);
 		}
 
 		if (mGridLines)
@@ -2194,9 +2192,11 @@ void Project::RenderSceneObjects(View* view)
 		};
 
 		glMatrixMode(GL_PROJECTION);
+		glPushMatrix();
 		glLoadIdentity();
 		glOrtho(0, view->mWidth, 0, view->mHeight, -50, 50);
 		glMatrixMode(GL_MODELVIEW);
+		glPushMatrix();
 		glLoadIdentity();
 		glTranslatef(25.375f, 25.375f, 0.0f);
 
@@ -2237,15 +2237,21 @@ void Project::RenderSceneObjects(View* view)
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 		m_pScreenFont->MakeCurrent();
 		glEnable(GL_TEXTURE_2D);
-		glEnable(GL_ALPHA_TEST);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glEnable(GL_BLEND);
 
 		glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
 		m_pScreenFont->PrintText(pts[0][0], pts[0][1], 40.0f, "X");
 		m_pScreenFont->PrintText(pts[1][0], pts[1][1], 40.0f, "Y");
 		m_pScreenFont->PrintText(pts[2][0], pts[2][1], 40.0f, "Z");
 
+		glDisable(GL_BLEND);
 		glDisable(GL_TEXTURE_2D);
-		glDisable(GL_ALPHA_TEST);
+
+		glMatrixMode(GL_PROJECTION);
+		glPopMatrix();
+		glMatrixMode(GL_MODELVIEW);
+		glPopMatrix();
 	}
 }
 
@@ -2877,7 +2883,8 @@ void Project::RenderOverlays(View* view)
 				glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 				m_pScreenFont->MakeCurrent();
 				glEnable(GL_TEXTURE_2D);
-				glEnable(GL_ALPHA_TEST);
+				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+				glEnable(GL_BLEND);
 
 				char buf[32];
 				sprintf(buf, "[%.2f]", fabsf(Angle));
@@ -2888,8 +2895,8 @@ void Project::RenderOverlays(View* view)
 				glColor4f(0.8f, 0.8f, 0.0f, 1.0f);
 				m_pScreenFont->PrintText(ScreenPos[0] - Viewport[0] - (cx / 2), ScreenPos[1] - Viewport[1] + (cy / 2), 0.0f, buf);
 
+				glDisable(GL_BLEND);
 				glDisable(GL_TEXTURE_2D);
-				glDisable(GL_ALPHA_TEST);
 
 				glMatrixMode(GL_PROJECTION);
 				glPopMatrix();
@@ -2988,11 +2995,12 @@ void Project::RenderViewports(View* view)
 	glEnable(GL_TEXTURE_2D);
 	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 	m_pScreenFont->MakeCurrent();
-	glEnable(GL_ALPHA_TEST);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_BLEND);
 
 	m_pScreenFont->PrintText(3.0f, (float)view->mHeight - 1.0f - 6.0f, 0.0f, view->mCamera->mName);
 
-	glDisable(GL_ALPHA_TEST);
+	glDisable(GL_BLEND);
 	glDisable(GL_TEXTURE_2D);
 
 	glDepthMask(GL_TRUE);
@@ -3012,8 +3020,6 @@ void Project::RenderInitialize()
 	// Load font
 	if (!m_pScreenFont->IsLoaded())
 		m_pScreenFont->Initialize();
-
-	glAlphaFunc(GL_GREATER, 0.0625);
 
 	if (m_nScene & LC_SCENE_FLOOR)
 		m_pTerrain->LoadTexture();
@@ -3090,7 +3096,7 @@ void Project::RenderInitialize()
 
 			int y = GridSize - 1;
 			for (int x = 0; x < GridSize - 1; x++)
-	{
+			{
 				lcuint8 a = GridImage.mData[x + y * GridSize];
 				lcuint8 b = GridImage.mData[x + 1 + y * GridSize];
 				BlurBuffer[x + y * GridSize] = (a + b) / 2;
@@ -5468,11 +5474,11 @@ void Project::HandleCommand(LC_COMMANDS id)
 			gMainWindow->UpdateAllViews();
 		} break;
 
-	case LC_EDIT_SELECT_NONE:
+		case LC_EDIT_SELECT_NONE:
 		mActiveModel->SetSelection(lcArray<lcObjectSection>());
 		break;
 
-	case LC_EDIT_SELECT_INVERT:
+		case LC_EDIT_SELECT_INVERT:
 		mActiveModel->InvertSelection();
 		break;
 
@@ -5647,7 +5653,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 				axis = lcVector3(0, 0, -axis[2]);
 
 			if ((m_nSnap & LC_DRAW_MOVEAXIS) == 0)
-			{
+		{
 				// TODO: rewrite this
 
 				View* ActiveView = gMainWindow->mActiveView;
@@ -6293,7 +6299,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 			*/
 
 			for (int i = 0; i < gMainWindow->mViews.GetSize (); i++)
-		{
+			{
 				gMainWindow->mViews[i]->MakeCurrent();
 				RenderInitialize(); // TODO: get rid of RenderInitialize(), most of it can be done once per frame
 			}
@@ -8491,7 +8497,7 @@ void Project::ModifyObject(Object* Object, lcObjectProperty Property, void* Valu
 			Camera* camera = (Camera*)Object;
 
 			if (camera->mPosition != Position)
-			{
+{
 				camera->ChangeKey(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys, Position, LC_CK_EYE);
 				camera->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
 
@@ -8587,7 +8593,7 @@ void Project::ModifyObject(Object* Object, lcObjectProperty Property, void* Valu
 	}
 
 	if (CheckPointString)
-	{
+					{
 		SetModifiedFlag(true);
 		CheckPoint(CheckPointString);
 		gMainWindow->UpdateFocusObject(GetFocusObject());
@@ -8597,29 +8603,29 @@ void Project::ModifyObject(Object* Object, lcObjectProperty Property, void* Valu
 }
 
 void Project::ZoomActiveView(int Amount)
-{
+						{
 	mActiveModel->BeginZoomTool();
 	mActiveModel->UpdateZoomTool(2.0f * Amount / (21 - m_nMouse), m_nCurStep, m_bAddKeys);
 	mActiveModel->EndZoomTool(true);
 
 	UpdateOverlayScale();
-}
+						}
 
 void Project::BeginPieceDrop(PieceInfo* Info)
-{
+						{
 	StartTracking(LC_TRACK_LEFT);
 
 	mDropPiece = Info;
 	mDropPiece->AddRef();
-}
+			}
 
 void Project::OnPieceDropMove(int x, int y)
-{
+			{
 	if (!mDropPiece)
 		return;
 
 	if (m_nDownX != x || m_nDownY != y)
-	{
+			{
 		m_nDownX = x;
 		m_nDownY = y;
 
@@ -8697,11 +8703,11 @@ void Project::OnLeftButtonDown(View* view)
 
 			if (Control)
 				mActiveModel->ClearSelectionOrSetFocus(ObjectSection);
-			else
+				else
 				mActiveModel->SetFocus(ObjectSection);
 
-			StartTracking(LC_TRACK_START_LEFT);
-		}
+				StartTracking(LC_TRACK_START_LEFT);
+			}
 		break;
 /*
 		case LC_TOOL_ERASER:
@@ -8838,28 +8844,28 @@ void Project::OnLeftButtonDown(View* view)
 		} break;
 
 	case LC_TOOL_SPOTLIGHT:
-		{
-			GLint max;
-			int count = 0;
-			Light *pLight;
+    {
+      GLint max;
+      int count = 0;
+      Light *pLight;
 
-			glGetIntegerv (GL_MAX_LIGHTS, &max);
-			for (pLight = m_pLights; pLight; pLight = pLight->m_pNext)
-				count++;
+      glGetIntegerv (GL_MAX_LIGHTS, &max);
+      for (pLight = m_pLights; pLight; pLight = pLight->m_pNext)
+        count++;
 
-			if (count == max)
-				break;
+      if (count == max)
+        break;
 
-			lcVector3 tmp = lcUnprojectPoint(lcVector3(x+1.0f, y-1.0f, 0.9f), ModelView, Projection, Viewport);
-			SelectAndFocusNone(false);
-			StartTracking(LC_TRACK_START_LEFT);
-			pLight = new Light (m_fTrack[0], m_fTrack[1], m_fTrack[2], tmp[0], tmp[1], tmp[2]);
-			pLight->GetTarget ()->Select (true, true, false);
-			pLight->m_pNext = m_pLights;
-			m_pLights = pLight;
-			UpdateSelection();
+	  lcVector3 tmp = lcUnprojectPoint(lcVector3(x+1.0f, y-1.0f, 0.9f), ModelView, Projection, Viewport);
+      SelectAndFocusNone(false);
+      StartTracking(LC_TRACK_START_LEFT);
+      pLight = new Light (m_fTrack[0], m_fTrack[1], m_fTrack[2], tmp[0], tmp[1], tmp[2]);
+      pLight->GetTarget ()->Select (true, true, false);
+      pLight->m_pNext = m_pLights;
+      m_pLights = pLight;
+      UpdateSelection();
 			gMainWindow->UpdateAllViews();
-			gMainWindow->UpdateFocusObject(pLight);
+	  gMainWindow->UpdateFocusObject(pLight);
 		}
 		break;
 
@@ -8882,19 +8888,19 @@ void Project::OnLeftButtonDown(View* view)
 
 			StartTracking(LC_TRACK_START_LEFT);
 		}
-		break;
+					break;
 
 	case LC_TOOL_MOVE:
-		{
+				{
 			if (mActiveModel->GetSelectedObjects().GetSize())
-			{
+					{
 				mActiveModel->BeginMoveTool();
 
 				StartTracking(LC_TRACK_START_LEFT);
 //				m_OverlayDelta = lcVector3(0.0f, 0.0f, 0.0f);
 //				m_MouseSnapLeftover = lcVector3(0.0f, 0.0f, 0.0f);
 			}
-		}
+			}
 		break;
 
 	case LC_TOOL_ROTATE:
@@ -9006,7 +9012,7 @@ void Project::OnLeftButtonDoubleClick(View* view)
 }
 
 void Project::OnLeftButtonUp(View* view)
-{
+		{
 	StopTracking(true);
 }
 
@@ -9180,7 +9186,7 @@ void Project::OnMouseMove(View* view)
 
 				gMainWindow->UpdateAllViews();
 			}
-		}
+			}
 		break;
 
 	case LC_TOOL_SPOTLIGHT:
@@ -9234,14 +9240,14 @@ void Project::OnMouseMove(View* view)
 			m_fTrack[1] = (float)ClampY;
 
 			if (m_nTracking != LC_TRACK_NONE)
-			{
+		{
 				ActivateOverlay(view, m_nCurAction, LC_OVERLAY_NONE);
 				UpdateOverlayScale();
 			}
 
 			gMainWindow->UpdateAllViews();
 		}
-		break;
+				break;
 
 	case LC_TOOL_MOVE:
 		{
@@ -9596,7 +9602,7 @@ void Project::OnMouseMove(View* view)
 
 			mActiveModel->UpdateZoomTool(Distance, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
 		}
-		break;
+				break;
 
 	case LC_TOOL_PAN:
 		{
@@ -9605,7 +9611,7 @@ void Project::OnMouseMove(View* view)
 
 			mActiveModel->UpdatePanTool(DistanceX, DistanceY, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
 		}
-		break;
+				break;
 
 	case LC_TOOL_ROTATE_VIEW:
 		{
@@ -9616,7 +9622,7 @@ void Project::OnMouseMove(View* view)
 				mActiveModel->UpdateRollTool(Angle, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
 			}
 			else
-			{
+		{
 				float AngleX = -0.1f * (x - m_nDownX) / (21 - m_nMouse);
 				float AngleY = 0.1f * (y - m_nDownY) / (21 - m_nMouse);
 
@@ -9628,26 +9634,26 @@ void Project::OnMouseMove(View* view)
 				mActiveModel->UpdateOrbitTool(AngleX, AngleY, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
 			}
 		}
-		break;
+				break;
 
 	case LC_TOOL_ROLL:
-		{
+			{
 			float Angle = -2.0f * (x - m_nDownX) / (21 - m_nMouse) * LC_DTOR;
 
 			mActiveModel->UpdateRollTool(Angle, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
 		}
-		break;
+					break;
 
 	case LC_TOOL_ZOOM_REGION:
 		{
 			if ((m_nDownY == y) && (m_nDownX == x))
-				break;
+					break;
 
 			m_nDownX = x;
 			m_nDownY = y;
 			gMainWindow->UpdateAllViews();
 		}
-		break;
+	  break;
 	}
 }
 

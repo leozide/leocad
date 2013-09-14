@@ -241,7 +241,7 @@ void lcModel::SetFocus(const lcObjectSection& ObjectSection)
 	gMainWindow->UpdateFocusObject();
 }
 
-void lcModel::BeginCameraTool(const lcVector3& Position, const lcVector3& TargetPosition, const lcVector3& UpVector)
+void lcModel::BeginCreateCameraTool(const lcVector3& Position, const lcVector3& TargetPosition, const lcVector3& UpVector)
 {
 	BeginCheckpoint(LC_ACTION_CREATE_CAMERA);
 
@@ -289,7 +289,7 @@ void lcModel::BeginCameraTool(const lcVector3& Position, const lcVector3& Target
 	gMainWindow->UpdateCameraMenu();
 }
 
-void lcModel::UpdateCameraTool(const lcVector3& Distance, lcTime Time, bool AddKeys)
+void lcModel::UpdateCreateCameraTool(const lcVector3& Distance, lcTime Time, bool AddKeys)
 {
 	LC_ASSERT(mCurrentCheckpoint->mActionType == LC_ACTION_CREATE_CAMERA);
 
@@ -313,7 +313,7 @@ void lcModel::UpdateCameraTool(const lcVector3& Distance, lcTime Time, bool AddK
 	gMainWindow->UpdateAllViews();
 }
 
-void lcModel::EndCameraTool(bool Accept)
+void lcModel::EndCreateCameraTool(bool Accept)
 {
 	if (Accept)
 	{
@@ -417,155 +417,9 @@ void lcModel::EndMoveTool(bool Accept)
 	EndCheckpoint(Accept, true);
 }
 
-void lcModel::BeginZoomTool()
+void lcModel::BeginEditCameraTool(lcActionType ActionType, const lcVector3& Center)
 {
-	BeginCheckpoint(LC_ACTION_ZOOM_CAMERA);
-
-	lcCamera* Camera = gMainWindow->mActiveView->mCamera;
-
-	lcMemFile& Revert = mCurrentCheckpoint->mRevert;
-	Revert.WriteS32(mObjects.FindIndex(Camera));
-	Camera->Save(Revert);
-
-	lcMemFile& Apply = mCurrentCheckpoint->mApply;
-	Apply.WriteFloat(0.0f);
-}
-
-void lcModel::UpdateZoomTool(float Distance, lcTime Time, bool AddKeys)
-{
-	LC_ASSERT(mCurrentCheckpoint->mActionType == LC_ACTION_ZOOM_CAMERA);
-
-	lcMemFile& Apply = mCurrentCheckpoint->mApply;
-	Apply.Seek(0, SEEK_SET);
-
-	float PreviousDistance = Apply.ReadFloat();
-
-	if (PreviousDistance == Distance)
-		return;
-
-	Apply.Seek(0, SEEK_SET);
-	Apply.WriteFloat(Distance);
-
-	lcMemFile& Revert = mCurrentCheckpoint->mRevert;
-	Revert.Seek(0, SEEK_SET);
-
-	Revert.ReadS32();
-	lcCamera* Camera = gMainWindow->mActiveView->mCamera;
-
-	Camera->Load(Revert);
-	Camera->Zoom(Distance, Time, AddKeys);
-	Camera->Update();
-
-	if (mFocusObject)
-		gMainWindow->UpdateFocusObject();
-	gMainWindow->UpdateAllViews();
-}
-
-void lcModel::EndZoomTool(bool Accept)
-{
-	LC_ASSERT(mCurrentCheckpoint->mActionType == LC_ACTION_ZOOM_CAMERA);
-
-	lcMemFile& Apply = mCurrentCheckpoint->mApply;
-	Apply.Seek(0, SEEK_SET);
-
-	float Distance = Apply.ReadFloat();
-
-	if (fabsf(Distance) < 0.0001f)
-		Accept = false;
-
-	lcCamera* Camera = gMainWindow->mActiveView->mCamera;
-
-	if (Accept)
-	{
-		Apply.Seek(0, SEEK_SET);
-
-		Apply.WriteS32(mObjects.FindIndex(Camera));
-		Camera->Save(Apply);
-
-//		SetModifiedFlag(true);
-	}
-
-	EndCheckpoint(Accept, !Camera->IsSimple());
-}
-
-void lcModel::BeginPanTool()
-{
-	BeginCheckpoint(LC_ACTION_PAN_CAMERA);
-
-	lcCamera* Camera = gMainWindow->mActiveView->mCamera;
-
-	lcMemFile& Revert = mCurrentCheckpoint->mRevert;
-	Revert.WriteS32(mObjects.FindIndex(Camera));
-	Camera->Save(Revert);
-
-	lcMemFile& Apply = mCurrentCheckpoint->mApply;
-	Apply.WriteFloat(0.0f);
-	Apply.WriteFloat(0.0f);
-}
-
-void lcModel::UpdatePanTool(float DistanceX, float DistanceY, lcTime Time, bool AddKeys)
-{
-	LC_ASSERT(mCurrentCheckpoint->mActionType == LC_ACTION_PAN_CAMERA);
-
-	lcMemFile& Apply = mCurrentCheckpoint->mApply;
-	Apply.Seek(0, SEEK_SET);
-
-	float PreviousDistanceX = Apply.ReadFloat();
-	float PreviousDistanceY = Apply.ReadFloat();
-
-	if (PreviousDistanceX == DistanceX && PreviousDistanceY == DistanceY)
-		return;
-
-	Apply.Seek(0, SEEK_SET);
-	Apply.WriteFloat(DistanceX);
-	Apply.WriteFloat(DistanceY);
-
-	lcMemFile& Revert = mCurrentCheckpoint->mRevert;
-	Revert.Seek(0, SEEK_SET);
-
-	Revert.ReadS32();
-	lcCamera* Camera = gMainWindow->mActiveView->mCamera;
-
-	Camera->Load(Revert);
-	Camera->Pan(DistanceX, DistanceY, Time, AddKeys);
-	Camera->Update();
-
-	if (mFocusObject)
-		gMainWindow->UpdateFocusObject();
-	gMainWindow->UpdateAllViews();
-}
-
-void lcModel::EndPanTool(bool Accept)
-{
-	LC_ASSERT(mCurrentCheckpoint->mActionType == LC_ACTION_PAN_CAMERA);
-
-	lcMemFile& Apply = mCurrentCheckpoint->mApply;
-	Apply.Seek(0, SEEK_SET);
-
-	float DistanceX = Apply.ReadFloat();
-	float DistanceY = Apply.ReadFloat();
-
-	if (fabsf(DistanceX) < 0.0001f && fabsf(DistanceY) < 0.0001f)
-		Accept = false;
-
-	lcCamera* Camera = gMainWindow->mActiveView->mCamera;
-
-	if (Accept)
-	{
-		Apply.Seek(0, SEEK_SET);
-
-		Apply.WriteS32(mObjects.FindIndex(Camera));
-		Camera->Save(Apply);
-
-//		SetModifiedFlag(true);
-	}
-
-	EndCheckpoint(Accept, !Camera->IsSimple());
-}
-
-void lcModel::BeginOrbitTool(const lcVector3& Center)
-{
-	BeginCheckpoint(LC_ACTION_ORBIT_CAMERA);
+	BeginCheckpoint(ActionType);
 
 	lcCamera* Camera = gMainWindow->mActiveView->mCamera;
 
@@ -579,26 +433,29 @@ void lcModel::BeginOrbitTool(const lcVector3& Center)
 	Apply.WriteFloats(Center, 3);
 }
 
-void lcModel::UpdateOrbitTool(float AngleX, float AngleY, lcTime Time, bool AddKeys)
+void lcModel::UpdateEditCameraTool(lcActionType ActionType, float ValueX, float ValueY, lcTime Time, bool AddKeys)
 {
-	LC_ASSERT(mCurrentCheckpoint->mActionType == LC_ACTION_ORBIT_CAMERA);
+	LC_ASSERT(mCurrentCheckpoint->mActionType == ActionType);
 
 	lcMemFile& Apply = mCurrentCheckpoint->mApply;
 	Apply.Seek(0, SEEK_SET);
 
-	float PreviousAngleX = Apply.ReadFloat();
-	float PreviousAngleY = Apply.ReadFloat();
+	lcVector3 PreviousValue;
+	Apply.ReadFloats(PreviousValue, 3);
 
-	if (PreviousAngleX == AngleX && PreviousAngleY == AngleY)
+	float PreviousValueX = Apply.ReadFloat();
+	float PreviousValueY = Apply.ReadFloat();
+
+	if (PreviousValueX == ValueX && PreviousValueY == ValueY)
 		return;
-
-	Apply.Seek(0, SEEK_SET);
-	Apply.WriteFloat(AngleX);
-	Apply.WriteFloat(AngleY);
 
 	lcVector3 Center;
 	Apply.ReadFloats(Center, 3);
 
+	Apply.Seek(0, SEEK_SET);
+	Apply.WriteFloat(ValueX);
+	Apply.WriteFloat(ValueY);
+
 	lcMemFile& Revert = mCurrentCheckpoint->mRevert;
 	Revert.Seek(0, SEEK_SET);
 
@@ -606,79 +463,24 @@ void lcModel::UpdateOrbitTool(float AngleX, float AngleY, lcTime Time, bool AddK
 	lcCamera* Camera = gMainWindow->mActiveView->mCamera;
 
 	Camera->Load(Revert);
-	Camera->Orbit(AngleX, AngleY, Center, Time, AddKeys);
-	Camera->Update();
-
-	if (mFocusObject)
-		gMainWindow->UpdateFocusObject();
-	gMainWindow->UpdateAllViews();
-}
-
-void lcModel::EndOrbitTool(bool Accept)
-{
-	LC_ASSERT(mCurrentCheckpoint->mActionType == LC_ACTION_ORBIT_CAMERA);
-
-	lcMemFile& Apply = mCurrentCheckpoint->mApply;
-	Apply.Seek(0, SEEK_SET);
-
-	float DistanceX = Apply.ReadFloat();
-	float DistanceY = Apply.ReadFloat();
-
-	if (fabsf(DistanceX) < 0.0001f && fabsf(DistanceY) < 0.0001f)
-		Accept = false;
-
-	lcCamera* Camera = gMainWindow->mActiveView->mCamera;
-
-	if (Accept)
+	switch (ActionType)
 	{
-		Apply.Seek(0, SEEK_SET);
+	case LC_ACTION_ZOOM_CAMERA:
+		Camera->Zoom(ValueX, Time, AddKeys);
+		break;
 
-		Apply.WriteS32(mObjects.FindIndex(Camera));
-		Camera->Save(Apply);
+	case LC_ACTION_PAN_CAMERA:
+		Camera->Pan(ValueX, ValueY, Time, AddKeys);
+		break;
 
-//		SetModifiedFlag(true);
+	case LC_ACTION_ORBIT_CAMERA:
+		Camera->Orbit(ValueX, ValueY, Center, Time, AddKeys);
+		break;
+
+	case LC_ACTION_ROLL_CAMERA:
+		Camera->Roll(ValueX, Time, AddKeys);
+		break;
 	}
-
-	EndCheckpoint(Accept, !Camera->IsSimple());
-}
-
-void lcModel::BeginRollTool()
-{
-	BeginCheckpoint(LC_ACTION_ROLL_CAMERA);
-
-	lcCamera* Camera = gMainWindow->mActiveView->mCamera;
-
-	lcMemFile& Revert = mCurrentCheckpoint->mRevert;
-	Revert.WriteS32(mObjects.FindIndex(Camera));
-	Camera->Save(Revert);
-
-	lcMemFile& Apply = mCurrentCheckpoint->mApply;
-	Apply.WriteFloat(0.0f);
-}
-
-void lcModel::UpdateRollTool(float Angle, lcTime Time, bool AddKeys)
-{
-	LC_ASSERT(mCurrentCheckpoint->mActionType == LC_ACTION_ROLL_CAMERA);
-
-	lcMemFile& Apply = mCurrentCheckpoint->mApply;
-	Apply.Seek(0, SEEK_SET);
-
-	float PreviousAngle = Apply.ReadFloat();
-
-	if (PreviousAngle == Angle)
-		return;
-
-	Apply.Seek(0, SEEK_SET);
-	Apply.WriteFloat(Angle);
-
-	lcMemFile& Revert = mCurrentCheckpoint->mRevert;
-	Revert.Seek(0, SEEK_SET);
-
-	Revert.ReadS32();
-	lcCamera* Camera = gMainWindow->mActiveView->mCamera;
-
-	Camera->Load(Revert);
-	Camera->Roll(Angle, Time, AddKeys);
 	Camera->Update();
 
 	if (mFocusObject)
@@ -686,16 +488,17 @@ void lcModel::UpdateRollTool(float Angle, lcTime Time, bool AddKeys)
 	gMainWindow->UpdateAllViews();
 }
 
-void lcModel::EndRollTool(bool Accept)
+void lcModel::EndEditCameraTool(lcActionType ActionType, bool Accept)
 {
-	LC_ASSERT(mCurrentCheckpoint->mActionType == LC_ACTION_ROLL_CAMERA);
+	LC_ASSERT(mCurrentCheckpoint->mActionType == ActionType);
 
 	lcMemFile& Apply = mCurrentCheckpoint->mApply;
 	Apply.Seek(0, SEEK_SET);
 
-	float Angle = Apply.ReadFloat();
+	float ValueX = Apply.ReadFloat();
+	float ValueY = Apply.ReadFloat();
 
-	if (fabsf(Angle) < 0.0001f)
+	if (fabsf(ValueX) < 0.0001f && fabsf(ValueY) < 0.0001f)
 		Accept = false;
 
 	lcCamera* Camera = gMainWindow->mActiveView->mCamera;

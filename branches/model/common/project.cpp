@@ -7618,7 +7618,7 @@ bool Project::StopTracking(bool Accept)
 	switch (Action)
 	{
 	case LC_TOOL_CAMERA:
-		mActiveModel->EndCameraTool(Accept);
+		mActiveModel->EndCreateCameraTool(Accept);
 		break;
 
 	case LC_TOOL_SELECT:
@@ -7653,19 +7653,19 @@ bool Project::StopTracking(bool Accept)
 		break;
 
 	case LC_TOOL_ZOOM:
-		mActiveModel->EndZoomTool(Accept);
+		mActiveModel->EndEditCameraTool(LC_ACTION_ZOOM_CAMERA, Accept);
 		break;
 
 	case LC_TOOL_PAN:
-		mActiveModel->EndPanTool(Accept);
+		mActiveModel->EndEditCameraTool(LC_ACTION_PAN_CAMERA, Accept);
 		break;
 
 	case LC_TOOL_ROTATE_VIEW:
-		mActiveModel->EndOrbitTool(Accept);
+		mActiveModel->EndEditCameraTool(LC_ACTION_ORBIT_CAMERA, Accept);
 		break;
 
 	case LC_TOOL_ROLL:
-		mActiveModel->EndRollTool(Accept);
+		mActiveModel->EndEditCameraTool(LC_ACTION_ROLL_CAMERA, Accept);
 		break;
 
 	case LC_TOOL_ZOOM_REGION:
@@ -8593,7 +8593,7 @@ void Project::ModifyObject(Object* Object, lcObjectProperty Property, void* Valu
 	}
 
 	if (CheckPointString)
-					{
+	{
 		SetModifiedFlag(true);
 		CheckPoint(CheckPointString);
 		gMainWindow->UpdateFocusObject(GetFocusObject());
@@ -8603,13 +8603,13 @@ void Project::ModifyObject(Object* Object, lcObjectProperty Property, void* Valu
 }
 
 void Project::ZoomActiveView(int Amount)
-						{
-	mActiveModel->BeginZoomTool();
-	mActiveModel->UpdateZoomTool(2.0f * Amount / (21 - m_nMouse), m_nCurStep, m_bAddKeys);
-	mActiveModel->EndZoomTool(true);
+{
+	mActiveModel->BeginEditCameraTool(LC_ACTION_ZOOM_CAMERA, lcVector3(0.0f, 0.0f, 0.0f));
+	mActiveModel->UpdateEditCameraTool(LC_ACTION_ZOOM_CAMERA, 2.0f * Amount / (21 - m_nMouse), 0.0f, m_nCurStep, m_bAddKeys);
+	mActiveModel->EndEditCameraTool(LC_ACTION_ZOOM_CAMERA, true);
 
 	UpdateOverlayScale();
-						}
+}
 
 void Project::BeginPieceDrop(PieceInfo* Info)
 						{
@@ -8884,23 +8884,23 @@ void Project::OnLeftButtonDown(View* view)
 			UpVector = lcCross(SideVector, FrontVector);
 			UpVector.Normalize();
 
-			mActiveModel->BeginCameraTool(Position, TargetPosition, UpVector);
+			mActiveModel->BeginCreateCameraTool(Position, TargetPosition, UpVector);
 
 			StartTracking(LC_TRACK_START_LEFT);
 		}
 					break;
 
 	case LC_TOOL_MOVE:
-				{
+		{
 			if (mActiveModel->GetSelectedObjects().GetSize())
-					{
+			{
 				mActiveModel->BeginMoveTool();
 
 				StartTracking(LC_TRACK_START_LEFT);
 //				m_OverlayDelta = lcVector3(0.0f, 0.0f, 0.0f);
 //				m_MouseSnapLeftover = lcVector3(0.0f, 0.0f, 0.0f);
 			}
-			}
+		}
 		break;
 
 	case LC_TOOL_ROTATE:
@@ -8928,12 +8928,12 @@ void Project::OnLeftButtonDown(View* view)
 		break;
 
 	case LC_TOOL_ZOOM:
-		mActiveModel->BeginZoomTool();
+		mActiveModel->BeginEditCameraTool(LC_ACTION_ZOOM_CAMERA, lcVector3(0.0f, 0.0f, 0.0f));
 		StartTracking(LC_TRACK_START_LEFT);
 		break;
 
 	case LC_TOOL_PAN:
-		mActiveModel->BeginPanTool();
+		mActiveModel->BeginEditCameraTool(LC_ACTION_PAN_CAMERA, lcVector3(0.0f, 0.0f, 0.0f));
 		StartTracking(LC_TRACK_START_LEFT);
 		break;
 
@@ -8945,13 +8945,13 @@ void Project::OnLeftButtonDown(View* view)
 					pPiece->CompareBoundingBox(bs);
 			lcVector3 Center((bs[0] + bs[3]) / 2, (bs[1] + bs[4]) / 2, (bs[2] + bs[5]) / 2);
 
-			mActiveModel->BeginOrbitTool(Center);
+			mActiveModel->BeginEditCameraTool(LC_ACTION_ZOOM_CAMERA, Center);
 			StartTracking(LC_TRACK_START_LEFT);
 		}
 		break;
 
 	case LC_TOOL_ROLL:
-		mActiveModel->BeginRollTool();
+		mActiveModel->BeginEditCameraTool(LC_ACTION_ROLL_CAMERA, lcVector3(0.0f, 0.0f, 0.0f));
 		StartTracking(LC_TRACK_START_LEFT);
 		break;
 	}
@@ -9218,7 +9218,7 @@ void Project::OnMouseMove(View* view)
 			m_fTrack[1] = pty;
 			m_fTrack[2] = ptz;
 
-			mActiveModel->UpdateCameraTool(Distance, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
+			mActiveModel->UpdateCreateCameraTool(Distance, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
 		}
 		break;
 
@@ -9600,18 +9600,18 @@ void Project::OnMouseMove(View* view)
 		{
 			float Distance = 2.0f * (y - m_nDownY) / (21 - m_nMouse);
 
-			mActiveModel->UpdateZoomTool(Distance, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
+			mActiveModel->UpdateEditCameraTool(LC_ACTION_ZOOM_CAMERA, Distance, 0.0f, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
 		}
-				break;
+		break;
 
 	case LC_TOOL_PAN:
 		{
 			float DistanceX = 2.0f * (x - m_nDownX) / (21 - m_nMouse);
 			float DistanceY = -2.0f * (y - m_nDownY) / (21 - m_nMouse);
 
-			mActiveModel->UpdatePanTool(DistanceX, DistanceY, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
+			mActiveModel->UpdateEditCameraTool(LC_ACTION_PAN_CAMERA, DistanceX, DistanceY, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
 		}
-				break;
+		break;
 
 	case LC_TOOL_ROTATE_VIEW:
 		{
@@ -9619,10 +9619,10 @@ void Project::OnMouseMove(View* view)
 			{
 				float Angle = -2.0f * (x - m_nDownX) / (21 - m_nMouse) * LC_DTOR;
 
-				mActiveModel->UpdateRollTool(Angle, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
+				mActiveModel->UpdateEditCameraTool(LC_ACTION_ROLL_CAMERA, Angle, 0.0f, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
 			}
 			else
-		{
+			{
 				float AngleX = -0.1f * (x - m_nDownX) / (21 - m_nMouse);
 				float AngleY = 0.1f * (y - m_nDownY) / (21 - m_nMouse);
 
@@ -9631,18 +9631,18 @@ void Project::OnMouseMove(View* view)
 				else if (m_OverlayMode == LC_OVERLAY_ROTATE_VIEW_X)
 					AngleX = 0.0f;
 
-				mActiveModel->UpdateOrbitTool(AngleX, AngleY, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
+				mActiveModel->UpdateEditCameraTool(LC_ACTION_ORBIT_CAMERA, AngleX, AngleY, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
 			}
 		}
-				break;
+		break;
 
 	case LC_TOOL_ROLL:
-			{
+		{
 			float Angle = -2.0f * (x - m_nDownX) / (21 - m_nMouse) * LC_DTOR;
 
-			mActiveModel->UpdateRollTool(Angle, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
+			mActiveModel->UpdateEditCameraTool(LC_ACTION_ROLL_CAMERA, Angle, 0.0f, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
 		}
-					break;
+		break;
 
 	case LC_TOOL_ZOOM_REGION:
 		{

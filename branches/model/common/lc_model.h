@@ -59,29 +59,17 @@ public:
 
 	void AddPiece(PieceInfo* Part, int ColorIndex, const lcVector3& Position, const lcVector4& AxisAngle, lcTime Time);
 
-	void BeginCameraTool(const lcVector3& Position, const lcVector3& TargetPosition, const lcVector3& UpVector);
-	void UpdateCameraTool(const lcVector3& Distance, lcTime Time, bool AddKeys);
-	void EndCameraTool(bool Accept);
+	void BeginCreateCameraTool(const lcVector3& Position, const lcVector3& TargetPosition, const lcVector3& UpVector);
+	void UpdateCreateCameraTool(const lcVector3& Distance, lcTime Time, bool AddKeys);
+	void EndCreateCameraTool(bool Accept);
 
 	void BeginMoveTool();
 	void UpdateMoveTool(const lcVector3& Distance, lcTime Time, bool AddKeys);
 	void EndMoveTool(bool Accept);
 
-	void BeginZoomTool();
-	void UpdateZoomTool(float Distance, lcTime Time, bool AddKeys);
-	void EndZoomTool(bool Accept);
-
-	void BeginPanTool();
-	void UpdatePanTool(float DistanceX, float DistanceY, lcTime Time, bool AddKeys);
-	void EndPanTool(bool Accept);
-
-	void BeginOrbitTool(const lcVector3& Center);
-	void UpdateOrbitTool(float AngleX, float AngleY, lcTime Time, bool AddKeys);
-	void EndOrbitTool(bool Accept);
-
-	void BeginRollTool();
-	void UpdateRollTool(float Angle, lcTime Time, bool AddKeys);
-	void EndRollTool(bool Accept);
+	void BeginEditCameraTool(lcActionType ActionType, const lcVector3& Center);
+	void UpdateEditCameraTool(lcActionType ActionType, float ValueX, float ValueY, lcTime Time, bool AddKeys);
+	void EndEditCameraTool(lcActionType ActionType, bool Accept);
 
 	void ZoomExtents(View* View, const lcVector3& Center, const lcVector3* Points, lcTime Time, bool AddKeys);
 	void ZoomRegion(View* View, float Left, float Right, float Bottom, float Top, lcTime Time, bool AddKeys);

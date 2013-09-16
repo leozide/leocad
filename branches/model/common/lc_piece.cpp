@@ -68,11 +68,10 @@ void lcPiece::ClosestHitTest(lcObjectHitTest& HitTest)
 
 	lcVector3 Intersection;
 
-	if (mPieceInfo->mMesh->MinIntersectDist(Start, End, Distance, Intersection))
+	if (mPieceInfo->mMesh->MinIntersectDist(Start, End, HitTest.Distance, Intersection))
 	{
 		HitTest.ObjectSection.Object = this;
 		HitTest.ObjectSection.Section = 0;
-		HitTest.Distance = Distance;
 	}
 }
 

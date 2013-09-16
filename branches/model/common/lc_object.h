@@ -10,8 +10,8 @@ struct lcRenderMesh;
 enum lcObjectType
 {
 	LC_OBJECT_TYPE_PIECE,
-	LC_OBJECT_TYPE_CAMERA,
-	LC_OBJECT_TYPE_LIGHT
+	LC_OBJECT_TYPE_CAMERA
+//	LC_OBJECT_TYPE_LIGHT
 };
 
 template<typename T>
@@ -45,6 +45,11 @@ class lcObject
 public:
 	lcObject(lcObjectType Type);
 	virtual ~lcObject();
+
+	lcObjectType ObjectType() const
+	{
+		return mObjectType;
+	}
 
 	bool IsCamera() const
 	{

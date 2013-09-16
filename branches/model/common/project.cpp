@@ -3162,101 +3162,6 @@ void Project::CalculateStep()
 		pLight->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
 }
 
-// Returns true if anything was removed (used by cut and del)
-bool Project::RemoveSelectedObjects()
-{
-	return false;
-	/*
-	Piece* pPiece;
-	Light* pLight;
-	void* pPrev;
-	bool RemovedPiece = false;
-	bool RemovedCamera = false;
-	bool RemovedLight = false;
-
-	pPiece = m_pPieces;
-	while (pPiece)
-	{
-		if (pPiece->IsSelected())
-		{
-			Piece* pTemp;
-			pTemp = pPiece->m_pNext;
-
-			RemovedPiece = true;
-			RemovePiece(pPiece);
-			delete pPiece;
-			pPiece = pTemp;
-		}
-		else
-			pPiece = pPiece->m_pNext;
-	}
-
-	// Cameras can't be removed while being used or default
-	for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
-	{
-		Camera* pCamera = mCameras[CameraIdx];
-
-		if (!pCamera->IsSelected())
-			continue;
-
-		bool CanDelete = true;
-
-		for (int ViewIdx = 0; ViewIdx < gMainWindow->mViews.GetSize(); ViewIdx++)
-		{
-			if (pCamera == gMainWindow->mViews[ViewIdx]->mCamera)
-			{
-				CanDelete = false;
-				break;
-			}
-		}
-
-		if (!CanDelete)
-			continue;
-
-		mCameras.RemoveIndex(CameraIdx);
-		CameraIdx--;
-		delete pCamera;
-
-		RemovedCamera = true;
-	}
-
-	if (RemovedCamera)
-		gMainWindow->UpdateCameraMenu();
-
-	for (pPrev = NULL, pLight = m_pLights; pLight; )
-	{
-		if (pLight->IsSelected())
-		{
-			if (pPrev)
-			{
-			  ((Light*)pPrev)->m_pNext = pLight->m_pNext;
-				delete pLight;
-				pLight = ((Light*)pPrev)->m_pNext;
-			}
-			else
-			{
-			  m_pLights = m_pLights->m_pNext;
-				delete pLight;
-				pLight = m_pLights;
-			}
-
-			RemovedLight = true;
-		}
-		else
-		{
-			pPrev = pLight;
-			pLight = pLight->m_pNext;
-		}
-	}
-
-	RemoveEmptyGroups();
-//	CalculateStep();
-//	AfxGetMainWnd()->PostMessage(WM_LC_UPDATE_INFO, NULL, OT_PIECE);
-
-	return RemovedPiece || RemovedCamera || RemovedLight;
-	*/
-}
-
 void Project::UpdateSelection()
 {
 	unsigned long flags = 0;
@@ -5328,14 +5233,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 					pLight->FileSave(Clipboard);
 */
 			if (id == LC_EDIT_CUT)
-			{
-				RemoveSelectedObjects();
-				gMainWindow->UpdateFocusObject(GetFocusObject());
-				UpdateSelection();
-				gMainWindow->UpdateAllViews();
-				SetModifiedFlag(true);
-				CheckPoint("Cutting");
-			}
+				mActiveModel->RemoveObjects(mActiveModel->GetSelectedObjects());
 
 			g_App->ExportClipboard(Clipboard);
 		} break;
@@ -5474,11 +5372,11 @@ void Project::HandleCommand(LC_COMMANDS id)
 			gMainWindow->UpdateAllViews();
 		} break;
 
-		case LC_EDIT_SELECT_NONE:
+	case LC_EDIT_SELECT_NONE:
 		mActiveModel->SetSelection(lcArray<lcObjectSection>());
 		break;
 
-		case LC_EDIT_SELECT_INVERT:
+	case LC_EDIT_SELECT_INVERT:
 		mActiveModel->InvertSelection();
 		break;
 
@@ -5526,25 +5424,25 @@ void Project::HandleCommand(LC_COMMANDS id)
 //	pFrame->UpdateInfo();
 						} break;
 
-		case LC_VIEW_SPLIT_HORIZONTAL:
-			gMainWindow->SplitHorizontal();
-			break;
+	case LC_VIEW_SPLIT_HORIZONTAL:
+		gMainWindow->SplitHorizontal();
+		break;
 
-		case LC_VIEW_SPLIT_VERTICAL:
-			gMainWindow->SplitVertical();
-			break;
+	case LC_VIEW_SPLIT_VERTICAL:
+		gMainWindow->SplitVertical();
+		break;
 
-		case LC_VIEW_REMOVE_VIEW:
-			gMainWindow->RemoveView();
-			break;
+	case LC_VIEW_REMOVE_VIEW:
+		gMainWindow->RemoveView();
+		break;
 
-		case LC_VIEW_RESET_VIEWS:
-			gMainWindow->ResetViews();
-			break;
+	case LC_VIEW_RESET_VIEWS:
+		gMainWindow->ResetViews();
+		break;
 
-		case LC_VIEW_FULLSCREEN:
-			gMainWindow->ToggleFullScreen();
-			break;
+	case LC_VIEW_FULLSCREEN:
+		gMainWindow->ToggleFullScreen();
+		break;
 
 		case LC_PIECE_INSERT:
 		{
@@ -5588,30 +5486,22 @@ void Project::HandleCommand(LC_COMMANDS id)
 			CheckPoint("Inserting");
 		} break;
 
-		case LC_PIECE_DELETE:
-		{
-			if (RemoveSelectedObjects())
-			{
-				gMainWindow->UpdateFocusObject(NULL);
-				UpdateSelection();
-				gMainWindow->UpdateAllViews();
-				SetModifiedFlag(true);
-				CheckPoint("Deleting");
-			}
-		} break;
+	case LC_PIECE_DELETE:
+		mActiveModel->RemoveObjects(mActiveModel->GetSelectedObjects());
+		break;
 
-		case LC_PIECE_MOVE_PLUSX:
-		case LC_PIECE_MOVE_MINUSX:
-		case LC_PIECE_MOVE_PLUSY:
-		case LC_PIECE_MOVE_MINUSY:
-		case LC_PIECE_MOVE_PLUSZ:
-		case LC_PIECE_MOVE_MINUSZ:
-		case LC_PIECE_ROTATE_PLUSX:
-		case LC_PIECE_ROTATE_MINUSX:
-		case LC_PIECE_ROTATE_PLUSY:
-		case LC_PIECE_ROTATE_MINUSY:
-		case LC_PIECE_ROTATE_PLUSZ:
-		case LC_PIECE_ROTATE_MINUSZ:
+	case LC_PIECE_MOVE_PLUSX:
+	case LC_PIECE_MOVE_MINUSX:
+	case LC_PIECE_MOVE_PLUSY:
+	case LC_PIECE_MOVE_MINUSY:
+	case LC_PIECE_MOVE_PLUSZ:
+	case LC_PIECE_MOVE_MINUSZ:
+	case LC_PIECE_ROTATE_PLUSX:
+	case LC_PIECE_ROTATE_MINUSX:
+	case LC_PIECE_ROTATE_PLUSY:
+	case LC_PIECE_ROTATE_MINUSY:
+	case LC_PIECE_ROTATE_PLUSZ:
+	case LC_PIECE_ROTATE_MINUSZ:
 		{
 			lcVector3 axis;
 			bool Rotate = id >= LC_PIECE_ROTATE_PLUSX && id <= LC_PIECE_ROTATE_MINUSZ;
@@ -5653,7 +5543,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 				axis = lcVector3(0, 0, -axis[2]);
 
 			if ((m_nSnap & LC_DRAW_MOVEAXIS) == 0)
-		{
+			{
 				// TODO: rewrite this
 
 				View* ActiveView = gMainWindow->mActiveView;
@@ -5818,10 +5708,10 @@ void Project::HandleCommand(LC_COMMANDS id)
 				break;
 
 			if (Options.Counts[0] * Options.Counts[1] * Options.Counts[2] < 2)
-				{
+			{
 				gMainWindow->DoMessageBox("Array only has 1 element or less, no pieces added.", LC_MB_OK | LC_MB_ICONINFORMATION);
 				break;
-				}
+			}
 
 			ConvertFromUserUnits(Options.Offsets[0]);
 			ConvertFromUserUnits(Options.Offsets[1]);
@@ -8703,71 +8593,26 @@ void Project::OnLeftButtonDown(View* view)
 
 			if (Control)
 				mActiveModel->ClearSelectionOrSetFocus(ObjectSection);
-				else
+			else
 				mActiveModel->SetFocus(ObjectSection);
 
-				StartTracking(LC_TRACK_START_LEFT);
-			}
+			StartTracking(LC_TRACK_START_LEFT);
+		}
+		break;
+
+	case LC_TOOL_ERASER:
+		{
+			lcObjectSection ObjectSection = FindClosestObject(view, x, y);
+
+			mActiveModel->RemoveObject(ObjectSection.Object);
+		}
 		break;
 /*
-		case LC_TOOL_ERASER:
 		case LC_TOOL_PAINT:
 		{
 			Object* Closest = FindObjectFromPoint(view, x, y);
 
-			if ((Action == LC_TOOL_ERASER) && (Closest != NULL))
-			{
-				switch (Closest->GetType ())
-				{
-					case LC_OBJECT_PIECE:
-					{
-						Piece* pPiece = (Piece*)Closest;
-						RemovePiece(pPiece);
-						delete pPiece;
-//						CalculateStep();
-						RemoveEmptyGroups();
-					} break;
-
-					case LC_OBJECT_CAMERA:
-					case LC_OBJECT_CAMERA_TARGET:
-					{
-						Camera* pCamera;
-						if (Closest->GetType() == LC_OBJECT_CAMERA)
-							pCamera = (Camera*)Closest;
-						else
-							pCamera = ((CameraTarget*)Closest)->GetParent();
-
-						bool CanDelete = true;
-
-						for (int ViewIdx = 0; ViewIdx < gMainWindow->mViews.GetSize() && CanDelete; ViewIdx++)
-							CanDelete = pCamera != gMainWindow->mViews[ViewIdx]->mCamera;
-
-						if (CanDelete)
-						{
-							mCameras.Remove(pCamera);
-							delete pCamera;
-
-							gMainWindow->UpdateCameraMenu();
-						}
-					} break;
-
-					case LC_OBJECT_LIGHT:
-					case LC_OBJECT_LIGHT_TARGET:
-					{
-//						pos = m_Lights.Find(pObject->m_pParent);
-//						m_Lights.RemoveAt(pos);
-//						delete pObject->m_pParent;
-					} break;
-				}
-
-				UpdateSelection();
-				gMainWindow->UpdateAllViews();
-				SetModifiedFlag(true);
-				CheckPoint("Deleting");
-//				AfxGetMainWnd()->PostMessage(WM_LC_UPDATE_INFO, NULL, OT_PIECE);
-			}
-
-			if ((Action == LC_TOOL_PAINT) && (Closest != NULL) && (Closest->GetType() == LC_OBJECT_PIECE))
+			if ((Closest != NULL) && (Closest->GetType() == LC_OBJECT_PIECE))
 			{
 				Piece* pPiece = (Piece*)Closest;
 
@@ -8785,56 +8630,27 @@ void Project::OnLeftButtonDown(View* view)
 		*/
 	case LC_TOOL_LIGHT:
 		{
-			if (Action == LC_TOOL_INSERT)
-			{
-				lcVector3 Pos;
-				lcVector4 Rot;
+			GLint max;
+			int count = 0;
+			Light *pLight;
 
-				GetPieceInsertPosition(view, x, y, Pos, Rot);
+			glGetIntegerv (GL_MAX_LIGHTS, &max);
+			for (pLight = m_pLights; pLight; pLight = pLight->m_pNext)
+				count++;
 
-				Piece* pPiece = new Piece(m_pCurPiece);
-				pPiece->Initialize(Pos[0], Pos[1], Pos[2], m_nCurStep, m_nCurFrame);
-				pPiece->SetColorIndex(gMainWindow->mColorIndex);
+			if (count == max)
+				break;
 
-				pPiece->ChangeKey(m_nCurStep, false, false, Rot, LC_PK_ROTATION);
-				pPiece->ChangeKey(m_nCurFrame, true, false, Rot, LC_PK_ROTATION);
-				pPiece->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
+			pLight = new Light (m_fTrack[0], m_fTrack[1], m_fTrack[2]);
 
-				SelectAndFocusNone(false);
-				pPiece->CreateName(m_pPieces);
-				AddPiece(pPiece);
-				pPiece->Select (true, true, false);
-				UpdateSelection();
-				SystemPieceComboAdd(m_pCurPiece->m_strDescription);
-				gMainWindow->UpdateFocusObject(pPiece);
+			SelectAndFocusNone (false);
 
-				if (!Control)
-					SetAction(LC_TOOL_SELECT);
-			}
-			else if (Action == LC_TOOL_LIGHT)
-			{
-				GLint max;
-				int count = 0;
-				Light *pLight;
-
-				glGetIntegerv (GL_MAX_LIGHTS, &max);
-				for (pLight = m_pLights; pLight; pLight = pLight->m_pNext)
-					count++;
-
-				if (count == max)
-					break;
-
-				pLight = new Light (m_fTrack[0], m_fTrack[1], m_fTrack[2]);
-
-				SelectAndFocusNone (false);
-
-				pLight->CreateName(m_pLights);
-				pLight->m_pNext = m_pLights;
-				m_pLights = pLight;
-				gMainWindow->UpdateFocusObject(pLight);
-				pLight->Select (true, true, false);
-				UpdateSelection ();
-			}
+			pLight->CreateName(m_pLights);
+			pLight->m_pNext = m_pLights;
+			m_pLights = pLight;
+			gMainWindow->UpdateFocusObject(pLight);
+			pLight->Select (true, true, false);
+			UpdateSelection ();
 
 //			AfxGetMainWnd()->PostMessage(WM_LC_UPDATE_INFO, (WPARAM)pNew, OT_PIECE);
 			UpdateSelection();
@@ -8844,28 +8660,28 @@ void Project::OnLeftButtonDown(View* view)
 		} break;
 
 	case LC_TOOL_SPOTLIGHT:
-    {
-      GLint max;
-      int count = 0;
-      Light *pLight;
+		{
+			GLint max;
+			int count = 0;
+			Light *pLight;
 
-      glGetIntegerv (GL_MAX_LIGHTS, &max);
-      for (pLight = m_pLights; pLight; pLight = pLight->m_pNext)
-        count++;
+			glGetIntegerv (GL_MAX_LIGHTS, &max);
+			for (pLight = m_pLights; pLight; pLight = pLight->m_pNext)
+				count++;
 
-      if (count == max)
-        break;
+			if (count == max)
+				break;
 
-	  lcVector3 tmp = lcUnprojectPoint(lcVector3(x+1.0f, y-1.0f, 0.9f), ModelView, Projection, Viewport);
-      SelectAndFocusNone(false);
-      StartTracking(LC_TRACK_START_LEFT);
-      pLight = new Light (m_fTrack[0], m_fTrack[1], m_fTrack[2], tmp[0], tmp[1], tmp[2]);
-      pLight->GetTarget ()->Select (true, true, false);
-      pLight->m_pNext = m_pLights;
-      m_pLights = pLight;
-      UpdateSelection();
+			lcVector3 tmp = lcUnprojectPoint(lcVector3(x+1.0f, y-1.0f, 0.9f), ModelView, Projection, Viewport);
+			SelectAndFocusNone(false);
+			StartTracking(LC_TRACK_START_LEFT);
+			pLight = new Light (m_fTrack[0], m_fTrack[1], m_fTrack[2], tmp[0], tmp[1], tmp[2]);
+			pLight->GetTarget ()->Select (true, true, false);
+			pLight->m_pNext = m_pLights;
+			m_pLights = pLight;
+			UpdateSelection();
 			gMainWindow->UpdateAllViews();
-	  gMainWindow->UpdateFocusObject(pLight);
+			gMainWindow->UpdateFocusObject(pLight);
 		}
 		break;
 
@@ -8888,18 +8704,16 @@ void Project::OnLeftButtonDown(View* view)
 
 			StartTracking(LC_TRACK_START_LEFT);
 		}
-					break;
+		break;
 
 	case LC_TOOL_MOVE:
 		{
-			if (mActiveModel->GetSelectedObjects().GetSize())
-			{
-				mActiveModel->BeginMoveTool();
+			if (!mActiveModel->GetSelectedObjects().GetSize())
+				break;
 
-				StartTracking(LC_TRACK_START_LEFT);
-//				m_OverlayDelta = lcVector3(0.0f, 0.0f, 0.0f);
-//				m_MouseSnapLeftover = lcVector3(0.0f, 0.0f, 0.0f);
-			}
+			mActiveModel->BeginMoveTool();
+
+			StartTracking(LC_TRACK_START_LEFT);
 		}
 		break;
 
@@ -9012,7 +8826,7 @@ void Project::OnLeftButtonDoubleClick(View* view)
 }
 
 void Project::OnLeftButtonUp(View* view)
-		{
+{
 	StopTracking(true);
 }
 
@@ -9186,7 +9000,7 @@ void Project::OnMouseMove(View* view)
 
 				gMainWindow->UpdateAllViews();
 			}
-			}
+		}
 		break;
 
 	case LC_TOOL_SPOTLIGHT:

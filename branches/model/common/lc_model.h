@@ -13,6 +13,7 @@ struct lcRenderMesh;
 
 enum lcActionType
 {
+	LC_ACTION_REMOVE_OBJECT,
 	LC_ACTION_CREATE_PIECE,
 	LC_ACTION_CREATE_CAMERA,
 	LC_ACTION_MOVE_OBJECTS,
@@ -58,6 +59,8 @@ public:
 	void FindObjectsInBox(const lcVector4* BoxPlanes, lcArray<lcObjectSection>& ObjectSections) const;
 
 	void AddPiece(PieceInfo* Part, int ColorIndex, const lcVector3& Position, const lcVector4& AxisAngle, lcTime Time);
+	void RemoveObject(lcObject* Object);
+	void RemoveObjects(const lcArray<lcObject*>& Objects);
 
 	void BeginCreateCameraTool(const lcVector3& Position, const lcVector3& TargetPosition, const lcVector3& UpVector);
 	void UpdateCreateCameraTool(const lcVector3& Distance, lcTime Time, bool AddKeys);
@@ -80,8 +83,7 @@ protected:
 
 	void BeginCheckpoint(lcActionType ActionType);
 	void EndCheckpoint(bool Accept, bool SaveCheckpoint);
-	void ApplyCheckpoint(lcCheckpoint* Checkpoint);
-	void RevertCheckpoint(lcCheckpoint* Checkpoint);
+	void ApplyCheckpoint(lcMemFile& File);
 
 	lcCheckpoint* mCurrentCheckpoint;
 	lcArray<lcCheckpoint*> mUndoCheckpoints;

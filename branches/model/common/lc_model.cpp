@@ -9,6 +9,13 @@
 #include "lc_mesh.h"
 #include "lc_file.h"
 
+enum
+{
+	LC_CHECKPOINT_CREATE_OBJECTS,
+	LC_CHECKPOINT_REMOVE_OBJECTS,
+	LC_CHECKPOINT_LOAD_OBJECTS
+};
+
 class lcCheckpoint
 {
 public:
@@ -95,7 +102,7 @@ void lcModel::EndCheckpoint(bool Accept, bool SaveCheckpoint)
 	else
 	{
 		if (!Accept)
-			RevertCheckpoint(mCurrentCheckpoint);
+			ApplyCheckpoint(mCurrentCheckpoint->mRevert);
 		delete mCurrentCheckpoint;
 	}
 
@@ -319,9 +326,19 @@ void lcModel::EndCreateCameraTool(bool Accept)
 	{
 		lcMemFile& Apply = mCurrentCheckpoint->mApply;
 		Apply.Seek(0, SEEK_SET);
+		lcint32 ObjectIndex = mObjects.GetSize() - 1;
 
-		lcCamera* Camera = (lcCamera*)mObjects[mObjects.GetSize() - 1];
-		Camera->Save(Apply);
+		Apply.WriteU32(LC_CHECKPOINT_CREATE_OBJECTS);
+		Apply.WriteS32(1);
+		Apply.WriteS32(ObjectIndex);
+		Apply.WriteU32(LC_OBJECT_TYPE_CAMERA);
+		mObjects[ObjectIndex]->Save(Apply);
+
+		lcMemFile& Revert = mCurrentCheckpoint->mRevert;
+		Revert.Seek(0, SEEK_SET);
+		Revert.WriteU32(LC_CHECKPOINT_REMOVE_OBJECTS);
+		Revert.WriteU32(1);
+		Revert.WriteU32(ObjectIndex);
 
 //		SetModifiedFlag(true);
 	}
@@ -334,6 +351,7 @@ void lcModel::BeginMoveTool()
 	BeginCheckpoint(LC_ACTION_MOVE_OBJECTS);
 	lcMemFile& Revert = mCurrentCheckpoint->mRevert;
 
+	Revert.WriteU32(LC_CHECKPOINT_LOAD_OBJECTS);
 	Revert.WriteS32(mSelectedObjects.GetSize());
 	for (int ObjectIdx = 0; ObjectIdx < mObjects.GetSize(); ObjectIdx++)
 	{
@@ -367,6 +385,7 @@ void lcModel::UpdateMoveTool(const lcVector3& Distance, lcTime Time, bool AddKey
 	lcMemFile& Revert = mCurrentCheckpoint->mRevert;
 	Revert.Seek(0, SEEK_SET);
 
+	Revert.ReadU32();
 	lcint32 NumObjects = Revert.ReadS32();
 	while (NumObjects--)
 	{
@@ -401,6 +420,7 @@ void lcModel::EndMoveTool(bool Accept)
 	{
 		Apply.Seek(0, SEEK_SET);
 
+		Apply.WriteU32(LC_CHECKPOINT_LOAD_OBJECTS);
 		Apply.WriteS32(mSelectedObjects.GetSize());
 		for (int ObjectIdx = 0; ObjectIdx < mObjects.GetSize(); ObjectIdx++)
 		{
@@ -424,6 +444,8 @@ void lcModel::BeginEditCameraTool(lcActionType ActionType, const lcVector3& Cent
 	lcCamera* Camera = gMainWindow->mActiveView->mCamera;
 
 	lcMemFile& Revert = mCurrentCheckpoint->mRevert;
+	Revert.WriteU32(LC_CHECKPOINT_LOAD_OBJECTS);
+	Revert.WriteS32(1);
 	Revert.WriteS32(mObjects.FindIndex(Camera));
 	Camera->Save(Revert);
 
@@ -439,9 +461,6 @@ void lcModel::UpdateEditCameraTool(lcActionType ActionType, float ValueX, float 
 
 	lcMemFile& Apply = mCurrentCheckpoint->mApply;
 	Apply.Seek(0, SEEK_SET);
-
-	lcVector3 PreviousValue;
-	Apply.ReadFloats(PreviousValue, 3);
 
 	float PreviousValueX = Apply.ReadFloat();
 	float PreviousValueY = Apply.ReadFloat();
@@ -480,6 +499,10 @@ void lcModel::UpdateEditCameraTool(lcActionType ActionType, float ValueX, float 
 	case LC_ACTION_ROLL_CAMERA:
 		Camera->Roll(ValueX, Time, AddKeys);
 		break;
+
+	default:
+		LC_ASSERT(0);
+		break;
 	}
 	Camera->Update();
 
@@ -507,6 +530,8 @@ void lcModel::EndEditCameraTool(lcActionType ActionType, bool Accept)
 	{
 		Apply.Seek(0, SEEK_SET);
 
+		Apply.WriteU32(LC_CHECKPOINT_LOAD_OBJECTS);
+		Apply.WriteS32(1);
 		Apply.WriteS32(mObjects.FindIndex(Camera));
 		Camera->Save(Apply);
 
@@ -525,6 +550,8 @@ void lcModel::ZoomExtents(View* View, const lcVector3& Center, const lcVector3* 
 		BeginCheckpoint(LC_ACTION_ZOOM_EXTENTS);
 		lcMemFile& Revert = mCurrentCheckpoint->mRevert;
 
+		Revert.WriteU32(LC_CHECKPOINT_LOAD_OBJECTS);
+		Revert.WriteS32(1);
 		Revert.WriteS32(mObjects.FindIndex(Camera));
 		Camera->Save(Revert);
 	}
@@ -540,6 +567,8 @@ void lcModel::ZoomExtents(View* View, const lcVector3& Center, const lcVector3* 
 	{
 		lcMemFile& Apply = mCurrentCheckpoint->mApply;
 
+		Apply.WriteU32(LC_CHECKPOINT_LOAD_OBJECTS);
+		Apply.WriteS32(1);
 		Apply.WriteS32(mObjects.FindIndex(Camera));
 		Camera->Save(Apply);
 
@@ -556,6 +585,8 @@ void lcModel::ZoomRegion(View* View, float Left, float Right, float Bottom, floa
 		BeginCheckpoint(LC_ACTION_ZOOM_REGION);
 		lcMemFile& Revert = mCurrentCheckpoint->mRevert;
 
+		Revert.WriteU32(LC_CHECKPOINT_LOAD_OBJECTS);
+		Revert.WriteS32(1);
 		Revert.WriteS32(mObjects.FindIndex(Camera));
 		Camera->Save(Revert);
 	}
@@ -571,6 +602,8 @@ void lcModel::ZoomRegion(View* View, float Left, float Right, float Bottom, floa
 	{
 		lcMemFile& Apply = mCurrentCheckpoint->mApply;
 
+		Apply.WriteU32(LC_CHECKPOINT_LOAD_OBJECTS);
+		Apply.WriteS32(1);
 		Apply.WriteS32(mObjects.FindIndex(Camera));
 		Camera->Save(Apply);
 
@@ -578,134 +611,102 @@ void lcModel::ZoomRegion(View* View, float Left, float Right, float Bottom, floa
 	}
 }
 
-void lcModel::ApplyCheckpoint(lcCheckpoint* Checkpoint)
+void lcModel::ApplyCheckpoint(lcMemFile& File)
 {
-	lcActionType ActionType = Checkpoint->mActionType;
-	lcMemFile& Apply = Checkpoint->mApply;
-	Apply.Seek(0, SEEK_SET);
+	File.Seek(0, SEEK_SET);
+	lcuint32 CheckpointType = File.ReadU32();
 
-	switch (ActionType)
+	switch (CheckpointType)
 	{
-	case LC_ACTION_CREATE_PIECE:
+	case LC_CHECKPOINT_CREATE_OBJECTS:
 		{
-			lcPiece* Piece = new lcPiece();
-			Piece->Load(Apply);
+			lcint32 ObjectCount = File.ReadS32();
+			bool UpdateCameraMenu = false;
 
-			gMainWindow->UpdateAllViews();
-		}
-		break;
-
-	case LC_ACTION_CREATE_CAMERA:
-		{
-			lcCamera* Camera = new lcCamera(false);
-			Camera->Load(Apply);
-
-			gMainWindow->UpdateAllViews();
-			gMainWindow->UpdateCameraMenu();
-		}
-		break;
-
-	case LC_ACTION_MOVE_OBJECTS:
-		{
-			lcint32 NumObjects = Apply.ReadS32();
-
-			while (NumObjects--)
+			while (ObjectCount--)
 			{
-				lcint32 ObjectIndex = Apply.ReadS32();
-				mObjects[ObjectIndex]->Load(Apply);
-				mObjects[ObjectIndex]->Update();
+				lcObjectType ObjectType = (lcObjectType)File.ReadS32();
+				lcint32 ObjectIndex = File.ReadS32();
+				lcObject* Object = NULL;
+
+				switch (ObjectType)
+				{
+				case LC_OBJECT_TYPE_PIECE:
+					Object = new lcPiece();
+					break;
+
+				case LC_OBJECT_TYPE_CAMERA:
+					Object = new lcCamera(false);
+					break;
+				}
+
+				Object->Load(File);
+				Object->Update();
+				mObjects.InsertAt(ObjectIndex, Object);
 			}
 
-			if (mFocusObject)
-				gMainWindow->UpdateFocusObject();
+			if (UpdateCameraMenu)
+				gMainWindow->UpdateCameraMenu();
+
 			gMainWindow->UpdateAllViews();
 		}
 		break;
 
-	case LC_ACTION_ZOOM_CAMERA:
-	case LC_ACTION_PAN_CAMERA:
-	case LC_ACTION_ORBIT_CAMERA:
-	case LC_ACTION_ROLL_CAMERA:
-	case LC_ACTION_ZOOM_EXTENTS:
-	case LC_ACTION_ZOOM_REGION:
+	case LC_CHECKPOINT_REMOVE_OBJECTS:
 		{
-			lcint32 ObjectIndex = Apply.ReadS32();
-			lcCamera* Camera = (lcCamera*)mObjects[ObjectIndex];
+			lcint32 ObjectCount = File.ReadS32();
+			bool UpdateSelection = false;
+			bool UpdateCameraMenu = false;
+			int ObjectsRemoved = 0;
 
-			Camera->Load(Apply);
-			Camera->Update();
-
-			if (mFocusObject)
-				gMainWindow->UpdateFocusObject();
-			gMainWindow->UpdateAllViews();
-		}
-		break;
-	}
-}
-
-void lcModel::RevertCheckpoint(lcCheckpoint* Checkpoint)
-{
-	lcActionType ActionType = Checkpoint->mActionType;
-	lcMemFile& Revert = Checkpoint->mRevert;
-	Revert.Seek(0, SEEK_SET);
-
-	switch (ActionType)
-	{
-	case LC_ACTION_CREATE_PIECE:
-	case LC_ACTION_CREATE_CAMERA:
-		{
-			lcObject* Camera = mObjects[mObjects.GetSize() - 1];
-
-			if (mFocusObject == Camera)
+			while (ObjectCount--)
 			{
-				mFocusObject = NULL;
-				gMainWindow->UpdateFocusObject();
+				lcint32 ObjectIndex = File.ReadS32();
+				lcObject* Object = mObjects[ObjectIndex - ObjectsRemoved];
+
+				if (mFocusObject == Object)
+				{
+					mFocusObject = NULL;
+					gMainWindow->UpdateFocusObject();
+				}
+
+				if (Object->IsSelected())
+				{
+					mSelectedObjects.Remove(Object);
+					UpdateSelection = true;
+				}
+// if view camera fix view
+
+				if (Object->IsCamera())
+					UpdateCameraMenu = true;
+
+				ObjectsRemoved++;
+				mObjects.RemoveIndex(ObjectIndex);
+				delete Object;
 			}
 
-			int SelectedIndex = mSelectedObjects.FindIndex(Camera);
-			if (SelectedIndex != -1)
-			{
-				mSelectedObjects.RemoveIndex(SelectedIndex);
+			if (UpdateSelection)
 				gMainWindow->UpdateSelection();
-			}
-// if view camera remove
-			delete Camera;
-			mObjects.RemoveIndex(mObjects.GetSize() - 1);
+
+			if (UpdateCameraMenu)
+				gMainWindow->UpdateCameraMenu();
 
 			gMainWindow->UpdateAllViews();
-			gMainWindow->UpdateCameraMenu();
 		}
 		break;
 
-	case LC_ACTION_MOVE_OBJECTS:
+	case LC_CHECKPOINT_LOAD_OBJECTS:
 		{
-			lcint32 NumObjects = Revert.ReadS32();
+			lcint32 NumObjects = File.ReadS32();
 
 			while (NumObjects--)
 			{
-				lcint32 ObjectIndex = Revert.ReadS32();
-				mObjects[ObjectIndex]->Load(Revert);
-				mObjects[ObjectIndex]->Update();
+				lcint32 ObjectIndex = File.ReadS32();
+				lcObject* Object = ObjectIndex == -1 ? gMainWindow->mActiveView->mCamera : mObjects[ObjectIndex];
+
+				Object->Load(File);
+				Object->Update();
 			}
-
-			if (mFocusObject)
-				gMainWindow->UpdateFocusObject();
-			gMainWindow->UpdateAllViews();
-		}
-		break;
-
-	case LC_ACTION_ZOOM_CAMERA:
-	case LC_ACTION_PAN_CAMERA:
-	case LC_ACTION_ORBIT_CAMERA:
-	case LC_ACTION_ROLL_CAMERA:
-	case LC_ACTION_ZOOM_EXTENTS:
-	case LC_ACTION_ZOOM_REGION:
-		{
-			lcint32 ObjectIndex = Revert.ReadS32();
-			lcCamera* Camera = ObjectIndex == -1 ? gMainWindow->mActiveView->mCamera : (lcCamera*)mObjects[ObjectIndex];
-
-			Camera->Load(Revert);
-			Camera->Update();
 
 			if (mFocusObject)
 				gMainWindow->UpdateFocusObject();
@@ -1058,5 +1059,53 @@ void lcModel::AddPiece(PieceInfo* Part, int ColorIndex, const lcVector3& Positio
 	SetFocus(ObjectSection);
 
 //	SystemPieceComboAdd(m_pCurPiece->m_strDescription);
+//	SetModifiedFlag(true);
+}
+
+void lcModel::RemoveObject(lcObject* Object)
+{
+	if (!Object)
+		return;
+
+	lcArray<lcObject*> Objects;
+	Objects.Add(Object);
+
+	RemoveObjects(Objects);
+}
+
+void lcModel::RemoveObjects(const lcArray<lcObject*>& Objects)
+{
+	if (!Objects.GetSize())
+		return;
+
+	BeginCheckpoint(LC_ACTION_REMOVE_OBJECT);
+
+	lcMemFile& Revert = mCurrentCheckpoint->mRevert;
+
+	Revert.WriteU32(LC_CHECKPOINT_CREATE_OBJECTS);
+	Revert.WriteS32(Objects.GetSize());
+
+	lcMemFile& Apply = mCurrentCheckpoint->mApply;
+
+	Apply.WriteU32(LC_CHECKPOINT_REMOVE_OBJECTS);
+	Apply.WriteU32(Objects.GetSize());
+
+	for (int ObjectIdx = 0; ObjectIdx < Objects.GetSize(); ObjectIdx++)
+	{
+		lcObject* Object = Objects[ObjectIdx];
+		int ObjectIndex = mObjects.FindIndex(Object);
+		LC_ASSERT(ObjectIndex != -1);
+
+		Revert.WriteS32(ObjectIndex);
+		Revert.WriteU32(Object->ObjectType());
+		Object->Save(Revert);
+
+		Apply.WriteS32(ObjectIndex);
+	}
+
+	EndCheckpoint(true, true);
+
+	ApplyCheckpoint(Apply);
+
 //	SetModifiedFlag(true);
 }

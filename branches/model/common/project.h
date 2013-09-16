@@ -310,7 +310,6 @@ protected:
 
 	void AddPiece(Piece* pPiece);
 	void RemovePiece(Piece* pPiece);
-	bool RemoveSelectedObjects();
 	void GetPieceInsertPosition(Piece* OffsetPiece, lcVector3& Position, lcVector4& Rotation);
 	void GetPieceInsertPosition(View* view, int MouseX, int MouseY, lcVector3& Position, lcVector4& Orientation);
 	Object* FindObjectFromPoint(View* view, int x, int y, bool PiecesOnly = false);

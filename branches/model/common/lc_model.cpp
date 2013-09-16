@@ -248,6 +248,40 @@ void lcModel::SetFocus(const lcObjectSection& ObjectSection)
 	gMainWindow->UpdateFocusObject();
 }
 
+void lcModel::HideSelectedObjects()
+{
+	for (int ObjectIdx = 0; ObjectIdx < mSelectedObjects.GetSize(); ObjectIdx++)
+		mSelectedObjects[ObjectIdx]->SetVisible(false);
+	mSelectedObjects.RemoveAll();
+	mFocusObject = NULL;
+
+	gMainWindow->UpdateAllViews();
+	gMainWindow->UpdateSelection();
+	gMainWindow->UpdateFocusObject();
+}
+
+void lcModel::HideUnselectedObjects()
+{
+	for (int ObjectIdx = 0; ObjectIdx < mObjects.GetSize(); ObjectIdx++)
+	{
+		lcObject* Object = mObjects[ObjectIdx];
+		if (!Object->IsSelected())
+			Object->SetVisible(false);
+	}
+
+	gMainWindow->UpdateAllViews();
+	gMainWindow->UpdateSelection();
+}
+
+void lcModel::UnhideAllObjects()
+{
+	for (int ObjectIdx = 0; ObjectIdx < mObjects.GetSize(); ObjectIdx++)
+		mObjects[ObjectIdx]->SetVisible(true);
+
+	gMainWindow->UpdateAllViews();
+	gMainWindow->UpdateSelection();
+}
+
 void lcModel::BeginCreateCameraTool(const lcVector3& Position, const lcVector3& TargetPosition, const lcVector3& UpVector)
 {
 	BeginCheckpoint(LC_ACTION_CREATE_CAMERA);

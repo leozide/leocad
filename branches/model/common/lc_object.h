@@ -56,6 +56,8 @@ public:
 		return mObjectType == LC_OBJECT_TYPE_CAMERA;
 	}
 
+	virtual bool IsVisible() const = 0;
+	virtual void SetVisible(bool Visible) = 0;
 	virtual bool IsSelected() const = 0;
 	virtual bool IsSelected(lcuint32 Section) const = 0;
 	virtual bool IsFocused() const = 0;

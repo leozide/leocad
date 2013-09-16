@@ -3130,23 +3130,6 @@ void Project::AddPiece(Piece* pPiece)
 	}
 }
 
-void Project::RemovePiece(Piece* pPiece)
-{
-	Piece* pTemp, *pLast;
-	pLast = NULL;
-
-	for (pTemp = m_pPieces; pTemp; pLast = pTemp, pTemp = pTemp->m_pNext)
-		if (pTemp == pPiece)
-		{
-			if (pLast != NULL)
-				pLast->m_pNext = pTemp->m_pNext;
-			else
-				m_pPieces = pTemp->m_pNext;
-
-			break;
-		}
-}
-
 void Project::CalculateStep()
 {
 	Piece* pPiece;
@@ -5978,35 +5961,17 @@ void Project::HandleCommand(LC_COMMANDS id)
 				CheckPoint("Editing");
 		} break;
 
-		case LC_PIECE_HIDE_SELECTED:
-		{
-			Piece* pPiece;
-			for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-				if (pPiece->IsSelected())
-					pPiece->Hide();
-			UpdateSelection();
-			gMainWindow->UpdateFocusObject(NULL);
-			gMainWindow->UpdateAllViews();
-		} break;
+	case LC_PIECE_HIDE_SELECTED:
+		mActiveModel->HideSelectedObjects();
+		break;
 
-		case LC_PIECE_HIDE_UNSELECTED:
-		{
-			Piece* pPiece;
-			for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-				if (!pPiece->IsSelected())
-					pPiece->Hide();
-			UpdateSelection();
-			gMainWindow->UpdateAllViews();
-		} break;
+	case LC_PIECE_HIDE_UNSELECTED:
+		mActiveModel->HideUnselectedObjects();
+		break;
 
-		case LC_PIECE_UNHIDE_ALL:
-		{
-			Piece* pPiece;
-			for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-				pPiece->UnHide();
-			UpdateSelection();
-			gMainWindow->UpdateAllViews();
-		} break;
+	case LC_PIECE_UNHIDE_ALL:
+		mActiveModel->UnhideAllObjects();
+		break;
 
 		case LC_PIECE_SHOW_EARLIER:
 		{

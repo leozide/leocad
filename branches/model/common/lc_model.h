@@ -55,6 +55,10 @@ public:
 	void ClearSelectionOrSetFocus(const lcObjectSection& ObjectSection);
 	void SetFocus(const lcObjectSection& ObjectSection);
 
+	void HideSelectedObjects();
+	void HideUnselectedObjects();
+	void UnhideAllObjects();
+
 	void FindClosestObject(lcObjectHitTest& HitTest) const;
 	void FindObjectsInBox(const lcVector4* BoxPlanes, lcArray<lcObjectSection>& ObjectSections) const;
 

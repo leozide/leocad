@@ -46,9 +46,20 @@ public:
 		return (mState & LC_CAMERA_SIMPLE) != 0;
 	}
 
-	bool IsVisible() const
+	virtual bool IsVisible() const
 	{
 		return (mState & LC_CAMERA_HIDDEN) == 0;
+	}
+
+	virtual void SetVisible(bool Visible)
+	{
+		if (Visible)
+			mState &= ~LC_CAMERA_HIDDEN;
+		else
+		{
+			mState |= LC_CAMERA_HIDDEN;
+			mState &= ~(LC_CAMERA_SELECTION_MASK | LC_CAMERA_FOCUS_MASK);
+		}
 	}
 
 	virtual bool IsSelected() const

@@ -19,6 +19,22 @@ public:
 	lcPiece(PieceInfo* Part, int ColorIndex, const lcVector3& Position, const lcVector4& AxisAngle, lcTime Time);
 	virtual ~lcPiece();
 
+	virtual bool IsVisible() const
+	{
+		return (mState & LC_PIECE_HIDDEN) == 0;
+	}
+
+	virtual void SetVisible(bool Visible)
+	{
+		if (Visible)
+			mState &= ~LC_PIECE_HIDDEN;
+		else
+		{
+			mState |= LC_PIECE_HIDDEN;
+			mState &= ~(LC_PIECE_SELECTION_MASK | LC_PIECE_FOCUS_MASK);
+		}
+	}
+
 	virtual bool IsSelected() const
 	{
 		return (mState & LC_PIECE_SELECTION_MASK) != 0;

@@ -471,6 +471,97 @@ void lcModel::EndMoveTool(bool Accept)
 	EndCheckpoint(Accept, true);
 }
 
+void lcModel::BeginRotateTool()
+{
+	BeginCheckpoint(LC_ACTION_ROTATE_OBJECTS);
+	lcMemFile& Revert = mCurrentCheckpoint->mRevert;
+
+	Revert.WriteU32(LC_CHECKPOINT_LOAD_OBJECTS);
+	Revert.WriteS32(mSelectedObjects.GetSize());
+	for (int ObjectIdx = 0; ObjectIdx < mObjects.GetSize(); ObjectIdx++)
+	{
+		if (!mObjects[ObjectIdx]->IsSelected())
+			continue;
+
+		Revert.WriteS32(ObjectIdx);
+		mObjects[ObjectIdx]->Save(Revert);
+	}
+
+	lcMemFile& Apply = mCurrentCheckpoint->mApply;
+	Apply.WriteFloats(lcVector3(0.0f, 0.0f, 0.0f), 3);
+}
+
+void lcModel::UpdateRotateTool(const lcVector3& Angles, lcTime Time, bool AddKeys)
+{
+	LC_ASSERT(mCurrentCheckpoint->mActionType == LC_ACTION_ROTATE_OBJECTS);
+
+	lcMemFile& Apply = mCurrentCheckpoint->mApply;
+	Apply.Seek(0, SEEK_SET);
+
+	lcVector3 PreviousAngles;
+	Apply.ReadFloats(PreviousAngles, 3);
+
+	if (PreviousAngles == Angles)
+		return;
+
+	Apply.Seek(0, SEEK_SET);
+	Apply.WriteFloats(Angles, 3);
+
+	lcMemFile& Revert = mCurrentCheckpoint->mRevert;
+	Revert.Seek(0, SEEK_SET);
+
+	Revert.ReadU32();
+	lcint32 NumObjects = Revert.ReadS32();
+	while (NumObjects--)
+	{
+		lcint32 ObjectIndex = Revert.ReadS32();
+		mObjects[ObjectIndex]->Load(Revert);
+//		mObjects[ObjectIndex]->Rotate(Angles, Time, AddKeys);
+		mObjects[ObjectIndex]->Update();
+	}
+
+	if (mFocusObject)
+		gMainWindow->UpdateFocusObject();
+	gMainWindow->UpdateAllViews();
+}
+
+void lcModel::EndRotateTool(bool Accept)
+{
+	LC_ASSERT(mCurrentCheckpoint->mActionType == LC_ACTION_MOVE_OBJECTS);
+
+	lcMemFile& Apply = mCurrentCheckpoint->mApply;
+	Apply.Seek(0, SEEK_SET);
+
+	lcVector3 Angles;
+	Apply.ReadFloats(Angles, 3);
+
+	if (fabsf(Angles[0]) < 0.0001f && fabsf(Angles[1]) < 0.0001f && fabsf(Angles[2]) < 0.0001f)
+		Accept = false;
+
+	if (!mSelectedObjects.GetSize())
+		Accept = false;
+
+	if (Accept)
+	{
+		Apply.Seek(0, SEEK_SET);
+
+		Apply.WriteU32(LC_CHECKPOINT_LOAD_OBJECTS);
+		Apply.WriteS32(mSelectedObjects.GetSize());
+		for (int ObjectIdx = 0; ObjectIdx < mObjects.GetSize(); ObjectIdx++)
+		{
+			if (!mObjects[ObjectIdx]->IsSelected())
+				continue;
+
+			Apply.WriteS32(ObjectIdx);
+			mObjects[ObjectIdx]->Save(Apply);
+		}
+
+//		SetModifiedFlag(true);
+	}
+
+	EndCheckpoint(Accept, true);
+}
+
 void lcModel::BeginEditCameraTool(lcActionType ActionType, const lcVector3& Center)
 {
 	BeginCheckpoint(ActionType);

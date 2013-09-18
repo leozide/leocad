@@ -17,6 +17,7 @@ enum lcActionType
 	LC_ACTION_CREATE_PIECE,
 	LC_ACTION_CREATE_CAMERA,
 	LC_ACTION_MOVE_OBJECTS,
+	LC_ACTION_ROTATE_OBJECTS,
 	LC_ACTION_ZOOM_CAMERA,
 	LC_ACTION_PAN_CAMERA,
 	LC_ACTION_ORBIT_CAMERA,
@@ -73,6 +74,10 @@ public:
 	void BeginMoveTool();
 	void UpdateMoveTool(const lcVector3& Distance, lcTime Time, bool AddKeys);
 	void EndMoveTool(bool Accept);
+
+	void BeginRotateTool();
+	void UpdateRotateTool(const lcVector3& Angles, lcTime Time, bool AddKeys);
+	void EndRotateTool(bool Accept);
 
 	void BeginEditCameraTool(lcActionType ActionType, const lcVector3& Center);
 	void UpdateEditCameraTool(lcActionType ActionType, float ValueX, float ValueY, lcTime Time, bool AddKeys);

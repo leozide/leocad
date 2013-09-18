@@ -432,7 +432,6 @@ void lcQMainWindow::createToolBars()
 	timeToolBar->addAction(actions[LC_VIEW_TIME_LAST]);
 	//LC_VIEW_TIME_STOP
 	//LC_VIEW_TIME_PLAY
-	//LC_VIEW_TIME_ANIMATION
 	//LC_VIEW_TIME_ADD_KEYS
 	// TODO: add missing menu items
 

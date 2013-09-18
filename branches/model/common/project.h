@@ -241,11 +241,6 @@ public:
 	void GetSnapIndex(int* SnapXY, int* SnapZ, int* SnapAngle) const;
 	void GetSnapText(char* SnapXY, char* SnapZ, char* SnapAngle) const;
 	void GetSnapDistance(float* SnapXY, float* SnapZ) const;
-	void GetTimeRange(int* from, int* to)
-	{
-		*from = m_bAnimation ? m_nCurFrame : m_nCurStep;
-		*to = m_bAnimation ? m_nTotalFrames : 255;
-	}
 	unsigned short GetTotalFrames () const
 		{ return m_nTotalFrames; }
 
@@ -320,14 +315,9 @@ protected:
 	lcSearchOptions mSearchOptions;
 
 	// Movement.
-	bool MoveSelectedObjects(lcVector3& Move, lcVector3& Remainder, bool Snap, bool Lock);
+	lcVector3 SnapVector(const lcVector3& Distance) const;
+	lcVector3 GetMoveDistance(const lcVector3& Distance, bool Snap, bool Lock);
 	bool RotateSelectedObjects(lcVector3& Delta, lcVector3& Remainder, bool Snap, bool Lock);
-	void SnapVector(lcVector3& Delta) const
-	{
-		lcVector3 Dummy;
-		SnapVector(Delta, Dummy);
-	}
-	void SnapVector(lcVector3& Delta, lcVector3& Leftover) const;
 	void SnapRotationVector(lcVector3& Delta, lcVector3& Leftover) const;
 
 	// Rendering functions.
@@ -380,10 +370,6 @@ public:
 	void OnMouseWheel(View* view, float Direction);
 
 	void SetAction(int Action);
-	int GetCurAction() const
-	{
-		return m_nCurAction;
-	}
 	int GetAction() const;
 
 	void HandleNotify(LC_NOTIFY id, unsigned long param);

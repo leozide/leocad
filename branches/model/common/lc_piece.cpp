@@ -240,6 +240,12 @@ void lcPiece::RenderInterface(View* View) const
 
 void lcPiece::Move(const lcVector3& Distance, lcTime Time, bool AddKeys)
 {
+	if (mState & LC_PIECE_POSITION_SELECTED)
+	{
+		mPosition += Distance;
+
+		ChangeKey(mPositionKeys, mPosition, Time, AddKeys);
+	}
 }
 
 /*

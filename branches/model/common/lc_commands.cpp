@@ -928,13 +928,6 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 		"Delete current step",
 		""
 	},
-	// LC_VIEW_TIME_ANIMATION
-	{
-		"View.Time.Animation",
-		"Animation",
-		"Toggle between animation and instruction mode",
-		""
-	},
 	// LC_VIEW_TIME_ADD_KEYS
 	{
 		"View.Time.AddKeys",

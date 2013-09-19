@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>500</width>
-    <height>391</height>
+    <height>370</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -187,10 +187,34 @@
           <string>Environment</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_2">
-          <item row="0" column="0">
-           <widget class="QCheckBox" name="fogCheckBox">
+          <item row="1" column="1">
+           <layout class="QHBoxLayout" name="horizontalLayout_5">
+            <item>
+             <widget class="QToolButton" name="ambientColorButton">
+              <property name="text">
+               <string/>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_4">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_20">
             <property name="text">
-             <string>Fog</string>
+             <string>Ambient Light</string>
             </property>
            </widget>
           </item>
@@ -235,46 +259,14 @@
             </item>
            </layout>
           </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_20">
+          <item row="0" column="0">
+           <widget class="QCheckBox" name="fogCheckBox">
             <property name="text">
-             <string>Ambient Light</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <layout class="QHBoxLayout" name="horizontalLayout_5">
-            <item>
-             <widget class="QToolButton" name="ambientColorButton">
-              <property name="text">
-               <string/>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <spacer name="horizontalSpacer_4">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-           </layout>
-          </item>
-          <item row="2" column="0">
-           <widget class="QCheckBox" name="floorCheckBox">
-            <property name="text">
-             <string>Draw Floor</string>
+             <string>Fog</string>
             </property>
            </widget>
           </item>
          </layout>
-         <zorder>floorCheckBox</zorder>
          <zorder>label_20</zorder>
          <zorder>fogCheckBox</zorder>
         </widget>
@@ -285,6 +277,19 @@
           <string>Set default options for new projects</string>
          </property>
         </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
        </item>
       </layout>
      </widget>
@@ -358,7 +363,6 @@
   <tabstop>fogColorButton</tabstop>
   <tabstop>fogDensityEdit</tabstop>
   <tabstop>ambientColorButton</tabstop>
-  <tabstop>floorCheckBox</tabstop>
   <tabstop>setDefaultCheckBox</tabstop>
   <tabstop>partsTable</tabstop>
  </tabstops>

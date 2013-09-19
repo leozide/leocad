@@ -307,7 +307,6 @@ protected:
 	void GetPieceInsertPosition(Piece* OffsetPiece, lcVector3& Position, lcVector4& Rotation);
 	void GetPieceInsertPosition(View* view, int MouseX, int MouseY, lcVector3& Position, lcVector4& Orientation);
 	Object* FindObjectFromPoint(View* view, int x, int y, bool PiecesOnly = false);
-	void FindObjectsInBox(float x1, float y1, float x2, float y2, lcArray<Object*>& Objects);
 	void SelectAndFocusNone(bool bFocusOnly);
 	void CalculateStep();
 

@@ -23,35 +23,39 @@ lcQPropertiesDialog::lcQPropertiesDialog(QWidget *parent, void *data) :
 
 	options = (lcPropertiesDialogOptions*)data;
 
-	ui->nameEdit->setText(options->Name);
-	ui->descriptionEdit->setText(options->Description);
-	ui->authorEdit->setText(options->Author);
-	ui->commentsEdit->setText(options->Comments);
+	ui->nameEdit->setText((const char*)options->Properties.mName);
+	ui->descriptionEdit->setText((const char*)options->Properties.mDescription);
+	ui->authorEdit->setText((const char*)options->Properties.mAuthor);
+	ui->commentsEdit->setText((const char*)options->Properties.mComments);
 
-	if (options->BackgroundType == 2)
+	if (options->Properties.mBackgroundType == LC_BACKGROUND_IMAGE)
 		ui->imageRadio->setChecked(true);
-	else if (options->BackgroundType == 1)
+	else if (options->Properties.mBackgroundType == LC_BACKGROUND_GRADIENT)
 		ui->gradientRadio->setChecked(true);
 	else
 		ui->solidRadio->setChecked(true);
 
-	ui->imageNameEdit->setText(options->BackgroundFileName);
-	ui->imageTileCheckBox->setChecked(options->BackgroundTile);
-	ui->fogCheckBox->setChecked(options->FogEnabled);
-	ui->fogDensityEdit->setText(QString::number(options->FogDensity));
-	ui->floorCheckBox->setChecked(options->DrawFloor);
+	ui->imageNameEdit->setText((const char*)options->Properties.mBackgroundImage);
+	ui->imageTileCheckBox->setChecked(options->Properties.mBackgroundImageTile);
+	ui->fogCheckBox->setChecked(options->Properties.mFogEnabled);
+	ui->fogDensityEdit->setText(QString::number(options->Properties.mFogDensity));
 
 	QPixmap pix(12, 12);
 
-	pix.fill(QColor(options->SolidColor[0] * 255, options->SolidColor[1] * 255, options->SolidColor[2] * 255));
+	lcuint32 color = options->Properties.mBackgroundSolidColor;
+	pix.fill(QColor(LC_RGBA_RED(color), LC_RGBA_GREEN(color), LC_RGBA_BLUE(color)));
 	ui->solidColorButton->setIcon(pix);
-	pix.fill(QColor(options->GradientColor1[0] * 255, options->GradientColor1[1] * 255, options->GradientColor1[2] * 255));
+	color = options->Properties.mBackgroundGradientColor1;
+	pix.fill(QColor(LC_RGBA_RED(color), LC_RGBA_GREEN(color), LC_RGBA_BLUE(color)));
 	ui->gradient1ColorButton->setIcon(pix);
-	pix.fill(QColor(options->GradientColor2[0] * 255, options->GradientColor2[1] * 255, options->GradientColor2[2] * 255));
+	color = options->Properties.mBackgroundGradientColor2;
+	pix.fill(QColor(LC_RGBA_RED(color), LC_RGBA_GREEN(color), LC_RGBA_BLUE(color)));
 	ui->gradient2ColorButton->setIcon(pix);
-	pix.fill(QColor(options->FogColor[0] * 255, options->FogColor[1] * 255, options->FogColor[2] * 255));
+	color = options->Properties.mFogColor;
+	pix.fill(QColor(LC_RGBA_RED(color), LC_RGBA_GREEN(color), LC_RGBA_BLUE(color)));
 	ui->fogColorButton->setIcon(pix);
-	pix.fill(QColor(options->AmbientColor[0] * 255, options->AmbientColor[1] * 255, options->AmbientColor[2] * 255));
+	color = options->Properties.mAmbientColor;
+	pix.fill(QColor(LC_RGBA_RED(color), LC_RGBA_GREEN(color), LC_RGBA_BLUE(color)));
 	ui->ambientColorButton->setIcon(pix);
 
 	lcPiecesLibrary *library = lcGetPiecesLibrary();
@@ -122,27 +126,22 @@ lcQPropertiesDialog::~lcQPropertiesDialog()
 
 void lcQPropertiesDialog::accept()
 {
-	strncpy(options->Name, ui->nameEdit->text().toLocal8Bit().data(), sizeof(options->Name));
-	options->Name[sizeof(options->Name) - 1] = 0;
-	strncpy(options->Author, ui->authorEdit->text().toLocal8Bit().data(), sizeof(options->Author));
-	options->Author[sizeof(options->Author) - 1] = 0;
-	strncpy(options->Description, ui->descriptionEdit->text().toLocal8Bit().data(), sizeof(options->Description));
-	options->Description[sizeof(options->Description) - 1] = 0;
-	strncpy(options->Comments, ui->commentsEdit->toPlainText().toLocal8Bit().data(), sizeof(options->Comments));
-	options->Comments[sizeof(options->Comments) - 1] = 0;
+	options->Properties.mName = ui->nameEdit->text().toLocal8Bit().data();
+	options->Properties.mAuthor = ui->authorEdit->text().toLocal8Bit().data();
+	options->Properties.mDescription = ui->descriptionEdit->text().toLocal8Bit().data();
+	options->Properties.mComments = ui->commentsEdit->toPlainText().toLocal8Bit().data();
 
 	if (ui->imageRadio->isChecked())
-		 options->BackgroundType = 2;
+		 options->Properties.mBackgroundType = LC_BACKGROUND_IMAGE;
 	else if (ui->gradientRadio->isChecked())
-		 options->BackgroundType = 1;
+		 options->Properties.mBackgroundType = LC_BACKGROUND_GRADIENT;
 	else
-		 options->BackgroundType = 0;
+		 options->Properties.mBackgroundType = LC_BACKGROUND_SOLID;
 
-	strcpy(options->BackgroundFileName, ui->imageNameEdit->text().toLocal8Bit().data());
-	options->BackgroundTile = ui->imageTileCheckBox->isChecked();
-	options->FogEnabled = ui->fogCheckBox->isChecked();
-	options->FogDensity = ui->fogDensityEdit->text().toFloat();
-	options->DrawFloor = ui->floorCheckBox->isChecked();
+	options->Properties.mBackgroundImage = ui->imageNameEdit->text().toLocal8Bit().data();
+	options->Properties.mBackgroundImageTile = ui->imageTileCheckBox->isChecked();
+	options->Properties.mFogEnabled = ui->fogCheckBox->isChecked();
+	options->Properties.mFogDensity = ui->fogDensityEdit->text().toFloat();
 	options->SetDefault = ui->setDefaultCheckBox->isChecked();
 
 	QDialog::accept();
@@ -152,43 +151,41 @@ void lcQPropertiesDialog::colorClicked()
 {
 	QObject *button = sender();
 	QString title;
-	float *color = NULL;
+	lcuint32 *color = NULL;
 
 	if (button == ui->solidColorButton)
 	{
-		color = options->SolidColor;
+		color = &options->Properties.mBackgroundSolidColor;
 		title = tr("Select Background Color");
 	}
 	else if (button == ui->gradient1ColorButton)
 	{
-		color = options->GradientColor1;
+		color = &options->Properties.mBackgroundGradientColor1;
 		title = tr("Select Background Top Color");
 	}
 	else if (button == ui->gradient2ColorButton)
 	{
-		color = options->GradientColor2;
+		color = &options->Properties.mBackgroundGradientColor2;
 		title = tr("Select Background Bottom Color");
 	}
 	else if (button == ui->fogColorButton)
 	{
-		color = options->FogColor;
+		color = &options->Properties.mFogColor;
 		title = tr("Select Fog Color");
 	}
 	else if (button == ui->ambientColorButton)
 	{
-		color = options->AmbientColor;
+		color = &options->Properties.mAmbientColor;
 		title = tr("Select Ambient Light Color");
 	}
 
-	QColor oldColor = QColor(color[0] * 255, color[1] * 255, color[2] * 255);
+	QColor oldColor = QColor(LC_RGBA_RED(*color), LC_RGBA_GREEN(*color), LC_RGBA_BLUE(*color));
 	QColor newColor = QColorDialog::getColor(oldColor, this, title);
 
 	if (newColor == oldColor || !newColor.isValid())
 		return;
 
-	color[0] = (float)newColor.red() / 255.0f;
-	color[1] = (float)newColor.green() / 255.0f;
-	color[2] = (float)newColor.blue() / 255.0f;
+	*color = LC_RGB(newColor.red(), newColor.green(), newColor.blue());
 
 	QPixmap pix(12, 12);
 

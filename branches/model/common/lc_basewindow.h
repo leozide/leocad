@@ -4,6 +4,7 @@
 #include "lc_math.h"
 #include "lc_array.h"
 #include "project.h"
+#include "lc_model.h"
 #include "lc_category.h"
 #include "image.h"
 #include "lc_shortcuts.h"
@@ -97,22 +98,8 @@ struct lcPOVRayDialogOptions
 
 struct lcPropertiesDialogOptions
 {
-	char Name[101];
-	char Author[101];
-	char Description[101];
-	char Comments[256];
+	lcModelProperties Properties;
 
-	int BackgroundType;
-	lcVector3 SolidColor;
-	lcVector3 GradientColor1;
-	lcVector3 GradientColor2;
-	char BackgroundFileName[LC_MAXPATH];
-	bool BackgroundTile;
-	bool FogEnabled;
-	float FogDensity;
-	lcVector3 FogColor;
-	lcVector3 AmbientColor;
-	bool DrawFloor;
 	bool SetDefault;
 
 	lcArray<lcPiecesUsedEntry> PartsUsed;

@@ -8,6 +8,7 @@
 #include "lc_light.h"
 #include "lc_mesh.h"
 #include "lc_file.h"
+#include "lc_profile.h"
 
 enum
 {
@@ -29,10 +30,43 @@ public:
 	lcMemFile mRevert;
 };
 
+void lcModelProperties::LoadDefaults()
+{
+	mAuthor = lcGetProfileString(LC_PROFILE_DEFAULT_AUTHOR_NAME);
+
+	mBackgroundType = (lcBackgroundType)lcGetProfileInt(LC_PROFILE_DEFAULT_BACKGROUND_TILE);
+	mBackgroundSolidColor = lcGetProfileInt(LC_PROFILE_DEFAULT_BACKGROUND_COLOR);
+	mBackgroundGradientColor1 = lcGetProfileInt(LC_PROFILE_DEFAULT_GRADIENT_COLOR1);
+	mBackgroundGradientColor2 = lcGetProfileInt(LC_PROFILE_DEFAULT_GRADIENT_COLOR2);
+	mBackgroundImage = lcGetProfileString(LC_PROFILE_DEFAULT_BACKGROUND_TEXTURE);
+	mBackgroundImageTile = lcGetProfileInt(LC_PROFILE_DEFAULT_BACKGROUND_TILE);
+
+	mFogEnabled = lcGetProfileInt(LC_PROFILE_DEFAULT_FOG_ENABLED);
+	mFogDensity = lcGetProfileFloat(LC_PROFILE_DEFAULT_FOG_DENSITY);
+	mFogColor = lcGetProfileInt(LC_PROFILE_DEFAULT_FOG_COLOR);
+	mAmbientColor = lcGetProfileInt(LC_PROFILE_DEFAULT_AMBIENT_COLOR);
+}
+
+void lcModelProperties::SaveDefaults()
+{
+	lcSetProfileInt(LC_PROFILE_DEFAULT_BACKGROUND_TYPE, mBackgroundType);
+	lcSetProfileInt(LC_PROFILE_DEFAULT_BACKGROUND_COLOR, mBackgroundSolidColor);
+	lcSetProfileInt(LC_PROFILE_DEFAULT_GRADIENT_COLOR1, mBackgroundGradientColor1);
+	lcSetProfileInt(LC_PROFILE_DEFAULT_GRADIENT_COLOR2, mBackgroundGradientColor2);
+	lcSetProfileString(LC_PROFILE_DEFAULT_BACKGROUND_TEXTURE, mBackgroundImage);
+	lcSetProfileInt(LC_PROFILE_DEFAULT_BACKGROUND_TILE, mBackgroundImageTile);
+
+	lcSetProfileInt(LC_PROFILE_DEFAULT_FOG_ENABLED, mFogEnabled);
+	lcSetProfileFloat(LC_PROFILE_DEFAULT_FOG_DENSITY, mFogDensity);
+	lcSetProfileInt(LC_PROFILE_DEFAULT_FOG_COLOR, mFogColor);
+	lcSetProfileInt(LC_PROFILE_DEFAULT_AMBIENT_COLOR, mAmbientColor);
+}
+
 lcModel::lcModel()
 {
 	mCurrentCheckpoint = NULL;
 	mFocusObject = NULL;
+	mProperties.LoadDefaults();
 }
 
 lcModel::~lcModel()
@@ -50,6 +84,46 @@ void lcModel::DeleteContents()
 	mFocusObject = NULL;
 	mSelectedObjects.RemoveAll();
 	mObjects.DeleteAll();
+}
+
+void lcModel::ShowPropertiesDialog()
+{
+	lcPropertiesDialogOptions Options;
+
+	Options.Properties = mProperties;
+	Options.SetDefault = false;
+
+//	GetPartsUsed(Options.PartsUsed);
+
+	if (!gMainWindow->DoDialog(LC_DIALOG_PROPERTIES, &Options))
+		return;
+
+	if (Options.SetDefault)
+		Options.Properties.SaveDefaults();
+
+	if (mProperties == Options.Properties)
+		return;
+
+// if model name changed update menu
+
+	mProperties = Options.Properties;
+
+/*
+	if (strcmp(m_strBackground, Options.BackgroundFileName))
+	{
+		strcpy(m_strBackground, Options.BackgroundFileName);
+		Modified = true;
+	}
+
+	for (int i = 0; i < gMainWindow->mViews.GetSize (); i++)
+	{
+		gMainWindow->mViews[i]->MakeCurrent();
+		RenderInitialize();
+	}
+*/
+
+//	SetModifiedFlag(true);
+//	CheckPoint("Properties");
 }
 
 lcCamera* lcModel::GetCamera(int CameraIndex)
@@ -843,25 +917,21 @@ void lcModel::ApplyCheckpoint(lcMemFile& File)
 
 void lcModel::RenderBackground(View* View) const
 {
-	glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	/*
-	if ((m_nScene & (LC_SCENE_GRADIENT | LC_SCENE_BG)) == 0)
+	if (mProperties.mBackgroundType == LC_BACKGROUND_SOLID)
 	{
-		glClearColor(m_fBackground[0], m_fBackground[1], m_fBackground[2], 0.0f);
+		const lcuint32 Color = mProperties.mBackgroundSolidColor;
+		glClearColor((float)LC_RGBA_RED(Color) / 255.0f, (float)LC_RGBA_GREEN(Color) / 255.0f, (float)LC_RGBA_BLUE(Color) / 255.0f, 0.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		return;
 	}
 
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClear(GL_DEPTH_BUFFER_BIT);
 
 	glDepthMask(GL_FALSE);
 	glDisable(GL_DEPTH_TEST);
-	glDisable(GL_LIGHTING);
 
-	float ViewWidth = (float)view->mWidth;
-	float ViewHeight = (float)view->mHeight;
+	float ViewWidth = (float)View->mWidth;
+	float ViewHeight = (float)View->mHeight;
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -870,67 +940,58 @@ void lcModel::RenderBackground(View* View) const
 	glLoadIdentity();
 	glTranslatef(0.375f, 0.375f, 0.0f);
 
-	// Draw gradient quad.
-	if (m_nScene & LC_SCENE_GRADIENT)
+	float Verts[4][2] = { { ViewWidth, ViewHeight }, { 0.0f, ViewHeight }, { 0.0f, 0.0f }, { ViewWidth, 0.0f } };
+	glVertexPointer(2, GL_FLOAT, 0, Verts);
+
+	if (mProperties.mBackgroundType == LC_BACKGROUND_GRADIENT)
 	{
 		glShadeModel(GL_SMOOTH);
 
-		float Verts[4][2];
-		float Colors[4][4];
+		lcVector4 Colors[4];
 
-		glEnableClientState(GL_VERTEX_ARRAY);
-		glVertexPointer(2, GL_FLOAT, 0, Verts);
+		lcuint32 Color = mProperties.mBackgroundGradientColor1;
+		lcVector4 TopColor((float)LC_RGBA_RED(Color) / 255.0f, (float)LC_RGBA_GREEN(Color) / 255.0f, (float)LC_RGBA_BLUE(Color) / 255.0f, 1.0f);
+		Color = mProperties.mBackgroundGradientColor2;
+		lcVector4 BottomColor((float)LC_RGBA_RED(Color) / 255.0f, (float)LC_RGBA_GREEN(Color) / 255.0f, (float)LC_RGBA_BLUE(Color) / 255.0f, 1.0f);
+
+		Colors[0] = TopColor;
+		Colors[1] = TopColor;
+		Colors[2] = BottomColor;
+		Colors[3] = BottomColor;
+
 		glEnableClientState(GL_COLOR_ARRAY);
 		glColorPointer(4, GL_FLOAT, 0, Colors);
 
-		Colors[0][0] = m_fGradient1[0]; Colors[0][1] = m_fGradient1[1]; Colors[0][2] = m_fGradient1[2]; Colors[0][3] = 1.0f;
-		Verts[0][0] = ViewWidth; Verts[0][1] = ViewHeight;
-		Colors[1][0] = m_fGradient1[0]; Colors[1][1] = m_fGradient1[1]; Colors[1][2] = m_fGradient1[2]; Colors[1][3] = 1.0f;
-		Verts[1][0] = 0; Verts[1][1] = ViewHeight;
-		Colors[2][0] = m_fGradient2[0]; Colors[2][1] = m_fGradient2[1]; Colors[2][2] = m_fGradient2[2]; Colors[2][3] = 1.0f;
-		Verts[2][0] = 0; Verts[2][1] = 0;
-		Colors[3][0] = m_fGradient2[0]; Colors[3][1] = m_fGradient2[1]; Colors[3][2] = m_fGradient2[2]; Colors[3][3] = 1.0f;
-		Verts[3][0] = ViewWidth; Verts[3][1] = 0;
-
 		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 
-		glDisableClientState(GL_VERTEX_ARRAY);
 		glDisableClientState(GL_COLOR_ARRAY);
 
 		glShadeModel(GL_FLAT);
 	}
-
-	// Draw the background picture.
-	if (m_nScene & LC_SCENE_BG)
+	else
 	{
+		/*
 		glEnable(GL_TEXTURE_2D);
 
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 		glBindTexture(GL_TEXTURE_2D, m_pBackground->mTexture);
 
-		float Verts[4][2];
 		float Coords[4][2];
 
-		glEnableClientState(GL_VERTEX_ARRAY);
-		glVertexPointer(2, GL_FLOAT, 0, Verts);
-		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-		glTexCoordPointer(2, GL_FLOAT, 0, Coords);
-
 		float tw = 1.0f, th = 1.0f;
-		if (m_nScene & LC_SCENE_BG_TILE)
+		if (mProperties.mBackgroundImageTile)
 		{
 			tw = ViewWidth / m_pBackground->mWidth;
 			th = ViewHeight / m_pBackground->mHeight;
 		}
 
 		Coords[0][0] = 0; Coords[0][1] = 0;
-		Verts[0][0] = 0; Verts[0][1] = ViewHeight;
 		Coords[1][0] = tw; Coords[1][1] = 0;
-		Verts[1][0] = ViewWidth; Verts[1][1] = ViewHeight;
 		Coords[2][0] = tw; Coords[2][1] = th;
-		Verts[2][0] = ViewWidth; Verts[2][1] = 0;
 		Coords[3][0] = 0; Coords[3][1] = th;
-		Verts[3][0] = 0; Verts[3][1] = 0;
+
+		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+		glTexCoordPointer(2, GL_FLOAT, 0, Coords);
 
 		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 
@@ -938,11 +999,11 @@ void lcModel::RenderBackground(View* View) const
 		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 
 		glDisable(GL_TEXTURE_2D);
+		*/
 	}
 
 	glEnable(GL_DEPTH_TEST);
 	glDepthMask(GL_TRUE);
-	*/
 }
 
 void lcModel::GetRenderMeshes(View* View, lcArray<lcRenderMesh>& OpaqueMeshes, lcArray<lcRenderMesh>& TranslucentMeshes, lcArray<lcObject*>& InterfaceObjects) const

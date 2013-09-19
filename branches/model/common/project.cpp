@@ -6431,159 +6431,21 @@ void Project::HandleCommand(LC_COMMANDS id)
 			CheckPoint("Reset Cameras");
 		} break;
 
-		case LC_MODEL_PROPERTIES:
-		{
-			lcPropertiesDialogOptions Options;
+	case LC_MODEL_PROPERTIES:
+		mActiveModel->ShowPropertiesDialog();
+		break;
 
-			strcpy(Options.Name, "");
-			strcpy(Options.Author, m_strAuthor);
-			strcpy(Options.Description, m_strDescription);
-			strcpy(Options.Comments, m_strComments);
+	case LC_HELP_HOMEPAGE:
+		g_App->OpenURL("http://www.leocad.org/");
+		break;
 
-			if (m_nScene & LC_SCENE_BG)
-				Options.BackgroundType = 2;
-			else if (m_nScene & LC_SCENE_GRADIENT)
-				Options.BackgroundType = 1;
-			else
-				Options.BackgroundType = 0;
+	case LC_HELP_EMAIL:
+		g_App->OpenURL("mailto:leozide@gmail.com?subject=LeoCAD");
+		break;
 
-			Options.SolidColor = lcVector3(m_fBackground[0], m_fBackground[1], m_fBackground[2]);
-			Options.GradientColor1 = lcVector3(m_fGradient1[0], m_fGradient1[1], m_fGradient1[2]);
-			Options.GradientColor2 = lcVector3(m_fGradient2[0], m_fGradient2[1], m_fGradient2[2]);
-			strcpy(Options.BackgroundFileName, m_strBackground);
-			Options.BackgroundTile = (m_nScene & LC_SCENE_BG_TILE) != 0;
-			Options.FogEnabled = (m_nScene & LC_SCENE_FOG) != 0;
-			Options.FogDensity = m_fFogDensity * 100.0f;
-			Options.FogColor = lcVector3(m_fFogColor[0], m_fFogColor[1], m_fFogColor[2]);
-			Options.AmbientColor = lcVector3(m_fAmbient[0], m_fAmbient[1], m_fAmbient[2]);
-			Options.DrawFloor = (m_nScene & LC_SCENE_FLOOR) != 0;
-			Options.SetDefault = false;
-
-			GetPiecesUsed(Options.PartsUsed);
-
-			if (!gMainWindow->DoDialog(LC_DIALOG_PROPERTIES, &Options))
-				break;
-
-			bool Modified = false;
-
-			if (strcmp(m_strAuthor, Options.Author))
-			{
-				strcpy(m_strAuthor, Options.Author);
-				Modified = true;
-			}
-
-			if (strcmp(m_strDescription, Options.Description))
-			{
-				strcpy(m_strDescription, Options.Description);
-				Modified = true;
-			}
-
-			if (strcmp(m_strComments, Options.Comments))
-			{
-				strcpy(m_strComments, Options.Comments);
-				Modified = true;
-			}
-
-			lcuint32 Scene = 0;
-
-			if (Options.BackgroundType == 2)
-				Scene |= LC_SCENE_BG;
-			else if (Options.BackgroundType == 1)
-				Scene |= LC_SCENE_GRADIENT;
-
-			if (Options.BackgroundTile)
-				Scene |= LC_SCENE_BG_TILE;
-
-			if (Options.FogEnabled)
-				Scene |= LC_SCENE_FOG;
-
-			if (Options.DrawFloor)
-				Scene |= LC_SCENE_FLOOR;
-
-			if (m_nScene != Scene)
-			{
-				m_nScene = Scene;
-				Modified = true;
-			}
-
-			if (strcmp(m_strBackground, Options.BackgroundFileName))
-			{
-				strcpy(m_strBackground, Options.BackgroundFileName);
-				Modified = true;
-			}
-
-			if (m_fFogDensity * 100.0f != Options.FogDensity)
-			{
-				m_fFogDensity = Options.FogDensity / 100.0f;
-				Modified = true;
-			}
-
-			if (memcmp(m_fBackground, Options.SolidColor, sizeof(Options.SolidColor)))
-			{
-				memcpy(m_fBackground, Options.SolidColor, sizeof(Options.SolidColor));
-				Modified = true;
-			}
-
-			if (memcmp(m_fGradient1, Options.GradientColor1, sizeof(Options.GradientColor1)))
-			{
-				memcpy(m_fGradient1, Options.GradientColor1, sizeof(Options.GradientColor1));
-				Modified = true;
-			}
-
-			if (memcmp(m_fGradient2, Options.GradientColor2, sizeof(Options.GradientColor2)))
-				{
-				memcpy(m_fGradient2, Options.GradientColor2, sizeof(Options.GradientColor2));
-				Modified = true;
-				}
-
-			if (memcmp(m_fFogColor, Options.FogColor, sizeof(Options.FogColor)))
-			{
-				memcpy(m_fFogColor, Options.FogColor, sizeof(Options.FogColor));
-				Modified = true;
-			}
-
-			if (memcmp(m_fAmbient, Options.AmbientColor, sizeof(Options.AmbientColor)))
-			{
-				memcpy(m_fAmbient, Options.AmbientColor, sizeof(Options.AmbientColor));
-				Modified = true;
-			}
-
-			if (Options.SetDefault)
-			{
-				lcSetProfileInt(LC_PROFILE_DEFAULT_SCENE, Scene);
-				lcSetProfileFloat(LC_PROFILE_DEFAULT_FOG_DENSITY, Options.FogDensity);
-				lcSetProfileString(LC_PROFILE_DEFAULT_BACKGROUND_TEXTURE, Options.BackgroundFileName);
-				lcSetProfileInt(LC_PROFILE_DEFAULT_BACKGROUND_COLOR, LC_RGB(Options.SolidColor[0] * 255, Options.SolidColor[1] * 255, Options.SolidColor[2] * 255));
-				lcSetProfileInt(LC_PROFILE_DEFAULT_FOG_COLOR, LC_RGB(Options.FogColor[0] * 255, Options.FogColor[1] * 255, Options.FogColor[2] * 255));
-				lcSetProfileInt(LC_PROFILE_DEFAULT_AMBIENT_COLOR, LC_RGB(Options.AmbientColor[0] * 255, Options.AmbientColor[1] * 255, Options.AmbientColor[2] * 255));
-				lcSetProfileInt(LC_PROFILE_DEFAULT_GRADIENT_COLOR1, LC_RGB(Options.GradientColor1[0] * 255, Options.GradientColor1[1] * 255, Options.GradientColor1[2] * 255));
-				lcSetProfileInt(LC_PROFILE_DEFAULT_GRADIENT_COLOR2, LC_RGB(Options.GradientColor2[0] * 255, Options.GradientColor1[1] * 255, Options.GradientColor1[2] * 255));
-			}
-
-			if (Modified)
-			{
-				for (int i = 0; i < gMainWindow->mViews.GetSize (); i++)
-				{
-					gMainWindow->mViews[i]->MakeCurrent();
-					RenderInitialize();
-				}
-
-				SetModifiedFlag(true);
-				CheckPoint("Properties");
-			}
-		} break;
-
-		case LC_HELP_HOMEPAGE:
-			g_App->OpenURL("http://www.leocad.org/");
-			break;
-
-		case LC_HELP_EMAIL:
-			g_App->OpenURL("mailto:leozide@gmail.com?subject=LeoCAD");
-			break;
-
-		case LC_HELP_UPDATES:
-			gMainWindow->DoDialog(LC_DIALOG_CHECK_UPDATES, NULL);
-			break;
+	case LC_HELP_UPDATES:
+		gMainWindow->DoDialog(LC_DIALOG_CHECK_UPDATES, NULL);
+		break;
 
 	case LC_HELP_ABOUT:
 		{
@@ -6790,87 +6652,34 @@ void Project::HandleCommand(LC_COMMANDS id)
 			gMainWindow->UpdateSnap();
 		} break;
 
-		case LC_EDIT_TRANSFORM:
-			TransformSelectedObjects((LC_TRANSFORM_TYPE)mTransformType, gMainWindow->GetTransformAmount());
-			break;
+	case LC_EDIT_TRANSFORM:
+		TransformSelectedObjects((LC_TRANSFORM_TYPE)mTransformType, gMainWindow->GetTransformAmount());
+		break;
 
-		case LC_EDIT_TRANSFORM_ABSOLUTE_TRANSLATION:
-		case LC_EDIT_TRANSFORM_RELATIVE_TRANSLATION:
-		case LC_EDIT_TRANSFORM_ABSOLUTE_ROTATION:
-		case LC_EDIT_TRANSFORM_RELATIVE_ROTATION:
-			mTransformType = id - LC_EDIT_TRANSFORM_ABSOLUTE_TRANSLATION;
-			gMainWindow->UpdateTransformType(mTransformType);
-			break;
+	case LC_EDIT_TRANSFORM_ABSOLUTE_TRANSLATION:
+	case LC_EDIT_TRANSFORM_RELATIVE_TRANSLATION:
+	case LC_EDIT_TRANSFORM_ABSOLUTE_ROTATION:
+	case LC_EDIT_TRANSFORM_RELATIVE_ROTATION:
+		mTransformType = id - LC_EDIT_TRANSFORM_ABSOLUTE_TRANSLATION;
+		gMainWindow->UpdateTransformType(mTransformType);
+		break;
 
-		case LC_EDIT_ACTION_SELECT:
-		{
-			SetAction(LC_TOOL_SELECT);
-		} break;
-
-		case LC_EDIT_ACTION_INSERT:
-		{
-			SetAction(LC_TOOL_INSERT);
-		} break;
-
-		case LC_EDIT_ACTION_LIGHT:
-		{
-			SetAction(LC_TOOL_LIGHT);
-		} break;
-
-		case LC_EDIT_ACTION_SPOTLIGHT:
-		{
-			SetAction(LC_TOOL_SPOTLIGHT);
-		} break;
-
-		case LC_EDIT_ACTION_CAMERA:
-		{
-			SetAction(LC_TOOL_CAMERA);
-		} break;
-
-		case LC_EDIT_ACTION_MOVE:
-		{
-			SetAction(LC_TOOL_MOVE);
-		} break;
-
-		case LC_EDIT_ACTION_ROTATE:
-		{
-			SetAction(LC_TOOL_ROTATE);
-		} break;
-
-		case LC_EDIT_ACTION_DELETE:
-		{
-			SetAction(LC_TOOL_ERASER);
-		} break;
-
-		case LC_EDIT_ACTION_PAINT:
-		{
-			SetAction(LC_TOOL_PAINT);
-		} break;
-
-		case LC_EDIT_ACTION_ZOOM:
-		{
-			SetAction(LC_TOOL_ZOOM);
-		} break;
-
-		case LC_EDIT_ACTION_ZOOM_REGION:
-		{
-			SetAction(LC_TOOL_ZOOM_REGION);
-		} break;
-
-		case LC_EDIT_ACTION_PAN:
-		{
-			SetAction(LC_TOOL_PAN);
-		} break;
-
-		case LC_EDIT_ACTION_ROTATE_VIEW:
-		{
-			SetAction(LC_TOOL_ROTATE_VIEW);
-		} break;
-
-		case LC_EDIT_ACTION_ROLL:
-		{
-			SetAction(LC_TOOL_ROLL);
-		} break;
+	case LC_EDIT_ACTION_SELECT:
+	case LC_EDIT_ACTION_INSERT:
+	case LC_EDIT_ACTION_LIGHT:
+	case LC_EDIT_ACTION_SPOTLIGHT:
+	case LC_EDIT_ACTION_CAMERA:
+	case LC_EDIT_ACTION_MOVE:
+	case LC_EDIT_ACTION_ROTATE:
+	case LC_EDIT_ACTION_DELETE:
+	case LC_EDIT_ACTION_PAINT:
+	case LC_EDIT_ACTION_ZOOM:
+	case LC_EDIT_ACTION_ZOOM_REGION:
+	case LC_EDIT_ACTION_PAN:
+	case LC_EDIT_ACTION_ROTATE_VIEW:
+	case LC_EDIT_ACTION_ROLL:
+		SetAction(id - LC_EDIT_ACTION_FIRST);
+		break;
 
 		case LC_EDIT_CANCEL:
 		{
@@ -6885,8 +6694,8 @@ void Project::HandleCommand(LC_COMMANDS id)
 			}
 		} break;
 
-		case LC_NUM_COMMANDS:
-			break;
+	case LC_NUM_COMMANDS:
+		break;
 	}
 }
 
@@ -7337,97 +7146,6 @@ Object* Project::FindObjectFromPoint(View* view, int x, int y, bool PiecesOnly)
 	}
 
 	return ClickLine.Closest;
-	*/
-}
-
-void Project::FindObjectsInBox(float x1, float y1, float x2, float y2, lcArray<Object*>& Objects)
-{
-	/*
-	View* ActiveView = gMainWindow->mActiveView;
-	int Viewport[4] = { 0, 0, ActiveView->mWidth, ActiveView->mHeight };
-	float Aspect = (float)Viewport[2]/(float)Viewport[3];
-	lcCamera* Camera = ActiveView->mCamera;
-
-	const lcMatrix44& ModelView = Camera->mWorldView;
-	lcMatrix44 Projection = lcMatrix44Perspective(Camera->mFOV, Aspect, Camera->mNear, Camera->mFar);
-
-	// Find out the top-left and bottom-right corners in screen coordinates.
-	float Left, Top, Bottom, Right;
-
-	if (x1 < x2)
-	{
-		Left = x1;
-		Right = x2;
-	}
-	else
-	{
-		Left = x2;
-		Right = x1;
-	}
-
-	if (y1 > y2)
-	{
-		Top = y1;
-		Bottom = y2;
-	}
-	else
-	{
-		Top = y2;
-		Bottom = y1;
-	}
-
-	// Unproject 6 points to world space.
-	lcVector3 Corners[6] =
-	{
-		lcVector3(Left, Top, 0), lcVector3(Left, Bottom, 0), lcVector3(Right, Bottom, 0),
-		lcVector3(Right, Top, 0), lcVector3(Left, Top, 1), lcVector3(Right, Bottom, 1)
-	};
-
-	lcUnprojectPoints(Corners, 6, ModelView, Projection, Viewport);
-
-	// Build the box planes.
-	lcVector3 PlaneNormals[6];
-
-	PlaneNormals[0] = lcNormalize(lcCross(Corners[4] - Corners[0], Corners[1] - Corners[0])); // Left
-	PlaneNormals[1] = lcNormalize(lcCross(Corners[5] - Corners[2], Corners[3] - Corners[2])); // Right
-	PlaneNormals[2] = lcNormalize(lcCross(Corners[3] - Corners[0], Corners[4] - Corners[0])); // Top
-	PlaneNormals[3] = lcNormalize(lcCross(Corners[1] - Corners[2], Corners[5] - Corners[2])); // Bottom
-	PlaneNormals[4] = lcNormalize(lcCross(Corners[1] - Corners[0], Corners[3] - Corners[0])); // Front
-	PlaneNormals[5] = lcNormalize(lcCross(Corners[1] - Corners[2], Corners[3] - Corners[2])); // Back
-
-	lcVector4 Planes[6];
-	Planes[0] = lcVector4(PlaneNormals[0], -lcDot(PlaneNormals[0], Corners[0]));
-	Planes[1] = lcVector4(PlaneNormals[1], -lcDot(PlaneNormals[1], Corners[5]));
-	Planes[2] = lcVector4(PlaneNormals[2], -lcDot(PlaneNormals[2], Corners[0]));
-	Planes[3] = lcVector4(PlaneNormals[3], -lcDot(PlaneNormals[3], Corners[5]));
-	Planes[4] = lcVector4(PlaneNormals[4], -lcDot(PlaneNormals[4], Corners[0]));
-	Planes[5] = lcVector4(PlaneNormals[5], -lcDot(PlaneNormals[5], Corners[5]));
-
-	// Check if any objects are inside the volume.
-	for (Piece* piece = m_pPieces; piece != NULL; piece = piece->m_pNext)
-	{
-		if (piece->IsVisible(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation))
-		{
-			if (piece->IntersectsVolume(Planes))
-				Objects.Add(piece);
-		}
-	}
-
-	for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
-	{
-		Camera* pCamera = mCameras[CameraIdx];
-
-		if (!pCamera->IsVisible() || pCamera == Camera)
-			continue;
-
-		if (pCamera->IntersectsVolume(Planes))
-			Objects.Add(pCamera);
-
-		if (pCamera->GetTarget()->IntersectsVolume(Planes))
-			Objects.Add(pCamera->GetTarget());
-	}
-
-	// TODO: lights and cameras.
 	*/
 }
 
@@ -8491,8 +8209,8 @@ void Project::OnLeftButtonDown(View* view)
 			mActiveModel->RemoveObject(ObjectSection.Object);
 		}
 		break;
-/*
-		case LC_TOOL_PAINT:
+
+	case LC_TOOL_PAINT:
 		{
 			Object* Closest = FindObjectFromPoint(view, x, y);
 
@@ -8511,7 +8229,7 @@ void Project::OnLeftButtonDown(View* view)
 				}
 			}
 		} break;
-		*/
+
 	case LC_TOOL_LIGHT:
 		{
 			GLint max;
@@ -9082,8 +8800,6 @@ void Project::OnMouseMove(View* view)
 				lcVector3 ScreenX = lcCross(ScreenZ, Camera->mUpVector);
 				lcVector3 ScreenY = Camera->mUpVector;
 
-				lcVector3 TotalMove;
-
 				if (m_nTracking == LC_TRACK_LEFT)
 				{
 					lcVector3 MoveX, MoveY;
@@ -9091,23 +8807,17 @@ void Project::OnMouseMove(View* view)
 					MoveX = ScreenX * (float)(x - m_nDownX) * 0.25f / (float)(21 - m_nMouse);
 					MoveY = ScreenY * (float)(y - m_nDownY) * 0.25f / (float)(21 - m_nMouse);
 
-					TotalMove = MoveX + MoveY + m_MouseSnapLeftover;
+					Distance = MoveX + MoveY;
 				}
 				else
 				{
-					lcVector3 MoveZ;
-
-					MoveZ = ScreenZ * (float)(y - m_nDownY) * 0.25f / (float)(21 - m_nMouse);
-
-					TotalMove = MoveZ + m_MouseSnapLeftover;
+					Distance = ScreenZ * (float)(y - m_nDownY) * 0.25f / (float)(21 - m_nMouse);
 				}
-
-				Distance = TotalMove;
 			}
 
 			Distance = GetMoveDistance(Distance, true, true);
 
-			mActiveModel->UpdateMoveTool(Distance, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
+			mActiveModel->UpdateMoveTool(Distance, m_nCurStep, m_bAddKeys);
 
 			if (m_OverlayActive)
 			{

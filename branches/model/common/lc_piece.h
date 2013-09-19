@@ -113,6 +113,7 @@ public:
 	virtual void ClosestHitTest(lcObjectHitTest& HitTest);
 	virtual void BoxTest(const lcVector4* BoxPlanes, lcArray<lcObjectSection>& ObjectSections);
 
+	virtual void GetPartsUsed(lcArray<lcObjectParts>& PartsUsed) const;
 	virtual void GetRenderMeshes(View* View, lcArray<lcRenderMesh>& OpaqueMeshes, lcArray<lcRenderMesh>& TranslucentMeshes, lcArray<lcObject*>& InterfaceObjects);
 	virtual void RenderInterface(View* View) const;
 

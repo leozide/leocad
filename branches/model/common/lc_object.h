@@ -5,6 +5,7 @@
 #include "lc_math.h"
 
 class View;
+class PieceInfo;
 struct lcRenderMesh;
 
 enum lcObjectType
@@ -38,6 +39,13 @@ struct lcObjectHitTest
 	lcVector3 End;
 	float Distance;
 	lcObjectSection ObjectSection;
+};
+
+struct lcObjectParts
+{
+	PieceInfo* Info;
+	int ColorIndex;
+	int Count;
 };
 
 class lcObject
@@ -76,6 +84,7 @@ public:
 	virtual void ClosestHitTest(lcObjectHitTest& HitTest) = 0;
 	virtual void BoxTest(const lcVector4* BoxPlanes, lcArray<lcObjectSection>& ObjectSections) = 0;
 
+	virtual void GetPartsUsed(lcArray<lcObjectParts>& PartsUsed) const { }
 	virtual void GetRenderMeshes(View* View, lcArray<lcRenderMesh>& OpaqueMeshes, lcArray<lcRenderMesh>& TranslucentMeshes, lcArray<lcObject*>& InterfaceObjects) = 0;
 	virtual void RenderInterface(View* View) const = 0;
 

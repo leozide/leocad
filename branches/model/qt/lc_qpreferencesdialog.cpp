@@ -7,6 +7,7 @@
 #include "lc_library.h"
 #include "lc_application.h"
 #include "pieceinf.h"
+#include "project.h"
 
 lcQPreferencesDialog::lcQPreferencesDialog(QWidget *parent, void *data) :
     QDialog(parent),

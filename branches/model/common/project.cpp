@@ -3388,36 +3388,6 @@ void Project::ZoomExtents(int FirstView, int LastView)
 	gMainWindow->UpdateAllViews();
 }
 
-void Project::GetPiecesUsed(lcArray<lcPiecesUsedEntry>& PiecesUsed) const
-{
-	for (Piece* Piece = m_pPieces; Piece; Piece = Piece->m_pNext)
-	{
-		if (Piece->mPieceInfo->m_strDescription[0] == '~')
-			continue;
-
-		int PieceIdx;
-
-		for (PieceIdx = 0; PieceIdx < PiecesUsed.GetSize(); PieceIdx++)
-		{
-			if (PiecesUsed[PieceIdx].Info != Piece->mPieceInfo || PiecesUsed[PieceIdx].ColorIndex != Piece->mColorIndex)
-				continue;
-
-			PiecesUsed[PieceIdx].Count++;
-			break;
-		}
-
-		if (PieceIdx == PiecesUsed.GetSize())
-		{
-			lcPiecesUsedEntry& Entry = PiecesUsed.Add();
-
-			Entry.Info = Piece->mPieceInfo;
-			Entry.ColorIndex = Piece->mColorIndex;
-			Entry.Count = 1;
-		}
-	}
-}
-
-// Create a series of pictures
 void Project::CreateImages(Image* images, int width, int height, unsigned short from, unsigned short to, bool hilite)
 {
 	if (!GL_BeginRenderToTexture(width, height))
@@ -4058,6 +4028,104 @@ void Project::Export3DStudio()
 	File.Seek(M3DStart + 2, SEEK_SET);
 	File.WriteU32(M3DEnd - M3DStart);
 	File.Seek(M3DEnd, SEEK_SET);
+}
+
+void Project::ExportBrickLink()
+{
+	lcArray<lcObjectParts> PartsUsed;
+	mActiveModel->GetPartsUsed(PartsUsed);
+
+	if (!PartsUsed.GetSize())
+	{
+		gMainWindow->DoMessageBox("Nothing to export.", LC_MB_OK | LC_MB_ICONINFORMATION);
+		return;
+	}
+
+	char FileName[LC_MAXPATH];
+	memset(FileName, 0, sizeof(FileName));
+
+	if (!gMainWindow->DoDialog(LC_DIALOG_EXPORT_BRICKLINK, FileName))
+		return;
+
+	lcDiskFile BrickLinkFile;
+	char Line[1024];
+
+	if (!BrickLinkFile.Open(FileName, "wt"))
+	{
+		gMainWindow->DoMessageBox("Could not open file for writing.", LC_MB_OK | LC_MB_ICONERROR);
+		return;
+	}
+
+	const char* OldLocale = setlocale(LC_NUMERIC, "C");
+	BrickLinkFile.WriteLine("<INVENTORY>\n");
+
+	for (int PartIdx = 0; PartIdx < PartsUsed.GetSize(); PartIdx++)
+	{
+		BrickLinkFile.WriteLine("  <ITEM>\n");
+		BrickLinkFile.WriteLine("    <ITEMTYPE>P</ITEMTYPE>\n");
+
+		sprintf(Line, "    <ITEMID>%s</ITEMID>\n", PartsUsed[PartIdx].Info->m_strName);
+		BrickLinkFile.WriteLine(Line);
+
+		int Count = PartsUsed[PartIdx].Count;
+		if (Count > 1)
+		{
+			sprintf(Line, "    <MINQTY>%d</MINQTY>\n", Count);
+			BrickLinkFile.WriteLine(Line);
+		}
+
+		int Color = lcGetBrickLinkColor(PartsUsed[PartIdx].ColorIndex);
+		if (Color)
+		{
+			sprintf(Line, "    <COLOR>%d</COLOR>\n", Color);
+			BrickLinkFile.WriteLine(Line);
+		}
+
+		BrickLinkFile.WriteLine("  </ITEM>\n");
+	}
+
+	BrickLinkFile.WriteLine("</INVENTORY>\n");
+
+	setlocale(LC_NUMERIC, OldLocale);
+}
+
+void Project::ExportCSV()
+{
+	lcArray<lcObjectParts> PartsUsed;
+	mActiveModel->GetPartsUsed(PartsUsed);
+
+	if (!PartsUsed.GetSize())
+	{
+		gMainWindow->DoMessageBox("Nothing to export.", LC_MB_OK | LC_MB_ICONINFORMATION);
+		return;
+	}
+
+	char FileName[LC_MAXPATH];
+	memset(FileName, 0, sizeof(FileName));
+
+	if (!gMainWindow->DoDialog(LC_DIALOG_EXPORT_CSV, FileName))
+		return;
+
+	lcDiskFile CSVFile;
+	char Line[1024];
+
+	if (!CSVFile.Open(FileName, "wt"))
+	{
+		gMainWindow->DoMessageBox("Could not open file for writing.", LC_MB_OK | LC_MB_ICONERROR);
+		return;
+	}
+
+	const char* OldLocale = setlocale(LC_NUMERIC, "C");
+	CSVFile.WriteLine("Part Name,Color,Quantity,Part ID,Color Code\n");
+
+	for (int PartIdx = 0; PartIdx < PartsUsed.GetSize(); PartIdx++)
+	{
+		sprintf(Line, "\"%s\",\"%s\",%d,%s,%d\n", PartsUsed[PartIdx].Info->m_strDescription, gColorList[PartsUsed[PartIdx].ColorIndex].Name,
+				PartsUsed[PartIdx].Count, PartsUsed[PartIdx].Info->m_strName, gColorList[PartsUsed[PartIdx].ColorIndex].Code);
+		CSVFile.WriteLine(Line);
+	}
+
+	setlocale(LC_NUMERIC, OldLocale);
 }
 
 void Project::ExportPOVRay(lcFile& POVFile)
@@ -4792,103 +4860,13 @@ void Project::HandleCommand(LC_COMMANDS id)
 			}
 		} break;
 
-		case LC_FILE_EXPORT_BRICKLINK:
-		{
-			if (!m_pPieces)
-			{
-				gMainWindow->DoMessageBox("Nothing to export.", LC_MB_OK | LC_MB_ICONINFORMATION);
-				break;
-			}
+	case LC_FILE_EXPORT_BRICKLINK:
+		ExportBrickLink();
+		break;
 
-			char FileName[LC_MAXPATH];
-			memset(FileName, 0, sizeof(FileName));
-
-			if (!gMainWindow->DoDialog(LC_DIALOG_EXPORT_BRICKLINK, FileName))
-				break;
-
-			lcDiskFile BrickLinkFile;
-			char Line[1024];
-
-			if (!BrickLinkFile.Open(FileName, "wt"))
-			{
-				gMainWindow->DoMessageBox("Could not open file for writing.", LC_MB_OK | LC_MB_ICONERROR);
-				break;
-			}
-
-			lcArray<lcPiecesUsedEntry> PiecesUsed;
-			GetPiecesUsed(PiecesUsed);
-
-			const char* OldLocale = setlocale(LC_NUMERIC, "C");
-			BrickLinkFile.WriteLine("<INVENTORY>\n");
-
-			for (int PieceIdx = 0; PieceIdx < PiecesUsed.GetSize(); PieceIdx++)
-			{
-				BrickLinkFile.WriteLine("  <ITEM>\n");
-				BrickLinkFile.WriteLine("    <ITEMTYPE>P</ITEMTYPE>\n");
-
-				sprintf(Line, "    <ITEMID>%s</ITEMID>\n", PiecesUsed[PieceIdx].Info->m_strName);
-				BrickLinkFile.WriteLine(Line);
-
-				int Count = PiecesUsed[PieceIdx].Count;
-				if (Count > 1)
-				{
-					sprintf(Line, "    <MINQTY>%d</MINQTY>\n", Count);
-					BrickLinkFile.WriteLine(Line);
-				}
-
-				int Color = lcGetBrickLinkColor(PiecesUsed[PieceIdx].ColorIndex);
-				if (Color)
-				{
-					sprintf(Line, "    <COLOR>%d</COLOR>\n", Color);
-					BrickLinkFile.WriteLine(Line);
-				}
-
-				BrickLinkFile.WriteLine("  </ITEM>\n");
-			}
-
-			BrickLinkFile.WriteLine("</INVENTORY>\n");
-
-			setlocale(LC_NUMERIC, OldLocale);
-		} break;
-
-		case LC_FILE_EXPORT_CSV:
-		{
-			if (!m_pPieces)
-			{
-				gMainWindow->DoMessageBox("Nothing to export.", LC_MB_OK | LC_MB_ICONINFORMATION);
-				break;
-			}
-
-			char FileName[LC_MAXPATH];
-			memset(FileName, 0, sizeof(FileName));
-
-			if (!gMainWindow->DoDialog(LC_DIALOG_EXPORT_CSV, FileName))
-				break;
-
-			lcDiskFile CSVFile;
-			char Line[1024];
-
-			if (!CSVFile.Open(FileName, "wt"))
-			{
-				gMainWindow->DoMessageBox("Could not open file for writing.", LC_MB_OK | LC_MB_ICONERROR);
-				break;
-			}
-
-			lcArray<lcPiecesUsedEntry> PiecesUsed;
-			GetPiecesUsed(PiecesUsed);
-
-			const char* OldLocale = setlocale(LC_NUMERIC, "C");
-			CSVFile.WriteLine("Part Name,Color,Quantity,Part ID,Color Code\n");
-
-			for (int PieceIdx = 0; PieceIdx < PiecesUsed.GetSize(); PieceIdx++)
-			{
-				sprintf(Line, "\"%s\",\"%s\",%d,%s,%d\n", PiecesUsed[PieceIdx].Info->m_strDescription, gColorList[PiecesUsed[PieceIdx].ColorIndex].Name,
-						PiecesUsed[PieceIdx].Count, PiecesUsed[PieceIdx].Info->m_strName, gColorList[PiecesUsed[PieceIdx].ColorIndex].Code);
-				CSVFile.WriteLine(Line);
-			}
-
-			setlocale(LC_NUMERIC, OldLocale);
-		} break;
+	case LC_FILE_EXPORT_CSV:
+		ExportCSV();
+		break;
 
 		case LC_FILE_EXPORT_POVRAY:
 		{

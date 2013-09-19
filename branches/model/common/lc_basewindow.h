@@ -3,11 +3,10 @@
 
 #include "lc_math.h"
 #include "lc_array.h"
-#include "project.h"
 #include "lc_model.h"
 #include "lc_category.h"
-#include "image.h"
 #include "lc_shortcuts.h"
+#include "image.h"
 
 class Group;
 
@@ -102,7 +101,7 @@ struct lcPropertiesDialogOptions
 
 	bool SetDefault;
 
-	lcArray<lcPiecesUsedEntry> PartsUsed;
+	lcArray<lcObjectParts> PartsUsed;
 };
 
 struct lcArrayDialogOptions

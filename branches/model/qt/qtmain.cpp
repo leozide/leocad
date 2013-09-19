@@ -4,6 +4,7 @@
 #include "lc_qupdatedialog.h"
 #include "lc_mainwindow.h"
 #include <QApplication>
+#include "project.h"
 
 #ifdef Q_OS_WIN
 

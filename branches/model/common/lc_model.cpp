@@ -93,7 +93,7 @@ void lcModel::ShowPropertiesDialog()
 	Options.Properties = mProperties;
 	Options.SetDefault = false;
 
-//	GetPartsUsed(Options.PartsUsed);
+	GetPartsUsed(Options.PartsUsed);
 
 	if (!gMainWindow->DoDialog(LC_DIALOG_PROPERTIES, &Options))
 		return;
@@ -108,22 +108,16 @@ void lcModel::ShowPropertiesDialog()
 
 	mProperties = Options.Properties;
 
-/*
-	if (strcmp(m_strBackground, Options.BackgroundFileName))
-	{
-		strcpy(m_strBackground, Options.BackgroundFileName);
-		Modified = true;
-	}
-
-	for (int i = 0; i < gMainWindow->mViews.GetSize (); i++)
-	{
-		gMainWindow->mViews[i]->MakeCurrent();
-		RenderInitialize();
-	}
-*/
+// reload background
 
 //	SetModifiedFlag(true);
 //	CheckPoint("Properties");
+}
+
+void lcModel::GetPartsUsed(lcArray<lcObjectParts>& PartsUsed) const
+{
+	for (int ObjectIdx = 0; ObjectIdx < mObjects.GetSize(); ObjectIdx++)
+		mObjects[ObjectIdx]->GetPartsUsed(PartsUsed);
 }
 
 lcCamera* lcModel::GetCamera(int CameraIndex)

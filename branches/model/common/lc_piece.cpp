@@ -134,6 +134,30 @@ void lcPiece::BoxTest(const lcVector4* BoxPlanes, lcArray<lcObjectSection>& Obje
 	}
 }
 
+void lcPiece::GetPartsUsed(lcArray<lcObjectParts>& PartsUsed) const
+{
+//	if (Piece->mPieceInfo->m_strDescription[0] == '~')
+//		continue;
+
+	for (int PartIdx = 0; PartIdx < PartsUsed.GetSize(); PartIdx++)
+	{
+		lcObjectParts& Entry = PartsUsed[PartIdx];
+
+// replace default color
+		if (Entry.Info != mPieceInfo || Entry.ColorIndex != mColorIndex)
+			continue;
+
+		Entry.Count++;
+		return;
+	}
+
+	lcObjectParts& Entry = PartsUsed.Add();
+
+	Entry.Info = mPieceInfo;
+	Entry.ColorIndex = mColorIndex;
+	Entry.Count = 1;
+}
+
 void lcPiece::GetRenderMeshes(View* View, lcArray<lcRenderMesh>& OpaqueMeshes, lcArray<lcRenderMesh>& TranslucentMeshes, lcArray<lcObject*>& InterfaceObjects)
 {
 //	if (!IsVisible())

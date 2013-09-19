@@ -10,6 +10,7 @@ class PieceInfo;
 class lcCheckpoint;
 struct lcObjectHitTest;
 struct lcObjectSection;
+struct lcObjectParts;
 struct lcRenderMesh;
 
 enum lcBackgroundType
@@ -116,6 +117,7 @@ public:
 		return mSelectedObjects;
 	}
 
+	void GetPartsUsed(lcArray<lcObjectParts>& PartsUsed) const;
 	lcCamera* GetCamera(int CameraIndex);
 	void GetCameras(lcArray<lcCamera*>& Cameras);
 

@@ -259,7 +259,6 @@ public:
 	void EndPieceDrop(bool Accept);
 	void BeginColorDrop();
 
-	void GetPiecesUsed(lcArray<lcPiecesUsedEntry>& PiecesUsed) const;
 	void CreateImages(Image* images, int width, int height, unsigned short from, unsigned short to, bool hilite);
 	void Render(View* view, bool bToMemory);
 	void CheckAutoSave();
@@ -329,6 +328,8 @@ protected:
 
 	void CreateHTMLPieceList(FILE* f, int nStep, bool bImages, const char* ext);
 	void Export3DStudio();
+	void ExportBrickLink();
+	void ExportCSV();
 	void ExportPOVRay(lcFile& File);
 	void ZoomExtents(int FirstView, int LastView);
 

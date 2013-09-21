@@ -5139,169 +5139,18 @@ void Project::HandleCommand(LC_COMMANDS id)
 			gMainWindow->UpdateUndoRedo(m_pUndoList->pNext ? m_pUndoList->strText : NULL, m_pRedoList ? m_pRedoList->strText : NULL);
 		} break;
 
-		case LC_EDIT_CUT:
-		case LC_EDIT_COPY:
-		{
-			lcMemFile* Clipboard = new lcMemFile();
+	case LC_EDIT_COPY:
+		mActiveModel->CopyToClipboard();
+		break;
 
-			int i = 0;
-			Piece* pPiece;
-			Group* pGroup;
-//			Light* pLight;
+	case LC_EDIT_CUT:
+		mActiveModel->CopyToClipboard();
+		mActiveModel->RemoveObjects(mActiveModel->GetSelectedObjects());
+		break;
 
-			for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-				if (pPiece->IsSelected())
-					i++;
-			Clipboard->WriteBuffer(&i, sizeof(i));
-
-			for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-				if (pPiece->IsSelected())
-					pPiece->FileSave(*Clipboard);
-
-			for (i = 0, pGroup = m_pGroups; pGroup; pGroup = pGroup->m_pNext)
-				i++;
-			Clipboard->WriteBuffer(&i, sizeof(i));
-
-			for (pGroup = m_pGroups; pGroup; pGroup = pGroup->m_pNext)
-				pGroup->FileSave(Clipboard, m_pGroups);
-
-			i = 0;
-			for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
-				if (mCameras[CameraIdx]->IsSelected())
-					i++;
-			Clipboard->WriteBuffer(&i, sizeof(i));
-
-			for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
-			{
-				Camera* pCamera = mCameras[CameraIdx];
-
-				if (pCamera->IsSelected())
-					pCamera->FileSave(*Clipboard);
-			}
-/*
-			for (i = 0, pLight = m_pLights; pLight; pLight = pLight->m_pNext)
-				if (pLight->IsSelected())
-					i++;
-			Clipboard->Write(&i, sizeof(i));
-
-			for (pLight = m_pLights; pLight; pLight = pLight->m_pNext)
-				if (pLight->IsSelected())
-					pLight->FileSave(Clipboard);
-*/
-			if (id == LC_EDIT_CUT)
-				mActiveModel->RemoveObjects(mActiveModel->GetSelectedObjects());
-
-			g_App->ExportClipboard(Clipboard);
-		} break;
-
-		case LC_EDIT_PASTE:
-		{
-			int i, j;
-			Piece* pPasted = NULL;
-			lcFile* file = g_App->mClipboard;
-			if (file == NULL)
-				break;
-			file->Seek(0, SEEK_SET);
-			SelectAndFocusNone(false);
-
-			file->ReadBuffer(&i, sizeof(i));
-			while (i--)
-			{
-				Piece* pPiece = new Piece(NULL);
-				pPiece->FileLoad(*file);
-					pPiece->m_pNext = pPasted;
-					pPasted = pPiece;
-				}
-
-			file->ReadBuffer(&i, sizeof(i));
-			Piece* pPiece;
-			Group** groups = (Group**)malloc(i*sizeof(Group**));
-			for (j = 0; j < i; j++)
-			{
-				groups[j] = new Group();
-				groups[j]->FileLoad(file);
-			}
-
-			while (pPasted)
-			{
-				pPiece = pPasted;
-				pPasted = pPasted->m_pNext;
-				pPiece->CreateName(m_pPieces);
-				pPiece->SetFrameShow(m_nCurFrame);
-				pPiece->SetStepShow(m_nCurStep);
-				AddPiece(pPiece);
-				pPiece->Select(true, false, false);
-
-				j = LC_POINTER_TO_INT(pPiece->GetGroup());
-				if (j != -1)
-					pPiece->SetGroup(groups[j]);
-				else
-					pPiece->UnGroup(NULL);
-			}
-
-			for (j = 0; j < i; j++)
-			{
-				int g = LC_POINTER_TO_INT(groups[j]->m_pGroup);
-				groups[j]->m_pGroup = (g != -1) ? groups[g] : NULL;
-			}
-
-			for (j = 0; j < i; j++)
-			{
-				Group* pGroup;
-				bool add = false;
-				for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-				{
-					for (pGroup = pPiece->GetGroup(); pGroup; pGroup = pGroup->m_pGroup)
-						if (pGroup == groups[j])
-						{
-							add = true;
-							break;
-						}
-
-					if (add)
-						break;
-				}
-
-				if (add)
-				{
-					int a, max = 0;
-
-					for (pGroup = m_pGroups; pGroup; pGroup = pGroup->m_pNext)
-						if (strncmp("Pasted Group #", pGroup->m_strName, 14) == 0)
-							if (sscanf(pGroup->m_strName + 14, "%d", &a) == 1)
-								if (a > max)
-									max = a;
-
-					sprintf(groups[j]->m_strName, "Pasted Group #%.2d", max+1);
-					groups[j]->m_pNext = m_pGroups;
-					m_pGroups = groups[j];
-				}
-				else
-					delete groups[j];
-			}
-
-			free(groups);
-
-			file->ReadBuffer(&i, sizeof(i));
-
-			while (i--)
-			{
-				Camera* pCamera = new Camera(false);
-				pCamera->FileLoad(*file);
-				pCamera->CreateName(mCameras);
-				pCamera->Select(true, false, false);
-				pCamera->GetTarget()->Select(true, false, false);
-				mCameras.Add(pCamera);
-			}
-
-			// TODO: lights
-			CalculateStep();
-			SetModifiedFlag(true);
-			CheckPoint("Pasting");
-			gMainWindow->UpdateFocusObject(GetFocusObject());
-			UpdateSelection();
-			gMainWindow->UpdateAllViews();
-		} break;
+	case LC_EDIT_PASTE:
+		mActiveModel->PasteFromClipboard();
+		break;
 
 		case LC_EDIT_FIND:
 			if (gMainWindow->DoDialog(LC_DIALOG_FIND, &mSearchOptions))

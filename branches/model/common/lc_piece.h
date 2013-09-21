@@ -55,14 +55,12 @@ public:
 		return (mState & LC_PIECE_FOCUS_MASK) != 0;
 	}
 
-	virtual void ClearSelection()
+	virtual void SetSelection(bool Selection)
 	{
-		mState &= ~(LC_PIECE_SELECTION_MASK | LC_PIECE_FOCUS_MASK);
-	}
-
-	virtual void ClearFocus()
-	{
-		mState &= ~LC_PIECE_FOCUS_MASK;
+		if (Selection)
+			mState |= LC_PIECE_SELECTION_MASK;
+		else
+			mState &= ~(LC_PIECE_SELECTION_MASK | LC_PIECE_FOCUS_MASK);
 	}
 
 	virtual void SetSelection(lcuint32 Section, bool Selection)
@@ -71,6 +69,11 @@ public:
 			mState |= LC_PIECE_POSITION_SELECTED;
 		else
 			mState &= ~(LC_PIECE_SELECTION_MASK | LC_PIECE_FOCUS_MASK);
+	}
+
+	virtual void ClearFocus()
+	{
+		mState &= ~LC_PIECE_FOCUS_MASK;
 	}
 
 	virtual void SetFocus(lcuint32 Section, bool Focus)

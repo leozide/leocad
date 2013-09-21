@@ -87,6 +87,7 @@ public:
 enum lcActionType
 {
 	LC_ACTION_REMOVE_OBJECT,
+	LC_ACTION_PASTE_OBJECTS,
 	LC_ACTION_CREATE_PIECE,
 	LC_ACTION_CREATE_CAMERA,
 	LC_ACTION_MOVE_OBJECTS,
@@ -142,6 +143,8 @@ public:
 	void AddPiece(PieceInfo* Part, int ColorIndex, const lcVector3& Position, const lcVector4& AxisAngle, lcTime Time);
 	void RemoveObject(lcObject* Object);
 	void RemoveObjects(const lcArray<lcObject*>& Objects);
+	void CopyToClipboard();
+	void PasteFromClipboard();
 
 	void BeginCreateCameraTool(const lcVector3& Position, const lcVector3& TargetPosition, const lcVector3& UpVector);
 	void UpdateCreateCameraTool(const lcVector3& Distance, lcTime Time, bool AddKeys);

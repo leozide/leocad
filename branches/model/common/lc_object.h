@@ -70,9 +70,9 @@ public:
 	virtual bool IsSelected(lcuint32 Section) const = 0;
 	virtual bool IsFocused() const = 0;
 	virtual bool IsFocused(lcuint32 Section) const = 0;
-	virtual void ClearSelection() = 0;
-	virtual void ClearFocus() = 0;
+	virtual void SetSelection(bool Selection) = 0;
 	virtual void SetSelection(lcuint32 Section, bool Selection) = 0;
+	virtual void ClearFocus() = 0;
 	virtual void SetFocus(lcuint32 Section, bool Focus) = 0;
 	virtual void InvertSelection() = 0;
 	virtual void InvertSelection(lcuint32 Section) = 0;

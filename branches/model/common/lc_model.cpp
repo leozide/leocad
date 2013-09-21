@@ -9,6 +9,7 @@
 #include "lc_mesh.h"
 #include "lc_file.h"
 #include "lc_profile.h"
+#include "lc_application.h"
 
 enum
 {
@@ -249,7 +250,7 @@ void lcModel::AddToSelection(const lcArray<lcObjectSection>& ObjectSections)
 void lcModel::SetSelection(const lcArray<lcObjectSection>& ObjectSections)
 {
 	for (int ObjectIdx = 0; ObjectIdx < mSelectedObjects.GetSize(); ObjectIdx++)
-		mSelectedObjects[ObjectIdx]->ClearSelection();
+		mSelectedObjects[ObjectIdx]->SetSelection(false);
 	mSelectedObjects.RemoveAll();
 
 	AddToSelection(ObjectSections);
@@ -300,7 +301,7 @@ void lcModel::SetFocus(const lcObjectSection& ObjectSection)
 	lcuint32 Section = ObjectSection.Section;
 
 	for (int ObjectIdx = 0; ObjectIdx < mSelectedObjects.GetSize(); ObjectIdx++)
-		mSelectedObjects[ObjectIdx]->ClearSelection();
+		mSelectedObjects[ObjectIdx]->SetSelection(false);
 	mSelectedObjects.RemoveAll();
 	mFocusObject = NULL;
 
@@ -1286,6 +1287,91 @@ void lcModel::RemoveObjects(const lcArray<lcObject*>& Objects)
 	EndCheckpoint(true, true);
 
 	ApplyCheckpoint(Apply);
+
+//	SetModifiedFlag(true);
+}
+
+void lcModel::CopyToClipboard()
+{
+	if (!mSelectedObjects.GetSize())
+		return;
+
+	lcMemFile* Clipboard = new lcMemFile();
+
+	Clipboard->WriteS32(mSelectedObjects.GetSize());
+
+	for (int ObjectIdx = 0; ObjectIdx < mSelectedObjects.GetSize(); ObjectIdx++)
+	{
+		lcObject* Object = mSelectedObjects[ObjectIdx];
+
+		Clipboard->WriteU32(Object->ObjectType());
+		Object->Save(*Clipboard);
+	}
+
+	g_App->ExportClipboard(Clipboard);
+}
+
+void lcModel::PasteFromClipboard()
+{
+	lcFile* Clipboard = g_App->mClipboard;
+	if (!Clipboard)
+		return;
+
+	Clipboard->Seek(0, SEEK_SET);
+	SetSelection(lcArray<lcObjectSection>());
+
+	lcint32 ObjectCount = Clipboard->ReadS32();
+	bool UpdateCameraMenu = false;
+
+	BeginCheckpoint(LC_ACTION_PASTE_OBJECTS);
+
+	lcMemFile& Revert = mCurrentCheckpoint->mRevert;
+
+	Revert.WriteU32(LC_CHECKPOINT_REMOVE_OBJECTS);
+	Revert.WriteS32(ObjectCount);
+
+	lcMemFile& Apply = mCurrentCheckpoint->mApply;
+
+	Apply.WriteU32(LC_CHECKPOINT_CREATE_OBJECTS);
+	Apply.WriteU32(ObjectCount);
+
+	while (ObjectCount--)
+	{
+		lcObjectType ObjectType = (lcObjectType)Clipboard->ReadS32();
+		lcObject* Object = NULL;
+
+		switch (ObjectType)
+		{
+		case LC_OBJECT_TYPE_PIECE:
+			Object = new lcPiece();
+			break;
+
+		case LC_OBJECT_TYPE_CAMERA:
+			Object = new lcCamera(false);
+			break;
+		}
+
+		Object->Load(*Clipboard);
+// set step show to current step
+		Object->Update();
+		mObjects.Add(Object);
+
+		Object->SetSelection(true);
+		mSelectedObjects.Add(Object);
+
+		Apply.WriteS32(mObjects.GetSize() - 1);
+		Apply.WriteS32(ObjectType);
+		Object->Save(Apply);
+
+		Revert.WriteS32(mObjects.GetSize() - 1);
+	}
+
+	EndCheckpoint(true, true);
+
+	if (UpdateCameraMenu)
+		gMainWindow->UpdateCameraMenu();
+
+	gMainWindow->UpdateAllViews();
 
 //	SetModifiedFlag(true);
 }

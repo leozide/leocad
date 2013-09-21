@@ -110,14 +110,12 @@ public:
 		return false;
 	}
 
-	virtual void ClearSelection()
+	virtual void SetSelection(bool Selection)
 	{
-		mState &= ~(LC_CAMERA_SELECTION_MASK | LC_CAMERA_FOCUS_MASK);
-	}
-
-	virtual void ClearFocus()
-	{
-		mState &= ~LC_CAMERA_FOCUS_MASK;
+		if (Selection)
+			mState |= LC_CAMERA_SELECTION_MASK;
+		else
+			mState &= ~(LC_CAMERA_SELECTION_MASK | LC_CAMERA_FOCUS_MASK);
 	}
 
 	virtual void SetSelection(lcuint32 Section, bool Selection)
@@ -145,6 +143,11 @@ public:
 				mState &= ~(LC_CAMERA_UPVECTOR_SELECTED | LC_CAMERA_UPVECTOR_FOCUSED);
 			break;
 		}
+	}
+
+	virtual void ClearFocus()
+	{
+		mState &= ~LC_CAMERA_FOCUS_MASK;
 	}
 
 	virtual void SetFocus(lcuint32 Section, bool Focus)

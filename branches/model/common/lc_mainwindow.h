@@ -36,6 +36,7 @@ class lcMainWindow : public lcBaseWindow
 	void UpdateSelection();
 	void UpdateFocusObject();
 	void UpdateCameraMenu();
+	void UpdateCheckpoint();
 
 	void UpdateFocusObject(Object* Focus);
 	void UpdateSelectedObjects(int Flags, int SelectedCount, Object* Focus);

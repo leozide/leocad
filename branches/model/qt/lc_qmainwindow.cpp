@@ -1038,6 +1038,54 @@ void lcQMainWindow::toggleFullScreen()
 		showFullScreen();
 }
 
+void lcQMainWindow::updateSelection()
+{
+
+}
+
+void lcQMainWindow::updateFocusObject()
+{
+
+}
+
+void lcQMainWindow::updateCameraMenu()
+{
+	lcCamera* currentCamera = gMainWindow->mActiveView ? gMainWindow->mActiveView->mCamera : NULL;
+	int currentIndex = -1;
+
+	lcArray<lcCamera*> cameras;
+	lcGetActiveProject()->mActiveModel->GetCameras(cameras);
+
+	for (int actionIdx = LC_VIEW_CAMERA_FIRST; actionIdx <= LC_VIEW_CAMERA_LAST; actionIdx++)
+	{
+		QAction* action = actions[actionIdx];
+		int cameraIdx = actionIdx - LC_VIEW_CAMERA_FIRST;
+
+		if (cameraIdx < cameras.GetSize())
+		{
+			if (currentCamera == cameras[cameraIdx])
+				currentIndex = cameraIdx;
+
+			action->setText(cameras[cameraIdx]->mName);
+			action->setVisible(true);
+		}
+		else
+			action->setVisible(false);
+	}
+
+	int actionIndex = LC_VIEW_CAMERA_FIRST + currentIndex;
+
+	if (actionIndex < LC_VIEW_CAMERA_FIRST || actionIndex > LC_VIEW_CAMERA_LAST)
+		actionIndex = LC_VIEW_CAMERA_NONE;
+
+	actions[actionIndex]->setChecked(true);
+}
+
+void lcQMainWindow::updateCheckpoint()
+{
+
+}
+
 void lcQMainWindow::updateFocusObject(Object *focus)
 {
 	propertiesWidget->updateFocusObject(focus);
@@ -1166,6 +1214,7 @@ void lcQMainWindow::updateSnap()
 
 void lcQMainWindow::updateUndoRedo(const char* undoText, const char* redoText)
 {
+	/*
 	QAction *undoAction = actions[LC_EDIT_UNDO];
 	QAction *redoAction = actions[LC_EDIT_REDO];
 
@@ -1190,6 +1239,7 @@ void lcQMainWindow::updateUndoRedo(const char* undoText, const char* redoText)
 		redoAction->setEnabled(false);
 		redoAction->setText(tr("&Redo"));
 	}
+	*/
 }
 
 void lcQMainWindow::updateTransformType(int newType)
@@ -1205,39 +1255,6 @@ void lcQMainWindow::updateTransformType(int newType)
 	LC_ASSERT(newType >= 0 && newType <= 3);
 	actions[LC_EDIT_TRANSFORM_ABSOLUTE_TRANSLATION + newType]->setChecked(true);
 	actions[LC_EDIT_TRANSFORM]->setIcon(QIcon(iconNames[newType]));
-}
-
-void lcQMainWindow::updateCameraMenu()
-{
-	lcCamera* currentCamera = gMainWindow->mActiveView ? gMainWindow->mActiveView->mCamera : NULL;
-	int currentIndex = -1;
-
-	lcArray<lcCamera*> cameras;
-	lcGetActiveProject()->mActiveModel->GetCameras(cameras);
-
-	for (int actionIdx = LC_VIEW_CAMERA_FIRST; actionIdx <= LC_VIEW_CAMERA_LAST; actionIdx++)
-	{
-		QAction* action = actions[actionIdx];
-		int cameraIdx = actionIdx - LC_VIEW_CAMERA_FIRST;
-
-		if (cameraIdx < cameras.GetSize())
-		{
-			if (currentCamera == cameras[cameraIdx])
-				currentIndex = cameraIdx;
-
-			action->setText(cameras[cameraIdx]->mName);
-			action->setVisible(true);
-		}
-		else
-			action->setVisible(false);
-	}
-
-	int actionIndex = LC_VIEW_CAMERA_FIRST + currentIndex;
-
-	if (actionIndex < LC_VIEW_CAMERA_FIRST || actionIndex > LC_VIEW_CAMERA_LAST)
-		actionIndex = LC_VIEW_CAMERA_NONE;
-
-	actions[actionIndex]->setChecked(true);
 }
 
 void lcQMainWindow::updateCategories()

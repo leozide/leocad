@@ -5077,67 +5077,13 @@ void Project::HandleCommand(LC_COMMANDS id)
 		gMainWindow->Close();
 		break;
 
-		case LC_EDIT_UNDO:
-		case LC_EDIT_REDO:
-		{
-			LC_UNDOINFO *pUndo, *pTmp;
-			int i;
+	case LC_EDIT_UNDO:
+		mActiveModel->UndoCheckpoint();
+		break;
 
-			if (id == LC_EDIT_UNDO)
-			{
-				if ((m_pUndoList != NULL) && (m_pUndoList->pNext != NULL))
-				{
-					// Remove the first item from the undo list.
-					pUndo = m_pUndoList;
-					m_pUndoList = pUndo->pNext;
-
-					// Check if we need to delete the last redo info.
-					for (pTmp = m_pRedoList, i = 0; pTmp; pTmp = pTmp->pNext, i++)
-						if ((i == 29) && (pTmp->pNext != NULL))
-						{
-							delete pTmp->pNext;
-							pTmp->pNext = NULL;
-						}
-
-					pUndo->pNext = m_pRedoList;
-					m_pRedoList = pUndo;
-
-					pUndo = m_pUndoList;
-					DeleteContents(true);
-					FileLoad(&pUndo->file, true, false);
-				}
-
-				if (m_bUndoOriginal && (m_pUndoList != NULL) && (m_pUndoList->pNext == NULL))
-					SetModifiedFlag(false);
-			}
-			else
-			{
-				if (m_pRedoList != NULL)
-				{
-					// Remove the first element from the redo list.
-					pUndo = m_pRedoList;
-					m_pRedoList = pUndo->pNext;
-
-					// Check if we can delete the last undo info.
-					for (pTmp = m_pUndoList, i = 0; pTmp; pTmp = pTmp->pNext, i++)
-						if ((i == 30) && (pTmp->pNext != NULL))
-						{
-							delete pTmp->pNext;
-							pTmp->pNext = NULL;
-						}
-
-					// Add info to the start of the undo list.
-					pUndo->pNext = m_pUndoList;
-					m_pUndoList = pUndo;
-
-					// Load state.
-					DeleteContents(true);
-					FileLoad(&pUndo->file, true, false);
-				}
-			}
-
-			gMainWindow->UpdateUndoRedo(m_pUndoList->pNext ? m_pUndoList->strText : NULL, m_pRedoList ? m_pRedoList->strText : NULL);
-		} break;
+	case LC_EDIT_REDO:
+		mActiveModel->RedoCheckpoint();
+		break;
 
 	case LC_EDIT_COPY:
 		mActiveModel->CopyToClipboard();

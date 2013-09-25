@@ -122,6 +122,9 @@ public:
 	lcCamera* GetCamera(int CameraIndex);
 	void GetCameras(lcArray<lcCamera*>& Cameras);
 
+	void UndoCheckpoint();
+	void RedoCheckpoint();
+
 	void RenderBackground(View* View) const;
 	void RenderScene(View* View, bool RenderInterface) const;
 	void GetRenderMeshes(View* View, lcArray<lcRenderMesh>& OpaqueMeshes, lcArray<lcRenderMesh>& TranslucentMeshes, lcArray<lcObject*>& InterfaceObjects) const;

@@ -471,10 +471,18 @@ void lcMainWindow::ToggleFullScreen()
 
 void lcMainWindow::UpdateSelection()
 {
+	lcQMainWindow* window = (lcQMainWindow*)mHandle;
+
+	if (window)
+		window->updateSelection();
 }
 
 void lcMainWindow::UpdateFocusObject()
 {
+	lcQMainWindow* window = (lcQMainWindow*)mHandle;
+
+	if (window)
+		window->updateFocusObject();
 }
 
 void lcMainWindow::UpdateCameraMenu()
@@ -485,6 +493,13 @@ void lcMainWindow::UpdateCameraMenu()
 		window->updateCameraMenu();
 }
 
+void lcMainWindow::UpdateCheckpoint()
+{
+	lcQMainWindow* window = (lcQMainWindow*)mHandle;
+
+	if (window)
+		window->updateCheckpoint();
+}
 
 void lcMainWindow::UpdateFocusObject(Object* Focus)
 {

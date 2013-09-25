@@ -152,6 +152,40 @@ void lcModel::Update(lcTime Time)
 //		mLights[LightIdx]->Update(Time);
 }
 
+void lcModel::UndoCheckpoint()
+{
+	int UndoCount = mUndoCheckpoints.GetSize();
+
+	if (!UndoCount)
+		return;
+
+	lcCheckpoint* Checkpoint = mUndoCheckpoints[UndoCount - 1];
+
+	ApplyCheckpoint(Checkpoint->mRevert);
+
+	mUndoCheckpoints.RemoveIndex(UndoCount - 1);
+	mRedoCheckpoints.Add(Checkpoint);
+
+	gMainWindow->UpdateCheckpoint();
+}
+
+void lcModel::RedoCheckpoint()
+{
+	int RedoCount = mRedoCheckpoints.GetSize();
+
+	if (!RedoCount)
+		return;
+
+	lcCheckpoint* Checkpoint = mRedoCheckpoints[RedoCount - 1];
+
+	ApplyCheckpoint(Checkpoint->mApply);
+
+	mRedoCheckpoints.RemoveIndex(RedoCount - 1);
+	mUndoCheckpoints.Add(Checkpoint);
+
+	gMainWindow->UpdateCheckpoint();
+}
+
 void lcModel::BeginCheckpoint(lcActionType ActionType)
 {
 	LC_ASSERT(!mCurrentCheckpoint);
@@ -166,7 +200,7 @@ void lcModel::EndCheckpoint(bool Accept, bool SaveCheckpoint)
 	{
 		mUndoCheckpoints.Add(mCurrentCheckpoint);
 		mRedoCheckpoints.DeleteAll();
-//		gMainWindow->UpdateUndoRedo(m_pUndoList->pNext ? m_pUndoList->strText : NULL, NULL);
+		gMainWindow->UpdateCheckpoint();
 	}
 	else
 	{
@@ -1230,8 +1264,20 @@ void lcModel::AddPiece(PieceInfo* Part, int ColorIndex, const lcVector3& Positio
 	mObjects.Add(Piece);
 
 	BeginCheckpoint(LC_ACTION_CREATE_PIECE);
+
 	lcMemFile& Apply = mCurrentCheckpoint->mApply;
+
+	Apply.WriteU32(LC_CHECKPOINT_CREATE_OBJECTS);
+	Apply.WriteS32(1);
+	Apply.WriteS32(mObjects.GetSize() - 1);
+	Apply.WriteS32(LC_OBJECT_TYPE_PIECE);
 	Piece->Save(Apply);
+
+	lcMemFile& Revert = mCurrentCheckpoint->mRevert;
+	Revert.WriteU32(LC_CHECKPOINT_REMOVE_OBJECTS);
+	Revert.WriteS32(1);
+	Revert.WriteS32(mObjects.GetSize() - 1);
+
 	EndCheckpoint(true, true);
 
 	lcObjectSection ObjectSection;
@@ -1269,7 +1315,7 @@ void lcModel::RemoveObjects(const lcArray<lcObject*>& Objects)
 	lcMemFile& Apply = mCurrentCheckpoint->mApply;
 
 	Apply.WriteU32(LC_CHECKPOINT_REMOVE_OBJECTS);
-	Apply.WriteU32(Objects.GetSize());
+	Apply.WriteS32(Objects.GetSize());
 
 	for (int ObjectIdx = 0; ObjectIdx < Objects.GetSize(); ObjectIdx++)
 	{

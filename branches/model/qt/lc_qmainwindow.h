@@ -31,6 +31,11 @@ public:
 	void togglePrintPreview();
 	void toggleFullScreen();
 
+	void updateSelection();
+	void updateFocusObject();
+	void updateCameraMenu();
+	void updateCheckpoint();
+
 	void updateFocusObject(Object *focus);
 	void updateSelectedObjects(int flags, int selectedCount, Object* focus);
 	void updateAction(int newAction);
@@ -41,7 +46,6 @@ public:
 	void updateSnap();
 	void updateUndoRedo(const char* undoText, const char* redoText);
 	void updateTransformType(int newType);
-	void updateCameraMenu();
 	void updateCategories();
 	void updateTitle(const char* title, bool modified);
 	void updateModified(bool modified);

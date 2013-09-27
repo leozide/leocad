@@ -319,7 +319,6 @@ protected:
 	void SnapRotationVector(lcVector3& Delta, lcVector3& Leftover) const;
 
 	// Rendering functions.
-	void RenderBackground(View* view);
 	void RenderScenePieces(View* view);
 	void RenderSceneBoxes(View* view);
 	void RenderSceneObjects(View* view);

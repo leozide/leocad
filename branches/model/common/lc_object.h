@@ -88,6 +88,7 @@ public:
 	virtual void GetRenderMeshes(View* View, lcArray<lcRenderMesh>& OpaqueMeshes, lcArray<lcRenderMesh>& TranslucentMeshes, lcArray<lcObject*>& InterfaceObjects) = 0;
 	virtual void RenderInterface(View* View) const = 0;
 
+	virtual lcVector3 GetFocusPosition() const = 0;
 	virtual void Move(const lcVector3& Distance, lcTime Time, bool AddKeys) = 0;
 
 protected:

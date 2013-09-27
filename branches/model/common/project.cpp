@@ -1477,7 +1477,13 @@ void Project::Render(View* View, bool ToMemory)
 
 	mActiveModel->RenderScene(View, !ToMemory);
 
-/*
+	if (!ToMemory)
+	{
+		RenderOverlays(View);
+		RenderViewports(View);
+	}
+
+	/*
 	if (ToMemory)
 		RenderScenePieces(view);
 	else
@@ -1495,105 +1501,6 @@ void Project::Render(View* View, bool ToMemory)
 		RenderViewports(view);
 	}
 	*/
-}
-
-void Project::RenderBackground(View* view)
-{
-	if ((m_nScene & (LC_SCENE_GRADIENT | LC_SCENE_BG)) == 0)
-	{
-		glClearColor(m_fBackground[0], m_fBackground[1], m_fBackground[2], 0.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		return;
-	}
-
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	glDepthMask(GL_FALSE);
-	glDisable(GL_DEPTH_TEST);
-	glDisable(GL_LIGHTING);
-
-	float ViewWidth = (float)view->mWidth;
-	float ViewHeight = (float)view->mHeight;
-
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glOrtho(0.0f, ViewWidth, 0.0f, ViewHeight, -1.0f, 1.0f);
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	glTranslatef(0.375f, 0.375f, 0.0f);
-
-	// Draw gradient quad.
-	if (m_nScene & LC_SCENE_GRADIENT)
-	{
-		glShadeModel(GL_SMOOTH);
-
-		float Verts[4][2];
-		float Colors[4][4];
-
-		glEnableClientState(GL_VERTEX_ARRAY);
-		glVertexPointer(2, GL_FLOAT, 0, Verts);
-		glEnableClientState(GL_COLOR_ARRAY);
-		glColorPointer(4, GL_FLOAT, 0, Colors);
-
-		Colors[0][0] = m_fGradient1[0]; Colors[0][1] = m_fGradient1[1]; Colors[0][2] = m_fGradient1[2]; Colors[0][3] = 1.0f;
-		Verts[0][0] = ViewWidth; Verts[0][1] = ViewHeight;
-		Colors[1][0] = m_fGradient1[0]; Colors[1][1] = m_fGradient1[1]; Colors[1][2] = m_fGradient1[2]; Colors[1][3] = 1.0f;
-		Verts[1][0] = 0; Verts[1][1] = ViewHeight;
-		Colors[2][0] = m_fGradient2[0]; Colors[2][1] = m_fGradient2[1]; Colors[2][2] = m_fGradient2[2]; Colors[2][3] = 1.0f;
-		Verts[2][0] = 0; Verts[2][1] = 0;
-		Colors[3][0] = m_fGradient2[0]; Colors[3][1] = m_fGradient2[1]; Colors[3][2] = m_fGradient2[2]; Colors[3][3] = 1.0f;
-		Verts[3][0] = ViewWidth; Verts[3][1] = 0;
-
-		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-
-		glDisableClientState(GL_VERTEX_ARRAY);
-		glDisableClientState(GL_COLOR_ARRAY);
-
-		glShadeModel(GL_FLAT);
-	}
-
-	// Draw the background picture.
-	if (m_nScene & LC_SCENE_BG)
-	{
-		glEnable(GL_TEXTURE_2D);
-
-		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-		glBindTexture(GL_TEXTURE_2D, m_pBackground->mTexture);
-
-		float Verts[4][2];
-		float Coords[4][2];
-
-		glEnableClientState(GL_VERTEX_ARRAY);
-		glVertexPointer(2, GL_FLOAT, 0, Verts);
-		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-		glTexCoordPointer(2, GL_FLOAT, 0, Coords);
-
-		float tw = 1.0f, th = 1.0f;
-		if (m_nScene & LC_SCENE_BG_TILE)
-		{
-			tw = ViewWidth / m_pBackground->mWidth;
-			th = ViewHeight / m_pBackground->mHeight;
-		}
-
-		Coords[0][0] = 0; Coords[0][1] = 0;
-		Verts[0][0] = 0; Verts[0][1] = ViewHeight;
-		Coords[1][0] = tw; Coords[1][1] = 0;
-		Verts[1][0] = ViewWidth; Verts[1][1] = ViewHeight;
-		Coords[2][0] = tw; Coords[2][1] = th;
-		Verts[2][0] = ViewWidth; Verts[2][1] = 0;
-		Coords[3][0] = 0; Coords[3][1] = th;
-		Verts[3][0] = 0; Verts[3][1] = 0;
-
-		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-
-		glDisableClientState(GL_VERTEX_ARRAY);
-		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-
-		glDisable(GL_TEXTURE_2D);
-	}
-
-	glEnable(GL_DEPTH_TEST);
-	glDepthMask(GL_TRUE);
 }
 
 struct lcTranslucentRenderSection
@@ -2257,6 +2164,9 @@ void Project::RenderOverlays(View* view)
 	if (mDropPiece)
 		return;
 
+	if (!m_OverlayActive && ((m_nCurAction != LC_TOOL_SELECT) || (m_nTracking != LC_TRACK_LEFT) || (gMainWindow->mActiveView != view)))
+		return;
+
 	if (((m_nCurAction == LC_TOOL_SELECT) && (m_nTracking == LC_TRACK_LEFT) && (gMainWindow->mActiveView == view) && (m_OverlayMode == LC_OVERLAY_NONE)) ||
 	    (m_nCurAction == LC_TOOL_ZOOM_REGION))
 	{
@@ -2332,7 +2242,6 @@ void Project::RenderOverlays(View* view)
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_BLEND);
 
-		glEnableClientState(GL_VERTEX_ARRAY);
 		glVertexPointer(2, GL_FLOAT, 0, Verts);
 
 		glColor4f(0.25f, 0.25f, 1.0f, 1.0f);
@@ -2340,8 +2249,6 @@ void Project::RenderOverlays(View* view)
 
 		glColor4f(0.25f, 0.25f, 1.0f, 0.25f);
 		glDrawArrays(GL_TRIANGLE_STRIP, 10, 4);
-
-		glDisableClientState(GL_VERTEX_ARRAY);
 
 		glDisable(GL_BLEND);
 		glEnable(GL_DEPTH_TEST);
@@ -2403,10 +2310,8 @@ void Project::RenderOverlays(View* view)
 				{ 0.0f, 0.0f, OverlayMovePlaneSize }
 			};
 
-			glEnableClientState(GL_VERTEX_ARRAY);
 			glVertexPointer(3, GL_FLOAT, 0, Verts);
 			glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-			glDisableClientState(GL_VERTEX_ARRAY);
 
 			glDisable(GL_BLEND);
 
@@ -2464,11 +2369,9 @@ void Project::RenderOverlays(View* view)
 					Verts[j + 2] = lcVector3(OverlayMoveArrowCapSize, y, z);
 				}
 
-				glEnableClientState(GL_VERTEX_ARRAY);
 				glVertexPointer(3, GL_FLOAT, 0, Verts);
 				glDrawArrays(GL_LINES, 0, 2);
 				glDrawArrays(GL_TRIANGLE_FAN, 1, 10);
-				glDisableClientState(GL_VERTEX_ARRAY);
 			}
 
 			// Rotation arrows.
@@ -2497,7 +2400,6 @@ void Project::RenderOverlays(View* view)
 				}
 
 				lcVector3 Verts[18];
-				glEnableClientState(GL_VERTEX_ARRAY);
 				glVertexPointer(3, GL_FLOAT, 0, Verts);
 
 				for (int j = 0; j < 9; j++)
@@ -2546,8 +2448,6 @@ void Project::RenderOverlays(View* view)
 				}
 
 				glDrawArrays(GL_TRIANGLE_FAN, 0, 10);
-
-				glDisableClientState(GL_VERTEX_ARRAY);
 			}
 
 			glPopMatrix();
@@ -2639,7 +2539,6 @@ void Project::RenderOverlays(View* view)
 				Verts[0] = lcVector3(0.0f, 0.0f, 0.0f);
 				int NumVerts = 1;
 
-				glEnableClientState(GL_VERTEX_ARRAY);
 				glVertexPointer(3, GL_FLOAT, 0, Verts);
 
 				float StartAngle;
@@ -2675,7 +2574,6 @@ void Project::RenderOverlays(View* view)
 				if (NumVerts > 2)
 					glDrawArrays(GL_TRIANGLE_FAN, 0, NumVerts);
 
-				glDisableClientState(GL_VERTEX_ARRAY);
 				glDisable(GL_BLEND);
 
 				glPopMatrix();
@@ -2705,10 +2603,8 @@ void Project::RenderOverlays(View* view)
 
 			glColor4f(0.1f, 0.1f, 0.1f, 1.0f);
 
-			glEnableClientState(GL_VERTEX_ARRAY);
 			glVertexPointer(3, GL_FLOAT, 0, Verts);
 			glDrawArrays(GL_LINE_LOOP, 0, 32);
-			glDisableClientState(GL_VERTEX_ARRAY);
 		}
 
 		lcVector3 ViewDir = Camera->mTargetPosition - Camera->mPosition;
@@ -2785,10 +2681,8 @@ void Project::RenderOverlays(View* view)
 				}
 			}
 
-			glEnableClientState(GL_VERTEX_ARRAY);
 			glVertexPointer(3, GL_FLOAT, 0, Verts);
 			glDrawArrays(GL_LINES, 0, NumVerts);
-			glDisableClientState(GL_VERTEX_ARRAY);
 		}
 
 		glPopMatrix();
@@ -2851,10 +2745,8 @@ void Project::RenderOverlays(View* view)
 					Verts[4] = lcVector3(0.0f, StartY, EndZ);
 					Verts[5] = lcVector3(0.0f, StartY - OverlayScale * OverlayRotateArrowCapSize, EndZ + TipZ);
 
-					glEnableClientState(GL_VERTEX_ARRAY);
 					glVertexPointer(3, GL_FLOAT, 0, Verts);
 					glDrawArrays(GL_LINES, 0, 6);
-					glDisableClientState(GL_VERTEX_ARRAY);
 				}
 
 				glPopMatrix();
@@ -2904,7 +2796,8 @@ void Project::RenderOverlays(View* view)
 
 		glEnable(GL_DEPTH_TEST);
 	}
-	else if (m_nCurAction == LC_TOOL_ROTATE_VIEW)
+
+	if (m_nCurAction == LC_TOOL_ROTATE_VIEW)
 	{
 		int x, y, w, h;
 
@@ -2936,7 +2829,6 @@ void Project::RenderOverlays(View* view)
 			verts[i][1] = sinf((float)i / 32.0f * (2.0f * LC_PI)) * r + cy;
 		}
 
-		glEnableClientState(GL_VERTEX_ARRAY);
 		glVertexPointer(2, GL_FLOAT, 0, verts);
 		glDrawArrays(GL_LINE_LOOP, 0, 32);
 
@@ -2969,7 +2861,6 @@ void Project::RenderOverlays(View* view)
 		glDrawArrays(GL_LINE_LOOP, 8, 4);
 		glDrawArrays(GL_LINE_LOOP, 12, 4);
 
-		glDisableClientState(GL_VERTEX_ARRAY);
 		glEnable(GL_DEPTH_TEST);
 	}
 }
@@ -6686,37 +6577,18 @@ void Project::ConvertFromUserUnits(lcVector3& Value) const
 
 bool Project::GetFocusPosition(lcVector3& Position) const
 {
-	Piece* pPiece;
+	lcObject* FocusObject = mActiveModel->GetFocusObject();
 
-	for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-		if (pPiece->IsFocused())
-		{
-			Position = pPiece->mPosition;
-			return true;
-		}
-
-	for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
+	if (FocusObject)
 	{
-		Camera* pCamera = mCameras[CameraIdx];
-
-		if (pCamera->IsEyeFocused())
-		{
-			Position = pCamera->mPosition;
-			return true;
-		}
-
-		if (pCamera->IsTargetFocused())
-		{
-			Position = pCamera->mTargetPosition;
-			return true;
-		}
+		Position = FocusObject->GetFocusPosition();
+		return true;
 	}
-
-	// TODO: light
-
-	Position = lcVector3(0.0f, 0.0f, 0.0f);
-
-	return false;
+	else
+	{
+		Position = lcVector3(0.0f, 0.0f, 0.0f);
+		return false;
+	}
 }
 
 // Returns the object that currently has focus.
@@ -6931,9 +6803,13 @@ bool Project::StopTracking(bool Accept)
 	if (m_nTracking == LC_TRACK_NONE)
 		return false;
 
-	int Action = GetAction();
+	View* ActiveView = gMainWindow->mActiveView;
 
-	switch (Action)
+	m_bTrackCancel = true;
+	m_nTracking = LC_TRACK_NONE;
+	ActiveView->ReleaseMouse();
+
+	switch (GetAction())
 	{
 	case LC_TOOL_CAMERA:
 		mActiveModel->EndCreateCameraTool(Accept);
@@ -7017,32 +6893,11 @@ bool Project::StopTracking(bool Accept)
 		break;
 	}
 
+	ActivateOverlay(ActiveView, m_nCurAction, LC_OVERLAY_NONE);
+	gMainWindow->UpdateAllViews();
 
-	View* ActiveView = gMainWindow->mActiveView;
 
-	if ((m_nTracking == LC_TRACK_START_LEFT) || (m_nTracking == LC_TRACK_START_RIGHT))
-	{
-		if (m_pTrackFile)
-		{
-			delete m_pTrackFile;
-			m_pTrackFile = NULL;
-		}
 
-		m_nTracking = LC_TRACK_NONE;
-		ActiveView->ReleaseMouse();
-		return false;
-	}
-
-	m_bTrackCancel = true;
-	m_nTracking = LC_TRACK_NONE;
-	ActiveView->ReleaseMouse();
-
-	// Reset the mouse overlay.
-	if (m_OverlayActive)
-	{
-		ActivateOverlay(ActiveView, m_nCurAction, LC_OVERLAY_NONE);
-		gMainWindow->UpdateAllViews();
-	}
 
 	if (Accept)
 	{
@@ -7085,37 +6940,6 @@ bool Project::StopTracking(bool Accept)
 				SetModifiedFlag(true);
 				CheckPoint("Inserting");
 			}
-		}
-		else
-		{
-		switch (Action)
-		{
-			case LC_TOOL_ROTATE:
-			{
-				SetModifiedFlag(true);
-				CheckPoint("Rotating");
-			} break;
-
-			case LC_TOOL_SPOTLIGHT:
-			{
-				SetModifiedFlag(true);
-				CheckPoint("Inserting");
-			} break;
-		}
-		}
-	}
-	else if (m_pTrackFile != NULL)
-	{
-		if ((Action == LC_TOOL_SELECT) || (Action == LC_TOOL_ZOOM_REGION))
-		{
-			gMainWindow->UpdateAllViews();
-		}
-		else
-		{
-			DeleteContents (true);
-			FileLoad (m_pTrackFile, true, false);
-			delete m_pTrackFile;
-			m_pTrackFile = NULL;
 		}
 	}
 
@@ -7971,6 +7795,7 @@ void Project::OnLeftButtonDown(View* view)
 			else
 				mActiveModel->SetFocus(ObjectSection);
 
+			ActivateOverlay(view, m_nCurAction, LC_OVERLAY_NONE);
 			StartTracking(LC_TRACK_START_LEFT);
 		}
 		break;

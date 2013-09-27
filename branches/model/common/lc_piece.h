@@ -120,6 +120,14 @@ public:
 	virtual void GetRenderMeshes(View* View, lcArray<lcRenderMesh>& OpaqueMeshes, lcArray<lcRenderMesh>& TranslucentMeshes, lcArray<lcObject*>& InterfaceObjects);
 	virtual void RenderInterface(View* View) const;
 
+	virtual lcVector3 GetFocusPosition() const
+	{
+		if (mState & LC_PIECE_POSITION_FOCUSED)
+			return mPosition;
+
+		return lcVector3(0.0f, 0.0f, 0.0f);
+	}
+
 	virtual void Move(const lcVector3& Distance, lcTime Time, bool AddKey);
 
 public:

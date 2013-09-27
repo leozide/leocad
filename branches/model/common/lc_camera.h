@@ -246,6 +246,23 @@ public:
 	virtual void GetRenderMeshes(View* View, lcArray<lcRenderMesh>& OpaqueMeshes, lcArray<lcRenderMesh>& TranslucentMeshes, lcArray<lcObject*>& InterfaceObjects);
 	virtual void RenderInterface(View* View) const;
 
+	virtual lcVector3 GetFocusPosition() const
+	{
+		if (mState & LC_CAMERA_POSITION_FOCUSED)
+			return mPosition;
+
+		if (mState & LC_CAMERA_TARGET_FOCUSED)
+			return mTargetPosition;
+
+		if (mState & LC_CAMERA_UPVECTOR_FOCUSED)
+		{
+			lcMatrix44 ViewWorld = lcMatrix44AffineInverse(mWorldView);
+			return lcMul31(lcVector3(0, 1, 0), ViewWorld);
+		}
+
+		return lcVector3(0.0f, 0.0f, 0.0f);
+	}
+
 	virtual void Move(const lcVector3& Distance, lcTime Time, bool AddKey);
 
 	void Zoom(float Distance, lcTime Time, bool AddKeys);

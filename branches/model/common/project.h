@@ -21,7 +21,7 @@
 //#define LC_DET_HIDDEN_LINE	0x00800	// Remove hidden lines
 //#define DET_STUDS_BOX	0x01000	// Draw studs as boxes
 //#define LC_DET_LINEAR		0x02000	// Linear filtering
-#define LC_DET_FAST			0x04000	// Fast rendering (boxes)
+//#define LC_DET_FAST	0x04000	// Fast rendering (boxes)
 //#define LC_DET_BACKGROUND	0x08000	// Background rendering
 //#define LC_DET_SCREENDOOR	0x10000	// No alpha blending
 
@@ -319,8 +319,6 @@ protected:
 	void SnapRotationVector(lcVector3& Delta, lcVector3& Leftover) const;
 
 	// Rendering functions.
-	void RenderScenePieces(View* view);
-	void RenderSceneBoxes(View* view);
 	void RenderSceneObjects(View* view);
 	void RenderViewports(View* view);
 	void RenderOverlays(View* view);
@@ -333,7 +331,6 @@ protected:
 	void ZoomExtents(int FirstView, int LastView);
 
 	bool m_bStopRender;
-	lcFile* m_pTrackFile;
 	bool m_bTrackCancel;
 	int m_nTracking;
 	int m_nDownX;

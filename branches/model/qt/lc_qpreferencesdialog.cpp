@@ -49,7 +49,6 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget *parent, void *data) :
 	ui->gridLineSpacing->setText(QString::number(options->GridLineSpacing));
 	ui->axisIcon->setChecked((options->Snap & LC_DRAW_AXIS) != 0);
 	ui->enableLighting->setChecked((options->Detail & LC_DET_LIGHTING) != 0);
-	ui->fastRendering->setChecked((options->Detail & LC_DET_FAST) != 0);
 
 	QPixmap pix(12, 12);
 
@@ -87,7 +86,7 @@ void lcQPreferencesDialog::accept()
 		return;
 	}
 
-	options->Detail &= ~(LC_DET_BRICKEDGES | LC_DET_LIGHTING | LC_DET_FAST);
+	options->Detail &= ~(LC_DET_BRICKEDGES | LC_DET_LIGHTING);
 	options->Snap &= ~(LC_DRAW_CM_UNITS | LC_DRAW_GLOBAL_SNAP | LC_DRAW_MOVEAXIS | LC_DRAW_GRID | LC_DRAW_AXIS);
 
 	strcpy(options->DefaultAuthor, ui->authorName->text().toLocal8Bit().data());
@@ -131,9 +130,6 @@ void lcQPreferencesDialog::accept()
 
 	if (ui->enableLighting->isChecked())
 		options->Detail |= LC_DET_LIGHTING;
-
-	if (ui->fastRendering->isChecked())
-		options->Detail |= LC_DET_FAST;
 
 	QDialog::accept();
 }

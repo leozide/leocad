@@ -110,8 +110,6 @@ void lcMesh::Render(int DefaultColorIdx, bool Selected, bool Focused)
 	char* ElementsOffset;
 	char* BufferOffset;
 
-	glEnableClientState(GL_VERTEX_ARRAY);
-
 	if (GL_HasVertexBufferObject())
 	{
 		glBindBuffer(GL_ARRAY_BUFFER_ARB, mVertexBuffer.mBuffer);
@@ -208,8 +206,6 @@ void lcMesh::Render(int DefaultColorIdx, bool Selected, bool Focused)
 		glTexCoordPointer(2, GL_FLOAT, 0, NULL);
 		glDisable(GL_TEXTURE_2D);
 	}
-
-	glDisableClientState(GL_VERTEX_ARRAY);
 }
 
 template<typename IndexType>

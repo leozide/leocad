@@ -77,13 +77,6 @@ public:
 	void ZoomExtents(float Fov, float Aspect, float* EyePos = NULL) const;
 	void RenderPiece(int nColor);
 
-	// Implementation
-	GLuint GetBoxDisplayList()
-	{
-		if (!m_nBoxList)
-			CreateBoxDisplayList();
-		return m_nBoxList;
-	};
 	void CreatePlaceholder(const char* Name);
 
 public:
@@ -98,11 +91,9 @@ public:
 
 protected:
 	int mRefCount;
-	GLuint m_nBoxList;
 
 	void Load();
 	void Unload();
-	void CreateBoxDisplayList();
 };
 
 #endif // _PIECEINF_H_

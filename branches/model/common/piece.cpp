@@ -574,32 +574,6 @@ void Piece::UpdatePosition(unsigned short nTime, bool bAnimation)
 	mModelWorld.SetTranslation(mPosition);
 }
 
-void Piece::RenderBox(bool bHilite, float fLineWidth)
-{
-	glPushMatrix();
-	glMultMatrixf(mModelWorld);
-
-	if (bHilite && ((m_nState & LC_PIECE_SELECTED) != 0))
-	{
-		if (m_nState & LC_PIECE_FOCUSED)
-			lcSetColorFocused();
-		else
-			lcSetColorSelected();
-		glLineWidth(2*fLineWidth);
-		glPushAttrib(GL_POLYGON_BIT);
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		glCallList(mPieceInfo->GetBoxDisplayList());
-		glPopAttrib();
-		glLineWidth(fLineWidth);
-	}
-	else
-	{
-		lcSetColor(mColorIndex);
-		glCallList(mPieceInfo->GetBoxDisplayList());
-	}
-	glPopMatrix();
-}
-
 void Piece::Render(bool bLighting, bool bEdges)
 {
 	glPushMatrix();

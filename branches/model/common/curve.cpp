@@ -385,8 +385,6 @@ void Curve::TesselateHose ()
   float x, y, z, t, t2, t3, cx[4], cy[4], cz[4];
   const float *p1, *p2, *r1, *r2, *u1, *u2;
 
-  glEnableClientState (GL_VERTEX_ARRAY);
-
   for (unsigned int i = 0; i < m_Points.GetSize () - 1; i++)
   {
     p1 = m_Points[i]->GetPosition ();
@@ -497,7 +495,6 @@ void Curve::TesselateHose ()
   float* verts = (float*)malloc ((steps1+1) * steps2 * 3 * sizeof (float));
   float a, b, c;
 
-  glEnableClientState (GL_VERTEX_ARRAY);
   glVertexPointer (3, GL_FLOAT, 0, verts);
 
   for (int i = 0; i < m_Points.GetSize () - 1; i++)

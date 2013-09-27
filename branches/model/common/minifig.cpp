@@ -1008,6 +1008,8 @@ void MinifigWizard::OnDraw()
 
 	Calculate();
 
+	glEnableClientState(GL_VERTEX_ARRAY);
+
 	for (int PieceIdx = 0; PieceIdx < LC_MFW_NUMITEMS; PieceIdx++)
 	{
 		if (!mMinifig->Parts[PieceIdx])
@@ -1018,6 +1020,8 @@ void MinifigWizard::OnDraw()
 		mMinifig->Parts[PieceIdx]->RenderPiece(mMinifig->Colors[PieceIdx]);
 		glPopMatrix();
 	}
+
+	glDisableClientState(GL_VERTEX_ARRAY);
 }
 
 void MinifigWizard::OnLeftButtonDown()

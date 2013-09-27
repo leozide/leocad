@@ -59,7 +59,10 @@ void PiecePreview::OnDraw()
 	float *bg = lcGetActiveProject()->GetBackgroundColor();
 	glClearColor(bg[0], bg[1], bg[2], bg[3]);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glEnableClientState(GL_VERTEX_ARRAY);
 	m_PieceInfo->RenderPiece(gMainWindow->mColorIndex);
+	glDisableClientState(GL_VERTEX_ARRAY);
 }
 
 void PiecePreview::SetCurrentPiece(PieceInfo *pInfo)

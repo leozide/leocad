@@ -18,7 +18,7 @@ void lcGLWidget::Redraw()
 {
 	QGLWidget* widget = (QGLWidget*)mWidget;
 
-	widget->update();
+	widget->updateGL();
 }
 
 void lcGLWidget::CaptureMouse()

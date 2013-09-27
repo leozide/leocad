@@ -1024,7 +1024,6 @@ void lcModel::RenderBackground(View* View) const
 
 		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 
-		glDisableClientState(GL_VERTEX_ARRAY);
 		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 
 		glDisable(GL_TEXTURE_2D);
@@ -1043,6 +1042,16 @@ void lcModel::GetRenderMeshes(View* View, lcArray<lcRenderMesh>& OpaqueMeshes, l
 
 void lcModel::RenderScene(View* View, bool RenderInterface) const
 {
+	glEnable(GL_POLYGON_OFFSET_FILL);
+	glPolygonOffset(0.5f, 0.1f);
+
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);
+	glDepthMask(GL_TRUE);
+
+	float AspectRatio = (float)View->mWidth / (float)View->mHeight;
+	View->mCamera->LoadProjection(AspectRatio);
+
 	/*
 	if (m_nDetail & LC_DET_LIGHTING)
 	{
@@ -1145,7 +1154,6 @@ void lcModel::RenderScene(View* View, bool RenderInterface) const
 	RenderDebugPrimitives();
 #endif
 
-	// Draw cameras & lights
 	if (m_nCurAction == LC_TOOL_INSERT || mDropPiece)
 	{
 		lcVector3 Pos;
@@ -1191,7 +1199,6 @@ void lcModel::RenderScene(View* View, bool RenderInterface) const
 		lcVector3 Verts[11];
 		Verts[0] = lcVector3(0.0f, 0.0f, 0.0f);
 
-		glEnableClientState(GL_VERTEX_ARRAY);
 		glVertexPointer(3, GL_FLOAT, 0, Verts);
 
 		for (int i = 0; i < 3; i++)
@@ -1217,8 +1224,6 @@ void lcModel::RenderScene(View* View, bool RenderInterface) const
 			glDrawArrays(GL_LINES, 0, 2);
 			glDrawArrays(GL_TRIANGLE_FAN, 1, 10);
 		}
-
-		glDisableClientState(GL_VERTEX_ARRAY);
 
 		// Draw the text.
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);

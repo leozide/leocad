@@ -948,8 +948,8 @@ void lcModel::RenderBackground(lcGLWidget* Widget) const
 {
 	if (mProperties.mBackgroundType == LC_BACKGROUND_SOLID)
 	{
-		const lcuint32 Color = mProperties.mBackgroundSolidColor;
-		glClearColor((float)LC_RGBA_RED(Color) / 255.0f, (float)LC_RGBA_GREEN(Color) / 255.0f, (float)LC_RGBA_BLUE(Color) / 255.0f, 0.0f);
+		lcVector4 Color = lcVector4FromColor(mProperties.mBackgroundSolidColor);
+		glClearColor(Color[0], Color[1], Color[2], 0.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		return;
 	}
@@ -978,10 +978,8 @@ void lcModel::RenderBackground(lcGLWidget* Widget) const
 
 		lcVector4 Colors[4];
 
-		lcuint32 Color = mProperties.mBackgroundGradientColor1;
-		lcVector4 TopColor((float)LC_RGBA_RED(Color) / 255.0f, (float)LC_RGBA_GREEN(Color) / 255.0f, (float)LC_RGBA_BLUE(Color) / 255.0f, 1.0f);
-		Color = mProperties.mBackgroundGradientColor2;
-		lcVector4 BottomColor((float)LC_RGBA_RED(Color) / 255.0f, (float)LC_RGBA_GREEN(Color) / 255.0f, (float)LC_RGBA_BLUE(Color) / 255.0f, 1.0f);
+		lcVector4 TopColor = lcVector4FromColor(mProperties.mBackgroundGradientColor1);
+		lcVector4 BottomColor = lcVector4FromColor(mProperties.mBackgroundGradientColor2);
 
 		Colors[0] = TopColor;
 		Colors[1] = TopColor;
@@ -1034,12 +1032,6 @@ void lcModel::RenderBackground(lcGLWidget* Widget) const
 	glDepthMask(GL_TRUE);
 }
 
-void lcModel::GetRenderMeshes(View* View, lcArray<lcRenderMesh>& OpaqueMeshes, lcArray<lcRenderMesh>& TranslucentMeshes, lcArray<lcObject*>& InterfaceObjects) const
-{
-	for (int ObjectIdx = 0; ObjectIdx < mObjects.GetSize(); ObjectIdx++)
-		mObjects[ObjectIdx]->GetRenderMeshes(View, OpaqueMeshes, TranslucentMeshes, InterfaceObjects);
-}
-
 void lcModel::RenderScene(View* View, bool RenderInterface) const
 {
 	glEnable(GL_POLYGON_OFFSET_FILL);
@@ -1054,8 +1046,7 @@ void lcModel::RenderScene(View* View, bool RenderInterface) const
 
 	lcPreferences* Preferences = lcGetPreferences();
 
-	/*
-	if (m_nDetail & LC_DET_LIGHTING)
+	if (Preferences->mLightingMode == LC_LIGHTING_FULL)
 	{
 		glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT);
 		glEnable(GL_COLOR_MATERIAL);
@@ -1065,13 +1056,15 @@ void lcModel::RenderScene(View* View, bool RenderInterface) const
 		glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, lcVector4(0.8f, 0.8f, 0.8f, 1.0f));
 		glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, lcVector4(0.8f, 0.8f, 0.8f, 1.0f));
 
-		glLightModelfv(GL_LIGHT_MODEL_AMBIENT, m_fAmbient);
+		glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lcVector4FromColor(mProperties.mAmbientColor));
 
+		/*
 		int index = 0;
 		Light *pLight;
 
 		for (pLight = m_pLights; pLight; pLight = pLight->m_pNext, index++)
 			pLight->Setup(index);
+		*/
 
 		glEnable(GL_LIGHTING);
 	}
@@ -1082,34 +1075,32 @@ void lcModel::RenderScene(View* View, bool RenderInterface) const
 		glShadeModel(GL_FLAT);
 	}
 
-	if (m_nScene & LC_SCENE_FOG)
+	if (mProperties.mFogEnabled)
 	{
 		glFogi(GL_FOG_MODE, GL_EXP);
-		glFogf(GL_FOG_DENSITY, m_fFogDensity);
-		glFogfv(GL_FOG_COLOR, m_fFogColor);
+		glFogf(GL_FOG_DENSITY, mProperties.mFogDensity);
+		glFogfv(GL_FOG_COLOR, lcVector4FromColor(mProperties.mFogColor));
 		glEnable(GL_FOG);
 	}
 
-	if (m_nScene & LC_SCENE_FLOOR)
-		m_pTerrain->Render(View->mCamera, AspectRatio);
+	glLineWidth(Preferences->mLineWidth);
 
-	glLineWidth(m_fLineWidth);
-*/
-	lcArray<lcRenderMesh> OpaqueMeshes;
+	lcArray<lcRenderMesh> OpaqueMeshes(mObjects.GetSize());
 	lcArray<lcRenderMesh> TranslucentMeshes;
 	lcArray<lcObject*> InterfaceObjects;
 
-	GetRenderMeshes(View, OpaqueMeshes, TranslucentMeshes, InterfaceObjects);
+	for (int ObjectIdx = 0; ObjectIdx < mObjects.GetSize(); ObjectIdx++)
+		mObjects[ObjectIdx]->GetRenderMeshes(View, OpaqueMeshes, TranslucentMeshes, InterfaceObjects);
 
 	OpaqueMeshes.Sort(lcOpaqueRenderMeshCompare);
 	TranslucentMeshes.Sort(lcTranslucentRenderMeshCompare);
 
 	lcRenderOpaqueMeshes(OpaqueMeshes);
 
-	if (!InterfaceObjects.GetSize())
-		RenderInterface = false;
+//	if (m_nScene & LC_SCENE_FLOOR)
+//		m_pTerrain->Render(View->mCamera, AspectRatio);
 
-	if (RenderInterface)
+	if (RenderInterface && (InterfaceObjects.GetSize() || Preferences->mDrawGridLines || Preferences->mDrawGridStuds))
 	{
 		if (Preferences->mLightingMode != LC_LIGHTING_FLAT)
 		{
@@ -1118,41 +1109,37 @@ void lcModel::RenderScene(View* View, bool RenderInterface) const
 			glShadeModel(GL_FLAT);
 		}
 
-//		if (m_nScene & LC_SCENE_FOG)
-//			glDisable(GL_FOG);
+		if (mProperties.mFogEnabled)
+			glDisable(GL_FOG);
 
 		for (int ObjectIdx = 0; ObjectIdx < InterfaceObjects.GetSize(); ObjectIdx++)
 			InterfaceObjects[ObjectIdx]->RenderInterface(View);
 
 		if (Preferences->mDrawGridLines || Preferences->mDrawGridStuds)
-		{
-// render grid
-		}
-/*
-		if (m_nDetail & LC_DET_LIGHTING)
+			RenderGrid();
+
+		if (Preferences->mLightingMode != LC_LIGHTING_FLAT)
 		{
 			glEnable(GL_LIGHTING);
 			glEnable(GL_COLOR_MATERIAL);
 			glShadeModel(GL_SMOOTH);
 		}
 
-		if (m_nScene & LC_SCENE_FOG)
+		if (mProperties.mFogEnabled)
 			glEnable(GL_FOG);
-			*/
 	}
 
 	lcRenderTranslucentMeshes(TranslucentMeshes);
-/*
-	if (m_nDetail & LC_DET_LIGHTING)
+
+	if (Preferences->mLightingMode != LC_LIGHTING_FLAT)
 	{
 		glDisable(GL_LIGHTING);
 		glDisable(GL_COLOR_MATERIAL);
 		glShadeModel(GL_FLAT);
 	}
 
-	if (m_nScene & LC_SCENE_FOG)
+	if (mProperties.mFogEnabled)
 		glDisable(GL_FOG);
-*/
 
 /*
 #ifdef LC_DEBUG
@@ -1174,77 +1161,157 @@ void lcModel::RenderScene(View* View, bool RenderInterface) const
 		glLineWidth(m_fLineWidth);
 		glPopMatrix();
 	}
+*/
+}
 
-	// Draw axis icon
-	if (m_nSnap & LC_DRAW_AXIS)
+void lcModel::RenderGrid() const
+{
+	lcPreferences* Preferences = lcGetPreferences();
+
+	const int Spacing = lcMax(Preferences->mGridLineSpacing, 1);
+	int MinX = 0, MaxX = 0, MinY = 0, MaxY = 0;
+/*
+	if (m_pPieces || (m_nCurAction == LC_TOOL_INSERT || mDropPiece))
 	{
-//		glClear(GL_DEPTH_BUFFER_BIT);
+		float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
 
-		lcMatrix44 Mats[3];
-		Mats[0] = view->mCamera->mWorldView;
-		Mats[0].SetTranslation(lcVector3(0, 0, 0));
-		Mats[1] = lcMul(lcMatrix44(lcVector4(0, 1, 0, 0), lcVector4(1, 0, 0, 0), lcVector4(0, 0, 1, 0), lcVector4(0, 0, 0, 1)), Mats[0]);
-		Mats[2] = lcMul(lcMatrix44(lcVector4(0, 0, 1, 0), lcVector4(0, 1, 0, 0), lcVector4(1, 0, 0, 0), lcVector4(0, 0, 0, 1)), Mats[0]);
+		for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+			if (pPiece->IsVisible(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation))
+				pPiece->CompareBoundingBox(bs);
 
-		lcVector3 pts[3] =
+		if (m_nCurAction == LC_TOOL_INSERT || mDropPiece)
 		{
-			lcMul30(lcVector3(20, 0, 0), Mats[0]),
-			lcMul30(lcVector3(0, 20, 0), Mats[0]),
-			lcMul30(lcVector3(0, 0, 20), Mats[0]),
-		};
+			lcVector3 Position;
+			lcVector4 Rotation;
+			GetPieceInsertPosition(view, m_nDownX, m_nDownY, Position, Rotation);
 
-		glMatrixMode(GL_PROJECTION);
-		glLoadIdentity();
-		glOrtho(0, view->mWidth, 0, view->mHeight, -50, 50);
-		glMatrixMode(GL_MODELVIEW);
-		glLoadIdentity();
-		glTranslatef(25.375f, 25.375f, 0.0f);
+			PieceInfo* PreviewPiece = mDropPiece ? mDropPiece : m_pCurPiece;
 
-		// Draw the arrows.
-		lcVector3 Verts[11];
-		Verts[0] = lcVector3(0.0f, 0.0f, 0.0f);
-
-		glVertexPointer(3, GL_FLOAT, 0, Verts);
-
-		for (int i = 0; i < 3; i++)
-		{
-			switch (i)
+			lcVector3 Points[8] =
 			{
-			case 0:
-				glColor4f(0.8f, 0.0f, 0.0f, 1.0f);
-				break;
-			case 1:
-				glColor4f(0.0f, 0.8f, 0.0f, 1.0f);
-				break;
-			case 2:
-				glColor4f(0.0f, 0.0f, 0.8f, 1.0f);
-				break;
+				lcVector3(PreviewPiece->m_fDimensions[0],PreviewPiece->m_fDimensions[1], PreviewPiece->m_fDimensions[5]),
+				lcVector3(PreviewPiece->m_fDimensions[3],PreviewPiece->m_fDimensions[1], PreviewPiece->m_fDimensions[5]),
+				lcVector3(PreviewPiece->m_fDimensions[0],PreviewPiece->m_fDimensions[1], PreviewPiece->m_fDimensions[2]),
+				lcVector3(PreviewPiece->m_fDimensions[3],PreviewPiece->m_fDimensions[4], PreviewPiece->m_fDimensions[5]),
+				lcVector3(PreviewPiece->m_fDimensions[3],PreviewPiece->m_fDimensions[4], PreviewPiece->m_fDimensions[2]),
+				lcVector3(PreviewPiece->m_fDimensions[0],PreviewPiece->m_fDimensions[4], PreviewPiece->m_fDimensions[2]),
+				lcVector3(PreviewPiece->m_fDimensions[0],PreviewPiece->m_fDimensions[4], PreviewPiece->m_fDimensions[5]),
+				lcVector3(PreviewPiece->m_fDimensions[3],PreviewPiece->m_fDimensions[1], PreviewPiece->m_fDimensions[2])
+			};
+
+			lcMatrix44 ModelWorld = lcMatrix44FromAxisAngle(lcVector3(Rotation[0], Rotation[1], Rotation[2]), Rotation[3] * LC_DTOR);
+			ModelWorld.SetTranslation(Position);
+
+			for (int i = 0; i < 8; i++)
+			{
+				lcVector3 Point = lcMul31(Points[i], ModelWorld);
+
+				if (Point[0] < bs[0]) bs[0] = Point[0];
+				if (Point[1] < bs[1]) bs[1] = Point[1];
+				if (Point[2] < bs[2]) bs[2] = Point[2];
+				if (Point[0] > bs[3]) bs[3] = Point[0];
+				if (Point[1] > bs[4]) bs[4] = Point[1];
+				if (Point[2] > bs[5]) bs[5] = Point[2];
 			}
-
-			Verts[1] = pts[i];
-
-			for (int j = 0; j < 9; j++)
-				Verts[j+2] = lcMul30(lcVector3(12.0f, cosf(LC_2PI * j / 8) * 3.0f, sinf(LC_2PI * j / 8) * 3.0f), Mats[i]);
-
-			glDrawArrays(GL_LINES, 0, 2);
-			glDrawArrays(GL_TRIANGLE_FAN, 1, 10);
 		}
 
-		// Draw the text.
-		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-		m_pScreenFont->MakeCurrent();
-		glEnable(GL_TEXTURE_2D);
-		glEnable(GL_ALPHA_TEST);
-
-		glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
-		m_pScreenFont->PrintText(pts[0][0], pts[0][1], 40.0f, "X");
-		m_pScreenFont->PrintText(pts[1][0], pts[1][1], 40.0f, "Y");
-		m_pScreenFont->PrintText(pts[2][0], pts[2][1], 40.0f, "Z");
-
-		glDisable(GL_TEXTURE_2D);
-		glDisable(GL_ALPHA_TEST);
+		MinX = (int)(floorf(bs[0] / (0.8f * Spacing))) - 1;
+		MinY = (int)(floorf(bs[1] / (0.8f * Spacing))) - 1;
+		MaxX = (int)(ceilf(bs[3] / (0.8f * Spacing))) + 1;
+		MaxY = (int)(ceilf(bs[4] / (0.8f * Spacing))) + 1;
 	}
 */
+	MinX = lcMin(MinX, -2);
+	MinY = lcMin(MinY, -2);
+	MaxX = lcMax(MaxX, 2);
+	MaxY = lcMax(MaxY, 2);
+/*
+	if (mGridStuds)
+	{
+		float Left = MinX * 0.8f * Spacing;
+		float Right = MaxX * 0.8f * Spacing;
+		float Top = MinY * 0.8f * Spacing;
+		float Bottom = MaxY * 0.8f * Spacing;
+		float Z = 0;
+		float U = (MaxX - MinX) * Spacing;
+		float V = (MaxY - MinY) * Spacing;
+
+		float Verts[4 * 5];
+		float* CurVert = Verts;
+
+		*CurVert++ = Left;
+		*CurVert++ = Top;
+		*CurVert++ = Z;
+		*CurVert++ = 0.0f;
+		*CurVert++ = V;
+
+		*CurVert++ = Left;
+		*CurVert++ = Bottom;
+		*CurVert++ = Z;
+		*CurVert++ = 0.0f;
+		*CurVert++ = 0.0f;
+
+		*CurVert++ = Right;
+		*CurVert++ = Bottom;
+		*CurVert++ = Z;
+		*CurVert++ = U;
+		*CurVert++ = 0.0f;
+
+		*CurVert++ = Right;
+		*CurVert++ = Top;
+		*CurVert++ = Z;
+		*CurVert++ = U;
+		*CurVert++ = V;
+
+		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+		glBindTexture(GL_TEXTURE_2D, mGridTexture->mTexture);
+		glEnable(GL_TEXTURE_2D);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glEnable(GL_BLEND);
+
+		glColor4fv(lcVector4FromColor(mGridStudColor));
+
+		glVertexPointer(3, GL_FLOAT, 5 * sizeof(float), Verts);
+		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+		glTexCoordPointer(2, GL_FLOAT, 5 * sizeof(float), Verts + 3);
+
+		glDrawArrays(GL_QUADS, 0, 4);
+
+		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+
+		glDisable(GL_TEXTURE_2D);
+		glDisable(GL_BLEND);
+	}
+*/
+	if (Preferences->mDrawGridLines)
+	{
+		glColor4fv(lcVector4FromColor(Preferences->mGridLineColor));
+
+		int NumVerts = 2 * (MaxX - MinX + MaxY - MinY + 2);
+		float* VertexBuffer = new float[NumVerts * 2];
+		float* Vert = VertexBuffer;
+		float LineSpacing = Spacing * 0.8f;
+
+		for (int Step = MinX; Step < MaxX + 1; Step++)
+		{
+			*Vert++ = Step * LineSpacing;
+			*Vert++ = MinY * LineSpacing;
+			*Vert++ = Step * LineSpacing;
+			*Vert++ = MaxY * LineSpacing;
+		}
+
+		for (int Step = MinY; Step < MaxY + 1; Step++)
+		{
+			*Vert++ = MinX * LineSpacing;
+			*Vert++ = Step * LineSpacing;
+			*Vert++ = MaxX * LineSpacing;
+			*Vert++ = Step * LineSpacing;
+		}
+
+		glVertexPointer(2, GL_FLOAT, 0, VertexBuffer);
+		glDrawArrays(GL_LINES, 0, NumVerts);
+		delete[] VertexBuffer;
+	}
 }
 
 void lcModel::FindClosestObject(lcObjectHitTest& HitTest) const

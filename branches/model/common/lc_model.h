@@ -127,7 +127,7 @@ public:
 
 	void RenderBackground(lcGLWidget* Widget) const;
 	void RenderScene(View* View, bool RenderInterface) const;
-	void GetRenderMeshes(View* View, lcArray<lcRenderMesh>& OpaqueMeshes, lcArray<lcRenderMesh>& TranslucentMeshes, lcArray<lcObject*>& InterfaceObjects) const;
+	void RenderGrid() const;
 
 	void InvertSelection();
 	void InvertSelection(const lcObjectSection& ObjectSection);

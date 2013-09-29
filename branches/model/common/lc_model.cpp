@@ -944,7 +944,7 @@ void lcModel::ApplyCheckpoint(lcMemFile& File)
 	}
 }
 
-void lcModel::RenderBackground(View* View) const
+void lcModel::RenderBackground(lcGLWidget* Widget) const
 {
 	if (mProperties.mBackgroundType == LC_BACKGROUND_SOLID)
 	{
@@ -959,8 +959,8 @@ void lcModel::RenderBackground(View* View) const
 	glDepthMask(GL_FALSE);
 	glDisable(GL_DEPTH_TEST);
 
-	float ViewWidth = (float)View->mWidth;
-	float ViewHeight = (float)View->mHeight;
+	float ViewWidth = (float)Widget->mWidth;
+	float ViewHeight = (float)Widget->mHeight;
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -1052,6 +1052,8 @@ void lcModel::RenderScene(View* View, bool RenderInterface) const
 	float AspectRatio = (float)View->mWidth / (float)View->mHeight;
 	View->mCamera->LoadProjection(AspectRatio);
 
+	lcPreferences* Preferences = lcGetPreferences();
+
 	/*
 	if (m_nDetail & LC_DET_LIGHTING)
 	{
@@ -1108,21 +1110,24 @@ void lcModel::RenderScene(View* View, bool RenderInterface) const
 		RenderInterface = false;
 
 	if (RenderInterface)
-	{/*
-		if (m_nDetail & LC_DET_LIGHTING)
+	{
+		if (Preferences->mLightingMode != LC_LIGHTING_FLAT)
 		{
 			glDisable(GL_LIGHTING);
 			glDisable(GL_COLOR_MATERIAL);
 			glShadeModel(GL_FLAT);
 		}
 
-		if (m_nScene & LC_SCENE_FOG)
-			glDisable(GL_FOG);
-*/
+//		if (m_nScene & LC_SCENE_FOG)
+//			glDisable(GL_FOG);
+
 		for (int ObjectIdx = 0; ObjectIdx < InterfaceObjects.GetSize(); ObjectIdx++)
 			InterfaceObjects[ObjectIdx]->RenderInterface(View);
 
+		if (Preferences->mDrawGridLines || Preferences->mDrawGridStuds)
+		{
 // render grid
+		}
 /*
 		if (m_nDetail & LC_DET_LIGHTING)
 		{

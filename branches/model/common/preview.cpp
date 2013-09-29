@@ -56,9 +56,7 @@ void PiecePreview::OnDraw()
 		glLoadMatrixf(lcMatrix44LookAt(Eye * m_Distance, m_PieceInfo->GetCenter(), lcVector3(0, 0, 1)));
 	}
 
-	float *bg = lcGetActiveProject()->GetBackgroundColor();
-	glClearColor(bg[0], bg[1], bg[2], bg[3]);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	lcGetActiveProject()->mActiveModel->RenderBackground(this);
 
 	glEnableClientState(GL_VERTEX_ARRAY);
 	m_PieceInfo->RenderPiece(gMainWindow->mColorIndex);

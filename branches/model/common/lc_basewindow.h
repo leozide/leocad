@@ -3,6 +3,7 @@
 
 #include "lc_math.h"
 #include "lc_array.h"
+#include "lc_application.h"
 #include "lc_model.h"
 #include "lc_category.h"
 #include "lc_shortcuts.h"
@@ -124,23 +125,17 @@ struct lcSelectDialogOptions
 
 struct lcPreferencesDialogOptions
 {
+	lcPreferences Preferences;
+
 	char DefaultAuthor[101];
 	char ProjectsPath[LC_MAXPATH];
 	char LibraryPath[LC_MAXPATH];
 	char POVRayPath[LC_MAXPATH];
 	char LGEOPath[LC_MAXPATH];
-	int MouseSensitivity;
 	int CheckForUpdates;
 
 	lcuint32 Snap;
-	lcuint32 Detail;
-	float LineWidth;
 	int AASamples;
-	bool GridStuds;
-	lcuint32 GridStudColor;
-	bool GridLines;
-	int GridLineSpacing;
-	lcuint32 GridLineColor;
 
 	lcArray<lcLibraryCategory> Categories;
 	bool CategoriesModified;

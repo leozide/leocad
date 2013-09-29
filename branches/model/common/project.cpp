@@ -55,7 +55,6 @@ Project::Project()
 	m_pBackground = new lcTexture();
 	mGridTexture = new lcTexture();
 	m_nAutosave = lcGetProfileInt(LC_PROFILE_AUTOSAVE_INTERVAL);
-	m_nMouse = lcGetProfileInt(LC_PROFILE_MOUSE_SENSITIVITY);
 	m_nDownX = 0;
 	m_nDownY = 0;
 	memset(&mSearchOptions, 0, sizeof(mSearchOptions));
@@ -200,7 +199,6 @@ void Project::DeleteContents(bool bUndo)
 void Project::LoadDefaults(bool cameras)
 {
 	int i;
-	unsigned long rgb;
 
 	// Default values
 	gMainWindow->SetColorIndex(lcGetColorIndex(4));
@@ -210,48 +208,16 @@ void Project::LoadDefaults(bool cameras)
 	gMainWindow->UpdateAnimation(m_bAnimation, m_bAddKeys);
 	m_bUndoOriginal = true;
 	gMainWindow->UpdateUndoRedo(NULL, NULL);
-	m_nDetail = lcGetProfileInt(LC_PROFILE_DETAIL);
 	m_nAngleSnap = (unsigned short)lcGetProfileInt(LC_PROFILE_ANGLE_SNAP);
 	m_nSnap = lcGetProfileInt(LC_PROFILE_SNAP);
 	gMainWindow->UpdateLockSnap(m_nSnap);
 	m_nMoveSnap = 0x0304;
 	gMainWindow->UpdateSnap();
-	m_fLineWidth = (float)lcGetProfileFloat(LC_PROFILE_LINE_WIDTH);
-	m_fFogDensity = (float)lcGetProfileFloat(LC_PROFILE_DEFAULT_FOG_DENSITY);
-	rgb = lcGetProfileInt(LC_PROFILE_DEFAULT_FOG_COLOR);
-	m_fFogColor[0] = (float)((unsigned char) (rgb))/255;
-	m_fFogColor[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
-	m_fFogColor[2] = (float)((unsigned char) ((rgb) >> 16))/255;
-	m_fFogColor[3] = 1.0f;
-	mGridStuds = lcGetProfileInt(LC_PROFILE_GRID_STUDS);
-	mGridStudColor = lcGetProfileInt(LC_PROFILE_GRID_STUD_COLOR);
-	mGridLines = lcGetProfileInt(LC_PROFILE_GRID_LINES);
-	mGridLineSpacing = lcGetProfileInt(LC_PROFILE_GRID_LINE_SPACING);
-	mGridLineColor = lcGetProfileInt(LC_PROFILE_GRID_LINE_COLOR);
-	rgb = lcGetProfileInt(LC_PROFILE_DEFAULT_AMBIENT_COLOR);
-	m_fAmbient[0] = (float)((unsigned char) (rgb))/255;
-	m_fAmbient[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
-	m_fAmbient[2] = (float)((unsigned char) ((rgb) >> 16))/255;
-	m_fAmbient[3] = 1.0f;
-	rgb = lcGetProfileInt(LC_PROFILE_DEFAULT_BACKGROUND_COLOR);
-	m_fBackground[0] = (float)((unsigned char) (rgb))/255;
-	m_fBackground[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
-	m_fBackground[2] = (float)((unsigned char) ((rgb) >> 16))/255;
-	m_fBackground[3] = 1.0f;
-	rgb = lcGetProfileInt(LC_PROFILE_DEFAULT_GRADIENT_COLOR1);
-	m_fGradient1[0] = (float)((unsigned char) (rgb))/255;
-	m_fGradient1[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
-	m_fGradient1[2] = (float)((unsigned char) ((rgb) >> 16))/255;
-	rgb = lcGetProfileInt(LC_PROFILE_DEFAULT_GRADIENT_COLOR2);
-	m_fGradient2[0] = (float)((unsigned char) (rgb))/255;
-	m_fGradient2[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
-	m_fGradient2[2] = (float)((unsigned char) ((rgb) >> 16))/255;
 	m_nFPS = 24;
 	m_nCurStep = 1;
 	m_nCurFrame = 1;
 	m_nTotalFrames = 100;
 	gMainWindow->UpdateTime(false, 1, 255);
-	m_nScene = lcGetProfileInt(LC_PROFILE_DEFAULT_SCENE);
 	m_nSaveTimer = 0;
 	strcpy(m_strHeader, "");
 	strcpy(m_strFooter, "Page &P");
@@ -310,12 +276,12 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 	if (fv > 0.4f)
 		file->ReadFloats(&fv, 1);
 
-	file->ReadU32(&rgb, 1);
+	file->ReadU32(&rgb, 1);//m_fBackground
 	if (!bMerge)
 	{
-		m_fBackground[0] = (float)((unsigned char) (rgb))/255;
-		m_fBackground[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
-		m_fBackground[2] = (float)((unsigned char) ((rgb) >> 16))/255;
+//		m_fBackground[0] = (float)((unsigned char) (rgb))/255;
+//		m_fBackground[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
+//		m_fBackground[2] = (float)((unsigned char) ((rgb) >> 16))/255;
 	}
 
 	if (fv < 0.6f) // old view
@@ -351,9 +317,10 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 	else
 	{
 		lcuint32 u;
+		float f;
 		file->ReadS32(&i, 1); m_nAngleSnap = i;
 		file->ReadU32(&u, 1); //m_nSnap
-		file->ReadFloats(&m_fLineWidth, 1);
+		file->ReadFloats(&f, 1); //m_fLineWidth
 		file->ReadU32(&u, 1); //m_nDetail
 		file->ReadS32(&i, 1); //m_nCurGroup = i;
 		file->ReadS32(&i, 1); //m_nCurColor = i;
@@ -362,7 +329,7 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 	}
 
 	if (fv > 0.8f)
-		file->ReadU32(&m_nScene, 1);
+		file->ReadU32();//m_nScene
 
 	file->ReadS32(&count, 1);
 //	SystemStartProgressBar(0, count, 1, "Loading project...");
@@ -601,17 +568,18 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 			}
 
 			file->ReadU32(&rgb, 1);
-			m_fFogColor[0] = (float)((unsigned char) (rgb))/255;
-			m_fFogColor[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
-			m_fFogColor[2] = (float)((unsigned char) ((rgb) >> 16))/255;
+//			m_fFogColor[0] = (float)((unsigned char) (rgb))/255;
+//			m_fFogColor[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
+//			m_fFogColor[2] = (float)((unsigned char) ((rgb) >> 16))/255;
 
+			float f;
 			if (fv < 1.0f)
 			{
 				file->ReadU32(&rgb, 1);
-				m_fFogDensity = (float)rgb/100;
+//				m_fFogDensity = (float)rgb/100;
 			}
 			else
-				file->ReadFloats(&m_fFogDensity, 1);
+				file->ReadFloats(&f, 1);//m_fFogDensity
 
 			if (fv < 1.3f)
 			{
@@ -640,9 +608,9 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 		if (fv > 0.9f)
 		{
 			file->ReadU32(&rgb, 1);
-			m_fAmbient[0] = (float)((unsigned char) (rgb))/255;
-			m_fAmbient[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
-			m_fAmbient[2] = (float)((unsigned char) ((rgb) >> 16))/255;
+//			m_fAmbient[0] = (float)((unsigned char) (rgb))/255;
+//			m_fAmbient[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
+//			m_fAmbient[2] = (float)((unsigned char) ((rgb) >> 16))/255;
 
 			if (fv < 1.3f)
 			{
@@ -671,13 +639,13 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 		if (fv > 1.0f)
 		{
 			file->ReadU32(&rgb, 1);
-			m_fGradient1[0] = (float)((unsigned char) (rgb))/255;
-			m_fGradient1[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
-			m_fGradient1[2] = (float)((unsigned char) ((rgb) >> 16))/255;
+//			m_fGradient1[0] = (float)((unsigned char) (rgb))/255;
+//			m_fGradient1[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
+//			m_fGradient1[2] = (float)((unsigned char) ((rgb) >> 16))/255;
 			file->ReadU32(&rgb, 1);
-			m_fGradient2[0] = (float)((unsigned char) (rgb))/255;
-			m_fGradient2[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
-			m_fGradient2[2] = (float)((unsigned char) ((rgb) >> 16))/255;
+//			m_fGradient2[0] = (float)((unsigned char) (rgb))/255;
+//			m_fGradient2[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
+//			m_fGradient2[2] = (float)((unsigned char) ((rgb) >> 16))/255;
 
 			if (fv > 1.1f)
 				m_pTerrain->FileLoad (file);
@@ -736,7 +704,6 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 void Project::FileSave(lcFile* file, bool bUndo)
 {
 	float ver_flt = 1.4f; // LeoCAD 0.75 - (and this should have been an integer).
-	lcuint32 rgb;
 	lcuint8 ch;
 	lcuint16 sh;
 	int i, j;
@@ -747,20 +714,19 @@ void Project::FileSave(lcFile* file, bool bUndo)
 	file->WriteBuffer(LC_STR_VERSION, 32);
 	file->WriteFloats(&ver_flt, 1);
 
-	rgb = LC_FLOATRGB(m_fBackground);
-	file->WriteU32(&rgb, 1);
+	file->WriteU32(0xffffffff);//m_fBackground
 
 	i = m_nAngleSnap; file->WriteS32(&i, 1);
 	file->WriteU32(&m_nSnap, 1);
-	file->WriteFloats(&m_fLineWidth, 1);
-	file->WriteU32(&m_nDetail, 1);
+	file->WriteFloat(1.0f);//m_fLineWidth
+	file->WriteU32(0); // m_nDetail
 	i = 0;//i = m_nCurGroup;
 	file->WriteS32(&i, 1);
 	i = 0;//i = m_nCurColor;
 	file->WriteS32(&i, 1);
 	i = m_nCurAction; file->WriteS32(&i, 1);
 	i = m_nCurStep; file->WriteS32(&i, 1);
-	file->WriteU32(&m_nScene, 1);
+	file->WriteU32(0);//m_nScene
 
 	Piece* pPiece;
 	for (i = 0, pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
@@ -810,9 +776,8 @@ void Project::FileSave(lcFile* file, bool bUndo)
 		file->WriteS32(&i, 1);
 	}
 
-	rgb = LC_FLOATRGB(m_fFogColor);
-	file->WriteU32(&rgb, 1);
-	file->WriteFloats(&m_fFogDensity, 1);
+	file->WriteU32(0xffffffff);//m_fFogColor
+	file->WriteFloat(0.1f);//m_fFogDensity
 	sh = strlen(m_strBackground);
 	file->WriteU16(&sh, 1);
 	file->WriteBuffer(m_strBackground, sh);
@@ -823,8 +788,7 @@ void Project::FileSave(lcFile* file, bool bUndo)
 	file->WriteBuffer(&ch, 1);
 	file->WriteBuffer(m_strFooter, ch);
 	// 0.60 (1.0)
-	rgb = LC_FLOATRGB(m_fAmbient);
-	file->WriteU32(&rgb, 1);
+	file->WriteU32(0xffffffff);//m_fAmbient
 	ch = m_bAnimation;
 	file->WriteBuffer(&ch, 1);
 	ch = m_bAddKeys;
@@ -835,10 +799,8 @@ void Project::FileSave(lcFile* file, bool bUndo)
 	file->WriteU16(0); // m_nGridSize
 	file->WriteU16(&m_nMoveSnap, 1);
 	// 0.62 (1.1)
-	rgb = LC_FLOATRGB(m_fGradient1);
-	file->WriteU32(&rgb, 1);
-	rgb = LC_FLOATRGB(m_fGradient2);
-	file->WriteU32(&rgb, 1);
+	file->WriteU32(0xffffffff); //m_fGradient1
+	file->WriteU32(0xffffffff); //m_fGradient2
 	// 0.64 (1.2)
 	m_pTerrain->FileSave(file);
 
@@ -1485,7 +1447,7 @@ void Project::RenderSceneObjects(View* view)
 #ifdef LC_DEBUG
 	RenderDebugPrimitives();
 #endif
-
+/*
 	// Draw cameras & lights
 	if (m_nCurAction == LC_TOOL_INSERT || mDropPiece)
 	{
@@ -1512,7 +1474,7 @@ void Project::RenderSceneObjects(View* view)
 		for (pLight = m_pLights; pLight; pLight = pLight->m_pNext, index++)
 			glDisable ((GLenum)(GL_LIGHT0+index));
 	}
-/*
+
 	for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
 	{
 		Camera* pCamera = mCameras[CameraIdx];
@@ -1522,7 +1484,7 @@ void Project::RenderSceneObjects(View* view)
 
 		pCamera->Render(m_fLineWidth);
 	}
-*/
+
 	for (Light* pLight = m_pLights; pLight; pLight = pLight->m_pNext)
 		if (pLight->IsVisible ())
 			pLight->Render(m_fLineWidth);
@@ -1756,6 +1718,7 @@ void Project::RenderSceneObjects(View* view)
 		glMatrixMode(GL_MODELVIEW);
 		glPopMatrix();
 	}
+	*/
 }
 
 void Project::RenderOverlays(View* view)
@@ -2498,7 +2461,7 @@ void Project::RenderInitialize()
 {
 	if (!m_pScreenFont->IsLoaded())
 		m_pScreenFont->Initialize();
-
+/*
 	if (m_nScene & LC_SCENE_FLOOR)
 		m_pTerrain->LoadTexture();
 
@@ -2508,7 +2471,7 @@ void Project::RenderInitialize()
 			m_nScene &= ~LC_SCENE_BG;
 //			AfxMessageBox ("Could not load background");
 		}
-
+*/
 	if (!mGridTexture->mTexture)
 	{
 		const int NumLevels = 9;
@@ -3008,6 +2971,7 @@ void Project::CreateHTMLPieceList(FILE* f, int nStep, bool bImages, const char* 
 
 void Project::Export3DStudio()
 {
+	/*
 	if (!m_pPieces)
 	{
 		gMainWindow->DoMessageBox("Nothing to export.", LC_MB_OK | LC_MB_ICONINFORMATION);
@@ -3509,6 +3473,7 @@ void Project::Export3DStudio()
 	File.Seek(M3DStart + 2, SEEK_SET);
 	File.WriteU32(M3DEnd - M3DStart);
 	File.Seek(M3DEnd, SEEK_SET);
+	*/
 }
 
 void Project::ExportBrickLink()
@@ -3611,6 +3576,7 @@ void Project::ExportCSV()
 
 void Project::ExportPOVRay(lcFile& POVFile)
 {
+	/*
 	char Line[1024];
 
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
@@ -3859,6 +3825,7 @@ void Project::ExportPOVRay(lcFile& POVFile)
 	delete[] PieceFlags;
 	setlocale(LC_NUMERIC, OldLocale);
 	POVFile.Close();
+	*/
 }
 
 // Special notifications.
@@ -5306,127 +5273,17 @@ void Project::HandleCommand(LC_COMMANDS id)
 			}
 		} break;
 
-		case LC_VIEW_PREFERENCES:
-		{
-			lcPreferencesDialogOptions Options;
-			int CurrentAASamples = lcGetProfileInt(LC_PROFILE_ANTIALIASING_SAMPLES);
+	case LC_VIEW_PREFERENCES:
+		g_App->ShowPreferencesDialog();
+		break;
 
-			strcpy(Options.DefaultAuthor, lcGetProfileString(LC_PROFILE_DEFAULT_AUTHOR_NAME));
-			strcpy(Options.ProjectsPath, lcGetProfileString(LC_PROFILE_PROJECTS_PATH));
-			strcpy(Options.LibraryPath, lcGetProfileString(LC_PROFILE_PARTS_LIBRARY));
-			strcpy(Options.POVRayPath, lcGetProfileString(LC_PROFILE_POVRAY_PATH));
-			strcpy(Options.LGEOPath, lcGetProfileString(LC_PROFILE_POVRAY_LGEO_PATH));
-			Options.MouseSensitivity = m_nMouse;
-			Options.CheckForUpdates = lcGetProfileInt(LC_PROFILE_CHECK_UPDATES);
+	case LC_VIEW_ZOOM_IN:
+		ZoomActiveView(-1);
+		break;
 
-			Options.Detail = m_nDetail;
-			Options.Snap = m_nSnap;
-			Options.LineWidth = m_fLineWidth;
-			Options.AASamples = CurrentAASamples;
-			Options.GridStuds = mGridStuds;
-			Options.GridStudColor = mGridStudColor;
-			Options.GridLines = mGridLines;
-			Options.GridLineSpacing = mGridLineSpacing;
-			Options.GridLineColor = mGridLineColor;
-
-			Options.Categories = gCategories;
-			Options.CategoriesModified = false;
-			Options.CategoriesDefault = false;
-
-			Options.KeyboardShortcuts = gKeyboardShortcuts;
-			Options.ShortcutsModified = false;
-			Options.ShortcutsDefault = false;
-
-			if (!gMainWindow->DoDialog(LC_DIALOG_PREFERENCES, &Options))
-				break;
-
-			bool LibraryChanged = strcmp(Options.LibraryPath, lcGetProfileString(LC_PROFILE_PARTS_LIBRARY));
-			bool AAChanged = CurrentAASamples != Options.AASamples;
-
-			m_nMouse = Options.MouseSensitivity;
-			m_nSnap = Options.Snap;
-			m_nDetail = Options.Detail;
-			m_fLineWidth = Options.LineWidth;
-			mGridStuds = Options.GridStuds;
-			mGridStudColor = Options.GridStudColor;
-			mGridLines = Options.GridLines;
-			mGridLineSpacing = Options.GridLineSpacing;
-			mGridLineColor = Options.GridLineColor;
-
-			lcSetProfileString(LC_PROFILE_DEFAULT_AUTHOR_NAME, Options.DefaultAuthor);
-			lcSetProfileString(LC_PROFILE_PROJECTS_PATH, Options.ProjectsPath);
-			lcSetProfileString(LC_PROFILE_PARTS_LIBRARY, Options.LibraryPath);
-			lcSetProfileString(LC_PROFILE_POVRAY_PATH, Options.POVRayPath);
-			lcSetProfileString(LC_PROFILE_POVRAY_LGEO_PATH, Options.LGEOPath);
-			lcSetProfileInt(LC_PROFILE_MOUSE_SENSITIVITY, m_nMouse);
-			lcSetProfileInt(LC_PROFILE_CHECK_UPDATES, Options.CheckForUpdates);
-			lcSetProfileInt(LC_PROFILE_SNAP, Options.Snap);
-			lcSetProfileInt(LC_PROFILE_DETAIL, Options.Detail);
-			lcSetProfileInt(LC_PROFILE_GRID_STUDS, Options.GridStuds);
-			lcSetProfileInt(LC_PROFILE_GRID_STUD_COLOR, Options.GridStudColor);
-			lcSetProfileInt(LC_PROFILE_GRID_LINES, Options.GridLines);
-			lcSetProfileInt(LC_PROFILE_GRID_LINE_SPACING, Options.GridLineSpacing);
-			lcSetProfileInt(LC_PROFILE_GRID_LINE_COLOR, Options.GridLineColor);
-			lcSetProfileFloat(LC_PROFILE_LINE_WIDTH, Options.LineWidth);
-			lcSetProfileInt(LC_PROFILE_ANTIALIASING_SAMPLES, Options.AASamples);
-
-			if (LibraryChanged && AAChanged)
-				gMainWindow->DoMessageBox("Parts library and Anti-aliasing changes will only take effect the next time you start LeoCAD.", LC_MB_OK);
-			else if (LibraryChanged)
-				gMainWindow->DoMessageBox("Parts library changes will only take effect the next time you start LeoCAD.", LC_MB_OK);
-			else if (AAChanged)
-				gMainWindow->DoMessageBox("Anti-aliasing changes will only take effect the next time you start LeoCAD.", LC_MB_OK);
-
-			if (Options.CategoriesModified)
-			{
-				if (Options.CategoriesDefault)
-					lcResetDefaultCategories();
-				else
-				{
-					gCategories = Options.Categories;
-					lcSaveDefaultCategories();
-				}
-
-				gMainWindow->UpdateCategories();
-			}
-
-			if (Options.ShortcutsModified)
-			{
-				if (Options.ShortcutsDefault)
-					lcResetDefaultKeyboardShortcuts();
-				else
-				{
-					gKeyboardShortcuts = Options.KeyboardShortcuts;
-					lcSaveDefaultKeyboardShortcuts();
-				}
-
-				gMainWindow->UpdateShortcuts();
-			}
-
-			// TODO: printing preferences
-			/*
-			strcpy(opts.strFooter, m_strFooter);
-			strcpy(opts.strHeader, m_strHeader);
-			*/
-
-			for (int i = 0; i < gMainWindow->mViews.GetSize (); i++)
-			{
-				gMainWindow->mViews[i]->MakeCurrent();
-				RenderInitialize(); // TODO: get rid of RenderInitialize(), most of it can be done once per frame
-			}
-
-			gMainWindow->UpdateAllViews();
-		} break;
-
-		case LC_VIEW_ZOOM_IN:
-		{
-			ZoomActiveView(-1);
-		} break;
-
-		case LC_VIEW_ZOOM_OUT:
-		{
-			ZoomActiveView(1);
-		} break;
+	case LC_VIEW_ZOOM_OUT:
+		ZoomActiveView(1);
+		break;
 
 		case LC_VIEW_ZOOM_EXTENTS:
 		{

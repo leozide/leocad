@@ -22,6 +22,8 @@ class lcFile;
 class lcMemFile;
 class lcDiskFile;
 
+class lcGLWidget;
+
 class lcModel;
 class lcObject;
 class lcPiece;

@@ -7,33 +7,12 @@
 #include "lc_math.h"
 #include "lc_commands.h"
 
-//#define DET_BACKFACES	0x00001	// Draw backfaces
-//#define DET_DEPTH		0x00002	// Enable depth test
-//#define DET_CLEAR		0x00004	// Use clear colors
-#define	LC_DET_LIGHTING		0x00008	// Lighting
-//#define	LC_DET_SMOOTH		0x00010	// Smooth shading
-//#define DET_STUDS		0x00020	// Draw studs
-//#define DET_WIREFRAME	0x00040	// Wireframe
-//#define LC_DET_ANTIALIAS	0x00080	// Turn on anti-aliasing
-#define LC_DET_BRICKEDGES	0x00100	// Draw lines
-//#define LC_DET_DITHER		0x00200	// Enable dithering
-//#define LC_DET_BOX_FILL		0x00400	// Filled boxes
-//#define LC_DET_HIDDEN_LINE	0x00800	// Remove hidden lines
-//#define DET_STUDS_BOX	0x01000	// Draw studs as boxes
-//#define LC_DET_LINEAR		0x02000	// Linear filtering
-//#define LC_DET_FAST	0x04000	// Fast rendering (boxes)
-//#define LC_DET_BACKGROUND	0x08000	// Background rendering
-//#define LC_DET_SCREENDOOR	0x10000	// No alpha blending
-
-#define LC_DRAW_AXIS           0x0001 // Orientation icon
-#define LC_DRAW_GRID           0x0002 // Grid
 #define LC_DRAW_SNAP_A         0x0004 // Snap Angle
 #define LC_DRAW_SNAP_X         0x0008 // Snap X
 #define LC_DRAW_SNAP_Y         0x0010 // Snap Y
 #define LC_DRAW_SNAP_Z         0x0020 // Snap Z
 #define LC_DRAW_SNAP_XYZ       (LC_DRAW_SNAP_X | LC_DRAW_SNAP_Y | LC_DRAW_SNAP_Z)
 #define LC_DRAW_GLOBAL_SNAP    0x0040 // Don't allow relative snap.
-//#define LC_DRAW_MOVE           0x0080 // Switch to move after insert
 #define LC_DRAW_LOCK_X         0x0100 // Lock X
 #define LC_DRAW_LOCK_Y         0x0200 // Lock Y
 #define LC_DRAW_LOCK_Z         0x0400 // Lock Z
@@ -43,12 +22,8 @@
 #define LC_DRAW_CM_UNITS       0x2000 // Use centimeters
 //#define LC_DRAW_3DMOUSE        0x4000 // Mouse moves in all directions
 
-//	#define RENDER_FAST			0x001
-//	#define RENDER_BACKGROUND	0x002
 #define LC_SCENE_FOG			0x004	// Enable fog
-//	#define RENDER_FOG_BG		0x008	// Use bg color for fog
 #define LC_SCENE_BG				0x010	// Draw bg image
-//	#define RENDER_BG_FAST	0x020
 #define LC_SCENE_BG_TILE		0x040	// Tile bg image
 #define LC_SCENE_FLOOR			0x080	// Render floor
 #define LC_SCENE_GRADIENT		0x100	// Draw gradient
@@ -232,8 +207,6 @@ public:
 	}
 	void SetCurrentPiece(PieceInfo* pInfo)
 		{ m_pCurPiece = pInfo; }
-	float* GetBackgroundColor()
-		{ return m_fBackground; }
 	unsigned long GetSnap() const
 		{ return m_nSnap; }
 	int GetOverlayMode() const
@@ -371,7 +344,7 @@ public:
 	void HandleNotify(LC_NOTIFY id, unsigned long param);
 	void HandleCommand(LC_COMMANDS id);
 
-	float m_fLineWidth;
+	lcuint32 m_nSnap;
 
 protected:
 	// State variables
@@ -386,23 +359,8 @@ protected:
 	lcuint16 m_nCurFrame;
 	lcuint16 m_nTotalFrames;
 
-	bool mGridStuds;
-	lcuint32 mGridStudColor;
-	bool mGridLines;
-	int mGridLineSpacing;
-	lcuint32 mGridLineColor;
-
-	lcuint32 m_nScene;
-	lcuint32 m_nDetail;
-	lcuint32 m_nSnap;
 	lcuint16 m_nMoveSnap;
 	lcuint16 m_nAngleSnap;
-	float m_fFogDensity;
-	float m_fFogColor[4];
-	float m_fAmbient[4];
-	float m_fBackground[4];
-	float m_fGradient1[3];
-	float m_fGradient2[3];
 	char m_strFooter[256];
 	char m_strHeader[256];
 

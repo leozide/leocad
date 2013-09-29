@@ -3,7 +3,6 @@
 #include "lc_mesh.h"
 #include "lc_colors.h"
 #include "lc_application.h"
-#include "project.h"
 #include "view.h"
 #include "tr.h"
 
@@ -218,7 +217,7 @@ void lcCamera::RenderInterface(View* View) const
 		{ UpVectorPosition[0], UpVectorPosition[1], UpVectorPosition[2] },
 	};
 
-	float LineWidth = lcGetActiveProject()->m_fLineWidth;
+	float LineWidth = lcGetPreferences()->mLineWidth;
 
 	// Camera.
 	glPushMatrix();

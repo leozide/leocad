@@ -1,6 +1,7 @@
 #include "lc_global.h"
 #include "lc_colors.h"
 #include "lc_math.h"
+#include "lc_file.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -9,6 +10,7 @@
 #include "opengl.h"
 #include "pieceinf.h"
 #include "project.h"
+#include "lc_model.h"
 #include "system.h"
 #include "lc_library.h"
 #include "lc_application.h"
@@ -1002,9 +1004,7 @@ void MinifigWizard::OnDraw()
 	glPolygonOffset(0.5f, 0.1f);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	float *bg = lcGetActiveProject()->GetBackgroundColor();
-	glClearColor(bg[0], bg[1], bg[2], bg[3]);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	lcGetActiveProject()->mActiveModel->RenderBackground(this);
 
 	Calculate();
 

@@ -127,9 +127,9 @@ public:
 	void UndoCheckpoint();
 	void RedoCheckpoint();
 
-	void RenderBackground(lcGLWidget* Widget) const;
-	void RenderScene(View* View, bool RenderInterface) const;
-	void RenderGrid() const;
+	void DrawBackground(lcGLWidget* Widget) const;
+	void DrawScene(View* View, bool RenderInterface) const;
+	void DrawGrid() const;
 
 	void InvertSelection();
 	void InvertSelection(const lcObjectSection& ObjectSection);
@@ -142,7 +142,7 @@ public:
 	void HideUnselectedObjects();
 	void UnhideAllObjects();
 
-	void FindClosestObject(lcObjectHitTest& HitTest) const;
+	void FindClosestObject(lcObjectHitTest& HitTest, bool PiecesOnly) const;
 	void FindObjectsInBox(const lcVector4* BoxPlanes, lcArray<lcObjectSection>& ObjectSections) const;
 
 	void AddPiece(PieceInfo* Part, int ColorIndex, const lcVector3& Position, const lcVector4& AxisAngle, lcTime Time);

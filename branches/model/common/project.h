@@ -258,7 +258,7 @@ public:
 	bool m_bModified;
 
 // Implementation
-protected:
+public:
 	lcObjectSection FindClosestObject(View* View, int x, int y) const;
 	void FindObjectsInRectangle(View* View, float x1, float y1, float x2, float y2, lcArray<lcObjectSection>& Objects) const;
 
@@ -342,7 +342,7 @@ public:
 	int m_nCurAction;
 	lcVector3 m_OverlayCenter;
 
-protected:
+public:
 	// State variables
 	int mTransformType;
 	PieceInfo* m_pCurPiece;

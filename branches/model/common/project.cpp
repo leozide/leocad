@@ -1430,8 +1430,8 @@ void Project::Render(View* View, bool ToMemory)
 	glViewport(0, 0, View->mWidth, View->mHeight);
 	glEnableClientState(GL_VERTEX_ARRAY);
 
-	mActiveModel->RenderBackground(View);
-	mActiveModel->RenderScene(View, !ToMemory);
+	mActiveModel->DrawBackground(View);
+	mActiveModel->DrawScene(View, !ToMemory);
 
 	glDisableClientState(GL_VERTEX_ARRAY);
 }
@@ -1540,6 +1540,7 @@ void Project::RenderSceneObjects(View* view)
 
 void Project::RenderOverlays(View* view)
 {
+	/*
 	if (mDropPiece)
 		return;
 
@@ -2242,6 +2243,7 @@ void Project::RenderOverlays(View* view)
 
 		glEnable(GL_DEPTH_TEST);
 	}
+	*/
 }
 
 void Project::RenderInitialize()
@@ -5915,7 +5917,7 @@ lcObjectSection Project::FindClosestObject(View* View, int x, int y) const
 	HitTest.ObjectSection.Object = NULL;
 	HitTest.ObjectSection.Section = 0;
 
-	mActiveModel->FindClosestObject(HitTest);
+	mActiveModel->FindClosestObject(HitTest, false);
 
 	return HitTest.ObjectSection;
 }
@@ -7827,6 +7829,7 @@ void Project::OnMouseMove(View* view)
 // Check if the mouse is over a different area of the overlay and redraw it.
 void Project::MouseUpdateOverlays(View* view, int x, int y)
 {
+	/*
 	const float OverlayScale = view->m_OverlayScale;
 
 	if (m_nCurAction == LC_TOOL_SELECT || m_nCurAction == LC_TOOL_MOVE)
@@ -8129,6 +8132,7 @@ void Project::MouseUpdateOverlays(View* view, int x, int y)
 	}
 
 	view->SetCursor(view->GetCursor());
+	*/
 }
 
 void Project::ActivateOverlay(View* view, int Action, int OverlayMode)
@@ -8161,24 +8165,4 @@ void Project::ActivateOverlay(View* view, int Action, int OverlayMode)
 
 void Project::UpdateOverlayScale()
 {
-	// TODO: This is not needed, draw the overlays using an ortho matrix.
-	if (m_OverlayActive)
-	{
-		// Calculate the scaling factor by projecting the center to the front plane then
-		// projecting a point close to it back.
-		View* ActiveView = gMainWindow->mActiveView;
-		int Viewport[4] = { 0, 0, ActiveView->mWidth, ActiveView->mHeight };
-		float Aspect = (float)Viewport[2]/(float)Viewport[3];
-		lcCamera* Camera = ActiveView->mCamera;
-
-		const lcMatrix44& ModelView = Camera->mWorldView;
-		lcMatrix44 Projection = lcMatrix44Perspective(Camera->mFOV, Aspect, Camera->mNear, Camera->mFar);
-
-		lcVector3 ScreenPos = lcProjectPoint(m_OverlayCenter, ModelView, Projection, Viewport);
-		ScreenPos[0] += 10.0f;
-		lcVector3 Point = lcUnprojectPoint(ScreenPos, ModelView, Projection, Viewport);
-
-		lcVector3 Dist(Point - m_OverlayCenter);
-		ActiveView->m_OverlayScale = Dist.Length() * 5.0f;
-	}
 }

@@ -2,15 +2,16 @@
 #include "view.h"
 #include "lc_mainwindow.h"
 #include "project.h"
+#include "pieceinf.h"
+#include "lc_piece.h"
 #include "lc_camera.h"
 #include "system.h"
 #include "texfont.h"
 
 View::View(Project *project)
 {
-	m_Project = project;
+	mProject = project;
 	mCamera = NULL;
-	m_OverlayScale = 1.0f;
 
 	mMouseTrack = LC_MOUSETRACK_NONE;
 	mTrackTool = LC_TRACKTOOL_NONE;
@@ -67,8 +68,9 @@ void View::SetDefaultCamera()
 LC_CURSOR_TYPE View::GetCursor() const
 {
 	// TODO: check if we're the focused window and return just the default arrow if we aren't.
+	lcTool Tool = GetMouseTool(mTrackTool);
 
-	switch (m_Project->GetAction())
+	switch (Tool)
 	{
 		case LC_TOOL_SELECT:
 			if (mInputState.Control)
@@ -110,7 +112,7 @@ LC_CURSOR_TYPE View::GetCursor() const
 			return LC_CURSOR_PAN;
 
 		case LC_TOOL_ROTATE_VIEW:
-			switch (m_Project->GetOverlayMode())
+			switch (mProject->GetOverlayMode())
 			{
 				case LC_OVERLAY_ROTATE_VIEW_X:
 					return LC_CURSOR_ROTATEX;
@@ -118,7 +120,7 @@ LC_CURSOR_TYPE View::GetCursor() const
 					return LC_CURSOR_ROTATEY;
 				case LC_TRACKTOOL_ROTATE_VIEW_Z:
 					return LC_CURSOR_ROLL;
-				case LC_TRACKTOOL_ROTATE_VIEW_XYZ:
+				case LC_TRACKTOOL_ROTATE_VIEW:
 				default:
 					return LC_CURSOR_ROTATE_VIEW;
 			}
@@ -137,13 +139,13 @@ void View::OnDraw()
 	glViewport(0, 0, mWidth, mHeight);
 	glEnableClientState(GL_VERTEX_ARRAY);
 
-	m_Project->mActiveModel->RenderBackground(this);
-	m_Project->mActiveModel->RenderScene(this, true);
+	mProject->mActiveModel->DrawBackground(this);
+	mProject->mActiveModel->DrawScene(this, true);
 
 	if (mWidget)
 	{
-		RenderInterface();
-		RenderViewport();
+		DrawMouseTracking();
+		DrawViewport();
 	}
 
 	glDisableClientState(GL_VERTEX_ARRAY);
@@ -158,7 +160,7 @@ void View::OnInitialUpdate()
 	if (!gMainWindow->mActiveView)
 		gMainWindow->SetActiveView(this);
 
-	m_Project->RenderInitialize();
+	mProject->RenderInitialize();
 }
 
 void View::OnUpdateCursor()
@@ -176,7 +178,7 @@ void View::OnLeftButtonDown()
 
 	gMainWindow->SetActiveView(this);
 
-	lcTrackTool TrackTool = mInputState.Alt ? LC_TRACKTOOL_ROTATE_VIEW_XYZ : GetTrackTool(NULL, NULL);
+	lcTrackTool TrackTool = mInputState.Alt ? LC_TRACKTOOL_ROTATE_VIEW : GetTrackTool(NULL, NULL);
 	lcTool Tool = GetMouseTool(TrackTool);
 
 /*
@@ -190,54 +192,68 @@ void View::OnLeftButtonDown()
 	m_nDownY = y;
 	m_MouseTotalDelta = lcVector3(0, 0, 0);
 	m_MouseSnapLeftover = lcVector3(0, 0, 0);
-
-	int Viewport[4] = { 0, 0, view->mWidth, view->mHeight };
+*/
+	int Viewport[4] = { 0, 0, mWidth, mHeight };
 	float Aspect = (float)Viewport[2]/(float)Viewport[3];
-	lcCamera* Camera = view->mCamera;
 
-	const lcMatrix44& ModelView = Camera->mWorldView;
-	lcMatrix44 Projection = lcMatrix44Perspective(Camera->mFOV, Aspect, Camera->mNear, Camera->mFar);
-
+	const lcMatrix44& ModelView = mCamera->mWorldView;
+	lcMatrix44 Projection = lcMatrix44Perspective(mCamera->mFOV, Aspect, mCamera->mNear, mCamera->mFar);
+/*
 	lcVector3 point = lcUnprojectPoint(lcVector3((float)x, (float)y, 0.9f), ModelView, Projection, Viewport);
 	m_fTrack[0] = point[0]; m_fTrack[1] = point[1]; m_fTrack[2] = point[2];
 */
 
 	switch (Tool)
 	{
-	/*
 	case LC_TOOL_INSERT:
 		{
 			lcVector3 Position;
 			lcVector4 AxisAngle;
 
-			GetPieceInsertPosition(view, x, y, Position, AxisAngle);
-			mActiveModel->AddPiece(m_pCurPiece, gMainWindow->mColorIndex, Position, AxisAngle, m_bAnimation ? m_nCurFrame : m_nCurStep);
+			GetPieceInsertPosition(&Position, &AxisAngle);
+			mProject->mActiveModel->AddPiece(mProject->m_pCurPiece, gMainWindow->mColorIndex, Position, AxisAngle, mProject->m_nCurStep);
 
-			if (!Control)
-				SetAction(LC_TOOL_SELECT);
+			if (!mInputState.Control)
+				mProject->SetAction(LC_TOOL_SELECT);
 		}
 		break;
-*/
+
+	case LC_TOOL_CAMERA:
+		{
+			lcVector3 Position = lcUnprojectPoint(lcVector3((float)mInputState.x, (float)mInputState.y, 0.9f), ModelView, Projection, Viewport);
+			lcVector3 TargetPosition = lcUnprojectPoint(lcVector3((float)mInputState.x + 1.0f, (float)mInputState.y - 1.0f, 0.9f), ModelView, Projection, Viewport);
+
+			lcVector3 FrontVector(lcNormalize(TargetPosition - Position));
+			lcVector3 UpVector(0, 0, 1);
+			lcVector3 SideVector = lcCross(FrontVector, UpVector);
+
+			if (fabsf(lcDot(UpVector, SideVector)) > 0.99f)
+				SideVector = lcVector3(1, 0, 0);
+
+			UpVector = lcCross(SideVector, FrontVector);
+			UpVector.Normalize();
+
+			mProject->mActiveModel->BeginCreateCameraTool(Position, TargetPosition, UpVector);
+
+			StartTracking(LC_MOUSETRACK_LEFT, TrackTool);
+		}
+		break;
+
 	case LC_TOOL_SELECT:
 		{
-			lcObjectSection ObjectSection = FindClosestObject();
+			lcObjectSection ObjectSection = FindClosestObject(false);
 
 			if (mInputState.Control)
-				m_Project->mActiveModel->ClearSelectionOrSetFocus(ObjectSection);
+				mProject->mActiveModel->ClearSelectionOrSetFocus(ObjectSection);
 			else
-				m_Project->mActiveModel->SetFocus(ObjectSection);
+				mProject->mActiveModel->SetFocus(ObjectSection);
 
-//			ActivateOverlay(view, m_nCurAction, LC_OVERLAY_NONE);
 			StartTracking(LC_MOUSETRACK_LEFT, TrackTool);
 		}
 		break;
 
 	case LC_TOOL_ERASER:
-		{
-			lcObjectSection ObjectSection = FindClosestObject();
-
-			m_Project->mActiveModel->RemoveObject(ObjectSection.Object);
-		}
+		mProject->mActiveModel->RemoveObject(FindClosestObject(false).Object);
 		break;
 /*
 	case LC_TOOL_PAINT:
@@ -316,34 +332,13 @@ void View::OnLeftButtonDown()
 			gMainWindow->UpdateFocusObject(pLight);
 		}
 		break;
-
-	case LC_TOOL_CAMERA:
-		{
-			lcVector3 Position = lcUnprojectPoint(lcVector3((float)x, (float)y, 0.9f), ModelView, Projection, Viewport);
-			lcVector3 TargetPosition = lcUnprojectPoint(lcVector3(x + 1.0f, y - 1.0f, 0.9f), ModelView, Projection, Viewport);
-
-			lcVector3 FrontVector(lcNormalize(TargetPosition - Position));
-			lcVector3 UpVector(0, 0, 1);
-			lcVector3 SideVector = lcCross(FrontVector, UpVector);
-
-			if (fabsf(lcDot(UpVector, SideVector)) > 0.99f)
-				SideVector = lcVector3(1, 0, 0);
-
-			UpVector = lcCross(SideVector, FrontVector);
-			UpVector.Normalize();
-
-			m_Project->mActiveModel->BeginCreateCameraTool(Position, TargetPosition, UpVector);
-
-			StartTracking(LC_MOUSETRACK_LEFT, TrackTool);
-		}
-		break;
 */
 	case LC_TOOL_MOVE:
 		{
-			if (!m_Project->mActiveModel->GetSelectedObjects().GetSize())
+			if (!mProject->mActiveModel->GetSelectedObjects().GetSize())
 				break;
 
-			m_Project->mActiveModel->BeginMoveTool();
+			mProject->mActiveModel->BeginMoveTool();
 
 			StartTracking(LC_MOUSETRACK_LEFT, TrackTool);
 		}
@@ -351,32 +346,23 @@ void View::OnLeftButtonDown()
 /*
 	case LC_TOOL_ROTATE:
 		{
-			if (!m_Project->mActiveModel->GetSelectedObjects().GetSize())
+			if (!mProject->mActiveModel->GetSelectedObjects().GetSize())
 				break;
 
-			m_Project->mActiveModel->BeginRotateTool();
+			mProject->mActiveModel->BeginRotateTool();
 
 			StartTracking(LC_MOUSETRACK_LEFT, TrackTool);
 			m_OverlayDelta = lcVector3(0.0f, 0.0f, 0.0f);
 		}
 		break;
-
-	case LC_TOOL_ZOOM_REGION:
-		{
-			m_OverlayTrackStart[0] = (float)x;
-			m_OverlayTrackStart[1] = (float)y;
-			StartTracking(LC_MOUSETRACK_LEFT, TrackTool);
-			ActivateOverlay(view, m_nCurAction, LC_OVERLAY_NONE);
-		}
-		break;
-*/
+		*/
 	case LC_TOOL_ZOOM:
-		m_Project->mActiveModel->BeginEditCameraTool(LC_ACTION_ZOOM_CAMERA, lcVector3(0.0f, 0.0f, 0.0f));
+		mProject->mActiveModel->BeginEditCameraTool(LC_ACTION_ZOOM_CAMERA, lcVector3(0.0f, 0.0f, 0.0f));
 		StartTracking(LC_MOUSETRACK_LEFT, TrackTool);
 		break;
 
 	case LC_TOOL_PAN:
-		m_Project->mActiveModel->BeginEditCameraTool(LC_ACTION_PAN_CAMERA, lcVector3(0.0f, 0.0f, 0.0f));
+		mProject->mActiveModel->BeginEditCameraTool(LC_ACTION_PAN_CAMERA, lcVector3(0.0f, 0.0f, 0.0f));
 		StartTracking(LC_MOUSETRACK_LEFT, TrackTool);
 		break;
 
@@ -388,13 +374,17 @@ void View::OnLeftButtonDown()
 					pPiece->CompareBoundingBox(bs);
 */			lcVector3 Center((bs[0] + bs[3]) / 2, (bs[1] + bs[4]) / 2, (bs[2] + bs[5]) / 2);
 
-			m_Project->mActiveModel->BeginEditCameraTool(LC_ACTION_ZOOM_CAMERA, Center);
+			mProject->mActiveModel->BeginEditCameraTool(LC_ACTION_ORBIT_CAMERA, Center);
 			StartTracking(LC_MOUSETRACK_LEFT, TrackTool);
 		}
 		break;
 
 	case LC_TOOL_ROLL:
-		m_Project->mActiveModel->BeginEditCameraTool(LC_ACTION_ROLL_CAMERA, lcVector3(0.0f, 0.0f, 0.0f));
+		mProject->mActiveModel->BeginEditCameraTool(LC_ACTION_ROLL_CAMERA, lcVector3(0.0f, 0.0f, 0.0f));
+		StartTracking(LC_MOUSETRACK_LEFT, TrackTool);
+		break;
+
+	case LC_TOOL_ZOOM_REGION:
 		StartTracking(LC_MOUSETRACK_LEFT, TrackTool);
 		break;
 	}
@@ -409,82 +399,83 @@ void View::OnLeftButtonDoubleClick()
 {
 	gMainWindow->SetActiveView(this);
 
-	lcObjectSection ObjectSection = FindClosestObject();
+	lcObjectSection ObjectSection = FindClosestObject(false);
 
 	if (mInputState.Control)
-		m_Project->mActiveModel->ClearSelectionOrSetFocus(ObjectSection);
+		mProject->mActiveModel->ClearSelectionOrSetFocus(ObjectSection);
 	else
-		m_Project->mActiveModel->SetFocus(ObjectSection);
+		mProject->mActiveModel->SetFocus(ObjectSection);
 }
 
 void View::OnMiddleButtonDown()
 {
-	m_Project->OnMiddleButtonDown(this);
+	mProject->OnMiddleButtonDown(this);
 }
 
 void View::OnMiddleButtonUp()
 {
-	m_Project->OnMiddleButtonUp(this);
+	mProject->OnMiddleButtonUp(this);
 }
 
 void View::OnRightButtonDown()
 {
-	m_Project->OnRightButtonDown(this);
+	mProject->OnRightButtonDown(this);
 }
 
 void View::OnRightButtonUp()
 {
-	m_Project->OnRightButtonUp(this);
+	mProject->OnRightButtonUp(this);
 }
 
 void View::OnMouseMove()
 {
-	lcTool Tool = GetMouseTool(mTrackTool);
+	int CurrentAction = mProject->m_nCurAction;
 
-	if ((mMouseTrack == LC_MOUSETRACK_NONE) && (Tool != LC_TOOL_INSERT))
+	if (CurrentAction == LC_TOOL_INSERT)
+	{
+		gMainWindow->UpdateAllViews();
+
 		return;
+	}
+	else if (mMouseTrack == LC_MOUSETRACK_NONE)
+	{
+		if (CurrentAction == LC_TOOL_SELECT || CurrentAction == LC_TOOL_MOVE || CurrentAction == LC_TOOL_ROTATE)
+		{
+			lcTrackTool TrackTool = GetTrackTool(NULL, NULL);
 
-/*
-	int x = view->mInputState.x;
-	int y = view->mInputState.y;
+			if (TrackTool != mTrackTool)
+			{
+				mTrackTool = TrackTool;
+				OnUpdateCursor();
+				Redraw();
+			}
+		}
 
-	if (m_nTracking == LC_TRACK_START_RIGHT)
-		m_nTracking = LC_TRACK_RIGHT;
+		return;
+	}
 
-	if (m_nTracking == LC_TRACK_START_LEFT)
-		m_nTracking = LC_TRACK_LEFT;
+	lcTool Tool = GetMouseTool(mTrackTool);
+	const float MouseSensitivity = 1.0f / (21.0f - g_App->mPreferences->mMouseSensitivity);
 
-	float ptx, pty, ptz;
-
-	int Viewport[4] = { 0, 0, view->mWidth, view->mHeight };
+	int Viewport[4] = { 0, 0, mWidth, mHeight };
 	float Aspect = (float)Viewport[2]/(float)Viewport[3];
-	lcCamera* Camera = view->mCamera;
 
-	const lcMatrix44& ModelView = Camera->mWorldView;
-	lcMatrix44 Projection = lcMatrix44Perspective(Camera->mFOV, Aspect, Camera->mNear, Camera->mFar);
-
+	const lcMatrix44& ModelView = mCamera->mWorldView;
+	lcMatrix44 Projection = lcMatrix44Perspective(mCamera->mFOV, Aspect, mCamera->mNear, mCamera->mFar);
+/*
 	lcVector3 tmp = lcUnprojectPoint(lcVector3((float)x, (float)y, 0.9f), ModelView, Projection, Viewport);
 	ptx = tmp[0]; pty = tmp[1]; ptz = tmp[2];
 */
 
 	switch (Tool)
 	{
-/*
 	case LC_TOOL_INSERT:
-		{
-			if (m_nDownX == x && m_nDownY == y)
-				break;
-
-			m_nDownX = x;
-			m_nDownY = y;
-
-			gMainWindow->UpdateAllViews();
-		}
+	case LC_TOOL_LIGHT:
 		break;
-
+/*
 	case LC_TOOL_SPOTLIGHT:
 		{
-			float mouse = 10.0f/(21 - m_nMouse);
+			float mouse = 10.0f * MouseSensitivity
 			float delta[3] = { (ptx - m_fTrack[0])*mouse,
 				(pty - m_fTrack[1])*mouse, (ptz - m_fTrack[2])*mouse };
 
@@ -501,20 +492,14 @@ void View::OnMouseMove()
 			gMainWindow->UpdateAllViews();
 		}
 		break;
-
+*/
 	case LC_TOOL_CAMERA:
 		{
-			float Mouse = 10.0f / (21 - m_nMouse);
-			lcVector3 Distance((ptx - m_fTrack[0]) * Mouse, (pty - m_fTrack[1]) * Mouse, (ptz - m_fTrack[2]) * Mouse);
-
-			m_fTrack[0] = ptx;
-			m_fTrack[1] = pty;
-			m_fTrack[2] = ptz;
-
-			mActiveModel->UpdateCreateCameraTool(Distance, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
+			lcVector3 Position = lcUnprojectPoint(lcVector3((float)mInputState.x, (float)mInputState.y, 0.9f), ModelView, Projection, Viewport);
+			mProject->mActiveModel->UpdateCreateCameraTool(Position, mProject->m_nCurStep, mProject->m_bAddKeys);
 		}
 		break;
-*/
+
 	case LC_TOOL_SELECT:
 		Redraw();
 		break;
@@ -848,55 +833,49 @@ void View::OnMouseMove()
 				gMainWindow->UpdateAllViews();
 		}
 		break;
-
+#endif
 	case LC_TOOL_ZOOM:
 		{
-			float Distance = 2.0f * (y - m_nDownY) / (21 - m_nMouse);
+			float Distance = 2.0f * MouseSensitivity * (mInputState.y - mMouseDownY);
 
-			mActiveModel->UpdateEditCameraTool(LC_ACTION_ZOOM_CAMERA, Distance, 0.0f, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
+			mProject->mActiveModel->UpdateEditCameraTool(LC_ACTION_ZOOM_CAMERA, Distance, 0.0f, mProject->m_nCurStep, mProject->m_bAddKeys);
 		}
 		break;
 
 	case LC_TOOL_PAN:
 		{
-			float DistanceX = 2.0f * (x - m_nDownX) / (21 - m_nMouse);
-			float DistanceY = -2.0f * (y - m_nDownY) / (21 - m_nMouse);
+			float DistanceX = 2.0f * MouseSensitivity * (mInputState.x - mMouseDownX);
+			float DistanceY = -2.0f * MouseSensitivity * (mInputState.y - mMouseDownY);
 
-			mActiveModel->UpdateEditCameraTool(LC_ACTION_PAN_CAMERA, DistanceX, DistanceY, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
+			mProject->mActiveModel->UpdateEditCameraTool(LC_ACTION_PAN_CAMERA, DistanceX, DistanceY, mProject->m_nCurStep, mProject->m_bAddKeys);
 		}
 		break;
 
 	case LC_TOOL_ROTATE_VIEW:
 		{
-			if (m_OverlayMode == LC_OVERLAY_ROTATE_VIEW_Z)
+			if (mTrackTool == LC_TRACKTOOL_ROTATE_VIEW_Z)
 			{
-				float Angle = -2.0f * (x - m_nDownX) / (21 - m_nMouse) * LC_DTOR;
+				float Angle = -2.0f * MouseSensitivity * (mInputState.x - mMouseDownX) * LC_DTOR;
 
-				mActiveModel->UpdateEditCameraTool(LC_ACTION_ROLL_CAMERA, Angle, 0.0f, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
+				mProject->mActiveModel->UpdateEditCameraTool(LC_ACTION_ROLL_CAMERA, Angle, 0.0f, mProject->m_nCurStep, mProject->m_bAddKeys);
 			}
 			else
 			{
-				float AngleX = -0.1f * (x - m_nDownX) / (21 - m_nMouse);
-				float AngleY = 0.1f * (y - m_nDownY) / (21 - m_nMouse);
+				float AngleX = (mTrackTool == LC_TRACKTOOL_ROTATE_VIEW_Y) ? 0.0f : -0.1f * MouseSensitivity * (mInputState.x - mMouseDownX);
+				float AngleY = (mTrackTool == LC_TRACKTOOL_ROTATE_VIEW_X) ? 0.0f : -0.1f * MouseSensitivity * (mInputState.y - mMouseDownY);
 
-				if (m_OverlayMode == LC_OVERLAY_ROTATE_VIEW_X)
-					AngleY = 0.0f;
-				else if (m_OverlayMode == LC_OVERLAY_ROTATE_VIEW_X)
-					AngleX = 0.0f;
-
-				mActiveModel->UpdateEditCameraTool(LC_ACTION_ORBIT_CAMERA, AngleX, AngleY, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
+				mProject->mActiveModel->UpdateEditCameraTool(LC_ACTION_ORBIT_CAMERA, AngleX, AngleY, mProject->m_nCurStep, mProject->m_bAddKeys);
 			}
 		}
 		break;
 
 	case LC_TOOL_ROLL:
 		{
-			float Angle = -2.0f * (x - m_nDownX) / (21 - m_nMouse) * LC_DTOR;
+			float Angle = -2.0f * MouseSensitivity * (mInputState.x - mMouseDownX) * LC_DTOR;
 
-			mActiveModel->UpdateEditCameraTool(LC_ACTION_ROLL_CAMERA, Angle, 0.0f, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
+			mProject->mActiveModel->UpdateEditCameraTool(LC_ACTION_ROLL_CAMERA, Angle, 0.0f, mProject->m_nCurStep, mProject->m_bAddKeys);
 		}
 		break;
-#endif
 
 	case LC_TOOL_ZOOM_REGION:
 		Redraw();
@@ -908,12 +887,12 @@ void View::OnMouseWheel(float Direction)
 {
 	gMainWindow->SetActiveView(this);
 
-	m_Project->ZoomActiveView((int)(10 * Direction));
+	mProject->ZoomActiveView((int)(10 * Direction));
 }
 
-void View::RenderInterface()
+void View::DrawMouseTracking()
 {
-	int CurrentAction = m_Project->m_nCurAction;
+	int CurrentAction = mProject->m_nCurAction;
 
 /*
 	if (mDropPiece)
@@ -1002,6 +981,8 @@ void View::RenderInterface()
 
 		glDisable(GL_BLEND);
 		glEnable(GL_DEPTH_TEST);
+
+		return;
 	}
 
 	if (CurrentAction == LC_TOOL_ROTATE_VIEW)
@@ -1068,12 +1049,14 @@ void View::RenderInterface()
 		glDrawArrays(GL_LINE_LOOP, 12, 4);
 
 		glEnable(GL_DEPTH_TEST);
+
+		return;
 	}
 
-	if (!m_Project->mActiveModel->GetSelectedObjects().GetSize())
+	if (CurrentAction != LC_TOOL_MOVE && CurrentAction != LC_TOOL_SELECT && CurrentAction != LC_TOOL_ROTATE)
 		return;
 
-	if (CurrentAction != LC_TOOL_MOVE && CurrentAction != LC_TOOL_SELECT && CurrentAction != LC_TOOL_ROTATE)
+	if (!mProject->mActiveModel->GetSelectedObjects().GetSize())
 		return;
 
 	float OverlayScale;
@@ -1098,7 +1081,7 @@ void View::RenderInterface()
 		glDisable(GL_DEPTH_TEST);
 
 		// Find the rotation from the focused piece if relative snap is enabled.
-		Object* Focus = NULL;
+		class Object* Focus = NULL;
 		lcVector4 Rot(0, 0, 1, 0);
 /*
 		if ((m_nSnap & LC_DRAW_GLOBAL_SNAP) == 0)
@@ -1147,6 +1130,18 @@ void View::RenderInterface()
 		}
 
 		// Translation arrows.
+		lcVector3 MoveArrowVerts[11];
+
+		MoveArrowVerts[0] = lcVector3(0.0f, 0.0f, 0.0f);
+		MoveArrowVerts[1] = lcVector3(OverlayMoveArrowSize, 0.0f, 0.0f);
+
+		for (int j = 0; j < 9; j++)
+		{
+			float y = cosf(LC_2PI * j / 8) * OverlayMoveArrowCapRadius;
+			float z = sinf(LC_2PI * j / 8) * OverlayMoveArrowCapRadius;
+			MoveArrowVerts[j + 2] = lcVector3(OverlayMoveArrowCapSize, y, z);
+		}
+
 		for (int i = 0; i < 3; i++)
 		{
 			switch (i)
@@ -1154,7 +1149,7 @@ void View::RenderInterface()
 			case 0:
 				if ((TrackTool == LC_TRACKTOOL_MOVE_X) || (TrackTool == LC_TRACKTOOL_MOVE_XY) || (TrackTool == LC_TRACKTOOL_MOVE_XZ))
 					glColor4f(0.8f, 0.8f, 0.0f, 1.0f);
-				else if (TrackTool == LC_TRACKTOOL_NONE)
+				else if (TrackTool == LC_TRACKTOOL_NONE || mMouseTrack == LC_MOUSETRACK_NONE)
 					glColor4f(0.8f, 0.0f, 0.0f, 1.0f);
 				else
 					continue;
@@ -1162,7 +1157,7 @@ void View::RenderInterface()
 			case 1:
 				if ((TrackTool == LC_TRACKTOOL_MOVE_Y) || (TrackTool == LC_TRACKTOOL_MOVE_XY) || (TrackTool == LC_TRACKTOOL_MOVE_YZ))
 					glColor4f(0.8f, 0.8f, 0.0f, 1.0f);
-				else if (TrackTool == LC_TRACKTOOL_NONE)
+				else if (TrackTool == LC_TRACKTOOL_NONE || mMouseTrack == LC_MOUSETRACK_NONE)
 					glColor4f(0.0f, 0.8f, 0.0f, 1.0f);
 				else
 					continue;
@@ -1170,7 +1165,7 @@ void View::RenderInterface()
 			case 2:
 				if ((TrackTool == LC_TRACKTOOL_MOVE_Z) || (TrackTool == LC_TRACKTOOL_MOVE_XZ) || (TrackTool == LC_TRACKTOOL_MOVE_YZ))
 					glColor4f(0.8f, 0.8f, 0.0f, 1.0f);
-				else if (TrackTool == LC_TRACKTOOL_NONE)
+				else if (TrackTool == LC_TRACKTOOL_NONE || mMouseTrack == LC_MOUSETRACK_NONE)
 					glColor4f(0.0f, 0.0f, 0.8f, 1.0f);
 				else
 					continue;
@@ -1188,21 +1183,11 @@ void View::RenderInterface()
 			else if (i == 2)
 				glMultMatrixf(lcMatrix44(lcVector4(0, 0, 1, 0), lcVector4(0, 1, 0, 0), lcVector4(1, 0, 0, 0), lcVector4(0, 0, 0, 1)));
 
-			lcVector3 Verts[11];
-
-			Verts[0] = lcVector3(0.0f, 0.0f, 0.0f);
-			Verts[1] = lcVector3(OverlayMoveArrowSize, 0.0f, 0.0f);
-
-			for (int j = 0; j < 9; j++)
-			{
-				float y = cosf(LC_2PI * j / 8) * OverlayMoveArrowCapRadius;
-				float z = sinf(LC_2PI * j / 8) * OverlayMoveArrowCapRadius;
-				Verts[j + 2] = lcVector3(OverlayMoveArrowCapSize, y, z);
-			}
-
-			glVertexPointer(3, GL_FLOAT, 0, Verts);
+			glVertexPointer(3, GL_FLOAT, 0, MoveArrowVerts);
 			glDrawArrays(GL_LINES, 0, 2);
 			glDrawArrays(GL_TRIANGLE_FAN, 1, 10);
+
+			glPopMatrix();
 		}
 
 		// Rotation arrows.
@@ -1210,6 +1195,17 @@ void View::RenderInterface()
 		{
 			for (int i = 0; i < 3; i++)
 			{
+				glPushMatrix();
+				glTranslatef(OverlayCenter[0], OverlayCenter[1], OverlayCenter[2]);
+
+				if (Focus)
+					glRotatef(Rot[3], Rot[0], Rot[1], Rot[2]);
+
+				if (i == 1)
+					glMultMatrixf(lcMatrix44(lcVector4(0, 1, 0, 0), lcVector4(1, 0, 0, 0), lcVector4(0, 0, 1, 0), lcVector4(0, 0, 0, 1)));
+				else if (i == 2)
+					glMultMatrixf(lcMatrix44(lcVector4(0, 0, 1, 0), lcVector4(0, 1, 0, 0), lcVector4(1, 0, 0, 0), lcVector4(0, 0, 0, 1)));
+
 				switch (i)
 				{
 				case 0:
@@ -1281,9 +1277,9 @@ void View::RenderInterface()
 				}
 
 				glDrawArrays(GL_TRIANGLE_FAN, 0, 10);
-			}
 
-			glPopMatrix();
+				glPopMatrix();
+			}
 		}
 
 		glEnable(GL_DEPTH_TEST);
@@ -1632,7 +1628,7 @@ void View::RenderInterface()
 */
 }
 
-void View::RenderViewport()
+void View::DrawViewport()
 {
 	const char* CameraName = mCamera->mName;
 
@@ -1653,11 +1649,11 @@ void View::RenderViewport()
 	glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
 	glEnable(GL_TEXTURE_2D);
 	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-	m_Project->m_pScreenFont->MakeCurrent();
+	mProject->m_pScreenFont->MakeCurrent();
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_BLEND);
 
-	m_Project->m_pScreenFont->PrintText(3.0f, (float)mHeight - 1.0f - 6.0f, 0.0f, CameraName);
+	mProject->m_pScreenFont->PrintText(3.0f, (float)mHeight - 1.0f - 6.0f, 0.0f, CameraName);
 
 	glDisable(GL_BLEND);
 	glDisable(GL_TEXTURE_2D);
@@ -1666,7 +1662,7 @@ void View::RenderViewport()
 	glEnable(GL_DEPTH_TEST);
 }
 
-lcObjectSection View::FindClosestObject() const
+lcObjectSection View::FindClosestObject(bool PiecesOnly) const
 {
 	int Viewport[4] = { 0, 0, mWidth, mHeight };
 	float Aspect = (float)Viewport[2]/(float)Viewport[3];
@@ -1688,14 +1684,115 @@ lcObjectSection View::FindClosestObject() const
 	HitTest.ObjectSection.Object = NULL;
 	HitTest.ObjectSection.Section = 0;
 
-	m_Project->mActiveModel->FindClosestObject(HitTest);
+	mProject->mActiveModel->FindClosestObject(HitTest, PiecesOnly);
 
 	return HitTest.ObjectSection;
 }
 
+void View::FindObjectsInRectangle(float x1, float y1, float x2, float y2, lcArray<lcObjectSection>& Objects) const
+{
+	int Viewport[4] = { 0, 0, mWidth, mHeight };
+	float Aspect = (float)Viewport[2]/(float)Viewport[3];
+
+	const lcMatrix44& ModelView = mCamera->mWorldView;
+	lcMatrix44 Projection = lcMatrix44Perspective(mCamera->mFOV, Aspect, mCamera->mNear, mCamera->mFar);
+
+	float Left, Top, Bottom, Right;
+
+	if (x1 < x2)
+	{
+		Left = x1;
+		Right = x2;
+	}
+	else
+	{
+		Left = x2;
+		Right = x1;
+	}
+
+	if (y1 > y2)
+	{
+		Top = y1;
+		Bottom = y2;
+	}
+	else
+	{
+		Top = y2;
+		Bottom = y1;
+	}
+
+	lcVector3 Corners[6] =
+	{
+		lcVector3(Left, Top, 0), lcVector3(Left, Bottom, 0), lcVector3(Right, Bottom, 0),
+		lcVector3(Right, Top, 0), lcVector3(Left, Top, 1), lcVector3(Right, Bottom, 1)
+	};
+
+	lcUnprojectPoints(Corners, 6, ModelView, Projection, Viewport);
+
+	lcVector3 PlaneNormals[6];
+
+	PlaneNormals[0] = lcNormalize(lcCross(Corners[4] - Corners[0], Corners[1] - Corners[0])); // Left
+	PlaneNormals[1] = lcNormalize(lcCross(Corners[5] - Corners[2], Corners[3] - Corners[2])); // Right
+	PlaneNormals[2] = lcNormalize(lcCross(Corners[3] - Corners[0], Corners[4] - Corners[0])); // Top
+	PlaneNormals[3] = lcNormalize(lcCross(Corners[1] - Corners[2], Corners[5] - Corners[2])); // Bottom
+	PlaneNormals[4] = lcNormalize(lcCross(Corners[1] - Corners[0], Corners[3] - Corners[0])); // Front
+	PlaneNormals[5] = lcNormalize(lcCross(Corners[1] - Corners[2], Corners[3] - Corners[2])); // Back
+
+	lcVector4 Planes[6];
+	Planes[0] = lcVector4(PlaneNormals[0], -lcDot(PlaneNormals[0], Corners[0]));
+	Planes[1] = lcVector4(PlaneNormals[1], -lcDot(PlaneNormals[1], Corners[5]));
+	Planes[2] = lcVector4(PlaneNormals[2], -lcDot(PlaneNormals[2], Corners[0]));
+	Planes[3] = lcVector4(PlaneNormals[3], -lcDot(PlaneNormals[3], Corners[5]));
+	Planes[4] = lcVector4(PlaneNormals[4], -lcDot(PlaneNormals[4], Corners[0]));
+	Planes[5] = lcVector4(PlaneNormals[5], -lcDot(PlaneNormals[5], Corners[5]));
+
+	mProject->mActiveModel->FindObjectsInBox(Planes, Objects);
+}
+
+void View::GetPieceInsertPosition(lcVector3* Position, lcVector4* AxisAngle)
+{
+	lcObjectSection ObjectSection = FindClosestObject(true);
+	lcPiece* Piece = NULL;
+
+	if (ObjectSection.Object)
+		Piece = ObjectSection.Object->GetPiece(ObjectSection.Section);
+
+	if (Piece)
+	{
+		lcVector3 Dist(0, 0, Piece->mPieceInfo->m_fDimensions[2] - mProject->m_pCurPiece->m_fDimensions[5]);
+		Dist = mProject->SnapVector(Dist);
+
+		*Position = lcMul31(Dist, Piece->mModelWorld);
+		*AxisAngle = Piece->mAxisAngle;
+
+		return;
+	}
+
+	int Viewport[4] = { 0, 0, mWidth, mHeight };
+	float Aspect = (float)Viewport[2]/(float)Viewport[3];
+
+	const lcMatrix44& ModelView = mCamera->mWorldView;
+	lcMatrix44 Projection = lcMatrix44Perspective(mCamera->mFOV, Aspect, mCamera->mNear, mCamera->mFar);
+
+	lcVector3 ClickPoints[2] = { lcVector3((float)mInputState.x, (float)mInputState.y, 0.0f), lcVector3((float)mInputState.x, (float)mInputState.y, 1.0f) };
+	lcUnprojectPoints(ClickPoints, 2, ModelView, Projection, Viewport);
+
+	lcVector3 Intersection;
+	if (lcLinePlaneIntersection(&Intersection, ClickPoints[0], ClickPoints[1], lcVector4(0, 0, 1, mProject->m_pCurPiece->m_fDimensions[5])))
+	{
+		Intersection = mProject->SnapVector(Intersection);
+		*Position = Intersection;
+		*AxisAngle = lcVector4(0, 0, 1, 0);
+		return;
+	}
+
+	*Position = lcUnprojectPoint(lcVector3((float)mInputState.x, (float)mInputState.y, 0.9f), ModelView, Projection, Viewport);
+	*AxisAngle = lcVector4(0, 0, 1, 0);
+}
+
 lcTrackTool View::GetTrackTool(float* InterfaceScale, lcVector3* InterfaceCenter) const
 {
-	int CurrentAction = m_Project->m_nCurAction;
+	int CurrentAction = mProject->m_nCurAction;
 	int x = mInputState.x;
 	int y = mInputState.y;
 
@@ -1727,7 +1824,7 @@ lcTrackTool View::GetTrackTool(float* InterfaceScale, lcVector3* InterfaceCenter
 		else
 		{
 			if (d < r)
-				return LC_TRACKTOOL_ROTATE_VIEW_XYZ;
+				return LC_TRACKTOOL_ROTATE_VIEW;
 			else
 				return LC_TRACKTOOL_ROTATE_VIEW_Z;
 		}
@@ -1742,7 +1839,7 @@ lcTrackTool View::GetTrackTool(float* InterfaceScale, lcVector3* InterfaceCenter
 	const lcMatrix44& ModelView = mCamera->mWorldView;
 	lcMatrix44 Projection = lcMatrix44Perspective(mCamera->mFOV, Aspect, mCamera->mNear, mCamera->mFar);
 
-	lcVector3 OverlayCenter = m_Project->mActiveModel->GetFocusOrSelectionCenter();
+	lcVector3 OverlayCenter = mProject->mActiveModel->GetFocusOrSelectionCenter();
 
 	lcVector3 ScreenPos = lcProjectPoint(OverlayCenter, ModelView, Projection, Viewport);
 	ScreenPos[0] += 10.0f;
@@ -2009,7 +2106,7 @@ lcTrackTool View::GetTrackTool(float* InterfaceScale, lcVector3* InterfaceCenter
 	return LC_TRACKTOOL_NONE;
 }
 
-lcTool View::GetMouseTool(lcTrackTool TrackTool)
+lcTool View::GetMouseTool(lcTrackTool TrackTool) const
 {
 	switch (TrackTool)
 	{
@@ -2042,12 +2139,12 @@ lcTool View::GetMouseTool(lcTrackTool TrackTool)
 	case LC_TRACKTOOL_ROTATE_VIEW_X:
 	case LC_TRACKTOOL_ROTATE_VIEW_Y:
 	case LC_TRACKTOOL_ROTATE_VIEW_Z:
-	case LC_TRACKTOOL_ROTATE_VIEW_XYZ:
+	case LC_TRACKTOOL_ROTATE_VIEW:
 		return LC_TOOL_ROTATE_VIEW;
 		break;
 	}
 
-	return (lcTool)m_Project->m_nCurAction;
+	return (lcTool)mProject->m_nCurAction;
 }
 
 void View::StartTracking(lcMouseTrack MouseTrack, lcTrackTool TrackTool)
@@ -2065,6 +2162,160 @@ void View::StopTracking(bool Accept)
 	if (mMouseTrack == LC_MOUSETRACK_NONE)
 		return;
 
+	lcTool Tool = GetMouseTool(mTrackTool);
+
 	mMouseTrack = LC_MOUSETRACK_NONE;
 	mTrackTool = LC_TRACKTOOL_NONE;
+
+	switch (Tool)
+	{
+	case LC_TOOL_CAMERA:
+		mProject->mActiveModel->EndCreateCameraTool(Accept);
+		break;
+
+	case LC_TOOL_SELECT:
+		if (Accept)
+		{
+			float pt1x = lcClamp((float)mMouseDownX, 0.0f, mWidth - 1.0f);
+			float pt1y = lcClamp((float)mMouseDownY, 0.0f, mHeight - 1.0f);
+			float pt2x = lcClamp((float)mInputState.x, 0.0f, mWidth - 1.0f);
+			float pt2y = lcClamp((float)mInputState.y, 0.0f, mHeight - 1.0f);
+
+			if (pt1x != pt2x && pt1y != pt2y)
+			{
+				lcArray<lcObjectSection> ObjectSections;
+				View* View = gMainWindow->mActiveView;
+
+				FindObjectsInRectangle(pt1x, pt1y, pt2x, pt2y, ObjectSections);
+
+				if (View->mInputState.Control)
+					mProject->mActiveModel->AddToSelection(ObjectSections);
+				else
+					mProject->mActiveModel->SetSelection(ObjectSections);
+			}
+			else
+				gMainWindow->UpdateAllViews();
+		}
+		else
+			gMainWindow->UpdateAllViews();
+		break;
+
+	case LC_TOOL_MOVE:
+		mProject->mActiveModel->EndMoveTool(Accept);
+		break;
+
+	case LC_TOOL_ZOOM:
+		mProject->mActiveModel->EndEditCameraTool(LC_ACTION_ZOOM_CAMERA, Accept);
+		break;
+
+	case LC_TOOL_PAN:
+		mProject->mActiveModel->EndEditCameraTool(LC_ACTION_PAN_CAMERA, Accept);
+		break;
+
+	case LC_TOOL_ROTATE_VIEW:
+		mProject->mActiveModel->EndEditCameraTool(LC_ACTION_ORBIT_CAMERA, Accept);
+		break;
+
+	case LC_TOOL_ROLL:
+		mProject->mActiveModel->EndEditCameraTool(LC_ACTION_ROLL_CAMERA, Accept);
+		break;
+
+	case LC_TOOL_ZOOM_REGION:
+		{
+			float pt1x = (float)mMouseDownX;
+			float pt1y = (float)mMouseDownY;
+			float pt2x = (float)mInputState.x;
+			float pt2y = (float)mInputState.y;
+
+			float Left, Right, Bottom, Top;
+
+			if (pt1x < pt2x)
+			{
+				Left = pt1x;
+				Right = pt2x;
+			}
+			else
+			{
+				Left = pt2x;
+				Right = pt1x;
+			}
+
+			if (pt1y < pt2y)
+			{
+				Bottom = pt1y;
+				Top = pt2y;
+			}
+			else
+			{
+				Bottom = pt2y;
+				Top = pt1y;
+			}
+
+			Left = lcMax(Left, 0.0f);
+			Right = lcMin(Right, mWidth - 1);
+			Bottom = lcMax(Bottom, 0.0f);
+			Top = lcMin(Top, mHeight - 1);
+
+			mProject->mActiveModel->ZoomRegion(gMainWindow->mActiveView, Left, Right, Bottom, Top, mProject->m_nCurStep, mProject->m_bAddKeys);
+		}
+		break;
+	}
+
+	gMainWindow->UpdateAllViews();
+
+
+
+/*
+	if (Accept)
+	{
+		if (mDropPiece)
+		{
+			int x = m_nDownX;
+			int y = m_nDownY;
+
+			if ((x > 0) && (x < ActiveView->mWidth) && (y > 0) && (y < ActiveView->mHeight))
+			{
+				lcVector3 Pos;
+				lcVector4 Rot;
+
+				GetPieceInsertPosition(ActiveView, x, y, Pos, Rot);
+
+				Piece* pPiece = new Piece(mDropPiece);
+				pPiece->Initialize(Pos[0], Pos[1], Pos[2], m_nCurStep, m_nCurFrame);
+				pPiece->SetColorIndex(gMainWindow->mColorIndex);
+
+				pPiece->ChangeKey(m_nCurStep, false, false, Rot, LC_PK_ROTATION);
+				pPiece->ChangeKey(m_nCurFrame, true, false, Rot, LC_PK_ROTATION);
+				pPiece->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
+
+				SelectAndFocusNone(false);
+				pPiece->CreateName(m_pPieces);
+				AddPiece(pPiece);
+				SystemPieceComboAdd(mDropPiece->m_strDescription);
+				pPiece->Select (true, true, false);
+
+				if (mDropPiece)
+				{
+					mDropPiece->Release();
+					mDropPiece = NULL;
+				}
+
+				UpdateSelection();
+				gMainWindow->UpdateAllViews();
+				gMainWindow->UpdateFocusObject(pPiece);
+
+				SetModifiedFlag(true);
+				CheckPoint("Inserting");
+			}
+		}
+	}
+
+	if (mDropPiece)
+	{
+		mDropPiece->Release();
+		mDropPiece = NULL;
+	}
+
+	return true;
+*/
 }

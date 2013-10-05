@@ -52,7 +52,7 @@ void lcPiece::Update()
 	mModelWorld.SetTranslation(mPosition);
 }
 
-void lcPiece::ClosestHitTest(lcObjectHitTest& HitTest)
+void lcPiece::ClosestHitTest(lcObjectHitTest& HitTest, bool PiecesOnly)
 {
 	lcVector3 Min(mPieceInfo->m_fDimensions[3], mPieceInfo->m_fDimensions[4], mPieceInfo->m_fDimensions[5]);
 	lcVector3 Max(mPieceInfo->m_fDimensions[0], mPieceInfo->m_fDimensions[1], mPieceInfo->m_fDimensions[2]);

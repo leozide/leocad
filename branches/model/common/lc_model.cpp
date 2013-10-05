@@ -250,7 +250,7 @@ void lcModel::InvertSelection()
 void lcModel::InvertSelection(const lcObjectSection& ObjectSection)
 {
 	lcObject* Object = ObjectSection.Object;
-	lcuint32 Section = ObjectSection.Section;
+	lcuintptr Section = ObjectSection.Section;
 
 	if (!Object)
 		return;
@@ -310,7 +310,7 @@ void lcModel::SetSelection(const lcArray<lcObjectSection>& ObjectSections)
 void lcModel::ClearSelectionOrSetFocus(const lcObjectSection& ObjectSection)
 {
 	lcObject* Object = ObjectSection.Object;
-	lcuint32 Section = ObjectSection.Section;
+	lcuintptr Section = ObjectSection.Section;
 
 	if (!Object)
 		return;
@@ -343,7 +343,7 @@ void lcModel::ClearSelectionOrSetFocus(const lcObjectSection& ObjectSection)
 void lcModel::SetFocus(const lcObjectSection& ObjectSection)
 {
 	lcObject* Object = ObjectSection.Object;
-	lcuint32 Section = ObjectSection.Section;
+	lcuintptr Section = ObjectSection.Section;
 
 	for (int ObjectIdx = 0; ObjectIdx < mSelectedObjects.GetSize(); ObjectIdx++)
 		mSelectedObjects[ObjectIdx]->SetSelection(false);
@@ -401,7 +401,7 @@ void lcModel::BeginCreateCameraTool(const lcVector3& Position, const lcVector3& 
 	BeginCheckpoint(LC_ACTION_CREATE_CAMERA);
 
 	lcMemFile& Apply = mCurrentCheckpoint->mApply;
-	Apply.WriteFloats(lcVector3(0.0f, 0.0f, 0.0f), 3);
+	Apply.WriteFloats(TargetPosition, 3);
 
 	const char* Prefix = "Camera ";
 	const int PrefixLength = strlen(Prefix);
@@ -444,24 +444,24 @@ void lcModel::BeginCreateCameraTool(const lcVector3& Position, const lcVector3& 
 	gMainWindow->UpdateCameraMenu();
 }
 
-void lcModel::UpdateCreateCameraTool(const lcVector3& Distance, lcTime Time, bool AddKeys)
+void lcModel::UpdateCreateCameraTool(const lcVector3& TargetPosition, lcTime Time, bool AddKeys)
 {
 	LC_ASSERT(mCurrentCheckpoint->mActionType == LC_ACTION_CREATE_CAMERA);
 
 	lcMemFile& Apply = mCurrentCheckpoint->mApply;
 	Apply.Seek(0, SEEK_SET);
 
-	lcVector3 PreviousDistance;
-	Apply.ReadFloats(PreviousDistance, 3);
+	lcVector3 PreviousTargetPosition;
+	Apply.ReadFloats(PreviousTargetPosition, 3);
 
-	if (PreviousDistance == Distance)
+	if (PreviousTargetPosition == TargetPosition)
 		return;
 
 	Apply.Seek(0, SEEK_SET);
-	Apply.WriteFloats(Distance, 3);
+	Apply.WriteFloats(TargetPosition, 3);
 
 	lcCamera* Camera = (lcCamera*)mObjects[mObjects.GetSize() - 1];
-	Camera->Move(Distance, Time, AddKeys);
+	Camera->Move(TargetPosition - Camera->mTargetPosition, Time, AddKeys);
 	Camera->Update();
 
 	gMainWindow->UpdateFocusObject();
@@ -718,6 +718,8 @@ void lcModel::UpdateEditCameraTool(lcActionType ActionType, float ValueX, float 
 	Revert.Seek(0, SEEK_SET);
 
 	Revert.ReadS32();
+	Revert.ReadS32();
+	Revert.ReadS32();
 	lcCamera* Camera = gMainWindow->mActiveView->mCamera;
 
 	Camera->Load(Revert);
@@ -955,7 +957,7 @@ void lcModel::ApplyCheckpoint(lcMemFile& File)
 	}
 }
 
-void lcModel::RenderBackground(lcGLWidget* Widget) const
+void lcModel::DrawBackground(lcGLWidget* Widget) const
 {
 	if (mProperties.mBackgroundType == LC_BACKGROUND_SOLID)
 	{
@@ -1043,7 +1045,7 @@ void lcModel::RenderBackground(lcGLWidget* Widget) const
 	glDepthMask(GL_TRUE);
 }
 
-void lcModel::RenderScene(View* View, bool RenderInterface) const
+void lcModel::DrawScene(View* View, bool DrawInterface) const
 {
 	glEnable(GL_POLYGON_OFFSET_FILL);
 	glPolygonOffset(0.5f, 0.1f);
@@ -1111,7 +1113,7 @@ void lcModel::RenderScene(View* View, bool RenderInterface) const
 //	if (m_nScene & LC_SCENE_FLOOR)
 //		m_pTerrain->Render(View->mCamera, AspectRatio);
 
-	if (RenderInterface && (InterfaceObjects.GetSize() || Preferences->mDrawGridLines || Preferences->mDrawGridStuds))
+	if (DrawInterface && (InterfaceObjects.GetSize() || Preferences->mDrawGridLines || Preferences->mDrawGridStuds))
 	{
 		if (Preferences->mLightingMode != LC_LIGHTING_FLAT)
 		{
@@ -1127,7 +1129,7 @@ void lcModel::RenderScene(View* View, bool RenderInterface) const
 			InterfaceObjects[ObjectIdx]->RenderInterface(View);
 
 		if (Preferences->mDrawGridLines || Preferences->mDrawGridStuds)
-			RenderGrid();
+			DrawGrid();
 
 		if (Preferences->mLightingMode != LC_LIGHTING_FLAT)
 		{
@@ -1175,7 +1177,7 @@ void lcModel::RenderScene(View* View, bool RenderInterface) const
 */
 }
 
-void lcModel::RenderGrid() const
+void lcModel::DrawGrid() const
 {
 	lcPreferences* Preferences = lcGetPreferences();
 
@@ -1325,13 +1327,13 @@ void lcModel::RenderGrid() const
 	}
 }
 
-void lcModel::FindClosestObject(lcObjectHitTest& HitTest) const
+void lcModel::FindClosestObject(lcObjectHitTest& HitTest, bool PiecesOnly) const
 {
 	for (int ObjectIdx = 0; ObjectIdx < mObjects.GetSize(); ObjectIdx++)
 	{
 //		if (visible)
 //		if (camera != viewcamera)
-		mObjects[ObjectIdx]->ClosestHitTest(HitTest);
+		mObjects[ObjectIdx]->ClosestHitTest(HitTest, PiecesOnly);
 	}
 }
 

@@ -67,7 +67,7 @@ public:
 		return (mState & LC_CAMERA_SELECTION_MASK) != 0;
 	}
 
-	virtual bool IsSelected(lcuint32 Section) const
+	virtual bool IsSelected(lcuintptr Section) const
 	{
 		switch (Section)
 		{
@@ -91,7 +91,7 @@ public:
 		return (mState & LC_CAMERA_FOCUS_MASK) != 0;
 	}
 
-	virtual bool IsFocused(lcuint32 Section) const
+	virtual bool IsFocused(lcuintptr Section) const
 	{
 		switch (Section)
 		{
@@ -118,7 +118,7 @@ public:
 			mState &= ~(LC_CAMERA_SELECTION_MASK | LC_CAMERA_FOCUS_MASK);
 	}
 
-	virtual void SetSelection(lcuint32 Section, bool Selection)
+	virtual void SetSelection(lcuintptr Section, bool Selection)
 	{
 		switch (Section)
 		{
@@ -150,7 +150,7 @@ public:
 		mState &= ~LC_CAMERA_FOCUS_MASK;
 	}
 
-	virtual void SetFocus(lcuint32 Section, bool Focus)
+	virtual void SetFocus(lcuintptr Section, bool Focus)
 	{
 		switch (Section)
 		{
@@ -195,7 +195,7 @@ public:
 			mState |= LC_CAMERA_UPVECTOR_SELECTED;
 	}
 
-	virtual void InvertSelection(lcuint32 Section)
+	virtual void InvertSelection(lcuintptr Section)
 	{
 		switch (Section)
 		{
@@ -240,7 +240,7 @@ public:
 	virtual void Load(lcFile& File);
 	virtual void Update();
 
-	virtual void ClosestHitTest(lcObjectHitTest& HitTest);
+	virtual void ClosestHitTest(lcObjectHitTest& HitTest, bool PiecesOnly);
 	virtual void BoxTest(const lcVector4* BoxPlanes, lcArray<lcObjectSection>& ObjectSections);
 
 	virtual void GetRenderMeshes(View* View, lcArray<lcRenderMesh>& OpaqueMeshes, lcArray<lcRenderMesh>& TranslucentMeshes, lcArray<lcObject*>& InterfaceObjects);

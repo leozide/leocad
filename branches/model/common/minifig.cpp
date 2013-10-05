@@ -1004,7 +1004,7 @@ void MinifigWizard::OnDraw()
 	glPolygonOffset(0.5f, 0.1f);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	lcGetActiveProject()->mActiveModel->RenderBackground(this);
+	lcGetActiveProject()->mActiveModel->DrawBackground(this);
 
 	Calculate();
 

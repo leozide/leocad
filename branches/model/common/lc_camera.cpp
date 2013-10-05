@@ -57,8 +57,11 @@ void lcCamera::Update()
 	mWorldView = lcMatrix44LookAt(mPosition, mTargetPosition, mUpVector);
 }
 
-void lcCamera::ClosestHitTest(lcObjectHitTest& HitTest)
+void lcCamera::ClosestHitTest(lcObjectHitTest& HitTest, bool PiecesOnly)
 {
+	if (PiecesOnly)
+		return;
+
 	lcVector3 Min = lcVector3(-0.3f, -0.3f, -0.3f);
 	lcVector3 Max = lcVector3(0.3f, 0.3f, 0.3f);
 

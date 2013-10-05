@@ -40,7 +40,7 @@ public:
 		return (mState & LC_PIECE_SELECTION_MASK) != 0;
 	}
 
-	virtual bool IsSelected(lcuint32 Section) const
+	virtual bool IsSelected(lcuintptr Section) const
 	{
 		return (mState & LC_PIECE_SELECTION_MASK) != 0;
 	}
@@ -50,7 +50,7 @@ public:
 		return (mState & LC_PIECE_FOCUS_MASK) != 0;
 	}
 
-	virtual bool IsFocused(lcuint32 Section) const
+	virtual bool IsFocused(lcuintptr Section) const
 	{
 		return (mState & LC_PIECE_FOCUS_MASK) != 0;
 	}
@@ -63,7 +63,7 @@ public:
 			mState &= ~(LC_PIECE_SELECTION_MASK | LC_PIECE_FOCUS_MASK);
 	}
 
-	virtual void SetSelection(lcuint32 Section, bool Selection)
+	virtual void SetSelection(lcuintptr Section, bool Selection)
 	{
 		if (Selection)
 			mState |= LC_PIECE_POSITION_SELECTED;
@@ -76,7 +76,7 @@ public:
 		mState &= ~LC_PIECE_FOCUS_MASK;
 	}
 
-	virtual void SetFocus(lcuint32 Section, bool Focus)
+	virtual void SetFocus(lcuintptr Section, bool Focus)
 	{
 		if (Focus)
 			mState |= LC_PIECE_POSITION_SELECTED | LC_PIECE_POSITION_FOCUSED;
@@ -92,7 +92,7 @@ public:
 			mState |= LC_PIECE_POSITION_SELECTED;
 	}
 
-	virtual void InvertSelection(lcuint32 Section)
+	virtual void InvertSelection(lcuintptr Section)
 	{
 		if (mState & (LC_PIECE_POSITION_SELECTED | LC_PIECE_POSITION_FOCUSED))
 			mState &= ~(LC_PIECE_POSITION_SELECTED | LC_PIECE_POSITION_FOCUSED);
@@ -113,9 +113,10 @@ public:
 	virtual void Load(lcFile& File);
 	virtual void Update();
 
-	virtual void ClosestHitTest(lcObjectHitTest& HitTest);
+	virtual void ClosestHitTest(lcObjectHitTest& HitTest, bool PiecesOnly);
 	virtual void BoxTest(const lcVector4* BoxPlanes, lcArray<lcObjectSection>& ObjectSections);
 
+	virtual lcPiece* GetPiece(lcuintptr Section) { return this; }
 	virtual void GetPartsUsed(lcArray<lcObjectParts>& PartsUsed) const;
 	virtual void GetRenderMeshes(View* View, lcArray<lcRenderMesh>& OpaqueMeshes, lcArray<lcRenderMesh>& TranslucentMeshes, lcArray<lcObject*>& InterfaceObjects);
 	virtual void RenderInterface(View* View) const;

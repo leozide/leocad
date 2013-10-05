@@ -56,7 +56,7 @@ void PiecePreview::OnDraw()
 		glLoadMatrixf(lcMatrix44LookAt(Eye * m_Distance, m_PieceInfo->GetCenter(), lcVector3(0, 0, 1)));
 	}
 
-	lcGetActiveProject()->mActiveModel->RenderBackground(this);
+	lcGetActiveProject()->mActiveModel->DrawBackground(this);
 
 	glEnableClientState(GL_VERTEX_ARRAY);
 	m_PieceInfo->RenderPiece(gMainWindow->mColorIndex);

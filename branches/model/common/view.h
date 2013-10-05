@@ -23,20 +23,15 @@ enum lcTrackTool
 	LC_TRACKTOOL_MOVE_XY,
 	LC_TRACKTOOL_MOVE_XZ,
 	LC_TRACKTOOL_MOVE_YZ,
-//	LC_TRACKTOOL_MOVE_XYZ,
 	LC_TRACKTOOL_ROTATE_X,
 	LC_TRACKTOOL_ROTATE_Y,
 	LC_TRACKTOOL_ROTATE_Z,
-//	LC_TRACKTOOL_ROTATE_XY,
-//	LC_TRACKTOOL_ROTATE_XZ,
-//	LC_TRACKTOOL_ROTATE_YZ,
-//	LC_TRACKTOOL_ROTATE_XYZ,
-	LC_TRACKTOOL_ZOOM,
-	LC_TRACKTOOL_PAN,
 	LC_TRACKTOOL_ROTATE_VIEW_X,
 	LC_TRACKTOOL_ROTATE_VIEW_Y,
 	LC_TRACKTOOL_ROTATE_VIEW_Z,
-	LC_TRACKTOOL_ROTATE_VIEW_XYZ
+	LC_TRACKTOOL_ZOOM,
+	LC_TRACKTOOL_PAN,
+	LC_TRACKTOOL_ROTATE_VIEW
 };
 
 class View : public lcGLWidget
@@ -63,18 +58,19 @@ public:
 
 	LC_CURSOR_TYPE GetCursor() const;
 
-	Project* m_Project;
+	Project* mProject;
 	lcCamera* mCamera;
-	float m_OverlayScale;
 
 protected:
-	void RenderInterface();
-	void RenderViewport();
+	void DrawMouseTracking();
+	void DrawViewport();
 
-	lcObjectSection FindClosestObject() const;
+	lcObjectSection FindClosestObject(bool PiecesOnly) const;
+	void FindObjectsInRectangle(float x1, float y1, float x2, float y2, lcArray<lcObjectSection>& Objects) const;
+	void GetPieceInsertPosition(lcVector3* Position, lcVector4* AxisAngle);
 
 	lcTrackTool GetTrackTool(float* InterfaceScale, lcVector3* InterfaceCenter) const;
-	lcTool GetMouseTool(lcTrackTool TrackTool);
+	lcTool GetMouseTool(lcTrackTool TrackTool) const;
 	void StartTracking(lcMouseTrack MouseTrack, lcTrackTool TrackTool);
 	void StopTracking(bool Accept);
 

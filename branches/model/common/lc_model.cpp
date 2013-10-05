@@ -140,6 +140,17 @@ void lcModel::GetCameras(lcArray<lcCamera*>& Cameras)
 			Cameras.Add((lcCamera*)mObjects[ObjectIdx]);
 }
 
+lcVector3 lcModel::GetFocusOrSelectionCenter() const
+{
+	if (mFocusObject)
+		return mFocusObject->GetFocusPosition();
+
+//	for (int ObjectIdx = 0; ObjectIdx < mSelectedObjects.GetSize(); ObjectIdx++)
+//		mSelectedObjects[ObjectIdx]->get
+
+	return lcVector3(0.0f, 0.0f, 0.0f);
+}
+
 void lcModel::Update(lcTime Time)
 {
 //	for (int PartIdx = 0; PartIdx < mParts.GetSize(); PartIdx++)

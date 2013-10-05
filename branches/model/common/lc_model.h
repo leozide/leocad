@@ -122,6 +122,8 @@ public:
 	lcCamera* GetCamera(int CameraIndex);
 	void GetCameras(lcArray<lcCamera*>& Cameras);
 
+	lcVector3 GetFocusOrSelectionCenter() const;
+
 	void UndoCheckpoint();
 	void RedoCheckpoint();
 

@@ -1433,12 +1433,6 @@ void Project::Render(View* View, bool ToMemory)
 	mActiveModel->RenderBackground(View);
 	mActiveModel->RenderScene(View, !ToMemory);
 
-	if (!ToMemory)
-	{
-		RenderOverlays(View);
-		RenderViewports(View);
-	}
-
 	glDisableClientState(GL_VERTEX_ARRAY);
 }
 
@@ -2248,36 +2242,6 @@ void Project::RenderOverlays(View* view)
 
 		glEnable(GL_DEPTH_TEST);
 	}
-}
-
-void Project::RenderViewports(View* view)
-{
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glOrtho(0.0f, view->mWidth, 0.0f, view->mHeight, -1.0f, 1.0f);
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	glTranslatef(0.375f, 0.375f, 0.0f);
-
-	glDepthMask(GL_FALSE);
-	glDisable(GL_DEPTH_TEST);
-	glDisable(GL_LIGHTING);
-
-	// Draw camera name
-	glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
-	glEnable(GL_TEXTURE_2D);
-	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-	m_pScreenFont->MakeCurrent();
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glEnable(GL_BLEND);
-
-	m_pScreenFont->PrintText(3.0f, (float)view->mHeight - 1.0f - 6.0f, 0.0f, view->mCamera->mName);
-
-	glDisable(GL_BLEND);
-	glDisable(GL_TEXTURE_2D);
-
-	glDepthMask(GL_TRUE);
-	glEnable(GL_DEPTH_TEST);
 }
 
 void Project::RenderInitialize()
@@ -6088,7 +6052,7 @@ bool Project::StopTracking(bool Accept)
 	case LC_TOOL_SELECT:
 		if (Accept && m_nTracking == LC_TRACK_LEFT)
 		{
-			float x1 = (float)m_nDownX;
+			float x1 = (float)m_nDownX; //todo: clamp to view
 			float y1 = (float)m_nDownY;
 			float x2 = m_fTrack[0];
 			float y2 = m_fTrack[1];
@@ -6964,20 +6928,20 @@ void Project::ZoomActiveView(int Amount)
 }
 
 void Project::BeginPieceDrop(PieceInfo* Info)
-						{
+{
 	StartTracking(LC_TRACK_LEFT);
 
 	mDropPiece = Info;
 	mDropPiece->AddRef();
-			}
+}
 
 void Project::OnPieceDropMove(int x, int y)
-			{
+{
 	if (!mDropPiece)
 		return;
 
 	if (m_nDownX != x || m_nDownY != y)
-			{
+	{
 		m_nDownX = x;
 		m_nDownY = y;
 
@@ -7229,60 +7193,6 @@ void Project::OnLeftButtonDown(View* view)
 		StartTracking(LC_TRACK_START_LEFT);
 		break;
 	}
-}
-
-void Project::OnLeftButtonDoubleClick(View* view)
-{
-	gMainWindow->SetActiveView(view);
-
-	int x = view->mInputState.x;
-	int y = view->mInputState.y;
-	bool Control = view->mInputState.Control;
-
-	int Viewport[4] = { 0, 0, view->mWidth, view->mHeight };
-	float Aspect = (float)Viewport[2]/(float)Viewport[3];
-	lcCamera* Camera = view->mCamera;
-
-	const lcMatrix44& ModelView = Camera->mWorldView;
-	lcMatrix44 Projection = lcMatrix44Perspective(Camera->mFOV, Aspect, Camera->mNear, Camera->mFar);
-
-	lcVector3 point = lcUnprojectPoint(lcVector3((float)x, (float)y, 0.9f), ModelView, Projection, Viewport);
-	m_fTrack[0] = point[0]; m_fTrack[1] = point[1]; m_fTrack[2] = point[2];
-
-	Object* Closest = FindObjectFromPoint(view, x, y);
-
-//  if (m_nCurAction == LC_TOOL_SELECT)
-  {
-	SelectAndFocusNone(Control);
-
-    if (Closest != NULL)
-      switch (Closest->GetType ())
-      {
-        case LC_OBJECT_PIECE:
-        {
-          Piece* pPiece = (Piece*)Closest;
-          pPiece->Select (true, true, false);
-          Group* pGroup = pPiece->GetTopGroup();
-
-          if (pGroup != NULL)
-            for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-              if (pPiece->GetTopGroup() == pGroup)
-                pPiece->Select (true, false, false);
-        } break;
-
-        case LC_OBJECT_CAMERA:
-        case LC_OBJECT_CAMERA_TARGET:
-        case LC_OBJECT_LIGHT:
-        case LC_OBJECT_LIGHT_TARGET:
-        {
-		  Closest->Select (true, true, Control);
-        } break;
-      }
-
-    UpdateSelection();
-	gMainWindow->UpdateAllViews();
-	gMainWindow->UpdateFocusObject(Closest);
-  }
 }
 
 void Project::OnLeftButtonUp(View* view)
@@ -7912,11 +7822,6 @@ void Project::OnMouseMove(View* view)
 		}
 	  break;
 	}
-}
-
-void Project::OnMouseWheel(View* view, float Direction)
-{
-	ZoomActiveView((int)(10 * Direction));
 }
 
 // Check if the mouse is over a different area of the overlay and redraw it.

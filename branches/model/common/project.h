@@ -266,9 +266,6 @@ protected:
 	char m_strDescription[101];
 	char m_strComments[256];
 
-	// Piece library
-	TexFont* m_pScreenFont;
-
 	// Undo support
 	LC_UNDOINFO* m_pUndoList;
 	LC_UNDOINFO* m_pRedoList;
@@ -293,7 +290,6 @@ protected:
 
 	// Rendering functions.
 	void RenderSceneObjects(View* view);
-	void RenderViewports(View* view);
 	void RenderOverlays(View* view);
 
 	void CreateHTMLPieceList(FILE* f, int nStep, bool bImages, const char* ext);
@@ -315,7 +311,6 @@ protected:
 
 	int m_OverlayMode;
 	bool m_OverlayActive;
-	lcVector3 m_OverlayCenter;
 	lcVector3 m_OverlayTrackStart;
 	lcVector3 m_OverlayDelta;
 	void MouseUpdateOverlays(View* view, int x, int y);
@@ -330,13 +325,11 @@ protected:
 public:
 	void OnLeftButtonDown(View* view);
 	void OnLeftButtonUp(View* view);
-	void OnLeftButtonDoubleClick(View* view);
 	void OnMiddleButtonDown(View* view);
 	void OnMiddleButtonUp(View* view);
 	void OnRightButtonDown(View* view);
 	void OnRightButtonUp(View* view);
 	void OnMouseMove(View* view);
-	void OnMouseWheel(View* view, float Direction);
 
 	void SetAction(int Action);
 	int GetAction() const;
@@ -345,11 +338,13 @@ public:
 	void HandleCommand(LC_COMMANDS id);
 
 	lcuint32 m_nSnap;
+	TexFont* m_pScreenFont;
+	int m_nCurAction;
+	lcVector3 m_OverlayCenter;
 
 protected:
 	// State variables
 	int mTransformType;
-	int m_nCurAction;
 	PieceInfo* m_pCurPiece;
 	PieceInfo* mDropPiece;
 	bool m_bAnimation;

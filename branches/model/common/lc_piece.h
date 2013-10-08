@@ -84,6 +84,14 @@ public:
 			mState &= ~LC_PIECE_FOCUS_MASK;
 	}
 
+	virtual lcuintptr GetFocusSection() const
+	{
+		if (mState & LC_PIECE_POSITION_FOCUSED)
+			return 0;
+
+		return ~0;
+	}
+
 	virtual void InvertSelection()
 	{
 		if (mState & (LC_PIECE_POSITION_SELECTED | LC_PIECE_POSITION_FOCUSED))

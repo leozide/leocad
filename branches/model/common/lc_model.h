@@ -135,6 +135,8 @@ public:
 	void InvertSelection(const lcObjectSection& ObjectSection);
 	void AddToSelection(const lcArray<lcObjectSection>& ObjectSections);
 	void SetSelection(const lcArray<lcObjectSection>& ObjectSections);
+	void SelectAllObjects();
+	void ClearSelection();
 	void ClearSelectionOrSetFocus(const lcObjectSection& ObjectSection);
 	void SetFocus(const lcObjectSection& ObjectSection);
 
@@ -145,6 +147,7 @@ public:
 	void FindClosestObject(lcObjectHitTest& HitTest, bool PiecesOnly) const;
 	void FindObjectsInBox(const lcVector4* BoxPlanes, lcArray<lcObjectSection>& ObjectSections) const;
 
+	void AddPiece(PieceInfo* Part, int ColorIndex, lcTime Time);
 	void AddPiece(PieceInfo* Part, int ColorIndex, const lcVector3& Position, const lcVector4& AxisAngle, lcTime Time);
 	void RemoveObject(lcObject* Object);
 	void RemoveObjects(const lcArray<lcObject*>& Objects);

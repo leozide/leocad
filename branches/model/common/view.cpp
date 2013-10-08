@@ -409,22 +409,88 @@ void View::OnLeftButtonDoubleClick()
 
 void View::OnMiddleButtonDown()
 {
-	mProject->OnMiddleButtonDown(this);
+	if (mMouseTrack != LC_MOUSETRACK_NONE)
+	{
+		StopTracking(false);
+		return;
+	}
+
+	gMainWindow->SetActiveView(this);
+
+	lcTrackTool TrackTool = mInputState.Alt ? LC_TRACKTOOL_PAN : GetTrackTool(NULL, NULL);
+	lcTool Tool = GetMouseTool(TrackTool);
+
+	switch (Tool)
+	{
+	case LC_TOOL_PAN:
+		mProject->mActiveModel->BeginEditCameraTool(LC_ACTION_PAN_CAMERA, lcVector3(0.0f, 0.0f, 0.0f));
+		StartTracking(LC_MOUSETRACK_MIDDLE, TrackTool);
+		break;
+
+	default:
+		break;
+	}
 }
 
 void View::OnMiddleButtonUp()
 {
-	mProject->OnMiddleButtonUp(this);
+	StopTracking(mMouseTrack == LC_MOUSETRACK_MIDDLE);
 }
 
 void View::OnRightButtonDown()
 {
-	mProject->OnRightButtonDown(this);
+	if (mMouseTrack != LC_MOUSETRACK_NONE)
+	{
+		StopTracking(false);
+		return;
+	}
+
+	gMainWindow->SetActiveView(this);
+
+	lcTrackTool TrackTool = mInputState.Alt ? LC_TRACKTOOL_ZOOM : GetTrackTool(NULL, NULL);
+	lcTool Tool = GetMouseTool(TrackTool);
+
+	switch (Tool)
+	{
+	case LC_TOOL_MOVE:
+		{
+			if (!mProject->mActiveModel->GetSelectedObjects().GetSize())
+				break;
+
+			mProject->mActiveModel->BeginMoveTool();
+
+			StartTracking(LC_MOUSETRACK_RIGHT, TrackTool);
+		}
+		break;
+	/*
+	case LC_TOOL_ROTATE:
+		{
+			if (!mProject->mActiveModel->GetSelectedObjects().GetSize())
+				break;
+
+			mProject->mActiveModel->BeginRotateTool();
+
+			StartTracking(LC_MOUSETRACK_LEFT, TrackTool);
+			m_OverlayDelta = lcVector3(0.0f, 0.0f, 0.0f);
+		}
+		break;
+*/
+	case LC_TOOL_ZOOM:
+		mProject->mActiveModel->BeginEditCameraTool(LC_ACTION_ZOOM_CAMERA, lcVector3(0.0f, 0.0f, 0.0f));
+		StartTracking(LC_MOUSETRACK_RIGHT, TrackTool);
+		break;
+
+	default:
+		break;
+	}
 }
 
 void View::OnRightButtonUp()
 {
-	mProject->OnRightButtonUp(this);
+	if (mMouseTrack == LC_MOUSETRACK_NONE)
+		ShowPopupMenu();
+
+	StopTracking(mMouseTrack == LC_MOUSETRACK_RIGHT);
 }
 
 void View::OnMouseMove()
@@ -896,9 +962,6 @@ void View::DrawMouseTracking()
 
 /*
 	if (mDropPiece)
-		return;
-
-	if (!m_OverlayActive && ((m_nCurAction != LC_TOOL_SELECT) || (m_nTracking != LC_TRACK_LEFT) || (gMainWindow->mActiveView != view)))
 		return;
 */
 
@@ -2169,6 +2232,9 @@ void View::StopTracking(bool Accept)
 
 	switch (Tool)
 	{
+	case LC_TOOL_LIGHT:
+		break;
+
 	case LC_TOOL_CAMERA:
 		mProject->mActiveModel->EndCreateCameraTool(Accept);
 		break;
@@ -2193,15 +2259,17 @@ void View::StopTracking(bool Accept)
 				else
 					mProject->mActiveModel->SetSelection(ObjectSections);
 			}
-			else
-				gMainWindow->UpdateAllViews();
 		}
-		else
-			gMainWindow->UpdateAllViews();
 		break;
 
 	case LC_TOOL_MOVE:
 		mProject->mActiveModel->EndMoveTool(Accept);
+		break;
+
+	case LC_TOOL_ERASER:
+		break;
+
+	case LC_TOOL_PAINT:
 		break;
 
 	case LC_TOOL_ZOOM:

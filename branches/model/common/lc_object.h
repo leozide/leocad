@@ -74,6 +74,7 @@ public:
 	virtual void SetSelection(lcuintptr Section, bool Selection) = 0;
 	virtual void ClearFocus() = 0;
 	virtual void SetFocus(lcuintptr Section, bool Focus) = 0;
+	virtual lcuintptr GetFocusSection() const = 0;
 	virtual void InvertSelection() = 0;
 	virtual void InvertSelection(lcuintptr Section) = 0;
 

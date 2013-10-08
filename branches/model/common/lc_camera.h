@@ -177,6 +177,20 @@ public:
 		}
 	}
 
+	virtual lcuintptr GetFocusSection() const
+	{
+		if (mState & LC_CAMERA_POSITION_FOCUSED)
+			return LC_CAMERA_POSITION;
+
+		if (mState & LC_CAMERA_TARGET_FOCUSED)
+			return LC_CAMERA_TARGET;
+
+		if (mState & LC_CAMERA_UPVECTOR_FOCUSED)
+			return LC_CAMERA_UPVECTOR;
+
+		return ~0;
+	}
+
 	virtual void InvertSelection()
 	{
 		if (mState & LC_CAMERA_POSITION_SELECTED)

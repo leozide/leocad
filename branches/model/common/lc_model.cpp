@@ -10,6 +10,7 @@
 #include "lc_file.h"
 #include "lc_profile.h"
 #include "lc_application.h"
+#include "pieceinf.h"
 
 enum
 {
@@ -299,6 +300,32 @@ void lcModel::SetSelection(const lcArray<lcObjectSection>& ObjectSections)
 	mSelectedObjects.RemoveAll();
 
 	AddToSelection(ObjectSections);
+
+	if (mFocusObject)
+	{
+		mFocusObject = NULL;
+		gMainWindow->UpdateFocusObject();
+	}
+}
+
+void lcModel::SelectAllObjects()
+{
+	mSelectedObjects = mObjects;
+	for (int ObjectIdx = 0; ObjectIdx < mSelectedObjects.GetSize(); ObjectIdx++)
+		mSelectedObjects[ObjectIdx]->SetSelection(true);
+
+	gMainWindow->UpdateAllViews();
+	gMainWindow->UpdateSelection();
+}
+
+void lcModel::ClearSelection()
+{
+	for (int ObjectIdx = 0; ObjectIdx < mSelectedObjects.GetSize(); ObjectIdx++)
+		mSelectedObjects[ObjectIdx]->SetSelection(false);
+	mSelectedObjects.RemoveAll();
+
+	gMainWindow->UpdateAllViews();
+	gMainWindow->UpdateSelection();
 
 	if (mFocusObject)
 	{
@@ -1347,6 +1374,28 @@ void lcModel::FindObjectsInBox(const lcVector4* BoxPlanes, lcArray<lcObjectSecti
 	}
 }
 
+void lcModel::AddPiece(PieceInfo* Part, int ColorIndex, lcTime Time)
+{
+	lcVector3 Position(0.0f, 0.0f, -Part->m_fDimensions[5]);
+	lcVector4 AxisAngle(0.0f, 0.0f, 1.0f, 0.0f);
+
+	if (mFocusObject)
+	{
+		lcPiece* Piece = mFocusObject->GetPiece(mFocusObject->GetFocusSection());
+
+		if (Piece)
+		{
+			lcVector3 Dist(0, 0, Piece->mPieceInfo->m_fDimensions[2] - Part->m_fDimensions[5]);
+			Dist = lcGetActiveProject()->SnapVector(Dist);
+
+			Position = lcMul31(Dist, Piece->mModelWorld);
+			AxisAngle = Piece->mAxisAngle;
+		}
+	}
+
+	AddPiece(Part, ColorIndex, Position, AxisAngle, Time);
+}
+
 void lcModel::AddPiece(PieceInfo* Part, int ColorIndex, const lcVector3& Position, const lcVector4& AxisAngle, lcTime Time)
 {
 	lcPiece* Piece = new lcPiece(Part, ColorIndex, Position, AxisAngle, Time);
@@ -1453,8 +1502,17 @@ void lcModel::PasteFromClipboard()
 	if (!Clipboard)
 		return;
 
+	for (int ObjectIdx = 0; ObjectIdx < mSelectedObjects.GetSize(); ObjectIdx++)
+		mSelectedObjects[ObjectIdx]->SetSelection(false);
+	mSelectedObjects.RemoveAll();
+
+	if (mFocusObject)
+	{
+		mFocusObject = NULL;
+		gMainWindow->UpdateFocusObject();
+	}
+
 	Clipboard->Seek(0, SEEK_SET);
-	SetSelection(lcArray<lcObjectSection>());
 
 	lcint32 ObjectCount = Clipboard->ReadS32();
 	bool UpdateCameraMenu = false;
@@ -1508,6 +1566,7 @@ void lcModel::PasteFromClipboard()
 		gMainWindow->UpdateCameraMenu();
 
 	gMainWindow->UpdateAllViews();
+	gMainWindow->UpdateSelection();
 
 //	SetModifiedFlag(true);
 }

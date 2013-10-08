@@ -48,11 +48,6 @@
 #define LC_SEL_FOCUSGROUP	0x200 // focused piece is grouped
 #define LC_SEL_CANGROUP		0x400 // can make a new group
 
-enum LC_NOTIFY
-{
-	LC_CAPTURE_LOST
-};
-
 enum LC_TRANSFORM_TYPE
 {
 	LC_TRANSFORM_ABSOLUTE_TRANSLATION,
@@ -334,7 +329,6 @@ public:
 	void SetAction(int Action);
 	int GetAction() const;
 
-	void HandleNotify(LC_NOTIFY id, unsigned long param);
 	void HandleCommand(LC_COMMANDS id);
 
 	lcuint32 m_nSnap;

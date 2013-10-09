@@ -378,6 +378,12 @@ void lcModel::SetFocus(const lcObjectSection& ObjectSection)
 	gMainWindow->UpdateFocusObject();
 }
 
+lcTime lcModel::GetTotalTime() const
+{
+// todo: total time
+	return 1000;
+}
+
 void lcModel::SetCurrentTime(lcTime Time)
 {
 	Time = lcClamp(Time, (lcTime)1, (lcTime)~0 - 1);
@@ -407,7 +413,7 @@ void lcModel::SetCurrentTime(lcTime Time)
 	gMainWindow->UpdateAllViews();
 	gMainWindow->UpdateSelection();
 	gMainWindow->UpdateFocusObject();
-//	gMainWindow->UpdateTime(m_bAnimation, m_nCurStep, 255);
+	gMainWindow->UpdateCurrentTime();
 }
 
 void lcModel::HideSelectedObjects()

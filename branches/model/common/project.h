@@ -65,32 +65,6 @@ enum LC_MOUSE_TRACK
 	LC_TRACK_RIGHT
 };
 
-// Mouse control overlays.
-enum LC_OVERLAY_MODES
-{
-	LC_OVERLAY_NONE,
-	LC_OVERLAY_MOVE_X,
-	LC_OVERLAY_MOVE_Y,
-	LC_OVERLAY_MOVE_Z,
-	LC_OVERLAY_MOVE_XY,
-	LC_OVERLAY_MOVE_XZ,
-	LC_OVERLAY_MOVE_YZ,
-	LC_OVERLAY_MOVE_XYZ,
-	LC_OVERLAY_ROTATE_X,
-	LC_OVERLAY_ROTATE_Y,
-	LC_OVERLAY_ROTATE_Z,
-	LC_OVERLAY_ROTATE_XY,
-	LC_OVERLAY_ROTATE_XZ,
-	LC_OVERLAY_ROTATE_YZ,
-	LC_OVERLAY_ROTATE_XYZ,
-	LC_OVERLAY_ZOOM,
-	LC_OVERLAY_PAN,
-	LC_OVERLAY_ROTATE_VIEW_X,
-	LC_OVERLAY_ROTATE_VIEW_Y,
-	LC_OVERLAY_ROTATE_VIEW_Z,
-	LC_OVERLAY_ROTATE_VIEW_XYZ
-};
-
 class Piece;
 class Camera;
 class Light;
@@ -100,7 +74,6 @@ class PieceInfo;
 class View;
 class Image;
 class TexFont;
-struct lcObjectSection;
 
 // Undo support
 
@@ -118,13 +91,6 @@ struct LC_FILEENTRY
 {
 	lcMemFile File;
 	char FileName[LC_MAXPATH];
-};
-
-struct lcPiecesUsedEntry
-{
-	PieceInfo* Info;
-	int ColorIndex;
-	int Count;
 };
 
 struct lcSearchOptions
@@ -175,21 +141,16 @@ enum lcTool
 class Project
 {
 public:
-// Constructors
 	Project();
 	~Project();
 
-// Attributes
 public:
 	bool IsModified()
 		{ return m_bModified; }
 
-	// Access to protected members
 	unsigned char GetLastStep();
 	bool IsAnimation()
 		{ return m_bAnimation; }
-	void SetAnimation(bool Anim)
-	{ m_bAnimation = Anim; } // only to be called from lcApplication::Initialize()
 	unsigned short GetCurrentTime ()
 		{ return m_nCurStep; }
 	void SetCurrentTime(unsigned short Time)
@@ -201,8 +162,6 @@ public:
 		{ m_pCurPiece = pInfo; }
 	unsigned long GetSnap() const
 		{ return m_nSnap; }
-	int GetOverlayMode() const
-		{ return m_OverlayMode; }
 	void GetSnapIndex(int* SnapXY, int* SnapZ, int* SnapAngle) const;
 	void GetSnapText(char* SnapXY, char* SnapZ, char* SnapAngle) const;
 	void GetSnapDistance(float* SnapXY, float* SnapZ) const;
@@ -213,8 +172,8 @@ public:
 	void ConvertFromUserUnits(lcVector3& Value) const;
 
 	void UpdateInterface();
-	void SetPathName (const char* lpszPathName, bool bAddToMRU);
-	void SetTitle (const char* lpszTitle);
+	void SetPathName(const char* lpszPathName, bool bAddToMRU);
+	void SetTitle(const char* lpszTitle);
 
 public:
 	void DeleteContents(bool bUndo);
@@ -249,11 +208,7 @@ public:
 	char m_strPathName[LC_MAXPATH];
 	bool m_bModified;
 
-// Implementation
 public:
-	lcObjectSection FindClosestObject(View* View, int x, int y) const;
-	void FindObjectsInRectangle(View* View, float x1, float y1, float x2, float y2, lcArray<lcObjectSection>& Objects) const;
-
 	char m_strAuthor[101];
 	char m_strDescription[101];
 	char m_strComments[256];
@@ -290,12 +245,10 @@ public:
 	void ExportPOVRay(lcFile& File);
 	void ZoomExtents(int FirstView, int LastView);
 
-	bool m_bStopRender;
 	bool m_bTrackCancel;
 	int m_nTracking;
 	int m_nDownX;
 	int m_nDownY;
-	float m_fTrack[3];
 	int m_nMouse;
 	lcVector3 m_MouseSnapLeftover;
 	lcVector3 m_MouseTotalDelta;
@@ -313,17 +266,7 @@ public:
 	void RemoveEmptyGroups();
 
 public:
-	void OnLeftButtonDown(View* view);
-	void OnLeftButtonUp(View* view);
-	void OnMiddleButtonDown(View* view);
-	void OnMiddleButtonUp(View* view);
-	void OnRightButtonDown(View* view);
-	void OnRightButtonUp(View* view);
-	void OnMouseMove(View* view);
-
 	void SetAction(int Action);
-	int GetAction() const;
-
 	void HandleCommand(LC_COMMANDS id);
 
 	lcuint32 m_nSnap;
@@ -331,7 +274,6 @@ public:
 	int m_nCurAction;
 
 public:
-	// State variables
 	int mTransformType;
 	PieceInfo* m_pCurPiece;
 	PieceInfo* mDropPiece;
@@ -352,7 +294,6 @@ public:
 	lcTexture* mGridTexture;
 
 protected:
-	// File load/save implementation.
 	bool DoSave(const char* FileName);
 	bool FileLoad(lcFile* file, bool bUndo, bool bMerge);
 	void FileSave(lcFile* file, bool bUndo);
@@ -360,7 +301,6 @@ protected:
 	void FileReadMPD(lcFile& MPD, lcArray<LC_FILEENTRY*>& FileArray) const;
 
 public:
-	// File helpers
 	bool OnNewDocument();
 	bool OnOpenDocument(const char* FileName);
 	bool OpenProject(const char* FileName);

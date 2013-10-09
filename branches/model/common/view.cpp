@@ -112,9 +112,9 @@ LC_CURSOR_TYPE View::GetCursor() const
 			return LC_CURSOR_PAN;
 
 		case LC_TOOL_ROTATE_VIEW:
-			switch (mProject->GetOverlayMode())
+			switch (mTrackTool)
 			{
-				case LC_OVERLAY_ROTATE_VIEW_X:
+				case LC_TRACKTOOL_ROTATE_VIEW_X:
 					return LC_CURSOR_ROTATEX;
 				case LC_TRACKTOOL_ROTATE_VIEW_Y:
 					return LC_CURSOR_ROTATEY;

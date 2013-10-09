@@ -309,8 +309,6 @@ void lcQMainWindow::createMenus()
 	menuStep->addAction(actions[LC_VIEW_TIME_PREVIOUS]);
 	menuStep->addAction(actions[LC_VIEW_TIME_NEXT]);
 	menuStep->addAction(actions[LC_VIEW_TIME_LAST]);
-	//LC_VIEW_TIME_STOP
-	//LC_VIEW_TIME_PLAY
 	menuStep->addSeparator();
 	menuStep->addAction(actions[LC_VIEW_TIME_INSERT]);
 	menuStep->addAction(actions[LC_VIEW_TIME_DELETE]);
@@ -430,8 +428,6 @@ void lcQMainWindow::createToolBars()
 	timeToolBar->addAction(actions[LC_VIEW_TIME_PREVIOUS]);
 	timeToolBar->addAction(actions[LC_VIEW_TIME_NEXT]);
 	timeToolBar->addAction(actions[LC_VIEW_TIME_LAST]);
-	//LC_VIEW_TIME_STOP
-	//LC_VIEW_TIME_PLAY
 	//LC_VIEW_TIME_ADD_KEYS
 	// TODO: add missing menu items
 
@@ -803,8 +799,6 @@ void lcQMainWindow::print(QPrinter *printer)
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);
 
 	unsigned short previousTime = project->GetCurrentTime();
-	bool wasAnimation = project->IsAnimation();
-	project->SetAnimation(false);
 
 	QPainter painter(printer);
 	lcuint8 *buffer = (lcuint8*)malloc(tileWidth * tileHeight * 4);
@@ -986,8 +980,6 @@ void lcQMainWindow::print(QPrinter *printer)
 
 	free(buffer);
 
-	if (wasAnimation)
-		project->SetAnimation(true);
 	project->SetCurrentTime(previousTime);
 
 	GL_EndRenderToTexture();
@@ -1161,17 +1153,18 @@ void lcQMainWindow::updatePaste(bool enabled)
 		action->setEnabled(enabled);
 }
 
-void lcQMainWindow::updateTime(bool animation, int currentTime, int totalTime)
+void lcQMainWindow::updateCurrentTime()
 {
+	lcModel* activeModel = lcGetActiveProject()->mActiveModel;
+	lcTime currentTime = activeModel->GetCurrentTime();
+	lcTime totalTime = activeModel->GetTotalTime();
+
 	actions[LC_VIEW_TIME_FIRST]->setEnabled(currentTime != 1);
 	actions[LC_VIEW_TIME_PREVIOUS]->setEnabled(currentTime > 1);
-	actions[LC_VIEW_TIME_NEXT]->setEnabled(currentTime < totalTime);
+	actions[LC_VIEW_TIME_NEXT]->setEnabled(currentTime < (lcTime)~0);
 	actions[LC_VIEW_TIME_LAST]->setEnabled(currentTime != totalTime);
 
-	if (animation)
-		statusTimeLabel->setText(QString(tr(" %1 / %2 ")).arg(QString::number(currentTime), QString::number(totalTime)));
-	else
-		statusTimeLabel->setText(QString(tr(" Step %1 ")).arg(QString::number(currentTime)));
+	statusTimeLabel->setText(QString(tr(" Step %1 ")).arg(QString::number(currentTime)));
 }
 
 void lcQMainWindow::updateAnimation(bool animation, bool addKeys)

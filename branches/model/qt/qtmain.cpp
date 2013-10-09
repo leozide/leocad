@@ -533,12 +533,12 @@ void lcMainWindow::UpdatePaste(bool Enabled)
 		window->updatePaste(Enabled);
 }
 
-void lcMainWindow::UpdateTime(bool Animation, int CurrentTime, int TotalTime)
+void lcMainWindow::UpdateCurrentTime()
 {
 	lcQMainWindow* window = (lcQMainWindow*)mHandle;
 
 	if (window)
-		window->updateTime(Animation, CurrentTime, TotalTime);
+		window->updateCurrentTime();
 }
 
 void lcMainWindow::UpdateAnimation(bool Animation, bool AddKeys)

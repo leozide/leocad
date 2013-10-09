@@ -123,6 +123,10 @@ public:
 		return mCurrentTime;
 	}
 
+	lcTime GetTotalTime() const;
+	void SetCurrentTime(lcTime Time);
+
+
 	void GetPartsUsed(lcArray<lcObjectParts>& PartsUsed) const;
 	lcCamera* GetCamera(int CameraIndex);
 	void GetCameras(lcArray<lcCamera*>& Cameras);
@@ -144,8 +148,6 @@ public:
 	void ClearSelection();
 	void ClearSelectionOrSetFocus(const lcObjectSection& ObjectSection);
 	void SetFocus(const lcObjectSection& ObjectSection);
-
-	void SetCurrentTime(lcTime Time);
 
 	void HideSelectedObjects();
 	void HideUnselectedObjects();

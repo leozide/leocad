@@ -779,16 +779,8 @@ void lcQPropertiesTree::setPart(Object *newFocusObject)
 	partRotationZ->setData(0, PropertyValueRole, rotation[2]);
 
 	lcuint32 show, hide;
-	if (lcGetActiveProject()->IsAnimation())
-	{
-		show = part->GetFrameShow();
-		hide = part->GetFrameHide();
-	}
-	else
-	{
-		show = part->GetStepShow();
-		hide = part->GetStepHide();
-	}
+	show = part->GetStepShow();
+	hide = part->GetStepHide();
 
 	partShow->setText(1, QString::number(show));
 	partShow->setData(0, PropertyValueRole, show);

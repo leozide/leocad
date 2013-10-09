@@ -900,20 +900,6 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 		"Go to the last step of the model",
 		"Alt+Down"
 	},
-	// LC_VIEW_TIME_STOP
-	{
-		"View.Time.Stop",
-		"Stop",
-		"Stop playing animation",
-		""
-	},
-	// LC_VIEW_TIME_PLAY
-	{
-		"View.Time.Play",
-		"Play",
-		"Play animation",
-		""
-	},
 	// LC_VIEW_TIME_INSERT
 	{
 		"View.Time.Insert",

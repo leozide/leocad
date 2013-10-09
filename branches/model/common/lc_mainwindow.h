@@ -42,7 +42,7 @@ class lcMainWindow : public lcBaseWindow
 	void UpdateSelectedObjects(int Flags, int SelectedCount, Object* Focus);
 	void UpdateAction(int NewAction);
 	void UpdatePaste(bool Enabled);
-	void UpdateTime(bool Animation, int CurrentTime, int TotalTime);
+	void UpdateCurrentTime();
 	void UpdateAnimation(bool Animation, bool AddKeys);
 	void UpdateLockSnap(lcuint32 Snap);
 	void UpdateSnap();

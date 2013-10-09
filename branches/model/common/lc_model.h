@@ -118,6 +118,11 @@ public:
 		return mSelectedObjects;
 	}
 
+	lcTime GetCurrentTime() const
+	{
+		return mCurrentTime;
+	}
+
 	void GetPartsUsed(lcArray<lcObjectParts>& PartsUsed) const;
 	lcCamera* GetCamera(int CameraIndex);
 	void GetCameras(lcArray<lcCamera*>& Cameras);
@@ -140,6 +145,8 @@ public:
 	void ClearSelectionOrSetFocus(const lcObjectSection& ObjectSection);
 	void SetFocus(const lcObjectSection& ObjectSection);
 
+	void SetCurrentTime(lcTime Time);
+
 	void HideSelectedObjects();
 	void HideUnselectedObjects();
 	void UnhideAllObjects();
@@ -147,39 +154,40 @@ public:
 	void FindClosestObject(lcObjectHitTest& HitTest, bool PiecesOnly) const;
 	void FindObjectsInBox(const lcVector4* BoxPlanes, lcArray<lcObjectSection>& ObjectSections) const;
 
-	void AddPiece(PieceInfo* Part, int ColorIndex, lcTime Time);
-	void AddPiece(PieceInfo* Part, int ColorIndex, const lcVector3& Position, const lcVector4& AxisAngle, lcTime Time);
+	void AddPiece(PieceInfo* Part, int ColorIndex);
+	void AddPiece(PieceInfo* Part, int ColorIndex, const lcVector3& Position, const lcVector4& AxisAngle);
 	void RemoveObject(lcObject* Object);
 	void RemoveObjects(const lcArray<lcObject*>& Objects);
 	void CopyToClipboard();
 	void PasteFromClipboard();
 
 	void BeginCreateCameraTool(const lcVector3& Position, const lcVector3& TargetPosition, const lcVector3& UpVector);
-	void UpdateCreateCameraTool(const lcVector3& Distance, lcTime Time, bool AddKeys);
+	void UpdateCreateCameraTool(const lcVector3& Distance, bool AddKeys);
 	void EndCreateCameraTool(bool Accept);
 
 	void BeginMoveTool();
-	void UpdateMoveTool(const lcVector3& Distance, lcTime Time, bool AddKeys);
+	void UpdateMoveTool(const lcVector3& Distance, bool AddKeys);
 	void EndMoveTool(bool Accept);
 
 	void BeginRotateTool();
-	void UpdateRotateTool(const lcVector3& Angles, lcTime Time, bool AddKeys);
+	void UpdateRotateTool(const lcVector3& Angles, bool AddKeys);
 	void EndRotateTool(bool Accept);
 
 	void BeginEditCameraTool(lcActionType ActionType, const lcVector3& Center);
-	void UpdateEditCameraTool(lcActionType ActionType, float ValueX, float ValueY, lcTime Time, bool AddKeys);
+	void UpdateEditCameraTool(lcActionType ActionType, float ValueX, float ValueY, bool AddKeys);
 	void EndEditCameraTool(lcActionType ActionType, bool Accept);
 
-	void ZoomExtents(View* View, const lcVector3& Center, const lcVector3* Points, lcTime Time, bool AddKeys);
-	void ZoomRegion(View* View, float Left, float Right, float Bottom, float Top, lcTime Time, bool AddKeys);
+	void ZoomExtents(View* View, const lcVector3& Center, const lcVector3* Points, bool AddKeys);
+	void ZoomRegion(View* View, float Left, float Right, float Bottom, float Top, bool AddKeys);
 
 protected:
 	void DeleteContents();
-	void Update(lcTime Time);
 
 	void BeginCheckpoint(lcActionType ActionType);
 	void EndCheckpoint(bool Accept, bool SaveCheckpoint);
 	void ApplyCheckpoint(lcMemFile& File);
+
+	lcTime mCurrentTime;
 
 	lcCheckpoint* mCurrentCheckpoint;
 	lcArray<lcCheckpoint*> mUndoCheckpoints;

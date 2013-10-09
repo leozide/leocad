@@ -78,6 +78,8 @@ public:
 	virtual void InvertSelection() = 0;
 	virtual void InvertSelection(lcuintptr Section) = 0;
 
+	virtual void SetCurrentTime(lcTime Time) = 0;
+
 	virtual void Save(lcFile& File) = 0;
 	virtual void Load(lcFile& File) = 0;
 	virtual void Update() = 0;

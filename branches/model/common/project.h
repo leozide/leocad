@@ -191,13 +191,10 @@ public:
 	void SetAnimation(bool Anim)
 	{ m_bAnimation = Anim; } // only to be called from lcApplication::Initialize()
 	unsigned short GetCurrentTime ()
-		{ return m_bAnimation ? m_nCurFrame : m_nCurStep; }
+		{ return m_nCurStep; }
 	void SetCurrentTime(unsigned short Time)
 	{
-		if (m_bAnimation)
-			m_nCurFrame = Time;
-		else
-			m_nCurStep = (unsigned char)Time;
+		m_nCurStep = (unsigned char)Time;
 		CalculateStep();
 	}
 	void SetCurrentPiece(PieceInfo* pInfo)
@@ -285,7 +282,6 @@ public:
 
 	// Rendering functions.
 	void RenderSceneObjects(View* view);
-	void RenderOverlays(View* view);
 
 	void CreateHTMLPieceList(FILE* f, int nStep, bool bImages, const char* ext);
 	void Export3DStudio();
@@ -310,7 +306,6 @@ public:
 	lcVector3 m_OverlayDelta;
 	void MouseUpdateOverlays(View* view, int x, int y);
 	void ActivateOverlay(View* view, int Action, int OverlayMode);
-	void UpdateOverlayScale();
 
 	bool StopTracking(bool bAccept);
 	void StartTracking(int mode);
@@ -334,7 +329,6 @@ public:
 	lcuint32 m_nSnap;
 	TexFont* m_pScreenFont;
 	int m_nCurAction;
-	lcVector3 m_OverlayCenter;
 
 public:
 	// State variables
@@ -343,9 +337,7 @@ public:
 	PieceInfo* mDropPiece;
 	bool m_bAnimation;
 	bool m_bAddKeys;
-	unsigned char m_nFPS;
 	unsigned char m_nCurStep;
-	lcuint16 m_nCurFrame;
 	lcuint16 m_nTotalFrames;
 
 	lcuint16 m_nMoveSnap;

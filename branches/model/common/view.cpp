@@ -211,7 +211,7 @@ void View::OnLeftButtonDown()
 			lcVector4 AxisAngle;
 
 			GetPieceInsertPosition(&Position, &AxisAngle);
-			mProject->mActiveModel->AddPiece(mProject->m_pCurPiece, gMainWindow->mColorIndex, Position, AxisAngle, mProject->m_nCurStep);
+			mProject->mActiveModel->AddPiece(mProject->m_pCurPiece, gMainWindow->mColorIndex, Position, AxisAngle);
 
 			if (!mInputState.Control)
 				mProject->SetAction(LC_TOOL_SELECT);
@@ -562,7 +562,7 @@ void View::OnMouseMove()
 	case LC_TOOL_CAMERA:
 		{
 			lcVector3 Position = lcUnprojectPoint(lcVector3((float)mInputState.x, (float)mInputState.y, 0.9f), ModelView, Projection, Viewport);
-			mProject->mActiveModel->UpdateCreateCameraTool(Position, mProject->m_nCurStep, mProject->m_bAddKeys);
+			mProject->mActiveModel->UpdateCreateCameraTool(Position, mProject->m_bAddKeys);
 		}
 		break;
 
@@ -900,11 +900,17 @@ void View::OnMouseMove()
 		}
 		break;
 #endif
+	case LC_TOOL_ERASER:
+		break;
+
+	case LC_TOOL_PAINT:
+		break;
+
 	case LC_TOOL_ZOOM:
 		{
 			float Distance = 2.0f * MouseSensitivity * (mInputState.y - mMouseDownY);
 
-			mProject->mActiveModel->UpdateEditCameraTool(LC_ACTION_ZOOM_CAMERA, Distance, 0.0f, mProject->m_nCurStep, mProject->m_bAddKeys);
+			mProject->mActiveModel->UpdateEditCameraTool(LC_ACTION_ZOOM_CAMERA, Distance, 0.0f, mProject->m_bAddKeys);
 		}
 		break;
 
@@ -913,7 +919,7 @@ void View::OnMouseMove()
 			float DistanceX = 2.0f * MouseSensitivity * (mInputState.x - mMouseDownX);
 			float DistanceY = -2.0f * MouseSensitivity * (mInputState.y - mMouseDownY);
 
-			mProject->mActiveModel->UpdateEditCameraTool(LC_ACTION_PAN_CAMERA, DistanceX, DistanceY, mProject->m_nCurStep, mProject->m_bAddKeys);
+			mProject->mActiveModel->UpdateEditCameraTool(LC_ACTION_PAN_CAMERA, DistanceX, DistanceY, mProject->m_bAddKeys);
 		}
 		break;
 
@@ -923,14 +929,14 @@ void View::OnMouseMove()
 			{
 				float Angle = -2.0f * MouseSensitivity * (mInputState.x - mMouseDownX) * LC_DTOR;
 
-				mProject->mActiveModel->UpdateEditCameraTool(LC_ACTION_ROLL_CAMERA, Angle, 0.0f, mProject->m_nCurStep, mProject->m_bAddKeys);
+				mProject->mActiveModel->UpdateEditCameraTool(LC_ACTION_ROLL_CAMERA, Angle, 0.0f, mProject->m_bAddKeys);
 			}
 			else
 			{
 				float AngleX = (mTrackTool == LC_TRACKTOOL_ROTATE_VIEW_Y) ? 0.0f : -0.1f * MouseSensitivity * (mInputState.x - mMouseDownX);
 				float AngleY = (mTrackTool == LC_TRACKTOOL_ROTATE_VIEW_X) ? 0.0f : -0.1f * MouseSensitivity * (mInputState.y - mMouseDownY);
 
-				mProject->mActiveModel->UpdateEditCameraTool(LC_ACTION_ORBIT_CAMERA, AngleX, AngleY, mProject->m_nCurStep, mProject->m_bAddKeys);
+				mProject->mActiveModel->UpdateEditCameraTool(LC_ACTION_ORBIT_CAMERA, AngleX, AngleY, mProject->m_bAddKeys);
 			}
 		}
 		break;
@@ -939,7 +945,7 @@ void View::OnMouseMove()
 		{
 			float Angle = -2.0f * MouseSensitivity * (mInputState.x - mMouseDownX) * LC_DTOR;
 
-			mProject->mActiveModel->UpdateEditCameraTool(LC_ACTION_ROLL_CAMERA, Angle, 0.0f, mProject->m_nCurStep, mProject->m_bAddKeys);
+			mProject->mActiveModel->UpdateEditCameraTool(LC_ACTION_ROLL_CAMERA, Angle, 0.0f, mProject->m_bAddKeys);
 		}
 		break;
 
@@ -2232,6 +2238,9 @@ void View::StopTracking(bool Accept)
 
 	switch (Tool)
 	{
+	case LC_TOOL_INSERT:
+		break;
+
 	case LC_TOOL_LIGHT:
 		break;
 
@@ -2324,7 +2333,7 @@ void View::StopTracking(bool Accept)
 			Bottom = lcMax(Bottom, 0.0f);
 			Top = lcMin(Top, mHeight - 1);
 
-			mProject->mActiveModel->ZoomRegion(gMainWindow->mActiveView, Left, Right, Bottom, Top, mProject->m_nCurStep, mProject->m_bAddKeys);
+			mProject->mActiveModel->ZoomRegion(gMainWindow->mActiveView, Left, Right, Bottom, Top, mProject->m_bAddKeys);
 		}
 		break;
 	}
@@ -2349,12 +2358,11 @@ void View::StopTracking(bool Accept)
 				GetPieceInsertPosition(ActiveView, x, y, Pos, Rot);
 
 				Piece* pPiece = new Piece(mDropPiece);
-				pPiece->Initialize(Pos[0], Pos[1], Pos[2], m_nCurStep, m_nCurFrame);
+				pPiece->Initialize(Pos[0], Pos[1], Pos[2], m_nCurStep);
 				pPiece->SetColorIndex(gMainWindow->mColorIndex);
 
 				pPiece->ChangeKey(m_nCurStep, false, false, Rot, LC_PK_ROTATION);
-				pPiece->ChangeKey(m_nCurFrame, true, false, Rot, LC_PK_ROTATION);
-				pPiece->UpdatePosition(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation);
+				pPiece->UpdatePosition(m_nCurStep, m_bAnimation);
 
 				SelectAndFocusNone(false);
 				pPiece->CreateName(m_pPieces);

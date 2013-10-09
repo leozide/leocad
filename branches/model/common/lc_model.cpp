@@ -66,6 +66,7 @@ void lcModelProperties::SaveDefaults()
 
 lcModel::lcModel()
 {
+	mCurrentTime = 1;
 	mCurrentCheckpoint = NULL;
 	mFocusObject = NULL;
 	mProperties.LoadDefaults();
@@ -150,18 +151,6 @@ lcVector3 lcModel::GetFocusOrSelectionCenter() const
 //		mSelectedObjects[ObjectIdx]->get
 
 	return lcVector3(0.0f, 0.0f, 0.0f);
-}
-
-void lcModel::Update(lcTime Time)
-{
-//	for (int PartIdx = 0; PartIdx < mParts.GetSize(); PartIdx++)
-//		mParts[PartIdx]->Update(Time);
-
-//	for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
-//		mCameras[CameraIdx]->Update(Time);
-
-//	for (int LightIdx = 0; LightIdx < mLights.GetSize(); LightIdx++)
-//		mLights[LightIdx]->Update(Time);
 }
 
 void lcModel::UndoCheckpoint()
@@ -389,10 +378,47 @@ void lcModel::SetFocus(const lcObjectSection& ObjectSection)
 	gMainWindow->UpdateFocusObject();
 }
 
+void lcModel::SetCurrentTime(lcTime Time)
+{
+	Time = lcClamp(Time, (lcTime)1, (lcTime)~0 - 1);
+
+	if (mCurrentTime == Time)
+		return;
+
+	mCurrentTime = Time;
+
+	for (int ObjectIdx = 0; ObjectIdx < mObjects.GetSize(); ObjectIdx++)
+	{
+		lcObject* Object = mObjects[ObjectIdx];
+
+		Object->SetCurrentTime(mCurrentTime);
+
+		if (!Object->IsSelected() || Object->IsVisible())
+			continue;
+
+		Object->SetSelection(false);
+
+		if (mFocusObject == Object)
+			mFocusObject = NULL;
+
+		mSelectedObjects.Remove(Object);
+	}
+
+	gMainWindow->UpdateAllViews();
+	gMainWindow->UpdateSelection();
+	gMainWindow->UpdateFocusObject();
+//	gMainWindow->UpdateTime(m_bAnimation, m_nCurStep, 255);
+}
+
 void lcModel::HideSelectedObjects()
 {
 	for (int ObjectIdx = 0; ObjectIdx < mSelectedObjects.GetSize(); ObjectIdx++)
-		mSelectedObjects[ObjectIdx]->SetVisible(false);
+	{
+		lcObject* Object = mSelectedObjects[ObjectIdx];
+
+		Object->SetSelection(false);
+		Object->SetVisible(false);
+	}
 	mSelectedObjects.RemoveAll();
 	mFocusObject = NULL;
 
@@ -471,7 +497,7 @@ void lcModel::BeginCreateCameraTool(const lcVector3& Position, const lcVector3& 
 	gMainWindow->UpdateCameraMenu();
 }
 
-void lcModel::UpdateCreateCameraTool(const lcVector3& TargetPosition, lcTime Time, bool AddKeys)
+void lcModel::UpdateCreateCameraTool(const lcVector3& TargetPosition, bool AddKeys)
 {
 	LC_ASSERT(mCurrentCheckpoint->mActionType == LC_ACTION_CREATE_CAMERA);
 
@@ -488,7 +514,7 @@ void lcModel::UpdateCreateCameraTool(const lcVector3& TargetPosition, lcTime Tim
 	Apply.WriteFloats(TargetPosition, 3);
 
 	lcCamera* Camera = (lcCamera*)mObjects[mObjects.GetSize() - 1];
-	Camera->Move(TargetPosition - Camera->mTargetPosition, Time, AddKeys);
+	Camera->Move(TargetPosition - Camera->mTargetPosition, mCurrentTime, AddKeys);
 	Camera->Update();
 
 	gMainWindow->UpdateFocusObject();
@@ -541,7 +567,7 @@ void lcModel::BeginMoveTool()
 	Apply.WriteFloats(lcVector3(0.0f, 0.0f, 0.0f), 3);
 }
 
-void lcModel::UpdateMoveTool(const lcVector3& Distance, lcTime Time, bool AddKeys)
+void lcModel::UpdateMoveTool(const lcVector3& Distance, bool AddKeys)
 {
 	LC_ASSERT(mCurrentCheckpoint->mActionType == LC_ACTION_MOVE_OBJECTS);
 
@@ -566,7 +592,7 @@ void lcModel::UpdateMoveTool(const lcVector3& Distance, lcTime Time, bool AddKey
 	{
 		lcint32 ObjectIndex = Revert.ReadS32();
 		mObjects[ObjectIndex]->Load(Revert);
-		mObjects[ObjectIndex]->Move(Distance, Time, AddKeys);
+		mObjects[ObjectIndex]->Move(Distance, mCurrentTime, AddKeys);
 		mObjects[ObjectIndex]->Update();
 	}
 
@@ -632,7 +658,7 @@ void lcModel::BeginRotateTool()
 	Apply.WriteFloats(lcVector3(0.0f, 0.0f, 0.0f), 3);
 }
 
-void lcModel::UpdateRotateTool(const lcVector3& Angles, lcTime Time, bool AddKeys)
+void lcModel::UpdateRotateTool(const lcVector3& Angles, bool AddKeys)
 {
 	LC_ASSERT(mCurrentCheckpoint->mActionType == LC_ACTION_ROTATE_OBJECTS);
 
@@ -721,7 +747,7 @@ void lcModel::BeginEditCameraTool(lcActionType ActionType, const lcVector3& Cent
 	Apply.WriteFloats(Center, 3);
 }
 
-void lcModel::UpdateEditCameraTool(lcActionType ActionType, float ValueX, float ValueY, lcTime Time, bool AddKeys)
+void lcModel::UpdateEditCameraTool(lcActionType ActionType, float ValueX, float ValueY, bool AddKeys)
 {
 	LC_ASSERT(mCurrentCheckpoint->mActionType == ActionType);
 
@@ -753,19 +779,19 @@ void lcModel::UpdateEditCameraTool(lcActionType ActionType, float ValueX, float 
 	switch (ActionType)
 	{
 	case LC_ACTION_ZOOM_CAMERA:
-		Camera->Zoom(ValueX, Time, AddKeys);
+		Camera->Zoom(ValueX, mCurrentTime, AddKeys);
 		break;
 
 	case LC_ACTION_PAN_CAMERA:
-		Camera->Pan(ValueX, ValueY, Time, AddKeys);
+		Camera->Pan(ValueX, ValueY, mCurrentTime, AddKeys);
 		break;
 
 	case LC_ACTION_ORBIT_CAMERA:
-		Camera->Orbit(ValueX, ValueY, Center, Time, AddKeys);
+		Camera->Orbit(ValueX, ValueY, Center, mCurrentTime, AddKeys);
 		break;
 
 	case LC_ACTION_ROLL_CAMERA:
-		Camera->Roll(ValueX, Time, AddKeys);
+		Camera->Roll(ValueX, mCurrentTime, AddKeys);
 		break;
 
 	default:
@@ -809,7 +835,7 @@ void lcModel::EndEditCameraTool(lcActionType ActionType, bool Accept)
 	EndCheckpoint(Accept, !Camera->IsSimple());
 }
 
-void lcModel::ZoomExtents(View* View, const lcVector3& Center, const lcVector3* Points, lcTime Time, bool AddKeys)
+void lcModel::ZoomExtents(View* View, const lcVector3& Center, const lcVector3* Points, bool AddKeys)
 {
 	lcCamera* Camera = View->mCamera;
 
@@ -824,7 +850,7 @@ void lcModel::ZoomExtents(View* View, const lcVector3& Center, const lcVector3* 
 		Camera->Save(Revert);
 	}
 
-	Camera->ZoomExtents(View, Center, Points, Time, AddKeys);
+	Camera->ZoomExtents(View, Center, Points, mCurrentTime, AddKeys);
 	Camera->Update();
 
 	if (mFocusObject)
@@ -844,7 +870,7 @@ void lcModel::ZoomExtents(View* View, const lcVector3& Center, const lcVector3* 
 	}
 }
 
-void lcModel::ZoomRegion(View* View, float Left, float Right, float Bottom, float Top, lcTime Time, bool AddKeys)
+void lcModel::ZoomRegion(View* View, float Left, float Right, float Bottom, float Top, bool AddKeys)
 {
 	lcCamera* Camera = View->mCamera;
 
@@ -859,7 +885,7 @@ void lcModel::ZoomRegion(View* View, float Left, float Right, float Bottom, floa
 		Camera->Save(Revert);
 	}
 
-	Camera->ZoomRegion(View, Left, Right, Bottom, Top, Time, AddKeys);
+	Camera->ZoomRegion(View, Left, Right, Bottom, Top, mCurrentTime, AddKeys);
 	Camera->Update();
 
 	if (mFocusObject)
@@ -1216,7 +1242,7 @@ void lcModel::DrawGrid() const
 		float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
 
 		for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-			if (pPiece->IsVisible(m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation))
+			if (pPiece->IsVisible(m_nCurStep, m_bAnimation))
 				pPiece->CompareBoundingBox(bs);
 
 		if (m_nCurAction == LC_TOOL_INSERT || mDropPiece)
@@ -1374,7 +1400,7 @@ void lcModel::FindObjectsInBox(const lcVector4* BoxPlanes, lcArray<lcObjectSecti
 	}
 }
 
-void lcModel::AddPiece(PieceInfo* Part, int ColorIndex, lcTime Time)
+void lcModel::AddPiece(PieceInfo* Part, int ColorIndex)
 {
 	lcVector3 Position(0.0f, 0.0f, -Part->m_fDimensions[5]);
 	lcVector4 AxisAngle(0.0f, 0.0f, 1.0f, 0.0f);
@@ -1393,12 +1419,12 @@ void lcModel::AddPiece(PieceInfo* Part, int ColorIndex, lcTime Time)
 		}
 	}
 
-	AddPiece(Part, ColorIndex, Position, AxisAngle, Time);
+	AddPiece(Part, ColorIndex, Position, AxisAngle);
 }
 
-void lcModel::AddPiece(PieceInfo* Part, int ColorIndex, const lcVector3& Position, const lcVector4& AxisAngle, lcTime Time)
+void lcModel::AddPiece(PieceInfo* Part, int ColorIndex, const lcVector3& Position, const lcVector4& AxisAngle)
 {
-	lcPiece* Piece = new lcPiece(Part, ColorIndex, Position, AxisAngle, Time);
+	lcPiece* Piece = new lcPiece(Part, ColorIndex, Position, AxisAngle, mCurrentTime);
 	Piece->Update();
 	mObjects.Add(Piece);
 

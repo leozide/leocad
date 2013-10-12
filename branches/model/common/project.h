@@ -270,7 +270,6 @@ public:
 	void HandleCommand(LC_COMMANDS id);
 
 	lcuint32 m_nSnap;
-	TexFont* m_pScreenFont;
 	int m_nCurAction;
 
 public:
@@ -291,7 +290,6 @@ public:
 	unsigned long m_nSaveTimer;
 	char m_strBackground[LC_MAXPATH];
 	lcTexture* m_pBackground;
-	lcTexture* mGridTexture;
 
 protected:
 	bool DoSave(const char* FileName);

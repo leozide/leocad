@@ -106,6 +106,16 @@ SOURCES += common/view.cpp \
     common/camera.cpp \
     common/lc_profile.cpp \
     common/lc_category.cpp \
+    common/lc_commands.cpp \
+    common/lc_shortcuts.cpp \
+    common/lc_mainwindow.cpp \
+    common/lc_part.cpp \
+    common/lc_model.cpp \
+    common/lc_object.cpp \
+    common/lc_camera.cpp \
+    common/lc_light.cpp \
+    common/lc_piece.cpp \
+	common/lc_glwidget.cpp \
     qt/lc_qmainwindow.cpp \
     qt/system.cpp \
     qt/qtmain.cpp \
@@ -128,19 +138,10 @@ SOURCES += common/view.cpp \
     qt/lc_qutils.cpp \
     qt/lc_qpropertiestree.cpp \
     qt/lc_qcolorpicker.cpp \
-    common/lc_commands.cpp \
-    common/lc_shortcuts.cpp \
     qt/lc_qimage.cpp \
     qt/lc_qglwidget.cpp \
     qt/lc_qcolorlist.cpp \
-    qt/lc_qfinddialog.cpp \
-    common/lc_mainwindow.cpp \
-    common/lc_part.cpp \
-    common/lc_model.cpp \
-    common/lc_object.cpp \
-    common/lc_camera.cpp \
-    common/lc_light.cpp \
-    common/lc_piece.cpp
+    qt/lc_qfinddialog.cpp 
 HEADERS += \
     common/view.h \
     common/tr.h \
@@ -172,6 +173,18 @@ HEADERS += \
     common/camera.h \
     common/lc_profile.h \
     common/lc_category.h \
+    common/lc_commands.h \
+    common/lc_shortcuts.h \
+    common/lc_glwidget.h \
+    common/lc_array.h \
+    common/lc_basewindow.h \
+    common/lc_mainwindow.h \
+    common/lc_part.h \
+    common/lc_model.h \
+    common/lc_object.h \
+    common/lc_camera.h \
+    common/lc_light.h \
+    common/lc_piece.h \
     qt/lc_qmainwindow.h \
     qt/lc_config.h \
     qt/lc_qpovraydialog.h \
@@ -191,21 +204,9 @@ HEADERS += \
     qt/lc_qutils.h \
     qt/lc_qpropertiestree.h \
     qt/lc_qcolorpicker.h \
-    common/lc_commands.h \
-    common/lc_shortcuts.h \
     qt/lc_qglwidget.h \
     qt/lc_qcolorlist.h \
-    common/lc_glwidget.h \
-    qt/lc_qfinddialog.h \
-    common/lc_array.h \
-    common/lc_basewindow.h \
-    common/lc_mainwindow.h \
-    common/lc_part.h \
-    common/lc_model.h \
-    common/lc_object.h \
-    common/lc_camera.h \
-    common/lc_light.h \
-    common/lc_piece.h
+    qt/lc_qfinddialog.h
 FORMS += \ 
     qt/lc_qpovraydialog.ui \
     qt/lc_qarraydialog.ui \

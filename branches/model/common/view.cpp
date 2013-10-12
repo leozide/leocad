@@ -1718,11 +1718,11 @@ void View::DrawViewport()
 	glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
 	glEnable(GL_TEXTURE_2D);
 	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-	mProject->m_pScreenFont->MakeCurrent();
+	mDefaultFont->MakeCurrent();
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_BLEND);
 
-	mProject->m_pScreenFont->PrintText(3.0f, (float)mHeight - 1.0f - 6.0f, 0.0f, CameraName);
+	mDefaultFont->PrintText(3.0f, (float)mHeight - 1.0f - 6.0f, 0.0f, CameraName);
 
 	glDisable(GL_BLEND);
 	glDisable(GL_TEXTURE_2D);
@@ -2224,6 +2224,8 @@ void View::StartTracking(lcMouseTrack MouseTrack, lcTrackTool TrackTool)
 	mTrackTool = TrackTool;
 	mMouseDownX = mInputState.x;
 	mMouseDownY = mInputState.y;
+
+	OnUpdateCursor();
 }
 
 void View::StopTracking(bool Accept)
@@ -2339,7 +2341,7 @@ void View::StopTracking(bool Accept)
 	}
 
 	gMainWindow->UpdateAllViews();
-
+	OnUpdateCursor();
 
 
 /*

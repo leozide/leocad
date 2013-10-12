@@ -1,6 +1,8 @@
 #ifndef _LC_GLWIDGET_H_
 #define _LC_GLWIDGET_H_
 
+class TexFont;
+
 enum LC_CURSOR_TYPE
 {
 	LC_CURSOR_DEFAULT,
@@ -71,11 +73,22 @@ public:
 	virtual void OnMouseMove() { }
 	virtual void OnMouseWheel(float Direction) { }
 
+	void InitializeGL();
+	void ShutdownGL();
+
+	static lcTexture* mGridTexture;
+	static TexFont* mDefaultFont;
+
 	lcInputState mInputState;
 	int mWidth;
 	int mHeight;
 	int mCursorType;
 	void* mWidget;
+
+protected:
+	void CreateGridTexture();
+
+	static int mNumWidgets;
 };
 
 #endif // _LC_GLWIDGET_H_

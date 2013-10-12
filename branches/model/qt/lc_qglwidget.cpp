@@ -116,7 +116,7 @@ lcQGLWidget::lcQGLWidget(QWidget *parent, lcQGLWidget *share, lcGLWidget *owner,
 	widget->mWidget = this;
 
 	widget->MakeCurrent();
-	GL_InitializeSharedExtensions(widget);
+	widget->InitializeGL();
 	widget->OnInitialUpdate();
 
 	preferredSize = QSize(0, 0);
@@ -132,6 +132,7 @@ lcQGLWidget::lcQGLWidget(QWidget *parent, lcQGLWidget *share, lcGLWidget *owner,
 
 lcQGLWidget::~lcQGLWidget()
 {
+	widget->ShutdownGL();
 	if (isView)
 		delete widget;
 }

@@ -3,8 +3,7 @@
 
 class lcGLWidget;
 
-void GL_InitializeSharedExtensions(lcGLWidget* Window);
-bool GL_ExtensionSupported(const GLubyte* Extensions, const char* Name);
+void GL_InitializeExtensions(lcGLWidget* Window);
 
 extern bool GL_SupportsVertexBufferObject;
 extern bool GL_UseVertexBufferObject;

@@ -1,6 +1,4 @@
 #include "lc_global.h"
-#include <string.h>
-#include <stdio.h>
 #include "opengl.h"
 #include "lc_glwidget.h"
 #include "lc_mainwindow.h"
@@ -45,7 +43,7 @@ bool GL_SupportsFramebufferObject;
 bool GL_SupportsAnisotropic;
 GLfloat GL_MaxAnisotropy;
 
-bool GL_ExtensionSupported(const GLubyte* Extensions, const char* Name)
+static bool GL_ExtensionSupported(const GLubyte* Extensions, const char* Name)
 {
 	const GLubyte *start;
 	GLubyte *where, *terminator;
@@ -74,7 +72,7 @@ bool GL_ExtensionSupported(const GLubyte* Extensions, const char* Name)
 	return false;
 }
 
-void GL_InitializeSharedExtensions(lcGLWidget* Window)
+void GL_InitializeExtensions(lcGLWidget* Window)
 {
 	const GLubyte* Extensions = glGetString(GL_EXTENSIONS);
 

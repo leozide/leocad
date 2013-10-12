@@ -11,6 +11,7 @@
 #include "lc_profile.h"
 #include "lc_application.h"
 #include "pieceinf.h"
+#include "lc_texture.h"
 
 enum
 {
@@ -1297,55 +1298,50 @@ void lcModel::DrawGrid() const
 	MinY = lcMin(MinY, -2);
 	MaxX = lcMax(MaxX, 2);
 	MaxY = lcMax(MaxY, 2);
-/*
-	if (mGridStuds)
+
+	if (Preferences->mDrawGridStuds)
 	{
 		float Left = MinX * 0.8f * Spacing;
 		float Right = MaxX * 0.8f * Spacing;
 		float Top = MinY * 0.8f * Spacing;
 		float Bottom = MaxY * 0.8f * Spacing;
-		float Z = 0;
 		float U = (MaxX - MinX) * Spacing;
 		float V = (MaxY - MinY) * Spacing;
 
-		float Verts[4 * 5];
+		float Verts[4 * 4];
 		float* CurVert = Verts;
 
 		*CurVert++ = Left;
 		*CurVert++ = Top;
-		*CurVert++ = Z;
 		*CurVert++ = 0.0f;
 		*CurVert++ = V;
 
 		*CurVert++ = Left;
 		*CurVert++ = Bottom;
-		*CurVert++ = Z;
 		*CurVert++ = 0.0f;
 		*CurVert++ = 0.0f;
 
 		*CurVert++ = Right;
 		*CurVert++ = Bottom;
-		*CurVert++ = Z;
 		*CurVert++ = U;
 		*CurVert++ = 0.0f;
 
 		*CurVert++ = Right;
 		*CurVert++ = Top;
-		*CurVert++ = Z;
 		*CurVert++ = U;
 		*CurVert++ = V;
 
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-		glBindTexture(GL_TEXTURE_2D, mGridTexture->mTexture);
+		glBindTexture(GL_TEXTURE_2D, lcGLWidget::mGridTexture->mTexture);
 		glEnable(GL_TEXTURE_2D);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_BLEND);
 
-		glColor4fv(lcVector4FromColor(mGridStudColor));
+		glColor4fv(lcVector4FromColor(Preferences->mGridStudColor));
 
-		glVertexPointer(3, GL_FLOAT, 5 * sizeof(float), Verts);
+		glVertexPointer(2, GL_FLOAT, 4 * sizeof(float), Verts);
 		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-		glTexCoordPointer(2, GL_FLOAT, 5 * sizeof(float), Verts + 3);
+		glTexCoordPointer(2, GL_FLOAT, 4 * sizeof(float), Verts + 2);
 
 		glDrawArrays(GL_QUADS, 0, 4);
 
@@ -1354,7 +1350,7 @@ void lcModel::DrawGrid() const
 		glDisable(GL_TEXTURE_2D);
 		glDisable(GL_BLEND);
 	}
-*/
+
 	if (Preferences->mDrawGridLines)
 	{
 		glColor4fv(lcVector4FromColor(Preferences->mGridLineColor));

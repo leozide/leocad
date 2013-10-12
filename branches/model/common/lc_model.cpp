@@ -976,10 +976,20 @@ void lcModel::ApplyCheckpoint(lcMemFile& File)
 					mSelectedObjects.Remove(Object);
 					UpdateSelection = true;
 				}
-// if view camera fix view
 
 				if (Object->IsCamera())
+				{
+					for (int ViewIdx = 0; ViewIdx < gMainWindow->mViews.GetSize(); ViewIdx++)
+					{
+						View* View = gMainWindow->mViews[ViewIdx];
+						lcCamera* Camera = View->mCamera;
+
+						if (Camera == Object)
+							View->SetCamera(Camera, true);
+					}
+
 					UpdateCameraMenu = true;
+				}
 
 				ObjectsRemoved++;
 				mObjects.RemoveIndex(ObjectIndex);
@@ -1382,23 +1392,29 @@ void lcModel::DrawGrid() const
 	}
 }
 
-void lcModel::FindClosestObject(lcObjectHitTest& HitTest, bool PiecesOnly) const
+void lcModel::FindClosestObject(lcObjectHitTest& HitTest) const
 {
 	for (int ObjectIdx = 0; ObjectIdx < mObjects.GetSize(); ObjectIdx++)
 	{
-//		if (visible)
-//		if (camera != viewcamera)
-		mObjects[ObjectIdx]->ClosestHitTest(HitTest, PiecesOnly);
+		lcObject* Object = mObjects[ObjectIdx];
+
+		if (!Object->IsVisible())
+			continue;
+
+		Object->ClosestHitTest(HitTest);
 	}
 }
 
-void lcModel::FindObjectsInBox(const lcVector4* BoxPlanes, lcArray<lcObjectSection>& ObjectSections) const
+void lcModel::FindObjectsInBox(lcObjectBoxTest& BoxTest) const
 {
 	for (int ObjectIdx = 0; ObjectIdx < mObjects.GetSize(); ObjectIdx++)
 	{
-//		if (visible)
-//		if (camera != viewcamera)
-		mObjects[ObjectIdx]->BoxTest(BoxPlanes, ObjectSections);
+		lcObject* Object = mObjects[ObjectIdx];
+
+		if (!Object->IsVisible())
+			continue;
+
+		Object->BoxTest(BoxTest);
 	}
 }
 

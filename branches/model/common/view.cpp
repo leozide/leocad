@@ -1742,18 +1742,17 @@ lcObjectSection View::FindClosestObject(bool PiecesOnly) const
 	float x = (float)mInputState.x;
 	float y = (float)mInputState.y;
 
-	lcVector3 Start = lcUnprojectPoint(lcVector3(x, y, 0.0f), ModelView, Projection, Viewport);
-	lcVector3 End = lcUnprojectPoint(lcVector3(x, y, 1.0f), ModelView, Projection, Viewport);
-
 	lcObjectHitTest HitTest;
 
-	HitTest.Start = Start;
-	HitTest.End = End;
+	HitTest.PiecesOnly = PiecesOnly;
+	HitTest.Camera = mCamera;
+	HitTest.Start = lcUnprojectPoint(lcVector3(x, y, 0.0f), ModelView, Projection, Viewport);
+	HitTest.End = lcUnprojectPoint(lcVector3(x, y, 1.0f), ModelView, Projection, Viewport);
 	HitTest.Distance = FLT_MAX;
 	HitTest.ObjectSection.Object = NULL;
 	HitTest.ObjectSection.Section = 0;
 
-	mProject->mActiveModel->FindClosestObject(HitTest, PiecesOnly);
+	mProject->mActiveModel->FindClosestObject(HitTest);
 
 	return HitTest.ObjectSection;
 }
@@ -1807,15 +1806,17 @@ void View::FindObjectsInRectangle(float x1, float y1, float x2, float y2, lcArra
 	PlaneNormals[4] = lcNormalize(lcCross(Corners[1] - Corners[0], Corners[3] - Corners[0])); // Front
 	PlaneNormals[5] = lcNormalize(lcCross(Corners[1] - Corners[2], Corners[3] - Corners[2])); // Back
 
-	lcVector4 Planes[6];
-	Planes[0] = lcVector4(PlaneNormals[0], -lcDot(PlaneNormals[0], Corners[0]));
-	Planes[1] = lcVector4(PlaneNormals[1], -lcDot(PlaneNormals[1], Corners[5]));
-	Planes[2] = lcVector4(PlaneNormals[2], -lcDot(PlaneNormals[2], Corners[0]));
-	Planes[3] = lcVector4(PlaneNormals[3], -lcDot(PlaneNormals[3], Corners[5]));
-	Planes[4] = lcVector4(PlaneNormals[4], -lcDot(PlaneNormals[4], Corners[0]));
-	Planes[5] = lcVector4(PlaneNormals[5], -lcDot(PlaneNormals[5], Corners[5]));
+	lcObjectBoxTest BoxTest;
 
-	mProject->mActiveModel->FindObjectsInBox(Planes, Objects);
+	BoxTest.Camera = mCamera;
+	BoxTest.Planes[0] = lcVector4(PlaneNormals[0], -lcDot(PlaneNormals[0], Corners[0]));
+	BoxTest.Planes[1] = lcVector4(PlaneNormals[1], -lcDot(PlaneNormals[1], Corners[5]));
+	BoxTest.Planes[2] = lcVector4(PlaneNormals[2], -lcDot(PlaneNormals[2], Corners[0]));
+	BoxTest.Planes[3] = lcVector4(PlaneNormals[3], -lcDot(PlaneNormals[3], Corners[5]));
+	BoxTest.Planes[4] = lcVector4(PlaneNormals[4], -lcDot(PlaneNormals[4], Corners[0]));
+	BoxTest.Planes[5] = lcVector4(PlaneNormals[5], -lcDot(PlaneNormals[5], Corners[5]));
+
+	mProject->mActiveModel->FindObjectsInBox(BoxTest);
 }
 
 void View::GetPieceInsertPosition(lcVector3* Position, lcVector4* AxisAngle)

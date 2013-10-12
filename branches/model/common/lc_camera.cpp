@@ -57,9 +57,9 @@ void lcCamera::Update()
 	mWorldView = lcMatrix44LookAt(mPosition, mTargetPosition, mUpVector);
 }
 
-void lcCamera::ClosestHitTest(lcObjectHitTest& HitTest, bool PiecesOnly)
+void lcCamera::ClosestHitTest(lcObjectHitTest& HitTest)
 {
-	if (PiecesOnly)
+	if (HitTest.PiecesOnly || HitTest.Camera == this)
 		return;
 
 	lcVector3 Min = lcVector3(-0.3f, -0.3f, -0.3f);
@@ -109,8 +109,11 @@ void lcCamera::ClosestHitTest(lcObjectHitTest& HitTest, bool PiecesOnly)
 	}
 }
 
-void lcCamera::BoxTest(const lcVector4* BoxPlanes, lcArray<lcObjectSection>& ObjectSections)
+void lcCamera::BoxTest(lcObjectBoxTest& BoxTest)
 {
+	if (BoxTest.Camera == this)
+		return;
+
 	lcVector3 Min(-0.3f, -0.3f, -0.3f);
 	lcVector3 Max(0.3f, 0.3f, 0.3f);
 
@@ -118,13 +121,13 @@ void lcCamera::BoxTest(const lcVector4* BoxPlanes, lcArray<lcObjectSection>& Obj
 
 	for (int PlaneIdx = 0; PlaneIdx < 6; PlaneIdx++)
 	{
-		lcVector3 Normal = lcMul30(BoxPlanes[PlaneIdx], mWorldView);
-		LocalPlanes[PlaneIdx] = lcVector4(Normal, BoxPlanes[PlaneIdx][3] - lcDot3(mWorldView[3], Normal));
+		lcVector3 Normal = lcMul30(BoxTest.Planes[PlaneIdx], mWorldView);
+		LocalPlanes[PlaneIdx] = lcVector4(Normal, BoxTest.Planes[PlaneIdx][3] - lcDot3(mWorldView[3], Normal));
 	}
 
 	if (lcBoundingBoxIntersectsVolume(Min, Max, LocalPlanes))
 	{
-		lcObjectSection& ObjectSection = ObjectSections.Add();
+		lcObjectSection& ObjectSection = BoxTest.ObjectSections.Add();
 		ObjectSection.Object = this;
 		ObjectSection.Section = LC_CAMERA_POSITION;
 	}
@@ -137,13 +140,13 @@ void lcCamera::BoxTest(const lcVector4* BoxPlanes, lcArray<lcObjectSection>& Obj
 
 	for (int PlaneIdx = 0; PlaneIdx < 6; PlaneIdx++)
 	{
-		lcVector3 Normal = lcMul30(BoxPlanes[PlaneIdx], WorldView);
-		LocalPlanes[PlaneIdx] = lcVector4(Normal, BoxPlanes[PlaneIdx][3] - lcDot3(WorldView[3], Normal));
+		lcVector3 Normal = lcMul30(BoxTest.Planes[PlaneIdx], WorldView);
+		LocalPlanes[PlaneIdx] = lcVector4(Normal, BoxTest.Planes[PlaneIdx][3] - lcDot3(WorldView[3], Normal));
 	}
 
 	if (lcBoundingBoxIntersectsVolume(Min, Max, LocalPlanes))
 	{
-		lcObjectSection& ObjectSection = ObjectSections.Add();
+		lcObjectSection& ObjectSection = BoxTest.ObjectSections.Add();
 		ObjectSection.Object = this;
 		ObjectSection.Section = LC_CAMERA_TARGET;
 	}
@@ -156,13 +159,13 @@ void lcCamera::BoxTest(const lcVector4* BoxPlanes, lcArray<lcObjectSection>& Obj
 
 	for (int PlaneIdx = 0; PlaneIdx < 6; PlaneIdx++)
 	{
-		lcVector3 Normal = lcMul30(BoxPlanes[PlaneIdx], WorldView);
-		LocalPlanes[PlaneIdx] = lcVector4(Normal, BoxPlanes[PlaneIdx][3] - lcDot3(WorldView[3], Normal));
+		lcVector3 Normal = lcMul30(BoxTest.Planes[PlaneIdx], WorldView);
+		LocalPlanes[PlaneIdx] = lcVector4(Normal, BoxTest.Planes[PlaneIdx][3] - lcDot3(WorldView[3], Normal));
 	}
 
 	if (lcBoundingBoxIntersectsVolume(Min, Max, LocalPlanes))
 	{
-		lcObjectSection& ObjectSection = ObjectSections.Add();
+		lcObjectSection& ObjectSection = BoxTest.ObjectSections.Add();
 		ObjectSection.Object = this;
 		ObjectSection.Section = LC_CAMERA_UPVECTOR;
 	}

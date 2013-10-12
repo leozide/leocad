@@ -9,6 +9,7 @@ class View;
 class PieceInfo;
 class lcCheckpoint;
 struct lcObjectHitTest;
+struct lcObjectBoxTest;
 struct lcObjectSection;
 struct lcObjectParts;
 struct lcRenderMesh;
@@ -153,8 +154,8 @@ public:
 	void HideUnselectedObjects();
 	void UnhideAllObjects();
 
-	void FindClosestObject(lcObjectHitTest& HitTest, bool PiecesOnly) const;
-	void FindObjectsInBox(const lcVector4* BoxPlanes, lcArray<lcObjectSection>& ObjectSections) const;
+	void FindClosestObject(lcObjectHitTest& HitTest) const;
+	void FindObjectsInBox(lcObjectBoxTest& BoxTest) const;
 
 	void AddPiece(PieceInfo* Part, int ColorIndex);
 	void AddPiece(PieceInfo* Part, int ColorIndex, const lcVector3& Position, const lcVector4& AxisAngle);

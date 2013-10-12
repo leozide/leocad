@@ -121,8 +121,8 @@ public:
 	virtual void Load(lcFile& File);
 	virtual void Update();
 
-	virtual void ClosestHitTest(lcObjectHitTest& HitTest, bool PiecesOnly);
-	virtual void BoxTest(const lcVector4* BoxPlanes, lcArray<lcObjectSection>& ObjectSections);
+	virtual void ClosestHitTest(lcObjectHitTest& HitTest);
+	virtual void BoxTest(lcObjectBoxTest& BoxTest);
 
 	virtual lcPiece* GetPiece(lcuintptr Section) { return this; }
 	virtual void GetPartsUsed(lcArray<lcObjectParts>& PartsUsed) const;

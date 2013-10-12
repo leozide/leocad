@@ -35,10 +35,19 @@ struct lcObjectSection
 
 struct lcObjectHitTest
 {
+	bool PiecesOnly;
+	lcCamera* Camera;
 	lcVector3 Start;
 	lcVector3 End;
 	float Distance;
 	lcObjectSection ObjectSection;
+};
+
+struct lcObjectBoxTest
+{
+	lcCamera* Camera;
+	lcVector4 Planes[6];
+	lcArray<lcObjectSection> ObjectSections;
 };
 
 struct lcObjectParts
@@ -84,8 +93,8 @@ public:
 	virtual void Load(lcFile& File) = 0;
 	virtual void Update() = 0;
 
-	virtual void ClosestHitTest(lcObjectHitTest& HitTest, bool PiecesOnly) = 0;
-	virtual void BoxTest(const lcVector4* BoxPlanes, lcArray<lcObjectSection>& ObjectSections) = 0;
+	virtual void ClosestHitTest(lcObjectHitTest& HitTest) = 0;
+	virtual void BoxTest(lcObjectBoxTest& BoxTest) = 0;
 
 	virtual lcPiece* GetPiece(lcuintptr Section) { return NULL; }
 	virtual void GetPartsUsed(lcArray<lcObjectParts>& PartsUsed) const { }

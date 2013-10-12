@@ -52,7 +52,7 @@ void lcPiece::Update()
 	mModelWorld.SetTranslation(mPosition);
 }
 
-void lcPiece::ClosestHitTest(lcObjectHitTest& HitTest, bool PiecesOnly)
+void lcPiece::ClosestHitTest(lcObjectHitTest& HitTest)
 {
 	lcVector3 Min(mPieceInfo->m_fDimensions[3], mPieceInfo->m_fDimensions[4], mPieceInfo->m_fDimensions[5]);
 	lcVector3 Max(mPieceInfo->m_fDimensions[0], mPieceInfo->m_fDimensions[1], mPieceInfo->m_fDimensions[2]);
@@ -75,7 +75,7 @@ void lcPiece::ClosestHitTest(lcObjectHitTest& HitTest, bool PiecesOnly)
 	}
 }
 
-void lcPiece::BoxTest(const lcVector4* BoxPlanes, lcArray<lcObjectSection>& ObjectSections)
+void lcPiece::BoxTest(lcObjectBoxTest& BoxTest)
 {
 	lcVector3 Box[8] =
 	{
@@ -98,8 +98,8 @@ void lcPiece::BoxTest(const lcVector4* BoxPlanes, lcArray<lcObjectSection>& Obje
 
 	for (i = 0; i < NumPlanes; i++)
 	{
-		lcVector3 PlaneNormal = lcMul30(BoxPlanes[i], WorldToLocal);
-		LocalPlanes[i] = lcVector4(PlaneNormal, BoxPlanes[i][3] - lcDot3(WorldToLocal[3], PlaneNormal));
+		lcVector3 PlaneNormal = lcMul30(BoxTest.Planes[i], WorldToLocal);
+		LocalPlanes[i] = lcVector4(PlaneNormal, BoxTest.Planes[i][3] - lcDot3(WorldToLocal[3], PlaneNormal));
 	}
 
 	int Outcodes[8];
@@ -128,7 +128,7 @@ void lcPiece::BoxTest(const lcVector4* BoxPlanes, lcArray<lcObjectSection>& Obje
 
 	if (OutcodesOR == 0 || mPieceInfo->mMesh->IntersectsPlanes(LocalPlanes))
 	{
-		lcObjectSection& ObjectSection = ObjectSections.Add();
+		lcObjectSection& ObjectSection = BoxTest.ObjectSections.Add();
 		ObjectSection.Object = this;
 		ObjectSection.Section = 0;
 	}

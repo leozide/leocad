@@ -40,7 +40,6 @@ Project::Project()
 	mActiveModel = new lcModel;
 
 	m_bModified = false;
-	m_bTrackCancel = false;
 	m_nTracking = LC_TRACK_NONE;
 	mDropPiece = NULL;
 	m_pPieces = NULL;
@@ -48,11 +47,8 @@ Project::Project()
 	m_pGroups = NULL;
 	m_pUndoList = NULL;
 	m_pRedoList = NULL;
-	m_nCurAction = 0;
-	mTransformType = LC_TRANSFORM_RELATIVE_TRANSLATION;
 	m_pTerrain = new Terrain();
 	m_pBackground = new lcTexture();
-	m_nAutosave = lcGetProfileInt(LC_PROFILE_AUTOSAVE_INTERVAL);
 	m_nDownX = 0;
 	m_nDownY = 0;
 	memset(&mSearchOptions, 0, sizeof(mSearchOptions));
@@ -73,6 +69,10 @@ Project::~Project()
 void Project::UpdateInterface()
 {
 	// Update all user interface elements.
+	gMainWindow->UpdateTransformMode();
+	gMainWindow->UpdateCurrentTool();
+	gMainWindow->UpdateAddKeys();
+
 	gMainWindow->UpdateUndoRedo(m_pUndoList->pNext ? m_pUndoList->strText : NULL, m_pRedoList ? m_pRedoList->strText : NULL);
 	gMainWindow->UpdatePaste(g_App->mClipboard != NULL);
 	SystemUpdatePlay(true, false);
@@ -80,9 +80,6 @@ void Project::UpdateInterface()
 	gMainWindow->UpdateTitle(m_strTitle, m_bModified);
 
 	gMainWindow->UpdateFocusObject(GetFocusObject());
-	SetAction(m_nCurAction);
-	gMainWindow->UpdateTransformType(mTransformType);
-	gMainWindow->UpdateAnimation(m_bAnimation, m_bAddKeys);
 	gMainWindow->UpdateLockSnap(m_nSnap);
 	gMainWindow->UpdateSnap();
 	gMainWindow->UpdateCameraMenu();
@@ -175,15 +172,6 @@ void Project::DeleteContents(bool bUndo)
 		m_pGroups = m_pGroups->m_pNext;
 		delete pGroup;
 	}
-
-
-/*
-	if (!m_strTempFile.IsEmpty())
-	{
-		DeleteFile (m_strTempFile);
-		m_strTempFile.Empty();
-	}
-*/
 }
 
 // Only call after DeleteContents()
@@ -191,12 +179,13 @@ void Project::LoadDefaults(bool cameras)
 {
 	int i;
 
-	// Default values
+	gMainWindow->SetTransformMode(LC_TRANSFORM_RELATIVE_TRANSLATION);
+	gMainWindow->SetCurrentTool(LC_TOOL_SELECT);
+	gMainWindow->SetAddKeys(false);
 	gMainWindow->SetColorIndex(lcGetColorIndex(4));
-	SetAction(LC_TOOL_SELECT);
+
+	// Default values
 	m_bAnimation = false;
-	m_bAddKeys = false;
-	gMainWindow->UpdateAnimation(m_bAnimation, m_bAddKeys);
 	m_bUndoOriginal = true;
 	gMainWindow->UpdateUndoRedo(NULL, NULL);
 	m_nAngleSnap = (unsigned short)lcGetProfileInt(LC_PROFILE_ANGLE_SNAP);
@@ -207,7 +196,6 @@ void Project::LoadDefaults(bool cameras)
 	m_nCurStep = 1;
 	m_nTotalFrames = 100;
 	gMainWindow->UpdateCurrentTime();
-	m_nSaveTimer = 0;
 	strcpy(m_strHeader, "");
 	strcpy(m_strFooter, "Page &P");
 	strcpy(m_strBackground, lcGetProfileString(LC_PROFILE_DEFAULT_BACKGROUND_TEXTURE));
@@ -243,7 +231,7 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 	char id[32];
 	lcuint32 rgb;
 	float fv = 0.4f;
-	lcuint8 ch, action = m_nCurAction;
+	lcuint8 ch;
 	lcuint16 sh;
 
 	file->Seek(0, SEEK_SET);
@@ -312,7 +300,7 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 		file->ReadU32(&u, 1); //m_nDetail
 		file->ReadS32(&i, 1); //m_nCurGroup = i;
 		file->ReadS32(&i, 1); //m_nCurColor = i;
-		file->ReadS32(&i, 1); action = i;
+		file->ReadS32(&i, 1); //action = i;
 		file->ReadS32(&i, 1); m_nCurStep = i;
 	}
 
@@ -674,8 +662,6 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 			ZoomExtents(0, gMainWindow->mViews.GetSize());
 	}
 
-	SetAction(action);
-	gMainWindow->UpdateAnimation(m_bAnimation, m_bAddKeys);
 	gMainWindow->UpdateLockSnap(m_nSnap);
 	gMainWindow->UpdateSnap();
 	gMainWindow->UpdateCameraMenu();
@@ -709,7 +695,7 @@ void Project::FileSave(lcFile* file, bool bUndo)
 	file->WriteS32(&i, 1);
 	i = 0;//i = m_nCurColor;
 	file->WriteS32(&i, 1);
-	i = m_nCurAction; file->WriteS32(&i, 1);
+	file->WriteS32(0);//m_nCurAction
 	i = m_nCurStep; file->WriteS32(&i, 1);
 	file->WriteU32(0);//m_nScene
 
@@ -776,7 +762,7 @@ void Project::FileSave(lcFile* file, bool bUndo)
 	file->WriteU32(0xffffffff);//m_fAmbient
 	ch = m_bAnimation;
 	file->WriteBuffer(&ch, 1);
-	ch = m_bAddKeys;
+	ch = gMainWindow->mAddKeys;
 	file->WriteU8(&ch, 1);
 	file->WriteU8 (24); // m_nFPS
 	file->WriteU16(1); // m_nCurFrame
@@ -812,7 +798,6 @@ void Project::FileSave(lcFile* file, bool bUndo)
 		}
 */
 		file->WriteU32(&pos, 1);
-		m_nSaveTimer = 0;
 	}
 }
 
@@ -1344,7 +1329,6 @@ bool Project::OnOpenDocument (const char* lpszPathName)
   }
 
   CheckPoint("");
-  m_nSaveTimer = 0;
 
   SetModifiedFlag(false);     // start off with unmodified
 
@@ -1656,42 +1640,6 @@ void Project::UpdateSelection()
 	gMainWindow->UpdateSelectedObjects(flags, SelectedCount, Focus);
 }
 
-void Project::CheckAutoSave()
-{
-	/*
-	m_nSaveTimer += 5;
-	if (m_nAutosave & LC_AUTOSAVE_FLAG)
-	{
-//		int nInterval;
-//		nInterval = m_nAutosave & ~LC_AUTOSAVE_FLAG;
-
-		if (m_nSaveTimer >= (m_nAutosave*60))
-		{
-			m_nSaveTimer = 0;
-
-			if (m_strTempFile.IsEmpty())
-			{
-				char tmpFile[_MAX_PATH], out[_MAX_PATH];
-				GetTempPath (_MAX_PATH, out);
-				GetTempFileName (out, "~LC", 0, tmpFile);
-				DeleteFile (tmpFile);
-				if (char *ptr = strchr(tmpFile, '.')) *ptr = 0;
-				strcat (tmpFile, ".lcd");
-				m_strTempFile = tmpFile;
-			}
-
-			CFile file (m_strTempFile, CFile::modeCreate|CFile::modeWrite|CFile::typeBinary);
-			m_bUndo = TRUE;
-			file.SeekToBegin();
-			CArchive ar(&file, CArchive::store);
-			Serialize(ar);
-			ar.Close();
-			m_bUndo = FALSE;
-		}
-	}
-	*/
-}
-
 unsigned char Project::GetLastStep()
 {
 	unsigned char last = 1;
@@ -1803,7 +1751,7 @@ void Project::ZoomExtents(int FirstView, int LastView)
 	{
 		View* view = gMainWindow->mViews[vp];
 
-		mActiveModel->ZoomExtents(view, Center, Points, m_bAddKeys);
+		mActiveModel->ZoomExtents(view, Center, Points, gMainWindow->mAddKeys);
 	}
 
 	gMainWindow->UpdateFocusObject(GetFocusObject());
@@ -3712,7 +3660,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 			else
 			{
 				mActiveModel->BeginMoveTool();
-				mActiveModel->UpdateMoveTool(GetMoveDistance(axis, false, true), m_bAddKeys);
+				mActiveModel->UpdateMoveTool(GetMoveDistance(axis, false, true), gMainWindow->mAddKeys);
 				mActiveModel->EndMoveTool(true);
 			}
 
@@ -4397,11 +4345,9 @@ void Project::HandleCommand(LC_COMMANDS id)
 		}
 		break;
 
-		case LC_VIEW_TIME_ADD_KEYS:
-		{
-			m_bAddKeys = !m_bAddKeys;
-			gMainWindow->UpdateAnimation(m_bAnimation, m_bAddKeys);
-		} break;
+	case LC_VIEW_TIME_ADD_KEYS:
+		gMainWindow->SetAddKeys(!gMainWindow->mAddKeys);
+		break;
 
 		case LC_EDIT_SNAP_X:
 				if (m_nSnap & LC_DRAW_SNAP_X)
@@ -4555,15 +4501,14 @@ void Project::HandleCommand(LC_COMMANDS id)
 		} break;
 
 	case LC_EDIT_TRANSFORM:
-		TransformSelectedObjects((LC_TRANSFORM_TYPE)mTransformType, gMainWindow->GetTransformAmount());
+//		TransformSelectedObjects((LC_TRANSFORM_TYPE)mTransformType, gMainWindow->GetTransformAmount());
 		break;
 
 	case LC_EDIT_TRANSFORM_ABSOLUTE_TRANSLATION:
 	case LC_EDIT_TRANSFORM_RELATIVE_TRANSLATION:
 	case LC_EDIT_TRANSFORM_ABSOLUTE_ROTATION:
 	case LC_EDIT_TRANSFORM_RELATIVE_ROTATION:
-		mTransformType = id - LC_EDIT_TRANSFORM_ABSOLUTE_TRANSLATION;
-		gMainWindow->UpdateTransformType(mTransformType);
+		gMainWindow->SetTransformMode((lcTransformMode)(id - LC_EDIT_TRANSFORM_ABSOLUTE_TRANSLATION));
 		break;
 
 	case LC_EDIT_ACTION_SELECT:
@@ -4580,7 +4525,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 	case LC_EDIT_ACTION_PAN:
 	case LC_EDIT_ACTION_ROTATE_VIEW:
 	case LC_EDIT_ACTION_ROLL:
-		SetAction(id - LC_EDIT_ACTION_FIRST);
+		gMainWindow->SetCurrentTool((lcTool)(id - LC_EDIT_ACTION_FIRST));
 		break;
 
 		case LC_EDIT_CANCEL:
@@ -4599,15 +4544,6 @@ void Project::HandleCommand(LC_COMMANDS id)
 	case LC_NUM_COMMANDS:
 		break;
 	}
-}
-
-void Project::SetAction(int nAction)
-{
-	m_nCurAction = nAction;
-
-	gMainWindow->UpdateAction(m_nCurAction);
-
-	gMainWindow->UpdateAllViews();
 }
 
 // Remove unused groups
@@ -5114,7 +5050,7 @@ bool Project::RotateSelectedObjects(lcVector3& Delta, lcVector3& Remainder, bool
 			pos[1] = Center[1] + Distance[1];
 			pos[2] = Center[2] + Distance[2];
 
-			pPiece->ChangeKey(m_nCurStep, m_bAnimation, m_bAddKeys, pos, LC_PK_POSITION);
+			pPiece->ChangeKey(m_nCurStep, m_bAnimation, gMainWindow->mAddKeys, pos, LC_PK_POSITION);
 		}
 
 		rot[0] = NewRotation[0];
@@ -5122,13 +5058,13 @@ bool Project::RotateSelectedObjects(lcVector3& Delta, lcVector3& Remainder, bool
 		rot[2] = NewRotation[2];
 		rot[3] = NewRotation[3] * LC_RTOD;
 
-		pPiece->ChangeKey(m_nCurStep, m_bAnimation, m_bAddKeys, rot, LC_PK_ROTATION);
+		pPiece->ChangeKey(m_nCurStep, m_bAnimation, gMainWindow->mAddKeys, rot, LC_PK_ROTATION);
 		pPiece->UpdatePosition(m_nCurStep, m_bAnimation);
 	}
 
 	return true;
 }
-
+/*
 void Project::TransformSelectedObjects(LC_TRANSFORM_TYPE Type, const lcVector3& Transform)
 {
 	if (!mActiveModel->GetSelectedObjects().GetSize())
@@ -5271,7 +5207,7 @@ void Project::TransformSelectedObjects(LC_TRANSFORM_TYPE Type, const lcVector3& 
 		} break;
 	}
 }
-
+*/
 void Project::ModifyObject(Object* Object, lcObjectProperty Property, void* Value)
 {
 	const char* CheckPointString = NULL;
@@ -5285,7 +5221,7 @@ void Project::ModifyObject(Object* Object, lcObjectProperty Property, void* Valu
 
 			if (Part->mPosition != Position)
 		{
-				Part->ChangeKey(m_nCurStep, m_bAnimation, m_bAddKeys, Position, LC_PK_POSITION);
+				Part->ChangeKey(m_nCurStep, m_bAnimation, gMainWindow->mAddKeys, Position, LC_PK_POSITION);
 				Part->UpdatePosition(m_nCurStep, m_bAnimation);
 
 				CheckPointString = "Moving";
@@ -5299,7 +5235,7 @@ void Project::ModifyObject(Object* Object, lcObjectProperty Property, void* Valu
 
 			if (Rotation != Part->mRotation)
 		{
-				Part->ChangeKey(m_nCurStep, m_bAnimation, m_bAddKeys, Rotation, LC_PK_ROTATION);
+				Part->ChangeKey(m_nCurStep, m_bAnimation, gMainWindow->mAddKeys, Rotation, LC_PK_ROTATION);
 				Part->UpdatePosition(m_nCurStep, m_bAnimation);
 
 				CheckPointString = "Rotating";
@@ -5391,7 +5327,7 @@ void Project::ModifyObject(Object* Object, lcObjectProperty Property, void* Valu
 
 			if (camera->mPosition != Position)
 {
-				camera->ChangeKey(m_nCurStep, m_bAnimation, m_bAddKeys, Position, LC_CK_EYE);
+				camera->ChangeKey(m_nCurStep, m_bAnimation, gMainWindow->mAddKeys, Position, LC_CK_EYE);
 				camera->UpdatePosition(m_nCurStep, m_bAnimation);
 
 				CheckPointString = "Camera";
@@ -5405,7 +5341,7 @@ void Project::ModifyObject(Object* Object, lcObjectProperty Property, void* Valu
 
 			if (camera->mTargetPosition != TargetPosition)
 				{
-				camera->ChangeKey(m_nCurStep, m_bAnimation, m_bAddKeys, TargetPosition, LC_CK_TARGET);
+				camera->ChangeKey(m_nCurStep, m_bAnimation, gMainWindow->mAddKeys, TargetPosition, LC_CK_TARGET);
 				camera->UpdatePosition(m_nCurStep, m_bAnimation);
 
 				CheckPointString = "Camera";
@@ -5419,7 +5355,7 @@ void Project::ModifyObject(Object* Object, lcObjectProperty Property, void* Valu
 
 			if (camera->mUpVector != Up)
 					{
-				camera->ChangeKey(m_nCurStep, m_bAnimation, m_bAddKeys, Up, LC_CK_UP);
+				camera->ChangeKey(m_nCurStep, m_bAnimation, gMainWindow->mAddKeys, Up, LC_CK_UP);
 				camera->UpdatePosition(m_nCurStep, m_bAnimation);
 
 				CheckPointString = "Camera";
@@ -5497,7 +5433,7 @@ void Project::ModifyObject(Object* Object, lcObjectProperty Property, void* Valu
 void Project::ZoomActiveView(int Amount)
 {
 	mActiveModel->BeginEditCameraTool(LC_ACTION_ZOOM_CAMERA, lcVector3(0.0f, 0.0f, 0.0f));
-	mActiveModel->UpdateEditCameraTool(LC_ACTION_ZOOM_CAMERA, 2.0f * Amount / (21 - m_nMouse), 0.0f, m_bAddKeys);
+	mActiveModel->UpdateEditCameraTool(LC_ACTION_ZOOM_CAMERA, 2.0f * Amount / (21 - m_nMouse), 0.0f, gMainWindow->mAddKeys);
 	mActiveModel->EndEditCameraTool(LC_ACTION_ZOOM_CAMERA, true);
 }
 
@@ -5534,12 +5470,7 @@ void Project::EndPieceDrop(bool Accept)
 void Project::BeginColorDrop()
 {
 	StartTracking(LC_TRACK_LEFT);
-	SetAction(LC_TOOL_PAINT);
-//	m_RestoreAction = true;
-}
-
-void Project::ActivateOverlay(View* view, int Action, int OverlayMode)
-{
+//	SetAction(LC_TOOL_PAINT);
 }
 
 bool Project::StopTracking(bool Accept)

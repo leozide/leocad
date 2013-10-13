@@ -12,6 +12,7 @@
 #include "lc_application.h"
 #include "pieceinf.h"
 #include "lc_texture.h"
+#include "project.h"
 
 enum
 {

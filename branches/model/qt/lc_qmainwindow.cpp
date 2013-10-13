@@ -140,6 +140,7 @@ void lcQMainWindow::createActions()
 	actions[LC_VIEW_TIME_PREVIOUS]->setIcon(QIcon(":/resources/time_previous.png"));
 	actions[LC_VIEW_TIME_NEXT]->setIcon(QIcon(":/resources/time_next.png"));
 	actions[LC_VIEW_TIME_LAST]->setIcon(QIcon(":/resources/time_last.png"));
+	actions[LC_VIEW_TIME_ADD_KEYS]->setIcon(QIcon(":/resources/time_add_keys.png"));
 	actions[LC_HELP_HOMEPAGE]->setIcon(QIcon(":/resources/help_homepage.png"));
 	actions[LC_HELP_EMAIL]->setIcon(QIcon(":/resources/help_email.png"));
 
@@ -428,7 +429,7 @@ void lcQMainWindow::createToolBars()
 	timeToolBar->addAction(actions[LC_VIEW_TIME_PREVIOUS]);
 	timeToolBar->addAction(actions[LC_VIEW_TIME_NEXT]);
 	timeToolBar->addAction(actions[LC_VIEW_TIME_LAST]);
-	//LC_VIEW_TIME_ADD_KEYS
+	timeToolBar->addAction(actions[LC_VIEW_TIME_ADD_KEYS]);
 	// TODO: add missing menu items
 
 	partsToolBar = new QDockWidget(tr("Parts"), this);
@@ -1137,9 +1138,9 @@ void lcQMainWindow::updateSelectedObjects(int flags, int selectedCount, Object* 
 	statusBarLabel->setText(message);
 }
 
-void lcQMainWindow::updateAction(int newAction)
+void lcQMainWindow::updateCurrentTool()
 {
-	QAction *action = actions[LC_EDIT_ACTION_FIRST + newAction];
+	QAction *action = actions[LC_EDIT_ACTION_FIRST + gMainWindow->mCurrentTool];
 
 	if (action)
 		action->setChecked(true);
@@ -1167,15 +1168,9 @@ void lcQMainWindow::updateCurrentTime()
 	statusTimeLabel->setText(QString(tr(" Step %1 ")).arg(QString::number(currentTime)));
 }
 
-void lcQMainWindow::updateAnimation(bool animation, bool addKeys)
+void lcQMainWindow::updateAddKeys()
 {
-	// TODO: update animation
-	/*
-	gtk_widget_set_sensitive (anim_toolbar.play, bAnimation);
-	gtk_widget_set_sensitive (anim_toolbar.stop, FALSE);
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(anim_toolbar.anim), bAnimation);
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(anim_toolbar.keys), bAddKeys);
-	*/
+	actions[LC_VIEW_TIME_ADD_KEYS]->setChecked(gMainWindow->mAddKeys);
 }
 
 void lcQMainWindow::updateLockSnap(lcuint32 snap)
@@ -1235,7 +1230,7 @@ void lcQMainWindow::updateUndoRedo(const char* undoText, const char* redoText)
 	*/
 }
 
-void lcQMainWindow::updateTransformType(int newType)
+void lcQMainWindow::updateTransformMode()
 {
 	const char* iconNames[] =
 	{
@@ -1245,9 +1240,10 @@ void lcQMainWindow::updateTransformType(int newType)
 		":/resources/edit_transform_relative_rotation.png"
 	};
 
-	LC_ASSERT(newType >= 0 && newType <= 3);
-	actions[LC_EDIT_TRANSFORM_ABSOLUTE_TRANSLATION + newType]->setChecked(true);
-	actions[LC_EDIT_TRANSFORM]->setIcon(QIcon(iconNames[newType]));
+	lcTransformMode transformMode = gMainWindow->mTransformMode;
+	LC_ASSERT(transformMode >= 0 && transformMode <= 3);
+	actions[LC_EDIT_TRANSFORM_ABSOLUTE_TRANSLATION + transformMode]->setChecked(true);
+	actions[LC_EDIT_TRANSFORM]->setIcon(QIcon(iconNames[transformMode]));
 }
 
 void lcQMainWindow::updateCategories()

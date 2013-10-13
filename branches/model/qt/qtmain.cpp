@@ -517,12 +517,12 @@ void lcMainWindow::UpdateSelectedObjects(int Flags, int SelectedCount, Object* F
 		window->updateSelectedObjects(Flags, SelectedCount, Focus);
 }
 
-void lcMainWindow::UpdateAction(int NewAction)
+void lcMainWindow::UpdateCurrentTool()
 {
 	lcQMainWindow* window = (lcQMainWindow*)mHandle;
 
 	if (window)
-		window->updateAction(NewAction);
+		window->updateCurrentTool();
 }
 
 void lcMainWindow::UpdatePaste(bool Enabled)
@@ -541,12 +541,12 @@ void lcMainWindow::UpdateCurrentTime()
 		window->updateCurrentTime();
 }
 
-void lcMainWindow::UpdateAnimation(bool Animation, bool AddKeys)
+void lcMainWindow::UpdateAddKeys()
 {
 	lcQMainWindow* window = (lcQMainWindow*)mHandle;
 
 	if (window)
-		window->updateAnimation(Animation, AddKeys);
+		window->updateAddKeys();
 }
 
 void lcMainWindow::UpdateLockSnap(lcuint32 Snap)
@@ -573,12 +573,12 @@ void lcMainWindow::UpdateUndoRedo(const char* UndoText, const char* RedoText)
 		window->updateUndoRedo(UndoText, RedoText);
 }
 
-void lcMainWindow::UpdateTransformType(int NewType)
+void lcMainWindow::UpdateTransformMode()
 {
 	lcQMainWindow* window = (lcQMainWindow*)mHandle;
 
 	if (window)
-		window->updateTransformType(NewType);
+		window->updateTransformMode();
 }
 
 void lcMainWindow::UpdateCategories()

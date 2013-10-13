@@ -5,6 +5,7 @@
 #include <QPrinter>
 #include "lc_array.h"
 #include "lc_commands.h"
+#include "lc_model.h"
 
 class QComboBox;
 class lcQGLWidget;
@@ -35,17 +36,17 @@ public:
 	void updateFocusObject();
 	void updateCameraMenu();
 	void updateCheckpoint();
+	void updateTransformMode();
+	void updateCurrentTool();
+	void updateAddKeys();
 
 	void updateFocusObject(Object *focus);
 	void updateSelectedObjects(int flags, int selectedCount, Object* focus);
-	void updateAction(int newAction);
 	void updatePaste(bool enabled);
 	void updateCurrentTime();
-	void updateAnimation(bool animation, bool addKeys);
 	void updateLockSnap(lcuint32 snap);
 	void updateSnap();
 	void updateUndoRedo(const char* undoText, const char* redoText);
-	void updateTransformType(int newType);
 	void updateCategories();
 	void updateTitle(const char* title, bool modified);
 	void updateModified(bool modified);

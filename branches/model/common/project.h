@@ -48,14 +48,6 @@
 #define LC_SEL_FOCUSGROUP	0x200 // focused piece is grouped
 #define LC_SEL_CANGROUP		0x400 // can make a new group
 
-enum LC_TRANSFORM_TYPE
-{
-	LC_TRANSFORM_ABSOLUTE_TRANSLATION,
-	LC_TRANSFORM_RELATIVE_TRANSLATION,
-	LC_TRANSFORM_ABSOLUTE_ROTATION,
-	LC_TRANSFORM_RELATIVE_ROTATION
-};
-
 enum LC_MOUSE_TRACK
 {
 	LC_TRACK_NONE,
@@ -74,8 +66,6 @@ class PieceInfo;
 class View;
 class Image;
 class TexFont;
-
-// Undo support
 
 #include "lc_file.h"
 
@@ -118,24 +108,6 @@ enum lcObjectProperty
 	LC_PROPERTY_CAMERA_NEAR,
 	LC_PROPERTY_CAMERA_FAR,
 	LC_PROPERTY_CAMERA_NAME
-};
-
-enum lcTool
-{
-	LC_TOOL_INSERT,
-	LC_TOOL_LIGHT,
-	LC_TOOL_SPOTLIGHT,
-	LC_TOOL_CAMERA,
-	LC_TOOL_SELECT,
-	LC_TOOL_MOVE,
-	LC_TOOL_ROTATE,
-	LC_TOOL_ERASER,
-	LC_TOOL_PAINT,
-	LC_TOOL_ZOOM,
-	LC_TOOL_PAN,
-	LC_TOOL_ROTATE_VIEW,
-	LC_TOOL_ROLL,
-	LC_TOOL_ZOOM_REGION
 };
 
 class Project
@@ -185,12 +157,11 @@ public:
 
 	void CreateImages(Image* images, int width, int height, unsigned short from, unsigned short to, bool hilite);
 	void Render(View* view, bool bToMemory);
-	void CheckAutoSave();
 	bool GetSelectionCenter(lcVector3& Center) const;
 	bool GetFocusPosition(lcVector3& Position) const;
 	Object* GetFocusObject() const;
 	Group* AddGroup (const char* name, Group* pParent, float x, float y, float z);
-	void TransformSelectedObjects(LC_TRANSFORM_TYPE Type, const lcVector3& Transform);
+//	void TransformSelectedObjects(LC_TRANSFORM_TYPE Type, const lcVector3& Transform);
 	void ModifyObject(Object* Object, lcObjectProperty Property, void* Value);
 	void ZoomActiveView(int Amount);
 	void RenderInitialize();
@@ -245,7 +216,6 @@ public:
 	void ExportPOVRay(lcFile& File);
 	void ZoomExtents(int FirstView, int LastView);
 
-	bool m_bTrackCancel;
 	int m_nTracking;
 	int m_nDownX;
 	int m_nDownY;
@@ -253,12 +223,8 @@ public:
 	lcVector3 m_MouseSnapLeftover;
 	lcVector3 m_MouseTotalDelta;
 
-	int m_OverlayMode;
-	bool m_OverlayActive;
 	lcVector3 m_OverlayTrackStart;
 	lcVector3 m_OverlayDelta;
-	void MouseUpdateOverlays(View* view, int x, int y);
-	void ActivateOverlay(View* view, int Action, int OverlayMode);
 
 	bool StopTracking(bool bAccept);
 	void StartTracking(int mode);
@@ -266,18 +232,14 @@ public:
 	void RemoveEmptyGroups();
 
 public:
-	void SetAction(int Action);
 	void HandleCommand(LC_COMMANDS id);
 
 	lcuint32 m_nSnap;
-	int m_nCurAction;
 
 public:
-	int mTransformType;
 	PieceInfo* m_pCurPiece;
 	PieceInfo* mDropPiece;
 	bool m_bAnimation;
-	bool m_bAddKeys;
 	unsigned char m_nCurStep;
 	lcuint16 m_nTotalFrames;
 
@@ -286,8 +248,6 @@ public:
 	char m_strFooter[256];
 	char m_strHeader[256];
 
-	unsigned long m_nAutosave;
-	unsigned long m_nSaveTimer;
 	char m_strBackground[LC_MAXPATH];
 	lcTexture* m_pBackground;
 

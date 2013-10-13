@@ -3,7 +3,7 @@
 
 #include "lc_glwidget.h"
 #include "lc_object.h"
-#include "project.h"
+#include "lc_model.h"
 class Project;
 
 enum lcMouseTrack

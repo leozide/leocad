@@ -134,7 +134,7 @@ int main(int argc, char *argv[])
 	g_App = new lcApplication();
 	gMainWindow = new lcMainWindow();
 
-#ifdef Q_OS_WIN
+#if defined(Q_OS_WIN)
 	char libPath[LC_MAXPATH], *ptr;
 	strcpy(libPath, argv[0]);
 	ptr = strrchr(libPath,'\\');
@@ -143,20 +143,17 @@ int main(int argc, char *argv[])
 
 	lcRegisterShellFileTypes();
 	lcSehInit();
-#endif
-
-#ifdef Q_OS_LINUX
-	const char* libPath = LC_INSTALL_PREFIX"/share/leocad/";
-#endif
-
-#ifdef Q_OS_MAC
+#elif defined(Q_OS_MAC)
 	QDir bundlePath = QDir(QCoreApplication::applicationDirPath());
 	bundlePath.cdUp();
 	bundlePath.cdUp();
 	bundlePath = QDir::cleanPath(bundlePath.absolutePath() + "/Contents/Resources/");
 	QByteArray pathArray = bundlePath.absolutePath().toLocal8Bit();
 	const char* libPath = pathArray.data();
+#else
+	const char* libPath = LC_INSTALL_PREFIX"/share/leocad/";
 #endif
+
 
 	QString cachePath = QDesktopServices::storageLocation(QDesktopServices::CacheLocation);
 

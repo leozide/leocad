@@ -219,7 +219,6 @@ public:
 	int m_nTracking;
 	int m_nDownX;
 	int m_nDownY;
-	int m_nMouse;
 	lcVector3 m_MouseSnapLeftover;
 	lcVector3 m_MouseTotalDelta;
 

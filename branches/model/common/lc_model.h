@@ -158,6 +158,7 @@ public:
 	lcCamera* GetCamera(int CameraIndex);
 	void GetCameras(lcArray<lcCamera*>& Cameras);
 
+	lcMatrix44 GetRelativeTransform() const;
 	lcVector3 GetFocusOrSelectionCenter() const;
 
 	void UndoCheckpoint();

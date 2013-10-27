@@ -144,6 +144,25 @@ void lcModel::GetCameras(lcArray<lcCamera*>& Cameras)
 			Cameras.Add((lcCamera*)mObjects[ObjectIdx]);
 }
 
+lcMatrix44 lcModel::GetRelativeTransform() const
+{
+/*
+	if ((m_nSnap & LC_DRAW_GLOBAL_SNAP) == 0)
+	{
+		Object* Focus = GetFocusObject();
+
+		if ((Focus != NULL) && Focus->IsPiece())
+		{
+			const lcMatrix44& ModelWorld = ((Piece*)Focus)->mModelWorld;
+
+			PlaneNormal = lcMul30(PlaneNormal, ModelWorld);
+		}
+	}
+*/
+
+	return lcMatrix44Identity();
+}
+
 lcVector3 lcModel::GetFocusOrSelectionCenter() const
 {
 	if (mFocusObject)

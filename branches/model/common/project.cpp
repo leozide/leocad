@@ -5432,8 +5432,10 @@ void Project::ModifyObject(Object* Object, lcObjectProperty Property, void* Valu
 
 void Project::ZoomActiveView(int Amount)
 {
+	const float MouseSensitivity = 1.0f / (21.0f - g_App->mPreferences->mMouseSensitivity);
+
 	mActiveModel->BeginEditCameraTool(LC_ACTION_ZOOM_CAMERA, lcVector3(0.0f, 0.0f, 0.0f));
-	mActiveModel->UpdateEditCameraTool(LC_ACTION_ZOOM_CAMERA, 2.0f * Amount / (21 - m_nMouse), 0.0f, gMainWindow->mAddKeys);
+	mActiveModel->UpdateEditCameraTool(LC_ACTION_ZOOM_CAMERA, 2.0f * Amount * MouseSensitivity, 0.0f, gMainWindow->mAddKeys);
 	mActiveModel->EndEditCameraTool(LC_ACTION_ZOOM_CAMERA, true);
 }
 

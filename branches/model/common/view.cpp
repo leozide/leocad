@@ -252,9 +252,6 @@ void View::OnLeftButtonDown()
 		}
 		break;
 
-	case LC_TOOL_ERASER:
-		mProject->mActiveModel->RemoveObject(FindClosestObject(false).Object);
-		break;
 /*
 	case LC_TOOL_PAINT:
 		{
@@ -356,6 +353,11 @@ void View::OnLeftButtonDown()
 		}
 		break;
 		*/
+
+	case LC_TOOL_ERASER:
+		mProject->mActiveModel->RemoveObject(FindClosestObject(false).Object);
+		break;
+
 	case LC_TOOL_ZOOM:
 		mProject->mActiveModel->BeginEditCameraTool(LC_ACTION_ZOOM_CAMERA, lcVector3(0.0f, 0.0f, 0.0f));
 		StartTracking(LC_MOUSETRACK_LEFT, TrackTool);
@@ -505,7 +507,7 @@ void View::OnMouseMove()
 	}
 	else if (mMouseTrack == LC_MOUSETRACK_NONE)
 	{
-		if (CurrentTool == LC_TOOL_SELECT || CurrentTool == LC_TOOL_MOVE || CurrentTool == LC_TOOL_ROTATE)
+		if (CurrentTool == LC_TOOL_SELECT || CurrentTool == LC_TOOL_MOVE || CurrentTool == LC_TOOL_ROTATE || CurrentTool == LC_TOOL_ROTATE_VIEW)
 		{
 			lcTrackTool TrackTool = GetTrackTool(NULL, NULL);
 
@@ -569,175 +571,102 @@ void View::OnMouseMove()
 	case LC_TOOL_SELECT:
 		Redraw();
 		break;
-#if 0
+
 	case LC_TOOL_MOVE:
 		{
-			lcCamera* Camera = view->mCamera;
-			lcVector3 Distance;
+			int Viewport[4] = { 0, 0, mWidth, mHeight };
+			float Aspect = (float)Viewport[2]/(float)Viewport[3];
 
-			if ((m_OverlayActive && (m_OverlayMode != LC_OVERLAY_MOVE_XYZ)) /*|| (!Camera->IsSide())*/)
+			const lcMatrix44& ModelView = mCamera->mWorldView;
+			lcMatrix44 Projection = lcMatrix44Perspective(mCamera->mFOV, Aspect, mCamera->mNear, mCamera->mFar);
+
+			lcVector3 CurrentStart = lcUnprojectPoint(lcVector3((float)mInputState.x, (float)mInputState.y, 0.0f), ModelView, Projection, Viewport);
+			lcVector3 CurrentEnd = lcUnprojectPoint(lcVector3((float)mInputState.x, (float)mInputState.y, 1.0f), ModelView, Projection, Viewport);
+
+			lcVector3 MouseDownStart = lcUnprojectPoint(lcVector3(mMouseDownX, mMouseDownY, 0.0f), ModelView, Projection, Viewport);
+			lcVector3 MouseDownEnd = lcUnprojectPoint(lcVector3(mMouseDownX, mMouseDownY, 1.0f), ModelView, Projection, Viewport);
+
+			if (mTrackTool == LC_TRACKTOOL_MOVE_X || mTrackTool == LC_TRACKTOOL_MOVE_Y || mTrackTool == LC_TRACKTOOL_MOVE_Z)
 			{
-				lcVector3 ScreenX = lcNormalize(lcCross(Camera->mTargetPosition - Camera->mPosition, Camera->mUpVector));
-				lcVector3 ScreenY = Camera->mUpVector;
-				lcVector3 Dir1(0.0f, 0.0f, 0.0f), Dir2(0.0f, 0.0f, 0.0f);
-				bool SingleDir = true;
-
-				int OverlayMode;
-
-				if (m_OverlayActive && (m_OverlayMode != LC_OVERLAY_MOVE_XYZ))
-					OverlayMode = m_OverlayMode;
-				else if (m_nTracking == LC_TRACK_LEFT)
-					OverlayMode = LC_OVERLAY_MOVE_XY;
+				lcVector3 Direction;
+				if (mTrackTool == LC_TRACKTOOL_MOVE_X)
+					Direction = lcVector3(1.0, 0.0f, 0.0f);
+				else if (mTrackTool == LC_TRACKTOOL_MOVE_Y)
+					Direction = lcVector3(0.0, 1.0f, 0.0f);
 				else
-					OverlayMode = LC_OVERLAY_MOVE_Z;
+					Direction = lcVector3(0.0, 0.0f, 1.0f);
 
-				switch (OverlayMode)
-				{
-				case LC_OVERLAY_MOVE_X:
-					Dir1 = lcVector3(1, 0, 0);
-					break;
-				case LC_OVERLAY_MOVE_Y:
-					Dir1 = lcVector3(0, 1, 0);
-					break;
-				case LC_OVERLAY_MOVE_Z:
-					Dir1 = lcVector3(0, 0, 1);
-					break;
-				case LC_OVERLAY_MOVE_XY:
-					Dir1 = lcVector3(1, 0, 0);
-					Dir2 = lcVector3(0, 1, 0);
-					SingleDir = false;
-					break;
-				case LC_OVERLAY_MOVE_XZ:
-					Dir1 = lcVector3(1, 0, 0);
-					Dir2 = lcVector3(0, 0, 1);
-					SingleDir = false;
-					break;
-				case LC_OVERLAY_MOVE_YZ:
-					Dir1 = lcVector3(0, 1, 0);
-					Dir2 = lcVector3(0, 0, 1);
-					SingleDir = false;
-					break;
-				}
+				Direction = lcMul30(Direction, mProject->mActiveModel->GetRelativeTransform());
 
-				// Transform the translation axis.
-				lcVector3 Axis1 = Dir1;
-				lcVector3 Axis2 = Dir2;
+				lcVector3 Center = mProject->mActiveModel->GetFocusOrSelectionCenter();
 
-				if ((m_nSnap & LC_DRAW_GLOBAL_SNAP) == 0)
-				{
-					Object* Focus = GetFocusObject();
+				lcVector3 Intersection;
+				lcClosestPointsBetweenLines(Center, Center + Direction, CurrentStart, CurrentEnd, &Intersection, NULL);
 
-					if ((Focus != NULL) && Focus->IsPiece())
-					{
-						const lcMatrix44& ModelWorld = ((Piece*)Focus)->mModelWorld;
+				lcVector3 MoveStart;
+				lcClosestPointsBetweenLines(Center, Center + Direction, MouseDownStart, MouseDownEnd, &MoveStart, NULL);
 
-						Axis1 = lcMul30(Dir1, ModelWorld);
-						Axis2 = lcMul30(Dir2, ModelWorld);
-					}
-				}
+				lcVector3 Distance = Intersection - MoveStart;
+//				Distance = GetMoveDistance(Distance, true, true);
 
-				// Find out what direction the mouse is going to move stuff.
-				lcVector3 MoveX, MoveY;
+				mProject->mActiveModel->UpdateMoveTool(Distance, gMainWindow->mAddKeys);
+			}
+			else if (mTrackTool == LC_TRACKTOOL_MOVE_XY || mTrackTool == LC_TRACKTOOL_MOVE_XZ || mTrackTool == LC_TRACKTOOL_MOVE_YZ)
+			{
+				lcVector3 PlaneNormal;
 
-				if (SingleDir)
-				{
-					float dx1 = lcDot(ScreenX, Axis1);
-					float dy1 = lcDot(ScreenY, Axis1);
-
-					if (fabsf(dx1) > fabsf(dy1))
-					{
-						if (dx1 >= 0.0f)
-							MoveX = Dir1;
-						else
-							MoveX = -Dir1;
-
-						MoveY = lcVector3(0, 0, 0);
-					}
-					else
-					{
-						MoveX = lcVector3(0, 0, 0);
-
-						if (dy1 > 0.0f)
-							MoveY = Dir1;
-						else
-							MoveY = -Dir1;
-					}
-				}
+				if (mTrackTool == LC_TRACKTOOL_MOVE_XY)
+					PlaneNormal = lcVector3(0.0f, 0.0f, 1.0f);
+				else if (mTrackTool == LC_TRACKTOOL_MOVE_XZ)
+					PlaneNormal = lcVector3(0.0f, 1.0f, 0.0f);
 				else
+					PlaneNormal = lcVector3(1.0f, 0.0f, 0.0f);
+
+				PlaneNormal = lcMul30(PlaneNormal, mProject->mActiveModel->GetRelativeTransform());
+
+				lcVector3 Center = mProject->mActiveModel->GetFocusOrSelectionCenter();
+				lcVector4 Plane(PlaneNormal, -lcDot(PlaneNormal, Center));
+				lcVector3 Intersection;
+
+				if (lcLinePlaneIntersection(&Intersection, CurrentStart, CurrentEnd, Plane))
 				{
-					float dx1 = lcDot(ScreenX, Axis1);
-					float dy1 = lcDot(ScreenY, Axis1);
-					float dx2 = lcDot(ScreenX, Axis2);
-					float dy2 = lcDot(ScreenY, Axis2);
+					lcVector3 MoveStart;
 
-					if (fabsf(dx1) > fabsf(dx2))
+					if (lcLinePlaneIntersection(&MoveStart, MouseDownStart, MouseDownEnd, Plane))
 					{
-						if (dx1 >= 0.0f)
-							MoveX = Dir1;
-						else
-							MoveX = -Dir1;
+						lcVector3 Distance = Intersection - MoveStart;
+//						Distance = GetMoveDistance(Distance, true, true);
 
-						if (dy2 >= 0.0f)
-							MoveY = Dir2;
-						else
-							MoveY = -Dir2;
-					}
-					else
-					{
-						if (dx2 >= 0.0f)
-							MoveX = Dir2;
-						else
-							MoveX = -Dir2;
-
-						if (dy1 > 0.0f)
-							MoveY = Dir1;
-						else
-							MoveY = -Dir1;
+						mProject->mActiveModel->UpdateMoveTool(Distance, gMainWindow->mAddKeys);
 					}
 				}
-
-				MoveX *= (float)(x - m_nDownX) * 0.25f / (21 - m_nMouse);
-				MoveY *= (float)(y - m_nDownY) * 0.25f / (21 - m_nMouse);
-
-				Distance = MoveX + MoveY;
 			}
 			else
 			{
-				// 3D movement.
-				lcVector3 ScreenZ = lcNormalize(Camera->mTargetPosition - Camera->mPosition);
-				lcVector3 ScreenX = lcCross(ScreenZ, Camera->mUpVector);
-				lcVector3 ScreenY = Camera->mUpVector;
 
-				if (m_nTracking == LC_TRACK_LEFT)
+				lcVector3 PlaneNormal = lcNormalize(mCamera->mTargetPosition - mCamera->mPosition);
+
+				lcVector3 Center = mProject->mActiveModel->GetFocusOrSelectionCenter();
+				lcVector4 Plane(PlaneNormal, -lcDot(PlaneNormal, Center));
+				lcVector3 Intersection;
+
+				if (lcLinePlaneIntersection(&Intersection, CurrentStart, CurrentEnd, Plane))
 				{
-					lcVector3 MoveX, MoveY;
+					lcVector3 MoveStart;
 
-					MoveX = ScreenX * (float)(x - m_nDownX) * 0.25f / (float)(21 - m_nMouse);
-					MoveY = ScreenY * (float)(y - m_nDownY) * 0.25f / (float)(21 - m_nMouse);
+					if (lcLinePlaneIntersection(&MoveStart, MouseDownStart, MouseDownEnd, Plane))
+					{
+						lcVector3 Distance = Intersection - MoveStart;
+//						Distance = GetMoveDistance(Distance, true, true);
 
-					Distance = MoveX + MoveY;
-				}
-				else
-				{
-					Distance = ScreenZ * (float)(y - m_nDownY) * 0.25f / (float)(21 - m_nMouse);
+						mProject->mActiveModel->UpdateMoveTool(Distance, gMainWindow->mAddKeys);
+					}
 				}
 			}
-
-			Distance = GetMoveDistance(Distance, true, true);
-
-			mActiveModel->UpdateMoveTool(Distance, m_nCurStep, m_bAddKeys);
-
-			if (m_OverlayActive)
-			{
-				if (!GetFocusPosition(m_OverlayCenter))
-					GetSelectionCenter(m_OverlayCenter);
-			}
-
-			if (m_nTracking != LC_TRACK_NONE)
-				UpdateOverlayScale();
 		}
 		break;
 
+#if 0
 	case LC_TOOL_ROTATE:
 		{
 			lcCamera* Camera = gMainWindow->mActiveView->mCamera;
@@ -964,14 +893,13 @@ void View::OnMouseWheel(float Direction)
 
 void View::DrawMouseTracking()
 {
-	lcTool CurrentTool = gMainWindow->GetCurrentTool();
-
 /*
 	if (mDropPiece)
 		return;
 */
+	lcTool Tool = GetMouseTool(mTrackTool);
 
-	if ((CurrentTool == LC_TOOL_SELECT || CurrentTool == LC_TOOL_ZOOM_REGION) && mMouseTrack == LC_MOUSETRACK_LEFT)
+	if ((Tool == LC_TOOL_SELECT || Tool == LC_TOOL_ZOOM_REGION) && mMouseTrack == LC_MOUSETRACK_LEFT)
 	{
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
@@ -1053,6 +981,8 @@ void View::DrawMouseTracking()
 
 		return;
 	}
+
+	lcTool CurrentTool = gMainWindow->GetCurrentTool();
 
 	if (CurrentTool == LC_TOOL_ROTATE_VIEW)
 	{
@@ -1848,7 +1778,7 @@ void View::GetPieceInsertPosition(lcVector3* Position, lcVector4* AxisAngle)
 	lcUnprojectPoints(ClickPoints, 2, ModelView, Projection, Viewport);
 
 	lcVector3 Intersection;
-	if (lcLinePlaneIntersection(&Intersection, ClickPoints[0], ClickPoints[1], lcVector4(0, 0, 1, mProject->m_pCurPiece->m_fDimensions[5])))
+	if (lcLineSegmentPlaneIntersection(&Intersection, ClickPoints[0], ClickPoints[1], lcVector4(0, 0, 1, mProject->m_pCurPiece->m_fDimensions[5])))
 	{
 		Intersection = mProject->SnapVector(Intersection);
 		*Position = Intersection;
@@ -1964,7 +1894,7 @@ lcTrackTool View::GetTrackTool(float* InterfaceScale, lcVector3* InterfaceCenter
 			lcVector4 Plane(PlaneNormals[AxisIndex], -lcDot(PlaneNormals[AxisIndex], OverlayCenter));
 			lcVector3 Intersection;
 
-			if (!lcLinePlaneIntersection(&Intersection, Start, End, Plane))
+			if (!lcLineSegmentPlaneIntersection(&Intersection, Start, End, Plane))
 				continue;
 
 			float IntersectionDistance = lcLengthSquared(Intersection - Start);

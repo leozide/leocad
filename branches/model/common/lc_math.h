@@ -1158,9 +1158,41 @@ inline lcVector3 lcZoomExtents(const lcVector3& Position, const lcMatrix44& Worl
 	return Position - (Front * SmallestDistance);
 }
 
+inline void lcClosestPointsBetweenLines(const lcVector3& Line1a, const lcVector3& Line1b, const lcVector3& Line2a, const lcVector3& Line2b, lcVector3* Intersection1, lcVector3* Intersection2)
+{
+	lcVector3 u1 = Line1b - Line1a;
+	lcVector3 u2 = Line2b - Line2a;
+	lcVector3 p21 = Line2a - Line1a;
+	lcVector3 m = lcCross(u2, u1);
+	float m2 = lcDot(m, m);
+
+	if (m2 < 0.00001f)
+	{
+		if (Intersection1)
+			*Intersection1 = Line1a;
+		if (Intersection2)
+			*Intersection2 = Line2a;
+		return;
+	}
+
+	lcVector3 r = lcCross(p21, m / m2);
+
+	if (Intersection1)
+	{
+		float t1 = lcDot(r, u2);
+		*Intersection1 = Line1a + t1 * u1;
+	}
+
+	if (Intersection2)
+	{
+		float t2 = lcDot(r, u1);
+		*Intersection2 = Line2a + t2 * u2;
+	}
+}
+
 // Calculate the intersection of a line segment and a plane and returns false
 // if they are parallel or the intersection is outside the line segment.
-inline bool lcLinePlaneIntersection(lcVector3* Intersection, const lcVector3& Start, const lcVector3& End, const lcVector4& Plane)
+inline bool lcLineSegmentPlaneIntersection(lcVector3* Intersection, const lcVector3& Start, const lcVector3& End, const lcVector4& Plane)
 {
 	lcVector3 Dir = End - Start;
 	lcVector3 PlaneNormal(Plane[0], Plane[1], Plane[2]);
@@ -1177,6 +1209,25 @@ inline bool lcLinePlaneIntersection(lcVector3* Intersection, const lcVector3& St
 
 	if ((t < 0.0f) || (t > 1.0f))
 		return false;
+
+	return true;
+}
+
+// Calculate the intersection of a line and a plane and returns false if they are parallel.
+inline bool lcLinePlaneIntersection(lcVector3* Intersection, const lcVector3& Start, const lcVector3& End, const lcVector4& Plane)
+{
+	lcVector3 Dir = End - Start;
+	lcVector3 PlaneNormal(Plane[0], Plane[1], Plane[2]);
+
+	float t1 = lcDot(PlaneNormal, Start) + Plane[3];
+	float t2 = lcDot(PlaneNormal, Dir);
+
+	if (t2 == 0.0f)
+		return false;
+
+	float t = -t1 / t2;
+
+	*Intersection = Start + t * Dir;
 
 	return true;
 }
@@ -1254,7 +1305,7 @@ inline void lcPolygonPlaneClip(lcVector3* InPoints, int NumInPoints, lcVector3* 
 			else
 			{
 				// Outside, inside.
-				lcLinePlaneIntersection(&i, *s, *p, Plane);
+				lcLineSegmentPlaneIntersection(&i, *s, *p, Plane);
 
 				OutPoints[*NumOutPoints] = i;
 				*NumOutPoints = *NumOutPoints + 1;
@@ -1267,7 +1318,7 @@ inline void lcPolygonPlaneClip(lcVector3* InPoints, int NumInPoints, lcVector3* 
 			if (lcDot3(*s, Plane) + Plane[3] <= 0)
 			{
 				// Inside, outside.
-				lcLinePlaneIntersection(&i, *s, *p, Plane);
+				lcLineSegmentPlaneIntersection(&i, *s, *p, Plane);
 
 				OutPoints[*NumOutPoints] = i;
 				*NumOutPoints = *NumOutPoints + 1;

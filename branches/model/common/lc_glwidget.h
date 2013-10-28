@@ -63,6 +63,7 @@ public:
 	virtual void OnDraw() { }
 	virtual void OnInitialUpdate() { }
 	virtual void OnUpdateCursor() { }
+	virtual void OnPieceDrop() { }
 	virtual void OnLeftButtonDown() { }
 	virtual void OnLeftButtonUp() { }
 	virtual void OnLeftButtonDoubleClick() { }

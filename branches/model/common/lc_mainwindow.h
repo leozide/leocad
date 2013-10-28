@@ -42,7 +42,6 @@ class lcMainWindow : public lcBaseWindow
 	void UpdateCurrentTool();
 	void UpdateAddKeys();
 
-	void UpdateFocusObject(Object* Focus);
 	void UpdateSelectedObjects(int Flags, int SelectedCount, Object* Focus);
 	void UpdatePaste(bool Enabled);
 	void UpdateCurrentTime();
@@ -54,6 +53,11 @@ class lcMainWindow : public lcBaseWindow
 	void UpdateModified(bool Modified);
 	void UpdateRecentFiles();
 	void UpdateShortcuts();
+
+	void SetPieceDrag(bool Drag)
+	{
+		mPieceDrag = Drag;
+	}
 
 	void SetTransformMode(lcTransformMode TransformMode)
 	{
@@ -72,7 +76,10 @@ class lcMainWindow : public lcBaseWindow
 
 	lcTool GetCurrentTool() const
 	{
-		return mCurrentTool;
+		if (mPieceDrag)
+			return LC_TOOL_INSERT;
+		else
+			return mCurrentTool;
 	}
 
 	void SetAddKeys(bool AddKeys)
@@ -91,6 +98,7 @@ class lcMainWindow : public lcBaseWindow
 	lcTool mCurrentTool;
 	lcTransformMode mTransformMode;
 	bool mAddKeys;
+	bool mPieceDrag;
 };
 
 extern class lcMainWindow* gMainWindow;

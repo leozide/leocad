@@ -43,6 +43,7 @@ public:
 	void OnDraw();
 	void OnInitialUpdate();
 	void OnUpdateCursor();
+	void OnPieceDrop();
 	void OnLeftButtonDown();
 	void OnLeftButtonUp();
 	void OnLeftButtonDoubleClick();
@@ -52,6 +53,12 @@ public:
 	void OnRightButtonUp();
 	void OnMouseMove();
 	void OnMouseWheel(float Direction);
+
+	void StopTracking(bool Accept);
+	bool IsTracking() const
+	{
+		return mMouseTrack != LC_MOUSETRACK_NONE;
+	}
 
 	void SetCamera(lcCamera* Camera, bool ForceCopy);
 	void SetDefaultCamera();
@@ -66,13 +73,12 @@ protected:
 	void DrawViewport();
 
 	lcObjectSection FindClosestObject(bool PiecesOnly) const;
-	void FindObjectsInRectangle(float x1, float y1, float x2, float y2, lcArray<lcObjectSection>& Objects) const;
+	void FindObjectsInRectangle(float x1, float y1, float x2, float y2, lcArray<lcObjectSection>& ObjectSections) const;
 	void GetPieceInsertPosition(lcVector3* Position, lcVector4* AxisAngle);
 
 	lcTrackTool GetTrackTool(float* InterfaceScale, lcVector3* InterfaceCenter) const;
 	lcTool GetMouseTool(lcTrackTool TrackTool) const;
 	void StartTracking(lcMouseTrack MouseTrack, lcTrackTool TrackTool);
-	void StopTracking(bool Accept);
 
 	lcMouseTrack mMouseTrack;
 	lcTrackTool mTrackTool;

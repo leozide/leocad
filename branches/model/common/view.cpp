@@ -168,6 +168,15 @@ void View::OnUpdateCursor()
 	SetCursor(GetCursor());
 }
 
+void View::OnPieceDrop()
+{
+	lcVector3 Position;
+	lcVector4 AxisAngle;
+
+	GetPieceInsertPosition(&Position, &AxisAngle);
+	mProject->mActiveModel->AddPiece(mProject->m_pCurPiece, gMainWindow->mColorIndex, Position, AxisAngle);
+}
+
 void View::OnLeftButtonDown()
 {
 	if (mMouseTrack != LC_MOUSETRACK_NONE)
@@ -214,7 +223,10 @@ void View::OnLeftButtonDown()
 			mProject->mActiveModel->AddPiece(mProject->m_pCurPiece, gMainWindow->mColorIndex, Position, AxisAngle);
 
 			if (!mInputState.Control)
+			{
 				gMainWindow->SetCurrentTool(LC_TOOL_SELECT);
+				OnUpdateCursor();
+			}
 		}
 		break;
 
@@ -499,8 +511,16 @@ void View::OnMouseMove()
 {
 	lcTool CurrentTool = gMainWindow->GetCurrentTool();
 
+	OnUpdateCursor();
+
 	if (CurrentTool == LC_TOOL_INSERT)
 	{
+		lcVector3 Position;
+		lcVector4 AxisAngle;
+
+		GetPieceInsertPosition(&Position, &AxisAngle);
+		mProject->mActiveModel->SetPreviewTransform(Position, AxisAngle);
+
 		gMainWindow->UpdateAllViews();
 
 		return;
@@ -514,7 +534,6 @@ void View::OnMouseMove()
 			if (TrackTool != mTrackTool)
 			{
 				mTrackTool = TrackTool;
-				OnUpdateCursor();
 				Redraw();
 			}
 		}
@@ -1687,7 +1706,7 @@ lcObjectSection View::FindClosestObject(bool PiecesOnly) const
 	return HitTest.ObjectSection;
 }
 
-void View::FindObjectsInRectangle(float x1, float y1, float x2, float y2, lcArray<lcObjectSection>& Objects) const
+void View::FindObjectsInRectangle(float x1, float y1, float x2, float y2, lcArray<lcObjectSection>& ObjectSections) const
 {
 	int Viewport[4] = { 0, 0, mWidth, mHeight };
 	float Aspect = (float)Viewport[2]/(float)Viewport[3];
@@ -1747,6 +1766,7 @@ void View::FindObjectsInRectangle(float x1, float y1, float x2, float y2, lcArra
 	BoxTest.Planes[5] = lcVector4(PlaneNormals[5], -lcDot(PlaneNormals[5], Corners[5]));
 
 	mProject->mActiveModel->FindObjectsInBox(BoxTest);
+	ObjectSections = BoxTest.ObjectSections;
 }
 
 void View::GetPieceInsertPosition(lcVector3* Position, lcVector4* AxisAngle)
@@ -1862,28 +1882,17 @@ lcTrackTool View::GetTrackTool(float* InterfaceScale, lcVector3* InterfaceCenter
 		const float OverlayRotateArrowStart = 1.0f * OverlayScale;
 		const float OverlayRotateArrowEnd = 1.5f * OverlayScale;
 
-		// Intersect the mouse with the 3 planes.
 		lcVector3 PlaneNormals[3] =
 		{
 			lcVector3(1.0f, 0.0f, 0.0f),
 			lcVector3(0.0f, 1.0f, 0.0f),
 			lcVector3(0.0f, 0.0f, 1.0f),
 		};
-/*
-		// Find the rotation from the focused piece if relative snap is enabled.
-		if ((m_nSnap & LC_DRAW_GLOBAL_SNAP) == 0)
-		{
-			Object* Focus = GetFocusObject();
 
-			if ((Focus != NULL) && Focus->IsPiece())
-			{
-				const lcMatrix44& RotMat = ((Piece*)Focus)->mModelWorld;
+		lcMatrix44 RelativeTransform = mProject->mActiveModel->GetRelativeTransform();
+		for (int PlaneIdx = 0; PlaneIdx < 3; PlaneIdx++)
+			PlaneNormals[PlaneIdx] = lcMul30(PlaneNormals[PlaneIdx], RelativeTransform);
 
-				for (int i = 0; i < 3; i++)
-					PlaneNormals[i] = lcMul30(PlaneNormals[i], RotMat);
-			}
-		}
-*/
 		lcVector3 Start = lcUnprojectPoint(lcVector3((float)x, (float)y, 0.0f), ModelView, Projection, Viewport);
 		lcVector3 End = lcUnprojectPoint(lcVector3((float)x, (float)y, 1.0f), ModelView, Projection, Viewport);
 		float ClosestIntersectionDistance = FLT_MAX;

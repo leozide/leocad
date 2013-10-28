@@ -1038,7 +1038,18 @@ void lcQMainWindow::updateSelection()
 
 void lcQMainWindow::updateFocusObject()
 {
+	/*
+	propertiesWidget->updateFocusObject(focus);
 
+	lcVector3 position;
+
+	lcGetActiveProject()->GetFocusPosition(position);
+	lcGetActiveProject()->ConvertToUserUnits(position);
+
+	QString label("X: %1 Y: %2 Z: %3");
+	label = label.arg(QString::number(position[0], 'f', 2), QString::number(position[1], 'f', 2), QString::number(position[2], 'f', 2));
+	statusPositionLabel->setText(label);
+	*/
 }
 
 void lcQMainWindow::updateCameraMenu()
@@ -1077,20 +1088,6 @@ void lcQMainWindow::updateCameraMenu()
 void lcQMainWindow::updateCheckpoint()
 {
 
-}
-
-void lcQMainWindow::updateFocusObject(Object *focus)
-{
-	propertiesWidget->updateFocusObject(focus);
-
-	lcVector3 position;
-
-	lcGetActiveProject()->GetFocusPosition(position);
-	lcGetActiveProject()->ConvertToUserUnits(position);
-
-	QString label("X: %1 Y: %2 Z: %3");
-	label = label.arg(QString::number(position[0], 'f', 2), QString::number(position[1], 'f', 2), QString::number(position[2], 'f', 2));
-	statusPositionLabel->setText(label);
 }
 
 void lcQMainWindow::updateSelectedObjects(int flags, int selectedCount, Object* focus)

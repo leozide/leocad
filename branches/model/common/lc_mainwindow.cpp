@@ -15,6 +15,7 @@ lcMainWindow::lcMainWindow()
 	mCurrentTool = LC_TOOL_SELECT;
 	mTransformMode = LC_TRANSFORM_RELATIVE_TRANSLATION;
 	mAddKeys = false;
+	mPieceDrag = false;
 
 	for (int FileIdx = 0; FileIdx < LC_MAX_RECENT_FILES; FileIdx++)
 		strcpy(mRecentFiles[FileIdx], lcGetProfileString((LC_PROFILE_KEY)(LC_PROFILE_RECENT_FILE1 + FileIdx)));

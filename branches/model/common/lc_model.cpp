@@ -334,14 +334,14 @@ void lcModel::ClearSelection()
 		mSelectedObjects[ObjectIdx]->SetSelection(false);
 	mSelectedObjects.RemoveAll();
 
-	gMainWindow->UpdateAllViews();
-	gMainWindow->UpdateSelection();
-
 	if (mFocusObject)
 	{
 		mFocusObject = NULL;
 		gMainWindow->UpdateFocusObject();
 	}
+
+	gMainWindow->UpdateAllViews();
+	gMainWindow->UpdateSelection();
 }
 
 void lcModel::ClearSelectionOrSetFocus(const lcObjectSection& ObjectSection)
@@ -1194,6 +1194,13 @@ void lcModel::DrawScene(View* View, bool DrawInterface) const
 
 	for (int ObjectIdx = 0; ObjectIdx < mObjects.GetSize(); ObjectIdx++)
 		mObjects[ObjectIdx]->GetRenderMeshes(View, OpaqueMeshes, TranslucentMeshes, InterfaceObjects);
+
+	if (gMainWindow->GetCurrentTool() == LC_TOOL_INSERT)
+	{
+		lcPiece Preview(lcGetActiveProject()->m_pCurPiece, gMainWindow->mColorIndex, mPreviewPosition, mPreviewAxisAngle, mCurrentTime);
+		Preview.Update();
+		Preview.GetRenderMeshes(View, OpaqueMeshes, TranslucentMeshes, InterfaceObjects);
+	}
 
 	OpaqueMeshes.Sort(lcOpaqueRenderMeshCompare);
 	TranslucentMeshes.Sort(lcTranslucentRenderMeshCompare);

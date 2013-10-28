@@ -40,7 +40,6 @@ public:
 	void updateCurrentTool();
 	void updateAddKeys();
 
-	void updateFocusObject(Object *focus);
 	void updateSelectedObjects(int flags, int selectedCount, Object* focus);
 	void updatePaste(bool enabled);
 	void updateCurrentTime();

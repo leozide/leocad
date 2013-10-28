@@ -51,9 +51,7 @@
 enum LC_MOUSE_TRACK
 {
 	LC_TRACK_NONE,
-	LC_TRACK_START_LEFT,
 	LC_TRACK_LEFT,
-	LC_TRACK_START_RIGHT,
 	LC_TRACK_RIGHT
 };
 
@@ -150,15 +148,11 @@ public:
 public:
 	void DeleteContents(bool bUndo);
 	void LoadDefaults(bool cameras);
-	void BeginPieceDrop(PieceInfo* Info);
-	void OnPieceDropMove(int x, int y);
-	void EndPieceDrop(bool Accept);
 	void BeginColorDrop();
 
 	void CreateImages(Image* images, int width, int height, unsigned short from, unsigned short to, bool hilite);
 	void Render(View* view, bool bToMemory);
 	bool GetSelectionCenter(lcVector3& Center) const;
-	bool GetFocusPosition(lcVector3& Position) const;
 	Object* GetFocusObject() const;
 	Group* AddGroup (const char* name, Group* pParent, float x, float y, float z);
 //	void TransformSelectedObjects(LC_TRANSFORM_TYPE Type, const lcVector3& Transform);
@@ -216,17 +210,12 @@ public:
 	void ExportPOVRay(lcFile& File);
 	void ZoomExtents(int FirstView, int LastView);
 
-	int m_nTracking;
-	int m_nDownX;
-	int m_nDownY;
 	lcVector3 m_MouseSnapLeftover;
 	lcVector3 m_MouseTotalDelta;
 
 	lcVector3 m_OverlayTrackStart;
 	lcVector3 m_OverlayDelta;
 
-	bool StopTracking(bool bAccept);
-	void StartTracking(int mode);
 	void UpdateSelection();
 	void RemoveEmptyGroups();
 
@@ -237,7 +226,6 @@ public:
 
 public:
 	PieceInfo* m_pCurPiece;
-	PieceInfo* mDropPiece;
 	bool m_bAnimation;
 	unsigned char m_nCurStep;
 	lcuint16 m_nTotalFrames;

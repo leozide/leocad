@@ -497,14 +497,6 @@ void lcMainWindow::UpdateCheckpoint()
 		window->updateCheckpoint();
 }
 
-void lcMainWindow::UpdateFocusObject(Object* Focus)
-{
-	lcQMainWindow* window = (lcQMainWindow*)mHandle;
-
-	if (window)
-		window->updateFocusObject(Focus);
-}
-
 void lcMainWindow::UpdateSelectedObjects(int Flags, int SelectedCount, Object* Focus)
 {
 	lcQMainWindow* window = (lcQMainWindow*)mHandle;

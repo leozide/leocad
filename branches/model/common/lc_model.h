@@ -184,10 +184,17 @@ public:
 	void FindClosestObject(lcObjectHitTest& HitTest) const;
 	void FindObjectsInBox(lcObjectBoxTest& BoxTest) const;
 
+	void SetPreviewTransform(const lcVector3& Position, const lcVector4& AxisAngle)
+	{
+		mPreviewPosition = Position;
+		mPreviewAxisAngle = AxisAngle;
+	}
+
 	void AddPiece(PieceInfo* Part, int ColorIndex);
 	void AddPiece(PieceInfo* Part, int ColorIndex, const lcVector3& Position, const lcVector4& AxisAngle);
 	void RemoveObject(lcObject* Object);
 	void RemoveObjects(const lcArray<lcObject*>& Objects);
+
 	void CopyToClipboard();
 	void PasteFromClipboard();
 
@@ -222,6 +229,9 @@ protected:
 	lcCheckpoint* mCurrentCheckpoint;
 	lcArray<lcCheckpoint*> mUndoCheckpoints;
 	lcArray<lcCheckpoint*> mRedoCheckpoints;
+
+	lcVector3 mPreviewPosition;
+	lcVector4 mPreviewAxisAngle;
 
 	lcObject* mFocusObject;
 	lcArray<lcObject*> mSelectedObjects;

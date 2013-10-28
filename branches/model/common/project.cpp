@@ -40,8 +40,6 @@ Project::Project()
 	mActiveModel = new lcModel;
 
 	m_bModified = false;
-	m_nTracking = LC_TRACK_NONE;
-	mDropPiece = NULL;
 	m_pPieces = NULL;
 	m_pLights = NULL;
 	m_pGroups = NULL;
@@ -49,8 +47,6 @@ Project::Project()
 	m_pRedoList = NULL;
 	m_pTerrain = new Terrain();
 	m_pBackground = new lcTexture();
-	m_nDownX = 0;
-	m_nDownY = 0;
 	memset(&mSearchOptions, 0, sizeof(mSearchOptions));
 }
 
@@ -79,7 +75,7 @@ void Project::UpdateInterface()
 	gMainWindow->UpdateCategories();
 	gMainWindow->UpdateTitle(m_strTitle, m_bModified);
 
-	gMainWindow->UpdateFocusObject(GetFocusObject());
+	gMainWindow->UpdateFocusObject();
 	gMainWindow->UpdateLockSnap(m_nSnap);
 	gMainWindow->UpdateSnap();
 	gMainWindow->UpdateCameraMenu();
@@ -218,7 +214,7 @@ void Project::LoadDefaults(bool cameras)
 
 	SystemPieceComboAdd(NULL);
 	UpdateSelection();
-	gMainWindow->UpdateFocusObject(NULL);
+	gMainWindow->UpdateFocusObject();
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -646,7 +642,7 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 		SelectAndFocusNone(false);
 
 	if (!bMerge)
-		gMainWindow->UpdateFocusObject(GetFocusObject());
+		gMainWindow->UpdateFocusObject();
 
 	if (!bMerge)
 	{
@@ -1296,7 +1292,7 @@ bool Project::OnOpenDocument (const char* lpszPathName)
 
       m_nCurStep = step;
 	  gMainWindow->UpdateCurrentTime();
-	  gMainWindow->UpdateFocusObject(GetFocusObject());
+	  gMainWindow->UpdateFocusObject();
       UpdateSelection();
       CalculateStep();
 
@@ -1715,7 +1711,7 @@ void Project::FindPiece(bool FindFirst, bool SearchForward)
 
 			UpdateSelection();
 			gMainWindow->UpdateAllViews();
-			gMainWindow->UpdateFocusObject(Current);
+			gMainWindow->UpdateFocusObject();
 
 			break;
 		}
@@ -1754,7 +1750,7 @@ void Project::ZoomExtents(int FirstView, int LastView)
 		mActiveModel->ZoomExtents(view, Center, Points, gMainWindow->mAddKeys);
 	}
 
-	gMainWindow->UpdateFocusObject(GetFocusObject());
+	gMainWindow->UpdateFocusObject();
 	gMainWindow->UpdateAllViews();
 }
 
@@ -3667,7 +3663,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 			gMainWindow->UpdateAllViews();
 			SetModifiedFlag(true);
 			CheckPoint(Rotate ? "Rotating" : "Moving");
-			gMainWindow->UpdateFocusObject(GetFocusObject());
+			gMainWindow->UpdateFocusObject();
 		} break;
 
 		case LC_PIECE_MINIFIG_WIZARD:
@@ -3729,7 +3725,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 				pGroup->m_fCenter[1] = (bs[1]+bs[4])/2;
 				pGroup->m_fCenter[2] = (bs[2]+bs[5])/2;
 
-				gMainWindow->UpdateFocusObject(GetFocusObject());
+				gMainWindow->UpdateFocusObject();
 				UpdateSelection();
 				gMainWindow->UpdateAllViews();
 				SetModifiedFlag(true);
@@ -3849,7 +3845,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 				}
 
 				SelectAndFocusNone(true);
-//			gMainWindow->UpdateFocusObject(GetFocusObject());
+//			gMainWindow->UpdateFocusObject();
 				UpdateSelection();
 				gMainWindow->UpdateAllViews();
 				SetModifiedFlag(true);
@@ -4031,7 +4027,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 				RemoveEmptyGroups();
 				SelectAndFocusNone(false);
-			gMainWindow->UpdateFocusObject(GetFocusObject());
+			gMainWindow->UpdateFocusObject();
 				UpdateSelection();
 				gMainWindow->UpdateAllViews();
 				SetModifiedFlag(true);
@@ -4251,13 +4247,9 @@ void Project::HandleCommand(LC_COMMANDS id)
 			}
 			else
 			{
-				if (id - LC_VIEW_CAMERA1 < mCameras.GetSize())
-				{
-					Camera = mActiveModel->GetCamera(id - LC_VIEW_CAMERA1);
+				Camera = mActiveModel->GetCamera(id - LC_VIEW_CAMERA1);
+				if (Camera)
 					ActiveView->SetCamera(Camera, false);
-				}
-				else
-					break;
 			}
 
 			gMainWindow->UpdateCameraMenu();
@@ -4275,7 +4267,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 			mCameras.RemoveAll();
 
 			gMainWindow->UpdateCameraMenu();
-			gMainWindow->UpdateFocusObject(GetFocusObject());
+			gMainWindow->UpdateFocusObject();
 			gMainWindow->UpdateAllViews();
 			SetModifiedFlag(true);
 			CheckPoint("Reset Cameras");
@@ -4528,18 +4520,12 @@ void Project::HandleCommand(LC_COMMANDS id)
 		gMainWindow->SetCurrentTool((lcTool)(id - LC_EDIT_ACTION_FIRST));
 		break;
 
-		case LC_EDIT_CANCEL:
-		{
-			if (m_nTracking != LC_TRACK_NONE)
-				StopTracking(false);
-			else
-			{
-				SelectAndFocusNone(false);
-				UpdateSelection();
-				gMainWindow->UpdateAllViews();
-				gMainWindow->UpdateFocusObject(NULL);
-			}
-		} break;
+	case LC_EDIT_CANCEL:
+		if (gMainWindow->mActiveView->IsTracking())
+			gMainWindow->mActiveView->StopTracking(false);
+		else
+			mActiveModel->ClearSelection();
+		break;
 
 	case LC_NUM_COMMANDS:
 		break;
@@ -4694,22 +4680,6 @@ void Project::ConvertFromUserUnits(lcVector3& Value) const
 {
 	if ((m_nSnap & LC_DRAW_CM_UNITS) == 0)
 		Value *= 0.04f;
-}
-
-bool Project::GetFocusPosition(lcVector3& Position) const
-{
-	lcObject* FocusObject = mActiveModel->GetFocusObject();
-
-	if (FocusObject)
-	{
-		Position = FocusObject->GetFocusPosition();
-		return true;
-	}
-	else
-	{
-		Position = lcVector3(0.0f, 0.0f, 0.0f);
-		return false;
-	}
 }
 
 // Returns the object that currently has focus.
@@ -5134,7 +5104,7 @@ void Project::TransformSelectedObjects(LC_TRANSFORM_TYPE Type, const lcVector3& 
 				gMainWindow->UpdateAllViews();
 				SetModifiedFlag(true);
 				CheckPoint("Moving");
-				gMainWindow->UpdateFocusObject(GetFocusObject());
+				gMainWindow->UpdateFocusObject();
 			}
 		} break;
 
@@ -5189,7 +5159,7 @@ void Project::TransformSelectedObjects(LC_TRANSFORM_TYPE Type, const lcVector3& 
 				gMainWindow->UpdateAllViews();
 				SetModifiedFlag(true);
 				CheckPoint("Rotating");
-				gMainWindow->UpdateFocusObject(GetFocusObject());
+				gMainWindow->UpdateFocusObject();
 			}
 		} break;
 
@@ -5202,7 +5172,7 @@ void Project::TransformSelectedObjects(LC_TRANSFORM_TYPE Type, const lcVector3& 
 				gMainWindow->UpdateAllViews();
 				SetModifiedFlag(true);
 				CheckPoint("Rotating");
-				gMainWindow->UpdateFocusObject(GetFocusObject());
+				gMainWindow->UpdateFocusObject();
 			}
 		} break;
 	}
@@ -5425,7 +5395,7 @@ void Project::ModifyObject(Object* Object, lcObjectProperty Property, void* Valu
 	{
 		SetModifiedFlag(true);
 		CheckPoint(CheckPointString);
-		gMainWindow->UpdateFocusObject(GetFocusObject());
+		gMainWindow->UpdateFocusObject();
 		gMainWindow->UpdateAllViews();
 	}
 }
@@ -5439,47 +5409,8 @@ void Project::ZoomActiveView(int Amount)
 	mActiveModel->EndEditCameraTool(LC_ACTION_ZOOM_CAMERA, true);
 }
 
-void Project::BeginPieceDrop(PieceInfo* Info)
-{
-	StartTracking(LC_TRACK_LEFT);
-
-	mDropPiece = Info;
-	mDropPiece->AddRef();
-}
-
-void Project::OnPieceDropMove(int x, int y)
-{
-	if (!mDropPiece)
-		return;
-
-	if (m_nDownX != x || m_nDownY != y)
-	{
-		m_nDownX = x;
-		m_nDownY = y;
-
-		gMainWindow->UpdateAllViews();
-	}
-}
-
-void Project::EndPieceDrop(bool Accept)
-{
-	StopTracking(Accept);
-
-	if (!Accept)
-		gMainWindow->UpdateAllViews();
-}
-
 void Project::BeginColorDrop()
 {
-	StartTracking(LC_TRACK_LEFT);
+//	StartTracking(LC_TRACK_LEFT);
 //	SetAction(LC_TOOL_PAINT);
-}
-
-bool Project::StopTracking(bool Accept)
-{
-	return false;
-}
-
-void Project::StartTracking(int mode)
-{
 }

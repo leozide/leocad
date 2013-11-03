@@ -72,6 +72,7 @@ lcModel::lcModel()
 	mCurrentCheckpoint = NULL;
 	mFocusObject = NULL;
 	mProperties.LoadDefaults();
+	mPreviewValid = false;
 }
 
 lcModel::~lcModel()
@@ -144,7 +145,7 @@ void lcModel::GetCameras(lcArray<lcCamera*>& Cameras)
 			Cameras.Add((lcCamera*)mObjects[ObjectIdx]);
 }
 
-lcMatrix44 lcModel::GetRelativeTransform() const
+lcMatrix44 lcModel::GetRelativeRotation() const
 {
 /*
 	if ((m_nSnap & LC_DRAW_GLOBAL_SNAP) == 0)
@@ -172,6 +173,20 @@ lcVector3 lcModel::GetFocusOrSelectionCenter() const
 //		mSelectedObjects[ObjectIdx]->get
 
 	return lcVector3(0.0f, 0.0f, 0.0f);
+}
+
+void lcModel::GetBoundingBox(lcVector3* Min, lcVector3* Max) const
+{
+	*Min = lcVector3(FLT_MAX, FLT_MAX, FLT_MAX);
+	*Max = lcVector3(-FLT_MAX, -FLT_MAX, -FLT_MAX);
+
+	for (int ObjectIdx = 0; ObjectIdx < mObjects.GetSize(); ObjectIdx++)
+	{
+		lcObject* Object = mObjects[ObjectIdx];
+
+		if (Object->IsVisible())
+			Object->AddBoundingBox(Min, Max);
+	}
 }
 
 void lcModel::UndoCheckpoint()
@@ -1195,7 +1210,7 @@ void lcModel::DrawScene(View* View, bool DrawInterface) const
 	for (int ObjectIdx = 0; ObjectIdx < mObjects.GetSize(); ObjectIdx++)
 		mObjects[ObjectIdx]->GetRenderMeshes(View, OpaqueMeshes, TranslucentMeshes, InterfaceObjects);
 
-	if (gMainWindow->GetCurrentTool() == LC_TOOL_INSERT)
+	if (gMainWindow->GetCurrentTool() == LC_TOOL_INSERT && mPreviewValid)
 	{
 		lcPiece Preview(lcGetActiveProject()->m_pCurPiece, gMainWindow->mColorIndex, mPreviewPosition, mPreviewAxisAngle, mCurrentTime);
 		Preview.Update();
@@ -1255,22 +1270,6 @@ void lcModel::DrawScene(View* View, bool DrawInterface) const
 #ifdef LC_DEBUG
 	RenderDebugPrimitives();
 #endif
-
-	if (m_nCurAction == LC_TOOL_INSERT || mDropPiece)
-	{
-		lcVector3 Pos;
-		lcVector4 Rot;
-		GetPieceInsertPosition(view, m_nDownX, m_nDownY, Pos, Rot);
-		PieceInfo* PreviewPiece = mDropPiece ? mDropPiece : m_pCurPiece;
-
-		glPushMatrix();
-		glTranslatef(Pos[0], Pos[1], Pos[2]);
-		glRotatef(Rot[3], Rot[0], Rot[1], Rot[2]);
-		glLineWidth(2*m_fLineWidth);
-		PreviewPiece->RenderPiece(gMainWindow->mColorIndex);
-		glLineWidth(m_fLineWidth);
-		glPopMatrix();
-	}
 */
 }
 
@@ -1280,57 +1279,25 @@ void lcModel::DrawGrid() const
 
 	const int Spacing = lcMax(Preferences->mGridLineSpacing, 1);
 	int MinX = 0, MaxX = 0, MinY = 0, MaxY = 0;
-/*
-	if (m_pPieces || (m_nCurAction == LC_TOOL_INSERT || mDropPiece))
+
+	lcVector3 Min, Max;
+	GetBoundingBox(&Min, &Max);
+
+	if (gMainWindow->GetCurrentTool() == LC_TOOL_INSERT && mPreviewValid)
 	{
-		float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
-
-		for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-			if (pPiece->IsVisible(m_nCurStep, m_bAnimation))
-				pPiece->CompareBoundingBox(bs);
-
-		if (m_nCurAction == LC_TOOL_INSERT || mDropPiece)
-		{
-			lcVector3 Position;
-			lcVector4 Rotation;
-			GetPieceInsertPosition(view, m_nDownX, m_nDownY, Position, Rotation);
-
-			PieceInfo* PreviewPiece = mDropPiece ? mDropPiece : m_pCurPiece;
-
-			lcVector3 Points[8] =
-			{
-				lcVector3(PreviewPiece->m_fDimensions[0],PreviewPiece->m_fDimensions[1], PreviewPiece->m_fDimensions[5]),
-				lcVector3(PreviewPiece->m_fDimensions[3],PreviewPiece->m_fDimensions[1], PreviewPiece->m_fDimensions[5]),
-				lcVector3(PreviewPiece->m_fDimensions[0],PreviewPiece->m_fDimensions[1], PreviewPiece->m_fDimensions[2]),
-				lcVector3(PreviewPiece->m_fDimensions[3],PreviewPiece->m_fDimensions[4], PreviewPiece->m_fDimensions[5]),
-				lcVector3(PreviewPiece->m_fDimensions[3],PreviewPiece->m_fDimensions[4], PreviewPiece->m_fDimensions[2]),
-				lcVector3(PreviewPiece->m_fDimensions[0],PreviewPiece->m_fDimensions[4], PreviewPiece->m_fDimensions[2]),
-				lcVector3(PreviewPiece->m_fDimensions[0],PreviewPiece->m_fDimensions[4], PreviewPiece->m_fDimensions[5]),
-				lcVector3(PreviewPiece->m_fDimensions[3],PreviewPiece->m_fDimensions[1], PreviewPiece->m_fDimensions[2])
-			};
-
-			lcMatrix44 ModelWorld = lcMatrix44FromAxisAngle(lcVector3(Rotation[0], Rotation[1], Rotation[2]), Rotation[3] * LC_DTOR);
-			ModelWorld.SetTranslation(Position);
-
-			for (int i = 0; i < 8; i++)
-			{
-				lcVector3 Point = lcMul31(Points[i], ModelWorld);
-
-				if (Point[0] < bs[0]) bs[0] = Point[0];
-				if (Point[1] < bs[1]) bs[1] = Point[1];
-				if (Point[2] < bs[2]) bs[2] = Point[2];
-				if (Point[0] > bs[3]) bs[3] = Point[0];
-				if (Point[1] > bs[4]) bs[4] = Point[1];
-				if (Point[2] > bs[5]) bs[5] = Point[2];
-			}
-		}
-
-		MinX = (int)(floorf(bs[0] / (0.8f * Spacing))) - 1;
-		MinY = (int)(floorf(bs[1] / (0.8f * Spacing))) - 1;
-		MaxX = (int)(ceilf(bs[3] / (0.8f * Spacing))) + 1;
-		MaxY = (int)(ceilf(bs[4] / (0.8f * Spacing))) + 1;
+		lcPiece Preview(lcGetActiveProject()->m_pCurPiece, gMainWindow->mColorIndex, mPreviewPosition, mPreviewAxisAngle, mCurrentTime);
+		Preview.Update();
+		Preview.AddBoundingBox(&Min, &Max);
 	}
-*/
+
+	if (Min != lcVector3(FLT_MAX, FLT_MAX, FLT_MAX) && Max != lcVector3(-FLT_MAX, -FLT_MAX, -FLT_MAX))
+	{
+		MinX = (int)(floorf(Min[0] / (0.8f * Spacing))) - 1;
+		MinY = (int)(floorf(Min[1] / (0.8f * Spacing))) - 1;
+		MaxX = (int)(ceilf(Max[0] / (0.8f * Spacing))) + 1;
+		MaxY = (int)(ceilf(Max[1] / (0.8f * Spacing))) + 1;
+	}
+
 	MinX = lcMin(MinX, -2);
 	MinY = lcMin(MinY, -2);
 	MaxX = lcMax(MaxX, 2);

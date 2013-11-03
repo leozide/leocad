@@ -95,6 +95,7 @@ public:
 
 	virtual void ClosestHitTest(lcObjectHitTest& HitTest) = 0;
 	virtual void BoxTest(lcObjectBoxTest& BoxTest) = 0;
+	virtual void AddBoundingBox(lcVector3* Min, lcVector3* Max) const { }
 
 	virtual lcPiece* GetPiece(lcuintptr Section) { return NULL; }
 	virtual void GetPartsUsed(lcArray<lcObjectParts>& PartsUsed) const { }

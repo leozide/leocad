@@ -123,6 +123,7 @@ public:
 
 	virtual void ClosestHitTest(lcObjectHitTest& HitTest);
 	virtual void BoxTest(lcObjectBoxTest& BoxTest);
+	virtual void AddBoundingBox(lcVector3* Min, lcVector3* Max) const;
 
 	virtual lcPiece* GetPiece(lcuintptr Section) { return this; }
 	virtual void GetPartsUsed(lcArray<lcObjectParts>& PartsUsed) const;

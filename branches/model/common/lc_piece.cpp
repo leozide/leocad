@@ -134,6 +134,33 @@ void lcPiece::BoxTest(lcObjectBoxTest& BoxTest)
 	}
 }
 
+void lcPiece::AddBoundingBox(lcVector3* Min, lcVector3* Max) const
+{
+	lcVector3 Points[8] =
+	{
+		lcVector3(mPieceInfo->m_fDimensions[0], mPieceInfo->m_fDimensions[1], mPieceInfo->m_fDimensions[5]),
+		lcVector3(mPieceInfo->m_fDimensions[3], mPieceInfo->m_fDimensions[1], mPieceInfo->m_fDimensions[5]),
+		lcVector3(mPieceInfo->m_fDimensions[0], mPieceInfo->m_fDimensions[1], mPieceInfo->m_fDimensions[2]),
+		lcVector3(mPieceInfo->m_fDimensions[3], mPieceInfo->m_fDimensions[4], mPieceInfo->m_fDimensions[5]),
+		lcVector3(mPieceInfo->m_fDimensions[3], mPieceInfo->m_fDimensions[4], mPieceInfo->m_fDimensions[2]),
+		lcVector3(mPieceInfo->m_fDimensions[0], mPieceInfo->m_fDimensions[4], mPieceInfo->m_fDimensions[2]),
+		lcVector3(mPieceInfo->m_fDimensions[0], mPieceInfo->m_fDimensions[4], mPieceInfo->m_fDimensions[5]),
+		lcVector3(mPieceInfo->m_fDimensions[3], mPieceInfo->m_fDimensions[1], mPieceInfo->m_fDimensions[2])
+	};
+
+	for (int PointIdx = 0; PointIdx < 8; PointIdx++)
+	{
+		lcVector3 Point = lcMul31(Points[PointIdx], mModelWorld);
+
+		(*Min)[0] = lcMin((*Min)[0], Point[0]);
+		(*Min)[1] = lcMin((*Min)[1], Point[1]);
+		(*Min)[2] = lcMin((*Min)[2], Point[2]);
+		(*Max)[0] = lcMax((*Max)[0], Point[0]);
+		(*Max)[1] = lcMax((*Max)[1], Point[1]);
+		(*Max)[2] = lcMax((*Max)[2], Point[2]);
+	}
+}
+
 void lcPiece::GetPartsUsed(lcArray<lcObjectParts>& PartsUsed) const
 {
 //	if (Piece->mPieceInfo->m_strDescription[0] == '~')

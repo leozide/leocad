@@ -158,8 +158,9 @@ public:
 	lcCamera* GetCamera(int CameraIndex);
 	void GetCameras(lcArray<lcCamera*>& Cameras);
 
-	lcMatrix44 GetRelativeTransform() const;
+	lcMatrix44 GetRelativeRotation() const;
 	lcVector3 GetFocusOrSelectionCenter() const;
+	void GetBoundingBox(lcVector3* Min, lcVector3* Max) const;
 
 	void UndoCheckpoint();
 	void RedoCheckpoint();
@@ -188,6 +189,7 @@ public:
 	{
 		mPreviewPosition = Position;
 		mPreviewAxisAngle = AxisAngle;
+		mPreviewValid = true;
 	}
 
 	void AddPiece(PieceInfo* Part, int ColorIndex);
@@ -232,6 +234,7 @@ protected:
 
 	lcVector3 mPreviewPosition;
 	lcVector4 mPreviewAxisAngle;
+	bool mPreviewValid;
 
 	lcObject* mFocusObject;
 	lcArray<lcObject*> mSelectedObjects;

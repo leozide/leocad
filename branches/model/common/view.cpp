@@ -615,7 +615,7 @@ void View::OnMouseMove()
 				else
 					Direction = lcVector3(0.0, 0.0f, 1.0f);
 
-				Direction = lcMul30(Direction, mProject->mActiveModel->GetRelativeTransform());
+				Direction = lcMul30(Direction, mProject->mActiveModel->GetRelativeRotation());
 
 				lcVector3 Center = mProject->mActiveModel->GetFocusOrSelectionCenter();
 
@@ -641,7 +641,7 @@ void View::OnMouseMove()
 				else
 					PlaneNormal = lcVector3(1.0f, 0.0f, 0.0f);
 
-				PlaneNormal = lcMul30(PlaneNormal, mProject->mActiveModel->GetRelativeTransform());
+				PlaneNormal = lcMul30(PlaneNormal, mProject->mActiveModel->GetRelativeRotation());
 
 				lcVector3 Center = mProject->mActiveModel->GetFocusOrSelectionCenter();
 				lcVector4 Plane(PlaneNormal, -lcDot(PlaneNormal, Center));
@@ -1098,28 +1098,14 @@ void View::DrawMouseTracking()
 
 		glDisable(GL_DEPTH_TEST);
 
-		// Find the rotation from the focused piece if relative snap is enabled.
-		class Object* Focus = NULL;
-		lcVector4 Rot(0, 0, 1, 0);
-/*
-		if ((m_nSnap & LC_DRAW_GLOBAL_SNAP) == 0)
-		{
-			Focus = GetFocusObject();
+		lcMatrix44 RelativeRotation = mProject->mActiveModel->GetRelativeRotation();
 
-			if ((Focus != NULL) && Focus->IsPiece())
-				Rot = ((Piece*)Focus)->mRotation;
-			else
-				Focus = NULL;
-		}
-*/
 		// Plane translation quad.
 		if ((TrackTool == LC_TRACKTOOL_MOVE_XY) || (TrackTool == LC_TRACKTOOL_MOVE_XZ) || (TrackTool == LC_TRACKTOOL_MOVE_YZ))
 		{
 			glPushMatrix();
 			glTranslatef(OverlayCenter[0], OverlayCenter[1], OverlayCenter[2]);
-
-			if (Focus)
-				glRotatef(Rot[3], Rot[0], Rot[1], Rot[2]);
+			glMultMatrixf(RelativeRotation);
 
 			if (TrackTool == LC_TRACKTOOL_MOVE_XZ)
 				glRotatef(90.0f, 0.0f, 0.0f, -1.0f);
@@ -1192,9 +1178,7 @@ void View::DrawMouseTracking()
 
 			glPushMatrix();
 			glTranslatef(OverlayCenter[0], OverlayCenter[1], OverlayCenter[2]);
-
-			if (Focus)
-				glRotatef(Rot[3], Rot[0], Rot[1], Rot[2]);
+			glMultMatrixf(RelativeRotation);
 
 			if (i == 1)
 				glMultMatrixf(lcMatrix44(lcVector4(0, 1, 0, 0), lcVector4(1, 0, 0, 0), lcVector4(0, 0, 1, 0), lcVector4(0, 0, 0, 1)));
@@ -1215,9 +1199,7 @@ void View::DrawMouseTracking()
 			{
 				glPushMatrix();
 				glTranslatef(OverlayCenter[0], OverlayCenter[1], OverlayCenter[2]);
-
-				if (Focus)
-					glRotatef(Rot[3], Rot[0], Rot[1], Rot[2]);
+				glMultMatrixf(RelativeRotation);
 
 				if (i == 1)
 					glMultMatrixf(lcMatrix44(lcVector4(0, 1, 0, 0), lcVector4(1, 0, 0, 0), lcVector4(0, 0, 1, 0), lcVector4(0, 0, 0, 1)));
@@ -1889,7 +1871,7 @@ lcTrackTool View::GetTrackTool(float* InterfaceScale, lcVector3* InterfaceCenter
 			lcVector3(0.0f, 0.0f, 1.0f),
 		};
 
-		lcMatrix44 RelativeTransform = mProject->mActiveModel->GetRelativeTransform();
+		lcMatrix44 RelativeTransform = mProject->mActiveModel->GetRelativeRotation();
 		for (int PlaneIdx = 0; PlaneIdx < 3; PlaneIdx++)
 			PlaneNormals[PlaneIdx] = lcMul30(PlaneNormals[PlaneIdx], RelativeTransform);
 
@@ -2026,28 +2008,17 @@ lcTrackTool View::GetTrackTool(float* InterfaceScale, lcVector3* InterfaceCenter
 					lcVector3(x1 + u2*(x2-x1), y1 + u2*(y2-y1), z1 + u2*(z2-z1))
 				};
 
+				lcMatrix44 RelativeRotation = mProject->mActiveModel->GetRelativeRotation();
+
 				for (int i = 0; i < 2; i++)
 				{
 					lcVector3 Dist = Intersections[i] - Center;
 
 					if (lcDot(ViewDir, Dist) > 0.0f)
 						continue;
-/*
-					// Find the rotation from the focused piece if relative snap is enabled.
-					if ((m_nSnap & LC_DRAW_GLOBAL_SNAP) == 0)
-					{
-						Object* Focus = GetFocusObject();
 
-						if ((Focus != NULL) && Focus->IsPiece())
-						{
-							const lcVector4& Rot = ((Piece*)Focus)->mRotation;
+					Dist = lcMul30(Dist, RelativeRotation);
 
-							lcMatrix44 RotMat = lcMatrix44FromAxisAngle(lcVector3(Rot[0], Rot[1], Rot[2]), -Rot[3] * LC_DTOR);
-
-							Dist = lcMul30(Dist, RotMat);
-						}
-					}
-*/
 					// Check if we're close enough to one of the axis.
 					Dist.Normalize();
 
@@ -2282,58 +2253,4 @@ void View::StopTracking(bool Accept)
 
 	gMainWindow->UpdateAllViews();
 	OnUpdateCursor();
-
-
-/*
-	if (Accept)
-	{
-		if (mDropPiece)
-		{
-			int x = m_nDownX;
-			int y = m_nDownY;
-
-			if ((x > 0) && (x < ActiveView->mWidth) && (y > 0) && (y < ActiveView->mHeight))
-			{
-				lcVector3 Pos;
-				lcVector4 Rot;
-
-				GetPieceInsertPosition(ActiveView, x, y, Pos, Rot);
-
-				Piece* pPiece = new Piece(mDropPiece);
-				pPiece->Initialize(Pos[0], Pos[1], Pos[2], m_nCurStep);
-				pPiece->SetColorIndex(gMainWindow->mColorIndex);
-
-				pPiece->ChangeKey(m_nCurStep, false, false, Rot, LC_PK_ROTATION);
-				pPiece->UpdatePosition(m_nCurStep, m_bAnimation);
-
-				SelectAndFocusNone(false);
-				pPiece->CreateName(m_pPieces);
-				AddPiece(pPiece);
-				SystemPieceComboAdd(mDropPiece->m_strDescription);
-				pPiece->Select (true, true, false);
-
-				if (mDropPiece)
-				{
-					mDropPiece->Release();
-					mDropPiece = NULL;
-				}
-
-				UpdateSelection();
-				gMainWindow->UpdateAllViews();
-				gMainWindow->UpdateFocusObject(pPiece);
-
-				SetModifiedFlag(true);
-				CheckPoint("Inserting");
-			}
-		}
-	}
-
-	if (mDropPiece)
-	{
-		mDropPiece->Release();
-		mDropPiece = NULL;
-	}
-
-	return true;
-*/
 }

@@ -81,7 +81,7 @@ LC_CURSOR_TYPE View::GetCursor() const
 		case LC_TOOL_INSERT:
 			return LC_CURSOR_BRICK;
 
-		case LC_TOOL_LIGHT:
+		case LC_TOOL_POINTLIGHT:
 			return LC_CURSOR_LIGHT;
 
 		case LC_TOOL_SPOTLIGHT:
@@ -196,11 +196,7 @@ void View::OnLeftButtonDown()
 	bool Control = view->mInputState.Control;
 	bool Alt = view->mInputState.Alt;
 
-	m_bTrackCancel = false;
-	m_nDownX = x;
-	m_nDownY = y;
 	m_MouseTotalDelta = lcVector3(0, 0, 0);
-	m_MouseSnapLeftover = lcVector3(0, 0, 0);
 */
 	int Viewport[4] = { 0, 0, mWidth, mHeight };
 	float Aspect = (float)Viewport[2]/(float)Viewport[3];
@@ -251,6 +247,30 @@ void View::OnLeftButtonDown()
 		}
 		break;
 
+	case LC_TOOL_POINTLIGHT:
+		{
+			lcVector3 Position = lcUnprojectPoint(lcVector3((float)mInputState.x, (float)mInputState.y, 0.9f), ModelView, Projection, Viewport);
+
+			mProject->mActiveModel->AddPointLight(Position);
+
+			if (!mInputState.Control)
+			{
+				gMainWindow->SetCurrentTool(LC_TOOL_SELECT);
+				OnUpdateCursor();
+			}
+		} break;
+
+	case LC_TOOL_SPOTLIGHT:
+		{
+			lcVector3 Position = lcUnprojectPoint(lcVector3((float)mInputState.x, (float)mInputState.y, 0.9f), ModelView, Projection, Viewport);
+			lcVector3 TargetPosition = lcUnprojectPoint(lcVector3((float)mInputState.x + 1.0f, (float)mInputState.y - 1.0f, 0.9f), ModelView, Projection, Viewport);
+
+			mProject->mActiveModel->BeginCreateSpotLightTool(Position, TargetPosition);
+
+			StartTracking(LC_MOUSETRACK_LEFT, TrackTool);
+		}
+		break;
+
 	case LC_TOOL_SELECT:
 		{
 			lcObjectSection ObjectSection = FindClosestObject(false);
@@ -264,84 +284,6 @@ void View::OnLeftButtonDown()
 		}
 		break;
 
-/*
-	case LC_TOOL_PAINT:
-		{
-			Object* Closest = FindObjectFromPoint(view, x, y);
-
-			if ((Closest != NULL) && (Closest->GetType() == LC_OBJECT_PIECE))
-			{
-				Piece* pPiece = (Piece*)Closest;
-
-				if (pPiece->mColorIndex != gMainWindow->mColorIndex)
-				{
-					pPiece->SetColorIndex(gMainWindow->mColorIndex);
-
-					SetModifiedFlag(true);
-					CheckPoint("Painting");
-					gMainWindow->UpdateFocusObject(GetFocusObject());
-					gMainWindow->UpdateAllViews();
-				}
-			}
-		} break;
-
-	case LC_TOOL_LIGHT:
-		{
-			GLint max;
-			int count = 0;
-			Light *pLight;
-
-			glGetIntegerv (GL_MAX_LIGHTS, &max);
-			for (pLight = m_pLights; pLight; pLight = pLight->m_pNext)
-				count++;
-
-			if (count == max)
-				break;
-
-			pLight = new Light (m_fTrack[0], m_fTrack[1], m_fTrack[2]);
-
-			SelectAndFocusNone (false);
-
-			pLight->CreateName(m_pLights);
-			pLight->m_pNext = m_pLights;
-			m_pLights = pLight;
-			gMainWindow->UpdateFocusObject(pLight);
-			pLight->Select (true, true, false);
-			UpdateSelection ();
-
-//			AfxGetMainWnd()->PostMessage(WM_LC_UPDATE_INFO, (WPARAM)pNew, OT_PIECE);
-			UpdateSelection();
-			gMainWindow->UpdateAllViews();
-			SetModifiedFlag(true);
-			CheckPoint("Inserting");
-		} break;
-
-	case LC_TOOL_SPOTLIGHT:
-		{
-			GLint max;
-			int count = 0;
-			Light *pLight;
-
-			glGetIntegerv (GL_MAX_LIGHTS, &max);
-			for (pLight = m_pLights; pLight; pLight = pLight->m_pNext)
-				count++;
-
-			if (count == max)
-				break;
-
-			lcVector3 tmp = lcUnprojectPoint(lcVector3(x+1.0f, y-1.0f, 0.9f), ModelView, Projection, Viewport);
-			SelectAndFocusNone(false);
-			StartTracking(LC_TRACK_START_LEFT);
-			pLight = new Light (m_fTrack[0], m_fTrack[1], m_fTrack[2], tmp[0], tmp[1], tmp[2]);
-			pLight->GetTarget ()->Select (true, true, false);
-			pLight->m_pNext = m_pLights;
-			m_pLights = pLight;
-			UpdateSelection();
-			gMainWindow->UpdateAllViews();
-			gMainWindow->UpdateFocusObject(pLight);
-		}
-		break;
-*/
 	case LC_TOOL_MOVE:
 		{
 			if (!mProject->mActiveModel->GetSelectedObjects().GetSize())
@@ -369,7 +311,27 @@ void View::OnLeftButtonDown()
 	case LC_TOOL_ERASER:
 		mProject->mActiveModel->RemoveObject(FindClosestObject(false).Object);
 		break;
+/*
+	case LC_TOOL_PAINT:
+		{
+			Object* Closest = FindObjectFromPoint(view, x, y);
 
+			if ((Closest != NULL) && (Closest->GetType() == LC_OBJECT_PIECE))
+			{
+				Piece* pPiece = (Piece*)Closest;
+
+				if (pPiece->mColorIndex != gMainWindow->mColorIndex)
+				{
+					pPiece->SetColorIndex(gMainWindow->mColorIndex);
+
+					SetModifiedFlag(true);
+					CheckPoint("Painting");
+					gMainWindow->UpdateFocusObject(GetFocusObject());
+					gMainWindow->UpdateAllViews();
+				}
+			}
+		} break;
+		*/
 	case LC_TOOL_ZOOM:
 		mProject->mActiveModel->BeginEditCameraTool(LC_ACTION_ZOOM_CAMERA, lcVector3(0.0f, 0.0f, 0.0f));
 		StartTracking(LC_MOUSETRACK_LEFT, TrackTool);
@@ -382,12 +344,7 @@ void View::OnLeftButtonDown()
 
 	case LC_TOOL_ROTATE_VIEW:
 		{
-			float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
-/*			for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-				if (pPiece->IsSelected())
-					pPiece->CompareBoundingBox(bs);
-*/			lcVector3 Center((bs[0] + bs[3]) / 2, (bs[1] + bs[4]) / 2, (bs[2] + bs[5]) / 2);
-
+			lcVector3 Center = mProject->mActiveModel->GetFocusOrSelectionCenter();
 			mProject->mActiveModel->BeginEditCameraTool(LC_ACTION_ORBIT_CAMERA, Center);
 			StartTracking(LC_MOUSETRACK_LEFT, TrackTool);
 		}
@@ -557,29 +514,16 @@ void View::OnMouseMove()
 	switch (Tool)
 	{
 	case LC_TOOL_INSERT:
-	case LC_TOOL_LIGHT:
+	case LC_TOOL_POINTLIGHT:
 		break;
-/*
+
 	case LC_TOOL_SPOTLIGHT:
 		{
-			float mouse = 10.0f * MouseSensitivity
-			float delta[3] = { (ptx - m_fTrack[0])*mouse,
-				(pty - m_fTrack[1])*mouse, (ptz - m_fTrack[2])*mouse };
-
-			m_fTrack[0] = ptx;
-			m_fTrack[1] = pty;
-			m_fTrack[2] = ptz;
-
-			Light* pLight = m_pLights;
-
-			pLight->Move (1, m_bAnimation, false, delta[0], delta[1], delta[2]);
-			pLight->UpdatePosition (1, m_bAnimation);
-
-			gMainWindow->UpdateFocusObject(pLight);
-			gMainWindow->UpdateAllViews();
+			lcVector3 Position = lcUnprojectPoint(lcVector3((float)mInputState.x, (float)mInputState.y, 0.9f), ModelView, Projection, Viewport);
+			mProject->mActiveModel->UpdateCreateSpotLightTool(Position, gMainWindow->mAddKeys);
 		}
 		break;
-*/
+
 	case LC_TOOL_CAMERA:
 		{
 			lcVector3 Position = lcUnprojectPoint(lcVector3((float)mInputState.x, (float)mInputState.y, 0.9f), ModelView, Projection, Viewport);
@@ -2154,7 +2098,11 @@ void View::StopTracking(bool Accept)
 	case LC_TOOL_INSERT:
 		break;
 
-	case LC_TOOL_LIGHT:
+	case LC_TOOL_POINTLIGHT:
+		break;
+
+	case LC_TOOL_SPOTLIGHT:
+		mProject->mActiveModel->EndCreateSpotLightTool(Accept);
 		break;
 
 	case LC_TOOL_CAMERA:

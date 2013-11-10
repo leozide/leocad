@@ -17,7 +17,7 @@ struct lcRenderMesh;
 enum lcTool
 {
 	LC_TOOL_INSERT,
-	LC_TOOL_LIGHT,
+	LC_TOOL_POINTLIGHT,
 	LC_TOOL_SPOTLIGHT,
 	LC_TOOL_CAMERA,
 	LC_TOOL_SELECT,
@@ -117,6 +117,7 @@ enum lcActionType
 	LC_ACTION_PASTE_OBJECTS,
 	LC_ACTION_CREATE_PIECE,
 	LC_ACTION_CREATE_CAMERA,
+	LC_ACTION_CREATE_LIGHT,
 	LC_ACTION_MOVE_OBJECTS,
 	LC_ACTION_ROTATE_OBJECTS,
 	LC_ACTION_ZOOM_CAMERA,
@@ -194,6 +195,7 @@ public:
 
 	void AddPiece(PieceInfo* Part, int ColorIndex);
 	void AddPiece(PieceInfo* Part, int ColorIndex, const lcVector3& Position, const lcVector4& AxisAngle);
+	void AddPointLight(const lcVector3& Position);
 	void RemoveObject(lcObject* Object);
 	void RemoveObjects(const lcArray<lcObject*>& Objects);
 
@@ -201,8 +203,12 @@ public:
 	void PasteFromClipboard();
 
 	void BeginCreateCameraTool(const lcVector3& Position, const lcVector3& TargetPosition, const lcVector3& UpVector);
-	void UpdateCreateCameraTool(const lcVector3& Distance, bool AddKeys);
+	void UpdateCreateCameraTool(const lcVector3& TargetPosition, bool AddKeys);
 	void EndCreateCameraTool(bool Accept);
+
+	void BeginCreateSpotLightTool(const lcVector3& Position, const lcVector3& TargetPosition);
+	void UpdateCreateSpotLightTool(const lcVector3& TargetPosition, bool AddKeys);
+	void EndCreateSpotLightTool(bool Accept);
 
 	void BeginMoveTool();
 	void UpdateMoveTool(const lcVector3& Distance, bool AddKeys);

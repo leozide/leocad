@@ -575,7 +575,7 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 	{
 		"Edit.Tool.Light",
 		"Light",
-		"Add new omni light sources to the model",
+		"Add new point light sources to the model",
 		""
 	},
 	// LC_EDIT_ACTION_SPOTLIGHT

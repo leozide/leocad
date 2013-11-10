@@ -122,7 +122,7 @@ void lcQPreferencesDialog::accept()
 	options->Preferences.mGridLineSpacing = gridLineSpacing;
 
 	options->Preferences.mDrawAxes = ui->axisIcon->isChecked();
-	options->Preferences.mLightingMode = ui->enableLighting->isChecked() ? LC_LIGHTING_FULL : LC_LIGHTING_FAKE;
+	options->Preferences.mLightingMode = ui->enableLighting->isChecked() ? LC_LIGHTING_FULL : LC_LIGHTING_FLAT;
 
 	QDialog::accept();
 }

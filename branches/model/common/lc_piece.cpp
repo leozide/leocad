@@ -3,6 +3,7 @@
 #include "lc_mesh.h"
 #include "lc_file.h"
 #include "lc_colors.h"
+#include "lc_application.h"
 #include "pieceinf.h"
 #include "view.h"
 #include "lc_camera.h"
@@ -271,10 +272,12 @@ void lcPiece::RenderInterface(View* View) const
 		{ Min[0], Min[1], Min[2] }, { Min[0], Min[1], Min[2] + Edge[2] },
 	};
 
+	float LineWidth = lcGetPreferences()->mLineWidth;
+
 	glPushMatrix();
 	glMultMatrixf(mModelWorld);
 
-	glLineWidth(2.0f);
+	glLineWidth(2.0f * LineWidth);
 
 	if (IsFocused())
 		lcSetColorFocused();
@@ -284,7 +287,7 @@ void lcPiece::RenderInterface(View* View) const
 	glVertexPointer(3, GL_FLOAT, 0, Verts);
 	glDrawArrays(GL_LINES, 0, 48);
 
-	glLineWidth(1.0f);
+	glLineWidth(LineWidth);
 
 	glPopMatrix();
 }

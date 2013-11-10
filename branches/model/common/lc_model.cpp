@@ -514,7 +514,7 @@ void lcModel::BeginCreateCameraTool(const lcVector3& Position, const lcVector3& 
 		if (strncmp(Camera->mName, Prefix, PrefixLength))
 			continue;
 
-		if (sscanf(Camera->mName + PrefixLength, " %d", &Index) != 1)
+		if (sscanf(Camera->mName + PrefixLength, "%d", &Index) != 1)
 			continue;
 
 		if (Index > MaxIndex)
@@ -575,6 +575,102 @@ void lcModel::EndCreateCameraTool(bool Accept)
 		Apply.WriteS32(1);
 		Apply.WriteS32(ObjectIndex);
 		Apply.WriteU32(LC_OBJECT_TYPE_CAMERA);
+		mObjects[ObjectIndex]->Save(Apply);
+
+		lcMemFile& Revert = mCurrentCheckpoint->mRevert;
+		Revert.Seek(0, SEEK_SET);
+		Revert.WriteU32(LC_CHECKPOINT_REMOVE_OBJECTS);
+		Revert.WriteU32(1);
+		Revert.WriteU32(ObjectIndex);
+
+//		SetModifiedFlag(true);
+	}
+
+	EndCheckpoint(Accept, true);
+}
+
+void lcModel::BeginCreateSpotLightTool(const lcVector3& Position, const lcVector3& TargetPosition)
+{
+	BeginCheckpoint(LC_ACTION_CREATE_LIGHT);
+
+	lcMemFile& Apply = mCurrentCheckpoint->mApply;
+	Apply.WriteFloats(TargetPosition, 3);
+
+	const char* Prefix = "Light ";
+	const int PrefixLength = strlen(Prefix);
+	int Index, MaxIndex = 0;
+
+	for (int ObjectIdx = 0; ObjectIdx < mObjects.GetSize(); ObjectIdx++)
+	{
+		lcObject* Object = mObjects[ObjectIdx];
+
+		if (!Object->IsLight())
+			continue;
+
+		lcLight* Light = (lcLight*)Object;
+
+		if (strncmp(Light->mName, Prefix, PrefixLength))
+			continue;
+
+		if (sscanf(Light->mName + PrefixLength, "%d", &Index) != 1)
+			continue;
+
+		if (Index > MaxIndex)
+			MaxIndex = Index;
+	}
+
+	lcLight* NewLight = new lcLight(Position);
+	mObjects.Add(NewLight);
+
+	NewLight->mState |= LC_LIGHT_SPOT;
+	NewLight->mSpotCutoff = 45.0f;
+	NewLight->mTargetPosition = TargetPosition;
+	sprintf(NewLight->mName, "%s%d", Prefix, MaxIndex + 1);
+
+	NewLight->Update();
+
+	lcObjectSection ObjectSection;
+	ObjectSection.Object = NewLight;
+	ObjectSection.Section = LC_LIGHT_TARGET;
+	SetFocus(ObjectSection);
+}
+
+void lcModel::UpdateCreateSpotLightTool(const lcVector3& TargetPosition, bool AddKeys)
+{
+	LC_ASSERT(mCurrentCheckpoint->mActionType == LC_ACTION_CREATE_LIGHT);
+
+	lcMemFile& Apply = mCurrentCheckpoint->mApply;
+	Apply.Seek(0, SEEK_SET);
+
+	lcVector3 PreviousTargetPosition;
+	Apply.ReadFloats(PreviousTargetPosition, 3);
+
+	if (PreviousTargetPosition == TargetPosition)
+		return;
+
+	Apply.Seek(0, SEEK_SET);
+	Apply.WriteFloats(TargetPosition, 3);
+
+	lcLight* Light = (lcLight*)mObjects[mObjects.GetSize() - 1];
+	Light->Move(TargetPosition - Light->mTargetPosition, mCurrentTime, AddKeys);
+	Light->Update();
+
+	gMainWindow->UpdateFocusObject();
+	gMainWindow->UpdateAllViews();
+}
+
+void lcModel::EndCreateSpotLightTool(bool Accept)
+{
+	if (Accept)
+	{
+		lcMemFile& Apply = mCurrentCheckpoint->mApply;
+		Apply.Seek(0, SEEK_SET);
+		lcint32 ObjectIndex = mObjects.GetSize() - 1;
+
+		Apply.WriteU32(LC_CHECKPOINT_CREATE_OBJECTS);
+		Apply.WriteS32(1);
+		Apply.WriteS32(ObjectIndex);
+		Apply.WriteU32(LC_OBJECT_TYPE_LIGHT);
 		mObjects[ObjectIndex]->Save(Apply);
 
 		lcMemFile& Revert = mCurrentCheckpoint->mRevert;
@@ -1176,13 +1272,24 @@ void lcModel::DrawScene(View* View, bool DrawInterface) const
 
 		glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lcVector4FromColor(mProperties.mAmbientColor));
 
-		/*
-		int index = 0;
-		Light *pLight;
+		int LightIndex = 0;
 
-		for (pLight = m_pLights; pLight; pLight = pLight->m_pNext, index++)
-			pLight->Setup(index);
-		*/
+		for (int ObjectIdx = 0; ObjectIdx < mObjects.GetSize(); ObjectIdx++)
+		{
+			lcObject* Object = mObjects[ObjectIdx];
+
+			if (Object->IsLight() && ((lcLight*)Object)->Setup(LightIndex))
+				LightIndex++;
+
+			if (LightIndex == 8)
+				break;
+		}
+
+		while (LightIndex < 8)
+		{
+			glDisable(GL_LIGHT0 + LightIndex);
+			LightIndex++;
+		}
 
 		glEnable(GL_LIGHTING);
 	}
@@ -1463,6 +1570,62 @@ void lcModel::AddPiece(PieceInfo* Part, int ColorIndex, const lcVector3& Positio
 	SetFocus(ObjectSection);
 
 //	SystemPieceComboAdd(m_pCurPiece->m_strDescription);
+//	SetModifiedFlag(true);
+}
+
+void lcModel::AddPointLight(const lcVector3& Position)
+{
+	const char* Prefix = "Light ";
+	const int PrefixLength = strlen(Prefix);
+	int Index, MaxIndex = 0;
+
+	for (int ObjectIdx = 0; ObjectIdx < mObjects.GetSize(); ObjectIdx++)
+	{
+		lcObject* Object = mObjects[ObjectIdx];
+
+		if (!Object->IsLight())
+			continue;
+
+		lcLight* Light = (lcLight*)Object;
+
+		if (strncmp(Light->mName, Prefix, PrefixLength))
+			continue;
+
+		if (sscanf(Light->mName + PrefixLength, "%d", &Index) != 1)
+			continue;
+
+		if (Index > MaxIndex)
+			MaxIndex = Index;
+	}
+
+	lcLight* Light = new lcLight(Position);
+	Light->Update();
+	mObjects.Add(Light);
+
+	sprintf(Light->mName, "%s%d", Prefix, MaxIndex + 1);
+
+	BeginCheckpoint(LC_ACTION_CREATE_LIGHT);
+
+	lcMemFile& Apply = mCurrentCheckpoint->mApply;
+
+	Apply.WriteU32(LC_CHECKPOINT_CREATE_OBJECTS);
+	Apply.WriteS32(1);
+	Apply.WriteS32(mObjects.GetSize() - 1);
+	Apply.WriteS32(LC_OBJECT_TYPE_LIGHT);
+	Light->Save(Apply);
+
+	lcMemFile& Revert = mCurrentCheckpoint->mRevert;
+	Revert.WriteU32(LC_CHECKPOINT_REMOVE_OBJECTS);
+	Revert.WriteS32(1);
+	Revert.WriteS32(mObjects.GetSize() - 1);
+
+	EndCheckpoint(true, true);
+
+	lcObjectSection ObjectSection;
+	ObjectSection.Object = Light;
+	ObjectSection.Section = LC_LIGHT_POSITION;
+	SetFocus(ObjectSection);
+
 //	SetModifiedFlag(true);
 }
 

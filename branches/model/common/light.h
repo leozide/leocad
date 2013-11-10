@@ -4,11 +4,11 @@
 #include "object.h"
 #include "lc_math.h"
 
-#define LC_LIGHT_HIDDEN			0x01
+#define LC_LIGHT_HIDDEN            0x0001
 #define LC_LIGHT_SELECTED		0x02
 #define LC_LIGHT_FOCUSED		0x04
-#define LC_LIGHT_TARGET_SELECTED	0x08
-#define LC_LIGHT_TARGET_FOCUSED		0x10
+#define LC_LIGHT_TARGET_SELECTED   0x0040
+#define LC_LIGHT_TARGET_FOCUSED    0x0080
 #define LC_LIGHT_ENABLED		0x20
 
 class Light;

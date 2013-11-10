@@ -1,5 +1,6 @@
 #include "lc_global.h"
 #include "lc_camera.h"
+#include "lc_file.h"
 #include "lc_mesh.h"
 #include "lc_colors.h"
 #include "lc_application.h"
@@ -300,7 +301,7 @@ void lcCamera::RenderInterface(View* View) const
 
 	// Lines.
 	lcSetColorCamera();
-	glLineWidth(1.0f);
+	glLineWidth(LineWidth);
 	glDrawArrays(GL_LINES, 34 + 24, 4);
 
 	// Frustum.

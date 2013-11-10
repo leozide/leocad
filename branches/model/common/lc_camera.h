@@ -1,9 +1,8 @@
-#ifndef LC_CAMERA_H
-#define LC_CAMERA_H
+#ifndef _LC_CAMERA_H_
+#define _LC_CAMERA_H_
 
 #include "lc_object.h"
 #include "lc_math.h"
-#include "lc_file.h"
 
 #define LC_CAMERA_HIDDEN            0x0001
 #define LC_CAMERA_SIMPLE            0x0002
@@ -397,4 +396,4 @@ protected:
 };
   */
 
-#endif // LC_CAMERA_H
+#endif // _LC_CAMERA_H_

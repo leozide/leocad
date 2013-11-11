@@ -491,6 +491,40 @@ void lcModel::UnhideAllObjects()
 	gMainWindow->UpdateSelection();
 }
 
+void lcModel::SetPieceColor(lcObjectSection ObjectSection, int ColorIndex)
+{
+	lcObject* Object = ObjectSection.Object;
+
+	if (!Object)
+		return;
+
+	lcMemFile Revert;
+
+	Revert.WriteU32(LC_CHECKPOINT_LOAD_OBJECTS);
+	Revert.WriteS32(1);
+	Revert.WriteS32(mObjects.FindIndex(Object));
+	Object->Save(Revert);
+
+	if (!Object->SetColor(ObjectSection.Section, ColorIndex))
+		return;
+
+	BeginCheckpoint(LC_ACTION_PAINT_PIECE);
+	mCurrentCheckpoint->mRevert = Revert;
+
+	lcMemFile& Apply = mCurrentCheckpoint->mApply;
+
+	Apply.WriteU32(LC_CHECKPOINT_LOAD_OBJECTS);
+	Apply.WriteS32(1);
+	Apply.WriteS32(mObjects.FindIndex(Object));
+	Object->Save(Apply);
+
+	EndCheckpoint(true, true);
+
+	if (mFocusObject == Object)
+		gMainWindow->UpdateFocusObject();
+	gMainWindow->UpdateAllViews();
+}
+
 void lcModel::BeginCreateCameraTool(const lcVector3& Position, const lcVector3& TargetPosition, const lcVector3& UpVector)
 {
 	BeginCheckpoint(LC_ACTION_CREATE_CAMERA);

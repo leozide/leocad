@@ -484,6 +484,7 @@ void lcQMainWindow::createToolBars()
 	colorLayout->setContentsMargins(0, 0, 0, 0);
 
 	colorList = new lcQColorList(partsSplitter);
+	colorList->setCurrentColor(gMainWindow->mColorIndex);
 	colorLayout->addWidget(colorList);
 	connect(colorList, SIGNAL(colorChanged(int)), this, SLOT(colorChanged(int)));
 

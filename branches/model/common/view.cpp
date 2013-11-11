@@ -311,27 +311,11 @@ void View::OnLeftButtonDown()
 	case LC_TOOL_ERASER:
 		mProject->mActiveModel->RemoveObject(FindClosestObject(false).Object);
 		break;
-/*
+
 	case LC_TOOL_PAINT:
-		{
-			Object* Closest = FindObjectFromPoint(view, x, y);
+		mProject->mActiveModel->SetPieceColor(FindClosestObject(true), gMainWindow->mColorIndex);
+		break;
 
-			if ((Closest != NULL) && (Closest->GetType() == LC_OBJECT_PIECE))
-			{
-				Piece* pPiece = (Piece*)Closest;
-
-				if (pPiece->mColorIndex != gMainWindow->mColorIndex)
-				{
-					pPiece->SetColorIndex(gMainWindow->mColorIndex);
-
-					SetModifiedFlag(true);
-					CheckPoint("Painting");
-					gMainWindow->UpdateFocusObject(GetFocusObject());
-					gMainWindow->UpdateAllViews();
-				}
-			}
-		} break;
-		*/
 	case LC_TOOL_ZOOM:
 		mProject->mActiveModel->BeginEditCameraTool(LC_ACTION_ZOOM_CAMERA, lcVector3(0.0f, 0.0f, 0.0f));
 		StartTracking(LC_MOUSETRACK_LEFT, TrackTool);

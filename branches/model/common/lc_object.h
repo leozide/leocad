@@ -104,6 +104,8 @@ public:
 
 	virtual lcPiece* GetPiece(lcuintptr Section) { return NULL; }
 	virtual void GetPartsUsed(lcArray<lcObjectParts>& PartsUsed) const { }
+	virtual bool SetColor(lcuintptr Section, int ColorIndex) { return false; }
+
 	virtual void GetRenderMeshes(View* View, lcArray<lcRenderMesh>& OpaqueMeshes, lcArray<lcRenderMesh>& TranslucentMeshes, lcArray<lcObject*>& InterfaceObjects) = 0;
 	virtual void RenderInterface(View* View) const = 0;
 

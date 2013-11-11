@@ -120,6 +120,7 @@ enum lcActionType
 	LC_ACTION_CREATE_LIGHT,
 	LC_ACTION_MOVE_OBJECTS,
 	LC_ACTION_ROTATE_OBJECTS,
+	LC_ACTION_PAINT_PIECE,
 	LC_ACTION_ZOOM_CAMERA,
 	LC_ACTION_PAN_CAMERA,
 	LC_ACTION_ORBIT_CAMERA,
@@ -201,6 +202,8 @@ public:
 
 	void CopyToClipboard();
 	void PasteFromClipboard();
+
+	void SetPieceColor(lcObjectSection ObjectSection, int ColorIndex);
 
 	void BeginCreateCameraTool(const lcVector3& Position, const lcVector3& TargetPosition, const lcVector3& UpVector);
 	void UpdateCreateCameraTool(const lcVector3& TargetPosition, bool AddKeys);

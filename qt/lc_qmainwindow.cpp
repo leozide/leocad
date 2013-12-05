@@ -26,6 +26,7 @@ lcQMainWindow::lcQMainWindow(QWidget *parent)
 {
 	memset(actions, 0, sizeof(actions));
 
+	setWindowIcon(QIcon(":/resources/icon64.png"));
 	setWindowFilePath(QString());
 
 	createActions();

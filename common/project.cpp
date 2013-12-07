@@ -987,8 +987,8 @@ void Project::FileReadLDraw(lcFile* file, const lcMatrix44& CurrentTransform, in
 		for (int TokenIdx = 2; TokenIdx < 14; TokenIdx++)
 			Matrix[TokenIdx - 2] = atof(Tokens[TokenIdx]);
 
-		lcMatrix44 IncludeTransform(lcVector4(Matrix[3], Matrix[9], -Matrix[6], 0.0f), lcVector4(Matrix[5], Matrix[11], -Matrix[8], 0.0f),
-			lcVector4(-Matrix[4], -Matrix[10], Matrix[7], 0.0f), lcVector4(Matrix[0], Matrix[2], -Matrix[1], 1.0f));
+		lcMatrix44 IncludeTransform(lcVector4(Matrix[3], Matrix[6], Matrix[9], 0.0f), lcVector4(Matrix[4], Matrix[7], Matrix[10], 0.0f),
+		                            lcVector4(Matrix[5], Matrix[8], Matrix[11], 0.0f), lcVector4(Matrix[0], Matrix[1], Matrix[2], 1.0f));
 
 		IncludeTransform = lcMul(IncludeTransform, CurrentTransform);
 
@@ -1017,10 +1017,14 @@ void Project::FileReadLDraw(lcFile* file, const lcMatrix44& CurrentTransform, in
 				Piece* pPiece = new Piece(pInfo);
 				read = false;
 
-				lcVector4 AxisAngle = lcMatrix44ToAxisAngle(IncludeTransform);
+				float* Matrix = IncludeTransform;
+				lcMatrix44 Transform(lcVector4(Matrix[0], Matrix[2], -Matrix[1], 0.0f), lcVector4(Matrix[8], Matrix[10], -Matrix[9], 0.0f),
+				                     lcVector4(-Matrix[4], -Matrix[6], Matrix[5], 0.0f), lcVector4(0.0f, 0.0f, 0.0f, 1.0f));
+
+				lcVector4 AxisAngle = lcMatrix44ToAxisAngle(Transform);
 				AxisAngle[3] *= LC_RTOD;
 
-				pPiece->Initialize(IncludeTransform[3].x / 25.0f, IncludeTransform[3].y / 25.0f, IncludeTransform[3].z / 25.0f, *nStep, 1);
+				pPiece->Initialize(IncludeTransform[3].x / 25.0f, IncludeTransform[3].z / 25.0f, -IncludeTransform[3].y / 25.0f, *nStep, 1);
 				pPiece->SetColorCode(ColorCode);
 				pPiece->CreateName(m_pPieces);
 				AddPiece(pPiece);
@@ -1073,10 +1077,14 @@ void Project::FileReadLDraw(lcFile* file, const lcMatrix44& CurrentTransform, in
 			Piece* pPiece = new Piece(Info);
 			read = false;
 
-			lcVector4 AxisAngle = lcMatrix44ToAxisAngle(IncludeTransform);
+			float* Matrix = IncludeTransform;
+			lcMatrix44 Transform(lcVector4(Matrix[0], Matrix[2], -Matrix[1], 0.0f), lcVector4(Matrix[8], Matrix[10], -Matrix[9], 0.0f),
+			                     lcVector4(-Matrix[4], -Matrix[6], Matrix[5], 0.0f), lcVector4(0.0f, 0.0f, 0.0f, 1.0f));
+
+			lcVector4 AxisAngle = lcMatrix44ToAxisAngle(Transform);
 			AxisAngle[3] *= LC_RTOD;
 
-			pPiece->Initialize(IncludeTransform[3].x, IncludeTransform[3].y, IncludeTransform[3].z, *nStep, 1);
+			pPiece->Initialize(IncludeTransform[3].x / 25.0f, IncludeTransform[3].z / 25.0f, -IncludeTransform[3].y / 25.0f, *nStep, 1);
 			pPiece->SetColorCode(ColorCode);
 			pPiece->CreateName(m_pPieces);
 			AddPiece(pPiece);

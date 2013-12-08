@@ -6,6 +6,7 @@ Leonardo Zide <leozide@gmail.com>
 Contributions (in alphabetical order):
 Christian Höltje <docwhat@gerf.org>
 David Paleino <dapal@debian.org>
+Hubert Figuiere <hub@figuiere.net>
 Joerg Scheurich <rusmufti@helpdesk.bera.rus.uni-stuttgart.de>
 Nicolas Guilbert <nicolas@ange.dk>
 Nicolas Schodet <nico-leocad@ni.fr.eu.org>

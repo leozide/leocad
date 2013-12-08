@@ -25,9 +25,9 @@ lcQPropertiesDialog::lcQPropertiesDialog(QWidget *parent, void *data) :
 
 	setWindowTitle(QString(tr("%1 Properties")).arg(options->Title));
 
-	ui->descriptionEdit->setText(options->Description);
-	ui->authorEdit->setText(options->Author);
-	ui->commentsEdit->setText(options->Comments);
+	ui->descriptionEdit->setText(QString::fromUtf8(options->Description));
+	ui->authorEdit->setText(QString::fromUtf8(options->Author));
+	ui->commentsEdit->setText(QString::fromUtf8(options->Comments));
 
 	if (options->BackgroundType == 2)
 		ui->imageRadio->setChecked(true);
@@ -123,9 +123,12 @@ lcQPropertiesDialog::~lcQPropertiesDialog()
 
 void lcQPropertiesDialog::accept()
 {
-	strcpy(options->Description, ui->descriptionEdit->text().toLocal8Bit().data());
-	strcpy(options->Author, ui->authorEdit->text().toLocal8Bit().data());
-	strcpy(options->Comments, ui->commentsEdit->toPlainText().toLocal8Bit().data());
+	strncpy(options->Description, ui->descriptionEdit->text().toUtf8().data(), sizeof(options->Description));
+	options->Description[sizeof(options->Description) - 1] = 0;
+	strncpy(options->Author, ui->authorEdit->text().toUtf8().data(), sizeof(options->Author));
+	options->Author[sizeof(options->Author) - 1] = 0;
+	strncpy(options->Comments, ui->commentsEdit->toPlainText().toUtf8().data(), sizeof(options->Comments));
+	options->Comments[sizeof(options->Comments) - 1] = 0;
 
 	if (ui->imageRadio->isChecked())
 		 options->BackgroundType = 2;

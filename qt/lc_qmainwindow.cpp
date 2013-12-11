@@ -566,6 +566,9 @@ void lcQMainWindow::actionTriggered()
 
 void lcQMainWindow::partsTreeItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous)
 {
+	if (!current)
+		return;
+
 	PieceInfo *info = (PieceInfo*)current->data(0, lcQPartsTree::PartInfoRole).value<void*>();
 
 	if (info)

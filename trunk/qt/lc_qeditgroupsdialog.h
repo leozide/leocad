@@ -22,18 +22,26 @@ public:
 	enum
 	{
 		PieceRole = Qt::UserRole,
-		GroupRole,
+		GroupRole
 	};
 
 public slots:
 	void accept();
 	void on_newGroup_clicked();
+	void onItemClicked(QTreeWidgetItem *item, int col);
+	void onItemDoubleClicked(QTreeWidgetItem *item, int col);
 
 private:
 	Ui::lcQEditGroupsDialog *ui;
 
 	void updateParents(QTreeWidgetItem *parentItem, Group *parentGroup);
 	void addChildren(QTreeWidgetItem *parentItem, Group *parentGroup);
+
+	void timerEvent(QTimerEvent *event);
+
+	QTreeWidgetItem* m_lastItemClicked;
+	bool m_editableDoubleClicked;
+	QBasicTimer m_clickTimer;
 };
 
 #endif // LC_QEDITGROUPSDIALOG_H

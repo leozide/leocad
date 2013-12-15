@@ -9735,7 +9735,7 @@ void Project::OnMouseMove(View* view)
 
 void Project::OnMouseWheel(View* view, float Direction)
 {
-	ZoomActiveView((int)(10 * Direction));
+	ZoomActiveView((int)((view->mInputState.Control ? 100 : 10) * Direction));
 }
 
 // Check if the mouse is over a different area of the overlay and redraw it.

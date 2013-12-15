@@ -2529,7 +2529,17 @@ void Project::RenderOverlays(View* view)
 			}
 
 			// Rotation arrows.
-			if (m_nCurAction == LC_ACTION_SELECT && m_nTracking == LC_TRACK_NONE)
+			bool AnyPieceSelected = false;
+			for (Piece* Piece = m_pPieces; Piece; Piece = Piece->m_pNext)
+			{
+				if (Piece->IsSelected())
+				{
+					AnyPieceSelected = true;
+					break;
+				}
+			}
+
+			if (m_nCurAction == LC_ACTION_SELECT && m_nTracking == LC_TRACK_NONE && AnyPieceSelected)
 			{
 				switch (i)
 				{

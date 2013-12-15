@@ -13,4 +13,5 @@ Nicolas Schodet <nico-leocad@ni.fr.eu.org>
 Pat Mahoney <pat7@gmx.net>
 Petter Reinholdtsen <pere@hungry.com>
 Renaud Breard <renaud@islande.net>
+Rodney Rushing <leocad.reg@yenandjen.com>
 Torbjörn Söderstedt <torbjrn@gmail.com>

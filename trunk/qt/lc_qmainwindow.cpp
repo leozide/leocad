@@ -13,6 +13,7 @@
 #include "piece.h"
 #include "camera.h"
 #include "view.h"
+#include "group.h"
 #include "lc_qpartstree.h"
 #include "lc_qcolorlist.h"
 #include "lc_qpropertiestree.h"
@@ -1089,6 +1090,15 @@ void lcQMainWindow::updateSelectedObjects(int flags, int selectedCount, Object* 
 			message = "1 Object selected";
 		else
 			message = QString("%1 Objects selected").arg(QString::number(selectedCount));
+
+		if ((focus != NULL) && focus->IsPiece())
+		{
+			message.append(QString(" - %1 (ID: %2)").arg(focus->GetName(), ((Piece*)focus)->mPieceInfo->m_strName));
+
+			const Group* pGroup = ((Piece*)focus)->GetGroup();
+			if ((pGroup != NULL) && pGroup->m_strName[0])
+				message.append(QString(" in group '%1'").arg(pGroup->m_strName));
+		}
 	}
 
 	statusBarLabel->setText(message);

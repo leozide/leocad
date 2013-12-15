@@ -7399,7 +7399,20 @@ bool Project::GetFocusPosition(lcVector3& Position) const
 		}
 	}
 
-	// TODO: light
+	for (Light* pLight = m_pLights; pLight; pLight = pLight->m_pNext)
+	{
+		if (pLight->IsEyeFocused())
+		{
+			Position = pLight->mPosition;
+			return true;
+		}
+
+		if (pLight->IsTargetFocused())
+		{
+			Position = pLight->mTargetPosition;
+			return true;
+		}
+	}
 
 	Position = lcVector3(0.0f, 0.0f, 0.0f);
 

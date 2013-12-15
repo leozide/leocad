@@ -9188,6 +9188,8 @@ void Project::OnMouseMove(View* view)
 	{
 		if (m_OverlayActive)
 			MouseUpdateOverlays(view, x, y);
+		else
+			view->SetCursor(view->GetCursor());
 
 		return;
 	}

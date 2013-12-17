@@ -829,6 +829,19 @@ void Camera::DoRoll(int dx, int mouse, unsigned short nTime, bool bAnimation, bo
 	UpdatePosition(nTime, bAnimation);
 }
 
+void Camera::DoCenter(lcVector3& point, unsigned short nTime, bool bAnimation, bool bAddKey)
+{
+	lcAlign(mTargetPosition, mPosition, point);
+
+	if (!IsSimple())
+	{
+		ChangeKey(nTime, bAnimation, bAddKey, mPosition, LC_CK_EYE);
+		ChangeKey(nTime, bAnimation, bAddKey, mTargetPosition, LC_CK_TARGET);
+	}
+
+	UpdatePosition(nTime, bAnimation);
+}
+
 void Camera::SetViewpoint(LC_VIEWPOINT Viewpoint, unsigned short nTime, bool bAnimation, bool bAddKey)
 {
 	lcVector3 Positions[] =

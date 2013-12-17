@@ -6584,6 +6584,25 @@ void Project::HandleCommand(LC_COMMANDS id)
 			ZoomExtents(FirstView, LastView);
 		} break;
 
+		case LC_VIEW_LOOK_AT:
+		{
+			lcVector3 Center;
+
+			if (!GetSelectionCenter(Center))
+			{
+				float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
+
+				for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+					pPiece->CompareBoundingBox(bs);
+
+				Center = lcVector3((bs[0] + bs[3]) * 0.5f, (bs[1] + bs[4]) * 0.5f, (bs[2] + bs[5]) * 0.5f);
+			}
+
+			m_ActiveView->mCamera->DoCenter(Center, m_bAnimation ? m_nCurFrame : m_nCurStep, m_bAnimation, m_bAddKeys);
+			UpdateAllViews();
+			break;
+		}
+
 		case LC_VIEW_TIME_NEXT:
 		{
 			if (m_bAnimation)

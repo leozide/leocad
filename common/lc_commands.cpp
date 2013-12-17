@@ -704,6 +704,13 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 		"Fit all pieces in current the view (hold the CTRL key down to zoom all views)",
 		""
 	},
+	// LC_VIEW_LOOK_AT
+	{
+		"View.LookAt",
+		"Look At",
+		"Rotate view so selected pieces are at center",
+		""
+	},
 	// LC_VIEW_VIEWPOINT_FRONT
 	{
 		"View.Viewpoint.Front",

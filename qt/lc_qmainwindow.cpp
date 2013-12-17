@@ -305,6 +305,7 @@ void lcQMainWindow::createMenus()
 	menuView->addAction(actions[LC_VIEW_PREFERENCES]);
 	menuView->addSeparator();
 	menuView->addAction(actions[LC_VIEW_ZOOM_EXTENTS]);
+	menuView->addAction(actions[LC_VIEW_LOOK_AT]);
 	QMenu* menuViewpoints = menuView->addMenu(tr("&Viewpoints"));
 	menuViewpoints->addAction(actions[LC_VIEW_VIEWPOINT_FRONT]);
 	menuViewpoints->addAction(actions[LC_VIEW_VIEWPOINT_BACK]);

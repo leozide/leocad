@@ -126,4 +126,4 @@ private:
 	int mViewPixelHeight;
 };
 
-#endif _LC_PROJECTION_H_
+#endif // _LC_PROJECTION_H_

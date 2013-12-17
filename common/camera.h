@@ -152,6 +152,7 @@ public:
 	void DoPan(int dx, int dy, int mouse, unsigned short nTime, bool bAnimation, bool bAddKey);
 	void DoRotate(int dx, int dy, int mouse, unsigned short nTime, bool bAnimation, bool bAddKey, float* center);
 	void DoRoll(int dx, int mouse, unsigned short nTime, bool bAnimation, bool bAddKey);
+	void DoCenter(lcVector3& point, unsigned short nTime, bool bAnimation, bool bAddKey);
 	void Move(unsigned short nTime, bool bAnimation, bool bAddKey, float x, float y, float z);
 	void SetViewpoint(LC_VIEWPOINT Viewpoint, unsigned short nTime, bool bAnimation, bool bAddKey);
 	void SetFocalPoint(const lcVector3& focus, unsigned short nTime, bool bAnimation, bool bAddKey);

@@ -16,6 +16,7 @@ win32 {
 	QMAKE_LFLAGS += /INCREMENTAL
 	PRECOMPILED_SOURCE = common/lc_global.cpp
 	RC_FILE = qt/leocad.rc
+	LIBS += -ladvapi32 -lshell32
 } else {
     LIBS += -lz
     QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-parameter
@@ -106,6 +107,7 @@ SOURCES += common/view.cpp \
     common/camera.cpp \
     common/lc_profile.cpp \
     common/lc_category.cpp \
+	common/lc_projection.cpp \
     qt/lc_qmainwindow.cpp \
     qt/system.cpp \
     qt/qtmain.cpp \
@@ -166,6 +168,7 @@ HEADERS += \
     common/camera.h \
     common/lc_profile.h \
     common/lc_category.h \
+	common/lc_projection.h \
     qt/lc_qmainwindow.h \
     qt/lc_config.h \
     qt/lc_qpovraydialog.h \

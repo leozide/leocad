@@ -13,6 +13,7 @@ class lcQColorList;
 class lcQPropertiesTree;
 class Object;
 class Camera;
+class View;
 
 class lcQMainWindow : public QMainWindow
 {
@@ -43,6 +44,7 @@ public:
 	void updateTransformType(int newType);
 	void updateCameraMenu(const lcArray<Camera*>& cameras, Camera* currentCamera);
 	void updateCurrentCamera(int cameraIndex);
+	void updatePerspective(View* view);
 	void updateCategories();
 	void updateTitle(const char* title, bool modified);
 	void updateModified(bool modified);

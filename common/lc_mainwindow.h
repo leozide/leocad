@@ -41,6 +41,7 @@ class lcMainWindow : public lcBaseWindow
 	void UpdateUndoRedo(const char* UndoText, const char* RedoText);
 	void UpdateTransformType(int NewType);
 	void UpdateCurrentCamera(int CameraIndex);
+	void UpdatePerspective(View* view);
 	void UpdateCameraMenu(const lcArray<Camera*>& Cameras, Camera* CurrentCamera);
 	void UpdateCategories();
 	void UpdateTitle(const char* Title, bool Modified);

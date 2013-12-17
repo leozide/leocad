@@ -195,6 +195,13 @@ void lcQMainWindow::createActions()
 		actionCameraGroup->addAction(actions[actionIdx]);
 	}
 
+	QActionGroup *actionPerspectiveGroup = new QActionGroup(this);
+	for (int actionIdx = LC_VIEW_PROJECTION_FIRST; actionIdx <= LC_VIEW_PROJECTION_LAST; actionIdx++)
+	{
+		actions[actionIdx]->setCheckable(true);
+		actionPerspectiveGroup->addAction(actions[actionIdx]);
+	}
+
 	updateShortcuts();
 }
 
@@ -307,6 +314,9 @@ void lcQMainWindow::createMenus()
 	menuViewpoints->addAction(actions[LC_VIEW_VIEWPOINT_BOTTOM]);
 	menuViewpoints->addAction(actions[LC_VIEW_VIEWPOINT_HOME]);
 	menuView->addMenu(menuCamera);
+	QMenu* menuPerspective = menuView->addMenu(tr("Projection"));
+	menuPerspective->addAction(actions[LC_VIEW_PROJECTION_PERSPECTIVE]);
+	menuPerspective->addAction(actions[LC_VIEW_PROJECTION_ORTHO]);
 	QMenu* menuStep = menuView->addMenu(tr("Ste&p"));
 	menuStep->addAction(actions[LC_VIEW_TIME_FIRST]);
 	menuStep->addAction(actions[LC_VIEW_TIME_PREVIOUS]);
@@ -1246,6 +1256,16 @@ void lcQMainWindow::updateCurrentCamera(int cameraIndex)
 		actionIndex = LC_VIEW_CAMERA_NONE;
 
 	actions[actionIndex]->setChecked(true);
+}
+
+void lcQMainWindow::updatePerspective(View* view)
+{
+	lcProjection::Type type = view->GetProjectionType();
+
+	if (lcProjection::Projection == type)
+		actions[LC_VIEW_PROJECTION_PERSPECTIVE]->setChecked(true);
+	else
+		actions[LC_VIEW_PROJECTION_ORTHO]->setChecked(true);
 }
 
 void lcQMainWindow::updateCategories()

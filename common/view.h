@@ -2,6 +2,7 @@
 #define _VIEW_H_
 
 #include "lc_glwidget.h"
+#include "lc_projection.h"
 
 class Camera;
 class Project;
@@ -27,12 +28,18 @@ public:
 
 	void SetCamera(Camera* camera, bool ForceCopy);
 	void SetDefaultCamera();
+	const lcProjection& UpdateProjection();
+	void SetProjectionType(lcProjection::Type type);
+	lcProjection::Type GetProjectionType() const;
 
 	LC_CURSOR_TYPE GetCursor() const;
 
 	Project* m_Project;
 	Camera* mCamera;
 	float m_OverlayScale;
+
+private:
+	lcProjection mProjection;
 };
 
 #endif // _VIEW_H_

@@ -4,6 +4,7 @@
 #include "object.h"
 #include "lc_math.h"
 #include "lc_array.h"
+#include "lc_projection.h"
 
 #define LC_CAMERA_HIDDEN            0x01
 #define LC_CAMERA_SELECTED          0x02
@@ -143,7 +144,7 @@ public:
 	void UpdatePosition(unsigned short nTime, bool bAnimation);
 	void CopyPosition(const Camera* camera);
 	void Render(float fLineWidth);
-	void LoadProjection(float fAspect);
+	void LoadProjection(const lcProjection& projection);
 
 	void ZoomExtents(View* view, const lcVector3& Center, const lcVector3* Points, int NumPoints, unsigned short nTime, bool bAnimation, bool bAddKey);
 	void ZoomRegion(View* view, float Left, float Right, float Bottom, float Top, unsigned short nTime, bool bAnimation, bool bAddKey);
@@ -153,6 +154,7 @@ public:
 	void DoRoll(int dx, int mouse, unsigned short nTime, bool bAnimation, bool bAddKey);
 	void Move(unsigned short nTime, bool bAnimation, bool bAddKey, float x, float y, float z);
 	void SetViewpoint(LC_VIEWPOINT Viewpoint, unsigned short nTime, bool bAnimation, bool bAddKey);
+	void SetFocalPoint(const lcVector3& focus, unsigned short nTime, bool bAnimation, bool bAddKey);
 
 	void StartTiledRendering(int tw, int th, int iw, int ih, float fAspect);
 	void GetTileInfo(int* row, int* col, int* width, int* height);
@@ -168,6 +170,8 @@ public:
 	lcVector3 mPosition;
 	lcVector3 mTargetPosition;
 	lcVector3 mUpVector;
+	lcVector3 mOrthoTarget;
+	lcProjection mProjection;
 
 protected:
 	void Initialize();

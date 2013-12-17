@@ -984,6 +984,34 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 		"Toggle fullscreen mode",
 		""
 	},
+	// LC_VIEW_PROJECTION_PERSPECTIVE
+	{
+		"View.Perspective.Point",
+		"&Point",
+		"Perspective projection",
+		""
+	},
+	// LC_VIEW_PROJECTION_ORTHO
+	{
+		"View.Perspective.Orthographic",
+		"&Ortho",
+		"Orthographic projection",
+		""
+	},
+	// LC_VIEW_PERSPECTIVE_CYCLE
+	{
+		"View.Perspective.Cycle",
+		"&Cycle",
+		"Cycle to next perspective",
+		""
+	},
+	// LC_VIEW_PERSPECTIVE_FOCUS
+	{
+		"View.Perspective.Focus",
+		"&Focus",
+		"Focus perspective on selected piece",
+		""
+	},
 	// LC_PIECE_INSERT
 	{
 		"Piece.Insert",

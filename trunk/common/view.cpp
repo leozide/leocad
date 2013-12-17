@@ -120,6 +120,25 @@ LC_CURSOR_TYPE View::GetCursor() const
 	}
 }
 
+// Call this once before using a view during a callback in order
+// to pick up any changes to the view or its camera.
+const lcProjection& View::UpdateProjection()
+{
+	mProjection.SetView(mCamera, mWidth, mHeight);
+	mCamera->LoadProjection(mProjection);
+	return mProjection;
+}
+
+void View::SetProjectionType(lcProjection::Type type)
+{
+	mProjection.SetType(type);
+}
+
+lcProjection::Type View::GetProjectionType() const
+{
+	return mProjection.GetType();
+}
+
 void View::OnDraw()
 {
 	m_Project->Render(this, false);

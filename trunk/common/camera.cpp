@@ -101,6 +101,7 @@ Camera::Camera(bool Simple)
 	{
 		mPosition = lcVector3(-10.0f, -10.0f, 5.0f);
 		mTargetPosition = lcVector3(0.0f, 0.0f, 0.0f);
+		mOrthoTarget = mTargetPosition;
 		mUpVector = lcVector3(-0.2357f, -0.2357f, 0.94281f);
 
 		ChangeKey(1, false, true, mPosition, LC_CK_EYE);
@@ -373,6 +374,7 @@ void Camera::Move(unsigned short nTime, bool bAnimation, bool bAddKey, float dx,
 	if (IsEyeSelected())
 	{
 		mPosition += MoveVec;
+		lcAlign(mOrthoTarget, mPosition, mTargetPosition);
 
 		if (!IsSimple())
 			ChangeKey(nTime, bAnimation, bAddKey, mPosition, LC_CK_EYE);
@@ -468,6 +470,7 @@ void Camera::CopyPosition(const Camera* camera)
 	mWorldView = camera->mWorldView;
 	mPosition = camera->mPosition;
 	mTargetPosition = camera->mTargetPosition;
+	mOrthoTarget = camera->mOrthoTarget;
 	mUpVector = camera->mUpVector;
 }
 
@@ -521,9 +524,38 @@ void Camera::Render(float fLineWidth)
 
 	glPopMatrix();
 
+	lcMatrix44 TargetMat = ViewWorld;
+	float box[24][3] =
+	{
+		{  0.2f,  0.2f,  0.2f }, { -0.2f,  0.2f,  0.2f },
+		{ -0.2f,  0.2f,  0.2f }, { -0.2f, -0.2f,  0.2f },
+		{ -0.2f, -0.2f,  0.2f }, {  0.2f, -0.2f,  0.2f },
+		{  0.2f, -0.2f,  0.2f }, {  0.2f,  0.2f,  0.2f },
+		{  0.2f,  0.2f, -0.2f }, { -0.2f,  0.2f, -0.2f },
+		{ -0.2f,  0.2f, -0.2f }, { -0.2f, -0.2f, -0.2f },
+		{ -0.2f, -0.2f, -0.2f }, {  0.2f, -0.2f, -0.2f },
+		{  0.2f, -0.2f, -0.2f }, {  0.2f,  0.2f, -0.2f },
+		{  0.2f,  0.2f,  0.2f }, {  0.2f,  0.2f, -0.2f },
+		{ -0.2f,  0.2f,  0.2f }, { -0.2f,  0.2f, -0.2f },
+		{ -0.2f, -0.2f,  0.2f }, { -0.2f, -0.2f, -0.2f },
+		{  0.2f, -0.2f,  0.2f }, {  0.2f, -0.2f, -0.2f }
+	};
+/*
+	// Draw ortho target.
+	glPushMatrix();
+	TargetMat.SetTranslation(mOrthoTarget);
+	glMultMatrixf(TargetMat);
+
+	glLineWidth(1.0f);
+	glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
+
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glVertexPointer(3, GL_FLOAT, 0, box);
+	glDrawArrays(GL_LINES, 0, 24);
+	glPopMatrix();
+*/
 	// Draw target.
 	glPushMatrix();
-	lcMatrix44 TargetMat = ViewWorld;
 	TargetMat.SetTranslation(mTargetPosition);
 	glMultMatrixf(TargetMat);
 
@@ -542,21 +574,6 @@ void Camera::Render(float fLineWidth)
 	}
 
 	glEnableClientState(GL_VERTEX_ARRAY);
-	float box[24][3] =
-	{
-		{  0.2f,  0.2f,  0.2f }, { -0.2f,  0.2f,  0.2f },
-		{ -0.2f,  0.2f,  0.2f }, { -0.2f, -0.2f,  0.2f },
-		{ -0.2f, -0.2f,  0.2f }, {  0.2f, -0.2f,  0.2f },
-		{  0.2f, -0.2f,  0.2f }, {  0.2f,  0.2f,  0.2f },
-		{  0.2f,  0.2f, -0.2f }, { -0.2f,  0.2f, -0.2f },
-		{ -0.2f,  0.2f, -0.2f }, { -0.2f, -0.2f, -0.2f },
-		{ -0.2f, -0.2f, -0.2f }, {  0.2f, -0.2f, -0.2f },
-		{  0.2f, -0.2f, -0.2f }, {  0.2f,  0.2f, -0.2f },
-		{  0.2f,  0.2f,  0.2f }, {  0.2f,  0.2f, -0.2f },
-		{ -0.2f,  0.2f,  0.2f }, { -0.2f,  0.2f, -0.2f },
-		{ -0.2f, -0.2f,  0.2f }, { -0.2f, -0.2f, -0.2f },
-		{  0.2f, -0.2f,  0.2f }, {  0.2f, -0.2f, -0.2f }
-	};
 	glVertexPointer(3, GL_FLOAT, 0, box);
 	glDrawArrays(GL_LINES, 0, 24);
 	glPopMatrix();
@@ -639,23 +656,15 @@ bool Camera::IntersectsVolume(const lcVector4 Planes[6]) const
 	return lcBoundingBoxIntersectsVolume(Min, Max, LocalPlanes);
 }
 
-void Camera::LoadProjection(float fAspect)
+void Camera::LoadProjection(const lcProjection& projection)
 {
 	if (m_pTR != NULL)
 		m_pTR->BeginTile();
 	else
 	{
 		glMatrixMode(GL_PROJECTION);
-		glLoadMatrixf(lcMatrix44Perspective(m_fovy, fAspect, m_zNear, m_zFar));
-/*
-		ymax = 10;//(m_zFar-m_zNear)*tan(DTOR*m_fovy)/3;
-		ymin = -ymax;
-		xmin = ymin * fAspect;
-		xmax = ymax * fAspect;
-		znear = -60;
-		zfar = 60;
-		glOrtho(xmin, xmax, ymin, ymax, znear, zfar);
-*/
+		mProjection = projection;
+		glLoadMatrixf((lcMatrix44&)mProjection);
 	}
 
 	glMatrixMode(GL_MODELVIEW);
@@ -674,6 +683,7 @@ void Camera::ZoomExtents(View* view, const lcVector3& Center, const lcVector3* P
 
 	mPosition = lcZoomExtents(Position, mWorldView, Projection, Points, NumPoints);
 	mTargetPosition = Center;
+	mOrthoTarget = mTargetPosition;
 
 	if (!IsSimple())
 	{
@@ -734,7 +744,13 @@ void Camera::DoZoom(int dy, int mouse, unsigned short nTime, bool bAnimation, bo
 	FrontVector.Normalize();
 	FrontVector *= -2.0f * dy / (21 - mouse);
 
-	// TODO: option to move eye, target or both
+	// Don't zoom ortho in if it would cross the ortho focal plane.
+	if (mProjection.GetType() == lcProjection::Ortho)
+	{
+		if ((dy > 0) && (lcDot(mPosition + FrontVector - mOrthoTarget, mPosition - mOrthoTarget) <= 0))
+			return;
+	}
+
 	mPosition += FrontVector;
 	mTargetPosition += FrontVector;
 
@@ -755,6 +771,7 @@ void Camera::DoPan(int dx, int dy, int mouse, unsigned short nTime, bool bAnimat
 	lcVector3 MoveVec = (SideVector * (2.0f * dx / (21 - mouse))) + (mUpVector * (-2.0f * dy / (21 - mouse)));
 	mPosition += MoveVec;
 	mTargetPosition += MoveVec;
+	mOrthoTarget += MoveVec;
 
 	if (!IsSimple())
 	{
@@ -786,6 +803,8 @@ void Camera::DoRotate(int dx, int dy, int mouse, unsigned short nTime, bool bAni
 
 	mPosition = lcMul31(mPosition - CenterPosition, transform) + CenterPosition;
 	mTargetPosition = lcMul31(mTargetPosition - CenterPosition, transform) + CenterPosition;
+	lcAlign(mOrthoTarget, mPosition, mTargetPosition);
+
 	mUpVector = lcMul31(mUpVector, transform);
 
 	if (!IsSimple())
@@ -836,6 +855,7 @@ void Camera::SetViewpoint(LC_VIEWPOINT Viewpoint, unsigned short nTime, bool bAn
 
 	mPosition = Positions[Viewpoint];
 	mTargetPosition = lcVector3(0, 0, 0);
+	mOrthoTarget = mTargetPosition;
 	mUpVector = Ups[Viewpoint];
 
 	if (!IsSimple())
@@ -879,4 +899,30 @@ bool Camera::EndTile()
 	}
 
 	return false;
+}
+
+void Camera::SetFocalPoint(const lcVector3& focus, unsigned short nTime, bool bAnimation, bool bAddKey)
+{
+	if (mProjection.GetType() == lcProjection::Ortho)
+	{
+		lcVector3 FocusVector = focus;
+		lcAlign(FocusVector, mPosition, mTargetPosition);
+		lcAlign(mOrthoTarget, mPosition, mTargetPosition);
+		lcVector3 TranslateVector = FocusVector - mOrthoTarget;
+		mPosition += TranslateVector;
+		mTargetPosition += TranslateVector;
+		mOrthoTarget = FocusVector;
+	}
+	else
+	{
+		mOrthoTarget = focus;
+	}
+
+	if (!IsSimple())
+	{
+		ChangeKey(nTime, bAnimation, bAddKey, mPosition, LC_CK_EYE);
+		ChangeKey(nTime, bAnimation, bAddKey, mTargetPosition, LC_CK_TARGET);
+	}
+
+	UpdatePosition(nTime, bAnimation);
 }

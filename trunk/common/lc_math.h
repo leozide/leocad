@@ -347,6 +347,14 @@ inline lcVector3 lcNormalize(const lcVector3& a)
 	return Ret;
 }
 
+inline void lcAlign(lcVector3& t, const lcVector3& a, const lcVector3& b)
+{
+	lcVector3 Vector(b - a);
+	Vector.Normalize();
+	Vector *=  (t - a).Length();
+	t = a + Vector;
+}
+
 inline float lcDot(const lcVector3& a, const lcVector3& b)
 {
 	return a.x * b.x + a.y * b.y + a.z * b.z;

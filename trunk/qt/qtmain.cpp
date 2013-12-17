@@ -559,6 +559,14 @@ void lcMainWindow::UpdateCurrentCamera(int CameraIndex)
 		window->updateCurrentCamera(CameraIndex);
 }
 
+void lcMainWindow::UpdatePerspective(View* view)
+{
+	lcQMainWindow* window = (lcQMainWindow*)mHandle;
+
+	if (window)
+		window->updatePerspective(view);
+}
+
 void lcMainWindow::UpdateCategories()
 {
 	lcQMainWindow* window = (lcQMainWindow*)mHandle;

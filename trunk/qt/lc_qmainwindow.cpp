@@ -603,7 +603,8 @@ void lcQMainWindow::partSearchReturn()
 
 void lcQMainWindow::partSearchChanged(const QString& text)
 {
-	const char *searchString = text.toLocal8Bit().data();
+	const QByteArray textConv = text.toLocal8Bit();
+	const char* searchString = textConv.data();
 	int length = strlen(searchString);
 
 	if (!length)

@@ -323,6 +323,7 @@ protected:
 	void FindObjectsInBox(float x1, float y1, float x2, float y2, lcArray<Object*>& Objects);
 	void SelectAndFocusNone(bool bFocusOnly);
 	void CalculateStep();
+	static int InstanceOfName(const String& existingString, const String& candidateString, String& baseNameOut );
 
 	void FindPiece(bool FindFirst, bool SearchForward);
 	lcSearchOptions mSearchOptions;

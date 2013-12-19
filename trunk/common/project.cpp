@@ -371,6 +371,8 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 	Library->OpenCache();
 
+	const Piece* pFirstExistingPiece = m_pPieces;
+
 	while (count--)
 	{
 		if (fv > 0.4f)
@@ -509,6 +511,24 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 			}
 			else
 				pGroup->FileLoad(file);
+
+			if (bMerge)
+			{
+				// Ensure a unique group name
+
+				int max = -1;
+				String baseName;
+
+				for (Group* pExisting = m_pGroups; pExisting && (pExisting != pGroup); pExisting = pExisting->m_pNext)
+					max = lcMax(max, InstanceOfName(pExisting->m_strName, pGroup->m_strName, baseName));
+
+				if (max > -1)
+				{
+					int baseReserve = sizeof(pGroup->m_strName) - 5; // space, #, 2-digits, and terminating 0
+					for (int num = max; (num > 99); num /= 10) { baseReserve--; }
+					sprintf(pGroup->m_strName, "%s #%.2d", (const char*)(baseName.Left(baseReserve)), max+1);
+				}
+			}
 		}
 
 		for (pGroup = pLastGroup; pGroup; pGroup = pGroup->m_pNext)
@@ -533,7 +553,7 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 
 
 		Piece* pPiece;
-		for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+		for (pPiece = m_pPieces; pPiece && pPiece != pFirstExistingPiece; pPiece = pPiece->m_pNext)
 		{
 			i = LC_POINTER_TO_INT(pPiece->GetGroup());
 			pPiece->SetGroup(NULL);
@@ -10113,4 +10133,54 @@ void Project::UpdateOverlayScale()
 		lcVector3 Dist(Point - m_OverlayCenter);
 		m_ActiveView->m_OverlayScale = Dist.Length() * 5.0f;
 	}
+}
+
+// Indicates if the existing string represents an instance of the candidate
+// string in the form "<basename> (#<instance>)".
+//
+// Returns:
+//	-1  if existing is not an instance of candidate.
+//	0  if existing is an instance but not numbered.
+//	>= 1  indicates the existing instance number.
+//
+int Project::InstanceOfName(const String& existingString, const String& candidateString, String& baseNameOut )
+{
+	int einst = 0;
+	String estr = existingString;
+	estr.TrimLeft();
+	estr.TrimRight();
+
+	int div = estr.ReverseFind('#');
+	if (-1 != div)
+	{
+		char* endptr;
+		einst = strtol(estr.Mid(div + 1), &endptr, 10);
+		if (!*endptr)
+		{
+			estr = estr.Left(div);
+			estr.TrimRight();
+		}
+	}
+
+	String cstr = candidateString;
+	cstr.TrimLeft();
+	cstr.TrimRight();
+
+	div = cstr.ReverseFind('#');
+	if (-1 != div)
+	{
+		char* endptr;
+		strtol(cstr.Mid(div + 1), &endptr, 10);
+		if (!*endptr)
+		{
+			cstr = cstr.Left(div);
+			cstr.TrimRight();
+		}
+	}
+
+	if (estr.CompareNoCase(cstr))
+		return -1;
+
+	baseNameOut = estr;
+	return einst;
 }

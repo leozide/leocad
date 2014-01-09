@@ -489,6 +489,14 @@ void lcMainWindow::UpdateCameraMenu()
 		window->updateCameraMenu();
 }
 
+void lcMainWindow::UpdateModelMenu()
+{
+	lcQMainWindow* window = (lcQMainWindow*)mHandle;
+
+	if (window)
+		window->updateModelMenu();
+}
+
 void lcMainWindow::UpdateCheckpoint()
 {
 	lcQMainWindow* window = (lcQMainWindow*)mHandle;

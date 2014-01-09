@@ -188,6 +188,13 @@ void lcQMainWindow::createActions()
 		actionToolGroup->addAction(actions[actionIdx]);
 	}
 
+	QActionGroup *actionModelGroup = new QActionGroup(this);
+	for (int actionIdx = LC_MODEL_FIRST; actionIdx <= LC_MODEL_LAST; actionIdx++)
+	{
+		actions[actionIdx]->setCheckable(true);
+		actionModelGroup->addAction(actions[actionIdx]);
+	}
+
 	QActionGroup *actionCameraGroup = new QActionGroup(this);
 	actionCameraGroup->addAction(actions[LC_VIEW_CAMERA_NONE]);
 	for (int actionIdx = LC_VIEW_CAMERA_FIRST; actionIdx <= LC_VIEW_CAMERA_LAST; actionIdx++)
@@ -1085,6 +1092,28 @@ void lcQMainWindow::updateCameraMenu()
 		actionIndex = LC_VIEW_CAMERA_NONE;
 
 	actions[actionIndex]->setChecked(true);
+}
+
+void lcQMainWindow::updateModelMenu()
+{
+	Project* project = lcGetActiveProject();
+	lcModel* currentModel = project->mActiveModel;
+	const lcArray<lcModel*>& models = project->mModels;
+
+	for (int actionIdx = LC_MODEL_FIRST; actionIdx <= LC_MODEL_LAST; actionIdx++)
+	{
+		QAction* action = actions[actionIdx];
+		int modelIndex = actionIdx - LC_MODEL_FIRST;
+
+		if (modelIndex < models.GetSize())
+		{
+			action->setText((const char*)models[modelIndex]->mProperties.mName);
+			action->setVisible(true);
+			action->setChecked(currentModel == models[modelIndex]);
+		}
+		else
+			action->setVisible(false);
+	}
 }
 
 void lcQMainWindow::updateCheckpoint()

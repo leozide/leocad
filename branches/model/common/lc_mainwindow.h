@@ -37,6 +37,7 @@ class lcMainWindow : public lcBaseWindow
 	void UpdateSelection();
 	void UpdateFocusObject();
 	void UpdateCameraMenu();
+	void UpdateModelMenu();
 	void UpdateCheckpoint();
 	void UpdateTransformMode();
 	void UpdateCurrentTool();

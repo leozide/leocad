@@ -155,7 +155,6 @@ public:
 	lcTime GetTotalTime() const;
 	void SetCurrentTime(lcTime Time);
 
-
 	void GetPartsUsed(lcArray<lcObjectParts>& PartsUsed) const;
 	lcCamera* GetCamera(int CameraIndex);
 	void GetCameras(lcArray<lcCamera*>& Cameras);
@@ -228,6 +227,8 @@ public:
 	void ZoomExtents(View* View, const lcVector3& Center, const lcVector3* Points, bool AddKeys);
 	void ZoomRegion(View* View, float Left, float Right, float Bottom, float Top, bool AddKeys);
 
+	lcModelProperties mProperties;
+
 protected:
 	void DeleteContents();
 
@@ -249,8 +250,6 @@ protected:
 	lcArray<lcObject*> mSelectedObjects;
 
 	lcArray<lcObject*> mObjects;
-
-	lcModelProperties mProperties;
 };
 
 #endif // LC_MODEL_H

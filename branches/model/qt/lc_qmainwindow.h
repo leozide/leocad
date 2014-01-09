@@ -35,6 +35,7 @@ public:
 	void updateSelection();
 	void updateFocusObject();
 	void updateCameraMenu();
+	void updateModelMenu();
 	void updateCheckpoint();
 	void updateTransformMode();
 	void updateCurrentTool();

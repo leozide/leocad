@@ -38,6 +38,8 @@
 Project::Project()
 {
 	mActiveModel = new lcModel;
+	mActiveModel->mProperties.mName = "Model 1";
+	mModels.Add(mActiveModel);
 
 	m_bModified = false;
 	m_pPieces = NULL;
@@ -79,6 +81,7 @@ void Project::UpdateInterface()
 	gMainWindow->UpdateLockSnap(m_nSnap);
 	gMainWindow->UpdateSnap();
 	gMainWindow->UpdateCameraMenu();
+	gMainWindow->UpdateModelMenu();
 	UpdateSelection();
 	gMainWindow->UpdateCurrentTime();
 
@@ -3861,7 +3864,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 		} break;
 
 	case LC_PIECE_GROUP:
-		mActiveModel->GroupSelectedObjects();
+//		mActiveModel->GroupSelectedObjects();
 		break;
 /*
 		{
@@ -4286,6 +4289,80 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 	case LC_MODEL_PROPERTIES:
 		mActiveModel->ShowPropertiesDialog();
+		break;
+
+	case LC_MODEL_NEW:
+		{
+			lcPropertiesDialogOptions Options;
+
+			const char* Prefix = "Model ";
+			const int PrefixLength = strlen(Prefix);
+			int Index, MaxIndex = 0;
+
+			for (int ModelIdx = 0; ModelIdx < mModels.GetSize(); ModelIdx++)
+			{
+				lcModel* Model = mModels[ModelIdx];
+
+				if (strncmp(Model->mProperties.mName, Prefix, PrefixLength))
+					continue;
+
+				if (sscanf((const char*)Model->mProperties.mName + PrefixLength, "%d", &Index) != 1)
+					continue;
+
+				if (Index > MaxIndex)
+					MaxIndex = Index;
+			}
+
+			sprintf(Options.Properties.mName.GetBuffer(PrefixLength + 10), "%s%d", Prefix, MaxIndex + 1);
+
+			Options.Properties.LoadDefaults();
+			Options.SetDefault = false;
+
+			if (!gMainWindow->DoDialog(LC_DIALOG_PROPERTIES, &Options))
+				break;
+
+			// todo: validate name
+
+			if (Options.SetDefault)
+				Options.Properties.SaveDefaults();
+
+			lcModel* Model = new lcModel();
+			Model->mProperties = Options.Properties;
+			mModels.Add(Model);
+
+			// todo: set active model function
+			// todo: fix cameras
+
+			mActiveModel = Model;
+			UpdateInterface();
+		}
+		break;
+
+	case LC_MODEL_MODEL1:
+	case LC_MODEL_MODEL2:
+	case LC_MODEL_MODEL3:
+	case LC_MODEL_MODEL4:
+	case LC_MODEL_MODEL5:
+	case LC_MODEL_MODEL6:
+	case LC_MODEL_MODEL7:
+	case LC_MODEL_MODEL8:
+	case LC_MODEL_MODEL9:
+	case LC_MODEL_MODEL10:
+	case LC_MODEL_MODEL11:
+	case LC_MODEL_MODEL12:
+	case LC_MODEL_MODEL13:
+	case LC_MODEL_MODEL14:
+	case LC_MODEL_MODEL15:
+	case LC_MODEL_MODEL16:
+		{
+			lcModel* Model = mModels[id - LC_MODEL_FIRST];
+
+			// todo: set active model function
+			// todo: fix cameras
+
+			mActiveModel = Model;
+			UpdateInterface();
+		}
 		break;
 
 	case LC_HELP_HOMEPAGE:

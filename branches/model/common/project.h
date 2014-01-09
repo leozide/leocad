@@ -161,6 +161,7 @@ public:
 	void RenderInitialize();
 
 	lcModel* mActiveModel;
+	lcArray<lcModel*> mModels;
 
 	// Objects
 	Piece* m_pPieces;

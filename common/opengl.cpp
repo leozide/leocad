@@ -170,6 +170,9 @@ bool GL_BeginRenderToTexture(int Width, int Height)
 
 void GL_EndRenderToTexture()
 {
+	if (!GL_SupportsFramebufferObject)
+		return;
+
 	glDeleteFramebuffers(1, &gFramebufferObject);
 	gFramebufferObject = 0;
 	glDeleteTextures(1, &gFramebufferTexture);

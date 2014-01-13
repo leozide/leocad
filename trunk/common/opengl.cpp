@@ -39,9 +39,28 @@ GLBLITFRAMEBUFFERARBPROC lcBlitFramebufferARB;
 GLRENDERBUFFERSTORAGEMULTISAMPLEARBPROC lcRenderbufferStorageMultisampleARB;
 GLFRAMEBUFFERTEXTURELAYERARBPROC lcFramebufferTextureLayerARB;
 
+GLISRENDERBUFFEREXTPROC lcIsRenderbufferEXT;
+GLBINDRENDERBUFFEREXTPROC lcBindRenderbufferEXT;
+GLDELETERENDERBUFFERSEXTPROC lcDeleteRenderbuffersEXT;
+GLGENRENDERBUFFERSEXTPROC lcGenRenderbuffersEXT;
+GLRENDERBUFFERSTORAGEEXTPROC lcRenderbufferStorageEXT;
+GLGETRENDERBUFFERPARAMETERIVEXTPROC lcGetRenderbufferParameterivEXT;
+GLISFRAMEBUFFEREXTPROC lcIsFramebufferEXT;
+GLBINDFRAMEBUFFEREXTPROC lcBindFramebufferEXT;
+GLDELETEFRAMEBUFFERSEXTPROC lcDeleteFramebuffersEXT;
+GLGENFRAMEBUFFERSEXTPROC lcGenFramebuffersEXT;
+GLCHECKFRAMEBUFFERSTATUSEXTPROC lcCheckFramebufferStatusEXT;
+GLFRAMEBUFFERTEXTURE1DEXTPROC lcFramebufferTexture1DEXT;
+GLFRAMEBUFFERTEXTURE2DEXTPROC lcFramebufferTexture2DEXT;
+GLFRAMEBUFFERTEXTURE3DEXTPROC lcFramebufferTexture3DEXT;
+GLFRAMEBUFFERRENDERBUFFEREXTPROC lcFramebufferRenderbufferEXT;
+GLGETFRAMEBUFFERATTACHMENTPARAMETERIVEXTPROC lcGetFramebufferAttachmentParameterivEXT;
+GLGENERATEMIPMAPEXTPROC lcGenerateMipmapEXT;
+
 bool GL_SupportsVertexBufferObject;
 bool GL_UseVertexBufferObject;
-bool GL_SupportsFramebufferObject;
+bool GL_SupportsFramebufferObjectARB;
+bool GL_SupportsFramebufferObjectEXT;
 bool GL_SupportsAnisotropic;
 GLfloat GL_MaxAnisotropy;
 
@@ -126,7 +145,30 @@ void GL_InitializeSharedExtensions(lcGLWidget* Window)
 		lcRenderbufferStorageMultisampleARB = (GLRENDERBUFFERSTORAGEMULTISAMPLEARBPROC)Window->GetExtensionAddress("glRenderbufferStorageMultisample");
 		lcFramebufferTextureLayerARB = (GLFRAMEBUFFERTEXTURELAYERARBPROC)Window->GetExtensionAddress("glFramebufferTextureLayer");
 
-		GL_SupportsFramebufferObject = true;
+		GL_SupportsFramebufferObjectARB = true;
+	}
+
+	if (GL_ExtensionSupported(Extensions, "GL_EXT_framebuffer_object"))
+	{
+		lcIsRenderbufferEXT = (GLISRENDERBUFFEREXTPROC)Window->GetExtensionAddress("glIsRenderbufferEXT");
+		lcBindRenderbufferEXT = (GLBINDRENDERBUFFEREXTPROC)Window->GetExtensionAddress("glBindRenderbufferEXT");
+		lcDeleteRenderbuffersEXT = (GLDELETERENDERBUFFERSEXTPROC)Window->GetExtensionAddress("glDeleteRenderbuffersEXT");
+		lcGenRenderbuffersEXT = (GLGENRENDERBUFFERSEXTPROC)Window->GetExtensionAddress("glGenRenderbuffersEXT");
+		lcRenderbufferStorageEXT = (GLRENDERBUFFERSTORAGEEXTPROC)Window->GetExtensionAddress("glRenderbufferStorageEXT");
+		lcGetRenderbufferParameterivEXT = (GLGETRENDERBUFFERPARAMETERIVEXTPROC)Window->GetExtensionAddress("glGetRenderbufferParameterivEXT");
+		lcIsFramebufferEXT = (GLISFRAMEBUFFEREXTPROC)Window->GetExtensionAddress("glIsFramebufferEXT");
+		lcBindFramebufferEXT = (GLBINDFRAMEBUFFEREXTPROC)Window->GetExtensionAddress("glBindFramebufferEXT");
+		lcDeleteFramebuffersEXT = (GLDELETEFRAMEBUFFERSEXTPROC)Window->GetExtensionAddress("glDeleteFramebuffersEXT");
+		lcGenFramebuffersEXT = (GLGENFRAMEBUFFERSEXTPROC)Window->GetExtensionAddress("glGenFramebuffersEXT");
+		lcCheckFramebufferStatusEXT = (GLCHECKFRAMEBUFFERSTATUSEXTPROC)Window->GetExtensionAddress("glCheckFramebufferStatusEXT");
+		lcFramebufferTexture1DEXT = (GLFRAMEBUFFERTEXTURE1DEXTPROC)Window->GetExtensionAddress("glFramebufferTexture1DEXT");
+		lcFramebufferTexture2DEXT = (GLFRAMEBUFFERTEXTURE2DEXTPROC)Window->GetExtensionAddress("glFramebufferTexture2DEXT");
+		lcFramebufferTexture3DEXT = (GLFRAMEBUFFERTEXTURE3DEXTPROC)Window->GetExtensionAddress("glFramebufferTexture3DEXT");
+		lcFramebufferRenderbufferEXT = (GLFRAMEBUFFERRENDERBUFFEREXTPROC)Window->GetExtensionAddress("glFramebufferRenderbufferEXT");
+		lcGetFramebufferAttachmentParameterivEXT = (GLGETFRAMEBUFFERATTACHMENTPARAMETERIVEXTPROC)Window->GetExtensionAddress("glGetFramebufferAttachmentParameterivEXT");
+		lcGenerateMipmapEXT = (GLGENERATEMIPMAPEXTPROC)Window->GetExtensionAddress("glGenerateMipmapEXT");
+
+		GL_SupportsFramebufferObjectEXT = true;
 	}
 }
 
@@ -136,47 +178,95 @@ static GLuint gDepthRenderbufferObject;
 
 bool GL_BeginRenderToTexture(int Width, int Height)
 {
-	if (!GL_SupportsFramebufferObject)
-		return false;
-
-	gMainWindow->mPreviewWidget->MakeCurrent();
-
-	glGenFramebuffers(1, &gFramebufferObject);
-	glGenTextures(1, &gFramebufferTexture);
-	glGenRenderbuffers(1, &gDepthRenderbufferObject);
-
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, gFramebufferObject);
-
-	glBindTexture(GL_TEXTURE_2D, gFramebufferTexture);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Width, Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, gFramebufferTexture, 0);
-
-	glBindRenderbuffer(GL_RENDERBUFFER, gDepthRenderbufferObject);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, Width, Height);
-	glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, gDepthRenderbufferObject);
-
-	glBindTexture(GL_TEXTURE_2D, 0);
-	glBindFramebuffer(GL_FRAMEBUFFER, gFramebufferObject);
-
-	if (glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+	if (GL_SupportsFramebufferObjectARB)
 	{
-		GL_EndRenderToTexture();
-		return false;
+		gMainWindow->mPreviewWidget->MakeCurrent();
+
+		glGenFramebuffers(1, &gFramebufferObject);
+		glGenTextures(1, &gFramebufferTexture);
+		glGenRenderbuffers(1, &gDepthRenderbufferObject);
+
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, gFramebufferObject);
+
+		glBindTexture(GL_TEXTURE_2D, gFramebufferTexture);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Width, Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, gFramebufferTexture, 0);
+
+		glBindRenderbuffer(GL_RENDERBUFFER, gDepthRenderbufferObject);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, Width, Height);
+		glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, gDepthRenderbufferObject);
+
+		glBindTexture(GL_TEXTURE_2D, 0);
+		glBindFramebuffer(GL_FRAMEBUFFER, gFramebufferObject);
+
+		if (glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		{
+			GL_EndRenderToTexture();
+			return false;
+		}
+
+		return true;
 	}
 
-	return true;
+	if (GL_SupportsFramebufferObjectEXT)
+	{
+		gMainWindow->mPreviewWidget->MakeCurrent();
+
+		glGenFramebuffersEXT(1, &gFramebufferObject); 
+		glGenTextures(1, &gFramebufferTexture); 
+
+		glBindTexture(GL_TEXTURE_2D, gFramebufferTexture); 
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, Width, Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL); 
+
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, gFramebufferObject); 
+		glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, gFramebufferTexture, 0); 
+
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, gFramebufferObject);
+
+		glGenRenderbuffersEXT(1, &gDepthRenderbufferObject); 
+		glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, gDepthRenderbufferObject); 
+		glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT24, Width, Height);
+
+		glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, gDepthRenderbufferObject); 
+
+		glBindTexture(GL_TEXTURE_2D, 0);
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, gFramebufferObject);
+
+		if (glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT) != GL_FRAMEBUFFER_COMPLETE_EXT)
+		{
+			GL_EndRenderToTexture();
+			return false;
+		}
+
+		return true;
+	}
+
+	return false;
 }
 
 void GL_EndRenderToTexture()
 {
-	if (!GL_SupportsFramebufferObject)
-		return;
+	if (GL_SupportsFramebufferObjectARB)
+	{
+		glDeleteFramebuffers(1, &gFramebufferObject);
+		gFramebufferObject = 0;
+		glDeleteTextures(1, &gFramebufferTexture);
+		gFramebufferTexture = 0;
+		glDeleteRenderbuffers(1, &gDepthRenderbufferObject);
+		gDepthRenderbufferObject = 0;
 
-	glDeleteFramebuffers(1, &gFramebufferObject);
-	gFramebufferObject = 0;
-	glDeleteTextures(1, &gFramebufferTexture);
-	gFramebufferTexture = 0;
-	glDeleteRenderbuffers(1, &gDepthRenderbufferObject);
-	gDepthRenderbufferObject = 0;
+		return;
+	}
+
+	if (GL_SupportsFramebufferObjectEXT)
+	{
+		glDeleteFramebuffersEXT(1, &gFramebufferObject);
+		gFramebufferObject = 0;
+		glDeleteTextures(1, &gFramebufferTexture);
+		gFramebufferTexture = 0;
+		glDeleteRenderbuffersEXT(1, &gDepthRenderbufferObject);
+		gDepthRenderbufferObject = 0;
+	}
 }

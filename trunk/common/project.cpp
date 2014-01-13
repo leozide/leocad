@@ -6949,7 +6949,9 @@ void Project::HandleCommand(LC_COMMANDS id)
 			Info += "\nGL_ARB_vertex_buffer_object extension: ";
 			Info += GL_HasVertexBufferObject() ? "supported" : "not supported";
 			Info += "\nGL_ARB_framebuffer_object extension: ";
-			Info += GL_HasFramebufferObject() ? "supported" : "not supported";
+			Info += GL_HasFramebufferObjectARB() ? "supported" : "not supported";
+			Info += "\nGL_EXT_framebuffer_object extension: ";
+			Info += GL_HasFramebufferObjectEXT() ? "supported" : "not supported";
 			Info += "\nGL_EXT_texture_filter_anisotropic extension: ";
 			if (GL_SupportsAnisotropic)
 			{

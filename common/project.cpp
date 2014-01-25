@@ -10145,7 +10145,7 @@ void Project::UpdateOverlayScale()
 //	0  if existing is an instance but not numbered.
 //	>= 1  indicates the existing instance number.
 //
-int Project::InstanceOfName(const String& existingString, const String& candidateString, String& baseNameOut )
+int Project::InstanceOfName(const String& existingString, const String& candidateString, String& baseNameOut)
 {
 	int einst = 0;
 	String estr = existingString;
@@ -10172,7 +10172,8 @@ int Project::InstanceOfName(const String& existingString, const String& candidat
 	if (-1 != div)
 	{
 		char* endptr;
-		strtol(cstr.Mid(div + 1), &endptr, 10);
+        int Value = strtol(cstr.Mid(div + 1), &endptr, 10);
+        (void)Value;
 		if (!*endptr)
 		{
 			cstr = cstr.Left(div);

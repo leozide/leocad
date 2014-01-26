@@ -3,7 +3,7 @@ TEMPLATE = app
 
 greaterThan(QT_MAJOR_VERSION, 4) {
 #	DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0
-#	QT *= printsupport
+	QT *= printsupport
 }
 
 INCLUDEPATH += qt common

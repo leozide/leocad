@@ -96,7 +96,12 @@ lcQPropertiesDialog::lcQPropertiesDialog(QWidget *parent, void *data) :
 	table->setColumnCount(numColors + 1);
 	table->setRowCount(numInfos);
 	table->setHorizontalHeaderLabels(horizontalLabels);
+
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+	table->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
+#else
 	table->horizontalHeader()->setResizeMode(0, QHeaderView::ResizeToContents);
+#endif
 
 	for (int rowIdx = 0; rowIdx < partNames.size(); rowIdx++)
 		table->setItem(rowIdx, 0, new QTableWidgetItem(partNames[rowIdx]));

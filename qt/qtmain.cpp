@@ -154,8 +154,12 @@ int main(int argc, char *argv[])
 	const char* libPath = LC_INSTALL_PREFIX"/share/leocad/";
 #endif
 
-
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+	QStringList cachePathList = QStandardPaths::standardLocations(QStandardPaths::CacheLocation);
+	QString cachePath = cachePathList.first();
+#else
 	QString cachePath = QDesktopServices::storageLocation(QDesktopServices::CacheLocation);
+#endif
 
 	QDir dir;
 	dir.mkdir(cachePath);

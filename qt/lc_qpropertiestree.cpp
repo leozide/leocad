@@ -253,8 +253,13 @@ lcQPropertiesTree::lcQPropertiesTree(QWidget *parent) :
 	labels.append(tr("Property"));
 	labels.append(tr("Value"));
 	setHeaderLabels(labels);
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+	header()->setSectionsMovable(false);
+	header()->setSectionResizeMode(QHeaderView::ResizeToContents);
+#else
 	header()->setMovable(false);
 	header()->setResizeMode(QHeaderView::ResizeToContents);
+#endif
 	header()->setVisible(false);
 	setAlternatingRowColors(true);
 	setRootIsDecorated(false);

@@ -57,6 +57,51 @@ GLFRAMEBUFFERRENDERBUFFEREXTPROC lcFramebufferRenderbufferEXT;
 GLGETFRAMEBUFFERATTACHMENTPARAMETERIVEXTPROC lcGetFramebufferAttachmentParameterivEXT;
 GLGENERATEMIPMAPEXTPROC lcGenerateMipmapEXT;
 
+GLDELETEOBJECTARBPROC lcDeleteObjectARB;
+GLGETHANDLEARBPROC lcGetHandleARB;
+GLDETACHOBJECTARBPROC lcDetachObjectARB;
+GLCREATESHADEROBJECTARBPROC lcCreateShaderObjectARB;
+GLSHADERSOURCEARBPROC lcShaderSourceARB;
+GLCOMPILESHADERARBPROC lcCompileShaderARB;
+GLCREATEPROGRAMOBJECTARBPROC lcCreateProgramObjectARB;
+GLATTACHOBJECTARBPROC lcAttachObjectARB;
+GLLINKPROGRAMARBPROC lcLinkProgramARB;
+GLUSEPROGRAMOBJECTARBPROC lcUseProgramObjectARB;
+GLVALIDATEPROGRAMARBPROC lcValidateProgramARB;
+GLUNIFORM1FARBPROC lcUniform1fARB;
+GLUNIFORM2FARBPROC lcUniform2fARB;
+GLUNIFORM3FARBPROC lcUniform3fARB;
+GLUNIFORM4FARBPROC lcUniform4fARB;
+GLUNIFORM1IARBPROC lcUniform1iARB;
+GLUNIFORM2IARBPROC lcUniform2iARB;
+GLUNIFORM3IARBPROC lcUniform3iARB;
+GLUNIFORM4IARBPROC lcUniform4iARB;
+GLUNIFORM1FVARBPROC lcUniform1fvARB;
+GLUNIFORM2FVARBPROC lcUniform2fvARB;
+GLUNIFORM3FVARBPROC lcUniform3fvARB;
+GLUNIFORM4FVARBPROC lcUniform4fvARB;
+GLUNIFORM1IVARBPROC lcUniform1ivARB;
+GLUNIFORM2IVARBPROC lcUniform2ivARB;
+GLUNIFORM3IVARBPROC lcUniform3ivARB;
+GLUNIFORM4IVARBPROC lcUniform4ivARB;
+GLUNIFORMMATRIX2FVARBPROC lcUniformMatrix2fvARB;
+GLUNIFORMMATRIX3FVARBPROC lcUniformMatrix3fvARB;
+GLUNIFORMMATRIX4FVARBPROC lcUniformMatrix4fvARB;
+GLGETOBJECTPARAMETERFVARBPROC lcGetObjectParameterfvARB;
+GLGETOBJECTPARAMETERIVARBPROC lcGetObjectParameterivARB;
+GLGETINFOLOGARBPROC lcGetInfoLogARB;
+GLGETATTACHEDOBJECTSARBPROC lcGetAttachedObjectsARB;
+GLGETUNIFORMLOCATIONARBPROC lcGetUniformLocationARB;
+GLGETACTIVEUNIFORMARBPROC lcGetActiveUniformARB;
+GLGETUNIFORMFVARBPROC lcGetUniformfvARB;
+GLGETUNIFORMIVARBPROC lcGetUniformivARB;
+GLGETSHADERSOURCEARBPROC lcGetShaderSourceARB;
+
+GLBINDATTRIBLOCATIONARBPROC lcBindAttribLocationARB;
+GLGETACTIVEATTRIBARBPROC lcGetActiveAttribARB;
+GLGETATTRIBLOCATIONARBPROC lcGetAttribLocationARB;
+
+bool GL_SupportsShaderObjects;
 bool GL_SupportsVertexBufferObject;
 bool GL_UseVertexBufferObject;
 bool GL_SupportsFramebufferObjectARB;
@@ -169,6 +214,56 @@ void GL_InitializeSharedExtensions(lcGLWidget* Window)
 		lcGenerateMipmapEXT = (GLGENERATEMIPMAPEXTPROC)Window->GetExtensionAddress("glGenerateMipmapEXT");
 
 		GL_SupportsFramebufferObjectEXT = true;
+	}
+
+	if (GL_ExtensionSupported(Extensions, "GL_ARB_shader_objects") && GL_ExtensionSupported(Extensions, "GL_ARB_shading_language_100") &&
+	    GL_ExtensionSupported(Extensions, "GL_ARB_vertex_shader") && GL_ExtensionSupported(Extensions, "GL_ARB_fragment_shader"))
+	{
+		lcDeleteObjectARB = (GLDELETEOBJECTARBPROC)Window->GetExtensionAddress("glDeleteObjectARB");
+		lcGetHandleARB = (GLGETHANDLEARBPROC)Window->GetExtensionAddress("glGetHandleARB");
+		lcDetachObjectARB = (GLDETACHOBJECTARBPROC)Window->GetExtensionAddress("glDetachObjectARB");
+		lcCreateShaderObjectARB = (GLCREATESHADEROBJECTARBPROC)Window->GetExtensionAddress("glCreateShaderObjectARB");
+		lcShaderSourceARB = (GLSHADERSOURCEARBPROC)Window->GetExtensionAddress("glShaderSourceARB");
+		lcCompileShaderARB = (GLCOMPILESHADERARBPROC)Window->GetExtensionAddress("glCompileShaderARB");
+		lcCreateProgramObjectARB = (GLCREATEPROGRAMOBJECTARBPROC)Window->GetExtensionAddress("glCreateProgramObjectARB");
+		lcAttachObjectARB = (GLATTACHOBJECTARBPROC)Window->GetExtensionAddress("glAttachObjectARB");
+		lcLinkProgramARB = (GLLINKPROGRAMARBPROC)Window->GetExtensionAddress("glLinkProgramARB");
+		lcUseProgramObjectARB = (GLUSEPROGRAMOBJECTARBPROC)Window->GetExtensionAddress("glUseProgramObjectARB");
+		lcValidateProgramARB = (GLVALIDATEPROGRAMARBPROC)Window->GetExtensionAddress("glValidateProgramARB");
+		lcUniform1fARB = (GLUNIFORM1FARBPROC)Window->GetExtensionAddress("glUniform1fARB");
+		lcUniform2fARB = (GLUNIFORM2FARBPROC)Window->GetExtensionAddress("glUniform2fARB");
+		lcUniform3fARB = (GLUNIFORM3FARBPROC)Window->GetExtensionAddress("glUniform3fARB");
+		lcUniform4fARB = (GLUNIFORM4FARBPROC)Window->GetExtensionAddress("glUniform4fARB");
+		lcUniform1iARB = (GLUNIFORM1IARBPROC)Window->GetExtensionAddress("glUniform1iARB");
+		lcUniform2iARB = (GLUNIFORM2IARBPROC)Window->GetExtensionAddress("glUniform2iARB");
+		lcUniform3iARB = (GLUNIFORM3IARBPROC)Window->GetExtensionAddress("glUniform3iARB");
+		lcUniform4iARB = (GLUNIFORM4IARBPROC)Window->GetExtensionAddress("glUniform4iARB");
+		lcUniform1fvARB = (GLUNIFORM1FVARBPROC)Window->GetExtensionAddress("glUniform1fvARB");
+		lcUniform2fvARB = (GLUNIFORM2FVARBPROC)Window->GetExtensionAddress("glUniform2fvARB");
+		lcUniform3fvARB = (GLUNIFORM3FVARBPROC)Window->GetExtensionAddress("glUniform3fvARB");
+		lcUniform4fvARB = (GLUNIFORM4FVARBPROC)Window->GetExtensionAddress("glUniform4fvARB");
+		lcUniform1ivARB = (GLUNIFORM1IVARBPROC)Window->GetExtensionAddress("glUniform1ivARB");
+		lcUniform2ivARB = (GLUNIFORM2IVARBPROC)Window->GetExtensionAddress("glUniform2ivARB");
+		lcUniform3ivARB = (GLUNIFORM3IVARBPROC)Window->GetExtensionAddress("glUniform3ivARB");
+		lcUniform4ivARB = (GLUNIFORM4IVARBPROC)Window->GetExtensionAddress("glUniform4ivARB");
+		lcUniformMatrix2fvARB = (GLUNIFORMMATRIX2FVARBPROC)Window->GetExtensionAddress("glUniformMatrix2fvARB");
+		lcUniformMatrix3fvARB = (GLUNIFORMMATRIX3FVARBPROC)Window->GetExtensionAddress("glUniformMatrix3fvARB");
+		lcUniformMatrix4fvARB = (GLUNIFORMMATRIX4FVARBPROC)Window->GetExtensionAddress("glUniformMatrix4fvARB");
+		lcGetObjectParameterfvARB = (GLGETOBJECTPARAMETERFVARBPROC)Window->GetExtensionAddress("glGetObjectParameterfvARB");
+		lcGetObjectParameterivARB = (GLGETOBJECTPARAMETERIVARBPROC)Window->GetExtensionAddress("glGetObjectParameterivARB");
+		lcGetInfoLogARB = (GLGETINFOLOGARBPROC)Window->GetExtensionAddress("glGetInfoLogARB");
+		lcGetAttachedObjectsARB = (GLGETATTACHEDOBJECTSARBPROC)Window->GetExtensionAddress("glGetAttachedObjectsARB");
+		lcGetUniformLocationARB = (GLGETUNIFORMLOCATIONARBPROC)Window->GetExtensionAddress("glGetUniformLocationARB");
+		lcGetActiveUniformARB = (GLGETACTIVEUNIFORMARBPROC)Window->GetExtensionAddress("glGetActiveUniformARB");
+		lcGetUniformfvARB = (GLGETUNIFORMFVARBPROC)Window->GetExtensionAddress("glGetUniformfvARB");
+		lcGetUniformivARB = (GLGETUNIFORMIVARBPROC)Window->GetExtensionAddress("glGetUniformivARB");
+		lcGetShaderSourceARB = (GLGETSHADERSOURCEARBPROC)Window->GetExtensionAddress("glGetShaderSourceARB");
+
+		lcBindAttribLocationARB = (GLBINDATTRIBLOCATIONARBPROC)Window->GetExtensionAddress("glBindAttribLocationARB");
+		lcGetActiveAttribARB = (GLGETACTIVEATTRIBARBPROC)Window->GetExtensionAddress("glGetActiveAttribARB");
+		lcGetAttribLocationARB = (GLGETATTRIBLOCATIONARBPROC)Window->GetExtensionAddress("glGetAttribLocationARB");
+
+		GL_SupportsShaderObjects = true;
 	}
 }
 

@@ -26,9 +26,9 @@ public:
 	Piece (PieceInfo* pPieceInfo);
 	~Piece ();
 
-	void Select (bool bSelecting, bool bFocus, bool bMultiple);
-	virtual void InsertTime (unsigned short start, bool animation, unsigned short time);
-	virtual void RemoveTime (unsigned short start, bool animation, unsigned short time);
+	void Select(bool bSelecting, bool bFocus, bool bMultiple);
+	virtual void InsertTime(unsigned short start, unsigned short time);
+	virtual void RemoveTime(unsigned short start, unsigned short time);
 	virtual bool IntersectsVolume(const lcVector4 Planes[6]) const;
 
 
@@ -52,16 +52,16 @@ public:
 	{ return m_strName; }
 
 	virtual void MinIntersectDist(lcClickLine* ClickLine);
-	bool IsVisible(unsigned short nTime, bool bAnimation);
-	void Initialize(float x, float y, float z, unsigned char nStep, unsigned short nFrame);
+	bool IsVisible(unsigned short nTime);
+	void Initialize(float x, float y, float z, unsigned char nStep);
 	void CreateName(Piece* pPiece);
 	void CompareBoundingBox(float box[6]);
 	void SetPieceInfo(PieceInfo* pPieceInfo);
 	bool FileLoad(lcFile& file);
 	void FileSave(lcFile& file) const;
 
-	void UpdatePosition(unsigned short nTime, bool bAnimation);
-	void Move(unsigned short nTime, bool bAnimation, bool bAddKey, float dx, float dy, float dz);
+	void UpdatePosition(unsigned short nTime);
+	void Move(unsigned short nTime, bool bAddKey, float dx, float dy, float dz);
 
 	void DoGroup(Group* pGroup);
 	void UnGroup(Group* pGroup);
@@ -82,14 +82,6 @@ public:
 		{ m_nStepHide = step; }
 	unsigned char GetStepHide()
 		{ return (unsigned char)m_nStepHide; }
-	void SetFrameShow(unsigned short frame)
-		{ m_nFrameShow = frame; }
-	unsigned short GetFrameShow()
-		{ return m_nFrameShow; }
-	void SetFrameHide(unsigned short frame)
-		{ m_nFrameHide = frame; }
-	unsigned short GetFrameHide()
-		{ return m_nFrameHide; }
 
 	void Render(bool bLighting, bool bEdges);
 	void RenderBox(bool bHilite, float fLineWidth);
@@ -120,8 +112,6 @@ protected:
 	// Atributes
 	Group* m_pGroup;
 
-	lcuint16 m_nFrameShow;
-	lcuint16 m_nFrameHide;
 	lcuint8 m_nStepShow;
 	lcuint8 m_nStepHide;
 

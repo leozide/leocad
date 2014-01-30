@@ -18,7 +18,6 @@ Object::Object(LC_OBJECT_TYPE nType)
   //  m_nState = 0;
   //  m_strName[0] = '\0';
 
-  m_pAnimationKeys = NULL;
   m_pInstructionKeys = NULL;
 
   m_nObjectType = nType;
@@ -54,7 +53,7 @@ bool Object::FileLoad(lcFile& file)
     file.ReadFloats(param, 4);
     file.ReadU8(&type, 1);
 
-    ChangeKey(time, false, true, param, type);
+	ChangeKey(time, true, param, type);
   }
 
   file.ReadU32(&n, 1);
@@ -63,8 +62,6 @@ bool Object::FileLoad(lcFile& file)
     file.ReadU16(&time, 1);
     file.ReadFloats(param, 4);
     file.ReadU8(&type, 1);
-
-    ChangeKey(time, true, true, param, type);
   }
 
   return true;
@@ -88,16 +85,7 @@ void Object::FileSave(lcFile& file) const
     file.WriteU8(node->type);
   }
 
-  for (n = 0, node = m_pAnimationKeys; node; node = node->next)
-    n++;
-  file.WriteU32(n);
-
-  for (node = m_pAnimationKeys; node; node = node->next)
-  {
-    file.WriteU16(node->time);
-    file.WriteFloats(node->param, 4);
-    file.WriteU8(node->type);
-  }
+  file.WriteU32(0);
 }
 
 // =============================================================================
@@ -131,14 +119,10 @@ void Object::RegisterKeys(float *values[], LC_OBJECT_KEY_INFO* info, int count)
   for (i = 0; i < count; i++)
     m_pKeyValues[i] = values[i];
 
-  m_pAnimationKeys = AddNode(NULL, 1, 0);
   m_pInstructionKeys = AddNode(NULL, 1, 0);
 
   for (i = count-1; i > 0; i--)
-  {
-    AddNode(m_pAnimationKeys, 1, i);
-    AddNode(m_pInstructionKeys, 1, i);
-  }
+	AddNode(m_pInstructionKeys, 1, i);
 
   m_pKeyInfo = info;
   m_nKeyInfoCount = count;
@@ -154,22 +138,12 @@ void Object::RemoveKeys()
     node = node->next;
     free(prev);
   }
-
-  for (node = m_pAnimationKeys; node;)
-  {
-    prev = node;
-    node = node->next;
-    free(prev);
-  }
 }
 
-void Object::ChangeKey(unsigned short nTime, bool bAnimation, bool bAddKey, const float *param, unsigned char nKeyType)
+void Object::ChangeKey(unsigned short nTime, bool bAddKey, const float *param, unsigned char nKeyType)
 {
   LC_OBJECT_KEY *node, *poskey = NULL, *newpos = NULL;
-  if (bAnimation)
-    node = m_pAnimationKeys;
-  else
-    node = m_pInstructionKeys;
+  node = m_pInstructionKeys;
 
   while (node)
   {
@@ -198,7 +172,7 @@ void Object::ChangeKey(unsigned short nTime, bool bAnimation, bool bAddKey, cons
     newpos->param[i] = param[i];
 }
 
-void Object::CalculateKeys(unsigned short nTime, bool bAnimation)
+void Object::CalculateKeys(unsigned short nTime)
 {
 //  LC_OBJECT_KEY *next[m_nKeyInfoCount], *prev[m_nKeyInfoCount], *node;
   LC_OBJECT_KEY *next[32], *prev[32], *node;
@@ -207,10 +181,7 @@ void Object::CalculateKeys(unsigned short nTime, bool bAnimation)
   for (i = 0; i < m_nKeyInfoCount; i++)
     next[i] = NULL;
 
-  if (bAnimation)
-    node = m_pAnimationKeys;
-  else
-    node = m_pInstructionKeys;
+  node = m_pInstructionKeys;
 
   // Get the previous and next keys for each variable
   while (node && empty)
@@ -234,29 +205,18 @@ void Object::CalculateKeys(unsigned short nTime, bool bAnimation)
   // TODO: USE KEY IN/OUT WEIGHTS
   for (i = 0; i < m_nKeyInfoCount; i++)
   {
-    LC_OBJECT_KEY *n = next[i], *p = prev[i];
+	LC_OBJECT_KEY *p = prev[i];
 
-    if (bAnimation && (n != NULL) && (p->time != nTime))
-    {
-      float t = (float)(nTime - p->time)/(n->time - p->time);
-
-      for (int j = 0; j < m_pKeyInfo[i].size; j++)
-        m_pKeyValues[i][j] = p->param[j] + (n->param[j] - p->param[j])*t;
-    }
-    else
-      for (int j = 0; j < m_pKeyInfo[i].size; j++)
-        m_pKeyValues[i][j] = p->param[j];
+	for (int j = 0; j < m_pKeyInfo[i].size; j++)
+	  m_pKeyValues[i][j] = p->param[j];
   }
 }
 
-void Object::CalculateSingleKey(unsigned short nTime, bool bAnimation, int keytype, float *value) const
+void Object::CalculateSingleKey(unsigned short nTime, int keytype, float *value) const
 {
-	LC_OBJECT_KEY *next = NULL, *prev = NULL, *node;
+	LC_OBJECT_KEY *prev = NULL, *node;
 
-	if (bAnimation)
-		node = m_pAnimationKeys;
-	else
-		node = m_pInstructionKeys;
+	node = m_pInstructionKeys;
 
 	while (node)
 	{
@@ -265,32 +225,17 @@ void Object::CalculateSingleKey(unsigned short nTime, bool bAnimation, int keyty
 			if (node->time <= nTime)
 				prev = node;
 			else
-			{
-				if (next == NULL)
-				{
-					next = node;
-					break;
-				}
-			}
+				break;
 		}
 
 		node = node->next;
 	}
 
-	// TODO: USE KEY IN/OUT WEIGHTS
-	if (bAnimation && (next != NULL) && (prev->time != nTime))
-	{
-		float t = (float)(nTime - prev->time)/(next->time - prev->time);
-
-		for (int j = 0; j < m_pKeyInfo[keytype].size; j++)
-			value[j] = prev->param[j] + (next->param[j] - prev->param[j])*t;
-	}
-	else
-		for (int j = 0; j < m_pKeyInfo[keytype].size; j++)
-			value[j] = prev->param[j];
+	for (int j = 0; j < m_pKeyInfo[keytype].size; j++)
+		value[j] = prev->param[j];
 }
 
-void Object::InsertTime(unsigned short start, bool animation, unsigned short time)
+void Object::InsertTime(unsigned short start, unsigned short time)
 {
   LC_OBJECT_KEY *node, *prev = NULL;
   unsigned short last;
@@ -300,16 +245,8 @@ void Object::InsertTime(unsigned short start, bool animation, unsigned short tim
   for (i = 0; i < m_nKeyInfoCount; i++)
     end[i] = false;
 
-  if (animation)
-  {
-    node = m_pAnimationKeys;
-    last = lcGetActiveProject()->GetTotalFrames();
-  }
-  else
-  {
-    node = m_pInstructionKeys;
-    last = 255;
-  }
+  node = m_pInstructionKeys;
+  last = 255;
 
   for (; node != NULL; prev = node, node = node->next)
   {
@@ -336,14 +273,11 @@ void Object::InsertTime(unsigned short start, bool animation, unsigned short tim
   }
 }
 
-void Object::RemoveTime(unsigned short start, bool animation, unsigned short time)
+void Object::RemoveTime(unsigned short start, unsigned short time)
 {
   LC_OBJECT_KEY *node, *prev = NULL;
 
-  if (animation)
-    node = m_pAnimationKeys;
-  else
-    node = m_pInstructionKeys;
+  node = m_pInstructionKeys;
 
   for (; node != NULL; prev = node, node = node->next)
   {

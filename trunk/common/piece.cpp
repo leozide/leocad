@@ -37,7 +37,6 @@ Piece::Piece(PieceInfo* pPieceInfo)
 	mColorCode = 0;
 	m_nStepShow = 1;
 	m_nStepHide = 255;
-	m_nFrameHide = 65535;
 	memset(m_strName, 0, sizeof(m_strName));
 	m_pGroup = NULL;
 
@@ -48,10 +47,8 @@ Piece::Piece(PieceInfo* pPieceInfo)
 	RegisterKeys (values, piece_key_info, LC_PK_COUNT);
 
 	float pos[3] = { 0, 0, 0 }, rot[4] = { 0, 0, 1, 0 };
-	ChangeKey (1, false, true, pos, LC_PK_POSITION);
-	ChangeKey (1, false, true, rot, LC_PK_ROTATION);
-	ChangeKey (1, true, true, pos, LC_PK_POSITION);
-	ChangeKey (1, true, true, rot, LC_PK_ROTATION);
+	ChangeKey(1, true, pos, LC_PK_POSITION);
+	ChangeKey(1, true, rot, LC_PK_ROTATION);
 }
 
 Piece::~Piece()
@@ -100,7 +97,7 @@ bool Piece::FileLoad(lcFile& file)
         file.ReadU16(&time, 1);
         file.ReadU8(&type, 1);
 
-        ChangeKey (time, false, true, param, type);
+		ChangeKey(time, true, param, type);
       }
 
       file.ReadU32(&keys, 1);
@@ -109,8 +106,6 @@ bool Piece::FileLoad(lcFile& file)
         file.ReadFloats(param, 4);
         file.ReadU16(&time, 1);
         file.ReadU8(&type, 1);
-
-        ChangeKey (time, true, true, param, type);
       }
     }
     else
@@ -141,14 +136,12 @@ bool Piece::FileLoad(lcFile& file)
 			file.ReadU8(&b, 1);
 			time = b;
 
-			ChangeKey(1, false, true, ModelWorld.r[3], LC_PK_POSITION);
-			ChangeKey(1, true, true, ModelWorld.r[3], LC_PK_POSITION);
+			ChangeKey(1, true, ModelWorld.r[3], LC_PK_POSITION);
 
 			lcVector4 AxisAngle = lcMatrix44ToAxisAngle(ModelWorld);
 			AxisAngle[3] *= LC_RTOD;
 
-			ChangeKey(time, false, true, AxisAngle, LC_PK_ROTATION);
-			ChangeKey(time, true, true, AxisAngle, LC_PK_ROTATION);
+			ChangeKey(time, true, AxisAngle, LC_PK_ROTATION);
 
 			lcint32 bl;
 			file.ReadS32(&bl, 1);
@@ -163,14 +156,12 @@ bool Piece::FileLoad(lcFile& file)
 			lcMatrix44 ModelWorld = lcMatrix44Translation(Translation);
 			ModelWorld = lcMul(lcMatrix44RotationZ(Rotation[2] * LC_DTOR), lcMul(lcMatrix44RotationY(Rotation[1] * LC_DTOR), lcMul(lcMatrix44RotationX(Rotation[0] * LC_DTOR), ModelWorld)));
 
-			ChangeKey(1, false, true, ModelWorld.r[3], LC_PK_POSITION);
-			ChangeKey(1, true, true, ModelWorld.r[3], LC_PK_POSITION);
+			ChangeKey(1, true, ModelWorld.r[3], LC_PK_POSITION);
 
 			lcVector4 AxisAngle = lcMatrix44ToAxisAngle(ModelWorld);
 			AxisAngle[3] *= LC_RTOD;
-			ChangeKey(1, false, true, AxisAngle, LC_PK_ROTATION);
-			ChangeKey(1, true, true, AxisAngle, LC_PK_ROTATION);
-      }
+			ChangeKey(1, true, AxisAngle, LC_PK_ROTATION);
+	  }
     }
   }
 
@@ -211,8 +202,8 @@ bool Piece::FileLoad(lcFile& file)
 
   if (version > 5)
   {
-    file.ReadU16(&m_nFrameShow, 1);
-    file.ReadU16(&m_nFrameHide, 1);
+	file.ReadU16(); // m_nFrameShow
+	file.ReadU16(); // m_nFrameHide
 
     if (version > 7)
     {
@@ -238,9 +229,6 @@ bool Piece::FileLoad(lcFile& file)
   }
   else
   {
-    m_nFrameShow = 1;
-    m_nFrameHide = 65535;
-
     file.ReadU8(&ch, 1);
     if (ch == 0)
       m_pGroup = (Group*)-1;
@@ -265,8 +253,8 @@ void Piece::FileSave(lcFile& file) const
 	file.WriteU32(mColorCode);
 	file.WriteU8(m_nStepShow);
 	file.WriteU8(m_nStepHide);
-	file.WriteU16(m_nFrameShow);
-	file.WriteU16(m_nFrameHide);
+	file.WriteU16(1); // m_nFrameShow
+	file.WriteU16(100); // m_nFrameHide
 
 	// version 8
 	file.WriteU8(m_nState);
@@ -294,18 +282,15 @@ void Piece::FileSave(lcFile& file) const
 	file.WriteS32(i);
 }
 
-void Piece::Initialize(float x, float y, float z, unsigned char nStep, unsigned short nFrame)
+void Piece::Initialize(float x, float y, float z, unsigned char nStep)
 {
-	m_nFrameShow = nFrame;
 	m_nStepShow = nStep;
 
 	float pos[3] = { x, y, z }, rot[4] = { 0, 0, 1, 0 };
-	ChangeKey (1, false, true, pos, LC_PK_POSITION);
-	ChangeKey (1, false, true, rot, LC_PK_ROTATION);
-	ChangeKey (1, true, true, pos, LC_PK_POSITION);
-	ChangeKey (1, true, true, rot, LC_PK_ROTATION);
+	ChangeKey(1, true, pos, LC_PK_POSITION);
+	ChangeKey(1, true, rot, LC_PK_ROTATION);
 
-	UpdatePosition (1, false);
+	UpdatePosition(1);
 }
 
 void Piece::CreateName(Piece* pPiece)
@@ -339,62 +324,32 @@ void Piece::Select (bool bSelecting, bool bFocus, bool bMultiple)
   }
 }
 
-void Piece::InsertTime (unsigned short start, bool animation, unsigned short time)
+void Piece::InsertTime(unsigned short start, unsigned short time)
 {
-  if (animation)
-  {
-    if (m_nFrameShow >= start)
-      m_nFrameShow = lcMin(m_nFrameShow + time, lcGetActiveProject()->GetTotalFrames());
+	if (m_nStepShow >= start)
+		m_nStepShow = lcMin(m_nStepShow + time, 255);
 
-    if (m_nFrameHide >= start)
-      m_nFrameHide = lcMin(m_nFrameHide + time, lcGetActiveProject()->GetTotalFrames());
+	if (m_nStepHide >= start)
+		m_nStepHide = lcMin(m_nStepHide + time, 255);
 
-    if (m_nFrameShow > lcGetActiveProject()->GetCurrentTime())
-      Select (false, false, false);
-  }
-  else
-  {
-    if (m_nStepShow >= start)
-      m_nStepShow = lcMin(m_nStepShow + time, 255);
+	if (m_nStepShow > lcGetActiveProject()->GetCurrentTime())
+		Select (false, false, false);
 
-    if (m_nStepHide >= start)
-      m_nStepHide = lcMin(m_nStepHide + time, 255);
-
-    if (m_nStepShow > lcGetActiveProject()->GetCurrentTime ())
-      Select (false, false, false);
-  }
-
-  Object::InsertTime (start, animation, time);
+	Object::InsertTime(start, time);
 }
 
-void Piece::RemoveTime (unsigned short start, bool animation, unsigned short time)
+void Piece::RemoveTime (unsigned short start, unsigned short time)
 {
-  if (animation)
-  {
-    if (m_nFrameShow >= start)
-      m_nFrameShow = lcMax(m_nFrameShow - time, 1);
+	if (m_nStepShow >= start)
+		m_nStepShow = lcMax(m_nStepShow - time, 1);
 
-    if (m_nFrameHide == lcGetActiveProject()->GetTotalFrames())
-      m_nFrameHide = lcGetActiveProject()->GetTotalFrames();
-    else
-      m_nFrameHide = lcMax(m_nFrameHide - time, 1);
+	if (m_nStepHide != 255)
+		m_nStepHide = lcMax(m_nStepHide - time, 1);
 
-    if (m_nFrameHide < lcGetActiveProject()->GetCurrentTime())
-      Select (false, false, false);
-  }
-  else
-  {
-    if (m_nStepShow >= start)
-      m_nStepShow = lcMax(m_nStepShow - time, 1);
+	if (m_nStepHide < lcGetActiveProject()->GetCurrentTime())
+		Select (false, false, false);
 
-    if (m_nStepHide != 255)
-      m_nStepHide = lcMax(m_nStepHide - time, 1);
-
-    if (m_nStepHide < lcGetActiveProject()->GetCurrentTime())
-      Select (false, false, false);
-  }
-
-  Object::RemoveTime (start, animation, time);
+	Object::RemoveTime(start, time);
 }
 
 void Piece::MinIntersectDist(lcClickLine* ClickLine)
@@ -482,35 +437,28 @@ bool Piece::IntersectsVolume(const lcVector4 Planes[6]) const
 	return Hit;
 }
 
-void Piece::Move(unsigned short nTime, bool bAnimation, bool bAddKey, float dx, float dy, float dz)
+void Piece::Move(unsigned short nTime, bool bAddKey, float dx, float dy, float dz)
 {
 	mPosition[0] += dx;
 	mPosition[1] += dy;
 	mPosition[2] += dz;
 
-	ChangeKey(nTime, bAnimation, bAddKey, mPosition, LC_PK_POSITION);
+	ChangeKey(nTime, bAddKey, mPosition, LC_PK_POSITION);
 
 	mModelWorld.SetTranslation(mPosition);
 }
 
-bool Piece::IsVisible(unsigned short nTime, bool bAnimation)
+bool Piece::IsVisible(unsigned short nTime)
 {
 	if (m_nState & LC_PIECE_HIDDEN)
 		return false;
 
-	if (bAnimation)
-	{
-		if (m_nFrameShow > nTime) return false;
-		if (m_nFrameHide < nTime) return false;
-		return true;
-	}
-	else
-	{
-		if (m_nStepShow > nTime) return false;
-		if ((m_nStepHide == 255) || (m_nStepHide > nTime))
-			return true;
+	if (m_nStepShow > nTime)
 		return false;
-	}
+
+	if ((m_nStepHide == 255) || (m_nStepHide > nTime))
+		return true;
+	return false;
 }
 
 void Piece::CompareBoundingBox(float box[6])
@@ -563,12 +511,12 @@ void Piece::UnGroup(Group* pGroup)
 }
 
 // Recalculates current position and connections
-void Piece::UpdatePosition(unsigned short nTime, bool bAnimation)
+void Piece::UpdatePosition(unsigned short nTime)
 {
-	if (!IsVisible(nTime, bAnimation))
+	if (!IsVisible(nTime))
 		m_nState &= ~(LC_PIECE_SELECTED|LC_PIECE_FOCUSED);
 
-	CalculateKeys (nTime, bAnimation);
+	CalculateKeys(nTime);
 
 	mModelWorld = lcMatrix44FromAxisAngle(lcVector3(mRotation[0], mRotation[1], mRotation[2]), mRotation[3] * LC_DTOR);
 	mModelWorld.SetTranslation(mPosition);

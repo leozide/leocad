@@ -36,8 +36,8 @@ public:
 	void updateSelectedObjects(int flags, int selectedCount, Object* focus);
 	void updateAction(int newAction);
 	void updatePaste(bool enabled);
-	void updateTime(bool animation, int currentTime, int totalTime);
-	void updateAnimation(bool animation, bool addKeys);
+	void updateTime(int currentTime, int totalTime);
+	void updateAnimation(bool addKeys);
 	void updateLockSnap(lcuint32 snap);
 	void updateSnap();
 	void updateUndoRedo(const char* undoText, const char* redoText);

@@ -79,12 +79,10 @@ Light::Light(float px, float py, float pz)
 
 	float pos[] = { px, py, pz }, target[] = { 0, 0, 0 };
 
-	ChangeKey(1, false, true, pos, LC_LK_POSITION);
-	ChangeKey(1, false, true, target, LC_LK_TARGET);
-	ChangeKey(1, true, true, pos, LC_LK_POSITION);
-	ChangeKey(1, true, true, target, LC_LK_TARGET);
+	ChangeKey(1, true, pos, LC_LK_POSITION);
+	ChangeKey(1, true, target, LC_LK_TARGET);
 
-	UpdatePosition(1, false);
+	UpdatePosition(1);
 }
 
 // New directional or spot light.
@@ -95,14 +93,12 @@ Light::Light(float px, float py, float pz, float tx, float ty, float tz)
 
 	float pos[] = { px, py, pz }, target[] = { tx, ty, tz };
 
-	ChangeKey(1, false, true, pos, LC_LK_POSITION);
-	ChangeKey(1, false, true, target, LC_LK_TARGET);
-	ChangeKey(1, true, true, pos, LC_LK_POSITION);
-	ChangeKey(1, true, true, target, LC_LK_TARGET);
+	ChangeKey(1, true, pos, LC_LK_POSITION);
+	ChangeKey(1, true, target, LC_LK_TARGET);
 
 	m_pTarget = new LightTarget(this);
 
-	UpdatePosition(1, false);
+	UpdatePosition(1);
 }
 
 void Light::Initialize()
@@ -125,22 +121,14 @@ void Light::Initialize()
 	float ambient[] = { 0, 0, 0 }, diffuse[] = { 0.8f, 0.8f, 0.8f }, specular[] = { 1, 1, 1 };
 	float constant = 1, linear = 0, quadratic = 0, cutoff = 30, exponent = 0;
 
-	ChangeKey(1, false, true, ambient, LC_LK_AMBIENT_COLOR);
-	ChangeKey(1, false, true, diffuse, LC_LK_DIFFUSE_COLOR);
-	ChangeKey(1, false, true, specular, LC_LK_SPECULAR_COLOR);
-	ChangeKey(1, false, true, &constant, LC_LK_CONSTANT_ATTENUATION);
-	ChangeKey(1, false, true, &linear, LC_LK_LINEAR_ATTENUATION);
-	ChangeKey(1, false, true, &quadratic, LC_LK_QUADRATIC_ATTENUATION);
-	ChangeKey(1, false, true, &cutoff, LC_LK_SPOT_CUTOFF);
-	ChangeKey(1, false, true, &exponent, LC_LK_SPOT_EXPONENT);
-	ChangeKey(1, true, true, ambient, LC_LK_AMBIENT_COLOR);
-	ChangeKey(1, true, true, diffuse, LC_LK_DIFFUSE_COLOR);
-	ChangeKey(1, true, true, specular, LC_LK_SPECULAR_COLOR);
-	ChangeKey(1, true, true, &constant, LC_LK_CONSTANT_ATTENUATION);
-	ChangeKey(1, true, true, &linear, LC_LK_LINEAR_ATTENUATION);
-	ChangeKey(1, true, true, &quadratic, LC_LK_QUADRATIC_ATTENUATION);
-	ChangeKey(1, true, true, &cutoff, LC_LK_SPOT_CUTOFF);
-	ChangeKey(1, true, true, &exponent, LC_LK_SPOT_EXPONENT);
+	ChangeKey(1, true, ambient, LC_LK_AMBIENT_COLOR);
+	ChangeKey(1, true, diffuse, LC_LK_DIFFUSE_COLOR);
+	ChangeKey(1, true, specular, LC_LK_SPECULAR_COLOR);
+	ChangeKey(1, true, &constant, LC_LK_CONSTANT_ATTENUATION);
+	ChangeKey(1, true, &linear, LC_LK_LINEAR_ATTENUATION);
+	ChangeKey(1, true, &quadratic, LC_LK_QUADRATIC_ATTENUATION);
+	ChangeKey(1, true, &cutoff, LC_LK_SPOT_CUTOFF);
+	ChangeKey(1, true, &exponent, LC_LK_SPOT_EXPONENT);
 }
 
 Light::~Light()
@@ -251,7 +239,7 @@ void Light::MinIntersectDist(lcClickLine* ClickLine)
 	}
 }
 
-void Light::Move(unsigned short nTime, bool bAnimation, bool bAddKey, float dx, float dy, float dz)
+void Light::Move(unsigned short nTime, bool bAddKey, float dx, float dy, float dz)
 {
 	lcVector3 MoveVec(dx, dy, dz);
 
@@ -259,20 +247,20 @@ void Light::Move(unsigned short nTime, bool bAnimation, bool bAddKey, float dx, 
 	{
 		mPosition += MoveVec;
 
-		ChangeKey(nTime, bAnimation, bAddKey, mPosition, LC_LK_POSITION);
+		ChangeKey(nTime, bAddKey, mPosition, LC_LK_POSITION);
 	}
 
 	if (IsTargetSelected())
 	{
 		mTargetPosition += MoveVec;
 
-		ChangeKey(nTime, bAnimation, bAddKey, mTargetPosition, LC_LK_TARGET);
+		ChangeKey(nTime, bAddKey, mTargetPosition, LC_LK_TARGET);
 	}
 }
 
-void Light::UpdatePosition(unsigned short nTime, bool bAnimation)
+void Light::UpdatePosition(unsigned short nTime)
 {
-	CalculateKeys(nTime, bAnimation);
+	CalculateKeys(nTime);
 
 	if (m_pTarget != NULL)
 	{

@@ -22,7 +22,6 @@
 #include "image.h"
 #include "system.h"
 #include "minifig.h"
-#include "curve.h"
 #include "lc_mainwindow.h"
 #include "view.h"
 #include "lc_library.h"
@@ -9581,35 +9580,6 @@ void Project::OnMouseMove(View* view)
 			gMainWindow->UpdateFocusObject(GetFocusObject());
 			UpdateAllViews();
 		} break;
-		/*
-    case LC_ACTION_CURVE:
-    {
-      float mouse = 10.0f/(21 - m_nMouse);
-      float dx = (ptx - m_fTrack[0])*mouse;
-      float dy = (pty - m_fTrack[1])*mouse;
-      float dz = (ptz - m_fTrack[2])*mouse;
-      Object *pObj = NULL;
-      Curve *pCurve;
-
-      m_fTrack[0] = ptx;
-      m_fTrack[1] = pty;
-      m_fTrack[2] = ptz;
-
-      for (pObj = m_pObjects; pObj != NULL; pObj = pObj->m_pNext)
-	if (pObj->IsSelected ())
-	  break;
-
-      if (pObj == NULL)
-	break;
-      pCurve = (Curve*)pObj;
-
-      pCurve->Move (1, m_bAnimation, false, dx, dy, dz);
-      pCurve->UpdatePosition(1, m_bAnimation);
-
-	  gMainWindow->UpdateFocusObject(GetFocusObject());
-      UpdateAllViews();
-    } break;
-                */
 	}
 }
 

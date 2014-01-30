@@ -56,7 +56,7 @@ public:
 
 public:
 	// Move the object.
-	virtual void Move(unsigned short nTime, bool bAnimation, bool bAddKey, float dx, float dy, float dz) = 0;
+	virtual void Move(unsigned short nTime, bool bAddKey, float dx, float dy, float dz) = 0;
 
 	// Check if the object intersects the ray.
 	virtual void MinIntersectDist(lcClickLine* ClickLine) = 0;
@@ -148,26 +148,25 @@ public:
 
   // Key handling stuff
  public:
-  void CalculateSingleKey(unsigned short nTime, bool bAnimation, int keytype, float *value) const;
-  void ChangeKey(unsigned short time, bool animation, bool addkey, const float *param, unsigned char keytype);
-  virtual void InsertTime(unsigned short start, bool animation, unsigned short time);
-  virtual void RemoveTime(unsigned short start, bool animation, unsigned short time);
+  void CalculateSingleKey(unsigned short nTime, int keytype, float *value) const;
+  void ChangeKey(unsigned short time, bool addkey, const float *param, unsigned char keytype);
+  virtual void InsertTime(unsigned short start, unsigned short time);
+  virtual void RemoveTime(unsigned short start, unsigned short time);
 
   int GetKeyTypeCount() const
     { return m_nKeyInfoCount; }
   const LC_OBJECT_KEY_INFO* GetKeyTypeInfo(int index) const
-    { return &m_pKeyInfo[index]; };
+	{ return &m_pKeyInfo[index]; }
   const float* GetKeyTypeValue(int index) const
-    { return m_pKeyValues[index]; };
+	{ return m_pKeyValues[index]; }
 
  protected:
   void RegisterKeys(float *values[], LC_OBJECT_KEY_INFO* info, int count);
-  void CalculateKeys(unsigned short nTime, bool bAnimation);
+  void CalculateKeys(unsigned short nTime);
 
  private:
   void RemoveKeys();
 
-  LC_OBJECT_KEY* m_pAnimationKeys;
   LC_OBJECT_KEY* m_pInstructionKeys;
   float **m_pKeyValues;
 

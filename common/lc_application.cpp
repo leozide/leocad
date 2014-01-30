@@ -124,8 +124,6 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 
 	// Image output options.
 	bool SaveImage = false;
-	bool ImageAnimation = false;
-	bool ImageInstructions = false;
 	bool ImageHighlight = false;
 	int ImageWidth = lcGetProfileInt(LC_PROFILE_IMAGE_WIDTH);
 	int ImageHeight = lcGetProfileInt(LC_PROFILE_IMAGE_HEIGHT);
@@ -173,10 +171,6 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 			{
 				ParseIntegerArgument(&i, argc, argv, &ImageEnd);
 			}
-			else if (strcmp(Param, "--animation") == 0)
-				ImageAnimation = true;
-			else if (strcmp(Param, "--instructions") == 0)
-				ImageInstructions = true;
 			else if (strcmp(Param, "--highlight") == 0)
 				ImageHighlight = true;
 			else if ((strcmp(Param, "-v") == 0) || (strcmp(Param, "--version") == 0))
@@ -196,8 +190,6 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 				printf("  -h, --height <height>: Sets the picture height.\n");
 				printf("  -f, --from <time>: Sets the first frame or step to save pictures.\n");
 				printf("  -t, --to <time>: Sets the last frame or step to save pictures.\n");
-				printf("  --animation: Saves animations frames.\n");
-				printf("  --instructions: Saves instructions steps.\n");
 				printf("  --highlight: Highlight pieces in the steps they appear.\n");
 				printf("  \n");
 
@@ -293,11 +285,6 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 			}
 		}
 
-		if (ImageInstructions)
-			mProject->SetAnimation(false);
-		else if (ImageAnimation)
-			mProject->SetAnimation(true);
-
 		if (ImageEnd < ImageStart)
 			ImageEnd = ImageStart;
 		else if (ImageStart > ImageEnd)
@@ -316,22 +303,11 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 			ImageEnd = ImageStart;
 		}
 
-		if (mProject->IsAnimation())
-		{
-			if (ImageStart > mProject->GetTotalFrames())
-				ImageStart = mProject->GetTotalFrames();
+		if (ImageStart > 255)
+			ImageStart = 255;
 
-			if (ImageEnd > mProject->GetTotalFrames())
-				ImageEnd = mProject->GetTotalFrames();
-		}
-		else
-		{
-			if (ImageStart > 255)
-				ImageStart = 255;
-
-			if (ImageEnd > 255)
-				ImageEnd = 255;
-		}
+		if (ImageEnd > 255)
+			ImageEnd = 255;
 
 		Image* images = new Image[ImageEnd - ImageStart + 1];
 		mProject->CreateImages(images, ImageWidth, ImageHeight, ImageStart, ImageEnd, ImageHighlight);

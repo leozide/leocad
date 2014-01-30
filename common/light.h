@@ -40,7 +40,7 @@ public:
 	virtual bool IntersectsVolume(const lcVector4 Planes[6]) const
 	{ return false; }
 	void Select (bool bSelecting, bool bFocus, bool bMultiple);
-	void Move (unsigned short nTime, bool bAnimation, bool bAddKey, float x, float y, float z)
+	void Move (unsigned short nTime, bool bAddKey, float x, float y, float z)
 	{
 		// FIXME: move the position handling to the light target
 	}
@@ -96,7 +96,7 @@ public:
 	{ return m_pTarget; }
 
 	const char* GetName() const
-	{ return m_strName; };
+	{ return m_strName; }
 
 	void Render(float fLineWidth);
 	void RenderCone();
@@ -106,8 +106,8 @@ public:
 	virtual void MinIntersectDist(lcClickLine* ClickLine);
 	virtual bool IntersectsVolume(const lcVector4 Planes[6]) const
 	{ return false; }
-	void UpdatePosition(unsigned short nTime, bool bAnimation);
-	void Move(unsigned short nTime, bool bAnimation, bool bAddKey, float dx, float dy, float dz);
+	void UpdatePosition(unsigned short nTime);
+	void Move(unsigned short nTime, bool bAddKey, float dx, float dy, float dz);
 	void Setup(int index);
 	void CreateName(const Light* pLight);
 

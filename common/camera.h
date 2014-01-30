@@ -55,7 +55,7 @@ public:
 	virtual void MinIntersectDist(lcClickLine* ClickLine);
 	virtual bool IntersectsVolume(const lcVector4 Planes[6]) const;
 	void Select(bool bSelecting, bool bFocus, bool bMultiple);
-	void Move(unsigned short nTime, bool bAnimation, bool bAddKey, float x, float y, float z)
+	void Move(unsigned short nTime, bool bAddKey, float x, float y, float z)
 	{
 		// FIXME: move the position handling to the camera target
 	}
@@ -141,21 +141,21 @@ public:
 	void Select(bool bSelecting, bool bFocus, bool bMultiple);
 
 
-	void UpdatePosition(unsigned short nTime, bool bAnimation);
+	void UpdatePosition(unsigned short nTime);
 	void CopyPosition(const Camera* camera);
 	void Render(float fLineWidth);
 	void LoadProjection(const lcProjection& projection);
 
-	void ZoomExtents(View* view, const lcVector3& Center, const lcVector3* Points, int NumPoints, unsigned short nTime, bool bAnimation, bool bAddKey);
-	void ZoomRegion(View* view, float Left, float Right, float Bottom, float Top, unsigned short nTime, bool bAnimation, bool bAddKey);
-	void DoZoom(int dy, int mouse, unsigned short nTime, bool bAnimation, bool bAddKey);
-	void DoPan(int dx, int dy, int mouse, unsigned short nTime, bool bAnimation, bool bAddKey);
-	void DoRotate(int dx, int dy, int mouse, unsigned short nTime, bool bAnimation, bool bAddKey, float* center);
-	void DoRoll(int dx, int mouse, unsigned short nTime, bool bAnimation, bool bAddKey);
-	void DoCenter(lcVector3& point, unsigned short nTime, bool bAnimation, bool bAddKey);
-	void Move(unsigned short nTime, bool bAnimation, bool bAddKey, float x, float y, float z);
-	void SetViewpoint(LC_VIEWPOINT Viewpoint, unsigned short nTime, bool bAnimation, bool bAddKey);
-	void SetFocalPoint(const lcVector3& focus, unsigned short nTime, bool bAnimation, bool bAddKey);
+	void ZoomExtents(View* view, const lcVector3& Center, const lcVector3* Points, int NumPoints, unsigned short nTime, bool bAddKey);
+	void ZoomRegion(View* view, float Left, float Right, float Bottom, float Top, unsigned short nTime, bool bAddKey);
+	void DoZoom(int dy, int mouse, unsigned short nTime, bool bAddKey);
+	void DoPan(int dx, int dy, int mouse, unsigned short nTime, bool bAddKey);
+	void DoRotate(int dx, int dy, int mouse, unsigned short nTime, bool bAddKey, float* center);
+	void DoRoll(int dx, int mouse, unsigned short nTime, bool bAddKey);
+	void DoCenter(lcVector3& point, unsigned short nTime, bool bAddKey);
+	void Move(unsigned short nTime, bool bAddKey, float x, float y, float z);
+	void SetViewpoint(LC_VIEWPOINT Viewpoint, unsigned short nTime, bool bAddKey);
+	void SetFocalPoint(const lcVector3& focus, unsigned short nTime, bool bAddKey);
 
 	void StartTiledRendering(int tw, int th, int iw, int ih, float fAspect);
 	void GetTileInfo(int* row, int* col, int* width, int* height);

@@ -499,20 +499,20 @@ void lcMainWindow::UpdatePaste(bool Enabled)
 		window->updatePaste(Enabled);
 }
 
-void lcMainWindow::UpdateTime(bool Animation, int CurrentTime, int TotalTime)
+void lcMainWindow::UpdateTime(int CurrentTime, int TotalTime)
 {
 	lcQMainWindow* window = (lcQMainWindow*)mHandle;
 
 	if (window)
-		window->updateTime(Animation, CurrentTime, TotalTime);
+		window->updateTime(CurrentTime, TotalTime);
 }
 
-void lcMainWindow::UpdateAnimation(bool Animation, bool AddKeys)
+void lcMainWindow::UpdateAnimation(bool AddKeys)
 {
 	lcQMainWindow* window = (lcQMainWindow*)mHandle;
 
 	if (window)
-		window->updateAnimation(Animation, AddKeys);
+		window->updateAnimation(AddKeys);
 }
 
 void lcMainWindow::UpdateLockSnap(lcuint32 Snap)

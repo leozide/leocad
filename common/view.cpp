@@ -49,7 +49,7 @@ void View::SetDefaultCamera()
 	if (!mCamera || !mCamera->IsSimple())
 		mCamera = new Camera(true);
 
-	mCamera->SetViewpoint(LC_VIEWPOINT_HOME, 1, false, false);
+	mCamera->SetViewpoint(LC_VIEWPOINT_HOME, 1, false);
 }
 
 LC_CURSOR_TYPE View::GetCursor() const

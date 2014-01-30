@@ -813,8 +813,6 @@ void lcQMainWindow::print(QPrinter *printer)
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);
 
 	unsigned short previousTime = project->GetCurrentTime();
-	bool wasAnimation = project->IsAnimation();
-	project->SetAnimation(false);
 
 	QPainter painter(printer);
 	lcuint8 *buffer = (lcuint8*)malloc(tileWidth * tileHeight * 4);
@@ -996,8 +994,6 @@ void lcQMainWindow::print(QPrinter *printer)
 
 	free(buffer);
 
-	if (wasAnimation)
-		project->SetAnimation(true);
 	project->SetCurrentTime(previousTime);
 
 	GL_EndRenderToTexture();
@@ -1132,26 +1128,20 @@ void lcQMainWindow::updatePaste(bool enabled)
 		action->setEnabled(enabled);
 }
 
-void lcQMainWindow::updateTime(bool animation, int currentTime, int totalTime)
+void lcQMainWindow::updateTime(int currentTime, int totalTime)
 {
 	actions[LC_VIEW_TIME_FIRST]->setEnabled(currentTime != 1);
 	actions[LC_VIEW_TIME_PREVIOUS]->setEnabled(currentTime > 1);
 	actions[LC_VIEW_TIME_NEXT]->setEnabled(currentTime < totalTime);
 	actions[LC_VIEW_TIME_LAST]->setEnabled(currentTime != totalTime);
 
-	if (animation)
-		statusTimeLabel->setText(QString(tr(" %1 / %2 ")).arg(QString::number(currentTime), QString::number(totalTime)));
-	else
-		statusTimeLabel->setText(QString(tr(" Step %1 ")).arg(QString::number(currentTime)));
+	statusTimeLabel->setText(QString(tr(" Step %1 ")).arg(QString::number(currentTime)));
 }
 
-void lcQMainWindow::updateAnimation(bool animation, bool addKeys)
+void lcQMainWindow::updateAnimation(bool addKeys)
 {
 	// TODO: update animation
 	/*
-	gtk_widget_set_sensitive (anim_toolbar.play, bAnimation);
-	gtk_widget_set_sensitive (anim_toolbar.stop, FALSE);
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(anim_toolbar.anim), bAnimation);
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(anim_toolbar.keys), bAddKeys);
 	*/
 }

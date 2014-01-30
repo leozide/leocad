@@ -215,18 +215,11 @@ public:
 
 	// Access to protected members
 	unsigned char GetLastStep();
-	bool IsAnimation()
-		{ return m_bAnimation; }
-	void SetAnimation(bool Anim)
-	{ m_bAnimation = Anim; } // only to be called from lcApplication::Initialize()
 	unsigned short GetCurrentTime ()
-		{ return m_bAnimation ? m_nCurFrame : m_nCurStep; }
+		{ return m_nCurStep; }
 	void SetCurrentTime(unsigned short Time)
 	{
-		if (m_bAnimation)
-			m_nCurFrame = Time;
-		else
-			m_nCurStep = (unsigned char)Time;
+		m_nCurStep = (unsigned char)Time;
 		CalculateStep();
 	}
 	void SetCurrentPiece(PieceInfo* pInfo)
@@ -242,11 +235,9 @@ public:
 	void GetSnapDistance(float* SnapXY, float* SnapZ) const;
 	void GetTimeRange(int* from, int* to)
 	{
-		*from = m_bAnimation ? m_nCurFrame : m_nCurStep;
-		*to = m_bAnimation ? m_nTotalFrames : 255;
+		*from = m_nCurStep;
+		*to = 255;
 	}
-	unsigned short GetTotalFrames () const
-		{ return m_nTotalFrames; }
 
 	void ConvertToUserUnits(lcVector3& Value) const;
 	void ConvertFromUserUnits(lcVector3& Value) const;
@@ -353,7 +344,6 @@ protected:
 	void ExportPOVRay(lcFile& File);
 	void ZoomExtents(int FirstView, int LastView);
 
-	bool m_bStopRender;
 	lcFile* m_pTrackFile;
 	bool m_bTrackCancel;
 	int m_nTracking;
@@ -405,12 +395,8 @@ protected:
 	int m_nCurAction;
 	PieceInfo* m_pCurPiece;
 	PieceInfo* mDropPiece;
-	bool m_bAnimation;
 	bool m_bAddKeys;
-	unsigned char m_nFPS;
 	unsigned char m_nCurStep;
-	lcuint16 m_nCurFrame;
-	lcuint16 m_nTotalFrames;
 
 	bool mGridStuds;
 	lcuint32 mGridStudColor;

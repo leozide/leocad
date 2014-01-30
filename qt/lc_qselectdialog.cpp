@@ -167,7 +167,7 @@ void lcQSelectDialog::addChildren(QTreeWidgetItem *parentItem, Group *parentGrou
 		if (piece->GetGroup() != parentGroup)
 			continue;
 
-		if (!piece->IsVisible(project->GetCurrentTime(), project->IsAnimation()))
+		if (!piece->IsVisible(project->GetCurrentTime()))
 			continue;
 
 		QTreeWidgetItem *pieceItem = new QTreeWidgetItem(parentItem, QStringList(piece->GetName()));

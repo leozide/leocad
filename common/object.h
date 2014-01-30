@@ -4,12 +4,6 @@
 #include "lc_math.h"
 
 class Object;
-/*
-#define LC_OBJECT_NAME_LEN         80
-#define LC_OBJECT_HIDDEN         0x01
-#define LC_OBJECT_SELECTED       0x02
-#define LC_OBJECT_FOCUSED        0x04
-*/
 
 enum LC_OBJECT_TYPE
 {
@@ -18,8 +12,6 @@ enum LC_OBJECT_TYPE
 	LC_OBJECT_CAMERA_TARGET,
 	LC_OBJECT_LIGHT,
 	LC_OBJECT_LIGHT_TARGET,
-//	LC_OBJECT_CURVE,
-//	LC_OBJECT_CURVE_POINT,
 //	LC_OBJECT_GROUP,
 //	LC_OBJECT_GROUP_PIVOT,
 };
@@ -81,8 +73,6 @@ public:
     { return (m_nState & LC_OBJECT_FOCUSED) != 0; };
   virtual bool IsVisible(unsigned short nTime, bool bAnimation) const
     { return (m_nState & LC_OBJECT_HIDDEN) == 0; }
-  const char* GetName() const
-    { return m_strName; }
 
 
   // State change, most classes will have to replace these functions
@@ -114,67 +104,69 @@ public:
     { return false; };
   */
 
-  // determine the object type
-  bool IsPiece() const
-    { return m_nObjectType == LC_OBJECT_PIECE; }
-  bool IsCamera() const
-    { return m_nObjectType == LC_OBJECT_CAMERA; }
-  bool IsLight() const
-    { return m_nObjectType == LC_OBJECT_LIGHT; }
-//  bool IsCurve() const
-//    { return m_nObjectType == LC_OBJECT_CURVE; }
+	bool IsPiece() const
+	{
+		return m_nObjectType == LC_OBJECT_PIECE;
+	}
 
-  LC_OBJECT_TYPE GetType() const
-    { return m_nObjectType; }
+	bool IsCamera() const
+	{
+		return m_nObjectType == LC_OBJECT_CAMERA;
+	}
 
-  virtual const char* GetName() const = 0;
-  /*
-  // For linked lists
-  Object* m_pNext;
-  Object* m_pNextRender;
-  Object* m_pParent;
+	bool IsLight() const
+	{
+		return m_nObjectType == LC_OBJECT_LIGHT;
+	}
 
-  Object* GetTopAncestor() const
-    { return m_pParent ? m_pParent->GetTopAncestor() : this; }
-  */
+	LC_OBJECT_TYPE GetType() const
+	{
+		return m_nObjectType;
+	}
 
- protected:
-  //  Str m_strName;
-  //  unsigned char m_nState;
+	virtual const char* GetName() const = 0;
 
-  virtual bool FileLoad(lcFile& file);
-  virtual void FileSave(lcFile& file) const;
+protected:
+	virtual bool FileLoad(lcFile& file);
+	virtual void FileSave(lcFile& file) const;
 
 
-  // Key handling stuff
- public:
-  void CalculateSingleKey(unsigned short nTime, int keytype, float *value) const;
-  void ChangeKey(unsigned short time, bool addkey, const float *param, unsigned char keytype);
-  virtual void InsertTime(unsigned short start, unsigned short time);
-  virtual void RemoveTime(unsigned short start, unsigned short time);
+public:
+	void CalculateSingleKey(unsigned short nTime, int keytype, float *value) const;
+	void ChangeKey(unsigned short time, bool addkey, const float *param, unsigned char keytype);
+	virtual void InsertTime(unsigned short start, unsigned short time);
+	virtual void RemoveTime(unsigned short start, unsigned short time);
 
-  int GetKeyTypeCount() const
-    { return m_nKeyInfoCount; }
-  const LC_OBJECT_KEY_INFO* GetKeyTypeInfo(int index) const
-	{ return &m_pKeyInfo[index]; }
-  const float* GetKeyTypeValue(int index) const
-	{ return m_pKeyValues[index]; }
+	int GetKeyTypeCount() const
+	{
+		return m_nKeyInfoCount;
+	}
 
- protected:
-  void RegisterKeys(float *values[], LC_OBJECT_KEY_INFO* info, int count);
-  void CalculateKeys(unsigned short nTime);
+	const LC_OBJECT_KEY_INFO* GetKeyTypeInfo(int index) const
+	{
+		return &m_pKeyInfo[index];
+	}
 
- private:
-  void RemoveKeys();
+	const float* GetKeyTypeValue(int index) const
+	{
+		return m_pKeyValues[index];
+	}
 
-  LC_OBJECT_KEY* m_pInstructionKeys;
-  float **m_pKeyValues;
-
-  LC_OBJECT_KEY_INFO *m_pKeyInfo;
-  int m_nKeyInfoCount;
+protected:
+	void RegisterKeys(float *values[], LC_OBJECT_KEY_INFO* info, int count);
+	void CalculateKeys(unsigned short nTime);
 
 private:
-  LC_OBJECT_TYPE m_nObjectType;
+	void RemoveKeys();
+
+	LC_OBJECT_KEY* m_pInstructionKeys;
+	float **m_pKeyValues;
+
+	LC_OBJECT_KEY_INFO *m_pKeyInfo;
+	int m_nKeyInfoCount;
+
+private:
+	LC_OBJECT_TYPE m_nObjectType;
 };
 
 #endif

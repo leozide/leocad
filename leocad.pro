@@ -103,7 +103,6 @@ SOURCES += common/view.cpp \
     common/image.cpp \
     common/group.cpp \
     common/debug.cpp \
-    common/curve.cpp \
     common/camera.cpp \
     common/lc_profile.cpp \
     common/lc_category.cpp \
@@ -164,7 +163,6 @@ HEADERS += \
     common/image.h \
     common/group.h \
     common/debug.h \
-    common/curve.h \
     common/camera.h \
     common/lc_profile.h \
     common/lc_category.h \

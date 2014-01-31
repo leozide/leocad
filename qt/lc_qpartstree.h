@@ -25,6 +25,9 @@ public:
 		ExpandedOnceRole
 	};
 
+protected:
+	bool event(QEvent *event);
+
 public slots:
 	void itemExpanded(QTreeWidgetItem *item);
 

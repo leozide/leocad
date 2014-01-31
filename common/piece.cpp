@@ -536,14 +536,14 @@ void Piece::RenderBox(bool bHilite, float fLineWidth)
 		glLineWidth(2*fLineWidth);
 		glPushAttrib(GL_POLYGON_BIT);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		glCallList(mPieceInfo->GetBoxDisplayList());
+		mPieceInfo->RenderBox();
 		glPopAttrib();
 		glLineWidth(fLineWidth);
 	}
 	else
 	{
 		lcSetColor(mColorIndex);
-		glCallList(mPieceInfo->GetBoxDisplayList());
+		mPieceInfo->RenderBox();
 	}
 	glPopMatrix();
 }

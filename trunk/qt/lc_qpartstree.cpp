@@ -44,6 +44,33 @@ QSize lcQPartsTree::sizeHint() const
 	return sizeHint;
 }
 
+bool lcQPartsTree::event(QEvent *event)
+{
+	if (event->type() == QEvent::ShortcutOverride)
+	{
+		QKeyEvent *keyEvent = (QKeyEvent*)event;
+
+		switch (keyEvent->key())
+		{
+		case Qt::Key_Down:
+		case Qt::Key_Up:
+		case Qt::Key_Left:
+		case Qt::Key_Right:
+		case Qt::Key_Home:
+		case Qt::Key_End:
+		case Qt::Key_PageUp:
+		case Qt::Key_PageDown:
+		case Qt::Key_Asterisk:
+		case Qt::Key_Plus:
+		case Qt::Key_Minus:
+			event->accept();
+			break;
+		}
+	}
+
+	return QTreeWidget::event(event);
+}
+
 void lcQPartsTree::updateCategories()
 {
 	clear();

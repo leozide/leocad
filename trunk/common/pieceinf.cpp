@@ -14,7 +14,6 @@ PieceInfo::PieceInfo(int ZipFileIndex)
 	mFlags = 0;
 	mMesh = NULL;
 	mRefCount = 0;
-	m_nBoxList = 0;
 }
 
 PieceInfo::~PieceInfo()
@@ -33,14 +32,8 @@ void PieceInfo::CreatePlaceholder(const char* Name)
 	mFlags = LC_PIECE_PLACEHOLDER;
 }
 
-void PieceInfo::CreateBoxDisplayList()
+void PieceInfo::RenderBox()
 {
-	if (m_nBoxList)
-		return;
-
-	// Create a display for the bounding box.
-	m_nBoxList = glGenLists(1);
-	glNewList(m_nBoxList, GL_COMPILE);
 	glEnableClientState(GL_VERTEX_ARRAY);
 
 	float box[24][3] =
@@ -73,7 +66,6 @@ void PieceInfo::CreateBoxDisplayList()
 
 	glVertexPointer(3, GL_FLOAT, 0, box);
 	glDrawArrays(GL_QUADS, 0, 24);
-	glEndList();
 }
 
 void PieceInfo::Load()
@@ -110,10 +102,6 @@ void PieceInfo::Unload()
 
 	delete mMesh;
 	mMesh = NULL;
-
-	if (m_nBoxList != 0)
-		glDeleteLists(m_nBoxList, 1);
-	m_nBoxList = 0;
 }
 
 // Zoom extents for the preview window and print catalog

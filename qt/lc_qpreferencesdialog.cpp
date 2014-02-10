@@ -28,7 +28,7 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget *parent, void *data) :
 	ui->partsLibrary->setText(options->LibraryPath);
 	ui->povrayExecutable->setText(options->POVRayPath);
 	ui->lgeoPath->setText(options->LGEOPath);
-	ui->mouseSensitivity->setValue(options->MouseSensitivity);
+	ui->mouseSensitivity->setValue(options->Preferences.mMouseSensitivity);
 	ui->checkForUpdates->setCurrentIndex(options->CheckForUpdates);
 	ui->centimeterUnits->setChecked((options->Snap & LC_DRAW_CM_UNITS) != 0);
 	ui->noRelativeSnap->setChecked((options->Snap & LC_DRAW_GLOBAL_SNAP) != 0);
@@ -41,21 +41,20 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget *parent, void *data) :
 		ui->antiAliasingSamples->setCurrentIndex(1);
 	else
 		ui->antiAliasingSamples->setCurrentIndex(0);
-	ui->edgeLines->setChecked((options->Detail & LC_DET_BRICKEDGES) != 0);
-	ui->lineWidth->setText(QString::number(options->LineWidth));
-	ui->gridStuds->setChecked(options->GridStuds);
-	ui->gridLines->setChecked(options->GridLines);
-	ui->gridLineSpacing->setText(QString::number(options->GridLineSpacing));
-	ui->axisIcon->setChecked((options->Snap & LC_DRAW_AXIS) != 0);
-	ui->enableLighting->setChecked((options->Detail & LC_DET_LIGHTING) != 0);
-	ui->fastRendering->setChecked((options->Detail & LC_DET_FAST) != 0);
+	ui->edgeLines->setChecked(options->Preferences.mDrawEdgeLines);
+	ui->lineWidth->setText(QString::number(options->Preferences.mLineWidth));
+	ui->gridStuds->setChecked(options->Preferences.mDrawGridStuds);
+	ui->gridLines->setChecked(options->Preferences.mDrawGridLines);
+	ui->gridLineSpacing->setText(QString::number(options->Preferences.mGridLineSpacing));
+	ui->axisIcon->setChecked(options->Preferences.mDrawAxes);
+	ui->enableLighting->setChecked(options->Preferences.mLightingMode != LC_LIGHTING_FLAT);
 
 	QPixmap pix(12, 12);
 
-	pix.fill(QColor(LC_RGBA_RED(options->GridStudColor), LC_RGBA_GREEN(options->GridStudColor), LC_RGBA_BLUE(options->GridStudColor)));
+	pix.fill(QColor(LC_RGBA_RED(options->Preferences.mGridStudColor), LC_RGBA_GREEN(options->Preferences.mGridStudColor), LC_RGBA_BLUE(options->Preferences.mGridStudColor)));
 	ui->gridStudColor->setIcon(pix);
 
-	pix.fill(QColor(LC_RGBA_RED(options->GridLineColor), LC_RGBA_GREEN(options->GridLineColor), LC_RGBA_BLUE(options->GridLineColor)));
+	pix.fill(QColor(LC_RGBA_RED(options->Preferences.mGridLineColor), LC_RGBA_GREEN(options->Preferences.mGridLineColor), LC_RGBA_BLUE(options->Preferences.mGridLineColor)));
 	ui->gridLineColor->setIcon(pix);
 
 	on_antiAliasing_toggled();
@@ -86,15 +85,14 @@ void lcQPreferencesDialog::accept()
 		return;
 	}
 
-	options->Detail &= ~(LC_DET_BRICKEDGES | LC_DET_LIGHTING | LC_DET_FAST);
-	options->Snap &= ~(LC_DRAW_CM_UNITS | LC_DRAW_GLOBAL_SNAP | LC_DRAW_MOVEAXIS | LC_DRAW_GRID | LC_DRAW_AXIS);
+	options->Snap &= ~(LC_DRAW_CM_UNITS | LC_DRAW_GLOBAL_SNAP | LC_DRAW_MOVEAXIS);
 
 	strcpy(options->DefaultAuthor, ui->authorName->text().toLocal8Bit().data());
 	strcpy(options->ProjectsPath, ui->projectsFolder->text().toLocal8Bit().data());
 	strcpy(options->LibraryPath, ui->partsLibrary->text().toLocal8Bit().data());
 	strcpy(options->POVRayPath, ui->povrayExecutable->text().toLocal8Bit().data());
 	strcpy(options->LGEOPath, ui->lgeoPath->text().toLocal8Bit().data());
-	options->MouseSensitivity = ui->mouseSensitivity->value();
+	options->Preferences.mMouseSensitivity = ui->mouseSensitivity->value();
 	options->CheckForUpdates = ui->checkForUpdates->currentIndex();
 
 	if (ui->centimeterUnits->isChecked())
@@ -115,24 +113,15 @@ void lcQPreferencesDialog::accept()
 	else
 		options->AASamples = 2;
 
-	if (ui->edgeLines->isChecked())
-	{
-		options->Detail |= LC_DET_BRICKEDGES;
-		options->LineWidth = ui->lineWidth->text().toFloat();
-	}
+	options->Preferences.mDrawEdgeLines = ui->edgeLines->isChecked();
+	options->Preferences.mLineWidth = ui->lineWidth->text().toFloat();
 
-	options->GridStuds = ui->gridStuds->isChecked();
-	options->GridLines = ui->gridLines->isChecked();
-	options->GridLineSpacing = gridLineSpacing;
+	options->Preferences.mDrawGridStuds = ui->gridStuds->isChecked();
+	options->Preferences.mDrawGridLines = ui->gridLines->isChecked();
+	options->Preferences.mGridLineSpacing = gridLineSpacing;
 
-	if (ui->axisIcon->isChecked())
-		options->Snap |= LC_DRAW_AXIS;
-
-	if (ui->enableLighting->isChecked())
-		options->Detail |= LC_DET_LIGHTING;
-
-	if (ui->fastRendering->isChecked())
-		options->Detail |= LC_DET_FAST;
+	options->Preferences.mDrawAxes = ui->axisIcon->isChecked();
+	options->Preferences.mLightingMode = ui->enableLighting->isChecked() ? LC_LIGHTING_FULL : LC_LIGHTING_FLAT;
 
 	QDialog::accept();
 }
@@ -184,13 +173,13 @@ void lcQPreferencesDialog::colorClicked()
 
 	if (button == ui->gridStudColor)
 	{
-		color = &options->GridStudColor;
+		color = &options->Preferences.mGridStudColor;
 		title = tr("Select Grid Stud Color");
 		dialogOptions = QColorDialog::ShowAlphaChannel;
 	}
 	else if (button == ui->gridLineColor)
 	{
-		color = &options->GridLineColor;
+		color = &options->Preferences.mGridLineColor;
 		title = tr("Select Grid Line Color");
 		dialogOptions = 0;
 	}

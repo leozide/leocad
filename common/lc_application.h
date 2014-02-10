@@ -7,6 +7,31 @@
 class Project;
 class lcPiecesLibrary;
 
+enum lcLightingMode
+{
+	LC_LIGHTING_FLAT,
+	LC_LIGHTING_FAKE,
+	LC_LIGHTING_FULL
+};
+
+class lcPreferences
+{
+public:
+	void LoadDefaults();
+	void SaveDefaults();
+
+	int mMouseSensitivity;
+	lcLightingMode mLightingMode;
+	bool mDrawAxes;
+	bool mDrawEdgeLines;
+	float mLineWidth;
+	bool mDrawGridStuds;
+	lcuint32 mGridStudColor;
+	bool mDrawGridLines;
+	int mGridLineSpacing;
+	lcuint32 mGridLineColor;
+};
+
 class lcApplication
 {
 public:
@@ -15,6 +40,7 @@ public:
 
 	bool Initialize(int argc, char *argv[], const char* LibraryInstallPath, const char* LibraryCachePath);
 	void Shutdown();
+	void ShowPreferencesDialog();
 
 	bool LoadPiecesLibrary(const char* LibPath, const char* LibraryInstallPath, const char* LibraryCachePath);
 
@@ -25,7 +51,8 @@ public:
 	void ExportClipboard(lcMemFile* Clipboard);
 
 	Project* mProject;
-	lcPiecesLibrary* m_Library;
+	lcPiecesLibrary* mLibrary;
+	lcPreferences mPreferences;
 	lcFile* mClipboard;
 
 protected:
@@ -37,12 +64,17 @@ extern lcApplication* g_App;
 
 inline lcPiecesLibrary* lcGetPiecesLibrary()
 {
-	return g_App->m_Library;
+	return g_App->mLibrary;
 }
 
 inline Project* lcGetActiveProject()
 {
 	return g_App->mProject;
+}
+
+inline const lcPreferences& lcGetPreferences()
+{
+	return g_App->mPreferences;
 }
 
 #endif // _LC_APPLICATION_H_

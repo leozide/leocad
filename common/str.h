@@ -87,6 +87,11 @@ public:
 		return (pf) ? (pf - m_pData) : -1;
 	}
 
+	char* Buffer()
+	{
+		return m_pData;
+	}
+
 	char* GetBuffer(int len)
 	{
 		if (len > (int)strlen(m_pData))

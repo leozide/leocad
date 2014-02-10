@@ -3,10 +3,11 @@
 
 #include "lc_math.h"
 #include "lc_array.h"
+#include "lc_application.h"
 #include "project.h"
 #include "lc_category.h"
-#include "image.h"
 #include "lc_shortcuts.h"
+#include "image.h"
 
 class Group;
 
@@ -97,23 +98,8 @@ struct lcPOVRayDialogOptions
 
 struct lcPropertiesDialogOptions
 {
-	const char* Title;
-
-	char Author[101];
-	char Description[101];
-	char Comments[256];
-
-	int BackgroundType;
-	lcVector3 SolidColor;
-	lcVector3 GradientColor1;
-	lcVector3 GradientColor2;
-	char BackgroundFileName[LC_MAXPATH];
-	bool BackgroundTile;
-	bool FogEnabled;
-	float FogDensity;
-	lcVector3 FogColor;
-	lcVector3 AmbientColor;
-	bool DrawFloor;
+	lcModelProperties Properties;
+	String Title;
 	bool SetDefault;
 
 	lcArray<lcPiecesUsedEntry> PartsUsed;
@@ -139,23 +125,17 @@ struct lcSelectDialogOptions
 
 struct lcPreferencesDialogOptions
 {
+	lcPreferences Preferences;
+
 	char DefaultAuthor[101];
 	char ProjectsPath[LC_MAXPATH];
 	char LibraryPath[LC_MAXPATH];
 	char POVRayPath[LC_MAXPATH];
 	char LGEOPath[LC_MAXPATH];
-	int MouseSensitivity;
 	int CheckForUpdates;
 
 	lcuint32 Snap;
-	lcuint32 Detail;
-	float LineWidth;
 	int AASamples;
-	bool GridStuds;
-	lcuint32 GridStudColor;
-	bool GridLines;
-	int GridLineSpacing;
-	lcuint32 GridLineColor;
 
 	lcArray<lcLibraryCategory> Categories;
 	bool CategoriesModified;

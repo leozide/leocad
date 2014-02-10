@@ -1,5 +1,6 @@
 #include "lc_global.h"
 #include "lc_profile.h"
+#include "lc_application.h"
 #include "image.h"
 #include "project.h"
 
@@ -45,10 +46,12 @@ lcProfileEntry::lcProfileEntry(const char* Section, const char* Key)
 
 lcProfileEntry gProfileEntries[LC_NUM_PROFILE_KEYS] =
 {
-	lcProfileEntry("Settings", "Detail", LC_DET_BRICKEDGES),                         // LC_PROFILE_DETAIL
 	lcProfileEntry("Settings", "Snap", LC_DRAW_SNAP_A | LC_DRAW_SNAP_XYZ),           // LC_PROFILE_SNAP
 	lcProfileEntry("Settings", "AngleSnap", 30),                                     // LC_PROFILE_ANGLE_SNAP
 	lcProfileEntry("Settings", "LineWidth", 1.0f),                                   // LC_PROFILE_LINE_WIDTH
+	lcProfileEntry("Settings", "LightingMode", LC_LIGHTING_FLAT),                    // LC_PROFILE_LIGHTING_MODE
+	lcProfileEntry("Settings", "DrawAxes", 0),                                       // LC_PROFILE_DRAW_AXES
+	lcProfileEntry("Settings", "DrawEdgeLines", 1),                                  // LC_PROFILE_DRAW_EDGE_LINES
 	lcProfileEntry("Settings", "GridStuds", 1),                                      // LC_PROFILE_GRID_STUDS
 	lcProfileEntry("Settings", "GridStudColor", LC_RGBA(64, 64, 64, 192)),           // LC_PROFILE_GRID_STUD_COLOR
 	lcProfileEntry("Settings", "GridLines", 1),                                      // LC_PROFILE_GRID_LINES
@@ -74,16 +77,18 @@ lcProfileEntry gProfileEntries[LC_NUM_PROFILE_KEYS] =
 	lcProfileEntry("Settings", "PrintColumns", 1),                                   // LC_PROFILE_PRINT_COLUMNS
 
 	lcProfileEntry("Defaults", "Author", ""),                                        // LC_PROFILE_DEFAULT_AUTHOR_NAME
-	lcProfileEntry("Defaults", "Scene", 0),                                          // LC_PROFILE_DEFAULT_SCENE
 	lcProfileEntry("Defaults", "FloorColor", LC_RGB(0, 191, 0)),                     // LC_PROFILE_DEFAULT_FLOOR_COLOR
 	lcProfileEntry("Defaults", "FloorTexture", ""),                                  // LC_PROFILE_DEFAULT_FLOOR_TEXTURE
+	lcProfileEntry("Defaults", "FogEnabled", 0),                                     // LC_PROFILE_DEFAULT_FOG_ENABLED
 	lcProfileEntry("Defaults", "FogDensity", 0.1f),                                  // LC_PROFILE_DEFAULT_FOG_DENSITY
 	lcProfileEntry("Defaults", "FogColor", LC_RGB(255, 255, 255)),                   // LC_PROFILE_DEFAULT_FOG_COLOR
 	lcProfileEntry("Defaults", "AmbientColor", LC_RGB(75, 75, 75)),                  // LC_PROFILE_DEFAULT_AMBIENT_COLOR
+	lcProfileEntry("Defaults", "BackgroundType", LC_BACKGROUND_SOLID),               // LC_PROFILE_DEFAULT_BACKGROUND_TYPE
 	lcProfileEntry("Defaults", "BackgroundColor", LC_RGB(255, 255, 255)),            // LC_PROFILE_DEFAULT_BACKGROUND_COLOR
 	lcProfileEntry("Defaults", "GradientColor1", LC_RGB(0, 0, 191)),                 // LC_PROFILE_DEFAULT_GRADIENT_COLOR1
 	lcProfileEntry("Defaults", "GradientColor2", LC_RGB(255, 255, 255)),             // LC_PROFILE_DEFAULT_GRADIENT_COLOR2
-	lcProfileEntry("Defaults", "BackgroundTeture", ""),                              // LC_PROFILE_DEFAULT_BACKGROUND_TEXTURE
+	lcProfileEntry("Defaults", "BackgroundTexture", ""),                             // LC_PROFILE_DEFAULT_BACKGROUND_TEXTURE
+	lcProfileEntry("Defaults", "BackgroundTile", 0),                                 // LC_PROFILE_DEFAULT_BACKGROUND_TILE
 
 	lcProfileEntry("HTML", "Options", LC_HTML_SINGLEPAGE),                           // LC_PROFILE_HTML_OPTIONS
 	lcProfileEntry("HTML", "ImageOptions", LC_IMAGE_PNG | LC_IMAGE_TRANSPARENT),     // LC_PROFILE_HTML_IMAGE_OPTIONS

@@ -455,11 +455,23 @@ inline lcVector4& operator/=(lcVector4& a, float b)
 	return a;
 }
 
+inline lcVector3 lcVector3FromColor(lcuint32 Color)
+{
+	lcVector3 v(LC_RGBA_RED(Color), LC_RGBA_GREEN(Color), LC_RGBA_BLUE(Color));
+	v /= 255.0f;
+	return v;
+}
+
 inline lcVector4 lcVector4FromColor(lcuint32 Color)
 {
 	lcVector4 v(LC_RGBA_RED(Color), LC_RGBA_GREEN(Color), LC_RGBA_BLUE(Color), LC_RGBA_ALPHA(Color));
 	v /= 255.0f;
 	return v;
+}
+
+inline lcuint32 lcColorFromVector3(const lcVector3& Color)
+{
+	return LC_RGB(Color[0] * 255, Color[1] * 255, Color[2] * 255);
 }
 
 inline lcVector3 lcMul31(const lcVector3& a, const lcMatrix44& b)

@@ -23,36 +23,35 @@ lcQPropertiesDialog::lcQPropertiesDialog(QWidget *parent, void *data) :
 
 	options = (lcPropertiesDialogOptions*)data;
 
-	setWindowTitle(QString(tr("%1 Properties")).arg(options->Title));
+	setWindowTitle(QString(tr("%1 Properties")).arg(options->Title.Buffer()));
 
-	ui->descriptionEdit->setText(QString::fromUtf8(options->Description));
-	ui->authorEdit->setText(QString::fromUtf8(options->Author));
-	ui->commentsEdit->setText(QString::fromUtf8(options->Comments));
+	ui->descriptionEdit->setText(QString::fromUtf8(options->Properties.mDescription.Buffer()));
+	ui->authorEdit->setText(QString::fromUtf8(options->Properties.mAuthor.Buffer()));
+	ui->commentsEdit->setText(QString::fromUtf8(options->Properties.mComments.Buffer()));
 
-	if (options->BackgroundType == 2)
+	if (options->Properties.mBackgroundType == LC_BACKGROUND_IMAGE)
 		ui->imageRadio->setChecked(true);
-	else if (options->BackgroundType == 1)
+	else if (options->Properties.mBackgroundType == LC_BACKGROUND_GRADIENT)
 		ui->gradientRadio->setChecked(true);
 	else
 		ui->solidRadio->setChecked(true);
 
-	ui->imageNameEdit->setText(options->BackgroundFileName);
-	ui->imageTileCheckBox->setChecked(options->BackgroundTile);
-	ui->fogCheckBox->setChecked(options->FogEnabled);
-	ui->fogDensityEdit->setText(QString::number(options->FogDensity));
-	ui->floorCheckBox->setChecked(options->DrawFloor);
+	ui->imageNameEdit->setText(options->Properties.mBackgroundImage.Buffer());
+	ui->imageTileCheckBox->setChecked(options->Properties.mBackgroundImageTile);
+	ui->fogCheckBox->setChecked(options->Properties.mFogEnabled);
+	ui->fogDensityEdit->setText(QString::number(options->Properties.mFogDensity));
 
 	QPixmap pix(12, 12);
 
-	pix.fill(QColor(options->SolidColor[0] * 255, options->SolidColor[1] * 255, options->SolidColor[2] * 255));
+	pix.fill(QColor(options->Properties.mBackgroundSolidColor[0] * 255, options->Properties.mBackgroundSolidColor[1] * 255, options->Properties.mBackgroundSolidColor[2] * 255));
 	ui->solidColorButton->setIcon(pix);
-	pix.fill(QColor(options->GradientColor1[0] * 255, options->GradientColor1[1] * 255, options->GradientColor1[2] * 255));
+	pix.fill(QColor(options->Properties.mBackgroundGradientColor1[0] * 255, options->Properties.mBackgroundGradientColor1[1] * 255, options->Properties.mBackgroundGradientColor1[2] * 255));
 	ui->gradient1ColorButton->setIcon(pix);
-	pix.fill(QColor(options->GradientColor2[0] * 255, options->GradientColor2[1] * 255, options->GradientColor2[2] * 255));
+	pix.fill(QColor(options->Properties.mBackgroundGradientColor2[0] * 255, options->Properties.mBackgroundGradientColor2[1] * 255, options->Properties.mBackgroundGradientColor2[2] * 255));
 	ui->gradient2ColorButton->setIcon(pix);
-	pix.fill(QColor(options->FogColor[0] * 255, options->FogColor[1] * 255, options->FogColor[2] * 255));
+	pix.fill(QColor(options->Properties.mFogColor[0] * 255, options->Properties.mFogColor[1] * 255, options->Properties.mFogColor[2] * 255));
 	ui->fogColorButton->setIcon(pix);
-	pix.fill(QColor(options->AmbientColor[0] * 255, options->AmbientColor[1] * 255, options->AmbientColor[2] * 255));
+	pix.fill(QColor(options->Properties.mAmbientColor[0] * 255, options->Properties.mAmbientColor[1] * 255, options->Properties.mAmbientColor[2] * 255));
 	ui->ambientColorButton->setIcon(pix);
 
 	lcPiecesLibrary *library = lcGetPiecesLibrary();
@@ -128,25 +127,21 @@ lcQPropertiesDialog::~lcQPropertiesDialog()
 
 void lcQPropertiesDialog::accept()
 {
-	strncpy(options->Description, ui->descriptionEdit->text().toUtf8().data(), sizeof(options->Description));
-	options->Description[sizeof(options->Description) - 1] = 0;
-	strncpy(options->Author, ui->authorEdit->text().toUtf8().data(), sizeof(options->Author));
-	options->Author[sizeof(options->Author) - 1] = 0;
-	strncpy(options->Comments, ui->commentsEdit->toPlainText().toUtf8().data(), sizeof(options->Comments));
-	options->Comments[sizeof(options->Comments) - 1] = 0;
+	options->Properties.mDescription = ui->descriptionEdit->text().toUtf8().data();
+	options->Properties.mAuthor = ui->authorEdit->text().toUtf8().data();
+	options->Properties.mComments = ui->commentsEdit->toPlainText().toUtf8().data();
 
 	if (ui->imageRadio->isChecked())
-		 options->BackgroundType = 2;
+		 options->Properties.mBackgroundType = LC_BACKGROUND_IMAGE;
 	else if (ui->gradientRadio->isChecked())
-		 options->BackgroundType = 1;
+		 options->Properties.mBackgroundType = LC_BACKGROUND_GRADIENT;
 	else
-		 options->BackgroundType = 0;
+		 options->Properties.mBackgroundType = LC_BACKGROUND_SOLID;
 
-	strcpy(options->BackgroundFileName, ui->imageNameEdit->text().toLocal8Bit().data());
-	options->BackgroundTile = ui->imageTileCheckBox->isChecked();
-	options->FogEnabled = ui->fogCheckBox->isChecked();
-	options->FogDensity = ui->fogDensityEdit->text().toFloat();
-	options->DrawFloor = ui->floorCheckBox->isChecked();
+	options->Properties.mBackgroundImage = ui->imageNameEdit->text().toLocal8Bit().data();
+	options->Properties.mBackgroundImageTile = ui->imageTileCheckBox->isChecked();
+	options->Properties.mFogEnabled = ui->fogCheckBox->isChecked();
+	options->Properties.mFogDensity = ui->fogDensityEdit->text().toFloat();
 	options->SetDefault = ui->setDefaultCheckBox->isChecked();
 
 	QDialog::accept();
@@ -160,27 +155,27 @@ void lcQPropertiesDialog::colorClicked()
 
 	if (button == ui->solidColorButton)
 	{
-		color = options->SolidColor;
+		color = options->Properties.mBackgroundSolidColor;
 		title = tr("Select Background Color");
 	}
 	else if (button == ui->gradient1ColorButton)
 	{
-		color = options->GradientColor1;
+		color = options->Properties.mBackgroundGradientColor1;
 		title = tr("Select Background Top Color");
 	}
 	else if (button == ui->gradient2ColorButton)
 	{
-		color = options->GradientColor2;
+		color = options->Properties.mBackgroundGradientColor2;
 		title = tr("Select Background Bottom Color");
 	}
 	else if (button == ui->fogColorButton)
 	{
-		color = options->FogColor;
+		color = options->Properties.mFogColor;
 		title = tr("Select Fog Color");
 	}
 	else if (button == ui->ambientColorButton)
 	{
-		color = options->AmbientColor;
+		color = options->Properties.mAmbientColor;
 		title = tr("Select Ambient Light Color");
 	}
 

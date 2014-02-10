@@ -13,11 +13,41 @@
 
 lcApplication* g_App;
 
+void lcPreferences::LoadDefaults()
+{
+	mMouseSensitivity = lcGetProfileInt(LC_PROFILE_MOUSE_SENSITIVITY);
+	mLightingMode = (lcLightingMode)lcGetProfileInt(LC_PROFILE_LIGHTING_MODE);
+	mDrawAxes = lcGetProfileInt(LC_PROFILE_DRAW_AXES);
+	mDrawEdgeLines = lcGetProfileInt(LC_PROFILE_DRAW_EDGE_LINES);
+	mLineWidth = lcGetProfileFloat(LC_PROFILE_LINE_WIDTH);
+	mDrawGridStuds = lcGetProfileInt(LC_PROFILE_GRID_STUDS);
+	mGridStudColor = lcGetProfileInt(LC_PROFILE_GRID_STUD_COLOR);
+	mDrawGridLines = lcGetProfileInt(LC_PROFILE_GRID_LINES);
+	mGridLineSpacing = lcGetProfileInt(LC_PROFILE_GRID_LINE_SPACING);
+	mGridLineColor = lcGetProfileInt(LC_PROFILE_GRID_LINE_COLOR);
+}
+
+void lcPreferences::SaveDefaults()
+{
+	lcSetProfileInt(LC_PROFILE_MOUSE_SENSITIVITY, mMouseSensitivity);
+	lcSetProfileInt(LC_PROFILE_LIGHTING_MODE, mLightingMode);
+	lcSetProfileInt(LC_PROFILE_DRAW_AXES, mDrawAxes);
+	lcSetProfileInt(LC_PROFILE_DRAW_EDGE_LINES, mDrawEdgeLines);
+	lcSetProfileFloat(LC_PROFILE_LINE_WIDTH, mLineWidth);
+	lcSetProfileInt(LC_PROFILE_GRID_STUDS, mDrawGridStuds);
+	lcSetProfileInt(LC_PROFILE_GRID_STUD_COLOR, mGridStudColor);
+	lcSetProfileInt(LC_PROFILE_GRID_LINES, mDrawGridLines);
+	lcSetProfileInt(LC_PROFILE_GRID_LINE_SPACING, mGridLineSpacing);
+	lcSetProfileInt(LC_PROFILE_GRID_LINE_COLOR, mGridLineColor);
+}
+
 lcApplication::lcApplication()
 {
 	mProject = NULL;
-	m_Library = NULL;
+	mLibrary = NULL;
 	mClipboard = NULL;
+
+	mPreferences.LoadDefaults();
 }
 
 lcApplication::~lcApplication()
@@ -35,12 +65,12 @@ void lcApplication::SetClipboard(lcFile* Clipboard)
 
 bool lcApplication::LoadPiecesLibrary(const char* LibPath, const char* LibraryInstallPath, const char* LibraryCachePath)
 {
-	if (m_Library == NULL)
-		m_Library = new lcPiecesLibrary();
+	if (mLibrary == NULL)
+		mLibrary = new lcPiecesLibrary();
 
 	if (LibPath && LibPath[0])
 	{
-		if (m_Library->Load(LibPath, LibraryCachePath))
+		if (mLibrary->Load(LibPath, LibraryCachePath))
 			return true;
 	}
 	else
@@ -49,7 +79,7 @@ bool lcApplication::LoadPiecesLibrary(const char* LibPath, const char* LibraryIn
 
 		if (EnvPath && EnvPath[0])
 		{
-			if (m_Library->Load(EnvPath, LibraryCachePath))
+			if (mLibrary->Load(EnvPath, LibraryCachePath))
 				return true;
 		}
 		else
@@ -60,7 +90,7 @@ bool lcApplication::LoadPiecesLibrary(const char* LibPath, const char* LibraryIn
 
 			if (CustomPath[0])
 			{
-				if (m_Library->Load(CustomPath, LibraryCachePath))
+				if (mLibrary->Load(CustomPath, LibraryCachePath))
 					return true;
 			}
 			else if (LibraryInstallPath && LibraryInstallPath[0])
@@ -75,9 +105,9 @@ bool lcApplication::LoadPiecesLibrary(const char* LibPath, const char* LibraryIn
 
 				strcat(LibraryPath, "library.bin");
 
-				if (m_Library->Load(LibraryPath, LibraryCachePath))
+				if (mLibrary->Load(LibraryPath, LibraryCachePath))
 				{
-					m_Library->mNumOfficialPieces = m_Library->mPieces.GetSize();
+					mLibrary->mNumOfficialPieces = mLibrary->mPieces.GetSize();
 					return true;
 				}
 			}
@@ -212,7 +242,7 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 			return false;
 		}
 
-		m_Library->CreateBuiltinPieces();
+		mLibrary->CreateBuiltinPieces();
 
 		gMainWindow->DoMessageBox("LeoCAD could not find a compatible Pieces Library so only a small number of pieces will be available.\n\n"
 		                          "Please visit http://www.leocad.org for information on how to download and install a library.", LC_MB_OK | LC_MB_ICONERROR);
@@ -349,6 +379,93 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 
 void lcApplication::Shutdown()
 {
-	delete m_Library;
-	m_Library = NULL;
+	delete mLibrary;
+	mLibrary = NULL;
+}
+
+void lcApplication::ShowPreferencesDialog()
+{
+	lcPreferencesDialogOptions Options;
+	int CurrentAASamples = lcGetProfileInt(LC_PROFILE_ANTIALIASING_SAMPLES);
+
+	Options.Preferences = mPreferences;
+
+	strcpy(Options.DefaultAuthor, lcGetProfileString(LC_PROFILE_DEFAULT_AUTHOR_NAME));
+	strcpy(Options.ProjectsPath, lcGetProfileString(LC_PROFILE_PROJECTS_PATH));
+	strcpy(Options.LibraryPath, lcGetProfileString(LC_PROFILE_PARTS_LIBRARY));
+	strcpy(Options.POVRayPath, lcGetProfileString(LC_PROFILE_POVRAY_PATH));
+	strcpy(Options.LGEOPath, lcGetProfileString(LC_PROFILE_POVRAY_LGEO_PATH));
+	Options.CheckForUpdates = lcGetProfileInt(LC_PROFILE_CHECK_UPDATES);
+
+	Options.Snap = lcGetActiveProject()->m_nSnap;
+	Options.AASamples = CurrentAASamples;
+
+	Options.Categories = gCategories;
+	Options.CategoriesModified = false;
+	Options.CategoriesDefault = false;
+
+	Options.KeyboardShortcuts = gKeyboardShortcuts;
+	Options.ShortcutsModified = false;
+	Options.ShortcutsDefault = false;
+
+	if (!gMainWindow->DoDialog(LC_DIALOG_PREFERENCES, &Options))
+		return;
+
+	bool LibraryChanged = strcmp(Options.LibraryPath, lcGetProfileString(LC_PROFILE_PARTS_LIBRARY));
+	bool AAChanged = CurrentAASamples != Options.AASamples;
+
+	mPreferences = Options.Preferences;
+	lcGetActiveProject()->m_nSnap = Options.Snap;
+
+	mPreferences.SaveDefaults();
+
+	lcSetProfileString(LC_PROFILE_DEFAULT_AUTHOR_NAME, Options.DefaultAuthor);
+	lcSetProfileString(LC_PROFILE_PROJECTS_PATH, Options.ProjectsPath);
+	lcSetProfileString(LC_PROFILE_PARTS_LIBRARY, Options.LibraryPath);
+	lcSetProfileString(LC_PROFILE_POVRAY_PATH, Options.POVRayPath);
+	lcSetProfileString(LC_PROFILE_POVRAY_LGEO_PATH, Options.LGEOPath);
+	lcSetProfileInt(LC_PROFILE_CHECK_UPDATES, Options.CheckForUpdates);
+	lcSetProfileInt(LC_PROFILE_SNAP, Options.Snap);
+	lcSetProfileInt(LC_PROFILE_ANTIALIASING_SAMPLES, Options.AASamples);
+
+	if (LibraryChanged && AAChanged)
+		gMainWindow->DoMessageBox("Parts library and Anti-aliasing changes will only take effect the next time you start LeoCAD.", LC_MB_OK);
+	else if (LibraryChanged)
+		gMainWindow->DoMessageBox("Parts library changes will only take effect the next time you start LeoCAD.", LC_MB_OK);
+	else if (AAChanged)
+		gMainWindow->DoMessageBox("Anti-aliasing changes will only take effect the next time you start LeoCAD.", LC_MB_OK);
+
+	if (Options.CategoriesModified)
+	{
+		if (Options.CategoriesDefault)
+			lcResetDefaultCategories();
+		else
+		{
+			gCategories = Options.Categories;
+			lcSaveDefaultCategories();
+		}
+
+		gMainWindow->UpdateCategories();
+	}
+
+	if (Options.ShortcutsModified)
+	{
+		if (Options.ShortcutsDefault)
+			lcResetDefaultKeyboardShortcuts();
+		else
+		{
+			gKeyboardShortcuts = Options.KeyboardShortcuts;
+			lcSaveDefaultKeyboardShortcuts();
+		}
+
+		gMainWindow->UpdateShortcuts();
+	}
+
+	// TODO: printing preferences
+	/*
+	strcpy(opts.strFooter, m_strFooter);
+	strcpy(opts.strHeader, m_strHeader);
+	*/
+
+	lcGetActiveProject()->UpdateAllViews();
 }

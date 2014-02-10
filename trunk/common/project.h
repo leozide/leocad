@@ -6,34 +6,14 @@
 #include "lc_array.h"
 #include "lc_math.h"
 #include "lc_commands.h"
+#include "str.h"
 
-//#define DET_BACKFACES	0x00001	// Draw backfaces
-//#define DET_DEPTH		0x00002	// Enable depth test
-//#define DET_CLEAR		0x00004	// Use clear colors
-#define	LC_DET_LIGHTING		0x00008	// Lighting
-//#define	LC_DET_SMOOTH		0x00010	// Smooth shading
-//#define DET_STUDS		0x00020	// Draw studs
-//#define DET_WIREFRAME	0x00040	// Wireframe
-//#define LC_DET_ANTIALIAS	0x00080	// Turn on anti-aliasing
-#define LC_DET_BRICKEDGES	0x00100	// Draw lines
-//#define LC_DET_DITHER		0x00200	// Enable dithering
-//#define LC_DET_BOX_FILL		0x00400	// Filled boxes
-//#define LC_DET_HIDDEN_LINE	0x00800	// Remove hidden lines
-//#define DET_STUDS_BOX	0x01000	// Draw studs as boxes
-//#define LC_DET_LINEAR		0x02000	// Linear filtering
-#define LC_DET_FAST			0x04000	// Fast rendering (boxes)
-//#define LC_DET_BACKGROUND	0x08000	// Background rendering
-//#define LC_DET_SCREENDOOR	0x10000	// No alpha blending
-
-#define LC_DRAW_AXIS           0x0001 // Orientation icon
-#define LC_DRAW_GRID           0x0002 // Grid
 #define LC_DRAW_SNAP_A         0x0004 // Snap Angle
 #define LC_DRAW_SNAP_X         0x0008 // Snap X
 #define LC_DRAW_SNAP_Y         0x0010 // Snap Y
 #define LC_DRAW_SNAP_Z         0x0020 // Snap Z
 #define LC_DRAW_SNAP_XYZ       (LC_DRAW_SNAP_X | LC_DRAW_SNAP_Y | LC_DRAW_SNAP_Z)
 #define LC_DRAW_GLOBAL_SNAP    0x0040 // Don't allow relative snap.
-//#define LC_DRAW_MOVE           0x0080 // Switch to move after insert
 #define LC_DRAW_LOCK_X         0x0100 // Lock X
 #define LC_DRAW_LOCK_Y         0x0200 // Lock Y
 #define LC_DRAW_LOCK_Z         0x0400 // Lock Z
@@ -43,12 +23,8 @@
 #define LC_DRAW_CM_UNITS       0x2000 // Use centimeters
 //#define LC_DRAW_3DMOUSE        0x4000 // Mouse moves in all directions
 
-//	#define RENDER_FAST			0x001
-//	#define RENDER_BACKGROUND	0x002
 #define LC_SCENE_FOG			0x004	// Enable fog
-//	#define RENDER_FOG_BG		0x008	// Use bg color for fog
 #define LC_SCENE_BG				0x010	// Draw bg image
-//	#define RENDER_BG_FAST	0x020
 #define LC_SCENE_BG_TILE		0x040	// Tile bg image
 #define LC_SCENE_FLOOR			0x080	// Render floor
 #define LC_SCENE_GRADIENT		0x100	// Draw gradient
@@ -76,6 +52,55 @@
 enum LC_NOTIFY
 {
 	LC_CAPTURE_LOST
+};
+
+enum lcBackgroundType
+{
+	LC_BACKGROUND_SOLID,
+	LC_BACKGROUND_GRADIENT,
+	LC_BACKGROUND_IMAGE
+};
+
+class lcModelProperties
+{
+public:
+	void LoadDefaults();
+	void SaveDefaults();
+
+	bool operator==(const lcModelProperties& Properties)
+	{
+		if (mName != Properties.mName || mAuthor != Properties.mAuthor ||
+			mDescription != Properties.mDescription || mComments != Properties.mComments)
+			return false;
+
+		if (mBackgroundType != Properties.mBackgroundType || mBackgroundSolidColor != Properties.mBackgroundSolidColor ||
+			mBackgroundGradientColor1 != Properties.mBackgroundGradientColor1 || mBackgroundGradientColor2 != Properties.mBackgroundGradientColor2 ||
+			mBackgroundImage != Properties.mBackgroundImage || mBackgroundImageTile != Properties.mBackgroundImageTile)
+			return false;
+
+		if (mFogEnabled != Properties.mFogEnabled || mFogDensity != Properties.mFogDensity ||
+			mFogColor != Properties.mFogColor || mAmbientColor != Properties.mAmbientColor)
+			return false;
+
+		return true;
+	}
+
+	String mName;
+	String mAuthor;
+	String mDescription;
+	String mComments;
+
+	lcBackgroundType mBackgroundType;
+	lcVector3 mBackgroundSolidColor;
+	lcVector3 mBackgroundGradientColor1;
+	lcVector3 mBackgroundGradientColor2;
+	String mBackgroundImage;
+	bool mBackgroundImageTile;
+
+	bool mFogEnabled;
+	float mFogDensity;
+	lcVector3 mFogColor;
+	lcVector3 mAmbientColor;
 };
 
 enum LC_TRANSFORM_TYPE
@@ -204,16 +229,13 @@ enum LC_ACTIONS
 class Project
 {
 public:
-// Constructors
 	Project();
 	~Project();
 
-// Attributes
 public:
 	bool IsModified()
 		{ return m_bModified; }
 
-	// Access to protected members
 	unsigned char GetLastStep();
 	unsigned short GetCurrentTime ()
 		{ return m_nCurStep; }
@@ -224,8 +246,8 @@ public:
 	}
 	void SetCurrentPiece(PieceInfo* pInfo)
 		{ m_pCurPiece = pInfo; }
-	float* GetBackgroundColor()
-		{ return m_fBackground; }
+	float* GetBackgroundColor() // todo: remove
+		{ return mProperties.mBackgroundSolidColor; }
 	unsigned long GetSnap() const
 		{ return m_nSnap; }
 	int GetOverlayMode() const
@@ -247,8 +269,7 @@ public:
 	void SetTitle (const char* lpszTitle);
 
 public:
-	// Special notifications
-	void DeleteContents(bool bUndo); // delete doc items etc
+	void DeleteContents(bool bUndo);
 	void LoadDefaults(bool cameras);
 	void BeginPieceDrop(PieceInfo* Info);
 	void OnPieceDropMove(int x, int y);
@@ -287,14 +308,9 @@ public:
 	char m_strPathName[LC_MAXPATH];
 	bool m_bModified;
 
-// Implementation
 protected:
 	View* m_ActiveView;
 	lcArray<View*> m_ViewList;
-
-	char m_strAuthor[101];
-	char m_strDescription[101];
-	char m_strComments[256];
 
 	// Piece library
 	TexFont* m_pScreenFont;
@@ -333,7 +349,6 @@ protected:
 	// Rendering functions.
 	void RenderBackground(View* view);
 	void RenderScenePieces(View* view);
-	void RenderSceneBoxes(View* view);
 	void RenderSceneObjects(View* view);
 	void RenderViewports(View* view);
 	void RenderOverlays(View* view);
@@ -389,6 +404,8 @@ public:
 	void HandleNotify(LC_NOTIFY id, unsigned long param);
 	void HandleCommand(LC_COMMANDS id);
 
+	lcuint32 m_nSnap;
+
 protected:
 	// State variables
 	int mTransformType;
@@ -398,35 +415,18 @@ protected:
 	bool m_bAddKeys;
 	unsigned char m_nCurStep;
 
-	bool mGridStuds;
-	lcuint32 mGridStudColor;
-	bool mGridLines;
-	int mGridLineSpacing;
-	lcuint32 mGridLineColor;
-
-	lcuint32 m_nScene;
-	lcuint32 m_nDetail;
-	lcuint32 m_nSnap;
 	lcuint16 m_nMoveSnap;
 	lcuint16 m_nAngleSnap;
-	float m_fLineWidth;
-	float m_fFogDensity;
-	float m_fFogColor[4];
-	float m_fAmbient[4];
-	float m_fBackground[4];
-	float m_fGradient1[3];
-	float m_fGradient2[3];
 	char m_strFooter[256];
 	char m_strHeader[256];
 
-	unsigned long m_nAutosave;
-	unsigned long m_nSaveTimer;
+	lcModelProperties mProperties;
+
 	char m_strBackground[LC_MAXPATH];
 	lcTexture* m_pBackground;
 	lcTexture* mGridTexture;
 
 protected:
-	// File load/save implementation.
 	bool DoSave(const char* FileName);
 	bool FileLoad(lcFile* file, bool bUndo, bool bMerge);
 	void FileSave(lcFile* file, bool bUndo);
@@ -434,7 +434,6 @@ protected:
 	void FileReadMPD(lcFile& MPD, lcArray<LC_FILEENTRY*>& FileArray) const;
 
 public:
-	// File helpers
 	bool OnNewDocument();
 	bool OnOpenDocument(const char* FileName);
 	bool OpenProject(const char* FileName);

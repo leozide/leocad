@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>500</width>
-    <height>389</height>
+    <height>362</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -256,15 +256,7 @@
             </item>
            </layout>
           </item>
-          <item row="2" column="0">
-           <widget class="QCheckBox" name="floorCheckBox">
-            <property name="text">
-             <string>Draw Floor</string>
-            </property>
-           </widget>
-          </item>
          </layout>
-         <zorder>floorCheckBox</zorder>
          <zorder>label_20</zorder>
          <zorder>fogCheckBox</zorder>
         </widget>
@@ -347,7 +339,7 @@
   <tabstop>fogColorButton</tabstop>
   <tabstop>fogDensityEdit</tabstop>
   <tabstop>ambientColorButton</tabstop>
-  <tabstop>floorCheckBox</tabstop>
+  <tabstop>setDefaultCheckBox</tabstop>
   <tabstop>partsTable</tabstop>
  </tabstops>
  <resources/>
@@ -359,8 +351,8 @@
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>248</x>
-     <y>254</y>
+     <x>257</x>
+     <y>352</y>
     </hint>
     <hint type="destinationlabel">
      <x>157</x>
@@ -375,8 +367,8 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>316</x>
-     <y>260</y>
+     <x>325</x>
+     <y>352</y>
     </hint>
     <hint type="destinationlabel">
      <x>286</x>

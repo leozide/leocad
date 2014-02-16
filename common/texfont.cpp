@@ -202,14 +202,12 @@ void TexFont::PrintText(float Left, float Top, float Z, const char* Text) const
 		Text++;
 	}
 
-	glEnableClientState(GL_VERTEX_ARRAY);
 	glVertexPointer(3, GL_FLOAT, 5 * sizeof(float), Verts);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	glTexCoordPointer(2, GL_FLOAT, 5 * sizeof(float), Verts + 3);
 
 	glDrawArrays(GL_QUADS, 0, 4 * Length);
 
-	glDisableClientState(GL_VERTEX_ARRAY);
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 
 	delete[] Verts;

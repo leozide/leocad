@@ -32,42 +32,6 @@ void PieceInfo::CreatePlaceholder(const char* Name)
 	mFlags = LC_PIECE_PLACEHOLDER;
 }
 
-void PieceInfo::RenderBox()
-{
-	glEnableClientState(GL_VERTEX_ARRAY);
-
-	float box[24][3] =
-	{
-		{ m_fDimensions[0], m_fDimensions[1], m_fDimensions[2] }, 
-		{ m_fDimensions[3], m_fDimensions[1], m_fDimensions[2] },
-		{ m_fDimensions[3], m_fDimensions[4], m_fDimensions[2] },
-		{ m_fDimensions[0], m_fDimensions[4], m_fDimensions[2] },
-		{ m_fDimensions[0], m_fDimensions[1], m_fDimensions[5] },
-		{ m_fDimensions[0], m_fDimensions[4], m_fDimensions[5] },
-		{ m_fDimensions[3], m_fDimensions[4], m_fDimensions[5] },
-		{ m_fDimensions[3], m_fDimensions[1], m_fDimensions[5] },
-		{ m_fDimensions[3], m_fDimensions[4], m_fDimensions[2] }, 
-		{ m_fDimensions[3], m_fDimensions[1], m_fDimensions[2] },
-		{ m_fDimensions[3], m_fDimensions[1], m_fDimensions[5] },
-		{ m_fDimensions[3], m_fDimensions[4], m_fDimensions[5] },
-		{ m_fDimensions[0], m_fDimensions[4], m_fDimensions[5] },
-		{ m_fDimensions[0], m_fDimensions[1], m_fDimensions[5] },
-		{ m_fDimensions[0], m_fDimensions[1], m_fDimensions[2] },
-		{ m_fDimensions[0], m_fDimensions[4], m_fDimensions[2] }, 
-		{ m_fDimensions[0], m_fDimensions[1], m_fDimensions[5] },
-		{ m_fDimensions[3], m_fDimensions[1], m_fDimensions[5] },
-		{ m_fDimensions[3], m_fDimensions[1], m_fDimensions[2] },
-		{ m_fDimensions[0], m_fDimensions[1], m_fDimensions[2] },
-		{ m_fDimensions[0], m_fDimensions[4], m_fDimensions[2] },
-		{ m_fDimensions[3], m_fDimensions[4], m_fDimensions[2] },
-		{ m_fDimensions[3], m_fDimensions[4], m_fDimensions[5] },
-		{ m_fDimensions[0], m_fDimensions[4], m_fDimensions[5] }
-	};
-
-	glVertexPointer(3, GL_FLOAT, 0, box);
-	glDrawArrays(GL_QUADS, 0, 24);
-}
-
 void PieceInfo::Load()
 {
 	if (mFlags & LC_PIECE_PLACEHOLDER)

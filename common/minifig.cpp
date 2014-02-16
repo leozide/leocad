@@ -963,6 +963,7 @@ void MinifigWizard::OnDraw()
 {
 	float Aspect = (float)mWidth/(float)mHeight;
 	glViewport(0, 0, mWidth, mHeight);
+	glEnableClientState(GL_VERTEX_ARRAY);
 
 	float Box[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
 
@@ -1062,6 +1063,8 @@ void MinifigWizard::OnDraw()
 		glLoadMatrixf(lcMul(mMinifig->Matrices[PieceIdx], ViewMatrix));
 		mMinifig->Parts[PieceIdx]->RenderPiece(mMinifig->Colors[PieceIdx]);
 	}
+
+	glDisableClientState(GL_VERTEX_ARRAY);
 }
 
 void MinifigWizard::OnLeftButtonDown()

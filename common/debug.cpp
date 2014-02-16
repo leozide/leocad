@@ -66,8 +66,6 @@ void AddDebugQuad(const lcVector3& pt1, const lcVector3& pt2, const lcVector3& p
 
 void RenderDebugPrimitives()
 {
-	glEnableClientState(GL_VERTEX_ARRAY);
-
 	for (int i = 0; i < NumDebugLines; i++)
 	{
 		glVertexPointer(3, GL_FLOAT, 0, &DebugLines[i].pt1);
@@ -88,8 +86,6 @@ void RenderDebugPrimitives()
 
 	glDisable(GL_BLEND);
 	glDepthMask(GL_TRUE);
-
-	glDisableClientState(GL_VERTEX_ARRAY);
 }
 
 #endif // LC_DEBUG

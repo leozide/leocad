@@ -98,8 +98,8 @@ public:
 	const char* GetName() const
 	{ return m_strName; }
 
-	void Render(float fLineWidth);
-	void RenderCone();
+	void Render(const lcMatrix44& ViewMatrix, float LineWidth);
+	void RenderCone(const lcMatrix44& ViewMatrix);
 	void RenderTarget();
 	void RenderSphere();
 

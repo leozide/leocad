@@ -1546,7 +1546,10 @@ void Project::Render(View* view, bool ToMemory)
 		RenderSceneObjects(view);
 
 		if (m_OverlayActive || ((m_nCurAction == LC_ACTION_SELECT) && (m_nTracking == LC_TRACK_LEFT) && (m_ActiveView == view)))
+		{
+			view->UpdateProjection();
 			RenderOverlays(view);
+		}
 
 		RenderViewports(view);
 	}
@@ -1724,7 +1727,7 @@ void Project::RenderScenePieces(View* view)
 	lcArray<Piece*> OpaquePieces(512);
 	lcArray<lcTranslucentRenderSection> TranslucentSections(512);
 
-	const lcMatrix44& WorldView = view->mCamera->mWorldView;
+	const lcMatrix44& ViewMatrix = view->mCamera->mWorldView;
 
 	for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 	{
@@ -1739,7 +1742,7 @@ void Project::RenderScenePieces(View* view)
 
 		if ((Info->mFlags & LC_PIECE_HAS_TRANSLUCENT) || ((Info->mFlags & LC_PIECE_HAS_DEFAULT) && Translucent))
 		{
-			lcVector3 Pos = lcMul31(pPiece->mPosition, WorldView);
+			lcVector3 Pos = lcMul31(pPiece->mPosition, ViewMatrix);
 
 			lcTranslucentRenderSection RenderSection;
 
@@ -1764,8 +1767,7 @@ void Project::RenderScenePieces(View* view)
 		Piece* piece = OpaquePieces[PieceIdx];
 		lcMesh* Mesh = piece->mPieceInfo->mMesh;
 
-		glPushMatrix();
-		glMultMatrixf(piece->mModelWorld);
+		glLoadMatrixf(lcMul(piece->mModelWorld, ViewMatrix));
 
 		if (PreviousMesh != Mesh)
 		{
@@ -1873,8 +1875,6 @@ void Project::RenderScenePieces(View* view)
 
 			glDrawElements(Section->PrimitiveType, Section->NumIndices, Mesh->mIndexType, ElementsOffset + Section->IndexOffset);
 		}
-
-		glPopMatrix();
 	}
 
 	if (PreviousSelected)
@@ -1891,8 +1891,7 @@ void Project::RenderScenePieces(View* view)
 			Piece* piece = TranslucentSections[PieceIdx].piece;
 			lcMesh* Mesh = piece->mPieceInfo->mMesh;
 
-			glPushMatrix();
-			glMultMatrixf(piece->mModelWorld);
+			glLoadMatrixf(lcMul(piece->mModelWorld, ViewMatrix));
 
 			if (PreviousMesh != Mesh)
 			{
@@ -1974,8 +1973,6 @@ void Project::RenderScenePieces(View* view)
 
 				glDrawElements(Section->PrimitiveType, Section->NumIndices, Mesh->mIndexType, ElementsOffset + Section->IndexOffset);
 			}
-
-			glPopMatrix();
 		}
 
 		glDepthMask(GL_TRUE);
@@ -2013,6 +2010,7 @@ void Project::RenderScenePieces(View* view)
 void Project::RenderSceneObjects(View* view)
 {
 	const lcPreferences& Preferences = lcGetPreferences();
+	const lcMatrix44& ViewMatrix = view->mCamera->mWorldView;
 
 #ifdef LC_DEBUG
 	RenderDebugPrimitives();
@@ -2021,18 +2019,19 @@ void Project::RenderSceneObjects(View* view)
 	// Draw cameras & lights
 	if (m_nCurAction == LC_ACTION_INSERT || mDropPiece)
 	{
-		lcVector3 Pos;
-		lcVector4 Rot;
-		GetPieceInsertPosition(view, m_nDownX, m_nDownY, Pos, Rot);
+		lcVector3 Position;
+		lcVector4 Rotation;
+		GetPieceInsertPosition(view, m_nDownX, m_nDownY, Position, Rotation);
 		PieceInfo* PreviewPiece = mDropPiece ? mDropPiece : m_pCurPiece;
 
-		glPushMatrix();
-		glTranslatef(Pos[0], Pos[1], Pos[2]);
-		glRotatef(Rot[3], Rot[0], Rot[1], Rot[2]);
+		lcMatrix44 WorldMatrix = lcMatrix44FromAxisAngle(lcVector3(Rotation[0], Rotation[1], Rotation[2]), Rotation[3] * LC_DTOR);
+		WorldMatrix.SetTranslation(Position);
+
+		glLoadMatrixf(lcMul(WorldMatrix, ViewMatrix));
+
 		glLineWidth(2 * Preferences.mLineWidth);
 		PreviewPiece->RenderPiece(gMainWindow->mColorIndex);
 		glLineWidth(Preferences.mLineWidth);
-		glPopMatrix();
 	}
 
 	if (Preferences.mLightingMode != LC_LIGHTING_FLAT)
@@ -2052,15 +2051,17 @@ void Project::RenderSceneObjects(View* view)
 		if ((pCamera == view->mCamera) || !pCamera->IsVisible())
 			continue;
 
-		pCamera->Render(Preferences.mLineWidth);
+		pCamera->Render(ViewMatrix, Preferences.mLineWidth);
 	}
 
 	for (Light* pLight = m_pLights; pLight; pLight = pLight->m_pNext)
 		if (pLight->IsVisible ())
-			pLight->Render(Preferences.mLineWidth);
+			pLight->Render(ViewMatrix, Preferences.mLineWidth);
 
 	if (Preferences.mDrawGridStuds || Preferences.mDrawGridLines)
 	{
+		glLoadMatrixf(ViewMatrix);
+
 		const int Spacing = lcMax(Preferences.mGridLineSpacing, 1);
 		int MinX = 0, MaxX = 0, MinY = 0, MaxY = 0;
 
@@ -2233,11 +2234,9 @@ void Project::RenderSceneObjects(View* view)
 		};
 
 		glMatrixMode(GL_PROJECTION);
-		glPushMatrix();
 		glLoadIdentity();
 		glOrtho(0, view->mWidth, 0, view->mHeight, -50, 50);
 		glMatrixMode(GL_MODELVIEW);
-		glPushMatrix();
 		glLoadIdentity();
 		glTranslatef(25.375f, 25.375f, 0.0f);
 
@@ -2288,11 +2287,6 @@ void Project::RenderSceneObjects(View* view)
 
 		glDisable(GL_BLEND);
 		glDisable(GL_TEXTURE_2D);
-
-		glMatrixMode(GL_PROJECTION);
-		glPopMatrix();
-		glMatrixMode(GL_MODELVIEW);
-		glPopMatrix();
 	}
 }
 
@@ -2392,6 +2386,7 @@ void Project::RenderOverlays(View* view)
 	}
 
 	const float OverlayScale = view->m_OverlayScale;
+	const lcMatrix44& ViewMatrix = view->mCamera->mWorldView;
 
 	if ((m_nCurAction == LC_ACTION_MOVE || m_nCurAction == LC_ACTION_SELECT) && (m_OverlayMode >= LC_OVERLAY_NONE && m_OverlayMode <= LC_OVERLAY_ROTATE_XYZ))
 	{
@@ -2408,14 +2403,14 @@ void Project::RenderOverlays(View* view)
 
 		// Find the rotation from the focused piece if relative snap is enabled.
 		Object* Focus = NULL;
-		lcVector4 Rot(0, 0, 1, 0);
+		lcVector4 Rotation(0, 0, 1, 0);
 
 		if ((m_nSnap & LC_DRAW_GLOBAL_SNAP) == 0)
 		{
 			Focus = GetFocusObject();
 
 			if ((Focus != NULL) && Focus->IsPiece())
-				Rot = ((Piece*)Focus)->mRotation;
+				Rotation = ((Piece*)Focus)->mRotation;
 			else
 				Focus = NULL;
 		}
@@ -2423,21 +2418,21 @@ void Project::RenderOverlays(View* view)
 		// Draw a quad if we're moving on a plane.
 		if ((m_OverlayMode == LC_OVERLAY_MOVE_XY) || (m_OverlayMode == LC_OVERLAY_MOVE_XZ) || (m_OverlayMode == LC_OVERLAY_MOVE_YZ))
 		{
-			glPushMatrix();
-			glTranslatef(m_OverlayCenter[0], m_OverlayCenter[1], m_OverlayCenter[2]);
+			lcMatrix44 WorldViewMatrix = lcMul(lcMatrix44Translation(m_OverlayCenter), ViewMatrix);
 
 			if (Focus)
-				glRotatef(Rot[3], Rot[0], Rot[1], Rot[2]);
+				WorldViewMatrix = lcMul(lcMatrix44FromAxisAngle(lcVector3(Rotation[0], Rotation[1], Rotation[2]), Rotation[3] * LC_DTOR), WorldViewMatrix);
 
 			if (m_OverlayMode == LC_OVERLAY_MOVE_XZ)
-				glRotatef(90.0f, 0.0f, 0.0f, -1.0f);
+				WorldViewMatrix = lcMul(lcMatrix44RotationZ(-LC_PI / 2), WorldViewMatrix);
 			else if (m_OverlayMode == LC_OVERLAY_MOVE_XY)
-				glRotatef(90.0f, 0.0f, 1.0f, 0.0f);
+				WorldViewMatrix = lcMul(lcMatrix44RotationY(LC_PI / 2), WorldViewMatrix);
 
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			glEnable(GL_BLEND);
 
 			glColor4f(0.8f, 0.8f, 0.0f, 0.3f);
+			glLoadMatrixf(WorldViewMatrix);
 
 			float Verts[4][3] =
 			{
@@ -2453,8 +2448,6 @@ void Project::RenderOverlays(View* view)
 			glDisableClientState(GL_VERTEX_ARRAY);
 
 			glDisable(GL_BLEND);
-
-			glPopMatrix();
 		}
 
 		// Draw the arrows.
@@ -2482,16 +2475,17 @@ void Project::RenderOverlays(View* view)
 				break;
 			}
 
-			glPushMatrix();
-			glTranslatef(m_OverlayCenter[0], m_OverlayCenter[1], m_OverlayCenter[2]);
+			lcMatrix44 WorldViewMatrix = lcMul(lcMatrix44Translation(m_OverlayCenter), ViewMatrix);
 
 			if (Focus)
-				glRotatef(Rot[3], Rot[0], Rot[1], Rot[2]);
+				WorldViewMatrix = lcMul(lcMatrix44FromAxisAngle(lcVector3(Rotation[0], Rotation[1], Rotation[2]), Rotation[3] * LC_DTOR), WorldViewMatrix);
 
 			if (i == 1)
-				glMultMatrixf(lcMatrix44(lcVector4(0, 1, 0, 0), lcVector4(1, 0, 0, 0), lcVector4(0, 0, 1, 0), lcVector4(0, 0, 0, 1)));
+				WorldViewMatrix = lcMul(lcMatrix44(lcVector4(0, 1, 0, 0), lcVector4(1, 0, 0, 0), lcVector4(0, 0, 1, 0), lcVector4(0, 0, 0, 1)), WorldViewMatrix);
 			else if (i == 2)
-				glMultMatrixf(lcMatrix44(lcVector4(0, 0, 1, 0), lcVector4(0, 1, 0, 0), lcVector4(1, 0, 0, 0), lcVector4(0, 0, 0, 1)));
+				WorldViewMatrix = lcMul(lcMatrix44(lcVector4(0, 0, 1, 0), lcVector4(0, 1, 0, 0), lcVector4(1, 0, 0, 0), lcVector4(0, 0, 0, 1)), WorldViewMatrix);
+
+			glLoadMatrixf(WorldViewMatrix);
 
 			// Translation arrows.
 			if (m_nTracking == LC_TRACK_NONE || (m_OverlayMode >= LC_OVERLAY_NONE && m_OverlayMode <= LC_OVERLAY_MOVE_XYZ))
@@ -2603,8 +2597,6 @@ void Project::RenderOverlays(View* view)
 
 				glDisableClientState(GL_VERTEX_ARRAY);
 			}
-
-			glPopMatrix();
 		}
 
 		glEnable(GL_DEPTH_TEST);
@@ -2678,13 +2670,14 @@ void Project::RenderOverlays(View* view)
 
 			if (fabsf(Angle) >= fabsf(Step))
 			{
-				glPushMatrix();
-				glTranslatef(m_OverlayCenter[0], m_OverlayCenter[1], m_OverlayCenter[2]);
+				lcMatrix44 WorldViewMatrix = lcMul(lcMatrix44Translation(m_OverlayCenter), ViewMatrix);
 
 				if (Focus)
-					glRotatef(Rot[3], Rot[0], Rot[1], Rot[2]);
+					WorldViewMatrix = lcMul(lcMatrix44FromAxisAngle(lcVector3(Rot[0], Rot[1], Rot[2]), Rot[3] * LC_DTOR), WorldViewMatrix);
 
-				glRotatef(Rotation[0], Rotation[1], Rotation[2], Rotation[3]);
+				WorldViewMatrix = lcMul(lcMatrix44FromAxisAngle(lcVector3(Rotation[1], Rotation[2], Rotation[3]), Rotation[0] * LC_DTOR), WorldViewMatrix);
+
+				glLoadMatrixf(WorldViewMatrix);
 
 				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 				glEnable(GL_BLEND);
@@ -2731,12 +2724,8 @@ void Project::RenderOverlays(View* view)
 
 				glDisableClientState(GL_VERTEX_ARRAY);
 				glDisable(GL_BLEND);
-
-				glPopMatrix();
 			}
 		}
-
-		glPushMatrix();
 
 		lcMatrix44 Mat = lcMatrix44AffineInverse(Cam->mWorldView);
 		Mat.SetTranslation(m_OverlayCenter);
@@ -2758,6 +2747,7 @@ void Project::RenderOverlays(View* view)
 			}
 
 			glColor4f(0.1f, 0.1f, 0.1f, 1.0f);
+			glLoadMatrixf(ViewMatrix);
 
 			glEnableClientState(GL_VERTEX_ARRAY);
 			glVertexPointer(3, GL_FLOAT, 0, Verts);
@@ -2776,10 +2766,12 @@ void Project::RenderOverlays(View* view)
 			ViewDir = lcMul30(ViewDir, RotMat);
 		}
 
-		glTranslatef(m_OverlayCenter[0], m_OverlayCenter[1], m_OverlayCenter[2]);
+		lcMatrix44 WorldViewMatrix = lcMul(lcMatrix44Translation(m_OverlayCenter), ViewMatrix);
 
 		if (Focus)
-			glRotatef(Rot[3], Rot[0], Rot[1], Rot[2]);
+			WorldViewMatrix = lcMul(lcMatrix44FromAxisAngle(lcVector3(Rot[0], Rot[1], Rot[2]), Rot[3] * LC_DTOR), WorldViewMatrix);
+
+		glLoadMatrixf(WorldViewMatrix);
 
 		// Draw each axis circle.
 		for (int i = 0; i < 3; i++)
@@ -2845,8 +2837,6 @@ void Project::RenderOverlays(View* view)
 			glDisableClientState(GL_VERTEX_ARRAY);
 		}
 
-		glPopMatrix();
-
 		// Draw tangent vector.
 		if (m_nTracking != LC_TRACK_NONE)
 		{
@@ -2878,13 +2868,14 @@ void Project::RenderOverlays(View* view)
 					break;
 				};
 
-				glPushMatrix();
-				glTranslatef(m_OverlayCenter[0], m_OverlayCenter[1], m_OverlayCenter[2]);
+				lcMatrix44 WorldViewMatrix = lcMul(lcMatrix44Translation(m_OverlayCenter), ViewMatrix);
 
 				if (Focus)
-					glRotatef(Rot[3], Rot[0], Rot[1], Rot[2]);
+					WorldViewMatrix = lcMul(lcMatrix44FromAxisAngle(lcVector3(Rot[0], Rot[1], Rot[2]), Rot[3] * LC_DTOR), WorldViewMatrix);
 
-				glRotatef(Rotation[0], Rotation[1], Rotation[2], Rotation[3]);
+				WorldViewMatrix = lcMul(lcMatrix44FromAxisAngle(lcVector3(Rotation[1], Rotation[2], Rotation[3]), Rotation[0] * LC_DTOR), WorldViewMatrix);
+
+				glLoadMatrixf(WorldViewMatrix);
 
 				glColor4f(0.8f, 0.8f, 0.0f, 1.0f);
 
@@ -2911,8 +2902,6 @@ void Project::RenderOverlays(View* view)
 					glDisableClientState(GL_VERTEX_ARRAY);
 				}
 
-				glPopMatrix();
-
 				// Draw text.
 				int Viewport[4] = { 0, 0, view->mWidth, view->mHeight };
 				float Aspect = (float)Viewport[2]/(float)Viewport[3];
@@ -2923,11 +2912,9 @@ void Project::RenderOverlays(View* view)
 				lcVector3 ScreenPos = lcProjectPoint(m_OverlayCenter, ModelView, Projection, Viewport);
 
 				glMatrixMode(GL_PROJECTION);
-				glPushMatrix();
 				glLoadIdentity();
 				glOrtho(0, Viewport[2], 0, Viewport[3], -1, 1);
 				glMatrixMode(GL_MODELVIEW);
-				glPushMatrix();
 				glLoadIdentity();
 				glTranslatef(0.375, 0.375, 0.0);
 
@@ -2948,11 +2935,6 @@ void Project::RenderOverlays(View* view)
 
 				glDisable(GL_BLEND);
 				glDisable(GL_TEXTURE_2D);
-
-				glMatrixMode(GL_PROJECTION);
-				glPopMatrix();
-				glMatrixMode(GL_MODELVIEW);
-				glPopMatrix();
 			}
 		}
 

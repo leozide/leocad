@@ -83,9 +83,6 @@ public:
 	unsigned char GetStepHide()
 		{ return (unsigned char)m_nStepHide; }
 
-	void Render(bool bLighting, bool bEdges);
-	void RenderBox(bool bHilite, float fLineWidth);
-
 	void SetColorCode(lcuint32 ColorCode)
 	{
 		mColorCode = ColorCode;

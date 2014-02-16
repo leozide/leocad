@@ -291,39 +291,37 @@ void Light::UpdatePosition(unsigned short nTime)
 	}
 }
 
-void Light::Render(float fLineWidth)
+void Light::Render(const lcMatrix44& ViewMatrix, float LineWidth)
 {
 	glEnableClientState(GL_VERTEX_ARRAY);
 
 	if (m_pTarget != NULL)
 	{
-		glPushMatrix();
-
 		if (IsEyeSelected())
 		{
-			glLineWidth(fLineWidth*2);
+			glLineWidth(LineWidth*2);
 			if (m_nState & LC_LIGHT_FOCUSED)
 				lcSetColorFocused();
 			else
 				lcSetColorSelected();
-			RenderCone();
-			glLineWidth(fLineWidth);
+			RenderCone(ViewMatrix);
+			glLineWidth(LineWidth);
 		}
 		else
 		{
 			lcSetColorLight();
-			RenderCone();
+			RenderCone(ViewMatrix);
 		}
 
 		if (IsTargetSelected())
 		{
-			glLineWidth(fLineWidth*2);
+			glLineWidth(LineWidth*2);
 			if (m_nState & LC_LIGHT_TARGET_FOCUSED)
 				lcSetColorFocused();
 			else
 				lcSetColorSelected();
 			RenderTarget();
-			glLineWidth(fLineWidth);
+			glLineWidth(LineWidth);
 		}
 		else
 		{
@@ -331,7 +329,7 @@ void Light::Render(float fLineWidth)
 			RenderTarget();
 		}
 
-		glPopMatrix();
+		glLoadMatrixf(ViewMatrix);
 
 		lcSetColorLight();
 
@@ -342,7 +340,7 @@ void Light::Render(float fLineWidth)
 
 		if (IsSelected())
 		{
-			lcMatrix44 projection, modelview;
+			lcMatrix44 ProjectionMatrix, LightMatrix;
 			lcVector3 FrontVector(mTargetPosition - mPosition);
 			lcVector3 UpVector(1, 1, 1);
 			float Length = FrontVector.Length();
@@ -362,15 +360,11 @@ void Light::Render(float fLineWidth)
 					UpVector[2] = -(UpVector[0] * FrontVector[0] + UpVector[1] * FrontVector[1]);
 			}
 
-			glPushMatrix();
-
-			modelview = lcMatrix44LookAt(mPosition, mTargetPosition, UpVector);
-			modelview = lcMatrix44AffineInverse(modelview);
-			glMultMatrixf(modelview);
-
-			projection = lcMatrix44Perspective(2*mSpotCutoff, 1.0f, 0.01f, Length);
-			projection = lcMatrix44Inverse(projection);
-			glMultMatrixf(projection);
+			LightMatrix = lcMatrix44LookAt(mPosition, mTargetPosition, UpVector);
+			LightMatrix = lcMatrix44AffineInverse(LightMatrix);
+			ProjectionMatrix = lcMatrix44Perspective(2 * mSpotCutoff, 1.0f, 0.01f, Length);
+			ProjectionMatrix = lcMatrix44Inverse(ProjectionMatrix);
+			glLoadMatrixf(lcMul(ProjectionMatrix, lcMul(LightMatrix, ViewMatrix)));
 
 			// Draw the light cone.
 			float Verts[16][3] =
@@ -396,14 +390,11 @@ void Light::Render(float fLineWidth)
 			glVertexPointer(3, GL_FLOAT, 0, Verts);
 			glDrawArrays(GL_LINE_LOOP, 0, 8);
 			glDrawArrays(GL_LINES, 8, 8);
-
-			glPopMatrix();
 		}
 	}
 	else
 	{
-		glPushMatrix();
-		glTranslatef(mPosition[0], mPosition[1], mPosition[2]);
+		glLoadMatrixf(lcMul(lcMatrix44Translation(mPosition), ViewMatrix));
 
 		if (IsEyeSelected())
 		{
@@ -416,17 +407,13 @@ void Light::Render(float fLineWidth)
 			lcSetColorLight();
 
 		RenderSphere();
-
-		glPopMatrix();
 	}
 
 	glDisableClientState(GL_VERTEX_ARRAY);
 }
 
-void Light::RenderCone()
+void Light::RenderCone(const lcMatrix44& ViewMatrix)
 {
-	glTranslatef(mPosition[0], mPosition[1], mPosition[2]);
-
 	lcVector3 FrontVector(mTargetPosition - mPosition);
 	lcVector3 UpVector(1, 1, 1);
 	float Length = FrontVector.Length();
@@ -446,11 +433,13 @@ void Light::RenderCone()
 			UpVector[2] = -(UpVector[0] * FrontVector[0] + UpVector[1] * FrontVector[1]);
 	}
 
-	lcMatrix44 mat = lcMatrix44LookAt(mPosition, mTargetPosition, UpVector);
-	mat = lcMatrix44AffineInverse(mat);
-	mat.SetTranslation(lcVector3(0, 0, 0));
+	lcMatrix44 LightMatrix = lcMatrix44LookAt(mPosition, mTargetPosition, UpVector);
+	LightMatrix = lcMatrix44AffineInverse(LightMatrix);
+	LightMatrix.SetTranslation(lcVector3(0, 0, 0));
 
-	glMultMatrixf(mat);
+	lcMatrix44 LightViewMatrix = lcMul(LightMatrix, lcMul(lcMatrix44Translation(mPosition), ViewMatrix));
+
+	glLoadMatrixf(LightViewMatrix);
 
 	float verts[16*3];
 	for (int i = 0; i < 8; i++)
@@ -479,7 +468,7 @@ void Light::RenderCone()
 	glVertexPointer(3, GL_FLOAT, 0, Lines);
 	glDrawArrays(GL_LINE_LOOP, 0, 4);
 
-	glTranslatef(0, 0, -Length);
+	glLoadMatrixf(lcMul(lcMatrix44Translation(lcVector3(0, 0, -Length)), LightViewMatrix));
 }
 
 void Light::RenderTarget()

@@ -76,7 +76,6 @@ public:
 	// Operations
 	void ZoomExtents(float Fov, float Aspect, float* EyePos = NULL) const;
 	void RenderPiece(int nColor);
-	void RenderBox();
 
 	void CreatePlaceholder(const char* Name);
 

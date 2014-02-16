@@ -467,7 +467,6 @@ void Camera::Render(const lcMatrix44& ViewMatrix, float LineWidth)
 	// Draw camera.
 	glLoadMatrixf(lcMul(ViewWorld, ViewMatrix));
 
-	glEnableClientState(GL_VERTEX_ARRAY);
 	float verts[34][3] =
 	{
 		{  0.3f,  0.3f,  0.3f }, { -0.3f,  0.3f,  0.3f },
@@ -531,7 +530,6 @@ void Camera::Render(const lcMatrix44& ViewMatrix, float LineWidth)
 	glLineWidth(1.0f);
 	glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
 
-	glEnableClientState(GL_VERTEX_ARRAY);
 	glVertexPointer(3, GL_FLOAT, 0, box);
 	glDrawArrays(GL_LINES, 0, 24);
 */
@@ -553,7 +551,6 @@ void Camera::Render(const lcMatrix44& ViewMatrix, float LineWidth)
 		lcSetColorCamera();
 	}
 
-	glEnableClientState(GL_VERTEX_ARRAY);
 	glVertexPointer(3, GL_FLOAT, 0, box);
 	glDrawArrays(GL_LINES, 0, 24);
 
@@ -595,8 +592,6 @@ void Camera::Render(const lcMatrix44& ViewMatrix, float LineWidth)
 		glVertexPointer(3, GL_FLOAT, 0, ProjVerts);
 		glDrawArrays(GL_LINES, 0, 16);
 	}
-
-	glDisableClientState(GL_VERTEX_ARRAY);
 }
 
 void Camera::MinIntersectDist(lcClickLine* ClickLine)

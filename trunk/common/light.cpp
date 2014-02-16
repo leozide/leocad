@@ -293,8 +293,6 @@ void Light::UpdatePosition(unsigned short nTime)
 
 void Light::Render(const lcMatrix44& ViewMatrix, float LineWidth)
 {
-	glEnableClientState(GL_VERTEX_ARRAY);
-
 	if (m_pTarget != NULL)
 	{
 		if (IsEyeSelected())
@@ -408,8 +406,6 @@ void Light::Render(const lcMatrix44& ViewMatrix, float LineWidth)
 
 		RenderSphere();
 	}
-
-	glDisableClientState(GL_VERTEX_ARRAY);
 }
 
 void Light::RenderCone(const lcMatrix44& ViewMatrix)

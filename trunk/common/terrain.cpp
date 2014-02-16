@@ -594,7 +594,6 @@ float tx, ty;
 tx = (tw*eye[0])/(2*pCam->m_zFar);
 ty = (th*eye[1])/(2*pCam->m_zFar);
 
-			glEnableClientState(GL_VERTEX_ARRAY);
 			glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
 			float Quad[20] =
@@ -611,7 +610,6 @@ ty = (th*eye[1])/(2*pCam->m_zFar);
 			glDrawArrays(GL_QUADS, 0, 4);
 
 			glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-			glDisableClientState(GL_VERTEX_ARRAY);
 
 			glDisable(GL_TEXTURE_2D);
 		}
@@ -627,12 +625,9 @@ ty = (th*eye[1])/(2*pCam->m_zFar);
 
 			glColor4f(m_fColor[0], m_fColor[1], m_fColor[2], 1.0f);
 
-			glEnableClientState(GL_VERTEX_ARRAY);
 			glVertexPointer(3, GL_FLOAT, 0, Quad);
 
 			glDrawArrays(GL_QUADS, 0, 4);
-
-			glDisableClientState(GL_VERTEX_ARRAY);
 		}
 
 		glPopMatrix();
@@ -643,7 +638,6 @@ ty = (th*eye[1])/(2*pCam->m_zFar);
 
 		int i, j;
 		glColor4f(m_fColor[0], m_fColor[1], m_fColor[2], 1.0f);
-		glEnableClientState(GL_VERTEX_ARRAY);
 
 		if (m_nOptions & LC_TERRAIN_TEXTURE)
 		{
@@ -679,8 +673,6 @@ ty = (th*eye[1])/(2*pCam->m_zFar);
 			glDisable(GL_TEXTURE_2D);
 			glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 		}
-
-		glDisableClientState(GL_VERTEX_ARRAY);
 	}
 }
 

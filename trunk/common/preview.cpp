@@ -33,6 +33,7 @@ void PiecePreview::OnDraw()
 
 	float aspect = (float)mWidth/(float)mHeight;
 	glViewport(0, 0, mWidth, mHeight);
+	glEnableClientState(GL_VERTEX_ARRAY);
 
 	lcVector3 Eye(0.0f, 0.0f, 1.0f);
 
@@ -60,6 +61,8 @@ void PiecePreview::OnDraw()
 	glClearColor(bg[0], bg[1], bg[2], bg[3]);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	m_PieceInfo->RenderPiece(gMainWindow->mColorIndex);
+
+	glDisableClientState(GL_VERTEX_ARRAY);
 }
 
 void PiecePreview::SetCurrentPiece(PieceInfo *pInfo)

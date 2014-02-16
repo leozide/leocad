@@ -1533,6 +1533,7 @@ bool Project::SetActiveView(View* view)
 void Project::Render(View* view, bool ToMemory)
 {
 	glViewport(0, 0, view->mWidth, view->mHeight);
+	glEnableClientState(GL_VERTEX_ARRAY);
 
 	RenderBackground(view);
 
@@ -1553,6 +1554,8 @@ void Project::Render(View* view, bool ToMemory)
 
 		RenderViewports(view);
 	}
+
+	glDisableClientState(GL_VERTEX_ARRAY);
 }
 
 void Project::RenderBackground(View* view)
@@ -1587,7 +1590,6 @@ void Project::RenderBackground(View* view)
 		float Verts[4][2];
 		float Colors[4][4];
 
-		glEnableClientState(GL_VERTEX_ARRAY);
 		glVertexPointer(2, GL_FLOAT, 0, Verts);
 		glEnableClientState(GL_COLOR_ARRAY);
 		glColorPointer(4, GL_FLOAT, 0, Colors);
@@ -1603,7 +1605,6 @@ void Project::RenderBackground(View* view)
 
 		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 
-		glDisableClientState(GL_VERTEX_ARRAY);
 		glDisableClientState(GL_COLOR_ARRAY);
 
 		glShadeModel(GL_FLAT);
@@ -1619,7 +1620,6 @@ void Project::RenderBackground(View* view)
 		float Verts[4][2];
 		float Coords[4][2];
 
-		glEnableClientState(GL_VERTEX_ARRAY);
 		glVertexPointer(2, GL_FLOAT, 0, Verts);
 		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 		glTexCoordPointer(2, GL_FLOAT, 0, Coords);
@@ -1642,7 +1642,6 @@ void Project::RenderBackground(View* view)
 
 		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 
-		glDisableClientState(GL_VERTEX_ARRAY);
 		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 
 		glDisable(GL_TEXTURE_2D);
@@ -1759,8 +1758,6 @@ void Project::RenderScenePieces(View* view)
 	char* ElementsOffset = NULL;
 	char* BaseBufferOffset = NULL;
 	char* PreviousOffset = (char*)(~0);
-
-	glEnableClientState(GL_VERTEX_ARRAY);
 
 	for (int PieceIdx = 0; PieceIdx < OpaquePieces.GetSize(); PieceIdx++)
 	{
@@ -1979,8 +1976,6 @@ void Project::RenderScenePieces(View* view)
 		glDisable(GL_BLEND);
 	}
 
-	glDisableClientState(GL_VERTEX_ARRAY);
-
 	if (Preferences.mLightingMode != LC_LIGHTING_FLAT)
 	{
 		glDisable(GL_LIGHTING);
@@ -2165,14 +2160,12 @@ void Project::RenderSceneObjects(View* view)
 
 			glColor4fv(lcVector4FromColor(Preferences.mGridStudColor));
 
-			glEnableClientState(GL_VERTEX_ARRAY);
 			glVertexPointer(3, GL_FLOAT, 5 * sizeof(float), Verts);
 			glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 			glTexCoordPointer(2, GL_FLOAT, 5 * sizeof(float), Verts + 3);
 
 			glDrawArrays(GL_QUADS, 0, 4);
 
-			glDisableClientState(GL_VERTEX_ARRAY);
 			glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 
 			glDisable(GL_TEXTURE_2D);
@@ -2183,7 +2176,6 @@ void Project::RenderSceneObjects(View* view)
 		{
 			glColor4fv(lcVector4FromColor(Preferences.mGridLineColor));
 
-			glEnableClientState(GL_VERTEX_ARRAY);
 			int NumVerts = 2 * (MaxX - MinX + MaxY - MinY + 2);
 			float* Verts = (float*)malloc(NumVerts * sizeof(float[3]));
 			float* Vert = Verts;
@@ -2211,7 +2203,6 @@ void Project::RenderSceneObjects(View* view)
 
 			glVertexPointer(3, GL_FLOAT, 0, Verts);
 			glDrawArrays(GL_LINES, 0, NumVerts);
-			glDisableClientState(GL_VERTEX_ARRAY);
 			free(Verts);
 		}
 	}
@@ -2244,7 +2235,6 @@ void Project::RenderSceneObjects(View* view)
 		lcVector3 Verts[11];
 		Verts[0] = lcVector3(0.0f, 0.0f, 0.0f);
 
-		glEnableClientState(GL_VERTEX_ARRAY);
 		glVertexPointer(3, GL_FLOAT, 0, Verts);
 
 		for (int i = 0; i < 3; i++)
@@ -2270,8 +2260,6 @@ void Project::RenderSceneObjects(View* view)
 			glDrawArrays(GL_LINES, 0, 2);
 			glDrawArrays(GL_TRIANGLE_FAN, 1, 10);
 		}
-
-		glDisableClientState(GL_VERTEX_ARRAY);
 
 		// Draw the text.
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
@@ -2370,7 +2358,6 @@ void Project::RenderOverlays(View* view)
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_BLEND);
 
-		glEnableClientState(GL_VERTEX_ARRAY);
 		glVertexPointer(2, GL_FLOAT, 0, Verts);
 
 		glColor4f(0.25f, 0.25f, 1.0f, 1.0f);
@@ -2378,8 +2365,6 @@ void Project::RenderOverlays(View* view)
 
 		glColor4f(0.25f, 0.25f, 1.0f, 0.25f);
 		glDrawArrays(GL_TRIANGLE_STRIP, 10, 4);
-
-		glDisableClientState(GL_VERTEX_ARRAY);
 
 		glDisable(GL_BLEND);
 		glEnable(GL_DEPTH_TEST);
@@ -2442,10 +2427,8 @@ void Project::RenderOverlays(View* view)
 				{ 0.0f, 0.0f, OverlayMovePlaneSize }
 			};
 
-			glEnableClientState(GL_VERTEX_ARRAY);
 			glVertexPointer(3, GL_FLOAT, 0, Verts);
 			glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-			glDisableClientState(GL_VERTEX_ARRAY);
 
 			glDisable(GL_BLEND);
 		}
@@ -2502,11 +2485,9 @@ void Project::RenderOverlays(View* view)
 					Verts[j + 2] = lcVector3(OverlayMoveArrowCapSize, y, z);
 				}
 
-				glEnableClientState(GL_VERTEX_ARRAY);
 				glVertexPointer(3, GL_FLOAT, 0, Verts);
 				glDrawArrays(GL_LINES, 0, 2);
 				glDrawArrays(GL_TRIANGLE_FAN, 1, 10);
-				glDisableClientState(GL_VERTEX_ARRAY);
 			}
 
 			// Rotation arrows.
@@ -2545,7 +2526,6 @@ void Project::RenderOverlays(View* view)
 				}
 
 				lcVector3 Verts[18];
-				glEnableClientState(GL_VERTEX_ARRAY);
 				glVertexPointer(3, GL_FLOAT, 0, Verts);
 
 				for (int j = 0; j < 9; j++)
@@ -2594,8 +2574,6 @@ void Project::RenderOverlays(View* view)
 				}
 
 				glDrawArrays(GL_TRIANGLE_FAN, 0, 10);
-
-				glDisableClientState(GL_VERTEX_ARRAY);
 			}
 		}
 
@@ -2686,7 +2664,6 @@ void Project::RenderOverlays(View* view)
 				Verts[0] = lcVector3(0.0f, 0.0f, 0.0f);
 				int NumVerts = 1;
 
-				glEnableClientState(GL_VERTEX_ARRAY);
 				glVertexPointer(3, GL_FLOAT, 0, Verts);
 
 				float StartAngle;
@@ -2722,7 +2699,6 @@ void Project::RenderOverlays(View* view)
 				if (NumVerts > 2)
 					glDrawArrays(GL_TRIANGLE_FAN, 0, NumVerts);
 
-				glDisableClientState(GL_VERTEX_ARRAY);
 				glDisable(GL_BLEND);
 			}
 		}
@@ -2749,10 +2725,8 @@ void Project::RenderOverlays(View* view)
 			glColor4f(0.1f, 0.1f, 0.1f, 1.0f);
 			glLoadMatrixf(ViewMatrix);
 
-			glEnableClientState(GL_VERTEX_ARRAY);
 			glVertexPointer(3, GL_FLOAT, 0, Verts);
 			glDrawArrays(GL_LINE_LOOP, 0, 32);
-			glDisableClientState(GL_VERTEX_ARRAY);
 		}
 
 		lcVector3 ViewDir = Cam->mTargetPosition - Cam->mPosition;
@@ -2831,10 +2805,8 @@ void Project::RenderOverlays(View* view)
 				}
 			}
 
-			glEnableClientState(GL_VERTEX_ARRAY);
 			glVertexPointer(3, GL_FLOAT, 0, Verts);
 			glDrawArrays(GL_LINES, 0, NumVerts);
-			glDisableClientState(GL_VERTEX_ARRAY);
 		}
 
 		// Draw tangent vector.
@@ -2896,10 +2868,8 @@ void Project::RenderOverlays(View* view)
 					Verts[4] = lcVector3(0.0f, StartY, EndZ);
 					Verts[5] = lcVector3(0.0f, StartY - OverlayScale * OverlayRotateArrowCapSize, EndZ + TipZ);
 
-					glEnableClientState(GL_VERTEX_ARRAY);
 					glVertexPointer(3, GL_FLOAT, 0, Verts);
 					glDrawArrays(GL_LINES, 0, 6);
-					glDisableClientState(GL_VERTEX_ARRAY);
 				}
 
 				// Draw text.
@@ -2972,7 +2942,6 @@ void Project::RenderOverlays(View* view)
 			verts[i][1] = sinf((float)i / 32.0f * (2.0f * LC_PI)) * r + cy;
 		}
 
-		glEnableClientState(GL_VERTEX_ARRAY);
 		glVertexPointer(2, GL_FLOAT, 0, verts);
 		glDrawArrays(GL_LINE_LOOP, 0, 32);
 
@@ -3005,7 +2974,6 @@ void Project::RenderOverlays(View* view)
 		glDrawArrays(GL_LINE_LOOP, 8, 4);
 		glDrawArrays(GL_LINE_LOOP, 12, 4);
 
-		glDisableClientState(GL_VERTEX_ARRAY);
 		glEnable(GL_DEPTH_TEST);
 	}
 }

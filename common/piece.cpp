@@ -521,37 +521,3 @@ void Piece::UpdatePosition(unsigned short nTime)
 	mModelWorld = lcMatrix44FromAxisAngle(lcVector3(mRotation[0], mRotation[1], mRotation[2]), mRotation[3] * LC_DTOR);
 	mModelWorld.SetTranslation(mPosition);
 }
-
-void Piece::RenderBox(bool bHilite, float fLineWidth)
-{
-	glPushMatrix();
-	glMultMatrixf(mModelWorld);
-
-	if (bHilite && ((m_nState & LC_PIECE_SELECTED) != 0))
-	{
-		if (m_nState & LC_PIECE_FOCUSED)
-			lcSetColorFocused();
-		else
-			lcSetColorSelected();
-		glLineWidth(2*fLineWidth);
-		glPushAttrib(GL_POLYGON_BIT);
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		mPieceInfo->RenderBox();
-		glPopAttrib();
-		glLineWidth(fLineWidth);
-	}
-	else
-	{
-		lcSetColor(mColorIndex);
-		mPieceInfo->RenderBox();
-	}
-	glPopMatrix();
-}
-
-void Piece::Render(bool bLighting, bool bEdges)
-{
-	glPushMatrix();
-	glMultMatrixf(mModelWorld);
-	mPieceInfo->mMesh->Render(mColorIndex, (m_nState & LC_PIECE_SELECTED) != 0, (m_nState & LC_PIECE_FOCUSED) != 0);
-	glPopMatrix();
-}

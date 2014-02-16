@@ -460,13 +460,12 @@ void Camera::CopyPosition(const Camera* camera)
 	mUpVector = camera->mUpVector;
 }
 
-void Camera::Render(float fLineWidth)
+void Camera::Render(const lcMatrix44& ViewMatrix, float LineWidth)
 {
 	lcMatrix44 ViewWorld = lcMatrix44AffineInverse(mWorldView);
 
 	// Draw camera.
-	glPushMatrix();
-	glMultMatrixf(ViewWorld);
+	glLoadMatrixf(lcMul(ViewWorld, ViewMatrix));
 
 	glEnableClientState(GL_VERTEX_ARRAY);
 	float verts[34][3] =
@@ -508,8 +507,6 @@ void Camera::Render(float fLineWidth)
 	glDrawArrays(GL_LINES, 0, 24);
 	glDrawArrays(GL_LINE_STRIP, 24, 10);
 
-	glPopMatrix();
-
 	lcMatrix44 TargetMat = ViewWorld;
 	float box[24][3] =
 	{
@@ -528,7 +525,6 @@ void Camera::Render(float fLineWidth)
 	};
 /*
 	// Draw ortho target.
-	glPushMatrix();
 	TargetMat.SetTranslation(mOrthoTarget);
 	glMultMatrixf(TargetMat);
 
@@ -538,12 +534,10 @@ void Camera::Render(float fLineWidth)
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glVertexPointer(3, GL_FLOAT, 0, box);
 	glDrawArrays(GL_LINES, 0, 24);
-	glPopMatrix();
 */
 	// Draw target.
-	glPushMatrix();
 	TargetMat.SetTranslation(mTargetPosition);
-	glMultMatrixf(TargetMat);
+	glLoadMatrixf(lcMul(TargetMat, ViewMatrix));
 
 	if (IsTargetSelected())
 	{
@@ -562,7 +556,8 @@ void Camera::Render(float fLineWidth)
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glVertexPointer(3, GL_FLOAT, 0, box);
 	glDrawArrays(GL_LINES, 0, 24);
-	glPopMatrix();
+
+	glLoadMatrixf(ViewMatrix);
 
 	lcVector3 Line[2] =
 	{
@@ -577,8 +572,7 @@ void Camera::Render(float fLineWidth)
 
 	if (IsSelected())
 	{
-		glPushMatrix();
-		glMultMatrixf(ViewWorld);
+		glLoadMatrixf(lcMul(ViewWorld, ViewMatrix));
 
 		float Dist = lcLength(mTargetPosition - mPosition);
 		lcMatrix44 Projection = lcMatrix44Perspective(m_fovy, 1.33f, 0.01f, Dist);
@@ -600,8 +594,6 @@ void Camera::Render(float fLineWidth)
 
 		glVertexPointer(3, GL_FLOAT, 0, ProjVerts);
 		glDrawArrays(GL_LINES, 0, 16);
-
-		glPopMatrix();
 	}
 
 	glDisableClientState(GL_VERTEX_ARRAY);

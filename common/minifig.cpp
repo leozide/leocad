@@ -1009,6 +1009,8 @@ void MinifigWizard::OnDraw()
 	glMatrixMode(GL_PROJECTION);
 	glLoadMatrixf(Projection);
 
+	lcMatrix44 ViewMatrix;
+
 	if (m_AutoZoom)
 	{
 		lcVector3 Points[8] =
@@ -1028,8 +1030,7 @@ void MinifigWizard::OnDraw()
 		lcMatrix44 ModelView = lcMatrix44LookAt(Eye, Center, lcVector3(0, 0, 1));
 		Eye = lcZoomExtents(Eye, ModelView, Projection, Points, 8);
 
-		glMatrixMode(GL_MODELVIEW);
-		glLoadMatrixf(lcMatrix44LookAt(Eye, Center, lcVector3(0, 0, 1)));
+		ViewMatrix = lcMatrix44LookAt(Eye, Center, lcVector3(0, 0, 1));
 
 		// Update the new camera distance.
 		lcVector3 d = Eye - Center;
@@ -1037,8 +1038,7 @@ void MinifigWizard::OnDraw()
 	}
 	else
 	{
-		glMatrixMode(GL_MODELVIEW);
-		glLoadMatrixf(lcMatrix44LookAt(Eye * m_Distance, Center, lcVector3(0, 0, 1)));
+		ViewMatrix = lcMatrix44LookAt(Eye * m_Distance, Center, lcVector3(0, 0, 1));
 	}
 
 	glEnable(GL_DEPTH_TEST);
@@ -1046,6 +1046,7 @@ void MinifigWizard::OnDraw()
 	glEnable(GL_POLYGON_OFFSET_FILL);
 	glPolygonOffset(0.5f, 0.1f);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glMatrixMode(GL_MODELVIEW);
 
 	float *bg = lcGetActiveProject()->GetBackgroundColor();
 	glClearColor(bg[0], bg[1], bg[2], bg[3]);
@@ -1058,10 +1059,8 @@ void MinifigWizard::OnDraw()
 		if (!mMinifig->Parts[PieceIdx])
 			continue;
 
-		glPushMatrix();
-		glMultMatrixf(mMinifig->Matrices[PieceIdx]);
+		glLoadMatrixf(lcMul(mMinifig->Matrices[PieceIdx], ViewMatrix));
 		mMinifig->Parts[PieceIdx]->RenderPiece(mMinifig->Colors[PieceIdx]);
-		glPopMatrix();
 	}
 }
 

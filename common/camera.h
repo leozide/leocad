@@ -143,7 +143,7 @@ public:
 
 	void UpdatePosition(unsigned short nTime);
 	void CopyPosition(const Camera* camera);
-	void Render(float fLineWidth);
+	void Render(const lcMatrix44& ViewMatrix, float LineWidth);
 	void LoadProjection(const lcProjection& projection);
 
 	void ZoomExtents(View* view, const lcVector3& Center, const lcVector3* Points, int NumPoints, unsigned short nTime, bool bAddKey);

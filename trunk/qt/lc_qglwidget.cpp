@@ -198,7 +198,7 @@ void lcQGLWidget::keyReleaseEvent(QKeyEvent *event)
 void lcQGLWidget::mousePressEvent(QMouseEvent *event)
 {
 	widget->mInputState.x = event->x();
-	widget->mInputState.y = height() - event->y() - 1;
+	widget->mInputState.y = widget->mHeight - event->y() - 1;
 	widget->mInputState.Control = (event->modifiers() & Qt::ControlModifier) != 0;
 	widget->mInputState.Shift = (event->modifiers() & Qt::ShiftModifier) != 0;
 	widget->mInputState.Alt = (event->modifiers() & Qt::AltModifier) != 0;
@@ -222,7 +222,7 @@ void lcQGLWidget::mousePressEvent(QMouseEvent *event)
 void lcQGLWidget::mouseReleaseEvent(QMouseEvent *event)
 {
 	widget->mInputState.x = event->x();
-	widget->mInputState.y = height() - event->y() - 1;
+	widget->mInputState.y = widget->mHeight - event->y() - 1;
 	widget->mInputState.Control = (event->modifiers() & Qt::ControlModifier) != 0;
 	widget->mInputState.Shift = (event->modifiers() & Qt::ShiftModifier) != 0;
 	widget->mInputState.Alt = (event->modifiers() & Qt::AltModifier) != 0;
@@ -246,7 +246,7 @@ void lcQGLWidget::mouseReleaseEvent(QMouseEvent *event)
 void lcQGLWidget::mouseMoveEvent(QMouseEvent *event)
 {
 	widget->mInputState.x = event->x();
-	widget->mInputState.y = height() - event->y() - 1;
+	widget->mInputState.y = widget->mHeight - event->y() - 1;
 	widget->mInputState.Control = (event->modifiers() & Qt::ControlModifier) != 0;
 	widget->mInputState.Shift = (event->modifiers() & Qt::ShiftModifier) != 0;
 	widget->mInputState.Alt = (event->modifiers() & Qt::AltModifier) != 0;
@@ -263,7 +263,7 @@ void lcQGLWidget::wheelEvent(QWheelEvent *event)
 	}
 
 	widget->mInputState.x = event->x();
-	widget->mInputState.y = height() - event->y() - 1;
+	widget->mInputState.y = widget->mHeight - event->y() - 1;
 	widget->mInputState.Control = (event->modifiers() & Qt::ControlModifier) != 0;
 	widget->mInputState.Shift = (event->modifiers() & Qt::ShiftModifier) != 0;
 	widget->mInputState.Alt = (event->modifiers() & Qt::AltModifier) != 0;
@@ -309,7 +309,7 @@ void lcQGLWidget::dragMoveEvent(QDragMoveEvent *event)
 	if (!isView || !event->mimeData()->hasFormat("application/vnd.leocad-part"))
 		return;
 
-	lcGetActiveProject()->OnPieceDropMove(event->pos().x(), height() - event->pos().y() - 1);
+	lcGetActiveProject()->OnPieceDropMove(event->pos().x(), widget->mHeight - event->pos().y() - 1);
 
 	event->accept();
 }

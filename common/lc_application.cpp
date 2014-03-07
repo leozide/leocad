@@ -107,7 +107,7 @@ bool lcApplication::LoadPiecesLibrary(const char* LibPath, const char* LibraryIn
 
 				if (mLibrary->Load(LibraryPath, LibraryCachePath))
 				{
-					mLibrary->mNumOfficialPieces = mLibrary->mPieces.GetSize();
+					mLibrary->SetOfficialPieces();
 					return true;
 				}
 			}

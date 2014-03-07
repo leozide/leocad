@@ -121,6 +121,12 @@ public:
 	void GetCategoryEntries(int CategoryIndex, bool GroupPieces, lcArray<PieceInfo*>& SinglePieces, lcArray<PieceInfo*>& GroupedPieces);
 	void GetPatternedPieces(PieceInfo* Parent, lcArray<PieceInfo*>& Pieces) const;
 
+	void SetOfficialPieces()
+	{
+		if (mZipFile)
+			mNumOfficialPieces = mPieces.GetSize();
+	}
+
 	lcArray<PieceInfo*> mPieces;
 	lcArray<lcLibraryPrimitive*> mPrimitives;
 	int mNumOfficialPieces;

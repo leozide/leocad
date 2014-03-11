@@ -1,33 +1,33 @@
 About LeoCAD
 ------------
 
-LeoCAD is a CAD program that allows people to build virtual models using
-bricks similar to those found in LEGO toys. It's available for free under
-the GNU Public License v2, and works on the Windows and Linux Operating
-Systems.
+LeoCAD is a CAD program for creating virtual LEGO models. It's available
+or free under the GNU Public License v2 and works on the Windows, Linux
+and Mac OSX Operating Systems.
 
 
 Installation
 ------------
 
-You can download the latest version of LeoCAD and its Pieces Library from
+You can download the latest version of LeoCAD and its Parts Library from
 the main website at http://www.leocad.org
 
-It's recommended that you install the latest drivers for your video card,
-since LeoCAD can take advantage of hardware acceleration for rendering by
-using OpenGL.
+It's recommended that you install the latest drivers for your video card
+since LeoCAD uses OpenGL to take advantage of hardware acceleration for
+rendering.
 
 - LeoCAD for Windows:
 
   Download LeoCAD-0.80.0-7439.exe to your computer, double click on the 
   icon to launch the installer and follow the intructions.
 
-- LeoCAD for Linux:
+- LeoCAD for Linux and FreeBSD:
 
-  You can either download the source from Subversion or use the i386 rpm
-  binaries. If you decide to compile it yourself you will also need to 
-  download the Pieces Library separately, extract it to any directory of 
-  your choice and point the LEOCAD_LIB environment variable to it. More 
+  Many distributions now include LeoCAD so check your package manager to
+  see if it's already available and install from there.
+
+  If you decide to compile it yourself you will also need to download the
+  Parts Library separately and follow the installation instructions. More
   information is available at http://www.leocad.org
 
 - LeoCAD for Mac OSX:

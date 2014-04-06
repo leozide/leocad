@@ -6,8 +6,8 @@
 // Version number.
 #define LC_VERSION_MAJOR 0
 #define LC_VERSION_MINOR 80
-#define LC_VERSION_PATCH 3
-#define LC_VERSION_TEXT "0.80.3"
+#define LC_VERSION_PATCH 4
+#define LC_VERSION_TEXT "0.80.4"
 
 // Forward declarations.
 class lcVector2;

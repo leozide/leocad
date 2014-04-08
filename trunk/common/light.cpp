@@ -104,7 +104,6 @@ Light::Light(float px, float py, float pz, float tx, float ty, float tz)
 void Light::Initialize()
 {
 	m_bEnabled = true;
-	m_pNext = NULL;
 	m_nState = 0;
 	m_pTarget = NULL;
 	memset(m_strName, 0, sizeof(m_strName));
@@ -136,12 +135,14 @@ Light::~Light()
 	delete m_pTarget;
 }
 
-void Light::CreateName(const Light* pLight)
+void Light::CreateName(const lcArray<Light*>& Lights)
 {
 	int i, max = 0;
 
-	for (; pLight; pLight = pLight->m_pNext)
+	for (int LightIdx = 0; LightIdx < Lights.GetSize(); LightIdx++)
 	{
+		Light* pLight = Lights[LightIdx];
+
 		if (strncmp(pLight->m_strName, "Light ", 6) == 0)
 		{
 			if (sscanf(pLight->m_strName + 6, " #%d", &i) == 1)

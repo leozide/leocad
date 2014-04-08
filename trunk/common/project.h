@@ -300,7 +300,7 @@ public:
 	// Objects
 	Piece* m_pPieces;
 	lcArray<Camera*> mCameras;
-	Light* m_pLights;
+	lcArray<Light*> mLights;
 	Group* m_pGroups;
 	Terrain* m_pTerrain;
 

@@ -65,8 +65,6 @@ public:
 	void SelectTarget (bool bSelecting, bool bFocus, bool bMultiple);
 
 public:
-	Light* m_pNext;
-
 	bool IsVisible()
 	{ return (m_nState & LC_LIGHT_HIDDEN) == 0; }
 	bool IsSelected()
@@ -109,7 +107,7 @@ public:
 	void UpdatePosition(unsigned short nTime);
 	void Move(unsigned short nTime, bool bAddKey, float dx, float dy, float dz);
 	void Setup(int index);
-	void CreateName(const Light* pLight);
+	void CreateName(const lcArray<Light*>& Lights);
 
 	// Temporary parameters
 	lcMatrix44 mWorldLight;

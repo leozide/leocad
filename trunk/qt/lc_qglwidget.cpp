@@ -197,7 +197,7 @@ void lcQGLWidget::keyReleaseEvent(QKeyEvent *event)
 
 void lcQGLWidget::mousePressEvent(QMouseEvent *event)
 {
-	float scale = windowHandle()->devicePixelRatio();
+	float scale = deviceScale();
 
 	widget->mInputState.x = event->x() * scale;
 	widget->mInputState.y = widget->mHeight - event->y() * scale - 1;
@@ -223,7 +223,7 @@ void lcQGLWidget::mousePressEvent(QMouseEvent *event)
 
 void lcQGLWidget::mouseReleaseEvent(QMouseEvent *event)
 {
-	float scale = windowHandle()->devicePixelRatio();
+	float scale = deviceScale();
 
 	widget->mInputState.x = event->x() * scale;
 	widget->mInputState.y = widget->mHeight - event->y() * scale - 1;
@@ -249,7 +249,7 @@ void lcQGLWidget::mouseReleaseEvent(QMouseEvent *event)
 
 void lcQGLWidget::mouseMoveEvent(QMouseEvent *event)
 {
-	float scale = windowHandle()->devicePixelRatio();
+	float scale = deviceScale();
 
 	widget->mInputState.x = event->x() * scale;
 	widget->mInputState.y = widget->mHeight - event->y() * scale - 1;
@@ -268,7 +268,7 @@ void lcQGLWidget::wheelEvent(QWheelEvent *event)
 		return;
 	}
 
-	float scale = windowHandle()->devicePixelRatio();
+	float scale = deviceScale();
 
 	widget->mInputState.x = event->x() * scale;
 	widget->mInputState.y = widget->mHeight - event->y() * scale - 1;
@@ -317,7 +317,9 @@ void lcQGLWidget::dragMoveEvent(QDragMoveEvent *event)
 	if (!isView || !event->mimeData()->hasFormat("application/vnd.leocad-part"))
 		return;
 
-	lcGetActiveProject()->OnPieceDropMove(event->pos().x(), widget->mHeight - event->pos().y() - 1);
+	float scale = deviceScale();
+
+	lcGetActiveProject()->OnPieceDropMove(event->pos().x() * scale, widget->mHeight - event->pos().y() * scale - 1);
 
 	event->accept();
 }

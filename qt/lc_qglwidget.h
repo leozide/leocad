@@ -16,6 +16,15 @@ public:
 	QSize preferredSize;
 	bool isView;
 
+	float deviceScale()
+	{
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+		return windowHandle()->devicePixelRatio();
+#else
+		return 1.0f;
+#endif
+	}
+
 protected:
 	void initializeGL();
 	void resizeGL(int x, int h);

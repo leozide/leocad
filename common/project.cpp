@@ -71,7 +71,6 @@ Project::Project()
 	m_OverlayMode = LC_OVERLAY_NONE;
 	mDropPiece = NULL;
 	m_pPieces = NULL;
-	m_pLights = NULL;
 	m_pGroups = NULL;
 	m_pUndoList = NULL;
 	m_pRedoList = NULL;
@@ -144,7 +143,6 @@ void Project::SetTitle(const char* Title)
 void Project::DeleteContents(bool bUndo)
 {
 	Piece* pPiece;
-	Light* pLight;
 	Group* pGroup;
 
 	mProperties.LoadDefaults();
@@ -192,16 +190,8 @@ void Project::DeleteContents(bool bUndo)
 		}
 	}
 
-	for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
-		delete mCameras[CameraIdx];
-	mCameras.RemoveAll();
-
-	while (m_pLights)
-	{
-		pLight = m_pLights;
-		m_pLights = m_pLights->m_pNext;
-		delete pLight;
-	}
+	mCameras.DeleteAll();
+	mLights.DeleteAll();
 
 	while (m_pGroups)
 	{
@@ -1697,11 +1687,8 @@ void Project::RenderScenePieces(View* view)
 
 		glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lcVector4(mProperties.mAmbientColor, 1.0f));
 
-		int index = 0;
-		Light *pLight;
-
-		for (pLight = m_pLights; pLight; pLight = pLight->m_pNext, index++)
-			pLight->Setup (index);
+		for (int LightIdx = 0; LightIdx < mLights.GetSize(); LightIdx++)
+			mLights[LightIdx]->Setup(LightIdx);
 
 		glEnable(GL_LIGHTING);
 	}
@@ -2030,14 +2017,7 @@ void Project::RenderSceneObjects(View* view)
 	}
 
 	if (Preferences.mLightingMode != LC_LIGHTING_FLAT)
-	{
 		glDisable (GL_LIGHTING);
-		int index = 0;
-		Light *pLight;
-
-		for (pLight = m_pLights; pLight; pLight = pLight->m_pNext, index++)
-			glDisable ((GLenum)(GL_LIGHT0+index));
-	}
 
 	for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
 	{
@@ -2049,9 +2029,9 @@ void Project::RenderSceneObjects(View* view)
 		pCamera->Render(ViewMatrix, Preferences.mLineWidth);
 	}
 
-	for (Light* pLight = m_pLights; pLight; pLight = pLight->m_pNext)
-		if (pLight->IsVisible ())
-			pLight->Render(ViewMatrix, Preferences.mLineWidth);
+	for (int LightIdx = 0; LightIdx < mLights.GetSize(); LightIdx++)
+		if (mLights[LightIdx]->IsVisible())
+			mLights[LightIdx]->Render(ViewMatrix, Preferences.mLineWidth);
 
 	if (Preferences.mDrawGridStuds || Preferences.mDrawGridLines)
 	{
@@ -3153,7 +3133,6 @@ void Project::RemovePiece(Piece* pPiece)
 void Project::CalculateStep()
 {
 	Piece* pPiece;
-	Light* pLight;
 
 	for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 		pPiece->UpdatePosition(m_nCurStep);
@@ -3161,16 +3140,14 @@ void Project::CalculateStep()
 	for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
 		mCameras[CameraIdx]->UpdatePosition(m_nCurStep);
 
-	for (pLight = m_pLights; pLight; pLight = pLight->m_pNext)
-		pLight->UpdatePosition(m_nCurStep);
+	for (int LightIdx = 0; LightIdx < mLights.GetSize(); LightIdx++)
+		mLights[LightIdx]->UpdatePosition(m_nCurStep);
 }
 
 // Returns true if anything was removed (used by cut and del)
 bool Project::RemoveSelectedObjects()
 {
 	Piece* pPiece;
-	Light* pLight;
-	void* pPrev;
 	bool RemovedPiece = false;
 	bool RemovedCamera = false;
 	bool RemovedLight = false;
@@ -3224,30 +3201,19 @@ bool Project::RemoveSelectedObjects()
 	if (RemovedCamera)
 		gMainWindow->UpdateCameraMenu(mCameras, m_ActiveView ? m_ActiveView->mCamera : NULL);
 
-	for (pPrev = NULL, pLight = m_pLights; pLight; )
+	for (int LightIdx = 0; LightIdx < mLights.GetSize(); )
 	{
+		Light* pLight = mLights[LightIdx];
+
 		if (pLight->IsSelected())
 		{
-			if (pPrev)
-			{
-			  ((Light*)pPrev)->m_pNext = pLight->m_pNext;
-				delete pLight;
-				pLight = ((Light*)pPrev)->m_pNext;
-			}
-			else
-			{
-			  m_pLights = m_pLights->m_pNext;
-				delete pLight;
-				pLight = m_pLights;
-			}
+			delete pLight;
+			mLights.RemoveIndex(LightIdx);
 
 			RemovedLight = true;
 		}
 		else
-		{
-			pPrev = pLight;
-			pLight = pLight->m_pNext;
-		}
+			LightIdx++;
 	}
 
 	RemoveEmptyGroups();
@@ -3330,7 +3296,10 @@ void Project::UpdateSelection()
 		}
 	}
 
-	for (Light* pLight = m_pLights; pLight; pLight = pLight->m_pNext)
+	for (int LightIdx = 0; LightIdx < mLights.GetSize(); LightIdx++)
+	{
+		Light* pLight = mLights[LightIdx];
+
 		if (pLight->IsSelected())
 		{
 			flags |= LC_SEL_LIGHT;
@@ -3339,6 +3308,7 @@ void Project::UpdateSelection()
 			if (pLight->IsEyeFocused() || pLight->IsTargetFocused())
 				Focus = pLight;
 		}
+	}
 
 	if (m_nTracking == LC_TRACK_NONE)
 	{
@@ -5496,9 +5466,9 @@ void Project::HandleCommand(LC_COMMANDS id)
 				if (mCameras[CameraIdx]->IsVisible())
 					Options.Selection.Add(mCameras[CameraIdx]->IsSelected());
 
-			for (Light* pLight = m_pLights; pLight; pLight = pLight->m_pNext)
-				if (pLight->IsVisible())
-					Options.Selection.Add(pLight->IsSelected());
+			for (int LightIdx = 0; LightIdx < mLights.GetSize(); LightIdx++)
+				if (mLights[LightIdx]->IsVisible())
+					Options.Selection.Add(mLights[LightIdx]->IsSelected());
 
 			if (Options.Selection.GetSize() == 0)
 			{
@@ -5520,9 +5490,9 @@ void Project::HandleCommand(LC_COMMANDS id)
 				if (Options.Selection[ObjectIndex])
 					mCameras[CameraIdx]->Select(true, false, false);
 
-			for (Light* pLight = m_pLights; pLight; pLight = pLight->m_pNext, ObjectIndex++)
+			for (int LightIdx = 0; LightIdx < mLights.GetSize(); LightIdx++)
 				if (Options.Selection[ObjectIndex])
-					pLight->Select(true, false, false);
+					mLights[LightIdx]->Select(true, false, false);
 
 			UpdateSelection();
 			UpdateAllViews();
@@ -6315,8 +6285,8 @@ void Project::HandleCommand(LC_COMMANDS id)
 			for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
 				mCameras[CameraIdx]->InsertTime(m_nCurStep, 1);
 
-			for (Light* pLight = m_pLights; pLight; pLight = pLight->m_pNext)
-				pLight->InsertTime(m_nCurStep, 1);
+			for (int LightIdx = 0; LightIdx < mLights.GetSize(); LightIdx++)
+				mLights[LightIdx]->InsertTime(m_nCurStep, 1);
 
 			SetModifiedFlag(true);
 			CheckPoint("Adding Step");
@@ -6333,8 +6303,8 @@ void Project::HandleCommand(LC_COMMANDS id)
 			for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
 				mCameras[CameraIdx]->RemoveTime(m_nCurStep, 1);
 
-			for (Light* pLight = m_pLights; pLight; pLight = pLight->m_pNext)
-				pLight->RemoveTime(m_nCurStep, 1);
+			for (int LightIdx = 0; LightIdx < mLights.GetSize(); LightIdx++)
+				mLights[LightIdx]->RemoveTime(m_nCurStep, 1);
 
 			SetModifiedFlag (true);
 			CheckPoint("Removing Step");
@@ -6932,7 +6902,6 @@ Group* Project::AddGroup (const char* name, Group* pParent, float x, float y, fl
 void Project::SelectAndFocusNone(bool bFocusOnly)
 {
 	Piece* pPiece;
-	Light* pLight;
 
 	for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 		pPiece->Select(false, bFocusOnly, false);
@@ -6945,8 +6914,10 @@ void Project::SelectAndFocusNone(bool bFocusOnly)
 		pCamera->GetTarget()->Select (false, bFocusOnly, false);
 	}
 
-	for (pLight = m_pLights; pLight; pLight = pLight->m_pNext)
+	for (int LightIdx = 0; LightIdx < mLights.GetSize(); LightIdx++)
 	{
+		Light* pLight = mLights[LightIdx];
+
 		pLight->Select(false, bFocusOnly, false);
 		if (pLight->GetTarget())
 			pLight->GetTarget()->Select (false, bFocusOnly, false);
@@ -7013,8 +6984,10 @@ bool Project::GetFocusPosition(lcVector3& Position) const
 		}
 	}
 
-	for (Light* pLight = m_pLights; pLight; pLight = pLight->m_pNext)
+	for (int LightIdx = 0; LightIdx < mLights.GetSize(); LightIdx++)
 	{
+		Light* pLight = mLights[LightIdx];
+
 		if (pLight->IsEyeFocused())
 		{
 			Position = pLight->mPosition;
@@ -7125,9 +7098,9 @@ Object* Project::FindObjectFromPoint(View* view, int x, int y, bool PiecesOnly)
 				pCamera->MinIntersectDist(&ClickLine);
 		}
 
-		for (Light* pLight = m_pLights; pLight; pLight = pLight->m_pNext)
-			if (pLight->IsVisible())
-				pLight->MinIntersectDist(&ClickLine);
+		for (int LightIdx = 0; LightIdx < mLights.GetSize(); LightIdx++)
+			if (mLights[LightIdx]->IsVisible())
+				mLights[LightIdx]->MinIntersectDist(&ClickLine);
 	}
 
 	return ClickLine.Closest;
@@ -7632,7 +7605,6 @@ bool Project::MoveSelectedObjects(lcVector3& Move, lcVector3& Remainder, bool Sn
 	}
 
 	Piece* pPiece;
-	Light* pLight;
 	float x = Move[0], y = Move[1], z = Move[2];
 
 	for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
@@ -7646,12 +7618,16 @@ bool Project::MoveSelectedObjects(lcVector3& Move, lcVector3& Remainder, bool Sn
 		}
 	}
 
-	for (pLight = m_pLights; pLight; pLight = pLight->m_pNext)
+	for (int LightIdx = 0; LightIdx < mLights.GetSize(); LightIdx++)
+	{
+		Light* pLight = mLights[LightIdx];
+
 		if (pLight->IsSelected())
 		{
 			pLight->Move (m_nCurStep, m_bAddKeys, x, y, z);
 			pLight->UpdatePosition (m_nCurStep);
 		}
+	}
 
 	for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
 		if (pPiece->IsSelected())
@@ -7869,8 +7845,6 @@ void Project::TransformSelectedObjects(LC_TRANSFORM_TYPE Type, const lcVector3& 
 
 			lcVector3 Offset = Transform - Center;
 
-			Light* pLight;
-
 			for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
 			{
 				Camera* pCamera = mCameras[CameraIdx];
@@ -7882,8 +7856,10 @@ void Project::TransformSelectedObjects(LC_TRANSFORM_TYPE Type, const lcVector3& 
 				}
 			}
 
-			for (pLight = m_pLights; pLight; pLight = pLight->m_pNext)
+			for (int LightIdx = 0; LightIdx < mLights.GetSize(); LightIdx++)
 			{
+				Light* pLight = mLights[LightIdx];
+
 				if (pLight->IsSelected())
 				{
 					pLight->Move(m_nCurStep, m_bAddKeys, Offset.x, Offset.y, Offset.z);
@@ -8425,12 +8401,10 @@ void Project::OnLeftButtonDown(View* view)
 			else if (Action == LC_ACTION_LIGHT)
 			{
 				GLint max;
-				int count = 0;
+				int count = mLights.GetSize();
 				Light *pLight;
 
 				glGetIntegerv (GL_MAX_LIGHTS, &max);
-				for (pLight = m_pLights; pLight; pLight = pLight->m_pNext)
-					count++;
 
 				if (count == max)
 					break;
@@ -8439,9 +8413,8 @@ void Project::OnLeftButtonDown(View* view)
 
 				SelectAndFocusNone (false);
 
-				pLight->CreateName(m_pLights);
-				pLight->m_pNext = m_pLights;
-				m_pLights = pLight;
+				pLight->CreateName(mLights);
+				mLights.Add(pLight);
 				gMainWindow->UpdateFocusObject(pLight);
 				pLight->Select (true, true, false);
 				UpdateSelection ();
@@ -8457,12 +8430,9 @@ void Project::OnLeftButtonDown(View* view)
 		case LC_ACTION_SPOTLIGHT:
 		{
 		  GLint max;
-		  int count = 0;
-		  Light *pLight;
+		  int count = mLights.GetSize();
 
 		  glGetIntegerv (GL_MAX_LIGHTS, &max);
-		  for (pLight = m_pLights; pLight; pLight = pLight->m_pNext)
-			count++;
 
 		  if (count == max)
 			break;
@@ -8470,10 +8440,9 @@ void Project::OnLeftButtonDown(View* view)
 		  lcVector3 tmp = projection.UnprojectPoint(view->mCamera->mWorldView, lcVector3(x+1.0f, y-1.0f, 0.9f));
 		  SelectAndFocusNone(false);
 		  StartTracking(LC_TRACK_START_LEFT);
-		  pLight = new Light (m_fTrack[0], m_fTrack[1], m_fTrack[2], tmp[0], tmp[1], tmp[2]);
-		  pLight->GetTarget ()->Select (true, true, false);
-		  pLight->m_pNext = m_pLights;
-		  m_pLights = pLight;
+		  Light* pLight = new Light(m_fTrack[0], m_fTrack[1], m_fTrack[2], tmp[0], tmp[1], tmp[2]);
+		  pLight->GetTarget()->Select(true, true, false);
+		  mLights.Add(pLight);
 		  UpdateSelection();
 		  UpdateAllViews();
 		  gMainWindow->UpdateFocusObject(pLight);
@@ -8513,9 +8482,9 @@ void Project::OnLeftButtonDown(View* view)
 
 			if (!sel)
 			{
-				for (Light* pLight = m_pLights; pLight; pLight = pLight->m_pNext)
+				for (int LightIdx = 0; LightIdx < mLights.GetSize(); LightIdx++)
 				{
-					if (pLight->IsSelected())
+					if (mLights[LightIdx]->IsSelected())
 					{
 						sel = true;
 						break;
@@ -8705,12 +8674,14 @@ void Project::OnRightButtonDown(View* view)
 				sel = mCameras[CameraIdx]->IsSelected();
 
 			if (!sel)
-			for (Light* pLight = m_pLights; pLight; pLight = pLight->m_pNext)
-				if (pLight->IsSelected())
-				{
-					sel = true;
-					break;
-				}
+			{
+				for (int LightIdx = 0; LightIdx < mLights.GetSize(); LightIdx++)
+					if (mLights[LightIdx]->IsSelected())
+					{
+						sel = true;
+						break;
+					}
+			}
 
 			if (sel)
 			{
@@ -8811,7 +8782,7 @@ void Project::OnMouseMove(View* view)
 			m_fTrack[1] = pty;
 			m_fTrack[2] = ptz;
 
-			Light* pLight = m_pLights;
+			Light* pLight = mLights[mLights.GetSize() - 1];
 
 			pLight->Move(1, false, delta[0], delta[1], delta[2]);
 			pLight->UpdatePosition(1);

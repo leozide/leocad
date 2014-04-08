@@ -148,6 +148,14 @@ public:
 		mLength = 0;
 	}
 
+	void DeleteAll()
+	{
+		for (int i = 0; i < mLength; i++)
+			delete mData[i];
+
+		mLength = 0;
+	}
+
 	int FindIndex(const T& Item) const
 	{
 		for (int i = 0; i < mLength; i++)

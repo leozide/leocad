@@ -298,7 +298,7 @@ public:
 	}
 
 	// Objects
-	Piece* m_pPieces;
+	lcArray<Piece*> mPieces;
 	lcArray<Camera*> mCameras;
 	lcArray<Light*> mLights;
 	Group* m_pGroups;

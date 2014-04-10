@@ -35,8 +35,6 @@ public:
 
 
 
-	Piece* m_pNext;
-
 	void Hide()
 		{ m_nState = LC_PIECE_HIDDEN; }
 	void UnHide()
@@ -54,7 +52,7 @@ public:
 	virtual void MinIntersectDist(lcClickLine* ClickLine);
 	bool IsVisible(unsigned short nTime);
 	void Initialize(float x, float y, float z, unsigned char nStep);
-	void CreateName(Piece* pPiece);
+	void CreateName(const lcArray<Piece*>& Pieces);
 	void CompareBoundingBox(float box[6]);
 	void SetPieceInfo(PieceInfo* pPieceInfo);
 	bool FileLoad(lcFile& file);

@@ -54,7 +54,7 @@ lcQMainWindow::lcQMainWindow(QWidget *parent)
 
 	GL_EnableVertexBufferObject();
 
-	if (lcGetActiveProject()->m_pPieces)
+	if (!lcGetActiveProject()->mPieces.IsEmpty())
 	{
 		for (int PieceIdx = 0; PieceIdx < Library->mPieces.GetSize(); PieceIdx++)
 		{

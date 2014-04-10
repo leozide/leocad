@@ -162,8 +162,10 @@ void lcQSelectDialog::addChildren(QTreeWidgetItem *parentItem, Group *parentGrou
 
 	int numObjects = 0;
 
-	for (Piece *piece = project->m_pPieces; piece; piece = piece->m_pNext, numObjects++)
+	for (int pieceIdx = 0; pieceIdx < project->mPieces.GetSize(); pieceIdx++, numObjects++)
 	{
+		Piece *piece = project->mPieces[pieceIdx];
+
 		if (piece->GetGroup() != parentGroup)
 			continue;
 

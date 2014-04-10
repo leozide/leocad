@@ -18,6 +18,12 @@ public:
 			AllocGrow(Size);
 	}
 
+	lcArray(const lcArray<T>& Array)
+	{
+		mData = NULL;
+		*this = Array;
+	}
+
 	~lcArray()
 	{
 		delete[] mData;

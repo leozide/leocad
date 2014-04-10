@@ -54,6 +54,11 @@ public:
 		return mData[Index];
 	}
 
+	bool IsEmpty() const
+	{
+		return mLength == 0;
+	}
+
 	int GetSize() const
 	{
 		return mLength;

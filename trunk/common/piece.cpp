@@ -30,7 +30,6 @@ static LC_OBJECT_KEY_INFO piece_key_info[LC_PK_COUNT] =
 Piece::Piece(PieceInfo* pPieceInfo)
 	: Object (LC_OBJECT_PIECE)
 {
-	m_pNext = NULL;
 	mPieceInfo = pPieceInfo;
 	m_nState = 0;
 	mColorIndex = 0;
@@ -293,15 +292,19 @@ void Piece::Initialize(float x, float y, float z, unsigned char nStep)
 	UpdatePosition(1);
 }
 
-void Piece::CreateName(Piece* pPiece)
+void Piece::CreateName(const lcArray<Piece*>& Pieces)
 {
 	int i, max = 0;
 
-	for (; pPiece; pPiece = pPiece->m_pNext)
-		if (strncmp (pPiece->m_strName, mPieceInfo->m_strDescription, strlen(mPieceInfo->m_strDescription)) == 0)
-			if (sscanf(pPiece->m_strName + strlen(mPieceInfo->m_strDescription), " #%d", &i) == 1)
+	for (int PieceIdx = 0; PieceIdx < Pieces.GetSize(); PieceIdx++)
+	{
+		Piece* Piece = Pieces[PieceIdx];
+
+		if (strncmp(Piece->m_strName, mPieceInfo->m_strDescription, strlen(mPieceInfo->m_strDescription)) == 0)
+			if (sscanf(Piece->m_strName + strlen(mPieceInfo->m_strDescription), " #%d", &i) == 1)
 				if (i > max)
 					max = i;
+	}
 
 	sprintf (m_strName, "%s #%.2d", mPieceInfo->m_strDescription, max+1);
 }

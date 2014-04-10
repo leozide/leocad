@@ -105,15 +105,9 @@ void lcQEditGroupsDialog::updateParents(QTreeWidgetItem *parentItem, Group *pare
 
 		if (itemPiece)
 		{
-			int pieceIndex = 0;
-			for (Piece *piece = project->m_pPieces; piece; piece = piece->m_pNext, pieceIndex++)
-			{
-				if (itemPiece == piece)
-				{
-					options->PieceParents[pieceIndex] = parentGroup;
-					break;
-				}
-			}
+			int pieceIndex = project->mPieces.FindIndex(itemPiece);
+			if (pieceIndex != -1)
+				options->PieceParents[pieceIndex] = parentGroup;
 		}
 		else
 		{
@@ -153,8 +147,10 @@ void lcQEditGroupsDialog::addChildren(QTreeWidgetItem *parentItem, Group *parent
 		addChildren(groupItem, group);
 	}
 
-	for (Piece *piece = project->m_pPieces; piece; piece = piece->m_pNext)
+	for (int pieceIndex = 0; pieceIndex < project->mPieces.GetSize(); pieceIndex++)
 	{
+		Piece *piece = project->mPieces[pieceIndex];
+
 		if (piece->GetGroup() != parentGroup)
 			continue;
 

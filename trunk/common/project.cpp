@@ -70,7 +70,6 @@ Project::Project()
 	m_nTracking = LC_TRACK_NONE;
 	m_OverlayMode = LC_OVERLAY_NONE;
 	mDropPiece = NULL;
-	m_pPieces = NULL;
 	m_pGroups = NULL;
 	m_pUndoList = NULL;
 	m_pRedoList = NULL;
@@ -142,7 +141,6 @@ void Project::SetTitle(const char* Title)
 
 void Project::DeleteContents(bool bUndo)
 {
-	Piece* pPiece;
 	Group* pGroup;
 
 	mProperties.LoadDefaults();
@@ -172,12 +170,7 @@ void Project::DeleteContents(bool bUndo)
 		m_pTerrain->LoadDefaults(true);
 	}
 
-	while (m_pPieces)
-	{
-		pPiece = m_pPieces;
-		m_pPieces = m_pPieces->m_pNext;
-		delete pPiece;
-	}
+	mPieces.DeleteAll();
 
 	if (!bUndo)
 	{
@@ -336,7 +329,7 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 	Library->OpenCache();
 
-	const Piece* pFirstExistingPiece = m_pPieces;
+	int FirstNewPiece = mPieces.GetSize();
 
 	while (count--)
 	{
@@ -346,15 +339,15 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 			pPiece->FileLoad(*file);
 
 			if (bMerge)
-				for (Piece* p = m_pPieces; p; p = p->m_pNext)
-					if (strcmp(p->GetName(), pPiece->GetName()) == 0)
+				for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+					if (strcmp(mPieces[PieceIdx]->GetName(), pPiece->GetName()) == 0)
 					{
-						pPiece->CreateName(m_pPieces);
+						pPiece->CreateName(mPieces);
 						break;
 					}
 
 			if (strlen(pPiece->GetName()) == 0)
-				pPiece->CreateName(m_pPieces);
+				pPiece->CreateName(mPieces);
 
 			AddPiece(pPiece);
 			if (!bUndo)
@@ -378,7 +371,7 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 
 			pPiece->Initialize(pos[0], pos[1], pos[2], step);
 			pPiece->SetColorCode(lcGetColorCodeFromOriginalColor(color));
-			pPiece->CreateName(m_pPieces);
+			pPiece->CreateName(mPieces);
 			AddPiece(pPiece);
 
 			lcMatrix44 ModelWorld = lcMul(lcMatrix44RotationZ(rot[2] * LC_DTOR), lcMul(lcMatrix44RotationY(rot[1] * LC_DTOR), lcMatrix44RotationX(rot[0] * LC_DTOR)));
@@ -525,11 +518,12 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 		}
 
 
-		Piece* pPiece;
-		for (pPiece = m_pPieces; pPiece && pPiece != pFirstExistingPiece; pPiece = pPiece->m_pNext)
+		for (int PieceIdx = FirstNewPiece; PieceIdx < mPieces.GetSize(); PieceIdx++)
 		{
-			i = LC_POINTER_TO_INT(pPiece->GetGroup());
-			pPiece->SetGroup(NULL);
+			Piece* Piece = mPieces[PieceIdx];
+
+			i = LC_POINTER_TO_INT(Piece->GetGroup());
+			Piece->SetGroup(NULL);
 
 			if (i > 0xFFFF || i == -1)
 				continue;
@@ -538,7 +532,7 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 			{
 				if (i == 0)
 				{
-					pPiece->SetGroup(pGroup);
+					Piece->SetGroup(pGroup);
 					break;
 				}
 
@@ -754,13 +748,9 @@ void Project::FileSave(lcFile* file, bool bUndo)
 	i = m_nCurStep; file->WriteS32(&i, 1);
 	file->WriteU32(0);//m_nScene
 
-	Piece* pPiece;
-	for (i = 0, pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-		i++;
-	file->WriteS32(&i, 1);
-
-	for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-		pPiece->FileSave(*file);
+	file->WriteS32(&i, mPieces.GetSize());
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+		mPieces[PieceIdx]->FileSave(*file);
 
 	const char* Author = mProperties.mAuthor.Buffer();
 	ch = lcMin(strlen(Author), 100U);
@@ -1020,7 +1010,7 @@ void Project::FileReadLDraw(lcFile* file, const lcMatrix44& CurrentTransform, in
 
 				pPiece->Initialize(IncludeTransform[3].x / 25.0f, IncludeTransform[3].z / 25.0f, -IncludeTransform[3].y / 25.0f, *nStep);
 				pPiece->SetColorCode(ColorCode);
-				pPiece->CreateName(m_pPieces);
+				pPiece->CreateName(mPieces);
 				AddPiece(pPiece);
 				pPiece->ChangeKey(1, false, AxisAngle, LC_PK_ROTATION);
 				SystemPieceComboAdd(pInfo->m_strDescription);
@@ -1079,7 +1069,7 @@ void Project::FileReadLDraw(lcFile* file, const lcMatrix44& CurrentTransform, in
 
 			pPiece->Initialize(IncludeTransform[3].x / 25.0f, IncludeTransform[3].z / 25.0f, -IncludeTransform[3].y / 25.0f, *nStep);
 			pPiece->SetColorCode(ColorCode);
-			pPiece->CreateName(m_pPieces);
+			pPiece->CreateName(mPieces);
 			AddPiece(pPiece);
 			pPiece->ChangeKey(1, false, AxisAngle, LC_PK_ROTATION);
 			SystemPieceComboAdd(Info->m_strDescription);
@@ -1141,7 +1131,6 @@ bool Project::DoSave(const char* FileName)
 
 	if ((strcmp(ext, "dat") == 0) || (strcmp(ext, "ldr") == 0))
 	{
-		Piece* pPiece;
 		int i, steps = GetLastStep();
 		char buf[256];
 
@@ -1168,13 +1157,15 @@ bool Project::DoSave(const char* FileName)
 
 		for (i = 1; i <= steps; i++)
 		{
-			for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 			{
-				if ((pPiece->IsVisible(i)) && (pPiece->GetStepShow() == i))
+				Piece* Piece = mPieces[PieceIdx];
+
+				if ((Piece->IsVisible(i)) && (Piece->GetStepShow() == i))
 				{
-					const float* f = pPiece->mModelWorld;
+					const float* f = Piece->mModelWorld;
 					sprintf (buf, " 1 %d %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %s.DAT\r\n",
-					         pPiece->mColorCode, f[12] * 25.0f, -f[14] * 25.0f, f[13] *25.0f, f[0], -f[8], f[4], -f[2], f[10], -f[6], f[1], -f[9], f[5], pPiece->mPieceInfo->m_strName);
+							 Piece->mColorCode, f[12] * 25.0f, -f[14] * 25.0f, f[13] *25.0f, f[0], -f[8], f[4], -f[2], f[10], -f[6], f[1], -f[9], f[5], Piece->mPieceInfo->m_strName);
 					file.WriteBuffer(buf, strlen(buf));
 				}
 			}
@@ -1715,25 +1706,27 @@ void Project::RenderScenePieces(View* view)
 
 	const lcMatrix44& ViewMatrix = view->mCamera->mWorldView;
 
-	for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 	{
-		if (!pPiece->IsVisible(m_nCurStep))
+		Piece* Piece = mPieces[PieceIdx];
+
+		if (!Piece->IsVisible(m_nCurStep))
 			continue;
 
-		bool Translucent = lcIsColorTranslucent(pPiece->mColorIndex);
-		PieceInfo* Info = pPiece->mPieceInfo;
+		bool Translucent = lcIsColorTranslucent(Piece->mColorIndex);
+		PieceInfo* Info = Piece->mPieceInfo;
 
 		if ((Info->mFlags & (LC_PIECE_HAS_SOLID | LC_PIECE_HAS_LINES)) || ((Info->mFlags & LC_PIECE_HAS_DEFAULT) && !Translucent))
-			OpaquePieces.AddSorted(pPiece, lcOpaqueRenderCompare);
+			OpaquePieces.AddSorted(Piece, lcOpaqueRenderCompare);
 
 		if ((Info->mFlags & LC_PIECE_HAS_TRANSLUCENT) || ((Info->mFlags & LC_PIECE_HAS_DEFAULT) && Translucent))
 		{
-			lcVector3 Pos = lcMul31(pPiece->mPosition, ViewMatrix);
+			lcVector3 Pos = lcMul31(Piece->mPosition, ViewMatrix);
 
 			lcTranslucentRenderSection RenderSection;
 
 			RenderSection.Distance = Pos[2];
-			RenderSection.piece = pPiece;
+			RenderSection.piece = Piece;
 
 			TranslucentSections.AddSorted(RenderSection, lcTranslucentRenderCompare);
 		}
@@ -2040,13 +2033,17 @@ void Project::RenderSceneObjects(View* view)
 		const int Spacing = lcMax(Preferences.mGridLineSpacing, 1);
 		int MinX = 0, MaxX = 0, MinY = 0, MaxY = 0;
 
-		if (m_pPieces || (m_nCurAction == LC_ACTION_INSERT || mDropPiece))
+		if (!mPieces.IsEmpty() || (m_nCurAction == LC_ACTION_INSERT || mDropPiece))
 		{
 			float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
 
-			for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-				if (pPiece->IsVisible(m_nCurStep))
-					pPiece->CompareBoundingBox(bs);
+			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+			{
+				Piece* Piece = mPieces[PieceIdx];
+
+				if (Piece->IsVisible(m_nCurStep))
+					Piece->CompareBoundingBox(bs);
+			}
 
 			if (m_nCurAction == LC_ACTION_INSERT || mDropPiece)
 			{
@@ -2472,9 +2469,9 @@ void Project::RenderOverlays(View* view)
 
 			// Rotation arrows.
 			bool AnyPieceSelected = false;
-			for (Piece* Piece = m_pPieces; Piece; Piece = Piece->m_pNext)
+			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 			{
-				if (Piece->IsSelected())
+				if (mPieces[PieceIdx]->IsSelected())
 				{
 					AnyPieceSelected = true;
 					break;
@@ -3101,41 +3098,18 @@ void Project::RenderInitialize()
 
 void Project::AddPiece(Piece* pPiece)
 {
-	if (m_pPieces != NULL)
-	{
-		pPiece->m_pNext = m_pPieces;
-		m_pPieces = pPiece;
-	}
-	else
-	{
-		m_pPieces = pPiece;
-		pPiece->m_pNext = NULL;
-	}
+	mPieces.Add(pPiece);
 }
 
 void Project::RemovePiece(Piece* pPiece)
 {
-	Piece* pTemp, *pLast;
-	pLast = NULL;
-
-	for (pTemp = m_pPieces; pTemp; pLast = pTemp, pTemp = pTemp->m_pNext)
-		if (pTemp == pPiece)
-		{
-			if (pLast != NULL)
-				pLast->m_pNext = pTemp->m_pNext;
-			else
-				m_pPieces = pTemp->m_pNext;
-
-			break;
-		}
+	mPieces.Remove(pPiece);
 }
 
 void Project::CalculateStep()
 {
-	Piece* pPiece;
-
-	for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-		pPiece->UpdatePosition(m_nCurStep);
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+		mPieces[PieceIdx]->UpdatePosition(m_nCurStep);
 
 	for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
 		mCameras[CameraIdx]->UpdatePosition(m_nCurStep);
@@ -3147,26 +3121,22 @@ void Project::CalculateStep()
 // Returns true if anything was removed (used by cut and del)
 bool Project::RemoveSelectedObjects()
 {
-	Piece* pPiece;
 	bool RemovedPiece = false;
 	bool RemovedCamera = false;
 	bool RemovedLight = false;
 
-	pPiece = m_pPieces;
-	while (pPiece)
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); )
 	{
-		if (pPiece->IsSelected())
-		{
-			Piece* pTemp;
-			pTemp = pPiece->m_pNext;
+		Piece* Piece = mPieces[PieceIdx];
 
+		if (Piece->IsSelected())
+		{
 			RemovedPiece = true;
-			RemovePiece(pPiece);
-			delete pPiece;
-			pPiece = pTemp;
+			RemovePiece(Piece);
+			delete Piece;
 		}
 		else
-			pPiece = pPiece->m_pNext;
+			PieceIdx++;
 	}
 
 	// Cameras can't be removed while being used or default
@@ -3229,43 +3199,44 @@ void Project::UpdateSelection()
 	int SelectedCount = 0;
 	Object* Focus = NULL;
 
-	if (m_pPieces == NULL)
+	if (mPieces.IsEmpty())
 		flags |= LC_SEL_NO_PIECES;
 	else
 	{
-		Piece* pPiece;
 		Group* pGroup = NULL;
 		bool first = true;
 
-		for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+		for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 		{
-			if (pPiece->IsSelected())
+			Piece* Piece = mPieces[PieceIdx];
+
+			if (Piece->IsSelected())
 			{
 				SelectedCount++;
 
-				if (pPiece->IsFocused())
-					Focus = pPiece;
+				if (Piece->IsFocused())
+					Focus = Piece;
 
 				if (flags & LC_SEL_PIECE)
 					flags |= LC_SEL_MULTIPLE;
 				else
 					flags |= LC_SEL_PIECE;
 
-				if (pPiece->GetGroup() != NULL)
+				if (Piece->GetGroup() != NULL)
 				{
 					flags |= LC_SEL_GROUP;
-					if (pPiece->IsFocused())
+					if (Piece->IsFocused())
 						flags |= LC_SEL_FOCUSGROUP;
 				}
 
 				if (first)
 				{
-					pGroup = pPiece->GetGroup();
+					pGroup = Piece->GetGroup();
 					first = false;
 				}
 				else
 				{
-					if (pGroup != pPiece->GetGroup())
+					if (pGroup != Piece->GetGroup())
 						flags |= LC_SEL_CANGROUP;
 					else
 						if (pGroup == NULL)
@@ -3276,7 +3247,7 @@ void Project::UpdateSelection()
 			{
 				flags |= LC_SEL_UNSELECTED;
 
-				if (pPiece->IsHidden())
+				if (Piece->IsHidden())
 					flags |= LC_SEL_HIDDEN;
 			}
 		}
@@ -3357,58 +3328,52 @@ void Project::CheckAutoSave()
 unsigned char Project::GetLastStep()
 {
 	unsigned char last = 1;
-	for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-		last = lcMax(last, pPiece->GetStepShow());
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+		last = lcMax(last, mPieces[PieceIdx]->GetStepShow());
 
 	return last;
 }
 
 void Project::FindPiece(bool FindFirst, bool SearchForward)
 {
-	if (!m_pPieces)
+	if (mPieces.IsEmpty())
 		return;
 
-	Piece* Start = NULL;
+	int StartIdx = mPieces.GetSize() - 1;
 	if (!FindFirst)
 	{
-		for (Start = m_pPieces; Start; Start = Start->m_pNext)
-			if (Start->IsFocused())
-				break;
+		for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+		{
+			Piece* Piece = mPieces[PieceIdx];
 
-		if (Start && !Start->IsVisible(m_nCurStep))
-			Start = NULL;
+			if (Piece->IsFocused() && Piece->IsVisible(m_nCurStep))
+			{
+				StartIdx = PieceIdx;
+				break;
+			}
+		}
 	}
 
 	SelectAndFocusNone(false);
 
-	Piece* Current = Start;
+	int CurrentIdx = StartIdx;
 
 	for (;;)
 	{
 		if (SearchForward)
-		{
-			Current = Current ? Current->m_pNext : m_pPieces;
-		}
+			CurrentIdx++;
 		else
-		{
-			if (Current == m_pPieces)
-				Current = NULL;
+			CurrentIdx--;
 
-			for (Piece* piece = m_pPieces; piece; piece = piece->m_pNext)
-			{
-				if (piece->m_pNext == Current)
-				{
-					Current = piece;
-					break;
-				}
-			}
-		}
+		if (CurrentIdx < 0)
+			CurrentIdx = mPieces.GetSize() - 1;
+		else if (CurrentIdx >= mPieces.GetSize())
+			CurrentIdx = 0;
 
-		if (Current == Start)
+		if (CurrentIdx == StartIdx)
 			break;
 
-		if (!Current)
-			continue;
+		Piece* Current = mPieces[CurrentIdx];
 
 		if (!Current->IsVisible(m_nCurStep))
 			continue;
@@ -3421,9 +3386,13 @@ void Project::FindPiece(bool FindFirst, bool SearchForward)
 			Group* TopGroup = Current->GetTopGroup();
 			if (TopGroup)
 			{
-				for (Piece* piece = m_pPieces; piece; piece = piece->m_pNext)
-					if (piece->IsVisible(m_nCurStep) && (piece->GetTopGroup() == TopGroup))
-						piece->Select (true, false, false);
+				for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+				{
+					Piece* Piece = mPieces[PieceIdx];
+
+					if (Piece->IsVisible(m_nCurStep) && (Piece->GetTopGroup() == TopGroup))
+						Piece->Select (true, false, false);
+				}
 			}
 
 			UpdateSelection();
@@ -3437,14 +3406,18 @@ void Project::FindPiece(bool FindFirst, bool SearchForward)
 
 void Project::ZoomExtents(int FirstView, int LastView)
 {
-	if (!m_pPieces)
+	if (mPieces.IsEmpty())
 		return;
 
 	float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
 
-	for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-		if (pPiece->IsVisible(m_nCurStep))
-			pPiece->CompareBoundingBox(bs);
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+	{
+		Piece* Piece = mPieces[PieceIdx];
+
+		if (Piece->IsVisible(m_nCurStep))
+			Piece->CompareBoundingBox(bs);
+	}
 
 	lcVector3 Center((bs[0] + bs[3]) / 2, (bs[1] + bs[4]) / 2, (bs[2] + bs[5]) / 2);
 
@@ -3474,23 +3447,25 @@ void Project::ZoomExtents(int FirstView, int LastView)
 
 void Project::GetPiecesUsed(lcArray<lcPiecesUsedEntry>& PiecesUsed) const
 {
-	for (Piece* Piece = m_pPieces; Piece; Piece = Piece->m_pNext)
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 	{
+		Piece* Piece = mPieces[PieceIdx];
+
 		if (Piece->mPieceInfo->m_strDescription[0] == '~')
 			continue;
 
-		int PieceIdx;
+		int UsedIdx;
 
-		for (PieceIdx = 0; PieceIdx < PiecesUsed.GetSize(); PieceIdx++)
+		for (UsedIdx = 0; UsedIdx < PiecesUsed.GetSize(); UsedIdx++)
 		{
-			if (PiecesUsed[PieceIdx].Info != Piece->mPieceInfo || PiecesUsed[PieceIdx].ColorIndex != Piece->mColorIndex)
+			if (PiecesUsed[UsedIdx].Info != Piece->mPieceInfo || PiecesUsed[UsedIdx].ColorIndex != Piece->mColorIndex)
 				continue;
 
-			PiecesUsed[PieceIdx].Count++;
+			PiecesUsed[UsedIdx].Count++;
 			break;
 		}
 
-		if (PieceIdx == PiecesUsed.GetSize())
+		if (UsedIdx == PiecesUsed.GetSize())
 		{
 			lcPiecesUsedEntry& Entry = PiecesUsed.Add();
 
@@ -3530,18 +3505,20 @@ void Project::CreateImages(Image* images, int width, int height, unsigned short 
 
 		if (hilite)
 		{
-			for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 			{
-				if (pPiece->GetStepShow() == i)
-					pPiece->Select (true, false, false);
+				Piece* Piece = mPieces[PieceIdx];
+
+				if (Piece->GetStepShow() == i)
+					Piece->Select (true, false, false);
 				else
-					pPiece->Select (false, false, false);
+					Piece->Select (false, false, false);
 			}
 		}
 
 		CalculateStep();
 		Render(&view, true);
-		images[i-from].FromOpenGL (width, height);
+		images[i-from].FromOpenGL(width, height);
 	}
 
 	m_nCurStep = (unsigned char)oldtime;
@@ -3558,10 +3535,12 @@ void Project::CreateHTMLPieceList(FILE* f, int nStep, bool bImages, const char* 
 	int* PiecesUsed = new int[gColorList.GetSize()];
 	int NumColors = 0;
 
-	for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 	{
-		if ((pPiece->GetStepShow() == nStep) || (nStep == 0))
-			ColorsUsed[pPiece->mColorIndex]++;
+		Piece* Piece = mPieces[PieceIdx];
+
+		if ((Piece->GetStepShow() == nStep) || (nStep == 0))
+			ColorsUsed[Piece->mColorIndex]++;
 	}
 
 	fputs("<br><table border=1><tr><td><center>Piece</center></td>\n",f);
@@ -3585,11 +3564,13 @@ void Project::CreateHTMLPieceList(FILE* f, int nStep, bool bImages, const char* 
 		memset(PiecesUsed, 0, sizeof(PiecesUsed[0]) * gColorList.GetSize());
 		pInfo = lcGetPiecesLibrary()->mPieces[j];
 
-		for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+		for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 		{
-			if ((pPiece->mPieceInfo == pInfo) && ((pPiece->GetStepShow() == nStep) || (nStep == 0)))
+			Piece* Piece = mPieces[PieceIdx];
+
+			if ((Piece->mPieceInfo == pInfo) && ((Piece->GetStepShow() == nStep) || (nStep == 0)))
 			{
-				PiecesUsed[pPiece->mColorIndex]++;
+				PiecesUsed[Piece->mColorIndex]++;
 				Add = true;
 			}
 		}
@@ -3634,7 +3615,7 @@ void Project::CreateHTMLPieceList(FILE* f, int nStep, bool bImages, const char* 
 
 void Project::Export3DStudio()
 {
-	if (!m_pPieces)
+	if (mPieces.IsEmpty())
 	{
 		gMainWindow->DoMessageBox("Nothing to export.", LC_MB_OK | LC_MB_ICONINFORMATION);
 		return;
@@ -3959,8 +3940,9 @@ void Project::Export3DStudio()
 	File.WriteU32(6);
 
 	int NumPieces = 0;
-	for (Piece* piece = m_pPieces; piece; piece = piece->m_pNext)
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 	{
+		Piece* piece = mPieces[PieceIdx];
 		PieceInfo* Info = piece->mPieceInfo;
 		lcMesh* Mesh = Info->mMesh;
 
@@ -4241,16 +4223,17 @@ void Project::ExportPOVRay(lcFile& POVFile)
 	{
 		POVFile.WriteLine("#include \"lg_defs.inc\"\n#include \"lg_color.inc\"\n\n");
 
-		for (Piece* piece = m_pPieces; piece; piece = piece->m_pNext)
+		for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 		{
+			Piece* piece = mPieces[PieceIdx];
 			PieceInfo* Info = piece->mPieceInfo;
 
-			for (Piece* FirstPiece = m_pPieces; FirstPiece; FirstPiece = FirstPiece->m_pNext)
+			for (int CheckIdx = 0; CheckIdx < mPieces.GetSize(); CheckIdx++)
 			{
-				if (FirstPiece->mPieceInfo != Info)
+				if (mPieces[CheckIdx]->mPieceInfo != Info)
 					continue;
 
-				if (FirstPiece != piece)
+				if (CheckIdx != PieceIdx)
 					break;
 
 				int Index = Library->mPieces.FindIndex(Info);
@@ -4295,9 +4278,10 @@ void Project::ExportPOVRay(lcFile& POVFile)
 	POVFile.WriteLine("\n");
 
 	// Add pieces not included in LGEO.
-	for (Piece* piece = m_pPieces; piece; piece = piece->m_pNext)
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 	{
-		PieceInfo* Info = piece->mPieceInfo;
+		Piece* Piece = mPieces[PieceIdx];
+		PieceInfo* Info = Piece->mPieceInfo;
 		int Index = Library->mPieces.FindIndex(Info);
 
 		if (PieceTable[Index * LC_PIECE_NAME_LEN])
@@ -4331,15 +4315,16 @@ void Project::ExportPOVRay(lcFile& POVFile)
 			mProperties.mBackgroundSolidColor[0], mProperties.mBackgroundSolidColor[1], mProperties.mBackgroundSolidColor[2]);
 	POVFile.WriteLine(Line);
 
-	for (Piece* piece = m_pPieces; piece; piece = piece->m_pNext)
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 	{
-		int Index = Library->mPieces.FindIndex(piece->mPieceInfo);
+		Piece* Piece = mPieces[PieceIdx];
+		int Index = Library->mPieces.FindIndex(Piece->mPieceInfo);
 		int Color;
 
-		Color = piece->mColorIndex;
+		Color = Piece->mColorIndex;
 		const char* Suffix = lcIsColorTranslucent(Color) ? "_clear" : "";
 
-		const float* f = piece->mModelWorld;
+		const float* f = Piece->mModelWorld;
 
 		if (PieceFlags[Index] & LGEO_PIECE_SLOPE)
 		{
@@ -4790,19 +4775,16 @@ void Project::HandleCommand(LC_COMMANDS id)
 					float aspect = (float)cx/(float)cy;
 					glViewport(0, 0, cx, cy);
 
-					Piece *p1, *p2;
 					PieceInfo* pInfo;
-					for (p1 = m_pPieces; p1; p1 = p1->m_pNext)
+					for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 					{
+						Piece* Piece = mPieces[PieceIdx];
 						bool bSkip = false;
-						pInfo = p1->mPieceInfo;
+						pInfo = Piece->mPieceInfo;
 
-						for (p2 = m_pPieces; p2; p2 = p2->m_pNext)
+						for (int CheckIdx = 0; CheckIdx < PieceIdx; CheckIdx++)
 						{
-							if (p2 == p1)
-								break;
-
-							if (p2->mPieceInfo == pInfo)
+							if (mPieces[CheckIdx]->mPieceInfo == pInfo)
 							{
 								bSkip = true;
 								break;
@@ -4835,7 +4817,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 		case LC_FILE_EXPORT_BRICKLINK:
 		{
-			if (!m_pPieces)
+			if (mPieces.IsEmpty())
 			{
 				gMainWindow->DoMessageBox("Nothing to export.", LC_MB_OK | LC_MB_ICONINFORMATION);
 				break;
@@ -4894,7 +4876,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 		case LC_FILE_EXPORT_CSV:
 		{
-			if (!m_pPieces)
+			if (mPieces.IsEmpty())
 			{
 				gMainWindow->DoMessageBox("Nothing to export.", LC_MB_OK | LC_MB_ICONINFORMATION);
 				break;
@@ -5009,7 +4991,6 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 			char buf[LC_MAXPATH], *ptr;
 			lcuint32 vert = 1;
-			Piece* pPiece;
 
 			const char* OldLocale = setlocale(LC_NUMERIC, "C");
 			strcpy(buf, m_strPathName);
@@ -5069,10 +5050,11 @@ void Project::HandleCommand(LC_COMMANDS id)
 			}
 			fclose(mat);
 
-			for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 			{
-				const lcMatrix44& ModelWorld = pPiece->mModelWorld;
-				PieceInfo* pInfo = pPiece->mPieceInfo;
+				Piece* Piece = mPieces[PieceIdx];
+				const lcMatrix44& ModelWorld = Piece->mModelWorld;
+				PieceInfo* pInfo = Piece->mPieceInfo;
 				float* Verts = (float*)pInfo->mMesh->mVertexBuffer.mData;
 
 				for (int i = 0; i < pInfo->mMesh->mNumVertices * 3; i += 3)
@@ -5085,11 +5067,12 @@ void Project::HandleCommand(LC_COMMANDS id)
 				OBJFile.WriteLine("#\n\n");
 			}
 
-			for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 			{
-				PieceInfo* Info = pPiece->mPieceInfo;
+				Piece* Piece = mPieces[PieceIdx];
+				PieceInfo* Info = Piece->mPieceInfo;
 
-				strcpy(buf, pPiece->GetName());
+				strcpy(buf, Piece->GetName());
 				for (unsigned int i = 0; i < strlen(buf); i++)
 					if ((buf[i] == '#') || (buf[i] == ' '))
 						buf[i] = '_';
@@ -5097,7 +5080,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 				sprintf(Line, "g %s\n", buf);
 				OBJFile.WriteLine(Line);
 
-				Info->mMesh->ExportWavefrontIndices(OBJFile, pPiece->mColorCode, vert);
+				Info->mMesh->ExportWavefrontIndices(OBJFile, Piece->mColorCode, vert);
 				vert += Info->mMesh->mNumVertices;
 			}
 
@@ -5241,18 +5224,21 @@ void Project::HandleCommand(LC_COMMANDS id)
 			lcMemFile* Clipboard = new lcMemFile();
 
 			int i = 0;
-			Piece* pPiece;
 			Group* pGroup;
 //			Light* pLight;
 
-			for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-				if (pPiece->IsSelected())
+			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+				if (mPieces[PieceIdx]->IsSelected())
 					i++;
 			Clipboard->WriteBuffer(&i, sizeof(i));
 
-			for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-				if (pPiece->IsSelected())
-					pPiece->FileSave(*Clipboard);
+			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+			{
+				Piece* Piece = mPieces[PieceIdx];
+
+				if (Piece->IsSelected())
+					Piece->FileSave(*Clipboard);
+			}
 
 			for (i = 0, pGroup = m_pGroups; pGroup; pGroup = pGroup->m_pNext)
 				i++;
@@ -5300,24 +5286,22 @@ void Project::HandleCommand(LC_COMMANDS id)
 		case LC_EDIT_PASTE:
 		{
 			int i, j;
-			Piece* pPasted = NULL;
 			lcFile* file = g_App->mClipboard;
 			if (file == NULL)
 				break;
 			file->Seek(0, SEEK_SET);
 			SelectAndFocusNone(false);
 
+			lcArray<Piece*> PastedPieces;
 			file->ReadBuffer(&i, sizeof(i));
 			while (i--)
 			{
-				Piece* pPiece = new Piece(NULL);
-				pPiece->FileLoad(*file);
-					pPiece->m_pNext = pPasted;
-					pPasted = pPiece;
-				}
+				Piece* piece = new Piece(NULL);
+				piece->FileLoad(*file);
+				PastedPieces.Add(piece);
+			}
 
 			file->ReadBuffer(&i, sizeof(i));
-			Piece* pPiece;
 			Group** groups = (Group**)malloc(i*sizeof(Group**));
 			for (j = 0; j < i; j++)
 			{
@@ -5325,20 +5309,19 @@ void Project::HandleCommand(LC_COMMANDS id)
 				groups[j]->FileLoad(file);
 			}
 
-			while (pPasted)
+			for (int PieceIdx = 0; PieceIdx < PastedPieces.GetSize(); PieceIdx++)
 			{
-				pPiece = pPasted;
-				pPasted = pPasted->m_pNext;
-				pPiece->CreateName(m_pPieces);
-				pPiece->SetStepShow(m_nCurStep);
-				AddPiece(pPiece);
-				pPiece->Select(true, false, false);
+				Piece* Piece = PastedPieces[PieceIdx];
+				Piece->CreateName(mPieces);
+				Piece->SetStepShow(m_nCurStep);
+				AddPiece(Piece);
+				Piece->Select(true, false, false);
 
-				j = LC_POINTER_TO_INT(pPiece->GetGroup());
+				j = LC_POINTER_TO_INT(Piece->GetGroup());
 				if (j != -1)
-					pPiece->SetGroup(groups[j]);
+					Piece->SetGroup(groups[j]);
 				else
-					pPiece->UnGroup(NULL);
+					Piece->UnGroup(NULL);
 			}
 
 			for (j = 0; j < i; j++)
@@ -5351,9 +5334,11 @@ void Project::HandleCommand(LC_COMMANDS id)
 			{
 				Group* pGroup;
 				bool add = false;
-				for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+				for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 				{
-					for (pGroup = pPiece->GetGroup(); pGroup; pGroup = pGroup->m_pGroup)
+					Piece* Piece = mPieces[PieceIdx];
+
+					for (pGroup = Piece->GetGroup(); pGroup; pGroup = pGroup->m_pGroup)
 						if (pGroup == groups[j])
 						{
 							add = true;
@@ -5420,10 +5405,13 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 		case LC_EDIT_SELECT_ALL:
 		{
-			Piece* pPiece;
-			for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-				if (pPiece->IsVisible(m_nCurStep))
-					pPiece->Select(true, false, false);
+			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+			{
+				Piece* Piece = mPieces[PieceIdx];
+
+				if (Piece->IsVisible(m_nCurStep))
+					Piece->Select(true, false, false);
+			}
 
 //	pFrame->UpdateInfo();
 			UpdateSelection();
@@ -5440,15 +5428,18 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 		case LC_EDIT_SELECT_INVERT:
 		{
-			Piece* pPiece;
-			for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-				if (pPiece->IsVisible(m_nCurStep))
+			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+			{
+				Piece* Piece = mPieces[PieceIdx];
+
+				if (Piece->IsVisible(m_nCurStep))
 				{
-                                  if (pPiece->IsSelected())
-                                    pPiece->Select(false, false, false);
-                                  else
-                                    pPiece->Select(true, false, false);
+					if (Piece->IsSelected())
+						Piece->Select(false, false, false);
+					else
+						Piece->Select(true, false, false);
 				}
+			}
 
 			gMainWindow->UpdateFocusObject(GetFocusObject());
 			UpdateSelection();
@@ -5459,8 +5450,8 @@ void Project::HandleCommand(LC_COMMANDS id)
 		{
 			lcSelectDialogOptions Options;
 
-			for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-				Options.Selection.Add(pPiece->IsSelected());
+			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+				Options.Selection.Add(mPieces[PieceIdx]->IsSelected());
 
 			for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
 				if (mCameras[CameraIdx]->IsVisible())
@@ -5482,9 +5473,9 @@ void Project::HandleCommand(LC_COMMANDS id)
 			SelectAndFocusNone(false);
 
 			int ObjectIndex = 0;
-			for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext, ObjectIndex++)
+			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++, ObjectIndex++)
 				if (Options.Selection[ObjectIndex])
-					pPiece->Select(true, false, false);
+					mPieces[PieceIdx]->Select(true, false, false);
 
 			for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++, ObjectIndex++)
 				if (Options.Selection[ObjectIndex])
@@ -5550,19 +5541,26 @@ void Project::HandleCommand(LC_COMMANDS id)
 		{
 			if (m_pCurPiece == NULL)
 				break;
-			Piece* pLast = NULL;
+			Piece* Last = mPieces.IsEmpty() ? NULL : mPieces[mPieces.GetSize() - 1];
 			Piece* pPiece = new Piece(m_pCurPiece);
 
-			for (pLast = m_pPieces; pLast; pLast = pLast->m_pNext)
-				if ((pLast->IsFocused()) || (pLast->m_pNext == NULL))
-					break;
+			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+			{
+				Piece* Piece = mPieces[PieceIdx];
 
-			if (pLast != NULL)
+				if (Piece->IsFocused())
+				{
+					Last = Piece;
+					break;
+				}
+			}
+
+			if (Last != NULL)
 			{
 				lcVector3 Pos;
 				lcVector4 Rot;
 
-				GetPieceInsertPosition(pLast, Pos, Rot);
+				GetPieceInsertPosition(Last, Pos, Rot);
 
 				pPiece->Initialize(Pos[0], Pos[1], Pos[2], m_nCurStep);
 
@@ -5574,7 +5572,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 			SelectAndFocusNone(false);
 			pPiece->SetColorIndex(gMainWindow->mColorIndex);
-			pPiece->CreateName(m_pPieces);
+			pPiece->CreateName(mPieces);
 			AddPiece(pPiece);
 			pPiece->Select (true, true, false);
 			gMainWindow->UpdateFocusObject(pPiece);
@@ -5734,7 +5732,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 					Rotation[3] *= LC_RTOD;
 					pPiece->Initialize(Position[0], Position[1], Position[2], m_nCurStep);
 					pPiece->SetColorIndex(Minifig.Colors[i]);
-					pPiece->CreateName(m_pPieces);
+					pPiece->CreateName(mPieces);
 					AddPiece(pPiece);
 					pPiece->Select(true, false, false);
 
@@ -5759,12 +5757,16 @@ void Project::HandleCommand(LC_COMMANDS id)
 				pGroup->m_pNext = m_pGroups;
 				m_pGroups = pGroup;
 
-				for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-					if (pPiece->IsSelected())
+				for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+				{
+					Piece* Piece = mPieces[PieceIdx];
+
+					if (Piece->IsSelected())
 					{
-						pPiece->SetGroup(pGroup);
-						pPiece->CompareBoundingBox(bs);
+						Piece->SetGroup(pGroup);
+						Piece->CompareBoundingBox(bs);
 					}
+				}
 
 				pGroup->m_fCenter[0] = (bs[0]+bs[3])/2;
 				pGroup->m_fCenter[1] = (bs[1]+bs[4])/2;
@@ -5779,15 +5781,16 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 		case LC_PIECE_ARRAY:
 		{
-			Piece *pPiece, *pFirst = NULL, *pLast = NULL;
 			float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
 			int sel = 0;
 
-			for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 			{
-				if (pPiece->IsSelected())
+				Piece* Piece = mPieces[PieceIdx];
+
+				if (Piece->IsSelected())
 				{
-					pPiece->CompareBoundingBox(bs);
+					Piece->CompareBoundingBox(bs);
 					sel++;
 				}
 			}
@@ -5818,6 +5821,8 @@ void Project::HandleCommand(LC_COMMANDS id)
 			ConvertFromUserUnits(Options.Offsets[1]);
 			ConvertFromUserUnits(Options.Offsets[2]);
 
+			lcArray<Piece*> NewPieces;
+
 			for (int Step1 = 0; Step1 < Options.Counts[0]; Step1++)
 			{
 				for (int Step2 = 0; Step2 < Options.Counts[1]; Step2++)
@@ -5833,8 +5838,10 @@ void Project::HandleCommand(LC_COMMANDS id)
 						lcVector3 RotationAngles = Options.Rotations[0] * Step1 + Options.Rotations[1] * Step2 + Options.Rotations[2] * Step3;
 						lcVector3 Offset = Options.Offsets[0] * Step1 + Options.Offsets[1] * Step2 + Options.Offsets[2] * Step3;
 
-						for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+						for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 						{
+							Piece* pPiece = mPieces[PieceIdx];
+
 							if (!pPiece->IsSelected())
 								continue;
 
@@ -5863,29 +5870,23 @@ void Project::HandleCommand(LC_COMMANDS id)
 							lcVector4 AxisAngle = lcMatrix44ToAxisAngle(ModelWorld);
 							AxisAngle[3] *= LC_RTOD;
 
-							if (pLast)
-							{
-								pLast->m_pNext = new Piece(pPiece->mPieceInfo);
-								pLast = pLast->m_pNext;
-							}
-							else
-								pLast = pFirst = new Piece(pPiece->mPieceInfo);
+							Piece* NewPiece = new Piece(pPiece->mPieceInfo);
+							NewPieces.Add(NewPiece);
 
-							pLast->Initialize(Position[0] + Offset[0], Position[1] + Offset[1], Position[2] + Offset[2], m_nCurStep);
-							pLast->SetColorIndex(pPiece->mColorIndex);
-							pLast->ChangeKey(1, false, AxisAngle, LC_PK_ROTATION);
+							NewPiece->Initialize(Position[0] + Offset[0], Position[1] + Offset[1], Position[2] + Offset[2], m_nCurStep);
+							NewPiece->SetColorIndex(pPiece->mColorIndex);
+							NewPiece->ChangeKey(1, false, AxisAngle, LC_PK_ROTATION);
 						}
 					}
 				}
 			}
 
-			while (pFirst)
+			for (int PieceIdx = 0; PieceIdx < NewPieces.GetSize(); PieceIdx++)
 			{
-				pPiece = pFirst->m_pNext;
-				pFirst->CreateName(m_pPieces);
-				pFirst->UpdatePosition(m_nCurStep);
-				AddPiece(pFirst);
-				pFirst = pPiece;
+				Piece* Piece = NewPieces[PieceIdx];
+				Piece->CreateName(mPieces);
+				Piece->UpdatePosition(m_nCurStep);
+				AddPiece(Piece);
 			}
 
 			SelectAndFocusNone(true);
@@ -5903,9 +5904,9 @@ void Project::HandleCommand(LC_COMMANDS id)
 			char name[65];
 			int Selected = 0;
 
-			for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 			{
-				if (pPiece->IsSelected())
+				if (mPieces[PieceIdx]->IsSelected())
 				{
 					Selected++;
 
@@ -5936,12 +5937,16 @@ void Project::HandleCommand(LC_COMMANDS id)
 				m_pGroups = pGroup;
 				float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
 
-				for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-					if (pPiece->IsSelected())
+				for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+				{
+					Piece* Piece = mPieces[PieceIdx];
+
+					if (Piece->IsSelected())
 					{
-						pPiece->DoGroup(pGroup);
-						pPiece->CompareBoundingBox(bs);
+						Piece->DoGroup(pGroup);
+						Piece->CompareBoundingBox(bs);
 					}
+				}
 
 				pGroup->m_fCenter[0] = (bs[0]+bs[3])/2;
 				pGroup->m_fCenter[1] = (bs[1]+bs[4])/2;
@@ -5957,12 +5962,14 @@ void Project::HandleCommand(LC_COMMANDS id)
 			Group* pList = NULL;
 			Group* pGroup;
 			Group* tmp;
-			Piece* pPiece;
 
-			for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-				if (pPiece->IsSelected())
+			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+			{
+				Piece* Piece = mPieces[PieceIdx];
+
+				if (Piece->IsSelected())
 				{
-					pGroup = pPiece->GetTopGroup();
+					pGroup = Piece->GetTopGroup();
 
 					// Check if we already removed the group
 					for (tmp = pList; tmp; tmp = tmp->m_pNext)
@@ -5987,12 +5994,17 @@ void Project::HandleCommand(LC_COMMANDS id)
 						pList = pGroup;
 					}
 				}
+			}
 
 			while (pList)
 			{
-				for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-					if (pPiece->IsSelected())
-						pPiece->UnGroup(pList);
+				for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+				{
+					Piece* Piece = mPieces[PieceIdx];
+
+					if (Piece->IsSelected())
+						Piece->UnGroup(pList);
+				}
 
 				pGroup = pList;
 				pList = pList->m_pNext;
@@ -6007,24 +6019,31 @@ void Project::HandleCommand(LC_COMMANDS id)
 		case LC_PIECE_GROUP_ADD:
 		{
 			Group* pGroup = NULL;
-			Piece* pPiece;
 
-			for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-				if (pPiece->IsSelected())
+			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+			{
+				Piece* Piece = mPieces[PieceIdx];
+
+				if (Piece->IsSelected())
 				{
-					pGroup = pPiece->GetTopGroup();
+					pGroup = Piece->GetTopGroup();
 					if (pGroup != NULL)
 						break;
 				}
+			}
 
 			if (pGroup != NULL)
 			{
-				for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-					if (pPiece->IsFocused())
+				for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+				{
+					Piece* Piece = mPieces[PieceIdx];
+
+					if (Piece->IsFocused())
 					{
-						pPiece->SetGroup(pGroup);
+						Piece->SetGroup(pGroup);
 						break;
 					}
+				}
 			}
 
 			RemoveEmptyGroups();
@@ -6034,14 +6053,16 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 		case LC_PIECE_GROUP_REMOVE:
 		{
-			Piece* pPiece;
+			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+			{
+				Piece* Piece = mPieces[PieceIdx];
 
-			for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-				if (pPiece->IsFocused())
+				if (Piece->IsFocused())
 				{
-					pPiece->UnGroup(NULL);
+					Piece->UnGroup(NULL);
 					break;
 				}
+			}
 
 			RemoveEmptyGroups();
 			SetModifiedFlag(true);
@@ -6052,8 +6073,8 @@ void Project::HandleCommand(LC_COMMANDS id)
 		{
 			lcEditGroupsDialogOptions Options;
 
-			for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-				Options.PieceParents.Add(pPiece->GetGroup());
+			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+				Options.PieceParents.Add(mPieces[PieceIdx]->GetGroup());
 
 			for (Group* pGroup = m_pGroups; pGroup; pGroup = pGroup->m_pNext)
 				Options.GroupParents.Add(pGroup->m_pGroup);
@@ -6061,9 +6082,8 @@ void Project::HandleCommand(LC_COMMANDS id)
 			if (!gMainWindow->DoDialog(LC_DIALOG_EDIT_GROUPS, &Options))
 				break;
 
-			int PieceIdx = 0;
-			for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-				pPiece->SetGroup(Options.PieceParents[PieceIdx++]);
+			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+				mPieces[PieceIdx]->SetGroup(Options.PieceParents[PieceIdx]);
 
 			int GroupIdx = 0;
 			for (Group* pGroup = m_pGroups; pGroup; pGroup = pGroup->m_pNext)
@@ -6080,10 +6100,14 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 		case LC_PIECE_HIDE_SELECTED:
 		{
-			Piece* pPiece;
-			for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-				if (pPiece->IsSelected())
-					pPiece->Hide();
+			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+			{
+				Piece* Piece = mPieces[PieceIdx];
+
+				if (Piece->IsSelected())
+					Piece->Hide();
+			}
+
 			UpdateSelection();
 			gMainWindow->UpdateFocusObject(NULL);
 			UpdateAllViews();
@@ -6091,19 +6115,22 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 		case LC_PIECE_HIDE_UNSELECTED:
 		{
-			Piece* pPiece;
-			for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-				if (!pPiece->IsSelected())
-					pPiece->Hide();
+			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+			{
+				Piece* Piece = mPieces[PieceIdx];
+
+				if (!Piece->IsSelected())
+					Piece->Hide();
+			}
+
 			UpdateSelection();
 			UpdateAllViews();
 		} break;
 
 		case LC_PIECE_UNHIDE_ALL:
 		{
-			Piece* pPiece;
-			for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-				pPiece->UnHide();
+			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+				mPieces[PieceIdx]->UnHide();
 			UpdateSelection();
 			UpdateAllViews();
 		} break;
@@ -6112,16 +6139,20 @@ void Project::HandleCommand(LC_COMMANDS id)
 		{
 			bool redraw = false;
 
-			for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-				if (pPiece->IsSelected())
+			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+			{
+				Piece* Piece = mPieces[PieceIdx];
+
+				if (Piece->IsSelected())
 				{
-					unsigned char t = pPiece->GetStepShow();
+					unsigned char t = Piece->GetStepShow();
 					if (t > 1)
 					{
 						redraw = true;
-						pPiece->SetStepShow(t-1);
+						Piece->SetStepShow(t-1);
 					}
 				}
+			}
 
 			if (redraw)
 			{
@@ -6135,19 +6166,23 @@ void Project::HandleCommand(LC_COMMANDS id)
 		{
 			bool redraw = false;
 
-			for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-				if (pPiece->IsSelected())
+			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+			{
+				Piece* Piece = mPieces[PieceIdx];
+
+				if (Piece->IsSelected())
 				{
-					unsigned char t = pPiece->GetStepShow();
+					unsigned char t = Piece->GetStepShow();
 					if (t < 255)
 					{
 						redraw = true;
-						pPiece->SetStepShow(t+1);
+						Piece->SetStepShow(t+1);
 
-						if (pPiece->IsSelected () && t == m_nCurStep)
-							pPiece->Select (false, false, false);
+						if (Piece->IsSelected () && t == m_nCurStep)
+							Piece->Select (false, false, false);
 					}
 				}
+			}
 
 			if (redraw)
 			{
@@ -6206,8 +6241,8 @@ void Project::HandleCommand(LC_COMMANDS id)
 			{
 				float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
 
-				for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-					pPiece->CompareBoundingBox(bs);
+				for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+					mPieces[PieceIdx]->CompareBoundingBox(bs);
 
 				Center = lcVector3((bs[0] + bs[3]) * 0.5f, (bs[1] + bs[4]) * 0.5f, (bs[2] + bs[5]) * 0.5f);
 			}
@@ -6279,8 +6314,8 @@ void Project::HandleCommand(LC_COMMANDS id)
 */
 		case LC_VIEW_TIME_INSERT:
 		{
-			for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-				pPiece->InsertTime(m_nCurStep, 1);
+			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+				mPieces[PieceIdx]->InsertTime(m_nCurStep, 1);
 
 			for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
 				mCameras[CameraIdx]->InsertTime(m_nCurStep, 1);
@@ -6297,8 +6332,8 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 		case LC_VIEW_TIME_DELETE:
 		{
-			for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-				pPiece->RemoveTime(m_nCurStep, 1);
+			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+				mPieces[PieceIdx]->RemoveTime(m_nCurStep, 1);
 
 			for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
 				mCameras[CameraIdx]->RemoveTime(m_nCurStep, 1);
@@ -6810,15 +6845,14 @@ void Project::RemoveEmptyGroups()
 {
 	bool recurse = false;
 	Group *g1, *g2;
-	Piece* pPiece;
 	int ref;
 
 	for (g1 = m_pGroups; g1;)
 	{
 		ref = 0;
 
-		for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-			if (pPiece->GetGroup() == g1)
+		for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+			if (mPieces[PieceIdx]->GetGroup() == g1)
 				ref++;
 
 		for (g2 = m_pGroups; g2; g2 = g2->m_pNext)
@@ -6829,9 +6863,13 @@ void Project::RemoveEmptyGroups()
 		{
 			if (ref != 0)
 			{
-				for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-					if (pPiece->GetGroup() == g1)
-						pPiece->SetGroup(g1->m_pGroup);
+				for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+				{
+					Piece* Piece = mPieces[PieceIdx];
+
+					if (Piece->GetGroup() == g1)
+						Piece->SetGroup(g1->m_pGroup);
+				}
 
 				for (g2 = m_pGroups; g2; g2 = g2->m_pNext)
 					if (g2->m_pGroup == g1)
@@ -6901,10 +6939,8 @@ Group* Project::AddGroup (const char* name, Group* pParent, float x, float y, fl
 
 void Project::SelectAndFocusNone(bool bFocusOnly)
 {
-	Piece* pPiece;
-
-	for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-		pPiece->Select(false, bFocusOnly, false);
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+		mPieces[PieceIdx]->Select(false, bFocusOnly, false);
 
 	for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
 	{
@@ -6930,11 +6966,13 @@ bool Project::GetSelectionCenter(lcVector3& Center) const
 	float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
 	bool Selected = false;
 
-	for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 	{
-		if (pPiece->IsSelected())
+		Piece* Piece = mPieces[PieceIdx];
+
+		if (Piece->IsSelected())
 		{
-			pPiece->CompareBoundingBox(bs);
+			Piece->CompareBoundingBox(bs);
 			Selected = true;
 		}
 	}
@@ -6958,14 +6996,16 @@ void Project::ConvertFromUserUnits(lcVector3& Value) const
 
 bool Project::GetFocusPosition(lcVector3& Position) const
 {
-	Piece* pPiece;
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+	{
+		Piece* Piece = mPieces[PieceIdx];
 
-	for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-		if (pPiece->IsFocused())
+		if (Piece->IsFocused())
 		{
-			Position = pPiece->mPosition;
+			Position = Piece->mPosition;
 			return true;
 		}
+	}
 
 	for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
 	{
@@ -7009,10 +7049,12 @@ bool Project::GetFocusPosition(lcVector3& Position) const
 // Returns the object that currently has focus.
 Object* Project::GetFocusObject() const
 {
-	for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 	{
-		if (pPiece->IsFocused())
-			return pPiece;
+		Piece* Piece = mPieces[PieceIdx];
+
+		if (Piece->IsFocused())
+			return Piece;
 	}
 
 	for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
@@ -7084,9 +7126,13 @@ Object* Project::FindObjectFromPoint(View* view, int x, int y, bool PiecesOnly)
 	ClickLine.MinDist = FLT_MAX;
 	ClickLine.Closest = NULL;
 
-	for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-		if (pPiece->IsVisible(m_nCurStep))
-			pPiece->MinIntersectDist(&ClickLine);
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+	{
+		Piece* Piece = mPieces[PieceIdx];
+
+		if (Piece->IsVisible(m_nCurStep))
+			Piece->MinIntersectDist(&ClickLine);
+	}
 
 	if (!PiecesOnly)
 	{
@@ -7164,12 +7210,14 @@ void Project::FindObjectsInBox(float x1, float y1, float x2, float y2, lcArray<O
 	Planes[5] = lcVector4(PlaneNormals[5], -lcDot(PlaneNormals[5], Corners[5]));
 
 	// Check if any objects are inside the volume.
-	for (Piece* piece = m_pPieces; piece != NULL; piece = piece->m_pNext)
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 	{
-		if (piece->IsVisible(m_nCurStep))
+		Piece* Piece = mPieces[PieceIdx];
+
+		if (Piece->IsVisible(m_nCurStep))
 		{
-			if (piece->IntersectsVolume(Planes))
-				Objects.Add(piece);
+			if (Piece->IntersectsVolume(Planes))
+				Objects.Add(Piece);
 		}
 	}
 
@@ -7247,7 +7295,7 @@ bool Project::StopTracking(bool bAccept)
 				pPiece->UpdatePosition(m_nCurStep);
 
 				SelectAndFocusNone(false);
-				pPiece->CreateName(m_pPieces);
+				pPiece->CreateName(mPieces);
 				AddPiece(pPiece);
 				SystemPieceComboAdd(mDropPiece->m_strDescription);
 				pPiece->Select (true, true, false);
@@ -7290,9 +7338,13 @@ bool Project::StopTracking(bool bAccept)
 							Group* pGroup = ((Piece*)Objects[i])->GetTopGroup();
 							if (pGroup != NULL)
 							{
-								for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-									if (pPiece->IsVisible(m_nCurStep) && (pPiece->GetTopGroup() == pGroup))
-										pPiece->Select (true, false, false);
+								for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+								{
+									Piece* Piece = mPieces[PieceIdx];
+
+									if (Piece->IsVisible(m_nCurStep) && (Piece->GetTopGroup() == pGroup))
+										Piece->Select (true, false, false);
+								}
 							}
 							else
 								Objects[i]->Select(true, false, true);
@@ -7604,7 +7656,6 @@ bool Project::MoveSelectedObjects(lcVector3& Move, lcVector3& Remainder, bool Sn
 			Move = lcMul30(Move, ((Piece*)Focus)->mModelWorld);
 	}
 
-	Piece* pPiece;
 	float x = Move[0], y = Move[1], z = Move[2];
 
 	for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
@@ -7629,12 +7680,16 @@ bool Project::MoveSelectedObjects(lcVector3& Move, lcVector3& Remainder, bool Sn
 		}
 	}
 
-	for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-		if (pPiece->IsSelected())
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+	{
+		Piece* Piece = mPieces[PieceIdx];
+
+		if (Piece->IsSelected())
 		{
-			pPiece->Move(m_nCurStep, m_bAddKeys, x, y, z);
-			pPiece->UpdatePosition(m_nCurStep);
+			Piece->Move(m_nCurStep, m_bAddKeys, x, y, z);
+			Piece->UpdatePosition(m_nCurStep);
 		}
+	}
 
 	// TODO: move group centers
 
@@ -7673,16 +7728,18 @@ bool Project::RotateSelectedObjects(lcVector3& Delta, lcVector3& Remainder, bool
 	lcVector3 pos;
 	lcVector4 rot;
 	int nSel = 0;
-	Piece *pPiece, *pFocus = NULL;
+	Piece *pFocus = NULL;
 
-	for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 	{
-		if (pPiece->IsSelected())
-		{
-			if (pPiece->IsFocused())
-				pFocus = pPiece;
+		Piece* Piece = mPieces[PieceIdx];
 
-			pPiece->CompareBoundingBox(bs);
+		if (Piece->IsSelected())
+		{
+			if (Piece->IsFocused())
+				pFocus = Piece;
+
+			Piece->CompareBoundingBox(bs);
 			nSel++;
 		}
 	}
@@ -7734,17 +7791,19 @@ bool Project::RotateSelectedObjects(lcVector3& Delta, lcVector3& Remainder, bool
 		RotationQuaternion = lcQuaternionMultiply(FocusToWorldQuaternion, RotationQuaternion);
 	}
 
-	for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 	{
-		if (!pPiece->IsSelected())
+		Piece* Piece = mPieces[PieceIdx];
+
+		if (!Piece->IsSelected())
 			continue;
 
-		pos = pPiece->mPosition;
-		rot = pPiece->mRotation;
+		pos = Piece->mPosition;
+		rot = Piece->mRotation;
 
 		lcVector4 NewRotation;
 
-		if ((nSel == 1) && (pFocus == pPiece))
+		if ((nSel == 1) && (pFocus == Piece))
 		{
 			lcVector4 LocalToWorldQuaternion;
 			LocalToWorldQuaternion = lcQuaternionFromAxisAngle(lcVector4(rot[0], rot[1], rot[2], rot[3] * LC_DTOR));
@@ -7794,7 +7853,7 @@ bool Project::RotateSelectedObjects(lcVector3& Delta, lcVector3& Remainder, bool
 			pos[1] = Center[1] + Distance[1];
 			pos[2] = Center[2] + Distance[2];
 
-			pPiece->ChangeKey(m_nCurStep, m_bAddKeys, pos, LC_PK_POSITION);
+			Piece->ChangeKey(m_nCurStep, m_bAddKeys, pos, LC_PK_POSITION);
 		}
 
 		rot[0] = NewRotation[0];
@@ -7802,8 +7861,8 @@ bool Project::RotateSelectedObjects(lcVector3& Delta, lcVector3& Remainder, bool
 		rot[2] = NewRotation[2];
 		rot[3] = NewRotation[3] * LC_RTOD;
 
-		pPiece->ChangeKey(m_nCurStep, m_bAddKeys, rot, LC_PK_ROTATION);
-		pPiece->UpdatePosition(m_nCurStep);
+		Piece->ChangeKey(m_nCurStep, m_bAddKeys, rot, LC_PK_ROTATION);
+		Piece->UpdatePosition(m_nCurStep);
 	}
 
 	if (m_OverlayActive)
@@ -7824,16 +7883,18 @@ void Project::TransformSelectedObjects(LC_TRANSFORM_TYPE Type, const lcVector3& 
 			float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
 			lcVector3 Center;
 			int nSel = 0;
-			Piece *pPiece, *pFocus = NULL;
+			Piece* pFocus = NULL;
 
-			for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 			{
-				if (pPiece->IsSelected())
-				{
-					if (pPiece->IsFocused())
-						pFocus = pPiece;
+				Piece* Piece = mPieces[PieceIdx];
 
-					pPiece->CompareBoundingBox(bs);
+				if (Piece->IsSelected())
+				{
+					if (Piece->IsFocused())
+						pFocus = Piece;
+
+					Piece->CompareBoundingBox(bs);
 					nSel++;
 				}
 			}
@@ -7867,12 +7928,14 @@ void Project::TransformSelectedObjects(LC_TRANSFORM_TYPE Type, const lcVector3& 
 				}
 			}
 
-			for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 			{
-				if (pPiece->IsSelected())
+				Piece* Piece = mPieces[PieceIdx];
+
+				if (Piece->IsSelected())
 				{
-					pPiece->Move(m_nCurStep, m_bAddKeys, Offset.x, Offset.y, Offset.z);
-					pPiece->UpdatePosition(m_nCurStep);
+					Piece->Move(m_nCurStep, m_bAddKeys, Offset.x, Offset.y, Offset.z);
+					Piece->UpdatePosition(m_nCurStep);
 				}
 			}
 
@@ -7932,15 +7995,16 @@ void Project::TransformSelectedObjects(LC_TRANSFORM_TYPE Type, const lcVector3& 
 			lcVector4 NewRotation = lcQuaternionToAxisAngle(RotationQuaternion);
 			NewRotation[3] *= LC_RTOD;
 
-			Piece *pPiece;
 			int nSel = 0;
 
-			for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 			{
-				if (pPiece->IsSelected())
+				Piece* Piece = mPieces[PieceIdx];
+
+				if (Piece->IsSelected())
 				{
-					pPiece->ChangeKey(m_nCurStep, m_bAddKeys, NewRotation, LC_PK_ROTATION);
-					pPiece->UpdatePosition(m_nCurStep);
+					Piece->ChangeKey(m_nCurStep, m_bAddKeys, NewRotation, LC_PK_ROTATION);
+					Piece->UpdatePosition(m_nCurStep);
 					nSel++;
 				}
 			}
@@ -8267,19 +8331,23 @@ void Project::OnLeftButtonDown(View* view)
 					{
 						case LC_OBJECT_PIECE:
 						{
-							Piece* pPiece = (Piece*)Closest;
-							Group* pGroup = pPiece->GetTopGroup();
-							bool bFocus = pPiece->IsFocused ();
+							Piece* ClosestPiece = (Piece*)Closest;
+							Group* pGroup = ClosestPiece->GetTopGroup();
+							bool bFocus = ClosestPiece->IsFocused();
 
 							SelectAndFocusNone(Control);
 
 							// if a piece has focus deselect it, otherwise set the focus
-							pPiece->Select (!bFocus, !bFocus, false);
+							ClosestPiece->Select(!bFocus, !bFocus, false);
 
 							if (pGroup != NULL)
-								for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-									if (pPiece->GetTopGroup() == pGroup)
-										pPiece->Select (!bFocus, false, false);
+								for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+								{
+									Piece* Piece = mPieces[PieceIdx];
+
+									if (Piece->GetTopGroup() == pGroup)
+										Piece->Select(!bFocus, false, false);
+								}
 						} break;
 
 						case LC_OBJECT_CAMERA:
@@ -8388,7 +8456,7 @@ void Project::OnLeftButtonDown(View* view)
 				pPiece->UpdatePosition(m_nCurStep);
 
 				SelectAndFocusNone(false);
-				pPiece->CreateName(m_pPieces);
+				pPiece->CreateName(mPieces);
 				AddPiece(pPiece);
 				pPiece->Select (true, true, false);
 				UpdateSelection();
@@ -8468,9 +8536,9 @@ void Project::OnLeftButtonDown(View* view)
 		{
 			bool sel = false;
 
-			for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 			{
-				if (pPiece->IsSelected())
+				if (mPieces[PieceIdx]->IsSelected())
 				{
 					sel = true;
 					break;
@@ -8502,11 +8570,9 @@ void Project::OnLeftButtonDown(View* view)
 
 		case LC_ACTION_ROTATE:
 		{
-			Piece* pPiece;
-
-			for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
+			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 			{
-				if (pPiece->IsSelected())
+				if (mPieces[PieceIdx]->IsSelected())
 				{
 					StartTracking(LC_TRACK_START_LEFT);
 					m_OverlayDelta = lcVector3(0.0f, 0.0f, 0.0f);
@@ -8550,37 +8616,40 @@ void Project::OnLeftButtonDoubleClick(View* view)
 	Object* Closest = FindObjectFromPoint(view, x, y);
 
 //  if (m_nCurAction == LC_ACTION_SELECT)
-  {
-	SelectAndFocusNone(Control);
+	{
+		SelectAndFocusNone(Control);
 
-    if (Closest != NULL)
-      switch (Closest->GetType ())
-      {
-        case LC_OBJECT_PIECE:
-        {
-          Piece* pPiece = (Piece*)Closest;
-          pPiece->Select (true, true, false);
-          Group* pGroup = pPiece->GetTopGroup();
+		if (Closest != NULL)
+		switch (Closest->GetType ())
+		{
+		case LC_OBJECT_PIECE:
+			{
+				Piece* ClosestPiece = (Piece*)Closest;
+				ClosestPiece->Select (true, true, false);
+				Group* pGroup = ClosestPiece->GetTopGroup();
 
-          if (pGroup != NULL)
-            for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-              if (pPiece->GetTopGroup() == pGroup)
-                pPiece->Select (true, false, false);
-        } break;
+				if (pGroup != NULL)
+					for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+					{
+						Piece* Piece = mPieces[PieceIdx];
+						if (Piece->GetTopGroup() == pGroup)
+							Piece->Select(true, false, false);
+					}
+			} break;
 
-        case LC_OBJECT_CAMERA:
-        case LC_OBJECT_CAMERA_TARGET:
-        case LC_OBJECT_LIGHT:
-        case LC_OBJECT_LIGHT_TARGET:
-        {
-		  Closest->Select (true, true, Control);
-        } break;
-      }
+		case LC_OBJECT_CAMERA:
+		case LC_OBJECT_CAMERA_TARGET:
+		case LC_OBJECT_LIGHT:
+		case LC_OBJECT_LIGHT_TARGET:
+			{
+				Closest->Select (true, true, Control);
+			} break;
+		}
 
-    UpdateSelection();
-    UpdateAllViews();
-	gMainWindow->UpdateFocusObject(Closest);
-  }
+		UpdateSelection();
+		UpdateAllViews();
+		gMainWindow->UpdateFocusObject(Closest);
+	}
 }
 
 void Project::OnLeftButtonUp(View* view)
@@ -8663,8 +8732,8 @@ void Project::OnRightButtonDown(View* view)
 		{
 			bool sel = false;
 
-			for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-				if (pPiece->IsSelected())
+			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+				if (mPieces[PieceIdx]->IsSelected())
 				{
 					sel = true;
 					break;
@@ -8692,10 +8761,8 @@ void Project::OnRightButtonDown(View* view)
 
 		case LC_ACTION_ROTATE:
 		{
-			Piece* pPiece;
-
-			for (pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-				if (pPiece->IsSelected())
+			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+				if (mPieces[PieceIdx]->IsSelected())
 				{
 					StartTracking(LC_TRACK_START_RIGHT);
 					m_fTrack[0] = m_fTrack[1] = m_fTrack[2] = 0.0f;
@@ -9192,9 +9259,15 @@ void Project::OnMouseMove(View* view)
 				break;
 
 			float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
-			for (Piece* pPiece = m_pPieces; pPiece; pPiece = pPiece->m_pNext)
-				if (pPiece->IsSelected())
-					pPiece->CompareBoundingBox(bs);
+
+			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+			{
+				Piece* Piece = mPieces[PieceIdx];
+
+				if (Piece->IsSelected())
+					Piece->CompareBoundingBox(bs);
+			}
+
 			bs[0] = (bs[0]+bs[3])/2;
 			bs[1] = (bs[1]+bs[4])/2;
 			bs[2] = (bs[2]+bs[5])/2;

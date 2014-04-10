@@ -189,8 +189,10 @@ void lcQSelectDialog::addChildren(QTreeWidgetItem *parentItem, Group *parentGrou
 			cameraItem->setCheckState(0, options->Selection[numObjects] ? Qt::Checked : Qt::Unchecked);
 		}
 
-		for (Light* light = project->m_pLights; light; light = light->m_pNext, numObjects++)
+		for (int lightIdx = 0; lightIdx < project->mLights.GetSize(); lightIdx++, numObjects++)
 		{
+			Light* light = project->mLights[lightIdx];
+
 			if (!light->IsVisible())
 				continue;
 

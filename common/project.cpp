@@ -107,7 +107,6 @@ void Project::UpdateInterface()
 	// Update all user interface elements.
 	gMainWindow->UpdateUndoRedo(m_pUndoList->pNext ? m_pUndoList->strText : NULL, m_pRedoList ? m_pRedoList->strText : NULL);
 	gMainWindow->UpdatePaste(g_App->mClipboard != NULL);
-	SystemUpdatePlay(true, false);
 	gMainWindow->UpdateCategories();
 	gMainWindow->UpdateTitle(m_strTitle, m_bModified);
 

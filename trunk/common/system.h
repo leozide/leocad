@@ -42,7 +42,6 @@ template<> struct lcStaticAssert<true> { };
 template<int i> struct lcStaticAssertTest { };
 #endif
 
-void SystemUpdatePlay(bool play, bool stop);
 void SystemPieceComboAdd(char* name);
 
 #endif // _SYSTEM_H_

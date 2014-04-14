@@ -15,7 +15,9 @@ class lcVector3;
 class lcVector4;
 class lcMatrix44;
 
+class lcContext;
 class lcMesh;
+struct lcMeshSection;
 class lcTexture;
 
 class lcFile;

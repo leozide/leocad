@@ -6,6 +6,7 @@
 #include "lc_application.h"
 #include "lc_qmainwindow.h"
 #include "lc_mainwindow.h"
+#include "lc_context.h"
 
 void lcGLWidget::MakeCurrent()
 {
@@ -128,6 +129,7 @@ lcQGLWidget::lcQGLWidget(QWidget *parent, lcQGLWidget *share, lcGLWidget *owner,
 {
 	widget = owner;
 	widget->mWidget = this;
+	owner->mContext = new lcContext();
 
 	widget->MakeCurrent();
 	GL_InitializeSharedExtensions(widget);

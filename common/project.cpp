@@ -1165,7 +1165,7 @@ bool Project::DoSave(const char* FileName)
 				if ((Piece->IsVisible(i)) && (Piece->GetStepShow() == i))
 				{
 					const float* f = Piece->mModelWorld;
-					sprintf (buf, " 1 %d %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %s.DAT\r\n",
+					sprintf (buf, "1 %d %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %s.DAT\r\n",
 							 Piece->mColorCode, f[12] * 25.0f, -f[14] * 25.0f, f[13] *25.0f, f[0], -f[8], f[4], -f[2], f[10], -f[6], f[1], -f[9], f[5], Piece->mPieceInfo->m_strName);
 					file.WriteBuffer(buf, strlen(buf));
 				}

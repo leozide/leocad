@@ -13,6 +13,7 @@
 
 class Light;
 class LightTarget;
+class View;
 
 enum LC_LK_TYPES
 {
@@ -96,7 +97,7 @@ public:
 	const char* GetName() const
 	{ return m_strName; }
 
-	void Render(const lcMatrix44& ViewMatrix, float LineWidth);
+	void Render(View* View);
 	void RenderCone(const lcMatrix44& ViewMatrix);
 	void RenderTarget();
 	void RenderSphere();

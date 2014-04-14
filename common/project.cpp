@@ -26,6 +26,8 @@
 #include "debug.h"
 #include "lc_application.h"
 #include "lc_profile.h"
+#include "lc_context.h"
+#include "preview.h"
 
 void lcModelProperties::LoadDefaults()
 {
@@ -1731,53 +1733,16 @@ void Project::RenderScenePieces(View* view)
 		}
 	}
 
-	lcMesh* PreviousMesh = NULL;
-	bool PreviousSelected = false;
-	lcTexture* PreviousTexture = NULL;
-	char* ElementsOffset = NULL;
-	char* BaseBufferOffset = NULL;
-	char* PreviousOffset = (char*)(~0);
+	lcContext* Context = view->mContext;
 
 	for (int PieceIdx = 0; PieceIdx < OpaquePieces.GetSize(); PieceIdx++)
 	{
 		Piece* piece = OpaquePieces[PieceIdx];
 		lcMesh* Mesh = piece->mPieceInfo->mMesh;
 
-		glLoadMatrixf(lcMul(piece->mModelWorld, ViewMatrix));
-
-		if (PreviousMesh != Mesh)
-		{
-			if (GL_HasVertexBufferObject())
-			{
-				glBindBuffer(GL_ARRAY_BUFFER_ARB, Mesh->mVertexBuffer.mBuffer);
-				BaseBufferOffset = NULL;
-				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER_ARB, Mesh->mIndexBuffer.mBuffer);
-				ElementsOffset = NULL;
-			}
-			else
-			{
-				BaseBufferOffset = (char*)Mesh->mVertexBuffer.mData;
-				ElementsOffset = (char*)Mesh->mIndexBuffer.mData;
-			}
-
-			PreviousMesh = Mesh;
-			PreviousOffset = (char*)(~0);
-		}
-
-		if (piece->IsSelected())
-		{
-			if (!PreviousSelected)
-				glLineWidth(2.0f * Preferences.mLineWidth);
-
-			PreviousSelected = true;
-		}
-		else
-		{
-			if (PreviousSelected)
-				glLineWidth(Preferences.mLineWidth);
-
-			PreviousSelected = false;
-		}
+		Context->BindMesh(Mesh);
+		Context->SetWorldViewMatrix(lcMul(piece->mModelWorld, ViewMatrix));
+		Context->SetLineWidth(piece->IsSelected() ? 2.0f * Preferences.mLineWidth : Preferences.mLineWidth);
 
 		for (int SectionIdx = 0; SectionIdx < Mesh->mNumSections; SectionIdx++)
 		{
@@ -1806,55 +1771,9 @@ void Project::RenderScenePieces(View* view)
 					lcSetColor(ColorIdx);
 			}
 
-			char* BufferOffset = BaseBufferOffset;
-			lcTexture* Texture = Section->Texture;
-
-			if (!Texture)
-			{
-				if (PreviousTexture)
-				{
-					glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-					glDisable(GL_TEXTURE_2D);
-				}
-			}
-			else
-			{
-				BufferOffset += Mesh->mNumVertices * sizeof(lcVertex);
-
-				if (Texture != PreviousTexture)
-				{
-					glBindTexture(GL_TEXTURE_2D, Section->Texture->mTexture);
-
-					if (!PreviousTexture)
-					{
-						glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-						glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
-						glEnable(GL_TEXTURE_2D);
-					}
-				}
-			}
-
-			PreviousTexture = Texture;
-
-			if (PreviousOffset != BufferOffset)
-			{
-				if (!Texture)
-					glVertexPointer(3, GL_FLOAT, 0, BufferOffset);
-				else
-				{
-					glVertexPointer(3, GL_FLOAT, sizeof(lcVertexTextured), BufferOffset);
-					glTexCoordPointer(2, GL_FLOAT, sizeof(lcVertexTextured), BufferOffset + sizeof(lcVector3));
-				}
-
-				PreviousOffset = BufferOffset;
-			}
-
-			glDrawElements(Section->PrimitiveType, Section->NumIndices, Mesh->mIndexType, ElementsOffset + Section->IndexOffset);
+			Context->DrawMeshSection(Mesh, Section);
 		}
 	}
-
-	if (PreviousSelected)
-		glLineWidth(Preferences.mLineWidth);
 
 	if (TranslucentSections.GetSize())
 	{
@@ -1867,26 +1786,8 @@ void Project::RenderScenePieces(View* view)
 			Piece* piece = TranslucentSections[PieceIdx].piece;
 			lcMesh* Mesh = piece->mPieceInfo->mMesh;
 
-			glLoadMatrixf(lcMul(piece->mModelWorld, ViewMatrix));
-
-			if (PreviousMesh != Mesh)
-			{
-				if (GL_HasVertexBufferObject())
-				{
-					glBindBuffer(GL_ARRAY_BUFFER_ARB, Mesh->mVertexBuffer.mBuffer);
-					BaseBufferOffset = NULL;
-					glBindBuffer(GL_ELEMENT_ARRAY_BUFFER_ARB, Mesh->mIndexBuffer.mBuffer);
-					ElementsOffset = NULL;
-				}
-				else
-				{
-					BaseBufferOffset = (char*)Mesh->mVertexBuffer.mData;
-					ElementsOffset = (char*)Mesh->mIndexBuffer.mData;
-				}
-
-				PreviousMesh = Mesh;
-				PreviousOffset = (char*)(~0);
-			}
+			Context->BindMesh(Mesh);
+			Context->SetWorldViewMatrix(lcMul(piece->mModelWorld, ViewMatrix));
 
 			for (int SectionIdx = 0; SectionIdx < Mesh->mNumSections; SectionIdx++)
 			{
@@ -1904,50 +1805,7 @@ void Project::RenderScenePieces(View* view)
 
 				lcSetColor(ColorIdx);
 
-				char* BufferOffset = BaseBufferOffset;
-				lcTexture* Texture = Section->Texture;
-
-				if (!Texture)
-				{
-					if (PreviousTexture)
-					{
-						glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-						glDisable(GL_TEXTURE_2D);
-					}
-				}
-				else
-				{
-					BufferOffset += Mesh->mNumVertices * sizeof(lcVertex);
-
-					if (Texture != PreviousTexture)
-					{
-						glBindTexture(GL_TEXTURE_2D, Section->Texture->mTexture);
-
-						if (!PreviousTexture)
-						{
-							glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-							glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
-							glEnable(GL_TEXTURE_2D);
-						}
-					}
-				}
-
-				PreviousTexture = Texture;
-
-				if (PreviousOffset != BufferOffset)
-				{
-					if (!Texture)
-						glVertexPointer(3, GL_FLOAT, 0, BufferOffset);
-					else
-					{
-						glVertexPointer(3, GL_FLOAT, sizeof(lcVertexTextured), BufferOffset);
-						glTexCoordPointer(2, GL_FLOAT, sizeof(lcVertexTextured), BufferOffset + sizeof(lcVector3));
-					}
-
-					PreviousOffset = BufferOffset;
-				}
-
-				glDrawElements(Section->PrimitiveType, Section->NumIndices, Mesh->mIndexType, ElementsOffset + Section->IndexOffset);
+				Context->DrawMeshSection(Mesh, Section);
 			}
 		}
 
@@ -1965,26 +1823,15 @@ void Project::RenderScenePieces(View* view)
 	if (mProperties.mFogEnabled)
 		glDisable(GL_FOG);
 
-	if (PreviousTexture)
-	{
-		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-		glDisable(GL_TEXTURE_2D);
-	}
-
-	if (GL_HasVertexBufferObject())
-	{
-		glBindBuffer(GL_ARRAY_BUFFER_ARB, 0);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
-	}
-
-	glVertexPointer(3, GL_FLOAT, 0, NULL);
-	glTexCoordPointer(2, GL_FLOAT, 0, NULL);
+	Context->SetLineWidth(Preferences.mLineWidth); // context remove
+	Context->UnbindMesh(); // context remove
 }
 
 void Project::RenderSceneObjects(View* view)
 {
 	const lcPreferences& Preferences = lcGetPreferences();
 	const lcMatrix44& ViewMatrix = view->mCamera->mWorldView;
+	lcContext* Context = view->mContext;
 
 #ifdef LC_DEBUG
 	RenderDebugPrimitives();
@@ -2003,9 +1850,8 @@ void Project::RenderSceneObjects(View* view)
 
 		glLoadMatrixf(lcMul(WorldMatrix, ViewMatrix));
 
-		glLineWidth(2 * Preferences.mLineWidth);
+		Context->SetLineWidth(2.0f * Preferences.mLineWidth);
 		PreviewPiece->RenderPiece(gMainWindow->mColorIndex);
-		glLineWidth(Preferences.mLineWidth);
 	}
 
 	if (Preferences.mLightingMode != LC_LIGHTING_FLAT)
@@ -2018,12 +1864,14 @@ void Project::RenderSceneObjects(View* view)
 		if ((pCamera == view->mCamera) || !pCamera->IsVisible())
 			continue;
 
-		pCamera->Render(ViewMatrix, Preferences.mLineWidth);
+		pCamera->Render(view);
 	}
 
 	for (int LightIdx = 0; LightIdx < mLights.GetSize(); LightIdx++)
 		if (mLights[LightIdx]->IsVisible())
-			mLights[LightIdx]->Render(ViewMatrix, Preferences.mLineWidth);
+			mLights[LightIdx]->Render(view);
+
+	Context->SetLineWidth(Preferences.mLineWidth); // context remove
 
 	if (Preferences.mDrawGridStuds || Preferences.mDrawGridLines)
 	{
@@ -3492,6 +3340,7 @@ void Project::CreateImages(Image* images, int width, int height, unsigned short 
 	view.SetCamera(m_ActiveView->mCamera, false);
 	view.mWidth = width;
 	view.mHeight = height;
+	view.mContext = gMainWindow->mPreviewWidget->mContext;
 
 	if (!hilite)
 		SelectAndFocusNone(false);

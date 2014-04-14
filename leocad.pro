@@ -18,8 +18,8 @@ win32 {
 	RC_FILE = qt/leocad.rc
 	LIBS += -ladvapi32 -lshell32
 } else {
-    LIBS += -lz
-    QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-parameter
+	LIBS += -lz
+	QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-parameter
 }
 
 unix:!macx {
@@ -93,20 +93,24 @@ SOURCES += common/view.cpp \
     common/object.cpp \
     common/minifig.cpp \
     common/light.cpp \
-    common/lc_zipfile.cpp \
-    common/lc_texture.cpp \
-    common/lc_mesh.cpp \
-    common/lc_library.cpp \
-    common/lc_file.cpp \
-    common/lc_colors.cpp \
     common/lc_application.cpp \
+    common/lc_category.cpp \
+    common/lc_colors.cpp \
+    common/lc_commands.cpp \
+    common/lc_context.cpp \
+    common/lc_file.cpp \
+    common/lc_library.cpp \
+    common/lc_mainwindow.cpp \
+    common/lc_mesh.cpp \
+    common/lc_profile.cpp \
+    common/lc_projection.cpp \
+    common/lc_shortcuts.cpp \
+    common/lc_texture.cpp \
+    common/lc_zipfile.cpp \
     common/image.cpp \
     common/group.cpp \
     common/debug.cpp \
     common/camera.cpp \
-    common/lc_profile.cpp \
-    common/lc_category.cpp \
-	common/lc_projection.cpp \
     qt/lc_qmainwindow.cpp \
     qt/system.cpp \
     qt/qtmain.cpp \
@@ -129,13 +133,10 @@ SOURCES += common/view.cpp \
     qt/lc_qutils.cpp \
     qt/lc_qpropertiestree.cpp \
     qt/lc_qcolorpicker.cpp \
-    common/lc_commands.cpp \
-    common/lc_shortcuts.cpp \
     qt/lc_qimage.cpp \
     qt/lc_qglwidget.cpp \
     qt/lc_qcolorlist.cpp \
-    qt/lc_qfinddialog.cpp \
-    common/lc_mainwindow.cpp
+    qt/lc_qfinddialog.cpp
 HEADERS += \
     common/view.h \
     common/tr.h \
@@ -151,22 +152,29 @@ HEADERS += \
     common/object.h \
     common/minifig.h \
     common/light.h \
-    common/lc_zipfile.h \
-    common/lc_texture.h \
-    common/lc_mesh.h \
-    common/lc_math.h \
-    common/lc_library.h \
-    common/lc_global.h \
-    common/lc_file.h \
-    common/lc_colors.h \
     common/lc_application.h \
+    common/lc_array.h \
+    common/lc_basewindow.h \
+    common/lc_category.h \
+    common/lc_colors.h \
+    common/lc_commands.h \
+    common/lc_context.h \
+    common/lc_file.h \
+    common/lc_global.h \
+    common/lc_glwidget.h \
+    common/lc_library.h \
+    common/lc_mainwindow.h \
+    common/lc_math.h \
+    common/lc_mesh.h \
+    common/lc_profile.h \
+    common/lc_projection.h \
+    common/lc_shortcuts.h \
+    common/lc_texture.h \
+    common/lc_zipfile.h \
     common/image.h \
     common/group.h \
     common/debug.h \
     common/camera.h \
-    common/lc_profile.h \
-    common/lc_category.h \
-	common/lc_projection.h \
     qt/lc_qmainwindow.h \
     qt/lc_config.h \
     qt/lc_qpovraydialog.h \
@@ -186,15 +194,9 @@ HEADERS += \
     qt/lc_qutils.h \
     qt/lc_qpropertiestree.h \
     qt/lc_qcolorpicker.h \
-    common/lc_commands.h \
-    common/lc_shortcuts.h \
     qt/lc_qglwidget.h \
     qt/lc_qcolorlist.h \
-    common/lc_glwidget.h \
-    qt/lc_qfinddialog.h \
-    common/lc_array.h \
-    common/lc_basewindow.h \
-    common/lc_mainwindow.h
+    qt/lc_qfinddialog.h
 FORMS += \ 
     qt/lc_qpovraydialog.ui \
     qt/lc_qarraydialog.ui \

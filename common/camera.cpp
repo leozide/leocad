@@ -10,6 +10,8 @@
 #include "camera.h"
 #include "view.h"
 #include "tr.h"
+#include "lc_application.h"
+#include "lc_context.h"
 
 #define LC_CAMERA_SAVE_VERSION 6 // LeoCAD 0.73
 
@@ -460,11 +462,13 @@ void Camera::CopyPosition(const Camera* camera)
 	mUpVector = camera->mUpVector;
 }
 
-void Camera::Render(const lcMatrix44& ViewMatrix, float LineWidth)
+void Camera::Render(View* View)
 {
-	lcMatrix44 ViewWorld = lcMatrix44AffineInverse(mWorldView);
+	float LineWidth = lcGetPreferences().mLineWidth;
+	const lcMatrix44& ViewMatrix = View->mCamera->mWorldView;
+	lcContext* Context = View->mContext;
 
-	// Draw camera.
+	lcMatrix44 ViewWorld = lcMatrix44AffineInverse(mWorldView);
 	glLoadMatrixf(lcMul(ViewWorld, ViewMatrix));
 
 	float verts[34][3] =
@@ -490,7 +494,7 @@ void Camera::Render(const lcMatrix44& ViewMatrix, float LineWidth)
 
 	if (IsEyeSelected())
 	{
-		glLineWidth(2.0f);
+		Context->SetLineWidth(2.0f * LineWidth);
 		if (m_nState & LC_CAMERA_FOCUSED)
 			lcSetColorFocused();
 		else
@@ -498,7 +502,7 @@ void Camera::Render(const lcMatrix44& ViewMatrix, float LineWidth)
 	}
 	else
 	{
-		glLineWidth(1.0f);
+		Context->SetLineWidth(LineWidth);
 		lcSetColorCamera();
 	}
 
@@ -522,24 +526,14 @@ void Camera::Render(const lcMatrix44& ViewMatrix, float LineWidth)
 		{ -0.2f, -0.2f,  0.2f }, { -0.2f, -0.2f, -0.2f },
 		{  0.2f, -0.2f,  0.2f }, {  0.2f, -0.2f, -0.2f }
 	};
-/*
-	// Draw ortho target.
-	TargetMat.SetTranslation(mOrthoTarget);
-	glMultMatrixf(TargetMat);
 
-	glLineWidth(1.0f);
-	glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
-
-	glVertexPointer(3, GL_FLOAT, 0, box);
-	glDrawArrays(GL_LINES, 0, 24);
-*/
 	// Draw target.
 	TargetMat.SetTranslation(mTargetPosition);
 	glLoadMatrixf(lcMul(TargetMat, ViewMatrix));
 
 	if (IsTargetSelected())
 	{
-		glLineWidth(2.0f);
+		Context->SetLineWidth(2.0f * LineWidth);
 		if (m_nState & LC_CAMERA_TARGET_FOCUSED)
 			lcSetColorFocused();
 		else
@@ -547,7 +541,7 @@ void Camera::Render(const lcMatrix44& ViewMatrix, float LineWidth)
 	}
 	else
 	{
-		glLineWidth(1.0f);
+		Context->SetLineWidth(LineWidth);
 		lcSetColorCamera();
 	}
 
@@ -564,7 +558,7 @@ void Camera::Render(const lcMatrix44& ViewMatrix, float LineWidth)
 
 	glVertexPointer(3, GL_FLOAT, 0, Line);
 	glColor4f(0.5f, 0.8f, 0.5f, 1.0f);
-	glLineWidth(1.0f);
+	Context->SetLineWidth(LineWidth);
 	glDrawArrays(GL_LINES, 0, 2);
 
 	if (IsSelected())

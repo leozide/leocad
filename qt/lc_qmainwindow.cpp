@@ -808,6 +808,7 @@ void lcQMainWindow::print(QPrinter *printer)
 	view.SetCamera(project->GetActiveView()->mCamera, false);
 	view.mWidth = tileWidth;
 	view.mHeight = tileHeight;
+	view.mContext = piecePreview->widget->mContext;
 
 	GL_BeginRenderToTexture(tileWidth, tileHeight);
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);

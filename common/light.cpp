@@ -6,6 +6,10 @@
 #include <stdio.h>
 #include <math.h>
 #include "light.h"
+#include "camera.h"
+#include "view.h"
+#include "lc_application.h"
+#include "lc_context.h"
 
 static LC_OBJECT_KEY_INFO light_key_info[LC_LK_COUNT] =
 {
@@ -292,44 +296,49 @@ void Light::UpdatePosition(unsigned short nTime)
 	}
 }
 
-void Light::Render(const lcMatrix44& ViewMatrix, float LineWidth)
+void Light::Render(View* View)
 {
+	float LineWidth = lcGetPreferences().mLineWidth;
+	const lcMatrix44& ViewMatrix = View->mCamera->mWorldView;
+	lcContext* Context = View->mContext;
+
 	if (m_pTarget != NULL)
 	{
 		if (IsEyeSelected())
 		{
-			glLineWidth(LineWidth*2);
+			Context->SetLineWidth(2.0f * LineWidth);
 			if (m_nState & LC_LIGHT_FOCUSED)
 				lcSetColorFocused();
 			else
 				lcSetColorSelected();
-			RenderCone(ViewMatrix);
-			glLineWidth(LineWidth);
 		}
 		else
 		{
+			Context->SetLineWidth(LineWidth);
 			lcSetColorLight();
-			RenderCone(ViewMatrix);
 		}
+
+			RenderCone(ViewMatrix);
 
 		if (IsTargetSelected())
 		{
-			glLineWidth(LineWidth*2);
+			Context->SetLineWidth(2.0f * LineWidth);
 			if (m_nState & LC_LIGHT_TARGET_FOCUSED)
 				lcSetColorFocused();
 			else
 				lcSetColorSelected();
-			RenderTarget();
-			glLineWidth(LineWidth);
 		}
 		else
 		{
+			Context->SetLineWidth(LineWidth);
 			lcSetColorLight();
-			RenderTarget();
 		}
+
+			RenderTarget();
 
 		glLoadMatrixf(ViewMatrix);
 
+		Context->SetLineWidth(LineWidth);
 		lcSetColorLight();
 
 		lcVector3 Line[2] = { mPosition, mTargetPosition };

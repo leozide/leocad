@@ -45,6 +45,7 @@ public:
 		mInputState.Control = false;
 		mInputState.Shift = false;
 		mInputState.Alt = false;
+		mContext = NULL;
 	}
 
 	virtual ~lcGLWidget()
@@ -78,6 +79,7 @@ public:
 	int mHeight;
 	int mCursorType;
 	void* mWidget;
+	lcContext* mContext;
 };
 
 #endif // _LC_GLWIDGET_H_

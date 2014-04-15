@@ -148,6 +148,9 @@ lcQGLWidget::lcQGLWidget(QWidget *parent, lcQGLWidget *share, lcGLWidget *owner,
 
 lcQGLWidget::~lcQGLWidget()
 {
+	delete widget->mContext;
+	widget->mContext = NULL;
+
 	if (isView)
 		delete widget;
 }

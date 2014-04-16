@@ -33,7 +33,7 @@ void lcModelProperties::LoadDefaults()
 {
 	mAuthor = lcGetProfileString(LC_PROFILE_DEFAULT_AUTHOR_NAME);
 
-	mBackgroundType = (lcBackgroundType)lcGetProfileInt(LC_PROFILE_DEFAULT_BACKGROUND_TILE);
+	mBackgroundType = (lcBackgroundType)lcGetProfileInt(LC_PROFILE_DEFAULT_BACKGROUND_TYPE);
 	mBackgroundSolidColor = lcVector3FromColor(lcGetProfileInt(LC_PROFILE_DEFAULT_BACKGROUND_COLOR));
 	mBackgroundGradientColor1 = lcVector3FromColor(lcGetProfileInt(LC_PROFILE_DEFAULT_GRADIENT_COLOR1));
 	mBackgroundGradientColor2 = lcVector3FromColor(lcGetProfileInt(LC_PROFILE_DEFAULT_GRADIENT_COLOR2));
@@ -218,7 +218,6 @@ void Project::LoadDefaults(bool cameras)
 	gMainWindow->UpdateTime(1, 255);
 	strcpy(m_strHeader, "");
 	strcpy(m_strFooter, "Page &P");
-	strcpy(m_strBackground, lcGetProfileString(LC_PROFILE_DEFAULT_BACKGROUND_TEXTURE));
 	m_pTerrain->LoadDefaults(true);
 	m_OverlayActive = false;
 
@@ -614,7 +613,11 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 				file->ReadU16(&sh, 1);
 
 			if (sh < LC_MAXPATH)
-				file->ReadBuffer(m_strBackground, sh);
+			{
+				char Background[LC_MAXPATH];
+				file->ReadBuffer(Background, sh);
+				mProperties.mBackgroundImage = Background;
+			}
 			else
 				file->Seek (sh, SEEK_CUR);
 		}
@@ -799,9 +802,9 @@ void Project::FileSave(lcFile* file, bool bUndo)
 	rgb = LC_FLOATRGB(mProperties.mFogColor);
 	file->WriteU32(&rgb, 1);
 	file->WriteFloats(&mProperties.mFogDensity, 1);
-	sh = strlen(m_strBackground);
+	sh = strlen(mProperties.mBackgroundImage.Buffer());
 	file->WriteU16(&sh, 1);
-	file->WriteBuffer(m_strBackground, sh);
+	file->WriteBuffer(mProperties.mBackgroundImage.Buffer(), sh);
 	ch = strlen(m_strHeader);
 	file->WriteBuffer(&ch, 1);
 	file->WriteBuffer(m_strHeader, ch);
@@ -2844,7 +2847,7 @@ void Project::RenderInitialize()
 //		m_pTerrain->LoadTexture();
 
 	if (mProperties.mBackgroundType == LC_BACKGROUND_IMAGE)
-		if (!m_pBackground->Load(m_strBackground, LC_TEXTURE_WRAPU | LC_TEXTURE_WRAPV))
+		if (!m_pBackground->Load(mProperties.mBackgroundImage.Buffer(), LC_TEXTURE_WRAPU | LC_TEXTURE_WRAPV))
 		{
 			mProperties.mBackgroundType = LC_BACKGROUND_SOLID;
 //			AfxMessageBox ("Could not load background");
@@ -3685,8 +3688,8 @@ void Project::Export3DStudio()
 	File.WriteFloats(mProperties.mBackgroundSolidColor, 3);
 
 	File.WriteU16(0x1100); // CHK_BIT_MAP
-	File.WriteU32(6 + 1 + strlen(m_strBackground));
-	File.WriteBuffer(m_strBackground, strlen(m_strBackground) + 1);
+	File.WriteU32(6 + 1 + strlen(mProperties.mBackgroundImage.Buffer()));
+	File.WriteBuffer(mProperties.mBackgroundImage.Buffer(), strlen(mProperties.mBackgroundImage.Buffer()) + 1);
 
 	File.WriteU16(0x1300); // CHK_V_GRADIENT
 	File.WriteU32(118);

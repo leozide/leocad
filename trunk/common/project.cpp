@@ -1512,36 +1512,36 @@ bool Project::SetActiveView(View* view)
 // Project rendering
 
 // Only this function should be called.
-void Project::Render(View* view, bool ToMemory)
+void Project::Render(View* View, bool ToMemory)
 {
-	glViewport(0, 0, view->mWidth, view->mHeight);
-	glEnableClientState(GL_VERTEX_ARRAY);
+	View->mContext->SetDefaultState();
+	glViewport(0, 0, View->mWidth, View->mHeight);
 
-	RenderBackground(view);
+	RenderBackground(View);
 
 	// Setup the projection and camera matrices.
-	view->UpdateProjection();
+	View->UpdateProjection();
 
-	RenderScenePieces(view);
+	RenderScenePieces(View);
 
 	if (!ToMemory)
 	{
-		RenderSceneObjects(view);
+		RenderSceneObjects(View);
 
-		if (m_OverlayActive || ((m_nCurAction == LC_ACTION_SELECT) && (m_nTracking == LC_TRACK_LEFT) && (m_ActiveView == view)))
+		if (m_OverlayActive || ((m_nCurAction == LC_ACTION_SELECT) && (m_nTracking == LC_TRACK_LEFT) && (m_ActiveView == View)))
 		{
-			view->UpdateProjection();
-			RenderOverlays(view);
+			View->UpdateProjection();
+			RenderOverlays(View);
 		}
 
-		RenderViewports(view);
+		RenderViewports(View);
 	}
-
-	glDisableClientState(GL_VERTEX_ARRAY);
 }
 
-void Project::RenderBackground(View* view)
+void Project::RenderBackground(View* View)
 {
+	lcContext* Context = View->mContext;
+
 	if (mProperties.mBackgroundType == LC_BACKGROUND_SOLID)
 	{
 		glClearColor(mProperties.mBackgroundSolidColor[0], mProperties.mBackgroundSolidColor[1], mProperties.mBackgroundSolidColor[2], 0.0f);
@@ -1555,35 +1555,30 @@ void Project::RenderBackground(View* view)
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_LIGHTING);
 
-	float ViewWidth = (float)view->mWidth;
-	float ViewHeight = (float)view->mHeight;
+	float ViewWidth = (float)View->mWidth;
+	float ViewHeight = (float)View->mHeight;
 
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glOrtho(0.0f, ViewWidth, 0.0f, ViewHeight, -1.0f, 1.0f);
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	glTranslatef(0.375f, 0.375f, 0.0f);
+	Context->SetProjectionMatrix(lcMatrix44Ortho(0.0f, ViewWidth, 0.0f, ViewHeight, -1.0f, 1.0f));
+	Context->SetWorldViewMatrix(lcMatrix44Translation(lcVector3(0.375f, 0.375f, 0.0f)));
 
 	if (mProperties.mBackgroundType == LC_BACKGROUND_GRADIENT)
 	{
 		glShadeModel(GL_SMOOTH);
 
-		float Verts[4][2];
-		float Colors[4][4];
+		const lcVector3& Color1 = mProperties.mBackgroundGradientColor1;
+		const lcVector3& Color2 = mProperties.mBackgroundGradientColor2;
 
-		glVertexPointer(2, GL_FLOAT, 0, Verts);
+		float Verts[] =
+		{
+			ViewWidth, ViewHeight, Color1[0], Color1[1], Color1[2], 1.0f,
+			0.0f,      ViewHeight, Color1[0], Color1[1], Color1[2], 1.0f,
+			0.0f,      0.0f,       Color2[0], Color2[1], Color2[2], 1.0f,
+			ViewWidth, 0.0f,       Color2[0], Color2[1], Color2[2], 1.0f
+		};
+
+		glVertexPointer(2, GL_FLOAT, 6 * sizeof(float), Verts);
 		glEnableClientState(GL_COLOR_ARRAY);
-		glColorPointer(4, GL_FLOAT, 0, Colors);
-
-		Colors[0][0] = mProperties.mBackgroundGradientColor1[0]; Colors[0][1] = mProperties.mBackgroundGradientColor1[1]; Colors[0][2] = mProperties.mBackgroundGradientColor1[2]; Colors[0][3] = 1.0f;
-		Verts[0][0] = ViewWidth; Verts[0][1] = ViewHeight;
-		Colors[1][0] = mProperties.mBackgroundGradientColor1[0]; Colors[1][1] = mProperties.mBackgroundGradientColor1[1]; Colors[1][2] = mProperties.mBackgroundGradientColor1[2]; Colors[1][3] = 1.0f;
-		Verts[1][0] = 0; Verts[1][1] = ViewHeight;
-		Colors[2][0] = mProperties.mBackgroundGradientColor2[0]; Colors[2][1] = mProperties.mBackgroundGradientColor2[1]; Colors[2][2] = mProperties.mBackgroundGradientColor2[2]; Colors[2][3] = 1.0f;
-		Verts[2][0] = 0; Verts[2][1] = 0;
-		Colors[3][0] = mProperties.mBackgroundGradientColor2[0]; Colors[3][1] = mProperties.mBackgroundGradientColor2[1]; Colors[3][2] = mProperties.mBackgroundGradientColor2[2]; Colors[3][3] = 1.0f;
-		Verts[3][0] = ViewWidth; Verts[3][1] = 0;
+		glColorPointer(4, GL_FLOAT, 6 * sizeof(float), Verts + 2);
 
 		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 
@@ -1599,28 +1594,25 @@ void Project::RenderBackground(View* view)
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 		glBindTexture(GL_TEXTURE_2D, m_pBackground->mTexture);
 
-		float Verts[4][2];
-		float Coords[4][2];
+		float TileWidth = 1.0f, TileHeight = 1.0f;
 
-		glVertexPointer(2, GL_FLOAT, 0, Verts);
-		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-		glTexCoordPointer(2, GL_FLOAT, 0, Coords);
-
-		float tw = 1.0f, th = 1.0f;
 		if (mProperties.mBackgroundImageTile)
 		{
-			tw = ViewWidth / m_pBackground->mWidth;
-			th = ViewHeight / m_pBackground->mHeight;
+			TileWidth = ViewWidth / m_pBackground->mWidth;
+			TileHeight = ViewHeight / m_pBackground->mHeight;
 		}
 
-		Coords[0][0] = 0; Coords[0][1] = 0;
-		Verts[0][0] = 0; Verts[0][1] = ViewHeight;
-		Coords[1][0] = tw; Coords[1][1] = 0;
-		Verts[1][0] = ViewWidth; Verts[1][1] = ViewHeight;
-		Coords[2][0] = tw; Coords[2][1] = th;
-		Verts[2][0] = ViewWidth; Verts[2][1] = 0;
-		Coords[3][0] = 0; Coords[3][1] = th;
-		Verts[3][0] = 0; Verts[3][1] = 0;
+		float Verts[] =
+		{
+			0.0f,      ViewHeight, 0.0f,      0.0f,
+			ViewWidth, ViewHeight, TileWidth, 0.0f,
+			ViewWidth, 0.0f,       TileWidth, TileHeight,
+			0.0f,      0.0f,       0.0f,      TileHeight
+		};
+
+		glVertexPointer(2, GL_FLOAT, 4 * sizeof(float), Verts);
+		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+		glTexCoordPointer(2, GL_FLOAT, 4 * sizeof(float), Verts + 2);
 
 		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 

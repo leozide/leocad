@@ -20,6 +20,36 @@ lcContext::~lcContext()
 {
 }
 
+void lcContext::SetDefaultState()
+{
+	glEnableClientState(GL_VERTEX_ARRAY);
+
+	if (GL_HasVertexBufferObject())
+	{
+		glBindBuffer(GL_ARRAY_BUFFER_ARB, 0);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
+	}
+
+	glVertexPointer(3, GL_FLOAT, 0, NULL);
+	glTexCoordPointer(2, GL_FLOAT, 0, NULL);
+
+	mVertexBufferObject = 0;
+	mIndexBufferObject = 0;
+	mVertexBufferPointer = NULL;
+	mIndexBufferPointer = NULL;
+	mVertexBufferOffset = (char*)~0;
+
+	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	glDisable(GL_TEXTURE_2D);
+	mTexture = NULL;
+
+	glLineWidth(1.0f);
+	mLineWidth = 1.0f;
+
+	glMatrixMode(GL_MODELVIEW);
+	mMatrixMode = GL_MODELVIEW;
+}
+
 void lcContext::SetWorldViewMatrix(const lcMatrix44& WorldViewMatrix)
 {
 	if (mMatrixMode != GL_MODELVIEW)

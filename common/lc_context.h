@@ -7,6 +7,8 @@ public:
 	lcContext();
 	~lcContext();
 
+	void SetDefaultState();
+
 	void SetWorldViewMatrix(const lcMatrix44& WorldViewMatrix);
 	void SetProjectionMatrix(const lcMatrix44& ProjectionMatrix);
 //	void SetColor(const lcVector4& Color);

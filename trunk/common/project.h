@@ -422,7 +422,6 @@ protected:
 
 	lcModelProperties mProperties;
 
-	char m_strBackground[LC_MAXPATH];
 	lcTexture* m_pBackground;
 	lcTexture* mGridTexture;
 

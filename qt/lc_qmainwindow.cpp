@@ -132,6 +132,8 @@ void lcQMainWindow::createActions()
 	actions[LC_EDIT_ACTION_ROTATE_VIEW]->setIcon(QIcon(":/resources/action_rotate_view.png"));
 	actions[LC_EDIT_ACTION_ROLL]->setIcon(QIcon(":/resources/action_roll.png"));
 	actions[LC_EDIT_ACTION_ZOOM_REGION]->setIcon(QIcon(":/resources/action_zoom_region.png"));
+	actions[LC_PIECE_SHOW_EARLIER]->setIcon(QIcon(":/resources/piece_show_earlier.png"));
+	actions[LC_PIECE_SHOW_LATER]->setIcon(QIcon(":/resources/piece_show_later.png"));
 	actions[LC_VIEW_SPLIT_HORIZONTAL]->setIcon(QIcon(":/resources/view_split_horizontal.png"));
 	actions[LC_VIEW_SPLIT_VERTICAL]->setIcon(QIcon(":/resources/view_split_vertical.png"));
 	actions[LC_VIEW_ZOOM_IN]->setIcon(QIcon(":/resources/view_zoomin.png"));
@@ -323,8 +325,6 @@ void lcQMainWindow::createMenus()
 	menuStep->addAction(actions[LC_VIEW_TIME_PREVIOUS]);
 	menuStep->addAction(actions[LC_VIEW_TIME_NEXT]);
 	menuStep->addAction(actions[LC_VIEW_TIME_LAST]);
-	//LC_VIEW_TIME_STOP
-	//LC_VIEW_TIME_PLAY
 	menuStep->addSeparator();
 	menuStep->addAction(actions[LC_VIEW_TIME_INSERT]);
 	menuStep->addAction(actions[LC_VIEW_TIME_DELETE]);
@@ -435,9 +435,8 @@ void lcQMainWindow::createToolBars()
 	timeToolBar->addAction(actions[LC_VIEW_TIME_PREVIOUS]);
 	timeToolBar->addAction(actions[LC_VIEW_TIME_NEXT]);
 	timeToolBar->addAction(actions[LC_VIEW_TIME_LAST]);
-	//LC_VIEW_TIME_STOP
-	//LC_VIEW_TIME_PLAY
-	//LC_VIEW_TIME_ANIMATION
+	timeToolBar->addAction(actions[LC_PIECE_SHOW_EARLIER]);
+	timeToolBar->addAction(actions[LC_PIECE_SHOW_LATER]);
 	//LC_VIEW_TIME_ADD_KEYS
 	// TODO: add missing menu items
 

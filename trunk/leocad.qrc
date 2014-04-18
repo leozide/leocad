@@ -50,8 +50,6 @@
         <file>resources/time_first.png</file>
         <file>resources/time_last.png</file>
         <file>resources/time_next.png</file>
-        <file>resources/time_pause.png</file>
-        <file>resources/time_play.png</file>
         <file>resources/time_previous.png</file>
         <file>resources/time_stop.png</file>
         <file>resources/icon64.png</file>
@@ -65,5 +63,7 @@
         <file>resources/edit_transform_absolute_translation.png</file>
         <file>resources/edit_transform_relative_rotation.png</file>
         <file>resources/edit_transform_relative_translation.png</file>
+        <file>resources/piece_show_earlier.png</file>
+        <file>resources/piece_show_later.png</file>
     </qresource>
 </RCC>

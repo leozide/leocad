@@ -48,15 +48,26 @@ public:
 		mInputState.Shift = false;
 		mInputState.Alt = false;
 		mContext = new lcContext();
+		mDeleteContext = true;
 	}
 
 	virtual ~lcGLWidget()
 	{
-		delete mContext;
+		if (mDeleteContext)
+			delete mContext;
 	}
 
 	void* GetExtensionAddress(const char* FunctionName);
 	void ShowPopupMenu();
+
+	void SetContext(lcContext* Context)
+	{
+		if (mDeleteContext)
+			delete mContext;
+
+		mContext = Context;
+		mDeleteContext = false;
+	}
 
 	void MakeCurrent();
 	void Redraw();
@@ -83,6 +94,7 @@ public:
 	int mCursorType;
 	void* mWidget;
 	lcContext* mContext;
+	bool mDeleteContext;
 };
 
 #endif // _LC_GLWIDGET_H_

@@ -3340,7 +3340,7 @@ void Project::CreateImages(Image* images, int width, int height, unsigned short 
 	view.SetCamera(m_ActiveView->mCamera, false);
 	view.mWidth = width;
 	view.mHeight = height;
-	view.mContext = gMainWindow->mPreviewWidget->mContext;
+	view.SetContext(gMainWindow->mPreviewWidget->mContext);
 
 	if (!hilite)
 		SelectAndFocusNone(false);

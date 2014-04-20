@@ -166,4 +166,17 @@ public:
 	int mIndexType;
 };
 
+struct lcRenderMesh
+{
+	lcMatrix44* WorldMatrix;
+	lcMesh* Mesh;
+	int ColorIndex;
+	float Distance;
+	bool Focused;
+	bool Selected;
+};
+
+int lcTranslucentRenderMeshCompare(const lcRenderMesh& a, const lcRenderMesh& b);
+int lcOpaqueRenderMeshCompare(const lcRenderMesh& a, const lcRenderMesh& b);
+
 #endif // _LC_MESH_H_

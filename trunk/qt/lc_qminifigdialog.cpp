@@ -94,6 +94,8 @@ lcQMinifigDialog::lcQMinifigDialog(QWidget *parent, void *data) :
 		colorPicker->setCurrentColor(options->Colors[itemIndex]);
 		colorPicker->blockSignals(false);
 	}
+
+	wizard->OnInitialUpdate();
 }
 
 lcQMinifigDialog::~lcQMinifigDialog()

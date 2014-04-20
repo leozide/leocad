@@ -18,6 +18,7 @@ class lcMatrix44;
 class lcContext;
 class lcMesh;
 struct lcMeshSection;
+struct lcRenderMesh;
 class lcTexture;
 
 class lcFile;

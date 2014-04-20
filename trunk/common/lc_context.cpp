@@ -2,6 +2,7 @@
 #include "lc_context.h"
 #include "lc_mesh.h"
 #include "lc_texture.h"
+#include "lc_colors.h"
 
 lcContext::lcContext()
 {
@@ -22,6 +23,12 @@ lcContext::~lcContext()
 
 void lcContext::SetDefaultState()
 {
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);
+
+	glEnable(GL_POLYGON_OFFSET_FILL);
+	glPolygonOffset(0.5f, 0.1f);
+
 	glEnableClientState(GL_VERTEX_ARRAY);
 
 	if (GL_HasVertexBufferObject())
@@ -183,4 +190,109 @@ void lcContext::DrawMeshSection(lcMesh* Mesh, lcMeshSection* Section)
 	}
 
 	glDrawElements(Section->PrimitiveType, Section->NumIndices, Mesh->mIndexType, mIndexBufferPointer + Section->IndexOffset);
+}
+
+void lcContext::DrawOpaqueMeshes(const lcMatrix44& ViewMatrix, const lcArray<lcRenderMesh>& OpaqueMeshes)
+{
+	for (int MeshIdx = 0; MeshIdx < OpaqueMeshes.GetSize(); MeshIdx++)
+	{
+		lcRenderMesh& RenderMesh = OpaqueMeshes[MeshIdx];
+		lcMesh* Mesh = RenderMesh.Mesh;
+
+		BindMesh(Mesh);
+		SetWorldViewMatrix(lcMul(*RenderMesh.WorldMatrix, ViewMatrix));
+
+		for (int SectionIdx = 0; SectionIdx < Mesh->mNumSections; SectionIdx++)
+		{
+			lcMeshSection* Section = &Mesh->mSections[SectionIdx];
+			int ColorIndex = Section->ColorIndex;
+
+			if (Section->PrimitiveType == GL_TRIANGLES)
+			{
+				if (ColorIndex == gDefaultColor)
+					ColorIndex = RenderMesh.ColorIndex;
+
+				if (lcIsColorTranslucent(ColorIndex))
+					continue;
+
+				if (RenderMesh.Focused)
+				{
+					float* Color = gColorList[ColorIndex].Value;
+					glColor4fv(lcVector4(Color[0] * 0.5f + 0.4000f * 0.5f, Color[1] * 0.5f + 0.2980f * 0.5f, Color[2] * 0.5f + 0.8980f * 0.5f, Color[3]));
+				}
+				else if (RenderMesh.Selected)
+				{
+					float* Color = gColorList[ColorIndex].Value;
+					glColor4fv(lcVector4(Color[0] * 0.5f + 0.8980f * 0.5f, Color[1] * 0.5f + 0.2980f * 0.5f, Color[2] * 0.5f + 0.4000f * 0.5f, Color[3]));
+				}
+				else
+					lcSetColor(ColorIndex);
+			}
+			else
+			{
+				if (RenderMesh.Focused)
+					lcSetColorFocused();
+				else if (RenderMesh.Selected)
+					lcSetColorSelected();
+				else if (ColorIndex == gEdgeColor)
+					lcSetEdgeColor(RenderMesh.ColorIndex);
+				else
+					lcSetColor(ColorIndex);
+			}
+
+			DrawMeshSection(Mesh, Section);
+		}
+	}
+}
+
+void lcContext::DrawTranslucentMeshes(const lcMatrix44& ViewMatrix, const lcArray<lcRenderMesh>& TranslucentMeshes)
+{
+	if (TranslucentMeshes.IsEmpty())
+		return;
+
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_BLEND);
+	glDepthMask(GL_FALSE);
+
+	for (int MeshIdx = 0; MeshIdx < TranslucentMeshes.GetSize(); MeshIdx++)
+	{
+		lcRenderMesh& RenderMesh = TranslucentMeshes[MeshIdx];
+		lcMesh* Mesh = RenderMesh.Mesh;
+
+		BindMesh(Mesh);
+		SetWorldViewMatrix(lcMul(*RenderMesh.WorldMatrix, ViewMatrix));
+
+		for (int SectionIdx = 0; SectionIdx < Mesh->mNumSections; SectionIdx++)
+		{
+			lcMeshSection* Section = &Mesh->mSections[SectionIdx];
+			int ColorIndex = Section->ColorIndex;
+
+			if (Section->PrimitiveType != GL_TRIANGLES)
+				continue;
+
+			if (ColorIndex == gDefaultColor)
+				ColorIndex = RenderMesh.ColorIndex;
+
+			if (!lcIsColorTranslucent(ColorIndex))
+				continue;
+
+			if (RenderMesh.Focused)
+			{
+				float* Color = gColorList[ColorIndex].Value;
+				glColor4fv(lcVector4(Color[0] * 0.5f + 0.4000f * 0.5f, Color[1] * 0.5f + 0.2980f * 0.5f, Color[2] * 0.5f + 0.8980f * 0.5f, Color[3]));
+			}
+			else if (RenderMesh.Selected)
+			{
+				float* Color = gColorList[ColorIndex].Value;
+				glColor4fv(lcVector4(Color[0] * 0.5f + 0.8980f * 0.5f, Color[1] * 0.5f + 0.2980f * 0.5f, Color[2] * 0.5f + 0.4000f * 0.5f, Color[3]));
+			}
+			else
+				lcSetColor(ColorIndex);
+
+			DrawMeshSection(Mesh, Section);
+		}
+	}
+
+	glDepthMask(GL_TRUE);
+	glDisable(GL_BLEND);
 }

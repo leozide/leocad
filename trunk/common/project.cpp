@@ -1525,7 +1525,7 @@ void Project::Render(View* View, bool ToMemory)
 	// Setup the projection and camera matrices.
 	View->UpdateProjection();
 
-	RenderScenePieces(View);
+	RenderScenePieces(View, !ToMemory);
 
 	if (!ToMemory)
 	{
@@ -1650,13 +1650,11 @@ int lcOpaqueRenderCompare(Piece* const& a, Piece* const& b)
 		return -1;
 }
 
-void Project::RenderScenePieces(View* view)
+void Project::RenderScenePieces(View* view, bool DrawInterface)
 {
 	const lcPreferences& Preferences = lcGetPreferences();
 
 	view->UpdateProjection();
-
-//	float AspectRatio = (float)view->mWidth / (float)view->mHeight;
 
 	if (Preferences.mLightingMode != LC_LIGHTING_FLAT)
 	{
@@ -1697,10 +1695,12 @@ void Project::RenderScenePieces(View* view)
 //	if (m_nScene & LC_SCENE_FLOOR)
 //		m_pTerrain->Render(view->mCamera, AspectRatio);
 
-	lcArray<Piece*> OpaquePieces(512);
-	lcArray<lcTranslucentRenderSection> TranslucentSections(512);
-
+	lcArray<lcRenderMesh> OpaqueMeshes(mPieces.GetSize());
+	lcArray<lcRenderMesh> TranslucentMeshes;
 	const lcMatrix44& ViewMatrix = view->mCamera->mWorldView;
+	lcContext* Context = view->mContext;
+
+	Context->SetLineWidth(Preferences.mLineWidth);
 
 	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 	{
@@ -1709,104 +1709,46 @@ void Project::RenderScenePieces(View* view)
 		if (!Piece->IsVisible(m_nCurStep))
 			continue;
 
-		bool Translucent = lcIsColorTranslucent(Piece->mColorIndex);
 		PieceInfo* Info = Piece->mPieceInfo;
+		lcRenderMesh RenderMesh;
+
+		RenderMesh.WorldMatrix = &Piece->mModelWorld;
+		RenderMesh.Mesh = Info->mMesh;
+		RenderMesh.ColorIndex = Piece->mColorIndex;
+
+		if (DrawInterface)
+		{
+			RenderMesh.Focused = Piece->IsFocused();
+			RenderMesh.Selected = Piece->IsSelected();
+		}
+		else
+		{
+			RenderMesh.Focused = false;
+			RenderMesh.Selected = false;
+		}
+
+		bool Translucent = lcIsColorTranslucent(Piece->mColorIndex);
 
 		if ((Info->mFlags & (LC_PIECE_HAS_SOLID | LC_PIECE_HAS_LINES)) || ((Info->mFlags & LC_PIECE_HAS_DEFAULT) && !Translucent))
-			OpaquePieces.AddSorted(Piece, lcOpaqueRenderCompare);
+			OpaqueMeshes.Add(RenderMesh);
 
 		if ((Info->mFlags & LC_PIECE_HAS_TRANSLUCENT) || ((Info->mFlags & LC_PIECE_HAS_DEFAULT) && Translucent))
 		{
 			lcVector3 Pos = lcMul31(Piece->mPosition, ViewMatrix);
 
-			lcTranslucentRenderSection RenderSection;
+			RenderMesh.Distance = Pos[2];
 
-			RenderSection.Distance = Pos[2];
-			RenderSection.piece = Piece;
-
-			TranslucentSections.AddSorted(RenderSection, lcTranslucentRenderCompare);
+			TranslucentMeshes.Add(RenderMesh);
 		}
 	}
 
-	lcContext* Context = view->mContext;
+	OpaqueMeshes.Sort(lcOpaqueRenderMeshCompare);
+	Context->DrawOpaqueMeshes(ViewMatrix, OpaqueMeshes);
 
-	for (int PieceIdx = 0; PieceIdx < OpaquePieces.GetSize(); PieceIdx++)
-	{
-		Piece* piece = OpaquePieces[PieceIdx];
-		lcMesh* Mesh = piece->mPieceInfo->mMesh;
+	TranslucentMeshes.Sort(lcTranslucentRenderMeshCompare);
+	Context->DrawTranslucentMeshes(ViewMatrix, TranslucentMeshes);
 
-		Context->BindMesh(Mesh);
-		Context->SetWorldViewMatrix(lcMul(piece->mModelWorld, ViewMatrix));
-		Context->SetLineWidth(piece->IsSelected() ? 2.0f * Preferences.mLineWidth : Preferences.mLineWidth);
-
-		for (int SectionIdx = 0; SectionIdx < Mesh->mNumSections; SectionIdx++)
-		{
-			lcMeshSection* Section = &Mesh->mSections[SectionIdx];
-			int ColorIdx = Section->ColorIndex;
-
-			if (Section->PrimitiveType == GL_TRIANGLES)
-			{
-				if (ColorIdx == gDefaultColor)
-					ColorIdx = piece->mColorIndex;
-
-				if (lcIsColorTranslucent(ColorIdx))
-					continue;
-
-				lcSetColor(ColorIdx);
-			}
-			else
-			{
-				if (piece->IsFocused())
-					lcSetColorFocused();
-				else if (piece->IsSelected())
-					lcSetColorSelected();
-				else if (ColorIdx == gEdgeColor)
-					lcSetEdgeColor(piece->mColorIndex);
-				else
-					lcSetColor(ColorIdx);
-			}
-
-			Context->DrawMeshSection(Mesh, Section);
-		}
-	}
-
-	if (TranslucentSections.GetSize())
-	{
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		glEnable(GL_BLEND);
-		glDepthMask(GL_FALSE);
-
-		for (int PieceIdx = 0; PieceIdx < TranslucentSections.GetSize(); PieceIdx++)
-		{
-			Piece* piece = TranslucentSections[PieceIdx].piece;
-			lcMesh* Mesh = piece->mPieceInfo->mMesh;
-
-			Context->BindMesh(Mesh);
-			Context->SetWorldViewMatrix(lcMul(piece->mModelWorld, ViewMatrix));
-
-			for (int SectionIdx = 0; SectionIdx < Mesh->mNumSections; SectionIdx++)
-			{
-				lcMeshSection* Section = &Mesh->mSections[SectionIdx];
-				int ColorIdx = Section->ColorIndex;
-
-				if (Section->PrimitiveType != GL_TRIANGLES)
-					continue;
-
-				if (ColorIdx == gDefaultColor)
-					ColorIdx = piece->mColorIndex;
-
-				if (!lcIsColorTranslucent(ColorIdx))
-					continue;
-
-				lcSetColor(ColorIdx);
-
-				Context->DrawMeshSection(Mesh, Section);
-			}
-		}
-
-		glDepthMask(GL_TRUE);
-		glDisable(GL_BLEND);
-	}
+	Context->UnbindMesh(); // context remove
 
 	if (Preferences.mLightingMode != LC_LIGHTING_FLAT)
 	{
@@ -1818,8 +1760,71 @@ void Project::RenderScenePieces(View* view)
 	if (mProperties.mFogEnabled)
 		glDisable(GL_FOG);
 
-	Context->SetLineWidth(Preferences.mLineWidth); // context remove
-	Context->UnbindMesh(); // context remove
+	if (DrawInterface)
+	{
+		Context->SetLineWidth(2.0f * Preferences.mLineWidth);
+
+		for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+		{
+			Piece* Piece = mPieces[PieceIdx];
+
+			if (!Piece->IsVisible(m_nCurStep) || !Piece->IsSelected())
+				continue;
+
+			PieceInfo* PieceInfo = Piece->mPieceInfo;
+
+			lcVector3 Min(PieceInfo->m_fDimensions[3], PieceInfo->m_fDimensions[4], PieceInfo->m_fDimensions[5]);
+			lcVector3 Max(PieceInfo->m_fDimensions[0], PieceInfo->m_fDimensions[1], PieceInfo->m_fDimensions[2]);
+			lcVector3 Edge((Max - Min) * 0.33f);
+
+			float Verts[48][3] =
+			{
+				{ Max[0], Max[1], Max[2] }, { Max[0] - Edge[0], Max[1], Max[2] },
+				{ Max[0], Max[1], Max[2] }, { Max[0], Max[1] - Edge[1], Max[2] },
+				{ Max[0], Max[1], Max[2] }, { Max[0], Max[1], Max[2] - Edge[2] },
+
+				{ Min[0], Max[1], Max[2] }, { Min[0] + Edge[0], Max[1], Max[2] },
+				{ Min[0], Max[1], Max[2] }, { Min[0], Max[1] - Edge[1], Max[2] },
+				{ Min[0], Max[1], Max[2] }, { Min[0], Max[1], Max[2] - Edge[2] },
+
+				{ Max[0], Min[1], Max[2] }, { Max[0] - Edge[0], Min[1], Max[2] },
+				{ Max[0], Min[1], Max[2] }, { Max[0], Min[1] + Edge[1], Max[2] },
+				{ Max[0], Min[1], Max[2] }, { Max[0], Min[1], Max[2] - Edge[2] },
+
+				{ Min[0], Min[1], Max[2] }, { Min[0] + Edge[0], Min[1], Max[2] },
+				{ Min[0], Min[1], Max[2] }, { Min[0], Min[1] + Edge[1], Max[2] },
+				{ Min[0], Min[1], Max[2] }, { Min[0], Min[1], Max[2] - Edge[2] },
+
+				{ Max[0], Max[1], Min[2] }, { Max[0] - Edge[0], Max[1], Min[2] },
+				{ Max[0], Max[1], Min[2] }, { Max[0], Max[1] - Edge[1], Min[2] },
+				{ Max[0], Max[1], Min[2] }, { Max[0], Max[1], Min[2] + Edge[2] },
+
+				{ Min[0], Max[1], Min[2] }, { Min[0] + Edge[0], Max[1], Min[2] },
+				{ Min[0], Max[1], Min[2] }, { Min[0], Max[1] - Edge[1], Min[2] },
+				{ Min[0], Max[1], Min[2] }, { Min[0], Max[1], Min[2] + Edge[2] },
+
+				{ Max[0], Min[1], Min[2] }, { Max[0] - Edge[0], Min[1], Min[2] },
+				{ Max[0], Min[1], Min[2] }, { Max[0], Min[1] + Edge[1], Min[2] },
+				{ Max[0], Min[1], Min[2] }, { Max[0], Min[1], Min[2] + Edge[2] },
+
+				{ Min[0], Min[1], Min[2] }, { Min[0] + Edge[0], Min[1], Min[2] },
+				{ Min[0], Min[1], Min[2] }, { Min[0], Min[1] + Edge[1], Min[2] },
+				{ Min[0], Min[1], Min[2] }, { Min[0], Min[1], Min[2] + Edge[2] },
+			};
+
+			Context->SetWorldViewMatrix(lcMul(Piece->mModelWorld, ViewMatrix));
+
+			if (Piece->IsFocused())
+				lcSetColorFocused();
+			else
+				lcSetColorSelected();
+
+			glVertexPointer(3, GL_FLOAT, 0, Verts);
+			glDrawArrays(GL_LINES, 0, 48);
+		}
+
+		Context->SetLineWidth(Preferences.mLineWidth); // context remove
+	}
 }
 
 void Project::RenderSceneObjects(View* view)

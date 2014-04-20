@@ -1,6 +1,8 @@
 #ifndef _LC_GLWIDGET_H_
 #define _LC_GLWIDGET_H_
 
+#include "lc_context.h"
+
 enum LC_CURSOR_TYPE
 {
 	LC_CURSOR_DEFAULT,
@@ -45,11 +47,12 @@ public:
 		mInputState.Control = false;
 		mInputState.Shift = false;
 		mInputState.Alt = false;
-		mContext = NULL;
+		mContext = new lcContext();
 	}
 
 	virtual ~lcGLWidget()
 	{
+		delete mContext;
 	}
 
 	void* GetExtensionAddress(const char* FunctionName);

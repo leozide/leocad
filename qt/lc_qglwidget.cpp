@@ -129,7 +129,6 @@ lcQGLWidget::lcQGLWidget(QWidget *parent, lcQGLWidget *share, lcGLWidget *owner,
 {
 	widget = owner;
 	widget->mWidget = this;
-	owner->mContext = new lcContext();
 
 	widget->MakeCurrent();
 	GL_InitializeSharedExtensions(widget);
@@ -148,9 +147,6 @@ lcQGLWidget::lcQGLWidget(QWidget *parent, lcQGLWidget *share, lcGLWidget *owner,
 
 lcQGLWidget::~lcQGLWidget()
 {
-	delete widget->mContext;
-	widget->mContext = NULL;
-
 	if (isView)
 		delete widget;
 }

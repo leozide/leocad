@@ -113,3 +113,28 @@ void PieceInfo::RenderPiece(int nColor)
 {
 	mMesh->Render(nColor, false, false);
 }
+
+void PieceInfo::AddRenderMeshes(const lcMatrix44& ViewMatrix, lcMatrix44* WorldMatrix, int ColorIndex, bool Focused, bool Selected, lcArray<lcRenderMesh>& OpaqueMeshes, lcArray<lcRenderMesh>& TranslucentMeshes)
+{
+	lcRenderMesh RenderMesh;
+
+	RenderMesh.WorldMatrix = WorldMatrix;
+	RenderMesh.Mesh = mMesh;
+	RenderMesh.ColorIndex = ColorIndex;
+	RenderMesh.Focused = Focused;
+	RenderMesh.Selected = Selected;
+
+	bool Translucent = lcIsColorTranslucent(ColorIndex);
+
+	if ((mFlags & (LC_PIECE_HAS_SOLID | LC_PIECE_HAS_LINES)) || ((mFlags & LC_PIECE_HAS_DEFAULT) && !Translucent))
+		OpaqueMeshes.Add(RenderMesh);
+
+	if ((mFlags & LC_PIECE_HAS_TRANSLUCENT) || ((mFlags & LC_PIECE_HAS_DEFAULT) && Translucent))
+	{
+		lcVector3 Pos = lcMul31((*WorldMatrix)[3], ViewMatrix);
+
+		RenderMesh.Distance = Pos[2];
+
+		TranslucentMeshes.Add(RenderMesh);
+	}
+}

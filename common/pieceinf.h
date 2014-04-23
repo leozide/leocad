@@ -6,6 +6,8 @@
 #include "opengl.h"
 #endif
 #include "lc_math.h"
+#include "lc_array.h"
+#include "lc_mesh.h"
 
 #define LC_PIECE_HAS_DEFAULT        0x01 // Piece has triangles using the default color
 #define LC_PIECE_HAS_SOLID          0x02 // Piece has triangles using a solid color
@@ -76,6 +78,7 @@ public:
 	// Operations
 	void ZoomExtents(float Fov, float Aspect, float* EyePos = NULL) const;
 	void RenderPiece(int nColor);
+	void AddRenderMeshes(const lcMatrix44& ViewMatrix, lcMatrix44* WorldMatrix, int ColorIndex, bool Focused, bool Selected, lcArray<lcRenderMesh>& OpaqueMeshes, lcArray<lcRenderMesh>& TranslucentMeshes);
 
 	void CreatePlaceholder(const char* Name);
 

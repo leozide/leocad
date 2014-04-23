@@ -1710,36 +1710,20 @@ void Project::RenderScenePieces(View* view, bool DrawInterface)
 			continue;
 
 		PieceInfo* Info = Piece->mPieceInfo;
-		lcRenderMesh RenderMesh;
-
-		RenderMesh.WorldMatrix = &Piece->mModelWorld;
-		RenderMesh.Mesh = Info->mMesh;
-		RenderMesh.ColorIndex = Piece->mColorIndex;
+		bool Focused, Selected;
 
 		if (DrawInterface)
 		{
-			RenderMesh.Focused = Piece->IsFocused();
-			RenderMesh.Selected = Piece->IsSelected();
+			Focused = Piece->IsFocused();
+			Selected = Piece->IsSelected();
 		}
 		else
 		{
-			RenderMesh.Focused = false;
-			RenderMesh.Selected = false;
+			Focused = false;
+			Selected = false;
 		}
 
-		bool Translucent = lcIsColorTranslucent(Piece->mColorIndex);
-
-		if ((Info->mFlags & (LC_PIECE_HAS_SOLID | LC_PIECE_HAS_LINES)) || ((Info->mFlags & LC_PIECE_HAS_DEFAULT) && !Translucent))
-			OpaqueMeshes.Add(RenderMesh);
-
-		if ((Info->mFlags & LC_PIECE_HAS_TRANSLUCENT) || ((Info->mFlags & LC_PIECE_HAS_DEFAULT) && Translucent))
-		{
-			lcVector3 Pos = lcMul31(Piece->mPosition, ViewMatrix);
-
-			RenderMesh.Distance = Pos[2];
-
-			TranslucentMeshes.Add(RenderMesh);
-		}
+		Info->AddRenderMeshes(ViewMatrix, &Piece->mModelWorld, Piece->mColorIndex, Focused, Selected, OpaqueMeshes, TranslucentMeshes);
 	}
 
 	OpaqueMeshes.Sort(lcOpaqueRenderMeshCompare);

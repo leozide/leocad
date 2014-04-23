@@ -1050,14 +1050,18 @@ void MinifigWizard::OnDraw()
 
 	Calculate();
 
-	for (int PieceIdx = 0; PieceIdx < LC_MFW_NUMITEMS; PieceIdx++)
-	{
-		if (!mMinifig->Parts[PieceIdx])
-			continue;
+	lcArray<lcRenderMesh> OpaqueMeshes(LC_MFW_NUMITEMS);
+	lcArray<lcRenderMesh> TranslucentMeshes;
 
-		mContext->SetWorldViewMatrix(lcMul(mMinifig->Matrices[PieceIdx], ViewMatrix));
-		mMinifig->Parts[PieceIdx]->RenderPiece(mMinifig->Colors[PieceIdx]);
-	}
+	for (int PieceIdx = 0; PieceIdx < LC_MFW_NUMITEMS; PieceIdx++)
+		if (mMinifig->Parts[PieceIdx])
+			mMinifig->Parts[PieceIdx]->AddRenderMeshes(ViewMatrix, &mMinifig->Matrices[PieceIdx], mMinifig->Colors[PieceIdx], false, false, OpaqueMeshes, TranslucentMeshes);
+
+	OpaqueMeshes.Sort(lcOpaqueRenderMeshCompare);
+	mContext->DrawOpaqueMeshes(ViewMatrix, OpaqueMeshes);
+
+	TranslucentMeshes.Sort(lcTranslucentRenderMeshCompare);
+	mContext->DrawTranslucentMeshes(ViewMatrix, TranslucentMeshes);
 }
 
 void MinifigWizard::OnLeftButtonDown()

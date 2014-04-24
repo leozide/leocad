@@ -16,7 +16,7 @@ public:
 		Ortho = 0,
 		Projection,
 		OUT_OF_RANGE,
-		Cycle,
+		Cycle
 	};
 
 	lcProjection()
@@ -53,24 +53,24 @@ public:
 		setTransformInput(pCamera, width, height);
 	}
 
-	inline lcVector3 ProjectPoint(const lcMatrix44 mWorldView, const lcVector3& Point) const
+	inline lcVector3 ProjectPoint(const lcMatrix44& WorldView, const lcVector3& Point) const
 	{
 		int viewport[4] = { 0, 0, mViewPixelWidth, mViewPixelHeight };
-		return lcProjectPoint(Point, mWorldView, mTransform, viewport);
+		return lcProjectPoint(Point, WorldView, mTransform, viewport);
 	}
 
-	inline lcVector3 UnprojectPoint(const lcMatrix44 mWorldView, const lcVector3& Point) const
+	inline lcVector3 UnprojectPoint(const lcMatrix44& WorldView, const lcVector3& Point) const
 	{
 		int viewport[4] = { 0, 0, mViewPixelWidth, mViewPixelHeight };
-		return lcUnprojectPoint(Point, mWorldView, mTransform, viewport);
+		return lcUnprojectPoint(Point, WorldView, mTransform, viewport);
 	}
 
-	inline void UnprojectPoints(const lcMatrix44 mWorldView, lcVector3* Points, int NumPoints) const
+	inline void UnprojectPoints(const lcMatrix44& WorldView, lcVector3* Points, int NumPoints) const
 	{
 		if (NumPoints > 0)
 		{
 			int viewport[4] = { 0, 0, mViewPixelWidth, mViewPixelHeight };
-			lcUnprojectPoints(Points, NumPoints, mWorldView, mTransform, viewport);
+			lcUnprojectPoints(Points, NumPoints, WorldView, mTransform, viewport);
 		}
 	}
 

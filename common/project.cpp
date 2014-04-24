@@ -517,7 +517,6 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 			}
 		}
 
-
 		for (int PieceIdx = FirstNewPiece; PieceIdx < mPieces.GetSize(); PieceIdx++)
 		{
 			Piece* Piece = mPieces[PieceIdx];
@@ -752,7 +751,7 @@ void Project::FileSave(lcFile* file, bool bUndo)
 	i = m_nCurStep; file->WriteS32(&i, 1);
 	file->WriteU32(0);//m_nScene
 
-	file->WriteS32(&i, mPieces.GetSize());
+	file->WriteS32(mPieces.GetSize());
 	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 		mPieces[PieceIdx]->FileSave(*file);
 

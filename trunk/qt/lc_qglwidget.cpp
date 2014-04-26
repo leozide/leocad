@@ -248,6 +248,26 @@ void lcQGLWidget::mouseReleaseEvent(QMouseEvent *event)
 	}
 }
 
+void lcQGLWidget::mouseDoubleClickEvent(QMouseEvent *event)
+{
+	float scale = deviceScale();
+
+	widget->mInputState.x = event->x() * scale;
+	widget->mInputState.y = widget->mHeight - event->y() * scale - 1;
+	widget->mInputState.Control = (event->modifiers() & Qt::ControlModifier) != 0;
+	widget->mInputState.Shift = (event->modifiers() & Qt::ShiftModifier) != 0;
+	widget->mInputState.Alt = (event->modifiers() & Qt::AltModifier) != 0;
+
+	switch (event->button())
+	{
+	case Qt::LeftButton:
+		widget->OnLeftButtonDoubleClick();
+		break;
+	default:
+		break;
+	}
+}
+
 void lcQGLWidget::mouseMoveEvent(QMouseEvent *event)
 {
 	float scale = deviceScale();

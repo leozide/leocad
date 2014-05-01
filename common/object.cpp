@@ -10,28 +10,18 @@
 
 #define LC_KEY_SAVE_VERSION 1 // LeoCAD 0.73
 
-// =============================================================================
-// Object class
-
-Object::Object(LC_OBJECT_TYPE nType)
+Object::Object(lcObjectType ObjectType)
 {
-  //  m_nState = 0;
-  //  m_strName[0] = '\0';
+	m_pInstructionKeys = NULL;
 
-  m_pInstructionKeys = NULL;
-
-  m_nObjectType = nType;
-  m_pKeyValues = NULL;
-
-  //  m_pParent = NULL;
-  //  m_pNext = NULL;
-  //  m_pNextRender = NULL;
+	mObjectType = ObjectType;
+	m_pKeyValues = NULL;
 }
 
 Object::~Object()
 {
-  delete []m_pKeyValues;
-  RemoveKeys();
+	delete []m_pKeyValues;
+	RemoveKeys();
 }
 
 bool Object::FileLoad(lcFile& file)

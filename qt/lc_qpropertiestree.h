@@ -1,7 +1,6 @@
 #ifndef _LC_QPROPERTIESWIDGET_H_
 #define _LC_QPROPERTIESWIDGET_H_
 
-class Object;
 struct lcPartProperties;
 class lcQPropertiesTreeDelegate;
 

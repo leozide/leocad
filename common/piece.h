@@ -1,7 +1,6 @@
 #ifndef _PIECE_H_
 #define _PIECE_H_
 
-class Piece;
 class Group;
 class PieceInfo;
 
@@ -28,11 +27,11 @@ enum LC_PK_TYPES
 	LC_PK_COUNT
 };
 
-class Piece : public Object
+class lcPiece : public lcObject
 {
 public:
-	Piece(PieceInfo* pPieceInfo);
-	~Piece();
+	lcPiece(PieceInfo* pPieceInfo);
+	~lcPiece();
 
 	virtual bool IsSelected() const
 	{

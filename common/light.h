@@ -4,8 +4,6 @@
 #include "object.h"
 #include "lc_math.h"
 
-class Light;
-class LightTarget;
 class View;
 
 #define LC_LIGHT_HIDDEN            0x0001
@@ -41,12 +39,12 @@ enum LC_LK_TYPES
 	LC_LK_COUNT
 };
 
-class Light : public Object
+class lcLight : public lcObject
 {
 public:
-	Light(float px, float py, float pz);
-	Light(float px, float py, float pz, float tx, float ty, float tz);
-	virtual ~Light();
+	lcLight(float px, float py, float pz);
+	lcLight(float px, float py, float pz, float tx, float ty, float tz);
+	virtual ~lcLight();
 
 	bool IsPointLight() const
 	{

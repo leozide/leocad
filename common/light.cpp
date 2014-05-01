@@ -26,7 +26,7 @@ static LC_OBJECT_KEY_INFO light_key_info[LC_LK_COUNT] =
 };
 
 // New omni light.
-Light::Light(float px, float py, float pz)
+lcLight::lcLight(float px, float py, float pz)
 	: Object(LC_OBJECT_LIGHT)
 {
 	Initialize();
@@ -40,7 +40,7 @@ Light::Light(float px, float py, float pz)
 }
 
 // New directional or spot light.
-Light::Light(float px, float py, float pz, float tx, float ty, float tz)
+lcLight::lcLight(float px, float py, float pz, float tx, float ty, float tz)
 	: Object(LC_OBJECT_LIGHT)
 {
 	Initialize();
@@ -53,7 +53,7 @@ Light::Light(float px, float py, float pz, float tx, float ty, float tz)
 	UpdatePosition(1);
 }
 
-void Light::Initialize()
+void lcLight::Initialize()
 {
 	mState = 0;
 	memset(m_strName, 0, sizeof(m_strName));
@@ -80,11 +80,11 @@ void Light::Initialize()
 	ChangeKey(1, true, &exponent, LC_LK_SPOT_EXPONENT);
 }
 
-Light::~Light()
+lcLight::~lcLight()
 {
 }
 
-void Light::CreateName(const lcArray<Light*>& Lights)
+void lcLight::CreateName(const lcArray<Light*>& Lights)
 {
 	int i, max = 0;
 
@@ -105,7 +105,7 @@ void Light::CreateName(const lcArray<Light*>& Lights)
 	sprintf(m_strName, "Light #%.2d", max+1);
 }
 
-void Light::RayTest(lcObjectRayTest& ObjectRayTest) const
+void lcLight::RayTest(lcObjectRayTest& ObjectRayTest) const
 {
 	if (IsPointLight())
 	{
@@ -152,7 +152,7 @@ void Light::RayTest(lcObjectRayTest& ObjectRayTest) const
 	}
 }
 
-void Light::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
+void lcLight::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
 {
 	if (IsPointLight())
 	{
@@ -205,7 +205,7 @@ void Light::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
 	}
 }
 
-void Light::Move(unsigned short nTime, bool bAddKey, float dx, float dy, float dz)
+void lcLight::Move(unsigned short nTime, bool bAddKey, float dx, float dy, float dz)
 {
 	lcVector3 MoveVec(dx, dy, dz);
 
@@ -224,7 +224,7 @@ void Light::Move(unsigned short nTime, bool bAddKey, float dx, float dy, float d
 	}
 }
 
-void Light::UpdatePosition(unsigned short nTime)
+void lcLight::UpdatePosition(unsigned short nTime)
 {
 	CalculateKeys(nTime);
 
@@ -257,7 +257,7 @@ void Light::UpdatePosition(unsigned short nTime)
 	}
 }
 
-void Light::Render(View* View)
+void lcLight::Render(View* View)
 {
 	float LineWidth = lcGetPreferences().mLineWidth;
 	const lcMatrix44& ViewMatrix = View->mCamera->mWorldView;
@@ -379,7 +379,7 @@ void Light::Render(View* View)
 	}
 }
 
-void Light::RenderCone(const lcMatrix44& ViewMatrix)
+void lcLight::RenderCone(const lcMatrix44& ViewMatrix)
 {
 	lcVector3 FrontVector(mTargetPosition - mPosition);
 	lcVector3 UpVector(1, 1, 1);
@@ -438,7 +438,7 @@ void Light::RenderCone(const lcMatrix44& ViewMatrix)
 	glLoadMatrixf(lcMul(lcMatrix44Translation(lcVector3(0, 0, -Length)), LightViewMatrix));
 }
 
-void Light::RenderTarget()
+void lcLight::RenderTarget()
 {
 	float box[24][3] =
 	{
@@ -460,7 +460,7 @@ void Light::RenderTarget()
 	glDrawArrays(GL_LINES, 0, 24);
 }
 
-void Light::RenderSphere()
+void lcLight::RenderSphere()
 {
 	const int Slices = 6;
 	const int NumIndices = 3 * Slices + 6 * Slices * (Slices - 2) + 3 * Slices;
@@ -541,7 +541,7 @@ void Light::RenderSphere()
 	glDrawElements(GL_TRIANGLES, NumIndices, GL_UNSIGNED_SHORT, Indices);
 }
 
-bool Light::Setup(int LightIndex)
+bool lcLight::Setup(int LightIndex)
 {
 	GLenum LightName = (GLenum)(GL_LIGHT0 + LightIndex);
 

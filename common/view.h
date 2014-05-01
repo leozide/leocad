@@ -4,7 +4,6 @@
 #include "lc_glwidget.h"
 #include "lc_projection.h"
 
-class Camera;
 class Project;
 
 class View : public lcGLWidget

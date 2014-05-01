@@ -4,11 +4,6 @@
 #include "lc_math.h"
 #include "lc_array.h"
 
-class Object;
-class Piece;
-class Camera;
-class Light;
-
 enum lcObjectType
 {
 	LC_OBJECT_PIECE,
@@ -34,7 +29,7 @@ struct LC_OBJECT_KEY_INFO
 
 struct lcObjectSection
 {
-	Object* Object;
+	lcObject* Object;
 	lcuintptr Section;
 };
 
@@ -62,11 +57,11 @@ struct lcObjectBoxTest
 	lcArray<lcObjectSection> ObjectSections;
 };
 
-class Object
+class lcObject
 {
 public:
-	Object(lcObjectType ObjectType);
-	virtual ~Object();
+	lcObject(lcObjectType ObjectType);
+	virtual ~lcObject();
 
 public:
 	bool IsPiece() const

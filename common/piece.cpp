@@ -27,7 +27,7 @@ static LC_OBJECT_KEY_INFO piece_key_info[LC_PK_COUNT] =
 /////////////////////////////////////////////////////////////////////////////
 // Piece construction/destruction
 
-Piece::Piece(PieceInfo* pPieceInfo)
+lcPiece::lcPiece(PieceInfo* pPieceInfo)
 	: Object (LC_OBJECT_PIECE)
 {
 	mPieceInfo = pPieceInfo;
@@ -50,7 +50,7 @@ Piece::Piece(PieceInfo* pPieceInfo)
 	ChangeKey(1, true, rot, LC_PK_ROTATION);
 }
 
-Piece::~Piece()
+lcPiece::~lcPiece()
 {
 	if (mPieceInfo != NULL)
 		mPieceInfo->Release();
@@ -60,13 +60,13 @@ Piece::~Piece()
 // Piece save/load
 
 // Use only when loading from a file
-void Piece::SetPieceInfo(PieceInfo* pPieceInfo)
+void lcPiece::SetPieceInfo(PieceInfo* pPieceInfo)
 {
 	mPieceInfo = pPieceInfo;
 	mPieceInfo->AddRef();
 }
 
-bool Piece::FileLoad(lcFile& file)
+bool lcPiece::FileLoad(lcFile& file)
 {
   lcuint8 version, ch;
 
@@ -244,7 +244,7 @@ bool Piece::FileLoad(lcFile& file)
   return true;
 }
 
-void Piece::FileSave(lcFile& file) const
+void lcPiece::FileSave(lcFile& file) const
 {
 	file.WriteU8(LC_PIECE_SAVE_VERSION);
 
@@ -283,7 +283,7 @@ void Piece::FileSave(lcFile& file) const
 	file.WriteS32(i);
 }
 
-void Piece::Initialize(float x, float y, float z, unsigned char nStep)
+void lcPiece::Initialize(float x, float y, float z, unsigned char nStep)
 {
 	m_nStepShow = nStep;
 
@@ -294,7 +294,7 @@ void Piece::Initialize(float x, float y, float z, unsigned char nStep)
 	UpdatePosition(1);
 }
 
-void Piece::CreateName(const lcArray<Piece*>& Pieces)
+void lcPiece::CreateName(const lcArray<Piece*>& Pieces)
 {
 	int i, max = 0;
 
@@ -311,7 +311,7 @@ void Piece::CreateName(const lcArray<Piece*>& Pieces)
 	sprintf (m_strName, "%s #%.2d", mPieceInfo->m_strDescription, max+1);
 }
 
-void Piece::InsertTime(unsigned short start, unsigned short time)
+void lcPiece::InsertTime(unsigned short start, unsigned short time)
 {
 	if (m_nStepShow >= start)
 		m_nStepShow = lcMin(m_nStepShow + time, 255);
@@ -322,7 +322,7 @@ void Piece::InsertTime(unsigned short start, unsigned short time)
 	Object::InsertTime(start, time);
 }
 
-void Piece::RemoveTime (unsigned short start, unsigned short time)
+void lcPiece::RemoveTime (unsigned short start, unsigned short time)
 {
 	if (m_nStepShow >= start)
 		m_nStepShow = lcMax(m_nStepShow - time, 1);
@@ -333,7 +333,7 @@ void Piece::RemoveTime (unsigned short start, unsigned short time)
 	Object::RemoveTime(start, time);
 }
 
-void Piece::RayTest(lcObjectRayTest& ObjectRayTest) const
+void lcPiece::RayTest(lcObjectRayTest& ObjectRayTest) const
 {
 	lcVector3 Min(mPieceInfo->m_fDimensions[3], mPieceInfo->m_fDimensions[4], mPieceInfo->m_fDimensions[5]);
 	lcVector3 Max(mPieceInfo->m_fDimensions[0], mPieceInfo->m_fDimensions[1], mPieceInfo->m_fDimensions[2]);
@@ -356,7 +356,7 @@ void Piece::RayTest(lcObjectRayTest& ObjectRayTest) const
 	}
 }
 
-void Piece::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
+void lcPiece::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
 {
 	lcVector3 Box[8] =
 	{
@@ -415,7 +415,7 @@ void Piece::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
 	}
 }
 
-void Piece::Move(unsigned short nTime, bool bAddKey, float dx, float dy, float dz)
+void lcPiece::Move(unsigned short nTime, bool bAddKey, float dx, float dy, float dz)
 {
 	mPosition[0] += dx;
 	mPosition[1] += dy;
@@ -426,7 +426,7 @@ void Piece::Move(unsigned short nTime, bool bAddKey, float dx, float dy, float d
 	mModelWorld.SetTranslation(mPosition);
 }
 
-bool Piece::IsVisible(unsigned short nTime)
+bool lcPiece::IsVisible(unsigned short nTime)
 {
 	if (mState & LC_PIECE_HIDDEN)
 		return false;
@@ -440,7 +440,7 @@ bool Piece::IsVisible(unsigned short nTime)
 	return false;
 }
 
-void Piece::CompareBoundingBox(float box[6])
+void lcPiece::CompareBoundingBox(float box[6])
 {
 	lcVector3 Points[8] =
 	{
@@ -467,12 +467,12 @@ void Piece::CompareBoundingBox(float box[6])
 	}
 }
 
-Group* Piece::GetTopGroup()
+Group* lcPiece::GetTopGroup()
 {
 	return m_pGroup ? m_pGroup->GetTopGroup() : NULL;
 }
 
-void Piece::DoGroup(Group* pGroup)
+void lcPiece::DoGroup(Group* pGroup)
 {
 	if (m_pGroup != NULL && m_pGroup != (Group*)-1 && m_pGroup > (Group*)0xFFFF)
 		m_pGroup->SetGroup(pGroup);
@@ -480,7 +480,7 @@ void Piece::DoGroup(Group* pGroup)
 		m_pGroup = pGroup;
 }
 
-void Piece::UnGroup(Group* pGroup)
+void lcPiece::UnGroup(Group* pGroup)
 {
 	if ((m_pGroup == pGroup) || (pGroup == NULL))
 		m_pGroup = NULL;
@@ -490,7 +490,7 @@ void Piece::UnGroup(Group* pGroup)
 }
 
 // Recalculates current position and connections
-void Piece::UpdatePosition(unsigned short nTime)
+void lcPiece::UpdatePosition(unsigned short nTime)
 {
 	CalculateKeys(nTime);
 

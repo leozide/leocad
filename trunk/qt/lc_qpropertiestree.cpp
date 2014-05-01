@@ -371,16 +371,8 @@ void lcQPropertiesTree::updateFocusObject(Object *newFocusObject)
 		setCamera(newFocusObject);
 		break;
 
-	case LC_OBJECT_CAMERA_TARGET:
-		setCamera(((CameraTarget*)newFocusObject)->GetParent());
-		break;
-
 	case LC_OBJECT_LIGHT:
 		setLight(newFocusObject);
-		break;
-
-	case LC_OBJECT_LIGHT_TARGET:
-		setLight(((LightTarget*)newFocusObject)->GetParent());
 		break;
 	}
 }

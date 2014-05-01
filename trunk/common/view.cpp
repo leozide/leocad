@@ -58,46 +58,46 @@ LC_CURSOR_TYPE View::GetCursor() const
 
 	switch (m_Project->GetAction())
 	{
-		case LC_ACTION_SELECT:
+		case LC_TOOL_SELECT:
 			if (mInputState.Control)
 				return LC_CURSOR_SELECT_GROUP;
 			else
 				return LC_CURSOR_SELECT;
 
-		case LC_ACTION_INSERT:
+		case LC_TOOL_INSERT:
 			return LC_CURSOR_BRICK;
 
-		case LC_ACTION_LIGHT:
+		case LC_TOOL_LIGHT:
 			return LC_CURSOR_LIGHT;
 
-		case LC_ACTION_SPOTLIGHT:
+		case LC_TOOL_SPOTLIGHT:
 			return LC_CURSOR_SPOTLIGHT;
 
-		case LC_ACTION_CAMERA:
+		case LC_TOOL_CAMERA:
 			return LC_CURSOR_CAMERA;
 
-		case LC_ACTION_MOVE:
+		case LC_TOOL_MOVE:
 			return LC_CURSOR_MOVE;
 
-		case LC_ACTION_ROTATE:
+		case LC_TOOL_ROTATE:
 			return LC_CURSOR_ROTATE;
 
-		case LC_ACTION_ERASER:
+		case LC_TOOL_ERASER:
 			return LC_CURSOR_DELETE;
 
-		case LC_ACTION_PAINT:
+		case LC_TOOL_PAINT:
 			return LC_CURSOR_PAINT;
 
-		case LC_ACTION_ZOOM:
+		case LC_TOOL_ZOOM:
 			return LC_CURSOR_ZOOM;
 
-		case LC_ACTION_ZOOM_REGION:
+		case LC_TOOL_ZOOM_REGION:
 			return LC_CURSOR_ZOOM_REGION;
 
-		case LC_ACTION_PAN:
+		case LC_TOOL_PAN:
 			return LC_CURSOR_PAN;
 
-		case LC_ACTION_ROTATE_VIEW:
+		case LC_TOOL_ROTATE_VIEW:
 			switch (m_Project->GetOverlayMode())
 			{
 				case LC_OVERLAY_ROTATE_VIEW_X:
@@ -111,7 +111,7 @@ LC_CURSOR_TYPE View::GetCursor() const
 					return LC_CURSOR_ROTATE_VIEW;
 			}
 
-		case LC_ACTION_ROLL:
+		case LC_TOOL_ROLL:
 			return LC_CURSOR_ROLL;
 
 		default:

@@ -208,22 +208,22 @@ enum lcObjectProperty
 	LC_CAMERA_NAME
 };
 
-enum LC_ACTIONS
+enum lcTool
 {
-	LC_ACTION_INSERT,
-	LC_ACTION_LIGHT,
-	LC_ACTION_SPOTLIGHT,
-	LC_ACTION_CAMERA,
-	LC_ACTION_SELECT,
-	LC_ACTION_MOVE,
-	LC_ACTION_ROTATE,
-	LC_ACTION_ERASER,
-	LC_ACTION_PAINT,
-	LC_ACTION_ZOOM,
-	LC_ACTION_PAN,
-	LC_ACTION_ROTATE_VIEW,
-	LC_ACTION_ROLL,
-	LC_ACTION_ZOOM_REGION
+	LC_TOOL_INSERT,
+	LC_TOOL_LIGHT,
+	LC_TOOL_SPOTLIGHT,
+	LC_TOOL_CAMERA,
+	LC_TOOL_SELECT,
+	LC_TOOL_MOVE,
+	LC_TOOL_ROTATE,
+	LC_TOOL_ERASER,
+	LC_TOOL_PAINT,
+	LC_TOOL_ZOOM,
+	LC_TOOL_PAN,
+	LC_TOOL_ROTATE_VIEW,
+	LC_TOOL_ROLL,
+	LC_TOOL_ZOOM_REGION
 };
 
 class Project
@@ -321,14 +321,21 @@ protected:
 	bool m_bUndoOriginal;
 	void CheckPoint (const char* text);
 
-	void AddPiece(Piece* pPiece);
-	void RemovePiece(Piece* pPiece);
 	bool RemoveSelectedObjects();
 	void GetPieceInsertPosition(Piece* OffsetPiece, lcVector3& Position, lcVector4& Rotation);
 	void GetPieceInsertPosition(View* view, int MouseX, int MouseY, lcVector3& Position, lcVector4& Orientation);
-	Object* FindObjectFromPoint(View* view, int x, int y, bool PiecesOnly = false);
-	void FindObjectsInBox(float x1, float y1, float x2, float y2, lcArray<Object*>& Objects);
+	lcObjectSection FindObjectFromPoint(View* view, int x, int y, bool PiecesOnly = false);
+	lcArray<lcObjectSection> FindObjectsInBox(View* View, float x1, float y1, float x2, float y2);
 	void SelectAndFocusNone(bool bFocusOnly);
+	void SelectGroup(Group* TopGroup, bool Select);
+
+	void FocusOrDeselectObject(const lcObjectSection& ObjectSection);
+	void ClearSelectionAndSetFocus(const lcObjectSection& ObjectSection)
+	{
+		ClearSelectionAndSetFocus(ObjectSection.Object, ObjectSection.Section);
+	}
+	void ClearSelectionAndSetFocus(Object* Object, lcuintptr Section);
+
 	void CalculateStep();
 	static int InstanceOfName(const String& existingString, const String& candidateString, String& baseNameOut );
 

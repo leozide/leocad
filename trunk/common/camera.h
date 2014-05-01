@@ -6,17 +6,21 @@
 #include "lc_array.h"
 #include "lc_projection.h"
 
-#define LC_CAMERA_HIDDEN            0x01
-#define LC_CAMERA_SELECTED          0x02
-#define LC_CAMERA_FOCUSED           0x04
-#define LC_CAMERA_TARGET_SELECTED   0x08
-#define LC_CAMERA_TARGET_FOCUSED    0x10
-#define LC_CAMERA_SIMPLE            0x20
-
 class Camera;
-class CameraTarget;
 class TiledRender;
 class View;
+
+#define LC_CAMERA_HIDDEN            0x0001
+#define LC_CAMERA_SIMPLE            0x0002
+#define LC_CAMERA_POSITION_SELECTED 0x0010
+#define LC_CAMERA_POSITION_FOCUSED  0x0020
+#define LC_CAMERA_TARGET_SELECTED   0x0040
+#define LC_CAMERA_TARGET_FOCUSED    0x0080
+#define LC_CAMERA_UPVECTOR_SELECTED 0x0100
+#define LC_CAMERA_UPVECTOR_FOCUSED  0x0200
+
+#define LC_CAMERA_SELECTION_MASK    (LC_CAMERA_POSITION_SELECTED | LC_CAMERA_TARGET_SELECTED | LC_CAMERA_UPVECTOR_SELECTED)
+#define LC_CAMERA_FOCUS_MASK        (LC_CAMERA_POSITION_FOCUSED | LC_CAMERA_TARGET_FOCUSED | LC_CAMERA_UPVECTOR_FOCUSED)
 
 enum LC_VIEWPOINT
 {
@@ -27,6 +31,13 @@ enum LC_VIEWPOINT
 	LC_VIEWPOINT_LEFT,
 	LC_VIEWPOINT_RIGHT,
 	LC_VIEWPOINT_HOME
+};
+
+enum lcCameraSection
+{
+	LC_CAMERA_SECTION_POSITION,
+	LC_CAMERA_SECTION_TARGET,
+	LC_CAMERA_SECTION_UPVECTOR
 };
 
 typedef enum
@@ -45,30 +56,6 @@ enum LC_CK_TYPES
 	LC_CK_COUNT
 };
 
-class CameraTarget : public Object
-{
-public:
-	CameraTarget(Camera *pParent);
-	virtual ~CameraTarget();
-
-public:
-	virtual void MinIntersectDist(lcClickLine* ClickLine);
-	virtual bool IntersectsVolume(const lcVector4 Planes[6]) const;
-	void Select(bool bSelecting, bool bFocus, bool bMultiple);
-	void Move(unsigned short nTime, bool bAddKey, float x, float y, float z)
-	{
-		// FIXME: move the position handling to the camera target
-	}
-
-	const char* GetName() const;
-
-	Camera* GetParent() const
-	{ return m_pParent; }
-
-protected:
-	Camera* m_pParent;
-};
-
 class Camera : public Object
 {
 public:
@@ -83,61 +70,173 @@ public:
 
 	void CreateName(const lcArray<Camera*>& Cameras);
 
-	CameraTarget* GetTarget() const
-	{
-		return m_pTarget;
-	}
-
 	bool IsSimple() const
 	{
-		return (m_nState & LC_CAMERA_SIMPLE) != 0;
+		return (mState & LC_CAMERA_SIMPLE) != 0;
+	}
+
+	virtual bool IsSelected() const
+	{
+		return (mState & LC_CAMERA_SELECTION_MASK) != 0;
+	}
+
+	virtual bool IsSelected(lcuintptr Section) const
+	{
+		switch (Section)
+		{
+		case LC_CAMERA_SECTION_POSITION:
+			return (mState & LC_CAMERA_POSITION_SELECTED) != 0;
+			break;
+
+		case LC_CAMERA_SECTION_TARGET:
+			return (mState & LC_CAMERA_TARGET_SELECTED) != 0;
+			break;
+
+		case LC_CAMERA_SECTION_UPVECTOR:
+			return (mState & LC_CAMERA_UPVECTOR_SELECTED) != 0;
+			break;
+		}
+		return false;
+	}
+
+	virtual void SetSelected(bool Selected)
+	{
+		if (Selected)
+			mState |= LC_CAMERA_SELECTION_MASK;
+		else
+			mState &= ~(LC_CAMERA_SELECTION_MASK | LC_CAMERA_FOCUS_MASK);
+	}
+
+	virtual void SetSelected(lcuintptr Section, bool Selected)
+	{
+		switch (Section)
+		{
+		case LC_CAMERA_SECTION_POSITION:
+			if (Selected)
+				mState |= LC_CAMERA_POSITION_SELECTED;
+			else
+				mState &= ~(LC_CAMERA_POSITION_SELECTED | LC_CAMERA_POSITION_FOCUSED);
+			break;
+
+		case LC_CAMERA_SECTION_TARGET:
+			if (Selected)
+				mState |= LC_CAMERA_TARGET_SELECTED;
+			else
+				mState &= ~(LC_CAMERA_TARGET_SELECTED | LC_CAMERA_TARGET_FOCUSED);
+			break;
+
+		case LC_CAMERA_SECTION_UPVECTOR:
+			if (Selected)
+				mState |= LC_CAMERA_UPVECTOR_SELECTED;
+			else
+				mState &= ~(LC_CAMERA_UPVECTOR_SELECTED | LC_CAMERA_UPVECTOR_FOCUSED);
+			break;
+		}
+	}
+
+	virtual bool IsFocused() const
+	{
+		return (mState & LC_CAMERA_FOCUS_MASK) != 0;
+	}
+
+	virtual bool IsFocused(lcuintptr Section) const
+	{
+		switch (Section)
+		{
+		case LC_CAMERA_SECTION_POSITION:
+			return (mState & LC_CAMERA_POSITION_FOCUSED) != 0;
+			break;
+
+		case LC_CAMERA_SECTION_TARGET:
+			return (mState & LC_CAMERA_TARGET_FOCUSED) != 0;
+			break;
+
+		case LC_CAMERA_SECTION_UPVECTOR:
+			return (mState & LC_CAMERA_UPVECTOR_FOCUSED) != 0;
+			break;
+		}
+		return false;
+	}
+
+	virtual void SetFocused(lcuintptr Section, bool Focus)
+	{
+		switch (Section)
+		{
+		case LC_CAMERA_SECTION_POSITION:
+			if (Focus)
+				mState |= LC_CAMERA_POSITION_SELECTED | LC_CAMERA_POSITION_FOCUSED;
+			else
+				mState &= ~(LC_CAMERA_POSITION_SELECTED | LC_CAMERA_POSITION_FOCUSED);
+			break;
+
+		case LC_CAMERA_SECTION_TARGET:
+			if (Focus)
+				mState |= LC_CAMERA_TARGET_SELECTED | LC_CAMERA_TARGET_FOCUSED;
+			else
+				mState &= ~(LC_CAMERA_TARGET_SELECTED | LC_CAMERA_TARGET_FOCUSED);
+			break;
+
+		case LC_CAMERA_SECTION_UPVECTOR:
+			if (Focus)
+				mState |= LC_CAMERA_UPVECTOR_SELECTED | LC_CAMERA_UPVECTOR_FOCUSED;
+			else
+				mState &= ~(LC_CAMERA_UPVECTOR_SELECTED | LC_CAMERA_UPVECTOR_FOCUSED);
+			break;
+		}
+	}
+
+	virtual lcuintptr GetFocusSection() const
+	{
+		if (mState & LC_CAMERA_POSITION_FOCUSED)
+			return LC_CAMERA_SECTION_POSITION;
+
+		if (mState & LC_CAMERA_TARGET_FOCUSED)
+			return LC_CAMERA_SECTION_TARGET;
+
+		if (mState & LC_CAMERA_UPVECTOR_FOCUSED)
+			return LC_CAMERA_SECTION_UPVECTOR;
+
+		return ~0;
+	}
+
+	virtual lcVector3 GetSectionPosition(lcuintptr Section) const
+	{
+		switch (Section)
+		{
+		case LC_CAMERA_SECTION_POSITION:
+			return mPosition;
+
+		case LC_CAMERA_SECTION_TARGET:
+			return mTargetPosition;
+
+		case LC_CAMERA_SECTION_UPVECTOR:
+			return lcMul31(lcVector3(0, 1, 0), lcMatrix44AffineInverse(mWorldView));
+		}
+
+		return lcVector3(0.0f, 0.0f, 0.0f);
 	}
 
 
 
 
 public:
-	void Hide()
-		{ m_nState = LC_CAMERA_HIDDEN; }
-	void UnHide()
-		{ m_nState &= ~LC_CAMERA_HIDDEN; }
+//	void Hide()
+//		{ mState = LC_CAMERA_HIDDEN; }
+//	void UnHide()
+//		{ mState &= ~LC_CAMERA_HIDDEN; }
 	char* GetName()
 		{ return m_strName; }
 	bool IsSide()
 		{ return m_nType < LC_CAMERA_MAIN; }
-	bool IsVisible()
-		{ return (m_nState & LC_CAMERA_HIDDEN) == 0; }
-	bool IsSelected()
-		{ return (m_nState & (LC_CAMERA_SELECTED|LC_CAMERA_TARGET_SELECTED)) != 0; }
-	bool IsEyeSelected()
-		{ return (m_nState & LC_CAMERA_SELECTED) != 0; } 
-	bool IsTargetSelected()
-		{ return (m_nState & LC_CAMERA_TARGET_SELECTED) != 0; } 
-	bool IsEyeFocused()
-		{ return (m_nState & LC_CAMERA_FOCUSED) != 0; } 
-	bool IsTargetFocused()
-		{ return (m_nState & LC_CAMERA_TARGET_FOCUSED) != 0; } 
-
-	/*
-	void Select()
-		{ m_nState |= (LC_CAMERA_SELECTED|LC_CAMERA_TARGET_SELECTED); } 
-	void UnSelect()
-		{ m_nState &= ~(LC_CAMERA_SELECTED|LC_CAMERA_FOCUSED|LC_CAMERA_TARGET_SELECTED|LC_CAMERA_TARGET_FOCUSED); }
-	void UnFocus()
-		{ m_nState &= ~(LC_CAMERA_FOCUSED|LC_CAMERA_TARGET_FOCUSED); } 
-	void FocusEye()
-		{ m_nState |= (LC_CAMERA_FOCUSED|LC_CAMERA_SELECTED); } 
-	void FocusTarget()
-		{ m_nState |= (LC_CAMERA_TARGET_FOCUSED|LC_CAMERA_TARGET_SELECTED); } 
-	*/
-
-	void SelectTarget(bool bSelecting, bool bFocus, bool bMultiple);
+	bool IsVisible() const
+		{ return (mState & LC_CAMERA_HIDDEN) == 0; }
 
 public:
+	virtual void RayTest(lcObjectRayTest& ObjectRayTest) const;
+	virtual void BoxTest(lcObjectBoxTest& ObjectBoxTest) const;
+
 	bool FileLoad(lcFile& file);
 	void FileSave(lcFile& file) const;
-	virtual void MinIntersectDist(lcClickLine* ClickLine);
-	virtual bool IntersectsVolume(const lcVector4 Planes[6]) const;
 	void Select(bool bSelecting, bool bFocus, bool bMultiple);
 
 
@@ -177,11 +276,7 @@ public:
 protected:
 	void Initialize();
 
-	// Camera target
-	CameraTarget* m_pTarget;
-
-	// Attributes
-	unsigned char m_nState;
+	lcuint32 mState;
 	unsigned char m_nType;
 
 	TiledRender* m_pTR;

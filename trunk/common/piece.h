@@ -9,9 +9,17 @@ class PieceInfo;
 #include "lc_colors.h"
 #include "lc_math.h"
 
-#define LC_PIECE_HIDDEN		0x01
-#define LC_PIECE_SELECTED	0x02
-#define LC_PIECE_FOCUSED	0x04
+#define LC_PIECE_HIDDEN             0x01
+#define LC_PIECE_POSITION_SELECTED  0x02
+#define LC_PIECE_POSITION_FOCUSED   0x04
+
+#define LC_PIECE_SELECTION_MASK     (LC_PIECE_POSITION_SELECTED)
+#define LC_PIECE_FOCUS_MASK         (LC_PIECE_POSITION_FOCUSED)
+
+enum lcPieceSection
+{
+	LC_PIECE_SECTION_POSITION
+};
 
 enum LC_PK_TYPES
 {
@@ -23,33 +31,96 @@ enum LC_PK_TYPES
 class Piece : public Object
 {
 public:
-	Piece (PieceInfo* pPieceInfo);
-	~Piece ();
+	Piece(PieceInfo* pPieceInfo);
+	~Piece();
 
-	void Select(bool bSelecting, bool bFocus, bool bMultiple);
+	virtual bool IsSelected() const
+	{
+		return (mState & LC_PIECE_SELECTION_MASK) != 0;
+	}
+
+	virtual bool IsSelected(lcuintptr Section) const
+	{
+		return (mState & LC_PIECE_SELECTION_MASK) != 0;
+	}
+
+	virtual void SetSelected(bool Selected)
+	{
+		if (Selected)
+			mState |= LC_PIECE_SELECTION_MASK;
+		else
+			mState &= ~(LC_PIECE_SELECTION_MASK | LC_PIECE_FOCUS_MASK);
+	}
+
+	virtual void SetSelected(lcuintptr Section, bool Selected)
+	{
+		if (Selected)
+			mState |= LC_PIECE_POSITION_SELECTED;
+		else
+			mState &= ~(LC_PIECE_SELECTION_MASK | LC_PIECE_FOCUS_MASK);
+	}
+
+	virtual bool IsFocused() const
+	{
+		return (mState & LC_PIECE_FOCUS_MASK) != 0;
+	}
+
+	virtual bool IsFocused(lcuintptr Section) const
+	{
+		return (mState & LC_PIECE_FOCUS_MASK) != 0;
+	}
+
+	virtual void SetFocused(lcuintptr Section, bool Focused)
+	{
+		if (Focused)
+			mState |= LC_PIECE_POSITION_SELECTED | LC_PIECE_POSITION_FOCUSED;
+		else
+			mState &= ~LC_PIECE_FOCUS_MASK;
+	}
+
+	virtual lcuintptr GetFocusSection() const
+	{
+		if (mState & LC_PIECE_POSITION_FOCUSED)
+			return LC_PIECE_SECTION_POSITION;
+
+		return ~0;
+	}
+
+	virtual lcVector3 GetSectionPosition(lcuintptr Section) const
+	{
+		switch (Section)
+		{
+		case LC_PIECE_SECTION_POSITION:
+			return mPosition;
+		}
+
+		return lcVector3(0.0f, 0.0f, 0.0f);
+	}
+
+	virtual void RayTest(lcObjectRayTest& ObjectRayTest) const;
+	virtual void BoxTest(lcObjectBoxTest& ObjectBoxTest) const;
+
 	virtual void InsertTime(unsigned short start, unsigned short time);
 	virtual void RemoveTime(unsigned short start, unsigned short time);
-	virtual bool IntersectsVolume(const lcVector4 Planes[6]) const;
 
-
-
-
-
-	void Hide()
-		{ m_nState = LC_PIECE_HIDDEN; }
-	void UnHide()
-		{ m_nState &= ~LC_PIECE_HIDDEN; }
 	bool IsHidden()
-		{ return (m_nState & LC_PIECE_HIDDEN) != 0; }
-	bool IsSelected()
-		{ return (m_nState & LC_PIECE_SELECTED) != 0; }
-	bool IsFocused()
-		{ return (m_nState & LC_PIECE_FOCUSED) != 0; }
+	{
+		return (mState & LC_PIECE_HIDDEN) != 0;
+	}
+
+	void SetHidden(bool Hidden)
+	{
+		if (Hidden)
+			mState |= LC_PIECE_HIDDEN;
+		else
+			mState &= ~LC_PIECE_HIDDEN;
+	}
 
 	const char* GetName() const
-	{ return m_strName; }
+	{
+		return m_strName;
+	}
 
-	virtual void MinIntersectDist(lcClickLine* ClickLine);
 	bool IsVisible(unsigned short nTime);
 	void Initialize(float x, float y, float z, unsigned char nStep);
 	void CreateName(const lcArray<Piece*>& Pieces);
@@ -110,7 +181,7 @@ protected:
 	lcuint8 m_nStepShow;
 	lcuint8 m_nStepHide;
 
-	lcuint8 m_nState;
+	lcuint8 mState;
 	char m_strName[81];
 };
 

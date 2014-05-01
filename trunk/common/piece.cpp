@@ -31,7 +31,7 @@ Piece::Piece(PieceInfo* pPieceInfo)
 	: Object (LC_OBJECT_PIECE)
 {
 	mPieceInfo = pPieceInfo;
-	m_nState = 0;
+	mState = 0;
 	mColorIndex = 0;
 	mColorCode = 0;
 	m_nStepShow = 1;
@@ -206,8 +206,10 @@ bool Piece::FileLoad(lcFile& file)
 
     if (version > 7)
     {
-      file.ReadU8(&m_nState, 1);
-      Select (false, false, false);
+      lcuint8 Hidden;
+      file.ReadU8(&Hidden, 1);
+	  if (Hidden & 1)
+		  mState |= LC_PIECE_HIDDEN;
       file.ReadU8(&ch, 1);
       file.ReadBuffer(m_strName, ch);
     }
@@ -216,7 +218,7 @@ bool Piece::FileLoad(lcFile& file)
       lcint32 hide;
       file.ReadS32(&hide, 1);
       if (hide != 0)
-        m_nState |= LC_PIECE_HIDDEN;
+        mState |= LC_PIECE_HIDDEN;
       file.ReadBuffer(m_strName, 81);
     }
 
@@ -236,7 +238,7 @@ bool Piece::FileLoad(lcFile& file)
 
     file.ReadU8(&ch, 1);
     if (ch & 0x01)
-      m_nState |= LC_PIECE_HIDDEN;
+      mState |= LC_PIECE_HIDDEN;
   }
 
   return true;
@@ -256,7 +258,7 @@ void Piece::FileSave(lcFile& file) const
 	file.WriteU16(100); // m_nFrameHide
 
 	// version 8
-	file.WriteU8(m_nState);
+	file.WriteU8(mState & LC_PIECE_HIDDEN ? 1 : 0);
 
 	lcuint8 Length = strlen(m_strName);
 	file.WriteU8(Length);
@@ -309,24 +311,6 @@ void Piece::CreateName(const lcArray<Piece*>& Pieces)
 	sprintf (m_strName, "%s #%.2d", mPieceInfo->m_strDescription, max+1);
 }
 
-void Piece::Select (bool bSelecting, bool bFocus, bool bMultiple)
-{
-  if (bSelecting == true)
-  {
-    if (bFocus == true)
-      m_nState |= (LC_PIECE_FOCUSED|LC_PIECE_SELECTED);
-    else
-      m_nState |= LC_PIECE_SELECTED;
-  }
-  else
-  {
-    if (bFocus == true)
-      m_nState &= ~(LC_PIECE_FOCUSED);
-    else
-      m_nState &= ~(LC_PIECE_SELECTED|LC_PIECE_FOCUSED);
-  }
-}
-
 void Piece::InsertTime(unsigned short start, unsigned short time)
 {
 	if (m_nStepShow >= start)
@@ -334,9 +318,6 @@ void Piece::InsertTime(unsigned short start, unsigned short time)
 
 	if (m_nStepHide >= start)
 		m_nStepHide = lcMin(m_nStepHide + time, 255);
-
-	if (m_nStepShow > lcGetActiveProject()->GetCurrentTime())
-		Select (false, false, false);
 
 	Object::InsertTime(start, time);
 }
@@ -349,35 +330,34 @@ void Piece::RemoveTime (unsigned short start, unsigned short time)
 	if (m_nStepHide != 255)
 		m_nStepHide = lcMax(m_nStepHide - time, 1);
 
-	if (m_nStepHide < lcGetActiveProject()->GetCurrentTime())
-		Select (false, false, false);
-
 	Object::RemoveTime(start, time);
 }
 
-void Piece::MinIntersectDist(lcClickLine* ClickLine)
+void Piece::RayTest(lcObjectRayTest& ObjectRayTest) const
 {
-	lcMatrix44 WorldModel = lcMatrix44AffineInverse(mModelWorld);
-
-	lcVector3 Start = lcMul31(ClickLine->Start, WorldModel);
-	lcVector3 End = lcMul31(ClickLine->End, WorldModel);
-
 	lcVector3 Min(mPieceInfo->m_fDimensions[3], mPieceInfo->m_fDimensions[4], mPieceInfo->m_fDimensions[5]);
 	lcVector3 Max(mPieceInfo->m_fDimensions[0], mPieceInfo->m_fDimensions[1], mPieceInfo->m_fDimensions[2]);
-	float Dist;
 
-	if (!lcBoundingBoxRayMinIntersectDistance(Min, Max, Start, End, &Dist, NULL) || (Dist >= ClickLine->MinDist))
+	lcMatrix44 WorldModel = lcMatrix44AffineInverse(mModelWorld);
+
+	lcVector3 Start = lcMul31(ObjectRayTest.Start, WorldModel);
+	lcVector3 End = lcMul31(ObjectRayTest.End, WorldModel);
+
+	float Distance;
+	if (!lcBoundingBoxRayMinIntersectDistance(Min, Max, Start, End, &Distance, NULL) || (Distance >= ObjectRayTest.Distance))
 		return;
 
 	lcVector3 Intersection;
 
-	if (mPieceInfo->mMesh->MinIntersectDist(Start, End, ClickLine->MinDist, Intersection))
-		ClickLine->Closest = this;
+	if (mPieceInfo->mMesh->MinIntersectDist(Start, End, ObjectRayTest.Distance, Intersection))
+	{
+		ObjectRayTest.ObjectSection.Object = const_cast<Piece*>(this);
+		ObjectRayTest.ObjectSection.Section = 0;
+	}
 }
 
-bool Piece::IntersectsVolume(const lcVector4 Planes[6]) const
+void Piece::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
 {
-	// First check the bounding box for quick rejection.
 	lcVector3 Box[8] =
 	{
 		lcVector3(mPieceInfo->m_fDimensions[0], mPieceInfo->m_fDimensions[1], mPieceInfo->m_fDimensions[5]),
@@ -390,7 +370,6 @@ bool Piece::IntersectsVolume(const lcVector4 Planes[6]) const
 		lcVector3(mPieceInfo->m_fDimensions[3], mPieceInfo->m_fDimensions[1], mPieceInfo->m_fDimensions[2])
 	};
 
-	// Transform the planes to local space.
 	lcMatrix44 WorldToLocal = lcMatrix44FromAxisAngle(lcVector3(mRotation[0], mRotation[1], mRotation[2]), -mRotation[3] * LC_DTOR);
 	WorldToLocal.SetTranslation(lcMul31(lcVector3(-mPosition[0], -mPosition[1], -mPosition[2]), WorldToLocal));
 
@@ -400,11 +379,10 @@ bool Piece::IntersectsVolume(const lcVector4 Planes[6]) const
 
 	for (i = 0; i < NumPlanes; i++)
 	{
-		lcVector3 PlaneNormal = lcMul30(Planes[i], WorldToLocal);
-		LocalPlanes[i] = lcVector4(PlaneNormal, Planes[i][3] - lcDot3(WorldToLocal[3], PlaneNormal));
+		lcVector3 PlaneNormal = lcMul30(ObjectBoxTest.Planes[i], WorldToLocal);
+		LocalPlanes[i] = lcVector4(PlaneNormal, ObjectBoxTest.Planes[i][3] - lcDot3(WorldToLocal[3], PlaneNormal));
 	}
 
-	// Start by testing trivial reject/accept cases.
 	int Outcodes[8];
 
 	for (i = 0; i < 8; i++)
@@ -426,18 +404,15 @@ bool Piece::IntersectsVolume(const lcVector4 Planes[6]) const
 		OutcodesOR |= Outcodes[i];
 	}
 
-	// All corners outside the same plane.
 	if (OutcodesAND != 0)
-		return false;
+		return;
 
-	// All corners inside the volume.
-	if (OutcodesOR == 0)
-		return true;
-
-	// Partial intersection, so check if any triangles are inside.
-	bool Hit = mPieceInfo->mMesh->IntersectsPlanes(LocalPlanes);
-
-	return Hit;
+	if (OutcodesOR == 0 || mPieceInfo->mMesh->IntersectsPlanes(LocalPlanes))
+	{
+		lcObjectSection& ObjectSection = ObjectBoxTest.ObjectSections.Add();
+		ObjectSection.Object = const_cast<Piece*>(this);
+		ObjectSection.Section = 0;
+	}
 }
 
 void Piece::Move(unsigned short nTime, bool bAddKey, float dx, float dy, float dz)
@@ -453,7 +428,7 @@ void Piece::Move(unsigned short nTime, bool bAddKey, float dx, float dy, float d
 
 bool Piece::IsVisible(unsigned short nTime)
 {
-	if (m_nState & LC_PIECE_HIDDEN)
+	if (mState & LC_PIECE_HIDDEN)
 		return false;
 
 	if (m_nStepShow > nTime)
@@ -461,6 +436,7 @@ bool Piece::IsVisible(unsigned short nTime)
 
 	if ((m_nStepHide == 255) || (m_nStepHide > nTime))
 		return true;
+
 	return false;
 }
 
@@ -516,9 +492,6 @@ void Piece::UnGroup(Group* pGroup)
 // Recalculates current position and connections
 void Piece::UpdatePosition(unsigned short nTime)
 {
-	if (!IsVisible(nTime))
-		m_nState &= ~(LC_PIECE_SELECTED|LC_PIECE_FOCUSED);
-
 	CalculateKeys(nTime);
 
 	mModelWorld = lcMatrix44FromAxisAngle(lcVector3(mRotation[0], mRotation[1], mRotation[2]), mRotation[3] * LC_DTOR);

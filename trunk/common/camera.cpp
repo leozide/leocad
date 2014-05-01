@@ -22,83 +22,13 @@ static LC_OBJECT_KEY_INFO camera_key_info[LC_CK_COUNT] =
 	{ "Camera Up Vector", 3, LC_CK_UP }
 };
 
-// =============================================================================
-// CameraTarget class
-
-CameraTarget::CameraTarget(Camera *pParent)
-	: Object(LC_OBJECT_CAMERA_TARGET)
-{
-	m_pParent = pParent;
-	/*
-	strcpy (m_strName, pParent->GetName ());
-	m_strName[LC_OBJECT_NAME_LEN-8] = '\0';
-	strcat (m_strName, ".Target");
-	*/
-}
-
-CameraTarget::~CameraTarget()
-{
-}
-
-void CameraTarget::MinIntersectDist(lcClickLine* ClickLine)
-{
-	lcVector3 Min = lcVector3(-0.2f, -0.2f, -0.2f);
-	lcVector3 Max = lcVector3(0.2f, 0.2f, 0.2f);
-
-	lcMatrix44 WorldView = ((Camera*)m_pParent)->mWorldView;
-	WorldView.SetTranslation(lcMul30(-((Camera*)m_pParent)->mTargetPosition, WorldView));
-
-	lcVector3 Start = lcMul31(ClickLine->Start, WorldView);
-	lcVector3 End = lcMul31(ClickLine->End, WorldView);
-
-	float Dist;
-	if (lcBoundingBoxRayMinIntersectDistance(Min, Max, Start, End, &Dist, NULL) && (Dist < ClickLine->MinDist))
-	{
-		ClickLine->Closest = this;
-		ClickLine->MinDist = Dist;
-	}
-}
-
-bool CameraTarget::IntersectsVolume(const lcVector4 Planes[6]) const
-{
-	lcVector3 Min(-0.2f, -0.2f, -0.2f);
-	lcVector3 Max(0.2f, 0.2f, 0.2f);
-
-	// Transform the planes to local space.
-	lcVector4 LocalPlanes[6];
-
-	lcMatrix44 WorldView = m_pParent->mWorldView;
-	WorldView.SetTranslation(lcMul30(-m_pParent->mTargetPosition, WorldView));
-
-	for (int PlaneIdx = 0; PlaneIdx < 6; PlaneIdx++)
-	{
-		lcVector3 Normal = lcMul30(lcVector3(Planes[PlaneIdx][0], Planes[PlaneIdx][1], Planes[PlaneIdx][2]), WorldView);
-		LocalPlanes[PlaneIdx] = lcVector4(Normal, Planes[PlaneIdx][3] - lcDot3(WorldView[3], Normal));
-	}
-
-	return lcBoundingBoxIntersectsVolume(Min, Max, LocalPlanes);
-}
-
-void CameraTarget::Select(bool bSelecting, bool bFocus, bool bMultiple)
-{
-	m_pParent->SelectTarget(bSelecting, bFocus, bMultiple);
-}
-
-const char* CameraTarget::GetName() const
-{
-	return m_pParent->GetName();
-}
-
-/////////////////////////////////////////////////////////////////////////////
-// Camera construction/destruction
-
 Camera::Camera(bool Simple)
 	: Object(LC_OBJECT_CAMERA)
 {
 	Initialize();
 
 	if (Simple)
-		m_nState |= LC_CAMERA_SIMPLE;
+		mState |= LC_CAMERA_SIMPLE;
 	else
 	{
 		mPosition = lcVector3(-10.0f, -10.0f, 5.0f);
@@ -140,7 +70,6 @@ Camera::Camera(float ex, float ey, float ez, float tx, float ty, float tz)
 
 Camera::~Camera()
 {
-	delete m_pTarget;
 }
 
 void Camera::Initialize()
@@ -149,7 +78,7 @@ void Camera::Initialize()
 	m_zNear = 1.0f;
 	m_zFar = 500.0f;
 
-	m_nState = 0;
+	mState = 0;
 	m_nType = LC_CAMERA_USER;
 
 	m_pTR = NULL;
@@ -157,8 +86,6 @@ void Camera::Initialize()
 
 	float *values[] = { mPosition, mTargetPosition, mUpVector };
 	RegisterKeys(values, camera_key_info, LC_CK_COUNT);
-
-	m_pTarget = new CameraTarget(this);
 }
 
 void Camera::CreateName(const lcArray<Camera*>& Cameras)
@@ -310,11 +237,13 @@ bool Camera::FileLoad(lcFile& file)
 		{
 			n = file.ReadS32();
 			if (n != 0)
-				m_nState |= LC_CAMERA_HIDDEN;
+				mState |= LC_CAMERA_HIDDEN;
 		}
 		else
 		{
-			m_nState = file.ReadU8();
+			ch = file.ReadU8();
+			if (ch & 1)
+				mState |= LC_CAMERA_HIDDEN;
 			m_nType = file.ReadU8();
 		}
 	}
@@ -328,7 +257,7 @@ bool Camera::FileLoad(lcFile& file)
 //		if (version > 2)
 		file.ReadS32(&user, 1);
 		if (show == 0)
-			m_nState |= LC_CAMERA_HIDDEN;
+			mState |= LC_CAMERA_HIDDEN;
 	}
 
 	return true;
@@ -348,7 +277,7 @@ void Camera::FileSave(lcFile& file) const
 	file.WriteFloat(m_zFar);
 	file.WriteFloat(m_zNear);
 	// version 5
-	file.WriteU8(m_nState);
+	file.WriteU8(mState & LC_CAMERA_HIDDEN ? 1 : 0);
 	file.WriteU8(m_nType);
 }
 
@@ -359,7 +288,7 @@ void Camera::Move(unsigned short nTime, bool bAddKey, float dx, float dy, float 
 {
 	lcVector3 MoveVec(dx, dy, dz);
 
-	if (IsEyeSelected())
+	if (IsSelected(LC_CAMERA_SECTION_POSITION))
 	{
 		mPosition += MoveVec;
 		lcAlign(mOrthoTarget, mPosition, mTargetPosition);
@@ -368,7 +297,7 @@ void Camera::Move(unsigned short nTime, bool bAddKey, float dx, float dy, float 
 			ChangeKey(nTime, bAddKey, mPosition, LC_CK_EYE);
 	}
 
-	if (IsTargetSelected())
+	if (IsSelected(LC_CAMERA_SECTION_TARGET))
 	{
 		mTargetPosition += MoveVec;
 
@@ -376,65 +305,23 @@ void Camera::Move(unsigned short nTime, bool bAddKey, float dx, float dy, float 
 			ChangeKey(nTime, bAddKey, mTargetPosition, LC_CK_TARGET);
 	}
 
-	// Fix the up vector
+	if (IsSelected(LC_CAMERA_SECTION_UPVECTOR))
+	{
+		mUpVector += MoveVec;
+		mUpVector.Normalize();
+
+		if (!IsSimple())
+			ChangeKey(nTime, bAddKey, mTargetPosition, LC_CK_UP);
+	}
+
 	lcVector3 FrontVector(mTargetPosition - mPosition);
 	lcVector3 SideVector = lcCross(FrontVector, mUpVector);
-	mUpVector = lcNormalize(lcCross(SideVector, FrontVector));
 
-	if (!IsSimple())
-		ChangeKey(nTime, bAddKey, mUpVector, LC_CK_UP);
-}
+	if (fabsf(lcDot(mUpVector, SideVector)) > 0.99f)
+		SideVector = lcVector3(1, 0, 0);
 
-void Camera::Select(bool bSelecting, bool bFocus, bool bMultiple)
-{
-	if (bSelecting == true)
-	{
-		if (bFocus == true)
-		{
-			m_nState |= (LC_CAMERA_FOCUSED|LC_CAMERA_SELECTED);
-
-			m_pTarget->Select(false, true, bMultiple);
-		}
-		else
-			m_nState |= LC_CAMERA_SELECTED;
-
-		if (bMultiple == false)
-			m_pTarget->Select(false, false, bMultiple);
-	}
-	else
-	{
-		if (bFocus == true)
-			m_nState &= ~(LC_CAMERA_FOCUSED);
-		else
-			m_nState &= ~(LC_CAMERA_SELECTED|LC_CAMERA_FOCUSED);
-	}
-}
-
-void Camera::SelectTarget(bool bSelecting, bool bFocus, bool bMultiple)
-{
-	// FIXME: the target should handle this
-
-	if (bSelecting == true)
-	{
-		if (bFocus == true)
-		{
-			m_nState |= (LC_CAMERA_TARGET_FOCUSED|LC_CAMERA_TARGET_SELECTED);
-
-			Select(false, true, bMultiple);
-		}
-		else
-			m_nState |= LC_CAMERA_TARGET_SELECTED;
-
-		if (bMultiple == false)
-			Select(false, false, bMultiple);
-	}
-	else
-	{
-		if (bFocus == true)
-			m_nState &= ~(LC_CAMERA_TARGET_FOCUSED);
-		else
-			m_nState &= ~(LC_CAMERA_TARGET_SELECTED|LC_CAMERA_TARGET_FOCUSED);
-	}
+	mUpVector = lcCross(SideVector, FrontVector);
+	mUpVector.Normalize();
 }
 
 void Camera::UpdatePosition(unsigned short nTime)
@@ -469,9 +356,9 @@ void Camera::Render(View* View)
 	lcContext* Context = View->mContext;
 
 	lcMatrix44 ViewWorld = lcMatrix44AffineInverse(mWorldView);
-	glLoadMatrixf(lcMul(ViewWorld, ViewMatrix));
+	lcVector3 UpVectorPosition = lcMul31(lcVector3(0, 1, 0), ViewWorld);
 
-	float verts[34][3] =
+	float Verts[34 + 24 + 4][3] =
 	{
 		{  0.3f,  0.3f,  0.3f }, { -0.3f,  0.3f,  0.3f },
 		{ -0.3f,  0.3f,  0.3f }, { -0.3f, -0.3f,  0.3f },
@@ -489,30 +376,8 @@ void Camera::Render(View* View)
 		{  0.0f,  0.0f, -0.3f }, { -0.3f, -0.3f, -0.6f },
 		{  0.3f, -0.3f, -0.6f }, {  0.0f,  0.0f, -0.3f },
 		{  0.3f,  0.3f, -0.6f }, {  0.3f, -0.3f, -0.6f },
-		{  0.3f,  0.3f, -0.6f }, { -0.3f,  0.3f, -0.6f }
-	};
+		{  0.3f,  0.3f, -0.6f }, { -0.3f,  0.3f, -0.6f },
 
-	if (IsEyeSelected())
-	{
-		Context->SetLineWidth(2.0f * LineWidth);
-		if (m_nState & LC_CAMERA_FOCUSED)
-			lcSetColorFocused();
-		else
-			lcSetColorSelected();
-	}
-	else
-	{
-		Context->SetLineWidth(LineWidth);
-		lcSetColorCamera();
-	}
-
-	glVertexPointer(3, GL_FLOAT, 0, verts);
-	glDrawArrays(GL_LINES, 0, 24);
-	glDrawArrays(GL_LINE_STRIP, 24, 10);
-
-	lcMatrix44 TargetMat = ViewWorld;
-	float box[24][3] =
-	{
 		{  0.2f,  0.2f,  0.2f }, { -0.2f,  0.2f,  0.2f },
 		{ -0.2f,  0.2f,  0.2f }, { -0.2f, -0.2f,  0.2f },
 		{ -0.2f, -0.2f,  0.2f }, {  0.2f, -0.2f,  0.2f },
@@ -524,17 +389,20 @@ void Camera::Render(View* View)
 		{  0.2f,  0.2f,  0.2f }, {  0.2f,  0.2f, -0.2f },
 		{ -0.2f,  0.2f,  0.2f }, { -0.2f,  0.2f, -0.2f },
 		{ -0.2f, -0.2f,  0.2f }, { -0.2f, -0.2f, -0.2f },
-		{  0.2f, -0.2f,  0.2f }, {  0.2f, -0.2f, -0.2f }
+		{  0.2f, -0.2f,  0.2f }, {  0.2f, -0.2f, -0.2f },
+
+		{ mPosition[0], mPosition[1], mPosition[2] },
+		{ mTargetPosition[0], mTargetPosition[1], mTargetPosition[2] },
+		{ mPosition[0], mPosition[1], mPosition[2] },
+		{ UpVectorPosition[0], UpVectorPosition[1], UpVectorPosition[2] },
 	};
 
-	// Draw target.
-	TargetMat.SetTranslation(mTargetPosition);
-	glLoadMatrixf(lcMul(TargetMat, ViewMatrix));
+	Context->SetWorldViewMatrix(lcMul(ViewWorld, ViewMatrix));
 
-	if (IsTargetSelected())
+	if (IsSelected(LC_CAMERA_SECTION_POSITION))
 	{
 		Context->SetLineWidth(2.0f * LineWidth);
-		if (m_nState & LC_CAMERA_TARGET_FOCUSED)
+		if (IsFocused(LC_CAMERA_SECTION_POSITION))
 			lcSetColorFocused();
 		else
 			lcSetColorSelected();
@@ -545,32 +413,66 @@ void Camera::Render(View* View)
 		lcSetColorCamera();
 	}
 
-	glVertexPointer(3, GL_FLOAT, 0, box);
+	glVertexPointer(3, GL_FLOAT, 0, Verts);
 	glDrawArrays(GL_LINES, 0, 24);
+	glDrawArrays(GL_LINE_STRIP, 24, 10);
 
-	glLoadMatrixf(ViewMatrix);
+	lcMatrix44 TargetMat = ViewWorld;
+	TargetMat.SetTranslation(mTargetPosition);
+	Context->SetWorldViewMatrix(lcMul(TargetMat, ViewMatrix));
 
-	lcVector3 Line[2] =
+	if (IsSelected(LC_CAMERA_SECTION_TARGET))
 	{
-		mPosition,
-		mTargetPosition
-	};
+		Context->SetLineWidth(2.0f * LineWidth);
+		if (IsFocused(LC_CAMERA_SECTION_TARGET))
+			lcSetColorFocused();
+		else
+			lcSetColorSelected();
+	}
+	else
+	{
+		Context->SetLineWidth(LineWidth);
+		lcSetColorCamera();
+	}
 
-	glVertexPointer(3, GL_FLOAT, 0, Line);
-	glColor4f(0.5f, 0.8f, 0.5f, 1.0f);
+	glDrawArrays(GL_LINES, 34, 24);
+
+	lcMatrix44 UpVectorMat = ViewWorld;
+	UpVectorMat.SetTranslation(UpVectorPosition);
+	Context->SetWorldViewMatrix(lcMul(UpVectorMat, ViewMatrix));
+
+	if (IsSelected(LC_CAMERA_SECTION_UPVECTOR))
+	{
+		Context->SetLineWidth(2.0f * LineWidth);
+		if (IsFocused(LC_CAMERA_SECTION_UPVECTOR))
+			lcSetColorFocused();
+		else
+			lcSetColorSelected();
+	}
+	else
+	{
+		Context->SetLineWidth(LineWidth);
+		lcSetColorCamera();
+	}
+
+	glDrawArrays(GL_LINES, 34, 24);
+
+	Context->SetWorldViewMatrix(ViewMatrix);
+
+	lcSetColorCamera();
 	Context->SetLineWidth(LineWidth);
-	glDrawArrays(GL_LINES, 0, 2);
+
+	glDrawArrays(GL_LINES, 34 + 24, 4);
 
 	if (IsSelected())
 	{
-		glLoadMatrixf(lcMul(ViewWorld, ViewMatrix));
+		Context->SetWorldViewMatrix(lcMul(ViewWorld, ViewMatrix));
 
 		float Dist = lcLength(mTargetPosition - mPosition);
 		lcMatrix44 Projection = lcMatrix44Perspective(m_fovy, 1.33f, 0.01f, Dist);
 		Projection = lcMatrix44Inverse(Projection);
 		glMultMatrixf(Projection);
 
-		// Draw the view frustum.
 		float ProjVerts[16][3] =
 		{
 			{  1,  1,  1 }, { -1,  1, 1 },
@@ -588,39 +490,112 @@ void Camera::Render(View* View)
 	}
 }
 
-void Camera::MinIntersectDist(lcClickLine* ClickLine)
+void Camera::RayTest(lcObjectRayTest& ObjectRayTest) const
 {
 	lcVector3 Min = lcVector3(-0.3f, -0.3f, -0.3f);
 	lcVector3 Max = lcVector3(0.3f, 0.3f, 0.3f);
 
-	lcVector3 Start = lcMul31(ClickLine->Start, mWorldView);
-	lcVector3 End = lcMul31(ClickLine->End, mWorldView);
+	lcVector3 Start = lcMul31(ObjectRayTest.Start, mWorldView);
+	lcVector3 End = lcMul31(ObjectRayTest.End, mWorldView);
 
-	float Dist;
-	if (lcBoundingBoxRayMinIntersectDistance(Min, Max, Start, End, &Dist, NULL) && (Dist < ClickLine->MinDist))
+	float Distance;
+	if (lcBoundingBoxRayMinIntersectDistance(Min, Max, Start, End, &Distance, NULL) && (Distance < ObjectRayTest.Distance))
 	{
-		ClickLine->Closest = this;
-		ClickLine->MinDist = Dist;
+		ObjectRayTest.ObjectSection.Object = const_cast<Camera*>(this);
+		ObjectRayTest.ObjectSection.Section = LC_CAMERA_SECTION_POSITION;
+		ObjectRayTest.Distance = Distance;
 	}
 
-	m_pTarget->MinIntersectDist(ClickLine);
+	Min = lcVector3(-0.2f, -0.2f, -0.2f);
+	Max = lcVector3(0.2f, 0.2f, 0.2f);
+
+	lcMatrix44 WorldView = mWorldView;
+	WorldView.SetTranslation(lcMul30(-mTargetPosition, WorldView));
+
+	Start = lcMul31(ObjectRayTest.Start, WorldView);
+	End = lcMul31(ObjectRayTest.End, WorldView);
+
+	if (lcBoundingBoxRayMinIntersectDistance(Min, Max, Start, End, &Distance, NULL) && (Distance < ObjectRayTest.Distance))
+	{
+		ObjectRayTest.ObjectSection.Object = const_cast<Camera*>(this);
+		ObjectRayTest.ObjectSection.Section = LC_CAMERA_SECTION_TARGET;
+		ObjectRayTest.Distance = Distance;
+	}
+
+	lcMatrix44 ViewWorld = lcMatrix44AffineInverse(mWorldView);
+	lcVector3 UpVectorPosition = lcMul31(lcVector3(0, 1, 0), ViewWorld);
+
+	WorldView = mWorldView;
+	WorldView.SetTranslation(lcMul30(-UpVectorPosition, WorldView));
+
+	Start = lcMul31(ObjectRayTest.Start, WorldView);
+	End = lcMul31(ObjectRayTest.End, WorldView);
+
+	if (lcBoundingBoxRayMinIntersectDistance(Min, Max, Start, End, &Distance, NULL) && (Distance < ObjectRayTest.Distance))
+	{
+		ObjectRayTest.ObjectSection.Object = const_cast<Camera*>(this);
+		ObjectRayTest.ObjectSection.Section = LC_CAMERA_SECTION_UPVECTOR;
+		ObjectRayTest.Distance = Distance;
+	}
 }
 
-bool Camera::IntersectsVolume(const lcVector4 Planes[6]) const
+void Camera::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
 {
 	lcVector3 Min(-0.3f, -0.3f, -0.3f);
 	lcVector3 Max(0.3f, 0.3f, 0.3f);
 
-	// Transform the planes to local space.
 	lcVector4 LocalPlanes[6];
 
 	for (int PlaneIdx = 0; PlaneIdx < 6; PlaneIdx++)
 	{
-		lcVector3 Normal = lcMul30(Planes[PlaneIdx], mWorldView);
-		LocalPlanes[PlaneIdx] = lcVector4(Normal, Planes[PlaneIdx][3] - lcDot3(mWorldView[3], Normal));
+		lcVector3 Normal = lcMul30(ObjectBoxTest.Planes[PlaneIdx], mWorldView);
+		LocalPlanes[PlaneIdx] = lcVector4(Normal, ObjectBoxTest.Planes[PlaneIdx][3] - lcDot3(mWorldView[3], Normal));
 	}
 
-	return lcBoundingBoxIntersectsVolume(Min, Max, LocalPlanes);
+	if (lcBoundingBoxIntersectsVolume(Min, Max, LocalPlanes))
+	{
+		lcObjectSection& ObjectSection = ObjectBoxTest.ObjectSections.Add();
+		ObjectSection.Object = const_cast<Camera*>(this);
+		ObjectSection.Section = LC_CAMERA_SECTION_POSITION;
+	}
+
+	Min = lcVector3(-0.2f, -0.2f, -0.2f);
+	Max = lcVector3(0.2f, 0.2f, 0.2f);
+
+	lcMatrix44 WorldView = mWorldView;
+	WorldView.SetTranslation(lcMul30(-mTargetPosition, WorldView));
+
+	for (int PlaneIdx = 0; PlaneIdx < 6; PlaneIdx++)
+	{
+		lcVector3 Normal = lcMul30(ObjectBoxTest.Planes[PlaneIdx], WorldView);
+		LocalPlanes[PlaneIdx] = lcVector4(Normal, ObjectBoxTest.Planes[PlaneIdx][3] - lcDot3(WorldView[3], Normal));
+	}
+
+	if (lcBoundingBoxIntersectsVolume(Min, Max, LocalPlanes))
+	{
+		lcObjectSection& ObjectSection = ObjectBoxTest.ObjectSections.Add();
+		ObjectSection.Object = const_cast<Camera*>(this);
+		ObjectSection.Section = LC_CAMERA_SECTION_TARGET;
+	}
+
+	lcMatrix44 ViewWorld = lcMatrix44AffineInverse(mWorldView);
+	lcVector3 UpVectorPosition = lcMul31(lcVector3(0, 1, 0), ViewWorld);
+
+	WorldView = mWorldView;
+	WorldView.SetTranslation(lcMul30(-UpVectorPosition, WorldView));
+
+	for (int PlaneIdx = 0; PlaneIdx < 6; PlaneIdx++)
+	{
+		lcVector3 Normal = lcMul30(ObjectBoxTest.Planes[PlaneIdx], WorldView);
+		LocalPlanes[PlaneIdx] = lcVector4(Normal, ObjectBoxTest.Planes[PlaneIdx][3] - lcDot3(WorldView[3], Normal));
+	}
+
+	if (lcBoundingBoxIntersectsVolume(Min, Max, LocalPlanes))
+	{
+		lcObjectSection& ObjectSection = ObjectBoxTest.ObjectSections.Add();
+		ObjectSection.Object = const_cast<Camera*>(this);
+		ObjectSection.Section = LC_CAMERA_SECTION_UPVECTOR;
+	}
 }
 
 void Camera::LoadProjection(const lcProjection& projection)

@@ -19,6 +19,7 @@ typedef qint32 lcint32;
 typedef quint32 lcuint32;
 typedef qint64 lcint64;
 typedef quint64 lcuint64;
+typedef quintptr lcuintptr;
 
 #if Q_BYTE_ORDER == Q_LITTLE_ENDIAN
 #define LC_LITTLE_ENDIAN

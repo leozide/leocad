@@ -2,18 +2,18 @@
 #define _OBJECT_H_
 
 #include "lc_math.h"
+#include "lc_array.h"
 
 class Object;
+class Piece;
+class Camera;
+class Light;
 
-enum LC_OBJECT_TYPE
+enum lcObjectType
 {
 	LC_OBJECT_PIECE,
 	LC_OBJECT_CAMERA,
-	LC_OBJECT_CAMERA_TARGET,
-	LC_OBJECT_LIGHT,
-	LC_OBJECT_LIGHT_TARGET,
-//	LC_OBJECT_GROUP,
-//	LC_OBJECT_GROUP_PIVOT,
+	LC_OBJECT_LIGHT
 };
 
 // key handling
@@ -32,104 +32,81 @@ struct LC_OBJECT_KEY_INFO
 	unsigned char type;
 };
 
-struct lcClickLine
+struct lcObjectSection
+{
+	Object* Object;
+	lcuintptr Section;
+};
+
+inline lcObjectSection lcMakeObjectSection(Object* Object, lcuintptr Section)
+{
+	lcObjectSection ObjectSection;
+
+	ObjectSection.Object = Object;
+	ObjectSection.Section = Section;
+
+	return ObjectSection;
+}
+
+struct lcObjectRayTest
 {
 	lcVector3 Start;
 	lcVector3 End;
-	float MinDist;
-	Object* Closest;
+	float Distance;
+	lcObjectSection ObjectSection;
+};
+
+struct lcObjectBoxTest
+{
+	lcVector4 Planes[6];
+	lcArray<lcObjectSection> ObjectSections;
 };
 
 class Object
 {
 public:
-	Object(LC_OBJECT_TYPE nType);
+	Object(lcObjectType ObjectType);
 	virtual ~Object();
 
 public:
-	// Move the object.
-	virtual void Move(unsigned short nTime, bool bAddKey, float dx, float dy, float dz) = 0;
-
-	// Check if the object intersects the ray.
-	virtual void MinIntersectDist(lcClickLine* ClickLine) = 0;
-
-	// bSelecting is the action (add/remove), bFocus means "add focus if selecting"
-	// or "remove focus only if deselecting", bMultiple = Ctrl key is down
-	virtual void Select(bool bSelecting, bool bFocus, bool bMultiple) = 0;
-
-	// Check if the object intersects the volume specified by a given set of planes.
-	virtual bool IntersectsVolume(const lcVector4 Planes[6]) const = 0;
-
-
-  /*
-  virtual void UpdatePosition(unsigned short nTime, bool bAnimation) = 0;
-  virtual void CompareBoundingBox(float *box) { };
-  virtual void Render(LC_RENDER_INFO* pInfo) = 0;
-
-  // Query functions
-  virtual bool IsSelected() const
-    { return (m_nState & LC_OBJECT_SELECTED) != 0; };
-  virtual bool IsFocused() const
-    { return (m_nState & LC_OBJECT_FOCUSED) != 0; };
-  virtual bool IsVisible(unsigned short nTime, bool bAnimation) const
-    { return (m_nState & LC_OBJECT_HIDDEN) == 0; }
-
-
-  // State change, most classes will have to replace these functions
-  virtual void SetSelection(bool bSelect, void *pParam = NULL)
-    {
-      if (bSelect)
-	m_nState |= LC_OBJECT_SELECTED;
-      else
-	m_nState &= ~(LC_OBJECT_SELECTED | LC_OBJECT_FOCUSED);
-    };
-  virtual void SetFocus(bool bFocus, void *pParam = NULL)
-    {
-      if (bFocus)
-	m_nState |= (LC_OBJECT_SELECTED | LC_OBJECT_FOCUSED);
-      else
-	m_nState &= ~LC_OBJECT_FOCUSED;
-    };
-  virtual void SetVisible(bool bVisible)
-    {
-      if (bVisible)
-	m_nState &= ~LC_OBJECT_HIDDEN;
-      else
-      {
-	m_nState |= LC_OBJECT_HIDDEN;
-	SetSelection (false, NULL);
-      }
-    }
-  virtual bool SetColor(int nColor)
-    { return false; };
-  */
-
 	bool IsPiece() const
 	{
-		return m_nObjectType == LC_OBJECT_PIECE;
+		return mObjectType == LC_OBJECT_PIECE;
 	}
 
 	bool IsCamera() const
 	{
-		return m_nObjectType == LC_OBJECT_CAMERA;
+		return mObjectType == LC_OBJECT_CAMERA;
 	}
 
 	bool IsLight() const
 	{
-		return m_nObjectType == LC_OBJECT_LIGHT;
+		return mObjectType == LC_OBJECT_LIGHT;
 	}
 
-	LC_OBJECT_TYPE GetType() const
+	lcObjectType GetType() const
 	{
-		return m_nObjectType;
+		return mObjectType;
 	}
 
+	virtual bool IsSelected() const = 0;
+	virtual bool IsSelected(lcuintptr Section) const = 0;
+	virtual void SetSelected(bool Selected) = 0;
+	virtual void SetSelected(lcuintptr Section, bool Selected) = 0;
+	virtual bool IsFocused() const = 0;
+	virtual bool IsFocused(lcuintptr Section) const = 0;
+	virtual void SetFocused(lcuintptr Section, bool Focused) = 0;
+	virtual lcuintptr GetFocusSection() const = 0;
+
+	virtual lcVector3 GetSectionPosition(lcuintptr Section) const = 0;
+	virtual void Move(unsigned short nTime, bool bAddKey, float dx, float dy, float dz) = 0;
+	virtual void RayTest(lcObjectRayTest& ObjectRayTest) const = 0;
+	virtual void BoxTest(lcObjectBoxTest& ObjectBoxTest) const = 0;
 	virtual const char* GetName() const = 0;
 
 protected:
 	virtual bool FileLoad(lcFile& file);
 	virtual void FileSave(lcFile& file) const;
-
 
 public:
 	void CalculateSingleKey(unsigned short nTime, int keytype, float *value) const;
@@ -166,7 +143,7 @@ private:
 	int m_nKeyInfoCount;
 
 private:
-	LC_OBJECT_TYPE m_nObjectType;
+	lcObjectType mObjectType;
 };
 
 #endif

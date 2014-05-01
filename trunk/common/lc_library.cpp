@@ -1541,6 +1541,7 @@ void lcLibraryMeshData::AddMeshData(const lcLibraryMeshData& Data, const lcMatri
 {
 	int VertexCount = Data.mVertices.GetSize();
 	lcArray<lcuint32> IndexRemap(VertexCount);
+	const float DistanceEpsilon = 0.05f;
 
 	if (!TextureMap)
 	{
@@ -1556,7 +1557,7 @@ void lcLibraryMeshData::AddMeshData(const lcLibraryMeshData& Data, const lcMatri
 				lcVertex& DstVertex = mVertices[DstVertexIdx];
 
 //				if (Vertex == mVertices[DstVertexIdx])
-				if (fabsf(Position.x - DstVertex.Position.x) < 0.1f && fabsf(Position.y - DstVertex.Position.y) < 0.1f && fabsf(Position.z - DstVertex.Position.z) < 0.1f)
+				if (fabsf(Position.x - DstVertex.Position.x) < DistanceEpsilon && fabsf(Position.y - DstVertex.Position.y) < DistanceEpsilon && fabsf(Position.z - DstVertex.Position.z) < DistanceEpsilon)
 				{
 					Index = DstVertexIdx;
 					break;
@@ -1590,7 +1591,7 @@ void lcLibraryMeshData::AddMeshData(const lcLibraryMeshData& Data, const lcMatri
 				lcVertexTextured& DstVertex = mTexturedVertices[DstVertexIdx];
 
 //				if (Vertex == mTexturedVertices[DstVertexIdx])
-				if (fabsf(Position.x - DstVertex.Position.x) < 0.1f && fabsf(Position.y - DstVertex.Position.y) < 0.1f && fabsf(Position.z - DstVertex.Position.z) < 0.1f &&
+				if (fabsf(Position.x - DstVertex.Position.x) < DistanceEpsilon && fabsf(Position.y - DstVertex.Position.y) < DistanceEpsilon && fabsf(Position.z - DstVertex.Position.z) < DistanceEpsilon &&
 					fabsf(TexCoord.x - DstVertex.TexCoord.x) < 0.01f && fabsf(TexCoord.y - DstVertex.TexCoord.y) < 0.01f)
 				{
 					Index = DstVertexIdx;

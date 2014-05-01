@@ -419,7 +419,8 @@ bool lcQPreferencesDialog::eventFilter(QObject *object, QEvent *event)
 			return true;
 
 		Qt::KeyboardModifiers state = keyEvent->modifiers();
-		if (state & Qt::ShiftModifier)
+		QString text = QKeySequence(nextKey).toString();
+		if ((state & Qt::ShiftModifier) && (text.isEmpty() || !text.at(0).isPrint() || text.at(0).isLetter() || text.at(0).isSpace()))
 			nextKey |= Qt::SHIFT;
 		if (state & Qt::ControlModifier)
 			nextKey |= Qt::CTRL;
@@ -435,10 +436,7 @@ bool lcQPreferencesDialog::eventFilter(QObject *object, QEvent *event)
 		return true;
 	}
 
-	if (event->type() == QEvent::Shortcut || event->type() == QEvent::KeyRelease)
-		return true;
-
-	if (event->type() == QEvent::ShortcutOverride)
+	if (event->type() == QEvent::Shortcut || event->type() == QEvent::KeyRelease || event->type() == QEvent::ShortcutOverride)
 	{
 		event->accept();
 		return true;

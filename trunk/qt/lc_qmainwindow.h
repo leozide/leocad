@@ -11,8 +11,6 @@ class lcQGLWidget;
 class lcQPartsTree;
 class lcQColorList;
 class lcQPropertiesTree;
-class Object;
-class Camera;
 class View;
 
 class lcQMainWindow : public QMainWindow

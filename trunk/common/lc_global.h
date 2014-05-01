@@ -10,6 +10,16 @@
 #define LC_VERSION_TEXT "0.80.4"
 
 // Forward declarations.
+class lcObject;
+class lcPiece;
+class lcCamera;
+class lcLight;
+
+typedef lcObject Object;
+typedef lcPiece Piece;
+typedef lcCamera Camera;
+typedef lcLight Light;
+
 class lcVector2;
 class lcVector3;
 class lcVector4;

@@ -6,7 +6,6 @@
 #include "lc_array.h"
 #include "lc_projection.h"
 
-class Camera;
 class TiledRender;
 class View;
 
@@ -56,12 +55,12 @@ enum LC_CK_TYPES
 	LC_CK_COUNT
 };
 
-class Camera : public Object
+class lcCamera : public lcObject
 {
 public:
-	Camera(bool Simple);
-	Camera(float ex, float ey, float ez, float tx, float ty, float tz);
-	virtual ~Camera();
+	lcCamera(bool Simple);
+	lcCamera(float ex, float ey, float ez, float tx, float ty, float tz);
+	virtual ~lcCamera();
 
 	const char* GetName() const
 	{

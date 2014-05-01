@@ -10,7 +10,7 @@
 
 #define LC_KEY_SAVE_VERSION 1 // LeoCAD 0.73
 
-Object::Object(lcObjectType ObjectType)
+lcObject::lcObject(lcObjectType ObjectType)
 {
 	m_pInstructionKeys = NULL;
 
@@ -18,13 +18,13 @@ Object::Object(lcObjectType ObjectType)
 	m_pKeyValues = NULL;
 }
 
-Object::~Object()
+lcObject::~lcObject()
 {
 	delete []m_pKeyValues;
 	RemoveKeys();
 }
 
-bool Object::FileLoad(lcFile& file)
+bool lcObject::FileLoad(lcFile& file)
 {
   lcuint8 version = file.ReadU8();
 
@@ -57,7 +57,7 @@ bool Object::FileLoad(lcFile& file)
   return true;
 }
 
-void Object::FileSave(lcFile& file) const
+void lcObject::FileSave(lcFile& file) const
 {
   LC_OBJECT_KEY *node;
   lcuint32 n;
@@ -100,7 +100,7 @@ static LC_OBJECT_KEY* AddNode(LC_OBJECT_KEY *node, unsigned short nTime, unsigne
   return newnode;
 }
 
-void Object::RegisterKeys(float *values[], LC_OBJECT_KEY_INFO* info, int count)
+void lcObject::RegisterKeys(float *values[], LC_OBJECT_KEY_INFO* info, int count)
 {
   int i;
 
@@ -118,7 +118,7 @@ void Object::RegisterKeys(float *values[], LC_OBJECT_KEY_INFO* info, int count)
   m_nKeyInfoCount = count;
 }
 
-void Object::RemoveKeys()
+void lcObject::RemoveKeys()
 {
   LC_OBJECT_KEY *node, *prev;
 
@@ -130,7 +130,7 @@ void Object::RemoveKeys()
   }
 }
 
-void Object::ChangeKey(unsigned short nTime, bool bAddKey, const float *param, unsigned char nKeyType)
+void lcObject::ChangeKey(unsigned short nTime, bool bAddKey, const float *param, unsigned char nKeyType)
 {
   LC_OBJECT_KEY *node, *poskey = NULL, *newpos = NULL;
   node = m_pInstructionKeys;
@@ -162,7 +162,7 @@ void Object::ChangeKey(unsigned short nTime, bool bAddKey, const float *param, u
     newpos->param[i] = param[i];
 }
 
-void Object::CalculateKeys(unsigned short nTime)
+void lcObject::CalculateKeys(unsigned short nTime)
 {
 //  LC_OBJECT_KEY *next[m_nKeyInfoCount], *prev[m_nKeyInfoCount], *node;
   LC_OBJECT_KEY *next[32], *prev[32], *node;
@@ -202,7 +202,7 @@ void Object::CalculateKeys(unsigned short nTime)
   }
 }
 
-void Object::CalculateSingleKey(unsigned short nTime, int keytype, float *value) const
+void lcObject::CalculateSingleKey(unsigned short nTime, int keytype, float *value) const
 {
 	LC_OBJECT_KEY *prev = NULL, *node;
 
@@ -225,7 +225,7 @@ void Object::CalculateSingleKey(unsigned short nTime, int keytype, float *value)
 		value[j] = prev->param[j];
 }
 
-void Object::InsertTime(unsigned short start, unsigned short time)
+void lcObject::InsertTime(unsigned short start, unsigned short time)
 {
   LC_OBJECT_KEY *node, *prev = NULL;
   unsigned short last;
@@ -263,7 +263,7 @@ void Object::InsertTime(unsigned short start, unsigned short time)
   }
 }
 
-void Object::RemoveTime(unsigned short start, unsigned short time)
+void lcObject::RemoveTime(unsigned short start, unsigned short time)
 {
   LC_OBJECT_KEY *node, *prev = NULL;
 

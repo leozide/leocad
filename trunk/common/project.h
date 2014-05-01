@@ -146,9 +146,6 @@ enum LC_OVERLAY_MODES
 	LC_OVERLAY_ROTATE_VIEW_XYZ
 };
 
-class Piece;
-class Camera;
-class Light;
 class Group;
 class Terrain;
 class PieceInfo;

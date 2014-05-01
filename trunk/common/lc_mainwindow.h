@@ -4,8 +4,6 @@
 #include "lc_basewindow.h"
 #include "lc_array.h"
 
-class Object;
-class Camera;
 class PiecePreview;
 
 #define LC_MAX_RECENT_FILES 4

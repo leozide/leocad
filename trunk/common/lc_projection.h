@@ -5,8 +5,6 @@
 #include "opengl.h"
 #include "lc_math.h"
 
-class Camera;
-
 class lcProjection
 {
 public:

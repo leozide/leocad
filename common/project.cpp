@@ -6852,14 +6852,12 @@ bool Project::GetSelectionCenter(lcVector3& Center) const
 
 void Project::ConvertToUserUnits(lcVector3& Value) const
 {
-	if ((m_nSnap & LC_DRAW_CM_UNITS) == 0)
-		Value /= 0.04f;
+	Value /= 0.04f;
 }
 
 void Project::ConvertFromUserUnits(lcVector3& Value) const
 {
-	if ((m_nSnap & LC_DRAW_CM_UNITS) == 0)
-		Value *= 0.04f;
+	Value *= 0.04f;
 }
 
 bool Project::GetFocusPosition(lcVector3& Position) const
@@ -7327,31 +7325,19 @@ void Project::GetSnapDistance(float* SnapXY, float* SnapZ) const
 
 void Project::GetSnapText(char* SnapXY, char* SnapZ, char* SnapAngle) const
 {
-	if (m_nSnap & LC_DRAW_CM_UNITS)
-	{
-		float xy, z;
+	const char* SnapXYText[] = { "0", "1/20S", "1/4S", "1F", "1/2S", "1S", "2S", "3S", "4S", "8S" };
+	const char* SnapZText[] = { "0", "1/20S", "1/4S", "1F", "1/2S", "1S", "1B", "2B", "4B", "8B" };
+	const char* SnapAngleText[] = { "0", "1", "5", "10", "15", "30", "45", "60", "90", "180" };
 
-		GetSnapDistance(&xy, &z);
+	int SXY, SZ, SA;
+	GetSnapIndex(&SXY, &SZ, &SA);
 
-		sprintf(SnapXY, "%.2f", xy);
-		sprintf(SnapZ, "%.2f", z);
-	}
-	else
-	{
-		const char* SnapXYText[] = { "0", "1/20S", "1/4S", "1F", "1/2S", "1S", "2S", "3S", "4S", "8S" };
-		const char* SnapZText[] = { "0", "1/20S", "1/4S", "1F", "1/2S", "1S", "1B", "2B", "4B", "8B" };
-		const char* SnapAngleText[] = { "0", "1", "5", "10", "15", "30", "45", "60", "90", "180" };
+	SXY = lcMin(SXY, 9);
+	SZ = lcMin(SZ, 9);
 
-		int SXY, SZ, SA;
-		GetSnapIndex(&SXY, &SZ, &SA);
-
-		SXY = lcMin(SXY, 9);
-		SZ = lcMin(SZ, 9);
-
-		strcpy(SnapXY, SnapXYText[SXY]);
-		strcpy(SnapZ, SnapZText[SZ]);
-		strcpy(SnapAngle, SnapAngleText[SA]);
-	}
+	strcpy(SnapXY, SnapXYText[SXY]);
+	strcpy(SnapZ, SnapZText[SZ]);
+	strcpy(SnapAngle, SnapAngleText[SA]);
 }
 
 void Project::SnapVector(lcVector3& Delta, lcVector3& Leftover) const

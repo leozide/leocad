@@ -20,7 +20,7 @@
 #define LC_DRAW_LOCK_XYZ       (LC_DRAW_LOCK_X | LC_DRAW_LOCK_Y | LC_DRAW_LOCK_Z)
 #define LC_DRAW_MOVEAXIS       0x0800 // Move on fixed axis
 //#define LC_DRAW_PREVIEW        0x1000 // Show piece position
-#define LC_DRAW_CM_UNITS       0x2000 // Use centimeters
+//#define LC_DRAW_CM_UNITS       0x2000 // Use centimeters
 //#define LC_DRAW_3DMOUSE        0x4000 // Mouse moves in all directions
 
 #define LC_SCENE_FOG			0x004	// Enable fog

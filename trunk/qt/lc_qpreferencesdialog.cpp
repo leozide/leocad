@@ -30,7 +30,6 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget *parent, void *data) :
 	ui->lgeoPath->setText(options->LGEOPath);
 	ui->mouseSensitivity->setValue(options->Preferences.mMouseSensitivity);
 	ui->checkForUpdates->setCurrentIndex(options->CheckForUpdates);
-	ui->centimeterUnits->setChecked((options->Snap & LC_DRAW_CM_UNITS) != 0);
 	ui->noRelativeSnap->setChecked((options->Snap & LC_DRAW_GLOBAL_SNAP) != 0);
 	ui->fixedDirectionKeys->setChecked((options->Snap & LC_DRAW_MOVEAXIS) != 0);
 
@@ -85,7 +84,7 @@ void lcQPreferencesDialog::accept()
 		return;
 	}
 
-	options->Snap &= ~(LC_DRAW_CM_UNITS | LC_DRAW_GLOBAL_SNAP | LC_DRAW_MOVEAXIS);
+	options->Snap &= ~(LC_DRAW_GLOBAL_SNAP | LC_DRAW_MOVEAXIS);
 
 	strcpy(options->DefaultAuthor, ui->authorName->text().toLocal8Bit().data());
 	strcpy(options->ProjectsPath, ui->projectsFolder->text().toLocal8Bit().data());
@@ -94,9 +93,6 @@ void lcQPreferencesDialog::accept()
 	strcpy(options->LGEOPath, ui->lgeoPath->text().toLocal8Bit().data());
 	options->Preferences.mMouseSensitivity = ui->mouseSensitivity->value();
 	options->CheckForUpdates = ui->checkForUpdates->currentIndex();
-
-	if (ui->centimeterUnits->isChecked())
-		options->Snap |= LC_DRAW_CM_UNITS;
 
 	if (ui->noRelativeSnap->isChecked())
 		options->Snap |= LC_DRAW_GLOBAL_SNAP;

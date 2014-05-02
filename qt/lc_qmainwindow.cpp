@@ -390,6 +390,9 @@ void lcQMainWindow::createToolBars()
 	standardToolBar->addAction(actions[LC_EDIT_SNAP_ANGLE]);
 	standardToolBar->addSeparator();
 	standardToolBar->addAction(actions[LC_EDIT_TRANSFORM]);
+	((QToolButton*)standardToolBar->widgetForAction(actions[LC_EDIT_LOCK_TOGGLE]))->setPopupMode(QToolButton::InstantPopup);
+	((QToolButton*)standardToolBar->widgetForAction(actions[LC_EDIT_SNAP_TOGGLE]))->setPopupMode(QToolButton::InstantPopup);
+	((QToolButton*)standardToolBar->widgetForAction(actions[LC_EDIT_SNAP_ANGLE]))->setPopupMode(QToolButton::InstantPopup);
 
 	QHBoxLayout *transformLayout = new QHBoxLayout;
 	QWidget *transformWidget = new QWidget();

@@ -972,30 +972,30 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 	},
 	// LC_VIEW_PROJECTION_PERSPECTIVE
 	{
-		"View.Perspective.Point",
-		"&Point",
-		"Perspective projection",
+		"View.Projection.Perspective",
+		"&Perspective",
+		"Set the current camera to use a perspective projection",
 		""
 	},
 	// LC_VIEW_PROJECTION_ORTHO
 	{
-		"View.Perspective.Orthographic",
+		"View.Projection.Orthographic",
 		"&Ortho",
-		"Orthographic projection",
+		"Set the current camera to use an orthographic projection",
 		""
 	},
-	// LC_VIEW_PERSPECTIVE_CYCLE
+	// LC_VIEW_PROJECTION_CYCLE
 	{
-		"View.Perspective.Cycle",
+		"View.Projection.Cycle",
 		"&Cycle",
-		"Cycle to next perspective",
+		"Cycle to next projection type",
 		""
 	},
-	// LC_VIEW_PERSPECTIVE_FOCUS
+	// LC_VIEW_PROJECTION_FOCUS
 	{
-		"View.Perspective.Focus",
+		"View.Projection.Focus",
 		"&Focus",
-		"Focus perspective on selected piece",
+		"Focus projection on selected piece",
 		""
 	},
 	// LC_PIECE_INSERT

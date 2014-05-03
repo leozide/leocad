@@ -28,7 +28,7 @@ lcCamera::lcCamera(bool Simple)
 	Initialize();
 
 	if (Simple)
-		mState |= LC_CAMERA_SIMPLE;
+		mState |= LC_CAMERA_SIMPLE | LC_CAMERA_ORTHO;
 	else
 	{
 		mPosition = lcVector3(-10.0f, -10.0f, 5.0f);
@@ -687,7 +687,7 @@ void lcCamera::DoZoom(int dy, int mouse, unsigned short nTime, bool bAddKey)
 	FrontVector *= -2.0f * dy / (21 - mouse);
 
 	// Don't zoom ortho in if it would cross the ortho focal plane.
-	if (mProjection.GetType() == lcProjection::Ortho)
+	if (IsOrtho())
 	{
 		if ((dy > 0) && (lcDot(mPosition + FrontVector - mOrthoTarget, mPosition - mOrthoTarget) <= 0))
 			return;
@@ -858,7 +858,7 @@ bool lcCamera::EndTile()
 
 void lcCamera::SetFocalPoint(const lcVector3& focus, unsigned short nTime, bool bAddKey)
 {
-	if (mProjection.GetType() == lcProjection::Ortho)
+	if (IsOrtho())
 	{
 		lcVector3 FocusVector = focus;
 		lcAlign(FocusVector, mPosition, mTargetPosition);

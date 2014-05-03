@@ -19,31 +19,8 @@ public:
 
 	lcProjection()
 	{
-		mType = Projection;
 		mTransform = lcMatrix44Identity();
 		mCamera = NULL;
-	}
-
-	inline void SetType(Type type)
-	{
-		if (Cycle == type)
-		{
-			type = (Type)((int)mType + 1);
-			if (OUT_OF_RANGE == type)
-				type = (Type)0;
-		}
-
-		if (type < OUT_OF_RANGE)
-		{
-			mType = type;
-		}
-
-		calculateTransform();
-	}
-
-	inline Type GetType() const
-	{
-		return mType;
 	}
 
 	inline void SetView(const Camera* pCamera, int width, int height)
@@ -97,27 +74,12 @@ public:
 		return mTransform;
 	}
 
-	const char* GetName() const
-	{
-		switch(mType)
-		{
-		case Ortho:
-			return "Ortho";
-
-		case Projection:
-			return "Projection";
-
-		default:
-			return "";
-		}
-	}
+	const char* GetName() const;
+	void calculateTransform();
 
 private:
-
-	void calculateTransform();
 	void setTransformInput(const Camera* pCamera, int width, int height);
 
-	Type mType;
 	lcMatrix44 mTransform;
 	const Camera* mCamera;
 	int mViewPixelWidth;

@@ -1521,9 +1521,6 @@ void Project::Render(View* View, bool ToMemory)
 
 	RenderBackground(View);
 
-	// Setup the projection and camera matrices.
-	View->UpdateProjection();
-
 	RenderScenePieces(View, !ToMemory);
 
 	if (!ToMemory)
@@ -1531,10 +1528,7 @@ void Project::Render(View* View, bool ToMemory)
 		RenderSceneObjects(View);
 
 		if (m_OverlayActive || ((m_nCurAction == LC_TOOL_SELECT) && (m_nTracking == LC_TRACK_LEFT) && (m_ActiveView == View)))
-		{
-			View->UpdateProjection();
 			RenderOverlays(View);
-		}
 
 		RenderViewports(View);
 	}
@@ -1652,8 +1646,9 @@ int lcOpaqueRenderCompare(Piece* const& a, Piece* const& b)
 void Project::RenderScenePieces(View* view, bool DrawInterface)
 {
 	const lcPreferences& Preferences = lcGetPreferences();
+	lcContext* Context = view->mContext;
 
-	view->UpdateProjection();
+	Context->SetProjectionMatrix(view->GetProjectionMatrix());
 
 	if (Preferences.mLightingMode != LC_LIGHTING_FLAT)
 	{
@@ -1697,7 +1692,6 @@ void Project::RenderScenePieces(View* view, bool DrawInterface)
 	lcArray<lcRenderMesh> OpaqueMeshes(mPieces.GetSize());
 	lcArray<lcRenderMesh> TranslucentMeshes;
 	const lcMatrix44& ViewMatrix = view->mCamera->mWorldView;
-	lcContext* Context = view->mContext;
 
 	Context->SetLineWidth(Preferences.mLineWidth);
 
@@ -1816,6 +1810,8 @@ void Project::RenderSceneObjects(View* view)
 	const lcMatrix44& ViewMatrix = view->mCamera->mWorldView;
 	lcContext* Context = view->mContext;
 
+	Context->SetProjectionMatrix(view->GetProjectionMatrix());
+
 #ifdef LC_DEBUG
 	RenderDebugPrimitives();
 #endif
@@ -1831,7 +1827,7 @@ void Project::RenderSceneObjects(View* view)
 		lcMatrix44 WorldMatrix = lcMatrix44FromAxisAngle(lcVector3(Rotation[0], Rotation[1], Rotation[2]), Rotation[3] * LC_DTOR);
 		WorldMatrix.SetTranslation(Position);
 
-		glLoadMatrixf(lcMul(WorldMatrix, ViewMatrix));
+		Context->SetWorldViewMatrix(lcMul(WorldMatrix, ViewMatrix));
 
 		Context->SetLineWidth(2.0f * Preferences.mLineWidth);
 		PreviewPiece->RenderPiece(gMainWindow->mColorIndex);
@@ -1858,7 +1854,7 @@ void Project::RenderSceneObjects(View* view)
 
 	if (Preferences.mDrawGridStuds || Preferences.mDrawGridLines)
 	{
-		glLoadMatrixf(ViewMatrix);
+		Context->SetWorldViewMatrix(ViewMatrix);
 
 		const int Spacing = lcMax(Preferences.mGridLineSpacing, 1);
 		int MinX = 0, MaxX = 0, MinY = 0, MaxY = 0;
@@ -2031,12 +2027,8 @@ void Project::RenderSceneObjects(View* view)
 			lcMul30(lcVector3(0, 0, 20), Mats[0]),
 		};
 
-		glMatrixMode(GL_PROJECTION);
-		glLoadIdentity();
-		glOrtho(0, view->mWidth, 0, view->mHeight, -50, 50);
-		glMatrixMode(GL_MODELVIEW);
-		glLoadIdentity();
-		glTranslatef(25.375f, 25.375f, 0.0f);
+		Context->SetProjectionMatrix(lcMatrix44Ortho(0, view->mWidth, 0, view->mHeight, -50, 50));
+		Context->SetWorldViewMatrix(lcMatrix44Translation(lcVector3(25.375f, 25.375f, 0.0f)));
 
 		// Draw the arrows.
 		lcVector3 Verts[11];
@@ -2090,15 +2082,13 @@ void Project::RenderOverlays(View* view)
 	if (mDropPiece)
 		return;
 
+	lcContext* Context = view->mContext;
+
 	if (((m_nCurAction == LC_TOOL_SELECT) && (m_nTracking == LC_TRACK_LEFT) && (m_ActiveView == view) && (m_OverlayMode == LC_OVERLAY_NONE)) ||
 	    (m_nCurAction == LC_TOOL_ZOOM_REGION))
 	{
-		glMatrixMode(GL_PROJECTION);
-		glLoadIdentity();
-		glOrtho(0.0f, view->mWidth, 0.0f, view->mHeight, -1.0f, 1.0f);
-		glMatrixMode(GL_MODELVIEW);
-		glLoadIdentity();
-		glTranslatef(0.375f, 0.375f, 0.0f);
+		Context->SetProjectionMatrix(lcMatrix44Ortho(0.0f, view->mWidth, 0.0f, view->mHeight, -1.0f, 1.0f));
+		Context->SetWorldViewMatrix(lcMatrix44Translation(lcVector3(0.375f, 0.375f, 0.0f)));
 
 		glDisable(GL_DEPTH_TEST);
 
@@ -2180,6 +2170,8 @@ void Project::RenderOverlays(View* view)
 	const float OverlayScale = view->m_OverlayScale;
 	const lcMatrix44& ViewMatrix = view->mCamera->mWorldView;
 
+	Context->SetProjectionMatrix(view->GetProjectionMatrix());
+
 	if ((m_nCurAction == LC_TOOL_MOVE || m_nCurAction == LC_TOOL_SELECT) && (m_OverlayMode >= LC_OVERLAY_NONE && m_OverlayMode <= LC_OVERLAY_ROTATE_XYZ))
 	{
 		const float OverlayMovePlaneSize = 0.5f * OverlayScale;
@@ -2224,7 +2216,7 @@ void Project::RenderOverlays(View* view)
 			glEnable(GL_BLEND);
 
 			glColor4f(0.8f, 0.8f, 0.0f, 0.3f);
-			glLoadMatrixf(WorldViewMatrix);
+			Context->SetWorldViewMatrix(WorldViewMatrix);
 
 			float Verts[4][3] =
 			{
@@ -2275,7 +2267,7 @@ void Project::RenderOverlays(View* view)
 			else if (i == 2)
 				WorldViewMatrix = lcMul(lcMatrix44(lcVector4(0, 0, 1, 0), lcVector4(0, 1, 0, 0), lcVector4(1, 0, 0, 0), lcVector4(0, 0, 0, 1)), WorldViewMatrix);
 
-			glLoadMatrixf(WorldViewMatrix);
+			Context->SetWorldViewMatrix(WorldViewMatrix);
 
 			// Translation arrows.
 			if (m_nTracking == LC_TRACK_NONE || (m_OverlayMode >= LC_OVERLAY_NONE && m_OverlayMode <= LC_OVERLAY_MOVE_XYZ))
@@ -2462,7 +2454,7 @@ void Project::RenderOverlays(View* view)
 
 				WorldViewMatrix = lcMul(lcMatrix44FromAxisAngle(lcVector3(Rotation[1], Rotation[2], Rotation[3]), Rotation[0] * LC_DTOR), WorldViewMatrix);
 
-				glLoadMatrixf(WorldViewMatrix);
+				Context->SetWorldViewMatrix(WorldViewMatrix);
 
 				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 				glEnable(GL_BLEND);
@@ -2530,7 +2522,7 @@ void Project::RenderOverlays(View* view)
 			}
 
 			glColor4f(0.1f, 0.1f, 0.1f, 1.0f);
-			glLoadMatrixf(ViewMatrix);
+			Context->SetWorldViewMatrix(ViewMatrix);
 
 			glVertexPointer(3, GL_FLOAT, 0, Verts);
 			glDrawArrays(GL_LINE_LOOP, 0, 32);
@@ -2552,7 +2544,7 @@ void Project::RenderOverlays(View* view)
 		if (Focus)
 			WorldViewMatrix = lcMul(lcMatrix44FromAxisAngle(lcVector3(Rot[0], Rot[1], Rot[2]), Rot[3] * LC_DTOR), WorldViewMatrix);
 
-		glLoadMatrixf(WorldViewMatrix);
+		Context->SetWorldViewMatrix(WorldViewMatrix);
 
 		// Draw each axis circle.
 		for (int i = 0; i < 3; i++)
@@ -2654,7 +2646,7 @@ void Project::RenderOverlays(View* view)
 
 				WorldViewMatrix = lcMul(lcMatrix44FromAxisAngle(lcVector3(Rotation[1], Rotation[2], Rotation[3]), Rotation[0] * LC_DTOR), WorldViewMatrix);
 
-				glLoadMatrixf(WorldViewMatrix);
+				Context->SetWorldViewMatrix(WorldViewMatrix);
 
 				glColor4f(0.8f, 0.8f, 0.0f, 1.0f);
 
@@ -2688,12 +2680,8 @@ void Project::RenderOverlays(View* view)
 
 				lcVector3 ScreenPos = lcProjectPoint(m_OverlayCenter, ModelView, Projection, Viewport);
 
-				glMatrixMode(GL_PROJECTION);
-				glLoadIdentity();
-				glOrtho(0, Viewport[2], 0, Viewport[3], -1, 1);
-				glMatrixMode(GL_MODELVIEW);
-				glLoadIdentity();
-				glTranslatef(0.375, 0.375, 0.0);
+				Context->SetProjectionMatrix(lcMatrix44Ortho(0, Viewport[2], 0, Viewport[3], -1, 1));
+				Context->SetWorldViewMatrix(lcMatrix44Translation(lcVector3(0.375, 0.375, 0.0)));
 
 				glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 				m_pScreenFont->MakeCurrent();
@@ -2726,12 +2714,8 @@ void Project::RenderOverlays(View* view)
 		w = view->mWidth;
 		h = view->mHeight;
 
-		glMatrixMode(GL_PROJECTION);
-		glLoadIdentity();
-		glOrtho(0, w, 0, h, -1, 1);
-		glMatrixMode(GL_MODELVIEW);
-		glLoadIdentity();
-		glTranslatef(0.375f, 0.375f, 0.0f);
+		Context->SetProjectionMatrix(lcMatrix44Ortho(0, w, 0, h, -1, 1));
+		Context->SetWorldViewMatrix(lcMatrix44Translation(lcVector3(0.375f, 0.375f, 0.0f)));
 
 		glDisable(GL_DEPTH_TEST);
 		glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
@@ -2787,12 +2771,10 @@ void Project::RenderOverlays(View* view)
 
 void Project::RenderViewports(View* view)
 {
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glOrtho(0.0f, view->mWidth, 0.0f, view->mHeight, -1.0f, 1.0f);
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	glTranslatef(0.375f, 0.375f, 0.0f);
+	lcContext* Context = view->mContext;
+
+	Context->SetProjectionMatrix(lcMatrix44Ortho(0.0f, view->mWidth, 0.0f, view->mHeight, -1.0f, 1.0f));
+	Context->SetWorldViewMatrix(lcMatrix44Translation(lcVector3(0.375f, 0.375f, 0.0f)));
 
 	glDepthMask(GL_FALSE);
 	glDisable(GL_DEPTH_TEST);
@@ -5307,12 +5289,18 @@ void Project::HandleCommand(LC_COMMANDS id)
 			break;
 
 		case LC_VIEW_PROJECTION_PERSPECTIVE:
+			m_ActiveView->mCamera->SetOrtho(false);
+			if (m_ActiveView->mCamera->IsFocused())
+				gMainWindow->UpdateFocusObject(m_ActiveView->mCamera);
 			m_ActiveView->SetProjectionType(lcProjection::Projection);
 			m_ActiveView->Redraw();
 			gMainWindow->UpdatePerspective(m_ActiveView);
 			break;
 
 		case LC_VIEW_PROJECTION_ORTHO:
+			m_ActiveView->mCamera->SetOrtho(true);
+			if (m_ActiveView->mCamera->IsFocused())
+				gMainWindow->UpdateFocusObject(m_ActiveView->mCamera);
 			m_ActiveView->SetProjectionType(lcProjection::Ortho);
 			m_ActiveView->Redraw();
 			gMainWindow->UpdatePerspective(m_ActiveView);
@@ -7844,7 +7832,7 @@ void Project::ModifyObject(Object* Object, lcObjectProperty Property, void* Valu
 
 	switch (Property)
 	{
-	case LC_PART_POSITION:
+	case LC_PIECE_PROPERTY_POSITION:
 		{
 			const lcVector3& Position = *(lcVector3*)Value;
 			Piece* Part = (Piece*)Object;
@@ -7858,7 +7846,7 @@ void Project::ModifyObject(Object* Object, lcObjectProperty Property, void* Valu
 			}
 		} break;
 
-	case LC_PART_ROTATION:
+	case LC_PIECE_PROPERTY_ROTATION:
 		{
 			const lcVector4& Rotation = *(lcVector4*)Value;
 			Piece* Part = (Piece*)Object;
@@ -7872,7 +7860,7 @@ void Project::ModifyObject(Object* Object, lcObjectProperty Property, void* Valu
 			}
 		} break;
 
-	case LC_PART_SHOW:
+	case LC_PIECE_PROPERTY_SHOW:
 		{
 			lcuint32 Show = *(lcuint32*)Value;
 			Piece* Part = (Piece*)Object;
@@ -7887,7 +7875,7 @@ void Project::ModifyObject(Object* Object, lcObjectProperty Property, void* Valu
 			}
 		} break;
 
-	case LC_PART_HIDE:
+	case LC_PIECE_PROPERTY_HIDE:
 		{
 			lcuint32 Hide = *(lcuint32*)Value;
 			Piece* Part = (Piece*)Object;
@@ -7900,7 +7888,7 @@ void Project::ModifyObject(Object* Object, lcObjectProperty Property, void* Valu
 			}
 		} break;
 
-	case LC_PART_COLOR:
+	case LC_PIECE_PROPERTY_COLOR:
 		{
 			int ColorIndex = *(int*)Value;
 			Piece* Part = (Piece*)Object;
@@ -7913,7 +7901,7 @@ void Project::ModifyObject(Object* Object, lcObjectProperty Property, void* Valu
 			}
 		} break;
 
-	case LC_PART_ID:
+	case LC_PIECE_PROPERTY_ID:
 		{
 			Piece* Part = (Piece*)Object;
 			PieceInfo* Info = (PieceInfo*)Value;
@@ -7928,7 +7916,7 @@ void Project::ModifyObject(Object* Object, lcObjectProperty Property, void* Valu
 			}
 		} break;
 
-	case LC_CAMERA_POSITION:
+	case LC_CAMERA_PROPERTY_POSITION:
 			{
 			const lcVector3& Position = *(lcVector3*)Value;
 			Camera* camera = (Camera*)Object;
@@ -7942,7 +7930,7 @@ void Project::ModifyObject(Object* Object, lcObjectProperty Property, void* Valu
 			}
 		} break;
 
-	case LC_CAMERA_TARGET:
+	case LC_CAMERA_PROPERTY_TARGET:
 		{
 			const lcVector3& TargetPosition = *(lcVector3*)Value;
 			Camera* camera = (Camera*)Object;
@@ -7956,7 +7944,7 @@ void Project::ModifyObject(Object* Object, lcObjectProperty Property, void* Valu
 			}
 		} break;
 
-	case LC_CAMERA_UP:
+	case LC_CAMERA_PROPERTY_UPVECTOR:
 		{
 			const lcVector3& Up = *(lcVector3*)Value;
 			Camera* camera = (Camera*)Object;
@@ -7970,7 +7958,21 @@ void Project::ModifyObject(Object* Object, lcObjectProperty Property, void* Valu
 			}
 		} break;
 
-	case LC_CAMERA_FOV:
+	case LC_CAMERA_PROPERTY_ORTHO:
+		{
+			bool Ortho = *(bool*)Value;
+			Camera* camera = (Camera*)Object;
+
+			if (camera->IsOrtho() != Ortho)
+			{
+				camera->SetOrtho(Ortho);
+				camera->UpdatePosition(m_nCurStep);
+
+				CheckPointString = "Camera";
+			}
+		} break;
+
+	case LC_CAMERA_PROPERTY_FOV:
 		{
 			float FOV = *(float*)Value;
 			Camera* camera = (Camera*)Object;
@@ -7984,7 +7986,7 @@ void Project::ModifyObject(Object* Object, lcObjectProperty Property, void* Valu
 			}
 		} break;
 
-	case LC_CAMERA_NEAR:
+	case LC_CAMERA_PROPERTY_NEAR:
 		{
 			float Near = *(float*)Value;
 			Camera* camera = (Camera*)Object;
@@ -7998,7 +8000,7 @@ void Project::ModifyObject(Object* Object, lcObjectProperty Property, void* Valu
 			}
 		} break;
 
-	case LC_CAMERA_FAR:
+	case LC_CAMERA_PROPERTY_FAR:
 		{
 			float Far = *(float*)Value;
 			Camera* camera = (Camera*)Object;
@@ -8012,7 +8014,7 @@ void Project::ModifyObject(Object* Object, lcObjectProperty Property, void* Valu
 			}
 		} break;
 
-	case LC_CAMERA_NAME:
+	case LC_CAMERA_PROPERTY_NAME:
 		{
 			const char* Name = (const char*)Value;
 			Camera* camera = (Camera*)Object;

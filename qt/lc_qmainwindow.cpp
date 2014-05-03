@@ -1255,12 +1255,10 @@ void lcQMainWindow::updateCurrentCamera(int cameraIndex)
 
 void lcQMainWindow::updatePerspective(View* view)
 {
-	lcProjection::Type type = view->GetProjectionType();
-
-	if (lcProjection::Projection == type)
-		actions[LC_VIEW_PROJECTION_PERSPECTIVE]->setChecked(true);
-	else
+	if (view->mCamera->IsOrtho())
 		actions[LC_VIEW_PROJECTION_ORTHO]->setChecked(true);
+	else
+		actions[LC_VIEW_PROJECTION_PERSPECTIVE]->setChecked(true);
 }
 
 void lcQMainWindow::updateCategories()

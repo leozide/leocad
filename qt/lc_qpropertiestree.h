@@ -32,6 +32,7 @@ public:
 	enum PropertyType
 	{
 		PropertyGroup,
+		PropertyBool,
 		PropertyFloat,
 		PropertyInt,
 		PropertyString,
@@ -40,6 +41,7 @@ public:
 	};
 
 protected slots:
+	void slotToggled(bool value);
 	void slotReturnPressed();
 	void slotSetValue(int value);
 	void slotColorButtonClicked();
@@ -94,6 +96,7 @@ protected:
 	QTreeWidgetItem *cameraUpY;
 	QTreeWidgetItem *cameraUpZ;
 	QTreeWidgetItem *cameraSettings;
+	QTreeWidgetItem *cameraOrtho;
 	QTreeWidgetItem *cameraFOV;
 	QTreeWidgetItem *cameraNear;
 	QTreeWidgetItem *cameraFar;

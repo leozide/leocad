@@ -52,6 +52,27 @@ void View::SetDefaultCamera()
 	mCamera->SetViewpoint(LC_VIEWPOINT_HOME, 1, false);
 }
 
+lcMatrix44 View::GetProjectionMatrix() const
+{
+	float AspectRatio = (float)mWidth / (float)mHeight;
+
+	if (mCamera->IsOrtho())
+	{
+		// Compute the FOV/plane intersection radius.
+		//                d               d
+		//   a = 2 atan(------) => ~ a = --- => d = af
+		//                2f              f
+		float f = (mCamera->mPosition - mCamera->mOrthoTarget).Length();
+		float d = (mCamera->m_fovy * f) * (LC_PI / 180.0f);
+		float r = d / 2;
+
+		float right = r * AspectRatio;
+		return lcMatrix44Ortho(-right, right, -r, r, mCamera->m_zNear, mCamera->m_zFar * 4);
+	}
+	else
+		return lcMatrix44Perspective(mCamera->m_fovy, AspectRatio, mCamera->m_zNear, mCamera->m_zFar);
+}
+
 LC_CURSOR_TYPE View::GetCursor() const
 {
 	// TODO: check if we're the focused window and return just the default arrow if we aren't.
@@ -131,12 +152,14 @@ const lcProjection& View::UpdateProjection()
 
 void View::SetProjectionType(lcProjection::Type type)
 {
-	mProjection.SetType(type);
-}
+	if (type == lcProjection::Ortho)
+		mCamera->SetOrtho(true);
+	else if (type == lcProjection::Projection)
+		mCamera->SetOrtho(false);
+	else if (type == lcProjection::Cycle)
+		mCamera->SetOrtho(!mCamera->IsOrtho());
 
-lcProjection::Type View::GetProjectionType() const
-{
-	return mProjection.GetType();
+	mProjection.calculateTransform();
 }
 
 void View::OnDraw()

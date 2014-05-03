@@ -1821,7 +1821,7 @@ void Project::RenderSceneObjects(View* view)
 	{
 		lcVector3 Position;
 		lcVector4 Rotation;
-		GetPieceInsertPosition(view, m_nDownX, m_nDownY, Position, Rotation);
+		GetPieceInsertPosition(view, Position, Rotation);
 		PieceInfo* PreviewPiece = mDropPiece ? mDropPiece : m_pCurPiece;
 
 		lcMatrix44 WorldMatrix = lcMatrix44FromAxisAngle(lcVector3(Rotation[0], Rotation[1], Rotation[2]), Rotation[3] * LC_DTOR);
@@ -1875,7 +1875,7 @@ void Project::RenderSceneObjects(View* view)
 			{
 				lcVector3 Position;
 				lcVector4 Rotation;
-				GetPieceInsertPosition(view, m_nDownX, m_nDownY, Position, Rotation);
+				GetPieceInsertPosition(view, Position, Rotation);
 
 				PieceInfo* PreviewPiece = mDropPiece ? mDropPiece : m_pCurPiece;
 
@@ -6895,10 +6895,10 @@ void Project::GetPieceInsertPosition(Piece* OffsetPiece, lcVector3& Position, lc
 }
 
 // Try to find a good starting position/orientation for a new piece.
-void Project::GetPieceInsertPosition(View* view, int MouseX, int MouseY, lcVector3& Position, lcVector4& Rotation)
+void Project::GetPieceInsertPosition(View* view, lcVector3& Position, lcVector4& Rotation)
 {
 	// Check if the mouse is over a piece.
-	Piece* HitPiece = (Piece*)FindObjectFromPoint(view, MouseX, MouseY, true).Object;
+	Piece* HitPiece = (Piece*)view->FindObjectUnderPointer(true).Object;
 
 	if (HitPiece)
 	{
@@ -6924,19 +6924,8 @@ void Project::GetPieceInsertPosition(View* view, int MouseX, int MouseY, lcVecto
 	Rotation = lcVector4(0, 0, 1, 0);
 }
 
-lcObjectSection Project::FindObjectFromPoint(View* view, int x, int y, bool PiecesOnly)
+void Project::RayTest(lcObjectRayTest& ObjectRayTest) const
 {
-	lcVector3 StartEnd[2] = { lcVector3((float)x, (float)y, 0.0f), lcVector3((float)x, (float)y, 1.0f) };
-	view->UnprojectPoints(StartEnd, 2);
-
-	lcObjectRayTest ObjectRayTest;
-
-	ObjectRayTest.Start = StartEnd[0];
-	ObjectRayTest.End = StartEnd[1];
-	ObjectRayTest.Distance = FLT_MAX;
-	ObjectRayTest.ObjectSection.Object = NULL;
-	ObjectRayTest.ObjectSection.Section = 0;;
-
 	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 	{
 		Piece* Piece = mPieces[PieceIdx];
@@ -6945,79 +6934,24 @@ lcObjectSection Project::FindObjectFromPoint(View* view, int x, int y, bool Piec
 			Piece->RayTest(ObjectRayTest);
 	}
 
-	if (!PiecesOnly)
+	if (ObjectRayTest.PiecesOnly)
+		return;
+
+	for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
 	{
-		for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
-		{
-			Camera* Camera = mCameras[CameraIdx];
+		Camera* Camera = mCameras[CameraIdx];
 
-			if (Camera != view->mCamera && Camera->IsVisible())
-				Camera->RayTest(ObjectRayTest);
-		}
-
-		for (int LightIdx = 0; LightIdx < mLights.GetSize(); LightIdx++)
-			if (mLights[LightIdx]->IsVisible())
-				mLights[LightIdx]->RayTest(ObjectRayTest);
+		if (Camera != ObjectRayTest.ViewCamera && Camera->IsVisible())
+			Camera->RayTest(ObjectRayTest);
 	}
 
-	return ObjectRayTest.ObjectSection;
+	for (int LightIdx = 0; LightIdx < mLights.GetSize(); LightIdx++)
+		if (mLights[LightIdx]->IsVisible())
+			mLights[LightIdx]->RayTest(ObjectRayTest);
 }
 
-lcArray<lcObjectSection> Project::FindObjectsInBox(View* View, float x1, float y1, float x2, float y2)
+void Project::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
 {
-	// Find out the top-left and bottom-right corners in screen coordinates.
-	float Left, Top, Bottom, Right;
-
-	if (x1 < x2)
-	{
-		Left = x1;
-		Right = x2;
-	}
-	else
-	{
-		Left = x2;
-		Right = x1;
-	}
-
-	if (y1 > y2)
-	{
-		Top = y1;
-		Bottom = y2;
-	}
-	else
-	{
-		Top = y2;
-		Bottom = y1;
-	}
-
-	// Unproject 6 points to world space.
-	lcVector3 Corners[6] =
-	{
-		lcVector3(Left, Top, 0), lcVector3(Left, Bottom, 0), lcVector3(Right, Bottom, 0),
-		lcVector3(Right, Top, 0), lcVector3(Left, Top, 1), lcVector3(Right, Bottom, 1)
-	};
-
-	m_ActiveView->UnprojectPoints(Corners, 6);
-
-	// Build the box planes.
-	lcVector3 PlaneNormals[6];
-
-	PlaneNormals[0] = lcNormalize(lcCross(Corners[4] - Corners[0], Corners[1] - Corners[0])); // Left
-	PlaneNormals[1] = lcNormalize(lcCross(Corners[5] - Corners[2], Corners[3] - Corners[2])); // Right
-	PlaneNormals[2] = lcNormalize(lcCross(Corners[3] - Corners[0], Corners[4] - Corners[0])); // Top
-	PlaneNormals[3] = lcNormalize(lcCross(Corners[1] - Corners[2], Corners[5] - Corners[2])); // Bottom
-	PlaneNormals[4] = lcNormalize(lcCross(Corners[1] - Corners[0], Corners[3] - Corners[0])); // Front
-	PlaneNormals[5] = lcNormalize(lcCross(Corners[1] - Corners[2], Corners[3] - Corners[2])); // Back
-
-	lcObjectBoxTest ObjectBoxTest;
-	ObjectBoxTest.Planes[0] = lcVector4(PlaneNormals[0], -lcDot(PlaneNormals[0], Corners[0]));
-	ObjectBoxTest.Planes[1] = lcVector4(PlaneNormals[1], -lcDot(PlaneNormals[1], Corners[5]));
-	ObjectBoxTest.Planes[2] = lcVector4(PlaneNormals[2], -lcDot(PlaneNormals[2], Corners[0]));
-	ObjectBoxTest.Planes[3] = lcVector4(PlaneNormals[3], -lcDot(PlaneNormals[3], Corners[5]));
-	ObjectBoxTest.Planes[4] = lcVector4(PlaneNormals[4], -lcDot(PlaneNormals[4], Corners[0]));
-	ObjectBoxTest.Planes[5] = lcVector4(PlaneNormals[5], -lcDot(PlaneNormals[5], Corners[5]));
-
-	// Check if any objects are inside the volume.
 	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 	{
 		Piece* Piece = mPieces[PieceIdx];
@@ -7030,15 +6964,13 @@ lcArray<lcObjectSection> Project::FindObjectsInBox(View* View, float x1, float y
 	{
 		Camera* Camera = mCameras[CameraIdx];
 
-		if (Camera != View->mCamera && Camera->IsVisible())
+		if (Camera != ObjectBoxTest.ViewCamera && Camera->IsVisible())
 			Camera->BoxTest(ObjectBoxTest);
 	}
 
 	for (int LightIdx = 0; LightIdx < mLights.GetSize(); LightIdx++)
 		if (mLights[LightIdx]->IsVisible())
 			mLights[LightIdx]->BoxTest(ObjectBoxTest);
-
-	return ObjectBoxTest.ObjectSections;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -7088,7 +7020,7 @@ bool Project::StopTracking(bool bAccept)
 				lcVector3 Pos;
 				lcVector4 Rot;
 
-				GetPieceInsertPosition(m_ActiveView, x, y, Pos, Rot);
+				GetPieceInsertPosition(m_ActiveView, Pos, Rot);
 
 				Piece* pPiece = new Piece(mDropPiece);
 				pPiece->Initialize(Pos[0], Pos[1], Pos[2], m_nCurStep);
@@ -7120,7 +7052,7 @@ bool Project::StopTracking(bool bAccept)
 			{
 				if (((float)m_nDownX != m_fTrack[0]) && ((float)m_nDownY != m_fTrack[1]))
 				{
-					lcArray<lcObjectSection> ObjectSections = FindObjectsInBox(m_ActiveView, (float)m_nDownX, (float)m_nDownY, m_fTrack[0], m_fTrack[1]);
+					lcArray<lcObjectSection> ObjectSections = m_ActiveView->FindObjectsInBox((float)m_nDownX, (float)m_nDownY, m_fTrack[0], m_fTrack[1]);
 
 					bool Control = m_ActiveView->mInputState.Control;
 					SelectAndFocusNone(Control);
@@ -8103,7 +8035,7 @@ void Project::OnLeftButtonDown(View* view)
 	{
 	case LC_TOOL_SELECT:
 		{
-			lcObjectSection ObjectSection = FindObjectFromPoint(view, x, y, false);
+			lcObjectSection ObjectSection = view->FindObjectUnderPointer(false);
 
 			if (Action == LC_TOOL_SELECT)
 			{
@@ -8119,7 +8051,7 @@ void Project::OnLeftButtonDown(View* view)
 
 	case LC_TOOL_ERASER:
 		{
-			lcObjectSection ObjectSection = FindObjectFromPoint(view, x, y, false);
+			lcObjectSection ObjectSection = view->FindObjectUnderPointer(false);
 			Object* Object = ObjectSection.Object;
 
 			if (!Object)
@@ -8165,7 +8097,7 @@ void Project::OnLeftButtonDown(View* view)
 
 	case LC_TOOL_PAINT:
 		{
-			Object* Object = FindObjectFromPoint(view, x, y, true).Object;
+			Object* Object = view->FindObjectUnderPointer(true).Object;
 
 			if (Object && (Object->GetType() == LC_OBJECT_PIECE))
 			{
@@ -8189,7 +8121,7 @@ void Project::OnLeftButtonDown(View* view)
 			lcVector3 Pos;
 			lcVector4 Rot;
 
-			GetPieceInsertPosition(view, x, y, Pos, Rot);
+			GetPieceInsertPosition(view, Pos, Rot);
 
 			Piece* pPiece = new Piece(m_pCurPiece);
 			pPiece->Initialize(Pos[0], Pos[1], Pos[2], m_nCurStep);
@@ -8335,7 +8267,7 @@ void Project::OnLeftButtonDoubleClick(View* View)
 	if (SetActiveView(View))
 		return;
 
-	lcObjectSection ObjectSection = FindObjectFromPoint(View, View->mInputState.x, View->mInputState.y, false);
+	lcObjectSection ObjectSection = View->FindObjectUnderPointer(false);
 
 	if (View->mInputState.Control)
 		FocusOrDeselectObject(ObjectSection);

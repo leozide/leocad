@@ -11,6 +11,7 @@ class View;
 
 #define LC_CAMERA_HIDDEN            0x0001
 #define LC_CAMERA_SIMPLE            0x0002
+#define LC_CAMERA_ORTHO             0x0004
 #define LC_CAMERA_POSITION_SELECTED 0x0010
 #define LC_CAMERA_POSITION_FOCUSED  0x0020
 #define LC_CAMERA_TARGET_SELECTED   0x0040
@@ -72,6 +73,19 @@ public:
 	bool IsSimple() const
 	{
 		return (mState & LC_CAMERA_SIMPLE) != 0;
+	}
+
+	bool IsOrtho() const
+	{
+		return (mState & LC_CAMERA_ORTHO) != 0;
+	}
+
+	void SetOrtho(bool Ortho)
+	{
+		if (Ortho)
+			mState |= LC_CAMERA_ORTHO;
+		else
+			mState &= ~LC_CAMERA_ORTHO;
 	}
 
 	virtual bool IsSelected() const

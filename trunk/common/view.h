@@ -27,9 +27,9 @@ public:
 
 	void SetCamera(Camera* camera, bool ForceCopy);
 	void SetDefaultCamera();
+	lcMatrix44 GetProjectionMatrix() const;
 	const lcProjection& UpdateProjection();
 	void SetProjectionType(lcProjection::Type type);
-	lcProjection::Type GetProjectionType() const;
 
 	LC_CURSOR_TYPE GetCursor() const;
 

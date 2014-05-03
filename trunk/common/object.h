@@ -45,6 +45,8 @@ inline lcObjectSection lcMakeObjectSection(Object* Object, lcuintptr Section)
 
 struct lcObjectRayTest
 {
+	lcCamera* ViewCamera;
+	bool PiecesOnly;
 	lcVector3 Start;
 	lcVector3 End;
 	float Distance;
@@ -53,6 +55,7 @@ struct lcObjectRayTest
 
 struct lcObjectBoxTest
 {
+	lcCamera* ViewCamera;
 	lcVector4 Planes[6];
 	lcArray<lcObjectSection> ObjectSections;
 };

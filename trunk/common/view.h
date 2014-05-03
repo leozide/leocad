@@ -27,8 +27,10 @@ public:
 	void SetCamera(Camera* camera, bool ForceCopy);
 	void SetDefaultCamera();
 	lcMatrix44 GetProjectionMatrix() const;
-
 	LC_CURSOR_TYPE GetCursor() const;
+
+	lcObjectSection FindObjectUnderPointer(bool PiecesOnly) const;
+	lcArray<lcObjectSection> FindObjectsInBox(float x1, float y1, float x2, float y2) const;
 
 	Project* m_Project;
 	Camera* mCamera;

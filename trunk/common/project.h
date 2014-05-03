@@ -286,6 +286,9 @@ public:
 	void ModifyObject(Object* Object, lcObjectProperty Property, void* Value);
 	void ZoomActiveView(int Amount);
 
+	void RayTest(lcObjectRayTest& ObjectRayTest) const;
+	void BoxTest(lcObjectBoxTest& ObjectBoxTest) const;
+
 	void AddView(View* view);
 	void RemoveView(View* view);
 	void UpdateAllViews();
@@ -321,9 +324,7 @@ protected:
 
 	bool RemoveSelectedObjects();
 	void GetPieceInsertPosition(Piece* OffsetPiece, lcVector3& Position, lcVector4& Rotation);
-	void GetPieceInsertPosition(View* view, int MouseX, int MouseY, lcVector3& Position, lcVector4& Orientation);
-	lcObjectSection FindObjectFromPoint(View* view, int x, int y, bool PiecesOnly = false);
-	lcArray<lcObjectSection> FindObjectsInBox(View* View, float x1, float y1, float x2, float y2);
+	void GetPieceInsertPosition(View* view, lcVector3& Position, lcVector4& Orientation);
 	void SelectAndFocusNone(bool bFocusOnly);
 	void SelectGroup(Group* TopGroup, bool Select);
 

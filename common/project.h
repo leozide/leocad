@@ -273,6 +273,7 @@ public:
 	void OnPieceDropMove(int x, int y);
 	void EndPieceDrop(bool Accept);
 	void BeginColorDrop();
+	void RenderInitialize();
 
 	void GetPiecesUsed(lcArray<lcPiecesUsedEntry>& PiecesUsed) const;
 	void CreateImages(Image* images, int width, int height, unsigned short from, unsigned short to, bool hilite);
@@ -289,15 +290,6 @@ public:
 	void RayTest(lcObjectRayTest& ObjectRayTest) const;
 	void BoxTest(lcObjectBoxTest& ObjectBoxTest) const;
 
-	void AddView(View* view);
-	void RemoveView(View* view);
-	void UpdateAllViews();
-	bool SetActiveView(View* view);
-	View* GetActiveView() const
-	{
-		return m_ActiveView;
-	}
-
 	// Objects
 	lcArray<Piece*> mPieces;
 	lcArray<Camera*> mCameras;
@@ -310,9 +302,6 @@ public:
 	bool m_bModified;
 
 protected:
-	View* m_ActiveView;
-	lcArray<View*> m_ViewList;
-
 	// Piece library
 	TexFont* m_pScreenFont;
 
@@ -359,7 +348,6 @@ protected:
 	void RenderViewports(View* view);
 	void RenderOverlays(View* view);
 
-	void RenderInitialize();
 	void CreateHTMLPieceList(FILE* f, int nStep, bool bImages, const char* ext);
 	void Export3DStudio();
 	void ExportPOVRay(lcFile& File);

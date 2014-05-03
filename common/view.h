@@ -2,6 +2,7 @@
 #define _VIEW_H_
 
 #include "lc_glwidget.h"
+#include "camera.h"
 
 class Project;
 

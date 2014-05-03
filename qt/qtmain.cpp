@@ -3,6 +3,7 @@
 #include "lc_qmainwindow.h"
 #include "lc_qupdatedialog.h"
 #include "lc_mainwindow.h"
+#include "view.h"
 #include <QApplication>
 
 #ifdef Q_OS_WIN
@@ -547,12 +548,12 @@ void lcMainWindow::UpdateTransformType(int NewType)
 		window->updateTransformType(NewType);
 }
 
-void lcMainWindow::UpdateCameraMenu(const lcArray<Camera*>& Cameras, Camera* CurrentCamera)
+void lcMainWindow::UpdateCameraMenu()
 {
 	lcQMainWindow* window = (lcQMainWindow*)mHandle;
 
 	if (window)
-		window->updateCameraMenu(Cameras, CurrentCamera);
+		window->updateCameraMenu();
 }
 
 void lcMainWindow::UpdateCurrentCamera(int CameraIndex)
@@ -563,12 +564,12 @@ void lcMainWindow::UpdateCurrentCamera(int CameraIndex)
 		window->updateCurrentCamera(CameraIndex);
 }
 
-void lcMainWindow::UpdatePerspective(View* view)
+void lcMainWindow::UpdatePerspective()
 {
 	lcQMainWindow* window = (lcQMainWindow*)mHandle;
 
 	if (window)
-		window->updatePerspective(view);
+		window->updatePerspective(mActiveView);
 }
 
 void lcMainWindow::UpdateCategories()

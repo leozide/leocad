@@ -4,6 +4,7 @@
 #include "lc_basewindow.h"
 #include "lc_array.h"
 
+class View;
 class PiecePreview;
 
 #define LC_MAX_RECENT_FILES 4
@@ -13,6 +14,21 @@ class lcMainWindow : public lcBaseWindow
  public:
 	lcMainWindow();
 	~lcMainWindow();
+
+	View* GetActiveView() const
+	{
+		return mActiveView;
+	}
+
+	const lcArray<View*>& GetViews()
+	{
+		return mViews;
+	}
+
+	void AddView(View* View);
+	void RemoveView(View* View);
+	void SetActiveView(View* ActiveView);
+	void UpdateAllViews();
 
 	void SetColorIndex(int ColorIndex);
 	void Close();
@@ -39,8 +55,8 @@ class lcMainWindow : public lcBaseWindow
 	void UpdateUndoRedo(const char* UndoText, const char* RedoText);
 	void UpdateTransformType(int NewType);
 	void UpdateCurrentCamera(int CameraIndex);
-	void UpdatePerspective(View* view);
-	void UpdateCameraMenu(const lcArray<Camera*>& Cameras, Camera* CurrentCamera);
+	void UpdatePerspective();
+	void UpdateCameraMenu();
 	void UpdateCategories();
 	void UpdateTitle(const char* Title, bool Modified);
 	void UpdateModified(bool Modified);
@@ -52,6 +68,10 @@ class lcMainWindow : public lcBaseWindow
 	char mRecentFiles[LC_MAX_RECENT_FILES][LC_MAXPATH];
 	PiecePreview* mPreviewWidget;
 	int mColorIndex;
+
+protected:
+	View* mActiveView;
+	lcArray<View*> mViews;
 };
 
 extern class lcMainWindow* gMainWindow;

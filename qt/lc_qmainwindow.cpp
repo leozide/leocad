@@ -807,7 +807,7 @@ void lcQMainWindow::print(QPrinter *printer)
 	float aspectRatio = (float)stepWidth / (float)stepHeight;
 
 	View view(project);
-	view.SetCamera(project->GetActiveView()->mCamera, false);
+	view.SetCamera(gMainWindow->GetActiveView()->mCamera, false);
 	view.mWidth = tileWidth;
 	view.mHeight = tileHeight;
 	view.SetContext(piecePreview->widget->mContext);
@@ -1219,8 +1219,10 @@ void lcQMainWindow::updateTransformType(int newType)
 	actions[LC_EDIT_TRANSFORM]->setIcon(QIcon(iconNames[newType]));
 }
 
-void lcQMainWindow::updateCameraMenu(const lcArray<Camera*>& cameras, Camera* currentCamera)
+void lcQMainWindow::updateCameraMenu()
 {
+	const lcArray<Camera*>& cameras = lcGetActiveProject()->mCameras;
+	Camera* currentCamera = gMainWindow->GetActiveView()->mCamera;
 	int actionIdx, currentIndex = -1;
 
 	for (actionIdx = LC_VIEW_CAMERA_FIRST; actionIdx <= LC_VIEW_CAMERA_LAST; actionIdx++)

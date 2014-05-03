@@ -28,6 +28,7 @@ typedef quintptr lcuintptr;
 #endif
 
 #ifdef Q_OS_WIN
+#define snprintf _snprintf
 #define isnan _isnan
 #define strcasecmp stricmp
 #define strncasecmp strnicmp

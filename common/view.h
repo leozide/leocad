@@ -2,7 +2,6 @@
 #define _VIEW_H_
 
 #include "lc_glwidget.h"
-#include "lc_projection.h"
 
 class Project;
 
@@ -28,8 +27,6 @@ public:
 	void SetCamera(Camera* camera, bool ForceCopy);
 	void SetDefaultCamera();
 	lcMatrix44 GetProjectionMatrix() const;
-	const lcProjection& UpdateProjection();
-	void SetProjectionType(lcProjection::Type type);
 
 	LC_CURSOR_TYPE GetCursor() const;
 
@@ -37,8 +34,23 @@ public:
 	Camera* mCamera;
 	float m_OverlayScale;
 
-private:
-	lcProjection mProjection;
+	lcVector3 ProjectPoint(const lcVector3& Point) const
+	{
+		int Viewport[4] = { 0, 0, mWidth, mHeight };
+		return lcProjectPoint(Point, mCamera->mWorldView, GetProjectionMatrix(), Viewport);
+	}
+
+	lcVector3 UnprojectPoint(const lcVector3& Point) const
+	{
+		int Viewport[4] = { 0, 0, mWidth, mHeight };
+		return lcUnprojectPoint(Point, mCamera->mWorldView, GetProjectionMatrix(), Viewport);
+	}
+
+	void UnprojectPoints(lcVector3* Points, int NumPoints) const
+	{
+		int Viewport[4] = { 0, 0, mWidth, mHeight };
+		lcUnprojectPoints(Points, NumPoints, mCamera->mWorldView, GetProjectionMatrix(), Viewport);
+	}
 };
 
 #endif // _VIEW_H_

@@ -598,21 +598,6 @@ void lcCamera::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
 	}
 }
 
-void lcCamera::LoadProjection(const lcProjection& projection)
-{
-	if (m_pTR != NULL)
-		m_pTR->BeginTile();
-	else
-	{
-		glMatrixMode(GL_PROJECTION);
-		mProjection = projection;
-		glLoadMatrixf((lcMatrix44&)mProjection);
-	}
-
-	glMatrixMode(GL_MODELVIEW);
-	glLoadMatrixf(mWorldView);
-}
-
 void lcCamera::ZoomExtents(View* view, const lcVector3& Center, const lcVector3* Points, int NumPoints, unsigned short nTime, bool bAddKey)
 {
 	int Viewport[4] = { 0, 0, view->mWidth, view->mHeight };
@@ -823,12 +808,22 @@ void lcCamera::SetViewpoint(LC_VIEWPOINT Viewpoint, unsigned short nTime, bool b
 	UpdatePosition(nTime);
 }
 
-void lcCamera::StartTiledRendering(int tw, int th, int iw, int ih, float fAspect)
+void lcCamera::StartTiledRendering(int tw, int th, int iw, int ih, float AspectRatio)
 {
 	m_pTR = new TiledRender();
 	m_pTR->TileSize(tw, th, 0);
 	m_pTR->ImageSize(iw, ih);
-	m_pTR->Perspective(m_fovy, fAspect, m_zNear, m_zFar);
+	if (IsOrtho())
+	{
+		float f = (mPosition - mOrthoTarget).Length();
+		float d = (m_fovy * f) * (LC_PI / 180.0f);
+		float r = d / 2;
+
+		float right = r * AspectRatio;
+		m_pTR->Ortho(-right, right, -r, r, m_zNear, m_zFar * 4);
+	}
+	else
+		m_pTR->Perspective(m_fovy, AspectRatio, m_zNear, m_zFar);
 }
 
 void lcCamera::GetTileInfo(int* row, int* col, int* width, int* height)

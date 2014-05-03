@@ -4,7 +4,6 @@
 #include "object.h"
 #include "lc_math.h"
 #include "lc_array.h"
-#include "lc_projection.h"
 
 class TiledRender;
 class View;
@@ -256,7 +255,6 @@ public:
 	void UpdatePosition(unsigned short nTime);
 	void CopyPosition(const Camera* camera);
 	void Render(View* View);
-	void LoadProjection(const lcProjection& projection);
 
 	void ZoomExtents(View* view, const lcVector3& Center, const lcVector3* Points, int NumPoints, unsigned short nTime, bool bAddKey);
 	void ZoomRegion(View* view, float Left, float Right, float Bottom, float Top, unsigned short nTime, bool bAddKey);
@@ -284,15 +282,13 @@ public:
 	lcVector3 mTargetPosition;
 	lcVector3 mUpVector;
 	lcVector3 mOrthoTarget;
-	lcProjection mProjection;
+	TiledRender* m_pTR;
 
 protected:
 	void Initialize();
 
 	lcuint32 mState;
 	unsigned char m_nType;
-
-	TiledRender* m_pTR;
 };
 
 #endif // _CAMERA_H_

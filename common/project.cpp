@@ -5292,7 +5292,6 @@ void Project::HandleCommand(LC_COMMANDS id)
 			m_ActiveView->mCamera->SetOrtho(false);
 			if (m_ActiveView->mCamera->IsFocused())
 				gMainWindow->UpdateFocusObject(m_ActiveView->mCamera);
-			m_ActiveView->SetProjectionType(lcProjection::Projection);
 			m_ActiveView->Redraw();
 			gMainWindow->UpdatePerspective(m_ActiveView);
 			break;
@@ -5301,13 +5300,12 @@ void Project::HandleCommand(LC_COMMANDS id)
 			m_ActiveView->mCamera->SetOrtho(true);
 			if (m_ActiveView->mCamera->IsFocused())
 				gMainWindow->UpdateFocusObject(m_ActiveView->mCamera);
-			m_ActiveView->SetProjectionType(lcProjection::Ortho);
 			m_ActiveView->Redraw();
 			gMainWindow->UpdatePerspective(m_ActiveView);
 			break;
 
 		case LC_VIEW_PROJECTION_CYCLE:
-			m_ActiveView->SetProjectionType(lcProjection::Cycle);
+			m_ActiveView->mCamera->SetOrtho(!m_ActiveView->mCamera->IsOrtho());
 			m_ActiveView->Redraw();
 			gMainWindow->UpdatePerspective(m_ActiveView);
 			break;
@@ -5432,9 +5430,8 @@ void Project::HandleCommand(LC_COMMANDS id)
 			{
 				// TODO: rewrite this
 			
-				const lcProjection& projection = m_ActiveView->UpdateProjection();
 				lcVector3 Pts[3] = { lcVector3(5.0f, 5.0f, 0.1f), lcVector3(10.0f, 5.0f, 0.1f), lcVector3(5.0f, 10.0f, 0.1f) };
-				projection.UnprojectPoints(m_ActiveView->mCamera->mWorldView, Pts, 3);
+				m_ActiveView->UnprojectPoints(Pts, 3);
 
 				float ax, ay;
 				lcVector3 vx((Pts[1][0] - Pts[0][0]), (Pts[1][1] - Pts[0][1]), 0);//Pts[1][2] - Pts[0][2] };
@@ -6146,49 +6143,42 @@ void Project::HandleCommand(LC_COMMANDS id)
 		{
 			m_ActiveView->mCamera->SetViewpoint(LC_VIEWPOINT_FRONT, m_nCurStep, m_bAddKeys);
 			HandleCommand(LC_VIEW_ZOOM_EXTENTS);
-			m_ActiveView->UpdateProjection();
 		} break;
 
 		case LC_VIEW_VIEWPOINT_BACK:
 		{
 			m_ActiveView->mCamera->SetViewpoint(LC_VIEWPOINT_BACK, m_nCurStep, m_bAddKeys);
 			HandleCommand(LC_VIEW_ZOOM_EXTENTS);
-			m_ActiveView->UpdateProjection();
 		} break;
 
 		case LC_VIEW_VIEWPOINT_TOP:
 		{
 			m_ActiveView->mCamera->SetViewpoint(LC_VIEWPOINT_TOP, m_nCurStep, m_bAddKeys);
 			HandleCommand(LC_VIEW_ZOOM_EXTENTS);
-			m_ActiveView->UpdateProjection();
 		} break;
 
 		case LC_VIEW_VIEWPOINT_BOTTOM:
 		{
 			m_ActiveView->mCamera->SetViewpoint(LC_VIEWPOINT_BOTTOM, m_nCurStep, m_bAddKeys);
 			HandleCommand(LC_VIEW_ZOOM_EXTENTS);
-			m_ActiveView->UpdateProjection();
 		} break;
 
 		case LC_VIEW_VIEWPOINT_LEFT:
 		{
 			m_ActiveView->mCamera->SetViewpoint(LC_VIEWPOINT_LEFT, m_nCurStep, m_bAddKeys);
 			HandleCommand(LC_VIEW_ZOOM_EXTENTS);
-			m_ActiveView->UpdateProjection();
 		} break;
 
 		case LC_VIEW_VIEWPOINT_RIGHT:
 		{
 			m_ActiveView->mCamera->SetViewpoint(LC_VIEWPOINT_RIGHT, m_nCurStep, m_bAddKeys);
 			HandleCommand(LC_VIEW_ZOOM_EXTENTS);
-			m_ActiveView->UpdateProjection();
 		} break;
 
 		case LC_VIEW_VIEWPOINT_HOME:
 		{
 			m_ActiveView->mCamera->SetViewpoint(LC_VIEWPOINT_HOME, m_nCurStep, m_bAddKeys);
 			HandleCommand(LC_VIEW_ZOOM_EXTENTS);
-			m_ActiveView->UpdateProjection();
 		} break;
 
 		case LC_VIEW_CAMERA_NONE:
@@ -6917,10 +6907,8 @@ void Project::GetPieceInsertPosition(View* view, int MouseX, int MouseY, lcVecto
 	}
 
 	// Try to hit the base grid.
-	const lcProjection& projection = view->UpdateProjection();
-
 	lcVector3 ClickPoints[2] = { lcVector3((float)m_nDownX, (float)m_nDownY, 0.0f), lcVector3((float)m_nDownX, (float)m_nDownY, 1.0f) };
-	projection.UnprojectPoints(view->mCamera->mWorldView, ClickPoints, 2);
+	view->UnprojectPoints(ClickPoints, 2);
 
 	lcVector3 Intersection;
 	if (lcLinePlaneIntersection(&Intersection, ClickPoints[0], ClickPoints[1], lcVector4(0, 0, 1, m_pCurPiece->m_fDimensions[5])))
@@ -6932,21 +6920,19 @@ void Project::GetPieceInsertPosition(View* view, int MouseX, int MouseY, lcVecto
 	}
 
 	// Couldn't find a good position, so just place the piece somewhere near the camera.
-	Position =  projection.UnprojectPoint(view->mCamera->mWorldView, lcVector3((float)m_nDownX, (float)m_nDownY, 0.9f));
+	Position =  view->UnprojectPoint(lcVector3((float)m_nDownX, (float)m_nDownY, 0.9f));
 	Rotation = lcVector4(0, 0, 1, 0);
 }
 
 lcObjectSection Project::FindObjectFromPoint(View* view, int x, int y, bool PiecesOnly)
 {
-	const lcProjection& projection = view->UpdateProjection();
-
-	lcVector3 Start = projection.UnprojectPoint(view->mCamera->mWorldView, lcVector3((float)x, (float)y, 0.0f));
-	lcVector3 End = projection.UnprojectPoint(view->mCamera->mWorldView, lcVector3((float)x, (float)y, 1.0f));
+	lcVector3 StartEnd[2] = { lcVector3((float)x, (float)y, 0.0f), lcVector3((float)x, (float)y, 1.0f) };
+	view->UnprojectPoints(StartEnd, 2);
 
 	lcObjectRayTest ObjectRayTest;
 
-	ObjectRayTest.Start = Start;
-	ObjectRayTest.End = End;
+	ObjectRayTest.Start = StartEnd[0];
+	ObjectRayTest.End = StartEnd[1];
 	ObjectRayTest.Distance = FLT_MAX;
 	ObjectRayTest.ObjectSection.Object = NULL;
 	ObjectRayTest.ObjectSection.Section = 0;;
@@ -6979,8 +6965,6 @@ lcObjectSection Project::FindObjectFromPoint(View* view, int x, int y, bool Piec
 
 lcArray<lcObjectSection> Project::FindObjectsInBox(View* View, float x1, float y1, float x2, float y2)
 {
-	const lcProjection& projection = m_ActiveView->UpdateProjection();
-
 	// Find out the top-left and bottom-right corners in screen coordinates.
 	float Left, Top, Bottom, Right;
 
@@ -7013,7 +6997,7 @@ lcArray<lcObjectSection> Project::FindObjectsInBox(View* View, float x1, float y
 		lcVector3(Right, Top, 0), lcVector3(Left, Top, 1), lcVector3(Right, Bottom, 1)
 	};
 
-	projection.UnprojectPoints(m_ActiveView->mCamera->mWorldView, Corners, 6);
+	m_ActiveView->UnprojectPoints(Corners, 6);
 
 	// Build the box planes.
 	lcVector3 PlaneNormals[6];
@@ -8106,8 +8090,7 @@ void Project::OnLeftButtonDown(View* view)
 	m_MouseTotalDelta = lcVector3(0, 0, 0);
 	m_MouseSnapLeftover = lcVector3(0, 0, 0);
 
-	const lcProjection& projection = view->UpdateProjection();
-	lcVector3 point = projection.UnprojectPoint(view->mCamera->mWorldView, lcVector3((float)x, (float)y, 0.9f));
+	lcVector3 point = view->UnprojectPoint(lcVector3((float)x, (float)y, 0.9f));
 
 	m_fTrack[0] = point[0]; m_fTrack[1] = point[1]; m_fTrack[2] = point[2];
 
@@ -8259,7 +8242,7 @@ void Project::OnLeftButtonDown(View* view)
 			if (count == max)
 				break;
 
-			lcVector3 tmp = projection.UnprojectPoint(view->mCamera->mWorldView, lcVector3(x+1.0f, y-1.0f, 0.9f));
+			lcVector3 tmp = view->UnprojectPoint(lcVector3(x+1.0f, y-1.0f, 0.9f));
 			StartTracking(LC_TRACK_START_LEFT);
 			Light* NewLight = new Light(m_fTrack[0], m_fTrack[1], m_fTrack[2], tmp[0], tmp[1], tmp[2]);
 			mLights.Add(NewLight);
@@ -8269,7 +8252,7 @@ void Project::OnLeftButtonDown(View* view)
 
 	case LC_TOOL_CAMERA:
 		{
-			lcVector3 tmp = projection.UnprojectPoint(view->mCamera->mWorldView, lcVector3(x+1.0f, y-1.0f, 0.9f));
+			lcVector3 tmp = view->UnprojectPoint(lcVector3(x + 1.0f, y - 1.0f, 0.9f));
 			StartTracking(LC_TRACK_START_LEFT);
 
 			Camera* NewCamera = new Camera(m_fTrack[0], m_fTrack[1], m_fTrack[2], tmp[0], tmp[1], tmp[2]);
@@ -8381,8 +8364,7 @@ void Project::OnMiddleButtonDown(View* view)
 	m_nDownY = y;
 	m_bTrackCancel = false;
 
-	const lcProjection& projection = view->UpdateProjection();
-	lcVector3 point = projection.UnprojectPoint(view->mCamera->mWorldView, lcVector3((float)x, (float)y, 0.9f));
+	lcVector3 point = view->UnprojectPoint(lcVector3((float)x, (float)y, 0.9f));
 
 	m_fTrack[0] = point[0]; m_fTrack[1] = point[1]; m_fTrack[2] = point[2];
 
@@ -8391,17 +8373,9 @@ void Project::OnMiddleButtonDown(View* view)
 
 	switch (GetAction())
 	{
-		case LC_TOOL_PAN:
-		{
-			StartTracking(LC_TRACK_START_RIGHT);
-		} break;
-
-		default:
-		{
-			view->SetProjectionType(lcProjection::Cycle);
-			gMainWindow->UpdatePerspective(view);
-			UpdateAllViews();
-		}
+	case LC_TOOL_PAN:
+		StartTracking(LC_TRACK_START_RIGHT);
+		break;
 	}
 }
 
@@ -8426,8 +8400,7 @@ void Project::OnRightButtonDown(View* view)
 	m_nDownY = y;
 	m_bTrackCancel = false;
 
-	const lcProjection& projection = view->UpdateProjection();
-	lcVector3 point = projection.UnprojectPoint(view->mCamera->mWorldView, lcVector3((float)x, (float)y, 0.9f));
+	lcVector3 point = view->UnprojectPoint(lcVector3((float)x, (float)y, 0.9f));
 
 	m_fTrack[0] = point[0]; m_fTrack[1] = point[1]; m_fTrack[2] = point[2];
 
@@ -8515,8 +8488,7 @@ void Project::OnMouseMove(View* view)
 
 	float ptx, pty, ptz;
 
-	const lcProjection& projection = view->UpdateProjection();
-	lcVector3 tmp = projection.UnprojectPoint(view->mCamera->mWorldView, lcVector3((float)x, (float)y, 0.9f));
+	lcVector3 tmp = view->UnprojectPoint(lcVector3((float)x, (float)y, 0.9f));
 
 	ptx = tmp[0]; pty = tmp[1]; ptz = tmp[2];
 
@@ -8524,8 +8496,8 @@ void Project::OnMouseMove(View* view)
 	{
 		case LC_TOOL_SELECT:
 		{
-			m_fTrack[0] = (float)projection.ConstrainX(x);
-			m_fTrack[1] = (float)projection.ConstrainY(y);
+			m_fTrack[0] = lcClamp((float)x, 1.0f, view->mWidth - 1.0f);
+			m_fTrack[1] = lcClamp((float)y, 1.0f, view->mHeight - 1.0f);
 
 			if (m_nTracking != LC_TRACK_NONE)
 			{
@@ -9036,8 +9008,6 @@ void Project::MouseUpdateOverlays(View* view, int x, int y)
 		const float OverlayRotateArrowStart = 1.0f * OverlayScale;
 		const float OverlayRotateArrowEnd = 1.5f * OverlayScale;
 
-		const lcProjection& projection = view->UpdateProjection();
-
 		// Intersect the mouse with the 3 planes.
 		lcVector3 PlaneNormals[3] =
 		{
@@ -9061,8 +9031,10 @@ void Project::MouseUpdateOverlays(View* view, int x, int y)
 		}
 
 		int Mode = (m_nCurAction == LC_TOOL_MOVE) ? LC_OVERLAY_MOVE_XYZ : LC_OVERLAY_NONE;
-		lcVector3 Start = projection.UnprojectPoint(view->mCamera->mWorldView, lcVector3((float)x, (float)y, 0.0f));
-		lcVector3 End = projection.UnprojectPoint(view->mCamera->mWorldView, lcVector3((float)x, (float)y, 1.0f));
+		lcVector3 StartEnd[2] = { lcVector3((float)x, (float)y, 0.0f), lcVector3((float)x, (float)y, 1.0f) };
+		view->UnprojectPoints(StartEnd, 2);
+		const lcVector3& Start = StartEnd[0];
+		const lcVector3& End = StartEnd[1];
 		float ClosestIntersectionDistance = FLT_MAX;
 
 		for (int AxisIndex = 0; AxisIndex < 3; AxisIndex++)
@@ -9131,11 +9103,11 @@ void Project::MouseUpdateOverlays(View* view, int x, int y)
 		const float OverlayRotateRadius = 2.0f;
 		Camera* Cam = m_ActiveView->mCamera;
 
-		const lcProjection& projection = view->UpdateProjection();
-
 		// Unproject the mouse point against both the front and the back clipping planes.
-		lcVector3 SegStart = projection.UnprojectPoint(view->mCamera->mWorldView, lcVector3((float)x, (float)y, 0.0f));
-		lcVector3 SegEnd = projection.UnprojectPoint(view->mCamera->mWorldView, lcVector3((float)x, (float)y, 1.0f));
+		lcVector3 StartEnd[2] = { lcVector3((float)x, (float)y, 0.0f), lcVector3((float)x, (float)y, 1.0f) };
+		view->UnprojectPoints(StartEnd, 2);
+		const lcVector3& SegStart = StartEnd[0];
+		const lcVector3& SegEnd = StartEnd[1];
 
 		lcVector3 Center(m_OverlayCenter);
 
@@ -9355,10 +9327,9 @@ void Project::UpdateOverlayScale()
 	{
 		// Calculate the scaling factor by projecting the center to the front plane then
 		// projecting a point close to it back.
-		const lcProjection& projection = m_ActiveView->UpdateProjection();
-		lcVector3 Screen = projection.ProjectPoint(m_ActiveView->mCamera->mWorldView, m_OverlayCenter);
+		lcVector3 Screen = m_ActiveView->ProjectPoint(m_OverlayCenter);
 		Screen[0] += 10.0f;
-		lcVector3 Point = projection.UnprojectPoint(m_ActiveView->mCamera->mWorldView, Screen);
+		lcVector3 Point = m_ActiveView->UnprojectPoint(Screen);
 
 		lcVector3 Dist(Point - m_OverlayCenter);
 		m_ActiveView->m_OverlayScale = Dist.Length() * 5.0f;

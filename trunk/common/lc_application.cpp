@@ -467,5 +467,5 @@ void lcApplication::ShowPreferencesDialog()
 	strcpy(opts.strHeader, m_strHeader);
 	*/
 
-	lcGetActiveProject()->UpdateAllViews();
+	gMainWindow->UpdateAllViews();
 }

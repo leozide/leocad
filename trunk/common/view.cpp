@@ -1,5 +1,6 @@
 #include "lc_global.h"
 #include <stdlib.h>
+#include "lc_mainwindow.h"
 #include "project.h"
 #include "camera.h"
 #include "view.h"
@@ -12,16 +13,17 @@ View::View(Project *project)
 	mCamera = NULL;
 	m_OverlayScale = 1.0f;
 
-	if (project->GetActiveView())
-		SetCamera(project->GetActiveView()->mCamera, false);
+	View* ActiveView = gMainWindow->GetActiveView();
+	if (ActiveView)
+		SetCamera(ActiveView->mCamera, false);
 	else
 		SetDefaultCamera();
 }
 
 View::~View()
 {
-	if (m_Project != NULL)
-		m_Project->RemoveView(this);
+	if (gMainWindow)
+		gMainWindow->RemoveView(this);
 
 	if (mCamera && mCamera->IsSimple())
 		delete mCamera;
@@ -238,7 +240,7 @@ void View::OnDraw()
 
 void View::OnInitialUpdate()
 {
-	m_Project->AddView(this);
+	gMainWindow->AddView(this);
 }
 
 void View::OnUpdateCursor()

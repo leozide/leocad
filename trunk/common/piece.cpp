@@ -308,7 +308,8 @@ void lcPiece::CreateName(const lcArray<Piece*>& Pieces)
 					max = i;
 	}
 
-	sprintf (m_strName, "%s #%.2d", mPieceInfo->m_strDescription, max+1);
+	snprintf(m_strName, sizeof(m_strName), "%s #%.2d", mPieceInfo->m_strDescription, max+1);
+	m_strName[sizeof(m_strName) - 1] = 0;
 }
 
 void lcPiece::InsertTime(unsigned short start, unsigned short time)

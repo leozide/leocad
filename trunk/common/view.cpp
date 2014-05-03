@@ -4,6 +4,7 @@
 #include "camera.h"
 #include "view.h"
 #include "system.h"
+#include "tr.h"
 
 View::View(Project *project)
 {
@@ -55,6 +56,9 @@ void View::SetDefaultCamera()
 lcMatrix44 View::GetProjectionMatrix() const
 {
 	float AspectRatio = (float)mWidth / (float)mHeight;
+
+	if (mCamera->m_pTR)
+		mCamera->m_pTR->BeginTile();
 
 	if (mCamera->IsOrtho())
 	{
@@ -139,27 +143,6 @@ LC_CURSOR_TYPE View::GetCursor() const
 			LC_ASSERT_FALSE("Unknown cursor type.");
 			return LC_CURSOR_DEFAULT;
 	}
-}
-
-// Call this once before using a view during a callback in order
-// to pick up any changes to the view or its camera.
-const lcProjection& View::UpdateProjection()
-{
-	mProjection.SetView(mCamera, mWidth, mHeight);
-	mCamera->LoadProjection(mProjection);
-	return mProjection;
-}
-
-void View::SetProjectionType(lcProjection::Type type)
-{
-	if (type == lcProjection::Ortho)
-		mCamera->SetOrtho(true);
-	else if (type == lcProjection::Projection)
-		mCamera->SetOrtho(false);
-	else if (type == lcProjection::Cycle)
-		mCamera->SetOrtho(!mCamera->IsOrtho());
-
-	mProjection.calculateTransform();
 }
 
 void View::OnDraw()

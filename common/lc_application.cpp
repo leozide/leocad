@@ -53,6 +53,7 @@ lcApplication::lcApplication()
 lcApplication::~lcApplication()
 {
 	delete mClipboard;
+	delete mLibrary;
 }
 
 void lcApplication::SetClipboard(lcFile* Clipboard)

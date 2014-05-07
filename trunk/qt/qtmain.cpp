@@ -163,7 +163,7 @@ int main(int argc, char *argv[])
 #endif
 
 	QDir dir;
-	dir.mkdir(cachePath);
+	dir.mkpath(cachePath);
 
 	if (!g_App->Initialize(argc, argv, libPath, cachePath.toLocal8Bit().data()))
 		return 1;

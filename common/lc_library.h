@@ -18,6 +18,13 @@ enum LC_MESH_PRIMITIVE_TYPE
 	LC_MESH_NUM_PRIMITIVE_TYPES
 };
 
+enum lcZipFileType
+{
+	LC_ZIPFILE_OFFICIAL,
+	LC_ZIPFILE_UNOFFICIAL,
+	LC_NUM_ZIPFILES
+};
+
 class lcLibraryMeshSection
 {
 public:
@@ -76,18 +83,26 @@ public:
 class lcLibraryPrimitive
 {
 public:
-	lcLibraryPrimitive(const char* Name, lcuint32 ZipFileIndex, bool Stud, bool SubFile)
+	lcLibraryPrimitive(const char* Name, lcZipFileType ZipFileType,lcuint32 ZipFileIndex, bool Stud, bool SubFile)
 	{
 		strncpy(mName, Name, sizeof(mName));
 		mName[sizeof(mName) - 1] = 0;
 
+		mZipFileType = ZipFileType;
 		mZipFileIndex = ZipFileIndex;
 		mLoaded = false;
 		mStud = Stud;
 		mSubFile = SubFile;
 	}
 
+	void SetZipFile(lcZipFileType ZipFileType,lcuint32 ZipFileIndex)
+	{
+		mZipFileType = ZipFileType;
+		mZipFileIndex = ZipFileIndex;
+	}
+
 	char mName[LC_MAXPATH];
+	lcZipFileType mZipFileType;
 	lcuint32 mZipFileIndex;
 	bool mLoaded;
 	bool mStud;
@@ -123,7 +138,7 @@ public:
 
 	void SetOfficialPieces()
 	{
-		if (mZipFile)
+		if (mZipFiles[LC_ZIPFILE_OFFICIAL])
 			mNumOfficialPieces = mPieces.GetSize();
 	}
 
@@ -136,8 +151,9 @@ public:
 	char mLibraryPath[LC_MAXPATH];
 
 protected:
-	bool OpenArchive(const char* FileName, const char* CachePath);
+	bool OpenArchive(const char* FileName, lcZipFileType ZipFileType);
 	bool OpenDirectory(const char* Path);
+	void ReadArchiveDescriptions(const char* OfficialFileName, const char* UnofficialFileName, const char* CachePath);
 
 	bool LoadCacheIndex(lcZipFile& CacheFile);
 	bool LoadCachePiece(PieceInfo* Info);
@@ -153,7 +169,8 @@ protected:
 	bool mSaveCache;
 
 	char mLibraryFileName[LC_MAXPATH];
-	lcZipFile* mZipFile;
+	char mUnofficialFileName[LC_MAXPATH];
+	lcZipFile* mZipFiles[LC_NUM_ZIPFILES];
 };
 
 #endif // _LC_LIBRARY_H_

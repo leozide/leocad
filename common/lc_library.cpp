@@ -13,7 +13,7 @@
 #include <ctype.h>
 #include <locale.h>
 
-#define LC_LIBRARY_CACHE_VERSION   0x0101
+#define LC_LIBRARY_CACHE_VERSION   0x0102
 #define LC_LIBRARY_CACHE_ARCHIVE   0x0001
 #define LC_LIBRARY_CACHE_DIRECTORY 0x0002
 
@@ -24,7 +24,9 @@ lcPiecesLibrary::lcPiecesLibrary()
 	mCacheFileName[0] = 0;
 	mCacheFileModifiedTime = 0;
 	mLibraryFileName[0] = 0;
-	mZipFile = NULL;
+	mUnofficialFileName[0] = 0;
+	mZipFiles[LC_ZIPFILE_OFFICIAL] = NULL;
+	mZipFiles[LC_ZIPFILE_UNOFFICIAL] = NULL;
 	mCacheFile = NULL;
 	mCacheFileName[0] = 0;
 	mSaveCache = false;
@@ -52,8 +54,10 @@ void lcPiecesLibrary::Unload()
 	mTextures.RemoveAll();
 
 	mNumOfficialPieces = 0;
-	delete mZipFile;
-	mZipFile = NULL;
+	delete mZipFiles[LC_ZIPFILE_OFFICIAL];
+	mZipFiles[LC_ZIPFILE_OFFICIAL] = NULL;
+	delete mZipFiles[LC_ZIPFILE_UNOFFICIAL];
+	mZipFiles[LC_ZIPFILE_UNOFFICIAL] = NULL;
 }
 
 PieceInfo* lcPiecesLibrary::FindPiece(const char* PieceName, bool CreatePlaceholderIfMissing)
@@ -70,7 +74,7 @@ PieceInfo* lcPiecesLibrary::FindPiece(const char* PieceName, bool CreatePlacehol
 
 PieceInfo* lcPiecesLibrary::CreatePlaceholder(const char* PieceName)
 {
-	PieceInfo* Info = new PieceInfo(-1);
+	PieceInfo* Info = new PieceInfo();
 
 	Info->CreatePlaceholder(PieceName);
 	mPieces.Add(Info);
@@ -89,17 +93,27 @@ lcTexture* lcPiecesLibrary::FindTexture(const char* TextureName)
 
 bool lcPiecesLibrary::Load(const char* LibraryPath, const char* CachePath)
 {
-	if (OpenArchive(LibraryPath, CachePath))
+	Unload();
+
+	if (OpenArchive(LibraryPath, LC_ZIPFILE_OFFICIAL))
 	{
 		lcMemFile ColorFile;
 
-		if (!mZipFile->ExtractFile("ldraw/ldconfig.ldr", ColorFile) || !lcLoadColorFile(ColorFile))
+		if (!mZipFiles[LC_ZIPFILE_OFFICIAL]->ExtractFile("ldraw/ldconfig.ldr", ColorFile) || !lcLoadColorFile(ColorFile))
 			lcLoadDefaultColors();
 
 		strcpy(mLibraryPath, LibraryPath);
 		char* Slash = lcMax(strrchr(mLibraryPath, '/'), strrchr(mLibraryPath, '\\'));
 		if (*Slash)
 			*(Slash + 1) = 0;
+
+		char UnofficialFileName[LC_MAXPATH];
+		strcpy(UnofficialFileName, mLibraryPath);
+		strcat(UnofficialFileName, "/ldrawunf.zip");
+
+		OpenArchive(UnofficialFileName, LC_ZIPFILE_UNOFFICIAL);
+
+		ReadArchiveDescriptions(LibraryPath, UnofficialFileName, CachePath);
 	}
 	else
 	{
@@ -129,25 +143,28 @@ bool lcPiecesLibrary::Load(const char* LibraryPath, const char* CachePath)
 	return true;
 }
 
-bool lcPiecesLibrary::OpenArchive(const char* FileName, const char* CachePath)
+bool lcPiecesLibrary::OpenArchive(const char* FileName, lcZipFileType ZipFileType)
 {
-	Unload();
+	lcZipFile* ZipFile = new lcZipFile();
 
-	mZipFile = new lcZipFile();
-
-	if (!mZipFile->OpenRead(FileName))
+	if (!ZipFile->OpenRead(FileName))
 	{
-		delete mZipFile;
-		mZipFile = NULL;
+		delete ZipFile;
 		return false;
 	}
 
-	strcpy(mLibraryFileName, FileName);
+	mZipFiles[ZipFileType] = ZipFile;
 
-	for (int FileIdx = 0; FileIdx < mZipFile->mFiles.GetSize(); FileIdx++)
+	if (ZipFileType == LC_ZIPFILE_OFFICIAL)
+		strcpy(mLibraryFileName, FileName);
+	else
+		strcpy(mUnofficialFileName, FileName);
+
+	for (int FileIdx = 0; FileIdx < ZipFile->mFiles.GetSize(); FileIdx++)
 	{
-		lcZipFileInfo& FileInfo = mZipFile->mFiles[FileIdx];
-		char Name[LC_PIECE_NAME_LEN];
+		lcZipFileInfo& FileInfo = ZipFile->mFiles[FileIdx];
+		char NameBuffer[LC_PIECE_NAME_LEN];
+		char* Name = NameBuffer;
 
 		const char* Src = FileInfo.file_name;
 		char* Dst = Name;
@@ -185,34 +202,63 @@ bool lcPiecesLibrary::OpenArchive(const char* FileName, const char* CachePath)
 		}
 		*Dst = 0;
 
-		if (memcmp(Name, "LDRAW/", 6))
-			continue;
-
-		if (!memcmp(Name + 6, "PARTS/", 6))
+		if (ZipFileType == LC_ZIPFILE_OFFICIAL)
 		{
-			if (memcmp(Name + 12, "S/", 2))
-			{
-				PieceInfo* Info = new PieceInfo(FileIdx);
-				mPieces.Add(Info);
+			if (memcmp(Name, "LDRAW/", 6))
+				continue;
 
-				strncpy(Info->m_strName, Name + 12, sizeof(Info->m_strName));
-				Info->m_strName[sizeof(Info->m_strName) - 1] = 0;
+			Name += 6;
+		}
+
+		if (!memcmp(Name, "PARTS/", 6))
+		{
+			Name += 6;
+
+			if (memcmp(Name, "S/", 2))
+			{
+				PieceInfo* Info = FindPiece(Name, false);
+
+				if (!Info)
+				{
+					Info = new PieceInfo();
+					mPieces.Add(Info);
+
+					strncpy(Info->m_strName, Name, sizeof(Info->m_strName));
+					Info->m_strName[sizeof(Info->m_strName) - 1] = 0;
+				}
+
+				Info->SetZipFile(ZipFileType, FileIdx);
 			}
 			else
 			{
-				lcLibraryPrimitive* Prim = new lcLibraryPrimitive(Name + 12, FileIdx, false, true);
-				mPrimitives.Add(Prim);
+				int PrimitiveIndex = FindPrimitiveIndex(Name);
+
+				if (PrimitiveIndex == -1)
+					mPrimitives.Add(new lcLibraryPrimitive(Name, ZipFileType, FileIdx, false, true));
+				else
+					mPrimitives[PrimitiveIndex]->SetZipFile(ZipFileType, FileIdx);
 			}
 		}
-		else if (!memcmp(Name + 6, "P/", 2))
+		else if (!memcmp(Name, "P/", 2))
 		{
-			lcLibraryPrimitive* Prim = new lcLibraryPrimitive(Name + 8, FileIdx, (memcmp(Name + 8, "STU", 3) == 0), false);
-			mPrimitives.Add(Prim);
+			Name += 2;
+
+			int PrimitiveIndex = FindPrimitiveIndex(Name);
+
+			if (PrimitiveIndex == -1)
+				mPrimitives.Add(new lcLibraryPrimitive(Name, ZipFileType, FileIdx, (memcmp(Name, "STU", 3) == 0), false));
+			else
+				mPrimitives[PrimitiveIndex]->SetZipFile(ZipFileType, FileIdx);
 		}
 	}
 
+	return true;
+}
+
+void lcPiecesLibrary::ReadArchiveDescriptions(const char* OfficialFileName, const char* UnofficialFileName, const char* CachePath)
+{
 	bool CacheValid = false;
-	struct stat LibraryStat;
+	struct stat OfficialStat, UnofficialStat;
 
 	strcpy(mCacheFileName, CachePath);
 	mCacheFileModifiedTime = 0;
@@ -226,8 +272,19 @@ bool lcPiecesLibrary::OpenArchive(const char* FileName, const char* CachePath)
 		strcat(mCacheFileName, "library.cache");
 	}
 
-	if (stat(FileName, &LibraryStat) == 0)
+	if (stat(OfficialFileName, &OfficialStat) == 0)
 	{
+		lcuint64 CheckSum[4] =
+		{
+			(lcuint64)OfficialStat.st_size, (lcuint64)OfficialStat.st_mtime, 0, 0
+		};
+
+		if (stat(UnofficialFileName, &UnofficialStat) == 0)
+		{
+			CheckSum[2] = (lcuint64)UnofficialStat.st_size;
+			CheckSum[3] = (lcuint64)UnofficialStat.st_mtime;
+		}
+
 		lcZipFile CacheFile;
 
 		if (CacheFile.OpenRead(mCacheFileName))
@@ -238,15 +295,14 @@ bool lcPiecesLibrary::OpenArchive(const char* FileName, const char* CachePath)
 			{
 				lcuint32 CacheVersion;
 				lcuint32 CacheFlags;
-				lcuint64 LibrarySize;
-				lcuint64 LibraryModified;
 
 				if (VersionFile.ReadU32(&CacheVersion, 1) && VersionFile.ReadU32(&CacheFlags, 1) &&
-				    VersionFile.ReadU64(&LibrarySize, 1) && VersionFile.ReadU64(&LibraryModified, 1))
+					CacheVersion == LC_LIBRARY_CACHE_VERSION && CacheFlags == LC_LIBRARY_CACHE_ARCHIVE)
 				{
-					if (CacheVersion == LC_LIBRARY_CACHE_VERSION && CacheFlags == LC_LIBRARY_CACHE_ARCHIVE &&
-					    LibrarySize == (lcuint64)LibraryStat.st_size && LibraryModified == (lcuint64)LibraryStat.st_mtime)
-						CacheValid = true;
+					lcuint64 CacheCheckSum[4];
+
+					if (VersionFile.ReadU64(CacheCheckSum, 4))
+						CacheValid = (memcmp(CacheCheckSum, CheckSum, sizeof(CheckSum)) == 0);
 				}
 			}
 		}
@@ -272,7 +328,7 @@ bool lcPiecesLibrary::OpenArchive(const char* FileName, const char* CachePath)
 		{
 			PieceInfo* Info = mPieces[PieceInfoIndex];
 
-			mZipFile->ExtractFile(Info->mZipFileIndex, PieceFile, 256);
+			mZipFiles[Info->mZipFileType]->ExtractFile(Info->mZipFileIndex, PieceFile, 256);
 			PieceFile.Seek(0, SEEK_END);
 			PieceFile.WriteU8(0);
 
@@ -292,14 +348,10 @@ bool lcPiecesLibrary::OpenArchive(const char* FileName, const char* CachePath)
 			}
 		}
 	}
-
-	return true;
 }
 
 bool lcPiecesLibrary::OpenDirectory(const char* Path)
 {
-	Unload();
-
 	char FileName[LC_MAXPATH];
 	lcArray<String> FileList;
 
@@ -354,7 +406,7 @@ bool lcPiecesLibrary::OpenDirectory(const char* Path)
 			if (!*Line || !*Description)
 				continue;
 
-			PieceInfo* Info = new PieceInfo(-1);
+			PieceInfo* Info = new PieceInfo();
 			mPieces.Add(Info);
 
 			strncpy(Info->m_strName, Line, sizeof(Info->m_strName));
@@ -410,7 +462,7 @@ bool lcPiecesLibrary::OpenDirectory(const char* Path)
 			if (!PieceFile.ReadLine(Line, sizeof(Line)))
 				continue;
 
-			PieceInfo* Info = new PieceInfo(-1);
+			PieceInfo* Info = new PieceInfo();
 			mPieces.Add(Info);
 
 			Src = (char*)Line + 2;
@@ -477,7 +529,7 @@ bool lcPiecesLibrary::OpenDirectory(const char* Path)
 			*Dst = 0;
 
 			bool SubFile = SubFileDirectories[DirectoryIdx];
-			lcLibraryPrimitive* Prim = new lcLibraryPrimitive(Name, 0, !SubFile && (memcmp(Name, "STU", 3) == 0), SubFile);
+			lcLibraryPrimitive* Prim = new lcLibraryPrimitive(Name, LC_NUM_ZIPFILES, 0, !SubFile && (memcmp(Name, "STU", 3) == 0), SubFile);
 			mPrimitives.Add(Prim);
 		}
 	}
@@ -642,17 +694,27 @@ void lcPiecesLibrary::SaveCacheFile()
 		if (!CacheFile.OpenWrite(mCacheFileName, false))
 			return;
 
-		struct stat LibraryStat;
+		struct stat OfficialStat, UnofficialStat;
 
-		if (stat(mLibraryFileName, &LibraryStat) != 0)
+		if (stat(mLibraryFileName, &OfficialStat) != 0)
 			return;
+
+		lcuint64 CheckSum[4] =
+		{
+			(lcuint64)OfficialStat.st_size, (lcuint64)OfficialStat.st_mtime, 0, 0
+		};
+
+		if (stat(mUnofficialFileName, &UnofficialStat) == 0)
+		{
+			CheckSum[2] = (lcuint64)UnofficialStat.st_size;
+			CheckSum[3] = (lcuint64)UnofficialStat.st_mtime;
+		}
 
 		lcMemFile VersionFile;
 
 		VersionFile.WriteU32(LC_LIBRARY_CACHE_VERSION);
 		VersionFile.WriteU32(LC_LIBRARY_CACHE_ARCHIVE);
-		VersionFile.WriteU64(LibraryStat.st_size);
-		VersionFile.WriteU64(LibraryStat.st_mtime);
+		VersionFile.WriteU64(CheckSum, 4);
 
 		CacheFile.AddFile("version", VersionFile);
 	}
@@ -748,14 +810,14 @@ bool lcPiecesLibrary::LoadPiece(PieceInfo* Info)
 	lcLibraryMeshData MeshData;
 	lcArray<lcLibraryTextureMap> TextureStack;
 
-	if (mZipFile)
+	if (mZipFiles[Info->mZipFileType])
 	{
 		if (LoadCachePiece(Info))
 			return true;
 
 		lcMemFile PieceFile;
 
-		if (!mZipFile->ExtractFile(Info->mZipFileIndex, PieceFile))
+		if (!mZipFiles[Info->mZipFileType]->ExtractFile(Info->mZipFileIndex, PieceFile))
 			return false;
 
 		const char* OldLocale = setlocale(LC_NUMERIC, "C");
@@ -907,7 +969,7 @@ bool lcPiecesLibrary::LoadPiece(PieceInfo* Info)
 	Info->mMesh = Mesh;
 	Info->AddRef();
 
-	if (mZipFile)
+	if (mZipFiles[LC_ZIPFILE_OFFICIAL])
 		mSaveCache = true;
 
 	return true;
@@ -920,14 +982,15 @@ bool lcPiecesLibrary::LoadTexture(lcTexture* Texture)
 	strcpy(Name, Texture->mName);
 	strlwr(Name);
 
-	if (mZipFile)
+	if (mZipFiles[LC_ZIPFILE_OFFICIAL])
 	{
 		lcMemFile TextureFile;
 
 		sprintf(FileName, "ldraw/parts/textures/%s.png", Name);
 
-		if (!mZipFile->ExtractFile(FileName, TextureFile))
-			return false;
+		if (!mZipFiles[LC_ZIPFILE_UNOFFICIAL] || !mZipFiles[LC_ZIPFILE_UNOFFICIAL]->ExtractFile(FileName, TextureFile))
+			if (!mZipFiles[LC_ZIPFILE_OFFICIAL]->ExtractFile(FileName, TextureFile))
+				return false;
 
 		if (!Texture->Load(TextureFile))
 			return false;
@@ -957,11 +1020,11 @@ bool lcPiecesLibrary::LoadPrimitive(int PrimitiveIndex)
 	lcLibraryPrimitive* Primitive = mPrimitives[PrimitiveIndex];
 	lcArray<lcLibraryTextureMap> TextureStack;
 
-	if (mZipFile)
+	if (mZipFiles[LC_ZIPFILE_OFFICIAL])
 	{
 		lcMemFile PrimFile;
 
-		if (!mZipFile->ExtractFile(Primitive->mZipFileIndex, PrimFile))
+		if (!mZipFiles[Primitive->mZipFileType]->ExtractFile(Primitive->mZipFileIndex, PrimFile))
 			return false;
 
 		if (!ReadMeshData(PrimFile, lcMatrix44Identity(), 16, TextureStack, Primitive->mMeshData))
@@ -1202,11 +1265,11 @@ bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransf
 						MeshData.AddMeshData(Primitive->mMeshData, IncludeTransform, ColorCode, TextureMap);
 					else
 					{
-						if (mZipFile)
+						if (mZipFiles[LC_ZIPFILE_OFFICIAL])
 						{
 							lcMemFile IncludeFile;
 
-							if (!mZipFile->ExtractFile(Primitive->mZipFileIndex, IncludeFile))
+							if (!mZipFiles[Primitive->mZipFileType]->ExtractFile(Primitive->mZipFileIndex, IncludeFile))
 								continue;
 
 							if (!ReadMeshData(IncludeFile, IncludeTransform, ColorCode, TextureStack, MeshData))
@@ -1242,11 +1305,11 @@ bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransf
 						if (strcmp(Info->m_strName, FileName))
 							continue;
 
-						if (mZipFile)
+						if (mZipFiles[LC_ZIPFILE_OFFICIAL])
 						{
 							lcMemFile IncludeFile;
 
-							if (!mZipFile->ExtractFile(Info->mZipFileIndex, IncludeFile))
+							if (!mZipFiles[Info->mZipFileType]->ExtractFile(Info->mZipFileIndex, IncludeFile))
 								break;
 
 							if (!ReadMeshData(IncludeFile, IncludeTransform, ColorCode, TextureStack, MeshData))
@@ -1974,7 +2037,7 @@ void lcPiecesLibrary::CreateBuiltinPieces()
 
 	for (unsigned int PieceIdx = 0; PieceIdx < sizeof(Pieces) / sizeof(Pieces[0]); PieceIdx++)
 	{
-		PieceInfo* Info = new PieceInfo(-1);
+		PieceInfo* Info = new PieceInfo();
 		mPieces.Add(Info);
 
 		strncpy(Info->m_strName, Pieces[PieceIdx][0], sizeof(Info->m_strName));

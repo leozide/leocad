@@ -8,9 +8,10 @@
 #include "lc_library.h"
 #include "lc_application.h"
 
-PieceInfo::PieceInfo(int ZipFileIndex)
+PieceInfo::PieceInfo()
 {
-	mZipFileIndex = ZipFileIndex;
+	mZipFileType = LC_NUM_ZIPFILES;
+	mZipFileIndex = -1;
 	mFlags = 0;
 	mMesh = NULL;
 	mRefCount = 0;

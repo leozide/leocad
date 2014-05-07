@@ -22,7 +22,7 @@
 class PieceInfo
 {
 public:
-	PieceInfo(int ZipFileIndex);
+	PieceInfo();
 	~PieceInfo();
 
 	int AddRef()
@@ -43,6 +43,12 @@ public:
 			Unload();
 
 		return mRefCount;
+	}
+
+	void SetZipFile(int ZipFileType, int ZipFileIndex)
+	{
+		mZipFileType = ZipFileType;
+		mZipFileIndex = ZipFileIndex;
 	}
 
 	bool IsPatterned() const
@@ -89,7 +95,8 @@ public:
 	char m_strName[LC_PIECE_NAME_LEN];
 	char m_strDescription[128];
 	float m_fDimensions[6];
-	lcuint32 mZipFileIndex;
+	int mZipFileType;
+	int mZipFileIndex;
 	lcuint32 mFlags;
 
 protected:

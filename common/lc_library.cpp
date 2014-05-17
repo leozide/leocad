@@ -810,7 +810,7 @@ bool lcPiecesLibrary::LoadPiece(PieceInfo* Info)
 	lcLibraryMeshData MeshData;
 	lcArray<lcLibraryTextureMap> TextureStack;
 
-	if (mZipFiles[Info->mZipFileType])
+	if (Info->mZipFileType != LC_NUM_ZIPFILES && mZipFiles[Info->mZipFileType])
 	{
 		if (LoadCachePiece(Info))
 			return true;

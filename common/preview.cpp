@@ -89,17 +89,13 @@ void PiecePreview::OnLeftButtonDown()
 		m_DownX = mInputState.x;
 		m_DownY = mInputState.y;
 		m_Tracking = LC_TRACK_LEFT;
-		CaptureMouse();
 	}
 }
 
 void PiecePreview::OnLeftButtonUp()
 {
 	if (m_Tracking == LC_TRACK_LEFT)
-	{
 		m_Tracking = LC_TRACK_NONE;
-		ReleaseMouse();
-	}
 }
 
 void PiecePreview::OnLeftButtonDoubleClick()
@@ -115,17 +111,13 @@ void PiecePreview::OnRightButtonDown()
 		m_DownX = mInputState.x;
 		m_DownY = mInputState.y;
 		m_Tracking = LC_TRACK_RIGHT;
-		CaptureMouse();
 	}
 }
 
 void PiecePreview::OnRightButtonUp()
 {
 	if (m_Tracking == LC_TRACK_RIGHT)
-	{
 		m_Tracking = LC_TRACK_NONE;
-		ReleaseMouse();
-	}
 }
 
 void PiecePreview::OnMouseMove()

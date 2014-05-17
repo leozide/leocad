@@ -22,20 +22,6 @@ void lcGLWidget::Redraw()
 	widget->updateGL();
 }
 
-void lcGLWidget::CaptureMouse()
-{
-	QGLWidget* widget = (QGLWidget*)mWidget;
-
-	widget->grabMouse();
-}
-
-void lcGLWidget::ReleaseMouse()
-{
-	QGLWidget* widget = (QGLWidget*)mWidget;
-
-	widget->releaseMouse();
-}
-
 void* lcGLWidget::GetExtensionAddress(const char* FunctionName)
 {
 	QGLWidget* Widget = (QGLWidget*)mWidget;

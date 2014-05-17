@@ -49,11 +49,6 @@
 #define LC_SEL_FOCUSGROUP	0x200 // focused piece is grouped
 #define LC_SEL_CANGROUP		0x400 // can make a new group
 
-enum LC_NOTIFY
-{
-	LC_CAPTURE_LOST
-};
-
 enum lcBackgroundType
 {
 	LC_BACKGROUND_SOLID,
@@ -114,36 +109,8 @@ enum LC_TRANSFORM_TYPE
 enum LC_MOUSE_TRACK
 {
 	LC_TRACK_NONE,
-	LC_TRACK_START_LEFT,
 	LC_TRACK_LEFT,
-	LC_TRACK_START_RIGHT,
 	LC_TRACK_RIGHT
-};
-
-// Mouse control overlays.
-enum LC_OVERLAY_MODES
-{
-	LC_OVERLAY_NONE,
-	LC_OVERLAY_MOVE_X,
-	LC_OVERLAY_MOVE_Y,
-	LC_OVERLAY_MOVE_Z,
-	LC_OVERLAY_MOVE_XY,
-	LC_OVERLAY_MOVE_XZ,
-	LC_OVERLAY_MOVE_YZ,
-	LC_OVERLAY_MOVE_XYZ,
-	LC_OVERLAY_ROTATE_X,
-	LC_OVERLAY_ROTATE_Y,
-	LC_OVERLAY_ROTATE_Z,
-	LC_OVERLAY_ROTATE_XY,
-	LC_OVERLAY_ROTATE_XZ,
-	LC_OVERLAY_ROTATE_YZ,
-	LC_OVERLAY_ROTATE_XYZ,
-	LC_OVERLAY_ZOOM,
-	LC_OVERLAY_PAN,
-	LC_OVERLAY_ROTATE_VIEW_X,
-	LC_OVERLAY_ROTATE_VIEW_Y,
-	LC_OVERLAY_ROTATE_VIEW_Z,
-	LC_OVERLAY_ROTATE_VIEW_XYZ
 };
 
 class Group;
@@ -152,8 +119,6 @@ class PieceInfo;
 class View;
 class Image;
 class TexFont;
-
-// Undo support
 
 #include "lc_file.h"
 
@@ -230,6 +195,44 @@ public:
 	Project();
 	~Project();
 
+	void RayTest(lcObjectRayTest& ObjectRayTest) const;
+	void BoxTest(lcObjectBoxTest& ObjectBoxTest) const;
+
+	void FocusOrDeselectObject(const lcObjectSection& ObjectSection);
+	void ClearSelectionAndSetFocus(Object* Object, lcuint32 Section);
+	void ClearSelectionAndSetFocus(const lcObjectSection& ObjectSection)
+	{
+		ClearSelectionAndSetFocus(ObjectSection.Object, ObjectSection.Section);
+	}
+	void SetSelection(const lcArray<lcObjectSection>& ObjectSections);
+	void AddToSelection(const lcArray<lcObjectSection>& ObjectSections);
+
+	const lcVector3& GetMouseToolDistance() const
+	{
+		return mMouseToolDistance;
+	}
+
+	void BeginMouseTool();
+	void EndMouseTool(lcTool Tool, bool Accept);
+	void InsertPieceToolClicked(const lcVector3& Position, const lcVector4& Rotation);
+	void PointLightToolClicked(const lcVector3& Position);
+	void BeginSpotLightTool(const lcVector3& Position, const lcVector3& Target);
+	void UpdateSpotLightTool(const lcVector3& Target);
+	void BeginCameraTool(const lcVector3& Position, const lcVector3& Target);
+	void UpdateCameraTool(const lcVector3& Target);
+	void UpdateMoveTool(const lcVector3& Distance);
+	void UpdateRotateTool(const lcVector3& Angles);
+	void EraserToolClicked(lcObject* Object);
+	void PaintToolClicked(lcObject* Object);
+	void UpdateZoomTool(lcCamera* Camera, float Mouse);
+	void UpdatePanTool(lcCamera* Camera, float MouseX, float MouseY);
+	void UpdateOrbitTool(lcCamera* Camera, float MouseX, float MouseY);
+	void UpdateRollTool(lcCamera* Camera, float Mouse);
+	void ZoomRegionToolClicked(lcCamera* Camera, const lcVector3* Points, float RatioX, float RatioY);
+
+protected:
+	lcVector3 mMouseToolDistance;
+
 public:
 	bool IsModified()
 		{ return m_bModified; }
@@ -248,8 +251,6 @@ public:
 		{ return mProperties.mBackgroundSolidColor; }
 	unsigned long GetSnap() const
 		{ return m_nSnap; }
-	int GetOverlayMode() const
-		{ return m_OverlayMode; }
 	void GetSnapIndex(int* SnapXY, int* SnapZ, int* SnapAngle) const;
 	void GetSnapText(char* SnapXY, char* SnapZ, char* SnapAngle) const;
 	void GetSnapDistance(float* SnapXY, float* SnapZ) const;
@@ -261,6 +262,7 @@ public:
 
 	void ConvertToUserUnits(lcVector3& Value) const;
 	void ConvertFromUserUnits(lcVector3& Value) const;
+	lcMatrix44 GetRelativeRotation() const;
 
 	void UpdateInterface();
 	void SetPathName (const char* lpszPathName, bool bAddToMRU);
@@ -280,20 +282,19 @@ public:
 	void Render(View* view, bool bToMemory);
 	void CheckAutoSave();
 	bool GetSelectionCenter(lcVector3& Center) const;
+	lcVector3 GetFocusOrSelectionCenter() const;
 	bool GetFocusPosition(lcVector3& Position) const;
 	Object* GetFocusObject() const;
+	bool AnyObjectsSelected(bool PiecesOnly) const;
 	Group* AddGroup (const char* name, Group* pParent, float x, float y, float z);
 	void TransformSelectedObjects(LC_TRANSFORM_TYPE Type, const lcVector3& Transform);
 	void ModifyObject(Object* Object, lcObjectProperty Property, void* Value);
 	void ZoomActiveView(int Amount);
 
-	void RayTest(lcObjectRayTest& ObjectRayTest) const;
-	void BoxTest(lcObjectBoxTest& ObjectBoxTest) const;
-
 	// Objects
-	lcArray<Piece*> mPieces;
-	lcArray<Camera*> mCameras;
-	lcArray<Light*> mLights;
+	lcArray<lcPiece*> mPieces;
+	lcArray<lcCamera*> mCameras;
+	lcArray<lcLight*> mLights;
 	Group* m_pGroups;
 	Terrain* m_pTerrain;
 
@@ -301,10 +302,11 @@ public:
 	char m_strPathName[LC_MAXPATH];
 	bool m_bModified;
 
-protected:
-	// Piece library
+	void GetPieceInsertPosition(View* view, lcVector3& Position, lcVector4& Orientation);
+
 	TexFont* m_pScreenFont;
 
+protected:
 	// Undo support
 	LC_UNDOINFO* m_pUndoList;
 	LC_UNDOINFO* m_pRedoList;
@@ -313,16 +315,8 @@ protected:
 
 	bool RemoveSelectedObjects();
 	void GetPieceInsertPosition(Piece* OffsetPiece, lcVector3& Position, lcVector4& Rotation);
-	void GetPieceInsertPosition(View* view, lcVector3& Position, lcVector4& Orientation);
 	void SelectAndFocusNone(bool bFocusOnly);
 	void SelectGroup(Group* TopGroup, bool Select);
-
-	void FocusOrDeselectObject(const lcObjectSection& ObjectSection);
-	void ClearSelectionAndSetFocus(const lcObjectSection& ObjectSection)
-	{
-		ClearSelectionAndSetFocus(ObjectSection.Object, ObjectSection.Section);
-	}
-	void ClearSelectionAndSetFocus(Object* Object, lcuintptr Section);
 
 	void CalculateStep();
 	static int InstanceOfName(const String& existingString, const String& candidateString, String& baseNameOut );
@@ -346,31 +340,15 @@ protected:
 	void RenderScenePieces(View* view, bool DrawInterface);
 	void RenderSceneObjects(View* view);
 	void RenderViewports(View* view);
-	void RenderOverlays(View* view);
 
 	void CreateHTMLPieceList(FILE* f, int nStep, bool bImages, const char* ext);
 	void Export3DStudio();
 	void ExportPOVRay(lcFile& File);
 	void ZoomExtents(int FirstView, int LastView);
 
-	lcFile* m_pTrackFile;
-	bool m_bTrackCancel;
 	int m_nTracking;
 	int m_nDownX;
 	int m_nDownY;
-	float m_fTrack[3];
-	int m_nMouse;
-	lcVector3 m_MouseSnapLeftover;
-	lcVector3 m_MouseTotalDelta;
-
-	int m_OverlayMode;
-	bool m_OverlayActive;
-	lcVector3 m_OverlayCenter;
-	lcVector3 m_OverlayTrackStart;
-	lcVector3 m_OverlayDelta;
-	void MouseUpdateOverlays(View* view, int x, int y);
-	void ActivateOverlay(View* view, int Action, int OverlayMode);
-	void UpdateOverlayScale();
 
 	bool StopTracking(bool bAccept);
 	void StartTracking(int mode);
@@ -378,14 +356,6 @@ protected:
 	void RemoveEmptyGroups();
 
 public:
-	void OnLeftButtonDown(View* view);
-	void OnLeftButtonUp(View* view);
-	void OnLeftButtonDoubleClick(View* view);
-	void OnMiddleButtonDown(View* view);
-	void OnMiddleButtonUp(View* view);
-	void OnRightButtonDown(View* view);
-	void OnRightButtonUp(View* view);
-	void OnMouseMove(View* view);
 	void OnMouseWheel(View* view, float Direction);
 
 	void SetAction(int Action);
@@ -393,9 +363,7 @@ public:
 	{
 		return m_nCurAction;
 	}
-	int GetAction() const;
 
-	void HandleNotify(LC_NOTIFY id, unsigned long param);
 	void HandleCommand(LC_COMMANDS id);
 
 	lcuint32 m_nSnap;

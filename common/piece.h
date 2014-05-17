@@ -38,7 +38,7 @@ public:
 		return (mState & LC_PIECE_SELECTION_MASK) != 0;
 	}
 
-	virtual bool IsSelected(lcuintptr Section) const
+	virtual bool IsSelected(lcuint32 Section) const
 	{
 		return (mState & LC_PIECE_SELECTION_MASK) != 0;
 	}
@@ -51,7 +51,7 @@ public:
 			mState &= ~(LC_PIECE_SELECTION_MASK | LC_PIECE_FOCUS_MASK);
 	}
 
-	virtual void SetSelected(lcuintptr Section, bool Selected)
+	virtual void SetSelected(lcuint32 Section, bool Selected)
 	{
 		if (Selected)
 			mState |= LC_PIECE_POSITION_SELECTED;
@@ -64,12 +64,12 @@ public:
 		return (mState & LC_PIECE_FOCUS_MASK) != 0;
 	}
 
-	virtual bool IsFocused(lcuintptr Section) const
+	virtual bool IsFocused(lcuint32 Section) const
 	{
 		return (mState & LC_PIECE_FOCUS_MASK) != 0;
 	}
 
-	virtual void SetFocused(lcuintptr Section, bool Focused)
+	virtual void SetFocused(lcuint32 Section, bool Focused)
 	{
 		if (Focused)
 			mState |= LC_PIECE_POSITION_SELECTED | LC_PIECE_POSITION_FOCUSED;
@@ -77,7 +77,7 @@ public:
 			mState &= ~LC_PIECE_FOCUS_MASK;
 	}
 
-	virtual lcuintptr GetFocusSection() const
+	virtual lcuint32 GetFocusSection() const
 	{
 		if (mState & LC_PIECE_POSITION_FOCUSED)
 			return LC_PIECE_SECTION_POSITION;
@@ -85,7 +85,7 @@ public:
 		return ~0;
 	}
 
-	virtual lcVector3 GetSectionPosition(lcuintptr Section) const
+	virtual lcVector3 GetSectionPosition(lcuint32 Section) const
 	{
 		switch (Section)
 		{

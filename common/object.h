@@ -30,18 +30,8 @@ struct LC_OBJECT_KEY_INFO
 struct lcObjectSection
 {
 	lcObject* Object;
-	lcuintptr Section;
+	lcuint32 Section;
 };
-
-inline lcObjectSection lcMakeObjectSection(Object* Object, lcuintptr Section)
-{
-	lcObjectSection ObjectSection;
-
-	ObjectSection.Object = Object;
-	ObjectSection.Section = Section;
-
-	return ObjectSection;
-}
 
 struct lcObjectRayTest
 {
@@ -88,15 +78,15 @@ public:
 	}
 
 	virtual bool IsSelected() const = 0;
-	virtual bool IsSelected(lcuintptr Section) const = 0;
+	virtual bool IsSelected(lcuint32 Section) const = 0;
 	virtual void SetSelected(bool Selected) = 0;
-	virtual void SetSelected(lcuintptr Section, bool Selected) = 0;
+	virtual void SetSelected(lcuint32 Section, bool Selected) = 0;
 	virtual bool IsFocused() const = 0;
-	virtual bool IsFocused(lcuintptr Section) const = 0;
-	virtual void SetFocused(lcuintptr Section, bool Focused) = 0;
-	virtual lcuintptr GetFocusSection() const = 0;
+	virtual bool IsFocused(lcuint32 Section) const = 0;
+	virtual void SetFocused(lcuint32 Section, bool Focused) = 0;
+	virtual lcuint32 GetFocusSection() const = 0;
 
-	virtual lcVector3 GetSectionPosition(lcuintptr Section) const = 0;
+	virtual lcVector3 GetSectionPosition(lcuint32 Section) const = 0;
 	virtual void Move(unsigned short nTime, bool bAddKey, float dx, float dy, float dz) = 0;
 	virtual void RayTest(lcObjectRayTest& ObjectRayTest) const = 0;
 	virtual void BoxTest(lcObjectBoxTest& ObjectBoxTest) const = 0;

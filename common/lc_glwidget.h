@@ -71,8 +71,6 @@ public:
 
 	void MakeCurrent();
 	void Redraw();
-	void CaptureMouse();
-	void ReleaseMouse();
 	void SetCursor(LC_CURSOR_TYPE Cursor);
 
 	virtual void OnDraw() { }

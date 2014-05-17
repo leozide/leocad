@@ -66,7 +66,7 @@ public:
 		return (mState & LC_LIGHT_SELECTION_MASK) != 0;
 	}
 
-	virtual bool IsSelected(lcuintptr Section) const
+	virtual bool IsSelected(lcuint32 Section) const
 	{
 		switch (Section)
 		{
@@ -94,7 +94,7 @@ public:
 			mState &= ~(LC_LIGHT_SELECTION_MASK | LC_LIGHT_FOCUS_MASK);
 	}
 
-	virtual void SetSelected(lcuintptr Section, bool Selected)
+	virtual void SetSelected(lcuint32 Section, bool Selected)
 	{
 		switch (Section)
 		{
@@ -122,7 +122,7 @@ public:
 		return (mState & LC_LIGHT_FOCUS_MASK) != 0;
 	}
 
-	virtual bool IsFocused(lcuintptr Section) const
+	virtual bool IsFocused(lcuint32 Section) const
 	{
 		switch (Section)
 		{
@@ -137,7 +137,7 @@ public:
 		return false;
 	}
 
-	virtual void SetFocused(lcuintptr Section, bool Focused)
+	virtual void SetFocused(lcuint32 Section, bool Focused)
 	{
 		switch (Section)
 		{
@@ -160,7 +160,7 @@ public:
 		}
 	}
 
-	virtual lcuintptr GetFocusSection() const
+	virtual lcuint32 GetFocusSection() const
 	{
 		if (mState & LC_LIGHT_POSITION_FOCUSED)
 			return LC_LIGHT_SECTION_POSITION;
@@ -171,7 +171,7 @@ public:
 		return ~0;
 	}
 
-	virtual lcVector3 GetSectionPosition(lcuintptr Section) const
+	virtual lcVector3 GetSectionPosition(lcuint32 Section) const
 	{
 		switch (Section)
 		{
@@ -207,6 +207,8 @@ public:
 	void Move(unsigned short nTime, bool bAddKey, float dx, float dy, float dz);
 	bool Setup(int LightIndex);
 	void CreateName(const lcArray<Light*>& Lights);
+	bool FileLoad(lcFile& file);
+	void FileSave(lcFile& file) const;
 
 	// Temporary parameters
 	lcMatrix44 mWorldLight;

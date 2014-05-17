@@ -67,22 +67,16 @@ void lcModelProperties::SaveDefaults()
 Project::Project()
 {
 	m_bModified = false;
-	m_bTrackCancel = false;
 	m_nTracking = LC_TRACK_NONE;
-	m_OverlayMode = LC_OVERLAY_NONE;
 	mDropPiece = NULL;
 	m_pGroups = NULL;
 	m_pUndoList = NULL;
 	m_pRedoList = NULL;
-	m_pTrackFile = NULL;
 	m_nCurAction = 0;
 	mTransformType = LC_TRANSFORM_RELATIVE_TRANSLATION;
 	m_pTerrain = new Terrain();
 	m_pBackground = new lcTexture();
 	mGridTexture = new lcTexture();
-	m_nMouse = lcGetProfileInt(LC_PROFILE_MOUSE_SENSITIVITY);
-	m_nDownX = 0;
-	m_nDownY = 0;
 	memset(&mSearchOptions, 0, sizeof(mSearchOptions));
 
 	m_pScreenFont = new TexFont();
@@ -92,7 +86,6 @@ Project::~Project()
 {
 	DeleteContents(false);
 
-    delete m_pTrackFile;
 	delete m_pTerrain;
 	delete m_pBackground;
 	delete mGridTexture;
@@ -220,7 +213,6 @@ void Project::LoadDefaults(bool cameras)
 	strcpy(m_strHeader, "");
 	strcpy(m_strFooter, "Page &P");
 	m_pTerrain->LoadDefaults(true);
-	m_OverlayActive = false;
 
 	const lcArray<View*> Views = gMainWindow->GetViews();
 	for (i = 0; i < Views.GetSize (); i++)
@@ -1472,9 +1464,6 @@ void Project::Render(View* View, bool ToMemory)
 	{
 		RenderSceneObjects(View);
 
-		if (m_OverlayActive || ((m_nCurAction == LC_TOOL_SELECT) && (m_nTracking == LC_TRACK_LEFT) && (gMainWindow->GetActiveView() == View)))
-			RenderOverlays(View);
-
 		RenderViewports(View);
 	}
 }
@@ -2022,698 +2011,6 @@ void Project::RenderSceneObjects(View* view)
 	}
 }
 
-void Project::RenderOverlays(View* view)
-{
-	if (mDropPiece)
-		return;
-
-	lcContext* Context = view->mContext;
-
-	if (((m_nCurAction == LC_TOOL_SELECT) && (m_nTracking == LC_TRACK_LEFT) && (gMainWindow->GetActiveView() == view) && (m_OverlayMode == LC_OVERLAY_NONE)) ||
-	    (m_nCurAction == LC_TOOL_ZOOM_REGION))
-	{
-		Context->SetProjectionMatrix(lcMatrix44Ortho(0.0f, view->mWidth, 0.0f, view->mHeight, -1.0f, 1.0f));
-		Context->SetWorldViewMatrix(lcMatrix44Translation(lcVector3(0.375f, 0.375f, 0.0f)));
-
-		glDisable(GL_DEPTH_TEST);
-
-		float pt1x = (float)m_nDownX;
-		float pt1y = (float)m_nDownY;
-		float pt2x, pt2y;
-
-		if (m_nCurAction == LC_TOOL_ZOOM_REGION)
-		{
-			pt2x = m_OverlayTrackStart[0];
-			pt2y = m_OverlayTrackStart[1];
-		}
-		else
-		{
-			pt2x = m_fTrack[0];
-			pt2y = m_fTrack[1];
-		}
-
-		float Left, Right, Bottom, Top;
-
-		if (pt1x < pt2x)
-		{
-			Left = pt1x;
-			Right = pt2x;
-		}
-		else
-		{
-			Left = pt2x;
-			Right = pt1x;
-		}
-
-		if (pt1y < pt2y)
-		{
-			Bottom = pt1y;
-			Top = pt2y;
-		}
-		else
-		{
-			Bottom = pt2y;
-			Top = pt1y;
-		}
-
-		float BorderX = lcMin(2.0f, Right - Left);
-		float BorderY = lcMin(2.0f, Top - Bottom);
-
-		float Verts[14][2] =
-		{
-			{ Left, Bottom },
-			{ Left + BorderX, Bottom + BorderY },
-			{ Right, Bottom },
-			{ Right - BorderX, Bottom + BorderY },
-			{ Right, Top },
-			{ Right - BorderX, Top - BorderY },
-			{ Left, Top },
-			{ Left + BorderX, Top - BorderY },
-			{ Left, Bottom },
-			{ Left + BorderX, Bottom + BorderY },
-			{ Left + BorderX, Bottom + BorderY },
-			{ Right - BorderX, Bottom + BorderY },
-			{ Left + BorderX, Top - BorderY },
-			{ Right - BorderX, Top - BorderY },
-		};
-
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		glEnable(GL_BLEND);
-
-		glVertexPointer(2, GL_FLOAT, 0, Verts);
-
-		glColor4f(0.25f, 0.25f, 1.0f, 1.0f);
-		glDrawArrays(GL_TRIANGLE_STRIP, 0, 10);
-
-		glColor4f(0.25f, 0.25f, 1.0f, 0.25f);
-		glDrawArrays(GL_TRIANGLE_STRIP, 10, 4);
-
-		glDisable(GL_BLEND);
-		glEnable(GL_DEPTH_TEST);
-	}
-
-	const float OverlayScale = view->m_OverlayScale;
-	const lcMatrix44& ViewMatrix = view->mCamera->mWorldView;
-
-	Context->SetProjectionMatrix(view->GetProjectionMatrix());
-
-	if ((m_nCurAction == LC_TOOL_MOVE || m_nCurAction == LC_TOOL_SELECT) && (m_OverlayMode >= LC_OVERLAY_NONE && m_OverlayMode <= LC_OVERLAY_ROTATE_XYZ))
-	{
-		const float OverlayMovePlaneSize = 0.5f * OverlayScale;
-		const float OverlayMoveArrowSize = 1.5f * OverlayScale;
-		const float OverlayMoveArrowCapSize = 0.9f * OverlayScale;
-		const float OverlayMoveArrowCapRadius = 0.1f * OverlayScale;
-		const float OverlayMoveArrowBodyRadius = 0.05f * OverlayScale;
-		const float OverlayRotateArrowStart = 1.0f * OverlayScale;
-		const float OverlayRotateArrowEnd = 1.5f * OverlayScale;
-		const float OverlayRotateArrowCenter = 1.2f * OverlayScale;
-
-		glDisable(GL_DEPTH_TEST);
-
-		// Find the rotation from the focused piece if relative snap is enabled.
-		Object* Focus = NULL;
-		lcVector4 Rotation(0, 0, 1, 0);
-
-		if ((m_nSnap & LC_DRAW_GLOBAL_SNAP) == 0)
-		{
-			Focus = GetFocusObject();
-
-			if ((Focus != NULL) && Focus->IsPiece())
-				Rotation = ((Piece*)Focus)->mRotation;
-			else
-				Focus = NULL;
-		}
-
-		// Draw a quad if we're moving on a plane.
-		if ((m_OverlayMode == LC_OVERLAY_MOVE_XY) || (m_OverlayMode == LC_OVERLAY_MOVE_XZ) || (m_OverlayMode == LC_OVERLAY_MOVE_YZ))
-		{
-			lcMatrix44 WorldViewMatrix = lcMul(lcMatrix44Translation(m_OverlayCenter), ViewMatrix);
-
-			if (Focus)
-				WorldViewMatrix = lcMul(lcMatrix44FromAxisAngle(lcVector3(Rotation[0], Rotation[1], Rotation[2]), Rotation[3] * LC_DTOR), WorldViewMatrix);
-
-			if (m_OverlayMode == LC_OVERLAY_MOVE_XZ)
-				WorldViewMatrix = lcMul(lcMatrix44RotationZ(-LC_PI / 2), WorldViewMatrix);
-			else if (m_OverlayMode == LC_OVERLAY_MOVE_XY)
-				WorldViewMatrix = lcMul(lcMatrix44RotationY(LC_PI / 2), WorldViewMatrix);
-
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-			glEnable(GL_BLEND);
-
-			glColor4f(0.8f, 0.8f, 0.0f, 0.3f);
-			Context->SetWorldViewMatrix(WorldViewMatrix);
-
-			float Verts[4][3] =
-			{
-				{ 0.0f, 0.0f, 0.0f },
-				{ 0.0f, OverlayMovePlaneSize, 0.0f },
-				{ 0.0f, OverlayMovePlaneSize, OverlayMovePlaneSize },
-				{ 0.0f, 0.0f, OverlayMovePlaneSize }
-			};
-
-			glVertexPointer(3, GL_FLOAT, 0, Verts);
-			glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-
-			glDisable(GL_BLEND);
-		}
-
-		// Draw the arrows.
-		for (int i = 0; i < 3; i++)
-		{
-			switch (i)
-			{
-			case 0:
-				if ((m_OverlayMode == LC_OVERLAY_MOVE_X) || (m_OverlayMode == LC_OVERLAY_MOVE_XY) || (m_OverlayMode == LC_OVERLAY_MOVE_XZ))
-					glColor4f(0.8f, 0.8f, 0.0f, 1.0f);
-				else
-					glColor4f(0.8f, 0.0f, 0.0f, 1.0f);
-				break;
-			case 1:
-				if ((m_OverlayMode == LC_OVERLAY_MOVE_Y) || (m_OverlayMode == LC_OVERLAY_MOVE_XY) || (m_OverlayMode == LC_OVERLAY_MOVE_YZ))
-					glColor4f(0.8f, 0.8f, 0.0f, 1.0f);
-				else
-					glColor4f(0.0f, 0.8f, 0.0f, 1.0f);
-				break;
-			case 2:
-				if ((m_OverlayMode == LC_OVERLAY_MOVE_Z) || (m_OverlayMode == LC_OVERLAY_MOVE_XZ) || (m_OverlayMode == LC_OVERLAY_MOVE_YZ))
-					glColor4f(0.8f, 0.8f, 0.0f, 1.0f);
-				else
-					glColor4f(0.0f, 0.0f, 0.8f, 1.0f);
-				break;
-			}
-
-			lcMatrix44 WorldViewMatrix = lcMul(lcMatrix44Translation(m_OverlayCenter), ViewMatrix);
-
-			if (Focus)
-				WorldViewMatrix = lcMul(lcMatrix44FromAxisAngle(lcVector3(Rotation[0], Rotation[1], Rotation[2]), Rotation[3] * LC_DTOR), WorldViewMatrix);
-
-			if (i == 1)
-				WorldViewMatrix = lcMul(lcMatrix44(lcVector4(0, 1, 0, 0), lcVector4(1, 0, 0, 0), lcVector4(0, 0, 1, 0), lcVector4(0, 0, 0, 1)), WorldViewMatrix);
-			else if (i == 2)
-				WorldViewMatrix = lcMul(lcMatrix44(lcVector4(0, 0, 1, 0), lcVector4(0, 1, 0, 0), lcVector4(1, 0, 0, 0), lcVector4(0, 0, 0, 1)), WorldViewMatrix);
-
-			Context->SetWorldViewMatrix(WorldViewMatrix);
-
-			// Translation arrows.
-			if (m_nTracking == LC_TRACK_NONE || (m_OverlayMode >= LC_OVERLAY_NONE && m_OverlayMode <= LC_OVERLAY_MOVE_XYZ))
-			{
-				lcVector3 Verts[11];
-
-				Verts[0] = lcVector3(0.0f, 0.0f, 0.0f);
-				Verts[1] = lcVector3(OverlayMoveArrowSize, 0.0f, 0.0f);
-
-				for (int j = 0; j < 9; j++)
-				{
-					float y = cosf(LC_2PI * j / 8) * OverlayMoveArrowCapRadius;
-					float z = sinf(LC_2PI * j / 8) * OverlayMoveArrowCapRadius;
-					Verts[j + 2] = lcVector3(OverlayMoveArrowCapSize, y, z);
-				}
-
-				glVertexPointer(3, GL_FLOAT, 0, Verts);
-				glDrawArrays(GL_LINES, 0, 2);
-				glDrawArrays(GL_TRIANGLE_FAN, 1, 10);
-			}
-
-			// Rotation arrows.
-			bool AnyPieceSelected = false;
-			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-			{
-				if (mPieces[PieceIdx]->IsSelected())
-				{
-					AnyPieceSelected = true;
-					break;
-				}
-			}
-
-			if (m_nCurAction == LC_TOOL_SELECT && m_nTracking == LC_TRACK_NONE && AnyPieceSelected)
-			{
-				switch (i)
-				{
-				case 0:
-					if (m_OverlayMode == LC_OVERLAY_ROTATE_X)
-						glColor4f(0.8f, 0.8f, 0.0f, 1.0f);
-					else
-						glColor4f(0.8f, 0.0f, 0.0f, 1.0f);
-					break;
-				case 1:
-					if (m_OverlayMode == LC_OVERLAY_ROTATE_Y)
-						glColor4f(0.8f, 0.8f, 0.0f, 1.0f);
-					else
-						glColor4f(0.0f, 0.8f, 0.0f, 1.0f);
-					break;
-				case 2:
-					if (m_OverlayMode == LC_OVERLAY_ROTATE_Z)
-						glColor4f(0.8f, 0.8f, 0.0f, 1.0f);
-					else
-						glColor4f(0.0f, 0.0f, 0.8f, 1.0f);
-					break;
-				}
-
-				lcVector3 Verts[18];
-				glVertexPointer(3, GL_FLOAT, 0, Verts);
-
-				for (int j = 0; j < 9; j++)
-				{
-					const float Radius1 = OverlayRotateArrowEnd - OverlayMoveArrowCapRadius - OverlayRotateArrowCenter - OverlayMoveArrowBodyRadius;
-					const float Radius2 = OverlayRotateArrowEnd - OverlayMoveArrowCapRadius - OverlayRotateArrowCenter + OverlayMoveArrowBodyRadius;
-					float x = cosf(LC_2PI / 4 * j / 8);
-					float y = sinf(LC_2PI / 4 * j / 8);
-
-					Verts[j * 2 + 0] = lcVector3(0.0f, OverlayRotateArrowCenter + x * Radius1, OverlayRotateArrowCenter + y * Radius1);
-					Verts[j * 2 + 1] = lcVector3(0.0f, OverlayRotateArrowCenter + x * Radius2, OverlayRotateArrowCenter + y * Radius2);
-				}
-
-				glDrawArrays(GL_TRIANGLE_STRIP, 0, 18);
-
-				for (int j = 0; j < 9; j++)
-				{
-					const float Radius = OverlayRotateArrowEnd - OverlayMoveArrowCapRadius - OverlayRotateArrowCenter;
-					float x = cosf(LC_2PI / 4 * j / 8);
-					float y = sinf(LC_2PI / 4 * j / 8);
-
-					Verts[j * 2 + 0] = lcVector3(-OverlayMoveArrowBodyRadius, OverlayRotateArrowCenter + x * Radius, OverlayRotateArrowCenter + y * Radius);
-					Verts[j * 2 + 1] = lcVector3( OverlayMoveArrowBodyRadius, OverlayRotateArrowCenter + x * Radius, OverlayRotateArrowCenter + y * Radius);
-				}
-
-				glDrawArrays(GL_TRIANGLE_STRIP, 0, 18);
-
-				Verts[0] = lcVector3(0.0f, OverlayRotateArrowEnd - OverlayMoveArrowCapRadius, OverlayRotateArrowStart);
-
-				for (int j = 0; j < 9; j++)
-				{
-					float x = cosf(LC_2PI * j / 8) * OverlayMoveArrowCapRadius;
-					float y = sinf(LC_2PI * j / 8) * OverlayMoveArrowCapRadius;
-					Verts[j + 1] = lcVector3(x, OverlayRotateArrowEnd - OverlayMoveArrowCapRadius + y, OverlayRotateArrowCenter);
-				}
-
-				glDrawArrays(GL_TRIANGLE_FAN, 0, 10);
-
-				Verts[0] = lcVector3(0.0f, OverlayRotateArrowStart, OverlayRotateArrowEnd - OverlayMoveArrowCapRadius);
-
-				for (int j = 0; j < 9; j++)
-				{
-					float x = cosf(LC_2PI * j / 8) * OverlayMoveArrowCapRadius;
-					float y = sinf(LC_2PI * j / 8) * OverlayMoveArrowCapRadius;
-					Verts[j + 1] = lcVector3(x, OverlayRotateArrowCenter, OverlayRotateArrowEnd - OverlayMoveArrowCapRadius + y);
-				}
-
-				glDrawArrays(GL_TRIANGLE_FAN, 0, 10);
-			}
-		}
-
-		glEnable(GL_DEPTH_TEST);
-	}
-
-	if (m_nCurAction == LC_TOOL_ROTATE || (m_nCurAction == LC_TOOL_SELECT && m_nTracking != LC_TRACK_NONE && m_OverlayMode >= LC_OVERLAY_ROTATE_X && m_OverlayMode <= LC_OVERLAY_ROTATE_XYZ))
-	{
-		const float OverlayRotateRadius = 2.0f;
-
-		glDisable(GL_DEPTH_TEST);
-
-		Camera* Cam = view->mCamera;
-		int j;
-
-		// Find the rotation from the focused piece if relative snap is enabled.
-		Object* Focus = NULL;
-		lcVector4 Rot(0, 0, 1, 0);
-
-		if ((m_nSnap & LC_DRAW_GLOBAL_SNAP) == 0)
-		{
-			Focus = GetFocusObject();
-
-			if ((Focus != NULL) && Focus->IsPiece())
-				Rot = ((Piece*)Focus)->mRotation;
-			else
-				Focus = NULL;
-		}
-
-		bool HasAngle = false;
-
-		// Draw a disc showing the rotation amount.
-		if (m_MouseTotalDelta.LengthSquared() != 0.0f && (m_nTracking != LC_TRACK_NONE))
-		{
-			lcVector4 Rotation;
-			float Angle, Step;
-
-			HasAngle = true;
-
-			switch (m_OverlayMode)
-			{
-			case LC_OVERLAY_ROTATE_X:
-				glColor4f(0.8f, 0.0f, 0.0f, 0.3f);
-				Angle = m_MouseTotalDelta[0];
-				Rotation = lcVector4(0.0f, 0.0f, 0.0f, 1.0f);
-				break;
-			case LC_OVERLAY_ROTATE_Y:
-				glColor4f(0.0f, 0.8f, 0.0f, 0.3f);
-				Angle = m_MouseTotalDelta[1];
-				Rotation = lcVector4(90.0f, 0.0f, 0.0f, 1.0f);
-				break;
-			case LC_OVERLAY_ROTATE_Z:
-				glColor4f(0.0f, 0.0f, 0.8f, 0.3f);
-				Angle = m_MouseTotalDelta[2];
-				Rotation = lcVector4(90.0f, 0.0f, -1.0f, 0.0f);
-				break;
-			default:
-				Rotation = lcVector4(0.0f, 0.0f, 0.0f, 1.0f);
-				Angle = 0.0f;
-				break;
-			};
-
-			if (Angle > 0.0f)
-			{
-				Step = 360.0f / 32;
-			}
-			else
-			{
-				Angle = -Angle;
-				Step = -360.0f / 32;
-			}
-
-			if (fabsf(Angle) >= fabsf(Step))
-			{
-				lcMatrix44 WorldViewMatrix = lcMul(lcMatrix44Translation(m_OverlayCenter), ViewMatrix);
-
-				if (Focus)
-					WorldViewMatrix = lcMul(lcMatrix44FromAxisAngle(lcVector3(Rot[0], Rot[1], Rot[2]), Rot[3] * LC_DTOR), WorldViewMatrix);
-
-				WorldViewMatrix = lcMul(lcMatrix44FromAxisAngle(lcVector3(Rotation[1], Rotation[2], Rotation[3]), Rotation[0] * LC_DTOR), WorldViewMatrix);
-
-				Context->SetWorldViewMatrix(WorldViewMatrix);
-
-				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-				glEnable(GL_BLEND);
-
-				lcVector3 Verts[33];
-				Verts[0] = lcVector3(0.0f, 0.0f, 0.0f);
-				int NumVerts = 1;
-
-				glVertexPointer(3, GL_FLOAT, 0, Verts);
-
-				float StartAngle;
-				int i = 0;
-
-				if (Step < 0)
-					StartAngle = -Angle;
-				else
-					StartAngle = Angle;
-
-				do
-				{
-					float x = cosf((Step * i - StartAngle) * LC_DTOR) * OverlayRotateRadius * OverlayScale;
-					float y = sinf((Step * i - StartAngle) * LC_DTOR) * OverlayRotateRadius * OverlayScale;
-
-					Verts[NumVerts++] = lcVector3(0.0f, x, y);
-
-					if (NumVerts == 33)
-					{
-						glDrawArrays(GL_TRIANGLE_FAN, 0, NumVerts);
-						Verts[1] = Verts[32];
-						NumVerts = 2;
-					}
-
-					i++;
-					if (Step > 0)
-						Angle -= Step;
-					else
-						Angle += Step;
-
-				} while (Angle >= 0.0f);
-
-				if (NumVerts > 2)
-					glDrawArrays(GL_TRIANGLE_FAN, 0, NumVerts);
-
-				glDisable(GL_BLEND);
-			}
-		}
-
-		lcMatrix44 Mat = lcMatrix44AffineInverse(Cam->mWorldView);
-		Mat.SetTranslation(m_OverlayCenter);
-
-		// Draw the circles.
-		if (m_nCurAction == LC_TOOL_ROTATE && !HasAngle && m_nTracking == LC_TRACK_NONE)
-		{
-			lcVector3 Verts[32];
-
-			for (j = 0; j < 32; j++)
-			{
-				lcVector3 Pt;
-
-				Pt[0] = cosf(LC_2PI * j / 32) * OverlayRotateRadius * OverlayScale;
-				Pt[1] = sinf(LC_2PI * j / 32) * OverlayRotateRadius * OverlayScale;
-				Pt[2] = 0.0f;
-
-				Verts[j] = lcMul31(Pt, Mat);
-			}
-
-			glColor4f(0.1f, 0.1f, 0.1f, 1.0f);
-			Context->SetWorldViewMatrix(ViewMatrix);
-
-			glVertexPointer(3, GL_FLOAT, 0, Verts);
-			glDrawArrays(GL_LINE_LOOP, 0, 32);
-		}
-
-		lcVector3 ViewDir = Cam->mTargetPosition - Cam->mPosition;
-		ViewDir.Normalize();
-
-		// Transform ViewDir to local space.
-		if (Focus)
-		{
-			lcMatrix44 RotMat = lcMatrix44FromAxisAngle(lcVector3(Rot[0], Rot[1], Rot[2]), -Rot[3] * LC_DTOR);
-
-			ViewDir = lcMul30(ViewDir, RotMat);
-		}
-
-		lcMatrix44 WorldViewMatrix = lcMul(lcMatrix44Translation(m_OverlayCenter), ViewMatrix);
-
-		if (Focus)
-			WorldViewMatrix = lcMul(lcMatrix44FromAxisAngle(lcVector3(Rot[0], Rot[1], Rot[2]), Rot[3] * LC_DTOR), WorldViewMatrix);
-
-		Context->SetWorldViewMatrix(WorldViewMatrix);
-
-		// Draw each axis circle.
-		for (int i = 0; i < 3; i++)
-		{
-			if (m_OverlayMode == LC_OVERLAY_ROTATE_X + i)
-			{
-				glColor4f(0.8f, 0.8f, 0.0f, 1.0f);
-			}
-			else
-			{
-				if (m_nCurAction != LC_TOOL_ROTATE || HasAngle || m_nTracking != LC_TRACK_NONE)
-					continue;
-
-				switch (i)
-				{
-				case 0:
-					glColor4f(0.8f, 0.0f, 0.0f, 1.0f);
-					break;
-				case 1:
-					glColor4f(0.0f, 0.8f, 0.0f, 1.0f);
-					break;
-				case 2:
-					glColor4f(0.0f, 0.0f, 0.8f, 1.0f);
-					break;
-				}
-			}
-
-			lcVector3 Verts[64];
-			int NumVerts = 0;
-
-			for (j = 0; j < 32; j++)
-			{
-				lcVector3 v1, v2;
-
-				switch (i)
-				{
-				case 0:
-					v1 = lcVector3(0.0f, cosf(LC_2PI * j / 32), sinf(LC_2PI * j / 32));
-					v2 = lcVector3(0.0f, cosf(LC_2PI * (j + 1) / 32), sinf(LC_2PI * (j + 1) / 32));
-					break;
-
-				case 1:
-					v1 = lcVector3(cosf(LC_2PI * j / 32), 0.0f, sinf(LC_2PI * j / 32));
-					v2 = lcVector3(cosf(LC_2PI * (j + 1) / 32), 0.0f, sinf(LC_2PI * (j + 1) / 32));
-					break;
-
-				case 2:
-					v1 = lcVector3(cosf(LC_2PI * j / 32), sinf(LC_2PI * j / 32), 0.0f);
-					v2 = lcVector3(cosf(LC_2PI * (j + 1) / 32), sinf(LC_2PI * (j + 1) / 32), 0.0f);
-					break;
-				}
-
-				if (m_nCurAction != LC_TOOL_ROTATE || HasAngle || m_nTracking != LC_TRACK_NONE || lcDot(ViewDir, v1 + v2) <= 0.0f)
-				{
-					Verts[NumVerts++] = v1 * (OverlayRotateRadius * OverlayScale);
-					Verts[NumVerts++] = v2 * (OverlayRotateRadius * OverlayScale);
-				}
-			}
-
-			glVertexPointer(3, GL_FLOAT, 0, Verts);
-			glDrawArrays(GL_LINES, 0, NumVerts);
-		}
-
-		// Draw tangent vector.
-		if (m_nTracking != LC_TRACK_NONE)
-		{
-			if ((m_OverlayMode == LC_OVERLAY_ROTATE_X) || (m_OverlayMode == LC_OVERLAY_ROTATE_Y) || (m_OverlayMode == LC_OVERLAY_ROTATE_Z))
-			{
-				const float OverlayRotateArrowSize = 1.5f;
-				const float OverlayRotateArrowCapSize = 0.25f;
-
-				lcVector4 Rotation;
-				float Angle;
-
-				switch (m_OverlayMode)
-				{
-				case LC_OVERLAY_ROTATE_X:
-					Angle = m_MouseTotalDelta[0];
-					Rotation = lcVector4(0.0f, 0.0f, 0.0f, 1.0f);
-					break;
-				case LC_OVERLAY_ROTATE_Y:
-					Angle = m_MouseTotalDelta[1];
-					Rotation = lcVector4(90.0f, 0.0f, 0.0f, 1.0f);
-					break;
-				case LC_OVERLAY_ROTATE_Z:
-					Angle = m_MouseTotalDelta[2];
-					Rotation = lcVector4(90.0f, 0.0f, -1.0f, 0.0f);
-					break;
-				default:
-					Angle = 0.0f;
-					Rotation = lcVector4(0.0f, 0.0f, 1.0f, 0.0f);
-					break;
-				};
-
-				lcMatrix44 WorldViewMatrix = lcMul(lcMatrix44Translation(m_OverlayCenter), ViewMatrix);
-
-				if (Focus)
-					WorldViewMatrix = lcMul(lcMatrix44FromAxisAngle(lcVector3(Rot[0], Rot[1], Rot[2]), Rot[3] * LC_DTOR), WorldViewMatrix);
-
-				WorldViewMatrix = lcMul(lcMatrix44FromAxisAngle(lcVector3(Rotation[1], Rotation[2], Rotation[3]), Rotation[0] * LC_DTOR), WorldViewMatrix);
-
-				Context->SetWorldViewMatrix(WorldViewMatrix);
-
-				glColor4f(0.8f, 0.8f, 0.0f, 1.0f);
-
-				if (HasAngle)
-				{
-					float StartY = OverlayScale * OverlayRotateRadius;
-					float EndZ = (Angle > 0.0f) ? OverlayScale * OverlayRotateArrowSize : -OverlayScale * OverlayRotateArrowSize;
-					float TipZ = (Angle > 0.0f) ? -OverlayScale * OverlayRotateArrowCapSize : OverlayScale * OverlayRotateArrowCapSize;
-
-					lcVector3 Verts[6];
-
-					Verts[0] = lcVector3(0.0f, StartY, 0.0f);
-					Verts[1] = lcVector3(0.0f, StartY, EndZ);
-
-					Verts[2] = lcVector3(0.0f, StartY, EndZ);
-					Verts[3] = lcVector3(0.0f, StartY + OverlayScale * OverlayRotateArrowCapSize, EndZ + TipZ);
-
-					Verts[4] = lcVector3(0.0f, StartY, EndZ);
-					Verts[5] = lcVector3(0.0f, StartY - OverlayScale * OverlayRotateArrowCapSize, EndZ + TipZ);
-
-					glVertexPointer(3, GL_FLOAT, 0, Verts);
-					glDrawArrays(GL_LINES, 0, 6);
-				}
-
-				// Draw text.
-				int Viewport[4] = { 0, 0, view->mWidth, view->mHeight };
-				float Aspect = (float)Viewport[2]/(float)Viewport[3];
-
-				const lcMatrix44& ModelView = Cam->mWorldView;
-				lcMatrix44 Projection = lcMatrix44Perspective(Cam->m_fovy, Aspect, Cam->m_zNear, Cam->m_zFar);
-
-				lcVector3 ScreenPos = lcProjectPoint(m_OverlayCenter, ModelView, Projection, Viewport);
-
-				Context->SetProjectionMatrix(lcMatrix44Ortho(0, Viewport[2], 0, Viewport[3], -1, 1));
-				Context->SetWorldViewMatrix(lcMatrix44Translation(lcVector3(0.375, 0.375, 0.0)));
-
-				glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-				m_pScreenFont->MakeCurrent();
-				glEnable(GL_TEXTURE_2D);
-				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-				glEnable(GL_BLEND);
-
-				char buf[32];
-				sprintf(buf, "[%.2f]", fabsf(Angle));
-
-				int cx, cy;
-				m_pScreenFont->GetStringDimensions(&cx, &cy, buf);
-
-				glColor4f(0.8f, 0.8f, 0.0f, 1.0f);
-				m_pScreenFont->PrintText(ScreenPos[0] - Viewport[0] - (cx / 2), ScreenPos[1] - Viewport[1] + (cy / 2), 0.0f, buf);
-
-				glDisable(GL_BLEND);
-				glDisable(GL_TEXTURE_2D);
-			}
-		}
-
-		glEnable(GL_DEPTH_TEST);
-	}
-	else if (m_nCurAction == LC_TOOL_ROTATE_VIEW)
-	{
-		int x, y, w, h;
-
-		x = 0;
-		y = 0;
-		w = view->mWidth;
-		h = view->mHeight;
-
-		Context->SetProjectionMatrix(lcMatrix44Ortho(0, w, 0, h, -1, 1));
-		Context->SetWorldViewMatrix(lcMatrix44Translation(lcVector3(0.375f, 0.375f, 0.0f)));
-
-		glDisable(GL_DEPTH_TEST);
-		glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
-
-		// Draw circle.
-		float verts[32][2];
-
-		float r = lcMin(w, h) * 0.35f;
-		float cx = x + w / 2.0f;
-		float cy = y + h / 2.0f;
-
-		for (int i = 0; i < 32; i++)
-		{
-			verts[i][0] = cosf((float)i / 32.0f * (2.0f * LC_PI)) * r + cx;
-			verts[i][1] = sinf((float)i / 32.0f * (2.0f * LC_PI)) * r + cy;
-		}
-
-		glVertexPointer(2, GL_FLOAT, 0, verts);
-		glDrawArrays(GL_LINE_LOOP, 0, 32);
-
-		const float OverlayCameraSquareSize = lcMax(8.0f, (w+h)/200);
-
-		// Draw squares.
-		float Squares[16][2] =
-		{
-			{ cx + OverlayCameraSquareSize, cy + r + OverlayCameraSquareSize },
-			{ cx - OverlayCameraSquareSize, cy + r + OverlayCameraSquareSize },
-			{ cx - OverlayCameraSquareSize, cy + r - OverlayCameraSquareSize },
-			{ cx + OverlayCameraSquareSize, cy + r - OverlayCameraSquareSize },
-			{ cx + OverlayCameraSquareSize, cy - r + OverlayCameraSquareSize },
-			{ cx - OverlayCameraSquareSize, cy - r + OverlayCameraSquareSize },
-			{ cx - OverlayCameraSquareSize, cy - r - OverlayCameraSquareSize },
-			{ cx + OverlayCameraSquareSize, cy - r - OverlayCameraSquareSize },
-			{ cx + r + OverlayCameraSquareSize, cy + OverlayCameraSquareSize },
-			{ cx + r - OverlayCameraSquareSize, cy + OverlayCameraSquareSize },
-			{ cx + r - OverlayCameraSquareSize, cy - OverlayCameraSquareSize },
-			{ cx + r + OverlayCameraSquareSize, cy - OverlayCameraSquareSize },
-			{ cx - r + OverlayCameraSquareSize, cy + OverlayCameraSquareSize },
-			{ cx - r - OverlayCameraSquareSize, cy + OverlayCameraSquareSize },
-			{ cx - r - OverlayCameraSquareSize, cy - OverlayCameraSquareSize },
-			{ cx - r + OverlayCameraSquareSize, cy - OverlayCameraSquareSize }
-		};
-
-		glVertexPointer(2, GL_FLOAT, 0, Squares);
-		glDrawArrays(GL_LINE_LOOP, 0, 4);
-		glDrawArrays(GL_LINE_LOOP, 4, 4);
-		glDrawArrays(GL_LINE_LOOP, 8, 4);
-		glDrawArrays(GL_LINE_LOOP, 12, 4);
-
-		glEnable(GL_DEPTH_TEST);
-	}
-}
-
 void Project::RenderViewports(View* view)
 {
 	lcContext* Context = view->mContext;
@@ -3029,9 +2326,6 @@ void Project::UpdateSelection()
 		}
 	}
 
-	if (m_nTracking == LC_TRACK_NONE)
-		ActivateOverlay(gMainWindow->GetActiveView(), m_nCurAction, LC_OVERLAY_NONE);
-
 	gMainWindow->UpdateSelectedObjects(flags, SelectedCount, Focus);
 }
 
@@ -3173,7 +2467,6 @@ void Project::ZoomExtents(int FirstView, int LastView)
 	}
 
 	gMainWindow->UpdateFocusObject(GetFocusObject());
-	UpdateOverlayScale();
 	gMainWindow->UpdateAllViews();
 }
 
@@ -4080,19 +3373,6 @@ void Project::ExportPOVRay(lcFile& POVFile)
 	delete[] PieceFlags;
 	setlocale(LC_NUMERIC, OldLocale);
 	POVFile.Close();
-}
-
-// Special notifications.
-void Project::HandleNotify(LC_NOTIFY id, unsigned long param)
-{
-	switch (id)
-	{
-		case LC_CAPTURE_LOST:
-	{
-			if (m_nTracking != LC_TRACK_NONE)
-				StopTracking(false);
-		} break;
-	}
 }
 
 void Project::HandleCommand(LC_COMMANDS id)
@@ -5446,7 +4726,6 @@ void Project::HandleCommand(LC_COMMANDS id)
 				MoveSelectedObjects(axis, tmp, false, true);
 			}
 
-			UpdateOverlayScale();
 			gMainWindow->UpdateAllViews();
 			SetModifiedFlag(true);
 			CheckPoint(Rotate ? "Rotating" : "Moving");
@@ -5994,7 +5273,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 				Center = lcVector3((bs[0] + bs[3]) * 0.5f, (bs[1] + bs[4]) * 0.5f, (bs[2] + bs[5]) * 0.5f);
 			}
 
-			gMainWindow->GetActiveView()->mCamera->DoCenter(Center, m_nCurStep, m_bAddKeys);
+			gMainWindow->GetActiveView()->mCamera->Center(Center, m_nCurStep, m_bAddKeys);
 			gMainWindow->UpdateAllViews();
 			break;
 		}
@@ -6099,42 +5378,49 @@ void Project::HandleCommand(LC_COMMANDS id)
 		{
 			gMainWindow->GetActiveView()->mCamera->SetViewpoint(LC_VIEWPOINT_FRONT, m_nCurStep, m_bAddKeys);
 			HandleCommand(LC_VIEW_ZOOM_EXTENTS);
+			gMainWindow->UpdateAllViews();
 		} break;
 
 		case LC_VIEW_VIEWPOINT_BACK:
 		{
 			gMainWindow->GetActiveView()->mCamera->SetViewpoint(LC_VIEWPOINT_BACK, m_nCurStep, m_bAddKeys);
 			HandleCommand(LC_VIEW_ZOOM_EXTENTS);
+			gMainWindow->UpdateAllViews();
 		} break;
 
 		case LC_VIEW_VIEWPOINT_TOP:
 		{
 			gMainWindow->GetActiveView()->mCamera->SetViewpoint(LC_VIEWPOINT_TOP, m_nCurStep, m_bAddKeys);
 			HandleCommand(LC_VIEW_ZOOM_EXTENTS);
+			gMainWindow->UpdateAllViews();
 		} break;
 
 		case LC_VIEW_VIEWPOINT_BOTTOM:
 		{
 			gMainWindow->GetActiveView()->mCamera->SetViewpoint(LC_VIEWPOINT_BOTTOM, m_nCurStep, m_bAddKeys);
 			HandleCommand(LC_VIEW_ZOOM_EXTENTS);
+			gMainWindow->UpdateAllViews();
 		} break;
 
 		case LC_VIEW_VIEWPOINT_LEFT:
 		{
 			gMainWindow->GetActiveView()->mCamera->SetViewpoint(LC_VIEWPOINT_LEFT, m_nCurStep, m_bAddKeys);
 			HandleCommand(LC_VIEW_ZOOM_EXTENTS);
+			gMainWindow->UpdateAllViews();
 		} break;
 
 		case LC_VIEW_VIEWPOINT_RIGHT:
 		{
 			gMainWindow->GetActiveView()->mCamera->SetViewpoint(LC_VIEWPOINT_RIGHT, m_nCurStep, m_bAddKeys);
 			HandleCommand(LC_VIEW_ZOOM_EXTENTS);
+			gMainWindow->UpdateAllViews();
 		} break;
 
 		case LC_VIEW_VIEWPOINT_HOME:
 		{
 			gMainWindow->GetActiveView()->mCamera->SetViewpoint(LC_VIEWPOINT_HOME, m_nCurStep, m_bAddKeys);
 			HandleCommand(LC_VIEW_ZOOM_EXTENTS);
+			gMainWindow->UpdateAllViews();
 		} break;
 
 		case LC_VIEW_CAMERA_NONE:
@@ -6180,7 +5466,6 @@ void Project::HandleCommand(LC_COMMANDS id)
 			}
 
 			gMainWindow->UpdateCurrentCamera(mCameras.FindIndex(ActiveView->mCamera));
-			UpdateOverlayScale();
 			gMainWindow->UpdateAllViews();
 		} break;
 
@@ -6196,7 +5481,6 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 			gMainWindow->UpdateCameraMenu();
 			gMainWindow->UpdateFocusObject(GetFocusObject());
-			UpdateOverlayScale();
 			gMainWindow->UpdateAllViews();
 			SetModifiedFlag(true);
 			CheckPoint("Reset Cameras");
@@ -6525,61 +5809,7 @@ void Project::SetAction(int nAction)
 	m_nCurAction = nAction;
 
 	gMainWindow->UpdateAction(m_nCurAction);
-
-	ActivateOverlay(gMainWindow->GetActiveView(), m_nCurAction, LC_OVERLAY_NONE);
-
 	gMainWindow->UpdateAllViews();
-}
-
-int Project::GetAction() const
-{
-	int Action = m_nCurAction;
-
-	if (m_OverlayActive)
-	{
-		switch (m_OverlayMode)
-		{
-		case LC_OVERLAY_NONE:
-			break;
-
-		case LC_OVERLAY_MOVE_X:
-		case LC_OVERLAY_MOVE_Y:
-		case LC_OVERLAY_MOVE_Z:
-		case LC_OVERLAY_MOVE_XY:
-		case LC_OVERLAY_MOVE_XZ:
-		case LC_OVERLAY_MOVE_YZ:
-		case LC_OVERLAY_MOVE_XYZ:
-			Action = LC_TOOL_MOVE;
-			break;
-
-		case LC_OVERLAY_ROTATE_X:
-		case LC_OVERLAY_ROTATE_Y:
-		case LC_OVERLAY_ROTATE_Z:
-		case LC_OVERLAY_ROTATE_XY:
-		case LC_OVERLAY_ROTATE_XZ:
-		case LC_OVERLAY_ROTATE_YZ:
-		case LC_OVERLAY_ROTATE_XYZ:
-			Action = LC_TOOL_ROTATE;
-			break;
-
-		case LC_OVERLAY_ZOOM:
-			Action = LC_TOOL_ZOOM;
-			break;
-
-		case LC_OVERLAY_PAN:
-			Action = LC_TOOL_PAN;
-			break;
-
-		case LC_OVERLAY_ROTATE_VIEW_X:
-		case LC_OVERLAY_ROTATE_VIEW_Y:
-		case LC_OVERLAY_ROTATE_VIEW_Z:
-		case LC_OVERLAY_ROTATE_VIEW_XYZ:
-			Action = LC_TOOL_ROTATE_VIEW;
-			break;
-		}
-	}
-
-	return Action;
 }
 
 // Remove unused groups
@@ -6717,38 +5947,41 @@ void Project::SelectGroup(Group* TopGroup, bool Select)
 
 void Project::FocusOrDeselectObject(const lcObjectSection& ObjectSection)
 {
-	Object* FocusObject;
+	Object* FocusObject = GetFocusObject();
 	Object* Object = ObjectSection.Object;
-	lcuintptr Section = ObjectSection.Section;
+	lcuint32 Section = ObjectSection.Section;
 
-	if (!Object)
-		return;
-
-	bool WasSelected = Object->IsSelected();
-
-	if (!Object->IsFocused(Section))
+	if (Object)
 	{
-		FocusObject = GetFocusObject();
+		bool WasSelected = Object->IsSelected();
 
-		if (FocusObject)
-			FocusObject->SetFocused(FocusObject->GetFocusSection(), false);
+		if (!Object->IsFocused(Section))
+		{
+			if (FocusObject)
+				FocusObject->SetFocused(FocusObject->GetFocusSection(), false);
 
-		Object->SetFocused(Section, true);
+			Object->SetFocused(Section, true);
+		}
+		else
+			Object->SetSelected(Section, false);
+
+		bool IsSelected = Object->IsSelected();
+
+		if (Object->IsPiece() && (WasSelected != IsSelected))
+			SelectGroup(((Piece*)Object)->GetTopGroup(), IsSelected);
 	}
 	else
-		Object->SetSelected(Section, false);
-
-	bool IsSelected = Object->IsSelected();
-
-	if (Object->IsPiece() && (WasSelected != IsSelected))
-		SelectGroup(((Piece*)Object)->GetTopGroup(), IsSelected);
+	{
+		if (FocusObject)
+			FocusObject->SetFocused(FocusObject->GetFocusSection(), false);
+	}
 
 	UpdateSelection();
 	gMainWindow->UpdateAllViews();
 	gMainWindow->UpdateFocusObject(GetFocusObject());
 }
 
-void Project::ClearSelectionAndSetFocus(Object* Object, lcuintptr Section)
+void Project::ClearSelectionAndSetFocus(Object* Object, lcuint32 Section)
 {
 	SelectAndFocusNone(false);
 
@@ -6763,6 +5996,30 @@ void Project::ClearSelectionAndSetFocus(Object* Object, lcuintptr Section)
 	UpdateSelection();
 	gMainWindow->UpdateAllViews();
 	gMainWindow->UpdateFocusObject(Object);
+}
+
+void Project::SetSelection(const lcArray<lcObjectSection>& ObjectSections)
+{
+	SelectAndFocusNone(false);
+	AddToSelection(ObjectSections);
+}
+
+void Project::AddToSelection(const lcArray<lcObjectSection>& ObjectSections)
+{
+	for (int ObjectIdx = 0; ObjectIdx < ObjectSections.GetSize(); ObjectIdx++)
+	{
+		lcObject* Object = ObjectSections[ObjectIdx].Object;
+
+		bool WasSelected = Object->IsSelected();
+		Object->SetSelected(ObjectSections[ObjectIdx].Section, true);
+
+		if (!WasSelected && Object->GetType() == LC_OBJECT_PIECE)
+			SelectGroup(((Piece*)Object)->GetTopGroup(), true);
+	}
+
+	UpdateSelection();
+	gMainWindow->UpdateAllViews();
+	gMainWindow->UpdateFocusObject(GetFocusObject());
 }
 
 bool Project::GetSelectionCenter(lcVector3& Center) const
@@ -6784,6 +6041,18 @@ bool Project::GetSelectionCenter(lcVector3& Center) const
 	Center = lcVector3((bs[0] + bs[3]) * 0.5f, (bs[1] + bs[4]) * 0.5f, (bs[2] + bs[5]) * 0.5f);
 
 	return Selected;
+}
+
+lcVector3 Project::GetFocusOrSelectionCenter() const
+{
+	lcVector3 Center;
+
+	if (GetFocusPosition(Center))
+		return Center;
+
+	GetSelectionCenter(Center);
+
+	return Center;
 }
 
 void Project::ConvertToUserUnits(lcVector3& Value) const
@@ -6842,6 +6111,26 @@ Object* Project::GetFocusObject() const
 	return NULL;
 }
 
+bool Project::AnyObjectsSelected(bool PiecesOnly) const
+{
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+		if (mPieces[PieceIdx]->IsSelected())
+			return true;
+
+	if (!PiecesOnly)
+	{
+		for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
+			if (mCameras[CameraIdx]->IsSelected())
+				return true;
+
+		for (int LightIdx = 0; LightIdx < mLights.GetSize(); LightIdx++)
+			if (mLights[LightIdx]->IsSelected())
+				return true;
+	}
+
+	return false;
+}
+
 // Find a good starting position/orientation relative to an existing piece.
 void Project::GetPieceInsertPosition(Piece* OffsetPiece, lcVector3& Position, lcVector4& Rotation)
 {
@@ -6865,7 +6154,7 @@ void Project::GetPieceInsertPosition(View* view, lcVector3& Position, lcVector4&
 	}
 
 	// Try to hit the base grid.
-	lcVector3 ClickPoints[2] = { lcVector3((float)m_nDownX, (float)m_nDownY, 0.0f), lcVector3((float)m_nDownX, (float)m_nDownY, 1.0f) };
+	lcVector3 ClickPoints[2] = { lcVector3((float)view->mInputState.x, (float)view->mInputState.y, 0.0f), lcVector3((float)view->mInputState.x, (float)view->mInputState.y, 1.0f) };
 	view->UnprojectPoints(ClickPoints, 2);
 
 	lcVector3 Intersection;
@@ -6878,7 +6167,7 @@ void Project::GetPieceInsertPosition(View* view, lcVector3& Position, lcVector4&
 	}
 
 	// Couldn't find a good position, so just place the piece somewhere near the camera.
-	Position =  view->UnprojectPoint(lcVector3((float)m_nDownX, (float)m_nDownY, 0.9f));
+	Position =  view->UnprojectPoint(lcVector3((float)view->mInputState.x, (float)view->mInputState.y, 0.9f));
 	Rotation = lcVector4(0, 0, 1, 0);
 }
 
@@ -6931,192 +6220,47 @@ void Project::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
 			mLights[LightIdx]->BoxTest(ObjectBoxTest);
 }
 
-/////////////////////////////////////////////////////////////////////////////
-// Mouse handling
-
-// Returns true if the mouse was being tracked.
 bool Project::StopTracking(bool bAccept)
 {
 	if (m_nTracking == LC_TRACK_NONE)
 		return false;
 
-	int Action = GetAction();
 	View* ActiveView = gMainWindow->GetActiveView();
 
-	if ((m_nTracking == LC_TRACK_START_LEFT) || (m_nTracking == LC_TRACK_START_RIGHT))
-	{
-		if (m_pTrackFile)
-		{
-			delete m_pTrackFile;
-			m_pTrackFile = NULL;
-		}
-
-		m_nTracking = LC_TRACK_NONE;
-		ActiveView->ReleaseMouse();
-		return false;
-	}
-
-	m_bTrackCancel = true;
 	m_nTracking = LC_TRACK_NONE;
-	ActiveView->ReleaseMouse();
 
-	// Reset the mouse overlay.
-	if (m_OverlayActive)
+	if (bAccept && mDropPiece)
 	{
-		ActivateOverlay(ActiveView, m_nCurAction, LC_OVERLAY_NONE);
-		gMainWindow->UpdateAllViews();
-	}
+		int x = m_nDownX;
+		int y = m_nDownY;
 
-	if (bAccept)
-	{
-		if (mDropPiece)
+		if ((x > 0) && (x < ActiveView->mWidth) && (y > 0) && (y < ActiveView->mHeight))
 		{
-			int x = m_nDownX;
-			int y = m_nDownY;
+			lcVector3 Pos;
+			lcVector4 Rot;
 
-			if ((x > 0) && (x < ActiveView->mWidth) && (y > 0) && (y < ActiveView->mHeight))
+			GetPieceInsertPosition(ActiveView, Pos, Rot);
+
+			Piece* pPiece = new Piece(mDropPiece);
+			pPiece->Initialize(Pos[0], Pos[1], Pos[2], m_nCurStep);
+			pPiece->SetColorIndex(gMainWindow->mColorIndex);
+
+			pPiece->ChangeKey(m_nCurStep, false, Rot, LC_PK_ROTATION);
+			pPiece->UpdatePosition(m_nCurStep);
+
+			pPiece->CreateName(mPieces);
+			mPieces.Add(pPiece);
+			SystemPieceComboAdd(mDropPiece->m_strDescription);
+			ClearSelectionAndSetFocus(pPiece, LC_PIECE_SECTION_POSITION);
+
+			if (mDropPiece)
 			{
-				lcVector3 Pos;
-				lcVector4 Rot;
-
-				GetPieceInsertPosition(ActiveView, Pos, Rot);
-
-				Piece* pPiece = new Piece(mDropPiece);
-				pPiece->Initialize(Pos[0], Pos[1], Pos[2], m_nCurStep);
-				pPiece->SetColorIndex(gMainWindow->mColorIndex);
-
-				pPiece->ChangeKey(m_nCurStep, false, Rot, LC_PK_ROTATION);
-				pPiece->UpdatePosition(m_nCurStep);
-
-				pPiece->CreateName(mPieces);
-				mPieces.Add(pPiece);
-				SystemPieceComboAdd(mDropPiece->m_strDescription);
-				ClearSelectionAndSetFocus(pPiece, LC_PIECE_SECTION_POSITION);
-
-				if (mDropPiece)
-				{
-					mDropPiece->Release();
-					mDropPiece = NULL;
-				}
-
-				SetModifiedFlag(true);
-				CheckPoint("Inserting");
+				mDropPiece->Release();
+				mDropPiece = NULL;
 			}
-		}
-		else
-		{
-		switch (Action)
-		{
-			case LC_TOOL_SELECT:
-			{
-				if (((float)m_nDownX != m_fTrack[0]) && ((float)m_nDownY != m_fTrack[1]))
-				{
-					lcArray<lcObjectSection> ObjectSections = ActiveView->FindObjectsInBox((float)m_nDownX, (float)m_nDownY, m_fTrack[0], m_fTrack[1]);
 
-					bool Control = ActiveView->mInputState.Control;
-					SelectAndFocusNone(Control);
-
-					for (int i = 0; i < ObjectSections.GetSize(); i++)
-					{
-						Object* Object = ObjectSections[i].Object;
-
-						bool WasSelected = Object->IsSelected();
-						Object->SetSelected(ObjectSections[i].Section, true);
-
-						if (!WasSelected && Object->GetType() == LC_OBJECT_PIECE)
-							SelectGroup(((Piece*)Object)->GetTopGroup(), true);
-					}
-				}
-
-				UpdateSelection();
-				gMainWindow->UpdateAllViews();
-				gMainWindow->UpdateFocusObject(GetFocusObject());
-			} break;
-
-			case LC_TOOL_MOVE:
-			{
-				SetModifiedFlag(true);
-				CheckPoint("Moving");
-			} break;
-
-			case LC_TOOL_ROTATE:
-			{
-				SetModifiedFlag(true);
-				CheckPoint("Rotating");
-			} break;
-
-			case LC_TOOL_CAMERA:
-			{
-				gMainWindow->UpdateCameraMenu();
-				SetModifiedFlag(true);
-				CheckPoint("Inserting");
-			} break;
-
-			case LC_TOOL_SPOTLIGHT:
-			{
-				SetModifiedFlag(true);
-				CheckPoint("Inserting");
-			} break;
-
-			case LC_TOOL_ZOOM:
-			case LC_TOOL_PAN:
-			case LC_TOOL_ROTATE_VIEW:
-			case LC_TOOL_ROLL:
-				break;
-
-			case LC_TOOL_ZOOM_REGION:
-			{
-				// Find the top-left and bottom-right corners in screen coordinates.
-				float Left, Top, Bottom, Right;
-
-				if (m_OverlayTrackStart[0] < m_nDownX)
-				{
-					Left = m_OverlayTrackStart[0];
-					Right = (float)m_nDownX;
-				}
-				else
-				{
-					Left = (float)m_nDownX;
-					Right = m_OverlayTrackStart[0];
-				}
-
-				if (m_OverlayTrackStart[1] > m_nDownY)
-				{
-					Top = m_OverlayTrackStart[1];
-					Bottom = (float)m_nDownY;
-				}
-				else
-				{
-					Top = (float)m_nDownY;
-					Bottom = m_OverlayTrackStart[1];
-				}
-
-				ActiveView->mCamera->ZoomRegion(ActiveView, Left, Right, Bottom, Top, m_nCurStep, m_bAddKeys);
-
-				gMainWindow->UpdateFocusObject(GetFocusObject());
-				gMainWindow->UpdateAllViews();
-			} break;
-
-			case LC_TOOL_INSERT:
-			case LC_TOOL_LIGHT:
-			case LC_TOOL_ERASER:
-			case LC_TOOL_PAINT:
-				break;
-		}
-		}
-	}
-	else if (m_pTrackFile != NULL)
-	{
-		if ((Action == LC_TOOL_SELECT) || (Action == LC_TOOL_ZOOM_REGION))
-		{
-			gMainWindow->UpdateAllViews();
-		}
-		else
-		{
-			DeleteContents (true);
-			FileLoad (m_pTrackFile, true, false);
-			delete m_pTrackFile;
-			m_pTrackFile = NULL;
+			SetModifiedFlag(true);
+			CheckPoint("Inserting");
 		}
 	}
 
@@ -7131,15 +6275,7 @@ bool Project::StopTracking(bool bAccept)
 
 void Project::StartTracking(int mode)
 {
-	gMainWindow->GetActiveView()->CaptureMouse();
 	m_nTracking = mode;
-
-  if (m_pTrackFile != NULL)
-    m_pTrackFile->SetLength (0);
-  else
-  	m_pTrackFile = new lcMemFile;
-
-	FileSave(m_pTrackFile, true);
 }
 
 void Project::GetSnapIndex(int* SnapXY, int* SnapZ, int* SnapAngle) const
@@ -7283,6 +6419,23 @@ void Project::SnapRotationVector(lcVector3& Delta, lcVector3& Leftover) const
 	}
 }
 
+lcMatrix44 Project::GetRelativeRotation() const
+{
+	if ((m_nSnap & LC_DRAW_GLOBAL_SNAP) == 0)
+	{
+		Object* Focus = GetFocusObject();
+
+		if ((Focus != NULL) && Focus->IsPiece())
+		{
+			lcMatrix44 WorldMatrix = ((Piece*)Focus)->mModelWorld;
+			WorldMatrix.SetTranslation(lcVector3(0.0f, 0.0f, 0.0f));
+			return WorldMatrix;
+		}
+	}
+
+	return lcMatrix44Identity();
+}
+
 bool Project::MoveSelectedObjects(lcVector3& Move, lcVector3& Remainder, bool Snap, bool Lock)
 {
 	// Don't move along locked directions.
@@ -7352,12 +6505,6 @@ bool Project::MoveSelectedObjects(lcVector3& Move, lcVector3& Remainder, bool Sn
 	}
 
 	// TODO: move group centers
-
-	if (m_OverlayActive)
-	{
-		if (!GetFocusPosition(m_OverlayCenter))
-			GetSelectionCenter(m_OverlayCenter);
-	}
 
 	return true;
 }
@@ -7525,12 +6672,6 @@ bool Project::RotateSelectedObjects(lcVector3& Delta, lcVector3& Remainder, bool
 		Piece->UpdatePosition(m_nCurStep);
 	}
 
-	if (m_OverlayActive)
-	{
-		if (!GetFocusPosition(m_OverlayCenter))
-			GetSelectionCenter(m_OverlayCenter);
-	}
-
 	return true;
 }
 
@@ -7599,15 +6740,8 @@ void Project::TransformSelectedObjects(LC_TRANSFORM_TYPE Type, const lcVector3& 
 				}
 			}
 
-			if (m_OverlayActive)
-			{
-				if (!GetFocusPosition(m_OverlayCenter))
-					GetSelectionCenter(m_OverlayCenter);
-			}
-
 			if (nSel)
 			{
-				UpdateOverlayScale();
 				gMainWindow->UpdateAllViews();
 				SetModifiedFlag(true);
 				CheckPoint("Moving");
@@ -7621,7 +6755,6 @@ void Project::TransformSelectedObjects(LC_TRANSFORM_TYPE Type, const lcVector3& 
 
 			if (MoveSelectedObjects(Move, Remainder, false, false))
 			{
-				UpdateOverlayScale();
 				gMainWindow->UpdateAllViews();
 				SetModifiedFlag(true);
 				CheckPoint("Moving");
@@ -7669,15 +6802,8 @@ void Project::TransformSelectedObjects(LC_TRANSFORM_TYPE Type, const lcVector3& 
 				}
 			}
 
-			if (m_OverlayActive)
-			{
-				if (!GetFocusPosition(m_OverlayCenter))
-					GetSelectionCenter(m_OverlayCenter);
-			}
-
 			if (nSel)
 			{
-				UpdateOverlayScale();
 				gMainWindow->UpdateAllViews();
 				SetModifiedFlag(true);
 				CheckPoint("Rotating");
@@ -7691,7 +6817,6 @@ void Project::TransformSelectedObjects(LC_TRANSFORM_TYPE Type, const lcVector3& 
 
 			if (RotateSelectedObjects(Rotate, Remainder, false, false))
 			{
-				UpdateOverlayScale();
 				gMainWindow->UpdateAllViews();
 				SetModifiedFlag(true);
 				CheckPoint("Rotating");
@@ -7911,16 +7036,16 @@ void Project::ModifyObject(Object* Object, lcObjectProperty Property, void* Valu
 		SetModifiedFlag(true);
 		CheckPoint(CheckPointString);
 		gMainWindow->UpdateFocusObject(GetFocusObject());
-		ActivateOverlay(gMainWindow->GetActiveView(), m_nCurAction, LC_OVERLAY_NONE);
 		gMainWindow->UpdateAllViews();
 	}
 }
 
 void Project::ZoomActiveView(int Amount)
 {
-	gMainWindow->GetActiveView()->mCamera->DoZoom(Amount, m_nMouse, m_nCurStep, m_bAddKeys);
+	float ScaledAmount = 2.0f * Amount / (21 - lcGetProfileInt(LC_PROFILE_MOUSE_SENSITIVITY));
+
+	gMainWindow->GetActiveView()->mCamera->Zoom(ScaledAmount, m_nCurStep, m_bAddKeys);
 	gMainWindow->UpdateFocusObject(GetFocusObject());
-	UpdateOverlayScale();
 	gMainWindow->UpdateAllViews();
 }
 
@@ -7958,1271 +7083,274 @@ void Project::BeginColorDrop()
 {
 	StartTracking(LC_TRACK_LEFT);
 	SetAction(LC_TOOL_PAINT);
-//	m_RestoreAction = true;
 }
 
-void Project::OnLeftButtonDown(View* view)
+void Project::BeginMouseTool()
 {
-	if (m_nTracking != LC_TRACK_NONE)
-		if (StopTracking(false))
-			return;
+	mMouseToolDistance = lcVector3(0.0f, 0.0f, 0.0f);
+}
 
-	gMainWindow->SetActiveView(view);
-
-	int x = view->mInputState.x;
-	int y = view->mInputState.y;
-	bool Control = view->mInputState.Control;
-	bool Alt = view->mInputState.Alt;
-
-	m_bTrackCancel = false;
-	m_nDownX = x;
-	m_nDownY = y;
-	m_MouseTotalDelta = lcVector3(0, 0, 0);
-	m_MouseSnapLeftover = lcVector3(0, 0, 0);
-
-	lcVector3 point = view->UnprojectPoint(lcVector3((float)x, (float)y, 0.9f));
-
-	m_fTrack[0] = point[0]; m_fTrack[1] = point[1]; m_fTrack[2] = point[2];
-
-	if (Alt)
-		ActivateOverlay(view, LC_TOOL_ROTATE_VIEW, LC_OVERLAY_ROTATE_VIEW_XYZ);
-
-	int Action = GetAction();
-
-	switch (Action)
+void Project::EndMouseTool(lcTool Tool, bool Accept)
+{
+	if (!Accept)
 	{
-	case LC_TOOL_SELECT:
-		{
-			lcObjectSection ObjectSection = view->FindObjectUnderPointer(false);
+		DeleteContents(true);
+		FileLoad(&m_pUndoList->file, true, false);
+		return;
+	}
 
-			if (Action == LC_TOOL_SELECT)
-			{
-				if (Control)
-					FocusOrDeselectObject(ObjectSection);
-				else
-					ClearSelectionAndSetFocus(ObjectSection);
-
-				StartTracking(LC_TRACK_START_LEFT);
-			}
-		}
-		break;
-
-	case LC_TOOL_ERASER:
-		{
-			lcObjectSection ObjectSection = view->FindObjectUnderPointer(false);
-			Object* Object = ObjectSection.Object;
-
-			if (!Object)
-				break;
-
-			switch (Object->GetType())
-			{
-			case LC_OBJECT_PIECE:
-				mPieces.Remove((Piece*)Object);
-				RemoveEmptyGroups();
-				break;
-
-			case LC_OBJECT_CAMERA:
-				{
-					const lcArray<View*> Views = gMainWindow->GetViews();
-					for (int ViewIdx = 0; ViewIdx < Views.GetSize(); ViewIdx++)
-					{
-						View* View = Views[ViewIdx];
-						Camera* Camera = View->mCamera;
-
-						if (Camera == Object)
-							View->SetCamera(Camera, true);
-					}
-
-					mCameras.Remove((Camera*)Object);
-
-					gMainWindow->UpdateCameraMenu();
-				}
-				break;
-
-			case LC_OBJECT_LIGHT:
-				mLights.Remove((Light*)Object);
-				break;
-			}
-
-			delete Object;
-			gMainWindow->UpdateFocusObject(GetFocusObject());
-			UpdateSelection();
-			gMainWindow->UpdateAllViews();
-			SetModifiedFlag(true);
-			CheckPoint("Deleting");
-		}
-		break;
-
-	case LC_TOOL_PAINT:
-		{
-			Object* Object = view->FindObjectUnderPointer(true).Object;
-
-			if (Object && (Object->GetType() == LC_OBJECT_PIECE))
-			{
-				Piece* pPiece = (Piece*)Object;
-
-				if (pPiece->mColorIndex != gMainWindow->mColorIndex)
-				{
-					pPiece->SetColorIndex(gMainWindow->mColorIndex);
-
-					SetModifiedFlag(true);
-					CheckPoint("Painting");
-					gMainWindow->UpdateFocusObject(GetFocusObject());
-					gMainWindow->UpdateAllViews();
-				}
-			}
-		}
-		break;
-
+	switch (Tool)
+	{
 	case LC_TOOL_INSERT:
-		{
-			lcVector3 Pos;
-			lcVector4 Rot;
-
-			GetPieceInsertPosition(view, Pos, Rot);
-
-			Piece* pPiece = new Piece(m_pCurPiece);
-			pPiece->Initialize(Pos[0], Pos[1], Pos[2], m_nCurStep);
-			pPiece->SetColorIndex(gMainWindow->mColorIndex);
-
-			pPiece->ChangeKey(m_nCurStep, false, Rot, LC_PK_ROTATION);
-			pPiece->UpdatePosition(m_nCurStep);
-
-			pPiece->CreateName(mPieces);
-			mPieces.Add(pPiece);
-			SystemPieceComboAdd(m_pCurPiece->m_strDescription);
-
-			ClearSelectionAndSetFocus(pPiece, LC_PIECE_SECTION_POSITION);
-			SetModifiedFlag(true);
-			CheckPoint("Inserting");
-
-			if (!Control)
-				SetAction(LC_TOOL_SELECT);
-		}
-		break;
-
 	case LC_TOOL_LIGHT:
-		{
-			GLint max;
-			int count = mLights.GetSize();
-
-			glGetIntegerv(GL_MAX_LIGHTS, &max);
-
-			if (count == max)
-				break;
-
-			Light* NewLight = new Light(m_fTrack[0], m_fTrack[1], m_fTrack[2]);
-
-			NewLight->CreateName(mLights);
-			mLights.Add(NewLight);
-
-			ClearSelectionAndSetFocus(NewLight, LC_LIGHT_SECTION_POSITION);
-			SetModifiedFlag(true);
-			CheckPoint("Inserting");
-		}
 		break;
 
 	case LC_TOOL_SPOTLIGHT:
-		{
-			GLint max;
-			int count = mLights.GetSize();
-
-			glGetIntegerv (GL_MAX_LIGHTS, &max);
-
-			if (count == max)
-				break;
-
-			lcVector3 tmp = view->UnprojectPoint(lcVector3(x+1.0f, y-1.0f, 0.9f));
-			StartTracking(LC_TRACK_START_LEFT);
-			Light* NewLight = new Light(m_fTrack[0], m_fTrack[1], m_fTrack[2], tmp[0], tmp[1], tmp[2]);
-			mLights.Add(NewLight);
-			ClearSelectionAndSetFocus(NewLight, LC_LIGHT_SECTION_TARGET);
-		}
+		CheckPoint("New SpotLight");
+		SetModifiedFlag(true);
 		break;
 
 	case LC_TOOL_CAMERA:
+		gMainWindow->UpdateCameraMenu();
+		CheckPoint("New Camera");
+		SetModifiedFlag(true);
+		break;
+
+	case LC_TOOL_SELECT:
+		break;
+
+	case LC_TOOL_MOVE:
+		CheckPoint("Move");
+		SetModifiedFlag(true);
+		break;
+
+	case LC_TOOL_ROTATE:
+		CheckPoint("Rotate");
+		SetModifiedFlag(true);
+		break;
+
+	case LC_TOOL_ERASER:
+	case LC_TOOL_PAINT:
+		break;
+
+	case LC_TOOL_ZOOM:
+		if (!gMainWindow->GetActiveView()->mCamera->IsSimple())
+			CheckPoint("Zoom");
+		break;
+
+	case LC_TOOL_PAN:
+		if (!gMainWindow->GetActiveView()->mCamera->IsSimple())
+			CheckPoint("Pan");
+		break;
+
+	case LC_TOOL_ROTATE_VIEW:
+		if (!gMainWindow->GetActiveView()->mCamera->IsSimple())
+			CheckPoint("Orbit");
+		break;
+
+	case LC_TOOL_ROLL:
+		if (!gMainWindow->GetActiveView()->mCamera->IsSimple())
+			CheckPoint("Roll");
+		break;
+	}
+}
+
+void Project::InsertPieceToolClicked(const lcVector3& Position, const lcVector4& Rotation)
+{
+	lcPiece* Piece = new lcPiece(m_pCurPiece);
+	Piece->Initialize(Position[0], Position[1], Position[2], m_nCurStep);
+	Piece->SetColorIndex(gMainWindow->mColorIndex);
+	Piece->ChangeKey(m_nCurStep, false, Rotation, LC_PK_ROTATION);
+	Piece->UpdatePosition(m_nCurStep);
+	Piece->CreateName(mPieces);
+	mPieces.Add(Piece);
+
+	SystemPieceComboAdd(m_pCurPiece->m_strDescription);
+	ClearSelectionAndSetFocus(Piece, LC_PIECE_SECTION_POSITION);
+
+	CheckPoint("Insert");
+	SetModifiedFlag(true);
+}
+
+void Project::PointLightToolClicked(const lcVector3& Position)
+{
+	lcLight* Light = new lcLight(Position[0], Position[1], Position[2]);
+	Light->CreateName(mLights);
+	mLights.Add(Light);
+
+	ClearSelectionAndSetFocus(Light, LC_LIGHT_SECTION_POSITION);
+	CheckPoint("New Light");
+	SetModifiedFlag(true);
+}
+
+void Project::BeginSpotLightTool(const lcVector3& Position, const lcVector3& Target)
+{
+	lcLight* Light = new lcLight(Position[0], Position[1], Position[2], Target[0], Target[1], Target[2]);
+	mLights.Add(Light);
+
+	ClearSelectionAndSetFocus(Light, LC_LIGHT_SECTION_TARGET);
+}
+
+void Project::UpdateSpotLightTool(const lcVector3& Target)
+{
+	lcLight* Light = mLights[mLights.GetSize() - 1];
+
+	Light->Move(1, false, Target[0], Target[1], Target[2]);
+	Light->UpdatePosition(1);
+
+	gMainWindow->UpdateFocusObject(Light);
+	gMainWindow->UpdateAllViews();
+}
+
+void Project::BeginCameraTool(const lcVector3& Position, const lcVector3& Target)
+{
+	lcCamera* Camera = new lcCamera(Position[0], Position[1], Position[2], Target[0], Target[1], Target[2]);
+	Camera->CreateName(mCameras);
+	mCameras.Add(Camera);
+
+	ClearSelectionAndSetFocus(Camera, LC_CAMERA_SECTION_TARGET);
+}
+
+void Project::UpdateCameraTool(const lcVector3& Target)
+{
+	lcCamera* Camera = mCameras[mCameras.GetSize() - 1];
+
+	Camera->Move(1, false, Target[0], Target[1], Target[2]);
+	Camera->UpdatePosition(1);
+
+	gMainWindow->UpdateFocusObject(Camera);
+	gMainWindow->UpdateAllViews();
+}
+
+void Project::UpdateMoveTool(const lcVector3& Distance)
+{
+	lcVector3 Delta, Remainder;
+	Delta = Distance - mMouseToolDistance;
+	MoveSelectedObjects(Delta, Remainder, true, true);
+	mMouseToolDistance += Delta;
+
+	gMainWindow->UpdateFocusObject(GetFocusObject());
+	gMainWindow->UpdateAllViews();
+}
+
+void Project::UpdateRotateTool(const lcVector3& Angles)
+{
+	lcVector3 Delta, Remainder;
+	Delta = Angles - mMouseToolDistance;
+	RotateSelectedObjects(Delta, Remainder, true, true);
+	mMouseToolDistance += Delta;
+
+	gMainWindow->UpdateFocusObject(GetFocusObject());
+	gMainWindow->UpdateAllViews();
+}
+
+void Project::EraserToolClicked(lcObject* Object)
+{
+	if (!Object)
+		return;
+
+	switch (Object->GetType())
+	{
+	case LC_OBJECT_PIECE:
+		mPieces.Remove((Piece*)Object);
+		RemoveEmptyGroups();
+		break;
+
+	case LC_OBJECT_CAMERA:
 		{
-			lcVector3 tmp = view->UnprojectPoint(lcVector3(x + 1.0f, y - 1.0f, 0.9f));
-			StartTracking(LC_TRACK_START_LEFT);
+			const lcArray<View*> Views = gMainWindow->GetViews();
+			for (int ViewIdx = 0; ViewIdx < Views.GetSize(); ViewIdx++)
+			{
+				View* View = Views[ViewIdx];
+				Camera* Camera = View->mCamera;
 
-			Camera* NewCamera = new Camera(m_fTrack[0], m_fTrack[1], m_fTrack[2], tmp[0], tmp[1], tmp[2]);
-			NewCamera->CreateName(mCameras);
-			mCameras.Add(NewCamera);
+				if (Camera == Object)
+					View->SetCamera(Camera, true);
+			}
 
-			ClearSelectionAndSetFocus(NewCamera, LC_CAMERA_SECTION_TARGET);
+			mCameras.Remove((Camera*)Object);
+
+			gMainWindow->UpdateCameraMenu();
 		}
 		break;
 
-		case LC_TOOL_MOVE:
-		{
-			bool sel = false;
-
-			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-			{
-				if (mPieces[PieceIdx]->IsSelected())
-				{
-					sel = true;
-					break;
-				}
-			}
-
-			for (int CameraIdx = 0; CameraIdx < mCameras.GetSize() && !sel; CameraIdx++)
-				sel = mCameras[CameraIdx]->IsSelected();
-
-			if (!sel)
-			{
-				for (int LightIdx = 0; LightIdx < mLights.GetSize(); LightIdx++)
-				{
-					if (mLights[LightIdx]->IsSelected())
-					{
-						sel = true;
-						break;
-					}
-				}
-			}
-
-			if (sel)
-			{
-				StartTracking(LC_TRACK_START_LEFT);
-				m_OverlayDelta = lcVector3(0.0f, 0.0f, 0.0f);
-				m_MouseSnapLeftover = lcVector3(0.0f, 0.0f, 0.0f);
-			}
-		} break;
-
-		case LC_TOOL_ROTATE:
-		{
-			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-			{
-				if (mPieces[PieceIdx]->IsSelected())
-				{
-					StartTracking(LC_TRACK_START_LEFT);
-					m_OverlayDelta = lcVector3(0.0f, 0.0f, 0.0f);
-					break;
-				}
-			}
-		} break;
-
-		case LC_TOOL_ZOOM_REGION:
-		{
-			m_OverlayTrackStart[0] = (float)x;
-			m_OverlayTrackStart[1] = (float)y;
-			StartTracking(LC_TRACK_START_LEFT);
-			ActivateOverlay(view, m_nCurAction, LC_OVERLAY_NONE);
-		} break;
-
-		case LC_TOOL_ZOOM:
-		case LC_TOOL_ROLL:
-		case LC_TOOL_PAN:
-		case LC_TOOL_ROTATE_VIEW:
-		{
-			StartTracking(LC_TRACK_START_LEFT);
-		} break;
-	}
-}
-
-void Project::OnLeftButtonDoubleClick(View* View)
-{
-	gMainWindow->SetActiveView(View);
-
-	lcObjectSection ObjectSection = View->FindObjectUnderPointer(false);
-
-	if (View->mInputState.Control)
-		FocusOrDeselectObject(ObjectSection);
-	else
-		ClearSelectionAndSetFocus(ObjectSection);
-}
-
-void Project::OnLeftButtonUp(View* view)
-{
-	StopTracking(true);
-}
-
-void Project::OnMiddleButtonDown(View* view)
-{
-	if (StopTracking(false))
-		return;
-
-	gMainWindow->SetActiveView(view);
-
-	int x = view->mInputState.x;
-	int y = view->mInputState.y;
-	bool Alt = view->mInputState.Alt;
-
-	m_nDownX = x;
-	m_nDownY = y;
-	m_bTrackCancel = false;
-
-	lcVector3 point = view->UnprojectPoint(lcVector3((float)x, (float)y, 0.9f));
-
-	m_fTrack[0] = point[0]; m_fTrack[1] = point[1]; m_fTrack[2] = point[2];
-
-	if (Alt)
-		ActivateOverlay(view, LC_TOOL_PAN, LC_OVERLAY_PAN);
-
-	switch (GetAction())
-	{
-	case LC_TOOL_PAN:
-		StartTracking(LC_TRACK_START_RIGHT);
+	case LC_OBJECT_LIGHT:
+		mLights.Remove((Light*)Object);
 		break;
 	}
+
+	delete Object;
+	gMainWindow->UpdateFocusObject(GetFocusObject());
+	UpdateSelection();
+	gMainWindow->UpdateAllViews();
+	SetModifiedFlag(true);
+	CheckPoint("Deleting");
 }
 
-void Project::OnMiddleButtonUp(View* view)
+void Project::PaintToolClicked(lcObject* Object)
 {
-	StopTracking(true);
-}
-
-void Project::OnRightButtonDown(View* view)
-{
-	if (StopTracking(false))
+	if (!Object || Object->GetType() != LC_OBJECT_PIECE)
 		return;
 
-	gMainWindow->SetActiveView(view);
+	lcPiece* Piece = (lcPiece*)Object;
 
-	int x = view->mInputState.x;
-	int y = view->mInputState.y;
-	bool Alt = view->mInputState.Alt;
-
-	m_nDownX = x;
-	m_nDownY = y;
-	m_bTrackCancel = false;
-
-	lcVector3 point = view->UnprojectPoint(lcVector3((float)x, (float)y, 0.9f));
-
-	m_fTrack[0] = point[0]; m_fTrack[1] = point[1]; m_fTrack[2] = point[2];
-
-	if (Alt)
-		ActivateOverlay(view, LC_TOOL_ZOOM, LC_OVERLAY_ZOOM);
-
-	switch (GetAction())
+	if (Piece->mColorIndex != gMainWindow->mColorIndex)
 	{
-		case LC_TOOL_MOVE:
-		{
-			bool sel = false;
+		Piece->SetColorIndex(gMainWindow->mColorIndex);
 
-			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-				if (mPieces[PieceIdx]->IsSelected())
-				{
-					sel = true;
-					break;
-				}
-
-			for (int CameraIdx = 0; CameraIdx < mCameras.GetSize() && !sel; CameraIdx++)
-				sel = mCameras[CameraIdx]->IsSelected();
-
-			if (!sel)
-			{
-				for (int LightIdx = 0; LightIdx < mLights.GetSize(); LightIdx++)
-					if (mLights[LightIdx]->IsSelected())
-					{
-						sel = true;
-						break;
-					}
-			}
-
-			if (sel)
-			{
-				StartTracking(LC_TRACK_START_RIGHT);
-				m_fTrack[0] = m_fTrack[1] = m_fTrack[2] = 0.0f;
-			}
-		} break;
-
-		case LC_TOOL_ROTATE:
-		{
-			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-				if (mPieces[PieceIdx]->IsSelected())
-				{
-					StartTracking(LC_TRACK_START_RIGHT);
-					m_fTrack[0] = m_fTrack[1] = m_fTrack[2] = 0.0f;
-					break;
-				}
-		} break;
-
-		case LC_TOOL_ZOOM:
-		{
-			StartTracking(LC_TRACK_START_RIGHT);
-		} break;
+		SetModifiedFlag(true);
+		CheckPoint("Painting");
+		gMainWindow->UpdateFocusObject(GetFocusObject());
+		gMainWindow->UpdateAllViews();
 	}
 }
 
-void Project::OnRightButtonUp(View* view)
+void Project::UpdateZoomTool(lcCamera* Camera, float Mouse)
 {
-	if (!StopTracking(true) && !m_bTrackCancel)
-		view->ShowPopupMenu();
-	m_bTrackCancel = false;
+	Camera->Zoom(Mouse - mMouseToolDistance.x, m_nCurStep, m_bAddKeys);
+	mMouseToolDistance.x = Mouse;
+	gMainWindow->UpdateAllViews();
 }
 
-void Project::OnMouseMove(View* view)
+void Project::UpdatePanTool(lcCamera* Camera, float MouseX, float MouseY)
 {
-	int x = view->mInputState.x;
-	int y = view->mInputState.y;
-
-	if ((m_nTracking == LC_TRACK_NONE) && (m_nCurAction != LC_TOOL_INSERT))
-	{
-		if (m_OverlayActive)
-			MouseUpdateOverlays(view, x, y);
-		else
-			view->SetCursor(view->GetCursor());
-
-		return;
-	}
-
-	if (m_nTracking == LC_TRACK_START_RIGHT)
-		m_nTracking = LC_TRACK_RIGHT;
-
-	if (m_nTracking == LC_TRACK_START_LEFT)
-		m_nTracking = LC_TRACK_LEFT;
-
-	float ptx, pty, ptz;
-
-	lcVector3 tmp = view->UnprojectPoint(lcVector3((float)x, (float)y, 0.9f));
-
-	ptx = tmp[0]; pty = tmp[1]; ptz = tmp[2];
-
-	switch (GetAction())
-	{
-		case LC_TOOL_SELECT:
-		{
-			m_fTrack[0] = lcClamp((float)x, 1.0f, view->mWidth - 1.0f);
-			m_fTrack[1] = lcClamp((float)y, 1.0f, view->mHeight - 1.0f);
-
-			if (m_nTracking != LC_TRACK_NONE)
-			{
-				ActivateOverlay(view, m_nCurAction, LC_OVERLAY_NONE);
-				UpdateOverlayScale();
-			}
-
-			gMainWindow->UpdateAllViews();
-		} break;
-
-		case LC_TOOL_INSERT:
-		{
-			if (m_nDownX != x || m_nDownY != y)
-			{
-				m_nDownX = x;
-				m_nDownY = y;
-
-				gMainWindow->UpdateAllViews();
-			}
-		}	break;
-
-		case LC_TOOL_SPOTLIGHT:
-		{
-			float mouse = 10.0f/(21 - m_nMouse);
-			float delta[3] = { (ptx - m_fTrack[0])*mouse,
-				(pty - m_fTrack[1])*mouse, (ptz - m_fTrack[2])*mouse };
-
-			m_fTrack[0] = ptx;
-			m_fTrack[1] = pty;
-			m_fTrack[2] = ptz;
-
-			Light* pLight = mLights[mLights.GetSize() - 1];
-
-			pLight->Move(1, false, delta[0], delta[1], delta[2]);
-			pLight->UpdatePosition(1);
-
-			gMainWindow->UpdateFocusObject(pLight);
-			gMainWindow->UpdateAllViews();
-		} break;
-
-		case LC_TOOL_CAMERA:
-		{
-			float mouse = 10.0f/(21 - m_nMouse);
-			float delta[3] = { (ptx - m_fTrack[0])*mouse,
-				(pty - m_fTrack[1])*mouse, (ptz - m_fTrack[2])*mouse };
-
-			m_fTrack[0] = ptx;
-			m_fTrack[1] = pty;
-			m_fTrack[2] = ptz;
-
-			Camera* pCamera = mCameras[mCameras.GetSize() - 1];
-
-			pCamera->Move(1, false, delta[0], delta[1], delta[2]);
-			pCamera->UpdatePosition(1);
-
-			gMainWindow->UpdateFocusObject(pCamera);
-			gMainWindow->UpdateAllViews();
-		} break;
-
-		case LC_TOOL_MOVE:
-		{
-			// Check if the mouse moved since the last update.
-			if ((x == m_nDownX) && (y == m_nDownY))
-				break;
-
-			Camera* Camera = view->mCamera;
-			bool Redraw;
-
-			if ((m_OverlayActive && (m_OverlayMode != LC_OVERLAY_MOVE_XYZ)) || (!Camera->IsSide()))
-			{
-				lcVector3 ScreenX = lcNormalize(lcCross(Camera->mTargetPosition - Camera->mPosition, Camera->mUpVector));
-				lcVector3 ScreenY = Camera->mUpVector;
-				lcVector3 Dir1(0.0f, 0.0f, 0.0f), Dir2(0.0f, 0.0f, 0.0f);
-				bool SingleDir = true;
-
-				int OverlayMode;
-
-				if (m_OverlayActive && (m_OverlayMode != LC_OVERLAY_MOVE_XYZ))
-					OverlayMode = m_OverlayMode;
-				else if (m_nTracking == LC_TRACK_LEFT)
-					OverlayMode = LC_OVERLAY_MOVE_XY;
-				else
-					OverlayMode = LC_OVERLAY_MOVE_Z;
-
-				switch (OverlayMode)
-				{
-				case LC_OVERLAY_MOVE_X:
-					Dir1 = lcVector3(1, 0, 0);
-					break;
-				case LC_OVERLAY_MOVE_Y:
-					Dir1 = lcVector3(0, 1, 0);
-					break;
-				case LC_OVERLAY_MOVE_Z:
-					Dir1 = lcVector3(0, 0, 1);
-					break;
-				case LC_OVERLAY_MOVE_XY:
-					Dir1 = lcVector3(1, 0, 0);
-					Dir2 = lcVector3(0, 1, 0);
-					SingleDir = false;
-					break;
-				case LC_OVERLAY_MOVE_XZ:
-					Dir1 = lcVector3(1, 0, 0);
-					Dir2 = lcVector3(0, 0, 1);
-					SingleDir = false;
-					break;
-				case LC_OVERLAY_MOVE_YZ:
-					Dir1 = lcVector3(0, 1, 0);
-					Dir2 = lcVector3(0, 0, 1);
-					SingleDir = false;
-					break;
-				}
-
-				// Transform the translation axis.
-				lcVector3 Axis1 = Dir1;
-				lcVector3 Axis2 = Dir2;
-
-				if ((m_nSnap & LC_DRAW_GLOBAL_SNAP) == 0)
-				{
-					Object* Focus = GetFocusObject();
-
-					if ((Focus != NULL) && Focus->IsPiece())
-					{
-						const lcMatrix44& ModelWorld = ((Piece*)Focus)->mModelWorld;
-
-						Axis1 = lcMul30(Dir1, ModelWorld);
-						Axis2 = lcMul30(Dir2, ModelWorld);
-					}
-				}
-
-				// Find out what direction the mouse is going to move stuff.
-				lcVector3 MoveX, MoveY;
-
-				if (SingleDir)
-				{
-					float dx1 = lcDot(ScreenX, Axis1);
-					float dy1 = lcDot(ScreenY, Axis1);
-
-					if (fabsf(dx1) > fabsf(dy1))
-					{
-						if (dx1 >= 0.0f)
-							MoveX = Dir1;
-						else
-							MoveX = -Dir1;
-
-						MoveY = lcVector3(0, 0, 0);
-					}
-					else
-					{
-						MoveX = lcVector3(0, 0, 0);
-
-						if (dy1 > 0.0f)
-							MoveY = Dir1;
-						else
-							MoveY = -Dir1;
-					}
-				}
-				else
-				{
-					float dx1 = lcDot(ScreenX, Axis1);
-					float dy1 = lcDot(ScreenY, Axis1);
-					float dx2 = lcDot(ScreenX, Axis2);
-					float dy2 = lcDot(ScreenY, Axis2);
-
-					if (fabsf(dx1) > fabsf(dx2))
-					{
-						if (dx1 >= 0.0f)
-							MoveX = Dir1;
-						else
-							MoveX = -Dir1;
-
-						if (dy2 >= 0.0f)
-							MoveY = Dir2;
-						else
-							MoveY = -Dir2;
-					}
-					else
-					{
-						if (dx2 >= 0.0f)
-							MoveX = Dir2;
-						else
-							MoveX = -Dir2;
-
-						if (dy1 > 0.0f)
-							MoveY = Dir1;
-						else
-							MoveY = -Dir1;
-					}
-				}
-
-				MoveX *= (float)(x - m_nDownX) * 0.25f / (21 - m_nMouse);
-				MoveY *= (float)(y - m_nDownY) * 0.25f / (21 - m_nMouse);
-
-				m_nDownX = x;
-				m_nDownY = y;
-
-				lcVector3 Delta = MoveX + MoveY + m_MouseSnapLeftover;
-				Redraw = MoveSelectedObjects(Delta, m_MouseSnapLeftover, true, true);
-				m_MouseTotalDelta += Delta;
-			}
-			else
-			{
-				// 3D movement.
-				lcVector3 ScreenZ = lcNormalize(Camera->mTargetPosition - Camera->mPosition);
-				lcVector3 ScreenX = lcCross(ScreenZ, Camera->mUpVector);
-				lcVector3 ScreenY = Camera->mUpVector;
-
-				lcVector3 TotalMove;
-
-				if (m_nTracking == LC_TRACK_LEFT)
-				{
-					lcVector3 MoveX, MoveY;
-
-					MoveX = ScreenX * (float)(x - m_nDownX) * 0.25f / (float)(21 - m_nMouse);
-					MoveY = ScreenY * (float)(y - m_nDownY) * 0.25f / (float)(21 - m_nMouse);
-
-					TotalMove = MoveX + MoveY + m_MouseSnapLeftover;
-				}
-				else
-				{
-					lcVector3 MoveZ;
-
-					MoveZ = ScreenZ * (float)(y - m_nDownY) * 0.25f / (float)(21 - m_nMouse);
-
-					TotalMove = MoveZ + m_MouseSnapLeftover;
-				}
-
-				m_nDownX = x;
-				m_nDownY = y;
-
-				Redraw = MoveSelectedObjects(TotalMove, m_MouseSnapLeftover, true, true);
-			}
-
-			gMainWindow->UpdateFocusObject(GetFocusObject());
-
-			if (m_nTracking != LC_TRACK_NONE)
-				UpdateOverlayScale();
-
-			if (Redraw)
-				gMainWindow->UpdateAllViews();
-		} break;
-
-		case LC_TOOL_ROTATE:
-		{
-			Camera* Camera = gMainWindow->GetActiveView()->mCamera;
-			bool Redraw;
-
-			if ((m_OverlayActive && (m_OverlayMode != LC_OVERLAY_ROTATE_XYZ)) || (!Camera->IsSide()))
-			{
-				lcVector3 ScreenX = lcNormalize(lcCross(Camera->mTargetPosition - Camera->mPosition, Camera->mUpVector));
-				lcVector3 ScreenY = Camera->mUpVector;
-				lcVector3 Dir1, Dir2;
-				bool SingleDir = true;
-
-				int OverlayMode;
-
-				if (m_OverlayActive && (m_OverlayMode != LC_OVERLAY_ROTATE_XYZ))
-					OverlayMode = m_OverlayMode;
-				else if (m_nTracking == LC_TRACK_LEFT)
-					OverlayMode = LC_OVERLAY_ROTATE_XY;
-				else
-					OverlayMode = LC_OVERLAY_ROTATE_Z;
-
-				switch (OverlayMode)
-				{
-				case LC_OVERLAY_ROTATE_X:
-					Dir1 = lcVector3(1, 0, 0);
-					break;
-				case LC_OVERLAY_ROTATE_Y:
-					Dir1 = lcVector3(0, 1, 0);
-					break;
-				case LC_OVERLAY_ROTATE_Z:
-					Dir1 = lcVector3(0, 0, 1);
-					break;
-				case LC_OVERLAY_ROTATE_XY:
-					Dir1 = lcVector3(1, 0, 0);
-					Dir2 = lcVector3(0, 1, 0);
-					SingleDir = false;
-					break;
-				case LC_OVERLAY_ROTATE_XZ:
-					Dir1 = lcVector3(1, 0, 0);
-					Dir2 = lcVector3(0, 0, 1);
-					SingleDir = false;
-					break;
-				case LC_OVERLAY_ROTATE_YZ:
-					Dir1 = lcVector3(0, 1, 0);
-					Dir2 = lcVector3(0, 0, 1);
-					SingleDir = false;
-					break;
-				default:
-					Dir1 = lcVector3(1, 0, 0);
-					break;
-				}
-
-				// Find out what direction the mouse is going to move stuff.
-				lcVector3 MoveX, MoveY;
-
-				if (SingleDir)
-				{
-					float dx1 = lcDot(ScreenX, Dir1);
-					float dy1 = lcDot(ScreenY, Dir1);
-
-					if (fabsf(dx1) > fabsf(dy1))
-					{
-						if (dx1 >= 0.0f)
-							MoveX = Dir1;
-						else
-							MoveX = -Dir1;
-
-						MoveY = lcVector3(0, 0, 0);
-					}
-					else
-					{
-						MoveX = lcVector3(0, 0, 0);
-
-						if (dy1 > 0.0f)
-							MoveY = Dir1;
-						else
-							MoveY = -Dir1;
-					}
-				}
-				else
-				{
-					float dx1 = lcDot(ScreenX, Dir1);
-					float dy1 = lcDot(ScreenY, Dir1);
-					float dx2 = lcDot(ScreenX, Dir2);
-					float dy2 = lcDot(ScreenY, Dir2);
-
-					if (fabsf(dx1) > fabsf(dx2))
-					{
-						if (dx1 >= 0.0f)
-							MoveX = Dir1;
-						else
-							MoveX = -Dir1;
-
-						if (dy2 >= 0.0f)
-							MoveY = Dir2;
-						else
-							MoveY = -Dir2;
-					}
-					else
-					{
-						if (dx2 >= 0.0f)
-							MoveX = Dir2;
-						else
-							MoveX = -Dir2;
-
-						if (dy1 > 0.0f)
-							MoveY = Dir1;
-						else
-							MoveY = -Dir1;
-					}
-				}
-
-				MoveX *= (float)(x - m_nDownX) * 36.0f / (21 - m_nMouse);
-				MoveY *= (float)(y - m_nDownY) * 36.0f / (21 - m_nMouse);
-
-				m_nDownX = x;
-				m_nDownY = y;
-
-				lcVector3 Delta = MoveX + MoveY + m_MouseSnapLeftover;
-				Redraw = RotateSelectedObjects(Delta, m_MouseSnapLeftover, true, true);
-				m_MouseTotalDelta += Delta;
-			}
-			else
-			{
-				// 3D movement.
-				lcVector3 ScreenZ = lcNormalize(Camera->mTargetPosition - Camera->mPosition);
-				lcVector3 ScreenX = lcCross(ScreenZ, Camera->mUpVector);
-				lcVector3 ScreenY = Camera->mUpVector;
-
-				lcVector3 Delta;
-
-				if (m_nTracking == LC_TRACK_LEFT)
-				{
-					lcVector3 MoveX, MoveY;
-
-					MoveX = ScreenX * (float)(x - m_nDownX) * 36.0f / (float)(21 - m_nMouse);
-					MoveY = ScreenY * (float)(y - m_nDownY) * 36.0f / (float)(21 - m_nMouse);
-
-					Delta = MoveX + MoveY + m_MouseSnapLeftover;
-				}
-				else
-				{
-					lcVector3 MoveZ;
-
-					MoveZ = ScreenZ * (float)(y - m_nDownY) * 36.0f / (float)(21 - m_nMouse);
-
-					Delta = MoveZ + m_MouseSnapLeftover;
-				}
-
-				m_nDownX = x;
-				m_nDownY = y;
-
-				Redraw = RotateSelectedObjects(Delta, m_MouseSnapLeftover, true, true);
-				m_MouseTotalDelta += Delta;
-			}
-
-			gMainWindow->UpdateFocusObject(GetFocusObject());
-			if (Redraw)
-				gMainWindow->UpdateAllViews();
-		} break;
-
-		case LC_TOOL_ZOOM:
-		{
-			if (m_nDownY == y)
-				break;
-
-			gMainWindow->GetActiveView()->mCamera->DoZoom(y - m_nDownY, m_nMouse, m_nCurStep, m_bAddKeys);
-			m_nDownY = y;
-			gMainWindow->UpdateFocusObject(GetFocusObject());
-			gMainWindow->UpdateAllViews();
-		} break;
-
-		case LC_TOOL_ZOOM_REGION:
-		{
-			if ((m_nDownY == y) && (m_nDownX == x))
-				break;
-
-			m_nDownX = x;
-			m_nDownY = y;
-			gMainWindow->UpdateAllViews();
-		} break;
-
-		case LC_TOOL_PAN:
-		{
-			if ((m_nDownY == y) && (m_nDownX == x))
-				break;
-
-			gMainWindow->GetActiveView()->mCamera->DoPan(x - m_nDownX, y - m_nDownY, m_nMouse, m_nCurStep, m_bAddKeys);
-			m_nDownX = x;
-			m_nDownY = y;
-			gMainWindow->UpdateFocusObject(GetFocusObject());
-			gMainWindow->UpdateAllViews();
-		} break;
-
-		case LC_TOOL_ROTATE_VIEW:
-		{
-			if ((m_nDownY == y) && (m_nDownX == x))
-				break;
-
-			float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
-
-			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-			{
-				Piece* Piece = mPieces[PieceIdx];
-
-				if (Piece->IsSelected())
-					Piece->CompareBoundingBox(bs);
-			}
-
-			bs[0] = (bs[0]+bs[3])/2;
-			bs[1] = (bs[1]+bs[4])/2;
-			bs[2] = (bs[2]+bs[5])/2;
-
-			switch (m_OverlayMode)
-			{
-				case LC_OVERLAY_ROTATE_VIEW_XYZ:
-					gMainWindow->GetActiveView()->mCamera->DoRotate(x - m_nDownX, y - m_nDownY, m_nMouse, m_nCurStep, m_bAddKeys, bs);
-					break;
-
-				case LC_OVERLAY_ROTATE_VIEW_X:
-					gMainWindow->GetActiveView()->mCamera->DoRotate(x - m_nDownX, 0, m_nMouse, m_nCurStep, m_bAddKeys, bs);
-					break;
-
-				case LC_OVERLAY_ROTATE_VIEW_Y:
-					gMainWindow->GetActiveView()->mCamera->DoRotate(0, y - m_nDownY, m_nMouse, m_nCurStep, m_bAddKeys, bs);
-					break;
-
-				case LC_OVERLAY_ROTATE_VIEW_Z:
-					gMainWindow->GetActiveView()->mCamera->DoRoll(x - m_nDownX, m_nMouse, m_nCurStep, m_bAddKeys);
-					break;
-			}
-
-			m_nDownX = x;
-			m_nDownY = y;
-			gMainWindow->UpdateFocusObject(GetFocusObject());
-			gMainWindow->UpdateAllViews();
-		} break;
-
-		case LC_TOOL_ROLL:
-		{
-			if (m_nDownX == x)
-				break;
-
-			gMainWindow->GetActiveView()->mCamera->DoRoll(x - m_nDownX, m_nMouse, m_nCurStep, m_bAddKeys);
-			m_nDownX = x;
-			gMainWindow->UpdateFocusObject(GetFocusObject());
-			gMainWindow->UpdateAllViews();
-		} break;
-	}
+	Camera->Pan(MouseX - mMouseToolDistance.x, MouseY - mMouseToolDistance.y, m_nCurStep, m_bAddKeys);
+	mMouseToolDistance.x = MouseX;
+	mMouseToolDistance.y = MouseY;
+	gMainWindow->UpdateAllViews();
+}
+
+void Project::UpdateOrbitTool(lcCamera* Camera, float MouseX, float MouseY)
+{
+	lcVector3 Center;
+	GetSelectionCenter(Center);
+	Camera->Orbit(MouseX - mMouseToolDistance.x, MouseY - mMouseToolDistance.y, Center, m_nCurStep, m_bAddKeys);
+	mMouseToolDistance.x = MouseX;
+	mMouseToolDistance.y = MouseY;
+	gMainWindow->UpdateAllViews();
+}
+
+void Project::UpdateRollTool(lcCamera* Camera, float Mouse)
+{
+	Camera->Roll(Mouse - mMouseToolDistance.x, m_nCurStep, m_bAddKeys);
+	mMouseToolDistance.x = Mouse;
+	gMainWindow->UpdateAllViews();
+}
+
+void Project::ZoomRegionToolClicked(lcCamera* Camera, const lcVector3* Points, float RatioX, float RatioY)
+{
+	Camera->ZoomRegion(Points, m_nCurStep, m_bAddKeys, RatioX, RatioY);
+
+	gMainWindow->UpdateFocusObject(GetFocusObject());
+	gMainWindow->UpdateAllViews();
+
+	if (!Camera->IsSimple())
+		CheckPoint("Zoom");
 }
 
 void Project::OnMouseWheel(View* view, float Direction)
 {
 	ZoomActiveView((int)((view->mInputState.Control ? 100 : 10) * Direction));
-}
-
-// Check if the mouse is over a different area of the overlay and redraw it.
-void Project::MouseUpdateOverlays(View* view, int x, int y)
-{
-	const float OverlayScale = view->m_OverlayScale;
-
-	if (m_nCurAction == LC_TOOL_SELECT || m_nCurAction == LC_TOOL_MOVE)
-	{
-		const float OverlayMovePlaneSize = 0.5f * OverlayScale;
-		const float OverlayMoveArrowSize = 1.5f * OverlayScale;
-		const float OverlayMoveArrowCapRadius = 0.1f * OverlayScale;
-		const float OverlayRotateArrowStart = 1.0f * OverlayScale;
-		const float OverlayRotateArrowEnd = 1.5f * OverlayScale;
-
-		// Intersect the mouse with the 3 planes.
-		lcVector3 PlaneNormals[3] =
-		{
-			lcVector3(1.0f, 0.0f, 0.0f),
-			lcVector3(0.0f, 1.0f, 0.0f),
-			lcVector3(0.0f, 0.0f, 1.0f),
-		};
-
-		// Find the rotation from the focused piece if relative snap is enabled.
-		if ((m_nSnap & LC_DRAW_GLOBAL_SNAP) == 0)
-		{
-			Object* Focus = GetFocusObject();
-
-			if ((Focus != NULL) && Focus->IsPiece())
-			{
-				const lcMatrix44& RotMat = ((Piece*)Focus)->mModelWorld;
-
-				for (int i = 0; i < 3; i++)
-					PlaneNormals[i] = lcMul30(PlaneNormals[i], RotMat);
-			}
-		}
-
-		int Mode = (m_nCurAction == LC_TOOL_MOVE) ? LC_OVERLAY_MOVE_XYZ : LC_OVERLAY_NONE;
-		lcVector3 StartEnd[2] = { lcVector3((float)x, (float)y, 0.0f), lcVector3((float)x, (float)y, 1.0f) };
-		view->UnprojectPoints(StartEnd, 2);
-		const lcVector3& Start = StartEnd[0];
-		const lcVector3& End = StartEnd[1];
-		float ClosestIntersectionDistance = FLT_MAX;
-
-		for (int AxisIndex = 0; AxisIndex < 3; AxisIndex++)
-		{
-			lcVector4 Plane(PlaneNormals[AxisIndex], -lcDot(PlaneNormals[AxisIndex], m_OverlayCenter));
-			lcVector3 Intersection;
-
-			if (!lcLinePlaneIntersection(&Intersection, Start, End, Plane))
-				continue;
-
-			float IntersectionDistance = lcLengthSquared(Intersection - Start);
-
-			if (IntersectionDistance > ClosestIntersectionDistance)
-				continue;
-
-			lcVector3 Dir(Intersection - m_OverlayCenter);
-
-			float Proj1 = lcDot(Dir, PlaneNormals[(AxisIndex + 1) % 3]);
-			float Proj2 = lcDot(Dir, PlaneNormals[(AxisIndex + 2) % 3]);
-
-			if (Proj1 > 0.0f && Proj1 < OverlayMovePlaneSize && Proj2 > 0.0f && Proj2 < OverlayMovePlaneSize)
-			{
-				LC_OVERLAY_MODES PlaneModes[] = { LC_OVERLAY_MOVE_YZ, LC_OVERLAY_MOVE_XZ, LC_OVERLAY_MOVE_XY };
-
-				Mode = PlaneModes[AxisIndex];
-
-				ClosestIntersectionDistance = IntersectionDistance;
-			}
-
-			if (Proj1 > OverlayRotateArrowStart && Proj1 < OverlayRotateArrowEnd && Proj2 > OverlayRotateArrowStart && Proj2 < OverlayRotateArrowEnd)
-			{
-				LC_OVERLAY_MODES PlaneModes[] = { LC_OVERLAY_ROTATE_X, LC_OVERLAY_ROTATE_Y, LC_OVERLAY_ROTATE_Z };
-
-				Mode = PlaneModes[AxisIndex];
-
-				ClosestIntersectionDistance = IntersectionDistance;
-			}
-
-			if (fabs(Proj1) < OverlayMoveArrowCapRadius && Proj2 > 0.0f && Proj2 < OverlayMoveArrowSize)
-			{
-				LC_OVERLAY_MODES DirModes[] = { LC_OVERLAY_MOVE_Z, LC_OVERLAY_MOVE_X, LC_OVERLAY_MOVE_Y };
-
-				Mode = DirModes[AxisIndex];
-
-				ClosestIntersectionDistance = IntersectionDistance;
-			}
-
-			if (fabs(Proj2) < OverlayMoveArrowCapRadius && Proj1 > 0.0f && Proj1 < OverlayMoveArrowSize)
-			{
-				LC_OVERLAY_MODES DirModes[] = { LC_OVERLAY_MOVE_Y, LC_OVERLAY_MOVE_Z, LC_OVERLAY_MOVE_X };
-
-				Mode = DirModes[AxisIndex];
-
-				ClosestIntersectionDistance = IntersectionDistance;
-			}
-		}
-
-		if (Mode != m_OverlayMode)
-		{
-			m_OverlayMode = Mode;
-			gMainWindow->UpdateAllViews();
-		}
-	}
-	else if (m_nCurAction == LC_TOOL_ROTATE)
-	{
-		const float OverlayRotateRadius = 2.0f;
-		lcCamera* Cam = gMainWindow->GetActiveView()->mCamera;
-
-		// Unproject the mouse point against both the front and the back clipping planes.
-		lcVector3 StartEnd[2] = { lcVector3((float)x, (float)y, 0.0f), lcVector3((float)x, (float)y, 1.0f) };
-		view->UnprojectPoints(StartEnd, 2);
-		const lcVector3& SegStart = StartEnd[0];
-		const lcVector3& SegEnd = StartEnd[1];
-
-		lcVector3 Center(m_OverlayCenter);
-
-		lcVector3 Line = SegEnd - SegStart;
-		lcVector3 Vec = Center - SegStart;
-
-		float u = lcDot(Vec, Line) / Line.LengthSquared();
-
-		// Closest point in the line to the mouse.
-		lcVector3 Closest = SegStart + Line * u;
-
-		int Mode = -1;
-		float Distance = (Closest - Center).Length();
-		const float Epsilon = 0.25f * OverlayScale;
-
-		if (Distance > (OverlayRotateRadius * OverlayScale + Epsilon))
-		{
-			Mode = LC_OVERLAY_ROTATE_XYZ;
-		}
-		else if (Distance < (OverlayRotateRadius * OverlayScale + Epsilon))
-		{
-			// 3D rotation unless we're over one of the axis circles.
-			Mode = LC_OVERLAY_ROTATE_XYZ;
-
-			// Point P on a line defined by two points P1 and P2 is described by P = P1 + u (P2 - P1)
-			// A sphere centered at P3 with radius r is described by (x - x3)^2 + (y - y3)^2 + (z - z3)^2 = r^2
-			// Substituting the equation of the line into the sphere gives a quadratic equation where:
-			// a = (x2 - x1)^2 + (y2 - y1)^2 + (z2 - z1)^2
-			// b = 2[ (x2 - x1) (x1 - x3) + (y2 - y1) (y1 - y3) + (z2 - z1) (z1 - z3) ]
-			// c = x32 + y32 + z32 + x12 + y12 + z12 - 2[x3 x1 + y3 y1 + z3 z1] - r2
-			// The solutions to this quadratic are described by: (-b +- sqrt(b^2 - 4 a c) / 2 a
-			// The exact behavior is determined by b^2 - 4 a c:
-			// If this is less than 0 then the line does not intersect the sphere.
-			// If it equals 0 then the line is a tangent to the sphere intersecting it at one point
-			// If it is greater then 0 the line intersects the sphere at two points.
-
-			float x1 = SegStart[0], y1 = SegStart[1], z1 = SegStart[2];
-			float x2 = SegEnd[0], y2 = SegEnd[1], z2 = SegEnd[2];
-			float x3 = m_OverlayCenter[0], y3 = m_OverlayCenter[1], z3 = m_OverlayCenter[2];
-			float r = OverlayRotateRadius * OverlayScale;
-
-			// TODO: rewrite using vectors.
-			float a = (x2 - x1)*(x2 - x1) + (y2 - y1)*(y2 - y1) + (z2 - z1)*(z2 - z1);
-			float b = 2 * ((x2 - x1)*(x1 - x3) + (y2 - y1)*(y1 - y3) + (z2 - z1)*(z1 - z3));
-			float c = x3*x3 + y3*y3 + z3*z3 + x1*x1 + y1*y1 + z1*z1 - 2*(x3*x1 + y3*y1 + z3*z1) - r*r;
-			float f = b * b - 4 * a * c;
-
-			if (f >= 0.0f)
-			{
-				lcVector3 ViewDir(Cam->mTargetPosition - Cam->mPosition);
-
-				float u1 = (-b + sqrtf(f)) / (2*a);
-				float u2 = (-b - sqrtf(f)) / (2*a);
-
-				lcVector3 Intersections[2] =
-				{
-					lcVector3(x1 + u1*(x2-x1), y1 + u1*(y2-y1), z1 + u1*(z2-z1)),
-					lcVector3(x1 + u2*(x2-x1), y1 + u2*(y2-y1), z1 + u2*(z2-z1))
-				};
-
-				for (int i = 0; i < 2; i++)
-				{
-					lcVector3 Dist = Intersections[i] - Center;
-
-					if (lcDot(ViewDir, Dist) > 0.0f)
-						continue;
-
-					// Find the rotation from the focused piece if relative snap is enabled.
-					if ((m_nSnap & LC_DRAW_GLOBAL_SNAP) == 0)
-					{
-						Object* Focus = GetFocusObject();
-
-						if ((Focus != NULL) && Focus->IsPiece())
-						{
-							const lcVector4& Rot = ((Piece*)Focus)->mRotation;
-
-							lcMatrix44 RotMat = lcMatrix44FromAxisAngle(lcVector3(Rot[0], Rot[1], Rot[2]), -Rot[3] * LC_DTOR);
-
-							Dist = lcMul30(Dist, RotMat);
-						}
-					}
-
-					// Check if we're close enough to one of the axis.
-					Dist.Normalize();
-
-					float dx = fabsf(Dist[0]);
-					float dy = fabsf(Dist[1]);
-					float dz = fabsf(Dist[2]);
-
-					if (dx < dy)
-					{
-						if (dx < dz)
-						{
-							if (dx < Epsilon)
-								Mode = LC_OVERLAY_ROTATE_X;
-						}
-						else
-						{
-							if (dz < Epsilon)
-								Mode = LC_OVERLAY_ROTATE_Z;
-						}
-					}
-					else
-					{
-						if (dy < dz)
-						{
-							if (dy < Epsilon)
-								Mode = LC_OVERLAY_ROTATE_Y;
-						}
-						else
-						{
-							if (dz < Epsilon)
-								Mode = LC_OVERLAY_ROTATE_Z;
-						}
-					}
-
-					if (Mode != LC_OVERLAY_ROTATE_XYZ)
-					{
-						switch (Mode)
-						{
-						case LC_OVERLAY_ROTATE_X:
-							Dist[0] = 0.0f;
-							break;
-						case LC_OVERLAY_ROTATE_Y:
-							Dist[1] = 0.0f;
-							break;
-						case LC_OVERLAY_ROTATE_Z:
-							Dist[2] = 0.0f;
-							break;
-						}
-
-						Dist *= r;
-
-						m_OverlayTrackStart = Center + Dist;
-
-						break;
-					}
-				}
-			}
-		}
-
-		if (Mode != m_OverlayMode)
-		{
-			m_OverlayMode = Mode;
-			gMainWindow->UpdateAllViews();
-		}
-	}
-	else if (m_nCurAction == LC_TOOL_ROTATE_VIEW)
-	{
-		int vx, vy, vw, vh;
-
-		vx = 0;
-		vy = 0;
-		vw = view->mWidth;
-		vh = view->mHeight;
-
-		int cx = vx + vw / 2;
-		int cy = vy + vh / 2;
-
-		float d = sqrtf((float)((cx - x) * (cx - x) + (cy - y) * (cy - y)));
-		float r = lcMin(vw, vh) * 0.35f;
-
-		const float SquareSize = lcMax(8.0f, (vw+vh)/200);
-
-		if ((d < r + SquareSize) && (d > r - SquareSize))
-		{
-			if ((cx - x < SquareSize) && (cx - x > -SquareSize))
-				m_OverlayMode = LC_OVERLAY_ROTATE_VIEW_Y;
-
-			if ((cy - y < SquareSize) && (cy - y > -SquareSize))
-				m_OverlayMode = LC_OVERLAY_ROTATE_VIEW_X;
-		}
-		else
-		{
-			if (d < r)
-				m_OverlayMode = LC_OVERLAY_ROTATE_VIEW_XYZ;
-			else
-				m_OverlayMode = LC_OVERLAY_ROTATE_VIEW_Z;
-		}
-	}
-
-	view->SetCursor(view->GetCursor());
-}
-
-void Project::ActivateOverlay(View* view, int Action, int OverlayMode)
-{
-	if ((Action == LC_TOOL_SELECT) || (Action == LC_TOOL_MOVE) || (Action == LC_TOOL_ROTATE))
-	{
-		if (GetFocusPosition(m_OverlayCenter))
-			m_OverlayActive = true;
-		else if (GetSelectionCenter(m_OverlayCenter))
-			m_OverlayActive = true;
-		else
-			m_OverlayActive = false;
-	}
-	else if ((Action == LC_TOOL_ZOOM_REGION) && (m_nTracking == LC_TRACK_START_LEFT))
-		m_OverlayActive = true;
-	else if (Action == LC_TOOL_ZOOM || Action == LC_TOOL_PAN || Action == LC_TOOL_ROTATE_VIEW)
-		m_OverlayActive = true;
-	else
-		m_OverlayActive = false;
-
-	if (m_OverlayActive)
-	{
-		m_OverlayMode = OverlayMode;
-		UpdateOverlayScale();
-	}
-
-	if (view)
-		view->SetCursor(view->GetCursor());
-}
-
-void Project::UpdateOverlayScale()
-{
-	// TODO: This is not needed, draw the overlays using an ortho matrix.
-	if (m_OverlayActive)
-	{
-		// Calculate the scaling factor by projecting the center to the front plane then
-		// projecting a point close to it back.
-		View* ActiveView = gMainWindow->GetActiveView();
-		lcVector3 Screen = ActiveView->ProjectPoint(m_OverlayCenter);
-		Screen[0] += 10.0f;
-		lcVector3 Point = ActiveView->UnprojectPoint(Screen);
-
-		lcVector3 Dist(Point - m_OverlayCenter);
-		ActiveView->m_OverlayScale = Dist.Length() * 5.0f;
-	}
 }
 
 // Indicates if the existing string represents an instance of the candidate

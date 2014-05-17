@@ -84,6 +84,15 @@ lcLight::~lcLight()
 {
 }
 
+bool lcLight::FileLoad(lcFile& file)
+{
+	return true;
+}
+
+void lcLight::FileSave(lcFile& file) const
+{
+}
+
 void lcLight::CreateName(const lcArray<Light*>& Lights)
 {
 	int i, max = 0;

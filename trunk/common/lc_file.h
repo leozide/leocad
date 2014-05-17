@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include "lc_math.h"
 
 #define LC_FOURCC(ch0, ch1, ch2, ch3) (lcuint32)((lcuint32)(lcuint8)(ch0) | ((lcuint32)(lcuint8)(ch1) << 8) | \
 												((lcuint32)(lcuint8)(ch2) << 16) | ((lcuint32)(lcuint8)(ch3) << 24 ))
@@ -152,6 +153,13 @@ public:
 		return Value;
 	}
 
+	lcVector3 ReadVector3()
+	{
+		lcVector3 Vector;
+		ReadFloats(Vector, 3);
+		return Vector;
+	}
+
 	size_t ReadDoubles(double* Buffer, size_t Count)
 	{
 		return Read64(Buffer, Count);
@@ -255,6 +263,11 @@ public:
 	size_t WriteDoubles(const double* Buffer, size_t Count)
 	{
 		return Write64(Buffer, Count);
+	}
+
+	void WriteVector3(const lcVector3& Vector)
+	{
+		WriteFloats(Vector, 3);
 	}
 
 protected:

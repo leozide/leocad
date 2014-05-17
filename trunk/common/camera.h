@@ -92,7 +92,7 @@ public:
 		return (mState & LC_CAMERA_SELECTION_MASK) != 0;
 	}
 
-	virtual bool IsSelected(lcuintptr Section) const
+	virtual bool IsSelected(lcuint32 Section) const
 	{
 		switch (Section)
 		{
@@ -119,7 +119,7 @@ public:
 			mState &= ~(LC_CAMERA_SELECTION_MASK | LC_CAMERA_FOCUS_MASK);
 	}
 
-	virtual void SetSelected(lcuintptr Section, bool Selected)
+	virtual void SetSelected(lcuint32 Section, bool Selected)
 	{
 		switch (Section)
 		{
@@ -151,7 +151,7 @@ public:
 		return (mState & LC_CAMERA_FOCUS_MASK) != 0;
 	}
 
-	virtual bool IsFocused(lcuintptr Section) const
+	virtual bool IsFocused(lcuint32 Section) const
 	{
 		switch (Section)
 		{
@@ -170,7 +170,7 @@ public:
 		return false;
 	}
 
-	virtual void SetFocused(lcuintptr Section, bool Focus)
+	virtual void SetFocused(lcuint32 Section, bool Focus)
 	{
 		switch (Section)
 		{
@@ -197,7 +197,7 @@ public:
 		}
 	}
 
-	virtual lcuintptr GetFocusSection() const
+	virtual lcuint32 GetFocusSection() const
 	{
 		if (mState & LC_CAMERA_POSITION_FOCUSED)
 			return LC_CAMERA_SECTION_POSITION;
@@ -211,7 +211,7 @@ public:
 		return ~0;
 	}
 
-	virtual lcVector3 GetSectionPosition(lcuintptr Section) const
+	virtual lcVector3 GetSectionPosition(lcuint32 Section) const
 	{
 		switch (Section)
 		{
@@ -257,12 +257,12 @@ public:
 	void Render(View* View);
 
 	void ZoomExtents(View* view, const lcVector3& Center, const lcVector3* Points, int NumPoints, unsigned short nTime, bool bAddKey);
-	void ZoomRegion(View* view, float Left, float Right, float Bottom, float Top, unsigned short nTime, bool bAddKey);
-	void DoZoom(int dy, int mouse, unsigned short nTime, bool bAddKey);
-	void DoPan(int dx, int dy, int mouse, unsigned short nTime, bool bAddKey);
-	void DoRotate(int dx, int dy, int mouse, unsigned short nTime, bool bAddKey, float* center);
-	void DoRoll(int dx, int mouse, unsigned short nTime, bool bAddKey);
-	void DoCenter(lcVector3& point, unsigned short nTime, bool bAddKey);
+	void ZoomRegion(const lcVector3* Points, float RatioX, float RatioY, unsigned short nTime, bool bAddKey);
+	void Zoom(float Distance, unsigned short nTime, bool bAddKey);
+	void Pan(float DistanceX, float DistanceY, unsigned short nTime, bool bAddKey);
+	void Orbit(float DistanceX, float DistanceY, const lcVector3& CenterPosition, unsigned short nTime, bool bAddKey);
+	void Roll(float Distance, unsigned short nTime, bool bAddKey);
+	void Center(lcVector3& point, unsigned short nTime, bool bAddKey);
 	void Move(unsigned short nTime, bool bAddKey, float x, float y, float z);
 	void SetViewpoint(LC_VIEWPOINT Viewpoint, unsigned short nTime, bool bAddKey);
 	void SetFocalPoint(const lcVector3& focus, unsigned short nTime, bool bAddKey);

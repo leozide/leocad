@@ -1071,17 +1071,13 @@ void MinifigWizard::OnLeftButtonDown()
 		m_DownX = mInputState.x;
 		m_DownY = mInputState.y;
 		m_Tracking = LC_TRACK_LEFT;
-		CaptureMouse();
 	}
 }
 
 void MinifigWizard::OnLeftButtonUp()
 {
 	if (m_Tracking == LC_TRACK_LEFT)
-	{
 		m_Tracking = LC_TRACK_NONE;
-		ReleaseMouse();
-	}
 }
 
 void MinifigWizard::OnLeftButtonDoubleClick()
@@ -1097,17 +1093,13 @@ void MinifigWizard::OnRightButtonDown()
 		m_DownX = mInputState.x;
 		m_DownY = mInputState.y;
 		m_Tracking = LC_TRACK_RIGHT;
-		CaptureMouse();
 	}
 }
 
 void MinifigWizard::OnRightButtonUp()
 {
 	if (m_Tracking == LC_TRACK_RIGHT)
-	{
 		m_Tracking = LC_TRACK_NONE;
-		ReleaseMouse();
-	}
 }
 
 void MinifigWizard::OnMouseMove()

@@ -508,12 +508,14 @@ void lcMainWindow::UpdateTime(int CurrentTime, int TotalTime)
 		window->updateTime(CurrentTime, TotalTime);
 }
 
-void lcMainWindow::UpdateAnimation(bool AddKeys)
+void lcMainWindow::SetAddKeys(bool AddKeys)
 {
 	lcQMainWindow* window = (lcQMainWindow*)mHandle;
 
 	if (window)
-		window->updateAnimation(AddKeys);
+		window->setAddKeys(AddKeys);
+
+	mAddKeys = AddKeys;
 }
 
 void lcMainWindow::UpdateLockSnap(lcuint32 Snap)

@@ -1141,12 +1141,9 @@ void lcQMainWindow::updateTime(int currentTime, int totalTime)
 	statusTimeLabel->setText(QString(tr(" Step %1 ")).arg(QString::number(currentTime)));
 }
 
-void lcQMainWindow::updateAnimation(bool addKeys)
+void lcQMainWindow::setAddKeys(bool addKeys)
 {
-	// TODO: update animation
-	/*
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(anim_toolbar.keys), bAddKeys);
-	*/
+	actions[LC_VIEW_TIME_ADD_KEYS]->setChecked(addKeys);
 }
 
 void lcQMainWindow::updateLockSnap(lcuint32 snap)

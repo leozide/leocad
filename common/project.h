@@ -374,7 +374,6 @@ protected:
 	int m_nCurAction;
 	PieceInfo* m_pCurPiece;
 	PieceInfo* mDropPiece;
-	bool m_bAddKeys;
 	unsigned char m_nCurStep;
 
 	lcuint16 m_nMoveSnap;

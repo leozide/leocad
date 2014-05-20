@@ -107,7 +107,6 @@ void Project::UpdateInterface()
 	gMainWindow->UpdateFocusObject(GetFocusObject());
 	SetAction(m_nCurAction);
 	gMainWindow->UpdateTransformType(mTransformType);
-	gMainWindow->UpdateAnimation(m_bAddKeys);
 	gMainWindow->UpdateLockSnap(m_nSnap);
 	gMainWindow->UpdateSnap();
 	gMainWindow->UpdateCameraMenu();
@@ -199,8 +198,7 @@ void Project::LoadDefaults(bool cameras)
 	// Default values
 	gMainWindow->SetColorIndex(lcGetColorIndex(4));
 	SetAction(LC_TOOL_SELECT);
-	m_bAddKeys = false;
-	gMainWindow->UpdateAnimation(m_bAddKeys);
+	gMainWindow->SetAddKeys(false);
 	m_bUndoOriginal = true;
 	gMainWindow->UpdateUndoRedo(NULL, NULL);
 	m_nAngleSnap = (unsigned short)lcGetProfileInt(LC_PROFILE_ANGLE_SNAP);
@@ -632,18 +630,18 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 
 			if (fv < 1.3f)
 			{
-				file->ReadS32(&i, 1); //m_bAnimation = (i != 0);
-				file->ReadS32(&i, 1); m_bAddKeys = (i != 0);
+				file->ReadS32(&i, 1); // m_bAnimation = (i != 0);
+				file->ReadS32(&i, 1); // mAddKeys = (i != 0);
 				file->ReadU8(&ch, 1); // m_nFPS
 				file->ReadS32(&i, 1); // m_nCurFrame = i;
 				file->ReadU16(&sh, 1); // m_nTotalFrames
-				file->ReadS32(&i, 1); //m_nGridSize = i;
-				file->ReadS32(&i, 1); //m_nMoveSnap = i;
+				file->ReadS32(&i, 1); // m_nGridSize = i;
+				file->ReadS32(&i, 1); // m_nMoveSnap = i;
 			}
 			else
 			{
-				file->ReadU8(&ch, 1); //m_bAnimation = (ch != 0);
-				file->ReadU8(&ch, 1); m_bAddKeys = (ch != 0);
+				file->ReadU8(&ch, 1); // m_bAnimation = (ch != 0);
+				file->ReadU8(&ch, 1); // mAddKeys = (ch != 0);
 				file->ReadU8(&ch, 1); // m_nFPS
 				file->ReadU16(&sh, 1); // m_nCurFrame
 				file->ReadU16(&sh, 1); // m_nTotalFrames
@@ -706,7 +704,6 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 	}
 
 	SetAction(action);
-	gMainWindow->UpdateAnimation(m_bAddKeys);
 	gMainWindow->UpdateLockSnap(m_nSnap);
 	gMainWindow->UpdateSnap();
 	gMainWindow->UpdateCameraMenu();
@@ -808,9 +805,9 @@ void Project::FileSave(lcFile* file, bool bUndo)
 	// 0.60 (1.0)
 	rgb = LC_FLOATRGB(mProperties.mAmbientColor);
 	file->WriteU32(&rgb, 1);
-	ch = 0;//m_bAnimation;
+	ch = 0;// m_bAnimation;
 	file->WriteBuffer(&ch, 1);
-	ch = m_bAddKeys;
+	ch = 0;// mAddKeys;
 	file->WriteU8(&ch, 1);
 	file->WriteU8 (24); // m_nFPS
 	file->WriteU16(1); // m_nCurFrame
@@ -1553,28 +1550,6 @@ void Project::RenderBackground(View* View)
 
 	glEnable(GL_DEPTH_TEST);
 	glDepthMask(GL_TRUE);
-}
-
-struct lcTranslucentRenderSection
-{
-	float Distance;
-	Piece* piece;
-};
-
-int lcTranslucentRenderCompare(const lcTranslucentRenderSection& a, const lcTranslucentRenderSection& b)
-{
-	if (a.Distance > b.Distance)
-		return 1;
-	else
-		return -1;
-}
-
-int lcOpaqueRenderCompare(Piece* const& a, Piece* const& b)
-{
-	if (a->mPieceInfo > b->mPieceInfo)
-		return 1;
-	else
-		return -1;
 }
 
 void Project::RenderScenePieces(View* view, bool DrawInterface)
@@ -2463,7 +2438,7 @@ void Project::ZoomExtents(int FirstView, int LastView)
 	{
 		View* view = Views[vp];
 
-		view->mCamera->ZoomExtents(view, Center, Points, 8, m_nCurStep, m_bAddKeys);
+		view->mCamera->ZoomExtents(view, Center, Points, 8, m_nCurStep, gMainWindow->GetAddKeys());
 	}
 
 	gMainWindow->UpdateFocusObject(GetFocusObject());
@@ -4561,7 +4536,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 		{
 			lcVector3 FocusVector;
 			GetSelectionCenter(FocusVector);
-			gMainWindow->GetActiveView()->mCamera->SetFocalPoint(FocusVector, m_nCurStep, m_bAddKeys);
+			gMainWindow->GetActiveView()->mCamera->SetFocalPoint(FocusVector, m_nCurStep, gMainWindow->GetAddKeys());
 			gMainWindow->UpdateAllViews();
 		}
 		break;
@@ -5273,7 +5248,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 				Center = lcVector3((bs[0] + bs[3]) * 0.5f, (bs[1] + bs[4]) * 0.5f, (bs[2] + bs[5]) * 0.5f);
 			}
 
-			gMainWindow->GetActiveView()->mCamera->Center(Center, m_nCurStep, m_bAddKeys);
+			gMainWindow->GetActiveView()->mCamera->Center(Center, m_nCurStep, gMainWindow->GetAddKeys());
 			gMainWindow->UpdateAllViews();
 			break;
 		}
@@ -5376,49 +5351,49 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 		case LC_VIEW_VIEWPOINT_FRONT:
 		{
-			gMainWindow->GetActiveView()->mCamera->SetViewpoint(LC_VIEWPOINT_FRONT, m_nCurStep, m_bAddKeys);
+			gMainWindow->GetActiveView()->mCamera->SetViewpoint(LC_VIEWPOINT_FRONT, m_nCurStep, gMainWindow->GetAddKeys());
 			HandleCommand(LC_VIEW_ZOOM_EXTENTS);
 			gMainWindow->UpdateAllViews();
 		} break;
 
 		case LC_VIEW_VIEWPOINT_BACK:
 		{
-			gMainWindow->GetActiveView()->mCamera->SetViewpoint(LC_VIEWPOINT_BACK, m_nCurStep, m_bAddKeys);
+			gMainWindow->GetActiveView()->mCamera->SetViewpoint(LC_VIEWPOINT_BACK, m_nCurStep, gMainWindow->GetAddKeys());
 			HandleCommand(LC_VIEW_ZOOM_EXTENTS);
 			gMainWindow->UpdateAllViews();
 		} break;
 
 		case LC_VIEW_VIEWPOINT_TOP:
 		{
-			gMainWindow->GetActiveView()->mCamera->SetViewpoint(LC_VIEWPOINT_TOP, m_nCurStep, m_bAddKeys);
+			gMainWindow->GetActiveView()->mCamera->SetViewpoint(LC_VIEWPOINT_TOP, m_nCurStep, gMainWindow->GetAddKeys());
 			HandleCommand(LC_VIEW_ZOOM_EXTENTS);
 			gMainWindow->UpdateAllViews();
 		} break;
 
 		case LC_VIEW_VIEWPOINT_BOTTOM:
 		{
-			gMainWindow->GetActiveView()->mCamera->SetViewpoint(LC_VIEWPOINT_BOTTOM, m_nCurStep, m_bAddKeys);
+			gMainWindow->GetActiveView()->mCamera->SetViewpoint(LC_VIEWPOINT_BOTTOM, m_nCurStep, gMainWindow->GetAddKeys());
 			HandleCommand(LC_VIEW_ZOOM_EXTENTS);
 			gMainWindow->UpdateAllViews();
 		} break;
 
 		case LC_VIEW_VIEWPOINT_LEFT:
 		{
-			gMainWindow->GetActiveView()->mCamera->SetViewpoint(LC_VIEWPOINT_LEFT, m_nCurStep, m_bAddKeys);
+			gMainWindow->GetActiveView()->mCamera->SetViewpoint(LC_VIEWPOINT_LEFT, m_nCurStep, gMainWindow->GetAddKeys());
 			HandleCommand(LC_VIEW_ZOOM_EXTENTS);
 			gMainWindow->UpdateAllViews();
 		} break;
 
 		case LC_VIEW_VIEWPOINT_RIGHT:
 		{
-			gMainWindow->GetActiveView()->mCamera->SetViewpoint(LC_VIEWPOINT_RIGHT, m_nCurStep, m_bAddKeys);
+			gMainWindow->GetActiveView()->mCamera->SetViewpoint(LC_VIEWPOINT_RIGHT, m_nCurStep, gMainWindow->GetAddKeys());
 			HandleCommand(LC_VIEW_ZOOM_EXTENTS);
 			gMainWindow->UpdateAllViews();
 		} break;
 
 		case LC_VIEW_VIEWPOINT_HOME:
 		{
-			gMainWindow->GetActiveView()->mCamera->SetViewpoint(LC_VIEWPOINT_HOME, m_nCurStep, m_bAddKeys);
+			gMainWindow->GetActiveView()->mCamera->SetViewpoint(LC_VIEWPOINT_HOME, m_nCurStep, gMainWindow->GetAddKeys());
 			HandleCommand(LC_VIEW_ZOOM_EXTENTS);
 			gMainWindow->UpdateAllViews();
 		} break;
@@ -5548,10 +5523,8 @@ void Project::HandleCommand(LC_COMMANDS id)
 		} break;
 
 		case LC_VIEW_TIME_ADD_KEYS:
-		{
-			m_bAddKeys = !m_bAddKeys;
-			gMainWindow->UpdateAnimation(m_bAddKeys);
-		} break;
+			gMainWindow->SetAddKeys(!gMainWindow->GetAddKeys());
+			break;
 
 		case LC_EDIT_SNAP_X:
 			if (m_nSnap & LC_DRAW_SNAP_X)
@@ -6477,7 +6450,7 @@ bool Project::MoveSelectedObjects(lcVector3& Move, lcVector3& Remainder, bool Sn
 
 		if (pCamera->IsSelected())
 		{
-			pCamera->Move(m_nCurStep, m_bAddKeys, x, y, z);
+			pCamera->Move(m_nCurStep, gMainWindow->GetAddKeys(), x, y, z);
 			pCamera->UpdatePosition(m_nCurStep);
 		}
 	}
@@ -6488,7 +6461,7 @@ bool Project::MoveSelectedObjects(lcVector3& Move, lcVector3& Remainder, bool Sn
 
 		if (pLight->IsSelected())
 		{
-			pLight->Move (m_nCurStep, m_bAddKeys, x, y, z);
+			pLight->Move (m_nCurStep, gMainWindow->GetAddKeys(), x, y, z);
 			pLight->UpdatePosition (m_nCurStep);
 		}
 	}
@@ -6499,7 +6472,7 @@ bool Project::MoveSelectedObjects(lcVector3& Move, lcVector3& Remainder, bool Sn
 
 		if (Piece->IsSelected())
 		{
-			Piece->Move(m_nCurStep, m_bAddKeys, x, y, z);
+			Piece->Move(m_nCurStep, gMainWindow->GetAddKeys(), x, y, z);
 			Piece->UpdatePosition(m_nCurStep);
 		}
 	}
@@ -6660,7 +6633,7 @@ bool Project::RotateSelectedObjects(lcVector3& Delta, lcVector3& Remainder, bool
 			pos[1] = Center[1] + Distance[1];
 			pos[2] = Center[2] + Distance[2];
 
-			Piece->ChangeKey(m_nCurStep, m_bAddKeys, pos, LC_PK_POSITION);
+			Piece->ChangeKey(m_nCurStep, gMainWindow->GetAddKeys(), pos, LC_PK_POSITION);
 		}
 
 		rot[0] = NewRotation[0];
@@ -6668,7 +6641,7 @@ bool Project::RotateSelectedObjects(lcVector3& Delta, lcVector3& Remainder, bool
 		rot[2] = NewRotation[2];
 		rot[3] = NewRotation[3] * LC_RTOD;
 
-		Piece->ChangeKey(m_nCurStep, m_bAddKeys, rot, LC_PK_ROTATION);
+		Piece->ChangeKey(m_nCurStep, gMainWindow->GetAddKeys(), rot, LC_PK_ROTATION);
 		Piece->UpdatePosition(m_nCurStep);
 	}
 
@@ -6713,7 +6686,7 @@ void Project::TransformSelectedObjects(LC_TRANSFORM_TYPE Type, const lcVector3& 
 
 				if (pCamera->IsSelected())
 				{
-					pCamera->Move(m_nCurStep, m_bAddKeys, Offset.x, Offset.y, Offset.z);
+					pCamera->Move(m_nCurStep, gMainWindow->GetAddKeys(), Offset.x, Offset.y, Offset.z);
 					pCamera->UpdatePosition(m_nCurStep);
 				}
 			}
@@ -6724,7 +6697,7 @@ void Project::TransformSelectedObjects(LC_TRANSFORM_TYPE Type, const lcVector3& 
 
 				if (pLight->IsSelected())
 				{
-					pLight->Move(m_nCurStep, m_bAddKeys, Offset.x, Offset.y, Offset.z);
+					pLight->Move(m_nCurStep, gMainWindow->GetAddKeys(), Offset.x, Offset.y, Offset.z);
 					pLight->UpdatePosition (m_nCurStep);
 				}
 			}
@@ -6735,7 +6708,7 @@ void Project::TransformSelectedObjects(LC_TRANSFORM_TYPE Type, const lcVector3& 
 
 				if (Piece->IsSelected())
 				{
-					Piece->Move(m_nCurStep, m_bAddKeys, Offset.x, Offset.y, Offset.z);
+					Piece->Move(m_nCurStep, gMainWindow->GetAddKeys(), Offset.x, Offset.y, Offset.z);
 					Piece->UpdatePosition(m_nCurStep);
 				}
 			}
@@ -6796,7 +6769,7 @@ void Project::TransformSelectedObjects(LC_TRANSFORM_TYPE Type, const lcVector3& 
 
 				if (Piece->IsSelected())
 				{
-					Piece->ChangeKey(m_nCurStep, m_bAddKeys, NewRotation, LC_PK_ROTATION);
+					Piece->ChangeKey(m_nCurStep, gMainWindow->GetAddKeys(), NewRotation, LC_PK_ROTATION);
 					Piece->UpdatePosition(m_nCurStep);
 					nSel++;
 				}
@@ -6838,8 +6811,8 @@ void Project::ModifyObject(Object* Object, lcObjectProperty Property, void* Valu
 			Piece* Part = (Piece*)Object;
 
 			if (Part->mPosition != Position)
-		{
-				Part->ChangeKey(m_nCurStep, m_bAddKeys, Position, LC_PK_POSITION);
+			{
+				Part->ChangeKey(m_nCurStep, gMainWindow->GetAddKeys(), Position, LC_PK_POSITION);
 				Part->UpdatePosition(m_nCurStep);
 
 				CheckPointString = "Moving";
@@ -6852,8 +6825,8 @@ void Project::ModifyObject(Object* Object, lcObjectProperty Property, void* Valu
 			Piece* Part = (Piece*)Object;
 
 			if (Rotation != Part->mRotation)
-		{
-				Part->ChangeKey(m_nCurStep, m_bAddKeys, Rotation, LC_PK_ROTATION);
+			{
+				Part->ChangeKey(m_nCurStep, gMainWindow->GetAddKeys(), Rotation, LC_PK_ROTATION);
 				Part->UpdatePosition(m_nCurStep);
 
 				CheckPointString = "Rotating";
@@ -6923,7 +6896,7 @@ void Project::ModifyObject(Object* Object, lcObjectProperty Property, void* Valu
 
 			if (camera->mPosition != Position)
 			{
-				camera->ChangeKey(m_nCurStep, m_bAddKeys, Position, LC_CK_EYE);
+				camera->ChangeKey(m_nCurStep, gMainWindow->GetAddKeys(), Position, LC_CK_EYE);
 				camera->UpdatePosition(m_nCurStep);
 
 				CheckPointString = "Camera";
@@ -6937,7 +6910,7 @@ void Project::ModifyObject(Object* Object, lcObjectProperty Property, void* Valu
 
 			if (camera->mTargetPosition != TargetPosition)
 			{
-				camera->ChangeKey(m_nCurStep, m_bAddKeys, TargetPosition, LC_CK_TARGET);
+				camera->ChangeKey(m_nCurStep, gMainWindow->GetAddKeys(), TargetPosition, LC_CK_TARGET);
 				camera->UpdatePosition(m_nCurStep);
 
 				CheckPointString = "Camera";
@@ -6951,7 +6924,7 @@ void Project::ModifyObject(Object* Object, lcObjectProperty Property, void* Valu
 
 			if (camera->mUpVector != Up)
 			{
-				camera->ChangeKey(m_nCurStep, m_bAddKeys, Up, LC_CK_UP);
+				camera->ChangeKey(m_nCurStep, gMainWindow->GetAddKeys(), Up, LC_CK_UP);
 				camera->UpdatePosition(m_nCurStep);
 
 				CheckPointString = "Camera";
@@ -7044,7 +7017,7 @@ void Project::ZoomActiveView(int Amount)
 {
 	float ScaledAmount = 2.0f * Amount / (21 - lcGetProfileInt(LC_PROFILE_MOUSE_SENSITIVITY));
 
-	gMainWindow->GetActiveView()->mCamera->Zoom(ScaledAmount, m_nCurStep, m_bAddKeys);
+	gMainWindow->GetActiveView()->mCamera->Zoom(ScaledAmount, m_nCurStep, gMainWindow->GetAddKeys());
 	gMainWindow->UpdateFocusObject(GetFocusObject());
 	gMainWindow->UpdateAllViews();
 }
@@ -7151,6 +7124,9 @@ void Project::EndMouseTool(lcTool Tool, bool Accept)
 	case LC_TOOL_ROLL:
 		if (!gMainWindow->GetActiveView()->mCamera->IsSimple())
 			CheckPoint("Roll");
+		break;
+
+	case LC_TOOL_ZOOM_REGION:
 		break;
 	}
 }
@@ -7307,14 +7283,14 @@ void Project::PaintToolClicked(lcObject* Object)
 
 void Project::UpdateZoomTool(lcCamera* Camera, float Mouse)
 {
-	Camera->Zoom(Mouse - mMouseToolDistance.x, m_nCurStep, m_bAddKeys);
+	Camera->Zoom(Mouse - mMouseToolDistance.x, m_nCurStep, gMainWindow->GetAddKeys());
 	mMouseToolDistance.x = Mouse;
 	gMainWindow->UpdateAllViews();
 }
 
 void Project::UpdatePanTool(lcCamera* Camera, float MouseX, float MouseY)
 {
-	Camera->Pan(MouseX - mMouseToolDistance.x, MouseY - mMouseToolDistance.y, m_nCurStep, m_bAddKeys);
+	Camera->Pan(MouseX - mMouseToolDistance.x, MouseY - mMouseToolDistance.y, m_nCurStep, gMainWindow->GetAddKeys());
 	mMouseToolDistance.x = MouseX;
 	mMouseToolDistance.y = MouseY;
 	gMainWindow->UpdateAllViews();
@@ -7324,7 +7300,7 @@ void Project::UpdateOrbitTool(lcCamera* Camera, float MouseX, float MouseY)
 {
 	lcVector3 Center;
 	GetSelectionCenter(Center);
-	Camera->Orbit(MouseX - mMouseToolDistance.x, MouseY - mMouseToolDistance.y, Center, m_nCurStep, m_bAddKeys);
+	Camera->Orbit(MouseX - mMouseToolDistance.x, MouseY - mMouseToolDistance.y, Center, m_nCurStep, gMainWindow->GetAddKeys());
 	mMouseToolDistance.x = MouseX;
 	mMouseToolDistance.y = MouseY;
 	gMainWindow->UpdateAllViews();
@@ -7332,14 +7308,14 @@ void Project::UpdateOrbitTool(lcCamera* Camera, float MouseX, float MouseY)
 
 void Project::UpdateRollTool(lcCamera* Camera, float Mouse)
 {
-	Camera->Roll(Mouse - mMouseToolDistance.x, m_nCurStep, m_bAddKeys);
+	Camera->Roll(Mouse - mMouseToolDistance.x, m_nCurStep, gMainWindow->GetAddKeys());
 	mMouseToolDistance.x = Mouse;
 	gMainWindow->UpdateAllViews();
 }
 
 void Project::ZoomRegionToolClicked(lcCamera* Camera, const lcVector3* Points, float RatioX, float RatioY)
 {
-	Camera->ZoomRegion(Points, m_nCurStep, m_bAddKeys, RatioX, RatioY);
+	Camera->ZoomRegion(Points, m_nCurStep, gMainWindow->GetAddKeys(), RatioX, RatioY);
 
 	gMainWindow->UpdateFocusObject(GetFocusObject());
 	gMainWindow->UpdateAllViews();

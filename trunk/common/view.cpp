@@ -1495,6 +1495,7 @@ void View::OnLeftButtonDown()
 	case LC_TRACKTOOL_ROTATE_X:
 	case LC_TRACKTOOL_ROTATE_Y:
 	case LC_TRACKTOOL_ROTATE_Z:
+	case LC_TRACKTOOL_ROTATE_XY:
 	case LC_TRACKTOOL_ROTATE_XYZ:
 		if (mProject->AnyObjectsSelected(true))
 			StartTracking(LC_TRACKBUTTON_LEFT);
@@ -1604,6 +1605,7 @@ void View::OnRightButtonDown()
 	case LC_TRACKTOOL_ROTATE_X:
 	case LC_TRACKTOOL_ROTATE_Y:
 	case LC_TRACKTOOL_ROTATE_Z:
+	case LC_TRACKTOOL_ROTATE_XY:
 	case LC_TRACKTOOL_ROTATE_XYZ:
 		if (mProject->AnyObjectsSelected(true))
 			StartTracking(LC_TRACKBUTTON_RIGHT);

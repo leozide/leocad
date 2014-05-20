@@ -15,6 +15,11 @@ class lcMainWindow : public lcBaseWindow
 	lcMainWindow();
 	~lcMainWindow();
 
+	bool GetAddKeys() const
+	{
+		return mAddKeys;
+	}
+
 	View* GetActiveView() const
 	{
 		return mActiveView;
@@ -49,7 +54,7 @@ class lcMainWindow : public lcBaseWindow
 	void UpdateAction(int NewAction);
 	void UpdatePaste(bool Enabled);
 	void UpdateTime(int CurrentTime, int TotalTime);
-	void UpdateAnimation(bool AddKeys);
+	void SetAddKeys(bool AddKeys);
 	void UpdateLockSnap(lcuint32 Snap);
 	void UpdateSnap();
 	void UpdateUndoRedo(const char* UndoText, const char* RedoText);
@@ -72,6 +77,8 @@ class lcMainWindow : public lcBaseWindow
 protected:
 	View* mActiveView;
 	lcArray<View*> mViews;
+
+	bool mAddKeys;
 };
 
 extern class lcMainWindow* gMainWindow;

@@ -11,6 +11,8 @@ lcMainWindow::lcMainWindow()
 	mActiveView = NULL;
 	mPreviewWidget = NULL;
 
+	mAddKeys = false;
+
 	for (int FileIdx = 0; FileIdx < LC_MAX_RECENT_FILES; FileIdx++)
 		strcpy(mRecentFiles[FileIdx], lcGetProfileString((LC_PROFILE_KEY)(LC_PROFILE_RECENT_FILE1 + FileIdx)));
 

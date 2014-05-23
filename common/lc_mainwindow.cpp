@@ -66,6 +66,14 @@ void lcMainWindow::UpdateAllViews()
 		mViews[ViewIdx]->Redraw();
 }
 
+void lcMainWindow::SetTool(lcTool Tool)
+{
+	mTool = Tool;
+
+	UpdateAction(mTool);
+	UpdateAllViews();
+}
+
 void lcMainWindow::SetColorIndex(int ColorIndex)
 {
 	mColorIndex = ColorIndex;

@@ -3,6 +3,7 @@
 
 #include "lc_basewindow.h"
 #include "lc_array.h"
+#include "project.h"
 
 class View;
 class PiecePreview;
@@ -14,6 +15,11 @@ class lcMainWindow : public lcBaseWindow
  public:
 	lcMainWindow();
 	~lcMainWindow();
+
+	lcTool GetTool() const
+	{
+		return mTool;
+	}
 
 	bool GetAddKeys() const
 	{
@@ -35,6 +41,7 @@ class lcMainWindow : public lcBaseWindow
 	void SetActiveView(View* ActiveView);
 	void UpdateAllViews();
 
+	void SetTool(lcTool Tool);
 	void SetColorIndex(int ColorIndex);
 	void Close();
 
@@ -79,6 +86,7 @@ protected:
 	lcArray<View*> mViews;
 
 	bool mAddKeys;
+	lcTool mTool;
 };
 
 extern class lcMainWindow* gMainWindow;

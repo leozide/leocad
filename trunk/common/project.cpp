@@ -72,7 +72,6 @@ Project::Project()
 	m_pGroups = NULL;
 	m_pUndoList = NULL;
 	m_pRedoList = NULL;
-	m_nCurAction = 0;
 	mTransformType = LC_TRANSFORM_RELATIVE_TRANSLATION;
 	m_pTerrain = new Terrain();
 	m_pBackground = new lcTexture();
@@ -103,9 +102,9 @@ void Project::UpdateInterface()
 	gMainWindow->UpdatePaste(g_App->mClipboard != NULL);
 	gMainWindow->UpdateCategories();
 	gMainWindow->UpdateTitle(m_strTitle, m_bModified);
+	gMainWindow->SetTool(gMainWindow->GetTool());
 
 	gMainWindow->UpdateFocusObject(GetFocusObject());
-	SetAction(m_nCurAction);
 	gMainWindow->UpdateTransformType(mTransformType);
 	gMainWindow->UpdateLockSnap(m_nSnap);
 	gMainWindow->UpdateSnap();
@@ -197,7 +196,7 @@ void Project::LoadDefaults(bool cameras)
 
 	// Default values
 	gMainWindow->SetColorIndex(lcGetColorIndex(4));
-	SetAction(LC_TOOL_SELECT);
+	gMainWindow->SetTool(LC_TOOL_SELECT);
 	gMainWindow->SetAddKeys(false);
 	m_bUndoOriginal = true;
 	gMainWindow->UpdateUndoRedo(NULL, NULL);
@@ -243,7 +242,7 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 	char id[32];
 	lcuint32 rgb;
 	float fv = 0.4f;
-	lcuint8 ch, action = m_nCurAction;
+	lcuint8 ch;
 	lcuint16 sh;
 
 	file->Seek(0, SEEK_SET);
@@ -703,7 +702,6 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 			ZoomExtents(0, Views.GetSize());
 	}
 
-	SetAction(action);
 	gMainWindow->UpdateLockSnap(m_nSnap);
 	gMainWindow->UpdateSnap();
 	gMainWindow->UpdateCameraMenu();
@@ -739,7 +737,7 @@ void Project::FileSave(lcFile* file, bool bUndo)
 	file->WriteS32(&i, 1);
 	i = 0;//i = m_nCurColor;
 	file->WriteS32(&i, 1);
-	i = m_nCurAction; file->WriteS32(&i, 1);
+	i = 0; file->WriteS32(&i, 1); // m_nCurAction
 	i = m_nCurStep; file->WriteS32(&i, 1);
 	file->WriteU32(0);//m_nScene
 
@@ -1726,7 +1724,7 @@ void Project::RenderSceneObjects(View* view)
 #endif
 
 	// Draw cameras & lights
-	if (m_nCurAction == LC_TOOL_INSERT || mDropPiece)
+	if (gMainWindow->GetTool() == LC_TOOL_INSERT || mDropPiece)
 	{
 		lcVector3 Position;
 		lcVector4 Rotation;
@@ -1768,7 +1766,7 @@ void Project::RenderSceneObjects(View* view)
 		const int Spacing = lcMax(Preferences.mGridLineSpacing, 1);
 		int MinX = 0, MaxX = 0, MinY = 0, MaxY = 0;
 
-		if (!mPieces.IsEmpty() || (m_nCurAction == LC_TOOL_INSERT || mDropPiece))
+		if (!mPieces.IsEmpty() || (gMainWindow->GetTool() == LC_TOOL_INSERT || mDropPiece))
 		{
 			float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
 
@@ -1780,7 +1778,7 @@ void Project::RenderSceneObjects(View* view)
 					Piece->CompareBoundingBox(bs);
 			}
 
-			if (m_nCurAction == LC_TOOL_INSERT || mDropPiece)
+			if (gMainWindow->GetTool() == LC_TOOL_INSERT || mDropPiece)
 			{
 				lcVector3 Position;
 				lcVector4 Rotation;
@@ -5690,74 +5688,60 @@ void Project::HandleCommand(LC_COMMANDS id)
 			break;
 
 		case LC_EDIT_ACTION_SELECT:
-		{
-			SetAction(LC_TOOL_SELECT);
-		} break;
+			gMainWindow->SetTool(LC_TOOL_SELECT);
+			break;
 
 		case LC_EDIT_ACTION_INSERT:
-		{
-			SetAction(LC_TOOL_INSERT);
-		} break;
+			gMainWindow->SetTool(LC_TOOL_INSERT);
+			break;
 
 		case LC_EDIT_ACTION_LIGHT:
-		{
-			SetAction(LC_TOOL_LIGHT);
-		} break;
+			gMainWindow->SetTool(LC_TOOL_LIGHT);
+			break;
 
 		case LC_EDIT_ACTION_SPOTLIGHT:
-		{
-			SetAction(LC_TOOL_SPOTLIGHT);
-		} break;
+			gMainWindow->SetTool(LC_TOOL_SPOTLIGHT);
+			break;
 
 		case LC_EDIT_ACTION_CAMERA:
-		{
-			SetAction(LC_TOOL_CAMERA);
-		} break;
+			gMainWindow->SetTool(LC_TOOL_CAMERA);
+			break;
 
 		case LC_EDIT_ACTION_MOVE:
-		{
-			SetAction(LC_TOOL_MOVE);
-		} break;
+			gMainWindow->SetTool(LC_TOOL_MOVE);
+			break;
 
 		case LC_EDIT_ACTION_ROTATE:
-		{
-			SetAction(LC_TOOL_ROTATE);
-		} break;
+			gMainWindow->SetTool(LC_TOOL_ROTATE);
+			break;
 
 		case LC_EDIT_ACTION_DELETE:
-		{
-			SetAction(LC_TOOL_ERASER);
-		} break;
+			gMainWindow->SetTool(LC_TOOL_ERASER);
+			break;
 
 		case LC_EDIT_ACTION_PAINT:
-		{
-			SetAction(LC_TOOL_PAINT);
-		} break;
+			gMainWindow->SetTool(LC_TOOL_PAINT);
+			break;
 
 		case LC_EDIT_ACTION_ZOOM:
-		{
-			SetAction(LC_TOOL_ZOOM);
-		} break;
+			gMainWindow->SetTool(LC_TOOL_ZOOM);
+			break;
 
 		case LC_EDIT_ACTION_ZOOM_REGION:
-		{
-			SetAction(LC_TOOL_ZOOM_REGION);
-		} break;
+			gMainWindow->SetTool(LC_TOOL_ZOOM_REGION);
+			break;
 
 		case LC_EDIT_ACTION_PAN:
-		{
-			SetAction(LC_TOOL_PAN);
-		} break;
+			gMainWindow->SetTool(LC_TOOL_PAN);
+			break;
 
 		case LC_EDIT_ACTION_ROTATE_VIEW:
-		{
-			SetAction(LC_TOOL_ROTATE_VIEW);
-		} break;
+			gMainWindow->SetTool(LC_TOOL_ROTATE_VIEW);
+			break;
 
 		case LC_EDIT_ACTION_ROLL:
-		{
-			SetAction(LC_TOOL_ROLL);
-		} break;
+			gMainWindow->SetTool(LC_TOOL_ROLL);
+			break;
 
 		case LC_EDIT_CANCEL:
 		{
@@ -5775,14 +5759,6 @@ void Project::HandleCommand(LC_COMMANDS id)
 		case LC_NUM_COMMANDS:
 			break;
 	}
-}
-
-void Project::SetAction(int nAction)
-{
-	m_nCurAction = nAction;
-
-	gMainWindow->UpdateAction(m_nCurAction);
-	gMainWindow->UpdateAllViews();
 }
 
 // Remove unused groups
@@ -7055,7 +7031,7 @@ void Project::EndPieceDrop(bool Accept)
 void Project::BeginColorDrop()
 {
 	StartTracking(LC_TRACK_LEFT);
-	SetAction(LC_TOOL_PAINT);
+	gMainWindow->SetTool(LC_TOOL_PAINT);
 }
 
 void Project::BeginMouseTool()

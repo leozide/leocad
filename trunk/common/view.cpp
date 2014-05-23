@@ -212,7 +212,7 @@ void View::OnDraw()
 
 	if (mWidget)
 	{
-		lcTool Tool = (lcTool)mProject->GetCurAction();
+		lcTool Tool = gMainWindow->GetTool();
 
 		if ((Tool == LC_TOOL_SELECT || Tool == LC_TOOL_MOVE) && mTrackButton == LC_TRACKBUTTON_NONE && mProject->AnyObjectsSelected(false))
 			DrawSelectMoveOverlay();
@@ -313,7 +313,7 @@ void View::DrawSelectMoveOverlay()
 		}
 
 		// Rotation arrows.
-		if (mProject->GetCurAction() == LC_TOOL_SELECT && mTrackButton == LC_TRACKBUTTON_NONE && AnyPiecesSelected)
+		if (gMainWindow->GetTool() == LC_TOOL_SELECT && mTrackButton == LC_TRACKBUTTON_NONE && AnyPiecesSelected)
 		{
 			switch (i)
 			{
@@ -540,7 +540,7 @@ void View::DrawRotateOverlay()
 	Mat.SetTranslation(OverlayCenter);
 
 	// Draw the circles.
-	if (mProject->GetCurAction() == LC_TOOL_ROTATE && !HasAngle && mTrackButton == LC_TRACKBUTTON_NONE)
+	if (gMainWindow->GetTool() == LC_TOOL_ROTATE && !HasAngle && mTrackButton == LC_TRACKBUTTON_NONE)
 	{
 		lcVector3 Verts[32];
 
@@ -581,7 +581,7 @@ void View::DrawRotateOverlay()
 		}
 		else
 		{
-			if (mProject->GetCurAction() != LC_TOOL_ROTATE || HasAngle || mTrackButton != LC_TRACKBUTTON_NONE)
+			if (gMainWindow->GetTool() != LC_TOOL_ROTATE || HasAngle || mTrackButton != LC_TRACKBUTTON_NONE)
 				continue;
 
 			switch (i)
@@ -623,7 +623,7 @@ void View::DrawRotateOverlay()
 				break;
 			}
 
-			if (mProject->GetCurAction() != LC_TOOL_ROTATE || HasAngle || mTrackButton != LC_TRACKBUTTON_NONE || lcDot(ViewDir, v1 + v2) <= 0.0f)
+			if (gMainWindow->GetTool() != LC_TOOL_ROTATE || HasAngle || mTrackButton != LC_TRACKBUTTON_NONE || lcDot(ViewDir, v1 + v2) <= 0.0f)
 			{
 				Verts[NumVerts++] = v1 * (OverlayRotateRadius * OverlayScale);
 				Verts[NumVerts++] = v2 * (OverlayRotateRadius * OverlayScale);
@@ -924,7 +924,7 @@ float View::GetOverlayScale() const
 
 void View::UpdateTrackTool()
 {
-	lcTool CurrentTool = (lcTool)mProject->GetCurAction();
+	lcTool CurrentTool = gMainWindow->GetTool();
 	lcTrackTool NewTrackTool = mTrackTool;
 	int x = mInputState.x;
 	int y = mInputState.y;
@@ -1446,7 +1446,7 @@ void View::OnLeftButtonDown()
 			mProject->InsertPieceToolClicked(Position, Rotation);
 
 			if (!mInputState.Control)
-				mProject->SetAction(LC_TOOL_SELECT);
+				gMainWindow->SetTool(LC_TOOL_SELECT);
 
 			UpdateTrackTool();
 		}
@@ -1457,7 +1457,7 @@ void View::OnLeftButtonDown()
 			mProject->PointLightToolClicked(UnprojectPoint(lcVector3((float)mInputState.x, (float)mInputState.y, 0.9f)));
 
 			if (!mInputState.Control)
-				mProject->SetAction(LC_TOOL_SELECT);
+				gMainWindow->SetTool(LC_TOOL_SELECT);
 
 			UpdateTrackTool();
 		}

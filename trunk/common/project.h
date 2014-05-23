@@ -357,13 +357,6 @@ protected:
 
 public:
 	void OnMouseWheel(View* view, float Direction);
-
-	void SetAction(int Action);
-	int GetCurAction() const
-	{
-		return m_nCurAction;
-	}
-
 	void HandleCommand(LC_COMMANDS id);
 
 	lcuint32 m_nSnap;
@@ -371,7 +364,6 @@ public:
 protected:
 	// State variables
 	int mTransformType;
-	int m_nCurAction;
 	PieceInfo* m_pCurPiece;
 	PieceInfo* mDropPiece;
 	unsigned char m_nCurStep;

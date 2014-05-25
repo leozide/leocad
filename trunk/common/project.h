@@ -49,55 +49,6 @@
 #define LC_SEL_FOCUSGROUP	0x200 // focused piece is grouped
 #define LC_SEL_CANGROUP		0x400 // can make a new group
 
-enum lcBackgroundType
-{
-	LC_BACKGROUND_SOLID,
-	LC_BACKGROUND_GRADIENT,
-	LC_BACKGROUND_IMAGE
-};
-
-class lcModelProperties
-{
-public:
-	void LoadDefaults();
-	void SaveDefaults();
-
-	bool operator==(const lcModelProperties& Properties)
-	{
-		if (mName != Properties.mName || mAuthor != Properties.mAuthor ||
-			mDescription != Properties.mDescription || mComments != Properties.mComments)
-			return false;
-
-		if (mBackgroundType != Properties.mBackgroundType || mBackgroundSolidColor != Properties.mBackgroundSolidColor ||
-			mBackgroundGradientColor1 != Properties.mBackgroundGradientColor1 || mBackgroundGradientColor2 != Properties.mBackgroundGradientColor2 ||
-			mBackgroundImage != Properties.mBackgroundImage || mBackgroundImageTile != Properties.mBackgroundImageTile)
-			return false;
-
-		if (mFogEnabled != Properties.mFogEnabled || mFogDensity != Properties.mFogDensity ||
-			mFogColor != Properties.mFogColor || mAmbientColor != Properties.mAmbientColor)
-			return false;
-
-		return true;
-	}
-
-	String mName;
-	String mAuthor;
-	String mDescription;
-	String mComments;
-
-	lcBackgroundType mBackgroundType;
-	lcVector3 mBackgroundSolidColor;
-	lcVector3 mBackgroundGradientColor1;
-	lcVector3 mBackgroundGradientColor2;
-	String mBackgroundImage;
-	bool mBackgroundImageTile;
-
-	bool mFogEnabled;
-	float mFogDensity;
-	lcVector3 mFogColor;
-	lcVector3 mAmbientColor;
-};
-
 enum LC_TRANSFORM_TYPE
 {
 	LC_TRANSFORM_ABSOLUTE_TRANSLATION,
@@ -113,7 +64,6 @@ enum LC_MOUSE_TRACK
 	LC_TRACK_RIGHT
 };
 
-class Group;
 class Terrain;
 class PieceInfo;
 class View;
@@ -171,25 +121,9 @@ enum lcObjectProperty
 	LC_CAMERA_PROPERTY_NAME
 };
 
-enum lcTool
-{
-	LC_TOOL_INSERT,
-	LC_TOOL_LIGHT,
-	LC_TOOL_SPOTLIGHT,
-	LC_TOOL_CAMERA,
-	LC_TOOL_SELECT,
-	LC_TOOL_MOVE,
-	LC_TOOL_ROTATE,
-	LC_TOOL_ERASER,
-	LC_TOOL_PAINT,
-	LC_TOOL_ZOOM,
-	LC_TOOL_PAN,
-	LC_TOOL_ROTATE_VIEW,
-	LC_TOOL_ROLL,
-	LC_TOOL_ZOOM_REGION
-};
+#include "lc_model.h"
 
-class Project
+class Project : public lcModel
 {
 public:
 	Project();
@@ -260,6 +194,11 @@ public:
 		*to = 255;
 	}
 
+	int GetGroupIndex(lcGroup* Group) const
+	{
+		return mGroups.FindIndex(Group);
+	}
+
 	void ConvertToUserUnits(lcVector3& Value) const;
 	void ConvertFromUserUnits(lcVector3& Value) const;
 	lcMatrix44 GetRelativeRotation() const;
@@ -286,16 +225,11 @@ public:
 	bool GetFocusPosition(lcVector3& Position) const;
 	Object* GetFocusObject() const;
 	bool AnyObjectsSelected(bool PiecesOnly) const;
-	Group* AddGroup (const char* name, Group* pParent, float x, float y, float z);
+	lcGroup* AddGroup(lcGroup* Parent);
 	void TransformSelectedObjects(LC_TRANSFORM_TYPE Type, const lcVector3& Transform);
 	void ModifyObject(Object* Object, lcObjectProperty Property, void* Value);
 	void ZoomActiveView(int Amount);
 
-	// Objects
-	lcArray<lcPiece*> mPieces;
-	lcArray<lcCamera*> mCameras;
-	lcArray<lcLight*> mLights;
-	Group* m_pGroups;
 	Terrain* m_pTerrain;
 
 	char m_strTitle[LC_MAXPATH];
@@ -372,8 +306,6 @@ protected:
 	lcuint16 m_nAngleSnap;
 	char m_strFooter[256];
 	char m_strHeader[256];
-
-	lcModelProperties mProperties;
 
 	lcTexture* m_pBackground;
 	lcTexture* mGridTexture;

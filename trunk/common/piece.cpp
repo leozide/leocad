@@ -265,22 +265,8 @@ void lcPiece::FileSave(lcFile& file) const
 	file.WriteBuffer(m_strName, Length);
 
 	// version 7
-	lcint32 i;
-
-	if (m_pGroup != NULL)
-	{
-		Group* pGroups = lcGetActiveProject()->m_pGroups;
-		for (i = 0; pGroups; pGroups = pGroups->m_pNext)
-		{
-			if (m_pGroup == pGroups)
-				break;
-			i++;
-		}
-	}
-	else
-		i = -1;
-
-	file.WriteS32(i);
+	lcint32 GroupIndex = lcGetActiveProject()->GetGroupIndex(m_pGroup);
+	file.WriteS32(GroupIndex);
 }
 
 void lcPiece::Initialize(float x, float y, float z, unsigned char nStep)

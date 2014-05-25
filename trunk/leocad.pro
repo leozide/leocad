@@ -102,6 +102,7 @@ SOURCES += common/view.cpp \
     common/lc_library.cpp \
     common/lc_mainwindow.cpp \
     common/lc_mesh.cpp \
+    common/lc_model.cpp \
     common/lc_profile.cpp \
     common/lc_shortcuts.cpp \
     common/lc_texture.cpp \
@@ -165,6 +166,7 @@ HEADERS += \
     common/lc_mainwindow.h \
     common/lc_math.h \
     common/lc_mesh.h \
+    common/lc_model.h \
     common/lc_profile.h \
     common/lc_shortcuts.h \
     common/lc_texture.h \

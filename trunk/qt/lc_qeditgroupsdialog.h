@@ -3,7 +3,6 @@
 
 #include <QDialog>
 struct lcEditGroupsDialogOptions;
-class Group;
 
 namespace Ui {
 class lcQEditGroupsDialog;

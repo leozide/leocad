@@ -48,7 +48,7 @@ void lcQEditGroupsDialog::on_newGroup_clicked()
 		currentItem = ui->treeWidget->invisibleRootItem();
 
 	Group *parentGroup = (Group*)currentItem->data(0, GroupRole).value<uintptr_t>();
-	Group *newGroup = lcGetActiveProject()->AddGroup(NULL, parentGroup, 0, 0, 0);
+	Group *newGroup = lcGetActiveProject()->AddGroup(parentGroup);
 	options->GroupParents.Add(NULL);
 
 	QTreeWidgetItem *groupItem = new QTreeWidgetItem(currentItem, QStringList(newGroup->m_strName));
@@ -116,12 +116,13 @@ void lcQEditGroupsDialog::updateParents(QTreeWidgetItem *parentItem, Group *pare
 			strncpy(itemGroup->m_strName, childItem->text(0).toLocal8Bit(), sizeof(itemGroup->m_strName));
 			itemGroup->m_strName[sizeof(itemGroup->m_strName) - 1] = 0;
 
-			int groupIndex = 0;
-			for (Group *group = project->m_pGroups; group; group = group->m_pNext, groupIndex++)
+			for (int groupIdx = 0; groupIdx < project->mGroups.GetSize(); groupIdx++)
 			{
+				lcGroup *group = project->mGroups[groupIdx];
+
 				if (itemGroup == group)
 				{
-					options->GroupParents[groupIndex] = parentGroup;
+					options->GroupParents[groupIdx] = parentGroup;
 					break;
 				}
 			}
@@ -135,9 +136,11 @@ void lcQEditGroupsDialog::addChildren(QTreeWidgetItem *parentItem, Group *parent
 {
 	Project *project = lcGetActiveProject();
 
-	for (Group *group = project->m_pGroups; group; group = group->m_pNext)
+	for (int groupIdx = 0; groupIdx < project->mGroups.GetSize(); groupIdx++)
 	{
-		if (group->m_pGroup != parentGroup)
+		lcGroup *group = project->mGroups[groupIdx];
+
+		if (group->mGroup != parentGroup)
 			continue;
 
 		QTreeWidgetItem *groupItem = new QTreeWidgetItem(parentItem, QStringList(group->m_strName));

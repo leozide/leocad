@@ -29,47 +29,11 @@
 #include "lc_context.h"
 #include "preview.h"
 
-void lcModelProperties::LoadDefaults()
-{
-	mAuthor = lcGetProfileString(LC_PROFILE_DEFAULT_AUTHOR_NAME);
-
-	mBackgroundType = (lcBackgroundType)lcGetProfileInt(LC_PROFILE_DEFAULT_BACKGROUND_TYPE);
-	mBackgroundSolidColor = lcVector3FromColor(lcGetProfileInt(LC_PROFILE_DEFAULT_BACKGROUND_COLOR));
-	mBackgroundGradientColor1 = lcVector3FromColor(lcGetProfileInt(LC_PROFILE_DEFAULT_GRADIENT_COLOR1));
-	mBackgroundGradientColor2 = lcVector3FromColor(lcGetProfileInt(LC_PROFILE_DEFAULT_GRADIENT_COLOR2));
-	mBackgroundImage = lcGetProfileString(LC_PROFILE_DEFAULT_BACKGROUND_TEXTURE);
-	mBackgroundImageTile = lcGetProfileInt(LC_PROFILE_DEFAULT_BACKGROUND_TILE);
-
-	mFogEnabled = lcGetProfileInt(LC_PROFILE_DEFAULT_FOG_ENABLED);
-	mFogDensity = lcGetProfileFloat(LC_PROFILE_DEFAULT_FOG_DENSITY);
-	mFogColor = lcVector3FromColor(lcGetProfileInt(LC_PROFILE_DEFAULT_FOG_COLOR));
-	mAmbientColor = lcVector3FromColor(lcGetProfileInt(LC_PROFILE_DEFAULT_AMBIENT_COLOR));
-}
-
-void lcModelProperties::SaveDefaults()
-{
-	lcSetProfileInt(LC_PROFILE_DEFAULT_BACKGROUND_TYPE, mBackgroundType);
-	lcSetProfileInt(LC_PROFILE_DEFAULT_BACKGROUND_COLOR, lcColorFromVector3(mBackgroundSolidColor));
-	lcSetProfileInt(LC_PROFILE_DEFAULT_GRADIENT_COLOR1, lcColorFromVector3(mBackgroundGradientColor1));
-	lcSetProfileInt(LC_PROFILE_DEFAULT_GRADIENT_COLOR2, lcColorFromVector3(mBackgroundGradientColor2));
-	lcSetProfileString(LC_PROFILE_DEFAULT_BACKGROUND_TEXTURE, mBackgroundImage);
-	lcSetProfileInt(LC_PROFILE_DEFAULT_BACKGROUND_TILE, mBackgroundImageTile);
-
-	lcSetProfileInt(LC_PROFILE_DEFAULT_FOG_ENABLED, mFogEnabled);
-	lcSetProfileFloat(LC_PROFILE_DEFAULT_FOG_DENSITY, mFogDensity);
-	lcSetProfileInt(LC_PROFILE_DEFAULT_FOG_COLOR, lcColorFromVector3(mFogColor));
-	lcSetProfileInt(LC_PROFILE_DEFAULT_AMBIENT_COLOR, lcColorFromVector3(mAmbientColor));
-}
-
-/////////////////////////////////////////////////////////////////////////////
-// Project construction/destruction
-
 Project::Project()
 {
 	m_bModified = false;
 	m_nTracking = LC_TRACK_NONE;
 	mDropPiece = NULL;
-	m_pGroups = NULL;
 	m_pUndoList = NULL;
 	m_pRedoList = NULL;
 	mTransformType = LC_TRANSFORM_RELATIVE_TRANSLATION;
@@ -90,10 +54,6 @@ Project::~Project()
 	delete mGridTexture;
 	delete m_pScreenFont;
 }
-
-
-/////////////////////////////////////////////////////////////////////////////
-// Project attributes, general services
 
 void Project::UpdateInterface()
 {
@@ -133,8 +93,6 @@ void Project::SetTitle(const char* Title)
 
 void Project::DeleteContents(bool bUndo)
 {
-	Group* pGroup;
-
 	mProperties.LoadDefaults();
 
 	if (!bUndo)
@@ -178,13 +136,7 @@ void Project::DeleteContents(bool bUndo)
 
 	mCameras.DeleteAll();
 	mLights.DeleteAll();
-
-	while (m_pGroups)
-	{
-		pGroup = m_pGroups;
-		m_pGroups = m_pGroups->m_pNext;
-		delete pGroup;
-	}
+	mGroups.DeleteAll();
 }
 
 // Only call after DeleteContents()
@@ -435,39 +387,27 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 
 	if (fv >= 0.5f)
 	{
+		int NumGroups = mGroups.GetSize();
+
 		file->ReadS32(&count, 1);
-
-		Group* pGroup;
-		Group* pLastGroup = NULL;
-		for (pGroup = m_pGroups; pGroup; pGroup = pGroup->m_pNext)
-			pLastGroup = pGroup;
-
-		pGroup = pLastGroup;
 		for (i = 0; i < count; i++)
-		{
-			if (pGroup)
-			{
-				pGroup->m_pNext = new Group();
-				pGroup = pGroup->m_pNext;
-			}
-			else
-				m_pGroups = pGroup = new Group();
-		}
-		pLastGroup = pLastGroup ? pLastGroup->m_pNext : m_pGroups;
+			mGroups.Add(new lcGroup());
 
-		for (pGroup = pLastGroup; pGroup; pGroup = pGroup->m_pNext)
+		for (int GroupIdx = NumGroups; GroupIdx < mGroups.GetSize(); GroupIdx++)
 		{
+			lcGroup* Group = mGroups[GroupIdx];
+
 			if (fv < 1.0f)
 			{
-				file->ReadBuffer(pGroup->m_strName, 65);
+				file->ReadBuffer(Group->m_strName, 65);
 				file->ReadBuffer(&ch, 1);
-				pGroup->m_fCenter[0] = 0;
-				pGroup->m_fCenter[1] = 0;
-				pGroup->m_fCenter[2] = 0;
-				pGroup->m_pGroup = (Group*)-1;
+				Group->m_fCenter[0] = 0;
+				Group->m_fCenter[1] = 0;
+				Group->m_fCenter[2] = 0;
+				Group->mGroup = (lcGroup*)-1;
 			}
 			else
-				pGroup->FileLoad(file);
+				Group->FileLoad(file);
 
 			if (bMerge)
 			{
@@ -476,36 +416,29 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 				int max = -1;
 				String baseName;
 
-				for (Group* pExisting = m_pGroups; pExisting && (pExisting != pGroup); pExisting = pExisting->m_pNext)
-					max = lcMax(max, InstanceOfName(pExisting->m_strName, pGroup->m_strName, baseName));
+				for (int Existing = 0; Existing < GroupIdx; Existing++)
+					max = lcMax(max, InstanceOfName(mGroups[Existing]->m_strName, Group->m_strName, baseName));
 
 				if (max > -1)
 				{
-					int baseReserve = sizeof(pGroup->m_strName) - 5; // space, #, 2-digits, and terminating 0
+					int baseReserve = sizeof(Group->m_strName) - 5; // space, #, 2-digits, and terminating 0
 					for (int num = max; (num > 99); num /= 10) { baseReserve--; }
-					sprintf(pGroup->m_strName, "%s #%.2d", (const char*)(baseName.Left(baseReserve)), max+1);
+					sprintf(Group->m_strName, "%s #%.2d", (const char*)(baseName.Left(baseReserve)), max+1);
 				}
 			}
 		}
 
-		for (pGroup = pLastGroup; pGroup; pGroup = pGroup->m_pNext)
+		for (int GroupIdx = NumGroups; GroupIdx < mGroups.GetSize(); GroupIdx++)
 		{
-			i = LC_POINTER_TO_INT(pGroup->m_pGroup);
-			pGroup->m_pGroup = NULL;
+			lcGroup* Group = mGroups[GroupIdx];
+
+			i = LC_POINTER_TO_INT(Group->mGroup);
+			Group->mGroup = NULL;
 
 			if (i > 0xFFFF || i == -1)
 				continue;
 
-			for (Group* g2 = pLastGroup; g2; g2 = g2->m_pNext)
-			{
-				if (i == 0)
-				{
-					pGroup->m_pGroup = g2;
-					break;
-				}
-
-				i--;
-			}
+			Group->mGroup = mGroups[NumGroups + i];
 		}
 
 		for (int PieceIdx = FirstNewPiece; PieceIdx < mPieces.GetSize(); PieceIdx++)
@@ -518,16 +451,7 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 			if (i > 0xFFFF || i == -1)
 				continue;
 
-			for (pGroup = pLastGroup; pGroup; pGroup = pGroup->m_pNext)
-			{
-				if (i == 0)
-				{
-					Piece->SetGroup(pGroup);
-					break;
-				}
-
-				i--;
-			}
+			Piece->SetGroup(mGroups[NumGroups + i]);
 		}
 
 		RemoveEmptyGroups();
@@ -758,13 +682,11 @@ void Project::FileSave(lcFile* file, bool bUndo)
 	file->WriteBuffer(&ch, 1);
 	file->WriteBuffer(Comments, ch);
 
-	Group* pGroup;
-	for (i = 0, pGroup = m_pGroups; pGroup; pGroup = pGroup->m_pNext)
-		i++;
+	i = mGroups.GetSize();
 	file->WriteS32(&i, 1);
 
-	for (pGroup = m_pGroups; pGroup; pGroup = pGroup->m_pNext)
-		pGroup->FileSave(file, m_pGroups);
+	for (int GroupIdx = 0; GroupIdx < mGroups.GetSize(); GroupIdx++)
+		mGroups[GroupIdx]->FileSave(file, mGroups);
 
 	lcuint8 ViewportMode = 0, ActiveViewport = 0;
 	file->WriteU8(&ViewportMode, 1);
@@ -4211,7 +4133,6 @@ void Project::HandleCommand(LC_COMMANDS id)
 			lcMemFile* Clipboard = new lcMemFile();
 
 			int i = 0;
-			Group* pGroup;
 //			Light* pLight;
 
 			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
@@ -4227,12 +4148,11 @@ void Project::HandleCommand(LC_COMMANDS id)
 					Piece->FileSave(*Clipboard);
 			}
 
-			for (i = 0, pGroup = m_pGroups; pGroup; pGroup = pGroup->m_pNext)
-				i++;
+			i = mGroups.GetSize();
 			Clipboard->WriteBuffer(&i, sizeof(i));
 
-			for (pGroup = m_pGroups; pGroup; pGroup = pGroup->m_pNext)
-				pGroup->FileSave(Clipboard, m_pGroups);
+			for (int GroupIdx = 0; GroupIdx < mGroups.GetSize(); GroupIdx++)
+				mGroups[GroupIdx]->FileSave(Clipboard, mGroups);
 
 			i = 0;
 			for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
@@ -4272,7 +4192,6 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 		case LC_EDIT_PASTE:
 		{
-			int i, j;
 			lcFile* file = g_App->mClipboard;
 			if (file == NULL)
 				break;
@@ -4280,85 +4199,96 @@ void Project::HandleCommand(LC_COMMANDS id)
 			SelectAndFocusNone(false);
 
 			lcArray<Piece*> PastedPieces;
-			file->ReadBuffer(&i, sizeof(i));
-			while (i--)
+			int NumPieces;
+			file->ReadBuffer(&NumPieces, sizeof(NumPieces));
+
+			while (NumPieces--)
 			{
-				Piece* piece = new Piece(NULL);
-				piece->FileLoad(*file);
-				PastedPieces.Add(piece);
+				lcPiece* Piece = new lcPiece(NULL);
+				Piece->FileLoad(*file);
+				PastedPieces.Add(Piece);
 			}
 
-			file->ReadBuffer(&i, sizeof(i));
-			Group** groups = (Group**)malloc(i*sizeof(Group**));
-			for (j = 0; j < i; j++)
+			lcArray<lcGroup*> Groups;
+			int NumGroups;
+			file->ReadBuffer(&NumGroups, sizeof(NumGroups));
+
+			while (NumGroups--)
 			{
-				groups[j] = new Group();
-				groups[j]->FileLoad(file);
+				lcGroup* Group = new lcGroup();
+				Group->FileLoad(file);
+				Groups.Add(Group);
 			}
 
 			for (int PieceIdx = 0; PieceIdx < PastedPieces.GetSize(); PieceIdx++)
 			{
-				Piece* Piece = PastedPieces[PieceIdx];
+				lcPiece* Piece = PastedPieces[PieceIdx];
 				Piece->CreateName(mPieces);
 				Piece->SetStepShow(m_nCurStep);
 				mPieces.Add(Piece);
 				Piece->SetSelected(true);
 
-				j = LC_POINTER_TO_INT(Piece->GetGroup());
-				if (j != -1)
-					Piece->SetGroup(groups[j]);
+				int GroupIndex = LC_POINTER_TO_INT(Piece->GetGroup());
+				if (GroupIndex != -1)
+					Piece->SetGroup(Groups[GroupIndex]);
 				else
 					Piece->UnGroup(NULL);
 			}
 
-			for (j = 0; j < i; j++)
+			for (int GroupIdx = 0; GroupIdx < Groups.GetSize(); GroupIdx++)
 			{
-				int g = LC_POINTER_TO_INT(groups[j]->m_pGroup);
-				groups[j]->m_pGroup = (g != -1) ? groups[g] : NULL;
+				lcGroup* Group = Groups[GroupIdx];
+				int GroupIndex = LC_POINTER_TO_INT(Group->mGroup);
+				Group->mGroup = (GroupIndex != -1) ? Groups[GroupIndex] : NULL;
 			}
 
-			for (j = 0; j < i; j++)
+			for (int GroupIdx = 0; GroupIdx < Groups.GetSize(); GroupIdx++)
 			{
-				Group* pGroup;
-				bool add = false;
-				for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-				{
-					Piece* Piece = mPieces[PieceIdx];
+				lcGroup* Group = Groups[GroupIdx];
+				bool Add = false;
 
-					for (pGroup = Piece->GetGroup(); pGroup; pGroup = pGroup->m_pGroup)
-						if (pGroup == groups[j])
+				for (int PieceIdx = 0; PieceIdx < PastedPieces.GetSize(); PieceIdx++)
+				{
+					lcPiece* Piece = PastedPieces[PieceIdx];
+					
+					for (lcGroup* PieceGroup = Piece->GetGroup(); PieceGroup; PieceGroup = PieceGroup->mGroup)
+					{
+						if (PieceGroup == Group)
 						{
-							add = true;
+							Add = true;
 							break;
 						}
+					}
 
-					if (add)
+					if (Add)
 						break;
 				}
 
-				if (add)
+				if (Add)
 				{
 					int a, max = 0;
 
-					for (pGroup = m_pGroups; pGroup; pGroup = pGroup->m_pNext)
-						if (strncmp("Pasted Group #", pGroup->m_strName, 14) == 0)
-							if (sscanf(pGroup->m_strName + 14, "%d", &a) == 1)
+					for (int SearchGroupIdx = 0; SearchGroupIdx < mGroups.GetSize(); SearchGroupIdx++)
+					{
+						lcGroup* SearchGroup = mGroups[SearchGroupIdx];
+
+						if (strncmp("Pasted Group #", SearchGroup ->m_strName, 14) == 0)
+							if (sscanf(SearchGroup ->m_strName + 14, "%d", &a) == 1)
 								if (a > max)
 									max = a;
+					}
 
-					sprintf(groups[j]->m_strName, "Pasted Group #%.2d", max+1);
-					groups[j]->m_pNext = m_pGroups;
-					m_pGroups = groups[j];
+					sprintf(Group->m_strName, "Pasted Group #%.2d", max+1);
+					mGroups.Add(Group);
 				}
 				else
-					delete groups[j];
+					delete Group;
 			}
 
-			free(groups);
+			int NumCameras;
+			file->ReadBuffer(&NumCameras, sizeof(NumCameras));
 
-			file->ReadBuffer(&i, sizeof(i));
-
-			while (i--)
+			while (NumCameras--)
 			{
 				Camera* pCamera = new Camera(false);
 				pCamera->FileLoad(*file);
@@ -4737,35 +4667,28 @@ void Project::HandleCommand(LC_COMMANDS id)
 				SystemPieceComboAdd(Minifig.Parts[i]->m_strDescription);
 			}
 
-			float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
-			int max = 0;
+			int Max = 0;
 
-			Group* pGroup;
-			for (pGroup = m_pGroups; pGroup; pGroup = pGroup->m_pNext)
-				if (strncmp (pGroup->m_strName, "Minifig #", 9) == 0)
-					if (sscanf(pGroup->m_strName, "Minifig #%d", &i) == 1)
-						if (i > max)
-							max = i;
-			pGroup = new Group;
-			sprintf(pGroup->m_strName, "Minifig #%.2d", max+1);
+			for (int GroupIdx = 0; GroupIdx < mGroups.GetSize(); GroupIdx++)
+			{
+				lcGroup* Group = mGroups[GroupIdx];
 
-			pGroup->m_pNext = m_pGroups;
-			m_pGroups = pGroup;
+				if (strncmp(Group->m_strName, "Minifig #", 9) == 0)
+					if (sscanf(Group->m_strName, "Minifig #%d", &i) == 1)
+						if (i > Max)
+							Max = i;
+			}
+
+			lcGroup* Group = AddGroup(NULL);
+			sprintf(Group->m_strName, "Minifig #%.2d", Max+1);
 
 			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 			{
 				Piece* Piece = mPieces[PieceIdx];
 
 				if (Piece->IsSelected())
-				{
-					Piece->SetGroup(pGroup);
-					Piece->CompareBoundingBox(bs);
-				}
+					Piece->SetGroup(Group);
 			}
-
-			pGroup->m_fCenter[0] = (bs[0]+bs[3])/2;
-			pGroup->m_fCenter[1] = (bs[1]+bs[4])/2;
-			pGroup->m_fCenter[2] = (bs[2]+bs[5])/2;
 
 			gMainWindow->UpdateFocusObject(GetFocusObject());
 			UpdateSelection();
@@ -4895,7 +4818,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 		case LC_PIECE_GROUP:
 		{
 			Group* pGroup;
-			int i, max = 0;
+			int i, Max = 0;
 			char name[65];
 			int Selected = 0;
 
@@ -4916,95 +4839,76 @@ void Project::HandleCommand(LC_COMMANDS id)
 				break;
 			}
 
-			for (pGroup = m_pGroups; pGroup; pGroup = pGroup->m_pNext)
-				if (strncmp (pGroup->m_strName, "Group #", 7) == 0)
-					if (sscanf(pGroup->m_strName, "Group #%d", &i) == 1)
-						if (i > max)
-							max = i;
-			sprintf(name, "Group #%.2d", max+1);
+			for (int GroupIdx = 0; GroupIdx < mGroups.GetSize(); GroupIdx++)
+			{
+				lcGroup* Group = mGroups[GroupIdx];
+
+				if (strncmp(Group->m_strName, "Group #", 7) == 0)
+					if (sscanf(Group->m_strName, "Group #%d", &i) == 1)
+						if (i > Max)
+							Max = i;
+			}
+
+			sprintf(name, "Group #%.2d", Max + 1);
 
 			if (!gMainWindow->DoDialog(LC_DIALOG_PIECE_GROUP, name))
 				break;
 
-				pGroup = new Group();
-				strcpy(pGroup->m_strName, name);
-				pGroup->m_pNext = m_pGroups;
-				m_pGroups = pGroup;
-				float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
-
-				for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-				{
-					Piece* Piece = mPieces[PieceIdx];
-
-					if (Piece->IsSelected())
-					{
-						Piece->DoGroup(pGroup);
-						Piece->CompareBoundingBox(bs);
-					}
-				}
-
-				pGroup->m_fCenter[0] = (bs[0]+bs[3])/2;
-				pGroup->m_fCenter[1] = (bs[1]+bs[4])/2;
-				pGroup->m_fCenter[2] = (bs[2]+bs[5])/2;
-
-				RemoveEmptyGroups();
-				SetModifiedFlag(true);
-				CheckPoint("Grouping");
-		} break;
-
-		case LC_PIECE_UNGROUP:
-		{
-			Group* pList = NULL;
-			Group* pGroup;
-			Group* tmp;
+			pGroup = new Group();
+			strcpy(pGroup->m_strName, name);
+			mGroups.Add(pGroup);
 
 			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 			{
 				Piece* Piece = mPieces[PieceIdx];
 
 				if (Piece->IsSelected())
+					Piece->DoGroup(pGroup);
+			}
+
+			RemoveEmptyGroups();
+			SetModifiedFlag(true);
+			CheckPoint("Grouping");
+		} break;
+
+		case LC_PIECE_UNGROUP:
+		{
+			lcArray<lcGroup*> Groups;
+
+			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+			{
+				lcPiece* Piece = mPieces[PieceIdx];
+
+				if (Piece->IsSelected())
 				{
-					pGroup = Piece->GetTopGroup();
+					lcGroup* Group = Piece->GetTopGroup();
 
-					// Check if we already removed the group
-					for (tmp = pList; tmp; tmp = tmp->m_pNext)
-						if (pGroup == tmp)
-							pGroup = NULL;
-
-					if (pGroup != NULL)
+					if (Groups.FindIndex(Group) == -1)
 					{
-						// First remove the group from the array
-						for (tmp = m_pGroups; tmp->m_pNext; tmp = tmp->m_pNext)
-							if (tmp->m_pNext == pGroup)
-							{
-								tmp->m_pNext = pGroup->m_pNext;
-								break;
-							}
-
-						if (pGroup == m_pGroups)
-							m_pGroups = pGroup->m_pNext;
-
-						// Now add it to the list of top groups
-						pGroup->m_pNext = pList;
-						pList = pGroup;
+						mGroups.Remove(Group);
+						Groups.Add(Group);
 					}
 				}
 			}
 
-			while (pList)
+			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 			{
-				for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-				{
-					Piece* Piece = mPieces[PieceIdx];
+				lcPiece* Piece = mPieces[PieceIdx];
+				lcGroup* Group = Piece->GetGroup();
 
-					if (Piece->IsSelected())
-						Piece->UnGroup(pList);
-				}
-
-				pGroup = pList;
-				pList = pList->m_pNext;
-				delete pGroup;
+				if (Groups.FindIndex(Group) != -1)
+					Piece->SetGroup(NULL);
 			}
+
+			for (int GroupIdx = 0; GroupIdx < mGroups.GetSize(); GroupIdx++)
+			{
+				lcGroup* Group = mGroups[GroupIdx];
+
+				if (Groups.FindIndex(Group->mGroup) != -1)
+					Group->mGroup = NULL;
+			}
+
+			Groups.DeleteAll();
 
 			RemoveEmptyGroups();
 			SetModifiedFlag(true);
@@ -5071,8 +4975,8 @@ void Project::HandleCommand(LC_COMMANDS id)
 			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 				Options.PieceParents.Add(mPieces[PieceIdx]->GetGroup());
 
-			for (Group* pGroup = m_pGroups; pGroup; pGroup = pGroup->m_pNext)
-				Options.GroupParents.Add(pGroup->m_pGroup);
+			for (int GroupIdx = 0; GroupIdx < mGroups.GetSize(); GroupIdx++)
+				Options.GroupParents.Add(mGroups[GroupIdx]->mGroup);
 
 			if (!gMainWindow->DoDialog(LC_DIALOG_EDIT_GROUPS, &Options))
 				break;
@@ -5080,9 +4984,8 @@ void Project::HandleCommand(LC_COMMANDS id)
 			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 				mPieces[PieceIdx]->SetGroup(Options.PieceParents[PieceIdx]);
 
-			int GroupIdx = 0;
-			for (Group* pGroup = m_pGroups; pGroup; pGroup = pGroup->m_pNext)
-				pGroup->m_pGroup = Options.GroupParents[GroupIdx++];
+			for (int GroupIdx = 0; GroupIdx < mGroups.GetSize(); GroupIdx++)
+				mGroups[GroupIdx]->mGroup = Options.GroupParents[GroupIdx];
 
 			RemoveEmptyGroups();
 			SelectAndFocusNone(false);
@@ -5764,98 +5667,87 @@ void Project::HandleCommand(LC_COMMANDS id)
 // Remove unused groups
 void Project::RemoveEmptyGroups()
 {
-	bool recurse = false;
-	Group *g1, *g2;
-	int ref;
+	bool Removed;
 
-	for (g1 = m_pGroups; g1;)
+	do
 	{
-		ref = 0;
+		Removed = false;
 
-		for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-			if (mPieces[PieceIdx]->GetGroup() == g1)
-				ref++;
-
-		for (g2 = m_pGroups; g2; g2 = g2->m_pNext)
-			if (g2->m_pGroup == g1)
-				ref++;
-
-		if (ref < 2)
+		for (int GroupIdx = 0; GroupIdx < mGroups.GetSize();)
 		{
-			if (ref != 0)
+			lcGroup* Group = mGroups[GroupIdx];
+			int Ref = 0;
+
+			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+				if (mPieces[PieceIdx]->GetGroup() == Group)
+					Ref++;
+
+			for (int ParentIdx = 0; ParentIdx < mGroups.GetSize(); ParentIdx++)
+				if (mGroups[ParentIdx]->mGroup == Group)
+					Ref++;
+
+			if (Ref > 1)
+			{
+				GroupIdx++;
+				continue;
+			}
+
+			if (Ref != 0)
 			{
 				for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 				{
-					Piece* Piece = mPieces[PieceIdx];
+					lcPiece* Piece = mPieces[PieceIdx];
 
-					if (Piece->GetGroup() == g1)
-						Piece->SetGroup(g1->m_pGroup);
-				}
-
-				for (g2 = m_pGroups; g2; g2 = g2->m_pNext)
-					if (g2->m_pGroup == g1)
-						g2->m_pGroup = g1->m_pGroup;
-			}
-
-			if (g1 == m_pGroups)
-			{
-				m_pGroups = g1->m_pNext;
-				delete g1;
-				g1 = m_pGroups;
-			}
-			else
-			{
-				for (g2 = m_pGroups; g2; g2 = g2->m_pNext)
-					if (g2->m_pNext == g1)
+					if (Piece->GetGroup() == Group)
 					{
-						g2->m_pNext = g1->m_pNext;
+						Piece->SetGroup(Group->mGroup);
 						break;
 					}
+				}
 
-				delete g1;
-				g1 = g2->m_pNext;
+				for (int ParentIdx = 0; ParentIdx < mGroups.GetSize(); ParentIdx++)
+				{
+					if (mGroups[ParentIdx]->mGroup == Group)
+					{
+						mGroups[ParentIdx]->mGroup = Group->mGroup;
+						break;
+					}
+				}
 			}
 
-			recurse = true;
+			mGroups.RemoveIndex(GroupIdx);
+			delete Group;
+			Removed = true;
 		}
-		else
-			g1 = g1->m_pNext;
 	}
-
-	if (recurse)
-		RemoveEmptyGroups();
+	while (Removed);
 }
 
-Group* Project::AddGroup (const char* name, Group* pParent, float x, float y, float z)
+lcGroup* Project::AddGroup(lcGroup* Parent)
 {
-  Group *pNewGroup = new Group();
+	lcGroup* NewGroup = new lcGroup();
 
-  if (name == NULL)
-  {
-    int i, max = 0;
-    char str[65];
+	int i, Max = 0;
 
-    for (Group *pGroup = m_pGroups; pGroup; pGroup = pGroup->m_pNext)
-      if (strncmp (pGroup->m_strName, "Group #", 7) == 0)
-        if (sscanf(pGroup->m_strName, "Group #%d", &i) == 1)
-          if (i > max)
-            max = i;
-    sprintf (str, "Group #%.2d", max+1);
+	for (int GroupIdx = 0; GroupIdx < mGroups.GetSize(); GroupIdx++)
+	{
+		lcGroup* Group = mGroups[GroupIdx];
 
-    strcpy (pNewGroup->m_strName, str);
-  }
-  else
-    strcpy (pNewGroup->m_strName, name);
+		if (strncmp(Group->m_strName, "Group #", 7) == 0)
+			if (sscanf(Group->m_strName, "Group #%d", &i) == 1)
+				if (i > Max)
+					Max = i;
+	}
 
-  pNewGroup->m_pNext = m_pGroups;
-  m_pGroups = pNewGroup;
+	sprintf(NewGroup->m_strName, "Group #%.2d", Max + 1);
+	mGroups.Add(NewGroup);
 
-  pNewGroup->m_fCenter[0] = x;
-  pNewGroup->m_fCenter[1] = y;
-  pNewGroup->m_fCenter[2] = z;
-  pNewGroup->m_pGroup = pParent;
+	NewGroup->m_fCenter[0] = 0.0f;
+	NewGroup->m_fCenter[1] = 0.0f;
+	NewGroup->m_fCenter[2] = 0.0f;
+	NewGroup->mGroup = Parent;
 
-  return pNewGroup;
+	return NewGroup;
 }
 
 void Project::SelectAndFocusNone(bool FocusOnly)

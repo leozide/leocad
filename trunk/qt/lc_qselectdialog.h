@@ -3,7 +3,6 @@
 
 #include <QDialog>
 struct lcSelectDialogOptions;
-class Group;
 
 namespace Ui {
 class lcQSelectDialog;

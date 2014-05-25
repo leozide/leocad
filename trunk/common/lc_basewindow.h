@@ -9,8 +9,6 @@
 #include "lc_shortcuts.h"
 #include "image.h"
 
-class Group;
-
 #define LC_OK           1
 #define LC_CANCEL       2
 #define LC_ABORT        3

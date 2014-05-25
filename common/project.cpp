@@ -401,9 +401,6 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 			{
 				file->ReadBuffer(Group->m_strName, 65);
 				file->ReadBuffer(&ch, 1);
-				Group->m_fCenter[0] = 0;
-				Group->m_fCenter[1] = 0;
-				Group->m_fCenter[2] = 0;
 				Group->mGroup = (lcGroup*)-1;
 			}
 			else
@@ -4232,7 +4229,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 				if (GroupIndex != -1)
 					Piece->SetGroup(Groups[GroupIndex]);
 				else
-					Piece->UnGroup(NULL);
+					Piece->SetGroup(NULL);
 			}
 
 			for (int GroupIdx = 0; GroupIdx < Groups.GetSize(); GroupIdx++)
@@ -4817,7 +4814,6 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 		case LC_PIECE_GROUP:
 		{
-			Group* pGroup;
 			int i, Max = 0;
 			char name[65];
 			int Selected = 0;
@@ -4854,16 +4850,23 @@ void Project::HandleCommand(LC_COMMANDS id)
 			if (!gMainWindow->DoDialog(LC_DIALOG_PIECE_GROUP, name))
 				break;
 
-			pGroup = new Group();
-			strcpy(pGroup->m_strName, name);
-			mGroups.Add(pGroup);
+			lcGroup* NewGroup = new lcGroup();
+			strcpy(NewGroup->m_strName, name);
+			mGroups.Add(NewGroup);
 
 			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 			{
 				Piece* Piece = mPieces[PieceIdx];
 
 				if (Piece->IsSelected())
-					Piece->DoGroup(pGroup);
+				{
+					lcGroup* Group = Piece->GetTopGroup();
+
+					if (!Group)
+						Piece->SetGroup(NewGroup);
+					else if (Group != NewGroup)
+						Group->mGroup = NewGroup;
+				}
 			}
 
 			RemoveEmptyGroups();
@@ -4958,7 +4961,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 				if (Piece->IsFocused())
 				{
-					Piece->UnGroup(NULL);
+					Piece->SetGroup(NULL);
 					break;
 				}
 			}
@@ -5742,9 +5745,6 @@ lcGroup* Project::AddGroup(lcGroup* Parent)
 	sprintf(NewGroup->m_strName, "Group #%.2d", Max + 1);
 	mGroups.Add(NewGroup);
 
-	NewGroup->m_fCenter[0] = 0.0f;
-	NewGroup->m_fCenter[1] = 0.0f;
-	NewGroup->m_fCenter[2] = 0.0f;
 	NewGroup->mGroup = Parent;
 
 	return NewGroup;

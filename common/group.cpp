@@ -1,51 +1,38 @@
-// Piece group
-//
-
 #include "lc_global.h"
 #include <stdlib.h>
 #include "group.h"
 #include "lc_file.h"
 
-/////////////////////////////////////////////////////////////////////////////
-// Group construction/destruction
-
-Group::Group()
+lcGroup::lcGroup()
 {
-	m_pGroup = NULL;
-	m_pNext = NULL;
+	mGroup = NULL;
 }
 
-Group::~Group()
+lcGroup::~lcGroup()
 {
 
 }
 
-Group* Group::GetTopGroup()
+void lcGroup::SetGroup(lcGroup* Group)
 {
-	return m_pGroup ? m_pGroup->GetTopGroup() : this;
-}
-
-void Group::SetGroup(Group* pGroup)
-{
-	if (pGroup == this)
+	if (Group == this)
 		return;
 
-	if (m_pGroup != NULL && m_pGroup != (Group*)-1)
-		m_pGroup->SetGroup(pGroup);
+	if (mGroup != NULL && mGroup != (lcGroup*)-1)
+		mGroup->SetGroup(Group);
 	else
-		m_pGroup = pGroup;
+		mGroup = Group;
 }
 
-void Group::UnGroup(Group* pGroup)
+void lcGroup::UnGroup(lcGroup* Group)
 {
-	if (m_pGroup == pGroup)
-		m_pGroup = NULL;
-	else
-		if (m_pGroup != NULL)
-			m_pGroup->UnGroup(pGroup);
+	if (mGroup == Group)
+		mGroup = NULL;
+	else if (mGroup != NULL)
+		mGroup->UnGroup(Group);
 }
 
-void Group::FileLoad(lcFile* file)
+void lcGroup::FileLoad(lcFile* file)
 {
 	lcuint8 version;
 	lcint32 i;
@@ -54,28 +41,17 @@ void Group::FileLoad(lcFile* file)
 	file->ReadBuffer(m_strName, 65);
 	file->ReadFloats(m_fCenter, 3);
 	file->ReadS32(&i, 1);
-	m_pGroup = (Group*)(long)i;
+	mGroup = (lcGroup*)(long)i;
 }
 
-void Group::FileSave(lcFile* file, Group* pGroups)
+void lcGroup::FileSave(lcFile* file, const lcArray<lcGroup*>& Groups)
 {
 	lcuint8 version = 1; // LeoCAD 0.60
-	lcint32 i = 0;
 
 	file->WriteU8(&version, 1);
 	file->WriteBuffer(m_strName, 65);
 	file->WriteFloats(m_fCenter, 3);
 
-	if (m_pGroup == NULL)
-		i = -1;
-	else
-	{
-		for (; pGroups; pGroups = pGroups->m_pNext)
-			if (pGroups == m_pGroup)
-				break;
-			else
-				i++;
-	}
-
-	file->WriteS32(&i, 1);
+	lcint32 GroupIndex = Groups.FindIndex(mGroup);
+	file->WriteS32(&GroupIndex, 1);
 }

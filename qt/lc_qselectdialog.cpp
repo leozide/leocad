@@ -150,9 +150,11 @@ void lcQSelectDialog::addChildren(QTreeWidgetItem *parentItem, Group *parentGrou
 {
 	Project *project = lcGetActiveProject();
 
-	for (Group *group = project->m_pGroups; group; group = group->m_pNext)
+	for (int groupIdx = 0; groupIdx < project->mGroups.GetSize(); groupIdx++)
 	{
-		if (group->m_pGroup != parentGroup)
+		lcGroup* group = project->mGroups[groupIdx];
+
+		if (group->mGroup != parentGroup)
 			continue;
 
 		QTreeWidgetItem *groupItem = new QTreeWidgetItem(parentItem, QStringList(group->m_strName));
@@ -164,7 +166,7 @@ void lcQSelectDialog::addChildren(QTreeWidgetItem *parentItem, Group *parentGrou
 
 	for (int pieceIdx = 0; pieceIdx < project->mPieces.GetSize(); pieceIdx++, numObjects++)
 	{
-		Piece *piece = project->mPieces[pieceIdx];
+		lcPiece *piece = project->mPieces[pieceIdx];
 
 		if (piece->GetGroup() != parentGroup)
 			continue;
@@ -181,7 +183,7 @@ void lcQSelectDialog::addChildren(QTreeWidgetItem *parentItem, Group *parentGrou
 	{
 		for (int cameraIdx = 0; cameraIdx < project->mCameras.GetSize(); cameraIdx++, numObjects++)
 		{
-			Camera *camera = project->mCameras[cameraIdx];
+			lcCamera *camera = project->mCameras[cameraIdx];
 
 			if (!camera->IsVisible())
 				continue;
@@ -193,7 +195,7 @@ void lcQSelectDialog::addChildren(QTreeWidgetItem *parentItem, Group *parentGrou
 
 		for (int lightIdx = 0; lightIdx < project->mLights.GetSize(); lightIdx++, numObjects++)
 		{
-			Light* light = project->mLights[lightIdx];
+			lcLight* light = project->mLights[lightIdx];
 
 			if (!light->IsVisible())
 				continue;

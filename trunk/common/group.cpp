@@ -10,48 +10,28 @@ lcGroup::lcGroup()
 
 lcGroup::~lcGroup()
 {
-
 }
 
-void lcGroup::SetGroup(lcGroup* Group)
+void lcGroup::FileLoad(lcFile* File)
 {
-	if (Group == this)
-		return;
+	lcuint8 Version;
+	lcint32 GroupIndex;
 
-	if (mGroup != NULL && mGroup != (lcGroup*)-1)
-		mGroup->SetGroup(Group);
-	else
-		mGroup = Group;
+	Version = File->ReadU8();
+	File->ReadBuffer(m_strName, 65);
+	File->ReadVector3();
+	File->ReadS32(&GroupIndex, 1);
+	mGroup = (lcGroup*)(long)GroupIndex;
 }
 
-void lcGroup::UnGroup(lcGroup* Group)
+void lcGroup::FileSave(lcFile* File, const lcArray<lcGroup*>& Groups)
 {
-	if (mGroup == Group)
-		mGroup = NULL;
-	else if (mGroup != NULL)
-		mGroup->UnGroup(Group);
-}
+	lcuint8 Version = 1; // LeoCAD 0.60
 
-void lcGroup::FileLoad(lcFile* file)
-{
-	lcuint8 version;
-	lcint32 i;
-
-	file->ReadU8(&version, 1);
-	file->ReadBuffer(m_strName, 65);
-	file->ReadFloats(m_fCenter, 3);
-	file->ReadS32(&i, 1);
-	mGroup = (lcGroup*)(long)i;
-}
-
-void lcGroup::FileSave(lcFile* file, const lcArray<lcGroup*>& Groups)
-{
-	lcuint8 version = 1; // LeoCAD 0.60
-
-	file->WriteU8(&version, 1);
-	file->WriteBuffer(m_strName, 65);
-	file->WriteFloats(m_fCenter, 3);
+	File->WriteU8(Version);
+	File->WriteBuffer(m_strName, 65);
+	File->WriteVector3(lcVector3(0.0f, 0.0f, 0.0f));
 
 	lcint32 GroupIndex = Groups.FindIndex(mGroup);
-	file->WriteS32(&GroupIndex, 1);
+	File->WriteS32(&GroupIndex, 1);
 }

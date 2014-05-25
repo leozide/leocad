@@ -16,16 +16,11 @@ public:
 		return mGroup ? mGroup->GetTopGroup() : this;
 	}
 
-	void SetGroup(lcGroup* Group);
-	void UnGroup(lcGroup* Group);
+	void FileLoad(lcFile* File);
+	void FileSave(lcFile* File, const lcArray<lcGroup*>& Groups);
 
 	lcGroup* mGroup;
-
-	void FileLoad(lcFile* file);
-	void FileSave(lcFile* file, const lcArray<lcGroup*>& Groups);
-
 	char m_strName[LC_MAX_GROUP_NAME + 1];
-	float m_fCenter[3];
 };
 
 #endif // _GROUP_H_

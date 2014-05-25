@@ -37,7 +37,7 @@ lcPiece::lcPiece(PieceInfo* pPieceInfo)
 	m_nStepShow = 1;
 	m_nStepHide = 255;
 	memset(m_strName, 0, sizeof(m_strName));
-	m_pGroup = NULL;
+	mGroup = NULL;
 
 	if (mPieceInfo != NULL)
 		mPieceInfo->AddRef();
@@ -226,15 +226,15 @@ bool lcPiece::FileLoad(lcFile& file)
     lcint32 i = -1;
     if (version > 6)
       file.ReadS32(&i, 1);
-    m_pGroup = (Group*)(long)i;
+    mGroup = (Group*)(long)i;
   }
   else
   {
     file.ReadU8(&ch, 1);
     if (ch == 0)
-      m_pGroup = (Group*)-1;
+      mGroup = (Group*)-1;
     else
-      m_pGroup = (Group*)(long)ch;
+      mGroup = (Group*)(long)ch;
 
     file.ReadU8(&ch, 1);
     if (ch & 0x01)
@@ -265,7 +265,7 @@ void lcPiece::FileSave(lcFile& file) const
 	file.WriteBuffer(m_strName, Length);
 
 	// version 7
-	lcint32 GroupIndex = lcGetActiveProject()->GetGroupIndex(m_pGroup);
+	lcint32 GroupIndex = lcGetActiveProject()->GetGroupIndex(mGroup);
 	file.WriteS32(GroupIndex);
 }
 
@@ -454,29 +454,11 @@ void lcPiece::CompareBoundingBox(float box[6])
 	}
 }
 
-Group* lcPiece::GetTopGroup()
+lcGroup* lcPiece::GetTopGroup()
 {
-	return m_pGroup ? m_pGroup->GetTopGroup() : NULL;
+	return mGroup ? mGroup->GetTopGroup() : NULL;
 }
 
-void lcPiece::DoGroup(Group* pGroup)
-{
-	if (m_pGroup != NULL && m_pGroup != (Group*)-1 && m_pGroup > (Group*)0xFFFF)
-		m_pGroup->SetGroup(pGroup);
-	else
-		m_pGroup = pGroup;
-}
-
-void lcPiece::UnGroup(Group* pGroup)
-{
-	if ((m_pGroup == pGroup) || (pGroup == NULL))
-		m_pGroup = NULL;
-	else
-		if (m_pGroup != NULL)
-			m_pGroup->UnGroup(pGroup);
-}
-
-// Recalculates current position and connections
 void lcPiece::UpdatePosition(unsigned short nTime)
 {
 	CalculateKeys(nTime);

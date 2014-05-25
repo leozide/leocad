@@ -130,13 +130,18 @@ public:
 	void UpdatePosition(unsigned short nTime);
 	void Move(unsigned short nTime, bool bAddKey, float dx, float dy, float dz);
 
-	void DoGroup(Group* pGroup);
-	void UnGroup(Group* pGroup);
-	Group* GetTopGroup();
-	void SetGroup(Group* pGroup)
-		{ m_pGroup = pGroup; }
-	Group* GetGroup()
-		{ return m_pGroup; }
+	lcGroup* GetTopGroup();
+
+	void SetGroup(lcGroup* Group)
+	{
+		mGroup = Group;
+	}
+
+	lcGroup* GetGroup()
+	{
+		return mGroup;
+	}
+
 	void SetName(char* name)
 		{ strcpy(m_strName, name); }
 	const char* GetName()
@@ -174,7 +179,7 @@ public:
 
 protected:
 	// Atributes
-	Group* m_pGroup;
+	Group* mGroup;
 
 	lcuint8 m_nStepShow;
 	lcuint8 m_nStepHide;

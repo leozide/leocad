@@ -46,6 +46,13 @@ enum lcTrackTool
 	LC_TRACKTOOL_ZOOM_REGION
 };
 
+enum lcDragState
+{
+	LC_DRAGSTATE_NONE,
+	LC_DRAGSTATE_PIECE
+//	LC_DRAGSTATE_COLOR
+};
+
 class View : public lcGLWidget
 {
 public:
@@ -64,6 +71,9 @@ public:
 	void OnRightButtonUp();
 	void OnMouseMove();
 	void OnMouseWheel(float Direction);
+
+	void BeginPieceDrag();
+	void EndPieceDrag(bool Accept);
 
 	void SetCamera(Camera* camera, bool ForceCopy);
 	void SetDefaultCamera();
@@ -107,10 +117,13 @@ protected:
 	void StartTracking(lcTrackButton TrackButton);
 	void StopTracking(bool Accept);
 
+	lcDragState mDragState;
 	lcTrackButton mTrackButton;
 	lcTrackTool mTrackTool;
 	int mMouseDownX;
 	int mMouseDownY;
+
+	friend class Project;
 };
 
 #endif // _VIEW_H_

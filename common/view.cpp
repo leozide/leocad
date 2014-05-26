@@ -13,6 +13,7 @@ View::View(Project *project)
 	mProject = project;
 	mCamera = NULL;
 
+	mDragState = LC_DRAGSTATE_NONE;
 	mTrackButton = LC_TRACKBUTTON_NONE;
 	mTrackTool = LC_TRACKTOOL_NONE;
 
@@ -922,6 +923,26 @@ float View::GetOverlayScale() const
 	return Dist.Length() * 5.0f;
 }
 
+void View::BeginPieceDrag()
+{
+	mDragState = LC_DRAGSTATE_PIECE;
+	UpdateTrackTool();
+}
+
+void View::EndPieceDrag(bool Accept)
+{
+	if (Accept)
+	{
+		lcVector3 Position;
+		lcVector4 Rotation;
+		mProject->GetPieceInsertPosition(this, Position, Rotation);
+		mProject->InsertPieceToolClicked(Position, Rotation);
+	}
+
+	mDragState = LC_DRAGSTATE_NONE;
+	UpdateTrackTool();
+}
+
 void View::UpdateTrackTool()
 {
 	lcTool CurrentTool = gMainWindow->GetTool();
@@ -1237,6 +1258,17 @@ void View::UpdateTrackTool()
 
 	case LC_TOOL_ZOOM_REGION:
 		NewTrackTool = LC_TRACKTOOL_ZOOM_REGION;
+		break;
+	}
+
+	switch (mDragState)
+	{
+	case LC_DRAGSTATE_NONE:
+		break;
+
+	case LC_DRAGSTATE_PIECE:
+		NewTrackTool = LC_TRACKTOOL_INSERT;
+		Redraw = true;
 		break;
 	}
 
@@ -1641,6 +1673,8 @@ void View::OnMouseMove()
 {
 	if (mTrackButton == LC_TRACKBUTTON_NONE)
 	{
+		UpdateTrackTool();
+
 		if (mTrackTool == LC_TRACKTOOL_INSERT)
 		{
 /*			lcVector3 Position;
@@ -1650,11 +1684,8 @@ void View::OnMouseMove()
 			mProject->mActiveModel->SetPreviewTransform(Position, AxisAngle);
 
 */			gMainWindow->UpdateAllViews();
-
-			return;
 		}
 
-		UpdateTrackTool();
 		return;
 	}
 

@@ -54,7 +54,7 @@ lcQMainWindow::lcQMainWindow(QWidget *parent)
 
 	GL_EnableVertexBufferObject();
 
-	if (!lcGetActiveProject()->mPieces.IsEmpty())
+	if (!lcGetActiveProject()->GetPieces().IsEmpty())
 	{
 		for (int PieceIdx = 0; PieceIdx < Library->mPieces.GetSize(); PieceIdx++)
 		{
@@ -1218,7 +1218,7 @@ void lcQMainWindow::updateTransformType(int newType)
 
 void lcQMainWindow::updateCameraMenu()
 {
-	const lcArray<Camera*>& cameras = lcGetActiveProject()->mCameras;
+	const lcArray<Camera*>& cameras = lcGetActiveProject()->GetCameras();
 	Camera* currentCamera = gMainWindow->GetActiveView()->mCamera;
 	int actionIdx, currentIndex = -1;
 

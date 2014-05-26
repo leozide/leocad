@@ -210,10 +210,6 @@ public:
 public:
 	void DeleteContents(bool bUndo);
 	void LoadDefaults(bool cameras);
-	void BeginPieceDrop(PieceInfo* Info);
-	void OnPieceDropMove(int x, int y);
-	void EndPieceDrop(bool Accept);
-	void BeginColorDrop();
 	void RenderInitialize();
 
 	void GetPiecesUsed(lcArray<lcPiecesUsedEntry>& PiecesUsed) const;
@@ -280,12 +276,6 @@ protected:
 	void ExportPOVRay(lcFile& File);
 	void ZoomExtents(int FirstView, int LastView);
 
-	int m_nTracking;
-	int m_nDownX;
-	int m_nDownY;
-
-	bool StopTracking(bool bAccept);
-	void StartTracking(int mode);
 	void UpdateSelection();
 	void RemoveEmptyGroups();
 
@@ -299,7 +289,6 @@ protected:
 	// State variables
 	int mTransformType;
 	PieceInfo* m_pCurPiece;
-	PieceInfo* mDropPiece;
 	unsigned char m_nCurStep;
 
 	lcuint16 m_nMoveSnap;

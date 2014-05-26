@@ -149,10 +149,13 @@ void lcQSelectDialog::saveSelection(QTreeWidgetItem *parentItem)
 void lcQSelectDialog::addChildren(QTreeWidgetItem *parentItem, Group *parentGroup)
 {
 	Project *project = lcGetActiveProject();
+	int numObjects = 0;
 
-	for (int groupIdx = 0; groupIdx < project->mGroups.GetSize(); groupIdx++)
+	const lcArray<lcGroup*>& groups = project->GetGroups();
+
+	for (int groupIdx = 0; groupIdx < groups.GetSize(); groupIdx++)
 	{
-		lcGroup* group = project->mGroups[groupIdx];
+		lcGroup* group = groups[groupIdx];
 
 		if (group->mGroup != parentGroup)
 			continue;
@@ -162,11 +165,11 @@ void lcQSelectDialog::addChildren(QTreeWidgetItem *parentItem, Group *parentGrou
 		addChildren(groupItem, group);
 	}
 
-	int numObjects = 0;
+	const lcArray<lcPiece*>& pieces = project->GetPieces();
 
-	for (int pieceIdx = 0; pieceIdx < project->mPieces.GetSize(); pieceIdx++, numObjects++)
+	for (int pieceIdx = 0; pieceIdx < pieces.GetSize(); pieceIdx++, numObjects++)
 	{
-		lcPiece *piece = project->mPieces[pieceIdx];
+		lcPiece *piece = pieces[pieceIdx];
 
 		if (piece->GetGroup() != parentGroup)
 			continue;
@@ -181,9 +184,11 @@ void lcQSelectDialog::addChildren(QTreeWidgetItem *parentItem, Group *parentGrou
 
 	if (!parentGroup)
 	{
-		for (int cameraIdx = 0; cameraIdx < project->mCameras.GetSize(); cameraIdx++, numObjects++)
+		const lcArray<lcCamera*>& cameras = project->GetCameras();
+
+		for (int cameraIdx = 0; cameraIdx < cameras.GetSize(); cameraIdx++, numObjects++)
 		{
-			lcCamera *camera = project->mCameras[cameraIdx];
+			lcCamera *camera = cameras[cameraIdx];
 
 			if (!camera->IsVisible())
 				continue;
@@ -193,9 +198,11 @@ void lcQSelectDialog::addChildren(QTreeWidgetItem *parentItem, Group *parentGrou
 			cameraItem->setCheckState(0, options->Selection[numObjects] ? Qt::Checked : Qt::Unchecked);
 		}
 
-		for (int lightIdx = 0; lightIdx < project->mLights.GetSize(); lightIdx++, numObjects++)
+		const lcArray<lcLight*>& lights = project->GetLights();
+
+		for (int lightIdx = 0; lightIdx < lights.GetSize(); lightIdx++, numObjects++)
 		{
-			lcLight* light = project->mLights[lightIdx];
+			lcLight* light = lights[lightIdx];
 
 			if (!light->IsVisible())
 				continue;

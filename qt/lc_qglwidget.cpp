@@ -7,6 +7,7 @@
 #include "lc_qmainwindow.h"
 #include "lc_mainwindow.h"
 #include "lc_context.h"
+#include "view.h"
 
 void lcGLWidget::MakeCurrent()
 {
@@ -303,7 +304,7 @@ void lcQGLWidget::dragEnterEvent(QDragEnterEvent *event)
 
 		dataStream >> id;
 
-		lcGetActiveProject()->BeginPieceDrop(lcGetPiecesLibrary()->FindPiece(id.toLocal8Bit().data(), false));
+		((View*)widget)->BeginPieceDrag();
 	}
 	else
 		event->ignore();
@@ -314,7 +315,7 @@ void lcQGLWidget::dragLeaveEvent(QDragLeaveEvent *event)
 	if (!isView)
 		return;
 
-	lcGetActiveProject()->EndPieceDrop(false);
+	((View*)widget)->EndPieceDrag(false);
 
 	event->accept();
 }
@@ -326,7 +327,13 @@ void lcQGLWidget::dragMoveEvent(QDragMoveEvent *event)
 
 	float scale = deviceScale();
 
-	lcGetActiveProject()->OnPieceDropMove(event->pos().x() * scale, widget->mHeight - event->pos().y() * scale - 1);
+	widget->mInputState.x = event->pos().x() * scale;
+	widget->mInputState.y = widget->mHeight - event->pos().y() * scale - 1;
+	widget->mInputState.Control = (event->keyboardModifiers() & Qt::ControlModifier) != 0;
+	widget->mInputState.Shift = (event->keyboardModifiers() & Qt::ShiftModifier) != 0;
+	widget->mInputState.Alt = (event->keyboardModifiers() & Qt::AltModifier) != 0;
+
+	widget->OnMouseMove();
 
 	event->accept();
 }
@@ -336,7 +343,7 @@ void lcQGLWidget::dropEvent(QDropEvent *event)
 	if (!isView || !event->mimeData()->hasFormat("application/vnd.leocad-part"))
 		return;
 
-	lcGetActiveProject()->EndPieceDrop(true);
+	((View*)widget)->EndPieceDrag(true);
 
 	event->accept();
 }

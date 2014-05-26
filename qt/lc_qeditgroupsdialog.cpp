@@ -96,6 +96,8 @@ void lcQEditGroupsDialog::timerEvent(QTimerEvent *event)
 void lcQEditGroupsDialog::updateParents(QTreeWidgetItem *parentItem, Group *parentGroup)
 {
 	Project *project = lcGetActiveProject();
+	const lcArray<lcPiece*>& pieces = project->GetPieces();
+	const lcArray<lcGroup*>& groups = project->GetGroups();
 
 	for (int childIndex = 0; childIndex < parentItem->childCount(); childIndex++)
 	{
@@ -105,7 +107,7 @@ void lcQEditGroupsDialog::updateParents(QTreeWidgetItem *parentItem, Group *pare
 
 		if (itemPiece)
 		{
-			int pieceIndex = project->mPieces.FindIndex(itemPiece);
+			int pieceIndex = pieces.FindIndex(itemPiece);
 			if (pieceIndex != -1)
 				options->PieceParents[pieceIndex] = parentGroup;
 		}
@@ -116,9 +118,9 @@ void lcQEditGroupsDialog::updateParents(QTreeWidgetItem *parentItem, Group *pare
 			strncpy(itemGroup->m_strName, childItem->text(0).toLocal8Bit(), sizeof(itemGroup->m_strName));
 			itemGroup->m_strName[sizeof(itemGroup->m_strName) - 1] = 0;
 
-			for (int groupIdx = 0; groupIdx < project->mGroups.GetSize(); groupIdx++)
+			for (int groupIdx = 0; groupIdx < groups.GetSize(); groupIdx++)
 			{
-				lcGroup *group = project->mGroups[groupIdx];
+				lcGroup *group = groups[groupIdx];
 
 				if (itemGroup == group)
 				{
@@ -135,10 +137,12 @@ void lcQEditGroupsDialog::updateParents(QTreeWidgetItem *parentItem, Group *pare
 void lcQEditGroupsDialog::addChildren(QTreeWidgetItem *parentItem, Group *parentGroup)
 {
 	Project *project = lcGetActiveProject();
+	const lcArray<lcPiece*>& pieces = project->GetPieces();
+	const lcArray<lcGroup*>& groups = project->GetGroups();
 
-	for (int groupIdx = 0; groupIdx < project->mGroups.GetSize(); groupIdx++)
+	for (int groupIdx = 0; groupIdx < groups.GetSize(); groupIdx++)
 	{
-		lcGroup *group = project->mGroups[groupIdx];
+		lcGroup *group = groups[groupIdx];
 
 		if (group->mGroup != parentGroup)
 			continue;
@@ -150,9 +154,9 @@ void lcQEditGroupsDialog::addChildren(QTreeWidgetItem *parentItem, Group *parent
 		addChildren(groupItem, group);
 	}
 
-	for (int pieceIndex = 0; pieceIndex < project->mPieces.GetSize(); pieceIndex++)
+	for (int pieceIndex = 0; pieceIndex < pieces.GetSize(); pieceIndex++)
 	{
-		Piece *piece = project->mPieces[pieceIndex];
+		Piece *piece = pieces[pieceIndex];
 
 		if (piece->GetGroup() != parentGroup)
 			continue;

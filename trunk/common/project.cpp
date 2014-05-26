@@ -32,8 +32,6 @@
 Project::Project()
 {
 	m_bModified = false;
-	m_nTracking = LC_TRACK_NONE;
-	mDropPiece = NULL;
 	m_pUndoList = NULL;
 	m_pRedoList = NULL;
 	mTransformType = LC_TRANSFORM_RELATIVE_TRANSLATION;
@@ -1642,13 +1640,11 @@ void Project::RenderSceneObjects(View* view)
 	RenderDebugPrimitives();
 #endif
 
-	// Draw cameras & lights
-	if (gMainWindow->GetTool() == LC_TOOL_INSERT || mDropPiece)
+	if (view->mTrackTool == LC_TRACKTOOL_INSERT)
 	{
 		lcVector3 Position;
 		lcVector4 Rotation;
 		GetPieceInsertPosition(view, Position, Rotation);
-		PieceInfo* PreviewPiece = mDropPiece ? mDropPiece : m_pCurPiece;
 
 		lcMatrix44 WorldMatrix = lcMatrix44FromAxisAngle(lcVector3(Rotation[0], Rotation[1], Rotation[2]), Rotation[3] * LC_DTOR);
 		WorldMatrix.SetTranslation(Position);
@@ -1656,11 +1652,11 @@ void Project::RenderSceneObjects(View* view)
 		Context->SetWorldViewMatrix(lcMul(WorldMatrix, ViewMatrix));
 
 		Context->SetLineWidth(2.0f * Preferences.mLineWidth);
-		PreviewPiece->RenderPiece(gMainWindow->mColorIndex);
+		m_pCurPiece->RenderPiece(gMainWindow->mColorIndex);
 	}
 
 	if (Preferences.mLightingMode != LC_LIGHTING_FLAT)
-		glDisable (GL_LIGHTING);
+		glDisable(GL_LIGHTING);
 
 	for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
 	{
@@ -1685,7 +1681,7 @@ void Project::RenderSceneObjects(View* view)
 		const int Spacing = lcMax(Preferences.mGridLineSpacing, 1);
 		int MinX = 0, MaxX = 0, MinY = 0, MaxY = 0;
 
-		if (!mPieces.IsEmpty() || (gMainWindow->GetTool() == LC_TOOL_INSERT || mDropPiece))
+		if (!mPieces.IsEmpty() || view->mTrackTool == LC_TRACKTOOL_INSERT)
 		{
 			float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
 
@@ -1697,24 +1693,22 @@ void Project::RenderSceneObjects(View* view)
 					Piece->CompareBoundingBox(bs);
 			}
 
-			if (gMainWindow->GetTool() == LC_TOOL_INSERT || mDropPiece)
+			if (view->mTrackTool == LC_TRACKTOOL_INSERT)
 			{
 				lcVector3 Position;
 				lcVector4 Rotation;
 				GetPieceInsertPosition(view, Position, Rotation);
 
-				PieceInfo* PreviewPiece = mDropPiece ? mDropPiece : m_pCurPiece;
-
 				lcVector3 Points[8] =
 				{
-					lcVector3(PreviewPiece->m_fDimensions[0],PreviewPiece->m_fDimensions[1], PreviewPiece->m_fDimensions[5]),
-					lcVector3(PreviewPiece->m_fDimensions[3],PreviewPiece->m_fDimensions[1], PreviewPiece->m_fDimensions[5]),
-					lcVector3(PreviewPiece->m_fDimensions[0],PreviewPiece->m_fDimensions[1], PreviewPiece->m_fDimensions[2]),
-					lcVector3(PreviewPiece->m_fDimensions[3],PreviewPiece->m_fDimensions[4], PreviewPiece->m_fDimensions[5]),
-					lcVector3(PreviewPiece->m_fDimensions[3],PreviewPiece->m_fDimensions[4], PreviewPiece->m_fDimensions[2]),
-					lcVector3(PreviewPiece->m_fDimensions[0],PreviewPiece->m_fDimensions[4], PreviewPiece->m_fDimensions[2]),
-					lcVector3(PreviewPiece->m_fDimensions[0],PreviewPiece->m_fDimensions[4], PreviewPiece->m_fDimensions[5]),
-					lcVector3(PreviewPiece->m_fDimensions[3],PreviewPiece->m_fDimensions[1], PreviewPiece->m_fDimensions[2])
+					lcVector3(m_pCurPiece->m_fDimensions[0], m_pCurPiece->m_fDimensions[1], m_pCurPiece->m_fDimensions[5]),
+					lcVector3(m_pCurPiece->m_fDimensions[3], m_pCurPiece->m_fDimensions[1], m_pCurPiece->m_fDimensions[5]),
+					lcVector3(m_pCurPiece->m_fDimensions[0], m_pCurPiece->m_fDimensions[1], m_pCurPiece->m_fDimensions[2]),
+					lcVector3(m_pCurPiece->m_fDimensions[3], m_pCurPiece->m_fDimensions[4], m_pCurPiece->m_fDimensions[5]),
+					lcVector3(m_pCurPiece->m_fDimensions[3], m_pCurPiece->m_fDimensions[4], m_pCurPiece->m_fDimensions[2]),
+					lcVector3(m_pCurPiece->m_fDimensions[0], m_pCurPiece->m_fDimensions[4], m_pCurPiece->m_fDimensions[2]),
+					lcVector3(m_pCurPiece->m_fDimensions[0], m_pCurPiece->m_fDimensions[4], m_pCurPiece->m_fDimensions[5]),
+					lcVector3(m_pCurPiece->m_fDimensions[3], m_pCurPiece->m_fDimensions[1], m_pCurPiece->m_fDimensions[2])
 				};
 
 				lcMatrix44 ModelWorld = lcMatrix44FromAxisAngle(lcVector3(Rotation[0], Rotation[1], Rotation[2]), Rotation[3] * LC_DTOR);
@@ -5651,8 +5645,9 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 		case LC_EDIT_CANCEL:
 		{
-			if (m_nTracking != LC_TRACK_NONE)
-				StopTracking(false);
+			View* ActiveView = gMainWindow->GetActiveView();
+			if (ActiveView && ActiveView->mTrackButton != LC_TRACKBUTTON_NONE)
+				ActiveView->StopTracking(false);
 			else
 			{
 				SelectAndFocusNone(false);
@@ -6059,64 +6054,6 @@ void Project::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
 	for (int LightIdx = 0; LightIdx < mLights.GetSize(); LightIdx++)
 		if (mLights[LightIdx]->IsVisible())
 			mLights[LightIdx]->BoxTest(ObjectBoxTest);
-}
-
-bool Project::StopTracking(bool bAccept)
-{
-	if (m_nTracking == LC_TRACK_NONE)
-		return false;
-
-	View* ActiveView = gMainWindow->GetActiveView();
-
-	m_nTracking = LC_TRACK_NONE;
-
-	if (bAccept && mDropPiece)
-	{
-		int x = m_nDownX;
-		int y = m_nDownY;
-
-		if ((x > 0) && (x < ActiveView->mWidth) && (y > 0) && (y < ActiveView->mHeight))
-		{
-			lcVector3 Pos;
-			lcVector4 Rot;
-
-			GetPieceInsertPosition(ActiveView, Pos, Rot);
-
-			Piece* pPiece = new Piece(mDropPiece);
-			pPiece->Initialize(Pos[0], Pos[1], Pos[2], m_nCurStep);
-			pPiece->SetColorIndex(gMainWindow->mColorIndex);
-
-			pPiece->ChangeKey(m_nCurStep, false, Rot, LC_PK_ROTATION);
-			pPiece->UpdatePosition(m_nCurStep);
-
-			pPiece->CreateName(mPieces);
-			mPieces.Add(pPiece);
-			SystemPieceComboAdd(mDropPiece->m_strDescription);
-			ClearSelectionAndSetFocus(pPiece, LC_PIECE_SECTION_POSITION);
-
-			if (mDropPiece)
-			{
-				mDropPiece->Release();
-				mDropPiece = NULL;
-			}
-
-			SetModifiedFlag(true);
-			CheckPoint("Inserting");
-		}
-	}
-
-	if (mDropPiece)
-	{
-		mDropPiece->Release();
-		mDropPiece = NULL;
-	}
-
-	return true;
-}
-
-void Project::StartTracking(int mode)
-{
-	m_nTracking = mode;
 }
 
 void Project::GetSnapIndex(int* SnapXY, int* SnapZ, int* SnapAngle) const
@@ -6888,42 +6825,6 @@ void Project::ZoomActiveView(int Amount)
 	gMainWindow->GetActiveView()->mCamera->Zoom(ScaledAmount, m_nCurStep, gMainWindow->GetAddKeys());
 	gMainWindow->UpdateFocusObject(GetFocusObject());
 	gMainWindow->UpdateAllViews();
-}
-
-void Project::BeginPieceDrop(PieceInfo* Info)
-{
-	StartTracking(LC_TRACK_LEFT);
-
-	mDropPiece = Info;
-	mDropPiece->AddRef();
-}
-
-void Project::OnPieceDropMove(int x, int y)
-{
-	if (!mDropPiece)
-		return;
-
-	if (m_nDownX != x || m_nDownY != y)
-	{
-		m_nDownX = x;
-		m_nDownY = y;
-
-		gMainWindow->UpdateAllViews();
-	}
-}
-
-void Project::EndPieceDrop(bool Accept)
-{
-	StopTracking(Accept);
-
-	if (!Accept)
-		gMainWindow->UpdateAllViews();
-}
-
-void Project::BeginColorDrop()
-{
-	StartTracking(LC_TRACK_LEFT);
-	gMainWindow->SetTool(LC_TOOL_PAINT);
 }
 
 void Project::BeginMouseTool()

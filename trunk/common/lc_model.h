@@ -78,7 +78,27 @@ public:
 	lcModel();
 	~lcModel();
 
-public:
+	const lcArray<lcPiece*>& GetPieces() const
+	{
+		return mPieces;
+	}
+
+	const lcArray<lcCamera*>& GetCameras() const
+	{
+		return mCameras;
+	}
+
+	const lcArray<lcLight*>& GetLights() const
+	{
+		return mLights;
+	}
+
+	const lcArray<lcGroup*>& GetGroups() const
+	{
+		return mGroups;
+	}
+
+protected:
 	lcModelProperties mProperties;
 
 	lcArray<lcPiece*> mPieces;

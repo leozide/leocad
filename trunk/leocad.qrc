@@ -65,5 +65,6 @@
         <file>resources/edit_transform_relative_translation.png</file>
         <file>resources/piece_show_earlier.png</file>
         <file>resources/piece_show_later.png</file>
+        <file>resources/time_add_keys.png</file>
     </qresource>
 </RCC>

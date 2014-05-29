@@ -143,6 +143,7 @@ void lcQMainWindow::createActions()
 	actions[LC_VIEW_TIME_PREVIOUS]->setIcon(QIcon(":/resources/time_previous.png"));
 	actions[LC_VIEW_TIME_NEXT]->setIcon(QIcon(":/resources/time_next.png"));
 	actions[LC_VIEW_TIME_LAST]->setIcon(QIcon(":/resources/time_last.png"));
+	actions[LC_VIEW_TIME_ADD_KEYS]->setIcon(QIcon(":/resources/time_add_keys.png"));
 	actions[LC_HELP_HOMEPAGE]->setIcon(QIcon(":/resources/help_homepage.png"));
 	actions[LC_HELP_EMAIL]->setIcon(QIcon(":/resources/help_email.png"));
 
@@ -153,6 +154,7 @@ void lcQMainWindow::createActions()
 	actions[LC_EDIT_SNAP_Y]->setCheckable(true);
 	actions[LC_EDIT_SNAP_Z]->setCheckable(true);
 	actions[LC_VIEW_CAMERA_NONE]->setCheckable(true);
+	actions[LC_VIEW_TIME_ADD_KEYS]->setCheckable(true);
 
 	QActionGroup *actionSnapXYGroup = new QActionGroup(this);
 	for (int actionIdx = LC_EDIT_SNAP_MOVE_XY0; actionIdx <= LC_EDIT_SNAP_MOVE_XY9; actionIdx++)
@@ -440,7 +442,7 @@ void lcQMainWindow::createToolBars()
 	timeToolBar->addAction(actions[LC_VIEW_TIME_LAST]);
 	timeToolBar->addAction(actions[LC_PIECE_SHOW_EARLIER]);
 	timeToolBar->addAction(actions[LC_PIECE_SHOW_LATER]);
-	//LC_VIEW_TIME_ADD_KEYS
+	timeToolBar->addAction(actions[LC_VIEW_TIME_ADD_KEYS]);
 	// TODO: add missing menu items
 
 	partsToolBar = new QDockWidget(tr("Parts"), this);

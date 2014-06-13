@@ -980,7 +980,7 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 	// LC_VIEW_PROJECTION_ORTHO
 	{
 		"View.Projection.Orthographic",
-		"&Ortho",
+		"&Orthographic",
 		"Set the current camera to use an orthographic projection",
 		""
 	},

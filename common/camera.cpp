@@ -699,7 +699,6 @@ void lcCamera::Orbit(float DistanceX, float DistanceY, const lcVector3& CenterPo
 	{
 		Z[0] = -Z[0];
 		Z[1] = -Z[1];
-		DistanceX = -DistanceX;
 	}
  
 	lcMatrix44 YRot(lcVector4(Z[0], Z[1], 0.0f, 0.0f), lcVector4(-Z[1], Z[0], 0.0f, 0.0f), lcVector4(0.0f, 0.0f, 1.0f, 0.0f), lcVector4(0.0f, 0.0f, 0.0f, 1.0f));
@@ -715,6 +714,7 @@ void lcCamera::Orbit(float DistanceX, float DistanceY, const lcVector3& CenterPo
 		bAddKey = false;
 
 	ChangeKey(nTime, bAddKey, mPosition, LC_CK_EYE);
+	ChangeKey(nTime, bAddKey, mTargetPosition, LC_CK_TARGET);
 	ChangeKey(nTime, bAddKey, mUpVector, LC_CK_UP);
 
 	UpdatePosition(nTime);

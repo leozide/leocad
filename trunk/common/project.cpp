@@ -6238,16 +6238,18 @@ bool Project::MoveSelectedObjects(lcVector3& Move, lcVector3& Remainder, bool Sn
 			return false;
 	}
 
+	lcVector3 TransformedMove(Move);
+
 	// Transform the translation if we're in relative mode.
 	if ((m_nSnap & LC_DRAW_GLOBAL_SNAP) == 0)
 	{
 		Object* Focus = GetFocusObject();
 
 		if ((Focus != NULL) && Focus->IsPiece())
-			Move = lcMul30(Move, ((Piece*)Focus)->mModelWorld);
+			TransformedMove = lcMul30(TransformedMove, ((Piece*)Focus)->mModelWorld);
 	}
 
-	float x = Move[0], y = Move[1], z = Move[2];
+	float x = TransformedMove[0], y = TransformedMove[1], z = TransformedMove[2];
 
 	for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
 	{

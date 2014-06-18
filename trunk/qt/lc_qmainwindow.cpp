@@ -150,6 +150,7 @@ void lcQMainWindow::createActions()
 	actions[LC_EDIT_LOCK_X]->setCheckable(true);
 	actions[LC_EDIT_LOCK_Y]->setCheckable(true);
 	actions[LC_EDIT_LOCK_Z]->setCheckable(true);
+	actions[LC_EDIT_SNAP_RELATIVE]->setCheckable(true);
 	actions[LC_EDIT_SNAP_X]->setCheckable(true);
 	actions[LC_EDIT_SNAP_Y]->setCheckable(true);
 	actions[LC_EDIT_SNAP_Z]->setCheckable(true);
@@ -387,6 +388,7 @@ void lcQMainWindow::createToolBars()
 	standardToolBar->addAction(actions[LC_EDIT_COPY]);
 	standardToolBar->addAction(actions[LC_EDIT_PASTE]);
 	standardToolBar->addSeparator();
+//	standardToolBar->addAction(actions[LC_EDIT_SNAP_RELATIVE]);
 	standardToolBar->addAction(actions[LC_EDIT_LOCK_TOGGLE]);
 	standardToolBar->addAction(actions[LC_EDIT_SNAP_TOGGLE]);
 	standardToolBar->addAction(actions[LC_EDIT_SNAP_ANGLE]);
@@ -1150,6 +1152,7 @@ void lcQMainWindow::setAddKeys(bool addKeys)
 
 void lcQMainWindow::updateLockSnap(lcuint32 snap)
 {
+	actions[LC_EDIT_SNAP_RELATIVE]->setChecked((snap & LC_DRAW_GLOBAL_SNAP) == 0);
 	actions[LC_EDIT_SNAP_X]->setChecked((snap & LC_DRAW_SNAP_X) != 0);
 	actions[LC_EDIT_SNAP_Y]->setChecked((snap & LC_DRAW_SNAP_Y) != 0);
 	actions[LC_EDIT_SNAP_Z]->setChecked((snap & LC_DRAW_SNAP_Z) != 0);

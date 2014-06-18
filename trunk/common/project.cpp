@@ -5424,6 +5424,15 @@ void Project::HandleCommand(LC_COMMANDS id)
 			gMainWindow->SetAddKeys(!gMainWindow->GetAddKeys());
 			break;
 
+		case LC_EDIT_SNAP_RELATIVE:
+			if (m_nSnap & LC_DRAW_GLOBAL_SNAP)
+				m_nSnap &= ~LC_DRAW_GLOBAL_SNAP;
+			else
+				m_nSnap |= LC_DRAW_GLOBAL_SNAP;
+			gMainWindow->UpdateLockSnap(m_nSnap);
+			gMainWindow->UpdateAllViews();
+			break;
+
 		case LC_EDIT_SNAP_X:
 			if (m_nSnap & LC_DRAW_SNAP_X)
 				m_nSnap &= ~LC_DRAW_SNAP_X;

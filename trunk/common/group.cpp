@@ -14,10 +14,9 @@ lcGroup::~lcGroup()
 
 void lcGroup::FileLoad(lcFile* File)
 {
-	lcuint8 Version;
 	lcint32 GroupIndex;
 
-	Version = File->ReadU8();
+	File->ReadU8();
 	File->ReadBuffer(m_strName, 65);
 	File->ReadVector3();
 	File->ReadS32(&GroupIndex, 1);

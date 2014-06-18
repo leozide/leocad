@@ -277,6 +277,13 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 		"Allows movement and rotation in all directions",
 		""
 	},
+	// LC_EDIT_SNAP_RELATIVE
+	{
+		"Edit.SnapRelative",
+		"Relative Snap",
+		"Enable relative movement and rotation",
+		""
+	},
 	// LC_EDIT_SNAP_X
 	{
 		"Edit.Snap.SnapX",

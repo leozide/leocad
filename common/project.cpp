@@ -1908,20 +1908,31 @@ void Project::RenderViewports(View* view)
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_LIGHTING);
 
-	// Draw camera name
-	glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
-	glEnable(GL_TEXTURE_2D);
-	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-	m_pScreenFont->MakeCurrent();
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glEnable(GL_BLEND);
+	if (gMainWindow->GetActiveView() == view)
+	{
+		glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
+		float Verts[8] = { 0.0f, 0.0f, view->mWidth - 1, 0.0f, view->mWidth - 1, view->mHeight - 1, 0.0f, view->mHeight - 1 };
 
-	String str(view->mCamera->GetName());
-	if (str.GetLength() > 0)
-		m_pScreenFont->PrintText(3.0f, (float)view->mHeight - 1.0f - 6.0f, 0.0f, str);
+		glVertexPointer(2, GL_FLOAT, 0, Verts);
+		glDrawArrays(GL_LINE_LOOP, 0, 4);
+	}
 
-	glDisable(GL_BLEND);
-	glDisable(GL_TEXTURE_2D);
+	const char* CameraName = view->mCamera->GetName();
+
+	if (CameraName[0])
+	{
+		glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
+		glEnable(GL_TEXTURE_2D);
+		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+		m_pScreenFont->MakeCurrent();
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glEnable(GL_BLEND);
+
+		m_pScreenFont->PrintText(3.0f, (float)view->mHeight - 1.0f - 6.0f, 0.0f, CameraName);
+
+		glDisable(GL_BLEND);
+		glDisable(GL_TEXTURE_2D);
+	}
 
 	glDepthMask(GL_TRUE);
 	glEnable(GL_DEPTH_TEST);

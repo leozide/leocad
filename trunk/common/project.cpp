@@ -6258,53 +6258,40 @@ bool Project::MoveSelectedObjects(lcVector3& Move, lcVector3& Remainder, bool Sn
 			return false;
 	}
 
-	lcVector3 TransformedMove(Move);
+	lcVector3 TransformedMove = lcMul30(Move, GetRelativeRotation());
 
-	// Transform the translation if we're in relative mode.
-	if ((m_nSnap & LC_DRAW_GLOBAL_SNAP) == 0)
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 	{
-		Object* Focus = GetFocusObject();
+		lcPiece* Piece = mPieces[PieceIdx];
 
-		if ((Focus != NULL) && Focus->IsPiece())
-			TransformedMove = lcMul30(TransformedMove, ((Piece*)Focus)->mModelWorld);
+		if (Piece->IsSelected())
+		{
+			Piece->Move(m_nCurStep, gMainWindow->GetAddKeys(), TransformedMove);
+			Piece->UpdatePosition(m_nCurStep);
+		}
 	}
-
-	float x = TransformedMove[0], y = TransformedMove[1], z = TransformedMove[2];
 
 	for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
 	{
-		Camera* pCamera = mCameras[CameraIdx];
+		lcCamera* Camera = mCameras[CameraIdx];
 
-		if (pCamera->IsSelected())
+		if (Camera->IsSelected())
 		{
-			pCamera->Move(m_nCurStep, gMainWindow->GetAddKeys(), x, y, z);
-			pCamera->UpdatePosition(m_nCurStep);
+			Camera->Move(m_nCurStep, gMainWindow->GetAddKeys(), TransformedMove);
+			Camera->UpdatePosition(m_nCurStep);
 		}
 	}
 
 	for (int LightIdx = 0; LightIdx < mLights.GetSize(); LightIdx++)
 	{
-		Light* pLight = mLights[LightIdx];
+		lcLight* Light = mLights[LightIdx];
 
-		if (pLight->IsSelected())
+		if (Light->IsSelected())
 		{
-			pLight->Move (m_nCurStep, gMainWindow->GetAddKeys(), x, y, z);
-			pLight->UpdatePosition (m_nCurStep);
+			Light->Move(m_nCurStep, gMainWindow->GetAddKeys(), TransformedMove);
+			Light->UpdatePosition(m_nCurStep);
 		}
 	}
-
-	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-	{
-		Piece* Piece = mPieces[PieceIdx];
-
-		if (Piece->IsSelected())
-		{
-			Piece->Move(m_nCurStep, gMainWindow->GetAddKeys(), x, y, z);
-			Piece->UpdatePosition(m_nCurStep);
-		}
-	}
-
-	// TODO: move group centers
 
 	return true;
 }
@@ -6513,7 +6500,7 @@ void Project::TransformSelectedObjects(LC_TRANSFORM_TYPE Type, const lcVector3& 
 
 				if (pCamera->IsSelected())
 				{
-					pCamera->Move(m_nCurStep, gMainWindow->GetAddKeys(), Offset.x, Offset.y, Offset.z);
+					pCamera->Move(m_nCurStep, gMainWindow->GetAddKeys(), Offset);
 					pCamera->UpdatePosition(m_nCurStep);
 				}
 			}
@@ -6524,7 +6511,7 @@ void Project::TransformSelectedObjects(LC_TRANSFORM_TYPE Type, const lcVector3& 
 
 				if (pLight->IsSelected())
 				{
-					pLight->Move(m_nCurStep, gMainWindow->GetAddKeys(), Offset.x, Offset.y, Offset.z);
+					pLight->Move(m_nCurStep, gMainWindow->GetAddKeys(), Offset);
 					pLight->UpdatePosition (m_nCurStep);
 				}
 			}
@@ -6535,7 +6522,7 @@ void Project::TransformSelectedObjects(LC_TRANSFORM_TYPE Type, const lcVector3& 
 
 				if (Piece->IsSelected())
 				{
-					Piece->Move(m_nCurStep, gMainWindow->GetAddKeys(), Offset.x, Offset.y, Offset.z);
+					Piece->Move(m_nCurStep, gMainWindow->GetAddKeys(), Offset);
 					Piece->UpdatePosition(m_nCurStep);
 				}
 			}
@@ -6962,7 +6949,7 @@ void Project::UpdateSpotLightTool(const lcVector3& Target)
 {
 	lcLight* Light = mLights[mLights.GetSize() - 1];
 
-	Light->Move(1, false, Target[0], Target[1], Target[2]);
+	Light->Move(1, false, Target);
 	Light->UpdatePosition(1);
 
 	gMainWindow->UpdateFocusObject(Light);
@@ -6982,7 +6969,7 @@ void Project::UpdateCameraTool(const lcVector3& Target)
 {
 	lcCamera* Camera = mCameras[mCameras.GetSize() - 1];
 
-	Camera->Move(1, false, Target[0], Target[1], Target[2]);
+	Camera->Move(1, false, Target);
 	Camera->UpdatePosition(1);
 
 	gMainWindow->UpdateFocusObject(Camera);

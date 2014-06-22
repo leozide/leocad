@@ -87,7 +87,7 @@ public:
 	virtual lcuint32 GetFocusSection() const = 0;
 
 	virtual lcVector3 GetSectionPosition(lcuint32 Section) const = 0;
-	virtual void Move(unsigned short nTime, bool bAddKey, float dx, float dy, float dz) = 0;
+	virtual void Move(unsigned short nTime, bool AddKey, const lcVector3& Distance) = 0;
 	virtual void RayTest(lcObjectRayTest& ObjectRayTest) const = 0;
 	virtual void BoxTest(lcObjectBoxTest& ObjectBoxTest) const = 0;
 	virtual const char* GetName() const = 0;

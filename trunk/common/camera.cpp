@@ -284,31 +284,29 @@ void lcCamera::FileSave(lcFile& file) const
 /////////////////////////////////////////////////////////////////////////////
 // Camera operations
 
-void lcCamera::Move(unsigned short nTime, bool bAddKey, float dx, float dy, float dz)
+void lcCamera::Move(unsigned short nTime, bool AddKey, const lcVector3& Distance)
 {
-	lcVector3 MoveVec(dx, dy, dz);
-
 	if (IsSimple())
-		bAddKey = false;
+		AddKey = false;
 
 	if (IsSelected(LC_CAMERA_SECTION_POSITION))
 	{
-		mPosition += MoveVec;
+		mPosition += Distance;
 		lcAlign(mOrthoTarget, mPosition, mTargetPosition);
-		ChangeKey(nTime, bAddKey, mPosition, LC_CK_EYE);
+		ChangeKey(nTime, AddKey, mPosition, LC_CK_EYE);
 	}
 
 	if (IsSelected(LC_CAMERA_SECTION_TARGET))
 	{
-		mTargetPosition += MoveVec;
-		ChangeKey(nTime, bAddKey, mTargetPosition, LC_CK_TARGET);
+		mTargetPosition += Distance;
+		ChangeKey(nTime, AddKey, mTargetPosition, LC_CK_TARGET);
 	}
 
 	if (IsSelected(LC_CAMERA_SECTION_UPVECTOR))
 	{
-		mUpVector += MoveVec;
+		mUpVector += Distance;
 		mUpVector.Normalize();
-		ChangeKey(nTime, bAddKey, mTargetPosition, LC_CK_UP);
+		ChangeKey(nTime, AddKey, mTargetPosition, LC_CK_UP);
 	}
 
 	lcVector3 FrontVector(mTargetPosition - mPosition);

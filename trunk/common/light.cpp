@@ -214,22 +214,20 @@ void lcLight::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
 	}
 }
 
-void lcLight::Move(unsigned short nTime, bool bAddKey, float dx, float dy, float dz)
+void lcLight::Move(unsigned short nTime, bool AddKey, const lcVector3& Distance)
 {
-	lcVector3 MoveVec(dx, dy, dz);
-
 	if (IsSelected(LC_LIGHT_SECTION_POSITION))
 	{
-		mPosition += MoveVec;
+		mPosition += Distance;
 
-		ChangeKey(nTime, bAddKey, mPosition, LC_LK_POSITION);
+		ChangeKey(nTime, AddKey, mPosition, LC_LK_POSITION);
 	}
 
 	if (IsSelected(LC_LIGHT_SECTION_TARGET))
 	{
-		mTargetPosition += MoveVec;
+		mTargetPosition += Distance;
 
-		ChangeKey(nTime, bAddKey, mTargetPosition, LC_LK_TARGET);
+		ChangeKey(nTime, AddKey, mTargetPosition, LC_LK_TARGET);
 	}
 }
 

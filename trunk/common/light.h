@@ -204,7 +204,7 @@ public:
 	void RenderSphere();
 
 	void UpdatePosition(unsigned short nTime);
-	void Move(unsigned short nTime, bool bAddKey, float dx, float dy, float dz);
+	void Move(unsigned short nTime, bool AddKey, const lcVector3& Distance);
 	bool Setup(int LightIndex);
 	void CreateName(const lcArray<Light*>& Lights);
 	bool FileLoad(lcFile& file);

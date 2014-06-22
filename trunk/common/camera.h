@@ -263,7 +263,7 @@ public:
 	void Orbit(float DistanceX, float DistanceY, const lcVector3& CenterPosition, unsigned short nTime, bool bAddKey);
 	void Roll(float Distance, unsigned short nTime, bool bAddKey);
 	void Center(lcVector3& point, unsigned short nTime, bool bAddKey);
-	void Move(unsigned short nTime, bool bAddKey, float x, float y, float z);
+	void Move(unsigned short nTime, bool AddKey, const lcVector3& Distance);
 	void SetViewpoint(LC_VIEWPOINT Viewpoint, unsigned short nTime, bool bAddKey);
 	void SetFocalPoint(const lcVector3& focus, unsigned short nTime, bool bAddKey);
 

@@ -402,13 +402,11 @@ void lcPiece::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
 	}
 }
 
-void lcPiece::Move(unsigned short nTime, bool bAddKey, float dx, float dy, float dz)
+void lcPiece::Move(unsigned short nTime, bool AddKey, const lcVector3& Distance)
 {
-	mPosition[0] += dx;
-	mPosition[1] += dy;
-	mPosition[2] += dz;
+	mPosition += Distance;
 
-	ChangeKey(nTime, bAddKey, mPosition, LC_PK_POSITION);
+	ChangeKey(nTime, AddKey, mPosition, LC_PK_POSITION);
 
 	mModelWorld.SetTranslation(mPosition);
 }

@@ -1744,7 +1744,8 @@ void View::OnMouseMove()
 				else
 					Direction = lcVector3(0.0, 0.0f, 1.0f);
 
-				Direction = lcMul30(Direction, mProject->GetRelativeRotation());
+				lcMatrix44 RelativeRotation = mProject->GetRelativeRotation();
+				Direction = lcMul30(Direction, RelativeRotation);
 
 				lcVector3 Intersection;
 				lcClosestPointsBetweenLines(Center, Center + Direction, CurrentStart, CurrentEnd, &Intersection, NULL);
@@ -1753,6 +1754,7 @@ void View::OnMouseMove()
 				lcClosestPointsBetweenLines(Center, Center + Direction, MouseDownStart, MouseDownEnd, &MoveStart, NULL);
 
 				lcVector3 Distance = Intersection - MoveStart;
+				Distance = lcMul30(Distance, lcMatrix44AffineInverse(RelativeRotation));
 				mProject->UpdateMoveTool(Distance);
 			}
 			else if (mTrackTool == LC_TRACKTOOL_MOVE_XY || mTrackTool == LC_TRACKTOOL_MOVE_XZ || mTrackTool == LC_TRACKTOOL_MOVE_YZ)
@@ -1766,7 +1768,8 @@ void View::OnMouseMove()
 				else
 					PlaneNormal = lcVector3(1.0f, 0.0f, 0.0f);
 
-				PlaneNormal = lcMul30(PlaneNormal, mProject->GetRelativeRotation());
+				lcMatrix44 RelativeRotation = mProject->GetRelativeRotation();
+				PlaneNormal = lcMul30(PlaneNormal, RelativeRotation);
 				lcVector4 Plane(PlaneNormal, -lcDot(PlaneNormal, Center));
 				lcVector3 Intersection;
 
@@ -1777,6 +1780,7 @@ void View::OnMouseMove()
 					if (lcLinePlaneIntersection(&MoveStart, MouseDownStart, MouseDownEnd, Plane))
 					{
 						lcVector3 Distance = Intersection - MoveStart;
+						Distance = lcMul30(Distance, lcMatrix44AffineInverse(RelativeRotation));
 						mProject->UpdateMoveTool(Distance);
 					}
 				}

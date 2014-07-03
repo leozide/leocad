@@ -32,8 +32,6 @@
 Project::Project()
 {
 	m_bModified = false;
-	m_pUndoList = NULL;
-	m_pRedoList = NULL;
 	mTransformType = LC_TRANSFORM_RELATIVE_TRANSLATION;
 	m_pTerrain = new Terrain();
 	m_pBackground = new lcTexture();
@@ -56,7 +54,7 @@ Project::~Project()
 void Project::UpdateInterface()
 {
 	// Update all user interface elements.
-	gMainWindow->UpdateUndoRedo(m_pUndoList->pNext ? m_pUndoList->strText : NULL, m_pRedoList ? m_pRedoList->strText : NULL);
+	gMainWindow->UpdateUndoRedo(mUndoHistory.GetSize() > 1 ? mUndoHistory[0]->Description : NULL, !mRedoHistory.IsEmpty() ? mRedoHistory[0]->Description : NULL);
 	gMainWindow->UpdatePaste(g_App->mClipboard != NULL);
 	gMainWindow->UpdateCategories();
 	gMainWindow->UpdateTitle(m_strTitle, m_bModified);
@@ -95,24 +93,8 @@ void Project::DeleteContents(bool bUndo)
 
 	if (!bUndo)
 	{
-		LC_UNDOINFO* pUndo;
-
-		while (m_pUndoList)
-		{
-			pUndo = m_pUndoList;
-			m_pUndoList = m_pUndoList->pNext;
-			delete pUndo;
-		}
-
-		while (m_pRedoList)
-		{
-			pUndo = m_pRedoList;
-			m_pRedoList = m_pRedoList->pNext;
-			delete pUndo;
-		}
-
-		m_pRedoList = NULL;
-		m_pUndoList = NULL;
+		mUndoHistory.DeleteAll();
+		mRedoHistory.DeleteAll();
 
 		m_pBackground->Unload();
 		m_pTerrain->LoadDefaults(true);
@@ -148,7 +130,6 @@ void Project::LoadDefaults(bool cameras)
 	gMainWindow->SetColorIndex(lcGetColorIndex(4));
 	gMainWindow->SetTool(LC_TOOL_SELECT);
 	gMainWindow->SetAddKeys(false);
-	m_bUndoOriginal = true;
 	gMainWindow->UpdateUndoRedo(NULL, NULL);
 	m_nAngleSnap = (unsigned short)lcGetProfileInt(LC_PROFILE_ANGLE_SNAP);
 	m_nSnap = lcGetProfileInt(LC_PROFILE_SNAP);
@@ -1328,35 +1309,17 @@ void Project::SetPathName(const char* PathName, bool bAddToMRU)
 // Undo/Redo support
 
 // Save current state.
-void Project::CheckPoint (const char* text)
+void Project::CheckPoint(const char* Description)
 {
-	LC_UNDOINFO* pTmp;
-	LC_UNDOINFO* pUndo = new LC_UNDOINFO;
-	int i;
+	lcModelHistoryEntry* ModelHistoryEntry = new lcModelHistoryEntry();
 
-	strcpy(pUndo->strText, text);
-	FileSave(&pUndo->file, true);
+	strcpy(ModelHistoryEntry->Description, Description);
+	FileSave(&ModelHistoryEntry->File, true);
 
-	for (pTmp = m_pUndoList, i = 0; pTmp; pTmp = pTmp->pNext, i++)
-		if ((i == 30) && (pTmp->pNext != NULL))
-		{
-			delete pTmp->pNext;
-			pTmp->pNext = NULL;
-			m_bUndoOriginal = false;
-		}
+	mUndoHistory.InsertAt(0, ModelHistoryEntry);
+	mRedoHistory.DeleteAll();
 
-	pUndo->pNext = m_pUndoList;
-	m_pUndoList = pUndo;
-
-	while (m_pRedoList)
-	{
-		pUndo = m_pRedoList;
-		m_pRedoList = m_pRedoList->pNext;
-		delete pUndo;
-	}
-	m_pRedoList = NULL;
-
-	gMainWindow->UpdateUndoRedo(m_pUndoList->pNext ? m_pUndoList->strText : NULL, NULL);
+	gMainWindow->UpdateUndoRedo(mUndoHistory.GetSize() > 1 ? mUndoHistory[0]->Description : NULL, !mRedoHistory.IsEmpty() ? mRedoHistory[0]->Description : NULL);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -4053,84 +4016,57 @@ void Project::HandleCommand(LC_COMMANDS id)
 //			}
 		} break;
 
-		case LC_FILE_RECENT1:
-		case LC_FILE_RECENT2:
-		case LC_FILE_RECENT3:
-		case LC_FILE_RECENT4:
+	case LC_FILE_RECENT1:
+	case LC_FILE_RECENT2:
+	case LC_FILE_RECENT3:
+	case LC_FILE_RECENT4:
+		if (!OpenProject(gMainWindow->mRecentFiles[id - LC_FILE_RECENT1]))
+			gMainWindow->RemoveRecentFile(id - LC_FILE_RECENT1);
+		break;
+
+	case LC_FILE_EXIT:
+		gMainWindow->Close();
+		break;
+
+	case LC_EDIT_UNDO:
 		{
-			if (!OpenProject(gMainWindow->mRecentFiles[id - LC_FILE_RECENT1]))
-				gMainWindow->RemoveRecentFile(id - LC_FILE_RECENT1);
-		} break;
+			if (mUndoHistory.GetSize() < 2)
+				break;
 
-		case LC_FILE_EXIT:
+			lcModelHistoryEntry* Undo = mUndoHistory[0];
+			mUndoHistory.RemoveIndex(0);
+			mRedoHistory.InsertAt(0, Undo);
+
+			DeleteContents(true);
+			FileLoad(&mUndoHistory[0]->File, true, false);
+
+			if (mUndoHistory.GetSize() == 1)
+				SetModifiedFlag(false);
+
+			gMainWindow->UpdateUndoRedo(mUndoHistory.GetSize() > 1 ? mUndoHistory[0]->Description : NULL, !mRedoHistory.IsEmpty() ? mRedoHistory[0]->Description : NULL);
+		}
+		break;
+
+	case LC_EDIT_REDO:
 		{
-			gMainWindow->Close();
-		} break;
+			if (mRedoHistory.IsEmpty())
+				break;
 
-		case LC_EDIT_UNDO:
-		case LC_EDIT_REDO:
-		{
-			LC_UNDOINFO *pUndo, *pTmp;
-			int i;
+			lcModelHistoryEntry* Redo = mRedoHistory[0];
+			mRedoHistory.RemoveIndex(0);
+			mUndoHistory.InsertAt(0, Redo);
 
-			if (id == LC_EDIT_UNDO)
-			{
-				if ((m_pUndoList != NULL) && (m_pUndoList->pNext != NULL))
-				{
-					// Remove the first item from the undo list.
-					pUndo = m_pUndoList;
-					m_pUndoList = pUndo->pNext;
+			DeleteContents(true);
+			FileLoad(&Redo->File, true, false);
 
-					// Check if we need to delete the last redo info.
-					for (pTmp = m_pRedoList, i = 0; pTmp; pTmp = pTmp->pNext, i++)
-						if ((i == 29) && (pTmp->pNext != NULL))
-						{
-							delete pTmp->pNext;
-							pTmp->pNext = NULL;
-						}
+			SetModifiedFlag(true);
 
-					pUndo->pNext = m_pRedoList;
-					m_pRedoList = pUndo;
+			gMainWindow->UpdateUndoRedo(mUndoHistory.GetSize() > 1 ? mUndoHistory[0]->Description : NULL, !mRedoHistory.IsEmpty() ? mRedoHistory[0]->Description : NULL);
+		}
+		break;
 
-					pUndo = m_pUndoList;
-					DeleteContents(true);
-					FileLoad(&pUndo->file, true, false);
-				}
-
-				if (m_bUndoOriginal && (m_pUndoList != NULL) && (m_pUndoList->pNext == NULL))
-					SetModifiedFlag(false);
-			}
-			else
-			{
-				if (m_pRedoList != NULL)
-				{
-					// Remove the first element from the redo list.
-					pUndo = m_pRedoList;
-					m_pRedoList = pUndo->pNext;
-
-					// Check if we can delete the last undo info.
-					for (pTmp = m_pUndoList, i = 0; pTmp; pTmp = pTmp->pNext, i++)
-						if ((i == 30) && (pTmp->pNext != NULL))
-						{
-							delete pTmp->pNext;
-							pTmp->pNext = NULL;
-						}
-
-					// Add info to the start of the undo list.
-					pUndo->pNext = m_pUndoList;
-					m_pUndoList = pUndo;
-
-					// Load state.
-					DeleteContents(true);
-					FileLoad(&pUndo->file, true, false);
-				}
-			}
-
-			gMainWindow->UpdateUndoRedo(m_pUndoList->pNext ? m_pUndoList->strText : NULL, m_pRedoList ? m_pRedoList->strText : NULL);
-		} break;
-
-		case LC_EDIT_CUT:
-		case LC_EDIT_COPY:
+	case LC_EDIT_CUT:
+	case LC_EDIT_COPY:
 		{
 			lcMemFile* Clipboard = new lcMemFile();
 
@@ -6846,7 +6782,7 @@ void Project::EndMouseTool(lcTool Tool, bool Accept)
 	if (!Accept)
 	{
 		DeleteContents(true);
-		FileLoad(&m_pUndoList->file, true, false);
+		FileLoad(&mUndoHistory[0]->File, true, false);
 		return;
 	}
 

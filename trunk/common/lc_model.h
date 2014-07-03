@@ -1,6 +1,7 @@
 #ifndef _LC_MODEL_H_
 #define _LC_MODEL_H_
 
+#include "lc_file.h"
 #include "lc_math.h"
 #include "str.h"
 #include "object.h"
@@ -72,6 +73,12 @@ enum lcTool
 	LC_TOOL_ZOOM_REGION
 };
 
+struct lcModelHistoryEntry
+{
+	lcMemFile File;
+	char Description[64];
+};
+
 class lcModel
 {
 public:
@@ -105,6 +112,9 @@ protected:
 	lcArray<lcCamera*> mCameras;
 	lcArray<lcLight*> mLights;
 	lcArray<lcGroup*> mGroups;
+
+	lcArray<lcModelHistoryEntry*> mUndoHistory;
+	lcArray<lcModelHistoryEntry*> mRedoHistory;
 };
 
 #endif // _LC_MODEL_H_

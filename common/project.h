@@ -72,14 +72,6 @@ class TexFont;
 
 #include "lc_file.h"
 
-struct LC_UNDOINFO
-{
-	lcMemFile file;
-	char strText[21];
-	LC_UNDOINFO* pNext;
-	LC_UNDOINFO() { pNext = NULL; }
-};
-
 struct LC_FILEENTRY
 {
 	lcMemFile File;
@@ -237,11 +229,7 @@ public:
 	TexFont* m_pScreenFont;
 
 protected:
-	// Undo support
-	LC_UNDOINFO* m_pUndoList;
-	LC_UNDOINFO* m_pRedoList;
-	bool m_bUndoOriginal;
-	void CheckPoint (const char* text);
+	void CheckPoint(const char* Description);
 
 	bool RemoveSelectedObjects();
 	void GetPieceInsertPosition(Piece* OffsetPiece, lcVector3& Position, lcVector4& Rotation);

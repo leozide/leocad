@@ -31,7 +31,6 @@
 
 Project::Project()
 {
-	m_bModified = false;
 	mTransformType = LC_TRANSFORM_RELATIVE_TRANSLATION;
 	m_pTerrain = new Terrain();
 	m_pBackground = new lcTexture();
@@ -57,7 +56,7 @@ void Project::UpdateInterface()
 	gMainWindow->UpdateUndoRedo(mUndoHistory.GetSize() > 1 ? mUndoHistory[0]->Description : NULL, !mRedoHistory.IsEmpty() ? mRedoHistory[0]->Description : NULL);
 	gMainWindow->UpdatePaste(g_App->mClipboard != NULL);
 	gMainWindow->UpdateCategories();
-	gMainWindow->UpdateTitle(m_strTitle, m_bModified);
+	gMainWindow->UpdateTitle(m_strTitle, IsModified());
 	gMainWindow->SetTool(gMainWindow->GetTool());
 
 	gMainWindow->UpdateFocusObject(GetFocusObject());
@@ -84,7 +83,7 @@ void Project::SetTitle(const char* Title)
 {
 	strcpy(m_strTitle, Title);
 
-	gMainWindow->UpdateTitle(m_strTitle, m_bModified);
+	gMainWindow->UpdateTitle(m_strTitle, IsModified());
 }
 
 void Project::DeleteContents(bool bUndo)
@@ -1073,7 +1072,7 @@ bool Project::DoSave(const char* FileName)
 
 	file.Close();
 
-	SetModifiedFlag(false);     // back to unmodified
+	mSavedHistory = mUndoHistory[0];
 
 	// reset the title and change the document name
 	SetPathName(SaveFileName, true);
@@ -1133,26 +1132,16 @@ bool Project::SaveModified()
 	return true;    // keep going
 }
 
-void Project::SetModifiedFlag(bool Modified)
-{
-	if (m_bModified != Modified)
-	{
-		m_bModified = Modified;
-		gMainWindow->UpdateModified(m_bModified);
-	}
-}
-
 /////////////////////////////////////////////////////////////////////////////
 // File operations
 
 bool Project::OnNewDocument()
 {
-	SetTitle("Untitled");
 	DeleteContents(false);
 	memset(m_strPathName, 0, sizeof(m_strPathName)); // no path name yet
-	SetModifiedFlag(false); // make clean
 	LoadDefaults(true);
 	CheckPoint("");
+	SetTitle("Untitled");
 
 	return true;
 }
@@ -1160,28 +1149,17 @@ bool Project::OnNewDocument()
 bool Project::OpenProject(const char* FileName)
 {
 	if (!SaveModified())
-		return false;  // Leave the original one
-
-	bool WasModified = IsModified();
-	SetModifiedFlag(false);  // Not dirty for open
+		return false;
 
 	if (!OnOpenDocument(FileName))
-	{
-		// Check if we corrupted the original document
-		if (!IsModified())
-			SetModifiedFlag(WasModified);
-		else
-			OnNewDocument();
-
-		return false;  // Open failed
-	}
+		return false;
 
 	SetPathName(FileName, true);
 
 	return true;
 }
 
-bool Project::OnOpenDocument (const char* lpszPathName)
+bool Project::OnOpenDocument(const char* lpszPathName)
 {
   lcDiskFile file;
   bool bSuccess = false;
@@ -1214,7 +1192,6 @@ bool Project::OnOpenDocument (const char* lpszPathName)
   // Delete the current project.
   DeleteContents(false);
   LoadDefaults(datfile || mpdfile);
-  SetModifiedFlag(true);  // dirty during loading
 
   if (file.GetLength() != 0)
   {
@@ -1260,26 +1237,19 @@ bool Project::OnOpenDocument (const char* lpszPathName)
       bSuccess = FileLoad(&file, false, false);
     }
 
-    // Clean up.
-    if (mpdfile)
-    {
-      for (int i = 0; i < FileArray.GetSize(); i++)
-        delete FileArray[i];
-    }
+	FileArray.DeleteAll();
   }
 
   file.Close();
 
   if (bSuccess == false)
   {
+	OnNewDocument();
 //    MessageBox("Failed to load.");
-    DeleteContents(false);   // remove failed contents
     return false;
   }
 
   CheckPoint("");
-
-  SetModifiedFlag(false);     // start off with unmodified
 
   return true;
 }
@@ -1319,6 +1289,10 @@ void Project::CheckPoint(const char* Description)
 	mUndoHistory.InsertAt(0, ModelHistoryEntry);
 	mRedoHistory.DeleteAll();
 
+	if (!Description[0])
+		mSavedHistory = ModelHistoryEntry;
+
+	gMainWindow->UpdateModified(IsModified());
 	gMainWindow->UpdateUndoRedo(mUndoHistory.GetSize() > 1 ? mUndoHistory[0]->Description : NULL, !mRedoHistory.IsEmpty() ? mRedoHistory[0]->Description : NULL);
 }
 
@@ -3988,7 +3962,6 @@ void Project::HandleCommand(LC_COMMANDS id)
 				RenderInitialize();
 			}
 
-			SetModifiedFlag(true);
 			CheckPoint("Properties");
 		} break;
 
@@ -4040,9 +4013,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 			DeleteContents(true);
 			FileLoad(&mUndoHistory[0]->File, true, false);
 
-			if (mUndoHistory.GetSize() == 1)
-				SetModifiedFlag(false);
-
+			gMainWindow->UpdateModified(IsModified());
 			gMainWindow->UpdateUndoRedo(mUndoHistory.GetSize() > 1 ? mUndoHistory[0]->Description : NULL, !mRedoHistory.IsEmpty() ? mRedoHistory[0]->Description : NULL);
 		}
 		break;
@@ -4059,8 +4030,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 			DeleteContents(true);
 			FileLoad(&Redo->File, true, false);
 
-			SetModifiedFlag(true);
-
+			gMainWindow->UpdateModified(IsModified());
 			gMainWindow->UpdateUndoRedo(mUndoHistory.GetSize() > 1 ? mUndoHistory[0]->Description : NULL, !mRedoHistory.IsEmpty() ? mRedoHistory[0]->Description : NULL);
 		}
 		break;
@@ -4121,7 +4091,6 @@ void Project::HandleCommand(LC_COMMANDS id)
 				gMainWindow->UpdateFocusObject(GetFocusObject());
 				UpdateSelection();
 				gMainWindow->UpdateAllViews();
-				SetModifiedFlag(true);
 				CheckPoint("Cutting");
 			}
 
@@ -4237,7 +4206,6 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 			// TODO: lights
 			CalculateStep();
-			SetModifiedFlag(true);
 			CheckPoint("Pasting");
 			gMainWindow->UpdateFocusObject(GetFocusObject());
 			UpdateSelection();
@@ -4446,7 +4414,6 @@ void Project::HandleCommand(LC_COMMANDS id)
 			ClearSelectionAndSetFocus(pPiece, LC_PIECE_SECTION_POSITION);
 			SystemPieceComboAdd(m_pCurPiece->m_strDescription);
 
-			SetModifiedFlag(true);
 			CheckPoint("Inserting");
 		} break;
 
@@ -4457,7 +4424,6 @@ void Project::HandleCommand(LC_COMMANDS id)
 				gMainWindow->UpdateFocusObject(NULL);
 				UpdateSelection();
 				gMainWindow->UpdateAllViews();
-				SetModifiedFlag(true);
 				CheckPoint("Deleting");
 			}
 		} break;
@@ -4568,7 +4534,6 @@ void Project::HandleCommand(LC_COMMANDS id)
 			}
 
 			gMainWindow->UpdateAllViews();
-			SetModifiedFlag(true);
 			CheckPoint(Rotate ? "Rotating" : "Moving");
 			gMainWindow->UpdateFocusObject(GetFocusObject());
 		} break;
@@ -4631,7 +4596,6 @@ void Project::HandleCommand(LC_COMMANDS id)
 			gMainWindow->UpdateFocusObject(GetFocusObject());
 			UpdateSelection();
 			gMainWindow->UpdateAllViews();
-			SetModifiedFlag(true);
 			CheckPoint("Minifig");
 		} break;
 
@@ -4749,7 +4713,6 @@ void Project::HandleCommand(LC_COMMANDS id)
 //			gMainWindow->UpdateFocusObject(GetFocusObject());
 			UpdateSelection();
 			gMainWindow->UpdateAllViews();
-			SetModifiedFlag(true);
 			CheckPoint("Array");
 		} break;
 
@@ -4811,7 +4774,6 @@ void Project::HandleCommand(LC_COMMANDS id)
 			}
 
 			RemoveEmptyGroups();
-			SetModifiedFlag(true);
 			CheckPoint("Grouping");
 		} break;
 
@@ -4855,7 +4817,6 @@ void Project::HandleCommand(LC_COMMANDS id)
 			Groups.DeleteAll();
 
 			RemoveEmptyGroups();
-			SetModifiedFlag(true);
 			CheckPoint("Ungrouping");
 		} break;
 
@@ -4890,7 +4851,6 @@ void Project::HandleCommand(LC_COMMANDS id)
 			}
 
 			RemoveEmptyGroups();
-			SetModifiedFlag(true);
 			CheckPoint("Grouping");
 		} break;
 
@@ -4908,7 +4868,6 @@ void Project::HandleCommand(LC_COMMANDS id)
 			}
 
 			RemoveEmptyGroups();
-			SetModifiedFlag(true);
 			CheckPoint("Ungrouping");
 		} break;
 
@@ -4936,7 +4895,6 @@ void Project::HandleCommand(LC_COMMANDS id)
 			gMainWindow->UpdateFocusObject(GetFocusObject());
 			UpdateSelection();
 			gMainWindow->UpdateAllViews();
-			SetModifiedFlag(true);
 			CheckPoint("Editing");
 		} break;
 
@@ -5001,7 +4959,6 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 			if (redraw)
 			{
-				SetModifiedFlag(true);
 				CheckPoint("Modifying");
 				gMainWindow->UpdateAllViews();
 			}
@@ -5031,7 +4988,6 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 			if (redraw)
 			{
-				SetModifiedFlag(true);
 				CheckPoint("Modifying");
 				gMainWindow->UpdateAllViews();
 				UpdateSelection ();
@@ -5162,7 +5118,6 @@ void Project::HandleCommand(LC_COMMANDS id)
 			for (int LightIdx = 0; LightIdx < mLights.GetSize(); LightIdx++)
 				mLights[LightIdx]->InsertTime(m_nCurStep, 1);
 
-			SetModifiedFlag(true);
 			CheckPoint("Adding Step");
 			CalculateStep();
 			gMainWindow->UpdateFocusObject(GetFocusObject());
@@ -5186,7 +5141,6 @@ void Project::HandleCommand(LC_COMMANDS id)
 			for (int LightIdx = 0; LightIdx < mLights.GetSize(); LightIdx++)
 				mLights[LightIdx]->RemoveTime(m_nCurStep, 1);
 
-			SetModifiedFlag(true);
 			CheckPoint("Removing Step");
 			CalculateStep();
 			gMainWindow->UpdateFocusObject(GetFocusObject());
@@ -5302,8 +5256,6 @@ void Project::HandleCommand(LC_COMMANDS id)
 			gMainWindow->UpdateCameraMenu();
 			gMainWindow->UpdateFocusObject(GetFocusObject());
 			gMainWindow->UpdateAllViews();
-			SetModifiedFlag(true);
-			CheckPoint("Reset Cameras");
 		} break;
 
 		case LC_HELP_HOMEPAGE:
@@ -6466,7 +6418,6 @@ void Project::TransformSelectedObjects(LC_TRANSFORM_TYPE Type, const lcVector3& 
 			if (nSel)
 			{
 				gMainWindow->UpdateAllViews();
-				SetModifiedFlag(true);
 				CheckPoint("Moving");
 				gMainWindow->UpdateFocusObject(GetFocusObject());
 			}
@@ -6479,7 +6430,6 @@ void Project::TransformSelectedObjects(LC_TRANSFORM_TYPE Type, const lcVector3& 
 			if (MoveSelectedObjects(Move, Remainder, false, false))
 			{
 				gMainWindow->UpdateAllViews();
-				SetModifiedFlag(true);
 				CheckPoint("Moving");
 				gMainWindow->UpdateFocusObject(GetFocusObject());
 			}
@@ -6528,7 +6478,6 @@ void Project::TransformSelectedObjects(LC_TRANSFORM_TYPE Type, const lcVector3& 
 			if (nSel)
 			{
 				gMainWindow->UpdateAllViews();
-				SetModifiedFlag(true);
 				CheckPoint("Rotating");
 				gMainWindow->UpdateFocusObject(GetFocusObject());
 			}
@@ -6541,7 +6490,6 @@ void Project::TransformSelectedObjects(LC_TRANSFORM_TYPE Type, const lcVector3& 
 			if (RotateSelectedObjects(Rotate, Remainder, false, false))
 			{
 				gMainWindow->UpdateAllViews();
-				SetModifiedFlag(true);
 				CheckPoint("Rotating");
 				gMainWindow->UpdateFocusObject(GetFocusObject());
 			}
@@ -6756,7 +6704,6 @@ void Project::ModifyObject(Object* Object, lcObjectProperty Property, void* Valu
 
 	if (CheckPointString)
 	{
-		SetModifiedFlag(true);
 		CheckPoint(CheckPointString);
 		gMainWindow->UpdateFocusObject(GetFocusObject());
 		gMainWindow->UpdateAllViews();
@@ -6794,13 +6741,11 @@ void Project::EndMouseTool(lcTool Tool, bool Accept)
 
 	case LC_TOOL_SPOTLIGHT:
 		CheckPoint("New SpotLight");
-		SetModifiedFlag(true);
 		break;
 
 	case LC_TOOL_CAMERA:
 		gMainWindow->UpdateCameraMenu();
 		CheckPoint("New Camera");
-		SetModifiedFlag(true);
 		break;
 
 	case LC_TOOL_SELECT:
@@ -6808,12 +6753,10 @@ void Project::EndMouseTool(lcTool Tool, bool Accept)
 
 	case LC_TOOL_MOVE:
 		CheckPoint("Move");
-		SetModifiedFlag(true);
 		break;
 
 	case LC_TOOL_ROTATE:
 		CheckPoint("Rotate");
-		SetModifiedFlag(true);
 		break;
 
 	case LC_TOOL_ERASER:
@@ -6859,7 +6802,6 @@ void Project::InsertPieceToolClicked(const lcVector3& Position, const lcVector4&
 	ClearSelectionAndSetFocus(Piece, LC_PIECE_SECTION_POSITION);
 
 	CheckPoint("Insert");
-	SetModifiedFlag(true);
 }
 
 void Project::PointLightToolClicked(const lcVector3& Position)
@@ -6870,7 +6812,6 @@ void Project::PointLightToolClicked(const lcVector3& Position)
 
 	ClearSelectionAndSetFocus(Light, LC_LIGHT_SECTION_POSITION);
 	CheckPoint("New Light");
-	SetModifiedFlag(true);
 }
 
 void Project::BeginSpotLightTool(const lcVector3& Position, const lcVector3& Target)
@@ -6973,7 +6914,6 @@ void Project::EraserToolClicked(lcObject* Object)
 	gMainWindow->UpdateFocusObject(GetFocusObject());
 	UpdateSelection();
 	gMainWindow->UpdateAllViews();
-	SetModifiedFlag(true);
 	CheckPoint("Deleting");
 }
 
@@ -6988,7 +6928,6 @@ void Project::PaintToolClicked(lcObject* Object)
 	{
 		Piece->SetColorIndex(gMainWindow->mColorIndex);
 
-		SetModifiedFlag(true);
 		CheckPoint("Painting");
 		gMainWindow->UpdateFocusObject(GetFocusObject());
 		gMainWindow->UpdateAllViews();

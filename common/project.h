@@ -160,8 +160,10 @@ protected:
 	lcVector3 mMouseToolDistance;
 
 public:
-	bool IsModified()
-		{ return m_bModified; }
+	bool IsModified() const
+	{
+		return mSavedHistory != mUndoHistory[0];
+	}
 
 	unsigned char GetLastStep();
 	unsigned short GetCurrentTime ()
@@ -222,7 +224,6 @@ public:
 
 	char m_strTitle[LC_MAXPATH];
 	char m_strPathName[LC_MAXPATH];
-	bool m_bModified;
 
 	void GetPieceInsertPosition(View* view, lcVector3& Position, lcVector4& Orientation);
 
@@ -299,7 +300,6 @@ public:
 	bool OnOpenDocument(const char* FileName);
 	bool OpenProject(const char* FileName);
 	bool SaveModified();
-	void SetModifiedFlag(bool Modified);
 };
 
 #endif // _PROJECT_H_

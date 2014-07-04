@@ -113,6 +113,7 @@ protected:
 	lcArray<lcLight*> mLights;
 	lcArray<lcGroup*> mGroups;
 
+	lcModelHistoryEntry* mSavedHistory;
 	lcArray<lcModelHistoryEntry*> mUndoHistory;
 	lcArray<lcModelHistoryEntry*> mRedoHistory;
 };

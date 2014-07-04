@@ -40,6 +40,7 @@ void lcModelProperties::SaveDefaults()
 
 lcModel::lcModel()
 {
+	mSavedHistory = NULL;
 }
 
 lcModel::~lcModel()

@@ -132,6 +132,7 @@ void lcApplication::ParseIntegerArgument(int* CurArg, int argc, char* argv[], in
 	}
 	else
 	{
+		*Value = 0;
 		printf("Not enough parameters for the %s argument.", argv[(*CurArg) - 1]);
 	}
 }
@@ -158,8 +159,8 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 	bool ImageHighlight = false;
 	int ImageWidth = lcGetProfileInt(LC_PROFILE_IMAGE_WIDTH);
 	int ImageHeight = lcGetProfileInt(LC_PROFILE_IMAGE_HEIGHT);
-	int ImageStart = 0;
-	int ImageEnd = 0;
+	lcStep ImageStart = 0;
+	lcStep ImageEnd = 0;
 	char* ImageName = NULL;
 
 	// File to open.
@@ -196,11 +197,15 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 			}
 			else if ((strcmp(Param, "-f") == 0) || (strcmp(Param, "--from") == 0))
 			{
-				ParseIntegerArgument(&i, argc, argv, &ImageStart);
+				int Step;
+				ParseIntegerArgument(&i, argc, argv, &Step);
+				ImageStart = Step;
 			}
 			else if ((strcmp(Param, "-t") == 0) || (strcmp(Param, "--to") == 0))
 			{
-				ParseIntegerArgument(&i, argc, argv, &ImageEnd);
+				int Step;
+				ParseIntegerArgument(&i, argc, argv, &Step);
+				ImageEnd = Step;
 			}
 			else if (strcmp(Param, "--highlight") == 0)
 				ImageHighlight = true;
@@ -323,7 +328,7 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 
 		if ((ImageStart == 0) && (ImageEnd == 0))
 		{
-			ImageStart = ImageEnd = mProject->GetCurrentTime();
+			ImageStart = ImageEnd = mProject->GetCurrentStep();
 		}
 		else if ((ImageStart == 0) && (ImageEnd != 0))
 		{
@@ -343,14 +348,14 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 		Image* images = new Image[ImageEnd - ImageStart + 1];
 		mProject->CreateImages(images, ImageWidth, ImageHeight, ImageStart, ImageEnd, ImageHighlight);
 
-		for (int i = 0; i <= ImageEnd - ImageStart; i++)
+		for (lcStep Step = 0; Step <= ImageEnd - ImageStart; Step++)
 		{
 			char idx[256];
 			String Frame;
 
 			if (ImageStart != ImageEnd)
 			{
-				sprintf(idx, "%02d", i+1);
+				sprintf(idx, "%02d", Step + 1);
 				int Ext = FileName.ReverseFind('.');
 
 				Frame = FileName.Left(Ext) + idx + FileName.Right(FileName.GetLength() - Ext);
@@ -358,7 +363,7 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 			else
 				Frame = FileName;
 
-			images[i].FileSave(Frame, ImageFormat, ImageTransparent);
+			images[Step].FileSave(Frame, ImageFormat, ImageTransparent);
 		}
 
 		delete []images;

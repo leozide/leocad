@@ -166,6 +166,7 @@ void lcQSelectDialog::addChildren(QTreeWidgetItem *parentItem, Group *parentGrou
 	}
 
 	const lcArray<lcPiece*>& pieces = project->GetPieces();
+	lcStep currentStep = project->GetCurrentStep();
 
 	for (int pieceIdx = 0; pieceIdx < pieces.GetSize(); pieceIdx++, numObjects++)
 	{
@@ -174,7 +175,7 @@ void lcQSelectDialog::addChildren(QTreeWidgetItem *parentItem, Group *parentGrou
 		if (piece->GetGroup() != parentGroup)
 			continue;
 
-		if (!piece->IsVisible(project->GetCurrentTime()))
+		if (!piece->IsVisible(currentStep))
 			continue;
 
 		QTreeWidgetItem *pieceItem = new QTreeWidgetItem(parentItem, QStringList(piece->GetName()));

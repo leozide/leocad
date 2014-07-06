@@ -4,6 +4,9 @@
 #include "lc_math.h"
 #include "lc_array.h"
 
+typedef lcuint32 lcStep;
+#define LC_STEP_MAX 0xffffffff
+
 enum lcObjectType
 {
 	LC_OBJECT_PIECE,
@@ -14,7 +17,7 @@ enum lcObjectType
 // key handling
 struct LC_OBJECT_KEY
 {
-	unsigned short  time;
+	lcStep Step;
 	float           param[4];
 	unsigned char   type;
 	LC_OBJECT_KEY*  next;
@@ -87,7 +90,7 @@ public:
 	virtual lcuint32 GetFocusSection() const = 0;
 
 	virtual lcVector3 GetSectionPosition(lcuint32 Section) const = 0;
-	virtual void Move(unsigned short nTime, bool AddKey, const lcVector3& Distance) = 0;
+	virtual void Move(lcStep Step, bool AddKey, const lcVector3& Distance) = 0;
 	virtual void RayTest(lcObjectRayTest& ObjectRayTest) const = 0;
 	virtual void BoxTest(lcObjectBoxTest& ObjectBoxTest) const = 0;
 	virtual const char* GetName() const = 0;
@@ -97,10 +100,9 @@ protected:
 	virtual void FileSave(lcFile& file) const;
 
 public:
-	void CalculateSingleKey(unsigned short nTime, int keytype, float *value) const;
-	void ChangeKey(unsigned short time, bool addkey, const float *param, unsigned char keytype);
-	virtual void InsertTime(unsigned short start, unsigned short time);
-	virtual void RemoveTime(unsigned short start, unsigned short time);
+	void ChangeKey(lcStep Step, bool AddKey, const float *param, unsigned char keytype);
+	virtual void InsertTime(lcStep Start, lcStep Time);
+	virtual void RemoveTime(lcStep Start, lcStep Time);
 
 	int GetKeyTypeCount() const
 	{
@@ -119,7 +121,7 @@ public:
 
 protected:
 	void RegisterKeys(float *values[], LC_OBJECT_KEY_INFO* info, int count);
-	void CalculateKeys(unsigned short nTime);
+	void CalculateKeys(lcStep Step);
 
 private:
 	void RemoveKeys();

@@ -59,29 +59,30 @@ bool lcObject::FileLoad(lcFile& file)
 
 void lcObject::FileSave(lcFile& file) const
 {
-  LC_OBJECT_KEY *node;
-  lcuint32 n;
+	LC_OBJECT_KEY *node;
+	lcuint32 n;
 
-  file.WriteU8(LC_KEY_SAVE_VERSION);
+	file.WriteU8(LC_KEY_SAVE_VERSION);
 
-  for (n = 0, node = m_pInstructionKeys; node; node = node->next)
-    n++;
-  file.WriteU32(n);
+	for (n = 0, node = m_pInstructionKeys; node; node = node->next)
+		n++;
+	file.WriteU32(n);
 
-  for (node = m_pInstructionKeys; node; node = node->next)
-  {
-    file.WriteU16(node->time);
-    file.WriteFloats(node->param, 4);
-    file.WriteU8(node->type);
-  }
+	for (node = m_pInstructionKeys; node; node = node->next)
+	{
+		lcuint16 Step = lcMin(node->Step, 0xFFFFU);
+		file.WriteU16(Step);
+		file.WriteFloats(node->param, 4);
+		file.WriteU8(node->type);
+	}
 
-  file.WriteU32(0);
+	file.WriteU32(0);
 }
 
 // =============================================================================
 // Key handling
 
-static LC_OBJECT_KEY* AddNode(LC_OBJECT_KEY *node, unsigned short nTime, unsigned char nType)
+static LC_OBJECT_KEY* AddNode(LC_OBJECT_KEY *node, lcStep Step, unsigned char nType)
 {
   LC_OBJECT_KEY* newnode = (LC_OBJECT_KEY*)malloc(sizeof(LC_OBJECT_KEY));
 
@@ -94,7 +95,7 @@ static LC_OBJECT_KEY* AddNode(LC_OBJECT_KEY *node, unsigned short nTime, unsigne
     newnode->next = NULL;
 
   newnode->type = nType;
-  newnode->time = nTime;
+  newnode->Step = Step;
   newnode->param[0] = newnode->param[1] = newnode->param[2] = newnode->param[3] = 0;
 
   return newnode;
@@ -130,163 +131,112 @@ void lcObject::RemoveKeys()
   }
 }
 
-void lcObject::ChangeKey(unsigned short nTime, bool bAddKey, const float *param, unsigned char nKeyType)
+void lcObject::ChangeKey(lcStep Step, bool AddKey, const float *param, unsigned char nKeyType)
 {
-  LC_OBJECT_KEY *node, *poskey = NULL, *newpos = NULL;
-  node = m_pInstructionKeys;
-
-  while (node)
-  {
-    if ((node->time <= nTime) &&
-	(node->type == nKeyType))
-      poskey = node;
-
-    node = node->next;
-  }
-
-  if (bAddKey)
-  {
-    if (poskey)
-    {
-      if (poskey->time != nTime)
-	newpos = AddNode(poskey, nTime, nKeyType);
-    }
-    else
-      newpos = AddNode(poskey, nTime, nKeyType);
-  }
-
-  if (newpos == NULL)
-    newpos = poskey;
-
-  for (int i = 0; i < m_pKeyInfo[nKeyType].size; i++)
-    newpos->param[i] = param[i];
-}
-
-void lcObject::CalculateKeys(unsigned short nTime)
-{
-//  LC_OBJECT_KEY *next[m_nKeyInfoCount], *prev[m_nKeyInfoCount], *node;
-  LC_OBJECT_KEY *next[32], *prev[32], *node;
-  int i, empty = m_nKeyInfoCount;
-
-  for (i = 0; i < m_nKeyInfoCount; i++)
-    next[i] = NULL;
-
-  node = m_pInstructionKeys;
-
-  // Get the previous and next keys for each variable
-  while (node && empty)
-  {
-    if (node->time <= nTime)
-    {
-      prev[node->type] = node;
-    }
-    else
-    {
-      if (next[node->type] == NULL)
-      {
-        next[node->type] = node;
-        empty--;
-      }
-    }
-
-    node = node->next;
-  }
-
-  // TODO: USE KEY IN/OUT WEIGHTS
-  for (i = 0; i < m_nKeyInfoCount; i++)
-  {
-	LC_OBJECT_KEY *p = prev[i];
-
-	for (int j = 0; j < m_pKeyInfo[i].size; j++)
-	  m_pKeyValues[i][j] = p->param[j];
-  }
-}
-
-void lcObject::CalculateSingleKey(unsigned short nTime, int keytype, float *value) const
-{
-	LC_OBJECT_KEY *prev = NULL, *node;
-
+	LC_OBJECT_KEY *node, *poskey = NULL, *newpos = NULL;
 	node = m_pInstructionKeys;
 
 	while (node)
 	{
-		if (node->type == keytype)
-		{
-			if (node->time <= nTime)
-				prev = node;
-			else
-				break;
-		}
+		if ((node->Step <= Step) && (node->type == nKeyType))
+			poskey = node;
 
 		node = node->next;
 	}
 
-	for (int j = 0; j < m_pKeyInfo[keytype].size; j++)
-		value[j] = prev->param[j];
+	if (AddKey)
+	{
+		if (poskey)
+		{
+			if (poskey->Step != Step)
+				newpos = AddNode(poskey, Step, nKeyType);
+		}
+		else
+			newpos = AddNode(poskey, Step, nKeyType);
+	}
+
+	if (newpos == NULL)
+		newpos = poskey;
+
+	for (int i = 0; i < m_pKeyInfo[nKeyType].size; i++)
+		newpos->param[i] = param[i];
 }
 
-void lcObject::InsertTime(unsigned short start, unsigned short time)
+void lcObject::CalculateKeys(lcStep Step)
 {
-  LC_OBJECT_KEY *node, *prev = NULL;
-  unsigned short last;
-  bool end[32];
-  int i;
+	LC_OBJECT_KEY* prev[32];
 
-  for (i = 0; i < m_nKeyInfoCount; i++)
-    end[i] = false;
+	for (LC_OBJECT_KEY* node = m_pInstructionKeys; node; node = node->next)
+		if (node->Step <= Step)
+			prev[node->type] = node;
 
-  node = m_pInstructionKeys;
-  last = 255;
+	for (int i = 0; i < m_nKeyInfoCount; i++)
+	{
+		LC_OBJECT_KEY *p = prev[i];
 
-  for (; node != NULL; prev = node, node = node->next)
-  {
-    // skip everything before the start time
-    if ((node->time < start) || (node->time == 1))
-      continue;
-
-    // there's already a key at the end, delete this one
-    if (end[node->type])
-    {
-      prev->next = node->next;
-      free(node);
-      node = prev;
-
-      continue;
-    }
-
-    node->time += time;
-    if (node->time >= last)
-    {
-      node->time = last;
-      end[node->type] = true;
-    }
-  }
+		for (int j = 0; j < m_pKeyInfo[i].size; j++)
+			m_pKeyValues[i][j] = p->param[j];
+	}
 }
 
-void lcObject::RemoveTime(unsigned short start, unsigned short time)
+void lcObject::InsertTime(lcStep Start, lcStep Time)
 {
-  LC_OBJECT_KEY *node, *prev = NULL;
+	LC_OBJECT_KEY *node, *prev = NULL;
+	bool end[32];
 
-  node = m_pInstructionKeys;
+	for (int i = 0; i < m_nKeyInfoCount; i++)
+		end[i] = false;
 
-  for (; node != NULL; prev = node, node = node->next)
-  {
-    // skip everything before the start time
-    if ((node->time < start) || (node->time == 1))
-      continue;
+	node = m_pInstructionKeys;
 
-    if (node->time < (start + time))
-    {
-      // delete this key
-      prev->next = node->next;
-      free(node);
-      node = prev;
+	for (; node != NULL; prev = node, node = node->next)
+	{
+		// skip everything before the start time
+		if ((node->Step < Start) || (node->Step == 1))
+			continue;
 
-      continue;
-    }
+		// there's already a key at the end, delete this one
+		if (end[node->type])
+		{
+			prev->next = node->next;
+			free(node);
+			node = prev;
 
-    node->time -= time;
-    if (node->time < 1)
-      node->time = 1;
-  }
+			continue;
+		}
+
+		if (node->Step >= LC_STEP_MAX - Time)
+		{
+			node->Step = LC_STEP_MAX;
+			end[node->type] = true;
+		}
+		else
+			node->Step += Time;
+	}
+}
+
+void lcObject::RemoveTime(lcStep Start, lcStep Time)
+{
+	LC_OBJECT_KEY *node = m_pInstructionKeys, *prev = NULL;
+
+	for (; node != NULL; prev = node, node = node->next)
+	{
+		// skip everything before the start time
+		if ((node->Step < Start) || (node->Step == 1))
+			continue;
+
+		if (node->Step < Start + Time)
+		{
+			// delete this key
+			prev->next = node->next;
+			free(node);
+			node = prev;
+
+			continue;
+		}
+
+		node->Step -= Time;
+		if (node->Step < 1)
+			node->Step = 1;
+	}
 }

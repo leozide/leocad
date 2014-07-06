@@ -500,12 +500,12 @@ void lcMainWindow::UpdatePaste(bool Enabled)
 		window->updatePaste(Enabled);
 }
 
-void lcMainWindow::UpdateTime(int CurrentTime, int TotalTime)
+void lcMainWindow::UpdateCurrentStep()
 {
 	lcQMainWindow* window = (lcQMainWindow*)mHandle;
 
 	if (window)
-		window->updateTime(CurrentTime, TotalTime);
+		window->updateCurrentStep();
 }
 
 void lcMainWindow::SetAddKeys(bool AddKeys)

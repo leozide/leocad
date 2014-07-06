@@ -67,7 +67,7 @@ void Project::UpdateInterface()
 	gMainWindow->UpdatePerspective();
 
 	UpdateSelection();
-	gMainWindow->UpdateTime(m_nCurStep, 255);
+	gMainWindow->UpdateCurrentStep();
 
 	const lcArray<View*> Views = gMainWindow->GetViews();
 	for (int i = 0; i < Views.GetSize(); i++)
@@ -135,8 +135,8 @@ void Project::LoadDefaults(bool cameras)
 	gMainWindow->UpdateLockSnap(m_nSnap);
 	m_nMoveSnap = 0x0304;
 	gMainWindow->UpdateSnap();
-	m_nCurStep = 1;
-	gMainWindow->UpdateTime(1, 255);
+	mCurrentStep = 1;
+	gMainWindow->UpdateCurrentStep();
 	strcpy(m_strHeader, "");
 	strcpy(m_strFooter, "Page &P");
 	m_pTerrain->LoadDefaults(true);
@@ -239,7 +239,7 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 		file->ReadS32(&i, 1); //m_nCurGroup = i;
 		file->ReadS32(&i, 1); //m_nCurColor = i;
 		file->ReadS32(&i, 1); //action = i;
-		file->ReadS32(&i, 1); m_nCurStep = i;
+		file->ReadS32(&i, 1); mCurrentStep = i;
 	}
 
 	if (fv > 0.8f)
@@ -605,7 +605,7 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 	gMainWindow->UpdateSnap();
 	gMainWindow->UpdateCameraMenu();
 	UpdateSelection();
-	gMainWindow->UpdateTime(m_nCurStep, 255);
+	gMainWindow->UpdateCurrentStep();
 	gMainWindow->UpdateAllViews();
 
 	return true;
@@ -637,7 +637,7 @@ void Project::FileSave(lcFile* file, bool bUndo)
 	i = 0;//i = m_nCurColor;
 	file->WriteS32(&i, 1);
 	i = 0; file->WriteS32(&i, 1); // m_nCurAction
-	i = m_nCurStep; file->WriteS32(&i, 1);
+	i = mCurrentStep; file->WriteS32(&i, 1);
 	file->WriteU32(0);//m_nScene
 
 	file->WriteS32(mPieces.GetSize());
@@ -733,8 +733,7 @@ void Project::FileSave(lcFile* file, bool bUndo)
 			opts.transparent = false;
 			opts.format = LC_IMAGE_GIF;
 
-			i = m_bAnimation ? m_nCurFrame : m_nCurStep;
-			CreateImages(image, 120, 100, i, i, false);
+			CreateImages(image, 120, 100, mCurrentStep, mCurrentStep, false);
 			image[0].FileSave (*file, &opts);
 			delete []image;
 		}
@@ -1021,7 +1020,6 @@ bool Project::DoSave(const char* FileName)
 
 	if ((strcmp(ext, "dat") == 0) || (strcmp(ext, "ldr") == 0))
 	{
-		int i, steps = GetLastStep();
 		char buf[256];
 
 		ptr = strrchr(m_strPathName, '\\');
@@ -1032,8 +1030,7 @@ bool Project::DoSave(const char* FileName)
 		else
 			ptr++;
 
-		sprintf(buf, "0 Model exported from LeoCAD\r\n"
-					"0 Original name: %s\r\n", ptr);
+		sprintf(buf, "0 Model exported from LeoCAD\r\n0 Original name: %s\r\n", ptr);
 		if (!mProperties.mAuthor.IsEmpty())
 		{
 			strcat(buf, "0 Author: ");
@@ -1045,13 +1042,14 @@ bool Project::DoSave(const char* FileName)
 
 		const char* OldLocale = setlocale(LC_NUMERIC, "C");
 
-		for (i = 1; i <= steps; i++)
+		lcStep LastStep = GetLastStep();
+		for (lcStep Step = 1; Step <= LastStep; Step++)
 		{
 			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 			{
 				Piece* Piece = mPieces[PieceIdx];
 
-				if ((Piece->IsVisible(i)) && (Piece->GetStepShow() == i))
+				if ((Piece->IsVisible(Step)) && (Piece->GetStepShow() == Step))
 				{
 					const float* f = Piece->mModelWorld;
 					sprintf (buf, "1 %d %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %s.DAT\r\n",
@@ -1060,7 +1058,7 @@ bool Project::DoSave(const char* FileName)
 				}
 			}
 
-			if (i != steps)
+			if (Step != LastStep)
 				file.WriteBuffer("0 STEP\r\n", 8);
 		}
 		file.WriteBuffer("0\r\n", 3);
@@ -1220,8 +1218,8 @@ bool Project::OnOpenDocument(const char* lpszPathName)
       else
         FileReadLDraw(&file, mat, &ok, 16, &step, FileArray);
 
-      m_nCurStep = step;
-	  gMainWindow->UpdateTime(m_nCurStep, 255);
+      mCurrentStep = step;
+	  gMainWindow->UpdateCurrentStep();
 	  gMainWindow->UpdateFocusObject(GetFocusObject());
       UpdateSelection();
       CalculateStep();
@@ -1460,7 +1458,7 @@ void Project::RenderScenePieces(View* view, bool DrawInterface)
 	{
 		Piece* Piece = mPieces[PieceIdx];
 
-		if (!Piece->IsVisible(m_nCurStep))
+		if (!Piece->IsVisible(mCurrentStep))
 			continue;
 
 		PieceInfo* Info = Piece->mPieceInfo;
@@ -1506,7 +1504,7 @@ void Project::RenderScenePieces(View* view, bool DrawInterface)
 		{
 			Piece* Piece = mPieces[PieceIdx];
 
-			if (!Piece->IsVisible(m_nCurStep) || !Piece->IsSelected())
+			if (!Piece->IsVisible(mCurrentStep) || !Piece->IsSelected())
 				continue;
 
 			PieceInfo* PieceInfo = Piece->mPieceInfo;
@@ -1626,7 +1624,7 @@ void Project::RenderSceneObjects(View* view)
 			{
 				Piece* Piece = mPieces[PieceIdx];
 
-				if (Piece->IsVisible(m_nCurStep))
+				if (Piece->IsVisible(mCurrentStep))
 					Piece->CompareBoundingBox(bs);
 			}
 
@@ -1989,11 +1987,11 @@ void Project::CalculateStep()
 	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 	{
 		Piece* Piece = mPieces[PieceIdx];
-		Piece->UpdatePosition(m_nCurStep);
+		Piece->UpdatePosition(mCurrentStep);
 
 		if (Piece->IsSelected())
 		{
-			if (!Piece->IsVisible(m_nCurStep))
+			if (!Piece->IsVisible(mCurrentStep))
 				Piece->SetSelected(false);
 			else
 				SelectGroup(Piece->GetTopGroup(), true);
@@ -2001,10 +1999,10 @@ void Project::CalculateStep()
 	}
 
 	for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
-		mCameras[CameraIdx]->UpdatePosition(m_nCurStep);
+		mCameras[CameraIdx]->UpdatePosition(mCurrentStep);
 
 	for (int LightIdx = 0; LightIdx < mLights.GetSize(); LightIdx++)
-		mLights[LightIdx]->UpdatePosition(m_nCurStep);
+		mLights[LightIdx]->UpdatePosition(mCurrentStep);
 }
 
 bool Project::RemoveSelectedObjects()
@@ -2199,15 +2197,6 @@ void Project::CheckAutoSave()
 	*/
 }
 
-unsigned char Project::GetLastStep()
-{
-	unsigned char last = 1;
-	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-		last = lcMax(last, mPieces[PieceIdx]->GetStepShow());
-
-	return last;
-}
-
 void Project::FindPiece(bool FindFirst, bool SearchForward)
 {
 	if (mPieces.IsEmpty())
@@ -2220,7 +2209,7 @@ void Project::FindPiece(bool FindFirst, bool SearchForward)
 		{
 			Piece* Piece = mPieces[PieceIdx];
 
-			if (Piece->IsFocused() && Piece->IsVisible(m_nCurStep))
+			if (Piece->IsFocused() && Piece->IsVisible(mCurrentStep))
 			{
 				StartIdx = PieceIdx;
 				break;
@@ -2248,7 +2237,7 @@ void Project::FindPiece(bool FindFirst, bool SearchForward)
 
 		Piece* Current = mPieces[CurrentIdx];
 
-		if (!Current->IsVisible(m_nCurStep))
+		if (!Current->IsVisible(mCurrentStep))
 			continue;
 
 		if ((!mSearchOptions.MatchInfo || Current->mPieceInfo == mSearchOptions.Info) &&
@@ -2274,7 +2263,7 @@ void Project::ZoomExtents(int FirstView, int LastView)
 	{
 		Piece* Piece = mPieces[PieceIdx];
 
-		if (Piece->IsVisible(m_nCurStep))
+		if (Piece->IsVisible(mCurrentStep))
 			Piece->CompareBoundingBox(bs);
 	}
 
@@ -2297,7 +2286,7 @@ void Project::ZoomExtents(int FirstView, int LastView)
 	{
 		View* view = Views[vp];
 
-		view->mCamera->ZoomExtents(view, Center, Points, 8, m_nCurStep, gMainWindow->GetAddKeys());
+		view->mCamera->ZoomExtents(view, Center, Points, 8, mCurrentStep, gMainWindow->GetAddKeys());
 	}
 
 	gMainWindow->UpdateFocusObject(GetFocusObject());
@@ -2336,7 +2325,7 @@ void Project::GetPiecesUsed(lcArray<lcPiecesUsedEntry>& PiecesUsed) const
 }
 
 // Create a series of pictures
-void Project::CreateImages(Image* images, int width, int height, unsigned short from, unsigned short to, bool hilite)
+void Project::CreateImages(Image* images, int width, int height, lcStep from, lcStep to, bool hilite)
 {
 	if (!GL_BeginRenderToTexture(width, height))
 	{
@@ -2344,9 +2333,8 @@ void Project::CreateImages(Image* images, int width, int height, unsigned short 
 		return;
 	}
 
-	unsigned short oldtime;
-	unsigned char* buf = (unsigned char*)malloc (width*height*3);
-	oldtime = m_nCurStep;
+	lcStep CurrentStep = mCurrentStep;
+	unsigned char* buf = (unsigned char*)malloc(width*height*3);
 
 	View view(this);
 	view.SetCamera(gMainWindow->GetActiveView()->mCamera, false);
@@ -2359,9 +2347,9 @@ void Project::CreateImages(Image* images, int width, int height, unsigned short 
 
 	RenderInitialize();
 
-	for (int i = from; i <= to; i++)
+	for (lcStep i = from; i <= to; i++)
 	{
-		m_nCurStep = i;
+		mCurrentStep = i;
 
 		if (hilite)
 		{
@@ -2380,14 +2368,13 @@ void Project::CreateImages(Image* images, int width, int height, unsigned short 
 	if (hilite)
 		SelectAndFocusNone(false);
 
-	m_nCurStep = (unsigned char)oldtime;
-	CalculateStep();
-	free (buf);
+	SetCurrentStep(CurrentStep);
+	free(buf);
 
 	GL_EndRenderToTexture();
 }
 
-void Project::CreateHTMLPieceList(FILE* f, int nStep, bool bImages, const char* ext)
+void Project::CreateHTMLPieceList(FILE* f, lcStep Step, bool bImages, const char* ext)
 {
 	int* ColorsUsed = new int[gColorList.GetSize()];
 	memset(ColorsUsed, 0, sizeof(ColorsUsed[0]) * gColorList.GetSize());
@@ -2398,7 +2385,7 @@ void Project::CreateHTMLPieceList(FILE* f, int nStep, bool bImages, const char* 
 	{
 		Piece* Piece = mPieces[PieceIdx];
 
-		if ((Piece->GetStepShow() == nStep) || (nStep == 0))
+		if ((Piece->GetStepShow() == Step) || (Step == 0))
 			ColorsUsed[Piece->mColorIndex]++;
 	}
 
@@ -2427,7 +2414,7 @@ void Project::CreateHTMLPieceList(FILE* f, int nStep, bool bImages, const char* 
 		{
 			Piece* Piece = mPieces[PieceIdx];
 
-			if ((Piece->mPieceInfo == pInfo) && ((Piece->GetStepShow() == nStep) || (nStep == 0)))
+			if ((Piece->mPieceInfo == pInfo) && ((Piece->GetStepShow() == Step) || (Step == 0)))
 			{
 				PiecesUsed[Piece->mColorIndex]++;
 				Add = true;
@@ -3306,8 +3293,8 @@ void Project::HandleCommand(LC_COMMANDS id)
 				}
 			}
 
-			Options.Start = m_nCurStep;
-			Options.End = m_nCurStep;
+			Options.Start = mCurrentStep;
+			Options.End = mCurrentStep;
 
 			if (!gMainWindow->DoDialog(LC_DIALOG_SAVE_IMAGE, &Options))
 				break;
@@ -3461,8 +3448,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 				FILE* f;
 				const char *ext, *htmlext;
 				char fn[LC_MAXPATH];
-				int i;
-				unsigned short last = GetLastStep();
+				lcStep LastStep = GetLastStep();
 
 				switch (Options.ImageFormat)
 				{
@@ -3492,13 +3478,13 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 					fprintf (f, "<HTML>\n<HEAD>\n<TITLE>Instructions for %s</TITLE>\n</HEAD>\n<BR>\n<CENTER>\n", m_strTitle);
 
-					for (i = 1; i <= last; i++)
+					for (lcStep Step = 1; Step <= LastStep; Step++)
 					{
 						fprintf(f, "<IMG SRC=\"%s-%02d%s\" ALT=\"Step %02d\" WIDTH=%d HEIGHT=%d><BR><BR>\n",
-							m_strTitle, i, ext, i, Options.StepImagesWidth, Options.StepImagesHeight);
+							m_strTitle, Step, ext, Step, Options.StepImagesWidth, Options.StepImagesHeight);
 
 						if (Options.PartsListStep)
-							CreateHTMLPieceList(f, i, Options.PartsListImages, ext);
+							CreateHTMLPieceList(f, Step, Options.PartsListImages, ext);
 					}
 
 					if (Options.PartsListEnd)
@@ -3525,8 +3511,8 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 						fprintf(f, "<HTML>\n<HEAD>\n<TITLE>Instructions for %s</TITLE>\n</HEAD>\n<BR>\n<CENTER>\n", m_strTitle);
 
-						for (i = 1; i <= last; i++)
-							fprintf(f, "<A HREF=\"%s-%02d%s\">Step %d<BR>\n</A>", m_strTitle, i, htmlext, i);
+						for (lcStep Step = 1; Step <= LastStep; Step++)
+							fprintf(f, "<A HREF=\"%s-%02d%s\">Step %d<BR>\n</A>", m_strTitle, Step, htmlext, Step);
 
 						if (Options.PartsListEnd)
 							fprintf(f, "<A HREF=\"%s-pieces%s\">Pieces Used</A><BR>\n", m_strTitle, htmlext);
@@ -3536,9 +3522,9 @@ void Project::HandleCommand(LC_COMMANDS id)
 					}
 
 					// Create each step
-					for (i = 1; i <= last; i++)
+					for (lcStep Step = 1; Step <= LastStep; Step++)
 					{
-						sprintf(fn, "%s%s-%02d%s", Options.PathName, m_strTitle, i, htmlext);
+						sprintf(fn, "%s%s-%02d%s", Options.PathName, m_strTitle, Step, htmlext);
 						f = fopen(fn, "wt");
 
 						if (!f)
@@ -3547,22 +3533,22 @@ void Project::HandleCommand(LC_COMMANDS id)
 							break;
 						}
 
-						fprintf(f, "<HTML>\n<HEAD>\n<TITLE>%s - Step %02d</TITLE>\n</HEAD>\n<BR>\n<CENTER>\n", m_strTitle, i);
+						fprintf(f, "<HTML>\n<HEAD>\n<TITLE>%s - Step %02d</TITLE>\n</HEAD>\n<BR>\n<CENTER>\n", m_strTitle, Step);
 						fprintf(f, "<IMG SRC=\"%s-%02d%s\" ALT=\"Step %02d\" WIDTH=%d HEIGHT=%d><BR><BR>\n",
-							m_strTitle, i, ext, i, Options.StepImagesWidth, Options.StepImagesHeight);
+							m_strTitle, Step, ext, Step, Options.StepImagesWidth, Options.StepImagesHeight);
 
 						if (Options.PartsListStep)
-							CreateHTMLPieceList(f, i, Options.PartsListImages, ext);
+							CreateHTMLPieceList(f, Step, Options.PartsListImages, ext);
 
 						fputs("</CENTER>\n<BR><HR><BR>", f);
-						if (i != 1)
-							fprintf(f, "<A HREF=\"%s-%02d%s\">Previous</A> ", m_strTitle, i-1, htmlext);
+						if (Step != 1)
+							fprintf(f, "<A HREF=\"%s-%02d%s\">Previous</A> ", m_strTitle, Step - 1, htmlext);
 
 						if (Options.IndexPage)
 							fprintf(f, "<A HREF=\"%s-index%s\">Index</A> ", m_strTitle, htmlext);
 
-						if (i != last)
-							fprintf(f, "<A HREF=\"%s-%02d%s\">Next</A>", m_strTitle, i+1, htmlext);
+						if (Step != LastStep)
+							fprintf(f, "<A HREF=\"%s-%02d%s\">Next</A>", m_strTitle, Step + 1, htmlext);
 						else if (Options.PartsListEnd)
 								fprintf(f, "<A HREF=\"%s-pieces%s\">Pieces Used</A>", m_strTitle, htmlext);
 
@@ -3589,7 +3575,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 						CreateHTMLPieceList(f, 0, Options.PartsListImages, ext);
 
 						fputs("</CENTER>\n<BR><HR><BR>", f);
-						fprintf(f, "<A HREF=\"%s-%02d%s\">Previous</A> ", m_strTitle, i-1, htmlext);
+						fprintf(f, "<A HREF=\"%s-%02d%s\">Previous</A> ", m_strTitle, LastStep, htmlext);
 
 						if (Options.IndexPage)
 							fprintf(f, "<A HREF=\"%s-index%s\">Index</A> ", m_strTitle, htmlext);
@@ -3600,13 +3586,13 @@ void Project::HandleCommand(LC_COMMANDS id)
 				}
 
 				// Save step pictures
-				Image* images = new Image[last];
-				CreateImages(images, Options.StepImagesWidth, Options.StepImagesHeight, 1, last, Options.HighlightNewParts);
+				Image* images = new Image[LastStep];
+				CreateImages(images, Options.StepImagesWidth, Options.StepImagesHeight, 1, LastStep, Options.HighlightNewParts);
 
-				for (i = 0; i < last; i++)
+				for (lcStep Step = 0; Step < LastStep; Step++)
 				{
-					sprintf(fn, "%s%s-%02d%s", Options.PathName, m_strTitle, i+1, ext);
-					images[i].FileSave(fn, Options.ImageFormat, Options.TransparentImages);
+					sprintf(fn, "%s%s-%02d%s", Options.PathName, m_strTitle, Step + 1, ext);
+					images[Step].FileSave(fn, Options.ImageFormat, Options.TransparentImages);
 				}
 				delete []images;
 
@@ -4131,7 +4117,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 			{
 				lcPiece* Piece = PastedPieces[PieceIdx];
 				Piece->CreateName(mPieces);
-				Piece->SetStepShow(m_nCurStep);
+				Piece->SetStepShow(mCurrentStep);
 				mPieces.Add(Piece);
 				Piece->SetSelected(true);
 
@@ -4231,7 +4217,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 			{
 				Piece* Piece = mPieces[PieceIdx];
 
-				if (Piece->IsVisible(m_nCurStep))
+				if (Piece->IsVisible(mCurrentStep))
 					Piece->SetSelected(true);
 			}
 
@@ -4253,7 +4239,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 			{
 				Piece* Piece = mPieces[PieceIdx];
 
-				if (Piece->IsVisible(m_nCurStep))
+				if (Piece->IsVisible(mCurrentStep))
 					Piece->SetSelected(!Piece->IsSelected());
 			}
 
@@ -4370,7 +4356,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 		{
 			lcVector3 FocusVector;
 			GetSelectionCenter(FocusVector);
-			gMainWindow->GetActiveView()->mCamera->SetFocalPoint(FocusVector, m_nCurStep, gMainWindow->GetAddKeys());
+			gMainWindow->GetActiveView()->mCamera->SetFocalPoint(FocusVector, mCurrentStep, gMainWindow->GetAddKeys());
 			gMainWindow->UpdateAllViews();
 		}
 		break;
@@ -4400,13 +4386,13 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 				GetPieceInsertPosition(Last, Pos, Rot);
 
-				pPiece->Initialize(Pos[0], Pos[1], Pos[2], m_nCurStep);
+				pPiece->Initialize(Pos[0], Pos[1], Pos[2], mCurrentStep);
 
-				pPiece->ChangeKey(m_nCurStep, false, Rot, LC_PK_ROTATION);
-				pPiece->UpdatePosition(m_nCurStep);
+				pPiece->ChangeKey(mCurrentStep, false, Rot, LC_PK_ROTATION);
+				pPiece->UpdatePosition(mCurrentStep);
 			}
 			else
-				pPiece->Initialize(0, 0, 0, m_nCurStep);
+				pPiece->Initialize(0, 0, 0, mCurrentStep);
 
 			pPiece->SetColorIndex(gMainWindow->mColorIndex);
 			pPiece->CreateName(mPieces);
@@ -4558,14 +4544,14 @@ void Project::HandleCommand(LC_COMMANDS id)
 				lcVector4& Position = Minifig.Matrices[i][3];
 				lcVector4 Rotation = lcMatrix44ToAxisAngle(Minifig.Matrices[i]);
 				Rotation[3] *= LC_RTOD;
-				pPiece->Initialize(Position[0], Position[1], Position[2], m_nCurStep);
+				pPiece->Initialize(Position[0], Position[1], Position[2], mCurrentStep);
 				pPiece->SetColorIndex(Minifig.Colors[i]);
 				pPiece->CreateName(mPieces);
 				mPieces.Add(pPiece);
 				pPiece->SetSelected(true);
 
 				pPiece->ChangeKey(1, false, Rotation, LC_PK_ROTATION);
-				pPiece->UpdatePosition(m_nCurStep);
+				pPiece->UpdatePosition(mCurrentStep);
 
 				SystemPieceComboAdd(Minifig.Parts[i]->m_strDescription);
 			}
@@ -4693,7 +4679,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 							Piece* NewPiece = new Piece(pPiece->mPieceInfo);
 							NewPieces.Add(NewPiece);
 
-							NewPiece->Initialize(Position[0] + Offset[0], Position[1] + Offset[1], Position[2] + Offset[2], m_nCurStep);
+							NewPiece->Initialize(Position[0] + Offset[0], Position[1] + Offset[1], Position[2] + Offset[2], mCurrentStep);
 							NewPiece->SetColorIndex(pPiece->mColorIndex);
 							NewPiece->ChangeKey(1, false, AxisAngle, LC_PK_ROTATION);
 						}
@@ -4705,7 +4691,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 			{
 				Piece* Piece = NewPieces[PieceIdx];
 				Piece->CreateName(mPieces);
-				Piece->UpdatePosition(m_nCurStep);
+				Piece->UpdatePosition(mCurrentStep);
 				mPieces.Add(Piece);
 			}
 
@@ -4940,7 +4926,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 		case LC_PIECE_SHOW_EARLIER:
 		{
-			bool redraw = false;
+			bool Redraw = false;
 
 			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 			{
@@ -4948,25 +4934,27 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 				if (Piece->IsSelected())
 				{
-					unsigned char t = Piece->GetStepShow();
-					if (t > 1)
+					lcStep Step = Piece->GetStepShow();
+
+					if (Step > 1)
 					{
-						redraw = true;
-						Piece->SetStepShow(t-1);
+						Redraw = true;
+						Piece->SetStepShow(Step - 1);
 					}
 				}
 			}
 
-			if (redraw)
+			if (Redraw)
 			{
 				CheckPoint("Modifying");
 				gMainWindow->UpdateAllViews();
+				UpdateSelection();
 			}
 		} break;
 
 		case LC_PIECE_SHOW_LATER:
 		{
-			bool redraw = false;
+			bool Redraw = false;
 
 			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 			{
@@ -4974,23 +4962,25 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 				if (Piece->IsSelected())
 				{
-					unsigned char t = Piece->GetStepShow();
-					if (t < 255)
-					{
-						redraw = true;
-						Piece->SetStepShow(t+1);
+					lcStep Step = Piece->GetStepShow();
 
-						if (t == m_nCurStep)
+					if (Step < LC_STEP_MAX)
+					{
+						Step++;
+						Redraw = true;
+						Piece->SetStepShow(Step);
+
+						if (Step > mCurrentStep)
 							Piece->SetSelected(false);
 					}
 				}
 			}
 
-			if (redraw)
+			if (Redraw)
 			{
 				CheckPoint("Modifying");
 				gMainWindow->UpdateAllViews();
-				UpdateSelection ();
+				UpdateSelection();
 			}
 		} break;
 
@@ -5049,57 +5039,58 @@ void Project::HandleCommand(LC_COMMANDS id)
 				Center = lcVector3((bs[0] + bs[3]) * 0.5f, (bs[1] + bs[4]) * 0.5f, (bs[2] + bs[5]) * 0.5f);
 			}
 
-			gMainWindow->GetActiveView()->mCamera->Center(Center, m_nCurStep, gMainWindow->GetAddKeys());
+			gMainWindow->GetActiveView()->mCamera->Center(Center, mCurrentStep, gMainWindow->GetAddKeys());
 			gMainWindow->UpdateAllViews();
 			break;
 		}
 
 		case LC_VIEW_TIME_NEXT:
 		{
-			m_nCurStep++;
+			if (mCurrentStep == LC_STEP_MAX)
+				break;
+
+			mCurrentStep++;
 
 			CalculateStep();
 			UpdateSelection();
 			gMainWindow->UpdateFocusObject(GetFocusObject());
 			gMainWindow->UpdateAllViews();
-
-			gMainWindow->UpdateTime(m_nCurStep, 255);
+			gMainWindow->UpdateCurrentStep();
 		} break;
 
 		case LC_VIEW_TIME_PREVIOUS:
 		{
-			m_nCurStep--;
+			if (mCurrentStep == 1)
+				break;
+			mCurrentStep--;
 
 			CalculateStep();
 			UpdateSelection();
 			gMainWindow->UpdateFocusObject(GetFocusObject());
 			gMainWindow->UpdateAllViews();
-
-			gMainWindow->UpdateTime(m_nCurStep, 255);
+			gMainWindow->UpdateCurrentStep();
 		} break;
 
 		case LC_VIEW_TIME_FIRST:
 		{
-			m_nCurStep = 1;
+			mCurrentStep = 1;
 
 			CalculateStep();
 			UpdateSelection();
 			gMainWindow->UpdateFocusObject(GetFocusObject());
 			gMainWindow->UpdateAllViews();
-
-			gMainWindow->UpdateTime(m_nCurStep, 255);
+			gMainWindow->UpdateCurrentStep();
 		} break;
 
 		case LC_VIEW_TIME_LAST:
 		{
-			m_nCurStep = GetLastStep ();
+			mCurrentStep = GetLastStep();
 
 			CalculateStep();
 			UpdateSelection();
 			gMainWindow->UpdateFocusObject(GetFocusObject());
 			gMainWindow->UpdateAllViews();
-
-			gMainWindow->UpdateTime(m_nCurStep, 255);
+			gMainWindow->UpdateCurrentStep();
 		} break;
 
 		case LC_VIEW_TIME_INSERT:
@@ -5107,16 +5098,16 @@ void Project::HandleCommand(LC_COMMANDS id)
 			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 			{
 				Piece* Piece = mPieces[PieceIdx];
-				Piece->InsertTime(m_nCurStep, 1);
-				if (Piece->IsSelected() && !Piece->IsVisible(m_nCurStep))
+				Piece->InsertTime(mCurrentStep, 1);
+				if (Piece->IsSelected() && !Piece->IsVisible(mCurrentStep))
 					Piece->SetSelected(false);
 			}
 
 			for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
-				mCameras[CameraIdx]->InsertTime(m_nCurStep, 1);
+				mCameras[CameraIdx]->InsertTime(mCurrentStep, 1);
 
 			for (int LightIdx = 0; LightIdx < mLights.GetSize(); LightIdx++)
-				mLights[LightIdx]->InsertTime(m_nCurStep, 1);
+				mLights[LightIdx]->InsertTime(mCurrentStep, 1);
 
 			CheckPoint("Adding Step");
 			CalculateStep();
@@ -5130,16 +5121,16 @@ void Project::HandleCommand(LC_COMMANDS id)
 			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 			{
 				Piece* Piece = mPieces[PieceIdx];
-				Piece->RemoveTime(m_nCurStep, 1);
-				if (Piece->IsSelected() && !Piece->IsVisible(m_nCurStep))
+				Piece->RemoveTime(mCurrentStep, 1);
+				if (Piece->IsSelected() && !Piece->IsVisible(mCurrentStep))
 					Piece->SetSelected(false);
 			}
 
 			for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
-				mCameras[CameraIdx]->RemoveTime(m_nCurStep, 1);
+				mCameras[CameraIdx]->RemoveTime(mCurrentStep, 1);
 
 			for (int LightIdx = 0; LightIdx < mLights.GetSize(); LightIdx++)
-				mLights[LightIdx]->RemoveTime(m_nCurStep, 1);
+				mLights[LightIdx]->RemoveTime(mCurrentStep, 1);
 
 			CheckPoint("Removing Step");
 			CalculateStep();
@@ -5150,49 +5141,49 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 		case LC_VIEW_VIEWPOINT_FRONT:
 		{
-			gMainWindow->GetActiveView()->mCamera->SetViewpoint(LC_VIEWPOINT_FRONT, m_nCurStep, gMainWindow->GetAddKeys());
+			gMainWindow->GetActiveView()->mCamera->SetViewpoint(LC_VIEWPOINT_FRONT, mCurrentStep, gMainWindow->GetAddKeys());
 			HandleCommand(LC_VIEW_ZOOM_EXTENTS);
 			gMainWindow->UpdateAllViews();
 		} break;
 
 		case LC_VIEW_VIEWPOINT_BACK:
 		{
-			gMainWindow->GetActiveView()->mCamera->SetViewpoint(LC_VIEWPOINT_BACK, m_nCurStep, gMainWindow->GetAddKeys());
+			gMainWindow->GetActiveView()->mCamera->SetViewpoint(LC_VIEWPOINT_BACK, mCurrentStep, gMainWindow->GetAddKeys());
 			HandleCommand(LC_VIEW_ZOOM_EXTENTS);
 			gMainWindow->UpdateAllViews();
 		} break;
 
 		case LC_VIEW_VIEWPOINT_TOP:
 		{
-			gMainWindow->GetActiveView()->mCamera->SetViewpoint(LC_VIEWPOINT_TOP, m_nCurStep, gMainWindow->GetAddKeys());
+			gMainWindow->GetActiveView()->mCamera->SetViewpoint(LC_VIEWPOINT_TOP, mCurrentStep, gMainWindow->GetAddKeys());
 			HandleCommand(LC_VIEW_ZOOM_EXTENTS);
 			gMainWindow->UpdateAllViews();
 		} break;
 
 		case LC_VIEW_VIEWPOINT_BOTTOM:
 		{
-			gMainWindow->GetActiveView()->mCamera->SetViewpoint(LC_VIEWPOINT_BOTTOM, m_nCurStep, gMainWindow->GetAddKeys());
+			gMainWindow->GetActiveView()->mCamera->SetViewpoint(LC_VIEWPOINT_BOTTOM, mCurrentStep, gMainWindow->GetAddKeys());
 			HandleCommand(LC_VIEW_ZOOM_EXTENTS);
 			gMainWindow->UpdateAllViews();
 		} break;
 
 		case LC_VIEW_VIEWPOINT_LEFT:
 		{
-			gMainWindow->GetActiveView()->mCamera->SetViewpoint(LC_VIEWPOINT_LEFT, m_nCurStep, gMainWindow->GetAddKeys());
+			gMainWindow->GetActiveView()->mCamera->SetViewpoint(LC_VIEWPOINT_LEFT, mCurrentStep, gMainWindow->GetAddKeys());
 			HandleCommand(LC_VIEW_ZOOM_EXTENTS);
 			gMainWindow->UpdateAllViews();
 		} break;
 
 		case LC_VIEW_VIEWPOINT_RIGHT:
 		{
-			gMainWindow->GetActiveView()->mCamera->SetViewpoint(LC_VIEWPOINT_RIGHT, m_nCurStep, gMainWindow->GetAddKeys());
+			gMainWindow->GetActiveView()->mCamera->SetViewpoint(LC_VIEWPOINT_RIGHT, mCurrentStep, gMainWindow->GetAddKeys());
 			HandleCommand(LC_VIEW_ZOOM_EXTENTS);
 			gMainWindow->UpdateAllViews();
 		} break;
 
 		case LC_VIEW_VIEWPOINT_HOME:
 		{
-			gMainWindow->GetActiveView()->mCamera->SetViewpoint(LC_VIEWPOINT_HOME, m_nCurStep, gMainWindow->GetAddKeys());
+			gMainWindow->GetActiveView()->mCamera->SetViewpoint(LC_VIEWPOINT_HOME, mCurrentStep, gMainWindow->GetAddKeys());
 			HandleCommand(LC_VIEW_ZOOM_EXTENTS);
 			gMainWindow->UpdateAllViews();
 		} break;
@@ -5684,7 +5675,7 @@ void Project::SelectGroup(Group* TopGroup, bool Select)
 	{
 		Piece* Piece = mPieces[PieceIdx];
 
-		if (!Piece->IsSelected() && Piece->IsVisible(m_nCurStep) && (Piece->GetTopGroup() == TopGroup))
+		if (!Piece->IsSelected() && Piece->IsVisible(mCurrentStep) && (Piece->GetTopGroup() == TopGroup))
 			Piece->SetSelected(Select);
 	}
 }
@@ -5921,7 +5912,7 @@ void Project::RayTest(lcObjectRayTest& ObjectRayTest) const
 	{
 		Piece* Piece = mPieces[PieceIdx];
 
-		if (Piece->IsVisible(m_nCurStep))
+		if (Piece->IsVisible(mCurrentStep))
 			Piece->RayTest(ObjectRayTest);
 	}
 
@@ -5947,7 +5938,7 @@ void Project::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
 	{
 		Piece* Piece = mPieces[PieceIdx];
 
-		if (Piece->IsVisible(m_nCurStep))
+		if (Piece->IsVisible(mCurrentStep))
 			Piece->BoxTest(ObjectBoxTest);
 	}
 
@@ -6154,8 +6145,8 @@ bool Project::MoveSelectedObjects(lcVector3& Move, lcVector3& Remainder, bool Sn
 
 		if (Piece->IsSelected())
 		{
-			Piece->Move(m_nCurStep, gMainWindow->GetAddKeys(), TransformedMove);
-			Piece->UpdatePosition(m_nCurStep);
+			Piece->Move(mCurrentStep, gMainWindow->GetAddKeys(), TransformedMove);
+			Piece->UpdatePosition(mCurrentStep);
 		}
 	}
 
@@ -6165,8 +6156,8 @@ bool Project::MoveSelectedObjects(lcVector3& Move, lcVector3& Remainder, bool Sn
 
 		if (Camera->IsSelected())
 		{
-			Camera->Move(m_nCurStep, gMainWindow->GetAddKeys(), TransformedMove);
-			Camera->UpdatePosition(m_nCurStep);
+			Camera->Move(mCurrentStep, gMainWindow->GetAddKeys(), TransformedMove);
+			Camera->UpdatePosition(mCurrentStep);
 		}
 	}
 
@@ -6176,8 +6167,8 @@ bool Project::MoveSelectedObjects(lcVector3& Move, lcVector3& Remainder, bool Sn
 
 		if (Light->IsSelected())
 		{
-			Light->Move(m_nCurStep, gMainWindow->GetAddKeys(), TransformedMove);
-			Light->UpdatePosition(m_nCurStep);
+			Light->Move(mCurrentStep, gMainWindow->GetAddKeys(), TransformedMove);
+			Light->UpdatePosition(mCurrentStep);
 		}
 	}
 
@@ -6335,7 +6326,7 @@ bool Project::RotateSelectedObjects(lcVector3& Delta, lcVector3& Remainder, bool
 			pos[1] = Center[1] + Distance[1];
 			pos[2] = Center[2] + Distance[2];
 
-			Piece->ChangeKey(m_nCurStep, gMainWindow->GetAddKeys(), pos, LC_PK_POSITION);
+			Piece->ChangeKey(mCurrentStep, gMainWindow->GetAddKeys(), pos, LC_PK_POSITION);
 		}
 
 		rot[0] = NewRotation[0];
@@ -6343,8 +6334,8 @@ bool Project::RotateSelectedObjects(lcVector3& Delta, lcVector3& Remainder, bool
 		rot[2] = NewRotation[2];
 		rot[3] = NewRotation[3] * LC_RTOD;
 
-		Piece->ChangeKey(m_nCurStep, gMainWindow->GetAddKeys(), rot, LC_PK_ROTATION);
-		Piece->UpdatePosition(m_nCurStep);
+		Piece->ChangeKey(mCurrentStep, gMainWindow->GetAddKeys(), rot, LC_PK_ROTATION);
+		Piece->UpdatePosition(mCurrentStep);
 	}
 
 	return true;
@@ -6388,8 +6379,8 @@ void Project::TransformSelectedObjects(LC_TRANSFORM_TYPE Type, const lcVector3& 
 
 				if (pCamera->IsSelected())
 				{
-					pCamera->Move(m_nCurStep, gMainWindow->GetAddKeys(), Offset);
-					pCamera->UpdatePosition(m_nCurStep);
+					pCamera->Move(mCurrentStep, gMainWindow->GetAddKeys(), Offset);
+					pCamera->UpdatePosition(mCurrentStep);
 				}
 			}
 
@@ -6399,8 +6390,8 @@ void Project::TransformSelectedObjects(LC_TRANSFORM_TYPE Type, const lcVector3& 
 
 				if (pLight->IsSelected())
 				{
-					pLight->Move(m_nCurStep, gMainWindow->GetAddKeys(), Offset);
-					pLight->UpdatePosition (m_nCurStep);
+					pLight->Move(mCurrentStep, gMainWindow->GetAddKeys(), Offset);
+					pLight->UpdatePosition (mCurrentStep);
 				}
 			}
 
@@ -6410,8 +6401,8 @@ void Project::TransformSelectedObjects(LC_TRANSFORM_TYPE Type, const lcVector3& 
 
 				if (Piece->IsSelected())
 				{
-					Piece->Move(m_nCurStep, gMainWindow->GetAddKeys(), Offset);
-					Piece->UpdatePosition(m_nCurStep);
+					Piece->Move(mCurrentStep, gMainWindow->GetAddKeys(), Offset);
+					Piece->UpdatePosition(mCurrentStep);
 				}
 			}
 
@@ -6469,8 +6460,8 @@ void Project::TransformSelectedObjects(LC_TRANSFORM_TYPE Type, const lcVector3& 
 
 				if (Piece->IsSelected())
 				{
-					Piece->ChangeKey(m_nCurStep, gMainWindow->GetAddKeys(), NewRotation, LC_PK_ROTATION);
-					Piece->UpdatePosition(m_nCurStep);
+					Piece->ChangeKey(mCurrentStep, gMainWindow->GetAddKeys(), NewRotation, LC_PK_ROTATION);
+					Piece->UpdatePosition(mCurrentStep);
 					nSel++;
 				}
 			}
@@ -6510,8 +6501,8 @@ void Project::ModifyObject(Object* Object, lcObjectProperty Property, void* Valu
 
 			if (Part->mPosition != Position)
 			{
-				Part->ChangeKey(m_nCurStep, gMainWindow->GetAddKeys(), Position, LC_PK_POSITION);
-				Part->UpdatePosition(m_nCurStep);
+				Part->ChangeKey(mCurrentStep, gMainWindow->GetAddKeys(), Position, LC_PK_POSITION);
+				Part->UpdatePosition(mCurrentStep);
 
 				CheckPointString = "Moving";
 			}
@@ -6524,8 +6515,8 @@ void Project::ModifyObject(Object* Object, lcObjectProperty Property, void* Valu
 
 			if (Rotation != Part->mRotation)
 			{
-				Part->ChangeKey(m_nCurStep, gMainWindow->GetAddKeys(), Rotation, LC_PK_ROTATION);
-				Part->UpdatePosition(m_nCurStep);
+				Part->ChangeKey(mCurrentStep, gMainWindow->GetAddKeys(), Rotation, LC_PK_ROTATION);
+				Part->UpdatePosition(mCurrentStep);
 
 				CheckPointString = "Rotating";
 			}
@@ -6533,13 +6524,13 @@ void Project::ModifyObject(Object* Object, lcObjectProperty Property, void* Valu
 
 	case LC_PIECE_PROPERTY_SHOW:
 		{
-			lcuint32 Show = *(lcuint32*)Value;
+			lcStep Step = *(lcStep*)Value;
 			Piece* Part = (Piece*)Object;
 
-			if (Show != Part->GetStepShow())
+			if (Step != Part->GetStepShow())
 			{
-				Part->SetStepShow(Show);
-				if (Part->IsSelected() && !Part->IsVisible(m_nCurStep))
+				Part->SetStepShow(Step);
+				if (Part->IsSelected() && !Part->IsVisible(mCurrentStep))
 					Part->SetSelected(false);
 
 				CheckPointString = "Show";
@@ -6548,12 +6539,12 @@ void Project::ModifyObject(Object* Object, lcObjectProperty Property, void* Valu
 
 	case LC_PIECE_PROPERTY_HIDE:
 		{
-			lcuint32 Hide = *(lcuint32*)Value;
+			lcStep Step = *(lcuint32*)Value;
 			Piece* Part = (Piece*)Object;
 
-			if (Hide != Part->GetStepHide())
+			if (Step != Part->GetStepHide())
 			{
-				Part->SetStepHide(Hide);
+				Part->SetStepHide(Step);
 
 				CheckPointString = "Hide";
 			}
@@ -6594,8 +6585,8 @@ void Project::ModifyObject(Object* Object, lcObjectProperty Property, void* Valu
 
 			if (camera->mPosition != Position)
 			{
-				camera->ChangeKey(m_nCurStep, gMainWindow->GetAddKeys(), Position, LC_CK_EYE);
-				camera->UpdatePosition(m_nCurStep);
+				camera->ChangeKey(mCurrentStep, gMainWindow->GetAddKeys(), Position, LC_CK_EYE);
+				camera->UpdatePosition(mCurrentStep);
 
 				CheckPointString = "Camera";
 			}
@@ -6608,8 +6599,8 @@ void Project::ModifyObject(Object* Object, lcObjectProperty Property, void* Valu
 
 			if (camera->mTargetPosition != TargetPosition)
 			{
-				camera->ChangeKey(m_nCurStep, gMainWindow->GetAddKeys(), TargetPosition, LC_CK_TARGET);
-				camera->UpdatePosition(m_nCurStep);
+				camera->ChangeKey(mCurrentStep, gMainWindow->GetAddKeys(), TargetPosition, LC_CK_TARGET);
+				camera->UpdatePosition(mCurrentStep);
 
 				CheckPointString = "Camera";
 			}
@@ -6622,8 +6613,8 @@ void Project::ModifyObject(Object* Object, lcObjectProperty Property, void* Valu
 
 			if (camera->mUpVector != Up)
 			{
-				camera->ChangeKey(m_nCurStep, gMainWindow->GetAddKeys(), Up, LC_CK_UP);
-				camera->UpdatePosition(m_nCurStep);
+				camera->ChangeKey(mCurrentStep, gMainWindow->GetAddKeys(), Up, LC_CK_UP);
+				camera->UpdatePosition(mCurrentStep);
 
 				CheckPointString = "Camera";
 			}
@@ -6637,7 +6628,7 @@ void Project::ModifyObject(Object* Object, lcObjectProperty Property, void* Valu
 			if (camera->IsOrtho() != Ortho)
 			{
 				camera->SetOrtho(Ortho);
-				camera->UpdatePosition(m_nCurStep);
+				camera->UpdatePosition(mCurrentStep);
 
 				CheckPointString = "Camera";
 			}
@@ -6651,7 +6642,7 @@ void Project::ModifyObject(Object* Object, lcObjectProperty Property, void* Valu
 			if (camera->m_fovy != FOV)
 			{
 				camera->m_fovy = FOV;
-				camera->UpdatePosition(m_nCurStep);
+				camera->UpdatePosition(mCurrentStep);
 
 				CheckPointString = "Camera";
 			}
@@ -6665,7 +6656,7 @@ void Project::ModifyObject(Object* Object, lcObjectProperty Property, void* Valu
 			if (camera->m_zNear != Near)
 			{
 				camera->m_zNear= Near;
-				camera->UpdatePosition(m_nCurStep);
+				camera->UpdatePosition(mCurrentStep);
 
 				CheckPointString = "Camera";
 			}
@@ -6679,7 +6670,7 @@ void Project::ModifyObject(Object* Object, lcObjectProperty Property, void* Valu
 			if (camera->m_zFar != Far)
 			{
 				camera->m_zFar = Far;
-				camera->UpdatePosition(m_nCurStep);
+				camera->UpdatePosition(mCurrentStep);
 
 				CheckPointString = "Camera";
 			}
@@ -6714,7 +6705,7 @@ void Project::ZoomActiveView(int Amount)
 {
 	float ScaledAmount = 2.0f * Amount / (21 - lcGetProfileInt(LC_PROFILE_MOUSE_SENSITIVITY));
 
-	gMainWindow->GetActiveView()->mCamera->Zoom(ScaledAmount, m_nCurStep, gMainWindow->GetAddKeys());
+	gMainWindow->GetActiveView()->mCamera->Zoom(ScaledAmount, mCurrentStep, gMainWindow->GetAddKeys());
 	gMainWindow->UpdateFocusObject(GetFocusObject());
 	gMainWindow->UpdateAllViews();
 }
@@ -6791,10 +6782,10 @@ void Project::EndMouseTool(lcTool Tool, bool Accept)
 void Project::InsertPieceToolClicked(const lcVector3& Position, const lcVector4& Rotation)
 {
 	lcPiece* Piece = new lcPiece(m_pCurPiece);
-	Piece->Initialize(Position[0], Position[1], Position[2], m_nCurStep);
+	Piece->Initialize(Position[0], Position[1], Position[2], mCurrentStep);
 	Piece->SetColorIndex(gMainWindow->mColorIndex);
-	Piece->ChangeKey(m_nCurStep, false, Rotation, LC_PK_ROTATION);
-	Piece->UpdatePosition(m_nCurStep);
+	Piece->ChangeKey(mCurrentStep, false, Rotation, LC_PK_ROTATION);
+	Piece->UpdatePosition(mCurrentStep);
 	Piece->CreateName(mPieces);
 	mPieces.Add(Piece);
 
@@ -6936,14 +6927,14 @@ void Project::PaintToolClicked(lcObject* Object)
 
 void Project::UpdateZoomTool(lcCamera* Camera, float Mouse)
 {
-	Camera->Zoom(Mouse - mMouseToolDistance.x, m_nCurStep, gMainWindow->GetAddKeys());
+	Camera->Zoom(Mouse - mMouseToolDistance.x, mCurrentStep, gMainWindow->GetAddKeys());
 	mMouseToolDistance.x = Mouse;
 	gMainWindow->UpdateAllViews();
 }
 
 void Project::UpdatePanTool(lcCamera* Camera, float MouseX, float MouseY)
 {
-	Camera->Pan(MouseX - mMouseToolDistance.x, MouseY - mMouseToolDistance.y, m_nCurStep, gMainWindow->GetAddKeys());
+	Camera->Pan(MouseX - mMouseToolDistance.x, MouseY - mMouseToolDistance.y, mCurrentStep, gMainWindow->GetAddKeys());
 	mMouseToolDistance.x = MouseX;
 	mMouseToolDistance.y = MouseY;
 	gMainWindow->UpdateAllViews();
@@ -6953,7 +6944,7 @@ void Project::UpdateOrbitTool(lcCamera* Camera, float MouseX, float MouseY)
 {
 	lcVector3 Center;
 	GetSelectionCenter(Center);
-	Camera->Orbit(MouseX - mMouseToolDistance.x, MouseY - mMouseToolDistance.y, Center, m_nCurStep, gMainWindow->GetAddKeys());
+	Camera->Orbit(MouseX - mMouseToolDistance.x, MouseY - mMouseToolDistance.y, Center, mCurrentStep, gMainWindow->GetAddKeys());
 	mMouseToolDistance.x = MouseX;
 	mMouseToolDistance.y = MouseY;
 	gMainWindow->UpdateAllViews();
@@ -6961,14 +6952,14 @@ void Project::UpdateOrbitTool(lcCamera* Camera, float MouseX, float MouseY)
 
 void Project::UpdateRollTool(lcCamera* Camera, float Mouse)
 {
-	Camera->Roll(Mouse - mMouseToolDistance.x, m_nCurStep, gMainWindow->GetAddKeys());
+	Camera->Roll(Mouse - mMouseToolDistance.x, mCurrentStep, gMainWindow->GetAddKeys());
 	mMouseToolDistance.x = Mouse;
 	gMainWindow->UpdateAllViews();
 }
 
 void Project::ZoomRegionToolClicked(lcCamera* Camera, const lcVector3* Points, float RatioX, float RatioY)
 {
-	Camera->ZoomRegion(Points, m_nCurStep, gMainWindow->GetAddKeys(), RatioX, RatioY);
+	Camera->ZoomRegion(Points, mCurrentStep, gMainWindow->GetAddKeys(), RatioX, RatioY);
 
 	gMainWindow->UpdateFocusObject(GetFocusObject());
 	gMainWindow->UpdateAllViews();

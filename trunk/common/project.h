@@ -160,19 +160,12 @@ protected:
 	lcVector3 mMouseToolDistance;
 
 public:
-	bool IsModified() const
+	void SetCurrentStep(lcStep Step)
 	{
-		return mSavedHistory != mUndoHistory[0];
-	}
-
-	unsigned char GetLastStep();
-	unsigned short GetCurrentTime ()
-		{ return m_nCurStep; }
-	void SetCurrentTime(unsigned short Time)
-	{
-		m_nCurStep = (unsigned char)Time;
+		mCurrentStep = Step;
 		CalculateStep();
 	}
+
 	void SetCurrentPiece(PieceInfo* pInfo)
 		{ m_pCurPiece = pInfo; }
 	float* GetBackgroundColor() // todo: remove
@@ -182,11 +175,6 @@ public:
 	void GetSnapIndex(int* SnapXY, int* SnapZ, int* SnapAngle) const;
 	void GetSnapText(char* SnapXY, char* SnapZ, char* SnapAngle) const;
 	void GetSnapDistance(float* SnapXY, float* SnapZ) const;
-	void GetTimeRange(int* from, int* to)
-	{
-		*from = m_nCurStep;
-		*to = 255;
-	}
 
 	int GetGroupIndex(lcGroup* Group) const
 	{
@@ -207,7 +195,7 @@ public:
 	void RenderInitialize();
 
 	void GetPiecesUsed(lcArray<lcPiecesUsedEntry>& PiecesUsed) const;
-	void CreateImages(Image* images, int width, int height, unsigned short from, unsigned short to, bool hilite);
+	void CreateImages(Image* images, int width, int height, lcStep from, lcStep to, bool hilite);
 	void Render(View* view, bool bToMemory);
 	void CheckAutoSave();
 	bool GetSelectionCenter(lcVector3& Center) const;
@@ -260,7 +248,7 @@ protected:
 	void RenderSceneObjects(View* view);
 	void RenderViewports(View* view);
 
-	void CreateHTMLPieceList(FILE* f, int nStep, bool bImages, const char* ext);
+	void CreateHTMLPieceList(FILE* f, lcStep Step, bool bImages, const char* ext);
 	void Export3DStudio();
 	void ExportPOVRay(lcFile& File);
 	void ZoomExtents(int FirstView, int LastView);
@@ -275,10 +263,8 @@ public:
 	lcuint32 m_nSnap;
 
 protected:
-	// State variables
 	int mTransformType;
 	PieceInfo* m_pCurPiece;
-	unsigned char m_nCurStep;
 
 	lcuint16 m_nMoveSnap;
 	lcuint16 m_nAngleSnap;

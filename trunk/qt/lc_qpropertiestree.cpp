@@ -555,13 +555,13 @@ void lcQPropertiesTree::slotReturnPressed()
 		}
 		else if (item == partShow)
 		{
-			lcuint32 value = editor->text().toUInt();
+			lcStep value = editor->text().toUInt();
 
 			project->ModifyObject(focusObject, LC_PIECE_PROPERTY_SHOW, &value);
 		}
 		else if (item == partHide)
 		{
-			lcuint32 value = editor->text().toUInt();
+			lcStep value = editor->text().toUInt();
 
 			project->ModifyObject(focusObject, LC_PIECE_PROPERTY_HIDE, &value);
 		}
@@ -805,8 +805,8 @@ void lcQPropertiesTree::setPart(Object *newFocusObject)
 	partRotationZ->setText(1, QString::number(rotation[2]));
 	partRotationZ->setData(0, PropertyValueRole, rotation[2]);
 
-	lcuint32 show = part->GetStepShow();
-	lcuint32 hide = part->GetStepHide();
+	lcStep show = part->GetStepShow();
+	lcStep hide = part->GetStepHide();
 
 	partShow->setText(1, QString::number(show));
 	partShow->setData(0, PropertyValueRole, show);

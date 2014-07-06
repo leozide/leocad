@@ -46,3 +46,13 @@ lcModel::lcModel()
 lcModel::~lcModel()
 {
 }
+
+lcStep lcModel::GetLastStep() const
+{
+	lcStep Step = 1;
+
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+		Step = lcMax(Step, mPieces[PieceIdx]->GetStepShow());
+
+	return Step;
+}

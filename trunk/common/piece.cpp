@@ -34,8 +34,8 @@ lcPiece::lcPiece(PieceInfo* pPieceInfo)
 	mState = 0;
 	mColorIndex = 0;
 	mColorCode = 0;
-	m_nStepShow = 1;
-	m_nStepHide = 255;
+	mStepShow = 1;
+	mStepHide = LC_STEP_MAX;
 	memset(m_strName, 0, sizeof(m_strName));
 	mGroup = NULL;
 
@@ -193,11 +193,16 @@ bool lcPiece::FileLoad(lcFile& file)
 		file.ReadU32(&mColorCode, 1);
 	mColorIndex = lcGetColorIndex(mColorCode);
 
-  file.ReadU8(&m_nStepShow, 1);
+  lcuint8 Step;
+  file.ReadU8(&Step, 1);
+  mStepShow = Step;
   if (version > 1)
-    file.ReadU8(&m_nStepHide, 1);
+  {
+    file.ReadU8(&Step, 1);
+	mStepHide = Step == 255 ? LC_STEP_MAX : Step;
+  }
   else
-    m_nStepHide = 255;
+    mStepHide = LC_STEP_MAX;
 
   if (version > 5)
   {
@@ -252,8 +257,8 @@ void lcPiece::FileSave(lcFile& file) const
 
 	file.WriteBuffer(mPieceInfo->m_strName, LC_PIECE_NAME_LEN);
 	file.WriteU32(mColorCode);
-	file.WriteU8(m_nStepShow);
-	file.WriteU8(m_nStepHide);
+	file.WriteU8(lcMin(mStepShow, 254U));
+	file.WriteU8(lcMin(mStepHide, 255U));
 	file.WriteU16(1); // m_nFrameShow
 	file.WriteU16(100); // m_nFrameHide
 
@@ -269,9 +274,9 @@ void lcPiece::FileSave(lcFile& file) const
 	file.WriteS32(GroupIndex);
 }
 
-void lcPiece::Initialize(float x, float y, float z, unsigned char nStep)
+void lcPiece::Initialize(float x, float y, float z, lcStep Step)
 {
-	m_nStepShow = nStep;
+	mStepShow = Step;
 
 	float pos[3] = { x, y, z }, rot[4] = { 0, 0, 1, 0 };
 	ChangeKey(1, true, pos, LC_PK_POSITION);
@@ -298,26 +303,68 @@ void lcPiece::CreateName(const lcArray<Piece*>& Pieces)
 	m_strName[sizeof(m_strName) - 1] = 0;
 }
 
-void lcPiece::InsertTime(unsigned short start, unsigned short time)
+void lcPiece::InsertTime(lcStep Start, lcStep Time)
 {
-	if (m_nStepShow >= start)
-		m_nStepShow = lcMin(m_nStepShow + time, 255);
+	if (mStepShow >= Start)
+	{
+		if (mStepShow < LC_STEP_MAX - Time)
+			mStepShow += Time;
+		else
+			mStepShow = LC_STEP_MAX;
+	}
 
-	if (m_nStepHide >= start)
-		m_nStepHide = lcMin(m_nStepHide + time, 255);
+	if (mStepHide >= Start)
+	{
+		if (mStepHide < LC_STEP_MAX - Time)
+			mStepHide += Time;
+		else
+			mStepHide = LC_STEP_MAX;
+	}
 
-	Object::InsertTime(start, time);
+	if (mStepShow >= mStepHide)
+	{
+		if (mStepShow != LC_STEP_MAX)
+			mStepHide = mStepShow + 1;
+		else
+		{
+			mStepShow = LC_STEP_MAX - 1;
+			mStepHide = LC_STEP_MAX;
+		}
+	}
+
+	Object::InsertTime(Start, Time);
 }
 
-void lcPiece::RemoveTime (unsigned short start, unsigned short time)
+void lcPiece::RemoveTime(lcStep Start, lcStep Time)
 {
-	if (m_nStepShow >= start)
-		m_nStepShow = lcMax(m_nStepShow - time, 1);
+	if (mStepShow >= Start)
+	{
+		if (mStepShow > Time)
+			mStepShow -= Time;
+		else
+			mStepShow = 1;
+	}
 
-	if (m_nStepHide != 255)
-		m_nStepHide = lcMax(m_nStepHide - time, 1);
+	if (mStepHide != LC_STEP_MAX)
+	{
+		if (mStepHide > Time)
+			mStepHide -= Time;
+		else
+			mStepHide = 1;
+	}
 
-	Object::RemoveTime(start, time);
+	if (mStepShow >= mStepHide)
+	{
+		if (mStepShow != LC_STEP_MAX)
+			mStepHide = mStepShow + 1;
+		else
+		{
+			mStepShow = LC_STEP_MAX - 1;
+			mStepHide = LC_STEP_MAX;
+		}
+	}
+
+	Object::RemoveTime(Start, Time);
 }
 
 void lcPiece::RayTest(lcObjectRayTest& ObjectRayTest) const
@@ -402,27 +449,21 @@ void lcPiece::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
 	}
 }
 
-void lcPiece::Move(unsigned short nTime, bool AddKey, const lcVector3& Distance)
+void lcPiece::Move(lcStep Step, bool AddKey, const lcVector3& Distance)
 {
 	mPosition += Distance;
 
-	ChangeKey(nTime, AddKey, mPosition, LC_PK_POSITION);
+	ChangeKey(Step, AddKey, mPosition, LC_PK_POSITION);
 
 	mModelWorld.SetTranslation(mPosition);
 }
 
-bool lcPiece::IsVisible(unsigned short nTime)
+bool lcPiece::IsVisible(lcStep Step)
 {
 	if (mState & LC_PIECE_HIDDEN)
 		return false;
 
-	if (m_nStepShow > nTime)
-		return false;
-
-	if ((m_nStepHide == 255) || (m_nStepHide > nTime))
-		return true;
-
-	return false;
+	return (mStepShow <= Step) && (mStepHide > Step);
 }
 
 void lcPiece::CompareBoundingBox(float box[6])
@@ -457,9 +498,9 @@ lcGroup* lcPiece::GetTopGroup()
 	return mGroup ? mGroup->GetTopGroup() : NULL;
 }
 
-void lcPiece::UpdatePosition(unsigned short nTime)
+void lcPiece::UpdatePosition(lcStep Step)
 {
-	CalculateKeys(nTime);
+	CalculateKeys(Step);
 
 	mModelWorld = lcMatrix44FromAxisAngle(lcVector3(mRotation[0], mRotation[1], mRotation[2]), mRotation[3] * LC_DTOR);
 	mModelWorld.SetTranslation(mPosition);

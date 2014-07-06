@@ -85,6 +85,11 @@ public:
 	lcModel();
 	~lcModel();
 
+	bool IsModified() const
+	{
+		return mSavedHistory != mUndoHistory[0];
+	}
+
 	const lcArray<lcPiece*>& GetPieces() const
 	{
 		return mPieces;
@@ -105,8 +110,16 @@ public:
 		return mGroups;
 	}
 
+	lcStep GetLastStep() const;
+	lcStep GetCurrentStep() const
+	{
+		return mCurrentStep;
+	}
+
 protected:
 	lcModelProperties mProperties;
+
+	lcStep mCurrentStep;
 
 	lcArray<lcPiece*> mPieces;
 	lcArray<lcCamera*> mCameras;

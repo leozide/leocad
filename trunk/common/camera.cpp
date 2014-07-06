@@ -269,7 +269,7 @@ void lcCamera::FileSave(lcFile& file) const
 
 	Object::FileSave(file);
 
-	lcuint8 ch = (unsigned char)strlen(m_strName);
+	lcuint8 ch = (lcuint8)strlen(m_strName);
 	file.WriteU8(ch);
 	file.WriteBuffer(m_strName, ch);
 
@@ -284,7 +284,7 @@ void lcCamera::FileSave(lcFile& file) const
 /////////////////////////////////////////////////////////////////////////////
 // Camera operations
 
-void lcCamera::Move(unsigned short nTime, bool AddKey, const lcVector3& Distance)
+void lcCamera::Move(lcStep Step, bool AddKey, const lcVector3& Distance)
 {
 	if (IsSimple())
 		AddKey = false;
@@ -293,20 +293,20 @@ void lcCamera::Move(unsigned short nTime, bool AddKey, const lcVector3& Distance
 	{
 		mPosition += Distance;
 		lcAlign(mOrthoTarget, mPosition, mTargetPosition);
-		ChangeKey(nTime, AddKey, mPosition, LC_CK_EYE);
+		ChangeKey(Step, AddKey, mPosition, LC_CK_EYE);
 	}
 
 	if (IsSelected(LC_CAMERA_SECTION_TARGET))
 	{
 		mTargetPosition += Distance;
-		ChangeKey(nTime, AddKey, mTargetPosition, LC_CK_TARGET);
+		ChangeKey(Step, AddKey, mTargetPosition, LC_CK_TARGET);
 	}
 
 	if (IsSelected(LC_CAMERA_SECTION_UPVECTOR))
 	{
 		mUpVector += Distance;
 		mUpVector.Normalize();
-		ChangeKey(nTime, AddKey, mTargetPosition, LC_CK_UP);
+		ChangeKey(Step, AddKey, mTargetPosition, LC_CK_UP);
 	}
 
 	lcVector3 FrontVector(mTargetPosition - mPosition);
@@ -319,9 +319,9 @@ void lcCamera::Move(unsigned short nTime, bool AddKey, const lcVector3& Distance
 	mUpVector.Normalize();
 }
 
-void lcCamera::UpdatePosition(unsigned short nTime)
+void lcCamera::UpdatePosition(lcStep Step)
 {
-	CalculateKeys(nTime);
+	CalculateKeys(Step);
 
 	lcVector3 FrontVector(mPosition - mTargetPosition);
 	lcVector3 SideVector = lcCross(FrontVector, mUpVector);
@@ -592,7 +592,7 @@ void lcCamera::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
 	}
 }
 
-void lcCamera::ZoomExtents(View* view, const lcVector3& Center, const lcVector3* Points, int NumPoints, unsigned short nTime, bool bAddKey)
+void lcCamera::ZoomExtents(View* view, const lcVector3& Center, const lcVector3* Points, int NumPoints, lcStep Step, bool AddKey)
 {
 	int Viewport[4] = { 0, 0, view->mWidth, view->mHeight };
 
@@ -607,15 +607,15 @@ void lcCamera::ZoomExtents(View* view, const lcVector3& Center, const lcVector3*
 	mOrthoTarget = mTargetPosition;
 
 	if (IsSimple())
-		bAddKey = false;
+		AddKey = false;
 
-	ChangeKey(nTime, bAddKey, mPosition, LC_CK_EYE);
-	ChangeKey(nTime, bAddKey, mTargetPosition, LC_CK_TARGET);
+	ChangeKey(Step, AddKey, mPosition, LC_CK_EYE);
+	ChangeKey(Step, AddKey, mTargetPosition, LC_CK_TARGET);
 
-	UpdatePosition(nTime);
+	UpdatePosition(Step);
 }
 
-void lcCamera::ZoomRegion(const lcVector3* Points, float RatioX, float RatioY, unsigned short nTime, bool bAddKey)
+void lcCamera::ZoomRegion(const lcVector3* Points, float RatioX, float RatioY, lcStep Step, bool AddKey)
 {
 	// Center camera.
 	lcVector3 Eye = mPosition;
@@ -633,15 +633,15 @@ void lcCamera::ZoomRegion(const lcVector3* Points, float RatioX, float RatioY, u
 
 	// Change the camera and redraw.
 	if (IsSimple())
-		bAddKey = false;
+		AddKey = false;
 
-	ChangeKey(nTime, bAddKey, mPosition, LC_CK_EYE);
-	ChangeKey(nTime, bAddKey, mTargetPosition, LC_CK_TARGET);
+	ChangeKey(Step, AddKey, mPosition, LC_CK_EYE);
+	ChangeKey(Step, AddKey, mTargetPosition, LC_CK_TARGET);
 
-	UpdatePosition(nTime);
+	UpdatePosition(Step);
 }
 
-void lcCamera::Zoom(float Distance, unsigned short nTime, bool bAddKey)
+void lcCamera::Zoom(float Distance, lcStep Step, bool AddKey)
 {
 	lcVector3 FrontVector(mPosition - mTargetPosition);
 	FrontVector.Normalize();
@@ -658,15 +658,15 @@ void lcCamera::Zoom(float Distance, unsigned short nTime, bool bAddKey)
 	mTargetPosition += FrontVector;
 
 	if (IsSimple())
-		bAddKey = false;
+		AddKey = false;
 
-	ChangeKey(nTime, bAddKey, mPosition, LC_CK_EYE);
-	ChangeKey(nTime, bAddKey, mTargetPosition, LC_CK_TARGET);
+	ChangeKey(Step, AddKey, mPosition, LC_CK_EYE);
+	ChangeKey(Step, AddKey, mTargetPosition, LC_CK_TARGET);
 
-	UpdatePosition(nTime);
+	UpdatePosition(Step);
 }
 
-void lcCamera::Pan(float DistanceX, float DistanceY, unsigned short nTime, bool bAddKey)
+void lcCamera::Pan(float DistanceX, float DistanceY, lcStep Step, bool AddKey)
 {
 	lcVector3 FrontVector(mPosition - mTargetPosition);
 	lcVector3 SideVector = lcNormalize(lcCross(FrontVector, mUpVector));
@@ -677,15 +677,15 @@ void lcCamera::Pan(float DistanceX, float DistanceY, unsigned short nTime, bool 
 	mOrthoTarget += MoveVec;
 
 	if (IsSimple())
-		bAddKey = false;
+		AddKey = false;
 
-	ChangeKey(nTime, bAddKey, mPosition, LC_CK_EYE);
-	ChangeKey(nTime, bAddKey, mTargetPosition, LC_CK_TARGET);
+	ChangeKey(Step, AddKey, mPosition, LC_CK_EYE);
+	ChangeKey(Step, AddKey, mTargetPosition, LC_CK_TARGET);
 
-	UpdatePosition(nTime);
+	UpdatePosition(Step);
 }
 
-void lcCamera::Orbit(float DistanceX, float DistanceY, const lcVector3& CenterPosition, unsigned short nTime, bool bAddKey)
+void lcCamera::Orbit(float DistanceX, float DistanceY, const lcVector3& CenterPosition, lcStep Step, bool AddKey)
 {
 	lcVector3 FrontVector(mPosition - mTargetPosition);
 
@@ -709,16 +709,16 @@ void lcCamera::Orbit(float DistanceX, float DistanceY, const lcVector3& CenterPo
 	mUpVector = lcMul31(mUpVector, transform);
 
 	if (IsSimple())
-		bAddKey = false;
+		AddKey = false;
 
-	ChangeKey(nTime, bAddKey, mPosition, LC_CK_EYE);
-	ChangeKey(nTime, bAddKey, mTargetPosition, LC_CK_TARGET);
-	ChangeKey(nTime, bAddKey, mUpVector, LC_CK_UP);
+	ChangeKey(Step, AddKey, mPosition, LC_CK_EYE);
+	ChangeKey(Step, AddKey, mTargetPosition, LC_CK_TARGET);
+	ChangeKey(Step, AddKey, mUpVector, LC_CK_UP);
 
-	UpdatePosition(nTime);
+	UpdatePosition(Step);
 }
 
-void lcCamera::Roll(float Distance, unsigned short nTime, bool bAddKey)
+void lcCamera::Roll(float Distance, lcStep Step, bool AddKey)
 {
 	lcVector3 FrontVector(mPosition - mTargetPosition);
 	lcMatrix44 Rotation = lcMatrix44FromAxisAngle(FrontVector, Distance);
@@ -726,27 +726,27 @@ void lcCamera::Roll(float Distance, unsigned short nTime, bool bAddKey)
 	mUpVector = lcMul30(mUpVector, Rotation);
 
 	if (IsSimple())
-		bAddKey = false;
+		AddKey = false;
 
-	ChangeKey(nTime, bAddKey, mUpVector, LC_CK_UP);
+	ChangeKey(Step, AddKey, mUpVector, LC_CK_UP);
 
-	UpdatePosition(nTime);
+	UpdatePosition(Step);
 }
 
-void lcCamera::Center(lcVector3& point, unsigned short nTime, bool bAddKey)
+void lcCamera::Center(lcVector3& point, lcStep Step, bool AddKey)
 {
 	lcAlign(mTargetPosition, mPosition, point);
 
 	if (IsSimple())
-		bAddKey = false;
+		AddKey = false;
 
-	ChangeKey(nTime, bAddKey, mPosition, LC_CK_EYE);
-	ChangeKey(nTime, bAddKey, mTargetPosition, LC_CK_TARGET);
+	ChangeKey(Step, AddKey, mPosition, LC_CK_EYE);
+	ChangeKey(Step, AddKey, mTargetPosition, LC_CK_TARGET);
 
-	UpdatePosition(nTime);
+	UpdatePosition(Step);
 }
 
-void lcCamera::SetViewpoint(LC_VIEWPOINT Viewpoint, unsigned short nTime, bool bAddKey)
+void lcCamera::SetViewpoint(LC_VIEWPOINT Viewpoint, lcStep Step, bool AddKey)
 {
 	lcVector3 Positions[] =
 	{
@@ -776,13 +776,13 @@ void lcCamera::SetViewpoint(LC_VIEWPOINT Viewpoint, unsigned short nTime, bool b
 	mUpVector = Ups[Viewpoint];
 
 	if (IsSimple())
-		bAddKey = false;
+		AddKey = false;
 
-	ChangeKey(nTime, bAddKey, mPosition, LC_CK_EYE);
-	ChangeKey(nTime, bAddKey, mTargetPosition, LC_CK_TARGET);
-	ChangeKey(nTime, bAddKey, mUpVector, LC_CK_UP);
+	ChangeKey(Step, AddKey, mPosition, LC_CK_EYE);
+	ChangeKey(Step, AddKey, mTargetPosition, LC_CK_TARGET);
+	ChangeKey(Step, AddKey, mUpVector, LC_CK_UP);
 
-	UpdatePosition(nTime);
+	UpdatePosition(Step);
 }
 
 void lcCamera::StartTiledRendering(int tw, int th, int iw, int ih, float AspectRatio)
@@ -828,7 +828,7 @@ bool lcCamera::EndTile()
 	return false;
 }
 
-void lcCamera::SetFocalPoint(const lcVector3& focus, unsigned short nTime, bool bAddKey)
+void lcCamera::SetFocalPoint(const lcVector3& focus, lcStep Step, bool AddKey)
 {
 	if (IsOrtho())
 	{
@@ -846,10 +846,10 @@ void lcCamera::SetFocalPoint(const lcVector3& focus, unsigned short nTime, bool 
 	}
 
 	if (IsSimple())
-		bAddKey = false;
+		AddKey = false;
 
-	ChangeKey(nTime, bAddKey, mPosition, LC_CK_EYE);
-	ChangeKey(nTime, bAddKey, mTargetPosition, LC_CK_TARGET);
+	ChangeKey(Step, AddKey, mPosition, LC_CK_EYE);
+	ChangeKey(Step, AddKey, mTargetPosition, LC_CK_TARGET);
 
-	UpdatePosition(nTime);
+	UpdatePosition(Step);
 }

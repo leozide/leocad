@@ -252,20 +252,20 @@ public:
 	void Select(bool bSelecting, bool bFocus, bool bMultiple);
 
 
-	void UpdatePosition(unsigned short nTime);
+	void UpdatePosition(lcStep Step);
 	void CopyPosition(const Camera* camera);
 	void Render(View* View);
 
-	void ZoomExtents(View* view, const lcVector3& Center, const lcVector3* Points, int NumPoints, unsigned short nTime, bool bAddKey);
-	void ZoomRegion(const lcVector3* Points, float RatioX, float RatioY, unsigned short nTime, bool bAddKey);
-	void Zoom(float Distance, unsigned short nTime, bool bAddKey);
-	void Pan(float DistanceX, float DistanceY, unsigned short nTime, bool bAddKey);
-	void Orbit(float DistanceX, float DistanceY, const lcVector3& CenterPosition, unsigned short nTime, bool bAddKey);
-	void Roll(float Distance, unsigned short nTime, bool bAddKey);
-	void Center(lcVector3& point, unsigned short nTime, bool bAddKey);
-	void Move(unsigned short nTime, bool AddKey, const lcVector3& Distance);
-	void SetViewpoint(LC_VIEWPOINT Viewpoint, unsigned short nTime, bool bAddKey);
-	void SetFocalPoint(const lcVector3& focus, unsigned short nTime, bool bAddKey);
+	void ZoomExtents(View* view, const lcVector3& Center, const lcVector3* Points, int NumPoints, lcStep Step, bool AddKey);
+	void ZoomRegion(const lcVector3* Points, float RatioX, float RatioY, lcStep Step, bool AddKey);
+	void Zoom(float Distance, lcStep Step, bool AddKey);
+	void Pan(float DistanceX, float DistanceY, lcStep Step, bool AddKey);
+	void Orbit(float DistanceX, float DistanceY, const lcVector3& CenterPosition, lcStep Step, bool AddKey);
+	void Roll(float Distance, lcStep Step, bool AddKey);
+	void Center(lcVector3& point, lcStep Step, bool AddKey);
+	void Move(lcStep Step, bool AddKey, const lcVector3& Distance);
+	void SetViewpoint(LC_VIEWPOINT Viewpoint, lcStep Step, bool AddKey);
+	void SetFocalPoint(const lcVector3& focus, lcStep Step, bool AddKey);
 
 	void StartTiledRendering(int tw, int th, int iw, int ih, float fAspect);
 	void GetTileInfo(int* row, int* col, int* width, int* height);

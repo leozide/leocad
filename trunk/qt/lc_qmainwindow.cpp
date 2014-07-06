@@ -819,7 +819,7 @@ void lcQMainWindow::print(QPrinter *printer)
 	GL_BeginRenderToTexture(tileWidth, tileHeight);
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);
 
-	unsigned short previousTime = project->GetCurrentTime();
+	lcStep previousTime = project->GetCurrentStep();
 
 	QPainter painter(printer);
 	lcuint8 *buffer = (lcuint8*)malloc(tileWidth * tileHeight * 4);
@@ -836,7 +836,7 @@ void lcQMainWindow::print(QPrinter *printer)
 				if (printer->printerState() == QPrinter::Aborted || printer->printerState() == QPrinter::Error)
 					return;
 
-				int currentStep = 1 + ((page - 1) * rows * columns);
+				lcStep currentStep = 1 + ((page - 1) * rows * columns);
 
 				for (int row = 0; row < rows; row++)
 				{
@@ -845,7 +845,7 @@ void lcQMainWindow::print(QPrinter *printer)
 						if (currentStep > project->GetLastStep())
 							break;
 
-						project->SetCurrentTime(currentStep);
+						project->SetCurrentStep(currentStep);
 
 						if (stepWidth > tileWidth || stepHeight > tileHeight)
 						{
@@ -1001,7 +1001,7 @@ void lcQMainWindow::print(QPrinter *printer)
 
 	free(buffer);
 
-	project->SetCurrentTime(previousTime);
+	project->SetCurrentStep(previousTime);
 
 	GL_EndRenderToTexture();
 }
@@ -1135,14 +1135,18 @@ void lcQMainWindow::updatePaste(bool enabled)
 		action->setEnabled(enabled);
 }
 
-void lcQMainWindow::updateTime(int currentTime, int totalTime)
+void lcQMainWindow::updateCurrentStep()
 {
-	actions[LC_VIEW_TIME_FIRST]->setEnabled(currentTime != 1);
-	actions[LC_VIEW_TIME_PREVIOUS]->setEnabled(currentTime > 1);
-	actions[LC_VIEW_TIME_NEXT]->setEnabled(currentTime < totalTime);
-	actions[LC_VIEW_TIME_LAST]->setEnabled(currentTime != totalTime);
+	Project *project = lcGetActiveProject();
+	lcStep currentStep = project->GetCurrentStep();
+	lcStep lastStep = project->GetLastStep();
 
-	statusTimeLabel->setText(QString(tr(" Step %1 ")).arg(QString::number(currentTime)));
+	actions[LC_VIEW_TIME_FIRST]->setEnabled(currentStep != 1);
+	actions[LC_VIEW_TIME_PREVIOUS]->setEnabled(currentStep > 1);
+	actions[LC_VIEW_TIME_NEXT]->setEnabled(currentStep < LC_STEP_MAX);
+	actions[LC_VIEW_TIME_LAST]->setEnabled(currentStep != lastStep);
+
+	statusTimeLabel->setText(QString(tr("Step %1")).arg(QString::number(currentStep)));
 }
 
 void lcQMainWindow::setAddKeys(bool addKeys)

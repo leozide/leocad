@@ -98,8 +98,8 @@ public:
 	virtual void RayTest(lcObjectRayTest& ObjectRayTest) const;
 	virtual void BoxTest(lcObjectBoxTest& ObjectBoxTest) const;
 
-	virtual void InsertTime(unsigned short start, unsigned short time);
-	virtual void RemoveTime(unsigned short start, unsigned short time);
+	virtual void InsertTime(lcStep Start, lcStep Time);
+	virtual void RemoveTime(lcStep Start, lcStep Time);
 
 	bool IsHidden()
 	{
@@ -119,16 +119,16 @@ public:
 		return m_strName;
 	}
 
-	bool IsVisible(unsigned short nTime);
-	void Initialize(float x, float y, float z, unsigned char nStep);
+	bool IsVisible(lcStep Step);
+	void Initialize(float x, float y, float z, lcStep Step);
 	void CreateName(const lcArray<Piece*>& Pieces);
 	void CompareBoundingBox(float box[6]);
 	void SetPieceInfo(PieceInfo* pPieceInfo);
 	bool FileLoad(lcFile& file);
 	void FileSave(lcFile& file) const;
 
-	void UpdatePosition(unsigned short nTime);
-	void Move(unsigned short nTime, bool AddKey, const lcVector3& Distance);
+	void UpdatePosition(lcStep Step);
+	void Move(lcStep Step, bool AddKey, const lcVector3& Distance);
 
 	lcGroup* GetTopGroup();
 
@@ -146,14 +146,26 @@ public:
 		{ strcpy(m_strName, name); }
 	const char* GetName()
 		{ return m_strName; }
-	void SetStepShow(unsigned char step)
-		{ m_nStepShow = step; }
-	unsigned char GetStepShow()
-		{ return m_nStepShow; }
-	void SetStepHide(unsigned char step)
-		{ m_nStepHide = step; }
-	unsigned char GetStepHide()
-		{ return (unsigned char)m_nStepHide; }
+
+	lcStep GetStepShow() const
+	{
+		return mStepShow;
+	}
+
+	lcStep GetStepHide() const
+	{
+		return mStepHide;
+	}
+
+	void SetStepHide(lcStep Step)
+	{
+		mStepHide = Step;
+	}
+
+	void SetStepShow(lcStep Step)
+	{
+		mStepShow = Step;
+	}
 
 	void SetColorCode(lcuint32 ColorCode)
 	{
@@ -181,8 +193,8 @@ protected:
 	// Atributes
 	Group* mGroup;
 
-	lcuint8 m_nStepShow;
-	lcuint8 m_nStepHide;
+	lcStep mStepShow;
+	lcStep mStepHide;
 
 	lcuint8 mState;
 	char m_strName[81];

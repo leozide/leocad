@@ -33,8 +33,8 @@ public slots:
 private:
 	Ui::lcQEditGroupsDialog *ui;
 
-	void updateParents(QTreeWidgetItem *parentItem, Group *parentGroup);
-	void addChildren(QTreeWidgetItem *parentItem, Group *parentGroup);
+	void updateParents(QTreeWidgetItem *parentItem, lcGroup *parentGroup);
+	void addChildren(QTreeWidgetItem *parentItem, lcGroup *parentGroup);
 
 	void timerEvent(QTimerEvent *event);
 

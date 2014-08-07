@@ -27,7 +27,7 @@ static LC_OBJECT_KEY_INFO light_key_info[LC_LK_COUNT] =
 
 // New omni light.
 lcLight::lcLight(float px, float py, float pz)
-	: Object(LC_OBJECT_LIGHT)
+	: lcObject(LC_OBJECT_LIGHT)
 {
 	Initialize();
 
@@ -41,7 +41,7 @@ lcLight::lcLight(float px, float py, float pz)
 
 // New directional or spot light.
 lcLight::lcLight(float px, float py, float pz, float tx, float ty, float tz)
-	: Object(LC_OBJECT_LIGHT)
+	: lcObject(LC_OBJECT_LIGHT)
 {
 	Initialize();
 
@@ -93,13 +93,13 @@ void lcLight::FileSave(lcFile& file) const
 {
 }
 
-void lcLight::CreateName(const lcArray<Light*>& Lights)
+void lcLight::CreateName(const lcArray<lcLight*>& Lights)
 {
 	int i, max = 0;
 
 	for (int LightIdx = 0; LightIdx < Lights.GetSize(); LightIdx++)
 	{
-		Light* pLight = Lights[LightIdx];
+		lcLight* pLight = Lights[LightIdx];
 
 		if (strncmp(pLight->m_strName, "Light ", 6) == 0)
 		{
@@ -122,7 +122,7 @@ void lcLight::RayTest(lcObjectRayTest& ObjectRayTest) const
 
 		if (lcSphereRayMinIntersectDistance(mPosition, 0.2f, ObjectRayTest.Start, ObjectRayTest.End, &Distance))
 		{
-			ObjectRayTest.ObjectSection.Object = const_cast<Light*>(this);
+			ObjectRayTest.ObjectSection.Object = const_cast<lcLight*>(this);
 			ObjectRayTest.ObjectSection.Section = LC_LIGHT_SECTION_POSITION;
 			ObjectRayTest.Distance = Distance;
 		}
@@ -139,7 +139,7 @@ void lcLight::RayTest(lcObjectRayTest& ObjectRayTest) const
 	float Distance;
 	if (lcBoundingBoxRayMinIntersectDistance(Min, Max, Start, End, &Distance, NULL) && (Distance < ObjectRayTest.Distance))
 	{
-		ObjectRayTest.ObjectSection.Object = const_cast<Light*>(this);
+		ObjectRayTest.ObjectSection.Object = const_cast<lcLight*>(this);
 		ObjectRayTest.ObjectSection.Section = LC_LIGHT_SECTION_POSITION;
 		ObjectRayTest.Distance = Distance;
 	}
@@ -155,7 +155,7 @@ void lcLight::RayTest(lcObjectRayTest& ObjectRayTest) const
 
 	if (lcBoundingBoxRayMinIntersectDistance(Min, Max, Start, End, &Distance, NULL) && (Distance < ObjectRayTest.Distance))
 	{
-		ObjectRayTest.ObjectSection.Object = const_cast<Light*>(this);
+		ObjectRayTest.ObjectSection.Object = const_cast<lcLight*>(this);
 		ObjectRayTest.ObjectSection.Section = LC_LIGHT_SECTION_TARGET;
 		ObjectRayTest.Distance = Distance;
 	}
@@ -170,7 +170,7 @@ void lcLight::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
 				return;
 
 		lcObjectSection& ObjectSection = ObjectBoxTest.ObjectSections.Add();
-		ObjectSection.Object = const_cast<Light*>(this);
+		ObjectSection.Object = const_cast<lcLight*>(this);
 		ObjectSection.Section = LC_LIGHT_SECTION_POSITION;
 
 		return;
@@ -190,7 +190,7 @@ void lcLight::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
 	if (lcBoundingBoxIntersectsVolume(Min, Max, LocalPlanes))
 	{
 		lcObjectSection& ObjectSection = ObjectBoxTest.ObjectSections.Add();
-		ObjectSection.Object = const_cast<Light*>(this);
+		ObjectSection.Object = const_cast<lcLight*>(this);
 		ObjectSection.Section = LC_LIGHT_SECTION_POSITION;
 	}
 
@@ -209,7 +209,7 @@ void lcLight::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
 	if (lcBoundingBoxIntersectsVolume(Min, Max, LocalPlanes))
 	{
 		lcObjectSection& ObjectSection = ObjectBoxTest.ObjectSections.Add();
-		ObjectSection.Object = const_cast<Light*>(this);
+		ObjectSection.Object = const_cast<lcLight*>(this);
 		ObjectSection.Section = LC_LIGHT_SECTION_TARGET;
 	}
 }

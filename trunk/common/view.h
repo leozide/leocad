@@ -75,7 +75,7 @@ public:
 	void BeginPieceDrag();
 	void EndPieceDrag(bool Accept);
 
-	void SetCamera(Camera* camera, bool ForceCopy);
+	void SetCamera(lcCamera* camera, bool ForceCopy);
 	void SetDefaultCamera();
 	lcMatrix44 GetProjectionMatrix() const;
 	LC_CURSOR_TYPE GetCursor() const;

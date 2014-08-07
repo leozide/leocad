@@ -571,7 +571,7 @@ void Terrain::Tesselate()
 	}
 }
 
-void Terrain::Render(Camera* pCam, float aspect)
+void Terrain::Render(lcCamera* pCam, float aspect)
 {
 	if (m_nOptions & LC_TERRAIN_FLAT)
 	{
@@ -676,7 +676,7 @@ ty = (th*eye[1])/(2*pCam->m_zFar);
 	}
 }
 
-void Terrain::FindVisiblePatches(Camera* pCam, float aspect)
+void Terrain::FindVisiblePatches(lcCamera* pCam, float aspect)
 {
 	// Get camera position information.
 	const lcVector3& eye = pCam->mPosition;

@@ -112,8 +112,8 @@ struct lcArrayDialogOptions
 
 struct lcEditGroupsDialogOptions
 {
-	lcArray<Group*> PieceParents;
-	lcArray<Group*> GroupParents;
+	lcArray<lcGroup*> PieceParents;
+	lcArray<lcGroup*> GroupParents;
 };
 
 struct lcSelectDialogOptions

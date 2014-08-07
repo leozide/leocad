@@ -36,7 +36,7 @@ private:
 	void setSelection(QTreeWidgetItem *parentItem, bool selected);
 	void loadSelection(QTreeWidgetItem *parentItem);
 	void saveSelection(QTreeWidgetItem *parentItem);
-	void addChildren(QTreeWidgetItem *parentItem, Group *parentGroup);
+	void addChildren(QTreeWidgetItem *parentItem, lcGroup *parentGroup);
 };
 
 #endif // _LC_QSELECTDIALOG_H_

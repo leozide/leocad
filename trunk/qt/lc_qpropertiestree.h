@@ -18,7 +18,7 @@ public:
 		return itemFromIndex(index);
 	}
 
-	void updateFocusObject(Object *newFocusObject);
+	void updateFocusObject(lcObject *newFocusObject);
 
 	QWidget *createEditor(QWidget *parent, QTreeWidgetItem *item) const;
 	bool lastColumn(int column) const;
@@ -55,13 +55,13 @@ protected:
 	QTreeWidgetItem *addProperty(QTreeWidgetItem *parent, const QString& label, PropertyType propertyType);
 
 	void setEmpty();
-	void setPart(Object *newFocusObject);
-	void setCamera(Object *newFocusObject);
-	void setLight(Object *newFocusObject);
+	void setPart(lcObject *newFocusObject);
+	void setCamera(lcObject *newFocusObject);
+	void setLight(lcObject *newFocusObject);
 
 	void getPartProperties(lcPartProperties *properties);
 
-	Object *focusObject;
+	lcObject *focusObject;
 
 	lcQPropertiesTreeDelegate *m_delegate;
 	QIcon m_expandIcon;

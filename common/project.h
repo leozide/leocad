@@ -125,7 +125,7 @@ public:
 	void BoxTest(lcObjectBoxTest& ObjectBoxTest) const;
 
 	void FocusOrDeselectObject(const lcObjectSection& ObjectSection);
-	void ClearSelectionAndSetFocus(Object* Object, lcuint32 Section);
+	void ClearSelectionAndSetFocus(lcObject* Object, lcuint32 Section);
 	void ClearSelectionAndSetFocus(const lcObjectSection& ObjectSection)
 	{
 		ClearSelectionAndSetFocus(ObjectSection.Object, ObjectSection.Section);
@@ -201,11 +201,11 @@ public:
 	bool GetSelectionCenter(lcVector3& Center) const;
 	lcVector3 GetFocusOrSelectionCenter() const;
 	bool GetFocusPosition(lcVector3& Position) const;
-	Object* GetFocusObject() const;
+	lcObject* GetFocusObject() const;
 	bool AnyObjectsSelected(bool PiecesOnly) const;
 	lcGroup* AddGroup(lcGroup* Parent);
 	void TransformSelectedObjects(LC_TRANSFORM_TYPE Type, const lcVector3& Transform);
-	void ModifyObject(Object* Object, lcObjectProperty Property, void* Value);
+	void ModifyObject(lcObject* Object, lcObjectProperty Property, void* Value);
 	void ZoomActiveView(int Amount);
 
 	Terrain* m_pTerrain;
@@ -221,9 +221,9 @@ protected:
 	void CheckPoint(const char* Description);
 
 	bool RemoveSelectedObjects();
-	void GetPieceInsertPosition(Piece* OffsetPiece, lcVector3& Position, lcVector4& Rotation);
+	void GetPieceInsertPosition(lcPiece* OffsetPiece, lcVector3& Position, lcVector4& Rotation);
 	void SelectAndFocusNone(bool bFocusOnly);
-	void SelectGroup(Group* TopGroup, bool Select);
+	void SelectGroup(lcGroup* TopGroup, bool Select);
 
 	void CalculateStep();
 	static int InstanceOfName(const String& existingString, const String& candidateString, String& baseNameOut );

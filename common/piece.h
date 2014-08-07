@@ -121,7 +121,7 @@ public:
 
 	bool IsVisible(lcStep Step);
 	void Initialize(float x, float y, float z, lcStep Step);
-	void CreateName(const lcArray<Piece*>& Pieces);
+	void CreateName(const lcArray<lcPiece*>& Pieces);
 	void CompareBoundingBox(float box[6]);
 	void SetPieceInfo(PieceInfo* pPieceInfo);
 	bool FileLoad(lcFile& file);
@@ -191,7 +191,7 @@ public:
 
 protected:
 	// Atributes
-	Group* mGroup;
+	lcGroup* mGroup;
 
 	lcStep mStepShow;
 	lcStep mStepHide;

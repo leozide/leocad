@@ -851,7 +851,7 @@ void lcQMainWindow::print(QPrinter *printer)
 						{
 							lcuint8* imageBuffer = (lcuint8*)malloc(stepWidth * stepHeight * 4);
 
-							Camera* camera = view.mCamera;
+							lcCamera* camera = view.mCamera;
 							camera->StartTiledRendering(tileWidth, tileHeight, stepWidth, stepHeight, aspectRatio);
 							do 
 							{
@@ -1051,7 +1051,7 @@ void lcQMainWindow::toggleFullScreen()
 		showFullScreen();
 }
 
-void lcQMainWindow::updateFocusObject(Object *focus)
+void lcQMainWindow::updateFocusObject(lcObject *focus)
 {
 	propertiesWidget->updateFocusObject(focus);
 
@@ -1065,7 +1065,7 @@ void lcQMainWindow::updateFocusObject(Object *focus)
 	statusPositionLabel->setText(label);
 }
 
-void lcQMainWindow::updateSelectedObjects(int flags, int selectedCount, Object* focus)
+void lcQMainWindow::updateSelectedObjects(int flags, int selectedCount, lcObject* focus)
 {
 	actions[LC_EDIT_CUT]->setEnabled(flags & (LC_SEL_PIECE | LC_SEL_CAMERA | LC_SEL_LIGHT));
 	actions[LC_EDIT_COPY]->setEnabled(flags & (LC_SEL_PIECE | LC_SEL_CAMERA | LC_SEL_LIGHT));
@@ -1095,7 +1095,7 @@ void lcQMainWindow::updateSelectedObjects(int flags, int selectedCount, Object* 
 	if ((selectedCount == 1) && (focus != NULL))
 	{
 		if (focus->IsPiece())
-			message = QString("%1 (ID: %2)").arg(focus->GetName(), ((Piece*)focus)->mPieceInfo->m_strName);
+			message = QString("%1 (ID: %2)").arg(focus->GetName(), ((lcPiece*)focus)->mPieceInfo->m_strName);
 		else
 			message = focus->GetName();
 	}
@@ -1108,9 +1108,9 @@ void lcQMainWindow::updateSelectedObjects(int flags, int selectedCount, Object* 
 
 		if ((focus != NULL) && focus->IsPiece())
 		{
-			message.append(QString(" - %1 (ID: %2)").arg(focus->GetName(), ((Piece*)focus)->mPieceInfo->m_strName));
+			message.append(QString(" - %1 (ID: %2)").arg(focus->GetName(), ((lcPiece*)focus)->mPieceInfo->m_strName));
 
-			const Group* pGroup = ((Piece*)focus)->GetGroup();
+			const lcGroup* pGroup = ((lcPiece*)focus)->GetGroup();
 			if ((pGroup != NULL) && pGroup->m_strName[0])
 				message.append(QString(" in group '%1'").arg(pGroup->m_strName));
 		}
@@ -1227,8 +1227,8 @@ void lcQMainWindow::updateTransformType(int newType)
 
 void lcQMainWindow::updateCameraMenu()
 {
-	const lcArray<Camera*>& cameras = lcGetActiveProject()->GetCameras();
-	Camera* currentCamera = gMainWindow->GetActiveView()->mCamera;
+	const lcArray<lcCamera*>& cameras = lcGetActiveProject()->GetCameras();
+	lcCamera* currentCamera = gMainWindow->GetActiveView()->mCamera;
 	int actionIdx, currentIndex = -1;
 
 	for (actionIdx = LC_VIEW_CAMERA_FIRST; actionIdx <= LC_VIEW_CAMERA_LAST; actionIdx++)

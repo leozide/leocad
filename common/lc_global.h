@@ -16,12 +16,6 @@ class lcCamera;
 class lcLight;
 class lcGroup;
 
-typedef lcObject Object;
-typedef lcPiece Piece;
-typedef lcCamera Camera;
-typedef lcLight Light;
-typedef lcGroup Group;
-
 class lcVector2;
 class lcVector3;
 class lcVector4;

@@ -146,7 +146,7 @@ void lcQSelectDialog::saveSelection(QTreeWidgetItem *parentItem)
 	}
 }
 
-void lcQSelectDialog::addChildren(QTreeWidgetItem *parentItem, Group *parentGroup)
+void lcQSelectDialog::addChildren(QTreeWidgetItem *parentItem, lcGroup *parentGroup)
 {
 	Project *project = lcGetActiveProject();
 	int numObjects = 0;

@@ -206,7 +206,7 @@ public:
 	void UpdatePosition(lcStep Step);
 	void Move(lcStep Step, bool AddKey, const lcVector3& Distance);
 	bool Setup(int LightIndex);
-	void CreateName(const lcArray<Light*>& Lights);
+	void CreateName(const lcArray<lcLight*>& Lights);
 	bool FileLoad(lcFile& file);
 	void FileSave(lcFile& file) const;
 

@@ -28,7 +28,7 @@ static LC_OBJECT_KEY_INFO piece_key_info[LC_PK_COUNT] =
 // Piece construction/destruction
 
 lcPiece::lcPiece(PieceInfo* pPieceInfo)
-	: Object (LC_OBJECT_PIECE)
+	: lcObject (LC_OBJECT_PIECE)
 {
 	mPieceInfo = pPieceInfo;
 	mState = 0;
@@ -76,7 +76,7 @@ bool lcPiece::FileLoad(lcFile& file)
     return false;
 
   if (version > 8)
-    if (!Object::FileLoad (file))
+    if (!lcObject::FileLoad (file))
       return false;
 
   if (version < 9)
@@ -231,15 +231,15 @@ bool lcPiece::FileLoad(lcFile& file)
     lcint32 i = -1;
     if (version > 6)
       file.ReadS32(&i, 1);
-    mGroup = (Group*)(long)i;
+    mGroup = (lcGroup*)(long)i;
   }
   else
   {
     file.ReadU8(&ch, 1);
     if (ch == 0)
-      mGroup = (Group*)-1;
+      mGroup = (lcGroup*)-1;
     else
-      mGroup = (Group*)(long)ch;
+      mGroup = (lcGroup*)(long)ch;
 
     file.ReadU8(&ch, 1);
     if (ch & 0x01)
@@ -253,7 +253,7 @@ void lcPiece::FileSave(lcFile& file) const
 {
 	file.WriteU8(LC_PIECE_SAVE_VERSION);
 
-	Object::FileSave (file);
+	lcObject::FileSave (file);
 
 	file.WriteBuffer(mPieceInfo->m_strName, LC_PIECE_NAME_LEN);
 	file.WriteU32(mColorCode);
@@ -285,13 +285,13 @@ void lcPiece::Initialize(float x, float y, float z, lcStep Step)
 	UpdatePosition(1);
 }
 
-void lcPiece::CreateName(const lcArray<Piece*>& Pieces)
+void lcPiece::CreateName(const lcArray<lcPiece*>& Pieces)
 {
 	int i, max = 0;
 
 	for (int PieceIdx = 0; PieceIdx < Pieces.GetSize(); PieceIdx++)
 	{
-		Piece* Piece = Pieces[PieceIdx];
+		lcPiece* Piece = Pieces[PieceIdx];
 
 		if (strncmp(Piece->m_strName, mPieceInfo->m_strDescription, strlen(mPieceInfo->m_strDescription)) == 0)
 			if (sscanf(Piece->m_strName + strlen(mPieceInfo->m_strDescription), " #%d", &i) == 1)
@@ -332,7 +332,7 @@ void lcPiece::InsertTime(lcStep Start, lcStep Time)
 		}
 	}
 
-	Object::InsertTime(Start, Time);
+	lcObject::InsertTime(Start, Time);
 }
 
 void lcPiece::RemoveTime(lcStep Start, lcStep Time)
@@ -364,7 +364,7 @@ void lcPiece::RemoveTime(lcStep Start, lcStep Time)
 		}
 	}
 
-	Object::RemoveTime(Start, Time);
+	lcObject::RemoveTime(Start, Time);
 }
 
 void lcPiece::RayTest(lcObjectRayTest& ObjectRayTest) const
@@ -385,7 +385,7 @@ void lcPiece::RayTest(lcObjectRayTest& ObjectRayTest) const
 
 	if (mPieceInfo->mMesh->MinIntersectDist(Start, End, ObjectRayTest.Distance, Intersection))
 	{
-		ObjectRayTest.ObjectSection.Object = const_cast<Piece*>(this);
+		ObjectRayTest.ObjectSection.Object = const_cast<lcPiece*>(this);
 		ObjectRayTest.ObjectSection.Section = 0;
 	}
 }
@@ -444,7 +444,7 @@ void lcPiece::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
 	if (OutcodesOR == 0 || mPieceInfo->mMesh->IntersectsPlanes(LocalPlanes))
 	{
 		lcObjectSection& ObjectSection = ObjectBoxTest.ObjectSections.Add();
-		ObjectSection.Object = const_cast<Piece*>(this);
+		ObjectSection.Object = const_cast<lcPiece*>(this);
 		ObjectSection.Section = 0;
 	}
 }

@@ -353,7 +353,7 @@ void lcQPropertiesTree::mousePressEvent(QMouseEvent *event)
 	}
 }
 
-void lcQPropertiesTree::updateFocusObject(Object *newFocusObject)
+void lcQPropertiesTree::updateFocusObject(lcObject *newFocusObject)
 {
 	if (!newFocusObject)
 	{
@@ -518,7 +518,7 @@ void lcQPropertiesTree::slotReturnPressed()
 
 	if (focusObject->GetType() == LC_OBJECT_PIECE)
 	{
-		Piece *part = (Piece*)focusObject;
+		lcPiece *part = (lcPiece*)focusObject;
 
 		if (item == partPositionX || item == partPositionY || item == partPositionZ)
 		{
@@ -568,7 +568,7 @@ void lcQPropertiesTree::slotReturnPressed()
 	}
 	else if (focusObject->GetType() == LC_OBJECT_CAMERA)
 	{
-		Camera *camera = (Camera*)focusObject;
+		lcCamera *camera = (lcCamera*)focusObject;
 
 		if (item == cameraPositionX || item == cameraPositionY || item == cameraPositionZ)
 		{
@@ -672,7 +672,7 @@ void lcQPropertiesTree::slotSetValue(int value)
 void lcQPropertiesTree::slotColorButtonClicked()
 {
 	QWidget *parent = (QWidget*)sender();
-	Piece *part = (Piece*)focusObject;
+	lcPiece *part = (lcPiece*)focusObject;
 
 	lcQColorPickerPopup *popup = new lcQColorPickerPopup(parent, part->mColorIndex);
 	connect(popup, SIGNAL(selected(int)), SLOT(slotSetValue(int)));
@@ -758,7 +758,7 @@ void lcQPropertiesTree::setEmpty()
 	cameraName = NULL;
 }
 
-void lcQPropertiesTree::setPart(Object *newFocusObject)
+void lcQPropertiesTree::setPart(lcObject *newFocusObject)
 {
 	if (!focusObject || focusObject->GetType() != LC_OBJECT_PIECE)
 	{
@@ -784,7 +784,7 @@ void lcQPropertiesTree::setPart(Object *newFocusObject)
 	}
 
 	focusObject = newFocusObject;
-	Piece *part = (Piece*)focusObject;
+	lcPiece *part = (lcPiece*)focusObject;
 
 	lcVector3 position = part->mPosition;
 	lcGetActiveProject()->ConvertToUserUnits(position);
@@ -832,7 +832,7 @@ void lcQPropertiesTree::setPart(Object *newFocusObject)
 	partID->setData(0, PropertyValueRole, qVariantFromValue((void*)part->mPieceInfo));
 }
 
-void lcQPropertiesTree::setCamera(Object *newFocusObject)
+void lcQPropertiesTree::setCamera(lcObject *newFocusObject)
 {
 	if (!focusObject || focusObject->GetType() != LC_OBJECT_CAMERA)
 	{
@@ -862,7 +862,7 @@ void lcQPropertiesTree::setCamera(Object *newFocusObject)
 	}
 
 	focusObject = newFocusObject;
-	Camera *camera = (Camera*)focusObject;
+	lcCamera *camera = (lcCamera*)focusObject;
 
 	lcVector3 position = camera->mPosition;
 	lcGetActiveProject()->ConvertToUserUnits(position);
@@ -907,7 +907,7 @@ void lcQPropertiesTree::setCamera(Object *newFocusObject)
 	cameraName->setData(0, PropertyValueRole, qVariantFromValue((void*)camera->GetName()));
 }
 
-void lcQPropertiesTree::setLight(Object *newFocusObject)
+void lcQPropertiesTree::setLight(lcObject *newFocusObject)
 {
 	// todo: light properties
 }

@@ -23,7 +23,7 @@ static LC_OBJECT_KEY_INFO camera_key_info[LC_CK_COUNT] =
 };
 
 lcCamera::lcCamera(bool Simple)
-	: Object(LC_OBJECT_CAMERA)
+	: lcObject(LC_OBJECT_CAMERA)
 {
 	Initialize();
 
@@ -45,7 +45,7 @@ lcCamera::lcCamera(bool Simple)
 }
 
 lcCamera::lcCamera(float ex, float ey, float ez, float tx, float ty, float tz)
-	: Object(LC_OBJECT_CAMERA)
+	: lcObject(LC_OBJECT_CAMERA)
 {
 	// Fix the up vector
 	lcVector3 UpVector(0, 0, 1), FrontVector(ex - tx, ey - ty, ez - tz), SideVector;
@@ -88,7 +88,7 @@ void lcCamera::Initialize()
 	RegisterKeys(values, camera_key_info, LC_CK_COUNT);
 }
 
-void lcCamera::CreateName(const lcArray<Camera*>& Cameras)
+void lcCamera::CreateName(const lcArray<lcCamera*>& Cameras)
 {
 	int i, max = 0;
 	const char* Prefix = "Camera ";
@@ -115,7 +115,7 @@ bool lcCamera::FileLoad(lcFile& file)
 		return false;
 
 	if (version > 5)
-		if (!Object::FileLoad(file))
+		if (!lcObject::FileLoad(file))
 			return false;
 
 	if (version == 4)
@@ -267,7 +267,7 @@ void lcCamera::FileSave(lcFile& file) const
 {
 	file.WriteU8(LC_CAMERA_SAVE_VERSION);
 
-	Object::FileSave(file);
+	lcObject::FileSave(file);
 
 	lcuint8 ch = (lcuint8)strlen(m_strName);
 	file.WriteU8(ch);
@@ -330,7 +330,7 @@ void lcCamera::UpdatePosition(lcStep Step)
 	mWorldView = lcMatrix44LookAt(mPosition, mTargetPosition, mUpVector);
 }
 
-void lcCamera::CopyPosition(const Camera* camera)
+void lcCamera::CopyPosition(const lcCamera* camera)
 {
 	m_fovy = camera->m_fovy;
 	m_zNear = camera->m_zNear;
@@ -495,7 +495,7 @@ void lcCamera::RayTest(lcObjectRayTest& ObjectRayTest) const
 	float Distance;
 	if (lcBoundingBoxRayMinIntersectDistance(Min, Max, Start, End, &Distance, NULL) && (Distance < ObjectRayTest.Distance))
 	{
-		ObjectRayTest.ObjectSection.Object = const_cast<Camera*>(this);
+		ObjectRayTest.ObjectSection.Object = const_cast<lcCamera*>(this);
 		ObjectRayTest.ObjectSection.Section = LC_CAMERA_SECTION_POSITION;
 		ObjectRayTest.Distance = Distance;
 	}
@@ -511,7 +511,7 @@ void lcCamera::RayTest(lcObjectRayTest& ObjectRayTest) const
 
 	if (lcBoundingBoxRayMinIntersectDistance(Min, Max, Start, End, &Distance, NULL) && (Distance < ObjectRayTest.Distance))
 	{
-		ObjectRayTest.ObjectSection.Object = const_cast<Camera*>(this);
+		ObjectRayTest.ObjectSection.Object = const_cast<lcCamera*>(this);
 		ObjectRayTest.ObjectSection.Section = LC_CAMERA_SECTION_TARGET;
 		ObjectRayTest.Distance = Distance;
 	}
@@ -527,7 +527,7 @@ void lcCamera::RayTest(lcObjectRayTest& ObjectRayTest) const
 
 	if (lcBoundingBoxRayMinIntersectDistance(Min, Max, Start, End, &Distance, NULL) && (Distance < ObjectRayTest.Distance))
 	{
-		ObjectRayTest.ObjectSection.Object = const_cast<Camera*>(this);
+		ObjectRayTest.ObjectSection.Object = const_cast<lcCamera*>(this);
 		ObjectRayTest.ObjectSection.Section = LC_CAMERA_SECTION_UPVECTOR;
 		ObjectRayTest.Distance = Distance;
 	}
@@ -549,7 +549,7 @@ void lcCamera::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
 	if (lcBoundingBoxIntersectsVolume(Min, Max, LocalPlanes))
 	{
 		lcObjectSection& ObjectSection = ObjectBoxTest.ObjectSections.Add();
-		ObjectSection.Object = const_cast<Camera*>(this);
+		ObjectSection.Object = const_cast<lcCamera*>(this);
 		ObjectSection.Section = LC_CAMERA_SECTION_POSITION;
 	}
 
@@ -568,7 +568,7 @@ void lcCamera::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
 	if (lcBoundingBoxIntersectsVolume(Min, Max, LocalPlanes))
 	{
 		lcObjectSection& ObjectSection = ObjectBoxTest.ObjectSections.Add();
-		ObjectSection.Object = const_cast<Camera*>(this);
+		ObjectSection.Object = const_cast<lcCamera*>(this);
 		ObjectSection.Section = LC_CAMERA_SECTION_TARGET;
 	}
 
@@ -587,7 +587,7 @@ void lcCamera::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
 	if (lcBoundingBoxIntersectsVolume(Min, Max, LocalPlanes))
 	{
 		lcObjectSection& ObjectSection = ObjectBoxTest.ObjectSections.Add();
-		ObjectSection.Object = const_cast<Camera*>(this);
+		ObjectSection.Object = const_cast<lcCamera*>(this);
 		ObjectSection.Section = LC_CAMERA_SECTION_UPVECTOR;
 	}
 }

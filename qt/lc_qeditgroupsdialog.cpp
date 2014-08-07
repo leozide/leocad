@@ -47,8 +47,8 @@ void lcQEditGroupsDialog::on_newGroup_clicked()
 	if (!currentItem)
 		currentItem = ui->treeWidget->invisibleRootItem();
 
-	Group *parentGroup = (Group*)currentItem->data(0, GroupRole).value<uintptr_t>();
-	Group *newGroup = lcGetActiveProject()->AddGroup(parentGroup);
+	lcGroup *parentGroup = (lcGroup*)currentItem->data(0, GroupRole).value<uintptr_t>();
+	lcGroup *newGroup = lcGetActiveProject()->AddGroup(parentGroup);
 	options->GroupParents.Add(NULL);
 
 	QTreeWidgetItem *groupItem = new QTreeWidgetItem(currentItem, QStringList(newGroup->m_strName));
@@ -93,7 +93,7 @@ void lcQEditGroupsDialog::timerEvent(QTimerEvent *event)
 	m_editableDoubleClicked = false;
 }
 
-void lcQEditGroupsDialog::updateParents(QTreeWidgetItem *parentItem, Group *parentGroup)
+void lcQEditGroupsDialog::updateParents(QTreeWidgetItem *parentItem, lcGroup *parentGroup)
 {
 	Project *project = lcGetActiveProject();
 	const lcArray<lcPiece*>& pieces = project->GetPieces();
@@ -103,7 +103,7 @@ void lcQEditGroupsDialog::updateParents(QTreeWidgetItem *parentItem, Group *pare
 	{
 		QTreeWidgetItem *childItem = parentItem->child(childIndex);
 
-		Piece *itemPiece = (Piece*)childItem->data(0, PieceRole).value<uintptr_t>();
+		lcPiece *itemPiece = (lcPiece*)childItem->data(0, PieceRole).value<uintptr_t>();
 
 		if (itemPiece)
 		{
@@ -113,7 +113,7 @@ void lcQEditGroupsDialog::updateParents(QTreeWidgetItem *parentItem, Group *pare
 		}
 		else
 		{
-			Group *itemGroup = (Group*)childItem->data(0, GroupRole).value<uintptr_t>();
+			lcGroup *itemGroup = (lcGroup*)childItem->data(0, GroupRole).value<uintptr_t>();
 
 			strncpy(itemGroup->m_strName, childItem->text(0).toLocal8Bit(), sizeof(itemGroup->m_strName));
 			itemGroup->m_strName[sizeof(itemGroup->m_strName) - 1] = 0;
@@ -134,7 +134,7 @@ void lcQEditGroupsDialog::updateParents(QTreeWidgetItem *parentItem, Group *pare
 	}
 }
 
-void lcQEditGroupsDialog::addChildren(QTreeWidgetItem *parentItem, Group *parentGroup)
+void lcQEditGroupsDialog::addChildren(QTreeWidgetItem *parentItem, lcGroup *parentGroup)
 {
 	Project *project = lcGetActiveProject();
 	const lcArray<lcPiece*>& pieces = project->GetPieces();
@@ -156,7 +156,7 @@ void lcQEditGroupsDialog::addChildren(QTreeWidgetItem *parentItem, Group *parent
 
 	for (int pieceIndex = 0; pieceIndex < pieces.GetSize(); pieceIndex++)
 	{
-		Piece *piece = pieces[pieceIndex];
+		lcPiece *piece = pieces[pieceIndex];
 
 		if (piece->GetGroup() != parentGroup)
 			continue;

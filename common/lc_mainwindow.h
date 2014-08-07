@@ -56,8 +56,8 @@ class lcMainWindow : public lcBaseWindow
 	void TogglePrintPreview();
 	void ToggleFullScreen();
 
-	void UpdateFocusObject(Object* Focus);
-	void UpdateSelectedObjects(int Flags, int SelectedCount, Object* Focus);
+	void UpdateFocusObject(lcObject* Focus);
+	void UpdateSelectedObjects(int Flags, int SelectedCount, lcObject* Focus);
 	void UpdateAction(int NewAction);
 	void UpdatePaste(bool Enabled);
 	void UpdateCurrentStep();

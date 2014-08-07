@@ -30,8 +30,8 @@ public:
 	void togglePrintPreview();
 	void toggleFullScreen();
 
-	void updateFocusObject(Object *focus);
-	void updateSelectedObjects(int flags, int selectedCount, Object* focus);
+	void updateFocusObject(lcObject *focus);
+	void updateSelectedObjects(int flags, int selectedCount, lcObject* focus);
 	void updateAction(int newAction);
 	void updatePaste(bool enabled);
 	void updateCurrentStep();

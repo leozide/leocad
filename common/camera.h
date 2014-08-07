@@ -67,7 +67,7 @@ public:
 		return m_strName;
 	}
 
-	void CreateName(const lcArray<Camera*>& Cameras);
+	void CreateName(const lcArray<lcCamera*>& Cameras);
 
 	bool IsSimple() const
 	{
@@ -253,7 +253,7 @@ public:
 
 
 	void UpdatePosition(lcStep Step);
-	void CopyPosition(const Camera* camera);
+	void CopyPosition(const lcCamera* camera);
 	void Render(View* View);
 
 	void ZoomExtents(View* view, const lcVector3& Center, const lcVector3* Points, int NumPoints, lcStep Step, bool AddKey);

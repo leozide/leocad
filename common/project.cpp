@@ -582,7 +582,7 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 	CalculateStep();
 
 	if (!bUndo)
-		SelectAndFocusNone(false);
+		ClearSelection(false);
 
 	if (!bMerge)
 		gMainWindow->UpdateFocusObject(GetFocusObject());
@@ -1273,10 +1273,6 @@ void Project::SetPathName(const char* PathName, bool bAddToMRU)
 		gMainWindow->AddRecentFile(m_strPathName);
 }
 
-/////////////////////////////////////////////////////////////////////////////
-// Undo/Redo support
-
-// Save current state.
 void Project::CheckPoint(const char* Description)
 {
 	lcModelHistoryEntry* ModelHistoryEntry = new lcModelHistoryEntry();
@@ -1293,9 +1289,6 @@ void Project::CheckPoint(const char* Description)
 	gMainWindow->UpdateModified(IsModified());
 	gMainWindow->UpdateUndoRedo(mUndoHistory.GetSize() > 1 ? mUndoHistory[0]->Description : NULL, !mRedoHistory.IsEmpty() ? mRedoHistory[0]->Description : NULL);
 }
-
-/////////////////////////////////////////////////////////////////////////////
-// Project rendering
 
 // Only this function should be called.
 void Project::Render(View* View, bool ToMemory)
@@ -2070,97 +2063,6 @@ bool Project::RemoveSelectedObjects()
 	return RemovedPiece || RemovedCamera || RemovedLight;
 }
 
-void Project::UpdateSelection()
-{
-	unsigned long flags = 0;
-	int SelectedCount = 0;
-	lcObject* Focus = NULL;
-
-	if (mPieces.IsEmpty())
-		flags |= LC_SEL_NO_PIECES;
-	else
-	{
-		lcGroup* pGroup = NULL;
-		bool first = true;
-
-		for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-		{
-			lcPiece* Piece = mPieces[PieceIdx];
-
-			if (Piece->IsSelected())
-			{
-				SelectedCount++;
-
-				if (Piece->IsFocused())
-					Focus = Piece;
-
-				if (flags & LC_SEL_PIECE)
-					flags |= LC_SEL_MULTIPLE;
-				else
-					flags |= LC_SEL_PIECE;
-
-				if (Piece->GetGroup() != NULL)
-				{
-					flags |= LC_SEL_GROUP;
-					if (Piece->IsFocused())
-						flags |= LC_SEL_FOCUSGROUP;
-				}
-
-				if (first)
-				{
-					pGroup = Piece->GetGroup();
-					first = false;
-				}
-				else
-				{
-					if (pGroup != Piece->GetGroup())
-						flags |= LC_SEL_CANGROUP;
-					else
-						if (pGroup == NULL)
-							flags |= LC_SEL_CANGROUP;
-				}
-			}
-			else
-			{
-				flags |= LC_SEL_UNSELECTED;
-
-				if (Piece->IsHidden())
-					flags |= LC_SEL_HIDDEN;
-			}
-		}
-	}
-
-	for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
-	{
-		lcCamera* pCamera = mCameras[CameraIdx];
-
-		if (pCamera->IsSelected())
-		{
-			flags |= LC_SEL_CAMERA;
-			SelectedCount++;
-
-			if (pCamera->IsFocused())
-				Focus = pCamera;
-		}
-	}
-
-	for (int LightIdx = 0; LightIdx < mLights.GetSize(); LightIdx++)
-	{
-		lcLight* pLight = mLights[LightIdx];
-
-		if (pLight->IsSelected())
-		{
-			flags |= LC_SEL_LIGHT;
-			SelectedCount++;
-
-			if (pLight->IsFocused())
-				Focus = pLight;
-		}
-	}
-
-	gMainWindow->UpdateSelectedObjects(flags, SelectedCount, Focus);
-}
-
 void Project::CheckAutoSave()
 {
 	/*
@@ -2343,7 +2245,7 @@ void Project::CreateImages(Image* images, int width, int height, lcStep from, lc
 	view.SetContext(gMainWindow->mPreviewWidget->mContext);
 
 	if (!hilite)
-		SelectAndFocusNone(false);
+		ClearSelection(false);
 
 	RenderInitialize();
 
@@ -2366,7 +2268,7 @@ void Project::CreateImages(Image* images, int width, int height, lcStep from, lc
 	}
 
 	if (hilite)
-		SelectAndFocusNone(false);
+		ClearSelection(false);
 
 	SetCurrentStep(CurrentStep);
 	free(buf);
@@ -4089,7 +3991,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 			if (file == NULL)
 				break;
 			file->Seek(0, SEEK_SET);
-			SelectAndFocusNone(false);
+			ClearSelection(false);
 
 			lcArray<lcPiece*> PastedPieces;
 			int NumPieces;
@@ -4227,10 +4129,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 		case LC_EDIT_SELECT_NONE:
 		{
-			SelectAndFocusNone(false);
-			gMainWindow->UpdateFocusObject(NULL);
-			UpdateSelection();
-			gMainWindow->UpdateAllViews();
+			ClearSelection(true);
 		} break;
 
 		case LC_EDIT_SELECT_INVERT:
@@ -4272,7 +4171,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 			if (!gMainWindow->DoDialog(LC_DIALOG_SELECT_BY_NAME, &Options))
 				break;
 
-			SelectAndFocusNone(false);
+			ClearSelection(false);
 
 			int ObjectIndex = 0;
 			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++, ObjectIndex++)
@@ -4532,7 +4431,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 			if (!gMainWindow->DoDialog(LC_DIALOG_MINIFIG, &Minifig))
 				break;
 
-			SelectAndFocusNone(false);
+			ClearSelection(false);
 
 			for (i = 0; i < LC_MFW_NUMITEMS; i++)
 			{
@@ -4627,7 +4526,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 			ConvertFromUserUnits(Options.Offsets[1]);
 			ConvertFromUserUnits(Options.Offsets[2]);
 
-			lcArray<lcPiece*> NewPieces;
+			lcArray<lcObjectSection> NewPieces;
 
 			for (int Step1 = 0; Step1 < Options.Counts[0]; Step1++)
 			{
@@ -4677,11 +4576,14 @@ void Project::HandleCommand(LC_COMMANDS id)
 							AxisAngle[3] *= LC_RTOD;
 
 							lcPiece* NewPiece = new lcPiece(pPiece->mPieceInfo);
-							NewPieces.Add(NewPiece);
-
 							NewPiece->Initialize(Position[0] + Offset[0], Position[1] + Offset[1], Position[2] + Offset[2], mCurrentStep);
 							NewPiece->SetColorIndex(pPiece->mColorIndex);
 							NewPiece->ChangeKey(1, false, AxisAngle, LC_PK_ROTATION);
+
+							lcObjectSection ObjectSection;
+							ObjectSection.Object = NewPiece;
+							ObjectSection.Section = LC_PIECE_SECTION_POSITION;
+							NewPieces.Add(ObjectSection);
 						}
 					}
 				}
@@ -4689,16 +4591,13 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 			for (int PieceIdx = 0; PieceIdx < NewPieces.GetSize(); PieceIdx++)
 			{
-				lcPiece* Piece = NewPieces[PieceIdx];
+				lcPiece* Piece = (lcPiece*)NewPieces[PieceIdx].Object;
 				Piece->CreateName(mPieces);
 				Piece->UpdatePosition(mCurrentStep);
 				mPieces.Add(Piece);
 			}
 
-			SelectAndFocusNone(true);
-//			gMainWindow->UpdateFocusObject(GetFocusObject());
-			UpdateSelection();
-			gMainWindow->UpdateAllViews();
+			AddToSelection(NewPieces);
 			CheckPoint("Array");
 		} break;
 
@@ -4877,10 +4776,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 				mGroups[GroupIdx]->mGroup = Options.GroupParents[GroupIdx];
 
 			RemoveEmptyGroups();
-			SelectAndFocusNone(false);
-			gMainWindow->UpdateFocusObject(GetFocusObject());
-			UpdateSelection();
-			gMainWindow->UpdateAllViews();
+			ClearSelection(true);
 			CheckPoint("Editing");
 		} break;
 
@@ -5548,12 +5444,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 			if (ActiveView && ActiveView->mTrackButton != LC_TRACKBUTTON_NONE)
 				ActiveView->StopTracking(false);
 			else
-			{
-				SelectAndFocusNone(false);
-				UpdateSelection();
-				gMainWindow->UpdateAllViews();
-				gMainWindow->UpdateFocusObject(NULL);
-			}
+				ClearSelection(true);
 		} break;
 
 		case LC_NUM_COMMANDS:
@@ -5644,119 +5535,6 @@ lcGroup* Project::AddGroup(lcGroup* Parent)
 	return NewGroup;
 }
 
-void Project::SelectAndFocusNone(bool FocusOnly)
-{
-	if (FocusOnly)
-	{
-		lcObject* FocusObject = GetFocusObject();
-
-		if (FocusObject)
-			FocusObject->SetFocused(FocusObject->GetFocusSection(), false);
-	}
-	else
-	{
-		for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-			mPieces[PieceIdx]->SetSelected(false);
-
-		for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
-			mCameras[CameraIdx]->SetSelected(false);
-
-		for (int LightIdx = 0; LightIdx < mLights.GetSize(); LightIdx++)
-			mLights[LightIdx]->SetSelected(false);
-	}
-}
-
-void Project::SelectGroup(lcGroup* TopGroup, bool Select)
-{
-	if (!TopGroup)
-		return;
-
-	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-	{
-		lcPiece* Piece = mPieces[PieceIdx];
-
-		if (!Piece->IsSelected() && Piece->IsVisible(mCurrentStep) && (Piece->GetTopGroup() == TopGroup))
-			Piece->SetSelected(Select);
-	}
-}
-
-void Project::FocusOrDeselectObject(const lcObjectSection& ObjectSection)
-{
-	lcObject* FocusObject = GetFocusObject();
-	lcObject* Object = ObjectSection.Object;
-	lcuint32 Section = ObjectSection.Section;
-
-	if (Object)
-	{
-		bool WasSelected = Object->IsSelected();
-
-		if (!Object->IsFocused(Section))
-		{
-			if (FocusObject)
-				FocusObject->SetFocused(FocusObject->GetFocusSection(), false);
-
-			Object->SetFocused(Section, true);
-		}
-		else
-			Object->SetSelected(Section, false);
-
-		bool IsSelected = Object->IsSelected();
-
-		if (Object->IsPiece() && (WasSelected != IsSelected))
-			SelectGroup(((lcPiece*)Object)->GetTopGroup(), IsSelected);
-	}
-	else
-	{
-		if (FocusObject)
-			FocusObject->SetFocused(FocusObject->GetFocusSection(), false);
-	}
-
-	UpdateSelection();
-	gMainWindow->UpdateAllViews();
-	gMainWindow->UpdateFocusObject(GetFocusObject());
-}
-
-void Project::ClearSelectionAndSetFocus(lcObject* Object, lcuint32 Section)
-{
-	SelectAndFocusNone(false);
-
-	if (Object)
-	{
-		Object->SetFocused(Section, true);
-
-		if (Object->IsPiece())
-			SelectGroup(((lcPiece*)Object)->GetTopGroup(), true);
-	}
-
-	UpdateSelection();
-	gMainWindow->UpdateAllViews();
-	gMainWindow->UpdateFocusObject(Object);
-}
-
-void Project::SetSelection(const lcArray<lcObjectSection>& ObjectSections)
-{
-	SelectAndFocusNone(false);
-	AddToSelection(ObjectSections);
-}
-
-void Project::AddToSelection(const lcArray<lcObjectSection>& ObjectSections)
-{
-	for (int ObjectIdx = 0; ObjectIdx < ObjectSections.GetSize(); ObjectIdx++)
-	{
-		lcObject* Object = ObjectSections[ObjectIdx].Object;
-
-		bool WasSelected = Object->IsSelected();
-		Object->SetSelected(ObjectSections[ObjectIdx].Section, true);
-
-		if (!WasSelected && Object->GetType() == LC_OBJECT_PIECE)
-			SelectGroup(((lcPiece*)Object)->GetTopGroup(), true);
-	}
-
-	UpdateSelection();
-	gMainWindow->UpdateAllViews();
-	gMainWindow->UpdateFocusObject(GetFocusObject());
-}
-
 bool Project::GetSelectionCenter(lcVector3& Center) const
 {
 	float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
@@ -5814,36 +5592,6 @@ bool Project::GetFocusPosition(lcVector3& Position) const
 		Position = lcVector3(0.0f, 0.0f, 0.0f);
 		return false;
 	}
-}
-
-// Returns the object that currently has focus.
-lcObject* Project::GetFocusObject() const
-{
-	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-	{
-		lcPiece* Piece = mPieces[PieceIdx];
-
-		if (Piece->IsFocused())
-			return Piece;
-	}
-
-	for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
-	{
-		lcCamera* Camera = mCameras[CameraIdx];
-
-		if (Camera->IsFocused())
-			return Camera;
-	}
-
-	for (int LightIdx = 0; LightIdx < mLights.GetSize(); LightIdx++)
-	{
-		lcLight* Light = mLights[LightIdx];
-
-		if (Light->IsFocused())
-			return Light;
-	}
-
-	return NULL;
 }
 
 bool Project::AnyObjectsSelected(bool PiecesOnly) const

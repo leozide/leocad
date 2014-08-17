@@ -1067,25 +1067,25 @@ void lcQMainWindow::updateFocusObject(lcObject *focus)
 
 void lcQMainWindow::updateSelectedObjects(int flags, int selectedCount, lcObject* focus)
 {
-	actions[LC_EDIT_CUT]->setEnabled(flags & (LC_SEL_PIECE | LC_SEL_CAMERA | LC_SEL_LIGHT));
-	actions[LC_EDIT_COPY]->setEnabled(flags & (LC_SEL_PIECE | LC_SEL_CAMERA | LC_SEL_LIGHT));
+	actions[LC_EDIT_CUT]->setEnabled(flags & LC_SEL_SELECTED);
+	actions[LC_EDIT_COPY]->setEnabled(flags & LC_SEL_SELECTED);
 	actions[LC_EDIT_FIND]->setEnabled((flags & LC_SEL_NO_PIECES) == 0);
 	actions[LC_EDIT_FIND_NEXT]->setEnabled((flags & LC_SEL_NO_PIECES) == 0);
 	actions[LC_EDIT_FIND_PREVIOUS]->setEnabled((flags & LC_SEL_NO_PIECES) == 0);
 	actions[LC_EDIT_SELECT_INVERT]->setEnabled((flags & LC_SEL_NO_PIECES) == 0);
 	actions[LC_EDIT_SELECT_BY_NAME]->setEnabled((flags & LC_SEL_NO_PIECES) == 0);
-	actions[LC_EDIT_SELECT_NONE]->setEnabled(flags & (LC_SEL_PIECE | LC_SEL_CAMERA | LC_SEL_LIGHT));
+	actions[LC_EDIT_SELECT_NONE]->setEnabled(flags & LC_SEL_SELECTED);
 	actions[LC_EDIT_SELECT_ALL]->setEnabled(flags & LC_SEL_UNSELECTED);
 
-	actions[LC_PIECE_DELETE]->setEnabled(flags & (LC_SEL_PIECE | LC_SEL_CAMERA | LC_SEL_LIGHT));
+	actions[LC_PIECE_DELETE]->setEnabled(flags & LC_SEL_SELECTED);
 	actions[LC_PIECE_ARRAY]->setEnabled(flags & LC_SEL_PIECE);
 	actions[LC_PIECE_HIDE_SELECTED]->setEnabled(flags & LC_SEL_PIECE);
 	actions[LC_PIECE_UNHIDE_ALL]->setEnabled(flags & LC_SEL_HIDDEN);
 	actions[LC_PIECE_HIDE_UNSELECTED]->setEnabled(flags & LC_SEL_UNSELECTED);
-	actions[LC_PIECE_GROUP]->setEnabled(flags & LC_SEL_CANGROUP);
-	actions[LC_PIECE_UNGROUP]->setEnabled(flags & LC_SEL_GROUP);
-	actions[LC_PIECE_GROUP_ADD]->setEnabled((flags & (LC_SEL_GROUP | LC_SEL_FOCUSGROUP)) == LC_SEL_GROUP);
-	actions[LC_PIECE_GROUP_REMOVE]->setEnabled(flags & LC_SEL_FOCUSGROUP);
+	actions[LC_PIECE_GROUP]->setEnabled(flags & LC_SEL_CAN_GROUP);
+	actions[LC_PIECE_UNGROUP]->setEnabled(flags & LC_SEL_GROUPED);
+	actions[LC_PIECE_GROUP_ADD]->setEnabled((flags & (LC_SEL_GROUPED | LC_SEL_FOCUS_GROUPED)) == LC_SEL_GROUPED);
+	actions[LC_PIECE_GROUP_REMOVE]->setEnabled(flags & LC_SEL_FOCUS_GROUPED);
 	actions[LC_PIECE_GROUP_EDIT]->setEnabled((flags & LC_SEL_NO_PIECES) == 0);
 	actions[LC_PIECE_SHOW_EARLIER]->setEnabled(flags & LC_SEL_PIECE); // FIXME: disable if current step is 1
 	actions[LC_PIECE_SHOW_LATER]->setEnabled(flags & LC_SEL_PIECE);

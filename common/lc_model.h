@@ -6,6 +6,15 @@
 #include "str.h"
 #include "object.h"
 
+#define LC_SEL_NO_PIECES     0x01 // No pieces in model
+#define LC_SEL_PIECE         0x02 // At last 1 piece selected
+#define LC_SEL_SELECTED      0x04 // At last 1 object selected
+#define LC_SEL_UNSELECTED    0x08 // At least 1 piece unselected
+#define LC_SEL_HIDDEN        0x10 // At least one piece hidden
+#define LC_SEL_GROUPED       0x20 // At least one piece selected is grouped
+#define LC_SEL_FOCUS_GROUPED 0x40 // Focused piece is grouped
+#define LC_SEL_CAN_GROUP     0x80 // Can make a new group
+
 enum lcBackgroundType
 {
 	LC_BACKGROUND_SOLID,
@@ -111,12 +120,24 @@ public:
 	}
 
 	lcStep GetLastStep() const;
+
 	lcStep GetCurrentStep() const
 	{
 		return mCurrentStep;
 	}
 
+	lcObject* GetFocusObject() const;
+	void FocusOrDeselectObject(const lcObjectSection& ObjectSection);
+	void ClearSelectionAndSetFocus(lcObject* Object, lcuint32 Section);
+	void ClearSelectionAndSetFocus(const lcObjectSection& ObjectSection);
+	void SetSelection(const lcArray<lcObjectSection>& ObjectSections);
+	void AddToSelection(const lcArray<lcObjectSection>& ObjectSections);
+
 protected:
+	void UpdateSelection() const;
+	void SelectGroup(lcGroup* TopGroup, bool Select);
+	void ClearSelection(bool UpdateInterface);
+
 	lcModelProperties mProperties;
 
 	lcStep mCurrentStep;

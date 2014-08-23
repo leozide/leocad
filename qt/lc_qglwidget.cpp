@@ -8,6 +8,8 @@
 #include "lc_mainwindow.h"
 #include "lc_context.h"
 #include "view.h"
+#include "texfont.h"
+#include "lc_texture.h"
 
 void lcGLWidget::MakeCurrent()
 {
@@ -121,6 +123,15 @@ lcQGLWidget::lcQGLWidget(QWidget *parent, lcQGLWidget *share, lcGLWidget *owner,
 	GL_InitializeSharedExtensions(widget);
 	widget->OnInitialUpdate();
 
+	// TODO: Find a better place for the grid texture and font
+	gTexFont.Load();
+	if (!gGridTexture)
+	{
+		gGridTexture = new lcTexture;
+		gGridTexture->CreateGridTexture();
+	}
+	gGridTexture->AddRef();
+
 	preferredSize = QSize(0, 0);
 	setMouseTracking(true);
 
@@ -134,6 +145,13 @@ lcQGLWidget::lcQGLWidget(QWidget *parent, lcQGLWidget *share, lcGLWidget *owner,
 
 lcQGLWidget::~lcQGLWidget()
 {
+	gTexFont.Release();
+	if (!gGridTexture->Release())
+	{
+		delete gGridTexture;
+		gGridTexture = NULL;
+	}
+
 	if (isView)
 		delete widget;
 }
@@ -148,6 +166,12 @@ QSize lcQGLWidget::sizeHint() const
 
 void lcQGLWidget::initializeGL()
 {
+	glEnable(GL_POLYGON_OFFSET_FILL);
+	glPolygonOffset(0.5f, 0.1f);
+
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);
+	glDepthMask(GL_TRUE);
 }
 
 void lcQGLWidget::resizeGL(int width, int height)

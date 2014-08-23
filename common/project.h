@@ -57,7 +57,6 @@ class Terrain;
 class PieceInfo;
 class View;
 class Image;
-class TexFont;
 
 #include "lc_file.h"
 
@@ -174,6 +173,7 @@ public:
 	void LoadDefaults(bool cameras);
 	void RenderInitialize();
 
+	bool GetPiecesBoundingBox(View* view, float BoundingBox[6]);
 	void GetPiecesUsed(lcArray<lcPiecesUsedEntry>& PiecesUsed) const;
 	void CreateImages(Image* images, int width, int height, lcStep from, lcStep to, bool hilite);
 	void Render(View* view, bool bToMemory);
@@ -193,8 +193,6 @@ public:
 	char m_strPathName[LC_MAXPATH];
 
 	void GetPieceInsertPosition(View* view, lcVector3& Position, lcVector4& Orientation);
-
-	TexFont* m_pScreenFont;
 
 protected:
 	void CheckPoint(const char* Description);
@@ -223,7 +221,6 @@ protected:
 	void RenderBackground(View* view);
 	void RenderScenePieces(View* view, bool DrawInterface);
 	void RenderSceneObjects(View* view);
-	void RenderViewports(View* view);
 
 	void CreateHTMLPieceList(FILE* f, lcStep Step, bool bImages, const char* ext);
 	void Export3DStudio();
@@ -248,7 +245,6 @@ protected:
 	char m_strHeader[256];
 
 	lcTexture* m_pBackground;
-	lcTexture* mGridTexture;
 
 protected:
 	bool DoSave(const char* FileName);

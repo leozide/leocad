@@ -32,7 +32,6 @@ void lcMainWindow::AddView(View* View)
 	mViews.Add(View);
 
 	View->MakeCurrent();
-	lcGetActiveProject()->RenderInitialize();
 
 	if (!mActiveView)
 	{

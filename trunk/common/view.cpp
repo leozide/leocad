@@ -7,6 +7,7 @@
 #include "system.h"
 #include "tr.h"
 #include "texfont.h"
+#include "lc_texture.h"
 
 View::View(Project *project)
 {
@@ -213,6 +214,14 @@ void View::OnDraw()
 
 	if (mWidget)
 	{
+		const lcPreferences& Preferences = lcGetPreferences();
+
+		if (Preferences.mDrawGridStuds || Preferences.mDrawGridLines)
+			DrawGrid();
+
+		if (Preferences.mDrawAxes)
+			DrawAxes();
+
 		lcTool Tool = gMainWindow->GetTool();
 
 		if ((Tool == LC_TOOL_SELECT || Tool == LC_TOOL_MOVE) && mTrackButton == LC_TRACKBUTTON_NONE && mProject->AnyObjectsSelected(false))
@@ -694,13 +703,12 @@ void View::DrawRotateOverlay()
 
 		// Draw text.
 		lcVector3 ScreenPos = ProjectPoint(OverlayCenter);
-		TexFont* Font = mProject->m_pScreenFont;
 
 		mContext->SetProjectionMatrix(lcMatrix44Ortho(0.0f, mWidth, 0.0f, mHeight, -1.0f, 1.0f));
 		mContext->SetWorldViewMatrix(lcMatrix44Translation(lcVector3(0.375, 0.375, 0.0)));
 
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-		Font->MakeCurrent();
+		gTexFont.MakeCurrent();
 		glEnable(GL_TEXTURE_2D);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_BLEND);
@@ -709,10 +717,10 @@ void View::DrawRotateOverlay()
 		sprintf(buf, "[%.2f]", fabsf(Angle));
 
 		int cx, cy;
-		Font->GetStringDimensions(&cx, &cy, buf);
+		gTexFont.GetStringDimensions(&cx, &cy, buf);
 
 		glColor4f(0.8f, 0.8f, 0.0f, 1.0f);
-		Font->PrintText(ScreenPos[0] - (cx / 2), ScreenPos[1] + (cy / 2), 0.0f, buf);
+		gTexFont.PrintText(ScreenPos[0] - (cx / 2), ScreenPos[1] + (cy / 2), 0.0f, buf);
 
 		glDisable(GL_BLEND);
 		glDisable(GL_TEXTURE_2D);
@@ -861,8 +869,226 @@ void View::DrawRotateViewOverlay()
 	glEnable(GL_DEPTH_TEST);
 }
 
+void View::DrawGrid()
+{
+	const lcPreferences& Preferences = lcGetPreferences();
+
+	mContext->SetWorldViewMatrix(mCamera->mWorldView);
+
+	const int Spacing = lcMax(Preferences.mGridLineSpacing, 1);
+	int MinX, MaxX, MinY, MaxY;
+	float BoundingBox[6];
+
+	if (mProject->GetPiecesBoundingBox(this, BoundingBox))
+	{
+		MinX = (int)(floorf(BoundingBox[0] / (0.8f * Spacing))) - 1;
+		MinY = (int)(floorf(BoundingBox[1] / (0.8f * Spacing))) - 1;
+		MaxX = (int)(ceilf(BoundingBox[3] / (0.8f * Spacing))) + 1;
+		MaxY = (int)(ceilf(BoundingBox[4] / (0.8f * Spacing))) + 1;
+
+		MinX = lcMin(MinX, -2);
+		MinY = lcMin(MinY, -2);
+		MaxX = lcMax(MaxX, 2);
+		MaxY = lcMax(MaxY, 2);
+	}
+	else
+	{
+		MinX = -2;
+		MinY = -2;
+		MaxX = 2;
+		MaxY = 2;
+	}
+
+	if (Preferences.mDrawGridStuds)
+	{
+		float Left = MinX * 0.8f * Spacing;
+		float Right = MaxX * 0.8f * Spacing;
+		float Top = MinY * 0.8f * Spacing;
+		float Bottom = MaxY * 0.8f * Spacing;
+		float Z = 0;
+		float U = (MaxX - MinX) * Spacing;
+		float V = (MaxY - MinY) * Spacing;
+
+		float Verts[4 * 5];
+		float* CurVert = Verts;
+
+		*CurVert++ = Left;
+		*CurVert++ = Top;
+		*CurVert++ = Z;
+		*CurVert++ = 0.0f;
+		*CurVert++ = V;
+
+		*CurVert++ = Left;
+		*CurVert++ = Bottom;
+		*CurVert++ = Z;
+		*CurVert++ = 0.0f;
+		*CurVert++ = 0.0f;
+
+		*CurVert++ = Right;
+		*CurVert++ = Bottom;
+		*CurVert++ = Z;
+		*CurVert++ = U;
+		*CurVert++ = 0.0f;
+
+		*CurVert++ = Right;
+		*CurVert++ = Top;
+		*CurVert++ = Z;
+		*CurVert++ = U;
+		*CurVert++ = V;
+
+		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+		glBindTexture(GL_TEXTURE_2D, gGridTexture->mTexture);
+		glEnable(GL_TEXTURE_2D);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glEnable(GL_BLEND);
+
+		glColor4fv(lcVector4FromColor(Preferences.mGridStudColor));
+
+		glVertexPointer(3, GL_FLOAT, 5 * sizeof(float), Verts);
+		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+		glTexCoordPointer(2, GL_FLOAT, 5 * sizeof(float), Verts + 3);
+
+		glDrawArrays(GL_QUADS, 0, 4);
+
+		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+
+		glDisable(GL_TEXTURE_2D);
+		glDisable(GL_BLEND);
+	}
+
+	if (Preferences.mDrawGridLines)
+	{
+		mContext->SetLineWidth(1.0f);
+		glColor4fv(lcVector4FromColor(Preferences.mGridLineColor));
+
+		int NumVerts = 2 * (MaxX - MinX + MaxY - MinY + 2);
+		float* Verts = (float*)malloc(NumVerts * sizeof(float[3]));
+		float* Vert = Verts;
+		float LineSpacing = Spacing * 0.8f;
+
+		for (int Step = MinX; Step < MaxX + 1; Step++)
+		{
+			*Vert++ = Step * LineSpacing;
+			*Vert++ = MinY * LineSpacing;
+			*Vert++ = 0.0f;
+			*Vert++ = Step * LineSpacing;
+			*Vert++ = MaxY * LineSpacing;
+			*Vert++ = 0.0f;
+		}
+
+		for (int Step = MinY; Step < MaxY + 1; Step++)
+		{
+			*Vert++ = MinX * LineSpacing;
+			*Vert++ = Step * LineSpacing;
+			*Vert++ = 0.0f;
+			*Vert++ = MaxX * LineSpacing;
+			*Vert++ = Step * LineSpacing;
+			*Vert++ = 0.0f;
+		}
+
+		glVertexPointer(3, GL_FLOAT, 0, Verts);
+		glDrawArrays(GL_LINES, 0, NumVerts);
+		free(Verts);
+	}
+}
+
+void View::DrawAxes()
+{
+//	glClear(GL_DEPTH_BUFFER_BIT);
+
+	lcMatrix44 Mats[3];
+	Mats[0] = mCamera->mWorldView;
+	Mats[0].SetTranslation(lcVector3(0, 0, 0));
+	Mats[1] = lcMul(lcMatrix44(lcVector4(0, 1, 0, 0), lcVector4(1, 0, 0, 0), lcVector4(0, 0, 1, 0), lcVector4(0, 0, 0, 1)), Mats[0]);
+	Mats[2] = lcMul(lcMatrix44(lcVector4(0, 0, 1, 0), lcVector4(0, 1, 0, 0), lcVector4(1, 0, 0, 0), lcVector4(0, 0, 0, 1)), Mats[0]);
+
+	lcVector3 pts[3] =
+	{
+		lcMul30(lcVector3(20, 0, 0), Mats[0]),
+		lcMul30(lcVector3(0, 20, 0), Mats[0]),
+		lcMul30(lcVector3(0, 0, 20), Mats[0]),
+	};
+
+	const lcVector4 Colors[3] =
+	{
+		lcVector4(0.8f, 0.0f, 0.0f, 1.0f),
+		lcVector4(0.0f, 0.8f, 0.0f, 1.0f),
+		lcVector4(0.0f, 0.0f, 0.8f, 1.0f)
+	};
+
+	mContext->SetProjectionMatrix(lcMatrix44Ortho(0, mWidth, 0, mHeight, -50, 50));
+	mContext->SetWorldViewMatrix(lcMatrix44Translation(lcVector3(25.375f, 25.375f, 0.0f)));
+
+	// Draw the arrows.
+	lcVector3 Verts[11];
+	Verts[0] = lcVector3(0.0f, 0.0f, 0.0f);
+
+	glVertexPointer(3, GL_FLOAT, 0, Verts);
+
+	for (int i = 0; i < 3; i++)
+	{
+		glColor4fv(Colors[i]);
+		Verts[1] = pts[i];
+
+		for (int j = 0; j < 9; j++)
+			Verts[j+2] = lcMul30(lcVector3(12.0f, cosf(LC_2PI * j / 8) * 3.0f, sinf(LC_2PI * j / 8) * 3.0f), Mats[i]);
+
+		glDrawArrays(GL_LINES, 0, 2);
+		glDrawArrays(GL_TRIANGLE_FAN, 1, 10);
+	}
+
+	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+	gTexFont.MakeCurrent();
+	glEnable(GL_TEXTURE_2D);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_BLEND);
+
+	glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
+	gTexFont.PrintText(pts[0][0], pts[0][1], 40.0f, "X");
+	gTexFont.PrintText(pts[1][0], pts[1][1], 40.0f, "Y");
+	gTexFont.PrintText(pts[2][0], pts[2][1], 40.0f, "Z");
+
+	glDisable(GL_BLEND);
+	glDisable(GL_TEXTURE_2D);
+}
+
 void View::DrawViewport()
 {
+	mContext->SetProjectionMatrix(lcMatrix44Ortho(0.0f, mWidth, 0.0f, mHeight, -1.0f, 1.0f));
+	mContext->SetWorldViewMatrix(lcMatrix44Translation(lcVector3(0.375f, 0.375f, 0.0f)));
+
+	glDepthMask(GL_FALSE);
+	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_LIGHTING);
+
+	if (gMainWindow->GetActiveView() == this)
+	{
+		glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
+		float Verts[8] = { 0.0f, 0.0f, mWidth - 1, 0.0f, mWidth - 1, mHeight - 1, 0.0f, mHeight - 1 };
+
+		glVertexPointer(2, GL_FLOAT, 0, Verts);
+		glDrawArrays(GL_LINE_LOOP, 0, 4);
+	}
+
+	const char* CameraName = mCamera->GetName();
+
+	if (CameraName[0])
+	{
+		glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
+		glEnable(GL_TEXTURE_2D);
+		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+		gTexFont.MakeCurrent();
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glEnable(GL_BLEND);
+
+		gTexFont.PrintText(3.0f, (float)mHeight - 1.0f - 6.0f, 0.0f, CameraName);
+
+		glDisable(GL_BLEND);
+		glDisable(GL_TEXTURE_2D);
+	}
+
+	glDepthMask(GL_TRUE);
+	glEnable(GL_DEPTH_TEST);
 }
 
 void View::OnInitialUpdate()

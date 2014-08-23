@@ -88,24 +88,29 @@ static const unsigned char GlyphData[] =
 
 // ============================================================================
 
+TexFont gTexFont;
+
 TexFont::TexFont()
 {
+	mRefCount = 0;
 	mTexture = 0;
 	memset(&mGlyphs, 0, sizeof(mGlyphs));
 }
 
 TexFont::~TexFont()
 {
-	glDeleteTextures(1, &mTexture);
 }
 
-bool TexFont::Initialize()
+bool TexFont::Load()
 {
+	mRefCount++;
+
+	if (mRefCount != 1)
+		return true;
+
 	mFontHeight = 16;
 
-	if (mTexture == 0)
-		glGenTextures(1, &mTexture);
-
+	glGenTextures(1, &mTexture);
 	glBindTexture(GL_TEXTURE_2D, mTexture);
 	glDisable(GL_TEXTURE_GEN_S);
 	glDisable(GL_TEXTURE_GEN_T);
@@ -146,6 +151,16 @@ bool TexFont::Initialize()
 	}
 
 	return true;
+}
+
+void TexFont::Release()
+{
+	mRefCount--;
+	if (mRefCount == 0)
+	{
+		glDeleteTextures(1, &mTexture);
+		mTexture = 0;
+	}
 }
 
 void TexFont::GetStringDimensions(int* cx, int* cy, const char* Text) const

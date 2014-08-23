@@ -109,6 +109,8 @@ protected:
 	void DrawRotateOverlay();
 	void DrawSelectZoomRegionOverlay();
 	void DrawRotateViewOverlay();
+	void DrawGrid();
+	void DrawAxes();
 	void DrawViewport();
 
 	void UpdateTrackTool();

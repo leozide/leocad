@@ -34,10 +34,7 @@ Project::Project()
 	mTransformType = LC_TRANSFORM_RELATIVE_TRANSLATION;
 	m_pTerrain = new Terrain();
 	m_pBackground = new lcTexture();
-	mGridTexture = new lcTexture();
 	memset(&mSearchOptions, 0, sizeof(mSearchOptions));
-
-	m_pScreenFont = new TexFont();
 }
 
 Project::~Project()
@@ -46,8 +43,6 @@ Project::~Project()
 
 	delete m_pTerrain;
 	delete m_pBackground;
-	delete mGridTexture;
-	delete m_pScreenFont;
 }
 
 void Project::UpdateInterface()
@@ -65,16 +60,7 @@ void Project::UpdateInterface()
 	gMainWindow->UpdateSnap();
 	gMainWindow->UpdateCameraMenu();
 	gMainWindow->UpdatePerspective();
-
-	UpdateSelection();
 	gMainWindow->UpdateCurrentStep();
-
-	const lcArray<View*> Views = gMainWindow->GetViews();
-	for (int i = 0; i < Views.GetSize(); i++)
-	{
-		Views[i]->MakeCurrent();
-		RenderInitialize();
-	}
 
 	UpdateSelection();
 }
@@ -1303,8 +1289,6 @@ void Project::Render(View* View, bool ToMemory)
 	if (!ToMemory)
 	{
 		RenderSceneObjects(View);
-
-		RenderViewports(View);
 	}
 }
 
@@ -1601,375 +1585,73 @@ void Project::RenderSceneObjects(View* view)
 			mLights[LightIdx]->Render(view);
 
 	Context->SetLineWidth(Preferences.mLineWidth); // context remove
-
-	if (Preferences.mDrawGridStuds || Preferences.mDrawGridLines)
-	{
-		Context->SetWorldViewMatrix(ViewMatrix);
-
-		const int Spacing = lcMax(Preferences.mGridLineSpacing, 1);
-		int MinX = 0, MaxX = 0, MinY = 0, MaxY = 0;
-
-		if (!mPieces.IsEmpty() || view->mTrackTool == LC_TRACKTOOL_INSERT)
-		{
-			float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
-
-			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-			{
-				lcPiece* Piece = mPieces[PieceIdx];
-
-				if (Piece->IsVisible(mCurrentStep))
-					Piece->CompareBoundingBox(bs);
-			}
-
-			if (view->mTrackTool == LC_TRACKTOOL_INSERT)
-			{
-				lcVector3 Position;
-				lcVector4 Rotation;
-				GetPieceInsertPosition(view, Position, Rotation);
-
-				lcVector3 Points[8] =
-				{
-					lcVector3(m_pCurPiece->m_fDimensions[0], m_pCurPiece->m_fDimensions[1], m_pCurPiece->m_fDimensions[5]),
-					lcVector3(m_pCurPiece->m_fDimensions[3], m_pCurPiece->m_fDimensions[1], m_pCurPiece->m_fDimensions[5]),
-					lcVector3(m_pCurPiece->m_fDimensions[0], m_pCurPiece->m_fDimensions[1], m_pCurPiece->m_fDimensions[2]),
-					lcVector3(m_pCurPiece->m_fDimensions[3], m_pCurPiece->m_fDimensions[4], m_pCurPiece->m_fDimensions[5]),
-					lcVector3(m_pCurPiece->m_fDimensions[3], m_pCurPiece->m_fDimensions[4], m_pCurPiece->m_fDimensions[2]),
-					lcVector3(m_pCurPiece->m_fDimensions[0], m_pCurPiece->m_fDimensions[4], m_pCurPiece->m_fDimensions[2]),
-					lcVector3(m_pCurPiece->m_fDimensions[0], m_pCurPiece->m_fDimensions[4], m_pCurPiece->m_fDimensions[5]),
-					lcVector3(m_pCurPiece->m_fDimensions[3], m_pCurPiece->m_fDimensions[1], m_pCurPiece->m_fDimensions[2])
-				};
-
-				lcMatrix44 ModelWorld = lcMatrix44FromAxisAngle(lcVector3(Rotation[0], Rotation[1], Rotation[2]), Rotation[3] * LC_DTOR);
-				ModelWorld.SetTranslation(Position);
-
-				for (int i = 0; i < 8; i++)
-				{
-					lcVector3 Point = lcMul31(Points[i], ModelWorld);
-
-					if (Point[0] < bs[0]) bs[0] = Point[0];
-					if (Point[1] < bs[1]) bs[1] = Point[1];
-					if (Point[2] < bs[2]) bs[2] = Point[2];
-					if (Point[0] > bs[3]) bs[3] = Point[0];
-					if (Point[1] > bs[4]) bs[4] = Point[1];
-					if (Point[2] > bs[5]) bs[5] = Point[2];
-				}
-			}
-
-			MinX = (int)(floorf(bs[0] / (0.8f * Spacing))) - 1;
-			MinY = (int)(floorf(bs[1] / (0.8f * Spacing))) - 1;
-			MaxX = (int)(ceilf(bs[3] / (0.8f * Spacing))) + 1;
-			MaxY = (int)(ceilf(bs[4] / (0.8f * Spacing))) + 1;
-		}
-
-		MinX = lcMin(MinX, -2);
-		MinY = lcMin(MinY, -2);
-		MaxX = lcMax(MaxX, 2);
-		MaxY = lcMax(MaxY, 2);
-
-		if (Preferences.mDrawGridStuds)
-		{
-			float Left = MinX * 0.8f * Spacing;
-			float Right = MaxX * 0.8f * Spacing;
-			float Top = MinY * 0.8f * Spacing;
-			float Bottom = MaxY * 0.8f * Spacing;
-			float Z = 0;
-			float U = (MaxX - MinX) * Spacing;
-			float V = (MaxY - MinY) * Spacing;
-
-			float Verts[4 * 5];
-			float* CurVert = Verts;
-
-			*CurVert++ = Left;
-			*CurVert++ = Top;
-			*CurVert++ = Z;
-			*CurVert++ = 0.0f;
-			*CurVert++ = V;
-
-			*CurVert++ = Left;
-			*CurVert++ = Bottom;
-			*CurVert++ = Z;
-			*CurVert++ = 0.0f;
-			*CurVert++ = 0.0f;
-
-			*CurVert++ = Right;
-			*CurVert++ = Bottom;
-			*CurVert++ = Z;
-			*CurVert++ = U;
-			*CurVert++ = 0.0f;
-
-			*CurVert++ = Right;
-			*CurVert++ = Top;
-			*CurVert++ = Z;
-			*CurVert++ = U;
-			*CurVert++ = V;
-
-			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-			glBindTexture(GL_TEXTURE_2D, mGridTexture->mTexture);
-			glEnable(GL_TEXTURE_2D);
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-			glEnable(GL_BLEND);
-
-			glColor4fv(lcVector4FromColor(Preferences.mGridStudColor));
-
-			glVertexPointer(3, GL_FLOAT, 5 * sizeof(float), Verts);
-			glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-			glTexCoordPointer(2, GL_FLOAT, 5 * sizeof(float), Verts + 3);
-
-			glDrawArrays(GL_QUADS, 0, 4);
-
-			glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-
-			glDisable(GL_TEXTURE_2D);
-			glDisable(GL_BLEND);
-		}
-
-		if (Preferences.mDrawGridLines)
-		{
-			glColor4fv(lcVector4FromColor(Preferences.mGridLineColor));
-
-			int NumVerts = 2 * (MaxX - MinX + MaxY - MinY + 2);
-			float* Verts = (float*)malloc(NumVerts * sizeof(float[3]));
-			float* Vert = Verts;
-			float LineSpacing = Spacing * 0.8f;
-
-			for (int Step = MinX; Step < MaxX + 1; Step++)
-			{
-				*Vert++ = Step * LineSpacing;
-				*Vert++ = MinY * LineSpacing;
-				*Vert++ = 0.0f;
-				*Vert++ = Step * LineSpacing;
-				*Vert++ = MaxY * LineSpacing;
-				*Vert++ = 0.0f;
-			}
-
-			for (int Step = MinY; Step < MaxY + 1; Step++)
-			{
-				*Vert++ = MinX * LineSpacing;
-				*Vert++ = Step * LineSpacing;
-				*Vert++ = 0.0f;
-				*Vert++ = MaxX * LineSpacing;
-				*Vert++ = Step * LineSpacing;
-				*Vert++ = 0.0f;
-			}
-
-			glVertexPointer(3, GL_FLOAT, 0, Verts);
-			glDrawArrays(GL_LINES, 0, NumVerts);
-			free(Verts);
-		}
-	}
-
-	if (Preferences.mDrawAxes)
-	{
-//		glClear(GL_DEPTH_BUFFER_BIT);
-
-		lcMatrix44 Mats[3];
-		Mats[0] = view->mCamera->mWorldView;
-		Mats[0].SetTranslation(lcVector3(0, 0, 0));
-		Mats[1] = lcMul(lcMatrix44(lcVector4(0, 1, 0, 0), lcVector4(1, 0, 0, 0), lcVector4(0, 0, 1, 0), lcVector4(0, 0, 0, 1)), Mats[0]);
-		Mats[2] = lcMul(lcMatrix44(lcVector4(0, 0, 1, 0), lcVector4(0, 1, 0, 0), lcVector4(1, 0, 0, 0), lcVector4(0, 0, 0, 1)), Mats[0]);
-
-		lcVector3 pts[3] =
-		{
-			lcMul30(lcVector3(20, 0, 0), Mats[0]),
-			lcMul30(lcVector3(0, 20, 0), Mats[0]),
-			lcMul30(lcVector3(0, 0, 20), Mats[0]),
-		};
-
-		Context->SetProjectionMatrix(lcMatrix44Ortho(0, view->mWidth, 0, view->mHeight, -50, 50));
-		Context->SetWorldViewMatrix(lcMatrix44Translation(lcVector3(25.375f, 25.375f, 0.0f)));
-
-		// Draw the arrows.
-		lcVector3 Verts[11];
-		Verts[0] = lcVector3(0.0f, 0.0f, 0.0f);
-
-		glVertexPointer(3, GL_FLOAT, 0, Verts);
-
-		for (int i = 0; i < 3; i++)
-		{
-			switch (i)
-			{
-			case 0:
-				glColor4f(0.8f, 0.0f, 0.0f, 1.0f);
-				break;
-			case 1:
-				glColor4f(0.0f, 0.8f, 0.0f, 1.0f);
-				break;
-			case 2:
-				glColor4f(0.0f, 0.0f, 0.8f, 1.0f);
-				break;
-			}
-
-			Verts[1] = pts[i];
-
-			for (int j = 0; j < 9; j++)
-				Verts[j+2] = lcMul30(lcVector3(12.0f, cosf(LC_2PI * j / 8) * 3.0f, sinf(LC_2PI * j / 8) * 3.0f), Mats[i]);
-
-			glDrawArrays(GL_LINES, 0, 2);
-			glDrawArrays(GL_TRIANGLE_FAN, 1, 10);
-		}
-
-		// Draw the text.
-		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-		m_pScreenFont->MakeCurrent();
-		glEnable(GL_TEXTURE_2D);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		glEnable(GL_BLEND);
-
-		glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
-		m_pScreenFont->PrintText(pts[0][0], pts[0][1], 40.0f, "X");
-		m_pScreenFont->PrintText(pts[1][0], pts[1][1], 40.0f, "Y");
-		m_pScreenFont->PrintText(pts[2][0], pts[2][1], 40.0f, "Z");
-
-		glDisable(GL_BLEND);
-		glDisable(GL_TEXTURE_2D);
-	}
 }
 
-void Project::RenderViewports(View* view)
-{
-	lcContext* Context = view->mContext;
-
-	Context->SetProjectionMatrix(lcMatrix44Ortho(0.0f, view->mWidth, 0.0f, view->mHeight, -1.0f, 1.0f));
-	Context->SetWorldViewMatrix(lcMatrix44Translation(lcVector3(0.375f, 0.375f, 0.0f)));
-
-	glDepthMask(GL_FALSE);
-	glDisable(GL_DEPTH_TEST);
-	glDisable(GL_LIGHTING);
-
-	if (gMainWindow->GetActiveView() == view)
-	{
-		glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
-		float Verts[8] = { 0.0f, 0.0f, view->mWidth - 1, 0.0f, view->mWidth - 1, view->mHeight - 1, 0.0f, view->mHeight - 1 };
-
-		glVertexPointer(2, GL_FLOAT, 0, Verts);
-		glDrawArrays(GL_LINE_LOOP, 0, 4);
-	}
-
-	const char* CameraName = view->mCamera->GetName();
-
-	if (CameraName[0])
-	{
-		glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
-		glEnable(GL_TEXTURE_2D);
-		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-		m_pScreenFont->MakeCurrent();
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		glEnable(GL_BLEND);
-
-		m_pScreenFont->PrintText(3.0f, (float)view->mHeight - 1.0f - 6.0f, 0.0f, CameraName);
-
-		glDisable(GL_BLEND);
-		glDisable(GL_TEXTURE_2D);
-	}
-
-	glDepthMask(GL_TRUE);
-	glEnable(GL_DEPTH_TEST);
-}
-
-// Initialize OpenGL
 void Project::RenderInitialize()
 {
-	glEnable(GL_POLYGON_OFFSET_FILL);
-	glPolygonOffset(0.5f, 0.1f);
-
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LEQUAL);
-	glDepthMask(GL_TRUE);
-
-	// Load font
-	if (!m_pScreenFont->IsLoaded())
-		m_pScreenFont->Initialize();
-
-//	if (m_nScene & LC_SCENE_FLOOR)
-//		m_pTerrain->LoadTexture();
-
 	if (mProperties.mBackgroundType == LC_BACKGROUND_IMAGE)
 		if (!m_pBackground->Load(mProperties.mBackgroundImage.Buffer(), LC_TEXTURE_WRAPU | LC_TEXTURE_WRAPV))
 		{
 			mProperties.mBackgroundType = LC_BACKGROUND_SOLID;
 //			AfxMessageBox ("Could not load background");
 		}
+}
 
-	if (!mGridTexture->mTexture)
+bool Project::GetPiecesBoundingBox(View* view, float BoundingBox[6])
+{
+	if (mPieces.IsEmpty() && view->mTrackTool != LC_TRACKTOOL_INSERT)
+		return false;
+
+	BoundingBox[0] = FLT_MAX;
+	BoundingBox[1] = FLT_MAX;
+	BoundingBox[2] = FLT_MAX;
+	BoundingBox[3] = -FLT_MAX;
+	BoundingBox[4] = -FLT_MAX;
+	BoundingBox[5] = -FLT_MAX;
+
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 	{
-		const int NumLevels = 9;
-		Image GridImages[NumLevels];
+		lcPiece* Piece = mPieces[PieceIdx];
 
-		for (int ImageLevel = 0; ImageLevel < NumLevels; ImageLevel++)
-		{
-			Image& GridImage = GridImages[ImageLevel];
-
-			const int GridSize = 256 >> ImageLevel;
-			const float Radius1 = (80 >> ImageLevel) * (80 >> ImageLevel);
-			const float Radius2 = (72 >> ImageLevel) * (72 >> ImageLevel);
-
-			GridImage.Allocate(GridSize, GridSize, LC_PIXEL_FORMAT_A8);
-			lcuint8* BlurBuffer = new lcuint8[GridSize * GridSize];
-
-			for (int y = 0; y < GridSize; y++)
-			{
-				lcuint8* Pixel = GridImage.mData + y * GridSize;
-				memset(Pixel, 0, GridSize);
-
-				const float y2 = (y - GridSize / 2) * (y - GridSize / 2);
-
-				if (Radius1 <= y2)
-					continue;
-
-				if (Radius2 <= y2)
-				{
-					int x1 = sqrtf(Radius1 - y2);
-
-					for (int x = GridSize / 2 - x1; x < GridSize / 2 + x1; x++)
-						Pixel[x] = 255;
-				}
-				else
-				{
-					int x1 = sqrtf(Radius1 - y2);
-					int x2 = sqrtf(Radius2 - y2);
-
-					for (int x = GridSize / 2 - x1; x < GridSize / 2 - x2; x++)
-						Pixel[x] = 255;
-
-					for (int x = GridSize / 2 + x2; x < GridSize / 2 + x1; x++)
-						Pixel[x] = 255;
-				}
-			}
-
-			for (int y = 0; y < GridSize - 1; y++)
-			{
-				for (int x = 0; x < GridSize - 1; x++)
-				{
-					lcuint8 a = GridImage.mData[x + y * GridSize];
-					lcuint8 b = GridImage.mData[x + 1 + y * GridSize];
-					lcuint8 c = GridImage.mData[x + (y + 1) * GridSize];
-					lcuint8 d = GridImage.mData[x + 1 + (y + 1) * GridSize];
-					BlurBuffer[x + y * GridSize] = (a + b + c + d) / 4;
-				}
-
-				int x = GridSize - 1;
-				lcuint8 a = GridImage.mData[x + y * GridSize];
-				lcuint8 c = GridImage.mData[x + (y + 1) * GridSize];
-				BlurBuffer[x + y * GridSize] = (a + c) / 2;
-			}
-
-			int y = GridSize - 1;
-			for (int x = 0; x < GridSize - 1; x++)
-			{
-				lcuint8 a = GridImage.mData[x + y * GridSize];
-				lcuint8 b = GridImage.mData[x + 1 + y * GridSize];
-				BlurBuffer[x + y * GridSize] = (a + b) / 2;
-			}
-
-			int x = GridSize - 1;
-			BlurBuffer[x + y * GridSize] = GridImage.mData[x + y * GridSize];
-
-			memcpy(GridImage.mData, BlurBuffer, GridSize * GridSize);
-			delete[] BlurBuffer;
-		}
-
-		mGridTexture->Load(GridImages, NumLevels, LC_TEXTURE_WRAPU | LC_TEXTURE_WRAPV | LC_TEXTURE_MIPMAPS | LC_TEXTURE_ANISOTROPIC);
+		if (Piece->IsVisible(mCurrentStep))
+			Piece->CompareBoundingBox(BoundingBox);
 	}
+
+	if (view->mTrackTool == LC_TRACKTOOL_INSERT)
+	{
+		lcVector3 Position;
+		lcVector4 Rotation;
+		GetPieceInsertPosition(view, Position, Rotation);
+
+		lcVector3 Points[8] =
+		{
+			lcVector3(m_pCurPiece->m_fDimensions[0], m_pCurPiece->m_fDimensions[1], m_pCurPiece->m_fDimensions[5]),
+			lcVector3(m_pCurPiece->m_fDimensions[3], m_pCurPiece->m_fDimensions[1], m_pCurPiece->m_fDimensions[5]),
+			lcVector3(m_pCurPiece->m_fDimensions[0], m_pCurPiece->m_fDimensions[1], m_pCurPiece->m_fDimensions[2]),
+			lcVector3(m_pCurPiece->m_fDimensions[3], m_pCurPiece->m_fDimensions[4], m_pCurPiece->m_fDimensions[5]),
+			lcVector3(m_pCurPiece->m_fDimensions[3], m_pCurPiece->m_fDimensions[4], m_pCurPiece->m_fDimensions[2]),
+			lcVector3(m_pCurPiece->m_fDimensions[0], m_pCurPiece->m_fDimensions[4], m_pCurPiece->m_fDimensions[2]),
+			lcVector3(m_pCurPiece->m_fDimensions[0], m_pCurPiece->m_fDimensions[4], m_pCurPiece->m_fDimensions[5]),
+			lcVector3(m_pCurPiece->m_fDimensions[3], m_pCurPiece->m_fDimensions[1], m_pCurPiece->m_fDimensions[2])
+		};
+
+		lcMatrix44 ModelWorld = lcMatrix44FromAxisAngle(lcVector3(Rotation[0], Rotation[1], Rotation[2]), Rotation[3] * LC_DTOR);
+		ModelWorld.SetTranslation(Position);
+
+		for (int i = 0; i < 8; i++)
+		{
+			lcVector3 Point = lcMul31(Points[i], ModelWorld);
+
+			if (Point[0] < BoundingBox[0]) BoundingBox[0] = Point[0];
+			if (Point[1] < BoundingBox[1]) BoundingBox[1] = Point[1];
+			if (Point[2] < BoundingBox[2]) BoundingBox[2] = Point[2];
+			if (Point[0] > BoundingBox[3]) BoundingBox[3] = Point[0];
+			if (Point[1] > BoundingBox[4]) BoundingBox[4] = Point[1];
+			if (Point[2] > BoundingBox[5]) BoundingBox[5] = Point[2];
+		}
+	}
+
+	return true;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -2246,8 +1928,6 @@ void Project::CreateImages(Image* images, int width, int height, lcStep from, lc
 
 	if (!hilite)
 		ClearSelection(false);
-
-	RenderInitialize();
 
 	for (lcStep i = from; i <= to; i++)
 	{
@@ -4881,16 +4561,8 @@ void Project::HandleCommand(LC_COMMANDS id)
 		} break;
 
 		case LC_VIEW_PREFERENCES:
-		{
 			g_App->ShowPreferencesDialog();
-
-			const lcArray<View*> Views = gMainWindow->GetViews();
-			for (int i = 0; i < Views.GetSize (); i++)
-			{
-				Views[i]->MakeCurrent();
-				RenderInitialize(); // TODO: get rid of RenderInitialize(), most of it can be done once per frame
-			}
-		} break;
+			break;
 
 		case LC_VIEW_ZOOM_IN:
 		{
@@ -6707,7 +6379,7 @@ void Project::UpdateRollTool(lcCamera* Camera, float Mouse)
 
 void Project::ZoomRegionToolClicked(lcCamera* Camera, const lcVector3* Points, float RatioX, float RatioY)
 {
-	Camera->ZoomRegion(Points, mCurrentStep, gMainWindow->GetAddKeys(), RatioX, RatioY);
+	Camera->ZoomRegion(Points, RatioX, RatioY, mCurrentStep, gMainWindow->GetAddKeys());
 
 	gMainWindow->UpdateFocusObject(GetFocusObject());
 	gMainWindow->UpdateAllViews();

@@ -21,6 +21,11 @@ class lcMainWindow : public lcBaseWindow
 		return mTool;
 	}
 
+	lcTransformType GetTransformType() const
+	{
+		return mTransformType;
+	}
+
 	bool GetAddKeys() const
 	{
 		return mAddKeys;
@@ -42,6 +47,7 @@ class lcMainWindow : public lcBaseWindow
 	void UpdateAllViews();
 
 	void SetTool(lcTool Tool);
+	void SetTransformType(lcTransformType TransformType);
 	void SetColorIndex(int ColorIndex);
 	void Close();
 
@@ -65,7 +71,6 @@ class lcMainWindow : public lcBaseWindow
 	void UpdateLockSnap(lcuint32 Snap);
 	void UpdateSnap();
 	void UpdateUndoRedo(const char* UndoText, const char* RedoText);
-	void UpdateTransformType(int NewType);
 	void UpdateCurrentCamera(int CameraIndex);
 	void UpdatePerspective();
 	void UpdateCameraMenu();
@@ -87,6 +92,7 @@ protected:
 
 	bool mAddKeys;
 	lcTool mTool;
+	lcTransformType mTransformType;
 };
 
 extern class lcMainWindow* gMainWindow;

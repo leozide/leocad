@@ -10,6 +10,7 @@ lcMainWindow::lcMainWindow()
 {
 	mActiveView = NULL;
 	mPreviewWidget = NULL;
+	mTransformType = LC_TRANSFORM_RELATIVE_TRANSLATION;
 
 	mAddKeys = false;
 

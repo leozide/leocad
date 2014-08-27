@@ -2142,5 +2142,5 @@ void View::OnMouseMove()
 
 void View::OnMouseWheel(float Direction)
 {
-	mProject->OnMouseWheel(this, Direction);
+	mProject->ZoomActiveView((int)((mInputState.Control ? 100 : 10) * Direction));
 }

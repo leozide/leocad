@@ -15,6 +15,14 @@
 #define LC_SEL_FOCUS_GROUPED 0x40 // Focused piece is grouped
 #define LC_SEL_CAN_GROUP     0x80 // Can make a new group
 
+enum lcTransformType
+{
+	LC_TRANSFORM_ABSOLUTE_TRANSLATION,
+	LC_TRANSFORM_RELATIVE_TRANSLATION,
+	LC_TRANSFORM_ABSOLUTE_ROTATION,
+	LC_TRANSFORM_RELATIVE_ROTATION
+};
+
 enum lcBackgroundType
 {
 	LC_BACKGROUND_SOLID,

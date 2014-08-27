@@ -31,7 +31,6 @@
 
 Project::Project()
 {
-	mTransformType = LC_TRANSFORM_RELATIVE_TRANSLATION;
 	m_pTerrain = new Terrain();
 	m_pBackground = new lcTexture();
 	memset(&mSearchOptions, 0, sizeof(mSearchOptions));
@@ -55,7 +54,7 @@ void Project::UpdateInterface()
 	gMainWindow->SetTool(gMainWindow->GetTool());
 
 	gMainWindow->UpdateFocusObject(GetFocusObject());
-	gMainWindow->UpdateTransformType(mTransformType);
+	gMainWindow->SetTransformType(gMainWindow->GetTransformType());
 	gMainWindow->UpdateLockSnap(m_nSnap);
 	gMainWindow->UpdateSnap();
 	gMainWindow->UpdateCameraMenu();
@@ -5043,15 +5042,14 @@ void Project::HandleCommand(LC_COMMANDS id)
 		} break;
 
 		case LC_EDIT_TRANSFORM:
-			TransformSelectedObjects((LC_TRANSFORM_TYPE)mTransformType, gMainWindow->GetTransformAmount());
+			TransformSelectedObjects(gMainWindow->GetTransformType(), gMainWindow->GetTransformAmount());
 			break;
 
 		case LC_EDIT_TRANSFORM_ABSOLUTE_TRANSLATION:
 		case LC_EDIT_TRANSFORM_RELATIVE_TRANSLATION:
 		case LC_EDIT_TRANSFORM_ABSOLUTE_ROTATION:
 		case LC_EDIT_TRANSFORM_RELATIVE_ROTATION:
-			mTransformType = id - LC_EDIT_TRANSFORM_ABSOLUTE_TRANSLATION;
-			gMainWindow->UpdateTransformType(mTransformType);
+			gMainWindow->SetTransformType((lcTransformType)(id - LC_EDIT_TRANSFORM_ABSOLUTE_TRANSLATION));
 			break;
 
 		case LC_EDIT_ACTION_SELECT:
@@ -5761,7 +5759,7 @@ bool Project::RotateSelectedObjects(lcVector3& Delta, lcVector3& Remainder, bool
 	return true;
 }
 
-void Project::TransformSelectedObjects(LC_TRANSFORM_TYPE Type, const lcVector3& Transform)
+void Project::TransformSelectedObjects(lcTransformType Type, const lcVector3& Transform)
 {
 	switch (Type)
 	{
@@ -6386,11 +6384,6 @@ void Project::ZoomRegionToolClicked(lcCamera* Camera, const lcVector3* Points, f
 
 	if (!Camera->IsSimple())
 		CheckPoint("Zoom");
-}
-
-void Project::OnMouseWheel(View* view, float Direction)
-{
-	ZoomActiveView((int)((view->mInputState.Control ? 100 : 10) * Direction));
 }
 
 // Indicates if the existing string represents an instance of the candidate

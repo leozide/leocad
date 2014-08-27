@@ -38,14 +38,6 @@
 //#define LC_HTML_HTMLEXT         0x40
 //#define LC_HTML_LISTID          0x80
 
-enum LC_TRANSFORM_TYPE
-{
-	LC_TRANSFORM_ABSOLUTE_TRANSLATION,
-	LC_TRANSFORM_RELATIVE_TRANSLATION,
-	LC_TRANSFORM_ABSOLUTE_ROTATION,
-	LC_TRANSFORM_RELATIVE_ROTATION
-};
-
 enum LC_MOUSE_TRACK
 {
 	LC_TRACK_NONE,
@@ -183,7 +175,7 @@ public:
 	bool GetFocusPosition(lcVector3& Position) const;
 	bool AnyObjectsSelected(bool PiecesOnly) const;
 	lcGroup* AddGroup(lcGroup* Parent);
-	void TransformSelectedObjects(LC_TRANSFORM_TYPE Type, const lcVector3& Transform);
+	void TransformSelectedObjects(lcTransformType Type, const lcVector3& Transform);
 	void ModifyObject(lcObject* Object, lcObjectProperty Property, void* Value);
 	void ZoomActiveView(int Amount);
 
@@ -230,13 +222,11 @@ protected:
 	void RemoveEmptyGroups();
 
 public:
-	void OnMouseWheel(View* view, float Direction);
 	void HandleCommand(LC_COMMANDS id);
 
 	lcuint32 m_nSnap;
 
 protected:
-	int mTransformType;
 	PieceInfo* m_pCurPiece;
 
 	lcuint16 m_nMoveSnap;

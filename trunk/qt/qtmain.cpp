@@ -542,12 +542,14 @@ void lcMainWindow::UpdateUndoRedo(const char* UndoText, const char* RedoText)
 		window->updateUndoRedo(UndoText, RedoText);
 }
 
-void lcMainWindow::UpdateTransformType(int NewType)
+void lcMainWindow::SetTransformType(lcTransformType TransformType)
 {
 	lcQMainWindow* window = (lcQMainWindow*)mHandle;
 
+	mTransformType = TransformType;
+
 	if (window)
-		window->updateTransformType(NewType);
+		window->updateTransformType(TransformType);
 }
 
 void lcMainWindow::UpdateCameraMenu()

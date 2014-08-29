@@ -122,8 +122,6 @@ public:
 protected:
 	void RegisterKeys(float *values[], LC_OBJECT_KEY_INFO* info, int count);
 	void CalculateKeys(lcStep Step);
-
-private:
 	void RemoveKeys();
 
 	LC_OBJECT_KEY* m_pInstructionKeys;

@@ -38,6 +38,53 @@ void lcModelProperties::SaveDefaults()
 	lcSetProfileInt(LC_PROFILE_DEFAULT_AMBIENT_COLOR, lcColorFromVector3(mAmbientColor));
 }
 
+QJsonObject lcModelProperties::Save()
+{
+	QJsonObject Properties;
+
+	if (!mName.IsEmpty())
+		Properties[QStringLiteral("Name")] = QString::fromLatin1(mName.Buffer());
+	if (!mAuthor.IsEmpty())
+		Properties[QStringLiteral("Author")] = QString::fromLatin1(mAuthor.Buffer());
+	if (!mDescription.IsEmpty())
+		Properties[QStringLiteral("Description")] = QString::fromLatin1(mDescription.Buffer());
+	if (!mComments.IsEmpty())
+		Properties[QStringLiteral("Comments")] = QString::fromLatin1(mComments.Buffer());
+
+	switch (mBackgroundType)
+	{
+	case LC_BACKGROUND_SOLID:
+		Properties[QStringLiteral("Background")] = QStringLiteral("Solid");
+		break;
+	case LC_BACKGROUND_GRADIENT:
+		Properties[QStringLiteral("Background")] = QStringLiteral("Gradient");
+		break;
+	case LC_BACKGROUND_IMAGE:
+		Properties[QStringLiteral("Background")] = QStringLiteral("Image");
+		break;
+	}
+
+	Properties[QStringLiteral("BackgroundSolidColor")] = QStringLiteral("%1 %2 %3").arg(QString::number(mBackgroundSolidColor[0]), QString::number(mBackgroundSolidColor[1]), QString::number(mBackgroundSolidColor[2]));
+	Properties[QStringLiteral("BackgroundGradientColor1")] = QStringLiteral("%1 %2 %3").arg(QString::number(mBackgroundGradientColor1[0]), QString::number(mBackgroundGradientColor1[1]), QString::number(mBackgroundGradientColor1[2]));
+	Properties[QStringLiteral("BackgroundGradientColor2")] = QStringLiteral("%1 %2 %3").arg(QString::number(mBackgroundGradientColor2[0]), QString::number(mBackgroundGradientColor2[1]), QString::number(mBackgroundGradientColor2[2]));
+	if (!mBackgroundImage.IsEmpty())
+		Properties[QStringLiteral("BackgroundImage")] = QString::fromLatin1(mBackgroundImage.Buffer());
+	if (mBackgroundImageTile)
+		Properties[QStringLiteral("BackgroundImageTile")] = QStringLiteral("true");
+
+	if (mFogEnabled)
+		Properties[QStringLiteral("FogEnabled")] = QStringLiteral("true");
+	Properties[QStringLiteral("FogDensity")] = QString::number(mFogDensity);
+	Properties[QStringLiteral("FogColor")] = QStringLiteral("%1 %2 %3").arg(QString::number(mBackgroundSolidColor[0]), QString::number(mBackgroundSolidColor[1]), QString::number(mBackgroundSolidColor[2]));
+	Properties[QStringLiteral("AmbientColor")] = QStringLiteral("%1 %2 %3").arg(QString::number(mBackgroundSolidColor[0]), QString::number(mBackgroundSolidColor[1]), QString::number(mBackgroundSolidColor[2]));
+
+	return Properties;
+}
+
+void lcModelProperties::Load(QJsonObject Properties)
+{
+}
+
 lcModel::lcModel()
 {
 	mSavedHistory = NULL;
@@ -45,6 +92,38 @@ lcModel::lcModel()
 
 lcModel::~lcModel()
 {
+}
+
+QJsonObject lcModel::Save()
+{
+	QJsonObject Model;
+
+	Model["Properties"] = mProperties.Save();
+	Model["CurrentStep"] = QString::number(mCurrentStep);
+
+	QJsonArray Pieces;
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+		Pieces.append(mPieces[PieceIdx]->Save());
+	Model["Pieces"] = Pieces;
+
+	QJsonArray Cameras;
+	for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
+		Cameras.append(mCameras[CameraIdx]->Save());
+	Model["Cameras"] = Cameras;
+
+	QJsonArray Lights;
+	for (int LightIdx = 0; LightIdx < mLights.GetSize(); LightIdx++)
+		Lights.append(mLights[LightIdx]->Save());
+	Model["Lights"] = Lights;
+
+//	lcArray<lcGroup*> mGroups;
+
+	return Model;
+}
+
+void lcModel::Load(QJsonObject Model)
+{
+
 }
 
 lcStep lcModel::GetLastStep() const

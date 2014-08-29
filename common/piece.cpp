@@ -56,6 +56,58 @@ lcPiece::~lcPiece()
 		mPieceInfo->Release();
 }
 
+QJsonObject lcPiece::Save()
+{
+	QJsonObject Piece;
+
+	Piece[QStringLiteral("ID")] = QString::fromLatin1(mPieceInfo->m_strName);
+	Piece[QStringLiteral("Color")] = QString::number(mColorCode);
+	Piece[QStringLiteral("Step")] = QString::number(mStepShow);
+	if (mStepHide != LC_STEP_MAX)
+		Piece[QStringLiteral("StepHide")] = QString::number(mStepHide);
+	Piece[QStringLiteral("Name")] = QString::fromLatin1(m_strName); // todo: replace with qstring
+	if (IsHidden())
+		Piece[QStringLiteral("Hidden")] = QStringLiteral("true");
+
+	QJsonArray PositionKeys, RotationKeys;
+
+	for (LC_OBJECT_KEY* Node = m_pInstructionKeys; Node; Node = Node->next)
+	{
+		QJsonObject Key;
+
+		Key[QStringLiteral("Step")] = QString::number(Node->Step);
+
+		if (Node->type == LC_PK_POSITION)
+		{
+			Key["Value"] = QStringLiteral("%1 %2 %3").arg(QString::number(Node->param[0]), QString::number(Node->param[1]), QString::number(Node->param[2]));
+			PositionKeys.append(Key);
+		}
+		else if (Node->type == LC_PK_ROTATION)
+		{
+			Key["Value"] = QStringLiteral("%1 %2 %3 %4").arg(QString::number(Node->param[0]), QString::number(Node->param[1]), QString::number(Node->param[2]), QString::number(Node->param[3]));
+			RotationKeys.append(Key);
+		}
+	}
+
+	if (PositionKeys.size() == 1 && RotationKeys.size() == 1)
+	{
+		Piece[QStringLiteral("Position")] = PositionKeys.first().toObject()["Value"].toString();
+		Piece[QStringLiteral("Rotation")] = RotationKeys.first().toObject()["Value"].toString();
+	}
+	else
+	{
+		Piece["PositionKeys"] = PositionKeys;
+		Piece["RotationKeys"] = RotationKeys;
+	}
+
+	return Piece;
+}
+
+void lcPiece::Load(QJsonObject Piece)
+{
+
+}
+
 /////////////////////////////////////////////////////////////////////////////
 // Piece save/load
 

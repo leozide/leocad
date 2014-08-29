@@ -95,6 +95,9 @@ public:
 		return lcVector3(0.0f, 0.0f, 0.0f);
 	}
 
+	QJsonObject Save();
+	void Load(QJsonObject Piece);
+
 	virtual void RayTest(lcObjectRayTest& ObjectRayTest) const;
 	virtual void BoxTest(lcObjectBoxTest& ObjectBoxTest) const;
 

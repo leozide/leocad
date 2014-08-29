@@ -102,6 +102,57 @@ void lcCamera::CreateName(const lcArray<lcCamera*>& Cameras)
 	sprintf(m_strName, "%s %d", Prefix, max+1);
 }
 
+QJsonObject lcCamera::Save()
+{
+	QJsonObject Camera;
+
+	Camera[QStringLiteral("FOV")] = QString::number(m_fovy);
+	Camera[QStringLiteral("ZNear")] = QString::number(m_zNear);
+	Camera[QStringLiteral("ZFar")] = QString::number(m_zFar);
+	Camera[QStringLiteral("Name")] = QString::fromLatin1(m_strName); // todo: replace with qstring
+	if (IsHidden())
+		Camera[QStringLiteral("Hidden")] = QStringLiteral("true");
+	if (IsOrtho())
+		Camera[QStringLiteral("Orthographic")] = QStringLiteral("true");
+
+	QJsonArray PositionKeys, TargetPositionKeys, UpVectorKeys;
+
+	for (LC_OBJECT_KEY* Node = m_pInstructionKeys; Node; Node = Node->next)
+	{
+		QJsonObject Key;
+
+		Key[QStringLiteral("Step")] = QString::number(Node->Step);
+		Key["Value"] = QStringLiteral("%1 %2 %3").arg(QString::number(Node->param[0]), QString::number(Node->param[1]), QString::number(Node->param[2]));
+
+		if (Node->type == LC_CK_EYE)
+			PositionKeys.append(Key);
+		else if (Node->type == LC_CK_TARGET)
+			TargetPositionKeys.append(Key);
+		else if (Node->type == LC_CK_UP)
+			UpVectorKeys.append(Key);
+	}
+
+	if (PositionKeys.size() == 1 && TargetPositionKeys.size() == 1 && UpVectorKeys.size() == 1)
+	{
+		Camera[QStringLiteral("Position")] = PositionKeys.first().toObject()["Value"].toString();
+		Camera[QStringLiteral("TargetPosition")] = TargetPositionKeys.first().toObject()["Value"].toString();
+		Camera[QStringLiteral("UpVector")] = UpVectorKeys.first().toObject()["Value"].toString();
+	}
+	else
+	{
+		Camera["PositionKeys"] = PositionKeys;
+		Camera["TargetPositionKeys"] = TargetPositionKeys;
+		Camera["UpVectorKeys"] = UpVectorKeys;
+	}
+
+	return Camera;
+}
+
+void lcCamera::Load(QJsonObject Camera)
+{
+
+}
+
 /////////////////////////////////////////////////////////////////////////////
 // Camera save/load
 

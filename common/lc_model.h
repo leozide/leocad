@@ -54,6 +54,9 @@ public:
 		return true;
 	}
 
+	QJsonObject Save();
+	void Load(QJsonObject Properties);
+
 	String mName;
 	String mAuthor;
 	String mDescription;
@@ -133,6 +136,9 @@ public:
 	{
 		return mCurrentStep;
 	}
+
+	QJsonObject Save();
+	void Load(QJsonObject Model);
 
 	lcObject* GetFocusObject() const;
 	void FocusOrDeselectObject(const lcObjectSection& ObjectSection);

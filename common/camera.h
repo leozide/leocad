@@ -228,6 +228,9 @@ public:
 		return lcVector3(0.0f, 0.0f, 0.0f);
 	}
 
+	QJsonObject Save();
+	void Load(QJsonObject Camera);
+
 
 
 
@@ -242,6 +245,8 @@ public:
 		{ return m_nType < LC_CAMERA_MAIN; }
 	bool IsVisible() const
 		{ return (mState & LC_CAMERA_HIDDEN) == 0; }
+	bool IsHidden() const
+		{ return (mState & LC_CAMERA_HIDDEN) != 0; }
 
 public:
 	virtual void RayTest(lcObjectRayTest& ObjectRayTest) const;

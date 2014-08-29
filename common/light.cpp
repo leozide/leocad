@@ -84,6 +84,16 @@ lcLight::~lcLight()
 {
 }
 
+QJsonObject lcLight::Save()
+{
+	return QJsonObject();
+}
+
+void lcLight::Load(QJsonObject Light)
+{
+
+}
+
 bool lcLight::FileLoad(lcFile& file)
 {
 	return true;

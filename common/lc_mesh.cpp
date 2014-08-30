@@ -46,8 +46,8 @@ void lcMesh::CreateBox()
 {
 	Create(2, 8, 0, 36 + 24);
 
-	lcVector3 Min(-0.4f, -0.4f, -0.96f);
-	lcVector3 Max(0.4f, 0.4f, 0.16f);
+	lcVector3 Min(-10.0f, -10.0f, -24.0f);
+	lcVector3 Max(10.0f, 10.0f, 4.0f);
 
 	float* Verts = (float*)mVertexBuffer.mData;
 	lcuint16* Indices = (lcuint16*)mIndexBuffer.mData;
@@ -302,9 +302,9 @@ void lcMesh::ExportPOVRay(lcFile& File, const char* MeshName, const char* ColorT
 		for (int Idx = 0; Idx < Section->NumIndices; Idx += 3)
 		{
 			sprintf(Line, "  triangle { <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f> }\n",
-				-Verts[Indices[Idx+0]*3+1], -Verts[Indices[Idx+0]*3], Verts[Indices[Idx+0]*3+2],
-				-Verts[Indices[Idx+1]*3+1], -Verts[Indices[Idx+1]*3], Verts[Indices[Idx+1]*3+2],
-				-Verts[Indices[Idx+2]*3+1], -Verts[Indices[Idx+2]*3], Verts[Indices[Idx+2]*3+2]);
+				-Verts[Indices[Idx+0]*3+1] / 25.0f, -Verts[Indices[Idx+0]*3] / 25.0f, Verts[Indices[Idx+0]*3+2] / 25.0f,
+				-Verts[Indices[Idx+1]*3+1] / 25.0f, -Verts[Indices[Idx+1]*3] / 25.0f, Verts[Indices[Idx+1]*3+2] / 25.0f,
+				-Verts[Indices[Idx+2]*3+1] / 25.0f, -Verts[Indices[Idx+2]*3] / 25.0f, Verts[Indices[Idx+2]*3+2] / 25.0f);
 			File.WriteLine(Line);
 		}
 

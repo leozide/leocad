@@ -946,9 +946,9 @@ void MinifigWizard::ParseSettings(lcFile& Settings)
 			OffsetMatrix[1] =  Mat[6];
 			OffsetMatrix[9] = -Mat[7];
 			OffsetMatrix[5] =  Mat[8];
-			OffsetMatrix[12] =  Mat[9] / 25.0f;
-			OffsetMatrix[14] = -Mat[10] / 25.0f;
-			OffsetMatrix[13] =  Mat[11] / 25.0f;
+			OffsetMatrix[12] =  Mat[9];
+			OffsetMatrix[14] = -Mat[10];
+			OffsetMatrix[13] =  Mat[11];
 
 			lcMinifigPieceInfo MinifigInfo;
 			strncpy(MinifigInfo.Description, DescriptionStart, sizeof(MinifigInfo.Description));
@@ -1007,7 +1007,7 @@ void MinifigWizard::OnDraw()
 	Eye = lcMul30(Eye, lcMatrix44RotationX(-m_RotateX * LC_DTOR));
 	Eye = lcMul30(Eye, lcMatrix44RotationZ(-m_RotateZ * LC_DTOR));
 
-	lcMatrix44 Projection = lcMatrix44Perspective(30.0f, Aspect, 1.0f, 100.0f);
+	lcMatrix44 Projection = lcMatrix44Perspective(30.0f, Aspect, 1.0f, 2500.0f);
 	mContext->SetProjectionMatrix(Projection);
 
 	lcMatrix44 ViewMatrix;
@@ -1149,9 +1149,9 @@ void MinifigWizard::Calculate()
 	bool SkeletonTorso = Parts[LC_MFW_BODY] && !strcmp(Parts[LC_MFW_BODY]->m_strName, "6260");
 
 	if (Parts[LC_MFW_BODY3])
-		Root = lcMatrix44Translation(lcVector3(0, 0, 2.96f));
+		Root = lcMatrix44Translation(lcVector3(0, 0, 74.0f));
 	else
-		Root = lcMatrix44Translation(lcVector3(0, 0, 2.88f));
+		Root = lcMatrix44Translation(lcVector3(0, 0, 72.0f));
 	Matrices[LC_MFW_BODY] = lcMul(mSettings[LC_MFW_BODY][GetSelectionIndex(LC_MFW_BODY)].Offset, Root);
 
 	if (Parts[LC_MFW_NECK])
@@ -1163,7 +1163,7 @@ void MinifigWizard::Calculate()
 	if (Parts[LC_MFW_HEAD])
 	{
 		Mat = lcMatrix44RotationZ(-LC_DTOR * Angles[LC_MFW_HEAD]);
-		Mat.SetTranslation(lcVector3(0.0f, 0.0f, 0.96f + HeadOffset));
+		Mat.SetTranslation(lcVector3(0.0f, 0.0f, 24.0f + HeadOffset));
 		Mat = lcMul(mSettings[LC_MFW_HEAD][GetSelectionIndex(LC_MFW_HEAD)].Offset, Mat);
 		Matrices[LC_MFW_HEAD] = lcMul(Mat, Root);
 	}
@@ -1190,7 +1190,7 @@ void MinifigWizard::Calculate()
 			Mat2 = lcMatrix44Identity();
 		else
 			Mat2 = lcMatrix44RotationY(-LC_DTOR * 9.791f);
-		Mat2.SetTranslation(lcVector3(0.62f, 0, -0.32f));
+		Mat2.SetTranslation(lcVector3(15.5f, 0, -8.0f));
 
 		Mat = lcMul(mSettings[LC_MFW_RARM][GetSelectionIndex(LC_MFW_RARM)].Offset, Mat);
 		Mat = lcMul(Mat, Mat2);
@@ -1203,14 +1203,14 @@ void MinifigWizard::Calculate()
 		Mat2 = lcMatrix44RotationX(LC_DTOR * 45);
 		Mat = lcMul(mSettings[LC_MFW_RHAND][GetSelectionIndex(LC_MFW_RHAND)].Offset, Mat);
 		Mat = lcMul(Mat, Mat2);
-		Mat.SetTranslation(lcVector3(0.2f, -0.4f, -0.76f));
+		Mat.SetTranslation(lcVector3(5.0f, -10.0f, -19.0f));
 		Matrices[LC_MFW_RHAND] = lcMul(Mat, Matrices[LC_MFW_RARM]);
 	}
 
 	if (Parts[LC_MFW_RHANDA])
 	{
 		Mat = lcMatrix44RotationZ(LC_DTOR * Angles[LC_MFW_RHANDA]);
-		Mat.SetTranslation(lcVector3(0, -0.4f, 0));
+		Mat.SetTranslation(lcVector3(0, -10.0f, 0));
 		Mat = lcMul(mSettings[LC_MFW_RHANDA][GetSelectionIndex(LC_MFW_RHANDA)].Offset, Mat);
 		Matrices[LC_MFW_RHANDA] = lcMul(Mat, Matrices[LC_MFW_RHAND]);
 	}
@@ -1223,7 +1223,7 @@ void MinifigWizard::Calculate()
 			Mat2 = lcMatrix44Identity();
 		else
 			Mat2 = lcMatrix44RotationY(LC_DTOR * 9.791f);
-		Mat2.SetTranslation(lcVector3(-0.62f, 0.0f, -0.32f));
+		Mat2.SetTranslation(lcVector3(-15.5f, 0.0f, -8.0f));
 
 		Mat = lcMul(mSettings[LC_MFW_LARM][GetSelectionIndex(LC_MFW_LARM)].Offset, Mat);
 		Mat = lcMul(Mat, Mat2);
@@ -1236,14 +1236,14 @@ void MinifigWizard::Calculate()
 		Mat2 = lcMatrix44RotationX(LC_DTOR * 45);
 		Mat = lcMul(mSettings[LC_MFW_LHAND][GetSelectionIndex(LC_MFW_LHAND)].Offset, Mat);
 		Mat = lcMul(Mat, Mat2);
-		Mat.SetTranslation(lcVector3(-0.2f, -0.4f, -0.76f));
+		Mat.SetTranslation(lcVector3(-5.0f, -10.0f, -19.0f));
 		Matrices[LC_MFW_LHAND] = lcMul(Mat, Matrices[LC_MFW_LARM]);
 	}
 
 	if (Parts[LC_MFW_LHANDA])
 	{
 		Mat = lcMatrix44RotationZ(LC_DTOR * Angles[LC_MFW_LHANDA]);
-		Mat.SetTranslation(lcVector3(0, -0.4f, 0));
+		Mat.SetTranslation(lcVector3(0, -10.0f, 0));
 		Mat = lcMul(mSettings[LC_MFW_LHANDA][GetSelectionIndex(LC_MFW_LHANDA)].Offset, Mat);
 		Matrices[LC_MFW_LHANDA] = lcMul(Mat, Matrices[LC_MFW_LHAND]);
 	}
@@ -1251,7 +1251,7 @@ void MinifigWizard::Calculate()
 	if (Parts[LC_MFW_BODY2])
 	{
 		Mat = lcMatrix44Identity();
-		Mat.SetTranslation(lcVector3(0, 0, -1.28f));
+		Mat.SetTranslation(lcVector3(0, 0, -32.0f));
 		Mat = lcMul(mSettings[LC_MFW_BODY2][GetSelectionIndex(LC_MFW_BODY2)].Offset, Mat);
 		Matrices[LC_MFW_BODY2] = lcMul(Mat, Root);
 	}
@@ -1259,7 +1259,7 @@ void MinifigWizard::Calculate()
 	if (Parts[LC_MFW_BODY3])
 	{
 		Mat = lcMatrix44Identity();
-		Mat.SetTranslation(lcVector3(0, 0, -1.28f));
+		Mat.SetTranslation(lcVector3(0, 0, -32.0f));
 		Mat = lcMul(mSettings[LC_MFW_BODY3][GetSelectionIndex(LC_MFW_BODY3)].Offset, Mat);
 		Matrices[LC_MFW_BODY3] = lcMul(Mat, Root);
 	}
@@ -1267,14 +1267,14 @@ void MinifigWizard::Calculate()
 	if (Parts[LC_MFW_RLEG])
 	{
 		Mat = lcMatrix44RotationX(-LC_DTOR * Angles[LC_MFW_RLEG]);
-		Mat.SetTranslation(lcVector3(0, 0, -1.76f));
+		Mat.SetTranslation(lcVector3(0, 0, -44.0f));
 		Mat = lcMul(mSettings[LC_MFW_RLEG][GetSelectionIndex(LC_MFW_RLEG)].Offset, Mat);
 		Matrices[LC_MFW_RLEG] = lcMul(Mat, Root);
 	}
 
 	if (Parts[LC_MFW_RLEGA])
 	{
-		lcVector3 Center(-0.4f, -0.04f, -1.12f);
+		lcVector3 Center(-10.0f, -1.0f, -28.0f);
 		Mat = lcMatrix44RotationZ(LC_DTOR * Angles[LC_MFW_RLEGA]);
 		Mat2 = mSettings[LC_MFW_RLEGA][GetSelectionIndex(LC_MFW_RLEGA)].Offset;
 		Mat2.SetTranslation(lcMul31(-Center, Mat2));
@@ -1286,14 +1286,14 @@ void MinifigWizard::Calculate()
 	if (Parts[LC_MFW_LLEG])
 	{
 		Mat = lcMatrix44RotationX(-LC_DTOR * Angles[LC_MFW_LLEG]);
-		Mat.SetTranslation(lcVector3(0, 0, -1.76f));
+		Mat.SetTranslation(lcVector3(0, 0, -44.0f));
 		Mat = lcMul(mSettings[LC_MFW_LLEG][GetSelectionIndex(LC_MFW_LLEG)].Offset, Mat);
 		Matrices[LC_MFW_LLEG] = lcMul(Mat, Root);
 	}
 
 	if (Parts[LC_MFW_LLEGA])
 	{
-		lcVector3 Center(0.4f, -0.04f, -1.12f);
+		lcVector3 Center(10.0f, -1.0f, -28.0f);
 		Mat = lcMatrix44RotationZ(LC_DTOR * Angles[LC_MFW_LLEGA]);
 		Mat2 = mSettings[LC_MFW_LLEGA][GetSelectionIndex(LC_MFW_LLEGA)].Offset;
 		Mat2.SetTranslation(lcMul31(-Center, Mat2));

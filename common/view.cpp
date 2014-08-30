@@ -881,10 +881,10 @@ void View::DrawGrid()
 
 	if (mProject->GetPiecesBoundingBox(this, BoundingBox))
 	{
-		MinX = (int)(floorf(BoundingBox[0] / (0.8f * Spacing))) - 1;
-		MinY = (int)(floorf(BoundingBox[1] / (0.8f * Spacing))) - 1;
-		MaxX = (int)(ceilf(BoundingBox[3] / (0.8f * Spacing))) + 1;
-		MaxY = (int)(ceilf(BoundingBox[4] / (0.8f * Spacing))) + 1;
+		MinX = (int)(floorf(BoundingBox[0] / (20.0f * Spacing))) - 1;
+		MinY = (int)(floorf(BoundingBox[1] / (20.0f * Spacing))) - 1;
+		MaxX = (int)(ceilf(BoundingBox[3] / (20.0f * Spacing))) + 1;
+		MaxY = (int)(ceilf(BoundingBox[4] / (20.0f * Spacing))) + 1;
 
 		MinX = lcMin(MinX, -2);
 		MinY = lcMin(MinY, -2);
@@ -901,10 +901,10 @@ void View::DrawGrid()
 
 	if (Preferences.mDrawGridStuds)
 	{
-		float Left = MinX * 0.8f * Spacing;
-		float Right = MaxX * 0.8f * Spacing;
-		float Top = MinY * 0.8f * Spacing;
-		float Bottom = MaxY * 0.8f * Spacing;
+		float Left = MinX * 20.0f * Spacing;
+		float Right = MaxX * 20.0f * Spacing;
+		float Top = MinY * 20.0f * Spacing;
+		float Bottom = MaxY * 20.0f * Spacing;
 		float Z = 0;
 		float U = (MaxX - MinX) * Spacing;
 		float V = (MaxY - MinY) * Spacing;
@@ -964,7 +964,7 @@ void View::DrawGrid()
 		int NumVerts = 2 * (MaxX - MinX + MaxY - MinY + 2);
 		float* Verts = (float*)malloc(NumVerts * sizeof(float[3]));
 		float* Vert = Verts;
-		float LineSpacing = Spacing * 0.8f;
+		float LineSpacing = Spacing * 20.0f;
 
 		for (int Step = MinX; Step < MaxX + 1; Step++)
 		{

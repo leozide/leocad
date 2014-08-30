@@ -52,7 +52,7 @@ void PiecePreview::OnDraw()
 	else
 	{
 		glMatrixMode(GL_PROJECTION);
-		glLoadMatrixf(lcMatrix44Perspective(30.0f, aspect, 1.0f, 100.0f));
+		glLoadMatrixf(lcMatrix44Perspective(30.0f, aspect, 1.0f, 2500.0f));
 		glMatrixMode(GL_MODELVIEW);
 		glLoadMatrixf(lcMatrix44LookAt(Eye * m_Distance, m_PieceInfo->GetCenter(), lcVector3(0, 0, 1)));
 	}

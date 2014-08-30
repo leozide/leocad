@@ -13,7 +13,7 @@
 #include <ctype.h>
 #include <locale.h>
 
-#define LC_LIBRARY_CACHE_VERSION   0x0102
+#define LC_LIBRARY_CACHE_VERSION   0x0103
 #define LC_LIBRARY_CACHE_ARCHIVE   0x0001
 #define LC_LIBRARY_CACHE_DIRECTORY 0x0002
 
@@ -875,7 +875,7 @@ bool lcPiecesLibrary::LoadPiece(PieceInfo* Info)
 		const lcVector3& SrcPosition = MeshData.mVertices[VertexIdx].Position;
 		lcVector3& DstPosition = DstVertex.Position;
 
-		DstPosition = lcVector3(SrcPosition.x / 25.0f, SrcPosition.z / 25.0f, -SrcPosition.y / 25.0f);
+		DstPosition = lcVector3(SrcPosition.x, SrcPosition.z, -SrcPosition.y);
 
 		Min.x = lcMin(Min.x, DstPosition.x);
 		Min.y = lcMin(Min.y, DstPosition.y);
@@ -895,7 +895,7 @@ bool lcPiecesLibrary::LoadPiece(PieceInfo* Info)
 		const lcVector3& SrcPosition = SrcVertex.Position;
 		lcVector3& DstPosition = DstVertex.Position;
 
-		DstPosition = lcVector3(SrcPosition.x / 25.0f, SrcPosition.z / 25.0f, -SrcPosition.y / 25.0f);
+		DstPosition = lcVector3(SrcPosition.x, SrcPosition.z, -SrcPosition.y);
 		DstVertex.TexCoord = SrcVertex.TexCoord;
 
 		Min.x = lcMin(Min.x, DstPosition.x);
@@ -2065,7 +2065,7 @@ bool lcPiecesLibrary::GeneratePiece(PieceInfo* Info)
 	if (Brick || Plate)
 	{
 		int StudsX, StudsY;
-		float MinZ = Brick ? -0.96f : -0.32f;
+		float MinZ = Brick ? -24.0f : -8.0f;
 
 		sscanf(Info->m_strDescription + 6, "%d x %d", &StudsY, &StudsX);
 
@@ -2074,11 +2074,11 @@ bool lcPiecesLibrary::GeneratePiece(PieceInfo* Info)
 
 		Info->mFlags |= LC_PIECE_HAS_DEFAULT | LC_PIECE_HAS_LINES;
 
-		Info->m_fDimensions[0] = 0.4f * StudsX;
-		Info->m_fDimensions[1] = 0.4f * StudsY;
-		Info->m_fDimensions[2] = 0.16f;
-		Info->m_fDimensions[3] = -0.4f * StudsX;
-		Info->m_fDimensions[4] = -0.4f * StudsY;
+		Info->m_fDimensions[0] = 10.0f * StudsX;
+		Info->m_fDimensions[1] = 10.0f * StudsY;
+		Info->m_fDimensions[2] = 4.0f;
+		Info->m_fDimensions[3] = -10.0f * StudsX;
+		Info->m_fDimensions[4] = -10.0f * StudsY;
 		Info->m_fDimensions[5] = MinZ;
 
 		lcMesh* Mesh = new lcMesh();
@@ -2087,8 +2087,8 @@ bool lcPiecesLibrary::GeneratePiece(PieceInfo* Info)
 		float* Verts = (float*)Mesh->mVertexBuffer.mData;
 		lcuint16* Indices = (lcuint16*)Mesh->mIndexBuffer.mData;
 
-		const lcVector3 OutBoxMin(-0.4f * StudsX, -0.4f * StudsY, MinZ);
-		const lcVector3 OutBoxMax(0.4f * StudsX, 0.4f * StudsY, 0.0f);
+		const lcVector3 OutBoxMin(-10.0f * StudsX, -10.0f * StudsY, MinZ);
+		const lcVector3 OutBoxMax(10.0f * StudsX, 10.0f * StudsY, 0.0f);
 
 		*Verts++ = OutBoxMin[0]; *Verts++ = OutBoxMin[1]; *Verts++ = OutBoxMin[2];
 		*Verts++ = OutBoxMin[0]; *Verts++ = OutBoxMax[1]; *Verts++ = OutBoxMin[2];
@@ -2099,8 +2099,8 @@ bool lcPiecesLibrary::GeneratePiece(PieceInfo* Info)
 		*Verts++ = OutBoxMax[0]; *Verts++ = OutBoxMax[1]; *Verts++ = OutBoxMax[2];
 		*Verts++ = OutBoxMax[0]; *Verts++ = OutBoxMin[1]; *Verts++ = OutBoxMax[2];
 
-		const lcVector3 InBoxMin(-0.4f * StudsX + 0.16f, -0.4f * StudsY + 0.16f, MinZ);
-		const lcVector3 InBoxMax(0.4f * StudsX - 0.16f, 0.4f * StudsY - 0.16f, -0.16f);
+		const lcVector3 InBoxMin(-10.0f * StudsX + 4.0f, -10.0f * StudsY + 4.0f, MinZ);
+		const lcVector3 InBoxMax(10.0f * StudsX - 4.0f, 10.0f * StudsY - 4.0f, -4.0f);
 
 		*Verts++ = InBoxMin[0]; *Verts++ = InBoxMin[1]; *Verts++ = InBoxMin[2];
 		*Verts++ = InBoxMin[0]; *Verts++ = InBoxMax[1]; *Verts++ = InBoxMin[2];
@@ -2115,20 +2115,20 @@ bool lcPiecesLibrary::GeneratePiece(PieceInfo* Info)
 		{
 			for (int y = 0; y < StudsY; y++)
 			{
-				const lcVector3 Center(((float)StudsX / 2.0f - x) * 0.8f - 0.4f, ((float)StudsY / 2.0f - y) * 0.8f - 0.4f, 0.0f);
+				const lcVector3 Center(((float)StudsX / 2.0f - x) * 20.0f - 10.0f, ((float)StudsY / 2.0f - y) * 20.0f - 10.0f, 0.0f);
 
 				*Verts++ = Center[0]; *Verts++ = Center[1]; *Verts++ = 0.16f;
 
 				for (int Step = 0; Step < StudSides; Step++)
-	{
-					float s = Center[0] + sinf((float)Step / (float)StudSides * LC_2PI) * 0.24f;
-					float c = Center[1] + cosf((float)Step / (float)StudSides * LC_2PI) * 0.24f;
+				{
+					float s = Center[0] + sinf((float)Step / (float)StudSides * LC_2PI) * 6.0f;
+					float c = Center[1] + cosf((float)Step / (float)StudSides * LC_2PI) * 6.0f;
 
-					*Verts++ = s; *Verts++ = c; *Verts++ = 0.16f;
+					*Verts++ = s; *Verts++ = c; *Verts++ = 4.0f;
 					*Verts++ = s; *Verts++ = c; *Verts++ = 0.0f;
 				}
 			}
-	}
+		}
 
 		lcMeshSection* Section = &Mesh->mSections[0];
 		Section->ColorIndex = gDefaultColor;
@@ -2180,14 +2180,14 @@ bool lcPiecesLibrary::GeneratePiece(PieceInfo* Info)
 		*Indices++ = 9; *Indices++ = 14; *Indices++ = 13;
 
 		for (int x = 0; x < StudsX; x++)
-	{
-			for (int y = 0; y < StudsY; y++)
 		{
+			for (int y = 0; y < StudsY; y++)
+			{
 				int CenterIndex = 16 + (StudSides * 2 + 1) * (x + StudsX * y);
 				int BaseIndex = CenterIndex + 1;
 
 				for (int Step = 0; Step < StudSides; Step++)
-	{
+				{
 					*Indices++ = CenterIndex;
 					*Indices++ = BaseIndex + Step * 2;
 					*Indices++ = BaseIndex + ((Step + 1) % StudSides) * 2;
@@ -2201,7 +2201,7 @@ bool lcPiecesLibrary::GeneratePiece(PieceInfo* Info)
 					*Indices++ = BaseIndex + ((Step + 1) % StudSides) * 2 + 1;
 				}
 			}
-	}
+		}
 
 		Section = &Mesh->mSections[1];
 		Section->ColorIndex = gEdgeColor;

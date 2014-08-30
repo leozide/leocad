@@ -1057,9 +1057,7 @@ void lcQMainWindow::updateFocusObject(lcObject *focus)
 	propertiesWidget->updateFocusObject(focus);
 
 	lcVector3 position;
-
 	lcGetActiveProject()->GetFocusPosition(position);
-	lcGetActiveProject()->ConvertToUserUnits(position);
 
 	QString label("X: %1 Y: %2 Z: %3");
 	label = label.arg(QString::number(position[0], 'f', 2), QString::number(position[1], 'f', 2), QString::number(position[2], 'f', 2));

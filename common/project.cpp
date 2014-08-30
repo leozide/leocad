@@ -659,16 +659,7 @@ void Project::FileSave(lcFile* file, bool bUndo)
 		mCameras[CameraIdx]->FileSave(*file);
 
 	for (j = 0; j < 4; j++)
-	{
-		i = 0;
-//		for (i = 0, pCamera = m_pCameras; pCamera; pCamera = pCamera->m_pNext)
-//			if (pCamera == m_pViewCameras[j])
-//				break;
-//			else
-//				i++;
-
-		file->WriteS32(&i, 1);
-	}
+		file->WriteS32(0);
 
 	rgb = LC_FLOATRGB(mProperties.mFogColor);
 	file->WriteU32(&rgb, 1);
@@ -701,30 +692,7 @@ void Project::FileSave(lcFile* file, bool bUndo)
 	file->WriteU32(&rgb, 1);
 	// 0.64 (1.2)
 	m_pTerrain->FileSave(file);
-
-	if (!bUndo)
-	{
-		lcuint32 pos = 0;
-/*
-		// TODO: add file preview
-		i = lcGetProfileValue("Default", "Save Preview", 0);
-		if (i != 0)
-		{
-			pos = file->GetPosition();
-
-			Image* image = new Image[1];
-			LC_IMAGE_OPTS opts;
-			opts.interlaced = false;
-			opts.transparent = false;
-			opts.format = LC_IMAGE_GIF;
-
-			CreateImages(image, 120, 100, mCurrentStep, mCurrentStep, false);
-			image[0].FileSave (*file, &opts);
-			delete []image;
-		}
-*/
-		file->WriteU32(&pos, 1);
-	}
+	file->WriteU32(0);
 }
 
 void Project::FileReadMPD(lcFile& MPD, lcArray<LC_FILEENTRY*>& FileArray) const
@@ -882,7 +850,7 @@ void Project::FileReadLDraw(lcFile* file, const lcMatrix44& CurrentTransform, in
 				lcVector4 AxisAngle = lcMatrix44ToAxisAngle(Transform);
 				AxisAngle[3] *= LC_RTOD;
 
-				pPiece->Initialize(IncludeTransform[3].x / 25.0f, IncludeTransform[3].z / 25.0f, -IncludeTransform[3].y / 25.0f, *nStep);
+				pPiece->Initialize(IncludeTransform[3].x, IncludeTransform[3].z, -IncludeTransform[3].y, *nStep);
 				pPiece->SetColorCode(ColorCode);
 				pPiece->CreateName(mPieces);
 				mPieces.Add(pPiece);
@@ -941,7 +909,7 @@ void Project::FileReadLDraw(lcFile* file, const lcMatrix44& CurrentTransform, in
 			lcVector4 AxisAngle = lcMatrix44ToAxisAngle(Transform);
 			AxisAngle[3] *= LC_RTOD;
 
-			pPiece->Initialize(IncludeTransform[3].x / 25.0f, IncludeTransform[3].z / 25.0f, -IncludeTransform[3].y / 25.0f, *nStep);
+			pPiece->Initialize(IncludeTransform[3].x, IncludeTransform[3].z, -IncludeTransform[3].y, *nStep);
 			pPiece->SetColorCode(ColorCode);
 			pPiece->CreateName(mPieces);
 			mPieces.Add(pPiece);
@@ -1038,7 +1006,7 @@ bool Project::DoSave(const char* FileName)
 				{
 					const float* f = Piece->mModelWorld;
 					sprintf (buf, "1 %d %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %s.DAT\r\n",
-							 Piece->mColorCode, f[12] * 25.0f, -f[14] * 25.0f, f[13] *25.0f, f[0], -f[8], f[4], -f[2], f[10], -f[6], f[1], -f[9], f[5], Piece->mPieceInfo->m_strName);
+							 Piece->mColorCode, f[12], -f[14], f[13], f[0], -f[8], f[4], -f[2], f[10], -f[6], f[1], -f[9], f[5], Piece->mPieceInfo->m_strName);
 					file.WriteBuffer(buf, strlen(buf));
 				}
 			}
@@ -2737,7 +2705,7 @@ void Project::ExportPOVRay(lcFile& POVFile)
 	const lcVector3& Up = Camera->mUpVector;
 
 	sprintf(Line, "camera {\n  sky<%1g,%1g,%1g>\n  location <%1g, %1g, %1g>\n  look_at <%1g, %1g, %1g>\n  angle %.0f\n}\n\n",
-	        Up[0], Up[1], Up[2], Position[1], Position[0], Position[2], Target[1], Target[0], Target[2], Camera->m_fovy);
+	        Up[0], Up[1], Up[2], Position[1] / 25.0f, Position[0] / 25.0f, Position[2] / 25.0f, Target[1] / 25.0f, Target[0] / 25.0f, Target[2] / 25.0f, Camera->m_fovy);
 	POVFile.WriteLine(Line);
 	sprintf(Line, "background { color rgb <%1g, %1g, %1g> }\n\nlight_source { <0, 0, 20> White shadowless }\n\n",
 	        mProperties.mBackgroundSolidColor[0], mProperties.mBackgroundSolidColor[1], mProperties.mBackgroundSolidColor[2]);
@@ -2760,12 +2728,12 @@ void Project::ExportPOVRay(lcFile& POVFile)
 			        " object {\n  %s_slope\n  texture { %s normal { bumps 0.3 scale 0.02 } }\n }\n"
 			        " matrix <%.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f>\n}\n",
 			        PieceTable + Index * LC_PIECE_NAME_LEN, Suffix, &ColorTable[Color * LC_MAX_COLOR_NAME], PieceTable + Index * LC_PIECE_NAME_LEN, &ColorTable[Color * LC_MAX_COLOR_NAME],
-			        -f[5], -f[4], -f[6], -f[1], -f[0], -f[2], f[9], f[8], f[10], f[13], f[12], f[14]);
+			        -f[5], -f[4], -f[6], -f[1], -f[0], -f[2], f[9], f[8], f[10], f[13] / 25.0f, f[12] / 25.0f, f[14] / 25.0f);
 		}
 		else
 		{
 			sprintf(Line, "object {\n %s%s\n texture { %s }\n matrix <%.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f>\n}\n",
-			        PieceTable + Index * LC_PIECE_NAME_LEN, Suffix, &ColorTable[Color * LC_MAX_COLOR_NAME], -f[5], -f[4], -f[6], -f[1], -f[0], -f[2], f[9], f[8], f[10], f[13], f[12], f[14]);
+			        PieceTable + Index * LC_PIECE_NAME_LEN, Suffix, &ColorTable[Color * LC_MAX_COLOR_NAME], -f[5], -f[4], -f[6], -f[1], -f[0], -f[2], f[9], f[8], f[10], f[13] / 25.0f, f[12] / 25.0f, f[14] / 25.0f);
 		}
 
 		POVFile.WriteLine(Line);
@@ -4201,10 +4169,6 @@ void Project::HandleCommand(LC_COMMANDS id)
 				break;
 			}
 
-			ConvertFromUserUnits(Options.Offsets[0]);
-			ConvertFromUserUnits(Options.Offsets[1]);
-			ConvertFromUserUnits(Options.Offsets[2]);
-
 			lcArray<lcObjectSection> NewPieces;
 
 			for (int Step1 = 0; Step1 < Options.Counts[0]; Step1++)
@@ -5238,16 +5202,6 @@ lcVector3 Project::GetFocusOrSelectionCenter() const
 	return Center;
 }
 
-void Project::ConvertToUserUnits(lcVector3& Value) const
-{
-	Value /= 0.04f;
-}
-
-void Project::ConvertFromUserUnits(lcVector3& Value) const
-{
-	Value *= 0.04f;
-}
-
 bool Project::GetFocusPosition(lcVector3& Position) const
 {
 	lcObject* FocusObject = GetFocusObject();
@@ -5404,8 +5358,8 @@ void Project::GetSnapIndex(int* SnapXY, int* SnapZ, int* SnapAngle) const
 
 void Project::GetSnapDistance(float* SnapXY, float* SnapZ) const
 {
-	const float SnapXYTable[] = { 0.01f, 0.04f, 0.2f, 0.32f, 0.4f, 0.8f, 1.6f, 2.4f, 3.2f, 6.4f };
-	const float SnapZTable[] = { 0.01f, 0.04f, 0.2f, 0.32f, 0.4f, 0.8f, 0.96f, 1.92f, 3.84f, 7.68f };
+	const float SnapXYTable[] = { 0.01f, 1.0f, 5.0f, 8.0f, 10.0f, 20.0f, 40.0f, 60.0f, 80.0f, 160.0f };
+	const float SnapZTable[] = { 0.01f, 1.0f, 5.0f, 8.0f, 10.0f, 20.0f, 24.0f, 48.0f, 96.0f, 192.0f };
 
 	int SXY, SZ;
 	GetSnapIndex(&SXY, &SZ, NULL);

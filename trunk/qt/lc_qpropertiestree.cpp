@@ -523,7 +523,6 @@ void lcQPropertiesTree::slotReturnPressed()
 		if (item == partPositionX || item == partPositionY || item == partPositionZ)
 		{
 			lcVector3 position = part->mPosition;
-			project->ConvertToUserUnits(position);
 			float value = editor->text().toFloat();
 
 			if (item == partPositionX)
@@ -533,7 +532,6 @@ void lcQPropertiesTree::slotReturnPressed()
 			else if (item == partPositionZ)
 				position[2] = value;
 
-			project->ConvertFromUserUnits(position);
 			project->ModifyObject(focusObject, LC_PIECE_PROPERTY_POSITION, &position);
 		}
 		else if (item == partRotationX || item == partRotationY || item == partRotationZ)
@@ -573,7 +571,6 @@ void lcQPropertiesTree::slotReturnPressed()
 		if (item == cameraPositionX || item == cameraPositionY || item == cameraPositionZ)
 		{
 			lcVector3 position = camera->mPosition;
-			project->ConvertToUserUnits(position);
 			float value = editor->text().toFloat();
 
 			if (item == cameraPositionX)
@@ -583,13 +580,11 @@ void lcQPropertiesTree::slotReturnPressed()
 			else if (item == cameraPositionZ)
 				position[2] = value;
 
-			project->ConvertFromUserUnits(position);
 			project->ModifyObject(focusObject, LC_CAMERA_PROPERTY_POSITION, &position);
 		}
 		else if (item == cameraTargetX || item == cameraTargetY || item == cameraTargetZ)
 		{
 			lcVector3 target = camera->mTargetPosition;
-			project->ConvertToUserUnits(target);
 			float value = editor->text().toFloat();
 
 			if (item == cameraTargetX)
@@ -599,7 +594,6 @@ void lcQPropertiesTree::slotReturnPressed()
 			else if (item == cameraTargetZ)
 				target[2] = value;
 
-			project->ConvertFromUserUnits(target);
 			project->ModifyObject(focusObject, LC_CAMERA_PROPERTY_TARGET, &target);
 		}
 		else if (item == cameraUpX || item == cameraUpY || item == cameraUpZ)
@@ -787,8 +781,6 @@ void lcQPropertiesTree::setPart(lcObject *newFocusObject)
 	lcPiece *part = (lcPiece*)focusObject;
 
 	lcVector3 position = part->mPosition;
-	lcGetActiveProject()->ConvertToUserUnits(position);
-
 	partPositionX->setText(1, QString::number(position[0]));
 	partPositionX->setData(0, PropertyValueRole, position[0]);
 	partPositionY->setText(1, QString::number(position[1]));
@@ -797,7 +789,6 @@ void lcQPropertiesTree::setPart(lcObject *newFocusObject)
 	partPositionZ->setData(0, PropertyValueRole, position[2]);
 
 	lcVector3 rotation = lcMatrix44ToEulerAngles(part->mModelWorld) * LC_RTOD;
-
 	partRotationX->setText(1, QString::number(rotation[0]));
 	partRotationX->setData(0, PropertyValueRole, rotation[0]);
 	partRotationY->setText(1, QString::number(rotation[1]));
@@ -865,8 +856,6 @@ void lcQPropertiesTree::setCamera(lcObject *newFocusObject)
 	lcCamera *camera = (lcCamera*)focusObject;
 
 	lcVector3 position = camera->mPosition;
-	lcGetActiveProject()->ConvertToUserUnits(position);
-
 	cameraPositionX->setText(1, QString::number(position[0]));
 	cameraPositionX->setData(0, PropertyValueRole, position[0]);
 	cameraPositionY->setText(1, QString::number(position[1]));
@@ -875,8 +864,6 @@ void lcQPropertiesTree::setCamera(lcObject *newFocusObject)
 	cameraPositionZ->setData(0, PropertyValueRole, position[2]);
 
 	lcVector3 target = camera->mTargetPosition;
-	lcGetActiveProject()->ConvertToUserUnits(target);
-
 	cameraTargetX->setText(1, QString::number(target[0]));
 	cameraTargetX->setData(0, PropertyValueRole, target[0]);
 	cameraTargetY->setText(1, QString::number(target[1]));
@@ -885,8 +872,6 @@ void lcQPropertiesTree::setCamera(lcObject *newFocusObject)
 	cameraTargetZ->setData(0, PropertyValueRole, target[2]);
 
 	lcVector3 up = camera->mUpVector;
-	lcGetActiveProject()->ConvertToUserUnits(up);
-
 	cameraUpX->setText(1, QString::number(up[0]));
 	cameraUpX->setData(0, PropertyValueRole, up[0]);
 	cameraUpY->setText(1, QString::number(up[1]));

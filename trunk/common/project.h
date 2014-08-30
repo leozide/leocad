@@ -152,8 +152,6 @@ public:
 		return mGroups.FindIndex(Group);
 	}
 
-	void ConvertToUserUnits(lcVector3& Value) const;
-	void ConvertFromUserUnits(lcVector3& Value) const;
 	lcMatrix44 GetRelativeRotation() const;
 
 	void UpdateInterface();

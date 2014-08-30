@@ -16,7 +16,7 @@
 #include "lc_application.h"
 #include "lc_library.h"
 
-#define LC_PIECE_SAVE_VERSION 11 // LeoCAD 0.77
+#define LC_PIECE_SAVE_VERSION 12 // LeoCAD 0.80
 
 static LC_OBJECT_KEY_INFO piece_key_info[LC_PK_COUNT] =
 {
@@ -298,14 +298,27 @@ bool lcPiece::FileLoad(lcFile& file)
       mState |= LC_PIECE_HIDDEN;
   }
 
-  return true;
+	if (version < 12)
+	{
+		for (LC_OBJECT_KEY* Key = m_pInstructionKeys; Key; Key = Key->next)
+		{
+			if (Key->type == LC_PK_POSITION)
+			{
+				Key->param[0] *= 25.0f;
+				Key->param[1] *= 25.0f;
+				Key->param[2] *= 25.0f;
+			}
+		}
+	}
+
+	return true;
 }
 
 void lcPiece::FileSave(lcFile& file) const
 {
 	file.WriteU8(LC_PIECE_SAVE_VERSION);
 
-	lcObject::FileSave (file);
+	lcObject::FileSave(file);
 
 	file.WriteBuffer(mPieceInfo->m_strName, LC_PIECE_NAME_LEN);
 	file.WriteU32(mColorCode);

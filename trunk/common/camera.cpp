@@ -13,7 +13,7 @@
 #include "lc_application.h"
 #include "lc_context.h"
 
-#define LC_CAMERA_SAVE_VERSION 6 // LeoCAD 0.73
+#define LC_CAMERA_SAVE_VERSION 7 // LeoCAD 0.80
 
 static LC_OBJECT_KEY_INFO camera_key_info[LC_CK_COUNT] =
 {
@@ -31,7 +31,7 @@ lcCamera::lcCamera(bool Simple)
 		mState |= LC_CAMERA_SIMPLE;
 	else
 	{
-		mPosition = lcVector3(-10.0f, -10.0f, 5.0f);
+		mPosition = lcVector3(-250.0f, -250.0f, 75.0f);
 		mTargetPosition = lcVector3(0.0f, 0.0f, 0.0f);
 		mOrthoTarget = mTargetPosition;
 		mUpVector = lcVector3(-0.2357f, -0.2357f, 0.94281f);
@@ -75,8 +75,8 @@ lcCamera::~lcCamera()
 void lcCamera::Initialize()
 {
 	m_fovy = 30.0f;
-	m_zNear = 1.0f;
-	m_zFar = 500.0f;
+	m_zNear = 25.0f;
+	m_zFar = 12500.0f;
 
 	mState = 0;
 	m_nType = LC_CAMERA_USER;
@@ -132,18 +132,20 @@ QJsonObject lcCamera::Save()
 			UpVectorKeys.append(Key);
 	}
 
-	if (PositionKeys.size() == 1 && TargetPositionKeys.size() == 1 && UpVectorKeys.size() == 1)
-	{
-		Camera[QStringLiteral("Position")] = PositionKeys.first().toObject()["Value"].toString();
-		Camera[QStringLiteral("TargetPosition")] = TargetPositionKeys.first().toObject()["Value"].toString();
-		Camera[QStringLiteral("UpVector")] = UpVectorKeys.first().toObject()["Value"].toString();
-	}
+	if (PositionKeys.size() == 1)
+		Camera[QStringLiteral("Position")] = PositionKeys.first().toObject()[QStringLiteral("Value")].toString();
 	else
-	{
-		Camera["PositionKeys"] = PositionKeys;
-		Camera["TargetPositionKeys"] = TargetPositionKeys;
-		Camera["UpVectorKeys"] = UpVectorKeys;
-	}
+		Camera[QStringLiteral("PositionKeys")] = PositionKeys;
+		
+	if  (TargetPositionKeys.size() == 1)
+		Camera[QStringLiteral("TargetPosition")] = TargetPositionKeys.first().toObject()[QStringLiteral("Value")].toString();
+	else		
+		Camera[QStringLiteral("UpVectorKeys")] = UpVectorKeys;
+		
+	if (UpVectorKeys.size() == 1)
+		Camera[QStringLiteral("UpVector")] = UpVectorKeys.first().toObject()[QStringLiteral("Value")].toString();
+	else
+		Camera[QStringLiteral("TargetPositionKeys")] = TargetPositionKeys;
 
 	return Camera;
 }
@@ -309,6 +311,22 @@ bool lcCamera::FileLoad(lcFile& file)
 		file.ReadS32(&user, 1);
 		if (show == 0)
 			mState |= LC_CAMERA_HIDDEN;
+	}
+
+	if (version < 7)
+	{
+		m_zFar *= 25.0f;
+		m_zNear *= 25.0f;
+
+		for (LC_OBJECT_KEY* Key = m_pInstructionKeys; Key; Key = Key->next)
+		{
+			if (Key->type == LC_CK_EYE || Key->type == LC_CK_TARGET)
+			{
+				Key->param[0] *= 25.0f;
+				Key->param[1] *= 25.0f;
+				Key->param[2] *= 25.0f;
+			}
+		}
 	}
 
 	return true;
@@ -801,13 +819,13 @@ void lcCamera::SetViewpoint(LC_VIEWPOINT Viewpoint, lcStep Step, bool AddKey)
 {
 	lcVector3 Positions[] =
 	{
-		lcVector3(  0.0f, -50.0f,   0.0f), // LC_VIEWPOINT_FRONT
-		lcVector3(  0.0f,  50.0f,   0.0f), // LC_VIEWPOINT_BACK
-		lcVector3(  0.0f,   0.0f,  50.0f), // LC_VIEWPOINT_TOP
-		lcVector3(  0.0f,   0.0f, -50.0f), // LC_VIEWPOINT_BOTTOM
-		lcVector3( 50.0f,   0.0f,   0.0f), // LC_VIEWPOINT_LEFT
-		lcVector3(-50.0f,   0.0f,   0.0f), // LC_VIEWPOINT_RIGHT
-		lcVector3(-15.0f, -15.0f,   7.5f)  // LC_VIEWPOINT_HOME
+		lcVector3(    0.0f, -1250.0f,     0.0f), // LC_VIEWPOINT_FRONT
+		lcVector3(    0.0f,  1250.0f,     0.0f), // LC_VIEWPOINT_BACK
+		lcVector3(    0.0f,     0.0f,  1250.0f), // LC_VIEWPOINT_TOP
+		lcVector3(    0.0f,     0.0f, -1250.0f), // LC_VIEWPOINT_BOTTOM
+		lcVector3( 1250.0f,     0.0f,     0.0f), // LC_VIEWPOINT_LEFT
+		lcVector3(-1250.0f,     0.0f,     0.0f), // LC_VIEWPOINT_RIGHT
+		lcVector3( -375.0f,  -375.0f,   187.5f)  // LC_VIEWPOINT_HOME
 	};
 
 	lcVector3 Ups[] =

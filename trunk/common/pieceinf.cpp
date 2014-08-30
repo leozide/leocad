@@ -42,12 +42,12 @@ void PieceInfo::Load()
 
 		mFlags |= LC_PIECE_HAS_DEFAULT | LC_PIECE_HAS_LINES;
 
-		m_fDimensions[0] = 0.4f;
-		m_fDimensions[1] = 0.4f;
-		m_fDimensions[2] = 0.16f;
-		m_fDimensions[3] = -0.4f;
-		m_fDimensions[4] = -0.4f;
-		m_fDimensions[5] = -0.96f;
+		m_fDimensions[0] = 10.0f;
+		m_fDimensions[1] = 10.0f;
+		m_fDimensions[2] = 4.0f;
+		m_fDimensions[3] = -10.0f;
+		m_fDimensions[4] = -10.0f;
+		m_fDimensions[5] = -24.0f;
 	}
 	else if (mFlags & LC_PIECE_GENERATED)
 		lcGetPiecesLibrary()->GeneratePiece(this);
@@ -90,10 +90,10 @@ void PieceInfo::ZoomExtents(float Fov, float Aspect, float* EyePos) const
 	if (EyePos)
 		Position = lcVector3(EyePos[0], EyePos[1], EyePos[2]);
 	else
-		Position = lcVector3(-10.0f, -10.0f, 5.0f);
+		Position = lcVector3(-250.0f, -250.0f, 75.0f);
 	Position += Center;
 
-	lcMatrix44 Projection = lcMatrix44Perspective(30.0f, Aspect, 1.0f, 100.0f);
+	lcMatrix44 Projection = lcMatrix44Perspective(30.0f, Aspect, 1.0f, 2500.0f);
 	lcMatrix44 ModelView = lcMatrix44LookAt(Position, Center, lcVector3(0, 0, 1));
 	Position = lcZoomExtents(Position, ModelView, Projection, Points, 8);
 

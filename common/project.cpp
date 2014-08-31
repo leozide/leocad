@@ -188,27 +188,9 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 
 	if (fv < 0.6f) // old view
 	{
-		lcCamera* pCam = new lcCamera(false);
-		pCam->CreateName(mCameras);
-		mCameras.Add(pCam);
-
 		double eye[3], target[3];
 		file->ReadDoubles(eye, 3);
 		file->ReadDoubles(target, 3);
-		float tmp[3] = { (float)eye[0], (float)eye[1], (float)eye[2] };
-		pCam->ChangeKey(1, false, tmp, LC_CK_EYE);
-		tmp[0] = (float)target[0]; tmp[1] = (float)target[1]; tmp[2] = (float)target[2];
-		pCam->ChangeKey(1, false, tmp, LC_CK_TARGET);
-
-		// Create up vector
-		lcVector3 UpVector(0, 0, 1), FrontVector((float)(eye[0] - target[0]), (float)(eye[1] - target[1]), (float)(eye[2] - target[2])), SideVector;
-		FrontVector.Normalize();
-		if (FrontVector == UpVector)
-			SideVector = lcVector3(1, 0, 0);
-		else
-			SideVector = lcCross(FrontVector, UpVector);
-		UpVector = lcNormalize(lcCross(SideVector, FrontVector));
-		pCam->ChangeKey(1, false, UpVector, LC_CK_UP);
 	}
 
 	if (bMerge)
@@ -262,7 +244,7 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 		else
 		{
 			char name[LC_PIECE_NAME_LEN];
-			float pos[3], rot[3];
+			lcVector3 pos, rot;
 			lcuint8 color, step, group;
 
 			file->ReadFloats(pos, 3);
@@ -272,19 +254,19 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 			file->ReadU8(&step, 1);
 			file->ReadU8(&group, 1);
 
-			PieceInfo* pInfo = Library->FindPiece(name, true);
-			lcPiece* pPiece = new lcPiece(pInfo);
-
-			pPiece->Initialize(pos[0], pos[1], pos[2], step);
-			pPiece->SetColorCode(lcGetColorCodeFromOriginalColor(color));
-			pPiece->CreateName(mPieces);
-			mPieces.Add(pPiece);
-
+			pos *= 25.0f;
 			lcMatrix44 ModelWorld = lcMul(lcMatrix44RotationZ(rot[2] * LC_DTOR), lcMul(lcMatrix44RotationY(rot[1] * LC_DTOR), lcMatrix44RotationX(rot[0] * LC_DTOR)));
 			lcVector4 AxisAngle = lcMatrix44ToAxisAngle(ModelWorld);
 			AxisAngle[3] *= LC_RTOD;
 
-			pPiece->ChangeKey(1, false, AxisAngle, LC_PK_ROTATION);
+			PieceInfo* pInfo = Library->FindPiece(name, true);
+			lcPiece* pPiece = new lcPiece(pInfo);
+
+			pPiece->Initialize(pos, AxisAngle, step);
+			pPiece->SetColorCode(lcGetColorCodeFromOriginalColor(color));
+			pPiece->CreateName(mPieces);
+			mPieces.Add(pPiece);
+
 //			pPiece->SetGroup((lcGroup*)group);
 			SystemPieceComboAdd(pInfo->m_strDescription);
 		}
@@ -850,11 +832,10 @@ void Project::FileReadLDraw(lcFile* file, const lcMatrix44& CurrentTransform, in
 				lcVector4 AxisAngle = lcMatrix44ToAxisAngle(Transform);
 				AxisAngle[3] *= LC_RTOD;
 
-				pPiece->Initialize(IncludeTransform[3].x, IncludeTransform[3].z, -IncludeTransform[3].y, *nStep);
+				pPiece->Initialize(lcVector3(IncludeTransform[3].x, IncludeTransform[3].z, -IncludeTransform[3].y), AxisAngle, *nStep);
 				pPiece->SetColorCode(ColorCode);
 				pPiece->CreateName(mPieces);
 				mPieces.Add(pPiece);
-				pPiece->ChangeKey(1, false, AxisAngle, LC_PK_ROTATION);
 				SystemPieceComboAdd(pInfo->m_strDescription);
 				(*nOk)++;
 			}
@@ -909,11 +890,10 @@ void Project::FileReadLDraw(lcFile* file, const lcMatrix44& CurrentTransform, in
 			lcVector4 AxisAngle = lcMatrix44ToAxisAngle(Transform);
 			AxisAngle[3] *= LC_RTOD;
 
-			pPiece->Initialize(IncludeTransform[3].x, IncludeTransform[3].z, -IncludeTransform[3].y, *nStep);
+			pPiece->Initialize(lcVector3(IncludeTransform[3].x, IncludeTransform[3].z, -IncludeTransform[3].y), AxisAngle, *nStep);
 			pPiece->SetColorCode(ColorCode);
 			pPiece->CreateName(mPieces);
 			mPieces.Add(pPiece);
-			pPiece->ChangeKey(1, false, AxisAngle, LC_PK_ROTATION);
 			SystemPieceComboAdd(Info->m_strDescription);
 			(*nOk)++;
 		}
@@ -3932,13 +3912,11 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 				GetPieceInsertPosition(Last, Pos, Rot);
 
-				pPiece->Initialize(Pos[0], Pos[1], Pos[2], mCurrentStep);
-
-				pPiece->ChangeKey(mCurrentStep, false, Rot, LC_PK_ROTATION);
+				pPiece->Initialize(Pos, Rot, mCurrentStep);
 				pPiece->UpdatePosition(mCurrentStep);
 			}
 			else
-				pPiece->Initialize(0, 0, 0, mCurrentStep);
+				pPiece->Initialize(lcVector3(0, 0, 0), lcVector4(0, 0, 1, 0), mCurrentStep);
 
 			pPiece->SetColorIndex(gMainWindow->mColorIndex);
 			pPiece->CreateName(mPieces);
@@ -4087,16 +4065,14 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 				lcPiece* pPiece = new lcPiece(Minifig.Parts[i]);
 
-				lcVector4& Position = Minifig.Matrices[i][3];
+				lcVector3 Position(Minifig.Matrices[i][3][0], Minifig.Matrices[i][3][1], Minifig.Matrices[i][3][2]);
 				lcVector4 Rotation = lcMatrix44ToAxisAngle(Minifig.Matrices[i]);
 				Rotation[3] *= LC_RTOD;
-				pPiece->Initialize(Position[0], Position[1], Position[2], mCurrentStep);
+				pPiece->Initialize(Position, Rotation, mCurrentStep);
 				pPiece->SetColorIndex(Minifig.Colors[i]);
 				pPiece->CreateName(mPieces);
 				mPieces.Add(pPiece);
 				pPiece->SetSelected(true);
-
-				pPiece->ChangeKey(1, false, Rotation, LC_PK_ROTATION);
 				pPiece->UpdatePosition(mCurrentStep);
 
 				SystemPieceComboAdd(Minifig.Parts[i]->m_strDescription);
@@ -4219,9 +4195,8 @@ void Project::HandleCommand(LC_COMMANDS id)
 							AxisAngle[3] *= LC_RTOD;
 
 							lcPiece* NewPiece = new lcPiece(pPiece->mPieceInfo);
-							NewPiece->Initialize(Position[0] + Offset[0], Position[1] + Offset[1], Position[2] + Offset[2], mCurrentStep);
+							NewPiece->Initialize(Position + Offset, AxisAngle, mCurrentStep);
 							NewPiece->SetColorIndex(pPiece->mColorIndex);
-							NewPiece->ChangeKey(1, false, AxisAngle, LC_PK_ROTATION);
 
 							lcObjectSection ObjectSection;
 							ObjectSection.Object = NewPiece;
@@ -5698,7 +5673,7 @@ bool Project::RotateSelectedObjects(lcVector3& Delta, lcVector3& Remainder, bool
 			pos[1] = Center[1] + Distance[1];
 			pos[2] = Center[2] + Distance[2];
 
-			Piece->ChangeKey(mCurrentStep, gMainWindow->GetAddKeys(), pos, LC_PK_POSITION);
+			Piece->SetPosition(pos, mCurrentStep, gMainWindow->GetAddKeys());
 		}
 
 		rot[0] = NewRotation[0];
@@ -5706,7 +5681,7 @@ bool Project::RotateSelectedObjects(lcVector3& Delta, lcVector3& Remainder, bool
 		rot[2] = NewRotation[2];
 		rot[3] = NewRotation[3] * LC_RTOD;
 
-		Piece->ChangeKey(mCurrentStep, gMainWindow->GetAddKeys(), rot, LC_PK_ROTATION);
+		Piece->SetRotation(rot, mCurrentStep, gMainWindow->GetAddKeys());
 		Piece->UpdatePosition(mCurrentStep);
 	}
 
@@ -5832,7 +5807,7 @@ void Project::TransformSelectedObjects(lcTransformType Type, const lcVector3& Tr
 
 				if (Piece->IsSelected())
 				{
-					Piece->ChangeKey(mCurrentStep, gMainWindow->GetAddKeys(), NewRotation, LC_PK_ROTATION);
+					Piece->SetRotation(NewRotation, mCurrentStep, gMainWindow->GetAddKeys());
 					Piece->UpdatePosition(mCurrentStep);
 					nSel++;
 				}
@@ -5869,12 +5844,12 @@ void Project::ModifyObject(lcObject* Object, lcObjectProperty Property, void* Va
 	case LC_PIECE_PROPERTY_POSITION:
 		{
 			const lcVector3& Position = *(lcVector3*)Value;
-			lcPiece* Part = (lcPiece*)Object;
+			lcPiece* Piece = (lcPiece*)Object;
 
-			if (Part->mPosition != Position)
+			if (Piece->mPosition != Position)
 			{
-				Part->ChangeKey(mCurrentStep, gMainWindow->GetAddKeys(), Position, LC_PK_POSITION);
-				Part->UpdatePosition(mCurrentStep);
+				Piece->SetPosition(Position, mCurrentStep, gMainWindow->GetAddKeys());
+				Piece->UpdatePosition(mCurrentStep);
 
 				CheckPointString = "Moving";
 			}
@@ -5883,12 +5858,12 @@ void Project::ModifyObject(lcObject* Object, lcObjectProperty Property, void* Va
 	case LC_PIECE_PROPERTY_ROTATION:
 		{
 			const lcVector4& Rotation = *(lcVector4*)Value;
-			lcPiece* Part = (lcPiece*)Object;
+			lcPiece* Piece = (lcPiece*)Object;
 
-			if (Rotation != Part->mRotation)
+			if (Rotation != Piece->mRotation)
 			{
-				Part->ChangeKey(mCurrentStep, gMainWindow->GetAddKeys(), Rotation, LC_PK_ROTATION);
-				Part->UpdatePosition(mCurrentStep);
+				Piece->SetRotation(Rotation, mCurrentStep, gMainWindow->GetAddKeys());
+				Piece->UpdatePosition(mCurrentStep);
 
 				CheckPointString = "Rotating";
 			}
@@ -5951,14 +5926,14 @@ void Project::ModifyObject(lcObject* Object, lcObjectProperty Property, void* Va
 		} break;
 
 	case LC_CAMERA_PROPERTY_POSITION:
-			{
+		{
 			const lcVector3& Position = *(lcVector3*)Value;
-			lcCamera* camera = (lcCamera*)Object;
+			lcCamera* Camera = (lcCamera*)Object;
 
-			if (camera->mPosition != Position)
+			if (Camera->mPosition != Position)
 			{
-				camera->ChangeKey(mCurrentStep, gMainWindow->GetAddKeys(), Position, LC_CK_EYE);
-				camera->UpdatePosition(mCurrentStep);
+				Camera->SetPosition(Position, mCurrentStep, gMainWindow->GetAddKeys());
+				Camera->UpdatePosition(mCurrentStep);
 
 				CheckPointString = "Camera";
 			}
@@ -5967,12 +5942,12 @@ void Project::ModifyObject(lcObject* Object, lcObjectProperty Property, void* Va
 	case LC_CAMERA_PROPERTY_TARGET:
 		{
 			const lcVector3& TargetPosition = *(lcVector3*)Value;
-			lcCamera* camera = (lcCamera*)Object;
+			lcCamera* Camera = (lcCamera*)Object;
 
-			if (camera->mTargetPosition != TargetPosition)
+			if (Camera->mTargetPosition != TargetPosition)
 			{
-				camera->ChangeKey(mCurrentStep, gMainWindow->GetAddKeys(), TargetPosition, LC_CK_TARGET);
-				camera->UpdatePosition(mCurrentStep);
+				Camera->SetTargetPosition(TargetPosition, mCurrentStep, gMainWindow->GetAddKeys());
+				Camera->UpdatePosition(mCurrentStep);
 
 				CheckPointString = "Camera";
 			}
@@ -5981,12 +5956,12 @@ void Project::ModifyObject(lcObject* Object, lcObjectProperty Property, void* Va
 	case LC_CAMERA_PROPERTY_UPVECTOR:
 		{
 			const lcVector3& Up = *(lcVector3*)Value;
-			lcCamera* camera = (lcCamera*)Object;
+			lcCamera* Camera = (lcCamera*)Object;
 
-			if (camera->mUpVector != Up)
+			if (Camera->mUpVector != Up)
 			{
-				camera->ChangeKey(mCurrentStep, gMainWindow->GetAddKeys(), Up, LC_CK_UP);
-				camera->UpdatePosition(mCurrentStep);
+				Camera->SetUpVector(Up, mCurrentStep, gMainWindow->GetAddKeys());
+				Camera->UpdatePosition(mCurrentStep);
 
 				CheckPointString = "Camera";
 			}
@@ -6154,9 +6129,8 @@ void Project::EndMouseTool(lcTool Tool, bool Accept)
 void Project::InsertPieceToolClicked(const lcVector3& Position, const lcVector4& Rotation)
 {
 	lcPiece* Piece = new lcPiece(m_pCurPiece);
-	Piece->Initialize(Position[0], Position[1], Position[2], mCurrentStep);
+	Piece->Initialize(Position, Rotation, mCurrentStep);
 	Piece->SetColorIndex(gMainWindow->mColorIndex);
-	Piece->ChangeKey(mCurrentStep, false, Rotation, LC_PK_ROTATION);
 	Piece->UpdatePosition(mCurrentStep);
 	Piece->CreateName(mPieces);
 	mPieces.Add(Piece);

@@ -24,21 +24,6 @@ enum lcLightSection
 	LC_LIGHT_SECTION_TARGET
 };
 
-enum LC_LK_TYPES
-{
-	LC_LK_POSITION,
-	LC_LK_TARGET,
-	LC_LK_AMBIENT_COLOR,
-	LC_LK_DIFFUSE_COLOR,
-	LC_LK_SPECULAR_COLOR,
-	LC_LK_CONSTANT_ATTENUATION,
-	LC_LK_LINEAR_ATTENUATION,
-	LC_LK_QUADRATIC_ATTENUATION,
-	LC_LK_SPOT_CUTOFF,
-	LC_LK_SPOT_EXPONENT,
-	LC_LK_COUNT
-};
-
 class lcLight : public lcObject
 {
 public:
@@ -192,6 +177,9 @@ public:
 	virtual void RayTest(lcObjectRayTest& ObjectRayTest) const;
 	virtual void BoxTest(lcObjectBoxTest& ObjectBoxTest) const;
 
+	void InsertTime(lcStep Start, lcStep Time);
+	void RemoveTime(lcStep Start, lcStep Time);
+
 	bool IsVisible() const
 	{ return (mState & LC_LIGHT_HIDDEN) == 0; }
 
@@ -220,14 +208,21 @@ public:
 	lcVector4 mAmbientColor;
 	lcVector4 mDiffuseColor;
 	lcVector4 mSpecularColor;
-	float mConstantAttenuation;
-	float mLinearAttenuation;
-	float mQuadraticAttenuation;
+	lcVector3 mAttenuation;
 	float mSpotCutoff;
 	float mSpotExponent;
 
 protected:
-	void Initialize();
+	lcArray<lcObjectKey<lcVector3>> mPositionKeys;
+	lcArray<lcObjectKey<lcVector3>> mTargetPositionKeys;
+	lcArray<lcObjectKey<lcVector4>> mAmbientColorKeys;
+	lcArray<lcObjectKey<lcVector4>> mDiffuseColorKeys;
+	lcArray<lcObjectKey<lcVector4>> mSpecularColorKeys;
+	lcArray<lcObjectKey<lcVector3>> mAttenuationKeys;
+	lcArray<lcObjectKey<float>> mSpotCutoffKeys;
+	lcArray<lcObjectKey<float>> mSpotExponentKeys;
+
+	void Initialize(const lcVector3& Position, const lcVector3& TargetPosition);
 
 	float m_fCone;
 	lcuint32 mState;

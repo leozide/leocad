@@ -14,20 +14,11 @@ enum lcObjectType
 	LC_OBJECT_LIGHT
 };
 
-// key handling
-struct LC_OBJECT_KEY
+template<typename T>
+struct lcObjectKey
 {
 	lcStep Step;
-	float           param[4];
-	unsigned char   type;
-	LC_OBJECT_KEY*  next;
-};
-
-struct LC_OBJECT_KEY_INFO
-{
-	const char *description;
-	unsigned char size; // number of floats
-	unsigned char type;
+	T Value;
 };
 
 struct lcObjectSection
@@ -96,39 +87,120 @@ public:
 	virtual const char* GetName() const = 0;
 
 protected:
-	virtual bool FileLoad(lcFile& file);
-	virtual void FileSave(lcFile& file) const;
+	QJsonArray SaveKeys(const lcArray<lcObjectKey<lcVector3>>& Keys);
+	QJsonArray SaveKeys(const lcArray<lcObjectKey<lcVector4>>& Keys);
 
-public:
-	void ChangeKey(lcStep Step, bool AddKey, const float *param, unsigned char keytype);
-	virtual void InsertTime(lcStep Start, lcStep Time);
-	virtual void RemoveTime(lcStep Start, lcStep Time);
-
-	int GetKeyTypeCount() const
+	template<typename T>
+	const T& CalculateKey(const lcArray<lcObjectKey<T>>& Keys, lcStep Step)
 	{
-		return m_nKeyInfoCount;
+		lcObjectKey<T>* PreviousKey = &Keys[0];
+
+		for (int KeyIdx = 0; KeyIdx < Keys.GetSize(); KeyIdx++)
+		{
+			if (Keys[KeyIdx].Step > Step)
+				break;
+
+			PreviousKey = &Keys[KeyIdx];
+		}
+
+		return PreviousKey->Value;
 	}
 
-	const LC_OBJECT_KEY_INFO* GetKeyTypeInfo(int index) const
+	template<typename T>
+	void ChangeKey(lcArray<lcObjectKey<T>>& Keys, const T& Value, lcStep Step, bool AddKey)
 	{
-		return &m_pKeyInfo[index];
+		lcObjectKey<T>* Key;
+
+		for (int KeyIdx = 0; KeyIdx < Keys.GetSize(); KeyIdx++)
+		{
+			Key = &Keys[KeyIdx];
+
+			if (Key->Step == Step)
+			{
+				Key->Value = Value;
+
+				return;
+			}
+
+			if (Key->Step > Step)
+			{
+				if (AddKey)
+				{
+					Key = &Keys.InsertAt(KeyIdx);
+					Key->Step = Step;
+				}
+				else if (KeyIdx)
+					Key = &Keys[KeyIdx - 1];
+
+				Key->Value = Value;
+
+				return;
+			}
+		}
+
+		if (AddKey || Keys.GetSize() == 0)
+		{
+			Key = &Keys.Add();
+
+			Key->Step = Step;
+			Key->Value = Value;
+		}
+		else
+		{
+			Key = &Keys[Keys.GetSize() - 1];
+			Key->Value = Value;
+		}
 	}
 
-	const float* GetKeyTypeValue(int index) const
+	template<typename T>
+	void InsertTime(lcArray<lcObjectKey<T>>& Keys, lcStep Start, lcStep Time)
 	{
-		return m_pKeyValues[index];
+		bool EndKey = false;
+
+		for (int KeyIdx = 0; KeyIdx < Keys.GetSize(); KeyIdx++)
+		{
+			lcObjectKey<T>& Key = Keys[KeyIdx];
+
+			if ((Key.Step < Start) || (Key.Step == 1))
+				continue;
+
+			if (EndKey)
+			{
+				Keys.RemoveIndex(KeyIdx);
+				KeyIdx--;
+				continue;
+			}
+
+			if (Key.Step >= LC_STEP_MAX - Time)
+			{
+				Key.Step = LC_STEP_MAX;
+				EndKey = true;
+			}
+			else
+				Key.Step += Time;
+		}
 	}
 
-protected:
-	void RegisterKeys(float *values[], LC_OBJECT_KEY_INFO* info, int count);
-	void CalculateKeys(lcStep Step);
-	void RemoveKeys();
+	template<typename T>
+	void RemoveTime(lcArray<lcObjectKey<T>>& Keys, lcStep Start, lcStep Time)
+	{
+		for (int KeyIdx = 0; KeyIdx < Keys.GetSize(); KeyIdx++)
+		{
+			lcObjectKey<T>& Key = Keys[KeyIdx];
 
-	LC_OBJECT_KEY* m_pInstructionKeys;
-	float **m_pKeyValues;
+			if ((Key.Step < Start) || (Key.Step == 1))
+				continue;
 
-	LC_OBJECT_KEY_INFO *m_pKeyInfo;
-	int m_nKeyInfoCount;
+			if (Key.Step < Start + Time)
+			{
+				Keys.RemoveIndex(KeyIdx);
+				KeyIdx--;
+				continue;
+			}
+
+			Key.Step -= Time;
+		}
+	}
 
 private:
 	lcObjectType mObjectType;

@@ -11,31 +11,11 @@
 #include "lc_application.h"
 #include "lc_context.h"
 
-static LC_OBJECT_KEY_INFO light_key_info[LC_LK_COUNT] =
-{
-	{ "Light Position", 3, LC_LK_POSITION },
-	{ "Light Target", 3, LC_LK_TARGET },
-	{ "Ambient Color", 3, LC_LK_AMBIENT_COLOR },
-	{ "Diffuse Color", 3, LC_LK_DIFFUSE_COLOR },
-	{ "Specular Color", 3, LC_LK_SPECULAR_COLOR },
-	{ "Constant Attenuation", 1, LC_LK_CONSTANT_ATTENUATION },
-	{ "Linear Attenuation", 1, LC_LK_LINEAR_ATTENUATION },
-	{ "Quadratic Attenuation", 1, LC_LK_QUADRATIC_ATTENUATION },
-	{ "Spot Cutoff", 1, LC_LK_SPOT_CUTOFF },
-	{ "Spot Exponent", 1, LC_LK_SPOT_EXPONENT }
-};
-
 // New omni light.
 lcLight::lcLight(float px, float py, float pz)
 	: lcObject(LC_OBJECT_LIGHT)
 {
-	Initialize();
-
-	float pos[] = { px, py, pz }, target[] = { 0, 0, 0 };
-
-	ChangeKey(1, true, pos, LC_LK_POSITION);
-	ChangeKey(1, true, target, LC_LK_TARGET);
-
+	Initialize(lcVector3(px, py, pz), lcVector3(0.0f, 0.0f, 0.0f));
 	UpdatePosition(1);
 }
 
@@ -43,41 +23,23 @@ lcLight::lcLight(float px, float py, float pz)
 lcLight::lcLight(float px, float py, float pz, float tx, float ty, float tz)
 	: lcObject(LC_OBJECT_LIGHT)
 {
-	Initialize();
-
-	float pos[] = { px, py, pz }, target[] = { tx, ty, tz };
-
-	ChangeKey(1, true, pos, LC_LK_POSITION);
-	ChangeKey(1, true, target, LC_LK_TARGET);
-
+	Initialize(lcVector3(px, py, pz), lcVector3(tx, ty, tz));
 	UpdatePosition(1);
 }
 
-void lcLight::Initialize()
+void lcLight::Initialize(const lcVector3& Position, const lcVector3& TargetPosition)
 {
 	mState = 0;
 	memset(m_strName, 0, sizeof(m_strName));
 
-	mAmbientColor[3] = 1.0f;
-	mDiffuseColor[3] = 1.0f;
-	mSpecularColor[3] = 1.0f;
-
-	float *values[] = { mPosition, mTargetPosition, mAmbientColor, mDiffuseColor, mSpecularColor,
-	                    &mConstantAttenuation, &mLinearAttenuation, &mQuadraticAttenuation, &mSpotCutoff, &mSpotExponent };
-	RegisterKeys(values, light_key_info, LC_LK_COUNT);
-
-	// set the default values
-	float ambient[] = { 0, 0, 0 }, diffuse[] = { 0.8f, 0.8f, 0.8f }, specular[] = { 1, 1, 1 };
-	float constant = 1, linear = 0, quadratic = 0, cutoff = 30, exponent = 0;
-
-	ChangeKey(1, true, ambient, LC_LK_AMBIENT_COLOR);
-	ChangeKey(1, true, diffuse, LC_LK_DIFFUSE_COLOR);
-	ChangeKey(1, true, specular, LC_LK_SPECULAR_COLOR);
-	ChangeKey(1, true, &constant, LC_LK_CONSTANT_ATTENUATION);
-	ChangeKey(1, true, &linear, LC_LK_LINEAR_ATTENUATION);
-	ChangeKey(1, true, &quadratic, LC_LK_QUADRATIC_ATTENUATION);
-	ChangeKey(1, true, &cutoff, LC_LK_SPOT_CUTOFF);
-	ChangeKey(1, true, &exponent, LC_LK_SPOT_EXPONENT);
+	ChangeKey(mPositionKeys, Position, 1, true);
+	ChangeKey(mTargetPositionKeys, TargetPosition, 1, true);
+	ChangeKey(mAmbientColorKeys, lcVector4(0.0f, 0.0f, 0.0f, 1.0f), 1, true);
+	ChangeKey(mDiffuseColorKeys, lcVector4(0.8f, 0.8f, 0.8f, 1.0f), 1, true);
+	ChangeKey(mSpecularColorKeys, lcVector4(1.0f, 1.0f, 1.0f, 1.0f), 1, true);
+	ChangeKey(mAttenuationKeys, lcVector3(1.0f, 0.0f, 0.0f), 1, true);
+	ChangeKey(mSpotCutoffKeys, 30.0f, 1, true);
+	ChangeKey(mSpotExponentKeys, 0.0f, 1, true);
 }
 
 lcLight::~lcLight()
@@ -229,21 +191,50 @@ void lcLight::Move(lcStep Step, bool AddKey, const lcVector3& Distance)
 	if (IsSelected(LC_LIGHT_SECTION_POSITION))
 	{
 		mPosition += Distance;
-
-		ChangeKey(Step, AddKey, mPosition, LC_LK_POSITION);
+		ChangeKey(mPositionKeys, mPosition, Step, AddKey);
 	}
 
 	if (IsSelected(LC_LIGHT_SECTION_TARGET))
 	{
 		mTargetPosition += Distance;
-
-		ChangeKey(Step, AddKey, mTargetPosition, LC_LK_TARGET);
+		ChangeKey(mTargetPositionKeys, mTargetPosition, Step, AddKey);
 	}
+}
+
+void lcLight::InsertTime(lcStep Start, lcStep Time)
+{
+	lcObject::InsertTime(mPositionKeys, Start, Time);
+	lcObject::InsertTime(mTargetPositionKeys, Start, Time);
+	lcObject::InsertTime(mAmbientColorKeys, Start, Time);
+	lcObject::InsertTime(mDiffuseColorKeys, Start, Time);
+	lcObject::InsertTime(mSpecularColorKeys, Start, Time);
+	lcObject::InsertTime(mAttenuationKeys, Start, Time);
+	lcObject::InsertTime(mSpotCutoffKeys, Start, Time);
+	lcObject::InsertTime(mSpotExponentKeys, Start, Time);
+}
+
+void lcLight::RemoveTime(lcStep Start, lcStep Time)
+{
+	lcObject::RemoveTime(mPositionKeys, Start, Time);
+	lcObject::RemoveTime(mTargetPositionKeys, Start, Time);
+	lcObject::RemoveTime(mAmbientColorKeys, Start, Time);
+	lcObject::RemoveTime(mDiffuseColorKeys, Start, Time);
+	lcObject::RemoveTime(mSpecularColorKeys, Start, Time);
+	lcObject::RemoveTime(mAttenuationKeys, Start, Time);
+	lcObject::RemoveTime(mSpotCutoffKeys, Start, Time);
+	lcObject::RemoveTime(mSpotExponentKeys, Start, Time);
 }
 
 void lcLight::UpdatePosition(lcStep Step)
 {
-	CalculateKeys(Step);
+	mPosition = CalculateKey(mPositionKeys, Step);
+	mTargetPosition = CalculateKey(mTargetPositionKeys, Step);
+	mAmbientColor = CalculateKey(mAmbientColorKeys, Step);
+	mDiffuseColor = CalculateKey(mDiffuseColorKeys, Step);
+	mSpecularColor = CalculateKey(mSpecularColorKeys, Step);
+	mAttenuation = CalculateKey(mAttenuationKeys, Step);
+	mSpotCutoff = CalculateKey(mSpotCutoffKeys, Step);
+	mSpotExponent = CalculateKey(mSpotExponentKeys, Step);
 
 	if (IsPointLight())
 	{
@@ -573,9 +564,9 @@ bool lcLight::Setup(int LightIndex)
 
 	if (!IsDirectionalLight())
 	{
-		glLightf(LightName, GL_CONSTANT_ATTENUATION, mConstantAttenuation);
-		glLightf(LightName, GL_LINEAR_ATTENUATION, mLinearAttenuation);
-		glLightf(LightName, GL_QUADRATIC_ATTENUATION, mQuadraticAttenuation);
+		glLightf(LightName, GL_CONSTANT_ATTENUATION, mAttenuation[0]);
+		glLightf(LightName, GL_LINEAR_ATTENUATION, mAttenuation[1]);
+		glLightf(LightName, GL_QUADRATIC_ATTENUATION, mAttenuation[2]);
 
 		lcVector4 Position(mPosition, 1.0f);
 		glLightfv(LightName, GL_POSITION, Position);

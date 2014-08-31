@@ -19,13 +19,6 @@ enum lcPieceSection
 	LC_PIECE_SECTION_POSITION
 };
 
-enum LC_PK_TYPES
-{
-	LC_PK_POSITION,
-	LC_PK_ROTATION,
-	LC_PK_COUNT
-};
-
 class lcPiece : public lcObject
 {
 public:
@@ -101,8 +94,8 @@ public:
 	virtual void RayTest(lcObjectRayTest& ObjectRayTest) const;
 	virtual void BoxTest(lcObjectBoxTest& ObjectBoxTest) const;
 
-	virtual void InsertTime(lcStep Start, lcStep Time);
-	virtual void RemoveTime(lcStep Start, lcStep Time);
+	void InsertTime(lcStep Start, lcStep Time);
+	void RemoveTime(lcStep Start, lcStep Time);
 
 	bool IsHidden()
 	{
@@ -123,7 +116,7 @@ public:
 	}
 
 	bool IsVisible(lcStep Step);
-	void Initialize(float x, float y, float z, lcStep Step);
+	void Initialize(const lcVector3& Position, const lcVector4& AxisAngle, lcStep Step);
 	void CreateName(const lcArray<lcPiece*>& Pieces);
 	void CompareBoundingBox(float box[6]);
 	void SetPieceInfo(PieceInfo* pPieceInfo);
@@ -182,6 +175,16 @@ public:
 		mColorCode = lcGetColorCode(ColorIndex);
 	}
 
+	void SetPosition(const lcVector3& Position, lcStep Step, bool AddKey)
+	{
+		ChangeKey(mPositionKeys, Position, Step, AddKey);
+	}
+
+	void SetRotation(const lcVector4& Rotation, lcStep Step, bool AddKey)
+	{
+		ChangeKey(mRotationKeys, Rotation, Step, AddKey);
+	}
+
 public:
 	PieceInfo* mPieceInfo;
 
@@ -193,6 +196,9 @@ public:
 	lcVector4 mRotation;
 
 protected:
+	lcArray<lcObjectKey<lcVector3>> mPositionKeys;
+	lcArray<lcObjectKey<lcVector4>> mRotationKeys;
+
 	// Atributes
 	lcGroup* mGroup;
 

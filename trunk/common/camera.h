@@ -47,14 +47,6 @@ typedef enum
 	LC_CAMERA_MAIN, LC_CAMERA_USER
 } LC_CAMERA_TYPES;
 
-enum LC_CK_TYPES
-{
-	LC_CK_EYE,
-	LC_CK_TARGET,
-	LC_CK_UP,
-	LC_CK_COUNT
-};
-
 class lcCamera : public lcObject
 {
 public:
@@ -248,9 +240,27 @@ public:
 	bool IsHidden() const
 		{ return (mState & LC_CAMERA_HIDDEN) != 0; }
 
+	void SetPosition(const lcVector3& Position, lcStep Step, bool AddKey)
+	{
+		ChangeKey(mPositionKeys, Position, Step, AddKey);
+	}
+
+	void SetTargetPosition(const lcVector3& TargetPosition, lcStep Step, bool AddKey)
+	{
+		ChangeKey(mTargetPositionKeys, TargetPosition, Step, AddKey);
+	}
+
+	void SetUpVector(const lcVector3& UpVector, lcStep Step, bool AddKey)
+	{
+		ChangeKey(mPositionKeys, UpVector, Step, AddKey);
+	}
+
 public:
 	virtual void RayTest(lcObjectRayTest& ObjectRayTest) const;
 	virtual void BoxTest(lcObjectBoxTest& ObjectBoxTest) const;
+
+	void InsertTime(lcStep Start, lcStep Time);
+	void RemoveTime(lcStep Start, lcStep Time);
 
 	bool FileLoad(lcFile& file);
 	void FileSave(lcFile& file) const;
@@ -290,6 +300,10 @@ public:
 	TiledRender* m_pTR;
 
 protected:
+	lcArray<lcObjectKey<lcVector3>> mPositionKeys;
+	lcArray<lcObjectKey<lcVector3>> mTargetPositionKeys;
+	lcArray<lcObjectKey<lcVector3>> mUpVectorKeys;
+
 	void Initialize();
 
 	lcuint32 mState;

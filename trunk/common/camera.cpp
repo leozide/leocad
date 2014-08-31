@@ -15,13 +15,6 @@
 
 #define LC_CAMERA_SAVE_VERSION 7 // LeoCAD 0.80
 
-static LC_OBJECT_KEY_INFO camera_key_info[LC_CK_COUNT] =
-{
-	{ "Camera Position", 3, LC_CK_EYE },
-	{ "Camera Target", 3, LC_CK_TARGET },
-	{ "Camera Up Vector", 3, LC_CK_UP }
-};
-
 lcCamera::lcCamera(bool Simple)
 	: lcObject(LC_OBJECT_CAMERA)
 {
@@ -36,9 +29,9 @@ lcCamera::lcCamera(bool Simple)
 		mOrthoTarget = mTargetPosition;
 		mUpVector = lcVector3(-0.2357f, -0.2357f, 0.94281f);
 
-		ChangeKey(1, true, mPosition, LC_CK_EYE);
-		ChangeKey(1, true, mTargetPosition, LC_CK_TARGET);
-		ChangeKey(1, true, mUpVector, LC_CK_UP);
+		ChangeKey(mPositionKeys, mPosition, 1, true);
+		ChangeKey(mTargetPositionKeys, mTargetPosition, 1, true);
+		ChangeKey(mUpVectorKeys, mUpVector, 1, true);
 
 		UpdatePosition(1);
 	}
@@ -59,11 +52,9 @@ lcCamera::lcCamera(float ex, float ey, float ez, float tx, float ty, float tz)
 
 	Initialize();
 
-	float eye[3] = { ex, ey, ez }, target[3] = { tx, ty, tz };
-
-	ChangeKey(1, true, eye, LC_CK_EYE);
-	ChangeKey(1, true, target, LC_CK_TARGET);
-	ChangeKey(1, true, UpVector, LC_CK_UP);
+	ChangeKey(mPositionKeys, lcVector3(ex, ey, ez), 1, true);
+	ChangeKey(mTargetPositionKeys, lcVector3(tx, ty, tz), 1, true);
+	ChangeKey(mUpVectorKeys, UpVector, 1, true);
 
 	UpdatePosition(1);
 }
@@ -83,9 +74,6 @@ void lcCamera::Initialize()
 
 	m_pTR = NULL;
 	memset(m_strName, 0, sizeof(m_strName));
-
-	float *values[] = { mPosition, mTargetPosition, mUpVector };
-	RegisterKeys(values, camera_key_info, LC_CK_COUNT);
 }
 
 void lcCamera::CreateName(const lcArray<lcCamera*>& Cameras)
@@ -115,37 +103,20 @@ QJsonObject lcCamera::Save()
 	if (IsOrtho())
 		Camera[QStringLiteral("Orthographic")] = QStringLiteral("true");
 
-	QJsonArray PositionKeys, TargetPositionKeys, UpVectorKeys;
-
-	for (LC_OBJECT_KEY* Node = m_pInstructionKeys; Node; Node = Node->next)
-	{
-		QJsonObject Key;
-
-		Key[QStringLiteral("Step")] = QString::number(Node->Step);
-		Key["Value"] = QStringLiteral("%1 %2 %3").arg(QString::number(Node->param[0]), QString::number(Node->param[1]), QString::number(Node->param[2]));
-
-		if (Node->type == LC_CK_EYE)
-			PositionKeys.append(Key);
-		else if (Node->type == LC_CK_TARGET)
-			TargetPositionKeys.append(Key);
-		else if (Node->type == LC_CK_UP)
-			UpVectorKeys.append(Key);
-	}
-
-	if (PositionKeys.size() == 1)
-		Camera[QStringLiteral("Position")] = PositionKeys.first().toObject()[QStringLiteral("Value")].toString();
+	if (mPositionKeys.GetSize() < 2)
+		Camera[QStringLiteral("Position")] = QStringLiteral("%1 %2 %3").arg(QString::number(mPosition[0]), QString::number(mPosition[1]), QString::number(mPosition[2]));
 	else
-		Camera[QStringLiteral("PositionKeys")] = PositionKeys;
-		
-	if  (TargetPositionKeys.size() == 1)
-		Camera[QStringLiteral("TargetPosition")] = TargetPositionKeys.first().toObject()[QStringLiteral("Value")].toString();
-	else		
-		Camera[QStringLiteral("UpVectorKeys")] = UpVectorKeys;
-		
-	if (UpVectorKeys.size() == 1)
-		Camera[QStringLiteral("UpVector")] = UpVectorKeys.first().toObject()[QStringLiteral("Value")].toString();
+		Camera[QStringLiteral("PositionKeys")] = SaveKeys(mPositionKeys);
+
+	if (mTargetPositionKeys.GetSize() < 2)
+		Camera[QStringLiteral("TargetPosition")] = QStringLiteral("%1 %2 %3").arg(QString::number(mTargetPosition[0]), QString::number(mTargetPosition[1]), QString::number(mTargetPosition[2]));
 	else
-		Camera[QStringLiteral("TargetPositionKeys")] = TargetPositionKeys;
+		Camera[QStringLiteral("TargetPositionKeys")] = SaveKeys(mTargetPositionKeys);
+
+	if (mUpVectorKeys.GetSize() < 2)
+		Camera[QStringLiteral("UpVector")] = QStringLiteral("%1 %2 %3").arg(QString::number(mUpVector[0]), QString::number(mUpVector[1]), QString::number(mUpVector[2]));
+	else
+		Camera[QStringLiteral("UpVectorKeys")] = SaveKeys(mUpVectorKeys);
 
 	return Camera;
 }
@@ -168,8 +139,38 @@ bool lcCamera::FileLoad(lcFile& file)
 		return false;
 
 	if (version > 5)
-		if (!lcObject::FileLoad(file))
+	{
+		if (file.ReadU8() != 1)
 			return false;
+
+		lcuint16 time;
+		float param[4];
+		lcuint8 type;
+		lcuint32 n;
+
+		file.ReadU32(&n, 1);
+		while (n--)
+		{
+			file.ReadU16(&time, 1);
+			file.ReadFloats(param, 4);
+			file.ReadU8(&type, 1);
+
+			if (type == 0)
+				ChangeKey(mPositionKeys, lcVector3(param[0], param[1], param[2]), time, true);
+			else if (type == 1)
+				ChangeKey(mTargetPositionKeys, lcVector3(param[0], param[1], param[2]), time, true);
+			else if (type == 2)
+				ChangeKey(mUpVectorKeys, lcVector3(param[0], param[1], param[2]), time, true);
+		}
+
+		file.ReadU32(&n, 1);
+		while (n--)
+		{
+			file.ReadU16(&time, 1);
+			file.ReadFloats(param, 4);
+			file.ReadU8(&type, 1);
+		}
+	}
 
 	if (version == 4)
 	{
@@ -194,19 +195,19 @@ bool lcCamera::FileLoad(lcFile& file)
 		f[0] = (float)d[0];
 		f[1] = (float)d[1];
 		f[2] = (float)d[2];
-		ChangeKey(1, true, f, LC_CK_EYE);
+		ChangeKey(mPositionKeys, lcVector3(f[0], f[1], f[2]), 1, true);
 
 		file.ReadDoubles(d, 3);
 		f[0] = (float)d[0];
 		f[1] = (float)d[1];
 		f[2] = (float)d[2];
-		ChangeKey(1, true, f, LC_CK_TARGET);
+		ChangeKey(mTargetPositionKeys, lcVector3(f[0], f[1], f[2]), 1, true);
 
 		file.ReadDoubles(d, 3);
 		f[0] = (float)d[0];
 		f[1] = (float)d[1];
 		f[2] = (float)d[2];
-		ChangeKey(1, true, f, LC_CK_UP);
+		ChangeKey(mUpVectorKeys, lcVector3(f[0], f[1], f[2]), 1, true);
 	}
 
 	if (version == 3)
@@ -230,17 +231,17 @@ bool lcCamera::FileLoad(lcFile& file)
 			f[0] = (float)eye[0];
 			f[1] = (float)eye[1];
 			f[2] = (float)eye[2];
-			ChangeKey(step, true, f, LC_CK_EYE);
+			ChangeKey(mPositionKeys, lcVector3(f[0], f[1], f[2]), step, true);
 
 			f[0] = (float)target[0];
 			f[1] = (float)target[1];
 			f[2] = (float)target[2];
-			ChangeKey(step, true, f, LC_CK_TARGET);
+			ChangeKey(mTargetPositionKeys, lcVector3(f[0], f[1], f[2]), step, true);
 
 			f[0] = (float)up[0];
 			f[1] = (float)up[1];
 			f[2] = (float)up[2];
-			ChangeKey(step, true, f, LC_CK_UP);
+			ChangeKey(mUpVectorKeys, lcVector3(f[0], f[1], f[2]), step, true);
 
 			file.ReadS32(); // snapshot
 			file.ReadS32(); // cam
@@ -270,7 +271,12 @@ bool lcCamera::FileLoad(lcFile& file)
 				file.ReadFloats(param, 3);
 				file.ReadU8(&type, 1);
 
-				ChangeKey(time, true, param, type);
+				if (type == 0)
+					ChangeKey(mPositionKeys, lcVector3(param[0], param[1], param[2]), time, true);
+				else if (type == 1)
+					ChangeKey(mTargetPositionKeys, lcVector3(param[0], param[1], param[2]), time, true);
+				else if (type == 2)
+					ChangeKey(mUpVectorKeys, lcVector3(param[0], param[1], param[2]), time, true);
 			}
 
 			n = file.ReadS32();
@@ -318,15 +324,11 @@ bool lcCamera::FileLoad(lcFile& file)
 		m_zFar *= 25.0f;
 		m_zNear *= 25.0f;
 
-		for (LC_OBJECT_KEY* Key = m_pInstructionKeys; Key; Key = Key->next)
-		{
-			if (Key->type == LC_CK_EYE || Key->type == LC_CK_TARGET)
-			{
-				Key->param[0] *= 25.0f;
-				Key->param[1] *= 25.0f;
-				Key->param[2] *= 25.0f;
-			}
-		}
+		for (int KeyIdx = 0; KeyIdx < mPositionKeys.GetSize(); KeyIdx++)
+			mPositionKeys[KeyIdx].Value *= 25.0f;
+
+		for (int KeyIdx = 0; KeyIdx < mTargetPositionKeys.GetSize(); KeyIdx++)
+			mTargetPositionKeys[KeyIdx].Value *= 25.0f;
 	}
 
 	return true;
@@ -336,7 +338,43 @@ void lcCamera::FileSave(lcFile& file) const
 {
 	file.WriteU8(LC_CAMERA_SAVE_VERSION);
 
-	lcObject::FileSave(file);
+	file.WriteU8(1);
+	file.WriteU32(mPositionKeys.GetSize() + mTargetPositionKeys.GetSize() + mUpVectorKeys.GetSize());
+
+	for (int KeyIdx = 0; KeyIdx < mPositionKeys.GetSize(); KeyIdx++)
+	{
+		lcObjectKey<lcVector3>& Key = mPositionKeys[KeyIdx];
+
+		lcuint16 Step = lcMin(Key.Step, 0xFFFFU);
+		file.WriteU16(Step);
+		file.WriteFloats(Key.Value, 3);
+		file.WriteFloat(0);
+		file.WriteU8(0);
+	}
+
+	for (int KeyIdx = 0; KeyIdx < mTargetPositionKeys.GetSize(); KeyIdx++)
+	{
+		lcObjectKey<lcVector3>& Key = mTargetPositionKeys[KeyIdx];
+
+		lcuint16 Step = lcMin(Key.Step, 0xFFFFU);
+		file.WriteU16(Step);
+		file.WriteFloats(Key.Value, 3);
+		file.WriteFloat(0);
+		file.WriteU8(1);
+	}
+
+	for (int KeyIdx = 0; KeyIdx < mUpVectorKeys.GetSize(); KeyIdx++)
+	{
+		lcObjectKey<lcVector3>& Key = mUpVectorKeys[KeyIdx];
+
+		lcuint16 Step = lcMin(Key.Step, 0xFFFFU);
+		file.WriteU16(Step);
+		file.WriteFloats(Key.Value, 3);
+		file.WriteFloat(0);
+		file.WriteU8(2);
+	}
+
+	file.WriteU32(0);
 
 	lcuint8 ch = (lcuint8)strlen(m_strName);
 	file.WriteU8(ch);
@@ -362,20 +400,19 @@ void lcCamera::Move(lcStep Step, bool AddKey, const lcVector3& Distance)
 	{
 		mPosition += Distance;
 		lcAlign(mOrthoTarget, mPosition, mTargetPosition);
-		ChangeKey(Step, AddKey, mPosition, LC_CK_EYE);
+		ChangeKey(mPositionKeys, mPosition, Step, AddKey);
 	}
 
 	if (IsSelected(LC_CAMERA_SECTION_TARGET))
 	{
 		mTargetPosition += Distance;
-		ChangeKey(Step, AddKey, mTargetPosition, LC_CK_TARGET);
+		ChangeKey(mTargetPositionKeys, mTargetPosition, Step, AddKey);
 	}
-
-	if (IsSelected(LC_CAMERA_SECTION_UPVECTOR))
+	else if (IsSelected(LC_CAMERA_SECTION_UPVECTOR))
 	{
 		mUpVector += Distance;
 		mUpVector.Normalize();
-		ChangeKey(Step, AddKey, mTargetPosition, LC_CK_UP);
+		ChangeKey(mUpVectorKeys, mUpVector, Step, AddKey);
 	}
 
 	lcVector3 FrontVector(mTargetPosition - mPosition);
@@ -390,7 +427,9 @@ void lcCamera::Move(lcStep Step, bool AddKey, const lcVector3& Distance)
 
 void lcCamera::UpdatePosition(lcStep Step)
 {
-	CalculateKeys(Step);
+	mPosition = CalculateKey(mPositionKeys, Step);
+	mTargetPosition = CalculateKey(mTargetPositionKeys, Step);
+	mUpVector = CalculateKey(mUpVectorKeys, Step);
 
 	lcVector3 FrontVector(mPosition - mTargetPosition);
 	lcVector3 SideVector = lcCross(FrontVector, mUpVector);
@@ -661,6 +700,20 @@ void lcCamera::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
 	}
 }
 
+void lcCamera::InsertTime(lcStep Start, lcStep Time)
+{
+	lcObject::InsertTime(mPositionKeys, Start, Time);
+	lcObject::InsertTime(mTargetPositionKeys, Start, Time);
+	lcObject::InsertTime(mUpVectorKeys, Start, Time);
+}
+
+void lcCamera::RemoveTime(lcStep Start, lcStep Time)
+{
+	lcObject::RemoveTime(mPositionKeys, Start, Time);
+	lcObject::RemoveTime(mTargetPositionKeys, Start, Time);
+	lcObject::RemoveTime(mUpVectorKeys, Start, Time);
+}
+
 void lcCamera::ZoomExtents(View* view, const lcVector3& Center, const lcVector3* Points, int NumPoints, lcStep Step, bool AddKey)
 {
 	int Viewport[4] = { 0, 0, view->mWidth, view->mHeight };
@@ -678,8 +731,8 @@ void lcCamera::ZoomExtents(View* view, const lcVector3& Center, const lcVector3*
 	if (IsSimple())
 		AddKey = false;
 
-	ChangeKey(Step, AddKey, mPosition, LC_CK_EYE);
-	ChangeKey(Step, AddKey, mTargetPosition, LC_CK_TARGET);
+	ChangeKey(mPositionKeys, mPosition, Step, AddKey);
+	ChangeKey(mTargetPositionKeys, mTargetPosition, Step, AddKey);
 
 	UpdatePosition(Step);
 }
@@ -704,8 +757,8 @@ void lcCamera::ZoomRegion(const lcVector3* Points, float RatioX, float RatioY, l
 	if (IsSimple())
 		AddKey = false;
 
-	ChangeKey(Step, AddKey, mPosition, LC_CK_EYE);
-	ChangeKey(Step, AddKey, mTargetPosition, LC_CK_TARGET);
+	ChangeKey(mPositionKeys, mPosition, Step, AddKey);
+	ChangeKey(mTargetPositionKeys, mTargetPosition, Step, AddKey);
 
 	UpdatePosition(Step);
 }
@@ -729,8 +782,8 @@ void lcCamera::Zoom(float Distance, lcStep Step, bool AddKey)
 	if (IsSimple())
 		AddKey = false;
 
-	ChangeKey(Step, AddKey, mPosition, LC_CK_EYE);
-	ChangeKey(Step, AddKey, mTargetPosition, LC_CK_TARGET);
+	ChangeKey(mPositionKeys, mPosition, Step, AddKey);
+	ChangeKey(mTargetPositionKeys, mTargetPosition, Step, AddKey);
 
 	UpdatePosition(Step);
 }
@@ -748,8 +801,8 @@ void lcCamera::Pan(float DistanceX, float DistanceY, lcStep Step, bool AddKey)
 	if (IsSimple())
 		AddKey = false;
 
-	ChangeKey(Step, AddKey, mPosition, LC_CK_EYE);
-	ChangeKey(Step, AddKey, mTargetPosition, LC_CK_TARGET);
+	ChangeKey(mPositionKeys, mPosition, Step, AddKey);
+	ChangeKey(mTargetPositionKeys, mTargetPosition, Step, AddKey);
 
 	UpdatePosition(Step);
 }
@@ -780,9 +833,9 @@ void lcCamera::Orbit(float DistanceX, float DistanceY, const lcVector3& CenterPo
 	if (IsSimple())
 		AddKey = false;
 
-	ChangeKey(Step, AddKey, mPosition, LC_CK_EYE);
-	ChangeKey(Step, AddKey, mTargetPosition, LC_CK_TARGET);
-	ChangeKey(Step, AddKey, mUpVector, LC_CK_UP);
+	ChangeKey(mPositionKeys, mPosition, Step, AddKey);
+	ChangeKey(mTargetPositionKeys, mTargetPosition, Step, AddKey);
+	ChangeKey(mUpVectorKeys, mUpVector, Step, AddKey);
 
 	UpdatePosition(Step);
 }
@@ -797,7 +850,7 @@ void lcCamera::Roll(float Distance, lcStep Step, bool AddKey)
 	if (IsSimple())
 		AddKey = false;
 
-	ChangeKey(Step, AddKey, mUpVector, LC_CK_UP);
+	ChangeKey(mUpVectorKeys, mUpVector, Step, AddKey);
 
 	UpdatePosition(Step);
 }
@@ -809,8 +862,8 @@ void lcCamera::Center(lcVector3& point, lcStep Step, bool AddKey)
 	if (IsSimple())
 		AddKey = false;
 
-	ChangeKey(Step, AddKey, mPosition, LC_CK_EYE);
-	ChangeKey(Step, AddKey, mTargetPosition, LC_CK_TARGET);
+	ChangeKey(mPositionKeys, mPosition, Step, AddKey);
+	ChangeKey(mTargetPositionKeys, mTargetPosition, Step, AddKey);
 
 	UpdatePosition(Step);
 }
@@ -847,9 +900,9 @@ void lcCamera::SetViewpoint(LC_VIEWPOINT Viewpoint, lcStep Step, bool AddKey)
 	if (IsSimple())
 		AddKey = false;
 
-	ChangeKey(Step, AddKey, mPosition, LC_CK_EYE);
-	ChangeKey(Step, AddKey, mTargetPosition, LC_CK_TARGET);
-	ChangeKey(Step, AddKey, mUpVector, LC_CK_UP);
+	ChangeKey(mPositionKeys, mPosition, Step, AddKey);
+	ChangeKey(mTargetPositionKeys, mTargetPosition, Step, AddKey);
+	ChangeKey(mUpVectorKeys, mUpVector, Step, AddKey);
 
 	UpdatePosition(Step);
 }
@@ -917,8 +970,8 @@ void lcCamera::SetFocalPoint(const lcVector3& focus, lcStep Step, bool AddKey)
 	if (IsSimple())
 		AddKey = false;
 
-	ChangeKey(Step, AddKey, mPosition, LC_CK_EYE);
-	ChangeKey(Step, AddKey, mTargetPosition, LC_CK_TARGET);
+	ChangeKey(mPositionKeys, mPosition, Step, AddKey);
+	ChangeKey(mTargetPositionKeys, mTargetPosition, Step, AddKey);
 
 	UpdatePosition(Step);
 }

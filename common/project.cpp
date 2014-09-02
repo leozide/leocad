@@ -953,49 +953,8 @@ bool Project::DoSave(const char* FileName)
 
 	if ((strcmp(ext, "dat") == 0) || (strcmp(ext, "ldr") == 0))
 	{
-		char buf[256];
-
-		ptr = strrchr(m_strPathName, '\\');
-		if (ptr == NULL)
-			ptr = strrchr(m_strPathName, '/');
-		if (ptr == NULL)
-			ptr = m_strPathName;
-		else
-			ptr++;
-
-		sprintf(buf, "0 Model exported from LeoCAD\r\n0 Original name: %s\r\n", ptr);
-		if (!mProperties.mAuthor.IsEmpty())
-		{
-			strcat(buf, "0 Author: ");
-			strcat(buf, mProperties.mAuthor.Buffer());
-			strcat(buf, "\r\n");
-		}
-		strcat(buf, "\r\n");
-		file.WriteBuffer(buf, strlen(buf));
-
 		const char* OldLocale = setlocale(LC_NUMERIC, "C");
-
-		lcStep LastStep = GetLastStep();
-		for (lcStep Step = 1; Step <= LastStep; Step++)
-		{
-			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-			{
-				lcPiece* Piece = mPieces[PieceIdx];
-
-				if ((Piece->IsVisible(Step)) && (Piece->GetStepShow() == Step))
-				{
-					const float* f = Piece->mModelWorld;
-					sprintf (buf, "1 %d %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %s.DAT\r\n",
-							 Piece->mColorCode, f[12], -f[14], f[13], f[0], -f[8], f[4], -f[2], f[10], -f[6], f[1], -f[9], f[5], Piece->mPieceInfo->m_strName);
-					file.WriteBuffer(buf, strlen(buf));
-				}
-			}
-
-			if (Step != LastStep)
-				file.WriteBuffer("0 STEP\r\n", 8);
-		}
-		file.WriteBuffer("0\r\n", 3);
-
+		SaveLDraw(file);
 		setlocale(LC_NUMERIC, OldLocale);
 	}
 	else
@@ -1149,7 +1108,17 @@ bool Project::OnOpenDocument(const char* lpszPathName)
       if (mpdfile)
         FileReadLDraw(&FileArray[0]->File, mat, &ok, 16, &step, FileArray);
       else
-        FileReadLDraw(&file, mat, &ok, 16, &step, FileArray);
+//        FileReadLDraw(&file, mat, &ok, 16, &step, FileArray);
+	  {
+		  QStringList Lines;
+		  QFile File(lpszPathName);
+		  if (!File.open(QIODevice::ReadOnly))
+		  {
+		  }
+		  while (!File.atEnd())
+			  Lines.append(File.readLine());
+		  LoadLDraw(Lines, mat, 16, step);
+	  }
 
       mCurrentStep = step;
 	  gMainWindow->UpdateCurrentStep();
@@ -1211,7 +1180,7 @@ void Project::CheckPoint(const char* Description)
 	lcModelHistoryEntry* ModelHistoryEntry = new lcModelHistoryEntry();
 
 	strcpy(ModelHistoryEntry->Description, Description);
-	FileSave(&ModelHistoryEntry->File, true);
+	ModelHistoryEntry->File = QJsonDocument(SaveJson()).toBinaryData();
 
 	mUndoHistory.InsertAt(0, ModelHistoryEntry);
 	mRedoHistory.DeleteAll();
@@ -1603,29 +1572,6 @@ bool Project::GetPiecesBoundingBox(View* view, float BoundingBox[6])
 
 /////////////////////////////////////////////////////////////////////////////
 // Project functions
-
-void Project::CalculateStep()
-{
-	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-	{
-		lcPiece* Piece = mPieces[PieceIdx];
-		Piece->UpdatePosition(mCurrentStep);
-
-		if (Piece->IsSelected())
-		{
-			if (!Piece->IsVisible(mCurrentStep))
-				Piece->SetSelected(false);
-			else
-				SelectGroup(Piece->GetTopGroup(), true);
-		}
-	}
-
-	for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
-		mCameras[CameraIdx]->UpdatePosition(mCurrentStep);
-
-	for (int LightIdx = 0; LightIdx < mLights.GetSize(); LightIdx++)
-		mLights[LightIdx]->UpdatePosition(mCurrentStep);
-}
 
 bool Project::RemoveSelectedObjects()
 {
@@ -3526,7 +3472,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 			mRedoHistory.InsertAt(0, Undo);
 
 			DeleteContents(true);
-			FileLoad(&mUndoHistory[0]->File, true, false);
+			LoadJson(QJsonDocument::fromBinaryData(mUndoHistory[0]->File).object());
 
 			gMainWindow->UpdateModified(IsModified());
 			gMainWindow->UpdateUndoRedo(mUndoHistory.GetSize() > 1 ? mUndoHistory[0]->Description : NULL, !mRedoHistory.IsEmpty() ? mRedoHistory[0]->Description : NULL);
@@ -3543,7 +3489,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 			mUndoHistory.InsertAt(0, Redo);
 
 			DeleteContents(true);
-			FileLoad(&Redo->File, true, false);
+			LoadJson(QJsonDocument::fromBinaryData(Redo->File).object());
 
 			gMainWindow->UpdateModified(IsModified());
 			gMainWindow->UpdateUndoRedo(mUndoHistory.GetSize() > 1 ? mUndoHistory[0]->Description : NULL, !mRedoHistory.IsEmpty() ? mRedoHistory[0]->Description : NULL);
@@ -6067,7 +6013,7 @@ void Project::EndMouseTool(lcTool Tool, bool Accept)
 	if (!Accept)
 	{
 		DeleteContents(true);
-		FileLoad(&mUndoHistory[0]->File, true, false);
+		LoadJson(QJsonDocument::fromBinaryData(mUndoHistory[0]->File).object());
 		return;
 	}
 

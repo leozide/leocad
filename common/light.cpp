@@ -46,6 +46,10 @@ lcLight::~lcLight()
 {
 }
 
+void lcLight::SaveLDraw(lcFile& File) const
+{
+}
+
 QJsonObject lcLight::Save()
 {
 	return QJsonObject();

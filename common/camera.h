@@ -220,8 +220,11 @@ public:
 		return lcVector3(0.0f, 0.0f, 0.0f);
 	}
 
-	QJsonObject Save();
-	void Load(QJsonObject Camera);
+	void SaveLDraw(lcFile& File) const;
+	bool ParseLDrawLine(QString& Line);
+
+	QJsonObject SaveJson() const;
+	bool LoadJson(const QJsonObject& Camera);
 
 
 
@@ -237,8 +240,19 @@ public:
 		{ return m_nType < LC_CAMERA_MAIN; }
 	bool IsVisible() const
 		{ return (mState & LC_CAMERA_HIDDEN) == 0; }
+
 	bool IsHidden() const
-		{ return (mState & LC_CAMERA_HIDDEN) != 0; }
+	{
+		return (mState & LC_CAMERA_HIDDEN) != 0;
+	}
+
+	void SetHidden(bool Hidden)
+	{
+		if (Hidden)
+			mState |= LC_CAMERA_HIDDEN;
+		else
+			mState &= ~LC_CAMERA_HIDDEN;
+	}
 
 	void SetPosition(const lcVector3& Position, lcStep Step, bool AddKey)
 	{

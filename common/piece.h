@@ -88,8 +88,11 @@ public:
 		return lcVector3(0.0f, 0.0f, 0.0f);
 	}
 
-	QJsonObject Save();
-	void Load(QJsonObject Piece);
+	void SaveLDraw(lcFile& File) const;
+	bool ParseLDrawLine(QString& Line, lcModel* Model);
+
+	QJsonObject SaveJson() const;
+	bool LoadJson(const QJsonObject& Piece);
 
 	virtual void RayTest(lcObjectRayTest& ObjectRayTest) const;
 	virtual void BoxTest(lcObjectBoxTest& ObjectBoxTest) const;
@@ -97,7 +100,7 @@ public:
 	void InsertTime(lcStep Start, lcStep Time);
 	void RemoveTime(lcStep Start, lcStep Time);
 
-	bool IsHidden()
+	bool IsHidden() const
 	{
 		return (mState & LC_PIECE_HIDDEN) != 0;
 	}

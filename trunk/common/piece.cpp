@@ -23,8 +23,8 @@ lcPiece::lcPiece(PieceInfo* pPieceInfo)
 {
 	mPieceInfo = pPieceInfo;
 	mState = 0;
-	mColorIndex = 0;
-	mColorCode = 0;
+	mColorIndex = gDefaultColor;
+	mColorCode = 16;
 	mStepShow = 1;
 	mStepHide = LC_STEP_MAX;
 	memset(m_strName, 0, sizeof(m_strName));
@@ -43,35 +43,160 @@ lcPiece::~lcPiece()
 		mPieceInfo->Release();
 }
 
-QJsonObject lcPiece::Save()
+void lcPiece::SaveLDraw(lcFile& File) const
+{
+	char Line[1024];
+
+	if (mStepHide != LC_STEP_MAX)
+	{
+		sprintf(Line, "0 !LEOCAD PIECE STEP_HIDE %d\r\n", mStepHide);
+		File.WriteBuffer(Line, strlen(Line));
+	}
+
+	sprintf(Line, "0 !LEOCAD PIECE NAME %s\r\n", m_strName);
+	File.WriteBuffer(Line, strlen(Line));
+
+	if (IsHidden())
+	{
+		strcpy(Line, "0 !LEOCAD PIECE HIDDEN\r\n");
+		File.WriteBuffer(Line, strlen(Line));
+	}
+
+	if (mGroup)
+	{
+		sprintf(Line, "0 !LEOCAD PIECE GROUP %s\r\n", mGroup->m_strName);
+		File.WriteBuffer(Line, strlen(Line));
+	}
+
+	if (mPositionKeys.GetSize() > 1)
+		SaveKeysLDraw(mPositionKeys, "PIECE POSITION_KEY", File);
+
+	if (mRotationKeys.GetSize() > 1)
+		SaveKeysLDraw(mRotationKeys, "PIECE ROTATION_KEY", File);
+
+	const float* Matrix = mModelWorld;
+	float Numbers[12] = { Matrix[12], -Matrix[14], Matrix[13], Matrix[0], -Matrix[8], Matrix[4], -Matrix[2], Matrix[10], -Matrix[6], Matrix[1], -Matrix[9], Matrix[5] };
+	char Strings[12][32];
+	for (int NumberIdx = 0; NumberIdx < 12; NumberIdx++)
+	{
+		sprintf(Strings[NumberIdx], "%f", Numbers[NumberIdx]);
+		char* Dot = strchr(Strings[NumberIdx], '.');
+		if (Dot)
+		{
+			char* Last;
+
+			for (Last = Dot + strlen(Dot) - 1; *Last == '0'; Last--)
+				*Last = 0;
+
+			if (Last == Dot)
+				*Dot = 0;
+		}
+	}
+
+	sprintf(Line, "1 %d %s %s %s %s %s %s %s %s %s %s %s %s %s.DAT\r\n",
+			mColorCode, Strings[0], Strings[1], Strings[2], Strings[3], Strings[4], Strings[5], Strings[6], Strings[7], Strings[8], Strings[9], Strings[10], Strings[11], mPieceInfo->m_strName);
+	File.WriteBuffer(Line, strlen(Line));
+}
+
+bool lcPiece::ParseLDrawLine(QString& Line, lcModel* Model)
+{
+	QRegExp TokenExp("\\s*(\\w+)\\s+(.*)");
+
+	if (!Line.contains(TokenExp))
+		return false;
+
+	QString Token = TokenExp.cap(1);
+	Line = TokenExp.cap(2);
+
+	if (Token == QStringLiteral("STEP_HIDE"))
+		mStepHide = Line.toInt();
+	else if (Token == QStringLiteral("NAME"))
+	{
+		QByteArray NameUtf = Line.toUtf8(); // todo: replace with qstring
+		strncpy(m_strName, NameUtf.constData(), sizeof(m_strName));
+		m_strName[sizeof(m_strName) - 1] = 0;
+	}
+	else if (Token == QStringLiteral("HIDDEN"))
+		SetHidden(true);
+	else if (Token == QStringLiteral("GROUP"))
+		mGroup = Model->GetGroup(Line.toUtf8(), true);
+	else if (Token == QStringLiteral("POSITION_KEY"))
+		LoadKeyLDraw(mPositionKeys, Line);
+	else if (Token == QStringLiteral("ROTATION_KEY"))
+		LoadKeyLDraw(mRotationKeys, Line);
+
+	return false;
+}
+
+QJsonObject lcPiece::SaveJson() const
 {
 	QJsonObject Piece;
 
 	Piece[QStringLiteral("ID")] = QString::fromLatin1(mPieceInfo->m_strName);
-	Piece[QStringLiteral("Color")] = QString::number(mColorCode);
-	Piece[QStringLiteral("Step")] = QString::number(mStepShow);
+	Piece[QStringLiteral("Color")] = (int)mColorCode;
+	Piece[QStringLiteral("Step")] = (int)mStepShow;
 	if (mStepHide != LC_STEP_MAX)
-		Piece[QStringLiteral("StepHide")] = QString::number(mStepHide);
-	Piece[QStringLiteral("Name")] = QString::fromLatin1(m_strName); // todo: replace with qstring
+		Piece[QStringLiteral("StepHide")] = (int)mStepHide;
+	Piece[QStringLiteral("Name")] = QString::fromUtf8(m_strName); // todo: replace with qstring
 	if (IsHidden())
-		Piece[QStringLiteral("Hidden")] = QStringLiteral("true");
+		Piece[QStringLiteral("Hidden")] = true;
 
 	if (mPositionKeys.GetSize() < 2)
-		Piece[QStringLiteral("Position")] = QStringLiteral("%1 %2 %3").arg(QString::number(mPosition[0]), QString::number(mPosition[1]), QString::number(mPosition[2]));
+		Piece[QStringLiteral("Position")] = QJsonArray() << mPosition[0] << mPosition[1] << mPosition[2];
 	else
-		Piece[QStringLiteral("PositionKeys")] = SaveKeys(mPositionKeys);
+		Piece[QStringLiteral("PositionKeys")] = SaveKeysJson(mPositionKeys);
 
 	if (mRotationKeys.GetSize() < 2)
-		Piece[QStringLiteral("Rotation")] = QStringLiteral("%1 %2 %3 %4").arg(QString::number(mRotation[0]), QString::number(mRotation[1]), QString::number(mRotation[2]), QString::number(mRotation[3]));
+		Piece[QStringLiteral("Rotation")] = QJsonArray() << mRotation[0] << mRotation[1] << mRotation[2] << mRotation[3];
 	else
-		Piece[QStringLiteral("RotationKeys")] = SaveKeys(mRotationKeys);
+		Piece[QStringLiteral("RotationKeys")] = SaveKeysJson(mRotationKeys);
 
 	return Piece;
 }
 
-void lcPiece::Load(QJsonObject Piece)
+bool lcPiece::LoadJson(const QJsonObject& Piece)
 {
+	QJsonValue ID = Piece.value(QStringLiteral("ID"));
 
+	if (ID.isUndefined())
+		return false;
+
+	SetPieceInfo(lcGetPiecesLibrary()->FindPiece(ID.toString().toLatin1(), true));
+
+	QJsonValue Color = Piece.value(QStringLiteral("Color"));
+	if (!Color.isUndefined())
+	{
+		mColorCode = Color.toInt();
+		mColorIndex = lcGetColorIndex(mColorCode);
+	}
+
+	QJsonValue Step = Piece.value(QStringLiteral("Step"));
+	if (!Step.isUndefined())
+		mStepShow = Step.toInt();
+
+	QJsonValue StepHide = Piece.value(QStringLiteral("StepHide"));
+	if (!StepHide.isUndefined())
+		mStepHide = StepHide.toInt();
+
+	QJsonValue Name = Piece.value(QStringLiteral("Name"));
+	if (!Name.isUndefined())
+	{
+		QByteArray NameUtf = Name.toString().toUtf8(); // todo: replace with qstring
+		strncpy(m_strName, NameUtf.constData(), sizeof(m_strName));
+		m_strName[sizeof(m_strName) - 1] = 0;
+	}
+
+	QJsonValue Hidden = Piece.value(QStringLiteral("Hidden"));
+	if (!Hidden.isUndefined())
+		SetHidden(Hidden.toBool());
+
+	QJsonValue PositionKeys = Piece.value(QStringLiteral("PositionKeys"));
+	mPositionKeys.SetSize(0);
+
+	LoadKeysJson(mPositionKeys, Piece.value(QStringLiteral("PositionKeys")), mPosition, Piece.value(QStringLiteral("Position")));
+	LoadKeysJson(mRotationKeys, Piece.value(QStringLiteral("RotationKeys")), mRotation, Piece.value(QStringLiteral("Rotation")));
+
+	return true;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -366,19 +491,38 @@ void lcPiece::Initialize(const lcVector3& Position, const lcVector4& AxisAngle, 
 
 void lcPiece::CreateName(const lcArray<lcPiece*>& Pieces)
 {
+	if (m_strName[0])
+	{
+		bool Found = false;
+
+		for (int PieceIdx = 0; PieceIdx < Pieces.GetSize(); PieceIdx++)
+		{
+			if (!strcmp(Pieces[PieceIdx]->m_strName, m_strName))
+			{
+				Found = true;
+				break;
+			}
+		}
+
+		if (!Found)
+			return;
+	}
+
+	const char* Prefix = mPieceInfo->m_strDescription;
+	int Length = strlen(Prefix);
 	int i, max = 0;
 
 	for (int PieceIdx = 0; PieceIdx < Pieces.GetSize(); PieceIdx++)
 	{
 		lcPiece* Piece = Pieces[PieceIdx];
 
-		if (strncmp(Piece->m_strName, mPieceInfo->m_strDescription, strlen(mPieceInfo->m_strDescription)) == 0)
-			if (sscanf(Piece->m_strName + strlen(mPieceInfo->m_strDescription), " #%d", &i) == 1)
+		if (strncmp(Piece->m_strName, Prefix, Length) == 0)
+			if (sscanf(Piece->m_strName + Length, " #%d", &i) == 1)
 				if (i > max)
 					max = i;
 	}
 
-	snprintf(m_strName, sizeof(m_strName), "%s #%.2d", mPieceInfo->m_strDescription, max+1);
+	snprintf(m_strName, sizeof(m_strName), "%s #%.2d", Prefix, max + 1);
 	m_strName[sizeof(m_strName) - 1] = 0;
 }
 

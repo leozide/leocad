@@ -190,7 +190,6 @@ protected:
 	bool RemoveSelectedObjects();
 	void GetPieceInsertPosition(lcPiece* OffsetPiece, lcVector3& Position, lcVector4& Rotation);
 
-	void CalculateStep();
 	static int InstanceOfName(const String& existingString, const String& candidateString, String& baseNameOut );
 
 	void FindPiece(bool FindFirst, bool SearchForward);

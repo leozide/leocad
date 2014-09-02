@@ -10,6 +10,7 @@
 #define LC_VERSION_TEXT "0.80.4"
 
 // Forward declarations.
+class lcModel;
 class lcObject;
 class lcPiece;
 class lcCamera;

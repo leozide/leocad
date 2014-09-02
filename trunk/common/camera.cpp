@@ -78,6 +78,22 @@ void lcCamera::Initialize()
 
 void lcCamera::CreateName(const lcArray<lcCamera*>& Cameras)
 {
+	if (m_strName[0])
+	{
+		bool Found = false;
+		for (int CameraIdx = 0; CameraIdx < Cameras.GetSize(); CameraIdx++)
+		{
+			if (!strcmp(Cameras[CameraIdx]->m_strName, m_strName))
+			{
+				Found = true;
+				break;
+			}
+		}
+
+		if (!Found)
+			return;
+	}
+
 	int i, max = 0;
 	const char* Prefix = "Camera ";
 
@@ -90,40 +106,168 @@ void lcCamera::CreateName(const lcArray<lcCamera*>& Cameras)
 	sprintf(m_strName, "%s %d", Prefix, max+1);
 }
 
-QJsonObject lcCamera::Save()
+void lcCamera::SaveLDraw(lcFile& File) const
+{
+	char Line[1024];
+
+	if (IsHidden())
+	{
+		strcpy(Line, "0 !LEOCAD CAMERA HIDDEN\r\n");
+		File.WriteBuffer(Line, strlen(Line));
+	}
+
+	if (IsOrtho())
+	{
+		strcpy(Line, "0 !LEOCAD CAMERA ORTHOGRAPHIC\r\n");
+		File.WriteBuffer(Line, strlen(Line));
+	}
+
+	sprintf(Line, "0 !LEOCAD CAMERA FOV %.2f\r\n", m_fovy);
+	File.WriteBuffer(Line, strlen(Line));
+
+	sprintf(Line, "0 !LEOCAD CAMERA ZNEAR %.2f\r\n", m_zNear);
+	File.WriteBuffer(Line, strlen(Line));
+
+	sprintf(Line, "0 !LEOCAD CAMERA ZFAR %.2f\r\n", m_zFar);
+	File.WriteBuffer(Line, strlen(Line));
+
+	if (mPositionKeys.GetSize() > 1)
+		SaveKeysLDraw(mPositionKeys, "CAMERA POSITION_KEY", File);
+	else
+	{
+		sprintf(Line, "0 !LEOCAD CAMERA POSITION %.2f %.2f %.2f\r\n", mPosition[0], mPosition[1], mPosition[2]);
+		File.WriteBuffer(Line, strlen(Line));
+	}
+
+	if (mTargetPositionKeys.GetSize() > 1)
+		SaveKeysLDraw(mTargetPositionKeys, "CAMERA TARGETPOSITION_KEY", File);
+	else
+	{
+		sprintf(Line, "0 !LEOCAD CAMERA TARGETPOSITION %.2f %.2f %.2f\r\n", mTargetPosition[0], mTargetPosition[1], mTargetPosition[2]);
+		File.WriteBuffer(Line, strlen(Line));
+	}
+
+	if (mUpVectorKeys.GetSize() > 1)
+		SaveKeysLDraw(mUpVectorKeys, "CAMERA UPVECTOR_KEY", File);
+	else
+	{
+		sprintf(Line, "0 !LEOCAD CAMERA UPVECTOR %.2f %.2f %.2f\r\n", mUpVector[0], mUpVector[1], mUpVector[2]);
+		File.WriteBuffer(Line, strlen(Line));
+	}
+
+	sprintf(Line, "0 !LEOCAD CAMERA NAME %s\r\n", m_strName);
+	File.WriteBuffer(Line, strlen(Line));
+}
+
+bool lcCamera::ParseLDrawLine(QString& Line)
+{
+	QRegExp TokenExp("\\s*(\\w+)\\s+(.*)");
+
+	if (!Line.contains(TokenExp))
+		return false;
+
+	QString Token = TokenExp.cap(1);
+	Line = TokenExp.cap(2);
+
+	if (Token == QStringLiteral("HIDDEN"))
+		SetHidden(true);
+	else if (Token == QStringLiteral("ORTHOGRAPHIC"))
+		SetOrtho(true);
+	else if (Token == QStringLiteral("FOV"))
+		m_fovy = Line.toFloat();
+	else if (Token == QStringLiteral("ZNEAR"))
+		m_zNear = Line.toFloat();
+	else if (Token == QStringLiteral("ZFAR"))
+		m_zFar = Line.toFloat();
+	else if (Token == QStringLiteral("POSITION"))
+		QTextStream(&Line) >> mPosition[0] >> mPosition[1] >> mPosition[2];
+	else if (Token == QStringLiteral("TARGETPOSITION"))
+		QTextStream(&Line) >> mTargetPosition[0] >> mTargetPosition[1] >> mTargetPosition[2];
+	else if (Token == QStringLiteral("UPVECTOR"))
+		QTextStream(&Line) >> mUpVector[0] >> mUpVector[1] >> mUpVector[2];
+	else if (Token == QStringLiteral("POSITION_KEY"))
+		LoadKeyLDraw(mPositionKeys, Line);
+	else if (Token == QStringLiteral("TARGETPOSITION_KEY"))
+		LoadKeyLDraw(mTargetPositionKeys, Line);
+	else if (Token == QStringLiteral("UPVECTOR_KEY"))
+		LoadKeyLDraw(mUpVectorKeys, Line);
+	else if (Token == QStringLiteral("NAME"))
+	{
+		QByteArray NameUtf = Line.toUtf8(); // todo: replace with qstring
+		strncpy(m_strName, NameUtf.constData(), sizeof(m_strName));
+		m_strName[sizeof(m_strName) - 1] = 0;
+		return true;
+	}
+
+	return false;
+}
+
+QJsonObject lcCamera::SaveJson() const
 {
 	QJsonObject Camera;
 
-	Camera[QStringLiteral("FOV")] = QString::number(m_fovy);
-	Camera[QStringLiteral("ZNear")] = QString::number(m_zNear);
-	Camera[QStringLiteral("ZFar")] = QString::number(m_zFar);
-	Camera[QStringLiteral("Name")] = QString::fromLatin1(m_strName); // todo: replace with qstring
+	Camera[QStringLiteral("FOV")] = m_fovy;
+	Camera[QStringLiteral("ZNear")] = m_zNear;
+	Camera[QStringLiteral("ZFar")] = m_zFar;
+	Camera[QStringLiteral("Name")] = QString::fromUtf8(m_strName); // todo: replace with qstring
 	if (IsHidden())
 		Camera[QStringLiteral("Hidden")] = QStringLiteral("true");
 	if (IsOrtho())
 		Camera[QStringLiteral("Orthographic")] = QStringLiteral("true");
 
 	if (mPositionKeys.GetSize() < 2)
-		Camera[QStringLiteral("Position")] = QStringLiteral("%1 %2 %3").arg(QString::number(mPosition[0]), QString::number(mPosition[1]), QString::number(mPosition[2]));
+		Camera[QStringLiteral("Position")] = QJsonArray() << mPosition[0] << mPosition[1] << mPosition[2];
 	else
-		Camera[QStringLiteral("PositionKeys")] = SaveKeys(mPositionKeys);
+		Camera[QStringLiteral("PositionKeys")] = SaveKeysJson(mPositionKeys);
 
 	if (mTargetPositionKeys.GetSize() < 2)
-		Camera[QStringLiteral("TargetPosition")] = QStringLiteral("%1 %2 %3").arg(QString::number(mTargetPosition[0]), QString::number(mTargetPosition[1]), QString::number(mTargetPosition[2]));
+		Camera[QStringLiteral("TargetPosition")] = QJsonArray() << mTargetPosition[0] << mTargetPosition[1] << mTargetPosition[2];
 	else
-		Camera[QStringLiteral("TargetPositionKeys")] = SaveKeys(mTargetPositionKeys);
+		Camera[QStringLiteral("TargetPositionKeys")] = SaveKeysJson(mTargetPositionKeys);
 
 	if (mUpVectorKeys.GetSize() < 2)
-		Camera[QStringLiteral("UpVector")] = QStringLiteral("%1 %2 %3").arg(QString::number(mUpVector[0]), QString::number(mUpVector[1]), QString::number(mUpVector[2]));
+		Camera[QStringLiteral("UpVector")] = QJsonArray() << mUpVector[0] << mUpVector[1] << mUpVector[2];
 	else
-		Camera[QStringLiteral("UpVectorKeys")] = SaveKeys(mUpVectorKeys);
+		Camera[QStringLiteral("UpVectorKeys")] = SaveKeysJson(mUpVectorKeys);
 
 	return Camera;
 }
 
-void lcCamera::Load(QJsonObject Camera)
+bool lcCamera::LoadJson(const QJsonObject& Camera)
 {
+	QJsonValue FOV = Camera.value(QStringLiteral("FOV"));
+	if (!FOV.isUndefined())
+		m_fovy = FOV.toDouble();
 
+	QJsonValue ZNear = Camera.value(QStringLiteral("ZNear"));
+	if (!ZNear.isUndefined())
+		m_zNear = ZNear.toDouble();
+
+	QJsonValue ZFar = Camera.value(QStringLiteral("ZFar"));
+	if (!ZFar.isUndefined())
+		m_zFar = ZFar.toDouble();
+
+	QJsonValue Name = Camera.value(QStringLiteral("Name"));
+	if (!Name.isUndefined())
+	{
+		QByteArray NameUtf = Name.toString().toUtf8(); // todo: replace with qstring
+		strncpy(m_strName, NameUtf.constData(), sizeof(m_strName));
+		m_strName[sizeof(m_strName) - 1] = 0;
+	}
+
+	QJsonValue Hidden = Camera.value(QStringLiteral("Hidden"));
+	if (!Hidden.isUndefined())
+		SetHidden(Hidden.toBool());
+
+	QJsonValue Ortho = Camera.value(QStringLiteral("Orthographic"));
+	if (!Ortho.isUndefined())
+		SetOrtho(Ortho.toBool());
+
+	LoadKeysJson(mPositionKeys, Camera.value(QStringLiteral("PositionKeys")), mPosition, Camera.value(QStringLiteral("Position")));
+	LoadKeysJson(mTargetPositionKeys, Camera.value(QStringLiteral("TargetPositionKeys")), mTargetPosition, Camera.value(QStringLiteral("TargetPosition")));
+	LoadKeysJson(mUpVectorKeys, Camera.value(QStringLiteral("UpVectorKeys")), mUpVector, Camera.value(QStringLiteral("UpVector")));
+
+	return true;
 }
 
 /////////////////////////////////////////////////////////////////////////////

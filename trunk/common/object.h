@@ -87,8 +87,107 @@ public:
 	virtual const char* GetName() const = 0;
 
 protected:
-	QJsonArray SaveKeys(const lcArray<lcObjectKey<lcVector3>>& Keys);
-	QJsonArray SaveKeys(const lcArray<lcObjectKey<lcVector4>>& Keys);
+	void SaveKeysLDraw(const lcArray<lcObjectKey<lcVector3>>& Keys, const char* KeyName, lcFile& File) const;
+	void SaveKeysLDraw(const lcArray<lcObjectKey<lcVector4>>& Keys, const char* KeyName, lcFile& File) const;
+
+	template<typename T>
+	void LoadKeyLDraw(lcArray<lcObjectKey<T>>& Keys, QString& Line)
+	{
+		QRegExp TokenExp("\\s*(\\w+)\\s+(.*)");
+
+		if (!Line.contains(TokenExp))
+			return;
+
+		QString Token = TokenExp.cap(1);
+		Line = TokenExp.cap(2);
+
+		int Step = Token.toInt();
+		T Value;
+
+		QTextStream Stream(&Line);
+		const int Count = sizeof(T) / sizeof(float);
+		for (int ValueIdx = 0; ValueIdx < Count; ValueIdx++)
+			Stream >> Value[ValueIdx];
+
+		lcObjectKey<T>& Key = Keys.Add();
+		Key.Step = Step;
+		Key.Value = Value;
+	}
+
+	template<typename T>
+	QJsonArray SaveKeysJson(const lcArray<lcObjectKey<T>>& Keys) const
+	{
+		const int Count = sizeof(T) / sizeof(float);
+		QJsonArray KeyArray;
+		QString StepString = QStringLiteral("Step");
+		QString ValueString = QStringLiteral("Value");
+
+		for (int KeyIdx = 0; KeyIdx < Keys.GetSize(); KeyIdx++)
+		{
+			lcObjectKey<T>& Key = Keys[KeyIdx];
+
+			QJsonArray ValueArray;
+			for (int ValueIdx = 0; ValueIdx < Count; ValueIdx++)
+				ValueArray << Key.Value[ValueIdx];
+
+			QJsonObject KeyObject;
+			KeyObject[StepString] = (int)Key.Step;
+			KeyObject[ValueString] = ValueArray;
+			KeyArray.append(KeyObject);
+		}
+
+		return KeyArray;
+	}
+
+	template<typename T>
+	void LoadKeysJson(lcArray<lcObjectKey<T>>& Keys, const QJsonValue& KeysValue, T& Single, const QJsonValue& SingleValue)
+	{
+		const int Count = sizeof(T) / sizeof(float);
+		Keys.SetSize(0);
+		QString StepString = QStringLiteral("Step");
+		QString ValueString = QStringLiteral("Value");
+
+		if (!KeysValue.isUndefined())
+		{
+			QJsonArray KeyArray = KeysValue.toArray();
+			Keys.AllocGrow(KeyArray.size());
+
+			for (int KeyIdx = 0; KeyIdx < KeyArray.size(); KeyIdx++)
+			{
+				QJsonObject KeyObject = KeyArray[KeyIdx].toObject();
+
+				QJsonValue Step = KeyObject.value(StepString);
+				QJsonValue Value = KeyObject.value(ValueString);
+
+				if (Step.isUndefined() || Value.isUndefined())
+					continue;
+
+				lcStep CurrentStep = Step.toInt();
+
+				if (!Keys.IsEmpty() && Keys[Keys.GetSize() - 1].Step >= CurrentStep)
+					continue;
+
+				lcObjectKey<T>& Key = Keys.Add();
+				Key.Step = CurrentStep;
+
+				QJsonArray ValueArray = Value.toArray();
+				if (ValueArray.size() == Count)
+					for (int ValueIdx = 0; ValueIdx < Count; ValueIdx++)
+						Single[ValueIdx] = ValueArray[ValueIdx].toDouble();
+			}
+		}
+		else if (!SingleValue.isUndefined())
+		{
+			QJsonArray ValueArray = SingleValue.toArray();
+
+			if (ValueArray.size() == Count)
+				for (int ValueIdx = 0; ValueIdx < Count; ValueIdx++)
+					Single[ValueIdx] = ValueArray[ValueIdx].toDouble();
+		}
+
+		if (Keys.IsEmpty())
+			ChangeKey(Keys, Single, 1, true);
+	}
 
 	template<typename T>
 	const T& CalculateKey(const lcArray<lcObjectKey<T>>& Keys, lcStep Step)

@@ -91,20 +91,14 @@ protected:
 	void SaveKeysLDraw(const lcArray<lcObjectKey<lcVector4>>& Keys, const char* KeyName, lcFile& File) const;
 
 	template<typename T>
-	void LoadKeyLDraw(lcArray<lcObjectKey<T>>& Keys, QString& Line)
+	void LoadKeyLDraw(lcArray<lcObjectKey<T>>& Keys, QTextStream& Stream)
 	{
-		QRegExp TokenExp("\\s*(\\w+)\\s+(.*)");
-
-		if (!Line.contains(TokenExp))
-			return;
-
-		QString Token = TokenExp.cap(1);
-		Line = TokenExp.cap(2);
+		QString Token;
+		Stream >> Token;
 
 		int Step = Token.toInt();
 		T Value;
 
-		QTextStream Stream(&Line);
 		const int Count = sizeof(T) / sizeof(float);
 		for (int ValueIdx = 0; ValueIdx < Count; ValueIdx++)
 			Stream >> Value[ValueIdx];

@@ -159,41 +159,37 @@ void lcCamera::SaveLDraw(lcFile& File) const
 	File.WriteBuffer(Line, strlen(Line));
 }
 
-bool lcCamera::ParseLDrawLine(QString& Line)
+bool lcCamera::ParseLDrawLine(QTextStream& Stream)
 {
-	QRegExp TokenExp("\\s*(\\w+)\\s+(.*)");
-
-	if (!Line.contains(TokenExp))
-		return false;
-
-	QString Token = TokenExp.cap(1);
-	Line = TokenExp.cap(2);
+	QString Token;
+	Stream >> Token;
 
 	if (Token == QStringLiteral("HIDDEN"))
 		SetHidden(true);
 	else if (Token == QStringLiteral("ORTHOGRAPHIC"))
 		SetOrtho(true);
 	else if (Token == QStringLiteral("FOV"))
-		m_fovy = Line.toFloat();
+		Stream >> m_fovy;
 	else if (Token == QStringLiteral("ZNEAR"))
-		m_zNear = Line.toFloat();
+		Stream >> m_zNear;
 	else if (Token == QStringLiteral("ZFAR"))
-		m_zFar = Line.toFloat();
+		Stream >> m_zFar;
 	else if (Token == QStringLiteral("POSITION"))
-		QTextStream(&Line) >> mPosition[0] >> mPosition[1] >> mPosition[2];
+		Stream >> mPosition[0] >> mPosition[1] >> mPosition[2];
 	else if (Token == QStringLiteral("TARGETPOSITION"))
-		QTextStream(&Line) >> mTargetPosition[0] >> mTargetPosition[1] >> mTargetPosition[2];
+		Stream >> mTargetPosition[0] >> mTargetPosition[1] >> mTargetPosition[2];
 	else if (Token == QStringLiteral("UPVECTOR"))
-		QTextStream(&Line) >> mUpVector[0] >> mUpVector[1] >> mUpVector[2];
+		Stream >> mUpVector[0] >> mUpVector[1] >> mUpVector[2];
 	else if (Token == QStringLiteral("POSITION_KEY"))
-		LoadKeyLDraw(mPositionKeys, Line);
+		LoadKeyLDraw(mPositionKeys, Stream);
 	else if (Token == QStringLiteral("TARGETPOSITION_KEY"))
-		LoadKeyLDraw(mTargetPositionKeys, Line);
+		LoadKeyLDraw(mTargetPositionKeys, Stream);
 	else if (Token == QStringLiteral("UPVECTOR_KEY"))
-		LoadKeyLDraw(mUpVectorKeys, Line);
+		LoadKeyLDraw(mUpVectorKeys, Stream);
 	else if (Token == QStringLiteral("NAME"))
 	{
-		QByteArray NameUtf = Line.toUtf8(); // todo: replace with qstring
+		QString Name = Stream.readAll().trimmed();
+		QByteArray NameUtf = Name.toUtf8(); // todo: replace with qstring
 		strncpy(m_strName, NameUtf.constData(), sizeof(m_strName));
 		m_strName[sizeof(m_strName) - 1] = 0;
 		return true;

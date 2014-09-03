@@ -98,32 +98,32 @@ void lcPiece::SaveLDraw(lcFile& File) const
 	File.WriteBuffer(Line, strlen(Line));
 }
 
-bool lcPiece::ParseLDrawLine(QString& Line, lcModel* Model)
+bool lcPiece::ParseLDrawLine(QTextStream& Stream, lcModel* Model)
 {
-	QRegExp TokenExp("\\s*(\\w+)\\s+(.*)");
-
-	if (!Line.contains(TokenExp))
-		return false;
-
-	QString Token = TokenExp.cap(1);
-	Line = TokenExp.cap(2);
+	QString Token;
+	Stream >> Token;
 
 	if (Token == QStringLiteral("STEP_HIDE"))
-		mStepHide = Line.toInt();
+		Stream >> mStepHide;
 	else if (Token == QStringLiteral("NAME"))
 	{
-		QByteArray NameUtf = Line.toUtf8(); // todo: replace with qstring
+		QString Name = Stream.readAll().trimmed();
+		QByteArray NameUtf = Name.toUtf8(); // todo: replace with qstring
 		strncpy(m_strName, NameUtf.constData(), sizeof(m_strName));
 		m_strName[sizeof(m_strName) - 1] = 0;
 	}
 	else if (Token == QStringLiteral("HIDDEN"))
 		SetHidden(true);
 	else if (Token == QStringLiteral("GROUP"))
-		mGroup = Model->GetGroup(Line.toUtf8(), true);
+	{
+		QString Name = Stream.readAll().trimmed();
+		QByteArray NameUtf = Name.toUtf8(); // todo: replace with qstring
+		mGroup = Model->GetGroup(NameUtf.constData(), true);
+	}
 	else if (Token == QStringLiteral("POSITION_KEY"))
-		LoadKeyLDraw(mPositionKeys, Line);
+		LoadKeyLDraw(mPositionKeys, Stream);
 	else if (Token == QStringLiteral("ROTATION_KEY"))
-		LoadKeyLDraw(mRotationKeys, Line);
+		LoadKeyLDraw(mRotationKeys, Stream);
 
 	return false;
 }

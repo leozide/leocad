@@ -294,7 +294,6 @@ void lcModel::SaveLDraw(lcFile& File) const
 
 void lcModel::LoadLDraw(const QStringList& Lines, const lcMatrix44& CurrentTransform, int DefaultColorCode, int& CurrentStep)
 {
-	QRegExp TokenExp("\\s*(!?\\w+)\\s+(.*)");
 	lcPiece* Piece = NULL;
 	lcCamera* Camera = NULL;
 	lcLight* Light = NULL;
@@ -302,20 +301,14 @@ void lcModel::LoadLDraw(const QStringList& Lines, const lcMatrix44& CurrentTrans
 	for (int LineIdx = 0; LineIdx < Lines.size(); LineIdx++)
 	{
 		QString Line = Lines[LineIdx].trimmed();
+		QTextStream Stream(&Line, QIODevice::ReadOnly);
 
-		if (!Line.contains(TokenExp))
-			continue;
-
-		QString Token = TokenExp.cap(1);
-		Line = TokenExp.cap(2);
+		QString Token;
+		Stream >> Token;
 
 		if (Token == QStringLiteral("0"))
 		{
-			if (!Line.contains(TokenExp))
-				continue;
-
-			Token = TokenExp.cap(1);
-			Line = TokenExp.cap(2);
+			Stream >> Token;
 
 			if (Token == QStringLiteral("STEP"))
 			{
@@ -326,11 +319,7 @@ void lcModel::LoadLDraw(const QStringList& Lines, const lcMatrix44& CurrentTrans
 			if (Token != QStringLiteral("!LEOCAD"))
 				continue;
 
-			if (!Line.contains(TokenExp))
-				continue;
-
-			Token = TokenExp.cap(1);
-			Line = TokenExp.cap(2);
+			Stream >> Token;
 
 			if (Token == QStringLiteral("MODEL"))
 			{
@@ -344,14 +333,14 @@ void lcModel::LoadLDraw(const QStringList& Lines, const lcMatrix44& CurrentTrans
 				if (!Piece)
 					Piece = new lcPiece(NULL);
 
-				Piece->ParseLDrawLine(Line, this);
+				Piece->ParseLDrawLine(Stream, this);
 			}
 			else if (Token == QStringLiteral("CAMERA"))
 			{
 				if (!Camera)
 					Camera = new lcCamera(false);
 
-				if (Camera->ParseLDrawLine(Line))
+				if (Camera->ParseLDrawLine(Stream))
 				{
 					Camera->CreateName(mCameras);
 					mCameras.Add(Camera);
@@ -369,8 +358,6 @@ void lcModel::LoadLDraw(const QStringList& Lines, const lcMatrix44& CurrentTrans
 		}
 		else if (Token == QStringLiteral("1"))
 		{
-			QTextStream Stream(&Line, QIODevice::ReadOnly);
-
 			int ColorCode;
 			Stream >> ColorCode;
 			if (ColorCode == 16)

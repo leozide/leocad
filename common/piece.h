@@ -89,7 +89,7 @@ public:
 	}
 
 	void SaveLDraw(lcFile& File) const;
-	bool ParseLDrawLine(QString& Line, lcModel* Model);
+	bool ParseLDrawLine(QTextStream& Stream, lcModel* Model);
 
 	QJsonObject SaveJson() const;
 	bool LoadJson(const QJsonObject& Piece);

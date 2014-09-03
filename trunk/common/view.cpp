@@ -1064,7 +1064,7 @@ void View::DrawViewport()
 	if (gMainWindow->GetActiveView() == this)
 	{
 		glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
-		float Verts[8] = { 0.0f, 0.0f, mWidth - 1, 0.0f, mWidth - 1, mHeight - 1, 0.0f, mHeight - 1 };
+		float Verts[8] = { 0.0f, 0.0f, mWidth - 1.0f, 0.0f, mWidth - 1.0f, mHeight - 1.0f, 0.0f, mHeight - 1.0f };
 
 		glVertexPointer(2, GL_FLOAT, 0, Verts);
 		glDrawArrays(GL_LINE_LOOP, 0, 4);

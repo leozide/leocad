@@ -7,7 +7,7 @@ greaterThan(QT_MAJOR_VERSION, 4) {
 }
 
 INCLUDEPATH += qt common
-CONFIG += precompile_header incremental
+CONFIG += precompile_header incremental c++11
 PRECOMPILED_HEADER = common/lc_global.h
 win32 { 
 	QMAKE_CXXFLAGS_WARN_ON += -wd4100

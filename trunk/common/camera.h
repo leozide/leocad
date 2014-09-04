@@ -223,11 +223,6 @@ public:
 	void SaveLDraw(lcFile& File) const;
 	bool ParseLDrawLine(QTextStream& Stream);
 
-	QJsonObject SaveJson() const;
-	bool LoadJson(const QJsonObject& Camera);
-
-
-
 
 public:
 //	void Hide()

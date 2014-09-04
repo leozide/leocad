@@ -164,29 +164,29 @@ bool lcCamera::ParseLDrawLine(QTextStream& Stream)
 	QString Token;
 	Stream >> Token;
 
-	if (Token == QStringLiteral("HIDDEN"))
+	if (Token == QLatin1String("HIDDEN"))
 		SetHidden(true);
-	else if (Token == QStringLiteral("ORTHOGRAPHIC"))
+	else if (Token == QLatin1String("ORTHOGRAPHIC"))
 		SetOrtho(true);
-	else if (Token == QStringLiteral("FOV"))
+	else if (Token == QLatin1String("FOV"))
 		Stream >> m_fovy;
-	else if (Token == QStringLiteral("ZNEAR"))
+	else if (Token == QLatin1String("ZNEAR"))
 		Stream >> m_zNear;
-	else if (Token == QStringLiteral("ZFAR"))
+	else if (Token == QLatin1String("ZFAR"))
 		Stream >> m_zFar;
-	else if (Token == QStringLiteral("POSITION"))
+	else if (Token == QLatin1String("POSITION"))
 		Stream >> mPosition[0] >> mPosition[1] >> mPosition[2];
-	else if (Token == QStringLiteral("TARGETPOSITION"))
+	else if (Token == QLatin1String("TARGETPOSITION"))
 		Stream >> mTargetPosition[0] >> mTargetPosition[1] >> mTargetPosition[2];
-	else if (Token == QStringLiteral("UPVECTOR"))
+	else if (Token == QLatin1String("UPVECTOR"))
 		Stream >> mUpVector[0] >> mUpVector[1] >> mUpVector[2];
-	else if (Token == QStringLiteral("POSITION_KEY"))
+	else if (Token == QLatin1String("POSITION_KEY"))
 		LoadKeyLDraw(mPositionKeys, Stream);
-	else if (Token == QStringLiteral("TARGETPOSITION_KEY"))
+	else if (Token == QLatin1String("TARGETPOSITION_KEY"))
 		LoadKeyLDraw(mTargetPositionKeys, Stream);
-	else if (Token == QStringLiteral("UPVECTOR_KEY"))
+	else if (Token == QLatin1String("UPVECTOR_KEY"))
 		LoadKeyLDraw(mUpVectorKeys, Stream);
-	else if (Token == QStringLiteral("NAME"))
+	else if (Token == QLatin1String("NAME"))
 	{
 		QString Name = Stream.readAll().trimmed();
 		QByteArray NameUtf = Name.toUtf8(); // todo: replace with qstring
@@ -196,74 +196,6 @@ bool lcCamera::ParseLDrawLine(QTextStream& Stream)
 	}
 
 	return false;
-}
-
-QJsonObject lcCamera::SaveJson() const
-{
-	QJsonObject Camera;
-
-	Camera[QStringLiteral("FOV")] = m_fovy;
-	Camera[QStringLiteral("ZNear")] = m_zNear;
-	Camera[QStringLiteral("ZFar")] = m_zFar;
-	Camera[QStringLiteral("Name")] = QString::fromUtf8(m_strName); // todo: replace with qstring
-	if (IsHidden())
-		Camera[QStringLiteral("Hidden")] = QStringLiteral("true");
-	if (IsOrtho())
-		Camera[QStringLiteral("Orthographic")] = QStringLiteral("true");
-
-	if (mPositionKeys.GetSize() < 2)
-		Camera[QStringLiteral("Position")] = QJsonArray() << mPosition[0] << mPosition[1] << mPosition[2];
-	else
-		Camera[QStringLiteral("PositionKeys")] = SaveKeysJson(mPositionKeys);
-
-	if (mTargetPositionKeys.GetSize() < 2)
-		Camera[QStringLiteral("TargetPosition")] = QJsonArray() << mTargetPosition[0] << mTargetPosition[1] << mTargetPosition[2];
-	else
-		Camera[QStringLiteral("TargetPositionKeys")] = SaveKeysJson(mTargetPositionKeys);
-
-	if (mUpVectorKeys.GetSize() < 2)
-		Camera[QStringLiteral("UpVector")] = QJsonArray() << mUpVector[0] << mUpVector[1] << mUpVector[2];
-	else
-		Camera[QStringLiteral("UpVectorKeys")] = SaveKeysJson(mUpVectorKeys);
-
-	return Camera;
-}
-
-bool lcCamera::LoadJson(const QJsonObject& Camera)
-{
-	QJsonValue FOV = Camera.value(QStringLiteral("FOV"));
-	if (!FOV.isUndefined())
-		m_fovy = FOV.toDouble();
-
-	QJsonValue ZNear = Camera.value(QStringLiteral("ZNear"));
-	if (!ZNear.isUndefined())
-		m_zNear = ZNear.toDouble();
-
-	QJsonValue ZFar = Camera.value(QStringLiteral("ZFar"));
-	if (!ZFar.isUndefined())
-		m_zFar = ZFar.toDouble();
-
-	QJsonValue Name = Camera.value(QStringLiteral("Name"));
-	if (!Name.isUndefined())
-	{
-		QByteArray NameUtf = Name.toString().toUtf8(); // todo: replace with qstring
-		strncpy(m_strName, NameUtf.constData(), sizeof(m_strName));
-		m_strName[sizeof(m_strName) - 1] = 0;
-	}
-
-	QJsonValue Hidden = Camera.value(QStringLiteral("Hidden"));
-	if (!Hidden.isUndefined())
-		SetHidden(Hidden.toBool());
-
-	QJsonValue Ortho = Camera.value(QStringLiteral("Orthographic"));
-	if (!Ortho.isUndefined())
-		SetOrtho(Ortho.toBool());
-
-	LoadKeysJson(mPositionKeys, Camera.value(QStringLiteral("PositionKeys")), mPosition, Camera.value(QStringLiteral("Position")));
-	LoadKeysJson(mTargetPositionKeys, Camera.value(QStringLiteral("TargetPositionKeys")), mTargetPosition, Camera.value(QStringLiteral("TargetPosition")));
-	LoadKeysJson(mUpVectorKeys, Camera.value(QStringLiteral("UpVectorKeys")), mUpVector, Camera.value(QStringLiteral("UpVector")));
-
-	return true;
 }
 
 /////////////////////////////////////////////////////////////////////////////

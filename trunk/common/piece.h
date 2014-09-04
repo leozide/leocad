@@ -91,9 +91,6 @@ public:
 	void SaveLDraw(lcFile& File) const;
 	bool ParseLDrawLine(QTextStream& Stream, lcModel* Model);
 
-	QJsonObject SaveJson() const;
-	bool LoadJson(const QJsonObject& Piece);
-
 	virtual void RayTest(lcObjectRayTest& ObjectRayTest) const;
 	virtual void BoxTest(lcObjectBoxTest& ObjectBoxTest) const;
 

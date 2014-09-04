@@ -171,8 +171,6 @@ public:
 	}
 
 	void SaveLDraw(lcFile& File) const;
-	QJsonObject Save();
-	void Load(QJsonObject Light);
 
 public:
 	virtual void RayTest(lcObjectRayTest& ObjectRayTest) const;

@@ -103,100 +103,29 @@ bool lcPiece::ParseLDrawLine(QTextStream& Stream, lcModel* Model)
 	QString Token;
 	Stream >> Token;
 
-	if (Token == QStringLiteral("STEP_HIDE"))
+	if (Token == QLatin1String("STEP_HIDE"))
 		Stream >> mStepHide;
-	else if (Token == QStringLiteral("NAME"))
+	else if (Token == QLatin1String("NAME"))
 	{
 		QString Name = Stream.readAll().trimmed();
 		QByteArray NameUtf = Name.toUtf8(); // todo: replace with qstring
 		strncpy(m_strName, NameUtf.constData(), sizeof(m_strName));
 		m_strName[sizeof(m_strName) - 1] = 0;
 	}
-	else if (Token == QStringLiteral("HIDDEN"))
+	else if (Token == QLatin1String("HIDDEN"))
 		SetHidden(true);
-	else if (Token == QStringLiteral("GROUP"))
+	else if (Token == QLatin1String("GROUP"))
 	{
 		QString Name = Stream.readAll().trimmed();
 		QByteArray NameUtf = Name.toUtf8(); // todo: replace with qstring
 		mGroup = Model->GetGroup(NameUtf.constData(), true);
 	}
-	else if (Token == QStringLiteral("POSITION_KEY"))
+	else if (Token == QLatin1String("POSITION_KEY"))
 		LoadKeyLDraw(mPositionKeys, Stream);
-	else if (Token == QStringLiteral("ROTATION_KEY"))
+	else if (Token == QLatin1String("ROTATION_KEY"))
 		LoadKeyLDraw(mRotationKeys, Stream);
 
 	return false;
-}
-
-QJsonObject lcPiece::SaveJson() const
-{
-	QJsonObject Piece;
-
-	Piece[QStringLiteral("ID")] = QString::fromLatin1(mPieceInfo->m_strName);
-	Piece[QStringLiteral("Color")] = (int)mColorCode;
-	Piece[QStringLiteral("Step")] = (int)mStepShow;
-	if (mStepHide != LC_STEP_MAX)
-		Piece[QStringLiteral("StepHide")] = (int)mStepHide;
-	Piece[QStringLiteral("Name")] = QString::fromUtf8(m_strName); // todo: replace with qstring
-	if (IsHidden())
-		Piece[QStringLiteral("Hidden")] = true;
-
-	if (mPositionKeys.GetSize() < 2)
-		Piece[QStringLiteral("Position")] = QJsonArray() << mPosition[0] << mPosition[1] << mPosition[2];
-	else
-		Piece[QStringLiteral("PositionKeys")] = SaveKeysJson(mPositionKeys);
-
-	if (mRotationKeys.GetSize() < 2)
-		Piece[QStringLiteral("Rotation")] = QJsonArray() << mRotation[0] << mRotation[1] << mRotation[2] << mRotation[3];
-	else
-		Piece[QStringLiteral("RotationKeys")] = SaveKeysJson(mRotationKeys);
-
-	return Piece;
-}
-
-bool lcPiece::LoadJson(const QJsonObject& Piece)
-{
-	QJsonValue ID = Piece.value(QStringLiteral("ID"));
-
-	if (ID.isUndefined())
-		return false;
-
-	SetPieceInfo(lcGetPiecesLibrary()->FindPiece(ID.toString().toLatin1(), true));
-
-	QJsonValue Color = Piece.value(QStringLiteral("Color"));
-	if (!Color.isUndefined())
-	{
-		mColorCode = Color.toInt();
-		mColorIndex = lcGetColorIndex(mColorCode);
-	}
-
-	QJsonValue Step = Piece.value(QStringLiteral("Step"));
-	if (!Step.isUndefined())
-		mStepShow = Step.toInt();
-
-	QJsonValue StepHide = Piece.value(QStringLiteral("StepHide"));
-	if (!StepHide.isUndefined())
-		mStepHide = StepHide.toInt();
-
-	QJsonValue Name = Piece.value(QStringLiteral("Name"));
-	if (!Name.isUndefined())
-	{
-		QByteArray NameUtf = Name.toString().toUtf8(); // todo: replace with qstring
-		strncpy(m_strName, NameUtf.constData(), sizeof(m_strName));
-		m_strName[sizeof(m_strName) - 1] = 0;
-	}
-
-	QJsonValue Hidden = Piece.value(QStringLiteral("Hidden"));
-	if (!Hidden.isUndefined())
-		SetHidden(Hidden.toBool());
-
-	QJsonValue PositionKeys = Piece.value(QStringLiteral("PositionKeys"));
-	mPositionKeys.SetSize(0);
-
-	LoadKeysJson(mPositionKeys, Piece.value(QStringLiteral("PositionKeys")), mPosition, Piece.value(QStringLiteral("Position")));
-	LoadKeysJson(mRotationKeys, Piece.value(QStringLiteral("RotationKeys")), mRotation, Piece.value(QStringLiteral("Rotation")));
-
-	return true;
 }
 
 /////////////////////////////////////////////////////////////////////////////

@@ -57,9 +57,6 @@ public:
 	void SaveLDraw(lcFile& File) const;
 	void ParseLDrawLine(char** Tokens);
 
-	QJsonObject Save() const;
-	bool Load(const QJsonObject& Properties);
-
 	String mName;
 	String mAuthor;
 	String mDescription;
@@ -98,7 +95,7 @@ enum lcTool
 
 struct lcModelHistoryEntry
 {
-	QByteArray File;
+	lcMemFile File;
 	char Description[64];
 };
 
@@ -145,8 +142,8 @@ public:
 	void SaveLDraw(lcFile& File) const;
 	void LoadLDraw(const QStringList& Lines, const lcMatrix44& CurrentTransform, int DefaultColorCode, int& CurrentStep);
 
-	QJsonObject SaveJson() const;
-	bool LoadJson(const QJsonObject& Model);
+	void SaveBinary(lcFile& File) const;
+	void LoadBinary(lcFile& File);
 
 	lcObject* GetFocusObject() const;
 	void FocusOrDeselectObject(const lcObjectSection& ObjectSection);

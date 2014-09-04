@@ -50,16 +50,6 @@ void lcLight::SaveLDraw(lcFile& File) const
 {
 }
 
-QJsonObject lcLight::Save()
-{
-	return QJsonObject();
-}
-
-void lcLight::Load(QJsonObject Light)
-{
-
-}
-
 bool lcLight::FileLoad(lcFile& file)
 {
 	return true;

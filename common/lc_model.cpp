@@ -199,54 +199,6 @@ void lcModelProperties::ParseLDrawLine(char** Tokens)
 */
 }
 
-QJsonObject lcModelProperties::Save() const
-{
-	QJsonObject Properties;
-
-	if (!mName.IsEmpty())
-		Properties[QStringLiteral("Name")] = QString::fromLatin1(mName); // todo: qstring
-	if (!mAuthor.IsEmpty())
-		Properties[QStringLiteral("Author")] = QString::fromLatin1(mAuthor);
-	if (!mDescription.IsEmpty())
-		Properties[QStringLiteral("Description")] = QString::fromLatin1(mDescription);
-	if (!mComments.IsEmpty())
-		Properties[QStringLiteral("Comments")] = QString::fromLatin1(mComments);
-
-	switch (mBackgroundType)
-	{
-	case LC_BACKGROUND_SOLID:
-		Properties[QStringLiteral("Background")] = QStringLiteral("Solid");
-		break;
-	case LC_BACKGROUND_GRADIENT:
-		Properties[QStringLiteral("Background")] = QStringLiteral("Gradient");
-		break;
-	case LC_BACKGROUND_IMAGE:
-		Properties[QStringLiteral("Background")] = QStringLiteral("Image");
-		break;
-	}
-
-	Properties[QStringLiteral("BackgroundSolidColor")] = QStringLiteral("%1 %2 %3").arg(QString::number(mBackgroundSolidColor[0]), QString::number(mBackgroundSolidColor[1]), QString::number(mBackgroundSolidColor[2]));
-	Properties[QStringLiteral("BackgroundGradientColor1")] = QStringLiteral("%1 %2 %3").arg(QString::number(mBackgroundGradientColor1[0]), QString::number(mBackgroundGradientColor1[1]), QString::number(mBackgroundGradientColor1[2]));
-	Properties[QStringLiteral("BackgroundGradientColor2")] = QStringLiteral("%1 %2 %3").arg(QString::number(mBackgroundGradientColor2[0]), QString::number(mBackgroundGradientColor2[1]), QString::number(mBackgroundGradientColor2[2]));
-	if (!mBackgroundImage.IsEmpty())
-		Properties[QStringLiteral("BackgroundImage")] = QString::fromLatin1(mBackgroundImage); // todo: qstring
-	if (mBackgroundImageTile)
-		Properties[QStringLiteral("BackgroundImageTile")] = QStringLiteral("true");
-
-	if (mFogEnabled)
-		Properties[QStringLiteral("FogEnabled")] = QStringLiteral("true");
-	Properties[QStringLiteral("FogDensity")] = QString::number(mFogDensity);
-	Properties[QStringLiteral("FogColor")] = QStringLiteral("%1 %2 %3").arg(QString::number(mBackgroundSolidColor[0]), QString::number(mBackgroundSolidColor[1]), QString::number(mBackgroundSolidColor[2]));
-	Properties[QStringLiteral("AmbientColor")] = QStringLiteral("%1 %2 %3").arg(QString::number(mBackgroundSolidColor[0]), QString::number(mBackgroundSolidColor[1]), QString::number(mBackgroundSolidColor[2]));
-
-	return Properties;
-}
-
-bool lcModelProperties::Load(const QJsonObject& Properties)
-{
-	return true;
-}
-
 lcModel::lcModel()
 {
 	mSavedHistory = NULL;
@@ -306,36 +258,36 @@ void lcModel::LoadLDraw(const QStringList& Lines, const lcMatrix44& CurrentTrans
 		QString Token;
 		Stream >> Token;
 
-		if (Token == QStringLiteral("0"))
+		if (Token == QLatin1String("0"))
 		{
 			Stream >> Token;
 
-			if (Token == QStringLiteral("STEP"))
+			if (Token == QLatin1String("STEP"))
 			{
 				CurrentStep++;
 				continue;
 			}
 
-			if (Token != QStringLiteral("!LEOCAD"))
+			if (Token != QLatin1String("!LEOCAD"))
 				continue;
 
 			Stream >> Token;
 
-			if (Token == QStringLiteral("MODEL"))
+			if (Token == QLatin1String("MODEL"))
 			{
 //				if (!strcmp(Tokens[3], "CURRENT_STEP") && Tokens[4])
 //					mCurrentStep = atoi(Tokens[4]);
 
 //				mProperties.ParseLDrawLine(Tokens);
 			}
-			else if (Token == QStringLiteral("PIECE"))
+			else if (Token == QLatin1String("PIECE"))
 			{
 				if (!Piece)
 					Piece = new lcPiece(NULL);
 
 				Piece->ParseLDrawLine(Stream, this);
 			}
-			else if (Token == QStringLiteral("CAMERA"))
+			else if (Token == QLatin1String("CAMERA"))
 			{
 				if (!Camera)
 					Camera = new lcCamera(false);
@@ -347,16 +299,16 @@ void lcModel::LoadLDraw(const QStringList& Lines, const lcMatrix44& CurrentTrans
 					Camera = NULL;
 				}
 			}
-			else if (Token == QStringLiteral("LIGHT"))
+			else if (Token == QLatin1String("LIGHT"))
 			{
 			}
-			else if (Token == QStringLiteral("GROUP"))
+			else if (Token == QLatin1String("GROUP"))
 			{
 			}
 
 			continue;
 		}
-		else if (Token == QStringLiteral("1"))
+		else if (Token == QLatin1String("1"))
 		{
 			int ColorCode;
 			Stream >> ColorCode;
@@ -376,7 +328,7 @@ void lcModel::LoadLDraw(const QStringList& Lines, const lcMatrix44& CurrentTrans
 			Stream >> File;
 
 			QString PartID = File.toUpper();
-			if (PartID.endsWith(QStringLiteral(".DAT")))
+			if (PartID.endsWith(QLatin1String(".DAT")))
 				PartID = PartID.left(PartID.size() - 4);
 
 			if (!Piece)
@@ -428,120 +380,6 @@ void lcModel::LoadLDraw(const QStringList& Lines, const lcMatrix44& CurrentTrans
 	delete Piece;
 	delete Camera;
 	delete Light;
-}
-
-QJsonObject lcModel::SaveJson() const
-{
-	QJsonObject Model;
-
-	Model["Properties"] = mProperties.Save();
-	Model["CurrentStep"] = (int)mCurrentStep;
-
-	QJsonArray Pieces;
-	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-		Pieces.append(mPieces[PieceIdx]->SaveJson());
-	Model["Pieces"] = Pieces;
-
-	QJsonArray Cameras;
-	for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
-		Cameras.append(mCameras[CameraIdx]->SaveJson());
-	Model["Cameras"] = Cameras;
-
-	QJsonArray Lights;
-	for (int LightIdx = 0; LightIdx < mLights.GetSize(); LightIdx++)
-		Lights.append(mLights[LightIdx]->Save());
-	Model["Lights"] = Lights;
-
-//	lcArray<lcGroup*> mGroups;
-
-	return Model;
-}
-
-bool lcModel::LoadJson(const QJsonObject& Model)
-{
-	QJsonValue Properties = Model.value(QStringLiteral("Properties"));
-	if (!Properties.isUndefined())
-		mProperties.Load(Properties.toObject());
-
-	QJsonValue CurrentStep = Model.value(QStringLiteral("CurrentStep"));
-	if (!CurrentStep.isUndefined())
-		mCurrentStep = CurrentStep.toInt();
-
-	QJsonValue Pieces = Model.value(QStringLiteral("Pieces"));
-	if (!Pieces.isUndefined())
-	{
-		QJsonArray PiecesArray = Pieces.toArray();
-
-		for (int PieceIdx = 0; PieceIdx < PiecesArray.size(); PieceIdx++)
-		{
-			lcPiece* Piece = new lcPiece(NULL);
-
-			if (Piece->LoadJson(PiecesArray[PieceIdx].toObject()))
-				mPieces.Add(Piece);
-			else
-				delete Piece;
-		}
-	}
-
-	QJsonValue Cameras = Model.value(QStringLiteral("Cameras"));
-	if (!Cameras.isUndefined())
-	{
-		QJsonArray CamerasArray = Cameras.toArray();
-
-		for (int CameraIdx = 0; CameraIdx < CamerasArray.size(); CameraIdx++)
-		{
-			lcCamera* Camera = new lcCamera(false);
-
-			if (Camera->LoadJson(CamerasArray[CameraIdx].toObject()))
-				mCameras.Add(Camera);
-			else
-				delete Camera;
-		}
-	}
-
-	QJsonValue Lights = Model.value(QStringLiteral("Lights"));
-	if (!Lights.isUndefined())
-	{
-		QJsonArray LightsArray = Lights.toArray();
-
-		for (int LightIdx = 0; LightIdx < LightsArray.size(); LightIdx++)
-		{
-/*			lcLight* Light = new lcLight();
-
-			if (Light->Load(LightsArray[LightIdx].toObject()))
-				mLights.Add(Light);
-			else
-				delete Light;
-*/		}
-	}
-
-// groups
-
-	CalculateStep();
-/*
-	if (!bMerge)
-		gMainWindow->UpdateFocusObject(GetFocusObject());
-
-	if (!bMerge)
-	{
-		for (int ViewIdx = 0; ViewIdx < Views.GetSize(); ViewIdx++)
-		{
-			View* view = Views[ViewIdx];
-
-			if (!view->mCamera->IsSimple())
-				view->SetDefaultCamera();
-		}
-
-		if (!bUndo)
-			ZoomExtents(0, Views.GetSize());
-	}
-*/
-	gMainWindow->UpdateCameraMenu();
-	UpdateSelection();
-	gMainWindow->UpdateCurrentStep();
-	gMainWindow->UpdateAllViews();
-
-	return true;
 }
 
 void lcModel::CalculateStep()

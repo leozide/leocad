@@ -1180,7 +1180,7 @@ void Project::CheckPoint(const char* Description)
 	lcModelHistoryEntry* ModelHistoryEntry = new lcModelHistoryEntry();
 
 	strcpy(ModelHistoryEntry->Description, Description);
-	ModelHistoryEntry->File = QJsonDocument(SaveJson()).toBinaryData();
+	FileSave(&ModelHistoryEntry->File, true);
 
 	mUndoHistory.InsertAt(0, ModelHistoryEntry);
 	mRedoHistory.DeleteAll();
@@ -3472,7 +3472,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 			mRedoHistory.InsertAt(0, Undo);
 
 			DeleteContents(true);
-			LoadJson(QJsonDocument::fromBinaryData(mUndoHistory[0]->File).object());
+			FileLoad(&mUndoHistory[0]->File, true, false);
 
 			gMainWindow->UpdateModified(IsModified());
 			gMainWindow->UpdateUndoRedo(mUndoHistory.GetSize() > 1 ? mUndoHistory[0]->Description : NULL, !mRedoHistory.IsEmpty() ? mRedoHistory[0]->Description : NULL);
@@ -3489,7 +3489,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 			mUndoHistory.InsertAt(0, Redo);
 
 			DeleteContents(true);
-			LoadJson(QJsonDocument::fromBinaryData(Redo->File).object());
+			FileLoad(&Redo->File, true, false);
 
 			gMainWindow->UpdateModified(IsModified());
 			gMainWindow->UpdateUndoRedo(mUndoHistory.GetSize() > 1 ? mUndoHistory[0]->Description : NULL, !mRedoHistory.IsEmpty() ? mRedoHistory[0]->Description : NULL);
@@ -6013,7 +6013,7 @@ void Project::EndMouseTool(lcTool Tool, bool Accept)
 	if (!Accept)
 	{
 		DeleteContents(true);
-		LoadJson(QJsonDocument::fromBinaryData(mUndoHistory[0]->File).object());
+		FileLoad(&mUndoHistory[0]->File, true, false);
 		return;
 	}
 

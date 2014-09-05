@@ -40,67 +40,41 @@ void lcModelProperties::SaveDefaults()
 	lcSetProfileInt(LC_PROFILE_DEFAULT_AMBIENT_COLOR, lcColorFromVector3(mAmbientColor));
 }
 
-void lcModelProperties::SaveLDraw(lcFile& File) const
+void lcModelProperties::SaveLDraw(QTextStream& Stream) const
 {
-	char Line[1024];
-
 	if (!mName.IsEmpty())
-	{
-		sprintf(Line, "0 !LEOCAD MODEL NAME %s\r\n", mName);
-		File.WriteBuffer(Line, strlen(Line));
-	}
+		Stream << QLatin1String("0 !LEOCAD MODEL NAME ") << mName.Buffer() << endl;
 
 	if (!mAuthor.IsEmpty())
-	{
-		sprintf(Line, "0 !LEOCAD MODEL AUTHOR %s\r\n", mAuthor);
-		File.WriteBuffer(Line, strlen(Line));
-	}
+		Stream << QLatin1String("0 !LEOCAD MODEL AUTHOR ") << mAuthor.Buffer() << endl;
 
 	if (!mDescription.IsEmpty())
-	{
-		sprintf(Line, "0 !LEOCAD MODEL DESCRIPTION %s\r\n", mDescription);
-		File.WriteBuffer(Line, strlen(Line));
-	}
+		Stream << QLatin1String("0 !LEOCAD MODEL DESCRIPTION ") << mDescription.Buffer() << endl;
 
 	if (!mComments.IsEmpty())
-	{
-		sprintf(Line, "0 !LEOCAD MODEL COMMENTS %s\r\n", mComments);
-		File.WriteBuffer(Line, strlen(Line));
-	}
+		Stream << QLatin1String("0 !LEOCAD MODEL COMMENTS ") << mComments.Buffer() << endl;
 
 	switch (mBackgroundType)
 	{
 	case LC_BACKGROUND_SOLID:
-		strcpy(Line, "0 !LEOCAD MODEL BACKGROUND_TYPE SOLID\r\n");
-		File.WriteBuffer(Line, strlen(Line));
+		Stream << QLatin1String("0 !LEOCAD MODEL BACKGROUND_TYPE SOLID") << endl;
 		break;
 	case LC_BACKGROUND_GRADIENT:
-		strcpy(Line, "0 !LEOCAD MODEL BACKGROUND_TYPE GRADIENT\r\n");
-		File.WriteBuffer(Line, strlen(Line));
+		Stream << QLatin1String("0 !LEOCAD MODEL BACKGROUND_TYPE GRADIENT") << endl;
 		break;
 	case LC_BACKGROUND_IMAGE:
-		strcpy(Line, "0 !LEOCAD MODEL BACKGROUND_TYPE IMAGE\r\n");
-		File.WriteBuffer(Line, strlen(Line));
+		Stream << QLatin1String("0 !LEOCAD MODEL BACKGROUND_TYPE IMAGE") << endl;
 		break;
 	}
 
-	sprintf(Line, "0 !LEOCAD MODEL BACKGROUND SOLID_COLOR %.2f %.2f %.2f\r\n", mBackgroundSolidColor[0], mBackgroundSolidColor[1], mBackgroundSolidColor[2]);
-	File.WriteBuffer(Line, strlen(Line));
-
-	sprintf(Line, "0 !LEOCAD MODEL BACKGROUND GRADIENT_COLORS %.2f %.2f %.2f %.2f %.2f %.2f\r\n", mBackgroundGradientColor1[0], mBackgroundGradientColor1[1], mBackgroundGradientColor1[2], mBackgroundGradientColor2[0], mBackgroundGradientColor2[1], mBackgroundGradientColor2[2]);
-	File.WriteBuffer(Line, strlen(Line));
+	Stream << QLatin1String("0 !LEOCAD MODEL BACKGROUND SOLID_COLOR ") << mBackgroundSolidColor[0] << ' ' << mBackgroundSolidColor[1] << ' ' << mBackgroundSolidColor[2] << endl;
+	Stream << QLatin1String("0 !LEOCAD MODEL BACKGROUND GRADIENT_COLORS ") << mBackgroundGradientColor1[0] << ' ' << mBackgroundGradientColor1[1] << ' ' << mBackgroundGradientColor1[2] << ' ' << mBackgroundGradientColor2[0] << ' ' << mBackgroundGradientColor2[1] << ' ' << mBackgroundGradientColor2[2] << endl;
 
 	if (!mBackgroundImage.IsEmpty())
-	{
-		sprintf(Line, "0 !LEOCAD MODEL BACKGROUND IMAGE_NAME %s\r\n", mBackgroundImage);
-		File.WriteBuffer(Line, strlen(Line));
-	}
+		Stream << QLatin1String("0 !LEOCAD MODEL BACKGROUND IMAGE_NAME ") << mBackgroundImage.Buffer() << endl;
 
 	if (mBackgroundImageTile)
-	{
-		strcat(Line, "0 !LEOCAD MODEL BACKGROUND IMAGE_TILE\r\n");
-		File.WriteBuffer(Line, strlen(Line));
-	}
+		Stream << QLatin1String("0 !LEOCAD MODEL BACKGROUND IMAGE_TILE") << endl;
 
 //	bool mFogEnabled;
 //	float mFogDensity;
@@ -208,18 +182,14 @@ lcModel::~lcModel()
 {
 }
 
-void lcModel::SaveLDraw(lcFile& File) const
+void lcModel::SaveLDraw(QTextStream& Stream) const
 {
-	mProperties.SaveLDraw(File);
+	mProperties.SaveLDraw(Stream);
 
 	lcStep LastStep = GetLastStep();
 
 	if (mCurrentStep != LastStep)
-	{
-		char Line[1024];
-		sprintf(Line, "0 !LEOCAD MODEL CURRENT_STEP %d\r\n", mCurrentStep);
-		File.WriteBuffer(Line, strlen(Line));
-	}
+		Stream << QLatin1String("0 !LEOCAD MODEL CURRENT_STEP") << mCurrentStep << endl;
 
 	for (lcStep Step = 1; Step <= LastStep; Step++)
 	{
@@ -228,18 +198,18 @@ void lcModel::SaveLDraw(lcFile& File) const
 			lcPiece* Piece = mPieces[PieceIdx];
 
 			if (Piece->GetStepShow() == Step)
-				Piece->SaveLDraw(File);
+				Piece->SaveLDraw(Stream);
 		}
 
 		if (Step != LastStep)
-			File.WriteBuffer("0 STEP\r\n", 8);
+			Stream << QLatin1String("0 STEP") << endl;
 	}
 
 	for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
-		mCameras[CameraIdx]->SaveLDraw(File);
+		mCameras[CameraIdx]->SaveLDraw(Stream);
 
 	for (int LightIdx = 0; LightIdx < mLights.GetSize(); LightIdx++)
-		mLights[LightIdx]->SaveLDraw(File);
+		mLights[LightIdx]->SaveLDraw(Stream);
 
 //	lcArray<lcGroup*> mGroups;
 }

@@ -106,57 +106,34 @@ void lcCamera::CreateName(const lcArray<lcCamera*>& Cameras)
 	sprintf(m_strName, "%s %d", Prefix, max+1);
 }
 
-void lcCamera::SaveLDraw(lcFile& File) const
+void lcCamera::SaveLDraw(QTextStream& Stream) const
 {
-	char Line[1024];
-
 	if (IsHidden())
-	{
-		strcpy(Line, "0 !LEOCAD CAMERA HIDDEN\r\n");
-		File.WriteBuffer(Line, strlen(Line));
-	}
+		Stream << QLatin1String("0 !LEOCAD CAMERA HIDDEN") << endl;
 
 	if (IsOrtho())
-	{
-		strcpy(Line, "0 !LEOCAD CAMERA ORTHOGRAPHIC\r\n");
-		File.WriteBuffer(Line, strlen(Line));
-	}
+		Stream << QLatin1String("0 !LEOCAD CAMERA ORTHOGRAPHIC") << endl;
 
-	sprintf(Line, "0 !LEOCAD CAMERA FOV %.2f\r\n", m_fovy);
-	File.WriteBuffer(Line, strlen(Line));
-
-	sprintf(Line, "0 !LEOCAD CAMERA ZNEAR %.2f\r\n", m_zNear);
-	File.WriteBuffer(Line, strlen(Line));
-
-	sprintf(Line, "0 !LEOCAD CAMERA ZFAR %.2f\r\n", m_zFar);
-	File.WriteBuffer(Line, strlen(Line));
+	Stream << QLatin1String("0 !LEOCAD CAMERA FOV ") << m_fovy << endl;
+	Stream << QLatin1String("0 !LEOCAD CAMERA ZNEAR ") << m_zNear << endl;
+	Stream << QLatin1String("0 !LEOCAD CAMERA ZFAR ") << m_zFar << endl;
 
 	if (mPositionKeys.GetSize() > 1)
-		SaveKeysLDraw(mPositionKeys, "CAMERA POSITION_KEY", File);
+		SaveKeysLDraw(Stream, mPositionKeys, "CAMERA POSITION_KEY ");
 	else
-	{
-		sprintf(Line, "0 !LEOCAD CAMERA POSITION %.2f %.2f %.2f\r\n", mPosition[0], mPosition[1], mPosition[2]);
-		File.WriteBuffer(Line, strlen(Line));
-	}
+		Stream << QLatin1String("0 !LEOCAD CAMERA POSITION ") << mPosition[0] << ' ' << mPosition[1] << ' ' << mPosition[2] << endl;
 
 	if (mTargetPositionKeys.GetSize() > 1)
-		SaveKeysLDraw(mTargetPositionKeys, "CAMERA TARGETPOSITION_KEY", File);
+		SaveKeysLDraw(Stream, mTargetPositionKeys, "CAMERA TARGETPOSITION_KEY ");
 	else
-	{
-		sprintf(Line, "0 !LEOCAD CAMERA TARGETPOSITION %.2f %.2f %.2f\r\n", mTargetPosition[0], mTargetPosition[1], mTargetPosition[2]);
-		File.WriteBuffer(Line, strlen(Line));
-	}
+		Stream << QLatin1String("0 !LEOCAD CAMERA TARGETPOSITION ") << mTargetPosition[0] << ' ' << mTargetPosition[1] << ' ' << mTargetPosition[2] << endl;
 
 	if (mUpVectorKeys.GetSize() > 1)
-		SaveKeysLDraw(mUpVectorKeys, "CAMERA UPVECTOR_KEY", File);
+		SaveKeysLDraw(Stream, mUpVectorKeys, "CAMERA UPVECTOR_KEY ");
 	else
-	{
-		sprintf(Line, "0 !LEOCAD CAMERA UPVECTOR %.2f %.2f %.2f\r\n", mUpVector[0], mUpVector[1], mUpVector[2]);
-		File.WriteBuffer(Line, strlen(Line));
-	}
+		Stream << QLatin1String("0 !LEOCAD CAMERA UPVECTOR ") << mUpVector[0] << ' ' << mUpVector[1] << ' ' << mUpVector[2] << endl;
 
-	sprintf(Line, "0 !LEOCAD CAMERA NAME %s\r\n", m_strName);
-	File.WriteBuffer(Line, strlen(Line));
+	Stream << QLatin1String("0 !LEOCAD CAMERA NAME ") << m_strName << endl;
 }
 
 bool lcCamera::ParseLDrawLine(QTextStream& Stream)
@@ -181,11 +158,11 @@ bool lcCamera::ParseLDrawLine(QTextStream& Stream)
 	else if (Token == QLatin1String("UPVECTOR"))
 		Stream >> mUpVector[0] >> mUpVector[1] >> mUpVector[2];
 	else if (Token == QLatin1String("POSITION_KEY"))
-		LoadKeyLDraw(mPositionKeys, Stream);
+		LoadKeysLDraw(Stream, mPositionKeys);
 	else if (Token == QLatin1String("TARGETPOSITION_KEY"))
-		LoadKeyLDraw(mTargetPositionKeys, Stream);
+		LoadKeysLDraw(Stream, mTargetPositionKeys);
 	else if (Token == QLatin1String("UPVECTOR_KEY"))
-		LoadKeyLDraw(mUpVectorKeys, Stream);
+		LoadKeysLDraw(Stream, mUpVectorKeys);
 	else if (Token == QLatin1String("NAME"))
 	{
 		QString Name = Stream.readAll().trimmed();

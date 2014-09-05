@@ -54,7 +54,7 @@ public:
 		return true;
 	}
 
-	void SaveLDraw(lcFile& File) const;
+	void SaveLDraw(QTextStream& Stream) const;
 	void ParseLDrawLine(char** Tokens);
 
 	String mName;
@@ -139,7 +139,7 @@ public:
 
 	lcGroup* GetGroup(const char* Name, bool CreateIfMissing);
 
-	void SaveLDraw(lcFile& File) const;
+	void SaveLDraw(QTextStream& Stream) const;
 	void LoadLDraw(const QStringList& Lines, const lcMatrix44& CurrentTransform, int DefaultColorCode, int& CurrentStep);
 
 	void SaveBinary(lcFile& File) const;

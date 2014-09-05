@@ -170,7 +170,7 @@ public:
 		return lcVector3(0.0f, 0.0f, 0.0f);
 	}
 
-	void SaveLDraw(lcFile& File) const;
+	void SaveLDraw(QTextStream& Stream) const;
 
 public:
 	virtual void RayTest(lcObjectRayTest& ObjectRayTest) const;

@@ -43,44 +43,34 @@ lcPiece::~lcPiece()
 		mPieceInfo->Release();
 }
 
-void lcPiece::SaveLDraw(lcFile& File) const
+void lcPiece::SaveLDraw(QTextStream& Stream) const
 {
-	char Line[1024];
-
 	if (mStepHide != LC_STEP_MAX)
-	{
-		sprintf(Line, "0 !LEOCAD PIECE STEP_HIDE %d\r\n", mStepHide);
-		File.WriteBuffer(Line, strlen(Line));
-	}
+		Stream << QLatin1String("0 !LEOCAD PIECE STEP_HIDE ") << mStepHide << endl;
 
-	sprintf(Line, "0 !LEOCAD PIECE NAME %s\r\n", m_strName);
-	File.WriteBuffer(Line, strlen(Line));
+	Stream << QLatin1String("0 !LEOCAD PIECE NAME ") << m_strName << endl;
 
 	if (IsHidden())
-	{
-		strcpy(Line, "0 !LEOCAD PIECE HIDDEN\r\n");
-		File.WriteBuffer(Line, strlen(Line));
-	}
+		Stream << QLatin1String("0 !LEOCAD PIECE HIDDEN") << endl;
 
 	if (mGroup)
-	{
-		sprintf(Line, "0 !LEOCAD PIECE GROUP %s\r\n", mGroup->m_strName);
-		File.WriteBuffer(Line, strlen(Line));
-	}
+		Stream << QLatin1String("0 !LEOCAD PIECE GROUP ") << mGroup->m_strName << endl;
 
 	if (mPositionKeys.GetSize() > 1)
-		SaveKeysLDraw(mPositionKeys, "PIECE POSITION_KEY", File);
+		SaveKeysLDraw(Stream, mPositionKeys, "PIECE POSITION_KEY ");
 
 	if (mRotationKeys.GetSize() > 1)
-		SaveKeysLDraw(mRotationKeys, "PIECE ROTATION_KEY", File);
+		SaveKeysLDraw(Stream, mRotationKeys, "PIECE ROTATION_KEY ");
+
+	Stream << "1 " << mColorCode << ' ';
 
 	const float* Matrix = mModelWorld;
 	float Numbers[12] = { Matrix[12], -Matrix[14], Matrix[13], Matrix[0], -Matrix[8], Matrix[4], -Matrix[2], Matrix[10], -Matrix[6], Matrix[1], -Matrix[9], Matrix[5] };
-	char Strings[12][32];
 	for (int NumberIdx = 0; NumberIdx < 12; NumberIdx++)
 	{
-		sprintf(Strings[NumberIdx], "%f", Numbers[NumberIdx]);
-		char* Dot = strchr(Strings[NumberIdx], '.');
+		char Number[64];
+		sprintf(Number, "%f", Numbers[NumberIdx]);
+		char* Dot = strchr(Number, '.');
 		if (Dot)
 		{
 			char* Last;
@@ -91,11 +81,11 @@ void lcPiece::SaveLDraw(lcFile& File) const
 			if (Last == Dot)
 				*Dot = 0;
 		}
+
+		Stream << Number << ' ';
 	}
 
-	sprintf(Line, "1 %d %s %s %s %s %s %s %s %s %s %s %s %s %s.DAT\r\n",
-			mColorCode, Strings[0], Strings[1], Strings[2], Strings[3], Strings[4], Strings[5], Strings[6], Strings[7], Strings[8], Strings[9], Strings[10], Strings[11], mPieceInfo->m_strName);
-	File.WriteBuffer(Line, strlen(Line));
+	Stream << mPieceInfo->m_strName << QLatin1String(".DAT") << endl;
 }
 
 bool lcPiece::ParseLDrawLine(QTextStream& Stream, lcModel* Model)
@@ -121,9 +111,9 @@ bool lcPiece::ParseLDrawLine(QTextStream& Stream, lcModel* Model)
 		mGroup = Model->GetGroup(NameUtf.constData(), true);
 	}
 	else if (Token == QLatin1String("POSITION_KEY"))
-		LoadKeyLDraw(mPositionKeys, Stream);
+		LoadKeysLDraw(Stream, mPositionKeys);
 	else if (Token == QLatin1String("ROTATION_KEY"))
-		LoadKeyLDraw(mRotationKeys, Stream);
+		LoadKeysLDraw(Stream, mRotationKeys);
 
 	return false;
 }

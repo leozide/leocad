@@ -46,7 +46,7 @@ lcLight::~lcLight()
 {
 }
 
-void lcLight::SaveLDraw(lcFile& File) const
+void lcLight::SaveLDraw(QTextStream& Stream) const
 {
 }
 

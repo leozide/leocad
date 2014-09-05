@@ -87,11 +87,22 @@ public:
 	virtual const char* GetName() const = 0;
 
 protected:
-	void SaveKeysLDraw(const lcArray<lcObjectKey<lcVector3>>& Keys, const char* KeyName, lcFile& File) const;
-	void SaveKeysLDraw(const lcArray<lcObjectKey<lcVector4>>& Keys, const char* KeyName, lcFile& File) const;
+	template<typename T>
+	void SaveKeysLDraw(QTextStream& Stream, const lcArray<lcObjectKey<T>>& Keys, const char* KeyName) const
+	{
+		const int Count = sizeof(T) / sizeof(float);
+		for (int KeyIdx = 0; KeyIdx < Keys.GetSize(); KeyIdx++)
+		{
+			lcObjectKey<T>& Key = Keys[KeyIdx];
+			Stream << QLatin1String("0 !LEOCAD ") << KeyName << Key.Step << ' ';
+			for (int ValueIdx = 0; ValueIdx < Count; ValueIdx++)
+				Stream << Key.Value[ValueIdx] << ' ';
+			Stream << endl;
+		}
+	}
 
 	template<typename T>
-	void LoadKeyLDraw(lcArray<lcObjectKey<T>>& Keys, QTextStream& Stream)
+	void LoadKeysLDraw(QTextStream& Stream, lcArray<lcObjectKey<T>>& Keys)
 	{
 		QString Token;
 		Stream >> Token;

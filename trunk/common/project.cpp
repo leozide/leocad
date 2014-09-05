@@ -935,13 +935,6 @@ bool Project::DoSave(const char* FileName)
 			return false;
 	}
 
-	lcDiskFile file;
-	if (!file.Open(SaveFileName, "wb"))
-	{
-//		MessageBox("Failed to save.");
-		return false;
-	}
-
 	char ext[4];
 	memset(ext, 0, 4);
 	const char* ptr = strrchr(SaveFileName, '.');
@@ -953,14 +946,30 @@ bool Project::DoSave(const char* FileName)
 
 	if ((strcmp(ext, "dat") == 0) || (strcmp(ext, "ldr") == 0))
 	{
-		const char* OldLocale = setlocale(LC_NUMERIC, "C");
-		SaveLDraw(file);
-		setlocale(LC_NUMERIC, OldLocale);
+		QFile File(SaveFileName);
+
+		if (!File.open(QIODevice::WriteOnly))
+		{
+			QMessageBox::warning(gMainWindow->mHandle, "Error", QString("Error writing to file '%1':\n%2").arg(SaveFileName, File.errorString()));
+			return false;
+		}
+
+		QTextStream Stream(&File);
+		SaveLDraw(Stream);
 	}
 	else
+	{
+		lcDiskFile file;
+		if (!file.Open(SaveFileName, "wb"))
+		{
+	//		MessageBox("Failed to save.");
+			return false;
+		}
+
 		FileSave(&file, false);     // save me
 
-	file.Close();
+		file.Close();
+	}
 
 	mSavedHistory = mUndoHistory[0];
 

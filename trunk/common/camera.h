@@ -220,7 +220,7 @@ public:
 		return lcVector3(0.0f, 0.0f, 0.0f);
 	}
 
-	void SaveLDraw(lcFile& File) const;
+	void SaveLDraw(QTextStream& Stream) const;
 	bool ParseLDrawLine(QTextStream& Stream);
 
 

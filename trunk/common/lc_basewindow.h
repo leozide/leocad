@@ -165,7 +165,7 @@ class lcBaseWindow
 
 	int DoMessageBox(const char* Text, const char* Caption = "LeoCAD", int Flags = LC_MB_OK | LC_MB_ICONINFORMATION);
 
-	void* mHandle;
+	QWidget* mHandle;
 };
 
 #endif // _LC_BASEWINDOW_H_

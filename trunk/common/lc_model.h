@@ -57,10 +57,10 @@ public:
 	void SaveLDraw(QTextStream& Stream) const;
 	void ParseLDrawLine(char** Tokens);
 
-	String mName;
-	String mAuthor;
-	String mDescription;
-	String mComments;
+	QString mName;
+	QString mAuthor;
+	QString mDescription;
+	QString mComments;
 
 	lcBackgroundType mBackgroundType;
 	lcVector3 mBackgroundSolidColor;

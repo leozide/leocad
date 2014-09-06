@@ -25,9 +25,9 @@ lcQPropertiesDialog::lcQPropertiesDialog(QWidget *parent, void *data) :
 
 	setWindowTitle(QString(tr("%1 Properties")).arg(options->Title.Buffer()));
 
-	ui->descriptionEdit->setText(QString::fromUtf8(options->Properties.mDescription.Buffer()));
-	ui->authorEdit->setText(QString::fromUtf8(options->Properties.mAuthor.Buffer()));
-	ui->commentsEdit->setText(QString::fromUtf8(options->Properties.mComments.Buffer()));
+	ui->descriptionEdit->setText(options->Properties.mDescription);
+	ui->authorEdit->setText(options->Properties.mAuthor);
+	ui->commentsEdit->setText(options->Properties.mComments);
 
 	if (options->Properties.mBackgroundType == LC_BACKGROUND_IMAGE)
 		ui->imageRadio->setChecked(true);
@@ -127,9 +127,9 @@ lcQPropertiesDialog::~lcQPropertiesDialog()
 
 void lcQPropertiesDialog::accept()
 {
-	options->Properties.mDescription = ui->descriptionEdit->text().toUtf8().data();
-	options->Properties.mAuthor = ui->authorEdit->text().toUtf8().data();
-	options->Properties.mComments = ui->commentsEdit->toPlainText().toUtf8().data();
+	options->Properties.mDescription = ui->descriptionEdit->text();
+	options->Properties.mAuthor = ui->authorEdit->text();
+	options->Properties.mComments = ui->commentsEdit->toPlainText();
 
 	if (ui->imageRadio->isChecked())
 		 options->Properties.mBackgroundType = LC_BACKGROUND_IMAGE;

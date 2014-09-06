@@ -287,8 +287,10 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 				file->Seek(sh, SEEK_CUR);
 			else
 			{
-				file->ReadBuffer(mProperties.mAuthor.GetBuffer(sh), sh);
-				mProperties.mAuthor.Buffer()[sh] = 0;
+				String Author;
+				file->ReadBuffer(Author.GetBuffer(sh), sh);
+				Author.Buffer()[sh] = 0;
+				mProperties.mAuthor = QString::fromUtf8(Author.Buffer());
 			}
 
 			file->ReadBuffer(&ch, 1);
@@ -297,8 +299,10 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 				file->Seek(sh, SEEK_CUR);
 			else
 			{
-				file->ReadBuffer(mProperties.mDescription.GetBuffer(sh), sh);
-				mProperties.mDescription.Buffer()[sh] = 0;
+				String Description;
+				file->ReadBuffer(Description.GetBuffer(sh), sh);
+				Description.Buffer()[sh] = 0;
+				mProperties.mDescription = QString::fromUtf8(Description.Buffer());
 			}
 
 			file->ReadBuffer(&ch, 1);
@@ -307,8 +311,11 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 				file->Seek(sh, SEEK_CUR);
 			else
 			{
-				file->ReadBuffer(mProperties.mComments.GetBuffer(sh), sh);
-				mProperties.mComments.Buffer()[sh] = 0;
+				String Comments;
+				file->ReadBuffer(Comments.GetBuffer(sh), sh);
+				Comments.Buffer()[sh] = 0;
+				mProperties.mComments = QString::fromUtf8(Comments.Buffer());
+				mProperties.mComments.replace(QLatin1String("\r\n"), QLatin1String("\n"));
 			}
 		}
 	}
@@ -611,15 +618,15 @@ void Project::FileSave(lcFile* file, bool bUndo)
 	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 		mPieces[PieceIdx]->FileSave(*file);
 
-	const char* Author = mProperties.mAuthor.Buffer();
+	QByteArray Author = mProperties.mAuthor.toUtf8();
 	ch = lcMin(strlen(Author), 100U);
 	file->WriteBuffer(&ch, 1);
 	file->WriteBuffer(Author, ch);
-	const char* Description = mProperties.mDescription.Buffer();
+	QByteArray Description = mProperties.mDescription.toUtf8();
 	ch = lcMin(strlen(Description), 100U);
 	file->WriteBuffer(&ch, 1);
 	file->WriteBuffer(Description, ch);
-	const char* Comments = mProperties.mComments.Buffer();
+	QByteArray Comments = mProperties.mComments.toUtf8();
 	ch = lcMin(strlen(Comments), 255U);
 	file->WriteBuffer(&ch, 1);
 	file->WriteBuffer(Comments, ch);
@@ -3328,12 +3335,6 @@ void Project::HandleCommand(LC_COMMANDS id)
 			if (strlen(buf) != 0)
 			{
 				sprintf(Line, "# Original name: %s\n", ptr);
-				OBJFile.WriteLine(Line);
-			}
-
-			if (!mProperties.mAuthor.IsEmpty())
-			{
-				sprintf(Line, "# Author: %s\n", mProperties.mAuthor.Buffer());
 				OBJFile.WriteLine(Line);
 			}
 

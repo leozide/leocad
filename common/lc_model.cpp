@@ -42,32 +42,38 @@ void lcModelProperties::SaveDefaults()
 
 void lcModelProperties::SaveLDraw(QTextStream& Stream) const
 {
-	if (!mName.IsEmpty())
-		Stream << QLatin1String("0 !LEOCAD MODEL NAME ") << mName.Buffer() << endl;
+	QLatin1String LineEnding("\r\n");
 
-	if (!mAuthor.IsEmpty())
-		Stream << QLatin1String("0 !LEOCAD MODEL AUTHOR ") << mAuthor.Buffer() << endl;
+	if (!mName.isEmpty())
+		Stream << QLatin1String("0 !LEOCAD MODEL NAME ") << mName << LineEnding;
 
-	if (!mDescription.IsEmpty())
-		Stream << QLatin1String("0 !LEOCAD MODEL DESCRIPTION ") << mDescription.Buffer() << endl;
+	if (!mAuthor.isEmpty())
+		Stream << QLatin1String("0 !LEOCAD MODEL AUTHOR ") << mAuthor << LineEnding;
 
-	if (!mComments.IsEmpty())
-		Stream << QLatin1String("0 !LEOCAD MODEL COMMENTS ") << mComments.Buffer() << endl;
+	if (!mDescription.isEmpty())
+		Stream << QLatin1String("0 !LEOCAD MODEL DESCRIPTION ") << mDescription << LineEnding;
+
+	if (!mComments.isEmpty())
+	{
+		QStringList Comments = mComments.split('\n');
+		for (const QString& Comment : Comments)
+			Stream << QLatin1String("0 !LEOCAD MODEL COMMENT ") << Comment << LineEnding;
+	}
 
 	switch (mBackgroundType)
 	{
 	case LC_BACKGROUND_SOLID:
-		Stream << QLatin1String("0 !LEOCAD MODEL BACKGROUND_TYPE SOLID") << endl;
+		Stream << QLatin1String("0 !LEOCAD MODEL BACKGROUND_TYPE SOLID\r\n");
 		break;
 	case LC_BACKGROUND_GRADIENT:
-		Stream << QLatin1String("0 !LEOCAD MODEL BACKGROUND_TYPE GRADIENT") << endl;
+		Stream << QLatin1String("0 !LEOCAD MODEL BACKGROUND_TYPE GRADIENT\r\n");
 		break;
 	case LC_BACKGROUND_IMAGE:
-		Stream << QLatin1String("0 !LEOCAD MODEL BACKGROUND_TYPE IMAGE") << endl;
+		Stream << QLatin1String("0 !LEOCAD MODEL BACKGROUND_TYPE IMAGE\r\n");
 		break;
 	}
 
-	Stream << QLatin1String("0 !LEOCAD MODEL BACKGROUND SOLID_COLOR ") << mBackgroundSolidColor[0] << ' ' << mBackgroundSolidColor[1] << ' ' << mBackgroundSolidColor[2] << endl;
+	Stream << QLatin1String("0 !LEOCAD MODEL BACKGROUND COLOR ") << mBackgroundSolidColor[0] << ' ' << mBackgroundSolidColor[1] << ' ' << mBackgroundSolidColor[2] << endl;
 	Stream << QLatin1String("0 !LEOCAD MODEL BACKGROUND GRADIENT_COLORS ") << mBackgroundGradientColor1[0] << ' ' << mBackgroundGradientColor1[1] << ' ' << mBackgroundGradientColor1[2] << ' ' << mBackgroundGradientColor2[0] << ' ' << mBackgroundGradientColor2[1] << ' ' << mBackgroundGradientColor2[2] << endl;
 
 	if (!mBackgroundImage.IsEmpty())
@@ -84,6 +90,7 @@ void lcModelProperties::SaveLDraw(QTextStream& Stream) const
 
 void lcModelProperties::ParseLDrawLine(char** Tokens)
 {
+	/*
 	if (!Tokens[4])
 		return;
 
@@ -151,7 +158,7 @@ void lcModelProperties::ParseLDrawLine(char** Tokens)
 
 		}
 	}
-
+*/
 /*
 	sprintf(Line, "0 !LEOCAD MODEL BACKGROUND SOLID_COLOR %.2f %.2f %.2f\r\n", mBackgroundSolidColor[0], mBackgroundSolidColor[1], mBackgroundSolidColor[2]);
 	File.WriteBuffer(Line, strlen(Line));

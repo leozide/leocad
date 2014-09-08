@@ -97,7 +97,7 @@ protected:
 			Stream << QLatin1String("0 !LEOCAD ") << KeyName << Key.Step << ' ';
 			for (int ValueIdx = 0; ValueIdx < Count; ValueIdx++)
 				Stream << Key.Value[ValueIdx] << ' ';
-			Stream << endl;
+			Stream << QLatin1String("\r\n");
 		}
 	}
 

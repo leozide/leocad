@@ -653,9 +653,10 @@ void Project::FileSave(lcFile* file, bool bUndo)
 	rgb = LC_FLOATRGB(mProperties.mFogColor);
 	file->WriteU32(&rgb, 1);
 	file->WriteFloats(&mProperties.mFogDensity, 1);
-	sh = strlen(mProperties.mBackgroundImage.Buffer());
+	QByteArray BackgroundImage = mProperties.mBackgroundImage.toLatin1();
+	sh = strlen(BackgroundImage.constData());
 	file->WriteU16(&sh, 1);
-	file->WriteBuffer(mProperties.mBackgroundImage.Buffer(), sh);
+	file->WriteBuffer(BackgroundImage.constData(), sh);
 	ch = strlen(m_strHeader);
 	file->WriteBuffer(&ch, 1);
 	file->WriteBuffer(m_strHeader, ch);
@@ -1126,14 +1127,19 @@ bool Project::OnOpenDocument(const char* lpszPathName)
       else
 //        FileReadLDraw(&file, mat, &ok, 16, &step, FileArray);
 	  {
-		  QStringList Lines;
 		  QFile File(lpszPathName);
+
 		  if (!File.open(QIODevice::ReadOnly))
 		  {
+				QMessageBox::warning(gMainWindow->mHandle, "Error", QString("Error reading file '%1':\n%2").arg(lpszPathName, File.errorString()));
+				return false;
 		  }
+
+		  QStringList Lines;
 		  while (!File.atEnd())
 			  Lines.append(File.readLine());
-		  LoadLDraw(Lines, mat, 16, step);
+
+		  LoadLDraw(Lines, mat, step);
 	  }
 
       mCurrentStep = step;
@@ -1522,7 +1528,7 @@ void Project::RenderSceneObjects(View* view)
 void Project::RenderInitialize()
 {
 	if (mProperties.mBackgroundType == LC_BACKGROUND_IMAGE)
-		if (!m_pBackground->Load(mProperties.mBackgroundImage.Buffer(), LC_TEXTURE_WRAPU | LC_TEXTURE_WRAPV))
+		if (!m_pBackground->Load(mProperties.mBackgroundImage.toLatin1().constData(), LC_TEXTURE_WRAPU | LC_TEXTURE_WRAPV)) // todo: qstring
 		{
 			mProperties.mBackgroundType = LC_BACKGROUND_SOLID;
 //			AfxMessageBox ("Could not load background");
@@ -2182,8 +2188,9 @@ void Project::Export3DStudio()
 	File.WriteFloats(mProperties.mBackgroundSolidColor, 3);
 
 	File.WriteU16(0x1100); // CHK_BIT_MAP
-	File.WriteU32(6 + 1 + strlen(mProperties.mBackgroundImage.Buffer()));
-	File.WriteBuffer(mProperties.mBackgroundImage.Buffer(), strlen(mProperties.mBackgroundImage.Buffer()) + 1);
+	QByteArray BackgroundImage = mProperties.mBackgroundImage.toLatin1();
+	File.WriteU32(6 + 1 + strlen(BackgroundImage.constData()));
+	File.WriteBuffer(BackgroundImage.constData(), strlen(BackgroundImage.constData()) + 1);
 
 	File.WriteU16(0x1300); // CHK_V_GRADIENT
 	File.WriteU32(118);

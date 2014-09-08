@@ -89,7 +89,7 @@ public:
 	}
 
 	void SaveLDraw(QTextStream& Stream) const;
-	bool ParseLDrawLine(QTextStream& Stream, lcModel* Model);
+	bool ParseLDrawLine(QTextStream& Stream);
 
 	virtual void RayTest(lcObjectRayTest& ObjectRayTest) const;
 	virtual void BoxTest(lcObjectBoxTest& ObjectBoxTest) const;
@@ -206,7 +206,7 @@ protected:
 	lcStep mStepHide;
 
 	lcuint8 mState;
-	char m_strName[81];
+	char m_strName[256];
 };
 
 #endif // _PIECE_H

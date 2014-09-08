@@ -45,16 +45,42 @@ lcPiece::~lcPiece()
 
 void lcPiece::SaveLDraw(QTextStream& Stream) const
 {
-	if (mStepHide != LC_STEP_MAX)
-		Stream << QLatin1String("0 !LEOCAD PIECE STEP_HIDE ") << mStepHide << endl;
+	QLatin1String LineEnding("\r\n");
 
-	Stream << QLatin1String("0 !LEOCAD PIECE NAME ") << m_strName << endl;
+	if (mStepHide != LC_STEP_MAX)
+		Stream << QLatin1String("0 !LEOCAD PIECE STEP_HIDE ") << mStepHide << LineEnding;
+
+	if (m_strName[0])
+	{
+		int Length = strlen(mPieceInfo->m_strDescription);
+		bool Save = true;
+
+		if (!strncmp(m_strName, mPieceInfo->m_strDescription, Length))
+		{
+			const char* Name = m_strName + Length;
+
+			if (*Name++ == ' ' && *Name++ == '#')
+			{
+				for (;;)
+				{
+					if (!isdigit(*Name++))
+						break;
+
+					if (*Name == 0)
+					{
+						Save = false;
+						break;
+					}
+				}
+			}
+		}
+
+		if (Save)
+			Stream << QLatin1String("0 !LEOCAD PIECE NAME ") << m_strName << LineEnding;
+	}
 
 	if (IsHidden())
-		Stream << QLatin1String("0 !LEOCAD PIECE HIDDEN") << endl;
-
-	if (mGroup)
-		Stream << QLatin1String("0 !LEOCAD PIECE GROUP ") << mGroup->m_strName << endl;
+		Stream << QLatin1String("0 !LEOCAD PIECE HIDDEN") << LineEnding;
 
 	if (mPositionKeys.GetSize() > 1)
 		SaveKeysLDraw(Stream, mPositionKeys, "PIECE POSITION_KEY ");
@@ -64,56 +90,53 @@ void lcPiece::SaveLDraw(QTextStream& Stream) const
 
 	Stream << "1 " << mColorCode << ' ';
 
+	QLocale Locale = QLocale::c();
+	QString Number;
+
 	const float* Matrix = mModelWorld;
 	float Numbers[12] = { Matrix[12], -Matrix[14], Matrix[13], Matrix[0], -Matrix[8], Matrix[4], -Matrix[2], Matrix[10], -Matrix[6], Matrix[1], -Matrix[9], Matrix[5] };
 	for (int NumberIdx = 0; NumberIdx < 12; NumberIdx++)
 	{
-		char Number[64];
-		sprintf(Number, "%f", Numbers[NumberIdx]);
-		char* Dot = strchr(Number, '.');
-		if (Dot)
+		Number = Locale.toString(Numbers[NumberIdx], 'f', 6);
+		int Dot = Number.indexOf('.');
+		if (Dot != -1)
 		{
-			char* Last;
+			while (Number.endsWith('0'))
+				Number.chop(1);
 
-			for (Last = Dot + strlen(Dot) - 1; *Last == '0'; Last--)
-				*Last = 0;
-
-			if (Last == Dot)
-				*Dot = 0;
+			if (Number.endsWith('.'))
+				Number.chop(1);
 		}
 
 		Stream << Number << ' ';
 	}
 
-	Stream << mPieceInfo->m_strName << QLatin1String(".DAT") << endl;
+	Stream << mPieceInfo->m_strName << QLatin1String(".DAT") << LineEnding;
 }
 
-bool lcPiece::ParseLDrawLine(QTextStream& Stream, lcModel* Model)
+bool lcPiece::ParseLDrawLine(QTextStream& Stream)
 {
-	QString Token;
-	Stream >> Token;
+	while (!Stream.atEnd())
+	{
+		QString Token;
+		Stream >> Token;
 
-	if (Token == QLatin1String("STEP_HIDE"))
-		Stream >> mStepHide;
-	else if (Token == QLatin1String("NAME"))
-	{
-		QString Name = Stream.readAll().trimmed();
-		QByteArray NameUtf = Name.toUtf8(); // todo: replace with qstring
-		strncpy(m_strName, NameUtf.constData(), sizeof(m_strName));
-		m_strName[sizeof(m_strName) - 1] = 0;
+		if (Token == QLatin1String("STEP_HIDE"))
+			Stream >> mStepHide;
+		else if (Token == QLatin1String("NAME"))
+		{
+			QString Name = Stream.readAll().trimmed();
+			QByteArray NameUtf = Name.toUtf8(); // todo: replace with qstring
+			strncpy(m_strName, NameUtf.constData(), sizeof(m_strName));
+			m_strName[sizeof(m_strName) - 1] = 0;
+		}
+		else if (Token == QLatin1String("HIDDEN"))
+			SetHidden(true);
+		else if (Token == QLatin1String("POSITION_KEY"))
+			LoadKeysLDraw(Stream, mPositionKeys);
+		else if (Token == QLatin1String("ROTATION_KEY"))
+			LoadKeysLDraw(Stream, mRotationKeys);
 	}
-	else if (Token == QLatin1String("HIDDEN"))
-		SetHidden(true);
-	else if (Token == QLatin1String("GROUP"))
-	{
-		QString Name = Stream.readAll().trimmed();
-		QByteArray NameUtf = Name.toUtf8(); // todo: replace with qstring
-		mGroup = Model->GetGroup(NameUtf.constData(), true);
-	}
-	else if (Token == QLatin1String("POSITION_KEY"))
-		LoadKeysLDraw(Stream, mPositionKeys);
-	else if (Token == QLatin1String("ROTATION_KEY"))
-		LoadKeysLDraw(Stream, mRotationKeys);
 
 	return false;
 }

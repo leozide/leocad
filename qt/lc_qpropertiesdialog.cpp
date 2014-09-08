@@ -36,7 +36,7 @@ lcQPropertiesDialog::lcQPropertiesDialog(QWidget *parent, void *data) :
 	else
 		ui->solidRadio->setChecked(true);
 
-	ui->imageNameEdit->setText(options->Properties.mBackgroundImage.Buffer());
+	ui->imageNameEdit->setText(options->Properties.mBackgroundImage);
 	ui->imageTileCheckBox->setChecked(options->Properties.mBackgroundImageTile);
 	ui->fogCheckBox->setChecked(options->Properties.mFogEnabled);
 	ui->fogDensityEdit->setText(QString::number(options->Properties.mFogDensity));
@@ -138,7 +138,7 @@ void lcQPropertiesDialog::accept()
 	else
 		 options->Properties.mBackgroundType = LC_BACKGROUND_SOLID;
 
-	options->Properties.mBackgroundImage = ui->imageNameEdit->text().toLocal8Bit().data();
+	options->Properties.mBackgroundImage = ui->imageNameEdit->text();
 	options->Properties.mBackgroundImageTile = ui->imageTileCheckBox->isChecked();
 	options->Properties.mFogEnabled = ui->fogCheckBox->isChecked();
 	options->Properties.mFogDensity = ui->fogDensityEdit->text().toFloat();

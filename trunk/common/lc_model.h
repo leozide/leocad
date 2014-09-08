@@ -27,7 +27,8 @@ enum lcBackgroundType
 {
 	LC_BACKGROUND_SOLID,
 	LC_BACKGROUND_GRADIENT,
-	LC_BACKGROUND_IMAGE
+	LC_BACKGROUND_IMAGE,
+	LC_NUM_BACKGROUND_TYPES
 };
 
 class lcModelProperties
@@ -55,7 +56,7 @@ public:
 	}
 
 	void SaveLDraw(QTextStream& Stream) const;
-	void ParseLDrawLine(char** Tokens);
+	void ParseLDrawLine(QTextStream& Stream);
 
 	QString mName;
 	QString mAuthor;
@@ -66,7 +67,7 @@ public:
 	lcVector3 mBackgroundSolidColor;
 	lcVector3 mBackgroundGradientColor1;
 	lcVector3 mBackgroundGradientColor2;
-	String mBackgroundImage;
+	QString mBackgroundImage;
 	bool mBackgroundImageTile;
 
 	bool mFogEnabled;
@@ -140,7 +141,7 @@ public:
 	lcGroup* GetGroup(const char* Name, bool CreateIfMissing);
 
 	void SaveLDraw(QTextStream& Stream) const;
-	void LoadLDraw(const QStringList& Lines, const lcMatrix44& CurrentTransform, int DefaultColorCode, int& CurrentStep);
+	void LoadLDraw(const QStringList& Lines, const lcMatrix44& CurrentTransform, int& CurrentStep);
 
 	void SaveBinary(lcFile& File) const;
 	void LoadBinary(lcFile& File);

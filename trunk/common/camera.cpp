@@ -108,68 +108,73 @@ void lcCamera::CreateName(const lcArray<lcCamera*>& Cameras)
 
 void lcCamera::SaveLDraw(QTextStream& Stream) const
 {
-	if (IsHidden())
-		Stream << QLatin1String("0 !LEOCAD CAMERA HIDDEN") << endl;
+	QLatin1String LineEnding("\r\n");
 
-	if (IsOrtho())
-		Stream << QLatin1String("0 !LEOCAD CAMERA ORTHOGRAPHIC") << endl;
-
-	Stream << QLatin1String("0 !LEOCAD CAMERA FOV ") << m_fovy << endl;
-	Stream << QLatin1String("0 !LEOCAD CAMERA ZNEAR ") << m_zNear << endl;
-	Stream << QLatin1String("0 !LEOCAD CAMERA ZFAR ") << m_zFar << endl;
+	Stream << QLatin1String("0 !LEOCAD CAMERA FOV ") << m_fovy << QLatin1String(" ZNEAR ") << m_zNear << QLatin1String(" ZFAR ") << m_zFar << LineEnding;
 
 	if (mPositionKeys.GetSize() > 1)
 		SaveKeysLDraw(Stream, mPositionKeys, "CAMERA POSITION_KEY ");
 	else
-		Stream << QLatin1String("0 !LEOCAD CAMERA POSITION ") << mPosition[0] << ' ' << mPosition[1] << ' ' << mPosition[2] << endl;
+		Stream << QLatin1String("0 !LEOCAD CAMERA POSITION ") << mPosition[0] << ' ' << mPosition[1] << ' ' << mPosition[2] << LineEnding;
 
 	if (mTargetPositionKeys.GetSize() > 1)
 		SaveKeysLDraw(Stream, mTargetPositionKeys, "CAMERA TARGETPOSITION_KEY ");
 	else
-		Stream << QLatin1String("0 !LEOCAD CAMERA TARGETPOSITION ") << mTargetPosition[0] << ' ' << mTargetPosition[1] << ' ' << mTargetPosition[2] << endl;
+		Stream << QLatin1String("0 !LEOCAD CAMERA TARGETPOSITION ") << mTargetPosition[0] << ' ' << mTargetPosition[1] << ' ' << mTargetPosition[2] << LineEnding;
 
 	if (mUpVectorKeys.GetSize() > 1)
 		SaveKeysLDraw(Stream, mUpVectorKeys, "CAMERA UPVECTOR_KEY ");
 	else
-		Stream << QLatin1String("0 !LEOCAD CAMERA UPVECTOR ") << mUpVector[0] << ' ' << mUpVector[1] << ' ' << mUpVector[2] << endl;
+		Stream << QLatin1String("0 !LEOCAD CAMERA UPVECTOR ") << mUpVector[0] << ' ' << mUpVector[1] << ' ' << mUpVector[2] << LineEnding;
 
-	Stream << QLatin1String("0 !LEOCAD CAMERA NAME ") << m_strName << endl;
+	Stream << QLatin1String("0 !LEOCAD CAMERA ");
+
+	if (IsHidden())
+		Stream << QLatin1String("HIDDEN");
+
+	if (IsOrtho())
+		Stream << QLatin1String("ORTHOGRAPHIC ");
+
+	Stream << QLatin1String("NAME ") << m_strName << LineEnding;
 }
 
 bool lcCamera::ParseLDrawLine(QTextStream& Stream)
 {
-	QString Token;
-	Stream >> Token;
-
-	if (Token == QLatin1String("HIDDEN"))
-		SetHidden(true);
-	else if (Token == QLatin1String("ORTHOGRAPHIC"))
-		SetOrtho(true);
-	else if (Token == QLatin1String("FOV"))
-		Stream >> m_fovy;
-	else if (Token == QLatin1String("ZNEAR"))
-		Stream >> m_zNear;
-	else if (Token == QLatin1String("ZFAR"))
-		Stream >> m_zFar;
-	else if (Token == QLatin1String("POSITION"))
-		Stream >> mPosition[0] >> mPosition[1] >> mPosition[2];
-	else if (Token == QLatin1String("TARGETPOSITION"))
-		Stream >> mTargetPosition[0] >> mTargetPosition[1] >> mTargetPosition[2];
-	else if (Token == QLatin1String("UPVECTOR"))
-		Stream >> mUpVector[0] >> mUpVector[1] >> mUpVector[2];
-	else if (Token == QLatin1String("POSITION_KEY"))
-		LoadKeysLDraw(Stream, mPositionKeys);
-	else if (Token == QLatin1String("TARGETPOSITION_KEY"))
-		LoadKeysLDraw(Stream, mTargetPositionKeys);
-	else if (Token == QLatin1String("UPVECTOR_KEY"))
-		LoadKeysLDraw(Stream, mUpVectorKeys);
-	else if (Token == QLatin1String("NAME"))
+	while (!Stream.atEnd())
 	{
-		QString Name = Stream.readAll().trimmed();
-		QByteArray NameUtf = Name.toUtf8(); // todo: replace with qstring
-		strncpy(m_strName, NameUtf.constData(), sizeof(m_strName));
-		m_strName[sizeof(m_strName) - 1] = 0;
-		return true;
+		QString Token;
+		Stream >> Token;
+
+		if (Token == QLatin1String("HIDDEN"))
+				SetHidden(true);
+		else if (Token == QLatin1String("ORTHOGRAPHIC"))
+			SetOrtho(true);
+		else if (Token == QLatin1String("FOV"))
+			Stream >> m_fovy;
+		else if (Token == QLatin1String("ZNEAR"))
+			Stream >> m_zNear;
+		else if (Token == QLatin1String("ZFAR"))
+			Stream >> m_zFar;
+		else if (Token == QLatin1String("POSITION"))
+			Stream >> mPosition[0] >> mPosition[1] >> mPosition[2];
+		else if (Token == QLatin1String("TARGETPOSITION"))
+			Stream >> mTargetPosition[0] >> mTargetPosition[1] >> mTargetPosition[2];
+		else if (Token == QLatin1String("UPVECTOR"))
+			Stream >> mUpVector[0] >> mUpVector[1] >> mUpVector[2];
+		else if (Token == QLatin1String("POSITION_KEY"))
+			LoadKeysLDraw(Stream, mPositionKeys);
+		else if (Token == QLatin1String("TARGETPOSITION_KEY"))
+			LoadKeysLDraw(Stream, mTargetPositionKeys);
+		else if (Token == QLatin1String("UPVECTOR_KEY"))
+			LoadKeysLDraw(Stream, mUpVectorKeys);
+		else if (Token == QLatin1String("NAME"))
+		{
+			QString Name = Stream.readAll().trimmed();
+			QByteArray NameUtf = Name.toUtf8(); // todo: replace with qstring
+			strncpy(m_strName, NameUtf.constData(), sizeof(m_strName));
+			m_strName[sizeof(m_strName) - 1] = 0;
+			return true;
+		}
 	}
 
 	return false;

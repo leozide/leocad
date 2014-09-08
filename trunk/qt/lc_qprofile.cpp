@@ -87,6 +87,16 @@ void lcSetProfileString(LC_PROFILE_KEY Key, const char* Value)
 
 	LC_ASSERT(entry.mType == LC_PROFILE_ENTRY_STRING);
 
+	settings.setValue(QString("%1/%2").arg(entry.mSection, entry.mKey), QString::fromUtf8(Value));
+}
+
+void lcSetProfileString(LC_PROFILE_KEY Key, const QString& Value)
+{
+	lcProfileEntry& entry = gProfileEntries[Key];
+	QSettings settings;
+
+	LC_ASSERT(entry.mType == LC_PROFILE_ENTRY_STRING);
+
 	settings.setValue(QString("%1/%2").arg(entry.mSection, entry.mKey), Value);
 }
 

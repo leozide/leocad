@@ -56,31 +56,31 @@ void lcModelProperties::SaveLDraw(QTextStream& Stream) const
 	if (!mComments.isEmpty())
 	{
 		QStringList Comments = mComments.split('\n');
-		for (const QString& Comment : Comments)
+		foreach (const QString& Comment, Comments)
 			Stream << QLatin1String("0 !LEOCAD MODEL COMMENT ") << Comment << LineEnding;
 	}
 
-	switch (mBackgroundType)
+	for (int BackgroundIdx = 0; BackgroundIdx < LC_NUM_BACKGROUND_TYPES; BackgroundIdx++)
 	{
-	case LC_BACKGROUND_SOLID:
-		Stream << QLatin1String("0 !LEOCAD MODEL BACKGROUND_TYPE SOLID\r\n");
-		break;
-	case LC_BACKGROUND_GRADIENT:
-		Stream << QLatin1String("0 !LEOCAD MODEL BACKGROUND_TYPE GRADIENT\r\n");
-		break;
-	case LC_BACKGROUND_IMAGE:
-		Stream << QLatin1String("0 !LEOCAD MODEL BACKGROUND_TYPE IMAGE\r\n");
-		break;
+		switch ((mBackgroundType + 1 + BackgroundIdx) % LC_NUM_BACKGROUND_TYPES)
+		{
+		case LC_BACKGROUND_SOLID:
+			Stream << QLatin1String("0 !LEOCAD MODEL BACKGROUND COLOR ") << mBackgroundSolidColor[0] << ' ' << mBackgroundSolidColor[1] << ' ' << mBackgroundSolidColor[2] << LineEnding;
+			break;
+		case LC_BACKGROUND_GRADIENT:
+			Stream << QLatin1String("0 !LEOCAD MODEL BACKGROUND GRADIENT ") << mBackgroundGradientColor1[0] << ' ' << mBackgroundGradientColor1[1] << ' ' << mBackgroundGradientColor1[2] << ' ' << mBackgroundGradientColor2[0] << ' ' << mBackgroundGradientColor2[1] << ' ' << mBackgroundGradientColor2[2] << LineEnding;
+			break;
+		case LC_BACKGROUND_IMAGE:
+			if (!mBackgroundImage.isEmpty())
+			{
+				Stream << QLatin1String("0 !LEOCAD MODEL BACKGROUND IMAGE ");
+				if (mBackgroundImageTile)
+					Stream << QLatin1String("TILE ");
+				Stream << QLatin1String("NAME ") << mBackgroundImage << LineEnding;
+			}
+			break;
+		}
 	}
-
-	Stream << QLatin1String("0 !LEOCAD MODEL BACKGROUND COLOR ") << mBackgroundSolidColor[0] << ' ' << mBackgroundSolidColor[1] << ' ' << mBackgroundSolidColor[2] << endl;
-	Stream << QLatin1String("0 !LEOCAD MODEL BACKGROUND GRADIENT_COLORS ") << mBackgroundGradientColor1[0] << ' ' << mBackgroundGradientColor1[1] << ' ' << mBackgroundGradientColor1[2] << ' ' << mBackgroundGradientColor2[0] << ' ' << mBackgroundGradientColor2[1] << ' ' << mBackgroundGradientColor2[2] << endl;
-
-	if (!mBackgroundImage.IsEmpty())
-		Stream << QLatin1String("0 !LEOCAD MODEL BACKGROUND IMAGE_NAME ") << mBackgroundImage.Buffer() << endl;
-
-	if (mBackgroundImageTile)
-		Stream << QLatin1String("0 !LEOCAD MODEL BACKGROUND IMAGE_TILE") << endl;
 
 //	bool mFogEnabled;
 //	float mFogDensity;
@@ -88,96 +88,53 @@ void lcModelProperties::SaveLDraw(QTextStream& Stream) const
 //	lcVector3 mAmbientColor;
 }
 
-void lcModelProperties::ParseLDrawLine(char** Tokens)
+void lcModelProperties::ParseLDrawLine(QTextStream& Stream)
 {
-	/*
-	if (!Tokens[4])
-		return;
+	QString Token;
+	Stream >> Token;
 
-	strupr(Tokens[4]);
+	if (Token == QLatin1String("NAME"))
+		Stream >> mName;
+	else if (Token == QLatin1String("AUTHOR"))
+		Stream >> mAuthor;
+	else if (Token == QLatin1String("DESCRIPTION"))
+		Stream >> mDescription;
+	else if (Token == QLatin1String("COMMENT"))
+	{
+		QString Comment;
+		Stream >> Comment;
+		if (!mComments.isEmpty())
+			mComments += '\n';
+		mComments += Comment;
+	}
+	else if (Token == QLatin1String("BACKGROUND"))
+	{
+		Stream >> Token;
 
-	if (!strcmp(Tokens[4], "NAME"))
-	{
-		if (Tokens[5])
+		if (Token == QLatin1String("COLOR"))
 		{
-			strncpy(mName, Tokens[5], sizeof(mName));
-			mName[sizeof(mName) - 1] = 0;
+			mBackgroundType = LC_BACKGROUND_SOLID;
+			Stream >> mBackgroundSolidColor[0] >> mBackgroundSolidColor[1] >> mBackgroundSolidColor[2];
 		}
-		else
-			mName[0] = 0;
-	}
-	else if (!strcmp(Tokens[4], "AUTHOR"))
-	{
-		if (Tokens[5])
+		else if (Token == QLatin1String("GRADIENT"))
 		{
-			strncpy(mAuthor, Tokens[5], sizeof(mAuthor));
-			mAuthor[sizeof(mAuthor) - 1] = 0;
+			mBackgroundType = LC_BACKGROUND_GRADIENT;
+			Stream >> mBackgroundGradientColor1[0] >> mBackgroundGradientColor1[1] >> mBackgroundGradientColor1[2] >> mBackgroundGradientColor2[0] >> mBackgroundGradientColor2[1] >> mBackgroundGradientColor2[2];
 		}
-		else
-			mAuthor[0] = 0;
-	}
-	else if (!strcmp(Tokens[4], "DESCRIPTION"))
-	{
-		if (Tokens[5])
+		else if (Token == QLatin1String("IMAGE"))
 		{
-			strncpy(mDescription, Tokens[5], sizeof(mDescription));
-			mDescription[sizeof(mDescription) - 1] = 0;
-		}
-		else
-			mDescription[0] = 0;
-	}
-	else if (!strcmp(Tokens[4], "COMMENTS"))
-	{
-		if (Tokens[5])
-		{
-			strncpy(mComments, Tokens[5], sizeof(mComments));
-			mComments[sizeof(mComments) - 1] = 0;
-		}
-		else
-			mComments[0] = 0;
-	}
-	else if (!strcmp(Tokens[4], "BACKGROUND_TYPE"))
-	{
-		if (Tokens[5])
-		{
-			strupr(Tokens[5]);
+			Stream >> Token;
 
-			if (!strcmp(Tokens[5], "SOLID"))
-				mBackgroundType = LC_BACKGROUND_SOLID;
-			else if (!strcmp(Tokens[5], "GRADIENT"))
-				mBackgroundType = LC_BACKGROUND_GRADIENT;
-			else if (!strcmp(Tokens[5], "IMAGE"))
-				mBackgroundType = LC_BACKGROUND_IMAGE;
+			if (Token == QLatin1String("TILE"))
+			{
+				mBackgroundImageTile = true;
+				Stream >> Token;
+			}
+
+			if (Token == QLatin1String("NAME"))
+				mBackgroundImage = Stream.readLine();
 		}
 	}
-	else if (!strcmp(Tokens[4], "BACKGROUND"))
-	{
-		if (Tokens[5])
-		{
-			strupr(Tokens[5]);
-
-		}
-	}
-*/
-/*
-	sprintf(Line, "0 !LEOCAD MODEL BACKGROUND SOLID_COLOR %.2f %.2f %.2f\r\n", mBackgroundSolidColor[0], mBackgroundSolidColor[1], mBackgroundSolidColor[2]);
-	File.WriteBuffer(Line, strlen(Line));
-
-	sprintf(Line, "0 !LEOCAD MODEL BACKGROUND GRADIENT_COLORS %.2f %.2f %.2f %.2f %.2f %.2f\r\n", mBackgroundGradientColor1[0], mBackgroundGradientColor1[1], mBackgroundGradientColor1[2], mBackgroundGradientColor2[0], mBackgroundGradientColor2[1], mBackgroundGradientColor2[2]);
-	File.WriteBuffer(Line, strlen(Line));
-
-	if (!mBackgroundImage.IsEmpty())
-	{
-		sprintf(Line, "0 !LEOCAD MODEL BACKGROUND IMAGE_NAME %s\r\n", mBackgroundImage);
-		File.WriteBuffer(Line, strlen(Line));
-	}
-
-	if (mBackgroundImageTile)
-	{
-		strcat(Line, "0 !LEOCAD MODEL BACKGROUND IMAGE_TILE\r\n");
-		File.WriteBuffer(Line, strlen(Line));
-	}
-*/
 }
 
 lcModel::lcModel()
@@ -191,26 +148,51 @@ lcModel::~lcModel()
 
 void lcModel::SaveLDraw(QTextStream& Stream) const
 {
+	QLatin1String LineEnding("\r\n");
+
 	mProperties.SaveLDraw(Stream);
 
 	lcStep LastStep = GetLastStep();
-
 	if (mCurrentStep != LastStep)
-		Stream << QLatin1String("0 !LEOCAD MODEL CURRENT_STEP") << mCurrentStep << endl;
+		Stream << QLatin1String("0 !LEOCAD MODEL CURRENT_STEP") << mCurrentStep << LineEnding;
+
+	lcGroup* CurrentGroup = NULL;
+	lcArray<lcGroup*> SavedGroups;
 
 	for (lcStep Step = 1; Step <= LastStep; Step++)
 	{
 		for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 		{
 			lcPiece* Piece = mPieces[PieceIdx];
+			lcGroup* PieceGroup = Piece->GetGroup();
+
+			if (PieceGroup != CurrentGroup)
+			{
+				if (CurrentGroup)
+					Stream << QLatin1String("0 !LEOCAD GROUP END\r\n");
+
+				if (PieceGroup)
+					Stream << QLatin1String("0 !LEOCAD GROUP BEGIN ") << PieceGroup->m_strName << LineEnding;
+
+				if (PieceGroup->mGroup && SavedGroups.FindIndex(PieceGroup) == -1)
+				{
+					Stream << QLatin1String("0 !LEOCAD GROUP PARENT ") << PieceGroup->mGroup->m_strName << LineEnding;
+					SavedGroups.Add(PieceGroup);
+				}
+
+				CurrentGroup = PieceGroup;
+			}
 
 			if (Piece->GetStepShow() == Step)
 				Piece->SaveLDraw(Stream);
 		}
 
 		if (Step != LastStep)
-			Stream << QLatin1String("0 STEP") << endl;
+			Stream << QLatin1String("0 STEP\r\n");
 	}
+
+	if (CurrentGroup)
+		Stream << QLatin1String("0 !LEOCAD GROUP END\r\n");
 
 	for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
 		mCameras[CameraIdx]->SaveLDraw(Stream);
@@ -218,14 +200,25 @@ void lcModel::SaveLDraw(QTextStream& Stream) const
 	for (int LightIdx = 0; LightIdx < mLights.GetSize(); LightIdx++)
 		mLights[LightIdx]->SaveLDraw(Stream);
 
-//	lcArray<lcGroup*> mGroups;
+	for (int GroupIdx = 0; GroupIdx < mGroups.GetSize(); GroupIdx++)
+	{
+		lcGroup* Group = mGroups[GroupIdx];
+
+		if (Group->mGroup && SavedGroups.FindIndex(Group) == -1)
+		{
+			Stream << QLatin1String("0 !LEOCAD GROUP BEGIN ") << Group->m_strName << LineEnding;
+			Stream << QLatin1String("0 !LEOCAD GROUP PARENT ") << Group->mGroup->m_strName << LineEnding;
+			Stream << QLatin1String("0 !LEOCAD GROUP END\r\n");
+		}
+	}
 }
 
-void lcModel::LoadLDraw(const QStringList& Lines, const lcMatrix44& CurrentTransform, int DefaultColorCode, int& CurrentStep)
+void lcModel::LoadLDraw(const QStringList& Lines, const lcMatrix44& CurrentTransform, int& CurrentStep)
 {
 	lcPiece* Piece = NULL;
 	lcCamera* Camera = NULL;
 	lcLight* Light = NULL;
+	lcGroup* Group = NULL;
 
 	for (int LineIdx = 0; LineIdx < Lines.size(); LineIdx++)
 	{
@@ -255,14 +248,14 @@ void lcModel::LoadLDraw(const QStringList& Lines, const lcMatrix44& CurrentTrans
 //				if (!strcmp(Tokens[3], "CURRENT_STEP") && Tokens[4])
 //					mCurrentStep = atoi(Tokens[4]);
 
-//				mProperties.ParseLDrawLine(Tokens);
+				mProperties.ParseLDrawLine(Stream);
 			}
 			else if (Token == QLatin1String("PIECE"))
 			{
 				if (!Piece)
 					Piece = new lcPiece(NULL);
 
-				Piece->ParseLDrawLine(Stream, this);
+				Piece->ParseLDrawLine(Stream);
 			}
 			else if (Token == QLatin1String("CAMERA"))
 			{
@@ -281,6 +274,27 @@ void lcModel::LoadLDraw(const QStringList& Lines, const lcMatrix44& CurrentTrans
 			}
 			else if (Token == QLatin1String("GROUP"))
 			{
+				Stream >> Token;
+
+				if (Token == QLatin1String("BEGIN"))
+				{
+					QString Name = Stream.readAll().trimmed();
+					QByteArray NameUtf = Name.toUtf8(); // todo: replace with qstring
+					Group = GetGroup(NameUtf.constData(), true);
+				}
+				else if (Token == QLatin1String("END"))
+				{
+					Group = NULL;
+				}
+				else if (Token == QLatin1String("PARENT"))
+				{
+					if (Group)
+					{
+						QString Name = Stream.readAll().trimmed();
+						QByteArray NameUtf = Name.toUtf8(); // todo: replace with qstring
+						Group->mGroup = GetGroup(NameUtf.constData(), true);
+					}
+				}
 			}
 
 			continue;
@@ -289,8 +303,6 @@ void lcModel::LoadLDraw(const QStringList& Lines, const lcMatrix44& CurrentTrans
 		{
 			int ColorCode;
 			Stream >> ColorCode;
-			if (ColorCode == 16)
-				ColorCode = DefaultColorCode;
 
 			float Matrix[12];
 			for (int TokenIdx = 0; TokenIdx < 12; TokenIdx++)
@@ -310,6 +322,9 @@ void lcModel::LoadLDraw(const QStringList& Lines, const lcMatrix44& CurrentTrans
 
 			if (!Piece)
 				Piece = new lcPiece(NULL);
+
+			if (Group)
+				Piece->SetGroup(Group);
 
 			PieceInfo* Info = lcGetPiecesLibrary()->FindPiece(PartID.toLatin1().constData(), false);
 			if (Info != NULL)

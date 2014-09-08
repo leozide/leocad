@@ -212,7 +212,7 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 			else if ((strcmp(Param, "-v") == 0) || (strcmp(Param, "--version") == 0))
 			{
 				printf("LeoCAD Version " LC_VERSION_TEXT "\n");
-				printf("Compiled "__DATE__"\n");
+				printf("Compiled " __DATE__ "\n");
 
 				return false;
 			}

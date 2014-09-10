@@ -163,6 +163,9 @@ protected:
 	bool LoadPrimitive(int PrimitiveIndex);
 	bool ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform, lcuint32 CurrentColorCode, lcArray<lcLibraryTextureMap>& TextureStack, lcLibraryMeshData& MeshData);
 
+	template<typename IndexType>
+	bool GeneratePieceIndices(PieceInfo* Info, bool Brick, bool Plate, bool Baseplate, int StudsX, int StudsY);
+
 	char mCacheFileName[LC_MAXPATH];
 	lcuint64 mCacheFileModifiedTime;
 	lcZipFile* mCacheFile;

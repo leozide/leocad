@@ -2033,6 +2033,20 @@ void lcPiecesLibrary::CreateBuiltinPieces()
 		{ "41539", "Plate  8 x  8" },
 		{ "728",   "Plate  8 x 11" },
 		{ "92438", "Plate  8 x 16" },
+		{ "819",   "Baseplate  8 x 12" },
+		{ "3865",  "Baseplate  8 x 16" },
+		{ "3497",  "Baseplate  8 x 24" },
+		{ "4187",  "Baseplate  8 x 32" },
+		{ "397",   "Baseplate 10 x 16" },
+		{ "3867",  "Baseplate 16 x 16" },
+		{ "184",   "Baseplate 16 x 18" },
+		{ "210",   "Baseplate 16 x 22" },
+		{ "3334",  "Baseplate 16 x 24" },
+		{ "10",    "Baseplate 24 x 32" },
+		{ "3645",  "Baseplate 24 x 40" },
+		{ "3811",  "Baseplate 32 x 32" },
+		{ "4186",  "Baseplate 48 x 48" },
+		{ "782",   "Baseplate 50 x 50" },
 	};
 
 	for (unsigned int PieceIdx = 0; PieceIdx < sizeof(Pieces) / sizeof(Pieces[0]); PieceIdx++)
@@ -2061,32 +2075,43 @@ bool lcPiecesLibrary::GeneratePiece(PieceInfo* Info)
 
 	bool Brick = !strncmp(Info->m_strDescription, "Brick ", 6);
 	bool Plate = !strncmp(Info->m_strDescription, "Plate ", 6);
+	bool Baseplate = !strncmp(Info->m_strDescription, "Baseplate ", 10);
+
+	int StudsX, StudsY;
+	float MinZ = Brick ? -24.0f : Plate ? -8.0f : -4.0f;
+
+	sscanf(strchr(Info->m_strDescription, ' '), "%d x %d", &StudsY, &StudsX);
+
+	Info->mFlags |= LC_PIECE_HAS_DEFAULT | LC_PIECE_HAS_LINES;
+
+	Info->m_fDimensions[0] = 10.0f * StudsX;
+	Info->m_fDimensions[1] = 10.0f * StudsY;
+	Info->m_fDimensions[2] = 4.0f;
+	Info->m_fDimensions[3] = -10.0f * StudsX;
+	Info->m_fDimensions[4] = -10.0f * StudsY;
+	Info->m_fDimensions[5] = MinZ;
+
+	int NumVertices, NumIndices;
 
 	if (Brick || Plate)
 	{
-		int StudsX, StudsY;
-		float MinZ = Brick ? -24.0f : -8.0f;
+		NumVertices = (StudSides * 2 + 1) * StudsX * StudsY + 16;
+		NumIndices = ((StudSides * 3) * StudsX * StudsY + 28) * 3 + ((StudSides * 2) * StudsX * StudsY + 24) * 2;
+	}
+	else if (Baseplate)
+	{
+		NumVertices = (StudSides * 2 + 1) * StudsX * StudsY + 8;
+		NumIndices = ((StudSides * 3) * StudsX * StudsY + 12) * 3 + ((StudSides * 2) * StudsX * StudsY + 24) * 2;
+	}
 
-		sscanf(Info->m_strDescription + 6, "%d x %d", &StudsY, &StudsX);
+	lcMesh* Mesh = new lcMesh();
+	Mesh->Create(2, NumVertices, 0, NumIndices);
+	Info->mMesh = Mesh;
 
-		int NumVertices = (StudSides * 2 + 1) * StudsX * StudsY + 16;
-		int NumIndices = ((StudSides * 3) * StudsX * StudsY + 28) * 3 + ((StudSides * 2) * StudsX * StudsY + 24) * 2;
+	float* Verts = (float*)Mesh->mVertexBuffer.mData;
 
-		Info->mFlags |= LC_PIECE_HAS_DEFAULT | LC_PIECE_HAS_LINES;
-
-		Info->m_fDimensions[0] = 10.0f * StudsX;
-		Info->m_fDimensions[1] = 10.0f * StudsY;
-		Info->m_fDimensions[2] = 4.0f;
-		Info->m_fDimensions[3] = -10.0f * StudsX;
-		Info->m_fDimensions[4] = -10.0f * StudsY;
-		Info->m_fDimensions[5] = MinZ;
-
-		lcMesh* Mesh = new lcMesh();
-		Mesh->Create(2, NumVertices, 0, NumIndices);
-
-		float* Verts = (float*)Mesh->mVertexBuffer.mData;
-		lcuint16* Indices = (lcuint16*)Mesh->mIndexBuffer.mData;
-
+	if (Brick || Plate || Baseplate)
+	{
 		const lcVector3 OutBoxMin(-10.0f * StudsX, -10.0f * StudsY, MinZ);
 		const lcVector3 OutBoxMax(10.0f * StudsX, 10.0f * StudsY, 0.0f);
 
@@ -2098,7 +2123,10 @@ bool lcPiecesLibrary::GeneratePiece(PieceInfo* Info)
 		*Verts++ = OutBoxMin[0]; *Verts++ = OutBoxMax[1]; *Verts++ = OutBoxMax[2];
 		*Verts++ = OutBoxMax[0]; *Verts++ = OutBoxMax[1]; *Verts++ = OutBoxMax[2];
 		*Verts++ = OutBoxMax[0]; *Verts++ = OutBoxMin[1]; *Verts++ = OutBoxMax[2];
+	}
 
+	if (Brick || Plate)
+	{
 		const lcVector3 InBoxMin(-10.0f * StudsX + 4.0f, -10.0f * StudsY + 4.0f, MinZ);
 		const lcVector3 InBoxMax(10.0f * StudsX - 4.0f, 10.0f * StudsY - 4.0f, -4.0f);
 
@@ -2110,7 +2138,10 @@ bool lcPiecesLibrary::GeneratePiece(PieceInfo* Info)
 		*Verts++ = InBoxMin[0]; *Verts++ = InBoxMax[1]; *Verts++ = InBoxMax[2];
 		*Verts++ = InBoxMax[0]; *Verts++ = InBoxMax[1]; *Verts++ = InBoxMax[2];
 		*Verts++ = InBoxMax[0]; *Verts++ = InBoxMin[1]; *Verts++ = InBoxMax[2];
+	}
 
+	if (Brick || Plate || Baseplate)
+	{
 		for (int x = 0; x < StudsX; x++)
 		{
 			for (int y = 0; y < StudsY; y++)
@@ -2129,25 +2160,32 @@ bool lcPiecesLibrary::GeneratePiece(PieceInfo* Info)
 				}
 			}
 		}
+	}
 
-		lcMeshSection* Section = &Mesh->mSections[0];
-		Section->ColorIndex = gDefaultColor;
-		Section->IndexOffset = 0;
-		Section->NumIndices = ((StudSides * 3) * StudsX * StudsY + 28) * 3;
-		Section->PrimitiveType = GL_TRIANGLES;
-		Section->Texture = NULL;
+	if (Mesh->mIndexType == GL_UNSIGNED_SHORT)
+		return GeneratePieceIndices<GLushort>(Info, Brick, Plate, Baseplate, StudsX, StudsY);
+	else
+		return GeneratePieceIndices<GLuint>(Info, Brick, Plate, Baseplate, StudsX, StudsY);
+}
 
-		*Indices++ = 0; *Indices++ = 1; *Indices++ = 8;
-		*Indices++ = 1; *Indices++ = 8; *Indices++ = 9;
+template<typename IndexType>
+bool lcPiecesLibrary::GeneratePieceIndices(PieceInfo* Info, bool Brick, bool Plate, bool Baseplate, int StudsX, int StudsY)
+{
+	const int StudSides = 16;
 
-		*Indices++ = 2; *Indices++ = 3; *Indices++ = 10;
-		*Indices++ = 3; *Indices++ = 10; *Indices++ = 11;
+	lcMesh* Mesh = Info->mMesh;
+	lcMeshSection* Section = &Mesh->mSections[0];
+	Section->ColorIndex = gDefaultColor;
+	Section->IndexOffset = 0;
+	Section->NumIndices = 0;
+	Section->PrimitiveType = GL_TRIANGLES;
+	Section->Texture = NULL;
 
-		*Indices++ = 0; *Indices++ = 8; *Indices++ = 11;
-		*Indices++ = 0; *Indices++ = 11; *Indices++ = 3;
+	IndexType* Indices = (IndexType*)Mesh->mIndexBuffer.mData;
 
-		*Indices++ = 1; *Indices++ = 9; *Indices++ = 10;
-		*Indices++ = 1; *Indices++ = 10; *Indices++ = 2;
+	if (Brick || Plate || Baseplate)
+	{
+		Section->NumIndices += 10 * 3;
 
 		*Indices++ = 7; *Indices++ = 6; *Indices++ = 5;
 		*Indices++ = 7; *Indices++ = 5; *Indices++ = 4;
@@ -2163,6 +2201,23 @@ bool lcPiecesLibrary::GeneratePiece(PieceInfo* Info)
 
 		*Indices++ = 1; *Indices++ = 2; *Indices++ = 6;
 		*Indices++ = 1; *Indices++ = 6; *Indices++ = 5;
+	}
+
+	if (Brick || Plate)
+	{
+		Section->NumIndices += 18 * 3;
+
+		*Indices++ = 0; *Indices++ = 1; *Indices++ = 8;
+		*Indices++ = 1; *Indices++ = 8; *Indices++ = 9;
+
+		*Indices++ = 2; *Indices++ = 3; *Indices++ = 10;
+		*Indices++ = 3; *Indices++ = 10; *Indices++ = 11;
+
+		*Indices++ = 0; *Indices++ = 8; *Indices++ = 11;
+		*Indices++ = 0; *Indices++ = 11; *Indices++ = 3;
+
+		*Indices++ = 1; *Indices++ = 9; *Indices++ = 10;
+		*Indices++ = 1; *Indices++ = 10; *Indices++ = 2;
 
 		*Indices++ = 15; *Indices++ = 14; *Indices++ = 13;
 		*Indices++ = 15; *Indices++ = 13; *Indices++ = 12;
@@ -2178,12 +2233,26 @@ bool lcPiecesLibrary::GeneratePiece(PieceInfo* Info)
 
 		*Indices++ = 9; *Indices++ = 10; *Indices++ = 14;
 		*Indices++ = 9; *Indices++ = 14; *Indices++ = 13;
+	}
+
+	if (Baseplate)
+	{
+		Section->NumIndices += 2 * 3;
+
+		*Indices++ = 3; *Indices++ = 2; *Indices++ = 1;
+		*Indices++ = 3; *Indices++ = 1; *Indices++ = 0;
+	}
+
+	if (Brick || Plate || Baseplate)
+	{
+		Section->NumIndices += ((StudSides * 3) * StudsX * StudsY) * 3;
+		const int FirstVertex = (Brick || Plate) ? 16 : 8;
 
 		for (int x = 0; x < StudsX; x++)
 		{
 			for (int y = 0; y < StudsY; y++)
 			{
-				int CenterIndex = 16 + (StudSides * 2 + 1) * (x + StudsX * y);
+				int CenterIndex = FirstVertex + (StudSides * 2 + 1) * (x + StudsX * y);
 				int BaseIndex = CenterIndex + 1;
 
 				for (int Step = 0; Step < StudSides; Step++)
@@ -2202,13 +2271,18 @@ bool lcPiecesLibrary::GeneratePiece(PieceInfo* Info)
 				}
 			}
 		}
+	}
 
-		Section = &Mesh->mSections[1];
-		Section->ColorIndex = gEdgeColor;
-		Section->IndexOffset = (char*)Indices - (char*)Mesh->mIndexBuffer.mData;
-		Section->NumIndices = ((StudSides * 2) * StudsX * StudsY + 24) * 2;
-		Section->PrimitiveType = GL_LINES;
-		Section->Texture = NULL;
+	Section = &Mesh->mSections[1];
+	Section->ColorIndex = gEdgeColor;
+	Section->IndexOffset = (char*)Indices - (char*)Mesh->mIndexBuffer.mData;
+	Section->NumIndices = 0;
+	Section->PrimitiveType = GL_LINES;
+	Section->Texture = NULL;
+
+	if (Brick || Plate || Baseplate)
+	{
+		Section->NumIndices += 12 * 2;
 
 		*Indices++ = 0; *Indices++ = 1; *Indices++ = 1; *Indices++ = 2;
 		*Indices++ = 2; *Indices++ = 3; *Indices++ = 3; *Indices++ = 0;
@@ -2218,6 +2292,11 @@ bool lcPiecesLibrary::GeneratePiece(PieceInfo* Info)
 
 		*Indices++ = 0; *Indices++ = 4; *Indices++ = 1; *Indices++ = 5;
 		*Indices++ = 2; *Indices++ = 6; *Indices++ = 3; *Indices++ = 7;
+	}
+
+	if (Brick || Plate)
+	{
+		Section->NumIndices += 12 * 2;
 
 		*Indices++ = 8; *Indices++ = 9; *Indices++ = 9; *Indices++ = 10;
 		*Indices++ = 10; *Indices++ = 11; *Indices++ = 11; *Indices++ = 8;
@@ -2227,12 +2306,18 @@ bool lcPiecesLibrary::GeneratePiece(PieceInfo* Info)
 
 		*Indices++ = 8; *Indices++ = 12; *Indices++ = 9; *Indices++ = 13;
 		*Indices++ = 10; *Indices++ = 14; *Indices++ = 11; *Indices++ = 15;
+	}
+
+	if (Brick || Plate || Baseplate)
+	{
+		Section->NumIndices += ((StudSides * 2) * StudsX * StudsY) * 2;
+		const int FirstVertex = (Brick || Plate) ? 16 : 8;
 
 		for (int x = 0; x < StudsX; x++)
 		{
 			for (int y = 0; y < StudsY; y++)
 			{
-				int BaseIndex = 16 + (StudSides * 2 + 1) * (x + StudsX * y) + 1;
+				int BaseIndex = FirstVertex + (StudSides * 2 + 1) * (x + StudsX * y) + 1;
 
 				for (int Step = 0; Step < StudSides; Step++)
 				{
@@ -2244,10 +2329,9 @@ bool lcPiecesLibrary::GeneratePiece(PieceInfo* Info)
 				}
 			}
 		}
-
-		Mesh->UpdateBuffers();
-		Info->mMesh = Mesh;
 	}
+
+	Mesh->UpdateBuffers();
 
 	return false;
 }

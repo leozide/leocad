@@ -71,6 +71,7 @@ void lcResetCategories(lcArray<lcLibraryCategory>& Categories, bool BuiltInLibra
 
 	const char BuiltInCategories[] =
 	{
+		"Baseplate=^%Baseplate\n"
 		"Brick=^%Brick\n"
 		"Plate=^%Plate\n"
 	};

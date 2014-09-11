@@ -248,10 +248,12 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 			return false;
 		}
 
-		mLibrary->CreateBuiltinPieces();
-
-		gMainWindow->DoMessageBox("LeoCAD could not find a compatible Pieces Library so only a small number of pieces will be available.\n\n"
-		                          "Please visit http://www.leocad.org for information on how to download and install a library.", LC_MB_OK | LC_MB_ICONERROR);
+		if (mLibrary->LoadBuiltinPieces())
+			gMainWindow->DoMessageBox("LeoCAD could not find a compatible Parts Library so only a small number of parts will be available.\n\n"
+									  "Please visit http://www.leocad.org for information on how to download and install a library.", LC_MB_OK | LC_MB_ICONERROR);
+		else
+			gMainWindow->DoMessageBox("LeoCAD could not load Parts Library.\n\n"
+									  "Please visit http://www.leocad.org for information on how to download and install a library.", LC_MB_OK | LC_MB_ICONERROR);
 	}
 
 	// Create a new project.

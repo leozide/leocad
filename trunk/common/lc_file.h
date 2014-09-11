@@ -37,6 +37,7 @@ public:
 
 	virtual size_t ReadBuffer(void* Buffer, long Bytes) = 0;
 	virtual size_t WriteBuffer(const void* Buffer, long Bytes) = 0;
+	virtual void CopyFrom(lcMemFile& Source) = 0;
 
 	lcuint8 ReadU8()
 	{
@@ -457,6 +458,7 @@ public:
 	size_t WriteBuffer(const void* Buffer, long Bytes);
 
 	void CopyFrom(lcFile& Source);
+	void CopyFrom(lcMemFile& Source);
 	void GrowFile(size_t NewLength);
 
 	size_t mGrowBytes;

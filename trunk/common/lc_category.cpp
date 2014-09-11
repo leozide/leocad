@@ -74,6 +74,8 @@ void lcResetCategories(lcArray<lcLibraryCategory>& Categories, bool BuiltInLibra
 		"Baseplate=^%Baseplate\n"
 		"Brick=^%Brick\n"
 		"Plate=^%Plate\n"
+		"Slope=^%Slope\n"
+		"Tile=^%Tile\n"
 	};
 
 	lcMemFile File;

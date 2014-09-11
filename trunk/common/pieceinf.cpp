@@ -49,11 +49,9 @@ void PieceInfo::Load()
 		m_fDimensions[4] = -10.0f;
 		m_fDimensions[5] = -24.0f;
 	}
-	else if (mFlags & LC_PIECE_GENERATED)
-		lcGetPiecesLibrary()->GeneratePiece(this);
 	else
 		lcGetPiecesLibrary()->LoadPiece(this);
-	}
+}
 
 void PieceInfo::Unload()
 {

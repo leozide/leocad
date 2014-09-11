@@ -122,8 +122,7 @@ public:
 	PieceInfo* FindPiece(const char* PieceName, bool CreatePlaceholderIfMissing);
 	PieceInfo* CreatePlaceholder(const char* PieceName);
 	bool LoadPiece(PieceInfo* Info);
-	bool GeneratePiece(PieceInfo* Info);
-	void CreateBuiltinPieces();
+	bool LoadBuiltinPieces();
 
 	lcTexture* FindTexture(const char* TextureName);
 	bool LoadTexture(lcTexture* Texture);
@@ -152,6 +151,7 @@ public:
 
 protected:
 	bool OpenArchive(const char* FileName, lcZipFileType ZipFileType);
+	bool OpenArchive(lcFile* File, const char* FileName, lcZipFileType ZipFileType);
 	bool OpenDirectory(const char* Path);
 	void ReadArchiveDescriptions(const char* OfficialFileName, const char* UnofficialFileName, const char* CachePath);
 
@@ -162,9 +162,6 @@ protected:
 	int FindPrimitiveIndex(const char* Name);
 	bool LoadPrimitive(int PrimitiveIndex);
 	bool ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform, lcuint32 CurrentColorCode, lcArray<lcLibraryTextureMap>& TextureStack, lcLibraryMeshData& MeshData);
-
-	template<typename IndexType>
-	bool GeneratePieceIndices(PieceInfo* Info, bool Brick, bool Plate, bool Baseplate, int StudsX, int StudsY);
 
 	char mCacheFileName[LC_MAXPATH];
 	lcuint64 mCacheFileModifiedTime;

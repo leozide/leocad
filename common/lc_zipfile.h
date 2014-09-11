@@ -54,6 +54,7 @@ public:
 	~lcZipFile();
 
 	bool OpenRead(const char* FilePath);
+	bool OpenRead(lcFile* File);
 	bool OpenWrite(const char* FilePath, bool Append);
 
 	bool ExtractFile(int FileIndex, lcMemFile& File, lcuint32 MaxLength = 0xffffffff);
@@ -71,7 +72,7 @@ protected:
 	lcuint64 SearchCentralDir64();
 	bool CheckFileCoherencyHeader(int FileIndex, lcuint32* SizeVar, lcuint64* OffsetLocalExtraField, lcuint32* SizeLocalExtraField);
 
-	lcDiskFile* mFile;
+	lcFile* mFile;
 
 	bool mModified;
 	bool mZip64;

@@ -186,6 +186,17 @@ void lcMemFile::CopyFrom(lcFile& Source)
 	Source.ReadBuffer(mBuffer, Length);
 }
 
+void lcMemFile::CopyFrom(lcMemFile& Source)
+{
+	size_t Length = Source.GetLength();
+
+	SetLength(Length);
+	Seek(0, SEEK_SET);
+
+	Source.Seek(0, SEEK_SET);
+	Source.ReadBuffer(mBuffer, Length);
+}
+
 // =============================================================================
 // lcDiskFile
 

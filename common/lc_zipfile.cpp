@@ -38,6 +38,19 @@ bool lcZipFile::OpenRead(const char* FilePath)
 	return true;
 }
 
+bool lcZipFile::OpenRead(lcFile* File)
+{
+	mFile = File;
+
+	if (!Open())
+	{
+		mFile = NULL;
+		return false;
+	}
+
+	return true;
+}
+
 bool lcZipFile::OpenWrite(const char* FilePath, bool Append)
 {
 	lcDiskFile* File = new lcDiskFile();

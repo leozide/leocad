@@ -15,7 +15,6 @@
 #define LC_PIECE_HAS_LINES          0x08 // Piece has lines
 #define LC_PIECE_PLACEHOLDER        0x10 // Placeholder for a piece not in the library
 #define LC_PIECE_CACHED             0x20 // Piece is saved in the library cache
-#define LC_PIECE_GENERATED          0x40 // Mesh is generated in code
 
 #define LC_PIECE_NAME_LEN 256
 

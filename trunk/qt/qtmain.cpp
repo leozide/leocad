@@ -174,7 +174,9 @@ int main(int argc, char *argv[])
 	gMainWindow->UpdateRecentFiles();
 	w.show();
 
+#if !LC_DISABLE_UPDATE_CHECK
 	lcDoInitialUpdateCheck();
+#endif
 
 	int execReturn = app.exec();
 

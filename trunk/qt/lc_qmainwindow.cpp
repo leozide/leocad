@@ -367,7 +367,9 @@ void lcQMainWindow::createMenus()
 	menuHelp = menuBar()->addMenu(tr("&Help"));
 	menuHelp->addAction(actions[LC_HELP_HOMEPAGE]);
 	menuHelp->addAction(actions[LC_HELP_EMAIL]);
+#if !LC_DISABLE_UPDATE_CHECK
 	menuHelp->addAction(actions[LC_HELP_UPDATES]);
+#endif
 	menuHelp->addSeparator();
 	menuHelp->addAction(actions[LC_HELP_ABOUT]);
 }

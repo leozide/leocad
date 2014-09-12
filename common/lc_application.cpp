@@ -64,55 +64,58 @@ void lcApplication::SetClipboard(lcFile* Clipboard)
 	gMainWindow->UpdatePaste(mClipboard != NULL);
 }
 
-bool lcApplication::LoadPiecesLibrary(const char* LibPath, const char* LibraryInstallPath, const char* LibraryCachePath)
+bool lcApplication::LoadPiecesLibrary(const char* LibPath, const char* LibraryInstallPath, const char* LDrawPath, const char* LibraryCachePath)
 {
 	if (mLibrary == NULL)
 		mLibrary = new lcPiecesLibrary();
 
 	if (LibPath && LibPath[0])
+		return mLibrary->Load(LibPath, LibraryCachePath);
+
+	char* EnvPath = getenv("LEOCAD_LIB");
+
+	if (EnvPath && EnvPath[0])
 	{
-		if (mLibrary->Load(LibPath, LibraryCachePath))
-			return true;
+		return mLibrary->Load(EnvPath, LibraryCachePath);
 	}
-	else
+
+	char CustomPath[LC_MAXPATH];
+	strcpy(CustomPath, lcGetProfileString(LC_PROFILE_PARTS_LIBRARY));
+
+	if (CustomPath[0])
+		return mLibrary->Load(CustomPath, LibraryCachePath);
+
+	if (LibraryInstallPath && LibraryInstallPath[0])
 	{
-		char* EnvPath = getenv("LEOCAD_LIB");
+		char LibraryPath[LC_MAXPATH];
 
-		if (EnvPath && EnvPath[0])
+		strcpy(LibraryPath, LibraryInstallPath);
+
+		int i = strlen(LibraryPath) - 1;
+		if ((LibraryPath[i] != '\\') && (LibraryPath[i] != '/'))
+			strcat(LibraryPath, "/");
+
+		strcat(LibraryPath, "library.bin");
+
+		if (mLibrary->Load(LibraryPath, LibraryCachePath))
 		{
-			if (mLibrary->Load(EnvPath, LibraryCachePath))
-				return true;
+			mLibrary->SetOfficialPieces();
+			return true;
 		}
-		else
-		{
-			char CustomPath[LC_MAXPATH];
+	}
 
-			strcpy(CustomPath, lcGetProfileString(LC_PROFILE_PARTS_LIBRARY));
+	if (LDrawPath && LDrawPath[0])
+	{
+		char LibraryPath[LC_MAXPATH];
 
-			if (CustomPath[0])
-			{
-				if (mLibrary->Load(CustomPath, LibraryCachePath))
-					return true;
-			}
-			else if (LibraryInstallPath && LibraryInstallPath[0])
-			{
-				char LibraryPath[LC_MAXPATH];
+		strcpy(LibraryPath, LDrawPath);
 
-				strcpy(LibraryPath, LibraryInstallPath);
+		int i = strlen(LibraryPath) - 1;
+		if ((LibraryPath[i] != '\\') && (LibraryPath[i] != '/'))
+			strcat(LibraryPath, "/");
 
-				int i = strlen(LibraryPath) - 1;
-				if ((LibraryPath[i] != '\\') && (LibraryPath[i] != '/'))
-					strcat(LibraryPath, "/");
-
-				strcat(LibraryPath, "library.bin");
-
-				if (mLibrary->Load(LibraryPath, LibraryCachePath))
-				{
-					mLibrary->SetOfficialPieces();
-					return true;
-				}
-			}
-		}
+		if (mLibrary->Load(LibraryPath, LibraryCachePath))
+			return true;
 	}
 
 	return false;
@@ -150,7 +153,7 @@ void lcApplication::ParseStringArgument(int* CurArg, int argc, char* argv[], cha
 	}
 }
 
-bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstallPath, const char* LibraryCachePath)
+bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstallPath, const char* LDrawPath, const char* LibraryCachePath)
 {
 	char* LibPath = NULL;
 
@@ -240,7 +243,7 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 		}
 	}
 
-	if (!LoadPiecesLibrary(LibPath, LibraryInstallPath, LibraryCachePath))
+	if (!LoadPiecesLibrary(LibPath, LibraryInstallPath, LDrawPath, LibraryCachePath))
 	{
 		if (SaveImage)
 		{

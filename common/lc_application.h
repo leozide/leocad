@@ -38,11 +38,11 @@ public:
 	lcApplication();
 	~lcApplication();
 
-	bool Initialize(int argc, char *argv[], const char* LibraryInstallPath, const char* LibraryCachePath);
+	bool Initialize(int argc, char *argv[], const char* LibraryInstallPath, const char* LDrawPath, const char* LibraryCachePath);
 	void Shutdown();
 	void ShowPreferencesDialog();
 
-	bool LoadPiecesLibrary(const char* LibPath, const char* LibraryInstallPath, const char* LibraryCachePath);
+	bool LoadPiecesLibrary(const char* LibPath, const char* LibraryInstallPath, const char* LDrawPath, const char* LibraryCachePath);
 
 	void OpenURL(const char* URL);
 	void RunProcess(const char* ExecutablePath, const lcArray<String>& Arguments);

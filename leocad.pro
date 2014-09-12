@@ -48,6 +48,7 @@ unix:!macx {
 	isEmpty(DESKTOP_DIR):DESKTOP_DIR = $$INSTALL_PREFIX/share/applications
 	isEmpty(MIME_DIR):MIME_DIR = $$INSTALL_PREFIX/share/mime/packages
 	isEmpty(MIME_ICON_DIR):MIME_ICON_DIR = $$INSTALL_PREFIX/share/icons/hicolor/scalable/mimetypes
+	isEmpty(DISABLE_UPDATE_CHECK):DISABLE_UPDATE_CHECK = 0
 
 	target.path = $$BIN_DIR
 	docs.path = $$DOCS_DIR
@@ -66,6 +67,7 @@ unix:!macx {
 	INSTALLS += target docs man desktop icon mime mime_icon
 
 	DEFINES += LC_INSTALL_PREFIX=\\\"$$INSTALL_PREFIX\\\"
+	DEFINES += LC_DISABLE_UPDATE_CHECK=$$DISABLE_UPDATE_CHECK
 }
 
 macx {

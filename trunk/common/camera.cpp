@@ -118,14 +118,14 @@ void lcCamera::SaveLDraw(QTextStream& Stream) const
 		Stream << QLatin1String("0 !LEOCAD CAMERA POSITION ") << mPosition[0] << ' ' << mPosition[1] << ' ' << mPosition[2] << LineEnding;
 
 	if (mTargetPositionKeys.GetSize() > 1)
-		SaveKeysLDraw(Stream, mTargetPositionKeys, "CAMERA TARGETPOSITION_KEY ");
+		SaveKeysLDraw(Stream, mTargetPositionKeys, "CAMERA TARGET_POSITION_KEY ");
 	else
-		Stream << QLatin1String("0 !LEOCAD CAMERA TARGETPOSITION ") << mTargetPosition[0] << ' ' << mTargetPosition[1] << ' ' << mTargetPosition[2] << LineEnding;
+		Stream << QLatin1String("0 !LEOCAD CAMERA TARGET_POSITION ") << mTargetPosition[0] << ' ' << mTargetPosition[1] << ' ' << mTargetPosition[2] << LineEnding;
 
 	if (mUpVectorKeys.GetSize() > 1)
-		SaveKeysLDraw(Stream, mUpVectorKeys, "CAMERA UPVECTOR_KEY ");
+		SaveKeysLDraw(Stream, mUpVectorKeys, "CAMERA UP_VECTOR_KEY ");
 	else
-		Stream << QLatin1String("0 !LEOCAD CAMERA UPVECTOR ") << mUpVector[0] << ' ' << mUpVector[1] << ' ' << mUpVector[2] << LineEnding;
+		Stream << QLatin1String("0 !LEOCAD CAMERA UP_VECTOR ") << mUpVector[0] << ' ' << mUpVector[1] << ' ' << mUpVector[2] << LineEnding;
 
 	Stream << QLatin1String("0 !LEOCAD CAMERA ");
 
@@ -157,15 +157,15 @@ bool lcCamera::ParseLDrawLine(QTextStream& Stream)
 			Stream >> m_zFar;
 		else if (Token == QLatin1String("POSITION"))
 			Stream >> mPosition[0] >> mPosition[1] >> mPosition[2];
-		else if (Token == QLatin1String("TARGETPOSITION"))
+		else if (Token == QLatin1String("TARGET_POSITION"))
 			Stream >> mTargetPosition[0] >> mTargetPosition[1] >> mTargetPosition[2];
-		else if (Token == QLatin1String("UPVECTOR"))
+		else if (Token == QLatin1String("UP_VECTOR"))
 			Stream >> mUpVector[0] >> mUpVector[1] >> mUpVector[2];
 		else if (Token == QLatin1String("POSITION_KEY"))
 			LoadKeysLDraw(Stream, mPositionKeys);
-		else if (Token == QLatin1String("TARGETPOSITION_KEY"))
+		else if (Token == QLatin1String("TARGET_POSITION_KEY"))
 			LoadKeysLDraw(Stream, mTargetPositionKeys);
-		else if (Token == QLatin1String("UPVECTOR_KEY"))
+		else if (Token == QLatin1String("UP_VECTOR_KEY"))
 			LoadKeysLDraw(Stream, mUpVectorKeys);
 		else if (Token == QLatin1String("NAME"))
 		{

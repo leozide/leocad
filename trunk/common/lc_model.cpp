@@ -156,61 +156,82 @@ void lcModel::SaveLDraw(QTextStream& Stream) const
 	if (mCurrentStep != LastStep)
 		Stream << QLatin1String("0 !LEOCAD MODEL CURRENT_STEP") << mCurrentStep << LineEnding;
 
-	lcGroup* CurrentGroup = NULL;
-	lcArray<lcGroup*> SavedGroups;
+	lcArray<lcGroup*> CurrentGroups;
 
 	for (lcStep Step = 1; Step <= LastStep; Step++)
 	{
 		for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 		{
 			lcPiece* Piece = mPieces[PieceIdx];
+
+			if (Piece->GetStepShow() != Step)
+				continue;
+
 			lcGroup* PieceGroup = Piece->GetGroup();
 
-			if (PieceGroup != CurrentGroup)
+			if (PieceGroup)
 			{
-				if (CurrentGroup)
-					Stream << QLatin1String("0 !LEOCAD GROUP END\r\n");
-
-				if (PieceGroup)
-					Stream << QLatin1String("0 !LEOCAD GROUP BEGIN ") << PieceGroup->m_strName << LineEnding;
-
-				if (PieceGroup->mGroup && SavedGroups.FindIndex(PieceGroup) == -1)
+				if (CurrentGroups.IsEmpty() || (!CurrentGroups.IsEmpty() && PieceGroup != CurrentGroups[CurrentGroups.GetSize() - 1]))
 				{
-					Stream << QLatin1String("0 !LEOCAD GROUP PARENT ") << PieceGroup->mGroup->m_strName << LineEnding;
-					SavedGroups.Add(PieceGroup);
-				}
+					lcArray<lcGroup*> PieceParents;
 
-				CurrentGroup = PieceGroup;
+					for (lcGroup* Group = PieceGroup; Group; Group = Group->mGroup)
+						PieceParents.InsertAt(0, Group);
+
+					int FoundParent = -1;
+
+					while (!CurrentGroups.IsEmpty())
+					{
+						lcGroup* Group = CurrentGroups[CurrentGroups.GetSize() - 1];
+						int Index = PieceParents.FindIndex(Group);
+
+						if (Index == -1)
+						{
+							CurrentGroups.RemoveIndex(CurrentGroups.GetSize() - 1);
+							Stream << QLatin1String("0 !LEOCAD GROUP END\r\n");
+						}
+						else
+						{
+							FoundParent = Index;
+							break;
+						}
+					}
+
+					for (int ParentIdx = FoundParent + 1; ParentIdx < PieceParents.GetSize(); ParentIdx++)
+					{
+						lcGroup* Group = PieceParents[ParentIdx];
+						CurrentGroups.Add(Group);
+						Stream << QLatin1String("0 !LEOCAD GROUP BEGIN ") << Group->m_strName << LineEnding;
+					}
+				}
+			}
+			else
+			{
+				while (CurrentGroups.GetSize())
+				{
+					CurrentGroups.RemoveIndex(CurrentGroups.GetSize() - 1);
+					Stream << QLatin1String("0 !LEOCAD GROUP END\r\n");
+				}
 			}
 
-			if (Piece->GetStepShow() == Step)
-				Piece->SaveLDraw(Stream);
+			Piece->SaveLDraw(Stream);
 		}
 
 		if (Step != LastStep)
 			Stream << QLatin1String("0 STEP\r\n");
 	}
 
-	if (CurrentGroup)
+	while (CurrentGroups.GetSize())
+	{
+		CurrentGroups.RemoveIndex(CurrentGroups.GetSize() - 1);
 		Stream << QLatin1String("0 !LEOCAD GROUP END\r\n");
+	}
 
 	for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
 		mCameras[CameraIdx]->SaveLDraw(Stream);
 
 	for (int LightIdx = 0; LightIdx < mLights.GetSize(); LightIdx++)
 		mLights[LightIdx]->SaveLDraw(Stream);
-
-	for (int GroupIdx = 0; GroupIdx < mGroups.GetSize(); GroupIdx++)
-	{
-		lcGroup* Group = mGroups[GroupIdx];
-
-		if (Group->mGroup && SavedGroups.FindIndex(Group) == -1)
-		{
-			Stream << QLatin1String("0 !LEOCAD GROUP BEGIN ") << Group->m_strName << LineEnding;
-			Stream << QLatin1String("0 !LEOCAD GROUP PARENT ") << Group->mGroup->m_strName << LineEnding;
-			Stream << QLatin1String("0 !LEOCAD GROUP END\r\n");
-		}
-	}
 }
 
 void lcModel::LoadLDraw(const QStringList& Lines, const lcMatrix44& CurrentTransform, int& CurrentStep)
@@ -218,7 +239,7 @@ void lcModel::LoadLDraw(const QStringList& Lines, const lcMatrix44& CurrentTrans
 	lcPiece* Piece = NULL;
 	lcCamera* Camera = NULL;
 	lcLight* Light = NULL;
-	lcGroup* Group = NULL;
+	lcArray<lcGroup*> CurrentGroups;
 
 	for (int LineIdx = 0; LineIdx < Lines.size(); LineIdx++)
 	{
@@ -280,20 +301,15 @@ void lcModel::LoadLDraw(const QStringList& Lines, const lcMatrix44& CurrentTrans
 				{
 					QString Name = Stream.readAll().trimmed();
 					QByteArray NameUtf = Name.toUtf8(); // todo: replace with qstring
-					Group = GetGroup(NameUtf.constData(), true);
+					lcGroup* Group = GetGroup(NameUtf.constData(), true);
+					if (!CurrentGroups.IsEmpty())
+						Group->mGroup = CurrentGroups[CurrentGroups.GetSize() - 1];
+					CurrentGroups.Add(Group);
 				}
 				else if (Token == QLatin1String("END"))
 				{
-					Group = NULL;
-				}
-				else if (Token == QLatin1String("PARENT"))
-				{
-					if (Group)
-					{
-						QString Name = Stream.readAll().trimmed();
-						QByteArray NameUtf = Name.toUtf8(); // todo: replace with qstring
-						Group->mGroup = GetGroup(NameUtf.constData(), true);
-					}
+					if (!CurrentGroups.IsEmpty())
+						CurrentGroups.RemoveIndex(CurrentGroups.GetSize() - 1);
 				}
 			}
 
@@ -323,8 +339,8 @@ void lcModel::LoadLDraw(const QStringList& Lines, const lcMatrix44& CurrentTrans
 			if (!Piece)
 				Piece = new lcPiece(NULL);
 
-			if (Group)
-				Piece->SetGroup(Group);
+			if (!CurrentGroups.IsEmpty())
+				Piece->SetGroup(CurrentGroups[CurrentGroups.GetSize() - 1]);
 
 			PieceInfo* Info = lcGetPiecesLibrary()->FindPiece(PartID.toLatin1().constData(), false);
 			if (Info != NULL)

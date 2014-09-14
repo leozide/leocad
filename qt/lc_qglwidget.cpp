@@ -20,9 +20,9 @@ void lcGLWidget::MakeCurrent()
 
 void lcGLWidget::Redraw()
 {
-	QGLWidget* widget = (QGLWidget*)mWidget;
+	QGLWidget* Widget = (QGLWidget*)mWidget;
 
-	widget->updateGL();
+	QTimer::singleShot(0, Widget, SLOT(updateGL()));
 }
 
 void* lcGLWidget::GetExtensionAddress(const char* FunctionName)

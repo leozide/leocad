@@ -542,7 +542,7 @@ void lcMainWindow::UpdateSnap()
 		window->updateSnap();
 }
 
-void lcMainWindow::UpdateUndoRedo(const char* UndoText, const char* RedoText)
+void lcMainWindow::UpdateUndoRedo(const QString& UndoText, const QString& RedoText)
 {
 	lcQMainWindow* window = (lcQMainWindow*)mHandle;
 

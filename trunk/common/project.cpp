@@ -14,7 +14,6 @@
 #include "camera.h"
 #include "light.h"
 #include "group.h"
-#include "terrain.h"
 #include "project.h"
 #include "image.h"
 #include "system.h"
@@ -31,7 +30,6 @@
 
 Project::Project()
 {
-	m_pTerrain = new Terrain();
 	m_pBackground = new lcTexture();
 	memset(&mSearchOptions, 0, sizeof(mSearchOptions));
 }
@@ -40,7 +38,6 @@ Project::~Project()
 {
 	DeleteContents(false);
 
-	delete m_pTerrain;
 	delete m_pBackground;
 }
 
@@ -81,7 +78,6 @@ void Project::DeleteContents(bool bUndo)
 		mRedoHistory.DeleteAll();
 
 		m_pBackground->Unload();
-		m_pTerrain->LoadDefaults(true);
 	}
 
 	mPieces.DeleteAll();
@@ -124,7 +120,6 @@ void Project::LoadDefaults(bool cameras)
 	gMainWindow->UpdateCurrentStep();
 	strcpy(m_strHeader, "");
 	strcpy(m_strFooter, "Page &P");
-	m_pTerrain->LoadDefaults(true);
 
 	const lcArray<View*> Views = gMainWindow->GetViews();
 	for (i = 0; i < Views.GetSize (); i++)
@@ -882,6 +877,7 @@ bool Project::OnNewDocument()
 	memset(m_strPathName, 0, sizeof(m_strPathName)); // no path name yet
 	LoadDefaults(true);
 	CheckPoint("");
+	mSavedHistory = mUndoHistory[0];
 	SetTitle("Untitled");
 
 	return true;
@@ -1002,6 +998,7 @@ bool Project::OnOpenDocument(const char* lpszPathName)
   }
 
   CheckPoint("");
+  mSavedHistory = mUndoHistory[0];
 
   return true;
 }
@@ -1029,21 +1026,7 @@ void Project::SetPathName(const char* PathName, bool bAddToMRU)
 
 void Project::CheckPoint(const char* Description)
 {
-	lcModelHistoryEntry* ModelHistoryEntry = new lcModelHistoryEntry();
-
-	strcpy(ModelHistoryEntry->Description, Description);
-
-	QTextStream Stream(&ModelHistoryEntry->File);
-	SaveLDraw(Stream);
-
-	mUndoHistory.InsertAt(0, ModelHistoryEntry);
-	mRedoHistory.DeleteAll();
-
-	if (!Description[0])
-		mSavedHistory = ModelHistoryEntry;
-
-	gMainWindow->UpdateModified(IsModified());
-	gMainWindow->UpdateUndoRedo(mUndoHistory.GetSize() > 1 ? mUndoHistory[0]->Description : NULL, !mRedoHistory.IsEmpty() ? mRedoHistory[0]->Description : NULL);
+	SaveCheckpoint(Description);
 }
 
 void Project::LoadCheckPoint(lcModelHistoryEntry* CheckPoint)
@@ -1223,9 +1206,6 @@ void Project::RenderScenePieces(View* view, bool DrawInterface)
 		glFogfv(GL_FOG_COLOR, lcVector4(mProperties.mFogColor, 1.0f));
 		glEnable(GL_FOG);
 	}
-
-//	if (m_nScene & LC_SCENE_FLOOR)
-//		m_pTerrain->Render(view->mCamera, AspectRatio);
 
 	lcArray<lcRenderMesh> OpaqueMeshes(mPieces.GetSize());
 	lcArray<lcRenderMesh> TranslucentMeshes;
@@ -3319,18 +3299,6 @@ void Project::HandleCommand(LC_COMMANDS id)
 		case LC_FILE_PRINT_BOM:
 			break;
 
-		case LC_FILE_TERRAIN_EDITOR:
-		{
-			// TODO: decide what to do with the terrain editor
-//			Terrain temp = *m_pTerrain;
-
-//			if (SystemDoDialog(LC_DLG_TERRAIN, temp))
-//			{
-//				*m_pTerrain = temp;
-//				m_pTerrain->LoadTexture();
-//			}
-		} break;
-
 	case LC_FILE_RECENT1:
 	case LC_FILE_RECENT2:
 	case LC_FILE_RECENT3:
@@ -5078,55 +5046,6 @@ void Project::GetPieceInsertPosition(View* view, lcVector3& Position, lcVector4&
 	Rotation = lcVector4(0, 0, 1, 0);
 }
 
-void Project::RayTest(lcObjectRayTest& ObjectRayTest) const
-{
-	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-	{
-		lcPiece* Piece = mPieces[PieceIdx];
-
-		if (Piece->IsVisible(mCurrentStep))
-			Piece->RayTest(ObjectRayTest);
-	}
-
-	if (ObjectRayTest.PiecesOnly)
-		return;
-
-	for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
-	{
-		lcCamera* Camera = mCameras[CameraIdx];
-
-		if (Camera != ObjectRayTest.ViewCamera && Camera->IsVisible())
-			Camera->RayTest(ObjectRayTest);
-	}
-
-	for (int LightIdx = 0; LightIdx < mLights.GetSize(); LightIdx++)
-		if (mLights[LightIdx]->IsVisible())
-			mLights[LightIdx]->RayTest(ObjectRayTest);
-}
-
-void Project::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
-{
-	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-	{
-		lcPiece* Piece = mPieces[PieceIdx];
-
-		if (Piece->IsVisible(mCurrentStep))
-			Piece->BoxTest(ObjectBoxTest);
-	}
-
-	for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
-	{
-		lcCamera* Camera = mCameras[CameraIdx];
-
-		if (Camera != ObjectBoxTest.ViewCamera && Camera->IsVisible())
-			Camera->BoxTest(ObjectBoxTest);
-	}
-
-	for (int LightIdx = 0; LightIdx < mLights.GetSize(); LightIdx++)
-		if (mLights[LightIdx]->IsVisible())
-			mLights[LightIdx]->BoxTest(ObjectBoxTest);
-}
-
 void Project::GetSnapIndex(int* SnapXY, int* SnapZ, int* SnapAngle) const
 {
 	if (SnapXY)
@@ -5902,23 +5821,23 @@ void Project::EndMouseTool(lcTool Tool, bool Accept)
 		break;
 
 	case LC_TOOL_SPOTLIGHT:
-		CheckPoint("New SpotLight");
+		SaveCheckpoint(tr("New SpotLight"));
 		break;
 
 	case LC_TOOL_CAMERA:
 		gMainWindow->UpdateCameraMenu();
-		CheckPoint("New Camera");
+		SaveCheckpoint(tr("New Camera"));
 		break;
 
 	case LC_TOOL_SELECT:
 		break;
 
 	case LC_TOOL_MOVE:
-		CheckPoint("Move");
+		SaveCheckpoint(tr("Move"));
 		break;
 
 	case LC_TOOL_ROTATE:
-		CheckPoint("Rotate");
+		SaveCheckpoint(tr("Rotate"));
 		break;
 
 	case LC_TOOL_ERASER:
@@ -5927,22 +5846,22 @@ void Project::EndMouseTool(lcTool Tool, bool Accept)
 
 	case LC_TOOL_ZOOM:
 		if (!gMainWindow->GetActiveView()->mCamera->IsSimple())
-			CheckPoint("Zoom");
+			SaveCheckpoint(tr("Zoom"));
 		break;
 
 	case LC_TOOL_PAN:
 		if (!gMainWindow->GetActiveView()->mCamera->IsSimple())
-			CheckPoint("Pan");
+			SaveCheckpoint(tr("Pan"));
 		break;
 
 	case LC_TOOL_ROTATE_VIEW:
 		if (!gMainWindow->GetActiveView()->mCamera->IsSimple())
-			CheckPoint("Orbit");
+			SaveCheckpoint(tr("Orbit"));
 		break;
 
 	case LC_TOOL_ROLL:
 		if (!gMainWindow->GetActiveView()->mCamera->IsSimple())
-			CheckPoint("Roll");
+			SaveCheckpoint(tr("Roll"));
 		break;
 
 	case LC_TOOL_ZOOM_REGION:
@@ -5962,7 +5881,7 @@ void Project::InsertPieceToolClicked(const lcVector3& Position, const lcVector4&
 	SystemPieceComboAdd(m_pCurPiece->m_strDescription);
 	ClearSelectionAndSetFocus(Piece, LC_PIECE_SECTION_POSITION);
 
-	CheckPoint("Insert");
+	SaveCheckpoint(tr("Insert"));
 }
 
 void Project::PointLightToolClicked(const lcVector3& Position)
@@ -5972,7 +5891,7 @@ void Project::PointLightToolClicked(const lcVector3& Position)
 	mLights.Add(Light);
 
 	ClearSelectionAndSetFocus(Light, LC_LIGHT_SECTION_POSITION);
-	CheckPoint("New Light");
+	SaveCheckpoint(tr("New Light"));
 }
 
 void Project::BeginSpotLightTool(const lcVector3& Position, const lcVector3& Target)
@@ -6075,7 +5994,7 @@ void Project::EraserToolClicked(lcObject* Object)
 	gMainWindow->UpdateFocusObject(GetFocusObject());
 	UpdateSelection();
 	gMainWindow->UpdateAllViews();
-	CheckPoint("Deleting");
+	SaveCheckpoint(tr("Deleting"));
 }
 
 void Project::PaintToolClicked(lcObject* Object)
@@ -6089,7 +6008,7 @@ void Project::PaintToolClicked(lcObject* Object)
 	{
 		Piece->SetColorIndex(gMainWindow->mColorIndex);
 
-		CheckPoint("Painting");
+		SaveCheckpoint(tr("Painting"));
 		gMainWindow->UpdateFocusObject(GetFocusObject());
 		gMainWindow->UpdateAllViews();
 	}
@@ -6135,7 +6054,7 @@ void Project::ZoomRegionToolClicked(lcCamera* Camera, const lcVector3* Points, f
 	gMainWindow->UpdateAllViews();
 
 	if (!Camera->IsSimple())
-		CheckPoint("Zoom");
+		SaveCheckpoint(tr("Zoom"));
 }
 
 // Indicates if the existing string represents an instance of the candidate

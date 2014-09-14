@@ -97,7 +97,7 @@ enum lcTool
 struct lcModelHistoryEntry
 {
 	QByteArray File;
-	char Description[64];
+	QString Description;
 };
 
 class lcModel
@@ -143,8 +143,8 @@ public:
 	void SaveLDraw(QTextStream& Stream) const;
 	void LoadLDraw(QTextStream& Stream);
 
-	void SaveBinary(lcFile& File) const;
-	void LoadBinary(lcFile& File);
+	void RayTest(lcObjectRayTest& ObjectRayTest) const;
+	void BoxTest(lcObjectBoxTest& ObjectBoxTest) const;
 
 	lcObject* GetFocusObject() const;
 	void FocusOrDeselectObject(const lcObjectSection& ObjectSection);
@@ -154,6 +154,7 @@ public:
 	void AddToSelection(const lcArray<lcObjectSection>& ObjectSections);
 
 protected:
+	void SaveCheckpoint(const QString& Description);
 	void CalculateStep();
 	void UpdateSelection() const;
 	void SelectGroup(lcGroup* TopGroup, bool Select);
@@ -162,6 +163,7 @@ protected:
 	lcModelProperties mProperties;
 
 	lcStep mCurrentStep;
+	lcVector3 mMouseToolDistance;
 
 	lcArray<lcPiece*> mPieces;
 	lcArray<lcCamera*> mCameras;

@@ -91,7 +91,6 @@ macx {
 SOURCES += common/view.cpp \
     common/tr.cpp \
     common/texfont.cpp \
-    common/terrain.cpp \
     common/str.cpp \
     common/project.cpp \
     common/preview.cpp \
@@ -149,7 +148,6 @@ HEADERS += \
     common/view.h \
     common/tr.h \
     common/texfont.h \
-    common/terrain.h \
     common/system.h \
     common/str.h \
     common/project.h \

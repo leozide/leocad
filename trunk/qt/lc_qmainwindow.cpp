@@ -1183,31 +1183,31 @@ void lcQMainWindow::updateSnap()
 	statusSnapLabel->setText(QString(tr(" M: %1 %2 R: %3 ")).arg(xy, z, angle));
 }
 
-void lcQMainWindow::updateUndoRedo(const char* undoText, const char* redoText)
+void lcQMainWindow::updateUndoRedo(const QString& UndoText, const QString& RedoText)
 {
-	QAction *undoAction = actions[LC_EDIT_UNDO];
-	QAction *redoAction = actions[LC_EDIT_REDO];
+	QAction* UndoAction = actions[LC_EDIT_UNDO];
+	QAction* RedoAction = actions[LC_EDIT_REDO];
 
-	if (undoText)
+	if (!UndoText.isEmpty())
 	{
-		undoAction->setEnabled(true);
-		undoAction->setText(QString(tr("&Undo %1")).arg(undoText));
+		UndoAction->setEnabled(true);
+		UndoAction->setText(QString(tr("&Undo %1")).arg(UndoText));
 	}
 	else
 	{
-		undoAction->setEnabled(false);
-		undoAction->setText(tr("&Undo"));
+		UndoAction->setEnabled(false);
+		UndoAction->setText(tr("&Undo"));
 	}
 
-	if (redoText)
+	if (!RedoText.isEmpty())
 	{
-		redoAction->setEnabled(true);
-		redoAction->setText(QString(tr("&Redo %1")).arg(redoText));
+		RedoAction->setEnabled(true);
+		RedoAction->setText(QString(tr("&Redo %1")).arg(RedoText));
 	}
 	else
 	{
-		redoAction->setEnabled(false);
-		redoAction->setText(tr("&Redo"));
+		RedoAction->setEnabled(false);
+		RedoAction->setText(tr("&Redo"));
 	}
 }
 

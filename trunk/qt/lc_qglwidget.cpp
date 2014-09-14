@@ -20,9 +20,9 @@ void lcGLWidget::MakeCurrent()
 
 void lcGLWidget::Redraw()
 {
-	QGLWidget* Widget = (QGLWidget*)mWidget;
+	lcQGLWidget* Widget = (lcQGLWidget*)mWidget;
 
-	QTimer::singleShot(0, Widget, SLOT(updateGL()));
+	Widget->mUpdateTimer.start(0);
 }
 
 void* lcGLWidget::GetExtensionAddress(const char* FunctionName)
@@ -118,6 +118,9 @@ lcQGLWidget::lcQGLWidget(QWidget *parent, lcQGLWidget *share, lcGLWidget *owner,
 {
 	widget = owner;
 	widget->mWidget = this;
+
+	mUpdateTimer.setSingleShot(true);
+	connect(&mUpdateTimer, SIGNAL(timeout()), this, SLOT(updateGL()));
 
 	widget->MakeCurrent();
 	GL_InitializeSharedExtensions(widget);

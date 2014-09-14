@@ -25,6 +25,8 @@ public:
 #endif
 	}
 
+	QTimer mUpdateTimer;
+
 protected:
 	void initializeGL();
 	void resizeGL(int x, int h);

@@ -50,15 +50,6 @@ void lcLight::SaveLDraw(QTextStream& Stream) const
 {
 }
 
-bool lcLight::FileLoad(lcFile& file)
-{
-	return true;
-}
-
-void lcLight::FileSave(lcFile& file) const
-{
-}
-
 void lcLight::CreateName(const lcArray<lcLight*>& Lights)
 {
 	int i, max = 0;

@@ -38,7 +38,7 @@ public:
 	void setAddKeys(bool addKeys);
 	void updateLockSnap(lcuint32 snap);
 	void updateSnap();
-	void updateUndoRedo(const char* undoText, const char* redoText);
+	void updateUndoRedo(const QString& UndoText, const QString& RedoText);
 	void updateTransformType(int newType);
 	void updateCameraMenu();
 	void updateCurrentCamera(int cameraIndex);

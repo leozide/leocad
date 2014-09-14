@@ -70,7 +70,7 @@ class lcMainWindow : public lcBaseWindow
 	void SetAddKeys(bool AddKeys);
 	void UpdateLockSnap(lcuint32 Snap);
 	void UpdateSnap();
-	void UpdateUndoRedo(const char* UndoText, const char* RedoText);
+	void UpdateUndoRedo(const QString& UndoText, const QString& RedoText);
 	void UpdateCurrentCamera(int CameraIndex);
 	void UpdatePerspective();
 	void UpdateCameraMenu();

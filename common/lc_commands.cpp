@@ -95,13 +95,6 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 		"Display project properties",
 		""
 	},
-	// LC_FILE_TERRAIN_EDITOR
-	{
-		"File.TerrainEditor",
-		"&Terrain Editor...",
-		"Edit terrain",
-		""
-	},
 	// LC_FILE_PRINT
 	{
 		"File.Print",

@@ -391,6 +391,71 @@ void lcModel::LoadLDraw(QTextStream& Stream)
 	delete Light;
 }
 
+void lcModel::RayTest(lcObjectRayTest& ObjectRayTest) const
+{
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+	{
+		lcPiece* Piece = mPieces[PieceIdx];
+
+		if (Piece->IsVisible(mCurrentStep))
+			Piece->RayTest(ObjectRayTest);
+	}
+
+	if (ObjectRayTest.PiecesOnly)
+		return;
+
+	for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
+	{
+		lcCamera* Camera = mCameras[CameraIdx];
+
+		if (Camera != ObjectRayTest.ViewCamera && Camera->IsVisible())
+			Camera->RayTest(ObjectRayTest);
+	}
+
+	for (int LightIdx = 0; LightIdx < mLights.GetSize(); LightIdx++)
+		if (mLights[LightIdx]->IsVisible())
+			mLights[LightIdx]->RayTest(ObjectRayTest);
+}
+
+void lcModel::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
+{
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+	{
+		lcPiece* Piece = mPieces[PieceIdx];
+
+		if (Piece->IsVisible(mCurrentStep))
+			Piece->BoxTest(ObjectBoxTest);
+	}
+
+	for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
+	{
+		lcCamera* Camera = mCameras[CameraIdx];
+
+		if (Camera != ObjectBoxTest.ViewCamera && Camera->IsVisible())
+			Camera->BoxTest(ObjectBoxTest);
+	}
+
+	for (int LightIdx = 0; LightIdx < mLights.GetSize(); LightIdx++)
+		if (mLights[LightIdx]->IsVisible())
+			mLights[LightIdx]->BoxTest(ObjectBoxTest);
+}
+
+void lcModel::SaveCheckpoint(const QString& Description)
+{
+	lcModelHistoryEntry* ModelHistoryEntry = new lcModelHistoryEntry();
+
+	ModelHistoryEntry->Description = Description;
+
+	QTextStream Stream(&ModelHistoryEntry->File);
+	SaveLDraw(Stream);
+
+	mUndoHistory.InsertAt(0, ModelHistoryEntry);
+	mRedoHistory.DeleteAll();
+
+	gMainWindow->UpdateModified(IsModified());
+	gMainWindow->UpdateUndoRedo(mUndoHistory.GetSize() > 1 ? mUndoHistory[0]->Description : QString(), !mRedoHistory.IsEmpty() ? mRedoHistory[0]->Description : QString());
+}
+
 void lcModel::CalculateStep()
 {
 	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)

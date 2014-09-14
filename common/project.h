@@ -26,7 +26,6 @@
 #define LC_SCENE_FOG			0x004	// Enable fog
 #define LC_SCENE_BG				0x010	// Draw bg image
 #define LC_SCENE_BG_TILE		0x040	// Tile bg image
-#define LC_SCENE_FLOOR			0x080	// Render floor
 #define LC_SCENE_GRADIENT		0x100	// Draw gradient
 
 #define LC_HTML_SINGLEPAGE      0x01
@@ -45,7 +44,6 @@ enum LC_MOUSE_TRACK
 	LC_TRACK_RIGHT
 };
 
-class Terrain;
 class PieceInfo;
 class View;
 class Image;
@@ -103,9 +101,6 @@ public:
 	Project();
 	~Project();
 
-	void RayTest(lcObjectRayTest& ObjectRayTest) const;
-	void BoxTest(lcObjectBoxTest& ObjectBoxTest) const;
-
 	const lcVector3& GetMouseToolDistance() const
 	{
 		return mMouseToolDistance;
@@ -128,9 +123,6 @@ public:
 	void UpdateOrbitTool(lcCamera* Camera, float MouseX, float MouseY);
 	void UpdateRollTool(lcCamera* Camera, float Mouse);
 	void ZoomRegionToolClicked(lcCamera* Camera, const lcVector3* Points, float RatioX, float RatioY);
-
-protected:
-	lcVector3 mMouseToolDistance;
 
 public:
 	void SetCurrentStep(lcStep Step)
@@ -178,8 +170,6 @@ public:
 	void TransformSelectedObjects(lcTransformType Type, const lcVector3& Transform);
 	void ModifyObject(lcObject* Object, lcObjectProperty Property, void* Value);
 	void ZoomActiveView(int Amount);
-
-	Terrain* m_pTerrain;
 
 	char m_strTitle[LC_MAXPATH];
 	char m_strPathName[LC_MAXPATH];

@@ -150,7 +150,6 @@ void Project::LoadDefaults(bool cameras)
 /////////////////////////////////////////////////////////////////////////////
 // Standard file menu commands
 
-// Read a .lcd file
 bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 {
 	lcint32 i, count;
@@ -213,7 +212,6 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 		file->ReadU32();//m_nScene
 
 	file->ReadS32(&count, 1);
-//	SystemStartProgressBar(0, count, 1, "Loading project...");
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 	Library->OpenCache();
 
@@ -270,12 +268,9 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 //			pPiece->SetGroup((lcGroup*)group);
 			SystemPieceComboAdd(pInfo->m_strDescription);
 		}
-
-//		SytemStepProgressBar();
 	}
 
 	Library->CloseCache();
-//	SytemEndProgressBar();
 
 	if (!bMerge)
 	{
@@ -411,16 +406,9 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 		if (fv >= 0.6f)
 		{
 			if (fv < 1.0f)
-			{
-				lcuint32 ViewportMode;
-				file->ReadU32(&ViewportMode, 1);
-			}
+				file->Seek(4, SEEK_CUR);
 			else
-			{
-				lcuint8 ViewportMode, ActiveViewport;
-				file->ReadU8(&ViewportMode, 1);
-				file->ReadU8(&ActiveViewport, 1);
-			}
+				file->Seek(2, SEEK_CUR);
 
 			file->ReadS32(&count, 1);
 			for (i = 0; i < count; i++)
@@ -442,15 +430,7 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 
 		if (fv >= 0.7f)
 		{
-			for (count = 0; count < 4; count++)
-			{
-				file->ReadS32(&i, 1);
-
-//				lcCamera* pCam = m_pCameras;
-//				while (i--)
-//					pCam = pCam->m_pNext;
-//				m_pViewCameras[count] = pCam;
-			}
+			file->Seek(16, SEEK_CUR);
 
 			file->ReadU32(&rgb, 1);
 			mProperties.mFogColor[0] = (float)((unsigned char) (rgb))/255;
@@ -501,27 +481,9 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 			mProperties.mAmbientColor[2] = (float)((unsigned char) ((rgb) >> 16))/255;
 
 			if (fv < 1.3f)
-			{
-				file->ReadS32(&i, 1); // m_bAnimation = (i != 0);
-				file->ReadS32(&i, 1); // mAddKeys = (i != 0);
-				file->ReadU8(&ch, 1); // m_nFPS
-				file->ReadS32(&i, 1); // m_nCurFrame = i;
-				file->ReadU16(&sh, 1); // m_nTotalFrames
-				file->ReadS32(&i, 1); // m_nGridSize = i;
-				file->ReadS32(&i, 1); // m_nMoveSnap = i;
-			}
+				file->Seek(23, SEEK_CUR);
 			else
-			{
-				file->ReadU8(&ch, 1); // m_bAnimation = (ch != 0);
-				file->ReadU8(&ch, 1); // mAddKeys = (ch != 0);
-				file->ReadU8(&ch, 1); // m_nFPS
-				file->ReadU16(&sh, 1); // m_nCurFrame
-				file->ReadU16(&sh, 1); // m_nTotalFrames
-				file->ReadU16(&sh, 1); // m_nGridSize = sh;
-				file->ReadU16(&sh, 1);
-				if (fv >= 1.4f)
-					m_nMoveSnap = sh;
-			}
+				file->Seek(11, SEEK_CUR);
 		}
 
 		if (fv > 1.0f)
@@ -534,15 +496,6 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 			mProperties.mBackgroundGradientColor2[0] = (float)((unsigned char) (rgb))/255;
 			mProperties.mBackgroundGradientColor2[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
 			mProperties.mBackgroundGradientColor2[2] = (float)((unsigned char) ((rgb) >> 16))/255;
-
-			if (fv > 1.1f)
-				m_pTerrain->FileLoad (file);
-			else
-			{
-				file->Seek(4, SEEK_CUR);
-				file->ReadBuffer(&ch, 1);
-				file->Seek(ch, SEEK_CUR);
-			}
 		}
 	}
 
@@ -583,106 +536,6 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 	gMainWindow->UpdateAllViews();
 
 	return true;
-}
-
-void Project::FileSave(lcFile* file, bool bUndo)
-{
-	float ver_flt = 1.4f; // LeoCAD 0.75 - (and this should have been an integer).
-	lcuint32 rgb;
-	lcuint8 ch;
-	lcuint16 sh;
-	int i, j;
-
-	const char LC_STR_VERSION[32] = "LeoCAD 0.7 Project\0\0";
-
-	file->Seek(0, SEEK_SET);
-	file->WriteBuffer(LC_STR_VERSION, 32);
-	file->WriteFloats(&ver_flt, 1);
-
-	rgb = LC_FLOATRGB(mProperties.mBackgroundSolidColor);
-	file->WriteU32(&rgb, 1);
-
-	i = m_nAngleSnap; file->WriteS32(&i, 1);
-	file->WriteU32(&m_nSnap, 1);
-	file->WriteFloat(1.0f);//m_fLineWidth
-	file->WriteU32(0); // m_nDetail
-	i = 0;//i = m_nCurGroup;
-	file->WriteS32(&i, 1);
-	i = 0;//i = m_nCurColor;
-	file->WriteS32(&i, 1);
-	i = 0; file->WriteS32(&i, 1); // m_nCurAction
-	i = mCurrentStep; file->WriteS32(&i, 1);
-	file->WriteU32(0);//m_nScene
-
-	file->WriteS32(mPieces.GetSize());
-	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-		mPieces[PieceIdx]->FileSave(*file);
-
-	QByteArray Author = mProperties.mAuthor.toUtf8();
-	ch = lcMin(strlen(Author), 100U);
-	file->WriteBuffer(&ch, 1);
-	file->WriteBuffer(Author, ch);
-	QByteArray Description = mProperties.mDescription.toUtf8();
-	ch = lcMin(strlen(Description), 100U);
-	file->WriteBuffer(&ch, 1);
-	file->WriteBuffer(Description, ch);
-	QByteArray Comments = mProperties.mComments.toUtf8();
-	ch = lcMin(strlen(Comments), 255U);
-	file->WriteBuffer(&ch, 1);
-	file->WriteBuffer(Comments, ch);
-
-	i = mGroups.GetSize();
-	file->WriteS32(&i, 1);
-
-	for (int GroupIdx = 0; GroupIdx < mGroups.GetSize(); GroupIdx++)
-		mGroups[GroupIdx]->FileSave(file, mGroups);
-
-	lcuint8 ViewportMode = 0, ActiveViewport = 0;
-	file->WriteU8(&ViewportMode, 1);
-	file->WriteU8(&ActiveViewport, 1);
-
-	i = mCameras.GetSize();
-	file->WriteS32(&i, 1);
-
-	for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
-		mCameras[CameraIdx]->FileSave(*file);
-
-	for (j = 0; j < 4; j++)
-		file->WriteS32(0);
-
-	rgb = LC_FLOATRGB(mProperties.mFogColor);
-	file->WriteU32(&rgb, 1);
-	file->WriteFloats(&mProperties.mFogDensity, 1);
-	QByteArray BackgroundImage = mProperties.mBackgroundImage.toLatin1();
-	sh = strlen(BackgroundImage.constData());
-	file->WriteU16(&sh, 1);
-	file->WriteBuffer(BackgroundImage.constData(), sh);
-	ch = strlen(m_strHeader);
-	file->WriteBuffer(&ch, 1);
-	file->WriteBuffer(m_strHeader, ch);
-	ch = strlen(m_strFooter);
-	file->WriteBuffer(&ch, 1);
-	file->WriteBuffer(m_strFooter, ch);
-	// 0.60 (1.0)
-	rgb = LC_FLOATRGB(mProperties.mAmbientColor);
-	file->WriteU32(&rgb, 1);
-	ch = 0;// m_bAnimation;
-	file->WriteBuffer(&ch, 1);
-	ch = 0;// mAddKeys;
-	file->WriteU8(&ch, 1);
-	file->WriteU8 (24); // m_nFPS
-	file->WriteU16(1); // m_nCurFrame
-	file->WriteU16(100); // m_nTotalFrames
-	file->WriteU16(0); // m_nGridSize
-	file->WriteU16(&m_nMoveSnap, 1);
-	// 0.62 (1.1)
-	rgb = LC_FLOATRGB(mProperties.mBackgroundGradientColor1);
-	file->WriteU32(&rgb, 1);
-	rgb = LC_FLOATRGB(mProperties.mBackgroundGradientColor2);
-	file->WriteU32(&rgb, 1);
-	// 0.64 (1.2)
-	m_pTerrain->FileSave(file);
-	file->WriteU32(0);
 }
 
 void Project::FileReadMPD(lcFile& MPD, lcArray<LC_FILEENTRY*>& FileArray) const
@@ -921,8 +774,8 @@ bool Project::DoSave(const char* FileName)
 	{
 		if (m_strPathName[0])
 			strcpy(SaveFileName, m_strPathName);
-	else
-	{
+		else
+		{
 			strcpy(SaveFileName, lcGetProfileString(LC_PROFILE_PROJECTS_PATH));
 
 			int Length = strlen(SaveFileName);
@@ -936,48 +789,29 @@ bool Project::DoSave(const char* FileName)
 			if (iBad != -1)
 				SaveFileName[iBad] = 0;
 
-			strcat(SaveFileName, ".lcd");
+			strcat(SaveFileName, ".ldr");
 		}
 
 		if (!gMainWindow->DoDialog(LC_DIALOG_SAVE_PROJECT, SaveFileName))
 			return false;
 	}
 
-	char ext[4];
-	memset(ext, 0, 4);
-	const char* ptr = strrchr(SaveFileName, '.');
-	if (ptr != NULL)
+	if (QFileInfo(SaveFileName).suffix().toLower() == QLatin1String("lcd"))
 	{
-		strncpy(ext, ptr+1, 3);
-		strlwr(ext);
+		QMessageBox::warning(gMainWindow->mHandle, tr("Error"), tr("Saving files in LCD format is no longer supported, please use the LDR format instead."));
+		return false;
 	}
 
-	if ((strcmp(ext, "dat") == 0) || (strcmp(ext, "ldr") == 0))
+	QFile File(SaveFileName);
+
+	if (!File.open(QIODevice::WriteOnly))
 	{
-		QFile File(SaveFileName);
-
-		if (!File.open(QIODevice::WriteOnly))
-		{
-			QMessageBox::warning(gMainWindow->mHandle, "Error", QString("Error writing to file '%1':\n%2").arg(SaveFileName, File.errorString()));
-			return false;
-		}
-
-		QTextStream Stream(&File);
-		SaveLDraw(Stream);
+		QMessageBox::warning(gMainWindow->mHandle, tr("Error"), tr("Error writing to file '%1':\n%2").arg(SaveFileName, File.errorString()));
+		return false;
 	}
-	else
-	{
-		lcDiskFile file;
-		if (!file.Open(SaveFileName, "wb"))
-		{
-	//		MessageBox("Failed to save.");
-			return false;
-		}
 
-		FileSave(&file, false);     // save me
-
-		file.Close();
-	}
+	QTextStream Stream(&File);
+	SaveLDraw(Stream);
 
 	mSavedHistory = mUndoHistory[0];
 
@@ -1131,15 +965,11 @@ bool Project::OnOpenDocument(const char* lpszPathName)
 
 		  if (!File.open(QIODevice::ReadOnly))
 		  {
-				QMessageBox::warning(gMainWindow->mHandle, "Error", QString("Error reading file '%1':\n%2").arg(lpszPathName, File.errorString()));
+				QMessageBox::warning(gMainWindow->mHandle, tr("Error"), tr("Error reading file '%1':\n%2").arg(lpszPathName, File.errorString()));
 				return false;
 		  }
 
-		  QStringList Lines;
-		  while (!File.atEnd())
-			  Lines.append(File.readLine());
-
-		  LoadLDraw(Lines, mat, step);
+		  LoadLDraw(QTextStream(&File));
 	  }
 
       mCurrentStep = step;
@@ -1202,7 +1032,9 @@ void Project::CheckPoint(const char* Description)
 	lcModelHistoryEntry* ModelHistoryEntry = new lcModelHistoryEntry();
 
 	strcpy(ModelHistoryEntry->Description, Description);
-	FileSave(&ModelHistoryEntry->File, true);
+
+	QTextStream Stream(&ModelHistoryEntry->File);
+	SaveLDraw(Stream);
 
 	mUndoHistory.InsertAt(0, ModelHistoryEntry);
 	mRedoHistory.DeleteAll();
@@ -1212,6 +1044,38 @@ void Project::CheckPoint(const char* Description)
 
 	gMainWindow->UpdateModified(IsModified());
 	gMainWindow->UpdateUndoRedo(mUndoHistory.GetSize() > 1 ? mUndoHistory[0]->Description : NULL, !mRedoHistory.IsEmpty() ? mRedoHistory[0]->Description : NULL);
+}
+
+void Project::LoadCheckPoint(lcModelHistoryEntry* CheckPoint)
+{
+	DeleteContents(true);
+	LoadLDraw(QTextStream(CheckPoint->File, QIODevice::ReadOnly));
+
+	const lcArray<View*> Views = gMainWindow->GetViews();
+	for (int i = 0; i < Views.GetSize (); i++)
+	{
+		Views[i]->MakeCurrent();
+		RenderInitialize();
+	}
+
+	CalculateStep();
+
+	gMainWindow->UpdateFocusObject(GetFocusObject());
+
+	for (int ViewIdx = 0; ViewIdx < Views.GetSize(); ViewIdx++)
+	{
+		View* view = Views[ViewIdx];
+
+		if (!view->mCamera->IsSimple())
+			view->SetDefaultCamera();
+	}
+
+	gMainWindow->UpdateLockSnap(m_nSnap);
+	gMainWindow->UpdateSnap();
+	gMainWindow->UpdateCameraMenu();
+	UpdateSelection();
+	gMainWindow->UpdateCurrentStep();
+	gMainWindow->UpdateAllViews();
 }
 
 // Only this function should be called.
@@ -3488,8 +3352,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 			mUndoHistory.RemoveIndex(0);
 			mRedoHistory.InsertAt(0, Undo);
 
-			DeleteContents(true);
-			FileLoad(&mUndoHistory[0]->File, true, false);
+			LoadCheckPoint(mUndoHistory[0]);
 
 			gMainWindow->UpdateModified(IsModified());
 			gMainWindow->UpdateUndoRedo(mUndoHistory.GetSize() > 1 ? mUndoHistory[0]->Description : NULL, !mRedoHistory.IsEmpty() ? mRedoHistory[0]->Description : NULL);
@@ -3505,8 +3368,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 			mRedoHistory.RemoveIndex(0);
 			mUndoHistory.InsertAt(0, Redo);
 
-			DeleteContents(true);
-			FileLoad(&Redo->File, true, false);
+			LoadCheckPoint(Redo);
 
 			gMainWindow->UpdateModified(IsModified());
 			gMainWindow->UpdateUndoRedo(mUndoHistory.GetSize() > 1 ? mUndoHistory[0]->Description : NULL, !mRedoHistory.IsEmpty() ? mRedoHistory[0]->Description : NULL);
@@ -6029,8 +5891,7 @@ void Project::EndMouseTool(lcTool Tool, bool Accept)
 {
 	if (!Accept)
 	{
-		DeleteContents(true);
-		FileLoad(&mUndoHistory[0]->File, true, false);
+		LoadCheckPoint(mUndoHistory[0]);
 		return;
 	}
 

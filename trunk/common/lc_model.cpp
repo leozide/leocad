@@ -234,24 +234,25 @@ void lcModel::SaveLDraw(QTextStream& Stream) const
 		mLights[LightIdx]->SaveLDraw(Stream);
 }
 
-void lcModel::LoadLDraw(const QStringList& Lines, const lcMatrix44& CurrentTransform, int& CurrentStep)
+void lcModel::LoadLDraw(QTextStream& Stream)
 {
 	lcPiece* Piece = NULL;
 	lcCamera* Camera = NULL;
 	lcLight* Light = NULL;
 	lcArray<lcGroup*> CurrentGroups;
+	int CurrentStep = 1;
 
-	for (int LineIdx = 0; LineIdx < Lines.size(); LineIdx++)
+	while (!Stream.atEnd())
 	{
-		QString Line = Lines[LineIdx].trimmed();
-		QTextStream Stream(&Line, QIODevice::ReadOnly);
+		QString Line = Stream.readLine().trimmed();
+		QTextStream LineStream(&Line, QIODevice::ReadOnly);
 
 		QString Token;
-		Stream >> Token;
+		LineStream >> Token;
 
 		if (Token == QLatin1String("0"))
 		{
-			Stream >> Token;
+			LineStream >> Token;
 
 			if (Token == QLatin1String("STEP"))
 			{
@@ -262,28 +263,28 @@ void lcModel::LoadLDraw(const QStringList& Lines, const lcMatrix44& CurrentTrans
 			if (Token != QLatin1String("!LEOCAD"))
 				continue;
 
-			Stream >> Token;
+			LineStream >> Token;
 
 			if (Token == QLatin1String("MODEL"))
 			{
 //				if (!strcmp(Tokens[3], "CURRENT_STEP") && Tokens[4])
 //					mCurrentStep = atoi(Tokens[4]);
 
-				mProperties.ParseLDrawLine(Stream);
+				mProperties.ParseLDrawLine(LineStream);
 			}
 			else if (Token == QLatin1String("PIECE"))
 			{
 				if (!Piece)
 					Piece = new lcPiece(NULL);
 
-				Piece->ParseLDrawLine(Stream);
+				Piece->ParseLDrawLine(LineStream);
 			}
 			else if (Token == QLatin1String("CAMERA"))
 			{
 				if (!Camera)
 					Camera = new lcCamera(false);
 
-				if (Camera->ParseLDrawLine(Stream))
+				if (Camera->ParseLDrawLine(LineStream))
 				{
 					Camera->CreateName(mCameras);
 					mCameras.Add(Camera);
@@ -295,15 +296,17 @@ void lcModel::LoadLDraw(const QStringList& Lines, const lcMatrix44& CurrentTrans
 			}
 			else if (Token == QLatin1String("GROUP"))
 			{
-				Stream >> Token;
+				LineStream >> Token;
 
 				if (Token == QLatin1String("BEGIN"))
 				{
-					QString Name = Stream.readAll().trimmed();
+					QString Name = LineStream.readAll().trimmed();
 					QByteArray NameUtf = Name.toUtf8(); // todo: replace with qstring
 					lcGroup* Group = GetGroup(NameUtf.constData(), true);
 					if (!CurrentGroups.IsEmpty())
 						Group->mGroup = CurrentGroups[CurrentGroups.GetSize() - 1];
+					else
+						Group->mGroup = NULL;
 					CurrentGroups.Add(Group);
 				}
 				else if (Token == QLatin1String("END"))
@@ -318,19 +321,17 @@ void lcModel::LoadLDraw(const QStringList& Lines, const lcMatrix44& CurrentTrans
 		else if (Token == QLatin1String("1"))
 		{
 			int ColorCode;
-			Stream >> ColorCode;
+			LineStream >> ColorCode;
 
 			float Matrix[12];
 			for (int TokenIdx = 0; TokenIdx < 12; TokenIdx++)
-				Stream >> Matrix[TokenIdx];
+				LineStream >> Matrix[TokenIdx];
 
 			lcMatrix44 IncludeTransform(lcVector4(Matrix[3], Matrix[6], Matrix[9], 0.0f), lcVector4(Matrix[4], Matrix[7], Matrix[10], 0.0f),
 			                            lcVector4(Matrix[5], Matrix[8], Matrix[11], 0.0f), lcVector4(Matrix[0], Matrix[1], Matrix[2], 1.0f));
 
-			IncludeTransform = lcMul(IncludeTransform, CurrentTransform);
-
 			QString File;
-			Stream >> File;
+			LineStream >> File;
 
 			QString PartID = File.toUpper();
 			if (PartID.endsWith(QLatin1String(".DAT")))

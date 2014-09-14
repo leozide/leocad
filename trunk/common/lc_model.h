@@ -96,7 +96,7 @@ enum lcTool
 
 struct lcModelHistoryEntry
 {
-	lcMemFile File;
+	QByteArray File;
 	char Description[64];
 };
 
@@ -141,7 +141,7 @@ public:
 	lcGroup* GetGroup(const char* Name, bool CreateIfMissing);
 
 	void SaveLDraw(QTextStream& Stream) const;
-	void LoadLDraw(const QStringList& Lines, const lcMatrix44& CurrentTransform, int& CurrentStep);
+	void LoadLDraw(QTextStream& Stream);
 
 	void SaveBinary(lcFile& File) const;
 	void LoadBinary(lcFile& File);

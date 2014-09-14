@@ -298,7 +298,7 @@ bool lcBaseWindow::DoDialog(LC_DIALOG_TYPE Type, void* Data)
 				break;
 
 			case LC_DIALOG_SAVE_PROJECT:
-				result = QFileDialog::getSaveFileName(parent, parent->tr("Save Project"), FileName, parent->tr("Supported Files (*.lcd *.ldr *.dat);;All Files (*.*)"));
+				result = QFileDialog::getSaveFileName(parent, parent->tr("Save Project"), FileName, parent->tr("Supported Files (*.ldr *.dat);;All Files (*.*)"));
 				break;
 
 			case LC_DIALOG_MERGE_PROJECT:

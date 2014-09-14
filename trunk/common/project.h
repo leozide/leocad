@@ -97,6 +97,8 @@ enum lcObjectProperty
 
 class Project : public lcModel
 {
+	Q_DECLARE_TR_FUNCTIONS(Project)
+
 public:
 	Project();
 	~Project();
@@ -186,6 +188,7 @@ public:
 
 protected:
 	void CheckPoint(const char* Description);
+	void LoadCheckPoint(lcModelHistoryEntry* CheckPoint);
 
 	bool RemoveSelectedObjects();
 	void GetPieceInsertPosition(lcPiece* OffsetPiece, lcVector3& Position, lcVector4& Rotation);
@@ -236,7 +239,6 @@ protected:
 protected:
 	bool DoSave(const char* FileName);
 	bool FileLoad(lcFile* file, bool bUndo, bool bMerge);
-	void FileSave(lcFile* file, bool bUndo);
 	void FileReadLDraw(lcFile* file, const lcMatrix44& CurrentTransform, int* nOk, int DefColor, int* nStep, lcArray<LC_FILEENTRY*>& FileArray);
 	void FileReadMPD(lcFile& MPD, lcArray<LC_FILEENTRY*>& FileArray) const;
 

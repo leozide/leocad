@@ -132,6 +132,10 @@ int main(int argc, char *argv[])
 	QCoreApplication::setApplicationName("LeoCAD");
 	QCoreApplication::setApplicationVersion(LC_VERSION_TEXT);
 
+	QTranslator Translator;
+	Translator.load(QString("leocad_") + QLocale::system().name() + ".qm", ":/resources");
+	app.installTranslator(&Translator);
+
 	g_App = new lcApplication();
 	gMainWindow = new lcMainWindow();
 

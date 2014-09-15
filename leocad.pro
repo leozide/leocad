@@ -22,6 +22,22 @@ win32 {
 	QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-parameter
 }
 
+isEmpty(QMAKE_LRELEASE) {
+	win32:QMAKE_LRELEASE = $$[QT_INSTALL_BINS]\\lrelease.exe
+	else:QMAKE_LRELEASE = $$[QT_INSTALL_BINS]/lrelease
+	unix {
+		!exists($$QMAKE_LRELEASE) { QMAKE_LRELEASE = lrelease-qt4 }
+	} else {
+		!exists($$QMAKE_LRELEASE) { QMAKE_LRELEASE = lrelease }
+	}
+}
+
+lrelease.input = TRANSLATIONS
+lrelease.output = resources/${QMAKE_FILE_BASE}.qm
+lrelease.commands = $$QMAKE_LRELEASE -silent ${QMAKE_FILE_IN} -qm resources/${QMAKE_FILE_BASE}.qm
+lrelease.CONFIG += no_link target_predeps
+QMAKE_EXTRA_COMPILERS += lrelease
+
 unix:!macx {
 	TARGET = leocad
 } else {
@@ -220,3 +236,4 @@ FORMS += \
     qt/lc_qfinddialog.ui
 OTHER_FILES += 
 RESOURCES += leocad.qrc
+TRANSLATIONS = resources/leocad_pt_BR.ts

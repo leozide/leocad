@@ -965,7 +965,8 @@ bool Project::OnOpenDocument(const char* lpszPathName)
 				return false;
 		  }
 
-		  LoadLDraw(QTextStream(&File));
+		  QTextStream Stream(&File);
+		  LoadLDraw(Stream);
 	  }
 
       mCurrentStep = step;
@@ -1032,7 +1033,9 @@ void Project::CheckPoint(const char* Description)
 void Project::LoadCheckPoint(lcModelHistoryEntry* CheckPoint)
 {
 	DeleteContents(true);
-	LoadLDraw(QTextStream(CheckPoint->File, QIODevice::ReadOnly));
+
+	QTextStream Stream(CheckPoint->File, QIODevice::ReadOnly);
+	LoadLDraw(Stream);
 
 	const lcArray<View*> Views = gMainWindow->GetViews();
 	for (int i = 0; i < Views.GetSize (); i++)

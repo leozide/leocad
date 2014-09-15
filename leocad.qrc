@@ -67,5 +67,6 @@
         <file>resources/piece_show_later.png</file>
         <file>resources/time_add_keys.png</file>
         <file>resources/library.zip</file>
+        <file>resources/leocad_pt_BR.qm</file>
     </qresource>
 </RCC>

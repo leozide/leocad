@@ -298,31 +298,31 @@ bool lcBaseWindow::DoDialog(LC_DIALOG_TYPE Type, void* Data)
 			switch (Type)
 			{
 			case LC_DIALOG_OPEN_PROJECT:
-				result = QFileDialog::getOpenFileName(parent, parent->tr("Open Project"), FileName, parent->tr("Supported Files (*.lcd *.ldr *.dat *.mpd);;All Files (*.*)"));
+				result = QFileDialog::getOpenFileName(parent, tr("Open Project"), FileName, tr("Supported Files (*.lcd *.ldr *.dat *.mpd);;All Files (*.*)"));
 				break;
 
 			case LC_DIALOG_SAVE_PROJECT:
-				result = QFileDialog::getSaveFileName(parent, parent->tr("Save Project"), FileName, parent->tr("Supported Files (*.ldr *.dat);;All Files (*.*)"));
+				result = QFileDialog::getSaveFileName(parent, tr("Save Project"), FileName, tr("Supported Files (*.ldr *.dat);;All Files (*.*)"));
 				break;
 
 			case LC_DIALOG_MERGE_PROJECT:
-				result = QFileDialog::getOpenFileName(parent, parent->tr("Merge Project"), FileName, parent->tr("Supported Files (*.lcd *.ldr *.dat *.mpd);;All Files (*.*)"));
+				result = QFileDialog::getOpenFileName(parent, tr("Merge Project"), FileName, tr("Supported Files (*.lcd *.ldr *.dat *.mpd);;All Files (*.*)"));
 				break;
 
 			case LC_DIALOG_EXPORT_3DSTUDIO:
-				result = QFileDialog::getSaveFileName(parent, parent->tr("Export 3D Studio"), FileName, parent->tr("3DS Files (*.3ds);;All Files (*.*)"));
+				result = QFileDialog::getSaveFileName(parent, tr("Export 3D Studio"), FileName, tr("3DS Files (*.3ds);;All Files (*.*)"));
 				break;
 
 			case LC_DIALOG_EXPORT_BRICKLINK:
-				result = QFileDialog::getSaveFileName(parent, parent->tr("Export BrickLink"), FileName, parent->tr("XML Files (*.xml);;All Files (*.*)"));
+				result = QFileDialog::getSaveFileName(parent, tr("Export BrickLink"), FileName, tr("XML Files (*.xml);;All Files (*.*)"));
 				break;
 
 			case LC_DIALOG_EXPORT_CSV:
-				result = QFileDialog::getSaveFileName(parent, parent->tr("Export CSV"), FileName, parent->tr("CSV Files (*.csv);;All Files (*.*)"));
+				result = QFileDialog::getSaveFileName(parent, tr("Export CSV"), FileName, tr("CSV Files (*.csv);;All Files (*.*)"));
 				break;
 
 			case LC_DIALOG_EXPORT_WAVEFRONT:
-				result = QFileDialog::getSaveFileName(parent, parent->tr("Export Wavefront"), FileName, parent->tr("Wavefront Files (*.obj);;All Files (*.*)"));
+				result = QFileDialog::getSaveFileName(parent, tr("Export Wavefront"), FileName, tr("Wavefront Files (*.obj);;All Files (*.*)"));
 				break;
 
 			default:

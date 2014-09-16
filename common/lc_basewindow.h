@@ -146,7 +146,9 @@ struct lcPreferencesDialogOptions
 
 class lcBaseWindow
 {
- public:
+	Q_DECLARE_TR_FUNCTIONS(lcBaseWindow)
+
+public:
 	lcBaseWindow()
 	{
 		mHandle = NULL;

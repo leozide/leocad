@@ -33,8 +33,8 @@ isEmpty(QMAKE_LRELEASE) {
 }
 
 lrelease.input = TRANSLATIONS
-lrelease.output = resources/${QMAKE_FILE_BASE}.qm
-lrelease.commands = $$QMAKE_LRELEASE -silent ${QMAKE_FILE_IN} -qm resources/${QMAKE_FILE_BASE}.qm
+lrelease.output = ${QMAKE_FILE_PATH}/${QMAKE_FILE_BASE}.qm
+lrelease.commands = $$QMAKE_LRELEASE -silent ${QMAKE_FILE_IN} -qm ${QMAKE_FILE_PATH}/${QMAKE_FILE_BASE}.qm
 lrelease.CONFIG += no_link target_predeps
 QMAKE_EXTRA_COMPILERS += lrelease
 

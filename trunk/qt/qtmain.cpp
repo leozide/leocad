@@ -133,7 +133,7 @@ int main(int argc, char *argv[])
 	QCoreApplication::setApplicationVersion(LC_VERSION_TEXT);
 
 	QTranslator Translator;
-	Translator.load(QString("leocad_") + QLocale::system().name() + ".qm", ":/resources");
+	Translator.load(QString("leocad_") + QLocale::system().name().section('_', 0, 0) + ".qm", ":/resources");
 	app.installTranslator(&Translator);
 
 	g_App = new lcApplication();

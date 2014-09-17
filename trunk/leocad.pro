@@ -236,4 +236,4 @@ FORMS += \
     qt/lc_qfinddialog.ui
 OTHER_FILES += 
 RESOURCES += leocad.qrc
-TRANSLATIONS = resources/leocad_pt_BR.ts
+TRANSLATIONS = resources/leocad_pt.ts

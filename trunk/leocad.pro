@@ -32,7 +32,8 @@ isEmpty(QMAKE_LRELEASE) {
 	}
 }
 
-lrelease.input = TRANSLATIONS
+TSFILES = resources/leocad_pt.ts
+lrelease.input = TSFILES
 lrelease.output = ${QMAKE_FILE_PATH}/${QMAKE_FILE_BASE}.qm
 lrelease.commands = $$QMAKE_LRELEASE -silent ${QMAKE_FILE_IN} -qm ${QMAKE_FILE_PATH}/${QMAKE_FILE_BASE}.qm
 lrelease.CONFIG += no_link target_predeps
@@ -236,4 +237,7 @@ FORMS += \
     qt/lc_qfinddialog.ui
 OTHER_FILES += 
 RESOURCES += leocad.qrc
-TRANSLATIONS = resources/leocad_pt.ts
+
+!win32 { 
+	TRANSLATIONS = TSFILES
+}

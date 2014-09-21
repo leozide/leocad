@@ -31,7 +31,6 @@
 Project::Project()
 {
 	m_pBackground = new lcTexture();
-	memset(&mSearchOptions, 0, sizeof(mSearchOptions));
 }
 
 Project::~Project()
@@ -141,9 +140,6 @@ void Project::LoadDefaults(bool cameras)
 	UpdateSelection();
 	gMainWindow->UpdateFocusObject(NULL);
 }
-
-/////////////////////////////////////////////////////////////////////////////
-// Standard file menu commands
 
 bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 {
@@ -868,9 +864,6 @@ bool Project::SaveModified()
 	return true;    // keep going
 }
 
-/////////////////////////////////////////////////////////////////////////////
-// File operations
-
 bool Project::OnNewDocument()
 {
 	DeleteContents(false);
@@ -1439,9 +1432,6 @@ bool Project::GetPiecesBoundingBox(View* view, float BoundingBox[6])
 	return true;
 }
 
-/////////////////////////////////////////////////////////////////////////////
-// Project functions
-
 bool Project::RemoveSelectedObjects()
 {
 	bool RemovedPiece = false;
@@ -1505,97 +1495,6 @@ bool Project::RemoveSelectedObjects()
 	RemoveEmptyGroups();
 
 	return RemovedPiece || RemovedCamera || RemovedLight;
-}
-
-void Project::CheckAutoSave()
-{
-	/*
-	m_nSaveTimer += 5;
-	if (m_nAutosave & LC_AUTOSAVE_FLAG)
-	{
-//		int nInterval;
-//		nInterval = m_nAutosave & ~LC_AUTOSAVE_FLAG;
-
-		if (m_nSaveTimer >= (m_nAutosave*60))
-		{
-			m_nSaveTimer = 0;
-
-			if (m_strTempFile.IsEmpty())
-			{
-				char tmpFile[_MAX_PATH], out[_MAX_PATH];
-				GetTempPath (_MAX_PATH, out);
-				GetTempFileName (out, "~LC", 0, tmpFile);
-				DeleteFile (tmpFile);
-				if (char *ptr = strchr(tmpFile, '.')) *ptr = 0;
-				strcat (tmpFile, ".lcd");
-				m_strTempFile = tmpFile;
-			}
-
-			CFile file (m_strTempFile, CFile::modeCreate|CFile::modeWrite|CFile::typeBinary);
-			m_bUndo = TRUE;
-			file.SeekToBegin();
-			CArchive ar(&file, CArchive::store);
-			Serialize(ar);
-			ar.Close();
-			m_bUndo = FALSE;
-		}
-	}
-	*/
-}
-
-void Project::FindPiece(bool FindFirst, bool SearchForward)
-{
-	if (mPieces.IsEmpty())
-		return;
-
-	int StartIdx = mPieces.GetSize() - 1;
-	if (!FindFirst)
-	{
-		for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-		{
-			lcPiece* Piece = mPieces[PieceIdx];
-
-			if (Piece->IsFocused() && Piece->IsVisible(mCurrentStep))
-			{
-				StartIdx = PieceIdx;
-				break;
-			}
-		}
-	}
-
-	int CurrentIdx = StartIdx;
-	lcObject* Focus = NULL;
-
-	for (;;)
-	{
-		if (SearchForward)
-			CurrentIdx++;
-		else
-			CurrentIdx--;
-
-		if (CurrentIdx < 0)
-			CurrentIdx = mPieces.GetSize() - 1;
-		else if (CurrentIdx >= mPieces.GetSize())
-			CurrentIdx = 0;
-
-		if (CurrentIdx == StartIdx)
-			break;
-
-		lcPiece* Current = mPieces[CurrentIdx];
-
-		if (!Current->IsVisible(mCurrentStep))
-			continue;
-
-		if ((!mSearchOptions.MatchInfo || Current->mPieceInfo == mSearchOptions.Info) &&
-			(!mSearchOptions.MatchColor || Current->mColorIndex == mSearchOptions.ColorIndex) &&
-			(!mSearchOptions.MatchName || strcasestr(Current->GetName(), mSearchOptions.Name)))
-		{
-			Focus = Current;
-			break;
-		}
-	}
-
-	ClearSelectionAndSetFocus(Focus, LC_PIECE_SECTION_POSITION);
 }
 
 void Project::ZoomExtents(int FirstView, int LastView)
@@ -3524,7 +3423,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 		} break;
 
 		case LC_EDIT_FIND:
-			if (gMainWindow->DoDialog(LC_DIALOG_FIND, &mSearchOptions))
+			if (gMainWindow->DoDialog(LC_DIALOG_FIND, &gMainWindow->mSearchOptions))
 				FindPiece(true, true);
 			break;
 

@@ -10,9 +10,19 @@ class PiecePreview;
 
 #define LC_MAX_RECENT_FILES 4
 
+struct lcSearchOptions
+{
+	bool MatchInfo;
+	bool MatchColor;
+	bool MatchName;
+	PieceInfo* Info;
+	int ColorIndex;
+	char Name[256];
+};
+
 class lcMainWindow : public lcBaseWindow
 {
- public:
+public:
 	lcMainWindow();
 	~lcMainWindow();
 
@@ -85,6 +95,7 @@ class lcMainWindow : public lcBaseWindow
 	char mRecentFiles[LC_MAX_RECENT_FILES][LC_MAXPATH];
 	PiecePreview* mPreviewWidget;
 	int mColorIndex;
+	lcSearchOptions mSearchOptions;
 
 protected:
 	View* mActiveView;

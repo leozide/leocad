@@ -63,16 +63,6 @@ struct lcPiecesUsedEntry
 	int Count;
 };
 
-struct lcSearchOptions
-{
-	bool MatchInfo;
-	bool MatchColor;
-	bool MatchName;
-	PieceInfo* Info;
-	int ColorIndex;
-	char Name[256];
-};
-
 enum lcObjectProperty
 {
 	LC_PIECE_PROPERTY_POSITION,
@@ -161,7 +151,6 @@ public:
 	void GetPiecesUsed(lcArray<lcPiecesUsedEntry>& PiecesUsed) const;
 	void CreateImages(Image* images, int width, int height, lcStep from, lcStep to, bool hilite);
 	void Render(View* view, bool bToMemory);
-	void CheckAutoSave();
 	bool GetSelectionCenter(lcVector3& Center) const;
 	lcVector3 GetFocusOrSelectionCenter() const;
 	bool GetFocusPosition(lcVector3& Position) const;
@@ -184,9 +173,6 @@ protected:
 	void GetPieceInsertPosition(lcPiece* OffsetPiece, lcVector3& Position, lcVector4& Rotation);
 
 	static int InstanceOfName(const String& existingString, const String& candidateString, String& baseNameOut );
-
-	void FindPiece(bool FindFirst, bool SearchForward);
-	lcSearchOptions mSearchOptions;
 
 	// Movement.
 	bool MoveSelectedObjects(lcVector3& Move, lcVector3& Remainder, bool Snap, bool Lock);

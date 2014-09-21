@@ -153,6 +153,8 @@ public:
 	void SetSelection(const lcArray<lcObjectSection>& ObjectSections);
 	void AddToSelection(const lcArray<lcObjectSection>& ObjectSections);
 
+	void FindPiece(bool FindFirst, bool SearchForward);
+
 protected:
 	void SaveCheckpoint(const QString& Description);
 	void CalculateStep();

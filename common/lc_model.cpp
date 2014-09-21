@@ -744,3 +744,59 @@ void lcModel::AddToSelection(const lcArray<lcObjectSection>& ObjectSections)
 	gMainWindow->UpdateAllViews();
 	gMainWindow->UpdateFocusObject(GetFocusObject());
 }
+
+void lcModel::FindPiece(bool FindFirst, bool SearchForward)
+{
+	if (mPieces.IsEmpty())
+		return;
+
+	int StartIdx = mPieces.GetSize() - 1;
+	if (!FindFirst)
+	{
+		for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+		{
+			lcPiece* Piece = mPieces[PieceIdx];
+
+			if (Piece->IsFocused() && Piece->IsVisible(mCurrentStep))
+			{
+				StartIdx = PieceIdx;
+				break;
+			}
+		}
+	}
+
+	int CurrentIdx = StartIdx;
+	lcObject* Focus = NULL;
+	const lcSearchOptions& SearchOptions = gMainWindow->mSearchOptions;
+
+	for (;;)
+	{
+		if (SearchForward)
+			CurrentIdx++;
+		else
+			CurrentIdx--;
+
+		if (CurrentIdx < 0)
+			CurrentIdx = mPieces.GetSize() - 1;
+		else if (CurrentIdx >= mPieces.GetSize())
+			CurrentIdx = 0;
+
+		if (CurrentIdx == StartIdx)
+			break;
+
+		lcPiece* Current = mPieces[CurrentIdx];
+
+		if (!Current->IsVisible(mCurrentStep))
+			continue;
+
+		if ((!SearchOptions.MatchInfo || Current->mPieceInfo == SearchOptions.Info) &&
+			(!SearchOptions.MatchColor || Current->mColorIndex == SearchOptions.ColorIndex) &&
+			(!SearchOptions.MatchName || strcasestr(Current->GetName(), SearchOptions.Name)))
+		{
+			Focus = Current;
+			break;
+		}
+	}
+
+	ClearSelectionAndSetFocus(Focus, LC_PIECE_SECTION_POSITION);
+}

@@ -1,6 +1,6 @@
 #include "lc_qfinddialog.h"
 #include "ui_lc_qfinddialog.h"
-#include "project.h"
+#include "lc_mainwindow.h"
 #include "lc_library.h"
 #include "lc_application.h"
 #include "pieceinf.h"

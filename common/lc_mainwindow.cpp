@@ -13,6 +13,7 @@ lcMainWindow::lcMainWindow()
 	mTransformType = LC_TRANSFORM_RELATIVE_TRANSLATION;
 
 	mAddKeys = false;
+	memset(&mSearchOptions, 0, sizeof(mSearchOptions));
 
 	for (int FileIdx = 0; FileIdx < LC_MAX_RECENT_FILES; FileIdx++)
 		strcpy(mRecentFiles[FileIdx], lcGetProfileString((LC_PROFILE_KEY)(LC_PROFILE_RECENT_FILE1 + FileIdx)));

@@ -448,7 +448,7 @@ void View::DrawRotateOverlay()
 
 	lcMatrix44 RelativeRotation = mProject->GetRelativeRotation();
 	lcVector3 OverlayCenter = mProject->GetFocusOrSelectionCenter();
-	const lcVector3& MouseToolDistance = mProject->GetMouseToolDistance();
+	lcVector3 MouseToolDistance = mProject->SnapRotation(mProject->GetMouseToolDistance());
 	bool HasAngle = false;
 
 	// Draw a disc showing the rotation amount.

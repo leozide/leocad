@@ -41,6 +41,66 @@ public:
 		return mAddKeys;
 	}
 
+	int GetMoveXYSnap() const
+	{
+		const int SnapXYTable[] = { 0, 1, 5, 8, 10, 20, 40, 60, 80, 160 };
+		return SnapXYTable[mMoveXYSnapIndex];
+	}
+
+	int GetMoveZSnap() const
+	{
+		const int SnapZTable[] = { 0, 1, 5, 8, 10, 20, 24, 48, 96, 192 };
+		return SnapZTable[mMoveZSnapIndex];
+	}
+
+	int GetAngleSnap() const
+	{
+		const int AngleTable[] = { 0, 1, 5, 10, 15, 30, 45, 60, 90, 180 };
+		return AngleTable[mAngleSnapIndex];
+	}
+
+	int GetMoveXYSnapIndex() const
+	{
+		return mMoveXYSnapIndex;
+	}
+
+	int GetMoveZSnapIndex() const
+	{
+		return mMoveZSnapIndex;
+	}
+
+	int GetAngleSnapIndex() const
+	{
+		return mAngleSnapIndex;
+	}
+
+	const char* GetMoveXYSnapText() const
+	{
+		const char* SnapXYText[] = { "0", "1/20S", "1/4S", "1F", "1/2S", "1S", "2S", "3S", "4S", "8S" };
+		return SnapXYText[mMoveXYSnapIndex];
+	}
+
+	const char* GetMoveZSnapText() const
+	{
+		const char* SnapZText[] = { "0", "1/20S", "1/4S", "1F", "1/2S", "1S", "1B", "2B", "4B", "8B" };
+		return SnapZText[mMoveZSnapIndex];
+	}
+
+	bool GetLockX() const
+	{
+		return mLockX;
+	}
+
+	bool GetLockY() const
+	{
+		return mLockY;
+	}
+
+	bool GetLockZ() const
+	{
+		return mLockZ;
+	}
+
 	View* GetActiveView() const
 	{
 		return mActiveView;
@@ -59,6 +119,13 @@ public:
 	void SetTool(lcTool Tool);
 	void SetTransformType(lcTransformType TransformType);
 	void SetColorIndex(int ColorIndex);
+	void SetMoveXYSnapIndex(int Index);
+	void SetMoveZSnapIndex(int Index);
+	void SetAngleSnapIndex(int Index);
+	void SetLockX(bool LockX);
+	void SetLockY(bool LockY);
+	void SetLockZ(bool LockZ);
+
 	void Close();
 
 	void AddRecentFile(const char* FileName);
@@ -78,7 +145,7 @@ public:
 	void UpdatePaste(bool Enabled);
 	void UpdateCurrentStep();
 	void SetAddKeys(bool AddKeys);
-	void UpdateLockSnap(lcuint32 Snap);
+	void UpdateLockSnap();
 	void UpdateSnap();
 	void UpdateUndoRedo(const QString& UndoText, const QString& RedoText);
 	void UpdateCurrentCamera(int CameraIndex);
@@ -104,6 +171,12 @@ protected:
 	bool mAddKeys;
 	lcTool mTool;
 	lcTransformType mTransformType;
+	int mMoveXYSnapIndex;
+	int mMoveZSnapIndex;
+	int mAngleSnapIndex;
+	bool mLockX;
+	bool mLockY;
+	bool mLockZ;
 };
 
 extern class lcMainWindow* gMainWindow;

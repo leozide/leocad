@@ -8,6 +8,25 @@
 
 lcTexture* gGridTexture;
 
+lcTexture* lcLoadTexture(const QString& FileName, int Flags)
+{
+	lcTexture* Texture = new lcTexture();
+
+	if (!Texture->Load(FileName.toLatin1().constData(), Flags)) // todo: qstring
+	{
+		delete Texture;
+		Texture = NULL;
+	}
+
+	return Texture;
+}
+
+void lcReleaseTexture(lcTexture* Texture)
+{
+	if (Texture && Texture->Release() == 0)
+		delete Texture;
+}
+
 lcTexture::lcTexture()
 {
 	mTexture = 0;

@@ -15,6 +15,8 @@ lcApplication* g_App;
 
 void lcPreferences::LoadDefaults()
 {
+	mForceGlobalTransforms = lcGetProfileInt(LC_PROFILE_FORCE_GLOBAL_TRANSFORMS);
+	mFixedAxes = lcGetProfileInt(LC_PROFILE_FIXED_AXES);
 	mMouseSensitivity = lcGetProfileInt(LC_PROFILE_MOUSE_SENSITIVITY);
 	mLightingMode = (lcLightingMode)lcGetProfileInt(LC_PROFILE_LIGHTING_MODE);
 	mDrawAxes = lcGetProfileInt(LC_PROFILE_DRAW_AXES);
@@ -29,6 +31,8 @@ void lcPreferences::LoadDefaults()
 
 void lcPreferences::SaveDefaults()
 {
+	lcSetProfileInt(LC_PROFILE_FORCE_GLOBAL_TRANSFORMS, mForceGlobalTransforms);
+	lcSetProfileInt(LC_PROFILE_FIXED_AXES, mFixedAxes);
 	lcSetProfileInt(LC_PROFILE_MOUSE_SENSITIVITY, mMouseSensitivity);
 	lcSetProfileInt(LC_PROFILE_LIGHTING_MODE, mLightingMode);
 	lcSetProfileInt(LC_PROFILE_DRAW_AXES, mDrawAxes);
@@ -39,6 +43,14 @@ void lcPreferences::SaveDefaults()
 	lcSetProfileInt(LC_PROFILE_GRID_LINES, mDrawGridLines);
 	lcSetProfileInt(LC_PROFILE_GRID_LINE_SPACING, mGridLineSpacing);
 	lcSetProfileInt(LC_PROFILE_GRID_LINE_COLOR, mGridLineColor);
+}
+
+void lcPreferences::SetForceGlobalTransforms(bool ForceGlobalTransforms)
+{
+	mForceGlobalTransforms = ForceGlobalTransforms;
+	lcSetProfileInt(LC_PROFILE_FORCE_GLOBAL_TRANSFORMS, mForceGlobalTransforms);
+	gMainWindow->UpdateLockSnap();
+	gMainWindow->UpdateAllViews();
 }
 
 lcApplication::lcApplication()
@@ -408,7 +420,6 @@ void lcApplication::ShowPreferencesDialog()
 	strcpy(Options.LGEOPath, lcGetProfileString(LC_PROFILE_POVRAY_LGEO_PATH));
 	Options.CheckForUpdates = lcGetProfileInt(LC_PROFILE_CHECK_UPDATES);
 
-	Options.Snap = lcGetActiveProject()->m_nSnap;
 	Options.AASamples = CurrentAASamples;
 
 	Options.Categories = gCategories;
@@ -426,7 +437,6 @@ void lcApplication::ShowPreferencesDialog()
 	bool AAChanged = CurrentAASamples != Options.AASamples;
 
 	mPreferences = Options.Preferences;
-	lcGetActiveProject()->m_nSnap = Options.Snap;
 
 	mPreferences.SaveDefaults();
 
@@ -436,7 +446,6 @@ void lcApplication::ShowPreferencesDialog()
 	lcSetProfileString(LC_PROFILE_POVRAY_PATH, Options.POVRayPath);
 	lcSetProfileString(LC_PROFILE_POVRAY_LGEO_PATH, Options.LGEOPath);
 	lcSetProfileInt(LC_PROFILE_CHECK_UPDATES, Options.CheckForUpdates);
-	lcSetProfileInt(LC_PROFILE_SNAP, Options.Snap);
 	lcSetProfileInt(LC_PROFILE_ANTIALIASING_SAMPLES, Options.AASamples);
 
 	if (LibraryChanged && AAChanged)

@@ -7,6 +7,9 @@
 #include "lc_mainwindow.h"
 #include "lc_profile.h"
 #include "lc_library.h"
+#include "lc_texture.h"
+#include "view.h"
+#include "preview.h"
 
 void lcModelProperties::LoadDefaults()
 {
@@ -139,11 +142,42 @@ void lcModelProperties::ParseLDrawLine(QTextStream& Stream)
 
 lcModel::lcModel()
 {
+	mBackgroundTexture = NULL;
 	mSavedHistory = NULL;
 }
 
 lcModel::~lcModel()
 {
+	DeleteModel();
+	DeleteHistory();
+}
+
+void lcModel::DeleteHistory()
+{
+	mUndoHistory.DeleteAll();
+	mRedoHistory.DeleteAll();
+}
+
+void lcModel::DeleteModel()
+{
+	lcReleaseTexture(mBackgroundTexture);
+	mBackgroundTexture = NULL;
+
+	const lcArray<View*> Views = gMainWindow->GetViews();
+
+	for (int ViewIdx = 0; ViewIdx < Views.GetSize(); ViewIdx++)
+	{
+		View* View = Views[ViewIdx];
+		lcCamera* Camera = View->mCamera;
+
+		if (!Camera->IsSimple())
+			View->SetCamera(Camera, true);
+	}
+
+	mPieces.DeleteAll();
+	mCameras.DeleteAll();
+	mLights.DeleteAll();
+	mGroups.DeleteAll();
 }
 
 void lcModel::SaveLDraw(QTextStream& Stream) const
@@ -386,9 +420,26 @@ void lcModel::LoadLDraw(QTextStream& Stream)
 		}
 	}
 
+	CalculateStep();
+	UpdateBackgroundTexture();
+
 	delete Piece;
 	delete Camera;
 	delete Light;
+}
+
+void lcModel::UpdateBackgroundTexture()
+{
+	lcReleaseTexture(mBackgroundTexture);
+	mBackgroundTexture = NULL;
+
+	if (mProperties.mBackgroundType == LC_BACKGROUND_IMAGE)
+	{
+		mBackgroundTexture = lcLoadTexture(mProperties.mBackgroundImage, LC_TEXTURE_WRAPU | LC_TEXTURE_WRAPV);
+
+		if (!mBackgroundTexture)
+			mProperties.mBackgroundType = LC_BACKGROUND_SOLID;
+	}
 }
 
 void lcModel::RayTest(lcObjectRayTest& ObjectRayTest) const
@@ -456,6 +507,20 @@ void lcModel::SaveCheckpoint(const QString& Description)
 	gMainWindow->UpdateUndoRedo(mUndoHistory.GetSize() > 1 ? mUndoHistory[0]->Description : QString(), !mRedoHistory.IsEmpty() ? mRedoHistory[0]->Description : QString());
 }
 
+void lcModel::LoadCheckPoint(lcModelHistoryEntry* CheckPoint)
+{
+	DeleteModel();
+
+	QTextStream Stream(CheckPoint->File, QIODevice::ReadOnly);
+	LoadLDraw(Stream);
+
+	gMainWindow->UpdateFocusObject(GetFocusObject());
+	gMainWindow->UpdateCameraMenu();
+	UpdateSelection();
+	gMainWindow->UpdateCurrentStep();
+	gMainWindow->UpdateAllViews();
+}
+
 void lcModel::CalculateStep()
 {
 	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
@@ -513,6 +578,246 @@ lcGroup* lcModel::GetGroup(const char* Name, bool CreateIfMissing)
 	return NULL;
 }
 
+void lcModel::RemoveEmptyGroups()
+{
+	bool Removed;
+
+	do
+	{
+		Removed = false;
+
+		for (int GroupIdx = 0; GroupIdx < mGroups.GetSize();)
+		{
+			lcGroup* Group = mGroups[GroupIdx];
+			int Ref = 0;
+
+			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+				if (mPieces[PieceIdx]->GetGroup() == Group)
+					Ref++;
+
+			for (int ParentIdx = 0; ParentIdx < mGroups.GetSize(); ParentIdx++)
+				if (mGroups[ParentIdx]->mGroup == Group)
+					Ref++;
+
+			if (Ref > 1)
+			{
+				GroupIdx++;
+				continue;
+			}
+
+			if (Ref != 0)
+			{
+				for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+				{
+					lcPiece* Piece = mPieces[PieceIdx];
+
+					if (Piece->GetGroup() == Group)
+					{
+						Piece->SetGroup(Group->mGroup);
+						break;
+					}
+				}
+
+				for (int ParentIdx = 0; ParentIdx < mGroups.GetSize(); ParentIdx++)
+				{
+					if (mGroups[ParentIdx]->mGroup == Group)
+					{
+						mGroups[ParentIdx]->mGroup = Group->mGroup;
+						break;
+					}
+				}
+			}
+
+			mGroups.RemoveIndex(GroupIdx);
+			delete Group;
+			Removed = true;
+		}
+	}
+	while (Removed);
+}
+
+#include "project.h"
+#include "lc_application.h"
+
+lcMatrix44 lcModel::GetRelativeRotation() const
+{
+	const lcPreferences& Preferences = lcGetPreferences();
+
+	if (!Preferences.mForceGlobalTransforms)
+	{
+		lcObject* Focus = GetFocusObject();
+
+		if ((Focus != NULL) && Focus->IsPiece())
+		{
+			lcMatrix44 WorldMatrix = ((lcPiece*)Focus)->mModelWorld;
+			WorldMatrix.SetTranslation(lcVector3(0.0f, 0.0f, 0.0f));
+			return WorldMatrix;
+		}
+	}
+
+	return lcMatrix44Identity();
+}
+
+bool lcModel::MoveSelectedObjects(const lcVector3& PieceDistance, const lcVector3& ObjectDistance)
+{
+	lcMatrix44 RelativeRotation = GetRelativeRotation();
+	bool Moved = false;
+
+	if (PieceDistance.LengthSquared() >= 0.001f)
+	{
+		lcVector3 TransformedPieceDistance = lcMul30(PieceDistance, RelativeRotation);
+
+		for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+		{
+			lcPiece* Piece = mPieces[PieceIdx];
+
+			if (Piece->IsSelected())
+			{
+				Piece->Move(mCurrentStep, gMainWindow->GetAddKeys(), TransformedPieceDistance);
+				Piece->UpdatePosition(mCurrentStep);
+				Moved = true;
+			}
+		}
+	}
+
+	if (ObjectDistance.LengthSquared() >= 0.001f)
+	{
+		lcVector3 TransformedObjectDistance = lcMul30(ObjectDistance, RelativeRotation);
+
+		for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
+		{
+			lcCamera* Camera = mCameras[CameraIdx];
+
+			if (Camera->IsSelected())
+			{
+				Camera->Move(mCurrentStep, gMainWindow->GetAddKeys(), TransformedObjectDistance);
+				Camera->UpdatePosition(mCurrentStep);
+				Moved = true;
+			}
+		}
+
+		for (int LightIdx = 0; LightIdx < mLights.GetSize(); LightIdx++)
+		{
+			lcLight* Light = mLights[LightIdx];
+
+			if (Light->IsSelected())
+			{
+				Light->Move(mCurrentStep, gMainWindow->GetAddKeys(), TransformedObjectDistance);
+				Light->UpdatePosition(mCurrentStep);
+				Moved = true;
+			}
+		}
+	}
+
+	return Moved;
+}
+
+bool lcModel::RotateSelectedPieces(const lcVector3& Angles)
+{
+	if (Angles.LengthSquared() < 0.001f)
+		return false;
+
+	float Bounds[6] = { FLT_MAX, FLT_MAX, FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX };
+	lcPiece* Focus = NULL;
+	int SelectedCount = 0;
+
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+	{
+		lcPiece* Piece = mPieces[PieceIdx];
+
+		if (Piece->IsSelected())
+		{
+			if (Piece->IsFocused())
+				Focus = Piece;
+
+			Piece->CompareBoundingBox(Bounds);
+			SelectedCount++;
+		}
+	}
+
+	lcVector3 Center;
+
+	if (Focus)
+		Center = Focus->mPosition;
+	else
+		Center = lcVector3((Bounds[0] + Bounds[3]) / 2.0f, (Bounds[1] + Bounds[4]) / 2.0f, (Bounds[2] + Bounds[5]) / 2.0f);
+
+	// Create the rotation matrix.
+	lcVector4 RotationQuaternion(0, 0, 0, 1);
+	lcVector4 WorldToFocusQuaternion, FocusToWorldQuaternion;
+
+	if (Angles[0] != 0.0f)
+	{
+		lcVector4 q = lcQuaternionRotationX(Angles[0] * LC_DTOR);
+		RotationQuaternion = lcQuaternionMultiply(q, RotationQuaternion);
+	}
+
+	if (Angles[1] != 0.0f)
+	{
+		lcVector4 q = lcQuaternionRotationY(Angles[1] * LC_DTOR);
+		RotationQuaternion = lcQuaternionMultiply(q, RotationQuaternion);
+	}
+
+	if (Angles[2] != 0.0f)
+	{
+		lcVector4 q = lcQuaternionRotationZ(Angles[2] * LC_DTOR);
+		RotationQuaternion = lcQuaternionMultiply(q, RotationQuaternion);
+	}
+
+	const lcPreferences& Preferences = lcGetPreferences();
+	if (Preferences.mForceGlobalTransforms)
+		Focus = NULL;
+
+	if (Focus)
+	{
+		const lcVector4& Rotation = Focus->mRotation;
+
+		WorldToFocusQuaternion = lcQuaternionFromAxisAngle(lcVector4(Rotation[0], Rotation[1], Rotation[2], -Rotation[3] * LC_DTOR));
+		FocusToWorldQuaternion = lcQuaternionFromAxisAngle(lcVector4(Rotation[0], Rotation[1], Rotation[2], Rotation[3] * LC_DTOR));
+
+		RotationQuaternion = lcQuaternionMultiply(FocusToWorldQuaternion, RotationQuaternion);
+	}
+
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+	{
+		lcPiece* Piece = mPieces[PieceIdx];
+
+		if (!Piece->IsSelected())
+			continue;
+
+		const lcVector4& Rotation = Piece->mRotation;
+		lcVector3 Distance = Piece->mPosition - Center;
+		lcVector4 LocalToWorldQuaternion = lcQuaternionFromAxisAngle(lcVector4(Rotation[0], Rotation[1], Rotation[2], Rotation[3] * LC_DTOR));
+		lcVector4 NewRotation, NewLocalToWorldQuaternion;
+
+		if (Focus)
+		{
+			lcVector4 LocalToFocusQuaternion = lcQuaternionMultiply(WorldToFocusQuaternion, LocalToWorldQuaternion);
+			NewLocalToWorldQuaternion = lcQuaternionMultiply(RotationQuaternion, LocalToFocusQuaternion);
+
+			lcVector4 WorldToLocalQuaternion = lcQuaternionFromAxisAngle(lcVector4(Rotation[0], Rotation[1], Rotation[2], -Rotation[3] * LC_DTOR));
+
+			Distance = lcQuaternionMul(Distance, WorldToLocalQuaternion);
+			Distance = lcQuaternionMul(Distance, NewLocalToWorldQuaternion);
+		}
+		else
+		{
+			NewLocalToWorldQuaternion = lcQuaternionMultiply(RotationQuaternion, LocalToWorldQuaternion);
+
+			Distance = lcQuaternionMul(Distance, RotationQuaternion);
+		}
+
+		NewRotation = lcQuaternionToAxisAngle(NewLocalToWorldQuaternion);
+		NewRotation[3] *= LC_RTOD;
+
+		Piece->SetPosition(Center + Distance, mCurrentStep, gMainWindow->GetAddKeys());
+		Piece->SetRotation(NewRotation, mCurrentStep, gMainWindow->GetAddKeys());
+		Piece->UpdatePosition(mCurrentStep);
+	}
+
+	return true;
+}
+
 lcObject* lcModel::GetFocusObject() const
 {
 	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
@@ -540,6 +845,27 @@ lcObject* lcModel::GetFocusObject() const
 	}
 
 	return NULL;
+}
+
+bool lcModel::GetSelectionCenter(lcVector3& Center) const
+{
+	float Bounds[6] = { FLT_MAX, FLT_MAX, FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX };
+	bool Selected = false;
+
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+	{
+		lcPiece* Piece = mPieces[PieceIdx];
+
+		if (Piece->IsSelected())
+		{
+			Piece->CompareBoundingBox(Bounds);
+			Selected = true;
+		}
+	}
+
+	Center = lcVector3((Bounds[0] + Bounds[3]) * 0.5f, (Bounds[1] + Bounds[4]) * 0.5f, (Bounds[2] + Bounds[5]) * 0.5f);
+
+	return Selected;
 }
 
 void lcModel::UpdateSelection() const
@@ -799,4 +1125,259 @@ void lcModel::FindPiece(bool FindFirst, bool SearchForward)
 	}
 
 	ClearSelectionAndSetFocus(Focus, LC_PIECE_SECTION_POSITION);
+}
+
+void lcModel::BeginMouseTool()
+{
+	mMouseToolDistance = lcVector3(0.0f, 0.0f, 0.0f);
+}
+
+void lcModel::EndMouseTool(lcTool Tool, bool Accept)
+{
+	if (!Accept)
+	{
+		LoadCheckPoint(mUndoHistory[0]);
+		return;
+	}
+
+	switch (Tool)
+	{
+	case LC_TOOL_INSERT:
+	case LC_TOOL_LIGHT:
+		break;
+
+	case LC_TOOL_SPOTLIGHT:
+		SaveCheckpoint(tr("New SpotLight"));
+		break;
+
+	case LC_TOOL_CAMERA:
+		gMainWindow->UpdateCameraMenu();
+		SaveCheckpoint(tr("New Camera"));
+		break;
+
+	case LC_TOOL_SELECT:
+		break;
+
+	case LC_TOOL_MOVE:
+		SaveCheckpoint(tr("Move"));
+		break;
+
+	case LC_TOOL_ROTATE:
+		SaveCheckpoint(tr("Rotate"));
+		break;
+
+	case LC_TOOL_ERASER:
+	case LC_TOOL_PAINT:
+		break;
+
+	case LC_TOOL_ZOOM:
+		if (!gMainWindow->GetActiveView()->mCamera->IsSimple())
+			SaveCheckpoint(tr("Zoom"));
+		break;
+
+	case LC_TOOL_PAN:
+		if (!gMainWindow->GetActiveView()->mCamera->IsSimple())
+			SaveCheckpoint(tr("Pan"));
+		break;
+
+	case LC_TOOL_ROTATE_VIEW:
+		if (!gMainWindow->GetActiveView()->mCamera->IsSimple())
+			SaveCheckpoint(tr("Orbit"));
+		break;
+
+	case LC_TOOL_ROLL:
+		if (!gMainWindow->GetActiveView()->mCamera->IsSimple())
+			SaveCheckpoint(tr("Roll"));
+		break;
+
+	case LC_TOOL_ZOOM_REGION:
+		break;
+	}
+}
+
+void lcModel::InsertPieceToolClicked(const lcVector3& Position, const lcVector4& Rotation)
+{
+	lcPiece* Piece = new lcPiece(gMainWindow->mPreviewWidget->GetCurrentPiece());
+	Piece->Initialize(Position, Rotation, mCurrentStep);
+	Piece->SetColorIndex(gMainWindow->mColorIndex);
+	Piece->UpdatePosition(mCurrentStep);
+	Piece->CreateName(mPieces);
+	mPieces.Add(Piece);
+
+	ClearSelectionAndSetFocus(Piece, LC_PIECE_SECTION_POSITION);
+
+	SaveCheckpoint(tr("Insert"));
+}
+
+void lcModel::PointLightToolClicked(const lcVector3& Position)
+{
+	lcLight* Light = new lcLight(Position[0], Position[1], Position[2]);
+	Light->CreateName(mLights);
+	mLights.Add(Light);
+
+	ClearSelectionAndSetFocus(Light, LC_LIGHT_SECTION_POSITION);
+	SaveCheckpoint(tr("New Light"));
+}
+
+void lcModel::BeginSpotLightTool(const lcVector3& Position, const lcVector3& Target)
+{
+	lcLight* Light = new lcLight(Position[0], Position[1], Position[2], Target[0], Target[1], Target[2]);
+	mLights.Add(Light);
+
+	ClearSelectionAndSetFocus(Light, LC_LIGHT_SECTION_TARGET);
+}
+
+void lcModel::UpdateSpotLightTool(const lcVector3& Target)
+{
+	lcLight* Light = mLights[mLights.GetSize() - 1];
+
+	Light->Move(1, false, Target);
+	Light->UpdatePosition(1);
+
+	gMainWindow->UpdateFocusObject(Light);
+	gMainWindow->UpdateAllViews();
+}
+
+void lcModel::BeginCameraTool(const lcVector3& Position, const lcVector3& Target)
+{
+	lcCamera* Camera = new lcCamera(Position[0], Position[1], Position[2], Target[0], Target[1], Target[2]);
+	Camera->CreateName(mCameras);
+	mCameras.Add(Camera);
+
+	ClearSelectionAndSetFocus(Camera, LC_CAMERA_SECTION_TARGET);
+}
+
+void lcModel::UpdateCameraTool(const lcVector3& Target)
+{
+	lcCamera* Camera = mCameras[mCameras.GetSize() - 1];
+
+	Camera->Move(1, false, Target);
+	Camera->UpdatePosition(1);
+
+	gMainWindow->UpdateFocusObject(Camera);
+	gMainWindow->UpdateAllViews();
+}
+
+void lcModel::UpdateMoveTool(const lcVector3& Distance)
+{
+	lcVector3 PieceDistance = lcGetActiveProject()->LockVector(lcGetActiveProject()->SnapVector(Distance) - lcGetActiveProject()->SnapVector(mMouseToolDistance));
+	lcVector3 ObjectDistance = Distance - mMouseToolDistance;
+
+	MoveSelectedObjects(PieceDistance, ObjectDistance);
+	mMouseToolDistance = Distance;
+
+	gMainWindow->UpdateFocusObject(GetFocusObject());
+	gMainWindow->UpdateAllViews();
+}
+
+void lcModel::UpdateRotateTool(const lcVector3& Angles)
+{
+	lcVector3 Delta = lcGetActiveProject()->LockVector(lcGetActiveProject()->SnapRotation(Angles) - lcGetActiveProject()->SnapRotation(mMouseToolDistance));
+	RotateSelectedPieces(Delta);
+	mMouseToolDistance = Angles;
+
+	gMainWindow->UpdateFocusObject(GetFocusObject());
+	gMainWindow->UpdateAllViews();
+}
+
+void lcModel::EraserToolClicked(lcObject* Object)
+{
+	if (!Object)
+		return;
+
+	switch (Object->GetType())
+	{
+	case LC_OBJECT_PIECE:
+		mPieces.Remove((lcPiece*)Object);
+		RemoveEmptyGroups();
+		break;
+
+	case LC_OBJECT_CAMERA:
+		{
+			const lcArray<View*> Views = gMainWindow->GetViews();
+			for (int ViewIdx = 0; ViewIdx < Views.GetSize(); ViewIdx++)
+			{
+				View* View = Views[ViewIdx];
+				lcCamera* Camera = View->mCamera;
+
+				if (Camera == Object)
+					View->SetCamera(Camera, true);
+			}
+
+			mCameras.Remove((lcCamera*)Object);
+
+			gMainWindow->UpdateCameraMenu();
+		}
+		break;
+
+	case LC_OBJECT_LIGHT:
+		mLights.Remove((lcLight*)Object);
+		break;
+	}
+
+	delete Object;
+	gMainWindow->UpdateFocusObject(GetFocusObject());
+	UpdateSelection();
+	gMainWindow->UpdateAllViews();
+	SaveCheckpoint(tr("Deleting"));
+}
+
+void lcModel::PaintToolClicked(lcObject* Object)
+{
+	if (!Object || Object->GetType() != LC_OBJECT_PIECE)
+		return;
+
+	lcPiece* Piece = (lcPiece*)Object;
+
+	if (Piece->mColorIndex != gMainWindow->mColorIndex)
+	{
+		Piece->SetColorIndex(gMainWindow->mColorIndex);
+
+		SaveCheckpoint(tr("Painting"));
+		gMainWindow->UpdateFocusObject(GetFocusObject());
+		gMainWindow->UpdateAllViews();
+	}
+}
+
+void lcModel::UpdateZoomTool(lcCamera* Camera, float Mouse)
+{
+	Camera->Zoom(Mouse - mMouseToolDistance.x, mCurrentStep, gMainWindow->GetAddKeys());
+	mMouseToolDistance.x = Mouse;
+	gMainWindow->UpdateAllViews();
+}
+
+void lcModel::UpdatePanTool(lcCamera* Camera, float MouseX, float MouseY)
+{
+	Camera->Pan(MouseX - mMouseToolDistance.x, MouseY - mMouseToolDistance.y, mCurrentStep, gMainWindow->GetAddKeys());
+	mMouseToolDistance.x = MouseX;
+	mMouseToolDistance.y = MouseY;
+	gMainWindow->UpdateAllViews();
+}
+
+void lcModel::UpdateOrbitTool(lcCamera* Camera, float MouseX, float MouseY)
+{
+	lcVector3 Center;
+	GetSelectionCenter(Center);
+	Camera->Orbit(MouseX - mMouseToolDistance.x, MouseY - mMouseToolDistance.y, Center, mCurrentStep, gMainWindow->GetAddKeys());
+	mMouseToolDistance.x = MouseX;
+	mMouseToolDistance.y = MouseY;
+	gMainWindow->UpdateAllViews();
+}
+
+void lcModel::UpdateRollTool(lcCamera* Camera, float Mouse)
+{
+	Camera->Roll(Mouse - mMouseToolDistance.x, mCurrentStep, gMainWindow->GetAddKeys());
+	mMouseToolDistance.x = Mouse;
+	gMainWindow->UpdateAllViews();
+}
+
+void lcModel::ZoomRegionToolClicked(lcCamera* Camera, const lcVector3* Points, float RatioX, float RatioY)
+{
+	Camera->ZoomRegion(Points, RatioX, RatioY, mCurrentStep, gMainWindow->GetAddKeys());
+
+	gMainWindow->UpdateFocusObject(GetFocusObject());
+	gMainWindow->UpdateAllViews();
+
+	if (!Camera->IsSimple())
+		SaveCheckpoint(tr("Zoom"));
 }

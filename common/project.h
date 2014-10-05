@@ -117,10 +117,6 @@ public:
 
 	void GetPieceInsertPosition(View* view, lcVector3& Position, lcVector4& Orientation);
 
-	lcVector3 LockVector(const lcVector3& Vector) const;
-	lcVector3 SnapVector(const lcVector3& Delta) const;
-	lcVector3 SnapRotation(const lcVector3& Delta) const;
-
 	void HandleCommand(LC_COMMANDS id);
 
 protected:

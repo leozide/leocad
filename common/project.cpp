@@ -4602,7 +4602,7 @@ bool Project::AnyObjectsSelected(bool PiecesOnly) const
 void Project::GetPieceInsertPosition(lcPiece* OffsetPiece, lcVector3& Position, lcVector4& Rotation)
 {
 	lcVector3 Dist(0, 0, OffsetPiece->mPieceInfo->m_fDimensions[2] - m_pCurPiece->m_fDimensions[5]);
-	Dist = SnapVector(Dist);
+	Dist = SnapPosition(Dist);
 
 	Position = lcMul31(Dist, OffsetPiece->mModelWorld);
 	Rotation = OffsetPiece->mRotation;
@@ -4627,7 +4627,7 @@ void Project::GetPieceInsertPosition(View* view, lcVector3& Position, lcVector4&
 	lcVector3 Intersection;
 	if (lcLinePlaneIntersection(&Intersection, ClickPoints[0], ClickPoints[1], lcVector4(0, 0, 1, m_pCurPiece->m_fDimensions[5])))
 	{
-		Intersection = SnapVector(Intersection);
+		Intersection = SnapPosition(Intersection);
 		Position = Intersection;
 		Rotation = lcVector4(0, 0, 1, 0);
 		return;
@@ -4636,103 +4636,6 @@ void Project::GetPieceInsertPosition(View* view, lcVector3& Position, lcVector4&
 	// Couldn't find a good position, so just place the piece somewhere near the camera.
 	Position =  view->UnprojectPoint(lcVector3((float)view->mInputState.x, (float)view->mInputState.y, 0.9f));
 	Rotation = lcVector4(0, 0, 1, 0);
-}
-
-lcVector3 Project::LockVector(const lcVector3& Vector) const
-{
-	lcVector3 NewVector(Vector);
-
-	if (gMainWindow->GetLockX())
-		NewVector[0] = 0;
-
-	if (gMainWindow->GetLockY())
-		NewVector[1] = 0;
-
-	if (gMainWindow->GetLockZ())
-		NewVector[2] = 0;
-
-	return NewVector;
-}
-
-lcVector3 Project::SnapVector(const lcVector3& Distance) const
-{
-	lcVector3 NewDistance(Distance);
-
-	if (gMainWindow->GetMoveXYSnap())
-	{
-		float SnapXY = (float)gMainWindow->GetMoveXYSnap();
-		int i = (int)(NewDistance[0] / SnapXY);
-		float Leftover = NewDistance[0] - (SnapXY * i);
-
-		if (Leftover > SnapXY / 2)
-		{
-			Leftover -= SnapXY;
-			i++;
-		}
-		else if (Leftover < -SnapXY / 2)
-		{
-			Leftover += SnapXY;
-			i--;
-		}
-
-		NewDistance[0] = SnapXY * i;
-
-		i = (int)(NewDistance[1] / SnapXY);
-		Leftover = NewDistance[1] - (SnapXY * i);
-
-		if (Leftover > SnapXY / 2)
-		{
-			Leftover -= SnapXY;
-			i++;
-		}
-		else if (Leftover < -SnapXY / 2)
-		{
-			Leftover += SnapXY;
-			i--;
-		}
-
-		NewDistance[1] = SnapXY * i;
-	}
-
-	if (gMainWindow->GetMoveZSnap())
-	{
-		float SnapZ = (float)gMainWindow->GetMoveZSnap();
-		int i = (int)(NewDistance[2] / SnapZ);
-		float Leftover = NewDistance[2] - (SnapZ * i);
-
-		if (Leftover > SnapZ / 2)
-		{
-			Leftover -= SnapZ;
-			i++;
-		}
-		else if (Leftover < -SnapZ / 2)
-		{
-			Leftover += SnapZ;
-			i--;
-		}
-
-		NewDistance[2] = SnapZ * i;
-	}
-
-	return NewDistance;
-}
-
-lcVector3 Project::SnapRotation(const lcVector3& Angles) const
-{
-	int AngleSnap = gMainWindow->GetAngleSnap();
-	lcVector3 NewAngles(Angles);
-
-	if (AngleSnap)
-	{
-		int Snap[3];
-
-		for (int i = 0; i < 3; i++)
-			Snap[i] = (int)(Angles[i] / (float)AngleSnap);
-
-		NewAngles = lcVector3((float)(AngleSnap * Snap[0]), (float)(AngleSnap * Snap[1]), (float)(AngleSnap * Snap[2]));
-	}
-
-	return NewAngles;
 }
 
 void Project::TransformSelectedObjects(lcTransformType Type, const lcVector3& Transform)

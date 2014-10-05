@@ -636,8 +636,102 @@ void lcModel::RemoveEmptyGroups()
 	while (Removed);
 }
 
-#include "project.h"
-#include "lc_application.h"
+lcVector3 lcModel::LockVector(const lcVector3& Vector) const
+{
+	lcVector3 NewVector(Vector);
+
+	if (gMainWindow->GetLockX())
+		NewVector[0] = 0;
+
+	if (gMainWindow->GetLockY())
+		NewVector[1] = 0;
+
+	if (gMainWindow->GetLockZ())
+		NewVector[2] = 0;
+
+	return NewVector;
+}
+
+lcVector3 lcModel::SnapPosition(const lcVector3& Distance) const
+{
+	lcVector3 NewDistance(Distance);
+
+	if (gMainWindow->GetMoveXYSnap())
+	{
+		float SnapXY = (float)gMainWindow->GetMoveXYSnap();
+		int i = (int)(NewDistance[0] / SnapXY);
+		float Leftover = NewDistance[0] - (SnapXY * i);
+
+		if (Leftover > SnapXY / 2)
+		{
+			Leftover -= SnapXY;
+			i++;
+		}
+		else if (Leftover < -SnapXY / 2)
+		{
+			Leftover += SnapXY;
+			i--;
+		}
+
+		NewDistance[0] = SnapXY * i;
+
+		i = (int)(NewDistance[1] / SnapXY);
+		Leftover = NewDistance[1] - (SnapXY * i);
+
+		if (Leftover > SnapXY / 2)
+		{
+			Leftover -= SnapXY;
+			i++;
+		}
+		else if (Leftover < -SnapXY / 2)
+		{
+			Leftover += SnapXY;
+			i--;
+		}
+
+		NewDistance[1] = SnapXY * i;
+	}
+
+	if (gMainWindow->GetMoveZSnap())
+	{
+		float SnapZ = (float)gMainWindow->GetMoveZSnap();
+		int i = (int)(NewDistance[2] / SnapZ);
+		float Leftover = NewDistance[2] - (SnapZ * i);
+
+		if (Leftover > SnapZ / 2)
+		{
+			Leftover -= SnapZ;
+			i++;
+		}
+		else if (Leftover < -SnapZ / 2)
+		{
+			Leftover += SnapZ;
+			i--;
+		}
+
+		NewDistance[2] = SnapZ * i;
+	}
+
+	return NewDistance;
+}
+
+lcVector3 lcModel::SnapRotation(const lcVector3& Angles) const
+{
+	int AngleSnap = gMainWindow->GetAngleSnap();
+	lcVector3 NewAngles(Angles);
+
+	if (AngleSnap)
+	{
+		int Snap[3];
+
+		for (int i = 0; i < 3; i++)
+			Snap[i] = (int)(Angles[i] / (float)AngleSnap);
+
+		NewAngles = lcVector3((float)(AngleSnap * Snap[0]), (float)(AngleSnap * Snap[1]), (float)(AngleSnap * Snap[2]));
+	}
+
+	return NewAngles;
+}
 
 lcMatrix44 lcModel::GetRelativeRotation() const
 {
@@ -742,7 +836,6 @@ bool lcModel::RotateSelectedPieces(const lcVector3& Angles)
 	else
 		Center = lcVector3((Bounds[0] + Bounds[3]) / 2.0f, (Bounds[1] + Bounds[4]) / 2.0f, (Bounds[2] + Bounds[5]) / 2.0f);
 
-	// Create the rotation matrix.
 	lcVector4 RotationQuaternion(0, 0, 0, 1);
 	lcVector4 WorldToFocusQuaternion, FocusToWorldQuaternion;
 
@@ -1260,7 +1353,7 @@ void lcModel::UpdateCameraTool(const lcVector3& Target)
 
 void lcModel::UpdateMoveTool(const lcVector3& Distance)
 {
-	lcVector3 PieceDistance = lcGetActiveProject()->LockVector(lcGetActiveProject()->SnapVector(Distance) - lcGetActiveProject()->SnapVector(mMouseToolDistance));
+	lcVector3 PieceDistance = LockVector(SnapPosition(Distance) - SnapPosition(mMouseToolDistance));
 	lcVector3 ObjectDistance = Distance - mMouseToolDistance;
 
 	MoveSelectedObjects(PieceDistance, ObjectDistance);
@@ -1272,7 +1365,7 @@ void lcModel::UpdateMoveTool(const lcVector3& Distance)
 
 void lcModel::UpdateRotateTool(const lcVector3& Angles)
 {
-	lcVector3 Delta = lcGetActiveProject()->LockVector(lcGetActiveProject()->SnapRotation(Angles) - lcGetActiveProject()->SnapRotation(mMouseToolDistance));
+	lcVector3 Delta = LockVector(SnapRotation(Angles) - SnapRotation(mMouseToolDistance));
 	RotateSelectedPieces(Delta);
 	mMouseToolDistance = Angles;
 

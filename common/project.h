@@ -8,21 +8,6 @@
 #include "lc_commands.h"
 #include "str.h"
 
-#define LC_DRAW_SNAP_A         0x0004 // Snap Angle
-#define LC_DRAW_SNAP_X         0x0008 // Snap X
-#define LC_DRAW_SNAP_Y         0x0010 // Snap Y
-#define LC_DRAW_SNAP_Z         0x0020 // Snap Z
-#define LC_DRAW_SNAP_XYZ       (LC_DRAW_SNAP_X | LC_DRAW_SNAP_Y | LC_DRAW_SNAP_Z)
-#define LC_DRAW_GLOBAL_SNAP    0x0040 // Don't allow relative snap.
-#define LC_DRAW_LOCK_X         0x0100 // Lock X
-#define LC_DRAW_LOCK_Y         0x0200 // Lock Y
-#define LC_DRAW_LOCK_Z         0x0400 // Lock Z
-#define LC_DRAW_LOCK_XYZ       (LC_DRAW_LOCK_X | LC_DRAW_LOCK_Y | LC_DRAW_LOCK_Z)
-#define LC_DRAW_MOVEAXIS       0x0800 // Move on fixed axis
-//#define LC_DRAW_PREVIEW        0x1000 // Show piece position
-//#define LC_DRAW_CM_UNITS       0x2000 // Use centimeters
-//#define LC_DRAW_3DMOUSE        0x4000 // Mouse moves in all directions
-
 #define LC_SCENE_FOG			0x004	// Enable fog
 #define LC_SCENE_BG				0x010	// Draw bg image
 #define LC_SCENE_BG_TILE		0x040	// Tile bg image
@@ -91,29 +76,6 @@ public:
 	Project();
 	~Project();
 
-	const lcVector3& GetMouseToolDistance() const
-	{
-		return mMouseToolDistance;
-	}
-
-	void BeginMouseTool();
-	void EndMouseTool(lcTool Tool, bool Accept);
-	void InsertPieceToolClicked(const lcVector3& Position, const lcVector4& Rotation);
-	void PointLightToolClicked(const lcVector3& Position);
-	void BeginSpotLightTool(const lcVector3& Position, const lcVector3& Target);
-	void UpdateSpotLightTool(const lcVector3& Target);
-	void BeginCameraTool(const lcVector3& Position, const lcVector3& Target);
-	void UpdateCameraTool(const lcVector3& Target);
-	void UpdateMoveTool(const lcVector3& Distance);
-	void UpdateRotateTool(const lcVector3& Angles);
-	void EraserToolClicked(lcObject* Object);
-	void PaintToolClicked(lcObject* Object);
-	void UpdateZoomTool(lcCamera* Camera, float Mouse);
-	void UpdatePanTool(lcCamera* Camera, float MouseX, float MouseY);
-	void UpdateOrbitTool(lcCamera* Camera, float MouseX, float MouseY);
-	void UpdateRollTool(lcCamera* Camera, float Mouse);
-	void ZoomRegionToolClicked(lcCamera* Camera, const lcVector3* Points, float RatioX, float RatioY);
-
 public:
 	void SetCurrentStep(lcStep Step)
 	{
@@ -125,33 +87,23 @@ public:
 		{ m_pCurPiece = pInfo; }
 	float* GetBackgroundColor() // todo: remove
 		{ return mProperties.mBackgroundSolidColor; }
-	unsigned long GetSnap() const
-		{ return m_nSnap; }
-	void GetSnapIndex(int* SnapXY, int* SnapZ, int* SnapAngle) const;
-	void GetSnapText(char* SnapXY, char* SnapZ, char* SnapAngle) const;
-	void GetSnapDistance(float* SnapXY, float* SnapZ) const;
 
 	int GetGroupIndex(lcGroup* Group) const
 	{
 		return mGroups.FindIndex(Group);
 	}
 
-	lcMatrix44 GetRelativeRotation() const;
-
 	void UpdateInterface();
 	void SetPathName (const char* lpszPathName, bool bAddToMRU);
 	void SetTitle (const char* lpszTitle);
 
 public:
-	void DeleteContents(bool bUndo);
-	void LoadDefaults(bool cameras);
-	void RenderInitialize();
+	void LoadDefaults();
 
 	bool GetPiecesBoundingBox(View* view, float BoundingBox[6]);
 	void GetPiecesUsed(lcArray<lcPiecesUsedEntry>& PiecesUsed) const;
 	void CreateImages(Image* images, int width, int height, lcStep from, lcStep to, bool hilite);
 	void Render(View* view, bool bToMemory);
-	bool GetSelectionCenter(lcVector3& Center) const;
 	lcVector3 GetFocusOrSelectionCenter() const;
 	bool GetFocusPosition(lcVector3& Position) const;
 	bool AnyObjectsSelected(bool PiecesOnly) const;
@@ -165,27 +117,20 @@ public:
 
 	void GetPieceInsertPosition(View* view, lcVector3& Position, lcVector4& Orientation);
 
+	lcVector3 LockVector(const lcVector3& Vector) const;
+	lcVector3 SnapVector(const lcVector3& Delta) const;
+	lcVector3 SnapRotation(const lcVector3& Delta) const;
+
+	void HandleCommand(LC_COMMANDS id);
+
 protected:
 	void CheckPoint(const char* Description);
-	void LoadCheckPoint(lcModelHistoryEntry* CheckPoint);
 
 	bool RemoveSelectedObjects();
 	void GetPieceInsertPosition(lcPiece* OffsetPiece, lcVector3& Position, lcVector4& Rotation);
 
 	static int InstanceOfName(const String& existingString, const String& candidateString, String& baseNameOut );
 
-	// Movement.
-	bool MoveSelectedObjects(lcVector3& Move, lcVector3& Remainder, bool Snap, bool Lock);
-	bool RotateSelectedObjects(lcVector3& Delta, lcVector3& Remainder, bool Snap, bool Lock);
-	void SnapVector(lcVector3& Delta) const
-	{
-		lcVector3 Dummy;
-		SnapVector(Delta, Dummy);
-	}
-	void SnapVector(lcVector3& Delta, lcVector3& Leftover) const;
-	void SnapRotationVector(lcVector3& Delta, lcVector3& Leftover) const;
-
-	// Rendering functions.
 	void RenderBackground(View* view);
 	void RenderScenePieces(View* view, bool DrawInterface);
 	void RenderSceneObjects(View* view);
@@ -195,24 +140,10 @@ protected:
 	void ExportPOVRay(lcFile& File);
 	void ZoomExtents(int FirstView, int LastView);
 
-	void RemoveEmptyGroups();
-
-public:
-	void HandleCommand(LC_COMMANDS id);
-
-	lcuint32 m_nSnap;
-
 protected:
 	PieceInfo* m_pCurPiece;
+//	lcuint16 m_nMoveSnap;
 
-	lcuint16 m_nMoveSnap;
-	lcuint16 m_nAngleSnap;
-	char m_strFooter[256];
-	char m_strHeader[256];
-
-	lcTexture* m_pBackground;
-
-protected:
 	bool DoSave(const char* FileName);
 	bool FileLoad(lcFile* file, bool bUndo, bool bMerge);
 	void FileReadLDraw(lcFile* file, const lcMatrix44& CurrentTransform, int* nOk, int DefColor, int* nStep, lcArray<LC_FILEENTRY*>& FileArray);

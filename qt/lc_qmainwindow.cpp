@@ -115,9 +115,6 @@ void lcQMainWindow::createActions()
 	actions[LC_EDIT_CUT]->setIcon(QIcon(":/resources/edit_cut.png"));
 	actions[LC_EDIT_COPY]->setIcon(QIcon(":/resources/edit_copy.png"));
 	actions[LC_EDIT_PASTE]->setIcon(QIcon(":/resources/edit_paste.png"));
-	actions[LC_EDIT_LOCK_TOGGLE]->setIcon(QIcon(":/resources/edit_lock.png"));
-	actions[LC_EDIT_SNAP_TOGGLE]->setIcon(QIcon(":/resources/edit_snap_move.png"));
-	actions[LC_EDIT_SNAP_ANGLE]->setIcon(QIcon(":/resources/edit_snap_angle.png"));
 	actions[LC_EDIT_ACTION_INSERT]->setIcon(QIcon(":/resources/action_insert.png"));
 	actions[LC_EDIT_ACTION_LIGHT]->setIcon(QIcon(":/resources/action_light.png"));
 	actions[LC_EDIT_ACTION_SPOTLIGHT]->setIcon(QIcon(":/resources/action_spotlight.png"));
@@ -151,9 +148,6 @@ void lcQMainWindow::createActions()
 	actions[LC_EDIT_LOCK_Y]->setCheckable(true);
 	actions[LC_EDIT_LOCK_Z]->setCheckable(true);
 	actions[LC_EDIT_SNAP_RELATIVE]->setCheckable(true);
-	actions[LC_EDIT_SNAP_X]->setCheckable(true);
-	actions[LC_EDIT_SNAP_Y]->setCheckable(true);
-	actions[LC_EDIT_SNAP_Z]->setCheckable(true);
 	actions[LC_VIEW_CAMERA_NONE]->setCheckable(true);
 	actions[LC_VIEW_TIME_ADD_KEYS]->setCheckable(true);
 
@@ -212,37 +206,6 @@ void lcQMainWindow::createActions()
 
 void lcQMainWindow::createMenus()
 {
-	QMenu* lockMenu = new QMenu(tr("Lock Menu"));
-	lockMenu->addAction(actions[LC_EDIT_LOCK_X]);
-	lockMenu->addAction(actions[LC_EDIT_LOCK_Y]);
-	lockMenu->addAction(actions[LC_EDIT_LOCK_Z]);
-	lockMenu->addAction(actions[LC_EDIT_LOCK_NONE]);
-	actions[LC_EDIT_LOCK_TOGGLE]->setMenu(lockMenu);
-
-	QMenu* snapXYMenu = new QMenu(tr("Snap XY"));
-	for (int actionIdx = LC_EDIT_SNAP_MOVE_XY0; actionIdx <= LC_EDIT_SNAP_MOVE_XY9; actionIdx++)
-		snapXYMenu->addAction(actions[actionIdx]);
-
-	QMenu* snapZMenu = new QMenu(tr("Snap Z"));
-	for (int actionIdx = LC_EDIT_SNAP_MOVE_Z0; actionIdx <= LC_EDIT_SNAP_MOVE_Z9; actionIdx++)
-		snapZMenu->addAction(actions[actionIdx]);
-
-	QMenu* snapMenu = new QMenu(tr("Snap Menu"));
-	snapMenu->addMenu(snapXYMenu);
-	snapMenu->addMenu(snapZMenu);
-	snapMenu->addSeparator();
-	snapMenu->addAction(actions[LC_EDIT_SNAP_X]);
-	snapMenu->addAction(actions[LC_EDIT_SNAP_Y]);
-	snapMenu->addAction(actions[LC_EDIT_SNAP_Z]);
-	snapMenu->addAction(actions[LC_EDIT_SNAP_NONE]);
-	snapMenu->addAction(actions[LC_EDIT_SNAP_ALL]);
-	actions[LC_EDIT_SNAP_TOGGLE]->setMenu(snapMenu);
-
-	QMenu* snapAngleMenu = new QMenu(tr("Snap Angle Menu"));
-	for (int actionIdx = LC_EDIT_SNAP_ANGLE0; actionIdx <= LC_EDIT_SNAP_ANGLE9; actionIdx++)
-		snapAngleMenu->addAction(actions[actionIdx]);
-	actions[LC_EDIT_SNAP_ANGLE]->setMenu(snapAngleMenu);
-
 	QMenu* transformMenu = new QMenu(tr("Transform"));
 	transformMenu->addAction(actions[LC_EDIT_TRANSFORM_RELATIVE_TRANSLATION]);
 	transformMenu->addAction(actions[LC_EDIT_TRANSFORM_ABSOLUTE_TRANSLATION]);
@@ -376,6 +339,43 @@ void lcQMainWindow::createMenus()
 
 void lcQMainWindow::createToolBars()
 {
+	QMenu* lockMenu = new QMenu(tr("Lock Menu"));
+	lockMenu->addAction(actions[LC_EDIT_LOCK_X]);
+	lockMenu->addAction(actions[LC_EDIT_LOCK_Y]);
+	lockMenu->addAction(actions[LC_EDIT_LOCK_Z]);
+	lockMenu->addAction(actions[LC_EDIT_LOCK_NONE]);
+
+	QAction* lockAction = new QAction(tr("Lock Menu"), this);
+	lockAction->setStatusTip(tr("Toggle mouse movement on specific axes"));
+	lockAction->setIcon(QIcon(":/resources/edit_lock.png"));
+	lockAction->setMenu(lockMenu);
+
+	QMenu* snapXYMenu = new QMenu(tr("Snap XY"));
+	for (int actionIdx = LC_EDIT_SNAP_MOVE_XY0; actionIdx <= LC_EDIT_SNAP_MOVE_XY9; actionIdx++)
+		snapXYMenu->addAction(actions[actionIdx]);
+
+	QMenu* snapZMenu = new QMenu(tr("Snap Z"));
+	for (int actionIdx = LC_EDIT_SNAP_MOVE_Z0; actionIdx <= LC_EDIT_SNAP_MOVE_Z9; actionIdx++)
+		snapZMenu->addAction(actions[actionIdx]);
+
+	QMenu* snapMenu = new QMenu(tr("Snap Menu"));
+	snapMenu->addMenu(snapXYMenu);
+	snapMenu->addMenu(snapZMenu);
+
+	QAction* moveAction = new QAction(tr("Snap Move"), this);
+	moveAction->setStatusTip(tr("Snap translations to fixed intervals"));
+	moveAction->setIcon(QIcon(":/resources/edit_snap_move.png"));
+	moveAction->setMenu(snapMenu);
+
+	QMenu* snapAngleMenu = new QMenu(tr("Snap Angle Menu"));
+	for (int actionIdx = LC_EDIT_SNAP_ANGLE0; actionIdx <= LC_EDIT_SNAP_ANGLE9; actionIdx++)
+		snapAngleMenu->addAction(actions[actionIdx]);
+
+	QAction* angleAction = new QAction(tr("Snap Rotate"), this);
+	angleAction->setStatusTip(tr("Snap rotations to fixed intervals"));
+	angleAction->setIcon(QIcon(":/resources/edit_snap_angle.png"));
+	angleAction->setMenu(snapMenu);
+
 	standardToolBar = addToolBar(tr("Standard"));
 	standardToolBar->setObjectName("StandardToolbar");
 	standardToolBar->addAction(actions[LC_FILE_NEW]);
@@ -390,15 +390,15 @@ void lcQMainWindow::createToolBars()
 	standardToolBar->addAction(actions[LC_EDIT_COPY]);
 	standardToolBar->addAction(actions[LC_EDIT_PASTE]);
 	standardToolBar->addSeparator();
-//	standardToolBar->addAction(actions[LC_EDIT_SNAP_RELATIVE]);
-	standardToolBar->addAction(actions[LC_EDIT_LOCK_TOGGLE]);
-	standardToolBar->addAction(actions[LC_EDIT_SNAP_TOGGLE]);
-	standardToolBar->addAction(actions[LC_EDIT_SNAP_ANGLE]);
+//	standardToolBar->addAction(actions[LC_EDIT_SNAP_RELATIVE]); todo
+	standardToolBar->addAction(lockAction);
+	standardToolBar->addAction(moveAction);
+	standardToolBar->addAction(angleAction);
 	standardToolBar->addSeparator();
 	standardToolBar->addAction(actions[LC_EDIT_TRANSFORM]);
-	((QToolButton*)standardToolBar->widgetForAction(actions[LC_EDIT_LOCK_TOGGLE]))->setPopupMode(QToolButton::InstantPopup);
-	((QToolButton*)standardToolBar->widgetForAction(actions[LC_EDIT_SNAP_TOGGLE]))->setPopupMode(QToolButton::InstantPopup);
-	((QToolButton*)standardToolBar->widgetForAction(actions[LC_EDIT_SNAP_ANGLE]))->setPopupMode(QToolButton::InstantPopup);
+	((QToolButton*)standardToolBar->widgetForAction(lockAction))->setPopupMode(QToolButton::InstantPopup);
+	((QToolButton*)standardToolBar->widgetForAction(moveAction))->setPopupMode(QToolButton::InstantPopup);
+	((QToolButton*)standardToolBar->widgetForAction(angleAction))->setPopupMode(QToolButton::InstantPopup);
 	((QToolButton*)standardToolBar->widgetForAction(actions[LC_EDIT_TRANSFORM]))->setPopupMode(QToolButton::InstantPopup);
 
 	QHBoxLayout *transformLayout = new QHBoxLayout;
@@ -1155,32 +1155,23 @@ void lcQMainWindow::setAddKeys(bool addKeys)
 	actions[LC_VIEW_TIME_ADD_KEYS]->setChecked(addKeys);
 }
 
-void lcQMainWindow::updateLockSnap(lcuint32 snap)
+void lcQMainWindow::updateLockSnap()
 {
-	actions[LC_EDIT_SNAP_RELATIVE]->setChecked((snap & LC_DRAW_GLOBAL_SNAP) == 0);
-	actions[LC_EDIT_SNAP_X]->setChecked((snap & LC_DRAW_SNAP_X) != 0);
-	actions[LC_EDIT_SNAP_Y]->setChecked((snap & LC_DRAW_SNAP_Y) != 0);
-	actions[LC_EDIT_SNAP_Z]->setChecked((snap & LC_DRAW_SNAP_Z) != 0);
+	const lcPreferences& Preferences = lcGetPreferences();
 
-	actions[LC_EDIT_LOCK_X]->setChecked((snap & LC_DRAW_LOCK_X) != 0);
-	actions[LC_EDIT_LOCK_Y]->setChecked((snap & LC_DRAW_LOCK_Y) != 0);
-	actions[LC_EDIT_LOCK_Z]->setChecked((snap & LC_DRAW_LOCK_Z) != 0);
+	actions[LC_EDIT_SNAP_RELATIVE]->setChecked(!Preferences.mForceGlobalTransforms);
+	actions[LC_EDIT_LOCK_X]->setChecked(gMainWindow->GetLockX());
+	actions[LC_EDIT_LOCK_Y]->setChecked(gMainWindow->GetLockY());
+	actions[LC_EDIT_LOCK_Z]->setChecked(gMainWindow->GetLockZ());
 }
 
 void lcQMainWindow::updateSnap()
 {
-	char xy[32], z[32], angle[32];
-	int moveXYSnapIndex, moveZSnapIndex, angleSnapIndex;
-	Project *project = lcGetActiveProject();
+	actions[LC_EDIT_SNAP_MOVE_XY0 + gMainWindow->GetMoveXYSnapIndex()]->setChecked(true);
+	actions[LC_EDIT_SNAP_MOVE_Z0 + gMainWindow->GetMoveZSnapIndex()]->setChecked(true);
+	actions[LC_EDIT_SNAP_ANGLE0 + gMainWindow->GetAngleSnapIndex()]->setChecked(true);
 
-	project->GetSnapText(xy, z, angle);
-	project->GetSnapIndex(&moveXYSnapIndex, &moveZSnapIndex, &angleSnapIndex);
-
-	actions[LC_EDIT_SNAP_MOVE_XY0 + moveXYSnapIndex]->setChecked(true);
-	actions[LC_EDIT_SNAP_MOVE_Z0 + moveZSnapIndex]->setChecked(true);
-	actions[LC_EDIT_SNAP_ANGLE0 + angleSnapIndex]->setChecked(true);
-
-	statusSnapLabel->setText(QString(tr(" M: %1 %2 R: %3 ")).arg(xy, z, angle));
+	statusSnapLabel->setText(QString(tr(" M: %1 %2 R: %3 ")).arg(gMainWindow->GetMoveXYSnapText(), gMainWindow->GetMoveZSnapText(), QString::number(gMainWindow->GetAngleSnap())));
 }
 
 void lcQMainWindow::updateUndoRedo(const QString& UndoText, const QString& RedoText)

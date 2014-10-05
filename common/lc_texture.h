@@ -64,6 +64,9 @@ protected:
 	int mRefCount;
 };
 
+lcTexture* lcLoadTexture(const QString& FileName, int Flags);
+void lcReleaseTexture(lcTexture* Texture);
+
 extern lcTexture* gGridTexture;
 
 #endif // _LC_TEXTURE_H_

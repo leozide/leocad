@@ -30,14 +30,10 @@
 
 Project::Project()
 {
-	m_pBackground = new lcTexture();
 }
 
 Project::~Project()
 {
-	DeleteContents(false);
-
-	delete m_pBackground;
 }
 
 void Project::UpdateInterface()
@@ -51,7 +47,7 @@ void Project::UpdateInterface()
 
 	gMainWindow->UpdateFocusObject(GetFocusObject());
 	gMainWindow->SetTransformType(gMainWindow->GetTransformType());
-	gMainWindow->UpdateLockSnap(m_nSnap);
+	gMainWindow->UpdateLockSnap();
 	gMainWindow->UpdateSnap();
 	gMainWindow->UpdateCameraMenu();
 	gMainWindow->UpdatePerspective();
@@ -67,76 +63,26 @@ void Project::SetTitle(const char* Title)
 	gMainWindow->UpdateTitle(m_strTitle, IsModified());
 }
 
-void Project::DeleteContents(bool bUndo)
+void Project::LoadDefaults()
 {
 	mProperties.LoadDefaults();
 
-	if (!bUndo)
-	{
-		mUndoHistory.DeleteAll();
-		mRedoHistory.DeleteAll();
-
-		m_pBackground->Unload();
-	}
-
-	mPieces.DeleteAll();
-
-	if (!bUndo)
-	{
-		const lcArray<View*> Views = gMainWindow->GetViews();
-		for (int ViewIdx = 0; ViewIdx < Views.GetSize(); ViewIdx++)
-		{
-			View* view = Views[ViewIdx];
-
-			if (!view->mCamera->IsSimple())
-				view->SetDefaultCamera();
-		}
-	}
-
-	mCameras.DeleteAll();
-	mLights.DeleteAll();
-	mGroups.DeleteAll();
-}
-
-// Only call after DeleteContents()
-void Project::LoadDefaults(bool cameras)
-{
-	int i;
-
-	mProperties.LoadDefaults();
-
-	// Default values
 	gMainWindow->SetColorIndex(lcGetColorIndex(4));
 	gMainWindow->SetTool(LC_TOOL_SELECT);
 	gMainWindow->SetAddKeys(false);
 	gMainWindow->UpdateUndoRedo(NULL, NULL);
-	m_nAngleSnap = (unsigned short)lcGetProfileInt(LC_PROFILE_ANGLE_SNAP);
-	m_nSnap = lcGetProfileInt(LC_PROFILE_SNAP);
-	gMainWindow->UpdateLockSnap(m_nSnap);
-	m_nMoveSnap = 0x0304;
+	gMainWindow->UpdateLockSnap();
 	gMainWindow->UpdateSnap();
 	mCurrentStep = 1;
 	gMainWindow->UpdateCurrentStep();
-	strcpy(m_strHeader, "");
-	strcpy(m_strFooter, "Page &P");
 
-	const lcArray<View*> Views = gMainWindow->GetViews();
-	for (i = 0; i < Views.GetSize (); i++)
-	{
-		Views[i]->MakeCurrent();
-		RenderInitialize();
-	}
+	const lcArray<View*>& Views = gMainWindow->GetViews();
+	for (int i = 0; i < Views.GetSize(); i++)
+		if (!Views[i]->mCamera->IsSimple())
+			Views[i]->SetDefaultCamera();
 
-	if (cameras)
-	{
-		for (i = 0; i < Views.GetSize(); i++)
-			if (!Views[i]->mCamera->IsSimple())
-				Views[i]->SetDefaultCamera();
+	gMainWindow->UpdateCameraMenu();
 
-		gMainWindow->UpdateCameraMenu();
-	}
-
-	SystemPieceComboAdd(NULL);
 	UpdateSelection();
 	gMainWindow->UpdateFocusObject(NULL);
 }
@@ -187,16 +133,9 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 		file->Seek(32, SEEK_CUR);
 	else
 	{
-		lcuint32 u;
-		float f;
-		file->ReadS32(&i, 1); m_nAngleSnap = i;
-		file->ReadU32(&u, 1); //m_nSnap
-		file->ReadFloats(&f, 1); //m_fLineWidth
-		file->ReadU32(&u, 1); //m_nDetail
-		file->ReadS32(&i, 1); //m_nCurGroup = i;
-		file->ReadS32(&i, 1); //m_nCurColor = i;
-		file->ReadS32(&i, 1); //action = i;
-		file->ReadS32(&i, 1); mCurrentStep = i;
+		file->Seek(28, SEEK_CUR);
+		file->ReadS32(&i, 1);
+		mCurrentStep = i;
 	}
 
 	if (fv > 0.8f)
@@ -227,8 +166,6 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 				pPiece->CreateName(mPieces);
 
 			mPieces.Add(pPiece);
-			if (!bUndo)
-				SystemPieceComboAdd(pPiece->mPieceInfo->m_strDescription);
 		}
 		else
 		{
@@ -257,7 +194,6 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 			mPieces.Add(pPiece);
 
 //			pPiece->SetGroup((lcGroup*)group);
-			SystemPieceComboAdd(pInfo->m_strDescription);
 		}
 	}
 
@@ -453,15 +389,15 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 				mProperties.mBackgroundImage = Background;
 			}
 			else
-				file->Seek (sh, SEEK_CUR);
+				file->Seek(sh, SEEK_CUR);
 		}
 
 		if (fv >= 0.8f)
 		{
 			file->ReadBuffer(&ch, 1);
-			file->ReadBuffer(m_strHeader, ch);
+			file->Seek(ch, SEEK_CUR);
 			file->ReadBuffer(&ch, 1);
-			file->ReadBuffer(m_strFooter, ch);
+			file->Seek(ch, SEEK_CUR);
 		}
 
 		if (fv > 0.9f)
@@ -490,13 +426,7 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 		}
 	}
 
-	const lcArray<View*> Views = gMainWindow->GetViews();
-	for (i = 0; i < Views.GetSize (); i++)
-	{
-		Views[i]->MakeCurrent();
-		RenderInitialize();
-	}
-
+	UpdateBackgroundTexture();
 	CalculateStep();
 
 	if (!bUndo)
@@ -507,6 +437,7 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 
 	if (!bMerge)
 	{
+		const lcArray<View*>& Views = gMainWindow->GetViews();
 		for (int ViewIdx = 0; ViewIdx < Views.GetSize(); ViewIdx++)
 		{
 			View* view = Views[ViewIdx];
@@ -519,7 +450,7 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 			ZoomExtents(0, Views.GetSize());
 	}
 
-	gMainWindow->UpdateLockSnap(m_nSnap);
+	gMainWindow->UpdateLockSnap();
 	gMainWindow->UpdateSnap();
 	gMainWindow->UpdateCameraMenu();
 	UpdateSelection();
@@ -688,7 +619,6 @@ void Project::FileReadLDraw(lcFile* file, const lcMatrix44& CurrentTransform, in
 				pPiece->SetColorCode(ColorCode);
 				pPiece->CreateName(mPieces);
 				mPieces.Add(pPiece);
-				SystemPieceComboAdd(pInfo->m_strDescription);
 				(*nOk)++;
 			}
 		}
@@ -746,7 +676,6 @@ void Project::FileReadLDraw(lcFile* file, const lcMatrix44& CurrentTransform, in
 			pPiece->SetColorCode(ColorCode);
 			pPiece->CreateName(mPieces);
 			mPieces.Add(pPiece);
-			SystemPieceComboAdd(Info->m_strDescription);
 			(*nOk)++;
 		}
 	}
@@ -866,9 +795,12 @@ bool Project::SaveModified()
 
 bool Project::OnNewDocument()
 {
-	DeleteContents(false);
-	memset(m_strPathName, 0, sizeof(m_strPathName)); // no path name yet
-	LoadDefaults(true);
+	memset(m_strPathName, 0, sizeof(m_strPathName));
+
+	DeleteModel();
+	DeleteHistory();
+	LoadDefaults();
+
 	CheckPoint("");
 	mSavedHistory = mUndoHistory[0];
 	SetTitle("Untitled");
@@ -919,9 +851,9 @@ bool Project::OnOpenDocument(const char* lpszPathName)
   else if (strcmp(ext, "mpd") == 0)
     mpdfile = true;
 
-  // Delete the current project.
-  DeleteContents(false);
-  LoadDefaults(datfile || mpdfile);
+	DeleteModel();
+	DeleteHistory();
+	LoadDefaults();
 
   if (file.GetLength() != 0)
   {
@@ -966,7 +898,6 @@ bool Project::OnOpenDocument(const char* lpszPathName)
 	  gMainWindow->UpdateCurrentStep();
 	  gMainWindow->UpdateFocusObject(GetFocusObject());
       UpdateSelection();
-      CalculateStep();
 
 	  ZoomExtents(0, gMainWindow->GetViews().GetSize());
       gMainWindow->UpdateAllViews();
@@ -1021,40 +952,6 @@ void Project::SetPathName(const char* PathName, bool bAddToMRU)
 void Project::CheckPoint(const char* Description)
 {
 	SaveCheckpoint(Description);
-}
-
-void Project::LoadCheckPoint(lcModelHistoryEntry* CheckPoint)
-{
-	DeleteContents(true);
-
-	QTextStream Stream(CheckPoint->File, QIODevice::ReadOnly);
-	LoadLDraw(Stream);
-
-	const lcArray<View*> Views = gMainWindow->GetViews();
-	for (int i = 0; i < Views.GetSize (); i++)
-	{
-		Views[i]->MakeCurrent();
-		RenderInitialize();
-	}
-
-	CalculateStep();
-
-	gMainWindow->UpdateFocusObject(GetFocusObject());
-
-	for (int ViewIdx = 0; ViewIdx < Views.GetSize(); ViewIdx++)
-	{
-		View* view = Views[ViewIdx];
-
-		if (!view->mCamera->IsSimple())
-			view->SetDefaultCamera();
-	}
-
-	gMainWindow->UpdateLockSnap(m_nSnap);
-	gMainWindow->UpdateSnap();
-	gMainWindow->UpdateCameraMenu();
-	UpdateSelection();
-	gMainWindow->UpdateCurrentStep();
-	gMainWindow->UpdateAllViews();
 }
 
 // Only this function should be called.
@@ -1127,14 +1024,14 @@ void Project::RenderBackground(View* View)
 		glEnable(GL_TEXTURE_2D);
 
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-		glBindTexture(GL_TEXTURE_2D, m_pBackground->mTexture);
+		glBindTexture(GL_TEXTURE_2D, mBackgroundTexture->mTexture);
 
 		float TileWidth = 1.0f, TileHeight = 1.0f;
 
 		if (mProperties.mBackgroundImageTile)
 		{
-			TileWidth = ViewWidth / m_pBackground->mWidth;
-			TileHeight = ViewHeight / m_pBackground->mHeight;
+			TileWidth = ViewWidth / mBackgroundTexture->mWidth;
+			TileHeight = ViewHeight / mBackgroundTexture->mHeight;
 		}
 
 		float Verts[] =
@@ -1363,16 +1260,6 @@ void Project::RenderSceneObjects(View* view)
 			mLights[LightIdx]->Render(view);
 
 	Context->SetLineWidth(Preferences.mLineWidth); // context remove
-}
-
-void Project::RenderInitialize()
-{
-	if (mProperties.mBackgroundType == LC_BACKGROUND_IMAGE)
-		if (!m_pBackground->Load(mProperties.mBackgroundImage.toLatin1().constData(), LC_TEXTURE_WRAPU | LC_TEXTURE_WRAPV)) // todo: qstring
-		{
-			mProperties.mBackgroundType = LC_BACKGROUND_SOLID;
-//			AfxMessageBox ("Could not load background");
-		}
 }
 
 bool Project::GetPiecesBoundingBox(View* view, float BoundingBox[6])
@@ -3179,12 +3066,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 			mProperties = Options.Properties;
 
-			const lcArray<View*> Views = gMainWindow->GetViews();
-			for (int i = 0; i < Views.GetSize (); i++)
-			{
-				Views[i]->MakeCurrent();
-				RenderInitialize();
-			}
+			UpdateBackgroundTexture();
 
 			CheckPoint("Properties");
 		} break;
@@ -3617,7 +3499,6 @@ void Project::HandleCommand(LC_COMMANDS id)
 			pPiece->CreateName(mPieces);
 			mPieces.Add(pPiece);
 			ClearSelectionAndSetFocus(pPiece, LC_PIECE_SECTION_POSITION);
-			SystemPieceComboAdd(m_pCurPiece->m_strDescription);
 
 			CheckPoint("Inserting");
 		} break;
@@ -3651,24 +3532,18 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 			if (Rotate)
 			{
-				if (m_nSnap & LC_DRAW_SNAP_A)
-					axis[0] = axis[1] = axis[2] = m_nAngleSnap;
-				else
-					axis[0] = axis[1] = axis[2] = 1;
+				axis[0] = axis[1] = axis[2] = lcMax(gMainWindow->GetAngleSnap(), 1);
 			}
 			else
 			{
-				float xy, z;
-				GetSnapDistance(&xy, &z);
+				axis[0] = axis[1] = gMainWindow->GetMoveXYSnap();
+				axis[2] = gMainWindow->GetMoveZSnap();
 
-				axis[0] = axis[1] = xy;
-				axis[2] = z;
-
-				if ((m_nSnap & LC_DRAW_SNAP_X) == 0)// || bControl)
+				if (!axis[0])// || bControl)
 					axis[0] = 0.01f;
-				if ((m_nSnap & LC_DRAW_SNAP_Y) == 0)// || bControl)
+				if (!axis[1])// || bControl)
 					axis[1] = 0.01f;
-				if ((m_nSnap & LC_DRAW_SNAP_Z) == 0)// || bControl)
+				if (!axis[2])// || bControl)
 					axis[2] = 0.01f;
 			}
 
@@ -3685,7 +3560,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 			else if (id == LC_PIECE_MOVE_MINUSZ || id == LC_PIECE_ROTATE_MINUSZ)
 				axis = lcVector3(0, 0, -axis[2]);
 
-			if ((m_nSnap & LC_DRAW_MOVEAXIS) == 0)
+			if (!lcGetPreferences().mFixedAxes)
 			{
 				// TODO: rewrite this
 			
@@ -3728,15 +3603,9 @@ void Project::HandleCommand(LC_COMMANDS id)
 			}
 
 			if (Rotate)
-			{
-				lcVector3 tmp;
-				RotateSelectedObjects(axis, tmp, true, true);
-			}
+				RotateSelectedPieces(axis);
 			else
-			{
-				lcVector3 tmp;
-				MoveSelectedObjects(axis, tmp, false, true);
-			}
+				MoveSelectedObjects(axis, axis);
 
 			gMainWindow->UpdateAllViews();
 			CheckPoint(Rotate ? "Rotating" : "Moving");
@@ -3769,8 +3638,6 @@ void Project::HandleCommand(LC_COMMANDS id)
 				mPieces.Add(pPiece);
 				pPiece->SetSelected(true);
 				pPiece->UpdatePosition(mCurrentStep);
-
-				SystemPieceComboAdd(Minifig.Parts[i]->m_strDescription);
 			}
 
 			int Max = 0;
@@ -4515,165 +4382,68 @@ void Project::HandleCommand(LC_COMMANDS id)
 			gMainWindow->SetAddKeys(!gMainWindow->GetAddKeys());
 			break;
 
-		case LC_EDIT_SNAP_RELATIVE:
-			if (m_nSnap & LC_DRAW_GLOBAL_SNAP)
-				m_nSnap &= ~LC_DRAW_GLOBAL_SNAP;
-			else
-				m_nSnap |= LC_DRAW_GLOBAL_SNAP;
-			gMainWindow->UpdateLockSnap(m_nSnap);
-			gMainWindow->UpdateAllViews();
-			break;
-
-		case LC_EDIT_SNAP_X:
-			if (m_nSnap & LC_DRAW_SNAP_X)
-				m_nSnap &= ~LC_DRAW_SNAP_X;
-			else
-				m_nSnap |= LC_DRAW_SNAP_X;
-			gMainWindow->UpdateLockSnap(m_nSnap);
-			break;
-
-		case LC_EDIT_SNAP_Y:
-			if (m_nSnap & LC_DRAW_SNAP_Y)
-				m_nSnap &= ~LC_DRAW_SNAP_Y;
-			else
-				m_nSnap |= LC_DRAW_SNAP_Y;
-			gMainWindow->UpdateLockSnap(m_nSnap);
-			break;
-
-		case LC_EDIT_SNAP_Z:
-			if (m_nSnap & LC_DRAW_SNAP_Z)
-				m_nSnap &= ~LC_DRAW_SNAP_Z;
-			else
-				m_nSnap |= LC_DRAW_SNAP_Z;
-			gMainWindow->UpdateLockSnap(m_nSnap);
-			break;
-
-		case LC_EDIT_SNAP_ALL:
-				m_nSnap |= LC_DRAW_SNAP_XYZ;
-			gMainWindow->UpdateLockSnap(m_nSnap);
-				break;
-
-		case LC_EDIT_SNAP_NONE:
-			m_nSnap &= ~LC_DRAW_SNAP_XYZ;
-			gMainWindow->UpdateLockSnap(m_nSnap);
-			break;
-
-		case LC_EDIT_SNAP_TOGGLE:
-			if ((m_nSnap & LC_DRAW_SNAP_XYZ) == LC_DRAW_SNAP_XYZ)
-				m_nSnap &= ~LC_DRAW_SNAP_XYZ;
-			else
-				m_nSnap |= LC_DRAW_SNAP_XYZ;
-			gMainWindow->UpdateLockSnap(m_nSnap);
-			break;
-
-		case LC_EDIT_LOCK_X:
-			if (m_nSnap & LC_DRAW_LOCK_X)
-				m_nSnap &= ~LC_DRAW_LOCK_X;
-			else
-				m_nSnap |= LC_DRAW_LOCK_X;
-			gMainWindow->UpdateLockSnap(m_nSnap);
-			break;
-
-		case LC_EDIT_LOCK_Y:
-			if (m_nSnap & LC_DRAW_LOCK_Y)
-				m_nSnap &= ~LC_DRAW_LOCK_Y;
-			else
-				m_nSnap |= LC_DRAW_LOCK_Y;
-			gMainWindow->UpdateLockSnap(m_nSnap);
-			break;
-
-		case LC_EDIT_LOCK_Z:
-			if (m_nSnap & LC_DRAW_LOCK_Z)
-				m_nSnap &= ~LC_DRAW_LOCK_Z;
-			else
-				m_nSnap |= LC_DRAW_LOCK_Z;
-			gMainWindow->UpdateLockSnap(m_nSnap);
-			break;
-
-		case LC_EDIT_LOCK_NONE:
-			m_nSnap &= ~LC_DRAW_LOCK_XYZ;
-			gMainWindow->UpdateLockSnap(m_nSnap);
-			break;
-
-		case LC_EDIT_LOCK_TOGGLE:
-			if ((m_nSnap & LC_DRAW_LOCK_XYZ) == LC_DRAW_LOCK_XYZ)
-				m_nSnap &= ~LC_DRAW_LOCK_XYZ;
-			else
-				m_nSnap |= LC_DRAW_LOCK_XYZ;
-			gMainWindow->UpdateLockSnap(m_nSnap);
-			break;
-
-		case LC_EDIT_SNAP_MOVE_XY0:
-		case LC_EDIT_SNAP_MOVE_XY1:
-		case LC_EDIT_SNAP_MOVE_XY2:
-		case LC_EDIT_SNAP_MOVE_XY3:
-		case LC_EDIT_SNAP_MOVE_XY4:
-		case LC_EDIT_SNAP_MOVE_XY5:
-		case LC_EDIT_SNAP_MOVE_XY6:
-		case LC_EDIT_SNAP_MOVE_XY7:
-		case LC_EDIT_SNAP_MOVE_XY8:
-		case LC_EDIT_SNAP_MOVE_XY9:
+	case LC_EDIT_SNAP_RELATIVE:
 		{
-			m_nMoveSnap = (id - LC_EDIT_SNAP_MOVE_XY0) | (m_nMoveSnap & ~0xff);
-			if (id != LC_EDIT_SNAP_MOVE_XY0)
-				m_nSnap |= LC_DRAW_SNAP_X | LC_DRAW_SNAP_Y;
-			else
-				m_nSnap &= ~(LC_DRAW_SNAP_X | LC_DRAW_SNAP_Y);
-			gMainWindow->UpdateSnap();
+			lcPreferences& Preferences = lcGetPreferences();
+			Preferences.SetForceGlobalTransforms(!Preferences.mForceGlobalTransforms);
 		} break;
 
-		case LC_EDIT_SNAP_MOVE_Z0:
-		case LC_EDIT_SNAP_MOVE_Z1:
-		case LC_EDIT_SNAP_MOVE_Z2:
-		case LC_EDIT_SNAP_MOVE_Z3:
-		case LC_EDIT_SNAP_MOVE_Z4:
-		case LC_EDIT_SNAP_MOVE_Z5:
-		case LC_EDIT_SNAP_MOVE_Z6:
-		case LC_EDIT_SNAP_MOVE_Z7:
-		case LC_EDIT_SNAP_MOVE_Z8:
-		case LC_EDIT_SNAP_MOVE_Z9:
-		{
-			m_nMoveSnap = (((id - LC_EDIT_SNAP_MOVE_Z0) << 8) | (m_nMoveSnap & ~0xff00));
-			if (id != LC_EDIT_SNAP_MOVE_Z0)
-				m_nSnap |= LC_DRAW_SNAP_Z;
-			else
-				m_nSnap &= ~LC_DRAW_SNAP_Z;
-			gMainWindow->UpdateSnap();
-		} break;
+	case LC_EDIT_LOCK_X:
+		gMainWindow->SetLockX(!gMainWindow->GetLockX());
+		break;
 
-		case LC_EDIT_SNAP_ANGLE:
-			if (m_nSnap & LC_DRAW_SNAP_A)
-				m_nSnap &= ~LC_DRAW_SNAP_A;
-			else
-		{
-				m_nSnap |= LC_DRAW_SNAP_A;
-				m_nAngleSnap = lcMax(1, m_nAngleSnap);
-			}
-			gMainWindow->UpdateSnap();
-			break;
+	case LC_EDIT_LOCK_Y:
+		gMainWindow->SetLockY(!gMainWindow->GetLockY());
+		break;
 
-		case LC_EDIT_SNAP_ANGLE0:
-		case LC_EDIT_SNAP_ANGLE1:
-		case LC_EDIT_SNAP_ANGLE2:
-		case LC_EDIT_SNAP_ANGLE3:
-		case LC_EDIT_SNAP_ANGLE4:
-		case LC_EDIT_SNAP_ANGLE5:
-		case LC_EDIT_SNAP_ANGLE6:
-		case LC_EDIT_SNAP_ANGLE7:
-		case LC_EDIT_SNAP_ANGLE8:
-		case LC_EDIT_SNAP_ANGLE9:
-		{
-			const int Angles[] = { 0, 1, 5, 10, 15, 30, 45, 60, 90, 180 };
+	case LC_EDIT_LOCK_Z:
+		gMainWindow->SetLockZ(!gMainWindow->GetLockZ());
+		break;
 
-			if (id == LC_EDIT_SNAP_ANGLE0)
-				m_nSnap &= ~LC_DRAW_SNAP_A;
-			else
-			{
-				m_nSnap |= LC_DRAW_SNAP_A;
-				m_nAngleSnap = Angles[id - LC_EDIT_SNAP_ANGLE0];
-			}
-			gMainWindow->UpdateSnap();
-		} break;
+	case LC_EDIT_LOCK_NONE:
+		gMainWindow->SetLockX(false);
+		gMainWindow->SetLockY(false);
+		gMainWindow->SetLockZ(false);
+		break;
+
+	case LC_EDIT_SNAP_MOVE_XY0:
+	case LC_EDIT_SNAP_MOVE_XY1:
+	case LC_EDIT_SNAP_MOVE_XY2:
+	case LC_EDIT_SNAP_MOVE_XY3:
+	case LC_EDIT_SNAP_MOVE_XY4:
+	case LC_EDIT_SNAP_MOVE_XY5:
+	case LC_EDIT_SNAP_MOVE_XY6:
+	case LC_EDIT_SNAP_MOVE_XY7:
+	case LC_EDIT_SNAP_MOVE_XY8:
+	case LC_EDIT_SNAP_MOVE_XY9:
+		gMainWindow->SetMoveXYSnapIndex(id - LC_EDIT_SNAP_MOVE_XY0);
+		break;
+
+	case LC_EDIT_SNAP_MOVE_Z0:
+	case LC_EDIT_SNAP_MOVE_Z1:
+	case LC_EDIT_SNAP_MOVE_Z2:
+	case LC_EDIT_SNAP_MOVE_Z3:
+	case LC_EDIT_SNAP_MOVE_Z4:
+	case LC_EDIT_SNAP_MOVE_Z5:
+	case LC_EDIT_SNAP_MOVE_Z6:
+	case LC_EDIT_SNAP_MOVE_Z7:
+	case LC_EDIT_SNAP_MOVE_Z8:
+	case LC_EDIT_SNAP_MOVE_Z9:
+		gMainWindow->SetMoveZSnapIndex(id - LC_EDIT_SNAP_MOVE_Z0);
+		break;
+
+	case LC_EDIT_SNAP_ANGLE0:
+	case LC_EDIT_SNAP_ANGLE1:
+	case LC_EDIT_SNAP_ANGLE2:
+	case LC_EDIT_SNAP_ANGLE3:
+	case LC_EDIT_SNAP_ANGLE4:
+	case LC_EDIT_SNAP_ANGLE5:
+	case LC_EDIT_SNAP_ANGLE6:
+	case LC_EDIT_SNAP_ANGLE7:
+	case LC_EDIT_SNAP_ANGLE8:
+	case LC_EDIT_SNAP_ANGLE9:
+		gMainWindow->SetAngleSnapIndex(id - LC_EDIT_SNAP_ANGLE0);
+		break;
 
 		case LC_EDIT_TRANSFORM:
 			TransformSelectedObjects(gMainWindow->GetTransformType(), gMainWindow->GetTransformAmount());
@@ -4756,65 +4526,6 @@ void Project::HandleCommand(LC_COMMANDS id)
 	}
 }
 
-// Remove unused groups
-void Project::RemoveEmptyGroups()
-{
-	bool Removed;
-
-	do
-	{
-		Removed = false;
-
-		for (int GroupIdx = 0; GroupIdx < mGroups.GetSize();)
-		{
-			lcGroup* Group = mGroups[GroupIdx];
-			int Ref = 0;
-
-			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-				if (mPieces[PieceIdx]->GetGroup() == Group)
-					Ref++;
-
-			for (int ParentIdx = 0; ParentIdx < mGroups.GetSize(); ParentIdx++)
-				if (mGroups[ParentIdx]->mGroup == Group)
-					Ref++;
-
-			if (Ref > 1)
-			{
-				GroupIdx++;
-				continue;
-			}
-
-			if (Ref != 0)
-			{
-				for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-				{
-					lcPiece* Piece = mPieces[PieceIdx];
-
-					if (Piece->GetGroup() == Group)
-					{
-						Piece->SetGroup(Group->mGroup);
-						break;
-					}
-				}
-
-				for (int ParentIdx = 0; ParentIdx < mGroups.GetSize(); ParentIdx++)
-				{
-					if (mGroups[ParentIdx]->mGroup == Group)
-					{
-						mGroups[ParentIdx]->mGroup = Group->mGroup;
-						break;
-					}
-				}
-			}
-
-			mGroups.RemoveIndex(GroupIdx);
-			delete Group;
-			Removed = true;
-		}
-	}
-	while (Removed);
-}
-
 lcGroup* Project::AddGroup(lcGroup* Parent)
 {
 	lcGroup* NewGroup = new lcGroup();
@@ -4837,27 +4548,6 @@ lcGroup* Project::AddGroup(lcGroup* Parent)
 	NewGroup->mGroup = Parent;
 
 	return NewGroup;
-}
-
-bool Project::GetSelectionCenter(lcVector3& Center) const
-{
-	float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
-	bool Selected = false;
-
-	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-	{
-		lcPiece* Piece = mPieces[PieceIdx];
-
-		if (Piece->IsSelected())
-		{
-			Piece->CompareBoundingBox(bs);
-			Selected = true;
-		}
-	}
-
-	Center = lcVector3((bs[0] + bs[3]) * 0.5f, (bs[1] + bs[4]) * 0.5f, (bs[2] + bs[5]) * 0.5f);
-
-	return Selected;
 }
 
 lcVector3 Project::GetFocusOrSelectionCenter() const
@@ -4912,7 +4602,7 @@ bool Project::AnyObjectsSelected(bool PiecesOnly) const
 void Project::GetPieceInsertPosition(lcPiece* OffsetPiece, lcVector3& Position, lcVector4& Rotation)
 {
 	lcVector3 Dist(0, 0, OffsetPiece->mPieceInfo->m_fDimensions[2] - m_pCurPiece->m_fDimensions[5]);
-	SnapVector(Dist);
+	Dist = SnapVector(Dist);
 
 	Position = lcMul31(Dist, OffsetPiece->mModelWorld);
 	Rotation = OffsetPiece->mRotation;
@@ -4937,7 +4627,7 @@ void Project::GetPieceInsertPosition(View* view, lcVector3& Position, lcVector4&
 	lcVector3 Intersection;
 	if (lcLinePlaneIntersection(&Intersection, ClickPoints[0], ClickPoints[1], lcVector4(0, 0, 1, m_pCurPiece->m_fDimensions[5])))
 	{
-		SnapVector(Intersection);
+		Intersection = SnapVector(Intersection);
 		Position = Intersection;
 		Rotation = lcVector4(0, 0, 1, 0);
 		return;
@@ -4948,390 +4638,101 @@ void Project::GetPieceInsertPosition(View* view, lcVector3& Position, lcVector4&
 	Rotation = lcVector4(0, 0, 1, 0);
 }
 
-void Project::GetSnapIndex(int* SnapXY, int* SnapZ, int* SnapAngle) const
+lcVector3 Project::LockVector(const lcVector3& Vector) const
 {
-	if (SnapXY)
-		*SnapXY = (m_nMoveSnap & 0xff);
+	lcVector3 NewVector(Vector);
 
-	if (SnapZ)
-		*SnapZ = ((m_nMoveSnap >> 8) & 0xff);
+	if (gMainWindow->GetLockX())
+		NewVector[0] = 0;
 
-	if (SnapAngle)
+	if (gMainWindow->GetLockY())
+		NewVector[1] = 0;
+
+	if (gMainWindow->GetLockZ())
+		NewVector[2] = 0;
+
+	return NewVector;
+}
+
+lcVector3 Project::SnapVector(const lcVector3& Distance) const
+{
+	lcVector3 NewDistance(Distance);
+
+	if (gMainWindow->GetMoveXYSnap())
 	{
-		if (m_nSnap & LC_DRAW_SNAP_A)
+		float SnapXY = (float)gMainWindow->GetMoveXYSnap();
+		int i = (int)(NewDistance[0] / SnapXY);
+		float Leftover = NewDistance[0] - (SnapXY * i);
+
+		if (Leftover > SnapXY / 2)
 		{
-			int Angles[] = { 0, 1, 5, 10, 15, 30, 45, 60, 90, 180 };
-			*SnapAngle = -1;
-
-			for (unsigned int i = 0; i < sizeof(Angles)/sizeof(Angles[0]); i++)
-			{
-				if (m_nAngleSnap == Angles[i])
-				{
-					*SnapAngle = i;
-					break;
-				}
-			}
-		}
-		else
-			*SnapAngle = 0;
-	}
-}
-
-void Project::GetSnapDistance(float* SnapXY, float* SnapZ) const
-{
-	const float SnapXYTable[] = { 0.01f, 1.0f, 5.0f, 8.0f, 10.0f, 20.0f, 40.0f, 60.0f, 80.0f, 160.0f };
-	const float SnapZTable[] = { 0.01f, 1.0f, 5.0f, 8.0f, 10.0f, 20.0f, 24.0f, 48.0f, 96.0f, 192.0f };
-
-	int SXY, SZ;
-	GetSnapIndex(&SXY, &SZ, NULL);
-
-	SXY = lcMin(SXY, 9);
-	SZ = lcMin(SZ, 9);
-
-	*SnapXY = SnapXYTable[SXY];
-	*SnapZ = SnapZTable[SZ];
-}
-
-void Project::GetSnapText(char* SnapXY, char* SnapZ, char* SnapAngle) const
-{
-	const char* SnapXYText[] = { "0", "1/20S", "1/4S", "1F", "1/2S", "1S", "2S", "3S", "4S", "8S" };
-	const char* SnapZText[] = { "0", "1/20S", "1/4S", "1F", "1/2S", "1S", "1B", "2B", "4B", "8B" };
-	const char* SnapAngleText[] = { "0", "1", "5", "10", "15", "30", "45", "60", "90", "180" };
-
-	int SXY, SZ, SA;
-	GetSnapIndex(&SXY, &SZ, &SA);
-
-	SXY = lcMin(SXY, 9);
-	SZ = lcMin(SZ, 9);
-
-	strcpy(SnapXY, SnapXYText[SXY]);
-	strcpy(SnapZ, SnapZText[SZ]);
-	strcpy(SnapAngle, SnapAngleText[SA]);
-}
-
-void Project::SnapVector(lcVector3& Delta, lcVector3& Leftover) const
-{
-	float SnapXY, SnapZ;
-	GetSnapDistance(&SnapXY, &SnapZ);
-
-	if (m_nSnap & LC_DRAW_SNAP_X)
-	{
-		int i = (int)(Delta[0] / SnapXY);
-		Leftover[0] = Delta[0] - (SnapXY * i);
-
-		if (Leftover[0] > SnapXY / 2)
-		{
-			Leftover[0] -= SnapXY;
+			Leftover -= SnapXY;
 			i++;
 		}
-		else if (Leftover[0] < -SnapXY / 2)
+		else if (Leftover < -SnapXY / 2)
 		{
-			Leftover[0] += SnapXY;
+			Leftover += SnapXY;
 			i--;
 		}
 
-		Delta[0] = SnapXY * i;
-	}
+		NewDistance[0] = SnapXY * i;
 
-	if (m_nSnap & LC_DRAW_SNAP_Y)
-	{
-		int i = (int)(Delta[1] / SnapXY);
-		Leftover[1] = Delta[1] - (SnapXY * i);
+		i = (int)(NewDistance[1] / SnapXY);
+		Leftover = NewDistance[1] - (SnapXY * i);
 
-		if (Leftover[1] > SnapXY / 2)
+		if (Leftover > SnapXY / 2)
 		{
-			Leftover[1] -= SnapXY;
+			Leftover -= SnapXY;
 			i++;
 		}
-		else if (Leftover[1] < -SnapXY / 2)
+		else if (Leftover < -SnapXY / 2)
 		{
-			Leftover[1] += SnapXY;
+			Leftover += SnapXY;
 			i--;
 		}
 
-		Delta[1] = SnapXY * i;
+		NewDistance[1] = SnapXY * i;
 	}
 
-	if (m_nSnap & LC_DRAW_SNAP_Z)
+	if (gMainWindow->GetMoveZSnap())
 	{
-		int i = (int)(Delta[2] / SnapZ);
-		Leftover[2] = Delta[2] - (SnapZ * i);
+		float SnapZ = (float)gMainWindow->GetMoveZSnap();
+		int i = (int)(NewDistance[2] / SnapZ);
+		float Leftover = NewDistance[2] - (SnapZ * i);
 
-		if (Leftover[2] > SnapZ / 2)
+		if (Leftover > SnapZ / 2)
 		{
-			Leftover[2] -= SnapZ;
+			Leftover -= SnapZ;
 			i++;
 		}
-		else if (Leftover[2] < -SnapZ / 2)
+		else if (Leftover < -SnapZ / 2)
 		{
-			Leftover[2] += SnapZ;
+			Leftover += SnapZ;
 			i--;
 		}
 
-		Delta[2] = SnapZ * i;
+		NewDistance[2] = SnapZ * i;
 	}
+
+	return NewDistance;
 }
 
-void Project::SnapRotationVector(lcVector3& Delta, lcVector3& Leftover) const
+lcVector3 Project::SnapRotation(const lcVector3& Angles) const
 {
-	if (m_nSnap & LC_DRAW_SNAP_A)
+	int AngleSnap = gMainWindow->GetAngleSnap();
+	lcVector3 NewAngles(Angles);
+
+	if (AngleSnap)
 	{
 		int Snap[3];
 
 		for (int i = 0; i < 3; i++)
-		{
-			Snap[i] = (int)(Delta[i] / (float)m_nAngleSnap);
-		}
+			Snap[i] = (int)(Angles[i] / (float)AngleSnap);
 
-		lcVector3 NewDelta((float)(m_nAngleSnap * Snap[0]), (float)(m_nAngleSnap * Snap[1]), (float)(m_nAngleSnap * Snap[2]));
-		Leftover = Delta - NewDelta;
-		Delta = NewDelta;
-	}
-}
-
-lcMatrix44 Project::GetRelativeRotation() const
-{
-	if ((m_nSnap & LC_DRAW_GLOBAL_SNAP) == 0)
-	{
-		lcObject* Focus = GetFocusObject();
-
-		if ((Focus != NULL) && Focus->IsPiece())
-		{
-			lcMatrix44 WorldMatrix = ((lcPiece*)Focus)->mModelWorld;
-			WorldMatrix.SetTranslation(lcVector3(0.0f, 0.0f, 0.0f));
-			return WorldMatrix;
-		}
+		NewAngles = lcVector3((float)(AngleSnap * Snap[0]), (float)(AngleSnap * Snap[1]), (float)(AngleSnap * Snap[2]));
 	}
 
-	return lcMatrix44Identity();
-}
-
-bool Project::MoveSelectedObjects(lcVector3& Move, lcVector3& Remainder, bool Snap, bool Lock)
-{
-	// Don't move along locked directions.
-	if (Lock)
-	{
-		if (m_nSnap & LC_DRAW_LOCK_X)
-			Move[0] = 0;
-
-		if (m_nSnap & LC_DRAW_LOCK_Y)
-			Move[1] = 0;
-
-		if (m_nSnap & LC_DRAW_LOCK_Z)
-			Move[2] = 0;
-	}
-
-	// Snap.
-	if (Snap)
-	{
-		SnapVector(Move, Remainder);
-
-		if (Move.LengthSquared() < 0.001f)
-			return false;
-	}
-
-	lcVector3 TransformedMove = lcMul30(Move, GetRelativeRotation());
-
-	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-	{
-		lcPiece* Piece = mPieces[PieceIdx];
-
-		if (Piece->IsSelected())
-		{
-			Piece->Move(mCurrentStep, gMainWindow->GetAddKeys(), TransformedMove);
-			Piece->UpdatePosition(mCurrentStep);
-		}
-	}
-
-	for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
-	{
-		lcCamera* Camera = mCameras[CameraIdx];
-
-		if (Camera->IsSelected())
-		{
-			Camera->Move(mCurrentStep, gMainWindow->GetAddKeys(), TransformedMove);
-			Camera->UpdatePosition(mCurrentStep);
-		}
-	}
-
-	for (int LightIdx = 0; LightIdx < mLights.GetSize(); LightIdx++)
-	{
-		lcLight* Light = mLights[LightIdx];
-
-		if (Light->IsSelected())
-		{
-			Light->Move(mCurrentStep, gMainWindow->GetAddKeys(), TransformedMove);
-			Light->UpdatePosition(mCurrentStep);
-		}
-	}
-
-	return true;
-}
-
-bool Project::RotateSelectedObjects(lcVector3& Delta, lcVector3& Remainder, bool Snap, bool Lock)
-{
-	// Don't move along locked directions.
-	if (Lock)
-	{
-		if (m_nSnap & LC_DRAW_LOCK_X)
-			Delta[0] = 0;
-
-		if (m_nSnap & LC_DRAW_LOCK_Y)
-			Delta[1] = 0;
-
-		if (m_nSnap & LC_DRAW_LOCK_Z)
-			Delta[2] = 0;
-	}
-
-	// Snap.
-	if (Snap)
-		SnapRotationVector(Delta, Remainder);
-
-	if (Delta.LengthSquared() < 0.001f)
-		return false;
-
-	float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
-	lcVector3 pos;
-	lcVector4 rot;
-	int nSel = 0;
-	lcPiece *pFocus = NULL;
-
-	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-	{
-		lcPiece* Piece = mPieces[PieceIdx];
-
-		if (Piece->IsSelected())
-		{
-			if (Piece->IsFocused())
-				pFocus = Piece;
-
-			Piece->CompareBoundingBox(bs);
-			nSel++;
-		}
-	}
-
-	if (pFocus != NULL)
-	{
-		pos = pFocus->mPosition;
-		bs[0] = bs[3] = pos[0];
-		bs[1] = bs[4] = pos[1];
-		bs[2] = bs[5] = pos[2];
-	}
-
-	lcVector3 Center((bs[0]+bs[3])/2, (bs[1]+bs[4])/2, (bs[2]+bs[5])/2);
-
-	// Create the rotation matrix.
-	lcVector4 RotationQuaternion(0, 0, 0, 1);
-	lcVector4 WorldToFocusQuaternion, FocusToWorldQuaternion;
-
-	if (!(m_nSnap & LC_DRAW_LOCK_X) && (Delta[0] != 0.0f))
-	{
-		lcVector4 q = lcQuaternionRotationX(Delta[0] * LC_DTOR);
-		RotationQuaternion = lcQuaternionMultiply(q, RotationQuaternion);
-	}
-
-	if (!(m_nSnap & LC_DRAW_LOCK_Y) && (Delta[1] != 0.0f))
-	{
-		lcVector4 q = lcQuaternionRotationY(Delta[1] * LC_DTOR);
-		RotationQuaternion = lcQuaternionMultiply(q, RotationQuaternion);
-	}
-
-	if (!(m_nSnap & LC_DRAW_LOCK_Z) && (Delta[2] != 0.0f))
-	{
-		lcVector4 q = lcQuaternionRotationZ(Delta[2] * LC_DTOR);
-		RotationQuaternion = lcQuaternionMultiply(q, RotationQuaternion);
-	}
-
-	// Transform the rotation relative to the focused piece.
-	if (m_nSnap & LC_DRAW_GLOBAL_SNAP)
-		pFocus = NULL;
-
-	if (pFocus != NULL)
-	{
-		lcVector4 Rot;
-		Rot = ((lcPiece*)pFocus)->mRotation;
-
-		WorldToFocusQuaternion = lcQuaternionFromAxisAngle(lcVector4(Rot[0], Rot[1], Rot[2], -Rot[3] * LC_DTOR));
-		FocusToWorldQuaternion = lcQuaternionFromAxisAngle(lcVector4(Rot[0], Rot[1], Rot[2], Rot[3] * LC_DTOR));
-
-		RotationQuaternion = lcQuaternionMultiply(FocusToWorldQuaternion, RotationQuaternion);
-	}
-
-	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-	{
-		lcPiece* Piece = mPieces[PieceIdx];
-
-		if (!Piece->IsSelected())
-			continue;
-
-		pos = Piece->mPosition;
-		rot = Piece->mRotation;
-
-		lcVector4 NewRotation;
-
-		if ((nSel == 1) && (pFocus == Piece))
-		{
-			lcVector4 LocalToWorldQuaternion;
-			LocalToWorldQuaternion = lcQuaternionFromAxisAngle(lcVector4(rot[0], rot[1], rot[2], rot[3] * LC_DTOR));
-
-			lcVector4 NewLocalToWorldQuaternion;
-
-			if (pFocus != NULL)
-			{
-				lcVector4 LocalToFocusQuaternion = lcQuaternionMultiply(WorldToFocusQuaternion, LocalToWorldQuaternion);
-				NewLocalToWorldQuaternion = lcQuaternionMultiply(LocalToFocusQuaternion, RotationQuaternion);
-			}
-			else
-			{
-				NewLocalToWorldQuaternion = lcQuaternionMultiply(RotationQuaternion, LocalToWorldQuaternion);
-			}
-
-			NewRotation = lcQuaternionToAxisAngle(NewLocalToWorldQuaternion);
-		}
-		else
-		{
-			lcVector3 Distance = lcVector3(pos[0], pos[1], pos[2]) - Center;
-
-			lcVector4 LocalToWorldQuaternion = lcQuaternionFromAxisAngle(lcVector4(rot[0], rot[1], rot[2], rot[3] * LC_DTOR));
-
-			lcVector4 NewLocalToWorldQuaternion;
-
-			if (pFocus != NULL)
-			{
-				lcVector4 LocalToFocusQuaternion = lcQuaternionMultiply(WorldToFocusQuaternion, LocalToWorldQuaternion);
-				NewLocalToWorldQuaternion = lcQuaternionMultiply(RotationQuaternion, LocalToFocusQuaternion);
-
-				lcVector4 WorldToLocalQuaternion = lcQuaternionFromAxisAngle(lcVector4(rot[0], rot[1], rot[2], -rot[3] * LC_DTOR));
-
-				Distance = lcQuaternionMul(Distance, WorldToLocalQuaternion);
-				Distance = lcQuaternionMul(Distance, NewLocalToWorldQuaternion);
-			}
-			else
-			{
-				NewLocalToWorldQuaternion = lcQuaternionMultiply(RotationQuaternion, LocalToWorldQuaternion);
-
-				Distance = lcQuaternionMul(Distance, RotationQuaternion);
-			}
-
-			NewRotation = lcQuaternionToAxisAngle(NewLocalToWorldQuaternion);
-
-			pos[0] = Center[0] + Distance[0];
-			pos[1] = Center[1] + Distance[1];
-			pos[2] = Center[2] + Distance[2];
-
-			Piece->SetPosition(pos, mCurrentStep, gMainWindow->GetAddKeys());
-		}
-
-		rot[0] = NewRotation[0];
-		rot[1] = NewRotation[1];
-		rot[2] = NewRotation[2];
-		rot[3] = NewRotation[3] * LC_RTOD;
-
-		Piece->SetRotation(rot, mCurrentStep, gMainWindow->GetAddKeys());
-		Piece->UpdatePosition(mCurrentStep);
-	}
-
-	return true;
+	return NewAngles;
 }
 
 void Project::TransformSelectedObjects(lcTransformType Type, const lcVector3& Transform)
@@ -5409,14 +4810,14 @@ void Project::TransformSelectedObjects(lcTransformType Type, const lcVector3& Tr
 
 	case LC_TRANSFORM_RELATIVE_TRANSLATION:
 		{
-			lcVector3 Move(Transform), Remainder;
+/*			lcVector3 Move(Transform);
 
-			if (MoveSelectedObjects(Move, Remainder, false, false))
+			if (MoveSelectedObjects(Move, false, false))
 			{
 				gMainWindow->UpdateAllViews();
 				CheckPoint("Moving");
 				gMainWindow->UpdateFocusObject(GetFocusObject());
-			}
+			}*/
 		} break;
 
 	case LC_TRANSFORM_ABSOLUTE_ROTATION:
@@ -5469,9 +4870,9 @@ void Project::TransformSelectedObjects(lcTransformType Type, const lcVector3& Tr
 
 	case LC_TRANSFORM_RELATIVE_ROTATION:
 		{
-			lcVector3 Rotate(Transform), Remainder;
+			lcVector3 Rotate(Transform);
 
-			if (RotateSelectedObjects(Rotate, Remainder, false, false))
+			if (RotateSelectedPieces(Rotate))
 			{
 				gMainWindow->UpdateAllViews();
 				CheckPoint("Rotating");
@@ -5701,262 +5102,6 @@ void Project::ZoomActiveView(int Amount)
 	gMainWindow->GetActiveView()->mCamera->Zoom(ScaledAmount, mCurrentStep, gMainWindow->GetAddKeys());
 	gMainWindow->UpdateFocusObject(GetFocusObject());
 	gMainWindow->UpdateAllViews();
-}
-
-void Project::BeginMouseTool()
-{
-	mMouseToolDistance = lcVector3(0.0f, 0.0f, 0.0f);
-}
-
-void Project::EndMouseTool(lcTool Tool, bool Accept)
-{
-	if (!Accept)
-	{
-		LoadCheckPoint(mUndoHistory[0]);
-		return;
-	}
-
-	switch (Tool)
-	{
-	case LC_TOOL_INSERT:
-	case LC_TOOL_LIGHT:
-		break;
-
-	case LC_TOOL_SPOTLIGHT:
-		SaveCheckpoint(tr("New SpotLight"));
-		break;
-
-	case LC_TOOL_CAMERA:
-		gMainWindow->UpdateCameraMenu();
-		SaveCheckpoint(tr("New Camera"));
-		break;
-
-	case LC_TOOL_SELECT:
-		break;
-
-	case LC_TOOL_MOVE:
-		SaveCheckpoint(tr("Move"));
-		break;
-
-	case LC_TOOL_ROTATE:
-		SaveCheckpoint(tr("Rotate"));
-		break;
-
-	case LC_TOOL_ERASER:
-	case LC_TOOL_PAINT:
-		break;
-
-	case LC_TOOL_ZOOM:
-		if (!gMainWindow->GetActiveView()->mCamera->IsSimple())
-			SaveCheckpoint(tr("Zoom"));
-		break;
-
-	case LC_TOOL_PAN:
-		if (!gMainWindow->GetActiveView()->mCamera->IsSimple())
-			SaveCheckpoint(tr("Pan"));
-		break;
-
-	case LC_TOOL_ROTATE_VIEW:
-		if (!gMainWindow->GetActiveView()->mCamera->IsSimple())
-			SaveCheckpoint(tr("Orbit"));
-		break;
-
-	case LC_TOOL_ROLL:
-		if (!gMainWindow->GetActiveView()->mCamera->IsSimple())
-			SaveCheckpoint(tr("Roll"));
-		break;
-
-	case LC_TOOL_ZOOM_REGION:
-		break;
-	}
-}
-
-void Project::InsertPieceToolClicked(const lcVector3& Position, const lcVector4& Rotation)
-{
-	lcPiece* Piece = new lcPiece(m_pCurPiece);
-	Piece->Initialize(Position, Rotation, mCurrentStep);
-	Piece->SetColorIndex(gMainWindow->mColorIndex);
-	Piece->UpdatePosition(mCurrentStep);
-	Piece->CreateName(mPieces);
-	mPieces.Add(Piece);
-
-	SystemPieceComboAdd(m_pCurPiece->m_strDescription);
-	ClearSelectionAndSetFocus(Piece, LC_PIECE_SECTION_POSITION);
-
-	SaveCheckpoint(tr("Insert"));
-}
-
-void Project::PointLightToolClicked(const lcVector3& Position)
-{
-	lcLight* Light = new lcLight(Position[0], Position[1], Position[2]);
-	Light->CreateName(mLights);
-	mLights.Add(Light);
-
-	ClearSelectionAndSetFocus(Light, LC_LIGHT_SECTION_POSITION);
-	SaveCheckpoint(tr("New Light"));
-}
-
-void Project::BeginSpotLightTool(const lcVector3& Position, const lcVector3& Target)
-{
-	lcLight* Light = new lcLight(Position[0], Position[1], Position[2], Target[0], Target[1], Target[2]);
-	mLights.Add(Light);
-
-	ClearSelectionAndSetFocus(Light, LC_LIGHT_SECTION_TARGET);
-}
-
-void Project::UpdateSpotLightTool(const lcVector3& Target)
-{
-	lcLight* Light = mLights[mLights.GetSize() - 1];
-
-	Light->Move(1, false, Target);
-	Light->UpdatePosition(1);
-
-	gMainWindow->UpdateFocusObject(Light);
-	gMainWindow->UpdateAllViews();
-}
-
-void Project::BeginCameraTool(const lcVector3& Position, const lcVector3& Target)
-{
-	lcCamera* Camera = new lcCamera(Position[0], Position[1], Position[2], Target[0], Target[1], Target[2]);
-	Camera->CreateName(mCameras);
-	mCameras.Add(Camera);
-
-	ClearSelectionAndSetFocus(Camera, LC_CAMERA_SECTION_TARGET);
-}
-
-void Project::UpdateCameraTool(const lcVector3& Target)
-{
-	lcCamera* Camera = mCameras[mCameras.GetSize() - 1];
-
-	Camera->Move(1, false, Target);
-	Camera->UpdatePosition(1);
-
-	gMainWindow->UpdateFocusObject(Camera);
-	gMainWindow->UpdateAllViews();
-}
-
-void Project::UpdateMoveTool(const lcVector3& Distance)
-{
-	lcVector3 Delta, Remainder;
-	Delta = Distance - mMouseToolDistance;
-	MoveSelectedObjects(Delta, Remainder, true, true);
-	mMouseToolDistance += Delta;
-
-	gMainWindow->UpdateFocusObject(GetFocusObject());
-	gMainWindow->UpdateAllViews();
-}
-
-void Project::UpdateRotateTool(const lcVector3& Angles)
-{
-	lcVector3 Delta, Remainder;
-	Delta = Angles - mMouseToolDistance;
-	RotateSelectedObjects(Delta, Remainder, true, true);
-	mMouseToolDistance += Delta;
-
-	gMainWindow->UpdateFocusObject(GetFocusObject());
-	gMainWindow->UpdateAllViews();
-}
-
-void Project::EraserToolClicked(lcObject* Object)
-{
-	if (!Object)
-		return;
-
-	switch (Object->GetType())
-	{
-	case LC_OBJECT_PIECE:
-		mPieces.Remove((lcPiece*)Object);
-		RemoveEmptyGroups();
-		break;
-
-	case LC_OBJECT_CAMERA:
-		{
-			const lcArray<View*> Views = gMainWindow->GetViews();
-			for (int ViewIdx = 0; ViewIdx < Views.GetSize(); ViewIdx++)
-			{
-				View* View = Views[ViewIdx];
-				lcCamera* Camera = View->mCamera;
-
-				if (Camera == Object)
-					View->SetCamera(Camera, true);
-			}
-
-			mCameras.Remove((lcCamera*)Object);
-
-			gMainWindow->UpdateCameraMenu();
-		}
-		break;
-
-	case LC_OBJECT_LIGHT:
-		mLights.Remove((lcLight*)Object);
-		break;
-	}
-
-	delete Object;
-	gMainWindow->UpdateFocusObject(GetFocusObject());
-	UpdateSelection();
-	gMainWindow->UpdateAllViews();
-	SaveCheckpoint(tr("Deleting"));
-}
-
-void Project::PaintToolClicked(lcObject* Object)
-{
-	if (!Object || Object->GetType() != LC_OBJECT_PIECE)
-		return;
-
-	lcPiece* Piece = (lcPiece*)Object;
-
-	if (Piece->mColorIndex != gMainWindow->mColorIndex)
-	{
-		Piece->SetColorIndex(gMainWindow->mColorIndex);
-
-		SaveCheckpoint(tr("Painting"));
-		gMainWindow->UpdateFocusObject(GetFocusObject());
-		gMainWindow->UpdateAllViews();
-	}
-}
-
-void Project::UpdateZoomTool(lcCamera* Camera, float Mouse)
-{
-	Camera->Zoom(Mouse - mMouseToolDistance.x, mCurrentStep, gMainWindow->GetAddKeys());
-	mMouseToolDistance.x = Mouse;
-	gMainWindow->UpdateAllViews();
-}
-
-void Project::UpdatePanTool(lcCamera* Camera, float MouseX, float MouseY)
-{
-	Camera->Pan(MouseX - mMouseToolDistance.x, MouseY - mMouseToolDistance.y, mCurrentStep, gMainWindow->GetAddKeys());
-	mMouseToolDistance.x = MouseX;
-	mMouseToolDistance.y = MouseY;
-	gMainWindow->UpdateAllViews();
-}
-
-void Project::UpdateOrbitTool(lcCamera* Camera, float MouseX, float MouseY)
-{
-	lcVector3 Center;
-	GetSelectionCenter(Center);
-	Camera->Orbit(MouseX - mMouseToolDistance.x, MouseY - mMouseToolDistance.y, Center, mCurrentStep, gMainWindow->GetAddKeys());
-	mMouseToolDistance.x = MouseX;
-	mMouseToolDistance.y = MouseY;
-	gMainWindow->UpdateAllViews();
-}
-
-void Project::UpdateRollTool(lcCamera* Camera, float Mouse)
-{
-	Camera->Roll(Mouse - mMouseToolDistance.x, mCurrentStep, gMainWindow->GetAddKeys());
-	mMouseToolDistance.x = Mouse;
-	gMainWindow->UpdateAllViews();
-}
-
-void Project::ZoomRegionToolClicked(lcCamera* Camera, const lcVector3* Points, float RatioX, float RatioY)
-{
-	Camera->ZoomRegion(Points, RatioX, RatioY, mCurrentStep, gMainWindow->GetAddKeys());
-
-	gMainWindow->UpdateFocusObject(GetFocusObject());
-	gMainWindow->UpdateAllViews();
-
-	if (!Camera->IsSimple())
-		SaveCheckpoint(tr("Zoom"));
 }
 
 // Indicates if the existing string represents an instance of the candidate

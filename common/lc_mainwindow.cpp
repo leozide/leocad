@@ -13,6 +13,13 @@ lcMainWindow::lcMainWindow()
 	mTransformType = LC_TRANSFORM_RELATIVE_TRANSLATION;
 
 	mAddKeys = false;
+	mMoveXYSnapIndex = 4;
+	mMoveZSnapIndex = 3;
+	mAngleSnapIndex = 5;
+	mLockX = false;
+	mLockY = false;
+	mLockZ = false;
+
 	memset(&mSearchOptions, 0, sizeof(mSearchOptions));
 
 	for (int FileIdx = 0; FileIdx < LC_MAX_RECENT_FILES; FileIdx++)
@@ -81,6 +88,42 @@ void lcMainWindow::SetColorIndex(int ColorIndex)
 
 	if (mPreviewWidget)
 		mPreviewWidget->Redraw();
+}
+
+void lcMainWindow::SetMoveXYSnapIndex(int Index)
+{
+	mMoveXYSnapIndex = Index;
+	UpdateSnap();
+}
+
+void lcMainWindow::SetMoveZSnapIndex(int Index)
+{
+	mMoveZSnapIndex = Index;
+	UpdateSnap();
+}
+
+void lcMainWindow::SetAngleSnapIndex(int Index)
+{
+	mAngleSnapIndex = Index;
+	UpdateSnap();
+}
+
+void lcMainWindow::SetLockX(bool LockX)
+{
+	mLockX = LockX;
+	UpdateLockSnap();
+}
+
+void lcMainWindow::SetLockY(bool LockY)
+{
+	mLockY = LockY;
+	UpdateLockSnap();
+}
+
+void lcMainWindow::SetLockZ(bool LockZ)
+{
+	mLockZ = LockZ;
+	UpdateLockSnap();
 }
 
 void lcMainWindow::AddRecentFile(const char* FileName)

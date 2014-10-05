@@ -147,6 +147,7 @@ public:
 	void BoxTest(lcObjectBoxTest& ObjectBoxTest) const;
 
 	lcObject* GetFocusObject() const;
+	bool GetSelectionCenter(lcVector3& Center) const;
 	void FocusOrDeselectObject(const lcObjectSection& ObjectSection);
 	void ClearSelectionAndSetFocus(lcObject* Object, lcuint32 Section);
 	void ClearSelectionAndSetFocus(const lcObjectSection& ObjectSection);
@@ -155,9 +156,43 @@ public:
 
 	void FindPiece(bool FindFirst, bool SearchForward);
 
+	lcMatrix44 GetRelativeRotation() const;
+
+	const lcVector3& GetMouseToolDistance() const
+	{
+		return mMouseToolDistance;
+	}
+
+	void BeginMouseTool();
+	void EndMouseTool(lcTool Tool, bool Accept);
+	void InsertPieceToolClicked(const lcVector3& Position, const lcVector4& Rotation);
+	void PointLightToolClicked(const lcVector3& Position);
+	void BeginSpotLightTool(const lcVector3& Position, const lcVector3& Target);
+	void UpdateSpotLightTool(const lcVector3& Target);
+	void BeginCameraTool(const lcVector3& Position, const lcVector3& Target);
+	void UpdateCameraTool(const lcVector3& Target);
+	void UpdateMoveTool(const lcVector3& Distance);
+	void UpdateRotateTool(const lcVector3& Angles);
+	void EraserToolClicked(lcObject* Object);
+	void PaintToolClicked(lcObject* Object);
+	void UpdateZoomTool(lcCamera* Camera, float Mouse);
+	void UpdatePanTool(lcCamera* Camera, float MouseX, float MouseY);
+	void UpdateOrbitTool(lcCamera* Camera, float MouseX, float MouseY);
+	void UpdateRollTool(lcCamera* Camera, float Mouse);
+	void ZoomRegionToolClicked(lcCamera* Camera, const lcVector3* Points, float RatioX, float RatioY);
+
 protected:
+	void DeleteModel();
+	void DeleteHistory();
 	void SaveCheckpoint(const QString& Description);
+	void LoadCheckPoint(lcModelHistoryEntry* CheckPoint);
+
+	void RemoveEmptyGroups();
+	bool MoveSelectedObjects(const lcVector3& PieceDistance, const lcVector3& ObjectDistance);
+	bool RotateSelectedPieces(const lcVector3& Angles);
 	void CalculateStep();
+	void UpdateBackgroundTexture();
+
 	void UpdateSelection() const;
 	void SelectGroup(lcGroup* TopGroup, bool Select);
 	void ClearSelection(bool UpdateInterface);
@@ -166,6 +201,7 @@ protected:
 
 	lcStep mCurrentStep;
 	lcVector3 mMouseToolDistance;
+	lcTexture* mBackgroundTexture;
 
 	lcArray<lcPiece*> mPieces;
 	lcArray<lcCamera*> mCameras;
@@ -175,6 +211,8 @@ protected:
 	lcModelHistoryEntry* mSavedHistory;
 	lcArray<lcModelHistoryEntry*> mUndoHistory;
 	lcArray<lcModelHistoryEntry*> mRedoHistory;
+
+	Q_DECLARE_TR_FUNCTIONS(lcModel)
 };
 
 #endif // _LC_MODEL_H_

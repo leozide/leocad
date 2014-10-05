@@ -30,8 +30,8 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget *parent, void *data) :
 	ui->lgeoPath->setText(options->LGEOPath);
 	ui->mouseSensitivity->setValue(options->Preferences.mMouseSensitivity);
 	ui->checkForUpdates->setCurrentIndex(options->CheckForUpdates);
-	ui->noRelativeSnap->setChecked((options->Snap & LC_DRAW_GLOBAL_SNAP) != 0);
-	ui->fixedDirectionKeys->setChecked((options->Snap & LC_DRAW_MOVEAXIS) != 0);
+	ui->noRelativeSnap->setChecked(options->Preferences.mForceGlobalTransforms);
+	ui->fixedDirectionKeys->setChecked((options->Preferences.mFixedAxes) != 0);
 
 	ui->antiAliasing->setChecked(options->AASamples != 1);
 	if (options->AASamples == 8)
@@ -84,8 +84,6 @@ void lcQPreferencesDialog::accept()
 		return;
 	}
 
-	options->Snap &= ~(LC_DRAW_GLOBAL_SNAP | LC_DRAW_MOVEAXIS);
-
 	strcpy(options->DefaultAuthor, ui->authorName->text().toLocal8Bit().data());
 	strcpy(options->ProjectsPath, ui->projectsFolder->text().toLocal8Bit().data());
 	strcpy(options->LibraryPath, ui->partsLibrary->text().toLocal8Bit().data());
@@ -93,12 +91,8 @@ void lcQPreferencesDialog::accept()
 	strcpy(options->LGEOPath, ui->lgeoPath->text().toLocal8Bit().data());
 	options->Preferences.mMouseSensitivity = ui->mouseSensitivity->value();
 	options->CheckForUpdates = ui->checkForUpdates->currentIndex();
-
-	if (ui->noRelativeSnap->isChecked())
-		options->Snap |= LC_DRAW_GLOBAL_SNAP;
-
-	if (ui->fixedDirectionKeys->isChecked())
-		options->Snap |= LC_DRAW_MOVEAXIS;
+	options->Preferences.mForceGlobalTransforms = ui->noRelativeSnap->isChecked();
+	options->Preferences.mFixedAxes = ui->fixedDirectionKeys->isChecked();
 
 	if (!ui->antiAliasing->isChecked())
 		options->AASamples = 1;

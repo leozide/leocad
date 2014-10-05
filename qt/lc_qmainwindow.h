@@ -36,7 +36,7 @@ public:
 	void updatePaste(bool enabled);
 	void updateCurrentStep();
 	void setAddKeys(bool addKeys);
-	void updateLockSnap(lcuint32 snap);
+	void updateLockSnap();
 	void updateSnap();
 	void updateUndoRedo(const QString& UndoText, const QString& RedoText);
 	void updateTransformType(int newType);

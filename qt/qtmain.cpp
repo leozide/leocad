@@ -530,12 +530,12 @@ void lcMainWindow::SetAddKeys(bool AddKeys)
 	mAddKeys = AddKeys;
 }
 
-void lcMainWindow::UpdateLockSnap(lcuint32 Snap)
+void lcMainWindow::UpdateLockSnap()
 {
 	lcQMainWindow* window = (lcQMainWindow*)mHandle;
 
 	if (window)
-		window->updateLockSnap(Snap);
+		window->updateLockSnap();
 }
 
 void lcMainWindow::UpdateSnap()

@@ -20,6 +20,8 @@ public:
 	void LoadDefaults();
 	void SaveDefaults();
 
+	void SetForceGlobalTransforms(bool ForceGlobalTransforms);
+
 	int mMouseSensitivity;
 	lcLightingMode mLightingMode;
 	bool mDrawAxes;
@@ -30,6 +32,8 @@ public:
 	bool mDrawGridLines;
 	int mGridLineSpacing;
 	lcuint32 mGridLineColor;
+	bool mForceGlobalTransforms;
+	bool mFixedAxes;
 };
 
 class lcApplication
@@ -72,7 +76,7 @@ inline Project* lcGetActiveProject()
 	return g_App->mProject;
 }
 
-inline const lcPreferences& lcGetPreferences()
+inline lcPreferences& lcGetPreferences()
 {
 	return g_App->mPreferences;
 }

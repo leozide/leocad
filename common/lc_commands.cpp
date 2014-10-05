@@ -256,13 +256,6 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 		QT_TRANSLATE_NOOP("Status", "Prevents movement and rotation along the Z axis"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
-	// LC_EDIT_LOCK_TOGGLE
-	{
-		"Edit.Lock.Toggle",
-		QT_TRANSLATE_NOOP("Menu", "Lock Toggle"),
-		QT_TRANSLATE_NOOP("Status", "Toggle locked axes"),
-		QT_TRANSLATE_NOOP("Shortcut", "")
-	},
 	// LC_EDIT_LOCK_NONE
 	{
 		"Edit.Lock.None",
@@ -275,55 +268,6 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 		"Edit.SnapRelative",
 		QT_TRANSLATE_NOOP("Menu", "Relative Snap"),
 		QT_TRANSLATE_NOOP("Status", "Enable relative movement and rotation"),
-		QT_TRANSLATE_NOOP("Shortcut", "")
-	},
-	// LC_EDIT_SNAP_X
-	{
-		"Edit.Snap.SnapX",
-		QT_TRANSLATE_NOOP("Menu", "Snap X"),
-		QT_TRANSLATE_NOOP("Status", "Snap movement along the X axis to fixed intervals"),
-		QT_TRANSLATE_NOOP("Shortcut", "")
-	},
-	// LC_EDIT_SNAP_Y
-	{
-		"Edit.Snap.SnapY",
-		QT_TRANSLATE_NOOP("Menu", "Snap Y"),
-		QT_TRANSLATE_NOOP("Status", "Snap movement along the Y axis to fixed intervals"),
-		QT_TRANSLATE_NOOP("Shortcut", "")
-	},
-	// LC_EDIT_SNAP_Z
-	{
-		"Edit.Snap.SnapZ",
-		QT_TRANSLATE_NOOP("Menu", "Snap Z"),
-		QT_TRANSLATE_NOOP("Status", "Snap movement along the Z axis to fixed intervals"),
-		QT_TRANSLATE_NOOP("Shortcut", "")
-	},
-	// LC_EDIT_SNAP_TOGGLE
-	{
-		"Edit.Snap.Toggle",
-		QT_TRANSLATE_NOOP("Menu", "Snap Toggle"),
-		QT_TRANSLATE_NOOP("Status", "Toggle snap axes"),
-		QT_TRANSLATE_NOOP("Shortcut", "")
-	},
-	// LC_EDIT_SNAP_NONE
-	{
-		"Edit.Snap.None",
-		QT_TRANSLATE_NOOP("Menu", "Snap None"),
-		QT_TRANSLATE_NOOP("Status", "Disable snapping along all axes"),
-		QT_TRANSLATE_NOOP("Shortcut", "")
-	},
-	// LC_EDIT_SNAP_ALL
-	{
-		"Edit.Snap.All",
-		QT_TRANSLATE_NOOP("Menu", "Snap All"),
-		QT_TRANSLATE_NOOP("Status", "Snap movement along all axes to fixed intervals"),
-		QT_TRANSLATE_NOOP("Shortcut", "")
-	},
-	// LC_EDIT_SNAP_ANGLE
-	{
-		"Edit.SnapAngle.Toggle",
-		QT_TRANSLATE_NOOP("Menu", "Snap Angle Toggle"),
-		QT_TRANSLATE_NOOP("Status", "Snap rotations to fixed intervals"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
 	// LC_EDIT_SNAP_MOVE_XY0

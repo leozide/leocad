@@ -132,7 +132,6 @@ struct lcPreferencesDialogOptions
 	char LGEOPath[LC_MAXPATH];
 	int CheckForUpdates;
 
-	lcuint32 Snap;
 	int AASamples;
 
 	lcArray<lcLibraryCategory> Categories;

@@ -77,7 +77,6 @@ void PiecePreview::SetCurrentPiece(PieceInfo *pInfo)
 	if (m_PieceInfo != NULL)
 	{
 		m_PieceInfo->AddRef();
-		lcGetActiveProject()->SetCurrentPiece(m_PieceInfo);
 		Redraw();
 	}
 }

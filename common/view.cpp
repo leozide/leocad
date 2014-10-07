@@ -224,11 +224,11 @@ void View::OnDraw()
 
 		lcTool Tool = gMainWindow->GetTool();
 
-		if ((Tool == LC_TOOL_SELECT || Tool == LC_TOOL_MOVE) && mTrackButton == LC_TRACKBUTTON_NONE && mProject->AnyObjectsSelected(false))
+		if ((Tool == LC_TOOL_SELECT || Tool == LC_TOOL_MOVE) && mTrackButton == LC_TRACKBUTTON_NONE && mProject->AnyObjectsSelected())
 			DrawSelectMoveOverlay();
 		else if (GetCurrentTool() == LC_TOOL_MOVE && mTrackButton != LC_TRACKBUTTON_NONE)
 			DrawSelectMoveOverlay();
-		else if ((Tool == LC_TOOL_ROTATE || (Tool == LC_TOOL_SELECT && mTrackButton != LC_TRACKBUTTON_NONE && mTrackTool >= LC_TRACKTOOL_ROTATE_X && mTrackTool <= LC_TRACKTOOL_ROTATE_XYZ)) && mProject->AnyObjectsSelected(true))
+		else if ((Tool == LC_TOOL_ROTATE || (Tool == LC_TOOL_SELECT && mTrackButton != LC_TRACKBUTTON_NONE && mTrackTool >= LC_TRACKTOOL_ROTATE_X && mTrackTool <= LC_TRACKTOOL_ROTATE_XYZ)) && mProject->AnyPiecesSelected())
 			DrawRotateOverlay();
 		else if ((mTrackTool == LC_TRACKTOOL_SELECT || mTrackTool == LC_TRACKTOOL_ZOOM_REGION) && mTrackButton == LC_TRACKBUTTON_LEFT)
 			DrawSelectZoomRegionOverlay();
@@ -259,7 +259,7 @@ void View::DrawSelectMoveOverlay()
 
 	lcMatrix44 RelativeRotation = mProject->GetRelativeRotation();
 	lcVector3 OverlayCenter = mProject->GetFocusOrSelectionCenter();
-	bool AnyPiecesSelected = mProject->AnyObjectsSelected(true);
+	bool AnyPiecesSelected = mProject->AnyPiecesSelected();
 
 	// Draw the arrows.
 	for (int i = 0; i < 3; i++)
@@ -1746,7 +1746,7 @@ void View::OnLeftButtonDown()
 	case LC_TRACKTOOL_MOVE_XZ:
 	case LC_TRACKTOOL_MOVE_YZ:
 	case LC_TRACKTOOL_MOVE_XYZ:
-		if (mProject->AnyObjectsSelected(false))
+		if (mProject->AnyObjectsSelected())
 			StartTracking(LC_TRACKBUTTON_LEFT);
 		break;
 
@@ -1755,7 +1755,7 @@ void View::OnLeftButtonDown()
 	case LC_TRACKTOOL_ROTATE_Z:
 	case LC_TRACKTOOL_ROTATE_XY:
 	case LC_TRACKTOOL_ROTATE_XYZ:
-		if (mProject->AnyObjectsSelected(true))
+		if (mProject->AnyPiecesSelected())
 			StartTracking(LC_TRACKBUTTON_LEFT);
 		break;
 
@@ -1856,7 +1856,7 @@ void View::OnRightButtonDown()
 	case LC_TRACKTOOL_MOVE_XZ:
 	case LC_TRACKTOOL_MOVE_YZ:
 	case LC_TRACKTOOL_MOVE_XYZ:
-		if (mProject->AnyObjectsSelected(false))
+		if (mProject->AnyObjectsSelected())
 			StartTracking(LC_TRACKBUTTON_RIGHT);
 		break;
 
@@ -1865,7 +1865,7 @@ void View::OnRightButtonDown()
 	case LC_TRACKTOOL_ROTATE_Z:
 	case LC_TRACKTOOL_ROTATE_XY:
 	case LC_TRACKTOOL_ROTATE_XYZ:
-		if (mProject->AnyObjectsSelected(true))
+		if (mProject->AnyPiecesSelected())
 			StartTracking(LC_TRACKBUTTON_RIGHT);
 		break;
 

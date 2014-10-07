@@ -752,6 +752,71 @@ lcMatrix44 lcModel::GetRelativeRotation() const
 	return lcMatrix44Identity();
 }
 
+bool lcModel::RemoveSelectedObjects()
+{
+	bool RemovedPiece = false;
+	bool RemovedCamera = false;
+	bool RemovedLight = false;
+
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); )
+	{
+		lcPiece* Piece = mPieces[PieceIdx];
+
+		if (Piece->IsSelected())
+		{
+			RemovedPiece = true;
+			mPieces.Remove(Piece);
+			delete Piece;
+		}
+		else
+			PieceIdx++;
+	}
+
+	for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); )
+	{
+		lcCamera* Camera = mCameras[CameraIdx];
+
+		if (Camera->IsSelected())
+		{
+			const lcArray<View*> Views = gMainWindow->GetViews();
+			for (int ViewIdx = 0; ViewIdx < Views.GetSize(); ViewIdx++)
+			{
+				View* View = Views[ViewIdx];
+
+				if (Camera == View->mCamera)
+					View->SetCamera(Camera, true);
+			}
+
+			RemovedCamera = true;
+			mCameras.RemoveIndex(CameraIdx);
+			delete Camera;
+		}
+		else
+			CameraIdx++;
+	}
+
+	if (RemovedCamera)
+		gMainWindow->UpdateCameraMenu();
+
+	for (int LightIdx = 0; LightIdx < mLights.GetSize(); )
+	{
+		lcLight* Light = mLights[LightIdx];
+
+		if (Light->IsSelected())
+		{
+			RemovedLight = true;
+			mLights.RemoveIndex(LightIdx);
+			delete Light;
+		}
+		else
+			LightIdx++;
+	}
+
+	RemoveEmptyGroups();
+
+	return RemovedPiece || RemovedCamera || RemovedLight;
+}
+
 bool lcModel::MoveSelectedObjects(const lcVector3& PieceDistance, const lcVector3& ObjectDistance)
 {
 	lcMatrix44 RelativeRotation = GetRelativeRotation();
@@ -911,6 +976,32 @@ bool lcModel::RotateSelectedPieces(const lcVector3& Angles)
 	return true;
 }
 
+bool lcModel::AnyPiecesSelected() const
+{
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+		if (mPieces[PieceIdx]->IsSelected())
+			return true;
+
+	return false;
+}
+
+bool lcModel::AnyObjectsSelected() const
+{
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+		if (mPieces[PieceIdx]->IsSelected())
+			return true;
+
+	for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
+		if (mCameras[CameraIdx]->IsSelected())
+			return true;
+
+	for (int LightIdx = 0; LightIdx < mLights.GetSize(); LightIdx++)
+		if (mLights[LightIdx]->IsSelected())
+			return true;
+
+	return false;
+}
+
 lcObject* lcModel::GetFocusObject() const
 {
 	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
@@ -938,6 +1029,34 @@ lcObject* lcModel::GetFocusObject() const
 	}
 
 	return NULL;
+}
+
+lcVector3 lcModel::GetFocusOrSelectionCenter() const
+{
+	lcVector3 Center;
+
+	if (GetFocusPosition(Center))
+		return Center;
+
+	GetSelectionCenter(Center);
+
+	return Center;
+}
+
+bool lcModel::GetFocusPosition(lcVector3& Position) const
+{
+	lcObject* FocusObject = GetFocusObject();
+
+	if (FocusObject)
+	{
+		Position = FocusObject->GetSectionPosition(FocusObject->GetFocusSection());
+		return true;
+	}
+	else
+	{
+		Position = lcVector3(0.0f, 0.0f, 0.0f);
+		return false;
+	}
 }
 
 bool lcModel::GetSelectionCenter(lcVector3& Center) const

@@ -1,11 +1,6 @@
 #include "lc_global.h"
 #include "lc_math.h"
 #include "lc_mesh.h"
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <float.h>
-#include <math.h>
 #include <locale.h>
 #include "opengl.h"
 #include "pieceinf.h"
@@ -1239,7 +1234,7 @@ void Project::RenderSceneObjects(View* view)
 		Context->SetWorldViewMatrix(lcMul(WorldMatrix, ViewMatrix));
 
 		Context->SetLineWidth(2.0f * Preferences.mLineWidth);
-		m_pCurPiece->RenderPiece(gMainWindow->mColorIndex);
+		gMainWindow->mPreviewWidget->GetCurrentPiece()->RenderPiece(gMainWindow->mColorIndex);
 	}
 
 	if (Preferences.mLightingMode != LC_LIGHTING_FLAT)
@@ -1287,17 +1282,18 @@ bool Project::GetPiecesBoundingBox(View* view, float BoundingBox[6])
 		lcVector3 Position;
 		lcVector4 Rotation;
 		GetPieceInsertPosition(view, Position, Rotation);
+		PieceInfo* CurPiece = gMainWindow->mPreviewWidget->GetCurrentPiece();
 
 		lcVector3 Points[8] =
 		{
-			lcVector3(m_pCurPiece->m_fDimensions[0], m_pCurPiece->m_fDimensions[1], m_pCurPiece->m_fDimensions[5]),
-			lcVector3(m_pCurPiece->m_fDimensions[3], m_pCurPiece->m_fDimensions[1], m_pCurPiece->m_fDimensions[5]),
-			lcVector3(m_pCurPiece->m_fDimensions[0], m_pCurPiece->m_fDimensions[1], m_pCurPiece->m_fDimensions[2]),
-			lcVector3(m_pCurPiece->m_fDimensions[3], m_pCurPiece->m_fDimensions[4], m_pCurPiece->m_fDimensions[5]),
-			lcVector3(m_pCurPiece->m_fDimensions[3], m_pCurPiece->m_fDimensions[4], m_pCurPiece->m_fDimensions[2]),
-			lcVector3(m_pCurPiece->m_fDimensions[0], m_pCurPiece->m_fDimensions[4], m_pCurPiece->m_fDimensions[2]),
-			lcVector3(m_pCurPiece->m_fDimensions[0], m_pCurPiece->m_fDimensions[4], m_pCurPiece->m_fDimensions[5]),
-			lcVector3(m_pCurPiece->m_fDimensions[3], m_pCurPiece->m_fDimensions[1], m_pCurPiece->m_fDimensions[2])
+			lcVector3(CurPiece->m_fDimensions[0], CurPiece->m_fDimensions[1], CurPiece->m_fDimensions[5]),
+			lcVector3(CurPiece->m_fDimensions[3], CurPiece->m_fDimensions[1], CurPiece->m_fDimensions[5]),
+			lcVector3(CurPiece->m_fDimensions[0], CurPiece->m_fDimensions[1], CurPiece->m_fDimensions[2]),
+			lcVector3(CurPiece->m_fDimensions[3], CurPiece->m_fDimensions[4], CurPiece->m_fDimensions[5]),
+			lcVector3(CurPiece->m_fDimensions[3], CurPiece->m_fDimensions[4], CurPiece->m_fDimensions[2]),
+			lcVector3(CurPiece->m_fDimensions[0], CurPiece->m_fDimensions[4], CurPiece->m_fDimensions[2]),
+			lcVector3(CurPiece->m_fDimensions[0], CurPiece->m_fDimensions[4], CurPiece->m_fDimensions[5]),
+			lcVector3(CurPiece->m_fDimensions[3], CurPiece->m_fDimensions[1], CurPiece->m_fDimensions[2])
 		};
 
 		lcMatrix44 ModelWorld = lcMatrix44FromAxisAngle(lcVector3(Rotation[0], Rotation[1], Rotation[2]), Rotation[3] * LC_DTOR);
@@ -1317,71 +1313,6 @@ bool Project::GetPiecesBoundingBox(View* view, float BoundingBox[6])
 	}
 
 	return true;
-}
-
-bool Project::RemoveSelectedObjects()
-{
-	bool RemovedPiece = false;
-	bool RemovedCamera = false;
-	bool RemovedLight = false;
-
-	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); )
-	{
-		lcPiece* Piece = mPieces[PieceIdx];
-
-		if (Piece->IsSelected())
-		{
-			RemovedPiece = true;
-			mPieces.Remove(Piece);
-			delete Piece;
-		}
-		else
-			PieceIdx++;
-	}
-
-	for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); )
-	{
-		lcCamera* Camera = mCameras[CameraIdx];
-
-		if (Camera->IsSelected())
-		{
-			const lcArray<View*> Views = gMainWindow->GetViews();
-			for (int ViewIdx = 0; ViewIdx < Views.GetSize(); ViewIdx++)
-			{
-				View* View = Views[ViewIdx];
-
-				if (Camera == View->mCamera)
-					View->SetCamera(Camera, true);
-			}
-
-			RemovedCamera = true;
-			mCameras.RemoveIndex(CameraIdx);
-			delete Camera;
-		}
-		else
-			CameraIdx++;
-	}
-
-	if (RemovedCamera)
-		gMainWindow->UpdateCameraMenu();
-
-	for (int LightIdx = 0; LightIdx < mLights.GetSize(); )
-	{
-		lcLight* Light = mLights[LightIdx];
-
-		if (Light->IsSelected())
-		{
-			RemovedLight = true;
-			mLights.RemoveIndex(LightIdx);
-			delete Light;
-		}
-		else
-			LightIdx++;
-	}
-
-	RemoveEmptyGroups();
-
-	return RemovedPiece || RemovedCamera || RemovedLight;
 }
 
 void Project::ZoomExtents(int FirstView, int LastView)
@@ -2377,15 +2308,13 @@ void Project::HandleCommand(LC_COMMANDS id)
 			}
 		} break;
 
-		case LC_FILE_SAVE:
-		{
-			DoSave(m_strPathName);
-		} break;
+	case LC_FILE_SAVE:
+		DoSave(m_strPathName);
+		break;
 
-		case LC_FILE_SAVEAS:
-		{
-			DoSave(NULL);
-		} break;
+	case LC_FILE_SAVEAS:
+		DoSave(NULL);
+		break;
 
 		case LC_FILE_SAVE_IMAGE:
 		{
@@ -3466,10 +3395,13 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 		case LC_PIECE_INSERT:
 		{
-			if (m_pCurPiece == NULL)
+			PieceInfo* CurPiece = gMainWindow->mPreviewWidget->GetCurrentPiece();
+
+			if (!CurPiece)
 				break;
+
 			lcPiece* Last = mPieces.IsEmpty() ? NULL : mPieces[mPieces.GetSize() - 1];
-			lcPiece* pPiece = new lcPiece(m_pCurPiece);
+			lcPiece* pPiece = new lcPiece(CurPiece);
 
 			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 			{
@@ -3547,7 +3479,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 					axis[2] = 0.01f;
 			}
 
-			if (id == LC_PIECE_MOVE_PLUSX || id ==  LC_PIECE_ROTATE_PLUSX)
+			if (id == LC_PIECE_MOVE_PLUSX || id == LC_PIECE_ROTATE_PLUSX)
 				axis = lcVector3(axis[0], 0, 0);
 			else if (id == LC_PIECE_MOVE_MINUSX || id == LC_PIECE_ROTATE_MINUSX)
 				axis = lcVector3(-axis[0], 0, 0);
@@ -4550,58 +4482,11 @@ lcGroup* Project::AddGroup(lcGroup* Parent)
 	return NewGroup;
 }
 
-lcVector3 Project::GetFocusOrSelectionCenter() const
-{
-	lcVector3 Center;
-
-	if (GetFocusPosition(Center))
-		return Center;
-
-	GetSelectionCenter(Center);
-
-	return Center;
-}
-
-bool Project::GetFocusPosition(lcVector3& Position) const
-{
-	lcObject* FocusObject = GetFocusObject();
-
-	if (FocusObject)
-	{
-		Position = FocusObject->GetSectionPosition(FocusObject->GetFocusSection());
-		return true;
-	}
-	else
-	{
-		Position = lcVector3(0.0f, 0.0f, 0.0f);
-		return false;
-	}
-}
-
-bool Project::AnyObjectsSelected(bool PiecesOnly) const
-{
-	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-		if (mPieces[PieceIdx]->IsSelected())
-			return true;
-
-	if (!PiecesOnly)
-	{
-		for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
-			if (mCameras[CameraIdx]->IsSelected())
-				return true;
-
-		for (int LightIdx = 0; LightIdx < mLights.GetSize(); LightIdx++)
-			if (mLights[LightIdx]->IsSelected())
-				return true;
-	}
-
-	return false;
-}
-
 // Find a good starting position/orientation relative to an existing piece.
 void Project::GetPieceInsertPosition(lcPiece* OffsetPiece, lcVector3& Position, lcVector4& Rotation)
 {
-	lcVector3 Dist(0, 0, OffsetPiece->mPieceInfo->m_fDimensions[2] - m_pCurPiece->m_fDimensions[5]);
+	PieceInfo* CurPiece = gMainWindow->mPreviewWidget->GetCurrentPiece();
+	lcVector3 Dist(0, 0, OffsetPiece->mPieceInfo->m_fDimensions[2] - CurPiece->m_fDimensions[5]);
 	Dist = SnapPosition(Dist);
 
 	Position = lcMul31(Dist, OffsetPiece->mModelWorld);
@@ -4624,8 +4509,10 @@ void Project::GetPieceInsertPosition(View* view, lcVector3& Position, lcVector4&
 	lcVector3 ClickPoints[2] = { lcVector3((float)view->mInputState.x, (float)view->mInputState.y, 0.0f), lcVector3((float)view->mInputState.x, (float)view->mInputState.y, 1.0f) };
 	view->UnprojectPoints(ClickPoints, 2);
 
+	PieceInfo* CurPiece = gMainWindow->mPreviewWidget->GetCurrentPiece();
 	lcVector3 Intersection;
-	if (lcLinePlaneIntersection(&Intersection, ClickPoints[0], ClickPoints[1], lcVector4(0, 0, 1, m_pCurPiece->m_fDimensions[5])))
+
+	if (lcLinePlaneIntersection(&Intersection, ClickPoints[0], ClickPoints[1], lcVector4(0, 0, 1, CurPiece->m_fDimensions[5])))
 	{
 		Intersection = SnapPosition(Intersection);
 		Position = Intersection;
@@ -4634,7 +4521,7 @@ void Project::GetPieceInsertPosition(View* view, lcVector3& Position, lcVector4&
 	}
 
 	// Couldn't find a good position, so just place the piece somewhere near the camera.
-	Position =  view->UnprojectPoint(lcVector3((float)view->mInputState.x, (float)view->mInputState.y, 0.9f));
+	Position = view->UnprojectPoint(lcVector3((float)view->mInputState.x, (float)view->mInputState.y, 0.9f));
 	Rotation = lcVector4(0, 0, 1, 0);
 }
 

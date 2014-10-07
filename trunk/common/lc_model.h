@@ -146,6 +146,10 @@ public:
 	void RayTest(lcObjectRayTest& ObjectRayTest) const;
 	void BoxTest(lcObjectBoxTest& ObjectBoxTest) const;
 
+	bool AnyPiecesSelected() const;
+	bool AnyObjectsSelected() const;
+	lcVector3 GetFocusOrSelectionCenter() const;
+	bool GetFocusPosition(lcVector3& Position) const;
 	lcObject* GetFocusObject() const;
 	bool GetSelectionCenter(lcVector3& Center) const;
 	void FocusOrDeselectObject(const lcObjectSection& ObjectSection);
@@ -191,6 +195,7 @@ protected:
 	void LoadCheckPoint(lcModelHistoryEntry* CheckPoint);
 
 	void RemoveEmptyGroups();
+	bool RemoveSelectedObjects();
 	bool MoveSelectedObjects(const lcVector3& PieceDistance, const lcVector3& ObjectDistance);
 	bool RotateSelectedPieces(const lcVector3& Angles);
 	void CalculateStep();

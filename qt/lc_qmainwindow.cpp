@@ -373,7 +373,7 @@ void lcQMainWindow::createToolBars()
 	QAction* angleAction = new QAction(tr("Snap Rotate"), this);
 	angleAction->setStatusTip(tr("Snap rotations to fixed intervals"));
 	angleAction->setIcon(QIcon(":/resources/edit_snap_angle.png"));
-	angleAction->setMenu(snapMenu);
+	angleAction->setMenu(snapAngleMenu);
 
 	standardToolBar = addToolBar(tr("Standard"));
 	standardToolBar->setObjectName("StandardToolbar");

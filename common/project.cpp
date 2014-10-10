@@ -1257,91 +1257,25 @@ void Project::RenderSceneObjects(View* view)
 	Context->SetLineWidth(Preferences.mLineWidth); // context remove
 }
 
-bool Project::GetPiecesBoundingBox(View* view, float BoundingBox[6])
-{
-	if (mPieces.IsEmpty() && view->mTrackTool != LC_TRACKTOOL_INSERT)
-		return false;
-
-	BoundingBox[0] = FLT_MAX;
-	BoundingBox[1] = FLT_MAX;
-	BoundingBox[2] = FLT_MAX;
-	BoundingBox[3] = -FLT_MAX;
-	BoundingBox[4] = -FLT_MAX;
-	BoundingBox[5] = -FLT_MAX;
-
-	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-	{
-		lcPiece* Piece = mPieces[PieceIdx];
-
-		if (Piece->IsVisible(mCurrentStep))
-			Piece->CompareBoundingBox(BoundingBox);
-	}
-
-	if (view->mTrackTool == LC_TRACKTOOL_INSERT)
-	{
-		lcVector3 Position;
-		lcVector4 Rotation;
-		GetPieceInsertPosition(view, Position, Rotation);
-		PieceInfo* CurPiece = gMainWindow->mPreviewWidget->GetCurrentPiece();
-
-		lcVector3 Points[8] =
-		{
-			lcVector3(CurPiece->m_fDimensions[0], CurPiece->m_fDimensions[1], CurPiece->m_fDimensions[5]),
-			lcVector3(CurPiece->m_fDimensions[3], CurPiece->m_fDimensions[1], CurPiece->m_fDimensions[5]),
-			lcVector3(CurPiece->m_fDimensions[0], CurPiece->m_fDimensions[1], CurPiece->m_fDimensions[2]),
-			lcVector3(CurPiece->m_fDimensions[3], CurPiece->m_fDimensions[4], CurPiece->m_fDimensions[5]),
-			lcVector3(CurPiece->m_fDimensions[3], CurPiece->m_fDimensions[4], CurPiece->m_fDimensions[2]),
-			lcVector3(CurPiece->m_fDimensions[0], CurPiece->m_fDimensions[4], CurPiece->m_fDimensions[2]),
-			lcVector3(CurPiece->m_fDimensions[0], CurPiece->m_fDimensions[4], CurPiece->m_fDimensions[5]),
-			lcVector3(CurPiece->m_fDimensions[3], CurPiece->m_fDimensions[1], CurPiece->m_fDimensions[2])
-		};
-
-		lcMatrix44 ModelWorld = lcMatrix44FromAxisAngle(lcVector3(Rotation[0], Rotation[1], Rotation[2]), Rotation[3] * LC_DTOR);
-		ModelWorld.SetTranslation(Position);
-
-		for (int i = 0; i < 8; i++)
-		{
-			lcVector3 Point = lcMul31(Points[i], ModelWorld);
-
-			if (Point[0] < BoundingBox[0]) BoundingBox[0] = Point[0];
-			if (Point[1] < BoundingBox[1]) BoundingBox[1] = Point[1];
-			if (Point[2] < BoundingBox[2]) BoundingBox[2] = Point[2];
-			if (Point[0] > BoundingBox[3]) BoundingBox[3] = Point[0];
-			if (Point[1] > BoundingBox[4]) BoundingBox[4] = Point[1];
-			if (Point[2] > BoundingBox[5]) BoundingBox[5] = Point[2];
-		}
-	}
-
-	return true;
-}
-
 void Project::ZoomExtents(int FirstView, int LastView)
 {
-	if (mPieces.IsEmpty())
+	float BoundingBox[6];
+
+	if (!GetPiecesBoundingBox(BoundingBox))
 		return;
 
-	float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
-
-	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-	{
-		lcPiece* Piece = mPieces[PieceIdx];
-
-		if (Piece->IsVisible(mCurrentStep))
-			Piece->CompareBoundingBox(bs);
-	}
-
-	lcVector3 Center((bs[0] + bs[3]) / 2, (bs[1] + bs[4]) / 2, (bs[2] + bs[5]) / 2);
+	lcVector3 Center((BoundingBox[0] + BoundingBox[3]) / 2, (BoundingBox[1] + BoundingBox[4]) / 2, (BoundingBox[2] + BoundingBox[5]) / 2);
 
 	lcVector3 Points[8] =
 	{
-		lcVector3(bs[0], bs[1], bs[5]),
-		lcVector3(bs[3], bs[1], bs[5]),
-		lcVector3(bs[0], bs[1], bs[2]),
-		lcVector3(bs[3], bs[4], bs[5]),
-		lcVector3(bs[3], bs[4], bs[2]),
-		lcVector3(bs[0], bs[4], bs[2]),
-		lcVector3(bs[0], bs[4], bs[5]),
-		lcVector3(bs[3], bs[1], bs[2])
+		lcVector3(BoundingBox[0], BoundingBox[1], BoundingBox[5]),
+		lcVector3(BoundingBox[3], BoundingBox[1], BoundingBox[5]),
+		lcVector3(BoundingBox[0], BoundingBox[1], BoundingBox[2]),
+		lcVector3(BoundingBox[3], BoundingBox[4], BoundingBox[5]),
+		lcVector3(BoundingBox[3], BoundingBox[4], BoundingBox[2]),
+		lcVector3(BoundingBox[0], BoundingBox[4], BoundingBox[2]),
+		lcVector3(BoundingBox[0], BoundingBox[4], BoundingBox[5]),
+		lcVector3(BoundingBox[3], BoundingBox[1], BoundingBox[2])
 	};
 
 	const lcArray<View*> Views = gMainWindow->GetViews();
@@ -4031,12 +3965,12 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 			if (!GetSelectionCenter(Center))
 			{
-				float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
+				float BoundingBox[6];
 
-				for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-					mPieces[PieceIdx]->CompareBoundingBox(bs);
-
-				Center = lcVector3((bs[0] + bs[3]) * 0.5f, (bs[1] + bs[4]) * 0.5f, (bs[2] + bs[5]) * 0.5f);
+				if (GetPiecesBoundingBox(BoundingBox))
+					Center = lcVector3((BoundingBox[0] + BoundingBox[3]) / 2, (BoundingBox[1] + BoundingBox[4]) / 2, (BoundingBox[2] + BoundingBox[5]) / 2);
+				else
+					Center = lcVector3(0.0f, 0.0f, 0.0f);
 			}
 
 			gMainWindow->GetActiveView()->mCamera->Center(Center, mCurrentStep, gMainWindow->GetAddKeys());

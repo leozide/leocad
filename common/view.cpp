@@ -8,6 +8,8 @@
 #include "tr.h"
 #include "texfont.h"
 #include "lc_texture.h"
+#include "preview.h"
+#include "pieceinf.h"
 
 View::View(Project *project)
 {
@@ -879,7 +881,46 @@ void View::DrawGrid()
 	int MinX, MaxX, MinY, MaxY;
 	float BoundingBox[6];
 
-	if (mProject->GetPiecesBoundingBox(this, BoundingBox))
+	bool GridSizeValid = mProject->GetPiecesBoundingBox(BoundingBox);
+
+	if (mTrackTool == LC_TRACKTOOL_INSERT)
+	{
+		lcVector3 Position;
+		lcVector4 Rotation;
+		mProject->GetPieceInsertPosition(this, Position, Rotation);
+		PieceInfo* CurPiece = gMainWindow->mPreviewWidget->GetCurrentPiece();
+
+		lcVector3 Points[8] =
+		{
+			lcVector3(CurPiece->m_fDimensions[0], CurPiece->m_fDimensions[1], CurPiece->m_fDimensions[5]),
+			lcVector3(CurPiece->m_fDimensions[3], CurPiece->m_fDimensions[1], CurPiece->m_fDimensions[5]),
+			lcVector3(CurPiece->m_fDimensions[0], CurPiece->m_fDimensions[1], CurPiece->m_fDimensions[2]),
+			lcVector3(CurPiece->m_fDimensions[3], CurPiece->m_fDimensions[4], CurPiece->m_fDimensions[5]),
+			lcVector3(CurPiece->m_fDimensions[3], CurPiece->m_fDimensions[4], CurPiece->m_fDimensions[2]),
+			lcVector3(CurPiece->m_fDimensions[0], CurPiece->m_fDimensions[4], CurPiece->m_fDimensions[2]),
+			lcVector3(CurPiece->m_fDimensions[0], CurPiece->m_fDimensions[4], CurPiece->m_fDimensions[5]),
+			lcVector3(CurPiece->m_fDimensions[3], CurPiece->m_fDimensions[1], CurPiece->m_fDimensions[2])
+		};
+
+		lcMatrix44 ModelWorld = lcMatrix44FromAxisAngle(lcVector3(Rotation[0], Rotation[1], Rotation[2]), Rotation[3] * LC_DTOR);
+		ModelWorld.SetTranslation(Position);
+
+		for (int i = 0; i < 8; i++)
+		{
+			lcVector3 Point = lcMul31(Points[i], ModelWorld);
+
+			if (Point[0] < BoundingBox[0]) BoundingBox[0] = Point[0];
+			if (Point[1] < BoundingBox[1]) BoundingBox[1] = Point[1];
+			if (Point[2] < BoundingBox[2]) BoundingBox[2] = Point[2];
+			if (Point[0] > BoundingBox[3]) BoundingBox[3] = Point[0];
+			if (Point[1] > BoundingBox[4]) BoundingBox[4] = Point[1];
+			if (Point[2] > BoundingBox[5]) BoundingBox[5] = Point[2];
+		}
+
+		GridSizeValid = true;
+	}
+
+	if (GridSizeValid)
 	{
 		MinX = (int)(floorf(BoundingBox[0] / (20.0f * Spacing))) - 1;
 		MinY = (int)(floorf(BoundingBox[1] / (20.0f * Spacing))) - 1;

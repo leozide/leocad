@@ -100,6 +100,13 @@ struct lcModelHistoryEntry
 	QString Description;
 };
 
+struct lcPartsListEntry
+{
+	PieceInfo* Info;
+	int ColorIndex;
+	int Count;
+};
+
 class lcModel
 {
 public:
@@ -153,6 +160,7 @@ public:
 	lcObject* GetFocusObject() const;
 	bool GetSelectionCenter(lcVector3& Center) const;
 	bool GetPiecesBoundingBox(float BoundingBox[6]) const;
+	void GetPartsList(lcArray<lcPartsListEntry>& PartsList) const;
 
 	void FocusOrDeselectObject(const lcObjectSection& ObjectSection);
 	void ClearSelectionAndSetFocus(lcObject* Object, lcuint32 Section);
@@ -190,6 +198,12 @@ public:
 	void UpdateRollTool(lcCamera* Camera, float Mouse);
 	void ZoomRegionToolClicked(lcCamera* Camera, const lcVector3* Points, float RatioX, float RatioY);
 
+	void Export3DStudio() const;
+	void ExportBrickLink() const;
+	void ExportCSV() const;
+	void ExportPOVRay() const;
+	void ExportWavefront() const;
+
 protected:
 	void DeleteModel();
 	void DeleteHistory();
@@ -222,7 +236,7 @@ protected:
 	lcArray<lcModelHistoryEntry*> mUndoHistory;
 	lcArray<lcModelHistoryEntry*> mRedoHistory;
 
-	Q_DECLARE_TR_FUNCTIONS(lcModel)
+	Q_DECLARE_TR_FUNCTIONS(lcModel);
 };
 
 #endif // _LC_MODEL_H_

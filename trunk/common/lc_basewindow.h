@@ -100,7 +100,7 @@ struct lcPropertiesDialogOptions
 	String Title;
 	bool SetDefault;
 
-	lcArray<lcPiecesUsedEntry> PartsUsed;
+	lcArray<lcPartsListEntry> PartsList;
 };
 
 struct lcArrayDialogOptions

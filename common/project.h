@@ -41,13 +41,6 @@ struct LC_FILEENTRY
 	char FileName[LC_MAXPATH];
 };
 
-struct lcPiecesUsedEntry
-{
-	PieceInfo* Info;
-	int ColorIndex;
-	int Count;
-};
-
 enum lcObjectProperty
 {
 	LC_PIECE_PROPERTY_POSITION,
@@ -96,7 +89,6 @@ public:
 
 public:
 	void LoadDefaults();
-	void GetPiecesUsed(lcArray<lcPiecesUsedEntry>& PiecesUsed) const;
 	void CreateImages(Image* images, int width, int height, lcStep from, lcStep to, bool hilite);
 	void Render(View* view, bool bToMemory);
 	lcGroup* AddGroup(lcGroup* Parent);
@@ -118,8 +110,6 @@ protected:
 	void RenderSceneObjects(View* view);
 
 	void CreateHTMLPieceList(FILE* f, lcStep Step, bool bImages, const char* ext);
-	void Export3DStudio();
-	void ExportPOVRay(lcFile& File);
 	void ZoomExtents(int FirstView, int LastView);
 
 	bool DoSave(const char* FileName);

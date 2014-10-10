@@ -16,6 +16,7 @@ class lcPiece;
 class lcCamera;
 class lcLight;
 class lcGroup;
+class PieceInfo;
 
 class lcVector2;
 class lcVector3;

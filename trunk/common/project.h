@@ -96,7 +96,6 @@ public:
 
 public:
 	void LoadDefaults();
-	bool GetPiecesBoundingBox(View* view, float BoundingBox[6]);
 	void GetPiecesUsed(lcArray<lcPiecesUsedEntry>& PiecesUsed) const;
 	void CreateImages(Image* images, int width, int height, lcStep from, lcStep to, bool hilite);
 	void Render(View* view, bool bToMemory);

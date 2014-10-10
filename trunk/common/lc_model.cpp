@@ -1080,6 +1080,29 @@ bool lcModel::GetSelectionCenter(lcVector3& Center) const
 	return Selected;
 }
 
+bool lcModel::GetPiecesBoundingBox(float BoundingBox[6]) const
+{
+	if (mPieces.IsEmpty())
+		return false;
+
+	BoundingBox[0] = FLT_MAX;
+	BoundingBox[1] = FLT_MAX;
+	BoundingBox[2] = FLT_MAX;
+	BoundingBox[3] = -FLT_MAX;
+	BoundingBox[4] = -FLT_MAX;
+	BoundingBox[5] = -FLT_MAX;
+
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+	{
+		lcPiece* Piece = mPieces[PieceIdx];
+
+		if (Piece->IsVisible(mCurrentStep))
+			Piece->CompareBoundingBox(BoundingBox);
+	}
+
+	return true;
+}
+
 void lcModel::UpdateSelection() const
 {
 	int Flags = 0;

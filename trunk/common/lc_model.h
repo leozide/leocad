@@ -152,6 +152,8 @@ public:
 	bool GetFocusPosition(lcVector3& Position) const;
 	lcObject* GetFocusObject() const;
 	bool GetSelectionCenter(lcVector3& Center) const;
+	bool GetPiecesBoundingBox(float BoundingBox[6]) const;
+
 	void FocusOrDeselectObject(const lcObjectSection& ObjectSection);
 	void ClearSelectionAndSetFocus(lcObject* Object, lcuint32 Section);
 	void ClearSelectionAndSetFocus(const lcObjectSection& ObjectSection);

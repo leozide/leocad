@@ -16,6 +16,10 @@ public:
 //	void SetColor(const lcVector4& Color);
 	void SetLineWidth(float LineWidth);
 
+	bool BeginRenderToTexture(int Width, int Height);
+	void EndRenderToTexture();
+	QImage GetRenderToTextureImage(int Width, int Height);
+
 	void BindMesh(lcMesh* Mesh);
 	void UnbindMesh();
 	void DrawMeshSection(lcMesh* Mesh, lcMeshSection* Section);
@@ -32,6 +36,10 @@ protected:
 	lcTexture* mTexture;
 	float mLineWidth;
 	int mMatrixMode;
+
+	GLuint mFramebufferObject;
+	GLuint mFramebufferTexture;
+	GLuint mDepthRenderbufferObject;
 };
 
 #endif // _LC_CONTEXT_H_

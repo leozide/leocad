@@ -2,9 +2,7 @@
 #define _IMAGE_H_
 
 // Image Options
-//#define LC_IMAGE_PROGRESSIVE	0x1000
 #define LC_IMAGE_TRANSPARENT	0x2000
-//#define LC_IMAGE_HIGHCOLOR	0x4000
 #define LC_IMAGE_MASK		0x7000
 
 enum LC_IMAGE_FORMAT
@@ -32,14 +30,11 @@ public:
 	int GetBPP() const;
 	bool HasAlpha() const;
 
-	bool FileSave(lcMemFile& File, LC_IMAGE_FORMAT Format, bool Transparent) const;
-	bool FileSave(const char* FileName, LC_IMAGE_FORMAT Format, bool Transparent) const;
 	bool FileLoad(lcMemFile& File);
 	bool FileLoad(const char* FileName);
 
 	void Resize(int Width, int Height);
 	void ResizePow2();
-	void FromOpenGL(int Width, int Height);
 	void Allocate(int Width, int Height, lcPixelFormat Format);
 	void FreeData();
 

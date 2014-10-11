@@ -1,6 +1,5 @@
 #include "lc_global.h"
 #include "image.h"
-#include "opengl.h"
 
 Image::Image()
 {
@@ -115,23 +114,8 @@ void Image::Resize(int width, int height)
 		}
 	}
 
-	free (mData);
+	free(mData);
 	mData = bits;
 	mWidth = width;
 	mHeight = height;
-}
-
-void Image::FromOpenGL(int Width, int Height)
-{
-	Allocate(Width, Height, LC_PIXEL_FORMAT_R8G8B8A8);
-
-	lcuint8* Buffer = (lcuint8*)malloc(Width * Height * 4);
-
-	glPixelStorei (GL_PACK_ALIGNMENT, 1);
-	glReadPixels(0, 0, Width, Height, GL_RGBA, GL_UNSIGNED_BYTE, Buffer);
-
-	for (int Row = 0; Row < Height; Row++)
-		memcpy(mData + (Row * Width * 4), Buffer + ((Height - Row - 1) * Width * 4), Width * 4);
-
-	free(Buffer);
 }

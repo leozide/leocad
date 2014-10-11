@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>240</height>
+    <width>421</width>
+    <height>196</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,68 +15,19 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <layout class="QFormLayout" name="formLayout">
-     <item row="0" column="0">
-      <widget class="QLabel" name="label">
-       <property name="text">
-        <string>File name:</string>
-       </property>
-       <property name="buddy">
-        <cstring>fileName</cstring>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="0">
-      <widget class="QLabel" name="label_2">
-       <property name="text">
-        <string>Format:</string>
-       </property>
-       <property name="buddy">
-        <cstring>format</cstring>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="0">
-      <widget class="QLabel" name="label_3">
-       <property name="text">
-        <string>Width:</string>
-       </property>
-       <property name="buddy">
-        <cstring>width</cstring>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="0">
-      <widget class="QLabel" name="label_4">
-       <property name="text">
-        <string>Height:</string>
-       </property>
-       <property name="buddy">
-        <cstring>height</cstring>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="1">
-      <widget class="QComboBox" name="format">
-       <item>
-        <property name="text">
-         <string>BMP</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>JPEG</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>PNG</string>
-        </property>
-       </item>
-      </widget>
-     </item>
-     <item row="0" column="1">
+    <layout class="QVBoxLayout" name="verticalLayout_2">
+     <item>
       <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <item>
+        <widget class="QLabel" name="label">
+         <property name="text">
+          <string>File name:</string>
+         </property>
+         <property name="buddy">
+          <cstring>fileName</cstring>
+         </property>
+        </widget>
+       </item>
        <item>
         <widget class="QLineEdit" name="fileName"/>
        </item>
@@ -89,72 +40,126 @@
        </item>
       </layout>
      </item>
-     <item row="2" column="0" colspan="2">
-      <widget class="QCheckBox" name="transparent">
-       <property name="text">
-        <string>Transparent background</string>
-       </property>
-      </widget>
-     </item>
-     <item row="5" column="0">
-      <widget class="QLabel" name="label_5">
-       <property name="text">
-        <string>First step:</string>
-       </property>
-       <property name="buddy">
-        <cstring>firstStep</cstring>
-       </property>
-      </widget>
-     </item>
-     <item row="6" column="0">
-      <widget class="QLabel" name="label_6">
-       <property name="text">
-        <string>Last step:</string>
-       </property>
-       <property name="buddy">
-        <cstring>lastStep</cstring>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="1">
-      <widget class="QLineEdit" name="width">
-       <property name="maximumSize">
-        <size>
-         <width>75</width>
-         <height>16777215</height>
-        </size>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="1">
-      <widget class="QLineEdit" name="height">
-       <property name="maximumSize">
-        <size>
-         <width>75</width>
-         <height>16777215</height>
-        </size>
-       </property>
-      </widget>
-     </item>
-     <item row="5" column="1">
-      <widget class="QLineEdit" name="firstStep">
-       <property name="maximumSize">
-        <size>
-         <width>75</width>
-         <height>16777215</height>
-        </size>
-       </property>
-      </widget>
-     </item>
-     <item row="6" column="1">
-      <widget class="QLineEdit" name="lastStep">
-       <property name="maximumSize">
-        <size>
-         <width>75</width>
-         <height>16777215</height>
-        </size>
-       </property>
-      </widget>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_3">
+       <item>
+        <widget class="QGroupBox" name="groupBox">
+         <property name="title">
+          <string>Dimensions</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_2">
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_3">
+            <property name="text">
+             <string>Width:</string>
+            </property>
+            <property name="buddy">
+             <cstring>width</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="width">
+            <property name="maximumSize">
+             <size>
+              <width>75</width>
+              <height>16777215</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_4">
+            <property name="text">
+             <string>Height:</string>
+            </property>
+            <property name="buddy">
+             <cstring>height</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="height">
+            <property name="maximumSize">
+             <size>
+              <width>75</width>
+              <height>16777215</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="groupBox_2">
+         <property name="title">
+          <string>Step Range</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_3">
+          <item>
+           <widget class="QRadioButton" name="rangeAll">
+            <property name="text">
+             <string>All Steps</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QRadioButton" name="rangeCurrent">
+            <property name="text">
+             <string>Current Step</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout">
+            <item>
+             <widget class="QRadioButton" name="rangeCustom">
+              <property name="text">
+               <string>Custom Range</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_2">
+              <property name="text">
+               <string>From:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="firstStep">
+              <property name="maximumSize">
+               <size>
+                <width>75</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_7">
+              <property name="text">
+               <string>To:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="lastStep">
+              <property name="maximumSize">
+               <size>
+                <width>75</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
      </item>
     </layout>
    </item>
@@ -181,15 +186,16 @@
   </layout>
  </widget>
  <tabstops>
-  <tabstop>buttonBox</tabstop>
   <tabstop>fileName</tabstop>
   <tabstop>fileNameBrowse</tabstop>
-  <tabstop>format</tabstop>
-  <tabstop>transparent</tabstop>
   <tabstop>width</tabstop>
   <tabstop>height</tabstop>
+  <tabstop>rangeAll</tabstop>
+  <tabstop>rangeCurrent</tabstop>
+  <tabstop>rangeCustom</tabstop>
   <tabstop>firstStep</tabstop>
   <tabstop>lastStep</tabstop>
+  <tabstop>buttonBox</tabstop>
  </tabstops>
  <resources/>
  <connections>

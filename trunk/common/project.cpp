@@ -1290,52 +1290,79 @@ void Project::ZoomExtents(int FirstView, int LastView)
 	gMainWindow->UpdateAllViews();
 }
 
-// Create a series of pictures
-void Project::CreateImages(Image* images, int width, int height, lcStep from, lcStep to, bool hilite)
+void Project::SaveImage()
 {
-	if (!GL_BeginRenderToTexture(width, height))
+	lcImageDialogOptions Options;
+	lcStep LastStep = GetLastStep();
+
+	Options.Width = lcGetProfileInt(LC_PROFILE_IMAGE_WIDTH);
+	Options.Height = lcGetProfileInt(LC_PROFILE_IMAGE_HEIGHT);
+	Options.Start = mCurrentStep;
+	Options.End = LastStep;
+
+	if (m_strPathName[0])
+	{
+		Options.FileName = m_strPathName;
+		QString Extension = QFileInfo(Options.FileName).suffix();
+		Options.FileName = Options.FileName.mid(0, Options.FileName.length() - Extension.length());
+	}
+	else
+		Options.FileName = QLatin1String("image");
+
+	Options.FileName += lcGetProfileString(LC_PROFILE_IMAGE_EXTENSION);
+
+	if (!gMainWindow->DoDialog(LC_DIALOG_SAVE_IMAGE, &Options))
+		return;
+	
+	QString Extension = QFileInfo(Options.FileName).suffix();
+
+	if (!Extension.isEmpty())
+		lcSetProfileString(LC_PROFILE_IMAGE_EXTENSION, Options.FileName.right(Extension.length() + 1));
+
+	lcSetProfileInt(LC_PROFILE_IMAGE_WIDTH, Options.Width);
+	lcSetProfileInt(LC_PROFILE_IMAGE_HEIGHT, Options.Height);
+
+	if (Options.Start != Options.End)
+		Options.FileName = Options.FileName.insert(Options.FileName.length() - Extension.length() - 1, QLatin1String("%1"));
+
+	SaveStepImages(Options.FileName, Options.Width, Options.Height, Options.Start, Options.End);
+}
+
+void Project::SaveStepImages(const QString& BaseName, int Width, int Height, lcStep Start, lcStep End)
+{
+	gMainWindow->mPreviewWidget->MakeCurrent();
+	lcContext* Context = gMainWindow->mPreviewWidget->mContext;
+
+	if (!Context->BeginRenderToTexture(Width, Height))
 	{
 		gMainWindow->DoMessageBox("Error creating images.", LC_MB_ICONERROR | LC_MB_OK);
 		return;
 	}
 
 	lcStep CurrentStep = mCurrentStep;
-	unsigned char* buf = (unsigned char*)malloc(width*height*3);
 
-	View view(this);
-	view.SetCamera(gMainWindow->GetActiveView()->mCamera, false);
-	view.mWidth = width;
-	view.mHeight = height;
-	view.SetContext(gMainWindow->mPreviewWidget->mContext);
+	View View(this);
+	View.SetCamera(gMainWindow->GetActiveView()->mCamera, false);
+	View.mWidth = Width;
+	View.mHeight = Height;
+	View.SetContext(Context);
 
-	if (!hilite)
-		ClearSelection(false);
-
-	for (lcStep i = from; i <= to; i++)
+	for (lcStep Step = Start; Step <= End; Step++)
 	{
-		mCurrentStep = i;
+		SetCurrentStep(Step);
+		Render(&View, true);
 
-		if (hilite)
+		QString FileName = BaseName.arg(Step, 2, 10, QLatin1Char('0'));
+		if (!Context->GetRenderToTextureImage(Width, Height).save(FileName))
 		{
-			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-			{
-				lcPiece* Piece = mPieces[PieceIdx];
-				Piece->SetSelected(Piece->GetStepShow() == i);
-			}
+			QMessageBox::warning(gMainWindow->mHandle, tr("Error"), tr("Error saving '%1'.").arg(FileName));
+			break;
 		}
-
-		CalculateStep();
-		Render(&view, true);
-		images[i-from].FromOpenGL(width, height);
 	}
 
-	if (hilite)
-		ClearSelection(false);
-
 	SetCurrentStep(CurrentStep);
-	free(buf);
 
-	GL_EndRenderToTexture();
+	Context->EndRenderToTexture();
 }
 
 void Project::CreateHTMLPieceList(FILE* f, lcStep Step, bool bImages, const char* ext)
@@ -1481,118 +1508,13 @@ void Project::HandleCommand(LC_COMMANDS id)
 		DoSave(NULL);
 		break;
 
-		case LC_FILE_SAVE_IMAGE:
-		{
-			lcImageDialogOptions Options;
+	case LC_FILE_SAVE_IMAGE:
+		SaveImage();
+		break;
 
-			int ImageOptions = lcGetProfileInt(LC_PROFILE_IMAGE_OPTIONS);
-
-			Options.Format = (LC_IMAGE_FORMAT)(ImageOptions & ~(LC_IMAGE_MASK));
-			Options.Transparent = (ImageOptions & LC_IMAGE_TRANSPARENT) != 0;
-			Options.Width = lcGetProfileInt(LC_PROFILE_IMAGE_WIDTH);
-			Options.Height = lcGetProfileInt(LC_PROFILE_IMAGE_HEIGHT);
-
-			if (m_strPathName[0])
-				strcpy(Options.FileName, m_strPathName);
-			else if (m_strTitle[0])
-				strcpy(Options.FileName, m_strTitle);
-			else
-				strcpy(Options.FileName, "Image");
-
-			if (Options.FileName[0])
-			{
-				char* ext = strrchr(Options.FileName, '.');
-
-				if (ext && (!stricmp(ext, ".lcd") || !stricmp(ext, ".dat") || !stricmp(ext, ".ldr")))
-					*ext = 0;
-
-				switch (Options.Format)
-				{
-				case LC_IMAGE_BMP: strcat(Options.FileName, ".bmp");
-					break;
-				case LC_IMAGE_JPG: strcat(Options.FileName, ".jpg");
-					break;
-				default:
-				case LC_IMAGE_PNG: strcat(Options.FileName, ".png");
-					break;
-				}
-			}
-
-			Options.Start = mCurrentStep;
-			Options.End = mCurrentStep;
-
-			if (!gMainWindow->DoDialog(LC_DIALOG_SAVE_IMAGE, &Options))
-				break;
-
-			ImageOptions = Options.Format;
-
-			if (Options.Transparent)
-				ImageOptions |= LC_IMAGE_TRANSPARENT;
-
-			lcSetProfileInt(LC_PROFILE_IMAGE_OPTIONS, ImageOptions);
-			lcSetProfileInt(LC_PROFILE_IMAGE_WIDTH, Options.Width);
-			lcSetProfileInt(LC_PROFILE_IMAGE_HEIGHT, Options.Height);
-
-			if (!Options.FileName[0])
-				strcpy(Options.FileName, "Image");
-
-			char* Ext = strrchr(Options.FileName, '.');
-			if (Ext)
-			{
-				if (!strcmp(Ext, ".jpg") || !strcmp(Ext, ".jpeg") || !strcmp(Ext, ".bmp") || !strcmp(Ext, ".png"))
-					*Ext = 0;
-			}
-
-			const char* ext;
-			switch (Options.Format)
-			{
-			case LC_IMAGE_BMP: ext = ".bmp";
-				break;
-			case LC_IMAGE_JPG: ext = ".jpg";
-				break;
-			default:
-			case LC_IMAGE_PNG: ext = ".png";
-				break;
-			}
-
-			Options.End = lcMin(Options.End, 255);
-			Options.Start = lcMax(1, Options.Start);
-
-			if (Options.Start > Options.End)
-			{
-				if (Options.Start > Options.End)
-				{
-					int Temp = Options.Start;
-					Options.Start = Options.End;
-					Options.End = Temp;
-				}
-			}
-
-			Image* images = new Image[Options.End - Options.Start + 1];
-			CreateImages(images, Options.Width, Options.Height, Options.Start, Options.End, false);
-
-			for (int i = 0; i <= Options.End - Options.Start; i++)
-			{
-				char filename[LC_MAXPATH];
-
-				if (Options.Start != Options.End)
-				{
-					sprintf(filename, "%s%02d%s", Options.FileName, i+1, ext);
-				}
-				else
-				{
-					strcat(Options.FileName, ext);
-					strcpy(filename, Options.FileName);
-				}
-
-				images[i].FileSave(filename, Options.Format, Options.Transparent);
-			}
-			delete []images;
-		} break;
-
-		case LC_FILE_EXPORT_3DS:
-			Export3DStudio();
-			break;
+	case LC_FILE_EXPORT_3DS:
+		Export3DStudio();
+		break;
 
 		case LC_FILE_EXPORT_HTML:
 		{
@@ -1810,21 +1732,17 @@ void Project::HandleCommand(LC_COMMANDS id)
 					}
 				}
 
-				// Save step pictures
-				Image* images = new Image[LastStep];
-				CreateImages(images, Options.StepImagesWidth, Options.StepImagesHeight, 1, LastStep, Options.HighlightNewParts);
-
-				for (lcStep Step = 0; Step < LastStep; Step++)
-				{
-					sprintf(fn, "%s%s-%02d%s", Options.PathName, m_strTitle, Step + 1, ext);
-					images[Step].FileSave(fn, Options.ImageFormat, Options.TransparentImages);
-				}
-				delete []images;
+				sprintf(fn, "%s%s-%%1%s", Options.PathName, m_strTitle, ext);
+				SaveStepImages(fn, Options.StepImagesWidth, Options.StepImagesHeight, 1, LastStep);
 
 				if (Options.PartsListImages)
 				{
-					int cx = Options.PartImagesWidth, cy = Options.PartImagesHeight;
-					if (!GL_BeginRenderToTexture(cx, cy))
+					gMainWindow->mPreviewWidget->MakeCurrent();
+					lcContext* Context = gMainWindow->mPreviewWidget->mContext;
+					int cx = Options.PartImagesWidth;
+					int cy = Options.PartImagesHeight;
+
+					if (!Context->BeginRenderToTexture(cx, cy))
 					{
 						gMainWindow->DoMessageBox("Error creating images.", LC_MB_ICONERROR | LC_MB_OK);
 						break;
@@ -1833,42 +1751,38 @@ void Project::HandleCommand(LC_COMMANDS id)
 					float aspect = (float)cx/(float)cy;
 					glViewport(0, 0, cx, cy);
 
-					PieceInfo* pInfo;
 					for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 					{
 						lcPiece* Piece = mPieces[PieceIdx];
-						bool bSkip = false;
-						pInfo = Piece->mPieceInfo;
+						bool Skip = false;
+						PieceInfo* Info = Piece->mPieceInfo;
 
 						for (int CheckIdx = 0; CheckIdx < PieceIdx; CheckIdx++)
 						{
-							if (mPieces[CheckIdx]->mPieceInfo == pInfo)
+							if (mPieces[CheckIdx]->mPieceInfo == Info)
 							{
-								bSkip = true;
+								Skip = true;
 								break;
 							}
 						}
 
-						if (bSkip)
+						if (Skip)
 							continue;
 
-						glDepthFunc(GL_LEQUAL);
-						glEnable(GL_DEPTH_TEST);
-						glEnable(GL_POLYGON_OFFSET_FILL);
-						glPolygonOffset(0.5f, 0.1f);
 						glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
 						glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-						pInfo->ZoomExtents(30.0f, aspect);
-						pInfo->RenderPiece(Options.PartImagesColor);
+						Info->ZoomExtents(30.0f, aspect);
+						Info->RenderPiece(Options.PartImagesColor);
 						glFinish();
 
-						Image image;
-						image.FromOpenGL (cx, cy);
-
-						sprintf(fn, "%s%s%s", Options.PathName, pInfo->m_strName, ext);
-						image.FileSave(fn, Options.ImageFormat, Options.TransparentImages);
+						sprintf(fn, "%s%s%s", Options.PathName, Info->m_strName, ext);
+						if (!Context->GetRenderToTextureImage(cx, cy).save(fn))
+						{
+							QMessageBox::warning(gMainWindow->mHandle, tr("Error"), tr("Error saving '%1'.").arg(fn));
+							break;
+						}
 					}
-					GL_EndRenderToTexture();
+					Context->EndRenderToTexture();
 				}
 			}
 		} break;

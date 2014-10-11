@@ -15,6 +15,10 @@ lcContext::lcContext()
 	mTexture = NULL;
 	mLineWidth = 1.0f;
 	mMatrixMode = GL_MODELVIEW;
+
+	mFramebufferObject = 0;
+	mFramebufferTexture = 0;
+	mDepthRenderbufferObject = 0;
 }
 
 lcContext::~lcContext()
@@ -86,6 +90,121 @@ void lcContext::SetLineWidth(float LineWidth)
 
 	glLineWidth(LineWidth);
 	mLineWidth = LineWidth;
+}
+
+bool lcContext::BeginRenderToTexture(int Width, int Height)
+{
+	if (GL_SupportsFramebufferObjectARB)
+	{
+		glGenFramebuffers(1, &mFramebufferObject);
+		glGenTextures(1, &mFramebufferTexture);
+		glGenRenderbuffers(1, &mDepthRenderbufferObject);
+
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mFramebufferObject);
+
+		glBindTexture(GL_TEXTURE_2D, mFramebufferTexture);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Width, Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mFramebufferTexture, 0);
+
+		glBindRenderbuffer(GL_RENDERBUFFER, mDepthRenderbufferObject);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, Width, Height);
+		glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, mDepthRenderbufferObject);
+
+		glBindTexture(GL_TEXTURE_2D, 0);
+		glBindFramebuffer(GL_FRAMEBUFFER, mFramebufferObject);
+
+		if (glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		{
+			EndRenderToTexture();
+			return false;
+		}
+
+		return true;
+	}
+
+	if (GL_SupportsFramebufferObjectEXT)
+	{
+		glGenFramebuffersEXT(1, &mFramebufferObject); 
+		glGenTextures(1, &mFramebufferTexture); 
+
+		glBindTexture(GL_TEXTURE_2D, mFramebufferTexture); 
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, Width, Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL); 
+
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, mFramebufferObject); 
+		glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, mFramebufferTexture, 0); 
+
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, mFramebufferObject);
+
+		glGenRenderbuffersEXT(1, &mDepthRenderbufferObject); 
+		glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, mDepthRenderbufferObject); 
+		glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT24, Width, Height);
+
+		glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, mDepthRenderbufferObject); 
+
+		glBindTexture(GL_TEXTURE_2D, 0);
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, mFramebufferObject);
+
+		if (glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT) != GL_FRAMEBUFFER_COMPLETE_EXT)
+		{
+			EndRenderToTexture();
+			return false;
+		}
+
+		return true;
+	}
+
+	return false;
+}
+
+void lcContext::EndRenderToTexture()
+{
+	if (GL_SupportsFramebufferObjectARB)
+	{
+		glDeleteFramebuffers(1, &mFramebufferObject);
+		mFramebufferObject = 0;
+		glDeleteTextures(1, &mFramebufferTexture);
+		mFramebufferTexture = 0;
+		glDeleteRenderbuffers(1, &mDepthRenderbufferObject);
+		mDepthRenderbufferObject = 0;
+
+		return;
+	}
+
+	if (GL_SupportsFramebufferObjectEXT)
+	{
+		glDeleteFramebuffersEXT(1, &mFramebufferObject);
+		mFramebufferObject = 0;
+		glDeleteTextures(1, &mFramebufferTexture);
+		mFramebufferTexture = 0;
+		glDeleteRenderbuffersEXT(1, &mDepthRenderbufferObject);
+		mDepthRenderbufferObject = 0;
+	}
+}
+
+QImage lcContext::GetRenderToTextureImage(int Width, int Height)
+{
+	QImage Image = QImage(Width, Height, QImage::Format_ARGB32);
+	lcuint8* Buffer = (lcuint8*)malloc(Width * Height * 4);
+
+	glFinish();
+	glReadPixels(0, 0, Width, Height, GL_RGBA, GL_UNSIGNED_BYTE, Buffer);
+
+	for (int y = 0; y < Height; y++)
+	{
+		lcuint8* Pixel = Buffer + ((Height - y - 1) * Width * 4);
+
+		for (int x = 0; x < Width; x++)
+		{
+			Image.setPixel(x, y, qRgba(Pixel[0], Pixel[1], Pixel[2], Pixel[3]));
+			Pixel += 4;
+		}
+	}
+
+	free(Buffer);
+
+	return Image;
 }
 
 void lcContext::BindMesh(lcMesh* Mesh)

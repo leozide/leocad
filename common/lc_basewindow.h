@@ -59,9 +59,7 @@ enum LC_DIALOG_TYPE
 
 struct lcImageDialogOptions
 {
-	char FileName[LC_MAXPATH];
-	LC_IMAGE_FORMAT Format;
-	bool Transparent;
+	QString FileName;
 	int Width;
 	int Height;
 	int Start;

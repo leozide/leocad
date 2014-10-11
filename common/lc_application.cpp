@@ -315,28 +315,8 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 				NeedExt = false;
 		}
 
-		// Setup default options.
-		int ImageOptions = lcGetProfileInt(LC_PROFILE_IMAGE_OPTIONS);
-		bool ImageTransparent = (ImageOptions & LC_IMAGE_TRANSPARENT) != 0;
-		LC_IMAGE_FORMAT ImageFormat = (LC_IMAGE_FORMAT)(ImageOptions & ~(LC_IMAGE_MASK));
-
-		// Append file extension if needed.
 		if (NeedExt)
-		{
-			switch (ImageFormat)
-			{
-			case LC_IMAGE_BMP:
-				FileName += ".bmp";
-				break;
-			case LC_IMAGE_JPG:
-				FileName += ".jpg";
-				break;
-			default:
-			case LC_IMAGE_PNG:
-				FileName += ".png";
-				break;
-			}
-		}
+			FileName += lcGetProfileString(LC_PROFILE_IMAGE_EXTENSION);
 
 		if (ImageEnd < ImageStart)
 			ImageEnd = ImageStart;
@@ -362,28 +342,18 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 		if (ImageEnd > 255)
 			ImageEnd = 255;
 
-		Image* images = new Image[ImageEnd - ImageStart + 1];
-		mProject->CreateImages(images, ImageWidth, ImageHeight, ImageStart, ImageEnd, ImageHighlight);
+		String Frame;
 
-		for (lcStep Step = 0; Step <= ImageEnd - ImageStart; Step++)
+		if (ImageStart != ImageEnd)
 		{
-			char idx[256];
-			String Frame;
+			int Ext = FileName.ReverseFind('.');
 
-			if (ImageStart != ImageEnd)
-			{
-				sprintf(idx, "%02d", Step + 1);
-				int Ext = FileName.ReverseFind('.');
-
-				Frame = FileName.Left(Ext) + idx + FileName.Right(FileName.GetLength() - Ext);
-			}
-			else
-				Frame = FileName;
-
-			images[Step].FileSave(Frame, ImageFormat, ImageTransparent);
+			Frame = FileName.Left(Ext) + "%1" + FileName.Right(FileName.GetLength() - Ext);
 		}
+		else
+			Frame = FileName;
 
-		delete []images;
+		mProject->SaveStepImages(Frame.Buffer(), ImageWidth, ImageHeight, ImageStart, ImageEnd);
 
 		return false;
 	}

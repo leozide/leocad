@@ -795,7 +795,8 @@ void lcQMainWindow::print(QPrinter *printer)
 		ascending = false;
 	}
 
-	piecePreview->makeCurrent();
+	gMainWindow->mPreviewWidget->MakeCurrent();
+	lcContext* Context = gMainWindow->mPreviewWidget->mContext;
 
 	QRect pageRect = printer->pageRect();
 
@@ -817,8 +818,7 @@ void lcQMainWindow::print(QPrinter *printer)
 	view.mHeight = tileHeight;
 	view.SetContext(piecePreview->widget->mContext);
 
-	GL_BeginRenderToTexture(tileWidth, tileHeight);
-	glPixelStorei(GL_PACK_ALIGNMENT, 1);
+	Context->BeginRenderToTexture(tileWidth, tileHeight);
 
 	lcStep previousTime = project->GetCurrentStep();
 
@@ -1004,7 +1004,7 @@ void lcQMainWindow::print(QPrinter *printer)
 
 	project->SetCurrentStep(previousTime);
 
-	GL_EndRenderToTexture();
+	Context->EndRenderToTexture();
 }
 
 void lcQMainWindow::showPrintDialog()

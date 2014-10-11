@@ -17,11 +17,12 @@ public:
 	~lcQImageDialog();
 
 	lcImageDialogOptions *options;
+	int currentStep;
+	int lastStep;
 
 public slots:
 	void accept();
 	void on_fileNameBrowse_clicked();
-	void on_format_currentIndexChanged(int index);
 
 private:
 	Ui::lcQImageDialog *ui;

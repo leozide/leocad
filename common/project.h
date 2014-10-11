@@ -89,7 +89,8 @@ public:
 
 public:
 	void LoadDefaults();
-	void CreateImages(Image* images, int width, int height, lcStep from, lcStep to, bool hilite);
+	void SaveImage();
+	void SaveStepImages(const QString& BaseName, int Width, int Height, lcStep Start, lcStep End);
 	void Render(View* view, bool bToMemory);
 	lcGroup* AddGroup(lcGroup* Parent);
 	void TransformSelectedObjects(lcTransformType Type, const lcVector3& Transform);

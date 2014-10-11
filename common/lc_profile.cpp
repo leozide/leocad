@@ -72,7 +72,7 @@ lcProfileEntry gProfileEntries[LC_NUM_PROFILE_KEYS] =
 	lcProfileEntry("Settings", "MouseSensitivity", 11),                              // LC_PROFILE_MOUSE_SENSITIVITY
 	lcProfileEntry("Settings", "ImageWidth", 1280),                                  // LC_PROFILE_IMAGE_WIDTH
 	lcProfileEntry("Settings", "ImageHeight", 720),                                  // LC_PROFILE_IMAGE_HEIGHT
-	lcProfileEntry("Settings", "ImageOptions", LC_IMAGE_PNG | LC_IMAGE_TRANSPARENT), // LC_PROFILE_IMAGE_OPTIONS
+	lcProfileEntry("Settings", "ImageExtension", ".png"),                            // LC_PROFILE_IMAGE_EXTENSION
 	lcProfileEntry("Settings", "PrintRows", 1),                                      // LC_PROFILE_PRINT_ROWS
 	lcProfileEntry("Settings", "PrintColumns", 1),                                   // LC_PROFILE_PRINT_COLUMNS
 

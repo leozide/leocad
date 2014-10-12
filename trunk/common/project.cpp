@@ -1353,11 +1353,8 @@ void Project::SaveStepImages(const QString& BaseName, int Width, int Height, lcS
 		Render(&View, true);
 
 		QString FileName = BaseName.arg(Step, 2, 10, QLatin1Char('0'));
-		if (!Context->GetRenderToTextureImage(Width, Height).save(FileName))
-		{
-			QMessageBox::warning(gMainWindow->mHandle, tr("Error"), tr("Error saving '%1'.").arg(FileName));
+		if (!Context->SaveRenderToTextureImage(FileName, Width, Height))
 			break;
-		}
 	}
 
 	SetCurrentStep(CurrentStep);
@@ -1776,11 +1773,8 @@ void Project::HandleCommand(LC_COMMANDS id)
 						glFinish();
 
 						sprintf(fn, "%s%s%s", Options.PathName, Info->m_strName, ext);
-						if (!Context->GetRenderToTextureImage(cx, cy).save(fn))
-						{
-							QMessageBox::warning(gMainWindow->mHandle, tr("Error"), tr("Error saving '%1'.").arg(fn));
+						if (!Context->SaveRenderToTextureImage(fn, cx, cy))
 							break;
-						}
 					}
 					Context->EndRenderToTexture();
 				}

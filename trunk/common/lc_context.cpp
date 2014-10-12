@@ -3,6 +3,7 @@
 #include "lc_mesh.h"
 #include "lc_texture.h"
 #include "lc_colors.h"
+#include "lc_mainwindow.h"
 
 lcContext::lcContext()
 {
@@ -183,28 +184,49 @@ void lcContext::EndRenderToTexture()
 	}
 }
 
-QImage lcContext::GetRenderToTextureImage(int Width, int Height)
+bool lcContext::SaveRenderToTextureImage(const QString& FileName, int Width, int Height)
 {
-	QImage Image = QImage(Width, Height, QImage::Format_ARGB32);
 	lcuint8* Buffer = (lcuint8*)malloc(Width * Height * 4);
 
 	glFinish();
 	glReadPixels(0, 0, Width, Height, GL_RGBA, GL_UNSIGNED_BYTE, Buffer);
 
-	for (int y = 0; y < Height; y++)
+	for (int y = 0; y < (Height + 1) / 2; y++)
 	{
-		lcuint8* Pixel = Buffer + ((Height - y - 1) * Width * 4);
+		lcuint8* Top = Buffer + ((Height - y - 1) * Width * 4);
+		lcuint8* Bottom = Buffer + y * Width * 4;
 
 		for (int x = 0; x < Width; x++)
 		{
-			Image.setPixel(x, y, qRgba(Pixel[0], Pixel[1], Pixel[2], Pixel[3]));
-			Pixel += 4;
+			lcuint8 Red = Top[0];
+			lcuint8 Green = Top[1];
+			lcuint8 Blue = Top[2];
+			lcuint8 Alpha = Top[3];
+
+			Top[0] = Bottom[2];
+			Top[1] = Bottom[1];
+			Top[2] = Bottom[0];
+			Top[3] = Bottom[3];
+
+			Bottom[0] = Blue;
+			Bottom[1] = Green;
+			Bottom[2] = Red;
+			Bottom[3] = Alpha;
+
+			Top += 4;
+			Bottom +=4;
 		}
 	}
 
+    QImageWriter Writer(FileName);
+    bool Result = Writer.write(QImage(Buffer, Width, Height, QImage::Format_ARGB32));
+
+	if (!Result)
+		QMessageBox::information(gMainWindow->mHandle, tr("Error"), tr("Cannot save '%1': %2").arg(FileName, Writer.errorString()));
+
 	free(Buffer);
 
-	return Image;
+	return Result;
 }
 
 void lcContext::BindMesh(lcMesh* Mesh)

@@ -23,7 +23,7 @@ lcMainWindow::lcMainWindow()
 	memset(&mSearchOptions, 0, sizeof(mSearchOptions));
 
 	for (int FileIdx = 0; FileIdx < LC_MAX_RECENT_FILES; FileIdx++)
-		strcpy(mRecentFiles[FileIdx], lcGetProfileString((LC_PROFILE_KEY)(LC_PROFILE_RECENT_FILE1 + FileIdx)));
+		mRecentFiles[FileIdx] = lcGetProfileString((LC_PROFILE_KEY)(LC_PROFILE_RECENT_FILE1 + FileIdx));
 
 	gMainWindow = this;
 }
@@ -126,18 +126,19 @@ void lcMainWindow::SetLockZ(bool LockZ)
 	UpdateLockSnap();
 }
 
-void lcMainWindow::AddRecentFile(const char* FileName)
+void lcMainWindow::AddRecentFile(const QString& FileName)
 {
+	QString SavedName = FileName;
 	int FileIdx;
 
 	for (FileIdx = 0; FileIdx < LC_MAX_RECENT_FILES; FileIdx++)
-		if (!strcmp(mRecentFiles[FileIdx], FileName))
+		if (mRecentFiles[FileIdx] == FileName)
 			break;
 
 	for (FileIdx = lcMin(FileIdx, LC_MAX_RECENT_FILES - 1); FileIdx > 0; FileIdx--)
-		strcpy(mRecentFiles[FileIdx], mRecentFiles[FileIdx - 1]);
+		mRecentFiles[FileIdx] = mRecentFiles[FileIdx - 1];
 
-	strcpy(mRecentFiles[0], FileName);
+	mRecentFiles[0] = SavedName;
 
 	UpdateRecentFiles();
 }
@@ -145,9 +146,9 @@ void lcMainWindow::AddRecentFile(const char* FileName)
 void lcMainWindow::RemoveRecentFile(int FileIndex)
 {
 	for (int FileIdx = FileIndex; FileIdx < LC_MAX_RECENT_FILES - 1; FileIdx++)
-		strcpy(mRecentFiles[FileIdx], mRecentFiles[FileIdx + 1]);
+		mRecentFiles[FileIdx] = mRecentFiles[FileIdx + 1];
 
-	mRecentFiles[LC_MAX_RECENT_FILES - 1][0] = 0;
+	mRecentFiles[LC_MAX_RECENT_FILES - 1].clear();
 
 	UpdateRecentFiles();
 }

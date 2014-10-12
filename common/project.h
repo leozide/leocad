@@ -84,8 +84,6 @@ public:
 	}
 
 	void UpdateInterface();
-	void SetPathName(const char* lpszPathName, bool bAddToMRU);
-	void SetTitle(const char* lpszTitle);
 
 public:
 	void LoadDefaults();
@@ -113,19 +111,21 @@ protected:
 	void CreateHTMLPieceList(FILE* f, lcStep Step, bool bImages, const char* ext);
 	void ZoomExtents(int FirstView, int LastView);
 
-	bool DoSave(const char* FileName);
+	bool DoSave(const QString& FileName);
 	bool FileLoad(lcFile* file, bool bUndo, bool bMerge);
 	void FileReadLDraw(lcFile* file, const lcMatrix44& CurrentTransform, int* nOk, int DefColor, int* nStep, lcArray<LC_FILEENTRY*>& FileArray);
 	void FileReadMPD(lcFile& MPD, lcArray<LC_FILEENTRY*>& FileArray) const;
 
-	char m_strTitle[LC_MAXPATH];
-	char m_strPathName[LC_MAXPATH];
+	void SetFileName(const QString& FileName);
+	QString GetTitle() const;
+
+	QString mFileName;
 
 public:
 	bool OnNewDocument();
-	bool OnOpenDocument(const char* FileName);
-	bool OpenProject(const char* FileName);
-	bool SaveModified();
+	bool OnOpenDocument(const QString& FileName);
+	bool OpenProject(const QString& FileName);
+	bool SaveIfModified();
 };
 
 #endif // _PROJECT_H_

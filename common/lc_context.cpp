@@ -222,7 +222,7 @@ bool lcContext::SaveRenderToTextureImage(const QString& FileName, int Width, int
     bool Result = Writer.write(QImage(Buffer, Width, Height, QImage::Format_ARGB32));
 
 	if (!Result)
-		QMessageBox::information(gMainWindow->mHandle, tr("Error"), tr("Cannot save '%1': %2").arg(FileName, Writer.errorString()));
+		QMessageBox::information(gMainWindow->mHandle, tr("Error"), tr("Cannot save '%1':\n%2").arg(FileName, Writer.errorString()));
 
 	free(Buffer);
 

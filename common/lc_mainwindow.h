@@ -128,7 +128,7 @@ public:
 
 	void Close();
 
-	void AddRecentFile(const char* FileName);
+	void AddRecentFile(const QString& FileName);
 	void RemoveRecentFile(int FileIndex);
 
 	void SplitHorizontal();
@@ -152,14 +152,14 @@ public:
 	void UpdatePerspective();
 	void UpdateCameraMenu();
 	void UpdateCategories();
-	void UpdateTitle(const char* Title, bool Modified);
+	void UpdateTitle(const QString& Title, bool Modified);
 	void UpdateModified(bool Modified);
 	void UpdateRecentFiles();
 	void UpdateShortcuts();
 
 	lcVector3 GetTransformAmount();
 
-	char mRecentFiles[LC_MAX_RECENT_FILES][LC_MAXPATH];
+	QString mRecentFiles[LC_MAX_RECENT_FILES];
 	PiecePreview* mPreviewWidget;
 	int mColorIndex;
 	lcSearchOptions mSearchOptions;

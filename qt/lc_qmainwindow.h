@@ -44,9 +44,9 @@ public:
 	void updateCurrentCamera(int cameraIndex);
 	void updatePerspective(View* view);
 	void updateCategories();
-	void updateTitle(const char* title, bool modified);
+	void updateTitle(const QString& title, bool modified);
 	void updateModified(bool modified);
-	void updateRecentFiles(const char** fileNames);
+	void updateRecentFiles();
 	void updateShortcuts();
 
 	lcVector3 getTransformAmount();

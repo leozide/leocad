@@ -284,9 +284,6 @@ bool lcBaseWindow::DoDialog(LC_DIALOG_TYPE Type, void* Data)
 
 	switch (Type)
 	{
-	case LC_DIALOG_OPEN_PROJECT:
-	case LC_DIALOG_SAVE_PROJECT:
-	case LC_DIALOG_MERGE_PROJECT:
 	case LC_DIALOG_EXPORT_3DSTUDIO:
 	case LC_DIALOG_EXPORT_BRICKLINK:
 	case LC_DIALOG_EXPORT_CSV:
@@ -297,18 +294,6 @@ bool lcBaseWindow::DoDialog(LC_DIALOG_TYPE Type, void* Data)
 
 			switch (Type)
 			{
-			case LC_DIALOG_OPEN_PROJECT:
-				result = QFileDialog::getOpenFileName(parent, tr("Open Project"), FileName, tr("Supported Files (*.lcd *.ldr *.dat *.mpd);;All Files (*.*)"));
-				break;
-
-			case LC_DIALOG_SAVE_PROJECT:
-				result = QFileDialog::getSaveFileName(parent, tr("Save Project"), FileName, tr("Supported Files (*.ldr *.dat);;All Files (*.*)"));
-				break;
-
-			case LC_DIALOG_MERGE_PROJECT:
-				result = QFileDialog::getOpenFileName(parent, tr("Merge Project"), FileName, tr("Supported Files (*.lcd *.ldr *.dat *.mpd);;All Files (*.*)"));
-				break;
-
 			case LC_DIALOG_EXPORT_3DSTUDIO:
 				result = QFileDialog::getSaveFileName(parent, tr("Export 3D Studio"), FileName, tr("3DS Files (*.3ds);;All Files (*.*)"));
 				break;
@@ -596,7 +581,7 @@ void lcMainWindow::UpdateCategories()
 		window->updateCategories();
 }
 
-void lcMainWindow::UpdateTitle(const char* Title, bool Modified)
+void lcMainWindow::UpdateTitle(const QString& Title, bool Modified)
 {
 	lcQMainWindow* window = (lcQMainWindow*)mHandle;
 
@@ -614,15 +599,10 @@ void lcMainWindow::UpdateModified(bool Modified)
 
 void lcMainWindow::UpdateRecentFiles()
 {
-	const char* fileNames[LC_MAX_RECENT_FILES];
-
-	for (int fileIdx = 0; fileIdx < LC_MAX_RECENT_FILES; fileIdx++)
-		fileNames[fileIdx] = mRecentFiles[fileIdx];
-
 	lcQMainWindow* window = (lcQMainWindow*)mHandle;
 
 	if (window)
-		window->updateRecentFiles(fileNames);
+		window->updateRecentFiles();
 }
 
 void lcMainWindow::UpdateShortcuts()

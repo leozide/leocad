@@ -34,9 +34,6 @@
 
 enum LC_DIALOG_TYPE
 {
-	LC_DIALOG_OPEN_PROJECT,
-	LC_DIALOG_SAVE_PROJECT,
-	LC_DIALOG_MERGE_PROJECT,
 	LC_DIALOG_SAVE_IMAGE,
 	LC_DIALOG_EXPORT_3DSTUDIO,
 	LC_DIALOG_EXPORT_BRICKLINK,
@@ -68,7 +65,7 @@ struct lcImageDialogOptions
 
 struct lcHTMLDialogOptions
 {
-	char PathName[LC_MAXPATH];
+	QString PathName;
 	LC_IMAGE_FORMAT ImageFormat;
 	bool TransparentImages;
 	bool SinglePage;
@@ -95,7 +92,7 @@ struct lcPOVRayDialogOptions
 struct lcPropertiesDialogOptions
 {
 	lcModelProperties Properties;
-	String Title;
+	QString Title;
 	bool SetDefault;
 
 	lcArray<lcPartsListEntry> PartsList;

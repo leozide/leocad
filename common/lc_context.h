@@ -18,7 +18,7 @@ public:
 
 	bool BeginRenderToTexture(int Width, int Height);
 	void EndRenderToTexture();
-	QImage GetRenderToTextureImage(int Width, int Height);
+	bool SaveRenderToTextureImage(const QString& FileName, int Width, int Height);
 
 	void BindMesh(lcMesh* Mesh);
 	void UnbindMesh();
@@ -40,6 +40,8 @@ protected:
 	GLuint mFramebufferObject;
 	GLuint mFramebufferTexture;
 	GLuint mDepthRenderbufferObject;
+
+	Q_DECLARE_TR_FUNCTIONS(lcContext);
 };
 
 #endif // _LC_CONTEXT_H_

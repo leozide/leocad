@@ -94,14 +94,6 @@ void lcQImageDialog::accept()
 		}
 	}
 
-	QImageWriter writer(fileName);
-
-	if (!writer.canWrite())
-	{
-		QMessageBox::information(this, tr("Error"), tr("Cannot save '%1':").arg(writer.errorString()));
-		return;
-	}
-
 	options->FileName = fileName;
 	options->Width = width;
 	options->Height = height;

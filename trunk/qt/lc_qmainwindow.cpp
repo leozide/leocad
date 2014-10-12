@@ -542,7 +542,7 @@ void lcQMainWindow::createStatusBar()
 
 void lcQMainWindow::closeEvent(QCloseEvent *event)
 {
-	if (lcGetActiveProject()->SaveModified())
+	if (lcGetActiveProject()->SaveIfModified())
 	{
 		event->accept();
 
@@ -1264,7 +1264,7 @@ void lcQMainWindow::updateCategories()
 	partsTree->updateCategories();
 }
 
-void lcQMainWindow::updateTitle(const char* title, bool modified)
+void lcQMainWindow::updateTitle(const QString& title, bool modified)
 {
 	setWindowModified(modified);
 	setWindowFilePath(title);
@@ -1275,23 +1275,23 @@ void lcQMainWindow::updateModified(bool modified)
 	setWindowModified(modified);
 }
 
-void lcQMainWindow::updateRecentFiles(const char** fileNames)
+void lcQMainWindow::updateRecentFiles()
 {
 	for (int actionIdx = LC_FILE_RECENT_FIRST; actionIdx <= LC_FILE_RECENT_LAST; actionIdx++)
 	{
 		int fileIdx = actionIdx - LC_FILE_RECENT_FIRST;
 		QAction *action = actions[actionIdx];
 
-		if (fileNames[fileIdx][0])
+		if (!gMainWindow->mRecentFiles[fileIdx].isEmpty())
 		{
-			action->setText(QString("&%1 %2").arg(QString::number(fileIdx + 1), QDir::toNativeSeparators(fileNames[fileIdx])));
+			action->setText(QString("&%1 %2").arg(QString::number(fileIdx + 1), QDir::toNativeSeparators(gMainWindow->mRecentFiles[fileIdx])));
 			action->setVisible(true);
 		}
 		else
 			action->setVisible(false);
 	}
 
-	actionFileRecentSeparator->setVisible(fileNames[0][0] != 0);
+	actionFileRecentSeparator->setVisible(!gMainWindow->mRecentFiles[0].isEmpty());
 }
 
 void lcQMainWindow::updateShortcuts()

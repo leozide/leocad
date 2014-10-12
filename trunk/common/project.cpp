@@ -37,7 +37,7 @@ void Project::UpdateInterface()
 	gMainWindow->UpdateUndoRedo(mUndoHistory.GetSize() > 1 ? mUndoHistory[0]->Description : NULL, !mRedoHistory.IsEmpty() ? mRedoHistory[0]->Description : NULL);
 	gMainWindow->UpdatePaste(g_App->mClipboard != NULL);
 	gMainWindow->UpdateCategories();
-	gMainWindow->UpdateTitle(m_strTitle, IsModified());
+	gMainWindow->UpdateTitle(GetTitle(), IsModified());
 	gMainWindow->SetTool(gMainWindow->GetTool());
 
 	gMainWindow->UpdateFocusObject(GetFocusObject());
@@ -49,13 +49,6 @@ void Project::UpdateInterface()
 	gMainWindow->UpdateCurrentStep();
 
 	UpdateSelection();
-}
-
-void Project::SetTitle(const char* Title)
-{
-	strcpy(m_strTitle, Title);
-
-	gMainWindow->UpdateTitle(m_strTitle, IsModified());
 }
 
 void Project::LoadDefaults()
@@ -679,35 +672,22 @@ void Project::FileReadLDraw(lcFile* file, const lcMatrix44& CurrentTransform, in
 	file->Seek(Offset, SEEK_SET);
 }
 
-bool Project::DoSave(const char* FileName)
+bool Project::DoSave(const QString& FileName)
 {
-	char SaveFileName[LC_MAXPATH];
+	QString SaveFileName;
 
-	if (FileName && FileName[0])
-		strcpy(SaveFileName, FileName);
+	if (!FileName.isEmpty())
+		SaveFileName = FileName;
 	else
 	{
-		if (m_strPathName[0])
-			strcpy(SaveFileName, m_strPathName);
+		if (!mFileName.isEmpty())
+			SaveFileName = mFileName;
 		else
-		{
-			strcpy(SaveFileName, lcGetProfileString(LC_PROFILE_PROJECTS_PATH));
+			SaveFileName = QFileInfo(QDir(QLatin1String(lcGetProfileString(LC_PROFILE_PROJECTS_PATH))), GetTitle()).absoluteFilePath();
 
-			int Length = strlen(SaveFileName);
-			if (Length && (SaveFileName[Length - 1] != '/' && SaveFileName[Length - 1] != '\\'))
-				strcat(SaveFileName, "/");
+		SaveFileName = QFileDialog::getSaveFileName(gMainWindow->mHandle, tr("Save Project"), SaveFileName, tr("Supported Files (*.ldr *.dat);;All Files (*.*)"));
 
-			strcat(SaveFileName, m_strTitle);
-
-			// check for dubious filename
-			int iBad = strcspn(SaveFileName, " #%;/\\");
-			if (iBad != -1)
-				SaveFileName[iBad] = 0;
-
-			strcat(SaveFileName, ".ldr");
-		}
-
-		if (!gMainWindow->DoDialog(LC_DIALOG_SAVE_PROJECT, SaveFileName))
+		if (SaveFileName.isEmpty())
 			return false;
 	}
 
@@ -730,58 +710,27 @@ bool Project::DoSave(const char* FileName)
 
 	mSavedHistory = mUndoHistory[0];
 
-	// reset the title and change the document name
-	SetPathName(SaveFileName, true);
+	SetFileName(SaveFileName);
 
-	return true; // success
+	return true;
 }
 
-// return true if ok to continue
-bool Project::SaveModified()
+bool Project::SaveIfModified()
 {
 	if (!IsModified())
-		return true;        // ok to continue
+		return true;
 
-	// get name/title of document
-	char name[LC_MAXPATH];
-	if (strlen(m_strPathName) == 0)
-	{
-		// get name based on caption
-		strcpy(name, m_strTitle);
-		if (strlen(name) == 0)
-			strcpy(name, "Untitled");
-	}
-	else
-	{
-		// get name based on file title of path name
-		char* p;
-
-		p = strrchr(m_strPathName, '\\');
-		if (!p)
-			p = strrchr(m_strPathName, '/');
-
-		if (p)
-			strcpy(name, ++p);
-		else
-			strcpy(name, m_strPathName);
-	}
-
-	char prompt[512];
-	sprintf(prompt, "Save changes to %s ?", name);
-
-	switch (gMainWindow->DoMessageBox(prompt, LC_MB_YESNOCANCEL))
+	switch (QMessageBox::question(gMainWindow->mHandle, tr("Save Project"), tr("Save changes to '%1'?").arg(GetTitle()), QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel))
 	{
 	case LC_CANCEL:
-		return false;       // don't continue
+		return false;
 
 	case LC_YES:
-		// If so, either Save or Update, as appropriate
-		if (!DoSave(m_strPathName))
+		if (!DoSave(mFileName))
 			return false;
 		break;
 
 	case LC_NO:
-		// If not saving changes, revert the document
 		break;
 	}
 
@@ -790,158 +739,136 @@ bool Project::SaveModified()
 
 bool Project::OnNewDocument()
 {
-	memset(m_strPathName, 0, sizeof(m_strPathName));
-
 	DeleteModel();
 	DeleteHistory();
 	LoadDefaults();
 
 	CheckPoint("");
 	mSavedHistory = mUndoHistory[0];
-	SetTitle("Untitled");
+
+	SetFileName(QString());
 
 	return true;
 }
 
-bool Project::OpenProject(const char* FileName)
+bool Project::OpenProject(const QString& FileName)
 {
-	if (!SaveModified())
+	if (!SaveIfModified())
 		return false;
 
 	if (!OnOpenDocument(FileName))
 		return false;
 
-	SetPathName(FileName, true);
+	SetFileName(FileName);
 
 	return true;
 }
 
-bool Project::OnOpenDocument(const char* lpszPathName)
+bool Project::OnOpenDocument(const QString& FileName)
 {
-  lcDiskFile file;
-  bool bSuccess = false;
+	lcDiskFile file;
+	bool bSuccess = false;
 
-  if (!file.Open(lpszPathName, "rb"))
-  {
-//    MessageBox("Failed to open file.");
-    return false;
-  }
+	if (!file.Open(FileName.toLatin1().constData(), "rb")) // todo: qstring
+	{
+//		MessageBox("Failed to open file.");
+		return false;
+	}
 
-  char ext[4];
-  const char *ptr;
-  memset(ext, 0, 4);
-  ptr = strrchr(lpszPathName, '.');
-  if (ptr != NULL)
-  {
-    strncpy(ext, ptr+1, 3);
-    strlwr(ext);
-  }
+	QString Extension = QFileInfo(FileName).suffix().toLower();
 
-  bool datfile = false;
-  bool mpdfile = false;
-
-  // Find out what file type we're loading.
-  if ((strcmp(ext, "dat") == 0) || (strcmp(ext, "ldr") == 0))
-    datfile = true;
-  else if (strcmp(ext, "mpd") == 0)
-    mpdfile = true;
+	bool datfile = (Extension == QLatin1String("dat") || Extension == QLatin1String("ldr"));
+	bool mpdfile = (Extension == QLatin1String("mpd"));
 
 	DeleteModel();
 	DeleteHistory();
 	LoadDefaults();
 
-  if (file.GetLength() != 0)
-  {
-	lcArray<LC_FILEENTRY*> FileArray;
-
-    // Unpack the MPD file.
-    if (mpdfile)
-    {
-      FileReadMPD(file, FileArray);
-
-      if (FileArray.GetSize() == 0)
-      {
-        file.Seek(0, SEEK_SET);
-        mpdfile = false;
-        datfile = true;
-      }
-    }
-
-    if (datfile || mpdfile)
-    {
-      int ok = 0, step = 1;
-      lcMatrix44 mat = lcMatrix44Identity();
-
-      if (mpdfile)
-        FileReadLDraw(&FileArray[0]->File, mat, &ok, 16, &step, FileArray);
-      else
-//        FileReadLDraw(&file, mat, &ok, 16, &step, FileArray);
-	  {
-		  QFile File(lpszPathName);
-
-		  if (!File.open(QIODevice::ReadOnly))
-		  {
-				QMessageBox::warning(gMainWindow->mHandle, tr("Error"), tr("Error reading file '%1':\n%2").arg(lpszPathName, File.errorString()));
-				return false;
-		  }
-
-		  QTextStream Stream(&File);
-		  LoadLDraw(Stream);
-	  }
-
-      mCurrentStep = step;
-	  gMainWindow->UpdateCurrentStep();
-	  gMainWindow->UpdateFocusObject(GetFocusObject());
-      UpdateSelection();
-
-	  ZoomExtents(0, gMainWindow->GetViews().GetSize());
-      gMainWindow->UpdateAllViews();
-
-      bSuccess = true;
-    }
-    else
-    {
-      // Load a LeoCAD file.
-      bSuccess = FileLoad(&file, false, false);
-    }
-
-	FileArray.DeleteAll();
-  }
-
-  file.Close();
-
-  if (bSuccess == false)
-  {
-	OnNewDocument();
-//    MessageBox("Failed to load.");
-    return false;
-  }
-
-  CheckPoint("");
-  mSavedHistory = mUndoHistory[0];
-
-  return true;
-}
-
-void Project::SetPathName(const char* PathName, bool bAddToMRU)
-{
-	strcpy(m_strPathName, PathName);
-
-	// always capture the complete file name including extension (if present)
-	const char* lpszTemp = PathName;
-	for (const char* lpsz = PathName; *lpsz != '\0'; lpsz++)
+	if (file.GetLength() != 0)
 	{
-		// remember last directory/drive separator
-		if (*lpsz == '\\' || *lpsz == '/' || *lpsz == ':')
-			lpszTemp = lpsz + 1;
+		lcArray<LC_FILEENTRY*> FileArray;
+
+		// Unpack the MPD file.
+		if (mpdfile)
+		{
+			FileReadMPD(file, FileArray);
+
+			if (FileArray.GetSize() == 0)
+			{
+				file.Seek(0, SEEK_SET);
+				mpdfile = false;
+				datfile = true;
+			}
+		}
+
+		if (datfile || mpdfile)
+		{
+			int ok = 0, step = 1;
+			lcMatrix44 mat = lcMatrix44Identity();
+
+			if (mpdfile)
+				FileReadLDraw(&FileArray[0]->File, mat, &ok, 16, &step, FileArray);
+			else
+//				FileReadLDraw(&file, mat, &ok, 16, &step, FileArray);
+			{
+				QFile File(FileName);
+
+				if (!File.open(QIODevice::ReadOnly))
+				{
+					QMessageBox::warning(gMainWindow->mHandle, tr("Error"), tr("Error reading file '%1':\n%2").arg(FileName, File.errorString()));
+					return false;
+				}
+
+				QTextStream Stream(&File);
+				LoadLDraw(Stream);
+			}
+
+			mCurrentStep = step;
+			gMainWindow->UpdateCurrentStep();
+			gMainWindow->UpdateFocusObject(GetFocusObject());
+			UpdateSelection();
+
+			ZoomExtents(0, gMainWindow->GetViews().GetSize());
+			gMainWindow->UpdateAllViews();
+
+			bSuccess = true;
+		}
+		else
+		{
+			// Load a LeoCAD file.
+			bSuccess = FileLoad(&file, false, false);
+		}
+
+		FileArray.DeleteAll();
 	}
 
-	// set the document title based on path name
-	SetTitle(lpszTemp);
+	file.Close();
 
-	// add it to the file MRU list
-	if (bAddToMRU)
-		gMainWindow->AddRecentFile(m_strPathName);
+	if (bSuccess == false)
+	{
+		OnNewDocument();
+//		MessageBox("Failed to load.");
+		return false;
+	}
+
+	CheckPoint("");
+	mSavedHistory = mUndoHistory[0];
+
+	return true;
+}
+
+void Project::SetFileName(const QString& FileName)
+{
+	mFileName = FileName;
+
+	if (!FileName.isEmpty())
+		gMainWindow->AddRecentFile(FileName);
+	gMainWindow->UpdateTitle(GetTitle(), IsModified());
+}
+
+QString Project::GetTitle() const
+{
+	return mFileName.isEmpty() ? tr("New Project") : QFileInfo(mFileName).fileName();
 }
 
 void Project::CheckPoint(const char* Description)
@@ -1300,9 +1227,9 @@ void Project::SaveImage()
 	Options.Start = mCurrentStep;
 	Options.End = LastStep;
 
-	if (m_strPathName[0])
+	if (!mFileName.isEmpty())
 	{
-		Options.FileName = m_strPathName;
+		Options.FileName = mFileName;
 		QString Extension = QFileInfo(Options.FileName).suffix();
 		Options.FileName = Options.FileName.mid(0, Options.FileName.length() - Extension.length());
 	}
@@ -1453,8 +1380,8 @@ void Project::HandleCommand(LC_COMMANDS id)
 	{
 		case LC_FILE_NEW:
 		{
-			if (!SaveModified())
-				return;  // leave the original one
+			if (!SaveIfModified())
+				return;
 
 			OnNewDocument();
 			gMainWindow->UpdateAllViews();
@@ -1462,30 +1389,35 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 		case LC_FILE_OPEN:
 		{
-			char FileName[LC_MAXPATH];
+			QString FileName;
 
-			if (m_strPathName[0])
-				strcpy(FileName, m_strPathName);
+			if (!mFileName.isEmpty())
+				FileName = mFileName;
 			else
-				strcpy(FileName, lcGetProfileString(LC_PROFILE_PROJECTS_PATH));
+				FileName = lcGetProfileString(LC_PROFILE_PROJECTS_PATH);
 
-			if (gMainWindow->DoDialog(LC_DIALOG_OPEN_PROJECT, FileName))
+			FileName = QFileDialog::getOpenFileName(gMainWindow->mHandle, tr("Open Project"), FileName, tr("Supported Files (*.lcd *.ldr *.dat *.mpd);;All Files (*.*)"));
+
+			if (!FileName.isEmpty())
 				OpenProject(FileName);
 		} break;
 
 		case LC_FILE_MERGE:
 		{
-			char FileName[LC_MAXPATH];
+			QString FileName;
 
-			if (m_strPathName[0])
-				strcpy(FileName, m_strPathName);
+			if (!mFileName.isEmpty())
+				FileName = mFileName;
 			else
-				strcpy(FileName, lcGetProfileString(LC_PROFILE_PROJECTS_PATH));
+				FileName = lcGetProfileString(LC_PROFILE_PROJECTS_PATH);
 
-			if (gMainWindow->DoDialog(LC_DIALOG_MERGE_PROJECT, FileName))
+			FileName = QFileDialog::getOpenFileName(gMainWindow->mHandle, tr("Merge Project"), FileName, tr("Supported Files (*.lcd *.ldr *.dat *.mpd);;All Files (*.*)"));
+
+			if (!FileName.isEmpty())
 			{
+				// todo: detect format
 				lcDiskFile file;
-				if (file.Open(FileName, "rb"))
+				if (file.Open(FileName.toLatin1().constData(), "rb")) // todo: qstring
 				{
 					if (file.GetLength() != 0)
 					{
@@ -1498,11 +1430,11 @@ void Project::HandleCommand(LC_COMMANDS id)
 		} break;
 
 	case LC_FILE_SAVE:
-		DoSave(m_strPathName);
+		DoSave(mFileName);
 		break;
 
 	case LC_FILE_SAVEAS:
-		DoSave(NULL);
+		DoSave(QString());
 		break;
 
 	case LC_FILE_SAVE_IMAGE:
@@ -1517,21 +1449,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 		{
 			lcHTMLDialogOptions Options;
 
-			strcpy(Options.PathName, m_strPathName);
-
-			if (Options.PathName[0] != 0)
-			{
-				char* Slash = strrchr(Options.PathName, '/');
-
-				if (Slash == NULL)
-					Slash = strrchr(Options.PathName, '\\');
-
-				if (Slash)
-					{
-					Slash++;
-					*Slash = 0;
-				}
-			}
+			Options.PathName = QFileInfo(mFileName).canonicalPath();
 
 			int ImageOptions = lcGetProfileInt(LC_PROFILE_HTML_IMAGE_OPTIONS);
 			int HTMLOptions = lcGetProfileInt(LC_PROFILE_HTML_OPTIONS);
@@ -1581,11 +1499,8 @@ void Project::HandleCommand(LC_COMMANDS id)
 			lcSetProfileInt(LC_PROFILE_HTML_PARTS_WIDTH, Options.PartImagesWidth);
 			lcSetProfileInt(LC_PROFILE_HTML_PARTS_HEIGHT, Options.PartImagesHeight);
 
-			int PathLength = strlen(Options.PathName);
-			if (PathLength && Options.PathName[PathLength] != '/' && Options.PathName[PathLength] != '\\')
-				strcat(Options.PathName, "/");
-
-			// TODO: create directory
+			QDir Dir(Options.PathName);
+			Dir.mkpath(QLatin1String("."));
 
 			// TODO: Move to its own function
 			{
@@ -1607,12 +1522,13 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 				htmlext = ".html";
 
+				QString Title = GetTitle();
+				char m_strTitle[256];
+				strcpy(m_strTitle, Title.toLatin1().constData()); // todo: qstring
+
 				if (Options.SinglePage)
 				{
-					strcpy(fn, Options.PathName);
-					strcat(fn, m_strTitle);
-					strcat(fn, htmlext);
-					f = fopen (fn, "wt");
+					f = fopen(QFileInfo(Dir, Title + htmlext).canonicalFilePath().toLatin1().constData(), "wt");
 
 					if (!f)
 					{
@@ -1641,11 +1557,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 				{
 					if (Options.IndexPage)
 					{
-						strcpy(fn, Options.PathName);
-						strcat (fn, m_strTitle);
-						strcat (fn, "-index");
-						strcat (fn, htmlext);
-						f = fopen (fn, "wt");
+						f = fopen(QFileInfo(Dir, Title + "-index" + htmlext).canonicalFilePath().toLatin1().constData(), "wt");
 
 						if (!f)
 						{
@@ -1668,7 +1580,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 					// Create each step
 					for (lcStep Step = 1; Step <= LastStep; Step++)
 					{
-						sprintf(fn, "%s%s-%02d%s", Options.PathName, m_strTitle, Step, htmlext);
+						sprintf(fn, "%s%s-%02d%s", Options.PathName.toLatin1().constData(), m_strTitle, Step, htmlext);
 						f = fopen(fn, "wt");
 
 						if (!f)
@@ -1702,11 +1614,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 					if (Options.PartsListEnd)
 					{
-						strcpy(fn, Options.PathName);
-						strcat (fn, m_strTitle);
-						strcat (fn, "-pieces");
-						strcat (fn, htmlext);
-						f = fopen (fn, "wt");
+						f = fopen(QFileInfo(Dir, Title + "-pieces" + htmlext).canonicalFilePath().toLatin1().constData(), "wt");
 
 						if (!f)
 						{
@@ -1729,7 +1637,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 					}
 				}
 
-				sprintf(fn, "%s%s-%%1%s", Options.PathName, m_strTitle, ext);
+				sprintf(fn, "%s%s-%%1%s", Options.PathName.toLatin1().constData(), m_strTitle, ext);
 				SaveStepImages(fn, Options.StepImagesWidth, Options.StepImagesHeight, 1, LastStep);
 
 				if (Options.PartsListImages)
@@ -1772,7 +1680,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 						Info->RenderPiece(Options.PartImagesColor);
 						glFinish();
 
-						sprintf(fn, "%s%s%s", Options.PathName, Info->m_strName, ext);
+						sprintf(fn, "%s%s%s", Options.PathName.toLatin1().constData(), Info->m_strName, ext);
 						if (!Context->SaveRenderToTextureImage(fn, cx, cy))
 							break;
 					}
@@ -1802,7 +1710,7 @@ void Project::HandleCommand(LC_COMMANDS id)
 			lcPropertiesDialogOptions Options;
 
 			Options.Properties = mProperties;
-			Options.Title = m_strTitle;
+			Options.Title = GetTitle();
 			Options.SetDefault = false;
 
 			GetPartsList(Options.PartsList);

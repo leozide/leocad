@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>569</height>
+    <height>553</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,6 +20,9 @@
       <string>General</string>
      </property>
      <layout class="QFormLayout" name="formLayout_3">
+      <property name="fieldGrowthPolicy">
+       <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+      </property>
       <item row="2" column="0">
        <widget class="QLabel" name="label_6">
         <property name="text">
@@ -51,6 +54,13 @@
         </property>
        </widget>
       </item>
+      <item row="4" column="0" colspan="2">
+       <widget class="QCheckBox" name="transparentImages">
+        <property name="text">
+         <string>Transparent image background</string>
+        </property>
+       </widget>
+      </item>
       <item row="3" column="1">
        <widget class="QComboBox" name="imageFormat">
         <item>
@@ -68,13 +78,6 @@
           <string>PNG</string>
          </property>
         </item>
-       </widget>
-      </item>
-      <item row="4" column="0" colspan="2">
-       <widget class="QCheckBox" name="transparentImages">
-        <property name="text">
-         <string>Transparent image background</string>
-        </property>
        </widget>
       </item>
      </layout>
@@ -235,11 +238,28 @@
        </widget>
       </item>
       <item row="3" column="1">
-       <widget class="lcQColorPicker" name="partColor">
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="lcQColorPicker" name="partColor">
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
       </item>
      </layout>
     </widget>
@@ -288,7 +308,6 @@
   <tabstop>partsAfterEachStep</tabstop>
   <tabstop>partsAtTheEnd</tabstop>
   <tabstop>partImages</tabstop>
-  <tabstop>partColor</tabstop>
   <tabstop>partImagesWidth</tabstop>
   <tabstop>partImagesHeight</tabstop>
  </tabstops>

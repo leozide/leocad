@@ -108,7 +108,8 @@ protected:
 	void RenderScenePieces(View* view, bool DrawInterface);
 	void RenderSceneObjects(View* view);
 
-	void CreateHTMLPieceList(FILE* f, lcStep Step, bool bImages, const char* ext);
+	void ExportHTML();
+	void CreateHTMLPieceList(QTextStream& Stream, lcStep Step, bool Images, const QString& ImageExtension);
 	void ZoomExtents(int FirstView, int LastView);
 
 	bool DoSave(const QString& FileName);

@@ -16,7 +16,7 @@ lcQHTMLDialog::lcQHTMLDialog(QWidget *parent, void *data) :
 
 	options = (lcHTMLDialogOptions*)data;
 
-	ui->outputFolder->setText(options->PathName);
+	ui->outputFolder->setText(QDir::toNativeSeparators(options->PathName));
 	ui->imageFormat->setCurrentIndex(options->ImageFormat);
 	ui->transparentImages->setChecked(options->TransparentImages);
 	ui->singlePage->setChecked(options->SinglePage);

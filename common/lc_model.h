@@ -150,6 +150,8 @@ public:
 	void SaveLDraw(QTextStream& Stream) const;
 	void LoadLDraw(QTextStream& Stream);
 
+	void DrawBackground(lcContext* Context);
+
 	void RayTest(lcObjectRayTest& ObjectRayTest) const;
 	void BoxTest(lcObjectBoxTest& ObjectBoxTest) const;
 

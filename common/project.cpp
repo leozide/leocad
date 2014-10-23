@@ -722,6 +722,7 @@ bool Project::SaveIfModified()
 
 	switch (QMessageBox::question(gMainWindow->mHandle, tr("Save Project"), tr("Save changes to '%1'?").arg(GetTitle()), QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel))
 	{
+	default:
 	case QMessageBox::Cancel:
 		return false;
 
@@ -878,10 +879,12 @@ void Project::CheckPoint(const char* Description)
 
 void Project::Render(View* View, bool ToMemory)
 {
-	View->mContext->SetDefaultState();
-	glViewport(0, 0, View->mWidth, View->mHeight);
+	lcContext* Context = View->mContext;
 
-	RenderBackground(View);
+	Context->SetDefaultState();
+	Context->SetViewport(0, 0, View->mWidth, View->mHeight);
+
+	DrawBackground(Context);
 
 	RenderScenePieces(View, !ToMemory);
 
@@ -889,93 +892,6 @@ void Project::Render(View* View, bool ToMemory)
 	{
 		RenderSceneObjects(View);
 	}
-}
-
-void Project::RenderBackground(View* View)
-{
-	lcContext* Context = View->mContext;
-
-	if (mProperties.mBackgroundType == LC_BACKGROUND_SOLID)
-	{
-		glClearColor(mProperties.mBackgroundSolidColor[0], mProperties.mBackgroundSolidColor[1], mProperties.mBackgroundSolidColor[2], 0.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		return;
-	}
-
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	glDepthMask(GL_FALSE);
-	glDisable(GL_DEPTH_TEST);
-	glDisable(GL_LIGHTING);
-
-	float ViewWidth = (float)View->mWidth;
-	float ViewHeight = (float)View->mHeight;
-
-	Context->SetProjectionMatrix(lcMatrix44Ortho(0.0f, ViewWidth, 0.0f, ViewHeight, -1.0f, 1.0f));
-	Context->SetWorldViewMatrix(lcMatrix44Translation(lcVector3(0.375f, 0.375f, 0.0f)));
-
-	if (mProperties.mBackgroundType == LC_BACKGROUND_GRADIENT)
-	{
-		glShadeModel(GL_SMOOTH);
-
-		const lcVector3& Color1 = mProperties.mBackgroundGradientColor1;
-		const lcVector3& Color2 = mProperties.mBackgroundGradientColor2;
-
-		float Verts[] =
-		{
-			ViewWidth, ViewHeight, Color1[0], Color1[1], Color1[2], 1.0f,
-			0.0f,      ViewHeight, Color1[0], Color1[1], Color1[2], 1.0f,
-			0.0f,      0.0f,       Color2[0], Color2[1], Color2[2], 1.0f,
-			ViewWidth, 0.0f,       Color2[0], Color2[1], Color2[2], 1.0f
-		};
-
-		glVertexPointer(2, GL_FLOAT, 6 * sizeof(float), Verts);
-		glEnableClientState(GL_COLOR_ARRAY);
-		glColorPointer(4, GL_FLOAT, 6 * sizeof(float), Verts + 2);
-
-		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-
-		glDisableClientState(GL_COLOR_ARRAY);
-
-		glShadeModel(GL_FLAT);
-	}
-
-	if (mProperties.mBackgroundType == LC_BACKGROUND_IMAGE)
-	{
-		glEnable(GL_TEXTURE_2D);
-
-		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-		glBindTexture(GL_TEXTURE_2D, mBackgroundTexture->mTexture);
-
-		float TileWidth = 1.0f, TileHeight = 1.0f;
-
-		if (mProperties.mBackgroundImageTile)
-		{
-			TileWidth = ViewWidth / mBackgroundTexture->mWidth;
-			TileHeight = ViewHeight / mBackgroundTexture->mHeight;
-		}
-
-		float Verts[] =
-		{
-			0.0f,      ViewHeight, 0.0f,      0.0f,
-			ViewWidth, ViewHeight, TileWidth, 0.0f,
-			ViewWidth, 0.0f,       TileWidth, TileHeight,
-			0.0f,      0.0f,       0.0f,      TileHeight
-		};
-
-		glVertexPointer(2, GL_FLOAT, 4 * sizeof(float), Verts);
-		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-		glTexCoordPointer(2, GL_FLOAT, 4 * sizeof(float), Verts + 2);
-
-		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-
-		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-
-		glDisable(GL_TEXTURE_2D);
-	}
-
-	glEnable(GL_DEPTH_TEST);
-	glDepthMask(GL_TRUE);
 }
 
 void Project::RenderScenePieces(View* view, bool DrawInterface)
@@ -1585,7 +1501,7 @@ void Project::ExportHTML()
 		}
 
 		float aspect = (float)Width/(float)Height;
-		glViewport(0, 0, Width, Height);
+		Context->SetViewport(0, 0, Width, Height);
 
 		for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 		{

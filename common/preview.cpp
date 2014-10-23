@@ -32,8 +32,10 @@ void PiecePreview::OnDraw()
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	float aspect = (float)mWidth/(float)mHeight;
-	glViewport(0, 0, mWidth, mHeight);
+	mContext->SetViewport(0, 0, mWidth, mHeight);
 	glEnableClientState(GL_VERTEX_ARRAY);
+
+	lcGetActiveProject()->DrawBackground(mContext);
 
 	lcVector3 Eye(0.0f, 0.0f, 1.0f);
 
@@ -57,9 +59,6 @@ void PiecePreview::OnDraw()
 		glLoadMatrixf(lcMatrix44LookAt(Eye * m_Distance, m_PieceInfo->GetCenter(), lcVector3(0, 0, 1)));
 	}
 
-	float *bg = lcGetActiveProject()->GetBackgroundColor();
-	glClearColor(bg[0], bg[1], bg[2], bg[3]);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	m_PieceInfo->RenderPiece(gMainWindow->mColorIndex);
 
 	glDisableClientState(GL_VERTEX_ARRAY);

@@ -171,7 +171,7 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 
 	// Image output options.
 	bool SaveImage = false;
-	bool ImageHighlight = false;
+//	bool ImageHighlight = false;
 	int ImageWidth = lcGetProfileInt(LC_PROFILE_IMAGE_WIDTH);
 	int ImageHeight = lcGetProfileInt(LC_PROFILE_IMAGE_HEIGHT);
 	lcStep ImageStart = 0;
@@ -222,8 +222,8 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 				ParseIntegerArgument(&i, argc, argv, &Step);
 				ImageEnd = Step;
 			}
-			else if (strcmp(Param, "--highlight") == 0)
-				ImageHighlight = true;
+//			else if (strcmp(Param, "--highlight") == 0)
+//				ImageHighlight = true;
 			else if ((strcmp(Param, "-v") == 0) || (strcmp(Param, "--version") == 0))
 			{
 				printf("LeoCAD Version " LC_VERSION_TEXT "\n");

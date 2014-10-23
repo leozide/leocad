@@ -429,6 +429,91 @@ void lcModel::LoadLDraw(QTextStream& Stream)
 	delete Light;
 }
 
+void lcModel::DrawBackground(lcContext* Context)
+{
+	if (mProperties.mBackgroundType == LC_BACKGROUND_SOLID)
+	{
+		glClearColor(mProperties.mBackgroundSolidColor[0], mProperties.mBackgroundSolidColor[1], mProperties.mBackgroundSolidColor[2], 0.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		return;
+	}
+
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glDepthMask(GL_FALSE);
+	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_LIGHTING);
+
+	float ViewWidth = (float)Context->GetViewportWidth();
+	float ViewHeight = (float)Context->GetViewportHeight();
+
+	Context->SetProjectionMatrix(lcMatrix44Ortho(0.0f, ViewWidth, 0.0f, ViewHeight, -1.0f, 1.0f));
+	Context->SetWorldViewMatrix(lcMatrix44Translation(lcVector3(0.375f, 0.375f, 0.0f)));
+
+	if (mProperties.mBackgroundType == LC_BACKGROUND_GRADIENT)
+	{
+		glShadeModel(GL_SMOOTH);
+
+		const lcVector3& Color1 = mProperties.mBackgroundGradientColor1;
+		const lcVector3& Color2 = mProperties.mBackgroundGradientColor2;
+
+		float Verts[] =
+		{
+			ViewWidth, ViewHeight, Color1[0], Color1[1], Color1[2], 1.0f,
+			0.0f,      ViewHeight, Color1[0], Color1[1], Color1[2], 1.0f,
+			0.0f,      0.0f,       Color2[0], Color2[1], Color2[2], 1.0f,
+			ViewWidth, 0.0f,       Color2[0], Color2[1], Color2[2], 1.0f
+		};
+
+		glVertexPointer(2, GL_FLOAT, 6 * sizeof(float), Verts);
+		glEnableClientState(GL_COLOR_ARRAY);
+		glColorPointer(4, GL_FLOAT, 6 * sizeof(float), Verts + 2);
+
+		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+
+		glDisableClientState(GL_COLOR_ARRAY);
+
+		glShadeModel(GL_FLAT);
+	}
+
+	if (mProperties.mBackgroundType == LC_BACKGROUND_IMAGE)
+	{
+		glEnable(GL_TEXTURE_2D);
+
+		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+		glBindTexture(GL_TEXTURE_2D, mBackgroundTexture->mTexture);
+
+		float TileWidth = 1.0f, TileHeight = 1.0f;
+
+		if (mProperties.mBackgroundImageTile)
+		{
+			TileWidth = ViewWidth / mBackgroundTexture->mWidth;
+			TileHeight = ViewHeight / mBackgroundTexture->mHeight;
+		}
+
+		float Verts[] =
+		{
+			0.0f,      ViewHeight, 0.0f,      0.0f,
+			ViewWidth, ViewHeight, TileWidth, 0.0f,
+			ViewWidth, 0.0f,       TileWidth, TileHeight,
+			0.0f,      0.0f,       0.0f,      TileHeight
+		};
+
+		glVertexPointer(2, GL_FLOAT, 4 * sizeof(float), Verts);
+		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+		glTexCoordPointer(2, GL_FLOAT, 4 * sizeof(float), Verts + 2);
+
+		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+
+		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+
+		glDisable(GL_TEXTURE_2D);
+	}
+
+	glEnable(GL_DEPTH_TEST);
+	glDepthMask(GL_TRUE);
+}
+
 void lcModel::UpdateBackgroundTexture()
 {
 	lcReleaseTexture(mBackgroundTexture);

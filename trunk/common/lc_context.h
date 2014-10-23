@@ -9,8 +9,19 @@ public:
 	lcContext();
 	~lcContext();
 
+	int GetViewportWidth() const
+	{
+		return mViewportWidth;
+	}
+
+	int GetViewportHeight() const
+	{
+		return mViewportHeight;
+	}
+
 	void SetDefaultState();
 
+	void SetViewport(int x, int y, int Width, int Height);
 	void SetWorldViewMatrix(const lcMatrix44& WorldViewMatrix);
 	void SetProjectionMatrix(const lcMatrix44& ProjectionMatrix);
 //	void SetColor(const lcVector4& Color);
@@ -36,6 +47,11 @@ protected:
 	lcTexture* mTexture;
 	float mLineWidth;
 	int mMatrixMode;
+
+	int mViewportX;
+	int mViewportY;
+	int mViewportWidth;
+	int mViewportHeight;
 
 	GLuint mFramebufferObject;
 	GLuint mFramebufferTexture;

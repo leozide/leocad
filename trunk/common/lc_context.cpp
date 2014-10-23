@@ -62,6 +62,19 @@ void lcContext::SetDefaultState()
 	mMatrixMode = GL_MODELVIEW;
 }
 
+void lcContext::SetViewport(int x, int y, int Width, int Height)
+{
+	if (mViewportX == x && mViewportY == y && mViewportWidth == Width && mViewportHeight == Height)
+		return;
+
+	glViewport(x, y, Width, Height);
+
+	mViewportX = x;
+	mViewportY = y;
+	mViewportWidth = Width;
+	mViewportHeight = Height;
+}
+
 void lcContext::SetWorldViewMatrix(const lcMatrix44& WorldViewMatrix)
 {
 	if (mMatrixMode != GL_MODELVIEW)

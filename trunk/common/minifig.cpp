@@ -964,7 +964,9 @@ void MinifigWizard::ParseSettings(lcFile& Settings)
 void MinifigWizard::OnDraw()
 {
 	float Aspect = (float)mWidth/(float)mHeight;
-	glViewport(0, 0, mWidth, mHeight);
+	mContext->SetViewport(0, 0, mWidth, mHeight);
+
+	lcGetActiveProject()->DrawBackground(mContext);
 
 	float Box[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
 
@@ -1041,12 +1043,6 @@ void MinifigWizard::OnDraw()
 	{
 		ViewMatrix = lcMatrix44LookAt(Eye * m_Distance, Center, lcVector3(0, 0, 1));
 	}
-
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-	float *bg = lcGetActiveProject()->GetBackgroundColor();
-	glClearColor(bg[0], bg[1], bg[2], bg[3]);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	Calculate();
 

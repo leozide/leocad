@@ -73,19 +73,12 @@ public:
 		CalculateStep();
 	}
 
-	float* GetBackgroundColor() // todo: remove
-	{
-		return mProperties.mBackgroundSolidColor;
-	}
-
 	int GetGroupIndex(lcGroup* Group) const
 	{
 		return mGroups.FindIndex(Group);
 	}
 
 	void UpdateInterface();
-
-public:
 	void LoadDefaults();
 	void SaveImage();
 	void SaveStepImages(const QString& BaseName, int Width, int Height, lcStep Start, lcStep End);
@@ -104,7 +97,6 @@ protected:
 
 	static int InstanceOfName(const String& existingString, const String& candidateString, String& baseNameOut);
 
-	void RenderBackground(View* view);
 	void RenderScenePieces(View* view, bool DrawInterface);
 	void RenderSceneObjects(View* view);
 

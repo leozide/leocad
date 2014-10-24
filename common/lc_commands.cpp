@@ -928,13 +928,6 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 		QT_TRANSLATE_NOOP("Status", "Set the current camera to use an orthographic projection"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
-	// LC_VIEW_PROJECTION_CYCLE
-	{
-		"View.Projection.Cycle",
-		QT_TRANSLATE_NOOP("Menu", "&Cycle"),
-		QT_TRANSLATE_NOOP("Status", "Cycle to next projection type"),
-		QT_TRANSLATE_NOOP("Shortcut", "")
-	},
 	// LC_VIEW_PROJECTION_FOCUS
 	{
 		"View.Projection.Focus",

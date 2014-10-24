@@ -1423,6 +1423,20 @@ void lcModel::AddToSelection(const lcArray<lcObjectSection>& ObjectSections)
 	gMainWindow->UpdateFocusObject(GetFocusObject());
 }
 
+void lcModel::SelectAllPieces()
+{
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+	{
+		lcPiece* Piece = mPieces[PieceIdx];
+
+		if (Piece->IsVisible(mCurrentStep))
+			Piece->SetSelected(true);
+	}
+
+	UpdateSelection();
+	gMainWindow->UpdateAllViews();
+}
+
 void lcModel::FindPiece(bool FindFirst, bool SearchForward)
 {
 	if (mPieces.IsEmpty())
@@ -1477,6 +1491,36 @@ void lcModel::FindPiece(bool FindFirst, bool SearchForward)
 	}
 
 	ClearSelectionAndSetFocus(Focus, LC_PIECE_SECTION_POSITION);
+}
+
+void lcModel::UndoAction()
+{
+	if (mUndoHistory.GetSize() < 2)
+		return;
+
+	lcModelHistoryEntry* Undo = mUndoHistory[0];
+	mUndoHistory.RemoveIndex(0);
+	mRedoHistory.InsertAt(0, Undo);
+
+	LoadCheckPoint(mUndoHistory[0]);
+
+	gMainWindow->UpdateModified(IsModified());
+	gMainWindow->UpdateUndoRedo(mUndoHistory.GetSize() > 1 ? mUndoHistory[0]->Description : NULL, !mRedoHistory.IsEmpty() ? mRedoHistory[0]->Description : NULL);
+}
+
+void lcModel::RedoAction()
+{
+	if (mRedoHistory.IsEmpty())
+		return;
+
+	lcModelHistoryEntry* Redo = mRedoHistory[0];
+	mRedoHistory.RemoveIndex(0);
+	mUndoHistory.InsertAt(0, Redo);
+
+	LoadCheckPoint(Redo);
+
+	gMainWindow->UpdateModified(IsModified());
+	gMainWindow->UpdateUndoRedo(mUndoHistory.GetSize() > 1 ? mUndoHistory[0]->Description : NULL, !mRedoHistory.IsEmpty() ? mRedoHistory[0]->Description : NULL);
 }
 
 void lcModel::BeginMouseTool()

@@ -238,7 +238,6 @@ void lcQMainWindow::createMenus()
 	exportMenu->addAction(actions[LC_FILE_EXPORT_WAVEFRONT]);
 	menuFile->addSeparator();
 	menuFile->addAction(actions[LC_FILE_PROPERTIES]);
-//	menuFile->addAction(actions[LC_FILE_TERRAIN_EDITOR]);
 	menuFile->addSeparator();
 	menuFile->addAction(actions[LC_FILE_PRINT]);
 	menuFile->addAction(actions[LC_FILE_PRINT_PREVIEW]);

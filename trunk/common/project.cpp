@@ -1660,9 +1660,9 @@ void Project::HandleCommand(LC_COMMANDS id)
 			gMainWindow->DoDialog(LC_DIALOG_PRINT, NULL);
 			break;
 
-		// TODO: printing
-		case LC_FILE_PRINT_BOM:
-			break;
+	// TODO: printing
+	case LC_FILE_PRINT_BOM:
+		break;
 
 	case LC_FILE_RECENT1:
 	case LC_FILE_RECENT2:
@@ -1677,35 +1677,11 @@ void Project::HandleCommand(LC_COMMANDS id)
 		break;
 
 	case LC_EDIT_UNDO:
-		{
-			if (mUndoHistory.GetSize() < 2)
-				break;
-
-			lcModelHistoryEntry* Undo = mUndoHistory[0];
-			mUndoHistory.RemoveIndex(0);
-			mRedoHistory.InsertAt(0, Undo);
-
-			LoadCheckPoint(mUndoHistory[0]);
-
-			gMainWindow->UpdateModified(IsModified());
-			gMainWindow->UpdateUndoRedo(mUndoHistory.GetSize() > 1 ? mUndoHistory[0]->Description : NULL, !mRedoHistory.IsEmpty() ? mRedoHistory[0]->Description : NULL);
-		}
+		UndoAction();
 		break;
 
 	case LC_EDIT_REDO:
-		{
-			if (mRedoHistory.IsEmpty())
-				break;
-
-			lcModelHistoryEntry* Redo = mRedoHistory[0];
-			mRedoHistory.RemoveIndex(0);
-			mUndoHistory.InsertAt(0, Redo);
-
-			LoadCheckPoint(Redo);
-
-			gMainWindow->UpdateModified(IsModified());
-			gMainWindow->UpdateUndoRedo(mUndoHistory.GetSize() > 1 ? mUndoHistory[0]->Description : NULL, !mRedoHistory.IsEmpty() ? mRedoHistory[0]->Description : NULL);
-		}
+		RedoAction();
 		break;
 
 	case LC_EDIT_CUT:
@@ -1885,37 +1861,26 @@ void Project::HandleCommand(LC_COMMANDS id)
 			gMainWindow->UpdateAllViews();
 		} break;
 
-		case LC_EDIT_FIND:
-			if (gMainWindow->DoDialog(LC_DIALOG_FIND, &gMainWindow->mSearchOptions))
-				FindPiece(true, true);
-			break;
+	case LC_EDIT_FIND:
+		if (gMainWindow->DoDialog(LC_DIALOG_FIND, &gMainWindow->mSearchOptions))
+			FindPiece(true, true);
+		break;
 
-		case LC_EDIT_FIND_NEXT:
-			FindPiece(false, true);
-			break;
+	case LC_EDIT_FIND_NEXT:
+		FindPiece(false, true);
+		break;
 
-		case LC_EDIT_FIND_PREVIOUS:
-			FindPiece(false, false);
-			break;
+	case LC_EDIT_FIND_PREVIOUS:
+		FindPiece(false, false);
+		break;
 
-		case LC_EDIT_SELECT_ALL:
-		{
-			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-			{
-				lcPiece* Piece = mPieces[PieceIdx];
+	case LC_EDIT_SELECT_ALL:
+		SelectAllPieces();
+		break;
 
-				if (Piece->IsVisible(mCurrentStep))
-					Piece->SetSelected(true);
-			}
-
-			UpdateSelection();
-			gMainWindow->UpdateAllViews();
-		} break;
-
-		case LC_EDIT_SELECT_NONE:
-		{
-			ClearSelection(true);
-		} break;
+	case LC_EDIT_SELECT_NONE:
+		ClearSelection(true);
+		break;
 
 		case LC_EDIT_SELECT_INVERT:
 		{
@@ -2019,18 +1984,6 @@ void Project::HandleCommand(LC_COMMANDS id)
 
 			if (Camera->IsFocused())
 				gMainWindow->UpdateFocusObject(Camera);
-			gMainWindow->UpdateAllViews();
-			gMainWindow->UpdatePerspective();
-		}
-		break;
-
-	case LC_VIEW_PROJECTION_CYCLE:
-		{
-			View* ActiveView = gMainWindow->GetActiveView();
-			lcCamera* Camera = ActiveView->mCamera;
-
-			Camera->SetOrtho(!Camera->IsOrtho());
-
 			gMainWindow->UpdateAllViews();
 			gMainWindow->UpdatePerspective();
 		}

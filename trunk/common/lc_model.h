@@ -169,8 +169,12 @@ public:
 	void ClearSelectionAndSetFocus(const lcObjectSection& ObjectSection);
 	void SetSelection(const lcArray<lcObjectSection>& ObjectSections);
 	void AddToSelection(const lcArray<lcObjectSection>& ObjectSections);
+	void SelectAllPieces();
 
 	void FindPiece(bool FindFirst, bool SearchForward);
+
+	void UndoAction();
+	void RedoAction();
 
 	lcVector3 LockVector(const lcVector3& Vector) const;
 	lcVector3 SnapPosition(const lcVector3& Delta) const;

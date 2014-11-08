@@ -171,6 +171,10 @@ public:
 	void AddToSelection(const lcArray<lcObjectSection>& ObjectSections);
 	void SelectAllPieces();
 
+	void HideSelectedPieces();
+	void HideUnselectedPieces();
+	void UnhideAllPieces();
+
 	void FindPiece(bool FindFirst, bool SearchForward);
 
 	void UndoAction();
@@ -203,6 +207,8 @@ public:
 	void UpdateOrbitTool(lcCamera* Camera, float MouseX, float MouseY);
 	void UpdateRollTool(lcCamera* Camera, float Mouse);
 	void ZoomRegionToolClicked(lcCamera* Camera, const lcVector3* Points, float RatioX, float RatioY);
+	void ZoomExtents(lcCamera* Camera, float Aspect);
+	void Zoom(lcCamera* Camera, float Amount);
 
 	void Export3DStudio() const;
 	void ExportBrickLink() const;

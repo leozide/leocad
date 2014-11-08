@@ -54,12 +54,22 @@ void View::SetCamera(lcCamera* Camera, bool ForceCopy)
 	}
 }
 
+void View::SetViewpoint(lcViewpoint Viewpoint)
+{
+	if (!mCamera || !mCamera->IsSimple())
+		mCamera = new lcCamera(true);
+
+	mCamera->SetViewpoint(Viewpoint);
+	ZoomExtents();
+	Redraw();
+}
+
 void View::SetDefaultCamera()
 {
 	if (!mCamera || !mCamera->IsSimple())
 		mCamera = new lcCamera(true);
 
-	mCamera->SetViewpoint(LC_VIEWPOINT_HOME, 1, false);
+	mCamera->SetViewpoint(LC_VIEWPOINT_HOME);
 }
 
 lcMatrix44 View::GetProjectionMatrix() const
@@ -1210,6 +1220,11 @@ void View::EndPieceDrag(bool Accept)
 	UpdateTrackTool();
 }
 
+void View::ZoomExtents()
+{
+	mProject->ZoomExtents(mCamera, (float)mWidth / (float)mHeight);
+}
+
 void View::UpdateTrackTool()
 {
 	lcTool CurrentTool = gMainWindow->GetTool();
@@ -2183,5 +2198,5 @@ void View::OnMouseMove()
 
 void View::OnMouseWheel(float Direction)
 {
-	mProject->ZoomActiveView((int)((mInputState.Control ? 100 : 10) * Direction));
+	mProject->Zoom(mCamera, (int)((mInputState.Control ? 100 : 10) * Direction));
 }

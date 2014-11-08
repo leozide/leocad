@@ -21,7 +21,7 @@ class View;
 #define LC_CAMERA_SELECTION_MASK    (LC_CAMERA_POSITION_SELECTED | LC_CAMERA_TARGET_SELECTED | LC_CAMERA_UPVECTOR_SELECTED)
 #define LC_CAMERA_FOCUS_MASK        (LC_CAMERA_POSITION_FOCUSED | LC_CAMERA_TARGET_FOCUSED | LC_CAMERA_UPVECTOR_FOCUSED)
 
-enum LC_VIEWPOINT
+enum lcViewpoint
 {
 	LC_VIEWPOINT_FRONT,
 	LC_VIEWPOINT_BACK,
@@ -280,7 +280,7 @@ public:
 	void CopyPosition(const lcCamera* camera);
 	void Render(View* View);
 
-	void ZoomExtents(View* view, const lcVector3& Center, const lcVector3* Points, int NumPoints, lcStep Step, bool AddKey);
+	void ZoomExtents(float Aspect, const lcVector3& Center, const lcVector3* Points, int NumPoints, lcStep Step, bool AddKey);
 	void ZoomRegion(const lcVector3* Points, float RatioX, float RatioY, lcStep Step, bool AddKey);
 	void Zoom(float Distance, lcStep Step, bool AddKey);
 	void Pan(float DistanceX, float DistanceY, lcStep Step, bool AddKey);
@@ -288,7 +288,7 @@ public:
 	void Roll(float Distance, lcStep Step, bool AddKey);
 	void Center(lcVector3& point, lcStep Step, bool AddKey);
 	void Move(lcStep Step, bool AddKey, const lcVector3& Distance);
-	void SetViewpoint(LC_VIEWPOINT Viewpoint, lcStep Step, bool AddKey);
+	void SetViewpoint(lcViewpoint Viewpoint);
 	void SetFocalPoint(const lcVector3& focus, lcStep Step, bool AddKey);
 
 	void StartTiledRendering(int tw, int th, int iw, int ih, float fAspect);

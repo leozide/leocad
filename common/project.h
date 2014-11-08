@@ -86,7 +86,6 @@ public:
 	lcGroup* AddGroup(lcGroup* Parent);
 	void TransformSelectedObjects(lcTransformType Type, const lcVector3& Transform);
 	void ModifyObject(lcObject* Object, lcObjectProperty Property, void* Value);
-	void ZoomActiveView(int Amount);
 	void GetPieceInsertPosition(View* view, lcVector3& Position, lcVector4& Orientation);
 	void HandleCommand(LC_COMMANDS id);
 
@@ -102,7 +101,6 @@ protected:
 
 	void ExportHTML();
 	void CreateHTMLPieceList(QTextStream& Stream, lcStep Step, bool Images, const QString& ImageExtension);
-	void ZoomExtents(int FirstView, int LastView);
 
 	bool DoSave(const QString& FileName);
 	bool FileLoad(lcFile* file, bool bUndo, bool bMerge);

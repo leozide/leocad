@@ -74,8 +74,10 @@ public:
 
 	void BeginPieceDrag();
 	void EndPieceDrag(bool Accept);
+	void ZoomExtents();
 
-	void SetCamera(lcCamera* camera, bool ForceCopy);
+	void SetCamera(lcCamera* Camera, bool ForceCopy);
+	void SetViewpoint(lcViewpoint Viewpoint);
 	void SetDefaultCamera();
 	lcMatrix44 GetProjectionMatrix() const;
 	LC_CURSOR_TYPE GetCursor() const;

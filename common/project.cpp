@@ -1099,39 +1099,6 @@ void Project::RenderSceneObjects(View* view)
 	Context->SetLineWidth(Preferences.mLineWidth); // context remove
 }
 
-void Project::ZoomExtents(int FirstView, int LastView)
-{
-	float BoundingBox[6];
-
-	if (!GetPiecesBoundingBox(BoundingBox))
-		return;
-
-	lcVector3 Center((BoundingBox[0] + BoundingBox[3]) / 2, (BoundingBox[1] + BoundingBox[4]) / 2, (BoundingBox[2] + BoundingBox[5]) / 2);
-
-	lcVector3 Points[8] =
-	{
-		lcVector3(BoundingBox[0], BoundingBox[1], BoundingBox[5]),
-		lcVector3(BoundingBox[3], BoundingBox[1], BoundingBox[5]),
-		lcVector3(BoundingBox[0], BoundingBox[1], BoundingBox[2]),
-		lcVector3(BoundingBox[3], BoundingBox[4], BoundingBox[5]),
-		lcVector3(BoundingBox[3], BoundingBox[4], BoundingBox[2]),
-		lcVector3(BoundingBox[0], BoundingBox[4], BoundingBox[2]),
-		lcVector3(BoundingBox[0], BoundingBox[4], BoundingBox[5]),
-		lcVector3(BoundingBox[3], BoundingBox[1], BoundingBox[2])
-	};
-
-	const lcArray<View*> Views = gMainWindow->GetViews();
-	for (int vp = FirstView; vp < LastView; vp++)
-	{
-		View* view = Views[vp];
-
-		view->mCamera->ZoomExtents(view, Center, Points, 8, mCurrentStep, gMainWindow->GetAddKeys());
-	}
-
-	gMainWindow->UpdateFocusObject(GetFocusObject());
-	gMainWindow->UpdateAllViews();
-}
-
 void Project::SaveImage()
 {
 	lcImageDialogOptions Options;
@@ -2497,45 +2464,17 @@ void Project::HandleCommand(LC_COMMANDS id)
 			CheckPoint("Editing");
 		} break;
 
-		case LC_PIECE_HIDE_SELECTED:
-		{
-			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-			{
-				lcPiece* Piece = mPieces[PieceIdx];
+	case LC_PIECE_HIDE_SELECTED:
+		HideSelectedPieces();
+		break;
 
-				if (Piece->IsSelected())
-				{
-					Piece->SetHidden(true);
-					Piece->SetSelected(false);
-				}
-			}
+	case LC_PIECE_HIDE_UNSELECTED:
+		HideUnselectedPieces();
+		break;
 
-			UpdateSelection();
-			gMainWindow->UpdateFocusObject(NULL);
-			gMainWindow->UpdateAllViews();
-		} break;
-
-		case LC_PIECE_HIDE_UNSELECTED:
-		{
-			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-			{
-				lcPiece* Piece = mPieces[PieceIdx];
-
-				if (!Piece->IsSelected())
-					Piece->SetHidden(true);
-			}
-
-			UpdateSelection();
-			gMainWindow->UpdateAllViews();
-		} break;
-
-		case LC_PIECE_UNHIDE_ALL:
-		{
-			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-				mPieces[PieceIdx]->SetHidden(false);
-			UpdateSelection();
-			gMainWindow->UpdateAllViews();
-		} break;
+	case LC_PIECE_UNHIDE_ALL:
+		UnhideAllPieces();
+		break;
 
 		case LC_PIECE_SHOW_EARLIER:
 		{
@@ -2597,38 +2536,21 @@ void Project::HandleCommand(LC_COMMANDS id)
 			}
 		} break;
 
-		case LC_VIEW_PREFERENCES:
-			g_App->ShowPreferencesDialog();
-			break;
+	case LC_VIEW_PREFERENCES:
+		g_App->ShowPreferencesDialog();
+		break;
 
-		case LC_VIEW_ZOOM_IN:
-		{
-			ZoomActiveView(-1);
-		} break;
+	case LC_VIEW_ZOOM_IN:
+		Zoom(gMainWindow->GetActiveView()->mCamera, -10.0f);
+		break;
 
-		case LC_VIEW_ZOOM_OUT:
-		{
-			ZoomActiveView(1);
-		} break;
+	case LC_VIEW_ZOOM_OUT:
+		Zoom(gMainWindow->GetActiveView()->mCamera, 10.0f);
+		break;
 
-		case LC_VIEW_ZOOM_EXTENTS:
-		{
-			int FirstView, LastView;
-
-			// TODO: Find a way to let users zoom extents all views
-//			if (Sys_KeyDown(KEY_CONTROL))
-//			{
-//				FirstView = 0;
-//				LastView = m_ViewList.GetSize();
-//			}
-//			else
-			{
-				FirstView = gMainWindow->GetViews().FindIndex(gMainWindow->GetActiveView());
-				LastView = FirstView + 1;
-			}
-
-			ZoomExtents(FirstView, LastView);
-		} break;
+	case LC_VIEW_ZOOM_EXTENTS:
+		gMainWindow->GetActiveView()->ZoomExtents();
+		break;
 
 		case LC_VIEW_LOOK_AT:
 		{
@@ -2744,54 +2666,33 @@ void Project::HandleCommand(LC_COMMANDS id)
 			UpdateSelection();
 		} break;
 
-		case LC_VIEW_VIEWPOINT_FRONT:
-		{
-			gMainWindow->GetActiveView()->mCamera->SetViewpoint(LC_VIEWPOINT_FRONT, mCurrentStep, gMainWindow->GetAddKeys());
-			HandleCommand(LC_VIEW_ZOOM_EXTENTS);
-			gMainWindow->UpdateAllViews();
-		} break;
+	case LC_VIEW_VIEWPOINT_FRONT:
+		gMainWindow->GetActiveView()->SetViewpoint(LC_VIEWPOINT_FRONT);
+		break;
 
-		case LC_VIEW_VIEWPOINT_BACK:
-		{
-			gMainWindow->GetActiveView()->mCamera->SetViewpoint(LC_VIEWPOINT_BACK, mCurrentStep, gMainWindow->GetAddKeys());
-			HandleCommand(LC_VIEW_ZOOM_EXTENTS);
-			gMainWindow->UpdateAllViews();
-		} break;
+	case LC_VIEW_VIEWPOINT_BACK:
+		gMainWindow->GetActiveView()->SetViewpoint(LC_VIEWPOINT_BACK);
+		break;
 
-		case LC_VIEW_VIEWPOINT_TOP:
-		{
-			gMainWindow->GetActiveView()->mCamera->SetViewpoint(LC_VIEWPOINT_TOP, mCurrentStep, gMainWindow->GetAddKeys());
-			HandleCommand(LC_VIEW_ZOOM_EXTENTS);
-			gMainWindow->UpdateAllViews();
-		} break;
+	case LC_VIEW_VIEWPOINT_TOP:
+		gMainWindow->GetActiveView()->SetViewpoint(LC_VIEWPOINT_TOP);
+		break;
 
-		case LC_VIEW_VIEWPOINT_BOTTOM:
-		{
-			gMainWindow->GetActiveView()->mCamera->SetViewpoint(LC_VIEWPOINT_BOTTOM, mCurrentStep, gMainWindow->GetAddKeys());
-			HandleCommand(LC_VIEW_ZOOM_EXTENTS);
-			gMainWindow->UpdateAllViews();
-		} break;
+	case LC_VIEW_VIEWPOINT_BOTTOM:
+		gMainWindow->GetActiveView()->SetViewpoint(LC_VIEWPOINT_BOTTOM);
+		break;
 
-		case LC_VIEW_VIEWPOINT_LEFT:
-		{
-			gMainWindow->GetActiveView()->mCamera->SetViewpoint(LC_VIEWPOINT_LEFT, mCurrentStep, gMainWindow->GetAddKeys());
-			HandleCommand(LC_VIEW_ZOOM_EXTENTS);
-			gMainWindow->UpdateAllViews();
-		} break;
+	case LC_VIEW_VIEWPOINT_LEFT:
+		gMainWindow->GetActiveView()->SetViewpoint(LC_VIEWPOINT_LEFT);
+		break;
 
-		case LC_VIEW_VIEWPOINT_RIGHT:
-		{
-			gMainWindow->GetActiveView()->mCamera->SetViewpoint(LC_VIEWPOINT_RIGHT, mCurrentStep, gMainWindow->GetAddKeys());
-			HandleCommand(LC_VIEW_ZOOM_EXTENTS);
-			gMainWindow->UpdateAllViews();
-		} break;
+	case LC_VIEW_VIEWPOINT_RIGHT:
+		gMainWindow->GetActiveView()->SetViewpoint(LC_VIEWPOINT_RIGHT);
+		break;
 
-		case LC_VIEW_VIEWPOINT_HOME:
-		{
-			gMainWindow->GetActiveView()->mCamera->SetViewpoint(LC_VIEWPOINT_HOME, mCurrentStep, gMainWindow->GetAddKeys());
-			HandleCommand(LC_VIEW_ZOOM_EXTENTS);
-			gMainWindow->UpdateAllViews();
-		} break;
+	case LC_VIEW_VIEWPOINT_HOME:
+		gMainWindow->GetActiveView()->SetViewpoint(LC_VIEWPOINT_HOME);
+		break;
 
 		case LC_VIEW_CAMERA_NONE:
 		case LC_VIEW_CAMERA1:
@@ -2854,17 +2755,17 @@ void Project::HandleCommand(LC_COMMANDS id)
 			gMainWindow->UpdateAllViews();
 		} break;
 
-		case LC_HELP_HOMEPAGE:
-			g_App->OpenURL("http://www.leocad.org/");
-			break;
+	case LC_HELP_HOMEPAGE:
+		g_App->OpenURL("http://www.leocad.org/");
+		break;
 
-		case LC_HELP_EMAIL:
-			g_App->OpenURL("mailto:leozide@gmail.com?subject=LeoCAD");
-			break;
+	case LC_HELP_EMAIL:
+		g_App->OpenURL("mailto:leozide@gmail.com?subject=LeoCAD");
+		break;
 
-		case LC_HELP_UPDATES:
-			gMainWindow->DoDialog(LC_DIALOG_CHECK_UPDATES, NULL);
-			break;
+	case LC_HELP_UPDATES:
+		gMainWindow->DoDialog(LC_DIALOG_CHECK_UPDATES, NULL);
+		break;
 
 		case LC_HELP_ABOUT:
 		{
@@ -2982,72 +2883,72 @@ void Project::HandleCommand(LC_COMMANDS id)
 		gMainWindow->SetAngleSnapIndex(id - LC_EDIT_SNAP_ANGLE0);
 		break;
 
-		case LC_EDIT_TRANSFORM:
-			TransformSelectedObjects(gMainWindow->GetTransformType(), gMainWindow->GetTransformAmount());
-			break;
+	case LC_EDIT_TRANSFORM:
+		TransformSelectedObjects(gMainWindow->GetTransformType(), gMainWindow->GetTransformAmount());
+		break;
 
-		case LC_EDIT_TRANSFORM_ABSOLUTE_TRANSLATION:
-		case LC_EDIT_TRANSFORM_RELATIVE_TRANSLATION:
-		case LC_EDIT_TRANSFORM_ABSOLUTE_ROTATION:
-		case LC_EDIT_TRANSFORM_RELATIVE_ROTATION:
-			gMainWindow->SetTransformType((lcTransformType)(id - LC_EDIT_TRANSFORM_ABSOLUTE_TRANSLATION));
-			break;
+	case LC_EDIT_TRANSFORM_ABSOLUTE_TRANSLATION:
+	case LC_EDIT_TRANSFORM_RELATIVE_TRANSLATION:
+	case LC_EDIT_TRANSFORM_ABSOLUTE_ROTATION:
+	case LC_EDIT_TRANSFORM_RELATIVE_ROTATION:
+		gMainWindow->SetTransformType((lcTransformType)(id - LC_EDIT_TRANSFORM_ABSOLUTE_TRANSLATION));
+		break;
 
-		case LC_EDIT_ACTION_SELECT:
-			gMainWindow->SetTool(LC_TOOL_SELECT);
-			break;
+	case LC_EDIT_ACTION_SELECT:
+		gMainWindow->SetTool(LC_TOOL_SELECT);
+		break;
 
-		case LC_EDIT_ACTION_INSERT:
-			gMainWindow->SetTool(LC_TOOL_INSERT);
-			break;
+	case LC_EDIT_ACTION_INSERT:
+		gMainWindow->SetTool(LC_TOOL_INSERT);
+		break;
 
-		case LC_EDIT_ACTION_LIGHT:
-			gMainWindow->SetTool(LC_TOOL_LIGHT);
-			break;
+	case LC_EDIT_ACTION_LIGHT:
+		gMainWindow->SetTool(LC_TOOL_LIGHT);
+		break;
 
-		case LC_EDIT_ACTION_SPOTLIGHT:
-			gMainWindow->SetTool(LC_TOOL_SPOTLIGHT);
-			break;
+	case LC_EDIT_ACTION_SPOTLIGHT:
+		gMainWindow->SetTool(LC_TOOL_SPOTLIGHT);
+		break;
 
-		case LC_EDIT_ACTION_CAMERA:
-			gMainWindow->SetTool(LC_TOOL_CAMERA);
-			break;
+	case LC_EDIT_ACTION_CAMERA:
+		gMainWindow->SetTool(LC_TOOL_CAMERA);
+		break;
 
-		case LC_EDIT_ACTION_MOVE:
-			gMainWindow->SetTool(LC_TOOL_MOVE);
-			break;
+	case LC_EDIT_ACTION_MOVE:
+		gMainWindow->SetTool(LC_TOOL_MOVE);
+		break;
 
-		case LC_EDIT_ACTION_ROTATE:
-			gMainWindow->SetTool(LC_TOOL_ROTATE);
-			break;
+	case LC_EDIT_ACTION_ROTATE:
+		gMainWindow->SetTool(LC_TOOL_ROTATE);
+		break;
 
-		case LC_EDIT_ACTION_DELETE:
-			gMainWindow->SetTool(LC_TOOL_ERASER);
-			break;
+	case LC_EDIT_ACTION_DELETE:
+		gMainWindow->SetTool(LC_TOOL_ERASER);
+		break;
 
-		case LC_EDIT_ACTION_PAINT:
-			gMainWindow->SetTool(LC_TOOL_PAINT);
-			break;
+	case LC_EDIT_ACTION_PAINT:
+		gMainWindow->SetTool(LC_TOOL_PAINT);
+		break;
 
-		case LC_EDIT_ACTION_ZOOM:
-			gMainWindow->SetTool(LC_TOOL_ZOOM);
-			break;
+	case LC_EDIT_ACTION_ZOOM:
+		gMainWindow->SetTool(LC_TOOL_ZOOM);
+		break;
 
-		case LC_EDIT_ACTION_ZOOM_REGION:
-			gMainWindow->SetTool(LC_TOOL_ZOOM_REGION);
-			break;
+	case LC_EDIT_ACTION_ZOOM_REGION:
+		gMainWindow->SetTool(LC_TOOL_ZOOM_REGION);
+		break;
 
-		case LC_EDIT_ACTION_PAN:
-			gMainWindow->SetTool(LC_TOOL_PAN);
-			break;
+	case LC_EDIT_ACTION_PAN:
+		gMainWindow->SetTool(LC_TOOL_PAN);
+		break;
 
-		case LC_EDIT_ACTION_ROTATE_VIEW:
-			gMainWindow->SetTool(LC_TOOL_ROTATE_VIEW);
-			break;
+	case LC_EDIT_ACTION_ROTATE_VIEW:
+		gMainWindow->SetTool(LC_TOOL_ROTATE_VIEW);
+		break;
 
-		case LC_EDIT_ACTION_ROLL:
-			gMainWindow->SetTool(LC_TOOL_ROLL);
-			break;
+	case LC_EDIT_ACTION_ROLL:
+		gMainWindow->SetTool(LC_TOOL_ROLL);
+		break;
 
 		case LC_EDIT_CANCEL:
 		{
@@ -3488,15 +3389,6 @@ void Project::ModifyObject(lcObject* Object, lcObjectProperty Property, void* Va
 		gMainWindow->UpdateFocusObject(GetFocusObject());
 		gMainWindow->UpdateAllViews();
 	}
-}
-
-void Project::ZoomActiveView(int Amount)
-{
-	float ScaledAmount = 2.0f * Amount / (21 - lcGetProfileInt(LC_PROFILE_MOUSE_SENSITIVITY));
-
-	gMainWindow->GetActiveView()->mCamera->Zoom(ScaledAmount, mCurrentStep, gMainWindow->GetAddKeys());
-	gMainWindow->UpdateFocusObject(GetFocusObject());
-	gMainWindow->UpdateAllViews();
 }
 
 // Indicates if the existing string represents an instance of the candidate

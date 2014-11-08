@@ -768,12 +768,8 @@ void lcCamera::RemoveTime(lcStep Start, lcStep Time)
 	lcObject::RemoveTime(mUpVectorKeys, Start, Time);
 }
 
-void lcCamera::ZoomExtents(View* view, const lcVector3& Center, const lcVector3* Points, int NumPoints, lcStep Step, bool AddKey)
+void lcCamera::ZoomExtents(float Aspect, const lcVector3& Center, const lcVector3* Points, int NumPoints, lcStep Step, bool AddKey)
 {
-	int Viewport[4] = { 0, 0, view->mWidth, view->mHeight };
-
-	float Aspect = (float)Viewport[2]/(float)Viewport[3];
-
 	lcVector3 Position(mPosition + Center - mTargetPosition);
 
 	lcMatrix44 Projection = lcMatrix44Perspective(m_fovy, Aspect, m_zNear, m_zFar);
@@ -922,7 +918,7 @@ void lcCamera::Center(lcVector3& point, lcStep Step, bool AddKey)
 	UpdatePosition(Step);
 }
 
-void lcCamera::SetViewpoint(LC_VIEWPOINT Viewpoint, lcStep Step, bool AddKey)
+void lcCamera::SetViewpoint(lcViewpoint Viewpoint)
 {
 	lcVector3 Positions[] =
 	{
@@ -951,14 +947,11 @@ void lcCamera::SetViewpoint(LC_VIEWPOINT Viewpoint, lcStep Step, bool AddKey)
 	mOrthoTarget = mTargetPosition;
 	mUpVector = Ups[Viewpoint];
 
-	if (IsSimple())
-		AddKey = false;
+	ChangeKey(mPositionKeys, mPosition, 1, false);
+	ChangeKey(mTargetPositionKeys, mTargetPosition, 1, false);
+	ChangeKey(mUpVectorKeys, mUpVector, 1, false);
 
-	ChangeKey(mPositionKeys, mPosition, Step, AddKey);
-	ChangeKey(mTargetPositionKeys, mTargetPosition, Step, AddKey);
-	ChangeKey(mUpVectorKeys, mUpVector, Step, AddKey);
-
-	UpdatePosition(Step);
+	UpdatePosition(1);
 }
 
 void lcCamera::StartTiledRendering(int tw, int th, int iw, int ih, float AspectRatio)

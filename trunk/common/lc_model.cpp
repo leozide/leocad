@@ -164,7 +164,7 @@ void lcModel::DeleteModel()
 	lcReleaseTexture(mBackgroundTexture);
 	mBackgroundTexture = NULL;
 
-	const lcArray<View*> Views = gMainWindow->GetViews();
+	const lcArray<View*>& Views = gMainWindow->GetViews();
 
 	for (int ViewIdx = 0; ViewIdx < Views.GetSize(); ViewIdx++)
 	{
@@ -864,7 +864,7 @@ bool lcModel::RemoveSelectedObjects()
 
 		if (Camera->IsSelected())
 		{
-			const lcArray<View*> Views = gMainWindow->GetViews();
+			const lcArray<View*>& Views = gMainWindow->GetViews();
 			for (int ViewIdx = 0; ViewIdx < Views.GetSize(); ViewIdx++)
 			{
 				View* View = Views[ViewIdx];
@@ -1437,6 +1437,47 @@ void lcModel::SelectAllPieces()
 	gMainWindow->UpdateAllViews();
 }
 
+void lcModel::HideSelectedPieces()
+{
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+	{
+		lcPiece* Piece = mPieces[PieceIdx];
+
+		if (Piece->IsSelected())
+		{
+			Piece->SetHidden(true);
+			Piece->SetSelected(false);
+		}
+	}
+
+	UpdateSelection();
+	gMainWindow->UpdateFocusObject(NULL);
+	gMainWindow->UpdateAllViews();
+}
+
+void lcModel::HideUnselectedPieces()
+{
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+	{
+		lcPiece* Piece = mPieces[PieceIdx];
+
+		if (!Piece->IsSelected())
+			Piece->SetHidden(true);
+	}
+
+	UpdateSelection();
+	gMainWindow->UpdateAllViews();
+}
+
+void lcModel::UnhideAllPieces()
+{
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+		mPieces[PieceIdx]->SetHidden(false);
+
+	UpdateSelection();
+	gMainWindow->UpdateAllViews();
+}
+
 void lcModel::FindPiece(bool FindFirst, bool SearchForward)
 {
 	if (mPieces.IsEmpty())
@@ -1771,6 +1812,46 @@ void lcModel::ZoomRegionToolClicked(lcCamera* Camera, const lcVector3* Points, f
 {
 	Camera->ZoomRegion(Points, RatioX, RatioY, mCurrentStep, gMainWindow->GetAddKeys());
 
+	gMainWindow->UpdateFocusObject(GetFocusObject());
+	gMainWindow->UpdateAllViews();
+
+	if (!Camera->IsSimple())
+		SaveCheckpoint(tr("Zoom"));
+}
+
+void lcModel::ZoomExtents(lcCamera* Camera, float Aspect)
+{
+	float BoundingBox[6];
+
+	if (!GetPiecesBoundingBox(BoundingBox))
+		return;
+
+	lcVector3 Center((BoundingBox[0] + BoundingBox[3]) / 2, (BoundingBox[1] + BoundingBox[4]) / 2, (BoundingBox[2] + BoundingBox[5]) / 2);
+
+	lcVector3 Points[8] =
+	{
+		lcVector3(BoundingBox[0], BoundingBox[1], BoundingBox[5]),
+		lcVector3(BoundingBox[3], BoundingBox[1], BoundingBox[5]),
+		lcVector3(BoundingBox[0], BoundingBox[1], BoundingBox[2]),
+		lcVector3(BoundingBox[3], BoundingBox[4], BoundingBox[5]),
+		lcVector3(BoundingBox[3], BoundingBox[4], BoundingBox[2]),
+		lcVector3(BoundingBox[0], BoundingBox[4], BoundingBox[2]),
+		lcVector3(BoundingBox[0], BoundingBox[4], BoundingBox[5]),
+		lcVector3(BoundingBox[3], BoundingBox[1], BoundingBox[2])
+	};
+
+	Camera->ZoomExtents(Aspect, Center, Points, 8, mCurrentStep, gMainWindow->GetAddKeys());
+
+	gMainWindow->UpdateFocusObject(GetFocusObject());
+	gMainWindow->UpdateAllViews();
+
+	if (!Camera->IsSimple())
+		SaveCheckpoint(tr("Zoom"));
+}
+
+void lcModel::Zoom(lcCamera* Camera, float Amount)
+{
+	Camera->Zoom(Amount, mCurrentStep, gMainWindow->GetAddKeys());
 	gMainWindow->UpdateFocusObject(GetFocusObject());
 	gMainWindow->UpdateAllViews();
 

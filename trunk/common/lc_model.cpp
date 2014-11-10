@@ -11,6 +11,7 @@
 #include "pieceinf.h"
 #include "view.h"
 #include "preview.h"
+#include "minifig.h"
 
 void lcModelProperties::LoadDefaults()
 {
@@ -640,6 +641,17 @@ lcStep lcModel::GetLastStep() const
 	return Step;
 }
 
+lcGroup* lcModel::AddGroup(const char* Prefix, lcGroup* Parent)
+{
+	lcGroup* Group = new lcGroup();
+	mGroups.Add(Group);
+
+	GetGroupName(Prefix, Group->m_strName);
+	Group->mGroup = Parent;
+
+	return Group;
+}
+
 lcGroup* lcModel::GetGroup(const char* Name, bool CreateIfMissing)
 {
 	for (int GroupIdx = 0; GroupIdx < mGroups.GetSize(); GroupIdx++)
@@ -662,6 +674,212 @@ lcGroup* lcModel::GetGroup(const char* Name, bool CreateIfMissing)
 	}
 
 	return NULL;
+}
+
+void lcModel::RemoveGroup(lcGroup* Group)
+{
+	mGroups.Remove(Group);
+	delete Group;
+}
+
+void lcModel::GroupSelection()
+{
+	if (!AnyPiecesSelected())
+	{
+		gMainWindow->DoMessageBox("No pieces selected.", LC_MB_OK | LC_MB_ICONINFORMATION);
+		return;
+	}
+
+	char GroupName[LC_MAX_GROUP_NAME + 1];
+
+	GetGroupName("Group #", GroupName);
+
+	if (!gMainWindow->DoDialog(LC_DIALOG_PIECE_GROUP, GroupName))
+		return;
+
+	lcGroup* NewGroup = GetGroup(GroupName, true);
+
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+	{
+		lcPiece* Piece = mPieces[PieceIdx];
+
+		if (Piece->IsSelected())
+		{
+			lcGroup* Group = Piece->GetTopGroup();
+
+			if (!Group)
+				Piece->SetGroup(NewGroup);
+			else if (Group != NewGroup)
+				Group->mGroup = NewGroup;
+		}
+	}
+
+	SaveCheckpoint("Grouping");
+}
+
+void lcModel::UngroupSelection()
+{
+	lcArray<lcGroup*> SelectedGroups;
+
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+	{
+		lcPiece* Piece = mPieces[PieceIdx];
+
+		if (Piece->IsSelected())
+		{
+			lcGroup* Group = Piece->GetTopGroup();
+
+			if (SelectedGroups.FindIndex(Group) == -1)
+			{
+				mGroups.Remove(Group);
+				SelectedGroups.Add(Group);
+			}
+		}
+	}
+
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+	{
+		lcPiece* Piece = mPieces[PieceIdx];
+		lcGroup* Group = Piece->GetGroup();
+
+		if (SelectedGroups.FindIndex(Group) != -1)
+			Piece->SetGroup(NULL);
+	}
+
+	for (int GroupIdx = 0; GroupIdx < mGroups.GetSize(); GroupIdx++)
+	{
+		lcGroup* Group = mGroups[GroupIdx];
+
+		if (SelectedGroups.FindIndex(Group->mGroup) != -1)
+			Group->mGroup = NULL;
+	}
+
+	SelectedGroups.DeleteAll();
+
+	RemoveEmptyGroups();
+	SaveCheckpoint("Ungrouping");
+}
+
+void lcModel::AddSelectedPiecesToGroup()
+{
+	lcGroup* Group = NULL;
+
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+	{
+		lcPiece* Piece = mPieces[PieceIdx];
+
+		if (Piece->IsSelected())
+		{
+			Group = Piece->GetTopGroup();
+			if (Group)
+				break;
+		}
+	}
+
+	if (Group)
+	{
+		for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+		{
+			lcPiece* Piece = mPieces[PieceIdx];
+
+			if (Piece->IsFocused())
+			{
+				Piece->SetGroup(Group);
+				break;
+			}
+		}
+	}
+
+	RemoveEmptyGroups();
+	SaveCheckpoint("Grouping");
+}
+
+void lcModel::RemoveFocusPieceFromGroup()
+{
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+	{
+		lcPiece* Piece = mPieces[PieceIdx];
+
+		if (Piece->IsFocused())
+		{
+			Piece->SetGroup(NULL);
+			break;
+		}
+	}
+
+	RemoveEmptyGroups();
+	SaveCheckpoint("Ungrouping");
+}
+
+void lcModel::ShowEditGroupsDialog()
+{
+	lcEditGroupsDialogOptions Options;
+
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+	{
+		lcPiece* Piece = mPieces[PieceIdx];
+		Options.PieceParents[Piece] = Piece->GetGroup();
+	}
+
+	for (int GroupIdx = 0; GroupIdx < mGroups.GetSize(); GroupIdx++)
+	{
+		lcGroup* Group = mGroups[GroupIdx];
+		Options.GroupParents[Group] = Group->mGroup;
+	}
+
+	if (!gMainWindow->DoDialog(LC_DIALOG_EDIT_GROUPS, &Options))
+		return;
+
+	bool Modified = Options.NewGroups.isEmpty();
+
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+	{
+		lcPiece* Piece = mPieces[PieceIdx];
+		lcGroup* ParentGroup = Options.PieceParents.value(Piece);
+
+		if (ParentGroup != Piece->GetGroup())
+		{
+			mPieces[PieceIdx]->SetGroup(ParentGroup);
+			Modified = true;
+		}
+	}
+
+	for (int GroupIdx = 0; GroupIdx < mGroups.GetSize(); GroupIdx++)
+	{
+		lcGroup* Group = mGroups[GroupIdx];
+		lcGroup* ParentGroup = Options.GroupParents.value(Group);
+
+		if (ParentGroup != Group->mGroup)
+		{
+			Group->mGroup = ParentGroup;
+			Modified = true;
+		}
+	}
+
+	if (Modified)
+	{
+		ClearSelection(true);
+		SaveCheckpoint("Editing Groups");
+	}
+}
+
+void lcModel::GetGroupName(const char* Prefix, char* GroupName)
+{
+	int Length = strlen(Prefix);
+	int Max = 0;
+
+	for (int GroupIdx = 0; GroupIdx < mGroups.GetSize(); GroupIdx++)
+	{
+		lcGroup* Group = mGroups[GroupIdx];
+		int GroupNumber;
+
+		if (strncmp(Group->m_strName, Prefix, Length) == 0)
+			if (sscanf(Group->m_strName + Length, "%d", &GroupNumber) == 1)
+				if (GroupNumber > Max)
+					Max = GroupNumber;
+	}
+
+	sprintf(GroupName, "%s%.2d", Prefix, Max + 1);
 }
 
 void lcModel::RemoveEmptyGroups()
@@ -964,7 +1182,6 @@ bool lcModel::RotateSelectedPieces(const lcVector3& Angles)
 
 	float Bounds[6] = { FLT_MAX, FLT_MAX, FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX };
 	lcPiece* Focus = NULL;
-	int SelectedCount = 0;
 
 	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 	{
@@ -976,7 +1193,6 @@ bool lcModel::RotateSelectedPieces(const lcVector3& Angles)
 				Focus = Piece;
 
 			Piece->CompareBoundingBox(Bounds);
-			SelectedCount++;
 		}
 	}
 
@@ -1117,6 +1333,36 @@ lcObject* lcModel::GetFocusObject() const
 	return NULL;
 }
 
+bool lcModel::GetPieceFocusOrSelectionCenter(lcVector3& Center) const
+{
+	float Bounds[6] = { FLT_MAX, FLT_MAX, FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX };
+	bool Selected = false;
+
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+	{
+		lcPiece* Piece = mPieces[PieceIdx];
+
+		if (Piece->IsFocused())
+		{
+			Center = Piece->mPosition;
+			return true;
+		}
+
+		if (Piece->IsSelected())
+		{
+			Piece->CompareBoundingBox(Bounds);
+			Selected = true;
+		}
+	}
+
+	if (Selected)
+		Center = lcVector3((Bounds[0] + Bounds[3]) * 0.5f, (Bounds[1] + Bounds[4]) * 0.5f, (Bounds[2] + Bounds[5]) * 0.5f);
+	else
+		Center = lcVector3(0.0f, 0.0f, 0.0f);
+
+	return Selected;
+}
+
 lcVector3 lcModel::GetFocusOrSelectionCenter() const
 {
 	lcVector3 Center;
@@ -1124,9 +1370,10 @@ lcVector3 lcModel::GetFocusOrSelectionCenter() const
 	if (GetFocusPosition(Center))
 		return Center;
 
-	GetSelectionCenter(Center);
+	if (GetSelectionCenter(Center))
+		return Center;
 
-	return Center;
+	return lcVector3(0.0f, 0.0f, 0.0f);
 }
 
 bool lcModel::GetFocusPosition(lcVector3& Position) const
@@ -1161,7 +1408,32 @@ bool lcModel::GetSelectionCenter(lcVector3& Center) const
 		}
 	}
 
-	Center = lcVector3((Bounds[0] + Bounds[3]) * 0.5f, (Bounds[1] + Bounds[4]) * 0.5f, (Bounds[2] + Bounds[5]) * 0.5f);
+	for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
+	{
+		lcCamera* Camera = mCameras[CameraIdx];
+
+		if (Camera->IsSelected())
+		{
+			Camera->CompareBoundingBox(Bounds);
+			Selected = true;
+		}
+	}
+
+	for (int LightIdx = 0; LightIdx < mLights.GetSize(); LightIdx++)
+	{
+		lcLight* Light = mLights[LightIdx];
+
+		if (Light->IsSelected())
+		{
+			Light->CompareBoundingBox(Bounds);
+			Selected = true;
+		}
+	}
+
+	if (Selected)
+		Center = lcVector3((Bounds[0] + Bounds[3]) * 0.5f, (Bounds[1] + Bounds[4]) * 0.5f, (Bounds[2] + Bounds[5]) * 0.5f);
+	else
+		Center = lcVector3(0.0f, 0.0f, 0.0f);
 
 	return Selected;
 }
@@ -1857,6 +2129,128 @@ void lcModel::Zoom(lcCamera* Camera, float Amount)
 
 	if (!Camera->IsSimple())
 		SaveCheckpoint(tr("Zoom"));
+}
+
+void lcModel::ShowArrayDialog()
+{
+	lcVector3 Center;
+
+	if (!GetPieceFocusOrSelectionCenter(Center))
+	{
+		gMainWindow->DoMessageBox("No pieces selected.", LC_MB_OK | LC_MB_ICONINFORMATION);
+		return;
+	}
+	
+	lcArrayDialogOptions Options;
+
+	memset(&Options, 0, sizeof(Options));
+	Options.Counts[0] = 10;
+	Options.Counts[1] = 1;
+	Options.Counts[2] = 1;
+
+	if (!gMainWindow->DoDialog(LC_DIALOG_PIECE_ARRAY, &Options))
+		return;
+
+	if (Options.Counts[0] * Options.Counts[1] * Options.Counts[2] < 2)
+	{
+		gMainWindow->DoMessageBox("Array only has 1 element or less, no pieces added.", LC_MB_OK | LC_MB_ICONINFORMATION);
+		return;
+	}
+
+	lcArray<lcObjectSection> NewPieces;
+
+	for (int Step1 = 0; Step1 < Options.Counts[0]; Step1++)
+	{
+		for (int Step2 = 0; Step2 < Options.Counts[1]; Step2++)
+		{
+			for (int Step3 = (Step1 == 0 && Step2 == 0) ? 1 : 0; Step3 < Options.Counts[2]; Step3++)
+			{
+				lcMatrix44 ModelWorld;
+				lcVector3 Position;
+
+				lcVector3 RotationAngles = Options.Rotations[0] * Step1 + Options.Rotations[1] * Step2 + Options.Rotations[2] * Step3;
+				lcVector3 Offset = Options.Offsets[0] * Step1 + Options.Offsets[1] * Step2 + Options.Offsets[2] * Step3;
+
+				for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+				{
+					lcPiece* Piece = mPieces[PieceIdx];
+
+					if (!Piece->IsSelected())
+						continue;
+
+					ModelWorld = Piece->mModelWorld;
+
+					ModelWorld.r[3] -= lcVector4(Center, 0.0f);
+					ModelWorld = lcMul(ModelWorld, lcMatrix44RotationX(RotationAngles[0] * LC_DTOR));
+					ModelWorld = lcMul(ModelWorld, lcMatrix44RotationY(RotationAngles[1] * LC_DTOR));
+					ModelWorld = lcMul(ModelWorld, lcMatrix44RotationZ(RotationAngles[2] * LC_DTOR));
+					ModelWorld.r[3] += lcVector4(Center, 0.0f);
+
+					Position = lcVector3(ModelWorld.r[3].x, ModelWorld.r[3].y, ModelWorld.r[3].z);
+
+					lcVector4 AxisAngle = lcMatrix44ToAxisAngle(ModelWorld);
+					AxisAngle[3] *= LC_RTOD;
+
+					lcPiece* NewPiece = new lcPiece(Piece->mPieceInfo);
+					NewPiece->Initialize(Position + Offset, AxisAngle, mCurrentStep);
+					NewPiece->SetColorIndex(Piece->mColorIndex);
+
+					lcObjectSection ObjectSection;
+					ObjectSection.Object = NewPiece;
+					ObjectSection.Section = LC_PIECE_SECTION_POSITION;
+					NewPieces.Add(ObjectSection);
+				}
+			}
+		}
+	}
+
+	for (int PieceIdx = 0; PieceIdx < NewPieces.GetSize(); PieceIdx++)
+	{
+		lcPiece* Piece = (lcPiece*)NewPieces[PieceIdx].Object;
+		Piece->CreateName(mPieces);
+		Piece->UpdatePosition(mCurrentStep);
+		mPieces.Add(Piece);
+	}
+
+	AddToSelection(NewPieces);
+	SaveCheckpoint("Array");
+}
+
+void lcModel::ShowMinifigDialog()
+{
+	lcMinifig Minifig;
+
+	if (!gMainWindow->DoDialog(LC_DIALOG_MINIFIG, &Minifig))
+		return;
+
+	lcGroup* Group = AddGroup("Minifig #", NULL);
+	lcArray<lcObjectSection> Pieces(LC_MFW_NUMITEMS);
+
+	for (int PartIdx = 0; PartIdx < LC_MFW_NUMITEMS; PartIdx++)
+	{
+		if (Minifig.Parts[PartIdx] == NULL)
+			continue;
+
+		lcPiece* Piece = new lcPiece(Minifig.Parts[PartIdx]);
+
+		lcVector3 Position(Minifig.Matrices[PartIdx][3][0], Minifig.Matrices[PartIdx][3][1], Minifig.Matrices[PartIdx][3][2]);
+		lcVector4 Rotation = lcMatrix44ToAxisAngle(Minifig.Matrices[PartIdx]);
+		Rotation[3] *= LC_RTOD;
+		Piece->Initialize(Position, Rotation, mCurrentStep);
+		Piece->SetColorIndex(Minifig.Colors[PartIdx]);
+		Piece->CreateName(mPieces);
+		Piece->SetGroup(Group);
+		mPieces.Add(Piece);
+		Piece->UpdatePosition(mCurrentStep);
+
+		lcObjectSection ObjectSection;
+		ObjectSection.Object = Piece;
+		ObjectSection.Section = LC_PIECE_SECTION_POSITION;
+		Pieces.Add(ObjectSection);
+	}
+
+	SetSelection(Pieces);
+	SaveCheckpoint("Minifig");
 }
 
 void lcModel::Export3DStudio() const

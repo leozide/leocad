@@ -432,10 +432,10 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 
 			if (!view->mCamera->IsSimple())
 				view->SetDefaultCamera();
-		}
 
-		if (!bUndo)
-			ZoomExtents(0, Views.GetSize());
+			if (!bUndo)
+				view->ZoomExtents();
+		}
 	}
 
 	gMainWindow->UpdateLockSnap();
@@ -829,8 +829,9 @@ bool Project::OnOpenDocument(const QString& FileName)
 			gMainWindow->UpdateFocusObject(GetFocusObject());
 			UpdateSelection();
 
-			ZoomExtents(0, gMainWindow->GetViews().GetSize());
-			gMainWindow->UpdateAllViews();
+			const lcArray<View*>& Views = gMainWindow->GetViews();
+			for (int ViewIdx = 0; ViewIdx < Views.GetSize(); ViewIdx++)
+				Views[ViewIdx]->ZoomExtents();
 
 			bSuccess = true;
 		}
@@ -1908,25 +1909,25 @@ void Project::HandleCommand(LC_COMMANDS id)
 			gMainWindow->UpdateFocusObject(GetFocusObject());
 		} break;
 
-		case LC_VIEW_SPLIT_HORIZONTAL:
-			gMainWindow->SplitHorizontal();
-			break;
+	case LC_VIEW_SPLIT_HORIZONTAL:
+		gMainWindow->SplitHorizontal();
+		break;
 
-		case LC_VIEW_SPLIT_VERTICAL:
-			gMainWindow->SplitVertical();
-			break;
+	case LC_VIEW_SPLIT_VERTICAL:
+		gMainWindow->SplitVertical();
+		break;
 
-		case LC_VIEW_REMOVE_VIEW:
-			gMainWindow->RemoveView();
-			break;
+	case LC_VIEW_REMOVE_VIEW:
+		gMainWindow->RemoveView();
+		break;
 
-		case LC_VIEW_RESET_VIEWS:
-			gMainWindow->ResetViews();
-			break;
+	case LC_VIEW_RESET_VIEWS:
+		gMainWindow->ResetViews();
+		break;
 
-		case LC_VIEW_FULLSCREEN:
-			gMainWindow->ToggleFullScreen();
-			break;
+	case LC_VIEW_FULLSCREEN:
+		gMainWindow->ToggleFullScreen();
+		break;
 
 	case LC_VIEW_PROJECTION_PERSPECTIVE:
 		{
@@ -2116,353 +2117,33 @@ void Project::HandleCommand(LC_COMMANDS id)
 			gMainWindow->UpdateFocusObject(GetFocusObject());
 		} break;
 
-		case LC_PIECE_MINIFIG_WIZARD:
-		{
-			lcMinifig Minifig;
-			int i;
-
-			if (!gMainWindow->DoDialog(LC_DIALOG_MINIFIG, &Minifig))
-				break;
-
-			ClearSelection(false);
-
-			for (i = 0; i < LC_MFW_NUMITEMS; i++)
-			{
-				if (Minifig.Parts[i] == NULL)
-					continue;
-
-				lcPiece* pPiece = new lcPiece(Minifig.Parts[i]);
-
-				lcVector3 Position(Minifig.Matrices[i][3][0], Minifig.Matrices[i][3][1], Minifig.Matrices[i][3][2]);
-				lcVector4 Rotation = lcMatrix44ToAxisAngle(Minifig.Matrices[i]);
-				Rotation[3] *= LC_RTOD;
-				pPiece->Initialize(Position, Rotation, mCurrentStep);
-				pPiece->SetColorIndex(Minifig.Colors[i]);
-				pPiece->CreateName(mPieces);
-				mPieces.Add(pPiece);
-				pPiece->SetSelected(true);
-				pPiece->UpdatePosition(mCurrentStep);
-			}
-
-			int Max = 0;
-
-			for (int GroupIdx = 0; GroupIdx < mGroups.GetSize(); GroupIdx++)
-			{
-				lcGroup* Group = mGroups[GroupIdx];
-
-				if (strncmp(Group->m_strName, "Minifig #", 9) == 0)
-					if (sscanf(Group->m_strName, "Minifig #%d", &i) == 1)
-						if (i > Max)
-							Max = i;
-			}
-
-			lcGroup* Group = AddGroup(NULL);
-			sprintf(Group->m_strName, "Minifig #%.2d", Max+1);
-
-			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-			{
-				lcPiece* Piece = mPieces[PieceIdx];
-
-				if (Piece->IsSelected())
-					Piece->SetGroup(Group);
-			}
-
-			gMainWindow->UpdateFocusObject(GetFocusObject());
-			UpdateSelection();
-			gMainWindow->UpdateAllViews();
-			CheckPoint("Minifig");
-		} break;
-
-		case LC_PIECE_ARRAY:
-		{
-			float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
-			int sel = 0;
-
-			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-			{
-				lcPiece* Piece = mPieces[PieceIdx];
-
-				if (Piece->IsSelected())
-				{
-					Piece->CompareBoundingBox(bs);
-					sel++;
-				}
-			}
-
-			if (!sel)
-			{
-				gMainWindow->DoMessageBox("No pieces selected.", LC_MB_OK | LC_MB_ICONINFORMATION);
-				break;
-			}
-
-			lcArrayDialogOptions Options;
-
-			memset(&Options, 0, sizeof(Options));
-			Options.Counts[0] = 10;
-			Options.Counts[1] = 1;
-			Options.Counts[2] = 1;
-
-			if (!gMainWindow->DoDialog(LC_DIALOG_PIECE_ARRAY, &Options))
-				break;
-
-			if (Options.Counts[0] * Options.Counts[1] * Options.Counts[2] < 2)
-			{
-				gMainWindow->DoMessageBox("Array only has 1 element or less, no pieces added.", LC_MB_OK | LC_MB_ICONINFORMATION);
-				break;
-			}
-
-			lcArray<lcObjectSection> NewPieces;
-
-			for (int Step1 = 0; Step1 < Options.Counts[0]; Step1++)
-			{
-				for (int Step2 = 0; Step2 < Options.Counts[1]; Step2++)
-				{
-					for (int Step3 = 0; Step3 < Options.Counts[2]; Step3++)
-					{
-						if (Step1 == 0 && Step2 == 0 && Step3 == 0)
-							continue;
-
-						lcMatrix44 ModelWorld;
-						lcVector3 Position;
-
-						lcVector3 RotationAngles = Options.Rotations[0] * Step1 + Options.Rotations[1] * Step2 + Options.Rotations[2] * Step3;
-						lcVector3 Offset = Options.Offsets[0] * Step1 + Options.Offsets[1] * Step2 + Options.Offsets[2] * Step3;
-
-						for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-						{
-							lcPiece* pPiece = mPieces[PieceIdx];
-
-							if (!pPiece->IsSelected())
-								continue;
-
-							if (sel == 1)
-							{
-								ModelWorld = lcMul(pPiece->mModelWorld, lcMatrix44RotationX(RotationAngles[0] * LC_DTOR));
-								ModelWorld = lcMul(ModelWorld, lcMatrix44RotationY(RotationAngles[1] * LC_DTOR));
-								ModelWorld = lcMul(ModelWorld, lcMatrix44RotationZ(RotationAngles[2] * LC_DTOR));
-
-								Position = pPiece->mPosition;
-							}
-							else
-							{
-								lcVector4 Center((bs[0] + bs[3]) / 2, (bs[1] + bs[4]) / 2, (bs[2] + bs[5]) / 2, 0.0f);
-								ModelWorld = pPiece->mModelWorld;
-
-								ModelWorld.r[3] -= Center;
-								ModelWorld = lcMul(ModelWorld, lcMatrix44RotationX(RotationAngles[0] * LC_DTOR));
-								ModelWorld = lcMul(ModelWorld, lcMatrix44RotationY(RotationAngles[1] * LC_DTOR));
-								ModelWorld = lcMul(ModelWorld, lcMatrix44RotationZ(RotationAngles[2] * LC_DTOR));
-								ModelWorld.r[3] += Center;
-
-								Position = lcVector3(ModelWorld.r[3].x, ModelWorld.r[3].y, ModelWorld.r[3].z);
-							}
-
-							lcVector4 AxisAngle = lcMatrix44ToAxisAngle(ModelWorld);
-							AxisAngle[3] *= LC_RTOD;
-
-							lcPiece* NewPiece = new lcPiece(pPiece->mPieceInfo);
-							NewPiece->Initialize(Position + Offset, AxisAngle, mCurrentStep);
-							NewPiece->SetColorIndex(pPiece->mColorIndex);
-
-							lcObjectSection ObjectSection;
-							ObjectSection.Object = NewPiece;
-							ObjectSection.Section = LC_PIECE_SECTION_POSITION;
-							NewPieces.Add(ObjectSection);
-						}
-					}
-				}
-			}
-
-			for (int PieceIdx = 0; PieceIdx < NewPieces.GetSize(); PieceIdx++)
-			{
-				lcPiece* Piece = (lcPiece*)NewPieces[PieceIdx].Object;
-				Piece->CreateName(mPieces);
-				Piece->UpdatePosition(mCurrentStep);
-				mPieces.Add(Piece);
-			}
-
-			AddToSelection(NewPieces);
-			CheckPoint("Array");
-		} break;
-
-		case LC_PIECE_GROUP:
-		{
-			int i, Max = 0;
-			char name[65];
-			int Selected = 0;
-
-			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-			{
-				if (mPieces[PieceIdx]->IsSelected())
-				{
-					Selected++;
-
-					if (Selected > 1)
-						break;
-				}
-			}
-
-			if (!Selected)
-			{
-				gMainWindow->DoMessageBox("No pieces selected.", LC_MB_OK | LC_MB_ICONINFORMATION);
-				break;
-			}
-
-			for (int GroupIdx = 0; GroupIdx < mGroups.GetSize(); GroupIdx++)
-			{
-				lcGroup* Group = mGroups[GroupIdx];
-
-				if (strncmp(Group->m_strName, "Group #", 7) == 0)
-					if (sscanf(Group->m_strName, "Group #%d", &i) == 1)
-						if (i > Max)
-							Max = i;
-			}
-
-			sprintf(name, "Group #%.2d", Max + 1);
-
-			if (!gMainWindow->DoDialog(LC_DIALOG_PIECE_GROUP, name))
-				break;
-
-			lcGroup* NewGroup = new lcGroup();
-			strcpy(NewGroup->m_strName, name);
-			mGroups.Add(NewGroup);
-
-			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-			{
-				lcPiece* Piece = mPieces[PieceIdx];
-
-				if (Piece->IsSelected())
-				{
-					lcGroup* Group = Piece->GetTopGroup();
-
-					if (!Group)
-						Piece->SetGroup(NewGroup);
-					else if (Group != NewGroup)
-						Group->mGroup = NewGroup;
-				}
-			}
-
-			RemoveEmptyGroups();
-			CheckPoint("Grouping");
-		} break;
-
-		case LC_PIECE_UNGROUP:
-		{
-			lcArray<lcGroup*> Groups;
-
-			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-			{
-				lcPiece* Piece = mPieces[PieceIdx];
-
-				if (Piece->IsSelected())
-				{
-					lcGroup* Group = Piece->GetTopGroup();
-
-					if (Groups.FindIndex(Group) == -1)
-					{
-						mGroups.Remove(Group);
-						Groups.Add(Group);
-					}
-				}
-			}
-
-			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-			{
-				lcPiece* Piece = mPieces[PieceIdx];
-				lcGroup* Group = Piece->GetGroup();
-
-				if (Groups.FindIndex(Group) != -1)
-					Piece->SetGroup(NULL);
-			}
-
-			for (int GroupIdx = 0; GroupIdx < mGroups.GetSize(); GroupIdx++)
-			{
-				lcGroup* Group = mGroups[GroupIdx];
-
-				if (Groups.FindIndex(Group->mGroup) != -1)
-					Group->mGroup = NULL;
-			}
-
-			Groups.DeleteAll();
-
-			RemoveEmptyGroups();
-			CheckPoint("Ungrouping");
-		} break;
-
-		case LC_PIECE_GROUP_ADD:
-		{
-			lcGroup* pGroup = NULL;
-
-			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-			{
-				lcPiece* Piece = mPieces[PieceIdx];
-
-				if (Piece->IsSelected())
-				{
-					pGroup = Piece->GetTopGroup();
-					if (pGroup != NULL)
-						break;
-				}
-			}
-
-			if (pGroup != NULL)
-			{
-				for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-				{
-					lcPiece* Piece = mPieces[PieceIdx];
-
-					if (Piece->IsFocused())
-					{
-						Piece->SetGroup(pGroup);
-						break;
-					}
-				}
-			}
-
-			RemoveEmptyGroups();
-			CheckPoint("Grouping");
-		} break;
-
-		case LC_PIECE_GROUP_REMOVE:
-		{
-			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-			{
-				lcPiece* Piece = mPieces[PieceIdx];
-
-				if (Piece->IsFocused())
-				{
-					Piece->SetGroup(NULL);
-					break;
-				}
-			}
-
-			RemoveEmptyGroups();
-			CheckPoint("Ungrouping");
-		} break;
-
-		case LC_PIECE_GROUP_EDIT:
-		{
-			lcEditGroupsDialogOptions Options;
-
-			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-				Options.PieceParents.Add(mPieces[PieceIdx]->GetGroup());
-
-			for (int GroupIdx = 0; GroupIdx < mGroups.GetSize(); GroupIdx++)
-				Options.GroupParents.Add(mGroups[GroupIdx]->mGroup);
-
-			if (!gMainWindow->DoDialog(LC_DIALOG_EDIT_GROUPS, &Options))
-				break;
-
-			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-				mPieces[PieceIdx]->SetGroup(Options.PieceParents[PieceIdx]);
-
-			for (int GroupIdx = 0; GroupIdx < mGroups.GetSize(); GroupIdx++)
-				mGroups[GroupIdx]->mGroup = Options.GroupParents[GroupIdx];
-
-			RemoveEmptyGroups();
-			ClearSelection(true);
-			CheckPoint("Editing");
-		} break;
+	case LC_PIECE_MINIFIG_WIZARD:
+		ShowMinifigDialog();
+		break;
+
+	case LC_PIECE_ARRAY:
+		ShowArrayDialog();
+		break;
+
+	case LC_PIECE_GROUP:
+		GroupSelection();
+		break;
+
+	case LC_PIECE_UNGROUP:
+		UngroupSelection();
+		break;
+
+	case LC_PIECE_GROUP_ADD:
+		AddSelectedPiecesToGroup();
+		break;
+
+	case LC_PIECE_GROUP_REMOVE:
+		RemoveFocusPieceFromGroup();
+		break;
+
+	case LC_PIECE_GROUP_EDIT:
+		ShowEditGroupsDialog();
+		break;
 
 	case LC_PIECE_HIDE_SELECTED:
 		HideSelectedPieces();
@@ -2962,30 +2643,6 @@ void Project::HandleCommand(LC_COMMANDS id)
 		case LC_NUM_COMMANDS:
 			break;
 	}
-}
-
-lcGroup* Project::AddGroup(lcGroup* Parent)
-{
-	lcGroup* NewGroup = new lcGroup();
-
-	int i, Max = 0;
-
-	for (int GroupIdx = 0; GroupIdx < mGroups.GetSize(); GroupIdx++)
-	{
-		lcGroup* Group = mGroups[GroupIdx];
-
-		if (strncmp(Group->m_strName, "Group #", 7) == 0)
-			if (sscanf(Group->m_strName, "Group #%d", &i) == 1)
-				if (i > Max)
-					Max = i;
-	}
-
-	sprintf(NewGroup->m_strName, "Group #%.2d", Max + 1);
-	mGroups.Add(NewGroup);
-
-	NewGroup->mGroup = Parent;
-
-	return NewGroup;
 }
 
 // Find a good starting position/orientation relative to an existing piece.

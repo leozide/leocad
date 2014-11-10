@@ -13,10 +13,10 @@ class lcQEditGroupsDialog : public QDialog
 	Q_OBJECT
 	
 public:
-	explicit lcQEditGroupsDialog(QWidget *parent, void *data);
+	explicit lcQEditGroupsDialog(QWidget* Parent, void* Data);
 	~lcQEditGroupsDialog();
 	
-	lcEditGroupsDialogOptions *options;
+	lcEditGroupsDialogOptions* mOptions;
 
 	enum
 	{
@@ -26,21 +26,22 @@ public:
 
 public slots:
 	void accept();
+	void reject();
 	void on_newGroup_clicked();
-	void onItemClicked(QTreeWidgetItem *item, int col);
-	void onItemDoubleClicked(QTreeWidgetItem *item, int col);
+	void onItemClicked(QTreeWidgetItem* Item, int Column);
+	void onItemDoubleClicked(QTreeWidgetItem* Item, int Column);
 
 private:
 	Ui::lcQEditGroupsDialog *ui;
 
-	void updateParents(QTreeWidgetItem *parentItem, lcGroup *parentGroup);
-	void addChildren(QTreeWidgetItem *parentItem, lcGroup *parentGroup);
+	void UpdateParents(QTreeWidgetItem* ParentItem, lcGroup* ParentGroup);
+	void AddChildren(QTreeWidgetItem* ParentItem, lcGroup* ParentGroup);
 
-	void timerEvent(QTimerEvent *event);
+	void timerEvent(QTimerEvent* Event);
 
-	QTreeWidgetItem* m_lastItemClicked;
-	bool m_editableDoubleClicked;
-	QBasicTimer m_clickTimer;
+	QTreeWidgetItem* mLastItemClicked;
+	bool mEditableDoubleClicked;
+	QBasicTimer mClickTimer;
 };
 
 #endif // LC_QEDITGROUPSDIALOG_H

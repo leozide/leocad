@@ -275,7 +275,7 @@ public:
 	void FileSave(lcFile& file) const;
 	void Select(bool bSelecting, bool bFocus, bool bMultiple);
 
-
+	void CompareBoundingBox(float box[6]);
 	void UpdatePosition(lcStep Step);
 	void CopyPosition(const lcCamera* camera);
 	void Render(View* View);

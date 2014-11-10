@@ -7,11 +7,10 @@
 #include "group.h"
 #include "lc_basewindow.h"
 
-lcQEditGroupsDialog::lcQEditGroupsDialog(QWidget *parent, void *data) :
-    QDialog(parent),
-    ui(new Ui::lcQEditGroupsDialog)
+lcQEditGroupsDialog::lcQEditGroupsDialog(QWidget* Parent, void* Data)
+	: QDialog(Parent), ui(new Ui::lcQEditGroupsDialog)
 {
-	m_lastItemClicked = NULL;
+	mLastItemClicked = NULL;
 
 	ui->setupUi(this);
 	connect(ui->treeWidget,SIGNAL(itemClicked(QTreeWidgetItem *,int)), this, SLOT(onItemClicked(QTreeWidgetItem *,int)));
@@ -20,9 +19,10 @@ lcQEditGroupsDialog::lcQEditGroupsDialog(QWidget *parent, void *data) :
 	QPushButton *newGroup = ui->buttonBox->addButton(tr("New Group"), QDialogButtonBox::ActionRole);
 	connect(newGroup, SIGNAL(clicked()), this, SLOT(on_newGroup_clicked()));
 
-	options = (lcEditGroupsDialogOptions*)data;
+	mOptions = (lcEditGroupsDialogOptions*)Data;
 
-	addChildren(ui->treeWidget->invisibleRootItem(), NULL);
+	AddChildren(ui->treeWidget->invisibleRootItem(), NULL);
+	ui->treeWidget->expandAll();
 }
 
 lcQEditGroupsDialog::~lcQEditGroupsDialog()
@@ -32,44 +32,54 @@ lcQEditGroupsDialog::~lcQEditGroupsDialog()
 
 void lcQEditGroupsDialog::accept()
 {
-	updateParents(ui->treeWidget->invisibleRootItem(), NULL);
+	UpdateParents(ui->treeWidget->invisibleRootItem(), NULL);
 
 	QDialog::accept();
 }
 
+void lcQEditGroupsDialog::reject()
+{
+	for (int GroupIdx = 0; GroupIdx < mOptions->NewGroups.size(); GroupIdx++)
+		lcGetActiveProject()->RemoveGroup(mOptions->NewGroups[GroupIdx]);
+
+	QDialog::reject();
+}
+
 void lcQEditGroupsDialog::on_newGroup_clicked()
 {
-	QTreeWidgetItem *currentItem = ui->treeWidget->currentItem();
+	QTreeWidgetItem* CurrentItem = ui->treeWidget->currentItem();
 
-	if (currentItem && currentItem->data(0, PieceRole).value<uintptr_t>())
-		currentItem = currentItem->parent();
+	if (CurrentItem && CurrentItem->data(0, PieceRole).value<uintptr_t>())
+		CurrentItem = CurrentItem->parent();
 
-	if (!currentItem)
-		currentItem = ui->treeWidget->invisibleRootItem();
+	if (!CurrentItem)
+		CurrentItem = ui->treeWidget->invisibleRootItem();
 
-	lcGroup *parentGroup = (lcGroup*)currentItem->data(0, GroupRole).value<uintptr_t>();
-	lcGroup *newGroup = lcGetActiveProject()->AddGroup(parentGroup);
-	options->GroupParents.Add(NULL);
+	lcGroup* ParentGroup = (lcGroup*)CurrentItem->data(0, GroupRole).value<uintptr_t>();
 
-	QTreeWidgetItem *groupItem = new QTreeWidgetItem(currentItem, QStringList(newGroup->m_strName));
-	groupItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | Qt::ItemIsEnabled | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled | Qt::ItemIsEditable);
-	groupItem->setData(0, GroupRole, qVariantFromValue<uintptr_t>((uintptr_t)newGroup));
+	lcGroup* NewGroup = lcGetActiveProject()->AddGroup("Group #", ParentGroup);
+	mOptions->GroupParents[NewGroup] = ParentGroup;
+	mOptions->NewGroups.append(NewGroup);
+
+	QTreeWidgetItem* GroupItem = new QTreeWidgetItem(CurrentItem, QStringList(NewGroup->m_strName));
+	GroupItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | Qt::ItemIsEnabled | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled | Qt::ItemIsEditable);
+	GroupItem->setData(0, GroupRole, qVariantFromValue<uintptr_t>((uintptr_t)NewGroup));
 }
 
 void lcQEditGroupsDialog::onItemClicked(QTreeWidgetItem *item, int column)
 {
 	if (item->flags() & Qt::ItemIsEditable)
 	{
-		m_clickTimer.stop();
+		mClickTimer.stop();
 
-		if (m_lastItemClicked != item)
+		if (mLastItemClicked != item)
 		{
-			m_lastItemClicked = item;
-			m_editableDoubleClicked = false;
+			mLastItemClicked = item;
+			mEditableDoubleClicked = false;
 		}
 		else
 		{
-			m_clickTimer.start(QApplication::doubleClickInterval() + 50, this);
+			mClickTimer.start(QApplication::doubleClickInterval() + 50, this);
 		}
 	}
 }
@@ -78,91 +88,75 @@ void lcQEditGroupsDialog::onItemDoubleClicked(QTreeWidgetItem *item, int column)
 {
 	if (item->flags() & Qt::ItemIsEditable)
 	{
-		m_editableDoubleClicked = true;
+		mEditableDoubleClicked = true;
 	}
 }
 
 void lcQEditGroupsDialog::timerEvent(QTimerEvent *event)
 {
-	m_clickTimer.stop();
-	if (!m_editableDoubleClicked)
+	mClickTimer.stop();
+	if (!mEditableDoubleClicked)
 	{
-		ui->treeWidget->editItem(m_lastItemClicked);
+		ui->treeWidget->editItem(mLastItemClicked);
 	}
 
-	m_editableDoubleClicked = false;
+	mEditableDoubleClicked = false;
 }
 
-void lcQEditGroupsDialog::updateParents(QTreeWidgetItem *parentItem, lcGroup *parentGroup)
+void lcQEditGroupsDialog::UpdateParents(QTreeWidgetItem* ParentItem, lcGroup* ParentGroup)
 {
-	Project *project = lcGetActiveProject();
-	const lcArray<lcPiece*>& pieces = project->GetPieces();
-	const lcArray<lcGroup*>& groups = project->GetGroups();
-
-	for (int childIndex = 0; childIndex < parentItem->childCount(); childIndex++)
+	for (int ChildIdx = 0; ChildIdx < ParentItem->childCount(); ChildIdx++)
 	{
-		QTreeWidgetItem *childItem = parentItem->child(childIndex);
+		QTreeWidgetItem* ChildItem = ParentItem->child(ChildIdx);
 
-		lcPiece *itemPiece = (lcPiece*)childItem->data(0, PieceRole).value<uintptr_t>();
+		lcPiece* Piece = (lcPiece*)ChildItem->data(0, PieceRole).value<uintptr_t>();
 
-		if (itemPiece)
+		if (Piece)
 		{
-			int pieceIndex = pieces.FindIndex(itemPiece);
-			if (pieceIndex != -1)
-				options->PieceParents[pieceIndex] = parentGroup;
+			mOptions->PieceParents[Piece] = ParentGroup;
 		}
 		else
 		{
-			lcGroup *itemGroup = (lcGroup*)childItem->data(0, GroupRole).value<uintptr_t>();
+			lcGroup* Group = (lcGroup*)ChildItem->data(0, GroupRole).value<uintptr_t>();
 
-			strncpy(itemGroup->m_strName, childItem->text(0).toLocal8Bit(), sizeof(itemGroup->m_strName));
-			itemGroup->m_strName[sizeof(itemGroup->m_strName) - 1] = 0;
+			// todo: validate unique group name
+			strncpy(Group->m_strName, ChildItem->text(0).toLatin1(), sizeof(Group->m_strName)); // todo: qstring
+			Group->m_strName[sizeof(Group->m_strName) - 1] = 0;
 
-			for (int groupIdx = 0; groupIdx < groups.GetSize(); groupIdx++)
-			{
-				lcGroup *group = groups[groupIdx];
+			mOptions->GroupParents[Group] = ParentGroup;
 
-				if (itemGroup == group)
-				{
-					options->GroupParents[groupIdx] = parentGroup;
-					break;
-				}
-			}
-
-			updateParents(childItem, itemGroup);
+			UpdateParents(ChildItem, Group);
 		}
 	}
 }
 
-void lcQEditGroupsDialog::addChildren(QTreeWidgetItem *parentItem, lcGroup *parentGroup)
+void lcQEditGroupsDialog::AddChildren(QTreeWidgetItem* ParentItem, lcGroup* ParentGroup)
 {
-	Project *project = lcGetActiveProject();
-	const lcArray<lcPiece*>& pieces = project->GetPieces();
-	const lcArray<lcGroup*>& groups = project->GetGroups();
-
-	for (int groupIdx = 0; groupIdx < groups.GetSize(); groupIdx++)
+	for (QMap<lcGroup*, lcGroup*>::const_iterator it = mOptions->GroupParents.constBegin(); it != mOptions->GroupParents.constEnd(); it++)
 	{
-		lcGroup *group = groups[groupIdx];
+		lcGroup* Group = it.key();
+		lcGroup* Parent = it.value();
 
-		if (group->mGroup != parentGroup)
+		if (Parent != ParentGroup)
 			continue;
 
-		QTreeWidgetItem *groupItem = new QTreeWidgetItem(parentItem, QStringList(group->m_strName));
-		groupItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | Qt::ItemIsEnabled | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled | Qt::ItemIsEditable);
-		groupItem->setData(0, GroupRole, qVariantFromValue<uintptr_t>((uintptr_t)group));
+		QTreeWidgetItem* GroupItem = new QTreeWidgetItem(ParentItem, QStringList(Group->m_strName));
+		GroupItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | Qt::ItemIsEnabled | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled | Qt::ItemIsEditable);
+		GroupItem->setData(0, GroupRole, qVariantFromValue<uintptr_t>((uintptr_t)Group));
 
-		addChildren(groupItem, group);
+		AddChildren(GroupItem, Group);
 	}
 
-	for (int pieceIndex = 0; pieceIndex < pieces.GetSize(); pieceIndex++)
+	for (QMap<lcPiece*, lcGroup*>::const_iterator it = mOptions->PieceParents.constBegin(); it != mOptions->PieceParents.constEnd(); it++)
 	{
-		lcPiece *piece = pieces[pieceIndex];
+		lcPiece* Piece = it.key();
+		lcGroup* Parent = it.value();
 
-		if (piece->GetGroup() != parentGroup)
+		if (Parent != ParentGroup)
 			continue;
 
-		QTreeWidgetItem *pieceItem = new QTreeWidgetItem(parentItem, QStringList(piece->GetName()));
-		pieceItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | Qt::ItemIsEnabled | Qt::ItemIsDragEnabled);
-		pieceItem->setData(0, PieceRole, qVariantFromValue<uintptr_t>((uintptr_t)piece));
+		QTreeWidgetItem* PieceItem = new QTreeWidgetItem(ParentItem, QStringList(Piece->GetName()));
+		PieceItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | Qt::ItemIsEnabled | Qt::ItemIsDragEnabled);
+		PieceItem->setData(0, PieceRole, qVariantFromValue<uintptr_t>((uintptr_t)Piece));
 	}
 }

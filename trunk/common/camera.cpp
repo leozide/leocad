@@ -442,8 +442,25 @@ void lcCamera::FileSave(lcFile& file) const
 	file.WriteU8(m_nType);
 }
 
-/////////////////////////////////////////////////////////////////////////////
-// Camera operations
+void lcCamera::CompareBoundingBox(float box[6])
+{
+	const lcVector3 Points[2] =
+	{
+		mPosition, mTargetPosition
+	};
+
+	for (int i = 0; i < 2; i++)
+	{
+		const lcVector3& Point = Points[i];
+
+		if (Point[0] < box[0]) box[0] = Point[0];
+		if (Point[1] < box[1]) box[1] = Point[1];
+		if (Point[2] < box[2]) box[2] = Point[2];
+		if (Point[0] > box[3]) box[3] = Point[0];
+		if (Point[1] > box[4]) box[4] = Point[1];
+		if (Point[2] > box[5]) box[5] = Point[2];
+	}
+}
 
 void lcCamera::Move(lcStep Step, bool AddKey, const lcVector3& Distance)
 {

@@ -193,6 +193,7 @@ public:
 	void RenderTarget();
 	void RenderSphere();
 
+	void CompareBoundingBox(float box[6]);
 	void UpdatePosition(lcStep Step);
 	void Move(lcStep Step, bool AddKey, const lcVector3& Distance);
 	bool Setup(int LightIndex);

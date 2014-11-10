@@ -145,7 +145,14 @@ public:
 		return mCurrentStep;
 	}
 
+	lcGroup* AddGroup(const char* Prefix, lcGroup* Parent);
 	lcGroup* GetGroup(const char* Name, bool CreateIfMissing);
+	void RemoveGroup(lcGroup* Group);
+	void GroupSelection();
+	void UngroupSelection();
+	void AddSelectedPiecesToGroup();
+	void RemoveFocusPieceFromGroup();
+	void ShowEditGroupsDialog();
 
 	void SaveLDraw(QTextStream& Stream) const;
 	void LoadLDraw(QTextStream& Stream);
@@ -157,6 +164,7 @@ public:
 
 	bool AnyPiecesSelected() const;
 	bool AnyObjectsSelected() const;
+	bool GetPieceFocusOrSelectionCenter(lcVector3& Center) const;
 	lcVector3 GetFocusOrSelectionCenter() const;
 	bool GetFocusPosition(lcVector3& Position) const;
 	lcObject* GetFocusObject() const;
@@ -210,6 +218,9 @@ public:
 	void ZoomExtents(lcCamera* Camera, float Aspect);
 	void Zoom(lcCamera* Camera, float Amount);
 
+	void ShowArrayDialog();
+	void ShowMinifigDialog();
+
 	void Export3DStudio() const;
 	void ExportBrickLink() const;
 	void ExportCSV() const;
@@ -222,6 +233,7 @@ protected:
 	void SaveCheckpoint(const QString& Description);
 	void LoadCheckPoint(lcModelHistoryEntry* CheckPoint);
 
+	void GetGroupName(const char* Prefix, char* GroupName);
 	void RemoveEmptyGroups();
 	bool RemoveSelectedObjects();
 	bool MoveSelectedObjects(const lcVector3& PieceDistance, const lcVector3& ObjectDistance);

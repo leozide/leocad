@@ -107,8 +107,10 @@ struct lcArrayDialogOptions
 
 struct lcEditGroupsDialogOptions
 {
-	lcArray<lcGroup*> PieceParents;
-	lcArray<lcGroup*> GroupParents;
+	QMap<lcPiece*, lcGroup*> PieceParents;
+	QMap<lcGroup*, lcGroup*> GroupParents;
+	QList<lcGroup*> NewGroups;
+	//QList<lcGroup*> DeletedGroups; // todo: support deleting groups in the edit groups dialog
 };
 
 struct lcSelectDialogOptions

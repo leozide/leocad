@@ -83,7 +83,6 @@ public:
 	void SaveImage();
 	void SaveStepImages(const QString& BaseName, int Width, int Height, lcStep Start, lcStep End);
 	void Render(View* view, bool bToMemory);
-	lcGroup* AddGroup(lcGroup* Parent);
 	void TransformSelectedObjects(lcTransformType Type, const lcVector3& Transform);
 	void ModifyObject(lcObject* Object, lcObjectProperty Property, void* Value);
 	void GetPieceInsertPosition(View* view, lcVector3& Position, lcVector4& Orientation);

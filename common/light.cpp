@@ -270,11 +270,9 @@ void lcLight::UpdatePosition(lcStep Step)
 	}
 }
 
-void lcLight::Render(View* View)
+void lcLight::DrawInterface(lcContext* Context, const lcMatrix44& ViewMatrix) const
 {
 	float LineWidth = lcGetPreferences().mLineWidth;
-	const lcMatrix44& ViewMatrix = View->mCamera->mWorldView;
-	lcContext* Context = View->mContext;
 
 	if (IsPointLight())
 	{
@@ -392,7 +390,7 @@ void lcLight::Render(View* View)
 	}
 }
 
-void lcLight::RenderCone(const lcMatrix44& ViewMatrix)
+void lcLight::RenderCone(const lcMatrix44& ViewMatrix) const
 {
 	lcVector3 FrontVector(mTargetPosition - mPosition);
 	lcVector3 UpVector(1, 1, 1);
@@ -451,7 +449,7 @@ void lcLight::RenderCone(const lcMatrix44& ViewMatrix)
 	glLoadMatrixf(lcMul(lcMatrix44Translation(lcVector3(0, 0, -Length)), LightViewMatrix));
 }
 
-void lcLight::RenderTarget()
+void lcLight::RenderTarget() const
 {
 	float box[24][3] =
 	{
@@ -473,7 +471,7 @@ void lcLight::RenderTarget()
 	glDrawArrays(GL_LINES, 0, 24);
 }
 
-void lcLight::RenderSphere()
+void lcLight::RenderSphere() const
 {
 	const int Slices = 6;
 	const int NumIndices = 3 * Slices + 6 * Slices * (Slices - 2) + 3 * Slices;

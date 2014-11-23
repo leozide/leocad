@@ -84,6 +84,7 @@ public:
 	virtual void Move(lcStep Step, bool AddKey, const lcVector3& Distance) = 0;
 	virtual void RayTest(lcObjectRayTest& ObjectRayTest) const = 0;
 	virtual void BoxTest(lcObjectBoxTest& ObjectBoxTest) const = 0;
+	virtual void DrawInterface(lcContext* Context, const lcMatrix44& ViewMatrix) const = 0;
 	virtual const char* GetName() const = 0;
 
 protected:

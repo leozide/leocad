@@ -12,6 +12,7 @@
 #include "project.h"
 #include "lc_application.h"
 #include "lc_library.h"
+#include "lc_context.h"
 
 #define LC_PIECE_SAVE_VERSION 12 // LeoCAD 0.80
 
@@ -614,6 +615,61 @@ void lcPiece::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
 		ObjectSection.Object = const_cast<lcPiece*>(this);
 		ObjectSection.Section = 0;
 	}
+}
+
+void lcPiece::DrawInterface(lcContext* Context, const lcMatrix44& ViewMatrix) const
+{
+	float LineWidth = lcGetPreferences().mLineWidth;
+	Context->SetLineWidth(2.0f * LineWidth);
+
+	lcVector3 Min(mPieceInfo->m_fDimensions[3], mPieceInfo->m_fDimensions[4], mPieceInfo->m_fDimensions[5]);
+	lcVector3 Max(mPieceInfo->m_fDimensions[0], mPieceInfo->m_fDimensions[1], mPieceInfo->m_fDimensions[2]);
+	lcVector3 Edge((Max - Min) * 0.33f);
+
+	float Verts[48][3] =
+	{
+		{ Max[0], Max[1], Max[2] }, { Max[0] - Edge[0], Max[1], Max[2] },
+		{ Max[0], Max[1], Max[2] }, { Max[0], Max[1] - Edge[1], Max[2] },
+		{ Max[0], Max[1], Max[2] }, { Max[0], Max[1], Max[2] - Edge[2] },
+
+		{ Min[0], Max[1], Max[2] }, { Min[0] + Edge[0], Max[1], Max[2] },
+		{ Min[0], Max[1], Max[2] }, { Min[0], Max[1] - Edge[1], Max[2] },
+		{ Min[0], Max[1], Max[2] }, { Min[0], Max[1], Max[2] - Edge[2] },
+
+		{ Max[0], Min[1], Max[2] }, { Max[0] - Edge[0], Min[1], Max[2] },
+		{ Max[0], Min[1], Max[2] }, { Max[0], Min[1] + Edge[1], Max[2] },
+		{ Max[0], Min[1], Max[2] }, { Max[0], Min[1], Max[2] - Edge[2] },
+
+		{ Min[0], Min[1], Max[2] }, { Min[0] + Edge[0], Min[1], Max[2] },
+		{ Min[0], Min[1], Max[2] }, { Min[0], Min[1] + Edge[1], Max[2] },
+		{ Min[0], Min[1], Max[2] }, { Min[0], Min[1], Max[2] - Edge[2] },
+
+		{ Max[0], Max[1], Min[2] }, { Max[0] - Edge[0], Max[1], Min[2] },
+		{ Max[0], Max[1], Min[2] }, { Max[0], Max[1] - Edge[1], Min[2] },
+		{ Max[0], Max[1], Min[2] }, { Max[0], Max[1], Min[2] + Edge[2] },
+
+		{ Min[0], Max[1], Min[2] }, { Min[0] + Edge[0], Max[1], Min[2] },
+		{ Min[0], Max[1], Min[2] }, { Min[0], Max[1] - Edge[1], Min[2] },
+		{ Min[0], Max[1], Min[2] }, { Min[0], Max[1], Min[2] + Edge[2] },
+
+		{ Max[0], Min[1], Min[2] }, { Max[0] - Edge[0], Min[1], Min[2] },
+		{ Max[0], Min[1], Min[2] }, { Max[0], Min[1] + Edge[1], Min[2] },
+		{ Max[0], Min[1], Min[2] }, { Max[0], Min[1], Min[2] + Edge[2] },
+
+		{ Min[0], Min[1], Min[2] }, { Min[0] + Edge[0], Min[1], Min[2] },
+		{ Min[0], Min[1], Min[2] }, { Min[0], Min[1] + Edge[1], Min[2] },
+		{ Min[0], Min[1], Min[2] }, { Min[0], Min[1], Min[2] + Edge[2] },
+	};
+
+	Context->SetWorldViewMatrix(lcMul(mModelWorld, ViewMatrix));
+
+	if (IsFocused())
+		lcSetColorFocused();
+	else
+		lcSetColorSelected();
+
+	glVertexPointer(3, GL_FLOAT, 0, Verts);
+	glDrawArrays(GL_LINES, 0, 48);
 }
 
 void lcPiece::Move(lcStep Step, bool AddKey, const lcVector3& Distance)

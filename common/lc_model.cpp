@@ -430,6 +430,67 @@ void lcModel::LoadLDraw(QTextStream& Stream)
 	delete Light;
 }
 
+void lcModel::GetScene(lcScene& Scene, lcCamera* ViewCamera, bool DrawInterface) const
+{
+	Scene.Camera = ViewCamera;
+	Scene.OpaqueMeshes.RemoveAll();
+	Scene.OpaqueMeshes.AllocGrow(mPieces.GetSize());
+	Scene.TranslucentMeshes.RemoveAll();
+	Scene.TranslucentMeshes.AllocGrow(mPieces.GetSize());
+	Scene.InterfaceObjects.RemoveAll();
+
+	const lcMatrix44& ViewMatrix = ViewCamera->mWorldView;
+
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+	{
+		lcPiece* Piece = mPieces[PieceIdx];
+
+		if (!Piece->IsVisible(mCurrentStep))
+			continue;
+
+		PieceInfo* Info = Piece->mPieceInfo;
+		bool Focused, Selected;
+
+		if (DrawInterface)
+		{
+			Focused = Piece->IsFocused();
+			Selected = Piece->IsSelected();
+		}
+		else
+		{
+			Focused = false;
+			Selected = false;
+		}
+
+		Info->AddRenderMeshes(ViewMatrix, &Piece->mModelWorld, Piece->mColorIndex, Focused, Selected, Scene.OpaqueMeshes, Scene.TranslucentMeshes);
+
+		if (Selected)
+			Scene.InterfaceObjects.Add(Piece);
+	}
+
+	if (DrawInterface)
+	{
+		for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
+		{
+			lcCamera* Camera = mCameras[CameraIdx];
+
+			if (Camera != ViewCamera && Camera->IsVisible())
+				Scene.InterfaceObjects.Add(Camera);
+		}
+
+		for (int LightIdx = 0; LightIdx < mLights.GetSize(); LightIdx++)
+		{
+			lcLight* Light = mLights[LightIdx];
+
+			if (Light->IsVisible())
+				Scene.InterfaceObjects.Add(Light);
+		}
+	}
+
+	Scene.OpaqueMeshes.Sort(lcOpaqueRenderMeshCompare);
+	Scene.TranslucentMeshes.Sort(lcTranslucentRenderMeshCompare);
+}
+
 void lcModel::DrawBackground(lcContext* Context)
 {
 	if (mProperties.mBackgroundType == LC_BACKGROUND_SOLID)

@@ -450,3 +450,9 @@ void lcContext::DrawTranslucentMeshes(const lcMatrix44& ViewMatrix, const lcArra
 	glDepthMask(GL_TRUE);
 	glDisable(GL_BLEND);
 }
+
+void lcContext::DrawInterfaceObjects(const lcMatrix44& ViewMatrix, const lcArray<lcObject*>& InterfaceObjects)
+{
+	for (int ObjectIdx = 0; ObjectIdx < InterfaceObjects.GetSize(); ObjectIdx++)
+		InterfaceObjects[ObjectIdx]->DrawInterface(this, ViewMatrix);
+}

@@ -222,11 +222,90 @@ lcArray<lcObjectSection> View::FindObjectsInBox(float x1, float y1, float x2, fl
 
 void View::OnDraw()
 {
-	mProject->Render(this, false);
+	bool DrawInterface = mWidget != NULL;
 
-	if (mWidget)
+	lcScene Scene;
+	mProject->GetScene(Scene, mCamera, DrawInterface);
+
+	mContext->SetDefaultState();
+	mContext->SetViewport(0, 0, mWidth, mHeight);
+
+	mProject->DrawBackground(mContext);
+
+	const lcPreferences& Preferences = lcGetPreferences();
+	const lcModelProperties& Properties = mProject->GetProperties();
+
+	mContext->SetProjectionMatrix(GetProjectionMatrix());
+
+	if (Preferences.mLightingMode != LC_LIGHTING_FLAT)
 	{
-		const lcPreferences& Preferences = lcGetPreferences();
+		glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT);
+		glEnable(GL_COLOR_MATERIAL);
+		glShadeModel(GL_SMOOTH);
+
+		float Shininess = 64.0f;
+		glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, &Shininess);
+		glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, lcVector4(0.8f, 0.8f, 0.8f, 1.0f));
+		glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, lcVector4(0.8f, 0.8f, 0.8f, 1.0f));
+
+		glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lcVector4(Properties.mAmbientColor, 1.0f));
+
+//		for (int LightIdx = 0; LightIdx < mLights.GetSize(); LightIdx++)
+//			mLights[LightIdx]->Setup(LightIdx);
+
+		glEnable(GL_LIGHTING);
+	}
+	else
+	{
+		glDisable(GL_LIGHTING);
+		glDisable(GL_COLOR_MATERIAL);
+		glShadeModel(GL_FLAT);
+	}
+
+	if (Properties.mFogEnabled)
+	{
+		glFogi(GL_FOG_MODE, GL_EXP);
+		glFogf(GL_FOG_DENSITY, Properties.mFogDensity);
+		glFogfv(GL_FOG_COLOR, lcVector4(Properties.mFogColor, 1.0f));
+		glEnable(GL_FOG);
+	}
+
+	const lcMatrix44& ViewMatrix = mCamera->mWorldView;
+	mContext->DrawOpaqueMeshes(ViewMatrix, Scene.OpaqueMeshes);
+	mContext->DrawTranslucentMeshes(ViewMatrix, Scene.TranslucentMeshes);
+
+	mContext->UnbindMesh(); // context remove
+
+	if (Preferences.mLightingMode != LC_LIGHTING_FLAT)
+	{
+		glDisable(GL_LIGHTING);
+		glDisable(GL_COLOR_MATERIAL);
+		glShadeModel(GL_FLAT);
+	}
+
+	if (Properties.mFogEnabled)
+		glDisable(GL_FOG);
+
+	if (DrawInterface)
+	{
+		if (mTrackTool == LC_TRACKTOOL_INSERT)
+		{
+			lcVector3 Position;
+			lcVector4 Rotation;
+			mProject->GetPieceInsertPosition(this, Position, Rotation);
+
+			lcMatrix44 WorldMatrix = lcMatrix44FromAxisAngle(lcVector3(Rotation[0], Rotation[1], Rotation[2]), Rotation[3] * LC_DTOR);
+			WorldMatrix.SetTranslation(Position);
+
+			mContext->SetWorldViewMatrix(lcMul(WorldMatrix, ViewMatrix));
+
+			mContext->SetLineWidth(2.0f * Preferences.mLineWidth);
+			gMainWindow->mPreviewWidget->GetCurrentPiece()->RenderPiece(gMainWindow->mColorIndex);
+		}
+
+		mContext->DrawInterfaceObjects(ViewMatrix, Scene.InterfaceObjects);
+
+		mContext->SetLineWidth(Preferences.mLineWidth); // context remove
 
 		if (Preferences.mDrawGridStuds || Preferences.mDrawGridLines)
 			DrawGrid();

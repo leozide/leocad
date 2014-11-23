@@ -138,6 +138,11 @@ public:
 		return mGroups;
 	}
 
+	const lcModelProperties& GetProperties() const
+	{
+		return mProperties;
+	}
+
 	lcStep GetLastStep() const;
 
 	lcStep GetCurrentStep() const
@@ -157,6 +162,7 @@ public:
 	void SaveLDraw(QTextStream& Stream) const;
 	void LoadLDraw(QTextStream& Stream);
 
+	void GetScene(lcScene& Scene, lcCamera* ViewCamera, bool DrawInterface) const;
 	void DrawBackground(lcContext* Context);
 
 	void RayTest(lcObjectRayTest& ObjectRayTest) const;

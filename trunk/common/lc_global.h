@@ -28,6 +28,7 @@ class lcMesh;
 struct lcMeshSection;
 struct lcRenderMesh;
 class lcTexture;
+struct lcScene;
 
 class lcFile;
 class lcMemFile;

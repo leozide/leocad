@@ -855,7 +855,7 @@ void lcQMainWindow::print(QPrinter *printer)
 							camera->StartTiledRendering(tileWidth, tileHeight, stepWidth, stepHeight, aspectRatio);
 							do 
 							{
-								project->Render(&view, true);
+								view.OnDraw();
 
 								int tileRow, tileColumn, currentTileWidth, currentTileHeight;
 								camera->GetTileInfo(&tileRow, &tileColumn, &currentTileWidth, &currentTileHeight);
@@ -898,7 +898,7 @@ void lcQMainWindow::print(QPrinter *printer)
 						}
 						else
 						{
-							project->Render(&view, true);
+							view.OnDraw();
 
 							glFinish();
 							glReadPixels(0, 0, tileWidth, tileHeight, GL_RGBA, GL_UNSIGNED_BYTE, buffer);

@@ -3,6 +3,14 @@
 
 #include "lc_array.h"
 
+struct lcScene
+{
+	lcCamera* Camera;
+	lcArray<lcRenderMesh> OpaqueMeshes;
+	lcArray<lcRenderMesh> TranslucentMeshes;
+	lcArray<lcObject*> InterfaceObjects;
+};
+
 class lcContext
 {
 public:
@@ -36,6 +44,7 @@ public:
 	void DrawMeshSection(lcMesh* Mesh, lcMeshSection* Section);
 	void DrawOpaqueMeshes(const lcMatrix44& ViewMatrix, const lcArray<lcRenderMesh>& OpaqueMeshes);
 	void DrawTranslucentMeshes(const lcMatrix44& ViewMatrix, const lcArray<lcRenderMesh>& TranslucentMeshes);
+	void DrawInterfaceObjects(const lcMatrix44& ViewMatrix, const lcArray<lcObject*>& InterfaceObjects);
 
 protected:
 	GLuint mVertexBufferObject;

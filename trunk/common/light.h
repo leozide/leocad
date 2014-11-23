@@ -175,6 +175,7 @@ public:
 public:
 	virtual void RayTest(lcObjectRayTest& ObjectRayTest) const;
 	virtual void BoxTest(lcObjectBoxTest& ObjectBoxTest) const;
+	virtual void DrawInterface(lcContext* Context, const lcMatrix44& ViewMatrix) const;
 
 	void InsertTime(lcStep Start, lcStep Time);
 	void RemoveTime(lcStep Start, lcStep Time);
@@ -188,10 +189,9 @@ public:
 	const char* GetName() const
 	{ return m_strName; }
 
-	void Render(View* View);
-	void RenderCone(const lcMatrix44& ViewMatrix);
-	void RenderTarget();
-	void RenderSphere();
+	void RenderCone(const lcMatrix44& ViewMatrix) const;
+	void RenderTarget() const;
+	void RenderSphere() const;
 
 	void CompareBoundingBox(float box[6]);
 	void UpdatePosition(lcStep Step);

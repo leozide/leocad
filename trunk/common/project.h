@@ -82,7 +82,6 @@ public:
 	void LoadDefaults();
 	void SaveImage();
 	void SaveStepImages(const QString& BaseName, int Width, int Height, lcStep Start, lcStep End);
-	void Render(View* view, bool bToMemory);
 	void TransformSelectedObjects(lcTransformType Type, const lcVector3& Transform);
 	void ModifyObject(lcObject* Object, lcObjectProperty Property, void* Value);
 	void GetPieceInsertPosition(View* view, lcVector3& Position, lcVector4& Orientation);
@@ -94,9 +93,6 @@ protected:
 	void GetPieceInsertPosition(lcPiece* OffsetPiece, lcVector3& Position, lcVector4& Rotation);
 
 	static int InstanceOfName(const String& existingString, const String& candidateString, String& baseNameOut);
-
-	void RenderScenePieces(View* view, bool DrawInterface);
-	void RenderSceneObjects(View* view);
 
 	void ExportHTML();
 	void CreateHTMLPieceList(QTextStream& Stream, lcStep Step, bool Images, const QString& ImageExtension);

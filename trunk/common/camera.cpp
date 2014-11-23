@@ -522,11 +522,9 @@ void lcCamera::CopyPosition(const lcCamera* camera)
 	mUpVector = camera->mUpVector;
 }
 
-void lcCamera::Render(View* View)
+void lcCamera::DrawInterface(lcContext* Context, const lcMatrix44& ViewMatrix) const
 {
 	float LineWidth = lcGetPreferences().mLineWidth;
-	const lcMatrix44& ViewMatrix = View->mCamera->mWorldView;
-	lcContext* Context = View->mContext;
 
 	lcMatrix44 ViewWorld = lcMatrix44AffineInverse(mWorldView);
 	lcVector3 UpVectorPosition = lcMul31(lcVector3(0, 1, 0), ViewWorld);

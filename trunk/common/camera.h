@@ -267,6 +267,7 @@ public:
 public:
 	virtual void RayTest(lcObjectRayTest& ObjectRayTest) const;
 	virtual void BoxTest(lcObjectBoxTest& ObjectBoxTest) const;
+	virtual void DrawInterface(lcContext* Context, const lcMatrix44& ViewMatrix) const;
 
 	void InsertTime(lcStep Start, lcStep Time);
 	void RemoveTime(lcStep Start, lcStep Time);
@@ -278,7 +279,6 @@ public:
 	void CompareBoundingBox(float box[6]);
 	void UpdatePosition(lcStep Step);
 	void CopyPosition(const lcCamera* camera);
-	void Render(View* View);
 
 	void ZoomExtents(float Aspect, const lcVector3& Center, const lcVector3* Points, int NumPoints, lcStep Step, bool AddKey);
 	void ZoomRegion(const lcVector3* Points, float RatioX, float RatioY, lcStep Step, bool AddKey);

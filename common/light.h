@@ -189,7 +189,7 @@ public:
 	const char* GetName() const
 	{ return m_strName; }
 
-	void RenderCone(const lcMatrix44& ViewMatrix) const;
+	void RenderCone(lcContext* Context, const lcMatrix44& ViewMatrix) const;
 	void RenderTarget() const;
 	void RenderSphere() const;
 

@@ -11,6 +11,10 @@
 #include "lc_application.h"
 #include "lc_context.h"
 
+#define LC_LIGHT_POSITION_EDGE 7.5f
+#define LC_LIGHT_TARGET_EDGE 5.0f
+#define LC_LIGHT_SPHERE_RADIUS 5.0f
+
 // New omni light.
 lcLight::lcLight(float px, float py, float pz)
 	: lcObject(LC_OBJECT_LIGHT)
@@ -24,6 +28,7 @@ lcLight::lcLight(float px, float py, float pz, float tx, float ty, float tz)
 	: lcObject(LC_OBJECT_LIGHT)
 {
 	Initialize(lcVector3(px, py, pz), lcVector3(tx, ty, tz));
+	mState |= LC_LIGHT_SPOT;
 	UpdatePosition(1);
 }
 
@@ -97,7 +102,7 @@ void lcLight::RayTest(lcObjectRayTest& ObjectRayTest) const
 	{
 		float Distance;
 
-		if (lcSphereRayMinIntersectDistance(mPosition, 0.2f, ObjectRayTest.Start, ObjectRayTest.End, &Distance))
+		if (lcSphereRayMinIntersectDistance(mPosition, LC_LIGHT_SPHERE_RADIUS, ObjectRayTest.Start, ObjectRayTest.End, &Distance))
 		{
 			ObjectRayTest.ObjectSection.Object = const_cast<lcLight*>(this);
 			ObjectRayTest.ObjectSection.Section = LC_LIGHT_SECTION_POSITION;
@@ -107,8 +112,8 @@ void lcLight::RayTest(lcObjectRayTest& ObjectRayTest) const
 		return;
 	}
 
-	lcVector3 Min = lcVector3(-0.2f, -0.2f, -0.2f);
-	lcVector3 Max = lcVector3(0.2f, 0.2f, 0.2f);
+	lcVector3 Min = lcVector3(-LC_LIGHT_POSITION_EDGE, -LC_LIGHT_POSITION_EDGE, -LC_LIGHT_POSITION_EDGE);
+	lcVector3 Max = lcVector3(LC_LIGHT_POSITION_EDGE, LC_LIGHT_POSITION_EDGE, LC_LIGHT_POSITION_EDGE);
 
 	lcVector3 Start = lcMul31(ObjectRayTest.Start, mWorldLight);
 	lcVector3 End = lcMul31(ObjectRayTest.End, mWorldLight);
@@ -121,8 +126,8 @@ void lcLight::RayTest(lcObjectRayTest& ObjectRayTest) const
 		ObjectRayTest.Distance = Distance;
 	}
 
-	Min = lcVector3(-0.2f, -0.2f, -0.2f);
-	Max = lcVector3(0.2f, 0.2f, 0.2f);
+	Min = lcVector3(-LC_LIGHT_TARGET_EDGE, -LC_LIGHT_TARGET_EDGE, -LC_LIGHT_TARGET_EDGE);
+	Max = lcVector3(LC_LIGHT_TARGET_EDGE, LC_LIGHT_TARGET_EDGE, LC_LIGHT_TARGET_EDGE);
 
 	lcMatrix44 WorldTarget = mWorldLight;
 	WorldTarget.SetTranslation(lcMul30(-mTargetPosition, WorldTarget));
@@ -143,7 +148,7 @@ void lcLight::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
 	if (IsPointLight())
 	{
 		for (int PlaneIdx = 0; PlaneIdx < 6; PlaneIdx++)
-			if (lcDot3(mPosition, ObjectBoxTest.Planes[PlaneIdx]) + ObjectBoxTest.Planes[PlaneIdx][3] > 0.2f)
+			if (lcDot3(mPosition, ObjectBoxTest.Planes[PlaneIdx]) + ObjectBoxTest.Planes[PlaneIdx][3] > LC_LIGHT_SPHERE_RADIUS)
 				return;
 
 		lcObjectSection& ObjectSection = ObjectBoxTest.ObjectSections.Add();
@@ -153,8 +158,8 @@ void lcLight::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
 		return;
 	}
 
-	lcVector3 Min(-0.2f, -0.2f, -0.2f);
-	lcVector3 Max(0.2f, 0.2f, 0.2f);
+	lcVector3 Min(-LC_LIGHT_POSITION_EDGE, -LC_LIGHT_POSITION_EDGE, -LC_LIGHT_POSITION_EDGE);
+	lcVector3 Max(LC_LIGHT_POSITION_EDGE, LC_LIGHT_POSITION_EDGE, LC_LIGHT_POSITION_EDGE);
 
 	lcVector4 LocalPlanes[6];
 
@@ -171,8 +176,8 @@ void lcLight::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
 		ObjectSection.Section = LC_LIGHT_SECTION_POSITION;
 	}
 
-	Min = lcVector3(-0.2f, -0.2f, -0.2f);
-	Max = lcVector3(0.2f, 0.2f, 0.2f);
+	Min = lcVector3(-LC_LIGHT_TARGET_EDGE, -LC_LIGHT_TARGET_EDGE, -LC_LIGHT_TARGET_EDGE);
+	Max = lcVector3(LC_LIGHT_TARGET_EDGE, LC_LIGHT_TARGET_EDGE, LC_LIGHT_TARGET_EDGE);
 
 	lcMatrix44 WorldTarget = mWorldLight;
 	WorldTarget.SetTranslation(lcMul30(-mTargetPosition, WorldTarget));
@@ -306,7 +311,7 @@ void lcLight::DrawInterface(lcContext* Context, const lcMatrix44& ViewMatrix) co
 			lcSetColorLight();
 		}
 
-		RenderCone(ViewMatrix);
+		RenderCone(Context, ViewMatrix);
 
 		if (IsSelected(LC_LIGHT_SECTION_TARGET))
 		{
@@ -390,7 +395,7 @@ void lcLight::DrawInterface(lcContext* Context, const lcMatrix44& ViewMatrix) co
 	}
 }
 
-void lcLight::RenderCone(const lcMatrix44& ViewMatrix) const
+void lcLight::RenderCone(lcContext* Context, const lcMatrix44& ViewMatrix) const
 {
 	lcVector3 FrontVector(mTargetPosition - mPosition);
 	lcVector3 UpVector(1, 1, 1);
@@ -416,16 +421,16 @@ void lcLight::RenderCone(const lcMatrix44& ViewMatrix) const
 	LightMatrix.SetTranslation(lcVector3(0, 0, 0));
 
 	lcMatrix44 LightViewMatrix = lcMul(LightMatrix, lcMul(lcMatrix44Translation(mPosition), ViewMatrix));
+	Context->SetWorldViewMatrix(LightViewMatrix);
 
-	glLoadMatrixf(LightViewMatrix);
-
+	float Edge = LC_LIGHT_POSITION_EDGE;
 	float verts[16*3];
 	for (int i = 0; i < 8; i++)
 	{
-		verts[i*6] = verts[i*6+3] = (float)cos((float)i/4 * LC_PI) * 0.3f;
-		verts[i*6+1] = verts[i*6+4] = (float)sin((float)i/4 * LC_PI) * 0.3f;
-		verts[i*6+2] = 0.3f;
-		verts[i*6+5] = -0.3f;
+		verts[i*6] = verts[i*6+3] = (float)cos((float)i/4 * LC_PI) * Edge;
+		verts[i*6+1] = verts[i*6+4] = (float)sin((float)i/4 * LC_PI) * Edge;
+		verts[i*6+2] = Edge;
+		verts[i*6+5] = -Edge;
 	}
 
 	glVertexPointer(3, GL_FLOAT, 0, verts);
@@ -437,37 +442,39 @@ void lcLight::RenderCone(const lcMatrix44& ViewMatrix) const
 
 	float Lines[4][3] =
 	{
-		{ -0.5f, -0.5f, -0.3f },
-		{  0.5f, -0.5f, -0.3f },
-		{  0.5f,  0.5f, -0.3f },
-		{ -0.5f,  0.5f, -0.3f }
+		{ -12.5f, -12.5f, -Edge },
+		{  12.5f, -12.5f, -Edge },
+		{  12.5f,  12.5f, -Edge },
+		{ -12.5f,  12.5f, -Edge }
 	};
 
 	glVertexPointer(3, GL_FLOAT, 0, Lines);
 	glDrawArrays(GL_LINE_LOOP, 0, 4);
 
-	glLoadMatrixf(lcMul(lcMatrix44Translation(lcVector3(0, 0, -Length)), LightViewMatrix));
+	Context->SetWorldViewMatrix(lcMul(lcMatrix44Translation(lcVector3(0, 0, -Length)), LightViewMatrix));
 }
 
 void lcLight::RenderTarget() const
 {
-	float box[24][3] =
+	float Edge = LC_LIGHT_TARGET_EDGE;
+
+	float Box[24][3] =
 	{
-		{  0.2f,  0.2f,  0.2f }, { -0.2f,  0.2f,  0.2f },
-		{ -0.2f,  0.2f,  0.2f }, { -0.2f, -0.2f,  0.2f },
-		{ -0.2f, -0.2f,  0.2f }, {  0.2f, -0.2f,  0.2f },
-		{  0.2f, -0.2f,  0.2f }, {  0.2f,  0.2f,  0.2f },
-		{  0.2f,  0.2f, -0.2f }, { -0.2f,  0.2f, -0.2f },
-		{ -0.2f,  0.2f, -0.2f }, { -0.2f, -0.2f, -0.2f },
-		{ -0.2f, -0.2f, -0.2f }, {  0.2f, -0.2f, -0.2f },
-		{  0.2f, -0.2f, -0.2f }, {  0.2f,  0.2f, -0.2f },
-		{  0.2f,  0.2f,  0.2f }, {  0.2f,  0.2f, -0.2f },
-		{ -0.2f,  0.2f,  0.2f }, { -0.2f,  0.2f, -0.2f },
-		{ -0.2f, -0.2f,  0.2f }, { -0.2f, -0.2f, -0.2f },
-		{  0.2f, -0.2f,  0.2f }, {  0.2f, -0.2f, -0.2f }
+		{  Edge,  Edge,  Edge }, { -Edge,  Edge,  Edge },
+		{ -Edge,  Edge,  Edge }, { -Edge, -Edge,  Edge },
+		{ -Edge, -Edge,  Edge }, {  Edge, -Edge,  Edge },
+		{  Edge, -Edge,  Edge }, {  Edge,  Edge,  Edge },
+		{  Edge,  Edge, -Edge }, { -Edge,  Edge, -Edge },
+		{ -Edge,  Edge, -Edge }, { -Edge, -Edge, -Edge },
+		{ -Edge, -Edge, -Edge }, {  Edge, -Edge, -Edge },
+		{  Edge, -Edge, -Edge }, {  Edge,  Edge, -Edge },
+		{  Edge,  Edge,  Edge }, {  Edge,  Edge, -Edge },
+		{ -Edge,  Edge,  Edge }, { -Edge,  Edge, -Edge },
+		{ -Edge, -Edge,  Edge }, { -Edge, -Edge, -Edge },
+		{  Edge, -Edge,  Edge }, {  Edge, -Edge, -Edge }
 	};
 
-	glVertexPointer(3, GL_FLOAT, 0, box);
+	glVertexPointer(3, GL_FLOAT, 0, Box);
 	glDrawArrays(GL_LINES, 0, 24);
 }
 
@@ -476,7 +483,7 @@ void lcLight::RenderSphere() const
 	const int Slices = 6;
 	const int NumIndices = 3 * Slices + 6 * Slices * (Slices - 2) + 3 * Slices;
 	const int NumVertices = (Slices - 1) * Slices + 2;
-	const float Radius = 0.2f;
+	const float Radius = LC_LIGHT_SPHERE_RADIUS;
 	lcVector3 Vertices[NumVertices];
 	lcuint16 Indices[NumIndices];
 

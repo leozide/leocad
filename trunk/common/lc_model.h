@@ -209,9 +209,9 @@ public:
 	void InsertPieceToolClicked(const lcVector3& Position, const lcVector4& Rotation);
 	void PointLightToolClicked(const lcVector3& Position);
 	void BeginSpotLightTool(const lcVector3& Position, const lcVector3& Target);
-	void UpdateSpotLightTool(const lcVector3& Target);
+	void UpdateSpotLightTool(const lcVector3& Position);
 	void BeginCameraTool(const lcVector3& Position, const lcVector3& Target);
-	void UpdateCameraTool(const lcVector3& Target);
+	void UpdateCameraTool(const lcVector3& Position);
 	void UpdateMoveTool(const lcVector3& Distance);
 	void UpdateRotateTool(const lcVector3& Angles);
 	void EraserToolClicked(lcObject* Object);

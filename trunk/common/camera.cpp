@@ -13,6 +13,9 @@
 #include "lc_application.h"
 #include "lc_context.h"
 
+#define LC_CAMERA_POSITION_EDGE 7.5f
+#define LC_CAMERA_TARGET_EDGE 7.5f
+
 #define LC_CAMERA_SAVE_VERSION 7 // LeoCAD 0.80
 
 lcCamera::lcCamera(bool Simple)
@@ -529,38 +532,42 @@ void lcCamera::DrawInterface(lcContext* Context, const lcMatrix44& ViewMatrix) c
 	lcMatrix44 ViewWorld = lcMatrix44AffineInverse(mWorldView);
 	lcVector3 UpVectorPosition = lcMul31(lcVector3(0, 1, 0), ViewWorld);
 
+	float PositionEdge = LC_CAMERA_POSITION_EDGE;
+	float PositionLens = LC_CAMERA_POSITION_EDGE * 2;
+	float TargetEdge = LC_CAMERA_TARGET_EDGE;
+
 	float Verts[34 + 24 + 4][3] =
 	{
-		{  0.3f,  0.3f,  0.3f }, { -0.3f,  0.3f,  0.3f },
-		{ -0.3f,  0.3f,  0.3f }, { -0.3f, -0.3f,  0.3f },
-		{ -0.3f, -0.3f,  0.3f }, {  0.3f, -0.3f,  0.3f },
-		{  0.3f, -0.3f,  0.3f }, {  0.3f,  0.3f,  0.3f },
-		{  0.3f,  0.3f, -0.3f }, { -0.3f,  0.3f, -0.3f },
-		{ -0.3f,  0.3f, -0.3f }, { -0.3f, -0.3f, -0.3f },
-		{ -0.3f, -0.3f, -0.3f }, {  0.3f, -0.3f, -0.3f },
-		{  0.3f, -0.3f, -0.3f }, {  0.3f,  0.3f, -0.3f },
-		{  0.3f,  0.3f,  0.3f }, {  0.3f,  0.3f, -0.3f },
-		{ -0.3f,  0.3f,  0.3f }, { -0.3f,  0.3f, -0.3f },
-		{ -0.3f, -0.3f,  0.3f }, { -0.3f, -0.3f, -0.3f },
-		{  0.3f, -0.3f,  0.3f }, {  0.3f, -0.3f, -0.3f },
-		{ -0.3f, -0.3f, -0.6f }, { -0.3f,  0.3f, -0.6f },
-		{  0.0f,  0.0f, -0.3f }, { -0.3f, -0.3f, -0.6f },
-		{  0.3f, -0.3f, -0.6f }, {  0.0f,  0.0f, -0.3f },
-		{  0.3f,  0.3f, -0.6f }, {  0.3f, -0.3f, -0.6f },
-		{  0.3f,  0.3f, -0.6f }, { -0.3f,  0.3f, -0.6f },
+		{  PositionEdge,  PositionEdge,  PositionEdge }, { -PositionEdge,  PositionEdge,  PositionEdge },
+		{ -PositionEdge,  PositionEdge,  PositionEdge }, { -PositionEdge, -PositionEdge,  PositionEdge },
+		{ -PositionEdge, -PositionEdge,  PositionEdge }, {  PositionEdge, -PositionEdge,  PositionEdge },
+		{  PositionEdge, -PositionEdge,  PositionEdge }, {  PositionEdge,  PositionEdge,  PositionEdge },
+		{  PositionEdge,  PositionEdge, -PositionEdge }, { -PositionEdge,  PositionEdge, -PositionEdge },
+		{ -PositionEdge,  PositionEdge, -PositionEdge }, { -PositionEdge, -PositionEdge, -PositionEdge },
+		{ -PositionEdge, -PositionEdge, -PositionEdge }, {  PositionEdge, -PositionEdge, -PositionEdge },
+		{  PositionEdge, -PositionEdge, -PositionEdge }, {  PositionEdge,  PositionEdge, -PositionEdge },
+		{  PositionEdge,  PositionEdge,  PositionEdge }, {  PositionEdge,  PositionEdge, -PositionEdge },
+		{ -PositionEdge,  PositionEdge,  PositionEdge }, { -PositionEdge,  PositionEdge, -PositionEdge },
+		{ -PositionEdge, -PositionEdge,  PositionEdge }, { -PositionEdge, -PositionEdge, -PositionEdge },
+		{  PositionEdge, -PositionEdge,  PositionEdge }, {  PositionEdge, -PositionEdge, -PositionEdge },
+		{ -PositionEdge, -PositionEdge, -PositionLens }, { -PositionEdge,  PositionEdge, -PositionLens },
+		{          0.0f,          0.0f, -PositionEdge }, { -PositionEdge, -PositionEdge, -PositionLens },
+		{  PositionEdge, -PositionEdge, -PositionLens }, {          0.0f,          0.0f, -PositionEdge },
+		{  PositionEdge,  PositionEdge, -PositionLens }, {  PositionEdge, -PositionEdge, -PositionLens },
+		{  PositionEdge,  PositionEdge, -PositionLens }, { -PositionEdge,  PositionEdge, -PositionLens },
 
-		{  0.2f,  0.2f,  0.2f }, { -0.2f,  0.2f,  0.2f },
-		{ -0.2f,  0.2f,  0.2f }, { -0.2f, -0.2f,  0.2f },
-		{ -0.2f, -0.2f,  0.2f }, {  0.2f, -0.2f,  0.2f },
-		{  0.2f, -0.2f,  0.2f }, {  0.2f,  0.2f,  0.2f },
-		{  0.2f,  0.2f, -0.2f }, { -0.2f,  0.2f, -0.2f },
-		{ -0.2f,  0.2f, -0.2f }, { -0.2f, -0.2f, -0.2f },
-		{ -0.2f, -0.2f, -0.2f }, {  0.2f, -0.2f, -0.2f },
-		{  0.2f, -0.2f, -0.2f }, {  0.2f,  0.2f, -0.2f },
-		{  0.2f,  0.2f,  0.2f }, {  0.2f,  0.2f, -0.2f },
-		{ -0.2f,  0.2f,  0.2f }, { -0.2f,  0.2f, -0.2f },
-		{ -0.2f, -0.2f,  0.2f }, { -0.2f, -0.2f, -0.2f },
-		{  0.2f, -0.2f,  0.2f }, {  0.2f, -0.2f, -0.2f },
+		{  TargetEdge,  TargetEdge,  TargetEdge }, { -TargetEdge,  TargetEdge,  TargetEdge },
+		{ -TargetEdge,  TargetEdge,  TargetEdge }, { -TargetEdge, -TargetEdge,  TargetEdge },
+		{ -TargetEdge, -TargetEdge,  TargetEdge }, {  TargetEdge, -TargetEdge,  TargetEdge },
+		{  TargetEdge, -TargetEdge,  TargetEdge }, {  TargetEdge,  TargetEdge,  TargetEdge },
+		{  TargetEdge,  TargetEdge, -TargetEdge }, { -TargetEdge,  TargetEdge, -TargetEdge },
+		{ -TargetEdge,  TargetEdge, -TargetEdge }, { -TargetEdge, -TargetEdge, -TargetEdge },
+		{ -TargetEdge, -TargetEdge, -TargetEdge }, {  TargetEdge, -TargetEdge, -TargetEdge },
+		{  TargetEdge, -TargetEdge, -TargetEdge }, {  TargetEdge,  TargetEdge, -TargetEdge },
+		{  TargetEdge,  TargetEdge,  TargetEdge }, {  TargetEdge,  TargetEdge, -TargetEdge },
+		{ -TargetEdge,  TargetEdge,  TargetEdge }, { -TargetEdge,  TargetEdge, -TargetEdge },
+		{ -TargetEdge, -TargetEdge,  TargetEdge }, { -TargetEdge, -TargetEdge, -TargetEdge },
+		{  TargetEdge, -TargetEdge,  TargetEdge }, {  TargetEdge, -TargetEdge, -TargetEdge },
 
 		{ mPosition[0], mPosition[1], mPosition[2] },
 		{ mTargetPosition[0], mTargetPosition[1], mTargetPosition[2] },
@@ -663,8 +670,8 @@ void lcCamera::DrawInterface(lcContext* Context, const lcMatrix44& ViewMatrix) c
 
 void lcCamera::RayTest(lcObjectRayTest& ObjectRayTest) const
 {
-	lcVector3 Min = lcVector3(-0.3f, -0.3f, -0.3f);
-	lcVector3 Max = lcVector3(0.3f, 0.3f, 0.3f);
+	lcVector3 Min = lcVector3(-LC_CAMERA_POSITION_EDGE, -LC_CAMERA_POSITION_EDGE, -LC_CAMERA_POSITION_EDGE);
+	lcVector3 Max = lcVector3(LC_CAMERA_POSITION_EDGE, LC_CAMERA_POSITION_EDGE, LC_CAMERA_POSITION_EDGE);
 
 	lcVector3 Start = lcMul31(ObjectRayTest.Start, mWorldView);
 	lcVector3 End = lcMul31(ObjectRayTest.End, mWorldView);
@@ -677,8 +684,8 @@ void lcCamera::RayTest(lcObjectRayTest& ObjectRayTest) const
 		ObjectRayTest.Distance = Distance;
 	}
 
-	Min = lcVector3(-0.2f, -0.2f, -0.2f);
-	Max = lcVector3(0.2f, 0.2f, 0.2f);
+	Min = lcVector3(-LC_CAMERA_TARGET_EDGE, -LC_CAMERA_TARGET_EDGE, -LC_CAMERA_TARGET_EDGE);
+	Max = lcVector3(LC_CAMERA_TARGET_EDGE, LC_CAMERA_TARGET_EDGE, LC_CAMERA_TARGET_EDGE);
 
 	lcMatrix44 WorldView = mWorldView;
 	WorldView.SetTranslation(lcMul30(-mTargetPosition, WorldView));
@@ -712,8 +719,8 @@ void lcCamera::RayTest(lcObjectRayTest& ObjectRayTest) const
 
 void lcCamera::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
 {
-	lcVector3 Min(-0.3f, -0.3f, -0.3f);
-	lcVector3 Max(0.3f, 0.3f, 0.3f);
+	lcVector3 Min(-LC_CAMERA_POSITION_EDGE, -LC_CAMERA_POSITION_EDGE, -LC_CAMERA_POSITION_EDGE);
+	lcVector3 Max(LC_CAMERA_POSITION_EDGE, LC_CAMERA_POSITION_EDGE, LC_CAMERA_POSITION_EDGE);
 
 	lcVector4 LocalPlanes[6];
 
@@ -730,8 +737,8 @@ void lcCamera::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
 		ObjectSection.Section = LC_CAMERA_SECTION_POSITION;
 	}
 
-	Min = lcVector3(-0.2f, -0.2f, -0.2f);
-	Max = lcVector3(0.2f, 0.2f, 0.2f);
+	Min = lcVector3(-LC_CAMERA_TARGET_EDGE, -LC_CAMERA_TARGET_EDGE, -LC_CAMERA_TARGET_EDGE);
+	Max = lcVector3(LC_CAMERA_TARGET_EDGE, LC_CAMERA_TARGET_EDGE, LC_CAMERA_TARGET_EDGE);
 
 	lcMatrix44 WorldView = mWorldView;
 	WorldView.SetTranslation(lcMul30(-mTargetPosition, WorldView));

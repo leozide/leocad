@@ -1994,15 +1994,19 @@ void lcModel::BeginSpotLightTool(const lcVector3& Position, const lcVector3& Tar
 	lcLight* Light = new lcLight(Position[0], Position[1], Position[2], Target[0], Target[1], Target[2]);
 	mLights.Add(Light);
 
+	mMouseToolDistance = Target;
+
 	ClearSelectionAndSetFocus(Light, LC_LIGHT_SECTION_TARGET);
 }
 
-void lcModel::UpdateSpotLightTool(const lcVector3& Target)
+void lcModel::UpdateSpotLightTool(const lcVector3& Position)
 {
 	lcLight* Light = mLights[mLights.GetSize() - 1];
 
-	Light->Move(1, false, Target);
+	Light->Move(1, false, Position - mMouseToolDistance);
 	Light->UpdatePosition(1);
+
+	mMouseToolDistance = Position;
 
 	gMainWindow->UpdateFocusObject(Light);
 	gMainWindow->UpdateAllViews();
@@ -2014,15 +2018,19 @@ void lcModel::BeginCameraTool(const lcVector3& Position, const lcVector3& Target
 	Camera->CreateName(mCameras);
 	mCameras.Add(Camera);
 
+	mMouseToolDistance = Position;
+
 	ClearSelectionAndSetFocus(Camera, LC_CAMERA_SECTION_TARGET);
 }
 
-void lcModel::UpdateCameraTool(const lcVector3& Target)
+void lcModel::UpdateCameraTool(const lcVector3& Position)
 {
 	lcCamera* Camera = mCameras[mCameras.GetSize() - 1];
 
-	Camera->Move(1, false, Target);
+	Camera->Move(1, false, Position - mMouseToolDistance);
 	Camera->UpdatePosition(1);
+
+	mMouseToolDistance = Position;
 
 	gMainWindow->UpdateFocusObject(Camera);
 	gMainWindow->UpdateAllViews();

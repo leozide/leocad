@@ -2030,100 +2030,29 @@ void Project::HandleCommand(LC_COMMANDS id)
 			break;
 		}
 
-		case LC_VIEW_TIME_NEXT:
-		{
-			if (mCurrentStep == LC_STEP_MAX)
-				break;
+	case LC_VIEW_TIME_NEXT:
+		ShowNextStep();
+		break;
 
-			mCurrentStep++;
+	case LC_VIEW_TIME_PREVIOUS:
+		ShowPreviousStep();
+		break;
 
-			CalculateStep();
-			UpdateSelection();
-			gMainWindow->UpdateFocusObject(GetFocusObject());
-			gMainWindow->UpdateAllViews();
-			gMainWindow->UpdateCurrentStep();
-		} break;
+	case LC_VIEW_TIME_FIRST:
+		ShowFirstStep();
+		break;
 
-		case LC_VIEW_TIME_PREVIOUS:
-		{
-			if (mCurrentStep == 1)
-				break;
-			mCurrentStep--;
+	case LC_VIEW_TIME_LAST:
+		ShowLastStep();
+		break;
 
-			CalculateStep();
-			UpdateSelection();
-			gMainWindow->UpdateFocusObject(GetFocusObject());
-			gMainWindow->UpdateAllViews();
-			gMainWindow->UpdateCurrentStep();
-		} break;
+	case LC_VIEW_TIME_INSERT:
+		InsertStep();
+		break;
 
-		case LC_VIEW_TIME_FIRST:
-		{
-			mCurrentStep = 1;
-
-			CalculateStep();
-			UpdateSelection();
-			gMainWindow->UpdateFocusObject(GetFocusObject());
-			gMainWindow->UpdateAllViews();
-			gMainWindow->UpdateCurrentStep();
-		} break;
-
-		case LC_VIEW_TIME_LAST:
-		{
-			mCurrentStep = GetLastStep();
-
-			CalculateStep();
-			UpdateSelection();
-			gMainWindow->UpdateFocusObject(GetFocusObject());
-			gMainWindow->UpdateAllViews();
-			gMainWindow->UpdateCurrentStep();
-		} break;
-
-		case LC_VIEW_TIME_INSERT:
-		{
-			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-			{
-				lcPiece* Piece = mPieces[PieceIdx];
-				Piece->InsertTime(mCurrentStep, 1);
-				if (Piece->IsSelected() && !Piece->IsVisible(mCurrentStep))
-					Piece->SetSelected(false);
-			}
-
-			for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
-				mCameras[CameraIdx]->InsertTime(mCurrentStep, 1);
-
-			for (int LightIdx = 0; LightIdx < mLights.GetSize(); LightIdx++)
-				mLights[LightIdx]->InsertTime(mCurrentStep, 1);
-
-			CheckPoint("Adding Step");
-			CalculateStep();
-			gMainWindow->UpdateFocusObject(GetFocusObject());
-			gMainWindow->UpdateAllViews();
-			UpdateSelection();
-		} break;
-
-		case LC_VIEW_TIME_DELETE:
-		{
-			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-			{
-				lcPiece* Piece = mPieces[PieceIdx];
-				Piece->RemoveTime(mCurrentStep, 1);
-				if (Piece->IsSelected() && !Piece->IsVisible(mCurrentStep))
-					Piece->SetSelected(false);
-			}
-
-			for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
-				mCameras[CameraIdx]->RemoveTime(mCurrentStep, 1);
-
-			for (int LightIdx = 0; LightIdx < mLights.GetSize(); LightIdx++)
-				mLights[LightIdx]->RemoveTime(mCurrentStep, 1);
-
-			CheckPoint("Removing Step");
-			CalculateStep();
-			gMainWindow->UpdateFocusObject(GetFocusObject());
-			gMainWindow->UpdateAllViews();
-			UpdateSelection();
-		} break;
+	case LC_VIEW_TIME_DELETE:
+		RemoveStep();
+		break;
 
 	case LC_VIEW_VIEWPOINT_FRONT:
 		gMainWindow->GetActiveView()->SetViewpoint(LC_VIEWPOINT_FRONT);
@@ -2153,51 +2082,28 @@ void Project::HandleCommand(LC_COMMANDS id)
 		gMainWindow->GetActiveView()->SetViewpoint(LC_VIEWPOINT_HOME);
 		break;
 
-		case LC_VIEW_CAMERA_NONE:
-		case LC_VIEW_CAMERA1:
-		case LC_VIEW_CAMERA2:
-		case LC_VIEW_CAMERA3:
-		case LC_VIEW_CAMERA4:
-		case LC_VIEW_CAMERA5:
-		case LC_VIEW_CAMERA6:
-		case LC_VIEW_CAMERA7:
-		case LC_VIEW_CAMERA8:
-		case LC_VIEW_CAMERA9:
-		case LC_VIEW_CAMERA10:
-		case LC_VIEW_CAMERA11:
-		case LC_VIEW_CAMERA12:
-		case LC_VIEW_CAMERA13:
-		case LC_VIEW_CAMERA14:
-		case LC_VIEW_CAMERA15:
-		case LC_VIEW_CAMERA16:
-		{
-			View* ActiveView = gMainWindow->GetActiveView();
-			lcCamera* Camera = NULL;
+	case LC_VIEW_CAMERA_NONE:
+		gMainWindow->GetActiveView()->RemoveCamera();
+		break;
 
-			if (id == LC_VIEW_CAMERA_NONE)
-			{
-				Camera = ActiveView->mCamera;
-
-				if (!Camera->IsSimple())
-				{
-					ActiveView->SetCamera(Camera, true);
-					Camera = ActiveView->mCamera;
-				}
-			}
-			else
-			{
-				if (id - LC_VIEW_CAMERA1 < mCameras.GetSize())
-				{
-					Camera = mCameras[id - LC_VIEW_CAMERA1];
-					ActiveView->SetCamera(Camera, false);
-				}
-				else
-					break;
-			}
-
-			gMainWindow->UpdateCurrentCamera(mCameras.FindIndex(ActiveView->mCamera));
-			gMainWindow->UpdateAllViews();
-		} break;
+	case LC_VIEW_CAMERA1:
+	case LC_VIEW_CAMERA2:
+	case LC_VIEW_CAMERA3:
+	case LC_VIEW_CAMERA4:
+	case LC_VIEW_CAMERA5:
+	case LC_VIEW_CAMERA6:
+	case LC_VIEW_CAMERA7:
+	case LC_VIEW_CAMERA8:
+	case LC_VIEW_CAMERA9:
+	case LC_VIEW_CAMERA10:
+	case LC_VIEW_CAMERA11:
+	case LC_VIEW_CAMERA12:
+	case LC_VIEW_CAMERA13:
+	case LC_VIEW_CAMERA14:
+	case LC_VIEW_CAMERA15:
+	case LC_VIEW_CAMERA16:
+		gMainWindow->GetActiveView()->SetCameraIndex(id - LC_VIEW_CAMERA1);
+		break;
 
 		case LC_VIEW_CAMERA_RESET:
 		{
@@ -2226,64 +2132,16 @@ void Project::HandleCommand(LC_COMMANDS id)
 		gMainWindow->DoDialog(LC_DIALOG_CHECK_UPDATES, NULL);
 		break;
 
-		case LC_HELP_ABOUT:
-		{
-			String Info;
-			char Text[256];
+	case LC_HELP_ABOUT:
+		gMainWindow->DoDialog(LC_DIALOG_ABOUT, NULL);
 
-			gMainWindow->GetActiveView()->MakeCurrent();
-
-			GLint Red, Green, Blue, Alpha, Depth, Stencil;
-			GLboolean DoubleBuffer, RGBA;
-
-			glGetIntegerv(GL_RED_BITS, &Red);
-			glGetIntegerv(GL_GREEN_BITS, &Green);
-			glGetIntegerv(GL_BLUE_BITS, &Blue);
-			glGetIntegerv(GL_ALPHA_BITS, &Alpha);
-			glGetIntegerv(GL_DEPTH_BITS, &Depth);
-			glGetIntegerv(GL_STENCIL_BITS, &Stencil);
-			glGetBooleanv(GL_DOUBLEBUFFER, &DoubleBuffer);
-			glGetBooleanv(GL_RGBA_MODE, &RGBA);
-
-			Info = "OpenGL Version ";
-			Info += (const char*)glGetString(GL_VERSION);
-			Info += "\n";
-			Info += (const char*)glGetString(GL_RENDERER);
-			Info += " - ";
-			Info += (const char*)glGetString(GL_VENDOR);
-			sprintf(Text, "\n\nColor Buffer: %d bits %s %s", Red + Green + Blue + Alpha, RGBA ? "RGBA" : "indexed", DoubleBuffer ? "double buffered" : "");
-			Info += Text;
-			sprintf(Text, "\nDepth Buffer: %d bits", Depth);
-			Info += Text;
-			sprintf(Text, "\nStencil Buffer: %d bits", Stencil);
-			Info += Text;
-			Info += "\nGL_ARB_vertex_buffer_object extension: ";
-			Info += GL_HasVertexBufferObject() ? "supported" : "not supported";
-			Info += "\nGL_ARB_framebuffer_object extension: ";
-			Info += GL_HasFramebufferObjectARB() ? "supported" : "not supported";
-			Info += "\nGL_EXT_framebuffer_object extension: ";
-			Info += GL_HasFramebufferObjectEXT() ? "supported" : "not supported";
-			Info += "\nGL_EXT_texture_filter_anisotropic extension: ";
-			if (GL_SupportsAnisotropic)
-			{
-				sprintf(Text, "supported (max %d)", (int)GL_MaxAnisotropy);
-				Info += Text;
-			}
-			else
-				Info += "not supported";
-
-			gMainWindow->DoDialog(LC_DIALOG_ABOUT, (char*)Info);
-		} break;
-
-		case LC_VIEW_TIME_ADD_KEYS:
-			gMainWindow->SetAddKeys(!gMainWindow->GetAddKeys());
-			break;
+	case LC_VIEW_TIME_ADD_KEYS:
+		gMainWindow->SetAddKeys(!gMainWindow->GetAddKeys());
+		break;
 
 	case LC_EDIT_SNAP_RELATIVE:
-		{
-			lcPreferences& Preferences = lcGetPreferences();
-			Preferences.SetForceGlobalTransforms(!Preferences.mForceGlobalTransforms);
-		} break;
+		lcGetPreferences().SetForceGlobalTransforms(!lcGetPreferences().mForceGlobalTransforms);
+		break;
 
 	case LC_EDIT_LOCK_X:
 		gMainWindow->SetLockX(!gMainWindow->GetLockX());

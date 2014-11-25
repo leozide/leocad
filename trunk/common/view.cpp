@@ -36,6 +36,21 @@ View::~View()
 		delete mCamera;
 }
 
+void View::RemoveCamera()
+{
+	if (mCamera && mCamera->IsSimple())
+		return;
+
+	lcCamera* Camera = mCamera;
+	mCamera = new lcCamera(true);
+
+	if (Camera)
+		mCamera->CopyPosition(Camera);
+
+	gMainWindow->UpdateCurrentCamera(-1);
+	Redraw();
+}
+
 void View::SetCamera(lcCamera* Camera, bool ForceCopy)
 {
 	if (Camera->IsSimple() || ForceCopy)
@@ -52,6 +67,20 @@ void View::SetCamera(lcCamera* Camera, bool ForceCopy)
 
 		mCamera = Camera;
 	}
+}
+
+void View::SetCameraIndex(int Index)
+{
+	const lcArray<lcCamera*>& Cameras = mProject->GetCameras();
+
+	if (Index >= Cameras.GetSize())
+		return;
+
+	lcCamera* Camera = Cameras[Index];
+	SetCamera(Camera, false);
+
+	gMainWindow->UpdateCurrentCamera(Index);
+	Redraw();
 }
 
 void View::SetViewpoint(lcViewpoint Viewpoint)

@@ -15,8 +15,6 @@ public:
 	explicit lcQAboutDialog(QWidget *parent, void *data);
 	~lcQAboutDialog();
 
-	char* options;
-
 private:
 	Ui::lcQAboutDialog *ui;
 };

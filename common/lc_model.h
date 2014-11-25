@@ -150,6 +150,13 @@ public:
 		return mCurrentStep;
 	}
 
+	void ShowFirstStep();
+	void ShowLastStep();
+	void ShowPreviousStep();
+	void ShowNextStep();
+	void InsertStep();
+	void RemoveStep();
+
 	lcGroup* AddGroup(const char* Prefix, lcGroup* Parent);
 	lcGroup* GetGroup(const char* Name, bool CreateIfMissing);
 	void RemoveGroup(lcGroup* Group);

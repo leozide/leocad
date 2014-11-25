@@ -692,6 +692,64 @@ void lcModel::CalculateStep()
 		mLights[LightIdx]->UpdatePosition(mCurrentStep);
 }
 
+void lcModel::ShowFirstStep()
+{
+	if (mCurrentStep == 1)
+		return;
+
+	mCurrentStep = 1;
+
+	CalculateStep();
+	UpdateSelection();
+	gMainWindow->UpdateFocusObject(GetFocusObject());
+	gMainWindow->UpdateAllViews();
+	gMainWindow->UpdateCurrentStep();
+}
+
+void lcModel::ShowLastStep()
+{
+	lcStep LastStep = GetLastStep();
+
+	if (mCurrentStep == LastStep)
+		return;
+
+	mCurrentStep = LastStep;
+
+	CalculateStep();
+	UpdateSelection();
+	gMainWindow->UpdateFocusObject(GetFocusObject());
+	gMainWindow->UpdateAllViews();
+	gMainWindow->UpdateCurrentStep();
+}
+
+void lcModel::ShowPreviousStep()
+{
+	if (mCurrentStep == 1)
+		return;
+
+	mCurrentStep--;
+
+	CalculateStep();
+	UpdateSelection();
+	gMainWindow->UpdateFocusObject(GetFocusObject());
+	gMainWindow->UpdateAllViews();
+	gMainWindow->UpdateCurrentStep();
+}
+
+void lcModel::ShowNextStep()
+{
+	if (mCurrentStep == LC_STEP_MAX)
+		return;
+
+	mCurrentStep++;
+
+	CalculateStep();
+	UpdateSelection();
+	gMainWindow->UpdateFocusObject(GetFocusObject());
+	gMainWindow->UpdateAllViews();
+	gMainWindow->UpdateCurrentStep();
+}
+
 lcStep lcModel::GetLastStep() const
 {
 	lcStep Step = 1;
@@ -700,6 +758,52 @@ lcStep lcModel::GetLastStep() const
 		Step = lcMax(Step, mPieces[PieceIdx]->GetStepShow());
 
 	return Step;
+}
+
+void lcModel::InsertStep()
+{
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+	{
+		lcPiece* Piece = mPieces[PieceIdx];
+		Piece->InsertTime(mCurrentStep, 1);
+		if (Piece->IsSelected() && !Piece->IsVisible(mCurrentStep))
+			Piece->SetSelected(false);
+	}
+
+	for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
+		mCameras[CameraIdx]->InsertTime(mCurrentStep, 1);
+
+	for (int LightIdx = 0; LightIdx < mLights.GetSize(); LightIdx++)
+		mLights[LightIdx]->InsertTime(mCurrentStep, 1);
+
+	SaveCheckpoint(tr("Inserting Step"));
+	CalculateStep();
+	gMainWindow->UpdateFocusObject(GetFocusObject());
+	gMainWindow->UpdateAllViews();
+	UpdateSelection();
+}
+
+void lcModel::RemoveStep()
+{
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+	{
+		lcPiece* Piece = mPieces[PieceIdx];
+		Piece->RemoveTime(mCurrentStep, 1);
+		if (Piece->IsSelected() && !Piece->IsVisible(mCurrentStep))
+			Piece->SetSelected(false);
+	}
+
+	for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
+		mCameras[CameraIdx]->RemoveTime(mCurrentStep, 1);
+
+	for (int LightIdx = 0; LightIdx < mLights.GetSize(); LightIdx++)
+		mLights[LightIdx]->RemoveTime(mCurrentStep, 1);
+
+	SaveCheckpoint(tr("Removing Step"));
+	CalculateStep();
+	gMainWindow->UpdateFocusObject(GetFocusObject());
+	gMainWindow->UpdateAllViews();
+	UpdateSelection();
 }
 
 lcGroup* lcModel::AddGroup(const char* Prefix, lcGroup* Parent)
@@ -775,7 +879,7 @@ void lcModel::GroupSelection()
 		}
 	}
 
-	SaveCheckpoint("Grouping");
+	SaveCheckpoint(tr("Grouping"));
 }
 
 void lcModel::UngroupSelection()
@@ -818,7 +922,7 @@ void lcModel::UngroupSelection()
 	SelectedGroups.DeleteAll();
 
 	RemoveEmptyGroups();
-	SaveCheckpoint("Ungrouping");
+	SaveCheckpoint(tr("Ungrouping"));
 }
 
 void lcModel::AddSelectedPiecesToGroup()
@@ -852,7 +956,7 @@ void lcModel::AddSelectedPiecesToGroup()
 	}
 
 	RemoveEmptyGroups();
-	SaveCheckpoint("Grouping");
+	SaveCheckpoint(tr("Grouping"));
 }
 
 void lcModel::RemoveFocusPieceFromGroup()
@@ -869,7 +973,7 @@ void lcModel::RemoveFocusPieceFromGroup()
 	}
 
 	RemoveEmptyGroups();
-	SaveCheckpoint("Ungrouping");
+	SaveCheckpoint(tr("Ungrouping"));
 }
 
 void lcModel::ShowEditGroupsDialog()
@@ -920,7 +1024,7 @@ void lcModel::ShowEditGroupsDialog()
 	if (Modified)
 	{
 		ClearSelection(true);
-		SaveCheckpoint("Editing Groups");
+		SaveCheckpoint(tr("Editing Groups"));
 	}
 }
 
@@ -2282,7 +2386,7 @@ void lcModel::ShowArrayDialog()
 	}
 
 	AddToSelection(NewPieces);
-	SaveCheckpoint("Array");
+	SaveCheckpoint(tr("Array"));
 }
 
 void lcModel::ShowMinifigDialog()
@@ -2319,7 +2423,7 @@ void lcModel::ShowMinifigDialog()
 	}
 
 	SetSelection(Pieces);
-	SaveCheckpoint("Minifig");
+	SaveCheckpoint(tr("Minifig"));
 }
 
 void lcModel::Export3DStudio() const

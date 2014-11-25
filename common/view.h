@@ -76,7 +76,9 @@ public:
 	void EndPieceDrag(bool Accept);
 	void ZoomExtents();
 
+	void RemoveCamera();
 	void SetCamera(lcCamera* Camera, bool ForceCopy);
+	void SetCameraIndex(int Index);
 	void SetViewpoint(lcViewpoint Viewpoint);
 	void SetDefaultCamera();
 	lcMatrix44 GetProjectionMatrix() const;

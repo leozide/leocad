@@ -9,6 +9,7 @@
 #include "texfont.h"
 #include "lc_texture.h"
 #include "preview.h"
+#include "piece.h"
 #include "pieceinf.h"
 
 View::View(Project *project)
@@ -164,6 +165,39 @@ LC_CURSOR_TYPE View::GetCursor() const
 	return CursorFromTrackTool[mTrackTool];
 }
 
+void View::GetPieceInsertPosition(lcVector3& Position, lcVector4& Rotation) const
+{
+	PieceInfo* CurPiece = gMainWindow->mPreviewWidget->GetCurrentPiece();
+	lcPiece* HitPiece = (lcPiece*)FindObjectUnderPointer(true).Object;
+
+	if (HitPiece)
+	{
+		lcVector3 Dist(0, 0, HitPiece->mPieceInfo->m_fDimensions[2] - CurPiece->m_fDimensions[5]);
+		Dist = mProject->SnapPosition(Dist);
+
+		Position = lcMul31(Dist, HitPiece->mModelWorld);
+		Rotation = HitPiece->mRotation;
+
+		return;
+	}
+
+	lcVector3 ClickPoints[2] = { lcVector3((float)mInputState.x, (float)mInputState.y, 0.0f), lcVector3((float)mInputState.x, (float)mInputState.y, 1.0f) };
+	UnprojectPoints(ClickPoints, 2);
+
+	lcVector3 Intersection;
+
+	if (lcLinePlaneIntersection(&Intersection, ClickPoints[0], ClickPoints[1], lcVector4(0, 0, 1, CurPiece->m_fDimensions[5])))
+	{
+		Intersection = mProject->SnapPosition(Intersection);
+		Position = Intersection;
+		Rotation = lcVector4(0, 0, 1, 0);
+		return;
+	}
+
+	Position = UnprojectPoint(lcVector3((float)mInputState.x, (float)mInputState.y, 0.9f));
+	Rotation = lcVector4(0, 0, 1, 0);
+}
+
 lcObjectSection View::FindObjectUnderPointer(bool PiecesOnly) const
 {
 	lcVector3 StartEnd[2] =
@@ -189,7 +223,7 @@ lcObjectSection View::FindObjectUnderPointer(bool PiecesOnly) const
 	return ObjectRayTest.ObjectSection;
 }
 
-lcArray<lcObjectSection> View::FindObjectsInBox(float x1, float y1, float x2, float y2) const
+lcArray<lcObject*> View::FindObjectsInBox(float x1, float y1, float x2, float y2) const
 {
 	float Left, Top, Bottom, Right;
 
@@ -246,7 +280,7 @@ lcArray<lcObjectSection> View::FindObjectsInBox(float x1, float y1, float x2, fl
 
 	mProject->BoxTest(ObjectBoxTest);
 
-	return ObjectBoxTest.ObjectSections;
+	return ObjectBoxTest.Objects;
 }
 
 void View::OnDraw()
@@ -321,7 +355,7 @@ void View::OnDraw()
 		{
 			lcVector3 Position;
 			lcVector4 Rotation;
-			mProject->GetPieceInsertPosition(this, Position, Rotation);
+			GetPieceInsertPosition(Position, Rotation);
 
 			lcMatrix44 WorldMatrix = lcMatrix44FromAxisAngle(lcVector3(Rotation[0], Rotation[1], Rotation[2]), Rotation[3] * LC_DTOR);
 			WorldMatrix.SetTranslation(Position);
@@ -1005,7 +1039,7 @@ void View::DrawGrid()
 	{
 		lcVector3 Position;
 		lcVector4 Rotation;
-		mProject->GetPieceInsertPosition(this, Position, Rotation);
+		GetPieceInsertPosition(Position, Rotation);
 		PieceInfo* CurPiece = gMainWindow->mPreviewWidget->GetCurrentPiece();
 
 		lcVector3 Points[8] =
@@ -1320,7 +1354,7 @@ void View::EndPieceDrag(bool Accept)
 	{
 		lcVector3 Position;
 		lcVector4 Rotation;
-		mProject->GetPieceInsertPosition(this, Position, Rotation);
+		GetPieceInsertPosition(Position, Rotation);
 		mProject->InsertPieceToolClicked(Position, Rotation);
 	}
 
@@ -1786,12 +1820,12 @@ void View::StopTracking(bool Accept)
 	case LC_TOOL_SELECT:
 		if (Accept && mMouseDownX != mInputState.x && mMouseDownY != mInputState.y)
 		{
-			lcArray<lcObjectSection> ObjectSections = FindObjectsInBox(mMouseDownX, mMouseDownY, mInputState.x, mInputState.y);
+			lcArray<lcObject*> Objects = FindObjectsInBox(mMouseDownX, mMouseDownY, mInputState.x, mInputState.y);
 
 			if (mInputState.Control)
-				mProject->AddToSelection(ObjectSections);
+				mProject->AddToSelection(Objects);
 			else
-				mProject->SetSelection(ObjectSections);
+				mProject->SetSelection(Objects);
 		}
 		break;
 
@@ -1835,6 +1869,14 @@ void View::StopTracking(bool Accept)
 	gMainWindow->UpdateAllViews();
 }
 
+void View::CancelTrackingOrClearSelection()
+{
+	if (mTrackButton != LC_TRACKBUTTON_NONE)
+		StopTracking(false);
+	else
+		mProject->ClearSelection(true);
+}
+
 void View::OnLeftButtonDown()
 {
 	if (mTrackButton != LC_TRACKBUTTON_NONE)
@@ -1864,7 +1906,7 @@ void View::OnLeftButtonDown()
 		{
 			lcVector3 Position;
 			lcVector4 Rotation;
-			mProject->GetPieceInsertPosition(this, Position, Rotation);
+			GetPieceInsertPosition(Position, Rotation);
 			mProject->InsertPieceToolClicked(Position, Rotation);
 
 			if (!mInputState.Control)
@@ -2066,15 +2108,7 @@ void View::OnMouseMove()
 		UpdateTrackTool();
 
 		if (mTrackTool == LC_TRACKTOOL_INSERT)
-		{
-/*			lcVector3 Position;
-			lcVector4 AxisAngle;
-
-			GetPieceInsertPosition(&Position, &AxisAngle);
-			mProject->mActiveModel->SetPreviewTransform(Position, AxisAngle);
-
-*/			gMainWindow->UpdateAllViews();
-		}
+			gMainWindow->UpdateAllViews();
 
 		return;
 	}

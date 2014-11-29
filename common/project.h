@@ -41,24 +41,6 @@ struct LC_FILEENTRY
 	char FileName[LC_MAXPATH];
 };
 
-enum lcObjectProperty
-{
-	LC_PIECE_PROPERTY_POSITION,
-	LC_PIECE_PROPERTY_ROTATION,
-	LC_PIECE_PROPERTY_SHOW,
-	LC_PIECE_PROPERTY_HIDE,
-	LC_PIECE_PROPERTY_COLOR,
-	LC_PIECE_PROPERTY_ID,
-	LC_CAMERA_PROPERTY_POSITION,
-	LC_CAMERA_PROPERTY_TARGET,
-	LC_CAMERA_PROPERTY_UPVECTOR,
-	LC_CAMERA_PROPERTY_ORTHO,
-	LC_CAMERA_PROPERTY_FOV,
-	LC_CAMERA_PROPERTY_NEAR,
-	LC_CAMERA_PROPERTY_FAR,
-	LC_CAMERA_PROPERTY_NAME
-};
-
 #include "lc_model.h"
 
 class Project : public lcModel
@@ -82,15 +64,10 @@ public:
 	void LoadDefaults();
 	void SaveImage();
 	void SaveStepImages(const QString& BaseName, int Width, int Height, lcStep Start, lcStep End);
-	void TransformSelectedObjects(lcTransformType Type, const lcVector3& Transform);
-	void ModifyObject(lcObject* Object, lcObjectProperty Property, void* Value);
-	void GetPieceInsertPosition(View* view, lcVector3& Position, lcVector4& Orientation);
 	void HandleCommand(LC_COMMANDS id);
 
 protected:
 	void CheckPoint(const char* Description);
-
-	void GetPieceInsertPosition(lcPiece* OffsetPiece, lcVector3& Position, lcVector4& Rotation);
 
 	static int InstanceOfName(const String& existingString, const String& candidateString, String& baseNameOut);
 

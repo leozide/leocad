@@ -92,7 +92,6 @@ struct lcPOVRayDialogOptions
 struct lcPropertiesDialogOptions
 {
 	lcModelProperties Properties;
-	QString Title;
 	bool SetDefault;
 
 	lcArray<lcPartsListEntry> PartsList;
@@ -115,7 +114,7 @@ struct lcEditGroupsDialogOptions
 
 struct lcSelectDialogOptions
 {
-	lcArray<bool> Selection;
+	lcArray<lcObject*> Objects;
 };
 
 struct lcPreferencesDialogOptions

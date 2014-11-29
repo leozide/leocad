@@ -186,11 +186,13 @@ public:
 	void GetPartsList(lcArray<lcPartsListEntry>& PartsList) const;
 
 	void FocusOrDeselectObject(const lcObjectSection& ObjectSection);
+	void ClearSelection(bool UpdateInterface);
 	void ClearSelectionAndSetFocus(lcObject* Object, lcuint32 Section);
 	void ClearSelectionAndSetFocus(const lcObjectSection& ObjectSection);
-	void SetSelection(const lcArray<lcObjectSection>& ObjectSections);
-	void AddToSelection(const lcArray<lcObjectSection>& ObjectSections);
+	void SetSelection(const lcArray<lcObject*>& Objects);
+	void AddToSelection(const lcArray<lcObject*>& Objects);
 	void SelectAllPieces();
+	void InvertSelection();
 
 	void HideSelectedPieces();
 	void HideUnselectedPieces();
@@ -231,6 +233,11 @@ public:
 	void ZoomExtents(lcCamera* Camera, float Aspect);
 	void Zoom(lcCamera* Camera, float Amount);
 
+	void TransformSelectedObjects(lcTransformType TransformType, const lcVector3& Transform);
+	void SetObjectProperty(lcObject* Object, lcObjectPropertyType ObjectPropertyType, const void* Value);
+
+	void ShowPropertiesDialog();
+	void ShowSelectByNameDialog();
 	void ShowArrayDialog();
 	void ShowMinifigDialog();
 
@@ -256,7 +263,6 @@ protected:
 
 	void UpdateSelection() const;
 	void SelectGroup(lcGroup* TopGroup, bool Select);
-	void ClearSelection(bool UpdateInterface);
 
 	lcModelProperties mProperties;
 

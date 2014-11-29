@@ -33,10 +33,7 @@ public slots:
 private:
 	Ui::lcQSelectDialog *ui;
 
-	void setSelection(QTreeWidgetItem *parentItem, bool selected);
-	void loadSelection(QTreeWidgetItem *parentItem);
-	void saveSelection(QTreeWidgetItem *parentItem);
-	void addChildren(QTreeWidgetItem *parentItem, lcGroup *parentGroup);
+	void AddChildren(QTreeWidgetItem* ParentItem, lcGroup* ParentGroup);
 };
 
 #endif // _LC_QSELECTDIALOG_H_

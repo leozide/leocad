@@ -23,8 +23,6 @@ lcQPropertiesDialog::lcQPropertiesDialog(QWidget *parent, void *data) :
 
 	options = (lcPropertiesDialogOptions*)data;
 
-	setWindowTitle(QString(tr("%1 Properties")).arg(options->Title));
-
 	ui->descriptionEdit->setText(options->Properties.mDescription);
 	ui->authorEdit->setText(options->Properties.mAuthor);
 	ui->commentsEdit->setText(options->Properties.mComments);

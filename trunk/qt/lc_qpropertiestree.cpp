@@ -502,7 +502,7 @@ void lcQPropertiesTree::slotToggled(bool value)
 	{
 		if (item == cameraOrtho)
 		{
-			project->ModifyObject(focusObject, LC_CAMERA_PROPERTY_ORTHO, &value);
+			project->SetObjectProperty(focusObject, LC_CAMERA_PROPERTY_ORTHO, &value);
 		}
 	}
 }
@@ -532,7 +532,7 @@ void lcQPropertiesTree::slotReturnPressed()
 			else if (item == partPositionZ)
 				position[2] = value;
 
-			project->ModifyObject(focusObject, LC_PIECE_PROPERTY_POSITION, &position);
+			project->SetObjectProperty(focusObject, LC_PIECE_PROPERTY_POSITION, &position);
 		}
 		else if (item == partRotationX || item == partRotationY || item == partRotationZ)
 		{
@@ -549,19 +549,19 @@ void lcQPropertiesTree::slotReturnPressed()
 
 			lcVector4 axisAngle = lcMatrix44ToAxisAngle(lcMatrix44FromEulerAngles(rotation * LC_DTOR));
 			axisAngle[3] *= LC_RTOD;
-			project->ModifyObject(focusObject, LC_PIECE_PROPERTY_ROTATION, &axisAngle);
+			project->SetObjectProperty(focusObject, LC_PIECE_PROPERTY_ROTATION, &axisAngle);
 		}
 		else if (item == partShow)
 		{
 			lcStep value = editor->text().toUInt();
 
-			project->ModifyObject(focusObject, LC_PIECE_PROPERTY_SHOW, &value);
+			project->SetObjectProperty(focusObject, LC_PIECE_PROPERTY_SHOW, &value);
 		}
 		else if (item == partHide)
 		{
 			lcStep value = editor->text().toUInt();
 
-			project->ModifyObject(focusObject, LC_PIECE_PROPERTY_HIDE, &value);
+			project->SetObjectProperty(focusObject, LC_PIECE_PROPERTY_HIDE, &value);
 		}
 	}
 	else if (focusObject->GetType() == LC_OBJECT_CAMERA)
@@ -580,7 +580,7 @@ void lcQPropertiesTree::slotReturnPressed()
 			else if (item == cameraPositionZ)
 				position[2] = value;
 
-			project->ModifyObject(focusObject, LC_CAMERA_PROPERTY_POSITION, &position);
+			project->SetObjectProperty(focusObject, LC_CAMERA_PROPERTY_POSITION, &position);
 		}
 		else if (item == cameraTargetX || item == cameraTargetY || item == cameraTargetZ)
 		{
@@ -594,7 +594,7 @@ void lcQPropertiesTree::slotReturnPressed()
 			else if (item == cameraTargetZ)
 				target[2] = value;
 
-			project->ModifyObject(focusObject, LC_CAMERA_PROPERTY_TARGET, &target);
+			project->SetObjectProperty(focusObject, LC_CAMERA_PROPERTY_TARGET, &target);
 		}
 		else if (item == cameraUpX || item == cameraUpY || item == cameraUpZ)
 		{
@@ -608,31 +608,31 @@ void lcQPropertiesTree::slotReturnPressed()
 			else if (item == cameraUpZ)
 				up[2] = value;
 
-			project->ModifyObject(focusObject, LC_CAMERA_PROPERTY_UPVECTOR, &up);
+			project->SetObjectProperty(focusObject, LC_CAMERA_PROPERTY_UPVECTOR, &up);
 		}
 		else if (item == cameraFOV)
 		{
 			float value = editor->text().toFloat();
 
-			project->ModifyObject(focusObject, LC_CAMERA_PROPERTY_FOV, &value);
+			project->SetObjectProperty(focusObject, LC_CAMERA_PROPERTY_FOV, &value);
 		}
 		else if (item == cameraNear)
 		{
 			float value = editor->text().toFloat();
 
-			project->ModifyObject(focusObject, LC_CAMERA_PROPERTY_NEAR, &value);
+			project->SetObjectProperty(focusObject, LC_CAMERA_PROPERTY_NEAR, &value);
 		}
 		else if (item == cameraFar)
 		{
 			float value = editor->text().toFloat();
 
-			project->ModifyObject(focusObject, LC_CAMERA_PROPERTY_FAR, &value);
+			project->SetObjectProperty(focusObject, LC_CAMERA_PROPERTY_FAR, &value);
 		}
 		else if (item == cameraName)
 		{
 			QString value = editor->text();
 
-			project->ModifyObject(focusObject, LC_CAMERA_PROPERTY_NAME, value.toLocal8Bit().data());
+			project->SetObjectProperty(focusObject, LC_CAMERA_PROPERTY_NAME, value.toLocal8Bit().data());
 		}
 	}
 }
@@ -649,7 +649,7 @@ void lcQPropertiesTree::slotSetValue(int value)
 	{
 		if (item == partColor)
 		{
-			project->ModifyObject(focusObject, LC_PIECE_PROPERTY_COLOR, &value);
+			project->SetObjectProperty(focusObject, LC_PIECE_PROPERTY_COLOR, &value);
 
 			QPushButton *editor = (QPushButton*)m_delegate->editor();
 			updateColorEditor(editor, value);
@@ -658,7 +658,7 @@ void lcQPropertiesTree::slotSetValue(int value)
 		{
 			QComboBox *editor = (QComboBox*)sender();
 
-			project->ModifyObject(focusObject, LC_PIECE_PROPERTY_ID, editor->itemData(value).value<void*>());
+			project->SetObjectProperty(focusObject, LC_PIECE_PROPERTY_ID, editor->itemData(value).value<void*>());
 		}
 	}
 }

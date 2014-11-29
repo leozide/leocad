@@ -1372,39 +1372,17 @@ void Project::HandleCommand(LC_COMMANDS id)
 		ExportWavefront();
 		break;
 
-		case LC_FILE_PROPERTIES:
-		{
-			lcPropertiesDialogOptions Options;
+	case LC_FILE_PROPERTIES:
+		ShowPropertiesDialog();
+		break;
 
-			Options.Properties = mProperties;
-			Options.Title = GetTitle();
-			Options.SetDefault = false;
+	case LC_FILE_PRINT_PREVIEW:
+		gMainWindow->TogglePrintPreview();
+		break;
 
-			GetPartsList(Options.PartsList);
-
-			if (!gMainWindow->DoDialog(LC_DIALOG_PROPERTIES, &Options))
-				break;
-
-			if (Options.SetDefault)
-				Options.Properties.SaveDefaults();
-
-			if (mProperties == Options.Properties)
-				break;
-
-			mProperties = Options.Properties;
-
-			UpdateBackgroundTexture();
-
-			CheckPoint("Properties");
-		} break;
-
-		case LC_FILE_PRINT_PREVIEW:
-			gMainWindow->TogglePrintPreview();
-			break;
-
-		case LC_FILE_PRINT:
-			gMainWindow->DoDialog(LC_DIALOG_PRINT, NULL);
-			break;
+	case LC_FILE_PRINT:
+		gMainWindow->DoDialog(LC_DIALOG_PRINT, NULL);
+		break;
 
 	// TODO: printing
 	case LC_FILE_PRINT_BOM:
@@ -1628,64 +1606,13 @@ void Project::HandleCommand(LC_COMMANDS id)
 		ClearSelection(true);
 		break;
 
-		case LC_EDIT_SELECT_INVERT:
-		{
-			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-			{
-				lcPiece* Piece = mPieces[PieceIdx];
+	case LC_EDIT_SELECT_INVERT:
+		InvertSelection();
+		break;
 
-				if (Piece->IsVisible(mCurrentStep))
-					Piece->SetSelected(!Piece->IsSelected());
-			}
-
-			gMainWindow->UpdateFocusObject(GetFocusObject());
-			UpdateSelection();
-			gMainWindow->UpdateAllViews();
-		} break;
-
-		case LC_EDIT_SELECT_BY_NAME:
-		{
-			lcSelectDialogOptions Options;
-
-			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-				Options.Selection.Add(mPieces[PieceIdx]->IsSelected());
-
-			for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
-				if (mCameras[CameraIdx]->IsVisible())
-					Options.Selection.Add(mCameras[CameraIdx]->IsSelected());
-
-			for (int LightIdx = 0; LightIdx < mLights.GetSize(); LightIdx++)
-				if (mLights[LightIdx]->IsVisible())
-					Options.Selection.Add(mLights[LightIdx]->IsSelected());
-
-			if (Options.Selection.GetSize() == 0)
-			{
-				gMainWindow->DoMessageBox("Nothing to select.", LC_MB_OK | LC_MB_ICONINFORMATION);
-				break;
-			}
-
-			if (!gMainWindow->DoDialog(LC_DIALOG_SELECT_BY_NAME, &Options))
-				break;
-
-			ClearSelection(false);
-
-			int ObjectIndex = 0;
-			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++, ObjectIndex++)
-				if (Options.Selection[ObjectIndex])
-					mPieces[PieceIdx]->SetSelected(true);
-
-			for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++, ObjectIndex++)
-				if (Options.Selection[ObjectIndex])
-					mCameras[CameraIdx]->SetSelected(true);
-
-			for (int LightIdx = 0; LightIdx < mLights.GetSize(); LightIdx++)
-				if (Options.Selection[ObjectIndex])
-					mLights[LightIdx]->SetSelected(true);
-
-			UpdateSelection();
-			gMainWindow->UpdateAllViews();
-			gMainWindow->UpdateFocusObject(GetFocusObject());
-		} break;
+	case LC_EDIT_SELECT_BY_NAME:
+		ShowSelectByNameDialog();
+		break;
 
 	case LC_VIEW_SPLIT_HORIZONTAL:
 		gMainWindow->SplitHorizontal();
@@ -1752,7 +1679,6 @@ void Project::HandleCommand(LC_COMMANDS id)
 				break;
 
 			lcPiece* Last = mPieces.IsEmpty() ? NULL : mPieces[mPieces.GetSize() - 1];
-			lcPiece* pPiece = new lcPiece(CurPiece);
 
 			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 			{
@@ -1765,23 +1691,28 @@ void Project::HandleCommand(LC_COMMANDS id)
 				}
 			}
 
+			lcVector3 Position(0, 0, 0);
+			lcVector4 Rotation(0, 0, 1, 0);
+
 			if (Last != NULL)
 			{
-				lcVector3 Pos;
-				lcVector4 Rot;
+				lcVector3 Dist(0, 0, Last->mPieceInfo->m_fDimensions[2] - CurPiece->m_fDimensions[5]);
+				Dist = SnapPosition(Dist);
 
-				GetPieceInsertPosition(Last, Pos, Rot);
-
-				pPiece->Initialize(Pos, Rot, mCurrentStep);
-				pPiece->UpdatePosition(mCurrentStep);
+				Position = lcMul31(Dist, Last->mModelWorld);
+				Rotation = Last->mRotation;
 			}
 			else
-				pPiece->Initialize(lcVector3(0, 0, 0), lcVector4(0, 0, 1, 0), mCurrentStep);
+			{
+				Position[2] = -CurPiece->m_fDimensions[5];
+			}
 
-			pPiece->SetColorIndex(gMainWindow->mColorIndex);
-			pPiece->CreateName(mPieces);
-			mPieces.Add(pPiece);
-			ClearSelectionAndSetFocus(pPiece, LC_PIECE_SECTION_POSITION);
+			lcPiece* Piece = new lcPiece(CurPiece);
+			Piece->Initialize(Position, Rotation, mCurrentStep);
+			Piece->SetColorIndex(gMainWindow->mColorIndex);
+			Piece->CreateName(mPieces);
+			mPieces.Add(Piece);
+			ClearSelectionAndSetFocus(Piece, LC_PIECE_SECTION_POSITION);
 
 			CheckPoint("Inserting");
 		} break;
@@ -2267,420 +2198,12 @@ void Project::HandleCommand(LC_COMMANDS id)
 		gMainWindow->SetTool(LC_TOOL_ROLL);
 		break;
 
-		case LC_EDIT_CANCEL:
-		{
-			View* ActiveView = gMainWindow->GetActiveView();
-			if (ActiveView && ActiveView->mTrackButton != LC_TRACKBUTTON_NONE)
-				ActiveView->StopTracking(false);
-			else
-				ClearSelection(true);
-		} break;
-
-		case LC_NUM_COMMANDS:
-			break;
-	}
-}
-
-// Find a good starting position/orientation relative to an existing piece.
-void Project::GetPieceInsertPosition(lcPiece* OffsetPiece, lcVector3& Position, lcVector4& Rotation)
-{
-	PieceInfo* CurPiece = gMainWindow->mPreviewWidget->GetCurrentPiece();
-	lcVector3 Dist(0, 0, OffsetPiece->mPieceInfo->m_fDimensions[2] - CurPiece->m_fDimensions[5]);
-	Dist = SnapPosition(Dist);
-
-	Position = lcMul31(Dist, OffsetPiece->mModelWorld);
-	Rotation = OffsetPiece->mRotation;
-}
-
-// Try to find a good starting position/orientation for a new piece.
-void Project::GetPieceInsertPosition(View* view, lcVector3& Position, lcVector4& Rotation)
-{
-	// Check if the mouse is over a piece.
-	lcPiece* HitPiece = (lcPiece*)view->FindObjectUnderPointer(true).Object;
-
-	if (HitPiece)
-	{
-		GetPieceInsertPosition(HitPiece, Position, Rotation);
-		return;
-	}
-
-	// Try to hit the base grid.
-	lcVector3 ClickPoints[2] = { lcVector3((float)view->mInputState.x, (float)view->mInputState.y, 0.0f), lcVector3((float)view->mInputState.x, (float)view->mInputState.y, 1.0f) };
-	view->UnprojectPoints(ClickPoints, 2);
-
-	PieceInfo* CurPiece = gMainWindow->mPreviewWidget->GetCurrentPiece();
-	lcVector3 Intersection;
-
-	if (lcLinePlaneIntersection(&Intersection, ClickPoints[0], ClickPoints[1], lcVector4(0, 0, 1, CurPiece->m_fDimensions[5])))
-	{
-		Intersection = SnapPosition(Intersection);
-		Position = Intersection;
-		Rotation = lcVector4(0, 0, 1, 0);
-		return;
-	}
-
-	// Couldn't find a good position, so just place the piece somewhere near the camera.
-	Position = view->UnprojectPoint(lcVector3((float)view->mInputState.x, (float)view->mInputState.y, 0.9f));
-	Rotation = lcVector4(0, 0, 1, 0);
-}
-
-void Project::TransformSelectedObjects(lcTransformType Type, const lcVector3& Transform)
-{
-	switch (Type)
-	{
-	case LC_TRANSFORM_ABSOLUTE_TRANSLATION:
-		{
-			float bs[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
-			lcVector3 Center;
-			int nSel = 0;
-			lcPiece* pFocus = NULL;
-
-			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-			{
-				lcPiece* Piece = mPieces[PieceIdx];
-
-				if (Piece->IsSelected())
-				{
-					if (Piece->IsFocused())
-						pFocus = Piece;
-
-					Piece->CompareBoundingBox(bs);
-					nSel++;
-				}
-			}
-
-			if (pFocus != NULL)
-				Center = pFocus->mPosition;
-			else
-				Center = lcVector3((bs[0]+bs[3])/2, (bs[1]+bs[4])/2, (bs[2]+bs[5])/2);
-
-			lcVector3 Offset = Transform - Center;
-
-			for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
-			{
-				lcCamera* pCamera = mCameras[CameraIdx];
-
-				if (pCamera->IsSelected())
-				{
-					pCamera->Move(mCurrentStep, gMainWindow->GetAddKeys(), Offset);
-					pCamera->UpdatePosition(mCurrentStep);
-				}
-			}
-
-			for (int LightIdx = 0; LightIdx < mLights.GetSize(); LightIdx++)
-			{
-				lcLight* pLight = mLights[LightIdx];
-
-				if (pLight->IsSelected())
-				{
-					pLight->Move(mCurrentStep, gMainWindow->GetAddKeys(), Offset);
-					pLight->UpdatePosition (mCurrentStep);
-				}
-			}
-
-			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-			{
-				lcPiece* Piece = mPieces[PieceIdx];
-
-				if (Piece->IsSelected())
-				{
-					Piece->Move(mCurrentStep, gMainWindow->GetAddKeys(), Offset);
-					Piece->UpdatePosition(mCurrentStep);
-				}
-			}
-
-			if (nSel)
-			{
-				gMainWindow->UpdateAllViews();
-				CheckPoint("Moving");
-				gMainWindow->UpdateFocusObject(GetFocusObject());
-			}
-		} break;
-
-	case LC_TRANSFORM_RELATIVE_TRANSLATION:
-		{
-/*			lcVector3 Move(Transform);
-
-			if (MoveSelectedObjects(Move, false, false))
-			{
-				gMainWindow->UpdateAllViews();
-				CheckPoint("Moving");
-				gMainWindow->UpdateFocusObject(GetFocusObject());
-			}*/
-		} break;
-
-	case LC_TRANSFORM_ABSOLUTE_ROTATION:
-		{
-			// Create the rotation matrix.
-			lcVector4 RotationQuaternion(0, 0, 0, 1);
-
-			if (Transform[0] != 0.0f)
-			{
-				lcVector4 q = lcQuaternionRotationX(Transform[0] * LC_DTOR);
-				RotationQuaternion = lcQuaternionMultiply(q, RotationQuaternion);
-			}
-
-			if (Transform[1] != 0.0f)
-			{
-				lcVector4 q = lcQuaternionRotationY(Transform[1] * LC_DTOR);
-				RotationQuaternion = lcQuaternionMultiply(q, RotationQuaternion);
-			}
-
-			if (Transform[2] != 0.0f)
-			{
-				lcVector4 q = lcQuaternionRotationZ(Transform[2] * LC_DTOR);
-				RotationQuaternion = lcQuaternionMultiply(q, RotationQuaternion);
-			}
-
-			lcVector4 NewRotation = lcQuaternionToAxisAngle(RotationQuaternion);
-			NewRotation[3] *= LC_RTOD;
-
-			int nSel = 0;
-
-			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-			{
-				lcPiece* Piece = mPieces[PieceIdx];
-
-				if (Piece->IsSelected())
-				{
-					Piece->SetRotation(NewRotation, mCurrentStep, gMainWindow->GetAddKeys());
-					Piece->UpdatePosition(mCurrentStep);
-					nSel++;
-				}
-			}
-
-			if (nSel)
-			{
-				gMainWindow->UpdateAllViews();
-				CheckPoint("Rotating");
-				gMainWindow->UpdateFocusObject(GetFocusObject());
-			}
-		} break;
-
-	case LC_TRANSFORM_RELATIVE_ROTATION:
-		{
-			lcVector3 Rotate(Transform);
-
-			if (RotateSelectedPieces(Rotate))
-			{
-				gMainWindow->UpdateAllViews();
-				CheckPoint("Rotating");
-				gMainWindow->UpdateFocusObject(GetFocusObject());
-			}
-		} break;
-	}
-}
-
-void Project::ModifyObject(lcObject* Object, lcObjectProperty Property, void* Value)
-{
-	const char* CheckPointString = NULL;
-
-	switch (Property)
-	{
-	case LC_PIECE_PROPERTY_POSITION:
-		{
-			const lcVector3& Position = *(lcVector3*)Value;
-			lcPiece* Piece = (lcPiece*)Object;
-
-			if (Piece->mPosition != Position)
-			{
-				Piece->SetPosition(Position, mCurrentStep, gMainWindow->GetAddKeys());
-				Piece->UpdatePosition(mCurrentStep);
-
-				CheckPointString = "Moving";
-			}
-		} break;
-
-	case LC_PIECE_PROPERTY_ROTATION:
-		{
-			const lcVector4& Rotation = *(lcVector4*)Value;
-			lcPiece* Piece = (lcPiece*)Object;
-
-			if (Rotation != Piece->mRotation)
-			{
-				Piece->SetRotation(Rotation, mCurrentStep, gMainWindow->GetAddKeys());
-				Piece->UpdatePosition(mCurrentStep);
-
-				CheckPointString = "Rotating";
-			}
-		} break;
-
-	case LC_PIECE_PROPERTY_SHOW:
-		{
-			lcStep Step = *(lcStep*)Value;
-			lcPiece* Part = (lcPiece*)Object;
-
-			if (Step != Part->GetStepShow())
-			{
-				Part->SetStepShow(Step);
-				if (Part->IsSelected() && !Part->IsVisible(mCurrentStep))
-					Part->SetSelected(false);
-
-				CheckPointString = "Show";
-			}
-		} break;
-
-	case LC_PIECE_PROPERTY_HIDE:
-		{
-			lcStep Step = *(lcuint32*)Value;
-			lcPiece* Part = (lcPiece*)Object;
-
-			if (Step != Part->GetStepHide())
-			{
-				Part->SetStepHide(Step);
-
-				CheckPointString = "Hide";
-			}
-		} break;
-
-	case LC_PIECE_PROPERTY_COLOR:
-		{
-			int ColorIndex = *(int*)Value;
-			lcPiece* Part = (lcPiece*)Object;
-
-			if (ColorIndex != Part->mColorIndex)
-			{
-				Part->SetColorIndex(ColorIndex);
-
-				CheckPointString = "Color";
-			}
-		} break;
-
-	case LC_PIECE_PROPERTY_ID:
-		{
-			lcPiece* Part = (lcPiece*)Object;
-			PieceInfo* Info = (PieceInfo*)Value;
-
-			if (Info != Part->mPieceInfo)
-			{
-				Part->mPieceInfo->Release();
-				Part->mPieceInfo = Info;
-				Part->mPieceInfo->AddRef();
-
-				CheckPointString = "Part";
-			}
-		} break;
-
-	case LC_CAMERA_PROPERTY_POSITION:
-		{
-			const lcVector3& Position = *(lcVector3*)Value;
-			lcCamera* Camera = (lcCamera*)Object;
-
-			if (Camera->mPosition != Position)
-			{
-				Camera->SetPosition(Position, mCurrentStep, gMainWindow->GetAddKeys());
-				Camera->UpdatePosition(mCurrentStep);
-
-				CheckPointString = "Camera";
-			}
-		} break;
-
-	case LC_CAMERA_PROPERTY_TARGET:
-		{
-			const lcVector3& TargetPosition = *(lcVector3*)Value;
-			lcCamera* Camera = (lcCamera*)Object;
-
-			if (Camera->mTargetPosition != TargetPosition)
-			{
-				Camera->SetTargetPosition(TargetPosition, mCurrentStep, gMainWindow->GetAddKeys());
-				Camera->UpdatePosition(mCurrentStep);
-
-				CheckPointString = "Camera";
-			}
-		} break;
-
-	case LC_CAMERA_PROPERTY_UPVECTOR:
-		{
-			const lcVector3& Up = *(lcVector3*)Value;
-			lcCamera* Camera = (lcCamera*)Object;
-
-			if (Camera->mUpVector != Up)
-			{
-				Camera->SetUpVector(Up, mCurrentStep, gMainWindow->GetAddKeys());
-				Camera->UpdatePosition(mCurrentStep);
-
-				CheckPointString = "Camera";
-			}
-		} break;
-
-	case LC_CAMERA_PROPERTY_ORTHO:
-		{
-			bool Ortho = *(bool*)Value;
-			lcCamera* camera = (lcCamera*)Object;
-
-			if (camera->IsOrtho() != Ortho)
-			{
-				camera->SetOrtho(Ortho);
-				camera->UpdatePosition(mCurrentStep);
-
-				CheckPointString = "Camera";
-			}
-		} break;
-
-	case LC_CAMERA_PROPERTY_FOV:
-		{
-			float FOV = *(float*)Value;
-			lcCamera* camera = (lcCamera*)Object;
-
-			if (camera->m_fovy != FOV)
-			{
-				camera->m_fovy = FOV;
-				camera->UpdatePosition(mCurrentStep);
-
-				CheckPointString = "Camera";
-			}
-		} break;
-
-	case LC_CAMERA_PROPERTY_NEAR:
-		{
-			float Near = *(float*)Value;
-			lcCamera* camera = (lcCamera*)Object;
-
-			if (camera->m_zNear != Near)
-			{
-				camera->m_zNear= Near;
-				camera->UpdatePosition(mCurrentStep);
-
-				CheckPointString = "Camera";
-			}
-		} break;
-
-	case LC_CAMERA_PROPERTY_FAR:
-		{
-			float Far = *(float*)Value;
-			lcCamera* camera = (lcCamera*)Object;
-
-			if (camera->m_zFar != Far)
-			{
-				camera->m_zFar = Far;
-				camera->UpdatePosition(mCurrentStep);
-
-				CheckPointString = "Camera";
-			}
-		} break;
-
-	case LC_CAMERA_PROPERTY_NAME:
-		{
-			const char* Name = (const char*)Value;
-			lcCamera* camera = (lcCamera*)Object;
-
-			if (strcmp(camera->m_strName, Name))
-			{
-				strncpy(camera->m_strName, Name, sizeof(camera->m_strName));
-				camera->m_strName[sizeof(camera->m_strName) - 1] = 0;
-
-				gMainWindow->UpdateCameraMenu();
-
-				CheckPointString = "Camera";
-			}
-		}
-	}
-
-	if (CheckPointString)
-	{
-		CheckPoint(CheckPointString);
-		gMainWindow->UpdateFocusObject(GetFocusObject());
-		gMainWindow->UpdateAllViews();
+	case LC_EDIT_CANCEL:
+		gMainWindow->GetActiveView()->CancelTrackingOrClearSelection();
+		break;
+
+	case LC_NUM_COMMANDS:
+		break;
 	}
 }
 

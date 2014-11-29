@@ -732,9 +732,8 @@ void lcCamera::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
 
 	if (lcBoundingBoxIntersectsVolume(Min, Max, LocalPlanes))
 	{
-		lcObjectSection& ObjectSection = ObjectBoxTest.ObjectSections.Add();
-		ObjectSection.Object = const_cast<lcCamera*>(this);
-		ObjectSection.Section = LC_CAMERA_SECTION_POSITION;
+		ObjectBoxTest.Objects.Add(const_cast<lcCamera*>(this));
+		return;
 	}
 
 	Min = lcVector3(-LC_CAMERA_TARGET_EDGE, -LC_CAMERA_TARGET_EDGE, -LC_CAMERA_TARGET_EDGE);
@@ -751,9 +750,8 @@ void lcCamera::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
 
 	if (lcBoundingBoxIntersectsVolume(Min, Max, LocalPlanes))
 	{
-		lcObjectSection& ObjectSection = ObjectBoxTest.ObjectSections.Add();
-		ObjectSection.Object = const_cast<lcCamera*>(this);
-		ObjectSection.Section = LC_CAMERA_SECTION_TARGET;
+		ObjectBoxTest.Objects.Add(const_cast<lcCamera*>(this));
+		return;
 	}
 
 	lcMatrix44 ViewWorld = lcMatrix44AffineInverse(mWorldView);
@@ -770,9 +768,8 @@ void lcCamera::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
 
 	if (lcBoundingBoxIntersectsVolume(Min, Max, LocalPlanes))
 	{
-		lcObjectSection& ObjectSection = ObjectBoxTest.ObjectSections.Add();
-		ObjectSection.Object = const_cast<lcCamera*>(this);
-		ObjectSection.Section = LC_CAMERA_SECTION_UPVECTOR;
+		ObjectBoxTest.Objects.Add(const_cast<lcCamera*>(this));
+		return;
 	}
 }
 

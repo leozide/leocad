@@ -1403,6 +1403,8 @@ bool lcModel::RotateSelectedPieces(const lcVector3& Angles)
 		RotationQuaternion = lcQuaternionMultiply(FocusToWorldQuaternion, RotationQuaternion);
 	}
 
+	bool Rotated = false;
+
 	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 	{
 		lcPiece* Piece = mPieces[PieceIdx];
@@ -1438,9 +1440,345 @@ bool lcModel::RotateSelectedPieces(const lcVector3& Angles)
 		Piece->SetPosition(Center + Distance, mCurrentStep, gMainWindow->GetAddKeys());
 		Piece->SetRotation(NewRotation, mCurrentStep, gMainWindow->GetAddKeys());
 		Piece->UpdatePosition(mCurrentStep);
+		Rotated = true;
 	}
 
-	return true;
+	return Rotated;
+}
+
+void lcModel::TransformSelectedObjects(lcTransformType TransformType, const lcVector3& Transform)
+{
+	switch (TransformType)
+	{
+	case LC_TRANSFORM_ABSOLUTE_TRANSLATION:
+		{
+			lcVector3 Center = GetFocusOrSelectionCenter();
+			lcVector3 Offset = Transform - Center;
+
+			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+			{
+				lcPiece* Piece = mPieces[PieceIdx];
+
+				if (Piece->IsSelected())
+				{
+					Piece->Move(mCurrentStep, gMainWindow->GetAddKeys(), Offset);
+					Piece->UpdatePosition(mCurrentStep);
+				}
+			}
+
+			for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
+			{
+				lcCamera* Camera = mCameras[CameraIdx];
+
+				if (Camera->IsSelected())
+				{
+					Camera->Move(mCurrentStep, gMainWindow->GetAddKeys(), Offset);
+					Camera->UpdatePosition(mCurrentStep);
+				}
+			}
+
+			for (int LightIdx = 0; LightIdx < mLights.GetSize(); LightIdx++)
+			{
+				lcLight* Light = mLights[LightIdx];
+
+				if (Light->IsSelected())
+				{
+					Light->Move(mCurrentStep, gMainWindow->GetAddKeys(), Offset);
+					Light->UpdatePosition(mCurrentStep);
+				}
+			}
+
+			gMainWindow->UpdateAllViews();
+			SaveCheckpoint("Moving");
+			gMainWindow->UpdateFocusObject(GetFocusObject());
+		}
+		break;
+
+	case LC_TRANSFORM_RELATIVE_TRANSLATION:
+		{
+			if (MoveSelectedObjects(Transform, Transform))
+			{
+				gMainWindow->UpdateAllViews();
+				SaveCheckpoint("Moving");
+				gMainWindow->UpdateFocusObject(GetFocusObject());
+			}
+		}
+		break;
+
+	case LC_TRANSFORM_ABSOLUTE_ROTATION:
+		{
+			lcVector4 RotationQuaternion(0, 0, 0, 1);
+
+			if (Transform[0] != 0.0f)
+			{
+				lcVector4 q = lcQuaternionRotationX(Transform[0] * LC_DTOR);
+				RotationQuaternion = lcQuaternionMultiply(q, RotationQuaternion);
+			}
+
+			if (Transform[1] != 0.0f)
+			{
+				lcVector4 q = lcQuaternionRotationY(Transform[1] * LC_DTOR);
+				RotationQuaternion = lcQuaternionMultiply(q, RotationQuaternion);
+			}
+
+			if (Transform[2] != 0.0f)
+			{
+				lcVector4 q = lcQuaternionRotationZ(Transform[2] * LC_DTOR);
+				RotationQuaternion = lcQuaternionMultiply(q, RotationQuaternion);
+			}
+
+			lcVector4 NewRotation = lcQuaternionToAxisAngle(RotationQuaternion);
+			NewRotation[3] *= LC_RTOD;
+
+			bool Rotated = false;
+
+			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+			{
+				lcPiece* Piece = mPieces[PieceIdx];
+
+				if (Piece->IsSelected())
+				{
+					Piece->SetRotation(NewRotation, mCurrentStep, gMainWindow->GetAddKeys());
+					Piece->UpdatePosition(mCurrentStep);
+					Rotated = true;
+				}
+			}
+
+			if (Rotated)
+			{
+				gMainWindow->UpdateAllViews();
+				SaveCheckpoint("Rotating");
+				gMainWindow->UpdateFocusObject(GetFocusObject());
+			}
+		}
+		break;
+
+	case LC_TRANSFORM_RELATIVE_ROTATION:
+		{
+			lcVector3 Rotate(Transform);
+
+			if (RotateSelectedPieces(Rotate))
+			{
+				gMainWindow->UpdateAllViews();
+				SaveCheckpoint("Rotating");
+				gMainWindow->UpdateFocusObject(GetFocusObject());
+			}
+		}
+		break;
+	}
+}
+
+void lcModel::SetObjectProperty(lcObject* Object, lcObjectPropertyType ObjectPropertyType, const void* Value)
+{
+	QString CheckPointString;
+
+	switch (ObjectPropertyType)
+	{
+	case LC_PIECE_PROPERTY_POSITION:
+		{
+			const lcVector3& Position = *(lcVector3*)Value;
+			lcPiece* Piece = (lcPiece*)Object;
+
+			if (Piece->mPosition != Position)
+			{
+				Piece->SetPosition(Position, mCurrentStep, gMainWindow->GetAddKeys());
+				Piece->UpdatePosition(mCurrentStep);
+
+				CheckPointString = tr("Moving");
+			}
+		} break;
+
+	case LC_PIECE_PROPERTY_ROTATION:
+		{
+			const lcVector4& Rotation = *(lcVector4*)Value;
+			lcPiece* Piece = (lcPiece*)Object;
+
+			if (Rotation != Piece->mRotation)
+			{
+				Piece->SetRotation(Rotation, mCurrentStep, gMainWindow->GetAddKeys());
+				Piece->UpdatePosition(mCurrentStep);
+
+				CheckPointString = tr("Rotating");
+			}
+		} break;
+
+	case LC_PIECE_PROPERTY_SHOW:
+		{
+			lcStep Step = *(lcStep*)Value;
+			lcPiece* Part = (lcPiece*)Object;
+
+			if (Step != Part->GetStepShow())
+			{
+				Part->SetStepShow(Step);
+				if (Part->IsSelected() && !Part->IsVisible(mCurrentStep))
+					Part->SetSelected(false);
+
+				CheckPointString = tr("Showing");
+			}
+		} break;
+
+	case LC_PIECE_PROPERTY_HIDE:
+		{
+			lcStep Step = *(lcuint32*)Value;
+			lcPiece* Part = (lcPiece*)Object;
+
+			if (Step != Part->GetStepHide())
+			{
+				Part->SetStepHide(Step);
+
+				CheckPointString = tr("Hiding");
+			}
+		} break;
+
+	case LC_PIECE_PROPERTY_COLOR:
+		{
+			int ColorIndex = *(int*)Value;
+			lcPiece* Part = (lcPiece*)Object;
+
+			if (ColorIndex != Part->mColorIndex)
+			{
+				Part->SetColorIndex(ColorIndex);
+
+				CheckPointString = tr("Setting Color");
+			}
+		} break;
+
+	case LC_PIECE_PROPERTY_ID:
+		{
+			lcPiece* Part = (lcPiece*)Object;
+			PieceInfo* Info = (PieceInfo*)Value;
+
+			if (Info != Part->mPieceInfo)
+			{
+				Part->mPieceInfo->Release();
+				Part->mPieceInfo = Info;
+				Part->mPieceInfo->AddRef();
+
+				CheckPointString = tr("Setting Part");
+			}
+		} break;
+
+	case LC_CAMERA_PROPERTY_POSITION:
+		{
+			const lcVector3& Position = *(lcVector3*)Value;
+			lcCamera* Camera = (lcCamera*)Object;
+
+			if (Camera->mPosition != Position)
+			{
+				Camera->SetPosition(Position, mCurrentStep, gMainWindow->GetAddKeys());
+				Camera->UpdatePosition(mCurrentStep);
+
+				CheckPointString = tr("Moving Camera");
+			}
+		} break;
+
+	case LC_CAMERA_PROPERTY_TARGET:
+		{
+			const lcVector3& TargetPosition = *(lcVector3*)Value;
+			lcCamera* Camera = (lcCamera*)Object;
+
+			if (Camera->mTargetPosition != TargetPosition)
+			{
+				Camera->SetTargetPosition(TargetPosition, mCurrentStep, gMainWindow->GetAddKeys());
+				Camera->UpdatePosition(mCurrentStep);
+
+				CheckPointString = tr("Moving Camera");
+			}
+		} break;
+
+	case LC_CAMERA_PROPERTY_UPVECTOR:
+		{
+			const lcVector3& Up = *(lcVector3*)Value;
+			lcCamera* Camera = (lcCamera*)Object;
+
+			if (Camera->mUpVector != Up)
+			{
+				Camera->SetUpVector(Up, mCurrentStep, gMainWindow->GetAddKeys());
+				Camera->UpdatePosition(mCurrentStep);
+
+				CheckPointString = tr("Rotating Camera");
+			}
+		} break;
+
+	case LC_CAMERA_PROPERTY_ORTHO:
+		{
+			bool Ortho = *(bool*)Value;
+			lcCamera* Camera = (lcCamera*)Object;
+
+			if (Camera->IsOrtho() != Ortho)
+			{
+				Camera->SetOrtho(Ortho);
+				Camera->UpdatePosition(mCurrentStep);
+
+				CheckPointString = tr("Changing Camera");
+			}
+		} break;
+
+	case LC_CAMERA_PROPERTY_FOV:
+		{
+			float FOV = *(float*)Value;
+			lcCamera* Camera = (lcCamera*)Object;
+
+			if (Camera->m_fovy != FOV)
+			{
+				Camera->m_fovy = FOV;
+				Camera->UpdatePosition(mCurrentStep);
+
+				CheckPointString = tr("Setting FOV");
+			}
+		} break;
+
+	case LC_CAMERA_PROPERTY_NEAR:
+		{
+			float Near = *(float*)Value;
+			lcCamera* Camera = (lcCamera*)Object;
+
+			if (Camera->m_zNear != Near)
+			{
+				Camera->m_zNear= Near;
+				Camera->UpdatePosition(mCurrentStep);
+
+				CheckPointString = tr("Setting Camera");
+			}
+		} break;
+
+	case LC_CAMERA_PROPERTY_FAR:
+		{
+			float Far = *(float*)Value;
+			lcCamera* Camera = (lcCamera*)Object;
+
+			if (Camera->m_zFar != Far)
+			{
+				Camera->m_zFar = Far;
+				Camera->UpdatePosition(mCurrentStep);
+
+				CheckPointString = tr("Setting Camera");
+			}
+		} break;
+
+	case LC_CAMERA_PROPERTY_NAME:
+		{
+			const char* Name = (const char*)Value;
+			lcCamera* Camera = (lcCamera*)Object;
+
+			if (strcmp(Camera->m_strName, Name))
+			{
+				strncpy(Camera->m_strName, Name, sizeof(Camera->m_strName));
+				Camera->m_strName[sizeof(Camera->m_strName) - 1] = 0;
+
+				gMainWindow->UpdateCameraMenu();
+
+				CheckPointString = tr("Naming Camera");
+			}
+		}
+	}
+
+	if (!CheckPointString.isEmpty())
+	{
+		SaveCheckpoint(CheckPointString);
+		gMainWindow->UpdateFocusObject(GetFocusObject());
+		gMainWindow->UpdateAllViews();
+	}
 }
 
 bool lcModel::AnyPiecesSelected() const
@@ -1836,20 +2174,20 @@ void lcModel::ClearSelectionAndSetFocus(const lcObjectSection& ObjectSection)
 	ClearSelectionAndSetFocus(ObjectSection.Object, ObjectSection.Section);
 }
 
-void lcModel::SetSelection(const lcArray<lcObjectSection>& ObjectSections)
+void lcModel::SetSelection(const lcArray<lcObject*>& Objects)
 {
 	ClearSelection(false);
-	AddToSelection(ObjectSections);
+	AddToSelection(Objects);
 }
 
-void lcModel::AddToSelection(const lcArray<lcObjectSection>& ObjectSections)
+void lcModel::AddToSelection(const lcArray<lcObject*>& Objects)
 {
-	for (int ObjectIdx = 0; ObjectIdx < ObjectSections.GetSize(); ObjectIdx++)
+	for (int ObjectIdx = 0; ObjectIdx < Objects.GetSize(); ObjectIdx++)
 	{
-		lcObject* Object = ObjectSections[ObjectIdx].Object;
+		lcObject* Object = Objects[ObjectIdx];
 
 		bool WasSelected = Object->IsSelected();
-		Object->SetSelected(ObjectSections[ObjectIdx].Section, true);
+		Object->SetSelected(Objects[ObjectIdx]);
 
 		if (!WasSelected && Object->GetType() == LC_OBJECT_PIECE)
 			SelectGroup(((lcPiece*)Object)->GetTopGroup(), true);
@@ -1870,6 +2208,21 @@ void lcModel::SelectAllPieces()
 			Piece->SetSelected(true);
 	}
 
+	UpdateSelection();
+	gMainWindow->UpdateAllViews();
+}
+
+void lcModel::InvertSelection()
+{
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+	{
+		lcPiece* Piece = mPieces[PieceIdx];
+
+		if (Piece->IsVisible(mCurrentStep))
+			Piece->SetSelected(!Piece->IsSelected());
+	}
+
+	gMainWindow->UpdateFocusObject(GetFocusObject());
 	UpdateSelection();
 	gMainWindow->UpdateAllViews();
 }
@@ -2304,6 +2657,46 @@ void lcModel::Zoom(lcCamera* Camera, float Amount)
 		SaveCheckpoint(tr("Zoom"));
 }
 
+void lcModel::ShowPropertiesDialog()
+{
+	lcPropertiesDialogOptions Options;
+
+	Options.Properties = mProperties;
+	Options.SetDefault = false;
+
+	GetPartsList(Options.PartsList);
+
+	if (!gMainWindow->DoDialog(LC_DIALOG_PROPERTIES, &Options))
+		return;
+
+	if (Options.SetDefault)
+		Options.Properties.SaveDefaults();
+
+	if (mProperties == Options.Properties)
+		return;
+
+	mProperties = Options.Properties;
+
+	UpdateBackgroundTexture();
+
+	SaveCheckpoint(tr("Changing Properties"));
+}
+
+void lcModel::ShowSelectByNameDialog()
+{
+	if (mPieces.IsEmpty() && mCameras.IsEmpty() && mLights.IsEmpty())
+	{
+		gMainWindow->DoMessageBox("Nothing to select.", LC_MB_OK | LC_MB_ICONINFORMATION);
+		return;
+	}
+
+	lcSelectDialogOptions Options;
+	if (!gMainWindow->DoDialog(LC_DIALOG_SELECT_BY_NAME, &Options))
+		return;
+
+	SetSelection(Options.Objects);
+}
+
 void lcModel::ShowArrayDialog()
 {
 	lcVector3 Center;
@@ -2330,7 +2723,7 @@ void lcModel::ShowArrayDialog()
 		return;
 	}
 
-	lcArray<lcObjectSection> NewPieces;
+	lcArray<lcObject*> NewPieces;
 
 	for (int Step1 = 0; Step1 < Options.Counts[0]; Step1++)
 	{
@@ -2368,10 +2761,7 @@ void lcModel::ShowArrayDialog()
 					NewPiece->Initialize(Position + Offset, AxisAngle, mCurrentStep);
 					NewPiece->SetColorIndex(Piece->mColorIndex);
 
-					lcObjectSection ObjectSection;
-					ObjectSection.Object = NewPiece;
-					ObjectSection.Section = LC_PIECE_SECTION_POSITION;
-					NewPieces.Add(ObjectSection);
+					NewPieces.Add(NewPiece);
 				}
 			}
 		}
@@ -2379,7 +2769,7 @@ void lcModel::ShowArrayDialog()
 
 	for (int PieceIdx = 0; PieceIdx < NewPieces.GetSize(); PieceIdx++)
 	{
-		lcPiece* Piece = (lcPiece*)NewPieces[PieceIdx].Object;
+		lcPiece* Piece = (lcPiece*)NewPieces[PieceIdx];
 		Piece->CreateName(mPieces);
 		Piece->UpdatePosition(mCurrentStep);
 		mPieces.Add(Piece);
@@ -2397,7 +2787,7 @@ void lcModel::ShowMinifigDialog()
 		return;
 
 	lcGroup* Group = AddGroup("Minifig #", NULL);
-	lcArray<lcObjectSection> Pieces(LC_MFW_NUMITEMS);
+	lcArray<lcObject*> Pieces(LC_MFW_NUMITEMS);
 
 	for (int PartIdx = 0; PartIdx < LC_MFW_NUMITEMS; PartIdx++)
 	{
@@ -2416,10 +2806,7 @@ void lcModel::ShowMinifigDialog()
 		mPieces.Add(Piece);
 		Piece->UpdatePosition(mCurrentStep);
 
-		lcObjectSection ObjectSection;
-		ObjectSection.Object = Piece;
-		ObjectSection.Section = LC_PIECE_SECTION_POSITION;
-		Pieces.Add(ObjectSection);
+		Pieces.Add(Piece);
 	}
 
 	SetSelection(Pieces);

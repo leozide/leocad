@@ -429,7 +429,7 @@ void lcPiece::Initialize(const lcVector3& Position, const lcVector4& AxisAngle, 
 	ChangeKey(mPositionKeys, Position, 1, true);
 	ChangeKey(mRotationKeys, AxisAngle, 1, true);
 
-	UpdatePosition(1);
+	UpdatePosition(Step);
 }
 
 void lcPiece::CreateName(const lcArray<lcPiece*>& Pieces)
@@ -610,11 +610,7 @@ void lcPiece::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
 		return;
 
 	if (OutcodesOR == 0 || mPieceInfo->mMesh->IntersectsPlanes(LocalPlanes))
-	{
-		lcObjectSection& ObjectSection = ObjectBoxTest.ObjectSections.Add();
-		ObjectSection.Object = const_cast<lcPiece*>(this);
-		ObjectSection.Section = 0;
-	}
+		ObjectBoxTest.Objects.Add(const_cast<lcPiece*>(this));
 }
 
 void lcPiece::DrawInterface(lcContext* Context, const lcMatrix44& ViewMatrix) const

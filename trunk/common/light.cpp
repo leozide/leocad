@@ -151,10 +151,7 @@ void lcLight::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
 			if (lcDot3(mPosition, ObjectBoxTest.Planes[PlaneIdx]) + ObjectBoxTest.Planes[PlaneIdx][3] > LC_LIGHT_SPHERE_RADIUS)
 				return;
 
-		lcObjectSection& ObjectSection = ObjectBoxTest.ObjectSections.Add();
-		ObjectSection.Object = const_cast<lcLight*>(this);
-		ObjectSection.Section = LC_LIGHT_SECTION_POSITION;
-
+		ObjectBoxTest.Objects.Add(const_cast<lcLight*>(this));
 		return;
 	}
 
@@ -171,9 +168,8 @@ void lcLight::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
 
 	if (lcBoundingBoxIntersectsVolume(Min, Max, LocalPlanes))
 	{
-		lcObjectSection& ObjectSection = ObjectBoxTest.ObjectSections.Add();
-		ObjectSection.Object = const_cast<lcLight*>(this);
-		ObjectSection.Section = LC_LIGHT_SECTION_POSITION;
+		ObjectBoxTest.Objects.Add(const_cast<lcLight*>(this));
+		return;
 	}
 
 	Min = lcVector3(-LC_LIGHT_TARGET_EDGE, -LC_LIGHT_TARGET_EDGE, -LC_LIGHT_TARGET_EDGE);
@@ -190,9 +186,8 @@ void lcLight::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
 
 	if (lcBoundingBoxIntersectsVolume(Min, Max, LocalPlanes))
 	{
-		lcObjectSection& ObjectSection = ObjectBoxTest.ObjectSections.Add();
-		ObjectSection.Object = const_cast<lcLight*>(this);
-		ObjectSection.Section = LC_LIGHT_SECTION_TARGET;
+		ObjectBoxTest.Objects.Add(const_cast<lcLight*>(this));
+		return;
 	}
 }
 

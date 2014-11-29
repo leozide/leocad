@@ -92,11 +92,6 @@ public:
 	{
 	}
 
-	lcVector3(const lcVector3& a)
-		: x(a.x), y(a.y), z(a.z)
-	{
-	}
-
 	operator const float*() const
 	{
 		return (const float*)this;

@@ -72,6 +72,7 @@ public:
 	void OnMouseMove();
 	void OnMouseWheel(float Direction);
 
+	void CancelTrackingOrClearSelection();
 	void BeginPieceDrag();
 	void EndPieceDrag(bool Accept);
 	void ZoomExtents();
@@ -84,8 +85,9 @@ public:
 	lcMatrix44 GetProjectionMatrix() const;
 	LC_CURSOR_TYPE GetCursor() const;
 
+	void GetPieceInsertPosition(lcVector3& Position, lcVector4& Rotation) const;
 	lcObjectSection FindObjectUnderPointer(bool PiecesOnly) const;
-	lcArray<lcObjectSection> FindObjectsInBox(float x1, float y1, float x2, float y2) const;
+	lcArray<lcObject*> FindObjectsInBox(float x1, float y1, float x2, float y2) const;
 
 	Project* mProject;
 	lcCamera* mCamera;

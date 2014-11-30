@@ -157,6 +157,11 @@ public:
 	void InsertStep();
 	void RemoveStep();
 
+	void AddPiece();
+	void DeleteSelectedObjects();
+	void ShowSelectedPiecesEarlier();
+	void ShowSelectedPiecesLater();
+
 	lcGroup* AddGroup(const char* Prefix, lcGroup* Parent);
 	lcGroup* GetGroup(const char* Name, bool CreateIfMissing);
 	void RemoveGroup(lcGroup* Group);
@@ -230,6 +235,7 @@ public:
 	void UpdateOrbitTool(lcCamera* Camera, float MouseX, float MouseY);
 	void UpdateRollTool(lcCamera* Camera, float Mouse);
 	void ZoomRegionToolClicked(lcCamera* Camera, const lcVector3* Points, float RatioX, float RatioY);
+	void LookAt(lcCamera* Camera);
 	void ZoomExtents(lcCamera* Camera, float Aspect);
 	void Zoom(lcCamera* Camera, float Amount);
 
@@ -256,8 +262,14 @@ protected:
 	void GetGroupName(const char* Prefix, char* GroupName);
 	void RemoveEmptyGroups();
 	bool RemoveSelectedObjects();
-	bool MoveSelectedObjects(const lcVector3& PieceDistance, const lcVector3& ObjectDistance);
-	bool RotateSelectedPieces(const lcVector3& Angles);
+
+	void MoveSelectedObjects(const lcVector3& Distance, bool Update)
+	{
+		MoveSelectedObjects(Distance, Distance, Update);
+	}
+
+	void MoveSelectedObjects(const lcVector3& PieceDistance, const lcVector3& ObjectDistance, bool Update);
+	void RotateSelectedPieces(const lcVector3& Angles, bool Update);
 	void CalculateStep();
 	void UpdateBackgroundTexture();
 

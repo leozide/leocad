@@ -165,6 +165,54 @@ LC_CURSOR_TYPE View::GetCursor() const
 	return CursorFromTrackTool[mTrackTool];
 }
 
+lcVector3 View::GetMoveDirection(const lcVector3& Direction) const
+{
+	if (lcGetPreferences().mFixedAxes)
+		return Direction;
+
+	// TODO: rewrite this
+	lcVector3 axis = Direction;
+
+	lcVector3 Pts[3] = { lcVector3(5.0f, 5.0f, 0.1f), lcVector3(10.0f, 5.0f, 0.1f), lcVector3(5.0f, 10.0f, 0.1f) };
+	UnprojectPoints(Pts, 3);
+
+	float ax, ay;
+	lcVector3 vx((Pts[1][0] - Pts[0][0]), (Pts[1][1] - Pts[0][1]), 0);//Pts[1][2] - Pts[0][2] };
+	vx.Normalize();
+	lcVector3 x(1, 0, 0);
+	ax = acosf(lcDot(vx, x));
+
+	lcVector3 vy((Pts[2][0] - Pts[0][0]), (Pts[2][1] - Pts[0][1]), 0);//Pts[2][2] - Pts[0][2] };
+	vy.Normalize();
+	lcVector3 y(0, -1, 0);
+	ay = acosf(lcDot(vy, y));
+
+	if (ax > 135)
+		axis[0] = -axis[0];
+
+	if (ay < 45)
+		axis[1] = -axis[1];
+
+	if (ax >= 45 && ax <= 135)
+	{
+		float tmp = axis[0];
+
+		ax = acosf(lcDot(vx, y));
+		if (ax > 90)
+		{
+			axis[0] = -axis[1];
+			axis[1] = tmp;
+		}
+		else
+		{
+			axis[0] = axis[1];
+			axis[1] = -tmp;
+		}
+	}
+
+	return axis;
+}
+
 void View::GetPieceInsertPosition(lcVector3& Position, lcVector4& Rotation) const
 {
 	PieceInfo* CurPiece = gMainWindow->mPreviewWidget->GetCurrentPiece();
@@ -1360,6 +1408,24 @@ void View::EndPieceDrag(bool Accept)
 
 	mDragState = LC_DRAGSTATE_NONE;
 	UpdateTrackTool();
+}
+
+void View::SetProjection(bool Ortho)
+{
+	if (mCamera->IsSimple())
+	{
+		mCamera->SetOrtho(Ortho);
+		Redraw();
+
+		gMainWindow->UpdatePerspective();
+	}
+	else
+		mProject->SetObjectProperty(mCamera, LC_CAMERA_PROPERTY_ORTHO, &Ortho);
+}
+
+void View::LookAt()
+{
+	mProject->LookAt(mCamera);
 }
 
 void View::ZoomExtents()

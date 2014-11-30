@@ -1635,31 +1635,11 @@ void Project::HandleCommand(LC_COMMANDS id)
 		break;
 
 	case LC_VIEW_PROJECTION_PERSPECTIVE:
-		{
-			View* ActiveView = gMainWindow->GetActiveView();
-			lcCamera* Camera = ActiveView->mCamera;
-
-			Camera->SetOrtho(false);
-
-			if (Camera->IsFocused())
-				gMainWindow->UpdateFocusObject(Camera);
-			gMainWindow->UpdateAllViews();
-			gMainWindow->UpdatePerspective();
-		}
+		gMainWindow->GetActiveView()->SetProjection(false);
 		break;
 
 	case LC_VIEW_PROJECTION_ORTHO:
-		{
-			View* ActiveView = gMainWindow->GetActiveView();
-			lcCamera* Camera = ActiveView->mCamera;
-
-			Camera->SetOrtho(true);
-
-			if (Camera->IsFocused())
-				gMainWindow->UpdateFocusObject(Camera);
-			gMainWindow->UpdateAllViews();
-			gMainWindow->UpdatePerspective();
-		}
+		gMainWindow->GetActiveView()->SetProjection(true);
 		break;
 
 	case LC_VIEW_PROJECTION_FOCUS:
@@ -1671,160 +1651,61 @@ void Project::HandleCommand(LC_COMMANDS id)
 		}
 		break;
 
-		case LC_PIECE_INSERT:
-		{
-			PieceInfo* CurPiece = gMainWindow->mPreviewWidget->GetCurrentPiece();
+	case LC_PIECE_INSERT:
+		AddPiece();
+		break;
 
-			if (!CurPiece)
-				break;
+	case LC_PIECE_DELETE:
+		DeleteSelectedObjects();
+		break;
 
-			lcPiece* Last = mPieces.IsEmpty() ? NULL : mPieces[mPieces.GetSize() - 1];
+	case LC_PIECE_MOVE_PLUSX:
+		MoveSelectedObjects(gMainWindow->GetActiveView()->GetMoveDirection(lcVector3(lcMax(gMainWindow->GetMoveXYSnap(), 0.01f), 0.0f, 0.0f)), true);
+		break;
 
-			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-			{
-				lcPiece* Piece = mPieces[PieceIdx];
+	case LC_PIECE_MOVE_MINUSX:
+		MoveSelectedObjects(gMainWindow->GetActiveView()->GetMoveDirection(lcVector3(-lcMax(gMainWindow->GetMoveXYSnap(), 0.01f), 0.0f, 0.0f)), true);
+		break;
 
-				if (Piece->IsFocused())
-				{
-					Last = Piece;
-					break;
-				}
-			}
+	case LC_PIECE_MOVE_PLUSY:
+		MoveSelectedObjects(gMainWindow->GetActiveView()->GetMoveDirection(lcVector3(0.0f, lcMax(gMainWindow->GetMoveXYSnap(), 0.01f), 0.0f)), true);
+		break;
 
-			lcVector3 Position(0, 0, 0);
-			lcVector4 Rotation(0, 0, 1, 0);
+	case LC_PIECE_MOVE_MINUSY:
+		MoveSelectedObjects(gMainWindow->GetActiveView()->GetMoveDirection(lcVector3(0.0f, -lcMax(gMainWindow->GetMoveXYSnap(), 0.01f), 0.0f)), true);
+		break;
 
-			if (Last != NULL)
-			{
-				lcVector3 Dist(0, 0, Last->mPieceInfo->m_fDimensions[2] - CurPiece->m_fDimensions[5]);
-				Dist = SnapPosition(Dist);
+	case LC_PIECE_MOVE_PLUSZ:
+		MoveSelectedObjects(gMainWindow->GetActiveView()->GetMoveDirection(lcVector3(0.0f, 0.0f, lcMax(gMainWindow->GetMoveZSnap(), 0.01f))), true);
+		break;
 
-				Position = lcMul31(Dist, Last->mModelWorld);
-				Rotation = Last->mRotation;
-			}
-			else
-			{
-				Position[2] = -CurPiece->m_fDimensions[5];
-			}
+	case LC_PIECE_MOVE_MINUSZ:
+		MoveSelectedObjects(gMainWindow->GetActiveView()->GetMoveDirection(lcVector3(0.0f, 0.0f, -lcMax(gMainWindow->GetMoveZSnap(), 0.01f))), true);
+		break;
 
-			lcPiece* Piece = new lcPiece(CurPiece);
-			Piece->Initialize(Position, Rotation, mCurrentStep);
-			Piece->SetColorIndex(gMainWindow->mColorIndex);
-			Piece->CreateName(mPieces);
-			mPieces.Add(Piece);
-			ClearSelectionAndSetFocus(Piece, LC_PIECE_SECTION_POSITION);
+	case LC_PIECE_ROTATE_PLUSX:
+		RotateSelectedPieces(gMainWindow->GetActiveView()->GetMoveDirection(lcVector3(lcMax(gMainWindow->GetAngleSnap(), 1.0f), 0.0f, 0.0f)), true);
+		break;
 
-			CheckPoint("Inserting");
-		} break;
+	case LC_PIECE_ROTATE_MINUSX:
+		RotateSelectedPieces(gMainWindow->GetActiveView()->GetMoveDirection(-lcVector3(lcMax(gMainWindow->GetAngleSnap(), 1.0f), 0.0f, 0.0f)), true);
+		break;
 
-		case LC_PIECE_DELETE:
-		{
-			if (RemoveSelectedObjects())
-			{
-				gMainWindow->UpdateFocusObject(NULL);
-				UpdateSelection();
-				gMainWindow->UpdateAllViews();
-				CheckPoint("Deleting");
-			}
-		} break;
+	case LC_PIECE_ROTATE_PLUSY:
+		RotateSelectedPieces(gMainWindow->GetActiveView()->GetMoveDirection(lcVector3(0.0f, lcMax(gMainWindow->GetAngleSnap(), 1.0f), 0.0f)), true);
+		break;
 
-		case LC_PIECE_MOVE_PLUSX:
-		case LC_PIECE_MOVE_MINUSX:
-		case LC_PIECE_MOVE_PLUSY:
-		case LC_PIECE_MOVE_MINUSY:
-		case LC_PIECE_MOVE_PLUSZ:
-		case LC_PIECE_MOVE_MINUSZ:
-		case LC_PIECE_ROTATE_PLUSX:
-		case LC_PIECE_ROTATE_MINUSX:
-		case LC_PIECE_ROTATE_PLUSY:
-		case LC_PIECE_ROTATE_MINUSY:
-		case LC_PIECE_ROTATE_PLUSZ:
-		case LC_PIECE_ROTATE_MINUSZ:
-		{
-			lcVector3 axis;
-			bool Rotate = id >= LC_PIECE_ROTATE_PLUSX && id <= LC_PIECE_ROTATE_MINUSZ;
+	case LC_PIECE_ROTATE_MINUSY:
+		RotateSelectedPieces(gMainWindow->GetActiveView()->GetMoveDirection(lcVector3(0.0f, -lcMax(gMainWindow->GetAngleSnap(), 1.0f), 0.0f)), true);
+		break;
 
-			if (Rotate)
-			{
-				axis[0] = axis[1] = axis[2] = lcMax(gMainWindow->GetAngleSnap(), 1);
-			}
-			else
-			{
-				axis[0] = axis[1] = gMainWindow->GetMoveXYSnap();
-				axis[2] = gMainWindow->GetMoveZSnap();
+	case LC_PIECE_ROTATE_PLUSZ:
+		RotateSelectedPieces(gMainWindow->GetActiveView()->GetMoveDirection(lcVector3(0.0f, 0.0f, lcMax(gMainWindow->GetAngleSnap(), 1.0f))), true);
+		break;
 
-				if (!axis[0])// || bControl)
-					axis[0] = 0.01f;
-				if (!axis[1])// || bControl)
-					axis[1] = 0.01f;
-				if (!axis[2])// || bControl)
-					axis[2] = 0.01f;
-			}
-
-			if (id == LC_PIECE_MOVE_PLUSX || id == LC_PIECE_ROTATE_PLUSX)
-				axis = lcVector3(axis[0], 0, 0);
-			else if (id == LC_PIECE_MOVE_MINUSX || id == LC_PIECE_ROTATE_MINUSX)
-				axis = lcVector3(-axis[0], 0, 0);
-			else if (id == LC_PIECE_MOVE_PLUSY || id == LC_PIECE_ROTATE_PLUSY)
-				axis = lcVector3(0, axis[1], 0);
-			else if (id == LC_PIECE_MOVE_MINUSY || id == LC_PIECE_ROTATE_MINUSY)
-				axis = lcVector3(0, -axis[1], 0);
-			else if (id == LC_PIECE_MOVE_PLUSZ || id == LC_PIECE_ROTATE_PLUSZ)
-				axis = lcVector3(0, 0, axis[2]);
-			else if (id == LC_PIECE_MOVE_MINUSZ || id == LC_PIECE_ROTATE_MINUSZ)
-				axis = lcVector3(0, 0, -axis[2]);
-
-			if (!lcGetPreferences().mFixedAxes)
-			{
-				// TODO: rewrite this
-			
-				lcVector3 Pts[3] = { lcVector3(5.0f, 5.0f, 0.1f), lcVector3(10.0f, 5.0f, 0.1f), lcVector3(5.0f, 10.0f, 0.1f) };
-				gMainWindow->GetActiveView()->UnprojectPoints(Pts, 3);
-
-				float ax, ay;
-				lcVector3 vx((Pts[1][0] - Pts[0][0]), (Pts[1][1] - Pts[0][1]), 0);//Pts[1][2] - Pts[0][2] };
-				vx.Normalize();
-				lcVector3 x(1, 0, 0);
-				ax = acosf(lcDot(vx, x));
-
-				lcVector3 vy((Pts[2][0] - Pts[0][0]), (Pts[2][1] - Pts[0][1]), 0);//Pts[2][2] - Pts[0][2] };
-				vy.Normalize();
-				lcVector3 y(0, -1, 0);
-				ay = acosf(lcDot(vy, y));
-
-				if (ax > 135)
-					axis[0] = -axis[0];
-
-				if (ay < 45)
-					axis[1] = -axis[1];
-
-				if (ax >= 45 && ax <= 135)
-				{
-					float tmp = axis[0];
-
-					ax = acosf(lcDot(vx, y));
-					if (ax > 90)
-					{
-						axis[0] = -axis[1];
-						axis[1] = tmp;
-					}
-					else
-					{
-						axis[0] = axis[1];
-						axis[1] = -tmp;
-					}
-				}
-			}
-
-			if (Rotate)
-				RotateSelectedPieces(axis);
-			else
-				MoveSelectedObjects(axis, axis);
-
-			gMainWindow->UpdateAllViews();
-			CheckPoint(Rotate ? "Rotating" : "Moving");
-			gMainWindow->UpdateFocusObject(GetFocusObject());
-		} break;
+	case LC_PIECE_ROTATE_MINUSZ:
+		RotateSelectedPieces(gMainWindow->GetActiveView()->GetMoveDirection(lcVector3(0.0f, 0.0f, -lcMax(gMainWindow->GetAngleSnap(), 1.0f))), true);
+		break;
 
 	case LC_PIECE_MINIFIG_WIZARD:
 		ShowMinifigDialog();
@@ -1866,65 +1747,13 @@ void Project::HandleCommand(LC_COMMANDS id)
 		UnhideAllPieces();
 		break;
 
-		case LC_PIECE_SHOW_EARLIER:
-		{
-			bool Redraw = false;
+	case LC_PIECE_SHOW_EARLIER:
+		ShowSelectedPiecesEarlier();
+		break;
 
-			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-			{
-				lcPiece* Piece = mPieces[PieceIdx];
-
-				if (Piece->IsSelected())
-				{
-					lcStep Step = Piece->GetStepShow();
-
-					if (Step > 1)
-					{
-						Redraw = true;
-						Piece->SetStepShow(Step - 1);
-					}
-				}
-			}
-
-			if (Redraw)
-			{
-				CheckPoint("Modifying");
-				gMainWindow->UpdateAllViews();
-				UpdateSelection();
-			}
-		} break;
-
-		case LC_PIECE_SHOW_LATER:
-		{
-			bool Redraw = false;
-
-			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-			{
-				lcPiece* Piece = mPieces[PieceIdx];
-
-				if (Piece->IsSelected())
-				{
-					lcStep Step = Piece->GetStepShow();
-
-					if (Step < LC_STEP_MAX)
-					{
-						Step++;
-						Redraw = true;
-						Piece->SetStepShow(Step);
-
-						if (Step > mCurrentStep)
-							Piece->SetSelected(false);
-					}
-				}
-			}
-
-			if (Redraw)
-			{
-				CheckPoint("Modifying");
-				gMainWindow->UpdateAllViews();
-				UpdateSelection();
-			}
-		} break;
+	case LC_PIECE_SHOW_LATER:
+		ShowSelectedPiecesLater();
+		break;
 
 	case LC_VIEW_PREFERENCES:
 		g_App->ShowPreferencesDialog();
@@ -1942,24 +1771,9 @@ void Project::HandleCommand(LC_COMMANDS id)
 		gMainWindow->GetActiveView()->ZoomExtents();
 		break;
 
-		case LC_VIEW_LOOK_AT:
-		{
-			lcVector3 Center;
-
-			if (!GetSelectionCenter(Center))
-			{
-				float BoundingBox[6];
-
-				if (GetPiecesBoundingBox(BoundingBox))
-					Center = lcVector3((BoundingBox[0] + BoundingBox[3]) / 2, (BoundingBox[1] + BoundingBox[4]) / 2, (BoundingBox[2] + BoundingBox[5]) / 2);
-				else
-					Center = lcVector3(0.0f, 0.0f, 0.0f);
-			}
-
-			gMainWindow->GetActiveView()->mCamera->Center(Center, mCurrentStep, gMainWindow->GetAddKeys());
-			gMainWindow->UpdateAllViews();
-			break;
-		}
+	case LC_VIEW_LOOK_AT:
+		gMainWindow->GetActiveView()->LookAt();
+		break;
 
 	case LC_VIEW_TIME_NEXT:
 		ShowNextStep();

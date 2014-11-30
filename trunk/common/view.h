@@ -75,6 +75,9 @@ public:
 	void CancelTrackingOrClearSelection();
 	void BeginPieceDrag();
 	void EndPieceDrag(bool Accept);
+
+	void SetProjection(bool Ortho);
+	void LookAt();
 	void ZoomExtents();
 
 	void RemoveCamera();
@@ -85,6 +88,7 @@ public:
 	lcMatrix44 GetProjectionMatrix() const;
 	LC_CURSOR_TYPE GetCursor() const;
 
+	lcVector3 GetMoveDirection(const lcVector3& Direction) const;
 	void GetPieceInsertPosition(lcVector3& Position, lcVector4& Rotation) const;
 	lcObjectSection FindObjectUnderPointer(bool PiecesOnly) const;
 	lcArray<lcObject*> FindObjectsInBox(float x1, float y1, float x2, float y2) const;

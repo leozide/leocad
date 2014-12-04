@@ -56,8 +56,10 @@ enum lcDragState
 class View : public lcGLWidget
 {
 public:
-	View(Project *project);
+	View(Project* Project);
 	virtual ~View();
+
+	void SetProject(Project* Project);
 
 	void OnDraw();
 	void OnInitialUpdate();

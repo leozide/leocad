@@ -49,6 +49,17 @@ public:
 	Project();
 	~Project();
 
+	QString GetTitle() const;
+	QString GetFileName() const
+	{
+		return mFileName;
+	}
+
+	bool Load(const QString& FileName);
+	void SetSaved(const QString& FileName);
+
+
+
 	void SetCurrentStep(lcStep Step)
 	{
 		mCurrentStep = Step;
@@ -60,35 +71,24 @@ public:
 		return mGroups.FindIndex(Group);
 	}
 
+	void ExportHTML();
 	void UpdateInterface();
 	void LoadDefaults();
 	void SaveImage();
 	void SaveStepImages(const QString& BaseName, int Width, int Height, lcStep Start, lcStep End);
-	void HandleCommand(LC_COMMANDS id);
 
 protected:
 	void CheckPoint(const char* Description);
 
 	static int InstanceOfName(const String& existingString, const String& candidateString, String& baseNameOut);
 
-	void ExportHTML();
 	void CreateHTMLPieceList(QTextStream& Stream, lcStep Step, bool Images, const QString& ImageExtension);
 
-	bool DoSave(const QString& FileName);
 	bool FileLoad(lcFile* file, bool bUndo, bool bMerge);
 	void FileReadLDraw(lcFile* file, const lcMatrix44& CurrentTransform, int* nOk, int DefColor, int* nStep, lcArray<LC_FILEENTRY*>& FileArray);
 	void FileReadMPD(lcFile& MPD, lcArray<LC_FILEENTRY*>& FileArray) const;
 
-	void SetFileName(const QString& FileName);
-	QString GetTitle() const;
-
 	QString mFileName;
-
-public:
-	bool OnNewDocument();
-	bool OnOpenDocument(const QString& FileName);
-	bool OpenProject(const QString& FileName);
-	bool SaveIfModified();
 };
 
 #endif // _PROJECT_H_

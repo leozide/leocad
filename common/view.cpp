@@ -37,6 +37,23 @@ View::~View()
 		delete mCamera;
 }
 
+void View::SetProject(Project* Project)
+{
+	if (mProject == Project)
+		return;
+
+	mProject = Project;
+
+	if (mCamera && !mCamera->IsSimple())
+	{
+		lcCamera* Camera = mCamera;
+		mCamera = new lcCamera(true);
+
+		if (Camera)
+			mCamera->CopyPosition(Camera);
+	}
+}
+
 void View::RemoveCamera()
 {
 	if (mCamera && mCamera->IsSimple())

@@ -239,6 +239,13 @@ public:
 	void ZoomExtents(lcCamera* Camera, float Aspect);
 	void Zoom(lcCamera* Camera, float Amount);
 
+	void MoveSelectedObjects(const lcVector3& Distance, bool Update)
+	{
+		MoveSelectedObjects(Distance, Distance, Update);
+	}
+
+	void MoveSelectedObjects(const lcVector3& PieceDistance, const lcVector3& ObjectDistance, bool Update);
+	void RotateSelectedPieces(const lcVector3& Angles, bool Update);
 	void TransformSelectedObjects(lcTransformType TransformType, const lcVector3& Transform);
 	void SetObjectProperty(lcObject* Object, lcObjectPropertyType ObjectPropertyType, const void* Value);
 
@@ -263,13 +270,6 @@ protected:
 	void RemoveEmptyGroups();
 	bool RemoveSelectedObjects();
 
-	void MoveSelectedObjects(const lcVector3& Distance, bool Update)
-	{
-		MoveSelectedObjects(Distance, Distance, Update);
-	}
-
-	void MoveSelectedObjects(const lcVector3& PieceDistance, const lcVector3& ObjectDistance, bool Update);
-	void RotateSelectedPieces(const lcVector3& Angles, bool Update);
 	void CalculateStep();
 	void UpdateBackgroundTexture();
 

@@ -11,24 +11,110 @@
 #include "group.h"
 #include "project.h"
 #include "image.h"
-#include "system.h"
-#include "minifig.h"
 #include "lc_mainwindow.h"
 #include "view.h"
 #include "lc_library.h"
-#include "texfont.h"
-#include "debug.h"
 #include "lc_application.h"
 #include "lc_profile.h"
-#include "lc_context.h"
 #include "preview.h"
 
 Project::Project()
 {
+	LoadDefaults();
+
+	CheckPoint("");
+	mSavedHistory = mUndoHistory[0];
 }
 
 Project::~Project()
 {
+	DeleteModel();
+	DeleteHistory();
+}
+
+bool Project::Load(const QString& FileName)
+{
+	lcDiskFile file;
+	bool bSuccess = false;
+
+	if (!file.Open(FileName.toLatin1().constData(), "rb")) // todo: qstring
+		return false;
+
+	QString Extension = QFileInfo(FileName).suffix().toLower();
+
+	// todo: detect using file contents instead
+	bool datfile = (Extension == QLatin1String("dat") || Extension == QLatin1String("ldr"));
+	bool mpdfile = (Extension == QLatin1String("mpd"));
+
+	DeleteHistory();
+	LoadDefaults();
+
+	if (file.GetLength() != 0)
+	{
+		lcArray<LC_FILEENTRY*> FileArray;
+
+		// Unpack the MPD file.
+		if (mpdfile)
+		{
+			FileReadMPD(file, FileArray);
+
+			if (FileArray.GetSize() == 0)
+			{
+				file.Seek(0, SEEK_SET);
+				mpdfile = false;
+				datfile = true;
+			}
+		}
+
+		if (datfile || mpdfile)
+		{
+			int ok = 0, step = 1;
+			lcMatrix44 mat = lcMatrix44Identity();
+
+			if (mpdfile)
+				FileReadLDraw(&FileArray[0]->File, mat, &ok, 16, &step, FileArray);
+			else
+//				FileReadLDraw(&file, mat, &ok, 16, &step, FileArray);
+			{
+				QFile File(FileName);
+
+				if (!File.open(QIODevice::ReadOnly))
+				{
+					QMessageBox::warning(gMainWindow->mHandle, tr("Error"), tr("Error reading file '%1':\n%2").arg(FileName, File.errorString()));
+					return false;
+				}
+
+				QTextStream Stream(&File);
+				LoadLDraw(Stream);
+			}
+
+			mCurrentStep = step;
+			gMainWindow->UpdateCurrentStep();
+			gMainWindow->UpdateFocusObject(GetFocusObject());
+			UpdateSelection();
+
+			const lcArray<View*>& Views = gMainWindow->GetViews();
+			for (int ViewIdx = 0; ViewIdx < Views.GetSize(); ViewIdx++)
+				Views[ViewIdx]->ZoomExtents();
+
+			bSuccess = true;
+		}
+		else
+		{
+			// Load a LeoCAD file.
+			bSuccess = FileLoad(&file, false, false);
+		}
+
+		FileArray.DeleteAll();
+	}
+
+	file.Close();
+
+	CheckPoint("");
+	mSavedHistory = mUndoHistory[0];
+	mFileName = FileName;
+
+	return bSuccess;
 }
 
 void Project::UpdateInterface()
@@ -51,7 +137,7 @@ void Project::UpdateInterface()
 	UpdateSelection();
 }
 
-void Project::LoadDefaults()
+void Project::LoadDefaults() // todo: Change the interface in SetProject() instead
 {
 	mProperties.LoadDefaults();
 
@@ -672,200 +758,10 @@ void Project::FileReadLDraw(lcFile* file, const lcMatrix44& CurrentTransform, in
 	file->Seek(Offset, SEEK_SET);
 }
 
-bool Project::DoSave(const QString& FileName)
+void Project::SetSaved(const QString& FileName)
 {
-	QString SaveFileName;
-
-	if (!FileName.isEmpty())
-		SaveFileName = FileName;
-	else
-	{
-		if (!mFileName.isEmpty())
-			SaveFileName = mFileName;
-		else
-			SaveFileName = QFileInfo(QDir(QLatin1String(lcGetProfileString(LC_PROFILE_PROJECTS_PATH))), GetTitle()).absoluteFilePath();
-
-		SaveFileName = QFileDialog::getSaveFileName(gMainWindow->mHandle, tr("Save Project"), SaveFileName, tr("Supported Files (*.ldr *.dat);;All Files (*.*)"));
-
-		if (SaveFileName.isEmpty())
-			return false;
-	}
-
-	if (QFileInfo(SaveFileName).suffix().toLower() == QLatin1String("lcd"))
-	{
-		QMessageBox::warning(gMainWindow->mHandle, tr("Error"), tr("Saving files in LCD format is no longer supported, please use the LDR format instead."));
-		return false;
-	}
-
-	QFile File(SaveFileName);
-
-	if (!File.open(QIODevice::WriteOnly))
-	{
-		QMessageBox::warning(gMainWindow->mHandle, tr("Error"), tr("Error writing to file '%1':\n%2").arg(SaveFileName, File.errorString()));
-		return false;
-	}
-
-	QTextStream Stream(&File);
-	SaveLDraw(Stream);
-
 	mSavedHistory = mUndoHistory[0];
-
-	SetFileName(SaveFileName);
-
-	return true;
-}
-
-bool Project::SaveIfModified()
-{
-	if (!IsModified())
-		return true;
-
-	switch (QMessageBox::question(gMainWindow->mHandle, tr("Save Project"), tr("Save changes to '%1'?").arg(GetTitle()), QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel))
-	{
-	default:
-	case QMessageBox::Cancel:
-		return false;
-
-	case QMessageBox::Yes:
-		if (!DoSave(mFileName))
-			return false;
-		break;
-
-	case QMessageBox::No:
-		break;
-	}
-
-	return true;
-}
-
-bool Project::OnNewDocument()
-{
-	DeleteModel();
-	DeleteHistory();
-	LoadDefaults();
-
-	CheckPoint("");
-	mSavedHistory = mUndoHistory[0];
-
-	SetFileName(QString());
-
-	return true;
-}
-
-bool Project::OpenProject(const QString& FileName)
-{
-	if (!SaveIfModified())
-		return false;
-
-	if (!OnOpenDocument(FileName))
-		return false;
-
-	SetFileName(FileName);
-
-	return true;
-}
-
-bool Project::OnOpenDocument(const QString& FileName)
-{
-	lcDiskFile file;
-	bool bSuccess = false;
-
-	if (!file.Open(FileName.toLatin1().constData(), "rb")) // todo: qstring
-	{
-//		MessageBox("Failed to open file.");
-		return false;
-	}
-
-	QString Extension = QFileInfo(FileName).suffix().toLower();
-
-	bool datfile = (Extension == QLatin1String("dat") || Extension == QLatin1String("ldr"));
-	bool mpdfile = (Extension == QLatin1String("mpd"));
-
-	DeleteModel();
-	DeleteHistory();
-	LoadDefaults();
-
-	if (file.GetLength() != 0)
-	{
-		lcArray<LC_FILEENTRY*> FileArray;
-
-		// Unpack the MPD file.
-		if (mpdfile)
-		{
-			FileReadMPD(file, FileArray);
-
-			if (FileArray.GetSize() == 0)
-			{
-				file.Seek(0, SEEK_SET);
-				mpdfile = false;
-				datfile = true;
-			}
-		}
-
-		if (datfile || mpdfile)
-		{
-			int ok = 0, step = 1;
-			lcMatrix44 mat = lcMatrix44Identity();
-
-			if (mpdfile)
-				FileReadLDraw(&FileArray[0]->File, mat, &ok, 16, &step, FileArray);
-			else
-//				FileReadLDraw(&file, mat, &ok, 16, &step, FileArray);
-			{
-				QFile File(FileName);
-
-				if (!File.open(QIODevice::ReadOnly))
-				{
-					QMessageBox::warning(gMainWindow->mHandle, tr("Error"), tr("Error reading file '%1':\n%2").arg(FileName, File.errorString()));
-					return false;
-				}
-
-				QTextStream Stream(&File);
-				LoadLDraw(Stream);
-			}
-
-			mCurrentStep = step;
-			gMainWindow->UpdateCurrentStep();
-			gMainWindow->UpdateFocusObject(GetFocusObject());
-			UpdateSelection();
-
-			const lcArray<View*>& Views = gMainWindow->GetViews();
-			for (int ViewIdx = 0; ViewIdx < Views.GetSize(); ViewIdx++)
-				Views[ViewIdx]->ZoomExtents();
-
-			bSuccess = true;
-		}
-		else
-		{
-			// Load a LeoCAD file.
-			bSuccess = FileLoad(&file, false, false);
-		}
-
-		FileArray.DeleteAll();
-	}
-
-	file.Close();
-
-	if (bSuccess == false)
-	{
-		OnNewDocument();
-//		MessageBox("Failed to load.");
-		return false;
-	}
-
-	CheckPoint("");
-	mSavedHistory = mUndoHistory[0];
-
-	return true;
-}
-
-void Project::SetFileName(const QString& FileName)
-{
 	mFileName = FileName;
-
-	if (!FileName.isEmpty())
-		gMainWindow->AddRecentFile(FileName);
-	gMainWindow->UpdateTitle(GetTitle(), IsModified());
 }
 
 QString Project::GetTitle() const
@@ -1278,746 +1174,6 @@ void Project::ExportHTML()
 				break;
 		}
 		Context->EndRenderToTexture();
-	}
-}
-
-void Project::HandleCommand(LC_COMMANDS id)
-{
-	switch (id)
-	{
-		case LC_FILE_NEW:
-		{
-			if (!SaveIfModified())
-				return;
-
-			OnNewDocument();
-			gMainWindow->UpdateAllViews();
-		} break;
-
-		case LC_FILE_OPEN:
-		{
-			QString FileName;
-
-			if (!mFileName.isEmpty())
-				FileName = mFileName;
-			else
-				FileName = lcGetProfileString(LC_PROFILE_PROJECTS_PATH);
-
-			FileName = QFileDialog::getOpenFileName(gMainWindow->mHandle, tr("Open Project"), FileName, tr("Supported Files (*.lcd *.ldr *.dat *.mpd);;All Files (*.*)"));
-
-			if (!FileName.isEmpty())
-				OpenProject(FileName);
-		} break;
-
-		case LC_FILE_MERGE:
-		{
-			QString FileName;
-
-			if (!mFileName.isEmpty())
-				FileName = mFileName;
-			else
-				FileName = lcGetProfileString(LC_PROFILE_PROJECTS_PATH);
-
-			FileName = QFileDialog::getOpenFileName(gMainWindow->mHandle, tr("Merge Project"), FileName, tr("Supported Files (*.lcd *.ldr *.dat *.mpd);;All Files (*.*)"));
-
-			if (!FileName.isEmpty())
-			{
-				// todo: detect format
-				lcDiskFile file;
-				if (file.Open(FileName.toLatin1().constData(), "rb")) // todo: qstring
-				{
-					if (file.GetLength() != 0)
-					{
-						FileLoad(&file, false, true);
-						CheckPoint("Merging");
-					}
-					file.Close();
-				}
-			}
-		} break;
-
-	case LC_FILE_SAVE:
-		DoSave(mFileName);
-		break;
-
-	case LC_FILE_SAVEAS:
-		DoSave(QString());
-		break;
-
-	case LC_FILE_SAVE_IMAGE:
-		SaveImage();
-		break;
-
-	case LC_FILE_EXPORT_3DS:
-		Export3DStudio();
-		break;
-
-	case LC_FILE_EXPORT_HTML:
-		ExportHTML();
-		break;
-
-	case LC_FILE_EXPORT_BRICKLINK:
-		ExportBrickLink();
-		break;
-
-	case LC_FILE_EXPORT_CSV:
-		ExportCSV();
-		break;
-
-	case LC_FILE_EXPORT_POVRAY:
-		ExportPOVRay();
-		break;
-
-	case LC_FILE_EXPORT_WAVEFRONT:
-		ExportWavefront();
-		break;
-
-	case LC_FILE_PROPERTIES:
-		ShowPropertiesDialog();
-		break;
-
-	case LC_FILE_PRINT_PREVIEW:
-		gMainWindow->TogglePrintPreview();
-		break;
-
-	case LC_FILE_PRINT:
-		gMainWindow->DoDialog(LC_DIALOG_PRINT, NULL);
-		break;
-
-	// TODO: printing
-	case LC_FILE_PRINT_BOM:
-		break;
-
-	case LC_FILE_RECENT1:
-	case LC_FILE_RECENT2:
-	case LC_FILE_RECENT3:
-	case LC_FILE_RECENT4:
-		if (!OpenProject(gMainWindow->mRecentFiles[id - LC_FILE_RECENT1]))
-			gMainWindow->RemoveRecentFile(id - LC_FILE_RECENT1);
-		break;
-
-	case LC_FILE_EXIT:
-		gMainWindow->Close();
-		break;
-
-	case LC_EDIT_UNDO:
-		UndoAction();
-		break;
-
-	case LC_EDIT_REDO:
-		RedoAction();
-		break;
-
-	case LC_EDIT_CUT:
-	case LC_EDIT_COPY:
-		{
-			lcMemFile* Clipboard = new lcMemFile();
-
-			int i = 0;
-//			lcLight* pLight;
-
-			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-				if (mPieces[PieceIdx]->IsSelected())
-					i++;
-			Clipboard->WriteBuffer(&i, sizeof(i));
-
-			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-			{
-				lcPiece* Piece = mPieces[PieceIdx];
-
-				if (Piece->IsSelected())
-					Piece->FileSave(*Clipboard);
-			}
-
-			i = mGroups.GetSize();
-			Clipboard->WriteBuffer(&i, sizeof(i));
-
-			for (int GroupIdx = 0; GroupIdx < mGroups.GetSize(); GroupIdx++)
-				mGroups[GroupIdx]->FileSave(Clipboard, mGroups);
-
-			i = 0;
-			for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
-				if (mCameras[CameraIdx]->IsSelected())
-					i++;
-			Clipboard->WriteBuffer(&i, sizeof(i));
-
-			for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
-			{
-				lcCamera* pCamera = mCameras[CameraIdx];
-
-				if (pCamera->IsSelected())
-					pCamera->FileSave(*Clipboard);
-			}
-/*
-			for (i = 0, pLight = m_pLights; pLight; pLight = pLight->m_pNext)
-				if (pLight->IsSelected())
-					i++;
-			Clipboard->Write(&i, sizeof(i));
-
-			for (pLight = m_pLights; pLight; pLight = pLight->m_pNext)
-				if (pLight->IsSelected())
-					pLight->FileSave(Clipboard);
-*/
-			if (id == LC_EDIT_CUT)
-			{
-				RemoveSelectedObjects();
-				gMainWindow->UpdateFocusObject(GetFocusObject());
-				UpdateSelection();
-				gMainWindow->UpdateAllViews();
-				CheckPoint("Cutting");
-			}
-
-			g_App->ExportClipboard(Clipboard);
-		} break;
-
-		case LC_EDIT_PASTE:
-		{
-			lcFile* file = g_App->mClipboard;
-			if (file == NULL)
-				break;
-			file->Seek(0, SEEK_SET);
-			ClearSelection(false);
-
-			lcArray<lcPiece*> PastedPieces;
-			int NumPieces;
-			file->ReadBuffer(&NumPieces, sizeof(NumPieces));
-
-			while (NumPieces--)
-			{
-				lcPiece* Piece = new lcPiece(NULL);
-				Piece->FileLoad(*file);
-				PastedPieces.Add(Piece);
-			}
-
-			lcArray<lcGroup*> Groups;
-			int NumGroups;
-			file->ReadBuffer(&NumGroups, sizeof(NumGroups));
-
-			while (NumGroups--)
-			{
-				lcGroup* Group = new lcGroup();
-				Group->FileLoad(file);
-				Groups.Add(Group);
-			}
-
-			for (int PieceIdx = 0; PieceIdx < PastedPieces.GetSize(); PieceIdx++)
-			{
-				lcPiece* Piece = PastedPieces[PieceIdx];
-				Piece->CreateName(mPieces);
-				Piece->SetStepShow(mCurrentStep);
-				mPieces.Add(Piece);
-				Piece->SetSelected(true);
-
-				int GroupIndex = LC_POINTER_TO_INT(Piece->GetGroup());
-				if (GroupIndex != -1)
-					Piece->SetGroup(Groups[GroupIndex]);
-				else
-					Piece->SetGroup(NULL);
-			}
-
-			for (int GroupIdx = 0; GroupIdx < Groups.GetSize(); GroupIdx++)
-			{
-				lcGroup* Group = Groups[GroupIdx];
-				int GroupIndex = LC_POINTER_TO_INT(Group->mGroup);
-				Group->mGroup = (GroupIndex != -1) ? Groups[GroupIndex] : NULL;
-			}
-
-			for (int GroupIdx = 0; GroupIdx < Groups.GetSize(); GroupIdx++)
-			{
-				lcGroup* Group = Groups[GroupIdx];
-				bool Add = false;
-
-				for (int PieceIdx = 0; PieceIdx < PastedPieces.GetSize(); PieceIdx++)
-				{
-					lcPiece* Piece = PastedPieces[PieceIdx];
-					
-					for (lcGroup* PieceGroup = Piece->GetGroup(); PieceGroup; PieceGroup = PieceGroup->mGroup)
-					{
-						if (PieceGroup == Group)
-						{
-							Add = true;
-							break;
-						}
-					}
-
-					if (Add)
-						break;
-				}
-
-				if (Add)
-				{
-					int a, max = 0;
-
-					for (int SearchGroupIdx = 0; SearchGroupIdx < mGroups.GetSize(); SearchGroupIdx++)
-					{
-						lcGroup* SearchGroup = mGroups[SearchGroupIdx];
-
-						if (strncmp("Pasted Group #", SearchGroup ->m_strName, 14) == 0)
-							if (sscanf(SearchGroup ->m_strName + 14, "%d", &a) == 1)
-								if (a > max)
-									max = a;
-					}
-
-					sprintf(Group->m_strName, "Pasted Group #%.2d", max+1);
-					mGroups.Add(Group);
-				}
-				else
-					delete Group;
-			}
-
-			int NumCameras;
-			file->ReadBuffer(&NumCameras, sizeof(NumCameras));
-
-			while (NumCameras--)
-			{
-				lcCamera* pCamera = new lcCamera(false);
-				pCamera->FileLoad(*file);
-				pCamera->CreateName(mCameras);
-				pCamera->SetSelected(true);
-				mCameras.Add(pCamera);
-			}
-
-			// TODO: lights
-			CalculateStep();
-			CheckPoint("Pasting");
-			gMainWindow->UpdateFocusObject(GetFocusObject());
-			UpdateSelection();
-			gMainWindow->UpdateAllViews();
-		} break;
-
-	case LC_EDIT_FIND:
-		if (gMainWindow->DoDialog(LC_DIALOG_FIND, &gMainWindow->mSearchOptions))
-			FindPiece(true, true);
-		break;
-
-	case LC_EDIT_FIND_NEXT:
-		FindPiece(false, true);
-		break;
-
-	case LC_EDIT_FIND_PREVIOUS:
-		FindPiece(false, false);
-		break;
-
-	case LC_EDIT_SELECT_ALL:
-		SelectAllPieces();
-		break;
-
-	case LC_EDIT_SELECT_NONE:
-		ClearSelection(true);
-		break;
-
-	case LC_EDIT_SELECT_INVERT:
-		InvertSelection();
-		break;
-
-	case LC_EDIT_SELECT_BY_NAME:
-		ShowSelectByNameDialog();
-		break;
-
-	case LC_VIEW_SPLIT_HORIZONTAL:
-		gMainWindow->SplitHorizontal();
-		break;
-
-	case LC_VIEW_SPLIT_VERTICAL:
-		gMainWindow->SplitVertical();
-		break;
-
-	case LC_VIEW_REMOVE_VIEW:
-		gMainWindow->RemoveView();
-		break;
-
-	case LC_VIEW_RESET_VIEWS:
-		gMainWindow->ResetViews();
-		break;
-
-	case LC_VIEW_FULLSCREEN:
-		gMainWindow->ToggleFullScreen();
-		break;
-
-	case LC_VIEW_PROJECTION_PERSPECTIVE:
-		gMainWindow->GetActiveView()->SetProjection(false);
-		break;
-
-	case LC_VIEW_PROJECTION_ORTHO:
-		gMainWindow->GetActiveView()->SetProjection(true);
-		break;
-
-	case LC_VIEW_PROJECTION_FOCUS:
-		{
-			lcVector3 FocusVector;
-			GetSelectionCenter(FocusVector);
-			gMainWindow->GetActiveView()->mCamera->SetFocalPoint(FocusVector, mCurrentStep, gMainWindow->GetAddKeys());
-			gMainWindow->UpdateAllViews();
-		}
-		break;
-
-	case LC_PIECE_INSERT:
-		AddPiece();
-		break;
-
-	case LC_PIECE_DELETE:
-		DeleteSelectedObjects();
-		break;
-
-	case LC_PIECE_MOVE_PLUSX:
-		MoveSelectedObjects(gMainWindow->GetActiveView()->GetMoveDirection(lcVector3(lcMax(gMainWindow->GetMoveXYSnap(), 0.01f), 0.0f, 0.0f)), true);
-		break;
-
-	case LC_PIECE_MOVE_MINUSX:
-		MoveSelectedObjects(gMainWindow->GetActiveView()->GetMoveDirection(lcVector3(-lcMax(gMainWindow->GetMoveXYSnap(), 0.01f), 0.0f, 0.0f)), true);
-		break;
-
-	case LC_PIECE_MOVE_PLUSY:
-		MoveSelectedObjects(gMainWindow->GetActiveView()->GetMoveDirection(lcVector3(0.0f, lcMax(gMainWindow->GetMoveXYSnap(), 0.01f), 0.0f)), true);
-		break;
-
-	case LC_PIECE_MOVE_MINUSY:
-		MoveSelectedObjects(gMainWindow->GetActiveView()->GetMoveDirection(lcVector3(0.0f, -lcMax(gMainWindow->GetMoveXYSnap(), 0.01f), 0.0f)), true);
-		break;
-
-	case LC_PIECE_MOVE_PLUSZ:
-		MoveSelectedObjects(gMainWindow->GetActiveView()->GetMoveDirection(lcVector3(0.0f, 0.0f, lcMax(gMainWindow->GetMoveZSnap(), 0.01f))), true);
-		break;
-
-	case LC_PIECE_MOVE_MINUSZ:
-		MoveSelectedObjects(gMainWindow->GetActiveView()->GetMoveDirection(lcVector3(0.0f, 0.0f, -lcMax(gMainWindow->GetMoveZSnap(), 0.01f))), true);
-		break;
-
-	case LC_PIECE_ROTATE_PLUSX:
-		RotateSelectedPieces(gMainWindow->GetActiveView()->GetMoveDirection(lcVector3(lcMax(gMainWindow->GetAngleSnap(), 1.0f), 0.0f, 0.0f)), true);
-		break;
-
-	case LC_PIECE_ROTATE_MINUSX:
-		RotateSelectedPieces(gMainWindow->GetActiveView()->GetMoveDirection(-lcVector3(lcMax(gMainWindow->GetAngleSnap(), 1.0f), 0.0f, 0.0f)), true);
-		break;
-
-	case LC_PIECE_ROTATE_PLUSY:
-		RotateSelectedPieces(gMainWindow->GetActiveView()->GetMoveDirection(lcVector3(0.0f, lcMax(gMainWindow->GetAngleSnap(), 1.0f), 0.0f)), true);
-		break;
-
-	case LC_PIECE_ROTATE_MINUSY:
-		RotateSelectedPieces(gMainWindow->GetActiveView()->GetMoveDirection(lcVector3(0.0f, -lcMax(gMainWindow->GetAngleSnap(), 1.0f), 0.0f)), true);
-		break;
-
-	case LC_PIECE_ROTATE_PLUSZ:
-		RotateSelectedPieces(gMainWindow->GetActiveView()->GetMoveDirection(lcVector3(0.0f, 0.0f, lcMax(gMainWindow->GetAngleSnap(), 1.0f))), true);
-		break;
-
-	case LC_PIECE_ROTATE_MINUSZ:
-		RotateSelectedPieces(gMainWindow->GetActiveView()->GetMoveDirection(lcVector3(0.0f, 0.0f, -lcMax(gMainWindow->GetAngleSnap(), 1.0f))), true);
-		break;
-
-	case LC_PIECE_MINIFIG_WIZARD:
-		ShowMinifigDialog();
-		break;
-
-	case LC_PIECE_ARRAY:
-		ShowArrayDialog();
-		break;
-
-	case LC_PIECE_GROUP:
-		GroupSelection();
-		break;
-
-	case LC_PIECE_UNGROUP:
-		UngroupSelection();
-		break;
-
-	case LC_PIECE_GROUP_ADD:
-		AddSelectedPiecesToGroup();
-		break;
-
-	case LC_PIECE_GROUP_REMOVE:
-		RemoveFocusPieceFromGroup();
-		break;
-
-	case LC_PIECE_GROUP_EDIT:
-		ShowEditGroupsDialog();
-		break;
-
-	case LC_PIECE_HIDE_SELECTED:
-		HideSelectedPieces();
-		break;
-
-	case LC_PIECE_HIDE_UNSELECTED:
-		HideUnselectedPieces();
-		break;
-
-	case LC_PIECE_UNHIDE_ALL:
-		UnhideAllPieces();
-		break;
-
-	case LC_PIECE_SHOW_EARLIER:
-		ShowSelectedPiecesEarlier();
-		break;
-
-	case LC_PIECE_SHOW_LATER:
-		ShowSelectedPiecesLater();
-		break;
-
-	case LC_VIEW_PREFERENCES:
-		g_App->ShowPreferencesDialog();
-		break;
-
-	case LC_VIEW_ZOOM_IN:
-		Zoom(gMainWindow->GetActiveView()->mCamera, -10.0f);
-		break;
-
-	case LC_VIEW_ZOOM_OUT:
-		Zoom(gMainWindow->GetActiveView()->mCamera, 10.0f);
-		break;
-
-	case LC_VIEW_ZOOM_EXTENTS:
-		gMainWindow->GetActiveView()->ZoomExtents();
-		break;
-
-	case LC_VIEW_LOOK_AT:
-		gMainWindow->GetActiveView()->LookAt();
-		break;
-
-	case LC_VIEW_TIME_NEXT:
-		ShowNextStep();
-		break;
-
-	case LC_VIEW_TIME_PREVIOUS:
-		ShowPreviousStep();
-		break;
-
-	case LC_VIEW_TIME_FIRST:
-		ShowFirstStep();
-		break;
-
-	case LC_VIEW_TIME_LAST:
-		ShowLastStep();
-		break;
-
-	case LC_VIEW_TIME_INSERT:
-		InsertStep();
-		break;
-
-	case LC_VIEW_TIME_DELETE:
-		RemoveStep();
-		break;
-
-	case LC_VIEW_VIEWPOINT_FRONT:
-		gMainWindow->GetActiveView()->SetViewpoint(LC_VIEWPOINT_FRONT);
-		break;
-
-	case LC_VIEW_VIEWPOINT_BACK:
-		gMainWindow->GetActiveView()->SetViewpoint(LC_VIEWPOINT_BACK);
-		break;
-
-	case LC_VIEW_VIEWPOINT_TOP:
-		gMainWindow->GetActiveView()->SetViewpoint(LC_VIEWPOINT_TOP);
-		break;
-
-	case LC_VIEW_VIEWPOINT_BOTTOM:
-		gMainWindow->GetActiveView()->SetViewpoint(LC_VIEWPOINT_BOTTOM);
-		break;
-
-	case LC_VIEW_VIEWPOINT_LEFT:
-		gMainWindow->GetActiveView()->SetViewpoint(LC_VIEWPOINT_LEFT);
-		break;
-
-	case LC_VIEW_VIEWPOINT_RIGHT:
-		gMainWindow->GetActiveView()->SetViewpoint(LC_VIEWPOINT_RIGHT);
-		break;
-
-	case LC_VIEW_VIEWPOINT_HOME:
-		gMainWindow->GetActiveView()->SetViewpoint(LC_VIEWPOINT_HOME);
-		break;
-
-	case LC_VIEW_CAMERA_NONE:
-		gMainWindow->GetActiveView()->RemoveCamera();
-		break;
-
-	case LC_VIEW_CAMERA1:
-	case LC_VIEW_CAMERA2:
-	case LC_VIEW_CAMERA3:
-	case LC_VIEW_CAMERA4:
-	case LC_VIEW_CAMERA5:
-	case LC_VIEW_CAMERA6:
-	case LC_VIEW_CAMERA7:
-	case LC_VIEW_CAMERA8:
-	case LC_VIEW_CAMERA9:
-	case LC_VIEW_CAMERA10:
-	case LC_VIEW_CAMERA11:
-	case LC_VIEW_CAMERA12:
-	case LC_VIEW_CAMERA13:
-	case LC_VIEW_CAMERA14:
-	case LC_VIEW_CAMERA15:
-	case LC_VIEW_CAMERA16:
-		gMainWindow->GetActiveView()->SetCameraIndex(id - LC_VIEW_CAMERA1);
-		break;
-
-		case LC_VIEW_CAMERA_RESET:
-		{
-			const lcArray<View*> Views = gMainWindow->GetViews();
-			for (int ViewIdx = 0; ViewIdx < Views.GetSize(); ViewIdx++)
-				Views[ViewIdx]->SetDefaultCamera();
-
-			for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
-				delete mCameras[CameraIdx];
-			mCameras.RemoveAll();
-
-			gMainWindow->UpdateCameraMenu();
-			gMainWindow->UpdateFocusObject(GetFocusObject());
-			gMainWindow->UpdateAllViews();
-		} break;
-
-	case LC_HELP_HOMEPAGE:
-		g_App->OpenURL("http://www.leocad.org/");
-		break;
-
-	case LC_HELP_EMAIL:
-		g_App->OpenURL("mailto:leozide@gmail.com?subject=LeoCAD");
-		break;
-
-	case LC_HELP_UPDATES:
-		gMainWindow->DoDialog(LC_DIALOG_CHECK_UPDATES, NULL);
-		break;
-
-	case LC_HELP_ABOUT:
-		gMainWindow->DoDialog(LC_DIALOG_ABOUT, NULL);
-
-	case LC_VIEW_TIME_ADD_KEYS:
-		gMainWindow->SetAddKeys(!gMainWindow->GetAddKeys());
-		break;
-
-	case LC_EDIT_SNAP_RELATIVE:
-		lcGetPreferences().SetForceGlobalTransforms(!lcGetPreferences().mForceGlobalTransforms);
-		break;
-
-	case LC_EDIT_LOCK_X:
-		gMainWindow->SetLockX(!gMainWindow->GetLockX());
-		break;
-
-	case LC_EDIT_LOCK_Y:
-		gMainWindow->SetLockY(!gMainWindow->GetLockY());
-		break;
-
-	case LC_EDIT_LOCK_Z:
-		gMainWindow->SetLockZ(!gMainWindow->GetLockZ());
-		break;
-
-	case LC_EDIT_LOCK_NONE:
-		gMainWindow->SetLockX(false);
-		gMainWindow->SetLockY(false);
-		gMainWindow->SetLockZ(false);
-		break;
-
-	case LC_EDIT_SNAP_MOVE_XY0:
-	case LC_EDIT_SNAP_MOVE_XY1:
-	case LC_EDIT_SNAP_MOVE_XY2:
-	case LC_EDIT_SNAP_MOVE_XY3:
-	case LC_EDIT_SNAP_MOVE_XY4:
-	case LC_EDIT_SNAP_MOVE_XY5:
-	case LC_EDIT_SNAP_MOVE_XY6:
-	case LC_EDIT_SNAP_MOVE_XY7:
-	case LC_EDIT_SNAP_MOVE_XY8:
-	case LC_EDIT_SNAP_MOVE_XY9:
-		gMainWindow->SetMoveXYSnapIndex(id - LC_EDIT_SNAP_MOVE_XY0);
-		break;
-
-	case LC_EDIT_SNAP_MOVE_Z0:
-	case LC_EDIT_SNAP_MOVE_Z1:
-	case LC_EDIT_SNAP_MOVE_Z2:
-	case LC_EDIT_SNAP_MOVE_Z3:
-	case LC_EDIT_SNAP_MOVE_Z4:
-	case LC_EDIT_SNAP_MOVE_Z5:
-	case LC_EDIT_SNAP_MOVE_Z6:
-	case LC_EDIT_SNAP_MOVE_Z7:
-	case LC_EDIT_SNAP_MOVE_Z8:
-	case LC_EDIT_SNAP_MOVE_Z9:
-		gMainWindow->SetMoveZSnapIndex(id - LC_EDIT_SNAP_MOVE_Z0);
-		break;
-
-	case LC_EDIT_SNAP_ANGLE0:
-	case LC_EDIT_SNAP_ANGLE1:
-	case LC_EDIT_SNAP_ANGLE2:
-	case LC_EDIT_SNAP_ANGLE3:
-	case LC_EDIT_SNAP_ANGLE4:
-	case LC_EDIT_SNAP_ANGLE5:
-	case LC_EDIT_SNAP_ANGLE6:
-	case LC_EDIT_SNAP_ANGLE7:
-	case LC_EDIT_SNAP_ANGLE8:
-	case LC_EDIT_SNAP_ANGLE9:
-		gMainWindow->SetAngleSnapIndex(id - LC_EDIT_SNAP_ANGLE0);
-		break;
-
-	case LC_EDIT_TRANSFORM:
-		TransformSelectedObjects(gMainWindow->GetTransformType(), gMainWindow->GetTransformAmount());
-		break;
-
-	case LC_EDIT_TRANSFORM_ABSOLUTE_TRANSLATION:
-	case LC_EDIT_TRANSFORM_RELATIVE_TRANSLATION:
-	case LC_EDIT_TRANSFORM_ABSOLUTE_ROTATION:
-	case LC_EDIT_TRANSFORM_RELATIVE_ROTATION:
-		gMainWindow->SetTransformType((lcTransformType)(id - LC_EDIT_TRANSFORM_ABSOLUTE_TRANSLATION));
-		break;
-
-	case LC_EDIT_ACTION_SELECT:
-		gMainWindow->SetTool(LC_TOOL_SELECT);
-		break;
-
-	case LC_EDIT_ACTION_INSERT:
-		gMainWindow->SetTool(LC_TOOL_INSERT);
-		break;
-
-	case LC_EDIT_ACTION_LIGHT:
-		gMainWindow->SetTool(LC_TOOL_LIGHT);
-		break;
-
-	case LC_EDIT_ACTION_SPOTLIGHT:
-		gMainWindow->SetTool(LC_TOOL_SPOTLIGHT);
-		break;
-
-	case LC_EDIT_ACTION_CAMERA:
-		gMainWindow->SetTool(LC_TOOL_CAMERA);
-		break;
-
-	case LC_EDIT_ACTION_MOVE:
-		gMainWindow->SetTool(LC_TOOL_MOVE);
-		break;
-
-	case LC_EDIT_ACTION_ROTATE:
-		gMainWindow->SetTool(LC_TOOL_ROTATE);
-		break;
-
-	case LC_EDIT_ACTION_DELETE:
-		gMainWindow->SetTool(LC_TOOL_ERASER);
-		break;
-
-	case LC_EDIT_ACTION_PAINT:
-		gMainWindow->SetTool(LC_TOOL_PAINT);
-		break;
-
-	case LC_EDIT_ACTION_ZOOM:
-		gMainWindow->SetTool(LC_TOOL_ZOOM);
-		break;
-
-	case LC_EDIT_ACTION_ZOOM_REGION:
-		gMainWindow->SetTool(LC_TOOL_ZOOM_REGION);
-		break;
-
-	case LC_EDIT_ACTION_PAN:
-		gMainWindow->SetTool(LC_TOOL_PAN);
-		break;
-
-	case LC_EDIT_ACTION_ROTATE_VIEW:
-		gMainWindow->SetTool(LC_TOOL_ROTATE_VIEW);
-		break;
-
-	case LC_EDIT_ACTION_ROLL:
-		gMainWindow->SetTool(LC_TOOL_ROLL);
-		break;
-
-	case LC_EDIT_CANCEL:
-		gMainWindow->GetActiveView()->CancelTrackingOrClearSelection();
-		break;
-
-	case LC_NUM_COMMANDS:
-		break;
 	}
 }
 

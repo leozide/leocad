@@ -541,7 +541,7 @@ void lcQMainWindow::createStatusBar()
 
 void lcQMainWindow::closeEvent(QCloseEvent *event)
 {
-	if (lcGetActiveProject()->SaveIfModified())
+	if (gMainWindow->SaveProjectIfModified())
 	{
 		event->accept();
 
@@ -577,7 +577,7 @@ void lcQMainWindow::actionTriggered()
 	{
 		if (action == actions[Command])
 		{
-			lcGetActiveProject()->HandleCommand((LC_COMMANDS)Command);
+			gMainWindow->HandleCommand((lcCommandId)Command);
 			break;
 		}
 	}

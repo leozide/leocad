@@ -3,7 +3,7 @@
 
 #include "lc_basewindow.h"
 #include "lc_array.h"
-#include "project.h"
+#include "lc_commands.h"
 
 class View;
 class PiecePreview;
@@ -127,6 +127,11 @@ public:
 	void SetLockZ(bool LockZ);
 
 	void Close();
+	void NewProject();
+	bool OpenProject(const QString& FileName);
+	bool SaveProject(const QString& FileName);
+	bool SaveProjectIfModified();
+	void HandleCommand(lcCommandId CommandId);
 
 	void AddRecentFile(const QString& FileName);
 	void RemoveRecentFile(int FileIndex);

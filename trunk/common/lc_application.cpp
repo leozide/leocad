@@ -10,6 +10,7 @@
 #include "image.h"
 #include "lc_mainwindow.h"
 #include "lc_shortcuts.h"
+#include "view.h"
 
 lcApplication* g_App;
 
@@ -66,6 +67,18 @@ lcApplication::~lcApplication()
 {
 	delete mClipboard;
 	delete mLibrary;
+}
+
+void lcApplication::SetProject(Project* Project)
+{
+	delete mProject;
+	mProject = Project;
+
+	const lcArray<View*>& Views = gMainWindow->GetViews();
+	for (int ViewIdx = 0; ViewIdx < Views.GetSize(); ViewIdx++)
+		Views[ViewIdx]->SetProject(Project);
+
+	gMainWindow->UpdateTitle(mProject->GetTitle(), mProject->IsModified());
 }
 
 void lcApplication::SetClipboard(lcFile* Clipboard)
@@ -277,7 +290,7 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 	GL_DisableVertexBufferObject();
 
 	// Load project.
-	if (ProjectName && mProject->OpenProject(ProjectName))
+	if (ProjectName && mProject->Load(ProjectName))
 	{
 		if (!SaveImage)
 			return true;
@@ -361,8 +374,6 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 	{
 		if (SaveImage)
 			return false;
-		else
-			mProject->OnNewDocument();
 	}
 
 	lcLoadDefaultKeyboardShortcuts();

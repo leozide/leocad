@@ -1,7 +1,7 @@
 #ifndef _LC_COMMANDS_H_
 #define _LC_COMMANDS_H_
 
-enum LC_COMMANDS
+enum lcCommandId
 {
 	LC_FILE_NEW,
 	LC_FILE_OPEN,

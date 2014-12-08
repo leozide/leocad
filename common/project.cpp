@@ -20,75 +20,68 @@
 
 Project::Project()
 {
-	LoadDefaults();
-
-	CheckPoint("");
-	mSavedHistory = mUndoHistory[0];
+	mModified = false;
+	mActiveModel = NULL;
 }
 
 Project::~Project()
 {
-	DeleteModel();
-	DeleteHistory();
+	mModels.DeleteAll();
+}
+
+void Project::NewModel()
+{
+	mActiveModel = new lcModel();
+	mModels.Add(mActiveModel);
 }
 
 bool Project::Load(const QString& FileName)
 {
-	lcDiskFile file;
-	bool bSuccess = false;
+	QFile File(FileName);
 
-	if (!file.Open(FileName.toLatin1().constData(), "rb")) // todo: qstring
+	if (!File.open(QIODevice::ReadOnly))
+	{
+		QMessageBox::warning(gMainWindow->mHandle, tr("Error"), tr("Error reading file '%1':\n%2").arg(FileName, File.errorString()));
 		return false;
+	}
 
 	QString Extension = QFileInfo(FileName).suffix().toLower();
 
-	// todo: detect using file contents instead
-	bool datfile = (Extension == QLatin1String("dat") || Extension == QLatin1String("ldr"));
-	bool mpdfile = (Extension == QLatin1String("mpd"));
-
-	DeleteHistory();
-	LoadDefaults();
-
-	if (file.GetLength() != 0)
+	if (Extension == QLatin1String("dat") || Extension == QLatin1String("ldr") || Extension == QLatin1String("mpd"))
 	{
-		lcArray<LC_FILEENTRY*> FileArray;
+		QTextStream Stream(&File);
 
-		// Unpack the MPD file.
-		if (mpdfile)
+		while (!Stream.atEnd())
 		{
-			FileReadMPD(file, FileArray);
-
-			if (FileArray.GetSize() == 0)
-			{
-				file.Seek(0, SEEK_SET);
-				mpdfile = false;
-				datfile = true;
-			}
+			lcModel* Model = new lcModel();
+			mModels.Add(Model);
+			Model->LoadLDraw(Stream);
 		}
+	}
+	else
+	{
+		lcMemFile MemFile;
+		QByteArray FileData = File.readAll();
+		MemFile.WriteBuffer(FileData.constData(), FileData.size());
+		MemFile.Seek(0, SEEK_SET);
 
+		lcModel* Model = new lcModel();
+
+		if (Model->LoadBinary(&MemFile))
+			mModels.Add(Model);
+		else
+			delete Model;
+	}
+
+	if (mModels.IsEmpty())
+		return false;
+
+	mActiveModel = mModels[0];
+
+
+/*
 		if (datfile || mpdfile)
 		{
-			int ok = 0, step = 1;
-			lcMatrix44 mat = lcMatrix44Identity();
-
-			if (mpdfile)
-				FileReadLDraw(&FileArray[0]->File, mat, &ok, 16, &step, FileArray);
-			else
-//				FileReadLDraw(&file, mat, &ok, 16, &step, FileArray);
-			{
-				QFile File(FileName);
-
-				if (!File.open(QIODevice::ReadOnly))
-				{
-					QMessageBox::warning(gMainWindow->mHandle, tr("Error"), tr("Error reading file '%1':\n%2").arg(FileName, File.errorString()));
-					return false;
-				}
-
-				QTextStream Stream(&File);
-				LoadLDraw(Stream);
-			}
-
-			mCurrentStep = step;
 			gMainWindow->UpdateCurrentStep();
 			gMainWindow->UpdateFocusObject(GetFocusObject());
 			UpdateSelection();
@@ -97,408 +90,11 @@ bool Project::Load(const QString& FileName)
 			for (int ViewIdx = 0; ViewIdx < Views.GetSize(); ViewIdx++)
 				Views[ViewIdx]->ZoomExtents();
 
-			bSuccess = true;
+			Success = true;
 		}
 		else
 		{
-			// Load a LeoCAD file.
-			bSuccess = FileLoad(&file, false, false);
-		}
-
-		FileArray.DeleteAll();
-	}
-
-	file.Close();
-
-	CheckPoint("");
-	mSavedHistory = mUndoHistory[0];
-	mFileName = FileName;
-
-	return bSuccess;
-}
-
-void Project::UpdateInterface()
-{
-	// Update all user interface elements.
-	gMainWindow->UpdateUndoRedo(mUndoHistory.GetSize() > 1 ? mUndoHistory[0]->Description : NULL, !mRedoHistory.IsEmpty() ? mRedoHistory[0]->Description : NULL);
-	gMainWindow->UpdatePaste(g_App->mClipboard != NULL);
-	gMainWindow->UpdateCategories();
-	gMainWindow->UpdateTitle(GetTitle(), IsModified());
-	gMainWindow->SetTool(gMainWindow->GetTool());
-
-	gMainWindow->UpdateFocusObject(GetFocusObject());
-	gMainWindow->SetTransformType(gMainWindow->GetTransformType());
-	gMainWindow->UpdateLockSnap();
-	gMainWindow->UpdateSnap();
-	gMainWindow->UpdateCameraMenu();
-	gMainWindow->UpdatePerspective();
-	gMainWindow->UpdateCurrentStep();
-
-	UpdateSelection();
-}
-
-void Project::LoadDefaults() // todo: Change the interface in SetProject() instead
-{
-	mProperties.LoadDefaults();
-
-	gMainWindow->SetColorIndex(lcGetColorIndex(4));
-	gMainWindow->SetTool(LC_TOOL_SELECT);
-	gMainWindow->SetAddKeys(false);
-	gMainWindow->UpdateUndoRedo(NULL, NULL);
-	gMainWindow->UpdateLockSnap();
-	gMainWindow->UpdateSnap();
-	mCurrentStep = 1;
-	gMainWindow->UpdateCurrentStep();
-
-	const lcArray<View*>& Views = gMainWindow->GetViews();
-	for (int i = 0; i < Views.GetSize(); i++)
-		if (!Views[i]->mCamera->IsSimple())
-			Views[i]->SetDefaultCamera();
-
-	gMainWindow->UpdateCameraMenu();
-
-	UpdateSelection();
-	gMainWindow->UpdateFocusObject(NULL);
-}
-
-bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
-{
-	lcint32 i, count;
-	char id[32];
-	lcuint32 rgb;
-	float fv = 0.4f;
-	lcuint8 ch;
-	lcuint16 sh;
-
-	file->Seek(0, SEEK_SET);
-	file->ReadBuffer(id, 32);
-	sscanf(&id[7], "%f", &fv);
-
-	// Fix the ugly floating point reading on computers with different decimal points.
-	if (fv == 0.0f)
-	{
-		lconv *loc = localeconv();
-		id[8] = loc->decimal_point[0];
-		sscanf(&id[7], "%f", &fv);
-
-		if (fv == 0.0f)
-			return false;
-	}
-
-	if (fv > 0.4f)
-		file->ReadFloats(&fv, 1);
-
-	file->ReadU32(&rgb, 1);
-	if (!bMerge)
-	{
-		mProperties.mBackgroundSolidColor[0] = (float)((unsigned char) (rgb))/255;
-		mProperties.mBackgroundSolidColor[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
-		mProperties.mBackgroundSolidColor[2] = (float)((unsigned char) ((rgb) >> 16))/255;
-	}
-
-	if (fv < 0.6f) // old view
-	{
-		double eye[3], target[3];
-		file->ReadDoubles(eye, 3);
-		file->ReadDoubles(target, 3);
-	}
-
-	if (bMerge)
-		file->Seek(32, SEEK_CUR);
-	else
-	{
-		file->Seek(28, SEEK_CUR);
-		file->ReadS32(&i, 1);
-		mCurrentStep = i;
-	}
-
-	if (fv > 0.8f)
-		file->ReadU32();//m_nScene
-
-	file->ReadS32(&count, 1);
-	lcPiecesLibrary* Library = lcGetPiecesLibrary();
-	Library->OpenCache();
-
-	int FirstNewPiece = mPieces.GetSize();
-
-	while (count--)
-	{
-		if (fv > 0.4f)
-		{
-			lcPiece* pPiece = new lcPiece(NULL);
-			pPiece->FileLoad(*file);
-
-			if (bMerge)
-				for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-					if (strcmp(mPieces[PieceIdx]->GetName(), pPiece->GetName()) == 0)
-					{
-						pPiece->CreateName(mPieces);
-						break;
-					}
-
-			if (strlen(pPiece->GetName()) == 0)
-				pPiece->CreateName(mPieces);
-
-			mPieces.Add(pPiece);
-		}
-		else
-		{
-			char name[LC_PIECE_NAME_LEN];
-			lcVector3 pos, rot;
-			lcuint8 color, step, group;
-
-			file->ReadFloats(pos, 3);
-			file->ReadFloats(rot, 3);
-			file->ReadU8(&color, 1);
-			file->ReadBuffer(name, 9);
-			file->ReadU8(&step, 1);
-			file->ReadU8(&group, 1);
-
-			pos *= 25.0f;
-			lcMatrix44 ModelWorld = lcMul(lcMatrix44RotationZ(rot[2] * LC_DTOR), lcMul(lcMatrix44RotationY(rot[1] * LC_DTOR), lcMatrix44RotationX(rot[0] * LC_DTOR)));
-			lcVector4 AxisAngle = lcMatrix44ToAxisAngle(ModelWorld);
-			AxisAngle[3] *= LC_RTOD;
-
-			PieceInfo* pInfo = Library->FindPiece(name, true);
-			lcPiece* pPiece = new lcPiece(pInfo);
-
-			pPiece->Initialize(pos, AxisAngle, step);
-			pPiece->SetColorCode(lcGetColorCodeFromOriginalColor(color));
-			pPiece->CreateName(mPieces);
-			mPieces.Add(pPiece);
-
-//			pPiece->SetGroup((lcGroup*)group);
-		}
-	}
-
-	Library->CloseCache();
-
-	if (!bMerge)
-	{
-		if (fv >= 0.4f)
-		{
-			file->ReadBuffer(&ch, 1);
-			if (ch == 0xFF) file->ReadU16(&sh, 1); else sh = ch;
-			if (sh > 100)
-				file->Seek(sh, SEEK_CUR);
-			else
-			{
-				String Author;
-				file->ReadBuffer(Author.GetBuffer(sh), sh);
-				Author.Buffer()[sh] = 0;
-				mProperties.mAuthor = QString::fromUtf8(Author.Buffer());
-			}
-
-			file->ReadBuffer(&ch, 1);
-			if (ch == 0xFF) file->ReadU16(&sh, 1); else sh = ch;
-			if (sh > 100)
-				file->Seek(sh, SEEK_CUR);
-			else
-			{
-				String Description;
-				file->ReadBuffer(Description.GetBuffer(sh), sh);
-				Description.Buffer()[sh] = 0;
-				mProperties.mDescription = QString::fromUtf8(Description.Buffer());
-			}
-
-			file->ReadBuffer(&ch, 1);
-			if (ch == 0xFF && fv < 1.3f) file->ReadU16(&sh, 1); else sh = ch;
-			if (sh > 255)
-				file->Seek(sh, SEEK_CUR);
-			else
-			{
-				String Comments;
-				file->ReadBuffer(Comments.GetBuffer(sh), sh);
-				Comments.Buffer()[sh] = 0;
-				mProperties.mComments = QString::fromUtf8(Comments.Buffer());
-				mProperties.mComments.replace(QLatin1String("\r\n"), QLatin1String("\n"));
-			}
-		}
-	}
-	else
-	{
-		if (fv >= 0.4f)
-		{
-			file->ReadBuffer(&ch, 1);
-			if (ch == 0xFF) file->ReadU16(&sh, 1); else sh = ch;
-			file->Seek (sh, SEEK_CUR);
-
-			file->ReadBuffer(&ch, 1);
-			if (ch == 0xFF) file->ReadU16(&sh, 1); else sh = ch;
-			file->Seek (sh, SEEK_CUR);
-
-			file->ReadBuffer(&ch, 1);
-			if (ch == 0xFF && fv < 1.3f) file->ReadU16(&sh, 1); else sh = ch;
-			file->Seek (sh, SEEK_CUR);
-		}
-	}
-
-	if (fv >= 0.5f)
-	{
-		int NumGroups = mGroups.GetSize();
-
-		file->ReadS32(&count, 1);
-		for (i = 0; i < count; i++)
-			mGroups.Add(new lcGroup());
-
-		for (int GroupIdx = NumGroups; GroupIdx < mGroups.GetSize(); GroupIdx++)
-		{
-			lcGroup* Group = mGroups[GroupIdx];
-
-			if (fv < 1.0f)
-			{
-				file->ReadBuffer(Group->m_strName, 65);
-				file->ReadBuffer(&ch, 1);
-				Group->mGroup = (lcGroup*)-1;
-			}
-			else
-				Group->FileLoad(file);
-
-			if (bMerge)
-			{
-				// Ensure a unique group name
-
-				int max = -1;
-				String baseName;
-
-				for (int Existing = 0; Existing < GroupIdx; Existing++)
-					max = lcMax(max, InstanceOfName(mGroups[Existing]->m_strName, Group->m_strName, baseName));
-
-				if (max > -1)
-				{
-					int baseReserve = sizeof(Group->m_strName) - 5; // space, #, 2-digits, and terminating 0
-					for (int num = max; (num > 99); num /= 10) { baseReserve--; }
-					sprintf(Group->m_strName, "%s #%.2d", (const char*)(baseName.Left(baseReserve)), max+1);
-				}
-			}
-		}
-
-		for (int GroupIdx = NumGroups; GroupIdx < mGroups.GetSize(); GroupIdx++)
-		{
-			lcGroup* Group = mGroups[GroupIdx];
-
-			i = LC_POINTER_TO_INT(Group->mGroup);
-			Group->mGroup = NULL;
-
-			if (i > 0xFFFF || i == -1)
-				continue;
-
-			Group->mGroup = mGroups[NumGroups + i];
-		}
-
-		for (int PieceIdx = FirstNewPiece; PieceIdx < mPieces.GetSize(); PieceIdx++)
-		{
-			lcPiece* Piece = mPieces[PieceIdx];
-
-			i = LC_POINTER_TO_INT(Piece->GetGroup());
-			Piece->SetGroup(NULL);
-
-			if (i > 0xFFFF || i == -1)
-				continue;
-
-			Piece->SetGroup(mGroups[NumGroups + i]);
-		}
-
-		RemoveEmptyGroups();
-	}
-
-	if (!bMerge)
-	{
-		if (fv >= 0.6f)
-		{
-			if (fv < 1.0f)
-				file->Seek(4, SEEK_CUR);
-			else
-				file->Seek(2, SEEK_CUR);
-
-			file->ReadS32(&count, 1);
-			for (i = 0; i < count; i++)
-				mCameras.Add(new lcCamera(false));
-
-			if (count < 7)
-			{
-				lcCamera* pCam = new lcCamera(false);
-				for (i = 0; i < count; i++)
-					pCam->FileLoad(*file);
-				delete pCam;
-			}
-			else
-			{
-				for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
-					mCameras[CameraIdx]->FileLoad(*file);
-			}
-		}
-
-		if (fv >= 0.7f)
-		{
-			file->Seek(16, SEEK_CUR);
-
-			file->ReadU32(&rgb, 1);
-			mProperties.mFogColor[0] = (float)((unsigned char) (rgb))/255;
-			mProperties.mFogColor[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
-			mProperties.mFogColor[2] = (float)((unsigned char) ((rgb) >> 16))/255;
-
-			if (fv < 1.0f)
-			{
-				file->ReadU32(&rgb, 1);
-				mProperties.mFogDensity = (float)rgb/100;
-			}
-			else
-				file->ReadFloats(&mProperties.mFogDensity, 1);
-
-			if (fv < 1.3f)
-			{
-				file->ReadU8(&ch, 1);
-				if (ch == 0xFF)
-					file->ReadU16(&sh, 1);
-				sh = ch;
-			}
-			else
-				file->ReadU16(&sh, 1);
-
-			if (sh < LC_MAXPATH)
-			{
-				char Background[LC_MAXPATH];
-				file->ReadBuffer(Background, sh);
-				mProperties.mBackgroundImage = Background;
-			}
-			else
-				file->Seek(sh, SEEK_CUR);
-		}
-
-		if (fv >= 0.8f)
-		{
-			file->ReadBuffer(&ch, 1);
-			file->Seek(ch, SEEK_CUR);
-			file->ReadBuffer(&ch, 1);
-			file->Seek(ch, SEEK_CUR);
-		}
-
-		if (fv > 0.9f)
-		{
-			file->ReadU32(&rgb, 1);
-			mProperties.mAmbientColor[0] = (float)((unsigned char) (rgb))/255;
-			mProperties.mAmbientColor[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
-			mProperties.mAmbientColor[2] = (float)((unsigned char) ((rgb) >> 16))/255;
-
-			if (fv < 1.3f)
-				file->Seek(23, SEEK_CUR);
-			else
-				file->Seek(11, SEEK_CUR);
-		}
-
-		if (fv > 1.0f)
-		{
-			file->ReadU32(&rgb, 1);
-			mProperties.mBackgroundGradientColor1[0] = (float)((unsigned char) (rgb))/255;
-			mProperties.mBackgroundGradientColor1[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
-			mProperties.mBackgroundGradientColor1[2] = (float)((unsigned char) ((rgb) >> 16))/255;
-			file->ReadU32(&rgb, 1);
-			mProperties.mBackgroundGradientColor2[0] = (float)((unsigned char) (rgb))/255;
-			mProperties.mBackgroundGradientColor2[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
-			mProperties.mBackgroundGradientColor2[2] = (float)((unsigned char) ((rgb) >> 16))/255;
-		}
-	}
+			Success = FileLoad(&file, false, false);
 
 	UpdateBackgroundTexture();
 	CalculateStep();
@@ -530,252 +126,91 @@ bool Project::FileLoad(lcFile* file, bool bUndo, bool bMerge)
 	UpdateSelection();
 	gMainWindow->UpdateCurrentStep();
 	gMainWindow->UpdateAllViews();
+		}
+*/
+
+	mFileName = FileName;
 
 	return true;
 }
 
-void Project::FileReadMPD(lcFile& MPD, lcArray<LC_FILEENTRY*>& FileArray) const
+bool Project::Save(const QString& FileName)
 {
-	LC_FILEENTRY* CurFile = NULL;
-	char Buf[1024];
+	QFile File(FileName);
 
-	while (MPD.ReadLine(Buf, 1024))
+	if (!File.open(QIODevice::WriteOnly))
 	{
-		String Line(Buf);
-
-		Line.TrimLeft();
-
-		if (Line[0] != '0')
-		{
-			// Copy current line.
-			if (CurFile != NULL)
-				CurFile->File.WriteBuffer(Buf, strlen(Buf));
-
-			continue;
-		}
-
-		Line.TrimRight();
-		Line = Line.Right(Line.GetLength() - 1);
-		Line.TrimLeft();
-
-		// Find where a subfile starts.
-		if (Line.CompareNoCase("FILE", 4) == 0)
-		{
-			Line = Line.Right(Line.GetLength() - 4);
-			Line.TrimLeft();
-
-			// Create a new file.
-			CurFile = new LC_FILEENTRY();
-			strncpy(CurFile->FileName, Line, sizeof(CurFile->FileName));
-			FileArray.Add(CurFile);
-		}
-		else if (Line.CompareNoCase("ENDFILE", 7) == 0)
-		{
-			// File ends here.
-			CurFile = NULL;
-		}
-		else if (CurFile != NULL)
-		{
-			// Copy current line.
-			CurFile->File.WriteBuffer(Buf, strlen(Buf));
-		}
-	}
-}
-
-void Project::FileReadLDraw(lcFile* file, const lcMatrix44& CurrentTransform, int* nOk, int DefColor, int* nStep, lcArray<LC_FILEENTRY*>& FileArray)
-{
-	char Line[1024];
-
-	// Save file offset.
-	lcuint32 Offset = file->GetPosition();
-	file->Seek(0, SEEK_SET);
-
-	while (file->ReadLine(Line, 1024))
-	{
-		bool read = true;
-		char* Ptr = Line;
-		char* Tokens[15];
-
-		for (int TokenIdx = 0; TokenIdx < 15; TokenIdx++)
-		{
-			Tokens[TokenIdx] = 0;
-
-			while (*Ptr && *Ptr <= 32)
-			{
-				*Ptr = 0;
-				Ptr++;
-			}
-
-			Tokens[TokenIdx] = Ptr;
-
-			while (*Ptr > 32)
-				Ptr++;
-		}
-
-		if (!Tokens[0])
-			continue;
-
-		int LineType = atoi(Tokens[0]);
-
-		if (LineType == 0)
-		{
-			if (Tokens[1])
-			{
-				strupr(Tokens[1]);
-
-				if (!strcmp(Tokens[1], "STEP"))
-					(*nStep)++;
-			}
-
-			continue;
-		}
-
-		if (LineType != 1)
-			continue;
-
-		bool Error = false;
-		for (int TokenIdx = 1; TokenIdx < 15; TokenIdx++)
-		{
-			if (!Tokens[TokenIdx])
-			{
-				Error = true;
-				break;
-			}
-		}
-
-		if (Error)
-			continue;
-
-		int ColorCode = atoi(Tokens[1]);
-
-		float Matrix[12];
-		for (int TokenIdx = 2; TokenIdx < 14; TokenIdx++)
-			Matrix[TokenIdx - 2] = atof(Tokens[TokenIdx]);
-
-		lcMatrix44 IncludeTransform(lcVector4(Matrix[3], Matrix[6], Matrix[9], 0.0f), lcVector4(Matrix[4], Matrix[7], Matrix[10], 0.0f),
-		                            lcVector4(Matrix[5], Matrix[8], Matrix[11], 0.0f), lcVector4(Matrix[0], Matrix[1], Matrix[2], 1.0f));
-
-		IncludeTransform = lcMul(IncludeTransform, CurrentTransform);
-
-		if (ColorCode == 16)
-			ColorCode = DefColor;
-
-		char* IncludeName = Tokens[14];
-		for (Ptr = IncludeName; *Ptr; Ptr++)
-			if (*Ptr == '\r' || *Ptr == '\n')
-				*Ptr = 0;
-
-		// See if it's a piece in the library
-		if (strlen(IncludeName) < LC_PIECE_NAME_LEN)
-		{
-			char name[LC_PIECE_NAME_LEN];
-			strcpy(name, IncludeName);
-			strupr(name);
-
-			Ptr = strrchr(name, '.');
-			if (Ptr != NULL)
-				*Ptr = 0;
-
-			PieceInfo* pInfo = lcGetPiecesLibrary()->FindPiece(name, false);
-			if (pInfo != NULL)
-			{
-				lcPiece* pPiece = new lcPiece(pInfo);
-				read = false;
-
-				float* Matrix = IncludeTransform;
-				lcMatrix44 Transform(lcVector4(Matrix[0], Matrix[2], -Matrix[1], 0.0f), lcVector4(Matrix[8], Matrix[10], -Matrix[9], 0.0f),
-				                     lcVector4(-Matrix[4], -Matrix[6], Matrix[5], 0.0f), lcVector4(0.0f, 0.0f, 0.0f, 1.0f));
-
-				lcVector4 AxisAngle = lcMatrix44ToAxisAngle(Transform);
-				AxisAngle[3] *= LC_RTOD;
-
-				pPiece->Initialize(lcVector3(IncludeTransform[3].x, IncludeTransform[3].z, -IncludeTransform[3].y), AxisAngle, *nStep);
-				pPiece->SetColorCode(ColorCode);
-				pPiece->CreateName(mPieces);
-				mPieces.Add(pPiece);
-				(*nOk)++;
-			}
-		}
-
-		// Check for MPD files first.
-		if (read)
-		{
-			for (int i = 0; i < FileArray.GetSize(); i++)
-			{
-				if (stricmp(FileArray[i]->FileName, IncludeName) == 0)
-				{
-					FileReadLDraw(&FileArray[i]->File, IncludeTransform, nOk, ColorCode, nStep, FileArray);
-					read = false;
-					break;
-				}
-			}
-		}
-
-		// Try to read the file from disk.
-		if (read)
-		{
-			lcDiskFile tf;
-
-			if (tf.Open(IncludeName, "rt"))
-			{
-				FileReadLDraw(&tf, IncludeTransform, nOk, ColorCode, nStep, FileArray);
-				read = false;
-			}
-		}
-
-		if (read)
-		{
-			// Create a placeholder.
-			char name[LC_PIECE_NAME_LEN];
-			strcpy(name, IncludeName);
-			strupr(name);
-
-			Ptr = strrchr(name, '.');
-			if (Ptr != NULL)
-				*Ptr = 0;
-
-			PieceInfo* Info = lcGetPiecesLibrary()->CreatePlaceholder(name);
-
-			lcPiece* pPiece = new lcPiece(Info);
-			read = false;
-
-			float* Matrix = IncludeTransform;
-			lcMatrix44 Transform(lcVector4(Matrix[0], Matrix[2], -Matrix[1], 0.0f), lcVector4(Matrix[8], Matrix[10], -Matrix[9], 0.0f),
-			                     lcVector4(-Matrix[4], -Matrix[6], Matrix[5], 0.0f), lcVector4(0.0f, 0.0f, 0.0f, 1.0f));
-
-			lcVector4 AxisAngle = lcMatrix44ToAxisAngle(Transform);
-			AxisAngle[3] *= LC_RTOD;
-
-			pPiece->Initialize(lcVector3(IncludeTransform[3].x, IncludeTransform[3].z, -IncludeTransform[3].y), AxisAngle, *nStep);
-			pPiece->SetColorCode(ColorCode);
-			pPiece->CreateName(mPieces);
-			mPieces.Add(pPiece);
-			(*nOk)++;
-		}
+		QMessageBox::warning(gMainWindow->mHandle, tr("Error"), tr("Error writing to file '%1':\n%2").arg(FileName, File.errorString()));
+		return false;
 	}
 
-	// Restore file offset.
-	file->Seek(Offset, SEEK_SET);
-}
+	QTextStream Stream(&File);
+	bool MPD = mModels.GetSize() > 1;
 
-void Project::SetSaved(const QString& FileName)
-{
-	mSavedHistory = mUndoHistory[0];
+	for (int ModelIdx = 0; ModelIdx < mModels.GetSize(); ModelIdx++)
+	{
+		lcModel* Model = mModels[ModelIdx];
+
+		if (MPD)
+			Stream << QLatin1String("0 FILE ") << Model->GetProperties().mName << QLatin1String("\r\n");
+
+		Model->SaveLDraw(Stream);
+		Model->SetSaved();
+
+		if (MPD)
+			Stream << QLatin1String("0 ENDFILE\r\n");
+	}
+
 	mFileName = FileName;
+	mModified = false;
+
+	return true;
 }
 
+bool Project::IsModified() const
+{
+	if (mModified)
+		return true;
+
+	for (int ModelIdx = 0; ModelIdx < mModels.GetSize(); ModelIdx++)
+		if (mModels[ModelIdx]->IsModified())
+			return true;
+
+	return false;
+}
+/*
+void Project::LoadDefaults() // todo: Change the interface in SetProject() instead
+{
+	mProperties.LoadDefaults();
+
+	gMainWindow->SetColorIndex(lcGetColorIndex(4));
+	gMainWindow->SetTool(LC_TOOL_SELECT);
+	gMainWindow->SetAddKeys(false);
+	gMainWindow->UpdateUndoRedo(NULL, NULL);
+	gMainWindow->UpdateLockSnap();
+	gMainWindow->UpdateSnap();
+	mCurrentStep = 1;
+	gMainWindow->UpdateCurrentStep();
+
+	const lcArray<View*>& Views = gMainWindow->GetViews();
+	for (int i = 0; i < Views.GetSize(); i++)
+		if (!Views[i]->mCamera->IsSimple())
+			Views[i]->SetDefaultCamera();
+
+	gMainWindow->UpdateCameraMenu();
+
+	UpdateSelection();
+	gMainWindow->UpdateFocusObject(NULL);
+}
+*/
 QString Project::GetTitle() const
 {
 	return mFileName.isEmpty() ? tr("New Project.ldr") : QFileInfo(mFileName).fileName();
 }
 
-void Project::CheckPoint(const char* Description)
-{
-	SaveCheckpoint(Description);
-}
-
 void Project::SaveImage()
 {
+	/*
 	lcImageDialogOptions Options;
 	lcStep LastStep = GetLastStep();
 
@@ -810,10 +245,12 @@ void Project::SaveImage()
 		Options.FileName = Options.FileName.insert(Options.FileName.length() - Extension.length() - 1, QLatin1String("%1"));
 
 	SaveStepImages(Options.FileName, Options.Width, Options.Height, Options.Start, Options.End);
+	*/
 }
 
 void Project::SaveStepImages(const QString& BaseName, int Width, int Height, lcStep Start, lcStep End)
 {
+	/*
 	gMainWindow->mPreviewWidget->MakeCurrent();
 	lcContext* Context = gMainWindow->mPreviewWidget->mContext;
 
@@ -844,8 +281,9 @@ void Project::SaveStepImages(const QString& BaseName, int Width, int Height, lcS
 	SetCurrentStep(CurrentStep);
 
 	Context->EndRenderToTexture();
+	*/
 }
-
+/*
 void Project::CreateHTMLPieceList(QTextStream& Stream, lcStep Step, bool Images, const QString& ImageExtension)
 {
 	int* ColorsUsed = new int[gColorList.GetSize()];
@@ -1176,54 +614,4 @@ void Project::ExportHTML()
 		Context->EndRenderToTexture();
 	}
 }
-
-// Indicates if the existing string represents an instance of the candidate
-// string in the form "<basename> (#<instance>)".
-//
-// Returns:
-//	-1  if existing is not an instance of candidate.
-//	0  if existing is an instance but not numbered.
-//	>= 1  indicates the existing instance number.
-//
-int Project::InstanceOfName(const String& existingString, const String& candidateString, String& baseNameOut)
-{
-	int einst = 0;
-	String estr = existingString;
-	estr.TrimLeft();
-	estr.TrimRight();
-
-	int div = estr.ReverseFind('#');
-	if (-1 != div)
-	{
-		char* endptr;
-		einst = strtol(estr.Mid(div + 1), &endptr, 10);
-		if (!*endptr)
-		{
-			estr = estr.Left(div);
-			estr.TrimRight();
-		}
-	}
-
-	String cstr = candidateString;
-	cstr.TrimLeft();
-	cstr.TrimRight();
-
-	div = cstr.ReverseFind('#');
-	if (-1 != div)
-	{
-		char* endptr;
-        int Value = strtol(cstr.Mid(div + 1), &endptr, 10);
-        (void)Value;
-		if (!*endptr)
-		{
-			cstr = cstr.Left(div);
-			cstr.TrimRight();
-		}
-	}
-
-	if (estr.CompareNoCase(cstr))
-		return -1;
-
-	baseNameOut = estr;
-	return einst;
-}
+*/

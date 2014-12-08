@@ -3,6 +3,8 @@
 #include "lc_profile.h"
 #include "preview.h"
 #include "view.h"
+#include "project.h"
+#include "lc_colors.h"
 
 lcMainWindow* gMainWindow;
 
@@ -12,6 +14,8 @@ lcMainWindow::lcMainWindow()
 	mPreviewWidget = NULL;
 	mTransformType = LC_TRANSFORM_RELATIVE_TRANSLATION;
 
+	mColorIndex = lcGetColorIndex(4);
+	mTool = LC_TOOL_SELECT;
 	mAddKeys = false;
 	mMoveXYSnapIndex = 4;
 	mMoveZSnapIndex = 3;
@@ -159,6 +163,7 @@ void lcMainWindow::NewProject()
 		return;
 
 	Project* NewProject = new Project();
+	NewProject->NewModel();
 	g_App->SetProject(NewProject);
 }
 
@@ -224,20 +229,11 @@ bool lcMainWindow::SaveProject(const QString& FileName)
 		return false;
 	}
 
-	QFile File(SaveFileName);
-
-	if (!File.open(QIODevice::WriteOnly))
-	{
-		QMessageBox::warning(mHandle, tr("Error"), tr("Error writing to file '%1':\n%2").arg(SaveFileName, File.errorString()));
+	if (!Project->Save(SaveFileName))
 		return false;
-	}
-
-	QTextStream Stream(&File);
-	Project->SaveLDraw(Stream);
-	Project->SetSaved(SaveFileName);
 
 	AddRecentFile(SaveFileName);
-	UpdateTitle(Project->GetTitle(), Project->IsModified());
+	UpdateTitle();
 
 	return true;
 }
@@ -316,7 +312,7 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 	case LC_FILE_SAVE_IMAGE:
 		lcGetActiveProject()->SaveImage();
 		break;
-
+		/*
 	case LC_FILE_EXPORT_3DS:
 		lcGetActiveProject()->Export3DStudio();
 		break;
@@ -340,9 +336,9 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 	case LC_FILE_EXPORT_WAVEFRONT:
 		lcGetActiveProject()->ExportWavefront();
 		break;
-
+		*/
 	case LC_FILE_PROPERTIES:
-		lcGetActiveProject()->ShowPropertiesDialog();
+		lcGetActiveModel()->ShowPropertiesDialog();
 		break;
 
 	case LC_FILE_PRINT_PREVIEW:
@@ -370,11 +366,11 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		break;
 
 	case LC_EDIT_UNDO:
-		lcGetActiveProject()->UndoAction();
+		lcGetActiveModel()->UndoAction();
 		break;
 
 	case LC_EDIT_REDO:
-		lcGetActiveProject()->RedoAction();
+		lcGetActiveModel()->RedoAction();
 		break;
 /*
 	case LC_EDIT_CUT:
@@ -556,31 +552,31 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 */
 	case LC_EDIT_FIND:
 		if (gMainWindow->DoDialog(LC_DIALOG_FIND, &gMainWindow->mSearchOptions))
-			lcGetActiveProject()->FindPiece(true, true);
+			lcGetActiveModel()->FindPiece(true, true);
 		break;
 
 	case LC_EDIT_FIND_NEXT:
-		lcGetActiveProject()->FindPiece(false, true);
+		lcGetActiveModel()->FindPiece(false, true);
 		break;
 
 	case LC_EDIT_FIND_PREVIOUS:
-		lcGetActiveProject()->FindPiece(false, false);
+		lcGetActiveModel()->FindPiece(false, false);
 		break;
 
 	case LC_EDIT_SELECT_ALL:
-		lcGetActiveProject()->SelectAllPieces();
+		lcGetActiveModel()->SelectAllPieces();
 		break;
 
 	case LC_EDIT_SELECT_NONE:
-		lcGetActiveProject()->ClearSelection(true);
+		lcGetActiveModel()->ClearSelection(true);
 		break;
 
 	case LC_EDIT_SELECT_INVERT:
-		lcGetActiveProject()->InvertSelection();
+		lcGetActiveModel()->InvertSelection();
 		break;
 
 	case LC_EDIT_SELECT_BY_NAME:
-		lcGetActiveProject()->ShowSelectByNameDialog();
+		lcGetActiveModel()->ShowSelectByNameDialog();
 		break;
 
 	case LC_VIEW_SPLIT_HORIZONTAL:
@@ -621,107 +617,107 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		break;
 */
 	case LC_PIECE_INSERT:
-		lcGetActiveProject()->AddPiece();
+		lcGetActiveModel()->AddPiece();
 		break;
 
 	case LC_PIECE_DELETE:
-		lcGetActiveProject()->DeleteSelectedObjects();
+		lcGetActiveModel()->DeleteSelectedObjects();
 		break;
 
 	case LC_PIECE_MOVE_PLUSX:
-		lcGetActiveProject()->MoveSelectedObjects(mActiveView->GetMoveDirection(lcVector3(lcMax(GetMoveXYSnap(), 0.01f), 0.0f, 0.0f)), true);
+		lcGetActiveModel()->MoveSelectedObjects(mActiveView->GetMoveDirection(lcVector3(lcMax(GetMoveXYSnap(), 0.01f), 0.0f, 0.0f)), true);
 		break;
 
 	case LC_PIECE_MOVE_MINUSX:
-		lcGetActiveProject()->MoveSelectedObjects(mActiveView->GetMoveDirection(lcVector3(-lcMax(GetMoveXYSnap(), 0.01f), 0.0f, 0.0f)), true);
+		lcGetActiveModel()->MoveSelectedObjects(mActiveView->GetMoveDirection(lcVector3(-lcMax(GetMoveXYSnap(), 0.01f), 0.0f, 0.0f)), true);
 		break;
 
 	case LC_PIECE_MOVE_PLUSY:
-		lcGetActiveProject()->MoveSelectedObjects(mActiveView->GetMoveDirection(lcVector3(0.0f, lcMax(GetMoveXYSnap(), 0.01f), 0.0f)), true);
+		lcGetActiveModel()->MoveSelectedObjects(mActiveView->GetMoveDirection(lcVector3(0.0f, lcMax(GetMoveXYSnap(), 0.01f), 0.0f)), true);
 		break;
 
 	case LC_PIECE_MOVE_MINUSY:
-		lcGetActiveProject()->MoveSelectedObjects(mActiveView->GetMoveDirection(lcVector3(0.0f, -lcMax(GetMoveXYSnap(), 0.01f), 0.0f)), true);
+		lcGetActiveModel()->MoveSelectedObjects(mActiveView->GetMoveDirection(lcVector3(0.0f, -lcMax(GetMoveXYSnap(), 0.01f), 0.0f)), true);
 		break;
 
 	case LC_PIECE_MOVE_PLUSZ:
-		lcGetActiveProject()->MoveSelectedObjects(mActiveView->GetMoveDirection(lcVector3(0.0f, 0.0f, lcMax(GetMoveZSnap(), 0.01f))), true);
+		lcGetActiveModel()->MoveSelectedObjects(mActiveView->GetMoveDirection(lcVector3(0.0f, 0.0f, lcMax(GetMoveZSnap(), 0.01f))), true);
 		break;
 
 	case LC_PIECE_MOVE_MINUSZ:
-		lcGetActiveProject()->MoveSelectedObjects(mActiveView->GetMoveDirection(lcVector3(0.0f, 0.0f, -lcMax(GetMoveZSnap(), 0.01f))), true);
+		lcGetActiveModel()->MoveSelectedObjects(mActiveView->GetMoveDirection(lcVector3(0.0f, 0.0f, -lcMax(GetMoveZSnap(), 0.01f))), true);
 		break;
 
 	case LC_PIECE_ROTATE_PLUSX:
-		lcGetActiveProject()->RotateSelectedPieces(mActiveView->GetMoveDirection(lcVector3(lcMax(GetAngleSnap(), 1.0f), 0.0f, 0.0f)), true);
+		lcGetActiveModel()->RotateSelectedPieces(mActiveView->GetMoveDirection(lcVector3(lcMax(GetAngleSnap(), 1.0f), 0.0f, 0.0f)), true);
 		break;
 
 	case LC_PIECE_ROTATE_MINUSX:
-		lcGetActiveProject()->RotateSelectedPieces(mActiveView->GetMoveDirection(-lcVector3(lcMax(GetAngleSnap(), 1.0f), 0.0f, 0.0f)), true);
+		lcGetActiveModel()->RotateSelectedPieces(mActiveView->GetMoveDirection(-lcVector3(lcMax(GetAngleSnap(), 1.0f), 0.0f, 0.0f)), true);
 		break;
 
 	case LC_PIECE_ROTATE_PLUSY:
-		lcGetActiveProject()->RotateSelectedPieces(mActiveView->GetMoveDirection(lcVector3(0.0f, lcMax(GetAngleSnap(), 1.0f), 0.0f)), true);
+		lcGetActiveModel()->RotateSelectedPieces(mActiveView->GetMoveDirection(lcVector3(0.0f, lcMax(GetAngleSnap(), 1.0f), 0.0f)), true);
 		break;
 
 	case LC_PIECE_ROTATE_MINUSY:
-		lcGetActiveProject()->RotateSelectedPieces(mActiveView->GetMoveDirection(lcVector3(0.0f, -lcMax(GetAngleSnap(), 1.0f), 0.0f)), true);
+		lcGetActiveModel()->RotateSelectedPieces(mActiveView->GetMoveDirection(lcVector3(0.0f, -lcMax(GetAngleSnap(), 1.0f), 0.0f)), true);
 		break;
 
 	case LC_PIECE_ROTATE_PLUSZ:
-		lcGetActiveProject()->RotateSelectedPieces(mActiveView->GetMoveDirection(lcVector3(0.0f, 0.0f, lcMax(GetAngleSnap(), 1.0f))), true);
+		lcGetActiveModel()->RotateSelectedPieces(mActiveView->GetMoveDirection(lcVector3(0.0f, 0.0f, lcMax(GetAngleSnap(), 1.0f))), true);
 		break;
 
 	case LC_PIECE_ROTATE_MINUSZ:
-		lcGetActiveProject()->RotateSelectedPieces(mActiveView->GetMoveDirection(lcVector3(0.0f, 0.0f, -lcMax(GetAngleSnap(), 1.0f))), true);
+		lcGetActiveModel()->RotateSelectedPieces(mActiveView->GetMoveDirection(lcVector3(0.0f, 0.0f, -lcMax(GetAngleSnap(), 1.0f))), true);
 		break;
 
 	case LC_PIECE_MINIFIG_WIZARD:
-		lcGetActiveProject()->ShowMinifigDialog();
+		lcGetActiveModel()->ShowMinifigDialog();
 		break;
 
 	case LC_PIECE_ARRAY:
-		lcGetActiveProject()->ShowArrayDialog();
+		lcGetActiveModel()->ShowArrayDialog();
 		break;
 
 	case LC_PIECE_GROUP:
-		lcGetActiveProject()->GroupSelection();
+		lcGetActiveModel()->GroupSelection();
 		break;
 
 	case LC_PIECE_UNGROUP:
-		lcGetActiveProject()->UngroupSelection();
+		lcGetActiveModel()->UngroupSelection();
 		break;
 
 	case LC_PIECE_GROUP_ADD:
-		lcGetActiveProject()->AddSelectedPiecesToGroup();
+		lcGetActiveModel()->AddSelectedPiecesToGroup();
 		break;
 
 	case LC_PIECE_GROUP_REMOVE:
-		lcGetActiveProject()->RemoveFocusPieceFromGroup();
+		lcGetActiveModel()->RemoveFocusPieceFromGroup();
 		break;
 
 	case LC_PIECE_GROUP_EDIT:
-		lcGetActiveProject()->ShowEditGroupsDialog();
+		lcGetActiveModel()->ShowEditGroupsDialog();
 		break;
 
 	case LC_PIECE_HIDE_SELECTED:
-		lcGetActiveProject()->HideSelectedPieces();
+		lcGetActiveModel()->HideSelectedPieces();
 		break;
 
 	case LC_PIECE_HIDE_UNSELECTED:
-		lcGetActiveProject()->HideUnselectedPieces();
+		lcGetActiveModel()->HideUnselectedPieces();
 		break;
 
 	case LC_PIECE_UNHIDE_ALL:
-		lcGetActiveProject()->UnhideAllPieces();
+		lcGetActiveModel()->UnhideAllPieces();
 		break;
 
 	case LC_PIECE_SHOW_EARLIER:
-		lcGetActiveProject()->ShowSelectedPiecesEarlier();
+		lcGetActiveModel()->ShowSelectedPiecesEarlier();
 		break;
 
 	case LC_PIECE_SHOW_LATER:
-		lcGetActiveProject()->ShowSelectedPiecesLater();
+		lcGetActiveModel()->ShowSelectedPiecesLater();
 		break;
 
 	case LC_VIEW_PREFERENCES:
@@ -729,11 +725,11 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		break;
 
 	case LC_VIEW_ZOOM_IN:
-		lcGetActiveProject()->Zoom(mActiveView->mCamera, -10.0f);
+		lcGetActiveModel()->Zoom(mActiveView->mCamera, -10.0f);
 		break;
 
 	case LC_VIEW_ZOOM_OUT:
-		lcGetActiveProject()->Zoom(mActiveView->mCamera, 10.0f);
+		lcGetActiveModel()->Zoom(mActiveView->mCamera, 10.0f);
 		break;
 
 	case LC_VIEW_ZOOM_EXTENTS:
@@ -745,27 +741,27 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		break;
 
 	case LC_VIEW_TIME_NEXT:
-		lcGetActiveProject()->ShowNextStep();
+		lcGetActiveModel()->ShowNextStep();
 		break;
 
 	case LC_VIEW_TIME_PREVIOUS:
-		lcGetActiveProject()->ShowPreviousStep();
+		lcGetActiveModel()->ShowPreviousStep();
 		break;
 
 	case LC_VIEW_TIME_FIRST:
-		lcGetActiveProject()->ShowFirstStep();
+		lcGetActiveModel()->ShowFirstStep();
 		break;
 
 	case LC_VIEW_TIME_LAST:
-		lcGetActiveProject()->ShowLastStep();
+		lcGetActiveModel()->ShowLastStep();
 		break;
 
 	case LC_VIEW_TIME_INSERT:
-		lcGetActiveProject()->InsertStep();
+		lcGetActiveModel()->InsertStep();
 		break;
 
 	case LC_VIEW_TIME_DELETE:
-		lcGetActiveProject()->RemoveStep();
+		lcGetActiveModel()->RemoveStep();
 		break;
 
 	case LC_VIEW_VIEWPOINT_FRONT:
@@ -914,7 +910,7 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		break;
 
 	case LC_EDIT_TRANSFORM:
-		lcGetActiveProject()->TransformSelectedObjects(GetTransformType(), GetTransformAmount());
+		lcGetActiveModel()->TransformSelectedObjects(GetTransformType(), GetTransformAmount());
 		break;
 
 	case LC_EDIT_TRANSFORM_ABSOLUTE_TRANSLATION:

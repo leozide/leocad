@@ -3,6 +3,7 @@
 #include "ui_lc_qaboutdialog.h"
 #include "lc_mainwindow.h"
 #include "preview.h"
+#include "opengl.h"
 
 lcQAboutDialog::lcQAboutDialog(QWidget *parent, void *data) :
 	QDialog(parent),

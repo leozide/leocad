@@ -144,8 +144,13 @@ void lcModelProperties::ParseLDrawLine(QTextStream& Stream)
 
 lcModel::lcModel()
 {
+	mProperties.LoadDefaults();
+
+	SaveCheckpoint("");
+	SetSaved();
+
+	mCurrentStep = 1;
 	mBackgroundTexture = NULL;
-	mSavedHistory = NULL;
 }
 
 lcModel::~lcModel()
@@ -290,7 +295,16 @@ void lcModel::LoadLDraw(QTextStream& Stream)
 		{
 			LineStream >> Token;
 
-			if (Token == QLatin1String("STEP"))
+			if (Token == QLatin1String("FILE"))
+			{
+				mProperties.mName = LineStream.readAll().trimmed();
+				continue;
+			}
+			else if (Token == QLatin1String("ENDFILE"))
+			{
+				break;
+			}
+			else if (Token == QLatin1String("STEP"))
 			{
 				CurrentStep++;
 				continue;
@@ -422,12 +436,336 @@ void lcModel::LoadLDraw(QTextStream& Stream)
 		}
 	}
 
+	DeleteHistory();
+	SaveCheckpoint("");
+	SetSaved();
+
 	CalculateStep();
 	UpdateBackgroundTexture();
 
 	delete Piece;
 	delete Camera;
 	delete Light;
+}
+
+bool lcModel::LoadBinary(lcFile* file)
+{
+	lcint32 i, count;
+	char id[32];
+	lcuint32 rgb;
+	float fv = 0.4f;
+	lcuint8 ch;
+	lcuint16 sh;
+
+	file->Seek(0, SEEK_SET);
+	file->ReadBuffer(id, 32);
+	sscanf(&id[7], "%f", &fv);
+
+	if (fv == 0.0f)
+	{
+		lconv *loc = localeconv();
+		id[8] = loc->decimal_point[0];
+		sscanf(&id[7], "%f", &fv);
+
+		if (fv == 0.0f)
+			return false;
+	}
+
+	if (fv > 0.4f)
+		file->ReadFloats(&fv, 1);
+
+	file->ReadU32(&rgb, 1);
+	mProperties.mBackgroundSolidColor[0] = (float)((unsigned char) (rgb))/255;
+	mProperties.mBackgroundSolidColor[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
+	mProperties.mBackgroundSolidColor[2] = (float)((unsigned char) ((rgb) >> 16))/255;
+
+	if (fv < 0.6f) // old view
+	{
+		double eye[3], target[3];
+		file->ReadDoubles(eye, 3);
+		file->ReadDoubles(target, 3);
+	}
+
+	file->Seek(28, SEEK_CUR);
+	file->ReadS32(&i, 1);
+	mCurrentStep = i;
+
+	if (fv > 0.8f)
+		file->ReadU32();//m_nScene
+
+	file->ReadS32(&count, 1);
+	lcPiecesLibrary* Library = lcGetPiecesLibrary();
+	Library->OpenCache();
+
+	int FirstNewPiece = mPieces.GetSize();
+
+	while (count--)
+	{
+		if (fv > 0.4f)
+		{
+			lcPiece* pPiece = new lcPiece(NULL);
+			pPiece->FileLoad(*file);
+
+			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+			{
+				if (strcmp(mPieces[PieceIdx]->GetName(), pPiece->GetName()) == 0)
+				{
+					pPiece->CreateName(mPieces);
+					break;
+				}
+			}
+
+			if (strlen(pPiece->GetName()) == 0)
+				pPiece->CreateName(mPieces);
+
+			mPieces.Add(pPiece);
+		}
+		else
+		{
+			char name[LC_PIECE_NAME_LEN];
+			lcVector3 pos, rot;
+			lcuint8 color, step, group;
+
+			file->ReadFloats(pos, 3);
+			file->ReadFloats(rot, 3);
+			file->ReadU8(&color, 1);
+			file->ReadBuffer(name, 9);
+			file->ReadU8(&step, 1);
+			file->ReadU8(&group, 1);
+
+			pos *= 25.0f;
+			lcMatrix44 ModelWorld = lcMul(lcMatrix44RotationZ(rot[2] * LC_DTOR), lcMul(lcMatrix44RotationY(rot[1] * LC_DTOR), lcMatrix44RotationX(rot[0] * LC_DTOR)));
+			lcVector4 AxisAngle = lcMatrix44ToAxisAngle(ModelWorld);
+			AxisAngle[3] *= LC_RTOD;
+
+			PieceInfo* pInfo = Library->FindPiece(name, true);
+			lcPiece* pPiece = new lcPiece(pInfo);
+
+			pPiece->Initialize(pos, AxisAngle, step);
+			pPiece->SetColorCode(lcGetColorCodeFromOriginalColor(color));
+			pPiece->CreateName(mPieces);
+			mPieces.Add(pPiece);
+
+//			pPiece->SetGroup((lcGroup*)group);
+		}
+	}
+
+	Library->CloseCache();
+
+	if (fv >= 0.4f)
+	{
+		file->ReadBuffer(&ch, 1);
+		if (ch == 0xFF) file->ReadU16(&sh, 1); else sh = ch;
+		if (sh > 100)
+			file->Seek(sh, SEEK_CUR);
+		else
+		{
+			String Author;
+			file->ReadBuffer(Author.GetBuffer(sh), sh);
+			Author.Buffer()[sh] = 0;
+			mProperties.mAuthor = QString::fromUtf8(Author.Buffer());
+		}
+
+		file->ReadBuffer(&ch, 1);
+		if (ch == 0xFF) file->ReadU16(&sh, 1); else sh = ch;
+		if (sh > 100)
+			file->Seek(sh, SEEK_CUR);
+		else
+		{
+			String Description;
+			file->ReadBuffer(Description.GetBuffer(sh), sh);
+			Description.Buffer()[sh] = 0;
+			mProperties.mDescription = QString::fromUtf8(Description.Buffer());
+		}
+
+		file->ReadBuffer(&ch, 1);
+		if (ch == 0xFF && fv < 1.3f) file->ReadU16(&sh, 1); else sh = ch;
+		if (sh > 255)
+			file->Seek(sh, SEEK_CUR);
+		else
+		{
+			String Comments;
+			file->ReadBuffer(Comments.GetBuffer(sh), sh);
+			Comments.Buffer()[sh] = 0;
+			mProperties.mComments = QString::fromUtf8(Comments.Buffer());
+			mProperties.mComments.replace(QLatin1String("\r\n"), QLatin1String("\n"));
+		}
+	}
+
+	if (fv >= 0.5f)
+	{
+		int NumGroups = mGroups.GetSize();
+
+		file->ReadS32(&count, 1);
+		for (i = 0; i < count; i++)
+			mGroups.Add(new lcGroup());
+
+		for (int GroupIdx = NumGroups; GroupIdx < mGroups.GetSize(); GroupIdx++)
+		{
+			lcGroup* Group = mGroups[GroupIdx];
+
+			if (fv < 1.0f)
+			{
+				file->ReadBuffer(Group->m_strName, 65);
+				file->ReadBuffer(&ch, 1);
+				Group->mGroup = (lcGroup*)-1;
+			}
+			else
+				Group->FileLoad(file);
+		}
+
+		for (int GroupIdx = NumGroups; GroupIdx < mGroups.GetSize(); GroupIdx++)
+		{
+			lcGroup* Group = mGroups[GroupIdx];
+
+			i = LC_POINTER_TO_INT(Group->mGroup);
+			Group->mGroup = NULL;
+
+			if (i > 0xFFFF || i == -1)
+				continue;
+
+			Group->mGroup = mGroups[NumGroups + i];
+		}
+
+		for (int PieceIdx = FirstNewPiece; PieceIdx < mPieces.GetSize(); PieceIdx++)
+		{
+			lcPiece* Piece = mPieces[PieceIdx];
+
+			i = LC_POINTER_TO_INT(Piece->GetGroup());
+			Piece->SetGroup(NULL);
+
+			if (i > 0xFFFF || i == -1)
+				continue;
+
+			Piece->SetGroup(mGroups[NumGroups + i]);
+		}
+
+		RemoveEmptyGroups();
+	}
+
+	if (fv >= 0.6f)
+	{
+		if (fv < 1.0f)
+			file->Seek(4, SEEK_CUR);
+		else
+			file->Seek(2, SEEK_CUR);
+
+		file->ReadS32(&count, 1);
+		for (i = 0; i < count; i++)
+			mCameras.Add(new lcCamera(false));
+
+		if (count < 7)
+		{
+			lcCamera* pCam = new lcCamera(false);
+			for (i = 0; i < count; i++)
+				pCam->FileLoad(*file);
+			delete pCam;
+		}
+		else
+		{
+			for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
+				mCameras[CameraIdx]->FileLoad(*file);
+		}
+	}
+
+	if (fv >= 0.7f)
+	{
+		file->Seek(16, SEEK_CUR);
+
+		file->ReadU32(&rgb, 1);
+		mProperties.mFogColor[0] = (float)((unsigned char) (rgb))/255;
+		mProperties.mFogColor[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
+		mProperties.mFogColor[2] = (float)((unsigned char) ((rgb) >> 16))/255;
+
+		if (fv < 1.0f)
+		{
+			file->ReadU32(&rgb, 1);
+			mProperties.mFogDensity = (float)rgb/100;
+		}
+		else
+			file->ReadFloats(&mProperties.mFogDensity, 1);
+
+		if (fv < 1.3f)
+		{
+			file->ReadU8(&ch, 1);
+			if (ch == 0xFF)
+				file->ReadU16(&sh, 1);
+			sh = ch;
+		}
+		else
+			file->ReadU16(&sh, 1);
+
+		if (sh < LC_MAXPATH)
+		{
+			char Background[LC_MAXPATH];
+			file->ReadBuffer(Background, sh);
+			mProperties.mBackgroundImage = Background;
+		}
+		else
+			file->Seek(sh, SEEK_CUR);
+	}
+
+	if (fv >= 0.8f)
+	{
+		file->ReadBuffer(&ch, 1);
+		file->Seek(ch, SEEK_CUR);
+		file->ReadBuffer(&ch, 1);
+		file->Seek(ch, SEEK_CUR);
+	}
+
+	if (fv > 0.9f)
+	{
+		file->ReadU32(&rgb, 1);
+		mProperties.mAmbientColor[0] = (float)((unsigned char) (rgb))/255;
+		mProperties.mAmbientColor[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
+		mProperties.mAmbientColor[2] = (float)((unsigned char) ((rgb) >> 16))/255;
+
+		if (fv < 1.3f)
+			file->Seek(23, SEEK_CUR);
+		else
+			file->Seek(11, SEEK_CUR);
+	}
+
+	if (fv > 1.0f)
+	{
+		file->ReadU32(&rgb, 1);
+		mProperties.mBackgroundGradientColor1[0] = (float)((unsigned char) (rgb))/255;
+		mProperties.mBackgroundGradientColor1[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
+		mProperties.mBackgroundGradientColor1[2] = (float)((unsigned char) ((rgb) >> 16))/255;
+		file->ReadU32(&rgb, 1);
+		mProperties.mBackgroundGradientColor2[0] = (float)((unsigned char) (rgb))/255;
+		mProperties.mBackgroundGradientColor2[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
+		mProperties.mBackgroundGradientColor2[2] = (float)((unsigned char) ((rgb) >> 16))/255;
+	}
+
+	DeleteHistory();
+	SaveCheckpoint("");
+	SetSaved();
+
+	UpdateBackgroundTexture();
+	CalculateStep();
+
+	gMainWindow->UpdateFocusObject(GetFocusObject());
+
+	const lcArray<View*>& Views = gMainWindow->GetViews();
+	for (int ViewIdx = 0; ViewIdx < Views.GetSize(); ViewIdx++)
+	{
+		View* view = Views[ViewIdx];
+
+		if (!view->mCamera->IsSimple())
+			view->SetDefaultCamera();
+
+		view->ZoomExtents();
+	}
+
+	gMainWindow->UpdateLockSnap();
+	gMainWindow->UpdateSnap();
+	gMainWindow->UpdateCameraMenu();
+	UpdateSelection();
+	gMainWindow->UpdateCurrentStep();
+	gMainWindow->UpdateAllViews();
+
+	return true;
 }
 
 void lcModel::GetScene(lcScene& Scene, lcCamera* ViewCamera, bool DrawInterface) const
@@ -651,8 +989,11 @@ void lcModel::SaveCheckpoint(const QString& Description)
 	mUndoHistory.InsertAt(0, ModelHistoryEntry);
 	mRedoHistory.DeleteAll();
 
-	gMainWindow->UpdateModified(IsModified());
-	gMainWindow->UpdateUndoRedo(mUndoHistory.GetSize() > 1 ? mUndoHistory[0]->Description : QString(), !mRedoHistory.IsEmpty() ? mRedoHistory[0]->Description : QString());
+	if (!Description.isEmpty())
+	{
+		gMainWindow->UpdateModified(IsModified());
+		gMainWindow->UpdateUndoRedo(mUndoHistory.GetSize() > 1 ? mUndoHistory[0]->Description : QString(), !mRedoHistory.IsEmpty() ? mRedoHistory[0]->Description : QString());
+	}
 }
 
 void lcModel::LoadCheckPoint(lcModelHistoryEntry* CheckPoint)
@@ -2946,6 +3287,25 @@ void lcModel::ShowMinifigDialog()
 
 	SetSelection(Pieces);
 	SaveCheckpoint(tr("Minifig"));
+}
+
+void lcModel::UpdateInterface()
+{
+	gMainWindow->UpdateUndoRedo(mUndoHistory.GetSize() > 1 ? mUndoHistory[0]->Description : NULL, !mRedoHistory.IsEmpty() ? mRedoHistory[0]->Description : NULL);
+	gMainWindow->UpdatePaste(g_App->mClipboard != NULL);
+	gMainWindow->UpdateCategories();
+	gMainWindow->UpdateTitle();
+	gMainWindow->SetTool(gMainWindow->GetTool());
+
+	gMainWindow->UpdateFocusObject(GetFocusObject());
+	gMainWindow->SetTransformType(gMainWindow->GetTransformType());
+	gMainWindow->UpdateLockSnap();
+	gMainWindow->UpdateSnap();
+	gMainWindow->UpdateCameraMenu();
+	gMainWindow->UpdatePerspective();
+	gMainWindow->UpdateCurrentStep();
+
+	UpdateSelection();
 }
 
 void lcModel::Export3DStudio() const

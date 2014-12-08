@@ -1,6 +1,7 @@
 #include "lc_global.h"
 #include "preview.h"
 #include "project.h"
+#include "lc_model.h"
 #include "pieceinf.h"
 #include "system.h"
 #include "lc_application.h"
@@ -35,7 +36,7 @@ void PiecePreview::OnDraw()
 	mContext->SetViewport(0, 0, mWidth, mHeight);
 	glEnableClientState(GL_VERTEX_ARRAY);
 
-	lcGetActiveProject()->DrawBackground(mContext);
+	lcGetActiveModel()->DrawBackground(mContext);
 
 	lcVector3 Eye(0.0f, 0.0f, 1.0f);
 

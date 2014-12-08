@@ -10,6 +10,8 @@
 #include "piece.h"
 #include "group.h"
 #include "project.h"
+#include "lc_model.h"
+#include "lc_file.h"
 #include "lc_application.h"
 #include "lc_library.h"
 #include "lc_context.h"
@@ -418,7 +420,7 @@ void lcPiece::FileSave(lcFile& file) const
 	file.WriteBuffer(m_strName, Length);
 
 	// version 7
-	lcint32 GroupIndex = lcGetActiveProject()->GetGroupIndex(mGroup);
+	lcint32 GroupIndex = lcGetActiveModel()->GetGroups().FindIndex(mGroup);
 	file.WriteS32(GroupIndex);
 }
 

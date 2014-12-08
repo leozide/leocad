@@ -138,7 +138,6 @@ bool lcPiecesLibrary::Load(const char* LibraryPath, const char* CachePath)
 	}
 
 	lcLoadDefaultCategories();
-	gMainWindow->UpdateCategories();
 
 	return true;
 }

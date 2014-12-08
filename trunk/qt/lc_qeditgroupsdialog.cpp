@@ -3,6 +3,7 @@
 #include "ui_lc_qeditgroupsdialog.h"
 #include "lc_application.h"
 #include "project.h"
+#include "lc_model.h"
 #include "piece.h"
 #include "group.h"
 #include "lc_basewindow.h"
@@ -40,7 +41,7 @@ void lcQEditGroupsDialog::accept()
 void lcQEditGroupsDialog::reject()
 {
 	for (int GroupIdx = 0; GroupIdx < mOptions->NewGroups.size(); GroupIdx++)
-		lcGetActiveProject()->RemoveGroup(mOptions->NewGroups[GroupIdx]);
+		lcGetActiveModel()->RemoveGroup(mOptions->NewGroups[GroupIdx]);
 
 	QDialog::reject();
 }
@@ -57,7 +58,7 @@ void lcQEditGroupsDialog::on_newGroup_clicked()
 
 	lcGroup* ParentGroup = (lcGroup*)CurrentItem->data(0, GroupRole).value<uintptr_t>();
 
-	lcGroup* NewGroup = lcGetActiveProject()->AddGroup("Group #", ParentGroup);
+	lcGroup* NewGroup = lcGetActiveModel()->AddGroup("Group #", ParentGroup);
 	mOptions->GroupParents[NewGroup] = ParentGroup;
 	mOptions->NewGroups.append(NewGroup);
 

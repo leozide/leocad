@@ -4,7 +4,7 @@
 #include "lc_math.h"
 #include "lc_array.h"
 #include "lc_application.h"
-#include "project.h"
+#include "lc_model.h"
 #include "lc_category.h"
 #include "lc_shortcuts.h"
 #include "image.h"

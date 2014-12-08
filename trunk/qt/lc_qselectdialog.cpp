@@ -173,8 +173,8 @@ void lcQSelectDialog::itemChanged(QTreeWidgetItem *item, int column)
 
 void lcQSelectDialog::AddChildren(QTreeWidgetItem* ParentItem, lcGroup* ParentGroup)
 {
-	Project* Project = lcGetActiveProject();
-	const lcArray<lcGroup*>& Groups = Project->GetGroups();
+	lcModel* Model = lcGetActiveModel();
+	const lcArray<lcGroup*>& Groups = Model->GetGroups();
 
 	for (int GroupIdx = 0; GroupIdx < Groups.GetSize(); GroupIdx++)
 	{
@@ -188,8 +188,8 @@ void lcQSelectDialog::AddChildren(QTreeWidgetItem* ParentItem, lcGroup* ParentGr
 		AddChildren(GroupItem, Group);
 	}
 
-	const lcArray<lcPiece*>& Pieces = Project->GetPieces();
-	lcStep currentStep = Project->GetCurrentStep();
+	const lcArray<lcPiece*>& Pieces = Model->GetPieces();
+	lcStep currentStep = Model->GetCurrentStep();
 
 	for (int PieceIdx = 0; PieceIdx < Pieces.GetSize(); PieceIdx++)
 	{
@@ -205,7 +205,7 @@ void lcQSelectDialog::AddChildren(QTreeWidgetItem* ParentItem, lcGroup* ParentGr
 
 	if (!ParentGroup)
 	{
-		const lcArray<lcCamera*>& Cameras = Project->GetCameras();
+		const lcArray<lcCamera*>& Cameras = Model->GetCameras();
 
 		for (int CameraIdx = 0; CameraIdx < Cameras.GetSize(); CameraIdx++)
 		{
@@ -219,7 +219,7 @@ void lcQSelectDialog::AddChildren(QTreeWidgetItem* ParentItem, lcGroup* ParentGr
 			cameraItem->setCheckState(0, Camera->IsSelected() ? Qt::Checked : Qt::Unchecked);
 		}
 
-		const lcArray<lcLight*>& Lights = Project->GetLights();
+		const lcArray<lcLight*>& Lights = Model->GetLights();
 
 		for (int LightIdx = 0; LightIdx < Lights.GetSize(); LightIdx++)
 		{

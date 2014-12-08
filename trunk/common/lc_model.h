@@ -150,6 +150,12 @@ public:
 		return mCurrentStep;
 	}
 
+	void SetCurrentStep(lcStep Step)
+	{
+		mCurrentStep = Step;
+		CalculateStep();
+	}
+
 	void ShowFirstStep();
 	void ShowLastStep();
 	void ShowPreviousStep();
@@ -173,6 +179,11 @@ public:
 
 	void SaveLDraw(QTextStream& Stream) const;
 	void LoadLDraw(QTextStream& Stream);
+	bool LoadBinary(lcFile* File);
+	void SetSaved()
+	{
+		mSavedHistory = mUndoHistory[0];
+	}
 
 	void GetScene(lcScene& Scene, lcCamera* ViewCamera, bool DrawInterface) const;
 	void DrawBackground(lcContext* Context);
@@ -253,6 +264,7 @@ public:
 	void ShowSelectByNameDialog();
 	void ShowArrayDialog();
 	void ShowMinifigDialog();
+	void UpdateInterface();
 
 	void Export3DStudio() const;
 	void ExportBrickLink() const;

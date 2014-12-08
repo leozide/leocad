@@ -4,6 +4,7 @@
 #include "lc_qupdatedialog.h"
 #include "lc_mainwindow.h"
 #include "view.h"
+#include "project.h"
 #include <QApplication>
 
 #ifdef Q_OS_WIN
@@ -137,7 +138,6 @@ int main(int argc, char *argv[])
 	app.installTranslator(&Translator);
 
 	g_App = new lcApplication();
-	gMainWindow = new lcMainWindow();
 
 #if defined(Q_OS_WIN)
 	char libPath[LC_MAXPATH], *ptr;
@@ -178,9 +178,10 @@ int main(int argc, char *argv[])
 	if (!g_App->Initialize(argc, argv, libPath, LDrawPath, cachePath.toLocal8Bit().data()))
 		return 1;
 
+	gMainWindow = new lcMainWindow();
 	lcQMainWindow w;
 	gMainWindow->mHandle = &w;
-	lcGetActiveProject()->UpdateInterface();
+	lcGetActiveModel()->UpdateInterface();
 	gMainWindow->UpdateRecentFiles();
 	w.show();
 
@@ -581,12 +582,12 @@ void lcMainWindow::UpdateCategories()
 		window->updateCategories();
 }
 
-void lcMainWindow::UpdateTitle(const QString& Title, bool Modified)
+void lcMainWindow::UpdateTitle()
 {
 	lcQMainWindow* window = (lcQMainWindow*)mHandle;
 
 	if (window)
-		window->updateTitle(Title, Modified);
+		window->updateTitle(lcGetActiveProject()->GetTitle(), lcGetActiveProject()->IsModified());
 }
 
 void lcMainWindow::UpdateModified(bool Modified)

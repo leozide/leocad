@@ -7,6 +7,7 @@
 #include "lc_math.h"
 #include "lc_commands.h"
 #include "str.h"
+#include "lc_application.h"
 
 #define LC_SCENE_FOG			0x004	// Enable fog
 #define LC_SCENE_BG				0x010	// Draw bg image
@@ -33,21 +34,16 @@ class PieceInfo;
 class View;
 class Image;
 
-#include "lc_file.h"
-
-struct LC_FILEENTRY
-{
-	lcMemFile File;
-	char FileName[LC_MAXPATH];
-};
-
-#include "lc_model.h"
-
-class Project : public lcModel
+class Project
 {
 public:
 	Project();
 	~Project();
+
+	lcModel* GetActiveModel() const
+	{
+		return mActiveModel;
+	}
 
 	QString GetTitle() const;
 	QString GetFileName() const
@@ -55,22 +51,23 @@ public:
 		return mFileName;
 	}
 
+	void NewModel();
 	bool Load(const QString& FileName);
-	void SetSaved(const QString& FileName);
+	bool Save(const QString& FileName);
+
+	bool IsModified() const;
+
+protected:
+	bool mModified;
+	QString mFileName;
+
+	lcArray<lcModel*> mModels;
+	lcModel* mActiveModel;
+
+	Q_DECLARE_TR_FUNCTIONS(Project);
 
 
-
-	void SetCurrentStep(lcStep Step)
-	{
-		mCurrentStep = Step;
-		CalculateStep();
-	}
-
-	int GetGroupIndex(lcGroup* Group) const
-	{
-		return mGroups.FindIndex(Group);
-	}
-
+public:
 	void ExportHTML();
 	void UpdateInterface();
 	void LoadDefaults();
@@ -78,17 +75,12 @@ public:
 	void SaveStepImages(const QString& BaseName, int Width, int Height, lcStep Start, lcStep End);
 
 protected:
-	void CheckPoint(const char* Description);
-
-	static int InstanceOfName(const String& existingString, const String& candidateString, String& baseNameOut);
-
 	void CreateHTMLPieceList(QTextStream& Stream, lcStep Step, bool Images, const QString& ImageExtension);
-
-	bool FileLoad(lcFile* file, bool bUndo, bool bMerge);
-	void FileReadLDraw(lcFile* file, const lcMatrix44& CurrentTransform, int* nOk, int DefColor, int* nStep, lcArray<LC_FILEENTRY*>& FileArray);
-	void FileReadMPD(lcFile& MPD, lcArray<LC_FILEENTRY*>& FileArray) const;
-
-	QString mFileName;
 };
+
+inline lcModel* lcGetActiveModel()
+{
+	return lcGetActiveProject()->GetActiveModel();
+}
 
 #endif // _PROJECT_H_

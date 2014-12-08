@@ -43,7 +43,7 @@ lcQMainWindow::lcQMainWindow(QWidget *parent)
 	QGridLayout *previewLayout = new QGridLayout(previewFrame);
 	previewLayout->setContentsMargins(0, 0, 0, 0);
 
-	QWidget *viewWidget = new lcQGLWidget(previewFrame, piecePreview, new View(lcGetActiveProject()), true);
+	QWidget *viewWidget = new lcQGLWidget(previewFrame, piecePreview, new View(lcGetActiveModel()), true);
 	previewLayout->addWidget(viewWidget, 0, 0, 1, 1);
 
 	connect(QApplication::clipboard(), SIGNAL(dataChanged()), this, SLOT(clipboardChanged()));
@@ -54,7 +54,7 @@ lcQMainWindow::lcQMainWindow(QWidget *parent)
 
 	GL_EnableVertexBufferObject();
 
-	if (!lcGetActiveProject()->GetPieces().IsEmpty())
+	if (!lcGetActiveModel()->GetPieces().IsEmpty())
 	{
 		for (int PieceIdx = 0; PieceIdx < Library->mPieces.GetSize(); PieceIdx++)
 		{
@@ -656,42 +656,42 @@ void lcQMainWindow::clipboardChanged()
 	g_App->SetClipboard(clipboard);
 }
 
-void lcQMainWindow::splitView(Qt::Orientation orientation)
+void lcQMainWindow::splitView(Qt::Orientation Orientation)
 {
-	QWidget *focus = focusWidget();
+	QWidget* Focus = focusWidget();
 
-	if (typeid(*focus) != typeid(lcQGLWidget))
+	if (typeid(*Focus) != typeid(lcQGLWidget))
 		return;
 
-	QWidget *parent = focus->parentWidget();
-	QSplitter *splitter;
-	QList<int> sizes;
+	QWidget* Parent = Focus->parentWidget();
+	QSplitter* Splitter;
+	QList<int> Sizes;
 
-	if (parent == centralWidget())
+	if (Parent == centralWidget())
 	{
-		splitter = new QSplitter(orientation, parent);
-		parent->layout()->addWidget(splitter);
-		splitter->addWidget(focus);
-		splitter->addWidget(new lcQGLWidget(centralWidget(), piecePreview, new View(lcGetActiveProject()), true));
+		Splitter = new QSplitter(Orientation, Parent);
+		Parent->layout()->addWidget(Splitter);
+		Splitter->addWidget(Focus);
+		Splitter->addWidget(new lcQGLWidget(centralWidget(), piecePreview, new View(lcGetActiveModel()), true));
 	}
 	else
 	{
-		QSplitter *parentSplitter = (QSplitter*)parent;	
-		sizes = parentSplitter->sizes();
-		int focusIndex = parentSplitter->indexOf(focus);
+		QSplitter* ParentSplitter = (QSplitter*)Parent;	
+		Sizes = ParentSplitter->sizes();
+		int FocusIndex = ParentSplitter->indexOf(Focus);
 
-		splitter = new QSplitter(orientation, parent);
-		parentSplitter->insertWidget(focusIndex, splitter);
-		splitter->addWidget(focus);
-		splitter->addWidget(new lcQGLWidget(centralWidget(), piecePreview, new View(lcGetActiveProject()), true));
+		Splitter = new QSplitter(Orientation, Parent);
+		ParentSplitter->insertWidget(FocusIndex, Splitter);
+		Splitter->addWidget(Focus);
+		Splitter->addWidget(new lcQGLWidget(centralWidget(), piecePreview, new View(lcGetActiveModel()), true));
 
-		parentSplitter->setSizes(sizes);
+		ParentSplitter->setSizes(Sizes);
 	}
 
-	sizes.clear();
-	sizes.append(10);
-	sizes.append(10);
-	splitter->setSizes(sizes);
+	Sizes.clear();
+	Sizes.append(10);
+	Sizes.append(10);
+	Splitter->setSizes(Sizes);
 }
 
 void lcQMainWindow::splitHorizontal()
@@ -745,19 +745,19 @@ void lcQMainWindow::resetViews()
 {
 	QLayout* centralLayout = centralWidget()->layout();
 	delete centralLayout->itemAt(0)->widget();
-	centralLayout->addWidget(new lcQGLWidget(centralWidget(), piecePreview, new View(lcGetActiveProject()), true));
+	centralLayout->addWidget(new lcQGLWidget(centralWidget(), piecePreview, new View(lcGetActiveModel()), true));
 }
 
 void lcQMainWindow::print(QPrinter *printer)
 {
-	Project *project = lcGetActiveProject();
+	lcModel* Model = lcGetActiveModel();
 	int docCopies;
 	int pageCopies;
 
 	int rows = lcGetProfileInt(LC_PROFILE_PRINT_ROWS);
 	int columns = lcGetProfileInt(LC_PROFILE_PRINT_COLUMNS);
 	int stepsPerPage = rows * columns;
-	int pageCount = (project->GetLastStep() + stepsPerPage - 1) / stepsPerPage;
+	int pageCount = (Model->GetLastStep() + stepsPerPage - 1) / stepsPerPage;
 
 	if (printer->collateCopies())
 	{
@@ -811,7 +811,7 @@ void lcQMainWindow::print(QPrinter *printer)
 	int tileHeight = qMin(stepHeight, maxTexture);
 	float aspectRatio = (float)stepWidth / (float)stepHeight;
 
-	View view(project);
+	View view(Model);
 	view.SetCamera(gMainWindow->GetActiveView()->mCamera, false);
 	view.mWidth = tileWidth;
 	view.mHeight = tileHeight;
@@ -819,7 +819,7 @@ void lcQMainWindow::print(QPrinter *printer)
 
 	Context->BeginRenderToTexture(tileWidth, tileHeight);
 
-	lcStep previousTime = project->GetCurrentStep();
+	lcStep previousTime = Model->GetCurrentStep();
 
 	QPainter painter(printer);
 	lcuint8 *buffer = (lcuint8*)malloc(tileWidth * tileHeight * 4);
@@ -842,10 +842,10 @@ void lcQMainWindow::print(QPrinter *printer)
 				{
 					for (int column = 0; column < columns; column++)
 					{
-						if (currentStep > project->GetLastStep())
+						if (currentStep > Model->GetLastStep())
 							break;
 
-						project->SetCurrentStep(currentStep);
+						Model->SetCurrentStep(currentStep);
 
 						if (stepWidth > tileWidth || stepHeight > tileHeight)
 						{
@@ -1001,18 +1001,18 @@ void lcQMainWindow::print(QPrinter *printer)
 
 	free(buffer);
 
-	project->SetCurrentStep(previousTime);
+	Model->SetCurrentStep(previousTime);
 
 	Context->EndRenderToTexture();
 }
 
 void lcQMainWindow::showPrintDialog()
 {
-	Project *project = lcGetActiveProject();
+	lcModel* Model = lcGetActiveModel();
 	int rows = lcGetProfileInt(LC_PROFILE_PRINT_ROWS);
 	int columns = lcGetProfileInt(LC_PROFILE_PRINT_COLUMNS);
 	int stepsPerPage = rows * columns;
-	int pageCount = (project->GetLastStep() + stepsPerPage - 1) / stepsPerPage;
+	int pageCount = (Model->GetLastStep() + stepsPerPage - 1) / stepsPerPage;
 
 	QPrinter printer(QPrinter::HighResolution);
 	printer.setFromTo(1, pageCount + 1);
@@ -1027,11 +1027,11 @@ void lcQMainWindow::togglePrintPreview()
 {
 	// todo: print preview inside main window
 
-	Project *project = lcGetActiveProject();
+	lcModel* Model = lcGetActiveModel();
 	int rows = lcGetProfileInt(LC_PROFILE_PRINT_ROWS);
 	int columns = lcGetProfileInt(LC_PROFILE_PRINT_COLUMNS);
 	int stepsPerPage = rows * columns;
-	int pageCount = (project->GetLastStep() + stepsPerPage - 1) / stepsPerPage;
+	int pageCount = (Model->GetLastStep() + stepsPerPage - 1) / stepsPerPage;
 
 	QPrinter printer(QPrinter::ScreenResolution);
 	printer.setFromTo(1, pageCount + 1);
@@ -1051,16 +1051,16 @@ void lcQMainWindow::toggleFullScreen()
 		showFullScreen();
 }
 
-void lcQMainWindow::updateFocusObject(lcObject *focus)
+void lcQMainWindow::updateFocusObject(lcObject* Focus)
 {
-	propertiesWidget->updateFocusObject(focus);
+	propertiesWidget->updateFocusObject(Focus);
 
-	lcVector3 position;
-	lcGetActiveProject()->GetFocusPosition(position);
+	lcVector3 Position;
+	lcGetActiveModel()->GetFocusPosition(Position);
 
-	QString label("X: %1 Y: %2 Z: %3");
-	label = label.arg(QString::number(position[0], 'f', 2), QString::number(position[1], 'f', 2), QString::number(position[2], 'f', 2));
-	statusPositionLabel->setText(label);
+	QString Label("X: %1 Y: %2 Z: %3");
+	Label = Label.arg(QString::number(Position[0], 'f', 2), QString::number(Position[1], 'f', 2), QString::number(Position[2], 'f', 2));
+	statusPositionLabel->setText(Label);
 }
 
 void lcQMainWindow::updateSelectedObjects(int flags, int selectedCount, lcObject* focus)
@@ -1135,9 +1135,9 @@ void lcQMainWindow::updatePaste(bool enabled)
 
 void lcQMainWindow::updateCurrentStep()
 {
-	Project *project = lcGetActiveProject();
-	lcStep currentStep = project->GetCurrentStep();
-	lcStep lastStep = project->GetLastStep();
+	lcModel* Model = lcGetActiveModel();
+	lcStep currentStep = Model->GetCurrentStep();
+	lcStep lastStep = Model->GetLastStep();
 
 	actions[LC_VIEW_TIME_FIRST]->setEnabled(currentStep != 1);
 	actions[LC_VIEW_TIME_PREVIOUS]->setEnabled(currentStep > 1);
@@ -1216,7 +1216,7 @@ void lcQMainWindow::updateTransformType(int newType)
 
 void lcQMainWindow::updateCameraMenu()
 {
-	const lcArray<lcCamera*>& cameras = lcGetActiveProject()->GetCameras();
+	const lcArray<lcCamera*>& cameras = lcGetActiveModel()->GetCameras();
 	lcCamera* currentCamera = gMainWindow->GetActiveView()->mCamera;
 	int actionIdx, currentIndex = -1;
 

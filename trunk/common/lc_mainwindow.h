@@ -4,6 +4,7 @@
 #include "lc_basewindow.h"
 #include "lc_array.h"
 #include "lc_commands.h"
+#include "lc_model.h"
 
 class View;
 class PiecePreview;
@@ -157,7 +158,7 @@ public:
 	void UpdatePerspective();
 	void UpdateCameraMenu();
 	void UpdateCategories();
-	void UpdateTitle(const QString& Title, bool Modified);
+	void UpdateTitle();
 	void UpdateModified(bool Modified);
 	void UpdateRecentFiles();
 	void UpdateShortcuts();

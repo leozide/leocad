@@ -76,9 +76,9 @@ void lcApplication::SetProject(Project* Project)
 
 	const lcArray<View*>& Views = gMainWindow->GetViews();
 	for (int ViewIdx = 0; ViewIdx < Views.GetSize(); ViewIdx++)
-		Views[ViewIdx]->SetProject(Project);
+		Views[ViewIdx]->SetModel(lcGetActiveModel());
 
-	gMainWindow->UpdateTitle(mProject->GetTitle(), mProject->IsModified());
+	gMainWindow->UpdateTitle();
 }
 
 void lcApplication::SetClipboard(lcFile* Clipboard)
@@ -338,7 +338,7 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 
 		if ((ImageStart == 0) && (ImageEnd == 0))
 		{
-			ImageStart = ImageEnd = mProject->GetCurrentStep();
+			ImageStart = ImageEnd = mProject->GetActiveModel()->GetCurrentStep();
 		}
 		else if ((ImageStart == 0) && (ImageEnd != 0))
 		{
@@ -370,10 +370,13 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 
 		return false;
 	}
+	else if (SaveImage)
+	{
+		return false;
+	}
 	else
 	{
-		if (SaveImage)
-			return false;
+		mProject->NewModel();
 	}
 
 	lcLoadDefaultKeyboardShortcuts();

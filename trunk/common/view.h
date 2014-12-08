@@ -2,10 +2,8 @@
 #define _VIEW_H_
 
 #include "lc_glwidget.h"
+#include "lc_model.h"
 #include "camera.h"
-#include "project.h"
-
-class Project;
 
 enum lcTrackButton
 {
@@ -56,10 +54,10 @@ enum lcDragState
 class View : public lcGLWidget
 {
 public:
-	View(Project* Project);
+	View(lcModel* Model);
 	virtual ~View();
 
-	void SetProject(Project* Project);
+	void SetModel(lcModel* Model);
 
 	void OnDraw();
 	void OnInitialUpdate();
@@ -95,7 +93,7 @@ public:
 	lcObjectSection FindObjectUnderPointer(bool PiecesOnly) const;
 	lcArray<lcObject*> FindObjectsInBox(float x1, float y1, float x2, float y2) const;
 
-	Project* mProject;
+	lcModel* mModel;
 	lcCamera* mCamera;
 
 	lcVector3 ProjectPoint(const lcVector3& Point) const
@@ -136,8 +134,6 @@ protected:
 	lcTrackTool mTrackTool;
 	int mMouseDownX;
 	int mMouseDownY;
-
-	friend class Project;
 };
 
 #endif // _VIEW_H_

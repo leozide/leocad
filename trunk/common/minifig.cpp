@@ -9,10 +9,12 @@
 #include "opengl.h"
 #include "pieceinf.h"
 #include "project.h"
+#include "lc_model.h"
 #include "system.h"
 #include "lc_library.h"
 #include "lc_application.h"
 #include "lc_context.h"
+#include "lc_file.h"
 
 // =============================================================================
 // Static variables
@@ -966,7 +968,7 @@ void MinifigWizard::OnDraw()
 	float Aspect = (float)mWidth/(float)mHeight;
 	mContext->SetViewport(0, 0, mWidth, mHeight);
 
-	lcGetActiveProject()->DrawBackground(mContext);
+	lcGetActiveModel()->DrawBackground(mContext);
 
 	float Box[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
 

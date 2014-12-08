@@ -212,7 +212,7 @@ bool lcMainWindow::SaveProject(const QString& FileName)
 		SaveFileName = FileName;
 	else
 	{
-		QString SaveFileName = Project->GetFileName();
+		SaveFileName = Project->GetFileName();
 
 		if (SaveFileName.isEmpty())
 			SaveFileName = QFileInfo(QDir(lcGetProfileString(LC_PROFILE_PROJECTS_PATH)), Project->GetTitle()).absoluteFilePath();

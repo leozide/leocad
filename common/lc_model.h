@@ -110,7 +110,7 @@ struct lcPartsListEntry
 class lcModel
 {
 public:
-	lcModel();
+	lcModel(const QString& Name);
 	~lcModel();
 
 	bool IsModified() const

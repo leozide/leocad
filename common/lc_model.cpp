@@ -142,8 +142,9 @@ void lcModelProperties::ParseLDrawLine(QTextStream& Stream)
 	}
 }
 
-lcModel::lcModel()
+lcModel::lcModel(const QString& Name)
 {
+	mProperties.mName = Name;
 	mProperties.LoadDefaults();
 
 	SaveCheckpoint("");
@@ -3302,6 +3303,7 @@ void lcModel::UpdateInterface()
 	gMainWindow->UpdateLockSnap();
 	gMainWindow->UpdateSnap();
 	gMainWindow->UpdateCameraMenu();
+	gMainWindow->UpdateModels();
 	gMainWindow->UpdatePerspective();
 	gMainWindow->UpdateCurrentStep();
 

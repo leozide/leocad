@@ -1117,6 +1117,132 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 		QT_TRANSLATE_NOOP("Status", "Show selected pieces one step later"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
+	// LC_MODEL_NEW
+	{
+		"Model.New",
+		QT_TRANSLATE_NOOP("Menu", "New Model..."),
+		QT_TRANSLATE_NOOP("Status", "Add a new model to the project"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
+	// LC_MODEL_LIST
+	{
+		"Model.List",
+		QT_TRANSLATE_NOOP("Menu", "List..."),
+		QT_TRANSLATE_NOOP("Status", "Show a list of all models in this project"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
+	// LC_MODEL_01
+	{
+		"Model.Model01",
+		QT_TRANSLATE_NOOP("Menu", ""),
+		QT_TRANSLATE_NOOP("Status", "Switch to this model"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
+	// LC_MODEL_02
+	{
+		"Model.Model02",
+		QT_TRANSLATE_NOOP("Menu", ""),
+		QT_TRANSLATE_NOOP("Status", "Switch to this model"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
+	// LC_MODEL_03
+	{
+		"Model.Model03",
+		QT_TRANSLATE_NOOP("Menu", ""),
+		QT_TRANSLATE_NOOP("Status", "Switch to this model"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
+	// LC_MODEL_04
+	{
+		"Model.Model04",
+		QT_TRANSLATE_NOOP("Menu", ""),
+		QT_TRANSLATE_NOOP("Status", "Switch to this model"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
+	// LC_MODEL_05
+	{
+		"Model.Model05",
+		QT_TRANSLATE_NOOP("Menu", ""),
+		QT_TRANSLATE_NOOP("Status", "Switch to this model"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
+	// LC_MODEL_06
+	{
+		"Model.Model06",
+		QT_TRANSLATE_NOOP("Menu", ""),
+		QT_TRANSLATE_NOOP("Status", "Switch to this model"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
+	// LC_MODEL_07
+	{
+		"Model.Model07",
+		QT_TRANSLATE_NOOP("Menu", ""),
+		QT_TRANSLATE_NOOP("Status", "Switch to this model"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
+	// LC_MODEL_08
+	{
+		"Model.Model08",
+		QT_TRANSLATE_NOOP("Menu", ""),
+		QT_TRANSLATE_NOOP("Status", "Switch to this model"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
+	// LC_MODEL_09
+	{
+		"Model.Model09",
+		QT_TRANSLATE_NOOP("Menu", ""),
+		QT_TRANSLATE_NOOP("Status", "Switch to this model"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
+	// LC_MODEL_10
+	{
+		"Model.Model10",
+		QT_TRANSLATE_NOOP("Menu", ""),
+		QT_TRANSLATE_NOOP("Status", "Switch to this model"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
+	// LC_MODEL_11
+	{
+		"Model.Model11",
+		QT_TRANSLATE_NOOP("Menu", ""),
+		QT_TRANSLATE_NOOP("Status", "Switch to this model"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
+	// LC_MODEL_12
+	{
+		"Model.Model12",
+		QT_TRANSLATE_NOOP("Menu", ""),
+		QT_TRANSLATE_NOOP("Status", "Switch to this model"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
+	// LC_MODEL_13
+	{
+		"Model.Model13",
+		QT_TRANSLATE_NOOP("Menu", ""),
+		QT_TRANSLATE_NOOP("Status", "Switch to this model"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
+	// LC_MODEL_14
+	{
+		"Model.Model14",
+		QT_TRANSLATE_NOOP("Menu", ""),
+		QT_TRANSLATE_NOOP("Status", "Switch to this model"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
+	// LC_MODEL_15
+	{
+		"Model.Model15",
+		QT_TRANSLATE_NOOP("Menu", ""),
+		QT_TRANSLATE_NOOP("Status", "Switch to this model"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
+	// LC_MODEL_16
+	{
+		"Model.Model16",
+		QT_TRANSLATE_NOOP("Menu", ""),
+		QT_TRANSLATE_NOOP("Status", "Switch to this model"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
 	// LC_HELP_HOMEPAGE
 	{
 		"Help.HomePage",

@@ -200,6 +200,13 @@ void lcQMainWindow::createActions()
 		actionPerspectiveGroup->addAction(actions[actionIdx]);
 	}
 
+	QActionGroup *menuGroup = new QActionGroup(this);
+	for (int actionIdx = LC_MODEL_FIRST; actionIdx <= LC_MODEL_LAST; actionIdx++)
+	{
+		actions[actionIdx]->setCheckable(true);
+		menuGroup->addAction(actions[actionIdx]);
+	}
+
 	updateShortcuts();
 }
 
@@ -324,6 +331,13 @@ void lcQMainWindow::createMenus()
 	menuPiece->addAction(actions[LC_PIECE_HIDE_SELECTED]);
 	menuPiece->addAction(actions[LC_PIECE_HIDE_UNSELECTED]);
 	menuPiece->addAction(actions[LC_PIECE_UNHIDE_ALL]);
+
+	menuModel = menuBar()->addMenu(tr("&Model"));
+	menuModel->addAction(actions[LC_MODEL_NEW]);
+	menuModel->addAction(actions[LC_MODEL_LIST]);
+	menuModel->addSeparator();
+	for (int ModelIdx = 0; ModelIdx < LC_MODEL_LAST - LC_MODEL_FIRST; ModelIdx++)
+		menuModel->addAction(actions[LC_MODEL_FIRST + ModelIdx]);
 
 	menuHelp = menuBar()->addMenu(tr("&Help"));
 	menuHelp->addAction(actions[LC_HELP_HOMEPAGE]);
@@ -1256,6 +1270,27 @@ void lcQMainWindow::updatePerspective(View* view)
 		actions[LC_VIEW_PROJECTION_ORTHO]->setChecked(true);
 	else
 		actions[LC_VIEW_PROJECTION_PERSPECTIVE]->setChecked(true);
+}
+
+void lcQMainWindow::updateModels()
+{
+	const lcArray<lcModel*>& Models = lcGetActiveProject()->GetModels();
+	lcModel* CurrentModel = lcGetActiveModel();
+
+	for (int ActionIdx = LC_MODEL_FIRST; ActionIdx <= LC_MODEL_LAST; ActionIdx++)
+	{
+		QAction* Action = actions[ActionIdx];
+		int ModelIdx = ActionIdx - LC_MODEL_FIRST;
+
+		if (ModelIdx < Models.GetSize())
+		{
+			Action->setChecked(CurrentModel == Models[ModelIdx]);
+			Action->setText(Models[ModelIdx]->GetProperties().mName);
+			Action->setVisible(true);
+		}
+		else
+			Action->setVisible(false);
+	}
 }
 
 void lcQMainWindow::updateCategories()

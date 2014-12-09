@@ -574,6 +574,14 @@ void lcMainWindow::UpdatePerspective()
 		window->updatePerspective(mActiveView);
 }
 
+void lcMainWindow::UpdateModels()
+{
+	lcQMainWindow* window = (lcQMainWindow*)mHandle;
+
+	if (window)
+		window->updateModels();
+}
+
 void lcMainWindow::UpdateCategories()
 {
 	lcQMainWindow* window = (lcQMainWindow*)mHandle;

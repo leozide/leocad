@@ -31,7 +31,8 @@ Project::~Project()
 
 void Project::NewModel()
 {
-	mActiveModel = new lcModel();
+	//todo: add dialog to get the model name and check if the name is unique
+	mActiveModel = new lcModel(tr("Model%1").arg(QString::number(mModels.GetSize() + 1)));
 	mModels.Add(mActiveModel);
 }
 
@@ -53,7 +54,8 @@ bool Project::Load(const QString& FileName)
 
 		while (!Stream.atEnd())
 		{
-			lcModel* Model = new lcModel();
+			QString Name = tr("Model%1").arg(QString::number(mModels.GetSize() + 1));
+			lcModel* Model = new lcModel(Name);
 			mModels.Add(Model);
 			Model->LoadLDraw(Stream);
 		}
@@ -65,7 +67,7 @@ bool Project::Load(const QString& FileName)
 		MemFile.WriteBuffer(FileData.constData(), FileData.size());
 		MemFile.Seek(0, SEEK_SET);
 
-		lcModel* Model = new lcModel();
+		lcModel* Model = new lcModel(tr("Model1"));
 
 		if (Model->LoadBinary(&MemFile))
 			mModels.Add(Model);

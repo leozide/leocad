@@ -157,6 +157,7 @@ public:
 	void UpdateCurrentCamera(int CameraIndex);
 	void UpdatePerspective();
 	void UpdateCameraMenu();
+	void UpdateModels();
 	void UpdateCategories();
 	void UpdateTitle();
 	void UpdateModified(bool Modified);

@@ -43,6 +43,7 @@ public:
 	void updateCameraMenu();
 	void updateCurrentCamera(int cameraIndex);
 	void updatePerspective(View* view);
+	void updateModels();
 	void updateCategories();
 	void updateTitle(const QString& title, bool modified);
 	void updateModified(bool modified);
@@ -79,6 +80,7 @@ private:
 	QMenu *menuEdit;
 	QMenu *menuView;
 	QMenu *menuPiece;
+	QMenu *menuModel;
 	QMenu *menuHelp;
 
 	QToolBar *standardToolBar;

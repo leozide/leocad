@@ -40,6 +40,11 @@ public:
 	Project();
 	~Project();
 
+	const lcArray<lcModel*>& GetModels() const
+	{
+		return mModels;
+	}
+
 	lcModel* GetActiveModel() const
 	{
 		return mActiveModel;

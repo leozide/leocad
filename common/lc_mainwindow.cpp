@@ -163,7 +163,6 @@ void lcMainWindow::NewProject()
 		return;
 
 	Project* NewProject = new Project();
-	NewProject->NewModel();
 	g_App->SetProject(NewProject);
 }
 
@@ -829,6 +828,33 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 			UpdateAllViews();
 		} break;
 */
+	case LC_MODEL_NEW:
+		lcGetActiveProject()->CreateNewModel();
+		break;
+
+	case LC_MODEL_LIST:
+		lcGetActiveProject()->ShowModelListDialog();
+		break;
+
+	case LC_MODEL_01:
+	case LC_MODEL_02:
+	case LC_MODEL_03:
+	case LC_MODEL_04:
+	case LC_MODEL_05:
+	case LC_MODEL_06:
+	case LC_MODEL_07:
+	case LC_MODEL_08:
+	case LC_MODEL_09:
+	case LC_MODEL_10:
+	case LC_MODEL_11:
+	case LC_MODEL_12:
+	case LC_MODEL_13:
+	case LC_MODEL_14:
+	case LC_MODEL_15:
+	case LC_MODEL_16:
+		lcGetActiveProject()->SetActiveModel(CommandId - LC_MODEL_01);
+		break;
+
 	case LC_HELP_HOMEPAGE:
 		g_App->OpenURL("http://www.leocad.org/");
 		break;

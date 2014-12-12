@@ -160,7 +160,8 @@ SOURCES += common/view.cpp \
     qt/lc_qimage.cpp \
     qt/lc_qglwidget.cpp \
     qt/lc_qcolorlist.cpp \
-    qt/lc_qfinddialog.cpp
+    qt/lc_qfinddialog.cpp \
+    qt/lc_qmodellistdialog.cpp
 HEADERS += \
     common/view.h \
     common/tr.h \
@@ -219,7 +220,8 @@ HEADERS += \
     qt/lc_qcolorpicker.h \
     qt/lc_qglwidget.h \
     qt/lc_qcolorlist.h \
-    qt/lc_qfinddialog.h
+    qt/lc_qfinddialog.h \
+    qt/lc_qmodellistdialog.h
 FORMS += \ 
     qt/lc_qpovraydialog.ui \
     qt/lc_qarraydialog.ui \
@@ -234,7 +236,8 @@ FORMS += \
     qt/lc_qcategorydialog.ui \
     qt/lc_qimagedialog.ui \
     qt/lc_qupdatedialog.ui \
-    qt/lc_qfinddialog.ui
+    qt/lc_qfinddialog.ui \
+    qt/lc_qmodellistdialog.ui
 OTHER_FILES += 
 RESOURCES += leocad.qrc
 

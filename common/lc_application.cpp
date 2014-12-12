@@ -375,10 +375,6 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 	{
 		return false;
 	}
-	else
-	{
-		mProject->NewModel();
-	}
 
 	lcLoadDefaultKeyboardShortcuts();
 

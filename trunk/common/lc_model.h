@@ -143,6 +143,11 @@ public:
 		return mProperties;
 	}
 
+	void SetName(const QString& Name)
+	{
+		mProperties.mName = Name;
+	}
+
 	lcStep GetLastStep() const;
 
 	lcStep GetCurrentStep() const

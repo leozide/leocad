@@ -17,11 +17,13 @@
 #include "lc_application.h"
 #include "lc_profile.h"
 #include "preview.h"
+#include "lc_qmodellistdialog.h"
 
 Project::Project()
 {
 	mModified = false;
-	mActiveModel = NULL;
+	mActiveModel = new lcModel(tr("Model #1"));
+	mModels.Add(mActiveModel);
 }
 
 Project::~Project()
@@ -29,11 +31,148 @@ Project::~Project()
 	mModels.DeleteAll();
 }
 
-void Project::NewModel()
+bool Project::IsModified() const
 {
-	//todo: add dialog to get the model name and check if the name is unique
-	mActiveModel = new lcModel(tr("Model%1").arg(QString::number(mModels.GetSize() + 1)));
-	mModels.Add(mActiveModel);
+	if (mModified)
+		return true;
+
+	for (int ModelIdx = 0; ModelIdx < mModels.GetSize(); ModelIdx++)
+		if (mModels[ModelIdx]->IsModified())
+			return true;
+
+	return false;
+}
+
+QString Project::GetTitle() const
+{
+	return mFileName.isEmpty() ? tr("New Project.ldr") : QFileInfo(mFileName).fileName();
+}
+
+void Project::SetActiveModel(int ModelIndex)
+{
+	if (ModelIndex < 0 || ModelIndex >= mModels.GetSize())
+		return;
+
+	mActiveModel = mModels[ModelIndex];
+	mActiveModel->UpdateInterface();
+	gMainWindow->UpdateModels();
+
+	const lcArray<View*>& Views = gMainWindow->GetViews();
+	for (int ViewIdx = 0; ViewIdx < Views.GetSize(); ViewIdx++)
+		Views[ViewIdx]->SetModel(lcGetActiveModel());
+}
+
+bool Project::IsModelNameValid(const QString& Name) const
+{
+	if (Name.isEmpty())
+		return false;
+
+	for (int ModelIdx = 0; ModelIdx < mModels.GetSize(); ModelIdx++)
+		if (mModels[ModelIdx]->GetProperties().mName == Name)
+			return false;
+
+	return true;
+}
+
+void Project::CreateNewModel()
+{
+	const QString Prefix = tr("Model #");
+	int Max = 0;
+
+	for (int ModelIdx = 0; ModelIdx < mModels.GetSize(); ModelIdx++)
+	{
+		QString Name = mModels[ModelIdx]->GetProperties().mName;
+
+		if (Name.startsWith(Prefix))
+		{
+			QString NumberString = Name.mid(Prefix.length());
+			QTextStream Stream(&NumberString);
+			int Number;
+			Stream >> Number;
+			Max = qMax(Max, Number);
+		}
+	}
+
+	QString Name = Prefix + QString::number(Max + 1);
+
+	for (;;)
+	{
+		bool Ok = false;
+
+		Name = QInputDialog::getText(gMainWindow->mHandle, tr("New Model"), tr("Name:"), QLineEdit::Normal, Name, &Ok);
+
+		if (!Ok)
+			return;
+
+		if (IsModelNameValid(Name))
+			break;
+
+		if (Name.isEmpty())
+			QMessageBox::information(gMainWindow->mHandle, tr("Empty Name"), tr("The model name cannot be empty."));
+		else
+			QMessageBox::information(gMainWindow->mHandle, tr("Duplicate Model"), tr("A model named '%1' already exists in this project, please enter an unique name.").arg(Name));
+	}
+
+	if (!Name.isEmpty())
+	{
+		mModified = true;
+		mModels.Add(new lcModel(Name));
+		SetActiveModel(mModels.GetSize() - 1);
+		gMainWindow->UpdateTitle();
+	}
+}
+
+void Project::ShowModelListDialog()
+{
+	QList<QPair<QString, lcModel*>> Models;
+	Models.reserve(mModels.GetSize());
+
+	for (int ModelIdx = 0; ModelIdx < mModels.GetSize(); ModelIdx++)
+	{
+		lcModel* Model = mModels[ModelIdx];
+		Models.append(QPair<QString, lcModel*>(Model->GetProperties().mName, Model));
+	}
+
+	lcQModelListDialog Dialog(gMainWindow->mHandle, Models);
+
+	if (Dialog.exec() != QDialog::Accepted || Models.isEmpty())
+		return;
+
+	lcArray<lcModel*> NewModels;
+
+	for (QList<QPair<QString, lcModel*>>::iterator it = Models.begin(); it != Models.end(); it++)
+	{
+		lcModel* Model = it->second;
+
+		if (!Model)
+		{
+			Model = new lcModel(it->first);
+			mModified = true;
+		}
+		else if (Model->GetProperties().mName != it->first)
+		{
+			Model->SetName(it->first);
+			mModified = true;
+		}
+
+		NewModels.Add(Model);
+	}
+
+	for (int ModelIdx = 0; ModelIdx < mModels.GetSize(); ModelIdx++)
+	{
+		lcModel* Model = mModels[ModelIdx];
+
+		if (NewModels.FindIndex(Model) == -1)
+		{
+			delete Model;
+			mModified = true;
+		}
+	}
+
+	mModels = NewModels;
+
+	SetActiveModel(Dialog.mActiveModel);
+	gMainWindow->UpdateTitle();
 }
 
 bool Project::Load(const QString& FileName)
@@ -46,6 +185,7 @@ bool Project::Load(const QString& FileName)
 		return false;
 	}
 
+	mModels.DeleteAll();
 	QString Extension = QFileInfo(FileName).suffix().toLower();
 
 	if (Extension == QLatin1String("dat") || Extension == QLatin1String("ldr") || Extension == QLatin1String("mpd"))
@@ -74,6 +214,8 @@ bool Project::Load(const QString& FileName)
 		else
 			delete Model;
 	}
+
+	// todo: validate model names
 
 	if (mModels.IsEmpty())
 		return false;
@@ -132,6 +274,7 @@ bool Project::Load(const QString& FileName)
 */
 
 	mFileName = FileName;
+	mModified = false;
 
 	return true;
 }
@@ -169,17 +312,6 @@ bool Project::Save(const QString& FileName)
 	return true;
 }
 
-bool Project::IsModified() const
-{
-	if (mModified)
-		return true;
-
-	for (int ModelIdx = 0; ModelIdx < mModels.GetSize(); ModelIdx++)
-		if (mModels[ModelIdx]->IsModified())
-			return true;
-
-	return false;
-}
 /*
 void Project::LoadDefaults() // todo: Change the interface in SetProject() instead
 {
@@ -205,10 +337,6 @@ void Project::LoadDefaults() // todo: Change the interface in SetProject() inste
 	gMainWindow->UpdateFocusObject(NULL);
 }
 */
-QString Project::GetTitle() const
-{
-	return mFileName.isEmpty() ? tr("New Project.ldr") : QFileInfo(mFileName).fileName();
-}
 
 void Project::SaveImage()
 {

@@ -2,11 +2,7 @@
 #define _PROJECT_H_
 
 #include "object.h"
-#include "opengl.h"
 #include "lc_array.h"
-#include "lc_math.h"
-#include "lc_commands.h"
-#include "str.h"
 #include "lc_application.h"
 
 #define LC_SCENE_FOG			0x004	// Enable fog
@@ -50,17 +46,21 @@ public:
 		return mActiveModel;
 	}
 
+	bool IsModified() const;
 	QString GetTitle() const;
+
 	QString GetFileName() const
 	{
 		return mFileName;
 	}
 
-	void NewModel();
+	void SetActiveModel(int ModelIndex);
+	bool IsModelNameValid(const QString& Name) const;
+
+	void CreateNewModel();
+	void ShowModelListDialog();
 	bool Load(const QString& FileName);
 	bool Save(const QString& FileName);
-
-	bool IsModified() const;
 
 protected:
 	bool mModified;

@@ -1127,7 +1127,7 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 	// LC_MODEL_LIST
 	{
 		"Model.List",
-		QT_TRANSLATE_NOOP("Menu", "List..."),
+		QT_TRANSLATE_NOOP("Menu", "Models..."),
 		QT_TRANSLATE_NOOP("Status", "Show a list of all models in this project"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},

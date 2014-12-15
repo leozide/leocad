@@ -657,17 +657,12 @@ void lcQMainWindow::clipboardChanged()
 {
 	const QString mimeType("application/vnd.leocad-clipboard");
 	const QMimeData *mimeData = QApplication::clipboard()->mimeData();
-	lcMemFile *clipboard = NULL;
+	QByteArray clipboardData;
 
 	if (mimeData->hasFormat(mimeType))
-	{
-		QByteArray clipboardData = mimeData->data(mimeType);
+		clipboardData = mimeData->data(mimeType);
 
-		clipboard = new lcMemFile();
-		clipboard->WriteBuffer(clipboardData.constData(), clipboardData.size());
-	}
-
-	g_App->SetClipboard(clipboard);
+	g_App->SetClipboard(clipboardData);
 }
 
 void lcQMainWindow::splitView(Qt::Orientation Orientation)

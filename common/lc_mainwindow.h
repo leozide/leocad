@@ -130,6 +130,7 @@ public:
 	void Close();
 	void NewProject();
 	bool OpenProject(const QString& FileName);
+	void MergeProject();
 	bool SaveProject(const QString& FileName);
 	bool SaveProjectIfModified();
 	void HandleCommand(lcCommandId CommandId);

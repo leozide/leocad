@@ -23,6 +23,7 @@ Project::Project()
 {
 	mModified = false;
 	mActiveModel = new lcModel(tr("Model #1"));
+	mActiveModel->SetSaved();
 	mModels.Add(mActiveModel);
 }
 
@@ -116,7 +117,9 @@ void Project::CreateNewModel()
 	if (!Name.isEmpty())
 	{
 		mModified = true;
-		mModels.Add(new lcModel(Name));
+		lcModel* Model = new lcModel(Name);
+		Model->SetSaved();
+		mModels.Add(Model);
 		SetActiveModel(mModels.GetSize() - 1);
 		gMainWindow->UpdateTitle();
 	}
@@ -147,6 +150,7 @@ void Project::ShowModelListDialog()
 		if (!Model)
 		{
 			Model = new lcModel(it->first);
+			Model->SetSaved();
 			mModified = true;
 		}
 		else if (Model->GetProperties().mName != it->first)
@@ -198,6 +202,7 @@ bool Project::Load(const QString& FileName)
 			lcModel* Model = new lcModel(Name);
 			mModels.Add(Model);
 			Model->LoadLDraw(Stream);
+			Model->SetSaved();
 		}
 	}
 	else
@@ -210,7 +215,10 @@ bool Project::Load(const QString& FileName)
 		lcModel* Model = new lcModel(tr("Model1"));
 
 		if (Model->LoadBinary(&MemFile))
+		{
 			mModels.Add(Model);
+			Model->SetSaved();
+		}
 		else
 			delete Model;
 	}
@@ -299,7 +307,7 @@ bool Project::Save(const QString& FileName)
 		if (MPD)
 			Stream << QLatin1String("0 FILE ") << Model->GetProperties().mName << QLatin1String("\r\n");
 
-		Model->SaveLDraw(Stream);
+		Model->SaveLDraw(Stream, false);
 		Model->SetSaved();
 
 		if (MPD)

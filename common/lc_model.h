@@ -182,13 +182,22 @@ public:
 	void RemoveFocusPieceFromGroup();
 	void ShowEditGroupsDialog();
 
-	void SaveLDraw(QTextStream& Stream) const;
+	void SaveLDraw(QTextStream& Stream, bool SelectedOnly) const;
 	void LoadLDraw(QTextStream& Stream);
 	bool LoadBinary(lcFile* File);
+	void Merge(lcModel* Other);
+
 	void SetSaved()
 	{
+		if (mUndoHistory.IsEmpty())
+			SaveCheckpoint(QString());
+
 		mSavedHistory = mUndoHistory[0];
 	}
+
+	void Cut();
+	void Copy();
+	void Paste();
 
 	void GetScene(lcScene& Scene, lcCamera* ViewCamera, bool DrawInterface) const;
 	void DrawBackground(lcContext* Context);

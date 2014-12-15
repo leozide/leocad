@@ -202,6 +202,70 @@ bool lcMainWindow::OpenProject(const QString& FileName)
 	return false;
 }
 
+void lcMainWindow::MergeProject()
+{
+	/*
+	QString LoadFileName = FileName;
+
+	if (LoadFileName.isEmpty())
+	{
+		LoadFileName = lcGetActiveProject()->GetFileName();
+
+		if (LoadFileName.isEmpty())
+			LoadFileName = lcGetProfileString(LC_PROFILE_PROJECTS_PATH);
+
+		LoadFileName = QFileDialog::getOpenFileName(mHandle, tr("Open Project"), LoadFileName, tr("Supported Files (*.lcd *.ldr *.dat *.mpd);;All Files (*.*)"));
+
+		if (LoadFileName.isEmpty())
+			return false;
+	}
+
+	Project* NewProject = new Project();
+
+	if (NewProject->Load(LoadFileName))
+	{
+		g_App->SetProject(NewProject);
+		AddRecentFile(LoadFileName);
+
+		return true;
+	}
+
+	QMessageBox::information(mHandle, tr("LeoCAD"), tr("Error loading '%1'.").arg(LoadFileName));
+	delete NewProject;
+
+	return false;
+	*/
+
+/*
+		case LC_FILE_MERGE:
+		{
+			QString FileName;
+
+			if (!mFileName.isEmpty())
+				FileName = mFileName;
+			else
+				FileName = lcGetProfileString(LC_PROFILE_PROJECTS_PATH);
+
+			FileName = QFileDialog::getOpenFileName(gMainWindow->mHandle, tr("Merge Project"), FileName, tr("Supported Files (*.lcd *.ldr *.dat *.mpd);;All Files (*.*)"));
+
+			if (!FileName.isEmpty())
+			{
+				// todo: detect format
+				lcDiskFile file;
+				if (file.Open(FileName.toLatin1().constData(), "rb")) // todo: qstring
+				{
+					if (file.GetLength() != 0)
+					{
+						FileLoad(&file, false, true);
+						CheckPoint("Merging");
+					}
+					file.Close();
+				}
+			}
+		} break;
+*/
+}
+
 bool lcMainWindow::SaveProject(const QString& FileName)
 {
 	QString SaveFileName;
@@ -272,34 +336,11 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 	case LC_FILE_OPEN:
 		OpenProject(QString());
 		break;
-/*
-		case LC_FILE_MERGE:
-		{
-			QString FileName;
 
-			if (!mFileName.isEmpty())
-				FileName = mFileName;
-			else
-				FileName = lcGetProfileString(LC_PROFILE_PROJECTS_PATH);
+	case LC_FILE_MERGE:
+		MergeProject();
+		break;
 
-			FileName = QFileDialog::getOpenFileName(gMainWindow->mHandle, tr("Merge Project"), FileName, tr("Supported Files (*.lcd *.ldr *.dat *.mpd);;All Files (*.*)"));
-
-			if (!FileName.isEmpty())
-			{
-				// todo: detect format
-				lcDiskFile file;
-				if (file.Open(FileName.toLatin1().constData(), "rb")) // todo: qstring
-				{
-					if (file.GetLength() != 0)
-					{
-						FileLoad(&file, false, true);
-						CheckPoint("Merging");
-					}
-					file.Close();
-				}
-			}
-		} break;
-*/
 	case LC_FILE_SAVE:
 		SaveProject(lcGetActiveProject()->GetFileName());
 		break;
@@ -371,184 +412,19 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 	case LC_EDIT_REDO:
 		lcGetActiveModel()->RedoAction();
 		break;
-/*
+
 	case LC_EDIT_CUT:
+		lcGetActiveModel()->Cut();
+		break;
+
 	case LC_EDIT_COPY:
-		{
-			lcMemFile* Clipboard = new lcMemFile();
+		lcGetActiveModel()->Copy();
+		break;
 
-			int i = 0;
-//			lcLight* pLight;
+	case LC_EDIT_PASTE:
+		lcGetActiveModel()->Paste();
+		break;
 
-			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-				if (mPieces[PieceIdx]->IsSelected())
-					i++;
-			Clipboard->WriteBuffer(&i, sizeof(i));
-
-			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-			{
-				lcPiece* Piece = mPieces[PieceIdx];
-
-				if (Piece->IsSelected())
-					Piece->FileSave(*Clipboard);
-			}
-
-			i = mGroups.GetSize();
-			Clipboard->WriteBuffer(&i, sizeof(i));
-
-			for (int GroupIdx = 0; GroupIdx < mGroups.GetSize(); GroupIdx++)
-				mGroups[GroupIdx]->FileSave(Clipboard, mGroups);
-
-			i = 0;
-			for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
-				if (mCameras[CameraIdx]->IsSelected())
-					i++;
-			Clipboard->WriteBuffer(&i, sizeof(i));
-
-			for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
-			{
-				lcCamera* pCamera = mCameras[CameraIdx];
-
-				if (pCamera->IsSelected())
-					pCamera->FileSave(*Clipboard);
-			}
-
-//			for (i = 0, pLight = m_pLights; pLight; pLight = pLight->m_pNext)
-//				if (pLight->IsSelected())
-//					i++;
-//			Clipboard->Write(&i, sizeof(i));
-
-//			for (pLight = m_pLights; pLight; pLight = pLight->m_pNext)
-//				if (pLight->IsSelected())
-//					pLight->FileSave(Clipboard);
-
-			if (id == LC_EDIT_CUT)
-			{
-				RemoveSelectedObjects();
-				gMainWindow->UpdateFocusObject(GetFocusObject());
-				UpdateSelection();
-				gMainWindow->UpdateAllViews();
-				CheckPoint("Cutting");
-			}
-
-			g_App->ExportClipboard(Clipboard);
-		} break;
-
-		case LC_EDIT_PASTE:
-		{
-			lcFile* file = g_App->mClipboard;
-			if (file == NULL)
-				break;
-			file->Seek(0, SEEK_SET);
-			ClearSelection(false);
-
-			lcArray<lcPiece*> PastedPieces;
-			int NumPieces;
-			file->ReadBuffer(&NumPieces, sizeof(NumPieces));
-
-			while (NumPieces--)
-			{
-				lcPiece* Piece = new lcPiece(NULL);
-				Piece->FileLoad(*file);
-				PastedPieces.Add(Piece);
-			}
-
-			lcArray<lcGroup*> Groups;
-			int NumGroups;
-			file->ReadBuffer(&NumGroups, sizeof(NumGroups));
-
-			while (NumGroups--)
-			{
-				lcGroup* Group = new lcGroup();
-				Group->FileLoad(file);
-				Groups.Add(Group);
-			}
-
-			for (int PieceIdx = 0; PieceIdx < PastedPieces.GetSize(); PieceIdx++)
-			{
-				lcPiece* Piece = PastedPieces[PieceIdx];
-				Piece->CreateName(mPieces);
-				Piece->SetStepShow(mCurrentStep);
-				mPieces.Add(Piece);
-				Piece->SetSelected(true);
-
-				int GroupIndex = LC_POINTER_TO_INT(Piece->GetGroup());
-				if (GroupIndex != -1)
-					Piece->SetGroup(Groups[GroupIndex]);
-				else
-					Piece->SetGroup(NULL);
-			}
-
-			for (int GroupIdx = 0; GroupIdx < Groups.GetSize(); GroupIdx++)
-			{
-				lcGroup* Group = Groups[GroupIdx];
-				int GroupIndex = LC_POINTER_TO_INT(Group->mGroup);
-				Group->mGroup = (GroupIndex != -1) ? Groups[GroupIndex] : NULL;
-			}
-
-			for (int GroupIdx = 0; GroupIdx < Groups.GetSize(); GroupIdx++)
-			{
-				lcGroup* Group = Groups[GroupIdx];
-				bool Add = false;
-
-				for (int PieceIdx = 0; PieceIdx < PastedPieces.GetSize(); PieceIdx++)
-				{
-					lcPiece* Piece = PastedPieces[PieceIdx];
-
-					for (lcGroup* PieceGroup = Piece->GetGroup(); PieceGroup; PieceGroup = PieceGroup->mGroup)
-					{
-						if (PieceGroup == Group)
-						{
-							Add = true;
-							break;
-						}
-					}
-
-					if (Add)
-						break;
-				}
-
-				if (Add)
-				{
-					int a, max = 0;
-
-					for (int SearchGroupIdx = 0; SearchGroupIdx < mGroups.GetSize(); SearchGroupIdx++)
-					{
-						lcGroup* SearchGroup = mGroups[SearchGroupIdx];
-
-						if (strncmp("Pasted Group #", SearchGroup ->m_strName, 14) == 0)
-							if (sscanf(SearchGroup ->m_strName + 14, "%d", &a) == 1)
-								if (a > max)
-									max = a;
-					}
-
-					sprintf(Group->m_strName, "Pasted Group #%.2d", max+1);
-					mGroups.Add(Group);
-				}
-				else
-					delete Group;
-			}
-
-			int NumCameras;
-			file->ReadBuffer(&NumCameras, sizeof(NumCameras));
-
-			while (NumCameras--)
-			{
-				lcCamera* pCamera = new lcCamera(false);
-				pCamera->FileLoad(*file);
-				pCamera->CreateName(mCameras);
-				pCamera->SetSelected(true);
-				mCameras.Add(pCamera);
-			}
-
-			// TODO: lights
-			CalculateStep();
-			CheckPoint("Pasting");
-			gMainWindow->UpdateFocusObject(GetFocusObject());
-			UpdateSelection();
-			gMainWindow->UpdateAllViews();
-		} break;
-*/
 	case LC_EDIT_FIND:
 		if (gMainWindow->DoDialog(LC_DIALOG_FIND, &gMainWindow->mSearchOptions))
 			lcGetActiveModel()->FindPiece(true, true);

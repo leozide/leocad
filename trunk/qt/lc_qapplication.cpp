@@ -17,12 +17,11 @@ void lcApplication::RunProcess(const char* ExecutablePath, const lcArray<String>
 	QProcess::execute(ExecutablePath, argumentList);
 }
 
-void lcApplication::ExportClipboard(lcMemFile* Clipboard)
+void lcApplication::ExportClipboard(const QByteArray& Clipboard)
 {
-	QByteArray clipboardData = QByteArray::fromRawData((const char*)Clipboard->mBuffer, Clipboard->GetLength());
 	QMimeData *mimeData = new QMimeData();
 
-	mimeData->setData("application/vnd.leocad-clipboard", clipboardData);
+	mimeData->setData("application/vnd.leocad-clipboard", Clipboard);
 	QApplication::clipboard()->setMimeData(mimeData);
 
 	SetClipboard(Clipboard);

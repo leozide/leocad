@@ -147,9 +147,6 @@ lcModel::lcModel(const QString& Name)
 	mProperties.mName = Name;
 	mProperties.LoadDefaults();
 
-	SaveCheckpoint("");
-	SetSaved();
-
 	mCurrentStep = 1;
 	mBackgroundTexture = NULL;
 }
@@ -188,7 +185,7 @@ void lcModel::DeleteModel()
 	mGroups.DeleteAll();
 }
 
-void lcModel::SaveLDraw(QTextStream& Stream) const
+void lcModel::SaveLDraw(QTextStream& Stream, bool SelectedOnly) const
 {
 	QLatin1String LineEnding("\r\n");
 
@@ -206,7 +203,7 @@ void lcModel::SaveLDraw(QTextStream& Stream) const
 		{
 			lcPiece* Piece = mPieces[PieceIdx];
 
-			if (Piece->GetStepShow() != Step)
+			if (Piece->GetStepShow() != Step || (SelectedOnly && !Piece->IsSelected()))
 				continue;
 
 			lcGroup* PieceGroup = Piece->GetGroup();
@@ -270,10 +267,22 @@ void lcModel::SaveLDraw(QTextStream& Stream) const
 	}
 
 	for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
-		mCameras[CameraIdx]->SaveLDraw(Stream);
+	{
+		lcCamera* Camera = mCameras[CameraIdx];
+
+		if (!SelectedOnly || Camera->IsSelected())
+			Camera->SaveLDraw(Stream);
+	}
 
 	for (int LightIdx = 0; LightIdx < mLights.GetSize(); LightIdx++)
-		mLights[LightIdx]->SaveLDraw(Stream);
+	{
+		lcLight* Light = mLights[LightIdx];
+
+		if (!SelectedOnly || Light->IsSelected())
+			Light->SaveLDraw(Stream);
+	}
+
+	Stream.flush();
 }
 
 void lcModel::LoadLDraw(QTextStream& Stream)
@@ -436,10 +445,6 @@ void lcModel::LoadLDraw(QTextStream& Stream)
 			}
 		}
 	}
-
-	DeleteHistory();
-	SaveCheckpoint("");
-	SetSaved();
 
 	CalculateStep();
 	UpdateBackgroundTexture();
@@ -739,13 +744,9 @@ bool lcModel::LoadBinary(lcFile* file)
 		mProperties.mBackgroundGradientColor2[2] = (float)((unsigned char) ((rgb) >> 16))/255;
 	}
 
-	DeleteHistory();
-	SaveCheckpoint("");
-	SetSaved();
-
 	UpdateBackgroundTexture();
 	CalculateStep();
-
+/*
 	gMainWindow->UpdateFocusObject(GetFocusObject());
 
 	const lcArray<View*>& Views = gMainWindow->GetViews();
@@ -765,8 +766,89 @@ bool lcModel::LoadBinary(lcFile* file)
 	UpdateSelection();
 	gMainWindow->UpdateCurrentStep();
 	gMainWindow->UpdateAllViews();
-
+*/
 	return true;
+}
+
+void lcModel::Merge(lcModel* Other)
+{
+	for (int PieceIdx = 0; PieceIdx < Other->mPieces.GetSize(); PieceIdx++)
+	{
+		lcPiece* Piece = Other->mPieces[PieceIdx];
+		Piece->CreateName(mPieces);
+		mPieces.Add(Piece);
+	}
+
+	Other->mPieces.RemoveAll();
+
+	for (int CameraIdx = 0; CameraIdx < Other->mCameras.GetSize(); CameraIdx++)
+	{
+		lcCamera* Camera = Other->mCameras[CameraIdx];
+		Camera->CreateName(mCameras);
+		mCameras.Add(Camera);
+	}
+
+	Other->mCameras.RemoveAll();
+
+	for (int LightIdx = 0; LightIdx < Other->mLights.GetSize(); LightIdx++)
+	{
+		lcLight* Light = Other->mLights[LightIdx];
+		Light->CreateName(mLights);
+		mLights.Add(Light);
+	}
+
+	Other->mLights.RemoveAll();
+
+	for (int GroupIdx = 0; GroupIdx < Other->mGroups.GetSize(); GroupIdx++)
+	{
+		lcGroup* Group = Other->mGroups[GroupIdx];
+		Group->CreateName(mGroups);
+		mGroups.Add(Group);
+	}
+
+	Other->mGroups.RemoveAll();
+
+	delete Other;
+}
+
+void lcModel::Cut()
+{
+	Copy();
+
+	if (RemoveSelectedObjects())
+	{
+		gMainWindow->UpdateFocusObject(NULL);
+		UpdateSelection();
+		gMainWindow->UpdateAllViews();
+		SaveCheckpoint("Cutting");
+	}
+}
+
+void lcModel::Copy()
+{
+	QByteArray File;
+	QTextStream Stream(&File, QIODevice::WriteOnly);
+
+	SaveLDraw(Stream, true);
+
+	g_App->ExportClipboard(File);
+}
+
+void lcModel::Paste()
+{
+	if (g_App->mClipboard.isEmpty())
+		return;
+
+	lcModel* Model = new lcModel(QString());
+
+	QTextStream Stream(&g_App->mClipboard);
+	Model->LoadLDraw(Stream);
+
+	Merge(Model);
+	SaveCheckpoint(tr("Pasting"));
+
+	CalculateStep();
+	gMainWindow->UpdateAllViews();
 }
 
 void lcModel::GetScene(lcScene& Scene, lcCamera* ViewCamera, bool DrawInterface) const
@@ -985,7 +1067,7 @@ void lcModel::SaveCheckpoint(const QString& Description)
 	ModelHistoryEntry->Description = Description;
 
 	QTextStream Stream(&ModelHistoryEntry->File);
-	SaveLDraw(Stream);
+	SaveLDraw(Stream, false);
 
 	mUndoHistory.InsertAt(0, ModelHistoryEntry);
 	mRedoHistory.DeleteAll();
@@ -3293,7 +3375,7 @@ void lcModel::ShowMinifigDialog()
 void lcModel::UpdateInterface()
 {
 	gMainWindow->UpdateUndoRedo(mUndoHistory.GetSize() > 1 ? mUndoHistory[0]->Description : NULL, !mRedoHistory.IsEmpty() ? mRedoHistory[0]->Description : NULL);
-	gMainWindow->UpdatePaste(g_App->mClipboard != NULL);
+	gMainWindow->UpdatePaste(!g_App->mClipboard.isEmpty());
 	gMainWindow->UpdateCategories();
 	gMainWindow->UpdateTitle();
 	gMainWindow->SetTool(gMainWindow->GetTool());

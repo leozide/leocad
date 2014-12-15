@@ -52,13 +52,13 @@ public:
 	void OpenURL(const char* URL);
 	void RunProcess(const char* ExecutablePath, const lcArray<String>& Arguments);
 	void GetFileList(const char* Path, lcArray<String>& FileList);
-	void SetClipboard(lcFile* Clipboard);
-	void ExportClipboard(lcMemFile* Clipboard);
+	void SetClipboard(const QByteArray& Clipboard);
+	void ExportClipboard(const QByteArray& Clipboard);
 
 	Project* mProject;
 	lcPiecesLibrary* mLibrary;
 	lcPreferences mPreferences;
-	lcFile* mClipboard;
+	QByteArray mClipboard;
 
 protected:
 	void ParseIntegerArgument(int* CurArg, int argc, char* argv[], int* Value);

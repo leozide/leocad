@@ -34,3 +34,33 @@ void lcGroup::FileSave(lcFile* File, const lcArray<lcGroup*>& Groups)
 	lcint32 GroupIndex = Groups.FindIndex(mGroup);
 	File->WriteS32(&GroupIndex, 1);
 }
+
+void lcGroup::CreateName(const lcArray<lcGroup*>& Groups)
+{
+	if (m_strName[0])
+	{
+		bool Found = false;
+		for (int GroupIdx = 0; GroupIdx < Groups.GetSize(); GroupIdx++)
+		{
+			if (!strcmp(Groups[GroupIdx]->m_strName, m_strName))
+			{
+				Found = true;
+				break;
+			}
+		}
+
+		if (!Found)
+			return;
+	}
+
+	int i, max = 0;
+	const char* Prefix = "Group ";
+
+	for (int GroupIdx = 0; GroupIdx < Groups.GetSize(); GroupIdx++)
+		if (strncmp(Groups[GroupIdx]->m_strName, Prefix, strlen(Prefix)) == 0)
+			if (sscanf(Groups[GroupIdx]->m_strName + strlen(Prefix), " %d", &i) == 1)
+				if (i > max)
+					max = i;
+
+	sprintf(m_strName, "%s %d", Prefix, max+1);
+}

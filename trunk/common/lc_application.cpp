@@ -65,7 +65,6 @@ lcApplication::lcApplication()
 
 lcApplication::~lcApplication()
 {
-	delete mClipboard;
 	delete mLibrary;
 }
 
@@ -82,12 +81,10 @@ void lcApplication::SetProject(Project* Project)
 	gMainWindow->UpdateTitle();
 }
 
-void lcApplication::SetClipboard(lcFile* Clipboard)
+void lcApplication::SetClipboard(const QByteArray& Clipboard)
 {
-	delete mClipboard;
 	mClipboard = Clipboard;
-
-	gMainWindow->UpdatePaste(mClipboard != NULL);
+	gMainWindow->UpdatePaste(!mClipboard.isEmpty());
 }
 
 bool lcApplication::LoadPiecesLibrary(const char* LibPath, const char* LibraryInstallPath, const char* LDrawPath, const char* LibraryCachePath)

@@ -18,6 +18,7 @@ public:
 
 	void FileLoad(lcFile* File);
 	void FileSave(lcFile* File, const lcArray<lcGroup*>& Groups);
+	void CreateName(const lcArray<lcGroup*>& Groups);
 
 	lcGroup* mGroup;
 	char m_strName[LC_MAX_GROUP_NAME + 1];

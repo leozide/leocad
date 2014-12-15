@@ -57,6 +57,22 @@ void lcLight::SaveLDraw(QTextStream& Stream) const
 
 void lcLight::CreateName(const lcArray<lcLight*>& Lights)
 {
+	if (m_strName[0])
+	{
+		bool Found = false;
+		for (int LightIdx = 0; LightIdx < Lights.GetSize(); LightIdx++)
+		{
+			if (!strcmp(Lights[LightIdx]->m_strName, m_strName))
+			{
+				Found = true;
+				break;
+			}
+		}
+
+		if (!Found)
+			return;
+	}
+
 	int i, max = 0;
 
 	for (int LightIdx = 0; LightIdx < Lights.GetSize(); LightIdx++)

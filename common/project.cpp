@@ -248,12 +248,6 @@ bool Project::Load(const QString& FileName)
 		{
 			Success = FileLoad(&file, false, false);
 
-	UpdateBackgroundTexture();
-	CalculateStep();
-
-	if (!bUndo)
-		ClearSelection(false);
-
 	if (!bMerge)
 		gMainWindow->UpdateFocusObject(GetFocusObject());
 
@@ -318,6 +312,14 @@ bool Project::Save(const QString& FileName)
 	mModified = false;
 
 	return true;
+}
+
+void Project::Merge(Project* Other)
+{
+	for (int ModelIdx = 0; ModelIdx < Other->mModels.GetSize(); ModelIdx++)
+		mModels.Add(Other->mModels[ModelIdx]);
+
+	mModified = true;
 }
 
 /*

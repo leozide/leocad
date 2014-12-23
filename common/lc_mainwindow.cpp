@@ -204,66 +204,34 @@ bool lcMainWindow::OpenProject(const QString& FileName)
 
 void lcMainWindow::MergeProject()
 {
-	/*
-	QString LoadFileName = FileName;
+	QString LoadFileName = lcGetActiveProject()->GetFileName();
 
 	if (LoadFileName.isEmpty())
-	{
-		LoadFileName = lcGetActiveProject()->GetFileName();
+		LoadFileName = lcGetProfileString(LC_PROFILE_PROJECTS_PATH);
 
-		if (LoadFileName.isEmpty())
-			LoadFileName = lcGetProfileString(LC_PROFILE_PROJECTS_PATH);
+	LoadFileName = QFileDialog::getOpenFileName(mHandle, tr("Open Project"), LoadFileName, tr("Supported Files (*.lcd *.ldr *.dat *.mpd);;All Files (*.*)"));
 
-		LoadFileName = QFileDialog::getOpenFileName(mHandle, tr("Open Project"), LoadFileName, tr("Supported Files (*.lcd *.ldr *.dat *.mpd);;All Files (*.*)"));
-
-		if (LoadFileName.isEmpty())
-			return false;
-	}
+	if (LoadFileName.isEmpty())
+		return;
 
 	Project* NewProject = new Project();
 
 	if (NewProject->Load(LoadFileName))
 	{
-		g_App->SetProject(NewProject);
-		AddRecentFile(LoadFileName);
+		int NumModels = NewProject->GetModels().GetSize();
 
-		return true;
+		lcGetActiveProject()->Merge(NewProject);
+
+		if (NumModels == 1)
+			QMessageBox::information(mHandle, tr("LeoCAD"), tr("Merged 1 model."));
+		else
+			QMessageBox::information(mHandle, tr("LeoCAD"), tr("Merged %1 models.").arg(NumModels));
 	}
-
-	QMessageBox::information(mHandle, tr("LeoCAD"), tr("Error loading '%1'.").arg(LoadFileName));
-	delete NewProject;
-
-	return false;
-	*/
-
-/*
-		case LC_FILE_MERGE:
-		{
-			QString FileName;
-
-			if (!mFileName.isEmpty())
-				FileName = mFileName;
-			else
-				FileName = lcGetProfileString(LC_PROFILE_PROJECTS_PATH);
-
-			FileName = QFileDialog::getOpenFileName(gMainWindow->mHandle, tr("Merge Project"), FileName, tr("Supported Files (*.lcd *.ldr *.dat *.mpd);;All Files (*.*)"));
-
-			if (!FileName.isEmpty())
-			{
-				// todo: detect format
-				lcDiskFile file;
-				if (file.Open(FileName.toLatin1().constData(), "rb")) // todo: qstring
-				{
-					if (file.GetLength() != 0)
-					{
-						FileLoad(&file, false, true);
-						CheckPoint("Merging");
-					}
-					file.Close();
-				}
-			}
-		} break;
-*/
+	else
+	{
+		QMessageBox::information(mHandle, tr("LeoCAD"), tr("Error loading '%1'.").arg(LoadFileName));
+		delete NewProject;
+	}
 }
 
 bool lcMainWindow::SaveProject(const QString& FileName)

@@ -61,6 +61,7 @@ public:
 	void ShowModelListDialog();
 	bool Load(const QString& FileName);
 	bool Save(const QString& FileName);
+	void Merge(Project* Other);
 
 protected:
 	bool mModified;

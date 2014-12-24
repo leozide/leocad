@@ -1053,7 +1053,7 @@ void MinifigWizard::OnDraw()
 
 	for (int PieceIdx = 0; PieceIdx < LC_MFW_NUMITEMS; PieceIdx++)
 		if (mMinifig->Parts[PieceIdx])
-			mMinifig->Parts[PieceIdx]->AddRenderMeshes(ViewMatrix, &mMinifig->Matrices[PieceIdx], mMinifig->Colors[PieceIdx], false, false, OpaqueMeshes, TranslucentMeshes);
+			mMinifig->Parts[PieceIdx]->AddRenderMeshes(ViewMatrix, mMinifig->Matrices[PieceIdx], mMinifig->Colors[PieceIdx], false, false, OpaqueMeshes, TranslucentMeshes);
 
 	OpaqueMeshes.Sort(lcOpaqueRenderMeshCompare);
 	mContext->DrawOpaqueMeshes(ViewMatrix, OpaqueMeshes);

@@ -118,6 +118,14 @@ public:
 		return mSavedHistory != mUndoHistory[0];
 	}
 
+	bool IncludesModel(const lcModel* Model) const;
+	void CreatePieceInfo();
+
+	PieceInfo* GetPieceInfo() const
+	{
+		return mPieceInfo;
+	}
+
 	const lcArray<lcPiece*>& GetPieces() const
 	{
 		return mPieces;
@@ -200,6 +208,7 @@ public:
 	void Paste();
 
 	void GetScene(lcScene& Scene, lcCamera* ViewCamera, bool DrawInterface) const;
+	void AddRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, int DefaultColorIndex, bool Focused, bool Selected) const;
 	void DrawBackground(lcContext* Context);
 
 	void RayTest(lcObjectRayTest& ObjectRayTest) const;
@@ -303,6 +312,7 @@ protected:
 	void SelectGroup(lcGroup* TopGroup, bool Select);
 
 	lcModelProperties mProperties;
+	PieceInfo* mPieceInfo;
 
 	lcStep mCurrentStep;
 	lcVector3 mMouseToolDistance;

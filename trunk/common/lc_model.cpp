@@ -149,12 +149,25 @@ lcModel::lcModel(const QString& Name)
 
 	mCurrentStep = 1;
 	mBackgroundTexture = NULL;
+	mPieceInfo = NULL;
 }
 
 lcModel::~lcModel()
 {
 	DeleteModel();
 	DeleteHistory();
+}
+
+bool lcModel::IncludesModel(const lcModel* Model) const
+{
+	if (Model == this)
+		return true;
+
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+		if (mPieces[PieceIdx]->mPieceInfo->IncludesModel(Model))
+			return true;
+
+	return false;
 }
 
 void lcModel::DeleteHistory()
@@ -183,6 +196,13 @@ void lcModel::DeleteModel()
 	mCameras.DeleteAll();
 	mLights.DeleteAll();
 	mGroups.DeleteAll();
+}
+
+void lcModel::CreatePieceInfo()
+{
+	QString PartID = mProperties.mName.toUpper();
+	mPieceInfo = lcGetPiecesLibrary()->FindPiece(PartID.toLatin1().constData(), true);
+	mPieceInfo->SetModel(this);
 }
 
 void lcModel::SaveLDraw(QTextStream& Stream, bool SelectedOnly) const
@@ -295,6 +315,7 @@ void lcModel::LoadLDraw(QTextStream& Stream)
 
 	while (!Stream.atEnd())
 	{
+		qint64 Pos = Stream.pos();
 		QString Line = Stream.readLine().trimmed();
 		QTextStream LineStream(&Line, QIODevice::ReadOnly);
 
@@ -307,10 +328,16 @@ void lcModel::LoadLDraw(QTextStream& Stream)
 
 			if (Token == QLatin1String("FILE"))
 			{
+				if (!mProperties.mName.isEmpty())
+				{
+					Stream.seek(Pos);
+					break;
+				}
+
 				mProperties.mName = LineStream.readAll().trimmed();
 				continue;
 			}
-			else if (Token == QLatin1String("ENDFILE"))
+			else if (Token == QLatin1String("NOFILE"))
 			{
 				break;
 			}
@@ -860,8 +887,6 @@ void lcModel::GetScene(lcScene& Scene, lcCamera* ViewCamera, bool DrawInterface)
 	Scene.TranslucentMeshes.AllocGrow(mPieces.GetSize());
 	Scene.InterfaceObjects.RemoveAll();
 
-	const lcMatrix44& ViewMatrix = ViewCamera->mWorldView;
-
 	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 	{
 		lcPiece* Piece = mPieces[PieceIdx];
@@ -883,7 +908,7 @@ void lcModel::GetScene(lcScene& Scene, lcCamera* ViewCamera, bool DrawInterface)
 			Selected = false;
 		}
 
-		Info->AddRenderMeshes(ViewMatrix, &Piece->mModelWorld, Piece->mColorIndex, Focused, Selected, Scene.OpaqueMeshes, Scene.TranslucentMeshes);
+		Info->AddRenderMeshes(Scene, Piece->mModelWorld, Piece->mColorIndex, Focused, Selected);
 
 		if (Selected)
 			Scene.InterfaceObjects.Add(Piece);
@@ -910,6 +935,31 @@ void lcModel::GetScene(lcScene& Scene, lcCamera* ViewCamera, bool DrawInterface)
 
 	Scene.OpaqueMeshes.Sort(lcOpaqueRenderMeshCompare);
 	Scene.TranslucentMeshes.Sort(lcTranslucentRenderMeshCompare);
+}
+
+void lcModel::AddRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, int DefaultColorIndex, bool Focused, bool Selected) const
+{
+	// todo: use last step
+
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+	{
+		lcPiece* Piece = mPieces[PieceIdx];
+
+		if (!Piece->IsVisible(mCurrentStep))
+			continue;
+
+		int ColorIndex = Piece->mColorIndex;
+
+		if (ColorIndex == gDefaultColor)
+			ColorIndex = DefaultColorIndex;
+
+		PieceInfo* Info = Piece->mPieceInfo;
+		Info->AddRenderMeshes(Scene, lcMul(Piece->mModelWorld, WorldMatrix), ColorIndex, Focused, Selected);
+	}
+
+	// todo: add model bounding box
+//		if (Selected)
+//			Scene.InterfaceObjects.Add(Piece);
 }
 
 void lcModel::DrawBackground(lcContext* Context)

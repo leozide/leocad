@@ -602,7 +602,7 @@ void lcQMainWindow::partsTreeItemChanged(QTreeWidgetItem *current, QTreeWidgetIt
 	if (!current)
 		return;
 
-	PieceInfo *info = (PieceInfo*)current->data(0, lcQPartsTree::PartInfoRole).value<void*>();
+	PieceInfo *info = (PieceInfo*)current->data(0, lcQPartsTree::PieceInfoRole).value<void*>();
 
 	if (info)
 	{
@@ -1286,6 +1286,8 @@ void lcQMainWindow::updateModels()
 		else
 			Action->setVisible(false);
 	}
+
+	partsTree->UpdateModels();
 }
 
 void lcQMainWindow::updateCategories()

@@ -119,8 +119,7 @@ public:
 	bool Load(const char* LibraryPath, const char* CachePath);
 	void Unload();
 
-	PieceInfo* FindPiece(const char* PieceName, bool CreatePlaceholderIfMissing);
-	PieceInfo* CreatePlaceholder(const char* PieceName);
+	PieceInfo* FindPiece(const char* PieceName, bool CreatePlaceholder);
 	bool LoadPiece(PieceInfo* Info);
 	bool LoadBuiltinPieces();
 

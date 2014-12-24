@@ -60,26 +60,23 @@ void lcPiecesLibrary::Unload()
 	mZipFiles[LC_ZIPFILE_UNOFFICIAL] = NULL;
 }
 
-PieceInfo* lcPiecesLibrary::FindPiece(const char* PieceName, bool CreatePlaceholderIfMissing)
+PieceInfo* lcPiecesLibrary::FindPiece(const char* PieceName, bool CreatePlaceholder)
 {
 	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 		if (!strcmp(PieceName, mPieces[PieceIdx]->m_strName))
 			return mPieces[PieceIdx];
 
-	if (CreatePlaceholderIfMissing)
-		return CreatePlaceholder(PieceName);
+	if (CreatePlaceholder)
+	{
+		PieceInfo* Info = new PieceInfo();
+
+		Info->CreatePlaceholder(PieceName);
+		mPieces.Add(Info);
+
+		return Info;
+	}
 
 	return NULL;
-}
-
-PieceInfo* lcPiecesLibrary::CreatePlaceholder(const char* PieceName)
-{
-	PieceInfo* Info = new PieceInfo();
-
-	Info->CreatePlaceholder(PieceName);
-	mPieces.Add(Info);
-
-	return Info;
 }
 
 lcTexture* lcPiecesLibrary::FindTexture(const char* TextureName)
@@ -747,7 +744,7 @@ void lcPiecesLibrary::SaveCacheFile()
 	{
 		PieceInfo* Info = mPieces[PieceIdx];
 
-		if (Info->mFlags & LC_PIECE_PLACEHOLDER)
+		if (Info->mFlags & LC_PIECE_PLACEHOLDER || Info->mFlags & LC_PIECE_MODEL)
 			continue;
 
 		bool Cached = (Info->mFlags & LC_PIECE_CACHED) != 0;

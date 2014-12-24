@@ -15,12 +15,13 @@ public:
 	void startDrag(Qt::DropActions supportedActions);
 
 	void updateCategories();
+	void UpdateModels();
 	void searchParts(const QString& searchString);
 	void setCurrentPart(PieceInfo *part);
 
 	enum
 	{
-		PartInfoRole = Qt::UserRole,
+		PieceInfoRole = Qt::UserRole,
 		CategoryRole,
 		ExpandedOnceRole
 	};
@@ -32,7 +33,8 @@ public slots:
 	void itemExpanded(QTreeWidgetItem *item);
 
 private:
-	QTreeWidgetItem *searchResultsItem;
+	QTreeWidgetItem* mModelListItem;
+	QTreeWidgetItem* mSearchResultsItem;
 };
 
 #endif // LC_QPARTSTREE_H

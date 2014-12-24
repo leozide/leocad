@@ -198,8 +198,7 @@ bool Project::Load(const QString& FileName)
 
 		while (!Stream.atEnd())
 		{
-			QString Name = tr("Model%1").arg(QString::number(mModels.GetSize() + 1));
-			lcModel* Model = new lcModel(Name);
+			lcModel* Model = new lcModel(QString());
 			mModels.Add(Model);
 			Model->LoadLDraw(Stream);
 			Model->SetSaved();
@@ -212,7 +211,7 @@ bool Project::Load(const QString& FileName)
 		MemFile.WriteBuffer(FileData.constData(), FileData.size());
 		MemFile.Seek(0, SEEK_SET);
 
-		lcModel* Model = new lcModel(tr("Model1"));
+		lcModel* Model = new lcModel(QString());
 
 		if (Model->LoadBinary(&MemFile))
 		{
@@ -223,10 +222,20 @@ bool Project::Load(const QString& FileName)
 			delete Model;
 	}
 
-	// todo: validate model names
-
 	if (mModels.IsEmpty())
 		return false;
+
+	for (int ModelIdx = 0; ModelIdx < mModels.GetSize(); ModelIdx++)
+	{
+		lcModel* Model = mModels[ModelIdx];
+
+		if (Model->GetProperties().mName.isEmpty())
+			Model->SetName(tr("Model #%1").arg(QString::number(ModelIdx + 1)));
+
+		// todo: validate model names
+
+		Model->CreatePieceInfo();
+	}
 
 	mActiveModel = mModels[0];
 

@@ -15,6 +15,7 @@
 #define LC_PIECE_HAS_LINES          0x08 // Piece has lines
 #define LC_PIECE_PLACEHOLDER        0x10 // Placeholder for a piece not in the library
 #define LC_PIECE_CACHED             0x20 // Piece is saved in the library cache
+#define LC_PIECE_MODEL              0x40 // Piece if a model
 
 #define LC_PIECE_NAME_LEN 256
 
@@ -83,9 +84,13 @@ public:
 	// Operations
 	void ZoomExtents(float Fov, float Aspect, float* EyePos = NULL) const;
 	void RenderPiece(int nColor);
-	void AddRenderMeshes(const lcMatrix44& ViewMatrix, lcMatrix44* WorldMatrix, int ColorIndex, bool Focused, bool Selected, lcArray<lcRenderMesh>& OpaqueMeshes, lcArray<lcRenderMesh>& TranslucentMeshes);
+	void AddRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, int ColorIndex, bool Focused, bool Selected);
+	void AddRenderMeshes(const lcMatrix44& ViewMatrix, const lcMatrix44& WorldMatrix, int ColorIndex, bool Focused, bool Selected, lcArray<lcRenderMesh>& OpaqueMeshes, lcArray<lcRenderMesh>& TranslucentMeshes);
 
 	void CreatePlaceholder(const char* Name);
+
+	void SetModel(lcModel* Model);
+	bool IncludesModel(const lcModel* Model) const;
 
 public:
 	lcMesh* mMesh;
@@ -100,6 +105,7 @@ public:
 
 protected:
 	int mRefCount;
+	lcModel* mModel;
 
 	void Load();
 	void Unload();

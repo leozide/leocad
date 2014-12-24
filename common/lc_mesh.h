@@ -168,7 +168,7 @@ public:
 
 struct lcRenderMesh
 {
-	lcMatrix44* WorldMatrix;
+	lcMatrix44 WorldMatrix;
 	lcMesh* Mesh;
 	int ColorIndex;
 	float Distance;

@@ -354,7 +354,7 @@ void lcContext::DrawOpaqueMeshes(const lcMatrix44& ViewMatrix, const lcArray<lcR
 		lcMesh* Mesh = RenderMesh.Mesh;
 
 		BindMesh(Mesh);
-		SetWorldViewMatrix(lcMul(*RenderMesh.WorldMatrix, ViewMatrix));
+		SetWorldViewMatrix(lcMul(RenderMesh.WorldMatrix, ViewMatrix));
 
 		for (int SectionIdx = 0; SectionIdx < Mesh->mNumSections; SectionIdx++)
 		{
@@ -414,7 +414,7 @@ void lcContext::DrawTranslucentMeshes(const lcMatrix44& ViewMatrix, const lcArra
 		lcMesh* Mesh = RenderMesh.Mesh;
 
 		BindMesh(Mesh);
-		SetWorldViewMatrix(lcMul(*RenderMesh.WorldMatrix, ViewMatrix));
+		SetWorldViewMatrix(lcMul(RenderMesh.WorldMatrix, ViewMatrix));
 
 		for (int SectionIdx = 0; SectionIdx < Mesh->mNumSections; SectionIdx++)
 		{

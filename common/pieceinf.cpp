@@ -7,6 +7,9 @@
 #include "pieceinf.h"
 #include "lc_library.h"
 #include "lc_application.h"
+#include "lc_model.h"
+#include "lc_context.h"
+#include "camera.h"
 
 PieceInfo::PieceInfo()
 {
@@ -15,12 +18,38 @@ PieceInfo::PieceInfo()
 	mFlags = 0;
 	mMesh = NULL;
 	mRefCount = 0;
+	mModel = NULL;
 }
 
 PieceInfo::~PieceInfo()
 {
 	if (mRefCount)
 		Unload();
+}
+
+void PieceInfo::SetModel(lcModel* Model)
+{
+	m_strName[0] = 0;
+	m_strDescription[0] = 0;
+
+	mFlags = LC_PIECE_MODEL;
+	mModel = Model;
+
+	delete mMesh;
+	mMesh = NULL;
+}
+
+bool PieceInfo::IncludesModel(const lcModel* Model) const
+{
+	if (mFlags & LC_PIECE_MODEL)
+	{
+		if (mModel == Model)
+			return true;
+
+		return mModel->IncludesModel(Model);
+	}
+
+	return false;
 }
 
 void PieceInfo::CreatePlaceholder(const char* Name)
@@ -55,16 +84,19 @@ void PieceInfo::Load()
 
 void PieceInfo::Unload()
 {
-	for (int SectionIdx = 0; SectionIdx < mMesh->mNumSections; SectionIdx++)
+	if (mMesh)
 	{
-		lcMeshSection& Section = mMesh->mSections[SectionIdx];
+		for (int SectionIdx = 0; SectionIdx < mMesh->mNumSections; SectionIdx++)
+		{
+			lcMeshSection& Section = mMesh->mSections[SectionIdx];
 
-		if (Section.Texture)
-			Section.Texture->Release();
+			if (Section.Texture)
+				Section.Texture->Release();
+		}
+
+		delete mMesh;
+		mMesh = NULL;
 	}
-
-	delete mMesh;
-	mMesh = NULL;
 }
 
 // Zoom extents for the preview window and print catalog
@@ -113,7 +145,38 @@ void PieceInfo::RenderPiece(int nColor)
 	mMesh->Render(nColor, false, false);
 }
 
-void PieceInfo::AddRenderMeshes(const lcMatrix44& ViewMatrix, lcMatrix44* WorldMatrix, int ColorIndex, bool Focused, bool Selected, lcArray<lcRenderMesh>& OpaqueMeshes, lcArray<lcRenderMesh>& TranslucentMeshes)
+void PieceInfo::AddRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, int ColorIndex, bool Focused, bool Selected)
+{
+	if (mFlags & LC_PIECE_MODEL)
+	{
+		mModel->AddRenderMeshes(Scene, WorldMatrix, ColorIndex, Focused, Selected);
+		return;
+	}
+
+	lcRenderMesh RenderMesh;
+
+	RenderMesh.WorldMatrix = WorldMatrix;
+	RenderMesh.Mesh = mMesh;
+	RenderMesh.ColorIndex = ColorIndex;
+	RenderMesh.Focused = Focused;
+	RenderMesh.Selected = Selected;
+
+	bool Translucent = lcIsColorTranslucent(ColorIndex);
+
+	if ((mFlags & (LC_PIECE_HAS_SOLID | LC_PIECE_HAS_LINES)) || ((mFlags & LC_PIECE_HAS_DEFAULT) && !Translucent))
+		Scene.OpaqueMeshes.Add(RenderMesh);
+
+	if ((mFlags & LC_PIECE_HAS_TRANSLUCENT) || ((mFlags & LC_PIECE_HAS_DEFAULT) && Translucent))
+	{
+		lcVector3 Pos = lcMul31(WorldMatrix[3], Scene.Camera->mWorldView);
+
+		RenderMesh.Distance = Pos[2];
+
+		Scene.TranslucentMeshes.Add(RenderMesh);
+	}
+}
+
+void PieceInfo::AddRenderMeshes(const lcMatrix44& ViewMatrix, const lcMatrix44& WorldMatrix, int ColorIndex, bool Focused, bool Selected, lcArray<lcRenderMesh>& OpaqueMeshes, lcArray<lcRenderMesh>& TranslucentMeshes)
 {
 	lcRenderMesh RenderMesh;
 
@@ -130,7 +193,7 @@ void PieceInfo::AddRenderMeshes(const lcMatrix44& ViewMatrix, lcMatrix44* WorldM
 
 	if ((mFlags & LC_PIECE_HAS_TRANSLUCENT) || ((mFlags & LC_PIECE_HAS_DEFAULT) && Translucent))
 	{
-		lcVector3 Pos = lcMul31((*WorldMatrix)[3], ViewMatrix);
+		lcVector3 Pos = lcMul31(WorldMatrix[3], ViewMatrix);
 
 		RenderMesh.Distance = Pos[2];
 

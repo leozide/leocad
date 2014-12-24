@@ -4,6 +4,8 @@
 #include "lc_category.h"
 #include "lc_library.h"
 #include "pieceinf.h"
+#include "project.h"
+#include "lc_model.h"
 
 static int lcQPartsTreeSortFunc(PieceInfo* const& a, PieceInfo* const& b)
 {
@@ -25,11 +27,12 @@ static int lcQPartsTreeSortFunc(PieceInfo* const& a, PieceInfo* const& b)
 	return 0;
 }
 
-lcQPartsTree::lcQPartsTree(QWidget *parent) :
-    QTreeWidget(parent)
+lcQPartsTree::lcQPartsTree(QWidget* Parent)
+	: QTreeWidget(Parent)
 {
 	setDragEnabled(true);
 	setHeaderHidden(true);
+	setUniformRowHeights(true);
 	connect(this, SIGNAL(itemExpanded(QTreeWidgetItem*)), this, SLOT(itemExpanded(QTreeWidgetItem*)));
 
 	updateCategories();
@@ -83,13 +86,36 @@ void lcQPartsTree::updateCategories()
 		new QTreeWidgetItem(categoryItem);
 	}
 
-	searchResultsItem = new QTreeWidgetItem(this, QStringList(tr("Search Results")));
+	mModelListItem = new QTreeWidgetItem(this, QStringList(tr("Models")));
+	mSearchResultsItem = new QTreeWidgetItem(this, QStringList(tr("Search Results")));
+}
+
+void lcQPartsTree::UpdateModels()
+{
+	while (QTreeWidgetItem* Item = mModelListItem->child(0))
+		delete Item;
+
+	const lcArray<lcModel*>& Models = lcGetActiveProject()->GetModels();
+	lcModel* CurrentModel = lcGetActiveModel();
+
+	for (int ModelIdx = 0; ModelIdx < Models.GetSize(); ModelIdx++)
+	{
+		lcModel* Model = Models[ModelIdx];
+
+		if (!Model->IncludesModel(CurrentModel))
+		{
+			const lcModelProperties& Properties = Model->GetProperties();
+			QTreeWidgetItem* Item = new QTreeWidgetItem(mModelListItem, QStringList(Properties.mName));
+			Item->setData(0, PieceInfoRole, qVariantFromValue((void*)Model->GetPieceInfo()));
+			Item->setToolTip(0, Properties.mDescription);
+		}
+	}
 }
 
 void lcQPartsTree::searchParts(const QString& searchString)
 {
-	while (QTreeWidgetItem *item = searchResultsItem->child(0))
-		delete item;
+	while (QTreeWidgetItem* Item = mSearchResultsItem->child(0))
+		delete Item;
 
 	lcPiecesLibrary* library = lcGetPiecesLibrary();
 	lcArray<PieceInfo*> singleParts, groupedParts;
@@ -101,21 +127,21 @@ void lcQPartsTree::searchParts(const QString& searchString)
 	{
 		PieceInfo* partInfo = singleParts[partIndex];
 
-		QTreeWidgetItem* partItem = new QTreeWidgetItem(searchResultsItem, QStringList(partInfo->m_strDescription));
-		partItem->setData(0, PartInfoRole, qVariantFromValue((void*)partInfo));
+		QTreeWidgetItem* partItem = new QTreeWidgetItem(mSearchResultsItem, QStringList(partInfo->m_strDescription));
+		partItem->setData(0, PieceInfoRole, qVariantFromValue((void*)partInfo));
 		partItem->setToolTip(0, QString("%1 (%2)").arg(partInfo->m_strDescription, partInfo->m_strName));
 	}
 
-	setCurrentItem(searchResultsItem);
-	expandItem(searchResultsItem);
-	scrollToItem(searchResultsItem, PositionAtTop);
+	setCurrentItem(mSearchResultsItem);
+	expandItem(mSearchResultsItem);
+	scrollToItem(mSearchResultsItem, PositionAtTop);
 }
 
 void lcQPartsTree::itemExpanded(QTreeWidgetItem *expandedItem)
 {
 	QTreeWidgetItem *parent = expandedItem->parent();
 
-	if (parent || expandedItem == searchResultsItem)
+	if (parent || expandedItem == mModelListItem || expandedItem == mSearchResultsItem)
 		return;
 
 	if (expandedItem->data(0, ExpandedOnceRole).toBool())
@@ -140,7 +166,7 @@ void lcQPartsTree::itemExpanded(QTreeWidgetItem *expandedItem)
 		PieceInfo* partInfo = singleParts[partIndex];
 
 		QTreeWidgetItem* partItem = new QTreeWidgetItem(expandedItem, QStringList(partInfo->m_strDescription));
-		partItem->setData(0, PartInfoRole, qVariantFromValue((void*)partInfo));
+		partItem->setData(0, PieceInfoRole, qVariantFromValue((void*)partInfo));
 		partItem->setToolTip(0, QString("%1 (%2)").arg(partInfo->m_strDescription, partInfo->m_strName));
 
 		if (groupedParts.FindIndex(partInfo) != -1)
@@ -162,7 +188,7 @@ void lcQPartsTree::itemExpanded(QTreeWidgetItem *expandedItem)
 					desc += len;
 
 				QTreeWidgetItem* patternedItem = new QTreeWidgetItem(partItem, QStringList(desc));
-				patternedItem->setData(0, PartInfoRole, qVariantFromValue((void*)patternedInfo));
+				patternedItem->setData(0, PieceInfoRole, qVariantFromValue((void*)patternedInfo));
 				patternedItem->setToolTip(0, QString("%1 (%2)").arg(patternedInfo->m_strDescription, patternedInfo->m_strName));
 			}
 		}
@@ -200,7 +226,7 @@ void lcQPartsTree::setCurrentPart(PieceInfo *part)
 			for (int itemIndex = 0; itemIndex < categoryItem->childCount(); itemIndex++)
 			{
 				QTreeWidgetItem *item = categoryItem->child(itemIndex);
-				PieceInfo *info = (PieceInfo*)item->data(0, lcQPartsTree::PartInfoRole).value<void*>();
+				PieceInfo *info = (PieceInfo*)item->data(0, PieceInfoRole).value<void*>();
 
 				if (info == parentPart)
 				{
@@ -215,7 +241,7 @@ void lcQPartsTree::setCurrentPart(PieceInfo *part)
 	for (int itemIndex = 0; itemIndex < categoryItem->childCount(); itemIndex++)
 	{
 		QTreeWidgetItem *item = categoryItem->child(itemIndex);
-		PieceInfo *info = (PieceInfo*)item->data(0, lcQPartsTree::PartInfoRole).value<void*>();
+		PieceInfo *info = (PieceInfo*)item->data(0, PieceInfoRole).value<void*>();
 
 		if (info == part)
 		{
@@ -228,7 +254,7 @@ void lcQPartsTree::setCurrentPart(PieceInfo *part)
 
 void lcQPartsTree::startDrag(Qt::DropActions supportedActions)
 {
-	PieceInfo *info = (PieceInfo*)currentItem()->data(0, lcQPartsTree::PartInfoRole).value<void*>();
+	PieceInfo *info = (PieceInfo*)currentItem()->data(0, PieceInfoRole).value<void*>();
 
 	if (!info)
 		return;

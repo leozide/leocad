@@ -939,13 +939,11 @@ void lcModel::GetScene(lcScene& Scene, lcCamera* ViewCamera, bool DrawInterface)
 
 void lcModel::AddRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, int DefaultColorIndex, bool Focused, bool Selected) const
 {
-	// todo: use last step
-
 	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 	{
 		lcPiece* Piece = mPieces[PieceIdx];
 
-		if (!Piece->IsVisible(mCurrentStep))
+		if (Piece->GetStepHide() != LC_STEP_MAX)
 			continue;
 
 		int ColorIndex = Piece->mColorIndex;
@@ -1143,16 +1141,16 @@ void lcModel::LoadCheckPoint(lcModelHistoryEntry* CheckPoint)
 	gMainWindow->UpdateAllViews();
 }
 
-void lcModel::CalculateStep()
+void lcModel::CalculateStep(lcStep Step)
 {
 	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 	{
 		lcPiece* Piece = mPieces[PieceIdx];
-		Piece->UpdatePosition(mCurrentStep);
+		Piece->UpdatePosition(Step);
 
 		if (Piece->IsSelected())
 		{
-			if (!Piece->IsVisible(mCurrentStep))
+			if (!Piece->IsVisible(Step))
 				Piece->SetSelected(false);
 			else
 				SelectGroup(Piece->GetTopGroup(), true);
@@ -1160,10 +1158,10 @@ void lcModel::CalculateStep()
 	}
 
 	for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
-		mCameras[CameraIdx]->UpdatePosition(mCurrentStep);
+		mCameras[CameraIdx]->UpdatePosition(Step);
 
 	for (int LightIdx = 0; LightIdx < mLights.GetSize(); LightIdx++)
-		mLights[LightIdx]->UpdatePosition(mCurrentStep);
+		mLights[LightIdx]->UpdatePosition(Step);
 }
 
 void lcModel::ShowFirstStep()

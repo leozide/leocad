@@ -163,10 +163,11 @@ public:
 		return mCurrentStep;
 	}
 
+	void CalculateStep(lcStep Step);
 	void SetCurrentStep(lcStep Step)
 	{
 		mCurrentStep = Step;
-		CalculateStep();
+		CalculateStep(Step);
 	}
 
 	void ShowFirstStep();
@@ -305,7 +306,6 @@ protected:
 	void RemoveEmptyGroups();
 	bool RemoveSelectedObjects();
 
-	void CalculateStep();
 	void UpdateBackgroundTexture();
 
 	void UpdateSelection() const;

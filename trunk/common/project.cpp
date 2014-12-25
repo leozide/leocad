@@ -54,7 +54,12 @@ void Project::SetActiveModel(int ModelIndex)
 	if (ModelIndex < 0 || ModelIndex >= mModels.GetSize())
 		return;
 
+	for (int ModelIdx = 0; ModelIdx < mModels.GetSize(); ModelIdx++)
+		if (ModelIdx != ModelIndex)
+			mModels[ModelIdx]->CalculateStep(LC_STEP_MAX);
+
 	mActiveModel = mModels[ModelIndex];
+	mActiveModel->CalculateStep(mActiveModel->GetCurrentStep());
 	mActiveModel->UpdateInterface();
 	gMainWindow->UpdateModels();
 

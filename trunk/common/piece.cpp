@@ -114,7 +114,7 @@ void lcPiece::SaveLDraw(QTextStream& Stream) const
 		Stream << Number << ' ';
 	}
 
-	Stream << mPieceInfo->m_strName << QLatin1String(".DAT") << LineEnding;
+	Stream << mPieceInfo->GetSaveID() << LineEnding;
 }
 
 bool lcPiece::ParseLDrawLine(QTextStream& Stream)

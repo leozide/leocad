@@ -248,7 +248,7 @@ bool lcMainWindow::SaveProject(const QString& FileName)
 		if (SaveFileName.isEmpty())
 			SaveFileName = QFileInfo(QDir(lcGetProfileString(LC_PROFILE_PROJECTS_PATH)), Project->GetTitle()).absoluteFilePath();
 
-		SaveFileName = QFileDialog::getSaveFileName(mHandle, tr("Save Project"), SaveFileName, tr("Supported Files (*.ldr *.dat);;All Files (*.*)"));
+		SaveFileName = QFileDialog::getSaveFileName(mHandle, tr("Save Project"), SaveFileName, tr("Supported Files (*.ldr *.dat *.mpd);;All Files (*.*)"));
 
 		if (SaveFileName.isEmpty())
 			return false;

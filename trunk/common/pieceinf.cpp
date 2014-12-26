@@ -27,6 +27,14 @@ PieceInfo::~PieceInfo()
 		Unload();
 }
 
+QString PieceInfo::GetSaveID() const
+{
+	if (mFlags & LC_PIECE_MODEL)
+		return mModel->GetProperties().mName;
+
+	return QString::fromLatin1(m_strName) + QLatin1String(".DAT");
+}
+
 void PieceInfo::SetModel(lcModel* Model)
 {
 	m_strName[0] = 0;

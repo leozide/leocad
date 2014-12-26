@@ -677,7 +677,7 @@ void lcCamera::RayTest(lcObjectRayTest& ObjectRayTest) const
 	lcVector3 End = lcMul31(ObjectRayTest.End, mWorldView);
 
 	float Distance;
-	if (lcBoundingBoxRayMinIntersectDistance(Min, Max, Start, End, &Distance, NULL) && (Distance < ObjectRayTest.Distance))
+	if (lcBoundingBoxRayIntersectDistance(Min, Max, Start, End, &Distance, NULL) && (Distance < ObjectRayTest.Distance))
 	{
 		ObjectRayTest.ObjectSection.Object = const_cast<lcCamera*>(this);
 		ObjectRayTest.ObjectSection.Section = LC_CAMERA_SECTION_POSITION;
@@ -693,7 +693,7 @@ void lcCamera::RayTest(lcObjectRayTest& ObjectRayTest) const
 	Start = lcMul31(ObjectRayTest.Start, WorldView);
 	End = lcMul31(ObjectRayTest.End, WorldView);
 
-	if (lcBoundingBoxRayMinIntersectDistance(Min, Max, Start, End, &Distance, NULL) && (Distance < ObjectRayTest.Distance))
+	if (lcBoundingBoxRayIntersectDistance(Min, Max, Start, End, &Distance, NULL) && (Distance < ObjectRayTest.Distance))
 	{
 		ObjectRayTest.ObjectSection.Object = const_cast<lcCamera*>(this);
 		ObjectRayTest.ObjectSection.Section = LC_CAMERA_SECTION_TARGET;
@@ -709,7 +709,7 @@ void lcCamera::RayTest(lcObjectRayTest& ObjectRayTest) const
 	Start = lcMul31(ObjectRayTest.Start, WorldView);
 	End = lcMul31(ObjectRayTest.End, WorldView);
 
-	if (lcBoundingBoxRayMinIntersectDistance(Min, Max, Start, End, &Distance, NULL) && (Distance < ObjectRayTest.Distance))
+	if (lcBoundingBoxRayIntersectDistance(Min, Max, Start, End, &Distance, NULL) && (Distance < ObjectRayTest.Distance))
 	{
 		ObjectRayTest.ObjectSection.Object = const_cast<lcCamera*>(this);
 		ObjectRayTest.ObjectSection.Section = LC_CAMERA_SECTION_UPVECTOR;

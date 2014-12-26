@@ -539,21 +539,7 @@ void lcPiece::RemoveTime(lcStep Start, lcStep Time)
 
 void lcPiece::RayTest(lcObjectRayTest& ObjectRayTest) const
 {
-	lcVector3 Min(mPieceInfo->m_fDimensions[3], mPieceInfo->m_fDimensions[4], mPieceInfo->m_fDimensions[5]);
-	lcVector3 Max(mPieceInfo->m_fDimensions[0], mPieceInfo->m_fDimensions[1], mPieceInfo->m_fDimensions[2]);
-
-	lcMatrix44 WorldModel = lcMatrix44AffineInverse(mModelWorld);
-
-	lcVector3 Start = lcMul31(ObjectRayTest.Start, WorldModel);
-	lcVector3 End = lcMul31(ObjectRayTest.End, WorldModel);
-
-	float Distance;
-	if (!lcBoundingBoxRayMinIntersectDistance(Min, Max, Start, End, &Distance, NULL) || (Distance >= ObjectRayTest.Distance))
-		return;
-
-	lcVector3 Intersection;
-
-	if (mPieceInfo->mMesh->MinIntersectDist(Start, End, ObjectRayTest.Distance, Intersection))
+	if (mPieceInfo->MinIntersectDist(mModelWorld, ObjectRayTest.Start, ObjectRayTest.End, ObjectRayTest.Distance))
 	{
 		ObjectRayTest.ObjectSection.Object = const_cast<lcPiece*>(this);
 		ObjectRayTest.ObjectSection.Section = 0;
@@ -562,56 +548,7 @@ void lcPiece::RayTest(lcObjectRayTest& ObjectRayTest) const
 
 void lcPiece::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
 {
-	lcVector3 Box[8] =
-	{
-		lcVector3(mPieceInfo->m_fDimensions[0], mPieceInfo->m_fDimensions[1], mPieceInfo->m_fDimensions[5]),
-		lcVector3(mPieceInfo->m_fDimensions[3], mPieceInfo->m_fDimensions[1], mPieceInfo->m_fDimensions[5]),
-		lcVector3(mPieceInfo->m_fDimensions[0], mPieceInfo->m_fDimensions[1], mPieceInfo->m_fDimensions[2]),
-		lcVector3(mPieceInfo->m_fDimensions[3], mPieceInfo->m_fDimensions[4], mPieceInfo->m_fDimensions[5]),
-		lcVector3(mPieceInfo->m_fDimensions[3], mPieceInfo->m_fDimensions[4], mPieceInfo->m_fDimensions[2]),
-		lcVector3(mPieceInfo->m_fDimensions[0], mPieceInfo->m_fDimensions[4], mPieceInfo->m_fDimensions[2]),
-		lcVector3(mPieceInfo->m_fDimensions[0], mPieceInfo->m_fDimensions[4], mPieceInfo->m_fDimensions[5]),
-		lcVector3(mPieceInfo->m_fDimensions[3], mPieceInfo->m_fDimensions[1], mPieceInfo->m_fDimensions[2])
-	};
-
-	lcMatrix44 WorldToLocal = lcMatrix44FromAxisAngle(lcVector3(mRotation[0], mRotation[1], mRotation[2]), -mRotation[3] * LC_DTOR);
-	WorldToLocal.SetTranslation(lcMul31(lcVector3(-mPosition[0], -mPosition[1], -mPosition[2]), WorldToLocal));
-
-	const int NumPlanes = 6;
-	lcVector4 LocalPlanes[NumPlanes];
-	int i;
-
-	for (i = 0; i < NumPlanes; i++)
-	{
-		lcVector3 PlaneNormal = lcMul30(ObjectBoxTest.Planes[i], WorldToLocal);
-		LocalPlanes[i] = lcVector4(PlaneNormal, ObjectBoxTest.Planes[i][3] - lcDot3(WorldToLocal[3], PlaneNormal));
-	}
-
-	int Outcodes[8];
-
-	for (i = 0; i < 8; i++)
-	{
-		Outcodes[i] = 0;
-
-		for (int j = 0; j < NumPlanes; j++)
-		{
-			if (lcDot3(Box[i], LocalPlanes[j]) + LocalPlanes[j][3] > 0)
-				Outcodes[i] |= 1 << j;
-		}
-	}
-
-	int OutcodesOR = 0, OutcodesAND = 0x3f;
-
-	for (i = 0; i < 8; i++)
-	{
-		OutcodesAND &= Outcodes[i];
-		OutcodesOR |= Outcodes[i];
-	}
-
-	if (OutcodesAND != 0)
-		return;
-
-	if (OutcodesOR == 0 || mPieceInfo->mMesh->IntersectsPlanes(LocalPlanes))
+	if (mPieceInfo->BoxTest(mModelWorld, ObjectBoxTest.Planes))
 		ObjectBoxTest.Objects.Add(const_cast<lcPiece*>(this));
 }
 

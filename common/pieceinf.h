@@ -2,9 +2,6 @@
 #define _PIECEINF_H_
 
 #include <stdio.h>
-#ifndef GLuint
-#include "opengl.h"
-#endif
 #include "lc_math.h"
 #include "lc_array.h"
 #include "lc_mesh.h"
@@ -24,6 +21,8 @@ class PieceInfo
 public:
 	PieceInfo();
 	~PieceInfo();
+
+	QString GetSaveID() const;
 
 	int AddRef()
 	{

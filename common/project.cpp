@@ -319,7 +319,7 @@ bool Project::Save(const QString& FileName)
 		Model->SetSaved();
 
 		if (MPD)
-			Stream << QLatin1String("0 ENDFILE\r\n");
+			Stream << QLatin1String("0 NOFILE\r\n");
 	}
 
 	mFileName = FileName;

@@ -99,6 +99,83 @@ void PieceInfo::Unload()
 	}
 }
 
+bool PieceInfo::MinIntersectDist(const lcMatrix44& WorldMatrix, const lcVector3& WorldStart, const lcVector3& WorldEnd, float& MinDistance) const
+{
+	lcMatrix44 InverseWorldMatrix = lcMatrix44AffineInverse(WorldMatrix);
+	lcVector3 Start = lcMul31(WorldStart, InverseWorldMatrix);
+	lcVector3 End = lcMul31(WorldEnd, InverseWorldMatrix);
+
+	if (mFlags & LC_PIECE_MODEL)
+		return mModel->SubModelMinIntersectDist(Start, End, MinDistance);
+
+	lcVector3 Min(m_fDimensions[3], m_fDimensions[4], m_fDimensions[5]);
+	lcVector3 Max(m_fDimensions[0], m_fDimensions[1], m_fDimensions[2]);
+
+	float Distance;
+	if (!lcBoundingBoxRayIntersectDistance(Min, Max, Start, End, &Distance, NULL) || (Distance >= MinDistance))
+		return false;
+
+	lcVector3 Intersection;
+
+	return mMesh->MinIntersectDist(Start, End, MinDistance, Intersection);
+}
+
+bool PieceInfo::BoxTest(const lcMatrix44& WorldMatrix, const lcVector4 WorldPlanes[6]) const
+{
+	lcMatrix44 InverseWorldMatrix = lcMatrix44AffineInverse(WorldMatrix);
+
+	const int NumCorners = 8;
+	const int NumPlanes = 6;
+	lcVector4 LocalPlanes[NumPlanes];
+
+	for (int PlaneIdx = 0; PlaneIdx < NumPlanes; PlaneIdx++)
+	{
+		lcVector3 PlaneNormal = lcMul30(WorldPlanes[PlaneIdx], InverseWorldMatrix);
+		LocalPlanes[PlaneIdx] = lcVector4(PlaneNormal, WorldPlanes[PlaneIdx][3] - lcDot3(InverseWorldMatrix[3], PlaneNormal));
+	}
+
+	if (mFlags & LC_PIECE_MODEL)
+		return mModel->SubModelBoxTest(LocalPlanes);
+
+	lcVector3 Box[NumCorners] =
+	{
+		lcVector3(m_fDimensions[0], m_fDimensions[1], m_fDimensions[5]),
+		lcVector3(m_fDimensions[3], m_fDimensions[1], m_fDimensions[5]),
+		lcVector3(m_fDimensions[0], m_fDimensions[1], m_fDimensions[2]),
+		lcVector3(m_fDimensions[3], m_fDimensions[4], m_fDimensions[5]),
+		lcVector3(m_fDimensions[3], m_fDimensions[4], m_fDimensions[2]),
+		lcVector3(m_fDimensions[0], m_fDimensions[4], m_fDimensions[2]),
+		lcVector3(m_fDimensions[0], m_fDimensions[4], m_fDimensions[5]),
+		lcVector3(m_fDimensions[3], m_fDimensions[1], m_fDimensions[2])
+	};
+
+	int Outcodes[NumCorners];
+
+	for (int CornerIdx = 0; CornerIdx < NumCorners; CornerIdx++)
+	{
+		Outcodes[CornerIdx] = 0;
+
+		for (int PlaneIdx = 0; PlaneIdx < NumPlanes; PlaneIdx++)
+		{
+			if (lcDot3(Box[CornerIdx], LocalPlanes[PlaneIdx]) + LocalPlanes[PlaneIdx][3] > 0)
+				Outcodes[CornerIdx] |= 1 << PlaneIdx;
+		}
+	}
+
+	int OutcodesOR = 0, OutcodesAND = 0x3f;
+
+	for (int CornerIdx = 0; CornerIdx < NumCorners; CornerIdx++)
+	{
+		OutcodesAND &= Outcodes[CornerIdx];
+		OutcodesOR |= Outcodes[CornerIdx];
+	}
+
+	if (OutcodesAND != 0)
+		return false;
+
+	return OutcodesOR == 0 || mMesh->IntersectsPlanes(LocalPlanes);
+}
+
 // Zoom extents for the preview window and print catalog
 void PieceInfo::ZoomExtents(float Fov, float Aspect, float* EyePos) const
 {
@@ -149,7 +226,7 @@ void PieceInfo::AddRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, i
 {
 	if (mFlags & LC_PIECE_MODEL)
 	{
-		mModel->AddRenderMeshes(Scene, WorldMatrix, ColorIndex, Focused, Selected);
+		mModel->SubModelAddRenderMeshes(Scene, WorldMatrix, ColorIndex, Focused, Selected);
 		return;
 	}
 

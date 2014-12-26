@@ -209,11 +209,13 @@ public:
 	void Paste();
 
 	void GetScene(lcScene& Scene, lcCamera* ViewCamera, bool DrawInterface) const;
-	void AddRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, int DefaultColorIndex, bool Focused, bool Selected) const;
+	void SubModelAddRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, int DefaultColorIndex, bool Focused, bool Selected) const;
 	void DrawBackground(lcContext* Context);
 
 	void RayTest(lcObjectRayTest& ObjectRayTest) const;
 	void BoxTest(lcObjectBoxTest& ObjectBoxTest) const;
+	bool SubModelMinIntersectDist(const lcVector3& WorldStart, const lcVector3& WorldEnd, float& MinDistance) const;
+	bool SubModelBoxTest(const lcVector4 Planes[6]) const;
 
 	bool AnyPiecesSelected() const;
 	bool AnyObjectsSelected() const;

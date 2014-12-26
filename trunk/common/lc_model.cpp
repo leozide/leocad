@@ -473,7 +473,7 @@ void lcModel::LoadLDraw(QTextStream& Stream)
 		}
 	}
 
-	CalculateStep();
+	CalculateStep(mCurrentStep);
 	UpdateBackgroundTexture();
 
 	delete Piece;
@@ -772,7 +772,7 @@ bool lcModel::LoadBinary(lcFile* file)
 	}
 
 	UpdateBackgroundTexture();
-	CalculateStep();
+	CalculateStep(mCurrentStep);
 /*
 	gMainWindow->UpdateFocusObject(GetFocusObject());
 
@@ -874,7 +874,7 @@ void lcModel::Paste()
 	Merge(Model);
 	SaveCheckpoint(tr("Pasting"));
 
-	CalculateStep();
+	CalculateStep(mCurrentStep);
 	gMainWindow->UpdateAllViews();
 }
 
@@ -937,7 +937,7 @@ void lcModel::GetScene(lcScene& Scene, lcCamera* ViewCamera, bool DrawInterface)
 	Scene.TranslucentMeshes.Sort(lcTranslucentRenderMeshCompare);
 }
 
-void lcModel::AddRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, int DefaultColorIndex, bool Focused, bool Selected) const
+void lcModel::SubModelAddRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, int DefaultColorIndex, bool Focused, bool Selected) const
 {
 	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 	{
@@ -1108,6 +1108,37 @@ void lcModel::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
 			mLights[LightIdx]->BoxTest(ObjectBoxTest);
 }
 
+bool lcModel::SubModelMinIntersectDist(const lcVector3& WorldStart, const lcVector3& WorldEnd, float& MinDistance) const
+{
+	bool MinIntersect = false;
+
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+	{
+		lcPiece* Piece = mPieces[PieceIdx];
+
+		if (Piece->GetStepHide() == LC_STEP_MAX && Piece->mPieceInfo->MinIntersectDist(Piece->mModelWorld, WorldStart, WorldEnd, MinDistance))
+			MinIntersect = true;
+	}
+
+	return MinIntersect;
+}
+
+bool lcModel::SubModelBoxTest(const lcVector4 Planes[6]) const
+{
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+	{
+		lcPiece* Piece = mPieces[PieceIdx];
+
+		if (Piece->GetStepHide() != LC_STEP_MAX)
+			continue;
+
+		if (Piece->mPieceInfo->BoxTest(Piece->mModelWorld, Planes))
+			return true;
+	}
+
+	return false;
+}
+
 void lcModel::SaveCheckpoint(const QString& Description)
 {
 	lcModelHistoryEntry* ModelHistoryEntry = new lcModelHistoryEntry();
@@ -1171,7 +1202,7 @@ void lcModel::ShowFirstStep()
 
 	mCurrentStep = 1;
 
-	CalculateStep();
+	CalculateStep(mCurrentStep);
 	UpdateSelection();
 	gMainWindow->UpdateFocusObject(GetFocusObject());
 	gMainWindow->UpdateAllViews();
@@ -1187,7 +1218,7 @@ void lcModel::ShowLastStep()
 
 	mCurrentStep = LastStep;
 
-	CalculateStep();
+	CalculateStep(mCurrentStep);
 	UpdateSelection();
 	gMainWindow->UpdateFocusObject(GetFocusObject());
 	gMainWindow->UpdateAllViews();
@@ -1201,7 +1232,7 @@ void lcModel::ShowPreviousStep()
 
 	mCurrentStep--;
 
-	CalculateStep();
+	CalculateStep(mCurrentStep);
 	UpdateSelection();
 	gMainWindow->UpdateFocusObject(GetFocusObject());
 	gMainWindow->UpdateAllViews();
@@ -1215,7 +1246,7 @@ void lcModel::ShowNextStep()
 
 	mCurrentStep++;
 
-	CalculateStep();
+	CalculateStep(mCurrentStep);
 	UpdateSelection();
 	gMainWindow->UpdateFocusObject(GetFocusObject());
 	gMainWindow->UpdateAllViews();
@@ -1249,7 +1280,7 @@ void lcModel::InsertStep()
 		mLights[LightIdx]->InsertTime(mCurrentStep, 1);
 
 	SaveCheckpoint(tr("Inserting Step"));
-	CalculateStep();
+	CalculateStep(mCurrentStep);
 	gMainWindow->UpdateFocusObject(GetFocusObject());
 	gMainWindow->UpdateAllViews();
 	UpdateSelection();
@@ -1272,7 +1303,7 @@ void lcModel::RemoveStep()
 		mLights[LightIdx]->RemoveTime(mCurrentStep, 1);
 
 	SaveCheckpoint(tr("Removing Step"));
-	CalculateStep();
+	CalculateStep(mCurrentStep);
 	gMainWindow->UpdateFocusObject(GetFocusObject());
 	gMainWindow->UpdateAllViews();
 	UpdateSelection();

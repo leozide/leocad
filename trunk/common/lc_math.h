@@ -1377,7 +1377,7 @@ inline bool lcTriangleIntersectsPlanes(float* p1, float* p2, float* p3, const lc
 }
 
 // Return true if a ray intersects a bounding box, and calculates the distance from the start of the ray (adapted from Graphics Gems).
-inline bool lcBoundingBoxRayMinIntersectDistance(const lcVector3& Min, const lcVector3& Max, const lcVector3& Start, const lcVector3& End, float* Dist, lcVector3* Intersection)
+inline bool lcBoundingBoxRayIntersectDistance(const lcVector3& Min, const lcVector3& Max, const lcVector3& Start, const lcVector3& End, float* Dist, lcVector3* Intersection)
 {
 	bool MiddleQuadrant[3];
 	bool Inside = true;

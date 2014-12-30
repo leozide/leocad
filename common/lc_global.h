@@ -17,6 +17,8 @@ class lcCamera;
 class lcLight;
 class lcGroup;
 class PieceInfo;
+struct lcPartsListEntry;
+struct lcModelPartsEntry;
 
 class lcVector2;
 class lcVector3;

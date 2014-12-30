@@ -107,6 +107,13 @@ struct lcPartsListEntry
 	int Count;
 };
 
+struct lcModelPartsEntry
+{
+	lcMatrix44 WorldMatrix;
+	PieceInfo* Info;
+	int ColorIndex;
+};
+
 class lcModel
 {
 public:
@@ -225,7 +232,8 @@ public:
 	lcObject* GetFocusObject() const;
 	bool GetSelectionCenter(lcVector3& Center) const;
 	bool GetPiecesBoundingBox(float BoundingBox[6]) const;
-	void GetPartsList(lcArray<lcPartsListEntry>& PartsList) const;
+	void GetPartsList(int DefaultColorIndex, lcArray<lcPartsListEntry>& PartsList) const;
+	void GetModelParts(const lcMatrix44& WorldMatrix, int DefaultColorIndex, lcArray<lcModelPartsEntry>& ModelParts) const;
 
 	void FocusOrDeselectObject(const lcObjectSection& ObjectSection);
 	void ClearSelection(bool UpdateInterface);
@@ -291,12 +299,6 @@ public:
 	void ShowArrayDialog();
 	void ShowMinifigDialog();
 	void UpdateInterface();
-
-	void Export3DStudio() const;
-	void ExportBrickLink() const;
-	void ExportCSV() const;
-	void ExportPOVRay() const;
-	void ExportWavefront() const;
 
 protected:
 	void DeleteModel();

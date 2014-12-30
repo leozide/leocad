@@ -92,6 +92,8 @@ public:
 	bool IncludesModel(const lcModel* Model) const;
 	bool MinIntersectDist(const lcMatrix44& WorldMatrix, const lcVector3& WorldStart, const lcVector3& WorldEnd, float& MinDistance) const;
 	bool BoxTest(const lcMatrix44& WorldMatrix, const lcVector4 Planes[6]) const;
+	void GetPartsList(int DefaultColorIndex, lcArray<lcPartsListEntry>& PartsList) const;
+	void GetModelParts(const lcMatrix44& WorldMatrix, int DefaultColorIndex, lcArray<lcModelPartsEntry>& ModelParts) const;
 
 public:
 	lcMesh* mMesh;

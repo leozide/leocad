@@ -190,8 +190,22 @@ bool lcMainWindow::OpenProject(const QString& FileName)
 
 	if (NewProject->Load(LoadFileName))
 	{
+		NewProject->SetActiveModel(0);
+
 		g_App->SetProject(NewProject);
 		AddRecentFile(LoadFileName);
+
+		for (int ViewIdx = 0; ViewIdx < mViews.GetSize(); ViewIdx++)
+		{
+			View* View = mViews[ViewIdx];
+
+			if (!View->mCamera->IsSimple())
+				View->SetDefaultCamera();
+
+			View->ZoomExtents();
+		}
+
+		gMainWindow->UpdateAllViews();
 
 		return true;
 	}

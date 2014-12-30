@@ -63,7 +63,15 @@ public:
 	bool Save(const QString& FileName);
 	void Merge(Project* Other);
 
+	void Export3DStudio();
+	void ExportBrickLink();
+	void ExportCSV();
+	void ExportPOVRay();
+	void ExportWavefront();
+
 protected:
+	void GetModelParts(lcArray<lcModelPartsEntry>& ModelParts);
+
 	bool mModified;
 	QString mFileName;
 

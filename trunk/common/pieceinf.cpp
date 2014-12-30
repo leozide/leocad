@@ -285,3 +285,41 @@ void PieceInfo::AddRenderMeshes(const lcMatrix44& ViewMatrix, const lcMatrix44& 
 		TranslucentMeshes.Add(RenderMesh);
 	}
 }
+
+void PieceInfo::GetPartsList(int DefaultColorIndex, lcArray<lcPartsListEntry>& PartsList) const
+{
+	if (mFlags & LC_PIECE_MODEL)
+	{
+		mModel->GetPartsList(DefaultColorIndex, PartsList);
+		return;
+	}
+
+	for (int UsedIdx = 0; UsedIdx < PartsList.GetSize(); UsedIdx++)
+	{
+		if (PartsList[UsedIdx].Info != this || PartsList[UsedIdx].ColorIndex != DefaultColorIndex)
+			continue;
+
+		PartsList[UsedIdx].Count++;
+		return;
+	}
+
+	lcPartsListEntry& PartsListEntry = PartsList.Add();
+
+	PartsListEntry.Info = const_cast<PieceInfo*>(this);
+	PartsListEntry.ColorIndex = DefaultColorIndex;
+	PartsListEntry.Count = 1;
+}
+
+void PieceInfo::GetModelParts(const lcMatrix44& WorldMatrix, int DefaultColorIndex, lcArray<lcModelPartsEntry>& ModelParts) const
+{
+	if (mFlags & LC_PIECE_MODEL)
+	{
+		mModel->GetModelParts(WorldMatrix, DefaultColorIndex, ModelParts);
+		return;
+	}
+
+	lcModelPartsEntry& ModelPartsEntry = ModelParts.Add();
+	ModelPartsEntry.WorldMatrix = WorldMatrix;
+	ModelPartsEntry.ColorIndex = DefaultColorIndex;
+	ModelPartsEntry.Info = const_cast<PieceInfo*>(this);
+}

@@ -320,15 +320,15 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 	case LC_FILE_SAVE_IMAGE:
 		lcGetActiveProject()->SaveImage();
 		break;
-		/*
+
 	case LC_FILE_EXPORT_3DS:
 		lcGetActiveProject()->Export3DStudio();
 		break;
-
+/*
 	case LC_FILE_EXPORT_HTML:
 		lcGetActiveProject()->ExportHTML();
 		break;
-
+		*/
 	case LC_FILE_EXPORT_BRICKLINK:
 		lcGetActiveProject()->ExportBrickLink();
 		break;
@@ -344,7 +344,7 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 	case LC_FILE_EXPORT_WAVEFRONT:
 		lcGetActiveProject()->ExportWavefront();
 		break;
-		*/
+
 	case LC_FILE_PROPERTIES:
 		lcGetActiveModel()->ShowPropertiesDialog();
 		break;

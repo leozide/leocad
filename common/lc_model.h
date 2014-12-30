@@ -170,6 +170,7 @@ public:
 		return mCurrentStep;
 	}
 
+	void SetActive(bool Active);
 	void CalculateStep(lcStep Step);
 	void SetCurrentStep(lcStep Step)
 	{

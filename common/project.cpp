@@ -55,11 +55,9 @@ void Project::SetActiveModel(int ModelIndex)
 		return;
 
 	for (int ModelIdx = 0; ModelIdx < mModels.GetSize(); ModelIdx++)
-		if (ModelIdx != ModelIndex)
-			mModels[ModelIdx]->CalculateStep(LC_STEP_MAX);
+		mModels[ModelIdx]->SetActive(ModelIdx == ModelIndex);
 
 	mActiveModel = mModels[ModelIndex];
-	mActiveModel->CalculateStep(mActiveModel->GetCurrentStep());
 	mActiveModel->UpdateInterface();
 	gMainWindow->UpdateModels();
 
@@ -242,7 +240,7 @@ bool Project::Load(const QString& FileName)
 		Model->CreatePieceInfo();
 	}
 
-	mActiveModel = mModels[0];
+	SetActiveModel(0);
 
 
 /*

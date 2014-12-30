@@ -77,6 +77,7 @@ void lcApplication::SetProject(Project* Project)
 	for (int ViewIdx = 0; ViewIdx < Views.GetSize(); ViewIdx++)
 		Views[ViewIdx]->SetModel(lcGetActiveModel());
 
+	gMainWindow->UpdateAllViews();
 	gMainWindow->UpdateModels();
 	gMainWindow->UpdateTitle();
 }

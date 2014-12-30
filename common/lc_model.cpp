@@ -449,7 +449,6 @@ void lcModel::LoadLDraw(QTextStream& Stream)
 				continue;
 			}
 
-			// todo: mpd
 			// todo: load from disk
 
 			Info = lcGetPiecesLibrary()->FindPiece(PartID.toLatin1().constData(), true);
@@ -954,10 +953,6 @@ void lcModel::SubModelAddRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMat
 		PieceInfo* Info = Piece->mPieceInfo;
 		Info->AddRenderMeshes(Scene, lcMul(Piece->mModelWorld, WorldMatrix), ColorIndex, Focused, Selected);
 	}
-
-	// todo: add model bounding box
-//		if (Selected)
-//			Scene.InterfaceObjects.Add(Piece);
 }
 
 void lcModel::DrawBackground(lcContext* Context)
@@ -1170,6 +1165,33 @@ void lcModel::LoadCheckPoint(lcModelHistoryEntry* CheckPoint)
 	UpdateSelection();
 	gMainWindow->UpdateCurrentStep();
 	gMainWindow->UpdateAllViews();
+}
+
+void lcModel::SetActive(bool Active)
+{
+	if (Active)
+	{
+		CalculateStep(mCurrentStep);
+	}
+	else
+	{
+		CalculateStep(LC_STEP_MAX);
+
+		float BoundingBox[6];
+		GetPiecesBoundingBox(BoundingBox);
+
+		mPieceInfo->m_fDimensions[0] = BoundingBox[3];
+		mPieceInfo->m_fDimensions[1] = BoundingBox[4];
+		mPieceInfo->m_fDimensions[2] = BoundingBox[5];
+		mPieceInfo->m_fDimensions[3] = BoundingBox[0];
+		mPieceInfo->m_fDimensions[4] = BoundingBox[1];
+		mPieceInfo->m_fDimensions[5] = BoundingBox[2];
+
+		strncpy(mPieceInfo->m_strName, mProperties.mName.toLatin1().constData(), sizeof(mPieceInfo->m_strName));
+		mPieceInfo->m_strName[sizeof(mPieceInfo->m_strName) - 1] = 0;
+		strncpy(mPieceInfo->m_strDescription, mProperties.mName.toLatin1().constData(), sizeof(mPieceInfo->m_strDescription));
+		mPieceInfo->m_strDescription[sizeof(mPieceInfo->m_strDescription) - 1] = 0;
+	}
 }
 
 void lcModel::CalculateStep(lcStep Step)

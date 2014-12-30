@@ -449,8 +449,6 @@ void lcModel::LoadLDraw(QTextStream& Stream)
 				continue;
 			}
 
-			// todo: load from disk
-
 			Info = lcGetPiecesLibrary()->FindPiece(PartID.toLatin1().constData(), true);
 			if (Info != NULL)
 			{
@@ -772,27 +770,7 @@ bool lcModel::LoadBinary(lcFile* file)
 
 	UpdateBackgroundTexture();
 	CalculateStep(mCurrentStep);
-/*
-	gMainWindow->UpdateFocusObject(GetFocusObject());
 
-	const lcArray<View*>& Views = gMainWindow->GetViews();
-	for (int ViewIdx = 0; ViewIdx < Views.GetSize(); ViewIdx++)
-	{
-		View* view = Views[ViewIdx];
-
-		if (!view->mCamera->IsSimple())
-			view->SetDefaultCamera();
-
-		view->ZoomExtents();
-	}
-
-	gMainWindow->UpdateLockSnap();
-	gMainWindow->UpdateSnap();
-	gMainWindow->UpdateCameraMenu();
-	UpdateSelection();
-	gMainWindow->UpdateCurrentStep();
-	gMainWindow->UpdateAllViews();
-*/
 	return true;
 }
 

@@ -59,7 +59,6 @@ void Project::SetActiveModel(int ModelIndex)
 
 	mActiveModel = mModels[ModelIndex];
 	mActiveModel->UpdateInterface();
-	gMainWindow->UpdateModels();
 
 	const lcArray<View*>& Views = gMainWindow->GetViews();
 	for (int ViewIdx = 0; ViewIdx < Views.GetSize(); ViewIdx++)
@@ -240,7 +239,6 @@ bool Project::Load(const QString& FileName)
 		Model->CreatePieceInfo();
 	}
 
-	SetActiveModel(0);
 
 
 /*

@@ -77,9 +77,8 @@ void lcApplication::SetProject(Project* Project)
 	for (int ViewIdx = 0; ViewIdx < Views.GetSize(); ViewIdx++)
 		Views[ViewIdx]->SetModel(lcGetActiveModel());
 
+	lcGetActiveModel()->UpdateInterface();
 	gMainWindow->UpdateAllViews();
-	gMainWindow->UpdateModels();
-	gMainWindow->UpdateTitle();
 }
 
 void lcApplication::SetClipboard(const QByteArray& Clipboard)

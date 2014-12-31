@@ -1156,7 +1156,7 @@ void lcModel::SetActive(bool Active)
 		CalculateStep(LC_STEP_MAX);
 
 		float BoundingBox[6];
-		GetPiecesBoundingBox(BoundingBox);
+		GetPiecesBoundingBox(BoundingBox, true);
 
 		mPieceInfo->m_fDimensions[0] = BoundingBox[3];
 		mPieceInfo->m_fDimensions[1] = BoundingBox[4];
@@ -2556,7 +2556,7 @@ bool lcModel::GetSelectionCenter(lcVector3& Center) const
 	return Selected;
 }
 
-bool lcModel::GetPiecesBoundingBox(float BoundingBox[6]) const
+bool lcModel::GetPiecesBoundingBox(float BoundingBox[6], bool IncludeHidden) const
 {
 	if (mPieces.IsEmpty())
 		return false;
@@ -2572,7 +2572,7 @@ bool lcModel::GetPiecesBoundingBox(float BoundingBox[6]) const
 	{
 		lcPiece* Piece = mPieces[PieceIdx];
 
-		if (Piece->IsVisible(mCurrentStep))
+		if (IncludeHidden || Piece->IsVisible(mCurrentStep))
 			Piece->CompareBoundingBox(BoundingBox);
 	}
 
@@ -3257,7 +3257,7 @@ void lcModel::LookAt(lcCamera* Camera)
 	{
 		float BoundingBox[6];
 
-		if (GetPiecesBoundingBox(BoundingBox))
+		if (GetPiecesBoundingBox(BoundingBox, false))
 			Center = lcVector3((BoundingBox[0] + BoundingBox[3]) / 2, (BoundingBox[1] + BoundingBox[4]) / 2, (BoundingBox[2] + BoundingBox[5]) / 2);
 		else
 			Center = lcVector3(0.0f, 0.0f, 0.0f);
@@ -3276,7 +3276,7 @@ void lcModel::ZoomExtents(lcCamera* Camera, float Aspect)
 {
 	float BoundingBox[6];
 
-	if (!GetPiecesBoundingBox(BoundingBox))
+	if (!GetPiecesBoundingBox(BoundingBox, false))
 		return;
 
 	lcVector3 Center((BoundingBox[0] + BoundingBox[3]) / 2, (BoundingBox[1] + BoundingBox[4]) / 2, (BoundingBox[2] + BoundingBox[5]) / 2);

@@ -1098,7 +1098,7 @@ void View::DrawGrid()
 	int MinX, MaxX, MinY, MaxY;
 	float BoundingBox[6];
 
-	bool GridSizeValid = mModel->GetPiecesBoundingBox(BoundingBox);
+	bool GridSizeValid = mModel->GetPiecesBoundingBox(BoundingBox, false);
 
 	if (mTrackTool == LC_TRACKTOOL_INSERT)
 	{

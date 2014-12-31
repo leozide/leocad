@@ -288,7 +288,7 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 	GL_DisableVertexBufferObject();
 
 	// Load project.
-	if (ProjectName && mProject->Load(ProjectName))
+	if (ProjectName && gMainWindow->OpenProject(ProjectName))
 	{
 		if (!SaveImage)
 			return true;

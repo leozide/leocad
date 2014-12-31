@@ -663,9 +663,10 @@ bool lcPiecesLibrary::LoadCachePiece(PieceInfo* Info)
 		if (!mCacheFile->ExtractFile(Info->m_strName, PieceFile))
 			return false;
 
-		Info->mMesh = new lcMesh;
+		lcMesh* Mesh = new lcMesh;
+		Info->SetMesh(Mesh);
 
-		return Info->mMesh->FileLoad(PieceFile);
+		return Mesh->FileLoad(PieceFile);
 	}
 	else
 	{
@@ -684,9 +685,10 @@ bool lcPiecesLibrary::LoadCachePiece(PieceInfo* Info)
 		if (!CacheFile.ExtractFile(Info->m_strName, PieceFile))
 			return false;
 
-		Info->mMesh = new lcMesh;
+		lcMesh* Mesh = new lcMesh;
+		Info->SetMesh(Mesh);
 
-		return Info->mMesh->FileLoad(PieceFile);
+		return Mesh->FileLoad(PieceFile);
 	}
 }
 
@@ -748,8 +750,9 @@ void lcPiecesLibrary::SaveCacheFile()
 			continue;
 
 		bool Cached = (Info->mFlags & LC_PIECE_CACHED) != 0;
+		lcMesh* Mesh = Info->GetMesh();
 
-		if (Info->mMesh)
+		if (Mesh)
 			Info->mFlags |= LC_PIECE_CACHED;
 
 		int Length = strlen(Info->m_strDescription);
@@ -761,12 +764,12 @@ void lcPiecesLibrary::SaveCacheFile()
 
 		NumPieces++;
 
-		if (Cached || !Info->mMesh)
+		if (Cached || !Mesh)
 			continue;
 
 		lcMemFile PieceFile;
 
-		Info->mMesh->FileSave(PieceFile);
+		Mesh->FileSave(PieceFile);
 		CacheFile.AddFile(Info->m_strName, PieceFile);
 
 		Info->mFlags |= LC_PIECE_CACHED;
@@ -975,7 +978,7 @@ bool lcPiecesLibrary::LoadPiece(PieceInfo* Info)
 	}
 
 	Mesh->UpdateBuffers();
-	Info->mMesh = Mesh;
+	Info->SetMesh(Mesh);
 	Info->AddRef();
 
 	if (mZipFiles[LC_ZIPFILE_OFFICIAL])

@@ -682,9 +682,9 @@ void Project::Export3DStudio()
 	for (int PartIdx = 0; PartIdx < ModelParts.GetSize(); PartIdx++)
 	{
 		PieceInfo* Info = ModelParts[PartIdx].Info;
-		lcMesh* Mesh = Info->mMesh;
+		lcMesh* Mesh = Info->GetMesh();
 
-		if (Mesh->mIndexType == GL_UNSIGNED_INT)
+		if (!Mesh || Mesh->mIndexType == GL_UNSIGNED_INT)
 			continue;
 
 		long NamedObjectStart = File.GetPosition();
@@ -1148,9 +1148,10 @@ void Project::ExportPOVRay()
 	for (int PartIdx = 0; PartIdx < ModelParts.GetSize(); PartIdx++)
 	{
 		PieceInfo* Info = ModelParts[PartIdx].Info;
+		lcMesh* Mesh = Info->GetMesh();
 		int Index = Library->mPieces.FindIndex(Info);
 
-		if (PieceTable[Index * LC_PIECE_NAME_LEN])
+		if (!Mesh || PieceTable[Index * LC_PIECE_NAME_LEN])
 			continue;
 
 		char Name[LC_PIECE_NAME_LEN];
@@ -1162,7 +1163,7 @@ void Project::ExportPOVRay()
 
 		sprintf(PieceTable + Index * LC_PIECE_NAME_LEN, "lc_%s", Name);
 
-		Info->mMesh->ExportPOVRay(POVFile, Name, ColorTable);
+		Mesh->ExportPOVRay(POVFile, Name, ColorTable);
 
 		POVFile.WriteLine("}\n\n");
 
@@ -1314,11 +1315,15 @@ void Project::ExportWavefront()
 
 	for (int PartIdx = 0; PartIdx < ModelParts.GetSize(); PartIdx++)
 	{
-		const lcMatrix44& ModelWorld = ModelParts[PartIdx].WorldMatrix;
-		PieceInfo* Info = ModelParts[PartIdx].Info;
-		float* Verts = (float*)Info->mMesh->mVertexBuffer.mData;
+		lcMesh* Mesh = ModelParts[PartIdx].Info->GetMesh();
 
-		for (int i = 0; i < Info->mMesh->mNumVertices * 3; i += 3)
+		if (!Mesh)
+			continue;
+
+		const lcMatrix44& ModelWorld = ModelParts[PartIdx].WorldMatrix;
+		float* Verts = (float*)Mesh->mVertexBuffer.mData;
+
+		for (int i = 0; i < Mesh->mNumVertices * 3; i += 3)
 		{
 			lcVector3 Vertex = lcMul31(lcVector3(Verts[i], Verts[i+1], Verts[i+2]), ModelWorld);
 			sprintf(Line, "v %.2f %.2f %.2f\n", Vertex[0], Vertex[1], Vertex[2]);
@@ -1335,8 +1340,13 @@ void Project::ExportWavefront()
 		sprintf(Line, "g Piece%.3d\n", PartIdx);
 		OBJFile.WriteLine(Line);
 
-		Info->mMesh->ExportWavefrontIndices(OBJFile, lcGetColorCode(ModelParts[PartIdx].ColorIndex), vert);
-		vert += Info->mMesh->mNumVertices;
+		lcMesh* Mesh = Info->GetMesh();
+
+		if (Mesh)
+		{
+			Mesh->ExportWavefrontIndices(OBJFile, lcGetColorCode(ModelParts[PartIdx].ColorIndex), vert);
+			vert += Mesh->mNumVertices;
+		}
 	}
 
 	setlocale(LC_NUMERIC, OldLocale);

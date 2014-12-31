@@ -24,6 +24,16 @@ public:
 
 	QString GetSaveID() const;
 
+	lcMesh* GetMesh() const
+	{
+		return mMesh;
+	}
+
+	void SetMesh(lcMesh* Mesh)
+	{
+		mMesh = Mesh;
+	}
+
 	int AddRef()
 	{
 		mRefCount++;
@@ -96,8 +106,6 @@ public:
 	void GetModelParts(const lcMatrix44& WorldMatrix, int DefaultColorIndex, lcArray<lcModelPartsEntry>& ModelParts) const;
 
 public:
-	lcMesh* mMesh;
-
 	// Attributes
 	char m_strName[LC_PIECE_NAME_LEN];
 	char m_strDescription[128];
@@ -109,6 +117,7 @@ public:
 protected:
 	int mRefCount;
 	lcModel* mModel;
+	lcMesh* mMesh;
 
 	void Load();
 	void Unload();

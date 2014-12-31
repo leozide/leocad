@@ -58,7 +58,7 @@ lcQMainWindow::lcQMainWindow(QWidget *parent)
 	{
 		for (int PieceIdx = 0; PieceIdx < Library->mPieces.GetSize(); PieceIdx++)
 		{
-			lcMesh* Mesh = Library->mPieces[PieceIdx]->mMesh;
+			lcMesh* Mesh = Library->mPieces[PieceIdx]->GetMesh();
 
 			if (Mesh)
 				Mesh->UpdateBuffers();

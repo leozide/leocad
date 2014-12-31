@@ -19,7 +19,8 @@ win32 {
 	LIBS += -ladvapi32 -lshell32
 } else {
 	LIBS += -lz
-	QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-parameter
+        QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-parameter
+        QMAKE_CXXFLAGS += -std=c++0x
 }
 
 isEmpty(QMAKE_LRELEASE) {

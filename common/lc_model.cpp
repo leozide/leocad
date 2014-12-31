@@ -181,15 +181,18 @@ void lcModel::DeleteModel()
 	lcReleaseTexture(mBackgroundTexture);
 	mBackgroundTexture = NULL;
 
-	const lcArray<View*>& Views = gMainWindow->GetViews();
-
-	for (int ViewIdx = 0; ViewIdx < Views.GetSize(); ViewIdx++)
+	if (gMainWindow)
 	{
-		View* View = Views[ViewIdx];
-		lcCamera* Camera = View->mCamera;
+		const lcArray<View*>& Views = gMainWindow->GetViews();
 
-		if (!Camera->IsSimple())
-			View->SetCamera(Camera, true);
+		for (int ViewIdx = 0; ViewIdx < Views.GetSize(); ViewIdx++)
+		{
+			View* View = Views[ViewIdx];
+			lcCamera* Camera = View->mCamera;
+
+			if (!Camera->IsSimple() && mCameras.FindIndex(Camera) != -1)
+				View->SetCamera(Camera, true);
+		}
 	}
 
 	mPieces.DeleteAll();

@@ -174,11 +174,11 @@ int main(int argc, char *argv[])
 
 	QDir dir;
 	dir.mkpath(cachePath);
+	gMainWindow = new lcMainWindow();
 
 	if (!g_App->Initialize(argc, argv, libPath, LDrawPath, cachePath.toLocal8Bit().data()))
 		return 1;
 
-	gMainWindow = new lcMainWindow();
 	lcQMainWindow w;
 	gMainWindow->mHandle = &w;
 	lcGetActiveModel()->UpdateInterface();

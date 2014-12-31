@@ -135,8 +135,10 @@ void lcMainWindow::AddRecentFile(const QString& FileName)
 	QString SavedName = FileName;
 	int FileIdx;
 
+	QFileInfo FileInfo(FileName);
+
 	for (FileIdx = 0; FileIdx < LC_MAX_RECENT_FILES; FileIdx++)
-		if (mRecentFiles[FileIdx] == FileName)
+		if (QFileInfo(mRecentFiles[FileIdx]) == FileInfo)
 			break;
 
 	for (FileIdx = lcMin(FileIdx, LC_MAX_RECENT_FILES - 1); FileIdx > 0; FileIdx--)

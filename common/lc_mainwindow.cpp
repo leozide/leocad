@@ -361,10 +361,6 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		lcGetActiveProject()->ExportWavefront();
 		break;
 
-	case LC_FILE_PROPERTIES:
-		lcGetActiveModel()->ShowPropertiesDialog();
-		break;
-
 	case LC_FILE_PRINT_PREVIEW:
 		TogglePrintPreview();
 		break;
@@ -690,6 +686,10 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 */
 	case LC_MODEL_NEW:
 		lcGetActiveProject()->CreateNewModel();
+		break;
+
+	case LC_MODEL_PROPERTIES:
+		lcGetActiveModel()->ShowPropertiesDialog();
 		break;
 
 	case LC_MODEL_LIST:

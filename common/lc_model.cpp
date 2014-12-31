@@ -2605,13 +2605,7 @@ void lcModel::GetPartsList(int DefaultColorIndex, lcArray<lcPartsListEntry>& Par
 		}
 
 		if (UsedIdx == PartsList.GetSize())
-		{
-			lcPartsListEntry& Entry = PartsList.Add();
-
-			Entry.Info = Piece->mPieceInfo;
-			Entry.ColorIndex = ColorIndex;
-			Entry.Count = 1;
-		}
+			Piece->mPieceInfo->GetPartsList(ColorIndex, PartsList);
 	}
 }
 

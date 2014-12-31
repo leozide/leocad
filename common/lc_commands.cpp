@@ -88,13 +88,6 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 		QT_TRANSLATE_NOOP("Status", "Export the project in Wavefront OBJ format"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
-	// LC_FILE_PROPERTIES
-	{
-		"File.Properties",
-		QT_TRANSLATE_NOOP("Menu", "Prope&rties..."),
-		QT_TRANSLATE_NOOP("Status", "Display project properties"),
-		QT_TRANSLATE_NOOP("Shortcut", "")
-	},
 	// LC_FILE_PRINT
 	{
 		"File.Print",
@@ -1122,6 +1115,13 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 		"Model.New",
 		QT_TRANSLATE_NOOP("Menu", "New Model..."),
 		QT_TRANSLATE_NOOP("Status", "Add a new model to the project"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
+	// LC_MODEL_PROPERTIES
+	{
+		"Model.Properties",
+		QT_TRANSLATE_NOOP("Menu", "Prope&rties..."),
+		QT_TRANSLATE_NOOP("Status", "Display the properties of the current model"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
 	// LC_MODEL_LIST

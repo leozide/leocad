@@ -244,8 +244,6 @@ void lcQMainWindow::createMenus()
 	exportMenu->addAction(actions[LC_FILE_EXPORT_POVRAY]);
 	exportMenu->addAction(actions[LC_FILE_EXPORT_WAVEFRONT]);
 	menuFile->addSeparator();
-	menuFile->addAction(actions[LC_FILE_PROPERTIES]);
-	menuFile->addSeparator();
 	menuFile->addAction(actions[LC_FILE_PRINT]);
 	menuFile->addAction(actions[LC_FILE_PRINT_PREVIEW]);
 //	menuFile->addAction(actions[LC_FILE_PRINT_BOM]);
@@ -333,11 +331,12 @@ void lcQMainWindow::createMenus()
 	menuPiece->addAction(actions[LC_PIECE_UNHIDE_ALL]);
 
 	menuModel = menuBar()->addMenu(tr("&Model"));
+	menuModel->addAction(actions[LC_MODEL_PROPERTIES]);
 	menuModel->addAction(actions[LC_MODEL_NEW]);
-	menuModel->addAction(actions[LC_MODEL_LIST]);
 	menuModel->addSeparator();
 	for (int ModelIdx = 0; ModelIdx < LC_MODEL_LAST - LC_MODEL_FIRST; ModelIdx++)
 		menuModel->addAction(actions[LC_MODEL_FIRST + ModelIdx]);
+	menuModel->addAction(actions[LC_MODEL_LIST]);
 
 	menuHelp = menuBar()->addMenu(tr("&Help"));
 	menuHelp->addAction(actions[LC_HELP_HOMEPAGE]);
@@ -1280,7 +1279,7 @@ void lcQMainWindow::updateModels()
 		if (ModelIdx < Models.GetSize())
 		{
 			Action->setChecked(CurrentModel == Models[ModelIdx]);
-			Action->setText(Models[ModelIdx]->GetProperties().mName);
+			Action->setText(QString::fromLatin1("&%1 %2").arg(QString::number(ModelIdx + 1), Models[ModelIdx]->GetProperties().mName));
 			Action->setVisible(true);
 		}
 		else

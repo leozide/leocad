@@ -57,6 +57,9 @@ void Project::SetActiveModel(int ModelIndex)
 	for (int ModelIdx = 0; ModelIdx < mModels.GetSize(); ModelIdx++)
 		mModels[ModelIdx]->SetActive(ModelIdx == ModelIndex);
 
+	for (int ModelIdx = 0; ModelIdx < mModels.GetSize(); ModelIdx++)
+		mModels[ModelIdx]->SubModelUpdateBoundingBox();
+
 	mActiveModel = mModels[ModelIndex];
 	mActiveModel->UpdateInterface();
 

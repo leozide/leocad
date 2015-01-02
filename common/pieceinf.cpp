@@ -313,3 +313,9 @@ void PieceInfo::GetModelParts(const lcMatrix44& WorldMatrix, int DefaultColorInd
 	ModelPartsEntry.ColorIndex = DefaultColorIndex;
 	ModelPartsEntry.Info = const_cast<PieceInfo*>(this);
 }
+
+void PieceInfo::UpdateBoundingBox()
+{
+	if (mFlags & LC_PIECE_MODEL)
+		mModel->SubModelUpdateBoundingBox();
+}

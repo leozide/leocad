@@ -1157,16 +1157,6 @@ void lcModel::SetActive(bool Active)
 	{
 		CalculateStep(LC_STEP_MAX);
 
-		float BoundingBox[6];
-		GetPiecesBoundingBox(BoundingBox, true);
-
-		mPieceInfo->m_fDimensions[0] = BoundingBox[3];
-		mPieceInfo->m_fDimensions[1] = BoundingBox[4];
-		mPieceInfo->m_fDimensions[2] = BoundingBox[5];
-		mPieceInfo->m_fDimensions[3] = BoundingBox[0];
-		mPieceInfo->m_fDimensions[4] = BoundingBox[1];
-		mPieceInfo->m_fDimensions[5] = BoundingBox[2];
-
 		strncpy(mPieceInfo->m_strName, mProperties.mName.toLatin1().constData(), sizeof(mPieceInfo->m_strName));
 		mPieceInfo->m_strName[sizeof(mPieceInfo->m_strName) - 1] = 0;
 		strncpy(mPieceInfo->m_strDescription, mProperties.mName.toLatin1().constData(), sizeof(mPieceInfo->m_strDescription));
@@ -2558,7 +2548,36 @@ bool lcModel::GetSelectionCenter(lcVector3& Center) const
 	return Selected;
 }
 
-bool lcModel::GetPiecesBoundingBox(float BoundingBox[6], bool IncludeHidden) const
+void lcModel::SubModelUpdateBoundingBox()
+{
+	if (mPieces.IsEmpty())
+	{
+		memset(mPieceInfo->m_fDimensions, 0, sizeof(mPieceInfo->m_fDimensions));
+		return;
+	}
+
+	float BoundingBox[6] = { FLT_MAX, FLT_MAX, FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX };
+	
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+	{
+		lcPiece* Piece = mPieces[PieceIdx];
+
+		if (Piece->GetStepHide() == LC_STEP_MAX)
+		{
+			Piece->mPieceInfo->UpdateBoundingBox();
+			Piece->CompareBoundingBox(BoundingBox);
+		}
+	}
+
+	mPieceInfo->m_fDimensions[0] = BoundingBox[3];
+	mPieceInfo->m_fDimensions[1] = BoundingBox[4];
+	mPieceInfo->m_fDimensions[2] = BoundingBox[5];
+	mPieceInfo->m_fDimensions[3] = BoundingBox[0];
+	mPieceInfo->m_fDimensions[4] = BoundingBox[1];
+	mPieceInfo->m_fDimensions[5] = BoundingBox[2];
+}
+
+bool lcModel::GetPiecesBoundingBox(float BoundingBox[6]) const
 {
 	BoundingBox[0] = FLT_MAX;
 	BoundingBox[1] = FLT_MAX;
@@ -2574,7 +2593,7 @@ bool lcModel::GetPiecesBoundingBox(float BoundingBox[6], bool IncludeHidden) con
 	{
 		lcPiece* Piece = mPieces[PieceIdx];
 
-		if (IncludeHidden || Piece->IsVisible(mCurrentStep))
+		if (Piece->IsVisible(mCurrentStep))
 			Piece->CompareBoundingBox(BoundingBox);
 	}
 
@@ -3253,7 +3272,7 @@ void lcModel::LookAt(lcCamera* Camera)
 	{
 		float BoundingBox[6];
 
-		if (GetPiecesBoundingBox(BoundingBox, false))
+		if (GetPiecesBoundingBox(BoundingBox))
 			Center = lcVector3((BoundingBox[0] + BoundingBox[3]) / 2, (BoundingBox[1] + BoundingBox[4]) / 2, (BoundingBox[2] + BoundingBox[5]) / 2);
 		else
 			Center = lcVector3(0.0f, 0.0f, 0.0f);
@@ -3272,7 +3291,7 @@ void lcModel::ZoomExtents(lcCamera* Camera, float Aspect)
 {
 	float BoundingBox[6];
 
-	if (!GetPiecesBoundingBox(BoundingBox, false))
+	if (!GetPiecesBoundingBox(BoundingBox))
 		return;
 
 	lcVector3 Center((BoundingBox[0] + BoundingBox[3]) / 2, (BoundingBox[1] + BoundingBox[4]) / 2, (BoundingBox[2] + BoundingBox[5]) / 2);

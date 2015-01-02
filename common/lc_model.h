@@ -232,7 +232,8 @@ public:
 	bool GetFocusPosition(lcVector3& Position) const;
 	lcObject* GetFocusObject() const;
 	bool GetSelectionCenter(lcVector3& Center) const;
-	bool GetPiecesBoundingBox(float BoundingBox[6], bool IncludeHidden) const;
+	void SubModelUpdateBoundingBox();
+	bool GetPiecesBoundingBox(float BoundingBox[6]) const;
 	void GetPartsList(int DefaultColorIndex, lcArray<lcPartsListEntry>& PartsList) const;
 	void GetModelParts(const lcMatrix44& WorldMatrix, int DefaultColorIndex, lcArray<lcModelPartsEntry>& ModelParts) const;
 

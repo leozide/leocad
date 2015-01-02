@@ -43,10 +43,13 @@ void PiecePreview::OnDraw()
 	Eye = lcMul30(Eye, lcMatrix44RotationX(-m_RotateX * LC_DTOR));
 	Eye = lcMul30(Eye, lcMatrix44RotationZ(-m_RotateZ * LC_DTOR));
 
+	lcMatrix44 ProjectionMatrix = lcMatrix44Perspective(30.0f, aspect, 1.0f, 2500.0f);
+	lcMatrix44 ViewMatrix;
+
 	if (m_AutoZoom)
 	{
 		Eye = Eye * 100.0f;
-		m_PieceInfo->ZoomExtents(30.0f, aspect, Eye);
+		m_PieceInfo->ZoomExtents(ProjectionMatrix, ViewMatrix, Eye);
 
 		// Update the new camera distance.
 		lcVector3 d = Eye - m_PieceInfo->GetCenter();
@@ -54,13 +57,23 @@ void PiecePreview::OnDraw()
 	}
 	else
 	{
-		glMatrixMode(GL_PROJECTION);
-		glLoadMatrixf(lcMatrix44Perspective(30.0f, aspect, 1.0f, 2500.0f));
-		glMatrixMode(GL_MODELVIEW);
-		glLoadMatrixf(lcMatrix44LookAt(Eye * m_Distance, m_PieceInfo->GetCenter(), lcVector3(0, 0, 1)));
+		ViewMatrix = lcMatrix44LookAt(Eye * m_Distance, m_PieceInfo->GetCenter(), lcVector3(0, 0, 1));
 	}
 
-	m_PieceInfo->RenderPiece(gMainWindow->mColorIndex);
+	mContext->SetProjectionMatrix(ProjectionMatrix);
+
+	lcScene Scene;
+	Scene.ViewMatrix = ViewMatrix;
+
+	m_PieceInfo->AddRenderMeshes(Scene, lcMatrix44Identity(), gMainWindow->mColorIndex, false, false);
+
+	Scene.OpaqueMeshes.Sort(lcOpaqueRenderMeshCompare);
+	Scene.TranslucentMeshes.Sort(lcTranslucentRenderMeshCompare);
+
+	mContext->DrawOpaqueMeshes(ViewMatrix, Scene.OpaqueMeshes);
+	mContext->DrawTranslucentMeshes(ViewMatrix, Scene.TranslucentMeshes);
+
+	mContext->UnbindMesh(); // context remove
 
 	glDisableClientState(GL_VERTEX_ARRAY);
 }

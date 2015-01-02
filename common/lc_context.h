@@ -2,10 +2,11 @@
 #define _LC_CONTEXT_H_
 
 #include "lc_array.h"
+#include "lc_math.h"
 
 struct lcScene
 {
-	lcCamera* Camera;
+	lcMatrix44 ViewMatrix;
 	lcArray<lcRenderMesh> OpaqueMeshes;
 	lcArray<lcRenderMesh> TranslucentMeshes;
 	lcArray<lcObject*> InterfaceObjects;

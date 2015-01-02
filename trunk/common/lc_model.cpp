@@ -420,10 +420,9 @@ void lcModel::LoadLDraw(QTextStream& Stream)
 			lcMatrix44 IncludeTransform(lcVector4(Matrix[3], Matrix[6], Matrix[9], 0.0f), lcVector4(Matrix[4], Matrix[7], Matrix[10], 0.0f),
 			                            lcVector4(Matrix[5], Matrix[8], Matrix[11], 0.0f), lcVector4(Matrix[0], Matrix[1], Matrix[2], 1.0f));
 
-			QString File;
-			LineStream >> File;
-
+			QString File = LineStream.readAll().trimmed();
 			QString PartID = File.toUpper();
+
 			if (PartID.endsWith(QLatin1String(".DAT")))
 				PartID = PartID.left(PartID.size() - 4);
 

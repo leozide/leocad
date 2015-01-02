@@ -355,6 +355,18 @@ void View::OnDraw()
 	lcScene Scene;
 	mModel->GetScene(Scene, mCamera, DrawInterface);
 
+	if (DrawInterface && mTrackTool == LC_TRACKTOOL_INSERT)
+	{
+		lcVector3 Position;
+		lcVector4 Rotation;
+		GetPieceInsertPosition(Position, Rotation);
+
+		lcMatrix44 WorldMatrix = lcMatrix44FromAxisAngle(lcVector3(Rotation[0], Rotation[1], Rotation[2]), Rotation[3] * LC_DTOR);
+		WorldMatrix.SetTranslation(Position);
+
+		gMainWindow->mPreviewWidget->GetCurrentPiece()->AddRenderMeshes(Scene, WorldMatrix, gMainWindow->mColorIndex, true, true);
+	}
+
 	mContext->SetDefaultState();
 	mContext->SetViewport(0, 0, mWidth, mHeight);
 
@@ -416,21 +428,6 @@ void View::OnDraw()
 
 	if (DrawInterface)
 	{
-		if (mTrackTool == LC_TRACKTOOL_INSERT)
-		{
-			lcVector3 Position;
-			lcVector4 Rotation;
-			GetPieceInsertPosition(Position, Rotation);
-
-			lcMatrix44 WorldMatrix = lcMatrix44FromAxisAngle(lcVector3(Rotation[0], Rotation[1], Rotation[2]), Rotation[3] * LC_DTOR);
-			WorldMatrix.SetTranslation(Position);
-
-			mContext->SetWorldViewMatrix(lcMul(WorldMatrix, ViewMatrix));
-
-			mContext->SetLineWidth(2.0f * Preferences.mLineWidth);
-			gMainWindow->mPreviewWidget->GetCurrentPiece()->RenderPiece(gMainWindow->mColorIndex);
-		}
-
 		mContext->DrawInterfaceObjects(ViewMatrix, Scene.InterfaceObjects);
 
 		mContext->SetLineWidth(Preferences.mLineWidth); // context remove

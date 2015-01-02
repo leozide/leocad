@@ -220,11 +220,6 @@ void PieceInfo::ZoomExtents(const lcMatrix44& ProjectionMatrix, lcMatrix44& View
 	}
 }
 
-void PieceInfo::RenderPiece(int nColor)
-{
-	mMesh->Render(nColor, false, false);
-}
-
 void PieceInfo::AddRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, int ColorIndex, bool Focused, bool Selected)
 {
 	if (mFlags & LC_PIECE_MODEL)

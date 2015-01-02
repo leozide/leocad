@@ -5,6 +5,7 @@
 #include "lc_mainwindow.h"
 #include "view.h"
 #include "project.h"
+#include "lc_colors.h"
 #include <QApplication>
 
 #ifdef Q_OS_WIN
@@ -182,6 +183,7 @@ int main(int argc, char *argv[])
 	lcQMainWindow w;
 	gMainWindow->mHandle = &w;
 	lcGetActiveModel()->UpdateInterface();
+	gMainWindow->SetColorIndex(lcGetColorIndex(4));
 	gMainWindow->UpdateRecentFiles();
 	w.show();
 

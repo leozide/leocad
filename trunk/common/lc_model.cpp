@@ -860,7 +860,7 @@ void lcModel::Paste()
 
 void lcModel::GetScene(lcScene& Scene, lcCamera* ViewCamera, bool DrawInterface) const
 {
-	Scene.Camera = ViewCamera;
+	Scene.ViewMatrix = ViewCamera->mWorldView;
 	Scene.OpaqueMeshes.RemoveAll();
 	Scene.OpaqueMeshes.AllocGrow(mPieces.GetSize());
 	Scene.TranslucentMeshes.RemoveAll();

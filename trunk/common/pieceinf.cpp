@@ -185,7 +185,7 @@ bool PieceInfo::BoxTest(const lcMatrix44& WorldMatrix, const lcVector4 WorldPlan
 }
 
 // Zoom extents for the preview window and print catalog
-void PieceInfo::ZoomExtents(float Fov, float Aspect, float* EyePos) const
+void PieceInfo::ZoomExtents(const lcMatrix44& ProjectionMatrix, lcMatrix44& ViewMatrix, float* EyePos) const
 {
 	lcVector3 Points[8] =
 	{
@@ -208,14 +208,9 @@ void PieceInfo::ZoomExtents(float Fov, float Aspect, float* EyePos) const
 		Position = lcVector3(-250.0f, -250.0f, 75.0f);
 	Position += Center;
 
-	lcMatrix44 Projection = lcMatrix44Perspective(30.0f, Aspect, 1.0f, 2500.0f);
 	lcMatrix44 ModelView = lcMatrix44LookAt(Position, Center, lcVector3(0, 0, 1));
-	Position = lcZoomExtents(Position, ModelView, Projection, Points, 8);
-
-	glMatrixMode(GL_PROJECTION);
-	glLoadMatrixf(Projection);
-	glMatrixMode(GL_MODELVIEW);
-	glLoadMatrixf(lcMatrix44LookAt(Position, Center, lcVector3(0, 0, 1)));
+	Position = lcZoomExtents(Position, ModelView, ProjectionMatrix, Points, 8);
+	ViewMatrix = lcMatrix44LookAt(Position, Center, lcVector3(0, 0, 1));
 
 	if (EyePos)
 	{
@@ -253,7 +248,7 @@ void PieceInfo::AddRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, i
 
 	if ((mFlags & LC_PIECE_HAS_TRANSLUCENT) || ((mFlags & LC_PIECE_HAS_DEFAULT) && Translucent))
 	{
-		lcVector3 Pos = lcMul31(WorldMatrix[3], Scene.Camera->mWorldView);
+		lcVector3 Pos = lcMul31(WorldMatrix[3], Scene.ViewMatrix);
 
 		RenderMesh.Distance = Pos[2];
 

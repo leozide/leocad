@@ -1158,6 +1158,7 @@ void lcModel::SetActive(bool Active)
 		CalculateStep(LC_STEP_MAX);
 
 		strncpy(mPieceInfo->m_strName, mProperties.mName.toLatin1().constData(), sizeof(mPieceInfo->m_strName));
+		strupr(mPieceInfo->m_strName);
 		mPieceInfo->m_strName[sizeof(mPieceInfo->m_strName) - 1] = 0;
 		strncpy(mPieceInfo->m_strDescription, mProperties.mName.toLatin1().constData(), sizeof(mPieceInfo->m_strDescription));
 		mPieceInfo->m_strDescription[sizeof(mPieceInfo->m_strDescription) - 1] = 0;

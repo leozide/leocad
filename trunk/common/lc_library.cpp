@@ -13,7 +13,7 @@
 #include <ctype.h>
 #include <locale.h>
 
-#define LC_LIBRARY_CACHE_VERSION   0x0103
+#define LC_LIBRARY_CACHE_VERSION   0x0104
 #define LC_LIBRARY_CACHE_ARCHIVE   0x0001
 #define LC_LIBRARY_CACHE_DIRECTORY 0x0002
 
@@ -777,7 +777,7 @@ void lcPiecesLibrary::SaveCacheFile()
 	}
 
 	IndexFile.Seek(0, SEEK_SET);
-	IndexFile.WriteU32(mPieces.GetSize());
+	IndexFile.WriteU32(NumPieces);
 
 	CacheFile.AddFile("index", IndexFile);
 

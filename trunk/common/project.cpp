@@ -23,6 +23,7 @@ Project::Project()
 {
 	mModified = false;
 	mActiveModel = new lcModel(tr("Model #1"));
+	mActiveModel->CreatePieceInfo();
 	mActiveModel->SetSaved();
 	mModels.Add(mActiveModel);
 }
@@ -123,6 +124,7 @@ void Project::CreateNewModel()
 	{
 		mModified = true;
 		lcModel* Model = new lcModel(Name);
+		Model->CreatePieceInfo();
 		Model->SetSaved();
 		mModels.Add(Model);
 		SetActiveModel(mModels.GetSize() - 1);
@@ -155,6 +157,7 @@ void Project::ShowModelListDialog()
 		if (!Model)
 		{
 			Model = new lcModel(it->first);
+			Model->CreatePieceInfo();
 			Model->SetSaved();
 			mModified = true;
 		}

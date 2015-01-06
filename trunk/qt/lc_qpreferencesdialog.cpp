@@ -244,7 +244,7 @@ void lcQPreferencesDialog::updateParts()
 	{
 		lcArray<PieceInfo*> singleParts, groupedParts;
 
-		library->SearchPieces(options->Categories[categoryIndex].Keywords, false, singleParts, groupedParts);
+		library->GetCategoryEntries(options->Categories[categoryIndex].Keywords, false, singleParts, groupedParts);
 
 		for (int partIndex = 0; partIndex < singleParts.GetSize(); partIndex++)
 		{

@@ -117,10 +117,8 @@ void lcQPartsTree::searchParts(const QString& searchString)
 	while (QTreeWidgetItem* Item = mSearchResultsItem->child(0))
 		delete Item;
 
-	lcPiecesLibrary* library = lcGetPiecesLibrary();
-	lcArray<PieceInfo*> singleParts, groupedParts;
-
-	library->SearchPieces(searchString.toLocal8Bit().data(), false, singleParts, groupedParts);
+	lcArray<PieceInfo*> singleParts;
+	lcGetPiecesLibrary()->SearchPieces(searchString.toLocal8Bit().data(), singleParts);
 	singleParts.Sort(lcQPartsTreeSortFunc);
 
 	for (int partIndex = 0; partIndex < singleParts.GetSize(); partIndex++)

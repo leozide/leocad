@@ -1887,13 +1887,10 @@ bool lcPiecesLibrary::PieceInCategory(PieceInfo* Info, const String& CategoryKey
 
 void lcPiecesLibrary::GetCategoryEntries(int CategoryIndex, bool GroupPieces, lcArray<PieceInfo*>& SinglePieces, lcArray<PieceInfo*>& GroupedPieces)
 {
-	if (gCategories[CategoryIndex].Name == "Search Results")
-		GroupPieces = false;
-
-	SearchPieces(gCategories[CategoryIndex].Keywords, GroupPieces, SinglePieces, GroupedPieces);
+	GetCategoryEntries(gCategories[CategoryIndex].Keywords, GroupPieces, SinglePieces, GroupedPieces);
 }
 
-void lcPiecesLibrary::SearchPieces(const String& CategoryKeywords, bool GroupPieces, lcArray<PieceInfo*>& SinglePieces, lcArray<PieceInfo*>& GroupedPieces)
+void lcPiecesLibrary::GetCategoryEntries(const String& CategoryKeywords, bool GroupPieces, lcArray<PieceInfo*>& SinglePieces, lcArray<PieceInfo*>& GroupedPieces)
 {
 	SinglePieces.RemoveAll();
 	GroupedPieces.RemoveAll();
@@ -1950,6 +1947,36 @@ void lcPiecesLibrary::SearchPieces(const String& CategoryKeywords, bool GroupPie
 			if (Index == -1)
 				SinglePieces.Add(Info);
 		}
+	}
+}
+
+void lcPiecesLibrary::SearchPieces(const char* Keyword, lcArray<PieceInfo*>& Pieces) const
+{
+	Pieces.RemoveAll();
+
+	String LowerKeyword = Keyword;
+	LowerKeyword.MakeLower();
+
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+	{
+		PieceInfo* Info = mPieces[PieceIdx];
+
+		char LowerName[sizeof(Info->m_strName)];
+		strcpy(LowerName, Info->m_strName);
+		strlwr(LowerName);
+
+		if (strstr(LowerName, LowerKeyword))
+		{
+			Pieces.Add(Info);
+			continue;
+		}
+
+		char LowerDescription[sizeof(Info->m_strDescription)];
+		strcpy(LowerDescription, Info->m_strDescription);
+		strlwr(LowerDescription);
+
+		if (strstr(LowerDescription, LowerKeyword))
+			Pieces.Add(Info);
 	}
 }
 

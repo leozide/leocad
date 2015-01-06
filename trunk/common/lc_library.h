@@ -130,8 +130,9 @@ public:
 	void CloseCache();
 
 	bool PieceInCategory(PieceInfo* Info, const String& CategoryKeywords) const;
-	void SearchPieces(const String& CategoryKeywords, bool GroupPieces, lcArray<PieceInfo*>& SinglePieces, lcArray<PieceInfo*>& GroupedPieces);
+	void SearchPieces(const char* Keyword, lcArray<PieceInfo*>& Pieces) const;
 	void GetCategoryEntries(int CategoryIndex, bool GroupPieces, lcArray<PieceInfo*>& SinglePieces, lcArray<PieceInfo*>& GroupedPieces);
+	void GetCategoryEntries(const String& CategoryKeywords, bool GroupPieces, lcArray<PieceInfo*>& SinglePieces, lcArray<PieceInfo*>& GroupedPieces);
 	void GetPatternedPieces(PieceInfo* Parent, lcArray<PieceInfo*>& Pieces) const;
 
 	void SetOfficialPieces()

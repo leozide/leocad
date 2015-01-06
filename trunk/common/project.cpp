@@ -202,13 +202,15 @@ bool Project::Load(const QString& FileName)
 
 	if (Extension == QLatin1String("dat") || Extension == QLatin1String("ldr") || Extension == QLatin1String("mpd"))
 	{
-		QTextStream Stream(&File);
+		QByteArray FileData = File.readAll();
+		QBuffer Buffer(&FileData);
+		Buffer.open(QIODevice::ReadOnly);
 
-		while (!Stream.atEnd())
+		while (!Buffer.atEnd())
 		{
 			lcModel* Model = new lcModel(QString());
 			mModels.Add(Model);
-			Model->LoadLDraw(Stream);
+			Model->LoadLDraw(Buffer);
 			Model->SetSaved();
 		}
 	}

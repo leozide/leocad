@@ -200,7 +200,7 @@ public:
 	void ShowEditGroupsDialog();
 
 	void SaveLDraw(QTextStream& Stream, bool SelectedOnly) const;
-	void LoadLDraw(QTextStream& Stream);
+	void LoadLDraw(QIODevice& Device);
 	bool LoadBinary(lcFile* File);
 	void Merge(lcModel* Other);
 

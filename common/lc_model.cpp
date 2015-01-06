@@ -308,7 +308,7 @@ void lcModel::SaveLDraw(QTextStream& Stream, bool SelectedOnly) const
 	Stream.flush();
 }
 
-void lcModel::LoadLDraw(QTextStream& Stream)
+void lcModel::LoadLDraw(QIODevice& Device)
 {
 	lcPiece* Piece = NULL;
 	lcCamera* Camera = NULL;
@@ -316,10 +316,10 @@ void lcModel::LoadLDraw(QTextStream& Stream)
 	lcArray<lcGroup*> CurrentGroups;
 	int CurrentStep = 1;
 
-	while (!Stream.atEnd())
+	while (!Device.atEnd())
 	{
-		qint64 Pos = Stream.pos();
-		QString Line = Stream.readLine().trimmed();
+		qint64 Pos = Device.pos();
+		QString Line = Device.readLine().trimmed();
 		QTextStream LineStream(&Line, QIODevice::ReadOnly);
 
 		QString Token;
@@ -333,7 +333,7 @@ void lcModel::LoadLDraw(QTextStream& Stream)
 			{
 				if (!mProperties.mName.isEmpty())
 				{
-					Stream.seek(Pos);
+					Device.seek(Pos);
 					break;
 				}
 
@@ -847,8 +847,9 @@ void lcModel::Paste()
 
 	lcModel* Model = new lcModel(QString());
 
-	QTextStream Stream(&g_App->mClipboard);
-	Model->LoadLDraw(Stream);
+	QBuffer Buffer(&g_App->mClipboard);
+	Buffer.open(QIODevice::ReadOnly);
+	Model->LoadLDraw(Buffer);
 
 	Merge(Model);
 	SaveCheckpoint(tr("Pasting"));
@@ -1137,8 +1138,9 @@ void lcModel::LoadCheckPoint(lcModelHistoryEntry* CheckPoint)
 {
 	DeleteModel();
 
-	QTextStream Stream(CheckPoint->File, QIODevice::ReadOnly);
-	LoadLDraw(Stream);
+	QBuffer Buffer(&CheckPoint->File);
+	Buffer.open(QIODevice::ReadOnly);
+	LoadLDraw(Buffer);
 
 	gMainWindow->UpdateFocusObject(GetFocusObject());
 	gMainWindow->UpdateCameraMenu();

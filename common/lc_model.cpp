@@ -472,6 +472,7 @@ void lcModel::LoadLDraw(QIODevice& Device)
 		}
 	}
 
+	mCurrentStep = CurrentStep;
 	CalculateStep(mCurrentStep);
 	UpdateBackgroundTexture();
 

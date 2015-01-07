@@ -34,6 +34,9 @@ lcMainWindow::lcMainWindow()
 
 lcMainWindow::~lcMainWindow()
 {
+	delete mPreviewWidget;
+	mPreviewWidget = NULL;
+
 	for (int FileIdx = 0; FileIdx < LC_MAX_RECENT_FILES; FileIdx++)
 		lcSetProfileString((LC_PROFILE_KEY)(LC_PROFILE_RECENT_FILE1 + FileIdx), mRecentFiles[FileIdx]);
 

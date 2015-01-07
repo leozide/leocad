@@ -118,6 +118,7 @@ public:
 
 	bool Load(const char* LibraryPath, const char* CachePath);
 	void Unload();
+	void RemoveTemporaryPieces();
 
 	PieceInfo* FindPiece(const char* PieceName, bool CreatePlaceholder);
 	bool LoadPiece(PieceInfo* Info);

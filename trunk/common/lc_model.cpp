@@ -154,6 +154,15 @@ lcModel::lcModel(const QString& Name)
 
 lcModel::~lcModel()
 {
+	if (mPieceInfo)
+	{
+		if (gMainWindow->mPreviewWidget->GetCurrentPiece() == mPieceInfo)
+			gMainWindow->mPreviewWidget->SetCurrentPiece(NULL);
+
+		mPieceInfo->SetModel(NULL);
+		mPieceInfo->Release();
+	}
+
 	DeleteModel();
 	DeleteHistory();
 }
@@ -205,6 +214,7 @@ void lcModel::CreatePieceInfo()
 {
 	QString PartID = mProperties.mName.toUpper();
 	mPieceInfo = lcGetPiecesLibrary()->FindPiece(PartID.toLatin1().constData(), true);
+	mPieceInfo->AddRef();
 	mPieceInfo->SetModel(this);
 }
 

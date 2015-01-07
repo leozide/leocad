@@ -19,6 +19,8 @@ PiecePreview::PiecePreview()
 
 PiecePreview::~PiecePreview()
 {
+	if (m_PieceInfo)
+		m_PieceInfo->Release();
 }
 
 void PiecePreview::OnDraw()

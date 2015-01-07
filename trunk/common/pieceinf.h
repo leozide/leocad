@@ -54,6 +54,16 @@ public:
 		return mRefCount;
 	}
 
+	bool IsLoaded() const
+	{
+		return mRefCount != 0;
+	}
+
+	bool IsTemporary() const
+	{
+		return (mFlags & (LC_PIECE_PLACEHOLDER | LC_PIECE_MODEL)) != 0;
+	}
+
 	void SetZipFile(int ZipFileType, int ZipFileIndex)
 	{
 		mZipFileType = ZipFileType;

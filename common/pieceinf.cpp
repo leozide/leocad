@@ -30,16 +30,13 @@ PieceInfo::~PieceInfo()
 QString PieceInfo::GetSaveID() const
 {
 	if (mFlags & LC_PIECE_MODEL)
-		return mModel->GetProperties().mName;
+		return QString::fromLatin1(m_strName);
 
 	return QString::fromLatin1(m_strName) + QLatin1String(".DAT");
 }
 
 void PieceInfo::SetModel(lcModel* Model)
 {
-	m_strName[0] = 0;
-	m_strDescription[0] = 0;
-
 	mFlags = LC_PIECE_MODEL;
 	mModel = Model;
 
@@ -72,7 +69,9 @@ void PieceInfo::CreatePlaceholder(const char* Name)
 
 void PieceInfo::Load()
 {
-	if (mFlags & LC_PIECE_PLACEHOLDER)
+	if (mFlags & LC_PIECE_MODEL)
+		return;
+	else if (mFlags & LC_PIECE_PLACEHOLDER)
 	{
 		mMesh = new lcMesh();
 		mMesh->CreateBox();
@@ -105,6 +104,8 @@ void PieceInfo::Unload()
 		delete mMesh;
 		mMesh = NULL;
 	}
+
+	mModel = NULL;
 }
 
 bool PieceInfo::MinIntersectDist(const lcMatrix44& WorldMatrix, const lcVector3& WorldStart, const lcVector3& WorldEnd, float& MinDistance) const

@@ -357,14 +357,19 @@ void View::OnDraw()
 
 	if (DrawInterface && mTrackTool == LC_TRACKTOOL_INSERT)
 	{
-		lcVector3 Position;
-		lcVector4 Rotation;
-		GetPieceInsertPosition(Position, Rotation);
+		PieceInfo* Info = gMainWindow->mPreviewWidget->GetCurrentPiece();
 
-		lcMatrix44 WorldMatrix = lcMatrix44FromAxisAngle(lcVector3(Rotation[0], Rotation[1], Rotation[2]), Rotation[3] * LC_DTOR);
-		WorldMatrix.SetTranslation(Position);
+		if (Info)
+		{
+			lcVector3 Position;
+			lcVector4 Rotation;
+			GetPieceInsertPosition(Position, Rotation);
 
-		gMainWindow->mPreviewWidget->GetCurrentPiece()->AddRenderMeshes(Scene, WorldMatrix, gMainWindow->mColorIndex, true, true);
+			lcMatrix44 WorldMatrix = lcMatrix44FromAxisAngle(lcVector3(Rotation[0], Rotation[1], Rotation[2]), Rotation[3] * LC_DTOR);
+			WorldMatrix.SetTranslation(Position);
+
+			Info->AddRenderMeshes(Scene, WorldMatrix, gMainWindow->mColorIndex, true, true);
+		}
 	}
 
 	mContext->SetDefaultState();
@@ -1099,39 +1104,43 @@ void View::DrawGrid()
 
 	if (mTrackTool == LC_TRACKTOOL_INSERT)
 	{
-		lcVector3 Position;
-		lcVector4 Rotation;
-		GetPieceInsertPosition(Position, Rotation);
 		PieceInfo* CurPiece = gMainWindow->mPreviewWidget->GetCurrentPiece();
 
-		lcVector3 Points[8] =
+		if (CurPiece)
 		{
-			lcVector3(CurPiece->m_fDimensions[0], CurPiece->m_fDimensions[1], CurPiece->m_fDimensions[5]),
-			lcVector3(CurPiece->m_fDimensions[3], CurPiece->m_fDimensions[1], CurPiece->m_fDimensions[5]),
-			lcVector3(CurPiece->m_fDimensions[0], CurPiece->m_fDimensions[1], CurPiece->m_fDimensions[2]),
-			lcVector3(CurPiece->m_fDimensions[3], CurPiece->m_fDimensions[4], CurPiece->m_fDimensions[5]),
-			lcVector3(CurPiece->m_fDimensions[3], CurPiece->m_fDimensions[4], CurPiece->m_fDimensions[2]),
-			lcVector3(CurPiece->m_fDimensions[0], CurPiece->m_fDimensions[4], CurPiece->m_fDimensions[2]),
-			lcVector3(CurPiece->m_fDimensions[0], CurPiece->m_fDimensions[4], CurPiece->m_fDimensions[5]),
-			lcVector3(CurPiece->m_fDimensions[3], CurPiece->m_fDimensions[1], CurPiece->m_fDimensions[2])
-		};
+			lcVector3 Position;
+			lcVector4 Rotation;
+			GetPieceInsertPosition(Position, Rotation);
 
-		lcMatrix44 ModelWorld = lcMatrix44FromAxisAngle(lcVector3(Rotation[0], Rotation[1], Rotation[2]), Rotation[3] * LC_DTOR);
-		ModelWorld.SetTranslation(Position);
+			lcVector3 Points[8] =
+			{
+				lcVector3(CurPiece->m_fDimensions[0], CurPiece->m_fDimensions[1], CurPiece->m_fDimensions[5]),
+				lcVector3(CurPiece->m_fDimensions[3], CurPiece->m_fDimensions[1], CurPiece->m_fDimensions[5]),
+				lcVector3(CurPiece->m_fDimensions[0], CurPiece->m_fDimensions[1], CurPiece->m_fDimensions[2]),
+				lcVector3(CurPiece->m_fDimensions[3], CurPiece->m_fDimensions[4], CurPiece->m_fDimensions[5]),
+				lcVector3(CurPiece->m_fDimensions[3], CurPiece->m_fDimensions[4], CurPiece->m_fDimensions[2]),
+				lcVector3(CurPiece->m_fDimensions[0], CurPiece->m_fDimensions[4], CurPiece->m_fDimensions[2]),
+				lcVector3(CurPiece->m_fDimensions[0], CurPiece->m_fDimensions[4], CurPiece->m_fDimensions[5]),
+				lcVector3(CurPiece->m_fDimensions[3], CurPiece->m_fDimensions[1], CurPiece->m_fDimensions[2])
+			};
 
-		for (int i = 0; i < 8; i++)
-		{
-			lcVector3 Point = lcMul31(Points[i], ModelWorld);
+			lcMatrix44 ModelWorld = lcMatrix44FromAxisAngle(lcVector3(Rotation[0], Rotation[1], Rotation[2]), Rotation[3] * LC_DTOR);
+			ModelWorld.SetTranslation(Position);
 
-			if (Point[0] < BoundingBox[0]) BoundingBox[0] = Point[0];
-			if (Point[1] < BoundingBox[1]) BoundingBox[1] = Point[1];
-			if (Point[2] < BoundingBox[2]) BoundingBox[2] = Point[2];
-			if (Point[0] > BoundingBox[3]) BoundingBox[3] = Point[0];
-			if (Point[1] > BoundingBox[4]) BoundingBox[4] = Point[1];
-			if (Point[2] > BoundingBox[5]) BoundingBox[5] = Point[2];
+			for (int i = 0; i < 8; i++)
+			{
+				lcVector3 Point = lcMul31(Points[i], ModelWorld);
+
+				if (Point[0] < BoundingBox[0]) BoundingBox[0] = Point[0];
+				if (Point[1] < BoundingBox[1]) BoundingBox[1] = Point[1];
+				if (Point[2] < BoundingBox[2]) BoundingBox[2] = Point[2];
+				if (Point[0] > BoundingBox[3]) BoundingBox[3] = Point[0];
+				if (Point[1] > BoundingBox[4]) BoundingBox[4] = Point[1];
+				if (Point[2] > BoundingBox[5]) BoundingBox[5] = Point[2];
+			}
+
+			GridSizeValid = true;
 		}
-
-		GridSizeValid = true;
 	}
 
 	if (GridSizeValid)
@@ -1984,6 +1993,11 @@ void View::OnLeftButtonDown()
 
 	case LC_TRACKTOOL_INSERT:
 		{
+			PieceInfo* CurPiece = gMainWindow->mPreviewWidget->GetCurrentPiece();
+
+			if (!CurPiece)
+				break;
+
 			lcVector3 Position;
 			lcVector4 Rotation;
 			GetPieceInsertPosition(Position, Rotation);

@@ -183,6 +183,7 @@ void Project::ShowModelListDialog()
 
 	mModels = NewModels;
 
+	lcGetPiecesLibrary()->RemoveTemporaryPieces();
 	SetActiveModel(Dialog.mActiveModel);
 	gMainWindow->UpdateTitle();
 }

@@ -60,6 +60,24 @@ void lcPiecesLibrary::Unload()
 	mZipFiles[LC_ZIPFILE_UNOFFICIAL] = NULL;
 }
 
+void lcPiecesLibrary::RemoveTemporaryPieces()
+{
+	for (int PieceIdx = mPieces.GetSize() - 1; PieceIdx >= 0; PieceIdx--)
+	{
+		PieceInfo* Info = mPieces[PieceIdx];
+
+		if (!Info->IsTemporary())
+			break;
+
+		if (!Info->IsLoaded())
+		{
+			mPieces.RemoveIndex(PieceIdx);
+			delete Info;
+		}
+	}
+
+}
+
 PieceInfo* lcPiecesLibrary::FindPiece(const char* PieceName, bool CreatePlaceholder)
 {
 	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)

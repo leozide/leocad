@@ -23,6 +23,14 @@ lcQModelListDialog::~lcQModelListDialog()
 
 void lcQModelListDialog::accept()
 {
+	mModels.clear();
+
+	for (int ItemIdx = 0; ItemIdx < ui->ModelList->count(); ItemIdx++)
+	{
+		QListWidgetItem* Item = ui->ModelList->item(ItemIdx);
+		mModels.append(QPair<QString, lcModel*>(Item->text(), (lcModel*)Item->data(Qt::UserRole).value<uintptr_t>()));
+	}
+
 	mActiveModel = ui->ModelList->currentRow();
 	if (mActiveModel < 0)
 		mActiveModel = 0;

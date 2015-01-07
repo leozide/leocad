@@ -19,8 +19,18 @@ win32 {
 	LIBS += -ladvapi32 -lshell32
 } else {
 	LIBS += -lz
-        QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-parameter
-        QMAKE_CXXFLAGS += -std=c++0x
+	QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-parameter
+}
+
+lessThan(QT_MAJOR_VERSION, 5) {
+	unix {
+		GCC_VERSION = $$system(g++ -dumpversion)
+		greaterThan(GCC_VERSION, 4.6) {
+			QMAKE_CXXFLAGS += -std=c++11
+		} else {
+			QMAKE_CXXFLAGS += -std=c++0x
+		}
+	}
 }
 
 isEmpty(QMAKE_LRELEASE) {

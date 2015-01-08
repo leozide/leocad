@@ -10,6 +10,9 @@
 #include "view.h"
 #include "texfont.h"
 #include "lc_texture.h"
+#include "lc_mesh.h"
+
+static int gWidgetCount;
 
 void lcGLWidget::MakeCurrent()
 {
@@ -128,12 +131,16 @@ lcQGLWidget::lcQGLWidget(QWidget *parent, lcQGLWidget *share, lcGLWidget *owner,
 
 	// TODO: Find a better place for the grid texture and font
 	gTexFont.Load();
-	if (!gGridTexture)
+	if (!gWidgetCount)
 	{
 		gGridTexture = new lcTexture;
 		gGridTexture->CreateGridTexture();
+		gGridTexture->AddRef();
+
+		gPlaceholderMesh = new lcMesh;
+		gPlaceholderMesh->CreateBox();
 	}
-	gGridTexture->AddRef();
+	gWidgetCount++;
 
 	preferredSize = QSize(0, 0);
 	setMouseTracking(true);
@@ -148,11 +155,15 @@ lcQGLWidget::lcQGLWidget(QWidget *parent, lcQGLWidget *share, lcGLWidget *owner,
 
 lcQGLWidget::~lcQGLWidget()
 {
+	gWidgetCount--;
 	gTexFont.Release();
-	if (!gGridTexture->Release())
+	if (!gWidgetCount)
 	{
 		delete gGridTexture;
 		gGridTexture = NULL;
+
+		delete gPlaceholderMesh;
+		gPlaceholderMesh = NULL;
 	}
 
 	if (isView)

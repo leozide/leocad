@@ -7,6 +7,8 @@
 #include "lc_application.h"
 #include "lc_library.h"
 
+lcMesh* gPlaceholderMesh;
+
 lcMesh::lcMesh()
 {
 	mSections = NULL;

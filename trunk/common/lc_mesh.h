@@ -179,4 +179,6 @@ struct lcRenderMesh
 int lcTranslucentRenderMeshCompare(const lcRenderMesh& a, const lcRenderMesh& b);
 int lcOpaqueRenderMeshCompare(const lcRenderMesh& a, const lcRenderMesh& b);
 
+extern lcMesh* gPlaceholderMesh;
+
 #endif // _LC_MESH_H_

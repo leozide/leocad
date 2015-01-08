@@ -106,6 +106,7 @@ public:
 
 	void CreatePlaceholder(const char* Name);
 
+	void SetPlaceholder();
 	void SetModel(lcModel* Model);
 	bool IncludesModel(const lcModel* Model) const;
 	bool MinIntersectDist(const lcMatrix44& WorldMatrix, const lcVector3& WorldStart, const lcVector3& WorldEnd, float& MinDistance) const;

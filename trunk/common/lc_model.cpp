@@ -156,10 +156,7 @@ lcModel::~lcModel()
 {
 	if (mPieceInfo)
 	{
-		if (gMainWindow->mPreviewWidget->GetCurrentPiece() == mPieceInfo)
-			gMainWindow->mPreviewWidget->SetCurrentPiece(NULL);
-
-		mPieceInfo->SetModel(NULL);
+		mPieceInfo->SetPlaceholder();
 		mPieceInfo->Release();
 	}
 

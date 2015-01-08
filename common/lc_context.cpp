@@ -20,6 +20,11 @@ lcContext::lcContext()
 	mFramebufferObject = 0;
 	mFramebufferTexture = 0;
 	mDepthRenderbufferObject = 0;
+
+    mViewportX = 0;
+    mViewportY = 0;
+    mViewportWidth = 1;
+    mViewportHeight = 1;
 }
 
 lcContext::~lcContext()

@@ -135,7 +135,6 @@ lcQGLWidget::lcQGLWidget(QWidget *parent, lcQGLWidget *share, lcGLWidget *owner,
 	{
 		gGridTexture = new lcTexture;
 		gGridTexture->CreateGridTexture();
-		gGridTexture->AddRef();
 
 		gPlaceholderMesh = new lcMesh;
 		gPlaceholderMesh->CreateBox();

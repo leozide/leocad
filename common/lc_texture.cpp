@@ -117,6 +117,8 @@ void lcTexture::CreateGridTexture()
 	}
 
 	Load(GridImages, NumLevels, LC_TEXTURE_WRAPU | LC_TEXTURE_WRAPV | LC_TEXTURE_MIPMAPS | LC_TEXTURE_ANISOTROPIC);
+
+    mRefCount = 1;
 }
 
 bool lcTexture::Load()

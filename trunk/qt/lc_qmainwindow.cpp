@@ -212,14 +212,14 @@ void lcQMainWindow::createActions()
 
 void lcQMainWindow::createMenus()
 {
-	QMenu* transformMenu = new QMenu(tr("Transform"));
+    QMenu* transformMenu = new QMenu(tr("Transform"), this);
 	transformMenu->addAction(actions[LC_EDIT_TRANSFORM_RELATIVE_TRANSLATION]);
 	transformMenu->addAction(actions[LC_EDIT_TRANSFORM_ABSOLUTE_TRANSLATION]);
 	transformMenu->addAction(actions[LC_EDIT_TRANSFORM_RELATIVE_ROTATION]);
 	transformMenu->addAction(actions[LC_EDIT_TRANSFORM_ABSOLUTE_ROTATION]);
 	actions[LC_EDIT_TRANSFORM]->setMenu(transformMenu);
 
-	menuCamera = new QMenu(tr("C&ameras"));
+    menuCamera = new QMenu(tr("C&ameras"), this);
 	menuCamera->addAction(actions[LC_VIEW_CAMERA_NONE]);
 
 	for (int actionIdx = LC_VIEW_CAMERA_FIRST; actionIdx <= LC_VIEW_CAMERA_LAST; actionIdx++)
@@ -350,7 +350,7 @@ void lcQMainWindow::createMenus()
 
 void lcQMainWindow::createToolBars()
 {
-	QMenu* lockMenu = new QMenu(tr("Lock Menu"));
+    QMenu* lockMenu = new QMenu(tr("Lock Menu"), this);
 	lockMenu->addAction(actions[LC_EDIT_LOCK_X]);
 	lockMenu->addAction(actions[LC_EDIT_LOCK_Y]);
 	lockMenu->addAction(actions[LC_EDIT_LOCK_Z]);
@@ -361,15 +361,15 @@ void lcQMainWindow::createToolBars()
 	lockAction->setIcon(QIcon(":/resources/edit_lock.png"));
 	lockAction->setMenu(lockMenu);
 
-	QMenu* snapXYMenu = new QMenu(tr("Snap XY"));
+    QMenu* snapXYMenu = new QMenu(tr("Snap XY"), this);
 	for (int actionIdx = LC_EDIT_SNAP_MOVE_XY0; actionIdx <= LC_EDIT_SNAP_MOVE_XY9; actionIdx++)
 		snapXYMenu->addAction(actions[actionIdx]);
 
-	QMenu* snapZMenu = new QMenu(tr("Snap Z"));
+    QMenu* snapZMenu = new QMenu(tr("Snap Z"), this);
 	for (int actionIdx = LC_EDIT_SNAP_MOVE_Z0; actionIdx <= LC_EDIT_SNAP_MOVE_Z9; actionIdx++)
 		snapZMenu->addAction(actions[actionIdx]);
 
-	QMenu* snapMenu = new QMenu(tr("Snap Menu"));
+    QMenu* snapMenu = new QMenu(tr("Snap Menu"), this);
 	snapMenu->addMenu(snapXYMenu);
 	snapMenu->addMenu(snapZMenu);
 
@@ -378,7 +378,7 @@ void lcQMainWindow::createToolBars()
 	moveAction->setIcon(QIcon(":/resources/edit_snap_move.png"));
 	moveAction->setMenu(snapMenu);
 
-	QMenu* snapAngleMenu = new QMenu(tr("Snap Angle Menu"));
+    QMenu* snapAngleMenu = new QMenu(tr("Snap Angle Menu"), this);
 	for (int actionIdx = LC_EDIT_SNAP_ANGLE0; actionIdx <= LC_EDIT_SNAP_ANGLE9; actionIdx++)
 		snapAngleMenu->addAction(actions[actionIdx]);
 
@@ -501,7 +501,8 @@ void lcQMainWindow::createToolBars()
 	connect(partSearch, SIGNAL(returnPressed()), this, SLOT(partSearchReturn()));
 	connect(partSearch, SIGNAL(textChanged(QString)), this, SLOT(partSearchChanged(QString)));
 
-	QCompleter *completer = new QCompleter(new lcQPartsListModel(), this);
+    QCompleter *completer = new QCompleter(this);
+    completer->setModel(new lcQPartsListModel(completer));
 	completer->setCaseSensitivity(Qt::CaseInsensitive);
 	partSearch->setCompleter(completer);
 

@@ -65,7 +65,8 @@ lcApplication::lcApplication()
 
 lcApplication::~lcApplication()
 {
-	delete mLibrary;
+    delete mProject;
+    delete mLibrary;
 }
 
 void lcApplication::SetProject(Project* Project)

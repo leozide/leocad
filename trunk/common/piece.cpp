@@ -37,7 +37,7 @@ lcPiece::lcPiece(PieceInfo* pPieceInfo)
 		mPieceInfo->AddRef();
 
 	ChangeKey(mPositionKeys, lcVector3(0.0f, 0.0f, 0.0f), 1, true);
-	ChangeKey(mRotationKeys, lcVector4(0.0f, 0.0f, 1.0f, 0.0f), 1, true);
+	ChangeKey(mRotationKeys, lcMatrix33Identity(), 1, true);
 }
 
 lcPiece::~lcPiece()
@@ -183,7 +183,7 @@ bool lcPiece::FileLoad(lcFile& file)
 			if (type == 0)
 				ChangeKey(mPositionKeys, lcVector3(param[0], param[1], param[2]), time, true);
 			else if (type == 1)
-				ChangeKey(mRotationKeys, lcVector4(param[0], param[1], param[2], param[3]), time, true);
+				ChangeKey(mRotationKeys, lcMatrix33FromAxisAngle(lcVector3(param[0], param[1], param[2]), param[3] * LC_DTOR), time, true);
 		}
 
 		file.ReadU32(&n, 1);
@@ -215,7 +215,7 @@ bool lcPiece::FileLoad(lcFile& file)
 		if (type == 0)
 			ChangeKey(mPositionKeys, lcVector3(param[0], param[1], param[2]), time, true);
 		else if (type == 1)
-			ChangeKey(mRotationKeys, lcVector4(param[0], param[1], param[2], param[3]), time, true);
+			ChangeKey(mRotationKeys, lcMatrix33FromAxisAngle(lcVector3(param[0], param[1], param[2]), param[3] * LC_DTOR), time, true);
       }
 
       file.ReadU32(&keys, 1);
@@ -254,12 +254,8 @@ bool lcPiece::FileLoad(lcFile& file)
 			file.ReadU8(&b, 1);
 			time = b;
 
-			ChangeKey(mPositionKeys, lcVector3(ModelWorld.r[3][0], ModelWorld.r[3][1], ModelWorld.r[3][2]), 1, true);
-
-			lcVector4 AxisAngle = lcMatrix44ToAxisAngle(ModelWorld);
-			AxisAngle[3] *= LC_RTOD;
-
-			ChangeKey(mRotationKeys, AxisAngle, time, true);
+			ChangeKey(mPositionKeys, ModelWorld.GetTranslation(), 1, true);
+			ChangeKey(mRotationKeys, lcMatrix33(ModelWorld), time, true);
 
 			lcint32 bl;
 			file.ReadS32(&bl, 1);
@@ -275,10 +271,7 @@ bool lcPiece::FileLoad(lcFile& file)
 			ModelWorld = lcMul(lcMatrix44RotationZ(Rotation[2] * LC_DTOR), lcMul(lcMatrix44RotationY(Rotation[1] * LC_DTOR), lcMul(lcMatrix44RotationX(Rotation[0] * LC_DTOR), ModelWorld)));
 
 			ChangeKey(mPositionKeys, lcVector3(ModelWorld.r[3][0], ModelWorld.r[3][1], ModelWorld.r[3][2]), 1, true);
-
-			lcVector4 AxisAngle = lcMatrix44ToAxisAngle(ModelWorld);
-			AxisAngle[3] *= LC_RTOD;
-			ChangeKey(mRotationKeys, AxisAngle, 1, true);
+			ChangeKey(mRotationKeys, lcMatrix33(ModelWorld), 1, true);
 	  }
     }
   }
@@ -374,62 +367,12 @@ bool lcPiece::FileLoad(lcFile& file)
 	return true;
 }
 
-void lcPiece::FileSave(lcFile& file) const
-{
-	file.WriteU8(LC_PIECE_SAVE_VERSION);
-
-	file.WriteU8(1);
-	file.WriteU32(mPositionKeys.GetSize() + mRotationKeys.GetSize());
-
-	for (int KeyIdx = 0; KeyIdx < mPositionKeys.GetSize(); KeyIdx++)
-	{
-		lcObjectKey<lcVector3>& Key = mPositionKeys[KeyIdx];
-
-		lcuint16 Step = lcMin(Key.Step, 0xFFFFU);
-		file.WriteU16(Step);
-		file.WriteFloats(Key.Value, 3);
-		file.WriteFloat(0);
-		file.WriteU8(0);
-	}
-
-	for (int KeyIdx = 0; KeyIdx < mRotationKeys.GetSize(); KeyIdx++)
-	{
-		lcObjectKey<lcVector4>& Key = mRotationKeys[KeyIdx];
-
-		lcuint16 Step = lcMin(Key.Step, 0xFFFFU);
-		file.WriteU16(Step);
-		file.WriteFloats(Key.Value, 4);
-		file.WriteU8(1);
-	}
-
-	file.WriteU32(0);
-
-
-	file.WriteBuffer(mPieceInfo->m_strName, LC_PIECE_NAME_LEN);
-	file.WriteU32(mColorCode);
-	file.WriteU8(lcMin(mStepShow, 254U));
-	file.WriteU8(lcMin(mStepHide, 255U));
-	file.WriteU16(1); // m_nFrameShow
-	file.WriteU16(100); // m_nFrameHide
-
-	// version 8
-	file.WriteU8(mState & LC_PIECE_HIDDEN ? 1 : 0);
-
-	lcuint8 Length = strlen(m_strName);
-	file.WriteU8(Length);
-	file.WriteBuffer(m_strName, Length);
-
-	// version 7
-	lcint32 GroupIndex = lcGetActiveModel()->GetGroups().FindIndex(mGroup);
-	file.WriteS32(GroupIndex);
-}
-
-void lcPiece::Initialize(const lcVector3& Position, const lcVector4& AxisAngle, lcStep Step)
+void lcPiece::Initialize(const lcMatrix44& WorldMatrix, lcStep Step)
 {
 	mStepShow = Step;
 
-	ChangeKey(mPositionKeys, Position, 1, true);
-	ChangeKey(mRotationKeys, AxisAngle, 1, true);
+	ChangeKey(mPositionKeys, WorldMatrix.GetTranslation(), 1, true);
+	ChangeKey(mRotationKeys, lcMatrix33(WorldMatrix), 1, true);
 
 	UpdatePosition(Step);
 }
@@ -609,11 +552,11 @@ void lcPiece::DrawInterface(lcContext* Context, const lcMatrix44& ViewMatrix) co
 
 void lcPiece::Move(lcStep Step, bool AddKey, const lcVector3& Distance)
 {
-	mPosition += Distance;
+	lcVector3 Position = mModelWorld.GetTranslation() + Distance;
 
-	ChangeKey(mPositionKeys, mPosition, Step, AddKey);
+	ChangeKey(mPositionKeys, Position, Step, AddKey);
 
-	mModelWorld.SetTranslation(mPosition);
+	mModelWorld.SetTranslation(Position);
 }
 
 bool lcPiece::IsVisible(lcStep Step)
@@ -658,9 +601,8 @@ lcGroup* lcPiece::GetTopGroup()
 
 void lcPiece::UpdatePosition(lcStep Step)
 {
-	mPosition = CalculateKey(mPositionKeys, Step);
-	mRotation = CalculateKey(mRotationKeys, Step);
+	lcVector3 Position = CalculateKey(mPositionKeys, Step);
+	lcMatrix33 Rotation = CalculateKey(mRotationKeys, Step);
 
-	mModelWorld = lcMatrix44FromAxisAngle(lcVector3(mRotation[0], mRotation[1], mRotation[2]), mRotation[3] * LC_DTOR);
-	mModelWorld.SetTranslation(mPosition);
+	mModelWorld = lcMatrix44(Rotation, Position);
 }

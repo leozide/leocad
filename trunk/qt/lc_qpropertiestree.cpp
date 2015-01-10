@@ -523,7 +523,7 @@ void lcQPropertiesTree::slotReturnPressed()
 
 		if (Item == partPositionX || Item == partPositionY || Item == partPositionZ)
 		{
-			lcVector3 Position = Piece->mPosition;
+			lcVector3 Position = Piece->mModelWorld.GetTranslation();
 			float Value = Editor->text().toFloat();
 
 			if (Item == partPositionX)
@@ -547,9 +547,8 @@ void lcQPropertiesTree::slotReturnPressed()
 			else if (Item == partRotationZ)
 				Rotation[2] = Value;
 
-			lcVector4 AxisAngle = lcMatrix44ToAxisAngle(lcMatrix44FromEulerAngles(Rotation * LC_DTOR));
-			AxisAngle[3] *= LC_RTOD;
-			Model->SetObjectProperty(focusObject, LC_PIECE_PROPERTY_ROTATION, &AxisAngle);
+			Rotation *= LC_DTOR;
+			Model->SetObjectProperty(focusObject, LC_PIECE_PROPERTY_ROTATION, &Rotation);
 		}
 		else if (Item == partShow)
 		{
@@ -781,7 +780,7 @@ void lcQPropertiesTree::setPart(lcObject *newFocusObject)
 	focusObject = newFocusObject;
 	lcPiece *part = (lcPiece*)focusObject;
 
-	lcVector3 position = part->mPosition;
+	lcVector3 position = part->mModelWorld.GetTranslation();
 	partPositionX->setText(1, QString::number(position[0]));
 	partPositionX->setData(0, PropertyValueRole, position[0]);
 	partPositionY->setText(1, QString::number(position[1]));

@@ -131,7 +131,7 @@ protected:
 
 		const int Count = sizeof(T) / sizeof(float);
 		for (int ValueIdx = 0; ValueIdx < Count; ValueIdx++)
-			Stream >> Value[ValueIdx];
+			Stream >> ((float*)&Value)[ValueIdx];
 
 		lcObjectKey<T>& Key = Keys.Add();
 		Key.Step = Step;

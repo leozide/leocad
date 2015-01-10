@@ -23,6 +23,7 @@ struct lcModelPartsEntry;
 class lcVector2;
 class lcVector3;
 class lcVector4;
+class lcMatrix33;
 class lcMatrix44;
 
 class lcContext;

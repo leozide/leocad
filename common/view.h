@@ -89,7 +89,7 @@ public:
 	LC_CURSOR_TYPE GetCursor() const;
 
 	lcVector3 GetMoveDirection(const lcVector3& Direction) const;
-	void GetPieceInsertPosition(lcVector3& Position, lcVector4& Rotation) const;
+	lcMatrix44 GetPieceInsertPosition() const;
 	lcObjectSection FindObjectUnderPointer(bool PiecesOnly) const;
 	lcArray<lcObject*> FindObjectsInBox(float x1, float y1, float x2, float y2) const;
 

@@ -230,7 +230,7 @@ lcVector3 View::GetMoveDirection(const lcVector3& Direction) const
 	return axis;
 }
 
-void View::GetPieceInsertPosition(lcVector3& Position, lcVector4& Rotation) const
+lcMatrix44 View::GetPieceInsertPosition() const
 {
 	PieceInfo* CurPiece = gMainWindow->mPreviewWidget->GetCurrentPiece();
 	lcPiece* HitPiece = (lcPiece*)FindObjectUnderPointer(true).Object;
@@ -240,10 +240,11 @@ void View::GetPieceInsertPosition(lcVector3& Position, lcVector4& Rotation) cons
 		lcVector3 Dist(0, 0, HitPiece->mPieceInfo->m_fDimensions[2] - CurPiece->m_fDimensions[5]);
 		Dist = mModel->SnapPosition(Dist);
 
-		Position = lcMul31(Dist, HitPiece->mModelWorld);
-		Rotation = HitPiece->mRotation;
+		lcVector3 Position = lcMul31(Dist, HitPiece->mModelWorld);
+		lcMatrix44 WorldMatrix = HitPiece->mModelWorld;
+		WorldMatrix.SetTranslation(Position);
 
-		return;
+		return WorldMatrix;
 	}
 
 	lcVector3 ClickPoints[2] = { lcVector3((float)mInputState.x, (float)mInputState.y, 0.0f), lcVector3((float)mInputState.x, (float)mInputState.y, 1.0f) };
@@ -254,13 +255,10 @@ void View::GetPieceInsertPosition(lcVector3& Position, lcVector4& Rotation) cons
 	if (lcLinePlaneIntersection(&Intersection, ClickPoints[0], ClickPoints[1], lcVector4(0, 0, 1, CurPiece->m_fDimensions[5])))
 	{
 		Intersection = mModel->SnapPosition(Intersection);
-		Position = Intersection;
-		Rotation = lcVector4(0, 0, 1, 0);
-		return;
+		return lcMatrix44Translation(Intersection);
 	}
 
-	Position = UnprojectPoint(lcVector3((float)mInputState.x, (float)mInputState.y, 0.9f));
-	Rotation = lcVector4(0, 0, 1, 0);
+	return lcMatrix44Translation(UnprojectPoint(lcVector3((float)mInputState.x, (float)mInputState.y, 0.9f)));
 }
 
 lcObjectSection View::FindObjectUnderPointer(bool PiecesOnly) const
@@ -360,16 +358,7 @@ void View::OnDraw()
 		PieceInfo* Info = gMainWindow->mPreviewWidget->GetCurrentPiece();
 
 		if (Info)
-		{
-			lcVector3 Position;
-			lcVector4 Rotation;
-			GetPieceInsertPosition(Position, Rotation);
-
-			lcMatrix44 WorldMatrix = lcMatrix44FromAxisAngle(lcVector3(Rotation[0], Rotation[1], Rotation[2]), Rotation[3] * LC_DTOR);
-			WorldMatrix.SetTranslation(Position);
-
-			Info->AddRenderMeshes(Scene, WorldMatrix, gMainWindow->mColorIndex, true, true);
-		}
+			Info->AddRenderMeshes(Scene, GetPieceInsertPosition(), gMainWindow->mColorIndex, true, true);
 	}
 
 	mContext->SetDefaultState();
@@ -1108,10 +1097,6 @@ void View::DrawGrid()
 
 		if (CurPiece)
 		{
-			lcVector3 Position;
-			lcVector4 Rotation;
-			GetPieceInsertPosition(Position, Rotation);
-
 			lcVector3 Points[8] =
 			{
 				lcVector3(CurPiece->m_fDimensions[0], CurPiece->m_fDimensions[1], CurPiece->m_fDimensions[5]),
@@ -1124,12 +1109,11 @@ void View::DrawGrid()
 				lcVector3(CurPiece->m_fDimensions[3], CurPiece->m_fDimensions[1], CurPiece->m_fDimensions[2])
 			};
 
-			lcMatrix44 ModelWorld = lcMatrix44FromAxisAngle(lcVector3(Rotation[0], Rotation[1], Rotation[2]), Rotation[3] * LC_DTOR);
-			ModelWorld.SetTranslation(Position);
+			lcMatrix44 WorldMatrix = GetPieceInsertPosition();
 
 			for (int i = 0; i < 8; i++)
 			{
-				lcVector3 Point = lcMul31(Points[i], ModelWorld);
+				lcVector3 Point = lcMul31(Points[i], WorldMatrix);
 
 				if (Point[0] < BoundingBox[0]) BoundingBox[0] = Point[0];
 				if (Point[1] < BoundingBox[1]) BoundingBox[1] = Point[1];
@@ -1422,12 +1406,7 @@ void View::BeginPieceDrag()
 void View::EndPieceDrag(bool Accept)
 {
 	if (Accept)
-	{
-		lcVector3 Position;
-		lcVector4 Rotation;
-		GetPieceInsertPosition(Position, Rotation);
-		mModel->InsertPieceToolClicked(Position, Rotation);
-	}
+		mModel->InsertPieceToolClicked(GetPieceInsertPosition());
 
 	mDragState = LC_DRAGSTATE_NONE;
 	UpdateTrackTool();
@@ -1998,10 +1977,7 @@ void View::OnLeftButtonDown()
 			if (!CurPiece)
 				break;
 
-			lcVector3 Position;
-			lcVector4 Rotation;
-			GetPieceInsertPosition(Position, Rotation);
-			mModel->InsertPieceToolClicked(Position, Rotation);
+			mModel->InsertPieceToolClicked(GetPieceInsertPosition());
 
 			if (!mInputState.Control)
 				gMainWindow->SetTool(LC_TOOL_SELECT);

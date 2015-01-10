@@ -444,13 +444,10 @@ void lcModel::LoadLDraw(QIODevice& Device)
 			{
 				float* Matrix = IncludeTransform;
 				lcMatrix44 Transform(lcVector4(Matrix[0], Matrix[2], -Matrix[1], 0.0f), lcVector4(Matrix[8], Matrix[10], -Matrix[9], 0.0f),
-				                     lcVector4(-Matrix[4], -Matrix[6], Matrix[5], 0.0f), lcVector4(0.0f, 0.0f, 0.0f, 1.0f));
-
-				lcVector4 AxisAngle = lcMatrix44ToAxisAngle(Transform);
-				AxisAngle[3] *= LC_RTOD;
+				                     lcVector4(-Matrix[4], -Matrix[6], Matrix[5], 0.0f), lcVector4(Matrix[12], Matrix[14], -Matrix[13], 1.0f));
 
 				Piece->SetPieceInfo(Info);
-				Piece->Initialize(lcVector3(IncludeTransform[3].x, IncludeTransform[3].z, -IncludeTransform[3].y), AxisAngle, CurrentStep);
+				Piece->Initialize(Transform, CurrentStep);
 				Piece->SetColorCode(ColorCode);
 				Piece->CreateName(mPieces);
 				mPieces.Add(Piece);
@@ -463,13 +460,10 @@ void lcModel::LoadLDraw(QIODevice& Device)
 			{
 				float* Matrix = IncludeTransform;
 				lcMatrix44 Transform(lcVector4(Matrix[0], Matrix[2], -Matrix[1], 0.0f), lcVector4(Matrix[8], Matrix[10], -Matrix[9], 0.0f),
-				                     lcVector4(-Matrix[4], -Matrix[6], Matrix[5], 0.0f), lcVector4(0.0f, 0.0f, 0.0f, 1.0f));
-
-				lcVector4 AxisAngle = lcMatrix44ToAxisAngle(Transform);
-				AxisAngle[3] *= LC_RTOD;
+				                     lcVector4(-Matrix[4], -Matrix[6], Matrix[5], 0.0f), lcVector4(Matrix[12], Matrix[14], -Matrix[13], 1.0f));
 
 				Piece->SetPieceInfo(Info);
-				Piece->Initialize(lcVector3(IncludeTransform[3].x, IncludeTransform[3].z, -IncludeTransform[3].y), AxisAngle, CurrentStep);
+				Piece->Initialize(Transform, CurrentStep);
 				Piece->SetColorCode(ColorCode);
 				Piece->CreateName(mPieces);
 				mPieces.Add(Piece);
@@ -574,14 +568,13 @@ bool lcModel::LoadBinary(lcFile* file)
 			file->ReadU8(&group, 1);
 
 			pos *= 25.0f;
-			lcMatrix44 ModelWorld = lcMul(lcMatrix44RotationZ(rot[2] * LC_DTOR), lcMul(lcMatrix44RotationY(rot[1] * LC_DTOR), lcMatrix44RotationX(rot[0] * LC_DTOR)));
-			lcVector4 AxisAngle = lcMatrix44ToAxisAngle(ModelWorld);
-			AxisAngle[3] *= LC_RTOD;
+			lcMatrix44 WorldMatrix = lcMul(lcMatrix44RotationZ(rot[2] * LC_DTOR), lcMul(lcMatrix44RotationY(rot[1] * LC_DTOR), lcMatrix44RotationX(rot[0] * LC_DTOR)));
+			WorldMatrix.SetTranslation(pos);
 
 			PieceInfo* pInfo = Library->FindPiece(name, true);
 			lcPiece* pPiece = new lcPiece(pInfo);
 
-			pPiece->Initialize(pos, AxisAngle, step);
+			pPiece->Initialize(WorldMatrix, step);
 			pPiece->SetColorCode(lcGetColorCodeFromOriginalColor(color));
 			pPiece->CreateName(mPieces);
 			mPieces.Add(pPiece);
@@ -1747,24 +1740,23 @@ void lcModel::AddPiece()
 		}
 	}
 
-	lcVector3 Position(0, 0, 0);
-	lcVector4 Rotation(0, 0, 1, 0);
+	lcMatrix44 WorldMatrix;
 
 	if (Last != NULL)
 	{
 		lcVector3 Dist(0, 0, Last->mPieceInfo->m_fDimensions[2] - CurPiece->m_fDimensions[5]);
 		Dist = SnapPosition(Dist);
 
-		Position = lcMul31(Dist, Last->mModelWorld);
-		Rotation = Last->mRotation;
+		WorldMatrix = Last->mModelWorld;
+		WorldMatrix.SetTranslation(lcMul31(Dist, Last->mModelWorld));
 	}
 	else
 	{
-		Position[2] = -CurPiece->m_fDimensions[5];
+		WorldMatrix = lcMatrix44Translation(lcVector3(0.0f, 0.0f, -CurPiece->m_fDimensions[5]));
 	}
 
 	lcPiece* Piece = new lcPiece(CurPiece);
-	Piece->Initialize(Position, Rotation, mCurrentStep);
+	Piece->Initialize(WorldMatrix, mCurrentStep);
 	Piece->SetColorIndex(gMainWindow->mColorIndex);
 	Piece->CreateName(mPieces);
 	mPieces.Add(Piece);
@@ -1993,30 +1985,21 @@ void lcModel::RotateSelectedPieces(const lcVector3& Angles, bool Update)
 	lcVector3 Center;
 
 	if (Focus)
-		Center = Focus->mPosition;
+		Center = Focus->mModelWorld.GetTranslation();
 	else
 		Center = lcVector3((Bounds[0] + Bounds[3]) / 2.0f, (Bounds[1] + Bounds[4]) / 2.0f, (Bounds[2] + Bounds[5]) / 2.0f);
 
-	lcVector4 RotationQuaternion(0, 0, 0, 1);
-	lcVector4 WorldToFocusQuaternion, FocusToWorldQuaternion;
+	lcMatrix33 RotationMatrix = lcMatrix33Identity();
+	lcMatrix33 WorldToFocusMatrix, FocusToWorldMatrix;
 
 	if (Angles[0] != 0.0f)
-	{
-		lcVector4 q = lcQuaternionRotationX(Angles[0] * LC_DTOR);
-		RotationQuaternion = lcQuaternionMultiply(q, RotationQuaternion);
-	}
+		RotationMatrix = lcMul(lcMatrix33RotationX(Angles[0] * LC_DTOR), RotationMatrix);
 
 	if (Angles[1] != 0.0f)
-	{
-		lcVector4 q = lcQuaternionRotationY(Angles[1] * LC_DTOR);
-		RotationQuaternion = lcQuaternionMultiply(q, RotationQuaternion);
-	}
+		RotationMatrix = lcMul(lcMatrix33RotationY(Angles[1] * LC_DTOR), RotationMatrix);
 
 	if (Angles[2] != 0.0f)
-	{
-		lcVector4 q = lcQuaternionRotationZ(Angles[2] * LC_DTOR);
-		RotationQuaternion = lcQuaternionMultiply(q, RotationQuaternion);
-	}
+		RotationMatrix = lcMul(lcMatrix33RotationZ(Angles[2] * LC_DTOR), RotationMatrix);
 
 	const lcPreferences& Preferences = lcGetPreferences();
 	if (Preferences.mForceGlobalTransforms)
@@ -2024,12 +2007,10 @@ void lcModel::RotateSelectedPieces(const lcVector3& Angles, bool Update)
 
 	if (Focus)
 	{
-		const lcVector4& Rotation = Focus->mRotation;
+		FocusToWorldMatrix = lcMatrix33(Focus->mModelWorld);
+		WorldToFocusMatrix = lcMatrix33AffineInverse(FocusToWorldMatrix);
 
-		WorldToFocusQuaternion = lcQuaternionFromAxisAngle(lcVector4(Rotation[0], Rotation[1], Rotation[2], -Rotation[3] * LC_DTOR));
-		FocusToWorldQuaternion = lcQuaternionFromAxisAngle(lcVector4(Rotation[0], Rotation[1], Rotation[2], Rotation[3] * LC_DTOR));
-
-		RotationQuaternion = lcQuaternionMultiply(FocusToWorldQuaternion, RotationQuaternion);
+		RotationMatrix = lcMul(FocusToWorldMatrix, RotationMatrix);
 	}
 
 	bool Rotated = false;
@@ -2041,33 +2022,40 @@ void lcModel::RotateSelectedPieces(const lcVector3& Angles, bool Update)
 		if (!Piece->IsSelected())
 			continue;
 
-		const lcVector4& Rotation = Piece->mRotation;
-		lcVector3 Distance = Piece->mPosition - Center;
-		lcVector4 LocalToWorldQuaternion = lcQuaternionFromAxisAngle(lcVector4(Rotation[0], Rotation[1], Rotation[2], Rotation[3] * LC_DTOR));
-		lcVector4 NewRotation, NewLocalToWorldQuaternion;
+		lcVector3 Distance = Piece->mModelWorld.GetTranslation() - Center;
+		lcMatrix33 LocalToWorldMatrix = lcMatrix33(Piece->mModelWorld);
+		lcMatrix33 NewLocalToWorldMatrix;
 
 		if (Focus)
 		{
-			lcVector4 LocalToFocusQuaternion = lcQuaternionMultiply(WorldToFocusQuaternion, LocalToWorldQuaternion);
-			NewLocalToWorldQuaternion = lcQuaternionMultiply(RotationQuaternion, LocalToFocusQuaternion);
+			lcMatrix33 LocalToFocusMatrix = lcMul(WorldToFocusMatrix, LocalToWorldMatrix);
+			NewLocalToWorldMatrix = lcMul(RotationMatrix, LocalToFocusMatrix);
 
-			lcVector4 WorldToLocalQuaternion = lcQuaternionFromAxisAngle(lcVector4(Rotation[0], Rotation[1], Rotation[2], -Rotation[3] * LC_DTOR));
+			lcMatrix33 WorldToLocalMatrix = lcMatrix33AffineInverse(LocalToWorldMatrix);
 
-			Distance = lcQuaternionMul(Distance, WorldToLocalQuaternion);
-			Distance = lcQuaternionMul(Distance, NewLocalToWorldQuaternion);
+			Distance = lcMul(Distance, WorldToLocalMatrix);
+			Distance = lcMul(Distance, NewLocalToWorldMatrix);
 		}
 		else
 		{
-			NewLocalToWorldQuaternion = lcQuaternionMultiply(RotationQuaternion, LocalToWorldQuaternion);
+			NewLocalToWorldMatrix = lcMul(RotationMatrix, LocalToWorldMatrix);
 
-			Distance = lcQuaternionMul(Distance, RotationQuaternion);
+			Distance = lcMul(Distance, RotationMatrix);
 		}
 
-		NewRotation = lcQuaternionToAxisAngle(NewLocalToWorldQuaternion);
-		NewRotation[3] *= LC_RTOD;
+		NewLocalToWorldMatrix.Orthonormalize();
+
+
+//		NewLocalToWorldMatrix[0].Normalize();
+//		NewLocalToWorldMatrix[1].Normalize();
+//		NewLocalToWorldMatrix[2].Normalize();
+
+		qDebug() << lcCross(NewLocalToWorldMatrix[0], NewLocalToWorldMatrix[1]).Length() << lcCross(NewLocalToWorldMatrix[2], NewLocalToWorldMatrix[1]).Length() << lcCross(NewLocalToWorldMatrix[0], NewLocalToWorldMatrix[2]).Length();
+
+		qDebug() << NewLocalToWorldMatrix[0].Length() << NewLocalToWorldMatrix[1].Length() << NewLocalToWorldMatrix[2].Length();
 
 		Piece->SetPosition(Center + Distance, mCurrentStep, gMainWindow->GetAddKeys());
-		Piece->SetRotation(NewRotation, mCurrentStep, gMainWindow->GetAddKeys());
+		Piece->SetRotation(NewLocalToWorldMatrix, mCurrentStep, gMainWindow->GetAddKeys());
 		Piece->UpdatePosition(mCurrentStep);
 		Rotated = true;
 	}
@@ -2134,28 +2122,16 @@ void lcModel::TransformSelectedObjects(lcTransformType TransformType, const lcVe
 
 	case LC_TRANSFORM_ABSOLUTE_ROTATION:
 		{
-			lcVector4 RotationQuaternion(0, 0, 0, 1);
+			lcMatrix33 RotationMatrix = lcMatrix33Identity();
 
 			if (Transform[0] != 0.0f)
-			{
-				lcVector4 q = lcQuaternionRotationX(Transform[0] * LC_DTOR);
-				RotationQuaternion = lcQuaternionMultiply(q, RotationQuaternion);
-			}
+				RotationMatrix = lcMul(lcMatrix33RotationX(Transform[0] * LC_DTOR), RotationMatrix);
 
 			if (Transform[1] != 0.0f)
-			{
-				lcVector4 q = lcQuaternionRotationY(Transform[1] * LC_DTOR);
-				RotationQuaternion = lcQuaternionMultiply(q, RotationQuaternion);
-			}
+				RotationMatrix = lcMul(lcMatrix33RotationY(Transform[1] * LC_DTOR), RotationMatrix);
 
 			if (Transform[2] != 0.0f)
-			{
-				lcVector4 q = lcQuaternionRotationZ(Transform[2] * LC_DTOR);
-				RotationQuaternion = lcQuaternionMultiply(q, RotationQuaternion);
-			}
-
-			lcVector4 NewRotation = lcQuaternionToAxisAngle(RotationQuaternion);
-			NewRotation[3] *= LC_RTOD;
+				RotationMatrix = lcMul(lcMatrix33RotationZ(Transform[2] * LC_DTOR), RotationMatrix);
 
 			bool Rotated = false;
 
@@ -2165,7 +2141,7 @@ void lcModel::TransformSelectedObjects(lcTransformType TransformType, const lcVe
 
 				if (Piece->IsSelected())
 				{
-					Piece->SetRotation(NewRotation, mCurrentStep, gMainWindow->GetAddKeys());
+					Piece->SetRotation(RotationMatrix, mCurrentStep, gMainWindow->GetAddKeys());
 					Piece->UpdatePosition(mCurrentStep);
 					Rotated = true;
 				}
@@ -2197,7 +2173,7 @@ void lcModel::SetObjectProperty(lcObject* Object, lcObjectPropertyType ObjectPro
 			const lcVector3& Position = *(lcVector3*)Value;
 			lcPiece* Piece = (lcPiece*)Object;
 
-			if (Piece->mPosition != Position)
+			if (Piece->mModelWorld.GetTranslation() != Position)
 			{
 				Piece->SetPosition(Position, mCurrentStep, gMainWindow->GetAddKeys());
 				Piece->UpdatePosition(mCurrentStep);
@@ -2208,12 +2184,14 @@ void lcModel::SetObjectProperty(lcObject* Object, lcObjectPropertyType ObjectPro
 
 	case LC_PIECE_PROPERTY_ROTATION:
 		{
-			const lcVector4& Rotation = *(lcVector4*)Value;
+			const lcVector3& Rotation = *(lcVector3*)Value;
 			lcPiece* Piece = (lcPiece*)Object;
 
-			if (Rotation != Piece->mRotation)
+			if (Rotation != lcMatrix44ToEulerAngles(Piece->mModelWorld))
 			{
-				Piece->SetRotation(Rotation, mCurrentStep, gMainWindow->GetAddKeys());
+				lcMatrix33 RotationMatrix = lcMatrix33FromEulerAngles(Rotation);
+
+				Piece->SetRotation(RotationMatrix, mCurrentStep, gMainWindow->GetAddKeys());
 				Piece->UpdatePosition(mCurrentStep);
 
 				CheckPointString = tr("Rotating");
@@ -2465,7 +2443,7 @@ bool lcModel::GetPieceFocusOrSelectionCenter(lcVector3& Center) const
 
 		if (Piece->IsFocused())
 		{
-			Center = Piece->mPosition;
+			Center = Piece->mModelWorld.GetTranslation();
 			return true;
 		}
 
@@ -3080,10 +3058,10 @@ void lcModel::EndMouseTool(lcTool Tool, bool Accept)
 	}
 }
 
-void lcModel::InsertPieceToolClicked(const lcVector3& Position, const lcVector4& Rotation)
+void lcModel::InsertPieceToolClicked(const lcMatrix44& WorldMatrix)
 {
 	lcPiece* Piece = new lcPiece(gMainWindow->mPreviewWidget->GetCurrentPiece());
-	Piece->Initialize(Position, Rotation, mCurrentStep);
+	Piece->Initialize(WorldMatrix, mCurrentStep);
 	Piece->SetColorIndex(gMainWindow->mColorIndex);
 	Piece->UpdatePosition(mCurrentStep);
 	Piece->CreateName(mPieces);
@@ -3434,12 +3412,10 @@ void lcModel::ShowArrayDialog()
 					ModelWorld.r[3] += lcVector4(Center, 0.0f);
 
 					Position = lcVector3(ModelWorld.r[3].x, ModelWorld.r[3].y, ModelWorld.r[3].z);
-
-					lcVector4 AxisAngle = lcMatrix44ToAxisAngle(ModelWorld);
-					AxisAngle[3] *= LC_RTOD;
+					ModelWorld.SetTranslation(Position + Offset);
 
 					lcPiece* NewPiece = new lcPiece(Piece->mPieceInfo);
-					NewPiece->Initialize(Position + Offset, AxisAngle, mCurrentStep);
+					NewPiece->Initialize(ModelWorld, mCurrentStep);
 					NewPiece->SetColorIndex(Piece->mColorIndex);
 
 					NewPieces.Add(NewPiece);
@@ -3477,10 +3453,7 @@ void lcModel::ShowMinifigDialog()
 
 		lcPiece* Piece = new lcPiece(Minifig.Parts[PartIdx]);
 
-		lcVector3 Position(Minifig.Matrices[PartIdx][3][0], Minifig.Matrices[PartIdx][3][1], Minifig.Matrices[PartIdx][3][2]);
-		lcVector4 Rotation = lcMatrix44ToAxisAngle(Minifig.Matrices[PartIdx]);
-		Rotation[3] *= LC_RTOD;
-		Piece->Initialize(Position, Rotation, mCurrentStep);
+		Piece->Initialize(Minifig.Matrices[PartIdx], mCurrentStep);
 		Piece->SetColorIndex(Minifig.Colors[PartIdx]);
 		Piece->CreateName(mPieces);
 		Piece->SetGroup(Group);

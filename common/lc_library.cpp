@@ -75,7 +75,6 @@ void lcPiecesLibrary::RemoveTemporaryPieces()
 			delete Info;
 		}
 	}
-
 }
 
 PieceInfo* lcPiecesLibrary::FindPiece(const char* PieceName, bool CreatePlaceholder)

@@ -82,7 +82,7 @@ public:
 		switch (Section)
 		{
 		case LC_PIECE_SECTION_POSITION:
-			return mPosition;
+			return mModelWorld.GetTranslation();
 		}
 
 		return lcVector3(0.0f, 0.0f, 0.0f);
@@ -117,12 +117,11 @@ public:
 	}
 
 	bool IsVisible(lcStep Step);
-	void Initialize(const lcVector3& Position, const lcVector4& AxisAngle, lcStep Step);
+	void Initialize(const lcMatrix44& WorldMatrix, lcStep Step);
 	void CreateName(const lcArray<lcPiece*>& Pieces);
 	void CompareBoundingBox(float box[6]);
 	void SetPieceInfo(PieceInfo* pPieceInfo);
 	bool FileLoad(lcFile& file);
-	void FileSave(lcFile& file) const;
 
 	void UpdatePosition(lcStep Step);
 	void Move(lcStep Step, bool AddKey, const lcVector3& Distance);
@@ -181,7 +180,7 @@ public:
 		ChangeKey(mPositionKeys, Position, Step, AddKey);
 	}
 
-	void SetRotation(const lcVector4& Rotation, lcStep Step, bool AddKey)
+	void SetRotation(const lcMatrix33& Rotation, lcStep Step, bool AddKey)
 	{
 		ChangeKey(mRotationKeys, Rotation, Step, AddKey);
 	}
@@ -193,12 +192,10 @@ public:
 	lcuint32 mColorCode;
 
 	lcMatrix44 mModelWorld;
-	lcVector3 mPosition;
-	lcVector4 mRotation;
 
 protected:
 	lcArray<lcObjectKey<lcVector3>> mPositionKeys;
-	lcArray<lcObjectKey<lcVector4>> mRotationKeys;
+	lcArray<lcObjectKey<lcMatrix33>> mRotationKeys;
 
 	// Atributes
 	lcGroup* mGroup;

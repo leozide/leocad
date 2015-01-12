@@ -63,14 +63,17 @@ public:
 	bool Save(const QString& FileName);
 	void Merge(Project* Other);
 
+	void SaveImage();
 	void Export3DStudio();
 	void ExportBrickLink();
 	void ExportCSV();
+	void ExportHTML();
 	void ExportPOVRay();
 	void ExportWavefront();
 
 protected:
 	void GetModelParts(lcArray<lcModelPartsEntry>& ModelParts);
+	void CreateHTMLPieceList(QTextStream& Stream, lcModel* Model, lcStep Step, bool Images, const QString& ImageExtension);
 
 	bool mModified;
 	QString mFileName;
@@ -79,16 +82,6 @@ protected:
 	lcModel* mActiveModel;
 
 	Q_DECLARE_TR_FUNCTIONS(Project);
-
-
-public:
-	void ExportHTML();
-	void UpdateInterface();
-	void LoadDefaults();
-	void SaveImage();
-
-protected:
-	void CreateHTMLPieceList(QTextStream& Stream, lcModel* Model, lcStep Step, bool Images, const QString& ImageExtension);
 };
 
 inline lcModel* lcGetActiveModel()

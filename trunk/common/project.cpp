@@ -248,52 +248,6 @@ bool Project::Load(const QString& FileName)
 		Model->CreatePieceInfo();
 	}
 
-
-
-/*
-		if (datfile || mpdfile)
-		{
-			gMainWindow->UpdateCurrentStep();
-			gMainWindow->UpdateFocusObject(GetFocusObject());
-			UpdateSelection();
-
-			const lcArray<View*>& Views = gMainWindow->GetViews();
-			for (int ViewIdx = 0; ViewIdx < Views.GetSize(); ViewIdx++)
-				Views[ViewIdx]->ZoomExtents();
-
-			Success = true;
-		}
-		else
-		{
-			Success = FileLoad(&file, false, false);
-
-	if (!bMerge)
-		gMainWindow->UpdateFocusObject(GetFocusObject());
-
-	if (!bMerge)
-	{
-		const lcArray<View*>& Views = gMainWindow->GetViews();
-		for (int ViewIdx = 0; ViewIdx < Views.GetSize(); ViewIdx++)
-		{
-			View* view = Views[ViewIdx];
-
-			if (!view->mCamera->IsSimple())
-				view->SetDefaultCamera();
-
-			if (!bUndo)
-				view->ZoomExtents();
-		}
-	}
-
-	gMainWindow->UpdateLockSnap();
-	gMainWindow->UpdateSnap();
-	gMainWindow->UpdateCameraMenu();
-	UpdateSelection();
-	gMainWindow->UpdateCurrentStep();
-	gMainWindow->UpdateAllViews();
-		}
-*/
-
 	mFileName = FileName;
 	mModified = false;
 
@@ -1700,32 +1654,6 @@ void Project::ExportWavefront()
 
 	setlocale(LC_NUMERIC, OldLocale);
 }
-
-/*
-void Project::LoadDefaults() // todo: Change the interface in SetProject() instead
-{
-	mProperties.LoadDefaults();
-
-	gMainWindow->SetColorIndex(lcGetColorIndex(4));
-	gMainWindow->SetTool(LC_TOOL_SELECT);
-	gMainWindow->SetAddKeys(false);
-	gMainWindow->UpdateUndoRedo(NULL, NULL);
-	gMainWindow->UpdateLockSnap();
-	gMainWindow->UpdateSnap();
-	mCurrentStep = 1;
-	gMainWindow->UpdateCurrentStep();
-
-	const lcArray<View*>& Views = gMainWindow->GetViews();
-	for (int i = 0; i < Views.GetSize(); i++)
-		if (!Views[i]->mCamera->IsSimple())
-			Views[i]->SetDefaultCamera();
-
-	gMainWindow->UpdateCameraMenu();
-
-	UpdateSelection();
-	gMainWindow->UpdateFocusObject(NULL);
-}
-*/
 
 void Project::SaveImage()
 {

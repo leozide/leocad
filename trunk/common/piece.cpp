@@ -93,15 +93,13 @@ void lcPiece::SaveLDraw(QTextStream& Stream) const
 
 	Stream << "1 " << mColorCode << ' ';
 
-	QLocale Locale = QLocale::c();
-	QString Number;
-
 	const float* Matrix = mModelWorld;
 	float Numbers[12] = { Matrix[12], -Matrix[14], Matrix[13], Matrix[0], -Matrix[8], Matrix[4], -Matrix[2], Matrix[10], -Matrix[6], Matrix[1], -Matrix[9], Matrix[5] };
 	for (int NumberIdx = 0; NumberIdx < 12; NumberIdx++)
 	{
-		Number = Locale.toString(Numbers[NumberIdx], 'f', 6);
+		QString Number = QString::number(Numbers[NumberIdx], 'f', 6);
 		int Dot = Number.indexOf('.');
+
 		if (Dot != -1)
 		{
 			while (Number.endsWith('0'))

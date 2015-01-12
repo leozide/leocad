@@ -219,6 +219,7 @@ public:
 	void GetScene(lcScene& Scene, lcCamera* ViewCamera, bool DrawInterface) const;
 	void SubModelAddRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, int DefaultColorIndex, bool Focused, bool Selected) const;
 	void DrawBackground(lcContext* Context);
+	void SaveStepImages(const QString& BaseName, int Width, int Height, lcStep Start, lcStep End);
 
 	void RayTest(lcObjectRayTest& ObjectRayTest) const;
 	void BoxTest(lcObjectBoxTest& ObjectBoxTest) const;
@@ -235,6 +236,7 @@ public:
 	void SubModelUpdateBoundingBox();
 	bool GetPiecesBoundingBox(float BoundingBox[6]) const;
 	void GetPartsList(int DefaultColorIndex, lcArray<lcPartsListEntry>& PartsList) const;
+	void GetPartsListForStep(lcStep Step, int DefaultColorIndex, lcArray<lcPartsListEntry>& PartsList) const;
 	void GetModelParts(const lcMatrix44& WorldMatrix, int DefaultColorIndex, lcArray<lcModelPartsEntry>& ModelParts) const;
 
 	void FocusOrDeselectObject(const lcObjectSection& ObjectSection);
@@ -320,6 +322,7 @@ protected:
 	lcModelProperties mProperties;
 	PieceInfo* mPieceInfo;
 
+	bool mActive;
 	lcStep mCurrentStep;
 	lcVector3 mMouseToolDistance;
 	lcTexture* mBackgroundTexture;

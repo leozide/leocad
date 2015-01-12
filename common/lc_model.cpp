@@ -365,9 +365,6 @@ void lcModel::LoadLDraw(QIODevice& Device)
 
 			if (Token == QLatin1String("MODEL"))
 			{
-//				if (!strcmp(Tokens[3], "CURRENT_STEP") && Tokens[4])
-//					mCurrentStep = atoi(Tokens[4]);
-
 				mProperties.ParseLDrawLine(LineStream);
 			}
 			else if (Token == QLatin1String("PIECE"))

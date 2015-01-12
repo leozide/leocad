@@ -366,7 +366,7 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 		else
 			Frame = FileName;
 
-		mProject->SaveStepImages(Frame.Buffer(), ImageWidth, ImageHeight, ImageStart, ImageEnd);
+		lcGetActiveModel()->SaveStepImages(Frame.Buffer(), ImageWidth, ImageHeight, ImageStart, ImageEnd);
 
 		return false;
 	}

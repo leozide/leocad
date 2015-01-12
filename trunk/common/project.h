@@ -86,10 +86,9 @@ public:
 	void UpdateInterface();
 	void LoadDefaults();
 	void SaveImage();
-	void SaveStepImages(const QString& BaseName, int Width, int Height, lcStep Start, lcStep End);
 
 protected:
-	void CreateHTMLPieceList(QTextStream& Stream, lcStep Step, bool Images, const QString& ImageExtension);
+	void CreateHTMLPieceList(QTextStream& Stream, lcModel* Model, lcStep Step, bool Images, const QString& ImageExtension);
 };
 
 inline lcModel* lcGetActiveModel()

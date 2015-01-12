@@ -28,15 +28,10 @@ void PiecePreview::OnDraw()
 	if (m_PieceInfo == NULL)
 		return;
 
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LEQUAL);
-	glEnable(GL_POLYGON_OFFSET_FILL);
-	glPolygonOffset(0.5f, 0.1f);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	mContext->SetDefaultState();
 
 	float aspect = (float)mWidth/(float)mHeight;
 	mContext->SetViewport(0, 0, mWidth, mHeight);
-	glEnableClientState(GL_VERTEX_ARRAY);
 
 	lcGetActiveModel()->DrawBackground(mContext);
 
@@ -76,8 +71,6 @@ void PiecePreview::OnDraw()
 	mContext->DrawTranslucentMeshes(ViewMatrix, Scene.TranslucentMeshes);
 
 	mContext->UnbindMesh(); // context remove
-
-	glDisableClientState(GL_VERTEX_ARRAY);
 }
 
 void PiecePreview::SetCurrentPiece(PieceInfo *pInfo)

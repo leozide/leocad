@@ -147,6 +147,7 @@ lcModel::lcModel(const QString& Name)
 	mProperties.mName = Name;
 	mProperties.LoadDefaults();
 
+	mActive = false;
 	mCurrentStep = 1;
 	mBackgroundTexture = NULL;
 	mPieceInfo = NULL;
@@ -1022,6 +1023,43 @@ void lcModel::DrawBackground(lcContext* Context)
 	glDepthMask(GL_TRUE);
 }
 
+void lcModel::SaveStepImages(const QString& BaseName, int Width, int Height, lcStep Start, lcStep End)
+{
+	gMainWindow->mPreviewWidget->MakeCurrent();
+	lcContext* Context = gMainWindow->mPreviewWidget->mContext;
+
+	if (!Context->BeginRenderToTexture(Width, Height))
+	{
+		gMainWindow->DoMessageBox("Error creating images.", LC_MB_ICONERROR | LC_MB_OK);
+		return;
+	}
+
+	lcStep CurrentStep = mCurrentStep;
+
+	View View(this);
+	View.SetCamera(gMainWindow->GetActiveView()->mCamera, false);
+	View.mWidth = Width;
+	View.mHeight = Height;
+	View.SetContext(Context);
+
+	for (lcStep Step = Start; Step <= End; Step++)
+	{
+		SetCurrentStep(Step);
+		View.OnDraw();
+
+		QString FileName = BaseName.arg(Step, 2, 10, QLatin1Char('0'));
+		if (!Context->SaveRenderToTextureImage(FileName, Width, Height))
+			break;
+	}
+
+	Context->EndRenderToTexture();
+
+	SetCurrentStep(CurrentStep);
+
+	if (!mActive)
+		CalculateStep(LC_STEP_MAX);
+}
+
 void lcModel::UpdateBackgroundTexture()
 {
 	lcReleaseTexture(mBackgroundTexture);
@@ -1166,6 +1204,8 @@ void lcModel::SetActive(bool Active)
 		strncpy(mPieceInfo->m_strDescription, mProperties.mName.toLatin1().constData(), sizeof(mPieceInfo->m_strDescription));
 		mPieceInfo->m_strDescription[sizeof(mPieceInfo->m_strDescription) - 1] = 0;
 	}
+
+	mActive = Active;
 }
 
 void lcModel::CalculateStep(lcStep Step)
@@ -2585,6 +2625,36 @@ void lcModel::GetPartsList(int DefaultColorIndex, lcArray<lcPartsListEntry>& Par
 	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 	{
 		lcPiece* Piece = mPieces[PieceIdx];
+
+		int ColorIndex = Piece->mColorIndex;
+
+		if (ColorIndex == gDefaultColor)
+			ColorIndex = DefaultColorIndex;
+
+		int UsedIdx;
+
+		for (UsedIdx = 0; UsedIdx < PartsList.GetSize(); UsedIdx++)
+		{
+			if (PartsList[UsedIdx].Info != Piece->mPieceInfo || PartsList[UsedIdx].ColorIndex != ColorIndex)
+				continue;
+
+			PartsList[UsedIdx].Count++;
+			break;
+		}
+
+		if (UsedIdx == PartsList.GetSize())
+			Piece->mPieceInfo->GetPartsList(ColorIndex, PartsList);
+	}
+}
+
+void lcModel::GetPartsListForStep(lcStep Step, int DefaultColorIndex, lcArray<lcPartsListEntry>& PartsList) const
+{
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+	{
+		lcPiece* Piece = mPieces[PieceIdx];
+
+		if (Piece->GetStepShow() != Step)
+			continue;
 
 		int ColorIndex = Piece->mColorIndex;
 

@@ -9,10 +9,10 @@ lcQImageDialog::lcQImageDialog(QWidget *parent, void *data) :
 {
 	ui->setupUi(this);
 
-	ui->width->setValidator(new QIntValidator(1, 2048));
-	ui->height->setValidator(new QIntValidator(1, 2048));
-	ui->firstStep->setValidator(new QIntValidator(1, options->End));
-	ui->lastStep->setValidator(new QIntValidator(1, options->End));
+	ui->width->setValidator(new QIntValidator(1, 2048, this));
+	ui->height->setValidator(new QIntValidator(1, 2048, this));
+	ui->firstStep->setValidator(new QIntValidator(this));
+	ui->lastStep->setValidator(new QIntValidator(this));
 
 	options = (lcImageDialogOptions*)data;
 	currentStep = options->Start;

@@ -1647,7 +1647,7 @@ void Project::ExportWavefront()
 
 		if (Mesh)
 		{
-			Mesh->ExportWavefrontIndices(OBJFile, lcGetColorCode(ModelParts[PartIdx].ColorIndex), vert);
+			Mesh->ExportWavefrontIndices(OBJFile, ModelParts[PartIdx].ColorIndex, vert);
 			vert += Mesh->mNumVertices;
 		}
 	}

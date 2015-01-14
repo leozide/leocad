@@ -1669,7 +1669,7 @@ void Project::SaveImage()
 	{
 		Options.FileName = mFileName;
 		QString Extension = QFileInfo(Options.FileName).suffix();
-		Options.FileName = Options.FileName.left(Options.FileName.length() - Extension.length());
+		Options.FileName = Options.FileName.left(Options.FileName.length() - Extension.length() - 1);
 	}
 	else
 		Options.FileName = QLatin1String("image");

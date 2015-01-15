@@ -229,8 +229,6 @@ public:
 //		{ mState = LC_CAMERA_HIDDEN; }
 //	void UnHide()
 //		{ mState &= ~LC_CAMERA_HIDDEN; }
-	char* GetName()
-		{ return m_strName; }
 	bool IsSide()
 		{ return m_nType < LC_CAMERA_MAIN; }
 	bool IsVisible() const

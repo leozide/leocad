@@ -111,14 +111,9 @@ public:
 			mState &= ~LC_PIECE_HIDDEN;
 	}
 
-	const char* GetName() const
-	{
-		return m_strName;
-	}
-
+	const char* GetName() const;
 	bool IsVisible(lcStep Step);
 	void Initialize(const lcMatrix44& WorldMatrix, lcStep Step);
-	void CreateName(const lcArray<lcPiece*>& Pieces);
 	void CompareBoundingBox(float box[6]);
 	void SetPieceInfo(PieceInfo* pPieceInfo);
 	bool FileLoad(lcFile& file);
@@ -137,11 +132,6 @@ public:
 	{
 		return mGroup;
 	}
-
-	void SetName(char* name)
-		{ strcpy(m_strName, name); }
-	const char* GetName()
-		{ return m_strName; }
 
 	lcStep GetStepShow() const
 	{
@@ -204,7 +194,6 @@ protected:
 	lcStep mStepHide;
 
 	lcuint8 mState;
-	char m_strName[256];
 };
 
 #endif // _PIECE_H

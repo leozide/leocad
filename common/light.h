@@ -183,9 +183,6 @@ public:
 	bool IsVisible() const
 	{ return (mState & LC_LIGHT_HIDDEN) == 0; }
 
-	const char* GetName()
-	{ return m_strName; }
-
 	const char* GetName() const
 	{ return m_strName; }
 

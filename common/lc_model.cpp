@@ -447,7 +447,6 @@ void lcModel::LoadLDraw(QIODevice& Device)
 				Piece->SetPieceInfo(Info);
 				Piece->Initialize(Transform, CurrentStep);
 				Piece->SetColorCode(ColorCode);
-				Piece->CreateName(mPieces);
 				mPieces.Add(Piece);
 				Piece = NULL;
 				continue;
@@ -463,7 +462,6 @@ void lcModel::LoadLDraw(QIODevice& Device)
 				Piece->SetPieceInfo(Info);
 				Piece->Initialize(Transform, CurrentStep);
 				Piece->SetColorCode(ColorCode);
-				Piece->CreateName(mPieces);
 				mPieces.Add(Piece);
 				Piece = NULL;
 				continue;
@@ -537,19 +535,6 @@ bool lcModel::LoadBinary(lcFile* file)
 		{
 			lcPiece* pPiece = new lcPiece(NULL);
 			pPiece->FileLoad(*file);
-
-			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-			{
-				if (strcmp(mPieces[PieceIdx]->GetName(), pPiece->GetName()) == 0)
-				{
-					pPiece->CreateName(mPieces);
-					break;
-				}
-			}
-
-			if (strlen(pPiece->GetName()) == 0)
-				pPiece->CreateName(mPieces);
-
 			mPieces.Add(pPiece);
 		}
 		else
@@ -574,7 +559,6 @@ bool lcModel::LoadBinary(lcFile* file)
 
 			pPiece->Initialize(WorldMatrix, step);
 			pPiece->SetColorCode(lcGetColorCodeFromOriginalColor(color));
-			pPiece->CreateName(mPieces);
 			mPieces.Add(pPiece);
 
 //			pPiece->SetGroup((lcGroup*)group);
@@ -780,7 +764,6 @@ void lcModel::Merge(lcModel* Other)
 	for (int PieceIdx = 0; PieceIdx < Other->mPieces.GetSize(); PieceIdx++)
 	{
 		lcPiece* Piece = Other->mPieces[PieceIdx];
-		Piece->CreateName(mPieces);
 		mPieces.Add(Piece);
 	}
 
@@ -1795,7 +1778,6 @@ void lcModel::AddPiece()
 	lcPiece* Piece = new lcPiece(CurPiece);
 	Piece->Initialize(WorldMatrix, mCurrentStep);
 	Piece->SetColorIndex(gMainWindow->mColorIndex);
-	Piece->CreateName(mPieces);
 	mPieces.Add(Piece);
 	ClearSelectionAndSetFocus(Piece, LC_PIECE_SECTION_POSITION);
 
@@ -3122,7 +3104,6 @@ void lcModel::InsertPieceToolClicked(const lcMatrix44& WorldMatrix)
 	Piece->Initialize(WorldMatrix, mCurrentStep);
 	Piece->SetColorIndex(gMainWindow->mColorIndex);
 	Piece->UpdatePosition(mCurrentStep);
-	Piece->CreateName(mPieces);
 	mPieces.Add(Piece);
 
 	ClearSelectionAndSetFocus(Piece, LC_PIECE_SECTION_POSITION);
@@ -3485,7 +3466,6 @@ void lcModel::ShowArrayDialog()
 	for (int PieceIdx = 0; PieceIdx < NewPieces.GetSize(); PieceIdx++)
 	{
 		lcPiece* Piece = (lcPiece*)NewPieces[PieceIdx];
-		Piece->CreateName(mPieces);
 		Piece->UpdatePosition(mCurrentStep);
 		mPieces.Add(Piece);
 	}
@@ -3513,7 +3493,6 @@ void lcModel::ShowMinifigDialog()
 
 		Piece->Initialize(Minifig.Matrices[PartIdx], mCurrentStep);
 		Piece->SetColorIndex(Minifig.Colors[PartIdx]);
-		Piece->CreateName(mPieces);
 		Piece->SetGroup(Group);
 		mPieces.Add(Piece);
 		Piece->UpdatePosition(mCurrentStep);

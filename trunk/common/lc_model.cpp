@@ -1784,6 +1784,19 @@ void lcModel::AddPiece()
 	SaveCheckpoint("Adding Piece");
 }
 
+void lcModel::DeleteAllCameras()
+{
+	if (mCameras.IsEmpty())
+		return;
+
+	mCameras.DeleteAll();
+
+	gMainWindow->UpdateCameraMenu();
+	gMainWindow->UpdateFocusObject(GetFocusObject());
+	gMainWindow->UpdateAllViews();
+	SaveCheckpoint("Reseting Cameras");
+}
+
 void lcModel::DeleteSelectedObjects()
 {
 	if (RemoveSelectedObjects())

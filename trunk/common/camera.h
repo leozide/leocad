@@ -39,14 +39,6 @@ enum lcCameraSection
 	LC_CAMERA_SECTION_UPVECTOR
 };
 
-typedef enum
-{
-	LC_CAMERA_FRONT,LC_CAMERA_BACK,
-	LC_CAMERA_TOP,  LC_CAMERA_UNDER,
-	LC_CAMERA_LEFT, LC_CAMERA_RIGHT,
-	LC_CAMERA_MAIN, LC_CAMERA_USER
-} LC_CAMERA_TYPES;
-
 class lcCamera : public lcObject
 {
 public:
@@ -223,14 +215,7 @@ public:
 	void SaveLDraw(QTextStream& Stream) const;
 	bool ParseLDrawLine(QTextStream& Stream);
 
-
 public:
-//	void Hide()
-//		{ mState = LC_CAMERA_HIDDEN; }
-//	void UnHide()
-//		{ mState &= ~LC_CAMERA_HIDDEN; }
-	bool IsSide()
-		{ return m_nType < LC_CAMERA_MAIN; }
 	bool IsVisible() const
 		{ return (mState & LC_CAMERA_HIDDEN) == 0; }
 
@@ -271,7 +256,6 @@ public:
 	void RemoveTime(lcStep Start, lcStep Time);
 
 	bool FileLoad(lcFile& file);
-	void FileSave(lcFile& file) const;
 	void Select(bool bSelecting, bool bFocus, bool bMultiple);
 
 	void CompareBoundingBox(float box[6]);
@@ -314,7 +298,6 @@ protected:
 	void Initialize();
 
 	lcuint32 mState;
-	unsigned char m_nType;
 };
 
 #endif // _CAMERA_H_

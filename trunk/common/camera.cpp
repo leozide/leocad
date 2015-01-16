@@ -73,7 +73,6 @@ void lcCamera::Initialize()
 	m_zFar = 12500.0f;
 
 	mState = 0;
-	m_nType = LC_CAMERA_USER;
 
 	m_pTR = NULL;
 	memset(m_strName, 0, sizeof(m_strName));
@@ -360,7 +359,7 @@ bool lcCamera::FileLoad(lcFile& file)
 			ch = file.ReadU8();
 			if (ch & 1)
 				mState |= LC_CAMERA_HIDDEN;
-			m_nType = file.ReadU8();
+			file.ReadU8();
 		}
 	}
 
@@ -389,60 +388,6 @@ bool lcCamera::FileLoad(lcFile& file)
 	}
 
 	return true;
-}
-
-void lcCamera::FileSave(lcFile& file) const
-{
-	file.WriteU8(LC_CAMERA_SAVE_VERSION);
-
-	file.WriteU8(1);
-	file.WriteU32(mPositionKeys.GetSize() + mTargetPositionKeys.GetSize() + mUpVectorKeys.GetSize());
-
-	for (int KeyIdx = 0; KeyIdx < mPositionKeys.GetSize(); KeyIdx++)
-	{
-		lcObjectKey<lcVector3>& Key = mPositionKeys[KeyIdx];
-
-		lcuint16 Step = lcMin(Key.Step, 0xFFFFU);
-		file.WriteU16(Step);
-		file.WriteFloats(Key.Value, 3);
-		file.WriteFloat(0);
-		file.WriteU8(0);
-	}
-
-	for (int KeyIdx = 0; KeyIdx < mTargetPositionKeys.GetSize(); KeyIdx++)
-	{
-		lcObjectKey<lcVector3>& Key = mTargetPositionKeys[KeyIdx];
-
-		lcuint16 Step = lcMin(Key.Step, 0xFFFFU);
-		file.WriteU16(Step);
-		file.WriteFloats(Key.Value, 3);
-		file.WriteFloat(0);
-		file.WriteU8(1);
-	}
-
-	for (int KeyIdx = 0; KeyIdx < mUpVectorKeys.GetSize(); KeyIdx++)
-	{
-		lcObjectKey<lcVector3>& Key = mUpVectorKeys[KeyIdx];
-
-		lcuint16 Step = lcMin(Key.Step, 0xFFFFU);
-		file.WriteU16(Step);
-		file.WriteFloats(Key.Value, 3);
-		file.WriteFloat(0);
-		file.WriteU8(2);
-	}
-
-	file.WriteU32(0);
-
-	lcuint8 ch = (lcuint8)strlen(m_strName);
-	file.WriteU8(ch);
-	file.WriteBuffer(m_strName, ch);
-
-	file.WriteFloat(m_fovy);
-	file.WriteFloat(m_zFar);
-	file.WriteFloat(m_zNear);
-	// version 5
-	file.WriteU8(mState & LC_CAMERA_HIDDEN ? 1 : 0);
-	file.WriteU8(m_nType);
 }
 
 void lcCamera::CompareBoundingBox(float box[6])

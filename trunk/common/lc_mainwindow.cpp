@@ -43,6 +43,14 @@ lcMainWindow::~lcMainWindow()
 	gMainWindow = NULL;
 }
 
+void lcMainWindow::ResetCameras()
+{
+	for (int ViewIdx = 0; ViewIdx < mViews.GetSize(); ViewIdx++)
+		mViews[ViewIdx]->SetDefaultCamera();
+
+	lcGetActiveModel()->DeleteAllCameras();
+}
+
 void lcMainWindow::AddView(View* View)
 {
 	mViews.Add(View);
@@ -672,21 +680,11 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 	case LC_VIEW_CAMERA16:
 		mActiveView->SetCameraIndex(CommandId - LC_VIEW_CAMERA1);
 		break;
-/*
-		case LC_VIEW_CAMERA_RESET:
-		{
-			for (int ViewIdx = 0; ViewIdx < mViews.GetSize(); ViewIdx++)
-				mViews[ViewIdx]->SetDefaultCamera();
 
-			for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
-				delete mCameras[CameraIdx];
-			mCameras.RemoveAll();
+	case LC_VIEW_CAMERA_RESET:
+		ResetCameras();
+		break;
 
-			UpdateCameraMenu();
-			UpdateFocusObject(GetFocusObject());
-			UpdateAllViews();
-		} break;
-*/
 	case LC_MODEL_NEW:
 		lcGetActiveProject()->CreateNewModel();
 		break;

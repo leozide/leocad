@@ -186,6 +186,7 @@ public:
 	void RemoveStep();
 
 	void AddPiece();
+	void DeleteAllCameras();
 	void DeleteSelectedObjects();
 	void ShowSelectedPiecesEarlier();
 	void ShowSelectedPiecesLater();

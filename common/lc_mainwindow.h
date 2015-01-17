@@ -155,6 +155,7 @@ public:
 	void SetAddKeys(bool AddKeys);
 	void UpdateLockSnap();
 	void UpdateSnap();
+	void UpdateColor();
 	void UpdateUndoRedo(const QString& UndoText, const QString& RedoText);
 	void UpdateCurrentCamera(int CameraIndex);
 	void UpdatePerspective();

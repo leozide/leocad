@@ -38,6 +38,7 @@ public:
 	void setAddKeys(bool addKeys);
 	void updateLockSnap();
 	void updateSnap();
+	void updateColor();
 	void updateUndoRedo(const QString& UndoText, const QString& RedoText);
 	void updateTransformType(int newType);
 	void updateCameraMenu();

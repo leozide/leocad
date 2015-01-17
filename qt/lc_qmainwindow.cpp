@@ -1180,6 +1180,11 @@ void lcQMainWindow::updateSnap()
 	statusSnapLabel->setText(QString(tr(" M: %1 %2 R: %3 ")).arg(gMainWindow->GetMoveXYSnapText(), gMainWindow->GetMoveZSnapText(), QString::number(gMainWindow->GetAngleSnap())));
 }
 
+void lcQMainWindow::updateColor()
+{
+	colorList->setCurrentColor(gMainWindow->mColorIndex);
+}
+
 void lcQMainWindow::updateUndoRedo(const QString& UndoText, const QString& RedoText)
 {
 	QAction* UndoAction = actions[LC_EDIT_UNDO];

@@ -103,6 +103,8 @@ void lcMainWindow::SetColorIndex(int ColorIndex)
 
 	if (mPreviewWidget)
 		mPreviewWidget->Redraw();
+
+	UpdateColor();
 }
 
 void lcMainWindow::SetMoveXYSnapIndex(int Index)

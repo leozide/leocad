@@ -873,8 +873,12 @@ void lcModel::Paste()
 	Buffer.open(QIODevice::ReadOnly);
 	Model->LoadLDraw(Buffer);
 
+	lcArray<lcPiece*> PastedPieces = Model->mPieces;
+
 	Merge(Model);
 	SaveCheckpoint(tr("Pasting"));
+
+	SetSelection((lcArray<lcObject*>&)PastedPieces);
 
 	CalculateStep(mCurrentStep);
 	gMainWindow->UpdateAllViews();

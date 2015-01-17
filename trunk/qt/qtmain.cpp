@@ -534,6 +534,14 @@ void lcMainWindow::UpdateSnap()
 		window->updateSnap();
 }
 
+void lcMainWindow::UpdateColor()
+{
+	lcQMainWindow* window = (lcQMainWindow*)mHandle;
+
+	if (window)
+		window->updateColor();
+}
+
 void lcMainWindow::UpdateUndoRedo(const QString& UndoText, const QString& RedoText)
 {
 	lcQMainWindow* window = (lcQMainWindow*)mHandle;

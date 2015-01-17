@@ -127,6 +127,7 @@ public:
 
 	bool IncludesModel(const lcModel* Model) const;
 	void CreatePieceInfo();
+	void UpdatePieceInfo(lcArray<lcModel*>& UpdatedModels);
 
 	PieceInfo* GetPieceInfo() const
 	{
@@ -234,7 +235,6 @@ public:
 	bool GetFocusPosition(lcVector3& Position) const;
 	lcObject* GetFocusObject() const;
 	bool GetSelectionCenter(lcVector3& Center) const;
-	void SubModelUpdateBoundingBox();
 	bool GetPiecesBoundingBox(float BoundingBox[6]) const;
 	void GetPartsList(int DefaultColorIndex, lcArray<lcPartsListEntry>& PartsList) const;
 	void GetPartsListForStep(lcStep Step, int DefaultColorIndex, lcArray<lcPartsListEntry>& PartsList) const;

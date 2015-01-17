@@ -56,6 +56,11 @@ void PieceInfo::SetModel(lcModel* Model)
 	mFlags = LC_PIECE_MODEL;
 	mModel = Model;
 
+	strncpy(m_strName, Model->GetProperties().mName.toLatin1().data(), sizeof(m_strName));
+	m_strName[sizeof(m_strName)-1] = 0;
+	strncpy(m_strDescription, Model->GetProperties().mName.toLatin1().data(), sizeof(m_strDescription));
+	m_strDescription[sizeof(m_strDescription)-1] = 0;
+
 	delete mMesh;
 	mMesh = NULL;
 }
@@ -325,8 +330,8 @@ void PieceInfo::GetModelParts(const lcMatrix44& WorldMatrix, int DefaultColorInd
 	ModelPartsEntry.Info = const_cast<PieceInfo*>(this);
 }
 
-void PieceInfo::UpdateBoundingBox()
+void PieceInfo::UpdateBoundingBox(lcArray<lcModel*>& UpdatedModels)
 {
 	if (mFlags & LC_PIECE_MODEL)
-		mModel->SubModelUpdateBoundingBox();
+		mModel->UpdatePieceInfo(UpdatedModels);
 }

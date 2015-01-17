@@ -29,6 +29,11 @@ public:
 		return mMesh;
 	}
 
+	lcModel* GetModel() const
+	{
+		return mModel;
+	}
+
 	void SetMesh(lcMesh* Mesh)
 	{
 		mMesh = Mesh;
@@ -113,7 +118,7 @@ public:
 	bool BoxTest(const lcMatrix44& WorldMatrix, const lcVector4 Planes[6]) const;
 	void GetPartsList(int DefaultColorIndex, lcArray<lcPartsListEntry>& PartsList) const;
 	void GetModelParts(const lcMatrix44& WorldMatrix, int DefaultColorIndex, lcArray<lcModelPartsEntry>& ModelParts) const;
-	void UpdateBoundingBox();
+	void UpdateBoundingBox(lcArray<lcModel*>& UpdatedModels);
 
 public:
 	// Attributes

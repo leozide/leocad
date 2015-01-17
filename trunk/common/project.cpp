@@ -58,8 +58,11 @@ void Project::SetActiveModel(int ModelIndex)
 	for (int ModelIdx = 0; ModelIdx < mModels.GetSize(); ModelIdx++)
 		mModels[ModelIdx]->SetActive(ModelIdx == ModelIndex);
 
+	lcArray<lcModel*> UpdatedModels;
+	UpdatedModels.AllocGrow(mModels.GetSize());
+
 	for (int ModelIdx = 0; ModelIdx < mModels.GetSize(); ModelIdx++)
-		mModels[ModelIdx]->SubModelUpdateBoundingBox();
+		mModels[ModelIdx]->UpdatePieceInfo(UpdatedModels);
 
 	mActiveModel = mModels[ModelIndex];
 	mActiveModel->UpdateInterface();

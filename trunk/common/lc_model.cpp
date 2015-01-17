@@ -157,7 +157,8 @@ lcModel::~lcModel()
 {
 	if (mPieceInfo)
 	{
-		mPieceInfo->SetPlaceholder();
+		if (mPieceInfo->GetModel() == this)
+			mPieceInfo->SetPlaceholder();
 		mPieceInfo->Release();
 	}
 
@@ -211,9 +212,48 @@ void lcModel::DeleteModel()
 void lcModel::CreatePieceInfo()
 {
 	QString PartID = mProperties.mName.toUpper();
-	mPieceInfo = lcGetPiecesLibrary()->FindPiece(PartID.toLatin1().constData(), true);
+	mPieceInfo = lcGetPiecesLibrary()->FindPiece(PartID.toLatin1().constData(), false);
+	if (!mPieceInfo)
+	{
+		mPieceInfo = lcGetPiecesLibrary()->FindPiece(PartID.toLatin1().constData(), true);
+		mPieceInfo->SetModel(this);
+	}
 	mPieceInfo->AddRef();
+}
+
+void lcModel::UpdatePieceInfo(lcArray<lcModel*>& UpdatedModels)
+{
+	if (UpdatedModels.FindIndex(this) != -1)
+		return;
+
 	mPieceInfo->SetModel(this);
+	UpdatedModels.Add(this);
+
+	if (mPieces.IsEmpty())
+	{
+		memset(mPieceInfo->m_fDimensions, 0, sizeof(mPieceInfo->m_fDimensions));
+		return;
+	}
+
+	float BoundingBox[6] = { FLT_MAX, FLT_MAX, FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX };
+	
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+	{
+		lcPiece* Piece = mPieces[PieceIdx];
+
+		if (Piece->GetStepHide() == LC_STEP_MAX)
+		{
+			Piece->mPieceInfo->UpdateBoundingBox(UpdatedModels);
+			Piece->CompareBoundingBox(BoundingBox);
+		}
+	}
+
+	mPieceInfo->m_fDimensions[0] = BoundingBox[3];
+	mPieceInfo->m_fDimensions[1] = BoundingBox[4];
+	mPieceInfo->m_fDimensions[2] = BoundingBox[5];
+	mPieceInfo->m_fDimensions[3] = BoundingBox[0];
+	mPieceInfo->m_fDimensions[4] = BoundingBox[1];
+	mPieceInfo->m_fDimensions[5] = BoundingBox[2];
 }
 
 void lcModel::SaveLDraw(QTextStream& Stream, bool SelectedOnly) const
@@ -2558,35 +2598,6 @@ bool lcModel::GetSelectionCenter(lcVector3& Center) const
 		Center = lcVector3(0.0f, 0.0f, 0.0f);
 
 	return Selected;
-}
-
-void lcModel::SubModelUpdateBoundingBox()
-{
-	if (mPieces.IsEmpty())
-	{
-		memset(mPieceInfo->m_fDimensions, 0, sizeof(mPieceInfo->m_fDimensions));
-		return;
-	}
-
-	float BoundingBox[6] = { FLT_MAX, FLT_MAX, FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX };
-	
-	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-	{
-		lcPiece* Piece = mPieces[PieceIdx];
-
-		if (Piece->GetStepHide() == LC_STEP_MAX)
-		{
-			Piece->mPieceInfo->UpdateBoundingBox();
-			Piece->CompareBoundingBox(BoundingBox);
-		}
-	}
-
-	mPieceInfo->m_fDimensions[0] = BoundingBox[3];
-	mPieceInfo->m_fDimensions[1] = BoundingBox[4];
-	mPieceInfo->m_fDimensions[2] = BoundingBox[5];
-	mPieceInfo->m_fDimensions[3] = BoundingBox[0];
-	mPieceInfo->m_fDimensions[4] = BoundingBox[1];
-	mPieceInfo->m_fDimensions[5] = BoundingBox[2];
 }
 
 bool lcModel::GetPiecesBoundingBox(float BoundingBox[6]) const

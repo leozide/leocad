@@ -474,16 +474,7 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 	case LC_VIEW_PROJECTION_ORTHO:
 		mActiveView->SetProjection(true);
 		break;
-/*
-	case LC_VIEW_PROJECTION_FOCUS:
-		{
-			lcVector3 FocusVector;
-			GetSelectionCenter(FocusVector);
-			mActiveView->mCamera->SetFocalPoint(FocusVector, mCurrentStep, GetAddKeys());
-			UpdateAllViews();
-		}
-		break;
-*/
+
 	case LC_PIECE_INSERT:
 		lcGetActiveModel()->AddPiece();
 		break;

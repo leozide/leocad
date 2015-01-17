@@ -2066,7 +2066,7 @@ void lcModel::RotateSelectedPieces(const lcVector3& Angles, bool Update)
 		Center = lcVector3((Bounds[0] + Bounds[3]) / 2.0f, (Bounds[1] + Bounds[4]) / 2.0f, (Bounds[2] + Bounds[5]) / 2.0f);
 
 	lcMatrix33 RotationMatrix = lcMatrix33Identity();
-	lcMatrix33 WorldToFocusMatrix, FocusToWorldMatrix;
+	lcMatrix33 WorldToFocusMatrix;
 
 	if (Angles[0] != 0.0f)
 		RotationMatrix = lcMul(lcMatrix33RotationX(Angles[0] * LC_DTOR), RotationMatrix);
@@ -2083,11 +2083,13 @@ void lcModel::RotateSelectedPieces(const lcVector3& Angles, bool Update)
 
 	if (Focus)
 	{
-		FocusToWorldMatrix = lcMatrix33(Focus->mModelWorld);
+		lcMatrix33 FocusToWorldMatrix = lcMatrix33(Focus->mModelWorld);
 		WorldToFocusMatrix = lcMatrix33AffineInverse(FocusToWorldMatrix);
 
 		RotationMatrix = lcMul(FocusToWorldMatrix, RotationMatrix);
 	}
+	else
+		WorldToFocusMatrix = lcMatrix33Identity();
 
 	bool Rotated = false;
 
@@ -2100,24 +2102,14 @@ void lcModel::RotateSelectedPieces(const lcVector3& Angles, bool Update)
 
 		lcVector3 Distance = Piece->mModelWorld.GetTranslation() - Center;
 		lcMatrix33 LocalToWorldMatrix = lcMatrix33(Piece->mModelWorld);
-		lcMatrix33 NewLocalToWorldMatrix;
 
-		if (Focus)
-		{
-			lcMatrix33 LocalToFocusMatrix = lcMul(WorldToFocusMatrix, LocalToWorldMatrix);
-			NewLocalToWorldMatrix = lcMul(RotationMatrix, LocalToFocusMatrix);
+		lcMatrix33 LocalToFocusMatrix = lcMul(WorldToFocusMatrix, LocalToWorldMatrix);
+		lcMatrix33 NewLocalToWorldMatrix = lcMul(RotationMatrix, LocalToFocusMatrix);
 
-			lcMatrix33 WorldToLocalMatrix = lcMatrix33AffineInverse(LocalToWorldMatrix);
+		lcMatrix33 WorldToLocalMatrix = lcMatrix33AffineInverse(LocalToWorldMatrix);
 
-			Distance = lcMul(Distance, WorldToLocalMatrix);
-			Distance = lcMul(Distance, NewLocalToWorldMatrix);
-		}
-		else
-		{
-			NewLocalToWorldMatrix = lcMul(RotationMatrix, LocalToWorldMatrix);
-
-			Distance = lcMul(Distance, RotationMatrix);
-		}
+		Distance = lcMul(Distance, WorldToLocalMatrix);
+		Distance = lcMul(Distance, NewLocalToWorldMatrix);
 
 		NewLocalToWorldMatrix.Orthonormalize();
 

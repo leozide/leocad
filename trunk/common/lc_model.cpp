@@ -1,5 +1,6 @@
 #include "lc_global.h"
 #include "lc_model.h"
+#include <locale.h>
 #include "piece.h"
 #include "camera.h"
 #include "light.h"

@@ -47,7 +47,6 @@ lcProfileEntry::lcProfileEntry(const char* Section, const char* Key)
 
 lcProfileEntry gProfileEntries[LC_NUM_PROFILE_KEYS] =
 {
-	lcProfileEntry("Settings", "ForceGlobalTransforms", false),                      // LC_PROFILE_FORCE_GLOBAL_TRANSFORMS
 	lcProfileEntry("Settings", "FixedAxes", false),                                  // LC_PROFILE_FIXED_AXES
 	lcProfileEntry("Settings", "LineWidth", 1.0f),                                   // LC_PROFILE_LINE_WIDTH
 	lcProfileEntry("Settings", "LightingMode", LC_LIGHTING_FLAT),                    // LC_PROFILE_LIGHTING_MODE

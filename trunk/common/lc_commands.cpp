@@ -256,11 +256,11 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 		QT_TRANSLATE_NOOP("Status", "Allows movement and rotation in all directions"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
-	// LC_EDIT_SNAP_RELATIVE
+	// LC_EDIT_TRANSFORM_RELATIVE
 	{
-		"Edit.SnapRelative",
-		QT_TRANSLATE_NOOP("Menu", "Relative Snap"),
-		QT_TRANSLATE_NOOP("Status", "Enable relative movement and rotation"),
+		"Edit.TransformRelative",
+		QT_TRANSLATE_NOOP("Menu", "Relative Transforms"),
+		QT_TRANSLATE_NOOP("Status", "Move and rotate objects relative to the one that currently has focus"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
 	// LC_EDIT_SNAP_MOVE_XY0

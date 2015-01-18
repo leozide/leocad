@@ -30,7 +30,6 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget *parent, void *data) :
 	ui->lgeoPath->setText(options->LGEOPath);
 	ui->mouseSensitivity->setValue(options->Preferences.mMouseSensitivity);
 	ui->checkForUpdates->setCurrentIndex(options->CheckForUpdates);
-	ui->noRelativeSnap->setChecked(options->Preferences.mForceGlobalTransforms);
 	ui->fixedDirectionKeys->setChecked((options->Preferences.mFixedAxes) != 0);
 
 	ui->antiAliasing->setChecked(options->AASamples != 1);
@@ -91,7 +90,6 @@ void lcQPreferencesDialog::accept()
 	strcpy(options->LGEOPath, ui->lgeoPath->text().toLocal8Bit().data());
 	options->Preferences.mMouseSensitivity = ui->mouseSensitivity->value();
 	options->CheckForUpdates = ui->checkForUpdates->currentIndex();
-	options->Preferences.mForceGlobalTransforms = ui->noRelativeSnap->isChecked();
 	options->Preferences.mFixedAxes = ui->fixedDirectionKeys->isChecked();
 
 	if (!ui->antiAliasing->isChecked())

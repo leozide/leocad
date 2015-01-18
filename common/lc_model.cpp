@@ -2086,7 +2086,7 @@ void lcModel::RotateSelectedPieces(const lcVector3& Angles, bool Update)
 		lcMatrix33 FocusToWorldMatrix = lcMatrix33(Focus->mModelWorld);
 		WorldToFocusMatrix = lcMatrix33AffineInverse(FocusToWorldMatrix);
 
-		RotationMatrix = lcMul(FocusToWorldMatrix, RotationMatrix);
+		RotationMatrix = lcMul(RotationMatrix, FocusToWorldMatrix);
 	}
 	else
 		WorldToFocusMatrix = lcMatrix33Identity();
@@ -2103,8 +2103,8 @@ void lcModel::RotateSelectedPieces(const lcVector3& Angles, bool Update)
 		lcVector3 Distance = Piece->mModelWorld.GetTranslation() - Center;
 		lcMatrix33 LocalToWorldMatrix = lcMatrix33(Piece->mModelWorld);
 
-		lcMatrix33 LocalToFocusMatrix = lcMul(WorldToFocusMatrix, LocalToWorldMatrix);
-		lcMatrix33 NewLocalToWorldMatrix = lcMul(RotationMatrix, LocalToFocusMatrix);
+		lcMatrix33 LocalToFocusMatrix = lcMul(LocalToWorldMatrix, WorldToFocusMatrix);
+		lcMatrix33 NewLocalToWorldMatrix = lcMul(LocalToFocusMatrix, RotationMatrix);
 
 		lcMatrix33 WorldToLocalMatrix = lcMatrix33AffineInverse(LocalToWorldMatrix);
 

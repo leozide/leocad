@@ -2521,17 +2521,26 @@ bool lcModel::GetPieceFocusOrSelectionCenter(lcVector3& Center) const
 	return Selected;
 }
 
+bool lcModel::GetFocusOrSelectionCenter(lcVector3& Center) const
+{
+	if (GetFocusPosition(Center))
+		return true;
+
+	if (GetSelectionCenter(Center))
+		return true;
+
+	Center = lcVector3(0.0f, 0.0f, 0.0f);
+
+	return false;
+}
+
 lcVector3 lcModel::GetFocusOrSelectionCenter() const
 {
 	lcVector3 Center;
 
-	if (GetFocusPosition(Center))
-		return Center;
+	GetFocusOrSelectionCenter(Center);
 
-	if (GetSelectionCenter(Center))
-		return Center;
-
-	return lcVector3(0.0f, 0.0f, 0.0f);
+	return Center;
 }
 
 bool lcModel::GetFocusPosition(lcVector3& Position) const

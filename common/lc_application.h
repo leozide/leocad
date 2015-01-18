@@ -20,8 +20,6 @@ public:
 	void LoadDefaults();
 	void SaveDefaults();
 
-	void SetForceGlobalTransforms(bool ForceGlobalTransforms);
-
 	int mMouseSensitivity;
 	lcLightingMode mLightingMode;
 	bool mDrawAxes;
@@ -32,7 +30,6 @@ public:
 	bool mDrawGridLines;
 	int mGridLineSpacing;
 	lcuint32 mGridLineColor;
-	bool mForceGlobalTransforms;
 	bool mFixedAxes;
 };
 

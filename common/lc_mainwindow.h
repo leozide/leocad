@@ -102,6 +102,11 @@ public:
 		return mLockZ;
 	}
 
+	bool GetRelativeTransform() const
+	{
+		return mRelativeTransform;
+	}
+
 	View* GetActiveView() const
 	{
 		return mActiveView;
@@ -127,6 +132,7 @@ public:
 	void SetLockX(bool LockX);
 	void SetLockY(bool LockY);
 	void SetLockZ(bool LockZ);
+	void SetRelativeTransform(bool RelativeTransform);
 
 	void Close();
 	void NewProject();
@@ -187,6 +193,7 @@ protected:
 	bool mLockX;
 	bool mLockY;
 	bool mLockZ;
+	bool mRelativeTransform;
 };
 
 extern class lcMainWindow* gMainWindow;

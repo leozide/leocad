@@ -16,7 +16,6 @@ lcApplication* g_App;
 
 void lcPreferences::LoadDefaults()
 {
-	mForceGlobalTransforms = lcGetProfileInt(LC_PROFILE_FORCE_GLOBAL_TRANSFORMS);
 	mFixedAxes = lcGetProfileInt(LC_PROFILE_FIXED_AXES);
 	mMouseSensitivity = lcGetProfileInt(LC_PROFILE_MOUSE_SENSITIVITY);
 	mLightingMode = (lcLightingMode)lcGetProfileInt(LC_PROFILE_LIGHTING_MODE);
@@ -32,7 +31,6 @@ void lcPreferences::LoadDefaults()
 
 void lcPreferences::SaveDefaults()
 {
-	lcSetProfileInt(LC_PROFILE_FORCE_GLOBAL_TRANSFORMS, mForceGlobalTransforms);
 	lcSetProfileInt(LC_PROFILE_FIXED_AXES, mFixedAxes);
 	lcSetProfileInt(LC_PROFILE_MOUSE_SENSITIVITY, mMouseSensitivity);
 	lcSetProfileInt(LC_PROFILE_LIGHTING_MODE, mLightingMode);
@@ -44,14 +42,6 @@ void lcPreferences::SaveDefaults()
 	lcSetProfileInt(LC_PROFILE_GRID_LINES, mDrawGridLines);
 	lcSetProfileInt(LC_PROFILE_GRID_LINE_SPACING, mGridLineSpacing);
 	lcSetProfileInt(LC_PROFILE_GRID_LINE_COLOR, mGridLineColor);
-}
-
-void lcPreferences::SetForceGlobalTransforms(bool ForceGlobalTransforms)
-{
-	mForceGlobalTransforms = ForceGlobalTransforms;
-	lcSetProfileInt(LC_PROFILE_FORCE_GLOBAL_TRANSFORMS, mForceGlobalTransforms);
-	gMainWindow->UpdateLockSnap();
-	gMainWindow->UpdateAllViews();
 }
 
 lcApplication::lcApplication()

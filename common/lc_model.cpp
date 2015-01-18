@@ -1767,9 +1767,7 @@ lcVector3 lcModel::SnapRotation(const lcVector3& Angles) const
 
 lcMatrix44 lcModel::GetRelativeRotation() const
 {
-	const lcPreferences& Preferences = lcGetPreferences();
-
-	if (!Preferences.mForceGlobalTransforms)
+	if (gMainWindow->GetRelativeTransform())
 	{
 		lcObject* Focus = GetFocusObject();
 
@@ -2082,8 +2080,7 @@ void lcModel::RotateSelectedPieces(const lcVector3& Angles, bool Relative, bool 
 	if (Angles[2] != 0.0f)
 		RotationMatrix = lcMul(lcMatrix33RotationZ(Angles[2] * LC_DTOR), RotationMatrix);
 
-	const lcPreferences& Preferences = lcGetPreferences();
-	if (Preferences.mForceGlobalTransforms)
+	if (!gMainWindow->GetRelativeTransform())
 		Focus = NULL;
 
 	if (Focus && Relative)

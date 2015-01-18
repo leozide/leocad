@@ -23,6 +23,7 @@ lcMainWindow::lcMainWindow()
 	mLockX = false;
 	mLockY = false;
 	mLockZ = false;
+	mRelativeTransform = true;
 
 	memset(&mSearchOptions, 0, sizeof(mSearchOptions));
 
@@ -141,6 +142,13 @@ void lcMainWindow::SetLockZ(bool LockZ)
 {
 	mLockZ = LockZ;
 	UpdateLockSnap();
+}
+
+void lcMainWindow::SetRelativeTransform(bool RelativeTransform)
+{
+	mRelativeTransform = RelativeTransform;
+	UpdateLockSnap();
+	UpdateAllViews();
 }
 
 void lcMainWindow::AddRecentFile(const QString& FileName)
@@ -728,8 +736,8 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		SetAddKeys(!GetAddKeys());
 		break;
 
-	case LC_EDIT_SNAP_RELATIVE:
-		lcGetPreferences().SetForceGlobalTransforms(!lcGetPreferences().mForceGlobalTransforms);
+	case LC_EDIT_TRANSFORM_RELATIVE:
+		SetRelativeTransform(!GetRelativeTransform());
 		break;
 
 	case LC_EDIT_LOCK_X:

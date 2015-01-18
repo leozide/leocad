@@ -128,6 +128,7 @@ void lcQMainWindow::createActions()
 	actions[LC_EDIT_ACTION_ROTATE_VIEW]->setIcon(QIcon(":/resources/action_rotate_view.png"));
 	actions[LC_EDIT_ACTION_ROLL]->setIcon(QIcon(":/resources/action_roll.png"));
 	actions[LC_EDIT_ACTION_ZOOM_REGION]->setIcon(QIcon(":/resources/action_zoom_region.png"));
+	actions[LC_EDIT_TRANSFORM_RELATIVE]->setIcon(QIcon(":/resources/edit_transform_relative.png"));
 	actions[LC_PIECE_SHOW_EARLIER]->setIcon(QIcon(":/resources/piece_show_earlier.png"));
 	actions[LC_PIECE_SHOW_LATER]->setIcon(QIcon(":/resources/piece_show_later.png"));
 	actions[LC_VIEW_SPLIT_HORIZONTAL]->setIcon(QIcon(":/resources/view_split_horizontal.png"));
@@ -146,7 +147,7 @@ void lcQMainWindow::createActions()
 	actions[LC_EDIT_LOCK_X]->setCheckable(true);
 	actions[LC_EDIT_LOCK_Y]->setCheckable(true);
 	actions[LC_EDIT_LOCK_Z]->setCheckable(true);
-	actions[LC_EDIT_SNAP_RELATIVE]->setCheckable(true);
+	actions[LC_EDIT_TRANSFORM_RELATIVE]->setCheckable(true);
 	actions[LC_VIEW_CAMERA_NONE]->setCheckable(true);
 	actions[LC_VIEW_TIME_ADD_KEYS]->setCheckable(true);
 
@@ -401,7 +402,7 @@ void lcQMainWindow::createToolBars()
 	standardToolBar->addAction(actions[LC_EDIT_COPY]);
 	standardToolBar->addAction(actions[LC_EDIT_PASTE]);
 	standardToolBar->addSeparator();
-//	standardToolBar->addAction(actions[LC_EDIT_SNAP_RELATIVE]); todo
+	standardToolBar->addAction(actions[LC_EDIT_TRANSFORM_RELATIVE]);
 	standardToolBar->addAction(lockAction);
 	standardToolBar->addAction(moveAction);
 	standardToolBar->addAction(angleAction);
@@ -1163,9 +1164,7 @@ void lcQMainWindow::setAddKeys(bool addKeys)
 
 void lcQMainWindow::updateLockSnap()
 {
-	const lcPreferences& Preferences = lcGetPreferences();
-
-	actions[LC_EDIT_SNAP_RELATIVE]->setChecked(!Preferences.mForceGlobalTransforms);
+	actions[LC_EDIT_TRANSFORM_RELATIVE]->setChecked(gMainWindow->GetRelativeTransform());
 	actions[LC_EDIT_LOCK_X]->setChecked(gMainWindow->GetLockX());
 	actions[LC_EDIT_LOCK_Y]->setChecked(gMainWindow->GetLockY());
 	actions[LC_EDIT_LOCK_Z]->setChecked(gMainWindow->GetLockZ());

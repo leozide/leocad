@@ -1471,6 +1471,12 @@ void View::UpdateTrackTool()
 			const float OverlayRotateArrowStart = 1.0f * OverlayScale;
 			const float OverlayRotateArrowEnd = 1.5f * OverlayScale;
 
+			NewTrackTool = (CurrentTool == LC_TOOL_MOVE) ? LC_TRACKTOOL_MOVE_XYZ : LC_TRACKTOOL_SELECT;
+
+			lcVector3 OverlayCenter;
+			if (!mModel->GetFocusOrSelectionCenter(OverlayCenter))
+				break;
+
 			// Intersect the mouse with the 3 planes.
 			lcVector3 PlaneNormals[3] =
 			{
@@ -1480,12 +1486,10 @@ void View::UpdateTrackTool()
 			};
 
 			lcMatrix44 RelativeRotation = mModel->GetRelativeRotation();
-			lcVector3 OverlayCenter = mModel->GetFocusOrSelectionCenter();
 
 			for (int i = 0; i < 3; i++)
 				PlaneNormals[i] = lcMul30(PlaneNormals[i], RelativeRotation);
 
-			NewTrackTool = (CurrentTool == LC_TOOL_MOVE) ? LC_TRACKTOOL_MOVE_XYZ : LC_TRACKTOOL_SELECT;
 			lcVector3 StartEnd[2] = { lcVector3((float)x, (float)y, 0.0f), lcVector3((float)x, (float)y, 1.0f) };
 			UnprojectPoints(StartEnd, 2);
 			const lcVector3& Start = StartEnd[0];
@@ -1556,14 +1560,18 @@ void View::UpdateTrackTool()
 			const float OverlayScale = GetOverlayScale();
 			const float OverlayRotateRadius = 2.0f;
 
+			NewTrackTool = LC_TRACKTOOL_ROTATE_XYZ;
+
+			lcVector3 OverlayCenter;
+			if (!mModel->GetFocusOrSelectionCenter(OverlayCenter))
+				break;
+
 			// Calculate the distance from the mouse pointer to the center of the sphere.
 			lcVector3 StartEnd[2] = { lcVector3((float)x, (float)y, 0.0f), lcVector3((float)x, (float)y, 1.0f) };
 			UnprojectPoints(StartEnd, 2);
 			const lcVector3& SegStart = StartEnd[0];
 			const lcVector3& SegEnd = StartEnd[1];
-			NewTrackTool = LC_TRACKTOOL_ROTATE_XYZ;
 
-			lcVector3 OverlayCenter = mModel->GetFocusOrSelectionCenter();
 			lcVector3 Line = SegEnd - SegStart;
 			lcVector3 Vec = OverlayCenter - SegStart;
 

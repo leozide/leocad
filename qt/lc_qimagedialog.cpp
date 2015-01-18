@@ -57,7 +57,7 @@ void lcQImageDialog::accept()
 		return;
 	}
 
-	int start, end;
+	int start = currentStep, end = currentStep;
 
 	if (ui->rangeAll->isChecked())
 	{

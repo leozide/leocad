@@ -36,7 +36,7 @@ lcQAboutDialog::lcQAboutDialog(QWidget *parent, void *data) :
 	QString VertexBufferObject = GL_HasVertexBufferObject() ? tr("Supported") : tr("Not supported");
 	QString FramebufferObjectARB = GL_HasFramebufferObjectARB() ? tr("Supported") : tr("Not supported");
 	QString FramebufferObjectEXT = GL_HasFramebufferObjectEXT() ? tr("Supported") : tr("Not supported");
-	QString Anisotropic = GL_SupportsAnisotropic ? tr("Supported (max %d)").arg(QString::number(GL_MaxAnisotropy)) : tr("Not supported");
+	QString Anisotropic = GL_SupportsAnisotropic ? tr("Supported (max %1)").arg(GL_MaxAnisotropy) : tr("Not supported");
 	QString Extensions = ExtensionsFormat.arg(VertexBufferObject, FramebufferObjectARB, FramebufferObjectEXT, Anisotropic);
 
 	ui->info->setText(Version + Buffers + Extensions);

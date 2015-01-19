@@ -4,6 +4,23 @@
 #include "lc_library.h"
 #include "pieceinf.h"
 
+QString lcFormatValue(float Value)
+{
+	QString String = QString::number(Value, 'f', 6);
+	int Dot = String.indexOf('.');
+
+	if (Dot != -1)
+	{
+		while (String.endsWith('0'))
+			String.chop(1);
+
+		if (String.endsWith('.'))
+			String.chop(1);
+	}
+
+	return String;
+}
+
 // Resize all columns to content except for one stretching column. (taken from QT creator)
 lcQTreeWidgetColumnStretcher::lcQTreeWidgetColumnStretcher(QTreeWidget *treeWidget, int columnToStretch)
 	: QObject(treeWidget->header()), m_columnToStretch(columnToStretch)

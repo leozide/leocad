@@ -3,6 +3,8 @@
 
 #include <QObject>
 
+QString lcFormatValue(float Value);
+
 class lcQTreeWidgetColumnStretcher : public QObject
 {
 public:

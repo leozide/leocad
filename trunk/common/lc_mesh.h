@@ -129,7 +129,6 @@ public:
 
 	void Create(int NumSections, int NumVertices, int NumTexturedVertices, int NumIndices);
 	void CreateBox();
-	void Render(int ColorIdx, bool Selected, bool Focused);
 
 	bool FileLoad(lcFile& File);
 	void FileSave(lcFile& File);

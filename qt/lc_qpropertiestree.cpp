@@ -10,6 +10,7 @@
 #include "light.h"
 #include "pieceinf.h"
 #include "lc_library.h"
+#include "lc_qutils.h"
 
 // Draw an icon indicating opened/closing branches
 static QIcon drawIndicatorIcon(const QPalette &palette, QStyle *style)
@@ -17,7 +18,6 @@ static QIcon drawIndicatorIcon(const QPalette &palette, QStyle *style)
 	QPixmap pix(14, 14);
 	pix.fill(Qt::transparent);
 	QStyleOption branchOption;
-	QRect r(QPoint(0, 0), pix.size());
 	branchOption.rect = QRect(2, 2, 9, 9); // ### hardcoded in qcommonstyle.cpp
 	branchOption.palette = palette;
 	branchOption.state = QStyle::State_Children;
@@ -405,7 +405,7 @@ QWidget *lcQPropertiesTree::createEditor(QWidget *parent, QTreeWidgetItem *item)
 			float value = item->data(0, PropertyValueRole).toFloat();
 
 			editor->setValidator(new QDoubleValidator());
-			editor->setText(QString::number(value));
+			editor->setText(lcFormatValue(value));
 
 			connect(editor, SIGNAL(returnPressed()), this, SLOT(slotReturnPressed()));
 
@@ -781,19 +781,19 @@ void lcQPropertiesTree::setPart(lcObject *newFocusObject)
 	lcPiece *part = (lcPiece*)focusObject;
 
 	lcVector3 position = part->mModelWorld.GetTranslation();
-	partPositionX->setText(1, QString::number(position[0]));
+	partPositionX->setText(1, lcFormatValue(position[0]));
 	partPositionX->setData(0, PropertyValueRole, position[0]);
-	partPositionY->setText(1, QString::number(position[1]));
+	partPositionY->setText(1, lcFormatValue(position[1]));
 	partPositionY->setData(0, PropertyValueRole, position[1]);
-	partPositionZ->setText(1, QString::number(position[2]));
+	partPositionZ->setText(1, lcFormatValue(position[2]));
 	partPositionZ->setData(0, PropertyValueRole, position[2]);
 
 	lcVector3 rotation = lcMatrix44ToEulerAngles(part->mModelWorld) * LC_RTOD;
-	partRotationX->setText(1, QString::number(rotation[0]));
+	partRotationX->setText(1, lcFormatValue(rotation[0]));
 	partRotationX->setData(0, PropertyValueRole, rotation[0]);
-	partRotationY->setText(1, QString::number(rotation[1]));
+	partRotationY->setText(1, lcFormatValue(rotation[1]));
 	partRotationY->setData(0, PropertyValueRole, rotation[1]);
-	partRotationZ->setText(1, QString::number(rotation[2]));
+	partRotationZ->setText(1, lcFormatValue(rotation[2]));
 	partRotationZ->setData(0, PropertyValueRole, rotation[2]);
 
 	lcStep show = part->GetStepShow();
@@ -856,36 +856,36 @@ void lcQPropertiesTree::setCamera(lcObject *newFocusObject)
 	lcCamera *camera = (lcCamera*)focusObject;
 
 	lcVector3 position = camera->mPosition;
-	cameraPositionX->setText(1, QString::number(position[0]));
+	cameraPositionX->setText(1, lcFormatValue(position[0]));
 	cameraPositionX->setData(0, PropertyValueRole, position[0]);
-	cameraPositionY->setText(1, QString::number(position[1]));
+	cameraPositionY->setText(1, lcFormatValue(position[1]));
 	cameraPositionY->setData(0, PropertyValueRole, position[1]);
-	cameraPositionZ->setText(1, QString::number(position[2]));
+	cameraPositionZ->setText(1, lcFormatValue(position[2]));
 	cameraPositionZ->setData(0, PropertyValueRole, position[2]);
 
 	lcVector3 target = camera->mTargetPosition;
-	cameraTargetX->setText(1, QString::number(target[0]));
+	cameraTargetX->setText(1, lcFormatValue(target[0]));
 	cameraTargetX->setData(0, PropertyValueRole, target[0]);
-	cameraTargetY->setText(1, QString::number(target[1]));
+	cameraTargetY->setText(1, lcFormatValue(target[1]));
 	cameraTargetY->setData(0, PropertyValueRole, target[1]);
-	cameraTargetZ->setText(1, QString::number(target[2]));
+	cameraTargetZ->setText(1, lcFormatValue(target[2]));
 	cameraTargetZ->setData(0, PropertyValueRole, target[2]);
 
 	lcVector3 up = camera->mUpVector;
-	cameraUpX->setText(1, QString::number(up[0]));
+	cameraUpX->setText(1, lcFormatValue(up[0]));
 	cameraUpX->setData(0, PropertyValueRole, up[0]);
-	cameraUpY->setText(1, QString::number(up[1]));
+	cameraUpY->setText(1, lcFormatValue(up[1]));
 	cameraUpY->setData(0, PropertyValueRole, up[1]);
-	cameraUpZ->setText(1, QString::number(up[2]));
+	cameraUpZ->setText(1, lcFormatValue(up[2]));
 	cameraUpZ->setData(0, PropertyValueRole, up[2]);
 
 	cameraOrtho->setText(1, camera->IsOrtho() ? "True" : "False");
 	cameraOrtho->setData(0, PropertyValueRole, camera->IsOrtho());
-	cameraFOV->setText(1, QString::number(camera->m_fovy));
+	cameraFOV->setText(1, lcFormatValue(camera->m_fovy));
 	cameraFOV->setData(0, PropertyValueRole, camera->m_fovy);
-	cameraNear->setText(1, QString::number(camera->m_zNear));
+	cameraNear->setText(1, lcFormatValue(camera->m_zNear));
 	cameraNear->setData(0, PropertyValueRole, camera->m_zNear);
-	cameraFar->setText(1, QString::number(camera->m_zFar));
+	cameraFar->setText(1, lcFormatValue(camera->m_zFar));
 	cameraFar->setData(0, PropertyValueRole, camera->m_zFar);
 
 	cameraName->setText(1, camera->GetName());

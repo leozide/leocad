@@ -15,6 +15,7 @@
 #include "lc_application.h"
 #include "lc_library.h"
 #include "lc_context.h"
+#include "lc_qutils.h"
 
 #define LC_PIECE_SAVE_VERSION 12 // LeoCAD 0.80
 
@@ -65,22 +66,9 @@ void lcPiece::SaveLDraw(QTextStream& Stream) const
 
 	const float* Matrix = mModelWorld;
 	float Numbers[12] = { Matrix[12], -Matrix[14], Matrix[13], Matrix[0], -Matrix[8], Matrix[4], -Matrix[2], Matrix[10], -Matrix[6], Matrix[1], -Matrix[9], Matrix[5] };
+
 	for (int NumberIdx = 0; NumberIdx < 12; NumberIdx++)
-	{
-		QString Number = QString::number(Numbers[NumberIdx], 'f', 6);
-		int Dot = Number.indexOf('.');
-
-		if (Dot != -1)
-		{
-			while (Number.endsWith('0'))
-				Number.chop(1);
-
-			if (Number.endsWith('.'))
-				Number.chop(1);
-		}
-
-		Stream << Number << ' ';
-	}
+		Stream << lcFormatValue(Numbers[NumberIdx]) << ' ';
 
 	Stream << mPieceInfo->GetSaveID() << LineEnding;
 }

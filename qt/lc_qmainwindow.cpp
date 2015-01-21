@@ -43,37 +43,14 @@ lcQMainWindow::lcQMainWindow(QWidget *parent)
 	QGridLayout *previewLayout = new QGridLayout(previewFrame);
 	previewLayout->setContentsMargins(0, 0, 0, 0);
 
-	QWidget *viewWidget = new lcQGLWidget(previewFrame, piecePreview, new View(lcGetActiveModel()), true);
+	QWidget *viewWidget = new lcQGLWidget(previewFrame, piecePreview, new View(NULL), true);
 	previewLayout->addWidget(viewWidget, 0, 0, 1, 1);
 
 	connect(QApplication::clipboard(), SIGNAL(dataChanged()), this, SLOT(clipboardChanged()));
 	clipboardChanged();
 
-	lcPiecesLibrary* Library = lcGetPiecesLibrary();
-	PieceInfo* Info = Library->FindPiece("3005", false);
-
-	GL_EnableVertexBufferObject();
-
-	if (!lcGetActiveModel()->GetPieces().IsEmpty())
-	{
-		for (int PieceIdx = 0; PieceIdx < Library->mPieces.GetSize(); PieceIdx++)
-		{
-			lcMesh* Mesh = Library->mPieces[PieceIdx]->GetMesh();
-
-			if (Mesh)
-				Mesh->UpdateBuffers();
-		}
-	}
-
-	if (!Info)
-		Info = Library->mPieces[0];
-
-	if (Info)
-	{
-		PiecePreview* Preview = (PiecePreview*)piecePreview->widget;
-		gMainWindow->mPreviewWidget = Preview;
-		Preview->SetCurrentPiece(Info);
-	}
+	PiecePreview* Preview = (PiecePreview*)piecePreview->widget;
+	gMainWindow->mPreviewWidget = Preview;
 
 	QSettings settings;
 	settings.beginGroup("MainWindow");
@@ -86,6 +63,23 @@ lcQMainWindow::lcQMainWindow(QWidget *parent)
 
 lcQMainWindow::~lcQMainWindow()
 {
+}
+
+void lcQMainWindow::LibraryLoaded()
+{
+	lcPiecesLibrary* Library = lcGetPiecesLibrary();
+	PieceInfo* Info = Library->FindPiece("3005", false);
+
+	if (!Info)
+		Info = Library->mPieces[0];
+
+	if (Info)
+		gMainWindow->mPreviewWidget->SetCurrentPiece(Info);
+
+	QCompleter *completer = new QCompleter(this);
+	completer->setModel(new lcQPartsListModel(completer));
+	completer->setCaseSensitivity(Qt::CaseInsensitive);
+	partSearch->setCompleter(completer);
 }
 
 void lcQMainWindow::createActions()
@@ -501,11 +495,6 @@ void lcQMainWindow::createToolBars()
 	partSearch = new QLineEdit(partsSplitter);
 	connect(partSearch, SIGNAL(returnPressed()), this, SLOT(partSearchReturn()));
 	connect(partSearch, SIGNAL(textChanged(QString)), this, SLOT(partSearchChanged(QString)));
-
-    QCompleter *completer = new QCompleter(this);
-    completer->setModel(new lcQPartsListModel(completer));
-	completer->setCaseSensitivity(Qt::CaseInsensitive);
-	partSearch->setCompleter(completer);
 
 	QFrame *colorFrame = new QFrame(partsSplitter);
 	colorFrame->setFrameShape(QFrame::StyledPanel);

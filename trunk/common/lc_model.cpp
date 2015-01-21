@@ -1072,7 +1072,13 @@ void lcModel::SaveStepImages(const QString& BaseName, int Width, int Height, lcS
 		SetCurrentStep(Step);
 		View.OnDraw();
 
-		QString FileName = BaseName.arg(Step, 2, 10, QLatin1Char('0'));
+		QString FileName;
+
+		if (Start == End)
+			FileName = BaseName;
+		else
+			FileName = BaseName.arg(Step, 2, 10, QLatin1Char('0'));
+
 		if (!Context->SaveRenderToTextureImage(FileName, Width, Height))
 			break;
 	}

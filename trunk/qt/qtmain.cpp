@@ -176,12 +176,13 @@ int main(int argc, char *argv[])
 	QDir dir;
 	dir.mkpath(cachePath);
 	gMainWindow = new lcMainWindow();
+	lcQMainWindow w;
+	gMainWindow->mHandle = &w;
 
 	if (!g_App->Initialize(argc, argv, libPath, LDrawPath, cachePath.toLocal8Bit().data()))
 		return 1;
 
-	lcQMainWindow w;
-	gMainWindow->mHandle = &w;
+	w.LibraryLoaded();
 	lcGetActiveModel()->UpdateInterface();
 	gMainWindow->SetColorIndex(lcGetColorIndex(4));
 	gMainWindow->UpdateRecentFiles();

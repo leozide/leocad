@@ -277,49 +277,30 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 	// Create a new project.
 	mProject = new Project();
 
-	GL_DisableVertexBufferObject();
-
 	// Load project.
 	if (ProjectName && gMainWindow->OpenProject(ProjectName))
 	{
 		if (!SaveImage)
 			return true;
 
-		// Check if there's a file name and it has an extension.
-		bool NeedExt = true;
-		String FileName;
+		QString FileName;
 
-		if (!ImageName)
-		{
+		if (ImageName)
+			FileName = ImageName;
+		else
 			FileName = ProjectName;
 
-			int i = FileName.ReverseFind('.');
-			if (i != -1)
-				FileName[i] = 0;
-		}
-		else
+		QString Extension = QFileInfo(FileName).suffix().toLower();
+
+		if (Extension.isEmpty())
 		{
-			FileName = ImageName;
-
-			int i = FileName.ReverseFind('.');
-			String Ext;
-
-			if (i != -1)
-			{
-				Ext = FileName.Right(FileName.GetLength() - i);
-				Ext.MakeLower();
-			}
-
-			if (Ext == "bmp")
-				NeedExt = false;
-			else if ((Ext == "jpg") || (Ext == "jpeg"))
-				NeedExt = false;
-			else if (Ext == "png")
-				NeedExt = false;
-		}
-
-		if (NeedExt)
 			FileName += lcGetProfileString(LC_PROFILE_IMAGE_EXTENSION);
+		}
+		else if (Extension != "bmp" && Extension != "jpg" && Extension != "jpeg" && Extension != "png")
+		{
+			FileName = FileName.left(FileName.length() - Extension.length() - 1);
+			FileName += lcGetProfileString(LC_PROFILE_IMAGE_EXTENSION);
+		}
 
 		if (ImageEnd < ImageStart)
 			ImageEnd = ImageStart;
@@ -345,18 +326,17 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 		if (ImageEnd > 255)
 			ImageEnd = 255;
 
-		String Frame;
+		QString Frame;
 
 		if (ImageStart != ImageEnd)
 		{
-			int Ext = FileName.ReverseFind('.');
-
-			Frame = FileName.Left(Ext) + "%1" + FileName.Right(FileName.GetLength() - Ext);
+			QString Extension = QFileInfo(FileName).suffix();
+			Frame = FileName.left(FileName.length() - Extension.length() - 1) + QLatin1String("%1.") + Extension;
 		}
 		else
 			Frame = FileName;
 
-		lcGetActiveModel()->SaveStepImages(Frame.Buffer(), ImageWidth, ImageHeight, ImageStart, ImageEnd);
+		lcGetActiveModel()->SaveStepImages(Frame, ImageWidth, ImageHeight, ImageStart, ImageEnd);
 
 		return false;
 	}

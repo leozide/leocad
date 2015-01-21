@@ -21,6 +21,8 @@ public:
 	explicit lcQMainWindow(QWidget *parent = 0);
 	~lcQMainWindow();
 
+	void LibraryLoaded();
+
 	void showPrintDialog();
 
 	void splitHorizontal();

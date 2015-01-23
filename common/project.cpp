@@ -1555,7 +1555,7 @@ void Project::ExportPOVRay()
 	}
 }
 
-void Project::ExportWavefront()
+void Project::ExportWavefront(const QString& FileName)
 {
 	lcArray<lcModelPartsEntry> ModelParts;
 
@@ -1567,16 +1567,19 @@ void Project::ExportWavefront()
 		return;
 	}
 
-	char FileName[LC_MAXPATH];
-	memset(FileName, 0, sizeof(FileName));
+	QString SaveFileName = FileName;
+	if (SaveFileName.isEmpty())
+	{
+		SaveFileName = QFileDialog::getSaveFileName(gMainWindow->mHandle, tr("Export Wavefront"), SaveFileName, tr("Wavefront Files (*.obj);;All Files (*.*)"));
 
-	if (!gMainWindow->DoDialog(LC_DIALOG_EXPORT_WAVEFRONT, FileName))
-		return;
+		if (SaveFileName.isEmpty())
+			return;
+	}
 
 	lcDiskFile OBJFile;
 	char Line[1024];
 
-	if (!OBJFile.Open(FileName, "wt"))
+	if (!OBJFile.Open(SaveFileName.toLatin1().constData(), "wt")) // todo: qstring
 	{
 		gMainWindow->DoMessageBox("Could not open file for writing.", LC_MB_OK|LC_MB_ICONERROR);
 		return;
@@ -1589,7 +1592,7 @@ void Project::ExportWavefront()
 
 	OBJFile.WriteLine("# Model exported from LeoCAD\n");
 
-	strcpy(buf, FileName);
+	strcpy(buf, SaveFileName.toLatin1().constData());
 	ptr = strrchr(buf, '.');
 	if (ptr)
 		*ptr = 0;

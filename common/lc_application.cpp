@@ -174,15 +174,15 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 
 	// Image output options.
 	bool SaveImage = false;
+	bool SaveWavefront = false;
 //	bool ImageHighlight = false;
 	int ImageWidth = lcGetProfileInt(LC_PROFILE_IMAGE_WIDTH);
 	int ImageHeight = lcGetProfileInt(LC_PROFILE_IMAGE_HEIGHT);
 	lcStep ImageStart = 0;
 	lcStep ImageEnd = 0;
 	char* ImageName = NULL;
-
-	// File to open.
 	char* ProjectName = NULL;
+	char* WavefrontName = NULL;
 
 	// Parse the command line arguments.
 	for (int i = 1; i < argc; i++)
@@ -227,6 +227,17 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 			}
 //			else if (strcmp(Param, "--highlight") == 0)
 //				ImageHighlight = true;
+			else if ((strcmp(Param, "-wf") == 0) || (strcmp(Param, "--wavefront") == 0))
+			{
+				SaveWavefront = true;
+
+				if ((argc > (i+1)) && (argv[i+1][0] != '-'))
+				{
+					i++;
+					WavefrontName = argv[i];
+				}
+			}
+
 			else if ((strcmp(Param, "-v") == 0) || (strcmp(Param, "--version") == 0))
 			{
 				printf("LeoCAD Version " LC_VERSION_TEXT "\n");
@@ -244,7 +255,8 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 				printf("  -h, --height <height>: Sets the picture height.\n");
 				printf("  -f, --from <time>: Sets the first frame or step to save pictures.\n");
 				printf("  -t, --to <time>: Sets the last frame or step to save pictures.\n");
-				printf("  --highlight: Highlight pieces in the steps they appear.\n");
+//				printf("  --highlight: Highlight pieces in the steps they appear.\n");
+				printf("  -wf, --wavefront <outfile.obj>: Exports the model to Wavefront format.\n");
 				printf("  \n");
 
 				return false;
@@ -260,7 +272,7 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 
 	if (!LoadPiecesLibrary(LibPath, LibraryInstallPath, LDrawPath, LibraryCachePath))
 	{
-		if (SaveImage)
+		if (SaveImage || SaveWavefront)
 		{
 			fprintf(stderr, "ERROR: Cannot load pieces library.");
 			return false;
@@ -280,70 +292,91 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 	// Load project.
 	if (ProjectName && gMainWindow->OpenProject(ProjectName))
 	{
-		if (!SaveImage)
-			return true;
-
-		QString FileName;
-
-		if (ImageName)
-			FileName = ImageName;
-		else
-			FileName = ProjectName;
-
-		QString Extension = QFileInfo(FileName).suffix().toLower();
-
-		if (Extension.isEmpty())
+		if (SaveImage)
 		{
-			FileName += lcGetProfileString(LC_PROFILE_IMAGE_EXTENSION);
+			QString FileName;
+
+			if (ImageName)
+				FileName = ImageName;
+			else
+				FileName = ProjectName;
+
+			QString Extension = QFileInfo(FileName).suffix().toLower();
+
+			if (Extension.isEmpty())
+			{
+				FileName += lcGetProfileString(LC_PROFILE_IMAGE_EXTENSION);
+			}
+			else if (Extension != "bmp" && Extension != "jpg" && Extension != "jpeg" && Extension != "png")
+			{
+				FileName = FileName.left(FileName.length() - Extension.length() - 1);
+				FileName += lcGetProfileString(LC_PROFILE_IMAGE_EXTENSION);
+			}
+
+			if (ImageEnd < ImageStart)
+				ImageEnd = ImageStart;
+			else if (ImageStart > ImageEnd)
+				ImageStart = ImageEnd;
+
+			if ((ImageStart == 0) && (ImageEnd == 0))
+			{
+				ImageStart = ImageEnd = mProject->GetActiveModel()->GetCurrentStep();
+			}
+			else if ((ImageStart == 0) && (ImageEnd != 0))
+			{
+				ImageStart = ImageEnd;
+			}
+			else if ((ImageStart != 0) && (ImageEnd == 0))
+			{
+				ImageEnd = ImageStart;
+			}
+
+			if (ImageStart > 255)
+				ImageStart = 255;
+
+			if (ImageEnd > 255)
+				ImageEnd = 255;
+
+			QString Frame;
+
+			if (ImageStart != ImageEnd)
+			{
+				QString Extension = QFileInfo(FileName).suffix();
+				Frame = FileName.left(FileName.length() - Extension.length() - 1) + QLatin1String("%1.") + Extension;
+			}
+			else
+				Frame = FileName;
+
+			lcGetActiveModel()->SaveStepImages(Frame, ImageWidth, ImageHeight, ImageStart, ImageEnd);
 		}
-		else if (Extension != "bmp" && Extension != "jpg" && Extension != "jpeg" && Extension != "png")
+
+		if (SaveWavefront)
 		{
-			FileName = FileName.left(FileName.length() - Extension.length() - 1);
-			FileName += lcGetProfileString(LC_PROFILE_IMAGE_EXTENSION);
+			QString FileName;
+
+			if (WavefrontName)
+				FileName = WavefrontName;
+			else
+				FileName = ProjectName;
+
+			QString Extension = QFileInfo(FileName).suffix().toLower();
+
+			if (Extension.isEmpty())
+			{
+				FileName += ".obj";
+			}
+			else if (Extension != "obj")
+			{
+				FileName = FileName.left(FileName.length() - Extension.length() - 1);
+				FileName += ".obj";
+			}
+
+			mProject->ExportWavefront(FileName);
 		}
-
-		if (ImageEnd < ImageStart)
-			ImageEnd = ImageStart;
-		else if (ImageStart > ImageEnd)
-			ImageStart = ImageEnd;
-
-		if ((ImageStart == 0) && (ImageEnd == 0))
-		{
-			ImageStart = ImageEnd = mProject->GetActiveModel()->GetCurrentStep();
-		}
-		else if ((ImageStart == 0) && (ImageEnd != 0))
-		{
-			ImageStart = ImageEnd;
-		}
-		else if ((ImageStart != 0) && (ImageEnd == 0))
-		{
-			ImageEnd = ImageStart;
-		}
-
-		if (ImageStart > 255)
-			ImageStart = 255;
-
-		if (ImageEnd > 255)
-			ImageEnd = 255;
-
-		QString Frame;
-
-		if (ImageStart != ImageEnd)
-		{
-			QString Extension = QFileInfo(FileName).suffix();
-			Frame = FileName.left(FileName.length() - Extension.length() - 1) + QLatin1String("%1.") + Extension;
-		}
-		else
-			Frame = FileName;
-
-		lcGetActiveModel()->SaveStepImages(Frame, ImageWidth, ImageHeight, ImageStart, ImageEnd);
-
-		return false;
 	}
-	else if (SaveImage)
-	{
+
+	if (SaveImage || SaveWavefront)
 		return false;
-	}
 
 	lcLoadDefaultKeyboardShortcuts();
 

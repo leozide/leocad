@@ -291,7 +291,6 @@ bool lcBaseWindow::DoDialog(LC_DIALOG_TYPE Type, void* Data)
 	case LC_DIALOG_EXPORT_3DSTUDIO:
 	case LC_DIALOG_EXPORT_BRICKLINK:
 	case LC_DIALOG_EXPORT_CSV:
-	case LC_DIALOG_EXPORT_WAVEFRONT:
 		{
 			char* FileName = (char*)Data;
 			QString result;
@@ -308,10 +307,6 @@ bool lcBaseWindow::DoDialog(LC_DIALOG_TYPE Type, void* Data)
 
 			case LC_DIALOG_EXPORT_CSV:
 				result = QFileDialog::getSaveFileName(parent, tr("Export CSV"), FileName, tr("CSV Files (*.csv);;All Files (*.*)"));
-				break;
-
-			case LC_DIALOG_EXPORT_WAVEFRONT:
-				result = QFileDialog::getSaveFileName(parent, tr("Export Wavefront"), FileName, tr("Wavefront Files (*.obj);;All Files (*.*)"));
 				break;
 
 			default:

@@ -175,18 +175,16 @@ int main(int argc, char *argv[])
 
 	QDir dir;
 	dir.mkpath(cachePath);
-	gMainWindow = new lcMainWindow();
-	lcQMainWindow w;
-	gMainWindow->mHandle = &w;
 
 	if (!g_App->Initialize(argc, argv, libPath, LDrawPath, cachePath.toLocal8Bit().data()))
 		return 1;
 
-	w.LibraryLoaded();
+	lcQMainWindow* MainWindow = (lcQMainWindow*)gMainWindow->mHandle;
+	MainWindow->LibraryLoaded();
 	lcGetActiveModel()->UpdateInterface();
 	gMainWindow->SetColorIndex(lcGetColorIndex(4));
 	gMainWindow->UpdateRecentFiles();
-	w.show();
+	MainWindow->show();
 
 #if !LC_DISABLE_UPDATE_CHECK
 	lcDoInitialUpdateCheck();
@@ -198,6 +196,8 @@ int main(int argc, char *argv[])
 	gMainWindow = NULL;
 	delete g_App;
 	g_App = NULL;
+
+	delete MainWindow;
 
 	return execReturn;
 }

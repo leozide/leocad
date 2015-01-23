@@ -2499,6 +2499,8 @@ bool lcModel::GetFocusPosition(lcVector3& Position) const
 bool lcModel::GetSelectionCenter(lcVector3& Center) const
 {
 	float Bounds[6] = { FLT_MAX, FLT_MAX, FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX };
+	lcPiece* SelectedPiece = NULL;
+	bool SinglePieceSelected = true;
 	bool Selected = false;
 
 	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
@@ -2509,6 +2511,11 @@ bool lcModel::GetSelectionCenter(lcVector3& Center) const
 		{
 			Piece->CompareBoundingBox(Bounds);
 			Selected = true;
+
+			if (!SelectedPiece)
+				SelectedPiece = Piece;
+			else
+				SinglePieceSelected = false;
 		}
 	}
 
@@ -2520,6 +2527,7 @@ bool lcModel::GetSelectionCenter(lcVector3& Center) const
 		{
 			Camera->CompareBoundingBox(Bounds);
 			Selected = true;
+			SinglePieceSelected = false;
 		}
 	}
 
@@ -2531,10 +2539,13 @@ bool lcModel::GetSelectionCenter(lcVector3& Center) const
 		{
 			Light->CompareBoundingBox(Bounds);
 			Selected = true;
+			SinglePieceSelected = false;
 		}
 	}
 
-	if (Selected)
+	if (SelectedPiece && SinglePieceSelected)
+		Center = SelectedPiece->GetSectionPosition(LC_PIECE_SECTION_POSITION);
+	else if (Selected)
 		Center = lcVector3((Bounds[0] + Bounds[3]) * 0.5f, (Bounds[1] + Bounds[4]) * 0.5f, (Bounds[2] + Bounds[5]) * 0.5f);
 	else
 		Center = lcVector3(0.0f, 0.0f, 0.0f);

@@ -287,7 +287,8 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 	}
 
 	// Create a new project.
-	mProject = new Project();
+	Project* NewProject = new Project();
+	SetProject(NewProject);
 
 	// Load project.
 	if (ProjectName && gMainWindow->OpenProject(ProjectName))

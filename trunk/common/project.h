@@ -69,7 +69,7 @@ public:
 	void ExportCSV();
 	void ExportHTML();
 	void ExportPOVRay();
-	void ExportWavefront();
+	void ExportWavefront(const QString& FileName);
 
 protected:
 	void GetModelParts(lcArray<lcModelPartsEntry>& ModelParts);

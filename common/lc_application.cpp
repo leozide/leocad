@@ -11,6 +11,7 @@
 #include "lc_mainwindow.h"
 #include "lc_shortcuts.h"
 #include "view.h"
+#include "lc_qmainwindow.h"
 
 lcApplication* g_App;
 
@@ -270,6 +271,8 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 		}
 	}
 
+	gMainWindow = new lcMainWindow();
+
 	if (!LoadPiecesLibrary(LibPath, LibraryInstallPath, LDrawPath, LibraryCachePath))
 	{
 		if (SaveImage || SaveWavefront)
@@ -285,6 +288,8 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 			gMainWindow->DoMessageBox("LeoCAD could not load Parts Library.\n\n"
 									  "Please visit http://www.leocad.org for information on how to download and install a library.", LC_MB_OK | LC_MB_ICONERROR);
 	}
+
+	gMainWindow->mHandle = new lcQMainWindow;
 
 	// Create a new project.
 	Project* NewProject = new Project();

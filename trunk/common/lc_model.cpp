@@ -2054,6 +2054,8 @@ void lcModel::RotateSelectedPieces(const lcVector3& Angles, bool Relative, bool 
 
 	float Bounds[6] = { FLT_MAX, FLT_MAX, FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX };
 	lcPiece* Focus = NULL;
+	lcPiece* Selected = NULL;
+	int NumSelected = 0;
 
 	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 	{
@@ -2065,6 +2067,9 @@ void lcModel::RotateSelectedPieces(const lcVector3& Angles, bool Relative, bool 
 				Focus = Piece;
 
 			Piece->CompareBoundingBox(Bounds);
+
+			Selected = Piece;
+			NumSelected++;
 		}
 	}
 
@@ -2072,6 +2077,8 @@ void lcModel::RotateSelectedPieces(const lcVector3& Angles, bool Relative, bool 
 
 	if (Focus)
 		Center = Focus->mModelWorld.GetTranslation();
+	else if (NumSelected == 1)
+		Center = Selected->mModelWorld.GetTranslation();
 	else
 		Center = lcVector3((Bounds[0] + Bounds[3]) / 2.0f, (Bounds[1] + Bounds[4]) / 2.0f, (Bounds[2] + Bounds[5]) / 2.0f);
 
@@ -2431,7 +2438,8 @@ lcObject* lcModel::GetFocusObject() const
 bool lcModel::GetPieceFocusOrSelectionCenter(lcVector3& Center) const
 {
 	float Bounds[6] = { FLT_MAX, FLT_MAX, FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX };
-	bool Selected = false;
+	lcPiece* Selected = NULL;
+	int NumSelected = 0;
 
 	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 	{
@@ -2446,16 +2454,19 @@ bool lcModel::GetPieceFocusOrSelectionCenter(lcVector3& Center) const
 		if (Piece->IsSelected())
 		{
 			Piece->CompareBoundingBox(Bounds);
-			Selected = true;
+			Selected = Piece;
+			NumSelected++;
 		}
 	}
 
-	if (Selected)
+	if (NumSelected == 1)
+		Center = Selected->mModelWorld.GetTranslation();
+	else if (NumSelected)
 		Center = lcVector3((Bounds[0] + Bounds[3]) * 0.5f, (Bounds[1] + Bounds[4]) * 0.5f, (Bounds[2] + Bounds[5]) * 0.5f);
 	else
 		Center = lcVector3(0.0f, 0.0f, 0.0f);
 
-	return Selected;
+	return NumSelected != 0;
 }
 
 bool lcModel::GetFocusOrSelectionCenter(lcVector3& Center) const

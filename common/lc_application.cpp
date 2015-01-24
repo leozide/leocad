@@ -272,6 +272,7 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 	}
 
 	gMainWindow = new lcMainWindow();
+	lcLoadDefaultKeyboardShortcuts();
 
 	if (!LoadPiecesLibrary(LibPath, LibraryInstallPath, LDrawPath, LibraryCachePath))
 	{
@@ -383,8 +384,6 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 
 	if (SaveImage || SaveWavefront)
 		return false;
-
-	lcLoadDefaultKeyboardShortcuts();
 
 	return true;
 }

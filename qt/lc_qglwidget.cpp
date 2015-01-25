@@ -4,7 +4,6 @@
 #include "project.h"
 #include "lc_library.h"
 #include "lc_application.h"
-#include "lc_qmainwindow.h"
 #include "lc_mainwindow.h"
 #include "lc_context.h"
 #include "view.h"
@@ -38,9 +37,7 @@ void* lcGLWidget::GetExtensionAddress(const char* FunctionName)
 void lcGLWidget::ShowPopupMenu()
 {
 	QGLWidget* Widget = (QGLWidget*)mWidget;
-
-	lcQMainWindow *mainWindow = (lcQMainWindow*)gMainWindow->mHandle;
-	QAction **actions = mainWindow->actions;
+	QAction **actions = gMainWindow->mActions;
 
 	QMenu *popup = new QMenu(Widget);
 

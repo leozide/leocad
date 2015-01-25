@@ -109,7 +109,7 @@ void Project::CreateNewModel()
 	{
 		bool Ok = false;
 
-		Name = QInputDialog::getText(gMainWindow->mHandle, tr("New Model"), tr("Name:"), QLineEdit::Normal, Name, &Ok);
+		Name = QInputDialog::getText(gMainWindow, tr("New Model"), tr("Name:"), QLineEdit::Normal, Name, &Ok);
 
 		if (!Ok)
 			return;
@@ -118,9 +118,9 @@ void Project::CreateNewModel()
 			break;
 
 		if (Name.isEmpty())
-			QMessageBox::information(gMainWindow->mHandle, tr("Empty Name"), tr("The model name cannot be empty."));
+			QMessageBox::information(gMainWindow, tr("Empty Name"), tr("The model name cannot be empty."));
 		else
-			QMessageBox::information(gMainWindow->mHandle, tr("Duplicate Model"), tr("A model named '%1' already exists in this project, please enter an unique name.").arg(Name));
+			QMessageBox::information(gMainWindow, tr("Duplicate Model"), tr("A model named '%1' already exists in this project, please enter an unique name.").arg(Name));
 	}
 
 	if (!Name.isEmpty())
@@ -146,7 +146,7 @@ void Project::ShowModelListDialog()
 		Models.append(QPair<QString, lcModel*>(Model->GetProperties().mName, Model));
 	}
 
-	lcQModelListDialog Dialog(gMainWindow->mHandle, Models);
+	lcQModelListDialog Dialog(gMainWindow, Models);
 
 	if (Dialog.exec() != QDialog::Accepted || Models.isEmpty())
 		return;
@@ -197,7 +197,7 @@ bool Project::Load(const QString& FileName)
 
 	if (!File.open(QIODevice::ReadOnly))
 	{
-		QMessageBox::warning(gMainWindow->mHandle, tr("Error"), tr("Error reading file '%1':\n%2").arg(FileName, File.errorString()));
+		QMessageBox::warning(gMainWindow, tr("Error"), tr("Error reading file '%1':\n%2").arg(FileName, File.errorString()));
 		return false;
 	}
 
@@ -263,7 +263,7 @@ bool Project::Save(const QString& FileName)
 
 	if (!File.open(QIODevice::WriteOnly))
 	{
-		QMessageBox::warning(gMainWindow->mHandle, tr("Error"), tr("Error writing to file '%1':\n%2").arg(FileName, File.errorString()));
+		QMessageBox::warning(gMainWindow, tr("Error"), tr("Error writing to file '%1':\n%2").arg(FileName, File.errorString()));
 		return false;
 	}
 
@@ -1072,7 +1072,7 @@ void Project::ExportHTML()
 
 		if (!File.open(QIODevice::WriteOnly))
 		{
-			QMessageBox::warning(gMainWindow->mHandle, tr("Error"), tr("Error writing to file '%1':\n%2").arg(FileName, File.errorString()));
+			QMessageBox::warning(gMainWindow, tr("Error"), tr("Error writing to file '%1':\n%2").arg(FileName, File.errorString()));
 			return;
 		}
 
@@ -1103,7 +1103,7 @@ void Project::ExportHTML()
 
 			if (!File.open(QIODevice::WriteOnly))
 			{
-				QMessageBox::warning(gMainWindow->mHandle, tr("Error"), tr("Error writing to file '%1':\n%2").arg(FileName, File.errorString()));
+				QMessageBox::warning(gMainWindow, tr("Error"), tr("Error writing to file '%1':\n%2").arg(FileName, File.errorString()));
 				return;
 			}
 
@@ -1128,7 +1128,7 @@ void Project::ExportHTML()
 
 			if (!File.open(QIODevice::WriteOnly))
 			{
-				QMessageBox::warning(gMainWindow->mHandle, tr("Error"), tr("Error writing to file '%1':\n%2").arg(FileName, File.errorString()));
+				QMessageBox::warning(gMainWindow, tr("Error"), tr("Error writing to file '%1':\n%2").arg(FileName, File.errorString()));
 				return;
 			}
 
@@ -1162,7 +1162,7 @@ void Project::ExportHTML()
 
 			if (!File.open(QIODevice::WriteOnly))
 			{
-				QMessageBox::warning(gMainWindow->mHandle, tr("Error"), tr("Error writing to file '%1':\n%2").arg(FileName, File.errorString()));
+				QMessageBox::warning(gMainWindow, tr("Error"), tr("Error writing to file '%1':\n%2").arg(FileName, File.errorString()));
 				return;
 			}
 
@@ -1570,7 +1570,7 @@ void Project::ExportWavefront(const QString& FileName)
 	QString SaveFileName = FileName;
 	if (SaveFileName.isEmpty())
 	{
-		SaveFileName = QFileDialog::getSaveFileName(gMainWindow->mHandle, tr("Export Wavefront"), SaveFileName, tr("Wavefront Files (*.obj);;All Files (*.*)"));
+		SaveFileName = QFileDialog::getSaveFileName(gMainWindow, tr("Export Wavefront"), SaveFileName, tr("Wavefront Files (*.obj);;All Files (*.*)"));
 
 		if (SaveFileName.isEmpty())
 			return;

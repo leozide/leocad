@@ -1,5 +1,19 @@
 #include "lc_global.h"
 #include "lc_mainwindow.h"
+#include "lc_qmainwindow.h"
+#include "lc_qimagedialog.h"
+#include "lc_qhtmldialog.h"
+#include "lc_qpovraydialog.h"
+#include "lc_qpropertiesdialog.h"
+#include "lc_qfinddialog.h"
+#include "lc_qselectdialog.h"
+#include "lc_qminifigdialog.h"
+#include "lc_qarraydialog.h"
+#include "lc_qgroupdialog.h"
+#include "lc_qeditgroupsdialog.h"
+#include "lc_qpreferencesdialog.h"
+#include "lc_qupdatedialog.h"
+#include "lc_qaboutdialog.h"
 #include "lc_profile.h"
 #include "preview.h"
 #include "view.h"
@@ -10,6 +24,7 @@ lcMainWindow* gMainWindow;
 
 lcMainWindow::lcMainWindow()
 {
+	mHandle = NULL;
 	mActiveView = NULL;
 	mPreviewWidget = NULL;
 	mTransformType = LC_TRANSFORM_RELATIVE_TRANSLATION;
@@ -42,6 +57,193 @@ lcMainWindow::~lcMainWindow()
 		lcSetProfileString((LC_PROFILE_KEY)(LC_PROFILE_RECENT_FILE1 + FileIdx), mRecentFiles[FileIdx]);
 
 	gMainWindow = NULL;
+}
+
+int lcMainWindow::DoMessageBox(const char* Text, const char* Caption, int Flags)
+{
+	QMessageBox::StandardButton	Result;
+	QMessageBox::StandardButtons Buttons;
+
+	switch (Flags & LC_MB_TYPEMASK)
+	{
+	default:
+	case LC_MB_OK:
+		Buttons = QMessageBox::Ok;
+		break;
+
+	case LC_MB_OKCANCEL:
+		Buttons = QMessageBox::Ok | QMessageBox::Cancel;
+		break;
+
+	case LC_MB_YESNOCANCEL:
+		Buttons = QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel;
+		break;
+
+	case LC_MB_YESNO:
+		Buttons = QMessageBox::Yes | QMessageBox::No;
+		break;
+	}
+
+	switch (Flags & LC_MB_ICONMASK)
+	{
+	default:
+	case LC_MB_ICONINFORMATION:
+		Result = QMessageBox::information(mHandle, Caption, Text, Buttons);
+		break;
+
+	case LC_MB_ICONQUESTION:
+		Result = QMessageBox::question(mHandle, Caption, Text, Buttons);
+		break;
+
+	case LC_MB_ICONWARNING:
+		Result = QMessageBox::warning(mHandle, Caption, Text, Buttons);
+		break;
+
+	case LC_MB_ICONERROR:
+		Result = QMessageBox::critical(mHandle, Caption, Text, Buttons);
+		break;
+	}
+
+	switch (Result)
+	{
+	default:
+	case QMessageBox::Ok:
+		return LC_OK;
+
+	case QMessageBox::Cancel:
+		return LC_CANCEL;
+
+	case QMessageBox::Yes:
+		return LC_YES;
+
+	case QMessageBox::No:
+		return LC_NO;
+	}
+}
+
+bool lcMainWindow::DoDialog(LC_DIALOG_TYPE Type, void* Data)
+{
+	switch (Type)
+	{
+	case LC_DIALOG_EXPORT_3DSTUDIO:
+	case LC_DIALOG_EXPORT_BRICKLINK:
+	case LC_DIALOG_EXPORT_CSV:
+		{
+			char* FileName = (char*)Data;
+			QString Result;
+
+			switch (Type)
+			{
+			case LC_DIALOG_EXPORT_3DSTUDIO:
+				Result = QFileDialog::getSaveFileName(mHandle, tr("Export 3D Studio"), FileName, tr("3DS Files (*.3ds);;All Files (*.*)"));
+				break;
+
+			case LC_DIALOG_EXPORT_BRICKLINK:
+				Result = QFileDialog::getSaveFileName(mHandle, tr("Export BrickLink"), FileName, tr("XML Files (*.xml);;All Files (*.*)"));
+				break;
+
+			case LC_DIALOG_EXPORT_CSV:
+				Result = QFileDialog::getSaveFileName(mHandle, tr("Export CSV"), FileName, tr("CSV Files (*.csv);;All Files (*.*)"));
+				break;
+
+			default:
+				break;
+			}
+
+			if (!Result.isEmpty())
+			{
+				strcpy(FileName, Result.toLocal8Bit().data());
+				return true;
+			}
+		} break;
+
+	case LC_DIALOG_SAVE_IMAGE:
+		{
+			lcQImageDialog Dialog(mHandle, Data);
+			return Dialog.exec() == QDialog::Accepted;
+		} break;
+
+	case LC_DIALOG_EXPORT_HTML:
+		{
+			lcQHTMLDialog Dialog(mHandle, Data);
+			return Dialog.exec() == QDialog::Accepted;
+		} break;
+
+	case LC_DIALOG_EXPORT_POVRAY:
+		{
+			lcQPOVRayDialog Dialog(mHandle, Data);
+			return Dialog.exec() == QDialog::Accepted;
+		} break;
+
+	case LC_DIALOG_PROPERTIES:
+		{
+			lcQPropertiesDialog Dialog(mHandle, Data);
+			return Dialog.exec() == QDialog::Accepted;
+		} break;
+
+	case LC_DIALOG_PRINT:
+		{
+			lcQMainWindow* MainWindow = (lcQMainWindow*)mHandle;
+			MainWindow->showPrintDialog();
+			return true;
+		} break;
+
+	case LC_DIALOG_FIND:
+		{
+			lcQFindDialog Dialog(mHandle, Data);
+			return Dialog.exec() == QDialog::Accepted;
+		} break;
+
+	case LC_DIALOG_SELECT_BY_NAME:
+		{
+			lcQSelectDialog Dialog(mHandle, Data);
+			return Dialog.exec() == QDialog::Accepted;
+		} break;
+
+	case LC_DIALOG_MINIFIG:
+		{
+			lcQMinifigDialog Dialog(mHandle, Data);
+			return Dialog.exec() == QDialog::Accepted;
+		} break;
+
+	case LC_DIALOG_PIECE_ARRAY:
+		{
+			lcQArrayDialog Dialog(mHandle, Data);
+			return Dialog.exec() == QDialog::Accepted;
+		} break;
+
+	case LC_DIALOG_PIECE_GROUP:
+		{
+			lcQGroupDialog Dialog(mHandle, Data);
+			return Dialog.exec() == QDialog::Accepted;
+		} break;
+
+	case LC_DIALOG_EDIT_GROUPS:
+		{
+			lcQEditGroupsDialog Dialog(mHandle, Data);
+			return Dialog.exec() == QDialog::Accepted;
+		} break;
+
+	case LC_DIALOG_PREFERENCES:
+		{
+			lcQPreferencesDialog Dialog(mHandle, Data);
+			return Dialog.exec() == QDialog::Accepted;
+		} break;
+
+	case LC_DIALOG_ABOUT:
+		{
+			lcQAboutDialog Dialog(mHandle, Data);
+			return Dialog.exec() == QDialog::Accepted;
+		} break;
+
+	case LC_DIALOG_CHECK_UPDATES:
+		{
+			lcQUpdateDialog Dialog(mHandle, Data);
+			return Dialog.exec() == QDialog::Accepted;
+		} break;
+	}
+
+	return false;
 }
 
 void lcMainWindow::ResetCameras()

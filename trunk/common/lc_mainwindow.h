@@ -21,8 +21,10 @@ struct lcSearchOptions
 	char Name[256];
 };
 
-class lcMainWindow : public lcBaseWindow
+class lcMainWindow
 {
+	Q_DECLARE_TR_FUNCTIONS(lcBaseWindow)
+
 public:
 	lcMainWindow();
 	~lcMainWindow();
@@ -117,6 +119,15 @@ public:
 		return mViews;
 	}
 
+	bool DoDialog(LC_DIALOG_TYPE Type, void* Data);
+
+	int DoMessageBox(const char* Text, int Flags = LC_MB_OK | LC_MB_ICONINFORMATION)
+	{
+		return DoMessageBox(Text, "LeoCAD", Flags);
+	}
+
+	int DoMessageBox(const char* Text, const char* Caption = "LeoCAD", int Flags = LC_MB_OK | LC_MB_ICONINFORMATION);
+
 	void ResetCameras();
 	void AddView(View* View);
 	void RemoveView(View* View);
@@ -179,6 +190,8 @@ public:
 	PiecePreview* mPreviewWidget;
 	int mColorIndex;
 	lcSearchOptions mSearchOptions;
+
+	QWidget* mHandle;
 
 protected:
 	View* mActiveView;

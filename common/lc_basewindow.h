@@ -138,30 +138,4 @@ struct lcPreferencesDialogOptions
 	bool ShortcutsDefault;
 };
 
-class lcBaseWindow
-{
-	Q_DECLARE_TR_FUNCTIONS(lcBaseWindow)
-
-public:
-	lcBaseWindow()
-	{
-		mHandle = NULL;
-	}
-
-	~lcBaseWindow()
-	{
-	}
-
-	bool DoDialog(LC_DIALOG_TYPE Type, void* Data);
-
-	int DoMessageBox(const char* Text, int Flags = LC_MB_OK | LC_MB_ICONINFORMATION)
-	{
-		return DoMessageBox(Text, "LeoCAD", Flags);
-	}
-
-	int DoMessageBox(const char* Text, const char* Caption = "LeoCAD", int Flags = LC_MB_OK | LC_MB_ICONINFORMATION);
-
-	QWidget* mHandle;
-};
-
 #endif // _LC_BASEWINDOW_H_

@@ -8,6 +8,10 @@
 
 class View;
 class PiecePreview;
+class lcQGLWidget;
+class lcQPartsTree;
+class lcQColorList;
+class lcQPropertiesTree;
 
 #define LC_MAX_RECENT_FILES 4
 
@@ -21,13 +25,15 @@ struct lcSearchOptions
 	char Name[256];
 };
 
-class lcMainWindow
+class lcMainWindow : public QMainWindow
 {
-	Q_DECLARE_TR_FUNCTIONS(lcBaseWindow)
+	Q_OBJECT
 
 public:
 	lcMainWindow();
 	~lcMainWindow();
+
+	void CreateWidgets();
 
 	lcTool GetTool() const
 	{
@@ -145,7 +151,6 @@ public:
 	void SetLockZ(bool LockZ);
 	void SetRelativeTransform(bool RelativeTransform);
 
-	void Close();
 	void NewProject();
 	bool OpenProject(const QString& FileName);
 	void MergeProject();
@@ -158,7 +163,7 @@ public:
 
 	void SplitHorizontal();
 	void SplitVertical();
-	void RemoveView();
+	void RemoveActiveView();
 	void ResetViews();
 
 	void TogglePrintPreview();
@@ -166,7 +171,6 @@ public:
 
 	void UpdateFocusObject(lcObject* Focus);
 	void UpdateSelectedObjects(int Flags, int SelectedCount, lcObject* Focus);
-	void UpdateAction(int NewAction);
 	void UpdatePaste(bool Enabled);
 	void UpdateCurrentStep();
 	void SetAddKeys(bool AddKeys);
@@ -190,10 +194,28 @@ public:
 	PiecePreview* mPreviewWidget;
 	int mColorIndex;
 	lcSearchOptions mSearchOptions;
+	QAction* mActions[LC_NUM_COMMANDS];
 
-	QWidget* mHandle;
+protected slots:
+	void ClipboardChanged();
+	void ActionTriggered();
+	void PartsTreeItemChanged(QTreeWidgetItem* Current, QTreeWidgetItem* Previous);
+	void ColorChanged(int ColorIndex);
+	void PartSearchReturn();
+	void PartSearchChanged(const QString& Text);
+	void Print(QPrinter* Printer);
 
 protected:
+	void closeEvent(QCloseEvent *event);
+	QMenu* createPopupMenu();
+
+	void CreateActions();
+	void CreateMenus();
+	void CreateToolBars();
+	void CreateStatusBar();
+	void SplitView(Qt::Orientation Orientation);
+	void ShowPrintDialog();
+
 	View* mActiveView;
 	lcArray<View*> mViews;
 
@@ -207,6 +229,28 @@ protected:
 	bool mLockY;
 	bool mLockZ;
 	bool mRelativeTransform;
+
+	QAction* mActionFileRecentSeparator;
+
+	QToolBar* mStandardToolBar;
+	QToolBar* mToolsToolBar;
+	QToolBar* mTimeToolBar;
+	QDockWidget* mPartsToolBar;
+	QDockWidget* mPropertiesToolBar;
+
+	lcQGLWidget* mPiecePreviewWidget;
+	lcQPartsTree* mPartsTree;
+	QLineEdit* mPartSearchEdit;
+	lcQColorList* mColorList;
+	lcQPropertiesTree* mPropertiesWidget;
+	QLineEdit* mTransformXEdit;
+	QLineEdit* mTransformYEdit;
+	QLineEdit* mTransformZEdit;
+
+	QLabel* mStatusBarLabel;
+	QLabel* mStatusPositionLabel;
+	QLabel* mStatusSnapLabel;
+	QLabel* mStatusTimeLabel;
 };
 
 extern class lcMainWindow* gMainWindow;

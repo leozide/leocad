@@ -11,7 +11,6 @@
 #include "lc_mainwindow.h"
 #include "lc_shortcuts.h"
 #include "view.h"
-#include "lc_qmainwindow.h"
 
 lcApplication* g_App;
 
@@ -238,7 +237,6 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 					WavefrontName = argv[i];
 				}
 			}
-
 			else if ((strcmp(Param, "-v") == 0) || (strcmp(Param, "--version") == 0))
 			{
 				printf("LeoCAD Version " LC_VERSION_TEXT "\n");
@@ -290,7 +288,7 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 									  "Please visit http://www.leocad.org for information on how to download and install a library.", LC_MB_OK | LC_MB_ICONERROR);
 	}
 
-	gMainWindow->mHandle = new lcQMainWindow;
+	gMainWindow->CreateWidgets();
 
 	// Create a new project.
 	Project* NewProject = new Project();

@@ -319,21 +319,20 @@ void Project::Export3DStudio()
 
 	if (ModelParts.IsEmpty())
 	{
-		gMainWindow->DoMessageBox("Nothing to export.", LC_MB_OK | LC_MB_ICONINFORMATION);
+		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Nothing to export."));
 		return;
 	}
 
-	char FileName[LC_MAXPATH];
-	memset(FileName, 0, sizeof(FileName));
+	QString FileName = QFileDialog::getSaveFileName(gMainWindow, tr("Export 3D Studio"), FileName, tr("3DS Files (*.3ds);;All Files (*.*)"));
 
-	if (!gMainWindow->DoDialog(LC_DIALOG_EXPORT_3DSTUDIO, FileName))
+	if (FileName.isEmpty())
 		return;
 
 	lcDiskFile File;
 
-	if (!File.Open(FileName, "wb"))
+	if (!File.Open(FileName.toLatin1().constData(), "wb")) // todo: qstring
 	{
-		gMainWindow->DoMessageBox("Could not open file for writing.", LC_MB_OK | LC_MB_ICONERROR);
+		QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Could not open file '%1' for writing.").arg(FileName));
 		return;
 	}
 
@@ -808,22 +807,21 @@ void Project::ExportBrickLink()
 
 	if (PartsList.IsEmpty())
 	{
-		gMainWindow->DoMessageBox("Nothing to export.", LC_MB_OK | LC_MB_ICONINFORMATION);
+		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Nothing to export."));
 		return;
 	}
 
-	char FileName[LC_MAXPATH];
-	memset(FileName, 0, sizeof(FileName));
+	QString FileName = QFileDialog::getSaveFileName(gMainWindow, tr("Export BrickLink"), FileName, tr("XML Files (*.xml);;All Files (*.*)"));
 
-	if (!gMainWindow->DoDialog(LC_DIALOG_EXPORT_BRICKLINK, FileName))
+	if (FileName.isEmpty())
 		return;
 
 	lcDiskFile BrickLinkFile;
 	char Line[1024];
 
-	if (!BrickLinkFile.Open(FileName, "wt"))
+	if (!BrickLinkFile.Open(FileName.toLatin1().constData(), "wt")) // todo: qstring
 	{
-		gMainWindow->DoMessageBox("Could not open file for writing.", LC_MB_OK | LC_MB_ICONERROR);
+		QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Could not open file '%1' for writing.").arg(FileName));
 		return;
 	}
 
@@ -869,22 +867,21 @@ void Project::ExportCSV()
 
 	if (PartsList.IsEmpty())
 	{
-		gMainWindow->DoMessageBox("Nothing to export.", LC_MB_OK | LC_MB_ICONINFORMATION);
+		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Nothing to export."));
 		return;
 	}
 
-	char FileName[LC_MAXPATH];
-	memset(FileName, 0, sizeof(FileName));
+	QString FileName = QFileDialog::getSaveFileName(gMainWindow, tr("Export CSV"), FileName, tr("CSV Files (*.csv);;All Files (*.*)"));
 
-	if (!gMainWindow->DoDialog(LC_DIALOG_EXPORT_CSV, FileName))
+	if (FileName.isEmpty())
 		return;
 
 	lcDiskFile CSVFile;
 	char Line[1024];
 
-	if (!CSVFile.Open(FileName, "wt"))
+	if (!CSVFile.Open(FileName.toLatin1().constData(), "wt")) // todo: qstring
 	{
-		gMainWindow->DoMessageBox("Could not open file for writing.", LC_MB_OK | LC_MB_ICONERROR);
+		QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Could not open file '%1' for writing.").arg(FileName));
 		return;
 	}
 
@@ -1194,7 +1191,7 @@ void Project::ExportHTML()
 
 		if (!Context->BeginRenderToTexture(Width, Height))
 		{
-			gMainWindow->DoMessageBox("Error creating images.", LC_MB_ICONERROR | LC_MB_OK);
+			QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Error creating images."));
 			return;
 		}
 
@@ -1249,7 +1246,7 @@ void Project::ExportPOVRay()
 
 	if (ModelParts.IsEmpty())
 	{
-		gMainWindow->DoMessageBox("Nothing to export.", LC_MB_OK | LC_MB_ICONINFORMATION);
+		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Nothing to export."));
 		return;
 	}
 
@@ -1271,7 +1268,7 @@ void Project::ExportPOVRay()
 
 	if (!POVFile.Open(Options.FileName, "wt"))
 	{
-		gMainWindow->DoMessageBox("Could not open file for writing.", LC_MB_OK|LC_MB_ICONERROR);
+		QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Could not open file '%1' for writing.").arg(Options.FileName));
 		return;
 	}
 
@@ -1325,7 +1322,7 @@ void Project::ExportPOVRay()
 		{
 			delete[] PieceTable;
 			delete[] PieceFlags;
-			gMainWindow->DoMessageBox("Could not find LGEO files.", LC_MB_OK | LC_MB_ICONERROR);
+			QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Could not find LGEO files in folder '%1'.").arg(LGEOPath));
 			return;
 		}
 
@@ -1370,7 +1367,7 @@ void Project::ExportPOVRay()
 		{
 			delete[] PieceTable;
 			delete[] PieceFlags;
-			gMainWindow->DoMessageBox("Could not find LGEO files.", LC_MB_OK | LC_MB_ICONERROR);
+			QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Could not find LGEO files in folder '%1'.").arg(LGEOPath));
 			return;
 		}
 
@@ -1563,7 +1560,7 @@ void Project::ExportWavefront(const QString& FileName)
 
 	if (ModelParts.IsEmpty())
 	{
-		gMainWindow->DoMessageBox("Nothing to export.", LC_MB_OK | LC_MB_ICONINFORMATION);
+		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Nothing to export."));
 		return;
 	}
 
@@ -1581,7 +1578,7 @@ void Project::ExportWavefront(const QString& FileName)
 
 	if (!OBJFile.Open(SaveFileName.toLatin1().constData(), "wt")) // todo: qstring
 	{
-		gMainWindow->DoMessageBox("Could not open file for writing.", LC_MB_OK|LC_MB_ICONERROR);
+		QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Could not open file '%1' for writing.").arg(SaveFileName));
 		return;
 	}
 

@@ -281,11 +281,11 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 		}
 
 		if (mLibrary->LoadBuiltinPieces())
-			gMainWindow->DoMessageBox("LeoCAD could not find a compatible Parts Library so only a small number of parts will be available.\n\n"
-									  "Please visit http://www.leocad.org for information on how to download and install a library.", LC_MB_OK | LC_MB_ICONERROR);
+			QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("LeoCAD could not find a compatible Parts Library so only a small number of parts will be available.\n\n"
+			                         "Please visit http://www.leocad.org for information on how to download and install a library."));
 		else
-			gMainWindow->DoMessageBox("LeoCAD could not load Parts Library.\n\n"
-									  "Please visit http://www.leocad.org for information on how to download and install a library.", LC_MB_OK | LC_MB_ICONERROR);
+			QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("LeoCAD could not load Parts Library.\n\n"
+			                         "Please visit http://www.leocad.org for information on how to download and install a library."));
 	}
 
 	gMainWindow->CreateWidgets();
@@ -435,11 +435,11 @@ void lcApplication::ShowPreferencesDialog()
 	lcSetProfileInt(LC_PROFILE_ANTIALIASING_SAMPLES, Options.AASamples);
 
 	if (LibraryChanged && AAChanged)
-		gMainWindow->DoMessageBox("Parts library and Anti-aliasing changes will only take effect the next time you start LeoCAD.", LC_MB_OK);
+		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Parts library and Anti-aliasing changes will only take effect the next time you start LeoCAD."));
 	else if (LibraryChanged)
-		gMainWindow->DoMessageBox("Parts library changes will only take effect the next time you start LeoCAD.", LC_MB_OK);
+		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Parts library changes will only take effect the next time you start LeoCAD."));
 	else if (AAChanged)
-		gMainWindow->DoMessageBox("Anti-aliasing changes will only take effect the next time you start LeoCAD.", LC_MB_OK);
+		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Anti-aliasing changes will only take effect the next time you start LeoCAD."));
 
 	if (Options.CategoriesModified)
 	{

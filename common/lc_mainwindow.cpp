@@ -955,68 +955,6 @@ void lcMainWindow::ShowPrintDialog()
 		Print(&Printer);
 }
 
-int lcMainWindow::DoMessageBox(const char* Text, const char* Caption, int Flags)
-{
-	QMessageBox::StandardButton	Result;
-	QMessageBox::StandardButtons Buttons;
-
-	switch (Flags & LC_MB_TYPEMASK)
-	{
-	default:
-	case LC_MB_OK:
-		Buttons = QMessageBox::Ok;
-		break;
-
-	case LC_MB_OKCANCEL:
-		Buttons = QMessageBox::Ok | QMessageBox::Cancel;
-		break;
-
-	case LC_MB_YESNOCANCEL:
-		Buttons = QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel;
-		break;
-
-	case LC_MB_YESNO:
-		Buttons = QMessageBox::Yes | QMessageBox::No;
-		break;
-	}
-
-	switch (Flags & LC_MB_ICONMASK)
-	{
-	default:
-	case LC_MB_ICONINFORMATION:
-		Result = QMessageBox::information(this, Caption, Text, Buttons);
-		break;
-
-	case LC_MB_ICONQUESTION:
-		Result = QMessageBox::question(this, Caption, Text, Buttons);
-		break;
-
-	case LC_MB_ICONWARNING:
-		Result = QMessageBox::warning(this, Caption, Text, Buttons);
-		break;
-
-	case LC_MB_ICONERROR:
-		Result = QMessageBox::critical(this, Caption, Text, Buttons);
-		break;
-	}
-
-	switch (Result)
-	{
-	default:
-	case QMessageBox::Ok:
-		return LC_OK;
-
-	case QMessageBox::Cancel:
-		return LC_CANCEL;
-
-	case QMessageBox::Yes:
-		return LC_YES;
-
-	case QMessageBox::No:
-		return LC_NO;
-	}
-}
-
 // todo: call dialogs directly
 #include "lc_qimagedialog.h"
 #include "lc_qhtmldialog.h"
@@ -1036,38 +974,6 @@ bool lcMainWindow::DoDialog(LC_DIALOG_TYPE Type, void* Data)
 {
 	switch (Type)
 	{
-	case LC_DIALOG_EXPORT_3DSTUDIO:
-	case LC_DIALOG_EXPORT_BRICKLINK:
-	case LC_DIALOG_EXPORT_CSV:
-		{
-			char* FileName = (char*)Data;
-			QString Result;
-
-			switch (Type)
-			{
-			case LC_DIALOG_EXPORT_3DSTUDIO:
-				Result = QFileDialog::getSaveFileName(this, tr("Export 3D Studio"), FileName, tr("3DS Files (*.3ds);;All Files (*.*)"));
-				break;
-
-			case LC_DIALOG_EXPORT_BRICKLINK:
-				Result = QFileDialog::getSaveFileName(this, tr("Export BrickLink"), FileName, tr("XML Files (*.xml);;All Files (*.*)"));
-				break;
-
-			case LC_DIALOG_EXPORT_CSV:
-				Result = QFileDialog::getSaveFileName(this, tr("Export CSV"), FileName, tr("CSV Files (*.csv);;All Files (*.*)"));
-				break;
-
-			default:
-				break;
-			}
-
-			if (!Result.isEmpty())
-			{
-				strcpy(FileName, Result.toLocal8Bit().data());
-				return true;
-			}
-		} break;
-
 	case LC_DIALOG_SAVE_IMAGE:
 		{
 			lcQImageDialog Dialog(this, Data);
@@ -1090,12 +996,6 @@ bool lcMainWindow::DoDialog(LC_DIALOG_TYPE Type, void* Data)
 		{
 			lcQPropertiesDialog Dialog(this, Data);
 			return Dialog.exec() == QDialog::Accepted;
-		} break;
-
-	case LC_DIALOG_PRINT:
-		{
-			ShowPrintDialog();
-			return true;
 		} break;
 
 	case LC_DIALOG_FIND:
@@ -1909,7 +1809,7 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		break;
 
 	case LC_FILE_PRINT:
-		DoDialog(LC_DIALOG_PRINT, NULL);
+		ShowPrintDialog();
 		break;
 
 	// TODO: printing

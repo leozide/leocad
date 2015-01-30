@@ -9,39 +9,12 @@
 #include "lc_shortcuts.h"
 #include "image.h"
 
-#define LC_OK           1
-#define LC_CANCEL       2
-#define LC_ABORT        3
-#define LC_RETRY        4
-#define LC_IGNORE       5
-#define LC_YES          6
-#define LC_NO           7
- 
-#define LC_MB_OK                 0x000
-#define LC_MB_OKCANCEL           0x001
-//#define LC_MB_ABORTRETRYIGNORE 0x002
-#define LC_MB_YESNOCANCEL        0x003
-#define LC_MB_YESNO              0x004
-//#define LC_MB_RETRYCANCEL      0x005
-
-#define LC_MB_ICONERROR          0x010
-#define LC_MB_ICONQUESTION       0x020
-#define LC_MB_ICONWARNING        0x030
-#define LC_MB_ICONINFORMATION    0x040
- 
-#define LC_MB_TYPEMASK           0x00F
-#define LC_MB_ICONMASK           0x0F0
-
 enum LC_DIALOG_TYPE
 {
 	LC_DIALOG_SAVE_IMAGE,
-	LC_DIALOG_EXPORT_3DSTUDIO,
-	LC_DIALOG_EXPORT_BRICKLINK,
-	LC_DIALOG_EXPORT_CSV,
 	LC_DIALOG_EXPORT_HTML,
 	LC_DIALOG_EXPORT_POVRAY,
 	LC_DIALOG_PROPERTIES,
-	LC_DIALOG_PRINT,
 	LC_DIALOG_FIND,
 	LC_DIALOG_SELECT_BY_NAME,
 	LC_DIALOG_MINIFIG,

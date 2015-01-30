@@ -127,13 +127,6 @@ public:
 
 	bool DoDialog(LC_DIALOG_TYPE Type, void* Data);
 
-	int DoMessageBox(const char* Text, int Flags = LC_MB_OK | LC_MB_ICONINFORMATION)
-	{
-		return DoMessageBox(Text, "LeoCAD", Flags);
-	}
-
-	int DoMessageBox(const char* Text, const char* Caption = "LeoCAD", int Flags = LC_MB_OK | LC_MB_ICONINFORMATION);
-
 	void ResetCameras();
 	void AddView(View* View);
 	void RemoveView(View* View);

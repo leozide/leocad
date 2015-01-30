@@ -35,6 +35,8 @@ public:
 
 class lcApplication
 {
+	Q_DECLARE_TR_FUNCTIONS(lcApplication);
+
 public:
 	lcApplication();
 	~lcApplication();

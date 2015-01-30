@@ -1055,7 +1055,7 @@ void lcModel::SaveStepImages(const QString& BaseName, int Width, int Height, lcS
 
 	if (!Context->BeginRenderToTexture(Width, Height))
 	{
-		gMainWindow->DoMessageBox("Error creating images.", LC_MB_ICONERROR | LC_MB_OK);
+		QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Error creating images."));
 		return;
 	}
 
@@ -1421,7 +1421,7 @@ void lcModel::GroupSelection()
 {
 	if (!AnyPiecesSelected())
 	{
-		gMainWindow->DoMessageBox("No pieces selected.", LC_MB_OK | LC_MB_ICONINFORMATION);
+		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("No pieces selected."));
 		return;
 	}
 
@@ -3372,7 +3372,7 @@ void lcModel::ShowSelectByNameDialog()
 {
 	if (mPieces.IsEmpty() && mCameras.IsEmpty() && mLights.IsEmpty())
 	{
-		gMainWindow->DoMessageBox("Nothing to select.", LC_MB_OK | LC_MB_ICONINFORMATION);
+		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Nothing to select."));
 		return;
 	}
 
@@ -3389,7 +3389,7 @@ void lcModel::ShowArrayDialog()
 
 	if (!GetPieceFocusOrSelectionCenter(Center))
 	{
-		gMainWindow->DoMessageBox("No pieces selected.", LC_MB_OK | LC_MB_ICONINFORMATION);
+		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("No pieces selected."));
 		return;
 	}
 	
@@ -3405,7 +3405,7 @@ void lcModel::ShowArrayDialog()
 
 	if (Options.Counts[0] * Options.Counts[1] * Options.Counts[2] < 2)
 	{
-		gMainWindow->DoMessageBox("Array only has 1 element or less, no pieces added.", LC_MB_OK | LC_MB_ICONINFORMATION);
+		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Array only has 1 element or less, no pieces added."));
 		return;
 	}
 

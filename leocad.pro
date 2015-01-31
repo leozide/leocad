@@ -161,7 +161,6 @@ SOURCES += common/view.cpp \
     qt/lc_qpreferencesdialog.cpp \
     qt/lc_qcategorydialog.cpp \
     qt/lc_qimagedialog.cpp \
-    qt/lc_qapplication.cpp \
     qt/lc_qupdatedialog.cpp \
     qt/lc_qutils.cpp \
     qt/lc_qpropertiestree.cpp \
@@ -207,7 +206,6 @@ HEADERS += \
     common/group.h \
     common/debug.h \
     common/camera.h \
-    qt/lc_config.h \
     qt/lc_qpovraydialog.h \
     qt/lc_qarraydialog.h \
     qt/lc_qgroupdialog.h \

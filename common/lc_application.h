@@ -48,8 +48,6 @@ public:
 
 	bool LoadPiecesLibrary(const char* LibPath, const char* LibraryInstallPath, const char* LDrawPath, const char* LibraryCachePath);
 
-	void OpenURL(const char* URL);
-	void RunProcess(const char* ExecutablePath, const lcArray<String>& Arguments);
 	void GetFileList(const char* Path, lcArray<String>& FileList);
 	void SetClipboard(const QByteArray& Clipboard);
 	void ExportClipboard(const QByteArray& Clipboard);

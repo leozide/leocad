@@ -2140,11 +2140,11 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		break;
 
 	case LC_HELP_HOMEPAGE:
-		g_App->OpenURL("http://www.leocad.org/");
+		QDesktopServices::openUrl(QUrl("http://www.leocad.org/"));
 		break;
 
 	case LC_HELP_EMAIL:
-		g_App->OpenURL("mailto:leozide@gmail.com?subject=LeoCAD");
+		QDesktopServices::openUrl(QUrl("mailto:leozide@gmail.com?subject=LeoCAD"));
 		break;
 
 	case LC_HELP_UPDATES:

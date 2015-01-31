@@ -79,6 +79,32 @@ void lcApplication::SetClipboard(const QByteArray& Clipboard)
 	gMainWindow->UpdatePaste(!mClipboard.isEmpty());
 }
 
+void lcApplication::ExportClipboard(const QByteArray& Clipboard)
+{
+	QMimeData* MimeData = new QMimeData();
+
+	MimeData->setData("application/vnd.leocad-clipboard", Clipboard);
+	QApplication::clipboard()->setMimeData(MimeData);
+
+	SetClipboard(Clipboard);
+}
+
+void lcApplication::GetFileList(const char* Path, lcArray<String>& FileList)
+{
+	QDir Dir(Path);
+	Dir.setFilter(QDir::Files | QDir::Hidden | QDir::Readable);
+
+	FileList.RemoveAll();
+	QStringList Files = Dir.entryList();
+
+	for (int FileIdx = 0; FileIdx < Files.size(); FileIdx++)
+	{
+		QString AbsolutePath = Dir.absoluteFilePath(Files[FileIdx]);
+
+		FileList.Add(AbsolutePath.toLocal8Bit().data());
+	}
+}
+
 bool lcApplication::LoadPiecesLibrary(const char* LibPath, const char* LibraryInstallPath, const char* LDrawPath, const char* LibraryCachePath)
 {
 	if (mLibrary == NULL)

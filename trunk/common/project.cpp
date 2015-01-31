@@ -1521,18 +1521,18 @@ void Project::ExportPOVRay()
 
 	if (Options.Render)
 	{
-		lcArray<String> Arguments;
+		QStringList Arguments;
 		char Argument[LC_MAXPATH + 32];
 
 		sprintf(Argument, "+I%s", Options.FileName);
-		Arguments.Add(Argument);
+		Arguments.append(Argument);
 
 		if (Options.LGEOPath[0])
 		{
 			sprintf(Argument, "+L%slg/", Options.LGEOPath);
-			Arguments.Add(Argument);
+			Arguments.append(Argument);
 			sprintf(Argument, "+L%sar/", Options.LGEOPath);
-			Arguments.Add(Argument);
+			Arguments.append(Argument);
 		}
 
 		sprintf(Argument, "+o%s", Options.FileName);
@@ -1545,10 +1545,10 @@ void Project::ExportPOVRay()
 			else
 				*(Slash2 + 1) = 0;
 
-			Arguments.Add(Argument);
+			Arguments.append(Argument);
 		}
 
-		g_App->RunProcess(Options.POVRayPath, Arguments);
+		QProcess::execute(Options.POVRayPath, Arguments);
 	}
 }
 

@@ -3,7 +3,6 @@
 
 #include "lc_file.h"
 #include "lc_math.h"
-#include "str.h"
 #include "object.h"
 
 #define LC_SEL_NO_PIECES     0x01 // No pieces in model

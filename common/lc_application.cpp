@@ -120,11 +120,10 @@ bool lcApplication::LoadPiecesLibrary(const char* LibPath, const char* LibraryIn
 		return mLibrary->Load(EnvPath, LibraryCachePath);
 	}
 
-	char CustomPath[LC_MAXPATH];
-	strcpy(CustomPath, lcGetProfileString(LC_PROFILE_PARTS_LIBRARY));
+	QString CustomPath = lcGetProfileString(LC_PROFILE_PARTS_LIBRARY);
 
-	if (CustomPath[0])
-		return mLibrary->Load(CustomPath, LibraryCachePath);
+	if (!CustomPath.isEmpty())
+		return mLibrary->Load(CustomPath.toLatin1().constData(), LibraryCachePath); // todo: qstring
 
 	if (LibraryInstallPath && LibraryInstallPath[0])
 	{
@@ -425,11 +424,11 @@ void lcApplication::ShowPreferencesDialog()
 
 	Options.Preferences = mPreferences;
 
-	strcpy(Options.DefaultAuthor, lcGetProfileString(LC_PROFILE_DEFAULT_AUTHOR_NAME));
-	strcpy(Options.ProjectsPath, lcGetProfileString(LC_PROFILE_PROJECTS_PATH));
-	strcpy(Options.LibraryPath, lcGetProfileString(LC_PROFILE_PARTS_LIBRARY));
-	strcpy(Options.POVRayPath, lcGetProfileString(LC_PROFILE_POVRAY_PATH));
-	strcpy(Options.LGEOPath, lcGetProfileString(LC_PROFILE_POVRAY_LGEO_PATH));
+	Options.DefaultAuthor = lcGetProfileString(LC_PROFILE_DEFAULT_AUTHOR_NAME);
+	Options.ProjectsPath = lcGetProfileString(LC_PROFILE_PROJECTS_PATH);
+	Options.LibraryPath = lcGetProfileString(LC_PROFILE_PARTS_LIBRARY);
+	Options.POVRayPath = lcGetProfileString(LC_PROFILE_POVRAY_PATH);
+	Options.LGEOPath = lcGetProfileString(LC_PROFILE_POVRAY_LGEO_PATH);
 	Options.CheckForUpdates = lcGetProfileInt(LC_PROFILE_CHECK_UPDATES);
 
 	Options.AASamples = CurrentAASamples;
@@ -445,7 +444,7 @@ void lcApplication::ShowPreferencesDialog()
 	if (!gMainWindow->DoDialog(LC_DIALOG_PREFERENCES, &Options))
 		return;
 
-	bool LibraryChanged = strcmp(Options.LibraryPath, lcGetProfileString(LC_PROFILE_PARTS_LIBRARY));
+	bool LibraryChanged = Options.LibraryPath != lcGetProfileString(LC_PROFILE_PARTS_LIBRARY);
 	bool AAChanged = CurrentAASamples != Options.AASamples;
 
 	mPreferences = Options.Preferences;

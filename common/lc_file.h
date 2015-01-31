@@ -32,9 +32,6 @@ public:
 		WriteBuffer(Buffer, strlen(Buffer));
 	}
 
-	void ReadString(String& Value);
-	void WriteString(const String& Value);
-
 	virtual size_t ReadBuffer(void* Buffer, long Bytes) = 0;
 	virtual size_t WriteBuffer(const void* Buffer, long Bytes) = 0;
 	virtual void CopyFrom(lcMemFile& Source) = 0;

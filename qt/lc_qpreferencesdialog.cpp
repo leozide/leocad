@@ -83,11 +83,11 @@ void lcQPreferencesDialog::accept()
 		return;
 	}
 
-	strcpy(options->DefaultAuthor, ui->authorName->text().toLocal8Bit().data());
-	strcpy(options->ProjectsPath, ui->projectsFolder->text().toLocal8Bit().data());
-	strcpy(options->LibraryPath, ui->partsLibrary->text().toLocal8Bit().data());
-	strcpy(options->POVRayPath, ui->povrayExecutable->text().toLocal8Bit().data());
-	strcpy(options->LGEOPath, ui->lgeoPath->text().toLocal8Bit().data());
+	options->DefaultAuthor = ui->authorName->text();
+	options->ProjectsPath = ui->projectsFolder->text();
+	options->LibraryPath = ui->partsLibrary->text();
+	options->POVRayPath = ui->povrayExecutable->text();
+	options->LGEOPath = ui->lgeoPath->text();
 	options->Preferences.mMouseSensitivity = ui->mouseSensitivity->value();
 	options->CheckForUpdates = ui->checkForUpdates->currentIndex();
 	options->Preferences.mFixedAxes = ui->fixedDirectionKeys->isChecked();

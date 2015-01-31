@@ -132,17 +132,14 @@ float lcGetProfileFloat(LC_PROFILE_KEY Key)
 	return Settings.value(QString("%1/%2").arg(Entry.mSection, Entry.mKey), Entry.mDefault.FloatValue).toFloat();
 }
 
-const char* lcGetProfileString(LC_PROFILE_KEY Key)
+QString lcGetProfileString(LC_PROFILE_KEY Key)
 {
 	lcProfileEntry& Entry = gProfileEntries[Key];
 	QSettings Settings;
-	static QByteArray Value;
 
 	LC_ASSERT(Entry.mType == LC_PROFILE_ENTRY_STRING);
 
-	Value = Settings.value(QString("%1/%2").arg(Entry.mSection, Entry.mKey), Entry.mDefault.StringValue).toString().toLocal8Bit();
-
-	return Value.data();
+	return Settings.value(QString("%1/%2").arg(Entry.mSection, Entry.mKey), Entry.mDefault.StringValue).toString();
 }
 
 void lcGetProfileBuffer(LC_PROFILE_KEY Key, lcMemFile& Buffer)
@@ -179,16 +176,6 @@ void lcSetProfileFloat(LC_PROFILE_KEY Key, float Value)
 	LC_ASSERT(Entry.mType == LC_PROFILE_ENTRY_FLOAT);
 
 	Settings.setValue(QString("%1/%2").arg(Entry.mSection, Entry.mKey), Value);
-}
-
-void lcSetProfileString(LC_PROFILE_KEY Key, const char* Value)
-{
-	lcProfileEntry& Entry = gProfileEntries[Key];
-	QSettings Settings;
-
-	LC_ASSERT(Entry.mType == LC_PROFILE_ENTRY_STRING);
-
-	Settings.setValue(QString("%1/%2").arg(Entry.mSection, Entry.mKey), QString::fromUtf8(Value));
 }
 
 void lcSetProfileString(LC_PROFILE_KEY Key, const QString& Value)

@@ -55,9 +55,9 @@ struct lcHTMLDialogOptions
 
 struct lcPOVRayDialogOptions
 {
-	char FileName[LC_MAXPATH];
-	char POVRayPath[LC_MAXPATH];
-	char LGEOPath[LC_MAXPATH];
+	QString FileName;
+	QString POVRayPath;
+	QString LGEOPath;
 	bool Render;
 };
 
@@ -93,11 +93,11 @@ struct lcPreferencesDialogOptions
 {
 	lcPreferences Preferences;
 
-	char DefaultAuthor[101];
-	char ProjectsPath[LC_MAXPATH];
-	char LibraryPath[LC_MAXPATH];
-	char POVRayPath[LC_MAXPATH];
-	char LGEOPath[LC_MAXPATH];
+	QString DefaultAuthor;
+	QString ProjectsPath;
+	QString LibraryPath;
+	QString POVRayPath;
+	QString LGEOPath;
 	int CheckForUpdates;
 
 	int AASamples;

@@ -32,14 +32,9 @@ void lcQPOVRayDialog::accept()
 		return;
 	}
 
-	strcpy(options->FileName, fileName.toLocal8Bit().data());
-
-	QString povrayPath = ui->povrayEdit->text();
-	strcpy(options->POVRayPath, povrayPath.toLocal8Bit().data());
-
-	QString lgeoPath = ui->lgeoEdit->text();
-	strcpy(options->LGEOPath, lgeoPath.toLocal8Bit().data());
-
+	options->FileName = fileName;
+	options->POVRayPath = ui->povrayEdit->text();
+	options->LGEOPath = ui->lgeoEdit->text();
 	options->Render = ui->render->isChecked();
 
 	QDialog::accept();

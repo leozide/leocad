@@ -1252,9 +1252,8 @@ void Project::ExportPOVRay()
 
 	lcPOVRayDialogOptions Options;
 
-	memset(Options.FileName, 0, sizeof(Options.FileName));
-	strcpy(Options.POVRayPath, lcGetProfileString(LC_PROFILE_POVRAY_PATH));
-	strcpy(Options.LGEOPath, lcGetProfileString(LC_PROFILE_POVRAY_LGEO_PATH));
+	Options.POVRayPath = lcGetProfileString(LC_PROFILE_POVRAY_PATH);
+	Options.LGEOPath = lcGetProfileString(LC_PROFILE_POVRAY_LGEO_PATH);
 	Options.Render = lcGetProfileInt(LC_PROFILE_POVRAY_RENDER);
 
 	if (!gMainWindow->DoDialog(LC_DIALOG_EXPORT_POVRAY, &Options))
@@ -1266,7 +1265,7 @@ void Project::ExportPOVRay()
 
 	lcDiskFile POVFile;
 
-	if (!POVFile.Open(Options.FileName, "wt"))
+	if (!POVFile.Open(Options.FileName.toLatin1().constData(), "wt")) // todo: qstring
 	{
 		QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Could not open file '%1' for writing.").arg(Options.FileName));
 		return;
@@ -1302,27 +1301,15 @@ void Project::ExportPOVRay()
 		LGEO_COLOR_GLITTER     = 0x40
 	};
 
-	char LGEOPath[LC_MAXPATH];
-	strcpy(LGEOPath, lcGetProfileString(LC_PROFILE_POVRAY_LGEO_PATH));
-
-	if (LGEOPath[0])
+	if (!Options.LGEOPath.isEmpty())
 	{
 		lcDiskFile TableFile, ColorFile;
-		char Filename[LC_MAXPATH];
 
-		int Length = strlen(LGEOPath);
-
-		if ((LGEOPath[Length - 1] != '\\') && (LGEOPath[Length - 1] != '/'))
-			strcat(LGEOPath, "/");
-
-		strcpy(Filename, LGEOPath);
-		strcat(Filename, "lg_elements.lst");
-
-		if (!TableFile.Open(Filename, "rt"))
+		if (!TableFile.Open(QFileInfo(QDir(Options.LGEOPath), QLatin1String("lg_elements.lst")).absoluteFilePath().toLatin1().constData(), "rt"))
 		{
 			delete[] PieceTable;
 			delete[] PieceFlags;
-			QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Could not find LGEO files in folder '%1'.").arg(LGEOPath));
+			QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Could not find LGEO files in folder '%1'.").arg(Options.LGEOPath));
 			return;
 		}
 
@@ -1360,14 +1347,11 @@ void Project::ExportPOVRay()
 				PieceFlags[Index] |= LGEO_PIECE_SLOPE;
 		}
 
-		strcpy(Filename, LGEOPath);
-		strcat(Filename, "lg_colors.lst");
-
-		if (!ColorFile.Open(Filename, "rt"))
+		if (!ColorFile.Open(QFileInfo(QDir(Options.LGEOPath), QLatin1String("lg_colors.lst")).absoluteFilePath().toLatin1().constData(), "rt"))
 		{
 			delete[] PieceTable;
 			delete[] PieceFlags;
-			QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Could not find LGEO files in folder '%1'.").arg(LGEOPath));
+			QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Could not find LGEO files in folder '%1'.").arg(Options.LGEOPath));
 			return;
 		}
 
@@ -1392,7 +1376,7 @@ void Project::ExportPOVRay()
 
 	const char* OldLocale = setlocale(LC_NUMERIC, "C");
 
-	if (LGEOPath[0])
+	if (!Options.LGEOPath.isEmpty())
 	{
 		POVFile.WriteLine("#include \"lg_defs.inc\"\n#include \"lg_color.inc\"\n\n");
 
@@ -1522,31 +1506,18 @@ void Project::ExportPOVRay()
 	if (Options.Render)
 	{
 		QStringList Arguments;
-		char Argument[LC_MAXPATH + 32];
 
-		sprintf(Argument, "+I%s", Options.FileName);
-		Arguments.append(Argument);
+		Arguments.append(QString::fromLatin1("+I%1").arg(Options.FileName));
 
-		if (Options.LGEOPath[0])
+		if (!Options.LGEOPath.isEmpty())
 		{
-			sprintf(Argument, "+L%slg/", Options.LGEOPath);
-			Arguments.append(Argument);
-			sprintf(Argument, "+L%sar/", Options.LGEOPath);
-			Arguments.append(Argument);
+			Arguments.append(QString::fromLatin1("+L%1lg/").arg(Options.LGEOPath));
+			Arguments.append(QString::fromLatin1("+L%1ar/").arg(Options.LGEOPath));
 		}
 
-		sprintf(Argument, "+o%s", Options.FileName);
-		char* Slash1 = strrchr(Argument, '\\');
-		char* Slash2 = strrchr(Argument, '/');
-		if (Slash1 || Slash2)
-		{
-			if (Slash1 > Slash2)
-				*(Slash1 + 1) = 0;
-			else
-				*(Slash2 + 1) = 0;
-
-			Arguments.append(Argument);
-		}
+		QString AbsolutePath = QFileInfo(Options.FileName).absolutePath();
+		if (!AbsolutePath.isEmpty())
+			Arguments.append(QString::fromLatin1("+o%1").arg(AbsolutePath));
 
 		QProcess::execute(Options.POVRayPath, Arguments);
 	}

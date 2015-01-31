@@ -99,12 +99,11 @@ void lcRemoveProfileKey(LC_PROFILE_KEY Key);
 
 int lcGetProfileInt(LC_PROFILE_KEY Key);
 float lcGetProfileFloat(LC_PROFILE_KEY Key);
-const char* lcGetProfileString(LC_PROFILE_KEY Key);
+QString lcGetProfileString(LC_PROFILE_KEY Key);
 void lcGetProfileBuffer(LC_PROFILE_KEY Key, lcMemFile& Buffer);
 
 void lcSetProfileInt(LC_PROFILE_KEY Key, int Value);
 void lcSetProfileFloat(LC_PROFILE_KEY Key, float Value);
-void lcSetProfileString(LC_PROFILE_KEY Key, const char* Value); // todo: qstring
 void lcSetProfileString(LC_PROFILE_KEY Key, const QString& Value);
 void lcSetProfileBuffer(LC_PROFILE_KEY Key, const lcMemFile& Buffer);
 

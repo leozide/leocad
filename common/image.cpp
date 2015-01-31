@@ -1,5 +1,29 @@
 #include "lc_global.h"
 #include "image.h"
+#include "lc_file.h"
+
+static void CopyFromQImage(const QImage& Src, Image& Dest)
+{
+	bool Alpha = Src.hasAlphaChannel();
+	Dest.Allocate(Src.width(), Src.height(), Alpha ? LC_PIXEL_FORMAT_R8G8B8A8 : LC_PIXEL_FORMAT_R8G8B8);
+
+	lcuint8* Bytes = (lcuint8*)Dest.mData;
+
+	for (int y = 0; y < Dest.mHeight; y++)
+	{
+		for (int x = 0; x < Dest.mWidth; x++)
+		{
+			QRgb Pixel = Src.pixel(x, y);
+
+			*Bytes++ = qRed(Pixel);
+			*Bytes++ = qGreen(Pixel);
+			*Bytes++ = qBlue(Pixel);
+
+			if (Alpha)
+				*Bytes++ = qAlpha(Pixel);
+		}
+	}
+}
 
 Image::Image()
 {
@@ -118,4 +142,31 @@ void Image::Resize(int width, int height)
 	mData = bits;
 	mWidth = width;
 	mHeight = height;
+}
+
+bool Image::FileLoad(lcMemFile& File)
+{
+	QImage Image;
+
+	unsigned char* Buffer = File.mBuffer + File.mPosition;
+	int BufferLength = File.mFileSize - File.mPosition;
+
+	if (!Image.loadFromData(Buffer, BufferLength))
+		return false;
+
+	CopyFromQImage(Image, *this);
+
+	return true;
+}
+
+bool Image::FileLoad(const char* FileName)
+{
+	QImage Image;
+
+	if (!Image.load(FileName))
+		return false;
+
+	CopyFromQImage(Image, *this);
+
+	return true;
 }

@@ -160,14 +160,12 @@ SOURCES += common/view.cpp \
     qt/lc_qminifigdialog.cpp \
     qt/lc_qpreferencesdialog.cpp \
     qt/lc_qcategorydialog.cpp \
-    qt/lc_qprofile.cpp \
     qt/lc_qimagedialog.cpp \
     qt/lc_qapplication.cpp \
     qt/lc_qupdatedialog.cpp \
     qt/lc_qutils.cpp \
     qt/lc_qpropertiestree.cpp \
     qt/lc_qcolorpicker.cpp \
-    qt/lc_qimage.cpp \
     qt/lc_qglwidget.cpp \
     qt/lc_qcolorlist.cpp \
     qt/lc_qfinddialog.cpp \

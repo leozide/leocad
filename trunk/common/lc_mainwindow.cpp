@@ -1,5 +1,7 @@
 #include "lc_global.h"
 #include "lc_mainwindow.h"
+#include <QPrintDialog>
+#include <QPrintPreviewDialog>
 #include "lc_qglwidget.h"
 #include "lc_qpartstree.h"
 #include "lc_qcolorlist.h"

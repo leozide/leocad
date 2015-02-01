@@ -6,6 +6,7 @@
 #include <QtOpenGL>
 #include <QGLWidget>
 #include <QtGui>
+#include <QPrinter>
 
 // Old defines and declarations.
 #define LC_MAXPATH 1024

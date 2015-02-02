@@ -89,7 +89,7 @@ void lcResetCategories(lcArray<lcLibraryCategory>& Categories, bool BuiltInLibra
 	lcLoadCategories(File, Categories);
 }
 
-bool lcLoadCategories(const char* FileName, lcArray<lcLibraryCategory>& Categories)
+bool lcLoadCategories(const QString& FileName, lcArray<lcLibraryCategory>& Categories)
 {
 	lcDiskFile File;
 
@@ -128,7 +128,7 @@ bool lcLoadCategories(lcFile& File, lcArray<lcLibraryCategory>& Categories)
 	return true;
 }
 
-bool lcSaveCategories(const char* FileName, const lcArray<lcLibraryCategory>& Categories)
+bool lcSaveCategories(const QString& FileName, const lcArray<lcLibraryCategory>& Categories)
 {
 	lcDiskFile File;
 

@@ -486,6 +486,7 @@ public:
 	void CopyFrom(lcMemFile& Source);
 
 	bool Open(const char* FileName, const char* Mode);
+	bool Open(const QString& FileName, const char* Mode);
 
 	FILE* mFile;
 };

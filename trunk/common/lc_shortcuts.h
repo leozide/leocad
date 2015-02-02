@@ -17,9 +17,9 @@ void lcSaveDefaultKeyboardShortcuts();
 void lcResetDefaultKeyboardShortcuts();
 
 void lcResetKeyboardShortcuts(lcKeyboardShortcuts& Shortcuts);
-bool lcSaveKeyboardShortcuts(const char* FileName, const lcKeyboardShortcuts& Shortcuts);
+bool lcSaveKeyboardShortcuts(const QString& FileName, const lcKeyboardShortcuts& Shortcuts);
 bool lcSaveKeyboardShortcuts(lcFile& File, const lcKeyboardShortcuts& Shortcuts);
-bool lcLoadKeyboardShortcuts(const char* FileName, lcKeyboardShortcuts& Shortcuts);
+bool lcLoadKeyboardShortcuts(const QString& FileName, lcKeyboardShortcuts& Shortcuts);
 bool lcLoadKeyboardShortcuts(lcFile& File, lcKeyboardShortcuts& Shortcuts);
 
 #endif // _LC_SHORTCUTS_H_

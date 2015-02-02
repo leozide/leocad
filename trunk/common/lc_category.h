@@ -17,9 +17,9 @@ void lcLoadDefaultCategories(bool BuiltInLibrary = false);
 void lcSaveDefaultCategories();
 
 void lcResetCategories(lcArray<lcLibraryCategory>& Categories, bool BuiltInLibrary = false);
-bool lcLoadCategories(const char* FileName, lcArray<lcLibraryCategory>& Categories);
+bool lcLoadCategories(const QString& FileName, lcArray<lcLibraryCategory>& Categories);
 bool lcLoadCategories(lcFile& File, lcArray<lcLibraryCategory>& Categories);
-bool lcSaveCategories(const char* FileName, const lcArray<lcLibraryCategory>& Categories);
+bool lcSaveCategories(const QString& FileName, const lcArray<lcLibraryCategory>& Categories);
 bool lcSaveCategories(lcFile& File, const lcArray<lcLibraryCategory>& Categories);
 
 #endif // _LC_CATEGORY_H_

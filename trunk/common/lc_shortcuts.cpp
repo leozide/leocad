@@ -37,7 +37,7 @@ void lcResetKeyboardShortcuts(lcKeyboardShortcuts& Shortcuts)
 		strcpy(Shortcuts.Shortcuts[CommandIdx], gCommands[CommandIdx].DefaultShortcut);
 }
 
-bool lcSaveKeyboardShortcuts(const char* FileName, const lcKeyboardShortcuts& Shortcuts)
+bool lcSaveKeyboardShortcuts(const QString& FileName, const lcKeyboardShortcuts& Shortcuts)
 {
 	lcDiskFile File;
 
@@ -64,7 +64,7 @@ bool lcSaveKeyboardShortcuts(lcFile& File, const lcKeyboardShortcuts& Shortcuts)
 	return true;
 }
 
-bool lcLoadKeyboardShortcuts(const char* FileName, lcKeyboardShortcuts& Shortcuts)
+bool lcLoadKeyboardShortcuts(const QString& FileName, lcKeyboardShortcuts& Shortcuts)
 {
 	lcDiskFile File;
 

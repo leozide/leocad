@@ -248,6 +248,11 @@ size_t lcDiskFile::WriteBuffer(const void* pBuf, long Bytes)
 	return fwrite(pBuf, 1, Bytes, mFile);
 }
 
+bool lcDiskFile::Open(const QString& FileName, const char* Mode)
+{
+	return Open(FileName.toLatin1().constData(), Mode); // todo: qstring
+}
+
 bool lcDiskFile::Open(const char* FileName, const char* Mode)
 {
 	if (*FileName == 0)

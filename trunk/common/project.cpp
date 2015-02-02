@@ -330,7 +330,7 @@ void Project::Export3DStudio()
 
 	lcDiskFile File;
 
-	if (!File.Open(FileName.toLatin1().constData(), "wb")) // todo: qstring
+	if (!File.Open(FileName, "wb"))
 	{
 		QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Could not open file '%1' for writing.").arg(FileName));
 		return;
@@ -819,7 +819,7 @@ void Project::ExportBrickLink()
 	lcDiskFile BrickLinkFile;
 	char Line[1024];
 
-	if (!BrickLinkFile.Open(FileName.toLatin1().constData(), "wt")) // todo: qstring
+	if (!BrickLinkFile.Open(FileName, "wt"))
 	{
 		QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Could not open file '%1' for writing.").arg(FileName));
 		return;
@@ -879,7 +879,7 @@ void Project::ExportCSV()
 	lcDiskFile CSVFile;
 	char Line[1024];
 
-	if (!CSVFile.Open(FileName.toLatin1().constData(), "wt")) // todo: qstring
+	if (!CSVFile.Open(FileName, "wt"))
 	{
 		QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Could not open file '%1' for writing.").arg(FileName));
 		return;
@@ -1265,7 +1265,7 @@ void Project::ExportPOVRay()
 
 	lcDiskFile POVFile;
 
-	if (!POVFile.Open(Options.FileName.toLatin1().constData(), "wt")) // todo: qstring
+	if (!POVFile.Open(Options.FileName, "wt"))
 	{
 		QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Could not open file '%1' for writing.").arg(Options.FileName));
 		return;
@@ -1305,7 +1305,7 @@ void Project::ExportPOVRay()
 	{
 		lcDiskFile TableFile, ColorFile;
 
-		if (!TableFile.Open(QFileInfo(QDir(Options.LGEOPath), QLatin1String("lg_elements.lst")).absoluteFilePath().toLatin1().constData(), "rt"))
+		if (!TableFile.Open(QFileInfo(QDir(Options.LGEOPath), QLatin1String("lg_elements.lst")).absoluteFilePath(), "rt"))
 		{
 			delete[] PieceTable;
 			delete[] PieceFlags;
@@ -1347,7 +1347,7 @@ void Project::ExportPOVRay()
 				PieceFlags[Index] |= LGEO_PIECE_SLOPE;
 		}
 
-		if (!ColorFile.Open(QFileInfo(QDir(Options.LGEOPath), QLatin1String("lg_colors.lst")).absoluteFilePath().toLatin1().constData(), "rt"))
+		if (!ColorFile.Open(QFileInfo(QDir(Options.LGEOPath), QLatin1String("lg_colors.lst")).absoluteFilePath(), "rt"))
 		{
 			delete[] PieceTable;
 			delete[] PieceFlags;
@@ -1547,7 +1547,7 @@ void Project::ExportWavefront(const QString& FileName)
 	lcDiskFile OBJFile;
 	char Line[1024];
 
-	if (!OBJFile.Open(SaveFileName.toLatin1().constData(), "wt")) // todo: qstring
+	if (!OBJFile.Open(SaveFileName, "wt"))
 	{
 		QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Could not open file '%1' for writing.").arg(SaveFileName));
 		return;

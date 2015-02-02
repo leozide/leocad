@@ -1203,7 +1203,7 @@ void lcMainWindow::SplitView(Qt::Orientation Orientation)
 {
 	QWidget* Focus = focusWidget();
 
-	if (typeid(*Focus) != typeid(lcQGLWidget))
+	if (Focus->metaObject() != &lcQGLWidget::staticMetaObject)
 		return;
 
 	QWidget* Parent = Focus->parentWidget();
@@ -1251,7 +1251,7 @@ void lcMainWindow::RemoveActiveView()
 {
 	QWidget* Focus = focusWidget();
 
-	if (typeid(*Focus) != typeid(lcQGLWidget))
+	if (Focus->metaObject() != &lcQGLWidget::staticMetaObject)
 		return;
 
 	QWidget* Parent = Focus->parentWidget();

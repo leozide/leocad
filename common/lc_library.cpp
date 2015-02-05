@@ -2076,9 +2076,7 @@ bool lcPiecesLibrary::LoadBuiltinPieces()
 	}
 
 	lcLoadDefaultColors();
-
 	lcLoadDefaultCategories(true);
-	gMainWindow->UpdateCategories();
 
 	return true;
 }

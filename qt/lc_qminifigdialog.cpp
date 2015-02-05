@@ -185,7 +185,7 @@ int lcQMinifigDialog::getTypeIndex(QObject *widget)
 	else if (widget == ui->body2Type)
 		return LC_MFW_BODY2;
 	else if (widget == ui->body3Type)
-		return LC_MFW_BODY;
+		return LC_MFW_BODY3;
 	else if (widget == ui->rarmType)
 		return LC_MFW_RARM;
 	else if (widget == ui->larmType)

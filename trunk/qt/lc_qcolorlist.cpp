@@ -89,8 +89,9 @@ bool lcQColorList::event(QEvent *event)
 			buffer.open(QIODevice::WriteOnly);
 			image.save(&buffer, "PNG");
 
-			const char* format = "<table><tr><td style=\"vertical-align:middle\"><img height=16 src=\"data:image/png;base64,%1\"></td><td>%2</td></tr></table>";
-			QString text = QString(format).arg(QString(buffer.data().toBase64()), gColorList[mCellColors[CellIdx]].Name);
+			int colorIndex = mCellColors[CellIdx];
+			const char* format = "<table><tr><td style=\"vertical-align:middle\"><img height=16 src=\"data:image/png;base64,%1\"></td><td>%2 (%3)</td></tr></table>";
+			QString text = QString(format).arg(QString(buffer.data().toBase64()), gColorList[colorIndex].Name, QString::number(gColorList[colorIndex].Code));
 
 			QToolTip::showText(helpEvent->globalPos(), text);
 			return true;

@@ -459,15 +459,15 @@ void lcModel::LoadLDraw(QIODevice& Device)
 			int ColorCode;
 			LineStream >> ColorCode;
 
-			float Matrix[12];
+			float IncludeMatrix[12];
 			for (int TokenIdx = 0; TokenIdx < 12; TokenIdx++)
-				LineStream >> Matrix[TokenIdx];
+				LineStream >> IncludeMatrix[TokenIdx];
 
-			lcMatrix44 IncludeTransform(lcVector4(Matrix[3], Matrix[6], Matrix[9], 0.0f), lcVector4(Matrix[4], Matrix[7], Matrix[10], 0.0f),
-			                            lcVector4(Matrix[5], Matrix[8], Matrix[11], 0.0f), lcVector4(Matrix[0], Matrix[1], Matrix[2], 1.0f));
+			lcMatrix44 IncludeTransform(lcVector4(IncludeMatrix[3], IncludeMatrix[6], IncludeMatrix[9], 0.0f), lcVector4(IncludeMatrix[4], IncludeMatrix[7], IncludeMatrix[10], 0.0f),
+										lcVector4(IncludeMatrix[5], IncludeMatrix[8], IncludeMatrix[11], 0.0f), lcVector4(IncludeMatrix[0], IncludeMatrix[1], IncludeMatrix[2], 1.0f));
 
-			QString File = LineStream.readAll().trimmed();
-			QString PartID = File.toUpper();
+			QString File = LineStream.readAll().trimmed().toUpper();
+			QString PartID = File;
 
 			if (PartID.endsWith(QLatin1String(".DAT")))
 				PartID = PartID.left(PartID.size() - 4);
@@ -479,34 +479,19 @@ void lcModel::LoadLDraw(QIODevice& Device)
 				Piece->SetGroup(CurrentGroups[CurrentGroups.GetSize() - 1]);
 
 			PieceInfo* Info = lcGetPiecesLibrary()->FindPiece(PartID.toLatin1().constData(), false);
-			if (Info != NULL)
-			{
-				float* Matrix = IncludeTransform;
-				lcMatrix44 Transform(lcVector4(Matrix[0], Matrix[2], -Matrix[1], 0.0f), lcVector4(Matrix[8], Matrix[10], -Matrix[9], 0.0f),
-				                     lcVector4(-Matrix[4], -Matrix[6], Matrix[5], 0.0f), lcVector4(Matrix[12], Matrix[14], -Matrix[13], 1.0f));
 
-				Piece->SetPieceInfo(Info);
-				Piece->Initialize(Transform, CurrentStep);
-				Piece->SetColorCode(ColorCode);
-				mPieces.Add(Piece);
-				Piece = NULL;
-				continue;
-			}
+			if (!Info)
+				Info = lcGetPiecesLibrary()->FindPiece(File.toLatin1().constData(), true);
 
-			Info = lcGetPiecesLibrary()->FindPiece(PartID.toLatin1().constData(), true);
-			if (Info != NULL)
-			{
-				float* Matrix = IncludeTransform;
-				lcMatrix44 Transform(lcVector4(Matrix[0], Matrix[2], -Matrix[1], 0.0f), lcVector4(Matrix[8], Matrix[10], -Matrix[9], 0.0f),
-				                     lcVector4(-Matrix[4], -Matrix[6], Matrix[5], 0.0f), lcVector4(Matrix[12], Matrix[14], -Matrix[13], 1.0f));
+			float* Matrix = IncludeTransform;
+			lcMatrix44 Transform(lcVector4(Matrix[0], Matrix[2], -Matrix[1], 0.0f), lcVector4(Matrix[8], Matrix[10], -Matrix[9], 0.0f),
+								 lcVector4(-Matrix[4], -Matrix[6], Matrix[5], 0.0f), lcVector4(Matrix[12], Matrix[14], -Matrix[13], 1.0f));
 
-				Piece->SetPieceInfo(Info);
-				Piece->Initialize(Transform, CurrentStep);
-				Piece->SetColorCode(ColorCode);
-				mPieces.Add(Piece);
-				Piece = NULL;
-				continue;
-			}
+			Piece->SetPieceInfo(Info);
+			Piece->Initialize(Transform, CurrentStep);
+			Piece->SetColorCode(ColorCode);
+			mPieces.Add(Piece);
+			Piece = NULL;
 		}
 	}
 

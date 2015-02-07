@@ -138,9 +138,33 @@ bool GL_ExtensionSupported(const GLubyte* Extensions, const char* Name)
 	return false;
 }
 
+#ifndef QT_NO_DEBUG
+
+static void APIENTRY lcDebugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, GLvoid *userParam)
+{
+	qDebug() << message;
+}
+
+#endif
+
 void GL_InitializeSharedExtensions(lcGLWidget* Window)
 {
 	const GLubyte* Extensions = glGetString(GL_EXTENSIONS);
+
+#ifndef QT_NO_DEBUG
+	if (GL_ExtensionSupported(Extensions, "GL_KHR_debug"))
+	{
+		GLDEBUGMESSAGECALLBACKARBPROC DebugMessageCallback = (GLDEBUGMESSAGECALLBACKARBPROC)Window->GetExtensionAddress("glDebugMessageCallback");
+
+		if (DebugMessageCallback)
+		{
+			DebugMessageCallback((GLDEBUGPROCARB)&lcDebugCallback, NULL);
+			glEnable(GL_DEBUG_OUTPUT);
+			glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
+		}
+		glBegin(-1);
+	}
+#endif
 
 	if (GL_ExtensionSupported(Extensions, "GL_EXT_texture_filter_anisotropic"))
 	{

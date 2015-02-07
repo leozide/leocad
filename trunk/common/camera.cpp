@@ -784,7 +784,7 @@ void lcCamera::Zoom(float Distance, lcStep Step, bool AddKey)
 {
 	lcVector3 FrontVector(mPosition - mTargetPosition);
 	FrontVector.Normalize();
-	FrontVector *= -Distance;
+	FrontVector *= -5.0f * Distance;
 
 	// Don't zoom ortho in if it would cross the ortho focal plane.
 	if (IsOrtho())

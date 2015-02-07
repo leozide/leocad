@@ -313,7 +313,7 @@ void lcQGLWidget::wheelEvent(QWheelEvent *event)
 	widget->mInputState.Alt = (event->modifiers() & Qt::AltModifier) != 0;
 
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 2, 0))
-	int numDegrees = event->angleDelta() / 8;
+	int numDegrees = event->angleDelta().y() / 8;
 #else
 	int numDegrees = event->delta() / 8;
 #endif

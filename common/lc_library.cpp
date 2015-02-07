@@ -790,7 +790,6 @@ void lcPiecesLibrary::SaveCacheFile()
 		CacheFile.AddFile(Info->m_strName, PieceFile);
 
 		Info->mFlags |= LC_PIECE_CACHED;
-		Info->Release();
 	}
 
 	IndexFile.Seek(0, SEEK_SET);

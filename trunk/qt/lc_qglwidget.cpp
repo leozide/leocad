@@ -304,12 +304,6 @@ void lcQGLWidget::mouseMoveEvent(QMouseEvent *event)
 
 void lcQGLWidget::wheelEvent(QWheelEvent *event)
 {
-	if (event->orientation() != Qt::Vertical)
-	{
-		event->ignore();
-		return;
-	}
-
 	float scale = deviceScale();
 
 	widget->mInputState.x = event->x() * scale;
@@ -318,7 +312,11 @@ void lcQGLWidget::wheelEvent(QWheelEvent *event)
 	widget->mInputState.Shift = (event->modifiers() & Qt::ShiftModifier) != 0;
 	widget->mInputState.Alt = (event->modifiers() & Qt::AltModifier) != 0;
 
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 2, 0))
+	int numDegrees = event->angleDelta() / 8;
+#else
 	int numDegrees = event->delta() / 8;
+#endif
 	int numSteps = numDegrees / 15;
 
 	widget->OnMouseWheel(numSteps);

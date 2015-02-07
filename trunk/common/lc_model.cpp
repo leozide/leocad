@@ -3454,6 +3454,8 @@ void lcModel::ShowMinifigDialog()
 	if (!gMainWindow->DoDialog(LC_DIALOG_MINIFIG, &Minifig))
 		return;
 
+	gMainWindow->mPreviewWidget->MakeCurrent();
+
 	lcGroup* Group = AddGroup("Minifig #", NULL);
 	lcArray<lcObject*> Pieces(LC_MFW_NUMITEMS);
 

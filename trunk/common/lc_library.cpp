@@ -996,7 +996,6 @@ bool lcPiecesLibrary::LoadPiece(PieceInfo* Info)
 
 	Mesh->UpdateBuffers();
 	Info->SetMesh(Mesh);
-	Info->AddRef();
 
 	if (mZipFiles[LC_ZIPFILE_OFFICIAL])
 		mSaveCache = true;

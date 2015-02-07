@@ -1055,6 +1055,8 @@ void MinifigWizard::ParseSettings(lcFile& Settings)
 
 void MinifigWizard::OnDraw()
 {
+	mContext->SetDefaultState();
+
 	float Aspect = (float)mWidth/(float)mHeight;
 	mContext->SetViewport(0, 0, mWidth, mHeight);
 
@@ -1404,6 +1406,8 @@ int MinifigWizard::GetSelectionIndex(int Type) const
 
 void MinifigWizard::SetSelectionIndex(int Type, int Index)
 {
+	MakeCurrent();
+
 	if (mMinifig->Parts[Type])
 		mMinifig->Parts[Type]->Release();
 

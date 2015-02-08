@@ -1709,7 +1709,9 @@ bool lcMainWindow::SaveProject(const QString& FileName)
 		if (SaveFileName.isEmpty())
 			SaveFileName = QFileInfo(QDir(lcGetProfileString(LC_PROFILE_PROJECTS_PATH)), Project->GetTitle()).absoluteFilePath();
 
-		SaveFileName = QFileDialog::getSaveFileName(this, tr("Save Project"), SaveFileName, tr("Supported Files (*.ldr *.dat *.mpd);;All Files (*.*)"));
+		QString Filter = (Project->GetModels().GetSize() > 1) ? tr("Supported Files (*.mpd);;All Files (*.*)") : tr("Supported Files (*.ldr *.dat *.mpd);;All Files (*.*)");
+
+		SaveFileName = QFileDialog::getSaveFileName(this, tr("Save Project"), SaveFileName, Filter);
 
 		if (SaveFileName.isEmpty())
 			return false;
@@ -1717,7 +1719,7 @@ bool lcMainWindow::SaveProject(const QString& FileName)
 
 	if (QFileInfo(SaveFileName).suffix().toLower() == QLatin1String("lcd"))
 	{
-		QMessageBox::warning(this, tr("Error"), tr("Saving files in LCD format is no longer supported, please use the LDR format instead."));
+		QMessageBox::warning(this, tr("Error"), tr("Saving files in LCD format is no longer supported, please use the LDR or MPD formats instead."));
 		return false;
 	}
 

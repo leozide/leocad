@@ -46,11 +46,11 @@ void lcModelProperties::SaveDefaults()
 	lcSetProfileInt(LC_PROFILE_DEFAULT_AMBIENT_COLOR, lcColorFromVector3(mAmbientColor));
 }
 
-void lcModelProperties::SaveLDraw(QTextStream& Stream) const
+void lcModelProperties::SaveLDraw(QTextStream& Stream, bool MPD) const
 {
 	QLatin1String LineEnding("\r\n");
 
-	if (!mName.isEmpty())
+	if (!MPD && !mName.isEmpty())
 		Stream << QLatin1String("0 !LEOCAD MODEL NAME ") << mName << LineEnding;
 
 	if (!mAuthor.isEmpty())
@@ -257,11 +257,11 @@ void lcModel::UpdatePieceInfo(lcArray<lcModel*>& UpdatedModels)
 	mPieceInfo->m_fDimensions[5] = BoundingBox[2];
 }
 
-void lcModel::SaveLDraw(QTextStream& Stream, bool SelectedOnly) const
+void lcModel::SaveLDraw(QTextStream& Stream, bool MPD, bool SelectedOnly) const
 {
 	QLatin1String LineEnding("\r\n");
 
-	mProperties.SaveLDraw(Stream);
+	mProperties.SaveLDraw(Stream, MPD);
 
 	lcStep LastStep = GetLastStep();
 	if (mCurrentStep != LastStep)
@@ -843,7 +843,7 @@ void lcModel::Copy()
 	QByteArray File;
 	QTextStream Stream(&File, QIODevice::WriteOnly);
 
-	SaveLDraw(Stream, true);
+	SaveLDraw(Stream, false, true);
 
 	g_App->ExportClipboard(File);
 }
@@ -1177,7 +1177,7 @@ void lcModel::SaveCheckpoint(const QString& Description)
 	ModelHistoryEntry->Description = Description;
 
 	QTextStream Stream(&ModelHistoryEntry->File);
-	SaveLDraw(Stream, false);
+	SaveLDraw(Stream, false, false);
 
 	mUndoHistory.InsertAt(0, ModelHistoryEntry);
 	mRedoHistory.DeleteAll();

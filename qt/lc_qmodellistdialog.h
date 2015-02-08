@@ -25,6 +25,7 @@ public slots:
 	void on_RenameModel_clicked();
 	void on_MoveUp_clicked();
 	void on_MoveDown_clicked();
+	void on_ModelList_itemDoubleClicked(QListWidgetItem* Item);
 
 private:
 	Ui::lcQModelListDialog* ui;

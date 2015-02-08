@@ -153,3 +153,8 @@ void lcQModelListDialog::on_MoveDown_clicked()
 	ui->ModelList->insertItem(Row + 1, Item);
 	ui->ModelList->setCurrentItem(Item);
 }
+
+void lcQModelListDialog::on_ModelList_itemDoubleClicked(QListWidgetItem* Item)
+{
+	accept();
+}

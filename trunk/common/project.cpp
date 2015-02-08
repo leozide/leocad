@@ -323,7 +323,7 @@ void Project::Export3DStudio()
 		return;
 	}
 
-	QString FileName = QFileDialog::getSaveFileName(gMainWindow, tr("Export 3D Studio"), FileName, tr("3DS Files (*.3ds);;All Files (*.*)"));
+	QString FileName = QFileDialog::getSaveFileName(gMainWindow, tr("Export 3D Studio"), QString(), tr("3DS Files (*.3ds);;All Files (*.*)"));
 
 	if (FileName.isEmpty())
 		return;
@@ -811,7 +811,7 @@ void Project::ExportBrickLink()
 		return;
 	}
 
-	QString FileName = QFileDialog::getSaveFileName(gMainWindow, tr("Export BrickLink"), FileName, tr("XML Files (*.xml);;All Files (*.*)"));
+	QString FileName = QFileDialog::getSaveFileName(gMainWindow, tr("Export BrickLink"), QString(), tr("XML Files (*.xml);;All Files (*.*)"));
 
 	if (FileName.isEmpty())
 		return;
@@ -871,7 +871,7 @@ void Project::ExportCSV()
 		return;
 	}
 
-	QString FileName = QFileDialog::getSaveFileName(gMainWindow, tr("Export CSV"), FileName, tr("CSV Files (*.csv);;All Files (*.*)"));
+	QString FileName = QFileDialog::getSaveFileName(gMainWindow, tr("Export CSV"), QString(), tr("CSV Files (*.csv);;All Files (*.*)"));
 
 	if (FileName.isEmpty())
 		return;
@@ -1538,7 +1538,7 @@ void Project::ExportWavefront(const QString& FileName)
 	QString SaveFileName = FileName;
 	if (SaveFileName.isEmpty())
 	{
-		SaveFileName = QFileDialog::getSaveFileName(gMainWindow, tr("Export Wavefront"), SaveFileName, tr("Wavefront Files (*.obj);;All Files (*.*)"));
+		SaveFileName = QFileDialog::getSaveFileName(gMainWindow, tr("Export Wavefront"), QString(), tr("Wavefront Files (*.obj);;All Files (*.*)"));
 
 		if (SaveFileName.isEmpty())
 			return;

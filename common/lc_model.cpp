@@ -100,7 +100,10 @@ void lcModelProperties::ParseLDrawLine(QTextStream& Stream)
 	Stream >> Token;
 
 	if (Token == QLatin1String("NAME"))
-		mName = Stream.readAll().trimmed();
+	{
+		if (mName.isEmpty())
+			mName = Stream.readAll().trimmed();
+	}
 	else if (Token == QLatin1String("AUTHOR"))
 		Stream >> mAuthor;
 	else if (Token == QLatin1String("DESCRIPTION"))

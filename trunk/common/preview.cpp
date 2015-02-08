@@ -60,15 +60,14 @@ void PiecePreview::OnDraw()
 	mContext->SetProjectionMatrix(ProjectionMatrix);
 
 	lcScene Scene;
-	Scene.ViewMatrix = ViewMatrix;
+	Scene.Begin(ViewMatrix);
 
 	m_PieceInfo->AddRenderMeshes(Scene, lcMatrix44Identity(), gMainWindow->mColorIndex, false, false);
 
-	Scene.OpaqueMeshes.Sort(lcOpaqueRenderMeshCompare);
-	Scene.TranslucentMeshes.Sort(lcTranslucentRenderMeshCompare);
+	Scene.End();
 
-	mContext->DrawOpaqueMeshes(ViewMatrix, Scene.OpaqueMeshes);
-	mContext->DrawTranslucentMeshes(ViewMatrix, Scene.TranslucentMeshes);
+	mContext->DrawOpaqueMeshes(ViewMatrix, Scene.mOpaqueMeshes);
+	mContext->DrawTranslucentMeshes(ViewMatrix, Scene.mTranslucentMeshes);
 
 	mContext->UnbindMesh(); // context remove
 }

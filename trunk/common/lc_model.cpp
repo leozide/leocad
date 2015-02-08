@@ -875,12 +875,7 @@ void lcModel::Paste()
 
 void lcModel::GetScene(lcScene& Scene, lcCamera* ViewCamera, bool DrawInterface) const
 {
-	Scene.ViewMatrix = ViewCamera->mWorldView;
-	Scene.OpaqueMeshes.RemoveAll();
-	Scene.OpaqueMeshes.AllocGrow(mPieces.GetSize());
-	Scene.TranslucentMeshes.RemoveAll();
-	Scene.TranslucentMeshes.AllocGrow(mPieces.GetSize());
-	Scene.InterfaceObjects.RemoveAll();
+	Scene.Begin(ViewCamera->mWorldView);
 
 	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 	{
@@ -906,7 +901,7 @@ void lcModel::GetScene(lcScene& Scene, lcCamera* ViewCamera, bool DrawInterface)
 		Info->AddRenderMeshes(Scene, Piece->mModelWorld, Piece->mColorIndex, Focused, Selected);
 
 		if (Selected)
-			Scene.InterfaceObjects.Add(Piece);
+			Scene.mInterfaceObjects.Add(Piece);
 	}
 
 	if (DrawInterface)
@@ -916,7 +911,7 @@ void lcModel::GetScene(lcScene& Scene, lcCamera* ViewCamera, bool DrawInterface)
 			lcCamera* Camera = mCameras[CameraIdx];
 
 			if (Camera != ViewCamera && Camera->IsVisible())
-				Scene.InterfaceObjects.Add(Camera);
+				Scene.mInterfaceObjects.Add(Camera);
 		}
 
 		for (int LightIdx = 0; LightIdx < mLights.GetSize(); LightIdx++)
@@ -924,12 +919,11 @@ void lcModel::GetScene(lcScene& Scene, lcCamera* ViewCamera, bool DrawInterface)
 			lcLight* Light = mLights[LightIdx];
 
 			if (Light->IsVisible())
-				Scene.InterfaceObjects.Add(Light);
+				Scene.mInterfaceObjects.Add(Light);
 		}
 	}
 
-	Scene.OpaqueMeshes.Sort(lcOpaqueRenderMeshCompare);
-	Scene.TranslucentMeshes.Sort(lcTranslucentRenderMeshCompare);
+	Scene.End();
 }
 
 void lcModel::SubModelAddRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, int DefaultColorIndex, bool Focused, bool Selected) const

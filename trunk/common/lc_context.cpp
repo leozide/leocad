@@ -5,6 +5,52 @@
 #include "lc_colors.h"
 #include "lc_mainwindow.h"
 
+static int lcOpaqueRenderMeshCompare(const void* Elem1, const void* Elem2)
+{
+	lcRenderMesh* Mesh1 = (lcRenderMesh*)Elem1;
+	lcRenderMesh* Mesh2 = (lcRenderMesh*)Elem2;
+
+	if (Mesh1->Mesh < Mesh2->Mesh)
+		return -1;
+
+	if (Mesh1->Mesh > Mesh2->Mesh)
+		return 1;
+
+	return 0;
+}
+
+static int lcTranslucentRenderMeshCompare(const void* Elem1, const void* Elem2)
+{
+	lcRenderMesh* Mesh1 = (lcRenderMesh*)Elem1;
+	lcRenderMesh* Mesh2 = (lcRenderMesh*)Elem2;
+
+	if (Mesh1->Distance < Mesh2->Distance)
+		return -1;
+
+	if (Mesh1->Distance > Mesh2->Distance)
+		return 1;
+
+	return 0;
+}
+
+lcScene::lcScene()
+	: mOpaqueMeshes(0, 1024), mTranslucentMeshes(0, 1024), mInterfaceObjects(0, 1024)
+{
+}
+
+void lcScene::Begin(const lcMatrix44& ViewMatrix)
+{
+	mOpaqueMeshes.RemoveAll();
+	mTranslucentMeshes.RemoveAll();
+	mInterfaceObjects.RemoveAll();
+}
+
+void lcScene::End()
+{
+	qsort(&mOpaqueMeshes[0], mOpaqueMeshes.GetSize(), sizeof(mOpaqueMeshes[0]), lcOpaqueRenderMeshCompare);
+	qsort(&mTranslucentMeshes[0], mTranslucentMeshes.GetSize(), sizeof(mTranslucentMeshes[0]), lcTranslucentRenderMeshCompare);
+}
+
 lcContext::lcContext()
 {
 	mVertexBufferObject = 0;

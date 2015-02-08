@@ -129,6 +129,7 @@ protected:
 	void StartTracking(lcTrackButton TrackButton);
 	void StopTracking(bool Accept);
 
+	lcScene mScene;
 	lcDragState mDragState;
 	lcTrackButton mTrackButton;
 	lcTrackTool mTrackTool;

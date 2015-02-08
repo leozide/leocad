@@ -169,14 +169,11 @@ struct lcRenderMesh
 {
 	lcMatrix44 WorldMatrix;
 	lcMesh* Mesh;
-	int ColorIndex;
 	float Distance;
+	int ColorIndex;
 	bool Focused;
 	bool Selected;
 };
-
-int lcTranslucentRenderMeshCompare(const lcRenderMesh& a, const lcRenderMesh& b);
-int lcOpaqueRenderMeshCompare(const lcRenderMesh& a, const lcRenderMesh& b);
 
 extern lcMesh* gPlaceholderMesh;
 

@@ -63,7 +63,7 @@ class lcMesh;
 struct lcMeshSection;
 struct lcRenderMesh;
 class lcTexture;
-struct lcScene;
+class lcScene;
 
 class lcFile;
 class lcMemFile;

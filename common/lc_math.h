@@ -576,17 +576,14 @@ inline lcMatrix33 lcMul(const lcMatrix33& a, const lcMatrix33& b)
 
 inline lcMatrix44 lcMul(const lcMatrix44& a, const lcMatrix44& b)
 {
-	lcVector4 Col0(b.r[0][0], b.r[1][0], b.r[2][0], b.r[3][0]);
-	lcVector4 Col1(b.r[0][1], b.r[1][1], b.r[2][1], b.r[3][1]);
-	lcVector4 Col2(b.r[0][2], b.r[1][2], b.r[2][2], b.r[3][2]);
-	lcVector4 Col3(b.r[0][3], b.r[1][3], b.r[2][3], b.r[3][3]);
+	lcMatrix44 Result;
 
-	lcVector4 Ret0(lcDot(a.r[0], Col0), lcDot(a.r[0], Col1), lcDot(a.r[0], Col2), lcDot(a.r[0], Col3));
-	lcVector4 Ret1(lcDot(a.r[1], Col0), lcDot(a.r[1], Col1), lcDot(a.r[1], Col2), lcDot(a.r[1], Col3));
-	lcVector4 Ret2(lcDot(a.r[2], Col0), lcDot(a.r[2], Col1), lcDot(a.r[2], Col2), lcDot(a.r[2], Col3));
-	lcVector4 Ret3(lcDot(a.r[3], Col0), lcDot(a.r[3], Col1), lcDot(a.r[3], Col2), lcDot(a.r[3], Col3));
+	Result.r[0] = b.r[0] * a[0].x + b.r[1] * a[0].y + b.r[2] * a[0].z + b.r[3] * a[0].w;
+	Result.r[1] = b.r[0] * a[1].x + b.r[1] * a[1].y + b.r[2] * a[1].z + b.r[3] * a[1].w;
+	Result.r[2] = b.r[0] * a[2].x + b.r[1] * a[2].y + b.r[2] * a[2].z + b.r[3] * a[2].w;
+	Result.r[3] = b.r[0] * a[3].x + b.r[1] * a[3].y + b.r[2] * a[3].z + b.r[3] * a[3].w;
 
-	return lcMatrix44(Ret0, Ret1, Ret2, Ret3);
+	return Result;
 }
 
 inline lcMatrix33::lcMatrix33(const lcMatrix44& Matrix)

@@ -4,12 +4,18 @@
 #include "lc_array.h"
 #include "lc_math.h"
 
-struct lcScene
+class lcScene
 {
-	lcMatrix44 ViewMatrix;
-	lcArray<lcRenderMesh> OpaqueMeshes;
-	lcArray<lcRenderMesh> TranslucentMeshes;
-	lcArray<lcObject*> InterfaceObjects;
+public:
+	lcScene();
+
+	void Begin(const lcMatrix44& ViewMatrix);
+	void End();
+
+	lcMatrix44 mViewMatrix;
+	lcArray<lcRenderMesh> mOpaqueMeshes;
+	lcArray<lcRenderMesh> mTranslucentMeshes;
+	lcArray<lcObject*> mInterfaceObjects;
 };
 
 class lcContext

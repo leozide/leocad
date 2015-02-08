@@ -1218,15 +1218,14 @@ void Project::ExportHTML()
 			Info->ZoomExtents(ProjectionMatrix, ViewMatrix, CameraPosition);
 
 			lcScene Scene;
-			Scene.ViewMatrix = ViewMatrix;
+			Scene.Begin(ViewMatrix);
 
 			Info->AddRenderMeshes(Scene, lcMatrix44Identity(), Options.PartImagesColor, false, false);
 
-			Scene.OpaqueMeshes.Sort(lcOpaqueRenderMeshCompare);
-			Scene.TranslucentMeshes.Sort(lcTranslucentRenderMeshCompare);
+			Scene.End();
 
-			Context->DrawOpaqueMeshes(ViewMatrix, Scene.OpaqueMeshes);
-			Context->DrawTranslucentMeshes(ViewMatrix, Scene.TranslucentMeshes);
+			Context->DrawOpaqueMeshes(ViewMatrix, Scene.mOpaqueMeshes);
+			Context->DrawTranslucentMeshes(ViewMatrix, Scene.mTranslucentMeshes);
 
 			Context->UnbindMesh(); // context remove
 

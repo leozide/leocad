@@ -350,15 +350,14 @@ void View::OnDraw()
 {
 	bool DrawInterface = mWidget != NULL;
 
-	lcScene Scene;
-	mModel->GetScene(Scene, mCamera, DrawInterface);
+	mModel->GetScene(mScene, mCamera, DrawInterface);
 
 	if (DrawInterface && mTrackTool == LC_TRACKTOOL_INSERT)
 	{
 		PieceInfo* Info = gMainWindow->mPreviewWidget->GetCurrentPiece();
 
 		if (Info)
-			Info->AddRenderMeshes(Scene, GetPieceInsertPosition(), gMainWindow->mColorIndex, true, true);
+			Info->AddRenderMeshes(mScene, GetPieceInsertPosition(), gMainWindow->mColorIndex, true, true);
 	}
 
 	mContext->SetDefaultState();
@@ -405,8 +404,8 @@ void View::OnDraw()
 	}
 
 	const lcMatrix44& ViewMatrix = mCamera->mWorldView;
-	mContext->DrawOpaqueMeshes(ViewMatrix, Scene.OpaqueMeshes);
-	mContext->DrawTranslucentMeshes(ViewMatrix, Scene.TranslucentMeshes);
+	mContext->DrawOpaqueMeshes(ViewMatrix, mScene.mOpaqueMeshes);
+	mContext->DrawTranslucentMeshes(ViewMatrix, mScene.mTranslucentMeshes);
 
 	mContext->UnbindMesh(); // context remove
 
@@ -422,7 +421,7 @@ void View::OnDraw()
 
 	if (DrawInterface)
 	{
-		mContext->DrawInterfaceObjects(ViewMatrix, Scene.InterfaceObjects);
+		mContext->DrawInterfaceObjects(ViewMatrix, mScene.mInterfaceObjects);
 
 		mContext->SetLineWidth(Preferences.mLineWidth); // context remove
 

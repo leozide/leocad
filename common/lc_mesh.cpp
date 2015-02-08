@@ -362,19 +362,3 @@ void lcMesh::FileSave(lcFile& File)
 	else
 		File.WriteU32((lcuint32*)mIndexBuffer.mData, mIndexBuffer.mSize / 4);
 }
-
-int lcTranslucentRenderMeshCompare(const lcRenderMesh& a, const lcRenderMesh& b)
-{
-	if (a.Distance > b.Distance)
-		return 1;
-	else
-		return -1;
-}
-
-int lcOpaqueRenderMeshCompare(const lcRenderMesh& a, const lcRenderMesh& b)
-{
-	if (a.Mesh > b.Mesh)
-		return 1;
-	else
-		return -1;
-}

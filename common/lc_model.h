@@ -54,7 +54,7 @@ public:
 		return true;
 	}
 
-	void SaveLDraw(QTextStream& Stream) const;
+	void SaveLDraw(QTextStream& Stream, bool MPD) const;
 	void ParseLDrawLine(QTextStream& Stream);
 
 	QString mName;
@@ -200,7 +200,7 @@ public:
 	void RemoveFocusPieceFromGroup();
 	void ShowEditGroupsDialog();
 
-	void SaveLDraw(QTextStream& Stream, bool SelectedOnly) const;
+	void SaveLDraw(QTextStream& Stream, bool MPD, bool SelectedOnly) const;
 	void LoadLDraw(QIODevice& Device);
 	bool LoadBinary(lcFile* File);
 	void Merge(lcModel* Other);

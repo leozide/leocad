@@ -281,7 +281,7 @@ public:
 	void EraserToolClicked(lcObject* Object);
 	void PaintToolClicked(lcObject* Object);
 	void UpdateZoomTool(lcCamera* Camera, float Mouse);
-	void UpdatePanTool(lcCamera* Camera, float MouseX, float MouseY);
+	void UpdatePanTool(lcCamera* Camera, const lcVector3& Distance);
 	void UpdateOrbitTool(lcCamera* Camera, float MouseX, float MouseY);
 	void UpdateRollTool(lcCamera* Camera, float Mouse);
 	void ZoomRegionToolClicked(lcCamera* Camera, const lcVector3* Points, float RatioX, float RatioY);

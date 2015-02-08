@@ -805,15 +805,11 @@ void lcCamera::Zoom(float Distance, lcStep Step, bool AddKey)
 	UpdatePosition(Step);
 }
 
-void lcCamera::Pan(float DistanceX, float DistanceY, lcStep Step, bool AddKey)
+void lcCamera::Pan(const lcVector3& Distance, lcStep Step, bool AddKey)
 {
-	lcVector3 FrontVector(mPosition - mTargetPosition);
-	lcVector3 SideVector = lcNormalize(lcCross(FrontVector, mUpVector));
-
-	lcVector3 MoveVec = (SideVector * DistanceX) + (mUpVector * -DistanceY);
-	mPosition += MoveVec;
-	mTargetPosition += MoveVec;
-	mOrthoTarget += MoveVec;
+	mPosition += Distance;
+	mTargetPosition += Distance;
+	mOrthoTarget += Distance;
 
 	if (IsSimple())
 		AddKey = false;

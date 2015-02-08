@@ -2390,7 +2390,35 @@ void View::OnMouseMove()
 		break;
 
 	case LC_TRACKTOOL_PAN:
-		mModel->UpdatePanTool(mCamera, 2.0f * MouseSensitivity * (mInputState.x - mMouseDownX), 2.0f * MouseSensitivity * (mInputState.y - mMouseDownY));
+		{
+			lcVector3 Points[4] =
+			{
+				lcVector3((float)mInputState.x, (float)mInputState.y, 0.0f),
+				lcVector3((float)mInputState.x, (float)mInputState.y, 1.0f),
+				lcVector3(mMouseDownX, mMouseDownY, 0.0f),
+				lcVector3(mMouseDownX, mMouseDownY, 1.0f)
+			};
+
+			UnprojectPoints(Points, 4);
+
+			const lcVector3& CurrentStart = Points[0];
+			const lcVector3& CurrentEnd = Points[1];
+			const lcVector3& MouseDownStart = Points[2];
+			const lcVector3& MouseDownEnd = Points[3];
+			lcVector3 Center = mModel->GetFocusOrSelectionCenter();
+
+			lcVector3 PlaneNormal(mCamera->mPosition - mCamera->mTargetPosition);
+			lcVector4 Plane(PlaneNormal, -lcDot(PlaneNormal, Center));
+			lcVector3 Intersection;
+
+			if (lcLinePlaneIntersection(&Intersection, CurrentStart, CurrentEnd, Plane))
+			{
+				lcVector3 MoveStart;
+
+				if (lcLinePlaneIntersection(&MoveStart, MouseDownStart, MouseDownEnd, Plane))
+					mModel->UpdatePanTool(mCamera, MoveStart - Intersection);
+			}
+		}
 		break;
 
 	case LC_TRACKTOOL_ORBIT_X:

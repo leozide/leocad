@@ -1687,6 +1687,8 @@ void lcMainWindow::MergeProject()
 			QMessageBox::information(this, tr("LeoCAD"), tr("Merged 1 model."));
 		else
 			QMessageBox::information(this, tr("LeoCAD"), tr("Merged %1 models.").arg(NumModels));
+
+		UpdateModels();
 	}
 	else
 	{

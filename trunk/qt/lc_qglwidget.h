@@ -42,6 +42,8 @@ protected:
 	void dragLeaveEvent(QDragLeaveEvent *event);
 	void dragMoveEvent(QDragMoveEvent *event);
 	void dropEvent(QDropEvent *event);
+
+	int mWheelAccumulator;
 };
 
 #endif // _LC_VIEWWIDGET_H_

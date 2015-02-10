@@ -116,6 +116,7 @@ void lcGLWidget::SetCursor(LC_CURSOR_TYPE CursorType)
 lcQGLWidget::lcQGLWidget(QWidget *parent, lcQGLWidget *share, lcGLWidget *owner, bool view)
 	: QGLWidget(parent, share)
 {
+	mWheelAccumulator = 0;
 	widget = owner;
 	widget->mWidget = this;
 
@@ -304,6 +305,12 @@ void lcQGLWidget::mouseMoveEvent(QMouseEvent *event)
 
 void lcQGLWidget::wheelEvent(QWheelEvent *event)
 {
+	if ((event->orientation() & Qt::Vertical) == 0)
+	{
+		event->ignore();
+		return;
+	}
+
 	float scale = deviceScale();
 
 	widget->mInputState.x = event->x() * scale;
@@ -313,13 +320,17 @@ void lcQGLWidget::wheelEvent(QWheelEvent *event)
 	widget->mInputState.Alt = (event->modifiers() & Qt::AltModifier) != 0;
 
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 2, 0))
-	int numDegrees = event->angleDelta().y() / 8;
+	mWheelAccumulator += event->angleDelta().y() / 8;
 #else
-	int numDegrees = event->delta() / 8;
+	mWheelAccumulator += event->delta() / 8;
 #endif
-	int numSteps = numDegrees / 15;
+	int numSteps = mWheelAccumulator / 15;
 
-	widget->OnMouseWheel(numSteps);
+	if (numSteps)
+	{
+		widget->OnMouseWheel(numSteps);
+		mWheelAccumulator -= numSteps * 15;
+	}
 
 	event->accept();
 }

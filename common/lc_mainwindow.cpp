@@ -75,9 +75,11 @@ void lcMainWindow::CreateWidgets()
 	QGridLayout* CentralLayout = new QGridLayout(CentralFrame);
 	CentralLayout->setContentsMargins(0, 0, 0, 0);
 
-	QWidget* ViewWidget = new lcQGLWidget(CentralFrame, mPiecePreviewWidget, new View(NULL), true);
+	View* NewView = new View(NULL);
+	QWidget* ViewWidget = new lcQGLWidget(CentralFrame, mPiecePreviewWidget, NewView, true);
 	CentralLayout->addWidget(ViewWidget, 0, 0, 1, 1);
 	ViewWidget->setFocus();
+	SetActiveView(NewView);
 
 	connect(QApplication::clipboard(), SIGNAL(dataChanged()), this, SLOT(ClipboardChanged()));
 	ClipboardChanged();

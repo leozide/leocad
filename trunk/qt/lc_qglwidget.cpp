@@ -387,6 +387,7 @@ void lcQGLWidget::dropEvent(QDropEvent *event)
 		return;
 
 	((View*)widget)->EndPieceDrag(true);
+	setFocus(Qt::MouseFocusReason);
 
 	event->accept();
 }

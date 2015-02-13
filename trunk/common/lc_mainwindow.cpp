@@ -77,6 +77,7 @@ void lcMainWindow::CreateWidgets()
 
 	QWidget* ViewWidget = new lcQGLWidget(CentralFrame, mPiecePreviewWidget, new View(NULL), true);
 	CentralLayout->addWidget(ViewWidget, 0, 0, 1, 1);
+	ViewWidget->setFocus();
 
 	connect(QApplication::clipboard(), SIGNAL(dataChanged()), this, SLOT(ClipboardChanged()));
 	ClipboardChanged();
@@ -2020,11 +2021,11 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		break;
 
 	case LC_VIEW_ZOOM_IN:
-		lcGetActiveModel()->Zoom(mActiveView->mCamera, -10.0f);
+		lcGetActiveModel()->Zoom(mActiveView->mCamera, 10.0f);
 		break;
 
 	case LC_VIEW_ZOOM_OUT:
-		lcGetActiveModel()->Zoom(mActiveView->mCamera, 10.0f);
+		lcGetActiveModel()->Zoom(mActiveView->mCamera, -10.0f);
 		break;
 
 	case LC_VIEW_ZOOM_EXTENTS:

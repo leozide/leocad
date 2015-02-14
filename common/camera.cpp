@@ -739,7 +739,7 @@ void lcCamera::ZoomExtents(float Aspect, const lcVector3& Center, const lcVector
 {
 	lcVector3 Position(mPosition + Center - mTargetPosition);
 
-	lcMatrix44 Projection = lcMatrix44Perspective(m_fovy, Aspect, m_zNear, m_zFar);
+	lcMatrix44 Projection = lcMatrix44Perspective(m_fovy, Aspect, m_zNear, m_zFar); // todo: doesn't work on ortho cameras, and review all places where lcMatrix44Perspective is called
 
 	mPosition = lcZoomExtents(Position, mWorldView, Projection, Points, NumPoints);
 	mTargetPosition = Center;
@@ -754,23 +754,14 @@ void lcCamera::ZoomExtents(float Aspect, const lcVector3& Center, const lcVector
 	UpdatePosition(Step);
 }
 
-void lcCamera::ZoomRegion(const lcVector3* Points, float RatioX, float RatioY, lcStep Step, bool AddKey)
+void lcCamera::ZoomRegion(const lcMatrix44& ProjectionMatrix, const lcVector3& Position, const lcVector3& TargetPosition, const lcVector3* Corners, lcStep Step, bool AddKey)
 {
-	// Center camera.
-	lcVector3 Eye = mPosition;
-	Eye = Eye + (Points[0] - Points[1]);
+	lcMatrix44 WorldView = lcMatrix44LookAt(Position, TargetPosition, mUpVector);
 
-	lcVector3 Target = mTargetPosition;
-	Target = Target + (Points[0] - Points[1]);
+	mPosition = lcZoomExtents(Position, WorldView, ProjectionMatrix, Corners, 2);
+	mTargetPosition = TargetPosition;
+	mOrthoTarget = TargetPosition;
 
-	// Zoom in/out.
-	float ZoomFactor = -lcMax(RatioX, RatioY) + 0.75f;
-
-	lcVector3 Dir = Points[1] - Points[2];
-	mPosition = Eye + Dir * ZoomFactor;
-	mTargetPosition = Target + Dir * ZoomFactor;
-
-	// Change the camera and redraw.
 	if (IsSimple())
 		AddKey = false;
 

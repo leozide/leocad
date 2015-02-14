@@ -1922,19 +1922,29 @@ void View::StopTracking(bool Accept)
 
 	case LC_TOOL_ZOOM_REGION:
 		{
-			lcVector3 Points[3] =
+			if (mInputState.x == mMouseDownX || mInputState.y == mMouseDownY)
+				break;
+
+			lcVector3 Points[6] =
 			{
-				lcVector3((mMouseDownX + lcMin(mInputState.x, mWidth - 1)) / 2, (mMouseDownY + lcMin(mInputState.y, mHeight - 1)) / 2, 0.9f),
-				lcVector3((float)mWidth / 2.0f, (float)mHeight / 2.0f, 0.9f),
-				lcVector3((float)mWidth / 2.0f, (float)mHeight / 2.0f, 0.1f),
+				lcVector3((mMouseDownX + lcMin(mInputState.x, mWidth - 1)) / 2, (mMouseDownY + lcMin(mInputState.y, mHeight - 1)) / 2, 0.0f),
+				lcVector3((mMouseDownX + lcMin(mInputState.x, mWidth - 1)) / 2, (mMouseDownY + lcMin(mInputState.y, mHeight - 1)) / 2, 1.0f),
+				lcVector3((float)mInputState.x, (float)mInputState.y, 0.0f),
+				lcVector3((float)mInputState.x, (float)mInputState.y, 1.0f),
+				lcVector3(mMouseDownX, mMouseDownY, 0.0f),
+				lcVector3(mMouseDownX, mMouseDownY, 1.0f)
 			};
 
-			UnprojectPoints(Points, 3);
+			UnprojectPoints(Points, 5);
 
-			float RatioX = (mMouseDownX - mInputState.x) / mWidth;
-			float RatioY = (mMouseDownY - mInputState.y) / mHeight;
+			lcVector3 Center = mModel->GetSelectionOrModelCenter();
 
-			mModel->ZoomRegionToolClicked(mCamera, Points, fabsf(RatioX), fabsf(RatioY));
+			lcVector3 PlaneNormal(mCamera->mPosition - mCamera->mTargetPosition);
+			lcVector4 Plane(PlaneNormal, -lcDot(PlaneNormal, Center));
+			lcVector3 Target, Corners[2];
+
+			if (lcLinePlaneIntersection(&Target, Points[0], Points[1], Plane) && lcLinePlaneIntersection(&Corners[0], Points[2], Points[3], Plane) && lcLinePlaneIntersection(&Corners[1], Points[3], Points[4], Plane))
+				mModel->ZoomRegionToolClicked(mCamera, GetProjectionMatrix(), Points[0], Target, Corners);
 		}
 		break;
 	}
@@ -2405,7 +2415,7 @@ void View::OnMouseMove()
 			const lcVector3& CurrentEnd = Points[1];
 			const lcVector3& MouseDownStart = Points[2];
 			const lcVector3& MouseDownEnd = Points[3];
-			lcVector3 Center = mModel->GetFocusOrSelectionCenter();
+			lcVector3 Center = mModel->GetSelectionOrModelCenter();
 
 			lcVector3 PlaneNormal(mCamera->mPosition - mCamera->mTargetPosition);
 			lcVector4 Plane(PlaneNormal, -lcDot(PlaneNormal, Center));

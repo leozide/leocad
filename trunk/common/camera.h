@@ -263,7 +263,7 @@ public:
 	void CopyPosition(const lcCamera* camera);
 
 	void ZoomExtents(float Aspect, const lcVector3& Center, const lcVector3* Points, int NumPoints, lcStep Step, bool AddKey);
-	void ZoomRegion(const lcVector3* Points, float RatioX, float RatioY, lcStep Step, bool AddKey);
+	void ZoomRegion(const lcMatrix44& ProjectionMatrix, const lcVector3& Position, const lcVector3& TargetPosition, const lcVector3* Corners, lcStep Step, bool AddKey);
 	void Zoom(float Distance, lcStep Step, bool AddKey);
 	void Pan(const lcVector3& Distance, lcStep Step, bool AddKey);
 	void Orbit(float DistanceX, float DistanceY, const lcVector3& CenterPosition, lcStep Step, bool AddKey);

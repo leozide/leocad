@@ -2473,6 +2473,23 @@ lcVector3 lcModel::GetFocusOrSelectionCenter() const
 	return Center;
 }
 
+lcVector3 lcModel::GetSelectionOrModelCenter() const
+{
+	lcVector3 Center;
+
+	if (!GetSelectionCenter(Center))
+	{
+		float BoundingBox[6];
+
+		if (GetPiecesBoundingBox(BoundingBox))
+			Center = lcVector3((BoundingBox[0] + BoundingBox[3]) / 2, (BoundingBox[1] + BoundingBox[4]) / 2, (BoundingBox[2] + BoundingBox[5]) / 2);
+		else
+			Center = lcVector3(0.0f, 0.0f, 0.0f);
+	}
+
+	return Center;
+}
+
 bool lcModel::GetFocusPosition(lcVector3& Position) const
 {
 	lcObject* FocusObject = GetFocusObject();
@@ -3250,9 +3267,9 @@ void lcModel::UpdateRollTool(lcCamera* Camera, float Mouse)
 	gMainWindow->UpdateAllViews();
 }
 
-void lcModel::ZoomRegionToolClicked(lcCamera* Camera, const lcVector3* Points, float RatioX, float RatioY)
+void lcModel::ZoomRegionToolClicked(lcCamera* Camera, const lcMatrix44& ProjectionMatrix, const lcVector3& Position, const lcVector3& TargetPosition, const lcVector3* Corners)
 {
-	Camera->ZoomRegion(Points, RatioX, RatioY, mCurrentStep, gMainWindow->GetAddKeys());
+	Camera->ZoomRegion(ProjectionMatrix, Position, TargetPosition, Corners, mCurrentStep, gMainWindow->GetAddKeys());
 
 	gMainWindow->UpdateFocusObject(GetFocusObject());
 	gMainWindow->UpdateAllViews();

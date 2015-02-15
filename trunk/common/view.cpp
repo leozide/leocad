@@ -128,16 +128,10 @@ lcMatrix44 View::GetProjectionMatrix() const
 
 	if (mCamera->IsOrtho())
 	{
-		// Compute the FOV/plane intersection radius.
-		//                d               d
-		//   a = 2 atan(------) => ~ a = --- => d = af
-		//                2f              f
-		float f = (mCamera->mPosition - mCamera->mOrthoTarget).Length();
-		float d = (mCamera->m_fovy * f) * (LC_PI / 180.0f);
-		float r = d / 2;
+		float OrthoHeight = mCamera->GetOrthoHeight() / 2.0f;
+		float OrthoWidth = OrthoHeight * AspectRatio;
 
-		float right = r * AspectRatio;
-		return lcMatrix44Ortho(-right, right, -r, r, mCamera->m_zNear, mCamera->m_zFar * 4);
+		return lcMatrix44Ortho(-OrthoWidth, OrthoWidth, -OrthoHeight, OrthoHeight, mCamera->m_zNear, mCamera->m_zFar * 4);
 	}
 	else
 		return lcMatrix44Perspective(mCamera->m_fovy, AspectRatio, mCamera->m_zNear, mCamera->m_zFar);
@@ -1944,7 +1938,10 @@ void View::StopTracking(bool Accept)
 			lcVector3 Target, Corners[2];
 
 			if (lcLinePlaneIntersection(&Target, Points[0], Points[1], Plane) && lcLinePlaneIntersection(&Corners[0], Points[2], Points[3], Plane) && lcLinePlaneIntersection(&Corners[1], Points[3], Points[4], Plane))
-				mModel->ZoomRegionToolClicked(mCamera, GetProjectionMatrix(), Points[0], Target, Corners);
+			{
+				float AspectRatio = (float)mWidth / (float)mHeight;
+				mModel->ZoomRegionToolClicked(mCamera, AspectRatio, Points[0], Target, Corners);
+			}
 		}
 		break;
 	}

@@ -247,6 +247,16 @@ public:
 		ChangeKey(mPositionKeys, UpVector, Step, AddKey);
 	}
 
+	float GetOrthoHeight() const
+	{
+		// Compute the FOV/plane intersection radius.
+		//                d               d
+		//   a = 2 atan(------) => ~ a = --- => d = af
+		//                2f              f
+		float f = (mPosition - mTargetPosition).Length();
+		return (m_fovy * f) * (LC_PI / 180.0f);
+	}
+
 public:
 	virtual void RayTest(lcObjectRayTest& ObjectRayTest) const;
 	virtual void BoxTest(lcObjectBoxTest& ObjectBoxTest) const;
@@ -262,8 +272,8 @@ public:
 	void UpdatePosition(lcStep Step);
 	void CopyPosition(const lcCamera* camera);
 
-	void ZoomExtents(float Aspect, const lcVector3& Center, const lcVector3* Points, int NumPoints, lcStep Step, bool AddKey);
-	void ZoomRegion(const lcMatrix44& ProjectionMatrix, const lcVector3& Position, const lcVector3& TargetPosition, const lcVector3* Corners, lcStep Step, bool AddKey);
+	void ZoomExtents(float AspectRatio, const lcVector3& Center, const lcVector3* Points, int NumPoints, lcStep Step, bool AddKey);
+	void ZoomRegion(float AspectRatio, const lcVector3& Position, const lcVector3& TargetPosition, const lcVector3* Corners, lcStep Step, bool AddKey);
 	void Zoom(float Distance, lcStep Step, bool AddKey);
 	void Pan(const lcVector3& Distance, lcStep Step, bool AddKey);
 	void Orbit(float DistanceX, float DistanceY, const lcVector3& CenterPosition, lcStep Step, bool AddKey);
@@ -271,7 +281,6 @@ public:
 	void Center(lcVector3& point, lcStep Step, bool AddKey);
 	void Move(lcStep Step, bool AddKey, const lcVector3& Distance);
 	void SetViewpoint(lcViewpoint Viewpoint);
-	void SetFocalPoint(const lcVector3& focus, lcStep Step, bool AddKey);
 
 	void StartTiledRendering(int tw, int th, int iw, int ih, float fAspect);
 	void GetTileInfo(int* row, int* col, int* width, int* height);
@@ -287,7 +296,6 @@ public:
 	lcVector3 mPosition;
 	lcVector3 mTargetPosition;
 	lcVector3 mUpVector;
-	lcVector3 mOrthoTarget;
 	TiledRender* m_pTR;
 
 protected:

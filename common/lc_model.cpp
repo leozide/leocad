@@ -3267,9 +3267,9 @@ void lcModel::UpdateRollTool(lcCamera* Camera, float Mouse)
 	gMainWindow->UpdateAllViews();
 }
 
-void lcModel::ZoomRegionToolClicked(lcCamera* Camera, const lcMatrix44& ProjectionMatrix, const lcVector3& Position, const lcVector3& TargetPosition, const lcVector3* Corners)
+void lcModel::ZoomRegionToolClicked(lcCamera* Camera, float AspectRatio, const lcVector3& Position, const lcVector3& TargetPosition, const lcVector3* Corners)
 {
-	Camera->ZoomRegion(ProjectionMatrix, Position, TargetPosition, Corners, mCurrentStep, gMainWindow->GetAddKeys());
+	Camera->ZoomRegion(AspectRatio, Position, TargetPosition, Corners, mCurrentStep, gMainWindow->GetAddKeys());
 
 	gMainWindow->UpdateFocusObject(GetFocusObject());
 	gMainWindow->UpdateAllViews();

@@ -113,6 +113,7 @@ void lcQColorPicker::buttonPressed(bool toggled)
 	connect(popup, SIGNAL(changed(int)), SLOT(changed(int)));
 	connect(popup, SIGNAL(selected(int)), SLOT(selected(int)));
 	connect(popup, SIGNAL(hid()), SLOT(popupClosed()));
+	popup->setMinimumSize(300, 200);
 
 	const QRect desktop = QApplication::desktop()->geometry();
 
@@ -122,10 +123,10 @@ void lcQColorPicker::buttonPressed(bool toggled)
 	if (pos.y() < desktop.top())
 		pos.setY(desktop.top());
 
-	if ((pos.x() + popup->sizeHint().width()) > desktop.width())
-		pos.setX(desktop.width() - popup->sizeHint().width());
-	if ((pos.y() + popup->sizeHint().height()) > desktop.bottom())
-		pos.setY(desktop.bottom() - popup->sizeHint().height());
+	if ((pos.x() + popup->width()) > desktop.width())
+		pos.setX(desktop.width() - popup->width());
+	if ((pos.y() + popup->height()) > desktop.bottom())
+		pos.setY(desktop.bottom() - popup->height());
 	popup->move(pos);
 
 	clearFocus();

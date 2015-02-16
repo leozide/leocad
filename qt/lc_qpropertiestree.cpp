@@ -670,6 +670,7 @@ void lcQPropertiesTree::slotColorButtonClicked()
 
 	lcQColorPickerPopup *popup = new lcQColorPickerPopup(parent, part->mColorIndex);
 	connect(popup, SIGNAL(selected(int)), SLOT(slotSetValue(int)));
+	popup->setMinimumSize(300, 200);
 
 	const QRect desktop = QApplication::desktop()->geometry();
 
@@ -679,10 +680,10 @@ void lcQPropertiesTree::slotColorButtonClicked()
 	if (pos.y() < desktop.top())
 		pos.setY(desktop.top());
 
-	if ((pos.x() + popup->sizeHint().width()) > desktop.width())
-		pos.setX(desktop.width() - popup->sizeHint().width());
-	if ((pos.y() + popup->sizeHint().height()) > desktop.bottom())
-		pos.setY(desktop.bottom() - popup->sizeHint().height());
+	if ((pos.x() + popup->width()) > desktop.width())
+		pos.setX(desktop.width() - popup->width());
+	if ((pos.y() + popup->height()) > desktop.bottom())
+		pos.setY(desktop.bottom() - popup->height());
 	popup->move(pos);
 
 	popup->setFocus();

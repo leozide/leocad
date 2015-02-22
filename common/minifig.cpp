@@ -904,7 +904,7 @@ void MinifigWizard::OnInitialUpdate()
 	{
 		mMinifig->Colors[i] = lcGetColorIndex(ColorCodes[i]);
 
-		PieceInfo* Info = lcGetPiecesLibrary()->FindPiece(Pieces[i], false);
+		PieceInfo* Info = lcGetPiecesLibrary()->FindPiece(Pieces[i], NULL, false);
 		if (Info)
 		{
 			mMinifig->Parts[i] = Info;
@@ -1014,7 +1014,7 @@ void MinifigWizard::ParseSettings(lcFile& Settings)
 					*Ext = 0;
 			}
 
-			PieceInfo* Info = lcGetPiecesLibrary()->FindPiece(NameStart, false);
+			PieceInfo* Info = lcGetPiecesLibrary()->FindPiece(NameStart, NULL, false);
 			if (!Info && *NameStart)
 				continue;
 

@@ -217,7 +217,7 @@ void lcQPartsTree::setCurrentPart(PieceInfo *part)
 		strcpy(parentName, part->m_strName);
 		*strchr(parentName, 'P') = '\0';
 
-		PieceInfo *parentPart = library->FindPiece(parentName, false);
+		PieceInfo *parentPart = library->FindPiece(parentName, NULL, false);
 
 		if (parentPart)
 		{

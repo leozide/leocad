@@ -8,6 +8,7 @@
 #include "lc_category.h"
 #include "lc_application.h"
 #include "lc_mainwindow.h"
+#include "project.h"
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <ctype.h>
@@ -77,11 +78,26 @@ void lcPiecesLibrary::RemoveTemporaryPieces()
 	}
 }
 
-PieceInfo* lcPiecesLibrary::FindPiece(const char* PieceName, bool CreatePlaceholder)
+void lcPiecesLibrary::RemovePiece(PieceInfo* Info)
+{
+	mPieces.Remove(Info);
+	delete Info;
+}
+
+PieceInfo* lcPiecesLibrary::FindPiece(const char* PieceName, Project* Project, bool CreatePlaceholder)
 {
 	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-		if (!strcmp(PieceName, mPieces[PieceIdx]->m_strName))
-			return mPieces[PieceIdx];
+	{
+		PieceInfo* Info = mPieces[PieceIdx];
+
+		if (strcmp(PieceName, Info->m_strName))
+			continue;
+
+		if (Project && Info->IsModel() && Project->GetModels().FindIndex(Info->GetModel()) == -1)
+			continue;
+
+		return Info;
+	}
 
 	if (CreatePlaceholder)
 	{
@@ -242,7 +258,7 @@ bool lcPiecesLibrary::OpenArchive(lcFile* File, const char* FileName, lcZipFileT
 
 			if (memcmp(Name, "S/", 2))
 			{
-				PieceInfo* Info = FindPiece(Name, false);
+				PieceInfo* Info = FindPiece(Name, NULL, false);
 
 				if (!Info)
 				{
@@ -1887,6 +1903,9 @@ void lcLibraryMeshData::AddMeshDataNoDuplicateCheck(const lcLibraryMeshData& Dat
 
 bool lcPiecesLibrary::PieceInCategory(PieceInfo* Info, const String& CategoryKeywords) const
 {
+	if (Info->IsTemporary())
+		return false;
+
 	String PieceName;
 	if (Info->m_strDescription[0] == '~' || Info->m_strDescription[0] == '_')
 		PieceName = Info->m_strDescription + 1;
@@ -1933,7 +1952,7 @@ void lcPiecesLibrary::GetCategoryEntries(const String& CategoryKeywords, bool Gr
 			strcpy(ParentName, Info->m_strName);
 			*strchr(ParentName, 'P') = '\0';
 
-			Parent = FindPiece(ParentName, false);
+			Parent = FindPiece(ParentName, NULL, false);
 
 			if (Parent)
 			{

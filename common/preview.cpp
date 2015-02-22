@@ -6,6 +6,7 @@
 #include "system.h"
 #include "lc_application.h"
 #include "lc_mainwindow.h"
+#include "lc_library.h"
 
 PiecePreview::PiecePreview()
 {
@@ -86,6 +87,18 @@ void PiecePreview::SetCurrentPiece(PieceInfo *pInfo)
 		m_PieceInfo->AddRef();
 		Redraw();
 	}
+}
+
+void PiecePreview::SetDefaultPiece()
+{
+	lcPiecesLibrary* Library = lcGetPiecesLibrary();
+	PieceInfo* Info = Library->FindPiece("3005", NULL, false);
+
+	if (!Info)
+		Info = Library->mPieces[0];
+
+	if (Info)
+		SetCurrentPiece(Info);
 }
 
 void PiecePreview::OnLeftButtonDown()

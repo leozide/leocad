@@ -86,15 +86,7 @@ void lcMainWindow::CreateWidgets()
 
 	PiecePreview* Preview = (PiecePreview*)mPiecePreviewWidget->widget;
 	mPreviewWidget = Preview;
-
-	lcPiecesLibrary* Library = lcGetPiecesLibrary();
-	PieceInfo* Info = Library->FindPiece("3005", NULL, false);
-
-	if (!Info)
-		Info = Library->mPieces[0];
-
-	if (Info)
-		mPreviewWidget->SetCurrentPiece(Info);
+	mPreviewWidget->SetDefaultPiece();
 
 	QSettings Settings;
 	Settings.beginGroup("MainWindow");
@@ -1564,6 +1556,10 @@ void lcMainWindow::UpdateModels()
 	}
 
 	mPartsTree->UpdateModels();
+
+	PieceInfo* CurPiece = mPreviewWidget->GetCurrentPiece();
+	if (CurPiece->GetModel() == CurrentModel)
+		mPreviewWidget->SetDefaultPiece();
 }
 
 void lcMainWindow::UpdateCategories()

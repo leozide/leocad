@@ -20,8 +20,12 @@ public:
 	void OnMouseMove();
 
 	PieceInfo* GetCurrentPiece() const
-	{ return m_PieceInfo; }
+	{
+		return m_PieceInfo;
+	}
+
 	void SetCurrentPiece(PieceInfo* Info);
+	void SetDefaultPiece();
 
 protected:
 	PieceInfo* m_PieceInfo;

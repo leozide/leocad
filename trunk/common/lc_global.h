@@ -42,6 +42,7 @@ int stricmp(const char* str1, const char* str2);
 #define LC_VERSION_TEXT "0.81.0"
 
 // Forward declarations.
+class Project;
 class lcModel;
 class lcObject;
 class lcPiece;

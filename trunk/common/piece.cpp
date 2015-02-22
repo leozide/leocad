@@ -235,7 +235,7 @@ bool lcPiece::FileLoad(lcFile& file)
   else
 	  file.ReadBuffer(name, LC_PIECE_NAME_LEN);
 
-	PieceInfo* pInfo = lcGetPiecesLibrary()->FindPiece(name, true);
+	PieceInfo* pInfo = lcGetPiecesLibrary()->FindPiece(name, NULL, true);
 	SetPieceInfo(pInfo);
 
 	// 11 (0.77)

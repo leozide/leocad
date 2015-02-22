@@ -119,8 +119,9 @@ public:
 	bool Load(const char* LibraryPath, const char* CachePath);
 	void Unload();
 	void RemoveTemporaryPieces();
+	void RemovePiece(PieceInfo* Info);
 
-	PieceInfo* FindPiece(const char* PieceName, bool CreatePlaceholder);
+	PieceInfo* FindPiece(const char* PieceName, Project* Project, bool CreatePlaceholder);
 	bool LoadPiece(PieceInfo* Info);
 	bool LoadBuiltinPieces();
 

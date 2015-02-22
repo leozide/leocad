@@ -39,29 +39,30 @@ public:
 		mMesh = Mesh;
 	}
 
-	int AddRef()
+	void AddRef()
 	{
 		mRefCount++;
 
 		if (mRefCount == 1)
 			Load();
-
-		return mRefCount;
 	}
 
-	int Release()
+	void Release()
 	{
 		mRefCount--;
 
 		if (!mRefCount)
 			Unload();
-
-		return mRefCount;
 	}
 
 	bool IsLoaded() const
 	{
 		return mRefCount != 0;
+	}
+
+	bool IsModel() const
+	{
+		return (mFlags & LC_PIECE_MODEL) != 0;
 	}
 
 	bool IsTemporary() const

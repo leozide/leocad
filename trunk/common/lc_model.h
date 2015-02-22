@@ -125,7 +125,7 @@ public:
 	}
 
 	bool IncludesModel(const lcModel* Model) const;
-	void CreatePieceInfo();
+	void CreatePieceInfo(Project* Project);
 	void UpdatePieceInfo(lcArray<lcModel*>& UpdatedModels);
 
 	PieceInfo* GetPieceInfo() const
@@ -201,7 +201,7 @@ public:
 	void ShowEditGroupsDialog();
 
 	void SaveLDraw(QTextStream& Stream, bool MPD, bool SelectedOnly) const;
-	void LoadLDraw(QIODevice& Device);
+	void LoadLDraw(QIODevice& Device, Project* Project);
 	bool LoadBinary(lcFile* File);
 	void Merge(lcModel* Other);
 

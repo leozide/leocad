@@ -23,7 +23,7 @@ Project::Project()
 {
 	mModified = false;
 	mActiveModel = new lcModel(tr("Model #1"));
-	mActiveModel->CreatePieceInfo();
+	mActiveModel->CreatePieceInfo(this);
 	mActiveModel->SetSaved();
 	mModels.Add(mActiveModel);
 }
@@ -47,7 +47,10 @@ bool Project::IsModified() const
 
 QString Project::GetTitle() const
 {
-	return mFileName.isEmpty() ? tr("New Project.ldr") : QFileInfo(mFileName).fileName();
+	if (!mFileName.isEmpty())
+		return QFileInfo(mFileName).fileName();
+
+	return mModels.GetSize() == 1 ? tr("New Project.ldr") : tr("New Project.mpd");
 }
 
 void Project::SetActiveModel(int ModelIndex)
@@ -127,7 +130,7 @@ void Project::CreateNewModel()
 	{
 		mModified = true;
 		lcModel* Model = new lcModel(Name);
-		Model->CreatePieceInfo();
+		Model->CreatePieceInfo(this);
 		Model->SetSaved();
 		mModels.Add(Model);
 		SetActiveModel(mModels.GetSize() - 1);
@@ -160,7 +163,7 @@ void Project::ShowModelListDialog()
 		if (!Model)
 		{
 			Model = new lcModel(it->first);
-			Model->CreatePieceInfo();
+			Model->CreatePieceInfo(this);
 			Model->SetSaved();
 			mModified = true;
 		}
@@ -186,7 +189,6 @@ void Project::ShowModelListDialog()
 
 	mModels = NewModels;
 
-	lcGetPiecesLibrary()->RemoveTemporaryPieces();
 	SetActiveModel(Dialog.mActiveModel);
 	gMainWindow->UpdateTitle();
 }
@@ -202,7 +204,8 @@ bool Project::Load(const QString& FileName)
 	}
 
 	mModels.DeleteAll();
-	QString Extension = QFileInfo(FileName).suffix().toLower();
+	QFileInfo FileInfo(FileName);
+	QString Extension = FileInfo.suffix().toLower();
 
 	if (Extension == QLatin1String("dat") || Extension == QLatin1String("ldr") || Extension == QLatin1String("mpd"))
 	{
@@ -214,7 +217,7 @@ bool Project::Load(const QString& FileName)
 		{
 			lcModel* Model = new lcModel(QString());
 			mModels.Add(Model);
-			Model->LoadLDraw(Buffer);
+			Model->LoadLDraw(Buffer, this);
 			Model->SetSaved();
 		}
 	}
@@ -239,17 +242,16 @@ bool Project::Load(const QString& FileName)
 	if (mModels.IsEmpty())
 		return false;
 
-	for (int ModelIdx = 0; ModelIdx < mModels.GetSize(); ModelIdx++)
+	if (mModels.GetSize() == 1)
 	{
-		lcModel* Model = mModels[ModelIdx];
+		lcModel* Model = mModels[0];
 
 		if (Model->GetProperties().mName.isEmpty())
-			Model->SetName(tr("Model #%1").arg(QString::number(ModelIdx + 1)));
-
-		// todo: validate model names
-
-		Model->CreatePieceInfo();
+			Model->SetName(FileInfo.fileName());
 	}
+
+	for (int ModelIdx = 0; ModelIdx < mModels.GetSize(); ModelIdx++)
+		mModels[ModelIdx]->CreatePieceInfo(this);
 
 	mFileName = FileName;
 	mModified = false;
@@ -293,7 +295,32 @@ bool Project::Save(const QString& FileName)
 void Project::Merge(Project* Other)
 {
 	for (int ModelIdx = 0; ModelIdx < Other->mModels.GetSize(); ModelIdx++)
-		mModels.Add(Other->mModels[ModelIdx]);
+	{
+		lcModel* Model = Other->mModels[ModelIdx];
+		QString Name = Model->GetProperties().mName;
+
+		for (;;)
+		{
+			bool Duplicate = false;
+
+			for (int SearchIdx = 0; SearchIdx < mModels.GetSize(); SearchIdx++)
+			{
+				if (mModels[SearchIdx]->GetProperties().mName == Name)
+				{
+					Duplicate = true;
+					break;
+				}
+			}
+
+			if (!Duplicate)
+				break;
+
+			Name = tr("Merged ") + Name;
+			Model->SetName(Name);
+		}
+
+		mModels.Add(Model);
+	}
 
 	mModified = true;
 }
@@ -1324,7 +1351,7 @@ void Project::ExportPOVRay()
 
 			strupr(Src);
 
-			PieceInfo* Info = Library->FindPiece(Src, false);
+			PieceInfo* Info = Library->FindPiece(Src, NULL, false);
 			if (!Info)
 				continue;
 

@@ -115,6 +115,9 @@ void PieceInfo::Unload()
 	}
 
 	mModel = NULL;
+
+	if (IsModel())
+		lcGetPiecesLibrary()->RemovePiece(this);
 }
 
 bool PieceInfo::MinIntersectDist(const lcMatrix44& WorldMatrix, const lcVector3& WorldStart, const lcVector3& WorldEnd, float& MinDistance) const

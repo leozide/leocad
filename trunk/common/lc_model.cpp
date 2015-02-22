@@ -50,9 +50,6 @@ void lcModelProperties::SaveLDraw(QTextStream& Stream, bool MPD) const
 {
 	QLatin1String LineEnding("\r\n");
 
-	if (!MPD && !mName.isEmpty())
-		Stream << QLatin1String("0 !LEOCAD MODEL NAME ") << mName << LineEnding;
-
 	if (!mAuthor.isEmpty())
 		Stream << QLatin1String("0 !LEOCAD MODEL AUTHOR ") << mAuthor << LineEnding;
 
@@ -99,12 +96,7 @@ void lcModelProperties::ParseLDrawLine(QTextStream& Stream)
 	QString Token;
 	Stream >> Token;
 
-	if (Token == QLatin1String("NAME"))
-	{
-		if (mName.isEmpty())
-			mName = Stream.readAll().trimmed();
-	}
-	else if (Token == QLatin1String("AUTHOR"))
+	if (Token == QLatin1String("AUTHOR"))
 		Stream >> mAuthor;
 	else if (Token == QLatin1String("DESCRIPTION"))
 		Stream >> mDescription;
@@ -213,15 +205,10 @@ void lcModel::DeleteModel()
 	mGroups.DeleteAll();
 }
 
-void lcModel::CreatePieceInfo()
+void lcModel::CreatePieceInfo(Project* Project)
 {
-	QString PartID = mProperties.mName.toUpper();
-	mPieceInfo = lcGetPiecesLibrary()->FindPiece(PartID.toLatin1().constData(), false);
-	if (!mPieceInfo)
-	{
-		mPieceInfo = lcGetPiecesLibrary()->FindPiece(PartID.toLatin1().constData(), true);
-		mPieceInfo->SetModel(this);
-	}
+	mPieceInfo = lcGetPiecesLibrary()->FindPiece(mProperties.mName.toUpper().toLatin1().constData(), Project, true);
+	mPieceInfo->SetModel(this);
 	mPieceInfo->AddRef();
 }
 
@@ -360,7 +347,7 @@ void lcModel::SaveLDraw(QTextStream& Stream, bool MPD, bool SelectedOnly) const
 	Stream.flush();
 }
 
-void lcModel::LoadLDraw(QIODevice& Device)
+void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 {
 	lcPiece* Piece = NULL;
 	lcCamera* Camera = NULL;
@@ -481,10 +468,10 @@ void lcModel::LoadLDraw(QIODevice& Device)
 			if (!CurrentGroups.IsEmpty())
 				Piece->SetGroup(CurrentGroups[CurrentGroups.GetSize() - 1]);
 
-			PieceInfo* Info = lcGetPiecesLibrary()->FindPiece(PartID.toLatin1().constData(), false);
+			PieceInfo* Info = lcGetPiecesLibrary()->FindPiece(PartID.toLatin1().constData(), Project, false);
 
 			if (!Info)
-				Info = lcGetPiecesLibrary()->FindPiece(File.toLatin1().constData(), true);
+				Info = lcGetPiecesLibrary()->FindPiece(File.toLatin1().constData(), Project, true);
 
 			float* Matrix = IncludeTransform;
 			lcMatrix44 Transform(lcVector4(Matrix[0], Matrix[2], -Matrix[1], 0.0f), lcVector4(Matrix[8], Matrix[10], -Matrix[9], 0.0f),
@@ -583,7 +570,7 @@ bool lcModel::LoadBinary(lcFile* file)
 			lcMatrix44 WorldMatrix = lcMul(lcMatrix44RotationZ(rot[2] * LC_DTOR), lcMul(lcMatrix44RotationY(rot[1] * LC_DTOR), lcMatrix44RotationX(rot[0] * LC_DTOR)));
 			WorldMatrix.SetTranslation(pos);
 
-			PieceInfo* pInfo = Library->FindPiece(name, true);
+			PieceInfo* pInfo = Library->FindPiece(name, NULL, true);
 			lcPiece* pPiece = new lcPiece(pInfo);
 
 			pPiece->Initialize(WorldMatrix, step);
@@ -860,7 +847,7 @@ void lcModel::Paste()
 
 	QBuffer Buffer(&g_App->mClipboard);
 	Buffer.open(QIODevice::ReadOnly);
-	Model->LoadLDraw(Buffer);
+	Model->LoadLDraw(Buffer, lcGetActiveProject());
 
 	lcArray<lcPiece*> PastedPieces = Model->mPieces;
 
@@ -1192,7 +1179,7 @@ void lcModel::LoadCheckPoint(lcModelHistoryEntry* CheckPoint)
 
 	QBuffer Buffer(&CheckPoint->File);
 	Buffer.open(QIODevice::ReadOnly);
-	LoadLDraw(Buffer);
+	LoadLDraw(Buffer, lcGetActiveProject());
 
 	gMainWindow->UpdateFocusObject(GetFocusObject());
 	gMainWindow->UpdateCameraMenu();

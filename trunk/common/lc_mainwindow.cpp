@@ -88,7 +88,7 @@ void lcMainWindow::CreateWidgets()
 	mPreviewWidget = Preview;
 
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
-	PieceInfo* Info = Library->FindPiece("3005", false);
+	PieceInfo* Info = Library->FindPiece("3005", NULL, false);
 
 	if (!Info)
 		Info = Library->mPieces[0];
@@ -1673,7 +1673,7 @@ void lcMainWindow::MergeProject()
 	if (LoadFileName.isEmpty())
 		LoadFileName = lcGetProfileString(LC_PROFILE_PROJECTS_PATH);
 
-	LoadFileName = QFileDialog::getOpenFileName(this, tr("Open Project"), LoadFileName, tr("Supported Files (*.lcd *.ldr *.dat *.mpd);;All Files (*.*)"));
+	LoadFileName = QFileDialog::getOpenFileName(this, tr("Merge Project"), LoadFileName, tr("Supported Files (*.lcd *.ldr *.dat *.mpd);;All Files (*.*)"));
 
 	if (LoadFileName.isEmpty())
 		return;

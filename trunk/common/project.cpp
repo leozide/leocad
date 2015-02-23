@@ -253,6 +253,12 @@ bool Project::Load(const QString& FileName)
 	for (int ModelIdx = 0; ModelIdx < mModels.GetSize(); ModelIdx++)
 		mModels[ModelIdx]->CreatePieceInfo(this);
 
+	lcArray<lcModel*> UpdatedModels;
+	UpdatedModels.AllocGrow(mModels.GetSize());
+
+	for (int ModelIdx = 0; ModelIdx < mModels.GetSize(); ModelIdx++)
+		mModels[ModelIdx]->UpdatePieceInfo(UpdatedModels);
+
 	mFileName = FileName;
 	mModified = false;
 

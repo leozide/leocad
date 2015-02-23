@@ -113,6 +113,13 @@ struct lcModelPartsEntry
 	int ColorIndex;
 };
 
+struct lcModelMeshLine
+{
+	int LineType;
+	int ColorCode;
+	lcVector3 Vertices[4];
+};
+
 class lcModel
 {
 public:
@@ -161,6 +168,11 @@ public:
 	void SetName(const QString& Name)
 	{
 		mProperties.mName = Name;
+	}
+
+	const lcArray<lcModelMeshLine>& GetMeshLines() const
+	{
+		return mMeshLines;
 	}
 
 	lcStep GetLastStep() const;
@@ -333,6 +345,7 @@ protected:
 	lcArray<lcCamera*> mCameras;
 	lcArray<lcLight*> mLights;
 	lcArray<lcGroup*> mGroups;
+	lcArray<lcModelMeshLine> mMeshLines;
 
 	lcModelHistoryEntry* mSavedHistory;
 	lcArray<lcModelHistoryEntry*> mUndoHistory;

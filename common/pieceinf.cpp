@@ -51,18 +51,33 @@ void PieceInfo::SetPlaceholder()
 	mMesh = NULL;
 }
 
-void PieceInfo::SetModel(lcModel* Model)
+void PieceInfo::SetModel(lcModel* Model, bool UpdateMesh)
 {
-	mFlags = LC_PIECE_MODEL;
-	mModel = Model;
+	if (mModel != Model)
+	{
+		mFlags = LC_PIECE_MODEL;
+		mModel = Model;
+	}
 
 	strncpy(m_strName, Model->GetProperties().mName.toUpper().toLatin1().data(), sizeof(m_strName));
 	m_strName[sizeof(m_strName)-1] = 0;
 	strncpy(m_strDescription, Model->GetProperties().mName.toLatin1().data(), sizeof(m_strDescription));
 	m_strDescription[sizeof(m_strDescription)-1] = 0;
 
-	delete mMesh;
-	mMesh = NULL;
+	const lcArray<lcModelMeshLine>& MeshLines = Model->GetMeshLines();
+
+	if (UpdateMesh && !MeshLines.IsEmpty())
+	{
+		lcLibraryMeshData MeshData;
+
+		for (int LineIdx = 0; LineIdx < MeshLines.GetSize(); LineIdx++)
+		{
+			const lcModelMeshLine& Line = MeshLines[LineIdx];
+			MeshData.AddLine(Line.LineType, Line.ColorCode, Line.Vertices);
+		}
+
+		lcGetPiecesLibrary()->CreateMesh(this, MeshData);
+	}
 }
 
 bool PieceInfo::IncludesModel(const lcModel* Model) const
@@ -126,9 +141,6 @@ bool PieceInfo::MinIntersectDist(const lcMatrix44& WorldMatrix, const lcVector3&
 	lcVector3 Start = lcMul31(WorldStart, InverseWorldMatrix);
 	lcVector3 End = lcMul31(WorldEnd, InverseWorldMatrix);
 
-	if (mFlags & LC_PIECE_MODEL)
-		return mModel->SubModelMinIntersectDist(Start, End, MinDistance);
-
 	lcVector3 Min(m_fDimensions[3], m_fDimensions[4], m_fDimensions[5]);
 	lcVector3 Max(m_fDimensions[0], m_fDimensions[1], m_fDimensions[2]);
 
@@ -139,9 +151,18 @@ bool PieceInfo::MinIntersectDist(const lcMatrix44& WorldMatrix, const lcVector3&
 	if (mFlags & LC_PIECE_PLACEHOLDER)
 		return true;
 
-	lcVector3 Intersection;
+	bool Intersect = false;
 
-	return mMesh->MinIntersectDist(Start, End, MinDistance, Intersection);
+	if (mMesh)
+	{
+		lcVector3 Intersection;
+		Intersect = mMesh->MinIntersectDist(Start, End, MinDistance, Intersection);
+	}
+
+	if (mFlags & LC_PIECE_MODEL)
+		Intersect |= mModel->SubModelMinIntersectDist(Start, End, MinDistance);
+
+	return Intersect;
 }
 
 bool PieceInfo::BoxTest(const lcMatrix44& WorldMatrix, const lcVector4 WorldPlanes[6]) const
@@ -157,9 +178,6 @@ bool PieceInfo::BoxTest(const lcMatrix44& WorldMatrix, const lcVector4 WorldPlan
 		lcVector3 PlaneNormal = lcMul30(WorldPlanes[PlaneIdx], InverseWorldMatrix);
 		LocalPlanes[PlaneIdx] = lcVector4(PlaneNormal, WorldPlanes[PlaneIdx][3] - lcDot3(InverseWorldMatrix[3], PlaneNormal));
 	}
-
-	if (mFlags & LC_PIECE_MODEL)
-		return mModel->SubModelBoxTest(LocalPlanes);
 
 	lcVector3 Box[NumCorners] =
 	{
@@ -197,10 +215,19 @@ bool PieceInfo::BoxTest(const lcMatrix44& WorldMatrix, const lcVector4 WorldPlan
 	if (OutcodesAND != 0)
 		return false;
 
-	if (mFlags & LC_PIECE_PLACEHOLDER)
-		return OutcodesOR == 0;
+	if (OutcodesOR == 0)
+		return true;
 
-	return OutcodesOR == 0 || mMesh->IntersectsPlanes(LocalPlanes);
+	if (mFlags & LC_PIECE_PLACEHOLDER)
+		return gPlaceholderMesh->IntersectsPlanes(LocalPlanes);
+
+	if (mMesh && mMesh->IntersectsPlanes(LocalPlanes))
+		return true;
+
+	if (mFlags & LC_PIECE_MODEL)
+		return mModel->SubModelBoxTest(LocalPlanes);
+
+	return false;
 }
 
 // Zoom extents for the preview window and print catalog
@@ -239,35 +266,59 @@ void PieceInfo::ZoomExtents(const lcMatrix44& ProjectionMatrix, lcMatrix44& View
 	}
 }
 
-void PieceInfo::AddRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, int ColorIndex, bool Focused, bool Selected)
+void PieceInfo::AddRenderMesh(lcScene& Scene)
 {
-	if (mFlags & LC_PIECE_MODEL)
-	{
-		mModel->SubModelAddRenderMeshes(Scene, WorldMatrix, ColorIndex, Focused, Selected);
+	if (!mMesh)
 		return;
-	}
 
 	lcRenderMesh RenderMesh;
 
-	RenderMesh.WorldMatrix = WorldMatrix;
-	RenderMesh.Mesh = (mFlags & LC_PIECE_PLACEHOLDER) ? gPlaceholderMesh : mMesh;
-	RenderMesh.ColorIndex = ColorIndex;
-	RenderMesh.Focused = Focused;
-	RenderMesh.Selected = Selected;
+	RenderMesh.WorldMatrix = lcMatrix44Identity();
+	RenderMesh.Mesh = mMesh;
+	RenderMesh.ColorIndex = gDefaultColor;
+	RenderMesh.Focused = false;
+	RenderMesh.Selected = false;
 
-	bool Translucent = lcIsColorTranslucent(ColorIndex);
-
-	if ((mFlags & (LC_PIECE_HAS_SOLID | LC_PIECE_HAS_LINES)) || ((mFlags & LC_PIECE_HAS_DEFAULT) && !Translucent))
+	if (mFlags & (LC_PIECE_HAS_SOLID | LC_PIECE_HAS_DEFAULT | LC_PIECE_HAS_LINES))
 		Scene.mOpaqueMeshes.Add(RenderMesh);
 
-	if ((mFlags & LC_PIECE_HAS_TRANSLUCENT) || ((mFlags & LC_PIECE_HAS_DEFAULT) && Translucent))
+	if (mFlags & LC_PIECE_HAS_TRANSLUCENT)
 	{
-		lcVector3 Pos = lcMul31(WorldMatrix[3], Scene.mViewMatrix);
-
-		RenderMesh.Distance = Pos[2];
+		RenderMesh.Distance = Scene.mViewMatrix.r[3].z;
 
 		Scene.mTranslucentMeshes.Add(RenderMesh);
 	}
+}
+
+void PieceInfo::AddRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, int ColorIndex, bool Focused, bool Selected)
+{
+	if (mMesh || (mFlags & LC_PIECE_PLACEHOLDER))
+	{
+		lcRenderMesh RenderMesh;
+
+		RenderMesh.WorldMatrix = WorldMatrix;
+		RenderMesh.Mesh = (mFlags & LC_PIECE_PLACEHOLDER) ? gPlaceholderMesh : mMesh;
+		RenderMesh.ColorIndex = ColorIndex;
+		RenderMesh.Focused = Focused;
+		RenderMesh.Selected = Selected;
+
+		bool Translucent = lcIsColorTranslucent(ColorIndex);
+
+		if ((mFlags & (LC_PIECE_HAS_SOLID | LC_PIECE_HAS_LINES)) || ((mFlags & LC_PIECE_HAS_DEFAULT) && !Translucent))
+			Scene.mOpaqueMeshes.Add(RenderMesh);
+
+		if ((mFlags & LC_PIECE_HAS_TRANSLUCENT) || ((mFlags & LC_PIECE_HAS_DEFAULT) && Translucent))
+		{
+			lcVector3 Pos = lcMul31(WorldMatrix[3], Scene.mViewMatrix);
+
+			RenderMesh.Distance = Pos[2];
+
+			Scene.mTranslucentMeshes.Add(RenderMesh);
+		}
+	}
+
+	if (mFlags & LC_PIECE_MODEL)
+		mModel->SubModelAddRenderMeshes(Scene, WorldMatrix, ColorIndex, Focused, Selected);
 }
 
 void PieceInfo::GetPartsList(int DefaultColorIndex, lcArray<lcPartsListEntry>& PartsList) const

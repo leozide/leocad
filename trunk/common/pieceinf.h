@@ -107,12 +107,13 @@ public:
 	}
 
 	void ZoomExtents(const lcMatrix44& ProjectionMatrix, lcMatrix44& ViewMatrix, float* EyePos = NULL) const;
+	void AddRenderMesh(lcScene& Scene);
 	void AddRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, int ColorIndex, bool Focused, bool Selected);
 
 	void CreatePlaceholder(const char* Name);
 
 	void SetPlaceholder();
-	void SetModel(lcModel* Model);
+	void SetModel(lcModel* Model, bool UpdateMesh);
 	bool IncludesModel(const lcModel* Model) const;
 	bool MinIntersectDist(const lcMatrix44& WorldMatrix, const lcVector3& WorldStart, const lcVector3& WorldEnd, float& MinDistance) const;
 	bool BoxTest(const lcMatrix44& WorldMatrix, const lcVector4 Planes[6]) const;

@@ -206,12 +206,13 @@ void lcModel::DeleteModel()
 	mCameras.DeleteAll();
 	mLights.DeleteAll();
 	mGroups.DeleteAll();
+	mMeshLines.RemoveAll();
 }
 
 void lcModel::CreatePieceInfo(Project* Project)
 {
 	mPieceInfo = lcGetPiecesLibrary()->FindPiece(mProperties.mName.toUpper().toLatin1().constData(), Project, true);
-	mPieceInfo->SetModel(this);
+	mPieceInfo->SetModel(this, true);
 	mPieceInfo->AddRef();
 }
 
@@ -220,10 +221,12 @@ void lcModel::UpdatePieceInfo(lcArray<lcModel*>& UpdatedModels)
 	if (UpdatedModels.FindIndex(this) != -1)
 		return;
 
-	mPieceInfo->SetModel(this);
+	mPieceInfo->SetModel(this, false);
 	UpdatedModels.Add(this);
 
-	if (mPieces.IsEmpty())
+	lcMesh* Mesh = mPieceInfo->GetMesh();
+
+	if (mPieces.IsEmpty() && !Mesh)
 	{
 		memset(mPieceInfo->m_fDimensions, 0, sizeof(mPieceInfo->m_fDimensions));
 		return;
@@ -239,6 +242,23 @@ void lcModel::UpdatePieceInfo(lcArray<lcModel*>& UpdatedModels)
 		{
 			Piece->mPieceInfo->UpdateBoundingBox(UpdatedModels);
 			Piece->CompareBoundingBox(BoundingBox);
+		}
+	}
+
+	if (Mesh)
+	{
+		int NumVerts = Mesh->mVertexBuffer.mSize / sizeof(lcVertex);
+		float* Vertex = (float*)Mesh->mVertexBuffer.mData;
+
+		for (int VertexIdx = 0; VertexIdx < NumVerts; VertexIdx++)
+		{
+			if (Vertex[0] < BoundingBox[0]) BoundingBox[0] = Vertex[0];
+			if (Vertex[1] < BoundingBox[1]) BoundingBox[1] = Vertex[1];
+			if (Vertex[2] < BoundingBox[2]) BoundingBox[2] = Vertex[2];
+			if (Vertex[0] > BoundingBox[3]) BoundingBox[3] = Vertex[0];
+			if (Vertex[1] > BoundingBox[4]) BoundingBox[4] = Vertex[1];
+			if (Vertex[2] > BoundingBox[5]) BoundingBox[5] = Vertex[2];
+			Vertex += 3;
 		}
 	}
 
@@ -485,6 +505,37 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 			Piece->SetColorCode(ColorCode);
 			mPieces.Add(Piece);
 			Piece = NULL;
+		}
+		else if (Token == QLatin1String("2"))
+		{
+			lcModelMeshLine& Line = mMeshLines.Add();
+
+			Line.LineType = 2;
+			LineStream >> Line.ColorCode;
+
+			for (int TokenIdx = 0; TokenIdx < 6; TokenIdx++)
+				LineStream >> ((float*)Line.Vertices)[TokenIdx];
+
+		}
+		else if (Token == QLatin1String("3"))
+		{
+			lcModelMeshLine& Line = mMeshLines.Add();
+
+			Line.LineType = 3;
+			LineStream >> Line.ColorCode;
+
+			for (int TokenIdx = 0; TokenIdx < 9; TokenIdx++)
+				LineStream >> ((float*)Line.Vertices)[TokenIdx];
+		}
+		else if (Token == QLatin1String("4"))
+		{
+			lcModelMeshLine& Line = mMeshLines.Add();
+
+			Line.LineType = 4;
+			LineStream >> Line.ColorCode;
+
+			for (int TokenIdx = 0; TokenIdx < 12; TokenIdx++)
+				LineStream >> ((float*)Line.Vertices)[TokenIdx];
 		}
 	}
 
@@ -866,6 +917,8 @@ void lcModel::Paste()
 void lcModel::GetScene(lcScene& Scene, lcCamera* ViewCamera, bool DrawInterface) const
 {
 	Scene.Begin(ViewCamera->mWorldView);
+
+	mPieceInfo->AddRenderMesh(Scene);
 
 	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 	{

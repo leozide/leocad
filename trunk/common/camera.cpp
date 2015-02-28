@@ -589,12 +589,10 @@ void lcCamera::DrawInterface(lcContext* Context, const lcMatrix44& ViewMatrix) c
 
 	if (IsSelected())
 	{
-		Context->SetWorldViewMatrix(lcMul(ViewWorld, ViewMatrix));
-
 		float Dist = lcLength(mTargetPosition - mPosition);
 		lcMatrix44 Projection = lcMatrix44Perspective(m_fovy, 1.33f, 0.01f, Dist);
 		Projection = lcMatrix44Inverse(Projection);
-		glMultMatrixf(Projection);
+		Context->SetWorldViewMatrix(lcMul(Projection, lcMul(ViewWorld, ViewMatrix)));
 
 		float ProjVerts[16][3] =
 		{

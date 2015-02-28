@@ -205,7 +205,7 @@ void lcModel::DeleteModel()
 	mCameras.DeleteAll();
 	mLights.DeleteAll();
 	mGroups.DeleteAll();
-	mMeshLines.RemoveAll();
+	mMeshLines.clear();
 }
 
 void lcModel::CreatePieceInfo(Project* Project)
@@ -382,6 +382,7 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 		qint64 Pos = Device.pos();
 		QString Line = Device.readLine().trimmed();
 		QTextStream LineStream(&Line, QIODevice::ReadOnly);
+		bool MeshLine = false;
 
 		QString Token;
 		LineStream >> Token;
@@ -480,62 +481,44 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 
 			QString File = LineStream.readAll().trimmed().toUpper();
 			QString PartID = File;
+			PartID.replace('\\', '/');
 
 			if (PartID.endsWith(QLatin1String(".DAT")))
 				PartID = PartID.left(PartID.size() - 4);
 
-			if (!Piece)
-				Piece = new lcPiece(NULL);
+			lcPiecesLibrary* Library = lcGetPiecesLibrary();
 
-			if (!CurrentGroups.IsEmpty())
-				Piece->SetGroup(CurrentGroups[CurrentGroups.GetSize() - 1]);
+			if (Library->IsPrimitive(PartID.toLatin1().constData()))
+				MeshLine = true;
+			else
+			{
+				if (!Piece)
+					Piece = new lcPiece(NULL);
 
-			PieceInfo* Info = lcGetPiecesLibrary()->FindPiece(PartID.toLatin1().constData(), Project, false);
+				if (!CurrentGroups.IsEmpty())
+					Piece->SetGroup(CurrentGroups[CurrentGroups.GetSize() - 1]);
 
-			if (!Info)
-				Info = lcGetPiecesLibrary()->FindPiece(File.toLatin1().constData(), Project, true);
+				PieceInfo* Info = Library->FindPiece(PartID.toLatin1().constData(), Project, false);
 
-			float* Matrix = IncludeTransform;
-			lcMatrix44 Transform(lcVector4(Matrix[0], Matrix[2], -Matrix[1], 0.0f), lcVector4(Matrix[8], Matrix[10], -Matrix[9], 0.0f),
-								 lcVector4(-Matrix[4], -Matrix[6], Matrix[5], 0.0f), lcVector4(Matrix[12], Matrix[14], -Matrix[13], 1.0f));
+				if (!Info)
+					Info = Library->FindPiece(File.toLatin1().constData(), Project, true);
 
-			Piece->SetPieceInfo(Info);
-			Piece->Initialize(Transform, CurrentStep);
-			Piece->SetColorCode(ColorCode);
-			mPieces.Add(Piece);
-			Piece = NULL;
+				float* Matrix = IncludeTransform;
+				lcMatrix44 Transform(lcVector4(Matrix[0], Matrix[2], -Matrix[1], 0.0f), lcVector4(Matrix[8], Matrix[10], -Matrix[9], 0.0f),
+									 lcVector4(-Matrix[4], -Matrix[6], Matrix[5], 0.0f), lcVector4(Matrix[12], Matrix[14], -Matrix[13], 1.0f));
+
+				Piece->SetPieceInfo(Info);
+				Piece->Initialize(Transform, CurrentStep);
+				Piece->SetColorCode(ColorCode);
+				mPieces.Add(Piece);
+				Piece = NULL;
+			}
 		}
-		else if (Token == QLatin1String("2"))
-		{
-			lcModelMeshLine& Line = mMeshLines.Add();
+		else if (Token == QLatin1String("2") || Token == QLatin1String("3") || Token == QLatin1String("4"))
+			MeshLine = true;
 
-			Line.LineType = 2;
-			LineStream >> Line.ColorCode;
-
-			for (int TokenIdx = 0; TokenIdx < 6; TokenIdx++)
-				LineStream >> ((float*)Line.Vertices)[TokenIdx];
-
-		}
-		else if (Token == QLatin1String("3"))
-		{
-			lcModelMeshLine& Line = mMeshLines.Add();
-
-			Line.LineType = 3;
-			LineStream >> Line.ColorCode;
-
-			for (int TokenIdx = 0; TokenIdx < 9; TokenIdx++)
-				LineStream >> ((float*)Line.Vertices)[TokenIdx];
-		}
-		else if (Token == QLatin1String("4"))
-		{
-			lcModelMeshLine& Line = mMeshLines.Add();
-
-			Line.LineType = 4;
-			LineStream >> Line.ColorCode;
-
-			for (int TokenIdx = 0; TokenIdx < 12; TokenIdx++)
-				LineStream >> ((float*)Line.Vertices)[TokenIdx];
-		}
+		if (MeshLine)
+			mMeshLines.append(Line);
 	}
 
 	mCurrentStep = CurrentStep;

@@ -1054,7 +1054,7 @@ bool lcPiecesLibrary::LoadTexture(lcTexture* Texture)
 	return true;
 }
 
-int lcPiecesLibrary::FindPrimitiveIndex(const char* Name)
+int lcPiecesLibrary::FindPrimitiveIndex(const char* Name) const
 {
 	for (int PrimitiveIndex = 0; PrimitiveIndex < mPrimitives.GetSize(); PrimitiveIndex++)
 		if (!strcmp(mPrimitives[PrimitiveIndex]->mName, Name))

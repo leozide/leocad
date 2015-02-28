@@ -64,19 +64,29 @@ void PieceInfo::SetModel(lcModel* Model, bool UpdateMesh)
 	strncpy(m_strDescription, Model->GetProperties().mName.toLatin1().data(), sizeof(m_strDescription));
 	m_strDescription[sizeof(m_strDescription)-1] = 0;
 
-	const lcArray<lcModelMeshLine>& MeshLines = Model->GetMeshLines();
+	const QStringList& MeshLines = Model->GetMeshLines();
 
-	if (UpdateMesh && !MeshLines.IsEmpty())
+	if (UpdateMesh && !MeshLines.isEmpty())
 	{
-		lcLibraryMeshData MeshData;
+		lcMemFile PieceFile;
 
-		for (int LineIdx = 0; LineIdx < MeshLines.GetSize(); LineIdx++)
+		foreach (const QString& Line, MeshLines)
 		{
-			const lcModelMeshLine& Line = MeshLines[LineIdx];
-			MeshData.AddLine(Line.LineType, Line.ColorCode, Line.Vertices);
+			QByteArray Buffer = Line.toLatin1();
+			PieceFile.WriteBuffer(Buffer.constData(), Buffer.size());
+			PieceFile.WriteBuffer("\r\n", 2);
 		}
 
-		lcGetPiecesLibrary()->CreateMesh(this, MeshData);
+		lcLibraryMeshData MeshData;
+		lcArray<lcLibraryTextureMap> TextureStack;
+		PieceFile.Seek(0, SEEK_SET);
+
+		const char* OldLocale = setlocale(LC_NUMERIC, "C");
+		bool Ret = lcGetPiecesLibrary()->ReadMeshData(PieceFile, lcMatrix44Identity(), 16, TextureStack, MeshData);
+		setlocale(LC_NUMERIC, OldLocale);
+
+		if (Ret)
+			lcGetPiecesLibrary()->CreateMesh(this, MeshData);
 	}
 }
 

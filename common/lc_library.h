@@ -137,12 +137,18 @@ public:
 	void GetCategoryEntries(const String& CategoryKeywords, bool GroupPieces, lcArray<PieceInfo*>& SinglePieces, lcArray<PieceInfo*>& GroupedPieces);
 	void GetPatternedPieces(PieceInfo* Parent, lcArray<PieceInfo*>& Pieces) const;
 
+	bool IsPrimitive(const char* Name) const
+	{
+		return FindPrimitiveIndex(Name) != -1;
+	}
+
 	void SetOfficialPieces()
 	{
 		if (mZipFiles[LC_ZIPFILE_OFFICIAL])
 			mNumOfficialPieces = mPieces.GetSize();
 	}
 
+	bool ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform, lcuint32 CurrentColorCode, lcArray<lcLibraryTextureMap>& TextureStack, lcLibraryMeshData& MeshData);
 	void CreateMesh(PieceInfo* Info, lcLibraryMeshData& MeshData);
 
 	lcArray<PieceInfo*> mPieces;
@@ -163,9 +169,8 @@ protected:
 	bool LoadCachePiece(PieceInfo* Info);
 	void SaveCacheFile();
 
-	int FindPrimitiveIndex(const char* Name);
+	int FindPrimitiveIndex(const char* Name) const;
 	bool LoadPrimitive(int PrimitiveIndex);
-	bool ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform, lcuint32 CurrentColorCode, lcArray<lcLibraryTextureMap>& TextureStack, lcLibraryMeshData& MeshData);
 
 	char mCacheFileName[LC_MAXPATH];
 	lcuint64 mCacheFileModifiedTime;

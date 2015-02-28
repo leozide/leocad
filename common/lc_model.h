@@ -113,13 +113,6 @@ struct lcModelPartsEntry
 	int ColorIndex;
 };
 
-struct lcModelMeshLine
-{
-	int LineType;
-	int ColorCode;
-	lcVector3 Vertices[4];
-};
-
 class lcModel
 {
 public:
@@ -170,7 +163,7 @@ public:
 		mProperties.mName = Name;
 	}
 
-	const lcArray<lcModelMeshLine>& GetMeshLines() const
+	const QStringList& GetMeshLines() const
 	{
 		return mMeshLines;
 	}
@@ -345,7 +338,7 @@ protected:
 	lcArray<lcCamera*> mCameras;
 	lcArray<lcLight*> mLights;
 	lcArray<lcGroup*> mGroups;
-	lcArray<lcModelMeshLine> mMeshLines;
+	QStringList mMeshLines;
 
 	lcModelHistoryEntry* mSavedHistory;
 	lcArray<lcModelHistoryEntry*> mUndoHistory;

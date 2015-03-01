@@ -66,7 +66,11 @@ void lcApplication::SetProject(Project* Project)
 
 	const lcArray<View*>& Views = gMainWindow->GetViews();
 	for (int ViewIdx = 0; ViewIdx < Views.GetSize(); ViewIdx++)
-		Views[ViewIdx]->SetModel(lcGetActiveModel());
+	{
+		View* View = Views[ViewIdx];
+		View->ClearCameras();
+		View->SetModel(lcGetActiveModel());
+	}
 
 	lcGetPiecesLibrary()->RemoveTemporaryPieces();
 	lcGetActiveModel()->UpdateInterface();

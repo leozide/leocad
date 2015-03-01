@@ -33,8 +33,9 @@ View::~View()
 	if (gMainWindow)
 		gMainWindow->RemoveView(this);
 
-	if (mCamera && mCamera->IsSimple())
-		delete mCamera;
+	foreach (lcCamera* Camera, mCameras)
+		if (Camera && Camera->IsSimple())
+			delete Camera;
 }
 
 void View::SetModel(lcModel* Model)
@@ -44,14 +45,28 @@ void View::SetModel(lcModel* Model)
 
 	mModel = Model;
 
-	if (mCamera && !mCamera->IsSimple())
+	lcCamera* Camera = mCameras.value(mModel);
+
+	if (Camera)
+		mCamera = Camera;
+	else
 	{
-		lcCamera* Camera = mCamera;
+		Camera = mCamera;
 		mCamera = new lcCamera(true);
 
 		if (Camera)
 			mCamera->CopyPosition(Camera);
+		else
+			mCamera->SetViewpoint(LC_VIEWPOINT_HOME);
 	}
+
+	mCameras[mModel] = mCamera;
+}
+
+void View::ClearCameras()
+{
+	mCamera = NULL;
+	mCameras.clear();
 }
 
 void View::RemoveCamera()
@@ -64,6 +79,10 @@ void View::RemoveCamera()
 
 	if (Camera)
 		mCamera->CopyPosition(Camera);
+	else
+		mCamera->SetViewpoint(LC_VIEWPOINT_HOME);
+
+	mCameras[mModel] = mCamera;
 
 	gMainWindow->UpdateCurrentCamera(-1);
 	Redraw();
@@ -85,6 +104,8 @@ void View::SetCamera(lcCamera* Camera, bool ForceCopy)
 
 		mCamera = Camera;
 	}
+
+	mCameras[mModel] = mCamera;
 }
 
 void View::SetCameraIndex(int Index)
@@ -104,7 +125,10 @@ void View::SetCameraIndex(int Index)
 void View::SetViewpoint(lcViewpoint Viewpoint)
 {
 	if (!mCamera || !mCamera->IsSimple())
+	{
 		mCamera = new lcCamera(true);
+		mCameras[mModel] = mCamera;
+	}
 
 	mCamera->SetViewpoint(Viewpoint);
 	ZoomExtents();
@@ -114,7 +138,10 @@ void View::SetViewpoint(lcViewpoint Viewpoint)
 void View::SetDefaultCamera()
 {
 	if (!mCamera || !mCamera->IsSimple())
+	{
 		mCamera = new lcCamera(true);
+		mCameras[mModel] = mCamera;
+	}
 
 	mCamera->SetViewpoint(LC_VIEWPOINT_HOME);
 }

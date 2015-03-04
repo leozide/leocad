@@ -2,6 +2,7 @@
 #include "lc_mainwindow.h"
 #include <QPrintDialog>
 #include <QPrintPreviewDialog>
+#include "lc_timelinewidget.h"
 #include "lc_qglwidget.h"
 #include "lc_qpartstree.h"
 #include "lc_qcolorlist.h"
@@ -316,6 +317,7 @@ void lcMainWindow::CreateMenus()
 	QMenu* ToolBarsMenu = ViewMenu->addMenu(tr("T&oolbars"));
 	ToolBarsMenu->addAction(mPartsToolBar->toggleViewAction());
 	ToolBarsMenu->addAction(mPropertiesToolBar->toggleViewAction());
+	ToolBarsMenu->addAction(mTimelineToolBar->toggleViewAction());
 	ToolBarsMenu->addSeparator();
 	ToolBarsMenu->addAction(mStandardToolBar->toggleViewAction());
 	ToolBarsMenu->addAction(mToolsToolBar->toggleViewAction());
@@ -541,7 +543,17 @@ void lcMainWindow::CreateToolBars()
 	mPropertiesToolBar->setWidget(mPropertiesWidget);
 	addDockWidget(Qt::RightDockWidgetArea, mPropertiesToolBar);
 
+	mTimelineToolBar = new QDockWidget(tr("Timeline"), this);
+	mTimelineToolBar->setObjectName("TimelineToolbar");
+	mTimelineToolBar->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+
+	mTimelineWidget = new lcTimelineWidget(mTimelineToolBar);
+
+	mTimelineToolBar->setWidget(mTimelineWidget);
+	addDockWidget(Qt::RightDockWidgetArea, mTimelineToolBar);
+
 	tabifyDockWidget(mPartsToolBar, mPropertiesToolBar);
+	tabifyDockWidget(mPropertiesToolBar, mTimelineToolBar);
 	mPartsToolBar->raise();
 }
 
@@ -585,6 +597,7 @@ QMenu* lcMainWindow::createPopupMenu()
 
 	Menu->addAction(mPartsToolBar->toggleViewAction());
 	Menu->addAction(mPropertiesToolBar->toggleViewAction());
+	Menu->addAction(mTimelineToolBar->toggleViewAction());
 	Menu->addSeparator();
 	Menu->addAction(mStandardToolBar->toggleViewAction());
 	Menu->addAction(mToolsToolBar->toggleViewAction());
@@ -1345,6 +1358,7 @@ void lcMainWindow::RemoveRecentFile(int FileIndex)
 
 void lcMainWindow::UpdateFocusObject(lcObject* Focus)
 {
+	UpdateTimeline();
 	mPropertiesWidget->updateFocusObject(Focus);
 
 	lcVector3 Position;
@@ -1407,6 +1421,11 @@ void lcMainWindow::UpdateSelectedObjects(int Flags, int SelectedCount, lcObject*
 	}
 
 	mStatusBarLabel->setText(Message);
+}
+
+void lcMainWindow::UpdateTimeline()
+{
+	mTimelineWidget->Update();
 }
 
 void lcMainWindow::UpdatePaste(bool Enabled)

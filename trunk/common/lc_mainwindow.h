@@ -12,6 +12,7 @@ class lcQGLWidget;
 class lcQPartsTree;
 class lcQColorList;
 class lcQPropertiesTree;
+class lcTimelineWidget;
 
 #define LC_MAX_RECENT_FILES 4
 
@@ -164,6 +165,7 @@ public:
 
 	void UpdateFocusObject(lcObject* Focus);
 	void UpdateSelectedObjects(int Flags, int SelectedCount, lcObject* Focus);
+	void UpdateTimeline();
 	void UpdatePaste(bool Enabled);
 	void UpdateCurrentStep();
 	void SetAddKeys(bool AddKeys);
@@ -230,12 +232,14 @@ protected:
 	QToolBar* mTimeToolBar;
 	QDockWidget* mPartsToolBar;
 	QDockWidget* mPropertiesToolBar;
+	QDockWidget* mTimelineToolBar;
 
 	lcQGLWidget* mPiecePreviewWidget;
 	lcQPartsTree* mPartsTree;
 	QLineEdit* mPartSearchEdit;
 	lcQColorList* mColorList;
 	lcQPropertiesTree* mPropertiesWidget;
+	lcTimelineWidget* mTimelineWidget;
 	QLineEdit* mTransformXEdit;
 	QLineEdit* mTransformYEdit;
 	QLineEdit* mTransformZEdit;

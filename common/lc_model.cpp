@@ -1922,6 +1922,43 @@ void lcModel::ShowSelectedPiecesLater()
 		SaveCheckpoint("Modifying");
 		gMainWindow->UpdateAllViews();
 		UpdateSelection();
+		gMainWindow->UpdateFocusObject(GetFocusObject());
+	}
+}
+
+void lcModel::SetPieceSteps(const QList<QPair<lcPiece*, int>>& PieceSteps)
+{
+	if (PieceSteps.size() != mPieces.GetSize())
+		return;
+
+	bool Modified = false;
+
+	for (int PieceIdx = 0; PieceIdx < PieceSteps.size(); PieceIdx++)
+	{
+		const QPair<lcPiece*, int>& PieceStep = PieceSteps[PieceIdx];
+		lcPiece* Piece = mPieces[PieceIdx];
+
+		if (Piece != PieceStep.first || Piece->GetStepShow() != PieceStep.second)
+		{
+			Piece = PieceStep.first;
+			lcStep Step = PieceStep.second;
+
+			mPieces[PieceIdx] = Piece;
+			Piece->SetStepShow(Step);
+
+			if (Step > mCurrentStep)
+				Piece->SetSelected(false);
+
+			Modified = true;
+		}
+	}
+
+	if (Modified)
+	{
+		SaveCheckpoint("Modifying");
+		gMainWindow->UpdateAllViews();
+		UpdateSelection();
+		gMainWindow->UpdateFocusObject(GetFocusObject());
 	}
 }
 

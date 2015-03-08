@@ -546,6 +546,7 @@ void lcMainWindow::CreateToolBars()
 	mTimelineToolBar = new QDockWidget(tr("Timeline"), this);
 	mTimelineToolBar->setObjectName("TimelineToolbar");
 	mTimelineToolBar->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+	mTimelineToolBar->setAcceptDrops(true);
 
 	mTimelineWidget = new lcTimelineWidget(mTimelineToolBar);
 

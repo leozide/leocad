@@ -8,6 +8,9 @@ public:
 	virtual ~lcTimelineWidget();
 
 	void Update();
+
+protected:
+	virtual void dropEvent(QDropEvent* Event);
 };
 
 #endif // _LC_TIMELINEWIDGET_H_

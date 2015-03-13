@@ -1372,6 +1372,8 @@ void lcMainWindow::UpdateFocusObject(lcObject* Focus)
 
 void lcMainWindow::UpdateSelectedObjects(int Flags, int SelectedCount, lcObject* Focus)
 {
+	mTimelineWidget->UpdateSelection();
+
 	mActions[LC_EDIT_CUT]->setEnabled(Flags & LC_SEL_SELECTED);
 	mActions[LC_EDIT_COPY]->setEnabled(Flags & LC_SEL_SELECTED);
 	mActions[LC_EDIT_FIND]->setEnabled((Flags & LC_SEL_NO_PIECES) == 0);

@@ -28,18 +28,13 @@ lcTimelineWidget::~lcTimelineWidget()
 
 void lcTimelineWidget::CustomMenuRequested(QPoint Pos)
 {
-	QList<QTreeWidgetItem*> SelectedItems = selectedItems();
+	QMenu* Menu = new QMenu(this);
 
-	if (!SelectedItems.isEmpty())
-	{
-		QMenu* Menu = new QMenu(this);
+	Menu->addAction(gMainWindow->mActions[LC_PIECE_HIDE_SELECTED]);
+	Menu->addAction(gMainWindow->mActions[LC_PIECE_HIDE_UNSELECTED]);
+	Menu->addAction(gMainWindow->mActions[LC_PIECE_UNHIDE_ALL]);
 
-		Menu->addAction(gMainWindow->mActions[LC_PIECE_HIDE_SELECTED]);
-		Menu->addAction(gMainWindow->mActions[LC_PIECE_HIDE_UNSELECTED]);
-		Menu->addAction(gMainWindow->mActions[LC_PIECE_UNHIDE_ALL]);
-
-		Menu->popup(viewport()->mapToGlobal(Pos));
-	}
+	Menu->popup(viewport()->mapToGlobal(Pos));
 }
 
 void lcTimelineWidget::Update()
@@ -57,8 +52,20 @@ void lcTimelineWidget::Update()
 
 	int Steps = Model->GetLastStep();
 
-	for (int TopLevelItemIdx = Steps; TopLevelItemIdx < topLevelItemCount(); TopLevelItemIdx++)
-		delete topLevelItem(TopLevelItemIdx);
+	for (int TopLevelItemIdx = Steps; TopLevelItemIdx < topLevelItemCount(); )
+	{
+		QTreeWidgetItem* StepItem = topLevelItem(TopLevelItemIdx);
+
+		while (StepItem->childCount())
+		{
+			QTreeWidgetItem* PieceItem = StepItem->child(0);
+			lcPiece* Piece = (lcPiece*)PieceItem->data(0, Qt::UserRole).value<uintptr_t>();
+			mItems.remove(Piece);
+			delete PieceItem;
+		}
+
+		delete StepItem;
+	}
 
 	for (int Step = topLevelItemCount(); Step < Steps; Step++)
 	{
@@ -69,28 +76,76 @@ void lcTimelineWidget::Update()
 	}
 
 	const lcArray<lcPiece*>& Pieces = Model->GetPieces();
+	QTreeWidgetItem* StepItem = NULL;
+	int PieceItemIndex = 0;
+	int Step = -1;
 
-	for (int PieceIdx = 0; PieceIdx < Pieces.GetSize(); PieceIdx++)
+	for (int PieceIdx = 0; PieceIdx != Pieces.GetSize(); PieceIdx++)
 	{
 		lcPiece* Piece = Pieces[PieceIdx];
-		QTreeWidgetItem* PieceItem = mItems.value(Piece);
-		QTreeWidgetItem* StepItem = topLevelItem(Piece->GetStepShow() - 1);
 
-		if (PieceItem)
+		if (Step != Piece->GetStepShow())
 		{
-			if (PieceItem->parent() != StepItem)
-				StepItem->addChild(PieceItem);
+			if (StepItem)
+			{
+				while (PieceItemIndex < StepItem->childCount())
+				{
+					QTreeWidgetItem* PieceItem = StepItem->child(PieceItemIndex);
+					lcPiece* RemovePiece = (lcPiece*)PieceItem->data(0, Qt::UserRole).value<uintptr_t>();
+
+					if (Pieces.FindIndex(RemovePiece) == -1)
+					{
+						mItems.remove(RemovePiece);
+						delete PieceItem;
+					}
+					else
+					{
+						PieceItem->parent()->removeChild(PieceItem);
+						topLevelItem(RemovePiece->GetStepShow() - 1)->addChild(PieceItem);
+					}
+				}
+			}
+
+			Step = Piece->GetStepShow();
+			StepItem = topLevelItem(Step - 1);
+			PieceItemIndex = 0;
+		}
+
+		QTreeWidgetItem* PieceItem = mItems.value(Piece);
+
+		if (!PieceItem)
+		{
+			PieceItem = new QTreeWidgetItem(QStringList(Piece->mPieceInfo->m_strDescription));
+			PieceItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsDragEnabled);
+			PieceItem->setData(0, Qt::UserRole, qVariantFromValue<uintptr_t>((uintptr_t)Piece));
+			StepItem->insertChild(PieceItemIndex, PieceItem);
+			mItems[Piece] = PieceItem;
 		}
 		else
 		{
-			PieceItem = new QTreeWidgetItem(StepItem, QStringList(Piece->mPieceInfo->m_strDescription));
-			PieceItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsDragEnabled);
-			PieceItem->setData(0, Qt::UserRole, qVariantFromValue<uintptr_t>((uintptr_t)Piece));
-			StepItem->addChild(PieceItem);
-			mItems[Piece] = PieceItem;
+			if (PieceItemIndex >= StepItem->childCount() || PieceItem != StepItem->child(PieceItemIndex))
+			{
+				if (PieceItem->parent() == StepItem)
+					StepItem->removeChild(PieceItem);
+
+				StepItem->insertChild(PieceItemIndex, PieceItem);
+			}
 		}
 
 		PieceItem->setSelected(Piece->IsSelected());
+		PieceItemIndex++;
+	}
+
+	if (!StepItem)
+		StepItem = topLevelItem(0);
+
+	while (PieceItemIndex < StepItem->childCount())
+	{
+		QTreeWidgetItem* PieceItem = StepItem->child(PieceItemIndex);
+		lcPiece* RemovePiece = (lcPiece*)PieceItem->data(0, Qt::UserRole).value<uintptr_t>();
+
+		mItems.remove(RemovePiece);
+		delete PieceItem;
 	}
 
 	blockSignals(Blocked);

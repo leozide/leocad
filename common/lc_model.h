@@ -251,7 +251,7 @@ public:
 	void ClearSelection(bool UpdateInterface);
 	void ClearSelectionAndSetFocus(lcObject* Object, lcuint32 Section);
 	void ClearSelectionAndSetFocus(const lcObjectSection& ObjectSection);
-	void SetSelection(const lcArray<lcObject*>& Objects);
+	void SetSelectionAndFocus(const lcArray<lcObject*>& Selection, lcObject* Focus, lcuint32 Section);
 	void AddToSelection(const lcArray<lcObject*>& Objects);
 	void SelectAllPieces();
 	void InvertSelection();

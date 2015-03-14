@@ -849,6 +849,8 @@ void lcModel::Merge(lcModel* Other)
 	Other->mGroups.RemoveAll();
 
 	delete Other;
+
+	gMainWindow->UpdateTimeline();
 }
 
 void lcModel::Cut()
@@ -857,6 +859,7 @@ void lcModel::Cut()
 
 	if (RemoveSelectedObjects())
 	{
+		gMainWindow->UpdateTimeline();
 		gMainWindow->UpdateFocusObject(NULL);
 		UpdateSelection();
 		gMainWindow->UpdateAllViews();
@@ -890,9 +893,10 @@ void lcModel::Paste()
 	Merge(Model);
 	SaveCheckpoint(tr("Pasting"));
 
-	SetSelection((lcArray<lcObject*>&)PastedPieces);
+	SetSelectionAndFocus((lcArray<lcObject*>&)PastedPieces, NULL, 0);
 
 	CalculateStep(mCurrentStep);
+	gMainWindow->UpdateTimeline();
 	gMainWindow->UpdateAllViews();
 }
 
@@ -1219,6 +1223,7 @@ void lcModel::LoadCheckPoint(lcModelHistoryEntry* CheckPoint)
 	Buffer.open(QIODevice::ReadOnly);
 	LoadLDraw(Buffer, lcGetActiveProject());
 
+	gMainWindow->UpdateTimeline();
 	gMainWindow->UpdateFocusObject(GetFocusObject());
 	gMainWindow->UpdateCameraMenu();
 	UpdateSelection();
@@ -1355,6 +1360,7 @@ void lcModel::InsertStep()
 
 	SaveCheckpoint(tr("Inserting Step"));
 	CalculateStep(mCurrentStep);
+	gMainWindow->UpdateTimeline();
 	gMainWindow->UpdateFocusObject(GetFocusObject());
 	gMainWindow->UpdateAllViews();
 	UpdateSelection();
@@ -1378,6 +1384,7 @@ void lcModel::RemoveStep()
 
 	SaveCheckpoint(tr("Removing Step"));
 	CalculateStep(mCurrentStep);
+	gMainWindow->UpdateTimeline();
 	gMainWindow->UpdateFocusObject(GetFocusObject());
 	gMainWindow->UpdateAllViews();
 	UpdateSelection();
@@ -1835,6 +1842,7 @@ void lcModel::AddPiece()
 	Piece->Initialize(WorldMatrix, mCurrentStep);
 	Piece->SetColorIndex(gMainWindow->mColorIndex);
 	AddPiece(Piece);
+	gMainWindow->UpdateTimeline();
 	ClearSelectionAndSetFocus(Piece, LC_PIECE_SECTION_POSITION);
 
 	SaveCheckpoint("Adding Piece");
@@ -1871,6 +1879,7 @@ void lcModel::DeleteSelectedObjects()
 {
 	if (RemoveSelectedObjects())
 	{
+		gMainWindow->UpdateTimeline();
 		gMainWindow->UpdateFocusObject(NULL);
 		UpdateSelection();
 		gMainWindow->UpdateAllViews();
@@ -1989,6 +1998,7 @@ void lcModel::SetPieceSteps(const QList<QPair<lcPiece*, int>>& PieceSteps)
 		SaveCheckpoint("Modifying");
 		gMainWindow->UpdateAllViews();
 		UpdateSelection();
+		gMainWindow->UpdateTimeline();
 		gMainWindow->UpdateFocusObject(GetFocusObject());
 	}
 }
@@ -2450,6 +2460,7 @@ void lcModel::SetObjectProperty(lcObject* Object, lcObjectPropertyType ObjectPro
 	if (!CheckPointString.isEmpty())
 	{
 		SaveCheckpoint(CheckPointString);
+		gMainWindow->UpdateTimeline();
 		gMainWindow->UpdateFocusObject(GetFocusObject());
 		gMainWindow->UpdateAllViews();
 	}
@@ -2930,10 +2941,19 @@ void lcModel::ClearSelectionAndSetFocus(const lcObjectSection& ObjectSection)
 	ClearSelectionAndSetFocus(ObjectSection.Object, ObjectSection.Section);
 }
 
-void lcModel::SetSelection(const lcArray<lcObject*>& Objects)
+void lcModel::SetSelectionAndFocus(const lcArray<lcObject*>& Selection, lcObject* Focus, lcuint32 Section)
 {
 	ClearSelection(false);
-	AddToSelection(Objects);
+
+	if (Focus)
+	{
+		Focus->SetFocused(Section, true);
+
+		if (Focus->IsPiece())
+			SelectGroup(((lcPiece*)Focus)->GetTopGroup(), true);
+	}
+
+	AddToSelection(Selection);
 }
 
 void lcModel::AddToSelection(const lcArray<lcObject*>& Objects)
@@ -3186,6 +3206,7 @@ void lcModel::InsertPieceToolClicked(const lcMatrix44& WorldMatrix)
 	Piece->UpdatePosition(mCurrentStep);
 	AddPiece(Piece);
 
+	gMainWindow->UpdateTimeline();
 	ClearSelectionAndSetFocus(Piece, LC_PIECE_SECTION_POSITION);
 
 	SaveCheckpoint(tr("Insert"));
@@ -3306,6 +3327,7 @@ void lcModel::EraserToolClicked(lcObject* Object)
 	}
 
 	delete Object;
+	gMainWindow->UpdateTimeline();
 	gMainWindow->UpdateFocusObject(GetFocusObject());
 	UpdateSelection();
 	gMainWindow->UpdateAllViews();
@@ -3471,7 +3493,7 @@ void lcModel::ShowSelectByNameDialog()
 	if (!gMainWindow->DoDialog(LC_DIALOG_SELECT_BY_NAME, &Options))
 		return;
 
-	SetSelection(Options.Objects);
+	SetSelectionAndFocus(Options.Objects, NULL, 0);
 }
 
 void lcModel::ShowArrayDialog()
@@ -3550,6 +3572,7 @@ void lcModel::ShowArrayDialog()
 	}
 
 	AddToSelection(NewPieces);
+	gMainWindow->UpdateTimeline();
 	SaveCheckpoint(tr("Array"));
 }
 
@@ -3581,7 +3604,8 @@ void lcModel::ShowMinifigDialog()
 		Pieces.Add(Piece);
 	}
 
-	SetSelection(Pieces);
+	SetSelectionAndFocus(Pieces, NULL, 0);
+	gMainWindow->UpdateTimeline();
 	SaveCheckpoint(tr("Minifig"));
 }
 

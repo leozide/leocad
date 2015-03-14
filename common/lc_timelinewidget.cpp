@@ -39,6 +39,9 @@ void lcTimelineWidget::CustomMenuRequested(QPoint Pos)
 
 void lcTimelineWidget::Update()
 {
+	if (mIgnoreUpdates)
+		return;
+
 	lcModel* Model = lcGetActiveModel();
 
 	if (!Model)
@@ -67,9 +70,9 @@ void lcTimelineWidget::Update()
 		delete StepItem;
 	}
 
-	for (int Step = topLevelItemCount(); Step < Steps; Step++)
+	for (int TopLevelItemIdx = topLevelItemCount(); TopLevelItemIdx < Steps; TopLevelItemIdx++)
 	{
-		QTreeWidgetItem* StepItem = new QTreeWidgetItem(this, QStringList(tr("Step %1").arg(Step + 1)));
+		QTreeWidgetItem* StepItem = new QTreeWidgetItem(this, QStringList(tr("Step %1").arg(TopLevelItemIdx + 1)));
 		StepItem->setFlags(Qt::ItemIsEnabled | Qt::ItemIsDropEnabled);
 		addTopLevelItem(StepItem);
 		StepItem->setExpanded(true);
@@ -78,13 +81,13 @@ void lcTimelineWidget::Update()
 	const lcArray<lcPiece*>& Pieces = Model->GetPieces();
 	QTreeWidgetItem* StepItem = NULL;
 	int PieceItemIndex = 0;
-	int Step = -1;
+	int Step = 0;
 
 	for (int PieceIdx = 0; PieceIdx != Pieces.GetSize(); PieceIdx++)
 	{
 		lcPiece* Piece = Pieces[PieceIdx];
 
-		if (Step != Piece->GetStepShow())
+		while (Step != Piece->GetStepShow())
 		{
 			if (StepItem)
 			{
@@ -106,7 +109,7 @@ void lcTimelineWidget::Update()
 				}
 			}
 
-			Step = Piece->GetStepShow();
+			Step++;
 			StepItem = topLevelItem(Step - 1);
 			PieceItemIndex = 0;
 		}
@@ -184,9 +187,14 @@ void lcTimelineWidget::ItemSelectionChanged()
 		Selection.Add(Piece);
 	}
 
+	lcPiece* CurrentPiece = NULL;
+	QTreeWidgetItem* CurrentItem = currentItem();
+	if (CurrentItem && CurrentItem->isSelected())
+		CurrentPiece = (lcPiece*)CurrentItem->data(0, Qt::UserRole).value<uintptr_t>();
+
 	bool Blocked = blockSignals(true);
 	mIgnoreUpdates = true;
-	lcGetActiveModel()->SetSelection(Selection);
+	lcGetActiveModel()->SetSelectionAndFocus(Selection, CurrentPiece, LC_PIECE_SECTION_POSITION);
 	mIgnoreUpdates = false;
 	blockSignals(Blocked);
 }
@@ -210,5 +218,7 @@ void lcTimelineWidget::dropEvent(QDropEvent* Event)
 		}
 	}
 
+	mIgnoreUpdates = true;
 	lcGetActiveModel()->SetPieceSteps(PieceSteps);
+	mIgnoreUpdates = false;
 }

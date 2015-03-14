@@ -327,6 +327,8 @@ protected:
 	void UpdateSelection() const;
 	void SelectGroup(lcGroup* TopGroup, bool Select);
 
+	void AddPiece(lcPiece* Piece);
+
 	lcModelProperties mProperties;
 	PieceInfo* mPieceInfo;
 

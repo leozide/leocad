@@ -510,7 +510,7 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 				Piece->SetPieceInfo(Info);
 				Piece->Initialize(Transform, CurrentStep);
 				Piece->SetColorCode(ColorCode);
-				mPieces.Add(Piece);
+				AddPiece(Piece);
 				Piece = NULL;
 			}
 		}
@@ -587,7 +587,7 @@ bool lcModel::LoadBinary(lcFile* file)
 		{
 			lcPiece* pPiece = new lcPiece(NULL);
 			pPiece->FileLoad(*file);
-			mPieces.Add(pPiece);
+			AddPiece(pPiece);
 		}
 		else
 		{
@@ -611,7 +611,7 @@ bool lcModel::LoadBinary(lcFile* file)
 
 			pPiece->Initialize(WorldMatrix, step);
 			pPiece->SetColorCode(lcGetColorCodeFromOriginalColor(color));
-			mPieces.Add(pPiece);
+			AddPiece(pPiece);
 
 //			pPiece->SetGroup((lcGroup*)group);
 		}
@@ -816,7 +816,7 @@ void lcModel::Merge(lcModel* Other)
 	for (int PieceIdx = 0; PieceIdx < Other->mPieces.GetSize(); PieceIdx++)
 	{
 		lcPiece* Piece = Other->mPieces[PieceIdx];
-		mPieces.Add(Piece);
+		AddPiece(Piece);
 	}
 
 	Other->mPieces.RemoveAll();
@@ -1834,10 +1834,24 @@ void lcModel::AddPiece()
 	lcPiece* Piece = new lcPiece(CurPiece);
 	Piece->Initialize(WorldMatrix, mCurrentStep);
 	Piece->SetColorIndex(gMainWindow->mColorIndex);
-	mPieces.Add(Piece);
+	AddPiece(Piece);
 	ClearSelectionAndSetFocus(Piece, LC_PIECE_SECTION_POSITION);
 
 	SaveCheckpoint("Adding Piece");
+}
+
+void lcModel::AddPiece(lcPiece* Piece)
+{
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+	{
+		if (mPieces[PieceIdx]->GetStepShow() > Piece->GetStepShow())
+		{
+			mPieces.InsertAt(PieceIdx, Piece);
+			return;
+		}
+	}
+
+	mPieces.Add(Piece);
 }
 
 void lcModel::DeleteAllCameras()
@@ -1866,9 +1880,9 @@ void lcModel::DeleteSelectedObjects()
 
 void lcModel::ShowSelectedPiecesEarlier()
 {
-	bool Modified = false;
+	lcArray<lcPiece*> MovedPieces;
 
-	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); )
 	{
 		lcPiece* Piece = mPieces[PieceIdx];
 
@@ -1879,25 +1893,34 @@ void lcModel::ShowSelectedPiecesEarlier()
 			if (Step > 1)
 			{
 				Step--;
-				Modified = true;
 				Piece->SetStepShow(Step);
+
+				MovedPieces.Add(Piece);
+				mPieces.RemoveIndex(PieceIdx);
+				continue;
 			}
 		}
+
+		PieceIdx++;
 	}
 
-	if (Modified)
-	{
-		SaveCheckpoint("Modifying");
-		gMainWindow->UpdateAllViews();
-		UpdateSelection();
-	}
+	if (MovedPieces.IsEmpty())
+		return;
+
+	for (int PieceIdx = 0; PieceIdx < MovedPieces.GetSize(); PieceIdx++)
+		AddPiece(MovedPieces[PieceIdx]);
+
+	SaveCheckpoint("Modifying");
+	gMainWindow->UpdateAllViews();
+	gMainWindow->UpdateTimeline();
+	UpdateSelection();
 }
 
 void lcModel::ShowSelectedPiecesLater()
 {
-	bool Modified = false;
+	lcArray<lcPiece*> MovedPieces;
 
-	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); )
 	{
 		lcPiece* Piece = mPieces[PieceIdx];
 
@@ -1908,22 +1931,30 @@ void lcModel::ShowSelectedPiecesLater()
 			if (Step < LC_STEP_MAX)
 			{
 				Step++;
-				Modified = true;
 				Piece->SetStepShow(Step);
 
 				if (Step > mCurrentStep)
 					Piece->SetSelected(false);
+
+				MovedPieces.Add(Piece);
+				mPieces.RemoveIndex(PieceIdx);
+				continue;
 			}
 		}
+
+		PieceIdx++;
 	}
 
-	if (Modified)
-	{
-		SaveCheckpoint("Modifying");
-		gMainWindow->UpdateAllViews();
-		UpdateSelection();
-		gMainWindow->UpdateFocusObject(GetFocusObject());
-	}
+	if (MovedPieces.IsEmpty())
+		return;
+
+	for (int PieceIdx = 0; PieceIdx < MovedPieces.GetSize(); PieceIdx++)
+		AddPiece(MovedPieces[PieceIdx]);
+
+	SaveCheckpoint("Modifying");
+	gMainWindow->UpdateAllViews();
+	gMainWindow->UpdateTimeline();
+	UpdateSelection();
 }
 
 void lcModel::SetPieceSteps(const QList<QPair<lcPiece*, int>>& PieceSteps)
@@ -3153,7 +3184,7 @@ void lcModel::InsertPieceToolClicked(const lcMatrix44& WorldMatrix)
 	Piece->Initialize(WorldMatrix, mCurrentStep);
 	Piece->SetColorIndex(gMainWindow->mColorIndex);
 	Piece->UpdatePosition(mCurrentStep);
-	mPieces.Add(Piece);
+	AddPiece(Piece);
 
 	ClearSelectionAndSetFocus(Piece, LC_PIECE_SECTION_POSITION);
 
@@ -3515,7 +3546,7 @@ void lcModel::ShowArrayDialog()
 	{
 		lcPiece* Piece = (lcPiece*)NewPieces[PieceIdx];
 		Piece->UpdatePosition(mCurrentStep);
-		mPieces.Add(Piece);
+		AddPiece(Piece);
 	}
 
 	AddToSelection(NewPieces);
@@ -3544,7 +3575,7 @@ void lcModel::ShowMinifigDialog()
 		Piece->Initialize(Minifig.Matrices[PartIdx], mCurrentStep);
 		Piece->SetColorIndex(Minifig.Colors[PartIdx]);
 		Piece->SetGroup(Group);
-		mPieces.Add(Piece);
+		AddPiece(Piece);
 		Piece->UpdatePosition(mCurrentStep);
 
 		Pieces.Add(Piece);
@@ -3556,6 +3587,7 @@ void lcModel::ShowMinifigDialog()
 
 void lcModel::UpdateInterface()
 {
+	gMainWindow->UpdateTimeline();
 	gMainWindow->UpdateUndoRedo(mUndoHistory.GetSize() > 1 ? mUndoHistory[0]->Description : NULL, !mRedoHistory.IsEmpty() ? mRedoHistory[0]->Description : NULL);
 	gMainWindow->UpdatePaste(!g_App->mClipboard.isEmpty());
 	gMainWindow->UpdateCategories();

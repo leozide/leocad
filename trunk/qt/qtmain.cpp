@@ -178,7 +178,6 @@ int main(int argc, char *argv[])
 	if (!g_App->Initialize(argc, argv, libPath, LDrawPath, cachePath.toLocal8Bit().data()))
 		return 1;
 
-	lcGetActiveModel()->UpdateInterface();
 	gMainWindow->SetColorIndex(lcGetColorIndex(4));
 	gMainWindow->UpdateRecentFiles();
 	gMainWindow->show();

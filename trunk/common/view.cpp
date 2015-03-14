@@ -1921,7 +1921,7 @@ void View::StopTracking(bool Accept)
 			if (mInputState.Control)
 				mModel->AddToSelection(Objects);
 			else
-				mModel->SetSelection(Objects);
+				mModel->SetSelectionAndFocus(Objects, NULL, 0);
 		}
 		break;
 

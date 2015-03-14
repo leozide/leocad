@@ -1359,7 +1359,6 @@ void lcMainWindow::RemoveRecentFile(int FileIndex)
 
 void lcMainWindow::UpdateFocusObject(lcObject* Focus)
 {
-	UpdateTimeline();
 	mPropertiesWidget->updateFocusObject(Focus);
 
 	lcVector3 Position;

@@ -1385,9 +1385,10 @@ void lcMainWindow::UpdateSelectedObjects(int Flags, int SelectedCount, lcObject*
 
 	mActions[LC_PIECE_DELETE]->setEnabled(Flags & LC_SEL_SELECTED);
 	mActions[LC_PIECE_ARRAY]->setEnabled(Flags & LC_SEL_PIECE);
-	mActions[LC_PIECE_HIDE_SELECTED]->setEnabled(Flags & LC_SEL_PIECE);
-	mActions[LC_PIECE_UNHIDE_ALL]->setEnabled(Flags & LC_SEL_HIDDEN);
+	mActions[LC_PIECE_HIDE_SELECTED]->setEnabled(Flags & LC_SEL_VISIBLE_SELECTED);
 	mActions[LC_PIECE_HIDE_UNSELECTED]->setEnabled(Flags & LC_SEL_UNSELECTED);
+	mActions[LC_PIECE_UNHIDE_SELECTED]->setEnabled(Flags & LC_SEL_HIDDEN_SELECTED);
+	mActions[LC_PIECE_UNHIDE_ALL]->setEnabled(Flags & LC_SEL_HIDDEN);
 	mActions[LC_PIECE_GROUP]->setEnabled(Flags & LC_SEL_CAN_GROUP);
 	mActions[LC_PIECE_UNGROUP]->setEnabled(Flags & LC_SEL_GROUPED);
 	mActions[LC_PIECE_GROUP_ADD]->setEnabled((Flags & (LC_SEL_GROUPED | LC_SEL_FOCUS_GROUPED)) == LC_SEL_GROUPED);
@@ -2019,6 +2020,10 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 
 	case LC_PIECE_HIDE_UNSELECTED:
 		lcGetActiveModel()->HideUnselectedPieces();
+		break;
+
+	case LC_PIECE_UNHIDE_SELECTED:
+		lcGetActiveModel()->UnhideSelectedPieces();
 		break;
 
 	case LC_PIECE_UNHIDE_ALL:

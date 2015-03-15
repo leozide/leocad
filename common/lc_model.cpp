@@ -2766,6 +2766,11 @@ void lcModel::UpdateSelection() const
 				if (Piece->IsFocused())
 					Focus = Piece;
 
+				if (Piece->IsHidden())
+					Flags |= LC_SEL_HIDDEN | LC_SEL_HIDDEN_SELECTED;
+				else
+					Flags |= LC_SEL_VISIBLE_SELECTED;
+
 				Flags |= LC_SEL_PIECE | LC_SEL_SELECTED;
 
 				if (Piece->GetGroup() != NULL)
@@ -3009,6 +3014,20 @@ void lcModel::HideUnselectedPieces()
 
 		if (!Piece->IsSelected())
 			Piece->SetHidden(true);
+	}
+
+	UpdateSelection();
+	gMainWindow->UpdateAllViews();
+}
+
+void lcModel::UnhideSelectedPieces()
+{
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+	{
+		lcPiece* Piece = mPieces[PieceIdx];
+
+		if (Piece->IsSelected())
+			Piece->SetHidden(false);
 	}
 
 	UpdateSelection();

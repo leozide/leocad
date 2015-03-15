@@ -13,6 +13,8 @@ public:
 	void UpdateSelection();
 
 public slots:
+	void InsertStep();
+	void RemoveStep();
 	void ItemSelectionChanged();
 	void CustomMenuRequested(QPoint Pos);
 

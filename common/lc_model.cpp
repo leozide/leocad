@@ -1080,7 +1080,7 @@ void lcModel::SaveStepImages(const QString& BaseName, int Width, int Height, lcS
 
 	for (lcStep Step = Start; Step <= End; Step++)
 	{
-		SetCurrentStep(Step);
+		SetTemporaryStep(Step);
 		View.OnDraw();
 
 		QString FileName;
@@ -1096,7 +1096,7 @@ void lcModel::SaveStepImages(const QString& BaseName, int Width, int Height, lcS
 
 	Context->EndRenderToTexture();
 
-	SetCurrentStep(CurrentStep);
+	SetTemporaryStep(CurrentStep);
 
 	if (!mActive)
 		CalculateStep(LC_STEP_MAX);
@@ -1274,18 +1274,24 @@ void lcModel::CalculateStep(lcStep Step)
 		mLights[LightIdx]->UpdatePosition(Step);
 }
 
+void lcModel::SetCurrentStep(lcStep Step)
+{
+	mCurrentStep = Step;
+	CalculateStep(Step);
+
+	UpdateSelection();
+	gMainWindow->UpdateTimeline();
+	gMainWindow->UpdateFocusObject(GetFocusObject());
+	gMainWindow->UpdateAllViews();
+	gMainWindow->UpdateCurrentStep();
+}
+
 void lcModel::ShowFirstStep()
 {
 	if (mCurrentStep == 1)
 		return;
 
-	mCurrentStep = 1;
-
-	CalculateStep(mCurrentStep);
-	UpdateSelection();
-	gMainWindow->UpdateFocusObject(GetFocusObject());
-	gMainWindow->UpdateAllViews();
-	gMainWindow->UpdateCurrentStep();
+	SetCurrentStep(1);
 }
 
 void lcModel::ShowLastStep()
@@ -1295,13 +1301,7 @@ void lcModel::ShowLastStep()
 	if (mCurrentStep == LastStep)
 		return;
 
-	mCurrentStep = LastStep;
-
-	CalculateStep(mCurrentStep);
-	UpdateSelection();
-	gMainWindow->UpdateFocusObject(GetFocusObject());
-	gMainWindow->UpdateAllViews();
-	gMainWindow->UpdateCurrentStep();
+	SetCurrentStep(LastStep);
 }
 
 void lcModel::ShowPreviousStep()
@@ -1309,13 +1309,7 @@ void lcModel::ShowPreviousStep()
 	if (mCurrentStep == 1)
 		return;
 
-	mCurrentStep--;
-
-	CalculateStep(mCurrentStep);
-	UpdateSelection();
-	gMainWindow->UpdateFocusObject(GetFocusObject());
-	gMainWindow->UpdateAllViews();
-	gMainWindow->UpdateCurrentStep();
+	SetCurrentStep(mCurrentStep - 1);
 }
 
 void lcModel::ShowNextStep()
@@ -1323,13 +1317,7 @@ void lcModel::ShowNextStep()
 	if (mCurrentStep == LC_STEP_MAX)
 		return;
 
-	mCurrentStep++;
-
-	CalculateStep(mCurrentStep);
-	UpdateSelection();
-	gMainWindow->UpdateFocusObject(GetFocusObject());
-	gMainWindow->UpdateAllViews();
-	gMainWindow->UpdateCurrentStep();
+	SetCurrentStep(mCurrentStep + 1);
 }
 
 lcStep lcModel::GetLastStep() const
@@ -1342,52 +1330,44 @@ lcStep lcModel::GetLastStep() const
 	return Step;
 }
 
-void lcModel::InsertStep()
+void lcModel::InsertStep(lcStep Step)
 {
 	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 	{
 		lcPiece* Piece = mPieces[PieceIdx];
-		Piece->InsertTime(mCurrentStep, 1);
+		Piece->InsertTime(Step, 1);
 		if (Piece->IsSelected() && !Piece->IsVisible(mCurrentStep))
 			Piece->SetSelected(false);
 	}
 
 	for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
-		mCameras[CameraIdx]->InsertTime(mCurrentStep, 1);
+		mCameras[CameraIdx]->InsertTime(Step, 1);
 
 	for (int LightIdx = 0; LightIdx < mLights.GetSize(); LightIdx++)
-		mLights[LightIdx]->InsertTime(mCurrentStep, 1);
+		mLights[LightIdx]->InsertTime(Step, 1);
 
 	SaveCheckpoint(tr("Inserting Step"));
-	CalculateStep(mCurrentStep);
-	gMainWindow->UpdateTimeline();
-	gMainWindow->UpdateFocusObject(GetFocusObject());
-	gMainWindow->UpdateAllViews();
-	UpdateSelection();
+	SetCurrentStep(mCurrentStep);
 }
 
-void lcModel::RemoveStep()
+void lcModel::RemoveStep(lcStep Step)
 {
 	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 	{
 		lcPiece* Piece = mPieces[PieceIdx];
-		Piece->RemoveTime(mCurrentStep, 1);
+		Piece->RemoveTime(Step, 1);
 		if (Piece->IsSelected() && !Piece->IsVisible(mCurrentStep))
 			Piece->SetSelected(false);
 	}
 
 	for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
-		mCameras[CameraIdx]->RemoveTime(mCurrentStep, 1);
+		mCameras[CameraIdx]->RemoveTime(Step, 1);
 
 	for (int LightIdx = 0; LightIdx < mLights.GetSize(); LightIdx++)
-		mLights[LightIdx]->RemoveTime(mCurrentStep, 1);
+		mLights[LightIdx]->RemoveTime(Step, 1);
 
 	SaveCheckpoint(tr("Removing Step"));
-	CalculateStep(mCurrentStep);
-	gMainWindow->UpdateTimeline();
-	gMainWindow->UpdateFocusObject(GetFocusObject());
-	gMainWindow->UpdateAllViews();
-	UpdateSelection();
+	SetCurrentStep(mCurrentStep);
 }
 
 lcGroup* lcModel::AddGroup(const char* Prefix, lcGroup* Parent)

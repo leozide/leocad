@@ -177,7 +177,8 @@ public:
 
 	void SetActive(bool Active);
 	void CalculateStep(lcStep Step);
-	void SetCurrentStep(lcStep Step)
+	void SetCurrentStep(lcStep Step);
+	void SetTemporaryStep(lcStep Step)
 	{
 		mCurrentStep = Step;
 		CalculateStep(Step);
@@ -187,8 +188,8 @@ public:
 	void ShowLastStep();
 	void ShowPreviousStep();
 	void ShowNextStep();
-	void InsertStep();
-	void RemoveStep();
+	void InsertStep(lcStep Step);
+	void RemoveStep(lcStep Step);
 
 	void AddPiece();
 	void DeleteAllCameras();

@@ -774,7 +774,7 @@ void lcMainWindow::Print(QPrinter* Printer)
 				if (Printer->printerState() == QPrinter::Aborted || Printer->printerState() == QPrinter::Error)
 				{
 					free(Buffer);
-					Model->SetCurrentStep(PreviousTime);
+					Model->SetTemporaryStep(PreviousTime);
 					Context->EndRenderToTexture();
 					return;
 				}
@@ -788,7 +788,7 @@ void lcMainWindow::Print(QPrinter* Printer)
 						if (CurrentStep > Model->GetLastStep())
 							break;
 
-						Model->SetCurrentStep(CurrentStep);
+						Model->SetTemporaryStep(CurrentStep);
 
 						if (StepWidth > TileWidth || StepHeight > TileHeight)
 						{
@@ -944,7 +944,7 @@ void lcMainWindow::Print(QPrinter* Printer)
 
 	free(Buffer);
 
-	Model->SetCurrentStep(PreviousTime);
+	Model->SetTemporaryStep(PreviousTime);
 
 	Context->EndRenderToTexture();
 }
@@ -2070,11 +2070,11 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		break;
 
 	case LC_VIEW_TIME_INSERT:
-		lcGetActiveModel()->InsertStep();
+		lcGetActiveModel()->InsertStep(lcGetActiveModel()->GetCurrentStep());
 		break;
 
 	case LC_VIEW_TIME_DELETE:
-		lcGetActiveModel()->RemoveStep();
+		lcGetActiveModel()->RemoveStep(lcGetActiveModel()->GetCurrentStep());
 		break;
 
 	case LC_VIEW_VIEWPOINT_FRONT:

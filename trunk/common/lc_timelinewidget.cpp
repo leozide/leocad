@@ -30,6 +30,9 @@ void lcTimelineWidget::CustomMenuRequested(QPoint Pos)
 {
 	QMenu* Menu = new QMenu(this);
 
+	Menu->addAction(tr("Insert Step"), this, SLOT(InsertStep()));
+	Menu->addAction(tr("Remove Step"), this, SLOT(RemoveStep()));
+	Menu->addSeparator();
 	Menu->addAction(gMainWindow->mActions[LC_PIECE_HIDE_SELECTED]);
 	Menu->addAction(gMainWindow->mActions[LC_PIECE_HIDE_UNSELECTED]);
 	Menu->addAction(gMainWindow->mActions[LC_PIECE_UNHIDE_ALL]);
@@ -53,7 +56,7 @@ void lcTimelineWidget::Update()
 
 	bool Blocked = blockSignals(true);
 
-	int Steps = Model->GetLastStep();
+	int Steps = lcMax(Model->GetLastStep(), Model->GetCurrentStep());
 
 	for (int TopLevelItemIdx = Steps; TopLevelItemIdx < topLevelItemCount(); )
 	{
@@ -177,13 +180,51 @@ void lcTimelineWidget::UpdateSelection()
 	blockSignals(Blocked);
 }
 
+void lcTimelineWidget::InsertStep()
+{
+	QTreeWidgetItem* CurrentItem = currentItem();
+
+	if (!CurrentItem)
+		return;
+
+	if (CurrentItem->parent())
+		CurrentItem = CurrentItem->parent();
+
+	int Step = indexOfTopLevelItem(CurrentItem);
+
+	if (Step == -1)
+		return;
+
+	lcGetActiveModel()->InsertStep(Step + 1);
+}
+
+void lcTimelineWidget::RemoveStep()
+{
+	QTreeWidgetItem* CurrentItem = currentItem();
+
+	if (!CurrentItem)
+		return;
+
+	if (CurrentItem->parent())
+		CurrentItem = CurrentItem->parent();
+
+	int Step = indexOfTopLevelItem(CurrentItem);
+
+	if (Step == -1)
+		return;
+
+	lcGetActiveModel()->RemoveStep(Step + 1);
+}
+
 void lcTimelineWidget::ItemSelectionChanged()
 {
 	lcArray<lcObject*> Selection;
+	lcStep LastStep = 1;
 
 	foreach (QTreeWidgetItem* PieceItem, selectedItems())
 	{
 		lcPiece* Piece = (lcPiece*)PieceItem->data(0, Qt::UserRole).value<uintptr_t>();
+		LastStep = lcMax(LastStep, Piece->GetStepShow());
 		Selection.Add(Piece);
 	}
 
@@ -194,7 +235,10 @@ void lcTimelineWidget::ItemSelectionChanged()
 
 	bool Blocked = blockSignals(true);
 	mIgnoreUpdates = true;
-	lcGetActiveModel()->SetSelectionAndFocus(Selection, CurrentPiece, LC_PIECE_SECTION_POSITION);
+	lcModel* Model = lcGetActiveModel();
+	if (LastStep > Model->GetCurrentStep())
+		Model->SetCurrentStep(LastStep);
+	Model->SetSelectionAndFocus(Selection, CurrentPiece, LC_PIECE_SECTION_POSITION);
 	mIgnoreUpdates = false;
 	blockSignals(Blocked);
 }

@@ -18,6 +18,8 @@ lcTimelineWidget::lcTimelineWidget(QWidget* Parent)
 	setHeaderHidden(true);
 	setContextMenuPolicy(Qt::CustomContextMenu);
 
+	invisibleRootItem()->setFlags(invisibleRootItem()->flags() & ~Qt::ItemIsDropEnabled);
+
 	connect(this, SIGNAL(itemSelectionChanged()), SLOT(ItemSelectionChanged()));
 	connect(this, SIGNAL(customContextMenuRequested(QPoint)), SLOT(CustomMenuRequested(QPoint)));
 }
@@ -35,6 +37,7 @@ void lcTimelineWidget::CustomMenuRequested(QPoint Pos)
 	Menu->addSeparator();
 	Menu->addAction(gMainWindow->mActions[LC_PIECE_HIDE_SELECTED]);
 	Menu->addAction(gMainWindow->mActions[LC_PIECE_HIDE_UNSELECTED]);
+	Menu->addAction(gMainWindow->mActions[LC_PIECE_UNHIDE_SELECTED]);
 	Menu->addAction(gMainWindow->mActions[LC_PIECE_UNHIDE_ALL]);
 
 	Menu->popup(viewport()->mapToGlobal(Pos));

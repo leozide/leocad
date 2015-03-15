@@ -5,14 +5,16 @@
 #include "lc_math.h"
 #include "object.h"
 
-#define LC_SEL_NO_PIECES     0x01 // No pieces in model
-#define LC_SEL_PIECE         0x02 // At last 1 piece selected
-#define LC_SEL_SELECTED      0x04 // At last 1 object selected
-#define LC_SEL_UNSELECTED    0x08 // At least 1 piece unselected
-#define LC_SEL_HIDDEN        0x10 // At least one piece hidden
-#define LC_SEL_GROUPED       0x20 // At least one piece selected is grouped
-#define LC_SEL_FOCUS_GROUPED 0x40 // Focused piece is grouped
-#define LC_SEL_CAN_GROUP     0x80 // Can make a new group
+#define LC_SEL_NO_PIECES         0x001 // No pieces in model
+#define LC_SEL_PIECE             0x002 // At last 1 piece selected
+#define LC_SEL_SELECTED          0x004 // At last 1 object selected
+#define LC_SEL_UNSELECTED        0x008 // At least 1 piece unselected
+#define LC_SEL_HIDDEN            0x010 // At least one piece hidden
+#define LC_SEL_HIDDEN_SELECTED   0x020 // At least one piece selected is hidden
+#define LC_SEL_VISIBLE_SELECTED  0x040 // At least one piece selected is not hidden
+#define LC_SEL_GROUPED           0x080 // At least one piece selected is grouped
+#define LC_SEL_FOCUS_GROUPED     0x100 // Focused piece is grouped
+#define LC_SEL_CAN_GROUP         0x200 // Can make a new group
 
 enum lcTransformType
 {
@@ -259,6 +261,7 @@ public:
 
 	void HideSelectedPieces();
 	void HideUnselectedPieces();
+	void UnhideSelectedPieces();
 	void UnhideAllPieces();
 
 	void FindPiece(bool FindFirst, bool SearchForward);

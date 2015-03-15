@@ -1082,6 +1082,13 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 		QT_TRANSLATE_NOOP("Status", "Hide objects that are not selected"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
+	// LC_PIECE_UNHIDE_SELECTED
+	{
+		"Piece.UnhideSelected",
+		QT_TRANSLATE_NOOP("Menu", "&Unhide Selected"),
+		QT_TRANSLATE_NOOP("Status", "Show hidden objects that are selected"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
 	// LC_PIECE_UNHIDE_ALL
 	{
 		"Piece.UnhideAll",

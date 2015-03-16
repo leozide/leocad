@@ -9,7 +9,7 @@ public:
 	lcTimelineWidget(QWidget* Parent);
 	virtual ~lcTimelineWidget();
 
-	void Update();
+	void Update(bool Clear);
 	void UpdateSelection();
 
 public slots:

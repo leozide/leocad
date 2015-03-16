@@ -1426,9 +1426,9 @@ void lcMainWindow::UpdateSelectedObjects(int Flags, int SelectedCount, lcObject*
 	mStatusBarLabel->setText(Message);
 }
 
-void lcMainWindow::UpdateTimeline()
+void lcMainWindow::UpdateTimeline(bool Clear)
 {
-	mTimelineWidget->Update();
+	mTimelineWidget->Update(Clear);
 }
 
 void lcMainWindow::UpdatePaste(bool Enabled)

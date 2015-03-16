@@ -2048,7 +2048,7 @@ bool lcModel::RemoveSelectedObjects()
 	return RemovedPiece || RemovedCamera || RemovedLight;
 }
 
-void lcModel::MoveSelectedObjects(const lcVector3& PieceDistance, const lcVector3& ObjectDistance, bool Relative, bool Update)
+void lcModel::MoveSelectedObjects(const lcVector3& PieceDistance, const lcVector3& ObjectDistance, bool Relative, bool Update, bool Checkpoint)
 {
 	bool Moved = false;
 	lcMatrix44 RelativeRotation;
@@ -2107,12 +2107,13 @@ void lcModel::MoveSelectedObjects(const lcVector3& PieceDistance, const lcVector
 	if (Moved && Update)
 	{
 		gMainWindow->UpdateAllViews();
-		SaveCheckpoint("Moving");
+		if (Checkpoint)
+			SaveCheckpoint("Moving");
 		gMainWindow->UpdateFocusObject(GetFocusObject());
 	}
 }
 
-void lcModel::RotateSelectedPieces(const lcVector3& Angles, bool Relative, bool Update)
+void lcModel::RotateSelectedPieces(const lcVector3& Angles, bool Relative, bool Update, bool Checkpoint)
 {
 	if (Angles.LengthSquared() < 0.001f)
 		return;
@@ -2203,7 +2204,8 @@ void lcModel::RotateSelectedPieces(const lcVector3& Angles, bool Relative, bool 
 	if (Rotated && Update)
 	{
 		gMainWindow->UpdateAllViews();
-		SaveCheckpoint("Rotating");
+		if (Checkpoint)
+			SaveCheckpoint("Rotating");
 		gMainWindow->UpdateFocusObject(GetFocusObject());
 	}
 }
@@ -2213,19 +2215,19 @@ void lcModel::TransformSelectedObjects(lcTransformType TransformType, const lcVe
 	switch (TransformType)
 	{
 	case LC_TRANSFORM_ABSOLUTE_TRANSLATION:
-		MoveSelectedObjects(Transform, false, true);
+		MoveSelectedObjects(Transform, false, true, true);
 		break;
 
 	case LC_TRANSFORM_RELATIVE_TRANSLATION:
-		MoveSelectedObjects(Transform, true, true);
+		MoveSelectedObjects(Transform, true, true, true);
 		break;
 
 	case LC_TRANSFORM_ABSOLUTE_ROTATION:
-		RotateSelectedPieces(Transform, false, true);
+		RotateSelectedPieces(Transform, false, true, true);
 		break;
 
 	case LC_TRANSFORM_RELATIVE_ROTATION:
-		RotateSelectedPieces(Transform, true, true);
+		RotateSelectedPieces(Transform, true, true, true);
 		break;
 	}
 }
@@ -3273,7 +3275,7 @@ void lcModel::UpdateMoveTool(const lcVector3& Distance)
 	lcVector3 PieceDistance = LockVector(SnapPosition(Distance) - SnapPosition(mMouseToolDistance));
 	lcVector3 ObjectDistance = Distance - mMouseToolDistance;
 
-	MoveSelectedObjects(PieceDistance, ObjectDistance, true, true);
+	MoveSelectedObjects(PieceDistance, ObjectDistance, true, true, false);
 	mMouseToolDistance = Distance;
 
 	gMainWindow->UpdateFocusObject(GetFocusObject());
@@ -3283,7 +3285,7 @@ void lcModel::UpdateMoveTool(const lcVector3& Distance)
 void lcModel::UpdateRotateTool(const lcVector3& Angles)
 {
 	lcVector3 Delta = LockVector(SnapRotation(Angles) - SnapRotation(mMouseToolDistance));
-	RotateSelectedPieces(Delta, true, false);
+	RotateSelectedPieces(Delta, true, false, false);
 	mMouseToolDistance = Angles;
 
 	gMainWindow->UpdateFocusObject(GetFocusObject());

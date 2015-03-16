@@ -1939,51 +1939,51 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		break;
 
 	case LC_PIECE_MOVE_PLUSX:
-		lcGetActiveModel()->MoveSelectedObjects(mActiveView->GetMoveDirection(lcVector3(lcMax(GetMoveXYSnap(), 0.01f), 0.0f, 0.0f)), true, true);
+		lcGetActiveModel()->MoveSelectedObjects(mActiveView->GetMoveDirection(lcVector3(lcMax(GetMoveXYSnap(), 0.01f), 0.0f, 0.0f)), true, true, true);
 		break;
 
 	case LC_PIECE_MOVE_MINUSX:
-		lcGetActiveModel()->MoveSelectedObjects(mActiveView->GetMoveDirection(lcVector3(-lcMax(GetMoveXYSnap(), 0.01f), 0.0f, 0.0f)), true, true);
+		lcGetActiveModel()->MoveSelectedObjects(mActiveView->GetMoveDirection(lcVector3(-lcMax(GetMoveXYSnap(), 0.01f), 0.0f, 0.0f)), true, true, true);
 		break;
 
 	case LC_PIECE_MOVE_PLUSY:
-		lcGetActiveModel()->MoveSelectedObjects(mActiveView->GetMoveDirection(lcVector3(0.0f, lcMax(GetMoveXYSnap(), 0.01f), 0.0f)), true, true);
+		lcGetActiveModel()->MoveSelectedObjects(mActiveView->GetMoveDirection(lcVector3(0.0f, lcMax(GetMoveXYSnap(), 0.01f), 0.0f)), true, true, true);
 		break;
 
 	case LC_PIECE_MOVE_MINUSY:
-		lcGetActiveModel()->MoveSelectedObjects(mActiveView->GetMoveDirection(lcVector3(0.0f, -lcMax(GetMoveXYSnap(), 0.01f), 0.0f)), true, true);
+		lcGetActiveModel()->MoveSelectedObjects(mActiveView->GetMoveDirection(lcVector3(0.0f, -lcMax(GetMoveXYSnap(), 0.01f), 0.0f)), true, true, true);
 		break;
 
 	case LC_PIECE_MOVE_PLUSZ:
-		lcGetActiveModel()->MoveSelectedObjects(mActiveView->GetMoveDirection(lcVector3(0.0f, 0.0f, lcMax(GetMoveZSnap(), 0.01f))), true, true);
+		lcGetActiveModel()->MoveSelectedObjects(mActiveView->GetMoveDirection(lcVector3(0.0f, 0.0f, lcMax(GetMoveZSnap(), 0.01f))), true, true, true);
 		break;
 
 	case LC_PIECE_MOVE_MINUSZ:
-		lcGetActiveModel()->MoveSelectedObjects(mActiveView->GetMoveDirection(lcVector3(0.0f, 0.0f, -lcMax(GetMoveZSnap(), 0.01f))), true, true);
+		lcGetActiveModel()->MoveSelectedObjects(mActiveView->GetMoveDirection(lcVector3(0.0f, 0.0f, -lcMax(GetMoveZSnap(), 0.01f))), true, true, true);
 		break;
 
 	case LC_PIECE_ROTATE_PLUSX:
-		lcGetActiveModel()->RotateSelectedPieces(mActiveView->GetMoveDirection(lcVector3(lcMax(GetAngleSnap(), 1.0f), 0.0f, 0.0f)), true, true);
+		lcGetActiveModel()->RotateSelectedPieces(mActiveView->GetMoveDirection(lcVector3(lcMax(GetAngleSnap(), 1.0f), 0.0f, 0.0f)), true, true, true);
 		break;
 
 	case LC_PIECE_ROTATE_MINUSX:
-		lcGetActiveModel()->RotateSelectedPieces(mActiveView->GetMoveDirection(-lcVector3(lcMax(GetAngleSnap(), 1.0f), 0.0f, 0.0f)), true, true);
+		lcGetActiveModel()->RotateSelectedPieces(mActiveView->GetMoveDirection(-lcVector3(lcMax(GetAngleSnap(), 1.0f), 0.0f, 0.0f)), true, true, true);
 		break;
 
 	case LC_PIECE_ROTATE_PLUSY:
-		lcGetActiveModel()->RotateSelectedPieces(mActiveView->GetMoveDirection(lcVector3(0.0f, lcMax(GetAngleSnap(), 1.0f), 0.0f)), true, true);
+		lcGetActiveModel()->RotateSelectedPieces(mActiveView->GetMoveDirection(lcVector3(0.0f, lcMax(GetAngleSnap(), 1.0f), 0.0f)), true, true, true);
 		break;
 
 	case LC_PIECE_ROTATE_MINUSY:
-		lcGetActiveModel()->RotateSelectedPieces(mActiveView->GetMoveDirection(lcVector3(0.0f, -lcMax(GetAngleSnap(), 1.0f), 0.0f)), true, true);
+		lcGetActiveModel()->RotateSelectedPieces(mActiveView->GetMoveDirection(lcVector3(0.0f, -lcMax(GetAngleSnap(), 1.0f), 0.0f)), true, true, true);
 		break;
 
 	case LC_PIECE_ROTATE_PLUSZ:
-		lcGetActiveModel()->RotateSelectedPieces(mActiveView->GetMoveDirection(lcVector3(0.0f, 0.0f, lcMax(GetAngleSnap(), 1.0f))), true, true);
+		lcGetActiveModel()->RotateSelectedPieces(mActiveView->GetMoveDirection(lcVector3(0.0f, 0.0f, lcMax(GetAngleSnap(), 1.0f))), true, true, true);
 		break;
 
 	case LC_PIECE_ROTATE_MINUSZ:
-		lcGetActiveModel()->RotateSelectedPieces(mActiveView->GetMoveDirection(lcVector3(0.0f, 0.0f, -lcMax(GetAngleSnap(), 1.0f))), true, true);
+		lcGetActiveModel()->RotateSelectedPieces(mActiveView->GetMoveDirection(lcVector3(0.0f, 0.0f, -lcMax(GetAngleSnap(), 1.0f))), true, true, true);
 		break;
 
 	case LC_PIECE_MINIFIG_WIZARD:

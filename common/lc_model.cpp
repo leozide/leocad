@@ -3004,6 +3004,7 @@ void lcModel::HideSelectedPieces()
 	}
 
 	UpdateSelection();
+	gMainWindow->UpdateTimeline(false);
 	gMainWindow->UpdateFocusObject(NULL);
 	gMainWindow->UpdateAllViews();
 }
@@ -3019,6 +3020,7 @@ void lcModel::HideUnselectedPieces()
 	}
 
 	UpdateSelection();
+	gMainWindow->UpdateTimeline(false);
 	gMainWindow->UpdateAllViews();
 }
 
@@ -3033,6 +3035,7 @@ void lcModel::UnhideSelectedPieces()
 	}
 
 	UpdateSelection();
+	gMainWindow->UpdateTimeline(false);
 	gMainWindow->UpdateAllViews();
 }
 
@@ -3042,6 +3045,7 @@ void lcModel::UnhideAllPieces()
 		mPieces[PieceIdx]->SetHidden(false);
 
 	UpdateSelection();
+	gMainWindow->UpdateTimeline(false);
 	gMainWindow->UpdateAllViews();
 }
 

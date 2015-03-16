@@ -147,6 +147,11 @@ void lcTimelineWidget::Update(bool Clear)
 			}
 		}
 
+		QColor Color = palette().text().color();
+		if (Piece->IsHidden())
+			Color.setAlpha(128);
+		PieceItem->setTextColor(0, Color);
+
 		PieceItem->setSelected(Piece->IsSelected());
 		PieceItemIndex++;
 	}

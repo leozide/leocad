@@ -43,7 +43,7 @@ void lcTimelineWidget::CustomMenuRequested(QPoint Pos)
 	Menu->popup(viewport()->mapToGlobal(Pos));
 }
 
-void lcTimelineWidget::Update()
+void lcTimelineWidget::Update(bool Clear)
 {
 	if (mIgnoreUpdates)
 		return;
@@ -58,6 +58,12 @@ void lcTimelineWidget::Update()
 	}
 
 	bool Blocked = blockSignals(true);
+
+	if (Clear)
+	{
+		mItems.clear();
+		clear();
+	}
 
 	int Steps = lcMax(Model->GetLastStep(), Model->GetCurrentStep());
 

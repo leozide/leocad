@@ -850,7 +850,7 @@ void lcModel::Merge(lcModel* Other)
 
 	delete Other;
 
-	gMainWindow->UpdateTimeline();
+	gMainWindow->UpdateTimeline(false);
 }
 
 void lcModel::Cut()
@@ -859,7 +859,7 @@ void lcModel::Cut()
 
 	if (RemoveSelectedObjects())
 	{
-		gMainWindow->UpdateTimeline();
+		gMainWindow->UpdateTimeline(false);
 		gMainWindow->UpdateFocusObject(NULL);
 		UpdateSelection();
 		gMainWindow->UpdateAllViews();
@@ -896,7 +896,7 @@ void lcModel::Paste()
 	SetSelectionAndFocus((lcArray<lcObject*>&)PastedPieces, NULL, 0);
 
 	CalculateStep(mCurrentStep);
-	gMainWindow->UpdateTimeline();
+	gMainWindow->UpdateTimeline(false);
 	gMainWindow->UpdateAllViews();
 }
 
@@ -1223,7 +1223,7 @@ void lcModel::LoadCheckPoint(lcModelHistoryEntry* CheckPoint)
 	Buffer.open(QIODevice::ReadOnly);
 	LoadLDraw(Buffer, lcGetActiveProject());
 
-	gMainWindow->UpdateTimeline();
+	gMainWindow->UpdateTimeline(true);
 	gMainWindow->UpdateFocusObject(GetFocusObject());
 	gMainWindow->UpdateCameraMenu();
 	UpdateSelection();
@@ -1280,7 +1280,7 @@ void lcModel::SetCurrentStep(lcStep Step)
 	CalculateStep(Step);
 
 	UpdateSelection();
-	gMainWindow->UpdateTimeline();
+	gMainWindow->UpdateTimeline(false);
 	gMainWindow->UpdateFocusObject(GetFocusObject());
 	gMainWindow->UpdateAllViews();
 	gMainWindow->UpdateCurrentStep();
@@ -1822,7 +1822,7 @@ void lcModel::AddPiece()
 	Piece->Initialize(WorldMatrix, mCurrentStep);
 	Piece->SetColorIndex(gMainWindow->mColorIndex);
 	AddPiece(Piece);
-	gMainWindow->UpdateTimeline();
+	gMainWindow->UpdateTimeline(false);
 	ClearSelectionAndSetFocus(Piece, LC_PIECE_SECTION_POSITION);
 
 	SaveCheckpoint("Adding Piece");
@@ -1859,7 +1859,7 @@ void lcModel::DeleteSelectedObjects()
 {
 	if (RemoveSelectedObjects())
 	{
-		gMainWindow->UpdateTimeline();
+		gMainWindow->UpdateTimeline(false);
 		gMainWindow->UpdateFocusObject(NULL);
 		UpdateSelection();
 		gMainWindow->UpdateAllViews();
@@ -1901,7 +1901,7 @@ void lcModel::ShowSelectedPiecesEarlier()
 
 	SaveCheckpoint("Modifying");
 	gMainWindow->UpdateAllViews();
-	gMainWindow->UpdateTimeline();
+	gMainWindow->UpdateTimeline(false);
 	UpdateSelection();
 }
 
@@ -1942,7 +1942,7 @@ void lcModel::ShowSelectedPiecesLater()
 
 	SaveCheckpoint("Modifying");
 	gMainWindow->UpdateAllViews();
-	gMainWindow->UpdateTimeline();
+	gMainWindow->UpdateTimeline(false);
 	UpdateSelection();
 }
 
@@ -1978,7 +1978,7 @@ void lcModel::SetPieceSteps(const QList<QPair<lcPiece*, int>>& PieceSteps)
 		SaveCheckpoint("Modifying");
 		gMainWindow->UpdateAllViews();
 		UpdateSelection();
-		gMainWindow->UpdateTimeline();
+		gMainWindow->UpdateTimeline(false);
 		gMainWindow->UpdateFocusObject(GetFocusObject());
 	}
 }
@@ -2440,7 +2440,7 @@ void lcModel::SetObjectProperty(lcObject* Object, lcObjectPropertyType ObjectPro
 	if (!CheckPointString.isEmpty())
 	{
 		SaveCheckpoint(CheckPointString);
-		gMainWindow->UpdateTimeline();
+		gMainWindow->UpdateTimeline(false);
 		gMainWindow->UpdateFocusObject(GetFocusObject());
 		gMainWindow->UpdateAllViews();
 	}
@@ -3205,7 +3205,7 @@ void lcModel::InsertPieceToolClicked(const lcMatrix44& WorldMatrix)
 	Piece->UpdatePosition(mCurrentStep);
 	AddPiece(Piece);
 
-	gMainWindow->UpdateTimeline();
+	gMainWindow->UpdateTimeline(false);
 	ClearSelectionAndSetFocus(Piece, LC_PIECE_SECTION_POSITION);
 
 	SaveCheckpoint(tr("Insert"));
@@ -3326,7 +3326,7 @@ void lcModel::EraserToolClicked(lcObject* Object)
 	}
 
 	delete Object;
-	gMainWindow->UpdateTimeline();
+	gMainWindow->UpdateTimeline(false);
 	gMainWindow->UpdateFocusObject(GetFocusObject());
 	UpdateSelection();
 	gMainWindow->UpdateAllViews();
@@ -3571,7 +3571,7 @@ void lcModel::ShowArrayDialog()
 	}
 
 	AddToSelection(NewPieces);
-	gMainWindow->UpdateTimeline();
+	gMainWindow->UpdateTimeline(false);
 	SaveCheckpoint(tr("Array"));
 }
 
@@ -3604,13 +3604,13 @@ void lcModel::ShowMinifigDialog()
 	}
 
 	SetSelectionAndFocus(Pieces, NULL, 0);
-	gMainWindow->UpdateTimeline();
+	gMainWindow->UpdateTimeline(false);
 	SaveCheckpoint(tr("Minifig"));
 }
 
 void lcModel::UpdateInterface()
 {
-	gMainWindow->UpdateTimeline();
+	gMainWindow->UpdateTimeline(true);
 	gMainWindow->UpdateUndoRedo(mUndoHistory.GetSize() > 1 ? mUndoHistory[0]->Description : NULL, !mRedoHistory.IsEmpty() ? mRedoHistory[0]->Description : NULL);
 	gMainWindow->UpdatePaste(!g_App->mClipboard.isEmpty());
 	gMainWindow->UpdateCategories();

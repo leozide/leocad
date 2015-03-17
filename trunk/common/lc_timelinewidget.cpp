@@ -32,9 +32,25 @@ void lcTimelineWidget::CustomMenuRequested(QPoint Pos)
 {
 	QMenu* Menu = new QMenu(this);
 
-	Menu->addAction(tr("Insert Step"), this, SLOT(InsertStep()));
-	Menu->addAction(tr("Remove Step"), this, SLOT(RemoveStep()));
+	lcObject* FocusObject = lcGetActiveModel()->GetFocusObject();
+
+	if (FocusObject && FocusObject->IsPiece())
+	{
+		lcPiece* Piece = (lcPiece*)FocusObject;
+
+		if (Piece->mPieceInfo->IsModel())
+		{
+			Menu->addAction(gMainWindow->mActions[LC_MODEL_EDIT_FOCUS]);
+			Menu->addSeparator();
+		}
+	}
+
+	QAction* InsertStepAction = Menu->addAction(gMainWindow->mActions[LC_VIEW_TIME_INSERT]->text(), this, SLOT(InsertStep()));
+	InsertStepAction->setStatusTip(gMainWindow->mActions[LC_VIEW_TIME_INSERT]->statusTip());
+	QAction* RemoveStepAction = Menu->addAction(gMainWindow->mActions[LC_VIEW_TIME_DELETE]->text(), this, SLOT(RemoveStep()));
+	RemoveStepAction->setStatusTip(gMainWindow->mActions[LC_VIEW_TIME_DELETE]->statusTip());
 	Menu->addSeparator();
+
 	Menu->addAction(gMainWindow->mActions[LC_PIECE_HIDE_SELECTED]);
 	Menu->addAction(gMainWindow->mActions[LC_PIECE_HIDE_UNSELECTED]);
 	Menu->addAction(gMainWindow->mActions[LC_PIECE_UNHIDE_SELECTED]);

@@ -1777,6 +1777,22 @@ bool lcMainWindow::SaveProjectIfModified()
 	return true;
 }
 
+void lcMainWindow::SetModelFromFocus()
+{
+	lcObject* FocusObject = lcGetActiveModel()->GetFocusObject();
+
+	if (!FocusObject || !FocusObject->IsPiece())
+		return;
+
+	lcModel* Model = ((lcPiece*)FocusObject)->mPieceInfo->GetModel();
+
+	if (Model)
+	{
+		Project* Project = lcGetActiveProject();
+		Project->SetActiveModel(Project->GetModels().FindIndex(Model));
+	}
+}
+
 void lcMainWindow::HandleCommand(lcCommandId CommandId)
 {
 	switch (CommandId)
@@ -2143,6 +2159,10 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 
 	case LC_MODEL_PROPERTIES:
 		lcGetActiveModel()->ShowPropertiesDialog();
+		break;
+
+	case LC_MODEL_EDIT_FOCUS:
+		SetModelFromFocus();
 		break;
 
 	case LC_MODEL_LIST:

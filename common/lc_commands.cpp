@@ -1124,6 +1124,13 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 		QT_TRANSLATE_NOOP("Status", "Display the properties of the current model"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
+	// LC_MODEL_EDIT_FOCUS
+	{
+		"Model.SwitchToFocus",
+		QT_TRANSLATE_NOOP("Menu", "Switch to Model"),
+		QT_TRANSLATE_NOOP("Status", "Switch to the model corresponding to the piece with focus"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
 	// LC_MODEL_LIST
 	{
 		"Model.List",

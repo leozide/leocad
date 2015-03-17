@@ -424,6 +424,8 @@ void View::OnDraw()
 		glEnable(GL_FOG);
 	}
 
+	mContext->SetLineWidth(Preferences.mLineWidth);
+
 	const lcMatrix44& ViewMatrix = mCamera->mWorldView;
 	mContext->DrawOpaqueMeshes(ViewMatrix, mScene.mOpaqueMeshes);
 	mContext->DrawTranslucentMeshes(ViewMatrix, mScene.mTranslucentMeshes);
@@ -444,7 +446,7 @@ void View::OnDraw()
 	{
 		mContext->DrawInterfaceObjects(ViewMatrix, mScene.mInterfaceObjects);
 
-		mContext->SetLineWidth(Preferences.mLineWidth); // context remove
+		mContext->SetLineWidth(1.0f);
 
 		if (Preferences.mDrawGridStuds || Preferences.mDrawGridLines)
 			DrawGrid();

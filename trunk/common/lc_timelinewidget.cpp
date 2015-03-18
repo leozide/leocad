@@ -109,7 +109,7 @@ void lcTimelineWidget::Update(bool Clear)
 	const lcArray<lcPiece*>& Pieces = Model->GetPieces();
 	QTreeWidgetItem* StepItem = NULL;
 	int PieceItemIndex = 0;
-	int Step = 0;
+	lcStep Step = 0;
 
 	for (int PieceIdx = 0; PieceIdx != Pieces.GetSize(); PieceIdx++)
 	{
@@ -277,7 +277,7 @@ void lcTimelineWidget::dropEvent(QDropEvent* Event)
 {
 	QTreeWidget::dropEvent(Event);
 
-	QList<QPair<lcPiece*, int>> PieceSteps;
+	QList<QPair<lcPiece*, lcStep>> PieceSteps;
 
 	for (int TopLevelItemIdx = 0; TopLevelItemIdx < topLevelItemCount(); TopLevelItemIdx++)
 	{
@@ -288,7 +288,7 @@ void lcTimelineWidget::dropEvent(QDropEvent* Event)
 			QTreeWidgetItem* PieceItem = StepItem->child(PieceItemIdx);
 			lcPiece* Piece = (lcPiece*)PieceItem->data(0, Qt::UserRole).value<uintptr_t>();
 
-			PieceSteps.append(QPair<lcPiece*, int>(Piece, TopLevelItemIdx + 1));
+			PieceSteps.append(QPair<lcPiece*, lcStep>(Piece, TopLevelItemIdx + 1));
 		}
 	}
 

@@ -198,7 +198,7 @@ public:
 	void DeleteSelectedObjects();
 	void ShowSelectedPiecesEarlier();
 	void ShowSelectedPiecesLater();
-	void SetPieceSteps(const QList<QPair<lcPiece*, int>>& PieceSteps);
+	void SetPieceSteps(const QList<QPair<lcPiece*, lcStep>>& PieceSteps);
 
 	lcGroup* AddGroup(const char* Prefix, lcGroup* Parent);
 	lcGroup* GetGroup(const char* Name, bool CreateIfMissing);

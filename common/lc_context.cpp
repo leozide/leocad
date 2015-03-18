@@ -399,6 +399,8 @@ void lcContext::DrawMeshSection(lcMesh* Mesh, lcMeshSection* Section)
 
 void lcContext::DrawOpaqueMeshes(const lcMatrix44& ViewMatrix, const lcArray<lcRenderMesh>& OpaqueMeshes)
 {
+	bool DrawLines = lcGetPreferences().mDrawEdgeLines;
+
 	for (int MeshIdx = 0; MeshIdx < OpaqueMeshes.GetSize(); MeshIdx++)
 	{
 		lcRenderMesh& RenderMesh = OpaqueMeshes[MeshIdx];
@@ -439,10 +441,15 @@ void lcContext::DrawOpaqueMeshes(const lcMatrix44& ViewMatrix, const lcArray<lcR
 					lcSetColorFocused();
 				else if (RenderMesh.Selected)
 					lcSetColorSelected();
-				else if (ColorIndex == gEdgeColor)
-					lcSetEdgeColor(RenderMesh.ColorIndex);
+				else if (DrawLines)
+				{
+					if (ColorIndex == gEdgeColor)
+						lcSetEdgeColor(RenderMesh.ColorIndex);
+					else
+						lcSetColor(ColorIndex);
+				}
 				else
-					lcSetColor(ColorIndex);
+					continue;
 			}
 
 			DrawMeshSection(Mesh, Section);

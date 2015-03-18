@@ -1946,7 +1946,7 @@ void lcModel::ShowSelectedPiecesLater()
 	UpdateSelection();
 }
 
-void lcModel::SetPieceSteps(const QList<QPair<lcPiece*, int>>& PieceSteps)
+void lcModel::SetPieceSteps(const QList<QPair<lcPiece*, lcStep>>& PieceSteps)
 {
 	if (PieceSteps.size() != mPieces.GetSize())
 		return;
@@ -1955,7 +1955,7 @@ void lcModel::SetPieceSteps(const QList<QPair<lcPiece*, int>>& PieceSteps)
 
 	for (int PieceIdx = 0; PieceIdx < PieceSteps.size(); PieceIdx++)
 	{
-		const QPair<lcPiece*, int>& PieceStep = PieceSteps[PieceIdx];
+		const QPair<lcPiece*, lcStep>& PieceStep = PieceSteps[PieceIdx];
 		lcPiece* Piece = mPieces[PieceIdx];
 
 		if (Piece != PieceStep.first || Piece->GetStepShow() != PieceStep.second)

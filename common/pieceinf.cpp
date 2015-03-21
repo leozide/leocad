@@ -64,7 +64,7 @@ void PieceInfo::SetModel(lcModel* Model, bool UpdateMesh)
 	strncpy(m_strDescription, Model->GetProperties().mName.toLatin1().data(), sizeof(m_strDescription));
 	m_strDescription[sizeof(m_strDescription)-1] = 0;
 
-	const QStringList& MeshLines = Model->GetMeshLines();
+	const QStringList& MeshLines = Model->GetFileLines();
 
 	if (UpdateMesh && !MeshLines.isEmpty())
 	{

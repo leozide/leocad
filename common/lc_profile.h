@@ -97,6 +97,10 @@ extern lcProfileEntry gProfileEntries[LC_NUM_PROFILE_KEYS];
 
 void lcRemoveProfileKey(LC_PROFILE_KEY Key);
 
+int lcGetDefaultProfileInt(LC_PROFILE_KEY Key);
+float lcGetDefaultProfileFloat(LC_PROFILE_KEY Key);
+QString lcGetDefaultProfileString(LC_PROFILE_KEY Key);
+
 int lcGetProfileInt(LC_PROFILE_KEY Key);
 float lcGetProfileFloat(LC_PROFILE_KEY Key);
 QString lcGetProfileString(LC_PROFILE_KEY Key);

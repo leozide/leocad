@@ -63,26 +63,30 @@ void lcModelProperties::SaveLDraw(QTextStream& Stream, bool MPD) const
 			Stream << QLatin1String("0 !LEOCAD MODEL COMMENT ") << Comment << LineEnding;
 	}
 
-	for (int BackgroundIdx = 0; BackgroundIdx < LC_NUM_BACKGROUND_TYPES; BackgroundIdx++)
+	bool TypeChanged = (mBackgroundType != lcGetDefaultProfileInt(LC_PROFILE_DEFAULT_BACKGROUND_TYPE));
+
+	switch (mBackgroundType)
 	{
-		switch ((mBackgroundType + 1 + BackgroundIdx) % LC_NUM_BACKGROUND_TYPES)
-		{
-		case LC_BACKGROUND_SOLID:
+	case LC_BACKGROUND_SOLID:
+		if (mBackgroundSolidColor != lcVector3FromColor(lcGetDefaultProfileInt(LC_PROFILE_DEFAULT_BACKGROUND_COLOR)) || TypeChanged)
 			Stream << QLatin1String("0 !LEOCAD MODEL BACKGROUND COLOR ") << mBackgroundSolidColor[0] << ' ' << mBackgroundSolidColor[1] << ' ' << mBackgroundSolidColor[2] << LineEnding;
-			break;
-		case LC_BACKGROUND_GRADIENT:
+		break;
+
+	case LC_BACKGROUND_GRADIENT:
+		if (mBackgroundGradientColor1 != lcVector3FromColor(lcGetProfileInt(LC_PROFILE_DEFAULT_GRADIENT_COLOR1)) ||
+			mBackgroundGradientColor2 != lcVector3FromColor(lcGetProfileInt(LC_PROFILE_DEFAULT_GRADIENT_COLOR2)) || TypeChanged)
 			Stream << QLatin1String("0 !LEOCAD MODEL BACKGROUND GRADIENT ") << mBackgroundGradientColor1[0] << ' ' << mBackgroundGradientColor1[1] << ' ' << mBackgroundGradientColor1[2] << ' ' << mBackgroundGradientColor2[0] << ' ' << mBackgroundGradientColor2[1] << ' ' << mBackgroundGradientColor2[2] << LineEnding;
-			break;
-		case LC_BACKGROUND_IMAGE:
-			if (!mBackgroundImage.isEmpty())
-			{
-				Stream << QLatin1String("0 !LEOCAD MODEL BACKGROUND IMAGE ");
-				if (mBackgroundImageTile)
-					Stream << QLatin1String("TILE ");
-				Stream << QLatin1String("NAME ") << mBackgroundImage << LineEnding;
-			}
-			break;
+		break;
+
+	case LC_BACKGROUND_IMAGE:
+		if (!mBackgroundImage.isEmpty())
+		{
+			Stream << QLatin1String("0 !LEOCAD MODEL BACKGROUND IMAGE ");
+			if (mBackgroundImageTile)
+				Stream << QLatin1String("TILE ");
+			Stream << QLatin1String("NAME ") << mBackgroundImage << LineEnding;
 		}
+		break;
 	}
 
 //	bool mFogEnabled;
@@ -205,7 +209,7 @@ void lcModel::DeleteModel()
 	mCameras.DeleteAll();
 	mLights.DeleteAll();
 	mGroups.DeleteAll();
-	mMeshLines.clear();
+	mFileLines.clear();
 }
 
 void lcModel::CreatePieceInfo(Project* Project)
@@ -275,73 +279,86 @@ void lcModel::SaveLDraw(QTextStream& Stream, bool MPD, bool SelectedOnly) const
 
 	mProperties.SaveLDraw(Stream, MPD);
 
-	lcStep LastStep = GetLastStep();
-	if (mCurrentStep != LastStep)
+	if (mCurrentStep != GetLastStep())
 		Stream << QLatin1String("0 !LEOCAD MODEL CURRENT_STEP") << mCurrentStep << LineEnding;
 
 	lcArray<lcGroup*> CurrentGroups;
+	lcStep Step = 1;
+	int CurrentLine = 0;
 
-	for (lcStep Step = 1; Step <= LastStep; Step++)
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 	{
-		for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+		lcPiece* Piece = mPieces[PieceIdx];
+
+		if (SelectedOnly && !Piece->IsSelected())
+			continue;
+
+		while (Piece->GetFileLine() > CurrentLine && CurrentLine < mFileLines.size())
 		{
-			lcPiece* Piece = mPieces[PieceIdx];
-
-			if (Piece->GetStepShow() != Step || (SelectedOnly && !Piece->IsSelected()))
-				continue;
-
-			lcGroup* PieceGroup = Piece->GetGroup();
-
-			if (PieceGroup)
-			{
-				if (CurrentGroups.IsEmpty() || (!CurrentGroups.IsEmpty() && PieceGroup != CurrentGroups[CurrentGroups.GetSize() - 1]))
-				{
-					lcArray<lcGroup*> PieceParents;
-
-					for (lcGroup* Group = PieceGroup; Group; Group = Group->mGroup)
-						PieceParents.InsertAt(0, Group);
-
-					int FoundParent = -1;
-
-					while (!CurrentGroups.IsEmpty())
-					{
-						lcGroup* Group = CurrentGroups[CurrentGroups.GetSize() - 1];
-						int Index = PieceParents.FindIndex(Group);
-
-						if (Index == -1)
-						{
-							CurrentGroups.RemoveIndex(CurrentGroups.GetSize() - 1);
-							Stream << QLatin1String("0 !LEOCAD GROUP END\r\n");
-						}
-						else
-						{
-							FoundParent = Index;
-							break;
-						}
-					}
-
-					for (int ParentIdx = FoundParent + 1; ParentIdx < PieceParents.GetSize(); ParentIdx++)
-					{
-						lcGroup* Group = PieceParents[ParentIdx];
-						CurrentGroups.Add(Group);
-						Stream << QLatin1String("0 !LEOCAD GROUP BEGIN ") << Group->m_strName << LineEnding;
-					}
-				}
-			}
-			else
-			{
-				while (CurrentGroups.GetSize())
-				{
-					CurrentGroups.RemoveIndex(CurrentGroups.GetSize() - 1);
-					Stream << QLatin1String("0 !LEOCAD GROUP END\r\n");
-				}
-			}
-
-			Piece->SaveLDraw(Stream);
+			Stream << mFileLines[CurrentLine];
+			CurrentLine++;
 		}
 
-		if (Step != LastStep)
+		while (Piece->GetStepShow() < Step)
+		{
 			Stream << QLatin1String("0 STEP\r\n");
+			Step++;
+		}
+
+		lcGroup* PieceGroup = Piece->GetGroup();
+
+		if (PieceGroup)
+		{
+			if (CurrentGroups.IsEmpty() || (!CurrentGroups.IsEmpty() && PieceGroup != CurrentGroups[CurrentGroups.GetSize() - 1]))
+			{
+				lcArray<lcGroup*> PieceParents;
+
+				for (lcGroup* Group = PieceGroup; Group; Group = Group->mGroup)
+					PieceParents.InsertAt(0, Group);
+
+				int FoundParent = -1;
+
+				while (!CurrentGroups.IsEmpty())
+				{
+					lcGroup* Group = CurrentGroups[CurrentGroups.GetSize() - 1];
+					int Index = PieceParents.FindIndex(Group);
+
+					if (Index == -1)
+					{
+						CurrentGroups.RemoveIndex(CurrentGroups.GetSize() - 1);
+						Stream << QLatin1String("0 !LEOCAD GROUP END\r\n");
+					}
+					else
+					{
+						FoundParent = Index;
+						break;
+					}
+				}
+
+				for (int ParentIdx = FoundParent + 1; ParentIdx < PieceParents.GetSize(); ParentIdx++)
+				{
+					lcGroup* Group = PieceParents[ParentIdx];
+					CurrentGroups.Add(Group);
+					Stream << QLatin1String("0 !LEOCAD GROUP BEGIN ") << Group->m_strName << LineEnding;
+				}
+			}
+		}
+		else
+		{
+			while (CurrentGroups.GetSize())
+			{
+				CurrentGroups.RemoveIndex(CurrentGroups.GetSize() - 1);
+				Stream << QLatin1String("0 !LEOCAD GROUP END\r\n");
+			}
+		}
+
+		Piece->SaveLDraw(Stream);
+	}
+
+	while (CurrentLine < mFileLines.size())
+	{
+		Stream << mFileLines[CurrentLine];
+		CurrentLine++;
 	}
 
 	while (CurrentGroups.GetSize())
@@ -380,9 +397,9 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 	while (!Device.atEnd())
 	{
 		qint64 Pos = Device.pos();
-		QString Line = Device.readLine().trimmed();
+		QString OriginalLine = Device.readLine();
+		QString Line = OriginalLine.trimmed();
 		QTextStream LineStream(&Line, QIODevice::ReadOnly);
-		bool MeshLine = false;
 
 		QString Token;
 		LineStream >> Token;
@@ -413,7 +430,10 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 			}
 
 			if (Token != QLatin1String("!LEOCAD"))
+			{
+				mFileLines.append(OriginalLine); 
 				continue;
+			}
 
 			LineStream >> Token;
 
@@ -489,7 +509,9 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 			lcPiecesLibrary* Library = lcGetPiecesLibrary();
 
 			if (Library->IsPrimitive(PartID.toLatin1().constData()))
-				MeshLine = true;
+			{
+				mFileLines.append(OriginalLine); 
+			}
 			else
 			{
 				if (!Piece)
@@ -507,6 +529,7 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 				lcMatrix44 Transform(lcVector4(Matrix[0], Matrix[2], -Matrix[1], 0.0f), lcVector4(Matrix[8], Matrix[10], -Matrix[9], 0.0f),
 									 lcVector4(-Matrix[4], -Matrix[6], Matrix[5], 0.0f), lcVector4(Matrix[12], Matrix[14], -Matrix[13], 1.0f));
 
+				Piece->SetFileLine(mFileLines.size());
 				Piece->SetPieceInfo(Info);
 				Piece->Initialize(Transform, CurrentStep);
 				Piece->SetColorCode(ColorCode);
@@ -514,11 +537,8 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 				Piece = NULL;
 			}
 		}
-		else if (Token == QLatin1String("2") || Token == QLatin1String("3") || Token == QLatin1String("4"))
-			MeshLine = true;
-
-		if (MeshLine)
-			mMeshLines.append(Line);
+		else
+			mFileLines.append(OriginalLine); 
 	}
 
 	mCurrentStep = CurrentStep;
@@ -816,6 +836,7 @@ void lcModel::Merge(lcModel* Other)
 	for (int PieceIdx = 0; PieceIdx < Other->mPieces.GetSize(); PieceIdx++)
 	{
 		lcPiece* Piece = Other->mPieces[PieceIdx];
+		Piece->SetFileLine(-1);
 		AddPiece(Piece);
 	}
 
@@ -1909,7 +1930,11 @@ void lcModel::ShowSelectedPiecesEarlier()
 		return;
 
 	for (int PieceIdx = 0; PieceIdx < MovedPieces.GetSize(); PieceIdx++)
-		AddPiece(MovedPieces[PieceIdx]);
+	{
+		lcPiece* Piece = MovedPieces[PieceIdx];
+		Piece->SetFileLine(-1);
+		AddPiece(Piece);
+	}
 
 	SaveCheckpoint("Modifying");
 	gMainWindow->UpdateAllViews();
@@ -1950,7 +1975,11 @@ void lcModel::ShowSelectedPiecesLater()
 		return;
 
 	for (int PieceIdx = 0; PieceIdx < MovedPieces.GetSize(); PieceIdx++)
-		AddPiece(MovedPieces[PieceIdx]);
+	{
+		lcPiece* Piece = MovedPieces[PieceIdx];
+		Piece->SetFileLine(-1);
+		AddPiece(Piece);
+	}
 
 	SaveCheckpoint("Modifying");
 	gMainWindow->UpdateAllViews();

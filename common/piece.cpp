@@ -32,6 +32,7 @@ lcPiece::lcPiece(PieceInfo* pPieceInfo)
 	mStepShow = 1;
 	mStepHide = LC_STEP_MAX;
 	mGroup = NULL;
+	mFileLine = -1;
 
 	if (mPieceInfo != NULL)
 		mPieceInfo->AddRef();

@@ -890,10 +890,22 @@ void lcModel::Paste()
 
 	lcArray<lcPiece*> PastedPieces = Model->mPieces;
 
+	for (int PieceIdx = 0; PieceIdx < PastedPieces.GetSize(); PieceIdx++)
+	{
+		lcPiece* Piece = PastedPieces[PieceIdx];
+		lcStep Step = Piece->GetStepShow();
+
+		if (Step > mCurrentStep)
+			Piece->SetStepShow(mCurrentStep);
+	}
+
 	Merge(Model);
 	SaveCheckpoint(tr("Pasting"));
 
-	SetSelectionAndFocus((lcArray<lcObject*>&)PastedPieces, NULL, 0);
+	if (PastedPieces.GetSize() == 1)
+		ClearSelectionAndSetFocus(PastedPieces[0], LC_PIECE_SECTION_POSITION);
+	else
+		SetSelectionAndFocus((lcArray<lcObject*>&)PastedPieces, NULL, 0);
 
 	CalculateStep(mCurrentStep);
 	gMainWindow->UpdateTimeline(false);

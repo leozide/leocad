@@ -112,6 +112,21 @@ void lcRemoveProfileKey(LC_PROFILE_KEY Key)
 	Settings.remove(QString("%1/%2").arg(Entry.mSection, Entry.mKey));
 }
 
+int lcGetDefaultProfileInt(LC_PROFILE_KEY Key)
+{
+	return gProfileEntries[Key].mDefault.IntValue;
+}
+
+float lcGetDefaultProfileFloat(LC_PROFILE_KEY Key)
+{
+	return gProfileEntries[Key].mDefault.FloatValue;
+}
+
+QString lcGetDefaultProfileString(LC_PROFILE_KEY Key)
+{
+	return QString::fromLatin1(gProfileEntries[Key].mDefault.StringValue);
+}
+
 int lcGetProfileInt(LC_PROFILE_KEY Key)
 {
 	lcProfileEntry& Entry = gProfileEntries[Key];

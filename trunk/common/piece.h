@@ -91,6 +91,16 @@ public:
 	void SaveLDraw(QTextStream& Stream) const;
 	bool ParseLDrawLine(QTextStream& Stream);
 
+	void SetFileLine(int Line)
+	{
+		mFileLine = Line;
+	}
+
+	int GetFileLine() const
+	{
+		return mFileLine;
+	}
+
 	virtual void RayTest(lcObjectRayTest& ObjectRayTest) const;
 	virtual void BoxTest(lcObjectBoxTest& ObjectBoxTest) const;
 	virtual void DrawInterface(lcContext* Context, const lcMatrix44& ViewMatrix) const;
@@ -150,6 +160,7 @@ public:
 
 	void SetStepShow(lcStep Step)
 	{
+		mFileLine = -1;
 		mStepShow = Step;
 	}
 
@@ -186,6 +197,8 @@ public:
 protected:
 	lcArray<lcObjectKey<lcVector3>> mPositionKeys;
 	lcArray<lcObjectKey<lcMatrix33>> mRotationKeys;
+
+	int mFileLine;
 
 	// Atributes
 	lcGroup* mGroup;

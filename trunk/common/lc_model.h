@@ -165,9 +165,9 @@ public:
 		mProperties.mName = Name;
 	}
 
-	const QStringList& GetMeshLines() const
+	const QStringList& GetFileLines() const
 	{
-		return mMeshLines;
+		return mFileLines;
 	}
 
 	lcStep GetLastStep() const;
@@ -345,7 +345,7 @@ protected:
 	lcArray<lcCamera*> mCameras;
 	lcArray<lcLight*> mLights;
 	lcArray<lcGroup*> mGroups;
-	QStringList mMeshLines;
+	QStringList mFileLines;
 
 	lcModelHistoryEntry* mSavedHistory;
 	lcArray<lcModelHistoryEntry*> mUndoHistory;

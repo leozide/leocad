@@ -475,13 +475,13 @@ void lcCamera::DrawInterface(lcContext* Context, const lcMatrix44& ViewMatrix) c
 	float LineWidth = lcGetPreferences().mLineWidth;
 
 	lcMatrix44 ViewWorld = lcMatrix44AffineInverse(mWorldView);
-	lcVector3 UpVectorPosition = lcMul31(lcVector3(0, 1, 0), ViewWorld);
+	lcVector3 UpVectorPosition = lcMul31(lcVector3(0, 25, 0), ViewWorld);
 
 	float PositionEdge = LC_CAMERA_POSITION_EDGE;
 	float PositionLens = LC_CAMERA_POSITION_EDGE * 2;
 	float TargetEdge = LC_CAMERA_TARGET_EDGE;
 
-	float Verts[34 + 24 + 4][3] =
+	float Verts[34 + 24 + 4 + 16][3] =
 	{
 		{  PositionEdge,  PositionEdge,  PositionEdge }, { -PositionEdge,  PositionEdge,  PositionEdge },
 		{ -PositionEdge,  PositionEdge,  PositionEdge }, { -PositionEdge, -PositionEdge,  PositionEdge },
@@ -514,10 +514,17 @@ void lcCamera::DrawInterface(lcContext* Context, const lcMatrix44& ViewMatrix) c
 		{ -TargetEdge, -TargetEdge,  TargetEdge }, { -TargetEdge, -TargetEdge, -TargetEdge },
 		{  TargetEdge, -TargetEdge,  TargetEdge }, {  TargetEdge, -TargetEdge, -TargetEdge },
 
-		{ mPosition[0], mPosition[1], mPosition[2] },
-		{ mTargetPosition[0], mTargetPosition[1], mTargetPosition[2] },
-		{ mPosition[0], mPosition[1], mPosition[2] },
-		{ UpVectorPosition[0], UpVectorPosition[1], UpVectorPosition[2] },
+		{ mPosition[0], mPosition[1], mPosition[2] }, { mTargetPosition[0], mTargetPosition[1], mTargetPosition[2] },
+		{ mPosition[0], mPosition[1], mPosition[2] }, { UpVectorPosition[0], UpVectorPosition[1], UpVectorPosition[2] },
+
+		{  1,  1,  1 }, { -1,  1, 1 },
+		{ -1,  1,  1 }, { -1, -1, 1 },
+		{ -1, -1,  1 }, {  1, -1, 1 },
+		{  1, -1,  1 }, {  1,  1, 1 },
+		{  1,  1, -1 }, {  1,  1, 1 },
+		{ -1,  1, -1 }, { -1,  1, 1 },
+		{ -1, -1, -1 }, { -1, -1, 1 },
+		{  1, -1, -1 }, {  1, -1, 1 },
 	};
 
 	Context->SetWorldViewMatrix(lcMul(ViewWorld, ViewMatrix));
@@ -594,20 +601,7 @@ void lcCamera::DrawInterface(lcContext* Context, const lcMatrix44& ViewMatrix) c
 		Projection = lcMatrix44Inverse(Projection);
 		Context->SetWorldViewMatrix(lcMul(Projection, lcMul(ViewWorld, ViewMatrix)));
 
-		float ProjVerts[16][3] =
-		{
-			{  1,  1,  1 }, { -1,  1, 1 },
-			{ -1,  1,  1 }, { -1, -1, 1 },
-			{ -1, -1,  1 }, {  1, -1, 1 },
-			{  1, -1,  1 }, {  1,  1, 1 },
-			{  1,  1, -1 }, {  1,  1, 1 },
-			{ -1,  1, -1 }, { -1,  1, 1 },
-			{ -1, -1, -1 }, { -1, -1, 1 },
-			{  1, -1, -1 }, {  1, -1, 1 },
-		};
-
-		glVertexPointer(3, GL_FLOAT, 0, ProjVerts);
-		glDrawArrays(GL_LINES, 0, 16);
+		glDrawArrays(GL_LINES, 34 + 24 + 4, 16);
 	}
 }
 
@@ -644,7 +638,7 @@ void lcCamera::RayTest(lcObjectRayTest& ObjectRayTest) const
 	}
 
 	lcMatrix44 ViewWorld = lcMatrix44AffineInverse(mWorldView);
-	lcVector3 UpVectorPosition = lcMul31(lcVector3(0, 1, 0), ViewWorld);
+	lcVector3 UpVectorPosition = lcMul31(lcVector3(0, 25, 0), ViewWorld);
 
 	WorldView = mWorldView;
 	WorldView.SetTranslation(lcMul30(-UpVectorPosition, WorldView));
@@ -698,7 +692,7 @@ void lcCamera::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
 	}
 
 	lcMatrix44 ViewWorld = lcMatrix44AffineInverse(mWorldView);
-	lcVector3 UpVectorPosition = lcMul31(lcVector3(0, 1, 0), ViewWorld);
+	lcVector3 UpVectorPosition = lcMul31(lcVector3(0, 25, 0), ViewWorld);
 
 	WorldView = mWorldView;
 	WorldView.SetTranslation(lcMul30(-UpVectorPosition, WorldView));

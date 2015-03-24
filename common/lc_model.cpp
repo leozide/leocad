@@ -299,7 +299,7 @@ void lcModel::SaveLDraw(QTextStream& Stream, bool MPD, bool SelectedOnly) const
 			CurrentLine++;
 		}
 
-		while (Piece->GetStepShow() < Step)
+		while (Piece->GetStepShow() > Step)
 		{
 			Stream << QLatin1String("0 STEP\r\n");
 			Step++;

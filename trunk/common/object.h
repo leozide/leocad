@@ -115,7 +115,7 @@ protected:
 			lcObjectKey<T>& Key = Keys[KeyIdx];
 			Stream << QLatin1String("0 !LEOCAD ") << KeyName << Key.Step << ' ';
 			for (int ValueIdx = 0; ValueIdx < Count; ValueIdx++)
-				Stream << Key.Value[ValueIdx] << ' ';
+				Stream << ((float*)&Key.Value)[ValueIdx] << ' ';
 			Stream << QLatin1String("\r\n");
 		}
 	}
@@ -133,9 +133,7 @@ protected:
 		for (int ValueIdx = 0; ValueIdx < Count; ValueIdx++)
 			Stream >> ((float*)&Value)[ValueIdx];
 
-		lcObjectKey<T>& Key = Keys.Add();
-		Key.Step = Step;
-		Key.Value = Value;
+		ChangeKey(Keys, Value, Step, true);
 	}
 
 	template<typename T>

@@ -216,9 +216,15 @@ bool Project::Load(const QString& FileName)
 		while (!Buffer.atEnd())
 		{
 			lcModel* Model = new lcModel(QString());
-			mModels.Add(Model);
 			Model->LoadLDraw(Buffer, this);
-			Model->SetSaved();
+
+			if (mModels.IsEmpty() || !Model->GetProperties().mName.isEmpty())
+			{
+				mModels.Add(Model);
+				Model->SetSaved();
+			}
+			else
+				delete Model;
 		}
 	}
 	else

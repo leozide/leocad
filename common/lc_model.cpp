@@ -394,6 +394,8 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 	lcArray<lcGroup*> CurrentGroups;
 	int CurrentStep = 1;
 
+	mProperties.mAuthor.clear();
+
 	while (!Device.atEnd())
 	{
 		qint64 Pos = Device.pos();

@@ -350,6 +350,31 @@ void Project::GetModelParts(lcArray<lcModelPartsEntry>& ModelParts)
 	SetActiveModel(mModels.FindIndex(mActiveModel));
 }
 
+QString Project::GetExportFileName(const QString& FileName, const QString& DefaultExtension, const QString& DialogTitle, const QString& DialogFilter) const
+{
+	if (!FileName.isEmpty())
+		return FileName;
+
+	QString SaveFileName;
+
+	if (!mFileName.isEmpty())
+		SaveFileName = mFileName;
+	else
+		SaveFileName = GetTitle();
+
+	QString Extension = QFileInfo(SaveFileName).suffix().toLower();
+
+	if (Extension.isEmpty())
+		SaveFileName += "." + DefaultExtension;
+	else if (Extension != DefaultExtension && SaveFileName.length() > 4)
+	{
+		SaveFileName = SaveFileName.left(SaveFileName.length() - Extension.length() - 1);
+		SaveFileName += "." + DefaultExtension;
+	}
+
+	return QFileDialog::getSaveFileName(gMainWindow, DialogTitle, SaveFileName, DialogFilter);
+}
+
 void Project::Export3DStudio(const QString& FileName)
 {
 	lcArray<lcModelPartsEntry> ModelParts;
@@ -362,14 +387,10 @@ void Project::Export3DStudio(const QString& FileName)
 		return;
 	}
 
-	QString SaveFileName = FileName;
-	if (SaveFileName.isEmpty())
-	{
-		SaveFileName = QFileDialog::getSaveFileName(gMainWindow, tr("Export 3D Studio"), QString(), tr("3DS Files (*.3ds);;All Files (*.*)"));
+	QString SaveFileName = GetExportFileName(FileName, "3ds", tr("Export 3D Studio"), tr("3DS Files (*.3ds);;All Files (*.*)"));
 
-		if (SaveFileName.isEmpty())
-			return;
-	}
+	if (SaveFileName.isEmpty())
+		return;
 
 	lcDiskFile File;
 
@@ -854,17 +875,17 @@ void Project::ExportBrickLink()
 		return;
 	}
 
-	QString FileName = QFileDialog::getSaveFileName(gMainWindow, tr("Export BrickLink"), QString(), tr("XML Files (*.xml);;All Files (*.*)"));
+	QString SaveFileName = GetExportFileName(QString(), "xml", tr("Export BrickLink"), tr("XML Files (*.xml);;All Files (*.*)"));
 
-	if (FileName.isEmpty())
+	if (SaveFileName.isEmpty())
 		return;
 
 	lcDiskFile BrickLinkFile;
 	char Line[1024];
 
-	if (!BrickLinkFile.Open(FileName, "wt"))
+	if (!BrickLinkFile.Open(SaveFileName, "wt"))
 	{
-		QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Could not open file '%1' for writing.").arg(FileName));
+		QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Could not open file '%1' for writing.").arg(SaveFileName));
 		return;
 	}
 
@@ -914,17 +935,17 @@ void Project::ExportCSV()
 		return;
 	}
 
-	QString FileName = QFileDialog::getSaveFileName(gMainWindow, tr("Export CSV"), QString(), tr("CSV Files (*.csv);;All Files (*.*)"));
+	QString SaveFileName = GetExportFileName(QString(), "csv", tr("Export CSV"), tr("CSV Files (*.csv);;All Files (*.*)"));
 
-	if (FileName.isEmpty())
+	if (SaveFileName.isEmpty())
 		return;
 
 	lcDiskFile CSVFile;
 	char Line[1024];
 
-	if (!CSVFile.Open(FileName, "wt"))
+	if (!CSVFile.Open(SaveFileName, "wt"))
 	{
-		QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Could not open file '%1' for writing.").arg(FileName));
+		QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Could not open file '%1' for writing.").arg(SaveFileName));
 		return;
 	}
 
@@ -1577,14 +1598,10 @@ void Project::ExportWavefront(const QString& FileName)
 		return;
 	}
 
-	QString SaveFileName = FileName;
-	if (SaveFileName.isEmpty())
-	{
-		SaveFileName = QFileDialog::getSaveFileName(gMainWindow, tr("Export Wavefront"), QString(), tr("Wavefront Files (*.obj);;All Files (*.*)"));
+	QString SaveFileName = GetExportFileName(FileName, "obj", tr("Export Wavefront"), tr("Wavefront Files (*.obj);;All Files (*.*)"));
 
-		if (SaveFileName.isEmpty())
-			return;
-	}
+	if (SaveFileName.isEmpty())
+		return;
 
 	lcDiskFile OBJFile;
 	char Line[1024];

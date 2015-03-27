@@ -72,6 +72,7 @@ public:
 	void ExportWavefront(const QString& FileName);
 
 protected:
+	QString GetExportFileName(const QString& FileName, const QString& DefaultExtension, const QString& DialogTitle, const QString& DialogFilter) const;
 	void GetModelParts(lcArray<lcModelPartsEntry>& ModelParts);
 	void CreateHTMLPieceList(QTextStream& Stream, lcModel* Model, lcStep Step, bool Images, const QString& ImageExtension);
 

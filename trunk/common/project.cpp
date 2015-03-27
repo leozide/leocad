@@ -350,7 +350,7 @@ void Project::GetModelParts(lcArray<lcModelPartsEntry>& ModelParts)
 	SetActiveModel(mModels.FindIndex(mActiveModel));
 }
 
-void Project::Export3DStudio()
+void Project::Export3DStudio(const QString& FileName)
 {
 	lcArray<lcModelPartsEntry> ModelParts;
 
@@ -362,14 +362,18 @@ void Project::Export3DStudio()
 		return;
 	}
 
-	QString FileName = QFileDialog::getSaveFileName(gMainWindow, tr("Export 3D Studio"), QString(), tr("3DS Files (*.3ds);;All Files (*.*)"));
+	QString SaveFileName = FileName;
+	if (SaveFileName.isEmpty())
+	{
+		SaveFileName = QFileDialog::getSaveFileName(gMainWindow, tr("Export 3D Studio"), QString(), tr("3DS Files (*.3ds);;All Files (*.*)"));
 
-	if (FileName.isEmpty())
-		return;
+		if (SaveFileName.isEmpty())
+			return;
+	}
 
 	lcDiskFile File;
 
-	if (!File.Open(FileName, "wb"))
+	if (!File.Open(SaveFileName, "wb"))
 	{
 		QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Could not open file '%1' for writing.").arg(FileName));
 		return;

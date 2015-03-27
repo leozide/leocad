@@ -203,6 +203,7 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 	// Image output options.
 	bool SaveImage = false;
 	bool SaveWavefront = false;
+	bool Save3DS = false;
 //	bool ImageHighlight = false;
 	int ImageWidth = lcGetProfileInt(LC_PROFILE_IMAGE_WIDTH);
 	int ImageHeight = lcGetProfileInt(LC_PROFILE_IMAGE_HEIGHT);
@@ -210,7 +211,8 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 	lcStep ImageEnd = 0;
 	char* ImageName = NULL;
 	char* ProjectName = NULL;
-	char* WavefrontName = NULL;
+	char* SaveWavefrontName = NULL;
+	char* Save3DSName = NULL;
 
 	// Parse the command line arguments.
 	for (int i = 1; i < argc; i++)
@@ -255,14 +257,24 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 			}
 //			else if (strcmp(Param, "--highlight") == 0)
 //				ImageHighlight = true;
-			else if ((strcmp(Param, "-wf") == 0) || (strcmp(Param, "--wavefront") == 0))
+			else if ((strcmp(Param, "-wf") == 0) || (strcmp(Param, "--export-wavefront") == 0))
 			{
 				SaveWavefront = true;
 
 				if ((argc > (i+1)) && (argv[i+1][0] != '-'))
 				{
 					i++;
-					WavefrontName = argv[i];
+					SaveWavefrontName = argv[i];
+				}
+			}
+			else if ((strcmp(Param, "-3ds") == 0) || (strcmp(Param, "--export-3ds") == 0))
+			{
+				Save3DS = true;
+
+				if ((argc > (i+1)) && (argv[i+1][0] != '-'))
+				{
+					i++;
+					Save3DSName = argv[i];
 				}
 			}
 			else if ((strcmp(Param, "-v") == 0) || (strcmp(Param, "--version") == 0))
@@ -283,7 +295,8 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 				printf("  -f, --from <time>: Sets the first frame or step to save pictures.\n");
 				printf("  -t, --to <time>: Sets the last frame or step to save pictures.\n");
 //				printf("  --highlight: Highlight pieces in the steps they appear.\n");
-				printf("  -wf, --wavefront <outfile.obj>: Exports the model to Wavefront format.\n");
+				printf("  -wf, --export-wavefront <outfile.obj>: Exports the model to Wavefront format.\n");
+				printf("  -3ds, --export-3ds <outfile.3ds>: Exports the model to 3DS format.\n");
 				printf("  \n");
 
 				return false;
@@ -302,7 +315,7 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 
 	if (!LoadPiecesLibrary(LibPath, LibraryInstallPath, LDrawPath, LibraryCachePath))
 	{
-		if (SaveImage || SaveWavefront)
+		if (SaveImage || SaveWavefront || Save3DS)
 		{
 			fprintf(stderr, "ERROR: Cannot load pieces library.");
 			return false;
@@ -387,8 +400,8 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 		{
 			QString FileName;
 
-			if (WavefrontName)
-				FileName = WavefrontName;
+			if (SaveWavefrontName)
+				FileName = SaveWavefrontName;
 			else
 				FileName = ProjectName;
 
@@ -406,9 +419,33 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 
 			mProject->ExportWavefront(FileName);
 		}
+
+		if (Save3DS)
+		{
+			QString FileName;
+
+			if (Save3DSName)
+				FileName = Save3DSName;
+			else
+				FileName = ProjectName;
+
+			QString Extension = QFileInfo(FileName).suffix().toLower();
+
+			if (Extension.isEmpty())
+			{
+				FileName += ".3ds";
+			}
+			else if (Extension != "3ds")
+			{
+				FileName = FileName.left(FileName.length() - Extension.length() - 1);
+				FileName += ".3ds";
+			}
+
+			mProject->Export3DStudio(FileName);
+		}
 	}
 
-	if (SaveImage || SaveWavefront)
+	if (SaveImage || SaveWavefront || Save3DS)
 		return false;
 
 	return true;

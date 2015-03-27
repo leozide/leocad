@@ -64,7 +64,7 @@ public:
 	void Merge(Project* Other);
 
 	void SaveImage();
-	void Export3DStudio();
+	void Export3DStudio(const QString& FileName);
 	void ExportBrickLink();
 	void ExportCSV();
 	void ExportHTML();

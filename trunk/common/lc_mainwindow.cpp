@@ -1822,7 +1822,7 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		break;
 
 	case LC_FILE_EXPORT_3DS:
-		lcGetActiveProject()->Export3DStudio();
+		lcGetActiveProject()->Export3DStudio(QString());
 		break;
 
 	case LC_FILE_EXPORT_HTML:

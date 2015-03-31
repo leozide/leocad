@@ -295,7 +295,28 @@ void lcModel::SaveLDraw(QTextStream& Stream, bool MPD, bool SelectedOnly) const
 
 		while (Piece->GetFileLine() > CurrentLine && CurrentLine < mFileLines.size())
 		{
-			Stream << mFileLines[CurrentLine];
+			QString Line = mFileLines[CurrentLine];
+			QTextStream LineStream(&Line, QIODevice::ReadOnly);
+
+			QString Token;
+			LineStream >> Token;
+			bool Skip = false;
+
+			if (Token == QLatin1String("0"))
+			{
+				LineStream >> Token;
+
+				if (Token == QLatin1String("STEP"))
+				{
+					if (Piece->GetStepShow() > Step)
+						Step++;
+					else
+						Skip = true;
+				}
+			}
+
+			if (!Skip)
+				Stream << mFileLines[CurrentLine];
 			CurrentLine++;
 		}
 
@@ -428,6 +449,7 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 			else if (Token == QLatin1String("STEP"))
 			{
 				CurrentStep++;
+				mFileLines.append(OriginalLine);
 				continue;
 			}
 

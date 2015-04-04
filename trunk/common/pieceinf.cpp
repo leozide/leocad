@@ -10,6 +10,7 @@
 #include "lc_model.h"
 #include "lc_context.h"
 #include "camera.h"
+#include <locale.h>
 
 PieceInfo::PieceInfo()
 {

@@ -158,7 +158,7 @@ void GL_InitializeSharedExtensions(lcGLWidget* Window)
 
 		if (DebugMessageCallback)
 		{
-			DebugMessageCallback((GLDEBUGPROCARB)&lcDebugCallback, NULL);
+			DebugMessageCallback((GLDEBUGARBPROC)&lcDebugCallback, NULL);
 			glEnable(GL_DEBUG_OUTPUT);
 			glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
 		}

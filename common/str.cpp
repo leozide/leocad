@@ -368,25 +368,6 @@ void String::MakeLower ()
 	  *cp += 'a' - 'A';
 }
 
-void String::MakeReverse ()
-{
-  register char *h, *t;
-
-  h = m_pData;
-  t = m_pData + strlen (m_pData) - 1;
-
-  while (h < t)
-  {
-    register char c;
-
-    c = *h;
-    *h = *t;
-    h++;
-    *t = c;
-    t--;
-  }
-}
-
 void String::TrimRight ()
 {
   for (char *s = m_pData + strlen (m_pData) - 1; s >= m_pData && isspace (*s); s--)

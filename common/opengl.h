@@ -90,7 +90,7 @@ typedef char GLchar;
 
 #ifndef GL_ARB_debug_output
 #define GL_ARB_debug_output 1
-typedef void (APIENTRY  *GLDEBUGPROCARB) (GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam);
+typedef void (APIENTRY  *GLDEBUGARBPROC) (GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam);
 #define GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB          0x8242
 #define GL_DEBUG_NEXT_LOGGED_MESSAGE_LENGTH_ARB  0x8243
 #define GL_DEBUG_CALLBACK_FUNCTION_ARB           0x8244
@@ -173,7 +173,7 @@ typedef unsigned int GLhandleARB;
 // GL_ARB_debug_output
 typedef void (APIENTRY *GLDEBUGMESSAGECONTROLARBPROC) (GLenum source, GLenum type, GLenum severity, GLsizei count, const GLuint *ids, GLboolean enabled);
 typedef void (APIENTRY *GLDEBUGMESSAGEINSERTARBPROC) (GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *buf);
-typedef void (APIENTRY *GLDEBUGMESSAGECALLBACKARBPROC) (GLDEBUGPROCARB callback, const void *userParam);
+typedef void (APIENTRY *GLDEBUGMESSAGECALLBACKARBPROC) (GLDEBUGARBPROC callback, const void *userParam);
 typedef GLuint (APIENTRY *GLGETDEBUGMESSAGELOGARBPROC) (GLuint count, GLsizei bufSize, GLenum *sources, GLenum *types, GLuint *ids, GLenum *severities, GLsizei *lengths, GLchar *messageLog);
 
 // GL_ARB_vertex_buffer_object

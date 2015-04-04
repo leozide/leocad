@@ -56,7 +56,6 @@ public:
 	// upper/lower/reverse conversion
 	void MakeUpper();
 	void MakeLower();
-	void MakeReverse();
 
 	// trimming whitespace (either side)
 	void TrimRight();

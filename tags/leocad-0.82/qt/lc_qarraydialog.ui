@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>lcQArrayDialog</class>
+ <widget class="QDialog" name="lcQArrayDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>468</width>
+    <height>156</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Array</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QGroupBox" name="groupBox_4">
+       <property name="title">
+        <string>Dimensions</string>
+       </property>
+       <layout class="QGridLayout" name="gridLayout_8">
+        <item row="0" column="0">
+         <layout class="QGridLayout" name="gridLayout_9">
+          <item row="2" column="0">
+           <widget class="QSpinBox" name="count3">
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <number>1000</number>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QSpinBox" name="count1">
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <number>1000</number>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QSpinBox" name="count2">
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <number>1000</number>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="groupBox_5">
+       <property name="title">
+        <string>Offsets</string>
+       </property>
+       <layout class="QGridLayout" name="gridLayout_10">
+        <item row="0" column="1">
+         <widget class="QLineEdit" name="offset1y"/>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLineEdit" name="offset2x"/>
+        </item>
+        <item row="0" column="0">
+         <widget class="QLineEdit" name="offset1x"/>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLineEdit" name="offset3x"/>
+        </item>
+        <item row="0" column="2">
+         <widget class="QLineEdit" name="offset1z"/>
+        </item>
+        <item row="1" column="1">
+         <widget class="QLineEdit" name="offset2y"/>
+        </item>
+        <item row="2" column="1">
+         <widget class="QLineEdit" name="offset3y"/>
+        </item>
+        <item row="1" column="2">
+         <widget class="QLineEdit" name="offset2z"/>
+        </item>
+        <item row="2" column="2">
+         <widget class="QLineEdit" name="offset3z"/>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="groupBox_6">
+       <property name="title">
+        <string>Rotations</string>
+       </property>
+       <layout class="QGridLayout" name="gridLayout_11">
+        <item row="2" column="2">
+         <widget class="QLineEdit" name="rotation3z"/>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLineEdit" name="rotation3x"/>
+        </item>
+        <item row="0" column="0">
+         <widget class="QLineEdit" name="rotation1x"/>
+        </item>
+        <item row="1" column="2">
+         <widget class="QLineEdit" name="rotation2z"/>
+        </item>
+        <item row="0" column="2">
+         <widget class="QLineEdit" name="rotation1z"/>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLineEdit" name="rotation2x"/>
+        </item>
+        <item row="0" column="1">
+         <widget class="QLineEdit" name="rotation1y"/>
+        </item>
+        <item row="1" column="1">
+         <widget class="QLineEdit" name="rotation2y"/>
+        </item>
+        <item row="2" column="1">
+         <widget class="QLineEdit" name="rotation3y"/>
+        </item>
+       </layout>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QFrame" name="frame">
+     <property name="frameShape">
+      <enum>QFrame::HLine</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <tabstops>
+  <tabstop>count1</tabstop>
+  <tabstop>offset1x</tabstop>
+  <tabstop>offset1y</tabstop>
+  <tabstop>offset1z</tabstop>
+  <tabstop>rotation1x</tabstop>
+  <tabstop>rotation1y</tabstop>
+  <tabstop>rotation1z</tabstop>
+  <tabstop>count2</tabstop>
+  <tabstop>offset2x</tabstop>
+  <tabstop>offset2y</tabstop>
+  <tabstop>offset2z</tabstop>
+  <tabstop>rotation2x</tabstop>
+  <tabstop>rotation2y</tabstop>
+  <tabstop>rotation2z</tabstop>
+  <tabstop>count3</tabstop>
+  <tabstop>offset3x</tabstop>
+  <tabstop>offset3y</tabstop>
+  <tabstop>offset3z</tabstop>
+  <tabstop>rotation3x</tabstop>
+  <tabstop>rotation3y</tabstop>
+  <tabstop>rotation3z</tabstop>
+  <tabstop>buttonBox</tabstop>
+ </tabstops>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>lcQArrayDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>227</x>
+     <y>141</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>157</x>
+     <y>158</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>lcQArrayDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>295</x>
+     <y>147</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>286</x>
+     <y>158</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

@@ -42,7 +42,7 @@ void lcQPOVRayDialog::accept()
 
 void lcQPOVRayDialog::on_outputBrowse_clicked()
 {
-	QString result = QFileDialog::getOpenFileName(this, tr("Save POV-Ray File"), ui->outputEdit->text(), tr("POV-Ray Files (*.pov);;All Files (*.*)"));
+	QString result = QFileDialog::getSaveFileName(this, tr("Save POV-Ray File"), ui->outputEdit->text(), tr("POV-Ray Files (*.pov);;All Files (*.*)"));
 
 	if (!result.isEmpty())
 		ui->outputEdit->setText(QDir::toNativeSeparators(result));

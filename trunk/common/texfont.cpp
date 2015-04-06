@@ -228,7 +228,7 @@ void TexFont::PrintText(float Left, float Top, float Z, const char* Text) const
 	delete[] Verts;
 }
 
-void TexFont::GetGlyphQuad(float Left, float Top, float Z, char Glyph, float* Buffer) const
+void TexFont::GetGlyphQuad(float Left, float Top, float Z, int Glyph, float* Buffer) const
 {
 	Left -= mGlyphs[Glyph].width / 2.0f;
 	Top += mFontHeight / 2.0f;

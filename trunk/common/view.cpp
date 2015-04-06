@@ -1266,57 +1266,67 @@ void View::DrawAxes()
 {
 //	glClear(GL_DEPTH_BUFFER_BIT);
 
-	lcMatrix44 Mats[3];
-	Mats[0] = mCamera->mWorldView;
-	Mats[0].SetTranslation(lcVector3(0, 0, 0));
-	Mats[1] = lcMul(lcMatrix44(lcVector4(0, 1, 0, 0), lcVector4(1, 0, 0, 0), lcVector4(0, 0, 1, 0), lcVector4(0, 0, 0, 1)), Mats[0]);
-	Mats[2] = lcMul(lcMatrix44(lcVector4(0, 0, 1, 0), lcVector4(0, 1, 0, 0), lcVector4(1, 0, 0, 0), lcVector4(0, 0, 0, 1)), Mats[0]);
-
-	lcVector3 pts[3] =
+	const float Verts[28 * 3] =
 	{
-		lcMul30(lcVector3(20, 0, 0), Mats[0]),
-		lcMul30(lcVector3(0, 20, 0), Mats[0]),
-		lcMul30(lcVector3(0, 0, 20), Mats[0]),
+		 0.00f,  0.00f,  0.00f, 20.00f,  0.00f,  0.00f, 12.00f,  3.00f,  0.00f, 12.00f,  2.12f,  2.12f,
+		12.00f,  0.00f,  3.00f, 12.00f, -2.12f,  2.12f, 12.00f, -3.00f,  0.00f, 12.00f, -2.12f, -2.12f,
+		12.00f,  0.00f, -3.00f, 12.00f,  2.12f, -2.12f,  0.00f, 20.00f,  0.00f,  3.00f, 12.00f,  0.00f,
+		 2.12f, 12.00f,  2.12f,  0.00f, 12.00f,  3.00f, -2.12f, 12.00f,  2.12f, -3.00f, 12.00f,  0.00f,
+		-2.12f, 12.00f, -2.12f,  0.00f, 12.00f, -3.00f,  2.12f, 12.00f, -2.12f,  0.00f,  0.00f, 20.00f,
+		 0.00f,  3.00f, 12.00f,  2.12f,  2.12f, 12.00f,  3.00f,  0.00f, 12.00f,  2.12f, -2.12f, 12.00f,
+		 0.00f, -3.00f, 12.00f, -2.12f, -2.12f, 12.00f, -3.00f,  0.00f, 12.00f, -2.12f,  2.12f, 12.00f,
 	};
 
-	const lcVector4 Colors[3] =
+	GLushort LineIndices[6] = { 0, 1, 0, 10, 0, 19 };
+
+	GLushort TriIndices[72] = 
 	{
-		lcVector4(0.8f, 0.0f, 0.0f, 1.0f),
-		lcVector4(0.0f, 0.8f, 0.0f, 1.0f),
-		lcVector4(0.0f, 0.0f, 0.8f, 1.0f)
+		 1,  2,  3,  1,  3,  4,  1,  4,  5,  1,  5,  6,  1,  6,  7,  1,  7,  8,  1,  8,  9,  1,  9,  2,
+		10, 11, 12, 10, 12, 13, 10, 13, 14, 10, 14, 15, 10, 15, 16, 10, 16, 17, 10, 17, 18, 10, 18, 11,
+		19, 20, 21, 19, 21, 22, 19, 22, 23, 19, 23, 24, 19, 24, 25, 19, 25, 26, 19, 26, 27, 19, 27, 20
 	};
+
+	lcMatrix44 TranslationMatrix = lcMatrix44Translation(lcVector3(25.375f, 25.375f, 0.0f));
+	lcMatrix44 WorldViewMatrix = mCamera->mWorldView;
+	WorldViewMatrix.SetTranslation(lcVector3(0, 0, 0));
 
 	mContext->SetProjectionMatrix(lcMatrix44Ortho(0, mWidth, 0, mHeight, -50, 50));
-	mContext->SetWorldViewMatrix(lcMatrix44Translation(lcVector3(25.375f, 25.375f, 0.0f)));
-
-	// Draw the arrows.
-	lcVector3 Verts[11];
-	Verts[0] = lcVector3(0.0f, 0.0f, 0.0f);
+	mContext->SetWorldViewMatrix(lcMul(WorldViewMatrix, TranslationMatrix));
 
 	glVertexPointer(3, GL_FLOAT, 0, Verts);
 
-	for (int i = 0; i < 3; i++)
-	{
-		glColor4fv(Colors[i]);
-		Verts[1] = pts[i];
+	glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
+	glDrawElements(GL_LINES, 6, GL_UNSIGNED_SHORT, LineIndices);
+	glColor4f(0.8f, 0.0f, 0.0f, 1.0f),
+	glDrawElements(GL_TRIANGLES, 24, GL_UNSIGNED_SHORT, TriIndices);
+	glColor4f(0.0f, 0.8f, 0.0f, 1.0f);
+	glDrawElements(GL_TRIANGLES, 24, GL_UNSIGNED_SHORT, TriIndices + 24);
+	glColor4f(0.0f, 0.0f, 0.8f, 1.0f);
+	glDrawElements(GL_TRIANGLES, 24, GL_UNSIGNED_SHORT, TriIndices + 48);
 
-		for (int j = 0; j < 9; j++)
-			Verts[j+2] = lcMul30(lcVector3(12.0f, cosf(LC_2PI * j / 8) * 3.0f, sinf(LC_2PI * j / 8) * 3.0f), Mats[i]);
-
-		glDrawArrays(GL_LINES, 0, 2);
-		glDrawArrays(GL_TRIANGLE_FAN, 1, 10);
-	}
-
+	mContext->SetWorldViewMatrix(TranslationMatrix);
 	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 	gTexFont.MakeCurrent();
 	glEnable(GL_TEXTURE_2D);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_BLEND);
 
+	float TextBuffer[4 * 5 * 3];
+	lcVector3 PosX = lcMul30(lcVector3(25.0f, 0.0f, 0.0f), WorldViewMatrix);
+	gTexFont.GetGlyphQuad(PosX.x, PosX.y, PosX.z, 'X', TextBuffer);
+	lcVector3 PosY = lcMul30(lcVector3(0.0f, 25.0f, 0.0f), WorldViewMatrix);
+	gTexFont.GetGlyphQuad(PosY.x, PosY.y, PosY.z, 'Y', TextBuffer + 5 * 4);
+	lcVector3 PosZ = lcMul30(lcVector3(0.0f, 0.0f, 25.0f), WorldViewMatrix);
+	gTexFont.GetGlyphQuad(PosZ.x, PosZ.y, PosZ.z, 'Z', TextBuffer + 5 * 4 * 2);
+
+	glVertexPointer(3, GL_FLOAT, 5 * sizeof(float), TextBuffer);
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	glTexCoordPointer(2, GL_FLOAT, 5 * sizeof(float), TextBuffer + 3);
+
 	glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
-	gTexFont.PrintText(pts[0][0], pts[0][1], 40.0f, "X");
-	gTexFont.PrintText(pts[1][0], pts[1][1], 40.0f, "Y");
-	gTexFont.PrintText(pts[2][0], pts[2][1], 40.0f, "Z");
+	glDrawArrays(GL_QUADS, 0, 4 * 3);
+
+	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 
 	glDisable(GL_BLEND);
 	glDisable(GL_TEXTURE_2D);

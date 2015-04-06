@@ -227,3 +227,33 @@ void TexFont::PrintText(float Left, float Top, float Z, const char* Text) const
 
 	delete[] Verts;
 }
+
+void TexFont::GetGlyphQuad(float Left, float Top, float Z, char Glyph, float* Buffer) const
+{
+	Left -= mGlyphs[Glyph].width / 2.0f;
+	Top += mFontHeight / 2.0f;
+
+	*Buffer++ = Left;
+	*Buffer++ = Top;
+	*Buffer++ = Z;
+	*Buffer++ = mGlyphs[Glyph].left;
+	*Buffer++ = mGlyphs[Glyph].top;
+
+	*Buffer++ = Left;
+	*Buffer++ = Top - mFontHeight;
+	*Buffer++ = Z;
+	*Buffer++ = mGlyphs[Glyph].left;
+	*Buffer++ = mGlyphs[Glyph].bottom;
+
+	*Buffer++ = Left + mGlyphs[Glyph].width;
+	*Buffer++ = Top - mFontHeight;
+	*Buffer++ = Z;
+	*Buffer++ = mGlyphs[Glyph].right;
+	*Buffer++ = mGlyphs[Glyph].bottom;
+
+	*Buffer++ = Left + mGlyphs[Glyph].width;
+	*Buffer++ = Top;
+	*Buffer++ = Z;
+	*Buffer++ = mGlyphs[Glyph].right;
+	*Buffer++ = mGlyphs[Glyph].top;
+}

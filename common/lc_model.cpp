@@ -101,12 +101,12 @@ void lcModelProperties::ParseLDrawLine(QTextStream& Stream)
 	Stream >> Token;
 
 	if (Token == QLatin1String("AUTHOR"))
-		mAuthor = Stream.readLine();
+		mAuthor = Stream.readLine().mid(1);
 	else if (Token == QLatin1String("DESCRIPTION"))
-		mDescription = Stream.readLine();
+		mDescription = Stream.readLine().mid(1);
 	else if (Token == QLatin1String("COMMENT"))
 	{
-		QString Comment = Stream.readLine();
+		QString Comment = Stream.readLine().mid(1);
 		if (!mComments.isEmpty())
 			mComments += '\n';
 		mComments += Comment;

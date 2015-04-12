@@ -24,35 +24,35 @@
        <item>
         <widget class="QPushButton" name="NewModel">
          <property name="text">
-          <string>New...</string>
+          <string>&amp;New</string>
          </property>
         </widget>
        </item>
        <item>
         <widget class="QPushButton" name="DeleteModel">
          <property name="text">
-          <string>Delete...</string>
+          <string>D&amp;elete...</string>
          </property>
         </widget>
        </item>
        <item>
         <widget class="QPushButton" name="RenameModel">
          <property name="text">
-          <string>Rename...</string>
+          <string>&amp;Rename...</string>
          </property>
         </widget>
        </item>
        <item>
         <widget class="QPushButton" name="MoveUp">
          <property name="text">
-          <string>Move Up</string>
+          <string>Move &amp;Up</string>
          </property>
         </widget>
        </item>
        <item>
         <widget class="QPushButton" name="MoveDown">
          <property name="text">
-          <string>Move Down</string>
+          <string>Move &amp;Down</string>
          </property>
         </widget>
        </item>

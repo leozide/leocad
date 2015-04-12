@@ -136,7 +136,7 @@ void lcModelProperties::ParseLDrawLine(QTextStream& Stream)
 			}
 
 			if (Token == QLatin1String("NAME"))
-				mBackgroundImage = Stream.readLine();
+				mBackgroundImage = Stream.readLine().trimmed();
 		}
 	}
 }

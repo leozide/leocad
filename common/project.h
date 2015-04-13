@@ -87,7 +87,8 @@ protected:
 
 inline lcModel* lcGetActiveModel()
 {
-	return lcGetActiveProject()->GetActiveModel();
+	Project* Project = lcGetActiveProject();
+	return Project ? Project->GetActiveModel() : NULL;
 }
 
 #endif // _PROJECT_H_

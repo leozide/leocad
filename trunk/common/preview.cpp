@@ -34,7 +34,9 @@ void PiecePreview::OnDraw()
 	float aspect = (float)mWidth/(float)mHeight;
 	mContext->SetViewport(0, 0, mWidth, mHeight);
 
-	lcGetActiveModel()->DrawBackground(mContext);
+	lcModel* Model = lcGetActiveModel();
+	if (Model)
+		Model->DrawBackground(mContext);
 
 	lcVector3 Eye(0.0f, 0.0f, 1.0f);
 

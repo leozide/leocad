@@ -6,6 +6,7 @@
 #include "view.h"
 #include "system.h"
 #include "tr.h"
+#include "lc_mesh.h"
 #include "texfont.h"
 #include "lc_texture.h"
 #include "preview.h"
@@ -16,6 +17,8 @@ View::View(lcModel* Model)
 {
 	mModel = Model;
 	mCamera = NULL;
+	mGridBuffer = NULL;
+	memset(mGridSettings, 0, sizeof(mGridSettings));
 
 	mDragState = LC_DRAGSTATE_NONE;
 	mTrackButton = LC_TRACKBUTTON_NONE;
@@ -30,6 +33,8 @@ View::View(lcModel* Model)
 
 View::~View()
 {
+	delete mGridBuffer;
+
 	if (gMainWindow)
 		gMainWindow->RemoveView(this);
 
@@ -1026,16 +1031,19 @@ void View::DrawSelectZoomRegionOverlay()
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_BLEND);
 
-	glVertexPointer(2, GL_FLOAT, 0, Verts);
+	mContext->SetVertexBufferPointer(Verts);
+	mContext->SetVertexFormat(0, 2, 0, 0);
 
 	glColor4f(0.25f, 0.25f, 1.0f, 1.0f);
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 10);
+	mContext->DrawPrimitives(GL_TRIANGLE_STRIP, 0, 10);
 
 	glColor4f(0.25f, 0.25f, 1.0f, 0.25f);
-	glDrawArrays(GL_TRIANGLE_STRIP, 10, 4);
+	mContext->DrawPrimitives(GL_TRIANGLE_STRIP, 10, 4);
 
 	glDisable(GL_BLEND);
 	glEnable(GL_DEPTH_TEST);
+
+	mContext->ClearVertexBuffer(); // context remove
 }
 
 void View::DrawRotateViewOverlay()
@@ -1053,8 +1061,8 @@ void View::DrawRotateViewOverlay()
 	glDisable(GL_DEPTH_TEST);
 	glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
 
-	// Draw circle.
-	float verts[32][2];
+	float Verts[32 * 16 * 2];
+	float* CurVert = Verts;
 
 	float r = lcMin(w, h) * 0.35f;
 	float cx = x + w / 2.0f;
@@ -1062,43 +1070,45 @@ void View::DrawRotateViewOverlay()
 
 	for (int i = 0; i < 32; i++)
 	{
-		verts[i][0] = cosf((float)i / 32.0f * (2.0f * LC_PI)) * r + cx;
-		verts[i][1] = sinf((float)i / 32.0f * (2.0f * LC_PI)) * r + cy;
+		*CurVert++ = cosf((float)i / 32.0f * (2.0f * LC_PI)) * r + cx;
+		*CurVert++ = sinf((float)i / 32.0f * (2.0f * LC_PI)) * r + cy;
 	}
-
-	glVertexPointer(2, GL_FLOAT, 0, verts);
-	glDrawArrays(GL_LINE_LOOP, 0, 32);
 
 	const float OverlayCameraSquareSize = lcMax(8.0f, (w+h)/200);
 
-	// Draw squares.
-	float Squares[16][2] =
+	*CurVert++ = cx + OverlayCameraSquareSize; *CurVert++ = cy + r + OverlayCameraSquareSize;
+	*CurVert++ = cx - OverlayCameraSquareSize; *CurVert++ = cy + r + OverlayCameraSquareSize;
+	*CurVert++ = cx - OverlayCameraSquareSize; *CurVert++ = cy + r - OverlayCameraSquareSize;
+	*CurVert++ = cx + OverlayCameraSquareSize; *CurVert++ = cy + r - OverlayCameraSquareSize;
+	*CurVert++ = cx + OverlayCameraSquareSize; *CurVert++ = cy - r + OverlayCameraSquareSize;
+	*CurVert++ = cx - OverlayCameraSquareSize; *CurVert++ = cy - r + OverlayCameraSquareSize;
+	*CurVert++ = cx - OverlayCameraSquareSize; *CurVert++ = cy - r - OverlayCameraSquareSize;
+	*CurVert++ = cx + OverlayCameraSquareSize; *CurVert++ = cy - r - OverlayCameraSquareSize;
+	*CurVert++ = cx + r + OverlayCameraSquareSize; *CurVert++ = cy + OverlayCameraSquareSize;
+	*CurVert++ = cx + r - OverlayCameraSquareSize; *CurVert++ = cy + OverlayCameraSquareSize;
+	*CurVert++ = cx + r - OverlayCameraSquareSize; *CurVert++ = cy - OverlayCameraSquareSize;
+	*CurVert++ = cx + r + OverlayCameraSquareSize; *CurVert++ = cy - OverlayCameraSquareSize;
+	*CurVert++ = cx - r + OverlayCameraSquareSize; *CurVert++ = cy + OverlayCameraSquareSize;
+	*CurVert++ = cx - r - OverlayCameraSquareSize; *CurVert++ = cy + OverlayCameraSquareSize;
+	*CurVert++ = cx - r - OverlayCameraSquareSize; *CurVert++ = cy - OverlayCameraSquareSize;
+	*CurVert++ = cx - r + OverlayCameraSquareSize; *CurVert++ = cy - OverlayCameraSquareSize;
+
+	mContext->SetVertexBufferPointer(Verts);
+	mContext->SetVertexFormat(0, 2, 0, 0);
+
+	GLushort Indices[64 + 32] = 
 	{
-		{ cx + OverlayCameraSquareSize, cy + r + OverlayCameraSquareSize },
-		{ cx - OverlayCameraSquareSize, cy + r + OverlayCameraSquareSize },
-		{ cx - OverlayCameraSquareSize, cy + r - OverlayCameraSquareSize },
-		{ cx + OverlayCameraSquareSize, cy + r - OverlayCameraSquareSize },
-		{ cx + OverlayCameraSquareSize, cy - r + OverlayCameraSquareSize },
-		{ cx - OverlayCameraSquareSize, cy - r + OverlayCameraSquareSize },
-		{ cx - OverlayCameraSquareSize, cy - r - OverlayCameraSquareSize },
-		{ cx + OverlayCameraSquareSize, cy - r - OverlayCameraSquareSize },
-		{ cx + r + OverlayCameraSquareSize, cy + OverlayCameraSquareSize },
-		{ cx + r - OverlayCameraSquareSize, cy + OverlayCameraSquareSize },
-		{ cx + r - OverlayCameraSquareSize, cy - OverlayCameraSquareSize },
-		{ cx + r + OverlayCameraSquareSize, cy - OverlayCameraSquareSize },
-		{ cx - r + OverlayCameraSquareSize, cy + OverlayCameraSquareSize },
-		{ cx - r - OverlayCameraSquareSize, cy + OverlayCameraSquareSize },
-		{ cx - r - OverlayCameraSquareSize, cy - OverlayCameraSquareSize },
-		{ cx - r + OverlayCameraSquareSize, cy - OverlayCameraSquareSize }
+		0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13, 14, 14, 15, 15, 16, 16,
+		17, 17, 18, 18, 19, 19, 20, 20, 21, 21, 22, 22, 23, 23, 24, 24, 25, 25, 26, 26, 27, 27, 28, 28, 29, 29, 30, 30, 31, 31, 0,
+		32, 33, 33, 34, 34, 35, 35, 32, 36, 37, 37, 38, 38, 39, 39, 36,
+		40, 41, 41, 42, 42, 43, 43, 40, 44, 45, 45, 46, 46, 47, 47, 44
 	};
 
-	glVertexPointer(2, GL_FLOAT, 0, Squares);
-	glDrawArrays(GL_LINE_LOOP, 0, 4);
-	glDrawArrays(GL_LINE_LOOP, 4, 4);
-	glDrawArrays(GL_LINE_LOOP, 8, 4);
-	glDrawArrays(GL_LINE_LOOP, 12, 4);
+	glDrawElements(GL_LINES, 96, GL_UNSIGNED_SHORT, Indices);
 
 	glEnable(GL_DEPTH_TEST);
+
+	mContext->ClearVertexBuffer(); // context remove
 }
 
 void View::DrawGrid()
@@ -1169,43 +1179,99 @@ void View::DrawGrid()
 		MaxY = 2;
 	}
 
+	if (!mGridBuffer || MinX != mGridSettings[0] || MinY != mGridSettings[1] || MaxX != mGridSettings[2] || MaxY != mGridSettings[3] ||
+	    Spacing != mGridSettings[4] || (Preferences.mDrawGridStuds ? 1 : 0) != mGridSettings[5] || (Preferences.mDrawGridLines ? 1 : 0) != mGridSettings[6])
+	{
+		int BufferSize = 0;
+
+		if (Preferences.mDrawGridStuds)
+			BufferSize += 4 * 5;
+
+		if (Preferences.mDrawGridLines)
+			BufferSize += 2 * (MaxX - MinX + MaxY - MinY + 2) * 3;
+
+		if (!mGridBuffer)
+			mGridBuffer = new lcVertexBuffer();
+
+		mGridBuffer->SetSize(BufferSize * sizeof(float));
+		float* CurVert = (float*)mGridBuffer->mData;
+
+		if (Preferences.mDrawGridStuds)
+		{
+			float Left = MinX * 20.0f * Spacing;
+			float Right = MaxX * 20.0f * Spacing;
+			float Top = MinY * 20.0f * Spacing;
+			float Bottom = MaxY * 20.0f * Spacing;
+			float Z = 0;
+			float U = (MaxX - MinX) * Spacing;
+			float V = (MaxY - MinY) * Spacing;
+
+			*CurVert++ = Left;
+			*CurVert++ = Top;
+			*CurVert++ = Z;
+			*CurVert++ = 0.0f;
+			*CurVert++ = V;
+
+			*CurVert++ = Left;
+			*CurVert++ = Bottom;
+			*CurVert++ = Z;
+			*CurVert++ = 0.0f;
+			*CurVert++ = 0.0f;
+
+			*CurVert++ = Right;
+			*CurVert++ = Bottom;
+			*CurVert++ = Z;
+			*CurVert++ = U;
+			*CurVert++ = 0.0f;
+
+			*CurVert++ = Right;
+			*CurVert++ = Top;
+			*CurVert++ = Z;
+			*CurVert++ = U;
+			*CurVert++ = V;
+		}
+
+		if (Preferences.mDrawGridLines)
+		{
+			float LineSpacing = Spacing * 20.0f;
+
+			for (int Step = MinX; Step < MaxX + 1; Step++)
+			{
+				*CurVert++ = Step * LineSpacing;
+				*CurVert++ = MinY * LineSpacing;
+				*CurVert++ = 0.0f;
+				*CurVert++ = Step * LineSpacing;
+				*CurVert++ = MaxY * LineSpacing;
+				*CurVert++ = 0.0f;
+			}
+
+			for (int Step = MinY; Step < MaxY + 1; Step++)
+			{
+				*CurVert++ = MinX * LineSpacing;
+				*CurVert++ = Step * LineSpacing;
+				*CurVert++ = 0.0f;
+				*CurVert++ = MaxX * LineSpacing;
+				*CurVert++ = Step * LineSpacing;
+				*CurVert++ = 0.0f;
+			}
+		}
+
+		mGridSettings[0] = MinX;
+		mGridSettings[1] = MinY;
+		mGridSettings[2] = MaxX;
+		mGridSettings[3] = MaxY;
+		mGridSettings[4] = Spacing;
+		mGridSettings[5] = (Preferences.mDrawGridStuds ? 1 : 0);
+		mGridSettings[6] = (Preferences.mDrawGridLines ? 1 : 0);
+
+		mGridBuffer->UpdateBuffer();
+	}
+
+	int BufferOffset = 0;
+	mContext->SetVertexBuffer(mGridBuffer);
+
 	if (Preferences.mDrawGridStuds)
 	{
-		float Left = MinX * 20.0f * Spacing;
-		float Right = MaxX * 20.0f * Spacing;
-		float Top = MinY * 20.0f * Spacing;
-		float Bottom = MaxY * 20.0f * Spacing;
-		float Z = 0;
-		float U = (MaxX - MinX) * Spacing;
-		float V = (MaxY - MinY) * Spacing;
-
-		float Verts[4 * 5];
-		float* CurVert = Verts;
-
-		*CurVert++ = Left;
-		*CurVert++ = Top;
-		*CurVert++ = Z;
-		*CurVert++ = 0.0f;
-		*CurVert++ = V;
-
-		*CurVert++ = Left;
-		*CurVert++ = Bottom;
-		*CurVert++ = Z;
-		*CurVert++ = 0.0f;
-		*CurVert++ = 0.0f;
-
-		*CurVert++ = Right;
-		*CurVert++ = Bottom;
-		*CurVert++ = Z;
-		*CurVert++ = U;
-		*CurVert++ = 0.0f;
-
-		*CurVert++ = Right;
-		*CurVert++ = Top;
-		*CurVert++ = Z;
-		*CurVert++ = U;
-		*CurVert++ = V;
-
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 		glBindTexture(GL_TEXTURE_2D, gGridTexture->mTexture);
 		glEnable(GL_TEXTURE_2D);
@@ -1214,16 +1280,13 @@ void View::DrawGrid()
 
 		glColor4fv(lcVector4FromColor(Preferences.mGridStudColor));
 
-		glVertexPointer(3, GL_FLOAT, 5 * sizeof(float), Verts);
-		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-		glTexCoordPointer(2, GL_FLOAT, 5 * sizeof(float), Verts + 3);
-
-		glDrawArrays(GL_QUADS, 0, 4);
-
-		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+		mContext->SetVertexFormat(0, 3, 2, 0);
+		mContext->DrawPrimitives(GL_QUADS, 0, 4);
 
 		glDisable(GL_TEXTURE_2D);
 		glDisable(GL_BLEND);
+
+		BufferOffset = 4 * 5 * sizeof(float);
 	}
 
 	if (Preferences.mDrawGridLines)
@@ -1232,34 +1295,12 @@ void View::DrawGrid()
 		glColor4fv(lcVector4FromColor(Preferences.mGridLineColor));
 
 		int NumVerts = 2 * (MaxX - MinX + MaxY - MinY + 2);
-		float* Verts = (float*)malloc(NumVerts * sizeof(float[3]));
-		float* Vert = Verts;
-		float LineSpacing = Spacing * 20.0f;
 
-		for (int Step = MinX; Step < MaxX + 1; Step++)
-		{
-			*Vert++ = Step * LineSpacing;
-			*Vert++ = MinY * LineSpacing;
-			*Vert++ = 0.0f;
-			*Vert++ = Step * LineSpacing;
-			*Vert++ = MaxY * LineSpacing;
-			*Vert++ = 0.0f;
-		}
-
-		for (int Step = MinY; Step < MaxY + 1; Step++)
-		{
-			*Vert++ = MinX * LineSpacing;
-			*Vert++ = Step * LineSpacing;
-			*Vert++ = 0.0f;
-			*Vert++ = MaxX * LineSpacing;
-			*Vert++ = Step * LineSpacing;
-			*Vert++ = 0.0f;
-		}
-
-		glVertexPointer(3, GL_FLOAT, 0, Verts);
-		glDrawArrays(GL_LINES, 0, NumVerts);
-		free(Verts);
+		mContext->SetVertexFormat(BufferOffset, 3, 0, 0);
+		mContext->DrawPrimitives(GL_LINES, 0, NumVerts);
 	}
+
+	mContext->ClearVertexBuffer(); // context remove
 }
 
 void View::DrawAxes()
@@ -1293,7 +1334,8 @@ void View::DrawAxes()
 	mContext->SetProjectionMatrix(lcMatrix44Ortho(0, mWidth, 0, mHeight, -50, 50));
 	mContext->SetWorldViewMatrix(lcMul(WorldViewMatrix, TranslationMatrix));
 
-	glVertexPointer(3, GL_FLOAT, 0, Verts);
+	mContext->SetVertexBufferPointer(Verts);
+	mContext->SetVertexFormat(0, 3, 0, 0);
 
 	glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
 	glDrawElements(GL_LINES, 6, GL_UNSIGNED_SHORT, LineIndices);
@@ -1319,17 +1361,16 @@ void View::DrawAxes()
 	lcVector3 PosZ = lcMul30(lcVector3(0.0f, 0.0f, 25.0f), WorldViewMatrix);
 	gTexFont.GetGlyphQuad(PosZ.x, PosZ.y, PosZ.z, 'Z', TextBuffer + 5 * 4 * 2);
 
-	glVertexPointer(3, GL_FLOAT, 5 * sizeof(float), TextBuffer);
-	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	glTexCoordPointer(2, GL_FLOAT, 5 * sizeof(float), TextBuffer + 3);
+	mContext->SetVertexBufferPointer(TextBuffer);
+	mContext->SetVertexFormat(0, 3, 2, 0);
 
 	glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
-	glDrawArrays(GL_QUADS, 0, 4 * 3);
-
-	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	mContext->DrawPrimitives(GL_QUADS, 0, 4 * 3);
 
 	glDisable(GL_BLEND);
 	glDisable(GL_TEXTURE_2D);
+
+	mContext->ClearVertexBuffer(); // context remove
 }
 
 void View::DrawViewport()
@@ -1346,9 +1387,12 @@ void View::DrawViewport()
 		glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
 		float Verts[8] = { 0.0f, 0.0f, mWidth - 1.0f, 0.0f, mWidth - 1.0f, mHeight - 1.0f, 0.0f, mHeight - 1.0f };
 
-		glVertexPointer(2, GL_FLOAT, 0, Verts);
-		glDrawArrays(GL_LINE_LOOP, 0, 4);
+		mContext->SetVertexBufferPointer(Verts);
+		mContext->SetVertexFormat(0, 2, 0, 0);
+		mContext->DrawPrimitives(GL_LINE_LOOP, 0, 4);
 	}
+
+	mContext->ClearVertexBuffer(); // context remove
 
 	const char* CameraName = mCamera->GetName();
 

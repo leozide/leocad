@@ -137,6 +137,9 @@ protected:
 	lcTrackTool mTrackTool;
 	int mMouseDownX;
 	int mMouseDownY;
+
+	lcVertexBuffer* mGridBuffer;
+	int mGridSettings[7];
 };
 
 #endif // _VIEW_H_

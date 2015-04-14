@@ -46,6 +46,12 @@ public:
 	void EndRenderToTexture();
 	bool SaveRenderToTextureImage(const QString& FileName, int Width, int Height);
 
+	void ClearVertexBuffer();
+	void SetVertexBuffer(const lcVertexBuffer* VertexBuffer);
+	void SetVertexBufferPointer(const void* VertexBuffer);
+	void SetVertexFormat(int BufferOffset, int PositionSize, int TexCoordSize, int ColorSize);
+	void DrawPrimitives(GLenum Mode, GLint First, GLsizei Count);
+
 	void BindMesh(lcMesh* Mesh);
 	void UnbindMesh();
 	void DrawMeshSection(lcMesh* Mesh, lcMeshSection* Section);
@@ -59,6 +65,9 @@ protected:
 	char* mVertexBufferPointer;
 	char* mIndexBufferPointer;
 	char* mVertexBufferOffset;
+
+	bool mTexCoordEnabled;
+	bool mColorEnabled;
 
 	lcTexture* mTexture;
 	float mLineWidth;

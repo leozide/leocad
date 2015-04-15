@@ -21,6 +21,7 @@ public slots:
 protected:
 	virtual void dropEvent(QDropEvent* Event);
 
+	QMap<int, QIcon> mIcons;
 	QMap<lcPiece*, QTreeWidgetItem*> mItems;
 	bool mIgnoreUpdates;
 };

@@ -151,6 +151,25 @@ void lcTimelineWidget::Update(bool Clear)
 			PieceItem->setData(0, Qt::UserRole, qVariantFromValue<uintptr_t>((uintptr_t)Piece));
 			StepItem->insertChild(PieceItemIndex, PieceItem);
 			mItems[Piece] = PieceItem;
+
+			int ColorIndex = Piece->mColorIndex;
+			if (!mIcons.contains(ColorIndex))
+			{
+				int Size = rowHeight(indexFromItem(PieceItem));
+
+				QImage Image(Size, Size, QImage::Format_ARGB32);
+				Image.fill(QColor::fromRgbF(1.0, 1.0, 1.0, 0.0));
+
+				float* Color = gColorList[ColorIndex].Value;
+				QPainter Painter(&Image);
+				Painter.setPen(Qt::NoPen);
+				Painter.setBrush(QColor::fromRgbF(Color[0], Color[1], Color[2]));
+				Painter.drawEllipse(QPoint(Size / 2, Size / 2), Size / 2, Size / 2);
+
+				mIcons[ColorIndex] = QIcon(QPixmap::fromImage(Image));
+			}
+
+			PieceItem->setIcon(0, mIcons[ColorIndex]);
 		}
 		else
 		{

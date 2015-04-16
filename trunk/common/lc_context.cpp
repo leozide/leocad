@@ -372,13 +372,26 @@ void lcContext::SetVertexFormat(int BufferOffset, int PositionSize, int TexCoord
 			mTexCoordEnabled = true;
 		}
 	}
-	else
+	else if (mTexCoordEnabled)
 	{
-		if (mTexCoordEnabled)
+		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+		mTexCoordEnabled = false;
+	}
+
+	if (ColorSize)
+	{
+		glColorPointer(ColorSize, GL_FLOAT, VertexSize, VertexBufferPointer + (PositionSize + TexCoordSize) * sizeof(float));
+
+		if (!mColorEnabled)
 		{
-			glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-			mTexCoordEnabled = false;
+			glEnableClientState(GL_COLOR_ARRAY);
+			mColorEnabled = true;
 		}
+	}
+	else if (mColorEnabled)
+	{
+		glDisableClientState(GL_COLOR_ARRAY);
+		mColorEnabled = false;
 	}
 }
 

@@ -1067,18 +1067,16 @@ void lcModel::DrawBackground(lcContext* Context)
 			ViewWidth, 0.0f,       Color2[0], Color2[1], Color2[2], 1.0f
 		};
 
-		glVertexPointer(2, GL_FLOAT, 6 * sizeof(float), Verts);
-		glEnableClientState(GL_COLOR_ARRAY);
-		glColorPointer(4, GL_FLOAT, 6 * sizeof(float), Verts + 2);
+		Context->SetVertexBufferPointer(Verts);
+		Context->SetVertexFormat(0, 2, 0, 4);
 
-		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+		Context->DrawPrimitives(GL_TRIANGLE_FAN, 0, 4);
 
-		glDisableClientState(GL_COLOR_ARRAY);
+		Context->ClearVertexBuffer(); // context remove
 
 		glShadeModel(GL_FLAT);
 	}
-
-	if (mProperties.mBackgroundType == LC_BACKGROUND_IMAGE)
+	else if (mProperties.mBackgroundType == LC_BACKGROUND_IMAGE)
 	{
 		glEnable(GL_TEXTURE_2D);
 
@@ -1101,13 +1099,12 @@ void lcModel::DrawBackground(lcContext* Context)
 			0.0f,      0.0f,       0.0f,      TileHeight
 		};
 
-		glVertexPointer(2, GL_FLOAT, 4 * sizeof(float), Verts);
-		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-		glTexCoordPointer(2, GL_FLOAT, 4 * sizeof(float), Verts + 2);
+		Context->SetVertexBufferPointer(Verts);
+		Context->SetVertexFormat(0, 2, 2, 0);
 
-		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+		Context->DrawPrimitives(GL_TRIANGLE_FAN, 0, 4);
 
-		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+		Context->ClearVertexBuffer(); // context remove
 
 		glDisable(GL_TEXTURE_2D);
 	}

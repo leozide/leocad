@@ -472,136 +472,144 @@ void lcCamera::CopyPosition(const lcCamera* camera)
 
 void lcCamera::DrawInterface(lcContext* Context, const lcMatrix44& ViewMatrix) const
 {
-	float LineWidth = lcGetPreferences().mLineWidth;
+	lcMatrix44 ViewWorldMatrix = lcMatrix44AffineInverse(mWorldView);
+	ViewWorldMatrix.SetTranslation(lcVector3(0, 0, 0));
 
-	lcMatrix44 ViewWorld = lcMatrix44AffineInverse(mWorldView);
-	lcVector3 UpVectorPosition = lcMul31(lcVector3(0, 25, 0), ViewWorld);
+	lcMatrix44 CameraViewMatrix = lcMul(ViewWorldMatrix, lcMul(lcMatrix44Translation(mPosition), ViewMatrix));
+	Context->SetWorldViewMatrix(CameraViewMatrix);
 
-	float PositionEdge = LC_CAMERA_POSITION_EDGE;
-	float PositionLens = LC_CAMERA_POSITION_EDGE * 2;
-	float TargetEdge = LC_CAMERA_TARGET_EDGE;
+	float Verts[(12 + 8 + 8 + 3 + 4) * 3];
+	float* CurVert = Verts;
 
-	float Verts[34 + 24 + 4 + 16][3] =
+	float Length = lcLength(mPosition - mTargetPosition);
+
+	*CurVert++ =  LC_CAMERA_POSITION_EDGE; *CurVert++ =  LC_CAMERA_POSITION_EDGE; *CurVert++ =  LC_CAMERA_POSITION_EDGE;
+	*CurVert++ = -LC_CAMERA_POSITION_EDGE; *CurVert++ =  LC_CAMERA_POSITION_EDGE; *CurVert++ =  LC_CAMERA_POSITION_EDGE;
+	*CurVert++ = -LC_CAMERA_POSITION_EDGE; *CurVert++ = -LC_CAMERA_POSITION_EDGE; *CurVert++ =  LC_CAMERA_POSITION_EDGE;
+	*CurVert++ =  LC_CAMERA_POSITION_EDGE; *CurVert++ = -LC_CAMERA_POSITION_EDGE; *CurVert++ =  LC_CAMERA_POSITION_EDGE;
+	*CurVert++ =  LC_CAMERA_POSITION_EDGE; *CurVert++ =  LC_CAMERA_POSITION_EDGE; *CurVert++ = -LC_CAMERA_POSITION_EDGE;
+	*CurVert++ = -LC_CAMERA_POSITION_EDGE; *CurVert++ =  LC_CAMERA_POSITION_EDGE; *CurVert++ = -LC_CAMERA_POSITION_EDGE;
+	*CurVert++ = -LC_CAMERA_POSITION_EDGE; *CurVert++ = -LC_CAMERA_POSITION_EDGE; *CurVert++ = -LC_CAMERA_POSITION_EDGE;
+	*CurVert++ =  LC_CAMERA_POSITION_EDGE; *CurVert++ = -LC_CAMERA_POSITION_EDGE; *CurVert++ = -LC_CAMERA_POSITION_EDGE;
+	*CurVert++ =  LC_CAMERA_POSITION_EDGE; *CurVert++ =  LC_CAMERA_POSITION_EDGE; *CurVert++ = -LC_CAMERA_POSITION_EDGE * 2;
+	*CurVert++ = -LC_CAMERA_POSITION_EDGE; *CurVert++ =  LC_CAMERA_POSITION_EDGE; *CurVert++ = -LC_CAMERA_POSITION_EDGE * 2;
+	*CurVert++ = -LC_CAMERA_POSITION_EDGE; *CurVert++ = -LC_CAMERA_POSITION_EDGE; *CurVert++ = -LC_CAMERA_POSITION_EDGE * 2;
+	*CurVert++ =  LC_CAMERA_POSITION_EDGE; *CurVert++ = -LC_CAMERA_POSITION_EDGE; *CurVert++ = -LC_CAMERA_POSITION_EDGE * 2;
+
+	*CurVert++ =  LC_CAMERA_TARGET_EDGE; *CurVert++ =  LC_CAMERA_TARGET_EDGE; *CurVert++ =  LC_CAMERA_TARGET_EDGE - Length;
+	*CurVert++ = -LC_CAMERA_TARGET_EDGE; *CurVert++ =  LC_CAMERA_TARGET_EDGE; *CurVert++ =  LC_CAMERA_TARGET_EDGE - Length;
+	*CurVert++ = -LC_CAMERA_TARGET_EDGE; *CurVert++ = -LC_CAMERA_TARGET_EDGE; *CurVert++ =  LC_CAMERA_TARGET_EDGE - Length;
+	*CurVert++ =  LC_CAMERA_TARGET_EDGE; *CurVert++ = -LC_CAMERA_TARGET_EDGE; *CurVert++ =  LC_CAMERA_TARGET_EDGE - Length;
+	*CurVert++ =  LC_CAMERA_TARGET_EDGE; *CurVert++ =  LC_CAMERA_TARGET_EDGE; *CurVert++ = -LC_CAMERA_TARGET_EDGE - Length;
+	*CurVert++ = -LC_CAMERA_TARGET_EDGE; *CurVert++ =  LC_CAMERA_TARGET_EDGE; *CurVert++ = -LC_CAMERA_TARGET_EDGE - Length;
+	*CurVert++ = -LC_CAMERA_TARGET_EDGE; *CurVert++ = -LC_CAMERA_TARGET_EDGE; *CurVert++ = -LC_CAMERA_TARGET_EDGE - Length;
+	*CurVert++ =  LC_CAMERA_TARGET_EDGE; *CurVert++ = -LC_CAMERA_TARGET_EDGE; *CurVert++ = -LC_CAMERA_TARGET_EDGE - Length;
+
+	*CurVert++ =  LC_CAMERA_TARGET_EDGE; *CurVert++ =  LC_CAMERA_TARGET_EDGE + 25.0f; *CurVert++ =  LC_CAMERA_TARGET_EDGE;
+	*CurVert++ = -LC_CAMERA_TARGET_EDGE; *CurVert++ =  LC_CAMERA_TARGET_EDGE + 25.0f; *CurVert++ =  LC_CAMERA_TARGET_EDGE;
+	*CurVert++ = -LC_CAMERA_TARGET_EDGE; *CurVert++ = -LC_CAMERA_TARGET_EDGE + 25.0f; *CurVert++ =  LC_CAMERA_TARGET_EDGE;
+	*CurVert++ =  LC_CAMERA_TARGET_EDGE; *CurVert++ = -LC_CAMERA_TARGET_EDGE + 25.0f; *CurVert++ =  LC_CAMERA_TARGET_EDGE;
+	*CurVert++ =  LC_CAMERA_TARGET_EDGE; *CurVert++ =  LC_CAMERA_TARGET_EDGE + 25.0f; *CurVert++ = -LC_CAMERA_TARGET_EDGE;
+	*CurVert++ = -LC_CAMERA_TARGET_EDGE; *CurVert++ =  LC_CAMERA_TARGET_EDGE + 25.0f; *CurVert++ = -LC_CAMERA_TARGET_EDGE;
+	*CurVert++ = -LC_CAMERA_TARGET_EDGE; *CurVert++ = -LC_CAMERA_TARGET_EDGE + 25.0f; *CurVert++ = -LC_CAMERA_TARGET_EDGE;
+	*CurVert++ =  LC_CAMERA_TARGET_EDGE; *CurVert++ = -LC_CAMERA_TARGET_EDGE + 25.0f; *CurVert++ = -LC_CAMERA_TARGET_EDGE;
+
+	*CurVert++ = 0.0f; *CurVert++ = 0.0f; *CurVert++ = 0.0f;
+	*CurVert++ = 0.0f; *CurVert++ = 0.0f; *CurVert++ = -Length;
+	*CurVert++ = 0.0f; *CurVert++ = 25.0f; *CurVert++ = 0.0f;
+
+	const GLushort Indices[40 + 24 + 24 + 4 + 16] = 
 	{
-		{  PositionEdge,  PositionEdge,  PositionEdge }, { -PositionEdge,  PositionEdge,  PositionEdge },
-		{ -PositionEdge,  PositionEdge,  PositionEdge }, { -PositionEdge, -PositionEdge,  PositionEdge },
-		{ -PositionEdge, -PositionEdge,  PositionEdge }, {  PositionEdge, -PositionEdge,  PositionEdge },
-		{  PositionEdge, -PositionEdge,  PositionEdge }, {  PositionEdge,  PositionEdge,  PositionEdge },
-		{  PositionEdge,  PositionEdge, -PositionEdge }, { -PositionEdge,  PositionEdge, -PositionEdge },
-		{ -PositionEdge,  PositionEdge, -PositionEdge }, { -PositionEdge, -PositionEdge, -PositionEdge },
-		{ -PositionEdge, -PositionEdge, -PositionEdge }, {  PositionEdge, -PositionEdge, -PositionEdge },
-		{  PositionEdge, -PositionEdge, -PositionEdge }, {  PositionEdge,  PositionEdge, -PositionEdge },
-		{  PositionEdge,  PositionEdge,  PositionEdge }, {  PositionEdge,  PositionEdge, -PositionEdge },
-		{ -PositionEdge,  PositionEdge,  PositionEdge }, { -PositionEdge,  PositionEdge, -PositionEdge },
-		{ -PositionEdge, -PositionEdge,  PositionEdge }, { -PositionEdge, -PositionEdge, -PositionEdge },
-		{  PositionEdge, -PositionEdge,  PositionEdge }, {  PositionEdge, -PositionEdge, -PositionEdge },
-		{ -PositionEdge, -PositionEdge, -PositionLens }, { -PositionEdge,  PositionEdge, -PositionLens },
-		{          0.0f,          0.0f, -PositionEdge }, { -PositionEdge, -PositionEdge, -PositionLens },
-		{  PositionEdge, -PositionEdge, -PositionLens }, {          0.0f,          0.0f, -PositionEdge },
-		{  PositionEdge,  PositionEdge, -PositionLens }, {  PositionEdge, -PositionEdge, -PositionLens },
-		{  PositionEdge,  PositionEdge, -PositionLens }, { -PositionEdge,  PositionEdge, -PositionLens },
-
-		{  TargetEdge,  TargetEdge,  TargetEdge }, { -TargetEdge,  TargetEdge,  TargetEdge },
-		{ -TargetEdge,  TargetEdge,  TargetEdge }, { -TargetEdge, -TargetEdge,  TargetEdge },
-		{ -TargetEdge, -TargetEdge,  TargetEdge }, {  TargetEdge, -TargetEdge,  TargetEdge },
-		{  TargetEdge, -TargetEdge,  TargetEdge }, {  TargetEdge,  TargetEdge,  TargetEdge },
-		{  TargetEdge,  TargetEdge, -TargetEdge }, { -TargetEdge,  TargetEdge, -TargetEdge },
-		{ -TargetEdge,  TargetEdge, -TargetEdge }, { -TargetEdge, -TargetEdge, -TargetEdge },
-		{ -TargetEdge, -TargetEdge, -TargetEdge }, {  TargetEdge, -TargetEdge, -TargetEdge },
-		{  TargetEdge, -TargetEdge, -TargetEdge }, {  TargetEdge,  TargetEdge, -TargetEdge },
-		{  TargetEdge,  TargetEdge,  TargetEdge }, {  TargetEdge,  TargetEdge, -TargetEdge },
-		{ -TargetEdge,  TargetEdge,  TargetEdge }, { -TargetEdge,  TargetEdge, -TargetEdge },
-		{ -TargetEdge, -TargetEdge,  TargetEdge }, { -TargetEdge, -TargetEdge, -TargetEdge },
-		{  TargetEdge, -TargetEdge,  TargetEdge }, {  TargetEdge, -TargetEdge, -TargetEdge },
-
-		{ mPosition[0], mPosition[1], mPosition[2] }, { mTargetPosition[0], mTargetPosition[1], mTargetPosition[2] },
-		{ mPosition[0], mPosition[1], mPosition[2] }, { UpVectorPosition[0], UpVectorPosition[1], UpVectorPosition[2] },
-
-		{  1,  1,  1 }, { -1,  1, 1 },
-		{ -1,  1,  1 }, { -1, -1, 1 },
-		{ -1, -1,  1 }, {  1, -1, 1 },
-		{  1, -1,  1 }, {  1,  1, 1 },
-		{  1,  1, -1 }, {  1,  1, 1 },
-		{ -1,  1, -1 }, { -1,  1, 1 },
-		{ -1, -1, -1 }, { -1, -1, 1 },
-		{  1, -1, -1 }, {  1, -1, 1 },
+		0, 1, 1, 2, 2, 3, 3, 0,
+		4, 5, 5, 6, 6, 7, 7, 4,
+		0, 4, 1, 5, 2, 6, 3, 7,
+		8, 9, 9, 10, 10, 11, 11, 8,
+		8, 28, 9, 28, 10, 28, 11, 28,
+		12, 13, 13, 14, 14, 15, 15, 12,
+		16, 17, 17, 18, 18, 19, 19, 16,
+		12, 16, 13, 17, 14, 18, 15, 19,
+		20, 21, 21, 22, 22, 23, 23, 20,
+		24, 25, 25, 26, 26, 27, 27, 24,
+		20, 24, 21, 25, 22, 26, 23, 27,
+		28, 29, 28, 30,
+		31, 32, 32, 33, 33, 34, 34, 31,
+		28, 31, 28, 32, 28, 33, 28, 34
 	};
 
-	Context->SetWorldViewMatrix(lcMul(ViewWorld, ViewMatrix));
+	Context->SetVertexBufferPointer(Verts);
+	Context->SetVertexFormat(0, 3, 0, 0);
 
-	if (IsSelected(LC_CAMERA_SECTION_POSITION))
-	{
-		Context->SetLineWidth(2.0f * LineWidth);
-		if (IsFocused(LC_CAMERA_SECTION_POSITION))
-			lcSetColorFocused();
-		else
-			lcSetColorSelected();
-	}
-	else
+	float LineWidth = lcGetPreferences().mLineWidth;
+
+	if (!IsSelected())
 	{
 		Context->SetLineWidth(LineWidth);
 		lcSetColorCamera();
-	}
 
-	glVertexPointer(3, GL_FLOAT, 0, Verts);
-	glDrawArrays(GL_LINES, 0, 24);
-	glDrawArrays(GL_LINE_STRIP, 24, 10);
-
-	lcMatrix44 TargetMat = ViewWorld;
-	TargetMat.SetTranslation(mTargetPosition);
-	Context->SetWorldViewMatrix(lcMul(TargetMat, ViewMatrix));
-
-	if (IsSelected(LC_CAMERA_SECTION_TARGET))
-	{
-		Context->SetLineWidth(2.0f * LineWidth);
-		if (IsFocused(LC_CAMERA_SECTION_TARGET))
-			lcSetColorFocused();
-		else
-			lcSetColorSelected();
+		glDrawElements(GL_LINES, 40 + 24 + 24 + 4, GL_UNSIGNED_SHORT, Indices);
 	}
 	else
 	{
-		Context->SetLineWidth(LineWidth);
-		lcSetColorCamera();
-	}
-
-	glDrawArrays(GL_LINES, 34, 24);
-
-	lcMatrix44 UpVectorMat = ViewWorld;
-	UpVectorMat.SetTranslation(UpVectorPosition);
-	Context->SetWorldViewMatrix(lcMul(UpVectorMat, ViewMatrix));
-
-	if (IsSelected(LC_CAMERA_SECTION_UPVECTOR))
-	{
-		Context->SetLineWidth(2.0f * LineWidth);
-		if (IsFocused(LC_CAMERA_SECTION_UPVECTOR))
-			lcSetColorFocused();
+		if (IsSelected(LC_CAMERA_SECTION_POSITION))
+		{
+			Context->SetLineWidth(2.0f * LineWidth);
+			if (IsFocused(LC_CAMERA_SECTION_POSITION))
+				lcSetColorFocused();
+			else
+				lcSetColorSelected();
+		}
 		else
-			lcSetColorSelected();
-	}
-	else
-	{
-		Context->SetLineWidth(LineWidth);
+		{
+			Context->SetLineWidth(LineWidth);
+			lcSetColorCamera();
+		}
+
+		glDrawElements(GL_LINES, 40, GL_UNSIGNED_SHORT, Indices);
+
+		if (IsSelected(LC_CAMERA_SECTION_TARGET))
+		{
+			Context->SetLineWidth(2.0f * LineWidth);
+			if (IsFocused(LC_CAMERA_SECTION_TARGET))
+				lcSetColorFocused();
+			else
+				lcSetColorSelected();
+		}
+		else
+		{
+			Context->SetLineWidth(LineWidth);
+			lcSetColorCamera();
+		}
+
+		glDrawElements(GL_LINES, 24, GL_UNSIGNED_SHORT, Indices + 40);
+
+		if (IsSelected(LC_CAMERA_SECTION_UPVECTOR))
+		{
+			Context->SetLineWidth(2.0f * LineWidth);
+			if (IsFocused(LC_CAMERA_SECTION_UPVECTOR))
+				lcSetColorFocused();
+			else
+				lcSetColorSelected();
+		}
+		else
+		{
+			Context->SetLineWidth(LineWidth);
+			lcSetColorCamera();
+		}
+
+		glDrawElements(GL_LINES, 24, GL_UNSIGNED_SHORT, Indices + 40 + 24);
+
 		lcSetColorCamera();
-	}
+		Context->SetLineWidth(LineWidth);
 
-	glDrawArrays(GL_LINES, 34, 24);
+		float SizeY = tanf(LC_DTOR * m_fovy / 2) * Length;
+		float SizeX = SizeY * 1.333f;
 
-	Context->SetWorldViewMatrix(ViewMatrix);
+		*CurVert++ =  SizeX; *CurVert++ =  SizeY; *CurVert++ = -Length;
+		*CurVert++ = -SizeX; *CurVert++ =  SizeY; *CurVert++ = -Length;
+		*CurVert++ = -SizeX; *CurVert++ = -SizeY; *CurVert++ = -Length;
+		*CurVert++ =  SizeX; *CurVert++ = -SizeY; *CurVert++ = -Length;
 
-	lcSetColorCamera();
-	Context->SetLineWidth(LineWidth);
-
-	glDrawArrays(GL_LINES, 34 + 24, 4);
-
-	if (IsSelected())
-	{
-		float Dist = lcLength(mTargetPosition - mPosition);
-		lcMatrix44 Projection = lcMatrix44Perspective(m_fovy, 1.33f, 0.01f, Dist);
-		Projection = lcMatrix44Inverse(Projection);
-		Context->SetWorldViewMatrix(lcMul(Projection, lcMul(ViewWorld, ViewMatrix)));
-
-		glDrawArrays(GL_LINES, 34 + 24 + 4, 16);
+		glDrawElements(GL_LINES, 4 + 16, GL_UNSIGNED_SHORT, Indices + 40 + 24 + 24);
 	}
 }
 

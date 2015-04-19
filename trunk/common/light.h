@@ -186,10 +186,6 @@ public:
 	const char* GetName() const
 	{ return m_strName; }
 
-	void RenderCone(lcContext* Context, const lcMatrix44& ViewMatrix) const;
-	void RenderTarget() const;
-	void RenderSphere() const;
-
 	void CompareBoundingBox(float box[6]);
 	void UpdatePosition(lcStep Step);
 	void Move(lcStep Step, bool AddKey, const lcVector3& Distance);
@@ -219,7 +215,9 @@ protected:
 
 	void Initialize(const lcVector3& Position, const lcVector3& TargetPosition);
 
-	float m_fCone;
+	void DrawPointLight(lcContext* Context, const lcMatrix44& ViewMatrix) const;
+	void DrawSpotLight(lcContext* Context, const lcMatrix44& ViewMatrix) const;
+
 	lcuint32 mState;
 	char m_strName[81];
 };

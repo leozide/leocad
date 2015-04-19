@@ -288,129 +288,16 @@ void lcLight::UpdatePosition(lcStep Step)
 
 void lcLight::DrawInterface(lcContext* Context, const lcMatrix44& ViewMatrix) const
 {
-	float LineWidth = lcGetPreferences().mLineWidth;
-
 	if (IsPointLight())
-	{
-		Context->SetWorldViewMatrix(lcMul(lcMatrix44Translation(mPosition), ViewMatrix));
-
-		if (IsSelected(LC_LIGHT_SECTION_POSITION))
-		{
-			if (IsFocused(LC_LIGHT_SECTION_POSITION))
-				lcSetColorFocused();
-			else
-				lcSetColorSelected();
-		}
-		else
-			lcSetColorLight();
-
-		RenderSphere();
-	}
+		DrawPointLight(Context, ViewMatrix);
 	else
-	{
-		if (IsSelected(LC_LIGHT_SECTION_POSITION))
-		{
-			Context->SetLineWidth(2.0f * LineWidth);
-			if (IsFocused(LC_LIGHT_SECTION_POSITION))
-				lcSetColorFocused();
-			else
-				lcSetColorSelected();
-		}
-		else
-		{
-			Context->SetLineWidth(LineWidth);
-			lcSetColorLight();
-		}
-
-		RenderCone(Context, ViewMatrix);
-
-		if (IsSelected(LC_LIGHT_SECTION_TARGET))
-		{
-			Context->SetLineWidth(2.0f * LineWidth);
-			if (IsFocused(LC_LIGHT_SECTION_TARGET))
-				lcSetColorFocused();
-			else
-				lcSetColorSelected();
-		}
-		else
-		{
-			Context->SetLineWidth(LineWidth);
-			lcSetColorLight();
-		}
-
-		RenderTarget();
-
-		Context->SetWorldViewMatrix(ViewMatrix);
-
-		Context->SetLineWidth(LineWidth);
-		lcSetColorLight();
-
-		lcVector3 Line[2] = { mPosition, mTargetPosition };
-		glVertexPointer(3, GL_FLOAT, 0, Line);
-
-		glDrawArrays(GL_LINES, 0, 2);
-
-		if (IsSelected())
-		{
-			lcMatrix44 ProjectionMatrix, LightMatrix;
-			lcVector3 FrontVector(mTargetPosition - mPosition);
-			lcVector3 UpVector(1, 1, 1);
-			float Length = FrontVector.Length();
-
-			if (fabs(FrontVector[0]) < fabs(FrontVector[1]))
-			{
-				if (fabs(FrontVector[0]) < fabs(FrontVector[2]))
-					UpVector[0] = -(UpVector[1] * FrontVector[1] + UpVector[2] * FrontVector[2]);
-				else
-					UpVector[2] = -(UpVector[0] * FrontVector[0] + UpVector[1] * FrontVector[1]);
-			}
-			else
-			{
-				if (fabs(FrontVector[1]) < fabs(FrontVector[2]))
-					UpVector[1] = -(UpVector[0] * FrontVector[0] + UpVector[2] * FrontVector[2]);
-				else
-					UpVector[2] = -(UpVector[0] * FrontVector[0] + UpVector[1] * FrontVector[1]);
-			}
-
-			LightMatrix = lcMatrix44LookAt(mPosition, mTargetPosition, UpVector);
-			LightMatrix = lcMatrix44AffineInverse(LightMatrix);
-			ProjectionMatrix = lcMatrix44Perspective(2 * mSpotCutoff, 1.0f, 0.01f, Length);
-			ProjectionMatrix = lcMatrix44Inverse(ProjectionMatrix);
-			Context->SetWorldViewMatrix(lcMul(ProjectionMatrix, lcMul(LightMatrix, ViewMatrix)));
-
-			// Draw the light cone.
-			float Verts[16][3] =
-			{
-				{  0.5f,   1.0f,  1.0f },
-				{  1.0f,   0.5f,  1.0f },
-				{  1.0f,  -0.5f,  1.0f },
-				{  0.5f,  -1.0f,  1.0f },
-				{ -0.5f,  -1.0f,  1.0f },
-				{ -1.0f,  -0.5f,  1.0f },
-				{ -1.0f,   0.5f,  1.0f },
-				{ -0.5f,   1.0f,  1.0f },
-				{  1.0f,   1.0f, -1.0f },
-				{  0.75f,  0.75f, 1.0f },
-				{ -1.0f,   1.0f, -1.0f },
-				{ -0.75f,  0.75f, 1.0f },
-				{ -1.0f,  -1.0f, -1.0f },
-				{ -0.75f, -0.75f, 1.0f },
-				{  1.0f,  -1.0f, -1.0f },
-				{  0.75f, -0.75f, 1.0f }
-			};
-
-			glVertexPointer(3, GL_FLOAT, 0, Verts);
-			glDrawArrays(GL_LINE_LOOP, 0, 8);
-			glDrawArrays(GL_LINES, 8, 8);
-		}
-	}
+		DrawSpotLight(Context, ViewMatrix);
 }
 
-void lcLight::RenderCone(lcContext* Context, const lcMatrix44& ViewMatrix) const
+void lcLight::DrawSpotLight(lcContext* Context, const lcMatrix44& ViewMatrix) const
 {
 	lcVector3 FrontVector(mTargetPosition - mPosition);
 	lcVector3 UpVector(1, 1, 1);
-	float Length = FrontVector.Length();
 
 	if (fabs(FrontVector[0]) < fabs(FrontVector[1]))
 	{
@@ -434,62 +321,121 @@ void lcLight::RenderCone(lcContext* Context, const lcMatrix44& ViewMatrix) const
 	lcMatrix44 LightViewMatrix = lcMul(LightMatrix, lcMul(lcMatrix44Translation(mPosition), ViewMatrix));
 	Context->SetWorldViewMatrix(LightViewMatrix);
 
-	float Edge = LC_LIGHT_POSITION_EDGE;
-	float verts[16*3];
-	for (int i = 0; i < 8; i++)
+	float Verts[(20 + 8 + 2 + 16) * 3];
+	float* CurVert = Verts;
+
+	for (int EdgeIdx = 0; EdgeIdx < 8; EdgeIdx++)
 	{
-		verts[i*6] = verts[i*6+3] = (float)cos((float)i/4 * LC_PI) * Edge;
-		verts[i*6+1] = verts[i*6+4] = (float)sin((float)i/4 * LC_PI) * Edge;
-		verts[i*6+2] = Edge;
-		verts[i*6+5] = -Edge;
+		float c = cosf((float)EdgeIdx / 4 * LC_PI) * LC_LIGHT_POSITION_EDGE;
+		float s = sinf((float)EdgeIdx / 4 * LC_PI) * LC_LIGHT_POSITION_EDGE;
+
+		*CurVert++ = c;
+		*CurVert++ = s;
+		*CurVert++ = LC_LIGHT_POSITION_EDGE;
+		*CurVert++ = c;
+		*CurVert++ = s;
+		*CurVert++ = -LC_LIGHT_POSITION_EDGE;
 	}
 
-	glVertexPointer(3, GL_FLOAT, 0, verts);
-	glDrawArrays(GL_LINES, 0, 16);
-	glVertexPointer(3, GL_FLOAT, 6*sizeof(float), verts);
-	glDrawArrays(GL_LINE_LOOP, 0, 8);
-	glVertexPointer(3, GL_FLOAT, 6*sizeof(float), &verts[3]);
-	glDrawArrays(GL_LINE_LOOP, 0, 8);
+	*CurVert++ = -12.5f; *CurVert++ = -12.5f; *CurVert++ = -LC_LIGHT_POSITION_EDGE;
+	*CurVert++ =  12.5f; *CurVert++ = -12.5f; *CurVert++ = -LC_LIGHT_POSITION_EDGE;
+	*CurVert++ =  12.5f; *CurVert++ =  12.5f; *CurVert++ = -LC_LIGHT_POSITION_EDGE;
+	*CurVert++ = -12.5f; *CurVert++ =  12.5f; *CurVert++ = -LC_LIGHT_POSITION_EDGE;
 
-	float Lines[4][3] =
+	float Length = FrontVector.Length();
+
+	*CurVert++ =  LC_LIGHT_TARGET_EDGE; *CurVert++ =  LC_LIGHT_TARGET_EDGE; *CurVert++ =  LC_LIGHT_TARGET_EDGE - Length;
+	*CurVert++ = -LC_LIGHT_TARGET_EDGE; *CurVert++ =  LC_LIGHT_TARGET_EDGE; *CurVert++ =  LC_LIGHT_TARGET_EDGE - Length;
+	*CurVert++ = -LC_LIGHT_TARGET_EDGE; *CurVert++ = -LC_LIGHT_TARGET_EDGE; *CurVert++ =  LC_LIGHT_TARGET_EDGE - Length;
+	*CurVert++ =  LC_LIGHT_TARGET_EDGE; *CurVert++ = -LC_LIGHT_TARGET_EDGE; *CurVert++ =  LC_LIGHT_TARGET_EDGE - Length;
+	*CurVert++ =  LC_LIGHT_TARGET_EDGE; *CurVert++ =  LC_LIGHT_TARGET_EDGE; *CurVert++ = -LC_LIGHT_TARGET_EDGE - Length;
+	*CurVert++ = -LC_LIGHT_TARGET_EDGE; *CurVert++ =  LC_LIGHT_TARGET_EDGE; *CurVert++ = -LC_LIGHT_TARGET_EDGE - Length;
+	*CurVert++ = -LC_LIGHT_TARGET_EDGE; *CurVert++ = -LC_LIGHT_TARGET_EDGE; *CurVert++ = -LC_LIGHT_TARGET_EDGE - Length;
+	*CurVert++ =  LC_LIGHT_TARGET_EDGE; *CurVert++ = -LC_LIGHT_TARGET_EDGE; *CurVert++ = -LC_LIGHT_TARGET_EDGE - Length;
+
+	*CurVert++ = 0.0f; *CurVert++ = 0.0f; *CurVert++ = 0.0f;
+	*CurVert++ = 0.0f; *CurVert++ = 0.0f; *CurVert++ = -Length;
+
+	const GLushort Indices[56 + 24 + 2 + 40] = 
 	{
-		{ -12.5f, -12.5f, -Edge },
-		{  12.5f, -12.5f, -Edge },
-		{  12.5f,  12.5f, -Edge },
-		{ -12.5f,  12.5f, -Edge }
+		0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
+		0, 2, 2, 4, 4, 6, 6, 8, 8, 10, 10, 12, 12, 14, 14, 0,
+		1, 3, 3, 5, 5, 7, 7, 9, 9, 11, 11, 13, 13, 15, 15, 1,
+		16, 17, 17, 18, 18, 19, 19, 16,
+		20, 21, 21, 22, 22, 23, 23, 20,
+		24, 25, 25, 26, 26, 27, 27, 24,
+		20, 24, 21, 25, 22, 26, 23, 27,
+		28, 29,
+		30, 31, 31, 32, 32, 33, 33, 34, 34, 35, 35, 36, 36, 37, 37, 38,
+		38, 39, 39, 40, 40, 41, 41, 42, 42, 43, 43, 44, 44, 45, 45, 30,
+		28, 30, 28, 34, 28, 38, 28, 42
 	};
 
-	glVertexPointer(3, GL_FLOAT, 0, Lines);
-	glDrawArrays(GL_LINE_LOOP, 0, 4);
+	Context->SetVertexBufferPointer(Verts);
+	Context->SetVertexFormat(0, 3, 0, 0);
 
-	Context->SetWorldViewMatrix(lcMul(lcMatrix44Translation(lcVector3(0, 0, -Length)), LightViewMatrix));
-}
+	float LineWidth = lcGetPreferences().mLineWidth;
 
-void lcLight::RenderTarget() const
-{
-	float Edge = LC_LIGHT_TARGET_EDGE;
-
-	float Box[24][3] =
+	if (!IsSelected())
 	{
-		{  Edge,  Edge,  Edge }, { -Edge,  Edge,  Edge },
-		{ -Edge,  Edge,  Edge }, { -Edge, -Edge,  Edge },
-		{ -Edge, -Edge,  Edge }, {  Edge, -Edge,  Edge },
-		{  Edge, -Edge,  Edge }, {  Edge,  Edge,  Edge },
-		{  Edge,  Edge, -Edge }, { -Edge,  Edge, -Edge },
-		{ -Edge,  Edge, -Edge }, { -Edge, -Edge, -Edge },
-		{ -Edge, -Edge, -Edge }, {  Edge, -Edge, -Edge },
-		{  Edge, -Edge, -Edge }, {  Edge,  Edge, -Edge },
-		{  Edge,  Edge,  Edge }, {  Edge,  Edge, -Edge },
-		{ -Edge,  Edge,  Edge }, { -Edge,  Edge, -Edge },
-		{ -Edge, -Edge,  Edge }, { -Edge, -Edge, -Edge },
-		{  Edge, -Edge,  Edge }, {  Edge, -Edge, -Edge }
-	};
+		Context->SetLineWidth(LineWidth);
+		lcSetColorLight();
 
-	glVertexPointer(3, GL_FLOAT, 0, Box);
-	glDrawArrays(GL_LINES, 0, 24);
+		glDrawElements(GL_LINES, 56 + 24 + 2, GL_UNSIGNED_SHORT, Indices);
+	}
+	else
+	{
+		if (IsSelected(LC_LIGHT_SECTION_POSITION))
+		{
+			Context->SetLineWidth(2.0f * LineWidth);
+			if (IsFocused(LC_LIGHT_SECTION_POSITION))
+				lcSetColorFocused();
+			else
+				lcSetColorSelected();
+		}
+		else
+		{
+			Context->SetLineWidth(LineWidth);
+			lcSetColorLight();
+		}
+
+		glDrawElements(GL_LINES, 56, GL_UNSIGNED_SHORT, Indices);
+
+		if (IsSelected(LC_LIGHT_SECTION_TARGET))
+		{
+			Context->SetLineWidth(2.0f * LineWidth);
+			if (IsFocused(LC_LIGHT_SECTION_TARGET))
+				lcSetColorFocused();
+			else
+				lcSetColorSelected();
+		}
+		else
+		{
+			Context->SetLineWidth(LineWidth);
+			lcSetColorLight();
+		}
+
+		glDrawElements(GL_LINES, 24, GL_UNSIGNED_SHORT, Indices + 56);
+
+		Context->SetLineWidth(LineWidth);
+		lcSetColorLight();
+
+		float Radius = tanf(LC_DTOR * mSpotCutoff) * Length;
+
+		for (int EdgeIdx = 0; EdgeIdx < 16; EdgeIdx++)
+		{
+			*CurVert++ = cosf((float)EdgeIdx / 16 * LC_2PI) * Radius;
+			*CurVert++ = sinf((float)EdgeIdx / 16 * LC_2PI) * Radius;
+			*CurVert++ = -Length;
+		}
+
+		glDrawElements(GL_LINES, 2 + 40, GL_UNSIGNED_SHORT, Indices + 56 + 24);
+	}
+
+	Context->ClearVertexBuffer(); // context remove
 }
 
-void lcLight::RenderSphere() const
+void lcLight::DrawPointLight(lcContext* Context, const lcMatrix44& ViewMatrix) const
 {
 	const int Slices = 6;
 	const int NumIndices = 3 * Slices + 6 * Slices * (Slices - 2) + 3 * Slices;
@@ -566,7 +512,17 @@ void lcLight::RenderSphere() const
 	*Index++ = (Slices - 1) * (Slices - 1) + (Slices - 2) + 1;
 	*Index++ = (Slices - 1) * (Slices - 1);
 
-	glVertexPointer(3, GL_FLOAT, 0, Vertices);
+	Context->SetWorldViewMatrix(lcMul(lcMatrix44Translation(mPosition), ViewMatrix));
+
+	if (IsFocused(LC_LIGHT_SECTION_POSITION))
+		lcSetColorFocused();
+	else if (IsSelected(LC_LIGHT_SECTION_POSITION))
+		lcSetColorSelected();
+	else
+		lcSetColorLight();
+
+	Context->SetVertexBufferPointer(Vertices);
+	Context->SetVertexFormat(0, 3, 0, 0);
 	glDrawElements(GL_TRIANGLES, NumIndices, GL_UNSIGNED_SHORT, Indices);
 }
 

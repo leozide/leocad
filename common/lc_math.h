@@ -805,6 +805,18 @@ inline lcMatrix44 lcMatrix44RotationZ(const float Radians)
 	return m;
 }
 
+inline lcMatrix44 lcMatrix44Scale(const lcVector3& Scale)
+{
+	lcMatrix44 m;
+
+	m.r[0] = lcVector4(Scale.x, 0.0f, 0.0f, 0.0f);
+	m.r[1] = lcVector4(0.0f, Scale.y, 0.0f, 0.0f);
+	m.r[2] = lcVector4(0.0f, 0.0f, Scale.z, 0.0f);
+	m.r[3] = lcVector4(0.0f, 0.0f, 0.0f, 1.0f);
+
+	return m;
+}
+
 inline lcMatrix44 lcMatrix44LookAt(const lcVector3& Eye, const lcVector3& Target, const lcVector3& Up)
 {
 	lcVector3 x, y, z;

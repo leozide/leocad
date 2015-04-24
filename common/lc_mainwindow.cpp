@@ -31,6 +31,8 @@ lcMainWindow::lcMainWindow()
 	mColorIndex = lcGetColorIndex(4);
 	mTool = LC_TOOL_SELECT;
 	mAddKeys = false;
+	mMoveSnapEnabled = true;
+	mAngleSnapEnabled = true;
 	mMoveXYSnapIndex = 4;
 	mMoveZSnapIndex = 3;
 	mAngleSnapIndex = 5;
@@ -158,6 +160,8 @@ void lcMainWindow::CreateActions()
 	mActions[LC_EDIT_LOCK_Y]->setCheckable(true);
 	mActions[LC_EDIT_LOCK_Z]->setCheckable(true);
 	mActions[LC_EDIT_TRANSFORM_RELATIVE]->setCheckable(true);
+	mActions[LC_EDIT_SNAP_MOVE_TOGGLE]->setCheckable(true);
+	mActions[LC_EDIT_SNAP_ANGLE_TOGGLE]->setCheckable(true);
 	mActions[LC_VIEW_CAMERA_NONE]->setCheckable(true);
 	mActions[LC_VIEW_TIME_ADD_KEYS]->setCheckable(true);
 
@@ -382,19 +386,23 @@ void lcMainWindow::CreateToolBars()
 		SnapZMenu->addAction(mActions[actionIdx]);
 
 	QMenu* SnapMenu = new QMenu(tr("Snap Menu"), this);
+	SnapMenu->addAction(mActions[LC_EDIT_SNAP_MOVE_TOGGLE]);
+	SnapMenu->addSeparator();
 	SnapMenu->addMenu(SnapXYMenu);
 	SnapMenu->addMenu(SnapZMenu);
 
-	QAction* MoveAction = new QAction(tr("Snap Move"), this);
+	QAction* MoveAction = new QAction(tr("Movement Snap"), this);
 	MoveAction->setStatusTip(tr("Snap translations to fixed intervals"));
 	MoveAction->setIcon(QIcon(":/resources/edit_snap_move.png"));
 	MoveAction->setMenu(SnapMenu);
 
 	QMenu* SnapAngleMenu = new QMenu(tr("Snap Angle Menu"), this);
+	SnapAngleMenu->addAction(mActions[LC_EDIT_SNAP_ANGLE_TOGGLE]);
+	SnapAngleMenu->addSeparator();
 	for (int actionIdx = LC_EDIT_SNAP_ANGLE0; actionIdx <= LC_EDIT_SNAP_ANGLE9; actionIdx++)
 		SnapAngleMenu->addAction(mActions[actionIdx]);
 
-	QAction* AngleAction = new QAction(tr("Snap Rotate"), this);
+	QAction* AngleAction = new QAction(tr("Rotation Snap"), this);
 	AngleAction->setStatusTip(tr("Snap rotations to fixed intervals"));
 	AngleAction->setIcon(QIcon(":/resources/edit_snap_angle.png"));
 	AngleAction->setMenu(SnapAngleMenu);
@@ -1135,6 +1143,18 @@ void lcMainWindow::SetColorIndex(int ColorIndex)
 	UpdateColor();
 }
 
+void lcMainWindow::SetMoveSnapEnabled(bool Enabled)
+{
+	mMoveSnapEnabled = Enabled;
+	UpdateSnap();
+}
+
+void lcMainWindow::SetAngleSnapEnabled(bool Enabled)
+{
+	mAngleSnapEnabled = Enabled;
+	UpdateSnap();
+}
+
 void lcMainWindow::SetMoveXYSnapIndex(int Index)
 {
 	mMoveXYSnapIndex = Index;
@@ -1473,11 +1493,13 @@ void lcMainWindow::UpdateLockSnap()
 
 void lcMainWindow::UpdateSnap()
 {
-	mActions[LC_EDIT_SNAP_MOVE_XY0 + GetMoveXYSnapIndex()]->setChecked(true);
-	mActions[LC_EDIT_SNAP_MOVE_Z0 + GetMoveZSnapIndex()]->setChecked(true);
-	mActions[LC_EDIT_SNAP_ANGLE0 + GetAngleSnapIndex()]->setChecked(true);
+	mActions[LC_EDIT_SNAP_MOVE_TOGGLE]->setChecked(mMoveSnapEnabled);
+	mActions[LC_EDIT_SNAP_ANGLE_TOGGLE]->setChecked(mAngleSnapEnabled);
+	mActions[LC_EDIT_SNAP_MOVE_XY0 + mMoveXYSnapIndex]->setChecked(true);
+	mActions[LC_EDIT_SNAP_MOVE_Z0 + mMoveZSnapIndex]->setChecked(true);
+	mActions[LC_EDIT_SNAP_ANGLE0 + mAngleSnapIndex]->setChecked(true);
 
-	mStatusSnapLabel->setText(QString(tr(" M: %1 %2 R: %3 ")).arg(GetMoveXYSnapText(), GetMoveZSnapText(), QString::number(GetAngleSnap())));
+	mStatusSnapLabel->setText(QString(tr(" M: %1 %2 R: %3 ")).arg(GetMoveXYSnapText(), GetMoveZSnapText(), GetAngleSnapText()));
 }
 
 void lcMainWindow::UpdateColor()
@@ -1955,27 +1977,27 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		break;
 
 	case LC_PIECE_MOVE_PLUSX:
-		lcGetActiveModel()->MoveSelectedObjects(mActiveView->GetMoveDirection(lcVector3(lcMax(GetMoveXYSnap(), 0.01f), 0.0f, 0.0f)), true, true, true);
+		lcGetActiveModel()->MoveSelectedObjects(mActiveView->GetMoveDirection(lcVector3(lcMax(GetMoveXYSnap(), 0.1f), 0.0f, 0.0f)), true, true, true);
 		break;
 
 	case LC_PIECE_MOVE_MINUSX:
-		lcGetActiveModel()->MoveSelectedObjects(mActiveView->GetMoveDirection(lcVector3(-lcMax(GetMoveXYSnap(), 0.01f), 0.0f, 0.0f)), true, true, true);
+		lcGetActiveModel()->MoveSelectedObjects(mActiveView->GetMoveDirection(lcVector3(-lcMax(GetMoveXYSnap(), 0.1f), 0.0f, 0.0f)), true, true, true);
 		break;
 
 	case LC_PIECE_MOVE_PLUSY:
-		lcGetActiveModel()->MoveSelectedObjects(mActiveView->GetMoveDirection(lcVector3(0.0f, lcMax(GetMoveXYSnap(), 0.01f), 0.0f)), true, true, true);
+		lcGetActiveModel()->MoveSelectedObjects(mActiveView->GetMoveDirection(lcVector3(0.0f, lcMax(GetMoveXYSnap(), 0.1f), 0.0f)), true, true, true);
 		break;
 
 	case LC_PIECE_MOVE_MINUSY:
-		lcGetActiveModel()->MoveSelectedObjects(mActiveView->GetMoveDirection(lcVector3(0.0f, -lcMax(GetMoveXYSnap(), 0.01f), 0.0f)), true, true, true);
+		lcGetActiveModel()->MoveSelectedObjects(mActiveView->GetMoveDirection(lcVector3(0.0f, -lcMax(GetMoveXYSnap(), 0.1f), 0.0f)), true, true, true);
 		break;
 
 	case LC_PIECE_MOVE_PLUSZ:
-		lcGetActiveModel()->MoveSelectedObjects(mActiveView->GetMoveDirection(lcVector3(0.0f, 0.0f, lcMax(GetMoveZSnap(), 0.01f))), true, true, true);
+		lcGetActiveModel()->MoveSelectedObjects(mActiveView->GetMoveDirection(lcVector3(0.0f, 0.0f, lcMax(GetMoveZSnap(), 0.1f))), true, true, true);
 		break;
 
 	case LC_PIECE_MOVE_MINUSZ:
-		lcGetActiveModel()->MoveSelectedObjects(mActiveView->GetMoveDirection(lcVector3(0.0f, 0.0f, -lcMax(GetMoveZSnap(), 0.01f))), true, true, true);
+		lcGetActiveModel()->MoveSelectedObjects(mActiveView->GetMoveDirection(lcVector3(0.0f, 0.0f, -lcMax(GetMoveZSnap(), 0.1f))), true, true, true);
 		break;
 
 	case LC_PIECE_ROTATE_PLUSX:
@@ -2229,6 +2251,10 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		SetLockZ(false);
 		break;
 
+	case LC_EDIT_SNAP_MOVE_TOGGLE:
+		SetMoveSnapEnabled(!mMoveSnapEnabled);
+		break;
+
 	case LC_EDIT_SNAP_MOVE_XY0:
 	case LC_EDIT_SNAP_MOVE_XY1:
 	case LC_EDIT_SNAP_MOVE_XY2:
@@ -2253,6 +2279,10 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 	case LC_EDIT_SNAP_MOVE_Z8:
 	case LC_EDIT_SNAP_MOVE_Z9:
 		SetMoveZSnapIndex(CommandId - LC_EDIT_SNAP_MOVE_Z0);
+		break;
+
+	case LC_EDIT_SNAP_ANGLE_TOGGLE:
+		SetAngleSnapEnabled(!mAngleSnapEnabled);
 		break;
 
 	case LC_EDIT_SNAP_ANGLE0:

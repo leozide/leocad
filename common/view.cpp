@@ -511,16 +511,16 @@ void View::DrawSelectMoveOverlay()
 
 	for (int VertIdx = 0; VertIdx < 17; VertIdx++)
 	{
-		*CurVert++ = *(CurVert - 50);
-		*CurVert++ = *(CurVert - 52);
-		*CurVert++ = *(CurVert - 51);
+		*CurVert = *(CurVert - 50); CurVert++;
+		*CurVert = *(CurVert - 52); CurVert++;
+		*CurVert = *(CurVert - 51); CurVert++;
 	}
 
 	for (int VertIdx = 0; VertIdx < 17; VertIdx++)
 	{
-		*CurVert++ = *(CurVert - 100);
-		*CurVert++ = *(CurVert - 102);
-		*CurVert++ = *(CurVert - 104);
+		*CurVert = *(CurVert - 100); CurVert++;
+		*CurVert = *(CurVert - 102); CurVert++;
+		*CurVert = *(CurVert - 104); CurVert++;
 	}
 
 	*CurVert++ = 0.0f; *CurVert++ = OverlayRotateArrowEnd - OverlayMoveArrowCapRadius; *CurVert++ = OverlayRotateArrowStart;
@@ -572,16 +572,16 @@ void View::DrawSelectMoveOverlay()
 
 	for (int VertIdx = 0; VertIdx < 46; VertIdx++)
 	{
-		*CurVert++ = *(CurVert - 137);
-		*CurVert++ = *(CurVert - 139);
-		*CurVert++ = *(CurVert - 138);
+		*CurVert = *(CurVert - 137); CurVert++;
+		*CurVert = *(CurVert - 139); CurVert++;
+		*CurVert = *(CurVert - 138); CurVert++;
 	}
 
 	for (int VertIdx = 0; VertIdx < 46; VertIdx++)
 	{
-		*CurVert++ = *(CurVert - 274);
-		*CurVert++ = *(CurVert - 276);
-		*CurVert++ = *(CurVert - 278);
+		*CurVert = *(CurVert - 274); CurVert++;
+		*CurVert = *(CurVert - 276); CurVert++;
+		*CurVert = *(CurVert - 278); CurVert++;
 	}
 
 	*CurVert++ = 0.0f; *CurVert++ = 0.0f; *CurVert++ = 0.0f;

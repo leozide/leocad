@@ -263,6 +263,13 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 		QT_TRANSLATE_NOOP("Status", "Move and rotate objects relative to the one that currently has focus"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
+	// LC_EDIT_SNAP_MOVE_TOGGLE
+	{
+		"Edit.Snap.Toggle",
+		QT_TRANSLATE_NOOP("Menu", "Move Snap Enabled"),
+		QT_TRANSLATE_NOOP("Status", "Toggle snap axes"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
 	// LC_EDIT_SNAP_MOVE_XY0
 	{
 		"Edit.SnapMove.XY0",
@@ -402,6 +409,13 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 		QT_TRANSLATE_NOOP("Menu", "8 Bricks"),
 		QT_TRANSLATE_NOOP("Status", "Snap movement along the Z axis to 8 bricks"),
 		QT_TRANSLATE_NOOP("Shortcut", "Ctrl+Shift+9")
+	},
+	// LC_EDIT_SNAP_ANGLE_TOGGLE
+	{
+		"Edit.SnapAngle.Toggle",
+		QT_TRANSLATE_NOOP("Menu", "Rotation Snap Enabled"),
+		QT_TRANSLATE_NOOP("Status", "Snap rotations to fixed intervals"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
 	// LC_EDIT_SNAP_ANGLE0
 	{

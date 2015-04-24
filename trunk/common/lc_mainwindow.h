@@ -51,49 +51,39 @@ public:
 		return mAddKeys;
 	}
 
-	int GetMoveXYSnap() const
+	float GetMoveXYSnap() const
 	{
-		const int SnapXYTable[] = { 0, 1, 5, 8, 10, 20, 40, 60, 80, 160 };
-		return SnapXYTable[mMoveXYSnapIndex];
+		const float SnapXYTable[] = { 0.0f, 1.0f, 5.0f, 8.0f, 10.0f, 20.0f, 40.0f, 60.0f, 80.0f, 160.0f };
+		return mMoveSnapEnabled ? SnapXYTable[mMoveXYSnapIndex] : 0.0f;
 	}
 
-	int GetMoveZSnap() const
+	float GetMoveZSnap() const
 	{
-		const int SnapZTable[] = { 0, 1, 5, 8, 10, 20, 24, 48, 96, 192 };
-		return SnapZTable[mMoveZSnapIndex];
+		const float SnapZTable[] = { 0.0f, 1.0f, 5.0f, 8.0f, 10.0f, 20.0f, 24.0f, 48.0f, 96.0f, 192.0f };
+		return mMoveSnapEnabled ? SnapZTable[mMoveZSnapIndex] : 0.0f;
 	}
 
 	int GetAngleSnap() const
 	{
 		const int AngleTable[] = { 0, 1, 5, 10, 15, 30, 45, 60, 90, 180 };
-		return AngleTable[mAngleSnapIndex];
+		return mAngleSnapEnabled ? AngleTable[mAngleSnapIndex] : 0.0f;
 	}
 
-	int GetMoveXYSnapIndex() const
+	QString GetMoveXYSnapText() const
 	{
-		return mMoveXYSnapIndex;
+		QString SnapXYText[] = { tr("0"), tr("1/20S"), tr("1/4S"), tr("1F"), tr("1/2S"), tr("1S"), tr("2S"), tr("3S"), tr("4S"), tr("8S") };
+		return mMoveSnapEnabled ? SnapXYText[mMoveXYSnapIndex] : tr("None");
 	}
 
-	int GetMoveZSnapIndex() const
+	QString GetMoveZSnapText() const
 	{
-		return mMoveZSnapIndex;
+		QString SnapZText[] = { tr("0"), tr("1/20S"), tr("1/4S"), tr("1F"), tr("1/2S"), tr("1S"), tr("1B"), tr("2B"), tr("4B"), tr("8B") };
+		return mMoveSnapEnabled ? SnapZText[mMoveZSnapIndex] : tr("None");
 	}
 
-	int GetAngleSnapIndex() const
+	QString GetAngleSnapText() const
 	{
-		return mAngleSnapIndex;
-	}
-
-	const char* GetMoveXYSnapText() const
-	{
-		const char* SnapXYText[] = { "0", "1/20S", "1/4S", "1F", "1/2S", "1S", "2S", "3S", "4S", "8S" };
-		return SnapXYText[mMoveXYSnapIndex];
-	}
-
-	const char* GetMoveZSnapText() const
-	{
-		const char* SnapZText[] = { "0", "1/20S", "1/4S", "1F", "1/2S", "1S", "1B", "2B", "4B", "8B" };
-		return SnapZText[mMoveZSnapIndex];
+		return mAngleSnapEnabled ? QString::number(GetAngleSnap()) : tr("None");
 	}
 
 	bool GetLockX() const
@@ -137,6 +127,8 @@ public:
 	void SetTool(lcTool Tool);
 	void SetTransformType(lcTransformType TransformType);
 	void SetColorIndex(int ColorIndex);
+	void SetMoveSnapEnabled(bool Enabled);
+	void SetAngleSnapEnabled(bool Enabled);
 	void SetMoveXYSnapIndex(int Index);
 	void SetMoveZSnapIndex(int Index);
 	void SetAngleSnapIndex(int Index);
@@ -218,6 +210,8 @@ protected:
 	bool mAddKeys;
 	lcTool mTool;
 	lcTransformType mTransformType;
+	bool mMoveSnapEnabled;
+	bool mAngleSnapEnabled;
 	int mMoveXYSnapIndex;
 	int mMoveZSnapIndex;
 	int mAngleSnapIndex;

@@ -60,6 +60,11 @@ public:
 		return mRefCount != 0;
 	}
 
+	bool IsPlaceholder() const
+	{
+		return (mFlags & LC_PIECE_PLACEHOLDER) != 0;
+	}
+
 	bool IsModel() const
 	{
 		return (mFlags & LC_PIECE_MODEL) != 0;

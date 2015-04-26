@@ -1037,11 +1037,7 @@ void lcPiecesLibrary::UpdateBuffers(lcContext* Context)
 	for (int PieceInfoIndex = 0; PieceInfoIndex < mPieces.GetSize(); PieceInfoIndex++)
 	{
 		PieceInfo* Info = mPieces[PieceInfoIndex];
-
-		if (Info->IsModel())
-			continue;
-
-		lcMesh* Mesh = Info->IsTemporary() ? gPlaceholderMesh : Info->GetMesh();
+		lcMesh* Mesh = Info->IsPlaceholder() ? gPlaceholderMesh : Info->GetMesh();
 
 		if (!Mesh)
 			continue;
@@ -1065,11 +1061,7 @@ void lcPiecesLibrary::UpdateBuffers(lcContext* Context)
 	for (int PieceInfoIndex = 0; PieceInfoIndex < mPieces.GetSize(); PieceInfoIndex++)
 	{
 		PieceInfo* Info = mPieces[PieceInfoIndex];
-
-		if (Info->IsModel())
-			continue;
-
-		lcMesh* Mesh = Info->IsTemporary() ? gPlaceholderMesh : Info->GetMesh();
+		lcMesh* Mesh = Info->IsPlaceholder() ? gPlaceholderMesh : Info->GetMesh();
 
 		if (!Mesh)
 			continue;

@@ -60,8 +60,6 @@ class lcMatrix33;
 class lcMatrix44;
 
 class lcContext;
-class lcVertexBuffer;
-class lcIndexBuffer;
 class lcMesh;
 struct lcMeshSection;
 struct lcRenderMesh;

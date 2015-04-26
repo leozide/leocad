@@ -4,6 +4,7 @@
 #include "lc_texture.h"
 #include "lc_colors.h"
 #include "lc_mainwindow.h"
+#include "lc_library.h"
 
 static int lcOpaqueRenderMeshCompare(const void* Elem1, const void* Elem2)
 {
@@ -300,6 +301,94 @@ bool lcContext::SaveRenderToTextureImage(const QString& FileName, int Width, int
 	return Result;
 }
 
+lcVertexBuffer lcContext::CreateVertexBuffer(int Size, void* Data)
+{
+	if (GL_HasVertexBufferObject())
+	{
+		lcVertexBuffer VertexBuffer;
+
+		glGenBuffers(1, &VertexBuffer);
+		glBindBuffer(GL_ARRAY_BUFFER_ARB, VertexBuffer);
+		glBufferData(GL_ARRAY_BUFFER_ARB, Size, Data, GL_STATIC_DRAW_ARB);
+
+		glBindBuffer(GL_ARRAY_BUFFER_ARB, 0); // context remove
+		mVertexBufferObject = 0;
+
+		return VertexBuffer;
+	}
+	else
+	{
+		void* VertexBuffer = malloc(Size);
+		memcpy(VertexBuffer, Data, Size);
+		return (lcVertexBuffer)VertexBuffer;
+	}
+}
+
+void lcContext::DestroyVertexBuffer(lcVertexBuffer& VertexBuffer)
+{
+	if (!VertexBuffer)
+		return;
+
+	if (GL_HasVertexBufferObject())
+	{
+		if (mVertexBufferObject == VertexBuffer)
+		{
+			glBindBuffer(GL_ARRAY_BUFFER_ARB, 0);
+			mVertexBufferObject = 0;
+		}
+
+		glDeleteBuffers(1, &VertexBuffer);
+	}
+	else
+	{
+		free((void*)VertexBuffer);
+	}
+}
+
+lcIndexBuffer lcContext::CreateIndexBuffer(int Size, void* Data)
+{
+	if (GL_HasVertexBufferObject())
+	{
+		lcIndexBuffer IndexBuffer;
+
+		glGenBuffers(1, &IndexBuffer);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER_ARB, IndexBuffer);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER_ARB, Size, Data, GL_STATIC_DRAW_ARB);
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER_ARB, 0); // context remove
+		mIndexBufferObject = 0;
+
+		return IndexBuffer;
+	}
+	else
+	{
+		void* IndexBuffer = malloc(Size);
+		memcpy(IndexBuffer, Data, Size);
+		return (lcIndexBuffer)IndexBuffer;
+	}
+}
+
+void lcContext::DestroyIndexBuffer(lcIndexBuffer& IndexBuffer)
+{
+	if (!IndexBuffer)
+		return;
+
+	if (GL_HasVertexBufferObject())
+	{
+		if (mIndexBufferObject == IndexBuffer)
+		{
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
+			mIndexBufferObject = 0;
+		}
+
+		glDeleteBuffers(1, &IndexBuffer);
+	}
+	else
+	{
+		free((void*)IndexBuffer);
+	}
+}
+
 void lcContext::ClearVertexBuffer()
 {
 	mVertexBufferPointer = NULL;
@@ -318,11 +407,11 @@ void lcContext::ClearVertexBuffer()
 		glDisableClientState(GL_COLOR_ARRAY);
 }
 
-void lcContext::SetVertexBuffer(const lcVertexBuffer* VertexBuffer)
+void lcContext::SetVertexBuffer(lcVertexBuffer VertexBuffer)
 {
 	if (GL_HasVertexBufferObject())
 	{
-		GLuint VertexBufferObject = VertexBuffer->mBuffer;
+		GLuint VertexBufferObject = VertexBuffer;
 		mVertexBufferPointer = NULL;
 
 		if (VertexBufferObject != mVertexBufferObject)
@@ -334,7 +423,7 @@ void lcContext::SetVertexBuffer(const lcVertexBuffer* VertexBuffer)
 	}
 	else
 	{
-		mVertexBufferPointer = (char*)VertexBuffer->mData;
+		mVertexBufferPointer = (char*)VertexBuffer;
 		mVertexBufferOffset = (char*)~0;
 	}
 }
@@ -397,12 +486,14 @@ void lcContext::SetVertexFormat(int BufferOffset, int PositionSize, int TexCoord
 
 void lcContext::BindMesh(lcMesh* Mesh)
 {
-	if (GL_HasVertexBufferObject())
+	lcPiecesLibrary* Library = lcGetPiecesLibrary();
+
+	if (Mesh->mVertexCacheOffset != -1)
 	{
-		GLuint VertexBufferObject = Mesh->mVertexBuffer.mBuffer;
-		mVertexBufferPointer = NULL;
-		GLuint IndexBufferObject = Mesh->mIndexBuffer.mBuffer;
-		mIndexBufferPointer = NULL;
+		GLuint VertexBufferObject = Library->mVertexBuffer;
+		mVertexBufferPointer = (char*)Mesh->mVertexCacheOffset;
+		GLuint IndexBufferObject = Library->mIndexBuffer;
+		mIndexBufferPointer = (char*)Mesh->mIndexCacheOffset;
 
 		if (VertexBufferObject != mVertexBufferObject)
 		{
@@ -419,8 +510,20 @@ void lcContext::BindMesh(lcMesh* Mesh)
 	}
 	else
 	{
-		mVertexBufferPointer = (char*)Mesh->mVertexBuffer.mData;
-		mIndexBufferPointer = (char*)Mesh->mIndexBuffer.mData;
+		if (mVertexBufferObject)
+		{
+			glBindBuffer(GL_ARRAY_BUFFER_ARB, 0);
+			mVertexBufferObject = 0;
+		}
+
+		if (mIndexBufferObject)
+		{
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
+			mIndexBufferObject = 0;
+		}
+
+		mVertexBufferPointer = (char*)Mesh->mVertexData;
+		mIndexBufferPointer = (char*)Mesh->mIndexData;
 		mVertexBufferOffset = (char*)~0;
 	}
 }
@@ -507,6 +610,8 @@ void lcContext::DrawMeshSection(lcMesh* Mesh, lcMeshSection* Section)
 void lcContext::DrawOpaqueMeshes(const lcMatrix44& ViewMatrix, const lcArray<lcRenderMesh>& OpaqueMeshes)
 {
 	bool DrawLines = lcGetPreferences().mDrawEdgeLines;
+
+	lcGetPiecesLibrary()->UpdateBuffers(this); // TODO: find a better place for this update
 
 	for (int MeshIdx = 0; MeshIdx < OpaqueMeshes.GetSize(); MeshIdx++)
 	{

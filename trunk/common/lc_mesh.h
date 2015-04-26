@@ -19,98 +19,6 @@ struct lcVertexTextured
 	lcVector2 TexCoord;
 };
 
-class lcVertexBuffer
-{
-public:
-	lcVertexBuffer()
-	{
-		mData = NULL;
-		mSize = 0;
-		mBuffer = 0;
-	}
-
-	~lcVertexBuffer()
-	{
-		if (mBuffer)
-		{
-			glBindBuffer(GL_ARRAY_BUFFER_ARB, 0);
-			glDeleteBuffers(1, &mBuffer);
-		}
-
-		free(mData);
-	}
-
-	void SetSize(int Size)
-	{
-		free(mData);
-		mData = malloc(Size);
-		mSize = Size;
-	}
-
-	void UpdateBuffer()
-	{
-		if (!GL_HasVertexBufferObject())
-			return;
-
-		if (!mBuffer)
-			glGenBuffers(1, &mBuffer);
-
-		glBindBuffer(GL_ARRAY_BUFFER_ARB, mBuffer);
-		glBufferData(GL_ARRAY_BUFFER_ARB, mSize, mData, GL_STATIC_DRAW_ARB);
-		glBindBuffer(GL_ARRAY_BUFFER_ARB, 0);
-	}
-
-	void* mData;
-	int mSize;
-	GLuint mBuffer;
-};
-
-class lcIndexBuffer
-{
-public:
-	lcIndexBuffer()
-	{
-		mData = NULL;
-		mSize = 0;
-		mBuffer = 0;
-	}
-
-	~lcIndexBuffer()
-	{
-		if (mBuffer)
-		{
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
-			glDeleteBuffers(1, &mBuffer);
-		}
-
-		free(mData);
-	}
-
-	void SetSize(int Size)
-	{
-		free(mData);
-		mData = malloc(Size);
-		mSize = Size;
-	}
-
-	void UpdateBuffer()
-	{
-		if (!GL_HasVertexBufferObject())
-			return;
-
-		if (!mBuffer)
-			glGenBuffers(1, &mBuffer);
-
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER_ARB, mBuffer);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER_ARB, mSize, mData, GL_STATIC_DRAW_ARB);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
-	}
-
-	void* mData;
-	int mSize;
-	GLuint mBuffer;
-};
-
 struct lcMeshSection
 {
 	int ColorIndex;
@@ -118,7 +26,6 @@ struct lcMeshSection
 	int NumIndices;
 	int PrimitiveType;
 	lcTexture* Texture;
-//	BoundingBox Box;
 };
 
 class lcMesh
@@ -149,17 +56,16 @@ public:
 	bool IntersectsPlanes(const lcVector4 Planes[6]);
 	bool IntersectsPlanes(const lcVector4 Planes[6]);
 
-	void UpdateBuffers()
-	{
-		mVertexBuffer.UpdateBuffer();
-		mIndexBuffer.UpdateBuffer();
-	}
-
 	lcMeshSection* mSections;
 	int mNumSections;
 
-	lcVertexBuffer mVertexBuffer;
-	lcIndexBuffer mIndexBuffer;
+	void* mVertexData;
+	int mVertexDataSize;
+	void* mIndexData;
+	int mIndexDataSize;
+	int mVertexCacheOffset;
+	int mIndexCacheOffset;
+
 	int mNumVertices;
 	int mNumTexturedVertices;
 	int mIndexType;

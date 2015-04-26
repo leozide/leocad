@@ -17,20 +17,20 @@
 #define LC_RGBA_ALPHA(rgba) ((lcuint8)(((rgba) >> 24) & 0xff))
 #define LC_FLOATRGB(f) LC_RGB(f[0]*255, f[1]*255, f[2]*255)
 
-template <typename T, typename U>
-inline T lcMin(const T& a, const U& b)
+template<typename T>
+inline T lcMin(const T& a, const T& b)
 {
 	return a < b ? a : b;
 }
 
-template <typename T, typename U>
-inline T lcMax(const T& a, const U& b)
+template<typename T>
+inline T lcMax(const T& a, const T& b)
 {
 	return a > b ? a : b;
 }
 
-template <typename T, typename U, typename V>
-inline T lcClamp(const T& Value, const U& Min, const V& Max)
+template<typename T>
+inline T lcClamp(const T& Value, const T& Min, const T& Max)
 {
 	if (Value > Max)
 		return Max;

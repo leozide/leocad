@@ -250,8 +250,8 @@ void lcModel::UpdatePieceInfo(lcArray<lcModel*>& UpdatedModels)
 
 	if (Mesh)
 	{
-		int NumVerts = Mesh->mVertexBuffer.mSize / sizeof(lcVertex);
-		float* Vertex = (float*)Mesh->mVertexBuffer.mData;
+		int NumVerts = Mesh->mNumVertices;
+		float* Vertex = (float*)Mesh->mVertexData;
 
 		for (int VertexIdx = 0; VertexIdx < NumVerts; VertexIdx++)
 		{
@@ -1891,6 +1891,15 @@ void lcModel::AddPiece(lcPiece* Piece)
 			mPieces.InsertAt(PieceIdx, Piece);
 			return;
 		}
+	}
+
+	PieceInfo* Info = Piece->mPieceInfo;
+	if (!Info->IsModel())
+	{
+		lcMesh* Mesh = Info->IsTemporary() ? gPlaceholderMesh : Info->GetMesh();
+
+		if (Mesh->mVertexCacheOffset == -1)
+			lcGetPiecesLibrary()->mBuffersDirty = true;
 	}
 
 	mPieces.Add(Piece);

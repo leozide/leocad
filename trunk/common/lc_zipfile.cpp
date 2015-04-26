@@ -91,7 +91,7 @@ lcuint64 lcZipFile::SearchCentralDir()
 	lcuint8 buf[CommentBufferSize + 4];
 
 	SizeFile = mFile->GetLength();
-	MaxBack = lcMin(SizeFile, 0xffffU);
+	MaxBack = lcMin(SizeFile, 0xffffULL);
 	BackRead = 4;
 	PosFound = 0;
 
@@ -134,7 +134,7 @@ lcuint64 lcZipFile::SearchCentralDir64()
 	lcuint8 buf[CommentBufferSize + 4];
 
 	SizeFile = mFile->GetLength();
-	MaxBack = lcMin(SizeFile, 0xffffU);
+	MaxBack = lcMin(SizeFile, 0xffffULL);
 	BackRead = 4;
 	PosFound = 0;
 

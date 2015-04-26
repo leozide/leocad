@@ -138,7 +138,7 @@ protected:
 	int mMouseDownX;
 	int mMouseDownY;
 
-	lcVertexBuffer* mGridBuffer;
+	lcVertexBuffer mGridBuffer;
 	int mGridSettings[7];
 };
 

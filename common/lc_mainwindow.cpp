@@ -2001,27 +2001,27 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		break;
 
 	case LC_PIECE_ROTATE_PLUSX:
-		lcGetActiveModel()->RotateSelectedPieces(mActiveView->GetMoveDirection(lcVector3(lcMax(GetAngleSnap(), 1.0f), 0.0f, 0.0f)), true, true, true);
+		lcGetActiveModel()->RotateSelectedPieces(mActiveView->GetMoveDirection(lcVector3(lcMax((float)GetAngleSnap(), 1.0f), 0.0f, 0.0f)), true, true, true);
 		break;
 
 	case LC_PIECE_ROTATE_MINUSX:
-		lcGetActiveModel()->RotateSelectedPieces(mActiveView->GetMoveDirection(-lcVector3(lcMax(GetAngleSnap(), 1.0f), 0.0f, 0.0f)), true, true, true);
+		lcGetActiveModel()->RotateSelectedPieces(mActiveView->GetMoveDirection(-lcVector3(lcMax((float)GetAngleSnap(), 1.0f), 0.0f, 0.0f)), true, true, true);
 		break;
 
 	case LC_PIECE_ROTATE_PLUSY:
-		lcGetActiveModel()->RotateSelectedPieces(mActiveView->GetMoveDirection(lcVector3(0.0f, lcMax(GetAngleSnap(), 1.0f), 0.0f)), true, true, true);
+		lcGetActiveModel()->RotateSelectedPieces(mActiveView->GetMoveDirection(lcVector3(0.0f, lcMax((float)GetAngleSnap(), 1.0f), 0.0f)), true, true, true);
 		break;
 
 	case LC_PIECE_ROTATE_MINUSY:
-		lcGetActiveModel()->RotateSelectedPieces(mActiveView->GetMoveDirection(lcVector3(0.0f, -lcMax(GetAngleSnap(), 1.0f), 0.0f)), true, true, true);
+		lcGetActiveModel()->RotateSelectedPieces(mActiveView->GetMoveDirection(lcVector3(0.0f, -lcMax((float)GetAngleSnap(), 1.0f), 0.0f)), true, true, true);
 		break;
 
 	case LC_PIECE_ROTATE_PLUSZ:
-		lcGetActiveModel()->RotateSelectedPieces(mActiveView->GetMoveDirection(lcVector3(0.0f, 0.0f, lcMax(GetAngleSnap(), 1.0f))), true, true, true);
+		lcGetActiveModel()->RotateSelectedPieces(mActiveView->GetMoveDirection(lcVector3(0.0f, 0.0f, lcMax((float)GetAngleSnap(), 1.0f))), true, true, true);
 		break;
 
 	case LC_PIECE_ROTATE_MINUSZ:
-		lcGetActiveModel()->RotateSelectedPieces(mActiveView->GetMoveDirection(lcVector3(0.0f, 0.0f, -lcMax(GetAngleSnap(), 1.0f))), true, true, true);
+		lcGetActiveModel()->RotateSelectedPieces(mActiveView->GetMoveDirection(lcVector3(0.0f, 0.0f, -lcMax((float)GetAngleSnap(), 1.0f))), true, true, true);
 		break;
 
 	case LC_PIECE_MINIFIG_WIZARD:

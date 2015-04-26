@@ -18,6 +18,12 @@ public:
 	lcArray<lcObject*> mInterfaceObjects;
 };
 
+typedef quintptr lcVertexBuffer;
+typedef quintptr lcIndexBuffer;
+
+#define LC_INVALID_VERTEX_BUFFER 0
+#define LC_INVALID_INDEX_BUFFER 0
+
 class lcContext
 {
 public:
@@ -46,13 +52,17 @@ public:
 	void EndRenderToTexture();
 	bool SaveRenderToTextureImage(const QString& FileName, int Width, int Height);
 
+	lcVertexBuffer CreateVertexBuffer(int Size, void* Data);
+	void DestroyVertexBuffer(lcVertexBuffer& VertexBuffer);
+	lcIndexBuffer CreateIndexBuffer(int Size, void* Data);
+	void DestroyIndexBuffer(lcIndexBuffer& IndexBuffer);
+
 	void ClearVertexBuffer();
-	void SetVertexBuffer(const lcVertexBuffer* VertexBuffer);
+	void SetVertexBuffer(lcVertexBuffer VertexBuffer);
 	void SetVertexBufferPointer(const void* VertexBuffer);
 	void SetVertexFormat(int BufferOffset, int PositionSize, int TexCoordSize, int ColorSize);
 	void DrawPrimitives(GLenum Mode, GLint First, GLsizei Count);
 
-	void BindMesh(lcMesh* Mesh);
 	void UnbindMesh();
 	void DrawMeshSection(lcMesh* Mesh, lcMeshSection* Section);
 	void DrawOpaqueMeshes(const lcMatrix44& ViewMatrix, const lcArray<lcRenderMesh>& OpaqueMeshes);
@@ -60,6 +70,8 @@ public:
 	void DrawInterfaceObjects(const lcMatrix44& ViewMatrix, const lcArray<lcObject*>& InterfaceObjects);
 
 protected:
+	void BindMesh(lcMesh* Mesh);
+
 	GLuint mVertexBufferObject;
 	GLuint mIndexBufferObject;
 	char* mVertexBufferPointer;

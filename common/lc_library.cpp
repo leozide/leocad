@@ -8,6 +8,7 @@
 #include "lc_category.h"
 #include "lc_application.h"
 #include "lc_mainwindow.h"
+#include "lc_context.h"
 #include "project.h"
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -31,6 +32,9 @@ lcPiecesLibrary::lcPiecesLibrary()
 	mCacheFile = NULL;
 	mCacheFileName[0] = 0;
 	mSaveCache = false;
+	mBuffersDirty = false;
+	mVertexBuffer = LC_INVALID_VERTEX_BUFFER;
+	mIndexBuffer = LC_INVALID_INDEX_BUFFER;
 }
 
 lcPiecesLibrary::~lcPiecesLibrary()
@@ -919,7 +923,7 @@ void lcPiecesLibrary::CreateMesh(PieceInfo* Info, lcLibraryMeshData& MeshData)
 
 	Mesh->Create(MeshData.mSections.GetSize(), MeshData.mVertices.GetSize(), MeshData.mTexturedVertices.GetSize(), NumIndices);
 
-	lcVertex* DstVerts = (lcVertex*)Mesh->mVertexBuffer.mData;
+	lcVertex* DstVerts = (lcVertex*)Mesh->mVertexData;
 	lcVector3 Min(FLT_MAX, FLT_MAX, FLT_MAX), Max(-FLT_MAX, -FLT_MAX, -FLT_MAX);
 
 	for (int VertexIdx = 0; VertexIdx < MeshData.mVertices.GetSize(); VertexIdx++)
@@ -986,7 +990,7 @@ void lcPiecesLibrary::CreateMesh(PieceInfo* Info, lcLibraryMeshData& MeshData)
 		{
 			DstSection.IndexOffset = NumIndices * 2;
 
-			lcuint16* Index = (lcuint16*)Mesh->mIndexBuffer.mData + NumIndices;
+			lcuint16* Index = (lcuint16*)Mesh->mIndexData + NumIndices;
 
 			for (int IndexIdx = 0; IndexIdx < DstSection.NumIndices; IndexIdx++)
 				*Index++ = SrcSection->mIndices[IndexIdx];
@@ -995,7 +999,7 @@ void lcPiecesLibrary::CreateMesh(PieceInfo* Info, lcLibraryMeshData& MeshData)
 		{
 			DstSection.IndexOffset = NumIndices * 4;
 
-			lcuint32* Index = (lcuint32*)Mesh->mIndexBuffer.mData + NumIndices;
+			lcuint32* Index = (lcuint32*)Mesh->mIndexData + NumIndices;
 
 			for (int IndexIdx = 0; IndexIdx < DstSection.NumIndices; IndexIdx++)
 				*Index++ = SrcSection->mIndices[IndexIdx];
@@ -1019,8 +1023,73 @@ void lcPiecesLibrary::CreateMesh(PieceInfo* Info, lcLibraryMeshData& MeshData)
 		NumIndices += DstSection.NumIndices;
 	}
 
-	Mesh->UpdateBuffers();
 	Info->SetMesh(Mesh);
+}
+
+void lcPiecesLibrary::UpdateBuffers(lcContext* Context)
+{
+	if (!GL_HasVertexBufferObject() || !mBuffersDirty)
+		return;
+
+	int VertexDataSize = 0;
+	int IndexDataSize = 0;
+
+	for (int PieceInfoIndex = 0; PieceInfoIndex < mPieces.GetSize(); PieceInfoIndex++)
+	{
+		PieceInfo* Info = mPieces[PieceInfoIndex];
+
+		if (Info->IsModel())
+			continue;
+
+		lcMesh* Mesh = Info->IsTemporary() ? gPlaceholderMesh : Info->GetMesh();
+
+		if (!Mesh)
+			continue;
+
+		VertexDataSize += Mesh->mVertexDataSize;
+		IndexDataSize += Mesh->mIndexDataSize;
+	}
+
+	Context->DestroyVertexBuffer(mVertexBuffer);
+	Context->DestroyIndexBuffer(mIndexBuffer);
+
+	if (!VertexDataSize || !IndexDataSize)
+		return;
+
+	void* VertexData = malloc(VertexDataSize);
+	void* IndexData = malloc(IndexDataSize);
+
+	VertexDataSize = 0;
+	IndexDataSize = 0;
+
+	for (int PieceInfoIndex = 0; PieceInfoIndex < mPieces.GetSize(); PieceInfoIndex++)
+	{
+		PieceInfo* Info = mPieces[PieceInfoIndex];
+
+		if (Info->IsModel())
+			continue;
+
+		lcMesh* Mesh = Info->IsTemporary() ? gPlaceholderMesh : Info->GetMesh();
+
+		if (!Mesh)
+			continue;
+
+		Mesh->mVertexCacheOffset = VertexDataSize;
+		Mesh->mIndexCacheOffset = IndexDataSize;
+
+		memcpy((char*)VertexData + VertexDataSize, Mesh->mVertexData, Mesh->mVertexDataSize);
+		memcpy((char*)IndexData + IndexDataSize, Mesh->mIndexData, Mesh->mIndexDataSize);
+
+		VertexDataSize += Mesh->mVertexDataSize;
+		IndexDataSize += Mesh->mIndexDataSize;
+	}
+
+	mVertexBuffer = Context->CreateVertexBuffer(VertexDataSize, VertexData);
+	mIndexBuffer = Context->CreateIndexBuffer(IndexDataSize, IndexData);
+	mBuffersDirty = false;
+
+	free(VertexData);
+	free(IndexData);
 }
 
 bool lcPiecesLibrary::LoadTexture(lcTexture* Texture)

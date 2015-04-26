@@ -1,6 +1,7 @@
 #ifndef _LC_LIBRARY_H_
 #define _LC_LIBRARY_H_
 
+#include "lc_context.h"
 #include "lc_mesh.h"
 #include "lc_math.h"
 #include "lc_array.h"
@@ -150,6 +151,7 @@ public:
 
 	bool ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform, lcuint32 CurrentColorCode, lcArray<lcLibraryTextureMap>& TextureStack, lcLibraryMeshData& MeshData);
 	void CreateMesh(PieceInfo* Info, lcLibraryMeshData& MeshData);
+	void UpdateBuffers(lcContext* Context);
 
 	lcArray<PieceInfo*> mPieces;
 	lcArray<lcLibraryPrimitive*> mPrimitives;
@@ -158,6 +160,10 @@ public:
 	lcArray<lcTexture*> mTextures;
 
 	char mLibraryPath[LC_MAXPATH];
+
+	bool mBuffersDirty;
+	lcVertexBuffer mVertexBuffer;
+	lcIndexBuffer mIndexBuffer;
 
 protected:
 	bool OpenArchive(const char* FileName, lcZipFileType ZipFileType);

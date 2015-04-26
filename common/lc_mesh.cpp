@@ -16,10 +16,18 @@ lcMesh::lcMesh()
 	mNumVertices = 0;
 	mNumTexturedVertices = 0;
 	mIndexType = 0;
+	mVertexData = NULL;
+	mVertexDataSize = 0;
+	mIndexData = NULL;
+	mIndexDataSize = 0;
+	mVertexCacheOffset = -1;
+	mIndexCacheOffset = -1;
 }
 
 lcMesh::~lcMesh()
 {
+	free(mVertexData);
+	free(mIndexData);
 	delete[] mSections;
 }
 
@@ -30,18 +38,21 @@ void lcMesh::Create(int NumSections, int NumVertices, int NumTexturedVertices, i
 
 	mNumVertices = NumVertices;
 	mNumTexturedVertices = NumTexturedVertices;
-	mVertexBuffer.SetSize(NumVertices * sizeof(lcVertex) + NumTexturedVertices * sizeof(lcVertexTextured));
+	mVertexDataSize = NumVertices * sizeof(lcVertex) + NumTexturedVertices * sizeof(lcVertexTextured);
+	mVertexData = malloc(mVertexDataSize);
 
 	if (NumVertices < 0x10000 && NumTexturedVertices < 0x10000)
 	{
 		mIndexType = GL_UNSIGNED_SHORT;
-		mIndexBuffer.SetSize(NumIndices * sizeof(GLushort));
+		mIndexDataSize = NumIndices * sizeof(GLushort);
 	}
 	else
 	{
 		mIndexType = GL_UNSIGNED_INT;
-		mIndexBuffer.SetSize(NumIndices * sizeof(GLuint));
+		mIndexDataSize = NumIndices * sizeof(GLuint);
 	}
+
+	mIndexData = malloc(mIndexDataSize);
 }
 
 void lcMesh::CreateBox()
@@ -51,8 +62,8 @@ void lcMesh::CreateBox()
 	lcVector3 Min(-10.0f, -10.0f, -24.0f);
 	lcVector3 Max(10.0f, 10.0f, 4.0f);
 
-	float* Verts = (float*)mVertexBuffer.mData;
-	lcuint16* Indices = (lcuint16*)mIndexBuffer.mData;
+	float* Verts = (float*)mVertexData;
+	lcuint16* Indices = (lcuint16*)mIndexData;
 
 	*Verts++ = Min[0]; *Verts++ = Min[1]; *Verts++ = Min[2];
 	*Verts++ = Min[0]; *Verts++ = Max[1]; *Verts++ = Min[2];
@@ -103,14 +114,12 @@ void lcMesh::CreateBox()
 
 	*Indices++ = 0; *Indices++ = 4; *Indices++ = 1; *Indices++ = 5;
 	*Indices++ = 2; *Indices++ = 6; *Indices++ = 3; *Indices++ = 7;
-
-	UpdateBuffers();
 }
 
 template<typename IndexType>
 bool lcMesh::MinIntersectDist(const lcVector3& Start, const lcVector3& End, float& MinDist, lcVector3& Intersection)
 {
-	float* Verts = (float*)mVertexBuffer.mData;
+	float* Verts = (float*)mVertexData;
 	bool Hit = false;
 
 	for (int SectionIdx = 0; SectionIdx < mNumSections; SectionIdx++)
@@ -120,7 +129,7 @@ bool lcMesh::MinIntersectDist(const lcVector3& Start, const lcVector3& End, floa
 		if (Section->PrimitiveType != GL_TRIANGLES)
 			continue;
 
-		IndexType* Indices = (IndexType*)mIndexBuffer.mData + Section->IndexOffset / sizeof(IndexType);
+		IndexType* Indices = (IndexType*)mIndexData + Section->IndexOffset / sizeof(IndexType);
 
 		for (int Idx = 0; Idx < Section->NumIndices; Idx += 3)
 		{
@@ -150,7 +159,7 @@ bool lcMesh::MinIntersectDist(const lcVector3& Start, const lcVector3& End, floa
 template<typename IndexType>
 bool lcMesh::IntersectsPlanes(const lcVector4 Planes[6])
 {
-	float* Verts = (float*)mVertexBuffer.mData;
+	float* Verts = (float*)mVertexData;
 
 	for (int SectionIdx = 0; SectionIdx < mNumSections; SectionIdx++)
 	{
@@ -159,7 +168,7 @@ bool lcMesh::IntersectsPlanes(const lcVector4 Planes[6])
 		if (Section->PrimitiveType != GL_TRIANGLES)
 			continue;
 
-		IndexType* Indices = (IndexType*)mIndexBuffer.mData + Section->IndexOffset / sizeof(IndexType);
+		IndexType* Indices = (IndexType*)mIndexData + Section->IndexOffset / sizeof(IndexType);
 
 		for (int Idx = 0; Idx < Section->NumIndices; Idx += 3)
 			if (lcTriangleIntersectsPlanes(&Verts[Indices[Idx]*3], &Verts[Indices[Idx+1]*3], &Verts[Indices[Idx+2]*3], Planes))
@@ -185,7 +194,7 @@ void lcMesh::ExportPOVRay(lcFile& File, const char* MeshName, const char* ColorT
 	sprintf(Line, "#declare lc_%s = union {\n", MeshName);
 	File.WriteLine(Line);
 
-	float* Verts = (float*)mVertexBuffer.mData;
+	float* Verts = (float*)mVertexData;
 
 	for (int SectionIdx = 0; SectionIdx < mNumSections; SectionIdx++)
 	{
@@ -194,7 +203,7 @@ void lcMesh::ExportPOVRay(lcFile& File, const char* MeshName, const char* ColorT
 		if (Section->PrimitiveType != GL_TRIANGLES)
 			continue;
 
-		IndexType* Indices = (IndexType*)mIndexBuffer.mData + Section->IndexOffset / sizeof(IndexType);
+		IndexType* Indices = (IndexType*)mIndexData + Section->IndexOffset / sizeof(IndexType);
 
 		File.WriteLine(" mesh {\n");
 
@@ -237,7 +246,7 @@ void lcMesh::ExportWavefrontIndices(lcFile& File, int DefaultColorIndex, int Ver
 		if (Section->PrimitiveType != GL_TRIANGLES)
 			continue;
 
-		IndexType* Indices = (IndexType*)mIndexBuffer.mData + Section->IndexOffset / sizeof(IndexType);
+		IndexType* Indices = (IndexType*)mIndexData + Section->IndexOffset / sizeof(IndexType);
 
 		if (Section->ColorIndex == gDefaultColor)
 			sprintf(Line, "usemtl %s\n", gColorList[DefaultColorIndex].SafeName);
@@ -315,13 +324,11 @@ bool lcMesh::FileLoad(lcFile& File)
 			Section.Texture = NULL;
 	}
 
-	File.ReadFloats((float*)mVertexBuffer.mData, 3 * mNumVertices + 5 * mNumTexturedVertices);
+	File.ReadFloats((float*)mVertexData, 3 * mNumVertices + 5 * mNumTexturedVertices);
 	if (mIndexType == GL_UNSIGNED_SHORT)
-		File.ReadU16((lcuint16*)mIndexBuffer.mData, mIndexBuffer.mSize / 2);
+		File.ReadU16((lcuint16*)mIndexData, mIndexDataSize / 2);
 	else
-		File.ReadU32((lcuint32*)mIndexBuffer.mData, mIndexBuffer.mSize / 4);
-
-	UpdateBuffers();
+		File.ReadU32((lcuint32*)mIndexData, mIndexDataSize / 4);
 
 	return true;
 }
@@ -335,7 +342,7 @@ void lcMesh::FileSave(lcFile& File)
 	File.WriteU16(mNumSections);
 	File.WriteU32(mNumVertices);
 	File.WriteU32(mNumTexturedVertices);
-	File.WriteU32(mIndexBuffer.mSize / (mIndexType == GL_UNSIGNED_SHORT ? 2 : 4));
+	File.WriteU32(mIndexDataSize / (mIndexType == GL_UNSIGNED_SHORT ? 2 : 4));
 
 	for (int SectionIdx = 0; SectionIdx < mNumSections; SectionIdx++)
 	{
@@ -356,9 +363,9 @@ void lcMesh::FileSave(lcFile& File)
 			File.WriteU16(0);
 	}
 
-	File.WriteFloats((float*)mVertexBuffer.mData, 3 * mNumVertices + 5 * mNumTexturedVertices);
+	File.WriteFloats((float*)mVertexData, 3 * mNumVertices + 5 * mNumTexturedVertices);
 	if (mIndexType == GL_UNSIGNED_SHORT)
-		File.WriteU16((lcuint16*)mIndexBuffer.mData, mIndexBuffer.mSize / 2);
+		File.WriteU16((lcuint16*)mIndexData, mIndexDataSize / 2);
 	else
-		File.WriteU32((lcuint32*)mIndexBuffer.mData, mIndexBuffer.mSize / 4);
+		File.WriteU32((lcuint32*)mIndexData, mIndexDataSize / 4);
 }

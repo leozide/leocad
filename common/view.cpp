@@ -17,7 +17,7 @@ View::View(lcModel* Model)
 {
 	mModel = Model;
 	mCamera = NULL;
-	mGridBuffer = NULL;
+	mGridBuffer = LC_INVALID_VERTEX_BUFFER;
 	memset(mGridSettings, 0, sizeof(mGridSettings));
 
 	mDragState = LC_DRAGSTATE_NONE;
@@ -33,7 +33,7 @@ View::View(lcModel* Model)
 
 View::~View()
 {
-	delete mGridBuffer;
+	mContext->DestroyVertexBuffer(mGridBuffer);
 
 	if (gMainWindow)
 		gMainWindow->RemoveView(this);
@@ -1051,9 +1051,9 @@ void View::DrawSelectZoomRegionOverlay()
 	}
 
 	Left = lcMax(Left, 0.0f);
-	Right = lcMin(Right, mWidth - 1);
+	Right = lcMin(Right, mWidth - 1.0f);
 	Bottom = lcMax(Bottom, 0.0f);
-	Top = lcMin(Top, mHeight - 1);
+	Top = lcMin(Top, mHeight - 1.0f);
 
 	float BorderX = lcMin(2.0f, Right - Left);
 	float BorderY = lcMin(2.0f, Top - Bottom);
@@ -1122,7 +1122,7 @@ void View::DrawRotateViewOverlay()
 		*CurVert++ = sinf((float)i / 32.0f * (2.0f * LC_PI)) * r + cy;
 	}
 
-	const float OverlayCameraSquareSize = lcMax(8.0f, (w+h)/200);
+	const float OverlayCameraSquareSize = lcMax(8.0f, (w + h) / 200.0f);
 
 	*CurVert++ = cx + OverlayCameraSquareSize; *CurVert++ = cy + r + OverlayCameraSquareSize;
 	*CurVert++ = cx - OverlayCameraSquareSize; *CurVert++ = cy + r + OverlayCameraSquareSize;
@@ -1227,22 +1227,19 @@ void View::DrawGrid()
 		MaxY = 2;
 	}
 
-	if (!mGridBuffer || MinX != mGridSettings[0] || MinY != mGridSettings[1] || MaxX != mGridSettings[2] || MaxY != mGridSettings[3] ||
+	if (mGridBuffer == LC_INVALID_VERTEX_BUFFER || MinX != mGridSettings[0] || MinY != mGridSettings[1] || MaxX != mGridSettings[2] || MaxY != mGridSettings[3] ||
 	    Spacing != mGridSettings[4] || (Preferences.mDrawGridStuds ? 1 : 0) != mGridSettings[5] || (Preferences.mDrawGridLines ? 1 : 0) != mGridSettings[6])
 	{
-		int BufferSize = 0;
+		int VertexBufferSize = 0;
 
 		if (Preferences.mDrawGridStuds)
-			BufferSize += 4 * 5;
+			VertexBufferSize += 4 * 5 * sizeof(float);
 
 		if (Preferences.mDrawGridLines)
-			BufferSize += 2 * (MaxX - MinX + MaxY - MinY + 2) * 3;
+			VertexBufferSize += 2 * (MaxX - MinX + MaxY - MinY + 2) * 3 * sizeof(float);
 
-		if (!mGridBuffer)
-			mGridBuffer = new lcVertexBuffer();
-
-		mGridBuffer->SetSize(BufferSize * sizeof(float));
-		float* CurVert = (float*)mGridBuffer->mData;
+		float* Verts = (float*)malloc(VertexBufferSize);
+		float* CurVert = Verts;
 
 		if (Preferences.mDrawGridStuds)
 		{
@@ -1312,7 +1309,9 @@ void View::DrawGrid()
 		mGridSettings[5] = (Preferences.mDrawGridStuds ? 1 : 0);
 		mGridSettings[6] = (Preferences.mDrawGridLines ? 1 : 0);
 
-		mGridBuffer->UpdateBuffer();
+		mContext->DestroyVertexBuffer(mGridBuffer);
+		mGridBuffer = mContext->CreateVertexBuffer(VertexBufferSize, Verts);
+		free(Verts);
 	}
 
 	int BufferOffset = 0;
@@ -1856,7 +1855,7 @@ void View::UpdateTrackTool()
 			float d = sqrtf((float)((cx - x) * (cx - x) + (cy - y) * (cy - y)));
 			float r = lcMin(vw, vh) * 0.35f;
 
-			const float SquareSize = lcMax(8.0f, (vw + vh) / 200);
+			const float SquareSize = lcMax(8.0f, (vw + vh) / 200.0f);
 
 			if ((d < r + SquareSize) && (d > r - SquareSize))
 			{

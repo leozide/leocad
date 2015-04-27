@@ -131,8 +131,7 @@ lcQGLWidget::lcQGLWidget(QWidget *parent, lcQGLWidget *share, lcGLWidget *owner,
 	gTexFont.Load();
 	if (!gWidgetCount)
 	{
-		gGridTexture = new lcTexture;
-		gGridTexture->CreateGridTexture();
+		View::CreateResources(widget->mContext);
 
 		gPlaceholderMesh = new lcMesh;
 		gPlaceholderMesh->CreateBox();
@@ -156,8 +155,8 @@ lcQGLWidget::~lcQGLWidget()
 	gTexFont.Release();
 	if (!gWidgetCount)
 	{
-		delete gGridTexture;
-		gGridTexture = NULL;
+		widget->MakeCurrent();
+		View::DestroyResources(widget->mContext);
 
 		delete gPlaceholderMesh;
 		gPlaceholderMesh = NULL;

@@ -52,16 +52,22 @@ public:
 	void EndRenderToTexture();
 	bool SaveRenderToTextureImage(const QString& FileName, int Width, int Height);
 
-	lcVertexBuffer CreateVertexBuffer(int Size, void* Data);
+	lcVertexBuffer CreateVertexBuffer(int Size, const void* Data);
 	void DestroyVertexBuffer(lcVertexBuffer& VertexBuffer);
-	lcIndexBuffer CreateIndexBuffer(int Size, void* Data);
+	lcIndexBuffer CreateIndexBuffer(int Size, const void* Data);
 	void DestroyIndexBuffer(lcIndexBuffer& IndexBuffer);
 
 	void ClearVertexBuffer();
 	void SetVertexBuffer(lcVertexBuffer VertexBuffer);
 	void SetVertexBufferPointer(const void* VertexBuffer);
+
+	void ClearIndexBuffer();
+	void SetIndexBuffer(lcIndexBuffer IndexBuffer);
+	void SetIndexBufferPointer(const void* IndexBuffer);
+
 	void SetVertexFormat(int BufferOffset, int PositionSize, int TexCoordSize, int ColorSize);
 	void DrawPrimitives(GLenum Mode, GLint First, GLsizei Count);
+	void DrawIndexedPrimitives(GLenum Mode, GLsizei Count, GLenum Type, int Offset);
 
 	void UnbindMesh();
 	void DrawMeshSection(lcMesh* Mesh, lcMeshSection* Section);

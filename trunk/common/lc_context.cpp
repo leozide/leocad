@@ -301,7 +301,7 @@ bool lcContext::SaveRenderToTextureImage(const QString& FileName, int Width, int
 	return Result;
 }
 
-lcVertexBuffer lcContext::CreateVertexBuffer(int Size, void* Data)
+lcVertexBuffer lcContext::CreateVertexBuffer(int Size, const void* Data)
 {
 	if (GL_HasVertexBufferObject())
 	{
@@ -345,7 +345,7 @@ void lcContext::DestroyVertexBuffer(lcVertexBuffer& VertexBuffer)
 	}
 }
 
-lcIndexBuffer lcContext::CreateIndexBuffer(int Size, void* Data)
+lcIndexBuffer lcContext::CreateIndexBuffer(int Size, const void* Data)
 {
 	if (GL_HasVertexBufferObject())
 	{
@@ -484,6 +484,45 @@ void lcContext::SetVertexFormat(int BufferOffset, int PositionSize, int TexCoord
 	}
 }
 
+void lcContext::ClearIndexBuffer()
+{
+	if (mIndexBufferObject)
+	{
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
+		mIndexBufferObject = 0;
+	}
+}
+
+void lcContext::SetIndexBuffer(lcIndexBuffer IndexBuffer)
+{
+	if (GL_HasVertexBufferObject())
+	{
+		GLuint IndexBufferObject = IndexBuffer;
+		mIndexBufferPointer = NULL;
+
+		if (IndexBufferObject != mIndexBufferObject)
+		{
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER_ARB, IndexBufferObject);
+			mIndexBufferObject = IndexBufferObject;
+		}
+	}
+	else
+	{
+		mIndexBufferPointer = (char*)IndexBuffer;
+	}
+}
+
+void lcContext::SetIndexBufferPointer(const void* IndexBuffer)
+{
+	if (mIndexBufferObject)
+	{
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
+		mIndexBufferObject = 0;
+	}
+
+	mIndexBufferPointer = (char*)IndexBuffer;
+}
+
 void lcContext::BindMesh(lcMesh* Mesh)
 {
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
@@ -555,6 +594,11 @@ void lcContext::UnbindMesh()
 void lcContext::DrawPrimitives(GLenum Mode, GLint First, GLsizei Count)
 {
 	glDrawArrays(Mode, First, Count);
+}
+
+void lcContext::DrawIndexedPrimitives(GLenum Mode, GLsizei Count, GLenum Type, int Offset)
+{
+	glDrawElements(Mode, Count, Type, mIndexBufferPointer + Offset);
 }
 
 void lcContext::DrawMeshSection(lcMesh* Mesh, lcMeshSection* Section)

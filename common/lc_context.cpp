@@ -387,6 +387,8 @@ void lcContext::DestroyIndexBuffer(lcIndexBuffer& IndexBuffer)
 	{
 		free(IndexBuffer.Pointer);
 	}
+
+	IndexBuffer.Pointer = NULL;
 }
 
 void lcContext::ClearVertexBuffer()

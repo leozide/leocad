@@ -33,8 +33,6 @@ lcPiecesLibrary::lcPiecesLibrary()
 	mCacheFileName[0] = 0;
 	mSaveCache = false;
 	mBuffersDirty = false;
-	mVertexBuffer = LC_INVALID_VERTEX_BUFFER;
-	mIndexBuffer = LC_INVALID_INDEX_BUFFER;
 }
 
 lcPiecesLibrary::~lcPiecesLibrary()

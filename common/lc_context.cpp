@@ -303,89 +303,89 @@ bool lcContext::SaveRenderToTextureImage(const QString& FileName, int Width, int
 
 lcVertexBuffer lcContext::CreateVertexBuffer(int Size, const void* Data)
 {
+	lcVertexBuffer VertexBuffer;
+
 	if (GL_HasVertexBufferObject())
 	{
-		lcVertexBuffer VertexBuffer;
-
-		glGenBuffers(1, &VertexBuffer);
-		glBindBuffer(GL_ARRAY_BUFFER_ARB, VertexBuffer);
+		glGenBuffers(1, &VertexBuffer.Object);
+		glBindBuffer(GL_ARRAY_BUFFER_ARB, VertexBuffer.Object);
 		glBufferData(GL_ARRAY_BUFFER_ARB, Size, Data, GL_STATIC_DRAW_ARB);
 
 		glBindBuffer(GL_ARRAY_BUFFER_ARB, 0); // context remove
 		mVertexBufferObject = 0;
-
-		return VertexBuffer;
 	}
 	else
 	{
-		void* VertexBuffer = malloc(Size);
-		memcpy(VertexBuffer, Data, Size);
-		return (lcVertexBuffer)VertexBuffer;
+		VertexBuffer.Pointer = malloc(Size);
+		memcpy(VertexBuffer.Pointer, Data, Size);
 	}
+
+	return VertexBuffer;
 }
 
 void lcContext::DestroyVertexBuffer(lcVertexBuffer& VertexBuffer)
 {
-	if (!VertexBuffer)
+	if (!VertexBuffer.IsValid())
 		return;
 
 	if (GL_HasVertexBufferObject())
 	{
-		if (mVertexBufferObject == VertexBuffer)
+		if (mVertexBufferObject == VertexBuffer.Object)
 		{
 			glBindBuffer(GL_ARRAY_BUFFER_ARB, 0);
 			mVertexBufferObject = 0;
 		}
 
-		glDeleteBuffers(1, &VertexBuffer);
+		glDeleteBuffers(1, &VertexBuffer.Object);
 	}
 	else
 	{
-		free((void*)VertexBuffer);
+		free(VertexBuffer.Pointer);
 	}
+
+	VertexBuffer.Pointer = NULL;
 }
 
 lcIndexBuffer lcContext::CreateIndexBuffer(int Size, const void* Data)
 {
+	lcIndexBuffer IndexBuffer;
+
 	if (GL_HasVertexBufferObject())
 	{
-		lcIndexBuffer IndexBuffer;
-
-		glGenBuffers(1, &IndexBuffer);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER_ARB, IndexBuffer);
+		glGenBuffers(1, &IndexBuffer.Object);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER_ARB, IndexBuffer.Object);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER_ARB, Size, Data, GL_STATIC_DRAW_ARB);
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER_ARB, 0); // context remove
 		mIndexBufferObject = 0;
-
-		return IndexBuffer;
 	}
 	else
 	{
-		void* IndexBuffer = malloc(Size);
-		memcpy(IndexBuffer, Data, Size);
-		return (lcIndexBuffer)IndexBuffer;
+		IndexBuffer.Pointer = malloc(Size);
+		memcpy(IndexBuffer.Pointer, Data, Size);
 	}
+
+	return IndexBuffer;
 }
 
 void lcContext::DestroyIndexBuffer(lcIndexBuffer& IndexBuffer)
 {
-	if (!IndexBuffer)
+	if (!IndexBuffer.IsValid())
 		return;
 
 	if (GL_HasVertexBufferObject())
 	{
-		if (mIndexBufferObject == IndexBuffer)
+		if (mIndexBufferObject == IndexBuffer.Object)
 		{
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
 			mIndexBufferObject = 0;
 		}
 
-		glDeleteBuffers(1, &IndexBuffer);
+		glDeleteBuffers(1, &IndexBuffer.Object);
 	}
 	else
 	{
-		free((void*)IndexBuffer);
+		free(IndexBuffer.Pointer);
 	}
 }
 
@@ -411,7 +411,7 @@ void lcContext::SetVertexBuffer(lcVertexBuffer VertexBuffer)
 {
 	if (GL_HasVertexBufferObject())
 	{
-		GLuint VertexBufferObject = VertexBuffer;
+		GLuint VertexBufferObject = VertexBuffer.Object;
 		mVertexBufferPointer = NULL;
 
 		if (VertexBufferObject != mVertexBufferObject)
@@ -423,7 +423,7 @@ void lcContext::SetVertexBuffer(lcVertexBuffer VertexBuffer)
 	}
 	else
 	{
-		mVertexBufferPointer = (char*)VertexBuffer;
+		mVertexBufferPointer = (char*)VertexBuffer.Pointer;
 		mVertexBufferOffset = (char*)~0;
 	}
 }
@@ -497,7 +497,7 @@ void lcContext::SetIndexBuffer(lcIndexBuffer IndexBuffer)
 {
 	if (GL_HasVertexBufferObject())
 	{
-		GLuint IndexBufferObject = IndexBuffer;
+		GLuint IndexBufferObject = IndexBuffer.Object;
 		mIndexBufferPointer = NULL;
 
 		if (IndexBufferObject != mIndexBufferObject)
@@ -508,7 +508,7 @@ void lcContext::SetIndexBuffer(lcIndexBuffer IndexBuffer)
 	}
 	else
 	{
-		mIndexBufferPointer = (char*)IndexBuffer;
+		mIndexBufferPointer = (char*)IndexBuffer.Pointer;
 	}
 }
 
@@ -529,10 +529,10 @@ void lcContext::BindMesh(lcMesh* Mesh)
 
 	if (Mesh->mVertexCacheOffset != -1)
 	{
-		GLuint VertexBufferObject = Library->mVertexBuffer;
-		mVertexBufferPointer = (char*)Mesh->mVertexCacheOffset;
-		GLuint IndexBufferObject = Library->mIndexBuffer;
-		mIndexBufferPointer = (char*)Mesh->mIndexCacheOffset;
+		GLuint VertexBufferObject = Library->mVertexBuffer.Object;
+		mVertexBufferPointer = (char*)(quintptr)Mesh->mVertexCacheOffset;
+		GLuint IndexBufferObject = Library->mIndexBuffer.Object;
+		mIndexBufferPointer = (char*)(quintptr)Mesh->mIndexCacheOffset;
 
 		if (VertexBufferObject != mVertexBufferObject)
 		{

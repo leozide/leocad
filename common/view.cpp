@@ -20,7 +20,6 @@ View::View(lcModel* Model)
 {
 	mModel = Model;
 	mCamera = NULL;
-	mGridBuffer = LC_INVALID_VERTEX_BUFFER;
 	memset(mGridSettings, 0, sizeof(mGridSettings));
 
 	mDragState = LC_DRAGSTATE_NONE;
@@ -1256,7 +1255,7 @@ void View::DrawGrid()
 		MaxY = 2;
 	}
 
-	if (mGridBuffer == LC_INVALID_VERTEX_BUFFER || MinX != mGridSettings[0] || MinY != mGridSettings[1] || MaxX != mGridSettings[2] || MaxY != mGridSettings[3] ||
+	if (!mGridBuffer.IsValid() || MinX != mGridSettings[0] || MinY != mGridSettings[1] || MaxX != mGridSettings[2] || MaxY != mGridSettings[3] ||
 	    Spacing != mGridSettings[4] || (Preferences.mDrawGridStuds ? 1 : 0) != mGridSettings[5] || (Preferences.mDrawGridLines ? 1 : 0) != mGridSettings[6])
 	{
 		int VertexBufferSize = 0;

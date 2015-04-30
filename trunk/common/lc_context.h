@@ -18,11 +18,45 @@ public:
 	lcArray<lcObject*> mInterfaceObjects;
 };
 
-typedef quintptr lcVertexBuffer;
-typedef quintptr lcIndexBuffer;
+class lcVertexBuffer
+{
+public:
+	lcVertexBuffer()
+		: Pointer(NULL)
+	{
+	}
 
-#define LC_INVALID_VERTEX_BUFFER 0
-#define LC_INVALID_INDEX_BUFFER 0
+	bool IsValid() const
+	{
+		return Pointer != NULL;
+	}
+
+	union
+	{
+		GLuint Object;
+		void* Pointer;
+	};
+};
+
+class lcIndexBuffer
+{
+public:
+	lcIndexBuffer()
+		: Pointer(NULL)
+	{
+	}
+
+	bool IsValid() const
+	{
+		return Pointer != NULL;
+	}
+
+	union
+	{
+		GLuint Object;
+		void* Pointer;
+	};
+};
 
 class lcContext
 {

@@ -3,6 +3,7 @@
 
 #include "opengl.h"
 #include "lc_array.h"
+#include "lc_math.h"
 
 #define LC_MAX_COLOR_NAME 64
 #define LC_COLOR_DIRECT 0x80000000
@@ -11,8 +12,8 @@ struct lcColor
 {
 	lcuint32 Code;
 	bool Translucent;
-	float Value[4];
-	float Edge[4];
+	lcVector4 Value;
+	lcVector4 Edge;
 	char Name[LC_MAX_COLOR_NAME];
 	char SafeName[LC_MAX_COLOR_NAME];
 };
@@ -31,6 +32,16 @@ struct lcColorGroup
 	char Name[LC_MAX_COLOR_NAME];
 };
 
+enum lcInterfaceColor
+{
+	LC_COLOR_SELECTED,
+	LC_COLOR_FOCUSED,
+	LC_COLOR_CAMERA,
+	LC_COLOR_LIGHT,
+	LC_NUM_INTERFACECOLORS
+};
+
+extern lcVector4 gInterfaceColors[LC_NUM_INTERFACECOLORS];
 extern lcArray<lcColor> gColorList;
 extern lcColorGroup gColorGroups[LC_NUM_COLORGROUPS];
 extern int gNumUserColors;
@@ -62,36 +73,6 @@ inline lcuint32 lcGetColorCode(int ColorIndex)
 inline bool lcIsColorTranslucent(int ColorIndex)
 {
 	return gColorList[ColorIndex].Translucent;
-}
-
-inline void lcSetColor(int ColorIndex)
-{
-	glColor4fv(gColorList[ColorIndex].Value);
-}
-
-inline void lcSetEdgeColor(int ColorIndex)
-{
-	glColor4fv(gColorList[ColorIndex].Edge);
-}
-
-inline void lcSetColorFocused()
-{
-	glColor4f(0.4000f, 0.2980f, 0.8980f, 1.0000f);
-}
-
-inline void lcSetColorSelected()
-{
-	glColor4f(0.8980f, 0.2980f, 0.4000f, 1.0000f);
-}
-
-inline void lcSetColorCamera()
-{
-	glColor4f(0.5f, 0.8f, 0.5f, 1.0f);
-}
-
-inline void lcSetColorLight()
-{
-	glColor4f(0.5f, 0.8f, 0.5f, 1.0f);
 }
 
 #endif // _LC_COLORS_H_

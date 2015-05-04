@@ -379,7 +379,7 @@ void lcLight::DrawSpotLight(lcContext* Context, const lcMatrix44& ViewMatrix) co
 	if (!IsSelected())
 	{
 		Context->SetLineWidth(LineWidth);
-		lcSetColorLight();
+		Context->SetInterfaceColor(LC_COLOR_LIGHT);
 
 		glDrawElements(GL_LINES, 56 + 24 + 2, GL_UNSIGNED_SHORT, Indices);
 	}
@@ -389,14 +389,14 @@ void lcLight::DrawSpotLight(lcContext* Context, const lcMatrix44& ViewMatrix) co
 		{
 			Context->SetLineWidth(2.0f * LineWidth);
 			if (IsFocused(LC_LIGHT_SECTION_POSITION))
-				lcSetColorFocused();
+				Context->SetInterfaceColor(LC_COLOR_FOCUSED);
 			else
-				lcSetColorSelected();
+				Context->SetInterfaceColor(LC_COLOR_SELECTED);
 		}
 		else
 		{
 			Context->SetLineWidth(LineWidth);
-			lcSetColorLight();
+			Context->SetInterfaceColor(LC_COLOR_LIGHT);
 		}
 
 		glDrawElements(GL_LINES, 56, GL_UNSIGNED_SHORT, Indices);
@@ -405,20 +405,20 @@ void lcLight::DrawSpotLight(lcContext* Context, const lcMatrix44& ViewMatrix) co
 		{
 			Context->SetLineWidth(2.0f * LineWidth);
 			if (IsFocused(LC_LIGHT_SECTION_TARGET))
-				lcSetColorFocused();
+				Context->SetInterfaceColor(LC_COLOR_FOCUSED);
 			else
-				lcSetColorSelected();
+				Context->SetInterfaceColor(LC_COLOR_SELECTED);
 		}
 		else
 		{
 			Context->SetLineWidth(LineWidth);
-			lcSetColorLight();
+			Context->SetInterfaceColor(LC_COLOR_LIGHT);
 		}
 
 		glDrawElements(GL_LINES, 24, GL_UNSIGNED_SHORT, Indices + 56);
 
 		Context->SetLineWidth(LineWidth);
-		lcSetColorLight();
+		Context->SetInterfaceColor(LC_COLOR_LIGHT);
 
 		float Radius = tanf(LC_DTOR * mSpotCutoff) * Length;
 
@@ -515,11 +515,11 @@ void lcLight::DrawPointLight(lcContext* Context, const lcMatrix44& ViewMatrix) c
 	Context->SetWorldViewMatrix(lcMul(lcMatrix44Translation(mPosition), ViewMatrix));
 
 	if (IsFocused(LC_LIGHT_SECTION_POSITION))
-		lcSetColorFocused();
+		Context->SetInterfaceColor(LC_COLOR_FOCUSED);
 	else if (IsSelected(LC_LIGHT_SECTION_POSITION))
-		lcSetColorSelected();
+		Context->SetInterfaceColor(LC_COLOR_SELECTED);
 	else
-		lcSetColorLight();
+		Context->SetInterfaceColor(LC_COLOR_LIGHT);
 
 	Context->SetVertexBufferPointer(Vertices);
 	Context->SetVertexFormat(0, 3, 0, 0);

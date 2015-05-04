@@ -3,6 +3,7 @@
 
 #include "lc_array.h"
 #include "lc_math.h"
+#include "lc_colors.h"
 
 class lcScene
 {
@@ -79,8 +80,14 @@ public:
 	void SetViewport(int x, int y, int Width, int Height);
 	void SetWorldViewMatrix(const lcMatrix44& WorldViewMatrix);
 	void SetProjectionMatrix(const lcMatrix44& ProjectionMatrix);
-//	void SetColor(const lcVector4& Color);
 	void SetLineWidth(float LineWidth);
+
+	void SetColor(float Red, float Green, float Blue, float Alpha);
+	void SetColor(const lcVector4& Color);
+	void SetColorIndex(int ColorIndex);
+	void SetColorIndexTinted(int ColorIndex, lcInterfaceColor InterfaceColor);
+	void SetEdgeColorIndex(int ColorIndex);
+	void SetInterfaceColor(lcInterfaceColor InterfaceColor);
 
 	bool BeginRenderToTexture(int Width, int Height);
 	void EndRenderToTexture();

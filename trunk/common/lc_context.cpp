@@ -165,6 +165,36 @@ void lcContext::SetLineWidth(float LineWidth)
 	mLineWidth = LineWidth;
 }
 
+void lcContext::SetColor(float Red, float Green, float Blue, float Alpha)
+{
+	glColor4f(Red, Green, Blue, Alpha);
+}
+
+void lcContext::SetColor(const lcVector4& Color)
+{
+	glColor4fv(Color);
+}
+
+void lcContext::SetColorIndex(int ColorIndex)
+{
+	glColor4fv(gColorList[ColorIndex].Value);
+}
+
+void lcContext::SetColorIndexTinted(int ColorIndex, lcInterfaceColor InterfaceColor)
+{
+	glColor4fv((gColorList[ColorIndex].Value + gInterfaceColors[InterfaceColor]) * 0.5f);
+}
+
+void lcContext::SetEdgeColorIndex(int ColorIndex)
+{
+	glColor4fv(gColorList[ColorIndex].Edge);
+}
+
+void lcContext::SetInterfaceColor(lcInterfaceColor InterfaceColor)
+{
+	glColor4fv(gInterfaceColors[InterfaceColor]);
+}
+
 bool lcContext::BeginRenderToTexture(int Width, int Height)
 {
 	if (GL_SupportsFramebufferObjectARB)
@@ -680,34 +710,45 @@ void lcContext::DrawOpaqueMeshes(const lcMatrix44& ViewMatrix, const lcArray<lcR
 				if (lcIsColorTranslucent(ColorIndex))
 					continue;
 
-				if (RenderMesh.Focused)
+				switch (RenderMesh.State)
 				{
-					float* Color = gColorList[ColorIndex].Value;
-					glColor4fv(lcVector4(Color[0] * 0.5f + 0.4000f * 0.5f, Color[1] * 0.5f + 0.2980f * 0.5f, Color[2] * 0.5f + 0.8980f * 0.5f, Color[3]));
+				case LC_RENDERMESH_NONE:
+					SetColorIndex(ColorIndex);
+					break;
+
+				case LC_RENDERMESH_SELECTED:
+					SetColorIndexTinted(ColorIndex, LC_COLOR_SELECTED);
+					break;
+
+				case LC_RENDERMESH_FOCUSED:
+					SetColorIndexTinted(ColorIndex, LC_COLOR_FOCUSED);
+					break;
 				}
-				else if (RenderMesh.Selected)
-				{
-					float* Color = gColorList[ColorIndex].Value;
-					glColor4fv(lcVector4(Color[0] * 0.5f + 0.8980f * 0.5f, Color[1] * 0.5f + 0.2980f * 0.5f, Color[2] * 0.5f + 0.4000f * 0.5f, Color[3]));
-				}
-				else
-					lcSetColor(ColorIndex);
 			}
 			else
 			{
-				if (RenderMesh.Focused)
-					lcSetColorFocused();
-				else if (RenderMesh.Selected)
-					lcSetColorSelected();
-				else if (DrawLines)
+				switch (RenderMesh.State)
 				{
-					if (ColorIndex == gEdgeColor)
-						lcSetEdgeColor(RenderMesh.ColorIndex);
+				case LC_RENDERMESH_NONE:
+					if (DrawLines)
+					{
+						if (ColorIndex == gEdgeColor)
+							SetEdgeColorIndex(RenderMesh.ColorIndex);
+						else
+							SetColorIndex(ColorIndex);
+					}
 					else
-						lcSetColor(ColorIndex);
+						continue;
+					break;
+
+				case LC_RENDERMESH_SELECTED:
+					SetInterfaceColor(LC_COLOR_SELECTED);
+					break;
+
+				case LC_RENDERMESH_FOCUSED:
+					SetInterfaceColor(LC_COLOR_FOCUSED);
+					break;
 				}
-				else
-					continue;
 			}
 
 			DrawMeshSection(Mesh, Section);
@@ -746,18 +787,20 @@ void lcContext::DrawTranslucentMeshes(const lcMatrix44& ViewMatrix, const lcArra
 			if (!lcIsColorTranslucent(ColorIndex))
 				continue;
 
-			if (RenderMesh.Focused)
+			switch (RenderMesh.State)
 			{
-				float* Color = gColorList[ColorIndex].Value;
-				glColor4fv(lcVector4(Color[0] * 0.5f + 0.4000f * 0.5f, Color[1] * 0.5f + 0.2980f * 0.5f, Color[2] * 0.5f + 0.8980f * 0.5f, Color[3]));
+			case LC_RENDERMESH_NONE:
+				SetColorIndex(ColorIndex);
+				break;
+
+			case LC_RENDERMESH_SELECTED:
+				SetColorIndexTinted(ColorIndex, LC_COLOR_SELECTED);
+				break;
+
+			case LC_RENDERMESH_FOCUSED:
+				SetColorIndexTinted(ColorIndex, LC_COLOR_FOCUSED);
+				break;
 			}
-			else if (RenderMesh.Selected)
-			{
-				float* Color = gColorList[ColorIndex].Value;
-				glColor4fv(lcVector4(Color[0] * 0.5f + 0.8980f * 0.5f, Color[1] * 0.5f + 0.2980f * 0.5f, Color[2] * 0.5f + 0.4000f * 0.5f, Color[3]));
-			}
-			else
-				lcSetColor(ColorIndex);
 
 			DrawMeshSection(Mesh, Section);
 		}

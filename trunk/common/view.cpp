@@ -668,34 +668,34 @@ void View::DrawSelectMoveOverlay()
 	{
 		if ((mTrackTool == LC_TRACKTOOL_MOVE_X) || (mTrackTool == LC_TRACKTOOL_MOVE_XY) || (mTrackTool == LC_TRACKTOOL_MOVE_XZ))
 		{
-			glColor4f(0.8f, 0.8f, 0.0f, 1.0f);
+			mContext->SetColor(0.8f, 0.8f, 0.0f, 1.0f);
 			mContext->DrawIndexedPrimitives(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 0);
 		}
 		else if (mTrackButton == LC_TRACKBUTTON_NONE)
 		{
-			glColor4f(0.8f, 0.0f, 0.0f, 1.0f);
+			mContext->SetColor(0.8f, 0.0f, 0.0f, 1.0f);
 			mContext->DrawIndexedPrimitives(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 0);
 		}
 
 		if ((mTrackTool == LC_TRACKTOOL_MOVE_Y) || (mTrackTool == LC_TRACKTOOL_MOVE_XY) || (mTrackTool == LC_TRACKTOOL_MOVE_YZ))
 		{
-			glColor4f(0.8f, 0.8f, 0.0f, 1.0f);
+			mContext->SetColor(0.8f, 0.8f, 0.0f, 1.0f);
 			mContext->DrawIndexedPrimitives(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 36 * 2);
 		}
 		else if (mTrackButton == LC_TRACKBUTTON_NONE)
 		{
-			glColor4f(0.0f, 0.8f, 0.0f, 1.0f);
+			mContext->SetColor(0.0f, 0.8f, 0.0f, 1.0f);
 			mContext->DrawIndexedPrimitives(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 36 * 2);
 		}
 
 		if ((mTrackTool == LC_TRACKTOOL_MOVE_Z) || (mTrackTool == LC_TRACKTOOL_MOVE_XZ) || (mTrackTool == LC_TRACKTOOL_MOVE_YZ))
 		{
-			glColor4f(0.8f, 0.8f, 0.0f, 1.0f);
+			mContext->SetColor(0.8f, 0.8f, 0.0f, 1.0f);
 			mContext->DrawIndexedPrimitives(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 72 * 2);
 		}
 		else if (mTrackButton == LC_TRACKBUTTON_NONE)
 		{
-			glColor4f(0.0f, 0.0f, 0.8f, 1.0f);
+			mContext->SetColor(0.0f, 0.0f, 0.8f, 1.0f);
 			mContext->DrawIndexedPrimitives(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 72 * 2);
 		}
 	}
@@ -703,23 +703,23 @@ void View::DrawSelectMoveOverlay()
 	if (gMainWindow->GetTool() == LC_TOOL_SELECT && mTrackButton == LC_TRACKBUTTON_NONE && AnyPiecesSelected)
 	{
 		if (mTrackTool == LC_TRACKTOOL_ROTATE_X)
-			glColor4f(0.8f, 0.8f, 0.0f, 1.0f);
+			mContext->SetColor(0.8f, 0.8f, 0.0f, 1.0f);
 		else
-			glColor4f(0.8f, 0.0f, 0.0f, 1.0f);
+			mContext->SetColor(0.8f, 0.0f, 0.0f, 1.0f);
 
 		mContext->DrawIndexedPrimitives(GL_TRIANGLES, 120, GL_UNSIGNED_SHORT, 108 * 2);
 
 		if (mTrackTool == LC_TRACKTOOL_ROTATE_Y)
-			glColor4f(0.8f, 0.8f, 0.0f, 1.0f);
+			mContext->SetColor(0.8f, 0.8f, 0.0f, 1.0f);
 		else
-			glColor4f(0.0f, 0.8f, 0.0f, 1.0f);
+			mContext->SetColor(0.0f, 0.8f, 0.0f, 1.0f);
 
 		mContext->DrawIndexedPrimitives(GL_TRIANGLES, 120, GL_UNSIGNED_SHORT, (108 + 120) * 2);
 
 		if (mTrackTool == LC_TRACKTOOL_ROTATE_Z)
-			glColor4f(0.8f, 0.8f, 0.0f, 1.0f);
+			mContext->SetColor(0.8f, 0.8f, 0.0f, 1.0f);
 		else
-			glColor4f(0.0f, 0.0f, 0.8f, 1.0f);
+			mContext->SetColor(0.0f, 0.0f, 0.8f, 1.0f);
 
 		mContext->DrawIndexedPrimitives(GL_TRIANGLES, 120, GL_UNSIGNED_SHORT, (108 + 240) * 2);
 	}
@@ -729,7 +729,7 @@ void View::DrawSelectMoveOverlay()
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_BLEND);
 
-		glColor4f(0.8f, 0.8f, 0.0f, 0.3f);
+		mContext->SetColor(0.8f, 0.8f, 0.0f, 0.3f);
 
 		if (mTrackTool == LC_TRACKTOOL_MOVE_XY)
 			mContext->DrawIndexedPrimitives(GL_TRIANGLE_FAN, 4, GL_UNSIGNED_SHORT, (108 + 360 + 8) * 2);
@@ -775,17 +775,17 @@ void View::DrawRotateOverlay()
 		switch (mTrackTool)
 		{
 		case LC_TRACKTOOL_ROTATE_X:
-			glColor4f(0.8f, 0.0f, 0.0f, 0.3f);
+			mContext->SetColor(0.8f, 0.0f, 0.0f, 0.3f);
 			Angle = MouseToolDistance[0];
 			Rotation = lcVector4(0.0f, 0.0f, 0.0f, 1.0f);
 			break;
 		case LC_TRACKTOOL_ROTATE_Y:
-			glColor4f(0.0f, 0.8f, 0.0f, 0.3f);
+			mContext->SetColor(0.0f, 0.8f, 0.0f, 0.3f);
 			Angle = MouseToolDistance[1];
 			Rotation = lcVector4(90.0f, 0.0f, 0.0f, 1.0f);
 			break;
 		case LC_TRACKTOOL_ROTATE_Z:
-			glColor4f(0.0f, 0.0f, 0.8f, 0.3f);
+			mContext->SetColor(0.0f, 0.0f, 0.8f, 0.3f);
 			Angle = MouseToolDistance[2];
 			Rotation = lcVector4(90.0f, 0.0f, -1.0f, 0.0f);
 			break;
@@ -878,7 +878,7 @@ void View::DrawRotateOverlay()
 			Verts[j] = lcMul31(Pt, Mat);
 		}
 
-		glColor4f(0.1f, 0.1f, 0.1f, 1.0f);
+		mContext->SetColor(0.1f, 0.1f, 0.1f, 1.0f);
 		mContext->SetWorldViewMatrix(ViewMatrix);
 
 		glVertexPointer(3, GL_FLOAT, 0, Verts);
@@ -900,7 +900,7 @@ void View::DrawRotateOverlay()
 	{
 		if (mTrackTool == LC_TRACKTOOL_ROTATE_X + i)
 		{
-			glColor4f(0.8f, 0.8f, 0.0f, 1.0f);
+			mContext->SetColor(0.8f, 0.8f, 0.0f, 1.0f);
 		}
 		else
 		{
@@ -910,13 +910,13 @@ void View::DrawRotateOverlay()
 			switch (i)
 			{
 			case 0:
-				glColor4f(0.8f, 0.0f, 0.0f, 1.0f);
+				mContext->SetColor(0.8f, 0.0f, 0.0f, 1.0f);
 				break;
 			case 1:
-				glColor4f(0.0f, 0.8f, 0.0f, 1.0f);
+				mContext->SetColor(0.0f, 0.8f, 0.0f, 1.0f);
 				break;
 			case 2:
-				glColor4f(0.0f, 0.0f, 0.8f, 1.0f);
+				mContext->SetColor(0.0f, 0.0f, 0.8f, 1.0f);
 				break;
 			}
 		}
@@ -991,7 +991,7 @@ void View::DrawRotateOverlay()
 		WorldViewMatrix = lcMul(lcMatrix44FromAxisAngle(lcVector3(Rotation[1], Rotation[2], Rotation[3]), Rotation[0] * LC_DTOR), WorldViewMatrix);
 		mContext->SetWorldViewMatrix(WorldViewMatrix);
 
-		glColor4f(0.8f, 0.8f, 0.0f, 1.0f);
+		mContext->SetColor(0.8f, 0.8f, 0.0f, 1.0f);
 
 		if (HasAngle)
 		{
@@ -1032,7 +1032,7 @@ void View::DrawRotateOverlay()
 		int cx, cy;
 		gTexFont.GetStringDimensions(&cx, &cy, buf);
 
-		glColor4f(0.8f, 0.8f, 0.0f, 1.0f);
+		mContext->SetColor(0.8f, 0.8f, 0.0f, 1.0f);
 		gTexFont.PrintText(ScreenPos[0] - (cx / 2), ScreenPos[1] + (cy / 2), 0.0f, buf);
 
 		glDisable(GL_BLEND);
@@ -1110,10 +1110,10 @@ void View::DrawSelectZoomRegionOverlay()
 	mContext->SetVertexBufferPointer(Verts);
 	mContext->SetVertexFormat(0, 2, 0, 0);
 
-	glColor4f(0.25f, 0.25f, 1.0f, 1.0f);
+	mContext->SetColor(0.25f, 0.25f, 1.0f, 1.0f);
 	mContext->DrawPrimitives(GL_TRIANGLE_STRIP, 0, 10);
 
-	glColor4f(0.25f, 0.25f, 1.0f, 0.25f);
+	mContext->SetColor(0.25f, 0.25f, 1.0f, 0.25f);
 	mContext->DrawPrimitives(GL_TRIANGLE_STRIP, 10, 4);
 
 	glDisable(GL_BLEND);
@@ -1135,7 +1135,7 @@ void View::DrawRotateViewOverlay()
 	mContext->SetWorldViewMatrix(lcMatrix44Translation(lcVector3(0.375f, 0.375f, 0.0f)));
 
 	glDisable(GL_DEPTH_TEST);
-	glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
+	mContext->SetColor(0.0f, 0.0f, 0.0f, 1.0f);
 
 	float Verts[32 * 16 * 2];
 	float* CurVert = Verts;
@@ -1353,7 +1353,7 @@ void View::DrawGrid()
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_BLEND);
 
-		glColor4fv(lcVector4FromColor(Preferences.mGridStudColor));
+		mContext->SetColor(lcVector4FromColor(Preferences.mGridStudColor));
 
 		mContext->SetVertexFormat(0, 3, 2, 0);
 		mContext->DrawPrimitives(GL_QUADS, 0, 4);
@@ -1367,7 +1367,7 @@ void View::DrawGrid()
 	if (Preferences.mDrawGridLines)
 	{
 		mContext->SetLineWidth(1.0f);
-		glColor4fv(lcVector4FromColor(Preferences.mGridLineColor));
+		mContext->SetColor(lcVector4FromColor(Preferences.mGridLineColor));
 
 		int NumVerts = 2 * (MaxX - MinX + MaxY - MinY + 2);
 
@@ -1412,13 +1412,13 @@ void View::DrawAxes()
 	mContext->SetVertexBufferPointer(Verts);
 	mContext->SetVertexFormat(0, 3, 0, 0);
 
-	glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
+	mContext->SetColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glDrawElements(GL_LINES, 6, GL_UNSIGNED_SHORT, LineIndices);
-	glColor4f(0.8f, 0.0f, 0.0f, 1.0f),
+	mContext->SetColor(0.8f, 0.0f, 0.0f, 1.0f),
 	glDrawElements(GL_TRIANGLES, 24, GL_UNSIGNED_SHORT, TriIndices);
-	glColor4f(0.0f, 0.8f, 0.0f, 1.0f);
+	mContext->SetColor(0.0f, 0.8f, 0.0f, 1.0f);
 	glDrawElements(GL_TRIANGLES, 24, GL_UNSIGNED_SHORT, TriIndices + 24);
-	glColor4f(0.0f, 0.0f, 0.8f, 1.0f);
+	mContext->SetColor(0.0f, 0.0f, 0.8f, 1.0f);
 	glDrawElements(GL_TRIANGLES, 24, GL_UNSIGNED_SHORT, TriIndices + 48);
 
 	mContext->SetWorldViewMatrix(TranslationMatrix);
@@ -1439,7 +1439,7 @@ void View::DrawAxes()
 	mContext->SetVertexBufferPointer(TextBuffer);
 	mContext->SetVertexFormat(0, 3, 2, 0);
 
-	glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
+	mContext->SetColor(0.0f, 0.0f, 0.0f, 1.0f);
 	mContext->DrawPrimitives(GL_QUADS, 0, 4 * 3);
 
 	glDisable(GL_BLEND);
@@ -1459,7 +1459,7 @@ void View::DrawViewport()
 
 	if (gMainWindow->GetActiveView() == this)
 	{
-		glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
+		mContext->SetColor(1.0f, 0.0f, 0.0f, 1.0f);
 		float Verts[8] = { 0.0f, 0.0f, mWidth - 1.0f, 0.0f, mWidth - 1.0f, mHeight - 1.0f, 0.0f, mHeight - 1.0f };
 
 		mContext->SetVertexBufferPointer(Verts);
@@ -1473,7 +1473,7 @@ void View::DrawViewport()
 
 	if (CameraName[0])
 	{
-		glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
+		mContext->SetColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glEnable(GL_TEXTURE_2D);
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 		gTexFont.MakeCurrent();

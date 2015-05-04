@@ -287,8 +287,7 @@ void PieceInfo::AddRenderMesh(lcScene& Scene)
 	RenderMesh.WorldMatrix = lcMatrix44Identity();
 	RenderMesh.Mesh = mMesh;
 	RenderMesh.ColorIndex = gDefaultColor;
-	RenderMesh.Focused = false;
-	RenderMesh.Selected = false;
+	RenderMesh.State = LC_RENDERMESH_NONE;
 
 	if (mFlags & (LC_PIECE_HAS_SOLID | LC_PIECE_HAS_DEFAULT | LC_PIECE_HAS_LINES))
 		Scene.mOpaqueMeshes.Add(RenderMesh);
@@ -310,8 +309,7 @@ void PieceInfo::AddRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, i
 		RenderMesh.WorldMatrix = WorldMatrix;
 		RenderMesh.Mesh = (mFlags & LC_PIECE_PLACEHOLDER) ? gPlaceholderMesh : mMesh;
 		RenderMesh.ColorIndex = ColorIndex;
-		RenderMesh.Focused = Focused;
-		RenderMesh.Selected = Selected;
+		RenderMesh.State = Focused ? LC_RENDERMESH_FOCUSED : (Selected ? LC_RENDERMESH_SELECTED : LC_RENDERMESH_NONE);
 
 		bool Translucent = lcIsColorTranslucent(ColorIndex);
 

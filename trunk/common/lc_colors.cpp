@@ -9,6 +9,14 @@ int gNumUserColors;
 int gEdgeColor;
 int gDefaultColor;
 
+lcVector4 gInterfaceColors[LC_NUM_INTERFACECOLORS] = // todo: make the colors configurable and include the grid and other hardcoded colors here as well.
+{
+	lcVector4(0.8980f, 0.2980f, 0.4000f, 1.0000f), // LC_COLOR_SELECTED
+	lcVector4(0.4000f, 0.2980f, 0.8980f, 1.0000f), // LC_COLOR_FOCUSED
+	lcVector4(0.5f, 0.8f, 0.5f, 1.0f),             // LC_COLOR_CAMERA
+	lcVector4(0.5f, 0.8f, 0.5f, 1.0f)              // LC_COLOR_LIGHT
+};
+
 static const char sDefaultColorConfig[] =
 {
 	"0 LDraw.org Configuration File\n"

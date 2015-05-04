@@ -71,14 +71,20 @@ public:
 	int mIndexType;
 };
 
+enum lcRenderMeshState
+{
+	LC_RENDERMESH_NONE,
+	LC_RENDERMESH_SELECTED,
+	LC_RENDERMESH_FOCUSED
+};
+
 struct lcRenderMesh
 {
 	lcMatrix44 WorldMatrix;
 	lcMesh* Mesh;
 	float Distance;
 	int ColorIndex;
-	bool Focused;
-	bool Selected;
+	lcRenderMeshState State;
 };
 
 extern lcMesh* gPlaceholderMesh;

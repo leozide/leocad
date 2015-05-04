@@ -455,9 +455,9 @@ void lcPiece::DrawInterface(lcContext* Context, const lcMatrix44& ViewMatrix) co
 	Context->SetWorldViewMatrix(lcMul(mModelWorld, ViewMatrix));
 
 	if (IsFocused())
-		lcSetColorFocused();
+		Context->SetInterfaceColor(LC_COLOR_FOCUSED);
 	else
-		lcSetColorSelected();
+		Context->SetInterfaceColor(LC_COLOR_SELECTED);
 
 	Context->SetVertexBufferPointer(Verts);
 	Context->SetVertexFormat(0, 3, 0, 0);

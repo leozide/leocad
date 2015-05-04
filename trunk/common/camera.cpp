@@ -544,7 +544,7 @@ void lcCamera::DrawInterface(lcContext* Context, const lcMatrix44& ViewMatrix) c
 	if (!IsSelected())
 	{
 		Context->SetLineWidth(LineWidth);
-		lcSetColorCamera();
+		Context->SetInterfaceColor(LC_COLOR_CAMERA);
 
 		glDrawElements(GL_LINES, 40 + 24 + 24 + 4, GL_UNSIGNED_SHORT, Indices);
 	}
@@ -554,14 +554,14 @@ void lcCamera::DrawInterface(lcContext* Context, const lcMatrix44& ViewMatrix) c
 		{
 			Context->SetLineWidth(2.0f * LineWidth);
 			if (IsFocused(LC_CAMERA_SECTION_POSITION))
-				lcSetColorFocused();
+				Context->SetInterfaceColor(LC_COLOR_FOCUSED);
 			else
-				lcSetColorSelected();
+				Context->SetInterfaceColor(LC_COLOR_SELECTED);
 		}
 		else
 		{
 			Context->SetLineWidth(LineWidth);
-			lcSetColorCamera();
+			Context->SetInterfaceColor(LC_COLOR_CAMERA);
 		}
 
 		glDrawElements(GL_LINES, 40, GL_UNSIGNED_SHORT, Indices);
@@ -570,14 +570,14 @@ void lcCamera::DrawInterface(lcContext* Context, const lcMatrix44& ViewMatrix) c
 		{
 			Context->SetLineWidth(2.0f * LineWidth);
 			if (IsFocused(LC_CAMERA_SECTION_TARGET))
-				lcSetColorFocused();
+				Context->SetInterfaceColor(LC_COLOR_FOCUSED);
 			else
-				lcSetColorSelected();
+				Context->SetInterfaceColor(LC_COLOR_SELECTED);
 		}
 		else
 		{
 			Context->SetLineWidth(LineWidth);
-			lcSetColorCamera();
+			Context->SetInterfaceColor(LC_COLOR_CAMERA);
 		}
 
 		glDrawElements(GL_LINES, 24, GL_UNSIGNED_SHORT, Indices + 40);
@@ -586,19 +586,19 @@ void lcCamera::DrawInterface(lcContext* Context, const lcMatrix44& ViewMatrix) c
 		{
 			Context->SetLineWidth(2.0f * LineWidth);
 			if (IsFocused(LC_CAMERA_SECTION_UPVECTOR))
-				lcSetColorFocused();
+				Context->SetInterfaceColor(LC_COLOR_FOCUSED);
 			else
-				lcSetColorSelected();
+				Context->SetInterfaceColor(LC_COLOR_SELECTED);
 		}
 		else
 		{
 			Context->SetLineWidth(LineWidth);
-			lcSetColorCamera();
+			Context->SetInterfaceColor(LC_COLOR_CAMERA);
 		}
 
 		glDrawElements(GL_LINES, 24, GL_UNSIGNED_SHORT, Indices + 40 + 24);
 
-		lcSetColorCamera();
+		Context->SetInterfaceColor(LC_COLOR_CAMERA);
 		Context->SetLineWidth(LineWidth);
 
 		float SizeY = tanf(LC_DTOR * m_fovy / 2) * Length;

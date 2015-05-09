@@ -1,5 +1,4 @@
 #include "lc_global.h"
-#include "opengl.h"
 #include "debug.h"
 
 #ifdef LC_DEBUG

@@ -5,7 +5,6 @@
 #include <string.h>
 #include <stdio.h>
 #include <math.h>
-#include "opengl.h"
 #include "pieceinf.h"
 #include "piece.h"
 #include "group.h"

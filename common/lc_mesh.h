@@ -2,7 +2,6 @@
 #define _LC_MESH_H_
 
 #include <stdlib.h>
-#include "opengl.h"
 #include "lc_math.h"
 
 #define LC_MESH_FILE_ID      LC_FOURCC('M', 'E', 'S', 'H')

@@ -3,7 +3,6 @@
 #include "lc_mesh.h"
 #include "lc_colors.h"
 #include "lc_texture.h"
-#include "opengl.h"
 #include "pieceinf.h"
 #include "lc_library.h"
 #include "lc_application.h"

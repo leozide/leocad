@@ -8,6 +8,12 @@
 #include <QtGui>
 #include <QPrinter>
 
+#undef GL_LINES_ADJACENCY_EXT
+#undef GL_LINE_STRIP_ADJACENCY_EXT
+#undef GL_TRIANGLES_ADJACENCY_EXT
+#undef GL_TRIANGLE_STRIP_ADJACENCY_EXT
+#include "lc_glext.h"
+
 // Old defines and declarations.
 #define LC_MAXPATH 1024
 

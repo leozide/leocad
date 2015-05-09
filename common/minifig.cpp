@@ -6,7 +6,6 @@
 #include <stdio.h>
 #include <zlib.h>
 #include "minifig.h"
-#include "opengl.h"
 #include "pieceinf.h"
 #include "project.h"
 #include "lc_model.h"

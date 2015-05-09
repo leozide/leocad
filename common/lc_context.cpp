@@ -1,5 +1,6 @@
 #include "lc_global.h"
 #include "lc_context.h"
+#include "lc_glextensions.h"
 #include "lc_mesh.h"
 #include "lc_texture.h"
 #include "lc_colors.h"
@@ -93,7 +94,7 @@ void lcContext::SetDefaultState()
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	glDisableClientState(GL_COLOR_ARRAY);
 
-	if (GL_HasVertexBufferObject())
+	if (gSupportsVertexBufferObject)
 	{
 		glBindBuffer(GL_ARRAY_BUFFER_ARB, 0);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
@@ -197,7 +198,7 @@ void lcContext::SetInterfaceColor(lcInterfaceColor InterfaceColor)
 
 bool lcContext::BeginRenderToTexture(int Width, int Height)
 {
-	if (GL_SupportsFramebufferObjectARB)
+	if (gSupportsFramebufferObjectARB)
 	{
 		glGenFramebuffers(1, &mFramebufferObject);
 		glGenTextures(1, &mFramebufferTexture);
@@ -226,7 +227,7 @@ bool lcContext::BeginRenderToTexture(int Width, int Height)
 		return true;
 	}
 
-	if (GL_SupportsFramebufferObjectEXT)
+	if (gSupportsFramebufferObjectEXT)
 	{
 		glGenFramebuffersEXT(1, &mFramebufferObject); 
 		glGenTextures(1, &mFramebufferTexture); 
@@ -263,7 +264,7 @@ bool lcContext::BeginRenderToTexture(int Width, int Height)
 
 void lcContext::EndRenderToTexture()
 {
-	if (GL_SupportsFramebufferObjectARB)
+	if (gSupportsFramebufferObjectARB)
 	{
 		glDeleteFramebuffers(1, &mFramebufferObject);
 		mFramebufferObject = 0;
@@ -275,7 +276,7 @@ void lcContext::EndRenderToTexture()
 		return;
 	}
 
-	if (GL_SupportsFramebufferObjectEXT)
+	if (gSupportsFramebufferObjectEXT)
 	{
 		glDeleteFramebuffersEXT(1, &mFramebufferObject);
 		mFramebufferObject = 0;
@@ -335,7 +336,7 @@ lcVertexBuffer lcContext::CreateVertexBuffer(int Size, const void* Data)
 {
 	lcVertexBuffer VertexBuffer;
 
-	if (GL_HasVertexBufferObject())
+	if (gSupportsVertexBufferObject)
 	{
 		glGenBuffers(1, &VertexBuffer.Object);
 		glBindBuffer(GL_ARRAY_BUFFER_ARB, VertexBuffer.Object);
@@ -358,7 +359,7 @@ void lcContext::DestroyVertexBuffer(lcVertexBuffer& VertexBuffer)
 	if (!VertexBuffer.IsValid())
 		return;
 
-	if (GL_HasVertexBufferObject())
+	if (gSupportsVertexBufferObject)
 	{
 		if (mVertexBufferObject == VertexBuffer.Object)
 		{
@@ -380,7 +381,7 @@ lcIndexBuffer lcContext::CreateIndexBuffer(int Size, const void* Data)
 {
 	lcIndexBuffer IndexBuffer;
 
-	if (GL_HasVertexBufferObject())
+	if (gSupportsVertexBufferObject)
 	{
 		glGenBuffers(1, &IndexBuffer.Object);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER_ARB, IndexBuffer.Object);
@@ -403,7 +404,7 @@ void lcContext::DestroyIndexBuffer(lcIndexBuffer& IndexBuffer)
 	if (!IndexBuffer.IsValid())
 		return;
 
-	if (GL_HasVertexBufferObject())
+	if (gSupportsVertexBufferObject)
 	{
 		if (mIndexBufferObject == IndexBuffer.Object)
 		{
@@ -441,7 +442,7 @@ void lcContext::ClearVertexBuffer()
 
 void lcContext::SetVertexBuffer(lcVertexBuffer VertexBuffer)
 {
-	if (GL_HasVertexBufferObject())
+	if (gSupportsVertexBufferObject)
 	{
 		GLuint VertexBufferObject = VertexBuffer.Object;
 		mVertexBufferPointer = NULL;
@@ -462,7 +463,7 @@ void lcContext::SetVertexBuffer(lcVertexBuffer VertexBuffer)
 
 void lcContext::SetVertexBufferPointer(const void* VertexBuffer)
 {
-	if (GL_HasVertexBufferObject() && mVertexBufferObject)
+	if (gSupportsVertexBufferObject && mVertexBufferObject)
 	{
 		glBindBuffer(GL_ARRAY_BUFFER_ARB, 0);
 		mVertexBufferObject = 0;
@@ -527,7 +528,7 @@ void lcContext::ClearIndexBuffer()
 
 void lcContext::SetIndexBuffer(lcIndexBuffer IndexBuffer)
 {
-	if (GL_HasVertexBufferObject())
+	if (gSupportsVertexBufferObject)
 	{
 		GLuint IndexBufferObject = IndexBuffer.Object;
 		mIndexBufferPointer = NULL;
@@ -608,7 +609,7 @@ void lcContext::UnbindMesh()
 		mTexture = NULL;
 	}
 
-	if (GL_HasVertexBufferObject())
+	if (gSupportsVertexBufferObject)
 	{
 		glBindBuffer(GL_ARRAY_BUFFER_ARB, 0);
 		mVertexBufferObject = 0;

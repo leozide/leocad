@@ -1,8 +1,6 @@
 #ifndef _LC_TEXTURE_H_
 #define _LC_TEXTURE_H_
 
-#include "opengl.h"
-
 #define LC_TEXTURE_WRAPU         0x01
 #define LC_TEXTURE_WRAPV         0x02
 #define LC_TEXTURE_MIPMAPS       0x04

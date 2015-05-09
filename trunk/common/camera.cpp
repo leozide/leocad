@@ -5,7 +5,6 @@
 #include <string.h>
 #include <math.h>
 #include <float.h>
-#include "opengl.h"
 #include "lc_file.h"
 #include "camera.h"
 #include "view.h"

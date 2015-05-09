@@ -5,6 +5,7 @@
 #include "lc_library.h"
 #include "image.h"
 #include "system.h"
+#include "lc_glextensions.h"
 
 lcTexture* gGridTexture;
 
@@ -170,8 +171,8 @@ bool lcTexture::Load(Image* images, int NumLevels, int Flags)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, Filters[1][FilterIndex]);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-	if (GL_SupportsAnisotropic && FilterFlags == LC_TEXTURE_ANISOTROPIC)
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, lcMin(4.0f, GL_MaxAnisotropy));
+	if (gSupportsAnisotropic && FilterFlags == LC_TEXTURE_ANISOTROPIC)
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, lcMin(4.0f, gMaxAnisotropy));
 
 	int Format;
 	switch (images[0].mFormat)

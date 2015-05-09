@@ -3,7 +3,7 @@
 #include "ui_lc_qaboutdialog.h"
 #include "lc_mainwindow.h"
 #include "preview.h"
-#include "opengl.h"
+#include "lc_glextensions.h"
 
 lcQAboutDialog::lcQAboutDialog(QWidget *parent, void *data) :
 	QDialog(parent),
@@ -33,10 +33,10 @@ lcQAboutDialog::lcQAboutDialog(QWidget *parent, void *data) :
 	QString Buffers = BuffersFormat.arg(QString::number(Red + Green + Blue + Alpha), RGBA ? "RGBA" : tr("indexed"), DoubleBuffer ? tr("double buffered") : QString(), QString::number(Depth), QString::number(Stencil));
 
 	QString ExtensionsFormat = tr("GL_ARB_vertex_buffer_object extension: %1\nGL_ARB_framebuffer_object extension: %2\nGL_EXT_framebuffer_object extension: %3\nGL_EXT_texture_filter_anisotropic extension: %4\n");
-	QString VertexBufferObject = GL_HasVertexBufferObject() ? tr("Supported") : tr("Not supported");
-	QString FramebufferObjectARB = GL_HasFramebufferObjectARB() ? tr("Supported") : tr("Not supported");
-	QString FramebufferObjectEXT = GL_HasFramebufferObjectEXT() ? tr("Supported") : tr("Not supported");
-	QString Anisotropic = GL_SupportsAnisotropic ? tr("Supported (max %1)").arg(GL_MaxAnisotropy) : tr("Not supported");
+	QString VertexBufferObject = gSupportsVertexBufferObject ? tr("Supported") : tr("Not supported");
+	QString FramebufferObjectARB = gSupportsFramebufferObjectARB ? tr("Supported") : tr("Not supported");
+	QString FramebufferObjectEXT = gSupportsFramebufferObjectEXT ? tr("Supported") : tr("Not supported");
+	QString Anisotropic = gSupportsAnisotropic ? tr("Supported (max %1)").arg(gMaxAnisotropy) : tr("Not supported");
 	QString Extensions = ExtensionsFormat.arg(VertexBufferObject, FramebufferObjectARB, FramebufferObjectEXT, Anisotropic);
 
 	ui->info->setText(Version + Buffers + Extensions);

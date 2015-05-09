@@ -5,7 +5,6 @@
 #include "lc_library.h"
 #include "lc_profile.h"
 #include "system.h"
-#include "opengl.h"
 #include "project.h"
 #include "image.h"
 #include "lc_mainwindow.h"

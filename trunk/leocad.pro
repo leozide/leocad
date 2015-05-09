@@ -124,7 +124,6 @@ SOURCES += common/view.cpp \
     common/preview.cpp \
     common/pieceinf.cpp \
     common/piece.cpp \
-    common/opengl.cpp \
     common/object.cpp \
     common/minifig.cpp \
     common/light.cpp \
@@ -134,6 +133,7 @@ SOURCES += common/view.cpp \
     common/lc_commands.cpp \
     common/lc_context.cpp \
     common/lc_file.cpp \
+    common/lc_glextensions.cpp \
     common/lc_library.cpp \
     common/lc_mainwindow.cpp \
     common/lc_mesh.cpp \
@@ -180,7 +180,6 @@ HEADERS += \
     common/preview.h \
     common/pieceinf.h \
     common/piece.h \
-    common/opengl.h \
     common/object.h \
     common/minifig.h \
     common/light.h \
@@ -192,6 +191,8 @@ HEADERS += \
     common/lc_commands.h \
     common/lc_context.h \
     common/lc_file.h \
+    common/lc_glext.h \
+    common/lc_glextensions.h \
     common/lc_global.h \
     common/lc_glwidget.h \
     common/lc_library.h \

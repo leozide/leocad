@@ -9,6 +9,7 @@
 #include "lc_application.h"
 #include "lc_mainwindow.h"
 #include "lc_context.h"
+#include "lc_glextensions.h"
 #include "project.h"
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -1026,7 +1027,7 @@ void lcPiecesLibrary::CreateMesh(PieceInfo* Info, lcLibraryMeshData& MeshData)
 
 void lcPiecesLibrary::UpdateBuffers(lcContext* Context)
 {
-	if (!GL_HasVertexBufferObject() || !mBuffersDirty)
+	if (!gSupportsVertexBufferObject || !mBuffersDirty)
 		return;
 
 	int VertexDataSize = 0;

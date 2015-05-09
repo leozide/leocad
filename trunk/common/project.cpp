@@ -2,7 +2,6 @@
 #include "lc_math.h"
 #include "lc_mesh.h"
 #include <locale.h>
-#include "opengl.h"
 #include "pieceinf.h"
 #include "lc_texture.h"
 #include "piece.h"

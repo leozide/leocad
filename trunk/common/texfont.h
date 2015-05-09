@@ -1,8 +1,6 @@
 #ifndef _TEXFONT_H_
 #define _TEXFONT_H_
 
-#include "opengl.h"
-
 class TexFont
 {
 public:

@@ -1,7 +1,6 @@
 #ifndef _LC_COLORS_H_
 #define _LC_COLORS_H_
 
-#include "opengl.h"
 #include "lc_array.h"
 #include "lc_math.h"
 

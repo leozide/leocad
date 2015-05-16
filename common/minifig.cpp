@@ -1137,6 +1137,8 @@ void MinifigWizard::OnDraw()
 		ViewMatrix = lcMatrix44LookAt(Eye * m_Distance, Center, lcVector3(0, 0, 1));
 	}
 
+	mContext->SetViewMatrix(ViewMatrix);
+
 	Calculate();
 
 	lcScene Scene;
@@ -1148,8 +1150,9 @@ void MinifigWizard::OnDraw()
 
 	Scene.End();
 
-	mContext->DrawOpaqueMeshes(ViewMatrix, Scene.mOpaqueMeshes);
-	mContext->DrawTranslucentMeshes(ViewMatrix, Scene.mTranslucentMeshes);
+	mContext->SetProgram(LC_PROGRAM_SIMPLE);
+	mContext->DrawOpaqueMeshes(Scene.mOpaqueMeshes);
+	mContext->DrawTranslucentMeshes(Scene.mTranslucentMeshes);
 
 	mContext->UnbindMesh(); // context remove
 }

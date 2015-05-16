@@ -103,7 +103,7 @@ public:
 
 	virtual void RayTest(lcObjectRayTest& ObjectRayTest) const;
 	virtual void BoxTest(lcObjectBoxTest& ObjectBoxTest) const;
-	virtual void DrawInterface(lcContext* Context, const lcMatrix44& ViewMatrix) const;
+	virtual void DrawInterface(lcContext* Context) const;
 
 	void InsertTime(lcStep Start, lcStep Time);
 	void RemoveTime(lcStep Start, lcStep Time);

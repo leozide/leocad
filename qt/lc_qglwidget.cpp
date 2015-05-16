@@ -124,6 +124,7 @@ lcQGLWidget::lcQGLWidget(QWidget *parent, lcQGLWidget *share, lcGLWidget *owner,
 	if (!gWidgetCount)
 	{
 		lcInitializeGLExtensions(context());
+		lcContext::CreateResources();
 		View::CreateResources(widget->mContext);
 
 		gPlaceholderMesh = new lcMesh;
@@ -148,10 +149,11 @@ lcQGLWidget::~lcQGLWidget()
 {
 	gWidgetCount--;
 	gTexFont.Release();
+	makeCurrent();
 	if (!gWidgetCount)
 	{
-		widget->MakeCurrent();
 		View::DestroyResources(widget->mContext);
+		lcContext::DestroyResources();
 
 		delete gPlaceholderMesh;
 		gPlaceholderMesh = NULL;

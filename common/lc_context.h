@@ -59,6 +59,28 @@ public:
 	};
 };
 
+enum lcProgramType
+{
+	LC_PROGRAM_SIMPLE,
+	LC_PROGRAM_TEXTURE,
+	LC_PROGRAM_VERTEX_COLOR,
+	LC_NUM_PROGRAMS
+};
+
+enum lcProgramAttrib
+{
+	LC_ATTRIB_POSITION, 
+	LC_ATTRIB_TEXCOORD, 
+	LC_ATTRIB_COLOR
+};
+
+struct lcProgram
+{
+	GLuint Object;
+	GLint MatrixLocation;
+	GLint ColorLocation;
+};
+
 class lcContext
 {
 public:
@@ -75,15 +97,42 @@ public:
 		return mViewportHeight;
 	}
 
+	static void CreateResources();
+	static void DestroyResources();
+
 	void SetDefaultState();
 
+	void SetWorldMatrix(const lcMatrix44& WorldMatrix)
+	{
+		mWorldMatrix = WorldMatrix;
+		mWorldMatrixDirty = true;
+	}
+
+	void SetViewMatrix(const lcMatrix44& ViewMatrix)
+	{
+		mViewMatrix = ViewMatrix;
+		mViewMatrixDirty = true;
+		mViewProjectionMatrixDirty = true;
+	}
+
+	void SetProjectionMatrix(const lcMatrix44& ProjectionMatrix)
+	{
+		mProjectionMatrix = ProjectionMatrix;
+		mProjectionMatrixDirty = true;
+		mViewProjectionMatrixDirty = true;
+	}
+
+	void SetProgram(lcProgramType ProgramType);
 	void SetViewport(int x, int y, int Width, int Height);
-	void SetWorldViewMatrix(const lcMatrix44& WorldViewMatrix);
-	void SetProjectionMatrix(const lcMatrix44& ProjectionMatrix);
 	void SetLineWidth(float LineWidth);
 
+	void SetColor(const lcVector4& Color)
+	{
+		mColor = Color;
+		mColorDirty = true;
+	}
+
 	void SetColor(float Red, float Green, float Blue, float Alpha);
-	void SetColor(const lcVector4& Color);
 	void SetColorIndex(int ColorIndex);
 	void SetColorIndexTinted(int ColorIndex, lcInterfaceColor InterfaceColor);
 	void SetEdgeColorIndex(int ColorIndex);
@@ -112,12 +161,14 @@ public:
 
 	void UnbindMesh();
 	void DrawMeshSection(lcMesh* Mesh, lcMeshSection* Section);
-	void DrawOpaqueMeshes(const lcMatrix44& ViewMatrix, const lcArray<lcRenderMesh>& OpaqueMeshes);
-	void DrawTranslucentMeshes(const lcMatrix44& ViewMatrix, const lcArray<lcRenderMesh>& TranslucentMeshes);
-	void DrawInterfaceObjects(const lcMatrix44& ViewMatrix, const lcArray<lcObject*>& InterfaceObjects);
+	void DrawOpaqueMeshes(const lcArray<lcRenderMesh>& OpaqueMeshes);
+	void DrawTranslucentMeshes(const lcArray<lcRenderMesh>& TranslucentMeshes);
+	void DrawInterfaceObjects(const lcArray<lcObject*>& InterfaceObjects);
 
 protected:
+	static void CreateShaderPrograms();
 	void BindMesh(lcMesh* Mesh);
+	void FlushState();
 
 	GLuint mVertexBufferObject;
 	GLuint mIndexBufferObject;
@@ -125,6 +176,7 @@ protected:
 	char* mIndexBufferPointer;
 	char* mVertexBufferOffset;
 
+	lcProgramType mProgramType; 
 	bool mTexCoordEnabled;
 	bool mColorEnabled;
 
@@ -137,9 +189,22 @@ protected:
 	int mViewportWidth;
 	int mViewportHeight;
 
+	lcVector4 mColor;
+	lcMatrix44 mWorldMatrix;
+	lcMatrix44 mViewMatrix;
+	lcMatrix44 mProjectionMatrix;
+	lcMatrix44 mViewProjectionMatrix;
+	bool mColorDirty;
+	bool mWorldMatrixDirty;
+	bool mViewMatrixDirty;
+	bool mProjectionMatrixDirty;
+	bool mViewProjectionMatrixDirty;
+
 	GLuint mFramebufferObject;
 	GLuint mFramebufferTexture;
 	GLuint mDepthRenderbufferObject;
+
+	static lcProgram mPrograms[LC_NUM_PROGRAMS];
 
 	Q_DECLARE_TR_FUNCTIONS(lcContext);
 };

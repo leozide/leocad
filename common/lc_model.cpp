@@ -1049,8 +1049,9 @@ void lcModel::DrawBackground(lcContext* Context)
 	float ViewWidth = (float)Context->GetViewportWidth();
 	float ViewHeight = (float)Context->GetViewportHeight();
 
+	Context->SetWorldMatrix(lcMatrix44Identity());
+	Context->SetViewMatrix(lcMatrix44Translation(lcVector3(0.375, 0.375, 0.0)));
 	Context->SetProjectionMatrix(lcMatrix44Ortho(0.0f, ViewWidth, 0.0f, ViewHeight, -1.0f, 1.0f));
-	Context->SetWorldViewMatrix(lcMatrix44Translation(lcVector3(0.375f, 0.375f, 0.0f)));
 
 	if (mProperties.mBackgroundType == LC_BACKGROUND_GRADIENT)
 	{
@@ -1067,6 +1068,7 @@ void lcModel::DrawBackground(lcContext* Context)
 			ViewWidth, 0.0f,       Color2[0], Color2[1], Color2[2], 1.0f
 		};
 
+		Context->SetProgram(LC_PROGRAM_VERTEX_COLOR);
 		Context->SetVertexBufferPointer(Verts);
 		Context->SetVertexFormat(0, 2, 0, 4);
 
@@ -1099,6 +1101,7 @@ void lcModel::DrawBackground(lcContext* Context)
 			0.0f,      0.0f,       0.0f,      TileHeight
 		};
 
+		Context->SetProgram(LC_PROGRAM_TEXTURE);
 		Context->SetVertexBufferPointer(Verts);
 		Context->SetVertexFormat(0, 2, 2, 0);
 

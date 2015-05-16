@@ -407,7 +407,7 @@ void lcPiece::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
 		ObjectBoxTest.Objects.Add(const_cast<lcPiece*>(this));
 }
 
-void lcPiece::DrawInterface(lcContext* Context, const lcMatrix44& ViewMatrix) const
+void lcPiece::DrawInterface(lcContext* Context) const
 {
 	float LineWidth = lcGetPreferences().mLineWidth;
 	Context->SetLineWidth(2.0f * LineWidth);
@@ -451,7 +451,7 @@ void lcPiece::DrawInterface(lcContext* Context, const lcMatrix44& ViewMatrix) co
 		{ Min[0], Min[1], Min[2] }, { Min[0], Min[1], Min[2] + Edge[2] },
 	};
 
-	Context->SetWorldViewMatrix(lcMul(mModelWorld, ViewMatrix));
+	Context->SetWorldMatrix(mModelWorld);
 
 	if (IsFocused())
 		Context->SetInterfaceColor(LC_COLOR_FOCUSED);

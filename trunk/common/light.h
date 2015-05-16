@@ -175,7 +175,7 @@ public:
 public:
 	virtual void RayTest(lcObjectRayTest& ObjectRayTest) const;
 	virtual void BoxTest(lcObjectBoxTest& ObjectBoxTest) const;
-	virtual void DrawInterface(lcContext* Context, const lcMatrix44& ViewMatrix) const;
+	virtual void DrawInterface(lcContext* Context) const;
 
 	void InsertTime(lcStep Start, lcStep Time);
 	void RemoveTime(lcStep Start, lcStep Time);
@@ -215,8 +215,8 @@ protected:
 
 	void Initialize(const lcVector3& Position, const lcVector3& TargetPosition);
 
-	void DrawPointLight(lcContext* Context, const lcMatrix44& ViewMatrix) const;
-	void DrawSpotLight(lcContext* Context, const lcMatrix44& ViewMatrix) const;
+	void DrawPointLight(lcContext* Context) const;
+	void DrawSpotLight(lcContext* Context) const;
 
 	lcuint32 mState;
 	char m_strName[81];

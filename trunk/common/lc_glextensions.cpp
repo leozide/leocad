@@ -59,49 +59,58 @@ PFNGLFRAMEBUFFERRENDERBUFFEREXTPROC lcFramebufferRenderbufferEXT;
 PFNGLGETFRAMEBUFFERATTACHMENTPARAMETERIVEXTPROC lcGetFramebufferAttachmentParameterivEXT;
 PFNGLGENERATEMIPMAPEXTPROC lcGenerateMipmapEXT;
 
-PFNGLDELETEOBJECTARBPROC lcDeleteObjectARB;
-PFNGLGETHANDLEARBPROC lcGetHandleARB;
-PFNGLDETACHOBJECTARBPROC lcDetachObjectARB;
-PFNGLCREATESHADEROBJECTARBPROC lcCreateShaderObjectARB;
-PFNGLSHADERSOURCEARBPROC lcShaderSourceARB;
-PFNGLCOMPILESHADERARBPROC lcCompileShaderARB;
-PFNGLCREATEPROGRAMOBJECTARBPROC lcCreateProgramObjectARB;
-PFNGLATTACHOBJECTARBPROC lcAttachObjectARB;
-PFNGLLINKPROGRAMARBPROC lcLinkProgramARB;
-PFNGLUSEPROGRAMOBJECTARBPROC lcUseProgramObjectARB;
-PFNGLVALIDATEPROGRAMARBPROC lcValidateProgramARB;
-PFNGLUNIFORM1FARBPROC lcUniform1fARB;
-PFNGLUNIFORM2FARBPROC lcUniform2fARB;
-PFNGLUNIFORM3FARBPROC lcUniform3fARB;
-PFNGLUNIFORM4FARBPROC lcUniform4fARB;
-PFNGLUNIFORM1IARBPROC lcUniform1iARB;
-PFNGLUNIFORM2IARBPROC lcUniform2iARB;
-PFNGLUNIFORM3IARBPROC lcUniform3iARB;
-PFNGLUNIFORM4IARBPROC lcUniform4iARB;
-PFNGLUNIFORM1FVARBPROC lcUniform1fvARB;
-PFNGLUNIFORM2FVARBPROC lcUniform2fvARB;
-PFNGLUNIFORM3FVARBPROC lcUniform3fvARB;
-PFNGLUNIFORM4FVARBPROC lcUniform4fvARB;
-PFNGLUNIFORM1IVARBPROC lcUniform1ivARB;
-PFNGLUNIFORM2IVARBPROC lcUniform2ivARB;
-PFNGLUNIFORM3IVARBPROC lcUniform3ivARB;
-PFNGLUNIFORM4IVARBPROC lcUniform4ivARB;
-PFNGLUNIFORMMATRIX2FVARBPROC lcUniformMatrix2fvARB;
-PFNGLUNIFORMMATRIX3FVARBPROC lcUniformMatrix3fvARB;
-PFNGLUNIFORMMATRIX4FVARBPROC lcUniformMatrix4fvARB;
-PFNGLGETOBJECTPARAMETERFVARBPROC lcGetObjectParameterfvARB;
-PFNGLGETOBJECTPARAMETERIVARBPROC lcGetObjectParameterivARB;
-PFNGLGETINFOLOGARBPROC lcGetInfoLogARB;
-PFNGLGETATTACHEDOBJECTSARBPROC lcGetAttachedObjectsARB;
-PFNGLGETUNIFORMLOCATIONARBPROC lcGetUniformLocationARB;
-PFNGLGETACTIVEUNIFORMARBPROC lcGetActiveUniformARB;
-PFNGLGETUNIFORMFVARBPROC lcGetUniformfvARB;
-PFNGLGETUNIFORMIVARBPROC lcGetUniformivARB;
-PFNGLGETSHADERSOURCEARBPROC lcGetShaderSourceARB;
-
-PFNGLBINDATTRIBLOCATIONARBPROC lcBindAttribLocationARB;
-PFNGLGETACTIVEATTRIBARBPROC lcGetActiveAttribARB;
-PFNGLGETATTRIBLOCATIONARBPROC lcGetAttribLocationARB;
+PFNGLATTACHSHADERPROC lcAttachShader;
+PFNGLBINDATTRIBLOCATIONPROC lcBindAttribLocation;
+PFNGLCOMPILESHADERPROC lcCompileShader;
+PFNGLCREATEPROGRAMPROC lcCreateProgram;
+PFNGLCREATESHADERPROC lcCreateShader;
+PFNGLDELETEPROGRAMPROC lcDeleteProgram;
+PFNGLDELETESHADERPROC lcDeleteShader;
+PFNGLDETACHSHADERPROC lcDetachShader;
+PFNGLDISABLEVERTEXATTRIBARRAYPROC lcDisableVertexAttribArray;
+PFNGLENABLEVERTEXATTRIBARRAYPROC lcEnableVertexAttribArray;
+PFNGLGETACTIVEATTRIBPROC lcGetActiveAttrib;
+PFNGLGETACTIVEUNIFORMPROC lcGetActiveUniform;
+PFNGLGETATTACHEDSHADERSPROC lcGetAttachedShaders;
+PFNGLGETATTRIBLOCATIONPROC lcGetAttribLocation;
+PFNGLGETPROGRAMIVPROC lcGetProgramiv;
+PFNGLGETPROGRAMINFOLOGPROC lcGetProgramInfoLog;
+PFNGLGETSHADERIVPROC lcGetShaderiv;
+PFNGLGETSHADERINFOLOGPROC lcGetShaderInfoLog;
+PFNGLGETSHADERSOURCEPROC lcGetShaderSource;
+PFNGLGETUNIFORMLOCATIONPROC lcGetUniformLocation;
+PFNGLGETUNIFORMFVPROC lcGetUniformfv;
+PFNGLGETUNIFORMIVPROC lcGetUniformiv;
+PFNGLGETVERTEXATTRIBDVPROC lcGetVertexAttribdv;
+PFNGLGETVERTEXATTRIBFVPROC lcGetVertexAttribfv;
+PFNGLGETVERTEXATTRIBIVPROC lcGetVertexAttribiv;
+PFNGLGETVERTEXATTRIBPOINTERVPROC lcGetVertexAttribPointerv;
+PFNGLISPROGRAMPROC lcIsProgram;
+PFNGLISSHADERPROC lcIsShader;
+PFNGLLINKPROGRAMPROC lcLinkProgram;
+PFNGLSHADERSOURCEPROC lcShaderSource;
+PFNGLUSEPROGRAMPROC lcUseProgram;
+PFNGLUNIFORM1FPROC lcUniform1f;
+PFNGLUNIFORM2FPROC lcUniform2f;
+PFNGLUNIFORM3FPROC lcUniform3f;
+PFNGLUNIFORM4FPROC lcUniform4f;
+PFNGLUNIFORM1IPROC lcUniform1i;
+PFNGLUNIFORM2IPROC lcUniform2i;
+PFNGLUNIFORM3IPROC lcUniform3i;
+PFNGLUNIFORM4IPROC lcUniform4i;
+PFNGLUNIFORM1FVPROC lcUniform1fv;
+PFNGLUNIFORM2FVPROC lcUniform2fv;
+PFNGLUNIFORM3FVPROC lcUniform3fv;
+PFNGLUNIFORM4FVPROC lcUniform4fv;
+PFNGLUNIFORM1IVPROC lcUniform1iv;
+PFNGLUNIFORM2IVPROC lcUniform2iv;
+PFNGLUNIFORM3IVPROC lcUniform3iv;
+PFNGLUNIFORM4IVPROC lcUniform4iv;
+PFNGLUNIFORMMATRIX2FVPROC lcUniformMatrix2fv;
+PFNGLUNIFORMMATRIX3FVPROC lcUniformMatrix3fv;
+PFNGLUNIFORMMATRIX4FVPROC lcUniformMatrix4fv;
+PFNGLVALIDATEPROGRAMPROC lcValidateProgram;
+PFNGLVERTEXATTRIBPOINTERPROC lcVertexAttribPointer;
 
 static bool lcIsGLExtensionSupported(const GLubyte* Extensions, const char* Name)
 {
@@ -145,6 +154,11 @@ static void APIENTRY lcGLDebugCallback(GLenum Source, GLenum Type, GLuint Id, GL
 void lcInitializeGLExtensions(const QGLContext* Context)
 {
 	const GLubyte* Extensions = glGetString(GL_EXTENSIONS);
+	const GLubyte* Version = glGetString(GL_VERSION);
+	int VersionMajor = 0, VersionMinor = 0;
+
+	if (Version)
+		sscanf((const char*)Version, "%d.%d", &VersionMajor, &VersionMinor);
 
 #ifndef QT_NO_DEBUG
 	if (lcIsGLExtensionSupported(Extensions, "GL_KHR_debug"))
@@ -167,6 +181,7 @@ void lcInitializeGLExtensions(const QGLContext* Context)
 		gSupportsAnisotropic = true;
 	}
 
+	// todo: check gl version and use core functions instead
 	if (lcIsGLExtensionSupported(Extensions, "GL_ARB_vertex_buffer_object"))
 	{
 		lcBindBufferARB = (PFNGLBINDBUFFERARBPROC)Context->getProcAddress("glBindBufferARB");
@@ -184,6 +199,7 @@ void lcInitializeGLExtensions(const QGLContext* Context)
 		gSupportsVertexBufferObject = true;
 	}
 
+	// todo: check gl version
 	if (lcIsGLExtensionSupported(Extensions, "GL_ARB_framebuffer_object"))
 	{
 		lcIsRenderbuffer = (PFNGLISRENDERBUFFERPROC)Context->getProcAddress("glIsRenderbuffer");
@@ -233,52 +249,66 @@ void lcInitializeGLExtensions(const QGLContext* Context)
 		gSupportsFramebufferObjectEXT = true;
 	}
 
-	if (lcIsGLExtensionSupported(Extensions, "GL_ARB_shader_objects") && lcIsGLExtensionSupported(Extensions, "GL_ARB_shading_language_100") &&
-	    lcIsGLExtensionSupported(Extensions, "GL_ARB_vertex_shader") && lcIsGLExtensionSupported(Extensions, "GL_ARB_fragment_shader"))
-	{
-		lcDeleteObjectARB = (PFNGLDELETEOBJECTARBPROC)Context->getProcAddress("glDeleteObjectARB");
-		lcGetHandleARB = (PFNGLGETHANDLEARBPROC)Context->getProcAddress("glGetHandleARB");
-		lcDetachObjectARB = (PFNGLDETACHOBJECTARBPROC)Context->getProcAddress("glDetachObjectARB");
-		lcCreateShaderObjectARB = (PFNGLCREATESHADEROBJECTARBPROC)Context->getProcAddress("glCreateShaderObjectARB");
-		lcShaderSourceARB = (PFNGLSHADERSOURCEARBPROC)Context->getProcAddress("glShaderSourceARB");
-		lcCompileShaderARB = (PFNGLCOMPILESHADERARBPROC)Context->getProcAddress("glCompileShaderARB");
-		lcCreateProgramObjectARB = (PFNGLCREATEPROGRAMOBJECTARBPROC)Context->getProcAddress("glCreateProgramObjectARB");
-		lcAttachObjectARB = (PFNGLATTACHOBJECTARBPROC)Context->getProcAddress("glAttachObjectARB");
-		lcLinkProgramARB = (PFNGLLINKPROGRAMARBPROC)Context->getProcAddress("glLinkProgramARB");
-		lcUseProgramObjectARB = (PFNGLUSEPROGRAMOBJECTARBPROC)Context->getProcAddress("glUseProgramObjectARB");
-		lcValidateProgramARB = (PFNGLVALIDATEPROGRAMARBPROC)Context->getProcAddress("glValidateProgramARB");
-		lcUniform1fARB = (PFNGLUNIFORM1FARBPROC)Context->getProcAddress("glUniform1fARB");
-		lcUniform2fARB = (PFNGLUNIFORM2FARBPROC)Context->getProcAddress("glUniform2fARB");
-		lcUniform3fARB = (PFNGLUNIFORM3FARBPROC)Context->getProcAddress("glUniform3fARB");
-		lcUniform4fARB = (PFNGLUNIFORM4FARBPROC)Context->getProcAddress("glUniform4fARB");
-		lcUniform1iARB = (PFNGLUNIFORM1IARBPROC)Context->getProcAddress("glUniform1iARB");
-		lcUniform2iARB = (PFNGLUNIFORM2IARBPROC)Context->getProcAddress("glUniform2iARB");
-		lcUniform3iARB = (PFNGLUNIFORM3IARBPROC)Context->getProcAddress("glUniform3iARB");
-		lcUniform4iARB = (PFNGLUNIFORM4IARBPROC)Context->getProcAddress("glUniform4iARB");
-		lcUniform1fvARB = (PFNGLUNIFORM1FVARBPROC)Context->getProcAddress("glUniform1fvARB");
-		lcUniform2fvARB = (PFNGLUNIFORM2FVARBPROC)Context->getProcAddress("glUniform2fvARB");
-		lcUniform3fvARB = (PFNGLUNIFORM3FVARBPROC)Context->getProcAddress("glUniform3fvARB");
-		lcUniform4fvARB = (PFNGLUNIFORM4FVARBPROC)Context->getProcAddress("glUniform4fvARB");
-		lcUniform1ivARB = (PFNGLUNIFORM1IVARBPROC)Context->getProcAddress("glUniform1ivARB");
-		lcUniform2ivARB = (PFNGLUNIFORM2IVARBPROC)Context->getProcAddress("glUniform2ivARB");
-		lcUniform3ivARB = (PFNGLUNIFORM3IVARBPROC)Context->getProcAddress("glUniform3ivARB");
-		lcUniform4ivARB = (PFNGLUNIFORM4IVARBPROC)Context->getProcAddress("glUniform4ivARB");
-		lcUniformMatrix2fvARB = (PFNGLUNIFORMMATRIX2FVARBPROC)Context->getProcAddress("glUniformMatrix2fvARB");
-		lcUniformMatrix3fvARB = (PFNGLUNIFORMMATRIX3FVARBPROC)Context->getProcAddress("glUniformMatrix3fvARB");
-		lcUniformMatrix4fvARB = (PFNGLUNIFORMMATRIX4FVARBPROC)Context->getProcAddress("glUniformMatrix4fvARB");
-		lcGetObjectParameterfvARB = (PFNGLGETOBJECTPARAMETERFVARBPROC)Context->getProcAddress("glGetObjectParameterfvARB");
-		lcGetObjectParameterivARB = (PFNGLGETOBJECTPARAMETERIVARBPROC)Context->getProcAddress("glGetObjectParameterivARB");
-		lcGetInfoLogARB = (PFNGLGETINFOLOGARBPROC)Context->getProcAddress("glGetInfoLogARB");
-		lcGetAttachedObjectsARB = (PFNGLGETATTACHEDOBJECTSARBPROC)Context->getProcAddress("glGetAttachedObjectsARB");
-		lcGetUniformLocationARB = (PFNGLGETUNIFORMLOCATIONARBPROC)Context->getProcAddress("glGetUniformLocationARB");
-		lcGetActiveUniformARB = (PFNGLGETACTIVEUNIFORMARBPROC)Context->getProcAddress("glGetActiveUniformARB");
-		lcGetUniformfvARB = (PFNGLGETUNIFORMFVARBPROC)Context->getProcAddress("glGetUniformfvARB");
-		lcGetUniformivARB = (PFNGLGETUNIFORMIVARBPROC)Context->getProcAddress("glGetUniformivARB");
-		lcGetShaderSourceARB = (PFNGLGETSHADERSOURCEARBPROC)Context->getProcAddress("glGetShaderSourceARB");
+	const GLubyte* GLSLVersion = glGetString(GL_SHADING_LANGUAGE_VERSION);
+	int GLSLMajor = 0, GLSLMinor = 0;
 
-		lcBindAttribLocationARB = (PFNGLBINDATTRIBLOCATIONARBPROC)Context->getProcAddress("glBindAttribLocationARB");
-		lcGetActiveAttribARB = (PFNGLGETACTIVEATTRIBARBPROC)Context->getProcAddress("glGetActiveAttribARB");
-		lcGetAttribLocationARB = (PFNGLGETATTRIBLOCATIONARBPROC)Context->getProcAddress("glGetAttribLocationARB");
+	if (GLSLVersion)
+		sscanf((const char*)GLSLVersion, "%d.%d", &GLSLMajor, &GLSLMinor);
+
+	if (VersionMajor >= 2 && (GLSLMajor > 1 || (GLSLMajor == 1 && GLSLMinor >= 10)))
+	{
+		lcAttachShader = (PFNGLATTACHSHADERPROC)Context->getProcAddress("glAttachShader");
+		lcBindAttribLocation = (PFNGLBINDATTRIBLOCATIONPROC)Context->getProcAddress("glBindAttribLocation");
+		lcCompileShader = (PFNGLCOMPILESHADERPROC)Context->getProcAddress("glCompileShader");
+		lcCreateProgram = (PFNGLCREATEPROGRAMPROC)Context->getProcAddress("glCreateProgram");
+		lcCreateShader = (PFNGLCREATESHADERPROC)Context->getProcAddress("glCreateShader");
+		lcDeleteProgram = (PFNGLDELETEPROGRAMPROC)Context->getProcAddress("glDeleteProgram");
+		lcDeleteShader = (PFNGLDELETESHADERPROC)Context->getProcAddress("glDeleteShader");
+		lcDetachShader = (PFNGLDETACHSHADERPROC)Context->getProcAddress("glDetachShader");
+		lcDisableVertexAttribArray = (PFNGLDISABLEVERTEXATTRIBARRAYPROC)Context->getProcAddress("glDisableVertexAttribArray");
+		lcEnableVertexAttribArray = (PFNGLENABLEVERTEXATTRIBARRAYPROC)Context->getProcAddress("glEnableVertexAttribArray");
+		lcGetActiveAttrib = (PFNGLGETACTIVEATTRIBPROC)Context->getProcAddress("glGetActiveAttrib");
+		lcGetActiveUniform = (PFNGLGETACTIVEUNIFORMPROC)Context->getProcAddress("glGetActiveUniform");
+		lcGetAttachedShaders = (PFNGLGETATTACHEDSHADERSPROC)Context->getProcAddress("glGetAttachedShaders");
+		lcGetAttribLocation = (PFNGLGETATTRIBLOCATIONPROC)Context->getProcAddress("glGetAttribLocation");
+		lcGetProgramiv = (PFNGLGETPROGRAMIVPROC)Context->getProcAddress("glGetProgramiv");
+		lcGetProgramInfoLog = (PFNGLGETPROGRAMINFOLOGPROC)Context->getProcAddress("glGetProgramInfoLog");
+		lcGetShaderiv = (PFNGLGETSHADERIVPROC)Context->getProcAddress("glGetShaderiv");
+		lcGetShaderInfoLog = (PFNGLGETSHADERINFOLOGPROC)Context->getProcAddress("glGetShaderInfoLog");
+		lcGetShaderSource = (PFNGLGETSHADERSOURCEPROC)Context->getProcAddress("glGetShaderSource");
+		lcGetUniformLocation = (PFNGLGETUNIFORMLOCATIONPROC)Context->getProcAddress("glGetUniformLocation");
+		lcGetUniformfv = (PFNGLGETUNIFORMFVPROC)Context->getProcAddress("glGetUniformfv");
+		lcGetUniformiv = (PFNGLGETUNIFORMIVPROC)Context->getProcAddress("glGetUniformiv");
+		lcGetVertexAttribdv = (PFNGLGETVERTEXATTRIBDVPROC)Context->getProcAddress("glGetVertexAttribdv");
+		lcGetVertexAttribfv = (PFNGLGETVERTEXATTRIBFVPROC)Context->getProcAddress("glGetVertexAttribfv");
+		lcGetVertexAttribiv = (PFNGLGETVERTEXATTRIBIVPROC)Context->getProcAddress("glGetVertexAttribiv");
+		lcGetVertexAttribPointerv = (PFNGLGETVERTEXATTRIBPOINTERVPROC)Context->getProcAddress("glGetVertexAttribPointerv");
+		lcIsProgram = (PFNGLISPROGRAMPROC)Context->getProcAddress("glIsProgram");
+		lcIsShader = (PFNGLISSHADERPROC)Context->getProcAddress("glIsShader");
+		lcLinkProgram = (PFNGLLINKPROGRAMPROC)Context->getProcAddress("glLinkProgram");
+		lcShaderSource = (PFNGLSHADERSOURCEPROC)Context->getProcAddress("glShaderSource");
+		lcUseProgram = (PFNGLUSEPROGRAMPROC)Context->getProcAddress("glUseProgram");
+		lcUniform1f = (PFNGLUNIFORM1FPROC)Context->getProcAddress("glUniform1f");
+		lcUniform2f = (PFNGLUNIFORM2FPROC)Context->getProcAddress("glUniform2f");
+		lcUniform3f = (PFNGLUNIFORM3FPROC)Context->getProcAddress("glUniform3f");
+		lcUniform4f = (PFNGLUNIFORM4FPROC)Context->getProcAddress("glUniform4f");
+		lcUniform1i = (PFNGLUNIFORM1IPROC)Context->getProcAddress("glUniform1i");
+		lcUniform2i = (PFNGLUNIFORM2IPROC)Context->getProcAddress("glUniform2i");
+		lcUniform3i = (PFNGLUNIFORM3IPROC)Context->getProcAddress("glUniform3i");
+		lcUniform4i = (PFNGLUNIFORM4IPROC)Context->getProcAddress("glUniform4i");
+		lcUniform1fv = (PFNGLUNIFORM1FVPROC)Context->getProcAddress("glUniform1fv");
+		lcUniform2fv = (PFNGLUNIFORM2FVPROC)Context->getProcAddress("glUniform2fv");
+		lcUniform3fv = (PFNGLUNIFORM3FVPROC)Context->getProcAddress("glUniform3fv");
+		lcUniform4fv = (PFNGLUNIFORM4FVPROC)Context->getProcAddress("glUniform4fv");
+		lcUniform1iv = (PFNGLUNIFORM1IVPROC)Context->getProcAddress("glUniform1iv");
+		lcUniform2iv = (PFNGLUNIFORM2IVPROC)Context->getProcAddress("glUniform2iv");
+		lcUniform3iv = (PFNGLUNIFORM3IVPROC)Context->getProcAddress("glUniform3iv");
+		lcUniform4iv = (PFNGLUNIFORM4IVPROC)Context->getProcAddress("glUniform4iv");
+		lcUniformMatrix2fv = (PFNGLUNIFORMMATRIX2FVPROC)Context->getProcAddress("glUniformMatrix2fv");
+		lcUniformMatrix3fv = (PFNGLUNIFORMMATRIX3FVPROC)Context->getProcAddress("glUniformMatrix3fv");
+		lcUniformMatrix4fv = (PFNGLUNIFORMMATRIX4FVPROC)Context->getProcAddress("glUniformMatrix4fv");
+		lcValidateProgram = (PFNGLVALIDATEPROGRAMPROC)Context->getProcAddress("glValidateProgram");
+		lcVertexAttribPointer = (PFNGLVERTEXATTRIBPOINTERPROC)Context->getProcAddress("glVertexAttribPointer");
 
 		gSupportsShaderObjects = true;
 	}

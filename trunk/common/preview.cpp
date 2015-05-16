@@ -60,7 +60,9 @@ void PiecePreview::OnDraw()
 		ViewMatrix = lcMatrix44LookAt(Eye * m_Distance, m_PieceInfo->GetCenter(), lcVector3(0, 0, 1));
 	}
 
+	mContext->SetViewMatrix(ViewMatrix);
 	mContext->SetProjectionMatrix(ProjectionMatrix);
+	mContext->SetProgram(LC_PROGRAM_SIMPLE);
 
 	lcScene Scene;
 	Scene.Begin(ViewMatrix);
@@ -69,8 +71,8 @@ void PiecePreview::OnDraw()
 
 	Scene.End();
 
-	mContext->DrawOpaqueMeshes(ViewMatrix, Scene.mOpaqueMeshes);
-	mContext->DrawTranslucentMeshes(ViewMatrix, Scene.mTranslucentMeshes);
+	mContext->DrawOpaqueMeshes(Scene.mOpaqueMeshes);
+	mContext->DrawTranslucentMeshes(Scene.mTranslucentMeshes);
 
 	mContext->UnbindMesh(); // context remove
 }

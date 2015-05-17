@@ -165,7 +165,11 @@ void lcInitializeGLExtensions(const QGLContext* Context)
 	{
 		PFNGLDEBUGMESSAGECALLBACKARBPROC DebugMessageCallback = (PFNGLDEBUGMESSAGECALLBACKARBPROC)Context->getProcAddress("glDebugMessageCallback");
 
-		if (DebugMessageCallback)
+#ifndef GL_DEBUG_OUTPUT
+#define GL_DEBUG_OUTPUT 0x92E0
+#endif
+
+        if (DebugMessageCallback)
 		{
 			DebugMessageCallback((GLDEBUGPROCARB)&lcGLDebugCallback, NULL);
 			glEnable(GL_DEBUG_OUTPUT);

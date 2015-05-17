@@ -103,7 +103,7 @@ void lcContext::CreateShaderPrograms()
 	{
 		// LC_PROGRAM_SIMPLE
 		"#version 110\n"
-		"in vec3 VertexPosition;\n"
+		"attribute vec3 VertexPosition;\n"
 		"uniform mat4 WorldViewProjectionMatrix;\n"
 		"void main()\n"
 		"{\n"
@@ -111,8 +111,8 @@ void lcContext::CreateShaderPrograms()
 		"}\n",
 		// LC_PROGRAM_TEXTURE
 		"#version 110\n"
-		"in vec3 VertexPosition;\n"
-		"in vec2 VertexTexCoord;\n"
+		"attribute vec3 VertexPosition;\n"
+		"attribute vec2 VertexTexCoord;\n"
 		"varying vec2 PixelTexCoord;\n"
 		"uniform mat4 WorldViewProjectionMatrix;\n"
 		"void main()\n"
@@ -122,8 +122,8 @@ void lcContext::CreateShaderPrograms()
 		"}\n",
 		// LC_PROGRAM_VERTEX_COLOR
 		"#version 110\n"
-		"in vec3 VertexPosition;\n"
-		"in vec4 VertexColor;\n"
+		"attribute vec3 VertexPosition;\n"
+		"attribute vec4 VertexColor;\n"
 		"varying vec4 PixelColor;\n"
 		"uniform mat4 WorldViewProjectionMatrix;\n"
 		"void main()\n"

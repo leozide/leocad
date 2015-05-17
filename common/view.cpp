@@ -986,7 +986,7 @@ void View::DrawRotateOverlay()
 			break;
 		};
 
-		lcMatrix44 WorlMatrix = lcMul(RelativeRotation, lcMatrix44Translation(OverlayCenter));
+        lcMatrix44 WorldMatrix = lcMul(RelativeRotation, lcMatrix44Translation(OverlayCenter));
 		WorldMatrix = lcMul(lcMatrix44FromAxisAngle(lcVector3(Rotation[1], Rotation[2], Rotation[3]), Rotation[0] * LC_DTOR), WorldMatrix);
 		mContext->SetWorldMatrix(WorldMatrix);
 

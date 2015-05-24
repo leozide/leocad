@@ -82,7 +82,7 @@ void PieceInfo::SetModel(lcModel* Model, bool UpdateMesh)
 		PieceFile.Seek(0, SEEK_SET);
 
 		const char* OldLocale = setlocale(LC_NUMERIC, "C");
-		bool Ret = lcGetPiecesLibrary()->ReadMeshData(PieceFile, lcMatrix44Identity(), 16, TextureStack, MeshData);
+		bool Ret = lcGetPiecesLibrary()->ReadMeshData(PieceFile, lcMatrix44Identity(), 16, TextureStack, MeshData, LC_MESHDATA_SHARED);
 		setlocale(LC_NUMERIC, OldLocale);
 
 		if (Ret)
@@ -127,12 +127,15 @@ void PieceInfo::Unload()
 {
 	if (mMesh)
 	{
-		for (int SectionIdx = 0; SectionIdx < mMesh->mNumSections; SectionIdx++)
+		for (int LodIdx = 0; LodIdx < LC_NUM_MESH_LODS; LodIdx++)
 		{
-			lcMeshSection& Section = mMesh->mSections[SectionIdx];
+			for (int SectionIdx = 0; SectionIdx < mMesh->mLods[LodIdx].NumSections; SectionIdx++)
+			{
+				lcMeshSection& Section = mMesh->mLods[LodIdx].Sections[SectionIdx];
 
-			if (Section.Texture)
-				Section.Texture->Release();
+				if (Section.Texture)
+					Section.Texture->Release();
+			}
 		}
 
 		delete mMesh;
@@ -287,16 +290,14 @@ void PieceInfo::AddRenderMesh(lcScene& Scene)
 	RenderMesh.Mesh = mMesh;
 	RenderMesh.ColorIndex = gDefaultColor;
 	RenderMesh.State = LC_RENDERMESH_NONE;
+	RenderMesh.Distance = fabsf(Scene.mViewMatrix.r[3].z);
+	RenderMesh.LodIndex = mMesh->GetLodIndex(RenderMesh.Distance);
 
 	if (mFlags & (LC_PIECE_HAS_SOLID | LC_PIECE_HAS_DEFAULT | LC_PIECE_HAS_LINES))
 		Scene.mOpaqueMeshes.Add(RenderMesh);
 
 	if (mFlags & LC_PIECE_HAS_TRANSLUCENT)
-	{
-		RenderMesh.Distance = Scene.mViewMatrix.r[3].z;
-
 		Scene.mTranslucentMeshes.Add(RenderMesh);
-	}
 }
 
 void PieceInfo::AddRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, int ColorIndex, bool Focused, bool Selected)
@@ -309,6 +310,8 @@ void PieceInfo::AddRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, i
 		RenderMesh.Mesh = (mFlags & LC_PIECE_PLACEHOLDER) ? gPlaceholderMesh : mMesh;
 		RenderMesh.ColorIndex = ColorIndex;
 		RenderMesh.State = Focused ? LC_RENDERMESH_FOCUSED : (Selected ? LC_RENDERMESH_SELECTED : LC_RENDERMESH_NONE);
+		RenderMesh.Distance = fabsf(lcMul31(WorldMatrix[3], Scene.mViewMatrix).z);
+		RenderMesh.LodIndex = mMesh->GetLodIndex(RenderMesh.Distance);
 
 		bool Translucent = lcIsColorTranslucent(ColorIndex);
 
@@ -316,13 +319,7 @@ void PieceInfo::AddRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, i
 			Scene.mOpaqueMeshes.Add(RenderMesh);
 
 		if ((mFlags & LC_PIECE_HAS_TRANSLUCENT) || ((mFlags & LC_PIECE_HAS_DEFAULT) && Translucent))
-		{
-			lcVector3 Pos = lcMul31(WorldMatrix[3], Scene.mViewMatrix);
-
-			RenderMesh.Distance = Pos[2];
-
 			Scene.mTranslucentMeshes.Add(RenderMesh);
-		}
 	}
 
 	if (mFlags & LC_PIECE_MODEL)

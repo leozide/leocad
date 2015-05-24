@@ -29,10 +29,10 @@ static int lcTranslucentRenderMeshCompare(const void* Elem1, const void* Elem2)
 	lcRenderMesh* Mesh2 = (lcRenderMesh*)Elem2;
 
 	if (Mesh1->Distance < Mesh2->Distance)
-		return -1;
+		return 1;
 
 	if (Mesh1->Distance > Mesh2->Distance)
-		return 1;
+		return -1;
 
 	return 0;
 }
@@ -44,6 +44,7 @@ lcScene::lcScene()
 
 void lcScene::Begin(const lcMatrix44& ViewMatrix)
 {
+	mViewMatrix = ViewMatrix;
 	mOpaqueMeshes.RemoveAll();
 	mTranslucentMeshes.RemoveAll();
 	mInterfaceObjects.RemoveAll();
@@ -962,13 +963,14 @@ void lcContext::DrawOpaqueMeshes(const lcArray<lcRenderMesh>& OpaqueMeshes)
 	{
 		lcRenderMesh& RenderMesh = OpaqueMeshes[MeshIdx];
 		lcMesh* Mesh = RenderMesh.Mesh;
+		int LodIndex = RenderMesh.LodIndex;
 
 		BindMesh(Mesh);
 		SetWorldMatrix(RenderMesh.WorldMatrix);
 
-		for (int SectionIdx = 0; SectionIdx < Mesh->mNumSections; SectionIdx++)
+		for (int SectionIdx = 0; SectionIdx < Mesh->mLods[LodIndex].NumSections; SectionIdx++)
 		{
-			lcMeshSection* Section = &Mesh->mSections[SectionIdx];
+			lcMeshSection* Section = &Mesh->mLods[LodIndex].Sections[SectionIdx];
 			int ColorIndex = Section->ColorIndex;
 
 			if (Section->PrimitiveType == GL_TRIANGLES)
@@ -1038,13 +1040,14 @@ void lcContext::DrawTranslucentMeshes(const lcArray<lcRenderMesh>& TranslucentMe
 	{
 		lcRenderMesh& RenderMesh = TranslucentMeshes[MeshIdx];
 		lcMesh* Mesh = RenderMesh.Mesh;
+		int LodIndex = RenderMesh.LodIndex;
 
 		BindMesh(Mesh);
 		SetWorldMatrix(RenderMesh.WorldMatrix);
 
-		for (int SectionIdx = 0; SectionIdx < Mesh->mNumSections; SectionIdx++)
+		for (int SectionIdx = 0; SectionIdx < Mesh->mLods[LodIndex].NumSections; SectionIdx++)
 		{
-			lcMeshSection* Section = &Mesh->mSections[SectionIdx];
+			lcMeshSection* Section = &Mesh->mLods[LodIndex].Sections[SectionIdx];
 			int ColorIndex = Section->ColorIndex;
 
 			if (Section->PrimitiveType != GL_TRIANGLES)

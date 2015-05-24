@@ -78,6 +78,11 @@ public:
 		mLength = NewSize;
 	}
 
+	void SetGrow(int Grow)
+	{
+		mGrow = Grow;
+	}
+
 	void AllocGrow(int Grow)
 	{
 		if ((mLength + Grow) > mAlloc)

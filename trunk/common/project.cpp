@@ -765,9 +765,9 @@ void Project::Export3DStudio(const QString& FileName)
 
 		int NumTriangles = 0;
 
-		for (int SectionIdx = 0; SectionIdx < Mesh->mNumSections; SectionIdx++)
+		for (int SectionIdx = 0; SectionIdx < Mesh->mLods[LC_MESH_LOD_HIGH].NumSections; SectionIdx++)
 		{
-			lcMeshSection* Section = &Mesh->mSections[SectionIdx];
+			lcMeshSection* Section = &Mesh->mLods[LC_MESH_LOD_HIGH].Sections[SectionIdx];
 
 			if (Section->PrimitiveType != GL_TRIANGLES)
 				continue;
@@ -777,9 +777,9 @@ void Project::Export3DStudio(const QString& FileName)
 
 		File.WriteU16(NumTriangles);
 
-		for (int SectionIdx = 0; SectionIdx < Mesh->mNumSections; SectionIdx++)
+		for (int SectionIdx = 0; SectionIdx < Mesh->mLods[LC_MESH_LOD_HIGH].NumSections; SectionIdx++)
 		{
-			lcMeshSection* Section = &Mesh->mSections[SectionIdx];
+			lcMeshSection* Section = &Mesh->mLods[LC_MESH_LOD_HIGH].Sections[SectionIdx];
 
 			if (Section->PrimitiveType != GL_TRIANGLES)
 				continue;
@@ -797,9 +797,9 @@ void Project::Export3DStudio(const QString& FileName)
 
 		NumTriangles = 0;
 
-		for (int SectionIdx = 0; SectionIdx < Mesh->mNumSections; SectionIdx++)
+		for (int SectionIdx = 0; SectionIdx < Mesh->mLods[LC_MESH_LOD_HIGH].NumSections; SectionIdx++)
 		{
-			lcMeshSection* Section = &Mesh->mSections[SectionIdx];
+			lcMeshSection* Section = &Mesh->mLods[LC_MESH_LOD_HIGH].Sections[SectionIdx];
 
 			if (Section->PrimitiveType != GL_TRIANGLES)
 				continue;

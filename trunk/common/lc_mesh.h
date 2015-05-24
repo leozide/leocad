@@ -5,7 +5,7 @@
 #include "lc_math.h"
 
 #define LC_MESH_FILE_ID      LC_FOURCC('M', 'E', 'S', 'H')
-#define LC_MESH_FILE_VERSION 0x0100
+#define LC_MESH_FILE_VERSION 0x0110
 
 struct lcVertex
 {
@@ -27,13 +27,26 @@ struct lcMeshSection
 	lcTexture* Texture;
 };
 
+struct lcMeshLod
+{
+	lcMeshSection* Sections;
+	int NumSections;
+};
+
+enum
+{
+	LC_MESH_LOD_HIGH,
+	LC_MESH_LOD_LOW,
+	LC_NUM_MESH_LODS
+};
+
 class lcMesh
 {
 public:
 	lcMesh();
 	~lcMesh();
 
-	void Create(int NumSections, int NumVertices, int NumTexturedVertices, int NumIndices);
+	void Create(lcuint16 NumSections[LC_NUM_MESH_LODS], int NumVertices, int NumTexturedVertices, int NumIndices);
 	void CreateBox();
 
 	bool FileLoad(lcFile& File);
@@ -55,8 +68,10 @@ public:
 	bool IntersectsPlanes(const lcVector4 Planes[6]);
 	bool IntersectsPlanes(const lcVector4 Planes[6]);
 
-	lcMeshSection* mSections;
-	int mNumSections;
+	int GetLodIndex(float Distance) const;
+
+	lcMeshLod mLods[LC_NUM_MESH_LODS];
+	float mRadius;
 
 	void* mVertexData;
 	int mVertexDataSize;
@@ -83,6 +98,7 @@ struct lcRenderMesh
 	lcMesh* Mesh;
 	float Distance;
 	int ColorIndex;
+	int LodIndex;
 	lcRenderMeshState State;
 };
 

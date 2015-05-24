@@ -11,8 +11,12 @@ lcMesh* gPlaceholderMesh;
 
 lcMesh::lcMesh()
 {
-	mSections = NULL;
-	mNumSections = 0;
+	for (int LodIdx = 0; LodIdx < LC_NUM_MESH_LODS; LodIdx++)
+	{
+		mLods[LodIdx].Sections = NULL;
+		mLods[LodIdx].NumSections = 0;
+	}
+
 	mNumVertices = 0;
 	mNumTexturedVertices = 0;
 	mIndexType = 0;
@@ -28,13 +32,18 @@ lcMesh::~lcMesh()
 {
 	free(mVertexData);
 	free(mIndexData);
-	delete[] mSections;
+	for (int LodIdx = 0; LodIdx < LC_NUM_MESH_LODS; LodIdx++)
+		delete[] mLods[LodIdx].Sections;
 }
 
-void lcMesh::Create(int NumSections, int NumVertices, int NumTexturedVertices, int NumIndices)
+void lcMesh::Create(lcuint16 NumSections[LC_NUM_MESH_LODS], int NumVertices, int NumTexturedVertices, int NumIndices)
 {
-	mSections = new lcMeshSection[NumSections];
-	mNumSections = NumSections;
+	for (int LodIdx = 0; LodIdx < LC_NUM_MESH_LODS; LodIdx++)
+	{
+		if (NumSections[LodIdx])
+			mLods[LodIdx].Sections = new lcMeshSection[NumSections[LodIdx]];
+		mLods[LodIdx].NumSections = NumSections[LodIdx];
+	}
 
 	mNumVertices = NumVertices;
 	mNumTexturedVertices = NumTexturedVertices;
@@ -57,10 +66,15 @@ void lcMesh::Create(int NumSections, int NumVertices, int NumTexturedVertices, i
 
 void lcMesh::CreateBox()
 {
-	Create(2, 8, 0, 36 + 24);
+	lcuint16 NumSections[LC_NUM_MESH_LODS];
+	memset(NumSections, 0, sizeof(NumSections));
+	NumSections[LC_MESH_LOD_HIGH] = 2;
+
+	Create(NumSections, 8, 0, 36 + 24);
 
 	lcVector3 Min(-10.0f, -10.0f, -24.0f);
 	lcVector3 Max(10.0f, 10.0f, 4.0f);
+	mRadius = lcLength((Max - Min) / 2.0f);
 
 	float* Verts = (float*)mVertexData;
 	lcuint16* Indices = (lcuint16*)mIndexData;
@@ -74,7 +88,7 @@ void lcMesh::CreateBox()
 	*Verts++ = Max[0]; *Verts++ = Max[1]; *Verts++ = Max[2];
 	*Verts++ = Max[0]; *Verts++ = Min[1]; *Verts++ = Max[2];
 
-	lcMeshSection* Section = &mSections[0];
+	lcMeshSection* Section = &mLods[LC_MESH_LOD_HIGH].Sections[0];
 	Section->ColorIndex = gDefaultColor;
 	Section->IndexOffset = 0;
 	Section->NumIndices = 36;
@@ -99,7 +113,7 @@ void lcMesh::CreateBox()
 	*Indices++ = 1; *Indices++ = 2; *Indices++ = 6;
 	*Indices++ = 1; *Indices++ = 6; *Indices++ = 5;
 
-	Section = &mSections[1];
+	Section = &mLods[LC_MESH_LOD_HIGH].Sections[1];
 	Section->ColorIndex = gEdgeColor;
 	Section->IndexOffset = 36 * 2;
 	Section->NumIndices = 24;
@@ -122,9 +136,9 @@ bool lcMesh::MinIntersectDist(const lcVector3& Start, const lcVector3& End, floa
 	float* Verts = (float*)mVertexData;
 	bool Hit = false;
 
-	for (int SectionIdx = 0; SectionIdx < mNumSections; SectionIdx++)
+	for (int SectionIdx = 0; SectionIdx < mLods[LC_MESH_LOD_HIGH].NumSections; SectionIdx++)
 	{
-		lcMeshSection* Section = &mSections[SectionIdx];
+		lcMeshSection* Section = &mLods[LC_MESH_LOD_HIGH].Sections[SectionIdx];
 
 		if (Section->PrimitiveType != GL_TRIANGLES)
 			continue;
@@ -161,9 +175,9 @@ bool lcMesh::IntersectsPlanes(const lcVector4 Planes[6])
 {
 	float* Verts = (float*)mVertexData;
 
-	for (int SectionIdx = 0; SectionIdx < mNumSections; SectionIdx++)
+	for (int SectionIdx = 0; SectionIdx < mLods[LC_MESH_LOD_HIGH].NumSections; SectionIdx++)
 	{
-		lcMeshSection* Section = &mSections[SectionIdx];
+		lcMeshSection* Section = &mLods[LC_MESH_LOD_HIGH].Sections[SectionIdx];
 
 		if (Section->PrimitiveType != GL_TRIANGLES)
 			continue;
@@ -196,9 +210,9 @@ void lcMesh::ExportPOVRay(lcFile& File, const char* MeshName, const char* ColorT
 
 	float* Verts = (float*)mVertexData;
 
-	for (int SectionIdx = 0; SectionIdx < mNumSections; SectionIdx++)
+	for (int SectionIdx = 0; SectionIdx < mLods[LC_MESH_LOD_HIGH].NumSections; SectionIdx++)
 	{
-		lcMeshSection* Section = &mSections[SectionIdx];
+		lcMeshSection* Section = &mLods[LC_MESH_LOD_HIGH].Sections[SectionIdx];
 
 		if (Section->PrimitiveType != GL_TRIANGLES)
 			continue;
@@ -239,9 +253,9 @@ void lcMesh::ExportWavefrontIndices(lcFile& File, int DefaultColorIndex, int Ver
 {
 	char Line[1024];
 
-	for (int SectionIdx = 0; SectionIdx < mNumSections; SectionIdx++)
+	for (int SectionIdx = 0; SectionIdx < mLods[LC_MESH_LOD_HIGH].NumSections; SectionIdx++)
 	{
-		lcMeshSection* Section = &mSections[SectionIdx];
+		lcMeshSection* Section = &mLods[LC_MESH_LOD_HIGH].Sections[SectionIdx];
 
 		if (Section->PrimitiveType != GL_TRIANGLES)
 			continue;
@@ -283,45 +297,51 @@ bool lcMesh::FileLoad(lcFile& File)
 		return false;
 
 	lcuint32 NumVertices, NumTexturedVertices, NumIndices;
-	lcuint16 NumSections;
+	lcuint16 NumLods, NumSections[LC_NUM_MESH_LODS];
 
-	if (!File.ReadU16(&NumSections, 1) || !File.ReadU32(&NumVertices, 1) || !File.ReadU32(&NumTexturedVertices, 1) || !File.ReadU32(&NumIndices, 1))
+	if (!File.ReadU32(&NumVertices, 1) || !File.ReadU32(&NumTexturedVertices, 1) || !File.ReadU32(&NumIndices, 1))
+		return false;
+
+	if (!File.ReadU16(&NumLods, 1) || NumLods != LC_NUM_MESH_LODS || !File.ReadU16(NumSections, LC_NUM_MESH_LODS))
 		return false;
 
 	Create(NumSections, NumVertices, NumTexturedVertices, NumIndices);
 
-	for (int SectionIdx = 0; SectionIdx < mNumSections; SectionIdx++)
+	for (int LodIdx = 0; LodIdx < LC_NUM_MESH_LODS; LodIdx++)
 	{
-		lcMeshSection& Section = mSections[SectionIdx];
-
-		lcuint32 ColorCode, IndexOffset;
-		lcuint16 Triangles, Length;
-
-		if (!File.ReadU32(&ColorCode, 1) || !File.ReadU32(&IndexOffset, 1) || !File.ReadU32(&NumIndices, 1) || !File.ReadU16(&Triangles, 1))
-			return false;
-
-		Section.ColorIndex = lcGetColorIndex(ColorCode);
-		Section.IndexOffset = IndexOffset;
-		Section.NumIndices = NumIndices;
-		Section.PrimitiveType = Triangles ? GL_TRIANGLES : GL_LINES;
-
-		if (!File.ReadU16(&Length, 1))
-			return false;
-
-		if (Length)
+		for (int SectionIdx = 0; SectionIdx < mLods[LodIdx].NumSections; SectionIdx++)
 		{
-			if (Length >= LC_TEXTURE_NAME_LEN)
+			lcMeshSection& Section = mLods[LodIdx].Sections[SectionIdx];
+
+			lcuint32 ColorCode, IndexOffset;
+			lcuint16 Triangles, Length;
+
+			if (!File.ReadU32(&ColorCode, 1) || !File.ReadU32(&IndexOffset, 1) || !File.ReadU32(&NumIndices, 1) || !File.ReadU16(&Triangles, 1))
 				return false;
 
-			char FileName[LC_TEXTURE_NAME_LEN];
+			Section.ColorIndex = lcGetColorIndex(ColorCode);
+			Section.IndexOffset = IndexOffset;
+			Section.NumIndices = NumIndices;
+			Section.PrimitiveType = Triangles ? GL_TRIANGLES : GL_LINES;
 
-			File.ReadBuffer(FileName, Length);
-			FileName[Length] = 0;
+			if (!File.ReadU16(&Length, 1))
+				return false;
 
-			Section.Texture = lcGetPiecesLibrary()->FindTexture(FileName);
+			if (Length)
+			{
+				if (Length >= LC_TEXTURE_NAME_LEN)
+					return false;
+
+				char FileName[LC_TEXTURE_NAME_LEN];
+
+				File.ReadBuffer(FileName, Length);
+				FileName[Length] = 0;
+
+				Section.Texture = lcGetPiecesLibrary()->FindTexture(FileName);
+			}
+			else
+				Section.Texture = NULL;
 		}
-		else
-			Section.Texture = NULL;
 	}
 
 	File.ReadFloats((float*)mVertexData, 3 * mNumVertices + 5 * mNumTexturedVertices);
@@ -339,28 +359,34 @@ void lcMesh::FileSave(lcFile& File)
 	File.WriteU32(LC_MESH_FILE_ID);
 	File.WriteU32(LC_MESH_FILE_VERSION);
 
-	File.WriteU16(mNumSections);
 	File.WriteU32(mNumVertices);
 	File.WriteU32(mNumTexturedVertices);
 	File.WriteU32(mIndexDataSize / (mIndexType == GL_UNSIGNED_SHORT ? 2 : 4));
 
-	for (int SectionIdx = 0; SectionIdx < mNumSections; SectionIdx++)
+	File.WriteU16(LC_NUM_MESH_LODS);
+	for (int LodIdx = 0; LodIdx < LC_NUM_MESH_LODS; LodIdx++)
+		File.WriteU16(mLods[LodIdx].NumSections);
+
+	for (int LodIdx = 0; LodIdx < LC_NUM_MESH_LODS; LodIdx++)
 	{
-		lcMeshSection& Section = mSections[SectionIdx];
-
-		File.WriteU32(lcGetColorCode(Section.ColorIndex));
-		File.WriteU32(Section.IndexOffset);
-		File.WriteU32(Section.NumIndices);
-		File.WriteU16(Section.PrimitiveType == GL_TRIANGLES ? 1 : 0);
-
-		if (Section.Texture)
+		for (int SectionIdx = 0; SectionIdx < mLods[LodIdx].NumSections; SectionIdx++)
 		{
-			int Length = strlen(Section.Texture->mName);
-			File.WriteU16(Length);
-			File.WriteBuffer(Section.Texture->mName, Length);
+			lcMeshSection& Section = mLods[LodIdx].Sections[SectionIdx];
+
+			File.WriteU32(lcGetColorCode(Section.ColorIndex));
+			File.WriteU32(Section.IndexOffset);
+			File.WriteU32(Section.NumIndices);
+			File.WriteU16(Section.PrimitiveType == GL_TRIANGLES ? 1 : 0);
+
+			if (Section.Texture)
+			{
+				int Length = strlen(Section.Texture->mName);
+				File.WriteU16(Length);
+				File.WriteBuffer(Section.Texture->mName, Length);
+			}
+			else
+				File.WriteU16(0);
 		}
-		else
-			File.WriteU16(0);
 	}
 
 	File.WriteFloats((float*)mVertexData, 3 * mNumVertices + 5 * mNumTexturedVertices);
@@ -368,4 +394,12 @@ void lcMesh::FileSave(lcFile& File)
 		File.WriteU16((lcuint16*)mIndexData, mIndexDataSize / 2);
 	else
 		File.WriteU32((lcuint32*)mIndexData, mIndexDataSize / 4);
+}
+
+int lcMesh::GetLodIndex(float Distance) const
+{
+	if (mLods[LC_MESH_LOD_LOW].NumSections && (Distance - mRadius) > 250.0f)
+		return LC_MESH_LOD_LOW;
+	else
+		return LC_MESH_LOD_HIGH;
 }

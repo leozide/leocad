@@ -55,30 +55,39 @@ struct lcLibraryTextureMap
 	bool Next;
 };
 
+enum lcMeshDataType
+{
+	LC_MESHDATA_HIGH,
+	LC_MESHDATA_LOW,
+	LC_MESHDATA_SHARED,
+	LC_NUM_MESHDATA_TYPES
+};
+
 class lcLibraryMeshData
 {
 public:
 	lcLibraryMeshData()
-		: mVertices(1024, 1024)
 	{
+		for (int MeshDataIdx = 0; MeshDataIdx < LC_NUM_MESHDATA_TYPES; MeshDataIdx++)
+			mVertices[MeshDataIdx].SetGrow(1024);
 	}
 
 	~lcLibraryMeshData()
 	{
-		for (int SectionIdx = 0; SectionIdx < mSections.GetSize(); SectionIdx++)
-			delete mSections[SectionIdx];
+		for (int MeshDataIdx = 0; MeshDataIdx < LC_NUM_MESHDATA_TYPES; MeshDataIdx++)
+			mSections[MeshDataIdx].DeleteAll();
 	}
 
-	void AddLine(int LineType, lcuint32 ColorCode, const lcVector3* Vertices);
-	void AddTexturedLine(int LineType, lcuint32 ColorCode, const lcLibraryTextureMap& Map, const lcVector3* Vertices);
-	void AddMeshData(const lcLibraryMeshData& Data, const lcMatrix44& Transform, lcuint32 CurrentColorCode, lcLibraryTextureMap* TextureMap);
-	void AddMeshDataNoDuplicateCheck(const lcLibraryMeshData& Data, const lcMatrix44& Transform, lcuint32 CurrentColorCode, lcLibraryTextureMap* TextureMap);
+	void AddLine(lcMeshDataType MeshDataType, int LineType, lcuint32 ColorCode, const lcVector3* Vertices);
+	void AddTexturedLine(lcMeshDataType MeshDataType, int LineType, lcuint32 ColorCode, const lcLibraryTextureMap& Map, const lcVector3* Vertices);
+	void AddMeshData(const lcLibraryMeshData& Data, const lcMatrix44& Transform, lcuint32 CurrentColorCode, lcLibraryTextureMap* TextureMap, lcMeshDataType OverrideDestIndex);
+	void AddMeshDataNoDuplicateCheck(const lcLibraryMeshData& Data, const lcMatrix44& Transform, lcuint32 CurrentColorCode, lcLibraryTextureMap* TextureMap, lcMeshDataType OverrideDestIndex);
 	void TestQuad(int* QuadIndices, const lcVector3* Vertices);
 	void ResequenceQuad(int* QuadIndices, int a, int b, int c, int d);
 
-	lcArray<lcLibraryMeshSection*> mSections;
-	lcArray<lcVertex> mVertices;
-	lcArray<lcVertexTextured> mTexturedVertices;
+	lcArray<lcLibraryMeshSection*> mSections[LC_NUM_MESHDATA_TYPES];
+	lcArray<lcVertex> mVertices[LC_NUM_MESHDATA_TYPES];
+	lcArray<lcVertexTextured> mTexturedVertices[LC_NUM_MESHDATA_TYPES];
 };
 
 class lcLibraryPrimitive
@@ -149,7 +158,7 @@ public:
 			mNumOfficialPieces = mPieces.GetSize();
 	}
 
-	bool ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform, lcuint32 CurrentColorCode, lcArray<lcLibraryTextureMap>& TextureStack, lcLibraryMeshData& MeshData);
+	bool ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform, lcuint32 CurrentColorCode, lcArray<lcLibraryTextureMap>& TextureStack, lcLibraryMeshData& MeshData, lcMeshDataType MeshDataType);
 	void CreateMesh(PieceInfo* Info, lcLibraryMeshData& MeshData);
 	void UpdateBuffers(lcContext* Context);
 

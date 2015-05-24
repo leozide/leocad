@@ -71,7 +71,7 @@ lcQPropertiesDialog::lcQPropertiesDialog(QWidget *parent, void *data) :
 		int infoIndex = library->mPieces.FindIndex(partsUsed[partIdx].Info);
 		if (!infoRows[infoIndex])
 		{
-			infoRows[infoIndex] = numInfos++;
+			infoRows[infoIndex] = ++numInfos;
 			partNames.append(partsUsed[partIdx].Info->m_strDescription);
 		}
 	}
@@ -91,9 +91,11 @@ lcQPropertiesDialog::lcQPropertiesDialog(QWidget *parent, void *data) :
 		}
 	}
 
+	horizontalLabels.append(tr("Total"));
+
 	QTableWidget *table = ui->partsTable;
-	table->setColumnCount(numColors + 1);
-	table->setRowCount(numInfos);
+	table->setColumnCount(numColors + 2);
+	table->setRowCount(numInfos + 1);
 	table->setHorizontalHeaderLabels(horizontalLabels);
 
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
@@ -105,15 +107,47 @@ lcQPropertiesDialog::lcQPropertiesDialog(QWidget *parent, void *data) :
 	for (int rowIdx = 0; rowIdx < partNames.size(); rowIdx++)
 		table->setItem(rowIdx, 0, new QTableWidgetItem(partNames[rowIdx]));
 
+	table->setItem(partNames.size(), 0, new QTableWidgetItem(tr("Total")));
+
+	QVector<int> infoTotals;
+	QVector<int> colorTotals;
+	int total = 0;
+
+	infoTotals.resize(numInfos);
+	colorTotals.resize(numColors);
+
 	for (int partIdx = 0; partIdx < partsUsed.GetSize(); partIdx++)
 	{
 		int colorIndex = partsUsed[partIdx].ColorIndex;
 		int infoIndex = library->mPieces.FindIndex(partsUsed[partIdx].Info);
+		int count = partsUsed[partIdx].Count;
 
-		QTableWidgetItem *item = new QTableWidgetItem(QString::number(partsUsed[partIdx].Count));
+		QTableWidgetItem *item = new QTableWidgetItem(QString::number(count));
 		item->setTextAlignment(Qt::AlignCenter);
-		table->setItem(infoRows[infoIndex], colorColumns[colorIndex] + 1, item);
+		table->setItem(infoRows[infoIndex] - 1, colorColumns[colorIndex] + 1, item);
+
+		infoTotals[infoRows[infoIndex] - 1] += count;
+		colorTotals[colorColumns[colorIndex]] += count;
+		total += count;
 	}
+
+	for (int infoIdx = 0; infoIdx < numInfos; infoIdx++)
+	{
+		QTableWidgetItem *item = new QTableWidgetItem(QString::number(infoTotals[infoIdx]));
+		item->setTextAlignment(Qt::AlignCenter);
+		table->setItem(infoIdx, numColors + 1, item);
+	}
+
+	for (int colorIdx = 0; colorIdx < numColors; colorIdx++)
+	{
+		QTableWidgetItem *item = new QTableWidgetItem(QString::number(colorTotals[colorIdx]));
+		item->setTextAlignment(Qt::AlignCenter);
+		table->setItem(numInfos, colorIdx + 1, item);
+	}
+
+	QTableWidgetItem *item = new QTableWidgetItem(QString::number(total));
+	item->setTextAlignment(Qt::AlignCenter);
+	table->setItem(numInfos, numColors + 1, item);
 
 	delete[] colorColumns;
 	delete[] colorsUsed;

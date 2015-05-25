@@ -821,7 +821,8 @@ void View::DrawRotateOverlay()
 			Verts[0] = lcVector3(0.0f, 0.0f, 0.0f);
 			int NumVerts = 1;
 
-			glVertexPointer(3, GL_FLOAT, 0, Verts);
+			mContext->SetVertexBufferPointer(Verts);
+			mContext->SetVertexFormat(0, 3, 0, 0);
 
 			float StartAngle;
 			int i = 0;
@@ -840,7 +841,7 @@ void View::DrawRotateOverlay()
 
 				if (NumVerts == 33)
 				{
-					glDrawArrays(GL_TRIANGLE_FAN, 0, NumVerts);
+					mContext->DrawPrimitives(GL_TRIANGLE_FAN, 0, NumVerts);
 					Verts[1] = Verts[32];
 					NumVerts = 2;
 				}
@@ -854,7 +855,7 @@ void View::DrawRotateOverlay()
 			} while (Angle >= 0.0f);
 
 			if (NumVerts > 2)
-				glDrawArrays(GL_TRIANGLE_FAN, 0, NumVerts);
+				mContext->DrawPrimitives(GL_TRIANGLE_FAN, 0, NumVerts);
 
 			glDisable(GL_BLEND);
 		}
@@ -882,8 +883,10 @@ void View::DrawRotateOverlay()
 		mContext->SetColor(0.1f, 0.1f, 0.1f, 1.0f);
 		mContext->SetWorldMatrix(lcMatrix44Identity());
 
-		glVertexPointer(3, GL_FLOAT, 0, Verts);
-		glDrawArrays(GL_LINE_LOOP, 0, 32);
+		mContext->SetVertexBufferPointer(Verts);
+		mContext->SetVertexFormat(0, 3, 0, 0);
+
+		mContext->DrawPrimitives(GL_LINE_LOOP, 0, 32);
 	}
 
 	lcVector3 ViewDir = mCamera->mTargetPosition - mCamera->mPosition;
@@ -953,8 +956,10 @@ void View::DrawRotateOverlay()
 			}
 		}
 
-		glVertexPointer(3, GL_FLOAT, 0, Verts);
-		glDrawArrays(GL_LINES, 0, NumVerts);
+		mContext->SetVertexBufferPointer(Verts);
+		mContext->SetVertexFormat(0, 3, 0, 0);
+
+		mContext->DrawPrimitives(GL_LINES, 0, NumVerts);
 	}
 
 	// Draw tangent vector.
@@ -1009,13 +1014,16 @@ void View::DrawRotateOverlay()
 			Verts[4] = lcVector3(0.0f, StartY, EndZ);
 			Verts[5] = lcVector3(0.0f, StartY - OverlayScale * OverlayRotateArrowCapSize, EndZ + TipZ);
 
-			glVertexPointer(3, GL_FLOAT, 0, Verts);
-			glDrawArrays(GL_LINES, 0, 6);
+			mContext->SetVertexBufferPointer(Verts);
+			mContext->SetVertexFormat(0, 3, 0, 0);
+
+			mContext->DrawPrimitives(GL_LINES, 0, 6);
 		}
 
 		// Draw text.
 		lcVector3 ScreenPos = ProjectPoint(OverlayCenter);
 
+		mContext->SetProgram(LC_PROGRAM_TEXTURE);
 		mContext->SetWorldMatrix(lcMatrix44Identity());
 		mContext->SetViewMatrix(lcMatrix44Translation(lcVector3(0.375, 0.375, 0.0)));
 		mContext->SetProjectionMatrix(lcMatrix44Ortho(0.0f, mWidth, 0.0f, mHeight, -1.0f, 1.0f));

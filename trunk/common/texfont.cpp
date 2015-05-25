@@ -121,14 +121,17 @@ bool TexFont::Load()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-	unsigned char ExpandedData[sizeof(TextureData) * 8];
+	unsigned char ExpandedData[sizeof(TextureData) * 8 * 2];
 	for (unsigned int TexelIdx = 0; TexelIdx < sizeof(TextureData) * 8; TexelIdx++)
-		ExpandedData[TexelIdx] = TextureData[TexelIdx / 8] & (1 << (TexelIdx % 8)) ? 255 : 0;
+	{
+		unsigned char Texel = TextureData[TexelIdx / 8] & (1 << (TexelIdx % 8)) ? 255 : 0;
+		ExpandedData[TexelIdx * 2] = ExpandedData[TexelIdx * 2 + 1] = Texel;
+	}
 
 	mTextureWidth = 128;
 	mTextureHeight = 128;
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, mTextureWidth, mTextureHeight, 0, GL_ALPHA, GL_UNSIGNED_BYTE, ExpandedData);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE_ALPHA, mTextureWidth, mTextureHeight, 0, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, ExpandedData);
 
 	const unsigned char* Ptr = GlyphData;
 

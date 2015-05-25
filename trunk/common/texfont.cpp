@@ -1,6 +1,7 @@
 #include "lc_global.h"
 #include <string.h>
 #include "texfont.h"
+#include "lc_context.h"
 
 static const unsigned char TextureData[2048] =
 {
@@ -175,7 +176,7 @@ void TexFont::GetStringDimensions(int* cx, int* cy, const char* Text) const
 	}
 }
 
-void TexFont::PrintText(float Left, float Top, float Z, const char* Text) const
+void TexFont::PrintText(lcContext* Context, float Left, float Top, float Z, const char* Text) const
 {
 	int Length = strlen(Text);
 
@@ -217,13 +218,12 @@ void TexFont::PrintText(float Left, float Top, float Z, const char* Text) const
 		Text++;
 	}
 
-	glVertexPointer(3, GL_FLOAT, 5 * sizeof(float), Verts);
-	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	glTexCoordPointer(2, GL_FLOAT, 5 * sizeof(float), Verts + 3);
+	Context->SetVertexBufferPointer(Verts);
+	Context->SetVertexFormat(0, 3, 2, 0);
 
-	glDrawArrays(GL_QUADS, 0, 4 * Length);
+	Context->DrawPrimitives(GL_QUADS, 0, 4 * Length);
 
-	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	Context->ClearVertexBuffer(); // context remove
 
 	delete[] Verts;
 }

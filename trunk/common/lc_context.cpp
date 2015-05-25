@@ -145,7 +145,7 @@ void lcContext::CreateShaderPrograms()
 		"}\n",
 		// LC_PROGRAM_TEXTURE
 		"#version 110\n"
-		"in vec2 PixelTexCoord;\n"
+		"varying vec2 PixelTexCoord;\n"
 		"uniform sampler2D Texture;\n"
 		"void main()\n"
 		"{\n"
@@ -153,7 +153,7 @@ void lcContext::CreateShaderPrograms()
 		"}\n",
 		// LC_PROGRAM_VERTEX_COLOR
 		"#version 110\n"
-		"in vec4 PixelColor;\n"
+		"varying vec4 PixelColor;\n"
 		"void main()\n"
 		"{\n"
 		"	gl_FragColor = PixelColor;\n"

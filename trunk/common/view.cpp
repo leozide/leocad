@@ -986,7 +986,7 @@ void View::DrawRotateOverlay()
 			break;
 		};
 
-        lcMatrix44 WorldMatrix = lcMul(RelativeRotation, lcMatrix44Translation(OverlayCenter));
+		lcMatrix44 WorldMatrix = lcMul(RelativeRotation, lcMatrix44Translation(OverlayCenter));
 		WorldMatrix = lcMul(lcMatrix44FromAxisAngle(lcVector3(Rotation[1], Rotation[2], Rotation[3]), Rotation[0] * LC_DTOR), WorldMatrix);
 		mContext->SetWorldMatrix(WorldMatrix);
 
@@ -1033,7 +1033,7 @@ void View::DrawRotateOverlay()
 		gTexFont.GetStringDimensions(&cx, &cy, buf);
 
 		mContext->SetColor(0.8f, 0.8f, 0.0f, 1.0f);
-		gTexFont.PrintText(ScreenPos[0] - (cx / 2), ScreenPos[1] + (cy / 2), 0.0f, buf);
+		gTexFont.PrintText(mContext, ScreenPos[0] - (cx / 2), ScreenPos[1] + (cy / 2), 0.0f, buf);
 
 		glDisable(GL_BLEND);
 		glDisable(GL_TEXTURE_2D);
@@ -1461,7 +1461,6 @@ void View::DrawAxes()
 
 void View::DrawViewport()
 {
-	mContext->SetProgram(LC_PROGRAM_SIMPLE);
 	mContext->SetWorldMatrix(lcMatrix44Identity());
 	mContext->SetViewMatrix(lcMatrix44Translation(lcVector3(0.375, 0.375, 0.0)));
 	mContext->SetProjectionMatrix(lcMatrix44Ortho(0.0f, mWidth, 0.0f, mHeight, -1.0f, 1.0f));
@@ -1472,6 +1471,7 @@ void View::DrawViewport()
 
 	if (gMainWindow->GetActiveView() == this)
 	{
+		mContext->SetProgram(LC_PROGRAM_SIMPLE);
 		mContext->SetColor(1.0f, 0.0f, 0.0f, 1.0f);
 		float Verts[8] = { 0.0f, 0.0f, mWidth - 1.0f, 0.0f, mWidth - 1.0f, mHeight - 1.0f, 0.0f, mHeight - 1.0f };
 
@@ -1486,14 +1486,16 @@ void View::DrawViewport()
 
 	if (CameraName[0])
 	{
+		mContext->SetProgram(LC_PROGRAM_TEXTURE);
 		mContext->SetColor(0.0f, 0.0f, 0.0f, 1.0f);
+
 		glEnable(GL_TEXTURE_2D);
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 		gTexFont.MakeCurrent();
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_BLEND);
 
-		gTexFont.PrintText(3.0f, (float)mHeight - 1.0f - 6.0f, 0.0f, CameraName);
+		gTexFont.PrintText(mContext, 3.0f, (float)mHeight - 1.0f - 6.0f, 0.0f, CameraName);
 
 		glDisable(GL_BLEND);
 		glDisable(GL_TEXTURE_2D);

@@ -311,7 +311,7 @@ void PieceInfo::AddRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, i
 		RenderMesh.ColorIndex = ColorIndex;
 		RenderMesh.State = Focused ? LC_RENDERMESH_FOCUSED : (Selected ? LC_RENDERMESH_SELECTED : LC_RENDERMESH_NONE);
 		RenderMesh.Distance = fabsf(lcMul31(WorldMatrix[3], Scene.mViewMatrix).z);
-		RenderMesh.LodIndex = mMesh->GetLodIndex(RenderMesh.Distance);
+		RenderMesh.LodIndex = RenderMesh.Mesh->GetLodIndex(RenderMesh.Distance);
 
 		bool Translucent = lcIsColorTranslucent(ColorIndex);
 

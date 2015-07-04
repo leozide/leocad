@@ -175,8 +175,10 @@ void lcTimelineWidget::Update(bool Clear)
 		{
 			if (PieceItemIndex >= StepItem->childCount() || PieceItem != StepItem->child(PieceItemIndex))
 			{
-				if (PieceItem->parent() == StepItem)
-					StepItem->removeChild(PieceItem);
+				QTreeWidgetItem* PieceParent = PieceItem->parent();
+
+				if (PieceParent)
+					PieceParent->removeChild(PieceItem);
 
 				StepItem->insertChild(PieceItemIndex, PieceItem);
 			}

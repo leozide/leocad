@@ -59,7 +59,7 @@ void lcTimelineWidget::CustomMenuRequested(QPoint Pos)
 	Menu->popup(viewport()->mapToGlobal(Pos));
 }
 
-void lcTimelineWidget::Update(bool Clear)
+void lcTimelineWidget::Update(bool Clear, bool UpdateItems)
 {
 	if (mIgnoreUpdates)
 		return;
@@ -143,14 +143,34 @@ void lcTimelineWidget::Update(bool Clear)
 		}
 
 		QTreeWidgetItem* PieceItem = mItems.value(Piece);
+		bool UpdateItem = UpdateItems;
 
 		if (!PieceItem)
 		{
-			PieceItem = new QTreeWidgetItem(QStringList(Piece->mPieceInfo->m_strDescription));
+			PieceItem = new QTreeWidgetItem();
 			PieceItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsDragEnabled);
 			PieceItem->setData(0, Qt::UserRole, qVariantFromValue<uintptr_t>((uintptr_t)Piece));
 			StepItem->insertChild(PieceItemIndex, PieceItem);
 			mItems[Piece] = PieceItem;
+
+			UpdateItem = true;
+		}
+		else
+		{
+			if (PieceItemIndex >= StepItem->childCount() || PieceItem != StepItem->child(PieceItemIndex))
+			{
+				QTreeWidgetItem* PieceParent = PieceItem->parent();
+
+				if (PieceParent)
+					PieceParent->removeChild(PieceItem);
+
+				StepItem->insertChild(PieceItemIndex, PieceItem);
+			}
+		}
+
+		if (UpdateItem)
+		{
+			PieceItem->setText(0, Piece->mPieceInfo->m_strDescription);
 
 			int ColorIndex = Piece->mColorIndex;
 			if (!mIcons.contains(ColorIndex))
@@ -170,24 +190,12 @@ void lcTimelineWidget::Update(bool Clear)
 			}
 
 			PieceItem->setIcon(0, mIcons[ColorIndex]);
+
+			QColor Color = palette().text().color();
+			if (Piece->IsHidden())
+				Color.setAlpha(128);
+			PieceItem->setTextColor(0, Color);
 		}
-		else
-		{
-			if (PieceItemIndex >= StepItem->childCount() || PieceItem != StepItem->child(PieceItemIndex))
-			{
-				QTreeWidgetItem* PieceParent = PieceItem->parent();
-
-				if (PieceParent)
-					PieceParent->removeChild(PieceItem);
-
-				StepItem->insertChild(PieceItemIndex, PieceItem);
-			}
-		}
-
-		QColor Color = palette().text().color();
-		if (Piece->IsHidden())
-			Color.setAlpha(128);
-		PieceItem->setTextColor(0, Color);
 
 		PieceItem->setSelected(Piece->IsSelected());
 		PieceItemIndex++;

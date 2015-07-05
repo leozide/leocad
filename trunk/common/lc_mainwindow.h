@@ -158,7 +158,7 @@ public:
 
 	void UpdateFocusObject(lcObject* Focus);
 	void UpdateSelectedObjects(int Flags, int SelectedCount, lcObject* Focus);
-	void UpdateTimeline(bool Clear);
+	void UpdateTimeline(bool Clear, bool UpdateItems);
 	void UpdatePaste(bool Enabled);
 	void UpdateCurrentStep();
 	void SetAddKeys(bool AddKeys);

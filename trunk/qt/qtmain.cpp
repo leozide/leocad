@@ -165,17 +165,7 @@ int main(int argc, char *argv[])
 	const char* LDrawPath = NULL;
 #endif
 
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
-	QStringList cachePathList = QStandardPaths::standardLocations(QStandardPaths::CacheLocation);
-	QString cachePath = cachePathList.first();
-#else
-	QString cachePath = QDesktopServices::storageLocation(QDesktopServices::CacheLocation);
-#endif
-
-	QDir dir;
-	dir.mkpath(cachePath);
-
-	if (!g_App->Initialize(argc, argv, libPath, LDrawPath, cachePath.toLocal8Bit().data()))
+	if (!g_App->Initialize(argc, argv, libPath, LDrawPath))
 		return 1;
 
 	gMainWindow->SetColorIndex(lcGetColorIndex(4));

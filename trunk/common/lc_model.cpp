@@ -621,7 +621,6 @@ bool lcModel::LoadBinary(lcFile* file)
 
 	file->ReadS32(&count, 1);
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
-	Library->OpenCache();
 
 	int FirstNewPiece = mPieces.GetSize();
 
@@ -660,8 +659,6 @@ bool lcModel::LoadBinary(lcFile* file)
 //			pPiece->SetGroup((lcGroup*)group);
 		}
 	}
-
-	Library->CloseCache();
 
 	if (fv >= 0.4f)
 	{

@@ -49,8 +49,8 @@ public:
 	void Create(lcuint16 NumSections[LC_NUM_MESH_LODS], int NumVertices, int NumTexturedVertices, int NumIndices);
 	void CreateBox();
 
-	bool FileLoad(lcFile& File);
-	void FileSave(lcFile& File);
+	bool FileLoad(lcMemFile& File);
+	bool FileSave(lcMemFile& File);
 
 	template<typename IndexType>
 	void ExportPOVRay(lcFile& File, const char* MeshName, const char* ColorTable);

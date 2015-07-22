@@ -107,25 +107,25 @@ void lcApplication::GetFileList(const char* Path, lcArray<String>& FileList)
 	}
 }
 
-bool lcApplication::LoadPiecesLibrary(const char* LibPath, const char* LibraryInstallPath, const char* LDrawPath, const char* LibraryCachePath)
+bool lcApplication::LoadPiecesLibrary(const char* LibPath, const char* LibraryInstallPath, const char* LDrawPath)
 {
 	if (mLibrary == NULL)
 		mLibrary = new lcPiecesLibrary();
 
 	if (LibPath && LibPath[0])
-		return mLibrary->Load(LibPath, LibraryCachePath);
+		return mLibrary->Load(LibPath);
 
 	char* EnvPath = getenv("LEOCAD_LIB");
 
 	if (EnvPath && EnvPath[0])
 	{
-		return mLibrary->Load(EnvPath, LibraryCachePath);
+		return mLibrary->Load(EnvPath);
 	}
 
 	QString CustomPath = lcGetProfileString(LC_PROFILE_PARTS_LIBRARY);
 
 	if (!CustomPath.isEmpty())
-		return mLibrary->Load(CustomPath.toLatin1().constData(), LibraryCachePath); // todo: qstring
+		return mLibrary->Load(CustomPath.toLatin1().constData()); // todo: qstring
 
 	if (LibraryInstallPath && LibraryInstallPath[0])
 	{
@@ -139,7 +139,7 @@ bool lcApplication::LoadPiecesLibrary(const char* LibPath, const char* LibraryIn
 
 		strcat(LibraryPath, "library.bin");
 
-		if (mLibrary->Load(LibraryPath, LibraryCachePath))
+		if (mLibrary->Load(LibraryPath))
 		{
 			mLibrary->SetOfficialPieces();
 			return true;
@@ -156,7 +156,7 @@ bool lcApplication::LoadPiecesLibrary(const char* LibPath, const char* LibraryIn
 		if ((LibraryPath[i] != '\\') && (LibraryPath[i] != '/'))
 			strcat(LibraryPath, "/");
 
-		if (mLibrary->Load(LibraryPath, LibraryCachePath))
+		if (mLibrary->Load(LibraryPath))
 			return true;
 	}
 
@@ -195,7 +195,7 @@ void lcApplication::ParseStringArgument(int* CurArg, int argc, char* argv[], cha
 	}
 }
 
-bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstallPath, const char* LDrawPath, const char* LibraryCachePath)
+bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstallPath, const char* LDrawPath)
 {
 	char* LibPath = NULL;
 
@@ -312,7 +312,7 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 	gMainWindow = new lcMainWindow();
 	lcLoadDefaultKeyboardShortcuts();
 
-	if (!LoadPiecesLibrary(LibPath, LibraryInstallPath, LDrawPath, LibraryCachePath))
+	if (!LoadPiecesLibrary(LibPath, LibraryInstallPath, LDrawPath))
 	{
 		if (SaveImage || SaveWavefront || Save3DS)
 		{

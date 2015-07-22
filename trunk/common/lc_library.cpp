@@ -15,6 +15,13 @@
 #include <sys/stat.h>
 #include <ctype.h>
 #include <locale.h>
+#include <zlib.h>
+
+#if MAX_MEM_LEVEL >= 8
+#  define DEF_MEM_LEVEL 8
+#else
+#  define DEF_MEM_LEVEL  MAX_MEM_LEVEL
+#endif
 
 #define LC_LIBRARY_CACHE_VERSION   0x0104
 #define LC_LIBRARY_CACHE_ARCHIVE   0x0001
@@ -22,17 +29,22 @@
 
 lcPiecesLibrary::lcPiecesLibrary()
 {
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+	QStringList cachePathList = QStandardPaths::standardLocations(QStandardPaths::CacheLocation);
+	mCachePath = cachePathList.first();
+#else
+	mCachePath  = QDesktopServices::storageLocation(QDesktopServices::CacheLocation);
+#endif
+
+	QDir Dir;
+	Dir.mkpath(mCachePath);
+
 	mNumOfficialPieces = 0;
 	mLibraryPath[0] = 0;
-	mCacheFileName[0] = 0;
-	mCacheFileModifiedTime = 0;
 	mLibraryFileName[0] = 0;
 	mUnofficialFileName[0] = 0;
 	mZipFiles[LC_ZIPFILE_OFFICIAL] = NULL;
 	mZipFiles[LC_ZIPFILE_UNOFFICIAL] = NULL;
-	mCacheFile = NULL;
-	mCacheFileName[0] = 0;
-	mSaveCache = false;
 	mBuffersDirty = false;
 }
 
@@ -43,8 +55,6 @@ lcPiecesLibrary::~lcPiecesLibrary()
 
 void lcPiecesLibrary::Unload()
 {
-	SaveCacheFile();
-
 	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 		delete mPieces[PieceIdx];
 	mPieces.RemoveAll();
@@ -124,7 +134,7 @@ lcTexture* lcPiecesLibrary::FindTexture(const char* TextureName)
 	return NULL;
 }
 
-bool lcPiecesLibrary::Load(const char* LibraryPath, const char* CachePath)
+bool lcPiecesLibrary::Load(const char* LibraryPath)
 {
 	Unload();
 
@@ -146,7 +156,7 @@ bool lcPiecesLibrary::Load(const char* LibraryPath, const char* CachePath)
 
 		OpenArchive(UnofficialFileName, LC_ZIPFILE_UNOFFICIAL);
 
-		ReadArchiveDescriptions(LibraryPath, UnofficialFileName, CachePath);
+		ReadArchiveDescriptions(LibraryPath, UnofficialFileName);
 	}
 	else
 	{
@@ -300,74 +310,21 @@ bool lcPiecesLibrary::OpenArchive(lcFile* File, const char* FileName, lcZipFileT
 	return true;
 }
 
-void lcPiecesLibrary::ReadArchiveDescriptions(const char* OfficialFileName, const char* UnofficialFileName, const char* CachePath)
+void lcPiecesLibrary::ReadArchiveDescriptions(const QString& OfficialFileName, const QString& UnofficialFileName)
 {
-	bool CacheValid = false;
-	struct stat OfficialStat, UnofficialStat;
+	QFileInfo OfficialInfo(OfficialFileName);
+	QFileInfo UnofficialInfo(OfficialFileName);
+	
+	mArchiveCheckSum[0] = OfficialInfo.size();
+	mArchiveCheckSum[1] = OfficialInfo.lastModified().toMSecsSinceEpoch();
+	mArchiveCheckSum[2] = UnofficialInfo.size();
+	mArchiveCheckSum[3] = UnofficialInfo.lastModified().toMSecsSinceEpoch();
 
-	strcpy(mCacheFileName, CachePath);
-	mCacheFileModifiedTime = 0;
+	QString IndexFileName = QFileInfo(QDir(mCachePath), QLatin1String("index")).absoluteFilePath();
 
-	if (mCacheFileName[0])
-	{
-		int Length = strlen(mCacheFileName);
-		if (mCacheFileName[Length] != '/' && mCacheFileName[Length] != '\\')
-			strcat(mCacheFileName, "/");
-
-		strcat(mCacheFileName, "library.cache");
-	}
-
-	if (stat(OfficialFileName, &OfficialStat) == 0)
-	{
-		lcuint64 CheckSum[4] =
-		{
-			(lcuint64)OfficialStat.st_size, (lcuint64)OfficialStat.st_mtime, 0, 0
-		};
-
-		if (stat(UnofficialFileName, &UnofficialStat) == 0)
-		{
-			CheckSum[2] = (lcuint64)UnofficialStat.st_size;
-			CheckSum[3] = (lcuint64)UnofficialStat.st_mtime;
-		}
-
-		lcZipFile CacheFile;
-
-		if (CacheFile.OpenRead(mCacheFileName))
-		{
-			lcMemFile VersionFile;
-
-			if (CacheFile.ExtractFile("version", VersionFile))
-			{
-				lcuint32 CacheVersion;
-				lcuint32 CacheFlags;
-
-				if (VersionFile.ReadU32(&CacheVersion, 1) && VersionFile.ReadU32(&CacheFlags, 1) &&
-					CacheVersion == LC_LIBRARY_CACHE_VERSION && CacheFlags == LC_LIBRARY_CACHE_ARCHIVE)
-				{
-					lcuint64 CacheCheckSum[4];
-
-					if (VersionFile.ReadU64(CacheCheckSum, 4))
-						CacheValid = (memcmp(CacheCheckSum, CheckSum, sizeof(CheckSum)) == 0);
-				}
-			}
-		}
-
-		if (CacheValid)
-			CacheValid = LoadCacheIndex(CacheFile);
-	}
-
-	if (CacheValid)
-	{
-		struct stat CacheStat;
-
-		if (stat(mCacheFileName, &CacheStat) == 0)
-			mCacheFileModifiedTime = CacheStat.st_mtime;
-	}
-	else
+	if (!LoadCacheIndex(IndexFileName))
 	{
 		lcMemFile PieceFile;
-
-		mSaveCache = true;
 
 		for (int PieceInfoIndex = 0; PieceInfoIndex < mPieces.GetSize(); PieceInfoIndex++)
 		{
@@ -392,6 +349,8 @@ void lcPiecesLibrary::ReadArchiveDescriptions(const char* OfficialFileName, cons
 				break;
 			}
 		}
+
+		SaveCacheIndex(IndexFileName);
 	}
 }
 
@@ -624,199 +583,258 @@ bool lcPiecesLibrary::OpenDirectory(const char* Path)
 	return true;
 }
 
-bool lcPiecesLibrary::OpenCache()
+bool lcPiecesLibrary::ReadCacheFile(const QString& FileName, lcMemFile& CacheFile)
 {
-	struct stat CacheStat;
+	QFile File(FileName);
 
-	if (!mCacheFileName[0])
+	if (!File.open(QIODevice::ReadOnly))
 		return false;
 
-	if (stat(mCacheFileName, &CacheStat) != 0 || mCacheFileModifiedTime != (lcuint64)CacheStat.st_mtime)
+	quint32 CacheVersion, CacheFlags;
+	
+	if (File.read((char*)&CacheVersion, sizeof(CacheVersion)) == -1 || CacheVersion != LC_LIBRARY_CACHE_VERSION)
 		return false;
 
-	mCacheFile = new lcZipFile;
+	if (File.read((char*)&CacheFlags, sizeof(CacheFlags)) == -1 || CacheFlags != LC_LIBRARY_CACHE_ARCHIVE)
+		return false;
 
-	if (!mCacheFile->OpenRead(mCacheFileName))
+	qint64 CacheCheckSum[4];
+
+	if (File.read((char*)&CacheCheckSum, sizeof(CacheCheckSum)) == -1 || memcmp(CacheCheckSum, mArchiveCheckSum, sizeof(CacheCheckSum)))
+		return false;
+
+	quint32 UncompressedSize;
+
+	if (File.read((char*)&UncompressedSize, sizeof(UncompressedSize)) == -1)
+		return false;
+
+	QByteArray CompressedData = File.readAll();
+
+	CacheFile.SetLength(UncompressedSize);
+	CacheFile.Seek(0, SEEK_SET);
+
+	const int CHUNK = 16384;
+	int ret;
+	unsigned have;
+	z_stream strm;
+	unsigned char in[CHUNK];
+	unsigned char out[CHUNK];
+	int pos;
+
+	strm.zalloc = Z_NULL;
+	strm.zfree = Z_NULL;
+	strm.opaque = Z_NULL;
+	strm.avail_in = 0;
+	strm.next_in = Z_NULL;
+	pos = 0;
+
+	ret = inflateInit2(&strm, -MAX_WBITS);
+	if (ret != Z_OK)
+		return ret;
+
+	do
 	{
-		delete mCacheFile;
-		mCacheFile = NULL;
+		strm.avail_in = lcMin(CompressedData.size() - pos, CHUNK);
+		strm.next_in = in;
 
+		if (strm.avail_in == 0)
+			break;
+
+		memcpy(in, CompressedData.constData() + pos, strm.avail_in);
+		pos += strm.avail_in;
+
+		do
+		{
+			strm.avail_out = CHUNK;
+			strm.next_out = out;
+			ret = inflate(&strm, Z_NO_FLUSH);
+
+			switch (ret)
+			{
+			case Z_NEED_DICT:
+				ret = Z_DATA_ERROR;
+			case Z_DATA_ERROR:
+			case Z_MEM_ERROR:
+				(void)inflateEnd(&strm);
+				return ret;
+			}
+
+			have = CHUNK - strm.avail_out;
+			CacheFile.WriteBuffer(out, have);
+		} while (strm.avail_out == 0);
+	} while (ret != Z_STREAM_END);
+
+	(void)inflateEnd(&strm);
+	
+	CacheFile.Seek(0, SEEK_SET);
+
+	return ret == Z_STREAM_END;
+}
+
+bool lcPiecesLibrary::WriteCacheFile(const QString& FileName, lcMemFile& CacheFile)
+{
+	QFile File(FileName);
+
+	if (!File.open(QIODevice::WriteOnly))
 		return false;
-	}
+
+	quint32 CacheVersion = LC_LIBRARY_CACHE_VERSION;
+	quint32 CacheFlags = LC_LIBRARY_CACHE_ARCHIVE;
+	
+	if (File.write((char*)&CacheVersion, sizeof(CacheVersion)) == -1)
+		return false;
+
+	if (File.write((char*)&CacheFlags, sizeof(CacheFlags)) == -1)
+		return false;
+
+	if (File.write((char*)&mArchiveCheckSum, sizeof(mArchiveCheckSum)) == -1)
+		return false;
+
+	quint32 UncompressedSize = CacheFile.GetLength();
+
+	if (File.write((char*)&UncompressedSize, sizeof(UncompressedSize)) == -1)
+		return false;
+
+	const size_t BufferSize = 16384;
+	char WriteBuffer[BufferSize];
+	z_stream Stream;
+	lcuint32 Crc32 = 0;
+
+	CacheFile.Seek(0, SEEK_SET);
+
+	Stream.zalloc = (alloc_func)0;
+	Stream.zfree = (free_func)0;
+	Stream.opaque = (voidpf)0;
+
+	if (deflateInit2(&Stream, Z_DEFAULT_COMPRESSION, Z_DEFLATED, -MAX_WBITS, DEF_MEM_LEVEL, Z_DEFAULT_STRATEGY) != Z_OK)
+		return false;
+
+	Bytef* BufferIn = CacheFile.mBuffer;
+	int FlushMode;
+
+	do
+	{
+		uInt Read = lcMin(CacheFile.GetLength() - (BufferIn - CacheFile.mBuffer), BufferSize);
+		Stream.avail_in = Read;
+		Stream.next_in = BufferIn;
+		Crc32 = crc32(Crc32, BufferIn, Read);
+		BufferIn += Read;
+
+		FlushMode = (BufferIn >= CacheFile.mBuffer + CacheFile.GetLength()) ? Z_FINISH : Z_NO_FLUSH;
+
+		do
+		{
+			Stream.avail_out = BufferSize;
+			Stream.next_out = (Bytef*)WriteBuffer;
+			deflate(&Stream, FlushMode);
+			File.write(WriteBuffer, BufferSize - Stream.avail_out);
+		} while (Stream.avail_out == 0);
+	} while (FlushMode != Z_FINISH);
+
+    deflateEnd(&Stream);
 
 	return true;
 }
 
-void lcPiecesLibrary::CloseCache()
-{
-	delete mCacheFile;
-	mCacheFile = NULL;
-
-	SaveCacheFile();
-}
-
-bool lcPiecesLibrary::LoadCacheIndex(lcZipFile& CacheFile)
+bool lcPiecesLibrary::LoadCacheIndex(const QString& FileName)
 {
 	lcMemFile IndexFile;
 
-	if (!CacheFile.ExtractFile("index", IndexFile))
+	if (!ReadCacheFile(FileName, IndexFile))
 		return false;
 
-	lcuint32 NumFiles;
+	qint32 NumFiles;
 
-	if (!IndexFile.ReadU32(&NumFiles, 1) || NumFiles != (lcuint32)mPieces.GetSize())
+	if (IndexFile.ReadBuffer((char*)&NumFiles, sizeof(NumFiles)) == 0 || NumFiles != mPieces.GetSize())
 		return false;
 
 	for (int PieceInfoIndex = 0; PieceInfoIndex < mPieces.GetSize(); PieceInfoIndex++)
 	{
 		PieceInfo* Info = mPieces[PieceInfoIndex];
-		lcuint8 Length;
+		quint8 Length;
 
-		if (!IndexFile.ReadU8(&Length, 1) || Length >= sizeof(Info->m_strDescription))
+		if (IndexFile.ReadBuffer((char*)&Length, sizeof(Length)) == 0 || Length >= sizeof(Info->m_strDescription))
 			return false;
 
-		if (!IndexFile.ReadBuffer(Info->m_strDescription, Length) || !IndexFile.ReadU32(&Info->mFlags, 1))
+		if (IndexFile.ReadBuffer((char*)Info->m_strDescription, Length) == 0 || IndexFile.ReadBuffer((char*)&Info->mFlags, sizeof(Info->mFlags)) == 0)
 			return false;
 
 		Info->m_strDescription[Length] = 0;
-
-		if (!IndexFile.ReadFloats(Info->m_fDimensions, 6))
-			return false;
 	}
 
 	return true;
 }
 
-bool lcPiecesLibrary::LoadCachePiece(PieceInfo* Info)
+bool lcPiecesLibrary::SaveCacheIndex(const QString& FileName)
 {
-	if ((Info->mFlags & LC_PIECE_CACHED) == 0)
+	lcMemFile IndexFile;
+
+	qint32 NumFiles = mPieces.GetSize();
+
+	if (IndexFile.WriteBuffer((char*)&NumFiles, sizeof(NumFiles)) == 0)
 		return false;
 
-	if (mCacheFile)
+	for (int PieceInfoIndex = 0; PieceInfoIndex < mPieces.GetSize(); PieceInfoIndex++)
 	{
-		lcMemFile PieceFile;
+		PieceInfo* Info = mPieces[PieceInfoIndex];
+		quint8 Length = strlen(Info->m_strDescription);
 
-		if (!mCacheFile->ExtractFile(Info->m_strName, PieceFile))
+		if (IndexFile.WriteBuffer((char*)&Length, sizeof(Length)) == 0)
 			return false;
 
-		lcMesh* Mesh = new lcMesh;
-		Info->SetMesh(Mesh);
-
-		return Mesh->FileLoad(PieceFile);
+		if (IndexFile.WriteBuffer((char*)Info->m_strDescription, Length) == 0 || IndexFile.WriteBuffer((char*)&Info->mFlags, sizeof(Info->mFlags)) == 0)
+			return false;
 	}
-	else
-	{
-		struct stat CacheStat;
 
-		if (stat(mCacheFileName, &CacheStat) != 0 || mCacheFileModifiedTime != (lcuint64)CacheStat.st_mtime)
-			return false;
-
-		lcZipFile CacheFile;
-
-		if (!CacheFile.OpenRead(mCacheFileName))
-			return false;
-
-		lcMemFile PieceFile;
-
-		if (!CacheFile.ExtractFile(Info->m_strName, PieceFile))
-			return false;
-
-		lcMesh* Mesh = new lcMesh;
-		Info->SetMesh(Mesh);
-
-		return Mesh->FileLoad(PieceFile);
-	}
+	return WriteCacheFile(FileName, IndexFile);
 }
 
-void lcPiecesLibrary::SaveCacheFile()
+bool lcPiecesLibrary::LoadCachePiece(PieceInfo* Info)
 {
-	struct stat CacheStat;
-	lcZipFile CacheFile;
+	QString FileName = QFileInfo(QDir(mCachePath), QString::fromLatin1(Info->m_strName)).absoluteFilePath();
+	lcMemFile MeshData;
 
-	if (!mSaveCache)
-		return;
+	if (!ReadCacheFile(FileName, MeshData))
+		return false;
 
-	if (stat(mCacheFileName, &CacheStat) != 0 || mCacheFileModifiedTime != (lcuint64)CacheStat.st_mtime)
-	{
-		if (!CacheFile.OpenWrite(mCacheFileName, false))
-			return;
+	lcMesh* Mesh = new lcMesh;
+	Info->SetMesh(Mesh);
 
-		struct stat OfficialStat, UnofficialStat;
+	quint32 Flags;
+	if (MeshData.ReadBuffer((char*)&Flags, sizeof(Flags)) == 0)
+		return false;
 
-		if (stat(mLibraryFileName, &OfficialStat) != 0)
-			return;
+	Info->mFlags = Flags;
 
-		lcuint64 CheckSum[4] =
-		{
-			(lcuint64)OfficialStat.st_size, (lcuint64)OfficialStat.st_mtime, 0, 0
-		};
+	if (MeshData.ReadBuffer((char*)Info->m_fDimensions, sizeof(Info->m_fDimensions)) == 0) // todo: move dimensions to the mesh
+		return false;
 
-		if (stat(mUnofficialFileName, &UnofficialStat) == 0)
-		{
-			CheckSum[2] = (lcuint64)UnofficialStat.st_size;
-			CheckSum[3] = (lcuint64)UnofficialStat.st_mtime;
-		}
+	if (MeshData.ReadBuffer((char*)&Info->GetMesh()->mRadius, sizeof(float)) == 0)
+		return false;
 
-		lcMemFile VersionFile;
+	return Mesh->FileLoad(MeshData);
+}
 
-		VersionFile.WriteU32(LC_LIBRARY_CACHE_VERSION);
-		VersionFile.WriteU32(LC_LIBRARY_CACHE_ARCHIVE);
-		VersionFile.WriteU64(CheckSum, 4);
+bool lcPiecesLibrary::SaveCachePiece(PieceInfo* Info)
+{
+	lcMemFile MeshData;
 
-		CacheFile.AddFile("version", VersionFile);
-	}
-	else
-	{
-		if (!CacheFile.OpenWrite(mCacheFileName, true))
-			return;
+	quint32 Flags = Info->mFlags;
+	if (MeshData.WriteBuffer((char*)&Flags, sizeof(Flags)) == 0)
+		return false;
 
-		CacheFile.DeleteFile("index");
-	}
+	if (MeshData.WriteBuffer((char*)Info->m_fDimensions, sizeof(Info->m_fDimensions)) == 0)
+		return false;
 
-	lcMemFile IndexFile;
-	int NumPieces = 0;
+	if (MeshData.WriteBuffer((char*)&Info->GetMesh()->mRadius, sizeof(float)) == 0)
+		return false;
 
-	IndexFile.WriteU32(0);
+	if (!Info->GetMesh()->FileSave(MeshData))
+		return false;
 
-	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-	{
-		PieceInfo* Info = mPieces[PieceIdx];
+	QString FileName = QFileInfo(QDir(mCachePath), QString::fromLatin1(Info->m_strName)).absoluteFilePath();
 
-		if (Info->mFlags & LC_PIECE_PLACEHOLDER || Info->mFlags & LC_PIECE_MODEL)
-			continue;
-
-		bool Cached = (Info->mFlags & LC_PIECE_CACHED) != 0;
-		lcMesh* Mesh = Info->GetMesh();
-
-		if (Mesh)
-			Info->mFlags |= LC_PIECE_CACHED;
-
-		int Length = strlen(Info->m_strDescription);
-
-		IndexFile.WriteU8(Length);
-		IndexFile.WriteBuffer(Info->m_strDescription, Length);
-		IndexFile.WriteU32(Info->mFlags);
-		IndexFile.WriteFloats(Info->m_fDimensions, 6);
-
-		NumPieces++;
-
-		if (Cached || !Mesh)
-			continue;
-
-		lcMemFile PieceFile;
-
-		Mesh->FileSave(PieceFile);
-		CacheFile.AddFile(Info->m_strName, PieceFile);
-
-		Info->mFlags |= LC_PIECE_CACHED;
-	}
-
-	IndexFile.Seek(0, SEEK_SET);
-	IndexFile.WriteU32(NumPieces);
-
-	CacheFile.AddFile("index", IndexFile);
-
-	mSaveCache = false;
+	return WriteCacheFile(FileName, MeshData);
 }
 
 struct lcMergeSection
@@ -908,7 +926,7 @@ bool lcPiecesLibrary::LoadPiece(PieceInfo* Info)
 	CreateMesh(Info, MeshData);
 
 	if (mZipFiles[LC_ZIPFILE_OFFICIAL])
-		mSaveCache = true;
+		SaveCachePiece(Info);
 
 	return true;
 }
@@ -2361,8 +2379,6 @@ bool lcPiecesLibrary::LoadBuiltinPieces()
 	}
 
 	lcMemFile PieceFile;
-
-	mSaveCache = false;
 
 	for (int PieceInfoIndex = 0; PieceInfoIndex < mPieces.GetSize(); PieceInfoIndex++)
 	{

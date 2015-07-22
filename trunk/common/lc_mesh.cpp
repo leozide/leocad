@@ -291,9 +291,9 @@ void lcMesh::ExportWavefrontIndices(lcFile& File, int DefaultColorIndex, int Ver
 		ExportWavefrontIndices<GLuint>(File, DefaultColorIndex, VertexOffset);
 }
 
-bool lcMesh::FileLoad(lcFile& File)
+bool lcMesh::FileLoad(lcMemFile& File)
 {
-	if (File.ReadU32() != LC_FILE_ID || File.ReadU32() != LC_MESH_FILE_ID || File.ReadU32() != LC_MESH_FILE_VERSION)
+	if (File.ReadU32() != LC_MESH_FILE_ID || File.ReadU32() != LC_MESH_FILE_VERSION)
 		return false;
 
 	lcuint32 NumVertices, NumTexturedVertices, NumIndices;
@@ -353,9 +353,8 @@ bool lcMesh::FileLoad(lcFile& File)
 	return true;
 }
 
-void lcMesh::FileSave(lcFile& File)
+bool lcMesh::FileSave(lcMemFile& File)
 {
-	File.WriteU32(LC_FILE_ID);
 	File.WriteU32(LC_MESH_FILE_ID);
 	File.WriteU32(LC_MESH_FILE_VERSION);
 
@@ -394,6 +393,8 @@ void lcMesh::FileSave(lcFile& File)
 		File.WriteU16((lcuint16*)mIndexData, mIndexDataSize / 2);
 	else
 		File.WriteU32((lcuint32*)mIndexData, mIndexDataSize / 4);
+
+	return true;
 }
 
 int lcMesh::GetLodIndex(float Distance) const

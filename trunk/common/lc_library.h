@@ -126,7 +126,7 @@ public:
 	lcPiecesLibrary();
 	~lcPiecesLibrary();
 
-	bool Load(const char* LibraryPath, const char* CachePath);
+	bool Load(const char* LibraryPath);
 	void Unload();
 	void RemoveTemporaryPieces();
 	void RemovePiece(PieceInfo* Info);
@@ -137,9 +137,6 @@ public:
 
 	lcTexture* FindTexture(const char* TextureName);
 	bool LoadTexture(lcTexture* Texture);
-
-	bool OpenCache();
-	void CloseCache();
 
 	bool PieceInCategory(PieceInfo* Info, const String& CategoryKeywords) const;
 	void SearchPieces(const char* Keyword, lcArray<PieceInfo*>& Pieces) const;
@@ -178,20 +175,20 @@ protected:
 	bool OpenArchive(const char* FileName, lcZipFileType ZipFileType);
 	bool OpenArchive(lcFile* File, const char* FileName, lcZipFileType ZipFileType);
 	bool OpenDirectory(const char* Path);
-	void ReadArchiveDescriptions(const char* OfficialFileName, const char* UnofficialFileName, const char* CachePath);
+	void ReadArchiveDescriptions(const QString& OfficialFileName, const QString& UnofficialFileName);
 
-	bool LoadCacheIndex(lcZipFile& CacheFile);
+	bool ReadCacheFile(const QString& FileName, lcMemFile& CacheFile);
+	bool WriteCacheFile(const QString& FileName, lcMemFile& CacheFile);
+	bool LoadCacheIndex(const QString& FileName);
+	bool SaveCacheIndex(const QString& FileName);
 	bool LoadCachePiece(PieceInfo* Info);
-	void SaveCacheFile();
+	bool SaveCachePiece(PieceInfo* Info);
 
 	int FindPrimitiveIndex(const char* Name) const;
 	bool LoadPrimitive(int PrimitiveIndex);
 
-	char mCacheFileName[LC_MAXPATH];
-	lcuint64 mCacheFileModifiedTime;
-	lcZipFile* mCacheFile;
-	bool mSaveCache;
-
+	QString mCachePath;
+	qint64 mArchiveCheckSum[4];
 	char mLibraryFileName[LC_MAXPATH];
 	char mUnofficialFileName[LC_MAXPATH];
 	lcZipFile* mZipFiles[LC_NUM_ZIPFILES];

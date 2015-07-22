@@ -42,11 +42,11 @@ public:
 	~lcApplication();
 
 	void SetProject(Project* Project);
-	bool Initialize(int argc, char *argv[], const char* LibraryInstallPath, const char* LDrawPath, const char* LibraryCachePath);
+	bool Initialize(int argc, char *argv[], const char* LibraryInstallPath, const char* LDrawPath);
 	void Shutdown();
 	void ShowPreferencesDialog();
 
-	bool LoadPiecesLibrary(const char* LibPath, const char* LibraryInstallPath, const char* LDrawPath, const char* LibraryCachePath);
+	bool LoadPiecesLibrary(const char* LibPath, const char* LibraryInstallPath, const char* LDrawPath);
 
 	void GetFileList(const char* Path, lcArray<String>& FileList);
 	void SetClipboard(const QByteArray& Clipboard);

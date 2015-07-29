@@ -81,9 +81,9 @@ void lcTimelineWidget::Update(bool Clear, bool UpdateItems)
 		clear();
 	}
 
-	int Steps = lcMax(Model->GetLastStep(), Model->GetCurrentStep());
+	lcStep LastStep = lcMax(Model->GetLastStep(), Model->GetCurrentStep());
 
-	for (int TopLevelItemIdx = Steps; TopLevelItemIdx < topLevelItemCount(); )
+	for (int TopLevelItemIdx = LastStep; TopLevelItemIdx < topLevelItemCount(); )
 	{
 		QTreeWidgetItem* StepItem = topLevelItem(TopLevelItemIdx);
 
@@ -98,7 +98,7 @@ void lcTimelineWidget::Update(bool Clear, bool UpdateItems)
 		delete StepItem;
 	}
 
-	for (int TopLevelItemIdx = topLevelItemCount(); TopLevelItemIdx < Steps; TopLevelItemIdx++)
+	for (unsigned int TopLevelItemIdx = topLevelItemCount(); TopLevelItemIdx < LastStep; TopLevelItemIdx++)
 	{
 		QTreeWidgetItem* StepItem = new QTreeWidgetItem(this, QStringList(tr("Step %1").arg(TopLevelItemIdx + 1)));
 		StepItem->setFlags(Qt::ItemIsEnabled | Qt::ItemIsDropEnabled);
@@ -201,16 +201,26 @@ void lcTimelineWidget::Update(bool Clear, bool UpdateItems)
 		PieceItemIndex++;
 	}
 
-	if (!StepItem)
-		StepItem = topLevelItem(0);
-
-	while (PieceItemIndex < StepItem->childCount())
+	if (Step == 0)
 	{
-		QTreeWidgetItem* PieceItem = StepItem->child(PieceItemIndex);
-		lcPiece* RemovePiece = (lcPiece*)PieceItem->data(0, Qt::UserRole).value<uintptr_t>();
+		Step = 1;
+		StepItem = topLevelItem(0);
+	}
 
-		mItems.remove(RemovePiece);
-		delete PieceItem;
+	while (Step <= LastStep)
+	{
+		while (PieceItemIndex < StepItem->childCount())
+		{
+			QTreeWidgetItem* PieceItem = StepItem->child(PieceItemIndex);
+			lcPiece* RemovePiece = (lcPiece*)PieceItem->data(0, Qt::UserRole).value<uintptr_t>();
+
+			mItems.remove(RemovePiece);
+			delete PieceItem;
+		}
+
+		Step++;
+		StepItem = topLevelItem(Step - 1);
+		PieceItemIndex = 0;
 	}
 
 	blockSignals(Blocked);

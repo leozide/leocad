@@ -1579,9 +1579,7 @@ void Project::ExportPOVRay()
 			Arguments.append(QString::fromLatin1("+L%1ar/").arg(Options.LGEOPath));
 		}
 
-		QString AbsolutePath = QFileInfo(Options.FileName).absolutePath();
-		if (!AbsolutePath.isEmpty())
-			Arguments.append(QString::fromLatin1("+o%1").arg(AbsolutePath));
+		Arguments.append(QString::fromLatin1("/EXIT"));
 
 		QProcess::execute(Options.POVRayPath, Arguments);
 	}

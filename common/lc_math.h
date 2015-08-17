@@ -4,10 +4,10 @@
 #include <math.h>
 #include <float.h>
 
-#define LC_DTOR 0.017453f
-#define LC_RTOD 57.29578f
-#define LC_PI   3.141592f
-#define LC_2PI  6.283185f
+#define LC_DTOR (static_cast<float>(M_PI / 180))
+#define LC_RTOD (static_cast<float>(180 / M_PI))
+#define LC_PI   (static_cast<float>(M_PI))
+#define LC_2PI  (static_cast<float>(2*M_PI))
 
 #define LC_RGB(r,g,b) LC_RGBA(r,g,b,255)
 #define LC_RGBA(r,g,b,a) ((lcuint32)(((lcuint8) (r) | ((lcuint16) (g) << 8)) | (((lcuint32) (lcuint8) (b)) << 16) | (((lcuint32) (lcuint8) (a)) << 24))) 
@@ -16,6 +16,67 @@
 #define LC_RGBA_BLUE(rgba)  ((lcuint8)(((rgba) >> 16) & 0xff))
 #define LC_RGBA_ALPHA(rgba) ((lcuint8)(((rgba) >> 24) & 0xff))
 #define LC_FLOATRGB(f) LC_RGB(f[0]*255, f[1]*255, f[2]*255)
+
+inline float lcCos(float x)
+{
+	if(x == LC_PI * -12 / 6) return 1;
+
+	if(x == LC_PI * -10 / 6) return 0.5f;
+	if(x == LC_PI * - 9 / 6) return 0;
+	if(x == LC_PI * - 8 / 6) return -0.5f;
+
+	if(x == LC_PI * - 6 / 6) return -1;
+
+	if(x == LC_PI * - 4 / 6) return -0.5f;
+	if(x == LC_PI * - 3 / 6) return 0;
+	if(x == LC_PI * - 2 / 6) return 0.5f;
+
+	if(x == LC_PI *   0 / 6) return 1;
+
+	if(x == LC_PI *   2 / 6) return 0.5f;
+	if(x == LC_PI *   3 / 6) return 0;
+	if(x == LC_PI *   4 / 6) return -0.5f;
+
+	if(x == LC_PI *   6 / 6) return -1;
+
+	if(x == LC_PI *   8 / 6) return -0.5f;
+	if(x == LC_PI *   9 / 6) return 0;
+	if(x == LC_PI *  10 / 6) return 0.5f;
+
+	if(x == LC_PI *  12 / 6) return 1;
+
+	return cosf(x);
+}
+
+inline float lcSin(float x)
+{
+	if(x == LC_PI * -12 / 6) return 0;
+	if(x == LC_PI * -11 / 6) return 0.5f;
+
+	if(x == LC_PI * - 9 / 6) return 1;
+
+	if(x == LC_PI * - 7 / 6) return 0.5f;
+	if(x == LC_PI * - 6 / 6) return 0;
+	if(x == LC_PI * - 5 / 6) return -0.5f;
+
+	if(x == LC_PI * - 3 / 6) return -1;
+
+	if(x == LC_PI * - 1 / 6) return -0.5f;
+	if(x == LC_PI *   0 / 6) return 0;
+	if(x == LC_PI *   1 / 6) return 0.5f;
+
+	if(x == LC_PI *   3 / 6) return 1;
+
+	if(x == LC_PI *   5 / 6) return 0.5f;
+	if(x == LC_PI *   6 / 6) return 0;
+	if(x == LC_PI *   7 / 6) return -0.5f;
+
+	if(x == LC_PI *   9 / 6) return -1;
+
+	if(x == LC_PI *  11 / 6) return -0.5f;
+	if(x == LC_PI *  12 / 6) return 0;
+	return sinf(x);
+}
 
 template<typename T>
 inline T lcMin(const T& a, const T& b)
@@ -678,8 +739,8 @@ inline lcMatrix33 lcMatrix33RotationX(const float Radians)
 {
 	float s, c;
 
-	s = sinf(Radians);
-	c = cosf(Radians);
+	s = lcSin(Radians);
+	c = lcCos(Radians);
 
 	lcMatrix33 m;
 
@@ -694,8 +755,8 @@ inline lcMatrix33 lcMatrix33RotationY(const float Radians)
 {
 	float s, c;
 
-	s = sinf(Radians);
-	c = cosf(Radians);
+	s = lcSin(Radians);
+	c = lcCos(Radians);
 
 	lcMatrix33 m;
 
@@ -710,8 +771,8 @@ inline lcMatrix33 lcMatrix33RotationZ(const float Radians)
 {
 	float s, c;
 
-	s = sinf(Radians);
-	c = cosf(Radians);
+	s = lcSin(Radians);
+	c = lcCos(Radians);
 
 	lcMatrix33 m;
 
@@ -726,8 +787,8 @@ inline lcMatrix33 lcMatrix33FromAxisAngle(const lcVector3& Axis, const float Rad
 {
 	float s, c, mag, xx, yy, zz, xy, yz, zx, xs, ys, zs, one_c;
 
-	s = sinf(Radians);
-	c = cosf(Radians);
+	s = lcSin(Radians);
+	c = lcCos(Radians);
 	mag = Axis.Length();
 
 	if (mag == 0.0f)
@@ -781,12 +842,12 @@ inline lcMatrix33 lcMatrix33FromEulerAngles(const lcVector3& Radians)
 {
 	float CosYaw, SinYaw, CosPitch, SinPitch, CosRoll, SinRoll;
 
-	CosRoll = cosf(Radians[0]);
-	SinRoll = sinf(Radians[0]);
-	CosPitch = cosf(Radians[1]);
-	SinPitch = sinf(Radians[1]);
-	CosYaw = cosf(Radians[2]);
-	SinYaw = sinf(Radians[2]);
+	CosRoll = lcCos(Radians[0]);
+	SinRoll = lcSin(Radians[0]);
+	CosPitch = lcCos(Radians[1]);
+	SinPitch = lcSin(Radians[1]);
+	CosYaw = lcCos(Radians[2]);
+	SinYaw = lcSin(Radians[2]);
 
 	lcMatrix33 m;
 
@@ -863,8 +924,8 @@ inline lcMatrix44 lcMatrix44RotationX(const float Radians)
 {
 	float s, c;
 
-	s = sinf(Radians);
-	c = cosf(Radians);
+	s = lcSin(Radians);
+	c = lcCos(Radians);
 
 	lcMatrix44 m;
 
@@ -880,8 +941,8 @@ inline lcMatrix44 lcMatrix44RotationY(const float Radians)
 {
 	float s, c;
 
-	s = sinf(Radians);
-	c = cosf(Radians);
+	s = lcSin(Radians);
+	c = lcCos(Radians);
 
 	lcMatrix44 m;
 
@@ -897,8 +958,8 @@ inline lcMatrix44 lcMatrix44RotationZ(const float Radians)
 {
 	float s, c;
 
-	s = sinf(Radians);
-	c = cosf(Radians);
+	s = lcSin(Radians);
+	c = lcCos(Radians);
 
 	lcMatrix44 m;
 
@@ -994,8 +1055,8 @@ inline lcMatrix44 lcMatrix44FromAxisAngle(const lcVector3& Axis, const float Rad
 {
 	float s, c, mag, xx, yy, zz, xy, yz, zx, xs, ys, zs, one_c;
 
-	s = sinf(Radians);
-	c = cosf(Radians);
+	s = lcSin(Radians);
+	c = lcCos(Radians);
 	mag = Axis.Length();
 
 	if (mag == 0.0f)
@@ -1115,12 +1176,12 @@ inline lcMatrix44 lcMatrix44FromEulerAngles(const lcVector3& Radians)
 {
 	float CosYaw, SinYaw, CosPitch, SinPitch, CosRoll, SinRoll;
 
-	CosRoll = cosf(Radians[0]);
-	SinRoll = sinf(Radians[0]);
-	CosPitch = cosf(Radians[1]);
-	SinPitch = sinf(Radians[1]);
-	CosYaw = cosf(Radians[2]);
-	SinYaw = sinf(Radians[2]);
+	CosRoll = lcCos(Radians[0]);
+	SinRoll = lcSin(Radians[0]);
+	CosPitch = lcCos(Radians[1]);
+	SinPitch = lcSin(Radians[1]);
+	CosYaw = lcCos(Radians[2]);
+	SinYaw = lcSin(Radians[2]);
 
 	lcMatrix44 m;
 
@@ -1330,23 +1391,23 @@ inline lcMatrix44 lcMatrix44LDrawToLeoCAD(const lcMatrix44& Matrix)
 
 inline lcVector4 lcQuaternionRotationX(float Radians)
 {
-	return lcVector4(sinf(Radians / 2.0f), 0, 0, cosf(Radians / 2.0f));
+	return lcVector4(lcSin(Radians / 2.0f), 0, 0, lcCos(Radians / 2.0f));
 }
 
 inline lcVector4 lcQuaternionRotationY(float Radians)
 {
-	return lcVector4(0, sinf(Radians / 2.0f), 0, cosf(Radians / 2.0f));
+	return lcVector4(0, lcSin(Radians / 2.0f), 0, lcCos(Radians / 2.0f));
 }
 
 inline lcVector4 lcQuaternionRotationZ(float Radians)
 {
-	return lcVector4(0, 0, sinf(Radians / 2.0f), cosf(Radians / 2.0f));
+	return lcVector4(0, 0, lcSin(Radians / 2.0f), lcCos(Radians / 2.0f));
 }
 
 inline lcVector4 lcQuaternionFromAxisAngle(const lcVector4& a)
 {
-	float s = sinf(a[3] / 2.0f);
-	return lcVector4(a[0] * s, a[1] * s, a[2] * s, cosf(a[3] / 2.0f));
+	float s = lcSin(a[3] / 2.0f);
+	return lcVector4(a[0] * s, a[1] * s, a[2] * s, lcCos(a[3] / 2.0f));
 }
 
 inline lcVector4 lcQuaternionToAxisAngle(const lcVector4& a)

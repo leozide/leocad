@@ -229,12 +229,23 @@ void lcQGLWidget::mousePressEvent(QMouseEvent *event)
 	case Qt::LeftButton:
 		widget->OnLeftButtonDown();
 		break;
+
 	case Qt::MidButton:
 		widget->OnMiddleButtonDown();
 		break;
+
 	case Qt::RightButton:
 		widget->OnRightButtonDown();
 		break;
+
+	case Qt::BackButton:
+		widget->OnBackButtonDown();
+		break;
+
+	case Qt::ForwardButton:
+		widget->OnForwardButtonDown();
+		break;
+
 	default:
 		break;
 	}
@@ -255,12 +266,23 @@ void lcQGLWidget::mouseReleaseEvent(QMouseEvent *event)
 	case Qt::LeftButton:
 		widget->OnLeftButtonUp();
 		break;
+
 	case Qt::MidButton:
 		widget->OnMiddleButtonUp();
 		break;
+
 	case Qt::RightButton:
 		widget->OnRightButtonUp();
 		break;
+
+	case Qt::BackButton:
+		widget->OnBackButtonUp();
+		break;
+
+	case Qt::ForwardButton:
+		widget->OnForwardButtonUp();
+		break;
+
 	default:
 		break;
 	}

@@ -250,5 +250,5 @@ OTHER_FILES +=
 RESOURCES += leocad.qrc
 
 !win32 { 
-	TRANSLATIONS = TSFILES
+    TRANSLATIONS = resources/leocad_pt.ts
 }

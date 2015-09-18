@@ -50,6 +50,8 @@ lrelease.commands = $$QMAKE_LRELEASE -silent ${QMAKE_FILE_IN} -qm ${QMAKE_FILE_P
 lrelease.CONFIG += no_link target_predeps
 QMAKE_EXTRA_COMPILERS += lrelease
 
+system($$QMAKE_LRELEASE resources/leocad_*.ts)
+
 unix:!macx {
 	TARGET = leocad
 } else {

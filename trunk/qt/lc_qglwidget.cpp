@@ -238,6 +238,7 @@ void lcQGLWidget::mousePressEvent(QMouseEvent *event)
 		widget->OnRightButtonDown();
 		break;
 
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
 	case Qt::BackButton:
 		widget->OnBackButtonDown();
 		break;
@@ -245,6 +246,7 @@ void lcQGLWidget::mousePressEvent(QMouseEvent *event)
 	case Qt::ForwardButton:
 		widget->OnForwardButtonDown();
 		break;
+#endif
 
 	default:
 		break;
@@ -275,6 +277,7 @@ void lcQGLWidget::mouseReleaseEvent(QMouseEvent *event)
 		widget->OnRightButtonUp();
 		break;
 
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
 	case Qt::BackButton:
 		widget->OnBackButtonUp();
 		break;
@@ -282,6 +285,7 @@ void lcQGLWidget::mouseReleaseEvent(QMouseEvent *event)
 	case Qt::ForwardButton:
 		widget->OnForwardButtonUp();
 		break;
+#endif
 
 	default:
 		break;

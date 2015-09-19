@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.0" language="pt_PT">
+<TS version="2.0" language="fr_FR">
 <context>
     <name>Menu</name>
     <message>
         <location filename="../common/lc_commands.cpp" line="10"/>
         <source>&amp;New</source>
-        <translation>&amp;Novo</translation>
+        <translation>&amp;Nouveau</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="17"/>
@@ -2136,11 +2136,11 @@ Please visit http://www.leocad.org for information on how to download and instal
     <name>lcBaseWindow</name>
     <message>
         <source>Open Project</source>
-        <translation>Abrir Projeto</translation>
+        <translation>Ouvrir un Projet</translation>
     </message>
     <message>
         <source>Save Project</source>
-        <translation>Salvar Projeto</translation>
+        <translation>Enregistrer le Projet</translation>
     </message>
 </context>
 <context>
@@ -2867,12 +2867,12 @@ GL_EXT_texture_filter_anisotropic extension: %4
     <message>
         <location filename="../qt/lc_qeditgroupsdialog.ui" line="14"/>
         <source>Edit Groups</source>
-        <translation>Editar Grupos</translation>
+        <translation>Edition de Groupes</translation>
     </message>
     <message>
         <location filename="../qt/lc_qeditgroupsdialog.cpp" line="20"/>
         <source>New Group</source>
-        <translation>Novo Grupo</translation>
+        <translation>Nouveau Groupe</translation>
     </message>
 </context>
 <context>
@@ -2903,17 +2903,17 @@ GL_EXT_texture_filter_anisotropic extension: %4
     <message>
         <location filename="../qt/lc_qgroupdialog.ui" line="14"/>
         <source>Group</source>
-        <translation>Grupo</translation>
+        <translation>Groupe</translation>
     </message>
     <message>
         <location filename="../qt/lc_qgroupdialog.ui" line="22"/>
         <source>Name</source>
-        <translation>Nome</translation>
+        <translation>Nom</translation>
     </message>
     <message>
         <location filename="../qt/lc_qgroupdialog.cpp" line="30"/>
         <source>Name cannot be empty.</source>
-        <translation>O nome não pode estar vazio.</translation>
+        <translation>Le nom ne peut pas être vide.</translation>
     </message>
 </context>
 <context>
@@ -3153,15 +3153,15 @@ GL_EXT_texture_filter_anisotropic extension: %4
     <name>lcQMainWindow</name>
     <message>
         <source>New Project</source>
-        <translation>Novo Projeto</translation>
+        <translation>Nouveau Projet</translation>
     </message>
     <message>
         <source>Open Project</source>
-        <translation>Abrir Projeto</translation>
+        <translation>Ouvrir Projet</translation>
     </message>
     <message>
         <source>Save Project</source>
-        <translation>Salvar Projeto</translation>
+        <translation>Enregistrer Projet</translation>
     </message>
 </context>
 <context>
@@ -3952,22 +3952,22 @@ GL_EXT_texture_filter_anisotropic extension: %4
     <message>
         <location filename="../qt/lc_qselectdialog.ui" line="14"/>
         <source>Select Objects</source>
-        <translation>Selecionar Objetos</translation>
+        <translation>Selecionner Objets</translation>
     </message>
     <message>
         <location filename="../qt/lc_qselectdialog.ui" line="34"/>
         <source>All</source>
-        <translation>Todos</translation>
+        <translation>Tous</translation>
     </message>
     <message>
         <location filename="../qt/lc_qselectdialog.ui" line="41"/>
         <source>None</source>
-        <translation>Nenhum</translation>
+        <translation>Aucun</translation>
     </message>
     <message>
         <location filename="../qt/lc_qselectdialog.ui" line="48"/>
         <source>Invert</source>
-        <translation>Inverter</translation>
+        <translation>Inverser</translation>
     </message>
 </context>
 <context>

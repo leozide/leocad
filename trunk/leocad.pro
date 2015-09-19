@@ -43,14 +43,14 @@ isEmpty(QMAKE_LRELEASE) {
 	}
 }
 
-TSFILES = resources/leocad_pt.ts
+TSFILES = resources/leocad_fr.ts resources/leocad_pt.ts
 lrelease.input = TSFILES
 lrelease.output = ${QMAKE_FILE_PATH}/${QMAKE_FILE_BASE}.qm
 lrelease.commands = $$QMAKE_LRELEASE -silent ${QMAKE_FILE_IN} -qm ${QMAKE_FILE_PATH}/${QMAKE_FILE_BASE}.qm
 lrelease.CONFIG += no_link target_predeps
 QMAKE_EXTRA_COMPILERS += lrelease
 
-system($$QMAKE_LRELEASE resources/leocad_*.ts)
+system($$QMAKE_LRELEASE -silent $$TSFILES)
 
 unix:!macx {
 	TARGET = leocad

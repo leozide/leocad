@@ -10,4 +10,13 @@
 		<glob pattern="*.lcd"/>
 		<glob pattern="*.leocad"/>
 	</mime-type>
+	<mime-type type="application/x-ldraw">
+		<comment>LDraw File</comment>
+		<glob pattern="*.ldr"/>
+		<glob pattern="*.dat"/>
+	</mime-type>
+	<mime-type type="application/x-multi-part-ldraw">
+		<comment>Multi-part LDraw File</comment>
+		<glob pattern="*.mpd"/>
+	</mime-type>
 </mime-info>

@@ -104,8 +104,8 @@ void lcMainWindow::CreateActions()
 {
 	for (int CommandIdx = 0; CommandIdx < LC_NUM_COMMANDS; CommandIdx++)
 	{
-		QAction* Action = new QAction(tr(gCommands[CommandIdx].MenuName), this);
-		Action->setStatusTip(tr(gCommands[CommandIdx].StatusText));
+		QAction* Action = new QAction(qApp->translate("Menu", gCommands[CommandIdx].MenuName), this);
+		Action->setStatusTip(qApp->translate("Status", gCommands[CommandIdx].StatusText));
 		connect(Action, SIGNAL(triggered()), this, SLOT(ActionTriggered()));
 		addAction(Action);
 		mActions[CommandIdx] = Action;

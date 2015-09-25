@@ -34,7 +34,7 @@ void lcResetDefaultKeyboardShortcuts()
 void lcResetKeyboardShortcuts(lcKeyboardShortcuts& Shortcuts)
 {
 	for (int CommandIdx = 0; CommandIdx < LC_NUM_COMMANDS; CommandIdx++)
-		strcpy(Shortcuts.Shortcuts[CommandIdx], gCommands[CommandIdx].DefaultShortcut);
+		Shortcuts.Shortcuts[CommandIdx] = qApp->translate("Shortcut", gCommands[CommandIdx].DefaultShortcut);
 }
 
 bool lcSaveKeyboardShortcuts(const QString& FileName, const lcKeyboardShortcuts& Shortcuts)
@@ -53,7 +53,7 @@ bool lcSaveKeyboardShortcuts(lcFile& File, const lcKeyboardShortcuts& Shortcuts)
 
 	for (int CommandIdx = 0; CommandIdx < LC_NUM_COMMANDS; CommandIdx++)
 	{
-		if (!Shortcuts.Shortcuts[CommandIdx][0])
+		if (Shortcuts.Shortcuts[CommandIdx].isEmpty())
 			continue;
 
 		sprintf(Line, "%s=%s\n", gCommands[CommandIdx].ID, Shortcuts.Shortcuts[CommandIdx]);
@@ -103,7 +103,7 @@ bool lcLoadKeyboardShortcuts(lcFile& File, lcKeyboardShortcuts& Shortcuts)
 		if (NewLine)
 			*NewLine = 0;
 
-		strncpy(Shortcuts.Shortcuts[CommandIdx], Key, LC_SHORTCUT_LENGTH);
+		Shortcuts.Shortcuts[CommandIdx] = QString::fromUtf8(Key); // todo: qstring
 	}
 
 	return true;

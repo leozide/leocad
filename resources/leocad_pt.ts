@@ -11,57 +11,57 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="17"/>
         <source>&amp;Open...</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Abrir...</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="24"/>
         <source>&amp;Merge...</source>
-        <translation type="unfinished"></translation>
+        <translation>Co&amp;mbinar...</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="31"/>
         <source>&amp;Save</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Gravar</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="38"/>
         <source>Save &amp;As...</source>
-        <translation type="unfinished"></translation>
+        <translation>Gravar &amp;Como...</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="45"/>
         <source>Save &amp;Image...</source>
-        <translation type="unfinished"></translation>
+        <translation>Gravar &amp;Imagem...</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="52"/>
         <source>3D &amp;Studio...</source>
-        <translation type="unfinished"></translation>
+        <translation>3D &amp;Studio...</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="59"/>
         <source>&amp;HTML...</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;HTML...</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="66"/>
         <source>&amp;BrickLink...</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;BrickLink...</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="73"/>
         <source>&amp;CSV...</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;CSV...</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="80"/>
         <source>&amp;POV-Ray...</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;POV-Ray...</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="87"/>
         <source>&amp;Wavefront...</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Wavefront...</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="262"/>
@@ -81,7 +81,7 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="94"/>
         <source>&amp;Print...</source>
-        <translation type="unfinished"></translation>
+        <translation>Im&amp;primir...</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="101"/>
@@ -116,87 +116,87 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="143"/>
         <source>E&amp;xit</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Saír</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="150"/>
         <source>&amp;Undo</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Desfazer</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="157"/>
         <source>&amp;Redo</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Refazer</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="164"/>
         <source>Cu&amp;t</source>
-        <translation type="unfinished"></translation>
+        <translation>Cor&amp;tar</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="171"/>
         <source>&amp;Copy</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Copiar</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="178"/>
         <source>&amp;Paste</source>
-        <translation type="unfinished"></translation>
+        <translation>Co&amp;lar</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="185"/>
         <source>&amp;Find...</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Procurar...</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="192"/>
         <source>Find Ne&amp;xt</source>
-        <translation type="unfinished"></translation>
+        <translation>Procurar &amp;Seguinte</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="199"/>
         <source>Find Pre&amp;vious</source>
-        <translation type="unfinished"></translation>
+        <translation>Procurar &amp;Anterior</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="206"/>
         <source>Select &amp;All</source>
-        <translation type="unfinished"></translation>
+        <translation>Seleccion&amp;ar Tudo</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="213"/>
         <source>Select &amp;None</source>
-        <translation type="unfinished"></translation>
+        <translation>Deseleccio&amp;nar Tudo</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="220"/>
         <source>Select &amp;Invert</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Inverter a selecção</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="227"/>
         <source>Select by Na&amp;me...</source>
-        <translation type="unfinished"></translation>
+        <translation>Seleccionar por no&amp;me...</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="234"/>
         <source>Lock X</source>
-        <translation type="unfinished"></translation>
+        <translation>Bloquear X</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="241"/>
         <source>Lock Y</source>
-        <translation type="unfinished"></translation>
+        <translation>Bloquear Y</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="248"/>
         <source>Lock Z</source>
-        <translation type="unfinished"></translation>
+        <translation>Bloquear Z</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="255"/>
         <source>Unlock All</source>
-        <translation type="unfinished"></translation>
+        <translation>Bloquear Tudo</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="276"/>
@@ -204,7 +204,7 @@
         <location filename="../common/lc_commands.cpp" line="423"/>
         <location filename="../common/lc_commands.cpp" line="717"/>
         <source>None</source>
-        <translation type="unfinished">Nenhum</translation>
+        <translation>Nenhum</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="283"/>
@@ -422,17 +422,17 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="598"/>
         <source>Pan</source>
-        <translation type="unfinished"></translation>
+        <translation>Movimento Horizontal</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="605"/>
         <source>Rotate View</source>
-        <translation type="unfinished"></translation>
+        <translation>Rodar Vista</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="612"/>
         <source>Roll</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Inclinar</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="619"/>
@@ -472,62 +472,62 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="668"/>
         <source>&amp;Front</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Frente</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="675"/>
         <source>&amp;Back</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Traseira</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="682"/>
         <source>&amp;Top</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Acima</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="689"/>
         <source>B&amp;ottom</source>
-        <translation type="unfinished"></translation>
+        <translation>A&amp;baixo</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="696"/>
         <source>&amp;Left</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Esquerda</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="703"/>
         <source>&amp;Right</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Direita</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="710"/>
         <source>&amp;Home</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Base</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="836"/>
         <source>Reset</source>
-        <translation type="unfinished"></translation>
+        <translation>Reiniciar</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="843"/>
         <source>First</source>
-        <translation type="unfinished"></translation>
+        <translation>Primeiro</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="850"/>
         <source>Previous</source>
-        <translation type="unfinished"></translation>
+        <translation>Anterior</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="857"/>
         <source>Next</source>
-        <translation type="unfinished"></translation>
+        <translation>Seguinte</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="864"/>
         <source>Last</source>
-        <translation type="unfinished"></translation>
+        <translation>Último</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="885"/>
@@ -557,7 +557,7 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="920"/>
         <source>&amp;Full Screen</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Tela Cheia</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="927"/>
@@ -672,7 +672,7 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="1081"/>
         <source>&amp;Edit Groups...</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Editar Grupos...</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1088"/>
@@ -707,7 +707,7 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="1130"/>
         <source>New Model...</source>
-        <translation type="unfinished"></translation>
+        <translation>Novo Modelo...</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1144"/>
@@ -737,7 +737,7 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="1291"/>
         <source>&amp;About...</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Acerca...</translation>
     </message>
 </context>
 <context>
@@ -760,12 +760,12 @@
     <message>
         <location filename="../common/project.cpp" line="91"/>
         <source>Model #</source>
-        <translation type="unfinished"></translation>
+        <translation>Modelo #</translation>
     </message>
     <message>
         <location filename="../common/project.cpp" line="114"/>
         <source>New Model</source>
-        <translation type="unfinished"></translation>
+        <translation>Novo Modelo</translation>
     </message>
     <message>
         <location filename="../common/project.cpp" line="114"/>
@@ -800,12 +800,12 @@
         <location filename="../common/project.cpp" line="1191"/>
         <location filename="../common/project.cpp" line="1225"/>
         <source>Error</source>
-        <translation type="unfinished"></translation>
+        <translation>Erro</translation>
     </message>
     <message>
         <location filename="../common/project.cpp" line="329"/>
         <source>Merged </source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Combinado </translation>
     </message>
     <message>
         <location filename="../common/project.cpp" line="385"/>
@@ -822,7 +822,7 @@
         <location filename="../common/project.cpp" line="1596"/>
         <location filename="../common/project.cpp" line="1610"/>
         <source>LeoCAD</source>
-        <translation type="unfinished"></translation>
+        <translation>LeoCAD</translation>
     </message>
     <message>
         <location filename="../common/project.cpp" line="385"/>
@@ -915,417 +915,417 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="12"/>
         <source>Ctrl+N</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+N</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="19"/>
         <source>Ctrl+O</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+O</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="33"/>
         <source>Ctrl+S</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+S</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="152"/>
         <source>Ctrl+Z</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+Z</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="159"/>
         <source>Ctrl+Y</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+Y</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="166"/>
         <source>Ctrl+X</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+X</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="173"/>
         <source>Ctrl+C</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+C</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="180"/>
         <source>Ctrl+V</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+V</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="187"/>
         <source>Ctrl+F</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+F</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="194"/>
         <source>F3</source>
-        <translation type="unfinished"></translation>
+        <translation>F3</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="201"/>
         <source>Shift+F3</source>
-        <translation type="unfinished"></translation>
+        <translation>Shift+F3</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="208"/>
         <source>Ctrl+A</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+A</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="222"/>
         <source>Ctrl+I</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+I</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="278"/>
         <source>0</source>
-        <translation type="unfinished">8x {0?}</translation>
+        <translation>8x {0?}</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="285"/>
         <source>1</source>
-        <translation type="unfinished">8x {1?}</translation>
+        <translation>8x {1?}</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="292"/>
         <source>2</source>
-        <translation type="unfinished">8x {2?}</translation>
+        <translation>8x {2?}</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="299"/>
         <source>3</source>
-        <translation type="unfinished">8x {3?}</translation>
+        <translation>8x {3?}</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="306"/>
         <source>4</source>
-        <translation type="unfinished">8x {4?}</translation>
+        <translation>8x {4?}</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="313"/>
         <source>5</source>
-        <translation type="unfinished">8x {5?}</translation>
+        <translation>8x {5?}</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="320"/>
         <source>6</source>
-        <translation type="unfinished">8x {6?}</translation>
+        <translation>8x {6?}</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="327"/>
         <source>7</source>
-        <translation type="unfinished">8x {7?}</translation>
+        <translation>8x {7?}</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="334"/>
         <source>8</source>
-        <translation type="unfinished">8x {8?}</translation>
+        <translation>8x {8?}</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="341"/>
         <source>9</source>
-        <translation type="unfinished">8x {9?}</translation>
+        <translation>8x {9?}</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="348"/>
         <source>Ctrl+Shift+0</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+Shift+0</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="355"/>
         <source>Ctrl+Shift+1</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+Shift+1</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="362"/>
         <source>Ctrl+Shift+2</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+Shift+2</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="369"/>
         <source>Ctrl+Shift+3</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+Shift+3</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="376"/>
         <source>Ctrl+Shift+4</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+Shift+4</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="383"/>
         <source>Ctrl+Shift+5</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+Shift+5</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="390"/>
         <source>Ctrl+Shift+6</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+Shift+6</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="397"/>
         <source>Ctrl+Shift+7</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+Shift+7</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="404"/>
         <source>Ctrl+Shift+8</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+Shift+8</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="411"/>
         <source>Ctrl+Shift+9</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+Shift+9</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="425"/>
         <source>Shift+0</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="432"/>
         <source>Shift+1</source>
-        <translation type="unfinished"></translation>
+        <translation>Shift+1</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="439"/>
         <source>Shift+2</source>
-        <translation type="unfinished"></translation>
+        <translation>Shift+2</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="446"/>
         <source>Shift+3</source>
-        <translation type="unfinished"></translation>
+        <translation>Shift+3</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="453"/>
         <source>Shift+4</source>
-        <translation type="unfinished"></translation>
+        <translation>Shift+4</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="460"/>
         <source>Shift+5</source>
-        <translation type="unfinished"></translation>
+        <translation>Shift+5</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="467"/>
         <source>Shift+6</source>
-        <translation type="unfinished"></translation>
+        <translation>Shift+6</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="474"/>
         <source>Shift+7</source>
-        <translation type="unfinished"></translation>
+        <translation>Shift+7</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="481"/>
         <source>Shift+8</source>
-        <translation type="unfinished"></translation>
+        <translation>Shift+8</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="488"/>
         <source>Shift+9</source>
-        <translation type="unfinished"></translation>
+        <translation>Shift+9</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="558"/>
         <source>Shift+S</source>
-        <translation type="unfinished"></translation>
+        <translation>Shift+S</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="565"/>
         <source>Shift+M</source>
-        <translation type="unfinished"></translation>
+        <translation>Shift+M</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="572"/>
         <source>Shift+R</source>
-        <translation type="unfinished"></translation>
+        <translation>Shift+R</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="579"/>
         <source>Shift+D</source>
-        <translation type="unfinished"></translation>
+        <translation>Shift+D</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="586"/>
         <source>Shift+N</source>
-        <translation type="unfinished"></translation>
+        <translation>Shift+N</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="593"/>
         <source>Shift+Z</source>
-        <translation type="unfinished"></translation>
+        <translation>Shift+Z</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="600"/>
         <source>Shift+P</source>
-        <translation type="unfinished"></translation>
+        <translation>Shift+P</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="607"/>
         <source>Shift+T</source>
-        <translation type="unfinished"></translation>
+        <translation>Shift+T</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="614"/>
         <source>Shift+L</source>
-        <translation type="unfinished"></translation>
+        <translation>Shift+L</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="628"/>
         <source>Esc</source>
-        <translation type="unfinished"></translation>
+        <translation>Esc</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="642"/>
         <source>+</source>
-        <translation type="unfinished"></translation>
+        <translation>+</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="649"/>
         <source>-</source>
-        <translation type="unfinished"></translation>
+        <translation>-</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="670"/>
         <source>F</source>
-        <translation type="unfinished"></translation>
+        <translation>F</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="677"/>
         <source>B</source>
-        <translation type="unfinished"></translation>
+        <translation>B</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="684"/>
         <source>T</source>
-        <translation type="unfinished"></translation>
+        <translation>T</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="691"/>
         <source>O</source>
-        <translation type="unfinished"></translation>
+        <translation>O</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="698"/>
         <source>L</source>
-        <translation type="unfinished"></translation>
+        <translation>L</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="705"/>
         <source>R</source>
-        <translation type="unfinished"></translation>
+        <translation>R</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="712"/>
         <source>H</source>
-        <translation type="unfinished"></translation>
+        <translation>H</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="845"/>
         <source>Alt+Up</source>
-        <translation type="unfinished"></translation>
+        <translation>Alt+Up</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="852"/>
         <source>Alt+Left</source>
-        <translation type="unfinished"></translation>
+        <translation>Alt+Left</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="859"/>
         <source>Alt+Right</source>
-        <translation type="unfinished"></translation>
+        <translation>Alt+Right</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="866"/>
         <source>Alt+Down</source>
-        <translation type="unfinished"></translation>
+        <translation>Alt+Down</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="943"/>
         <source>Insert</source>
-        <translation type="unfinished"></translation>
+        <translation>Insert</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="950"/>
         <source>Delete</source>
-        <translation type="unfinished"></translation>
+        <translation>Delete</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="957"/>
         <source>Down</source>
-        <translation type="unfinished"></translation>
+        <translation>Down</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="964"/>
         <source>Up</source>
-        <translation type="unfinished"></translation>
+        <translation>Up</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="971"/>
         <source>Right</source>
-        <translation type="unfinished"></translation>
+        <translation>Right</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="978"/>
         <source>Left</source>
-        <translation type="unfinished"></translation>
+        <translation>Left</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="985"/>
         <source>PgUp</source>
-        <translation type="unfinished"></translation>
+        <translation>PgUp</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="992"/>
         <source>PgDown</source>
-        <translation type="unfinished"></translation>
+        <translation>PgDown</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="999"/>
         <source>Shift+Down</source>
-        <translation type="unfinished"></translation>
+        <translation>Shift+Down</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1006"/>
         <source>Shift+Up</source>
-        <translation type="unfinished"></translation>
+        <translation>Shift+Up</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1013"/>
         <source>Shift+Right</source>
-        <translation type="unfinished"></translation>
+        <translation>Shift+Right</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1020"/>
         <source>Shift+Left</source>
-        <translation type="unfinished"></translation>
+        <translation>Shift+Left</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1027"/>
         <source>Shift+PgUp</source>
-        <translation type="unfinished"></translation>
+        <translation>Shift+PgUp</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1034"/>
         <source>Shift+PgDown</source>
-        <translation type="unfinished"></translation>
+        <translation>Shift+PgDown</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1055"/>
         <source>Ctrl+G</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+G</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1062"/>
         <source>Ctrl+U</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+U</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1090"/>
         <source>Ctrl+H</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+H</translation>
     </message>
 </context>
 <context>
@@ -1333,7 +1333,7 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="11"/>
         <source>Create a new project</source>
-        <translation type="unfinished"></translation>
+        <translation>Criar um novo projecto</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="18"/>
@@ -2100,36 +2100,40 @@
         <location filename="../common/lc_application.cpp" line="504"/>
         <location filename="../common/lc_application.cpp" line="506"/>
         <source>LeoCAD</source>
-        <translation type="unfinished"></translation>
+        <translation>LeoCAD</translation>
     </message>
     <message>
         <location filename="../common/lc_application.cpp" line="324"/>
         <source>LeoCAD could not find a compatible Parts Library so only a small number of parts will be available.
 
 Please visit http://www.leocad.org for information on how to download and install a library.</source>
-        <translation type="unfinished"></translation>
+        <translation>LeoCAD não achou uma Biblioteca de Peças.compatível portanto só vai haver uma pequena quantia de peças disponível.
+
+Veja http://www.leocad.org para saber como descarragar e instalar uma biblioteca.</translation>
     </message>
     <message>
         <location filename="../common/lc_application.cpp" line="327"/>
         <source>LeoCAD could not load Parts Library.
 
 Please visit http://www.leocad.org for information on how to download and install a library.</source>
-        <translation type="unfinished"></translation>
+        <translation>LeoCAD não conseguiu carregar a Biblioteca de Peças.
+
+Veja http://www.leocad.org para saber como descarragar e instalar uma biblioteca.</translation>
     </message>
     <message>
         <location filename="../common/lc_application.cpp" line="502"/>
         <source>Parts library and Anti-aliasing changes will only take effect the next time you start LeoCAD.</source>
-        <translation type="unfinished"></translation>
+        <translation>As mudanças de Biblioteca e de Antisserrilhamento só tomam efeito após o próximo arranque do LeoCAD.</translation>
     </message>
     <message>
         <location filename="../common/lc_application.cpp" line="504"/>
         <source>Parts library changes will only take effect the next time you start LeoCAD.</source>
-        <translation type="unfinished"></translation>
+        <translation>As mudanças de Biblioteca só tomam efeito após o próximo arranque do LeoCAD.</translation>
     </message>
     <message>
         <location filename="../common/lc_application.cpp" line="506"/>
         <source>Anti-aliasing changes will only take effect the next time you start LeoCAD.</source>
-        <translation type="unfinished"></translation>
+        <translation>As mudanças de Antisserrilhamento só tomam efeito após o próximo arranque do LeoCAD.</translation>
     </message>
 </context>
 <context>
@@ -2148,13 +2152,14 @@ Please visit http://www.leocad.org for information on how to download and instal
     <message>
         <location filename="../common/lc_context.cpp" line="328"/>
         <source>Error</source>
-        <translation type="unfinished"></translation>
+        <translation>Erro</translation>
     </message>
     <message>
         <location filename="../common/lc_context.cpp" line="328"/>
         <source>Error writing to file &apos;%1&apos;:
 %2</source>
-        <translation type="unfinished"></translation>
+        <translation>Erro ao escrever no ficheiro &apos;%1&apos;:
+%2</translation>
     </message>
 </context>
 <context>
@@ -2180,67 +2185,67 @@ Please visit http://www.leocad.org for information on how to download and instal
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="230"/>
         <source>Transform</source>
-        <translation type="unfinished"></translation>
+        <translation>Transformar</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="237"/>
         <source>C&amp;ameras</source>
-        <translation type="unfinished"></translation>
+        <translation>Câm&amp;aras</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="246"/>
         <source>&amp;File</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Ficheiro</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="254"/>
         <source>&amp;Export</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Exportar</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="273"/>
         <source>&amp;Edit</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Editar</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="290"/>
         <source>&amp;View</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Ver</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="295"/>
         <source>&amp;Viewpoints</source>
-        <translation type="unfinished"></translation>
+        <translation>Ponto de &amp;Vista</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="304"/>
         <source>Projection</source>
-        <translation type="unfinished"></translation>
+        <translation>Projecção</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="307"/>
         <source>Ste&amp;p</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Passo</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="321"/>
         <source>T&amp;oolbars</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Barras de Ferramentas</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="331"/>
         <source>&amp;Piece</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Peça</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="349"/>
         <source>&amp;Model</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Modelo</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="357"/>
         <source>&amp;Help</source>
-        <translation type="unfinished"></translation>
+        <translation>A&amp;juda</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="369"/>
@@ -2341,23 +2346,23 @@ Please visit http://www.leocad.org for information on how to download and instal
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="1523"/>
         <source>&amp;Undo</source>
-        <translation type="unfinished"></translation>
+        <translation>Desfa&amp;zer</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="1529"/>
         <source>&amp;Redo %1</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Refazer %1</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="1534"/>
         <source>&amp;Redo</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Refazer</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="1673"/>
         <location filename="../common/lc_mainwindow.cpp" line="1714"/>
         <source>Supported Files (*.lcd *.ldr *.dat *.mpd);;All Files (*.*)</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Ficheiros Aceites (*.lcd *.ldr *.dat *.mpd);;All Files (*.*)</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="1701"/>
@@ -2365,7 +2370,7 @@ Please visit http://www.leocad.org for information on how to download and instal
         <location filename="../common/lc_mainwindow.cpp" line="1730"/>
         <location filename="../common/lc_mainwindow.cpp" line="1736"/>
         <source>LeoCAD</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="1701"/>
@@ -2417,84 +2422,84 @@ Please visit http://www.leocad.org for information on how to download and instal
         <location filename="../common/lc_mainwindow.h" line="74"/>
         <location filename="../common/lc_mainwindow.h" line="80"/>
         <source>0</source>
-        <translation type="unfinished">8x {0?}</translation>
+        <translation>8x {0?}</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.h" line="74"/>
         <location filename="../common/lc_mainwindow.h" line="80"/>
         <source>1/20S</source>
-        <translation type="unfinished">8x {1/20S?}</translation>
+        <translation>8x {1/20S?}</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.h" line="74"/>
         <location filename="../common/lc_mainwindow.h" line="80"/>
         <source>1/4S</source>
-        <translation type="unfinished">8x {1/4S?}</translation>
+        <translation>8x {1/4S?}</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.h" line="74"/>
         <location filename="../common/lc_mainwindow.h" line="80"/>
         <source>1F</source>
-        <translation type="unfinished">8x {1F?}</translation>
+        <translation>8x {1F?}</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.h" line="74"/>
         <location filename="../common/lc_mainwindow.h" line="80"/>
         <source>1/2S</source>
-        <translation type="unfinished">8x {1/2S?}</translation>
+        <translation>8x {1/2S?}</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.h" line="74"/>
         <location filename="../common/lc_mainwindow.h" line="80"/>
         <source>1S</source>
-        <translation type="unfinished">8x {1S?}</translation>
+        <translation>8x {1S?}</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.h" line="74"/>
         <source>2S</source>
-        <translation type="unfinished">8x {2S?}</translation>
+        <translation>8x {2S?}</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.h" line="74"/>
         <source>3S</source>
-        <translation type="unfinished">8x {3S?}</translation>
+        <translation>8x {3S?}</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.h" line="74"/>
         <source>4S</source>
-        <translation type="unfinished">8x {4S?}</translation>
+        <translation>8x {4S?}</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.h" line="74"/>
         <source>8S</source>
-        <translation type="unfinished">8x {8S?}</translation>
+        <translation>8x {8S?}</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.h" line="75"/>
         <location filename="../common/lc_mainwindow.h" line="81"/>
         <location filename="../common/lc_mainwindow.h" line="86"/>
         <source>None</source>
-        <translation type="unfinished">Nenhum</translation>
+        <translation>Nenhum</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.h" line="80"/>
         <source>1B</source>
-        <translation type="unfinished">8x {1B?}</translation>
+        <translation>8x {1B?}</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.h" line="80"/>
         <source>2B</source>
-        <translation type="unfinished">8x {2B?}</translation>
+        <translation>8x {2B?}</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.h" line="80"/>
         <source>4B</source>
-        <translation type="unfinished">8x {4B?}</translation>
+        <translation>8x {4B?}</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.h" line="80"/>
         <source>8B</source>
-        <translation type="unfinished">8x {8B?}</translation>
+        <translation>8x {8B?}</translation>
     </message>
 </context>
 <context>
@@ -2502,7 +2507,7 @@ Please visit http://www.leocad.org for information on how to download and instal
     <message>
         <location filename="../common/lc_model.cpp" line="948"/>
         <source>Pasting</source>
-        <translation type="unfinished"></translation>
+        <translation>Colando</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="1123"/>
@@ -2511,7 +2516,7 @@ Please visit http://www.leocad.org for information on how to download and instal
         <location filename="../common/lc_model.cpp" line="3581"/>
         <location filename="../common/lc_model.cpp" line="3597"/>
         <source>LeoCAD</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="1123"/>
@@ -2538,64 +2543,64 @@ Please visit http://www.leocad.org for information on how to download and instal
         <location filename="../common/lc_model.cpp" line="1500"/>
         <location filename="../common/lc_model.cpp" line="1577"/>
         <source>Grouping</source>
-        <translation type="unfinished"></translation>
+        <translation>Agrupar</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="1543"/>
         <location filename="../common/lc_model.cpp" line="1594"/>
         <source>Ungrouping</source>
-        <translation type="unfinished"></translation>
+        <translation>Desagrupar</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="1645"/>
         <source>Editing Groups</source>
-        <translation type="unfinished"></translation>
+        <translation>Editar Grupos</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="2322"/>
         <source>Moving</source>
-        <translation type="unfinished"></translation>
+        <translation>Mover</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="2338"/>
         <source>Rotating</source>
-        <translation type="unfinished"></translation>
+        <translation>Rodar</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="2353"/>
         <source>Showing</source>
-        <translation type="unfinished"></translation>
+        <translation>Mostrar</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="2366"/>
         <source>Hiding</source>
-        <translation type="unfinished"></translation>
+        <translation>Escoder</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="2379"/>
         <source>Setting Color</source>
-        <translation type="unfinished"></translation>
+        <translation>Definir a Cor</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="2394"/>
         <source>Setting Part</source>
-        <translation type="unfinished"></translation>
+        <translation>Definir a Peça</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="2408"/>
         <location filename="../common/lc_model.cpp" line="2422"/>
         <source>Moving Camera</source>
-        <translation type="unfinished"></translation>
+        <translation>Mover a Câmara</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="2436"/>
         <source>Rotating Camera</source>
-        <translation type="unfinished"></translation>
+        <translation>Rodar a Câmara</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="2450"/>
         <source>Changing Camera</source>
-        <translation type="unfinished"></translation>
+        <translation>Mudar a Câmara</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="2464"/>
@@ -2621,17 +2626,17 @@ Please visit http://www.leocad.org for information on how to download and instal
     <message>
         <location filename="../common/lc_model.cpp" line="3234"/>
         <source>New Camera</source>
-        <translation type="unfinished"></translation>
+        <translation>Nova Câmara</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="3241"/>
         <source>Move</source>
-        <translation type="unfinished"></translation>
+        <translation>Mover</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="3245"/>
         <source>Rotate</source>
-        <translation type="unfinished"></translation>
+        <translation>Rodar</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="3254"/>
@@ -2639,12 +2644,12 @@ Please visit http://www.leocad.org for information on how to download and instal
         <location filename="../common/lc_model.cpp" line="3522"/>
         <location filename="../common/lc_model.cpp" line="3532"/>
         <source>Zoom</source>
-        <translation type="unfinished"></translation>
+        <translation>Zoom</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="3259"/>
         <source>Pan</source>
-        <translation type="unfinished"></translation>
+        <translation>Movimento Horizontal</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="3264"/>
@@ -2654,32 +2659,32 @@ Please visit http://www.leocad.org for information on how to download and instal
     <message>
         <location filename="../common/lc_model.cpp" line="3269"/>
         <source>Roll</source>
-        <translation type="unfinished"></translation>
+        <translation>Inclinar</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="3288"/>
         <source>Insert</source>
-        <translation type="unfinished"></translation>
+        <translation>Inserir</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="3298"/>
         <source>New Light</source>
-        <translation type="unfinished"></translation>
+        <translation>Nova Luz</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="3410"/>
         <source>Deleting</source>
-        <translation type="unfinished"></translation>
+        <translation>Apagando</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="3424"/>
         <source>Painting</source>
-        <translation type="unfinished"></translation>
+        <translation>Pintado</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="3492"/>
         <source>Look At</source>
-        <translation type="unfinished"></translation>
+        <translation>Olhar Para</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="3557"/>
@@ -2801,12 +2806,12 @@ GL_EXT_texture_filter_anisotropic extension: %4
     <message>
         <location filename="../qt/lc_qarraydialog.ui" line="14"/>
         <source>Array</source>
-        <translation type="unfinished"></translation>
+        <translation>Quadro</translation>
     </message>
     <message>
         <location filename="../qt/lc_qarraydialog.ui" line="22"/>
         <source>Dimensions</source>
-        <translation type="unfinished"></translation>
+        <translation>Dimensões</translation>
     </message>
     <message>
         <location filename="../qt/lc_qarraydialog.ui" line="65"/>
@@ -2821,7 +2826,7 @@ GL_EXT_texture_filter_anisotropic extension: %4
     <message>
         <location filename="../qt/lc_qarraydialog.cpp" line="71"/>
         <source>Array is empty.</source>
-        <translation type="unfinished"></translation>
+        <translation>O quadro está vazio.</translation>
     </message>
 </context>
 <context>
@@ -2829,7 +2834,7 @@ GL_EXT_texture_filter_anisotropic extension: %4
     <message>
         <location filename="../qt/lc_qcategorydialog.ui" line="14"/>
         <source>Category</source>
-        <translation type="unfinished"></translation>
+        <translation>Categoria</translation>
     </message>
     <message>
         <location filename="../qt/lc_qcategorydialog.ui" line="22"/>
@@ -2890,7 +2895,7 @@ GL_EXT_texture_filter_anisotropic extension: %4
     <message>
         <location filename="../qt/lc_qfinddialog.ui" line="35"/>
         <source>Part ID</source>
-        <translation type="unfinished"></translation>
+        <translation>ID de Peça</translation>
     </message>
     <message>
         <location filename="../qt/lc_qfinddialog.ui" line="42"/>
@@ -2921,119 +2926,119 @@ GL_EXT_texture_filter_anisotropic extension: %4
     <message>
         <location filename="../qt/lc_qhtmldialog.ui" line="14"/>
         <source>HTML Options</source>
-        <translation type="unfinished"></translation>
+        <translation>Opções HTML</translation>
     </message>
     <message>
         <location filename="../qt/lc_qhtmldialog.ui" line="20"/>
         <source>General</source>
-        <translation type="unfinished"></translation>
+        <translation>Geral</translation>
     </message>
     <message>
         <location filename="../qt/lc_qhtmldialog.ui" line="29"/>
         <source>Output folder:</source>
-        <translation type="unfinished"></translation>
+        <translation>Pasta de saída:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qhtmldialog.ui" line="44"/>
         <source>...</source>
-        <translation type="unfinished"></translation>
+        <translation>...</translation>
     </message>
     <message>
         <location filename="../qt/lc_qhtmldialog.ui" line="53"/>
         <source>Image format:</source>
-        <translation type="unfinished"></translation>
+        <translation>Formato de Imagem:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qhtmldialog.ui" line="68"/>
         <source>BMP</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../qt/lc_qhtmldialog.ui" line="73"/>
         <source>JPEG</source>
-        <translation type="unfinished"></translation>
+        <translation>JPEG</translation>
     </message>
     <message>
         <location filename="../qt/lc_qhtmldialog.ui" line="78"/>
         <source>PNG</source>
-        <translation type="unfinished"></translation>
+        <translation>PNG</translation>
     </message>
     <message>
         <location filename="../qt/lc_qhtmldialog.ui" line="60"/>
         <source>Transparent image background</source>
-        <translation type="unfinished"></translation>
+        <translation>Fundo de imagem transparente</translation>
     </message>
     <message>
         <location filename="../qt/lc_qhtmldialog.ui" line="89"/>
         <source>Layout</source>
-        <translation type="unfinished"></translation>
+        <translation>Disposição</translation>
     </message>
     <message>
         <location filename="../qt/lc_qhtmldialog.ui" line="95"/>
         <source>Single page</source>
-        <translation type="unfinished"></translation>
+        <translation>Página única</translation>
     </message>
     <message>
         <location filename="../qt/lc_qhtmldialog.ui" line="102"/>
         <source>One step per page</source>
-        <translation type="unfinished"></translation>
+        <translation>Um passo por página</translation>
     </message>
     <message>
         <location filename="../qt/lc_qhtmldialog.ui" line="109"/>
         <location filename="../qt/lc_qhtmldialog.ui" line="206"/>
         <source>Width:</source>
-        <translation type="unfinished"></translation>
+        <translation>Largura:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qhtmldialog.ui" line="119"/>
         <location filename="../qt/lc_qhtmldialog.ui" line="216"/>
         <source>Height:</source>
-        <translation type="unfinished"></translation>
+        <translation>Altura:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qhtmldialog.ui" line="149"/>
         <source>Index page</source>
-        <translation type="unfinished"></translation>
+        <translation>Página de índice</translation>
     </message>
     <message>
         <location filename="../qt/lc_qhtmldialog.ui" line="156"/>
         <source>Highlight new parts</source>
-        <translation type="unfinished"></translation>
+        <translation>Destacar as novas peças</translation>
     </message>
     <message>
         <location filename="../qt/lc_qhtmldialog.ui" line="166"/>
         <source>Parts List</source>
-        <translation type="unfinished"></translation>
+        <translation>Lista das Peças</translation>
     </message>
     <message>
         <location filename="../qt/lc_qhtmldialog.ui" line="192"/>
         <source>At the end</source>
-        <translation type="unfinished"></translation>
+        <translation>No fim</translation>
     </message>
     <message>
         <location filename="../qt/lc_qhtmldialog.ui" line="199"/>
         <source>After each step</source>
-        <translation type="unfinished"></translation>
+        <translation>Após cada passo</translation>
     </message>
     <message>
         <location filename="../qt/lc_qhtmldialog.ui" line="226"/>
         <source>Color:</source>
-        <translation type="unfinished"></translation>
+        <translation>Cor:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qhtmldialog.ui" line="236"/>
         <source>Create images</source>
-        <translation type="unfinished"></translation>
+        <translation>Criar imagens</translation>
     </message>
     <message>
         <location filename="../qt/lc_qhtmldialog.cpp" line="47"/>
         <source>Output folder cannot be empty.</source>
-        <translation type="unfinished"></translation>
+        <translation>aTem de indicar a pasta de saída.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qhtmldialog.cpp" line="71"/>
         <source>Select Output Folder</source>
-        <translation type="unfinished"></translation>
+        <translation>Selecionar a Pasta de Saída</translation>
     </message>
 </context>
 <context>
@@ -3041,67 +3046,67 @@ GL_EXT_texture_filter_anisotropic extension: %4
     <message>
         <location filename="../qt/lc_qimagedialog.ui" line="14"/>
         <source>Save Image</source>
-        <translation type="unfinished"></translation>
+        <translation>Gravar Imagem</translation>
     </message>
     <message>
         <location filename="../qt/lc_qimagedialog.ui" line="24"/>
         <source>File name:</source>
-        <translation type="unfinished"></translation>
+        <translation>Nome do ficheiro:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qimagedialog.ui" line="48"/>
         <source>Dimensions</source>
-        <translation type="unfinished"></translation>
+        <translation>Dimensões</translation>
     </message>
     <message>
         <location filename="../qt/lc_qimagedialog.ui" line="109"/>
         <source>Step Range</source>
-        <translation type="unfinished"></translation>
+        <translation>Intervalo de Passos</translation>
     </message>
     <message>
         <location filename="../qt/lc_qimagedialog.ui" line="115"/>
         <source>All Steps</source>
-        <translation type="unfinished"></translation>
+        <translation>Todos os Passos</translation>
     </message>
     <message>
         <location filename="../qt/lc_qimagedialog.ui" line="122"/>
         <source>Current Step</source>
-        <translation type="unfinished"></translation>
+        <translation>Passo Actual</translation>
     </message>
     <message>
         <location filename="../qt/lc_qimagedialog.ui" line="131"/>
         <source>Custom Range</source>
-        <translation type="unfinished"></translation>
+        <translation>Intervalo Personalizado</translation>
     </message>
     <message>
         <location filename="../qt/lc_qimagedialog.ui" line="138"/>
         <source>From:</source>
-        <translation type="unfinished"></translation>
+        <translation>De:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qimagedialog.ui" line="161"/>
         <source>To:</source>
-        <translation type="unfinished"></translation>
+        <translation>Até:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qimagedialog.ui" line="54"/>
         <source>Width:</source>
-        <translation type="unfinished"></translation>
+        <translation>Largura:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qimagedialog.ui" line="80"/>
         <source>Height:</source>
-        <translation type="unfinished"></translation>
+        <translation>Altura:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qimagedialog.ui" line="37"/>
         <source>...</source>
-        <translation type="unfinished"></translation>
+        <translation>...</translation>
     </message>
     <message>
         <location filename="../qt/lc_qimagedialog.cpp" line="40"/>
         <source>Output File cannot be empty.</source>
-        <translation type="unfinished"></translation>
+        <translation>Tem de indicar o ficheiro de saída.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qimagedialog.cpp" line="40"/>
@@ -3111,42 +3116,42 @@ GL_EXT_texture_filter_anisotropic extension: %4
         <location filename="../qt/lc_qimagedialog.cpp" line="86"/>
         <location filename="../qt/lc_qimagedialog.cpp" line="92"/>
         <source>Error</source>
-        <translation type="unfinished"></translation>
+        <translation>Erro</translation>
     </message>
     <message>
         <location filename="../qt/lc_qimagedialog.cpp" line="48"/>
         <source>Please enter a width between 1 and 2048.</source>
-        <translation type="unfinished"></translation>
+        <translation>É favor escolher uma largura entre 1 e 2048.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qimagedialog.cpp" line="56"/>
         <source>Please enter a height between 1 and 2048.</source>
-        <translation type="unfinished"></translation>
+        <translation>É favor escolher uma altura entre 1 e 2048.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qimagedialog.cpp" line="78"/>
         <source>First step must be between 1 and %1.</source>
-        <translation type="unfinished"></translation>
+        <translation>O primeiro passo tem de ser entre 1 e %1.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qimagedialog.cpp" line="86"/>
         <source>Last step must be between 1 and %1.</source>
-        <translation type="unfinished"></translation>
+        <translation>O último passo tem de ser entre %1 e 1.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qimagedialog.cpp" line="108"/>
         <source>Supported Image Files (*.bmp *.png *.jpg);;BMP Files (*.bmp);;PNG Files (*.png);;JPEG Files (*.jpg);;All Files (*.*)</source>
-        <translation type="unfinished"></translation>
+        <translation>Formatos de Imagem Aceitados (*.bmp *.png *.jpg);;BMP Files (*.bmp);;PNG Files (*.png);;JPEG Files (*.jpg);;All Files (*.*)</translation>
     </message>
     <message>
         <location filename="../qt/lc_qimagedialog.cpp" line="92"/>
         <source>Last step must be greater than first step.</source>
-        <translation type="unfinished"></translation>
+        <translation>O último passo tem de ser superior au primeiro.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qimagedialog.cpp" line="108"/>
         <source>Save Image File</source>
-        <translation type="unfinished"></translation>
+        <translation>Exportar Imagem</translation>
     </message>
 </context>
 <context>
@@ -3169,7 +3174,7 @@ GL_EXT_texture_filter_anisotropic extension: %4
     <message>
         <location filename="../qt/lc_qminifigdialog.ui" line="14"/>
         <source>Dialog</source>
-        <translation type="unfinished"></translation>
+        <translation>Diálogo</translation>
     </message>
 </context>
 <context>
@@ -3177,42 +3182,42 @@ GL_EXT_texture_filter_anisotropic extension: %4
     <message>
         <location filename="../qt/lc_qmodellistdialog.ui" line="14"/>
         <source>Models</source>
-        <translation type="unfinished"></translation>
+        <translation>Modelos</translation>
     </message>
     <message>
         <location filename="../qt/lc_qmodellistdialog.ui" line="27"/>
         <source>&amp;New</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Novo</translation>
     </message>
     <message>
         <location filename="../qt/lc_qmodellistdialog.ui" line="34"/>
         <source>D&amp;elete...</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Apagar...</translation>
     </message>
     <message>
         <location filename="../qt/lc_qmodellistdialog.ui" line="41"/>
         <source>&amp;Rename...</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Mudar o Nome...</translation>
     </message>
     <message>
         <location filename="../qt/lc_qmodellistdialog.ui" line="48"/>
         <source>Move &amp;Up</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Subir</translation>
     </message>
     <message>
         <location filename="../qt/lc_qmodellistdialog.ui" line="55"/>
         <source>Move &amp;Down</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Descer</translation>
     </message>
     <message>
         <location filename="../qt/lc_qmodellistdialog.cpp" line="43"/>
         <source>Model #</source>
-        <translation type="unfinished"></translation>
+        <translation>Modelo #</translation>
     </message>
     <message>
         <location filename="../qt/lc_qmodellistdialog.cpp" line="74"/>
         <source>Error</source>
-        <translation type="unfinished"></translation>
+        <translation>Erro</translation>
     </message>
     <message>
         <location filename="../qt/lc_qmodellistdialog.cpp" line="74"/>
@@ -3237,7 +3242,7 @@ GL_EXT_texture_filter_anisotropic extension: %4
     <message>
         <location filename="../qt/lc_qmodellistdialog.cpp" line="102"/>
         <source>Name:</source>
-        <translation type="unfinished"></translation>
+        <translation>Nome:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qmodellistdialog.cpp" line="109"/>
@@ -3270,7 +3275,7 @@ GL_EXT_texture_filter_anisotropic extension: %4
     <message>
         <location filename="../qt/lc_qpovraydialog.ui" line="44"/>
         <source>Output File</source>
-        <translation type="unfinished"></translation>
+        <translation>Ficeiro de saída</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpovraydialog.ui" line="54"/>
@@ -3292,12 +3297,12 @@ GL_EXT_texture_filter_anisotropic extension: %4
         <location filename="../qt/lc_qpovraydialog.ui" line="112"/>
         <location filename="../qt/lc_qpovraydialog.ui" line="132"/>
         <source>...</source>
-        <translation type="unfinished"></translation>
+        <translation>...</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpovraydialog.cpp" line="31"/>
         <source>Output File cannot be empty.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Tem de indicar o ficheiro de saída.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpovraydialog.cpp" line="45"/>
@@ -3317,7 +3322,7 @@ GL_EXT_texture_filter_anisotropic extension: %4
     <message>
         <location filename="../qt/lc_qpovraydialog.cpp" line="56"/>
         <source>All Files (*.*)</source>
-        <translation type="unfinished"></translation>
+        <translation>Todos os Ficheiros (*.*)</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpovraydialog.cpp" line="59"/>
@@ -3335,12 +3340,12 @@ GL_EXT_texture_filter_anisotropic extension: %4
     <message>
         <location filename="../qt/lc_qpartstree.cpp" line="89"/>
         <source>Models</source>
-        <translation type="unfinished"></translation>
+        <translation>Modelos</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpartstree.cpp" line="90"/>
         <source>Search Results</source>
-        <translation type="unfinished"></translation>
+        <translation>Resultados da Procura</translation>
     </message>
 </context>
 <context>
@@ -3353,17 +3358,17 @@ GL_EXT_texture_filter_anisotropic extension: %4
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="24"/>
         <source>General</source>
-        <translation type="unfinished"></translation>
+        <translation>Geral</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="33"/>
         <source>Default author name:</source>
-        <translation type="unfinished"></translation>
+        <translation>Nome do autor por omissão:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="46"/>
         <source>Default projects folder:</source>
-        <translation type="unfinished"></translation>
+        <translation>Pasta dos projectos por omissão:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="61"/>
@@ -3371,12 +3376,12 @@ GL_EXT_texture_filter_anisotropic extension: %4
         <location filename="../qt/lc_qpreferencesdialog.ui" line="109"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="133"/>
         <source>...</source>
-        <translation type="unfinished"></translation>
+        <translation>...</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="70"/>
         <source>Custom parts library:</source>
-        <translation type="unfinished"></translation>
+        <translation>Bilioteca de peças personalizada:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="94"/>
@@ -3396,7 +3401,7 @@ GL_EXT_texture_filter_anisotropic extension: %4
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="168"/>
         <source>Check for updates:</source>
-        <translation type="unfinished"></translation>
+        <translation>Procurar actualizações:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="179"/>
@@ -3497,7 +3502,7 @@ GL_EXT_texture_filter_anisotropic extension: %4
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="450"/>
         <source>Name</source>
-        <translation type="unfinished">Nome</translation>
+        <translation>Nome</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="455"/>
@@ -3525,58 +3530,58 @@ GL_EXT_texture_filter_anisotropic extension: %4
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="505"/>
         <source>Category</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Categoria</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="511"/>
         <source>New...</source>
-        <translation type="unfinished"></translation>
+        <translation>Novo...</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="518"/>
         <source>Edit...</source>
-        <translation type="unfinished"></translation>
+        <translation>Editar...</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="525"/>
         <source>Delete...</source>
-        <translation type="unfinished"></translation>
+        <translation>Apagar...</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="549"/>
         <source>Keyboard</source>
-        <translation type="unfinished"></translation>
+        <translation>Teclado</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="559"/>
         <source>Keyboard Shortcuts</source>
-        <translation type="unfinished"></translation>
+        <translation>Atalhos de Teclado</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="572"/>
         <source>Command</source>
-        <translation type="unfinished"></translation>
+        <translation>Commando</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="577"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="629"/>
         <source>Shortcut</source>
-        <translation type="unfinished"></translation>
+        <translation>Atalho</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="635"/>
         <source>Key sequence:</source>
-        <translation type="unfinished"></translation>
+        <translation>Sequência de teclas:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="648"/>
         <source>Assign</source>
-        <translation type="unfinished"></translation>
+        <translation>Definir</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="655"/>
         <source>Remove</source>
-        <translation type="unfinished"></translation>
+        <translation>Remover</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="82"/>
@@ -3601,7 +3606,7 @@ GL_EXT_texture_filter_anisotropic extension: %4
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="138"/>
         <source>All Files (*.*)</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Todos os Ficheiros (*.*)</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="141"/>
@@ -3697,92 +3702,92 @@ GL_EXT_texture_filter_anisotropic extension: %4
     <message>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="14"/>
         <source>Properties</source>
-        <translation type="unfinished"></translation>
+        <translation>Propriedades</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="24"/>
         <source>Summary</source>
-        <translation type="unfinished"></translation>
+        <translation>Resumo</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="30"/>
         <source>Author:</source>
-        <translation type="unfinished"></translation>
+        <translation>Autor:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="40"/>
         <source>Description:</source>
-        <translation type="unfinished"></translation>
+        <translation>Descrição:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="50"/>
         <source>Comments:</source>
-        <translation type="unfinished"></translation>
+        <translation>Comentários:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="65"/>
         <source>Scene</source>
-        <translation type="unfinished"></translation>
+        <translation>Cena</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="71"/>
         <source>Background</source>
-        <translation type="unfinished"></translation>
+        <translation>Fundo</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="108"/>
         <source>Solid Color</source>
-        <translation type="unfinished"></translation>
+        <translation>Cor Sólida</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="115"/>
         <source>Image</source>
-        <translation type="unfinished"></translation>
+        <translation>Imagem</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="122"/>
         <source>Gradient</source>
-        <translation type="unfinished"></translation>
+        <translation>Gradiente</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="134"/>
         <source>...</source>
-        <translation type="unfinished"></translation>
+        <translation>...</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="143"/>
         <source>Tile</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="177"/>
         <source>Environment</source>
-        <translation type="unfinished"></translation>
+        <translation>Ambiente</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="183"/>
         <source>Fog</source>
-        <translation type="unfinished"></translation>
+        <translation>Nevoeiro</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="199"/>
         <source>Density</source>
-        <translation type="unfinished"></translation>
+        <translation>Densidade</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="231"/>
         <source>Ambient Light</source>
-        <translation type="unfinished"></translation>
+        <translation>Luz</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="267"/>
         <source>Set default options for new projects</source>
-        <translation type="unfinished"></translation>
+        <translation>Definir por omissão para os novos projectos</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="275"/>
         <source>Parts Used</source>
-        <translation type="unfinished"></translation>
+        <translation>Peças Utilizadas</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.cpp" line="26"/>
@@ -3792,7 +3797,7 @@ GL_EXT_texture_filter_anisotropic extension: %4
     <message>
         <location filename="../qt/lc_qpropertiesdialog.cpp" line="83"/>
         <source>Part</source>
-        <translation type="unfinished"></translation>
+        <translation>Peça</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.cpp" line="159"/>
@@ -3835,18 +3840,18 @@ GL_EXT_texture_filter_anisotropic extension: %4
     <message>
         <location filename="../qt/lc_qpropertiestree.cpp" line="254"/>
         <source>Property</source>
-        <translation type="unfinished"></translation>
+        <translation>Propriedade</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiestree.cpp" line="255"/>
         <source>Value</source>
-        <translation type="unfinished"></translation>
+        <translation>Valor</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiestree.cpp" line="762"/>
         <location filename="../qt/lc_qpropertiestree.cpp" line="833"/>
         <source>Position</source>
-        <translation type="unfinished"></translation>
+        <translation>Posição</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiestree.cpp" line="763"/>
@@ -3855,7 +3860,7 @@ GL_EXT_texture_filter_anisotropic extension: %4
         <location filename="../qt/lc_qpropertiestree.cpp" line="839"/>
         <location filename="../qt/lc_qpropertiestree.cpp" line="844"/>
         <source>X</source>
-        <translation type="unfinished"></translation>
+        <translation>X</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiestree.cpp" line="764"/>
@@ -3864,7 +3869,7 @@ GL_EXT_texture_filter_anisotropic extension: %4
         <location filename="../qt/lc_qpropertiestree.cpp" line="840"/>
         <location filename="../qt/lc_qpropertiestree.cpp" line="845"/>
         <source>Y</source>
-        <translation type="unfinished"></translation>
+        <translation>Y</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiestree.cpp" line="765"/>
@@ -3873,78 +3878,78 @@ GL_EXT_texture_filter_anisotropic extension: %4
         <location filename="../qt/lc_qpropertiestree.cpp" line="841"/>
         <location filename="../qt/lc_qpropertiestree.cpp" line="846"/>
         <source>Z</source>
-        <translation type="unfinished"></translation>
+        <translation>Z</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiestree.cpp" line="767"/>
         <source>Rotation</source>
-        <translation type="unfinished"></translation>
+        <translation>Rotação</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiestree.cpp" line="772"/>
         <source>Visibility</source>
-        <translation type="unfinished"></translation>
+        <translation>Visibilidade</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiestree.cpp" line="773"/>
         <source>Show</source>
-        <translation type="unfinished"></translation>
+        <translation>Mostrar</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiestree.cpp" line="774"/>
         <source>Hide</source>
-        <translation type="unfinished"></translation>
+        <translation>Esconder</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiestree.cpp" line="776"/>
         <source>Appearance</source>
-        <translation type="unfinished"></translation>
+        <translation>Estilo</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiestree.cpp" line="777"/>
         <source>Color</source>
-        <translation type="unfinished">Cor</translation>
+        <translation>Cor</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiestree.cpp" line="778"/>
         <source>Part</source>
-        <translation type="unfinished"></translation>
+        <translation>Peça</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiestree.cpp" line="838"/>
         <source>Target</source>
-        <translation type="unfinished"></translation>
+        <translation>Objectivo</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiestree.cpp" line="843"/>
         <location filename="../qt/lc_qpropertiestree.cpp" line="848"/>
         <source>Up</source>
-        <translation type="unfinished"></translation>
+        <translation>Subir</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiestree.cpp" line="849"/>
         <source>Orthographic</source>
-        <translation type="unfinished"></translation>
+        <translation>Ortográfico</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiestree.cpp" line="850"/>
         <source>FOV</source>
-        <translation type="unfinished"></translation>
+        <translation>FOV</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiestree.cpp" line="851"/>
         <source>Near</source>
-        <translation type="unfinished"></translation>
+        <translation>Perto</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiestree.cpp" line="852"/>
         <source>Far</source>
-        <translation type="unfinished"></translation>
+        <translation>Longe</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiestree.cpp" line="853"/>
         <source>Name</source>
-        <translation type="unfinished">Nome</translation>
+        <translation>Nome</translation>
     </message>
 </context>
 <context>
@@ -3975,47 +3980,47 @@ GL_EXT_texture_filter_anisotropic extension: %4
     <message>
         <location filename="../qt/lc_qupdatedialog.ui" line="14"/>
         <source>LeoCAD Updates</source>
-        <translation type="unfinished"></translation>
+        <translation>Actualizações do LeoCAD</translation>
     </message>
     <message>
         <location filename="../qt/lc_qupdatedialog.cpp" line="38"/>
         <source>Connecting to update server...</source>
-        <translation type="unfinished"></translation>
+        <translation>A ligar ao servidor de actualizações...</translation>
     </message>
     <message>
         <location filename="../qt/lc_qupdatedialog.cpp" line="123"/>
         <source>&lt;p&gt;There&apos;s a newer version of LeoCAD available for download (%1.%2.%3).&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;p&gt;Existe uma nova versão do LeoCAD em descarregamento (%1.%2.%3).&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_qupdatedialog.cpp" line="125"/>
         <source>&lt;p&gt;You are using the latest LeoCAD version.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;p&gt;Tem a última versão do LeoCAD.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_qupdatedialog.cpp" line="133"/>
         <source>&lt;p&gt;There are new parts available.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;p&gt;Existem novas peças disponiveis.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_qupdatedialog.cpp" line="137"/>
         <source>&lt;p&gt;There are no new parts available at this time.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;p&gt;Não há novas peças disponiveis.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_qupdatedialog.cpp" line="142"/>
         <source>&lt;p&gt;Visit &lt;a href=&quot;http://www.leocad.org/files/&quot;&gt;http://www.leocad.org/files/&lt;/a&gt; to download.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../qt/lc_qupdatedialog.cpp" line="148"/>
         <source>Error parsing update information.</source>
-        <translation type="unfinished"></translation>
+        <translation>Erro ao ler a informação de actualização.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qupdatedialog.cpp" line="156"/>
         <source>Error connecting to the update server.</source>
-        <translation type="unfinished"></translation>
+        <translation>Erro ao ligar ao servidor de actualizações.</translation>
     </message>
 </context>
 <context>
@@ -4023,7 +4028,7 @@ GL_EXT_texture_filter_anisotropic extension: %4
     <message>
         <location filename="../common/lc_timelinewidget.cpp" line="103"/>
         <source>Step %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Passo %1</translation>
     </message>
 </context>
 </TS>

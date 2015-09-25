@@ -3,11 +3,9 @@
 
 #include "lc_commands.h"
 
-#define LC_SHORTCUT_LENGTH 32
-
 struct lcKeyboardShortcuts
 {
-	char Shortcuts[LC_NUM_COMMANDS][LC_SHORTCUT_LENGTH];
+	QString Shortcuts[LC_NUM_COMMANDS];
 };
 
 extern lcKeyboardShortcuts gKeyboardShortcuts;

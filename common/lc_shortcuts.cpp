@@ -56,7 +56,7 @@ bool lcSaveKeyboardShortcuts(lcFile& File, const lcKeyboardShortcuts& Shortcuts)
 		if (Shortcuts.Shortcuts[CommandIdx].isEmpty())
 			continue;
 
-		sprintf(Line, "%s=%s\n", gCommands[CommandIdx].ID, Shortcuts.Shortcuts[CommandIdx]);
+		sprintf(Line, "%s=%s\n", gCommands[CommandIdx].ID, Shortcuts.Shortcuts[CommandIdx].toUtf8().constData()); // todo: qstring
 
 		File.WriteLine(Line);
 	}

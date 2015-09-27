@@ -1644,7 +1644,7 @@ void lcMainWindow::UpdateRecentFiles()
 void lcMainWindow::UpdateShortcuts()
 {
 	for (int ActionIdx = 0; ActionIdx < LC_NUM_COMMANDS; ActionIdx++)
-		mActions[ActionIdx]->setShortcut(QKeySequence(gKeyboardShortcuts.Shortcuts[ActionIdx]));
+		mActions[ActionIdx]->setShortcut(QKeySequence(gKeyboardShortcuts.mShortcuts[ActionIdx]));
 }
 
 void lcMainWindow::NewProject()

@@ -1,109 +1,95 @@
 #include "lc_global.h"
 #include "lc_shortcuts.h"
 #include "lc_profile.h"
-#include "lc_file.h"
 
 lcKeyboardShortcuts gKeyboardShortcuts;
 
 void lcLoadDefaultKeyboardShortcuts()
 {
-	lcMemFile File;
+	QByteArray Buffer = lcGetProfileBuffer(LC_PROFILE_SHORTCUTS);
 
-	lcGetProfileBuffer(LC_PROFILE_SHORTCUTS, File);
-
-	if (!File.GetLength() || !lcLoadKeyboardShortcuts(File, gKeyboardShortcuts))
-		lcResetKeyboardShortcuts(gKeyboardShortcuts);
+	if (Buffer.isEmpty() || !gKeyboardShortcuts.Load(QTextStream(Buffer, QIODevice::ReadOnly)))
+		gKeyboardShortcuts.Reset();
 }
 
 void lcSaveDefaultKeyboardShortcuts()
 {
-	lcMemFile File;
+	QByteArray Buffer;
 
-	lcSaveKeyboardShortcuts(File, gKeyboardShortcuts);
+	gKeyboardShortcuts.Save(QTextStream(&Buffer, QIODevice::WriteOnly));
 
-	lcSetProfileBuffer(LC_PROFILE_SHORTCUTS, File);
+	lcSetProfileBuffer(LC_PROFILE_SHORTCUTS, Buffer);
 }
 
 void lcResetDefaultKeyboardShortcuts()
 {
-	lcResetKeyboardShortcuts(gKeyboardShortcuts);
+	gKeyboardShortcuts.Reset();
 
 	lcRemoveProfileKey(LC_PROFILE_SHORTCUTS);
 }
 
-void lcResetKeyboardShortcuts(lcKeyboardShortcuts& Shortcuts)
+void lcKeyboardShortcuts::Reset()
 {
 	for (int CommandIdx = 0; CommandIdx < LC_NUM_COMMANDS; CommandIdx++)
-		Shortcuts.Shortcuts[CommandIdx] = qApp->translate("Shortcut", gCommands[CommandIdx].DefaultShortcut);
+		mShortcuts[CommandIdx] = qApp->translate("Shortcut", gCommands[CommandIdx].DefaultShortcut);
 }
 
-bool lcSaveKeyboardShortcuts(const QString& FileName, const lcKeyboardShortcuts& Shortcuts)
+bool lcKeyboardShortcuts::Save(const QString& FileName)
 {
-	lcDiskFile File;
+	QFile File(FileName);
 
-	if (!File.Open(FileName, "wt"))
+	if (!File.open(QIODevice::WriteOnly))
 		return false;
 
-	return lcSaveKeyboardShortcuts(File, Shortcuts);
+	return Save(QTextStream(&File));
 }
 
-bool lcSaveKeyboardShortcuts(lcFile& File, const lcKeyboardShortcuts& Shortcuts)
+bool lcKeyboardShortcuts::Save(QTextStream& Stream)
 {
-	char Line[1024];
-
 	for (int CommandIdx = 0; CommandIdx < LC_NUM_COMMANDS; CommandIdx++)
 	{
-		if (Shortcuts.Shortcuts[CommandIdx].isEmpty())
+		if (mShortcuts[CommandIdx].isEmpty())
 			continue;
 
-		sprintf(Line, "%s=%s\n", gCommands[CommandIdx].ID, Shortcuts.Shortcuts[CommandIdx].toUtf8().constData()); // todo: qstring
-
-		File.WriteLine(Line);
+		Stream << gCommands[CommandIdx].ID << QLatin1String("=") << mShortcuts[CommandIdx] << QLatin1String("\n");
 	}
 
 	return true;
 }
 
-bool lcLoadKeyboardShortcuts(const QString& FileName, lcKeyboardShortcuts& Shortcuts)
+bool lcKeyboardShortcuts::Load(const QString& FileName)
 {
-	lcDiskFile File;
+	QFile File(FileName);
 
-	if (!File.Open(FileName, "rt"))
+	if (!File.open(QIODevice::ReadOnly))
 		return false;
 
-	return lcLoadKeyboardShortcuts(File, Shortcuts);
+	return Load(QTextStream(&File));
 }
 
-bool lcLoadKeyboardShortcuts(lcFile& File, lcKeyboardShortcuts& Shortcuts)
+bool lcKeyboardShortcuts::Load(QTextStream& Stream)
 {
 	for (int CommandIdx = 0; CommandIdx < LC_NUM_COMMANDS; CommandIdx++)
-		Shortcuts.Shortcuts[CommandIdx][0] = 0;
+		mShortcuts[CommandIdx].clear();
 
-	char Line[1024];
-
-	while (File.ReadLine(Line, sizeof(Line)))
+	for (QString Line = Stream.readLine(); !Line.isNull(); Line = Stream.readLine())
 	{
-		char* Key = strchr(Line, '=');
+		int Equals = Line.indexOf('=');
 
-		if (!Key)
+		if (Equals == -1)
 			continue;
 
-		*Key = 0;
-		Key++;
+		QString Key = Line.left(Equals);
 
 		int CommandIdx;
 		for (CommandIdx = 0; CommandIdx < LC_NUM_COMMANDS; CommandIdx++)
-			if (!strcmp(gCommands[CommandIdx].ID, Line))
+			if (gCommands[CommandIdx].ID == Key)
 				break;
 
 		if (CommandIdx == LC_NUM_COMMANDS)
 			continue;
 
-		char* NewLine = strchr(Key, '\n');
-		if (NewLine)
-			*NewLine = 0;
-
-		Shortcuts.Shortcuts[CommandIdx] = QString::fromUtf8(Key); // todo: qstring
+		mShortcuts[CommandIdx] = Line.mid(Equals + 1);
 	}
 
 	return true;

@@ -7,16 +7,18 @@ lcKeyboardShortcuts gKeyboardShortcuts;
 void lcLoadDefaultKeyboardShortcuts()
 {
 	QByteArray Buffer = lcGetProfileBuffer(LC_PROFILE_SHORTCUTS);
+	QTextStream Stream(Buffer, QIODevice::ReadOnly);
 
-	if (Buffer.isEmpty() || !gKeyboardShortcuts.Load(QTextStream(Buffer, QIODevice::ReadOnly)))
+	if (Buffer.isEmpty() || !gKeyboardShortcuts.Load(Stream))
 		gKeyboardShortcuts.Reset();
 }
 
 void lcSaveDefaultKeyboardShortcuts()
 {
 	QByteArray Buffer;
+	QTextStream Stream(&Buffer, QIODevice::WriteOnly);
 
-	gKeyboardShortcuts.Save(QTextStream(&Buffer, QIODevice::WriteOnly));
+	gKeyboardShortcuts.Save(Stream);
 
 	lcSetProfileBuffer(LC_PROFILE_SHORTCUTS, Buffer);
 }
@@ -41,7 +43,9 @@ bool lcKeyboardShortcuts::Save(const QString& FileName)
 	if (!File.open(QIODevice::WriteOnly))
 		return false;
 
-	return Save(QTextStream(&File));
+	QTextStream Stream(&File);
+
+	return Save(Stream);
 }
 
 bool lcKeyboardShortcuts::Save(QTextStream& Stream)
@@ -64,7 +68,9 @@ bool lcKeyboardShortcuts::Load(const QString& FileName)
 	if (!File.open(QIODevice::ReadOnly))
 		return false;
 
-	return Load(QTextStream(&File));
+	QTextStream Stream(&File);
+
+	return Load(Stream);
 }
 
 bool lcKeyboardShortcuts::Load(QTextStream& Stream)

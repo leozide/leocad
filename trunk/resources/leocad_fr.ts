@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.0" language="fr_FR">
+<TS version="2.1" language="fr_FR">
 <context>
     <name>Menu</name>
     <message>
         <location filename="../common/lc_commands.cpp" line="10"/>
         <source>&amp;New</source>
-        <translation>&amp;Nouveau</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="17"/>
@@ -61,21 +61,6 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="87"/>
         <source>&amp;Wavefront...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="262"/>
-        <source>Relative Transforms</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="269"/>
-        <source>Move Snap Enabled</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="1137"/>
-        <source>Prope&amp;rties...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -199,12 +184,22 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../common/lc_commands.cpp" line="262"/>
+        <source>Relative Transforms</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="269"/>
+        <source>Move Snap Enabled</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../common/lc_commands.cpp" line="276"/>
         <location filename="../common/lc_commands.cpp" line="346"/>
         <location filename="../common/lc_commands.cpp" line="423"/>
         <location filename="../common/lc_commands.cpp" line="717"/>
         <source>None</source>
-        <translation type="unfinished">Nenhum</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="283"/>
@@ -710,6 +705,11 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../common/lc_commands.cpp" line="1137"/>
+        <source>Prope&amp;rties...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../common/lc_commands.cpp" line="1144"/>
         <source>Switch to Model</source>
         <translation type="unfinished"></translation>
@@ -803,6 +803,22 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../common/project.cpp" line="201"/>
+        <source>Error reading file &apos;%1&apos;:
+%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/project.cpp" line="279"/>
+        <location filename="../common/project.cpp" line="1135"/>
+        <location filename="../common/project.cpp" line="1166"/>
+        <location filename="../common/project.cpp" line="1191"/>
+        <location filename="../common/project.cpp" line="1225"/>
+        <source>Error writing to file &apos;%1&apos;:
+%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../common/project.cpp" line="329"/>
         <source>Merged </source>
         <translation type="unfinished"></translation>
@@ -815,10 +831,10 @@
         <location filename="../common/project.cpp" line="933"/>
         <location filename="../common/project.cpp" line="947"/>
         <location filename="../common/project.cpp" line="1257"/>
-        <location filename="../common/project.cpp" line="1311"/>
-        <location filename="../common/project.cpp" line="1332"/>
-        <location filename="../common/project.cpp" line="1374"/>
-        <location filename="../common/project.cpp" line="1416"/>
+        <location filename="../common/project.cpp" line="1313"/>
+        <location filename="../common/project.cpp" line="1334"/>
+        <location filename="../common/project.cpp" line="1376"/>
+        <location filename="../common/project.cpp" line="1418"/>
         <location filename="../common/project.cpp" line="1596"/>
         <location filename="../common/project.cpp" line="1610"/>
         <source>LeoCAD</source>
@@ -828,7 +844,7 @@
         <location filename="../common/project.cpp" line="385"/>
         <location filename="../common/project.cpp" line="873"/>
         <location filename="../common/project.cpp" line="933"/>
-        <location filename="../common/project.cpp" line="1311"/>
+        <location filename="../common/project.cpp" line="1313"/>
         <location filename="../common/project.cpp" line="1596"/>
         <source>Nothing to export.</source>
         <translation type="unfinished"></translation>
@@ -847,7 +863,7 @@
         <location filename="../common/project.cpp" line="398"/>
         <location filename="../common/project.cpp" line="887"/>
         <location filename="../common/project.cpp" line="947"/>
-        <location filename="../common/project.cpp" line="1332"/>
+        <location filename="../common/project.cpp" line="1334"/>
         <location filename="../common/project.cpp" line="1610"/>
         <source>Could not open file &apos;%1&apos; for writing.</source>
         <translation type="unfinished"></translation>
@@ -878,8 +894,8 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/project.cpp" line="1374"/>
-        <location filename="../common/project.cpp" line="1416"/>
+        <location filename="../common/project.cpp" line="1376"/>
+        <location filename="../common/project.cpp" line="1418"/>
         <source>Could not find LGEO files in folder &apos;%1&apos;.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -891,22 +907,6 @@
     <message>
         <location filename="../common/project.cpp" line="1600"/>
         <source>Wavefront Files (*.obj);;All Files (*.*)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../common/project.cpp" line="279"/>
-        <location filename="../common/project.cpp" line="1135"/>
-        <location filename="../common/project.cpp" line="1166"/>
-        <location filename="../common/project.cpp" line="1191"/>
-        <location filename="../common/project.cpp" line="1225"/>
-        <source>Error writing to file &apos;%1&apos;:
-%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../common/project.cpp" line="201"/>
-        <source>Error reading file &apos;%1&apos;:
-%2</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -980,52 +980,52 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="278"/>
         <source>0</source>
-        <translation type="unfinished">8x {0?}</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="285"/>
         <source>1</source>
-        <translation type="unfinished">8x {1?}</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="292"/>
         <source>2</source>
-        <translation type="unfinished">8x {2?}</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="299"/>
         <source>3</source>
-        <translation type="unfinished">8x {3?}</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="306"/>
         <source>4</source>
-        <translation type="unfinished">8x {4?}</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="313"/>
         <source>5</source>
-        <translation type="unfinished">8x {5?}</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="320"/>
         <source>6</source>
-        <translation type="unfinished">8x {6?}</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="327"/>
         <source>7</source>
-        <translation type="unfinished">8x {7?}</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="334"/>
         <source>8</source>
-        <translation type="unfinished">8x {8?}</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="341"/>
         <source>9</source>
-        <translation type="unfinished">8x {9?}</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="348"/>
@@ -1495,23 +1495,18 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../common/lc_commands.cpp" line="263"/>
+        <source>Move and rotate objects relative to the one that currently has focus</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../common/lc_commands.cpp" line="270"/>
         <source>Toggle snap axes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="417"/>
-        <source>Snap rotations to fixed intervals</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../common/lc_commands.cpp" line="277"/>
         <source>Do not snap movement along the XY plane</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="263"/>
-        <source>Move and rotate objects relative to the one that currently has focus</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1607,6 +1602,11 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="410"/>
         <source>Snap movement along the Z axis to 8 bricks</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="417"/>
+        <source>Snap rotations to fixed intervals</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2133,25 +2133,14 @@ Please visit http://www.leocad.org for information on how to download and instal
     </message>
 </context>
 <context>
-    <name>lcBaseWindow</name>
-    <message>
-        <source>Open Project</source>
-        <translation>Ouvrir un Projet</translation>
-    </message>
-    <message>
-        <source>Save Project</source>
-        <translation>Enregistrer le Projet</translation>
-    </message>
-</context>
-<context>
     <name>lcContext</name>
     <message>
-        <location filename="../common/lc_context.cpp" line="328"/>
+        <location filename="../common/lc_context.cpp" line="507"/>
         <source>Error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_context.cpp" line="328"/>
+        <location filename="../common/lc_context.cpp" line="507"/>
         <source>Error writing to file &apos;%1&apos;:
 %2</source>
         <translation type="unfinished"></translation>
@@ -2162,20 +2151,20 @@ Please visit http://www.leocad.org for information on how to download and instal
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="114"/>
         <source>New Project</source>
-        <translation>Novo Projeto</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="115"/>
         <location filename="../common/lc_mainwindow.cpp" line="1673"/>
         <source>Open Project</source>
-        <translation>Abrir Projeto</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="116"/>
         <location filename="../common/lc_mainwindow.cpp" line="1757"/>
         <location filename="../common/lc_mainwindow.cpp" line="1784"/>
         <source>Save Project</source>
-        <translation>Salvar Projeto</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="230"/>
@@ -2417,99 +2406,99 @@ Please visit http://www.leocad.org for information on how to download and instal
         <location filename="../common/lc_mainwindow.h" line="74"/>
         <location filename="../common/lc_mainwindow.h" line="80"/>
         <source>0</source>
-        <translation type="unfinished">8x {0?}</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.h" line="74"/>
         <location filename="../common/lc_mainwindow.h" line="80"/>
         <source>1/20S</source>
-        <translation type="unfinished">8x {1/20S?}</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.h" line="74"/>
         <location filename="../common/lc_mainwindow.h" line="80"/>
         <source>1/4S</source>
-        <translation type="unfinished">8x {1/4S?}</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.h" line="74"/>
         <location filename="../common/lc_mainwindow.h" line="80"/>
         <source>1F</source>
-        <translation type="unfinished">8x {1F?}</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.h" line="74"/>
         <location filename="../common/lc_mainwindow.h" line="80"/>
         <source>1/2S</source>
-        <translation type="unfinished">8x {1/2S?}</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.h" line="74"/>
         <location filename="../common/lc_mainwindow.h" line="80"/>
         <source>1S</source>
-        <translation type="unfinished">8x {1S?}</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.h" line="74"/>
         <source>2S</source>
-        <translation type="unfinished">8x {2S?}</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.h" line="74"/>
         <source>3S</source>
-        <translation type="unfinished">8x {3S?}</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.h" line="74"/>
         <source>4S</source>
-        <translation type="unfinished">8x {4S?}</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.h" line="74"/>
         <source>8S</source>
-        <translation type="unfinished">8x {8S?}</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.h" line="75"/>
         <location filename="../common/lc_mainwindow.h" line="81"/>
         <location filename="../common/lc_mainwindow.h" line="86"/>
         <source>None</source>
-        <translation type="unfinished">Nenhum</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.h" line="80"/>
         <source>1B</source>
-        <translation type="unfinished">8x {1B?}</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.h" line="80"/>
         <source>2B</source>
-        <translation type="unfinished">8x {2B?}</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.h" line="80"/>
         <source>4B</source>
-        <translation type="unfinished">8x {4B?}</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.h" line="80"/>
         <source>8B</source>
-        <translation type="unfinished">8x {8B?}</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>lcModel</name>
     <message>
-        <location filename="../common/lc_model.cpp" line="948"/>
+        <location filename="../common/lc_model.cpp" line="945"/>
         <source>Pasting</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="1123"/>
         <location filename="../common/lc_model.cpp" line="1472"/>
-        <location filename="../common/lc_model.cpp" line="3564"/>
-        <location filename="../common/lc_model.cpp" line="3581"/>
-        <location filename="../common/lc_model.cpp" line="3597"/>
+        <location filename="../common/lc_model.cpp" line="3568"/>
+        <location filename="../common/lc_model.cpp" line="3585"/>
+        <location filename="../common/lc_model.cpp" line="3601"/>
         <source>LeoCAD</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2530,7 +2519,7 @@ Please visit http://www.leocad.org for information on how to download and instal
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="1472"/>
-        <location filename="../common/lc_model.cpp" line="3581"/>
+        <location filename="../common/lc_model.cpp" line="3585"/>
         <source>No pieces selected.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2552,157 +2541,157 @@ Please visit http://www.leocad.org for information on how to download and instal
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="2322"/>
+        <location filename="../common/lc_model.cpp" line="2323"/>
         <source>Moving</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="2338"/>
+        <location filename="../common/lc_model.cpp" line="2339"/>
         <source>Rotating</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="2353"/>
+        <location filename="../common/lc_model.cpp" line="2354"/>
         <source>Showing</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="2366"/>
+        <location filename="../common/lc_model.cpp" line="2367"/>
         <source>Hiding</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="2379"/>
+        <location filename="../common/lc_model.cpp" line="2380"/>
         <source>Setting Color</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="2394"/>
+        <location filename="../common/lc_model.cpp" line="2396"/>
         <source>Setting Part</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="2408"/>
-        <location filename="../common/lc_model.cpp" line="2422"/>
+        <location filename="../common/lc_model.cpp" line="2411"/>
+        <location filename="../common/lc_model.cpp" line="2425"/>
         <source>Moving Camera</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="2436"/>
+        <location filename="../common/lc_model.cpp" line="2439"/>
         <source>Rotating Camera</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="2450"/>
+        <location filename="../common/lc_model.cpp" line="2453"/>
         <source>Changing Camera</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="2464"/>
+        <location filename="../common/lc_model.cpp" line="2467"/>
         <source>Setting FOV</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="2478"/>
-        <location filename="../common/lc_model.cpp" line="2492"/>
+        <location filename="../common/lc_model.cpp" line="2481"/>
+        <location filename="../common/lc_model.cpp" line="2495"/>
         <source>Setting Camera</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="2508"/>
+        <location filename="../common/lc_model.cpp" line="2511"/>
         <source>Naming Camera</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="3229"/>
+        <location filename="../common/lc_model.cpp" line="3232"/>
         <source>New SpotLight</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="3234"/>
+        <location filename="../common/lc_model.cpp" line="3237"/>
         <source>New Camera</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="3241"/>
+        <location filename="../common/lc_model.cpp" line="3244"/>
         <source>Move</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="3245"/>
+        <location filename="../common/lc_model.cpp" line="3248"/>
         <source>Rotate</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="3254"/>
-        <location filename="../common/lc_model.cpp" line="3469"/>
-        <location filename="../common/lc_model.cpp" line="3522"/>
-        <location filename="../common/lc_model.cpp" line="3532"/>
+        <location filename="../common/lc_model.cpp" line="3257"/>
+        <location filename="../common/lc_model.cpp" line="3473"/>
+        <location filename="../common/lc_model.cpp" line="3526"/>
+        <location filename="../common/lc_model.cpp" line="3536"/>
         <source>Zoom</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="3259"/>
+        <location filename="../common/lc_model.cpp" line="3262"/>
         <source>Pan</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="3264"/>
+        <location filename="../common/lc_model.cpp" line="3267"/>
         <source>Orbit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="3269"/>
+        <location filename="../common/lc_model.cpp" line="3272"/>
         <source>Roll</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="3288"/>
+        <location filename="../common/lc_model.cpp" line="3291"/>
         <source>Insert</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="3298"/>
+        <location filename="../common/lc_model.cpp" line="3301"/>
         <source>New Light</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="3410"/>
+        <location filename="../common/lc_model.cpp" line="3413"/>
         <source>Deleting</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="3424"/>
+        <location filename="../common/lc_model.cpp" line="3427"/>
         <source>Painting</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="3492"/>
+        <location filename="../common/lc_model.cpp" line="3496"/>
         <source>Look At</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="3557"/>
+        <location filename="../common/lc_model.cpp" line="3561"/>
         <source>Changing Properties</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="3564"/>
+        <location filename="../common/lc_model.cpp" line="3568"/>
         <source>Nothing to select.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="3597"/>
+        <location filename="../common/lc_model.cpp" line="3601"/>
         <source>Array only has 1 element or less, no pieces added.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="3652"/>
+        <location filename="../common/lc_model.cpp" line="3656"/>
         <source>Array</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="3685"/>
+        <location filename="../common/lc_model.cpp" line="3689"/>
         <source>Minifig</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2712,7 +2701,7 @@ Please visit http://www.leocad.org for information on how to download and instal
     <message>
         <location filename="../qt/lc_qaboutdialog.ui" line="14"/>
         <source>About LeoCAD</source>
-        <translation>Sobre LeoCAD</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qt/lc_qaboutdialog.ui" line="42"/>
@@ -2867,12 +2856,12 @@ GL_EXT_texture_filter_anisotropic extension: %4
     <message>
         <location filename="../qt/lc_qeditgroupsdialog.ui" line="14"/>
         <source>Edit Groups</source>
-        <translation>Edition de Groupes</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qt/lc_qeditgroupsdialog.cpp" line="20"/>
         <source>New Group</source>
-        <translation>Nouveau Groupe</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -2880,12 +2869,12 @@ GL_EXT_texture_filter_anisotropic extension: %4
     <message>
         <location filename="../qt/lc_qfinddialog.ui" line="14"/>
         <source>Find</source>
-        <translation>Procurar</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qt/lc_qfinddialog.ui" line="28"/>
         <source>Name</source>
-        <translation>Nome</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qt/lc_qfinddialog.ui" line="35"/>
@@ -2895,7 +2884,7 @@ GL_EXT_texture_filter_anisotropic extension: %4
     <message>
         <location filename="../qt/lc_qfinddialog.ui" line="42"/>
         <source>Color</source>
-        <translation>Cor</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -2903,17 +2892,17 @@ GL_EXT_texture_filter_anisotropic extension: %4
     <message>
         <location filename="../qt/lc_qgroupdialog.ui" line="14"/>
         <source>Group</source>
-        <translation>Groupe</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qt/lc_qgroupdialog.ui" line="22"/>
         <source>Name</source>
-        <translation>Nom</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qt/lc_qgroupdialog.cpp" line="30"/>
         <source>Name cannot be empty.</source>
-        <translation>Le nom ne peut pas être vide.</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -2944,6 +2933,11 @@ GL_EXT_texture_filter_anisotropic extension: %4
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../qt/lc_qhtmldialog.ui" line="60"/>
+        <source>Transparent image background</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../qt/lc_qhtmldialog.ui" line="68"/>
         <source>BMP</source>
         <translation type="unfinished"></translation>
@@ -2956,11 +2950,6 @@ GL_EXT_texture_filter_anisotropic extension: %4
     <message>
         <location filename="../qt/lc_qhtmldialog.ui" line="78"/>
         <source>PNG</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qt/lc_qhtmldialog.ui" line="60"/>
-        <source>Transparent image background</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -3049,8 +3038,23 @@ GL_EXT_texture_filter_anisotropic extension: %4
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../qt/lc_qimagedialog.ui" line="37"/>
+        <source>...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../qt/lc_qimagedialog.ui" line="48"/>
         <source>Dimensions</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qimagedialog.ui" line="54"/>
+        <source>Width:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qimagedialog.ui" line="80"/>
+        <source>Height:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -3084,26 +3088,6 @@ GL_EXT_texture_filter_anisotropic extension: %4
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qt/lc_qimagedialog.ui" line="54"/>
-        <source>Width:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qt/lc_qimagedialog.ui" line="80"/>
-        <source>Height:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qt/lc_qimagedialog.ui" line="37"/>
-        <source>...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qt/lc_qimagedialog.cpp" line="40"/>
-        <source>Output File cannot be empty.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../qt/lc_qimagedialog.cpp" line="40"/>
         <location filename="../qt/lc_qimagedialog.cpp" line="48"/>
         <location filename="../qt/lc_qimagedialog.cpp" line="56"/>
@@ -3111,6 +3095,11 @@ GL_EXT_texture_filter_anisotropic extension: %4
         <location filename="../qt/lc_qimagedialog.cpp" line="86"/>
         <location filename="../qt/lc_qimagedialog.cpp" line="92"/>
         <source>Error</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qimagedialog.cpp" line="40"/>
+        <source>Output File cannot be empty.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -3134,11 +3123,6 @@ GL_EXT_texture_filter_anisotropic extension: %4
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qt/lc_qimagedialog.cpp" line="108"/>
-        <source>Supported Image Files (*.bmp *.png *.jpg);;BMP Files (*.bmp);;PNG Files (*.png);;JPEG Files (*.jpg);;All Files (*.*)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../qt/lc_qimagedialog.cpp" line="92"/>
         <source>Last step must be greater than first step.</source>
         <translation type="unfinished"></translation>
@@ -3148,20 +3132,10 @@ GL_EXT_texture_filter_anisotropic extension: %4
         <source>Save Image File</source>
         <translation type="unfinished"></translation>
     </message>
-</context>
-<context>
-    <name>lcQMainWindow</name>
     <message>
-        <source>New Project</source>
-        <translation>Nouveau Projet</translation>
-    </message>
-    <message>
-        <source>Open Project</source>
-        <translation>Ouvrir Projet</translation>
-    </message>
-    <message>
-        <source>Save Project</source>
-        <translation>Enregistrer Projet</translation>
+        <location filename="../qt/lc_qimagedialog.cpp" line="108"/>
+        <source>Supported Image Files (*.bmp *.png *.jpg);;BMP Files (*.bmp);;PNG Files (*.png);;JPEG Files (*.jpg);;All Files (*.*)</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -3401,17 +3375,17 @@ GL_EXT_texture_filter_anisotropic extension: %4
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="179"/>
         <source>Never</source>
-        <translation>Nunca</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="184"/>
         <source>Once a day</source>
-        <translation>Uma vez por dia</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="189"/>
         <source>Once a week</source>
-        <translation>Uma vez por semana</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="197"/>
@@ -3451,17 +3425,17 @@ GL_EXT_texture_filter_anisotropic extension: %4
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="260"/>
         <source>2x</source>
-        <translation>2x</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="265"/>
         <source>4x</source>
-        <translation>4x</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="270"/>
         <source>8x</source>
-        <translation>8x</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="294"/>
@@ -3497,7 +3471,7 @@ GL_EXT_texture_filter_anisotropic extension: %4
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="450"/>
         <source>Name</source>
-        <translation type="unfinished">Nome</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="455"/>
@@ -3795,37 +3769,43 @@ GL_EXT_texture_filter_anisotropic extension: %4
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiesdialog.cpp" line="159"/>
+        <location filename="../qt/lc_qpropertiesdialog.cpp" line="94"/>
+        <location filename="../qt/lc_qpropertiesdialog.cpp" line="110"/>
+        <source>Total</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpropertiesdialog.cpp" line="193"/>
         <source>Select Background Color</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiesdialog.cpp" line="164"/>
+        <location filename="../qt/lc_qpropertiesdialog.cpp" line="198"/>
         <source>Select Background Top Color</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiesdialog.cpp" line="169"/>
+        <location filename="../qt/lc_qpropertiesdialog.cpp" line="203"/>
         <source>Select Background Bottom Color</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiesdialog.cpp" line="174"/>
+        <location filename="../qt/lc_qpropertiesdialog.cpp" line="208"/>
         <source>Select Fog Color</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiesdialog.cpp" line="179"/>
+        <location filename="../qt/lc_qpropertiesdialog.cpp" line="213"/>
         <source>Select Ambient Light Color</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiesdialog.cpp" line="200"/>
+        <location filename="../qt/lc_qpropertiesdialog.cpp" line="234"/>
         <source>Select Background Image</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiesdialog.cpp" line="200"/>
+        <location filename="../qt/lc_qpropertiesdialog.cpp" line="234"/>
         <source>All Image Files (*.png *.jpg *.gif *.bmp);;PNG Files (*.png);;JPEG Files (*.jpg);;GIF Files (*.gif);;BMP Files (*.bmp);;All Files (*.*)</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3903,7 +3883,7 @@ GL_EXT_texture_filter_anisotropic extension: %4
     <message>
         <location filename="../qt/lc_qpropertiestree.cpp" line="777"/>
         <source>Color</source>
-        <translation type="unfinished">Cor</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiestree.cpp" line="778"/>
@@ -3944,7 +3924,7 @@ GL_EXT_texture_filter_anisotropic extension: %4
     <message>
         <location filename="../qt/lc_qpropertiestree.cpp" line="853"/>
         <source>Name</source>
-        <translation type="unfinished">Nome</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -3952,22 +3932,22 @@ GL_EXT_texture_filter_anisotropic extension: %4
     <message>
         <location filename="../qt/lc_qselectdialog.ui" line="14"/>
         <source>Select Objects</source>
-        <translation>Selecionner Objets</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qt/lc_qselectdialog.ui" line="34"/>
         <source>All</source>
-        <translation>Tous</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qt/lc_qselectdialog.ui" line="41"/>
         <source>None</source>
-        <translation>Aucun</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qt/lc_qselectdialog.ui" line="48"/>
         <source>Invert</source>
-        <translation>Inverser</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

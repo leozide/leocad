@@ -115,28 +115,107 @@ void lcMainWindow::CreateActions()
 	mActions[LC_FILE_OPEN]->setToolTip(tr("Open Project"));
 	mActions[LC_FILE_SAVE]->setToolTip(tr("Save Project"));
 
-	mActions[LC_FILE_NEW]->setIcon(QIcon(":/resources/file_new.png"));
-	mActions[LC_FILE_OPEN]->setIcon(QIcon(":/resources/file_open.png"));
-	mActions[LC_FILE_SAVE]->setIcon(QIcon(":/resources/file_save.png"));
-	mActions[LC_FILE_SAVE_IMAGE]->setIcon(QIcon(":/resources/file_picture.png"));
-	mActions[LC_FILE_PRINT]->setIcon(QIcon(":/resources/file_print.png"));
-	mActions[LC_FILE_PRINT_PREVIEW]->setIcon(QIcon(":/resources/file_print_preview.png"));
-	mActions[LC_EDIT_UNDO]->setIcon(QIcon(":/resources/edit_undo.png"));
-	mActions[LC_EDIT_REDO]->setIcon(QIcon(":/resources/edit_redo.png"));
-	mActions[LC_EDIT_CUT]->setIcon(QIcon(":/resources/edit_cut.png"));
-	mActions[LC_EDIT_COPY]->setIcon(QIcon(":/resources/edit_copy.png"));
-	mActions[LC_EDIT_PASTE]->setIcon(QIcon(":/resources/edit_paste.png"));
-	mActions[LC_EDIT_ACTION_INSERT]->setIcon(QIcon(":/resources/action_insert.png"));
-	mActions[LC_EDIT_ACTION_LIGHT]->setIcon(QIcon(":/resources/action_light.png"));
-	mActions[LC_EDIT_ACTION_SPOTLIGHT]->setIcon(QIcon(":/resources/action_spotlight.png"));
+	QIcon FileNewIcon;
+	FileNewIcon.addFile(":/resources/file_new.png");
+	FileNewIcon.addFile(":/resources/file_new_16.png");
+	mActions[LC_FILE_NEW]->setIcon(FileNewIcon);
+
+	QIcon FileSaveIcon;
+	FileSaveIcon.addFile(":/resources/file_save.png");
+	FileSaveIcon.addFile(":/resources/file_save_16.png");
+	mActions[LC_FILE_SAVE]->setIcon(FileSaveIcon);
+
+	QIcon FileOpenIcon;
+	FileOpenIcon.addFile(":/resources/file_open.png");
+	FileOpenIcon.addFile(":/resources/file_open_16.png");
+	mActions[LC_FILE_OPEN]->setIcon(FileOpenIcon);
+
+	QIcon FilePrintIcon;
+	FilePrintIcon.addFile(":/resources/file_print.png");
+	FilePrintIcon.addFile(":/resources/file_print_16.png");
+	mActions[LC_FILE_PRINT]->setIcon(FilePrintIcon);
+
+	QIcon FilePrintPreviewIcon;
+	FilePrintPreviewIcon.addFile(":/resources/file_print_preview.png");
+	FilePrintPreviewIcon.addFile(":/resources/file_print_preview_16.png");
+	mActions[LC_FILE_PRINT_PREVIEW]->setIcon(FilePrintPreviewIcon);
+
+	QIcon EditUndoIcon;
+	EditUndoIcon.addFile(":/resources/edit_undo.png");
+	EditUndoIcon.addFile(":/resources/edit_undo_16.png");
+	mActions[LC_EDIT_UNDO]->setIcon(EditUndoIcon);
+
+	QIcon EditRedoIcon;
+	EditRedoIcon.addFile(":/resources/edit_redo.png");
+	EditRedoIcon.addFile(":/resources/edit_redo_16.png");
+	mActions[LC_EDIT_REDO]->setIcon(EditRedoIcon);
+
+	QIcon EditCutIcon;
+	EditCutIcon.addFile(":/resources/edit_cut.png");
+	EditCutIcon.addFile(":/resources/edit_cut_16.png");
+	mActions[LC_EDIT_CUT]->setIcon(EditCutIcon);
+
+	QIcon EditCopyIcon;
+	EditCopyIcon.addFile(":/resources/edit_copy.png");
+	EditCopyIcon.addFile(":/resources/edit_copy_16.png");
+	mActions[LC_EDIT_COPY]->setIcon(EditCopyIcon);
+
+	QIcon EditPasteIcon;
+	EditPasteIcon.addFile(":/resources/edit_paste.png");
+	EditPasteIcon.addFile(":/resources/edit_paste_16.png");
+	mActions[LC_EDIT_PASTE]->setIcon(EditPasteIcon);
+
+	QIcon EditActionInsertIcon;
+	EditActionInsertIcon.addFile(":/resources/action_insert.png");
+	EditActionInsertIcon.addFile(":/resources/action_insert_16.png");
+	mActions[LC_EDIT_ACTION_INSERT]->setIcon(EditActionInsertIcon);
+
+	QIcon EditActionLightIcon;
+	EditActionLightIcon.addFile(":/resources/action_light.png");
+	EditActionLightIcon.addFile(":/resources/action_light_16.png");
+	mActions[LC_EDIT_ACTION_LIGHT]->setIcon(EditActionLightIcon);
+
+	QIcon EditActionSpotLightIcon;
+	EditActionSpotLightIcon.addFile(":/resources/action_spotlight.png");
+	EditActionSpotLightIcon.addFile(":/resources/action_spotlight_16.png");
+	mActions[LC_EDIT_ACTION_SPOTLIGHT]->setIcon(EditActionSpotLightIcon);
+
+	QIcon EditActionSelectIcon;
+	EditActionSelectIcon.addFile(":/resources/action_select.png");
+	EditActionSelectIcon.addFile(":/resources/action_select_16.png");
+	mActions[LC_EDIT_ACTION_SELECT]->setIcon(EditActionSelectIcon);
+
+	QIcon EditActionMoveIcon;
+	EditActionMoveIcon.addFile(":/resources/action_move.png");
+	EditActionMoveIcon.addFile(":/resources/action_move_16.png");
+	mActions[LC_EDIT_ACTION_MOVE]->setIcon(EditActionMoveIcon);
+
+	QIcon EditActionRotateIcon;
+	EditActionRotateIcon.addFile(":/resources/action_rotate.png");
+	EditActionRotateIcon.addFile(":/resources/action_rotate_16.png");
+	mActions[LC_EDIT_ACTION_ROTATE]->setIcon(EditActionRotateIcon);
+
+	QIcon EditActionDeleteIcon;
+	EditActionDeleteIcon.addFile(":/resources/action_delete.png");
+	EditActionDeleteIcon.addFile(":/resources/action_delete_16.png");
+	mActions[LC_EDIT_ACTION_DELETE]->setIcon(EditActionDeleteIcon);
+
+	QIcon EditActionPaintIcon;
+	EditActionPaintIcon.addFile(":/resources/action_paint.png");
+	EditActionPaintIcon.addFile(":/resources/action_paint_16.png");
+	mActions[LC_EDIT_ACTION_PAINT]->setIcon(EditActionPaintIcon);
+
+	QIcon EditActionZoomIcon;
+	EditActionZoomIcon.addFile(":/resources/action_zoom.png");
+	EditActionZoomIcon.addFile(":/resources/action_zoom_16.png");
+	mActions[LC_EDIT_ACTION_ZOOM]->setIcon(EditActionZoomIcon);
+
+	QIcon EditActionPanIcon;
+	EditActionPanIcon.addFile(":/resources/action_pan.png");
+	EditActionPanIcon.addFile(":/resources/action_pan_16.png");
+	mActions[LC_EDIT_ACTION_PAN]->setIcon(EditActionPanIcon);
+
 	mActions[LC_EDIT_ACTION_CAMERA]->setIcon(QIcon(":/resources/action_camera.png"));
-	mActions[LC_EDIT_ACTION_SELECT]->setIcon(QIcon(":/resources/action_select.png"));
-	mActions[LC_EDIT_ACTION_MOVE]->setIcon(QIcon(":/resources/action_move.png"));
-	mActions[LC_EDIT_ACTION_ROTATE]->setIcon(QIcon(":/resources/action_rotate.png"));
-	mActions[LC_EDIT_ACTION_DELETE]->setIcon(QIcon(":/resources/action_delete.png"));
-	mActions[LC_EDIT_ACTION_PAINT]->setIcon(QIcon(":/resources/action_paint.png"));
-	mActions[LC_EDIT_ACTION_ZOOM]->setIcon(QIcon(":/resources/action_zoom.png"));
-	mActions[LC_EDIT_ACTION_PAN]->setIcon(QIcon(":/resources/action_pan.png"));
 	mActions[LC_EDIT_ACTION_ROTATE_VIEW]->setIcon(QIcon(":/resources/action_rotate_view.png"));
 	mActions[LC_EDIT_ACTION_ROLL]->setIcon(QIcon(":/resources/action_roll.png"));
 	mActions[LC_EDIT_ACTION_ZOOM_REGION]->setIcon(QIcon(":/resources/action_zoom_region.png"));
@@ -279,6 +358,8 @@ void lcMainWindow::CreateMenus()
 	EditMenu->addAction(mActions[LC_EDIT_PASTE]);
 	EditMenu->addSeparator();
 	EditMenu->addAction(mActions[LC_EDIT_FIND]);
+
+	mActions[LC_EDIT_FIND]->setIcon(QIcon(":/resources/edit_find.png"));
 	EditMenu->addAction(mActions[LC_EDIT_FIND_NEXT]);
 	EditMenu->addAction(mActions[LC_EDIT_FIND_PREVIOUS]);
 	EditMenu->addSeparator();
@@ -435,6 +516,8 @@ void lcMainWindow::CreateToolBars()
 	QHBoxLayout* TransformLayout = new QHBoxLayout;
 	QWidget* TransformWidget = new QWidget();
 	TransformWidget->setLayout(TransformLayout);
+
+	TransformLayout->setContentsMargins(5, 0, 5, 0);
 	mTransformXEdit = new QLineEdit();
 	mTransformXEdit->setMaximumWidth(75);
 	TransformLayout->addWidget(mTransformXEdit);

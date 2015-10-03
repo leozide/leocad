@@ -1,5 +1,25 @@
 <RCC>
     <qresource prefix="/">
+        <file>resources/action_delete_16.png</file>
+        <file>resources/action_insert_16.png</file>
+        <file>resources/action_light_16.png</file>
+        <file>resources/action_move_16.png</file>
+        <file>resources/action_paint_16.png</file>
+        <file>resources/action_pan_16.png</file>
+        <file>resources/action_rotate_16.png</file>
+        <file>resources/action_select_16.png</file>
+        <file>resources/action_spotlight_16.png</file>
+        <file>resources/action_zoom_16.png</file>
+        <file>resources/edit_copy_16.png</file>
+        <file>resources/edit_cut_16.png</file>
+        <file>resources/edit_paste_16.png</file>
+        <file>resources/edit_redo_16.png</file>
+        <file>resources/edit_undo_16.png</file>
+        <file>resources/file_new_16.png</file>
+        <file>resources/file_open_16.png</file>
+        <file>resources/file_print_16.png</file>
+        <file>resources/file_print_preview_16.png</file>
+        <file>resources/file_save_16.png</file>
         <file>resources/action_camera.png</file>
         <file>resources/action_delete.png</file>
         <file>resources/action_insert.png</file>
@@ -36,6 +56,7 @@
         <file>resources/cursor_zoom_region.png</file>
         <file>resources/edit_copy.png</file>
         <file>resources/edit_cut.png</file>
+        <file>resources/edit_find.png</file>
         <file>resources/edit_lock.png</file>
         <file>resources/edit_paste.png</file>
         <file>resources/edit_redo.png</file>

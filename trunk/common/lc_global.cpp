@@ -1,1 +1,1 @@
-#include "common/lc_global.h"
+#include "lc_global.h"

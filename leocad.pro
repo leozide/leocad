@@ -8,8 +8,8 @@ greaterThan(QT_MAJOR_VERSION, 4) {
 
 INCLUDEPATH += qt common
 CONFIG += precompile_header incremental c++11
-PRECOMPILED_HEADER = lc_global.h
 win32 { 
+	PRECOMPILED_HEADER = lc_global.h
 	QMAKE_CXXFLAGS_WARN_ON += -wd4100
 	DEFINES += _CRT_SECURE_NO_WARNINGS _CRT_SECURE_NO_DEPRECATE=1 _CRT_NONSTDC_NO_WARNINGS=1
 	INCLUDEPATH += $$[QT_INSTALL_PREFIX]/src/3rdparty/zlib
@@ -18,6 +18,7 @@ win32 {
 	RC_FILE = qt/leocad.rc
 	LIBS += -ladvapi32 -lshell32
 } else {
+	PRECOMPILED_HEADER = common/lc_global.h
 	LIBS += -lz
 	QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-parameter
 }

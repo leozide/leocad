@@ -3,17 +3,13 @@
 #include "ui_lc_qgroupdialog.h"
 #include "group.h"
 
-lcQGroupDialog::lcQGroupDialog(QWidget *parent, void *data) :
+lcQGroupDialog::lcQGroupDialog(QWidget *parent, const QString& Name) :
 	QDialog(parent),
 	ui(new Ui::lcQGroupDialog)
 {
 	ui->setupUi(this);
 
-	ui->name->setMaxLength(LC_MAX_GROUP_NAME);
-
-	options = (char*)data;
-
-	ui->name->setText(options);
+	ui->name->setText(Name);
 }
 
 lcQGroupDialog::~lcQGroupDialog()
@@ -23,15 +19,15 @@ lcQGroupDialog::~lcQGroupDialog()
 
 void lcQGroupDialog::accept()
 {
-	QString name = ui->name->text();
+	QString Name = ui->name->text();
 
-	if (name.isEmpty())
+	if (Name.isEmpty())
 	{
 		QMessageBox::information(this, "LeoCAD", tr("Name cannot be empty."));
 		return;
 	}
 
-	strcpy(options, name.toLocal8Bit().data());
+	mName = Name;
 
 	QDialog::accept();
 }

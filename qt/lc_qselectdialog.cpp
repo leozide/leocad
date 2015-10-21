@@ -183,7 +183,7 @@ void lcQSelectDialog::AddChildren(QTreeWidgetItem* ParentItem, lcGroup* ParentGr
 		if (Group->mGroup != ParentGroup)
 			continue;
 
-		QTreeWidgetItem* GroupItem = new QTreeWidgetItem(ParentItem, QStringList(Group->m_strName));
+		QTreeWidgetItem* GroupItem = new QTreeWidgetItem(ParentItem, QStringList(Group->mName));
 
 		AddChildren(GroupItem, Group);
 	}

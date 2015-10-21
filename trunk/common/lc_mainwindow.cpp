@@ -1066,7 +1066,6 @@ void lcMainWindow::ShowPrintDialog()
 #include "lc_qselectdialog.h"
 #include "lc_qminifigdialog.h"
 #include "lc_qarraydialog.h"
-#include "lc_qgroupdialog.h"
 #include "lc_qeditgroupsdialog.h"
 #include "lc_qpreferencesdialog.h"
 #include "lc_qupdatedialog.h"
@@ -1121,12 +1120,6 @@ bool lcMainWindow::DoDialog(LC_DIALOG_TYPE Type, void* Data)
 	case LC_DIALOG_PIECE_ARRAY:
 		{
 			lcQArrayDialog Dialog(this, Data);
-			return Dialog.exec() == QDialog::Accepted;
-		} break;
-
-	case LC_DIALOG_PIECE_GROUP:
-		{
-			lcQGroupDialog Dialog(this, Data);
 			return Dialog.exec() == QDialog::Accepted;
 		} break;
 
@@ -1521,8 +1514,8 @@ void lcMainWindow::UpdateSelectedObjects(int Flags, int SelectedCount, lcObject*
 			Message.append(QString(" - %1 (ID: %2)").arg(Focus->GetName(), ((lcPiece*)Focus)->mPieceInfo->m_strName));
 
 			const lcGroup* Group = ((lcPiece*)Focus)->GetGroup();
-			if (Group && Group->m_strName[0])
-				Message.append(QString(" in group '%1'").arg(Group->m_strName));
+			if (Group && !Group->mName.isEmpty())
+				Message.append(QString(" in group '%1'").arg(Group->mName));
 		}
 	}
 

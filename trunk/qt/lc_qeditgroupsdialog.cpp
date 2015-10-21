@@ -58,11 +58,11 @@ void lcQEditGroupsDialog::on_newGroup_clicked()
 
 	lcGroup* ParentGroup = (lcGroup*)CurrentItem->data(0, GroupRole).value<uintptr_t>();
 
-	lcGroup* NewGroup = lcGetActiveModel()->AddGroup("Group #", ParentGroup);
+	lcGroup* NewGroup = lcGetActiveModel()->AddGroup(tr("Group #"), ParentGroup);
 	mOptions->GroupParents[NewGroup] = ParentGroup;
 	mOptions->NewGroups.append(NewGroup);
 
-	QTreeWidgetItem* GroupItem = new QTreeWidgetItem(CurrentItem, QStringList(NewGroup->m_strName));
+	QTreeWidgetItem* GroupItem = new QTreeWidgetItem(CurrentItem, QStringList(NewGroup->mName));
 	GroupItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | Qt::ItemIsEnabled | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled | Qt::ItemIsEditable);
 	GroupItem->setData(0, GroupRole, qVariantFromValue<uintptr_t>((uintptr_t)NewGroup));
 }
@@ -121,8 +121,7 @@ void lcQEditGroupsDialog::UpdateParents(QTreeWidgetItem* ParentItem, lcGroup* Pa
 			lcGroup* Group = (lcGroup*)ChildItem->data(0, GroupRole).value<uintptr_t>();
 
 			// todo: validate unique group name
-			strncpy(Group->m_strName, ChildItem->text(0).toLatin1(), sizeof(Group->m_strName)); // todo: qstring
-			Group->m_strName[sizeof(Group->m_strName) - 1] = 0;
+			Group->mName = ChildItem->text(0);
 
 			mOptions->GroupParents[Group] = ParentGroup;
 
@@ -141,7 +140,7 @@ void lcQEditGroupsDialog::AddChildren(QTreeWidgetItem* ParentItem, lcGroup* Pare
 		if (Parent != ParentGroup)
 			continue;
 
-		QTreeWidgetItem* GroupItem = new QTreeWidgetItem(ParentItem, QStringList(Group->m_strName));
+		QTreeWidgetItem* GroupItem = new QTreeWidgetItem(ParentItem, QStringList(Group->mName));
 		GroupItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | Qt::ItemIsEnabled | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled | Qt::ItemIsEditable);
 		GroupItem->setData(0, GroupRole, qVariantFromValue<uintptr_t>((uintptr_t)Group));
 

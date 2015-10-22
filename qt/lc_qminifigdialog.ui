@@ -7,11 +7,11 @@
     <x>0</x>
     <y>0</y>
     <width>840</width>
-    <height>327</height>
+    <height>416</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Minifig Wizard</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>

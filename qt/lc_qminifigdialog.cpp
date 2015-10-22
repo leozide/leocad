@@ -74,24 +74,34 @@ lcQMinifigDialog::lcQMinifigDialog(QWidget *parent, void *data) :
 
 	options = (lcMinifig*)data;
 
-	for (int itemIndex = 0; itemIndex < LC_MFW_NUMITEMS; itemIndex++)
+	for (int ItemIndex = 0; ItemIndex < LC_MFW_NUMITEMS; ItemIndex++)
 	{
-		lcArray<lcMinifigPieceInfo>& parts = wizard->mSettings[itemIndex];
-		QStringList typeList;
+		lcArray<lcMinifigPieceInfo>& PartList = wizard->mSettings[ItemIndex];
+		QStringList ItemStrings;
+		QVector<int> Separators;
 
-		for (int partIndex = 0; partIndex < parts.GetSize(); partIndex++)
-			typeList.append(parts[partIndex].Description);
+		for (int PartIndex = 0; PartIndex < PartList.GetSize(); PartIndex++)
+		{
+			const char* Description = PartList[PartIndex].Description;
 
-		QComboBox *itemType = getTypeComboBox(itemIndex);
+			if (Description[0] != '-' || Description[1] != '-')
+				ItemStrings.append(Description);
+			else
+				Separators.append(ItemStrings.size());
+		}
 
-		itemType->blockSignals(true);
-		itemType->addItems(typeList);
-		itemType->setCurrentIndex(wizard->GetSelectionIndex(itemIndex));
-		itemType->blockSignals(false);
+		QComboBox* ItemCombo = getTypeComboBox(ItemIndex);
 
-		lcQColorPicker *colorPicker = getColorPicker(itemIndex);
+		ItemCombo->blockSignals(true);
+		ItemCombo->addItems(ItemStrings);
+		for (int SeparatorIndex = Separators.size() - 1; SeparatorIndex >= 0; SeparatorIndex--)
+			ItemCombo->insertSeparator(Separators[SeparatorIndex]);
+		ItemCombo->setCurrentIndex(wizard->GetSelectionIndex(ItemIndex));
+		ItemCombo->blockSignals(false);
+
+		lcQColorPicker *colorPicker = getColorPicker(ItemIndex);
 		colorPicker->blockSignals(true);
-		colorPicker->setCurrentColor(options->Colors[itemIndex]);
+		colorPicker->setCurrentColor(options->Colors[ItemIndex]);
 		colorPicker->blockSignals(false);
 	}
 

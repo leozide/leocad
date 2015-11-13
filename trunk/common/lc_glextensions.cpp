@@ -8,6 +8,8 @@ bool gSupportsFramebufferObjectEXT;
 bool gSupportsAnisotropic;
 GLfloat gMaxAnisotropy;
 
+#ifndef Q_OS_MAC
+
 PFNGLBINDBUFFERARBPROC lcBindBufferARB;
 PFNGLDELETEBUFFERSARBPROC lcDeleteBuffersARB;
 PFNGLGENBUFFERSARBPROC lcGenBuffersARB;
@@ -112,6 +114,8 @@ PFNGLUNIFORMMATRIX4FVPROC lcUniformMatrix4fv;
 PFNGLVALIDATEPROGRAMPROC lcValidateProgram;
 PFNGLVERTEXATTRIBPOINTERPROC lcVertexAttribPointer;
 
+#endif
+
 static bool lcIsGLExtensionSupported(const GLubyte* Extensions, const char* Name)
 {
 	const GLubyte* Start;
@@ -188,6 +192,7 @@ void lcInitializeGLExtensions(const QGLContext* Context)
 	// todo: check gl version and use core functions instead
 	if (lcIsGLExtensionSupported(Extensions, "GL_ARB_vertex_buffer_object"))
 	{
+#ifndef Q_OS_MAC
 		lcBindBufferARB = (PFNGLBINDBUFFERARBPROC)Context->getProcAddress("glBindBufferARB");
 		lcDeleteBuffersARB = (PFNGLDELETEBUFFERSARBPROC)Context->getProcAddress("glDeleteBuffersARB");
 		lcGenBuffersARB = (PFNGLGENBUFFERSARBPROC)Context->getProcAddress("glGenBuffersARB");
@@ -199,13 +204,14 @@ void lcInitializeGLExtensions(const QGLContext* Context)
 		lcUnmapBufferARB = (PFNGLUNMAPBUFFERARBPROC)Context->getProcAddress("glUnmapBufferARB");
 		lcGetBufferParameterivARB = (PFNGLGETBUFFERPARAMETERIVARBPROC)Context->getProcAddress("glGetBufferParameterivARB");
 		lcGetBufferPointervARB = (PFNGLGETBUFFERPOINTERVARBPROC)Context->getProcAddress("glGetBufferPointervARB");
-
+#endif
 		gSupportsVertexBufferObject = true;
 	}
 
 	// todo: check gl version
 	if (lcIsGLExtensionSupported(Extensions, "GL_ARB_framebuffer_object"))
 	{
+#ifndef Q_OS_MAC
 		lcIsRenderbuffer = (PFNGLISRENDERBUFFERPROC)Context->getProcAddress("glIsRenderbuffer");
 		lcBindRenderbuffer = (PFNGLBINDRENDERBUFFERPROC)Context->getProcAddress("glBindRenderbuffer");
 		lcDeleteRenderbuffers = (PFNGLDELETERENDERBUFFERSPROC)Context->getProcAddress("glDeleteRenderbuffers");
@@ -226,12 +232,13 @@ void lcInitializeGLExtensions(const QGLContext* Context)
 		lcBlitFramebuffer = (PFNGLBLITFRAMEBUFFERPROC)Context->getProcAddress("glBlitFramebuffer");
 		lcRenderbufferStorageMultisample = (PFNGLRENDERBUFFERSTORAGEMULTISAMPLEPROC)Context->getProcAddress("glRenderbufferStorageMultisample");
 		lcFramebufferTextureLayer = (PFNGLFRAMEBUFFERTEXTURELAYERARBPROC)Context->getProcAddress("glFramebufferTextureLayer");
-
+#endif
 		gSupportsFramebufferObjectARB = true;
 	}
 
 	if (lcIsGLExtensionSupported(Extensions, "GL_EXT_framebuffer_object"))
 	{
+#ifndef Q_OS_MAC
 		lcIsRenderbufferEXT = (PFNGLISRENDERBUFFEREXTPROC)Context->getProcAddress("glIsRenderbufferEXT");
 		lcBindRenderbufferEXT = (PFNGLBINDRENDERBUFFEREXTPROC)Context->getProcAddress("glBindRenderbufferEXT");
 		lcDeleteRenderbuffersEXT = (PFNGLDELETERENDERBUFFERSEXTPROC)Context->getProcAddress("glDeleteRenderbuffersEXT");
@@ -249,7 +256,7 @@ void lcInitializeGLExtensions(const QGLContext* Context)
 		lcFramebufferRenderbufferEXT = (PFNGLFRAMEBUFFERRENDERBUFFEREXTPROC)Context->getProcAddress("glFramebufferRenderbufferEXT");
 		lcGetFramebufferAttachmentParameterivEXT = (PFNGLGETFRAMEBUFFERATTACHMENTPARAMETERIVEXTPROC)Context->getProcAddress("glGetFramebufferAttachmentParameterivEXT");
 		lcGenerateMipmapEXT = (PFNGLGENERATEMIPMAPEXTPROC)Context->getProcAddress("glGenerateMipmapEXT");
-
+#endif
 		gSupportsFramebufferObjectEXT = true;
 	}
 
@@ -261,6 +268,7 @@ void lcInitializeGLExtensions(const QGLContext* Context)
 
 	if (VersionMajor >= 2 && (GLSLMajor > 1 || (GLSLMajor == 1 && GLSLMinor >= 10)))
 	{
+#ifndef Q_OS_MAC
 		lcAttachShader = (PFNGLATTACHSHADERPROC)Context->getProcAddress("glAttachShader");
 		lcBindAttribLocation = (PFNGLBINDATTRIBLOCATIONPROC)Context->getProcAddress("glBindAttribLocation");
 		lcCompileShader = (PFNGLCOMPILESHADERPROC)Context->getProcAddress("glCompileShader");
@@ -313,7 +321,7 @@ void lcInitializeGLExtensions(const QGLContext* Context)
 		lcUniformMatrix4fv = (PFNGLUNIFORMMATRIX4FVPROC)Context->getProcAddress("glUniformMatrix4fv");
 		lcValidateProgram = (PFNGLVALIDATEPROGRAMPROC)Context->getProcAddress("glValidateProgram");
 		lcVertexAttribPointer = (PFNGLVERTEXATTRIBPOINTERPROC)Context->getProcAddress("glVertexAttribPointer");
-
+#endif
 		gSupportsShaderObjects = true;
 	}
 }

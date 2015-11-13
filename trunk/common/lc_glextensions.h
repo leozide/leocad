@@ -10,6 +10,8 @@ extern bool gSupportsFramebufferObjectEXT;
 extern bool gSupportsAnisotropic;
 extern GLfloat gMaxAnisotropy;
 
+#ifndef Q_OS_MAC
+
 extern PFNGLBINDBUFFERARBPROC lcBindBufferARB;
 extern PFNGLDELETEBUFFERSARBPROC lcDeleteBuffersARB;
 extern PFNGLGENBUFFERSARBPROC lcGenBuffersARB;
@@ -217,5 +219,7 @@ extern PFNGLVERTEXATTRIBPOINTERPROC lcVertexAttribPointer;
 #define glUniformMatrix4fv lcUniformMatrix4fv
 #define glValidateProgram lcValidateProgram
 #define glVertexAttribPointer lcVertexAttribPointer
+
+#endif
 
 #endif

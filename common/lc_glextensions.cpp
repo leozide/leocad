@@ -8,7 +8,7 @@ bool gSupportsFramebufferObjectEXT;
 bool gSupportsAnisotropic;
 GLfloat gMaxAnisotropy;
 
-#ifndef Q_OS_MAC
+#ifdef LC_LOAD_GLEXTENSIONS
 
 PFNGLBINDBUFFERARBPROC lcBindBufferARB;
 PFNGLDELETEBUFFERSARBPROC lcDeleteBuffersARB;
@@ -192,7 +192,7 @@ void lcInitializeGLExtensions(const QGLContext* Context)
 	// todo: check gl version and use core functions instead
 	if (lcIsGLExtensionSupported(Extensions, "GL_ARB_vertex_buffer_object"))
 	{
-#ifndef Q_OS_MAC
+#ifdef LC_LOAD_GLEXTENSIONS
 		lcBindBufferARB = (PFNGLBINDBUFFERARBPROC)Context->getProcAddress("glBindBufferARB");
 		lcDeleteBuffersARB = (PFNGLDELETEBUFFERSARBPROC)Context->getProcAddress("glDeleteBuffersARB");
 		lcGenBuffersARB = (PFNGLGENBUFFERSARBPROC)Context->getProcAddress("glGenBuffersARB");
@@ -211,7 +211,7 @@ void lcInitializeGLExtensions(const QGLContext* Context)
 	// todo: check gl version
 	if (lcIsGLExtensionSupported(Extensions, "GL_ARB_framebuffer_object"))
 	{
-#ifndef Q_OS_MAC
+#ifdef LC_LOAD_GLEXTENSIONS
 		lcIsRenderbuffer = (PFNGLISRENDERBUFFERPROC)Context->getProcAddress("glIsRenderbuffer");
 		lcBindRenderbuffer = (PFNGLBINDRENDERBUFFERPROC)Context->getProcAddress("glBindRenderbuffer");
 		lcDeleteRenderbuffers = (PFNGLDELETERENDERBUFFERSPROC)Context->getProcAddress("glDeleteRenderbuffers");
@@ -238,7 +238,7 @@ void lcInitializeGLExtensions(const QGLContext* Context)
 
 	if (lcIsGLExtensionSupported(Extensions, "GL_EXT_framebuffer_object"))
 	{
-#ifndef Q_OS_MAC
+#ifdef LC_LOAD_GLEXTENSIONS
 		lcIsRenderbufferEXT = (PFNGLISRENDERBUFFEREXTPROC)Context->getProcAddress("glIsRenderbufferEXT");
 		lcBindRenderbufferEXT = (PFNGLBINDRENDERBUFFEREXTPROC)Context->getProcAddress("glBindRenderbufferEXT");
 		lcDeleteRenderbuffersEXT = (PFNGLDELETERENDERBUFFERSEXTPROC)Context->getProcAddress("glDeleteRenderbuffersEXT");
@@ -268,7 +268,7 @@ void lcInitializeGLExtensions(const QGLContext* Context)
 
 	if (VersionMajor >= 2 && (GLSLMajor > 1 || (GLSLMajor == 1 && GLSLMinor >= 10)))
 	{
-#ifndef Q_OS_MAC
+#ifdef LC_LOAD_GLEXTENSIONS
 		lcAttachShader = (PFNGLATTACHSHADERPROC)Context->getProcAddress("glAttachShader");
 		lcBindAttribLocation = (PFNGLBINDATTRIBLOCATIONPROC)Context->getProcAddress("glBindAttribLocation");
 		lcCompileShader = (PFNGLCOMPILESHADERPROC)Context->getProcAddress("glCompileShader");

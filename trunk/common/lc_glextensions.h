@@ -11,6 +11,10 @@ extern bool gSupportsAnisotropic;
 extern GLfloat gMaxAnisotropy;
 
 #ifndef Q_OS_MAC
+#define LC_LOAD_GLEXTENSIONS
+#endif
+
+#ifdef LC_LOAD_GLEXTENSIONS
 
 extern PFNGLBINDBUFFERARBPROC lcBindBufferARB;
 extern PFNGLDELETEBUFFERSARBPROC lcDeleteBuffersARB;

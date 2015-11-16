@@ -1275,6 +1275,12 @@ void lcPiecesLibrary::UpdateBuffers(lcContext* Context)
 	free(IndexData);
 }
 
+void lcPiecesLibrary::UnloadUnusedParts()
+{
+	for (int PieceInfoIndex = 0; PieceInfoIndex < mPieces.GetSize(); PieceInfoIndex++)
+		mPieces[PieceInfoIndex]->UnloadIfUnused();
+}
+
 bool lcPiecesLibrary::LoadTexture(lcTexture* Texture)
 {
 	char Name[LC_MAXPATH], FileName[LC_MAXPATH];

@@ -42,21 +42,27 @@ public:
 	{
 		mRefCount++;
 
-		if (mRefCount == 1)
+		if (!mLoaded)
 			Load();
 	}
 
-	void Release()
+	void Release(bool AllowUnload)
 	{
 		mRefCount--;
 
-		if (!mRefCount)
+		if (!mRefCount && AllowUnload)
+			Unload();
+	}
+
+	void UnloadIfUnused()
+	{
+		if (!mRefCount && mLoaded)
 			Unload();
 	}
 
 	bool IsLoaded() const
 	{
-		return mRefCount != 0;
+		return mLoaded;
 	}
 
 	bool IsPlaceholder() const
@@ -135,6 +141,7 @@ public:
 	lcuint32 mFlags;
 
 protected:
+	bool mLoaded;
 	int mRefCount;
 	lcModel* mModel;
 	lcMesh* mMesh;

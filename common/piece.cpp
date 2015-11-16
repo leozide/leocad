@@ -43,7 +43,7 @@ lcPiece::lcPiece(PieceInfo* pPieceInfo)
 lcPiece::~lcPiece()
 {
 	if (mPieceInfo != NULL)
-		mPieceInfo->Release();
+		mPieceInfo->Release(false);
 }
 
 void lcPiece::SaveLDraw(QTextStream& Stream) const

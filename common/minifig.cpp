@@ -78,11 +78,11 @@ void MinifigWizard::OnInitialUpdate()
 	Calculate();
 }
 
-MinifigWizard::~MinifigWizard ()
+MinifigWizard::~MinifigWizard()
 {
 	for (int i = 0; i < LC_MFW_NUMITEMS; i++)
 		if (mMinifig->Parts[i])
-			mMinifig->Parts[i]->Release();
+			mMinifig->Parts[i]->Release(true);
 }
 
 void MinifigWizard::ParseSettings(lcFile& Settings)
@@ -576,7 +576,7 @@ void MinifigWizard::SetSelectionIndex(int Type, int Index)
 	MakeCurrent();
 
 	if (mMinifig->Parts[Type])
-		mMinifig->Parts[Type]->Release();
+		mMinifig->Parts[Type]->Release(true);
 
 	mMinifig->Parts[Type] = mSettings[Type][Index].Info;
 

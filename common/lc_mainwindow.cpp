@@ -1730,6 +1730,7 @@ void lcMainWindow::NewProject()
 
 	Project* NewProject = new Project();
 	g_App->SetProject(NewProject);
+	lcGetPiecesLibrary()->UnloadUnusedParts();
 }
 
 bool lcMainWindow::OpenProject(const QString& FileName)

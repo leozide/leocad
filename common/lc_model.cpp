@@ -162,7 +162,7 @@ lcModel::~lcModel()
 
 		if (mPieceInfo->GetModel() == this)
 			mPieceInfo->SetPlaceholder();
-		mPieceInfo->Release();
+		mPieceInfo->Release(true);
 	}
 
 	DeleteModel();
@@ -569,6 +569,7 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 	mCurrentStep = CurrentStep;
 	CalculateStep(mCurrentStep);
 	UpdateBackgroundTexture();
+	lcGetPiecesLibrary()->UnloadUnusedParts();
 
 	delete Piece;
 	delete Camera;
@@ -851,6 +852,7 @@ bool lcModel::LoadBinary(lcFile* file)
 
 	UpdateBackgroundTexture();
 	CalculateStep(mCurrentStep);
+	lcGetPiecesLibrary()->UnloadUnusedParts();
 
 	return true;
 }
@@ -2389,7 +2391,7 @@ void lcModel::SetObjectProperty(lcObject* Object, lcObjectPropertyType ObjectPro
 
 			if (Info != Part->mPieceInfo)
 			{
-				Part->mPieceInfo->Release();
+				Part->mPieceInfo->Release(true);
 				Part->mPieceInfo = Info;
 				Part->mPieceInfo->AddRef();
 

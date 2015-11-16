@@ -16,6 +16,7 @@ PieceInfo::PieceInfo()
 	mZipFileType = LC_NUM_ZIPFILES;
 	mZipFileIndex = -1;
 	mFlags = 0;
+	mLoaded = false;
 	mRefCount = 0;
 	mMesh = NULL;
 	mModel = NULL;
@@ -23,7 +24,7 @@ PieceInfo::PieceInfo()
 
 PieceInfo::~PieceInfo()
 {
-	if (mRefCount)
+	if (mLoaded)
 		Unload();
 }
 
@@ -115,6 +116,8 @@ void PieceInfo::CreatePlaceholder(const char* Name)
 
 void PieceInfo::Load()
 {
+	mLoaded = true;
+
 	if (mFlags & LC_PIECE_MODEL)
 		return;
 	else if (mFlags & LC_PIECE_PLACEHOLDER)
@@ -142,6 +145,7 @@ void PieceInfo::Unload()
 		mMesh = NULL;
 	}
 
+	mLoaded = false;
 	mModel = NULL;
 
 	if (IsModel())

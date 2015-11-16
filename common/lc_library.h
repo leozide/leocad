@@ -158,6 +158,7 @@ public:
 	bool ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform, lcuint32 CurrentColorCode, lcArray<lcLibraryTextureMap>& TextureStack, lcLibraryMeshData& MeshData, lcMeshDataType MeshDataType);
 	void CreateMesh(PieceInfo* Info, lcLibraryMeshData& MeshData);
 	void UpdateBuffers(lcContext* Context);
+	void UnloadUnusedParts();
 
 	lcArray<PieceInfo*> mPieces;
 	lcArray<lcLibraryPrimitive*> mPrimitives;

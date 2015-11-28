@@ -231,7 +231,7 @@ void lcTimelineWidget::UpdateSelection()
 	if (mIgnoreUpdates)
 		return;
 
-	bool Blocked = blockSignals(true);
+	QItemSelection ItemSelection;
 
 	for (int TopLevelItemIdx = 0; TopLevelItemIdx < topLevelItemCount(); TopLevelItemIdx++)
 	{
@@ -242,9 +242,17 @@ void lcTimelineWidget::UpdateSelection()
 			QTreeWidgetItem* PieceItem = StepItem->child(PieceItemIdx);
 			lcPiece* Piece = (lcPiece*)PieceItem->data(0, Qt::UserRole).value<uintptr_t>();
 
-			PieceItem->setSelected(Piece->IsSelected());
+			if (Piece->IsSelected())
+			{
+				QModelIndex Index = indexFromItem(PieceItem);
+				ItemSelection.select(Index, Index);
+			}
 		}
 	}
+
+	bool Blocked = blockSignals(true);
+
+	selectionModel()->select(ItemSelection, QItemSelectionModel::ClearAndSelect);
 
 	blockSignals(Blocked);
 }

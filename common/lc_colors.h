@@ -28,7 +28,7 @@ enum
 struct lcColorGroup
 {
 	lcArray<int> Colors;
-	char Name[LC_MAX_COLOR_NAME];
+	QString Name;
 };
 
 enum lcInterfaceColor

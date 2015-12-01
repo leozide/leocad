@@ -415,6 +415,9 @@ void lcMainWindow::CreateMenus()
 	PieceMenu->addAction(mActions[LC_PIECE_ARRAY]);
 	PieceMenu->addAction(mActions[LC_PIECE_MINIFIG_WIZARD]);
 	PieceMenu->addSeparator();
+	PieceMenu->addAction(mActions[LC_PIECE_MOVE_SELECTION_TO_MODEL]);
+	PieceMenu->addAction(mActions[LC_PIECE_INLINE_SELECTED_MODELS]);
+	PieceMenu->addSeparator();
 	PieceMenu->addAction(mActions[LC_PIECE_GROUP]);
 	PieceMenu->addAction(mActions[LC_PIECE_UNGROUP]);
 	PieceMenu->addAction(mActions[LC_PIECE_GROUP_REMOVE]);
@@ -1485,6 +1488,8 @@ void lcMainWindow::UpdateSelectedObjects(int Flags, int SelectedCount, lcObject*
 	mActions[LC_PIECE_HIDE_UNSELECTED]->setEnabled(Flags & LC_SEL_UNSELECTED);
 	mActions[LC_PIECE_UNHIDE_SELECTED]->setEnabled(Flags & LC_SEL_HIDDEN_SELECTED);
 	mActions[LC_PIECE_UNHIDE_ALL]->setEnabled(Flags & LC_SEL_HIDDEN);
+	mActions[LC_PIECE_MOVE_SELECTION_TO_MODEL]->setEnabled(Flags & LC_SEL_PIECE);
+	mActions[LC_PIECE_INLINE_SELECTED_MODELS]->setEnabled(Flags & LC_SEL_MODEL_SELECTED);
 	mActions[LC_PIECE_GROUP]->setEnabled(Flags & LC_SEL_CAN_GROUP);
 	mActions[LC_PIECE_UNGROUP]->setEnabled(Flags & LC_SEL_GROUPED);
 	mActions[LC_PIECE_GROUP_ADD]->setEnabled((Flags & (LC_SEL_GROUPED | LC_SEL_FOCUS_GROUPED)) == LC_SEL_GROUPED);
@@ -2107,6 +2112,14 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 
 	case LC_PIECE_ARRAY:
 		lcGetActiveModel()->ShowArrayDialog();
+		break;
+
+	case LC_PIECE_MOVE_SELECTION_TO_MODEL:
+		lcGetActiveModel()->MoveSelectionToModel();
+		break;
+
+	case LC_PIECE_INLINE_SELECTED_MODELS:
+		lcGetActiveModel()->InlineSelectedModels();
 		break;
 
 	case LC_PIECE_GROUP:

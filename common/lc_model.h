@@ -15,6 +15,7 @@
 #define LC_SEL_GROUPED           0x080 // At least one piece selected is grouped
 #define LC_SEL_FOCUS_GROUPED     0x100 // Focused piece is grouped
 #define LC_SEL_CAN_GROUP         0x200 // Can make a new group
+#define LC_SEL_MODEL_SELECTED    0x400 // At least one model reference is selected
 
 enum lcTransformType
 {
@@ -199,6 +200,9 @@ public:
 	void ShowSelectedPiecesLater();
 	void SetPieceSteps(const QList<QPair<lcPiece*, lcStep>>& PieceSteps);
 
+	void MoveSelectionToModel();
+	void InlineSelectedModels();
+
 	lcGroup* AddGroup(const QString& Prefix, lcGroup* Parent);
 	lcGroup* GetGroup(const QString& Name, bool CreateIfMissing);
 	void RemoveGroup(lcGroup* Group);
@@ -331,6 +335,7 @@ protected:
 	void SelectGroup(lcGroup* TopGroup, bool Select);
 
 	void AddPiece(lcPiece* Piece);
+	void InsertPiece(lcPiece* Piece, int Index);
 
 	lcModelProperties mProperties;
 	PieceInfo* mPieceInfo;

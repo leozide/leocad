@@ -1890,12 +1890,18 @@ void lcModel::AddPiece(lcPiece* Piece)
 	{
 		if (mPieces[PieceIdx]->GetStepShow() > Piece->GetStepShow())
 		{
-			mPieces.InsertAt(PieceIdx, Piece);
+			InsertPiece(Piece, PieceIdx);
 			return;
 		}
 	}
 
+	InsertPiece(Piece, mPieces.GetSize());
+}
+
+void lcModel::InsertPiece(lcPiece* Piece, int Index)
+{
 	PieceInfo* Info = Piece->mPieceInfo;
+
 	if (!Info->IsModel())
 	{
 		lcMesh* Mesh = Info->IsTemporary() ? gPlaceholderMesh : Info->GetMesh();
@@ -1904,7 +1910,7 @@ void lcModel::AddPiece(lcPiece* Piece)
 			lcGetPiecesLibrary()->mBuffersDirty = true;
 	}
 
-	mPieces.Add(Piece);
+	mPieces.InsertAt(Index, Piece);
 }
 
 void lcModel::DeleteAllCameras()
@@ -2054,6 +2060,60 @@ void lcModel::SetPieceSteps(const QList<QPair<lcPiece*, lcStep>>& PieceSteps)
 		gMainWindow->UpdateTimeline(false, false);
 		gMainWindow->UpdateFocusObject(GetFocusObject());
 	}
+}
+
+void lcModel::MoveSelectionToModel()
+{
+}
+
+void lcModel::InlineSelectedModels()
+{
+	lcArray<lcPiece*> NewPieces;
+
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); )
+	{
+		lcPiece* Piece = mPieces[PieceIdx];
+
+		if (!Piece->IsSelected() || !Piece->mPieceInfo->IsModel())
+		{
+			PieceIdx++;
+			continue;
+		}
+
+		mPieces.RemoveIndex(PieceIdx);
+
+		lcArray<lcModelPartsEntry> ModelParts;
+		Piece->mPieceInfo->GetModelParts(Piece->mModelWorld, Piece->mColorIndex, ModelParts);
+
+		for (int InsertIdx = 0; InsertIdx < ModelParts.GetSize(); InsertIdx++)
+		{
+			lcModelPartsEntry& Entry = ModelParts[InsertIdx];
+
+			lcPiece* NewPiece = new lcPiece(Entry.Info);
+
+			NewPiece->Initialize(Entry.WorldMatrix, Piece->GetStepShow());
+			NewPiece->SetColorIndex(Entry.ColorIndex);
+			NewPiece->UpdatePosition(mCurrentStep);
+
+			NewPieces.Add(NewPiece);
+			InsertPiece(NewPiece, PieceIdx);
+			PieceIdx++;
+		}
+
+		delete Piece;
+	}
+
+	if (!NewPieces.GetSize())
+	{
+		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("No models selected."));
+		return;
+	}
+
+	SaveCheckpoint("Inlining");
+	gMainWindow->UpdateAllViews();
+	gMainWindow->UpdateTimeline(false, false);
+	gMainWindow->UpdateFocusObject(GetFocusObject());
+	UpdateSelection();
 }
 
 bool lcModel::RemoveSelectedObjects()
@@ -2843,6 +2903,9 @@ void lcModel::UpdateSelection() const
 
 				if (Piece->IsFocused())
 					Focus = Piece;
+
+				if (Piece->mPieceInfo->IsModel())
+					Flags |= LC_SEL_MODEL_SELECTED;
 
 				if (Piece->IsHidden())
 					Flags |= LC_SEL_HIDDEN | LC_SEL_HIDDEN_SELECTED;

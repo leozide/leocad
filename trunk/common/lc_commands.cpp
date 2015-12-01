@@ -1047,6 +1047,20 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 		QT_TRANSLATE_NOOP("Status", "Make copies of the selected pieces"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
+	// LC_PIECE_MOVE_SELECTION_TO_MODEL
+	{
+		"Piece.MoveSelectionToModel",
+		QT_TRANSLATE_NOOP("Menu", "Move Selection To Model..."),
+		QT_TRANSLATE_NOOP("Status", "Move the currently selected pieces to a new model and replaces them with a reference to the model"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
+	// LC_PIECE_INLINE_SELECTED_MODELS
+	{
+		"Piece.InlineSelectedModels",
+		QT_TRANSLATE_NOOP("Menu", "Inline Selected Models"),
+		QT_TRANSLATE_NOOP("Status", "Insert the contents of the selected model references into the current model"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
 	// LC_PIECE_GROUP
 	{
 		"Piece.Group",

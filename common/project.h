@@ -57,7 +57,7 @@ public:
 	void SetActiveModel(int ModelIndex);
 	bool IsModelNameValid(const QString& Name) const;
 
-	void CreateNewModel();
+	lcModel* CreateNewModel(bool ShowModel);
 	void ShowModelListDialog();
 	bool Load(const QString& FileName);
 	bool Save(const QString& FileName);

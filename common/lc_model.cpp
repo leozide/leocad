@@ -2062,13 +2062,52 @@ void lcModel::SetPieceSteps(const QList<QPair<lcPiece*, lcStep>>& PieceSteps)
 	}
 }
 
-void lcModel::MoveSelectionToModel()
+void lcModel::MoveSelectionToModel(lcModel* Model)
 {
+	if (!Model)
+		return;
+
+	lcArray<lcPiece*> Pieces;
+	lcPiece* ModelPiece = NULL;
+
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); )
+	{
+		lcPiece* Piece = mPieces[PieceIdx];
+
+		if (Piece->IsSelected())
+		{
+			mPieces.RemoveIndex(PieceIdx);
+			Piece->SetGroup(NULL); // todo: copy groups
+			Pieces.Add(Piece);
+
+			if (!ModelPiece)
+			{
+				ModelPiece = new lcPiece(Model->mPieceInfo);
+				ModelPiece->Initialize(lcMatrix44Identity(), Piece->GetStepShow());
+				ModelPiece->SetColorIndex(gDefaultColor);
+				InsertPiece(ModelPiece, PieceIdx);
+				PieceIdx++;
+			}
+		}
+		else
+			PieceIdx++;
+	}
+
+	for (int PieceIdx = 0; PieceIdx < Pieces.GetSize(); PieceIdx++)
+		Model->AddPiece(Pieces[PieceIdx]);
+
+	lcArray<lcModel*> UpdatedModels;
+	Model->UpdatePieceInfo(UpdatedModels);
+	ModelPiece->UpdatePosition(mCurrentStep);
+
+	SaveCheckpoint("New Model");
+	gMainWindow->UpdateTimeline(false, false);
+	ClearSelectionAndSetFocus(ModelPiece, LC_PIECE_SECTION_POSITION);
 }
 
 void lcModel::InlineSelectedModels()
 {
-	lcArray<lcPiece*> NewPieces;
+	lcArray<lcObject*> NewPieces;
 
 	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); )
 	{
@@ -2091,6 +2130,8 @@ void lcModel::InlineSelectedModels()
 
 			lcPiece* NewPiece = new lcPiece(Entry.Info);
 
+			// todo: recreate in groups in the current model
+
 			NewPiece->Initialize(Entry.WorldMatrix, Piece->GetStepShow());
 			NewPiece->SetColorIndex(Entry.ColorIndex);
 			NewPiece->UpdatePosition(mCurrentStep);
@@ -2110,10 +2151,8 @@ void lcModel::InlineSelectedModels()
 	}
 
 	SaveCheckpoint("Inlining");
-	gMainWindow->UpdateAllViews();
 	gMainWindow->UpdateTimeline(false, false);
-	gMainWindow->UpdateFocusObject(GetFocusObject());
-	UpdateSelection();
+	SetSelectionAndFocus(NewPieces, NULL, 0);
 }
 
 bool lcModel::RemoveSelectedObjects()

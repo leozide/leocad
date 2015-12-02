@@ -1050,7 +1050,7 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 	// LC_PIECE_MOVE_SELECTION_TO_MODEL
 	{
 		"Piece.MoveSelectionToModel",
-		QT_TRANSLATE_NOOP("Menu", "Move Selection To Model..."),
+		QT_TRANSLATE_NOOP("Menu", "Move to New Model..."),
 		QT_TRANSLATE_NOOP("Status", "Move the currently selected pieces to a new model and replaces them with a reference to the model"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},

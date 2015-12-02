@@ -200,7 +200,7 @@ public:
 	void ShowSelectedPiecesLater();
 	void SetPieceSteps(const QList<QPair<lcPiece*, lcStep>>& PieceSteps);
 
-	void MoveSelectionToModel();
+	void MoveSelectionToModel(lcModel* Model);
 	void InlineSelectedModels();
 
 	lcGroup* AddGroup(const QString& Prefix, lcGroup* Parent);

@@ -2115,7 +2115,7 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		break;
 
 	case LC_PIECE_MOVE_SELECTION_TO_MODEL:
-		lcGetActiveModel()->MoveSelectionToModel();
+		lcGetActiveModel()->MoveSelectionToModel(lcGetActiveProject()->CreateNewModel(false));
 		break;
 
 	case LC_PIECE_INLINE_SELECTED_MODELS:
@@ -2266,7 +2266,7 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		break;
 
 	case LC_MODEL_NEW:
-		lcGetActiveProject()->CreateNewModel();
+		lcGetActiveProject()->CreateNewModel(true);
 		break;
 
 	case LC_MODEL_PROPERTIES:

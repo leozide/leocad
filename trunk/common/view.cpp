@@ -386,8 +386,9 @@ void View::ShowContextMenu() const
 
 	Popup->addSeparator();
 
-	Popup->addAction(Actions[LC_PIECE_MOVE_SELECTION_TO_MODEL]);
+	Popup->addAction(Actions[LC_PIECE_VIEW_SELECTED_MODEL]);
 	Popup->addAction(Actions[LC_PIECE_INLINE_SELECTED_MODELS]);
+	Popup->addAction(Actions[LC_PIECE_MOVE_SELECTION_TO_MODEL]);
 
 	Popup->addSeparator();
 

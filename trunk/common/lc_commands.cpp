@@ -1047,6 +1047,13 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 		QT_TRANSLATE_NOOP("Status", "Make copies of the selected pieces"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
+	// 	LC_PIECE_VIEW_SELECTED_MODEL
+	{
+		"Piece.ViewSelectedModel",
+		QT_TRANSLATE_NOOP("Menu", "View Selected Model"),
+		QT_TRANSLATE_NOOP("Status", "View the model referenced by the currently selected piece"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
 	// LC_PIECE_MOVE_SELECTION_TO_MODEL
 	{
 		"Piece.MoveSelectionToModel",

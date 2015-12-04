@@ -2678,6 +2678,19 @@ lcObject* lcModel::GetFocusObject() const
 	return NULL;
 }
 
+lcModel* lcModel::GetFirstSelectedSubmodel() const
+{
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+	{
+		lcPiece* Piece = mPieces[PieceIdx];
+
+		if (Piece->IsSelected() && Piece->mPieceInfo->IsModel())
+			return Piece->mPieceInfo->GetModel();
+	}
+
+	return NULL;
+}
+
 bool lcModel::GetPieceFocusOrSelectionCenter(lcVector3& Center) const
 {
 	float Bounds[6] = { FLT_MAX, FLT_MAX, FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX };

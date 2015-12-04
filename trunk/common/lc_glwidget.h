@@ -57,8 +57,6 @@ public:
 			delete mContext;
 	}
 
-	void ShowPopupMenu();
-
 	void SetContext(lcContext* Context)
 	{
 		if (mDeleteContext)

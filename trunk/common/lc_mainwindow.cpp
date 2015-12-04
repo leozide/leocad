@@ -313,14 +313,23 @@ void lcMainWindow::CreateMenus()
 	TransformMenu->addAction(mActions[LC_EDIT_TRANSFORM_ABSOLUTE_ROTATION]);
 	mActions[LC_EDIT_TRANSFORM]->setMenu(TransformMenu);
 
-	QMenu* CameraMenu = new QMenu(tr("C&ameras"), this);
-	CameraMenu->addAction(mActions[LC_VIEW_CAMERA_NONE]);
+	mCameraMenu = new QMenu(tr("C&ameras"), this);
+	mCameraMenu->addAction(mActions[LC_VIEW_CAMERA_NONE]);
 
 	for (int actionIdx = LC_VIEW_CAMERA_FIRST; actionIdx <= LC_VIEW_CAMERA_LAST; actionIdx++)
-		CameraMenu->addAction(mActions[actionIdx]);
+		mCameraMenu->addAction(mActions[actionIdx]);
 
-	CameraMenu->addSeparator();
-	CameraMenu->addAction(mActions[LC_VIEW_CAMERA_RESET]);
+	mCameraMenu->addSeparator();
+	mCameraMenu->addAction(mActions[LC_VIEW_CAMERA_RESET]);
+
+	mViewpointMenu = new QMenu(tr("&Viewpoints"), this);
+	mViewpointMenu->addAction(mActions[LC_VIEW_VIEWPOINT_FRONT]);
+	mViewpointMenu->addAction(mActions[LC_VIEW_VIEWPOINT_BACK]);
+	mViewpointMenu->addAction(mActions[LC_VIEW_VIEWPOINT_LEFT]);
+	mViewpointMenu->addAction(mActions[LC_VIEW_VIEWPOINT_RIGHT]);
+	mViewpointMenu->addAction(mActions[LC_VIEW_VIEWPOINT_TOP]);
+	mViewpointMenu->addAction(mActions[LC_VIEW_VIEWPOINT_BOTTOM]);
+	mViewpointMenu->addAction(mActions[LC_VIEW_VIEWPOINT_HOME]);
 
 	QMenu* FileMenu = menuBar()->addMenu(tr("&File"));
 	FileMenu->addAction(mActions[LC_FILE_NEW]);
@@ -373,15 +382,8 @@ void lcMainWindow::CreateMenus()
 	ViewMenu->addSeparator();
 	ViewMenu->addAction(mActions[LC_VIEW_ZOOM_EXTENTS]);
 	ViewMenu->addAction(mActions[LC_VIEW_LOOK_AT]);
-	QMenu* ViewpointsMenu = ViewMenu->addMenu(tr("&Viewpoints"));
-	ViewpointsMenu->addAction(mActions[LC_VIEW_VIEWPOINT_FRONT]);
-	ViewpointsMenu->addAction(mActions[LC_VIEW_VIEWPOINT_BACK]);
-	ViewpointsMenu->addAction(mActions[LC_VIEW_VIEWPOINT_LEFT]);
-	ViewpointsMenu->addAction(mActions[LC_VIEW_VIEWPOINT_RIGHT]);
-	ViewpointsMenu->addAction(mActions[LC_VIEW_VIEWPOINT_TOP]);
-	ViewpointsMenu->addAction(mActions[LC_VIEW_VIEWPOINT_BOTTOM]);
-	ViewpointsMenu->addAction(mActions[LC_VIEW_VIEWPOINT_HOME]);
-	ViewMenu->addMenu(CameraMenu);
+	ViewMenu->addMenu(mViewpointMenu);
+	ViewMenu->addMenu(mCameraMenu);
 	QMenu* PerspectiveMenu = ViewMenu->addMenu(tr("Projection"));
 	PerspectiveMenu->addAction(mActions[LC_VIEW_PROJECTION_PERSPECTIVE]);
 	PerspectiveMenu->addAction(mActions[LC_VIEW_PROJECTION_ORTHO]);

@@ -116,6 +116,16 @@ public:
 		return mViews;
 	}
 
+	QMenu* GetCameraMenu() const
+	{
+		return mCameraMenu;
+	}
+
+	QMenu* GetViewpointMenu() const
+	{
+		return mViewpointMenu;
+	}
+
 	bool DoDialog(LC_DIALOG_TYPE Type, void* Data);
 
 	void ResetCameras();
@@ -243,6 +253,9 @@ protected:
 	QLabel* mStatusPositionLabel;
 	QLabel* mStatusSnapLabel;
 	QLabel* mStatusTimeLabel;
+
+	QMenu* mCameraMenu;
+	QMenu* mViewpointMenu;
 };
 
 extern class lcMainWindow* gMainWindow;

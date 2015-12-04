@@ -373,6 +373,37 @@ LC_CURSOR_TYPE View::GetCursor() const
 	return CursorFromTrackTool[mTrackTool];
 }
 
+void View::ShowContextMenu() const
+{
+	QGLWidget* Widget = (QGLWidget*)mWidget;
+	QAction** Actions = gMainWindow->mActions;
+
+	QMenu* Popup = new QMenu(Widget);
+
+	Popup->addAction(Actions[LC_EDIT_CUT]);
+	Popup->addAction(Actions[LC_EDIT_COPY]);
+	Popup->addAction(Actions[LC_EDIT_PASTE]);
+
+	Popup->addSeparator();
+
+	Popup->addAction(Actions[LC_PIECE_MOVE_SELECTION_TO_MODEL]);
+	Popup->addAction(Actions[LC_PIECE_INLINE_SELECTED_MODELS]);
+
+	Popup->addSeparator();
+
+	Popup->addMenu(gMainWindow->GetCameraMenu());
+	Popup->addMenu(gMainWindow->GetViewpointMenu());
+
+	Popup->addSeparator();
+
+	Popup->addAction(Actions[LC_VIEW_SPLIT_HORIZONTAL]);
+	Popup->addAction(Actions[LC_VIEW_SPLIT_VERTICAL]);
+	Popup->addAction(Actions[LC_VIEW_REMOVE_VIEW]);
+	Popup->addAction(Actions[LC_VIEW_RESET_VIEWS]);
+
+	Popup->exec(QCursor::pos());
+}
+
 lcVector3 View::GetMoveDirection(const lcVector3& Direction) const
 {
 	if (lcGetPreferences().mFixedAxes)
@@ -2361,7 +2392,7 @@ void View::OnRightButtonDown()
 void View::OnRightButtonUp()
 {
 	if (mTrackButton == LC_TRACKBUTTON_NONE)
-		ShowPopupMenu();
+		ShowContextMenu();
 	else
 		StopTracking(mTrackButton == LC_TRACKBUTTON_RIGHT);
 }

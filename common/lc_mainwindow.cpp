@@ -417,8 +417,9 @@ void lcMainWindow::CreateMenus()
 	PieceMenu->addAction(mActions[LC_PIECE_ARRAY]);
 	PieceMenu->addAction(mActions[LC_PIECE_MINIFIG_WIZARD]);
 	PieceMenu->addSeparator();
-	PieceMenu->addAction(mActions[LC_PIECE_MOVE_SELECTION_TO_MODEL]);
+	PieceMenu->addAction(mActions[LC_PIECE_VIEW_SELECTED_MODEL]);
 	PieceMenu->addAction(mActions[LC_PIECE_INLINE_SELECTED_MODELS]);
+	PieceMenu->addAction(mActions[LC_PIECE_MOVE_SELECTION_TO_MODEL]);
 	PieceMenu->addSeparator();
 	PieceMenu->addAction(mActions[LC_PIECE_GROUP]);
 	PieceMenu->addAction(mActions[LC_PIECE_UNGROUP]);
@@ -1490,6 +1491,7 @@ void lcMainWindow::UpdateSelectedObjects(int Flags, int SelectedCount, lcObject*
 	mActions[LC_PIECE_HIDE_UNSELECTED]->setEnabled(Flags & LC_SEL_UNSELECTED);
 	mActions[LC_PIECE_UNHIDE_SELECTED]->setEnabled(Flags & LC_SEL_HIDDEN_SELECTED);
 	mActions[LC_PIECE_UNHIDE_ALL]->setEnabled(Flags & LC_SEL_HIDDEN);
+	mActions[LC_PIECE_VIEW_SELECTED_MODEL]->setEnabled(Flags & LC_SEL_MODEL_SELECTED);
 	mActions[LC_PIECE_MOVE_SELECTION_TO_MODEL]->setEnabled(Flags & LC_SEL_PIECE);
 	mActions[LC_PIECE_INLINE_SELECTED_MODELS]->setEnabled(Flags & LC_SEL_MODEL_SELECTED);
 	mActions[LC_PIECE_GROUP]->setEnabled(Flags & LC_SEL_CAN_GROUP);
@@ -1883,14 +1885,31 @@ bool lcMainWindow::SaveProjectIfModified()
 	return true;
 }
 
-void lcMainWindow::SetModelFromFocus()
+bool lcMainWindow::SetModelFromFocus()
 {
 	lcObject* FocusObject = lcGetActiveModel()->GetFocusObject();
 
 	if (!FocusObject || !FocusObject->IsPiece())
-		return;
+		return false;
 
 	lcModel* Model = ((lcPiece*)FocusObject)->mPieceInfo->GetModel();
+
+	if (Model)
+	{
+		Project* Project = lcGetActiveProject();
+		Project->SetActiveModel(Project->GetModels().FindIndex(Model));
+		return true;
+	}
+
+	return false;
+}
+
+void lcMainWindow::SetModelFromSelection()
+{
+	if (SetModelFromFocus())
+		return;
+
+	lcModel* Model = lcGetActiveModel()->GetFirstSelectedSubmodel();
 
 	if (Model)
 	{
@@ -2114,6 +2133,10 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 
 	case LC_PIECE_ARRAY:
 		lcGetActiveModel()->ShowArrayDialog();
+		break;
+
+	case LC_PIECE_VIEW_SELECTED_MODEL:
+		SetModelFromSelection();
 		break;
 
 	case LC_PIECE_MOVE_SELECTION_TO_MODEL:

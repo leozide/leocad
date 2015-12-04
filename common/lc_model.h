@@ -241,6 +241,7 @@ public:
 
 	bool AnyPiecesSelected() const;
 	bool AnyObjectsSelected() const;
+	lcModel* GetFirstSelectedSubmodel() const;
 	bool GetPieceFocusOrSelectionCenter(lcVector3& Center) const;
 	bool GetFocusOrSelectionCenter(lcVector3& Center) const;
 	lcVector3 GetFocusOrSelectionCenter() const;

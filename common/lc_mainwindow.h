@@ -152,7 +152,8 @@ public:
 	void MergeProject();
 	bool SaveProject(const QString& FileName);
 	bool SaveProjectIfModified();
-	void SetModelFromFocus();
+	bool SetModelFromFocus();
+	void SetModelFromSelection();
 	void HandleCommand(lcCommandId CommandId);
 
 	void AddRecentFile(const QString& FileName);

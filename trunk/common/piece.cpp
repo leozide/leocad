@@ -17,14 +17,15 @@
 #include "lc_qutils.h"
 
 #define LC_PIECE_SAVE_VERSION 12 // LeoCAD 0.80
+#define LC_PIECE_CONTROL_POINT_SIZE 10.0f
 
 /////////////////////////////////////////////////////////////////////////////
 // Piece construction/destruction
 
-lcPiece::lcPiece(PieceInfo* pPieceInfo)
+lcPiece::lcPiece(PieceInfo* Info)
 	: lcObject (LC_OBJECT_PIECE)
 {
-	mPieceInfo = pPieceInfo;
+	SetPieceInfo(Info);
 	mState = 0;
 	mColorIndex = gDefaultColor;
 	mColorCode = 16;
@@ -44,6 +45,24 @@ lcPiece::~lcPiece()
 {
 	if (mPieceInfo != NULL)
 		mPieceInfo->Release(false);
+}
+
+void lcPiece::SetPieceInfo(PieceInfo* Info)
+{
+	mPieceInfo = Info;
+	if (mPieceInfo)
+		mPieceInfo->AddRef();
+
+	if (0) // todo: get control points from the piece info
+	{
+		mControlPoints.SetSize(2);
+		mControlPoints[0].Position = lcVector3(0, 0, -30);
+		mControlPoints[1].Position = lcVector3(0, 0, 30);
+	}
+	else
+	{
+		mControlPoints.RemoveAll();
+	}
 }
 
 void lcPiece::SaveLDraw(QTextStream& Stream) const
@@ -95,13 +114,6 @@ bool lcPiece::ParseLDrawLine(QTextStream& Stream)
 
 /////////////////////////////////////////////////////////////////////////////
 // Piece save/load
-
-// Use only when loading from a file
-void lcPiece::SetPieceInfo(PieceInfo* pPieceInfo)
-{
-	mPieceInfo = pPieceInfo;
-	mPieceInfo->AddRef();
-}
 
 bool lcPiece::FileLoad(lcFile& file)
 {
@@ -397,7 +409,31 @@ void lcPiece::RayTest(lcObjectRayTest& ObjectRayTest) const
 	if (mPieceInfo->MinIntersectDist(mModelWorld, ObjectRayTest.Start, ObjectRayTest.End, ObjectRayTest.Distance))
 	{
 		ObjectRayTest.ObjectSection.Object = const_cast<lcPiece*>(this);
-		ObjectRayTest.ObjectSection.Section = 0;
+		ObjectRayTest.ObjectSection.Section = LC_PIECE_SECTION_POSITION;
+	}
+
+	if (ControlPointsVisible())
+	{
+		lcMatrix44 InverseWorldMatrix = lcMatrix44AffineInverse(mModelWorld);
+		lcVector3 Start = lcMul31(ObjectRayTest.Start, InverseWorldMatrix);
+		lcVector3 End = lcMul31(ObjectRayTest.End, InverseWorldMatrix);
+
+		for (int ControlPointIdx = 0; ControlPointIdx < mControlPoints.GetSize(); ControlPointIdx++)
+		{
+			lcVector3 Min(-LC_PIECE_CONTROL_POINT_SIZE, -LC_PIECE_CONTROL_POINT_SIZE, -LC_PIECE_CONTROL_POINT_SIZE);
+			lcVector3 Max(LC_PIECE_CONTROL_POINT_SIZE, LC_PIECE_CONTROL_POINT_SIZE, LC_PIECE_CONTROL_POINT_SIZE);
+
+			Min += mControlPoints[ControlPointIdx].Position;
+			Max += mControlPoints[ControlPointIdx].Position;
+
+			float Distance;
+			if (!lcBoundingBoxRayIntersectDistance(Min, Max, Start, End, &Distance, NULL) || (Distance >= ObjectRayTest.Distance))
+				continue;
+
+			ObjectRayTest.ObjectSection.Object = const_cast<lcPiece*>(this);
+			ObjectRayTest.ObjectSection.Section = LC_PIECE_SECTION_CONTROL_POINT_1 + ControlPointIdx;
+			ObjectRayTest.Distance = Distance;
+		}
 	}
 }
 
@@ -451,9 +487,10 @@ void lcPiece::DrawInterface(lcContext* Context) const
 		{ Min[0], Min[1], Min[2] }, { Min[0], Min[1], Min[2] + Edge[2] },
 	};
 
+	Context->SetProgram(LC_PROGRAM_SIMPLE);
 	Context->SetWorldMatrix(mModelWorld);
 
-	if (IsFocused())
+	if (IsFocused(LC_PIECE_SECTION_POSITION))
 		Context->SetInterfaceColor(LC_COLOR_FOCUSED);
 	else
 		Context->SetInterfaceColor(LC_COLOR_SELECTED);
@@ -462,15 +499,68 @@ void lcPiece::DrawInterface(lcContext* Context) const
 	Context->SetVertexFormat(0, 3, 0, 0);
 
 	Context->DrawPrimitives(GL_LINES, 0, 48);
+
+	if (ControlPointsVisible())
+	{
+		for (int ControlPointIdx = 0; ControlPointIdx < mControlPoints.GetSize(); ControlPointIdx++)
+		{
+			float Verts[8 * 3];
+			float* CurVert = Verts;
+
+			lcVector3 Min(-LC_PIECE_CONTROL_POINT_SIZE, -LC_PIECE_CONTROL_POINT_SIZE, -LC_PIECE_CONTROL_POINT_SIZE);
+			lcVector3 Max(LC_PIECE_CONTROL_POINT_SIZE, LC_PIECE_CONTROL_POINT_SIZE, LC_PIECE_CONTROL_POINT_SIZE);
+
+			Min += mControlPoints[ControlPointIdx].Position;
+			Max += mControlPoints[ControlPointIdx].Position;
+
+			*CurVert++ = Min[0]; *CurVert++ = Min[1]; *CurVert++ = Min[2];
+			*CurVert++ = Min[0]; *CurVert++ = Max[1]; *CurVert++ = Min[2];
+			*CurVert++ = Max[0]; *CurVert++ = Max[1]; *CurVert++ = Min[2];
+			*CurVert++ = Max[0]; *CurVert++ = Min[1]; *CurVert++ = Min[2];
+			*CurVert++ = Min[0]; *CurVert++ = Min[1]; *CurVert++ = Max[2];
+			*CurVert++ = Min[0]; *CurVert++ = Max[1]; *CurVert++ = Max[2];
+			*CurVert++ = Max[0]; *CurVert++ = Max[1]; *CurVert++ = Max[2];
+			*CurVert++ = Max[0]; *CurVert++ = Min[1]; *CurVert++ = Max[2];
+
+			const GLushort Indices[36] =
+			{
+				0, 1, 2, 0, 2, 3, 7, 6, 5, 7, 5, 4, 0, 1, 5, 0, 5, 4,
+				2, 3, 7, 2, 7, 6, 0, 3, 7, 0, 7, 4, 1, 2, 6, 1, 6, 5
+			};
+
+			Context->SetVertexBufferPointer(Verts);
+			Context->SetVertexFormat(0, 3, 0, 0);
+			Context->SetIndexBufferPointer(Indices);
+
+			if (IsFocused(LC_PIECE_SECTION_CONTROL_POINT_1 + ControlPointIdx))
+				Context->SetInterfaceColor(LC_COLOR_FOCUSED);
+			else
+				Context->SetInterfaceColor(LC_COLOR_CAMERA);
+
+			Context->DrawIndexedPrimitives(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 0);
+		}
+	}
 }
 
 void lcPiece::Move(lcStep Step, bool AddKey, const lcVector3& Distance)
 {
-	lcVector3 Position = mModelWorld.GetTranslation() + Distance;
+	lcuint32 Section = GetFocusSection();
 
-	ChangeKey(mPositionKeys, Position, Step, AddKey);
+	if (Section == LC_PIECE_SECTION_POSITION || Section == LC_PIECE_SECTION_INVALID)
+	{
+		lcVector3 Position = mModelWorld.GetTranslation() + Distance;
 
-	mModelWorld.SetTranslation(Position);
+		ChangeKey(mPositionKeys, Position, Step, AddKey);
+
+		mModelWorld.SetTranslation(Position);
+	}
+	else
+	{
+		int ControlPointIndex = Section - LC_PIECE_SECTION_CONTROL_POINT_1;
+
+		if (ControlPointIndex >= 0 && ControlPointIndex < mControlPoints.GetSize())
+			mControlPoints[ControlPointIndex].Position += Distance;
+	}
 }
 
 const char* lcPiece::GetName() const

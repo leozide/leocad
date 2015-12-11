@@ -2491,8 +2491,7 @@ void lcModel::SetObjectProperty(lcObject* Object, lcObjectPropertyType ObjectPro
 			if (Info != Part->mPieceInfo)
 			{
 				Part->mPieceInfo->Release(true);
-				Part->mPieceInfo = Info;
-				Part->mPieceInfo->AddRef();
+				Part->SetPieceInfo(Info);
 
 				CheckPointString = tr("Setting Part");
 				UpdateTimelineItems = true;

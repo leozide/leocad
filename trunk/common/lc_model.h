@@ -196,6 +196,7 @@ public:
 	void AddPiece();
 	void DeleteAllCameras();
 	void DeleteSelectedObjects();
+	void ResetSelectedPiecesPivotPoint();
 	void ShowSelectedPiecesEarlier();
 	void ShowSelectedPiecesLater();
 	void SetPieceSteps(const QList<QPair<lcPiece*, lcStep>>& PieceSteps);
@@ -291,8 +292,8 @@ public:
 	void UpdateSpotLightTool(const lcVector3& Position);
 	void BeginCameraTool(const lcVector3& Position, const lcVector3& Target);
 	void UpdateCameraTool(const lcVector3& Position);
-	void UpdateMoveTool(const lcVector3& Distance);
-	void UpdateRotateTool(const lcVector3& Angles);
+	void UpdateMoveTool(const lcVector3& Distance, bool AlternateButtonDrag);
+	void UpdateRotateTool(const lcVector3& Angles, bool AlternateButtonDrag);
 	void EraserToolClicked(lcObject* Object);
 	void PaintToolClicked(lcObject* Object);
 	void UpdateZoomTool(lcCamera* Camera, float Mouse);
@@ -304,13 +305,13 @@ public:
 	void ZoomExtents(lcCamera* Camera, float Aspect);
 	void Zoom(lcCamera* Camera, float Amount);
 
-	void MoveSelectedObjects(const lcVector3& Distance, bool Relative, bool Update, bool Checkpoint)
+	void MoveSelectedObjects(const lcVector3& Distance, bool Relative, bool AlternateButtonDrag, bool Update, bool Checkpoint)
 	{
-		MoveSelectedObjects(Distance, Distance, Relative, Update, Checkpoint);
+		MoveSelectedObjects(Distance, Distance, Relative, AlternateButtonDrag, Update, Checkpoint);
 	}
 
-	void MoveSelectedObjects(const lcVector3& PieceDistance, const lcVector3& ObjectDistance, bool Relative, bool Update, bool Checkpoint);
-	void RotateSelectedPieces(const lcVector3& Angles, bool Relative, bool Update, bool Checkpoint);
+	void MoveSelectedObjects(const lcVector3& PieceDistance, const lcVector3& ObjectDistance, bool Relative, bool AlternateButtonDrag, bool Update, bool Checkpoint);
+	void RotateSelectedPieces(const lcVector3& Angles, bool Relative, bool AlternateButtonDrag, bool Update, bool Checkpoint);
 	void TransformSelectedObjects(lcTransformType TransformType, const lcVector3& Transform);
 	void SetObjectProperty(lcObject* Object, lcObjectPropertyType ObjectPropertyType, const void* Value);
 

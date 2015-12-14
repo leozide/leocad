@@ -8,24 +8,25 @@ class PieceInfo;
 #include "lc_math.h"
 
 #define LC_PIECE_HIDDEN                   0x00001
-#define LC_PIECE_POSITION_SELECTED        0x00002
-#define LC_PIECE_POSITION_FOCUSED         0x00004
-#define LC_PIECE_CONTROL_POINT_1_SELECTED 0x00008
-#define LC_PIECE_CONTROL_POINT_1_FOCUSED  0x00010
-#define LC_PIECE_CONTROL_POINT_2_SELECTED 0x00020
-#define LC_PIECE_CONTROL_POINT_2_FOCUSED  0x00040
-#define LC_PIECE_CONTROL_POINT_3_SELECTED 0x00080
-#define LC_PIECE_CONTROL_POINT_3_FOCUSED  0x00100
-#define LC_PIECE_CONTROL_POINT_4_SELECTED 0x00200
-#define LC_PIECE_CONTROL_POINT_4_FOCUSED  0x00400
-#define LC_PIECE_CONTROL_POINT_5_SELECTED 0x00800
-#define LC_PIECE_CONTROL_POINT_5_FOCUSED  0x01000
-#define LC_PIECE_CONTROL_POINT_6_SELECTED 0x02000
-#define LC_PIECE_CONTROL_POINT_6_FOCUSED  0x04000
-#define LC_PIECE_CONTROL_POINT_7_SELECTED 0x08000
-#define LC_PIECE_CONTROL_POINT_7_FOCUSED  0x10000
-#define LC_PIECE_CONTROL_POINT_8_SELECTED 0x20000
-#define LC_PIECE_CONTROL_POINT_8_FOCUSED  0x40000
+#define LC_PIECE_PIVOT_POINT_VALID        0x00002
+#define LC_PIECE_POSITION_SELECTED        0x00004
+#define LC_PIECE_POSITION_FOCUSED         0x00008
+#define LC_PIECE_CONTROL_POINT_1_SELECTED 0x00010
+#define LC_PIECE_CONTROL_POINT_1_FOCUSED  0x00020
+#define LC_PIECE_CONTROL_POINT_2_SELECTED 0x00040
+#define LC_PIECE_CONTROL_POINT_2_FOCUSED  0x00080
+#define LC_PIECE_CONTROL_POINT_3_SELECTED 0x00100
+#define LC_PIECE_CONTROL_POINT_3_FOCUSED  0x00200
+#define LC_PIECE_CONTROL_POINT_4_SELECTED 0x00400
+#define LC_PIECE_CONTROL_POINT_4_FOCUSED  0x00800
+#define LC_PIECE_CONTROL_POINT_5_SELECTED 0x01000
+#define LC_PIECE_CONTROL_POINT_5_FOCUSED  0x02000
+#define LC_PIECE_CONTROL_POINT_6_SELECTED 0x04000
+#define LC_PIECE_CONTROL_POINT_6_FOCUSED  0x08000
+#define LC_PIECE_CONTROL_POINT_7_SELECTED 0x10000
+#define LC_PIECE_CONTROL_POINT_7_FOCUSED  0x20000
+#define LC_PIECE_CONTROL_POINT_8_SELECTED 0x40000
+#define LC_PIECE_CONTROL_POINT_8_FOCUSED  0x80000
 
 #define LC_PIECE_SELECTION_MASK     (LC_PIECE_POSITION_SELECTED | LC_PIECE_CONTROL_POINT_1_SELECTED | LC_PIECE_CONTROL_POINT_2_SELECTED | LC_PIECE_CONTROL_POINT_3_SELECTED | LC_PIECE_CONTROL_POINT_4_SELECTED | LC_PIECE_CONTROL_POINT_5_SELECTED | LC_PIECE_CONTROL_POINT_6_SELECTED | LC_PIECE_CONTROL_POINT_7_SELECTED | LC_PIECE_CONTROL_POINT_8_SELECTED)
 #define LC_PIECE_FOCUS_MASK         (LC_PIECE_POSITION_FOCUSED | LC_PIECE_CONTROL_POINT_1_FOCUSED | LC_PIECE_CONTROL_POINT_2_FOCUSED | LC_PIECE_CONTROL_POINT_3_FOCUSED | LC_PIECE_CONTROL_POINT_4_FOCUSED | LC_PIECE_CONTROL_POINT_5_FOCUSED | LC_PIECE_CONTROL_POINT_6_FOCUSED | LC_PIECE_CONTROL_POINT_7_FOCUSED | LC_PIECE_CONTROL_POINT_8_FOCUSED)
@@ -340,7 +341,7 @@ public:
 	bool FileLoad(lcFile& file);
 
 	void UpdatePosition(lcStep Step);
-	void Move(lcStep Step, bool AddKey, const lcVector3& Distance);
+	void Move(lcStep Step, bool AddKey, const lcVector3& Distance, bool MovePivotPoint);
 
 	lcGroup* GetTopGroup();
 
@@ -397,6 +398,39 @@ public:
 		ChangeKey(mRotationKeys, Rotation, Step, AddKey);
 	}
 
+	lcVector3 GetRotationCenter() const
+	{
+		if (mState & LC_PIECE_PIVOT_POINT_VALID)
+		{
+			return lcMul(mModelWorld, mPivotMatrix).GetTranslation();
+		}
+		else
+		{
+			return mModelWorld.GetTranslation();
+		}
+	}
+
+	lcMatrix44 GetRelativeRotation() const
+	{
+		if (mState & LC_PIECE_PIVOT_POINT_VALID)
+		{
+			lcMatrix44 WorldMatrix = lcMul(mModelWorld, mPivotMatrix);
+			WorldMatrix.SetTranslation(lcVector3(0.0f, 0.0f, 0.0f));
+			return WorldMatrix;
+		}
+		else
+		{
+			lcMatrix44 WorldMatrix = mModelWorld;
+			WorldMatrix.SetTranslation(lcVector3(0.0f, 0.0f, 0.0f));
+			return WorldMatrix;
+		}
+	}
+
+	void ResetPivotPoint()
+	{
+		mState &= ~LC_PIECE_PIVOT_POINT_VALID;
+	}
+
 public:
 	PieceInfo* mPieceInfo;
 
@@ -404,9 +438,15 @@ public:
 	lcuint32 mColorCode;
 
 	lcMatrix44 mModelWorld;
+	lcMatrix44 mPivotMatrix;
 
 protected:
-	bool ControlPointsVisible() const
+	bool IsPivotPointVisible() const
+	{
+		return (mState & LC_PIECE_PIVOT_POINT_VALID) && IsFocused();
+	}
+
+	bool AreControlPointsVisible() const
 	{
 		return IsSelected();
 	}
@@ -426,4 +466,4 @@ protected:
 	lcArray<lcPieceControlPoint> mControlPoints;
 };
 
-#endif // _PIECE_H
+#endif // _PIECE_H_

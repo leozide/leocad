@@ -949,6 +949,13 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 		QT_TRANSLATE_NOOP("Status", "Delete selected objects"),
 		QT_TRANSLATE_NOOP("Shortcut", "Delete")
 	},
+	// LC_PIECE_RESET_PIVOT_POINT
+	{
+		"Piece.ResetPivotPoint",
+		QT_TRANSLATE_NOOP("Menu", "Reset &Pivot Point"),
+		QT_TRANSLATE_NOOP("Status", "Reset the pivot point of the selected pieces to their origin"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
 	// LC_PIECE_MOVE_PLUSX
 	{
 		"Piece.Move.PlusX",

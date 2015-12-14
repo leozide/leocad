@@ -99,7 +99,6 @@ public:
 	virtual lcuint32 GetFocusSection() const = 0;
 
 	virtual lcVector3 GetSectionPosition(lcuint32 Section) const = 0;
-	virtual void Move(lcStep Step, bool AddKey, const lcVector3& Distance) = 0;
 	virtual void RayTest(lcObjectRayTest& ObjectRayTest) const = 0;
 	virtual void BoxTest(lcObjectBoxTest& ObjectBoxTest) const = 0;
 	virtual void DrawInterface(lcContext* Context) const = 0;

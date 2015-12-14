@@ -16,14 +16,11 @@
 #include "lc_context.h"
 #include "lc_qutils.h"
 
-#define LC_PIECE_SAVE_VERSION 12 // LeoCAD 0.80
+#define LC_PIECE_PIVOT_POINT_SIZE 10.0f
 #define LC_PIECE_CONTROL_POINT_SIZE 10.0f
 
-/////////////////////////////////////////////////////////////////////////////
-// Piece construction/destruction
-
 lcPiece::lcPiece(PieceInfo* Info)
-	: lcObject (LC_OBJECT_PIECE)
+	: lcObject(LC_OBJECT_PIECE)
 {
 	SetPieceInfo(Info);
 	mState = 0;
@@ -33,9 +30,7 @@ lcPiece::lcPiece(PieceInfo* Info)
 	mStepHide = LC_STEP_MAX;
 	mGroup = NULL;
 	mFileLine = -1;
-
-	if (mPieceInfo != NULL)
-		mPieceInfo->AddRef();
+	mPivotMatrix = lcMatrix44Identity();
 
 	ChangeKey(mPositionKeys, lcVector3(0.0f, 0.0f, 0.0f), 1, true);
 	ChangeKey(mRotationKeys, lcMatrix33Identity(), 1, true);
@@ -43,7 +38,7 @@ lcPiece::lcPiece(PieceInfo* Info)
 
 lcPiece::~lcPiece()
 {
-	if (mPieceInfo != NULL)
+	if (mPieceInfo)
 		mPieceInfo->Release(false);
 }
 
@@ -121,7 +116,7 @@ bool lcPiece::FileLoad(lcFile& file)
 
 	version = file.ReadU8();
 
-	if (version > LC_PIECE_SAVE_VERSION)
+	if (version > 12) // LeoCAD 0.80
 		return false;
 
 	if (version > 8)
@@ -412,7 +407,7 @@ void lcPiece::RayTest(lcObjectRayTest& ObjectRayTest) const
 		ObjectRayTest.ObjectSection.Section = LC_PIECE_SECTION_POSITION;
 	}
 
-	if (ControlPointsVisible())
+	if (AreControlPointsVisible())
 	{
 		lcMatrix44 InverseWorldMatrix = lcMatrix44AffineInverse(mModelWorld);
 		lcVector3 Start = lcMul31(ObjectRayTest.Start, InverseWorldMatrix);
@@ -500,7 +495,37 @@ void lcPiece::DrawInterface(lcContext* Context) const
 
 	Context->DrawPrimitives(GL_LINES, 0, 48);
 
-	if (ControlPointsVisible())
+	if (IsPivotPointVisible())
+	{
+		float Verts[8 * 3];
+		float* CurVert = Verts;
+
+		lcVector3 Min = lcMul31(lcVector3(-LC_PIECE_PIVOT_POINT_SIZE, -LC_PIECE_PIVOT_POINT_SIZE, -LC_PIECE_PIVOT_POINT_SIZE), mPivotMatrix);
+		lcVector3 Max = lcMul31(lcVector3(LC_PIECE_PIVOT_POINT_SIZE, LC_PIECE_PIVOT_POINT_SIZE, LC_PIECE_PIVOT_POINT_SIZE), mPivotMatrix);
+
+		*CurVert++ = Min[0]; *CurVert++ = Min[1]; *CurVert++ = Min[2];
+		*CurVert++ = Min[0]; *CurVert++ = Max[1]; *CurVert++ = Min[2];
+		*CurVert++ = Max[0]; *CurVert++ = Max[1]; *CurVert++ = Min[2];
+		*CurVert++ = Max[0]; *CurVert++ = Min[1]; *CurVert++ = Min[2];
+		*CurVert++ = Min[0]; *CurVert++ = Min[1]; *CurVert++ = Max[2];
+		*CurVert++ = Min[0]; *CurVert++ = Max[1]; *CurVert++ = Max[2];
+		*CurVert++ = Max[0]; *CurVert++ = Max[1]; *CurVert++ = Max[2];
+		*CurVert++ = Max[0]; *CurVert++ = Min[1]; *CurVert++ = Max[2];
+
+		const GLushort Indices[36] =
+		{
+			0, 1, 2, 0, 2, 3, 7, 6, 5, 7, 5, 4, 0, 1, 5, 0, 5, 4,
+			2, 3, 7, 2, 7, 6, 0, 3, 7, 0, 7, 4, 1, 2, 6, 1, 6, 5
+		};
+
+		Context->SetVertexBufferPointer(Verts);
+		Context->SetVertexFormat(0, 3, 0, 0);
+		Context->SetIndexBufferPointer(Indices);
+
+		Context->DrawIndexedPrimitives(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 0);
+	}
+
+	if (AreControlPointsVisible())
 	{
 		for (int ControlPointIdx = 0; ControlPointIdx < mControlPoints.GetSize(); ControlPointIdx++)
 		{
@@ -542,17 +567,25 @@ void lcPiece::DrawInterface(lcContext* Context) const
 	}
 }
 
-void lcPiece::Move(lcStep Step, bool AddKey, const lcVector3& Distance)
+void lcPiece::Move(lcStep Step, bool AddKey, const lcVector3& Distance, bool MovePivotPoint)
 {
 	lcuint32 Section = GetFocusSection();
 
 	if (Section == LC_PIECE_SECTION_POSITION || Section == LC_PIECE_SECTION_INVALID)
 	{
-		lcVector3 Position = mModelWorld.GetTranslation() + Distance;
+		if (!MovePivotPoint)
+		{
+			lcVector3 Position = mModelWorld.GetTranslation() + Distance;
 
-		ChangeKey(mPositionKeys, Position, Step, AddKey);
+			ChangeKey(mPositionKeys, Position, Step, AddKey);
 
-		mModelWorld.SetTranslation(Position);
+			mModelWorld.SetTranslation(Position);
+		}
+		else
+		{
+			mState |= LC_PIECE_PIVOT_POINT_VALID;
+			mPivotMatrix.SetTranslation(mPivotMatrix.GetTranslation() + Distance);
+		}
 	}
 	else
 	{

@@ -1828,12 +1828,8 @@ lcMatrix44 lcModel::GetRelativeRotation() const
 	{
 		lcObject* Focus = GetFocusObject();
 
-		if ((Focus != NULL) && Focus->IsPiece())
-		{
-			lcMatrix44 WorldMatrix = ((lcPiece*)Focus)->mModelWorld;
-			WorldMatrix.SetTranslation(lcVector3(0.0f, 0.0f, 0.0f));
-			return WorldMatrix;
-		}
+		if (Focus && Focus->IsPiece())
+			return ((lcPiece*)Focus)->GetRelativeRotation();
 	}
 
 	return lcMatrix44Identity();
@@ -1936,6 +1932,19 @@ void lcModel::DeleteSelectedObjects()
 		gMainWindow->UpdateAllViews();
 		SaveCheckpoint("Deleting");
 	}
+}
+
+void lcModel::ResetSelectedPiecesPivotPoint()
+{
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+	{
+		lcPiece* Piece = mPieces[PieceIdx];
+
+		if (Piece->IsSelected())
+			Piece->ResetPivotPoint();
+	}
+
+	gMainWindow->UpdateAllViews();
 }
 
 void lcModel::ShowSelectedPiecesEarlier()
@@ -2220,7 +2229,7 @@ bool lcModel::RemoveSelectedObjects()
 	return RemovedPiece || RemovedCamera || RemovedLight;
 }
 
-void lcModel::MoveSelectedObjects(const lcVector3& PieceDistance, const lcVector3& ObjectDistance, bool Relative, bool Update, bool Checkpoint)
+void lcModel::MoveSelectedObjects(const lcVector3& PieceDistance, const lcVector3& ObjectDistance, bool Relative, bool AlternateButtonDrag, bool Update, bool Checkpoint)
 {
 	bool Moved = false;
 	lcMatrix44 RelativeRotation;
@@ -2240,7 +2249,7 @@ void lcModel::MoveSelectedObjects(const lcVector3& PieceDistance, const lcVector
 
 			if (Piece->IsSelected())
 			{
-				Piece->Move(mCurrentStep, gMainWindow->GetAddKeys(), TransformedPieceDistance);
+				Piece->Move(mCurrentStep, gMainWindow->GetAddKeys(), TransformedPieceDistance, AlternateButtonDrag);
 				Piece->UpdatePosition(mCurrentStep);
 				Moved = true;
 			}
@@ -2285,7 +2294,7 @@ void lcModel::MoveSelectedObjects(const lcVector3& PieceDistance, const lcVector
 	}
 }
 
-void lcModel::RotateSelectedPieces(const lcVector3& Angles, bool Relative, bool Update, bool Checkpoint)
+void lcModel::RotateSelectedPieces(const lcVector3& Angles, bool Relative, bool AlternateButtonDrag, bool Update, bool Checkpoint)
 {
 	if (Angles.LengthSquared() < 0.001f)
 		return;
@@ -2314,9 +2323,9 @@ void lcModel::RotateSelectedPieces(const lcVector3& Angles, bool Relative, bool 
 	lcVector3 Center;
 
 	if (Focus)
-		Center = Focus->mModelWorld.GetTranslation();
+		Center = Focus->GetRotationCenter();
 	else if (NumSelected == 1)
-		Center = Selected->mModelWorld.GetTranslation();
+		Center = Selected->GetRotationCenter();
 	else
 		Center = lcVector3((Bounds[0] + Bounds[3]) / 2.0f, (Bounds[1] + Bounds[4]) / 2.0f, (Bounds[2] + Bounds[5]) / 2.0f);
 
@@ -2387,19 +2396,19 @@ void lcModel::TransformSelectedObjects(lcTransformType TransformType, const lcVe
 	switch (TransformType)
 	{
 	case LC_TRANSFORM_ABSOLUTE_TRANSLATION:
-		MoveSelectedObjects(Transform, false, true, true);
+		MoveSelectedObjects(Transform, false, false, true, true);
 		break;
 
 	case LC_TRANSFORM_RELATIVE_TRANSLATION:
-		MoveSelectedObjects(Transform, true, true, true);
+		MoveSelectedObjects(Transform, true, false, true, true);
 		break;
 
 	case LC_TRANSFORM_ABSOLUTE_ROTATION:
-		RotateSelectedPieces(Transform, false, true, true);
+		RotateSelectedPieces(Transform, false, false, true, true);
 		break;
 
 	case LC_TRANSFORM_RELATIVE_ROTATION:
-		RotateSelectedPieces(Transform, true, true, true);
+		RotateSelectedPieces(Transform, true, false, true, true);
 		break;
 	}
 }
@@ -3464,22 +3473,22 @@ void lcModel::UpdateCameraTool(const lcVector3& Position)
 	gMainWindow->UpdateAllViews();
 }
 
-void lcModel::UpdateMoveTool(const lcVector3& Distance)
+void lcModel::UpdateMoveTool(const lcVector3& Distance, bool AlternateButtonDrag)
 {
 	lcVector3 PieceDistance = LockVector(SnapPosition(Distance) - SnapPosition(mMouseToolDistance));
 	lcVector3 ObjectDistance = Distance - mMouseToolDistance;
 
-	MoveSelectedObjects(PieceDistance, ObjectDistance, true, true, false);
+	MoveSelectedObjects(PieceDistance, ObjectDistance, true, AlternateButtonDrag, true, false);
 	mMouseToolDistance = Distance;
 
 	gMainWindow->UpdateFocusObject(GetFocusObject());
 	gMainWindow->UpdateAllViews();
 }
 
-void lcModel::UpdateRotateTool(const lcVector3& Angles)
+void lcModel::UpdateRotateTool(const lcVector3& Angles, bool AlternateButtonDrag)
 {
 	lcVector3 Delta = LockVector(SnapRotation(Angles) - SnapRotation(mMouseToolDistance));
-	RotateSelectedPieces(Delta, true, false, false);
+	RotateSelectedPieces(Delta, true, AlternateButtonDrag, false, false);
 	mMouseToolDistance = Angles;
 
 	gMainWindow->UpdateFocusObject(GetFocusObject());

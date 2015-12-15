@@ -270,7 +270,10 @@ public:
 		switch (Section)
 		{
 		case LC_PIECE_SECTION_POSITION:
-			return mModelWorld.GetTranslation();
+			if (mState & LC_PIECE_PIVOT_POINT_VALID)
+				return lcMul(mPivotMatrix, mModelWorld).GetTranslation();
+			else
+				return mModelWorld.GetTranslation();
 
 		case LC_PIECE_SECTION_CONTROL_POINT_1:
 			return lcMul31(mControlPoints[0].Position, mModelWorld);
@@ -342,6 +345,7 @@ public:
 
 	void UpdatePosition(lcStep Step);
 	void Move(lcStep Step, bool AddKey, const lcVector3& Distance, bool MovePivotPoint);
+	void RotatePivot(const lcMatrix33& RotationMatrix);
 
 	lcGroup* GetTopGroup();
 
@@ -401,13 +405,9 @@ public:
 	lcVector3 GetRotationCenter() const
 	{
 		if (mState & LC_PIECE_PIVOT_POINT_VALID)
-		{
 			return lcMul(mModelWorld, mPivotMatrix).GetTranslation();
-		}
 		else
-		{
 			return mModelWorld.GetTranslation();
-		}
 	}
 
 	lcMatrix44 GetRelativeRotation() const

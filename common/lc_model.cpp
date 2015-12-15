@@ -2299,38 +2299,8 @@ void lcModel::RotateSelectedPieces(const lcVector3& Angles, bool Relative, bool 
 	if (Angles.LengthSquared() < 0.001f)
 		return;
 
-	float Bounds[6] = { FLT_MAX, FLT_MAX, FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX };
-	lcPiece* Focus = NULL;
-	lcPiece* Selected = NULL;
-	int NumSelected = 0;
-
-	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-	{
-		lcPiece* Piece = mPieces[PieceIdx];
-
-		if (Piece->IsSelected())
-		{
-			if (Piece->IsFocused())
-				Focus = Piece;
-
-			Piece->CompareBoundingBox(Bounds);
-
-			Selected = Piece;
-			NumSelected++;
-		}
-	}
-
-	lcVector3 Center;
-
-	if (Focus)
-		Center = Focus->GetRotationCenter();
-	else if (NumSelected == 1)
-		Center = Selected->GetRotationCenter();
-	else
-		Center = lcVector3((Bounds[0] + Bounds[3]) / 2.0f, (Bounds[1] + Bounds[4]) / 2.0f, (Bounds[2] + Bounds[5]) / 2.0f);
-
 	lcMatrix33 RotationMatrix = lcMatrix33Identity();
-	lcMatrix33 WorldToFocusMatrix;
+	bool Rotated = false;
 
 	if (Angles[0] != 0.0f)
 		RotationMatrix = lcMul(lcMatrix33RotationX(Angles[0] * LC_DTOR), RotationMatrix);
@@ -2341,45 +2311,88 @@ void lcModel::RotateSelectedPieces(const lcVector3& Angles, bool Relative, bool 
 	if (Angles[2] != 0.0f)
 		RotationMatrix = lcMul(lcMatrix33RotationZ(Angles[2] * LC_DTOR), RotationMatrix);
 
-	if (!gMainWindow->GetRelativeTransform())
-		Focus = NULL;
-
-	if (Focus && Relative)
+	if (AlternateButtonDrag)
 	{
-		lcMatrix33 FocusToWorldMatrix = lcMatrix33(Focus->mModelWorld);
-		WorldToFocusMatrix = lcMatrix33AffineInverse(FocusToWorldMatrix);
+		lcObject* Focus = GetFocusObject();
 
-		RotationMatrix = lcMul(RotationMatrix, FocusToWorldMatrix);
+		if (Focus && Focus->IsPiece())
+		{
+			((lcPiece*)Focus)->RotatePivot(RotationMatrix);
+			Rotated = true;
+		}
 	}
 	else
-		WorldToFocusMatrix = lcMatrix33Identity();
-
-	bool Rotated = false;
-
-	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 	{
-		lcPiece* Piece = mPieces[PieceIdx];
+		float Bounds[6] = { FLT_MAX, FLT_MAX, FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX };
+		lcPiece* Focus = NULL;
+		lcPiece* Selected = NULL;
+		int NumSelected = 0;
 
-		if (!Piece->IsSelected())
-			continue;
+		for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+		{
+			lcPiece* Piece = mPieces[PieceIdx];
 
-		lcVector3 Distance = Piece->mModelWorld.GetTranslation() - Center;
-		lcMatrix33 LocalToWorldMatrix = lcMatrix33(Piece->mModelWorld);
+			if (Piece->IsSelected())
+			{
+				if (Piece->IsFocused())
+					Focus = Piece;
 
-		lcMatrix33 LocalToFocusMatrix = lcMul(LocalToWorldMatrix, WorldToFocusMatrix);
-		lcMatrix33 NewLocalToWorldMatrix = lcMul(LocalToFocusMatrix, RotationMatrix);
+				Piece->CompareBoundingBox(Bounds);
 
-		lcMatrix33 WorldToLocalMatrix = lcMatrix33AffineInverse(LocalToWorldMatrix);
+				Selected = Piece;
+				NumSelected++;
+			}
+		}
 
-		Distance = lcMul(Distance, WorldToLocalMatrix);
-		Distance = lcMul(Distance, NewLocalToWorldMatrix);
+		lcVector3 Center;
 
-		NewLocalToWorldMatrix.Orthonormalize();
+		if (Focus)
+			Center = Focus->GetRotationCenter();
+		else if (NumSelected == 1)
+			Center = Selected->mModelWorld.GetTranslation();
+		else
+			Center = lcVector3((Bounds[0] + Bounds[3]) / 2.0f, (Bounds[1] + Bounds[4]) / 2.0f, (Bounds[2] + Bounds[5]) / 2.0f);
 
-		Piece->SetPosition(Center + Distance, mCurrentStep, gMainWindow->GetAddKeys());
-		Piece->SetRotation(NewLocalToWorldMatrix, mCurrentStep, gMainWindow->GetAddKeys());
-		Piece->UpdatePosition(mCurrentStep);
-		Rotated = true;
+		lcMatrix33 WorldToFocusMatrix;
+
+		if (!gMainWindow->GetRelativeTransform())
+			Focus = NULL;
+
+		if (Focus && Relative)
+		{
+			lcMatrix33 FocusToWorldMatrix = lcMatrix33(Focus->mModelWorld);
+			WorldToFocusMatrix = lcMatrix33AffineInverse(FocusToWorldMatrix);
+
+			RotationMatrix = lcMul(RotationMatrix, FocusToWorldMatrix);
+		}
+		else
+			WorldToFocusMatrix = lcMatrix33Identity();
+
+		for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+		{
+			lcPiece* Piece = mPieces[PieceIdx];
+
+			if (!Piece->IsSelected())
+				continue;
+
+			lcVector3 Distance = Piece->mModelWorld.GetTranslation() - Center;
+			lcMatrix33 LocalToWorldMatrix = lcMatrix33(Piece->mModelWorld);
+
+			lcMatrix33 LocalToFocusMatrix = lcMul(LocalToWorldMatrix, WorldToFocusMatrix);
+			lcMatrix33 NewLocalToWorldMatrix = lcMul(LocalToFocusMatrix, RotationMatrix);
+
+			lcMatrix33 WorldToLocalMatrix = lcMatrix33AffineInverse(LocalToWorldMatrix);
+
+			Distance = lcMul(Distance, WorldToLocalMatrix);
+			Distance = lcMul(Distance, NewLocalToWorldMatrix);
+
+			NewLocalToWorldMatrix.Orthonormalize();
+
+			Piece->SetPosition(Center + Distance, mCurrentStep, gMainWindow->GetAddKeys());
+			Piece->SetRotation(NewLocalToWorldMatrix, mCurrentStep, gMainWindow->GetAddKeys());
+			Piece->UpdatePosition(mCurrentStep);
+			Rotated = true;
+		}
 	}
 
 	if (Rotated && Update)

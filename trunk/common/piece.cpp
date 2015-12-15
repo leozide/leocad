@@ -16,7 +16,6 @@
 #include "lc_context.h"
 #include "lc_qutils.h"
 
-#define LC_PIECE_PIVOT_POINT_SIZE 10.0f
 #define LC_PIECE_CONTROL_POINT_SIZE 10.0f
 
 lcPiece::lcPiece(PieceInfo* Info)
@@ -497,32 +496,25 @@ void lcPiece::DrawInterface(lcContext* Context) const
 
 	if (IsPivotPointVisible())
 	{
-		float Verts[8 * 3];
-		float* CurVert = Verts;
-
-		lcVector3 Min = lcMul31(lcVector3(-LC_PIECE_PIVOT_POINT_SIZE, -LC_PIECE_PIVOT_POINT_SIZE, -LC_PIECE_PIVOT_POINT_SIZE), mPivotMatrix);
-		lcVector3 Max = lcMul31(lcVector3(LC_PIECE_PIVOT_POINT_SIZE, LC_PIECE_PIVOT_POINT_SIZE, LC_PIECE_PIVOT_POINT_SIZE), mPivotMatrix);
-
-		*CurVert++ = Min[0]; *CurVert++ = Min[1]; *CurVert++ = Min[2];
-		*CurVert++ = Min[0]; *CurVert++ = Max[1]; *CurVert++ = Min[2];
-		*CurVert++ = Max[0]; *CurVert++ = Max[1]; *CurVert++ = Min[2];
-		*CurVert++ = Max[0]; *CurVert++ = Min[1]; *CurVert++ = Min[2];
-		*CurVert++ = Min[0]; *CurVert++ = Min[1]; *CurVert++ = Max[2];
-		*CurVert++ = Min[0]; *CurVert++ = Max[1]; *CurVert++ = Max[2];
-		*CurVert++ = Max[0]; *CurVert++ = Max[1]; *CurVert++ = Max[2];
-		*CurVert++ = Max[0]; *CurVert++ = Min[1]; *CurVert++ = Max[2];
-
-		const GLushort Indices[36] =
+		const float Size = 5.0f;
+		const float Verts[8 * 3] =
 		{
-			0, 1, 2, 0, 2, 3, 7, 6, 5, 7, 5, 4, 0, 1, 5, 0, 5, 4,
-			2, 3, 7, 2, 7, 6, 0, 3, 7, 0, 7, 4, 1, 2, 6, 1, 6, 5
+			-Size, -Size, -Size, -Size,  Size, -Size, Size,  Size, -Size, Size, -Size, -Size,
+			-Size, -Size,  Size, -Size,  Size,  Size, Size,  Size,  Size, Size, -Size,  Size
 		};
+
+		const GLushort Indices[24] =
+		{
+			0, 1, 1, 2, 2, 3, 3, 0, 4, 5, 5, 6, 6, 7, 7, 4, 0, 4, 1, 5, 2, 6, 3, 7
+		};
+
+		Context->SetWorldMatrix(lcMul(mPivotMatrix, mModelWorld));
 
 		Context->SetVertexBufferPointer(Verts);
 		Context->SetVertexFormat(0, 3, 0, 0);
 		Context->SetIndexBufferPointer(Indices);
 
-		Context->DrawIndexedPrimitives(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 0);
+		Context->DrawIndexedPrimitives(GL_LINES, 24, GL_UNSIGNED_SHORT, 0);
 	}
 
 	if (AreControlPointsVisible())
@@ -594,6 +586,15 @@ void lcPiece::Move(lcStep Step, bool AddKey, const lcVector3& Distance, bool Mov
 		if (ControlPointIndex >= 0 && ControlPointIndex < mControlPoints.GetSize())
 			mControlPoints[ControlPointIndex].Position += Distance;
 	}
+}
+
+void lcPiece::RotatePivot(const lcMatrix33& RotationMatrix)
+{
+	lcMatrix33 NewPivotRotationMatrix = lcMul(RotationMatrix, lcMatrix33(mPivotMatrix));
+	NewPivotRotationMatrix.Orthonormalize();
+
+	mPivotMatrix = lcMatrix44(NewPivotRotationMatrix, mPivotMatrix.GetTranslation());
+	mState |= LC_PIECE_PIVOT_POINT_VALID;
 }
 
 const char* lcPiece::GetName() const

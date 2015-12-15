@@ -683,11 +683,11 @@ void View::DrawSelectMoveOverlay()
 
 	glDisable(GL_DEPTH_TEST);
 
-	lcMatrix44 RelativeRotation = mModel->GetRelativeRotation();
+	lcMatrix33 RelativeRotation = mModel->GetRelativeRotation();
 	lcVector3 OverlayCenter = mModel->GetFocusOrSelectionCenter();
 	bool AnyPiecesSelected = mModel->AnyPiecesSelected();
 
-	lcMatrix44 WorldMatrix = lcMul(RelativeRotation, lcMatrix44Translation(OverlayCenter));
+	lcMatrix44 WorldMatrix = lcMatrix44(RelativeRotation, OverlayCenter);
 
 	const float OverlayScale = GetOverlayScale();
 	WorldMatrix = lcMul(lcMatrix44Scale(lcVector3(OverlayScale, OverlayScale, OverlayScale)), WorldMatrix);
@@ -793,7 +793,7 @@ void View::DrawRotateOverlay()
 
 	int j;
 
-	lcMatrix44 RelativeRotation = mModel->GetRelativeRotation();
+	lcMatrix33 RelativeRotation = mModel->GetRelativeRotation();
 	lcVector3 OverlayCenter = mModel->GetFocusOrSelectionCenter();
 	lcVector3 MouseToolDistance = mModel->SnapRotation(mModel->GetMouseToolDistance());
 	bool HasAngle = false;
@@ -841,7 +841,7 @@ void View::DrawRotateOverlay()
 
 		if (fabsf(Angle) >= fabsf(Step))
 		{
-			lcMatrix44 WorldMatrix = lcMul(RelativeRotation, lcMatrix44Translation(OverlayCenter));
+			lcMatrix44 WorldMatrix = lcMatrix44(RelativeRotation, OverlayCenter);
 			WorldMatrix = lcMul(lcMatrix44FromAxisAngle(lcVector3(Rotation[1], Rotation[2], Rotation[3]), Rotation[0] * LC_DTOR), WorldMatrix);
 
 			mContext->SetWorldMatrix(WorldMatrix);
@@ -925,9 +925,9 @@ void View::DrawRotateOverlay()
 	ViewDir.Normalize();
 
 	// Transform ViewDir to local space.
-	ViewDir = lcMul30(ViewDir, lcMatrix44AffineInverse(RelativeRotation));
+	ViewDir = lcMul(ViewDir, lcMatrix33AffineInverse(RelativeRotation));
 
-	lcMatrix44 WorldMatrix = lcMul(RelativeRotation, lcMatrix44Translation(OverlayCenter));
+	lcMatrix44 WorldMatrix = lcMatrix44(RelativeRotation, OverlayCenter);
 	mContext->SetWorldMatrix(WorldMatrix);
 
 	// Draw each axis circle.
@@ -1023,7 +1023,7 @@ void View::DrawRotateOverlay()
 			break;
 		};
 
-		lcMatrix44 WorldMatrix = lcMul(RelativeRotation, lcMatrix44Translation(OverlayCenter));
+		lcMatrix44 WorldMatrix = lcMatrix44(RelativeRotation, OverlayCenter);
 		WorldMatrix = lcMul(lcMatrix44FromAxisAngle(lcVector3(Rotation[1], Rotation[2], Rotation[3]), Rotation[0] * LC_DTOR), WorldMatrix);
 		mContext->SetWorldMatrix(WorldMatrix);
 
@@ -1691,10 +1691,10 @@ void View::UpdateTrackTool()
 				lcVector3(0.0f, 0.0f, 1.0f),
 			};
 
-			lcMatrix44 RelativeRotation = mModel->GetRelativeRotation();
+			lcMatrix33 RelativeRotation = mModel->GetRelativeRotation();
 
 			for (int i = 0; i < 3; i++)
-				PlaneNormals[i] = lcMul30(PlaneNormals[i], RelativeRotation);
+				PlaneNormals[i] = lcMul(PlaneNormals[i], RelativeRotation);
 
 			lcVector3 StartEnd[2] = { lcVector3((float)x, (float)y, 0.0f), lcVector3((float)x, (float)y, 1.0f) };
 			UnprojectPoints(StartEnd, 2);
@@ -1834,7 +1834,7 @@ void View::UpdateTrackTool()
 						lcVector3(x1 + u2*(x2-x1), y1 + u2*(y2-y1), z1 + u2*(z2-z1))
 					};
 
-					lcMatrix44 RelativeRotation = mModel->GetRelativeRotation();
+					lcMatrix33 RelativeRotation = mModel->GetRelativeRotation();
 
 					for (int i = 0; i < 2; i++)
 					{
@@ -1843,7 +1843,7 @@ void View::UpdateTrackTool()
 						if (lcDot(ViewDir, Dist) > 0.0f)
 							continue;
 
-						Dist = lcMul30(Dist, RelativeRotation);
+						Dist = lcMul(Dist, RelativeRotation);
 
 						// Check if we're close enough to one of the axis.
 						Dist.Normalize();
@@ -2475,8 +2475,8 @@ void View::OnMouseMove()
 				else
 					Direction = lcVector3(0.0, 0.0f, 1.0f);
 
-				lcMatrix44 RelativeRotation = mModel->GetRelativeRotation();
-				Direction = lcMul30(Direction, RelativeRotation);
+				lcMatrix33 RelativeRotation = mModel->GetRelativeRotation();
+				Direction = lcMul(Direction, RelativeRotation);
 
 				lcVector3 Intersection;
 				lcClosestPointsBetweenLines(Center, Center + Direction, CurrentStart, CurrentEnd, &Intersection, NULL);
@@ -2485,7 +2485,7 @@ void View::OnMouseMove()
 				lcClosestPointsBetweenLines(Center, Center + Direction, MouseDownStart, MouseDownEnd, &MoveStart, NULL);
 
 				lcVector3 Distance = Intersection - MoveStart;
-				Distance = lcMul30(Distance, lcMatrix44AffineInverse(RelativeRotation));
+				Distance = lcMul(Distance, lcMatrix33AffineInverse(RelativeRotation));
 				mModel->UpdateMoveTool(Distance, mTrackButton != LC_TRACKBUTTON_LEFT);
 			}
 			else if (mTrackTool == LC_TRACKTOOL_MOVE_XY || mTrackTool == LC_TRACKTOOL_MOVE_XZ || mTrackTool == LC_TRACKTOOL_MOVE_YZ)
@@ -2499,8 +2499,8 @@ void View::OnMouseMove()
 				else
 					PlaneNormal = lcVector3(1.0f, 0.0f, 0.0f);
 
-				lcMatrix44 RelativeRotation = mModel->GetRelativeRotation();
-				PlaneNormal = lcMul30(PlaneNormal, RelativeRotation);
+				lcMatrix33 RelativeRotation = mModel->GetRelativeRotation();
+				PlaneNormal = lcMul(PlaneNormal, RelativeRotation);
 				lcVector4 Plane(PlaneNormal, -lcDot(PlaneNormal, Center));
 				lcVector3 Intersection;
 
@@ -2511,7 +2511,7 @@ void View::OnMouseMove()
 					if (lcLinePlaneIntersection(&MoveStart, MouseDownStart, MouseDownEnd, Plane))
 					{
 						lcVector3 Distance = Intersection - MoveStart;
-						Distance = lcMul30(Distance, lcMatrix44AffineInverse(RelativeRotation));
+						Distance = lcMul(Distance, lcMatrix33AffineInverse(RelativeRotation));
 						mModel->UpdateMoveTool(Distance, mTrackButton != LC_TRACKBUTTON_LEFT);
 					}
 				}

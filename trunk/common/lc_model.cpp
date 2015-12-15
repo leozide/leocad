@@ -1822,7 +1822,7 @@ lcVector3 lcModel::SnapRotation(const lcVector3& Angles) const
 	return NewAngles;
 }
 
-lcMatrix44 lcModel::GetRelativeRotation() const
+lcMatrix33 lcModel::GetRelativeRotation() const
 {
 	if (gMainWindow->GetRelativeTransform())
 	{
@@ -1832,7 +1832,7 @@ lcMatrix44 lcModel::GetRelativeRotation() const
 			return ((lcPiece*)Focus)->GetRelativeRotation();
 	}
 
-	return lcMatrix44Identity();
+	return lcMatrix33Identity();
 }
 
 void lcModel::AddPiece()
@@ -2232,16 +2232,16 @@ bool lcModel::RemoveSelectedObjects()
 void lcModel::MoveSelectedObjects(const lcVector3& PieceDistance, const lcVector3& ObjectDistance, bool Relative, bool AlternateButtonDrag, bool Update, bool Checkpoint)
 {
 	bool Moved = false;
-	lcMatrix44 RelativeRotation;
+	lcMatrix33 RelativeRotation;
 
 	if (Relative)
 		RelativeRotation = GetRelativeRotation();
 	else
-		RelativeRotation = lcMatrix44Identity();
+		RelativeRotation = lcMatrix33Identity();
 
 	if (PieceDistance.LengthSquared() >= 0.001f)
 	{
-		lcVector3 TransformedPieceDistance = lcMul30(PieceDistance, RelativeRotation);
+		lcVector3 TransformedPieceDistance = lcMul(PieceDistance, RelativeRotation);
 
 		for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 		{
@@ -2258,7 +2258,7 @@ void lcModel::MoveSelectedObjects(const lcVector3& PieceDistance, const lcVector
 
 	if (ObjectDistance.LengthSquared() >= 0.001f)
 	{
-		lcVector3 TransformedObjectDistance = lcMul30(ObjectDistance, RelativeRotation);
+		lcVector3 TransformedObjectDistance = lcMul(ObjectDistance, RelativeRotation);
 
 		for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
 		{

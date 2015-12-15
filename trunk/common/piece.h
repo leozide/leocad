@@ -410,20 +410,12 @@ public:
 			return mModelWorld.GetTranslation();
 	}
 
-	lcMatrix44 GetRelativeRotation() const
+	lcMatrix33 GetRelativeRotation() const
 	{
 		if (mState & LC_PIECE_PIVOT_POINT_VALID)
-		{
-			lcMatrix44 WorldMatrix = lcMul(mModelWorld, mPivotMatrix);
-			WorldMatrix.SetTranslation(lcVector3(0.0f, 0.0f, 0.0f));
-			return WorldMatrix;
-		}
+			return lcMatrix33(lcMul(mModelWorld, mPivotMatrix));
 		else
-		{
-			lcMatrix44 WorldMatrix = mModelWorld;
-			WorldMatrix.SetTranslation(lcVector3(0.0f, 0.0f, 0.0f));
-			return WorldMatrix;
-		}
+			return lcMatrix33(mModelWorld);
 	}
 
 	void ResetPivotPoint()

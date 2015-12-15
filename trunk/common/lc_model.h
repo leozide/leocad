@@ -277,7 +277,7 @@ public:
 	lcVector3 LockVector(const lcVector3& Vector) const;
 	lcVector3 SnapPosition(const lcVector3& Delta) const;
 	lcVector3 SnapRotation(const lcVector3& Delta) const;
-	lcMatrix44 GetRelativeRotation() const;
+	lcMatrix33 GetRelativeRotation() const;
 
 	const lcVector3& GetMouseToolDistance() const
 	{

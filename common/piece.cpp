@@ -69,6 +69,19 @@ void lcPiece::SaveLDraw(QTextStream& Stream) const
 	if (IsHidden())
 		Stream << QLatin1String("0 !LEOCAD PIECE HIDDEN") << LineEnding;
 
+	if (mState & LC_PIECE_PIVOT_POINT_VALID)
+	{
+		const float* PivotMatrix = mPivotMatrix;
+		float PivotNumbers[12] = { PivotMatrix[12], -PivotMatrix[14], PivotMatrix[13], PivotMatrix[0], -PivotMatrix[8], PivotMatrix[4], -PivotMatrix[2], PivotMatrix[10], -PivotMatrix[6], PivotMatrix[1], -PivotMatrix[9], PivotMatrix[5] };
+
+		Stream << QLatin1String("0 !LEOCAD PIECE PIVOT ");
+
+		for (int NumberIdx = 0; NumberIdx < 12; NumberIdx++)
+			Stream << ' ' << lcFormatValue(PivotNumbers[NumberIdx]);
+
+		Stream << LineEnding;
+	}
+
 	if (mPositionKeys.GetSize() > 1)
 		SaveKeysLDraw(Stream, mPositionKeys, "PIECE POSITION_KEY ");
 
@@ -97,6 +110,18 @@ bool lcPiece::ParseLDrawLine(QTextStream& Stream)
 			Stream >> mStepHide;
 		else if (Token == QLatin1String("HIDDEN"))
 			SetHidden(true);
+		else if (Token == QLatin1String("PIVOT"))
+		{
+			float PivotNumbers[12];
+			for (int TokenIdx = 0; TokenIdx < 12; TokenIdx++)
+				Stream >> PivotNumbers[TokenIdx];
+
+			lcMatrix44 PivotMatrix(lcVector4(PivotNumbers[3], PivotNumbers[6], PivotNumbers[9], 0.0f), lcVector4(PivotNumbers[4], PivotNumbers[7], PivotNumbers[10], 0.0f),
+								   lcVector4(PivotNumbers[5], PivotNumbers[8], PivotNumbers[11], 0.0f), lcVector4(PivotNumbers[0], PivotNumbers[1], PivotNumbers[2], 1.0f));
+
+			mPivotMatrix = PivotMatrix;
+			mState |= LC_PIECE_PIVOT_POINT_VALID;
+		}
 		else if (Token == QLatin1String("POSITION_KEY"))
 			LoadKeysLDraw(Stream, mPositionKeys);
 		else if (Token == QLatin1String("ROTATION_KEY"))
@@ -105,9 +130,6 @@ bool lcPiece::ParseLDrawLine(QTextStream& Stream)
 
 	return false;
 }
-
-/////////////////////////////////////////////////////////////////////////////
-// Piece save/load
 
 bool lcPiece::FileLoad(lcFile& file)
 {

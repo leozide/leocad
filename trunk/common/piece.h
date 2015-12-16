@@ -186,51 +186,71 @@ public:
 
 	virtual void SetFocused(lcuint32 Section, bool Focused)
 	{
-		lcuint32 Bits = 0;
-
 		switch (Section)
 		{
 		case LC_PIECE_SECTION_POSITION:
-			Bits = LC_PIECE_POSITION_SELECTED | LC_PIECE_POSITION_FOCUSED;
+			if (Focused)
+				mState |= (LC_PIECE_POSITION_SELECTED | LC_PIECE_POSITION_FOCUSED);
+			else
+				mState &= ~LC_PIECE_POSITION_FOCUSED;
 			break;
 
 		case LC_PIECE_SECTION_CONTROL_POINT_1:
-			Bits = LC_PIECE_CONTROL_POINT_1_SELECTED | LC_PIECE_CONTROL_POINT_1_FOCUSED;
+			if (Focused)
+				mState |= (LC_PIECE_CONTROL_POINT_1_SELECTED | LC_PIECE_CONTROL_POINT_1_FOCUSED);
+			else
+				mState &= ~LC_PIECE_CONTROL_POINT_1_FOCUSED;
 			break;
 
 		case LC_PIECE_SECTION_CONTROL_POINT_2:
-			Bits = LC_PIECE_CONTROL_POINT_2_SELECTED | LC_PIECE_CONTROL_POINT_2_FOCUSED;
+			if (Focused)
+				mState |= (LC_PIECE_CONTROL_POINT_2_SELECTED | LC_PIECE_CONTROL_POINT_2_FOCUSED);
+			else
+				mState &= ~LC_PIECE_CONTROL_POINT_2_FOCUSED;
 			break;
 
 		case LC_PIECE_SECTION_CONTROL_POINT_3:
-			Bits = LC_PIECE_CONTROL_POINT_3_SELECTED | LC_PIECE_CONTROL_POINT_3_FOCUSED;
+			if (Focused)
+				mState |= (LC_PIECE_CONTROL_POINT_3_SELECTED | LC_PIECE_CONTROL_POINT_3_FOCUSED);
+			else
+				mState &= ~LC_PIECE_CONTROL_POINT_3_FOCUSED;
 			break;
 
 		case LC_PIECE_SECTION_CONTROL_POINT_4:
-			Bits = LC_PIECE_CONTROL_POINT_4_SELECTED | LC_PIECE_CONTROL_POINT_4_FOCUSED;
+			if (Focused)
+				mState |= (LC_PIECE_CONTROL_POINT_4_SELECTED | LC_PIECE_CONTROL_POINT_4_FOCUSED);
+			else
+				mState &= ~LC_PIECE_CONTROL_POINT_4_FOCUSED;
 			break;
 
 		case LC_PIECE_SECTION_CONTROL_POINT_5:
-			Bits = LC_PIECE_CONTROL_POINT_5_SELECTED | LC_PIECE_CONTROL_POINT_5_FOCUSED;
+			if (Focused)
+				mState |= (LC_PIECE_CONTROL_POINT_5_SELECTED | LC_PIECE_CONTROL_POINT_5_FOCUSED);
+			else
+				mState &= ~LC_PIECE_CONTROL_POINT_5_FOCUSED;
 			break;
 
 		case LC_PIECE_SECTION_CONTROL_POINT_6:
-			Bits = LC_PIECE_CONTROL_POINT_6_SELECTED | LC_PIECE_CONTROL_POINT_6_FOCUSED;
+			if (Focused)
+				mState |= (LC_PIECE_CONTROL_POINT_6_SELECTED | LC_PIECE_CONTROL_POINT_6_FOCUSED);
+			else
+				mState &= ~LC_PIECE_CONTROL_POINT_6_FOCUSED;
 			break;
 
 		case LC_PIECE_SECTION_CONTROL_POINT_7:
-			Bits = LC_PIECE_CONTROL_POINT_7_SELECTED | LC_PIECE_CONTROL_POINT_7_FOCUSED;
+			if (Focused)
+				mState |= (LC_PIECE_CONTROL_POINT_7_SELECTED | LC_PIECE_CONTROL_POINT_7_FOCUSED);
+			else
+				mState &= ~LC_PIECE_CONTROL_POINT_7_FOCUSED;
 			break;
 
 		case LC_PIECE_SECTION_CONTROL_POINT_8:
-			Bits = LC_PIECE_CONTROL_POINT_8_SELECTED | LC_PIECE_CONTROL_POINT_8_FOCUSED;
+			if (Focused)
+				mState |= (LC_PIECE_CONTROL_POINT_8_SELECTED | LC_PIECE_CONTROL_POINT_8_FOCUSED);
+			else
+				mState &= ~LC_PIECE_CONTROL_POINT_8_FOCUSED;
 			break;
 		}
-
-		if (Focused)
-			mState |= Bits;
-		else
-			mState &= ~Bits;
 	}
 
 	virtual lcuint32 GetFocusSection() const
@@ -344,8 +364,10 @@ public:
 	bool FileLoad(lcFile& file);
 
 	void UpdatePosition(lcStep Step);
-	void Move(lcStep Step, bool AddKey, const lcVector3& Distance, bool MovePivotPoint);
-	void RotatePivot(const lcMatrix33& RotationMatrix);
+	void Move(lcStep Step, bool AddKey, const lcVector3& Distance);
+	void Rotate(lcStep Step, bool AddKey, const lcMatrix33& RotationMatrix, const lcVector3& Center, const lcMatrix33& RotationFrame);
+	void MovePivotPoint(const lcVector3& Distance);
+	void RotatePivotPoint(const lcMatrix33& RotationMatrix);
 
 	lcGroup* GetTopGroup();
 
@@ -405,7 +427,7 @@ public:
 	lcVector3 GetRotationCenter() const
 	{
 		if (mState & LC_PIECE_PIVOT_POINT_VALID)
-			return lcMul(mModelWorld, mPivotMatrix).GetTranslation();
+			return lcMul31(mPivotMatrix.GetTranslation(), mModelWorld);
 		else
 			return mModelWorld.GetTranslation();
 	}

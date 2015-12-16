@@ -559,25 +559,17 @@ void lcPiece::DrawInterface(lcContext* Context) const
 	}
 }
 
-void lcPiece::Move(lcStep Step, bool AddKey, const lcVector3& Distance, bool MovePivotPoint)
+void lcPiece::Move(lcStep Step, bool AddKey, const lcVector3& Distance)
 {
 	lcuint32 Section = GetFocusSection();
 
 	if (Section == LC_PIECE_SECTION_POSITION || Section == LC_PIECE_SECTION_INVALID)
 	{
-		if (!MovePivotPoint)
-		{
-			lcVector3 Position = mModelWorld.GetTranslation() + Distance;
+		lcVector3 Position = mModelWorld.GetTranslation() + Distance;
 
-			ChangeKey(mPositionKeys, Position, Step, AddKey);
+		SetPosition(Position, Step, AddKey);
 
-			mModelWorld.SetTranslation(Position);
-		}
-		else
-		{
-			mState |= LC_PIECE_PIVOT_POINT_VALID;
-			mPivotMatrix.SetTranslation(mPivotMatrix.GetTranslation() + Distance);
-		}
+		mModelWorld.SetTranslation(Position);
 	}
 	else
 	{
@@ -588,8 +580,39 @@ void lcPiece::Move(lcStep Step, bool AddKey, const lcVector3& Distance, bool Mov
 	}
 }
 
-void lcPiece::RotatePivot(const lcMatrix33& RotationMatrix)
+void lcPiece::Rotate(lcStep Step, bool AddKey, const lcMatrix33& RotationMatrix, const lcVector3& Center, const lcMatrix33& RotationFrame)
 {
+	lcVector3 Distance = mModelWorld.GetTranslation() - Center;
+	lcMatrix33 LocalToWorldMatrix = lcMatrix33(mModelWorld);
+
+	lcMatrix33 LocalToFocusMatrix = lcMul(LocalToWorldMatrix, RotationFrame);
+	lcMatrix33 NewLocalToWorldMatrix = lcMul(LocalToFocusMatrix, RotationMatrix);
+
+	lcMatrix33 WorldToLocalMatrix = lcMatrix33AffineInverse(LocalToWorldMatrix);
+
+	Distance = lcMul(Distance, WorldToLocalMatrix);
+	Distance = lcMul(Distance, NewLocalToWorldMatrix);
+
+	NewLocalToWorldMatrix.Orthonormalize();
+
+	SetPosition(Center + Distance, Step, AddKey);
+	SetRotation(NewLocalToWorldMatrix, Step, AddKey);
+}
+
+void lcPiece::MovePivotPoint(const lcVector3& Distance)
+{
+	if (!IsFocused(LC_PIECE_SECTION_POSITION))
+		return;
+
+	mPivotMatrix.SetTranslation(mPivotMatrix.GetTranslation() + Distance);
+	mState |= LC_PIECE_PIVOT_POINT_VALID;
+}
+
+void lcPiece::RotatePivotPoint(const lcMatrix33& RotationMatrix)
+{
+	if (!IsFocused(LC_PIECE_SECTION_POSITION))
+		return;
+
 	lcMatrix33 NewPivotRotationMatrix = lcMul(RotationMatrix, lcMatrix33(mPivotMatrix));
 	NewPivotRotationMatrix.Orthonormalize();
 

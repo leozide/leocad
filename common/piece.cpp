@@ -116,8 +116,8 @@ bool lcPiece::ParseLDrawLine(QTextStream& Stream)
 			for (int TokenIdx = 0; TokenIdx < 12; TokenIdx++)
 				Stream >> PivotNumbers[TokenIdx];
 
-			lcMatrix44 PivotMatrix(lcVector4(PivotNumbers[3], PivotNumbers[6], PivotNumbers[9], 0.0f), lcVector4(PivotNumbers[4], PivotNumbers[7], PivotNumbers[10], 0.0f),
-								   lcVector4(PivotNumbers[5], PivotNumbers[8], PivotNumbers[11], 0.0f), lcVector4(PivotNumbers[0], PivotNumbers[1], PivotNumbers[2], 1.0f));
+			lcMatrix44 PivotMatrix(lcVector4( PivotNumbers[3],  PivotNumbers[9], -PivotNumbers[6], 0.0f), lcVector4(PivotNumbers[5], PivotNumbers[11], -PivotNumbers[8], 0.0f),
+								   lcVector4(-PivotNumbers[4], -PivotNumbers[10], PivotNumbers[7], 0.0f), lcVector4(PivotNumbers[0], PivotNumbers[2],  -PivotNumbers[1], 1.0f));
 
 			mPivotMatrix = PivotMatrix;
 			mState |= LC_PIECE_PIVOT_POINT_VALID;

@@ -1460,77 +1460,82 @@ void lcMainWindow::RemoveRecentFile(int FileIndex)
 	UpdateRecentFiles();
 }
 
-void lcMainWindow::UpdateFocusObject(lcObject* Focus)
+void lcMainWindow::UpdateSelectedObjects(bool SelectionChanged)
 {
-	mPropertiesWidget->updateFocusObject(Focus);
+	int Flags;
+	lcArray<lcObject*> Selection;
+	lcObject* Focus;
 
+	lcGetActiveModel()->GetSelectionInformation(&Flags, Selection, &Focus);
+
+	if (SelectionChanged)
+	{
+		mTimelineWidget->UpdateSelection();
+
+		mActions[LC_EDIT_CUT]->setEnabled(Flags & LC_SEL_SELECTED);
+		mActions[LC_EDIT_COPY]->setEnabled(Flags & LC_SEL_SELECTED);
+		mActions[LC_EDIT_FIND]->setEnabled((Flags & LC_SEL_NO_PIECES) == 0);
+		mActions[LC_EDIT_FIND_NEXT]->setEnabled((Flags & LC_SEL_NO_PIECES) == 0);
+		mActions[LC_EDIT_FIND_PREVIOUS]->setEnabled((Flags & LC_SEL_NO_PIECES) == 0);
+		mActions[LC_EDIT_SELECT_INVERT]->setEnabled((Flags & LC_SEL_NO_PIECES) == 0);
+		mActions[LC_EDIT_SELECT_BY_NAME]->setEnabled((Flags & LC_SEL_NO_PIECES) == 0);
+		mActions[LC_EDIT_SELECT_NONE]->setEnabled(Flags & LC_SEL_SELECTED);
+		mActions[LC_EDIT_SELECT_ALL]->setEnabled(Flags & LC_SEL_UNSELECTED);
+
+		mActions[LC_PIECE_DELETE]->setEnabled(Flags & LC_SEL_SELECTED);
+		mActions[LC_PIECE_RESET_PIVOT_POINT]->setEnabled(Flags & LC_SEL_SELECTED);
+		mActions[LC_PIECE_ARRAY]->setEnabled(Flags & LC_SEL_PIECE);
+		mActions[LC_PIECE_HIDE_SELECTED]->setEnabled(Flags & LC_SEL_VISIBLE_SELECTED);
+		mActions[LC_PIECE_HIDE_UNSELECTED]->setEnabled(Flags & LC_SEL_UNSELECTED);
+		mActions[LC_PIECE_UNHIDE_SELECTED]->setEnabled(Flags & LC_SEL_HIDDEN_SELECTED);
+		mActions[LC_PIECE_UNHIDE_ALL]->setEnabled(Flags & LC_SEL_HIDDEN);
+		mActions[LC_PIECE_VIEW_SELECTED_MODEL]->setEnabled(Flags & LC_SEL_MODEL_SELECTED);
+		mActions[LC_PIECE_MOVE_SELECTION_TO_MODEL]->setEnabled(Flags & LC_SEL_PIECE);
+		mActions[LC_PIECE_INLINE_SELECTED_MODELS]->setEnabled(Flags & LC_SEL_MODEL_SELECTED);
+		mActions[LC_PIECE_GROUP]->setEnabled(Flags & LC_SEL_CAN_GROUP);
+		mActions[LC_PIECE_UNGROUP]->setEnabled(Flags & LC_SEL_GROUPED);
+		mActions[LC_PIECE_GROUP_ADD]->setEnabled((Flags & (LC_SEL_GROUPED | LC_SEL_FOCUS_GROUPED)) == LC_SEL_GROUPED);
+		mActions[LC_PIECE_GROUP_REMOVE]->setEnabled(Flags & LC_SEL_FOCUS_GROUPED);
+		mActions[LC_PIECE_GROUP_EDIT]->setEnabled((Flags & LC_SEL_NO_PIECES) == 0);
+		mActions[LC_PIECE_SHOW_EARLIER]->setEnabled(Flags & LC_SEL_PIECE); // FIXME: disable if current step is 1
+		mActions[LC_PIECE_SHOW_LATER]->setEnabled(Flags & LC_SEL_PIECE);
+	}
+
+	mPropertiesWidget->Update(Selection, Focus);
+
+	QString Message;
+
+	if ((Selection.GetSize() == 1) && Focus)
+	{
+		if (Focus->IsPiece())
+			Message = tr("%1 (ID: %2)").arg(Focus->GetName(), ((lcPiece*)Focus)->mPieceInfo->m_strName);
+		else
+			Message = Focus->GetName();
+	}
+	else if (Selection.GetSize() > 0)
+	{
+		if (Selection.GetSize() == 1)
+			Message = tr("1 Object selected");
+		else
+			Message = tr("%1 Objects selected").arg(QString::number(Selection.GetSize()));
+
+		if (Focus && Focus->IsPiece())
+		{
+			Message.append(tr(" - %1 (ID: %2)").arg(Focus->GetName(), ((lcPiece*)Focus)->mPieceInfo->m_strName));
+
+			const lcGroup* Group = ((lcPiece*)Focus)->GetGroup();
+			if (Group && !Group->mName.isEmpty())
+				Message.append(tr(" in group '%1'").arg(Group->mName));
+		}
+	}
+
+	mStatusBarLabel->setText(Message);
 	lcVector3 Position;
 	lcGetActiveModel()->GetFocusPosition(Position);
 
 	QString Label("X: %1 Y: %2 Z: %3");
 	Label = Label.arg(QString::number(Position[0], 'f', 2), QString::number(Position[1], 'f', 2), QString::number(Position[2], 'f', 2));
 	mStatusPositionLabel->setText(Label);
-}
-
-void lcMainWindow::UpdateSelectedObjects(int Flags, int SelectedCount, lcObject* Focus)
-{
-	mTimelineWidget->UpdateSelection();
-
-	mActions[LC_EDIT_CUT]->setEnabled(Flags & LC_SEL_SELECTED);
-	mActions[LC_EDIT_COPY]->setEnabled(Flags & LC_SEL_SELECTED);
-	mActions[LC_EDIT_FIND]->setEnabled((Flags & LC_SEL_NO_PIECES) == 0);
-	mActions[LC_EDIT_FIND_NEXT]->setEnabled((Flags & LC_SEL_NO_PIECES) == 0);
-	mActions[LC_EDIT_FIND_PREVIOUS]->setEnabled((Flags & LC_SEL_NO_PIECES) == 0);
-	mActions[LC_EDIT_SELECT_INVERT]->setEnabled((Flags & LC_SEL_NO_PIECES) == 0);
-	mActions[LC_EDIT_SELECT_BY_NAME]->setEnabled((Flags & LC_SEL_NO_PIECES) == 0);
-	mActions[LC_EDIT_SELECT_NONE]->setEnabled(Flags & LC_SEL_SELECTED);
-	mActions[LC_EDIT_SELECT_ALL]->setEnabled(Flags & LC_SEL_UNSELECTED);
-
-	mActions[LC_PIECE_DELETE]->setEnabled(Flags & LC_SEL_SELECTED);
-	mActions[LC_PIECE_RESET_PIVOT_POINT]->setEnabled(Flags & LC_SEL_SELECTED);
-	mActions[LC_PIECE_ARRAY]->setEnabled(Flags & LC_SEL_PIECE);
-	mActions[LC_PIECE_HIDE_SELECTED]->setEnabled(Flags & LC_SEL_VISIBLE_SELECTED);
-	mActions[LC_PIECE_HIDE_UNSELECTED]->setEnabled(Flags & LC_SEL_UNSELECTED);
-	mActions[LC_PIECE_UNHIDE_SELECTED]->setEnabled(Flags & LC_SEL_HIDDEN_SELECTED);
-	mActions[LC_PIECE_UNHIDE_ALL]->setEnabled(Flags & LC_SEL_HIDDEN);
-	mActions[LC_PIECE_VIEW_SELECTED_MODEL]->setEnabled(Flags & LC_SEL_MODEL_SELECTED);
-	mActions[LC_PIECE_MOVE_SELECTION_TO_MODEL]->setEnabled(Flags & LC_SEL_PIECE);
-	mActions[LC_PIECE_INLINE_SELECTED_MODELS]->setEnabled(Flags & LC_SEL_MODEL_SELECTED);
-	mActions[LC_PIECE_GROUP]->setEnabled(Flags & LC_SEL_CAN_GROUP);
-	mActions[LC_PIECE_UNGROUP]->setEnabled(Flags & LC_SEL_GROUPED);
-	mActions[LC_PIECE_GROUP_ADD]->setEnabled((Flags & (LC_SEL_GROUPED | LC_SEL_FOCUS_GROUPED)) == LC_SEL_GROUPED);
-	mActions[LC_PIECE_GROUP_REMOVE]->setEnabled(Flags & LC_SEL_FOCUS_GROUPED);
-	mActions[LC_PIECE_GROUP_EDIT]->setEnabled((Flags & LC_SEL_NO_PIECES) == 0);
-	mActions[LC_PIECE_SHOW_EARLIER]->setEnabled(Flags & LC_SEL_PIECE); // FIXME: disable if current step is 1
-	mActions[LC_PIECE_SHOW_LATER]->setEnabled(Flags & LC_SEL_PIECE);
-
-	QString Message;
-
-	if ((SelectedCount == 1) && Focus)
-	{
-		if (Focus->IsPiece())
-			Message = QString("%1 (ID: %2)").arg(Focus->GetName(), ((lcPiece*)Focus)->mPieceInfo->m_strName);
-		else
-			Message = Focus->GetName();
-	}
-	else if (SelectedCount > 0)
-	{
-		if (SelectedCount == 1)
-			Message = "1 Object selected";
-		else
-			Message = QString("%1 Objects selected").arg(QString::number(SelectedCount));
-
-		if (Focus && Focus->IsPiece())
-		{
-			Message.append(QString(" - %1 (ID: %2)").arg(Focus->GetName(), ((lcPiece*)Focus)->mPieceInfo->m_strName));
-
-			const lcGroup* Group = ((lcPiece*)Focus)->GetGroup();
-			if (Group && !Group->mName.isEmpty())
-				Message.append(QString(" in group '%1'").arg(Group->mName));
-		}
-	}
-
-	mStatusBarLabel->setText(Message);
 }
 
 void lcMainWindow::UpdateTimeline(bool Clear, bool UpdateItems)

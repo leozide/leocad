@@ -1628,7 +1628,7 @@ void View::SetProjection(bool Ortho)
 		gMainWindow->UpdatePerspective();
 	}
 	else
-		mModel->SetObjectProperty(mCamera, LC_CAMERA_PROPERTY_ORTHO, &Ortho);
+		mModel->SetCameraOrthographic(mCamera, Ortho);
 }
 
 void View::LookAt()

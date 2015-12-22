@@ -393,13 +393,25 @@ public:
 
 	void SetStepHide(lcStep Step)
 	{
+		if (Step < 2)
+			Step = 2;
+
 		mStepHide = Step;
+
+		if (mStepHide <= mStepShow)
+			SetStepShow(mStepHide - 1);
 	}
 
 	void SetStepShow(lcStep Step)
 	{
+		if (Step == LC_STEP_MAX)
+			Step = LC_STEP_MAX - 1;
+
 		mFileLine = -1;
 		mStepShow = Step;
+
+		if (mStepHide <= mStepShow)
+			mStepHide = mStepShow + 1;
 	}
 
 	void SetColorCode(lcuint32 ColorCode)

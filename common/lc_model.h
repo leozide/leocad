@@ -254,6 +254,7 @@ public:
 	void GetPartsList(int DefaultColorIndex, lcArray<lcPartsListEntry>& PartsList) const;
 	void GetPartsListForStep(lcStep Step, int DefaultColorIndex, lcArray<lcPartsListEntry>& PartsList) const;
 	void GetModelParts(const lcMatrix44& WorldMatrix, int DefaultColorIndex, lcArray<lcModelPartsEntry>& ModelParts) const;
+	void GetSelectionInformation(int* Flags, lcArray<lcObject*>& Selection, lcObject** Focus) const;
 
 	void FocusOrDeselectObject(const lcObjectSection& ObjectSection);
 	void ClearSelection(bool UpdateInterface);
@@ -313,7 +314,16 @@ public:
 	void MoveSelectedObjects(const lcVector3& PieceDistance, const lcVector3& ObjectDistance, bool Relative, bool AlternateButtonDrag, bool Update, bool Checkpoint);
 	void RotateSelectedPieces(const lcVector3& Angles, bool Relative, bool AlternateButtonDrag, bool Update, bool Checkpoint);
 	void TransformSelectedObjects(lcTransformType TransformType, const lcVector3& Transform);
-	void SetObjectProperty(lcObject* Object, lcObjectPropertyType ObjectPropertyType, const void* Value);
+	void SetSelectedPiecesColorIndex(int ColorIndex);
+	void SetSelectedPiecesPieceInfo(PieceInfo* Info);
+	void SetSelectedPiecesStepShow(lcStep Step);
+	void SetSelectedPiecesStepHide(lcStep Step);
+
+	void SetCameraOrthographic(lcCamera* Camera, bool Ortho);
+	void SetCameraFOV(lcCamera* Camera, float FOV);
+	void SetCameraZNear(lcCamera* Camera, float ZNear);
+	void SetCameraZFar(lcCamera* Camera, float ZFar);
+	void SetCameraName(lcCamera* Camera, const char* Name);
 
 	void ShowPropertiesDialog();
 	void ShowSelectByNameDialog();
@@ -333,7 +343,6 @@ protected:
 
 	void UpdateBackgroundTexture();
 
-	void UpdateSelection() const;
 	void SelectGroup(lcGroup* TopGroup, bool Select);
 
 	void AddPiece(lcPiece* Piece);

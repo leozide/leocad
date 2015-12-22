@@ -167,8 +167,9 @@ public:
 	void TogglePrintPreview();
 	void ToggleFullScreen();
 
-	void UpdateFocusObject(lcObject* Focus);
-	void UpdateSelectedObjects(int Flags, int SelectedCount, lcObject* Focus);
+	void UpdateSelectedObjects(bool SelectionChanged);
+//	void UpdateFocusObject(lcObject* Focus);
+//	void UpdateSelectedObjects(int Flags, int SelectedCount, lcObject* Focus);
 	void UpdateTimeline(bool Clear, bool UpdateItems);
 	void UpdatePaste(bool Enabled);
 	void UpdateCurrentStep();

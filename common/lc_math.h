@@ -730,6 +730,37 @@ inline lcMatrix33 lcMatrix33FromEulerAngles(const lcVector3& Radians)
 	return m;
 }
 
+inline lcVector3 lcMatrix33ToEulerAngles(const lcMatrix33& RotMat)
+{
+	float SinPitch, CosPitch, SinRoll, CosRoll, SinYaw, CosYaw;
+
+	SinPitch = -RotMat.r[0][2];
+	CosPitch = sqrtf(1 - SinPitch*SinPitch);
+
+	if (fabsf(CosPitch) > 0.0005f)
+	{
+		SinRoll = RotMat.r[1][2] / CosPitch;
+		CosRoll = RotMat.r[2][2] / CosPitch;
+		SinYaw = RotMat.r[0][1] / CosPitch;
+		CosYaw = RotMat.r[0][0] / CosPitch;
+	}
+	else
+	{
+		SinRoll = -RotMat.r[2][1];
+		CosRoll = RotMat.r[1][1];
+		SinYaw = 0.0f;
+		CosYaw = 1.0f;
+	}
+
+	lcVector3 Rot(atan2f(SinRoll, CosRoll), atan2f(SinPitch, CosPitch), atan2f(SinYaw, CosYaw));
+
+	if (Rot[0] < 0) Rot[0] += LC_2PI;
+	if (Rot[1] < 0) Rot[1] += LC_2PI;
+	if (Rot[2] < 0) Rot[2] += LC_2PI;
+
+	return Rot;
+}
+
 inline lcMatrix44 lcMatrix44Identity()
 {
 	lcMatrix44 m;

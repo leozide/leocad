@@ -206,7 +206,7 @@ public:
 			return mTargetPosition;
 
 		case LC_CAMERA_SECTION_UPVECTOR:
-			return lcMul31(lcVector3(0, 1, 0), lcMatrix44AffineInverse(mWorldView));
+			return lcMul31(lcVector3(0, 25, 0), lcMatrix44AffineInverse(mWorldView));
 		}
 
 		return lcVector3(0.0f, 0.0f, 0.0f);

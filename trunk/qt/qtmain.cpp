@@ -127,6 +127,7 @@ static void lcRegisterShellFileTypes()
 int main(int argc, char *argv[])
 {
 	QApplication app(argc, argv);
+	app.setApplicationDisplayName("LeoCAD");
 
 	QCoreApplication::setOrganizationDomain("leocad.org");
 	QCoreApplication::setOrganizationName("LeoCAD Software");

@@ -934,7 +934,9 @@ void lcModel::Paste()
 	Buffer.open(QIODevice::ReadOnly);
 	Model->LoadLDraw(Buffer, lcGetActiveProject());
 
-	lcArray<lcPiece*> PastedPieces = Model->mPieces;
+	const lcArray<lcPiece*>& PastedPieces = Model->mPieces;
+	lcArray<lcObject*> SelectedObjects;
+	SelectedObjects.AllocGrow(PastedPieces.GetSize());
 
 	for (int PieceIdx = 0; PieceIdx < PastedPieces.GetSize(); PieceIdx++)
 	{
@@ -943,6 +945,8 @@ void lcModel::Paste()
 
 		if (Step > mCurrentStep)
 			Piece->SetStepShow(mCurrentStep);
+
+		SelectedObjects.Add(Piece);
 	}
 
 	Merge(Model);
@@ -951,7 +955,7 @@ void lcModel::Paste()
 	if (PastedPieces.GetSize() == 1)
 		ClearSelectionAndSetFocus(PastedPieces[0], LC_PIECE_SECTION_POSITION);
 	else
-		SetSelectionAndFocus((lcArray<lcObject*>&)PastedPieces, NULL, 0);
+		SetSelectionAndFocus(SelectedObjects, NULL, 0);
 
 	CalculateStep(mCurrentStep);
 	gMainWindow->UpdateTimeline(false, false);

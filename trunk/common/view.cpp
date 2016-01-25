@@ -2548,15 +2548,16 @@ void View::OnMouseMove()
 			switch (mTrackTool)
 			{
 			case LC_TRACKTOOL_ROTATE_X:
-				Dir1 = lcVector3(1, 0, 0);
+				Dir1 = lcVector3(1.0f, 0.0f, 0.0f);
 				break;
 			case LC_TRACKTOOL_ROTATE_Y:
-				Dir1 = lcVector3(0, 1, 0);
+				Dir1 = lcVector3(0.0f, 1.0f, 0.0f);
 				break;
 			case LC_TRACKTOOL_ROTATE_Z:
-				Dir1 = lcVector3(0, 0, 1);
+				Dir1 = lcVector3(0.0f, 0.0f, 1.0f);
 				break;
 			default:
+				Dir1 = lcVector3(0.0f, 0.0f, 1.0f);
 				break;
 			}
 

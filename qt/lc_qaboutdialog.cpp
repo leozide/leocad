@@ -27,8 +27,8 @@ lcQAboutDialog::lcQAboutDialog(QWidget *parent, void *data) :
 	glGetBooleanv(GL_DOUBLEBUFFER, &DoubleBuffer);
 	glGetBooleanv(GL_RGBA_MODE, &RGBA);
 
-	QString VersionFormat = tr("OpenGL Version %1\n%2 - %3\n\n");
-	QString Version = VersionFormat.arg(QString((const char*)glGetString(GL_VERSION)), QString((const char*)glGetString(GL_RENDERER)), QString((const char*)glGetString(GL_VENDOR)));
+	QString VersionFormat = tr("OpenGL Version %1 (GLSL %2)\n%3 - %4\n\n");
+	QString Version = VersionFormat.arg(QString((const char*)glGetString(GL_VERSION)), QString((const char*)glGetString(GL_SHADING_LANGUAGE_VERSION)), QString((const char*)glGetString(GL_RENDERER)), QString((const char*)glGetString(GL_VENDOR)));
 	QString BuffersFormat = tr("Color Buffer: %1 bits %2 %3\nDepth Buffer: %4 bits\nStencil Buffer: %5 bits\n\n");
 	QString Buffers = BuffersFormat.arg(QString::number(Red + Green + Blue + Alpha), RGBA ? "RGBA" : tr("indexed"), DoubleBuffer ? tr("double buffered") : QString(), QString::number(Depth), QString::number(Stencil));
 

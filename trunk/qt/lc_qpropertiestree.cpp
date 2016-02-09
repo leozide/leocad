@@ -426,7 +426,7 @@ void lcQPropertiesTree::Update(const lcArray<lcObject*>& Selection, lcObject* Fo
 		break;
 
 	case LC_PROPERTY_WIDGET_PIECE:
-		SetPiece(Focus);
+		SetPiece(Selection, Focus);
 		break;
 
 	case LC_PROPERTY_WIDGET_CAMERA:
@@ -839,7 +839,7 @@ void lcQPropertiesTree::SetEmpty()
 	mFocus = NULL;
 }
 
-void lcQPropertiesTree::SetPiece(lcObject* Focus)
+void lcQPropertiesTree::SetPiece(const lcArray<lcObject*>& Selection, lcObject* Focus)
 {
 	if (mWidgetMode != LC_PROPERTY_WIDGET_PIECE)
 	{
@@ -893,7 +893,6 @@ void lcQPropertiesTree::SetPiece(lcObject* Focus)
 	lcStep Show = 0;
 	lcStep Hide = 0;
 	int ColorIndex = gDefaultColor;
-	const char* Description = "";
 	PieceInfo* Info = NULL;
 
 	if (Piece)
@@ -901,8 +900,45 @@ void lcQPropertiesTree::SetPiece(lcObject* Focus)
 		Show = Piece->GetStepShow();
 		Hide = Piece->GetStepHide();
 		ColorIndex = Piece->mColorIndex;
-		Description = Piece->mPieceInfo->m_strDescription;
 		Info = Piece->mPieceInfo;
+	}
+	else
+	{
+		bool FirstPiece = true;
+
+		for (int ObjectIdx = 0; ObjectIdx < Selection.GetSize(); ObjectIdx++)
+		{
+			lcObject* Object = Selection[ObjectIdx];
+
+			if (Object->GetType() != LC_OBJECT_PIECE)
+				continue;
+
+			lcPiece* SelectedPiece = (lcPiece*)Object;
+
+			if (FirstPiece)
+			{
+				Show = SelectedPiece->GetStepShow();
+				Hide = SelectedPiece->GetStepHide();
+				ColorIndex = SelectedPiece->mColorIndex;
+				Info = SelectedPiece->mPieceInfo;
+
+				FirstPiece = false;
+			}
+			else
+			{
+				if (SelectedPiece->GetStepShow() != Show)
+					Show = 0;
+
+				if (SelectedPiece->GetStepHide() != Hide)
+					Hide = 0;
+
+				if (SelectedPiece->mColorIndex != ColorIndex)
+					ColorIndex = gDefaultColor;
+
+				if (SelectedPiece->mPieceInfo != Info)
+					Info = NULL;
+			}
+		}
 	}
 
 	partShow->setText(1, QString::number(Show));
@@ -925,7 +961,7 @@ void lcQPropertiesTree::SetPiece(lcObject* Focus)
 	partColor->setText(1, color->Name);
 	partColor->setData(0, PropertyValueRole, ColorIndex);
 
-	partID->setText(1, Description);
+	partID->setText(1, Info ? Info->m_strDescription : QString());
 	partID->setData(0, PropertyValueRole, qVariantFromValue((void*)Info));
 }
 

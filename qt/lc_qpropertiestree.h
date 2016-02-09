@@ -66,7 +66,7 @@ protected:
 	QTreeWidgetItem *addProperty(QTreeWidgetItem *parent, const QString& label, PropertyType propertyType);
 
 	void SetEmpty();
-	void SetPiece(lcObject* Focus);
+	void SetPiece(const lcArray<lcObject*>& Selection, lcObject* Focus);
 	void SetCamera(lcObject* Focus);
 	void SetLight(lcObject* Focus);
 	void SetMultiple();

@@ -147,6 +147,8 @@ void lcQPropertiesTreeDelegate::slotEditorDestroyed(QObject *object)
 
 QWidget *lcQPropertiesTreeDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &style, const QModelIndex &index) const
 {
+	Q_UNUSED(style);
+
 	if (index.column() == 1 && m_treeWidget)
 	{
 		QTreeWidgetItem *item = m_treeWidget->indexToItem(index);
@@ -967,6 +969,8 @@ void lcQPropertiesTree::SetPiece(const lcArray<lcObject*>& Selection, lcObject* 
 
 void lcQPropertiesTree::SetCamera(lcObject* Focus)
 {
+	Q_UNUSED(Focus);
+
 	if (mWidgetMode != LC_PROPERTY_WIDGET_CAMERA)
 	{
 		SetEmpty();
@@ -1057,6 +1061,8 @@ void lcQPropertiesTree::SetCamera(lcObject* Focus)
 
 void lcQPropertiesTree::SetLight(lcObject* Focus)
 {
+	Q_UNUSED(Focus);
+
 	SetEmpty();
 	mFocus = NULL;
 

@@ -162,7 +162,7 @@ bool lcPiecesLibrary::Load(const char* LibraryPath)
 	{
 		strcpy(mLibraryPath, LibraryPath);
 
-		int i = strlen(mLibraryPath) - 1;
+		size_t i = strlen(mLibraryPath) - 1;
 		if ((mLibraryPath[i] != '\\') && (mLibraryPath[i] != '/'))
 			strcat(mLibraryPath, "/");
 
@@ -425,7 +425,7 @@ bool lcPiecesLibrary::OpenDirectory(const char* Path)
 	{
 		strcpy(FileName, Path);
 		strcat(FileName, "parts/");
-		int PathLength = strlen(FileName);
+		size_t PathLength = strlen(FileName);
 
 		g_App->GetFileList(FileName, FileList);
 
@@ -498,7 +498,7 @@ bool lcPiecesLibrary::OpenDirectory(const char* Path)
 	for (int DirectoryIdx = 0; DirectoryIdx < (int)(sizeof(PrimitiveDirectories) / sizeof(PrimitiveDirectories[0])); DirectoryIdx++)
 	{
 		strcpy(FileName, Path);
-		int PathLength = strlen(FileName);
+		size_t PathLength = strlen(FileName);
 
 		strcat(FileName, PrimitiveDirectories[DirectoryIdx]);
 		PathLength += strchr(PrimitiveDirectories[DirectoryIdx], '/') - PrimitiveDirectories[DirectoryIdx] + 1;
@@ -540,7 +540,7 @@ bool lcPiecesLibrary::OpenDirectory(const char* Path)
 
 	strcpy(FileName, Path);
 	strcat(FileName, "parts/textures/");
-	int PathLength = strlen(FileName);
+	size_t PathLength = strlen(FileName);
 
 	g_App->GetFileList(FileName, FileList);
 
@@ -2354,7 +2354,7 @@ void lcPiecesLibrary::GetPatternedPieces(PieceInfo* Parent, lcArray<PieceInfo*>&
 	if (Pieces.GetSize() == 0)
 	{
 		strcpy(Name, Parent->m_strName);
-		int Len = strlen(Name);
+		size_t Len = strlen(Name);
 		if (Name[Len-1] < '0' || Name[Len-1] > '9')
 			Name[Len-1] = 'P';
 

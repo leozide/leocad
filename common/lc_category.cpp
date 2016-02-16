@@ -24,11 +24,12 @@ void lcLoadDefaultCategories(bool BuiltInLibrary)
 
 void lcSaveDefaultCategories()
 {
-	lcMemFile File;
+	QByteArray ByteArray;
+	QTextStream Stream(&ByteArray, QIODevice::WriteOnly);
 
-	lcSaveCategories(File, gCategories);
+	lcSaveCategories(Stream, gCategories);
 
-	lcSetProfileBuffer(LC_PROFILE_CATEGORIES, File);
+	lcSetProfileBuffer(LC_PROFILE_CATEGORIES, ByteArray);
 }
 
 void lcResetCategories(lcArray<lcLibraryCategory>& Categories, bool BuiltInLibrary)
@@ -130,26 +131,27 @@ bool lcLoadCategories(lcFile& File, lcArray<lcLibraryCategory>& Categories)
 
 bool lcSaveCategories(const QString& FileName, const lcArray<lcLibraryCategory>& Categories)
 {
-	lcDiskFile File;
+	QFile File(FileName);
 
-	if (!File.Open(FileName, "wt"))
+	if (!File.open(QIODevice::WriteOnly))
 		return false;
 
-	return lcSaveCategories(File, Categories);
+	QTextStream Stream(&File);
+
+	return lcSaveCategories(Stream, Categories);
 }
 
-bool lcSaveCategories(lcFile& File, const lcArray<lcLibraryCategory>& Categories)
+bool lcSaveCategories(QTextStream& Stream, const lcArray<lcLibraryCategory>& Categories)
 {
-	char Line[1024];
+	QString Format("%1=%2\r\n");
 
 	for (int CategoryIdx = 0; CategoryIdx < Categories.GetSize(); CategoryIdx++)
 	{
 		lcLibraryCategory& Category = Categories[CategoryIdx];
-
-		sprintf(Line, "%s=%s\n", (const char*)Category.Name, (const char*)Category.Keywords);
-
-		File.WriteLine(Line);
+		Stream << Format.arg((const char*)Category.Name, (const char*)Category.Keywords);
 	}
+
+	Stream.flush();
 
 	return true;
 }

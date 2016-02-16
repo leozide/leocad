@@ -58,6 +58,8 @@ bool lcKeyboardShortcuts::Save(QTextStream& Stream)
 		Stream << gCommands[CommandIdx].ID << QLatin1String("=") << mShortcuts[CommandIdx] << QLatin1String("\n");
 	}
 
+	Stream.flush();
+
 	return true;
 }
 

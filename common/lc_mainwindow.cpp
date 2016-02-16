@@ -733,6 +733,8 @@ void lcMainWindow::ActionTriggered()
 
 void lcMainWindow::PartsTreeItemChanged(QTreeWidgetItem* Current, QTreeWidgetItem* Previous)
 {
+	Q_UNUSED(Previous);
+
 	if (!Current)
 		return;
 
@@ -756,7 +758,7 @@ void lcMainWindow::PartSearchChanged(const QString& Text)
 {
 	const QByteArray TextConv = Text.toLocal8Bit();
 	const char* SearchString = TextConv.data();
-	int Length = strlen(SearchString);
+	size_t Length = strlen(SearchString);
 
 	if (!Length)
 		return;
@@ -1144,7 +1146,7 @@ bool lcMainWindow::DoDialog(LC_DIALOG_TYPE Type, void* Data)
 
 	case LC_DIALOG_ABOUT:
 		{
-			lcQAboutDialog Dialog(this, Data);
+			lcQAboutDialog Dialog(this);
 			return Dialog.exec() == QDialog::Accepted;
 		} break;
 

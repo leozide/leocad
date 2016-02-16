@@ -392,6 +392,8 @@ void lcQPreferencesDialog::on_resetCategories_clicked()
 
 bool lcQPreferencesDialog::eventFilter(QObject *object, QEvent *event)
 {
+	Q_UNUSED(object);
+
 	if (event->type() == QEvent::KeyPress)
 	{
 		QKeyEvent *keyEvent = static_cast<QKeyEvent*>(event);

@@ -133,7 +133,7 @@ bool lcApplication::LoadPiecesLibrary(const char* LibPath, const char* LibraryIn
 
 		strcpy(LibraryPath, LibraryInstallPath);
 
-		int i = strlen(LibraryPath) - 1;
+		size_t i = strlen(LibraryPath) - 1;
 		if ((LibraryPath[i] != '\\') && (LibraryPath[i] != '/'))
 			strcat(LibraryPath, "/");
 
@@ -152,7 +152,7 @@ bool lcApplication::LoadPiecesLibrary(const char* LibPath, const char* LibraryIn
 
 		strcpy(LibraryPath, LDrawPath);
 
-		int i = strlen(LibraryPath) - 1;
+		size_t i = strlen(LibraryPath) - 1;
 		if ((LibraryPath[i] != '\\') && (LibraryPath[i] != '/'))
 			strcat(LibraryPath, "/");
 

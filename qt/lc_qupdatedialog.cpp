@@ -79,6 +79,8 @@ void lcQUpdateDialog::reject()
 
 void lcQUpdateDialog::finished(int result)
 {
+	Q_UNUSED(result);
+
 	if (initialUpdate)
 		deleteLater();
 }

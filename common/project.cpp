@@ -300,7 +300,7 @@ bool Project::Save(const QString& FileName)
 		if (MPD)
 			Stream << QLatin1String("0 FILE ") << Model->GetProperties().mName << QLatin1String("\r\n");
 
-		Model->SaveLDraw(Stream, MPD, false);
+		Model->SaveLDraw(Stream, false);
 		Model->SetSaved();
 
 		if (MPD)

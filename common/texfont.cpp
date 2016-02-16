@@ -181,7 +181,7 @@ void TexFont::GetStringDimensions(int* cx, int* cy, const char* Text) const
 
 void TexFont::PrintText(lcContext* Context, float Left, float Top, float Z, const char* Text) const
 {
-	int Length = strlen(Text);
+	size_t Length = strlen(Text);
 
 	if (!Length)
 		return;

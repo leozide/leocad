@@ -85,7 +85,7 @@ public:
 	virtual void OnForwardButtonDown() { }
 	virtual void OnForwardButtonUp() { }
 	virtual void OnMouseMove() { }
-	virtual void OnMouseWheel(float Direction) { }
+	virtual void OnMouseWheel(float Direction) { Q_UNUSED(Direction); }
 
 	lcInputState mInputState;
 	int mWidth;

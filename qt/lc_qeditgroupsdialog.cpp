@@ -69,6 +69,8 @@ void lcQEditGroupsDialog::on_newGroup_clicked()
 
 void lcQEditGroupsDialog::onItemClicked(QTreeWidgetItem *item, int column)
 {
+	Q_UNUSED(column);
+
 	if (item->flags() & Qt::ItemIsEditable)
 	{
 		mClickTimer.stop();
@@ -87,6 +89,8 @@ void lcQEditGroupsDialog::onItemClicked(QTreeWidgetItem *item, int column)
 
 void lcQEditGroupsDialog::onItemDoubleClicked(QTreeWidgetItem *item, int column)
 {
+	Q_UNUSED(column);
+
 	if (item->flags() & Qt::ItemIsEditable)
 	{
 		mEditableDoubleClicked = true;
@@ -95,6 +99,8 @@ void lcQEditGroupsDialog::onItemDoubleClicked(QTreeWidgetItem *item, int column)
 
 void lcQEditGroupsDialog::timerEvent(QTimerEvent *event)
 {
+	Q_UNUSED(event);
+
 	mClickTimer.stop();
 	if (!mEditableDoubleClicked)
 	{

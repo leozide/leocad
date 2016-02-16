@@ -180,7 +180,7 @@ void lcQPartsTree::itemExpanded(QTreeWidgetItem *expandedItem)
 					continue;
 
 				const char* desc = patternedInfo->m_strDescription;
-				int len = strlen(partInfo->m_strDescription);
+				size_t len = strlen(partInfo->m_strDescription);
 
 				if (!strncmp(patternedInfo->m_strDescription, partInfo->m_strDescription, len))
 					desc += len;
@@ -252,6 +252,8 @@ void lcQPartsTree::setCurrentPart(PieceInfo *part)
 
 void lcQPartsTree::startDrag(Qt::DropActions supportedActions)
 {
+	Q_UNUSED(supportedActions);
+
 	PieceInfo *info = (PieceInfo*)currentItem()->data(0, PieceInfoRole).value<void*>();
 
 	if (!info)

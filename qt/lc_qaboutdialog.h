@@ -12,7 +12,7 @@ class lcQAboutDialog : public QDialog
 	Q_OBJECT
 
 public:
-	explicit lcQAboutDialog(QWidget *parent, void *data);
+	explicit lcQAboutDialog(QWidget *parent);
 	~lcQAboutDialog();
 
 private:

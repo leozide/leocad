@@ -156,5 +156,7 @@ void lcQModelListDialog::on_MoveDown_clicked()
 
 void lcQModelListDialog::on_ModelList_itemDoubleClicked(QListWidgetItem* Item)
 {
+	Q_UNUSED(Item);
+
 	accept();
 }

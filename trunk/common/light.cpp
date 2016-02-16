@@ -53,6 +53,7 @@ lcLight::~lcLight()
 
 void lcLight::SaveLDraw(QTextStream& Stream) const
 {
+	Q_UNUSED(Stream);
 }
 
 void lcLight::CreateName(const lcArray<lcLight*>& Lights)

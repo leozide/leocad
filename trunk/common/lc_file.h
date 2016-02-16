@@ -28,8 +28,8 @@ public:
 		WriteBuffer(Buffer, strlen(Buffer));
 	}
 
-	virtual size_t ReadBuffer(void* Buffer, long Bytes) = 0;
-	virtual size_t WriteBuffer(const void* Buffer, long Bytes) = 0;
+	virtual size_t ReadBuffer(void* Buffer, size_t Bytes) = 0;
+	virtual size_t WriteBuffer(const void* Buffer, size_t Bytes) = 0;
 	virtual void CopyFrom(lcMemFile& Source) = 0;
 
 	lcuint8 ReadU8()
@@ -447,8 +447,8 @@ public:
 	void Close();
 
 	char* ReadLine(char* Buffer, size_t BufferSize);
-	size_t ReadBuffer(void* Buffer, long Bytes);
-	size_t WriteBuffer(const void* Buffer, long Bytes);
+	size_t ReadBuffer(void* Buffer, size_t Bytes);
+	size_t WriteBuffer(const void* Buffer, size_t Bytes);
 
 	void CopyFrom(lcFile& Source);
 	void CopyFrom(lcMemFile& Source);
@@ -476,8 +476,8 @@ public:
 	void Close();
 
 	char* ReadLine(char* Buffer, size_t BufferSize);
-	size_t ReadBuffer(void* Buffer, long Bytes);
-	size_t WriteBuffer(const void* Buffer, long Bytes);
+	size_t ReadBuffer(void* Buffer, size_t Bytes);
+	size_t WriteBuffer(const void* Buffer, size_t Bytes);
 
 	void CopyFrom(lcMemFile& Source);
 

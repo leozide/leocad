@@ -64,6 +64,8 @@ public:
 
 	virtual bool IsSelected(lcuint32 Section) const
 	{
+		Q_UNUSED(Section);
+
 		return (mState & LC_PIECE_SELECTION_MASK) != 0;
 	}
 

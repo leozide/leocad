@@ -150,6 +150,13 @@ static bool lcIsGLExtensionSupported(const GLubyte* Extensions, const char* Name
 
 static void APIENTRY lcGLDebugCallback(GLenum Source, GLenum Type, GLuint Id, GLenum Severity, GLsizei Length, const GLchar* Message, GLvoid* UserParam)
 {
+	Q_UNUSED(Source);
+	Q_UNUSED(Type);
+	Q_UNUSED(Id);
+	Q_UNUSED(Severity);
+	Q_UNUSED(Length);
+	Q_UNUSED(UserParam);
+
 	qDebug() << Message;
 }
 

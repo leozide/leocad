@@ -80,7 +80,7 @@ void lcMemFile::Close()
 	mBuffer = NULL;
 }
 
-size_t lcMemFile::ReadBuffer(void* Buffer, long Bytes)
+size_t lcMemFile::ReadBuffer(void* Buffer, size_t Bytes)
 {
 	if (Bytes == 0 || mPosition > mFileSize)
 		return 0;
@@ -98,7 +98,7 @@ size_t lcMemFile::ReadBuffer(void* Buffer, long Bytes)
 	return BytesToRead;
 }
 
-size_t lcMemFile::WriteBuffer(const void* Buffer, long Bytes)
+size_t lcMemFile::WriteBuffer(const void* Buffer, size_t Bytes)
 {
 	if (Bytes == 0)
 		return 0;
@@ -238,14 +238,14 @@ void lcDiskFile::Close()
 	mFile = NULL;
 }
 
-size_t lcDiskFile::ReadBuffer(void* pBuf, long Bytes)
+size_t lcDiskFile::ReadBuffer(void* Buffer, size_t Bytes)
 {
-	return fread(pBuf, 1, Bytes, mFile);
+	return fread(Buffer, 1, Bytes, mFile);
 }
 
-size_t lcDiskFile::WriteBuffer(const void* pBuf, long Bytes)
+size_t lcDiskFile::WriteBuffer(const void* Buffer, size_t Bytes)
 {
-	return fwrite(pBuf, 1, Bytes, mFile);
+	return fwrite(Buffer, 1, Bytes, mFile);
 }
 
 bool lcDiskFile::Open(const QString& FileName, const char* Mode)

@@ -20,6 +20,6 @@ void lcResetCategories(lcArray<lcLibraryCategory>& Categories, bool BuiltInLibra
 bool lcLoadCategories(const QString& FileName, lcArray<lcLibraryCategory>& Categories);
 bool lcLoadCategories(lcFile& File, lcArray<lcLibraryCategory>& Categories);
 bool lcSaveCategories(const QString& FileName, const lcArray<lcLibraryCategory>& Categories);
-bool lcSaveCategories(lcFile& File, const lcArray<lcLibraryCategory>& Categories);
+bool lcSaveCategories(QTextStream& Stream, const lcArray<lcLibraryCategory>& Categories);
 
 #endif // _LC_CATEGORY_H_

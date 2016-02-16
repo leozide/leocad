@@ -118,7 +118,7 @@ void MinifigWizard::ParseSettings(lcFile& Settings)
 		char Line[1024];
 		bool FoundSection = false;
 		const char* SectionName = SectionNames[SectionIndex];
-		int SectionNameLength = strlen(SectionName);
+		size_t SectionNameLength = strlen(SectionName);
 
 		// Find start of section
 		while (Settings.ReadLine(Line, sizeof(Line)))

@@ -222,14 +222,3 @@ void lcSetProfileBuffer(LC_PROFILE_KEY Key, const QByteArray& Buffer)
 
 	Settings.setValue(QString("%1/%2").arg(Entry.mSection, Entry.mKey), Buffer);
 }
-
-void lcSetProfileBuffer(LC_PROFILE_KEY Key, const lcMemFile& Buffer) // todo: deprecated
-{
-	lcProfileEntry& Entry = gProfileEntries[Key];
-	QSettings Settings;
-	QByteArray Value = QByteArray::fromRawData((const char*)Buffer.mBuffer, Buffer.GetLength());
-
-	LC_ASSERT(Entry.mType == LC_PROFILE_ENTRY_BUFFER);
-
-	Settings.setValue(QString("%1/%2").arg(Entry.mSection, Entry.mKey), Value);
-}

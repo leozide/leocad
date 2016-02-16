@@ -149,7 +149,7 @@ bool Image::FileLoad(lcMemFile& File)
 	QImage Image;
 
 	unsigned char* Buffer = File.mBuffer + File.mPosition;
-	int BufferLength = File.mFileSize - File.mPosition;
+	size_t BufferLength = File.mFileSize - File.mPosition;
 
 	if (!Image.loadFromData(Buffer, BufferLength))
 		return false;

@@ -379,7 +379,7 @@ bool lcMesh::FileSave(lcMemFile& File)
 
 			if (Section.Texture)
 			{
-				int Length = strlen(Section.Texture->mName);
+				size_t Length = strlen(Section.Texture->mName);
 				File.WriteU16(Length);
 				File.WriteBuffer(Section.Texture->mName, Length);
 			}

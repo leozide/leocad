@@ -132,6 +132,8 @@ void lcQSelectDialog::on_selectInvert_clicked()
 
 void lcQSelectDialog::itemChanged(QTreeWidgetItem *item, int column)
 {
+	Q_UNUSED(column);
+
 	QTreeWidgetItem* ParentItem = item->parent();
 
 	if (!ParentItem)

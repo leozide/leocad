@@ -291,6 +291,8 @@ void lcQColorList::resizeEvent(QResizeEvent *event)
 
 void lcQColorList::paintEvent(QPaintEvent *event)
 {
+	Q_UNUSED(event);
+
 	QPainter painter(this);
 
 	painter.fillRect(rect(), palette().brush(QPalette::Base));

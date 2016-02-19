@@ -460,7 +460,8 @@ lcMatrix44 View::GetPieceInsertPosition() const
 
 	if (HitPiece)
 	{
-		lcVector3 Dist(0, 0, HitPiece->mPieceInfo->m_fDimensions[2] - CurPiece->m_fDimensions[5]);
+		const lcBoundingBox& BoundingBox = HitPiece->GetBoundingBox();
+		lcVector3 Dist(0, 0, BoundingBox.Max.z - BoundingBox.Min.z);
 		Dist = mModel->SnapPosition(Dist);
 
 		lcVector3 Position = lcMul31(Dist, HitPiece->mModelWorld);
@@ -475,7 +476,8 @@ lcMatrix44 View::GetPieceInsertPosition() const
 
 	lcVector3 Intersection;
 
-	if (lcLinePlaneIntersection(&Intersection, ClickPoints[0], ClickPoints[1], lcVector4(0, 0, 1, CurPiece->m_fDimensions[5])))
+	const lcBoundingBox& BoundingBox = CurPiece->GetBoundingBox();
+	if (lcLinePlaneIntersection(&Intersection, ClickPoints[0], ClickPoints[1], lcVector4(0, 0, 1, BoundingBox.Min.z)))
 	{
 		Intersection = mModel->SnapPosition(Intersection);
 		return lcMatrix44Translation(Intersection);
@@ -1240,9 +1242,9 @@ void View::DrawGrid()
 
 	const int Spacing = lcMax(Preferences.mGridLineSpacing, 1);
 	int MinX, MaxX, MinY, MaxY;
-	float BoundingBox[6];
+	lcVector3 Min(FLT_MAX, FLT_MAX, FLT_MAX), Max(-FLT_MAX, -FLT_MAX, -FLT_MAX);
 
-	bool GridSizeValid = mModel->GetPiecesBoundingBox(BoundingBox);
+	bool GridSizeValid = mModel->GetPiecesBoundingBox(Min, Max);
 
 	if (mTrackTool == LC_TRACKTOOL_INSERT)
 	{
@@ -1250,17 +1252,8 @@ void View::DrawGrid()
 
 		if (CurPiece)
 		{
-			lcVector3 Points[8] =
-			{
-				lcVector3(CurPiece->m_fDimensions[0], CurPiece->m_fDimensions[1], CurPiece->m_fDimensions[5]),
-				lcVector3(CurPiece->m_fDimensions[3], CurPiece->m_fDimensions[1], CurPiece->m_fDimensions[5]),
-				lcVector3(CurPiece->m_fDimensions[0], CurPiece->m_fDimensions[1], CurPiece->m_fDimensions[2]),
-				lcVector3(CurPiece->m_fDimensions[3], CurPiece->m_fDimensions[4], CurPiece->m_fDimensions[5]),
-				lcVector3(CurPiece->m_fDimensions[3], CurPiece->m_fDimensions[4], CurPiece->m_fDimensions[2]),
-				lcVector3(CurPiece->m_fDimensions[0], CurPiece->m_fDimensions[4], CurPiece->m_fDimensions[2]),
-				lcVector3(CurPiece->m_fDimensions[0], CurPiece->m_fDimensions[4], CurPiece->m_fDimensions[5]),
-				lcVector3(CurPiece->m_fDimensions[3], CurPiece->m_fDimensions[1], CurPiece->m_fDimensions[2])
-			};
+			lcVector3 Points[8];
+			lcGetBoxCorners(CurPiece->GetBoundingBox(), Points);
 
 			lcMatrix44 WorldMatrix = GetPieceInsertPosition();
 
@@ -1268,12 +1261,8 @@ void View::DrawGrid()
 			{
 				lcVector3 Point = lcMul31(Points[i], WorldMatrix);
 
-				if (Point[0] < BoundingBox[0]) BoundingBox[0] = Point[0];
-				if (Point[1] < BoundingBox[1]) BoundingBox[1] = Point[1];
-				if (Point[2] < BoundingBox[2]) BoundingBox[2] = Point[2];
-				if (Point[0] > BoundingBox[3]) BoundingBox[3] = Point[0];
-				if (Point[1] > BoundingBox[4]) BoundingBox[4] = Point[1];
-				if (Point[2] > BoundingBox[5]) BoundingBox[5] = Point[2];
+				Min = lcMin(Point, Min);
+				Max = lcMax(Point, Max);
 			}
 
 			GridSizeValid = true;
@@ -1282,10 +1271,10 @@ void View::DrawGrid()
 
 	if (GridSizeValid)
 	{
-		MinX = (int)(floorf(BoundingBox[0] / (20.0f * Spacing))) - 1;
-		MinY = (int)(floorf(BoundingBox[1] / (20.0f * Spacing))) - 1;
-		MaxX = (int)(ceilf(BoundingBox[3] / (20.0f * Spacing))) + 1;
-		MaxY = (int)(ceilf(BoundingBox[4] / (20.0f * Spacing))) + 1;
+		MinX = (int)(floorf(Min[0] / (20.0f * Spacing))) - 1;
+		MinY = (int)(floorf(Min[1] / (20.0f * Spacing))) - 1;
+		MaxX = (int)(ceilf(Max[0] / (20.0f * Spacing))) + 1;
+		MaxY = (int)(ceilf(Max[1] / (20.0f * Spacing))) + 1;
 
 		MinX = lcMin(MinX, -2);
 		MinY = lcMin(MinY, -2);

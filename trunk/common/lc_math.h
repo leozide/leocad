@@ -439,6 +439,18 @@ inline lcVector3 lcCross(const lcVector3& a, const lcVector3& b)
 	return lcVector3(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x);
 }
 
+template<>
+inline lcVector3 lcMin<lcVector3>(const lcVector3& a, const lcVector3& b)
+{
+	return lcVector3(a.x < b.x ? a.x : b.x, a.y < b.y ? a.y : b.y, a.z < b.z ? a.z : b.z);
+}
+
+template<>
+inline lcVector3 lcMax<lcVector3>(const lcVector3& a, const lcVector3& b)
+{
+	return lcVector3(a.x > b.x ? a.x : b.x, a.y > b.y ? a.y : b.y, a.z > b.z ? a.z : b.z);
+}
+
 inline lcVector4 operator+(const lcVector4& a, const lcVector4& b)
 {
 	return lcVector4(a.x + b.x, a.y + b.y, a.z + b.z, a.w + b.w);
@@ -1837,6 +1849,30 @@ inline bool lcBoundingBoxIntersectsVolume(const lcVector3& Min, const lcVector3&
 
 	return false;
 }
+
+struct lcBoundingBox
+{
+	lcVector3 Min;
+	lcVector3 Max;
+};
+
+inline void lcGetBoxCorners(const lcVector3& Min, const lcVector3& Max, lcVector3 Points[8])
+{
+	Points[0] = lcVector3(Max.x, Max.y, Min.z);
+	Points[1] = lcVector3(Min.x, Max.y, Min.z);
+	Points[2] = lcVector3(Max.x, Max.y, Max.z);
+	Points[3] = lcVector3(Min.x, Min.y, Min.z);
+	Points[4] = lcVector3(Min.x, Min.y, Max.z);
+	Points[5] = lcVector3(Max.x, Min.y, Max.z);
+	Points[6] = lcVector3(Max.x, Min.y, Min.z);
+	Points[7] = lcVector3(Min.x, Max.y, Max.z);
+}
+
+inline void lcGetBoxCorners(const lcBoundingBox& BoundingBox, lcVector3 Points[8])
+{
+	lcGetBoxCorners(BoundingBox.Min, BoundingBox.Max, Points);
+}
+
 /*
 bool SphereIntersectsVolume(const Vector3& Center, float Radius, const Vector4* Planes, int NumPlanes)
 {

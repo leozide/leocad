@@ -23,6 +23,17 @@ public:
 
 	QString GetSaveID() const;
 
+	const lcBoundingBox& GetBoundingBox() const
+	{
+		return mBoundingBox;
+	}
+
+	void SetBoundingBox(const lcVector3& Min, const lcVector3& Max)
+	{
+		mBoundingBox.Min = Min;
+		mBoundingBox.Max = Max;
+	}
+
 	lcMesh* GetMesh() const
 	{
 		return mMesh;
@@ -109,13 +120,6 @@ public:
 		return (m_strDescription[0] == '~');
 	}
 
-	lcVector3 GetCenter() const
-	{
-		return lcVector3((m_fDimensions[0] + m_fDimensions[3]) * 0.5f,
-		                 (m_fDimensions[1] + m_fDimensions[4]) * 0.5f,
-		                 (m_fDimensions[2] + m_fDimensions[5]) * 0.5f);
-	}
-
 	void ZoomExtents(const lcMatrix44& ProjectionMatrix, lcMatrix44& ViewMatrix, float* EyePos = NULL) const;
 	void AddRenderMesh(lcScene& Scene);
 	void AddRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, int ColorIndex, bool Focused, bool Selected);
@@ -135,7 +139,6 @@ public:
 	// Attributes
 	char m_strName[LC_PIECE_NAME_LEN];
 	char m_strDescription[128];
-	float m_fDimensions[6];
 	int mZipFileType;
 	int mZipFileIndex;
 	lcuint32 mFlags;
@@ -145,6 +148,7 @@ protected:
 	int mRefCount;
 	lcModel* mModel;
 	lcMesh* mMesh;
+	lcBoundingBox mBoundingBox;
 
 	void Load();
 	void Unload();

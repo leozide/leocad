@@ -21,6 +21,7 @@
 lcPiece::lcPiece(PieceInfo* Info)
 	: lcObject(LC_OBJECT_PIECE)
 {
+	mMesh = NULL;
 	SetPieceInfo(Info);
 	mState = 0;
 	mColorIndex = gDefaultColor;
@@ -39,6 +40,8 @@ lcPiece::~lcPiece()
 {
 	if (mPieceInfo)
 		mPieceInfo->Release(false);
+
+	delete mMesh;
 }
 
 void lcPiece::SetPieceInfo(PieceInfo* Info)
@@ -52,10 +55,13 @@ void lcPiece::SetPieceInfo(PieceInfo* Info)
 		mControlPoints.SetSize(2);
 		mControlPoints[0].Position = lcVector3(0, 0, -30);
 		mControlPoints[1].Position = lcVector3(0, 0, 30);
+		UpdateMesh();
 	}
 	else
 	{
 		mControlPoints.RemoveAll();
+		delete mMesh;
+		mMesh = NULL;
 	}
 }
 
@@ -320,7 +326,7 @@ bool lcPiece::FileLoad(lcFile& file)
     lcint32 i = -1;
     if (version > 6)
       file.ReadS32(&i, 1);
-    mGroup = (lcGroup*)(long)i;
+    mGroup = (lcGroup*)(quintptr)i;
   }
   else
   {
@@ -328,7 +334,7 @@ bool lcPiece::FileLoad(lcFile& file)
     if (ch == 0)
       mGroup = (lcGroup*)-1;
     else
-      mGroup = (lcGroup*)(long)ch;
+      mGroup = (lcGroup*)(quintptr)ch;
 
     file.ReadU8(&ch, 1);
     if (ch & 0x01)
@@ -464,8 +470,9 @@ void lcPiece::DrawInterface(lcContext* Context) const
 	float LineWidth = lcGetPreferences().mLineWidth;
 	Context->SetLineWidth(2.0f * LineWidth);
 
-	lcVector3 Min(mPieceInfo->m_fDimensions[3], mPieceInfo->m_fDimensions[4], mPieceInfo->m_fDimensions[5]);
-	lcVector3 Max(mPieceInfo->m_fDimensions[0], mPieceInfo->m_fDimensions[1], mPieceInfo->m_fDimensions[2]);
+	const lcBoundingBox& BoundingBox = GetBoundingBox();
+	const lcVector3& Min = BoundingBox.Min;
+	const lcVector3& Max = BoundingBox.Max;
 	lcVector3 Edge((Max - Min) * 0.33f);
 
 	float Verts[48][3] =
@@ -581,6 +588,47 @@ void lcPiece::DrawInterface(lcContext* Context) const
 	}
 }
 
+void lcPiece::AddRenderMeshes(lcScene& Scene, bool DrawInterface) const
+{
+	bool Focused, Selected;
+
+	if (DrawInterface)
+	{
+		Focused = IsFocused();
+		Selected = IsSelected();
+	}
+	else
+	{
+		Focused = false;
+		Selected = false;
+	}
+
+	if (!mMesh)
+		mPieceInfo->AddRenderMeshes(Scene, mModelWorld, mColorIndex, Focused, Selected);
+	else
+	{
+		lcRenderMesh RenderMesh;
+
+		RenderMesh.WorldMatrix = mModelWorld;
+		RenderMesh.Mesh = mMesh;
+		RenderMesh.ColorIndex = mColorIndex;
+		RenderMesh.State = Focused ? LC_RENDERMESH_FOCUSED : (Selected ? LC_RENDERMESH_SELECTED : LC_RENDERMESH_NONE);
+		RenderMesh.Distance = fabsf(lcMul31(mModelWorld[3], Scene.mViewMatrix).z);
+		RenderMesh.LodIndex = RenderMesh.Mesh->GetLodIndex(RenderMesh.Distance);
+
+//		bool Translucent = lcIsColorTranslucent(mColorIndex);
+
+//		if ((mFlags & (LC_PIECE_HAS_SOLID | LC_PIECE_HAS_LINES)) || ((mFlags & LC_PIECE_HAS_DEFAULT) && !Translucent))
+			Scene.mOpaqueMeshes.Add(RenderMesh);
+
+//		if ((mFlags & LC_PIECE_HAS_TRANSLUCENT) || ((mFlags & LC_PIECE_HAS_DEFAULT) && Translucent))
+//			Scene.mTranslucentMeshes.Add(RenderMesh);
+	}
+
+	if (Selected)
+		Scene.mInterfaceObjects.Add(this);
+}
+
 void lcPiece::Move(lcStep Step, bool AddKey, const lcVector3& Distance)
 {
 	lcuint32 Section = GetFocusSection();
@@ -599,6 +647,8 @@ void lcPiece::Move(lcStep Step, bool AddKey, const lcVector3& Distance)
 
 		if (ControlPointIndex >= 0 && ControlPointIndex < mControlPoints.GetSize())
 			mControlPoints[ControlPointIndex].Position += Distance;
+
+		UpdateMesh();
 	}
 }
 
@@ -655,30 +705,29 @@ bool lcPiece::IsVisible(lcStep Step)
 	return (mStepShow <= Step) && (mStepHide > Step);
 }
 
-void lcPiece::CompareBoundingBox(float box[6])
+const lcBoundingBox& lcPiece::GetBoundingBox() const
 {
-	lcVector3 Points[8] =
-	{
-		lcVector3(mPieceInfo->m_fDimensions[0], mPieceInfo->m_fDimensions[1], mPieceInfo->m_fDimensions[5]),
-		lcVector3(mPieceInfo->m_fDimensions[3], mPieceInfo->m_fDimensions[1], mPieceInfo->m_fDimensions[5]),
-		lcVector3(mPieceInfo->m_fDimensions[0], mPieceInfo->m_fDimensions[1], mPieceInfo->m_fDimensions[2]),
-		lcVector3(mPieceInfo->m_fDimensions[3], mPieceInfo->m_fDimensions[4], mPieceInfo->m_fDimensions[5]),
-		lcVector3(mPieceInfo->m_fDimensions[3], mPieceInfo->m_fDimensions[4], mPieceInfo->m_fDimensions[2]),
-		lcVector3(mPieceInfo->m_fDimensions[0], mPieceInfo->m_fDimensions[4], mPieceInfo->m_fDimensions[2]),
-		lcVector3(mPieceInfo->m_fDimensions[0], mPieceInfo->m_fDimensions[4], mPieceInfo->m_fDimensions[5]),
-		lcVector3(mPieceInfo->m_fDimensions[3], mPieceInfo->m_fDimensions[1], mPieceInfo->m_fDimensions[2])
-	};
+	if (!mMesh)
+		return mPieceInfo->GetBoundingBox();
+	else
+		return mMesh->mBoundingBox;
+}
+
+void lcPiece::CompareBoundingBox(lcVector3& Min, lcVector3& Max) const
+{
+	lcVector3 Points[8];
+
+	if (!mMesh)
+		lcGetBoxCorners(GetBoundingBox(), Points);
+	else
+		lcGetBoxCorners(mMesh->mBoundingBox, Points);
 
 	for (int i = 0; i < 8; i++)
 	{
 		lcVector3 Point = lcMul31(Points[i], mModelWorld);
 
-		if (Point[0] < box[0]) box[0] = Point[0];
-		if (Point[1] < box[1]) box[1] = Point[1];
-		if (Point[2] < box[2]) box[2] = Point[2];
-		if (Point[0] > box[3]) box[3] = Point[0];
-		if (Point[1] > box[4]) box[4] = Point[1];
-		if (Point[2] > box[5]) box[5] = Point[2];
+		Min = lcMin(Point, Min);
+		Max = lcMax(Point, Max);
 	}
 }
 
@@ -693,4 +742,51 @@ void lcPiece::UpdatePosition(lcStep Step)
 	lcMatrix33 Rotation = CalculateKey(mRotationKeys, Step);
 
 	mModelWorld = lcMatrix44(Rotation, Position);
+}
+
+void lcPiece::UpdateMesh()
+{
+	delete mMesh;
+
+	lcuint16 NumSections[LC_NUM_MESH_LODS] = { 1, 1 };
+
+	mMesh = new lcMesh();
+	mMesh->Create(NumSections, 2, 0, 2);
+
+	NumSections[0] = 2;
+	NumSections[1] = 2;
+
+	for (int LodIdx = 0; LodIdx < LC_NUM_MESH_LODS; LodIdx++)
+	{
+		lcMeshSection& Section = mMesh->mLods[LodIdx].Sections[0];
+
+		Section.ColorIndex = gDefaultColor;
+		Section.PrimitiveType = GL_LINES;
+		Section.NumIndices = 2;
+		Section.Texture = NULL;
+		Section.IndexOffset = 0;
+	}
+
+	lcuint16* Index = (lcuint16*)mMesh->mIndexData;
+	*Index++ = 0;
+	*Index++ = 1;
+
+	lcVertex* Verts = (lcVertex*)mMesh->mVertexData;
+	Verts[0].Position = mControlPoints[0].Position;
+	Verts[1].Position = mControlPoints[1].Position;
+
+	lcVector3 Min(FLT_MAX, FLT_MAX, FLT_MAX), Max(-FLT_MAX, -FLT_MAX, -FLT_MAX);
+
+	Min = lcMin(mControlPoints[0].Position, Min);
+	Min = lcMin(mControlPoints[1].Position, Min);
+
+	Max = lcMax(mControlPoints[0].Position, Max);
+	Max = lcMax(mControlPoints[1].Position, Max);
+
+	Min -= lcVector3(5.0f, 5.0f, 5.0f);
+	Max += lcVector3(5.0f, 5.0f, 5.0f);
+
+	mMesh->mRadius = lcLength(Max - Min) / 2.0f;
+	mMesh->mBoundingBox.Min = Min;
+	mMesh->mBoundingBox.Max = Max;
 }

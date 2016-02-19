@@ -232,12 +232,12 @@ void lcModel::UpdatePieceInfo(lcArray<lcModel*>& UpdatedModels)
 
 	if (mPieces.IsEmpty() && !Mesh)
 	{
-		memset(mPieceInfo->m_fDimensions, 0, sizeof(mPieceInfo->m_fDimensions));
+		mPieceInfo->SetBoundingBox(lcVector3(0.0f, 0.0f, 0.0f), lcVector3(0.0f, 0.0f, 0.0f));
 		return;
 	}
 
-	float BoundingBox[6] = { FLT_MAX, FLT_MAX, FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX };
-	
+	lcVector3 Min(FLT_MAX, FLT_MAX, FLT_MAX), Max(-FLT_MAX, -FLT_MAX, -FLT_MAX);
+
 	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 	{
 		lcPiece* Piece = mPieces[PieceIdx];
@@ -245,33 +245,17 @@ void lcModel::UpdatePieceInfo(lcArray<lcModel*>& UpdatedModels)
 		if (Piece->GetStepHide() == LC_STEP_MAX)
 		{
 			Piece->mPieceInfo->UpdateBoundingBox(UpdatedModels);
-			Piece->CompareBoundingBox(BoundingBox);
+			Piece->CompareBoundingBox(Min, Max);
 		}
 	}
 
 	if (Mesh)
 	{
-		int NumVerts = Mesh->mNumVertices;
-		float* Vertex = (float*)Mesh->mVertexData;
-
-		for (int VertexIdx = 0; VertexIdx < NumVerts; VertexIdx++)
-		{
-			if (Vertex[0] < BoundingBox[0]) BoundingBox[0] = Vertex[0];
-			if (Vertex[1] < BoundingBox[1]) BoundingBox[1] = Vertex[1];
-			if (Vertex[2] < BoundingBox[2]) BoundingBox[2] = Vertex[2];
-			if (Vertex[0] > BoundingBox[3]) BoundingBox[3] = Vertex[0];
-			if (Vertex[1] > BoundingBox[4]) BoundingBox[4] = Vertex[1];
-			if (Vertex[2] > BoundingBox[5]) BoundingBox[5] = Vertex[2];
-			Vertex += 3;
-		}
+		Min = lcMin(Min, Mesh->mBoundingBox.Min);
+		Max = lcMax(Max, Mesh->mBoundingBox.Max);
 	}
 
-	mPieceInfo->m_fDimensions[0] = BoundingBox[3];
-	mPieceInfo->m_fDimensions[1] = BoundingBox[4];
-	mPieceInfo->m_fDimensions[2] = BoundingBox[5];
-	mPieceInfo->m_fDimensions[3] = BoundingBox[0];
-	mPieceInfo->m_fDimensions[4] = BoundingBox[1];
-	mPieceInfo->m_fDimensions[5] = BoundingBox[2];
+	mPieceInfo->SetBoundingBox(Min, Max);
 }
 
 void lcModel::SaveLDraw(QTextStream& Stream, bool SelectedOnly) const
@@ -972,27 +956,8 @@ void lcModel::GetScene(lcScene& Scene, lcCamera* ViewCamera, bool DrawInterface)
 	{
 		lcPiece* Piece = mPieces[PieceIdx];
 
-		if (!Piece->IsVisible(mCurrentStep))
-			continue;
-
-		PieceInfo* Info = Piece->mPieceInfo;
-		bool Focused, Selected;
-
-		if (DrawInterface)
-		{
-			Focused = Piece->IsFocused();
-			Selected = Piece->IsSelected();
-		}
-		else
-		{
-			Focused = false;
-			Selected = false;
-		}
-
-		Info->AddRenderMeshes(Scene, Piece->mModelWorld, Piece->mColorIndex, Focused, Selected);
-
-		if (Selected)
-			Scene.mInterfaceObjects.Add(Piece);
+		if (Piece->IsVisible(mCurrentStep))
+			Piece->AddRenderMeshes(Scene, DrawInterface);
 	}
 
 	if (DrawInterface)
@@ -1858,9 +1823,10 @@ void lcModel::AddPiece()
 
 	lcMatrix44 WorldMatrix;
 
-	if (Last != NULL)
+	if (Last)
 	{
-		lcVector3 Dist(0, 0, Last->mPieceInfo->m_fDimensions[2] - CurPiece->m_fDimensions[5]);
+		const lcBoundingBox& BoundingBox = Last->GetBoundingBox();
+		lcVector3 Dist(0, 0, BoundingBox.Max.z - BoundingBox.Min.z);
 		Dist = SnapPosition(Dist);
 
 		WorldMatrix = Last->mModelWorld;
@@ -1868,7 +1834,8 @@ void lcModel::AddPiece()
 	}
 	else
 	{
-		WorldMatrix = lcMatrix44Translation(lcVector3(0.0f, 0.0f, -CurPiece->m_fDimensions[5]));
+		const lcBoundingBox& BoundingBox = CurPiece->GetBoundingBox();
+		WorldMatrix = lcMatrix44Translation(lcVector3(0.0f, 0.0f, -BoundingBox.Min.z));
 	}
 
 	lcPiece* Piece = new lcPiece(CurPiece);
@@ -2339,7 +2306,7 @@ void lcModel::RotateSelectedPieces(const lcVector3& Angles, bool Relative, bool 
 	}
 	else
 	{
-		float Bounds[6] = { FLT_MAX, FLT_MAX, FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX };
+		lcVector3 Min(FLT_MAX, FLT_MAX, FLT_MAX), Max(-FLT_MAX, -FLT_MAX, -FLT_MAX);
 		lcPiece* Focus = NULL;
 		lcPiece* Selected = NULL;
 		int NumSelected = 0;
@@ -2354,7 +2321,7 @@ void lcModel::RotateSelectedPieces(const lcVector3& Angles, bool Relative, bool 
 			if (Piece->IsFocused() && gMainWindow->GetRelativeTransform())
 				Focus = Piece;
 
-			Piece->CompareBoundingBox(Bounds);
+			Piece->CompareBoundingBox(Min, Max);
 
 			Selected = Piece;
 			NumSelected++;
@@ -2367,7 +2334,7 @@ void lcModel::RotateSelectedPieces(const lcVector3& Angles, bool Relative, bool 
 		else if (NumSelected == 1)
 			Center = Selected->mModelWorld.GetTranslation();
 		else
-			Center = lcVector3((Bounds[0] + Bounds[3]) / 2.0f, (Bounds[1] + Bounds[4]) / 2.0f, (Bounds[2] + Bounds[5]) / 2.0f);
+			Center = (Min + Max) / 2.0f;
 
 		lcMatrix33 WorldToFocusMatrix;
 
@@ -2671,7 +2638,7 @@ lcModel* lcModel::GetFirstSelectedSubmodel() const
 
 bool lcModel::GetPieceFocusOrSelectionCenter(lcVector3& Center) const
 {
-	float Bounds[6] = { FLT_MAX, FLT_MAX, FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX };
+	lcVector3 Min(FLT_MAX, FLT_MAX, FLT_MAX), Max(-FLT_MAX, -FLT_MAX, -FLT_MAX);
 	lcPiece* Selected = NULL;
 	int NumSelected = 0;
 
@@ -2687,7 +2654,7 @@ bool lcModel::GetPieceFocusOrSelectionCenter(lcVector3& Center) const
 
 		if (Piece->IsSelected())
 		{
-			Piece->CompareBoundingBox(Bounds);
+			Piece->CompareBoundingBox(Min, Max);
 			Selected = Piece;
 			NumSelected++;
 		}
@@ -2696,7 +2663,7 @@ bool lcModel::GetPieceFocusOrSelectionCenter(lcVector3& Center) const
 	if (NumSelected == 1)
 		Center = Selected->mModelWorld.GetTranslation();
 	else if (NumSelected)
-		Center = lcVector3((Bounds[0] + Bounds[3]) * 0.5f, (Bounds[1] + Bounds[4]) * 0.5f, (Bounds[2] + Bounds[5]) * 0.5f);
+		Center = (Min + Max) / 2.0f;
 	else
 		Center = lcVector3(0.0f, 0.0f, 0.0f);
 
@@ -2731,10 +2698,10 @@ lcVector3 lcModel::GetSelectionOrModelCenter() const
 
 	if (!GetSelectionCenter(Center))
 	{
-		float BoundingBox[6];
+		lcVector3 Min(FLT_MAX, FLT_MAX, FLT_MAX), Max(-FLT_MAX, -FLT_MAX, -FLT_MAX);
 
-		if (GetPiecesBoundingBox(BoundingBox))
-			Center = lcVector3((BoundingBox[0] + BoundingBox[3]) / 2, (BoundingBox[1] + BoundingBox[4]) / 2, (BoundingBox[2] + BoundingBox[5]) / 2);
+		if (GetPiecesBoundingBox(Min, Max))
+			Center = (Min + Max) / 2.0f;
 		else
 			Center = lcVector3(0.0f, 0.0f, 0.0f);
 	}
@@ -2760,7 +2727,7 @@ bool lcModel::GetFocusPosition(lcVector3& Position) const
 
 bool lcModel::GetSelectionCenter(lcVector3& Center) const
 {
-	float Bounds[6] = { FLT_MAX, FLT_MAX, FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX };
+	lcVector3 Min(FLT_MAX, FLT_MAX, FLT_MAX), Max(-FLT_MAX, -FLT_MAX, -FLT_MAX);
 	lcPiece* SelectedPiece = NULL;
 	bool SinglePieceSelected = true;
 	bool Selected = false;
@@ -2771,7 +2738,7 @@ bool lcModel::GetSelectionCenter(lcVector3& Center) const
 
 		if (Piece->IsSelected())
 		{
-			Piece->CompareBoundingBox(Bounds);
+			Piece->CompareBoundingBox(Min, Max);
 			Selected = true;
 
 			if (!SelectedPiece)
@@ -2787,7 +2754,7 @@ bool lcModel::GetSelectionCenter(lcVector3& Center) const
 
 		if (Camera->IsSelected())
 		{
-			Camera->CompareBoundingBox(Bounds);
+			Camera->CompareBoundingBox(Min, Max);
 			Selected = true;
 			SinglePieceSelected = false;
 		}
@@ -2799,7 +2766,7 @@ bool lcModel::GetSelectionCenter(lcVector3& Center) const
 
 		if (Light->IsSelected())
 		{
-			Light->CompareBoundingBox(Bounds);
+			Light->CompareBoundingBox(Min, Max);
 			Selected = true;
 			SinglePieceSelected = false;
 		}
@@ -2808,21 +2775,17 @@ bool lcModel::GetSelectionCenter(lcVector3& Center) const
 	if (SelectedPiece && SinglePieceSelected)
 		Center = SelectedPiece->GetSectionPosition(LC_PIECE_SECTION_POSITION);
 	else if (Selected)
-		Center = lcVector3((Bounds[0] + Bounds[3]) * 0.5f, (Bounds[1] + Bounds[4]) * 0.5f, (Bounds[2] + Bounds[5]) * 0.5f);
+		Center = (Min + Max) / 2.0f;
 	else
 		Center = lcVector3(0.0f, 0.0f, 0.0f);
 
 	return Selected;
 }
 
-bool lcModel::GetPiecesBoundingBox(float BoundingBox[6]) const
+bool lcModel::GetPiecesBoundingBox(lcVector3& Min, lcVector3& Max) const
 {
-	BoundingBox[0] = FLT_MAX;
-	BoundingBox[1] = FLT_MAX;
-	BoundingBox[2] = FLT_MAX;
-	BoundingBox[3] = -FLT_MAX;
-	BoundingBox[4] = -FLT_MAX;
-	BoundingBox[5] = -FLT_MAX;
+	Min = lcVector3(FLT_MAX, FLT_MAX, FLT_MAX);
+	Max = lcVector3(-FLT_MAX, -FLT_MAX, -FLT_MAX);
 
 	if (mPieces.IsEmpty())
 		return false;
@@ -2832,7 +2795,7 @@ bool lcModel::GetPiecesBoundingBox(float BoundingBox[6]) const
 		lcPiece* Piece = mPieces[PieceIdx];
 
 		if (Piece->IsVisible(mCurrentStep))
-			Piece->CompareBoundingBox(BoundingBox);
+			Piece->CompareBoundingBox(Min, Max);
 	}
 
 	return true;
@@ -3564,10 +3527,10 @@ void lcModel::LookAt(lcCamera* Camera)
 
 	if (!GetSelectionCenter(Center))
 	{
-		float BoundingBox[6];
+		lcVector3 Min(FLT_MAX, FLT_MAX, FLT_MAX), Max(-FLT_MAX, -FLT_MAX, -FLT_MAX);
 
-		if (GetPiecesBoundingBox(BoundingBox))
-			Center = lcVector3((BoundingBox[0] + BoundingBox[3]) / 2, (BoundingBox[1] + BoundingBox[4]) / 2, (BoundingBox[2] + BoundingBox[5]) / 2);
+		if (GetPiecesBoundingBox(Min, Max))
+			Center = (Min + Max) / 2.0f;
 		else
 			Center = lcVector3(0.0f, 0.0f, 0.0f);
 	}
@@ -3583,24 +3546,15 @@ void lcModel::LookAt(lcCamera* Camera)
 
 void lcModel::ZoomExtents(lcCamera* Camera, float Aspect)
 {
-	float BoundingBox[6];
+	lcVector3 Min(FLT_MAX, FLT_MAX, FLT_MAX), Max(-FLT_MAX, -FLT_MAX, -FLT_MAX);
 
-	if (!GetPiecesBoundingBox(BoundingBox))
+	if (!GetPiecesBoundingBox(Min, Max))
 		return;
 
-	lcVector3 Center((BoundingBox[0] + BoundingBox[3]) / 2, (BoundingBox[1] + BoundingBox[4]) / 2, (BoundingBox[2] + BoundingBox[5]) / 2);
+	lcVector3 Center = (Min + Max) / 2.0f;
 
-	lcVector3 Points[8] =
-	{
-		lcVector3(BoundingBox[0], BoundingBox[1], BoundingBox[5]),
-		lcVector3(BoundingBox[3], BoundingBox[1], BoundingBox[5]),
-		lcVector3(BoundingBox[0], BoundingBox[1], BoundingBox[2]),
-		lcVector3(BoundingBox[3], BoundingBox[4], BoundingBox[5]),
-		lcVector3(BoundingBox[3], BoundingBox[4], BoundingBox[2]),
-		lcVector3(BoundingBox[0], BoundingBox[4], BoundingBox[2]),
-		lcVector3(BoundingBox[0], BoundingBox[4], BoundingBox[5]),
-		lcVector3(BoundingBox[3], BoundingBox[1], BoundingBox[2])
-	};
+	lcVector3 Points[8];
+	lcGetBoxCorners(Min, Max, Points);
 
 	Camera->ZoomExtents(Aspect, Center, Points, 8, mCurrentStep, gMainWindow->GetAddKeys());
 

@@ -342,6 +342,8 @@ public:
 	virtual void BoxTest(lcObjectBoxTest& ObjectBoxTest) const;
 	virtual void DrawInterface(lcContext* Context) const;
 
+	void AddRenderMeshes(lcScene& Scene, bool DrawInterface) const;
+
 	void InsertTime(lcStep Start, lcStep Time);
 	void RemoveTime(lcStep Start, lcStep Time);
 
@@ -361,7 +363,8 @@ public:
 	const char* GetName() const;
 	bool IsVisible(lcStep Step);
 	void Initialize(const lcMatrix44& WorldMatrix, lcStep Step);
-	void CompareBoundingBox(float box[6]);
+	const lcBoundingBox& GetBoundingBox() const;
+	void CompareBoundingBox(lcVector3& Min, lcVector3& Max) const;
 	void SetPieceInfo(PieceInfo* Info);
 	bool FileLoad(lcFile& file);
 
@@ -469,6 +472,8 @@ public:
 	lcMatrix44 mPivotMatrix;
 
 protected:
+	void UpdateMesh();
+
 	bool IsPivotPointVisible() const
 	{
 		return (mState & LC_PIECE_PIVOT_POINT_VALID) && IsFocused();
@@ -484,7 +489,6 @@ protected:
 
 	int mFileLine;
 
-	// Atributes
 	lcGroup* mGroup;
 
 	lcStep mStepShow;
@@ -492,6 +496,7 @@ protected:
 
 	lcuint8 mState;
 	lcArray<lcPieceControlPoint> mControlPoints;
+	lcMesh* mMesh;
 };
 
 #endif // _PIECE_H_

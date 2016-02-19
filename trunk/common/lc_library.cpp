@@ -23,7 +23,7 @@
 #  define DEF_MEM_LEVEL  MAX_MEM_LEVEL
 #endif
 
-#define LC_LIBRARY_CACHE_VERSION   0x0104
+#define LC_LIBRARY_CACHE_VERSION   0x0105
 #define LC_LIBRARY_CACHE_ARCHIVE   0x0001
 #define LC_LIBRARY_CACHE_DIRECTORY 0x0002
 
@@ -313,7 +313,7 @@ bool lcPiecesLibrary::OpenArchive(lcFile* File, const char* FileName, lcZipFileT
 void lcPiecesLibrary::ReadArchiveDescriptions(const QString& OfficialFileName, const QString& UnofficialFileName)
 {
 	QFileInfo OfficialInfo(OfficialFileName);
-	QFileInfo UnofficialInfo(OfficialFileName);
+	QFileInfo UnofficialInfo(UnofficialFileName);
 	
 	mArchiveCheckSum[0] = OfficialInfo.size();
 	mArchiveCheckSum[1] = OfficialInfo.lastModified().toMSecsSinceEpoch();
@@ -690,7 +690,7 @@ bool lcPiecesLibrary::WriteCacheFile(const QString& FileName, lcMemFile& CacheFi
 	if (File.write((char*)&mArchiveCheckSum, sizeof(mArchiveCheckSum)) == -1)
 		return false;
 
-	quint32 UncompressedSize = CacheFile.GetLength();
+	quint32 UncompressedSize = (quint32)CacheFile.GetLength();
 
 	if (File.write((char*)&UncompressedSize, sizeof(UncompressedSize)) == -1)
 		return false;
@@ -714,7 +714,7 @@ bool lcPiecesLibrary::WriteCacheFile(const QString& FileName, lcMemFile& CacheFi
 
 	do
 	{
-		uInt Read = lcMin(CacheFile.GetLength() - (BufferIn - CacheFile.mBuffer), BufferSize);
+		uInt Read = (uInt)lcMin(CacheFile.GetLength() - (BufferIn - CacheFile.mBuffer), BufferSize);
 		Stream.avail_in = Read;
 		Stream.next_in = BufferIn;
 		Crc32 = crc32(Crc32, BufferIn, Read);
@@ -777,7 +777,7 @@ bool lcPiecesLibrary::SaveCacheIndex(const QString& FileName)
 	for (int PieceInfoIndex = 0; PieceInfoIndex < mPieces.GetSize(); PieceInfoIndex++)
 	{
 		PieceInfo* Info = mPieces[PieceInfoIndex];
-		quint8 Length = strlen(Info->m_strDescription);
+		quint8 Length = (quint8)strlen(Info->m_strDescription);
 
 		if (IndexFile.WriteBuffer((char*)&Length, sizeof(Length)) == 0)
 			return false;
@@ -806,12 +806,6 @@ bool lcPiecesLibrary::LoadCachePiece(PieceInfo* Info)
 
 	Info->mFlags = Flags;
 
-	if (MeshData.ReadBuffer((char*)Info->m_fDimensions, sizeof(Info->m_fDimensions)) == 0) // todo: move dimensions to the mesh
-		return false;
-
-	if (MeshData.ReadBuffer((char*)&Info->GetMesh()->mRadius, sizeof(float)) == 0)
-		return false;
-
 	return Mesh->FileLoad(MeshData);
 }
 
@@ -821,12 +815,6 @@ bool lcPiecesLibrary::SaveCachePiece(PieceInfo* Info)
 
 	quint32 Flags = Info->mFlags;
 	if (MeshData.WriteBuffer((char*)&Flags, sizeof(Flags)) == 0)
-		return false;
-
-	if (MeshData.WriteBuffer((char*)Info->m_fDimensions, sizeof(Info->m_fDimensions)) == 0)
-		return false;
-
-	if (MeshData.WriteBuffer((char*)&Info->GetMesh()->mRadius, sizeof(float)) == 0)
 		return false;
 
 	if (!Info->GetMesh()->FileSave(MeshData))
@@ -1026,12 +1014,8 @@ void lcPiecesLibrary::CreateMesh(PieceInfo* Info, lcLibraryMeshData& MeshData)
 
 			DstPosition = lcVector3(SrcPosition.x, SrcPosition.z, -SrcPosition.y);
 
-			Min.x = lcMin(Min.x, DstPosition.x);
-			Min.y = lcMin(Min.y, DstPosition.y);
-			Min.z = lcMin(Min.z, DstPosition.z);
-			Max.x = lcMax(Max.x, DstPosition.x);
-			Max.y = lcMax(Max.y, DstPosition.y);
-			Max.z = lcMax(Max.z, DstPosition.z);
+			Min = lcMin(Min, DstPosition);
+			Max = lcMax(Max, DstPosition);
 		}
 	}
 
@@ -1052,21 +1036,13 @@ void lcPiecesLibrary::CreateMesh(PieceInfo* Info, lcLibraryMeshData& MeshData)
 			DstPosition = lcVector3(SrcPosition.x, SrcPosition.z, -SrcPosition.y);
 			DstVertex.TexCoord = SrcVertex.TexCoord;
 
-			Min.x = lcMin(Min.x, DstPosition.x);
-			Min.y = lcMin(Min.y, DstPosition.y);
-			Min.z = lcMin(Min.z, DstPosition.z);
-			Max.x = lcMax(Max.x, DstPosition.x);
-			Max.y = lcMax(Max.y, DstPosition.y);
-			Max.z = lcMax(Max.z, DstPosition.z);
+			Min = lcMin(Min, DstPosition);
+			Max = lcMax(Max, DstPosition);
 		}
 	}
 
-	Info->m_fDimensions[0] = Max.x;
-	Info->m_fDimensions[1] = Max.y;
-	Info->m_fDimensions[2] = Max.z;
-	Info->m_fDimensions[3] = Min.x;
-	Info->m_fDimensions[4] = Min.y;
-	Info->m_fDimensions[5] = Min.z;
+	Mesh->mBoundingBox.Max = Max;
+	Mesh->mBoundingBox.Min = Min;
 	Mesh->mRadius = lcLength((Max - Min) / 2.0f);
 
 	NumIndices = 0;

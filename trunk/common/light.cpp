@@ -93,7 +93,7 @@ void lcLight::CreateName(const lcArray<lcLight*>& Lights)
 	sprintf(m_strName, "Light #%.2d", max+1);
 }
 
-void lcLight::CompareBoundingBox(float box[6])
+void lcLight::CompareBoundingBox(lcVector3& Min, lcVector3& Max)
 {
 	const lcVector3 Points[2] =
 	{
@@ -104,12 +104,10 @@ void lcLight::CompareBoundingBox(float box[6])
 	{
 		const lcVector3& Point = Points[i];
 
-		if (Point[0] < box[0]) box[0] = Point[0];
-		if (Point[1] < box[1]) box[1] = Point[1];
-		if (Point[2] < box[2]) box[2] = Point[2];
-		if (Point[0] > box[3]) box[3] = Point[0];
-		if (Point[1] > box[4]) box[4] = Point[1];
-		if (Point[2] > box[5]) box[5] = Point[2];
+		// TODO: this should check the entire mesh
+
+		Min = lcMin(Point, Min);
+		Max = lcMax(Point, Max);
 	}
 }
 

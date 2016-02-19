@@ -268,7 +268,7 @@ public:
 	bool FileLoad(lcFile& file);
 	void Select(bool bSelecting, bool bFocus, bool bMultiple);
 
-	void CompareBoundingBox(float box[6]);
+	void CompareBoundingBox(lcVector3& Min, lcVector3& Max);
 	void UpdatePosition(lcStep Step);
 	void CopyPosition(const lcCamera* camera);
 

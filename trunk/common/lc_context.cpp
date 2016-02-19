@@ -1085,7 +1085,7 @@ void lcContext::DrawTranslucentMeshes(const lcArray<lcRenderMesh>& TranslucentMe
 	glDisable(GL_BLEND);
 }
 
-void lcContext::DrawInterfaceObjects(const lcArray<lcObject*>& InterfaceObjects)
+void lcContext::DrawInterfaceObjects(const lcArray<const lcObject*>& InterfaceObjects)
 {
 	for (int ObjectIdx = 0; ObjectIdx < InterfaceObjects.GetSize(); ObjectIdx++)
 		InterfaceObjects[ObjectIdx]->DrawInterface(this);

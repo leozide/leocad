@@ -38,12 +38,8 @@ QString PieceInfo::GetSaveID() const
 
 void PieceInfo::SetPlaceholder()
 {
-	m_fDimensions[0] = 10.0f;
-	m_fDimensions[1] = 10.0f;
-	m_fDimensions[2] = 4.0f;
-	m_fDimensions[3] = -10.0f;
-	m_fDimensions[4] = -10.0f;
-	m_fDimensions[5] = -24.0f;
+	mBoundingBox.Min = lcVector3(-10.0f, -10.0f, -24.0f);
+	mBoundingBox.Max = lcVector3(10.0f, 10.0f, 4.0f);
 
 	mFlags = LC_PIECE_PLACEHOLDER | LC_PIECE_HAS_DEFAULT | LC_PIECE_HAS_LINES;
 	mModel = NULL;
@@ -71,7 +67,7 @@ void PieceInfo::SetModel(lcModel* Model, bool UpdateMesh)
 	{
 		lcMemFile PieceFile;
 
-		foreach (const QString& Line, MeshLines)
+		foreach(const QString& Line, MeshLines)
 		{
 			QByteArray Buffer = Line.toLatin1();
 			PieceFile.WriteBuffer(Buffer.constData(), Buffer.size());
@@ -121,9 +117,15 @@ void PieceInfo::Load()
 	if (mFlags & LC_PIECE_MODEL)
 		return;
 	else if (mFlags & LC_PIECE_PLACEHOLDER)
+	{
 		mFlags |= LC_PIECE_HAS_DEFAULT | LC_PIECE_HAS_LINES;
+		mBoundingBox = gPlaceholderMesh->mBoundingBox;
+	}
 	else
+	{
 		lcGetPiecesLibrary()->LoadPiece(this);
+		mBoundingBox = mMesh->mBoundingBox;
+	}
 }
 
 void PieceInfo::Unload()
@@ -158,8 +160,8 @@ bool PieceInfo::MinIntersectDist(const lcMatrix44& WorldMatrix, const lcVector3&
 	lcVector3 Start = lcMul31(WorldStart, InverseWorldMatrix);
 	lcVector3 End = lcMul31(WorldEnd, InverseWorldMatrix);
 
-	lcVector3 Min(m_fDimensions[3], m_fDimensions[4], m_fDimensions[5]);
-	lcVector3 Max(m_fDimensions[0], m_fDimensions[1], m_fDimensions[2]);
+	const lcVector3& Min = mBoundingBox.Min;
+	const lcVector3& Max = mBoundingBox.Max;
 
 	float Distance;
 	if (!lcBoundingBoxRayIntersectDistance(Min, Max, Start, End, &Distance, NULL) || (Distance >= MinDistance))
@@ -196,17 +198,8 @@ bool PieceInfo::BoxTest(const lcMatrix44& WorldMatrix, const lcVector4 WorldPlan
 		LocalPlanes[PlaneIdx] = lcVector4(PlaneNormal, WorldPlanes[PlaneIdx][3] - lcDot3(InverseWorldMatrix[3], PlaneNormal));
 	}
 
-	lcVector3 Box[NumCorners] =
-	{
-		lcVector3(m_fDimensions[0], m_fDimensions[1], m_fDimensions[5]),
-		lcVector3(m_fDimensions[3], m_fDimensions[1], m_fDimensions[5]),
-		lcVector3(m_fDimensions[0], m_fDimensions[1], m_fDimensions[2]),
-		lcVector3(m_fDimensions[3], m_fDimensions[4], m_fDimensions[5]),
-		lcVector3(m_fDimensions[3], m_fDimensions[4], m_fDimensions[2]),
-		lcVector3(m_fDimensions[0], m_fDimensions[4], m_fDimensions[2]),
-		lcVector3(m_fDimensions[0], m_fDimensions[4], m_fDimensions[5]),
-		lcVector3(m_fDimensions[3], m_fDimensions[1], m_fDimensions[2])
-	};
+	lcVector3 Box[NumCorners];
+	lcGetBoxCorners(mBoundingBox, Box);
 
 	int Outcodes[NumCorners];
 
@@ -250,19 +243,10 @@ bool PieceInfo::BoxTest(const lcMatrix44& WorldMatrix, const lcVector4 WorldPlan
 // Zoom extents for the preview window and print catalog
 void PieceInfo::ZoomExtents(const lcMatrix44& ProjectionMatrix, lcMatrix44& ViewMatrix, float* EyePos) const
 {
-	lcVector3 Points[8] =
-	{
-		lcVector3(m_fDimensions[0], m_fDimensions[1], m_fDimensions[5]),
-		lcVector3(m_fDimensions[3], m_fDimensions[1], m_fDimensions[5]),
-		lcVector3(m_fDimensions[0], m_fDimensions[1], m_fDimensions[2]),
-		lcVector3(m_fDimensions[3], m_fDimensions[4], m_fDimensions[5]),
-		lcVector3(m_fDimensions[3], m_fDimensions[4], m_fDimensions[2]),
-		lcVector3(m_fDimensions[0], m_fDimensions[4], m_fDimensions[2]),
-		lcVector3(m_fDimensions[0], m_fDimensions[4], m_fDimensions[5]),
-		lcVector3(m_fDimensions[3], m_fDimensions[1], m_fDimensions[2])
-	};
+	lcVector3 Points[8];
+	lcGetBoxCorners(mBoundingBox, Points);
 
-	lcVector3 Center(GetCenter());
+	lcVector3 Center = (mBoundingBox.Min + mBoundingBox.Max) / 2.0f;
 	lcVector3 Position;
 
 	if (EyePos)

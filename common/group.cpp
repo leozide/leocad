@@ -22,7 +22,7 @@ void lcGroup::FileLoad(lcFile* File)
 	mName = QString::fromUtf8(Name);
 	File->ReadVector3();
 	File->ReadS32(&GroupIndex, 1);
-	mGroup = (lcGroup*)(long)GroupIndex;
+	mGroup = (lcGroup*)(quintptr)GroupIndex;
 }
 
 void lcGroup::CreateName(const lcArray<lcGroup*>& Groups)

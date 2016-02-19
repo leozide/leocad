@@ -16,7 +16,7 @@ public:
 	lcMatrix44 mViewMatrix;
 	lcArray<lcRenderMesh> mOpaqueMeshes;
 	lcArray<lcRenderMesh> mTranslucentMeshes;
-	lcArray<lcObject*> mInterfaceObjects;
+	lcArray<const lcObject*> mInterfaceObjects;
 };
 
 class lcVertexBuffer
@@ -163,7 +163,7 @@ public:
 	void DrawMeshSection(lcMesh* Mesh, lcMeshSection* Section);
 	void DrawOpaqueMeshes(const lcArray<lcRenderMesh>& OpaqueMeshes);
 	void DrawTranslucentMeshes(const lcArray<lcRenderMesh>& TranslucentMeshes);
-	void DrawInterfaceObjects(const lcArray<lcObject*>& InterfaceObjects);
+	void DrawInterfaceObjects(const lcArray<const lcObject*>& InterfaceObjects);
 
 protected:
 	static void CreateShaderPrograms();

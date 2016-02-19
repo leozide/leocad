@@ -71,6 +71,7 @@ public:
 	int GetLodIndex(float Distance) const;
 
 	lcMeshLod mLods[LC_NUM_MESH_LODS];
+	lcBoundingBox mBoundingBox;
 	float mRadius;
 
 	void* mVertexData;

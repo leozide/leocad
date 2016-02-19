@@ -225,7 +225,7 @@ void MinifigWizard::OnDraw()
 
 	lcGetActiveModel()->DrawBackground(mContext);
 
-	float Box[6] = { 10000, 10000, 10000, -10000, -10000, -10000 };
+	lcVector3 Min(FLT_MAX, FLT_MAX, FLT_MAX), Max(-FLT_MAX, -FLT_MAX, -FLT_MAX);
 
 	for (int InfoIdx = 0; InfoIdx < LC_MFW_NUMITEMS; InfoIdx++)
 	{
@@ -234,32 +234,19 @@ void MinifigWizard::OnDraw()
 		if (!Info)
 			continue;
 
-		lcVector3 Points[8] =
-		{
-			lcVector3(Info->m_fDimensions[0], Info->m_fDimensions[1], Info->m_fDimensions[5]),
-			lcVector3(Info->m_fDimensions[3], Info->m_fDimensions[1], Info->m_fDimensions[5]),
-			lcVector3(Info->m_fDimensions[0], Info->m_fDimensions[1], Info->m_fDimensions[2]),
-			lcVector3(Info->m_fDimensions[3], Info->m_fDimensions[4], Info->m_fDimensions[5]),
-			lcVector3(Info->m_fDimensions[3], Info->m_fDimensions[4], Info->m_fDimensions[2]),
-			lcVector3(Info->m_fDimensions[0], Info->m_fDimensions[4], Info->m_fDimensions[2]),
-			lcVector3(Info->m_fDimensions[0], Info->m_fDimensions[4], Info->m_fDimensions[5]),
-			lcVector3(Info->m_fDimensions[3], Info->m_fDimensions[1], Info->m_fDimensions[2])
-		};
+		lcVector3 Points[8];
+		lcGetBoxCorners(Info->GetBoundingBox(), Points);
 
 		for (int PointIdx = 0; PointIdx < 8; PointIdx++)
 		{
 			lcVector3 Point = lcMul31(Points[PointIdx], mMinifig->Matrices[InfoIdx]);
 
-			if (Point[0] < Box[0]) Box[0] = Point[0];
-			if (Point[1] < Box[1]) Box[1] = Point[1];
-			if (Point[2] < Box[2]) Box[2] = Point[2];
-			if (Point[0] > Box[3]) Box[3] = Point[0];
-			if (Point[1] > Box[4]) Box[4] = Point[1];
-			if (Point[2] > Box[5]) Box[5] = Point[2];
+			Min = lcMin(Point, Min);
+			Max = lcMax(Point, Max);
 		}
 	}
 
-	lcVector3 Center((Box[0] + Box[3]) / 2, (Box[1] + Box[4]) / 2, (Box[2] + Box[5]) / 2);
+	lcVector3 Center = (Min + Max) / 2.0f;
 
 	lcVector3 Eye(0.0f, 0.0f, 1.0f);
 
@@ -273,17 +260,8 @@ void MinifigWizard::OnDraw()
 
 	if (m_AutoZoom)
 	{
-		lcVector3 Points[8] =
-		{
-			lcVector3(Box[0], Box[1], Box[5]),
-			lcVector3(Box[3], Box[1], Box[5]),
-			lcVector3(Box[0], Box[1], Box[2]),
-			lcVector3(Box[3], Box[4], Box[5]),
-			lcVector3(Box[3], Box[4], Box[2]),
-			lcVector3(Box[0], Box[4], Box[2]),
-			lcVector3(Box[0], Box[4], Box[5]),
-			lcVector3(Box[3], Box[1], Box[2])
-		};
+		lcVector3 Points[8];
+		lcGetBoxCorners(Min, Max, Points);
 
 		Eye += Center;
 

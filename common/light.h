@@ -186,7 +186,7 @@ public:
 	const char* GetName() const
 	{ return m_strName; }
 
-	void CompareBoundingBox(float box[6]);
+	void CompareBoundingBox(lcVector3& Min, lcVector3& Max);
 	void UpdatePosition(lcStep Step);
 	void Move(lcStep Step, bool AddKey, const lcVector3& Distance);
 	bool Setup(int LightIndex);

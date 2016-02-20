@@ -1292,6 +1292,62 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 		QT_TRANSLATE_NOOP("Status", "Switch to this model"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
+	// LC_MODEL_17
+	{
+		"Model.Model17",
+		QT_TRANSLATE_NOOP("Menu", ""),
+		QT_TRANSLATE_NOOP("Status", "Switch to this model"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
+	// LC_MODEL_18
+	{
+		"Model.Model18",
+		QT_TRANSLATE_NOOP("Menu", ""),
+		QT_TRANSLATE_NOOP("Status", "Switch to this model"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
+	// LC_MODEL_19
+	{
+		"Model.Model19",
+		QT_TRANSLATE_NOOP("Menu", ""),
+		QT_TRANSLATE_NOOP("Status", "Switch to this model"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
+	// LC_MODEL_20
+	{
+		"Model.Model20",
+		QT_TRANSLATE_NOOP("Menu", ""),
+		QT_TRANSLATE_NOOP("Status", "Switch to this model"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
+	// LC_MODEL_21
+	{
+		"Model.Model21",
+		QT_TRANSLATE_NOOP("Menu", ""),
+		QT_TRANSLATE_NOOP("Status", "Switch to this model"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
+	// LC_MODEL_22
+	{
+		"Model.Model22",
+		QT_TRANSLATE_NOOP("Menu", ""),
+		QT_TRANSLATE_NOOP("Status", "Switch to this model"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
+	// LC_MODEL_23
+	{
+		"Model.Model23",
+		QT_TRANSLATE_NOOP("Menu", ""),
+		QT_TRANSLATE_NOOP("Status", "Switch to this model"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
+	// LC_MODEL_24
+	{
+		"Model.Model24",
+		QT_TRANSLATE_NOOP("Menu", ""),
+		QT_TRANSLATE_NOOP("Status", "Switch to this model"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
 	// LC_HELP_HOMEPAGE
 	{
 		"Help.HomePage",

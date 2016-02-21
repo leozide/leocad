@@ -2335,6 +2335,14 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 	case LC_MODEL_14:
 	case LC_MODEL_15:
 	case LC_MODEL_16:
+	case LC_MODEL_17:
+	case LC_MODEL_18:
+	case LC_MODEL_19:
+	case LC_MODEL_20:
+	case LC_MODEL_21:
+	case LC_MODEL_22:
+	case LC_MODEL_23:
+	case LC_MODEL_24:
 		lcGetActiveProject()->SetActiveModel(CommandId - LC_MODEL_01);
 		break;
 

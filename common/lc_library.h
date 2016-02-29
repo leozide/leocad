@@ -155,8 +155,8 @@ public:
 			mNumOfficialPieces = mPieces.GetSize();
 	}
 
-	bool ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform, lcuint32 CurrentColorCode, lcArray<lcLibraryTextureMap>& TextureStack, lcLibraryMeshData& MeshData, lcMeshDataType MeshDataType);
-	void CreateMesh(PieceInfo* Info, lcLibraryMeshData& MeshData);
+	bool ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform, lcuint32 CurrentColorCode, lcArray<lcLibraryTextureMap>& TextureStack, lcLibraryMeshData& MeshData, lcMeshDataType MeshDataType, bool Optimize);
+	lcMesh* CreateMesh(PieceInfo* Info, lcLibraryMeshData& MeshData);
 	void UpdateBuffers(lcContext* Context);
 	void UnloadUnusedParts();
 

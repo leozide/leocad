@@ -1200,7 +1200,11 @@ bool lcModel::SubModelMinIntersectDist(const lcVector3& WorldStart, const lcVect
 	{
 		lcPiece* Piece = mPieces[PieceIdx];
 
-		if (Piece->GetStepHide() == LC_STEP_MAX && Piece->mPieceInfo->MinIntersectDist(Piece->mModelWorld, WorldStart, WorldEnd, MinDistance))
+		lcMatrix44 InverseWorldMatrix = lcMatrix44AffineInverse(Piece->mModelWorld);
+		lcVector3 Start = lcMul31(WorldStart, InverseWorldMatrix);
+		lcVector3 End = lcMul31(WorldEnd, InverseWorldMatrix);
+
+		if (Piece->GetStepHide() == LC_STEP_MAX && Piece->mPieceInfo->MinIntersectDist(Start, End, MinDistance)) // todo: this should check for piece->mMesh first
 			MinIntersect = true;
 	}
 

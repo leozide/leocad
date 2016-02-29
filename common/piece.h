@@ -48,7 +48,8 @@ enum lcPieceSection
 
 struct lcPieceControlPoint
 {
-	lcVector3 Position;
+	lcMatrix44 Transform;
+	float Stiffness;
 };
 
 class lcPiece : public lcObject
@@ -298,28 +299,28 @@ public:
 				return mModelWorld.GetTranslation();
 
 		case LC_PIECE_SECTION_CONTROL_POINT_1:
-			return lcMul31(mControlPoints[0].Position, mModelWorld);
+			return lcMul(mControlPoints[0].Transform, mModelWorld).GetTranslation();
 
 		case LC_PIECE_SECTION_CONTROL_POINT_2:
-			return lcMul31(mControlPoints[1].Position, mModelWorld);
+			return lcMul(mControlPoints[1].Transform, mModelWorld).GetTranslation();
 
 		case LC_PIECE_SECTION_CONTROL_POINT_3:
-			return lcMul31(mControlPoints[2].Position, mModelWorld);
+			return lcMul(mControlPoints[2].Transform, mModelWorld).GetTranslation();
 
 		case LC_PIECE_SECTION_CONTROL_POINT_4:
-			return lcMul31(mControlPoints[3].Position, mModelWorld);
+			return lcMul(mControlPoints[3].Transform, mModelWorld).GetTranslation();
 
 		case LC_PIECE_SECTION_CONTROL_POINT_5:
-			return lcMul31(mControlPoints[4].Position, mModelWorld);
+			return lcMul(mControlPoints[4].Transform, mModelWorld).GetTranslation();
 
 		case LC_PIECE_SECTION_CONTROL_POINT_6:
-			return lcMul31(mControlPoints[5].Position, mModelWorld);
+			return lcMul(mControlPoints[5].Transform, mModelWorld).GetTranslation();
 
 		case LC_PIECE_SECTION_CONTROL_POINT_7:
-			return lcMul31(mControlPoints[6].Position, mModelWorld);
+			return lcMul(mControlPoints[6].Transform, mModelWorld).GetTranslation();
 
 		case LC_PIECE_SECTION_CONTROL_POINT_8:
-			return lcMul31(mControlPoints[7].Position, mModelWorld);
+			return lcMul(mControlPoints[7].Transform, mModelWorld).GetTranslation();
 		}
 
 		return lcVector3(0.0f, 0.0f, 0.0f);
@@ -451,10 +452,27 @@ public:
 
 	lcMatrix33 GetRelativeRotation() const
 	{
-		if (mState & LC_PIECE_PIVOT_POINT_VALID)
-			return lcMatrix33(lcMul(mModelWorld, mPivotMatrix));
+		lcuint32 Section = GetFocusSection();
+
+		if (Section == LC_PIECE_SECTION_POSITION || Section == LC_PIECE_SECTION_INVALID)
+		{
+			if (mState & LC_PIECE_PIVOT_POINT_VALID)
+				return lcMatrix33(lcMul(mModelWorld, mPivotMatrix));
+			else
+				return lcMatrix33(mModelWorld);
+		}
 		else
-			return lcMatrix33(mModelWorld);
+		{
+			int ControlPointIndex = Section - LC_PIECE_SECTION_CONTROL_POINT_1;
+
+			if (ControlPointIndex >= 0 && ControlPointIndex < mControlPoints.GetSize())
+			{
+				lcMatrix44& Transform = mControlPoints[ControlPointIndex].Transform;
+				return lcMatrix33(lcMul(Transform, mModelWorld));
+			}
+
+			return lcMatrix33Identity();
+		}
 	}
 
 	void ResetPivotPoint()
@@ -494,7 +512,7 @@ protected:
 	lcStep mStepShow;
 	lcStep mStepHide;
 
-	lcuint8 mState;
+	lcuint32 mState;
 	lcArray<lcPieceControlPoint> mControlPoints;
 	lcMesh* mMesh;
 };

@@ -133,10 +133,15 @@ void lcMesh::CreateBox()
 }
 
 template<typename IndexType>
-bool lcMesh::MinIntersectDist(const lcVector3& Start, const lcVector3& End, float& MinDist, lcVector3& Intersection)
+bool lcMesh::MinIntersectDist(const lcVector3& Start, const lcVector3& End, float& MinDistance)
 {
+	float Distance;
+	if (!lcBoundingBoxRayIntersectDistance(mBoundingBox.Min, mBoundingBox.Max, Start, End, &Distance, NULL) || (Distance >= MinDistance))
+		return false;
+
 	float* Verts = (float*)mVertexData;
 	bool Hit = false;
+	lcVector3 Intersection;
 
 	for (int SectionIdx = 0; SectionIdx < mLods[LC_MESH_LOD_HIGH].NumSections; SectionIdx++)
 	{
@@ -156,7 +161,7 @@ bool lcMesh::MinIntersectDist(const lcVector3& Start, const lcVector3& End, floa
 			lcVector3 v2(p2[0], p2[1], p2[2]);
 			lcVector3 v3(p3[0], p3[1], p3[2]);
 
-			if (lcLineTriangleMinIntersection(v1, v2, v3, Start, End, &MinDist, &Intersection))
+			if (lcLineTriangleMinIntersection(v1, v2, v3, Start, End, &MinDistance, &Intersection))
 				Hit = true;
 		}
 	}
@@ -164,12 +169,12 @@ bool lcMesh::MinIntersectDist(const lcVector3& Start, const lcVector3& End, floa
 	return Hit;
 }
 
-bool lcMesh::MinIntersectDist(const lcVector3& Start, const lcVector3& End, float& MinDist, lcVector3& Intersection)
+bool lcMesh::MinIntersectDist(const lcVector3& Start, const lcVector3& End, float& MinDist)
 {
 	if (mIndexType == GL_UNSIGNED_SHORT)
-		return MinIntersectDist<GLushort>(Start, End, MinDist, Intersection);
+		return MinIntersectDist<GLushort>(Start, End, MinDist);
 	else
-		return MinIntersectDist<GLuint>(Start, End, MinDist, Intersection);
+		return MinIntersectDist<GLuint>(Start, End, MinDist);
 }
 
 template<typename IndexType>

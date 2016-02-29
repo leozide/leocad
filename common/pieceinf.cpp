@@ -8,6 +8,7 @@
 #include "lc_application.h"
 #include "lc_model.h"
 #include "lc_context.h"
+#include "lc_synth.h"
 #include "camera.h"
 #include <locale.h>
 
@@ -20,12 +21,15 @@ PieceInfo::PieceInfo()
 	mRefCount = 0;
 	mMesh = NULL;
 	mModel = NULL;
+	mSynthInfo = NULL;
 }
 
 PieceInfo::~PieceInfo()
 {
 	if (mLoaded)
 		Unload();
+
+	delete mSynthInfo;
 }
 
 QString PieceInfo::GetSaveID() const
@@ -79,7 +83,7 @@ void PieceInfo::SetModel(lcModel* Model, bool UpdateMesh)
 		PieceFile.Seek(0, SEEK_SET);
 
 		const char* OldLocale = setlocale(LC_NUMERIC, "C");
-		bool Ret = lcGetPiecesLibrary()->ReadMeshData(PieceFile, lcMatrix44Identity(), 16, TextureStack, MeshData, LC_MESHDATA_SHARED);
+		bool Ret = lcGetPiecesLibrary()->ReadMeshData(PieceFile, lcMatrix44Identity(), 16, TextureStack, MeshData, LC_MESHDATA_SHARED, true);
 		setlocale(LC_NUMERIC, OldLocale);
 
 		if (Ret)
@@ -154,32 +158,25 @@ void PieceInfo::Unload()
 		lcGetPiecesLibrary()->RemovePiece(this);
 }
 
-bool PieceInfo::MinIntersectDist(const lcMatrix44& WorldMatrix, const lcVector3& WorldStart, const lcVector3& WorldEnd, float& MinDistance) const
+bool PieceInfo::MinIntersectDist(const lcVector3& Start, const lcVector3& End, float& MinDistance) const
 {
-	lcMatrix44 InverseWorldMatrix = lcMatrix44AffineInverse(WorldMatrix);
-	lcVector3 Start = lcMul31(WorldStart, InverseWorldMatrix);
-	lcVector3 End = lcMul31(WorldEnd, InverseWorldMatrix);
-
-	const lcVector3& Min = mBoundingBox.Min;
-	const lcVector3& Max = mBoundingBox.Max;
-
-	float Distance;
-	if (!lcBoundingBoxRayIntersectDistance(Min, Max, Start, End, &Distance, NULL) || (Distance >= MinDistance))
-		return false;
-
-	if (mFlags & LC_PIECE_PLACEHOLDER)
-		return true;
-
 	bool Intersect = false;
 
-	if (mMesh)
+	if (mFlags & (LC_PIECE_PLACEHOLDER | LC_PIECE_MODEL))
 	{
-		lcVector3 Intersection;
-		Intersect = mMesh->MinIntersectDist(Start, End, MinDistance, Intersection);
+		float Distance;
+		if (!lcBoundingBoxRayIntersectDistance(mBoundingBox.Min, mBoundingBox.Max, Start, End, &Distance, NULL) || (Distance >= MinDistance))
+			return false;
+
+		if (mFlags & LC_PIECE_PLACEHOLDER)
+			return true;
+
+		if (mFlags & LC_PIECE_MODEL)
+			Intersect |= mModel->SubModelMinIntersectDist(Start, End, MinDistance);
 	}
 
-	if (mFlags & LC_PIECE_MODEL)
-		Intersect |= mModel->SubModelMinIntersectDist(Start, End, MinDistance);
+	if (mMesh)
+		Intersect = mMesh->MinIntersectDist(Start, End, MinDistance);
 
 	return Intersect;
 }

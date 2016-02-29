@@ -143,6 +143,7 @@ SOURCES += common/view.cpp \
     common/lc_model.cpp \
     common/lc_profile.cpp \
     common/lc_shortcuts.cpp \
+    common/lc_synth.cpp \
     common/lc_texture.cpp \
     common/lc_zipfile.cpp \
     common/image.cpp \
@@ -205,6 +206,7 @@ HEADERS += \
     common/lc_model.h \
     common/lc_profile.h \
     common/lc_shortcuts.h \
+    common/lc_synth.h \
     common/lc_texture.h \
     common/lc_zipfile.h \
     common/image.h \

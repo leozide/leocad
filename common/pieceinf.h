@@ -15,6 +15,8 @@
 
 #define LC_PIECE_NAME_LEN 256
 
+struct lcSynthInfo;
+
 class PieceInfo
 {
 public:
@@ -32,6 +34,16 @@ public:
 	{
 		mBoundingBox.Min = Min;
 		mBoundingBox.Max = Max;
+	}
+
+	lcSynthInfo* GetSynthInfo() const
+	{
+		return mSynthInfo;
+	}
+
+	void SetSynthInfo(lcSynthInfo* SynthInfo)
+	{
+		mSynthInfo = SynthInfo;
 	}
 
 	lcMesh* GetMesh() const
@@ -129,7 +141,7 @@ public:
 	void SetPlaceholder();
 	void SetModel(lcModel* Model, bool UpdateMesh);
 	bool IncludesModel(const lcModel* Model) const;
-	bool MinIntersectDist(const lcMatrix44& WorldMatrix, const lcVector3& WorldStart, const lcVector3& WorldEnd, float& MinDistance) const;
+	bool MinIntersectDist(const lcVector3& Start, const lcVector3& End, float& MinDistance) const;
 	bool BoxTest(const lcMatrix44& WorldMatrix, const lcVector4 Planes[6]) const;
 	void GetPartsList(int DefaultColorIndex, lcArray<lcPartsListEntry>& PartsList) const;
 	void GetModelParts(const lcMatrix44& WorldMatrix, int DefaultColorIndex, lcArray<lcModelPartsEntry>& ModelParts) const;
@@ -149,6 +161,7 @@ protected:
 	lcModel* mModel;
 	lcMesh* mMesh;
 	lcBoundingBox mBoundingBox;
+	lcSynthInfo* mSynthInfo;
 
 	void Load();
 	void Unload();

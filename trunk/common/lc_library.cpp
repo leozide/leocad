@@ -10,6 +10,7 @@
 #include "lc_mainwindow.h"
 #include "lc_context.h"
 #include "lc_glextensions.h"
+#include "lc_synth.h"
 #include "project.h"
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -181,6 +182,7 @@ bool lcPiecesLibrary::Load(const char* LibraryPath)
 	}
 
 	lcLoadDefaultCategories();
+	lcSynthInit();
 
 	return true;
 }
@@ -883,7 +885,7 @@ bool lcPiecesLibrary::LoadPiece(PieceInfo* Info)
 			return false;
 
 		const char* OldLocale = setlocale(LC_NUMERIC, "C");
-		bool Ret = ReadMeshData(PieceFile, lcMatrix44Identity(), 16, TextureStack, MeshData, LC_MESHDATA_SHARED);
+		bool Ret = ReadMeshData(PieceFile, lcMatrix44Identity(), 16, TextureStack, MeshData, LC_MESHDATA_SHARED, true);
 		setlocale(LC_NUMERIC, OldLocale);
 
         if (!Ret)
@@ -904,7 +906,7 @@ bool lcPiecesLibrary::LoadPiece(PieceInfo* Info)
 			return false;
 
 		const char* OldLocale = setlocale(LC_NUMERIC, "C");
-		bool Ret = ReadMeshData(PieceFile, lcMatrix44Identity(), 16, TextureStack, MeshData, LC_MESHDATA_SHARED);
+		bool Ret = ReadMeshData(PieceFile, lcMatrix44Identity(), 16, TextureStack, MeshData, LC_MESHDATA_SHARED, true);
 		setlocale(LC_NUMERIC, OldLocale);
 
         if (!Ret)
@@ -919,7 +921,7 @@ bool lcPiecesLibrary::LoadPiece(PieceInfo* Info)
 	return true;
 }
 
-void lcPiecesLibrary::CreateMesh(PieceInfo* Info, lcLibraryMeshData& MeshData)
+lcMesh* lcPiecesLibrary::CreateMesh(PieceInfo* Info, lcLibraryMeshData& MeshData)
 {
 	lcMesh* Mesh = new lcMesh();
 
@@ -1121,20 +1123,23 @@ void lcPiecesLibrary::CreateMesh(PieceInfo* Info, lcLibraryMeshData& MeshData)
 				}
 			}
 
-			if (DstSection.PrimitiveType == GL_TRIANGLES)
+			if (Info)
 			{
-				if (DstSection.ColorIndex == gDefaultColor)
-					Info->mFlags |= LC_PIECE_HAS_DEFAULT;
-				else
+				if (DstSection.PrimitiveType == GL_TRIANGLES)
 				{
-					if (lcIsColorTranslucent(DstSection.ColorIndex))
-						Info->mFlags |= LC_PIECE_HAS_TRANSLUCENT;
+					if (DstSection.ColorIndex == gDefaultColor)
+						Info->mFlags |= LC_PIECE_HAS_DEFAULT;
 					else
-						Info->mFlags |= LC_PIECE_HAS_SOLID;
+					{
+						if (lcIsColorTranslucent(DstSection.ColorIndex))
+							Info->mFlags |= LC_PIECE_HAS_TRANSLUCENT;
+						else
+							Info->mFlags |= LC_PIECE_HAS_SOLID;
+					}
 				}
+				else
+					Info->mFlags |= LC_PIECE_HAS_LINES;
 			}
-			else
-				Info->mFlags |= LC_PIECE_HAS_LINES;
 
 			NumIndices += DstSection.NumIndices;
 		}
@@ -1190,7 +1195,11 @@ void lcPiecesLibrary::CreateMesh(PieceInfo* Info, lcLibraryMeshData& MeshData)
 		NumIndices += DstSection.NumIndices;
 	}
 	*/
-	Info->SetMesh(Mesh);
+
+	if (Info)
+		Info->SetMesh(Mesh);
+
+	return Mesh;
 }
 
 void lcPiecesLibrary::UpdateBuffers(lcContext* Context)
@@ -1322,12 +1331,12 @@ bool lcPiecesLibrary::LoadPrimitive(int PrimitiveIndex)
 
 		if (LowPrimitiveIndex == -1)
 		{
-			if (!ReadMeshData(PrimFile, lcMatrix44Identity(), 16, TextureStack, Primitive->mMeshData, LC_MESHDATA_SHARED))
+			if (!ReadMeshData(PrimFile, lcMatrix44Identity(), 16, TextureStack, Primitive->mMeshData, LC_MESHDATA_SHARED, true))
 				return false;
 		}
 		else
 		{
-			if (!ReadMeshData(PrimFile, lcMatrix44Identity(), 16, TextureStack, Primitive->mMeshData, LC_MESHDATA_HIGH))
+			if (!ReadMeshData(PrimFile, lcMatrix44Identity(), 16, TextureStack, Primitive->mMeshData, LC_MESHDATA_HIGH, true))
 				return false;
 
 			lcLibraryPrimitive* LowPrimitive = mPrimitives[LowPrimitiveIndex];
@@ -1337,7 +1346,7 @@ bool lcPiecesLibrary::LoadPrimitive(int PrimitiveIndex)
 
 			TextureStack.RemoveAll();
 
-			if (!ReadMeshData(PrimFile, lcMatrix44Identity(), 16, TextureStack, Primitive->mMeshData, LC_MESHDATA_LOW))
+			if (!ReadMeshData(PrimFile, lcMatrix44Identity(), 16, TextureStack, Primitive->mMeshData, LC_MESHDATA_LOW, true))
 				return false;
 		}
 	}
@@ -1358,7 +1367,7 @@ bool lcPiecesLibrary::LoadPrimitive(int PrimitiveIndex)
 		if (!PrimFile.Open(FileName, "rt"))
 			return false;
 
-		if (!ReadMeshData(PrimFile, lcMatrix44Identity(), 16, TextureStack, Primitive->mMeshData, LC_MESHDATA_SHARED))
+		if (!ReadMeshData(PrimFile, lcMatrix44Identity(), 16, TextureStack, Primitive->mMeshData, LC_MESHDATA_SHARED, true))
 			return false;
 	}
 
@@ -1367,7 +1376,7 @@ bool lcPiecesLibrary::LoadPrimitive(int PrimitiveIndex)
 	return true;
 }
 
-bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform, lcuint32 CurrentColorCode, lcArray<lcLibraryTextureMap>& TextureStack, lcLibraryMeshData& MeshData, lcMeshDataType MeshDataType)
+bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform, lcuint32 CurrentColorCode, lcArray<lcLibraryTextureMap>& TextureStack, lcLibraryMeshData& MeshData, lcMeshDataType MeshDataType, bool Optimize)
 {
 	char Buffer[1024];
 	char* Line;
@@ -1573,7 +1582,12 @@ bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransf
 					if (Primitive->mStud)
 						MeshData.AddMeshDataNoDuplicateCheck(Primitive->mMeshData, IncludeTransform, ColorCode, TextureMap, MeshDataType);
 					else if (!Primitive->mSubFile)
-						MeshData.AddMeshData(Primitive->mMeshData, IncludeTransform, ColorCode, TextureMap, MeshDataType);
+					{
+						if (Optimize)
+							MeshData.AddMeshData(Primitive->mMeshData, IncludeTransform, ColorCode, TextureMap, MeshDataType);
+						else
+							MeshData.AddMeshDataNoDuplicateCheck(Primitive->mMeshData, IncludeTransform, ColorCode, TextureMap, MeshDataType);
+					}
 					else
 					{
 						if (mZipFiles[LC_ZIPFILE_OFFICIAL])
@@ -1583,7 +1597,7 @@ bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransf
 							if (!mZipFiles[Primitive->mZipFileType]->ExtractFile(Primitive->mZipFileIndex, IncludeFile))
 								continue;
 
-							if (!ReadMeshData(IncludeFile, IncludeTransform, ColorCode, TextureStack, MeshData, MeshDataType))
+							if (!ReadMeshData(IncludeFile, IncludeTransform, ColorCode, TextureStack, MeshData, MeshDataType, Optimize))
 								continue;
 						}
 						else
@@ -1602,7 +1616,7 @@ bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransf
 							if (!IncludeFile.Open(FileName, "rt"))
 								continue;
 
-							if (!ReadMeshData(IncludeFile, IncludeTransform, ColorCode, TextureStack, MeshData, MeshDataType))
+							if (!ReadMeshData(IncludeFile, IncludeTransform, ColorCode, TextureStack, MeshData, MeshDataType, Optimize))
 								continue;
 						}
 					}
@@ -1623,7 +1637,7 @@ bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransf
 							if (!mZipFiles[Info->mZipFileType]->ExtractFile(Info->mZipFileIndex, IncludeFile))
 								break;
 
-							if (!ReadMeshData(IncludeFile, IncludeTransform, ColorCode, TextureStack, MeshData, MeshDataType))
+							if (!ReadMeshData(IncludeFile, IncludeTransform, ColorCode, TextureStack, MeshData, MeshDataType, Optimize))
 								break;
 						}
 						else
@@ -1639,7 +1653,7 @@ bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransf
 							if (!IncludeFile.Open(FileName, "rt"))
 								break;
 
-							if (!ReadMeshData(IncludeFile, IncludeTransform, ColorCode, TextureStack, MeshData, MeshDataType))
+							if (!ReadMeshData(IncludeFile, IncludeTransform, ColorCode, TextureStack, MeshData, MeshDataType, Optimize))
 								break;
 						}
 
@@ -2388,6 +2402,7 @@ bool lcPiecesLibrary::LoadBuiltinPieces()
 
 	lcLoadDefaultColors();
 	lcLoadDefaultCategories(true);
+	lcSynthInit();
 
 	return true;
 }

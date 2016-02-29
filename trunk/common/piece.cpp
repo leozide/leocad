@@ -15,6 +15,7 @@
 #include "lc_library.h"
 #include "lc_context.h"
 #include "lc_qutils.h"
+#include "lc_synth.h"
 
 #define LC_PIECE_CONTROL_POINT_SIZE 10.0f
 
@@ -50,18 +51,20 @@ void lcPiece::SetPieceInfo(PieceInfo* Info)
 	if (mPieceInfo)
 		mPieceInfo->AddRef();
 
-	if (0) // todo: get control points from the piece info
+	mControlPoints.RemoveAll();
+	delete mMesh;
+	mMesh = NULL;
+
+	lcSynthInfo* SynthInfo = mPieceInfo ? mPieceInfo->GetSynthInfo() : NULL;
+
+	if (SynthInfo)
 	{
 		mControlPoints.SetSize(2);
-		mControlPoints[0].Position = lcVector3(0, 0, -30);
-		mControlPoints[1].Position = lcVector3(0, 0, 30);
+		mControlPoints[0].Transform = SynthInfo->DefaultControlPoints[0];
+		mControlPoints[0].Stiffness = SynthInfo->DefaultStiffness;
+		mControlPoints[1].Transform = SynthInfo->DefaultControlPoints[1];
+		mControlPoints[1].Stiffness = SynthInfo->DefaultStiffness;
 		UpdateMesh();
-	}
-	else
-	{
-		mControlPoints.RemoveAll();
-		delete mMesh;
-		mMesh = NULL;
 	}
 }
 
@@ -428,7 +431,19 @@ void lcPiece::RemoveTime(lcStep Start, lcStep Time)
 
 void lcPiece::RayTest(lcObjectRayTest& ObjectRayTest) const
 {
-	if (mPieceInfo->MinIntersectDist(mModelWorld, ObjectRayTest.Start, ObjectRayTest.End, ObjectRayTest.Distance))
+	lcMatrix44 InverseWorldMatrix = lcMatrix44AffineInverse(mModelWorld);
+	lcVector3 Start = lcMul31(ObjectRayTest.Start, InverseWorldMatrix);
+	lcVector3 End = lcMul31(ObjectRayTest.End, InverseWorldMatrix);
+
+	if (mMesh)
+	{
+		if (mMesh->MinIntersectDist(Start, End, ObjectRayTest.Distance))
+		{
+			ObjectRayTest.ObjectSection.Object = const_cast<lcPiece*>(this);
+			ObjectRayTest.ObjectSection.Section = LC_PIECE_SECTION_POSITION;
+		}
+	}
+	else if (mPieceInfo->MinIntersectDist(Start, End, ObjectRayTest.Distance))
 	{
 		ObjectRayTest.ObjectSection.Object = const_cast<lcPiece*>(this);
 		ObjectRayTest.ObjectSection.Section = LC_PIECE_SECTION_POSITION;
@@ -436,20 +451,17 @@ void lcPiece::RayTest(lcObjectRayTest& ObjectRayTest) const
 
 	if (AreControlPointsVisible())
 	{
-		lcMatrix44 InverseWorldMatrix = lcMatrix44AffineInverse(mModelWorld);
-		lcVector3 Start = lcMul31(ObjectRayTest.Start, InverseWorldMatrix);
-		lcVector3 End = lcMul31(ObjectRayTest.End, InverseWorldMatrix);
+		lcVector3 Min(-LC_PIECE_CONTROL_POINT_SIZE, -LC_PIECE_CONTROL_POINT_SIZE, -LC_PIECE_CONTROL_POINT_SIZE);
+		lcVector3 Max(LC_PIECE_CONTROL_POINT_SIZE, LC_PIECE_CONTROL_POINT_SIZE, LC_PIECE_CONTROL_POINT_SIZE);
 
 		for (int ControlPointIdx = 0; ControlPointIdx < mControlPoints.GetSize(); ControlPointIdx++)
 		{
-			lcVector3 Min(-LC_PIECE_CONTROL_POINT_SIZE, -LC_PIECE_CONTROL_POINT_SIZE, -LC_PIECE_CONTROL_POINT_SIZE);
-			lcVector3 Max(LC_PIECE_CONTROL_POINT_SIZE, LC_PIECE_CONTROL_POINT_SIZE, LC_PIECE_CONTROL_POINT_SIZE);
-
-			Min += mControlPoints[ControlPointIdx].Position;
-			Max += mControlPoints[ControlPointIdx].Position;
+			lcMatrix44 InverseTransform = lcMatrix44AffineInverse(mControlPoints[ControlPointIdx].Transform);
+			lcVector3 PointStart = lcMul31(Start, InverseTransform);
+			lcVector3 PointEnd = lcMul31(End, InverseTransform);
 
 			float Distance;
-			if (!lcBoundingBoxRayIntersectDistance(Min, Max, Start, End, &Distance, NULL) || (Distance >= ObjectRayTest.Distance))
+			if (!lcBoundingBoxRayIntersectDistance(Min, Max, PointStart, PointEnd, &Distance, NULL) || (Distance >= ObjectRayTest.Distance))
 				continue;
 
 			ObjectRayTest.ObjectSection.Object = const_cast<lcPiece*>(this);
@@ -548,31 +560,30 @@ void lcPiece::DrawInterface(lcContext* Context) const
 
 	if (AreControlPointsVisible())
 	{
+		float Verts[8 * 3];
+		float* CurVert = Verts;
+
+		lcVector3 Min(-LC_PIECE_CONTROL_POINT_SIZE, -LC_PIECE_CONTROL_POINT_SIZE, -LC_PIECE_CONTROL_POINT_SIZE);
+		lcVector3 Max(LC_PIECE_CONTROL_POINT_SIZE, LC_PIECE_CONTROL_POINT_SIZE, LC_PIECE_CONTROL_POINT_SIZE);
+
+		*CurVert++ = Min[0]; *CurVert++ = Min[1]; *CurVert++ = Min[2];
+		*CurVert++ = Min[0]; *CurVert++ = Max[1]; *CurVert++ = Min[2];
+		*CurVert++ = Max[0]; *CurVert++ = Max[1]; *CurVert++ = Min[2];
+		*CurVert++ = Max[0]; *CurVert++ = Min[1]; *CurVert++ = Min[2];
+		*CurVert++ = Min[0]; *CurVert++ = Min[1]; *CurVert++ = Max[2];
+		*CurVert++ = Min[0]; *CurVert++ = Max[1]; *CurVert++ = Max[2];
+		*CurVert++ = Max[0]; *CurVert++ = Max[1]; *CurVert++ = Max[2];
+		*CurVert++ = Max[0]; *CurVert++ = Min[1]; *CurVert++ = Max[2];
+
+		const GLushort Indices[36] =
+		{
+			0, 1, 2, 0, 2, 3, 7, 6, 5, 7, 5, 4, 0, 1, 5, 0, 5, 4,
+			2, 3, 7, 2, 7, 6, 0, 3, 7, 0, 7, 4, 1, 2, 6, 1, 6, 5
+		};
+
 		for (int ControlPointIdx = 0; ControlPointIdx < mControlPoints.GetSize(); ControlPointIdx++)
 		{
-			float Verts[8 * 3];
-			float* CurVert = Verts;
-
-			lcVector3 Min(-LC_PIECE_CONTROL_POINT_SIZE, -LC_PIECE_CONTROL_POINT_SIZE, -LC_PIECE_CONTROL_POINT_SIZE);
-			lcVector3 Max(LC_PIECE_CONTROL_POINT_SIZE, LC_PIECE_CONTROL_POINT_SIZE, LC_PIECE_CONTROL_POINT_SIZE);
-
-			Min += mControlPoints[ControlPointIdx].Position;
-			Max += mControlPoints[ControlPointIdx].Position;
-
-			*CurVert++ = Min[0]; *CurVert++ = Min[1]; *CurVert++ = Min[2];
-			*CurVert++ = Min[0]; *CurVert++ = Max[1]; *CurVert++ = Min[2];
-			*CurVert++ = Max[0]; *CurVert++ = Max[1]; *CurVert++ = Min[2];
-			*CurVert++ = Max[0]; *CurVert++ = Min[1]; *CurVert++ = Min[2];
-			*CurVert++ = Min[0]; *CurVert++ = Min[1]; *CurVert++ = Max[2];
-			*CurVert++ = Min[0]; *CurVert++ = Max[1]; *CurVert++ = Max[2];
-			*CurVert++ = Max[0]; *CurVert++ = Max[1]; *CurVert++ = Max[2];
-			*CurVert++ = Max[0]; *CurVert++ = Min[1]; *CurVert++ = Max[2];
-
-			const GLushort Indices[36] =
-			{
-				0, 1, 2, 0, 2, 3, 7, 6, 5, 7, 5, 4, 0, 1, 5, 0, 5, 4,
-				2, 3, 7, 2, 7, 6, 0, 3, 7, 0, 7, 4, 1, 2, 6, 1, 6, 5
-			};
+			Context->SetWorldMatrix(lcMul(mControlPoints[ControlPointIdx].Transform, mModelWorld));
 
 			Context->SetVertexBufferPointer(Verts);
 			Context->SetVertexFormat(0, 3, 0, 0);
@@ -616,13 +627,13 @@ void lcPiece::AddRenderMeshes(lcScene& Scene, bool DrawInterface) const
 		RenderMesh.Distance = fabsf(lcMul31(mModelWorld[3], Scene.mViewMatrix).z);
 		RenderMesh.LodIndex = RenderMesh.Mesh->GetLodIndex(RenderMesh.Distance);
 
-//		bool Translucent = lcIsColorTranslucent(mColorIndex);
+		bool Translucent = lcIsColorTranslucent(mColorIndex);
 
-//		if ((mFlags & (LC_PIECE_HAS_SOLID | LC_PIECE_HAS_LINES)) || ((mFlags & LC_PIECE_HAS_DEFAULT) && !Translucent))
+		if ((mPieceInfo->mFlags & (LC_PIECE_HAS_SOLID | LC_PIECE_HAS_LINES)) || ((mPieceInfo->mFlags & LC_PIECE_HAS_DEFAULT) && !Translucent))
 			Scene.mOpaqueMeshes.Add(RenderMesh);
 
-//		if ((mFlags & LC_PIECE_HAS_TRANSLUCENT) || ((mFlags & LC_PIECE_HAS_DEFAULT) && Translucent))
-//			Scene.mTranslucentMeshes.Add(RenderMesh);
+		if ((mPieceInfo->mFlags & LC_PIECE_HAS_TRANSLUCENT) || ((mPieceInfo->mFlags & LC_PIECE_HAS_DEFAULT) && Translucent))
+			Scene.mTranslucentMeshes.Add(RenderMesh);
 	}
 
 	if (Selected)
@@ -646,7 +657,12 @@ void lcPiece::Move(lcStep Step, bool AddKey, const lcVector3& Distance)
 		int ControlPointIndex = Section - LC_PIECE_SECTION_CONTROL_POINT_1;
 
 		if (ControlPointIndex >= 0 && ControlPointIndex < mControlPoints.GetSize())
-			mControlPoints[ControlPointIndex].Position += Distance;
+		{
+			lcMatrix33 InverseWorldMatrix = lcMatrix33AffineInverse(lcMatrix33(mModelWorld));
+			lcMatrix44& Transform = mControlPoints[ControlPointIndex].Transform;
+
+			Transform.SetTranslation(Transform.GetTranslation() + lcMul(Distance, InverseWorldMatrix));
+		}
 
 		UpdateMesh();
 	}
@@ -654,21 +670,45 @@ void lcPiece::Move(lcStep Step, bool AddKey, const lcVector3& Distance)
 
 void lcPiece::Rotate(lcStep Step, bool AddKey, const lcMatrix33& RotationMatrix, const lcVector3& Center, const lcMatrix33& RotationFrame)
 {
-	lcVector3 Distance = mModelWorld.GetTranslation() - Center;
-	lcMatrix33 LocalToWorldMatrix = lcMatrix33(mModelWorld);
+	lcuint32 Section = GetFocusSection();
 
-	lcMatrix33 LocalToFocusMatrix = lcMul(LocalToWorldMatrix, RotationFrame);
-	lcMatrix33 NewLocalToWorldMatrix = lcMul(LocalToFocusMatrix, RotationMatrix);
+	if (Section == LC_PIECE_SECTION_POSITION || Section == LC_PIECE_SECTION_INVALID)
+	{
+		lcVector3 Distance = mModelWorld.GetTranslation() - Center;
+		lcMatrix33 LocalToWorldMatrix = lcMatrix33(mModelWorld);
 
-	lcMatrix33 WorldToLocalMatrix = lcMatrix33AffineInverse(LocalToWorldMatrix);
+		lcMatrix33 LocalToFocusMatrix = lcMul(LocalToWorldMatrix, RotationFrame);
+		lcMatrix33 NewLocalToWorldMatrix = lcMul(LocalToFocusMatrix, RotationMatrix);
 
-	Distance = lcMul(Distance, WorldToLocalMatrix);
-	Distance = lcMul(Distance, NewLocalToWorldMatrix);
+		lcMatrix33 WorldToLocalMatrix = lcMatrix33AffineInverse(LocalToWorldMatrix);
 
-	NewLocalToWorldMatrix.Orthonormalize();
+		Distance = lcMul(Distance, WorldToLocalMatrix);
+		Distance = lcMul(Distance, NewLocalToWorldMatrix);
 
-	SetPosition(Center + Distance, Step, AddKey);
-	SetRotation(NewLocalToWorldMatrix, Step, AddKey);
+		NewLocalToWorldMatrix.Orthonormalize();
+
+		SetPosition(Center + Distance, Step, AddKey);
+		SetRotation(NewLocalToWorldMatrix, Step, AddKey);
+	}
+	else
+	{
+		int ControlPointIndex = Section - LC_PIECE_SECTION_CONTROL_POINT_1;
+
+		if (ControlPointIndex >= 0 && ControlPointIndex < mControlPoints.GetSize())
+		{
+			lcMatrix44& Transform = mControlPoints[ControlPointIndex].Transform;
+			lcMatrix33 PieceWorldMatrix(mModelWorld);
+			lcMatrix33 LocalToWorldMatrix = lcMul(lcMatrix33(Transform), PieceWorldMatrix);
+
+			lcMatrix33 LocalToFocusMatrix = lcMul(LocalToWorldMatrix, RotationFrame);
+			lcMatrix33 NewLocalToWorldMatrix = lcMul(lcMul(LocalToFocusMatrix, RotationMatrix), lcMatrix33AffineInverse(PieceWorldMatrix));
+
+			NewLocalToWorldMatrix.Orthonormalize();
+			Transform = lcMatrix44(NewLocalToWorldMatrix, Transform.GetTranslation());
+		}
+
+		UpdateMesh();
+	}
 }
 
 void lcPiece::MovePivotPoint(const lcVector3& Distance)
@@ -747,46 +787,5 @@ void lcPiece::UpdatePosition(lcStep Step)
 void lcPiece::UpdateMesh()
 {
 	delete mMesh;
-
-	lcuint16 NumSections[LC_NUM_MESH_LODS] = { 1, 1 };
-
-	mMesh = new lcMesh();
-	mMesh->Create(NumSections, 2, 0, 2);
-
-	NumSections[0] = 2;
-	NumSections[1] = 2;
-
-	for (int LodIdx = 0; LodIdx < LC_NUM_MESH_LODS; LodIdx++)
-	{
-		lcMeshSection& Section = mMesh->mLods[LodIdx].Sections[0];
-
-		Section.ColorIndex = gDefaultColor;
-		Section.PrimitiveType = GL_LINES;
-		Section.NumIndices = 2;
-		Section.Texture = NULL;
-		Section.IndexOffset = 0;
-	}
-
-	lcuint16* Index = (lcuint16*)mMesh->mIndexData;
-	*Index++ = 0;
-	*Index++ = 1;
-
-	lcVertex* Verts = (lcVertex*)mMesh->mVertexData;
-	Verts[0].Position = mControlPoints[0].Position;
-	Verts[1].Position = mControlPoints[1].Position;
-
-	lcVector3 Min(FLT_MAX, FLT_MAX, FLT_MAX), Max(-FLT_MAX, -FLT_MAX, -FLT_MAX);
-
-	Min = lcMin(mControlPoints[0].Position, Min);
-	Min = lcMin(mControlPoints[1].Position, Min);
-
-	Max = lcMax(mControlPoints[0].Position, Max);
-	Max = lcMax(mControlPoints[1].Position, Max);
-
-	Min -= lcVector3(5.0f, 5.0f, 5.0f);
-	Max += lcVector3(5.0f, 5.0f, 5.0f);
-
-	mMesh->mRadius = lcLength(Max - Min) / 2.0f;
-	mMesh->mBoundingBox.Min = Min;
-	mMesh->mBoundingBox.Max = Max;
+	mMesh = lcSynthCreateMesh(mPieceInfo->GetSynthInfo(), mControlPoints);
 }

@@ -732,6 +732,43 @@ void lcPiece::RotatePivotPoint(const lcMatrix33& RotationMatrix)
 	mState |= LC_PIECE_PIVOT_POINT_VALID;
 }
 
+bool lcPiece::InsertControlPoint(const lcVector3& WorldStart, const lcVector3& WorldEnd)
+{
+	if (!mPieceInfo->GetSynthInfo())
+		return false;
+
+	lcMatrix44 InverseWorldMatrix = lcMatrix44AffineInverse(mModelWorld);
+	lcVector3 Start = lcMul31(WorldStart, InverseWorldMatrix);
+	lcVector3 End = lcMul31(WorldEnd, InverseWorldMatrix);
+
+	int ControlPointIndex = lcSynthInsertControlPoint(mPieceInfo->GetSynthInfo(), mControlPoints, Start, End);
+	if (ControlPointIndex)
+	{
+		SetFocused(GetFocusSection(), false);
+		SetFocused(LC_PIECE_SECTION_CONTROL_POINT_1 + ControlPointIndex, true);
+		UpdateMesh();
+		return true;
+	}
+
+	return false;
+}
+
+bool lcPiece::RemoveFocusedControlPoint()
+{
+	int ControlPointIndex = GetFocusSection() - LC_PIECE_SECTION_CONTROL_POINT_1;
+
+	if (ControlPointIndex < 0 || ControlPointIndex >= mControlPoints.GetSize() || mControlPoints.GetSize() <= 2)
+		return false;
+
+	SetFocused(GetFocusSection(), false);
+	SetFocused(LC_PIECE_SECTION_POSITION, true);
+	mControlPoints.RemoveIndex(ControlPointIndex);
+
+	UpdateMesh();
+
+	return true;
+}
+
 const char* lcPiece::GetName() const
 {
 	return mPieceInfo->m_strDescription;

@@ -21,6 +21,7 @@ struct lcSynthInfo
 };
 
 void lcSynthInit();
-lcMesh* lcSynthCreateMesh(lcSynthInfo* SynthInfo, const lcArray<lcPieceControlPoint>& ControlPoints);
+lcMesh* lcSynthCreateMesh(const lcSynthInfo* SynthInfo, const lcArray<lcPieceControlPoint>& ControlPoints);
+int lcSynthInsertControlPoint(const lcSynthInfo* SynthInfo, lcArray<lcPieceControlPoint>& ControlPoints, const lcVector3& Start, const lcVector3& End);
 
 #endif // _LC_SYNTH_H_

@@ -956,6 +956,20 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 		QT_TRANSLATE_NOOP("Status", "Reset the pivot point of the selected pieces to their origin"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
+	// LC_PIECE_CONTROL_POINT_INSERT
+	{
+		"Piece.ControlPoint.Insert",
+		QT_TRANSLATE_NOOP("Menu", "Insert Control Point"),
+		QT_TRANSLATE_NOOP("Status", "Insert a new control point"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
+	// LC_PIECE_CONTROL_POINT_REMOVE
+	{
+		"Piece.ControlPoint.Remove",
+		QT_TRANSLATE_NOOP("Menu", "Remove Control Point"),
+		QT_TRANSLATE_NOOP("Status", "Remove the currently selected control point"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
 	// LC_PIECE_MOVE_PLUSX
 	{
 		"Piece.Move.PlusX",

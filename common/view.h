@@ -97,6 +97,7 @@ public:
 
 	lcVector3 GetMoveDirection(const lcVector3& Direction) const;
 	lcMatrix44 GetPieceInsertPosition() const;
+	void GetRayUnderPointer(lcVector3& Start, lcVector3& End) const;
 	lcObjectSection FindObjectUnderPointer(bool PiecesOnly) const;
 	lcArray<lcObject*> FindObjectsInBox(float x1, float y1, float x2, float y2) const;
 

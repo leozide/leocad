@@ -56,26 +56,13 @@ void lcSynthInit()
 	}
 }
 
-inline lcMatrix44 lcMatrix44LeoCADToLDraw(const lcMatrix44& Matrix)
-{
-	lcMatrix44 m;
-
-	m.r[0] = lcVector4( Matrix[0][0], -Matrix[2][0],  Matrix[1][0], 0.0f);
-	m.r[1] = lcVector4(-Matrix[0][2],  Matrix[2][2], -Matrix[1][2], 0.0f);
-	m.r[2] = lcVector4( Matrix[0][1], -Matrix[2][1],  Matrix[1][1], 0.0f);
-	m.r[3] = lcVector4( Matrix[3][0], -Matrix[3][2],  Matrix[3][1], 1.0f);
-
-	return m;
-}
-
 #include "lc_file.h"
 
-lcMesh* lcSynthCreateMesh(lcSynthInfo* SynthInfo, const lcArray<lcPieceControlPoint>& ControlPoints)
+static void lcSynthEvaluate(const lcSynthInfo* SynthInfo, const lcArray<lcPieceControlPoint>& ControlPoints, lcArray<lcMatrix44>& Sections, void (*SectionCallback)(const lcVector3& CurvePoint, int SegmentIndex, float t, void* Param), void* CallbackParam)
 {
-	lcArray<lcMatrix44> Sections;
 	float SectionLength = 0.0f;
 
-	for (int ControlPointIdx = 0; ControlPointIdx < ControlPoints.GetSize() - 1; ControlPointIdx++)
+	for (int ControlPointIdx = 0; ControlPointIdx < ControlPoints.GetSize() - 1 && Sections.GetSize() < SynthInfo->NumSections + 2; ControlPointIdx++)
 	{
 		lcVector3 SegmentControlPoints[4];
 
@@ -84,13 +71,13 @@ lcMesh* lcSynthCreateMesh(lcSynthInfo* SynthInfo, const lcArray<lcPieceControlPo
 
 		if (ControlPointIdx == 0)
 		{
-			StartTransform = lcMul(StartTransform, SynthInfo->Components[0].Transform);
+			StartTransform = lcMatrix44(lcMul(lcMatrix33(StartTransform), lcMatrix33(SynthInfo->Components[0].Transform)), StartTransform.GetTranslation());
 			Sections.Add(StartTransform);
 			SectionLength = SynthInfo->Components[0].Length;
 		}
 
 		if (ControlPointIdx == ControlPoints.GetSize() - 2)
-			EndTransform = lcMul(EndTransform, lcMatrix44(lcVector4(1.0f, 0.0f, 0.0f, 0.0f), lcVector4(0.0f, -1.0f, 0.0f, 0.0f), lcVector4(0.0f, 0.0f, 1.0f, 0.0f), lcVector4(0.0f, 0.0f, 0.0f, 1.0f)));
+			EndTransform = lcMatrix44(lcMul(lcMatrix33(EndTransform), lcMatrix33(lcVector3(1.0f, 0.0f, 0.0f), lcVector3(0.0f, -1.0f, 0.0f), lcVector3(0.0f, 0.0f, 1.0f))), EndTransform.GetTranslation());
 
 		SegmentControlPoints[0] = StartTransform.GetTranslation();
 		SegmentControlPoints[1] = lcMul31(lcVector3(0.0f, ControlPoints[ControlPointIdx].Stiffness, 0.0f), StartTransform);
@@ -159,6 +146,9 @@ lcMesh* lcSynthCreateMesh(lcSynthInfo* SynthInfo, const lcArray<lcPieceControlPo
 
 			Sections.Add(lcMatrix44(lcMatrix33(lcNormalize(Up), lcNormalize(Tangent), lcNormalize(Side)), CurvePoints[CurrentPointIndex]));
 
+			if (SectionCallback)
+				SectionCallback(CurvePoints[CurrentPointIndex], ControlPointIdx, t, CallbackParam);
+
 			if (Sections.GetSize() == SynthInfo->NumSections + 2)
 				break;
 
@@ -172,16 +162,25 @@ lcMesh* lcSynthCreateMesh(lcSynthInfo* SynthInfo, const lcArray<lcPieceControlPo
 	while (Sections.GetSize() < SynthInfo->NumSections + 2)
 	{
 		lcMatrix44 EndTransform = lcMatrix44LeoCADToLDraw(ControlPoints[ControlPoints.GetSize() - 1].Transform);
-		EndTransform = lcMul(EndTransform, lcMatrix44(lcVector4(1.0f, 0.0f, 0.0f, 0.0f), lcVector4(0.0f, -1.0f, 0.0f, 0.0f), lcVector4(0.0f, 0.0f, 1.0f, 0.0f), lcVector4(0.0f, 0.0f, 0.0f, 1.0f)));
+		EndTransform = lcMatrix44(lcMul(lcMatrix33(EndTransform), lcMatrix33(lcVector3(1.0f, 0.0f, 0.0f), lcVector3(0.0f, -1.0f, 0.0f), lcVector3(0.0f, 0.0f, 1.0f))), EndTransform.GetTranslation());
 		lcVector3 Position = lcMul31(lcVector3(0.0f, SectionLength, 0.0f), EndTransform);
 		EndTransform.SetTranslation(Position);
 		Sections.Add(EndTransform);
+
+		if (SectionCallback)
+			SectionCallback(Position, ControlPoints.GetSize() - 1, 1.0f, CallbackParam);
 
 		if (Sections.GetSize() < SynthInfo->NumSections + 1)
 			SectionLength += SynthInfo->Components[1].Length;
 		else
 			SectionLength += SynthInfo->Components[2].Length;
 	}
+}
+
+lcMesh* lcSynthCreateMesh(const lcSynthInfo* SynthInfo, const lcArray<lcPieceControlPoint>& ControlPoints)
+{
+	lcArray<lcMatrix44> Sections;
+	lcSynthEvaluate(SynthInfo, ControlPoints, Sections, NULL, NULL);
 
 	// todo: rewrite this to pass the parts directly
 
@@ -223,4 +222,59 @@ lcMesh* lcSynthCreateMesh(lcSynthInfo* SynthInfo, const lcArray<lcPieceControlPo
 		return lcGetPiecesLibrary()->CreateMesh(NULL, MeshData);
 
 	return NULL;
+}
+
+struct lcSynthInsertParam
+{
+	lcVector3 Start;
+	lcVector3 End;
+	int BestSegment;
+	float BestTime;
+	float BestDistance;
+	lcVector3 BestPosition;
+};
+
+static void lcSynthInsertCallback(const lcVector3& CurvePoint, int SegmentIndex, float t, void* Param)
+{
+	lcSynthInsertParam* SynthInsertParam = (lcSynthInsertParam*)Param;
+
+	float Distance = lcRayPointDistance(CurvePoint, SynthInsertParam->Start, SynthInsertParam->End);
+	if (Distance < SynthInsertParam->BestDistance)
+	{
+		SynthInsertParam->BestSegment = SegmentIndex;
+		SynthInsertParam->BestTime = t;
+		SynthInsertParam->BestDistance = Distance;
+		SynthInsertParam->BestPosition = lcVector3LDrawToLeoCAD(CurvePoint);
+	}
+}
+
+int lcSynthInsertControlPoint(const lcSynthInfo* SynthInfo, lcArray<lcPieceControlPoint>& ControlPoints, const lcVector3& Start, const lcVector3& End)
+{
+	lcArray<lcMatrix44> Sections;
+	lcSynthInsertParam SynthInsertParam;
+
+	SynthInsertParam.Start = Start;
+	SynthInsertParam.End = End;
+	SynthInsertParam.BestSegment = -1;
+	SynthInsertParam.BestDistance = FLT_MAX;
+
+	lcSynthEvaluate(SynthInfo, ControlPoints, Sections, lcSynthInsertCallback, &SynthInsertParam);
+
+	if (SynthInsertParam.BestSegment != -1)
+	{
+		lcPieceControlPoint ControlPoint = ControlPoints[SynthInsertParam.BestSegment];
+		ControlPoint.Transform.SetTranslation(SynthInsertParam.BestPosition);
+
+		if (SynthInsertParam.BestSegment != ControlPoints.GetSize() - 1)
+		{
+			lcPieceControlPoint NextControlPoint = ControlPoints[SynthInsertParam.BestSegment + 1];
+			float t = SynthInsertParam.BestTime;
+
+			ControlPoint.Stiffness = ControlPoint.Stiffness * (1.0f - t) + NextControlPoint.Stiffness * t;
+		}
+
+		ControlPoints.InsertAt(SynthInsertParam.BestSegment + 1, ControlPoint);
+	}
+
+	return SynthInsertParam.BestSegment + 1;
 }

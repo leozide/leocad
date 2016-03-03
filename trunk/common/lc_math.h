@@ -521,6 +521,11 @@ inline lcVector4& operator/=(lcVector4& a, float b)
 	return a;
 }
 
+inline lcVector3 lcVector3LDrawToLeoCAD(const lcVector3& Vector)
+{
+	return lcVector3(Vector[0], Vector[2], -Vector[1]);
+}
+
 inline lcVector3 lcVector3FromColor(lcuint32 Color)
 {
 	lcVector3 v(LC_RGBA_RED(Color), LC_RGBA_GREEN(Color), LC_RGBA_BLUE(Color));
@@ -1242,6 +1247,30 @@ inline lcMatrix44 lcMatrix44Inverse(const lcMatrix44& m)
 #undef SWAP_ROWS
 }
 
+inline lcMatrix44 lcMatrix44LeoCADToLDraw(const lcMatrix44& Matrix)
+{
+	lcMatrix44 m;
+
+	m.r[0] = lcVector4(Matrix[0][0], -Matrix[2][0], Matrix[1][0], 0.0f);
+	m.r[1] = lcVector4(-Matrix[0][2], Matrix[2][2], -Matrix[1][2], 0.0f);
+	m.r[2] = lcVector4(Matrix[0][1], -Matrix[2][1], Matrix[1][1], 0.0f);
+	m.r[3] = lcVector4(Matrix[3][0], -Matrix[3][2], Matrix[3][1], 1.0f);
+
+	return m;
+}
+
+inline lcMatrix44 lcMatrix44LDrawToLeoCAD(const lcMatrix44& Matrix)
+{
+	lcMatrix44 m;
+
+	m.r[0] = lcVector4(Matrix[0][0], Matrix[2][0], -Matrix[1][0], 0.0f);
+	m.r[1] = lcVector4(Matrix[0][2], Matrix[2][2], -Matrix[1][2], 0.0f);
+	m.r[2] = lcVector4(-Matrix[0][1], -Matrix[2][1], Matrix[1][1], 0.0f);
+	m.r[3] = lcVector4(Matrix[3][0], Matrix[3][2], -Matrix[3][1], 1.0f);
+
+	return m;
+}
+
 inline lcVector4 lcQuaternionRotationX(float Radians)
 {
 	return lcVector4(sinf(Radians / 2.0f), 0, 0, cosf(Radians / 2.0f));
@@ -1760,26 +1789,19 @@ inline bool lcSphereRayMinIntersectDistance(const lcVector3& Center, float Radiu
 	}
 }
 
-/*
-float LinePointMinDistance(const Vector3& Point, const Vector3& Start, const Vector3& End)
+inline float lcRayPointDistance(const lcVector3& Point, const lcVector3& Start, const lcVector3& End)
 {
-	Vector3 Dir = End - Start;
+	lcVector3 Dir = Point - Start;
+	lcVector3 RayDir = End - Start;
 
-	float t1 = Dot3(Start - Point, Dir);
-	float t2 = LengthSquared(Dir);
+	float t = lcDot(Dir, RayDir) / lcLengthSquared(RayDir);
+	t = lcClamp(t, 0.0f, 1.0f);
 
-	float t = -t1 / t2;
+	lcVector3 Closest = Start + t * RayDir;
 
-	if (t < 0.0f)
-		t = 0.0f;
-	else if (t > 1.0f)
-		t = 1.0f;
-
-	Vector3 Closest = Start + t * Dir;
-
-	return Length(Closest - Point);
+	return lcLength(Closest - Point);
 }
-*/
+
 // Returns true if the axis aligned box intersects the volume defined by planes.
 inline bool lcBoundingBoxIntersectsVolume(const lcVector3& Min, const lcVector3& Max, const lcVector4 Planes[6])
 {

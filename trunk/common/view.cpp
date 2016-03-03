@@ -386,6 +386,11 @@ void View::ShowContextMenu() const
 
 	Popup->addSeparator();
 
+	Popup->addAction(Actions[LC_PIECE_CONTROL_POINT_INSERT]);
+	Popup->addAction(Actions[LC_PIECE_CONTROL_POINT_REMOVE]);
+
+	Popup->addSeparator();
+
 	Popup->addAction(Actions[LC_PIECE_VIEW_SELECTED_MODEL]);
 	Popup->addAction(Actions[LC_PIECE_INLINE_SELECTED_MODELS]);
 	Popup->addAction(Actions[LC_PIECE_MOVE_SELECTION_TO_MODEL]);
@@ -484,6 +489,20 @@ lcMatrix44 View::GetPieceInsertPosition() const
 	}
 
 	return lcMatrix44Translation(UnprojectPoint(lcVector3((float)mInputState.x, (float)mInputState.y, 0.9f)));
+}
+
+void View::GetRayUnderPointer(lcVector3& Start, lcVector3& End) const
+{
+	lcVector3 StartEnd[2] =
+	{
+		lcVector3((float)mInputState.x, (float)mInputState.y, 0.0f),
+		lcVector3((float)mInputState.x, (float)mInputState.y, 1.0f)
+	};
+
+	UnprojectPoints(StartEnd, 2);
+
+	Start = StartEnd[0];
+	End = StartEnd[1];
 }
 
 lcObjectSection View::FindObjectUnderPointer(bool PiecesOnly) const

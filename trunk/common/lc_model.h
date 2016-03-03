@@ -5,17 +5,19 @@
 #include "lc_math.h"
 #include "object.h"
 
-#define LC_SEL_NO_PIECES         0x001 // No pieces in model
-#define LC_SEL_PIECE             0x002 // At last 1 piece selected
-#define LC_SEL_SELECTED          0x004 // At last 1 object selected
-#define LC_SEL_UNSELECTED        0x008 // At least 1 piece unselected
-#define LC_SEL_HIDDEN            0x010 // At least one piece hidden
-#define LC_SEL_HIDDEN_SELECTED   0x020 // At least one piece selected is hidden
-#define LC_SEL_VISIBLE_SELECTED  0x040 // At least one piece selected is not hidden
-#define LC_SEL_GROUPED           0x080 // At least one piece selected is grouped
-#define LC_SEL_FOCUS_GROUPED     0x100 // Focused piece is grouped
-#define LC_SEL_CAN_GROUP         0x200 // Can make a new group
-#define LC_SEL_MODEL_SELECTED    0x400 // At least one model reference is selected
+#define LC_SEL_NO_PIECES                0x0001 // No pieces in model
+#define LC_SEL_PIECE                    0x0002 // At last 1 piece selected
+#define LC_SEL_SELECTED                 0x0004 // At last 1 object selected
+#define LC_SEL_UNSELECTED               0x0008 // At least 1 piece unselected
+#define LC_SEL_HIDDEN                   0x0010 // At least one piece hidden
+#define LC_SEL_HIDDEN_SELECTED          0x0020 // At least one piece selected is hidden
+#define LC_SEL_VISIBLE_SELECTED         0x0040 // At least one piece selected is not hidden
+#define LC_SEL_GROUPED                  0x0080 // At least one piece selected is grouped
+#define LC_SEL_FOCUS_GROUPED            0x0100 // Focused piece is grouped
+#define LC_SEL_CAN_GROUP                0x0200 // Can make a new group
+#define LC_SEL_MODEL_SELECTED           0x0400 // At least one model reference is selected
+#define LC_SEL_CAN_ADD_CONTROL_POINT    0x0800 // Can add control points to focused piece
+#define LC_SEL_CAN_REMOVE_CONTROL_POINT 0x1000 // Can remove control points from focused piece
 
 enum lcTransformType
 {
@@ -197,6 +199,8 @@ public:
 	void DeleteAllCameras();
 	void DeleteSelectedObjects();
 	void ResetSelectedPiecesPivotPoint();
+	void InsertControlPoint();
+	void RemoveFocusedControlPoint();
 	void ShowSelectedPiecesEarlier();
 	void ShowSelectedPiecesLater();
 	void SetPieceSteps(const QList<QPair<lcPiece*, lcStep>>& PieceSteps);

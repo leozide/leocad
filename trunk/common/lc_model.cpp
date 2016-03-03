@@ -1918,6 +1918,43 @@ void lcModel::ResetSelectedPiecesPivotPoint()
 	gMainWindow->UpdateAllViews();
 }
 
+void lcModel::InsertControlPoint()
+{
+	lcObject* Focus = GetFocusObject();
+
+	if (!Focus || !Focus->IsPiece())
+		return;
+
+	lcPiece* Piece = (lcPiece*)Focus;
+
+	lcVector3 Start, End;
+	gMainWindow->GetActiveView()->GetRayUnderPointer(Start, End);
+
+	if (Piece->InsertControlPoint(Start, End))
+	{
+		SaveCheckpoint("Modifying");
+		gMainWindow->UpdateSelectedObjects(true);
+		gMainWindow->UpdateAllViews();
+	}
+}
+
+void lcModel::RemoveFocusedControlPoint()
+{
+	lcObject* Focus = GetFocusObject();
+
+	if (!Focus || !Focus->IsPiece())
+		return;
+
+	lcPiece* Piece = (lcPiece*)Focus;
+
+	if (Piece->RemoveFocusedControlPoint())
+	{
+		SaveCheckpoint("Modifying");
+		gMainWindow->UpdateSelectedObjects(true);
+		gMainWindow->UpdateAllViews();
+	}
+}
+
 void lcModel::ShowSelectedPiecesEarlier()
 {
 	lcArray<lcPiece*> MovedPieces;
@@ -2909,6 +2946,16 @@ void lcModel::GetSelectionInformation(int* Flags, lcArray<lcObject*>& Selection,
 					*Flags |= LC_SEL_VISIBLE_SELECTED;
 
 				*Flags |= LC_SEL_PIECE | LC_SEL_SELECTED;
+
+				if (Piece->mPieceInfo->GetSynthInfo())
+				{
+					*Flags |= LC_SEL_CAN_ADD_CONTROL_POINT;
+
+					lcuint32 Section = Piece->GetFocusSection();
+
+					if (Section >= LC_PIECE_SECTION_CONTROL_POINT_1 && Section <= LC_PIECE_SECTION_CONTROL_POINT_8 && Piece->GetControlPoints().GetSize() > 2)
+						*Flags |= LC_SEL_CAN_REMOVE_CONTROL_POINT;
+				}
 
 				if (Piece->GetGroup() != NULL)
 				{

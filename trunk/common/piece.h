@@ -361,6 +361,11 @@ public:
 			mState &= ~LC_PIECE_HIDDEN;
 	}
 
+	const lcArray<lcPieceControlPoint>& GetControlPoints() const
+	{
+		return mControlPoints;
+	}
+
 	const char* GetName() const;
 	bool IsVisible(lcStep Step);
 	void Initialize(const lcMatrix44& WorldMatrix, lcStep Step);
@@ -374,6 +379,9 @@ public:
 	void Rotate(lcStep Step, bool AddKey, const lcMatrix33& RotationMatrix, const lcVector3& Center, const lcMatrix33& RotationFrame);
 	void MovePivotPoint(const lcVector3& Distance);
 	void RotatePivotPoint(const lcMatrix33& RotationMatrix);
+
+	bool InsertControlPoint(const lcVector3& WorldStart, const lcVector3& WorldEnd);
+	bool RemoveFocusedControlPoint();
 
 	lcGroup* GetTopGroup();
 

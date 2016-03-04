@@ -59,11 +59,7 @@ void lcPiece::SetPieceInfo(PieceInfo* Info)
 
 	if (SynthInfo)
 	{
-		mControlPoints.SetSize(2);
-		mControlPoints[0].Transform = SynthInfo->DefaultControlPoints[0];
-		mControlPoints[0].Stiffness = SynthInfo->DefaultStiffness;
-		mControlPoints[1].Transform = SynthInfo->DefaultControlPoints[1];
-		mControlPoints[1].Stiffness = SynthInfo->DefaultStiffness;
+		SynthInfo->GetDefaultControlPoints(mControlPoints);
 		UpdateMesh();
 	}
 }
@@ -741,7 +737,7 @@ bool lcPiece::InsertControlPoint(const lcVector3& WorldStart, const lcVector3& W
 	lcVector3 Start = lcMul31(WorldStart, InverseWorldMatrix);
 	lcVector3 End = lcMul31(WorldEnd, InverseWorldMatrix);
 
-	int ControlPointIndex = lcSynthInsertControlPoint(mPieceInfo->GetSynthInfo(), mControlPoints, Start, End);
+	int ControlPointIndex = mPieceInfo->GetSynthInfo()->InsertControlPoint(mControlPoints, Start, End);
 	if (ControlPointIndex)
 	{
 		SetFocused(GetFocusSection(), false);
@@ -824,5 +820,5 @@ void lcPiece::UpdatePosition(lcStep Step)
 void lcPiece::UpdateMesh()
 {
 	delete mMesh;
-	mMesh = lcSynthCreateMesh(mPieceInfo->GetSynthInfo(), mControlPoints);
+	mMesh = mPieceInfo->GetSynthInfo()->CreateMesh(mControlPoints);
 }

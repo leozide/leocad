@@ -3,25 +3,41 @@
 
 #include "lc_math.h"
 #include "piece.h"
-#include "pieceinf.h"
+
+enum lcSynthType
+{
+	LC_SYNTH_PIECE_RIBBED_HOSE,
+	LC_SYNTH_PIECE_FLEXIBLE_AXLE
+};
 
 struct lcSynthComponent
 {
-	char PartID[LC_PIECE_NAME_LEN];
 	lcMatrix44 Transform;
 	float Length;
 };
 
-struct lcSynthInfo
+class lcSynthInfo
 {
-	lcMatrix44 DefaultControlPoints[2];
-	lcSynthComponent Components[3];
-	float DefaultStiffness;
-	int NumSections;
+public:
+	lcSynthInfo(lcSynthType Type, float Length, int NumSections);
+
+	void GetDefaultControlPoints(lcArray<lcPieceControlPoint>& ControlPoints) const;
+	int InsertControlPoint(lcArray<lcPieceControlPoint>& ControlPoints, const lcVector3& Start, const lcVector3& End) const;
+	lcMesh* CreateMesh(const lcArray<lcPieceControlPoint>& ControlPoints) const;
+
+protected:
+	void CalculateSections(const lcArray<lcPieceControlPoint>& ControlPoints, lcArray<lcMatrix44>& Sections, void(*SectionCallback)(const lcVector3& CurvePoint, int SegmentIndex, float t, void* Param), void* CallbackParam) const;
+	void AddRibbedHoseParts(lcMemFile& File, const lcArray<lcMatrix44>& Sections) const;
+	void AddFlexibleAxleParts(lcMemFile& File, const lcArray<lcMatrix44>& Sections) const;
+
+	lcSynthType mType;
+	lcSynthComponent mStart;
+	lcSynthComponent mMiddle;
+	lcSynthComponent mEnd;
+	float mLength;
+	int mNumSections;
 };
 
 void lcSynthInit();
-lcMesh* lcSynthCreateMesh(const lcSynthInfo* SynthInfo, const lcArray<lcPieceControlPoint>& ControlPoints);
-int lcSynthInsertControlPoint(const lcSynthInfo* SynthInfo, lcArray<lcPieceControlPoint>& ControlPoints, const lcVector3& Start, const lcVector3& End);
 
 #endif // _LC_SYNTH_H_

@@ -15,7 +15,7 @@
 
 #define LC_PIECE_NAME_LEN 256
 
-struct lcSynthInfo;
+class lcSynthInfo;
 
 class PieceInfo
 {

@@ -365,6 +365,15 @@ inline bool operator!=(const lcVector3& a, const lcVector3& b)
 	return a.x != b.x || a.y != b.y || a.z != b.z;
 }
 
+#ifndef QT_NO_DEBUG
+
+inline QDebug operator<<(QDebug d, const lcVector3& v)
+{
+	return d << v.x << v.y << v.z;
+}
+
+#endif
+
 inline void lcVector3::Normalize()
 {
 	float InvLength = 1.0f / Length();
@@ -631,6 +640,17 @@ inline lcMatrix33 lcMatrix33Identity()
 	m.r[0] = lcVector3(1.0f, 0.0f, 0.0f);
 	m.r[1] = lcVector3(0.0f, 1.0f, 0.0f);
 	m.r[2] = lcVector3(0.0f, 0.0f, 1.0f);
+
+	return m;
+}
+
+inline lcMatrix33 lcMatrix33Scale(const lcVector3& Scale)
+{
+	lcMatrix33 m;
+
+	m.r[0] = lcVector3(Scale.x, 0.0f, 0.0f);
+	m.r[1] = lcVector3(0.0f, Scale.y, 0.0f);
+	m.r[2] = lcVector3(0.0f, 0.0f, Scale.z);
 
 	return m;
 }

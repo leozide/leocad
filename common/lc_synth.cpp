@@ -163,7 +163,7 @@ void lcSynthInfo::CalculateSections(const lcArray<lcPieceControlPoint>& ControlP
 		float TotalSegmentLength = 0.0f;
 
 		for (int PointIdx = 0; PointIdx < CurvePoints.GetSize() - 1; PointIdx++)
-			TotalSegmentLength += lcLength(CurvePoints[CurrentPointIndex] - CurvePoints[CurrentPointIndex + 1]);
+			TotalSegmentLength += lcLength(CurvePoints[PointIdx] - CurvePoints[PointIdx + 1]);
 
 		while (CurrentPointIndex < CurvePoints.GetSize() - 1)
 		{
@@ -220,7 +220,7 @@ void lcSynthInfo::AddRibbedHoseParts(lcMemFile& File, const lcArray<lcMatrix44>&
 
 	{
 		const int SectionIdx = 0;
-		lcMatrix33 Transform(lcMul(lcMatrix33(lcVector3(1, 0, 0), lcVector3(0, -1, 0), lcVector3(0, 0, 1)), lcMatrix33(Sections[SectionIdx])));
+		lcMatrix33 Transform(lcMul(lcMatrix33Scale(lcVector3(1.0f, -1.0f, 1.0f)), lcMatrix33(Sections[SectionIdx])));
 		lcVector3 Offset = Sections[SectionIdx].GetTranslation();
 
 		sprintf(Line, "1 16 %f %f %f %f %f %f %f %f %f %f %f %f 79.DAT\n", Offset[0], Offset[1], Offset[2], Transform[0][0], Transform[1][0], Transform[2][0],
@@ -232,10 +232,9 @@ void lcSynthInfo::AddRibbedHoseParts(lcMemFile& File, const lcArray<lcMatrix44>&
 	for (int SectionIdx = 1; SectionIdx < Sections.GetSize() - 1; SectionIdx++)
 	{
 		const lcMatrix44& Transform = Sections[SectionIdx];
-		const char* PartID = (SectionIdx > 0 && SectionIdx < Sections.GetSize() - 1) ? "80.DAT" : "79.DAT";
 
-		sprintf(Line, "1 16 %f %f %f %f %f %f %f %f %f %f %f %f %s\n", Transform[3][0], Transform[3][1], Transform[3][2], Transform[0][0], Transform[1][0], Transform[2][0],
-				Transform[0][1], Transform[1][1], Transform[2][1], Transform[0][2], Transform[1][2], Transform[2][2], PartID);
+		sprintf(Line, "1 16 %f %f %f %f %f %f %f %f %f %f %f %f 80.DAT\n", Transform[3][0], Transform[3][1], Transform[3][2], Transform[0][0], Transform[1][0], Transform[2][0],
+				Transform[0][1], Transform[1][1], Transform[2][1], Transform[0][2], Transform[1][2], Transform[2][2]);
 
 		File.WriteBuffer(Line, strlen(Line));
 	}
@@ -267,16 +266,6 @@ void lcSynthInfo::AddFlexibleAxleParts(lcMemFile& File, const lcArray<lcMatrix44
 		lcMatrix33(lcVector3( 0.0f, 1.0f, 0.0f), lcVector3(1.0f,  0.0f, 0.0f), lcVector3(0.0f, 0.0f, -1.0f)),
 	};
 
-	lcVector3 EdgeOffsets[6] =
-	{
-		lcVector3(0.0f, 20.0f - 20.0f, 0.0f),
-		lcVector3(0.0f, 16.0f - 20.0f, 0.0f),
-		lcVector3(0.0f, 12.0f - 20.0f, 0.0f),
-		lcVector3(0.0f,  8.0f - 20.0f, 0.0f),
-		lcVector3(0.0f,  4.0f - 20.0f, 0.0f),
-		lcVector3(0.0f,  0.0f - 20.0f, 0.0f),
-	};
-
 	const char* EdgeParts[6] =
 	{
 		"STUD3A.DAT",
@@ -290,8 +279,8 @@ void lcSynthInfo::AddFlexibleAxleParts(lcMemFile& File, const lcArray<lcMatrix44
 	for (int PartIdx = 0; PartIdx < NumEdgeParts; PartIdx++)
 	{
 		const int SectionIdx = 0;
-		lcMatrix33 Transform(lcMul(lcMul(EdgeTransforms[PartIdx], lcMatrix33(lcVector3(1,0,0), lcVector3(0,-1,0), lcVector3(0,0,1))), lcMatrix33(Sections[SectionIdx])));
-		lcVector3 Offset = lcMul31(EdgeOffsets[5 - PartIdx], Sections[SectionIdx]);
+		lcMatrix33 Transform(lcMul(lcMul(EdgeTransforms[PartIdx], lcMatrix33Scale(lcVector3(1.0f, -1.0f, 1.0f))), lcMatrix33(Sections[SectionIdx])));
+		lcVector3 Offset = lcMul31(lcVector3(0.0f, -4.0f * (5 - PartIdx), 0.0f), Sections[SectionIdx]);
 
 		sprintf(Line, "1 16 %f %f %f %f %f %f %f %f %f %f %f %f %s\n", Offset[0], Offset[1], Offset[2], Transform[0][0], Transform[1][0], Transform[2][0],
 				Transform[0][1], Transform[1][1], Transform[2][1], Transform[0][2], Transform[1][2], Transform[2][2], EdgeParts[PartIdx]);
@@ -299,22 +288,56 @@ void lcSynthInfo::AddFlexibleAxleParts(lcMemFile& File, const lcArray<lcMatrix44
 		File.WriteBuffer(Line, strlen(Line));
 	}
 
+	lcVector3 MidLineVertices[12] =
+	{
+		lcVector3(-5.602f, 0.0f,  2.000f), lcVector3(-2.000f, 0.0f,  2.000f), lcVector3(-2.000f, 0.0f,  5.602f), lcVector3( 5.602f, 0.0f,  2.000f), 
+		lcVector3( 2.000f, 0.0f,  2.000f), lcVector3( 2.000f, 0.0f,  5.602f), lcVector3(-5.602f, 0.0f, -2.000f), lcVector3(-2.000f, 0.0f, -2.000f), 
+		lcVector3(-2.000f, 0.0f, -5.602f), lcVector3( 5.602f, 0.0f, -2.000f), lcVector3( 2.000f, 0.0f, -2.000f), lcVector3( 2.000f, 0.0f, -5.602f)
+	};
+
 	for (int SectionIdx = 1; SectionIdx < Sections.GetSize() - 1; SectionIdx++)
 	{
-		lcMatrix33 Transform(lcMul(lcMatrix33(lcVector3(1.0f, 0.0f, 0.0f), lcVector3(0.0f, 4.0f, 0.0f), lcVector3(0.0f, 0.0f, 1.0f)), lcMatrix33(Sections[SectionIdx])));
-		lcVector3 Offset(Sections[SectionIdx].GetTranslation());
+		for (int VertexIdx = 0; VertexIdx < 12; VertexIdx++)
+		{
+			lcVector3 Vertex1 = lcMul31(MidLineVertices[VertexIdx], Sections[SectionIdx]);
+			lcVector3 Vertex2 = lcMul31(MidLineVertices[VertexIdx], Sections[SectionIdx + 1]);
 
-		sprintf(Line, "1 7 %f %f %f %f %f %f %f %f %f %f %f %f axlehol8.dat\n", Offset[0], Offset[1], Offset[2], Transform[0][0], Transform[1][0], Transform[2][0],
-				Transform[0][1], Transform[1][1], Transform[2][1], Transform[0][2], Transform[1][2], Transform[2][2]);
+			sprintf(Line, "2 24 %f %f %f %f %f %f\n", Vertex1[0], Vertex1[1], Vertex1[2], Vertex2[0], Vertex2[1], Vertex2[2]);
+			File.WriteBuffer(Line, strlen(Line));
+		}
+	}
 
-		File.WriteBuffer(Line, strlen(Line));
+	lcVector3 MidQuadVertices[32] =
+	{
+		lcVector3(-6.000f, 0.0f,  0.000f), lcVector3(-5.602f, 0.0f,  2.000f), lcVector3(-5.602f, 0.0f,  2.000f), lcVector3(-2.000f, 0.0f,  2.000f),
+		lcVector3(-2.000f, 0.0f,  2.000f), lcVector3(-2.000f, 0.0f,  5.602f), lcVector3(-2.000f, 0.0f,  5.602f), lcVector3( 0.000f, 0.0f,  6.000f),
+		lcVector3( 5.602f, 0.0f,  2.000f), lcVector3( 6.000f, 0.0f,  0.000f), lcVector3( 2.000f, 0.0f,  2.000f), lcVector3( 5.602f, 0.0f,  2.000f),
+		lcVector3( 2.000f, 0.0f,  5.602f), lcVector3( 2.000f, 0.0f,  2.000f), lcVector3( 0.000f, 0.0f,  6.000f), lcVector3( 2.000f, 0.0f,  5.602f),
+		lcVector3(-5.602f, 0.0f, -2.000f), lcVector3(-6.000f, 0.0f,  0.000f), lcVector3(-2.000f, 0.0f, -2.000f), lcVector3(-5.602f, 0.0f, -2.000f),
+		lcVector3(-2.000f, 0.0f, -5.602f), lcVector3(-2.000f, 0.0f, -2.000f), lcVector3( 0.000f, 0.0f, -6.000f), lcVector3(-2.000f, 0.0f, -5.602f),
+		lcVector3( 6.000f, 0.0f,  0.000f), lcVector3( 5.602f, 0.0f, -2.000f), lcVector3( 5.602f, 0.0f, -2.000f), lcVector3( 2.000f, 0.0f, -2.000f),
+		lcVector3( 2.000f, 0.0f, -2.000f), lcVector3( 2.000f, 0.0f, -5.602f), lcVector3( 2.000f, 0.0f, -5.602f), lcVector3( 0.000f, 0.0f, -6.000f),
+	};
+
+	for (int SectionIdx = 1; SectionIdx < Sections.GetSize() - 1; SectionIdx++)
+	{
+		for (int VertexIdx = 0; VertexIdx < 32; VertexIdx += 2)
+		{
+			lcVector3 Vertex1 = lcMul31(MidQuadVertices[VertexIdx], Sections[SectionIdx]);
+			lcVector3 Vertex2 = lcMul31(MidQuadVertices[VertexIdx + 1], Sections[SectionIdx]);
+			lcVector3 Vertex3 = lcMul31(MidQuadVertices[VertexIdx + 1], Sections[SectionIdx + 1]);
+			lcVector3 Vertex4 = lcMul31(MidQuadVertices[VertexIdx], Sections[SectionIdx + 1]);
+
+			sprintf(Line, "4 16 %f %f %f %f %f %f %f %f %f %f %f %f\n", Vertex1[0], Vertex1[1], Vertex1[2], Vertex2[0], Vertex2[1], Vertex2[2], Vertex3[0], Vertex3[1], Vertex3[2], Vertex4[0], Vertex4[1], Vertex4[2]);
+			File.WriteBuffer(Line, strlen(Line));
+		}
 	}
 
 	for (int PartIdx = 0; PartIdx < NumEdgeParts; PartIdx++)
 	{
 		const int SectionIdx = Sections.GetSize() - 1;
 		lcMatrix33 Transform(lcMul(EdgeTransforms[PartIdx], lcMatrix33(Sections[SectionIdx])));
-		lcVector3 Offset = lcMul31(-EdgeOffsets[5 - PartIdx], Sections[SectionIdx]);
+		lcVector3 Offset = lcMul31(lcVector3(0.0f, 4.0f * (5 - PartIdx), 0.0f), Sections[SectionIdx]);
 
 		sprintf(Line, "1 16 %f %f %f %f %f %f %f %f %f %f %f %f %s\n", Offset[0], Offset[1], Offset[2], Transform[0][0], Transform[1][0], Transform[2][0],
 				Transform[0][1], Transform[1][1], Transform[2][1], Transform[0][2], Transform[1][2], Transform[2][2], EdgeParts[PartIdx]);

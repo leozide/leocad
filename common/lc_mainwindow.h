@@ -26,6 +26,56 @@ struct lcSearchOptions
 	char Name[256];
 };
 
+class lcModelTabWidget : public QWidget
+{
+	Q_OBJECT
+
+public:
+	lcModelTabWidget(lcModel* Model)
+	{
+		mModel = Model;
+		mActiveView = NULL;
+	}
+
+	View* GetActiveView() const
+	{
+		return mActiveView;
+	}
+
+	void SetActiveView(View* ActiveView)
+	{
+		mActiveView = ActiveView;
+	}
+
+	void AddView(View* View)
+	{
+		mViews.Add(View);
+	}
+
+	void RemoveView(View* View)
+	{
+		if (View == mActiveView)
+			mActiveView = NULL;
+
+		mViews.Remove(View);
+	}
+
+	lcModel* GetModel() const
+	{
+		return mModel;
+	}
+
+	const lcArray<View*>* GetViews() const
+	{
+		return &mViews;
+	}
+
+protected:
+	lcModel* mModel;
+	View* mActiveView;
+	lcArray<View*> mViews;
+};
+
 class lcMainWindow : public QMainWindow
 {
 	Q_OBJECT
@@ -108,12 +158,28 @@ public:
 
 	View* GetActiveView() const
 	{
-		return mActiveView;
+		lcModelTabWidget* CurrentTab = (lcModelTabWidget*)mModelTabWidget->currentWidget();
+		return CurrentTab ? CurrentTab->GetActiveView() : NULL;
 	}
 
-	const lcArray<View*>& GetViews()
+	const lcArray<View*>* GetViewsForModel(lcModel* Model) const
 	{
-		return mViews;
+		lcModelTabWidget* TabWidget = GetTabWidgetForModel(Model);
+		return TabWidget ? TabWidget->GetViews() : NULL;
+	}
+
+	lcModelTabWidget* GetTabForView(View* View) const
+	{
+		for (int TabIdx = 0; TabIdx < mModelTabWidget->count(); TabIdx++)
+		{
+			lcModelTabWidget* TabWidget = (lcModelTabWidget*)mModelTabWidget->widget(TabIdx);
+
+			int ViewIndex = TabWidget->GetViews()->FindIndex(View);
+			if (ViewIndex != -1)
+				return TabWidget;
+		}
+
+		return NULL;
 	}
 
 	QMenu* GetCameraMenu() const
@@ -128,6 +194,8 @@ public:
 
 	bool DoDialog(LC_DIALOG_TYPE Type, void* Data);
 
+	void RemoveAllModelTabs();
+	void SetCurrentModelTab(lcModel* Model);
 	void ResetCameras();
 	void AddView(View* View);
 	void RemoveView(View* View);
@@ -195,6 +263,8 @@ public:
 	QAction* mActions[LC_NUM_COMMANDS];
 
 protected slots:
+	void ModelTabClosed(int Index);
+	void ModelTabChanged(int Index);
 	void ClipboardChanged();
 	void ActionTriggered();
 	void PartsTreeItemChanged(QTreeWidgetItem* Current, QTreeWidgetItem* Previous);
@@ -214,8 +284,18 @@ protected:
 	void SplitView(Qt::Orientation Orientation);
 	void ShowPrintDialog();
 
-	View* mActiveView;
-	lcArray<View*> mViews;
+	lcModelTabWidget* GetTabWidgetForModel(lcModel* Model) const
+	{
+		for (int TabIdx = 0; TabIdx < mModelTabWidget->count(); TabIdx++)
+		{
+			lcModelTabWidget* TabWidget = (lcModelTabWidget*)mModelTabWidget->widget(TabIdx);
+
+			if (TabWidget->GetModel() == Model)
+				return TabWidget;
+		}
+
+		return NULL;
+	}
 
 	bool mAddKeys;
 	lcTool mTool;
@@ -232,6 +312,7 @@ protected:
 
 	QAction* mActionFileRecentSeparator;
 
+	QTabWidget* mModelTabWidget;
 	QToolBar* mStandardToolBar;
 	QToolBar* mToolsToolBar;
 	QToolBar* mTimeToolBar;

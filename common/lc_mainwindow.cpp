@@ -24,7 +24,6 @@ lcMainWindow::lcMainWindow()
 {
 	memset(mActions, 0, sizeof(mActions));
 
-	mActiveView = NULL;
 	mPreviewWidget = NULL;
 	mTransformType = LC_TRANSFORM_RELATIVE_TRANSLATION;
 
@@ -51,9 +50,6 @@ lcMainWindow::lcMainWindow()
 
 lcMainWindow::~lcMainWindow()
 {
-	delete mPreviewWidget;
-	mPreviewWidget = NULL;
-
 	for (int FileIdx = 0; FileIdx < LC_MAX_RECENT_FILES; FileIdx++)
 		lcSetProfileString((LC_PROFILE_KEY)(LC_PROFILE_RECENT_FILE1 + FileIdx), mRecentFiles[FileIdx]);
 
@@ -70,19 +66,12 @@ void lcMainWindow::CreateWidgets()
 	CreateMenus();
 	CreateStatusBar();
 
-	QFrame* CentralFrame = new QFrame;
-	CentralFrame->setFrameShape(QFrame::StyledPanel);
-	CentralFrame->setFrameShadow(QFrame::Sunken);
-	setCentralWidget(CentralFrame);
-
-	QGridLayout* CentralLayout = new QGridLayout(CentralFrame);
-	CentralLayout->setContentsMargins(0, 0, 0, 0);
-
-	View* NewView = new View(NULL);
-	QWidget* ViewWidget = new lcQGLWidget(CentralFrame, mPiecePreviewWidget, NewView, true);
-	CentralLayout->addWidget(ViewWidget, 0, 0, 1, 1);
-	ViewWidget->setFocus();
-	SetActiveView(NewView);
+	mModelTabWidget = new QTabWidget();
+	mModelTabWidget->tabBar()->setMovable(true);
+	mModelTabWidget->tabBar()->setTabsClosable(true);
+	setCentralWidget(mModelTabWidget);
+	connect(mModelTabWidget->tabBar(), SIGNAL(tabCloseRequested(int)), this, SLOT(ModelTabClosed(int)));
+	connect(mModelTabWidget, SIGNAL(currentChanged(int)), this, SLOT(ModelTabChanged(int)));
 
 	connect(QApplication::clipboard(), SIGNAL(dataChanged()), this, SLOT(ClipboardChanged()));
 	ClipboardChanged();
@@ -705,6 +694,19 @@ QMenu* lcMainWindow::createPopupMenu()
 	return Menu;
 }
 
+void lcMainWindow::ModelTabClosed(int Index)
+{
+	delete mModelTabWidget->widget(Index);
+}
+
+void lcMainWindow::ModelTabChanged(int Index)
+{
+	Project* Project = lcGetActiveProject();
+	lcModelTabWidget* CurrentTab = (lcModelTabWidget*)mModelTabWidget->widget(Index);
+
+	Project->SetActiveModel(Project->GetModels().FindIndex(CurrentTab ? CurrentTab->GetModel() : NULL));
+}
+
 void lcMainWindow::ClipboardChanged()
 {
 	const QString MimeType = QLatin1String("application/vnd.leocad-clipboard");
@@ -1160,41 +1162,92 @@ bool lcMainWindow::DoDialog(LC_DIALOG_TYPE Type, void* Data)
 	return false;
 }
 
+void lcMainWindow::RemoveAllModelTabs()
+{
+	while (mModelTabWidget->count())
+	{
+		QWidget* TabWidget = mModelTabWidget->widget(0);
+		delete TabWidget;
+	}
+}
+
+void lcMainWindow::SetCurrentModelTab(lcModel* Model)
+{
+	for (int TabIdx = 0; TabIdx < mModelTabWidget->count(); TabIdx++)
+	{
+		lcModelTabWidget* TabWidget = (lcModelTabWidget*)mModelTabWidget->widget(TabIdx);
+
+		if (TabWidget->GetModel() == Model)
+		{
+			mModelTabWidget->setCurrentIndex(TabIdx);
+			return;
+		}
+	}
+
+	lcModelTabWidget* TabWidget = new lcModelTabWidget(Model);
+	mModelTabWidget->addTab(TabWidget, Model->GetProperties().mName);
+	mModelTabWidget->setCurrentWidget(TabWidget);
+
+	QGridLayout* CentralLayout = new QGridLayout(TabWidget);
+	CentralLayout->setContentsMargins(0, 0, 0, 0);
+
+	View* NewView = new View(Model);
+	QWidget* ViewWidget = new lcQGLWidget(TabWidget, mPiecePreviewWidget, NewView, true);
+	CentralLayout->addWidget(ViewWidget, 0, 0, 1, 1);
+	ViewWidget->setFocus();
+	NewView->ZoomExtents();
+	SetActiveView(NewView);
+}
+
 void lcMainWindow::ResetCameras()
 {
-	for (int ViewIdx = 0; ViewIdx < mViews.GetSize(); ViewIdx++)
-		mViews[ViewIdx]->SetDefaultCamera();
+	lcModelTabWidget* CurrentTab = (lcModelTabWidget*)mModelTabWidget->currentWidget();
+
+	if (!CurrentTab)
+		return;
+
+	const lcArray<View*>* Views = CurrentTab->GetViews();
+
+	for (int ViewIdx = 0; ViewIdx < Views->GetSize(); ViewIdx++)
+		(*Views)[ViewIdx]->SetDefaultCamera();
 
 	lcGetActiveModel()->DeleteAllCameras();
 }
 
 void lcMainWindow::AddView(View* View)
 {
-	mViews.Add(View);
+	lcModelTabWidget* TabWidget = GetTabWidgetForModel(View->mModel);
+
+	if (!TabWidget)
+		return;
+
+	TabWidget->AddView(View);
 
 	View->MakeCurrent();
 
-	if (!mActiveView)
+	if (!TabWidget->GetActiveView())
 	{
-		mActiveView = View;
+		TabWidget->SetActiveView(View);
 		UpdatePerspective();
 	}
 }
 
 void lcMainWindow::RemoveView(View* View)
 {
-	if (View == mActiveView)
-		mActiveView = NULL;
+	lcModelTabWidget* TabWidget = GetTabForView(View);
 
-	mViews.Remove(View);
+	if (TabWidget)
+		TabWidget->RemoveView(View);
 }
 
 void lcMainWindow::SetActiveView(View* ActiveView)
 {
-	if (mActiveView == ActiveView)
+	lcModelTabWidget* TabWidget = GetTabForView(ActiveView);
+
+	if (!TabWidget || TabWidget->GetActiveView() == ActiveView)
 		return;
 
-	mActiveView = ActiveView;
+	TabWidget->SetActiveView(ActiveView);
 
 	UpdateCameraMenu();
 	UpdatePerspective();
@@ -1202,8 +1255,15 @@ void lcMainWindow::SetActiveView(View* ActiveView)
 
 void lcMainWindow::UpdateAllViews()
 {
-	for (int ViewIdx = 0; ViewIdx < mViews.GetSize(); ViewIdx++)
-		mViews[ViewIdx]->Redraw();
+	lcModelTabWidget* CurrentTab = (lcModelTabWidget*)mModelTabWidget->currentWidget();
+
+	if (CurrentTab)
+	{
+		const lcArray<View*>* Views = CurrentTab->GetViews();
+
+		for (int ViewIdx = 0; ViewIdx < Views->GetSize(); ViewIdx++)
+			(*Views)[ViewIdx]->Redraw();
+	}
 }
 
 void lcMainWindow::SetTool(lcTool Tool)
@@ -1634,7 +1694,8 @@ void lcMainWindow::UpdateUndoRedo(const QString& UndoText, const QString& RedoTe
 void lcMainWindow::UpdateCameraMenu()
 {
 	const lcArray<lcCamera*>& Cameras = lcGetActiveModel()->GetCameras();
-	lcCamera* CurrentCamera = mActiveView->mCamera;
+	View* ActiveView = GetActiveView();
+	lcCamera* CurrentCamera = ActiveView ? ActiveView->mCamera : NULL;
 	int CurrentIndex = -1;
 
 	for (int ActionIdx = LC_VIEW_CAMERA_FIRST; ActionIdx <= LC_VIEW_CAMERA_LAST; ActionIdx++)
@@ -1669,10 +1730,15 @@ void lcMainWindow::UpdateCurrentCamera(int CameraIndex)
 
 void lcMainWindow::UpdatePerspective()
 {
-	if (mActiveView->mCamera->IsOrtho())
-		mActions[LC_VIEW_PROJECTION_ORTHO]->setChecked(true);
-	else
-		mActions[LC_VIEW_PROJECTION_PERSPECTIVE]->setChecked(true);
+	View* ActiveView = GetActiveView();
+
+	if (ActiveView)
+	{
+		if (ActiveView->mCamera->IsOrtho())
+			mActions[LC_VIEW_PROJECTION_ORTHO]->setChecked(true);
+		else
+			mActions[LC_VIEW_PROJECTION_PERSPECTIVE]->setChecked(true);
+	}
 }
 
 void lcMainWindow::UpdateModels()
@@ -1693,6 +1759,20 @@ void lcMainWindow::UpdateModels()
 		}
 		else
 			Action->setVisible(false);
+	}
+
+	for (int TabIdx = 0; TabIdx < mModelTabWidget->count(); )
+	{
+		lcModelTabWidget* TabWidget = (lcModelTabWidget*)mModelTabWidget->widget(TabIdx);
+		lcModel* Model = TabWidget->GetModel();
+
+		if (Models.FindIndex(Model) != -1)
+		{
+			mModelTabWidget->setTabText(TabIdx, Model->GetProperties().mName);
+			TabIdx++;
+		}
+		else
+			delete TabWidget;
 	}
 
 	mPartsTree->UpdateModels();
@@ -1779,17 +1859,6 @@ bool lcMainWindow::OpenProject(const QString& FileName)
 	{
 		g_App->SetProject(NewProject);
 		AddRecentFile(LoadFileName);
-
-		for (int ViewIdx = 0; ViewIdx < mViews.GetSize(); ViewIdx++)
-		{
-			View* View = mViews[ViewIdx];
-
-			if (!View->mCamera->IsSimple())
-				View->SetDefaultCamera();
-
-			View->ZoomExtents();
-		}
-
 		UpdateAllViews();
 
 		return true;
@@ -1931,6 +2000,8 @@ void lcMainWindow::SetModelFromSelection()
 
 void lcMainWindow::HandleCommand(lcCommandId CommandId)
 {
+	View* ActiveView = GetActiveView();
+
 	switch (CommandId)
 	{
 	case LC_FILE_NEW:
@@ -2075,11 +2146,13 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		break;
 
 	case LC_VIEW_PROJECTION_PERSPECTIVE:
-		mActiveView->SetProjection(false);
+		if (ActiveView)
+			ActiveView->SetProjection(false);
 		break;
 
 	case LC_VIEW_PROJECTION_ORTHO:
-		mActiveView->SetProjection(true);
+		if (ActiveView)
+			ActiveView->SetProjection(true);
 		break;
 
 	case LC_PIECE_INSERT:
@@ -2103,51 +2176,63 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		break;
 
 	case LC_PIECE_MOVE_PLUSX:
-		lcGetActiveModel()->MoveSelectedObjects(mActiveView->GetMoveDirection(lcVector3(lcMax(GetMoveXYSnap(), 0.1f), 0.0f, 0.0f)), true, false, true, true);
+		if (ActiveView)
+			lcGetActiveModel()->MoveSelectedObjects(ActiveView->GetMoveDirection(lcVector3(lcMax(GetMoveXYSnap(), 0.1f), 0.0f, 0.0f)), true, false, true, true);
 		break;
 
 	case LC_PIECE_MOVE_MINUSX:
-		lcGetActiveModel()->MoveSelectedObjects(mActiveView->GetMoveDirection(lcVector3(-lcMax(GetMoveXYSnap(), 0.1f), 0.0f, 0.0f)), true, false, true, true);
+		if (ActiveView)
+			lcGetActiveModel()->MoveSelectedObjects(ActiveView->GetMoveDirection(lcVector3(-lcMax(GetMoveXYSnap(), 0.1f), 0.0f, 0.0f)), true, false, true, true);
 		break;
 
 	case LC_PIECE_MOVE_PLUSY:
-		lcGetActiveModel()->MoveSelectedObjects(mActiveView->GetMoveDirection(lcVector3(0.0f, lcMax(GetMoveXYSnap(), 0.1f), 0.0f)), true, false, true, true);
+		if (ActiveView)
+			lcGetActiveModel()->MoveSelectedObjects(ActiveView->GetMoveDirection(lcVector3(0.0f, lcMax(GetMoveXYSnap(), 0.1f), 0.0f)), true, false, true, true);
 		break;
 
 	case LC_PIECE_MOVE_MINUSY:
-		lcGetActiveModel()->MoveSelectedObjects(mActiveView->GetMoveDirection(lcVector3(0.0f, -lcMax(GetMoveXYSnap(), 0.1f), 0.0f)), true, false, true, true);
+		if (ActiveView)
+			lcGetActiveModel()->MoveSelectedObjects(ActiveView->GetMoveDirection(lcVector3(0.0f, -lcMax(GetMoveXYSnap(), 0.1f), 0.0f)), true, false, true, true);
 		break;
 
 	case LC_PIECE_MOVE_PLUSZ:
-		lcGetActiveModel()->MoveSelectedObjects(mActiveView->GetMoveDirection(lcVector3(0.0f, 0.0f, lcMax(GetMoveZSnap(), 0.1f))), true, false, true, true);
+		if (ActiveView)
+			lcGetActiveModel()->MoveSelectedObjects(ActiveView->GetMoveDirection(lcVector3(0.0f, 0.0f, lcMax(GetMoveZSnap(), 0.1f))), true, false, true, true);
 		break;
 
 	case LC_PIECE_MOVE_MINUSZ:
-		lcGetActiveModel()->MoveSelectedObjects(mActiveView->GetMoveDirection(lcVector3(0.0f, 0.0f, -lcMax(GetMoveZSnap(), 0.1f))), true, false, true, true);
+		if (ActiveView)
+			lcGetActiveModel()->MoveSelectedObjects(ActiveView->GetMoveDirection(lcVector3(0.0f, 0.0f, -lcMax(GetMoveZSnap(), 0.1f))), true, false, true, true);
 		break;
 
 	case LC_PIECE_ROTATE_PLUSX:
-		lcGetActiveModel()->RotateSelectedPieces(mActiveView->GetMoveDirection(lcVector3(lcMax((float)GetAngleSnap(), 1.0f), 0.0f, 0.0f)), true, false, true, true);
+		if (ActiveView)
+			lcGetActiveModel()->RotateSelectedPieces(ActiveView->GetMoveDirection(lcVector3(lcMax((float)GetAngleSnap(), 1.0f), 0.0f, 0.0f)), true, false, true, true);
 		break;
 
 	case LC_PIECE_ROTATE_MINUSX:
-		lcGetActiveModel()->RotateSelectedPieces(mActiveView->GetMoveDirection(-lcVector3(lcMax((float)GetAngleSnap(), 1.0f), 0.0f, 0.0f)), true, false, true, true);
+		if (ActiveView)
+			lcGetActiveModel()->RotateSelectedPieces(ActiveView->GetMoveDirection(-lcVector3(lcMax((float)GetAngleSnap(), 1.0f), 0.0f, 0.0f)), true, false, true, true);
 		break;
 
 	case LC_PIECE_ROTATE_PLUSY:
-		lcGetActiveModel()->RotateSelectedPieces(mActiveView->GetMoveDirection(lcVector3(0.0f, lcMax((float)GetAngleSnap(), 1.0f), 0.0f)), true, false, true, true);
+		if (ActiveView)
+			lcGetActiveModel()->RotateSelectedPieces(ActiveView->GetMoveDirection(lcVector3(0.0f, lcMax((float)GetAngleSnap(), 1.0f), 0.0f)), true, false, true, true);
 		break;
 
 	case LC_PIECE_ROTATE_MINUSY:
-		lcGetActiveModel()->RotateSelectedPieces(mActiveView->GetMoveDirection(lcVector3(0.0f, -lcMax((float)GetAngleSnap(), 1.0f), 0.0f)), true, false, true, true);
+		if (ActiveView)
+			lcGetActiveModel()->RotateSelectedPieces(ActiveView->GetMoveDirection(lcVector3(0.0f, -lcMax((float)GetAngleSnap(), 1.0f), 0.0f)), true, false, true, true);
 		break;
 
 	case LC_PIECE_ROTATE_PLUSZ:
-		lcGetActiveModel()->RotateSelectedPieces(mActiveView->GetMoveDirection(lcVector3(0.0f, 0.0f, lcMax((float)GetAngleSnap(), 1.0f))), true, false, true, true);
+		if (ActiveView)
+			lcGetActiveModel()->RotateSelectedPieces(ActiveView->GetMoveDirection(lcVector3(0.0f, 0.0f, lcMax((float)GetAngleSnap(), 1.0f))), true, false, true, true);
 		break;
 
 	case LC_PIECE_ROTATE_MINUSZ:
-		lcGetActiveModel()->RotateSelectedPieces(mActiveView->GetMoveDirection(lcVector3(0.0f, 0.0f, -lcMax((float)GetAngleSnap(), 1.0f))), true, false, true, true);
+		if (ActiveView)
+			lcGetActiveModel()->RotateSelectedPieces(ActiveView->GetMoveDirection(lcVector3(0.0f, 0.0f, -lcMax((float)GetAngleSnap(), 1.0f))), true, false, true, true);
 		break;
 
 	case LC_PIECE_MINIFIG_WIZARD:
@@ -2219,19 +2304,23 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		break;
 
 	case LC_VIEW_ZOOM_IN:
-		lcGetActiveModel()->Zoom(mActiveView->mCamera, 10.0f);
+		if (ActiveView)
+			lcGetActiveModel()->Zoom(ActiveView->mCamera, 10.0f);
 		break;
 
 	case LC_VIEW_ZOOM_OUT:
-		lcGetActiveModel()->Zoom(mActiveView->mCamera, -10.0f);
+		if (ActiveView)
+			lcGetActiveModel()->Zoom(ActiveView->mCamera, -10.0f);
 		break;
 
 	case LC_VIEW_ZOOM_EXTENTS:
-		mActiveView->ZoomExtents();
+		if (ActiveView)
+			ActiveView->ZoomExtents();
 		break;
 
 	case LC_VIEW_LOOK_AT:
-		mActiveView->LookAt();
+		if (ActiveView)
+			ActiveView->LookAt();
 		break;
 
 	case LC_VIEW_TIME_NEXT:
@@ -2259,35 +2348,43 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		break;
 
 	case LC_VIEW_VIEWPOINT_FRONT:
-		mActiveView->SetViewpoint(LC_VIEWPOINT_FRONT);
+		if (ActiveView)
+			ActiveView->SetViewpoint(LC_VIEWPOINT_FRONT);
 		break;
 
 	case LC_VIEW_VIEWPOINT_BACK:
-		mActiveView->SetViewpoint(LC_VIEWPOINT_BACK);
+		if (ActiveView)
+			ActiveView->SetViewpoint(LC_VIEWPOINT_BACK);
 		break;
 
 	case LC_VIEW_VIEWPOINT_TOP:
-		mActiveView->SetViewpoint(LC_VIEWPOINT_TOP);
+		if (ActiveView)
+			ActiveView->SetViewpoint(LC_VIEWPOINT_TOP);
 		break;
 
 	case LC_VIEW_VIEWPOINT_BOTTOM:
-		mActiveView->SetViewpoint(LC_VIEWPOINT_BOTTOM);
+		if (ActiveView)
+			ActiveView->SetViewpoint(LC_VIEWPOINT_BOTTOM);
 		break;
 
 	case LC_VIEW_VIEWPOINT_LEFT:
-		mActiveView->SetViewpoint(LC_VIEWPOINT_LEFT);
+		if (ActiveView)
+			ActiveView->SetViewpoint(LC_VIEWPOINT_LEFT);
 		break;
 
 	case LC_VIEW_VIEWPOINT_RIGHT:
-		mActiveView->SetViewpoint(LC_VIEWPOINT_RIGHT);
+		if (ActiveView)
+			ActiveView->SetViewpoint(LC_VIEWPOINT_RIGHT);
 		break;
 
 	case LC_VIEW_VIEWPOINT_HOME:
-		mActiveView->SetViewpoint(LC_VIEWPOINT_HOME);
+		if (ActiveView)
+			ActiveView->SetViewpoint(LC_VIEWPOINT_HOME);
 		break;
 
 	case LC_VIEW_CAMERA_NONE:
-		mActiveView->RemoveCamera();
+		if (ActiveView)
+			ActiveView->RemoveCamera();
 		break;
 
 	case LC_VIEW_CAMERA1:
@@ -2306,7 +2403,8 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 	case LC_VIEW_CAMERA14:
 	case LC_VIEW_CAMERA15:
 	case LC_VIEW_CAMERA16:
-		mActiveView->SetCameraIndex(CommandId - LC_VIEW_CAMERA1);
+		if (ActiveView)
+			ActiveView->SetCameraIndex(CommandId - LC_VIEW_CAMERA1);
 		break;
 
 	case LC_VIEW_CAMERA_RESET:
@@ -2512,7 +2610,8 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		break;
 
 	case LC_EDIT_CANCEL:
-		mActiveView->CancelTrackingOrClearSelection();
+		if (ActiveView)
+			ActiveView->CancelTrackingOrClearSelection();
 		break;
 
 	case LC_NUM_COMMANDS:

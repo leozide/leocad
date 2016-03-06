@@ -60,8 +60,6 @@ public:
 	static void CreateResources(lcContext* Context);
 	static void DestroyResources(lcContext* Context);
 
-	void SetModel(lcModel* Model);
-
 	void OnDraw();
 	void OnInitialUpdate();
 	void OnUpdateCursor();
@@ -85,7 +83,6 @@ public:
 	void LookAt();
 	void ZoomExtents();
 
-	void ClearCameras();
 	void RemoveCamera();
 	void SetCamera(lcCamera* Camera, bool ForceCopy);
 	void SetCameraIndex(int Index);
@@ -103,7 +100,6 @@ public:
 
 	lcModel* mModel;
 	lcCamera* mCamera;
-	QMap<lcModel*, lcCamera*> mCameras;
 
 	lcVector3 ProjectPoint(const lcVector3& Point) const
 	{

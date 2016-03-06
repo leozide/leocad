@@ -128,8 +128,7 @@ lcQGLWidget::~lcQGLWidget()
 		gPlaceholderMesh = NULL;
 	}
 
-	if (isView)
-		delete widget;
+	delete widget;
 }
 
 QSize lcQGLWidget::sizeHint() const

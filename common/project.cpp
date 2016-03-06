@@ -67,11 +67,8 @@ void Project::SetActiveModel(int ModelIndex)
 		mModels[ModelIdx]->UpdatePieceInfo(UpdatedModels);
 
 	mActiveModel = mModels[ModelIndex];
+	gMainWindow->SetCurrentModelTab(mActiveModel);
 	mActiveModel->UpdateInterface();
-
-	const lcArray<View*>& Views = gMainWindow->GetViews();
-	for (int ViewIdx = 0; ViewIdx < Views.GetSize(); ViewIdx++)
-		Views[ViewIdx]->SetModel(lcGetActiveModel());
 }
 
 bool Project::IsModelNameValid(const QString& Name) const

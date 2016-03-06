@@ -802,7 +802,7 @@ bool lcZipFile::AddFile(const char* FileName, lcMemFile& File)
 	Info.crc = Crc32;
 	Info.compressed_size = CompressedFile.GetLength();
 	Info.uncompressed_size = File.GetLength();
-	Info.size_filename = strlen(FileName);
+	Info.size_filename = (lcuint16)strlen(FileName);
 	Info.size_file_extra = 0;
 	Info.size_file_comment = 0;
 	Info.disk_num_start = 0;

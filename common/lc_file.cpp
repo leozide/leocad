@@ -45,7 +45,7 @@ void lcMemFile::Seek(long Offset, int From)
 
 long lcMemFile::GetPosition() const
 {
-	return mPosition;
+	return (long)mPosition;
 }
 
 void lcMemFile::SetLength(size_t NewLength)
@@ -206,7 +206,7 @@ void lcDiskFile::Seek(long Offset, int From)
 
 void lcDiskFile::SetLength(size_t NewLength)
 {
-	fseek(mFile, NewLength, SEEK_SET);
+	fseek(mFile, (int)NewLength, SEEK_SET);
 }
 
 size_t lcDiskFile::GetLength() const
@@ -267,7 +267,7 @@ bool lcDiskFile::Open(const char* FileName, const char* Mode)
 
 char* lcDiskFile::ReadLine(char* Buffer, size_t BufferSize)
 {
-	return fgets(Buffer, BufferSize, mFile);
+	return fgets(Buffer, (int)BufferSize, mFile);
 }
 
 void lcDiskFile::CopyFrom(lcMemFile& Source)

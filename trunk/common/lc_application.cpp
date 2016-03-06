@@ -63,13 +63,7 @@ void lcApplication::SetProject(Project* Project)
 	delete mProject;
 	mProject = Project;
 
-	const lcArray<View*>& Views = gMainWindow->GetViews();
-	for (int ViewIdx = 0; ViewIdx < Views.GetSize(); ViewIdx++)
-	{
-		View* View = Views[ViewIdx];
-		View->ClearCameras();
-		View->SetModel(lcGetActiveModel());
-	}
+	gMainWindow->RemoveAllModelTabs();
 
 	Project->SetActiveModel(0);
 	lcGetPiecesLibrary()->RemoveTemporaryPieces();

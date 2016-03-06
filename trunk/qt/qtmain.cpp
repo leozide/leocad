@@ -9,9 +9,12 @@
 
 #ifdef Q_OS_WIN
 
+#pragma warning(push)
+#pragma warning(disable : 4091)
 #include <dbghelp.h>
 #include <direct.h>
 #include <shlobj.h>
+#pragma warning(pop)
 
 #ifdef UNICODE
 #ifndef _UNICODE

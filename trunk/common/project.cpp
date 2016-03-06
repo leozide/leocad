@@ -619,7 +619,7 @@ void Project::Export3DStudio(const QString& FileName)
 
 	File.WriteU16(0x1100); // CHK_BIT_MAP
 	QByteArray BackgroundImage = Properties.mBackgroundImage.toLatin1();
-	File.WriteU32(6 + 1 + strlen(BackgroundImage.constData()));
+	File.WriteU32(6 + 1 + (lcuint32)strlen(BackgroundImage.constData()));
 	File.WriteBuffer(BackgroundImage.constData(), strlen(BackgroundImage.constData()) + 1);
 
 	File.WriteU16(0x1300); // CHK_V_GRADIENT

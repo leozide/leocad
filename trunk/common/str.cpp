@@ -62,7 +62,7 @@ const String& String::operator+= (const String& src)
 
 const String& String::operator+= (char ch)
 {
-  int len = GetLength ();
+  size_t len = GetLength ();
   char *tmp = new char[len + 1 + 1];
   strcpy (tmp, m_pData);
   tmp[len] = ch;
@@ -138,7 +138,7 @@ String& String::Mid (int first, int count) const
   if (count < 0)
     count = 0;
   else if (count > (int)GetLength ())
-    count = GetLength ();
+    count = (int)GetLength ();
 
   String s;
   strncpy (s.GetBuffer (count+1), m_pData + first, count);
@@ -153,7 +153,7 @@ String& String::Left (int count) const
   if (count < 0)
     count = 0;
   else if (count > (int)GetLength ())
-    count = GetLength ();
+    count = (int)GetLength ();
 
   String s;
   strncpy (s.GetBuffer (count+1), m_pData, count);
@@ -168,7 +168,7 @@ String& String::Right (int count) const
   if (count < 0)
     count = 0;
   else if (count > (int)GetLength ())
-    count = GetLength ();
+    count = (int)GetLength ();
 
   String s;
   strncpy (s.GetBuffer (count+1), m_pData + GetLength () - count, count);
@@ -223,7 +223,7 @@ bool String::Match(const String& Expression) const
 			String LeftStr, RightStr;
 
 			LeftStr = Expression.Left((p - Expression) - 1);
-			RightStr = Expression.Right(Expression.GetLength() - (p - Expression) - 1);
+			RightStr = Expression.Right((int)Expression.GetLength() - (p - Expression) - 1);
 
 			if (*p == '|')
 				return Match(LeftStr) || Match(RightStr);
@@ -302,7 +302,7 @@ bool String::Match(const String& Expression) const
 
 	if (WholeWord)
 	{
-		char End = GetAt(Result + strlen(Word));
+		char End = GetAt(Result + (int)strlen(Word));
 
 		if ((End != 0) && (End != ' '))
 			return false;

@@ -29,7 +29,7 @@ void lcSynthInit()
 		{ "55709", LC_SYNTH_PIECE_FLEXIBLE_AXLE, 140.00f, 35 }  // Technic Axle Flexible 11
 	};
 
-	for (int InfoIdx = 0; InfoIdx < sizeof(HoseInfo) / sizeof(HoseInfo[0]); InfoIdx++)
+    for (unsigned int InfoIdx = 0; InfoIdx < sizeof(HoseInfo) / sizeof(HoseInfo[0]); InfoIdx++)
 	{
 		PieceInfo* Info = Library->FindPiece(HoseInfo[InfoIdx].PartID, NULL, false);
 

@@ -67,10 +67,16 @@ void lcMainWindow::CreateWidgets()
 	CreateStatusBar();
 
 	mModelTabWidget = new QTabWidget();
-	mModelTabWidget->tabBar()->setMovable(true);
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+    mModelTabWidget->tabBar()->setMovable(true);
 	mModelTabWidget->tabBar()->setTabsClosable(true);
+    connect(mModelTabWidget->tabBar(), SIGNAL(tabCloseRequested(int)), this, SLOT(ModelTabClosed(int)));
+#else
+    mModelTabWidget->setMovable(true);
+    mModelTabWidget->setTabsClosable(true);
+    connect(mModelTabWidget, SIGNAL(tabCloseRequested(int)), this, SLOT(ModelTabClosed(int)));
+#endif
 	setCentralWidget(mModelTabWidget);
-	connect(mModelTabWidget->tabBar(), SIGNAL(tabCloseRequested(int)), this, SLOT(ModelTabClosed(int)));
 	connect(mModelTabWidget, SIGNAL(currentChanged(int)), this, SLOT(ModelTabChanged(int)));
 
 	connect(QApplication::clipboard(), SIGNAL(dataChanged()), this, SLOT(ClipboardChanged()));

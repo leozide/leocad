@@ -137,7 +137,7 @@ String& String::Mid (int first, int count) const
 {
   if (count < 0)
     count = 0;
-  else if (count > GetLength ())
+  else if (count > (int)GetLength ())
     count = GetLength ();
 
   String s;
@@ -152,7 +152,7 @@ String& String::Left (int count) const
 {
   if (count < 0)
     count = 0;
-  else if (count > GetLength ())
+  else if (count > (int)GetLength ())
     count = GetLength ();
 
   String s;
@@ -167,7 +167,7 @@ String& String::Right (int count) const
 {
   if (count < 0)
     count = 0;
-  else if (count > GetLength ())
+  else if (count > (int)GetLength ())
     count = GetLength ();
 
   String s;

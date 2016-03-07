@@ -1390,12 +1390,12 @@ void lcMainWindow::SplitView(Qt::Orientation Orientation)
 	QSplitter* Splitter;
 	QList<int> Sizes;
 
-	if (Parent == centralWidget())
+	if (Parent->metaObject() == &lcModelTabWidget::staticMetaObject)
 	{
 		Splitter = new QSplitter(Orientation, Parent);
 		Parent->layout()->addWidget(Splitter);
 		Splitter->addWidget(Focus);
-		Splitter->addWidget(new lcQGLWidget(centralWidget(), mPiecePreviewWidget, new View(lcGetActiveModel()), true));
+		Splitter->addWidget(new lcQGLWidget(mModelTabWidget->currentWidget(), mPiecePreviewWidget, new View(lcGetActiveModel()), true));
 	}
 	else
 	{
@@ -1406,7 +1406,7 @@ void lcMainWindow::SplitView(Qt::Orientation Orientation)
 		Splitter = new QSplitter(Orientation, Parent);
 		ParentSplitter->insertWidget(FocusIndex, Splitter);
 		Splitter->addWidget(Focus);
-		Splitter->addWidget(new lcQGLWidget(centralWidget(), mPiecePreviewWidget, new View(lcGetActiveModel()), true));
+		Splitter->addWidget(new lcQGLWidget(mModelTabWidget->currentWidget(), mPiecePreviewWidget, new View(lcGetActiveModel()), true));
 
 		ParentSplitter->setSizes(Sizes);
 	}
@@ -1436,14 +1436,14 @@ void lcMainWindow::RemoveActiveView()
 
 	QWidget* Parent = Focus->parentWidget();
 
-	if (Parent == centralWidget())
+	if (Parent->metaObject() == &lcModelTabWidget::staticMetaObject)
 		return;
 
 	QWidget* ParentParentWidget = Parent->parentWidget();
 	QSplitter* ParentSplitter = (QSplitter*)Parent;
 	int FocusIndex = ParentSplitter->indexOf(Focus);
 
-	if (ParentParentWidget == centralWidget())
+	if (ParentParentWidget->metaObject() == &lcModelTabWidget::staticMetaObject)
 	{
 		QLayout* CentralLayout = ParentParentWidget->layout();
 
@@ -1466,9 +1466,16 @@ void lcMainWindow::RemoveActiveView()
 
 void lcMainWindow::ResetViews()
 {
-	QLayout* CentralLayout = centralWidget()->layout();
-	delete CentralLayout->itemAt(0)->widget();
-	CentralLayout->addWidget(new lcQGLWidget(centralWidget(), mPiecePreviewWidget, new View(lcGetActiveModel()), true));
+	QWidget* TabWidget = mModelTabWidget->currentWidget();
+
+	if (!TabWidget)
+		return;
+
+	QLayout* TabLayout = TabWidget->layout();
+	QWidget* TopWidget = TabLayout->itemAt(0)->widget();
+	TabLayout->removeWidget(TopWidget);
+	TopWidget->deleteLater();
+	TabLayout->addWidget(new lcQGLWidget(TabWidget, mPiecePreviewWidget, new View(lcGetActiveModel()), true));
 }
 
 void lcMainWindow::TogglePrintPreview()

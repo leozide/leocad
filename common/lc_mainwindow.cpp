@@ -1200,6 +1200,7 @@ void lcMainWindow::SetCurrentModelTab(lcModel* Model)
 	View* NewView = new View(Model);
 	QWidget* ViewWidget = new lcQGLWidget(TabWidget, mPiecePreviewWidget, NewView, true);
 	CentralLayout->addWidget(ViewWidget, 0, 0, 1, 1);
+	ViewWidget->show();
 	ViewWidget->setFocus();
 	NewView->ZoomExtents();
 	SetActiveView(NewView);
@@ -1475,7 +1476,13 @@ void lcMainWindow::ResetViews()
 	QWidget* TopWidget = TabLayout->itemAt(0)->widget();
 	TabLayout->removeWidget(TopWidget);
 	TopWidget->deleteLater();
-	TabLayout->addWidget(new lcQGLWidget(TabWidget, mPiecePreviewWidget, new View(lcGetActiveModel()), true));
+	View* NewView = new View(lcGetActiveModel());
+	QWidget* ViewWidget = new lcQGLWidget(TabWidget, mPiecePreviewWidget, NewView, true);
+	TabLayout->addWidget(ViewWidget);
+	ViewWidget->show();
+	ViewWidget->setFocus();
+	NewView->ZoomExtents();
+	SetActiveView(NewView);
 }
 
 void lcMainWindow::TogglePrintPreview()

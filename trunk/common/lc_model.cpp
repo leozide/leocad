@@ -2415,6 +2415,33 @@ void lcModel::RotateSelectedPieces(const lcVector3& Angles, bool Relative, bool 
 	}
 }
 
+void lcModel::ScaleSelectedPieces(const float Scale, bool Update, bool Checkpoint)
+{
+	if (Scale < 0.001f)
+		return;
+
+	lcObject* Focus = GetFocusObject();
+	if (!Focus || !Focus->IsPiece())
+		return;
+
+	lcPiece* Piece = (lcPiece*)Focus;
+	lcuint32 Section = Piece->GetFocusSection();
+
+	if (Section >= LC_PIECE_SECTION_CONTROL_POINT_1 && Section <= LC_PIECE_SECTION_CONTROL_POINT_8)
+	{
+		int ControlPointIndex = Section - LC_PIECE_SECTION_CONTROL_POINT_1;
+		Piece->SetControlPointScale(ControlPointIndex, Scale);
+
+		if (Update)
+		{
+			gMainWindow->UpdateAllViews();
+			if (Checkpoint)
+				SaveCheckpoint("Scaling");
+			gMainWindow->UpdateSelectedObjects(false);
+		}
+	}
+}
+
 void lcModel::TransformSelectedObjects(lcTransformType TransformType, const lcVector3& Transform)
 {
 	switch (TransformType)
@@ -3469,6 +3496,14 @@ void lcModel::UpdateRotateTool(const lcVector3& Angles, bool AlternateButtonDrag
 	lcVector3 Delta = LockVector(SnapRotation(Angles) - SnapRotation(mMouseToolDistance));
 	RotateSelectedPieces(Delta, true, AlternateButtonDrag, false, false);
 	mMouseToolDistance = Angles;
+
+	gMainWindow->UpdateSelectedObjects(false);
+	gMainWindow->UpdateAllViews();
+}
+
+void lcModel::UpdateScaleTool(const float Scale)
+{
+	ScaleSelectedPieces(Scale, true, false);
 
 	gMainWindow->UpdateSelectedObjects(false);
 	gMainWindow->UpdateAllViews();

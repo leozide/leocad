@@ -49,7 +49,7 @@ enum lcPieceSection
 struct lcPieceControlPoint
 {
 	lcMatrix44 Transform;
-	float Stiffness;
+	float Scale;
 };
 
 class lcPiece : public lcObject
@@ -364,6 +364,12 @@ public:
 	const lcArray<lcPieceControlPoint>& GetControlPoints() const
 	{
 		return mControlPoints;
+	}
+
+	void SetControlPointScale(int ControlPointIndex, float Scale)
+	{
+		mControlPoints[ControlPointIndex].Scale = Scale;
+		UpdateMesh();
 	}
 
 	const char* GetName() const;

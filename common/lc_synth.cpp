@@ -74,25 +74,27 @@ void lcSynthInfo::GetDefaultControlPoints(lcArray<lcPieceControlPoint>& ControlP
 {
 	ControlPoints.SetSize(2);
 
-	float Stiffness;
+	float Scale;
 
 	switch (mType)
 	{
 	case LC_SYNTH_PIECE_RIBBED_HOSE:
-		Stiffness = 80.0f;
+		Scale = 80.0f;
 		break;
 
 	case LC_SYNTH_PIECE_FLEXIBLE_AXLE:
-		Stiffness = 12.0f;
+		Scale = 12.0f;
 		break;
 	}
 
 	lcMatrix33 RotationY = lcMatrix33RotationY(LC_PI / 2.0f);
+	float HalfLength = mLength / 2.0f;
+	Scale = lcMin(Scale, HalfLength);
 
-	ControlPoints[0].Transform = lcMatrix44(RotationY, lcVector3(-mLength / 2.0f, 0.0f, 0.0f));
-	ControlPoints[0].Stiffness = Stiffness;
-	ControlPoints[1].Transform = lcMatrix44(RotationY, lcVector3(mLength / 2.0f, 0.0f, 0.0f));
-	ControlPoints[1].Stiffness = Stiffness;
+	ControlPoints[0].Transform = lcMatrix44(RotationY, lcVector3(-HalfLength, 0.0f, 0.0f));
+	ControlPoints[0].Scale = Scale;
+	ControlPoints[1].Transform = lcMatrix44(RotationY, lcVector3( HalfLength, 0.0f, 0.0f));
+	ControlPoints[1].Scale = Scale;
 }
 
 #include "lc_file.h"
@@ -119,20 +121,9 @@ void lcSynthInfo::CalculateSections(const lcArray<lcPieceControlPoint>& ControlP
 			EndTransform = lcMatrix44(lcMul(lcMatrix33(EndTransform), lcMatrix33(lcVector3(1.0f, 0.0f, 0.0f), lcVector3(0.0f, -1.0f, 0.0f), lcVector3(0.0f, 0.0f, 1.0f))), EndTransform.GetTranslation());
 
 		SegmentControlPoints[0] = StartTransform.GetTranslation();
-		SegmentControlPoints[1] = lcMul31(lcVector3(0.0f, ControlPoints[ControlPointIdx].Stiffness, 0.0f), StartTransform);
-		SegmentControlPoints[2] = lcMul31(lcVector3(0.0f, -ControlPoints[ControlPointIdx + 1].Stiffness, 0.0f), EndTransform);
+		SegmentControlPoints[1] = lcMul31(lcVector3(0.0f, ControlPoints[ControlPointIdx].Scale, 0.0f), StartTransform);
+		SegmentControlPoints[2] = lcMul31(lcVector3(0.0f, -ControlPoints[ControlPointIdx + 1].Scale, 0.0f), EndTransform);
 		SegmentControlPoints[3] = EndTransform.GetTranslation();
-
-		float PointDistance = lcLength(SegmentControlPoints[3] - SegmentControlPoints[0]);
-		float PointDot = lcDot(SegmentControlPoints[1], SegmentControlPoints[2]);
-
-		if ((PointDistance < ControlPoints[ControlPointIdx].Stiffness + ControlPoints[ControlPointIdx + 1].Stiffness) && (PointDot <= 0.001f))
-		{
-			float Scale = 1.0f / (ControlPoints[ControlPointIdx].Stiffness + ControlPoints[ControlPointIdx + 1].Stiffness);
-
-			SegmentControlPoints[1] = lcMul31(lcVector3(0.0f, ControlPoints[ControlPointIdx].Stiffness * Scale, 0.0f), StartTransform);
-			SegmentControlPoints[2] = lcMul31(lcVector3(0.0f, -ControlPoints[ControlPointIdx + 1].Stiffness * Scale, 0.0f), EndTransform);
-		}
 
 		const int NumCurvePoints = 8192;
 		lcArray<lcVector3> CurvePoints;
@@ -428,7 +419,7 @@ int lcSynthInfo::InsertControlPoint(lcArray<lcPieceControlPoint>& ControlPoints,
 			lcPieceControlPoint NextControlPoint = ControlPoints[SynthInsertParam.BestSegment + 1];
 			float t = SynthInsertParam.BestTime;
 
-			ControlPoint.Stiffness = ControlPoint.Stiffness * (1.0f - t) + NextControlPoint.Stiffness * t;
+			ControlPoint.Scale = ControlPoint.Scale * (1.0f - t) + NextControlPoint.Scale * t;
 		}
 
 		ControlPoints.InsertAt(SynthInsertParam.BestSegment + 1, ControlPoint);

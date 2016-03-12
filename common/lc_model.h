@@ -299,6 +299,7 @@ public:
 	void UpdateCameraTool(const lcVector3& Position);
 	void UpdateMoveTool(const lcVector3& Distance, bool AlternateButtonDrag);
 	void UpdateRotateTool(const lcVector3& Angles, bool AlternateButtonDrag);
+	void UpdateScaleTool(const float Scale);
 	void EraserToolClicked(lcObject* Object);
 	void PaintToolClicked(lcObject* Object);
 	void UpdateZoomTool(lcCamera* Camera, float Mouse);
@@ -317,6 +318,7 @@ public:
 
 	void MoveSelectedObjects(const lcVector3& PieceDistance, const lcVector3& ObjectDistance, bool Relative, bool AlternateButtonDrag, bool Update, bool Checkpoint);
 	void RotateSelectedPieces(const lcVector3& Angles, bool Relative, bool AlternateButtonDrag, bool Update, bool Checkpoint);
+	void ScaleSelectedPieces(const float Scale, bool Update, bool Checkpoint);
 	void TransformSelectedObjects(lcTransformType TransformType, const lcVector3& Transform);
 	void SetSelectedPiecesColorIndex(int ColorIndex);
 	void SetSelectedPiecesPieceInfo(PieceInfo* Info);

@@ -317,6 +317,8 @@ LC_CURSOR_TYPE View::GetCursor() const
 		LC_CURSOR_ROTATE,      // LC_TRACKTOOL_ROTATE_Z
 		LC_CURSOR_ROTATE,      // LC_TRACKTOOL_ROTATE_XY
 		LC_CURSOR_ROTATE,      // LC_TRACKTOOL_ROTATE_XYZ
+		LC_CURSOR_MOVE,        // LC_TRACKTOOL_SCALE_PLUS
+		LC_CURSOR_MOVE,        // LC_TRACKTOOL_SCALE_MINUS
 		LC_CURSOR_DELETE,      // LC_TRACKTOOL_ERASER
 		LC_CURSOR_PAINT,       // LC_TRACKTOOL_PAINT
 		LC_CURSOR_ZOOM,        // LC_TRACKTOOL_ZOOM
@@ -752,6 +754,68 @@ void View::DrawSelectMoveOverlay()
 			mContext->DrawIndexedPrimitives(GL_TRIANGLE_FAN, 4, GL_UNSIGNED_SHORT, (108 + 360) * 2);
 
 		glDisable(GL_BLEND);
+	}
+
+	lcObject* Focus = mModel->GetFocusObject();
+	if (Focus && Focus->IsPiece())
+	{
+		lcPiece* Piece = (lcPiece*)Focus;
+		lcuint32 Section = Piece->GetFocusSection();
+
+		if (Section >= LC_PIECE_SECTION_CONTROL_POINT_1 && Section <= LC_PIECE_SECTION_CONTROL_POINT_8)
+		{
+			int ControlPointIndex = Section - LC_PIECE_SECTION_CONTROL_POINT_1;
+			float Strength = Piece->GetControlPoints()[ControlPointIndex].Scale;
+			const float ScaleStart = 2.0f;
+			float Length = ScaleStart + Strength / OverlayScale;
+			const float OverlayScaleInnerRadius = 0.075f;
+			const float OverlayScaleRadius = 0.125f;
+
+			lcVector3 Verts[38];
+			int NumVerts = 0;
+
+			Verts[NumVerts++] = lcVector3(0.0f, 0.0f, Length - OverlayScaleRadius);
+			Verts[NumVerts++] = lcVector3(0.0f, 0.0f, OverlayScaleRadius - Length);
+
+			float SinTable[9], CosTable[9];
+
+			for (int Step = 0; Step <= 8; Step++)
+			{
+				SinTable[Step] = sinf((float)Step / 8.0f * LC_2PI);
+				CosTable[Step] = cosf((float)Step / 8.0f * LC_2PI);
+			}
+
+			for (int Step = 0; Step <= 8; Step++)
+			{
+				float x = CosTable[Step];
+				float y = SinTable[Step];
+
+				Verts[NumVerts++] = lcVector3(x * OverlayScaleInnerRadius, 0.0f, y * OverlayScaleInnerRadius + Length);
+				Verts[NumVerts++] = lcVector3(x * OverlayScaleRadius, 0.0f, y * OverlayScaleRadius + Length);
+			}
+
+			for (int Step = 0; Step <= 8; Step++)
+			{
+				float x = CosTable[Step];
+				float y = SinTable[Step];
+
+				Verts[NumVerts++] = lcVector3(x * OverlayScaleInnerRadius, 0.0f, y * OverlayScaleInnerRadius - Length);
+				Verts[NumVerts++] = lcVector3(x * OverlayScaleRadius, 0.0f, y * OverlayScaleRadius - Length);
+			}
+
+			if (mTrackTool == LC_TRACKTOOL_SCALE_PLUS || mTrackTool == LC_TRACKTOOL_SCALE_MINUS)
+				mContext->SetColor(0.8f, 0.8f, 0.0f, 0.3f);
+			else
+				mContext->SetColor(0.0f, 0.0f, 0.8f, 1.0f);
+
+			mContext->SetVertexBufferPointer(Verts);
+			mContext->ClearIndexBuffer();
+			mContext->SetVertexFormat(0, 3, 0, 0);
+
+			mContext->DrawPrimitives(GL_LINES, 0, 2);
+			mContext->DrawPrimitives(GL_TRIANGLE_STRIP, 2, 18);
+			mContext->DrawPrimitives(GL_TRIANGLE_STRIP, 20, 18);
+		}
 	}
 
 	glEnable(GL_DEPTH_TEST);
@@ -1543,6 +1607,8 @@ lcTool View::GetCurrentTool() const
 		LC_TOOL_ROTATE,      // LC_TRACKTOOL_ROTATE_Z
 		LC_TOOL_ROTATE,      // LC_TRACKTOOL_ROTATE_XY
 		LC_TOOL_ROTATE,      // LC_TRACKTOOL_ROTATE_XYZ
+		LC_TOOL_MOVE,        // LC_TRACKTOOL_SCALE_PLUS
+		LC_TOOL_MOVE,        // LC_TRACKTOOL_SCALE_MINUS
 		LC_TOOL_ERASER,      // LC_TRACKTOOL_ERASER
 		LC_TOOL_PAINT,       // LC_TRACKTOOL_PAINT
 		LC_TOOL_ZOOM,        // LC_TRACKTOOL_ZOOM
@@ -1642,6 +1708,7 @@ void View::UpdateTrackTool()
 			const float OverlayMoveArrowCapRadius = 0.1f * OverlayScale;
 			const float OverlayRotateArrowStart = 1.0f * OverlayScale;
 			const float OverlayRotateArrowEnd = 1.5f * OverlayScale;
+			const float OverlayScaleRadius = 0.125f;
 
 			NewTrackTool = (CurrentTool == LC_TOOL_MOVE) ? LC_TRACKTOOL_MOVE_XYZ : LC_TRACKTOOL_SELECT;
 
@@ -1667,6 +1734,19 @@ void View::UpdateTrackTool()
 			const lcVector3& Start = StartEnd[0];
 			const lcVector3& End = StartEnd[1];
 			float ClosestIntersectionDistance = FLT_MAX;
+
+			lcObject* Focus = mModel->GetFocusObject();
+			int ControlPointIndex = -1;
+			if (Focus && Focus->IsPiece())
+			{
+				lcPiece* Piece = (lcPiece*)Focus;
+				lcuint32 Section = Piece->GetFocusSection();
+
+				if (Section >= LC_PIECE_SECTION_CONTROL_POINT_1 && Section <= LC_PIECE_SECTION_CONTROL_POINT_8)
+				{
+					ControlPointIndex = Section - LC_PIECE_SECTION_CONTROL_POINT_1;
+				}
+			}
 
 			for (int AxisIndex = 0; AxisIndex < 3; AxisIndex++)
 			{
@@ -1720,6 +1800,46 @@ void View::UpdateTrackTool()
 					NewTrackTool = DirModes[AxisIndex];
 
 					ClosestIntersectionDistance = IntersectionDistance;
+				}
+
+				if (ControlPointIndex != -1)
+				{
+					lcPiece* Piece = (lcPiece*)Focus;
+					float Strength = Piece->GetControlPoints()[ControlPointIndex].Scale;
+					const float ScaleMax = 200.0f;
+					const float ScaleStart = (2.0f - OverlayScaleRadius) * OverlayScale + Strength;
+					const float ScaleEnd = (2.0f + OverlayScaleRadius) * OverlayScale + Strength;
+
+					if (AxisIndex == 0 && fabs(Proj1) < OverlayScaleRadius * OverlayScale)
+					{
+						if (Proj2 > ScaleStart && Proj2 < ScaleEnd)
+						{
+							NewTrackTool = LC_TRACKTOOL_SCALE_PLUS;
+
+							ClosestIntersectionDistance = IntersectionDistance;
+						}
+						else if (Proj2 < -ScaleStart && Proj2 > -ScaleEnd)
+						{
+							NewTrackTool = LC_TRACKTOOL_SCALE_MINUS;
+
+							ClosestIntersectionDistance = IntersectionDistance;
+						}
+					}
+					else if (AxisIndex == 1 && fabs(Proj2) < OverlayScaleRadius * OverlayScale)
+					{
+						if (Proj1 > ScaleStart && Proj1 < ScaleEnd)
+						{
+							NewTrackTool = LC_TRACKTOOL_SCALE_PLUS;
+
+							ClosestIntersectionDistance = IntersectionDistance;
+						}
+						else if (Proj1 < -ScaleStart && Proj1 > -ScaleEnd)
+						{
+							NewTrackTool = LC_TRACKTOOL_SCALE_MINUS;
+
+							ClosestIntersectionDistance = IntersectionDistance;
+						}
+					}
 				}
 			}
 
@@ -2228,6 +2348,12 @@ void View::OnLeftButtonDown()
 			StartTracking(LC_TRACKBUTTON_LEFT);
 		break;
 
+	case LC_TRACKTOOL_SCALE_PLUS:
+	case LC_TRACKTOOL_SCALE_MINUS:
+		if (mModel->AnyPiecesSelected())
+			StartTracking(LC_TRACKBUTTON_LEFT);
+		break;
+
 	case LC_TRACKTOOL_ERASER:
 		mModel->EraserToolClicked(FindObjectUnderPointer(false).Object);
 		break;
@@ -2414,7 +2540,9 @@ void View::OnMouseMove()
 	case LC_TRACKTOOL_MOVE_XZ:
 	case LC_TRACKTOOL_MOVE_YZ:
 	case LC_TRACKTOOL_MOVE_XYZ:
-		{
+	case LC_TRACKTOOL_SCALE_PLUS:
+	case LC_TRACKTOOL_SCALE_MINUS:
+	{
 			lcVector3 Points[4] =
 			{
 				lcVector3((float)mInputState.x, (float)mInputState.y, 0.0f),
@@ -2435,11 +2563,11 @@ void View::OnMouseMove()
 			{
 				lcVector3 Direction;
 				if (mTrackTool == LC_TRACKTOOL_MOVE_X)
-					Direction = lcVector3(1.0, 0.0f, 0.0f);
+					Direction = lcVector3(1.0f, 0.0f, 0.0f);
 				else if (mTrackTool == LC_TRACKTOOL_MOVE_Y)
-					Direction = lcVector3(0.0, 1.0f, 0.0f);
+					Direction = lcVector3(0.0f, 1.0f, 0.0f);
 				else
-					Direction = lcVector3(0.0, 0.0f, 1.0f);
+					Direction = lcVector3(0.0f, 0.0f, 1.0f);
 
 				lcMatrix33 RelativeRotation = mModel->GetRelativeRotation();
 				Direction = lcMul(Direction, RelativeRotation);
@@ -2482,9 +2610,47 @@ void View::OnMouseMove()
 					}
 				}
 			}
+			else if (mTrackTool == LC_TRACKTOOL_SCALE_PLUS || mTrackTool == LC_TRACKTOOL_SCALE_MINUS)
+			{
+				lcVector3 Direction;
+				if (mTrackTool == LC_TRACKTOOL_SCALE_PLUS)
+					Direction = lcVector3(0.0f, 0.0f, 1.0f);
+				else
+					Direction = lcVector3(0.0f, 0.0f, -1.0f);
+
+				lcMatrix33 RelativeRotation = mModel->GetRelativeRotation();
+				Direction = lcMul(Direction, RelativeRotation);
+
+				lcVector3 Intersection;
+				lcClosestPointsBetweenLines(Center, Center + Direction, CurrentStart, CurrentEnd, &Intersection, NULL);
+
+				lcObject* Focus = mModel->GetFocusObject();
+				if (Focus && Focus->IsPiece())
+				{
+					lcPiece* Piece = (lcPiece*)Focus;
+					lcuint32 Section = Piece->GetFocusSection();
+
+					if (Section >= LC_PIECE_SECTION_CONTROL_POINT_1 && Section <= LC_PIECE_SECTION_CONTROL_POINT_8)
+					{
+						const float ScaleMax = 200.0f;
+						const float OverlayScale = GetOverlayScale();
+						const float ScaleStart = 2.0f * OverlayScale;
+
+						lcVector3 Position = Piece->GetSectionPosition(Section);
+						lcVector3 Start = Position + Direction * ScaleStart;
+
+						float Distance = lcLength(Intersection - Start);
+						if (lcDot(Direction, Intersection - Start) < 0.0f)
+							Distance = 0.0f;
+
+						float Scale = lcClamp(Distance, 0.1f, ScaleMax);
+
+						mModel->UpdateScaleTool(Scale);
+					}
+				}
+			}
 			else
 			{
-
 				lcVector3 PlaneNormal = lcNormalize(mCamera->mTargetPosition - mCamera->mPosition);
 				lcVector4 Plane(PlaneNormal, -lcDot(PlaneNormal, Center));
 				lcVector3 Intersection;

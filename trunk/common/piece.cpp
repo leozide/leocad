@@ -573,9 +573,13 @@ void lcPiece::DrawInterface(lcContext* Context) const
 
 		const GLushort Indices[36] =
 		{
-			0, 1, 2, 0, 2, 3, 7, 6, 5, 7, 5, 4, 0, 1, 5, 0, 5, 4,
-			2, 3, 7, 2, 7, 6, 0, 3, 7, 0, 7, 4, 1, 2, 6, 1, 6, 5
+			0, 1, 2, 0, 2, 3, 7, 6, 5, 7, 5, 4, 5, 1, 0, 4, 5, 0,
+			7, 3, 2, 6, 7, 2, 0, 3, 7, 0, 7, 4, 6, 2, 1, 5, 6, 1
 		};
+
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glEnable(GL_BLEND);
+		glEnable(GL_CULL_FACE);
 
 		for (int ControlPointIdx = 0; ControlPointIdx < mControlPoints.GetSize(); ControlPointIdx++)
 		{
@@ -586,12 +590,15 @@ void lcPiece::DrawInterface(lcContext* Context) const
 			Context->SetIndexBufferPointer(Indices);
 
 			if (IsFocused(LC_PIECE_SECTION_CONTROL_POINT_1 + ControlPointIdx))
-				Context->SetInterfaceColor(LC_COLOR_FOCUSED);
+				Context->SetInterfaceColor(LC_COLOR_CONTROL_POINT_FOCUSED);
 			else
-				Context->SetInterfaceColor(LC_COLOR_CAMERA);
+				Context->SetInterfaceColor(LC_COLOR_CONTROL_POINT);
 
 			Context->DrawIndexedPrimitives(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 0);
 		}
+
+		glDisable(GL_CULL_FACE);
+		glDisable(GL_BLEND);
 	}
 }
 

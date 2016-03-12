@@ -116,9 +116,10 @@ void lcSynthInfo::CalculateSections(const lcArray<lcPieceControlPoint>& ControlP
 			Sections.Add(StartTransform);
 			SectionLength = mStart.Length;
 		}
+		else
+			StartTransform = lcMatrix44(lcMul(lcMatrix33(StartTransform), lcMatrix33Scale(lcVector3(1.0f, -1.0f, 1.0f))), StartTransform.GetTranslation());
 
-		if (ControlPointIdx == ControlPoints.GetSize() - 2)
-			EndTransform = lcMatrix44(lcMul(lcMatrix33(EndTransform), lcMatrix33(lcVector3(1.0f, 0.0f, 0.0f), lcVector3(0.0f, -1.0f, 0.0f), lcVector3(0.0f, 0.0f, 1.0f))), EndTransform.GetTranslation());
+		EndTransform = lcMatrix44(lcMul(lcMatrix33(EndTransform), lcMatrix33Scale(lcVector3(1.0f, -1.0f, 1.0f))), EndTransform.GetTranslation());
 
 		SegmentControlPoints[0] = StartTransform.GetTranslation();
 		SegmentControlPoints[1] = lcMul31(lcVector3(0.0f, ControlPoints[ControlPointIdx].Scale, 0.0f), StartTransform);
@@ -191,7 +192,7 @@ void lcSynthInfo::CalculateSections(const lcArray<lcPieceControlPoint>& ControlP
 	while (Sections.GetSize() < mNumSections + 2)
 	{
 		lcMatrix44 EndTransform = lcMatrix44LeoCADToLDraw(ControlPoints[ControlPoints.GetSize() - 1].Transform);
-		EndTransform = lcMatrix44(lcMul(lcMatrix33(EndTransform), lcMatrix33(lcVector3(1.0f, 0.0f, 0.0f), lcVector3(0.0f, -1.0f, 0.0f), lcVector3(0.0f, 0.0f, 1.0f))), EndTransform.GetTranslation());
+		EndTransform = lcMatrix44(lcMul(lcMatrix33(EndTransform), lcMatrix33Scale(lcVector3(1.0f, -1.0f, 1.0f))), EndTransform.GetTranslation());
 		lcVector3 Position = lcMul31(lcVector3(0.0f, SectionLength, 0.0f), EndTransform);
 		EndTransform.SetTranslation(Position);
 		Sections.Add(EndTransform);

@@ -664,8 +664,9 @@ void View::DrawSelectMoveOverlay()
 
 	glDisable(GL_DEPTH_TEST);
 
-	lcMatrix33 RelativeRotation = mModel->GetRelativeRotation();
-	lcVector3 OverlayCenter = mModel->GetFocusOrSelectionCenter();
+	lcVector3 OverlayCenter;
+	lcMatrix33 RelativeRotation;
+	mModel->GetMoveRotateTransform(OverlayCenter, RelativeRotation);
 	bool AnyPiecesSelected = mModel->AnyPiecesSelected();
 
 	lcMatrix44 WorldMatrix = lcMatrix44(RelativeRotation, OverlayCenter);
@@ -836,8 +837,9 @@ void View::DrawRotateOverlay()
 
 	int j;
 
-	lcMatrix33 RelativeRotation = mModel->GetRelativeRotation();
-	lcVector3 OverlayCenter = mModel->GetFocusOrSelectionCenter();
+	lcVector3 OverlayCenter;
+	lcMatrix33 RelativeRotation;
+	mModel->GetMoveRotateTransform(OverlayCenter, RelativeRotation);
 	lcVector3 MouseToolDistance = mModel->SnapRotation(mModel->GetMouseToolDistance());
 	bool HasAngle = false;
 
@@ -1625,7 +1627,9 @@ lcTool View::GetCurrentTool() const
 
 float View::GetOverlayScale() const
 {
-	lcVector3 OverlayCenter = mModel->GetFocusOrSelectionCenter();
+	lcVector3 OverlayCenter;
+	lcMatrix33 RelativeRotation;
+	mModel->GetMoveRotateTransform(OverlayCenter, RelativeRotation);
 
 	lcVector3 ScreenPos = ProjectPoint(OverlayCenter);
 	ScreenPos[0] += 10.0f;
@@ -1713,7 +1717,8 @@ void View::UpdateTrackTool()
 			NewTrackTool = (CurrentTool == LC_TOOL_MOVE) ? LC_TRACKTOOL_MOVE_XYZ : LC_TRACKTOOL_SELECT;
 
 			lcVector3 OverlayCenter;
-			if (!mModel->GetFocusOrSelectionCenter(OverlayCenter))
+			lcMatrix33 RelativeRotation;
+			if (!mModel->GetMoveRotateTransform(OverlayCenter, RelativeRotation))
 				break;
 
 			// Intersect the mouse with the 3 planes.
@@ -1723,8 +1728,6 @@ void View::UpdateTrackTool()
 				lcVector3(0.0f, 1.0f, 0.0f),
 				lcVector3(0.0f, 0.0f, 1.0f),
 			};
-
-			lcMatrix33 RelativeRotation = mModel->GetRelativeRotation();
 
 			for (int i = 0; i < 3; i++)
 				PlaneNormals[i] = lcMul(PlaneNormals[i], RelativeRotation);
@@ -1855,7 +1858,8 @@ void View::UpdateTrackTool()
 			NewTrackTool = LC_TRACKTOOL_ROTATE_XYZ;
 
 			lcVector3 OverlayCenter;
-			if (!mModel->GetFocusOrSelectionCenter(OverlayCenter))
+			lcMatrix33 RelativeRotation;
+			if (!mModel->GetMoveRotateTransform(OverlayCenter, RelativeRotation))
 				break;
 
 			// Calculate the distance from the mouse pointer to the center of the sphere.
@@ -1919,8 +1923,6 @@ void View::UpdateTrackTool()
 						lcVector3(x1 + u1*(x2-x1), y1 + u1*(y2-y1), z1 + u1*(z2-z1)),
 						lcVector3(x1 + u2*(x2-x1), y1 + u2*(y2-y1), z1 + u2*(z2-z1))
 					};
-
-					lcMatrix33 RelativeRotation = mModel->GetRelativeRotation();
 
 					for (int i = 0; i < 2; i++)
 					{
@@ -2072,32 +2074,6 @@ void View::UpdateTrackTool()
 		if (Redraw)
 			gMainWindow->UpdateAllViews();
 	}
-
-/*
-	if (CurrentTool != LC_TOOL_SELECT && CurrentTool != LC_TOOL_MOVE && CurrentTool != LC_TOOL_ROTATE)
-		return LC_TRACKTOOL_NONE;
-
-	int Viewport[4] = { 0, 0, mWidth, mHeight };
-	float Aspect = (float)Viewport[2]/(float)Viewport[3];
-
-	const lcMatrix44& ModelView = mCamera->mWorldView;
-	lcMatrix44 Projection = lcMatrix44Perspective(mCamera->mFOV, Aspect, mCamera->mNear, mCamera->mFar);
-
-	lcVector3 OverlayCenter = mModel->mActiveModel->GetFocusOrSelectionCenter();
-
-	lcVector3 ScreenPos = lcProjectPoint(OverlayCenter, ModelView, Projection, Viewport);
-	ScreenPos[0] += 10.0f;
-	lcVector3 Point = lcUnprojectPoint(ScreenPos, ModelView, Projection, Viewport);
-
-	lcVector3 Dist(Point - OverlayCenter);
-	float OverlayScale = Dist.Length() * 5.0f;
-
-	if (InterfaceScale)
-		*InterfaceScale = OverlayScale;
-
-	if (InterfaceCenter)
-		*InterfaceCenter = OverlayCenter;
-*/
 }
 
 void View::StartTracking(lcTrackButton TrackButton)
@@ -2557,7 +2533,10 @@ void View::OnMouseMove()
 			const lcVector3& CurrentEnd = Points[1];
 			const lcVector3& MouseDownStart = Points[2];
 			const lcVector3& MouseDownEnd = Points[3];
-			lcVector3 Center = mModel->GetFocusOrSelectionCenter();
+
+			lcVector3 Center;
+			lcMatrix33 RelativeRotation;
+			mModel->GetMoveRotateTransform(Center, RelativeRotation);
 
 			if (mTrackTool == LC_TRACKTOOL_MOVE_X || mTrackTool == LC_TRACKTOOL_MOVE_Y || mTrackTool == LC_TRACKTOOL_MOVE_Z)
 			{
@@ -2569,7 +2548,6 @@ void View::OnMouseMove()
 				else
 					Direction = lcVector3(0.0f, 0.0f, 1.0f);
 
-				lcMatrix33 RelativeRotation = mModel->GetRelativeRotation();
 				Direction = lcMul(Direction, RelativeRotation);
 
 				lcVector3 Intersection;
@@ -2593,7 +2571,6 @@ void View::OnMouseMove()
 				else
 					PlaneNormal = lcVector3(1.0f, 0.0f, 0.0f);
 
-				lcMatrix33 RelativeRotation = mModel->GetRelativeRotation();
 				PlaneNormal = lcMul(PlaneNormal, RelativeRotation);
 				lcVector4 Plane(PlaneNormal, -lcDot(PlaneNormal, Center));
 				lcVector3 Intersection;
@@ -2618,7 +2595,6 @@ void View::OnMouseMove()
 				else
 					Direction = lcVector3(0.0f, 0.0f, -1.0f);
 
-				lcMatrix33 RelativeRotation = mModel->GetRelativeRotation();
 				Direction = lcMul(Direction, RelativeRotation);
 
 				lcVector3 Intersection;

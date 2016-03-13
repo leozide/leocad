@@ -591,7 +591,9 @@ void lcQPropertiesTree::slotReturnPressed()
 
 		if (Item == partPositionX || Item == partPositionY || Item == partPositionZ)
 		{
-			lcVector3 Center = Model->GetFocusOrSelectionCenter();
+			lcVector3 Center;
+			lcMatrix33 RelativeRotation;
+			Model->GetMoveRotateTransform(Center, RelativeRotation);
 			lcVector3 Position = Center;
 			float Value = Editor->text().toFloat();
 
@@ -872,7 +874,9 @@ void lcQPropertiesTree::SetPiece(const lcArray<lcObject*>& Selection, lcObject* 
 	lcPiece* Piece = (Focus && Focus->IsPiece()) ? (lcPiece*)Focus : NULL;
 	mFocus = Piece;
 
-	lcVector3 Position = Model->GetFocusOrSelectionCenter();
+	lcVector3 Position;
+	lcMatrix33 RelativeRotation;
+	Model->GetMoveRotateTransform(Position, RelativeRotation);
 	partPositionX->setText(1, lcFormatValue(Position[0]));
 	partPositionX->setData(0, PropertyValueRole, Position[0]);
 	partPositionY->setText(1, lcFormatValue(Position[1]));

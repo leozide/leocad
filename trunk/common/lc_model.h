@@ -247,9 +247,8 @@ public:
 	bool AnyPiecesSelected() const;
 	bool AnyObjectsSelected() const;
 	lcModel* GetFirstSelectedSubmodel() const;
+	bool GetMoveRotateTransform(lcVector3& Center, lcMatrix33& RelativeRotation) const;
 	bool GetPieceFocusOrSelectionCenter(lcVector3& Center) const;
-	bool GetFocusOrSelectionCenter(lcVector3& Center) const;
-	lcVector3 GetFocusOrSelectionCenter() const;
 	lcVector3 GetSelectionOrModelCenter() const;
 	bool GetFocusPosition(lcVector3& Position) const;
 	lcObject* GetFocusObject() const;

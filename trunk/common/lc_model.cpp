@@ -2351,44 +2351,17 @@ void lcModel::RotateSelectedPieces(const lcVector3& Angles, bool Relative, bool 
 	}
 	else
 	{
-		lcVector3 Min(FLT_MAX, FLT_MAX, FLT_MAX), Max(-FLT_MAX, -FLT_MAX, -FLT_MAX);
-		lcPiece* Focus = NULL;
-		lcPiece* Selected = NULL;
-		int NumSelected = 0;
-
-		for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-		{
-			lcPiece* Piece = mPieces[PieceIdx];
-
-			if (!Piece->IsSelected())
-				continue;
-
-			if (Piece->IsFocused() && gMainWindow->GetRelativeTransform())
-				Focus = Piece;
-
-			Piece->CompareBoundingBox(Min, Max);
-
-			Selected = Piece;
-			NumSelected++;
-		}
-
 		lcVector3 Center;
+		lcMatrix33 RelativeRotation;
 
-		if (Focus)
-			Center = Focus->GetRotationCenter();
-		else if (NumSelected == 1)
-			Center = Selected->mModelWorld.GetTranslation();
-		else
-			Center = (Min + Max) / 2.0f;
+		GetMoveRotateTransform(Center, RelativeRotation);
 
 		lcMatrix33 WorldToFocusMatrix;
 
-		if (Focus && Relative)
+		if (Relative)
 		{
-			lcMatrix33 FocusToWorldMatrix = lcMatrix33(Focus->GetRelativeRotation());
-			WorldToFocusMatrix = lcMatrix33AffineInverse(FocusToWorldMatrix);
-
-			RotationMatrix = lcMul(RotationMatrix, FocusToWorldMatrix);
+			WorldToFocusMatrix = lcMatrix33AffineInverse(RelativeRotation);
+			RotationMatrix = lcMul(RotationMatrix, RelativeRotation);
 		}
 		else
 			WorldToFocusMatrix = lcMatrix33Identity();
@@ -2708,6 +2681,84 @@ lcModel* lcModel::GetFirstSelectedSubmodel() const
 	return NULL;
 }
 
+bool lcModel::GetMoveRotateTransform(lcVector3& Center, lcMatrix33& RelativeRotation) const
+{
+	bool Relative = gMainWindow->GetRelativeTransform();
+	int NumSelected = 0;
+
+	Center = lcVector3(0.0f, 0.0f, 0.0f);
+	RelativeRotation = lcMatrix33Identity();
+
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+	{
+		lcPiece* Piece = mPieces[PieceIdx];
+
+		if (!Piece->IsSelected())
+			continue;
+
+		if (Piece->IsFocused() && Relative)
+		{
+			Center = Piece->GetRotationCenter();
+			RelativeRotation = Piece->GetRelativeRotation();
+			return true;
+		}
+
+		Center += Piece->mModelWorld.GetTranslation();
+		NumSelected++;
+	}
+
+	for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
+	{
+		lcCamera* Camera = mCameras[CameraIdx];
+
+		if (!Camera->IsSelected())
+			continue;
+
+		if (Camera->IsFocused() && Relative)
+		{
+			Center = Camera->GetSectionPosition(Camera->GetFocusSection());
+//			RelativeRotation = Piece->GetRelativeRotation();
+			return true;
+		}
+
+		Center += Camera->GetSectionPosition(LC_CAMERA_SECTION_POSITION);
+		Center += Camera->GetSectionPosition(LC_CAMERA_SECTION_TARGET);
+		Center += Camera->GetSectionPosition(LC_CAMERA_SECTION_UPVECTOR);
+		NumSelected += 3;
+	}
+
+	for (int LightIdx = 0; LightIdx < mLights.GetSize(); LightIdx++)
+	{
+		lcLight* Light = mLights[LightIdx];
+
+		if (!Light->IsSelected())
+			continue;
+
+		if (Light->IsFocused() && Relative)
+		{
+			Center = Light->GetSectionPosition(Light->GetFocusSection());
+//			RelativeRotation = Piece->GetRelativeRotation();
+			return true;
+		}
+
+		Center += Light->GetSectionPosition(LC_LIGHT_SECTION_POSITION);
+		NumSelected++;
+		if (Light->IsSpotLight() || Light->IsDirectionalLight())
+		{
+			Center += Light->GetSectionPosition(LC_LIGHT_SECTION_TARGET);
+			NumSelected++;
+		}
+	}
+
+	if (NumSelected)
+	{
+		Center /= NumSelected;
+		return true;
+	}
+
+	return false;
+}
+
 bool lcModel::GetPieceFocusOrSelectionCenter(lcVector3& Center) const
 {
 	lcVector3 Min(FLT_MAX, FLT_MAX, FLT_MAX), Max(-FLT_MAX, -FLT_MAX, -FLT_MAX);
@@ -2740,28 +2791,6 @@ bool lcModel::GetPieceFocusOrSelectionCenter(lcVector3& Center) const
 		Center = lcVector3(0.0f, 0.0f, 0.0f);
 
 	return NumSelected != 0;
-}
-
-bool lcModel::GetFocusOrSelectionCenter(lcVector3& Center) const
-{
-	if (GetFocusPosition(Center))
-		return true;
-
-	if (GetSelectionCenter(Center))
-		return true;
-
-	Center = lcVector3(0.0f, 0.0f, 0.0f);
-
-	return false;
-}
-
-lcVector3 lcModel::GetFocusOrSelectionCenter() const
-{
-	lcVector3 Center;
-
-	GetFocusOrSelectionCenter(Center);
-
-	return Center;
 }
 
 lcVector3 lcModel::GetSelectionOrModelCenter() const

@@ -458,10 +458,27 @@ public:
 
 	lcVector3 GetRotationCenter() const
 	{
-		if (mState & LC_PIECE_PIVOT_POINT_VALID)
-			return lcMul31(mPivotMatrix.GetTranslation(), mModelWorld);
+		lcuint32 Section = GetFocusSection();
+
+		if (Section == LC_PIECE_SECTION_POSITION || Section == LC_PIECE_SECTION_INVALID)
+		{
+			if (mState & LC_PIECE_PIVOT_POINT_VALID)
+				return lcMul31(mPivotMatrix.GetTranslation(), mModelWorld);
+			else
+				return mModelWorld.GetTranslation();
+		}
 		else
+		{
+			int ControlPointIndex = Section - LC_PIECE_SECTION_CONTROL_POINT_1;
+
+			if (ControlPointIndex >= 0 && ControlPointIndex < mControlPoints.GetSize())
+			{
+				lcMatrix44& Transform = mControlPoints[ControlPointIndex].Transform;
+				return lcMul31(Transform.GetTranslation(), mModelWorld);
+			}
+
 			return mModelWorld.GetTranslation();
+		}
 	}
 
 	lcMatrix33 GetRelativeRotation() const

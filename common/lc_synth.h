@@ -7,7 +7,8 @@
 enum lcSynthType
 {
 	LC_SYNTH_PIECE_RIBBED_HOSE,
-	LC_SYNTH_PIECE_FLEXIBLE_AXLE
+	LC_SYNTH_PIECE_FLEXIBLE_AXLE,
+	LC_SYNTH_PIECE_STRING_BRAIDED
 };
 
 struct lcSynthComponent
@@ -29,6 +30,7 @@ protected:
 	void CalculateSections(const lcArray<lcPieceControlPoint>& ControlPoints, lcArray<lcMatrix44>& Sections, void(*SectionCallback)(const lcVector3& CurvePoint, int SegmentIndex, float t, void* Param), void* CallbackParam) const;
 	void AddRibbedHoseParts(lcMemFile& File, const lcArray<lcMatrix44>& Sections) const;
 	void AddFlexibleAxleParts(lcMemFile& File, const lcArray<lcMatrix44>& Sections) const;
+	void AddStringBraidedParts(lcMemFile& File, const lcArray<lcMatrix44>& Sections) const;
 
 	lcSynthType mType;
 	lcSynthComponent mStart;
@@ -36,6 +38,7 @@ protected:
 	lcSynthComponent mEnd;
 	float mLength;
 	int mNumSections;
+	bool mRigidEdges;
 };
 
 void lcSynthInit();

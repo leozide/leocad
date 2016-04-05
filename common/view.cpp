@@ -1809,7 +1809,6 @@ void View::UpdateTrackTool()
 				{
 					lcPiece* Piece = (lcPiece*)Focus;
 					float Strength = Piece->GetControlPoints()[ControlPointIndex].Scale;
-					const float ScaleMax = 200.0f;
 					const float ScaleStart = (2.0f - OverlayScaleRadius) * OverlayScale + Strength;
 					const float ScaleEnd = (2.0f + OverlayScaleRadius) * OverlayScale + Strength;
 
@@ -2440,6 +2439,8 @@ void View::OnRightButtonDown()
 			StartTracking(LC_TRACKBUTTON_RIGHT);
 		break;
 
+	case LC_TRACKTOOL_SCALE_PLUS:
+	case LC_TRACKTOOL_SCALE_MINUS:
 	case LC_TRACKTOOL_ERASER:
 	case LC_TRACKTOOL_PAINT:
 		break;

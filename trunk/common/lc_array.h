@@ -85,7 +85,7 @@ public:
 	void SetSize(int NewSize)
 	{
 		if (NewSize > mAlloc)
-			AllocGrow(NewSize - mAlloc);
+			AllocGrow(NewSize - mLength);
 
 		mLength = NewSize;
 	}

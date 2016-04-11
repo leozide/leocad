@@ -1765,27 +1765,51 @@ void lcLibraryMeshData::TestQuad(int* QuadIndices, const lcVector3* Vertices)
 	}
 }
 
-void lcLibraryMeshData::AddLine(lcMeshDataType MeshDataType, int LineType, lcuint32 ColorCode, const lcVector3* Vertices)
+lcLibraryMeshSection* lcLibraryMeshData::AddSection(lcMeshDataType MeshDataType, LC_MESH_PRIMITIVE_TYPE PrimitiveType, lcuint32 ColorCode, lcTexture* Texture)
 {
-	lcLibraryMeshSection* Section = NULL;
-	int SectionIdx;
-	LC_MESH_PRIMITIVE_TYPE PrimitiveType = (LineType == 2) ? LC_MESH_LINES : LC_MESH_TRIANGLES;
 	lcArray<lcLibraryMeshSection*>& Sections = mSections[MeshDataType];
+	lcLibraryMeshSection* Section;
 
-	for (SectionIdx = 0; SectionIdx < Sections.GetSize(); SectionIdx++)
+	for (int SectionIdx = 0; SectionIdx < Sections.GetSize(); SectionIdx++)
 	{
 		Section = Sections[SectionIdx];
 
-		if (Section->mColor == ColorCode && Section->mPrimitiveType == PrimitiveType && Section->mTexture == NULL)
-			break;
+		if (Section->mColor == ColorCode && Section->mPrimitiveType == PrimitiveType && Section->mTexture == Texture)
+			return Section;
 	}
 
-	if (SectionIdx == Sections.GetSize())
-	{
-		Section = new lcLibraryMeshSection(PrimitiveType, ColorCode, NULL);
+	Section = new lcLibraryMeshSection(PrimitiveType, ColorCode, Texture);
+	Sections.Add(Section);
 
-		Sections.Add(Section);
-	}
+	return Section;
+}
+
+void lcLibraryMeshData::AddVertices(lcMeshDataType MeshDataType, int VertexCount, int* BaseVertex, lcVertex** VertexBuffer)
+{
+	lcArray<lcVertex>& Vertices = mVertices[MeshDataType];
+	int CurrentSize = Vertices.GetSize();
+
+	Vertices.SetSize(CurrentSize + VertexCount);
+
+	*BaseVertex = CurrentSize;
+	*VertexBuffer = &Vertices[CurrentSize];
+}
+
+void lcLibraryMeshData::AddIndices(lcMeshDataType MeshDataType, LC_MESH_PRIMITIVE_TYPE PrimitiveType, lcuint32 ColorCode, int IndexCount, lcuint32** IndexBuffer)
+{
+	lcLibraryMeshSection* Section = AddSection(MeshDataType, PrimitiveType, ColorCode, NULL);
+	lcArray<lcuint32>& Indices = Section->mIndices;
+	int CurrentSize = Indices.GetSize();
+
+	Indices.SetSize(CurrentSize + IndexCount);
+
+	*IndexBuffer = &Indices[CurrentSize];
+}
+
+void lcLibraryMeshData::AddLine(lcMeshDataType MeshDataType, int LineType, lcuint32 ColorCode, const lcVector3* Vertices)
+{
+	LC_MESH_PRIMITIVE_TYPE PrimitiveType = (LineType == 2) ? LC_MESH_LINES : LC_MESH_TRIANGLES;
+	lcLibraryMeshSection* Section = AddSection(MeshDataType, PrimitiveType, ColorCode, NULL);
 
 	int QuadIndices[4] = { 0, 1, 2, 3 };
 
@@ -1848,25 +1872,8 @@ void lcLibraryMeshData::AddLine(lcMeshDataType MeshDataType, int LineType, lcuin
 
 void lcLibraryMeshData::AddTexturedLine(lcMeshDataType MeshDataType, int LineType, lcuint32 ColorCode, const lcLibraryTextureMap& Map, const lcVector3* Vertices)
 {
-	lcLibraryMeshSection* Section = NULL;
-	int SectionIdx;
 	LC_MESH_PRIMITIVE_TYPE PrimitiveType = (LineType == 2) ? LC_MESH_TEXTURED_LINES : LC_MESH_TEXTURED_TRIANGLES;
-	lcArray<lcLibraryMeshSection*>& Sections = mSections[MeshDataType];
-
-	for (SectionIdx = 0; SectionIdx < Sections.GetSize(); SectionIdx++)
-	{
-		Section = Sections[SectionIdx];
-
-		if (Section->mColor == ColorCode && Section->mPrimitiveType == PrimitiveType && Section->mTexture == Map.Texture)
-			break;
-	}
-
-	if (SectionIdx == Sections.GetSize())
-	{
-		Section = new lcLibraryMeshSection(PrimitiveType, ColorCode, Map.Texture);
-
-		Sections.Add(Section);
-	}
+	lcLibraryMeshSection* Section = AddSection(MeshDataType, PrimitiveType, ColorCode, Map.Texture);
 
 	int QuadIndices[4] = { 0, 1, 2, 3 };
 

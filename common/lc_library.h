@@ -78,6 +78,9 @@ public:
 			mSections[MeshDataIdx].DeleteAll();
 	}
 
+	lcLibraryMeshSection* AddSection(lcMeshDataType MeshDataType, LC_MESH_PRIMITIVE_TYPE PrimitiveType, lcuint32 ColorCode, lcTexture* Texture);
+	void AddVertices(lcMeshDataType MeshDataType, int VertexCount, int* BaseVertex, lcVertex** VertexBuffer);
+	void AddIndices(lcMeshDataType MeshDataType, LC_MESH_PRIMITIVE_TYPE PrimitiveType, lcuint32 ColorCode, int IndexCount, lcuint32** IndexBuffer);
 	void AddLine(lcMeshDataType MeshDataType, int LineType, lcuint32 ColorCode, const lcVector3* Vertices);
 	void AddTexturedLine(lcMeshDataType MeshDataType, int LineType, lcuint32 ColorCode, const lcLibraryTextureMap& Map, const lcVector3* Vertices);
 	void AddMeshData(const lcLibraryMeshData& Data, const lcMatrix44& Transform, lcuint32 CurrentColorCode, lcLibraryTextureMap* TextureMap, lcMeshDataType OverrideDestIndex);

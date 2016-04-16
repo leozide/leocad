@@ -287,12 +287,7 @@ void lcSynthInfo::AddFlexibleAxleParts(lcMemFile& File, lcLibraryMeshData& MeshD
 
 	const char* EdgeParts[6] =
 	{
-		"STUD3A.DAT",
-		"S/FAXLE1.DAT",
-		"S/FAXLE2.DAT",
-		"S/FAXLE3.DAT",
-		"S/FAXLE4.DAT",
-		"S/FAXLE5.DAT",
+		"STUD3A.DAT", "S/FAXLE1.DAT", "S/FAXLE2.DAT", "S/FAXLE3.DAT", "S/FAXLE4.DAT", "S/FAXLE5.DAT"
 	};
 
 	for (int PartIdx = 0; PartIdx < NumEdgeParts; PartIdx++)
@@ -357,7 +352,7 @@ void lcSynthInfo::AddFlexibleAxleParts(lcMemFile& File, lcLibraryMeshData& MeshD
 		}
 	}
 
-	MeshData.AddIndices(LC_MESHDATA_SHARED, LC_MESH_TRIANGLES, 0, 6 * 16 * (Sections.GetSize() - 2), &IndexBuffer);
+	MeshData.AddIndices(LC_MESHDATA_SHARED, LC_MESH_TRIANGLES, 16, 6 * 16 * (Sections.GetSize() - 2), &IndexBuffer);
 
 	for (int SectionIdx = 1; SectionIdx < Sections.GetSize() - 1; SectionIdx++)
 	{

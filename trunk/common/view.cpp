@@ -775,8 +775,8 @@ void View::DrawSelectMoveOverlay()
 			lcVector3 Verts[38];
 			int NumVerts = 0;
 
-			Verts[NumVerts++] = lcVector3(0.0f, 0.0f, Length - OverlayScaleRadius);
-			Verts[NumVerts++] = lcVector3(0.0f, 0.0f, OverlayScaleRadius - Length);
+			Verts[NumVerts++] = lcVector3(Length - OverlayScaleRadius, 0.0f, 0.0f);
+			Verts[NumVerts++] = lcVector3(OverlayScaleRadius - Length, 0.0f, 0.0f);
 
 			float SinTable[9], CosTable[9];
 
@@ -791,8 +791,8 @@ void View::DrawSelectMoveOverlay()
 				float x = CosTable[Step];
 				float y = SinTable[Step];
 
-				Verts[NumVerts++] = lcVector3(x * OverlayScaleInnerRadius, 0.0f, y * OverlayScaleInnerRadius + Length);
-				Verts[NumVerts++] = lcVector3(x * OverlayScaleRadius, 0.0f, y * OverlayScaleRadius + Length);
+				Verts[NumVerts++] = lcVector3(Length + x * OverlayScaleInnerRadius, 0.0f, y * OverlayScaleInnerRadius);
+				Verts[NumVerts++] = lcVector3(Length + x * OverlayScaleRadius, 0.0f, y * OverlayScaleRadius);
 			}
 
 			for (int Step = 0; Step <= 8; Step++)
@@ -800,8 +800,8 @@ void View::DrawSelectMoveOverlay()
 				float x = CosTable[Step];
 				float y = SinTable[Step];
 
-				Verts[NumVerts++] = lcVector3(x * OverlayScaleInnerRadius, 0.0f, y * OverlayScaleInnerRadius - Length);
-				Verts[NumVerts++] = lcVector3(x * OverlayScaleRadius, 0.0f, y * OverlayScaleRadius - Length);
+				Verts[NumVerts++] = lcVector3(-Length + x * OverlayScaleInnerRadius, 0.0f, y * OverlayScaleInnerRadius);
+				Verts[NumVerts++] = lcVector3(-Length + x * OverlayScaleRadius, 0.0f, y * OverlayScaleRadius);
 			}
 
 			if (mTrackTool == LC_TRACKTOOL_SCALE_PLUS || mTrackTool == LC_TRACKTOOL_SCALE_MINUS)
@@ -1812,7 +1812,7 @@ void View::UpdateTrackTool()
 					const float ScaleStart = (2.0f - OverlayScaleRadius) * OverlayScale + Strength;
 					const float ScaleEnd = (2.0f + OverlayScaleRadius) * OverlayScale + Strength;
 
-					if (AxisIndex == 0 && fabs(Proj1) < OverlayScaleRadius * OverlayScale)
+					if (AxisIndex == 1 && fabs(Proj1) < OverlayScaleRadius * OverlayScale)
 					{
 						if (Proj2 > ScaleStart && Proj2 < ScaleEnd)
 						{
@@ -1827,7 +1827,7 @@ void View::UpdateTrackTool()
 							ClosestIntersectionDistance = IntersectionDistance;
 						}
 					}
-					else if (AxisIndex == 1 && fabs(Proj2) < OverlayScaleRadius * OverlayScale)
+					else if (AxisIndex == 2 && fabs(Proj2) < OverlayScaleRadius * OverlayScale)
 					{
 						if (Proj1 > ScaleStart && Proj1 < ScaleEnd)
 						{
@@ -2592,9 +2592,9 @@ void View::OnMouseMove()
 			{
 				lcVector3 Direction;
 				if (mTrackTool == LC_TRACKTOOL_SCALE_PLUS)
-					Direction = lcVector3(0.0f, 0.0f, 1.0f);
+					Direction = lcVector3(1.0f, 0.0f, 0.0f);
 				else
-					Direction = lcVector3(0.0f, 0.0f, -1.0f);
+					Direction = lcVector3(-1.0f, 0.0f, 0.0f);
 
 				Direction = lcMul(Direction, RelativeRotation);
 

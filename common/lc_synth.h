@@ -29,6 +29,7 @@ public:
 	lcMesh* CreateMesh(const lcArray<lcPieceControlPoint>& ControlPoints) const;
 
 protected:
+	float GetSectionTwist(const lcMatrix44& StartTransform, const lcMatrix44& EndTransform) const;
 	void CalculateSections(const lcArray<lcPieceControlPoint>& ControlPoints, lcArray<lcMatrix44>& Sections, void(*SectionCallback)(const lcVector3& CurvePoint, int SegmentIndex, float t, void* Param), void* CallbackParam) const;
 	void AddRibbedHoseParts(lcMemFile& File, const lcArray<lcMatrix44>& Sections) const;
 	void AddFlexibleAxleParts(lcMemFile& File, lcLibraryMeshData& MeshData, const lcArray<lcMatrix44>& Sections) const;

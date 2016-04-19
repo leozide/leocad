@@ -1030,7 +1030,7 @@ lcMesh* lcPiecesLibrary::CreateMesh(PieceInfo* Info, lcLibraryMeshData& MeshData
 		for (int VertexIdx = 0; VertexIdx < TexturedVertices.GetSize(); VertexIdx++)
 		{
 			lcVertexTextured& DstVertex = *DstTexturedVerts++;
-			lcVertexTextured& SrcVertex = TexturedVertices[VertexIdx];
+			const lcVertexTextured& SrcVertex = TexturedVertices[VertexIdx];
 
 			const lcVector3& SrcPosition = SrcVertex.Position;
 			lcVector3& DstPosition = DstVertex.Position;
@@ -1986,7 +1986,7 @@ void lcLibraryMeshData::AddMeshData(const lcLibraryMeshData& Data, const lcMatri
 
 			for (int SrcVertexIdx = 0; SrcVertexIdx < VertexCount; SrcVertexIdx++)
 			{
-				lcVertex& SrcVertex = DataVertices[SrcVertexIdx];
+				const lcVertex& SrcVertex = DataVertices[SrcVertexIdx];
 				lcVector3 Position = lcMul31(SrcVertex.Position, Transform);
 				lcVector2 TexCoord(lcDot3(lcVector3(Position.x, Position.y, Position.z), TextureMap->Params[0]) + TextureMap->Params[0].w,
 								   lcDot3(lcVector3(Position.x, Position.y, Position.z), TextureMap->Params[1]) + TextureMap->Params[1].w);
@@ -2027,7 +2027,7 @@ void lcLibraryMeshData::AddMeshData(const lcLibraryMeshData& Data, const lcMatri
 
 			for (int SrcVertexIdx = 0; SrcVertexIdx < TexturedVertexCount; SrcVertexIdx++)
 			{
-				lcVertexTextured& SrcVertex = DataTexturedVertices[SrcVertexIdx];
+				const lcVertexTextured& SrcVertex = DataTexturedVertices[SrcVertexIdx];
 				lcVector3 Position = lcMul31(SrcVertex.Position, Transform);
 				int Index = -1;
 
@@ -2137,7 +2137,7 @@ void lcLibraryMeshData::AddMeshDataNoDuplicateCheck(const lcLibraryMeshData& Dat
 
 			for (int SrcVertexIdx = 0; SrcVertexIdx < DataVertices.GetSize(); SrcVertexIdx++)
 			{
-				lcVertex& SrcVertex = DataVertices[SrcVertexIdx];
+				const lcVertex& SrcVertex = DataVertices[SrcVertexIdx];
 				lcVertexTextured& DstVertex = TexturedVertices.Add();
 
 				lcVector3 Position = lcMul31(SrcVertex.Position, Transform);
@@ -2160,7 +2160,7 @@ void lcLibraryMeshData::AddMeshDataNoDuplicateCheck(const lcLibraryMeshData& Dat
 
 			for (int SrcVertexIdx = 0; SrcVertexIdx < TexturedVertexCount; SrcVertexIdx++)
 			{
-				lcVertexTextured& SrcVertex = DataTexturedVertices[SrcVertexIdx];
+				const lcVertexTextured& SrcVertex = DataTexturedVertices[SrcVertexIdx];
 				lcVertexTextured& DstVertex = TexturedVertices.Add();
 				DstVertex.Position = lcMul31(SrcVertex.Position, Transform);
 				DstVertex.TexCoord = SrcVertex.TexCoord;

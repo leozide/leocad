@@ -964,7 +964,7 @@ void lcContext::DrawOpaqueMeshes(const lcArray<lcRenderMesh>& OpaqueMeshes)
 
 	for (int MeshIdx = 0; MeshIdx < OpaqueMeshes.GetSize(); MeshIdx++)
 	{
-		lcRenderMesh& RenderMesh = OpaqueMeshes[MeshIdx];
+		const lcRenderMesh& RenderMesh = OpaqueMeshes[MeshIdx];
 		lcMesh* Mesh = RenderMesh.Mesh;
 		int LodIndex = RenderMesh.LodIndex;
 
@@ -1041,7 +1041,7 @@ void lcContext::DrawTranslucentMeshes(const lcArray<lcRenderMesh>& TranslucentMe
 
 	for (int MeshIdx = 0; MeshIdx < TranslucentMeshes.GetSize(); MeshIdx++)
 	{
-		lcRenderMesh& RenderMesh = TranslucentMeshes[MeshIdx];
+		const lcRenderMesh& RenderMesh = TranslucentMeshes[MeshIdx];
 		lcMesh* Mesh = RenderMesh.Mesh;
 		int LodIndex = RenderMesh.LodIndex;
 

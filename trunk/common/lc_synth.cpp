@@ -415,7 +415,7 @@ void lcSynthInfo::AddFlexibleAxleParts(lcMemFile& File, lcLibraryMeshData& MeshD
 	}
 }
 
-void lcSynthInfo::AddStringBraidedParts(lcMemFile& File, lcLibraryMeshData& MeshData, const lcArray<lcMatrix44>& Sections) const
+void lcSynthInfo::AddStringBraidedParts(lcMemFile& File, lcLibraryMeshData& MeshData, lcArray<lcMatrix44>& Sections) const
 {
 	for (int SectionIdx = 0; SectionIdx < Sections.GetSize(); SectionIdx++)
 	{

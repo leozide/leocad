@@ -147,7 +147,7 @@ bool lcSaveCategories(QTextStream& Stream, const lcArray<lcLibraryCategory>& Cat
 
 	for (int CategoryIdx = 0; CategoryIdx < Categories.GetSize(); CategoryIdx++)
 	{
-		lcLibraryCategory& Category = Categories[CategoryIdx];
+		const lcLibraryCategory& Category = Categories[CategoryIdx];
 		Stream << Format.arg((const char*)Category.Name, (const char*)Category.Keywords);
 	}
 

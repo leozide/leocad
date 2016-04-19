@@ -93,7 +93,7 @@ protected:
 		const int Count = sizeof(T) / sizeof(float);
 		for (int KeyIdx = 0; KeyIdx < Keys.GetSize(); KeyIdx++)
 		{
-			lcObjectKey<T>& Key = Keys[KeyIdx];
+			const lcObjectKey<T>& Key = Keys[KeyIdx];
 			Stream << QLatin1String("0 !LEOCAD ") << KeyName << Key.Step << ' ';
 			for (int ValueIdx = 0; ValueIdx < Count; ValueIdx++)
 				Stream << ((float*)&Key.Value)[ValueIdx] << ' ';
@@ -120,7 +120,7 @@ protected:
 	template<typename T>
 	const T& CalculateKey(const lcArray<lcObjectKey<T>>& Keys, lcStep Step)
 	{
-		lcObjectKey<T>* PreviousKey = &Keys[0];
+		const lcObjectKey<T>* PreviousKey = &Keys[0];
 
 		for (int KeyIdx = 0; KeyIdx < Keys.GetSize(); KeyIdx++)
 		{

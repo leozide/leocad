@@ -473,7 +473,7 @@ public:
 
 			if (ControlPointIndex >= 0 && ControlPointIndex < mControlPoints.GetSize())
 			{
-				lcMatrix44& Transform = mControlPoints[ControlPointIndex].Transform;
+				const lcMatrix44& Transform = mControlPoints[ControlPointIndex].Transform;
 				return lcMul31(Transform.GetTranslation(), mModelWorld);
 			}
 
@@ -498,7 +498,7 @@ public:
 
 			if (ControlPointIndex >= 0 && ControlPointIndex < mControlPoints.GetSize())
 			{
-				lcMatrix44& Transform = mControlPoints[ControlPointIndex].Transform;
+				const lcMatrix44& Transform = mControlPoints[ControlPointIndex].Transform;
 				return lcMatrix33(lcMul(Transform, mModelWorld));
 			}
 

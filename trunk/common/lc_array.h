@@ -55,7 +55,12 @@ public:
 		return *this;
 	}
 
-	T& operator[](int Index) const
+	const T& operator[](int Index) const
+	{
+		return mData[Index];
+	}
+
+	T& operator[](int Index)
 	{
 		return mData[Index];
 	}

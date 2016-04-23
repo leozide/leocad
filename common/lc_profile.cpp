@@ -63,7 +63,8 @@ lcProfileEntry gProfileEntries[LC_NUM_PROFILE_KEYS] =
 	lcProfileEntry("Settings", "CheckUpdates", 1),                                   // LC_PROFILE_CHECK_UPDATES
 	lcProfileEntry("Settings", "ProjectsPath", ""),                                  // LC_PROFILE_PROJECTS_PATH
 	lcProfileEntry("Settings", "PartsLibrary", ""),                                  // LC_PROFILE_PARTS_LIBRARY
-	lcProfileEntry("Settings", "Shortcuts"),                                         // LC_PROFILE_SHORTCUTS
+	lcProfileEntry("Settings", "Shortcuts"),                                         // LC_PROFILE_KEYBOARD_SHORTCUTS
+	lcProfileEntry("Settings", "MouseShortcuts"),                                    // LC_PROFILE_MOUSE_SHORTCUTS
 	lcProfileEntry("Settings", "Categories"),                                        // LC_PROFILE_CATEGORIES
 	lcProfileEntry("Settings", "RecentFile1", ""),                                   // LC_PROFILE_RECENT_FILE1
 	lcProfileEntry("Settings", "RecentFile2", ""),                                   // LC_PROFILE_RECENT_FILE2

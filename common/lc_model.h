@@ -94,7 +94,8 @@ enum lcTool
 	LC_TOOL_PAN,
 	LC_TOOL_ROTATE_VIEW,
 	LC_TOOL_ROLL,
-	LC_TOOL_ZOOM_REGION
+	LC_TOOL_ZOOM_REGION,
+	LC_NUM_TOOLS
 };
 
 struct lcModelHistoryEntry

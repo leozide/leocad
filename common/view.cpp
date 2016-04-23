@@ -294,7 +294,7 @@ lcMatrix44 View::GetProjectionMatrix() const
 
 LC_CURSOR_TYPE View::GetCursor() const
 {
-	if (mTrackTool == LC_TRACKTOOL_SELECT && mInputState.Control)
+	if (mTrackTool == LC_TRACKTOOL_SELECT && (mInputState.Modifiers & Qt::ControlModifier))
 		return LC_CURSOR_SELECT_GROUP;
 
 	const LC_CURSOR_TYPE CursorFromTrackTool[] =
@@ -1625,6 +1625,34 @@ lcTool View::GetCurrentTool() const
 	return ToolFromTrackTool[mTrackTool];
 }
 
+lcTrackTool View::GetOverrideTrackTool(Qt::MouseButton Button) const
+{
+	lcTool OverrideTool = gMouseShortcuts.GetTool(Qt::LeftButton, mInputState.Modifiers);
+
+	if (OverrideTool == LC_NUM_TOOLS)
+		return LC_TRACKTOOL_NONE;
+
+	lcTrackTool TrackToolFromTool[LC_NUM_TOOLS] =
+	{
+		LC_TRACKTOOL_INSERT,     // LC_TOOL_INSERT
+		LC_TRACKTOOL_POINTLIGHT, // LC_TOOL_LIGHT
+		LC_TRACKTOOL_SPOTLIGHT,  // LC_TOOL_SPOTLIGHT
+		LC_TRACKTOOL_CAMERA,     // LC_TOOL_CAMERA
+		LC_TRACKTOOL_SELECT,     // LC_TOOL_SELECT
+		LC_TRACKTOOL_MOVE_XYZ,   // LC_TOOL_MOVE
+		LC_TRACKTOOL_ROTATE_XYZ, // LC_TOOL_ROTATE
+		LC_TRACKTOOL_ERASER,     // LC_TOOL_ERASER
+		LC_TRACKTOOL_PAINT,      // LC_TOOL_PAINT
+		LC_TRACKTOOL_ZOOM,       // LC_TOOL_ZOOM
+		LC_TRACKTOOL_PAN,        // LC_TOOL_PAN
+		LC_TRACKTOOL_ORBIT_XY,   // LC_TOOL_ROTATE_VIEW
+		LC_TRACKTOOL_ROLL,       // LC_TOOL_ROLL
+		LC_TRACKTOOL_ZOOM_REGION // LC_TOOL_ZOOM_REGION
+	};
+
+	return TrackToolFromTool[OverrideTool];
+}
+
 float View::GetOverlayScale() const
 {
 	lcVector3 OverlayCenter;
@@ -2052,6 +2080,9 @@ void View::UpdateTrackTool()
 	case LC_TOOL_ZOOM_REGION:
 		NewTrackTool = LC_TRACKTOOL_ZOOM_REGION;
 		break;
+
+	case LC_NUM_TOOLS:
+		break;
 	}
 
 	switch (mDragState)
@@ -2137,6 +2168,9 @@ void View::StartTracking(lcTrackButton TrackButton)
 
 	case LC_TOOL_ZOOM_REGION:
 		break;
+
+	case LC_NUM_TOOLS:
+		break;
 	}
 
 	OnUpdateCursor();
@@ -2165,7 +2199,7 @@ void View::StopTracking(bool Accept)
 		{
 			lcArray<lcObject*> Objects = FindObjectsInBox(mMouseDownX, mMouseDownY, mInputState.x, mInputState.y);
 
-			if (mInputState.Control)
+			if (mInputState.Modifiers & Qt::ControlModifier)
 				mModel->AddToSelection(Objects);
 			else
 				mModel->SetSelectionAndFocus(Objects, NULL, 0);
@@ -2218,6 +2252,9 @@ void View::StopTracking(bool Accept)
 			}
 		}
 		break;
+
+	case LC_NUM_TOOLS:
+		break;
 	}
 
 	mTrackButton = LC_TRACKBUTTON_NONE;
@@ -2243,9 +2280,11 @@ void View::OnLeftButtonDown()
 
 	gMainWindow->SetActiveView(this);
 
-	if (mInputState.Alt)
+	lcTrackTool OverrideTool = GetOverrideTrackTool(Qt::LeftButton);
+
+	if (OverrideTool != LC_TRACKTOOL_NONE)
 	{
-		mTrackTool = LC_TRACKTOOL_ORBIT_XY;
+		mTrackTool = OverrideTool;
 		OnUpdateCursor();
 	}
 	else if (mTrackTool == LC_TRACKTOOL_MOVE_XYZ)
@@ -2267,7 +2306,7 @@ void View::OnLeftButtonDown()
 
 			mModel->InsertPieceToolClicked(GetPieceInsertPosition());
 
-			if (!mInputState.Control)
+			if ((mInputState.Modifiers & Qt::ControlModifier) == 0)
 				gMainWindow->SetTool(LC_TOOL_SELECT);
 
 			UpdateTrackTool();
@@ -2278,7 +2317,7 @@ void View::OnLeftButtonDown()
 		{
 			mModel->PointLightToolClicked(UnprojectPoint(lcVector3((float)mInputState.x, (float)mInputState.y, 0.9f)));
 
-			if (!mInputState.Control)
+			if ((mInputState.Modifiers & Qt::ControlModifier) == 0)
 				gMainWindow->SetTool(LC_TOOL_SELECT);
 
 			UpdateTrackTool();
@@ -2294,7 +2333,7 @@ void View::OnLeftButtonDown()
 		{
 			lcObjectSection ObjectSection = FindObjectUnderPointer(false);
 
-			if (mInputState.Control)
+			if (mInputState.Modifiers & Qt::ControlModifier)
 				mModel->FocusOrDeselectObject(ObjectSection);
 			else
 				mModel->ClearSelectionAndSetFocus(ObjectSection);
@@ -2360,7 +2399,7 @@ void View::OnLeftButtonDoubleClick()
 
 	lcObjectSection ObjectSection = FindObjectUnderPointer(false);
 
-	if (mInputState.Control)
+	if (mInputState.Modifiers & Qt::ControlModifier)
 		mModel->FocusOrDeselectObject(ObjectSection);
 	else
 		mModel->ClearSelectionAndSetFocus(ObjectSection);
@@ -2376,9 +2415,11 @@ void View::OnMiddleButtonDown()
 
 	gMainWindow->SetActiveView(this);
 
-	if (mInputState.Alt)
+	lcTrackTool OverrideTool = GetOverrideTrackTool(Qt::MiddleButton);
+
+	if (OverrideTool != LC_TRACKTOOL_NONE)
 	{
-		mTrackTool = LC_TRACKTOOL_PAN;
+		mTrackTool = OverrideTool;
 		OnUpdateCursor();
 		StartTracking(LC_TRACKBUTTON_MIDDLE);
 	}
@@ -2399,9 +2440,11 @@ void View::OnRightButtonDown()
 
 	gMainWindow->SetActiveView(this);
 
-	if (mInputState.Alt)
+	lcTrackTool OverrideTool = GetOverrideTrackTool(Qt::RightButton);
+
+	if (OverrideTool != LC_TRACKTOOL_NONE)
 	{
-		mTrackTool = LC_TRACKTOOL_ZOOM;
+		mTrackTool = OverrideTool;
 		OnUpdateCursor();
 	}
 	else if (mTrackTool == LC_TRACKTOOL_MOVE_XYZ)
@@ -2785,5 +2828,5 @@ void View::OnMouseMove()
 
 void View::OnMouseWheel(float Direction)
 {
-	mModel->Zoom(mCamera, (int)((mInputState.Control ? 100 : 10) * Direction));
+	mModel->Zoom(mCamera, (int)(((mInputState.Modifiers & Qt::ControlModifier) ? 100 : 10) * Direction));
 }

@@ -305,6 +305,7 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 
 	gMainWindow = new lcMainWindow();
 	lcLoadDefaultKeyboardShortcuts();
+	lcLoadDefaultMouseShortcuts();
 
 	if (!LoadPiecesLibrary(LibPath, LibraryInstallPath, LDrawPath))
 	{

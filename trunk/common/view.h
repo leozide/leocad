@@ -134,6 +134,7 @@ protected:
 
 	void UpdateTrackTool();
 	lcTool GetCurrentTool() const;
+	lcTrackTool GetOverrideTrackTool(Qt::MouseButton Button) const;
 	float GetOverlayScale() const;
 	void StartTracking(lcTrackButton TrackButton);
 	void StopTracking(bool Accept);

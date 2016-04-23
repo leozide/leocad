@@ -3434,6 +3434,9 @@ void lcModel::EndMouseTool(lcTool Tool, bool Accept)
 
 	case LC_TOOL_ZOOM_REGION:
 		break;
+
+	case LC_NUM_TOOLS:
+		break;
 	}
 }
 

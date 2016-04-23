@@ -30,9 +30,7 @@ struct lcInputState
 {
 	int x;
 	int y;
-	bool Control;
-	bool Shift;
-	bool Alt;
+	Qt::KeyboardModifiers Modifiers;
 };
 
 class lcGLWidget
@@ -44,9 +42,7 @@ public:
 		mWidget = NULL;
 		mInputState.x = 0;
 		mInputState.y = 0;
-		mInputState.Control = false;
-		mInputState.Shift = false;
-		mInputState.Alt = false;
+		mInputState.Modifiers = Qt::NoModifier;
 		mContext = new lcContext();
 		mDeleteContext = true;
 	}

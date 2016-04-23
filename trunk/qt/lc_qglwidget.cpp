@@ -164,7 +164,7 @@ void lcQGLWidget::keyPressEvent(QKeyEvent *event)
 {
 	if (isView && event->key() == Qt::Key_Control)
 	{
-		widget->mInputState.Control = true;
+		widget->mInputState.Modifiers = event->modifiers();
 		widget->OnUpdateCursor();
 	}
 
@@ -175,7 +175,7 @@ void lcQGLWidget::keyReleaseEvent(QKeyEvent *event)
 {
 	if (isView && event->key() == Qt::Key_Control)
 	{
-		widget->mInputState.Control = false;
+		widget->mInputState.Modifiers = event->modifiers();
 		widget->OnUpdateCursor();
 	}
 
@@ -188,9 +188,7 @@ void lcQGLWidget::mousePressEvent(QMouseEvent *event)
 
 	widget->mInputState.x = event->x() * scale;
 	widget->mInputState.y = widget->mHeight - event->y() * scale - 1;
-	widget->mInputState.Control = (event->modifiers() & Qt::ControlModifier) != 0;
-	widget->mInputState.Shift = (event->modifiers() & Qt::ShiftModifier) != 0;
-	widget->mInputState.Alt = (event->modifiers() & Qt::AltModifier) != 0;
+	widget->mInputState.Modifiers = event->modifiers();
 
 	switch (event->button())
 	{
@@ -227,9 +225,7 @@ void lcQGLWidget::mouseReleaseEvent(QMouseEvent *event)
 
 	widget->mInputState.x = event->x() * scale;
 	widget->mInputState.y = widget->mHeight - event->y() * scale - 1;
-	widget->mInputState.Control = (event->modifiers() & Qt::ControlModifier) != 0;
-	widget->mInputState.Shift = (event->modifiers() & Qt::ShiftModifier) != 0;
-	widget->mInputState.Alt = (event->modifiers() & Qt::AltModifier) != 0;
+	widget->mInputState.Modifiers = event->modifiers();
 
 	switch (event->button())
 	{
@@ -266,9 +262,7 @@ void lcQGLWidget::mouseDoubleClickEvent(QMouseEvent *event)
 
 	widget->mInputState.x = event->x() * scale;
 	widget->mInputState.y = widget->mHeight - event->y() * scale - 1;
-	widget->mInputState.Control = (event->modifiers() & Qt::ControlModifier) != 0;
-	widget->mInputState.Shift = (event->modifiers() & Qt::ShiftModifier) != 0;
-	widget->mInputState.Alt = (event->modifiers() & Qt::AltModifier) != 0;
+	widget->mInputState.Modifiers = event->modifiers();
 
 	switch (event->button())
 	{
@@ -286,9 +280,7 @@ void lcQGLWidget::mouseMoveEvent(QMouseEvent *event)
 
 	widget->mInputState.x = event->x() * scale;
 	widget->mInputState.y = widget->mHeight - event->y() * scale - 1;
-	widget->mInputState.Control = (event->modifiers() & Qt::ControlModifier) != 0;
-	widget->mInputState.Shift = (event->modifiers() & Qt::ShiftModifier) != 0;
-	widget->mInputState.Alt = (event->modifiers() & Qt::AltModifier) != 0;
+	widget->mInputState.Modifiers = event->modifiers();
 
 	widget->OnMouseMove();
 }
@@ -305,9 +297,7 @@ void lcQGLWidget::wheelEvent(QWheelEvent *event)
 
 	widget->mInputState.x = event->x() * scale;
 	widget->mInputState.y = widget->mHeight - event->y() * scale - 1;
-	widget->mInputState.Control = (event->modifiers() & Qt::ControlModifier) != 0;
-	widget->mInputState.Shift = (event->modifiers() & Qt::ShiftModifier) != 0;
-	widget->mInputState.Alt = (event->modifiers() & Qt::AltModifier) != 0;
+	widget->mInputState.Modifiers = event->modifiers();
 
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 2, 0))
 	mWheelAccumulator += event->angleDelta().y() / 8;
@@ -362,9 +352,7 @@ void lcQGLWidget::dragMoveEvent(QDragMoveEvent *event)
 
 	widget->mInputState.x = event->pos().x() * scale;
 	widget->mInputState.y = widget->mHeight - event->pos().y() * scale - 1;
-	widget->mInputState.Control = (event->keyboardModifiers() & Qt::ControlModifier) != 0;
-	widget->mInputState.Shift = (event->keyboardModifiers() & Qt::ShiftModifier) != 0;
-	widget->mInputState.Alt = (event->keyboardModifiers() & Qt::AltModifier) != 0;
+	widget->mInputState.Modifiers = event->keyboardModifiers();
 
 	widget->OnMouseMove();
 

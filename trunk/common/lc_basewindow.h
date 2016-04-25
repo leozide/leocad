@@ -106,8 +106,12 @@ struct lcPreferencesDialogOptions
 	bool CategoriesDefault;
 
 	lcKeyboardShortcuts KeyboardShortcuts;
-	bool ShortcutsModified;
-	bool ShortcutsDefault;
+	bool KeyboardShortcutsModified;
+	bool KeyboardShortcutsDefault;
+
+	lcMouseShortcuts MouseShortcuts;
+	bool MouseShortcutsModified;
+	bool MouseShortcutsDefault;
 };
 
 #endif // _LC_BASEWINDOW_H_

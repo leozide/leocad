@@ -1627,7 +1627,7 @@ lcTool View::GetCurrentTool() const
 
 lcTrackTool View::GetOverrideTrackTool(Qt::MouseButton Button) const
 {
-	lcTool OverrideTool = gMouseShortcuts.GetTool(Qt::LeftButton, mInputState.Modifiers);
+	lcTool OverrideTool = gMouseShortcuts.GetTool(Button, mInputState.Modifiers);
 
 	if (OverrideTool == LC_NUM_TOOLS)
 		return LC_TRACKTOOL_NONE;

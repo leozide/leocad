@@ -41,6 +41,23 @@ void lcLoadDefaultMouseShortcuts()
 		gMouseShortcuts.Reset();
 }
 
+void lcSaveDefaultMouseShortcuts()
+{
+	QByteArray Buffer;
+	QTextStream Stream(&Buffer, QIODevice::WriteOnly);
+
+	gMouseShortcuts.Save(Stream);
+
+	lcSetProfileBuffer(LC_PROFILE_MOUSE_SHORTCUTS, Buffer);
+}
+
+void lcResetDefaultMouseShortcuts()
+{
+	gMouseShortcuts.Reset();
+
+	lcRemoveProfileKey(LC_PROFILE_MOUSE_SHORTCUTS);
+}
+
 void lcKeyboardShortcuts::Reset()
 {
 	for (int CommandIdx = 0; CommandIdx < LC_NUM_COMMANDS; CommandIdx++)
@@ -125,26 +142,6 @@ void lcMouseShortcuts::Reset()
 	mShortcuts[LC_TOOL_ZOOM].Button = Qt::RightButton;
 }
 
-QString gToolNames[LC_NUM_TOOLS] =
-{
-	"AddPiece",        // LC_TOOL_INSERT
-	"AddPointLight",   // LC_TOOL_LIGHT
-	"AddSpotLight",    // LC_TOOL_SPOTLIGHT
-	"AddCamera",       // LC_TOOL_CAMERA
-	"Select",          // LC_TOOL_SELECT
-	"Move",            // LC_TOOL_MOVE
-	"Rotate",          // LC_TOOL_ROTATE
-	"Delete",          // LC_TOOL_ERASER
-	"Paint",           // LC_TOOL_PAINT
-	"CameraZoom",      // LC_TOOL_ZOOM
-	"CameraPan",       // LC_TOOL_PAN
-	"CameraOrbit",     // LC_TOOL_ROTATE_VIEW
-	"CameraRoll",      // LC_TOOL_ROLL
-	"CameraZoomRegion" // LC_TOOL_ZOOM_REGION
-};
-
-LC_CASSERT(sizeof(gToolNames)/sizeof(gToolNames[0]) == LC_NUM_TOOLS);
-
 bool lcMouseShortcuts::Save(QTextStream& Stream)
 {
 	for (int ToolIdx = 0; ToolIdx < LC_NUM_TOOLS; ToolIdx++)
@@ -156,7 +153,8 @@ bool lcMouseShortcuts::Save(QTextStream& Stream)
 		if (!ButtonIndex)
 			continue;
 
-		Stream << gToolNames[ToolIdx] << QLatin1String("=") << QKeySequence(mShortcuts[ToolIdx].Modifiers | (Qt::Key_0 + ButtonIndex)).toString() << QLatin1String("\n");
+		QString Shortcut = QKeySequence(mShortcuts[ToolIdx].Modifiers | (Qt::Key_0 + ButtonIndex)).toString(QKeySequence::PortableText);
+		Stream << gToolNames[ToolIdx] << QLatin1String("=") << Shortcut << QLatin1String("\n");
 	}
 
 	Stream.flush();
@@ -191,7 +189,7 @@ bool lcMouseShortcuts::Load(QTextStream& Stream)
 
 		int Shortcut = KeySequence[0];
 		mShortcuts[ToolIdx].Modifiers = (Qt::KeyboardModifier)(Shortcut & Qt::KeyboardModifierMask);
-		mShortcuts[ToolIdx].Button = (Qt::MouseButton)(1 << (Shortcut & ~Qt::KeyboardModifierMask));
+		mShortcuts[ToolIdx].Button = (Qt::MouseButton)(1 << ((Shortcut & ~Qt::KeyboardModifierMask) - Qt::Key_0 - 1));
 	}
 
 	return true;

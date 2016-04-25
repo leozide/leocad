@@ -20,6 +20,7 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget *parent, void *data) :
 	connect(ui->categoriesTree, SIGNAL(itemSelectionChanged()), this, SLOT(updateParts()));
 	ui->shortcutEdit->installEventFilter(this);
 	connect(ui->commandList, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), this, SLOT(commandChanged(QTreeWidgetItem*)));
+	connect(ui->mouseTree, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), this, SLOT(MouseTreeItemChanged(QTreeWidgetItem*)));
 
 	options = (lcPreferencesDialogOptions*)data;
 
@@ -64,9 +65,12 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget *parent, void *data) :
 	ui->categoriesTree->setCurrentItem(ui->categoriesTree->topLevelItem(0));
 
 	updateCommandList();
-
 	new lcQTreeWidgetColumnStretcher(ui->commandList, 0);
 	commandChanged(NULL);
+
+	UpdateMouseTree();
+	new lcQTreeWidgetColumnStretcher(ui->mouseTree, 0);
+	MouseTreeItemChanged(NULL);
 }
 
 lcQPreferencesDialog::~lcQPreferencesDialog()
@@ -536,8 +540,8 @@ void lcQPreferencesDialog::on_shortcutAssign_clicked()
 
 	setShortcutModified(current, options->KeyboardShortcuts.mShortcuts[shortcutIndex] != gCommands[shortcutIndex].DefaultShortcut);
 
-	options->ShortcutsModified = true;
-	options->ShortcutsDefault = false;
+	options->KeyboardShortcutsModified = true;
+	options->KeyboardShortcutsDefault = false;
 }
 
 void lcQPreferencesDialog::on_shortcutRemove_clicked()
@@ -563,8 +567,8 @@ void lcQPreferencesDialog::on_shortcutsImport_clicked()
 
 	options->KeyboardShortcuts = Shortcuts;
 
-	options->ShortcutsModified = true;
-	options->ShortcutsDefault = false;
+	options->KeyboardShortcutsModified = true;
+	options->KeyboardShortcutsDefault = false;
 }
 
 void lcQPreferencesDialog::on_shortcutsExport_clicked()
@@ -589,6 +593,161 @@ void lcQPreferencesDialog::on_shortcutsReset_clicked()
 	options->KeyboardShortcuts.Reset();
 	updateCommandList();
 
-	options->ShortcutsModified = true;
-	options->ShortcutsDefault = true;
+	options->KeyboardShortcutsModified = true;
+	options->KeyboardShortcutsDefault = true;
+}
+
+void lcQPreferencesDialog::UpdateMouseTree()
+{
+	ui->mouseTree->clear();
+
+	for (int ToolIdx = 0; ToolIdx < LC_NUM_TOOLS; ToolIdx++)
+		UpdateMouseTreeItem(ToolIdx);
+}
+
+void lcQPreferencesDialog::UpdateMouseTreeItem(int ItemIndex)
+{
+	Qt::MouseButton Button = options->MouseShortcuts.mShortcuts[ItemIndex].Button;
+	QString Shortcut = QKeySequence(options->MouseShortcuts.mShortcuts[ItemIndex].Modifiers).toString(QKeySequence::NativeText);
+
+	switch (Button)
+	{
+	case Qt::LeftButton:
+		Shortcut += tr("Left Button");
+		break;
+
+	case Qt::MiddleButton:
+		Shortcut += tr("Middle Button");
+		break;
+
+	case Qt::RightButton:
+		Shortcut += tr("Right Button");
+		break;
+
+	default:
+		Shortcut.clear();
+	}
+
+	QTreeWidgetItem* Item = ui->mouseTree->topLevelItem(ItemIndex);
+
+	if (Item)
+		Item->setText(1, Shortcut);
+	else
+		new QTreeWidgetItem(ui->mouseTree, QStringList() << gToolNames[ItemIndex] << Shortcut);
+}
+
+void lcQPreferencesDialog::on_mouseAssign_clicked()
+{
+	QTreeWidgetItem* Current = ui->mouseTree->currentItem();
+
+	if (!Current)
+		return;
+
+	int ButtonIndex = ui->mouseButton->currentIndex();
+	Qt::MouseButton Button = Qt::NoButton;
+	Qt::KeyboardModifiers Modifiers = Qt::NoModifier;
+
+	if (ButtonIndex)
+	{
+		switch (ButtonIndex)
+		{
+		case 1:
+			Button = Qt::LeftButton;
+			break;
+
+		case 2:
+			Button = Qt::MiddleButton;
+			break;
+
+		case 3:
+			Button = Qt::RightButton;
+			break;
+		}
+
+		if (ui->mouseControl->isChecked())
+			Modifiers |= Qt::ControlModifier;
+
+		if (ui->mouseShift->isChecked())
+			Modifiers |= Qt::ShiftModifier;
+
+		if (ui->mouseAlt->isChecked())
+			Modifiers |= Qt::AltModifier;
+	}
+
+	int ItemIndex = ui->mouseTree->indexOfTopLevelItem(Current);
+	options->MouseShortcuts.mShortcuts[ItemIndex].Button = Button;
+	options->MouseShortcuts.mShortcuts[ItemIndex].Modifiers = Modifiers;
+
+	options->MouseShortcutsModified = true;
+	options->MouseShortcutsDefault = false;
+
+	UpdateMouseTreeItem(ItemIndex);
+}
+
+void lcQPreferencesDialog::on_mouseRemove_clicked()
+{
+	QTreeWidgetItem* Current = ui->mouseTree->currentItem();
+
+	if (!Current)
+		return;
+
+	int ItemIndex = ui->mouseTree->indexOfTopLevelItem(Current);
+	options->MouseShortcuts.mShortcuts[ItemIndex].Button = Qt::NoButton;
+	options->MouseShortcuts.mShortcuts[ItemIndex].Modifiers = Qt::NoModifier;
+
+	options->MouseShortcutsModified = true;
+	options->MouseShortcutsDefault = false;
+
+	UpdateMouseTreeItem(ItemIndex);
+}
+
+void lcQPreferencesDialog::on_mouseReset_clicked()
+{
+	if (QMessageBox::question(this, "LeoCAD", tr("Are you sure you want to load the default mouse shortcuts?"), QMessageBox::Yes | QMessageBox::No) != QMessageBox::Yes)
+		return;
+
+	options->MouseShortcuts.Reset();
+	UpdateMouseTree();
+
+	options->MouseShortcutsModified = true;
+	options->MouseShortcutsDefault = true;
+}
+
+void lcQPreferencesDialog::MouseTreeItemChanged(QTreeWidgetItem* Current)
+{
+	if (!Current)
+	{
+		ui->MouseShortcutGroup->setEnabled(false);
+		return;
+	}
+
+	ui->MouseShortcutGroup->setEnabled(true);
+
+	int ToolIndex = ui->mouseTree->indexOfTopLevelItem(Current);
+
+	Qt::MouseButton Button = options->MouseShortcuts.mShortcuts[ToolIndex].Button;
+
+	switch (Button)
+	{
+	case Qt::LeftButton:
+		ui->mouseButton->setCurrentIndex(1);
+		break;
+
+	case Qt::MiddleButton:
+		ui->mouseButton->setCurrentIndex(2);
+		break;
+
+	case Qt::RightButton:
+		ui->mouseButton->setCurrentIndex(3);
+		break;
+
+	default:
+		ui->mouseButton->setCurrentIndex(0);
+		break;
+	}
+
+	Qt::KeyboardModifiers Modifiers = options->MouseShortcuts.mShortcuts[ToolIndex].Modifiers;
+	ui->mouseControl->setChecked((Modifiers & Qt::ControlModifier) != 0);
+	ui->mouseShift->setChecked((Modifiers & Qt::ShiftModifier) != 0);
+	ui->mouseAlt->setChecked((Modifiers & Qt::AltModifier) != 0);
 }

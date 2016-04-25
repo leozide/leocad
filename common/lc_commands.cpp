@@ -1393,3 +1393,23 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 };
 
 LC_CASSERT(sizeof(gCommands)/sizeof(gCommands[0]) == LC_NUM_COMMANDS);
+
+QString gToolNames[LC_NUM_TOOLS] =
+{
+	"NewPiece",      // LC_TOOL_INSERT
+	"NewPointLight", // LC_TOOL_LIGHT
+	"NewSpotLight",  // LC_TOOL_SPOTLIGHT
+	"NewCamera",     // LC_TOOL_CAMERA
+	"Select",        // LC_TOOL_SELECT
+	"Move",          // LC_TOOL_MOVE
+	"Rotate",        // LC_TOOL_ROTATE
+	"Delete",        // LC_TOOL_ERASER
+	"Paint",         // LC_TOOL_PAINT
+	"Zoom",          // LC_TOOL_ZOOM
+	"Pan",           // LC_TOOL_PAN
+	"Orbit",         // LC_TOOL_ROTATE_VIEW
+	"Roll",          // LC_TOOL_ROLL
+	"ZoomRegion"     // LC_TOOL_ZOOM_REGION
+};
+
+LC_CASSERT(sizeof(gToolNames) / sizeof(gToolNames[0]) == LC_NUM_TOOLS);

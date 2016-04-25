@@ -4,6 +4,7 @@
 #include "lc_file.h"
 #include "lc_math.h"
 #include "object.h"
+#include "lc_commands.h"
 
 #define LC_SEL_NO_PIECES                0x0001 // No pieces in model
 #define LC_SEL_PIECE                    0x0002 // At last 1 piece selected
@@ -77,25 +78,6 @@ public:
 	float mFogDensity;
 	lcVector3 mFogColor;
 	lcVector3 mAmbientColor;
-};
-
-enum lcTool
-{
-	LC_TOOL_INSERT,
-	LC_TOOL_LIGHT,
-	LC_TOOL_SPOTLIGHT,
-	LC_TOOL_CAMERA,
-	LC_TOOL_SELECT,
-	LC_TOOL_MOVE,
-	LC_TOOL_ROTATE,
-	LC_TOOL_ERASER,
-	LC_TOOL_PAINT,
-	LC_TOOL_ZOOM,
-	LC_TOOL_PAN,
-	LC_TOOL_ROTATE_VIEW,
-	LC_TOOL_ROLL,
-	LC_TOOL_ZOOM_REGION,
-	LC_NUM_TOOLS
 };
 
 struct lcModelHistoryEntry

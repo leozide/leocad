@@ -2,7 +2,6 @@
 #define _LC_SHORTCUTS_H_
 
 #include "lc_commands.h"
-#include "lc_model.h"
 
 class lcKeyboardShortcuts
 {

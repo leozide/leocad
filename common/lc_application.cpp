@@ -472,8 +472,11 @@ void lcApplication::ShowPreferencesDialog()
 	Options.CategoriesDefault = false;
 
 	Options.KeyboardShortcuts = gKeyboardShortcuts;
-	Options.ShortcutsModified = false;
-	Options.ShortcutsDefault = false;
+	Options.KeyboardShortcutsModified = false;
+	Options.KeyboardShortcutsDefault = false;
+	Options.MouseShortcuts = gMouseShortcuts;
+	Options.MouseShortcutsModified = false;
+	Options.MouseShortcutsDefault = false;
 
 	if (!gMainWindow->DoDialog(LC_DIALOG_PREFERENCES, &Options))
 		return;
@@ -513,9 +516,9 @@ void lcApplication::ShowPreferencesDialog()
 		gMainWindow->UpdateCategories();
 	}
 
-	if (Options.ShortcutsModified)
+	if (Options.KeyboardShortcutsModified)
 	{
-		if (Options.ShortcutsDefault)
+		if (Options.KeyboardShortcutsDefault)
 			lcResetDefaultKeyboardShortcuts();
 		else
 		{
@@ -524,6 +527,17 @@ void lcApplication::ShowPreferencesDialog()
 		}
 
 		gMainWindow->UpdateShortcuts();
+	}
+
+	if (Options.MouseShortcutsModified)
+	{
+		if (Options.MouseShortcutsDefault)
+			lcResetDefaultMouseShortcuts();
+		else
+		{
+			gMouseShortcuts = Options.MouseShortcuts;
+			lcSaveDefaultMouseShortcuts();
+		}
 	}
 
 	// TODO: printing preferences

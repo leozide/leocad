@@ -34,21 +34,19 @@ void lcResetDefaultKeyboardShortcuts()
 
 void lcLoadDefaultMouseShortcuts()
 {
-	QByteArray Buffer = lcGetProfileBuffer(LC_PROFILE_MOUSE_SHORTCUTS);
-	QTextStream Stream(Buffer, QIODevice::ReadOnly);
+	QStringList Shortcuts = lcGetProfileStringList(LC_PROFILE_MOUSE_SHORTCUTS);
 
-	if (Buffer.isEmpty() || !gMouseShortcuts.Load(Stream))
+	if (Shortcuts.isEmpty() || !gMouseShortcuts.Load(Shortcuts))
 		gMouseShortcuts.Reset();
 }
 
 void lcSaveDefaultMouseShortcuts()
 {
-	QByteArray Buffer;
-	QTextStream Stream(&Buffer, QIODevice::WriteOnly);
+	QStringList Shortcuts;
 
-	gMouseShortcuts.Save(Stream);
+	gMouseShortcuts.Save(Shortcuts);
 
-	lcSetProfileBuffer(LC_PROFILE_MOUSE_SHORTCUTS, Buffer);
+	lcSetProfileStringList(LC_PROFILE_MOUSE_SHORTCUTS, Shortcuts);
 }
 
 void lcResetDefaultMouseShortcuts()
@@ -142,8 +140,10 @@ void lcMouseShortcuts::Reset()
 	mShortcuts[LC_TOOL_ZOOM].Button = Qt::RightButton;
 }
 
-bool lcMouseShortcuts::Save(QTextStream& Stream)
+bool lcMouseShortcuts::Save(QStringList& Shortcuts)
 {
+	Shortcuts.clear();
+
 	for (int ToolIdx = 0; ToolIdx < LC_NUM_TOOLS; ToolIdx++)
 	{
 		int ButtonIndex = 0;
@@ -154,26 +154,24 @@ bool lcMouseShortcuts::Save(QTextStream& Stream)
 			continue;
 
 		QString Shortcut = QKeySequence(mShortcuts[ToolIdx].Modifiers | (Qt::Key_0 + ButtonIndex)).toString(QKeySequence::PortableText);
-		Stream << gToolNames[ToolIdx] << QLatin1String("=") << Shortcut << QLatin1String("\n");
+		Shortcuts << gToolNames[ToolIdx] + QLatin1String("=") + Shortcut;
 	}
-
-	Stream.flush();
 
 	return true;
 }
 
-bool lcMouseShortcuts::Load(QTextStream& Stream)
+bool lcMouseShortcuts::Load(const QStringList& Shortcuts)
 {
 	memset(mShortcuts, 0, sizeof(mShortcuts));
 
-	for (QString Line = Stream.readLine(); !Line.isNull(); Line = Stream.readLine())
+	foreach (const QString& Shortcut, Shortcuts)
 	{
-		int Equals = Line.indexOf('=');
+		int Equals = Shortcut.indexOf('=');
 
 		if (Equals == -1)
 			continue;
 
-		QString Key = Line.left(Equals);
+		QString Key = Shortcut.left(Equals);
 
 		int ToolIdx;
 		for (ToolIdx = 0; ToolIdx < LC_NUM_TOOLS; ToolIdx++)
@@ -183,13 +181,14 @@ bool lcMouseShortcuts::Load(QTextStream& Stream)
 		if (ToolIdx == LC_NUM_TOOLS)
 			continue;
 
-		QKeySequence KeySequence(Line.mid(Equals + 1));
+		QKeySequence KeySequence(Shortcut.mid(Equals + 1));
+
 		if (KeySequence.isEmpty())
 			continue;
 
-		int Shortcut = KeySequence[0];
-		mShortcuts[ToolIdx].Modifiers = (Qt::KeyboardModifier)(Shortcut & Qt::KeyboardModifierMask);
-		mShortcuts[ToolIdx].Button = (Qt::MouseButton)(1 << ((Shortcut & ~Qt::KeyboardModifierMask) - Qt::Key_0 - 1));
+		int ShortcutKey = KeySequence[0];
+		mShortcuts[ToolIdx].Modifiers = (Qt::KeyboardModifier)(ShortcutKey & Qt::KeyboardModifierMask);
+		mShortcuts[ToolIdx].Button = (Qt::MouseButton)(1 << ((ShortcutKey & ~Qt::KeyboardModifierMask) - Qt::Key_0 - 1));
 	}
 
 	return true;

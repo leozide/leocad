@@ -69,6 +69,7 @@ enum LC_PROFILE_ENTRY_TYPE
 	LC_PROFILE_ENTRY_INT,
 	LC_PROFILE_ENTRY_FLOAT,
 	LC_PROFILE_ENTRY_STRING,
+	LC_PROFILE_ENTRY_STRINGLIST,
 	LC_PROFILE_ENTRY_BUFFER
 };
 
@@ -79,6 +80,7 @@ public:
 	lcProfileEntry(const char* Section, const char* Key, unsigned int DefaultValue);
 	lcProfileEntry(const char* Section, const char* Key, float DefaultValue);
 	lcProfileEntry(const char* Section, const char* Key, const char* DefaultValue);
+	lcProfileEntry(const char* Section, const char* Key, const QStringList& StringList);
 	lcProfileEntry(const char* Section, const char* Key);
 
 	LC_PROFILE_ENTRY_TYPE mType;
@@ -105,12 +107,13 @@ QString lcGetDefaultProfileString(LC_PROFILE_KEY Key);
 int lcGetProfileInt(LC_PROFILE_KEY Key);
 float lcGetProfileFloat(LC_PROFILE_KEY Key);
 QString lcGetProfileString(LC_PROFILE_KEY Key);
+QStringList lcGetProfileStringList(LC_PROFILE_KEY Key);
 QByteArray lcGetProfileBuffer(LC_PROFILE_KEY Key);
-void lcGetProfileBuffer(LC_PROFILE_KEY Key, lcMemFile& Buffer);
 
 void lcSetProfileInt(LC_PROFILE_KEY Key, int Value);
 void lcSetProfileFloat(LC_PROFILE_KEY Key, float Value);
 void lcSetProfileString(LC_PROFILE_KEY Key, const QString& Value);
+void lcSetProfileStringList(LC_PROFILE_KEY Key, const QStringList& Value);
 void lcSetProfileBuffer(LC_PROFILE_KEY Key, const QByteArray& Buffer);
 
 #endif // LC_PROFILE_H

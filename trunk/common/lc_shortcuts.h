@@ -25,8 +25,8 @@ class lcMouseShortcuts
 {
 public:
 	void Reset();
-	bool Save(QTextStream& Stream);
-	bool Load(QTextStream& Stream);
+	bool Save(QStringList& Shortcuts);
+	bool Load(const QStringList& Shortcuts);
 	lcTool GetTool(Qt::MouseButton Button, Qt::KeyboardModifiers Modifiers) const;
 
 	struct

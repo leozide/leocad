@@ -195,6 +195,11 @@ public:
 		return ~0;
 	}
 
+	virtual lcuint32 GetAllowedTransforms() const
+	{
+		return LC_OBJECT_TRANSFORM_MOVE_X | LC_OBJECT_TRANSFORM_MOVE_Y | LC_OBJECT_TRANSFORM_MOVE_Z;
+	}
+
 	virtual lcVector3 GetSectionPosition(lcuint32 Section) const
 	{
 		switch (Section)

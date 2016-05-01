@@ -35,7 +35,11 @@ void lcSynthInit()
 		{ "32235",  LC_SYNTH_PIECE_FLEXIBLE_AXLE,  360.00f,  75 }, // Technic Axle Flexible 19
 		{ "76384",  LC_SYNTH_PIECE_STRING_BRAIDED, 200.00f,  46 }, // String Braided 11L with End Studs
 		{ "75924",  LC_SYNTH_PIECE_STRING_BRAIDED, 400.00f,  96 }, // String Braided 21L with End Studs
-		{ "572C02", LC_SYNTH_PIECE_STRING_BRAIDED, 800.00f, 196 }  // String Braided 41L with End Studs
+		{ "572C02", LC_SYNTH_PIECE_STRING_BRAIDED, 800.00f, 196 }, // String Braided 41L with End Studs
+		{ "73129",  LC_SYNTH_PIECE_SHOCK_ABSORBER, 110.00f,   1 }, // Technic Shock Absorber 6.5L 
+		{ "41838",  LC_SYNTH_PIECE_SHOCK_ABSORBER, 110.00f,   1 }, // Technic Shock Absorber 6.5L Soft
+		{ "76138",  LC_SYNTH_PIECE_SHOCK_ABSORBER, 110.00f,   1 }, // Technic Shock Absorber 6.5L Stiff
+		{ "76537",  LC_SYNTH_PIECE_SHOCK_ABSORBER, 110.00f,   1 }  // Technic Shock Absorber 6.5L Extra Stiff
 	};
 
 	for (unsigned int InfoIdx = 0; InfoIdx < sizeof(HoseInfo) / sizeof(HoseInfo[0]); InfoIdx++)
@@ -43,7 +47,7 @@ void lcSynthInit()
 		PieceInfo* Info = Library->FindPiece(HoseInfo[InfoIdx].PartID, NULL, false);
 
 		if (Info)
-			Info->SetSynthInfo(new lcSynthInfo(HoseInfo[InfoIdx].Type, HoseInfo[InfoIdx].Length, HoseInfo[InfoIdx].NumSections));
+			Info->SetSynthInfo(new lcSynthInfo(HoseInfo[InfoIdx].Type, HoseInfo[InfoIdx].Length, HoseInfo[InfoIdx].NumSections, Info));
 	}
 
 //	"758C01" // Hose Flexible  12L
@@ -51,39 +55,58 @@ void lcSynthInit()
 //	"73590B" // Hose Flexible 8.5L with Tabs
 }
 
-lcSynthInfo::lcSynthInfo(lcSynthType Type, float Length, int NumSections)
-	: mType(Type), mLength(Length), mNumSections(NumSections)
+lcSynthInfo::lcSynthInfo(lcSynthType Type, float Length, int NumSections, PieceInfo* Info)
+	: mType(Type), mLength(Length), mNumSections(NumSections), mPieceInfo(Info)
 {
 	float EdgeSectionLength;
 	float MidSectionLength;
-
-	mRigidEdges = false;
 
 	switch (mType)
 	{
 	case LC_SYNTH_PIECE_RIBBED_HOSE:
 		EdgeSectionLength = 6.25f;
 		MidSectionLength = 6.25f;
+		mRigidEdges = false;
+		mCurve = true;
 		break;
 
 	case LC_SYNTH_PIECE_FLEXIBLE_AXLE:
 		EdgeSectionLength = 30.0f;
 		MidSectionLength = 4.0f;
 		mRigidEdges = true;
+		mCurve = true;
 		break;
 
 	case LC_SYNTH_PIECE_STRING_BRAIDED:
 		EdgeSectionLength = 8.0f;
 		MidSectionLength = 4.0f;
 		mRigidEdges = true;
+		mCurve = true;
+		break;
+
+	case LC_SYNTH_PIECE_SHOCK_ABSORBER:
+		EdgeSectionLength = 0.0f;
+		MidSectionLength = 0.0f;
+		mRigidEdges = false;
+		mCurve = false;
 		break;
 	}
 
-	mStart.Transform = lcMatrix44(lcMatrix33(lcVector3(0.0f, 0.0f, 1.0f), lcVector3(1.0f, 0.0f, 0.0f), lcVector3(0.0f, 1.0f, 0.0f)), lcVector3(0.0f, 0.0f, 0.0f));
+	if (mType != LC_SYNTH_PIECE_SHOCK_ABSORBER)
+	{
+		mStart.Transform = lcMatrix44(lcMatrix33(lcVector3(0.0f, 0.0f, 1.0f), lcVector3(1.0f, 0.0f, 0.0f), lcVector3(0.0f, 1.0f, 0.0f)), lcVector3(0.0f, 0.0f, 0.0f));
+		mMiddle.Transform = lcMatrix44Identity();
+		mEnd.Transform = lcMatrix44(lcMatrix33(lcVector3(0.0f, 0.0f, 1.0f), lcVector3(1.0f, 0.0f, 0.0f), lcVector3(0.0f, 1.0f, 0.0f)), lcVector3(0.0f, 0.0f, 0.0f));
+	}
+	else
+	{
+		mStart.Transform = lcMatrix44Identity();
+		mMiddle.Transform = lcMatrix44Identity();
+		mEnd.Transform = lcMatrix44Identity();
+	}
+
 	mStart.Length = EdgeSectionLength;
-	mMiddle.Transform = lcMatrix44Identity();
 	mMiddle.Length = MidSectionLength;
-	mEnd.Transform = lcMatrix44(lcMatrix33(lcVector3(0.0f, 0.0f, 1.0f), lcVector3(1.0f, 0.0f, 0.0f), lcVector3(0.0f, 1.0f, 0.0f)), lcVector3(0.0f, 0.0f, 0.0f));
 	mEnd.Length = EdgeSectionLength;
 }
 
@@ -106,14 +129,27 @@ void lcSynthInfo::GetDefaultControlPoints(lcArray<lcPieceControlPoint>& ControlP
 	case LC_SYNTH_PIECE_STRING_BRAIDED:
 		Scale = 12.0f;
 		break;
+
+	case LC_SYNTH_PIECE_SHOCK_ABSORBER:
+		Scale = 1.0f;
+		break;
 	}
 
 	float HalfLength = mLength / 2.0f;
 	Scale = lcMin(Scale, HalfLength);
 
-	ControlPoints[0].Transform = lcMatrix44Translation(lcVector3(-HalfLength, 0.0f, 0.0f));
+	if (mType != LC_SYNTH_PIECE_SHOCK_ABSORBER)
+	{
+		ControlPoints[0].Transform = lcMatrix44Translation(lcVector3(-HalfLength, 0.0f, 0.0f));
+		ControlPoints[1].Transform = lcMatrix44Translation(lcVector3( HalfLength, 0.0f, 0.0f));
+	}
+	else
+	{
+		ControlPoints[0].Transform = lcMatrix44Translation(lcVector3(0.0f, 0.0f, -mLength));
+		ControlPoints[1].Transform = lcMatrix44Translation(lcVector3(0.0f, 0.0f, 0.0f));
+	}
+
 	ControlPoints[0].Scale = Scale;
-	ControlPoints[1].Transform = lcMatrix44Translation(lcVector3( HalfLength, 0.0f, 0.0f));
 	ControlPoints[1].Scale = Scale;
 }
 
@@ -162,7 +198,7 @@ float lcSynthInfo::GetSectionTwist(const lcMatrix44& StartTransform, const lcMat
 	return 0.0f;
 }
 
-void lcSynthInfo::CalculateSections(const lcArray<lcPieceControlPoint>& ControlPoints, lcArray<lcMatrix44>& Sections, void (*SectionCallback)(const lcVector3& CurvePoint, int SegmentIndex, float t, void* Param), void* CallbackParam) const
+void lcSynthInfo::CalculateCurveSections(const lcArray<lcPieceControlPoint>& ControlPoints, lcArray<lcMatrix44>& Sections, void (*SectionCallback)(const lcVector3& CurvePoint, int SegmentIndex, float t, void* Param), void* CallbackParam) const
 {
 	float SectionLength = 0.0f;
 
@@ -273,6 +309,18 @@ void lcSynthInfo::CalculateSections(const lcArray<lcPieceControlPoint>& ControlP
 		SectionLength += mMiddle.Length;
 		if (Sections.GetSize() == mNumSections + 1 && !mRigidEdges)
 			SectionLength += mEnd.Length;
+	}
+}
+
+void lcSynthInfo::CalculateLineSections(const lcArray<lcPieceControlPoint>& ControlPoints, lcArray<lcMatrix44>& Sections, void(*SectionCallback)(const lcVector3& CurvePoint, int SegmentIndex, float t, void* Param), void* CallbackParam) const
+{
+	for (int ControlPointIdx = 0; ControlPointIdx < ControlPoints.GetSize(); ControlPointIdx++)
+	{
+		lcMatrix44 Transform = lcMatrix44LeoCADToLDraw(ControlPoints[ControlPointIdx].Transform);
+		Sections.Add(Transform);
+
+		if (SectionCallback)
+			SectionCallback(Transform.GetTranslation(), ControlPointIdx, 1.0f, CallbackParam);
 	}
 }
 
@@ -541,10 +589,47 @@ void lcSynthInfo::AddStringBraidedParts(lcMemFile& File, lcLibraryMeshData& Mesh
 	}
 }
 
+void lcSynthInfo::AddShockAbsorberParts(lcMemFile& File, lcArray<lcMatrix44>& Sections) const
+{
+	char Line[256];
+	lcVector3 Offset;
+
+	Offset = Sections[0].GetTranslation();
+	sprintf(Line, "1 0 %f %f %f 1 0 0 0 1 0 0 0 1 4254.DAT\n", Offset[0], Offset[1], Offset[2]);
+	File.WriteBuffer(Line, strlen(Line));
+
+	Offset = Sections[1].GetTranslation();
+	sprintf(Line, "1 16 %f %f %f 1 0 0 0 1 0 0 0 1 4255.DAT\n", Offset[0], Offset[1], Offset[2]);
+	File.WriteBuffer(Line, strlen(Line));
+
+	float Distance = Sections[0].GetTranslation().y - Sections[1].GetTranslation().y;
+	float Scale = (Distance - 66.0f) / 44.0f;
+	const char* SpringPart;
+
+	if (!strcmp(mPieceInfo->m_strName, "73129"))
+		SpringPart = "70038";
+	else if (!strcmp(mPieceInfo->m_strName, "41838"))
+		SpringPart = "41837";
+	else if (!strcmp(mPieceInfo->m_strName, "76138"))
+		SpringPart = "71953";
+	else if (!strcmp(mPieceInfo->m_strName, "76537"))
+		SpringPart = "22977";
+	else
+		return;
+
+	Offset = Sections[0].GetTranslation();
+	sprintf(Line, "1 494 %f %f %f 1 0 0 0 %f 0 0 0 1 %s.DAT\n", Offset[0], Offset[1] - 10 - 44.0f * Scale, Offset[2], Scale, SpringPart);
+	File.WriteBuffer(Line, strlen(Line));
+}
+
 lcMesh* lcSynthInfo::CreateMesh(const lcArray<lcPieceControlPoint>& ControlPoints) const
 {
 	lcArray<lcMatrix44> Sections;
-	CalculateSections(ControlPoints, Sections, NULL, NULL);
+
+	if (mCurve)
+		CalculateCurveSections(ControlPoints, Sections, NULL, NULL);
+	else
+		CalculateLineSections(ControlPoints, Sections, NULL, NULL);
 
 	lcLibraryMeshData MeshData;
 	lcMemFile File; // todo: rewrite this to pass the parts directly
@@ -561,6 +646,10 @@ lcMesh* lcSynthInfo::CreateMesh(const lcArray<lcPieceControlPoint>& ControlPoint
 
 	case LC_SYNTH_PIECE_STRING_BRAIDED:
 		AddStringBraidedParts(File, MeshData, Sections);
+		break;
+
+	case LC_SYNTH_PIECE_SHOCK_ABSORBER:
+		AddShockAbsorberParts(File, Sections);
 		break;
 	}
 
@@ -613,7 +702,7 @@ int lcSynthInfo::InsertControlPoint(lcArray<lcPieceControlPoint>& ControlPoints,
 	SynthInsertParam.BestSegment = -1;
 	SynthInsertParam.BestDistance = FLT_MAX;
 
-	CalculateSections(ControlPoints, Sections, lcSynthInsertCallback, &SynthInsertParam);
+	CalculateCurveSections(ControlPoints, Sections, lcSynthInsertCallback, &SynthInsertParam);
 
 	if (SynthInsertParam.BestSegment != -1)
 	{

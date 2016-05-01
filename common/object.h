@@ -44,6 +44,16 @@ struct lcObjectBoxTest
 	lcArray<lcObject*> Objects;
 };
 
+#define LC_OBJECT_TRANSFORM_MOVE_X   0x001
+#define LC_OBJECT_TRANSFORM_MOVE_Y   0x002
+#define LC_OBJECT_TRANSFORM_MOVE_Z   0x004
+#define LC_OBJECT_TRANSFORM_ROTATE_X 0x010
+#define LC_OBJECT_TRANSFORM_ROTATE_Y 0x020
+#define LC_OBJECT_TRANSFORM_ROTATE_Z 0x040
+#define LC_OBJECT_TRANSFORM_SCALE_X  0x100
+#define LC_OBJECT_TRANSFORM_SCALE_Y  0x200
+#define LC_OBJECT_TRANSFORM_SCALE_Z  0x400
+
 class lcObject
 {
 public:
@@ -80,6 +90,7 @@ public:
 	virtual void SetFocused(lcuint32 Section, bool Focused) = 0;
 	virtual lcuint32 GetFocusSection() const = 0;
 
+	virtual lcuint32 GetAllowedTransforms() const = 0;
 	virtual lcVector3 GetSectionPosition(lcuint32 Section) const = 0;
 	virtual void RayTest(lcObjectRayTest& ObjectRayTest) const = 0;
 	virtual void BoxTest(lcObjectBoxTest& ObjectBoxTest) const = 0;

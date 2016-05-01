@@ -735,16 +735,30 @@ void lcPiece::RotatePivotPoint(const lcMatrix33& RotationMatrix)
 	mState |= LC_PIECE_PIVOT_POINT_VALID;
 }
 
+lcuint32 lcPiece::GetAllowedTransforms() const
+{
+	lcuint32 Section = GetFocusSection();
+
+	if (Section == LC_PIECE_SECTION_POSITION || Section == LC_PIECE_SECTION_INVALID)
+		return LC_OBJECT_TRANSFORM_MOVE_X | LC_OBJECT_TRANSFORM_MOVE_Y | LC_OBJECT_TRANSFORM_MOVE_Z | LC_OBJECT_TRANSFORM_ROTATE_X | LC_OBJECT_TRANSFORM_ROTATE_Y | LC_OBJECT_TRANSFORM_ROTATE_Z;
+
+	if (mPieceInfo->GetSynthInfo()->IsCurve())
+		return LC_OBJECT_TRANSFORM_MOVE_X | LC_OBJECT_TRANSFORM_MOVE_Y | LC_OBJECT_TRANSFORM_MOVE_Z | LC_OBJECT_TRANSFORM_ROTATE_X | LC_OBJECT_TRANSFORM_ROTATE_Y | LC_OBJECT_TRANSFORM_ROTATE_Z | LC_OBJECT_TRANSFORM_SCALE_X;
+	else
+		return LC_OBJECT_TRANSFORM_MOVE_Z;
+}
+
 bool lcPiece::InsertControlPoint(const lcVector3& WorldStart, const lcVector3& WorldEnd)
 {
-	if (!mPieceInfo->GetSynthInfo())
+	lcSynthInfo* SynthInfo = mPieceInfo->GetSynthInfo();
+	if (!SynthInfo || !SynthInfo->CanAddControlPoints())
 		return false;
 
 	lcMatrix44 InverseWorldMatrix = lcMatrix44AffineInverse(mModelWorld);
 	lcVector3 Start = lcMul31(WorldStart, InverseWorldMatrix);
 	lcVector3 End = lcMul31(WorldEnd, InverseWorldMatrix);
 
-	int ControlPointIndex = mPieceInfo->GetSynthInfo()->InsertControlPoint(mControlPoints, Start, End);
+	int ControlPointIndex = SynthInfo->InsertControlPoint(mControlPoints, Start, End);
 	if (ControlPointIndex)
 	{
 		SetFocused(GetFocusSection(), false);

@@ -288,6 +288,8 @@ public:
 		return LC_PIECE_SECTION_INVALID;
 	}
 
+	virtual lcuint32 GetAllowedTransforms() const;
+
 	virtual lcVector3 GetSectionPosition(lcuint32 Section) const
 	{
 		switch (Section)

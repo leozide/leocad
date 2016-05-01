@@ -133,6 +133,7 @@ protected:
 	void DrawViewport();
 
 	void UpdateTrackTool();
+	bool IsTrackToolAllowed(lcTrackTool TrackTool, lcuint32 AllowedTransforms) const;
 	lcTool GetCurrentTool() const;
 	lcTrackTool GetOverrideTrackTool(Qt::MouseButton Button) const;
 	float GetOverlayScale() const;

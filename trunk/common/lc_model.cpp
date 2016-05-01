@@ -9,6 +9,7 @@
 #include "lc_profile.h"
 #include "lc_library.h"
 #include "lc_texture.h"
+#include "lc_synth.h"
 #include "pieceinf.h"
 #include "view.h"
 #include "preview.h"
@@ -3007,7 +3008,8 @@ void lcModel::GetSelectionInformation(int* Flags, lcArray<lcObject*>& Selection,
 
 				*Flags |= LC_SEL_PIECE | LC_SEL_SELECTED;
 
-				if (Piece->mPieceInfo->GetSynthInfo())
+				lcSynthInfo* SynthInfo = Piece->mPieceInfo->GetSynthInfo();
+				if (SynthInfo && SynthInfo->CanAddControlPoints())
 				{
 					*Flags |= LC_SEL_CAN_ADD_CONTROL_POINT;
 

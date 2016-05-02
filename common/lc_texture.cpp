@@ -1,6 +1,5 @@
 #include "lc_global.h"
 #include "lc_texture.h"
-#include "lc_file.h"
 #include "lc_application.h"
 #include "lc_library.h"
 #include "image.h"

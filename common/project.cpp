@@ -3,11 +3,7 @@
 #include "lc_mesh.h"
 #include <locale.h>
 #include "pieceinf.h"
-#include "lc_texture.h"
-#include "piece.h"
 #include "camera.h"
-#include "light.h"
-#include "group.h"
 #include "project.h"
 #include "image.h"
 #include "lc_mainwindow.h"
@@ -15,6 +11,7 @@
 #include "lc_library.h"
 #include "lc_application.h"
 #include "lc_profile.h"
+#include "lc_file.h"
 #include "preview.h"
 #include "lc_qmodellistdialog.h"
 

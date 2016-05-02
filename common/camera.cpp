@@ -7,7 +7,6 @@
 #include <float.h>
 #include "lc_file.h"
 #include "camera.h"
-#include "view.h"
 #include "tr.h"
 #include "lc_application.h"
 #include "lc_context.h"

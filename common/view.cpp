@@ -1,12 +1,10 @@
 #include "lc_global.h"
 #include <stdlib.h>
 #include "lc_mainwindow.h"
-#include "project.h"
 #include "camera.h"
 #include "view.h"
 #include "system.h"
 #include "tr.h"
-#include "lc_mesh.h"
 #include "texfont.h"
 #include "lc_texture.h"
 #include "preview.h"

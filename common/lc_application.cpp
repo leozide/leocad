@@ -1,15 +1,11 @@
 #include "lc_global.h"
 #include <stdio.h>
 #include "lc_application.h"
-#include "lc_colors.h"
 #include "lc_library.h"
 #include "lc_profile.h"
-#include "system.h"
 #include "project.h"
-#include "image.h"
 #include "lc_mainwindow.h"
 #include "lc_shortcuts.h"
-#include "view.h"
 
 lcApplication* g_App;
 

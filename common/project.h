@@ -26,10 +26,6 @@ enum LC_MOUSE_TRACK
 	LC_TRACK_RIGHT
 };
 
-class PieceInfo;
-class View;
-class Image;
-
 class Project
 {
 public:

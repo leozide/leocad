@@ -1,15 +1,12 @@
 #include "lc_global.h"
 #include "lc_mesh.h"
 #include "lc_colors.h"
-#include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 #include <math.h>
 #include "pieceinf.h"
 #include "piece.h"
 #include "group.h"
-#include "project.h"
-#include "lc_model.h"
 #include "lc_file.h"
 #include "lc_application.h"
 #include "lc_library.h"

@@ -6,7 +6,6 @@
 #include "lc_array.h"
 
 class TiledRender;
-class View;
 
 #define LC_CAMERA_HIDDEN            0x0001
 #define LC_CAMERA_SIMPLE            0x0002

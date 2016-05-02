@@ -9,7 +9,7 @@
 #include "lc_model.h"
 #include "lc_context.h"
 #include "lc_synth.h"
-#include "camera.h"
+#include "lc_file.h"
 #include <locale.h>
 
 PieceInfo::PieceInfo()

@@ -2,7 +2,6 @@
 #include "lc_application.h"
 #include "lc_qupdatedialog.h"
 #include "lc_mainwindow.h"
-#include "view.h"
 #include "project.h"
 #include "lc_colors.h"
 #include <QApplication>

@@ -2,7 +2,6 @@
 #define _VIEW_H_
 
 #include "lc_glwidget.h"
-#include "lc_model.h"
 #include "camera.h"
 
 enum lcTrackButton

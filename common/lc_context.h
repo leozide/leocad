@@ -4,6 +4,7 @@
 #include "lc_array.h"
 #include "lc_math.h"
 #include "lc_colors.h"
+#include "lc_mesh.h"
 
 class lcScene
 {

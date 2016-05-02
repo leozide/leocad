@@ -1,6 +1,5 @@
 #include "lc_global.h"
 #include <stdio.h>
-#include <memory.h>
 #include <stdlib.h>
 #include <string.h>
 #include "lc_file.h"

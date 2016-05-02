@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include "lc_math.h"
 #include "lc_array.h"
-#include "lc_mesh.h"
 
 #define LC_PIECE_HAS_DEFAULT        0x01 // Piece has triangles using the default color
 #define LC_PIECE_HAS_SOLID          0x02 // Piece has triangles using a solid color

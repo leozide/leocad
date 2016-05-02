@@ -1,7 +1,6 @@
 #ifndef _LC_MODEL_H_
 #define _LC_MODEL_H_
 
-#include "lc_file.h"
 #include "lc_math.h"
 #include "object.h"
 #include "lc_commands.h"

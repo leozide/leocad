@@ -10,6 +10,7 @@
 #include "lc_library.h"
 #include "lc_texture.h"
 #include "lc_synth.h"
+#include "lc_file.h"
 #include "pieceinf.h"
 #include "view.h"
 #include "preview.h"

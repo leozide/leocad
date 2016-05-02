@@ -3,7 +3,6 @@
 #include "project.h"
 #include "lc_model.h"
 #include "pieceinf.h"
-#include "system.h"
 #include "lc_application.h"
 #include "lc_mainwindow.h"
 #include "lc_library.h"

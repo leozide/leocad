@@ -1,7 +1,6 @@
 #include "lc_global.h"
 #include "lc_shortcuts.h"
 #include "lc_profile.h"
-#include "system.h"
 
 lcKeyboardShortcuts gKeyboardShortcuts;
 lcMouseShortcuts gMouseShortcuts;

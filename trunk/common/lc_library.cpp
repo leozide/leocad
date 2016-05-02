@@ -7,13 +7,10 @@
 #include "lc_texture.h"
 #include "lc_category.h"
 #include "lc_application.h"
-#include "lc_mainwindow.h"
 #include "lc_context.h"
 #include "lc_glextensions.h"
 #include "lc_synth.h"
 #include "project.h"
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <ctype.h>
 #include <locale.h>
 #include <zlib.h>

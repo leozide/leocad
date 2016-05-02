@@ -1,13 +1,10 @@
 #include "lc_global.h"
 #include "lc_math.h"
 #include "lc_colors.h"
-#include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 #include <math.h>
 #include "light.h"
-#include "camera.h"
-#include "view.h"
 #include "lc_application.h"
 #include "lc_context.h"
 

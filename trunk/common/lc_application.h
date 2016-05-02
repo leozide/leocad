@@ -2,10 +2,10 @@
 #define _LC_APPLICATION_H_
 
 #include "lc_array.h"
-#include "str.h"
 
 class Project;
 class lcPiecesLibrary;
+class String;
 
 enum lcLightingMode
 {

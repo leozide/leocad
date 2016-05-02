@@ -368,6 +368,15 @@ public:
 		return mControlPoints;
 	}
 
+	void SetControlPoints(const lcArray<lcPieceControlPoint>& ControlPoints)
+	{
+		if (ControlPoints.GetSize() != 1)
+		{
+			mControlPoints = ControlPoints;
+			UpdateMesh();
+		}
+	}
+
 	void SetControlPointScale(int ControlPointIndex, float Scale)
 	{
 		mControlPoints[ControlPointIndex].Scale = Scale;

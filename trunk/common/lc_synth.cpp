@@ -56,7 +56,7 @@ void lcSynthInit()
 }
 
 lcSynthInfo::lcSynthInfo(lcSynthType Type, float Length, int NumSections, PieceInfo* Info)
-	: mType(Type), mLength(Length), mNumSections(NumSections), mPieceInfo(Info)
+	: mPieceInfo(Info), mType(Type), mLength(Length), mNumSections(NumSections)
 {
 	float EdgeSectionLength;
 	float MidSectionLength;

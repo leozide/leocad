@@ -702,7 +702,7 @@ void View::DrawSelectMoveOverlay()
 
 		if (AllowedTransforms & LC_OBJECT_TRANSFORM_MOVE_Y)
 		{
-			if ((mTrackTool == LC_TRACKTOOL_MOVE_Y) || (mTrackTool == LC_TRACKTOOL_MOVE_XY) || (mTrackTool == LC_TRACKTOOL_MOVE_YZ) && (AllowedTransforms & LC_OBJECT_TRANSFORM_MOVE_Y))
+			if (((mTrackTool == LC_TRACKTOOL_MOVE_Y) || (mTrackTool == LC_TRACKTOOL_MOVE_XY) || (mTrackTool == LC_TRACKTOOL_MOVE_YZ)) && (AllowedTransforms & LC_OBJECT_TRANSFORM_MOVE_Y))
 			{
 				mContext->SetColor(0.8f, 0.8f, 0.0f, 1.0f);
 				mContext->DrawIndexedPrimitives(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 36 * 2);
@@ -716,7 +716,7 @@ void View::DrawSelectMoveOverlay()
 
 		if (AllowedTransforms & LC_OBJECT_TRANSFORM_MOVE_Z)
 		{
-			if ((mTrackTool == LC_TRACKTOOL_MOVE_Z) || (mTrackTool == LC_TRACKTOOL_MOVE_XZ) || (mTrackTool == LC_TRACKTOOL_MOVE_YZ) && (AllowedTransforms & LC_OBJECT_TRANSFORM_MOVE_Z))
+			if (((mTrackTool == LC_TRACKTOOL_MOVE_Z) || (mTrackTool == LC_TRACKTOOL_MOVE_XZ) || (mTrackTool == LC_TRACKTOOL_MOVE_YZ)) && (AllowedTransforms & LC_OBJECT_TRANSFORM_MOVE_Z))
 			{
 				mContext->SetColor(0.8f, 0.8f, 0.0f, 1.0f);
 				mContext->DrawIndexedPrimitives(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 72 * 2);

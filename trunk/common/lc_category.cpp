@@ -117,8 +117,8 @@ bool lcLoadCategories(const QByteArray& Buffer, lcArray<lcLibraryCategory>& Cate
 
 		lcLibraryCategory& Category = Categories.Add();
 
-		Category.Name = Name.toLatin1();
-		Category.Keywords = Keywords.toLatin1();
+		Category.Name = Name.toLatin1().constData();
+		Category.Keywords = Keywords.toLatin1().constData();
 	}
 
 	return true;

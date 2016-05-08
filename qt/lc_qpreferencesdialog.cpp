@@ -672,17 +672,17 @@ void lcQPreferencesDialog::on_mouseAssign_clicked()
 
 		if (ui->mouseAlt->isChecked())
 			Modifiers |= Qt::AltModifier;
-	}
 
-	for (int ToolIdx = 0; ToolIdx < LC_NUM_TOOLS; ToolIdx++)
-	{
-		if (ToolIdx != ButtonIndex && options->MouseShortcuts.mShortcuts[ToolIdx].Button == Button && options->MouseShortcuts.mShortcuts[ToolIdx].Modifiers == Modifiers)
+		for (int ToolIdx = 0; ToolIdx < LC_NUM_TOOLS; ToolIdx++)
 		{
-			if (QMessageBox::question(this, tr("Override Shortcut"), tr("This shortcut is already assigned to '%1', do you want to replace it?").arg(gToolNames[ToolIdx]), QMessageBox::Yes | QMessageBox::No) == QMessageBox::No)
-				return;
+			if (ToolIdx != ButtonIndex && options->MouseShortcuts.mShortcuts[ToolIdx].Button == Button && options->MouseShortcuts.mShortcuts[ToolIdx].Modifiers == Modifiers)
+			{
+				if (QMessageBox::question(this, tr("Override Shortcut"), tr("This shortcut is already assigned to '%1', do you want to replace it?").arg(gToolNames[ToolIdx]), QMessageBox::Yes | QMessageBox::No) == QMessageBox::No)
+					return;
 
-			options->MouseShortcuts.mShortcuts[ToolIdx].Button = Qt::NoButton;
-			options->MouseShortcuts.mShortcuts[ToolIdx].Modifiers = Qt::NoModifier;
+				options->MouseShortcuts.mShortcuts[ToolIdx].Button = Qt::NoButton;
+				options->MouseShortcuts.mShortcuts[ToolIdx].Modifiers = Qt::NoModifier;
+			}
 		}
 	}
 

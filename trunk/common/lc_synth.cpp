@@ -4,6 +4,7 @@
 #include "lc_application.h"
 #include "lc_file.h"
 #include "pieceinf.h"
+#include <locale.h>
 
 void lcSynthInit()
 {
@@ -633,6 +634,7 @@ lcMesh* lcSynthInfo::CreateMesh(const lcArray<lcPieceControlPoint>& ControlPoint
 
 	lcLibraryMeshData MeshData;
 	lcMemFile File; // todo: rewrite this to pass the parts directly
+	const char* OldLocale = setlocale(LC_NUMERIC, "C");
 
 	switch (mType)
 	{
@@ -658,7 +660,6 @@ lcMesh* lcSynthInfo::CreateMesh(const lcArray<lcPieceControlPoint>& ControlPoint
 	lcArray<lcLibraryTextureMap> TextureStack;
 	File.Seek(0, SEEK_SET);
 
-	const char* OldLocale = setlocale(LC_NUMERIC, "C");
 	bool Ret = lcGetPiecesLibrary()->ReadMeshData(File, lcMatrix44Identity(), 16, TextureStack, MeshData, LC_MESHDATA_SHARED, false);
 	setlocale(LC_NUMERIC, OldLocale);
 

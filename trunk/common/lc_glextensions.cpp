@@ -146,7 +146,7 @@ static bool lcIsGLExtensionSupported(const GLubyte* Extensions, const char* Name
 	return false;
 }
 
-#ifndef QT_NO_DEBUG
+#if !defined(QT_NO_DEBUG) && defined(GL_ARB_debug_output)
 
 static void APIENTRY lcGLDebugCallback(GLenum Source, GLenum Type, GLuint Id, GLenum Severity, GLsizei Length, const GLchar* Message, GLvoid* UserParam)
 {
@@ -171,7 +171,7 @@ void lcInitializeGLExtensions(const QGLContext* Context)
 	if (Version)
 		sscanf((const char*)Version, "%d.%d", &VersionMajor, &VersionMinor);
 
-#ifndef QT_NO_DEBUG
+#if !defined(QT_NO_DEBUG) && defined(GL_ARB_debug_output)
 	if (lcIsGLExtensionSupported(Extensions, "GL_KHR_debug"))
 	{
 		PFNGLDEBUGMESSAGECALLBACKARBPROC DebugMessageCallback = (PFNGLDEBUGMESSAGECALLBACKARBPROC)Context->getProcAddress("glDebugMessageCallback");

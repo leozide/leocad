@@ -13,13 +13,13 @@ void lcDoInitialUpdateCheck()
 		return;
 
 	QSettings settings;
-	QDateTime checkTime = settings.value("Updates/LastCheck", QDateTime()).toDateTime();
+	QDateTime CheckTime = settings.value("Updates/LastCheck", QDateTime()).toDateTime();
 
-	if (!checkTime.isNull())
+	if (!CheckTime.isNull())
 	{
-		checkTime.addDays(updateFrequency == 1 ? 1 : 7);
+		QDateTime NextCheckTime = CheckTime.addDays(updateFrequency == 1 ? 1 : 7);
 
-		if (checkTime > QDateTime::currentDateTimeUtc())
+		if (NextCheckTime > QDateTime::currentDateTimeUtc())
 			return;
 	}
 

@@ -838,5 +838,6 @@ void lcPiece::UpdatePosition(lcStep Step)
 void lcPiece::UpdateMesh()
 {
 	delete mMesh;
-	mMesh = mPieceInfo->GetSynthInfo()->CreateMesh(mControlPoints);
+	lcSynthInfo* SynthInfo = mPieceInfo->GetSynthInfo();
+	mMesh = SynthInfo ? SynthInfo->CreateMesh(mControlPoints) : NULL;
 }

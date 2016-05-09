@@ -2373,28 +2373,8 @@ void View::CancelTrackingOrClearSelection()
 		mModel->ClearSelection(true);
 }
 
-void View::OnLeftButtonDown()
+void View::OnButtonDown(lcTrackButton TrackButton)
 {
-	if (mTrackButton != LC_TRACKBUTTON_NONE)
-	{
-		StopTracking(false);
-		return;
-	}
-
-	gMainWindow->SetActiveView(this);
-
-	lcTrackTool OverrideTool = GetOverrideTrackTool(Qt::LeftButton);
-
-	if (OverrideTool != LC_TRACKTOOL_NONE)
-	{
-		mTrackTool = OverrideTool;
-		OnUpdateCursor();
-	}
-	else if (mTrackTool == LC_TRACKTOOL_MOVE_XYZ)
-		mTrackTool = LC_TRACKTOOL_MOVE_XY;
-	else if (mTrackTool == LC_TRACKTOOL_ROTATE_XYZ)
-		mTrackTool = LC_TRACKTOOL_ROTATE_XY;
-
 	switch (mTrackTool)
 	{
 	case LC_TRACKTOOL_NONE:
@@ -2429,7 +2409,7 @@ void View::OnLeftButtonDown()
 
 	case LC_TRACKTOOL_SPOTLIGHT:
 	case LC_TRACKTOOL_CAMERA:
-		StartTracking(LC_TRACKBUTTON_LEFT);
+		StartTracking(TrackButton);
 		break;
 		
 	case LC_TRACKTOOL_SELECT:
@@ -2441,7 +2421,7 @@ void View::OnLeftButtonDown()
 			else
 				mModel->ClearSelectionAndSetFocus(ObjectSection);
 
-			StartTracking(LC_TRACKBUTTON_LEFT);
+			StartTracking(TrackButton);
 		}
 		break;
 
@@ -2453,7 +2433,7 @@ void View::OnLeftButtonDown()
 	case LC_TRACKTOOL_MOVE_YZ:
 	case LC_TRACKTOOL_MOVE_XYZ:
 		if (mModel->AnyObjectsSelected())
-			StartTracking(LC_TRACKBUTTON_LEFT);
+			StartTracking(TrackButton);
 		break;
 
 	case LC_TRACKTOOL_ROTATE_X:
@@ -2462,13 +2442,13 @@ void View::OnLeftButtonDown()
 	case LC_TRACKTOOL_ROTATE_XY:
 	case LC_TRACKTOOL_ROTATE_XYZ:
 		if (mModel->AnyPiecesSelected())
-			StartTracking(LC_TRACKBUTTON_LEFT);
+			StartTracking(TrackButton);
 		break;
 
 	case LC_TRACKTOOL_SCALE_PLUS:
 	case LC_TRACKTOOL_SCALE_MINUS:
 		if (mModel->AnyPiecesSelected())
-			StartTracking(LC_TRACKBUTTON_LEFT);
+			StartTracking(TrackButton);
 		break;
 
 	case LC_TRACKTOOL_ERASER:
@@ -2486,9 +2466,34 @@ void View::OnLeftButtonDown()
 	case LC_TRACKTOOL_ORBIT_XY:
 	case LC_TRACKTOOL_ROLL:
 	case LC_TRACKTOOL_ZOOM_REGION:
-		StartTracking(LC_TRACKBUTTON_LEFT);
+		StartTracking(TrackButton);
 		break;
 	}
+}
+
+void View::OnLeftButtonDown()
+{
+	if (mTrackButton != LC_TRACKBUTTON_NONE)
+	{
+		StopTracking(false);
+		return;
+	}
+
+	gMainWindow->SetActiveView(this);
+
+	lcTrackTool OverrideTool = GetOverrideTrackTool(Qt::LeftButton);
+
+	if (OverrideTool != LC_TRACKTOOL_NONE)
+	{
+		mTrackTool = OverrideTool;
+		OnUpdateCursor();
+	}
+	else if (mTrackTool == LC_TRACKTOOL_MOVE_XYZ)
+		mTrackTool = LC_TRACKTOOL_MOVE_XY;
+	else if (mTrackTool == LC_TRACKTOOL_ROTATE_XYZ)
+		mTrackTool = LC_TRACKTOOL_ROTATE_XY;
+
+	OnButtonDown(LC_TRACKBUTTON_LEFT);
 }
 
 void View::OnLeftButtonUp()
@@ -2524,8 +2529,9 @@ void View::OnMiddleButtonDown()
 	{
 		mTrackTool = OverrideTool;
 		OnUpdateCursor();
-		StartTracking(LC_TRACKBUTTON_MIDDLE);
 	}
+
+	OnButtonDown(LC_TRACKBUTTON_MIDDLE);
 }
 
 void View::OnMiddleButtonUp()
@@ -2555,54 +2561,7 @@ void View::OnRightButtonDown()
 	else if (mTrackTool == LC_TRACKTOOL_ROTATE_XYZ)
 		mTrackTool = LC_TRACKTOOL_ROTATE_Z;
 
-	switch (mTrackTool)
-	{
-	case LC_TRACKTOOL_NONE:
-	case LC_TRACKTOOL_INSERT:
-	case LC_TRACKTOOL_POINTLIGHT:
-	case LC_TRACKTOOL_SPOTLIGHT:
-	case LC_TRACKTOOL_CAMERA:
-	case LC_TRACKTOOL_SELECT:
-		break;
-
-	case LC_TRACKTOOL_MOVE_X:
-	case LC_TRACKTOOL_MOVE_Y:
-	case LC_TRACKTOOL_MOVE_Z:
-	case LC_TRACKTOOL_MOVE_XY:
-	case LC_TRACKTOOL_MOVE_XZ:
-	case LC_TRACKTOOL_MOVE_YZ:
-	case LC_TRACKTOOL_MOVE_XYZ:
-		if (mModel->AnyObjectsSelected())
-			StartTracking(LC_TRACKBUTTON_RIGHT);
-		break;
-
-	case LC_TRACKTOOL_ROTATE_X:
-	case LC_TRACKTOOL_ROTATE_Y:
-	case LC_TRACKTOOL_ROTATE_Z:
-	case LC_TRACKTOOL_ROTATE_XY:
-	case LC_TRACKTOOL_ROTATE_XYZ:
-		if (mModel->AnyPiecesSelected())
-			StartTracking(LC_TRACKBUTTON_RIGHT);
-		break;
-
-	case LC_TRACKTOOL_SCALE_PLUS:
-	case LC_TRACKTOOL_SCALE_MINUS:
-	case LC_TRACKTOOL_ERASER:
-	case LC_TRACKTOOL_PAINT:
-		break;
-
-	case LC_TRACKTOOL_ZOOM:
-		StartTracking(LC_TRACKBUTTON_RIGHT);
-		break;
-
-	case LC_TRACKTOOL_PAN:
-	case LC_TRACKTOOL_ORBIT_X:
-	case LC_TRACKTOOL_ORBIT_Y:
-	case LC_TRACKTOOL_ORBIT_XY:
-	case LC_TRACKTOOL_ROLL:
-	case LC_TRACKTOOL_ZOOM_REGION:
-		break;
-	}
+	OnButtonDown(LC_TRACKBUTTON_RIGHT);
 }
 
 void View::OnRightButtonUp()

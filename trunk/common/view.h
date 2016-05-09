@@ -138,6 +138,7 @@ protected:
 	float GetOverlayScale() const;
 	void StartTracking(lcTrackButton TrackButton);
 	void StopTracking(bool Accept);
+	void OnButtonDown(lcTrackButton TrackButton);
 
 	lcScene mScene;
 	lcDragState mDragState;

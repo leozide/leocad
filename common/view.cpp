@@ -2214,6 +2214,7 @@ void View::StartTracking(lcTrackButton TrackButton)
 	LC_ASSERT(mTrackButton == LC_TRACKBUTTON_NONE);
 
 	mTrackButton = TrackButton;
+	mTrackUpdated = false;
 	mMouseDownX = mInputState.x;
 	mMouseDownY = mInputState.y;
 	lcTool Tool = GetCurrentTool();
@@ -2488,10 +2489,6 @@ void View::OnLeftButtonDown()
 		mTrackTool = OverrideTool;
 		OnUpdateCursor();
 	}
-	else if (mTrackTool == LC_TRACKTOOL_MOVE_XYZ)
-		mTrackTool = LC_TRACKTOOL_MOVE_XY;
-	else if (mTrackTool == LC_TRACKTOOL_ROTATE_XYZ)
-		mTrackTool = LC_TRACKTOOL_ROTATE_XY;
 
 	OnButtonDown(LC_TRACKBUTTON_LEFT);
 }
@@ -2556,20 +2553,19 @@ void View::OnRightButtonDown()
 		mTrackTool = OverrideTool;
 		OnUpdateCursor();
 	}
-	else if (mTrackTool == LC_TRACKTOOL_MOVE_XYZ)
-		mTrackTool = LC_TRACKTOOL_MOVE_Z;
-	else if (mTrackTool == LC_TRACKTOOL_ROTATE_XYZ)
-		mTrackTool = LC_TRACKTOOL_ROTATE_Z;
 
 	OnButtonDown(LC_TRACKBUTTON_RIGHT);
 }
 
 void View::OnRightButtonUp()
 {
-	if (mTrackButton == LC_TRACKBUTTON_NONE)
-		ShowContextMenu();
-	else
+	bool ShowMenu = mTrackButton == LC_TRACKBUTTON_NONE || !mTrackUpdated;
+
+	if (mTrackButton != LC_TRACKBUTTON_NONE)
 		StopTracking(mTrackButton == LC_TRACKBUTTON_RIGHT);
+
+	if (ShowMenu)
+		ShowContextMenu();
 }
 
 void View::OnBackButtonUp()
@@ -2594,6 +2590,7 @@ void View::OnMouseMove()
 		return;
 	}
 
+	mTrackUpdated = true;
 	const float MouseSensitivity = 1.0f / (21.0f - lcGetPreferences().mMouseSensitivity);
 
 	switch (mTrackTool)

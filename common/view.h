@@ -144,6 +144,7 @@ protected:
 	lcDragState mDragState;
 	lcTrackButton mTrackButton;
 	lcTrackTool mTrackTool;
+	bool mTrackUpdated;
 	int mMouseDownX;
 	int mMouseDownY;
 

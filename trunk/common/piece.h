@@ -370,7 +370,7 @@ public:
 
 	void SetControlPoints(const lcArray<lcPieceControlPoint>& ControlPoints)
 	{
-		if (ControlPoints.GetSize() != 1)
+		if (ControlPoints.GetSize() > 1)
 		{
 			mControlPoints = ControlPoints;
 			UpdateMesh();

@@ -122,8 +122,13 @@ void PieceInfo::Load()
 		return;
 	else if (mFlags & LC_PIECE_PLACEHOLDER)
 	{
-		mFlags |= LC_PIECE_HAS_DEFAULT | LC_PIECE_HAS_LINES;
-		mBoundingBox = gPlaceholderMesh->mBoundingBox;
+		if (lcGetPiecesLibrary()->LoadPiece(this))
+			mFlags &= ~LC_PIECE_PLACEHOLDER;
+		else
+		{
+			mFlags |= LC_PIECE_HAS_DEFAULT | LC_PIECE_HAS_LINES;
+			mBoundingBox = gPlaceholderMesh->mBoundingBox;
+		}
 	}
 	else
 	{

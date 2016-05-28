@@ -871,6 +871,9 @@ bool lcPiecesLibrary::LoadPiece(PieceInfo* Info)
 	lcLibraryMeshData MeshData;
 	lcArray<lcLibraryTextureMap> TextureStack;
 
+	bool Loaded = false;
+	bool SaveCache = false;
+
 	if (Info->mZipFileType != LC_NUM_ZIPFILES && mZipFiles[Info->mZipFileType])
 	{
 		if (LoadCachePiece(Info))
@@ -878,15 +881,14 @@ bool lcPiecesLibrary::LoadPiece(PieceInfo* Info)
 
 		lcMemFile PieceFile;
 
-		if (!mZipFiles[Info->mZipFileType]->ExtractFile(Info->mZipFileIndex, PieceFile))
-			return false;
+		if (mZipFiles[Info->mZipFileType]->ExtractFile(Info->mZipFileIndex, PieceFile))
+		{
+			const char* OldLocale = setlocale(LC_NUMERIC, "C");
+			Loaded = ReadMeshData(PieceFile, lcMatrix44Identity(), 16, TextureStack, MeshData, LC_MESHDATA_SHARED, true);
+			setlocale(LC_NUMERIC, OldLocale);
+		}
 
-		const char* OldLocale = setlocale(LC_NUMERIC, "C");
-		bool Ret = ReadMeshData(PieceFile, lcMatrix44Identity(), 16, TextureStack, MeshData, LC_MESHDATA_SHARED, true);
-		setlocale(LC_NUMERIC, OldLocale);
-
-        if (!Ret)
-			return false;
+		SaveCache = Loaded && (Info->mZipFileType == LC_ZIPFILE_OFFICIAL);
 	}
 	else
 	{
@@ -899,20 +901,33 @@ bool lcPiecesLibrary::LoadPiece(PieceInfo* Info)
 
 		sprintf(FileName, "%sparts/%s.dat", mLibraryPath, Name);
 
-		if (!PieceFile.Open(FileName, "rt"))
-			return false;
-
-		const char* OldLocale = setlocale(LC_NUMERIC, "C");
-		bool Ret = ReadMeshData(PieceFile, lcMatrix44Identity(), 16, TextureStack, MeshData, LC_MESHDATA_SHARED, true);
-		setlocale(LC_NUMERIC, OldLocale);
-
-        if (!Ret)
-			return false;
+		if (PieceFile.Open(FileName, "rt"))
+		{
+			const char* OldLocale = setlocale(LC_NUMERIC, "C");
+			Loaded = ReadMeshData(PieceFile, lcMatrix44Identity(), 16, TextureStack, MeshData, LC_MESHDATA_SHARED, true);
+			setlocale(LC_NUMERIC, OldLocale);
+		}
 	}
+
+	if (!Loaded && !mCurrentModelPath.isEmpty())
+	{
+		QFileInfo FileInfo(QDir(mCurrentModelPath), Info->m_strName);
+
+		lcDiskFile PieceFile;
+		if (PieceFile.Open(FileInfo.absoluteFilePath().toLatin1().constData(), "rt")) // todo: qstring
+		{
+			const char* OldLocale = setlocale(LC_NUMERIC, "C");
+			Loaded = ReadMeshData(PieceFile, lcMatrix44Identity(), 16, TextureStack, MeshData, LC_MESHDATA_SHARED, true);
+			setlocale(LC_NUMERIC, OldLocale);
+		}
+	}
+
+	if (!Loaded)
+		return false;
 
 	CreateMesh(Info, MeshData);
 
-	if (mZipFiles[LC_ZIPFILE_OFFICIAL])
+	if (SaveCache)
 		SaveCachePiece(Info);
 
 	return true;

@@ -917,7 +917,7 @@ bool lcPiecesLibrary::LoadPiece(PieceInfo* Info)
 		if (PieceFile.Open(FileInfo.absoluteFilePath().toLatin1().constData(), "rt")) // todo: qstring
 		{
 			const char* OldLocale = setlocale(LC_NUMERIC, "C");
-			Loaded = ReadMeshData(PieceFile, lcMatrix44Identity(), 16, TextureStack, MeshData, LC_MESHDATA_SHARED, true);
+			Loaded = ReadMeshData(PieceFile, lcMatrix44Identity(), 16, TextureStack, MeshData, LC_MESHDATA_SHARED, false);
 			setlocale(LC_NUMERIC, OldLocale);
 		}
 	}
@@ -1559,10 +1559,13 @@ bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransf
 		{
 		case 1:
 			{
-				char FileName[LC_MAXPATH];
+				char OriginalFileName[LC_MAXPATH];
 				float fm[12];
 
-				sscanf(Line, "%d %i %f %f %f %f %f %f %f %f %f %f %f %f %s", &LineType, &Dummy, &fm[0], &fm[1], &fm[2], &fm[3], &fm[4], &fm[5], &fm[6], &fm[7], &fm[8], &fm[9], &fm[10], &fm[11], FileName);
+				sscanf(Line, "%d %i %f %f %f %f %f %f %f %f %f %f %f %f %s", &LineType, &Dummy, &fm[0], &fm[1], &fm[2], &fm[3], &fm[4], &fm[5], &fm[6], &fm[7], &fm[8], &fm[9], &fm[10], &fm[11], OriginalFileName);
+
+				char FileName[LC_MAXPATH];
+				strcpy(FileName, OriginalFileName);
 
 				char* Ch;
 				for (Ch = FileName; *Ch; Ch++)
@@ -1635,6 +1638,8 @@ bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransf
 				}
 				else
 				{
+					bool Loaded = false;
+
 					for (int PieceInfoIndex = 0; PieceInfoIndex < mPieces.GetSize(); PieceInfoIndex++)
 					{
 						PieceInfo* Info = mPieces[PieceInfoIndex];
@@ -1646,11 +1651,8 @@ bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransf
 						{
 							lcMemFile IncludeFile;
 
-							if (!mZipFiles[Info->mZipFileType]->ExtractFile(Info->mZipFileIndex, IncludeFile))
-								break;
-
-							if (!ReadMeshData(IncludeFile, IncludeTransform, ColorCode, TextureStack, MeshData, MeshDataType, Optimize))
-								break;
+							if (mZipFiles[Info->mZipFileType]->ExtractFile(Info->mZipFileIndex, IncludeFile))
+								Loaded = ReadMeshData(IncludeFile, IncludeTransform, ColorCode, TextureStack, MeshData, MeshDataType, Optimize);
 						}
 						else
 						{
@@ -1662,14 +1664,24 @@ bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransf
 
 							sprintf(FileName, "%sparts/%s.dat", mLibraryPath, Name);
 
-							if (!IncludeFile.Open(FileName, "rt"))
-								break;
-
-							if (!ReadMeshData(IncludeFile, IncludeTransform, ColorCode, TextureStack, MeshData, MeshDataType, Optimize))
-								break;
+							if (IncludeFile.Open(FileName, "rt"))
+								Loaded = ReadMeshData(IncludeFile, IncludeTransform, ColorCode, TextureStack, MeshData, MeshDataType, Optimize);
 						}
 
 						break;
+					}
+
+					if (!Loaded && !mCurrentModelPath.isEmpty())
+					{
+						QFileInfo FileInfo(QDir(mCurrentModelPath), OriginalFileName);
+
+						lcDiskFile IncludeFile;
+						if (IncludeFile.Open(FileInfo.absoluteFilePath().toLatin1().constData(), "rt")) // todo: qstring
+						{
+							const char* OldLocale = setlocale(LC_NUMERIC, "C");
+							Loaded = ReadMeshData(IncludeFile, IncludeTransform, ColorCode, TextureStack, MeshData, MeshDataType, Optimize);
+							setlocale(LC_NUMERIC, OldLocale);
+						}
 					}
 				}
 			} break;

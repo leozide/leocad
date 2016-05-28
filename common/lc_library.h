@@ -158,6 +158,11 @@ public:
 			mNumOfficialPieces = mPieces.GetSize();
 	}
 
+	void SetCurrentModelPath(const QString& ModelPath)
+	{
+		mCurrentModelPath = ModelPath;
+	}
+
 	bool ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform, lcuint32 CurrentColorCode, lcArray<lcLibraryTextureMap>& TextureStack, lcLibraryMeshData& MeshData, lcMeshDataType MeshDataType, bool Optimize);
 	lcMesh* CreateMesh(PieceInfo* Info, lcLibraryMeshData& MeshData);
 	void UpdateBuffers(lcContext* Context);
@@ -192,6 +197,7 @@ protected:
 	bool LoadPrimitive(int PrimitiveIndex);
 
 	QString mCachePath;
+	QString mCurrentModelPath;
 	qint64 mArchiveCheckSum[4];
 	char mLibraryFileName[LC_MAXPATH];
 	char mUnofficialFileName[LC_MAXPATH];

@@ -210,6 +210,8 @@ bool Project::Load(const QString& FileName)
 	QFileInfo FileInfo(FileName);
 	QString Extension = FileInfo.suffix().toLower();
 
+	lcGetPiecesLibrary()->SetCurrentModelPath(FileInfo.absolutePath());
+
 	if (Extension == QLatin1String("dat") || Extension == QLatin1String("ldr") || Extension == QLatin1String("mpd"))
 	{
 		QByteArray FileData = File.readAll();
@@ -283,6 +285,8 @@ bool Project::Save(const QString& FileName)
 		QMessageBox::warning(gMainWindow, tr("Error"), tr("Error writing to file '%1':\n%2").arg(FileName, File.errorString()));
 		return false;
 	}
+
+	lcGetPiecesLibrary()->SetCurrentModelPath(QFileInfo(FileName).absolutePath());
 
 	QTextStream Stream(&File);
 	bool MPD = mModels.GetSize() > 1;

@@ -1126,7 +1126,7 @@ lcMesh* lcPiecesLibrary::CreateMesh(PieceInfo* Info, lcLibraryMeshData& MeshData
 				if (MergeSection.Lod)
 				{
 					lcuint32 BaseVertex = DstSection.Texture ? BaseTexturedVertices[LodIdx] : BaseVertices[LodIdx];
-					lcLibraryMeshSection* SrcSection = MergeSection.Shared;
+					lcLibraryMeshSection* SrcSection = MergeSection.Lod;
 
 					for (int IndexIdx = 0; IndexIdx < SrcSection->mIndices.GetSize(); IndexIdx++)
 						*Index++ = BaseVertex + SrcSection->mIndices[IndexIdx];

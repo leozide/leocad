@@ -2239,7 +2239,7 @@ void lcLibraryMeshData::AddMeshDataNoDuplicateCheck(const lcLibraryMeshData& Dat
 				Sections.Add(DstSection);
 			}
 
-			DstSection->mIndices.SetGrow(DstSection->mIndices.GetSize());
+			DstSection->mIndices.SetGrow(lcMin(DstSection->mIndices.GetSize(), 8 * 1024 * 1024));
 			DstSection->mIndices.AllocGrow(SrcSection->mIndices.GetSize());
 
 			if (!SrcSection->mTexture)

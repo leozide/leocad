@@ -97,7 +97,8 @@ public:
 
 	void SetGrow(int Grow)
 	{
-		mGrow = Grow;
+		if (Grow)
+			mGrow = Grow;
 	}
 
 	void AllocGrow(int Grow)

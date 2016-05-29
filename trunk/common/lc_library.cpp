@@ -1230,6 +1230,9 @@ void lcPiecesLibrary::UpdateBuffers(lcContext* Context)
 		if (!Mesh)
 			continue;
 
+		if (Mesh->mVertexDataSize > 16 * 1024 * 1024 || Mesh->mIndexDataSize > 16 * 1024 * 1024)
+			continue;
+
 		VertexDataSize += Mesh->mVertexDataSize;
 		IndexDataSize += Mesh->mIndexDataSize;
 	}
@@ -1252,6 +1255,9 @@ void lcPiecesLibrary::UpdateBuffers(lcContext* Context)
 		lcMesh* Mesh = Info->IsPlaceholder() ? gPlaceholderMesh : Info->GetMesh();
 
 		if (!Mesh)
+			continue;
+
+		if (Mesh->mVertexDataSize > 16 * 1024 * 1024 || Mesh->mIndexDataSize > 16 * 1024 * 1024)
 			continue;
 
 		Mesh->mVertexCacheOffset = VertexDataSize;
@@ -1695,13 +1701,13 @@ bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransf
 
 				if (TextureMap)
 				{
-					MeshData.AddTexturedLine(MeshDataType, LineType, ColorCode, *TextureMap, Points);
+					MeshData.AddTexturedLine(MeshDataType, LineType, ColorCode, *TextureMap, Points, Optimize);
 
 					if (TextureMap->Next)
 						TextureStack.RemoveIndex(TextureStack.GetSize() - 1);
 				}
 				else
-					MeshData.AddLine(MeshDataType, LineType, ColorCode, Points);
+					MeshData.AddLine(MeshDataType, LineType, ColorCode, Points, Optimize);
 			} break;
 
 		case 3:
@@ -1715,13 +1721,13 @@ bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransf
 
 				if (TextureMap)
 				{
-					MeshData.AddTexturedLine(MeshDataType, LineType, ColorCode, *TextureMap, Points);
+					MeshData.AddTexturedLine(MeshDataType, LineType, ColorCode, *TextureMap, Points, Optimize);
 
 					if (TextureMap->Next)
 						TextureStack.RemoveIndex(TextureStack.GetSize() - 1);
 				}
 				else
-					MeshData.AddLine(MeshDataType, LineType, ColorCode, Points);
+					MeshData.AddLine(MeshDataType, LineType, ColorCode, Points, Optimize);
 			} break;
 
 		case 4:
@@ -1736,13 +1742,13 @@ bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransf
 
 				if (TextureMap)
 				{
-					MeshData.AddTexturedLine(MeshDataType, LineType, ColorCode, *TextureMap, Points);
+					MeshData.AddTexturedLine(MeshDataType, LineType, ColorCode, *TextureMap, Points, Optimize);
 
 					if (TextureMap->Next)
 						TextureStack.RemoveIndex(TextureStack.GetSize() - 1);
 				}
 				else
-					MeshData.AddLine(MeshDataType, LineType, ColorCode, Points);
+					MeshData.AddLine(MeshDataType, LineType, ColorCode, Points, Optimize);
 			} break;
 		}
 	}
@@ -1830,7 +1836,7 @@ void lcLibraryMeshData::AddIndices(lcMeshDataType MeshDataType, LC_MESH_PRIMITIV
 	*IndexBuffer = &Indices[CurrentSize];
 }
 
-void lcLibraryMeshData::AddLine(lcMeshDataType MeshDataType, int LineType, lcuint32 ColorCode, const lcVector3* Vertices)
+void lcLibraryMeshData::AddLine(lcMeshDataType MeshDataType, int LineType, lcuint32 ColorCode, const lcVector3* Vertices, bool Optimize)
 {
 	LC_MESH_PRIMITIVE_TYPE PrimitiveType = (LineType == 2) ? LC_MESH_LINES : LC_MESH_TRIANGLES;
 	lcLibraryMeshSection* Section = AddSection(MeshDataType, PrimitiveType, ColorCode, NULL);
@@ -1847,14 +1853,17 @@ void lcLibraryMeshData::AddLine(lcMeshDataType MeshDataType, int LineType, lcuin
 		const lcVector3& Position = Vertices[QuadIndices[IndexIdx]];
 		lcArray<lcVertex>& VertexArray = mVertices[MeshDataType];
 
-		for (int VertexIdx = VertexArray.GetSize() - 1; VertexIdx >= 0; VertexIdx--)
+		if (Optimize)
 		{
-			lcVertex& DstVertex = VertexArray[VertexIdx];
-
-			if (Position == DstVertex.Position)
+			for (int VertexIdx = VertexArray.GetSize() - 1; VertexIdx >= 0; VertexIdx--)
 			{
-				Indices[IndexIdx] = VertexIdx;
-				break;
+				lcVertex& DstVertex = VertexArray[VertexIdx];
+
+				if (Position == DstVertex.Position)
+				{
+					Indices[IndexIdx] = VertexIdx;
+					break;
+				}
 			}
 		}
 
@@ -1894,7 +1903,7 @@ void lcLibraryMeshData::AddLine(lcMeshDataType MeshDataType, int LineType, lcuin
 	}
 }
 
-void lcLibraryMeshData::AddTexturedLine(lcMeshDataType MeshDataType, int LineType, lcuint32 ColorCode, const lcLibraryTextureMap& Map, const lcVector3* Vertices)
+void lcLibraryMeshData::AddTexturedLine(lcMeshDataType MeshDataType, int LineType, lcuint32 ColorCode, const lcLibraryTextureMap& Map, const lcVector3* Vertices, bool Optimize)
 {
 	LC_MESH_PRIMITIVE_TYPE PrimitiveType = (LineType == 2) ? LC_MESH_TEXTURED_LINES : LC_MESH_TEXTURED_TRIANGLES;
 	lcLibraryMeshSection* Section = AddSection(MeshDataType, PrimitiveType, ColorCode, Map.Texture);
@@ -1913,14 +1922,17 @@ void lcLibraryMeshData::AddTexturedLine(lcMeshDataType MeshDataType, int LineTyp
 						   lcDot3(lcVector3(Position.x, Position.y, Position.z), Map.Params[1]) + Map.Params[1].w);
 		lcArray<lcVertexTextured>& VertexArray = mTexturedVertices[MeshDataType];
 
-		for (int VertexIdx = VertexArray.GetSize() - 1; VertexIdx >= 0; VertexIdx--)
+		if (Optimize)
 		{
-			lcVertexTextured& DstVertex = VertexArray[VertexIdx];
-
-			if (Position == DstVertex.Position && TexCoord == DstVertex.TexCoord)
+			for (int VertexIdx = VertexArray.GetSize() - 1; VertexIdx >= 0; VertexIdx--)
 			{
-				Indices[IndexIdx] = VertexIdx;
-				break;
+				lcVertexTextured& DstVertex = VertexArray[VertexIdx];
+
+				if (Position == DstVertex.Position && TexCoord == DstVertex.TexCoord)
+				{
+					Indices[IndexIdx] = VertexIdx;
+					break;
+				}
 			}
 		}
 
@@ -2145,6 +2157,7 @@ void lcLibraryMeshData::AddMeshDataNoDuplicateCheck(const lcLibraryMeshData& Dat
 		{
 			BaseIndex = Vertices.GetSize();
 
+			Vertices.SetGrow(lcMin(Vertices.GetSize(), 8 * 1024 * 1024));
 			Vertices.AllocGrow(DataVertices.GetSize());
 
 			for (int SrcVertexIdx = 0; SrcVertexIdx < DataVertices.GetSize(); SrcVertexIdx++)
@@ -2226,6 +2239,7 @@ void lcLibraryMeshData::AddMeshDataNoDuplicateCheck(const lcLibraryMeshData& Dat
 				Sections.Add(DstSection);
 			}
 
+			DstSection->mIndices.SetGrow(DstSection->mIndices.GetSize());
 			DstSection->mIndices.AllocGrow(SrcSection->mIndices.GetSize());
 
 			if (!SrcSection->mTexture)

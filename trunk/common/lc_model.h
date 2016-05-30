@@ -229,6 +229,7 @@ public:
 	bool AnyPiecesSelected() const;
 	bool AnyObjectsSelected() const;
 	lcModel* GetFirstSelectedSubmodel() const;
+	void GetSubModels(lcArray<lcModel*> SubModels) const;
 	bool GetMoveRotateTransform(lcVector3& Center, lcMatrix33& RelativeRotation) const;
 	bool GetPieceFocusOrSelectionCenter(lcVector3& Center) const;
 	lcVector3 GetSelectionOrModelCenter() const;

@@ -2729,6 +2729,21 @@ lcModel* lcModel::GetFirstSelectedSubmodel() const
 	return NULL;
 }
 
+void lcModel::GetSubModels(lcArray<lcModel*> SubModels) const
+{
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+	{
+		lcPiece* Piece = mPieces[PieceIdx];
+
+		if (Piece->mPieceInfo->IsModel())
+		{
+			lcModel* SubModel = Piece->mPieceInfo->GetModel();
+			if (SubModels.FindIndex(SubModel) != -1)
+				SubModels.Add(SubModel);
+		}
+	}
+}
+
 bool lcModel::GetMoveRotateTransform(lcVector3& Center, lcMatrix33& RelativeRotation) const
 {
 	bool Relative = gMainWindow->GetRelativeTransform();

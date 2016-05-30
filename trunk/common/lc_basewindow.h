@@ -37,8 +37,9 @@ struct lcImageDialogOptions
 struct lcHTMLDialogOptions
 {
 	QString PathName;
-	LC_IMAGE_FORMAT ImageFormat;
 	bool TransparentImages;
+	bool SubModels;
+	bool CurrentOnly;
 	bool SinglePage;
 	bool IndexPage;
 	int StepImagesWidth;

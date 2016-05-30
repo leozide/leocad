@@ -3,7 +3,7 @@
 
 // Image Options
 #define LC_IMAGE_TRANSPARENT	0x2000
-#define LC_IMAGE_MASK		0x7000
+//#define LC_IMAGE_MASK		0x7000
 
 enum LC_IMAGE_FORMAT
 {

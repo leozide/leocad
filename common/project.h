@@ -10,14 +10,14 @@
 #define LC_SCENE_BG_TILE		0x040	// Tile bg image
 #define LC_SCENE_GRADIENT		0x100	// Draw gradient
 
-#define LC_HTML_SINGLEPAGE      0x01
-#define LC_HTML_INDEX           0x02
-#define LC_HTML_IMAGES          0x04
-#define LC_HTML_LISTEND         0x08
-#define LC_HTML_LISTSTEP        0x10
-#define LC_HTML_HIGHLIGHT       0x20
-//#define LC_HTML_HTMLEXT         0x40
-//#define LC_HTML_LISTID          0x80
+#define LC_HTML_SINGLEPAGE    0x01
+#define LC_HTML_INDEX         0x02
+#define LC_HTML_IMAGES        0x04
+#define LC_HTML_LISTEND       0x08
+#define LC_HTML_LISTSTEP      0x10
+#define LC_HTML_HIGHLIGHT     0x20
+#define LC_HTML_SUBMODELS     0x40
+#define LC_HTML_CURRENT_ONLY  0x80
 
 enum LC_MOUSE_TRACK
 {
@@ -70,7 +70,7 @@ public:
 protected:
 	QString GetExportFileName(const QString& FileName, const QString& DefaultExtension, const QString& DialogTitle, const QString& DialogFilter) const;
 	void GetModelParts(lcArray<lcModelPartsEntry>& ModelParts);
-	void CreateHTMLPieceList(QTextStream& Stream, lcModel* Model, lcStep Step, bool Images, const QString& ImageExtension);
+	void CreateHTMLPieceList(QTextStream& Stream, lcModel* Model, lcStep Step, bool Images);
 
 	bool mModified;
 	QString mFileName;

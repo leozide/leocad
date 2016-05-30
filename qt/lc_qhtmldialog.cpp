@@ -17,7 +17,14 @@ lcQHTMLDialog::lcQHTMLDialog(QWidget *parent, void *data) :
 	options = (lcHTMLDialogOptions*)data;
 
 	ui->outputFolder->setText(QDir::toNativeSeparators(options->PathName));
-	ui->imageFormat->setCurrentIndex(options->ImageFormat);
+
+	if (options->CurrentOnly)
+		ui->currentModelOnly->setChecked(true);
+	else if (options->SubModels)
+		ui->currentModelSubmodels->setChecked(true);
+	else
+		ui->allModels->setChecked(true);
+
 	ui->transparentImages->setChecked(options->TransparentImages);
 	ui->singlePage->setChecked(options->SinglePage);
 	ui->oneStepPerPage->setChecked(!options->SinglePage);
@@ -49,7 +56,8 @@ void lcQHTMLDialog::accept()
 	}
 
 	options->PathName = pathName;
-	options->ImageFormat = (LC_IMAGE_FORMAT)ui->imageFormat->currentIndex();
+	options->SubModels = ui->currentModelSubmodels->isChecked();
+	options->CurrentOnly = ui->currentModelOnly->isChecked();
 	options->TransparentImages = ui->transparentImages->isChecked();
 	options->SinglePage = ui->singlePage->isChecked();
 	options->IndexPage = ui->indexPage->isChecked();

@@ -969,7 +969,7 @@ void Project::ExportCSV()
 	setlocale(LC_NUMERIC, OldLocale);
 }
 
-void Project::CreateHTMLPieceList(QTextStream& Stream, lcModel* Model, lcStep Step, bool Images, const QString& ImageExtension)
+void Project::CreateHTMLPieceList(QTextStream& Stream, lcModel* Model, lcStep Step, bool Images)
 {
 	int* ColorsUsed = new int[gColorList.GetSize()];
 	memset(ColorsUsed, 0, sizeof(ColorsUsed[0]) * gColorList.GetSize());
@@ -1018,7 +1018,7 @@ void Project::CreateHTMLPieceList(QTextStream& Stream, lcModel* Model, lcStep St
 		if (Add)
 		{
 			if (Images)
-				Stream << QString("<tr><td><IMG SRC=\"%1%2\" ALT=\"%3\"></td>\n").arg(pInfo->m_strName, ImageExtension, pInfo->m_strDescription);
+				Stream << QString("<tr><td><IMG SRC=\"%1.png\" ALT=\"%2\"></td>\n").arg(pInfo->m_strName, pInfo->m_strDescription);
 			else
 				Stream << QString("<tr><td>%1</td>\r\n").arg(pInfo->m_strDescription);
 
@@ -1063,8 +1063,9 @@ void Project::ExportHTML()
 	int ImageOptions = lcGetProfileInt(LC_PROFILE_HTML_IMAGE_OPTIONS);
 	int HTMLOptions = lcGetProfileInt(LC_PROFILE_HTML_OPTIONS);
 
-	Options.ImageFormat = (LC_IMAGE_FORMAT)(ImageOptions & ~(LC_IMAGE_MASK));
 	Options.TransparentImages = (ImageOptions & LC_IMAGE_TRANSPARENT) != 0;
+	Options.SubModels = (HTMLOptions & (LC_HTML_SUBMODELS)) != 0;
+	Options.CurrentOnly = (HTMLOptions & LC_HTML_CURRENT_ONLY) != 0;
 	Options.SinglePage = (HTMLOptions & LC_HTML_SINGLEPAGE) != 0;
 	Options.IndexPage = (HTMLOptions & LC_HTML_INDEX) != 0;
 	Options.StepImagesWidth = lcGetProfileInt(LC_PROFILE_HTML_IMAGE_WIDTH);
@@ -1082,6 +1083,10 @@ void Project::ExportHTML()
 
 	HTMLOptions = 0;
 
+	if (Options.SubModels)
+		HTMLOptions |= LC_HTML_SUBMODELS;
+	if (Options.CurrentOnly)
+		HTMLOptions |= LC_HTML_CURRENT_ONLY;
 	if (Options.SinglePage)
 		HTMLOptions |= LC_HTML_SINGLEPAGE;
 	if (Options.IndexPage)
@@ -1095,12 +1100,7 @@ void Project::ExportHTML()
 	if (Options.PartsListImages)
 		HTMLOptions |= LC_HTML_IMAGES;
 
-	ImageOptions = Options.ImageFormat;
-
-	if (Options.TransparentImages)
-		ImageOptions |= LC_IMAGE_TRANSPARENT;
-
-	lcSetProfileInt(LC_PROFILE_HTML_IMAGE_OPTIONS, ImageOptions);
+	lcSetProfileInt(LC_PROFILE_HTML_IMAGE_OPTIONS, Options.TransparentImages ? LC_IMAGE_TRANSPARENT : 0);
 	lcSetProfileInt(LC_PROFILE_HTML_OPTIONS, HTMLOptions);
 	lcSetProfileInt(LC_PROFILE_HTML_IMAGE_WIDTH, Options.StepImagesWidth);
 	lcSetProfileInt(LC_PROFILE_HTML_IMAGE_HEIGHT, Options.StepImagesHeight);
@@ -1111,31 +1111,217 @@ void Project::ExportHTML()
 	QDir Dir(Options.PathName);
 	Dir.mkpath(QLatin1String("."));
 
-	QString Title = GetTitle();
-	QString BaseName = Title.left(Title.length() - QFileInfo(Title).suffix().length() - 1);
-	QString HTMLExtension = QLatin1String(".html");
-	QString ImageExtension;
+	lcArray<lcModel*> Models;
 
-	switch (Options.ImageFormat)
+	if (Options.CurrentOnly)
+		Models.Add(mActiveModel);
+	else if (Options.SubModels)
 	{
-	case LC_IMAGE_BMP:
-		ImageExtension = QLatin1String(".bmp");
-		break;
-	case LC_IMAGE_JPG:
-		ImageExtension = QLatin1String(".jpg");
-		break;
-	default:
-	case LC_IMAGE_PNG:
-		ImageExtension = QLatin1String(".png");
-		break;
+		Models.Add(mActiveModel);
+		mActiveModel->GetSubModels(Models);
 	}
-	
-	lcModel* Model = mModels[0];
-	lcStep LastStep = Model->GetLastStep();
+	else
+		Models = mModels;
 
-	if (Options.SinglePage)
+	QString ProjectTitle = GetTitle();
+
+	for (int ModelIdx = 0; ModelIdx < Models.GetSize(); ModelIdx++)
 	{
-		QString FileName = QFileInfo(Dir, BaseName + HTMLExtension).absoluteFilePath();
+		lcModel* Model = mModels[ModelIdx];
+		QString BaseName = ProjectTitle.left(ProjectTitle.length() - QFileInfo(ProjectTitle).suffix().length() - 1);
+		lcStep LastStep = Model->GetLastStep();
+		QString PageTitle;
+
+		if (Models.GetSize() > 1)
+		{
+			BaseName += '-' + Model->GetProperties().mName;
+			PageTitle = Model->GetProperties().mName;
+		}
+		else
+			PageTitle = ProjectTitle;
+		BaseName.replace('#', '_');
+
+		if (Options.SinglePage)
+		{
+			QString FileName = QFileInfo(Dir, BaseName + QLatin1String(".html")).absoluteFilePath();
+			QFile File(FileName);
+
+			if (!File.open(QIODevice::WriteOnly))
+			{
+				QMessageBox::warning(gMainWindow, tr("Error"), tr("Error writing to file '%1':\n%2").arg(FileName, File.errorString()));
+				return;
+			}
+
+			QTextStream Stream(&File);
+
+			Stream << QString::fromLatin1("<HTML>\r\n<HEAD>\r\n<TITLE>Instructions for %1</TITLE>\r\n</HEAD>\r\n<BR>\r\n<CENTER>\r\n").arg(PageTitle);
+
+			for (lcStep Step = 1; Step <= LastStep; Step++)
+			{
+				QString StepString = QString::fromLatin1("%1").arg(Step, 2, 10, QLatin1Char('0'));
+				Stream << QString::fromLatin1("<IMG SRC=\"%1-%2.png\" ALT=\"Step %3\" WIDTH=%4 HEIGHT=%5><BR><BR>\r\n").arg(BaseName, StepString, StepString, QString::number(Options.StepImagesWidth), QString::number(Options.StepImagesHeight));
+
+				if (Options.PartsListStep)
+					CreateHTMLPieceList(Stream, Model, Step, Options.PartsListImages);
+			}
+
+			if (Options.PartsListEnd)
+				CreateHTMLPieceList(Stream, Model, 0, Options.PartsListImages);
+
+			Stream << QLatin1String("</CENTER>\n<BR><HR><BR><B><I>Created by <A HREF=\"http://www.leocad.org\">LeoCAD</A></B></I><BR></HTML>\r\n");
+		}
+		else
+		{
+			if (Options.IndexPage)
+			{
+				QString FileName = QFileInfo(Dir, BaseName + QLatin1String("-index.html")).absoluteFilePath();
+				QFile File(FileName);
+
+				if (!File.open(QIODevice::WriteOnly))
+				{
+					QMessageBox::warning(gMainWindow, tr("Error"), tr("Error writing to file '%1':\n%2").arg(FileName, File.errorString()));
+					return;
+				}
+
+				QTextStream Stream(&File);
+
+				Stream << QString::fromLatin1("<HTML>\r\n<HEAD>\r\n<TITLE>Instructions for %1</TITLE>\r\n</HEAD>\r\n<BR>\r\n<CENTER>\r\n").arg(PageTitle);
+
+				for (lcStep Step = 1; Step <= LastStep; Step++)
+					Stream << QString::fromLatin1("<A HREF=\"%1-%2.html\">Step %3<BR>\r\n</A>").arg(BaseName, QString("%1").arg(Step, 2, 10, QLatin1Char('0')), QString::number(Step));
+
+				if (Options.PartsListEnd)
+					Stream << QString::fromLatin1("<A HREF=\"%1-pieces.html\">Pieces Used</A><BR>\r\n").arg(BaseName);
+
+				Stream << QLatin1String("</CENTER>\r\n<BR><HR><BR><B><I>Created by <A HREF=\"http://www.leocad.org\">LeoCAD</A></B></I><BR></HTML>\r\n");
+			}
+
+			for (lcStep Step = 1; Step <= LastStep; Step++)
+			{
+				QString StepString = QString::fromLatin1("%1").arg(Step, 2, 10, QLatin1Char('0'));
+				QString FileName = QFileInfo(Dir, QString("%1-%2.html").arg(BaseName, StepString)).absoluteFilePath();
+				QFile File(FileName);
+
+				if (!File.open(QIODevice::WriteOnly))
+				{
+					QMessageBox::warning(gMainWindow, tr("Error"), tr("Error writing to file '%1':\n%2").arg(FileName, File.errorString()));
+					return;
+				}
+
+				QTextStream Stream(&File);
+
+				Stream << QString::fromLatin1("<HTML>\r\n<HEAD>\r\n<TITLE>%1 - Step %2</TITLE>\r\n</HEAD>\r\n<BR>\r\n<CENTER>\r\n").arg(PageTitle, QString::number(Step));
+				Stream << QString::fromLatin1("<IMG SRC=\"%1-%2.png\" ALT=\"Step %3\" WIDTH=%4 HEIGHT=%5><BR><BR>\r\n").arg(BaseName, StepString, StepString, QString::number(Options.StepImagesWidth), QString::number(Options.StepImagesHeight));
+
+				if (Options.PartsListStep)
+					CreateHTMLPieceList(Stream, Model, Step, Options.PartsListImages);
+
+				Stream << QLatin1String("</CENTER>\r\n<BR><HR><BR>");
+				if (Step != 1)
+					Stream << QString::fromLatin1("<A HREF=\"%1-%2.html\">Previous</A> ").arg(BaseName, QString("%1").arg(Step - 1, 2, 10, QLatin1Char('0')));
+
+				if (Options.IndexPage)
+					Stream << QString::fromLatin1("<A HREF=\"%1-index.html\">Index</A> ").arg(BaseName);
+
+				if (Step != LastStep)
+					Stream << QString::fromLatin1("<A HREF=\"%1-%2.html\">Next</A>").arg(BaseName, QString("%1").arg(Step + 1, 2, 10, QLatin1Char('0')));
+				else if (Options.PartsListEnd)
+					Stream << QString::fromLatin1("<A HREF=\"%1-pieces.html\">Pieces Used</A>").arg(BaseName);
+
+				Stream << QLatin1String("<BR></HTML>\r\n");
+			}
+
+			if (Options.PartsListEnd)
+			{
+				QString FileName = QFileInfo(Dir, BaseName + QLatin1String("-pieces.html")).absoluteFilePath();
+				QFile File(FileName);
+
+				if (!File.open(QIODevice::WriteOnly))
+				{
+					QMessageBox::warning(gMainWindow, tr("Error"), tr("Error writing to file '%1':\n%2").arg(FileName, File.errorString()));
+					return;
+				}
+
+				QTextStream Stream(&File);
+
+				Stream << QString::fromLatin1("<HTML>\r\n<HEAD>\r\n<TITLE>Pieces used by %1</TITLE>\r\n</HEAD>\r\n<BR>\r\n<CENTER>\n").arg(PageTitle);
+
+				CreateHTMLPieceList(Stream, Model, 0, Options.PartsListImages);
+
+				Stream << QLatin1String("</CENTER>\n<BR><HR><BR>");
+				Stream << QString::fromLatin1("<A HREF=\"%1-%2.html\">Previous</A> ").arg(BaseName, QString("%1").arg(LastStep, 2, 10, QLatin1Char('0')));
+
+				if (Options.IndexPage)
+					Stream << QString::fromLatin1("<A HREF=\"%1-index.html\">Index</A> ").arg(BaseName);
+
+				Stream << QLatin1String("<BR></HTML>\r\n");
+			}
+		}
+
+		QString StepImageBaseName = QFileInfo(Dir, BaseName + QLatin1String("-%1.png")).absoluteFilePath();
+		Model->SaveStepImages(StepImageBaseName, Options.StepImagesWidth, Options.StepImagesHeight, 1, LastStep);
+
+		if (Options.PartsListImages)
+		{
+			gMainWindow->mPreviewWidget->MakeCurrent();
+			lcContext* Context = gMainWindow->mPreviewWidget->mContext;
+			int Width = Options.PartImagesWidth;
+			int Height = Options.PartImagesHeight;
+
+			if (!Context->BeginRenderToTexture(Width, Height))
+			{
+				QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Error creating images."));
+				return;
+			}
+
+			float aspect = (float)Width / (float)Height;
+			Context->SetViewport(0, 0, Width, Height);
+
+			lcArray<lcPartsListEntry> PartsList;
+			Model->GetPartsList(gDefaultColor, PartsList);
+
+			lcMatrix44 ProjectionMatrix = lcMatrix44Perspective(30.0f, aspect, 1.0f, 2500.0f);
+			lcMatrix44 ViewMatrix;
+
+			Context->SetDefaultState();
+			Context->SetProjectionMatrix(ProjectionMatrix);
+			Context->SetProgram(LC_PROGRAM_SIMPLE);
+
+			for (int PieceIdx = 0; PieceIdx < PartsList.GetSize(); PieceIdx++)
+			{
+				PieceInfo* Info = PartsList[PieceIdx].Info;
+
+				glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
+				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+				lcVector3 CameraPosition(-100.0f, -100.0f, 75.0f);
+				Info->ZoomExtents(ProjectionMatrix, ViewMatrix, CameraPosition);
+
+				lcScene Scene;
+				Scene.Begin(ViewMatrix);
+
+				Info->AddRenderMeshes(Scene, lcMatrix44Identity(), Options.PartImagesColor, false, false);
+
+				Scene.End();
+
+				Context->SetViewMatrix(ViewMatrix);
+				Context->DrawOpaqueMeshes(Scene.mOpaqueMeshes);
+				Context->DrawTranslucentMeshes(Scene.mTranslucentMeshes);
+
+				Context->UnbindMesh(); // context remove
+
+				QString FileName = QFileInfo(Dir, QLatin1String(Info->m_strName) + QLatin1String(".png")).absoluteFilePath();
+				if (!Context->SaveRenderToTextureImage(FileName, Width, Height))
+					break;
+			}
+			Context->EndRenderToTexture();
+		}
+	}
+
+	if (Models.GetSize() > 1)
+	{
+		QString BaseName = ProjectTitle.left(ProjectTitle.length() - QFileInfo(ProjectTitle).suffix().length() - 1);
+		QString FileName = QFileInfo(Dir, BaseName + QLatin1String("-index.html")).absoluteFilePath();
 		QFile File(FileName);
 
 		if (!File.open(QIODevice::WriteOnly))
@@ -1146,167 +1332,23 @@ void Project::ExportHTML()
 
 		QTextStream Stream(&File);
 
-		Stream << QString("<HTML>\r\n<HEAD>\r\n<TITLE>Instructions for %1</TITLE>\r\n</HEAD>\r\n<BR>\r\n<CENTER>\r\n").arg(Title);
+		Stream << QString::fromLatin1("<HTML>\r\n<HEAD>\r\n<TITLE>Instructions for %1</TITLE>\r\n</HEAD>\r\n<BR>\r\n<CENTER>\r\n").arg(ProjectTitle);
 
-		for (lcStep Step = 1; Step <= LastStep; Step++)
+		for (int ModelIdx = 0; ModelIdx < Models.GetSize(); ModelIdx++)
 		{
-			QString StepString = QString("%1").arg(Step, 2, 10, QLatin1Char('0'));
-			Stream << QString("<IMG SRC=\"%1-%2%3\" ALT=\"Step %4\" WIDTH=%5 HEIGHT=%6><BR><BR>\r\n").arg(BaseName, StepString, ImageExtension, StepString, QString::number(Options.StepImagesWidth), QString::number(Options.StepImagesHeight));
+			lcModel* Model = Models[ModelIdx];
+			QString BaseName = ProjectTitle.left(ProjectTitle.length() - QFileInfo(ProjectTitle).suffix().length() - 1) + '-' + Model->GetProperties().mName;
+			BaseName.replace('#', '_');
 
-			if (Options.PartsListStep)
-				CreateHTMLPieceList(Stream, Model, Step, Options.PartsListImages, ImageExtension);
+			if (Options.SinglePage)
+				FileName = BaseName + QLatin1String(".html");
+			else
+				FileName = BaseName + QLatin1String("-index.html");
+
+			Stream << QString::fromLatin1("<p><a href=\"%1\">%2</a>").arg(FileName, Model->GetProperties().mName);
 		}
-
-		if (Options.PartsListEnd)
-			CreateHTMLPieceList(Stream, Model, 0, Options.PartsListImages, ImageExtension);
 
 		Stream << QLatin1String("</CENTER>\n<BR><HR><BR><B><I>Created by <A HREF=\"http://www.leocad.org\">LeoCAD</A></B></I><BR></HTML>\r\n");
-	}
-	else
-	{
-		if (Options.IndexPage)
-		{
-			QString FileName = QFileInfo(Dir, BaseName + QLatin1String("-index") + HTMLExtension).absoluteFilePath();
-			QFile File(FileName);
-
-			if (!File.open(QIODevice::WriteOnly))
-			{
-				QMessageBox::warning(gMainWindow, tr("Error"), tr("Error writing to file '%1':\n%2").arg(FileName, File.errorString()));
-				return;
-			}
-
-			QTextStream Stream(&File);
-
-			Stream << QString("<HTML>\r\n<HEAD>\r\n<TITLE>Instructions for %1</TITLE>\r\n</HEAD>\r\n<BR>\r\n<CENTER>\r\n").arg(Title);
-
-			for (lcStep Step = 1; Step <= LastStep; Step++)
-				Stream << QString("<A HREF=\"%1-%2.html\">Step %3<BR>\r\n</A>").arg(BaseName, QString("%1").arg(Step, 2, 10, QLatin1Char('0')), QString::number(Step));
-
-			if (Options.PartsListEnd)
-				Stream << QString("<A HREF=\"%1-pieces.html\">Pieces Used</A><BR>\r\n").arg(BaseName);
-
-			Stream << QLatin1String("</CENTER>\r\n<BR><HR><BR><B><I>Created by <A HREF=\"http://www.leocad.org\">LeoCAD</A></B></I><BR></HTML>\r\n");
-		}
-
-		for (lcStep Step = 1; Step <= LastStep; Step++)
-		{
-			QString StepString = QString("%1").arg(Step, 2, 10, QLatin1Char('0'));
-			QString FileName = QFileInfo(Dir, BaseName + QLatin1String("-") + StepString + HTMLExtension).absoluteFilePath();
-			QFile File(FileName);
-
-			if (!File.open(QIODevice::WriteOnly))
-			{
-				QMessageBox::warning(gMainWindow, tr("Error"), tr("Error writing to file '%1':\n%2").arg(FileName, File.errorString()));
-				return;
-			}
-
-			QTextStream Stream(&File);
-
-			Stream << QString("<HTML>\r\n<HEAD>\r\n<TITLE>%1 - Step %2</TITLE>\r\n</HEAD>\r\n<BR>\r\n<CENTER>\r\n").arg(Title, QString::number(Step));
-			Stream << QString("<IMG SRC=\"%1-%2%3\" ALT=\"Step %4\" WIDTH=%5 HEIGHT=%6><BR><BR>\r\n").arg(BaseName, StepString, ImageExtension, StepString, QString::number(Options.StepImagesWidth), QString::number(Options.StepImagesHeight));
-
-			if (Options.PartsListStep)
-				CreateHTMLPieceList(Stream, Model, Step, Options.PartsListImages, ImageExtension);
-
-			Stream << QLatin1String("</CENTER>\r\n<BR><HR><BR>");
-			if (Step != 1)
-				Stream << QString("<A HREF=\"%1-%2.html\">Previous</A> ").arg(BaseName, QString("%1").arg(Step - 1, 2, 10, QLatin1Char('0')));
-
-			if (Options.IndexPage)
-				Stream << QString("<A HREF=\"%1-index.html\">Index</A> ").arg(BaseName);
-
-			if (Step != LastStep)
-				Stream << QString("<A HREF=\"%1-%2.html\">Next</A>").arg(BaseName, QString("%1").arg(Step + 1, 2, 10, QLatin1Char('0')));
-			else if (Options.PartsListEnd)
-				Stream << QString("<A HREF=\"%1-pieces.html\">Pieces Used</A>").arg(BaseName);
-
-			Stream << QLatin1String("<BR></HTML>\r\n");
-		}
-
-		if (Options.PartsListEnd)
-		{
-			QString FileName = QFileInfo(Dir, BaseName + QLatin1String("-pieces") + HTMLExtension).absoluteFilePath();
-			QFile File(FileName);
-
-			if (!File.open(QIODevice::WriteOnly))
-			{
-				QMessageBox::warning(gMainWindow, tr("Error"), tr("Error writing to file '%1':\n%2").arg(FileName, File.errorString()));
-				return;
-			}
-
-			QTextStream Stream(&File);
-
-			Stream << QString("<HTML>\r\n<HEAD>\r\n<TITLE>Pieces used by %1</TITLE>\r\n</HEAD>\r\n<BR>\r\n<CENTER>\n").arg(Title);
-
-			CreateHTMLPieceList(Stream, Model, 0, Options.PartsListImages, ImageExtension);
-
-			Stream << QLatin1String("</CENTER>\n<BR><HR><BR>");
-			Stream << QString("<A HREF=\"%1-%2.html\">Previous</A> ").arg(BaseName, QString("%1").arg(LastStep, 2, 10, QLatin1Char('0')));
-
-			if (Options.IndexPage)
-				Stream << QString("<A HREF=\"%1-index.html\">Index</A> ").arg(BaseName);
-
-			Stream << QLatin1String("<BR></HTML>\r\n");
-		}
-	}
-
-	QString StepImageBaseName = QFileInfo(Dir, BaseName + QLatin1String("-%1") + ImageExtension).absoluteFilePath();
-	Model->SaveStepImages(StepImageBaseName, Options.StepImagesWidth, Options.StepImagesHeight, 1, LastStep);
-
-	if (Options.PartsListImages)
-	{
-		gMainWindow->mPreviewWidget->MakeCurrent();
-		lcContext* Context = gMainWindow->mPreviewWidget->mContext;
-		int Width = Options.PartImagesWidth;
-		int Height = Options.PartImagesHeight;
-
-		if (!Context->BeginRenderToTexture(Width, Height))
-		{
-			QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Error creating images."));
-			return;
-		}
-
-		float aspect = (float)Width/(float)Height;
-		Context->SetViewport(0, 0, Width, Height);
-
-		lcArray<lcPartsListEntry> PartsList;
-		Model->GetPartsList(gDefaultColor, PartsList);
-
-		lcMatrix44 ProjectionMatrix = lcMatrix44Perspective(30.0f, aspect, 1.0f, 2500.0f);
-		lcMatrix44 ViewMatrix;
-
-		Context->SetDefaultState();
-		Context->SetProjectionMatrix(ProjectionMatrix);
-		Context->SetProgram(LC_PROGRAM_SIMPLE);
-
-		for (int PieceIdx = 0; PieceIdx < PartsList.GetSize(); PieceIdx++)
-		{
-			PieceInfo* Info = PartsList[PieceIdx].Info;
-
-			glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-			lcVector3 CameraPosition(-100.0f, -100.0f, 75.0f);
-			Info->ZoomExtents(ProjectionMatrix, ViewMatrix, CameraPosition);
-
-			lcScene Scene;
-			Scene.Begin(ViewMatrix);
-
-			Info->AddRenderMeshes(Scene, lcMatrix44Identity(), Options.PartImagesColor, false, false);
-
-			Scene.End();
-
-			Context->SetViewMatrix(ViewMatrix);
-			Context->DrawOpaqueMeshes(Scene.mOpaqueMeshes);
-			Context->DrawTranslucentMeshes(Scene.mTranslucentMeshes);
-
-			Context->UnbindMesh(); // context remove
-
-			QString FileName = QFileInfo(Dir, Info->m_strName + ImageExtension).absoluteFilePath();
-			if (!Context->SaveRenderToTextureImage(FileName, Width, Height))
-				break;
-		}
-		Context->EndRenderToTexture();
 	}
 }
 

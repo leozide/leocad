@@ -243,6 +243,6 @@ enum lcTool
 	LC_NUM_TOOLS
 };
 
-extern QString gToolNames[LC_NUM_TOOLS];
+extern const char* gToolNames[LC_NUM_TOOLS];
 
 #endif // _LC_COMMANDS_H_

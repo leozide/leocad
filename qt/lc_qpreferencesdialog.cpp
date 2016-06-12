@@ -440,7 +440,7 @@ void lcQPreferencesDialog::updateCommandList()
 
 	for (int actionIdx = 0; actionIdx < LC_NUM_COMMANDS; actionIdx++)
 	{
-		const QString identifier = gCommands[actionIdx].ID;
+		const QString identifier = tr(gCommands[actionIdx].ID);
 
 		int pos = identifier.indexOf(QLatin1Char('.'));
 		int subPos = identifier.indexOf(QLatin1Char('.'), pos + 1);
@@ -633,7 +633,7 @@ void lcQPreferencesDialog::UpdateMouseTreeItem(int ItemIndex)
 	if (Item)
 		Item->setText(1, Shortcut);
 	else
-		new QTreeWidgetItem(ui->mouseTree, QStringList() << gToolNames[ItemIndex] << Shortcut);
+		new QTreeWidgetItem(ui->mouseTree, QStringList() << tr(gToolNames[ItemIndex]) << Shortcut);
 }
 
 void lcQPreferencesDialog::on_mouseAssign_clicked()
@@ -677,7 +677,7 @@ void lcQPreferencesDialog::on_mouseAssign_clicked()
 		{
 			if (ToolIdx != ButtonIndex && options->MouseShortcuts.mShortcuts[ToolIdx].Button == Button && options->MouseShortcuts.mShortcuts[ToolIdx].Modifiers == Modifiers)
 			{
-				if (QMessageBox::question(this, tr("Override Shortcut"), tr("This shortcut is already assigned to '%1', do you want to replace it?").arg(gToolNames[ToolIdx]), QMessageBox::Yes | QMessageBox::No) == QMessageBox::No)
+				if (QMessageBox::question(this, tr("Override Shortcut"), tr("This shortcut is already assigned to '%1', do you want to replace it?").arg(tr(gToolNames[ToolIdx])), QMessageBox::Yes | QMessageBox::No) == QMessageBox::No)
 					return;
 
 				options->MouseShortcuts.mShortcuts[ToolIdx].Button = Qt::NoButton;

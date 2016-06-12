@@ -1598,10 +1598,7 @@ void lcMainWindow::UpdateSelectedObjects(bool SelectionChanged)
 	}
 	else if (Selection.GetSize() > 0)
 	{
-		if (Selection.GetSize() == 1)
-			Message = tr("1 Object selected");
-		else
-			Message = tr("%1 Objects selected").arg(QString::number(Selection.GetSize()));
+		Message = tr("%n Object(s) selected", "", Selection.GetSize());
 
 		if (Focus && Focus->IsPiece())
 		{

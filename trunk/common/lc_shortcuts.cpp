@@ -153,7 +153,7 @@ bool lcMouseShortcuts::Save(QStringList& Shortcuts)
 			continue;
 
 		QString Shortcut = QKeySequence(mShortcuts[ToolIdx].Modifiers | (Qt::Key_0 + ButtonIndex)).toString(QKeySequence::PortableText);
-		Shortcuts << gToolNames[ToolIdx] + QLatin1String("=") + Shortcut;
+		Shortcuts << QString::fromLatin1(gToolNames[ToolIdx]) + QLatin1String("=") + Shortcut;
 	}
 
 	return true;
@@ -174,7 +174,7 @@ bool lcMouseShortcuts::Load(const QStringList& Shortcuts)
 
 		int ToolIdx;
 		for (ToolIdx = 0; ToolIdx < LC_NUM_TOOLS; ToolIdx++)
-			if (gToolNames[ToolIdx] == Key)
+			if (Key == gToolNames[ToolIdx])
 				break;
 
 		if (ToolIdx == LC_NUM_TOOLS)

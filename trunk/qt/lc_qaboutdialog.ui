@@ -46,7 +46,7 @@
          <item>
           <widget class="QLabel" name="label_4">
            <property name="text">
-            <string>LeoCAD is a free application that can be used to create virtual LEGO models.</string>
+            <string>LeoCAD is a free application for creating virtual LEGO models.</string>
            </property>
            <property name="wordWrap">
             <bool>true</bool>

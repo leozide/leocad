@@ -15,3 +15,7 @@ Petter Reinholdtsen <pere@hungry.com>
 Renaud Breard <renaud@islande.net>
 Rodney Rushing <leocad.reg@yenandjen.com>
 Torbjörn Söderstedt <torbjrn@gmail.com>
+
+Translations:
+Sylvain L. Sauvage <SSauvage@club-internet.fr>
+Zezinho <lists.jjorge@free.fr>

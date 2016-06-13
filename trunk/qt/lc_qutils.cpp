@@ -21,6 +21,11 @@ QString lcFormatValue(float Value)
 	return String;
 }
 
+QString lcFormatValueLocalized(float Value)
+{
+	return QLocale::system().toString(Value, 'g', 100);
+}
+
 // Resize all columns to content except for one stretching column. (taken from QT creator)
 lcQTreeWidgetColumnStretcher::lcQTreeWidgetColumnStretcher(QTreeWidget *treeWidget, int columnToStretch)
 	: QObject(treeWidget->header()), m_columnToStretch(columnToStretch)

@@ -548,7 +548,7 @@ void lcQPropertiesTree::slotReturnPressed()
 			lcMatrix33 RelativeRotation;
 			Model->GetMoveRotateTransform(Center, RelativeRotation);
 			lcVector3 Position = Center;
-			float Value = Editor->text().toFloat();
+			float Value = lcParseValueLocalized(Editor->text());
 
 			if (Item == partPositionX)
 				Position[0] = Value;
@@ -570,7 +570,7 @@ void lcQPropertiesTree::slotReturnPressed()
 				InitialRotation = lcVector3(0.0f, 0.0f, 0.0f);
 			lcVector3 Rotation = InitialRotation;
 
-			float Value = Editor->text().toFloat();
+			float Value = lcParseValueLocalized(Editor->text());
 
 			if (Item == partRotationX)
 				Rotation[0] = Value;
@@ -604,7 +604,7 @@ void lcQPropertiesTree::slotReturnPressed()
 			{
 				lcVector3 Center = Camera->mPosition;
 				lcVector3 Position = Center;
-				float Value = Editor->text().toFloat();
+				float Value = lcParseValueLocalized(Editor->text());
 
 				if (Item == cameraPositionX)
 					Position[0] = Value;
@@ -621,7 +621,7 @@ void lcQPropertiesTree::slotReturnPressed()
 			{
 				lcVector3 Center = Camera->mTargetPosition;
 				lcVector3 Position = Center;
-				float Value = Editor->text().toFloat();
+				float Value = lcParseValueLocalized(Editor->text());
 
 				if (Item == cameraTargetX)
 					Position[0] = Value;
@@ -638,7 +638,7 @@ void lcQPropertiesTree::slotReturnPressed()
 			{
 				lcVector3 Center = Camera->mUpVector;
 				lcVector3 Position = Center;
-				float Value = Editor->text().toFloat();
+				float Value = lcParseValueLocalized(Editor->text());
 
 				if (Item == cameraUpX)
 					Position[0] = Value;
@@ -653,19 +653,19 @@ void lcQPropertiesTree::slotReturnPressed()
 			}
 			else if (Item == cameraFOV)
 			{
-				float Value = Editor->text().toFloat();
+				float Value = lcParseValueLocalized(Editor->text());
 
 				Model->SetCameraFOV(Camera, Value);
 			}
 			else if (Item == cameraNear)
 			{
-				float Value = Editor->text().toFloat();
+				float Value = lcParseValueLocalized(Editor->text());
 
 				Model->SetCameraZNear(Camera, Value);
 			}
 			else if (Item == cameraFar)
 			{
-				float Value = Editor->text().toFloat();
+				float Value = lcParseValueLocalized(Editor->text());
 
 				Model->SetCameraZFar(Camera, Value);
 			}

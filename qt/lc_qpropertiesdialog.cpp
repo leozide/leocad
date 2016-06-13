@@ -1,6 +1,7 @@
 #include "lc_global.h"
 #include "lc_qpropertiesdialog.h"
 #include "ui_lc_qpropertiesdialog.h"
+#include "lc_qutils.h"
 #include "lc_basewindow.h"
 #include "lc_colors.h"
 #include "lc_library.h"
@@ -39,7 +40,7 @@ lcQPropertiesDialog::lcQPropertiesDialog(QWidget *parent, void *data) :
 	ui->imageNameEdit->setText(options->Properties.mBackgroundImage);
 	ui->imageTileCheckBox->setChecked(options->Properties.mBackgroundImageTile);
 	ui->fogCheckBox->setChecked(options->Properties.mFogEnabled);
-	ui->fogDensityEdit->setText(QString::number(options->Properties.mFogDensity));
+	ui->fogDensityEdit->setText(lcFormatValueLocalized(options->Properties.mFogDensity));
 
 	QPixmap pix(12, 12);
 
@@ -175,7 +176,7 @@ void lcQPropertiesDialog::accept()
 	options->Properties.mBackgroundImage = ui->imageNameEdit->text();
 	options->Properties.mBackgroundImageTile = ui->imageTileCheckBox->isChecked();
 	options->Properties.mFogEnabled = ui->fogCheckBox->isChecked();
-	options->Properties.mFogDensity = ui->fogDensityEdit->text().toFloat();
+	options->Properties.mFogDensity = lcParseValueLocalized(ui->fogDensityEdit->text());
 	options->SetDefault = ui->setDefaultCheckBox->isChecked();
 
 	QDialog::accept();

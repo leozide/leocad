@@ -23,7 +23,25 @@ QString lcFormatValue(float Value)
 
 QString lcFormatValueLocalized(float Value)
 {
-	return QLocale::system().toString(Value, 'g', 100);
+	QLocale Locale = QLocale::system();
+	QChar DecimalPoint = Locale.decimalPoint();
+	QString String = Locale.toString(Value, 'f', 6);
+
+	if (String.indexOf(DecimalPoint) != -1)
+	{
+		while (String.endsWith('0'))
+			String.chop(1);
+
+		if (String.endsWith(DecimalPoint))
+			String.chop(1);
+	}
+
+	return String;
+}
+
+float lcParseValueLocalized(const QString& Value)
+{
+	return QLocale::system().toFloat(Value);
 }
 
 // Resize all columns to content except for one stretching column. (taken from QT creator)

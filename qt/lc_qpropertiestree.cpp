@@ -425,7 +425,7 @@ QWidget *lcQPropertiesTree::createEditor(QWidget *parent, QTreeWidgetItem *item)
 			float value = item->data(0, PropertyValueRole).toFloat();
 
 			editor->setValidator(new QDoubleValidator());
-			editor->setText(lcFormatValue(value));
+			editor->setText(lcFormatValueLocalized(value));
 
 			connect(editor, SIGNAL(returnPressed()), this, SLOT(slotReturnPressed()));
 
@@ -830,11 +830,11 @@ void lcQPropertiesTree::SetPiece(const lcArray<lcObject*>& Selection, lcObject* 
 	lcVector3 Position;
 	lcMatrix33 RelativeRotation;
 	Model->GetMoveRotateTransform(Position, RelativeRotation);
-	partPositionX->setText(1, lcFormatValue(Position[0]));
+	partPositionX->setText(1, lcFormatValueLocalized(Position[0]));
 	partPositionX->setData(0, PropertyValueRole, Position[0]);
-	partPositionY->setText(1, lcFormatValue(Position[1]));
+	partPositionY->setText(1, lcFormatValueLocalized(Position[1]));
 	partPositionY->setData(0, PropertyValueRole, Position[1]);
-	partPositionZ->setText(1, lcFormatValue(Position[2]));
+	partPositionZ->setText(1, lcFormatValueLocalized(Position[2]));
 	partPositionZ->setData(0, PropertyValueRole, Position[2]);
 
 	lcVector3 Rotation;
@@ -842,11 +842,11 @@ void lcQPropertiesTree::SetPiece(const lcArray<lcObject*>& Selection, lcObject* 
 		Rotation = lcMatrix44ToEulerAngles(Piece->mModelWorld) * LC_RTOD;
 	else
 		Rotation = lcVector3(0.0f, 0.0f, 0.0f);
-	partRotationX->setText(1, lcFormatValue(Rotation[0]));
+	partRotationX->setText(1, lcFormatValueLocalized(Rotation[0]));
 	partRotationX->setData(0, PropertyValueRole, Rotation[0]);
-	partRotationY->setText(1, lcFormatValue(Rotation[1]));
+	partRotationY->setText(1, lcFormatValueLocalized(Rotation[1]));
 	partRotationY->setData(0, PropertyValueRole, Rotation[1]);
-	partRotationZ->setText(1, lcFormatValue(Rotation[2]));
+	partRotationZ->setText(1, lcFormatValueLocalized(Rotation[2]));
 	partRotationZ->setData(0, PropertyValueRole, Rotation[2]);
 
 	lcStep Show = 0;
@@ -982,34 +982,34 @@ void lcQPropertiesTree::SetCamera(lcObject* Focus)
 		Name = Camera->GetName();
 	}
 
-	cameraPositionX->setText(1, lcFormatValue(Position[0]));
+	cameraPositionX->setText(1, lcFormatValueLocalized(Position[0]));
 	cameraPositionX->setData(0, PropertyValueRole, Position[0]);
-	cameraPositionY->setText(1, lcFormatValue(Position[1]));
+	cameraPositionY->setText(1, lcFormatValueLocalized(Position[1]));
 	cameraPositionY->setData(0, PropertyValueRole, Position[1]);
-	cameraPositionZ->setText(1, lcFormatValue(Position[2]));
+	cameraPositionZ->setText(1, lcFormatValueLocalized(Position[2]));
 	cameraPositionZ->setData(0, PropertyValueRole, Position[2]);
 
-	cameraTargetX->setText(1, lcFormatValue(Target[0]));
+	cameraTargetX->setText(1, lcFormatValueLocalized(Target[0]));
 	cameraTargetX->setData(0, PropertyValueRole, Target[0]);
-	cameraTargetY->setText(1, lcFormatValue(Target[1]));
+	cameraTargetY->setText(1, lcFormatValueLocalized(Target[1]));
 	cameraTargetY->setData(0, PropertyValueRole, Target[1]);
-	cameraTargetZ->setText(1, lcFormatValue(Target[2]));
+	cameraTargetZ->setText(1, lcFormatValueLocalized(Target[2]));
 	cameraTargetZ->setData(0, PropertyValueRole, Target[2]);
 
-	cameraUpX->setText(1, lcFormatValue(UpVector[0]));
+	cameraUpX->setText(1, lcFormatValueLocalized(UpVector[0]));
 	cameraUpX->setData(0, PropertyValueRole, UpVector[0]);
-	cameraUpY->setText(1, lcFormatValue(UpVector[1]));
+	cameraUpY->setText(1, lcFormatValueLocalized(UpVector[1]));
 	cameraUpY->setData(0, PropertyValueRole, UpVector[1]);
-	cameraUpZ->setText(1, lcFormatValue(UpVector[2]));
+	cameraUpZ->setText(1, lcFormatValueLocalized(UpVector[2]));
 	cameraUpZ->setData(0, PropertyValueRole, UpVector[2]);
 
 	cameraOrtho->setText(1, Ortho ? "True" : "False");
 	cameraOrtho->setData(0, PropertyValueRole, Ortho);
-	cameraFOV->setText(1, lcFormatValue(FoV));
+	cameraFOV->setText(1, lcFormatValueLocalized(FoV));
 	cameraFOV->setData(0, PropertyValueRole, FoV);
-	cameraNear->setText(1, lcFormatValue(ZNear));
+	cameraNear->setText(1, lcFormatValueLocalized(ZNear));
 	cameraNear->setData(0, PropertyValueRole, ZNear);
-	cameraFar->setText(1, lcFormatValue(ZFar));
+	cameraFar->setText(1, lcFormatValueLocalized(ZFar));
 	cameraFar->setData(0, PropertyValueRole, ZFar);
 
 	cameraName->setText(1, Name);

@@ -4,6 +4,7 @@
 #include <QObject>
 
 QString lcFormatValue(float Value);
+QString lcFormatValueLocalized(float Value);
 
 class lcQTreeWidgetColumnStretcher : public QObject
 {

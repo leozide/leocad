@@ -1373,9 +1373,9 @@ lcVector3 lcMainWindow::GetTransformAmount()
 {
 	lcVector3 Transform;
 
-	Transform.x = mTransformXEdit->text().toFloat();
-	Transform.y = mTransformYEdit->text().toFloat();
-	Transform.z = mTransformZEdit->text().toFloat();
+	Transform.x = lcParseValueLocalized(mTransformXEdit->text());
+	Transform.y = lcParseValueLocalized(mTransformYEdit->text());
+	Transform.z = lcParseValueLocalized(mTransformZEdit->text());
 
 	return Transform;
 }
@@ -1615,7 +1615,7 @@ void lcMainWindow::UpdateSelectedObjects(bool SelectionChanged)
 	lcGetActiveModel()->GetFocusPosition(Position);
 
 	QString Label("X: %1 Y: %2 Z: %3");
-	Label = Label.arg(QString::number(Position[0], 'f', 2), QString::number(Position[1], 'f', 2), QString::number(Position[2], 'f', 2));
+	Label = Label.arg(QLocale::system().toString(Position[0], 'f', 2), QLocale::system().toString(Position[1], 'f', 2), QLocale::system().toString(Position[2], 'f', 2));
 	mStatusPositionLabel->setText(Label);
 }
 

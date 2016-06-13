@@ -6,6 +6,7 @@
 #include "lc_basewindow.h"
 #include "lc_library.h"
 #include "lc_application.h"
+#include "lc_qutils.h"
 #include "pieceinf.h"
 
 lcQPreferencesDialog::lcQPreferencesDialog(QWidget *parent, void *data) :
@@ -41,7 +42,7 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget *parent, void *data) :
 	else
 		ui->antiAliasingSamples->setCurrentIndex(0);
 	ui->edgeLines->setChecked(options->Preferences.mDrawEdgeLines);
-	ui->lineWidth->setText(QString::number(options->Preferences.mLineWidth));
+	ui->lineWidth->setText(lcFormatValueLocalized(options->Preferences.mLineWidth));
 	ui->gridStuds->setChecked(options->Preferences.mDrawGridStuds);
 	ui->gridLines->setChecked(options->Preferences.mDrawGridLines);
 	ui->gridLineSpacing->setText(QString::number(options->Preferences.mGridLineSpacing));
@@ -106,7 +107,7 @@ void lcQPreferencesDialog::accept()
 		options->AASamples = 2;
 
 	options->Preferences.mDrawEdgeLines = ui->edgeLines->isChecked();
-	options->Preferences.mLineWidth = ui->lineWidth->text().toFloat();
+	options->Preferences.mLineWidth = lcParseValueLocalized(ui->lineWidth->text());
 
 	options->Preferences.mDrawGridStuds = ui->gridStuds->isChecked();
 	options->Preferences.mDrawGridLines = ui->gridLines->isChecked();

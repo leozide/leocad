@@ -559,7 +559,7 @@ void lcQPropertiesTree::slotReturnPressed()
 
 			lcVector3 Distance = Position - Center;
 
-			Model->MoveSelectedObjects(Distance, Distance, true, false, true, true);
+			Model->MoveSelectedObjects(Distance, Distance, false, false, true, true);
 		}
 		else if (Item == partRotationX || Item == partRotationY || Item == partRotationZ)
 		{
@@ -615,7 +615,7 @@ void lcQPropertiesTree::slotReturnPressed()
 
 				lcVector3 Distance = Position - Center;
 
-				Model->MoveSelectedObjects(Distance, Distance, true, false, true, true);
+				Model->MoveSelectedObjects(Distance, Distance, false, false, true, true);
 			}
 			else if (Item == cameraTargetX || Item == cameraTargetY || Item == cameraTargetZ)
 			{
@@ -632,7 +632,7 @@ void lcQPropertiesTree::slotReturnPressed()
 
 				lcVector3 Distance = Position - Center;
 
-				Model->MoveSelectedObjects(Distance, Distance, true, false, true, true);
+				Model->MoveSelectedObjects(Distance, Distance, false, false, true, true);
 			}
 			else if (Item == cameraUpX || Item == cameraUpY || Item == cameraUpZ)
 			{
@@ -649,7 +649,7 @@ void lcQPropertiesTree::slotReturnPressed()
 
 				lcVector3 Distance = Position - Center;
 
-				Model->MoveSelectedObjects(Distance, Distance, true, false, true, true);
+				Model->MoveSelectedObjects(Distance, Distance, false, false, true, true);
 			}
 			else if (Item == cameraFOV)
 			{

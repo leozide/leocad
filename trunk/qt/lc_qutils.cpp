@@ -24,6 +24,7 @@ QString lcFormatValue(float Value)
 QString lcFormatValueLocalized(float Value)
 {
 	QLocale Locale = QLocale::system();
+	Locale.setNumberOptions(QLocale::OmitGroupSeparator);
 	QChar DecimalPoint = Locale.decimalPoint();
 	QString String = Locale.toString(Value, 'f', 6);
 

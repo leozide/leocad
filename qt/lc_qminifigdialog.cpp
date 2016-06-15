@@ -110,7 +110,6 @@ lcQMinifigDialog::lcQMinifigDialog(QWidget *parent, void *data) :
 
 lcQMinifigDialog::~lcQMinifigDialog()
 {
-	delete wizard;
 	delete ui;
 }
 

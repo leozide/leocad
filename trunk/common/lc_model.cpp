@@ -3883,7 +3883,7 @@ void lcModel::ShowArrayDialog()
 
 void lcModel::ShowMinifigDialog()
 {
-	lcMinifig* Minifig = new lcMinifig();
+	lcMinifig Minifig;
 
 	if (!gMainWindow->DoDialog(LC_DIALOG_MINIFIG, &Minifig))
 		return;
@@ -3895,13 +3895,13 @@ void lcModel::ShowMinifigDialog()
 
 	for (int PartIdx = 0; PartIdx < LC_MFW_NUMITEMS; PartIdx++)
 	{
-		if (Minifig->Parts[PartIdx] == NULL)
+		if (Minifig.Parts[PartIdx] == NULL)
 			continue;
 
-		lcPiece* Piece = new lcPiece(Minifig->Parts[PartIdx]);
+		lcPiece* Piece = new lcPiece(Minifig.Parts[PartIdx]);
 
-		Piece->Initialize(Minifig->Matrices[PartIdx], mCurrentStep);
-		Piece->SetColorIndex(Minifig->Colors[PartIdx]);
+		Piece->Initialize(Minifig.Matrices[PartIdx], mCurrentStep);
+		Piece->SetColorIndex(Minifig.Colors[PartIdx]);
 		Piece->SetGroup(Group);
 		AddPiece(Piece);
 		Piece->UpdatePosition(mCurrentStep);

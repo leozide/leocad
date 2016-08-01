@@ -5,8 +5,6 @@
 #include "lc_math.h"
 #include "lc_array.h"
 
-class PieceInfo;
-
 enum LC_MFW_TYPES
 {
 	LC_MFW_HATS,
@@ -47,10 +45,10 @@ struct lcMinifig
 class MinifigWizard : public lcGLWidget
 {
 public:
-	MinifigWizard(lcMinifig* Minifig);
-	~MinifigWizard ();
+	MinifigWizard();
+	~MinifigWizard();
 
-	void OnDraw ();
+	void OnDraw();
 	void OnLeftButtonDown();
 	void OnLeftButtonUp();
 	void OnLeftButtonDoubleClick();
@@ -69,16 +67,16 @@ public:
 
 	lcArray<lcMinifigPieceInfo> mSettings[LC_MFW_NUMITEMS];
 
-	lcMinifig* mMinifig;
+	lcMinifig mMinifig;
 
-	int m_Tracking;
-	int m_DownX;
-	int m_DownY;
+	int mTracking;
+	int mDownX;
+	int mDownY;
 
-	float m_Distance;
-	float m_RotateX;
-	float m_RotateZ;
-	bool m_AutoZoom;
+	float mDistance;
+	float mRotateX;
+	float mRotateZ;
+	bool mAutoZoom;
 };
 
 #endif // _MINIFIG_H_

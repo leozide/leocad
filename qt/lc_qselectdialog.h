@@ -2,7 +2,7 @@
 #define _LC_QSELECTDIALOG_H_
 
 #include <QDialog>
-struct lcSelectDialogOptions;
+#include "lc_array.h"
 
 namespace Ui {
 class lcQSelectDialog;
@@ -13,10 +13,10 @@ class lcQSelectDialog : public QDialog
 	Q_OBJECT
 	
 public:
-	explicit lcQSelectDialog(QWidget *parent, void *data);
+	lcQSelectDialog(QWidget* Parent);
 	~lcQSelectDialog();
 
-	lcSelectDialogOptions *options;
+	lcArray<lcObject*> mObjects;
 
 	enum
 	{

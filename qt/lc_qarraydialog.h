@@ -2,7 +2,7 @@
 #define _LC_QARRAYDIALOG_H_
 
 #include <QDialog>
-struct lcArrayDialogOptions;
+#include "lc_math.h"
 
 namespace Ui {
 class lcQArrayDialog;
@@ -13,10 +13,12 @@ class lcQArrayDialog : public QDialog
 	Q_OBJECT
 
 public:
-	explicit lcQArrayDialog(QWidget *parent, void* data);
+	lcQArrayDialog(QWidget* Parent);
 	~lcQArrayDialog();
 
-	lcArrayDialogOptions *options;
+	int mCounts[3];
+	lcVector3 mOffsets[3];
+	lcVector3 mRotations[3];
 
 public slots:
 	void accept();

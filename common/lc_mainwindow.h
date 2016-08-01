@@ -282,6 +282,8 @@ protected:
 	void CreateToolBars();
 	void CreateStatusBar();
 	void SplitView(Qt::Orientation Orientation);
+	void ShowUpdatesDialog();
+	void ShowAboutDialog();
 	void ShowPrintDialog();
 
 	lcModelTabWidget* GetTabWidgetForModel(lcModel* Model) const

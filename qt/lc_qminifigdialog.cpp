@@ -7,7 +7,7 @@
 #include "lc_mainwindow.h"
 #include "preview.h"
 
-lcQMinifigDialog::lcQMinifigDialog(QWidget *parent, void *data) :
+lcQMinifigDialog::lcQMinifigDialog(QWidget *parent) :
 	QDialog(parent),
 	ui(new Ui::lcQMinifigDialog)
 {
@@ -16,9 +16,9 @@ lcQMinifigDialog::lcQMinifigDialog(QWidget *parent, void *data) :
 	QGridLayout *previewLayout = new QGridLayout(ui->minifigFrame);
 	previewLayout->setContentsMargins(0, 0, 0, 0);
 
-	wizard = new MinifigWizard((lcMinifig*)data);
+	mMinifigWidget = new MinifigWizard();
 
-	lcQGLWidget *minifigWidget = new lcQGLWidget(NULL, (lcQGLWidget*)gMainWindow->mPreviewWidget->mWidget, wizard, false);
+	lcQGLWidget *minifigWidget = new lcQGLWidget(NULL, (lcQGLWidget*)gMainWindow->mPreviewWidget->mWidget, mMinifigWidget, false);
 	minifigWidget->setMinimumWidth(100);
 	previewLayout->addWidget(minifigWidget);
 
@@ -72,11 +72,9 @@ lcQMinifigDialog::lcQMinifigDialog(QWidget *parent, void *data) :
 	connect(ui->rlegaAngle, SIGNAL(valueChanged(double)), this, SLOT(angleChanged(double)));
 	connect(ui->llegaAngle, SIGNAL(valueChanged(double)), this, SLOT(angleChanged(double)));
 
-	options = (lcMinifig*)data;
-
 	for (int ItemIndex = 0; ItemIndex < LC_MFW_NUMITEMS; ItemIndex++)
 	{
-		lcArray<lcMinifigPieceInfo>& PartList = wizard->mSettings[ItemIndex];
+		lcArray<lcMinifigPieceInfo>& PartList = mMinifigWidget->mSettings[ItemIndex];
 		QStringList ItemStrings;
 		QVector<int> Separators;
 
@@ -96,16 +94,16 @@ lcQMinifigDialog::lcQMinifigDialog(QWidget *parent, void *data) :
 		ItemCombo->addItems(ItemStrings);
 		for (int SeparatorIndex = Separators.size() - 1; SeparatorIndex >= 0; SeparatorIndex--)
 			ItemCombo->insertSeparator(Separators[SeparatorIndex]);
-		ItemCombo->setCurrentIndex(wizard->GetSelectionIndex(ItemIndex));
+		ItemCombo->setCurrentIndex(mMinifigWidget->GetSelectionIndex(ItemIndex));
 		ItemCombo->blockSignals(false);
 
 		lcQColorPicker *colorPicker = getColorPicker(ItemIndex);
 		colorPicker->blockSignals(true);
-		colorPicker->setCurrentColor(options->Colors[ItemIndex]);
+		colorPicker->setCurrentColor(mMinifigWidget->mMinifig.Colors[ItemIndex]);
 		colorPicker->blockSignals(false);
 	}
 
-	wizard->OnInitialUpdate();
+	mMinifigWidget->OnInitialUpdate();
 }
 
 lcQMinifigDialog::~lcQMinifigDialog()
@@ -120,20 +118,20 @@ void lcQMinifigDialog::accept()
 
 void lcQMinifigDialog::typeChanged(int index)
 {
-	wizard->SetSelectionIndex(getTypeIndex(sender()), index);
-	wizard->Redraw();
+	mMinifigWidget->SetSelectionIndex(getTypeIndex(sender()), index);
+	mMinifigWidget->Redraw();
 }
 
 void lcQMinifigDialog::colorChanged(int index)
 {
-	wizard->SetColor(getColorIndex(sender()), index);
-	wizard->Redraw();
+	mMinifigWidget->SetColor(getColorIndex(sender()), index);
+	mMinifigWidget->Redraw();
 }
 
 void lcQMinifigDialog::angleChanged(double value)
 {
-	wizard->SetAngle(getAngleIndex(sender()), value);
-	wizard->Redraw();
+	mMinifigWidget->SetAngle(getAngleIndex(sender()), value);
+	mMinifigWidget->Redraw();
 }
 
 QComboBox *lcQMinifigDialog::getTypeComboBox(int type)

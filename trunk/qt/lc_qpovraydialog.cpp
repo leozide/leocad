@@ -1,20 +1,21 @@
 #include "lc_global.h"
 #include "lc_qpovraydialog.h"
 #include "ui_lc_qpovraydialog.h"
-#include "lc_basewindow.h"
+#include "lc_profile.h"
 
-lcQPOVRayDialog::lcQPOVRayDialog(QWidget *parent, void *data) :
-	QDialog(parent),
-	ui(new Ui::lcQPOVRayDialog)
+lcQPOVRayDialog::lcQPOVRayDialog(QWidget* Parent)
+	: QDialog(Parent), ui(new Ui::lcQPOVRayDialog)
 {
 	ui->setupUi(this);
 
-	options = (lcPOVRayDialogOptions*)data;
+	mPOVRayPath = lcGetProfileString(LC_PROFILE_POVRAY_PATH);
+	mLGEOPath = lcGetProfileString(LC_PROFILE_POVRAY_LGEO_PATH);
+	mRender = lcGetProfileInt(LC_PROFILE_POVRAY_RENDER);
 
-	ui->outputEdit->setText(options->FileName);
-	ui->povrayEdit->setText(options->POVRayPath);
-	ui->lgeoEdit->setText(options->LGEOPath);
-	ui->render->setChecked(options->Render);
+	ui->outputEdit->setText(mFileName);
+	ui->povrayEdit->setText(mPOVRayPath);
+	ui->lgeoEdit->setText(mLGEOPath);
+	ui->render->setChecked(mRender);
 }
 
 lcQPOVRayDialog::~lcQPOVRayDialog()
@@ -32,10 +33,14 @@ void lcQPOVRayDialog::accept()
 		return;
 	}
 
-	options->FileName = fileName;
-	options->POVRayPath = ui->povrayEdit->text();
-	options->LGEOPath = ui->lgeoEdit->text();
-	options->Render = ui->render->isChecked();
+	mFileName = fileName;
+	mPOVRayPath = ui->povrayEdit->text();
+	mLGEOPath = ui->lgeoEdit->text();
+	mRender = ui->render->isChecked();
+
+	lcSetProfileString(LC_PROFILE_POVRAY_PATH, mPOVRayPath);
+	lcSetProfileString(LC_PROFILE_POVRAY_LGEO_PATH, mLGEOPath);
+	lcSetProfileInt(LC_PROFILE_POVRAY_RENDER, mRender);
 
 	QDialog::accept();
 }

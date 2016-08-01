@@ -3,19 +3,16 @@
 #include "ui_lc_qselectdialog.h"
 #include "lc_application.h"
 #include "project.h"
+#include "lc_model.h"
 #include "piece.h"
 #include "camera.h"
 #include "light.h"
 #include "group.h"
-#include "lc_basewindow.h"
 
-lcQSelectDialog::lcQSelectDialog(QWidget *parent, void *data) :
-	QDialog(parent),
-	ui(new Ui::lcQSelectDialog)
+lcQSelectDialog::lcQSelectDialog(QWidget* Parent)
+	: QDialog(Parent), ui(new Ui::lcQSelectDialog)
 {
 	ui->setupUi(this);
-
-	options = (lcSelectDialogOptions*)data;
 
 	AddChildren(ui->treeWidget->invisibleRootItem(), NULL);
 	ui->treeWidget->expandAll();
@@ -30,7 +27,7 @@ lcQSelectDialog::~lcQSelectDialog()
 
 void lcQSelectDialog::accept()
 {
-	options->Objects.RemoveAll();
+	mObjects.RemoveAll();
 
 	QList<QTreeWidgetItem*> Items;
 	Items.append(ui->treeWidget->invisibleRootItem());
@@ -45,7 +42,7 @@ void lcQSelectDialog::accept()
 			if (Item->checkState(0) == Qt::Checked)
 			{
 				lcObject* Object = (lcObject*)Item->data(0, IndexRole).value<uintptr_t>();
-				options->Objects.Add(Object);
+				mObjects.Add(Object);
 			}
 		}
 		else

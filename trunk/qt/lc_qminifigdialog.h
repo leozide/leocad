@@ -15,11 +15,10 @@ class lcQMinifigDialog : public QDialog
 	Q_OBJECT
 
 public:
-	explicit lcQMinifigDialog(QWidget *parent, void *data);
+	explicit lcQMinifigDialog(QWidget* Parent);
 	~lcQMinifigDialog();
 
-	lcMinifig *options;
-	MinifigWizard *wizard;
+	MinifigWizard* mMinifigWidget;
 
 public slots:
 	void accept();

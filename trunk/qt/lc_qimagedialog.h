@@ -2,7 +2,6 @@
 #define LC_QIMAGEDIALOG_H
 
 #include <QDialog>
-struct lcImageDialogOptions;
 
 namespace Ui {
 class lcQImageDialog;
@@ -13,12 +12,14 @@ class lcQImageDialog : public QDialog
 	Q_OBJECT
 	
 public:
-	explicit lcQImageDialog(QWidget *parent, void *data);
+	lcQImageDialog(QWidget* Parent);
 	~lcQImageDialog();
 
-	lcImageDialogOptions *options;
-	int currentStep;
-	int lastStep;
+	QString mFileName;
+	int mWidth;
+	int mHeight;
+	int mStart;
+	int mEnd;
 
 public slots:
 	void accept();

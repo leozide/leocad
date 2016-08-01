@@ -11,27 +11,10 @@
 
 enum LC_DIALOG_TYPE
 {
-	LC_DIALOG_SAVE_IMAGE,
 	LC_DIALOG_EXPORT_HTML,
-	LC_DIALOG_EXPORT_POVRAY,
 	LC_DIALOG_PROPERTIES,
 	LC_DIALOG_FIND,
-	LC_DIALOG_SELECT_BY_NAME,
-	LC_DIALOG_MINIFIG,
-	LC_DIALOG_PIECE_ARRAY,
-	LC_DIALOG_EDIT_GROUPS,
-	LC_DIALOG_PREFERENCES,
-	LC_DIALOG_CHECK_UPDATES,
-	LC_DIALOG_ABOUT
-};
-
-struct lcImageDialogOptions
-{
-	QString FileName;
-	int Width;
-	int Height;
-	int Start;
-	int End;
+	LC_DIALOG_PREFERENCES
 };
 
 struct lcHTMLDialogOptions
@@ -53,40 +36,12 @@ struct lcHTMLDialogOptions
 	int PartImagesHeight;
 };
 
-struct lcPOVRayDialogOptions
-{
-	QString FileName;
-	QString POVRayPath;
-	QString LGEOPath;
-	bool Render;
-};
-
 struct lcPropertiesDialogOptions
 {
 	lcModelProperties Properties;
 	bool SetDefault;
 
 	lcArray<lcPartsListEntry> PartsList;
-};
-
-struct lcArrayDialogOptions
-{
-	int Counts[3];
-	lcVector3 Offsets[3];
-	lcVector3 Rotations[3];
-};
-
-struct lcEditGroupsDialogOptions
-{
-	QMap<lcPiece*, lcGroup*> PieceParents;
-	QMap<lcGroup*, lcGroup*> GroupParents;
-	QList<lcGroup*> NewGroups;
-	//QList<lcGroup*> DeletedGroups; // todo: support deleting groups in the edit groups dialog
-};
-
-struct lcSelectDialogOptions
-{
-	lcArray<lcObject*> Objects;
 };
 
 struct lcPreferencesDialogOptions

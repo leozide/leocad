@@ -1,11 +1,13 @@
 #include "lc_global.h"
 #include "lc_qimagedialog.h"
 #include "ui_lc_qimagedialog.h"
-#include "lc_basewindow.h"
+#include "lc_application.h"
+#include "project.h"
+#include "lc_model.h"
+#include "lc_profile.h"
 
-lcQImageDialog::lcQImageDialog(QWidget *parent, void *data) :
-    QDialog(parent),
-    ui(new Ui::lcQImageDialog)
+lcQImageDialog::lcQImageDialog(QWidget* Parent)
+	: QDialog(Parent), ui(new Ui::lcQImageDialog)
 {
 	ui->setupUi(this);
 
@@ -14,15 +16,26 @@ lcQImageDialog::lcQImageDialog(QWidget *parent, void *data) :
 	ui->firstStep->setValidator(new QIntValidator(this));
 	ui->lastStep->setValidator(new QIntValidator(this));
 
-	options = (lcImageDialogOptions*)data;
-	currentStep = options->Start;
-	lastStep = options->End;
+	Project* Project = lcGetActiveProject();
+	lcModel* Model = Project->GetActiveModel();
+	mWidth = lcGetProfileInt(LC_PROFILE_IMAGE_WIDTH);
+	mHeight = lcGetProfileInt(LC_PROFILE_IMAGE_HEIGHT);
+	mStart = Model->GetCurrentStep();
+	mEnd = Model->GetLastStep();
+	mFileName = Project->GetFileName();
 
-	ui->fileName->setText(options->FileName);
-	ui->width->setText(QString::number(options->Width));
-	ui->height->setText(QString::number(options->Height));
-	ui->firstStep->setText(QString::number(1));
-	ui->lastStep->setText(QString::number(lastStep));
+	if (!mFileName.isEmpty())
+		mFileName = QFileInfo(mFileName).completeBaseName();
+	else
+		mFileName = QLatin1String("image");
+
+	mFileName += lcGetProfileString(LC_PROFILE_IMAGE_EXTENSION);
+
+	ui->fileName->setText(mFileName);
+	ui->width->setText(QString::number(mWidth));
+	ui->height->setText(QString::number(mHeight));
+	ui->firstStep->setText(QString::number(mStart));
+	ui->lastStep->setText(QString::number(mEnd));
 	ui->rangeCurrent->setChecked(true);
 }
 
@@ -57,33 +70,33 @@ void lcQImageDialog::accept()
 		return;
 	}
 
-	int start = currentStep, end = currentStep;
+	int start = mStart, end = mStart;
 
 	if (ui->rangeAll->isChecked())
 	{
 		start = 1;
-		end = lastStep;
+		end = mEnd;
 	}
 	else if (ui->rangeCurrent->isChecked())
 	{
-		start = currentStep;
-		end = currentStep;
+		start = mStart;
+		end = mStart;
 	}
 	else if (ui->rangeCustom->isChecked())
 	{
 		start = ui->firstStep->text().toInt();
 
-		if (start < 1 || start > lastStep)
+		if (start < 1 || start > mEnd)
 		{
-			QMessageBox::information(this, tr("Error"), tr("First step must be between 1 and %1.").arg(QString::number(lastStep)));
+			QMessageBox::information(this, tr("Error"), tr("First step must be between 1 and %1.").arg(QString::number(mEnd)));
 			return;
 		}
 
 		end = ui->lastStep->text().toInt();
 
-		if (end < 1 || end > lastStep)
+		if (end < 1 || end > mEnd)
 		{
-			QMessageBox::information(this, tr("Error"), tr("Last step must be between 1 and %1.").arg(QString::number(lastStep)));
+			QMessageBox::information(this, tr("Error"), tr("Last step must be between 1 and %1.").arg(QString::number(mEnd)));
 			return;
 		}
 
@@ -94,11 +107,14 @@ void lcQImageDialog::accept()
 		}
 	}
 
-	options->FileName = fileName;
-	options->Width = width;
-	options->Height = height;
-	options->Start = start;
-	options->End = end;
+	mFileName = fileName;
+	mWidth = width;
+	mHeight = height;
+	mStart = start;
+	mEnd = end;
+
+	lcSetProfileInt(LC_PROFILE_IMAGE_WIDTH, mWidth);
+	lcSetProfileInt(LC_PROFILE_IMAGE_HEIGHT, mHeight);
 
 	QDialog::accept();
 }

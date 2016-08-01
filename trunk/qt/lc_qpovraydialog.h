@@ -2,7 +2,6 @@
 #define _LC_QPOVRAYDIALOG_H_
 
 #include <QDialog>
-struct lcPOVRayDialogOptions;
 
 namespace Ui {
 class lcQPOVRayDialog;
@@ -13,10 +12,13 @@ class lcQPOVRayDialog : public QDialog
 	Q_OBJECT
 
 public:
-	explicit lcQPOVRayDialog(QWidget *parent, void* data);
+	lcQPOVRayDialog(QWidget* Parent);
 	~lcQPOVRayDialog();
 
-	lcPOVRayDialogOptions *options;
+	QString mFileName;
+	QString mPOVRayPath;
+	QString mLGEOPath;
+	bool mRender;
 
 public slots:
 	void accept();

@@ -8,6 +8,8 @@
 #include "lc_qcolorlist.h"
 #include "lc_qpropertiestree.h"
 #include "lc_qutils.h"
+#include "lc_qupdatedialog.h"
+#include "lc_qaboutdialog.h"
 #include "lc_profile.h"
 #include "preview.h"
 #include "view.h"
@@ -1057,6 +1059,18 @@ void lcMainWindow::Print(QPrinter* Printer)
 	Context->EndRenderToTexture();
 }
 
+void lcMainWindow::ShowUpdatesDialog()
+{
+	lcQUpdateDialog Dialog(this, false);
+	Dialog.exec();
+}
+
+void lcMainWindow::ShowAboutDialog()
+{
+	lcQAboutDialog Dialog(this);
+	Dialog.exec();
+}
+
 void lcMainWindow::ShowPrintDialog()
 {
 	lcModel* Model = lcGetActiveModel();
@@ -1075,38 +1089,18 @@ void lcMainWindow::ShowPrintDialog()
 }
 
 // todo: call dialogs directly
-#include "lc_qimagedialog.h"
 #include "lc_qhtmldialog.h"
-#include "lc_qpovraydialog.h"
 #include "lc_qpropertiesdialog.h"
 #include "lc_qfinddialog.h"
-#include "lc_qselectdialog.h"
-#include "lc_qminifigdialog.h"
-#include "lc_qarraydialog.h"
-#include "lc_qeditgroupsdialog.h"
 #include "lc_qpreferencesdialog.h"
-#include "lc_qupdatedialog.h"
-#include "lc_qaboutdialog.h"
 
 bool lcMainWindow::DoDialog(LC_DIALOG_TYPE Type, void* Data)
 {
 	switch (Type)
 	{
-	case LC_DIALOG_SAVE_IMAGE:
-		{
-			lcQImageDialog Dialog(this, Data);
-			return Dialog.exec() == QDialog::Accepted;
-		} break;
-
 	case LC_DIALOG_EXPORT_HTML:
 		{
 			lcQHTMLDialog Dialog(this, Data);
-			return Dialog.exec() == QDialog::Accepted;
-		} break;
-
-	case LC_DIALOG_EXPORT_POVRAY:
-		{
-			lcQPOVRayDialog Dialog(this, Data);
 			return Dialog.exec() == QDialog::Accepted;
 		} break;
 
@@ -1122,45 +1116,9 @@ bool lcMainWindow::DoDialog(LC_DIALOG_TYPE Type, void* Data)
 			return Dialog.exec() == QDialog::Accepted;
 		} break;
 
-	case LC_DIALOG_SELECT_BY_NAME:
-		{
-			lcQSelectDialog Dialog(this, Data);
-			return Dialog.exec() == QDialog::Accepted;
-		} break;
-
-	case LC_DIALOG_MINIFIG:
-		{
-			lcQMinifigDialog Dialog(this, Data);
-			return Dialog.exec() == QDialog::Accepted;
-		} break;
-
-	case LC_DIALOG_PIECE_ARRAY:
-		{
-			lcQArrayDialog Dialog(this, Data);
-			return Dialog.exec() == QDialog::Accepted;
-		} break;
-
-	case LC_DIALOG_EDIT_GROUPS:
-		{
-			lcQEditGroupsDialog Dialog(this, Data);
-			return Dialog.exec() == QDialog::Accepted;
-		} break;
-
 	case LC_DIALOG_PREFERENCES:
 		{
 			lcQPreferencesDialog Dialog(this, Data);
-			return Dialog.exec() == QDialog::Accepted;
-		} break;
-
-	case LC_DIALOG_ABOUT:
-		{
-			lcQAboutDialog Dialog(this);
-			return Dialog.exec() == QDialog::Accepted;
-		} break;
-
-	case LC_DIALOG_CHECK_UPDATES:
-		{
-			lcQUpdateDialog Dialog(this, Data);
 			return Dialog.exec() == QDialog::Accepted;
 		} break;
 	}
@@ -2482,11 +2440,12 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		break;
 
 	case LC_HELP_UPDATES:
-		DoDialog(LC_DIALOG_CHECK_UPDATES, NULL);
+		ShowUpdatesDialog();
 		break;
 
 	case LC_HELP_ABOUT:
-		DoDialog(LC_DIALOG_ABOUT, NULL);
+		ShowAboutDialog();
+		break;
 
 	case LC_VIEW_TIME_ADD_KEYS:
 		SetAddKeys(!GetAddKeys());

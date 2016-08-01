@@ -23,16 +23,14 @@ void lcDoInitialUpdateCheck()
 			return;
 	}
 
-	new lcQUpdateDialog(NULL, (void*)1);
+	new lcQUpdateDialog(NULL, true);
 }
 
-lcQUpdateDialog::lcQUpdateDialog(QWidget *parent, void *data) :
-	QDialog(parent),
-	ui(new Ui::lcQUpdateDialog)
+lcQUpdateDialog::lcQUpdateDialog(QWidget* Parent, bool InitialUpdate)
+	: QDialog(Parent), ui(new Ui::lcQUpdateDialog), mInitialUpdate(InitialUpdate)
 {
 	ui->setupUi(this);
 
-	initialUpdate = (bool)data;
 	connect(this, SIGNAL(finished(int)), this, SLOT(finished(int)));
 
 	ui->status->setText(tr("Connecting to update server..."));
@@ -81,7 +79,7 @@ void lcQUpdateDialog::finished(int result)
 {
 	Q_UNUSED(result);
 
-	if (initialUpdate)
+	if (mInitialUpdate)
 		deleteLater();
 }
 
@@ -100,7 +98,7 @@ void lcQUpdateDialog::replyFinished(QNetworkReply *reply)
 		QSettings settings;
 		QByteArray ignoreUpdate = settings.value("Updates/IgnoreVersion", QByteArray()).toByteArray();
 
-		if (initialUpdate && ignoreUpdate == versionData)
+		if (mInitialUpdate && ignoreUpdate == versionData)
 		{
 			updateAvailable = false;
 		}
@@ -157,7 +155,7 @@ void lcQUpdateDialog::replyFinished(QNetworkReply *reply)
 	else
 		ui->status->setText(tr("Error connecting to the update server."));
 
-	if (initialUpdate)
+	if (mInitialUpdate)
 	{
 		if (updateAvailable)
 			show();

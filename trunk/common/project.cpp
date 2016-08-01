@@ -13,7 +13,9 @@
 #include "lc_profile.h"
 #include "lc_file.h"
 #include "preview.h"
+#include "lc_qimagedialog.h"
 #include "lc_qmodellistdialog.h"
+#include "lc_qpovraydialog.h"
 
 Project::Project()
 {
@@ -1364,24 +1366,16 @@ void Project::ExportPOVRay()
 		return;
 	}
 
-	lcPOVRayDialogOptions Options;
+	lcQPOVRayDialog Dialog(gMainWindow);
 
-	Options.POVRayPath = lcGetProfileString(LC_PROFILE_POVRAY_PATH);
-	Options.LGEOPath = lcGetProfileString(LC_PROFILE_POVRAY_LGEO_PATH);
-	Options.Render = lcGetProfileInt(LC_PROFILE_POVRAY_RENDER);
-
-	if (!gMainWindow->DoDialog(LC_DIALOG_EXPORT_POVRAY, &Options))
+	if (Dialog.exec() != QDialog::Accepted)
 		return;
-
-	lcSetProfileString(LC_PROFILE_POVRAY_PATH, Options.POVRayPath);
-	lcSetProfileString(LC_PROFILE_POVRAY_LGEO_PATH, Options.LGEOPath);
-	lcSetProfileInt(LC_PROFILE_POVRAY_RENDER, Options.Render);
 
 	lcDiskFile POVFile;
 
-	if (!POVFile.Open(Options.FileName, "wt"))
+	if (!POVFile.Open(Dialog.mFileName, "wt"))
 	{
-		QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Could not open file '%1' for writing.").arg(Options.FileName));
+		QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Could not open file '%1' for writing.").arg(Dialog.mFileName));
 		return;
 	}
 
@@ -1415,15 +1409,15 @@ void Project::ExportPOVRay()
 		LGEO_COLOR_GLITTER     = 0x40
 	};
 
-	if (!Options.LGEOPath.isEmpty())
+	if (!Dialog.mLGEOPath.isEmpty())
 	{
 		lcDiskFile TableFile, ColorFile;
 
-		if (!TableFile.Open(QFileInfo(QDir(Options.LGEOPath), QLatin1String("lg_elements.lst")).absoluteFilePath(), "rt"))
+		if (!TableFile.Open(QFileInfo(QDir(Dialog.mLGEOPath), QLatin1String("lg_elements.lst")).absoluteFilePath(), "rt"))
 		{
 			delete[] PieceTable;
 			delete[] PieceFlags;
-			QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Could not find LGEO files in folder '%1'.").arg(Options.LGEOPath));
+			QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Could not find LGEO files in folder '%1'.").arg(Dialog.mLGEOPath));
 			return;
 		}
 
@@ -1461,11 +1455,11 @@ void Project::ExportPOVRay()
 				PieceFlags[Index] |= LGEO_PIECE_SLOPE;
 		}
 
-		if (!ColorFile.Open(QFileInfo(QDir(Options.LGEOPath), QLatin1String("lg_colors.lst")).absoluteFilePath(), "rt"))
+		if (!ColorFile.Open(QFileInfo(QDir(Dialog.mLGEOPath), QLatin1String("lg_colors.lst")).absoluteFilePath(), "rt"))
 		{
 			delete[] PieceTable;
 			delete[] PieceFlags;
-			QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Could not find LGEO files in folder '%1'.").arg(Options.LGEOPath));
+			QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Could not find LGEO files in folder '%1'.").arg(Dialog.mLGEOPath));
 			return;
 		}
 
@@ -1490,7 +1484,7 @@ void Project::ExportPOVRay()
 
 	const char* OldLocale = setlocale(LC_NUMERIC, "C");
 
-	if (!Options.LGEOPath.isEmpty())
+	if (!Dialog.mLGEOPath.isEmpty())
 	{
 		POVFile.WriteLine("#include \"lg_defs.inc\"\n#include \"lg_color.inc\"\n\n");
 
@@ -1617,21 +1611,21 @@ void Project::ExportPOVRay()
 	setlocale(LC_NUMERIC, OldLocale);
 	POVFile.Close();
 
-	if (Options.Render)
+	if (Dialog.mRender)
 	{
 		QStringList Arguments;
 
-		Arguments.append(QString::fromLatin1("+I%1").arg(Options.FileName));
+		Arguments.append(QString::fromLatin1("+I%1").arg(Dialog.mFileName));
 
-		if (!Options.LGEOPath.isEmpty())
+		if (!Dialog.mLGEOPath.isEmpty())
 		{
-			Arguments.append(QString::fromLatin1("+L%1lg/").arg(Options.LGEOPath));
-			Arguments.append(QString::fromLatin1("+L%1ar/").arg(Options.LGEOPath));
+			Arguments.append(QString::fromLatin1("+L%1lg/").arg(Dialog.mLGEOPath));
+			Arguments.append(QString::fromLatin1("+L%1ar/").arg(Dialog.mLGEOPath));
 		}
 
 		Arguments.append(QString::fromLatin1("/EXIT"));
 
-		QProcess::execute(Options.POVRayPath, Arguments);
+		QProcess::execute(Dialog.mPOVRayPath, Arguments);
 	}
 }
 
@@ -1739,38 +1733,18 @@ void Project::ExportWavefront(const QString& FileName)
 
 void Project::SaveImage()
 {
-	lcImageDialogOptions Options;
-	lcStep LastStep = mActiveModel->GetLastStep();
+	lcQImageDialog Dialog(gMainWindow);
 
-	Options.Width = lcGetProfileInt(LC_PROFILE_IMAGE_WIDTH);
-	Options.Height = lcGetProfileInt(LC_PROFILE_IMAGE_HEIGHT);
-	Options.Start = mActiveModel->GetCurrentStep();
-	Options.End = LastStep;
-
-	if (!mFileName.isEmpty())
-	{
-		Options.FileName = mFileName;
-		QString Extension = QFileInfo(Options.FileName).suffix();
-		Options.FileName = Options.FileName.left(Options.FileName.length() - Extension.length() - 1);
-	}
-	else
-		Options.FileName = QLatin1String("image");
-
-	Options.FileName += lcGetProfileString(LC_PROFILE_IMAGE_EXTENSION);
-
-	if (!gMainWindow->DoDialog(LC_DIALOG_SAVE_IMAGE, &Options))
+	if (Dialog.exec() != QDialog::Accepted)
 		return;
 	
-	QString Extension = QFileInfo(Options.FileName).suffix();
+	QString Extension = QFileInfo(Dialog.mFileName).suffix();
 
 	if (!Extension.isEmpty())
-		lcSetProfileString(LC_PROFILE_IMAGE_EXTENSION, Options.FileName.right(Extension.length() + 1));
+		lcSetProfileString(LC_PROFILE_IMAGE_EXTENSION, Dialog.mFileName.right(Extension.length() + 1));
 
-	lcSetProfileInt(LC_PROFILE_IMAGE_WIDTH, Options.Width);
-	lcSetProfileInt(LC_PROFILE_IMAGE_HEIGHT, Options.Height);
+	if (Dialog.mStart != Dialog.mEnd)
+		Dialog.mFileName = Dialog.mFileName.insert(Dialog.mFileName.length() - Extension.length() - 1, QLatin1String("%1"));
 
-	if (Options.Start != Options.End)
-		Options.FileName = Options.FileName.insert(Options.FileName.length() - Extension.length() - 1, QLatin1String("%1"));
-
-	mActiveModel->SaveStepImages(Options.FileName, Options.Width, Options.Height, Options.Start, Options.End);
+	mActiveModel->SaveStepImages(Dialog.mFileName, Dialog.mWidth, Dialog.mHeight, Dialog.mStart, Dialog.mEnd);
 }

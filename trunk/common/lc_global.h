@@ -31,7 +31,6 @@ typedef quintptr lcuintptr;
 
 #ifdef Q_OS_WIN
 #define snprintf _snprintf
-#define isnan _isnan
 #define strcasecmp stricmp
 #define strncasecmp strnicmp
 char* strcasestr(const char *s, const char *find);

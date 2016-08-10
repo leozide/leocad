@@ -9,9 +9,10 @@
 #include "lc_basewindow.h"
 
 lcQEditGroupsDialog::lcQEditGroupsDialog(QWidget* Parent, const QMap<lcPiece*, lcGroup*>& PieceParents, const QMap<lcGroup*, lcGroup*>& GroupParents)
-	: QDialog(Parent), ui(new Ui::lcQEditGroupsDialog), mPieceParents(PieceParents), mGroupParents(GroupParents)
+	: QDialog(Parent), mPieceParents(PieceParents), mGroupParents(GroupParents)
 {
 	mLastItemClicked = NULL;
+	ui = new Ui::lcQEditGroupsDialog;
 
 	ui->setupUi(this);
 	connect(ui->treeWidget,SIGNAL(itemClicked(QTreeWidgetItem *,int)), this, SLOT(onItemClicked(QTreeWidgetItem *,int)));

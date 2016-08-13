@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<mime-info xmlns='http://www.freedesktop.org/standards/shared-mime-info'>
+	<mime-type type="application/vnd.leocad">
+		<comment>LeoCAD Project</comment>
+		<magic priority="90">
+			<match type="string" offset="0" value="LeoCAD 0.">
+				<match type="string" offset="10" value=" Project\0\0"/>
+			</match>
+		</magic>
+		<glob pattern="*.lcd"/>
+		<glob pattern="*.leocad"/>
+	</mime-type>
+	<mime-type type="application/x-ldraw">
+		<comment>LDraw File</comment>
+		<glob pattern="*.ldr"/>
+		<glob pattern="*.dat"/>
+	</mime-type>
+	<mime-type type="application/x-multi-part-ldraw">
+		<comment>Multi-part LDraw File</comment>
+		<glob pattern="*.mpd"/>
+	</mime-type>
+</mime-info>

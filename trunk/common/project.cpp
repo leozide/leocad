@@ -779,7 +779,7 @@ void Project::Export3DStudio(const QString& FileName)
 		{
 			lcMeshSection* Section = &Mesh->mLods[LC_MESH_LOD_HIGH].Sections[SectionIdx];
 
-			if (Section->PrimitiveType != GL_TRIANGLES)
+			if (Section->PrimitiveType != LC_MESH_TRIANGLES && Section->PrimitiveType != LC_MESH_TEXTURED_TRIANGLES)
 				continue;
 
 			NumTriangles += Section->NumIndices / 3;
@@ -791,7 +791,7 @@ void Project::Export3DStudio(const QString& FileName)
 		{
 			lcMeshSection* Section = &Mesh->mLods[LC_MESH_LOD_HIGH].Sections[SectionIdx];
 
-			if (Section->PrimitiveType != GL_TRIANGLES)
+			if (Section->PrimitiveType != LC_MESH_TRIANGLES && Section->PrimitiveType != LC_MESH_TEXTURED_TRIANGLES)
 				continue;
 
 			lcuint16* Indices = (lcuint16*)Mesh->mIndexData + Section->IndexOffset / sizeof(lcuint16);
@@ -811,7 +811,7 @@ void Project::Export3DStudio(const QString& FileName)
 		{
 			lcMeshSection* Section = &Mesh->mLods[LC_MESH_LOD_HIGH].Sections[SectionIdx];
 
-			if (Section->PrimitiveType != GL_TRIANGLES)
+			if (Section->PrimitiveType != LC_MESH_TRIANGLES && Section->PrimitiveType != LC_MESH_TEXTURED_TRIANGLES)
 				continue;
 
 			int MaterialIndex = Section->ColorIndex == gDefaultColor ? ModelParts[PartIdx].ColorIndex : Section->ColorIndex;

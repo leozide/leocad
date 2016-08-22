@@ -4,7 +4,17 @@
 #include "lc_math.h"
 
 #define LC_MESH_FILE_ID      LC_FOURCC('M', 'E', 'S', 'H')
-#define LC_MESH_FILE_VERSION 0x0110
+#define LC_MESH_FILE_VERSION 0x0111
+
+enum lcMeshPrimitiveType
+{
+	LC_MESH_LINES,
+	LC_MESH_TRIANGLES,
+	LC_MESH_TEXTURED_LINES,
+	LC_MESH_TEXTURED_TRIANGLES,
+	LC_MESH_CONDITIONAL_LINES,
+	LC_MESH_NUM_PRIMITIVE_TYPES
+};
 
 struct lcVertex
 {
@@ -22,7 +32,7 @@ struct lcMeshSection
 	int ColorIndex;
 	int IndexOffset;
 	int NumIndices;
-	int PrimitiveType;
+	lcMeshPrimitiveType PrimitiveType;
 	lcTexture* Texture;
 };
 

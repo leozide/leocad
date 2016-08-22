@@ -953,7 +953,50 @@ void lcContext::DrawMeshSection(lcMesh* Mesh, lcMeshSection* Section)
 		}
 	}
 
-	DrawIndexedPrimitives(Section->PrimitiveType, Section->NumIndices, Mesh->mIndexType, IndexBufferOffset + Section->IndexOffset);
+	bool DrawConditional = false;
+
+	if (Section->PrimitiveType != LC_MESH_CONDITIONAL_LINES)
+	{
+		GLenum PrimitiveType = (Section->PrimitiveType == LC_MESH_TRIANGLES || Section->PrimitiveType == LC_MESH_TEXTURED_TRIANGLES) ? GL_TRIANGLES : GL_LINES;
+		DrawIndexedPrimitives(PrimitiveType, Section->NumIndices, Mesh->mIndexType, IndexBufferOffset + Section->IndexOffset);
+	}
+	else if (DrawConditional)
+	{
+		FlushState();
+		lcMatrix44 WorldViewProjectionMatrix = lcMul(mWorldMatrix, mViewProjectionMatrix);
+		float* VertexBuffer = (float*)Mesh->mVertexData;
+
+		if (Mesh->mIndexType == GL_UNSIGNED_SHORT)
+		{
+			lcuint16* Indices = (lcuint16*)((char*)Mesh->mIndexData + Section->IndexOffset);
+
+			for (int i = 0; i < Section->NumIndices; i += 4)
+			{
+				lcVector3 p1 = lcMul31(lcVector3(VertexBuffer[Indices[i] * 3], VertexBuffer[Indices[i] * 3 + 1], VertexBuffer[Indices[i] * 3 + 2]), WorldViewProjectionMatrix);
+				lcVector3 p2 = lcMul31(lcVector3(VertexBuffer[Indices[i + 1] * 3], VertexBuffer[Indices[i + 1] * 3 + 1], VertexBuffer[Indices[i + 1] * 3 + 2]), WorldViewProjectionMatrix);
+				lcVector3 p3 = lcMul31(lcVector3(VertexBuffer[Indices[i + 2] * 3], VertexBuffer[Indices[i + 2] * 3 + 1], VertexBuffer[Indices[i + 2] * 3 + 2]), WorldViewProjectionMatrix);
+				lcVector3 p4 = lcMul31(lcVector3(VertexBuffer[Indices[i + 3] * 3], VertexBuffer[Indices[i + 3] * 3 + 1], VertexBuffer[Indices[i + 3] * 3 + 2]), WorldViewProjectionMatrix);
+
+				if (((p1.y - p2.y) * (p3.x - p1.x) + (p2.x - p1.x) * (p3.y - p1.y)) * ((p1.y - p2.y) * (p4.x - p1.x) + (p2.x - p1.x) * (p4.y - p1.y)) >= 0)
+					DrawIndexedPrimitives(GL_LINES, 2, Mesh->mIndexType, IndexBufferOffset + Section->IndexOffset + i * sizeof(lcuint16));
+			}
+		}
+		else
+		{
+			lcuint32* Indices = (lcuint32*)((char*)Mesh->mIndexData + Section->IndexOffset);
+
+			for (int i = 0; i < Section->NumIndices; i += 4)
+			{
+				lcVector3 p1 = lcMul31(lcVector3(VertexBuffer[Indices[i] * 3], VertexBuffer[Indices[i] * 3 + 1], VertexBuffer[Indices[i] * 3 + 2]), WorldViewProjectionMatrix);
+				lcVector3 p2 = lcMul31(lcVector3(VertexBuffer[Indices[i + 1] * 3], VertexBuffer[Indices[i + 1] * 3 + 1], VertexBuffer[Indices[i + 1] * 3 + 2]), WorldViewProjectionMatrix);
+				lcVector3 p3 = lcMul31(lcVector3(VertexBuffer[Indices[i + 2] * 3], VertexBuffer[Indices[i + 2] * 3 + 1], VertexBuffer[Indices[i + 2] * 3 + 2]), WorldViewProjectionMatrix);
+				lcVector3 p4 = lcMul31(lcVector3(VertexBuffer[Indices[i + 3] * 3], VertexBuffer[Indices[i + 3] * 3 + 1], VertexBuffer[Indices[i + 3] * 3 + 2]), WorldViewProjectionMatrix);
+
+				if (((p1.y - p2.y) * (p3.x - p1.x) + (p2.x - p1.x) * (p3.y - p1.y)) * ((p1.y - p2.y) * (p4.x - p1.x) + (p2.x - p1.x) * (p4.y - p1.y)) >= 0)
+					DrawIndexedPrimitives(GL_LINES, 2, Mesh->mIndexType, IndexBufferOffset + Section->IndexOffset + i * sizeof(lcuint32));
+			}
+		}
+	}
 }
 
 void lcContext::DrawOpaqueMeshes(const lcArray<lcRenderMesh>& OpaqueMeshes)
@@ -976,7 +1019,7 @@ void lcContext::DrawOpaqueMeshes(const lcArray<lcRenderMesh>& OpaqueMeshes)
 			lcMeshSection* Section = &Mesh->mLods[LodIndex].Sections[SectionIdx];
 			int ColorIndex = Section->ColorIndex;
 
-			if (Section->PrimitiveType == GL_TRIANGLES)
+			if (Section->PrimitiveType == LC_MESH_TRIANGLES || Section->PrimitiveType == LC_MESH_TEXTURED_TRIANGLES)
 			{
 				if (ColorIndex == gDefaultColor)
 					ColorIndex = RenderMesh.ColorIndex;

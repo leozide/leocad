@@ -843,6 +843,7 @@ static int LibraryMeshSectionCompare(lcMergeSection const& First, lcMergeSection
 			LC_MESH_TEXTURED_TRIANGLES,
 			LC_MESH_LINES,
 			LC_MESH_TEXTURED_LINES,
+			LC_MESH_CONDITIONAL_LINES
 		};
 
 		for (int PrimitiveType = 0; PrimitiveType < LC_MESH_NUM_PRIMITIVE_TYPES; PrimitiveType++)
@@ -1071,7 +1072,7 @@ lcMesh* lcPiecesLibrary::CreateMesh(PieceInfo* Info, lcLibraryMeshData& MeshData
 			lcLibraryMeshSection* SetupSection = MergeSection.Shared ? MergeSection.Shared : MergeSection.Lod;
 
 			DstSection.ColorIndex = SetupSection->mColor;
-			DstSection.PrimitiveType = (SetupSection->mPrimitiveType == LC_MESH_TRIANGLES || SetupSection->mPrimitiveType == LC_MESH_TEXTURED_TRIANGLES) ? GL_TRIANGLES : GL_LINES;
+			DstSection.PrimitiveType = SetupSection->mPrimitiveType;
 			DstSection.NumIndices = 0;
 			DstSection.Texture = SetupSection->mTexture;
 
@@ -1137,7 +1138,7 @@ lcMesh* lcPiecesLibrary::CreateMesh(PieceInfo* Info, lcLibraryMeshData& MeshData
 
 			if (Info)
 			{
-				if (DstSection.PrimitiveType == GL_TRIANGLES)
+				if (DstSection.PrimitiveType == LC_MESH_TRIANGLES || DstSection.PrimitiveType == LC_MESH_TEXTURED_TRIANGLES)
 				{
 					if (DstSection.ColorIndex == gDefaultColor)
 						Info->mFlags |= LC_PIECE_HAS_DEFAULT;
@@ -1163,7 +1164,7 @@ lcMesh* lcPiecesLibrary::CreateMesh(PieceInfo* Info, lcLibraryMeshData& MeshData
 		lcLibraryMeshSection* SrcSection = MeshData.mSections[SectionIdx];
 
 		DstSection.ColorIndex = SrcSection->mColor;
-		DstSection.PrimitiveType = (SrcSection->mPrimitiveType == LC_MESH_TRIANGLES || SrcSection->mPrimitiveType == LC_MESH_TEXTURED_TRIANGLES) ? GL_TRIANGLES : GL_LINES;
+		DstSection.PrimitiveType = SrcSection->mPrimitiveType;
 		DstSection.NumIndices = SrcSection->mIndices.GetSize();
 		DstSection.Texture = SrcSection->mTexture;
 
@@ -1189,7 +1190,7 @@ lcMesh* lcPiecesLibrary::CreateMesh(PieceInfo* Info, lcLibraryMeshData& MeshData
 				*Index++ = SrcSection->mIndices[IndexIdx];
 		}
 
-		if (DstSection.PrimitiveType == GL_TRIANGLES)
+		if (DstSection.PrimitiveType == LC_MESH_TRIANGLES || DstSection.PrimitiveType == LC_MESH_TEXTURED_TRIANGLES)
 		{
 			if (DstSection.ColorIndex == gDefaultColor)
 				Info->mFlags |= LC_PIECE_HAS_DEFAULT;
@@ -1534,7 +1535,7 @@ bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransf
 		if (sscanf(Line, "%d %d", &LineType, &ColorCode) != 2)
 			continue;
 
-		if (LineType < 1 || LineType > 4)
+		if (LineType < 1 || LineType > 5)
 			continue;
 
 		if (ColorCode == 0)
@@ -1750,6 +1751,19 @@ bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransf
 				else
 					MeshData.AddLine(MeshDataType, LineType, ColorCode, Points, Optimize);
 			} break;
+
+		case 5:
+			{
+				sscanf(Line, "%d %i %f %f %f %f %f %f %f %f %f %f %f %f", &LineType, &Dummy, &Points[0].x, &Points[0].y, &Points[0].z,
+				       &Points[1].x, &Points[1].y, &Points[1].z, &Points[2].x, &Points[2].y, &Points[2].z, &Points[3].x, &Points[3].y, &Points[3].z);
+
+				Points[0] = lcMul31(Points[0], CurrentTransform);
+				Points[1] = lcMul31(Points[1], CurrentTransform);
+				Points[2] = lcMul31(Points[2], CurrentTransform);
+				Points[3] = lcMul31(Points[3], CurrentTransform);
+
+				MeshData.AddLine(MeshDataType, LineType, ColorCode, Points, Optimize);
+			} break;
 		}
 	}
 
@@ -1795,7 +1809,7 @@ void lcLibraryMeshData::TestQuad(int* QuadIndices, const lcVector3* Vertices)
 	}
 }
 
-lcLibraryMeshSection* lcLibraryMeshData::AddSection(lcMeshDataType MeshDataType, LC_MESH_PRIMITIVE_TYPE PrimitiveType, lcuint32 ColorCode, lcTexture* Texture)
+lcLibraryMeshSection* lcLibraryMeshData::AddSection(lcMeshDataType MeshDataType, lcMeshPrimitiveType PrimitiveType, lcuint32 ColorCode, lcTexture* Texture)
 {
 	lcArray<lcLibraryMeshSection*>& Sections = mSections[MeshDataType];
 	lcLibraryMeshSection* Section;
@@ -1825,7 +1839,7 @@ void lcLibraryMeshData::AddVertices(lcMeshDataType MeshDataType, int VertexCount
 	*VertexBuffer = &Vertices[CurrentSize];
 }
 
-void lcLibraryMeshData::AddIndices(lcMeshDataType MeshDataType, LC_MESH_PRIMITIVE_TYPE PrimitiveType, lcuint32 ColorCode, int IndexCount, lcuint32** IndexBuffer)
+void lcLibraryMeshData::AddIndices(lcMeshDataType MeshDataType, lcMeshPrimitiveType PrimitiveType, lcuint32 ColorCode, int IndexCount, lcuint32** IndexBuffer)
 {
 	lcLibraryMeshSection* Section = AddSection(MeshDataType, PrimitiveType, ColorCode, NULL);
 	lcArray<lcuint32>& Indices = Section->mIndices;
@@ -1838,7 +1852,8 @@ void lcLibraryMeshData::AddIndices(lcMeshDataType MeshDataType, LC_MESH_PRIMITIV
 
 void lcLibraryMeshData::AddLine(lcMeshDataType MeshDataType, int LineType, lcuint32 ColorCode, const lcVector3* Vertices, bool Optimize)
 {
-	LC_MESH_PRIMITIVE_TYPE PrimitiveType = (LineType == 2) ? LC_MESH_LINES : LC_MESH_TRIANGLES;
+	lcMeshPrimitiveType PrimitiveTypes[4] = { LC_MESH_LINES, LC_MESH_TRIANGLES, LC_MESH_TRIANGLES, LC_MESH_CONDITIONAL_LINES };
+	lcMeshPrimitiveType PrimitiveType = PrimitiveTypes[LineType - 2];
 	lcLibraryMeshSection* Section = AddSection(MeshDataType, PrimitiveType, ColorCode, NULL);
 
 	int QuadIndices[4] = { 0, 1, 2, 3 };
@@ -1848,7 +1863,7 @@ void lcLibraryMeshData::AddLine(lcMeshDataType MeshDataType, int LineType, lcuin
 
 	int Indices[4] = { -1, -1, -1, -1 };
 
-	for (int IndexIdx = 0; IndexIdx < LineType; IndexIdx++)
+	for (int IndexIdx = 0; IndexIdx < lcMin(LineType, 4); IndexIdx++)
 	{
 		const lcVector3& Position = Vertices[QuadIndices[IndexIdx]];
 		lcArray<lcVertex>& VertexArray = mVertices[MeshDataType];
@@ -1877,6 +1892,16 @@ void lcLibraryMeshData::AddLine(lcMeshDataType MeshDataType, int LineType, lcuin
 
 	switch (LineType)
 	{
+	case 5:
+		if (Indices[0] != Indices[1] && Indices[0] != Indices[2] && Indices[0] != Indices[3] && Indices[1] != Indices[2] && Indices[1] != Indices[3] && Indices[2] != Indices[3])
+		{
+			Section->mIndices.Add(Indices[0]);
+			Section->mIndices.Add(Indices[1]);
+			Section->mIndices.Add(Indices[2]);
+			Section->mIndices.Add(Indices[3]);
+		}
+		break;
+
 	case 4:
 		if (Indices[0] != Indices[2] && Indices[0] != Indices[3] && Indices[2] != Indices[3])
 		{
@@ -1893,6 +1918,7 @@ void lcLibraryMeshData::AddLine(lcMeshDataType MeshDataType, int LineType, lcuin
 			Section->mIndices.Add(Indices[2]);
 		}
 		break;
+
 	case 2:
 		if (Indices[0] != Indices[1])
 		{
@@ -1905,7 +1931,7 @@ void lcLibraryMeshData::AddLine(lcMeshDataType MeshDataType, int LineType, lcuin
 
 void lcLibraryMeshData::AddTexturedLine(lcMeshDataType MeshDataType, int LineType, lcuint32 ColorCode, const lcLibraryTextureMap& Map, const lcVector3* Vertices, bool Optimize)
 {
-	LC_MESH_PRIMITIVE_TYPE PrimitiveType = (LineType == 2) ? LC_MESH_TEXTURED_LINES : LC_MESH_TEXTURED_TRIANGLES;
+	lcMeshPrimitiveType PrimitiveType = (LineType == 2) ? LC_MESH_TEXTURED_LINES : LC_MESH_TEXTURED_TRIANGLES;
 	lcLibraryMeshSection* Section = AddSection(MeshDataType, PrimitiveType, ColorCode, Map.Texture);
 
 	int QuadIndices[4] = { 0, 1, 2, 3 };

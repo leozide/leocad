@@ -10,15 +10,6 @@
 class PieceInfo;
 class lcZipFile;
 
-enum LC_MESH_PRIMITIVE_TYPE
-{
-	LC_MESH_LINES,
-	LC_MESH_TRIANGLES,
-	LC_MESH_TEXTURED_LINES,
-	LC_MESH_TEXTURED_TRIANGLES,
-	LC_MESH_NUM_PRIMITIVE_TYPES
-};
-
 enum lcZipFileType
 {
 	LC_ZIPFILE_OFFICIAL,
@@ -29,7 +20,7 @@ enum lcZipFileType
 class lcLibraryMeshSection
 {
 public:
-	lcLibraryMeshSection(LC_MESH_PRIMITIVE_TYPE PrimitiveType, lcuint32 Color, lcTexture* Texture)
+	lcLibraryMeshSection(lcMeshPrimitiveType PrimitiveType, lcuint32 Color, lcTexture* Texture)
 		: mIndices(1024, 1024)
 	{
 		mPrimitiveType = PrimitiveType;
@@ -41,7 +32,7 @@ public:
 	{
 	}
 
-	LC_MESH_PRIMITIVE_TYPE mPrimitiveType;
+	lcMeshPrimitiveType mPrimitiveType;
 	lcuint32 mColor;
 	lcTexture* mTexture;
 	lcArray<lcuint32> mIndices;
@@ -78,9 +69,9 @@ public:
 			mSections[MeshDataIdx].DeleteAll();
 	}
 
-	lcLibraryMeshSection* AddSection(lcMeshDataType MeshDataType, LC_MESH_PRIMITIVE_TYPE PrimitiveType, lcuint32 ColorCode, lcTexture* Texture);
+	lcLibraryMeshSection* AddSection(lcMeshDataType MeshDataType, lcMeshPrimitiveType PrimitiveType, lcuint32 ColorCode, lcTexture* Texture);
 	void AddVertices(lcMeshDataType MeshDataType, int VertexCount, int* BaseVertex, lcVertex** VertexBuffer);
-	void AddIndices(lcMeshDataType MeshDataType, LC_MESH_PRIMITIVE_TYPE PrimitiveType, lcuint32 ColorCode, int IndexCount, lcuint32** IndexBuffer);
+	void AddIndices(lcMeshDataType MeshDataType, lcMeshPrimitiveType PrimitiveType, lcuint32 ColorCode, int IndexCount, lcuint32** IndexBuffer);
 	void AddLine(lcMeshDataType MeshDataType, int LineType, lcuint32 ColorCode, const lcVector3* Vertices, bool Optimize);
 	void AddTexturedLine(lcMeshDataType MeshDataType, int LineType, lcuint32 ColorCode, const lcLibraryTextureMap& Map, const lcVector3* Vertices, bool Optimize);
 	void AddMeshData(const lcLibraryMeshData& Data, const lcMatrix44& Transform, lcuint32 CurrentColorCode, lcLibraryTextureMap* TextureMap, lcMeshDataType OverrideDestIndex);

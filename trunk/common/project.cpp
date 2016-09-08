@@ -20,7 +20,7 @@
 Project::Project()
 {
 	mModified = false;
-	mActiveModel = new lcModel(tr("Model #1"));
+	mActiveModel = new lcModel(tr("Model #1.ldr"));
 	mActiveModel->CreatePieceInfo(this);
 	mActiveModel->SetSaved();
 	mModels.Add(mActiveModel);
@@ -70,75 +70,101 @@ void Project::SetActiveModel(int ModelIndex)
 	mActiveModel->UpdateInterface();
 }
 
-bool Project::IsModelNameValid(const QString& Name) const
+QString Project::GetNewModelName(QWidget* ParentWidget, const QString& DialogTitle, const QString& CurrentName, const QStringList& ExistingModels) const
 {
+	QString Name = CurrentName;
+
 	if (Name.isEmpty())
-		return false;
-
-	for (int ModelIdx = 0; ModelIdx < mModels.GetSize(); ModelIdx++)
-		if (mModels[ModelIdx]->GetProperties().mName == Name)
-			return false;
-
-	return true;
-}
-
-lcModel* Project::CreateNewModel(bool ShowModel)
-{
-	const QString Prefix = tr("Model #");
-	int Max = 0;
-
-	for (int ModelIdx = 0; ModelIdx < mModels.GetSize(); ModelIdx++)
 	{
-		QString Name = mModels[ModelIdx]->GetProperties().mName;
+		const QString Prefix = tr("Model #");
+		int Max = 0;
 
-		if (Name.startsWith(Prefix))
+		for (int ModelIdx = 0; ModelIdx < ExistingModels.size(); ModelIdx++)
 		{
-			QString NumberString = Name.mid(Prefix.length());
-			QTextStream Stream(&NumberString);
-			int Number;
-			Stream >> Number;
-			Max = qMax(Max, Number);
-		}
-	}
+			const QString& Name = ExistingModels[ModelIdx];
 
-	QString Name = Prefix + QString::number(Max + 1);
+			if (Name.startsWith(Prefix))
+			{
+				QString NumberString = Name.mid(Prefix.length());
+				QTextStream Stream(&NumberString);
+				int Number;
+				Stream >> Number;
+				Max = qMax(Max, Number);
+			}
+		}
+
+		Name = Prefix + QString::number(Max + 1) + ".ldr";
+	}
 
 	for (;;)
 	{
 		bool Ok = false;
 
-		Name = QInputDialog::getText(gMainWindow, tr("New Model"), tr("Name:"), QLineEdit::Normal, Name, &Ok);
+		Name = QInputDialog::getText(ParentWidget, DialogTitle, tr("Model Name:"), QLineEdit::Normal, Name, &Ok);
 
 		if (!Ok)
-			return NULL;
-
-		if (IsModelNameValid(Name))
-			break;
+			return QString();
 
 		if (Name.isEmpty())
-			QMessageBox::information(gMainWindow, tr("Empty Name"), tr("The model name cannot be empty."));
-		else
-			QMessageBox::information(gMainWindow, tr("Duplicate Model"), tr("A model named '%1' already exists in this project, please enter an unique name.").arg(Name));
-	}
-
-	lcModel* Model = NULL;
-
-	if (!Name.isEmpty())
-	{
-		mModified = true;
-		Model = new lcModel(Name);
-		Model->CreatePieceInfo(this);
-		Model->SetSaved();
-		mModels.Add(Model);
-
-		if (ShowModel)
 		{
-			SetActiveModel(mModels.GetSize() - 1);
-			gMainWindow->UpdateTitle();
+			QMessageBox::information(ParentWidget, tr("Empty Name"), tr("The model name cannot be empty."));
+			continue;
 		}
+
+		bool ExtensionValid = false;
+
+		if (Name.length() < 5)
+			ExtensionValid = false;
 		else
-			SetActiveModel(mModels.FindIndex(mActiveModel));
+		{
+			QString Extension = Name.right(4);
+			if (Extension.compare(".dat", Qt::CaseInsensitive) == 0 || Extension.compare(".ldr", Qt::CaseInsensitive) == 0)
+				ExtensionValid = true;
+		}
+
+		if (!ExtensionValid)
+		{
+			QMessageBox::information(ParentWidget, tr("Invalid Extension"), tr("The model name must end with either '.ldr', '.dat' or '.mpd'."));
+			continue;
+		}
+
+		if (ExistingModels.contains(Name, Qt::CaseInsensitive) && Name != CurrentName)
+		{
+			QMessageBox::information(ParentWidget, tr("Duplicate Model"), tr("A model named '%1' already exists, please enter an unique name.").arg(Name));
+			continue;
+		}
+
+		break;
 	}
+
+	return Name;
+}
+
+lcModel* Project::CreateNewModel(bool ShowModel)
+{
+	QStringList ModelNames;
+
+	for (int ModelIdx = 0; ModelIdx < mModels.GetSize(); ModelIdx++)
+		ModelNames.append(mModels[ModelIdx]->GetProperties().mName);
+
+	QString Name = GetNewModelName(gMainWindow, tr("New Model"), QString(), ModelNames);
+
+	if (Name.isEmpty())
+		return NULL;
+
+	mModified = true;
+	lcModel* Model = new lcModel(Name);
+	Model->CreatePieceInfo(this);
+	Model->SetSaved();
+	mModels.Add(Model);
+
+	if (ShowModel)
+	{
+		SetActiveModel(mModels.GetSize() - 1);
+		gMainWindow->UpdateTitle();
+	}
+	else
+		SetActiveModel(mModels.FindIndex(mActiveModel));
 
 	return Model;
 }

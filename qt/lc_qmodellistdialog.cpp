@@ -45,7 +45,7 @@ void lcQModelListDialog::on_NewModel_clicked()
 
 	for (int ItemIdx = 0; ItemIdx < ui->ModelList->count(); ItemIdx++)
 	{
-		QString Name = ui->ModelList->item(ItemIdx)->text();
+		const QString& Name = ui->ModelList->item(ItemIdx)->text();
 
 		if (Name.startsWith(Prefix))
 		{
@@ -57,7 +57,7 @@ void lcQModelListDialog::on_NewModel_clicked()
 		}
 	}
 
-	QString Name = Prefix + QString::number(Max + 1);
+	QString Name = Prefix + QString::number(Max + 1) + ".ldr";
 
 	if (Name.isEmpty())
 		return;
@@ -94,31 +94,15 @@ void lcQModelListDialog::on_RenameModel_clicked()
 	if (SelectedItems.isEmpty())
 		return;
 
-	QString Name = SelectedItems[0]->text();
-	bool Ok = false;
+	QStringList ModelNames;
 
-	for (;;)
-	{
-		Name = QInputDialog::getText(this, tr("Rename Model"), tr("Name:"), QLineEdit::Normal, Name, &Ok);
+	for (int ItemIdx = 0; ItemIdx < ui->ModelList->count(); ItemIdx++)
+		ModelNames.append(ui->ModelList->item(ItemIdx)->text());
 
-		if (!Ok)
-			return;
+	QString Name = lcGetActiveProject()->GetNewModelName(this, tr("Rename Model"), SelectedItems[0]->text(), ModelNames);
 
-		if (Name.isEmpty())
-		{
-			QMessageBox::information(this, tr("Empty Name"), tr("The model name cannot be empty."));
-			continue;
-		}
-
-		QList<QListWidgetItem*> MatchedItems = ui->ModelList->findItems(Name, Qt::MatchFixedString);
-
-		if (MatchedItems.isEmpty() || (MatchedItems.size() == 1 && MatchedItems[0] == SelectedItems[0]))
-			break;
-
-		QMessageBox::information(this, tr("Duplicate Model"), tr("A model named '%1' already exists in this project, please enter an unique name.").arg(Name));
-	}
-
-	SelectedItems[0]->setText(Name);
+	if (!Name.isEmpty())
+		SelectedItems[0]->setText(Name);
 }
 
 void lcQModelListDialog::on_MoveUp_clicked()

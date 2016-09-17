@@ -118,13 +118,13 @@ QString Project::GetNewModelName(QWidget* ParentWidget, const QString& DialogTit
 		else
 		{
 			QString Extension = Name.right(4);
-			if (Extension.compare(".dat", Qt::CaseInsensitive) == 0 || Extension.compare(".ldr", Qt::CaseInsensitive) == 0)
+			if (Extension.compare(".dat", Qt::CaseInsensitive) == 0 || Extension.compare(".ldr", Qt::CaseInsensitive) == 0 || Extension.compare(".mpd", Qt::CaseInsensitive) == 0)
 				ExtensionValid = true;
 		}
 
 		if (!ExtensionValid)
 		{
-			QMessageBox::information(ParentWidget, tr("Invalid Extension"), tr("The model name must end with either '.ldr', '.dat' or '.mpd'."));
+			QMessageBox::information(ParentWidget, tr("Invalid Extension"), tr("The model name must end with '.ldr', '.dat' or '.mpd'."));
 			continue;
 		}
 

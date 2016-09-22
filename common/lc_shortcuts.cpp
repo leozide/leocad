@@ -133,8 +133,10 @@ void lcMouseShortcuts::Reset()
 	memset(mShortcuts, 0, sizeof(mShortcuts));
 	mShortcuts[LC_TOOL_ROTATE_VIEW].Modifiers = Qt::AltModifier;
 	mShortcuts[LC_TOOL_ROTATE_VIEW].Button = Qt::LeftButton;
+#if (QT_VERSION >= QT_VERSION_CHECK(4, 7, 0))
 	mShortcuts[LC_TOOL_PAN].Modifiers = Qt::AltModifier;
 	mShortcuts[LC_TOOL_PAN].Button = Qt::MiddleButton;
+#endif
 	mShortcuts[LC_TOOL_ZOOM].Modifiers = Qt::AltModifier;
 	mShortcuts[LC_TOOL_ZOOM].Button = Qt::RightButton;
 }

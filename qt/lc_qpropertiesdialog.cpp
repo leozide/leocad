@@ -14,7 +14,7 @@ lcQPropertiesDialog::lcQPropertiesDialog(QWidget *parent, void *data) :
 {
 	ui->setupUi(this);
 
-	ui->fogDensityEdit->setValidator(new QDoubleValidator());
+	ui->fogDensityEdit->setValidator(new QDoubleValidator(ui->fogDensityEdit));
 
 	connect(ui->solidColorButton, SIGNAL(clicked()), this, SLOT(colorClicked()));
 	connect(ui->gradient1ColorButton, SIGNAL(clicked()), this, SLOT(colorClicked()));

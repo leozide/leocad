@@ -19,7 +19,11 @@ void lcDoInitialUpdateCheck()
 	{
 		QDateTime NextCheckTime = CheckTime.addDays(updateFrequency == 1 ? 1 : 7);
 
+#if (QT_VERSION >= QT_VERSION_CHECK(4, 7, 0))
 		if (NextCheckTime > QDateTime::currentDateTimeUtc())
+#else
+		if (NextCheckTime > QDateTime::currentDateTime())
+#endif
 			return;
 	}
 
@@ -147,7 +151,11 @@ void lcQUpdateDialog::replyFinished(QNetworkReply *reply)
 		else
 			ui->status->setText(tr("Error parsing update information."));
 
+#if (QT_VERSION >= QT_VERSION_CHECK(4, 7, 0))
 		settings.setValue("Updates/LastCheck", QDateTime::currentDateTimeUtc());
+#else
+		settings.setValue("Updates/LastCheck", QDateTime::currentDateTime());
+#endif
 
 		updateReply = NULL;
 		reply->deleteLater();

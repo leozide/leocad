@@ -178,8 +178,7 @@ void lcTimelineWidget::Update(bool Clear, bool UpdateItems)
 				int Size = rowHeight(indexFromItem(PieceItem));
 
 				QImage Image(Size, Size, QImage::Format_ARGB32);
-				Image.fill(QColor::fromRgbF(1.0, 1.0, 1.0, 0.0));
-
+				Image.fill(0);
 				float* Color = gColorList[ColorIndex].Value;
 				QPainter Painter(&Image);
 				Painter.setPen(Qt::NoPen);

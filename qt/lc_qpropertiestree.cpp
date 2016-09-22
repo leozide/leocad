@@ -424,7 +424,7 @@ QWidget *lcQPropertiesTree::createEditor(QWidget *parent, QTreeWidgetItem *item)
 			QLineEdit *editor = new QLineEdit(parent);
 			float value = item->data(0, PropertyValueRole).toFloat();
 
-			editor->setValidator(new QDoubleValidator());
+			editor->setValidator(new QDoubleValidator(editor));
 			editor->setText(lcFormatValueLocalized(value));
 
 			connect(editor, SIGNAL(returnPressed()), this, SLOT(slotReturnPressed()));

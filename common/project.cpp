@@ -172,7 +172,9 @@ lcModel* Project::CreateNewModel(bool ShowModel)
 void Project::ShowModelListDialog()
 {
 	QList<QPair<QString, lcModel*>> Models;
+#if (QT_VERSION >= QT_VERSION_CHECK(4, 7, 0))
 	Models.reserve(mModels.GetSize());
+#endif
 
 	for (int ModelIdx = 0; ModelIdx < mModels.GetSize(); ModelIdx++)
 	{

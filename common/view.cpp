@@ -2519,7 +2519,7 @@ void View::OnMiddleButtonDown()
 	}
 
 	gMainWindow->SetActiveView(this);
-
+#if (QT_VERSION >= QT_VERSION_CHECK(4, 7, 0))
 	lcTrackTool OverrideTool = GetOverrideTrackTool(Qt::MiddleButton);
 
 	if (OverrideTool != LC_TRACKTOOL_NONE)
@@ -2527,7 +2527,7 @@ void View::OnMiddleButtonDown()
 		mTrackTool = OverrideTool;
 		OnUpdateCursor();
 	}
-
+#endif
 	OnButtonDown(LC_TRACKBUTTON_MIDDLE);
 }
 

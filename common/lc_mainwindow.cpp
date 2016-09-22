@@ -810,11 +810,15 @@ void lcMainWindow::Print(QPrinter* Printer)
 	if (Printer->collateCopies())
 	{
 		DocCopies = 1;
+#if (QT_VERSION >= QT_VERSION_CHECK(4, 7, 0))
 		PageCopies = Printer->supportsMultipleCopies() ? 1 : Printer->copyCount();
+#endif
 	}
 	else
 	{
+#if (QT_VERSION >= QT_VERSION_CHECK(4, 7, 0))
 		DocCopies = Printer->supportsMultipleCopies() ? 1 : Printer->copyCount();
+#endif
 		PageCopies = 1;
 	}
 

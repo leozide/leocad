@@ -315,9 +315,17 @@ void lcPiecesLibrary::ReadArchiveDescriptions(const QString& OfficialFileName, c
 	QFileInfo UnofficialInfo(UnofficialFileName);
 	
 	mArchiveCheckSum[0] = OfficialInfo.size();
+#if (QT_VERSION >= QT_VERSION_CHECK(4, 7, 0))
 	mArchiveCheckSum[1] = OfficialInfo.lastModified().toMSecsSinceEpoch();
+#else
+	mArchiveCheckSum[1] = OfficialInfo.lastModified().toTime_t();
+#endif
 	mArchiveCheckSum[2] = UnofficialInfo.size();
+#if (QT_VERSION >= QT_VERSION_CHECK(4, 7, 0))
 	mArchiveCheckSum[3] = UnofficialInfo.lastModified().toMSecsSinceEpoch();
+#else
+	mArchiveCheckSum[3] = UnofficialInfo.lastModified().toTime_t();
+#endif
 
 	QString IndexFileName = QFileInfo(QDir(mCachePath), QLatin1String("index")).absoluteFilePath();
 

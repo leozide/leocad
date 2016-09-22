@@ -15,7 +15,7 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget *parent, void *data) :
 {
     ui->setupUi(this);
 
-	ui->lineWidth->setValidator(new QDoubleValidator());
+	ui->lineWidth->setValidator(new QDoubleValidator(ui->lineWidth));
 	connect(ui->gridStudColor, SIGNAL(clicked()), this, SLOT(colorClicked()));
 	connect(ui->gridLineColor, SIGNAL(clicked()), this, SLOT(colorClicked()));
 	connect(ui->categoriesTree, SIGNAL(itemSelectionChanged()), this, SLOT(updateParts()));
@@ -617,9 +617,11 @@ void lcQPreferencesDialog::UpdateMouseTreeItem(int ItemIndex)
 		Shortcut += tr("Left Button");
 		break;
 
+#if (QT_VERSION >= QT_VERSION_CHECK(4, 7, 0))
 	case Qt::MiddleButton:
 		Shortcut += tr("Middle Button");
 		break;
+#endif
 
 	case Qt::RightButton:
 		Shortcut += tr("Right Button");
@@ -656,9 +658,11 @@ void lcQPreferencesDialog::on_mouseAssign_clicked()
 			Button = Qt::LeftButton;
 			break;
 
+#if (QT_VERSION >= QT_VERSION_CHECK(4, 7, 0))
 		case 2:
 			Button = Qt::MiddleButton;
 			break;
+#endif
 
 		case 3:
 			Button = Qt::RightButton;
@@ -746,9 +750,11 @@ void lcQPreferencesDialog::MouseTreeItemChanged(QTreeWidgetItem* Current)
 		ui->mouseButton->setCurrentIndex(1);
 		break;
 
+#if (QT_VERSION >= QT_VERSION_CHECK(4, 7, 0))
 	case Qt::MiddleButton:
 		ui->mouseButton->setCurrentIndex(2);
 		break;
+#endif
 
 	case Qt::RightButton:
 		ui->mouseButton->setCurrentIndex(3);

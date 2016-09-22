@@ -8,24 +8,24 @@ lcQArrayDialog::lcQArrayDialog(QWidget* Parent)
 {
 	ui->setupUi(this);
 
-	ui->offset1x->setValidator(new QDoubleValidator());
-	ui->offset1y->setValidator(new QDoubleValidator());
-	ui->offset1z->setValidator(new QDoubleValidator());
-	ui->offset2x->setValidator(new QDoubleValidator());
-	ui->offset2y->setValidator(new QDoubleValidator());
-	ui->offset2z->setValidator(new QDoubleValidator());
-	ui->offset3x->setValidator(new QDoubleValidator());
-	ui->offset3y->setValidator(new QDoubleValidator());
-	ui->offset3z->setValidator(new QDoubleValidator());
-	ui->rotation1x->setValidator(new QDoubleValidator());
-	ui->rotation1y->setValidator(new QDoubleValidator());
-	ui->rotation1z->setValidator(new QDoubleValidator());
-	ui->rotation2x->setValidator(new QDoubleValidator());
-	ui->rotation2y->setValidator(new QDoubleValidator());
-	ui->rotation2z->setValidator(new QDoubleValidator());
-	ui->rotation3x->setValidator(new QDoubleValidator());
-	ui->rotation3y->setValidator(new QDoubleValidator());
-	ui->rotation3z->setValidator(new QDoubleValidator());
+	ui->offset1x->setValidator(new QDoubleValidator(ui->offset1x));
+	ui->offset1y->setValidator(new QDoubleValidator(ui->offset1y));
+	ui->offset1z->setValidator(new QDoubleValidator(ui->offset1z));
+	ui->offset2x->setValidator(new QDoubleValidator(ui->offset2x));
+	ui->offset2y->setValidator(new QDoubleValidator(ui->offset2y));
+	ui->offset2z->setValidator(new QDoubleValidator(ui->offset2z));
+	ui->offset3x->setValidator(new QDoubleValidator(ui->offset3x));
+	ui->offset3y->setValidator(new QDoubleValidator(ui->offset3y));
+	ui->offset3z->setValidator(new QDoubleValidator(ui->offset3z));
+	ui->rotation1x->setValidator(new QDoubleValidator(ui->rotation1x));
+	ui->rotation1y->setValidator(new QDoubleValidator(ui->rotation1y));
+	ui->rotation1z->setValidator(new QDoubleValidator(ui->rotation1z));
+	ui->rotation2x->setValidator(new QDoubleValidator(ui->rotation2x));
+	ui->rotation2y->setValidator(new QDoubleValidator(ui->rotation2y));
+	ui->rotation2z->setValidator(new QDoubleValidator(ui->rotation2z));
+	ui->rotation3x->setValidator(new QDoubleValidator(ui->rotation3x));
+	ui->rotation3y->setValidator(new QDoubleValidator(ui->rotation3y));
+	ui->rotation3z->setValidator(new QDoubleValidator(ui->rotation3z));
 
 	mCounts[0] = 10;
 	mCounts[1] = 1;

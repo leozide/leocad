@@ -1096,7 +1096,7 @@ void lcContext::DrawTranslucentMeshes(const lcArray<lcRenderMesh>& TranslucentMe
 			lcMeshSection* Section = &Mesh->mLods[LodIndex].Sections[SectionIdx];
 			int ColorIndex = Section->ColorIndex;
 
-			if (Section->PrimitiveType != GL_TRIANGLES)
+			if (Section->PrimitiveType != LC_MESH_TRIANGLES)
 				continue;
 
 			if (ColorIndex == gDefaultColor)

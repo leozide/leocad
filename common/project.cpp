@@ -241,10 +241,18 @@ bool Project::Load(const QString& FileName)
 	QString Extension = FileInfo.suffix().toLower();
 
 	lcGetPiecesLibrary()->SetCurrentModelPath(FileInfo.absolutePath());
+	QByteArray FileData = File.readAll();
+	bool LoadDAT;
 
 	if (Extension == QLatin1String("dat") || Extension == QLatin1String("ldr") || Extension == QLatin1String("mpd"))
+		LoadDAT = true;
+	else if (Extension == QLatin1String("lcd") || Extension == QLatin1String("leocad"))
+		LoadDAT = false;
+	else
+		LoadDAT = memcmp(FileData, "LeoCAD ", 7);
+
+	if (LoadDAT)
 	{
-		QByteArray FileData = File.readAll();
 		QBuffer Buffer(&FileData);
 		Buffer.open(QIODevice::ReadOnly);
 
@@ -265,7 +273,6 @@ bool Project::Load(const QString& FileName)
 	else
 	{
 		lcMemFile MemFile;
-		QByteArray FileData = File.readAll();
 		MemFile.WriteBuffer(FileData.constData(), FileData.size());
 		MemFile.Seek(0, SEEK_SET);
 

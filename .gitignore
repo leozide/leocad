@@ -1,5 +1,22 @@
-﻿################################################################################
-# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
-################################################################################
-
+﻿*.suo
+*.sln
+*.vcxproj
+*.filters
+*.user
+*.pdb
+*.db
+*.psess
+*.opendb
+*.opensdf
+*.sdf
 *.suo
+*.vspx
+*.xcodeproj
+build
+debug
+release
+ipch
+Makefile
+library.bin
+leocad_plugin_import.cpp
+*.qm

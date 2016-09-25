@@ -882,6 +882,7 @@ bool lcPiecesLibrary::LoadPiece(PieceInfo* Info)
 
 	bool Loaded = false;
 	bool SaveCache = false;
+	bool UpdateBoundingBox = false;
 
 	if (Info->mZipFileType != LC_NUM_ZIPFILES && mZipFiles[Info->mZipFileType])
 	{
@@ -928,13 +929,17 @@ bool lcPiecesLibrary::LoadPiece(PieceInfo* Info)
 			const char* OldLocale = setlocale(LC_NUMERIC, "C");
 			Loaded = ReadMeshData(PieceFile, lcMatrix44Identity(), 16, TextureStack, MeshData, LC_MESHDATA_SHARED, false);
 			setlocale(LC_NUMERIC, OldLocale);
+			UpdateBoundingBox = true;
 		}
 	}
 
 	if (!Loaded)
 		return false;
 
-	CreateMesh(Info, MeshData);
+	lcMesh* Mesh = CreateMesh(Info, MeshData);
+
+	if (UpdateBoundingBox)
+		Info->SetBoundingBox(Mesh->mBoundingBox.Min, Mesh->mBoundingBox.Max);
 
 	if (SaveCache)
 		SaveCachePiece(Info);

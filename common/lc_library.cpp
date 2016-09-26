@@ -921,10 +921,8 @@ bool lcPiecesLibrary::LoadPiece(PieceInfo* Info)
 
 	if (!Loaded && !mCurrentModelPath.isEmpty())
 	{
-		QFileInfo FileInfo(QDir(mCurrentModelPath), Info->m_strName);
-
-		lcDiskFile PieceFile;
-		if (PieceFile.Open(FileInfo.absoluteFilePath().toLatin1().constData(), "rt")) // todo: qstring
+		lcMemFile PieceFile;
+		if (LoadAndInlineFile(Info->m_strName, PieceFile))
 		{
 			const char* OldLocale = setlocale(LC_NUMERIC, "C");
 			Loaded = ReadMeshData(PieceFile, lcMatrix44Identity(), 16, TextureStack, MeshData, LC_MESHDATA_SHARED, false);
@@ -1408,6 +1406,32 @@ bool lcPiecesLibrary::LoadPrimitive(int PrimitiveIndex)
 	return true;
 }
 
+bool lcPiecesLibrary::LoadAndInlineFile(const char* FileName, lcMemFile& File)
+{
+	QFileInfo FileInfo(QDir(mCurrentModelPath), FileName);
+
+	if (!FileInfo.isFile())
+		return false;
+
+	Project TempProject;
+
+	if (!TempProject.Load(FileInfo.absoluteFilePath()))
+		return false;
+
+	TempProject.InlineAllModels();
+
+	QByteArray Data;
+	QTextStream Stream(&Data);
+	TempProject.Save(Stream);
+	Stream.flush();
+
+	File.Seek(0, SEEK_SET);
+	File.WriteBuffer(Data.constData(), Data.size());
+	File.Seek(0, SEEK_SET);
+
+	return true;
+}
+
 bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform, lcuint32 CurrentColorCode, lcArray<lcLibraryTextureMap>& TextureStack, lcLibraryMeshData& MeshData, lcMeshDataType MeshDataType, bool Optimize)
 {
 	char Buffer[1024];
@@ -1667,7 +1691,7 @@ bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransf
 						if (strcmp(Info->m_strName, FileName))
 							continue;
 
-						if (mZipFiles[LC_ZIPFILE_OFFICIAL])
+						if (mZipFiles[LC_ZIPFILE_OFFICIAL] && Info->mZipFileType != LC_NUM_ZIPFILES)
 						{
 							lcMemFile IncludeFile;
 
@@ -1693,13 +1717,11 @@ bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransf
 
 					if (!Loaded && !mCurrentModelPath.isEmpty())
 					{
-						QFileInfo FileInfo(QDir(mCurrentModelPath), OriginalFileName);
-
-						lcDiskFile IncludeFile;
-						if (IncludeFile.Open(FileInfo.absoluteFilePath().toLatin1().constData(), "rt")) // todo: qstring
+						lcMemFile IncludeFile;
+						if (LoadAndInlineFile(OriginalFileName, IncludeFile))
 						{
 							const char* OldLocale = setlocale(LC_NUMERIC, "C");
-							Loaded = ReadMeshData(IncludeFile, IncludeTransform, ColorCode, TextureStack, MeshData, MeshDataType, Optimize);
+							Loaded = ReadMeshData(File, IncludeTransform, ColorCode, TextureStack, MeshData, MeshDataType, Optimize);
 							setlocale(LC_NUMERIC, OldLocale);
 						}
 					}

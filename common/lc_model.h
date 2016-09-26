@@ -188,6 +188,7 @@ public:
 	void SetPieceSteps(const QList<QPair<lcPiece*, lcStep>>& PieceSteps);
 
 	void MoveSelectionToModel(lcModel* Model);
+	void InlineAllModels();
 	void InlineSelectedModels();
 
 	lcGroup* AddGroup(const QString& Prefix, lcGroup* Parent);

@@ -2180,6 +2180,50 @@ void lcModel::MoveSelectionToModel(lcModel* Model)
 	ClearSelectionAndSetFocus(ModelPiece, LC_PIECE_SECTION_POSITION);
 }
 
+void lcModel::InlineAllModels()
+{
+	for (;;)
+	{
+		bool Inlined = false;
+
+		for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); )
+		{
+			lcPiece* Piece = mPieces[PieceIdx];
+
+			if (!Piece->mPieceInfo->IsModel())
+			{
+				PieceIdx++;
+				continue;
+			}
+
+			mPieces.RemoveIndex(PieceIdx);
+
+			lcArray<lcModelPartsEntry> ModelParts;
+			Piece->mPieceInfo->GetModelParts(Piece->mModelWorld, Piece->mColorIndex, ModelParts);
+
+			for (int InsertIdx = 0; InsertIdx < ModelParts.GetSize(); InsertIdx++)
+			{
+				lcModelPartsEntry& Entry = ModelParts[InsertIdx];
+
+				lcPiece* NewPiece = new lcPiece(Entry.Info);
+
+				NewPiece->Initialize(Entry.WorldMatrix, Piece->GetStepShow());
+				NewPiece->SetColorIndex(Entry.ColorIndex);
+				NewPiece->UpdatePosition(mCurrentStep);
+
+				InsertPiece(NewPiece, PieceIdx);
+				PieceIdx++;
+			}
+
+			delete Piece;
+			Inlined = true;
+		}
+
+		if (!Inlined)
+			break;
+	}
+}
+
 void lcModel::InlineSelectedModels()
 {
 	lcArray<lcObject*> NewPieces;

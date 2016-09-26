@@ -186,6 +186,7 @@ protected:
 
 	int FindPrimitiveIndex(const char* Name) const;
 	bool LoadPrimitive(int PrimitiveIndex);
+	bool LoadAndInlineFile(const char* FileName, lcMemFile& File);
 
 	QString mCachePath;
 	QString mCurrentModelPath;

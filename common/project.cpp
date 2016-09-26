@@ -326,6 +326,16 @@ bool Project::Save(const QString& FileName)
 	lcGetPiecesLibrary()->SetCurrentModelPath(QFileInfo(FileName).absolutePath());
 
 	QTextStream Stream(&File);
+	bool Success = Save(Stream);
+
+	mFileName = FileName;
+	mModified = false;
+
+	return Success;
+}
+
+bool Project::Save(QTextStream& Stream)
+{
 	bool MPD = mModels.GetSize() > 1;
 
 	for (int ModelIdx = 0; ModelIdx < mModels.GetSize(); ModelIdx++)
@@ -341,9 +351,6 @@ bool Project::Save(const QString& FileName)
 		if (MPD)
 			Stream << QLatin1String("0 NOFILE\r\n");
 	}
-
-	mFileName = FileName;
-	mModified = false;
 
 	return true;
 }
@@ -379,6 +386,16 @@ void Project::Merge(Project* Other)
 	}
 
 	mModified = true;
+}
+
+void Project::InlineAllModels()
+{
+	mModels[0]->InlineAllModels();
+
+	for (int ModelIdx = 1; ModelIdx < mModels.GetSize(); ModelIdx++)
+		delete mModels[ModelIdx];
+
+	mModels.SetSize(1);
 }
 
 void Project::GetModelParts(lcArray<lcModelPartsEntry>& ModelParts)

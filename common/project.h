@@ -55,8 +55,11 @@ public:
 	lcModel* CreateNewModel(bool ShowModel);
 	QString GetNewModelName(QWidget* ParentWidget, const QString& DialogTitle, const QString& CurrentName, const QStringList& ExistingModels) const;
 	void ShowModelListDialog();
+	void InlineAllModels();
+
 	bool Load(const QString& FileName);
 	bool Save(const QString& FileName);
+	bool Save(QTextStream& Stream);
 	void Merge(Project* Other);
 
 	void SaveImage();

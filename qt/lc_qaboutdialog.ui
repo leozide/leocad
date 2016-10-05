@@ -24,7 +24,7 @@
           <string/>
          </property>
          <property name="pixmap">
-          <pixmap resource="../leocad.qrc">:/resources/icon64.png</pixmap>
+          <pixmap resource="../leocad.qrc">:/resources/leocad.png</pixmap>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>

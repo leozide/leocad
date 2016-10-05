@@ -60,7 +60,7 @@ lcMainWindow::~lcMainWindow()
 
 void lcMainWindow::CreateWidgets()
 {
-	setWindowIcon(QIcon(":/resources/icon64.png"));
+	setWindowIcon(QIcon(":/resources/leocad.png"));
 	setWindowFilePath(QString());
 
 	CreateActions();

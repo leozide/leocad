@@ -1847,6 +1847,8 @@ bool lcMainWindow::OpenProject(const QString& FileName)
 
 		if (LoadFileName.isEmpty())
 			return false;
+
+		lcSetProfileString(LC_PROFILE_PROJECTS_PATH, QFileInfo(LoadFileName).absolutePath());
 	}
 
 	Project* NewProject = new Project();
@@ -1877,6 +1879,8 @@ void lcMainWindow::MergeProject()
 
 	if (LoadFileName.isEmpty())
 		return;
+
+	lcSetProfileString(LC_PROFILE_PROJECTS_PATH, QFileInfo(LoadFileName).absolutePath());
 
 	Project* NewProject = new Project();
 
@@ -1920,6 +1924,8 @@ bool lcMainWindow::SaveProject(const QString& FileName)
 
 		if (SaveFileName.isEmpty())
 			return false;
+
+		lcSetProfileString(LC_PROFILE_PROJECTS_PATH, QFileInfo(SaveFileName).absolutePath());
 	}
 
 	if (QFileInfo(SaveFileName).suffix().toLower() == QLatin1String("lcd"))

@@ -49,7 +49,6 @@ struct lcPreferencesDialogOptions
 	lcPreferences Preferences;
 
 	QString DefaultAuthor;
-	QString ProjectsPath;
 	QString LibraryPath;
 	QString POVRayPath;
 	QString LGEOPath;

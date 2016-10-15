@@ -27,7 +27,6 @@ public:
 
 public slots:
 	void accept();
-	void on_projectsFolderBrowse_clicked();
 	void on_partsLibraryBrowse_clicked();
 	void on_povrayExecutableBrowse_clicked();
 	void on_lgeoPathBrowse_clicked();

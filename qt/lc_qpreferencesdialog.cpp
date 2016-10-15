@@ -26,7 +26,6 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget *parent, void *data) :
 	options = (lcPreferencesDialogOptions*)data;
 
 	ui->authorName->setText(options->DefaultAuthor);
-	ui->projectsFolder->setText(options->ProjectsPath);
 	ui->partsLibrary->setText(options->LibraryPath);
 	ui->povrayExecutable->setText(options->POVRayPath);
 	ui->lgeoPath->setText(options->LGEOPath);
@@ -89,7 +88,6 @@ void lcQPreferencesDialog::accept()
 	}
 
 	options->DefaultAuthor = ui->authorName->text();
-	options->ProjectsPath = ui->projectsFolder->text();
 	options->LibraryPath = ui->partsLibrary->text();
 	options->POVRayPath = ui->povrayExecutable->text();
 	options->LGEOPath = ui->lgeoPath->text();
@@ -117,14 +115,6 @@ void lcQPreferencesDialog::accept()
 	options->Preferences.mLightingMode = ui->enableLighting->isChecked() ? LC_LIGHTING_FULL : LC_LIGHTING_FLAT;
 
 	QDialog::accept();
-}
-
-void lcQPreferencesDialog::on_projectsFolderBrowse_clicked()
-{
-	QString result = QFileDialog::getExistingDirectory(this, tr("Open Projects Folder"), ui->projectsFolder->text());
-
-	if (!result.isEmpty())
-		ui->projectsFolder->setText(QDir::toNativeSeparators(result));
 }
 
 void lcQPreferencesDialog::on_partsLibraryBrowse_clicked()

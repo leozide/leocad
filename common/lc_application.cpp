@@ -455,7 +455,6 @@ void lcApplication::ShowPreferencesDialog()
 	Options.Preferences = mPreferences;
 
 	Options.DefaultAuthor = lcGetProfileString(LC_PROFILE_DEFAULT_AUTHOR_NAME);
-	Options.ProjectsPath = lcGetProfileString(LC_PROFILE_PROJECTS_PATH);
 	Options.LibraryPath = lcGetProfileString(LC_PROFILE_PARTS_LIBRARY);
 	Options.POVRayPath = lcGetProfileString(LC_PROFILE_POVRAY_PATH);
 	Options.LGEOPath = lcGetProfileString(LC_PROFILE_POVRAY_LGEO_PATH);
@@ -485,7 +484,6 @@ void lcApplication::ShowPreferencesDialog()
 	mPreferences.SaveDefaults();
 
 	lcSetProfileString(LC_PROFILE_DEFAULT_AUTHOR_NAME, Options.DefaultAuthor);
-	lcSetProfileString(LC_PROFILE_PROJECTS_PATH, Options.ProjectsPath);
 	lcSetProfileString(LC_PROFILE_PARTS_LIBRARY, Options.LibraryPath);
 	lcSetProfileString(LC_PROFILE_POVRAY_PATH, Options.POVRayPath);
 	lcSetProfileString(LC_PROFILE_POVRAY_LGEO_PATH, Options.LGEOPath);

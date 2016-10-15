@@ -60,7 +60,8 @@ lcMainWindow::~lcMainWindow()
 
 void lcMainWindow::CreateWidgets()
 {
-	setWindowIcon(QIcon(":/resources/leocad.png"));
+	setAcceptDrops(true);
+	setWindowIcon(QIcon(":/resources/icon64.png"));
 	setWindowFilePath(QString());
 
 	CreateActions();
@@ -685,6 +686,20 @@ void lcMainWindow::closeEvent(QCloseEvent *event)
 	}
 	else
 		event->ignore();
+}
+
+void lcMainWindow::dragEnterEvent(QDragEnterEvent* Event)
+{
+	if (Event->mimeData()->hasUrls())
+		Event->acceptProposedAction();
+}
+
+void lcMainWindow::dropEvent(QDropEvent* Event)
+{
+	const QMimeData* MimeData = Event->mimeData();
+	foreach (const QUrl &Url, MimeData->urls())
+		if (OpenProject(Url.toLocalFile()))
+			break;
 }
 
 QMenu* lcMainWindow::createPopupMenu()

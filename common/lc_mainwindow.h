@@ -275,6 +275,8 @@ protected slots:
 
 protected:
 	void closeEvent(QCloseEvent *event);
+	void dragEnterEvent(QDragEnterEvent* Event);
+	void dropEvent(QDropEvent* Event);
 	QMenu* createPopupMenu();
 
 	void CreateActions();

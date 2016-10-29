@@ -53,6 +53,9 @@ bool lcQPartsTree::event(QEvent *event)
 	{
 		QKeyEvent *keyEvent = (QKeyEvent*)event;
 
+		if (keyEvent->modifiers() == Qt::NoModifier)
+			event->accept();
+
 		switch (keyEvent->key())
 		{
 		case Qt::Key_Down:

@@ -1,0 +1,613 @@
+<!doctype html>
+<html>
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Version History | LeoCAD</title>
+    <link rel="stylesheet" href="../main.css">
+  </head>
+  <body>
+    <div class="container">
+
+<!-- navbar start -->
+<div class="nav-main">
+  <div class="wrap">
+    <a class="nav-home" href="../index.html"><img class="nav-logo" src="../leocad-32.png" width="32" height="32"> LeoCAD </a>
+    <ul class="nav-site nav-site-internal">
+      <li><a href="../download.html">Download</a></li>
+      <li><a href="start.html" class="active">Documentation</a></li>
+<!--      <li><a href="../help.html">Help</a></li> -->
+    </ul>
+    <ul class="nav-site nav-site-external">
+      <li><a href="https://github.com/leozide/leocad">GitHub</a></li>
+    </ul>
+  </div>
+</div>
+<!-- navbar end -->
+
+<section class="content wrap documentationContent">
+
+<!-- docbar start -->
+<div class="nav-docs">
+  <div class="nav-docs-section">
+    <h3>General Information</h3>
+    <ul>
+      <li><a href="start.html">Getting Started</a></li>
+      <li><a href="library.html">Parts Library</a></li>
+      <li><a href="compiling.html">Compiling Guide</a></li>
+      <li><a href="license.html">License</a></li>
+      <li><a href="history.html" class="active">Version History</a></li>
+    </ul>
+  </div>
+  <div class="nav-docs-section">
+    <h3>Tutorials</h3>
+    <ul>
+<!--
+      <li><a href="">Choosing and Adding Pieces</a></li>
+      <li><a href="">Moving and Rotating Pieces</a></li>
+      <li><a href="camera.html">Camera and Viewport</a></li> 
+      <li><a href="">Models</a></li> 
+      <li><a href="">Flexible Parts</a></li> 
+      Keyframing
+      POV-Ray
+ -->
+      <li><a href="tutorial1.html">Basic Tutorial</a></li>
+    </ul>
+  </div>
+<!--      <li><a href="">Coordinate System</a></li>
+  <div class="nav-docs-section">
+    <h3>Reference</h3>
+    <ul>
+      <li><a href="">Meta Commands</a></li>
+      <li><a href="">Configuration Shortcuts</a></li>
+    </ul>
+  </div>
+  -->
+</div>
+<!-- docbar end -->
+
+<div class="inner-content">
+
+<h2>Version History</h2>
+<p>
+Version 0.83.1 (13/8/2016)
+</p>
+<ul><li>Search the current path for submodels when opening files.
+</li><li>Optimizations for loading very large models.
+</li><li>Added option to control which models to export to HTML.
+</li><li>Fixed incorrectly localized numbers.
+</li><li>Fixed the position of rotated objects in the properties pane.
+</li><li>Fixed HTML export of models with only 1 step.
+</li><li>Fixed context menu not showing in some cases.
+</li><li>Fixed loading flex pieces without control points.
+</li><li>Fixed loading pieces with more than 64k verts.
+</li><li>Fixed Minifig Wizard crash.
+</li></ul><p>
+Version 0.83 (14/5/2016)
+</p>
+<ul><li>Added support for dynamically generated parts (Technic Ribbed Hoses, Flexible Axles, Braided Strings and Shock Absorbers).
+</li><li>Added option for specifying the pivot point of a piece (Drag the movement arrows with the Right Mouse Button).
+</li><li>Submodels now open in a separate tab on the main window.
+</li><li>Configurable mouse shortcuts.
+</li><li>Added more context menu options.
+</li><li>Allow changing multiple pieces at the same time using the properties widget.
+</li><li>Better piece rotation.
+</li></ul><p>
+Version 0.82.2 (14/11/2015)
+</p>
+<ul><li>Added Portuguese and French translations.
+</li><li>Added new toolbar and menu icons.
+</li><li>Mouse buttons 4 and 5 can now be used for navigating steps.
+</li><li>Added total parts to the Properties Dialog.
+</li><li>Fixed POV-Ray command line.
+</li><li>Fixed Timeline not updating correctly in some cases.
+</li></ul><p>
+Version 0.82.1 (12/4/2015)
+</p>
+<ul><li>Fixed crash on startup if a toolbar was floating when the application was closed.
+</li></ul><p>
+Version 0.82 (4/4/2015)
+</p>
+<ul><li>Added Timeline toolbar to show what parts were added at each step.
+</li><li>Added support for drawing triangles and lines in model files.
+</li><li>Preserve original file comments when saving.
+</li><li>Added Wavefront and 3DS export command line options.
+</li><li>Rendering optimizations.
+</li><li>Better pan tool sensitivity.
+</li><li>Improved zoom extents and zoom region.
+</li><li>Fixed MPD loading bugs.
+</li><li>Fixed Minifig Wizard crash.
+</li><li>Fixed waist accessory selection in the Minifig Wizard.
+</li><li>Fixed saving images from the command line.
+</li><li>Fixed mouse wheel in Qt5.
+</li><li>Fixed line width not being set for edge lines.
+</li><li>Fixed option to disable drawing lines.
+</li><li>Fixed steps and keyframes not saving correctly.
+</li></ul><p>
+Version 0.81 (18/1/2015)
+</p>
+<ul><li>Added support for multiple models and including submodels in the main model.
+</li><li>Changed save file format to ldr/mpd (loading lcd is still supported).
+</li><li>Added support for loading models that with pieces that are scaled or mirrored.
+</li><li>Added support for loading ldrawunf.zip, just place it in the same folder that the library is.
+</li><li>Added toolbar button for toggling relative transformation mode.
+</li><li>Added support for more than 255 steps in a model.
+</li><li>Improved movement and rotation of pieces.
+</li><li>Added more pieces to the built-in library.
+</li><li>Fixed crash when adding pieces with very long descriptions.
+</li></ul><p>
+Version 0.80.4 (6/4/2014)
+</p>
+<ul><li>Correct fix for OSX retina displays.
+</li></ul><p>
+Version 0.80.3 (5/4/2014)
+</p>
+<ul><li>Fixed mouse coordinates in OSX retina displays.
+</li><li>Fixed shortcuts in the parts tree.
+</li></ul><p>
+Version 0.80.2 (25/1/2014)
+</p>
+<ul><li>Added Look At command.
+</li><li>Added orthographic projection option.
+</li><li>Added editing of group names from the Edit Group Dialog.
+</li><li>Fixed wrong transform of some pieces when importing nested LDraw files.
+</li><li>Fixed printing and saving images on certain Intel video cards.
+</li><li>Fixed grid studs being enabled by grid lines option.
+</li><li>Fixed piece arrows not being drawn if the axis icon is enabled.
+</li><li>Preserve groups when merging.
+</li></ul><p>
+Version 0.80.1 (2/9/2013)
+</p>
+<ul><li>Added option to draw studs on the base grid.
+</li><li>Added option to ignore a new version when checking for updates.
+</li><li>Fixed 3DS export bugs.
+</li><li>Fixed loading mpd files with spaces in the name.
+</li><li>Fixed Used Parts List column mismatch.
+</li><li>Fixed find command getting disabled incorrectly.
+</li><li>Fixed bug restoring window position when maximized.
+</li><li>Fixed calling POV-Ray to render files.
+</li></ul><p>
+Version 0.80 (13/8/2013)
+</p>
+<ul><li>Switched user interface to Qt on all platforms.
+</li><li>Added native Mac OS X version.
+</li><li>Added dialog to search for specific parts in the current model.
+</li><li>Added option to export used parts in CSV format.
+</li><li>Save crash dump on Windows.
+</li><li>Fixed some parts being rendered incorrectly.
+</li><li>Fixed crash on Windows computers with the policy to disable recent menu files.
+</li></ul><p>
+Version 0.79.3 (6/3/2013)
+</p>
+<ul><li>Improved camera rotation.
+</li><li>Renamed default view positions.
+</li><li>Added option to print Bill of Materials for a model.
+</li><li>Added a small built-in parts library in case a real one is not available.
+</li><li>Added export to Brick Link.
+</li><li>Added option to display piece ID and select the piece color to the HTML exporter.
+</li><li>Added drag and drop support from piece list on Linux.
+</li><li>Added middle mouse button and mouse wheel support on Linux.
+</li><li>Added camera rotate and zoom to the Minifig Wizard preview.
+</li><li>Fixed 3ds export colors.
+</li></ul><p>
+Version 0.79.2 (21/1/2013)
+</p>
+<ul><li>Fixed rendering problems on computers with a decimal point other than a dot.
+</li><li>Fixed wrong pieces being selected after dragging a new piece from the piece list.
+</li><li>Better Linux desktop integration.
+</li></ul><p>
+Version 0.79.1 (2/1/2013)
+</p>
+<ul><li>Fixed rendering glitch with some translucent pieces.
+</li><li>Don't change view during undo or redo.
+</li><li>Fixed crash changing directories in the Linux file dialog.
+</li><li>Fixed bug loading textures from zip files.
+</li><li>Read parts.lst when using a library folder directly.
+</li></ul><p>
+Version 0.79 (13/12/2012)
+</p>
+<ul><li>Switched to a new library file format.
+</li><li>Added support for texture mapped pieces. 
+</li><li>Added support for using the LDraw library directly.
+</li><li>Load color config from ldconfig.ldr where the library is located.
+</li><li>Save view layout between sessions.
+</li><li>Allow the pieces search text box to auto-complete when entering piece numbers.
+</li><li>Fixed errors on big endian computers.
+</li><li>Zoom extents after loading a file.
+</li></ul><p>
+Version 0.78.1 (21/09/2012)
+</p>
+<ul><li>Fixed crash loading files with pieces not in the library.
+</li><li>Fixed Linux Properties Dialog crash.
+</li><li>Fixed wrong stud radius.
+</li><li>Added message about unsaved shortcut changes.
+</li></ul><p>
+Version 0.78 (14/08/2012)
+</p>
+<ul><li>New mouse overlay when in selection mode.
+</li><li>Added transform entries to the toolbar.
+</li><li>Added option to keep adding pieces with the mouse if the control key is pressed.
+</li><li>Added support for new minifig accessory categories.
+</li><li>Added MSAA support.
+</li><li>Fixed 3DS export colors.
+</li><li>Fixed mouse detection over the move overlay.
+</li><li>Fixed bug rotating multiple pieces.
+</li></ul><p>
+Version 0.77 (05/07/2012)
+</p>
+<ul><li>Added new colors.
+</li><li>Faster rendering on video cards that support Vertex Buffer Objects.
+</li><li>Fixed bug exporting certain Wavefront files.
+</li><li>Fixed instructions printing not centering correctly.
+</li><li>Fixed bug where translucent pieces at the same position could cause a crash.
+</li><li>Fixed shortcuts conflict with the Properties Pane.
+</li><li>Updated Minifig Wizard settings.
+</li></ul><p>
+Version 0.76.2 (07/04/2012)
+</p>
+<ul><li>Added command line option to create Pieces Library.
+</li><li>Fixed bug exporting Wavefront files.
+</li><li>Fixed bugs importing pieces.
+</li></ul><p>
+Version 0.76.1 (05/04/2012)
+</p>
+<ul><li>Fixed bug where piece categories would not expand on some computers.
+</li></ul><p>
+Version 0.76 (18/03/2012)
+</p>
+<ul><li>Updated Windows interface to a more modern style.
+</li><li>Updated Linux dialogs and interface.
+</li><li>Views can now be dynamically created and resized.
+</li><li>Added shortcut to quickly pan/zoom/rotate while holding the control key down and pressing the L/M/R mouse buttons.
+</li><li>Replaced the Modify toolbar with the Properties bar.
+</li><li>Updated POV-Ray export to support the current LGEO library.
+</li><li>Added Import Folder option to the Pieces Library Manager.
+</li><li>Better color conversion when importing pieces.
+</li><li>Insert placeholder pieces when loading files with pieces not in the library so they are not deleted when saving.
+</li><li>Changed position units to match LDraw.
+</li><li>Fixed bug where 3DS objects were not exported as double sided.
+</li><li>Fixed decimal separator when saving text files on computers with certain language settings.
+</li><li>Fixed stud rendering bug in pieces with a large number of vertices.
+</li></ul><p>
+Version 0.75.2 (17/06/2011)
+</p>
+<ul><li>Added support for pieces with names longer than 8 characters.
+</li></ul><p>
+Version 0.75.1 (11/07/2010)
+</p>
+<ul><li>Minifig Wizard can now read its settings from a config file.
+</li></ul><p>
+Version 0.75 (31/03/2006)
+</p>
+<ul><li>Added rubber band selection (drag the mouse to select pieces inside a given region).
+</li><li>Added the ability to rotate the piece preview camera. 
+</li><li>Added independent XY and Z snap values.
+</li><li>Added an overlay for helping rotate the camera.
+</li><li>Added an option to check for new versions at startup.
+</li><li>Added drag and drop of pieces from the Pieces Toolbar to the project.
+</li><li>New pieces are added at the same pos/orientation as the currently selected one.
+</li><li>When adding new pieces with the mouse their position is now previewed before inserting.
+</li><li>Changed piece movement to be relative to the currently selected piece by default. 
+</li><li>Replaced the piece groups with a category tree in the Pieces Toolbar. 
+</li><li>Fixed a bug that was causing some pieces to be incorrectly rotated after importing an LDraw file.
+</li><li>Pressing the delete key while in the pieces search window no longer deletes pieces in the project.
+</li><li>The size of the pieces toolbar will now be remembered when you restart the program.
+</li></ul><p>
+Version 0.74 (18/02/2005)
+</p>
+<ul><li>Fixed rotation bug.
+</li><li>Added icons to help moving/rotating pieces with the mouse.
+</li><li>Added support for custom user shortcut keys.
+</li><li>Added support to Big Endian computers (Linux PPC).
+</li><li>Added new pieces to the Minifig Wizard.
+</li><li>Added commands to insert and delete steps when creating instructions.
+</li><li>Fixed a bug that would cause pieces to disappear when rotating them.
+</li><li>Fixed some bugs in the 3DS exporter.
+</li><li>Fixed a crash loading files in computers configured to use different decimal separators.
+</li><li>Fixed a crash with the Zoom Extents command.
+</li><li>Fixed a crash loading very big pieces.
+</li></ul><p>
+Version 0.73 (18/12/2000)
+</p>
+<ul><li>Fixed rotation bug.
+</li><li>Fixed a bug when you insert a piece after a rotated piece wouldn't show the new piece correctly.
+</li><li>Fixed Z buffer bug in the piece preview.
+</li><li>Fixed blending in piece preview.
+</li><li>Fixed bug when exporting POV-Ray files using LGEO.
+</li><li>Fixed small bug in the texture font.
+</li><li>Fixed startup crash under win2k.
+</li><li>Adding rotation angles to each minifig wizard option.
+</li><li>Added an option to save custom minifigs to the Minifig Wizard.
+</li><li>Added new minifig pieces to the minifig wizard.
+</li><li>Added Save Picture dialog to the Linux version.
+</li><li>Added an overwrite prompt when saving a project under Linux.
+</li><li>Added project loading preview to the Linux version.
+</li><li>The Pieces toolbar can now be resized when docked or detached from the main window (Linux).
+</li><li>Fixed animation playback under Linux.
+</li><li>Fixed the numeric keypad under Linux.
+</li><li>Fixed problem with "focus follow mouse" in X.
+</li><li>Updated the Linux Array dialog.
+</li><li>Enabled the "Make Default" button of the preferences dialog (Linux).
+</li><li>Save window position and size under Linux.
+</li><li>The toolbar menu now has the checkboxes correct (Linux).
+</li><li>Remember toolbar state between sessions (Linux).
+</li><li>Added Linux man page.
+</li></ul><p>
+Version 0.71 (9/19/99)
+</p>
+<ul><li>Rendering is 30% faster in some 3D video cards
+</li><li>New way of moving objects with the mouse
+</li><li>Double click now selects the object under the cursor
+</li><li>Pasted pieces are selected now
+</li><li>Fixed a bug loading groups from old files
+</li><li>Fixed a bug in the .obj export code
+</li><li>Several small bugs fixed
+</li></ul><p>
+Version 0.70 (8/20/99)
+</p>
+<ul><li>First Linux version
+</li><li>Added new command line options
+</li><li>You can now work with multiple clipboards
+</li><li>Added 2 buttons to move pieces to the next/previous step
+</li><li>It’s now possible to have infinite groups depth
+</li><li>You can now specify a default path for .lcd files
+</li><li>Added a dialog to edit the piece groups
+</li><li>Added support for saving interlaced GIFs
+</li><li>Removed the spaces from the color names in .obj files
+</li><li>Fixed a bug reading compressed .bmp files
+</li><li>Fixed a bug choosing the image format when saving html pages
+</li><li>Groups are now pasted correctly
+</li><li>Fixed a bug with the file/merge command
+</li></ul><p>
+Version 0.66 (5/27/99)
+</p>
+<ul><li>Fixed a bug in the piece preview window 
+</li><li>Fixed a bug in the Array dialog
+</li><li>Arrays created  from groups of pieces are now rotated correctly
+</li></ul><p>
+Version 0.65 (4/26/99)
+</p>
+<ul><li>Added a reset cameras command
+</li><li>Changed the transparency to alpha blending
+</li><li>Changed the print preview toolbar
+</li><li>Fixed a bug in the minifig wizard
+</li><li>Fixed a bug when loading some files
+</li><li>Fixed a copy &amp; paste bug
+</li><li>Fixed the delete camera command
+</li><li>Fixed a bug running POV-Ray
+</li><li>Fixed a bug creating HTML instructions
+</li></ul><p>
+Version 0.64 (3/27/99)
+</p>
+<ul><li>Added a terrain editor
+</li><li>Added a completely new POV-Ray export function
+</li><li>Added 3DS and OBJ color export
+</li><li>Added a menu to set the snap spacing from the status bar
+</li><li>Fixed a bug changing the tabs in the Preferences dialog
+</li><li>Fixed a bug loading/saving piece groups
+</li><li>Fixed a bug with the name of pasted pieces
+</li><li>Fixed the option to set the size of the base grid
+</li></ul><p>
+Version 0.63 (2/12/99)
+</p>
+<ul><li>Redone the background rendering routines
+</li><li>Exporting to HTML can now create pictures of the pieces used 
+</li><li>Added an option to update the Piece Library
+</li><li>Fixed a bug importing LDraw files
+</li><li>Fixed a bug with the Print Preview
+</li><li>Fixed a bug running L2P
+</li></ul><p>
+Version 0.62 (1/21/99)
+</p>
+<ul><li>Added functions to export files to Wavefront &amp; 3DS (no colors yet)
+</li><li>Added an option to draw a floor &amp; sky
+</li><li>Added tooltips for the toolbar buttons
+</li><li>Added an option to highlight new pieces when creating HTML files
+</li><li>Fixed a bug with the minifig wizard
+</li><li>Fixed a bug loading the program on some computers
+</li><li>The title bar now correctly shows the name of the file loaded
+</li></ul><p>
+Version 0.61 (1/13/98)
+</p>
+<ul><li>About 40% speed increase
+</li><li>Accurate selection of pieces
+</li><li>Improved AutoPan/MouseWheel support
+</li><li>Autosave re-enabled
+</li><li>Basic animation support
+</li><li>Fixed some bugs loading old files
+</li></ul><p>
+Version 0.60 (12/24/98)
+</p>
+<ul><li>Rewrote the program, too many changes to list
+</li></ul><p>
+Version 0.54 (08/25/98)
+</p>
+<ul><li>Added an option to save transparent GIFs
+</li><li>Added an option to show the piece position on the status bar
+</li><li>Added an auto-save feature
+</li><li>Added an option to use "Brick" units instead of centimeters
+</li><li>Improved the way the program draw the lines
+</li><li>Pressing CTRL while the rotate tool is selected changes temporarily to pan (and vice-versa)
+</li><li>Fixed a bug that prevented the Infobar from floating
+</li><li>Fixed a bug with the print preview
+</li><li>Fixed a bug with the color selector on some video cards
+</li><li>When a new piece is inserted, it is now placed above the previously selected one
+</li><li>Changed some more colors (now black is a very dark grey and the edge lines are black)
+</li></ul><p>
+Version 0.53 (07/31/98)
+</p>
+<ul><li>Added an option to preview the position of new pieces
+</li><li>Added a function to print a list of pieces used
+</li><li>Fixed a bug with 256 colors displays
+</li><li>You can now select cameras with the mouse
+</li><li>Improved the zoom rectangle tool
+</li><li>The groups toolbar is now updated when you add/remove a new group
+</li><li>Changed some colors a little bit
+</li></ul><p>
+Version 0.52 (07/17/98)
+</p>
+<ul><li>Added new colors
+</li><li>Added a function to import a single LDraw piece into the library
+</li><li>Improved the minifig wizard
+</li><li>Tuned up the application to use less memory (about 6MB less)
+</li><li>Removed the shaded caption bar (Windows 98 will do it)
+</li><li>Changed the format of the piece library
+</li><li>Fixed some minor bugs
+</li></ul><p>
+Version 0.51a (06/25/98)
+</p>
+<ul><li>Fixed a bug with the LDraw import and export routines
+</li><li>Fixed a bug with the print catalog command on high resolution printers
+</li><li>It’s now possible to set the size of the preview window on the pieces toolbar
+</li></ul><p>
+Version 0.51 (06/16/98)
+</p>
+<ul><li>Rotations of more than 1 brick are now correct
+</li><li>Fixed a bug with the piece preview palette on 256 colors
+</li><li>Fixed another bug with the 'Save toolbar position' option
+</li><li>LeoCAD now remembers the 'view part number' settings
+</li><li>Background/Fast Rendering options are saved with the projects
+</li><li>Added an option to save a preview of the project files
+</li><li>Added an option to print a header &amp; footer
+</li><li>Added an option to set print margins
+</li><li>Added a print setup tab on the preferences dialog
+</li><li>Added: save GIF files
+</li><li>Added: save 256 colors BMP files
+</li><li>Added: save progressive JPG files
+</li><li>Added a button to browse for background images
+</li><li>It's possible to use GIF files as background
+</li><li>Moved the 'Save Picture' command to the 'Save As' dialog
+</li><li>Moved the 'Import LDraw' command to the 'Open' dialog
+</li></ul><p>
+Version 0.50a
+</p>
+<ul><li>Added an option to print with lower quality (using less memory)
+</li><li>Fixed a bug closing the print preview
+</li></ul><p>
+Version 0.50
+</p>
+<ul><li>Added a function to export files to POV-Ray (using LGEO)
+</li><li>Added a function to check for new versions
+</li><li>Added a function to print all pieces on the library
+</li><li>Added a function to send a project by e-mail
+</li><li>Added a function to save a sequence of pictures (to create a QTVR object)
+</li><li>Added an option to choose how many steps per page are printed
+</li><li>Added an option to draw a border around each step printed
+</li><li>Changed the ‘3D Snap’ button on the toolbar to display a menu
+</li><li>Fixed a bug saving the toolbars position
+</li><li>Fixed a bug with the selection of bricks with multiple viewports enabled
+</li></ul><p>
+Version 0.49
+</p>
+<ul><li>Added an option to save JPG files
+</li><li>Added an option to use a JPG file as background
+</li><li>Added tooltips for the color list
+</li><li>Added a 'total' field to the 'Pieces Used' list
+</li><li>Added a command to create HTML instructions
+</li><li>Added new movement modes keyframer/snapshot
+</li><li>Fixed/Added some options to the interface
+</li><li>Fixed the camera submenu
+</li><li>Fixed a bug that would crash the program while rendering in the background
+</li></ul><p>
+Version 0.48
+</p>
+<ul><li>Added an option to remove a brick after a chosen step
+</li><li>Added an option to draw the studs as boxes
+</li><li>Added a dialog to create minifigs
+</li><li>Added an option to set the mouse sensitivity
+</li><li>Added an ‘Apply’ button to the ‘Step’ and ‘Camera’ dialog 
+</li><li>The ‘Camera’ dialog now gets correctly updated 
+</li><li>The info bar now shows the rotations and get updated correctly
+</li><li>Better LDraw import
+</li><li>Fixed a bug with the print preview in full screen mode 
+</li><li>No more duplicate names on the brick combobox
+</li><li>The brick bar now shows the popups when you right click on almost any place
+</li></ul><p>
+Version 0.47
+</p>
+<ul><li>Fixed a bug that would crash LeoCAD on some computers
+</li></ul><p>
+Version 0.46
+</p>
+<ul><li>New color list
+</li><li>The keyboard keys now move/rotate on the direction of the screen
+</li><li>Numeric keypad now works correctly
+</li><li>It is possible to group the parts and keep the brick combobox
+</li><li>Fixed some problems with the save bitmap dialog
+</li><li>Fixed a bug that wouldn’t change the preferences on the second thread
+</li><li>When the program is not active, it will redraw the window faster
+</li><li>No more ‘~Moved to’ parts on the list of used pieces
+</li></ul><p>
+Version 0.45
+</p>
+<ul><li>Added a button to save default options for new projects
+</li><li>Added a dialog to modify a brick
+</li><li>Added an option do remove the hidden lines on the fast rendering
+</li><li>Added an option to draw filled boxes instead of only the edges
+</li><li>Added some options to hide the camera ‘boxes’
+</li><li>Faster grid
+</li><li>Faster rendering
+</li><li>Zoom extents all viewports (hold control and press the icon on the toolbar)
+</li><li>Changed a little bit the right button popups
+</li><li>Completely rewrote the Part Library Manager
+</li><li>Added a command to import Ldraw parts from a directory
+</li></ul><p>
+Version 0.44
+</p>
+<ul><li>Now LeoCAD saves the fog/background bitmap options of every project
+</li><li>Some more popup menu options
+</li></ul><p>
+Version 0.43
+</p>
+<ul><li>Fog effect
+</li><li>Load the background from a bitmap file
+</li><li>Option to save the toolbars position enabled
+</li><li>Menus with icons
+</li><li>LDraw models are now imported with the current color of the combobox
+</li><li>Better axis icon
+</li><li>Bricks are now pasted on the current step
+</li><li>Bricks that were grouped when copied to the clipboard are pasted correctly
+</li><li>Now correctly works with the ‘file/new LeoCAD project’ from windows explorer
+</li><li>Fixed a bug that would show a GPF sometimes when exiting the program
+</li></ul><p>
+Version 0.42
+</p>
+<ul><li>Multiple viewports
+</li><li>New parts are now inserted above the last part if you use the keyboard
+</li><li>Zoom extents will not freeze LeoCAD anymore
+</li><li>Fixed bugs on some old parts
+</li><li>Added 52 new parts
+</li></ul><p>
+Version 0.41
+</p>
+<ul><li>LeoCAD is now multithreaded
+</li><li>Added 45 new parts
+</li><li>Added new clear colors
+</li><li>Added a command to ‘hide’ bricks
+</li><li>Added shortcuts to the predefined views
+</li><li>Added shortcuts to zoom function (-/+ keys)
+</li><li>Added an icon that shows the axis orientation
+</li><li>Added a dialog to change the current step
+</li><li>Added an option to disable movement on certain axis
+</li><li>Added a dialog to enter names for the groups of bricks
+</li><li>Added a command to create ‘arrays’ of bricks
+</li><li>Added commands to select all/invert/by name/none bricks
+</li><li>Added an option to make the default action not move after inserting a part
+</li><li>Added warnings if there are old DLLs installed
+</li><li>Added tooltips for the parts list
+</li><li>Changed the toolbars
+</li><li>Changed the viewpoint dialog
+</li><li>Fixed a bug with the zoom extents
+</li><li>Fixed a bug with the paste command
+</li><li>Fixed a bug with the file version warning
+</li><li>Fixed a bug when changing the step of multiple bricks
+</li><li>Fixed some bugs with menu items not being correctly disabled
+</li></ul>
+
+        </div>
+      </section>
+<!-- footer start -->
+<footer class="wrap"><div class="right"> &copy; LeoCAD.org </div></footer>
+<!-- footer end -->
+    </div>
+  </body>
+</html>

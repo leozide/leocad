@@ -1,0 +1,111 @@
+<!doctype html>
+<html>
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Compiling Guide | LeoCAD</title>
+    <link rel="stylesheet" href="../main.css">
+  </head>
+  <body>
+    <div class="container">
+
+<!-- navbar start -->
+<div class="nav-main">
+  <div class="wrap">
+    <a class="nav-home" href="../index.html"><img class="nav-logo" src="../leocad-32.png" width="32" height="32"> LeoCAD </a>
+    <ul class="nav-site nav-site-internal">
+      <li><a href="../download.html">Download</a></li>
+      <li><a href="start.html" class="active">Documentation</a></li>
+<!--      <li><a href="../help.html">Help</a></li> -->
+    </ul>
+    <ul class="nav-site nav-site-external">
+      <li><a href="https://github.com/leozide/leocad">GitHub</a></li>
+    </ul>
+  </div>
+</div>
+<!-- navbar end -->
+
+<section class="content wrap documentationContent">
+
+<!-- docbar start -->
+<div class="nav-docs">
+  <div class="nav-docs-section">
+    <h3>General Information</h3>
+    <ul>
+      <li><a href="start.html">Getting Started</a></li>
+      <li><a href="library.html">Parts Library</a></li>
+      <li><a href="compiling.html" class="active">Compiling Guide</a></li>
+      <li><a href="license.html">License</a></li>
+      <li><a href="history.html">Version History</a></li>
+    </ul>
+  </div>
+  <div class="nav-docs-section">
+    <h3>Tutorials</h3>
+    <ul>
+<!--
+      <li><a href="">Choosing and Adding Pieces</a></li>
+      <li><a href="">Moving and Rotating Pieces</a></li>
+      <li><a href="camera.html">Camera and Viewport</a></li> 
+      <li><a href="">Models</a></li> 
+      <li><a href="">Flexible Parts</a></li> 
+      Keyframing
+      POV-Ray
+ -->
+      <li><a href="tutorial1.html">Basic Tutorial</a></li>
+    </ul>
+  </div>
+<!--      <li><a href="">Coordinate System</a></li>
+  <div class="nav-docs-section">
+    <h3>Reference</h3>
+    <ul>
+      <li><a href="">Meta Commands</a></li>
+      <li><a href="">Configuration Shortcuts</a></li>
+    </ul>
+  </div>
+  -->
+</div>
+<!-- docbar end -->
+
+<div class="inner-content">
+
+<h2>Getting the Source Code</h2>
+<div class="subHeader"></div>
+<p>Users that need to compile their own binaries should get the source code for the latest release from the <a href="../download.html">Download Page</a>.</p>
+<p>If you're a programmer and plan to contribute with code fixes or if you're user that wants to use the latest version and accepts the risks of doing that, then you should download the source from the Git server at https://github.com/leozide/leocad.git.</p>
+<p>Typing this will download the latest revision to a directory called 'leocad' on your computer:</p>
+<div class="highlight"><code>$ git clone https://github.com/leozide/leocad.git</code></div>
+<p>Note: You can receive notifications of source code changes by watching the project on the <a href="https://github.com/leozide/leocad">Github Page</a>.</p>
+
+<h2>Required Libraries</h2>
+<p>LeoCAD requires Qt 4.8 or later to compile. You can download the Qt SDK for all platforms from <a href="http://qt-project.org">http://qt-project.org</a>.</p>
+<p>Linux users may find it easier to just use their package manager instead:</p>
+<div class="highlight"><code>$ sudo apt-get install libqt4-dev zlib1g-dev</code></div>
+<p>Although it's not required, you should also download and install a <a href="library.html">Parts Library</a>, otherwise only a very small set of basic parts will be available.</p>
+
+<h2>Compiling</h2>
+<p>The easiest way to compile on any platform is to open 'leocad.pro' in Qt Creator and build it from there.</p>
+
+<h4>Linux</h4>
+<p>If you're not using Qt Creator, or if you prefer to compile from the command line you can generate a Makefile using qmake and then build and install it:</p>
+<div class="highlight"><code>leocad$ qmake leocad.pro<br>leocad$ make<br>leocad$ make install</code></div>
+<p>There are two options that can be passed to qmake to customize LeoCAD builds that distribution maintainers will be interested:</p>
+<ul>
+<li>DISABLE_UPDATE_CHECK=1: Disables update checks at startup and removes that option from the menu. This is recommended to be set for distributions that have their own way of updating applications to avoid confusing users.</li>
+<li>LDRAW_LIBRARY_PATH="path": Adds an extra path to be searched at startup for the LDraw library. The path should be the root folder of the LDraw library, for example: "/usr/share/ldraw".</li>
+</ul>
+
+<h4>Windows</h4>
+<p>Windows users also have the option to compile with Visual Studio, you just need to use qmake to generate the project files first:</p>
+<div class="highlight"><code>C:\leocad> qmake -tp vc</code></div>
+<p>This will generate a file called 'leocad.vcxproj' that can be opened in Visual Studio.</p>
+
+<h4>OSX</h4>
+<p>To compile for OSX you'll need to add a <a href="library.html">Parts Library</a> to the folder where you downloaded the source code. You can download the Linux library and unzip it there:</p>
+<div class="highlight"><code>leocad$ unzip Library-Linux-7931.zip</code></div>
+        </div>
+      </section>
+<!-- footer start -->
+<footer class="wrap"><div class="right"> &copy; LeoCAD.org </div></footer>
+<!-- footer end -->
+    </div>
+  </body>
+</html>

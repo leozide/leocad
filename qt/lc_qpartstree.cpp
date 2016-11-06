@@ -52,11 +52,12 @@ bool lcQPartsTree::event(QEvent *event)
 	if (event->type() == QEvent::ShortcutOverride)
 	{
 		QKeyEvent *keyEvent = (QKeyEvent*)event;
+		int Key = keyEvent->key();
 
-		if (keyEvent->modifiers() == Qt::NoModifier)
+		if (keyEvent->modifiers() == Qt::NoModifier && Key >= Qt::Key_A && Key <= Qt::Key_Z)
 			event->accept();
 
-		switch (keyEvent->key())
+		switch (Key)
 		{
 		case Qt::Key_Down:
 		case Qt::Key_Up:

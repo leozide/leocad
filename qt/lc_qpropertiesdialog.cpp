@@ -4,7 +4,6 @@
 #include "lc_qutils.h"
 #include "lc_basewindow.h"
 #include "lc_colors.h"
-#include "lc_library.h"
 #include "lc_application.h"
 #include "pieceinf.h"
 
@@ -55,39 +54,34 @@ lcQPropertiesDialog::lcQPropertiesDialog(QWidget *parent, void *data) :
 	pix.fill(QColor(options->Properties.mAmbientColor[0] * 255, options->Properties.mAmbientColor[1] * 255, options->Properties.mAmbientColor[2] * 255));
 	ui->ambientColorButton->setIcon(pix);
 
-	lcPiecesLibrary *library = lcGetPiecesLibrary();
 	lcArray<lcPartsListEntry>& partsUsed = options->PartsList;
 	QStringList horizontalLabels, partNames;
 
-	bool *colorsUsed = new bool[gNumUserColors];
-	memset(colorsUsed, 0, sizeof(bool) * gNumUserColors);
+	QVector<bool> ColorsUsed(gNumUserColors);
+	QMap<PieceInfo*, int> InfoRows;
 
-	int *infoRows = new int[library->mPieces.GetSize()], numInfos = 0;
-	memset(infoRows, 0, sizeof(int) * library->mPieces.GetSize());
-
-	for (int partIdx = 0; partIdx < partsUsed.GetSize(); partIdx++)
+	for (int PartIdx = 0; PartIdx < partsUsed.GetSize(); PartIdx++)
 	{
-		colorsUsed[partsUsed[partIdx].ColorIndex] = true;
+		ColorsUsed[partsUsed[PartIdx].ColorIndex] = true;
+		PieceInfo* Info = partsUsed[PartIdx].Info;
 
-		int infoIndex = library->mPieces.FindIndex(partsUsed[partIdx].Info);
-		if (!infoRows[infoIndex])
+		if (!InfoRows.value(Info))
 		{
-			infoRows[infoIndex] = ++numInfos;
-			partNames.append(partsUsed[partIdx].Info->m_strDescription);
+			InfoRows[Info] = InfoRows.size();
+			partNames.append(Info->m_strDescription);
 		}
 	}
 
-	int *colorColumns = new int[gNumUserColors];
-	memset(colorColumns, 0, sizeof(int) * gNumUserColors);
-	int numColors = 0;
+	QVector<int> ColorColumns(gNumUserColors);
+	int NumColors = 0;
 
 	horizontalLabels.append(tr("Part"));
 
 	for (int colorIdx = 0; colorIdx < gNumUserColors; colorIdx++)
 	{
-		if (colorsUsed[colorIdx])
+		if (ColorsUsed[colorIdx])
 		{
-			colorColumns[colorIdx] = numColors++;
+			ColorColumns[colorIdx] = NumColors++;
 			horizontalLabels.append(gColorList[colorIdx].Name);
 		}
 	}
@@ -95,8 +89,8 @@ lcQPropertiesDialog::lcQPropertiesDialog(QWidget *parent, void *data) :
 	horizontalLabels.append(tr("Total"));
 
 	QTableWidget *table = ui->partsTable;
-	table->setColumnCount(numColors + 2);
-	table->setRowCount(numInfos + 1);
+	table->setColumnCount(NumColors + 2);
+	table->setRowCount(InfoRows.size() + 1);
 	table->setHorizontalHeaderLabels(horizontalLabels);
 
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
@@ -110,49 +104,45 @@ lcQPropertiesDialog::lcQPropertiesDialog(QWidget *parent, void *data) :
 
 	table->setItem(partNames.size(), 0, new QTableWidgetItem(tr("Total")));
 
-	QVector<int> infoTotals;
-	QVector<int> colorTotals;
+	QVector<int> InfoTotals;
+	QVector<int> ColorTotals;
 	int total = 0;
 
-	infoTotals.resize(numInfos);
-	colorTotals.resize(numColors);
+	InfoTotals.resize(InfoRows.size());
+	ColorTotals.resize(NumColors);
 
 	for (int partIdx = 0; partIdx < partsUsed.GetSize(); partIdx++)
 	{
 		int colorIndex = partsUsed[partIdx].ColorIndex;
-		int infoIndex = library->mPieces.FindIndex(partsUsed[partIdx].Info);
+		PieceInfo* info = partsUsed[partIdx].Info;
 		int count = partsUsed[partIdx].Count;
 
 		QTableWidgetItem *item = new QTableWidgetItem(QString::number(count));
 		item->setTextAlignment(Qt::AlignCenter);
-		table->setItem(infoRows[infoIndex] - 1, colorColumns[colorIndex] + 1, item);
+		table->setItem(InfoRows[info] - 1, ColorColumns[colorIndex] + 1, item);
 
-		infoTotals[infoRows[infoIndex] - 1] += count;
-		colorTotals[colorColumns[colorIndex]] += count;
+		InfoTotals[InfoRows[info] - 1] += count;
+		ColorTotals[ColorColumns[colorIndex]] += count;
 		total += count;
 	}
 
-	for (int infoIdx = 0; infoIdx < numInfos; infoIdx++)
+	for (int infoIdx = 0; infoIdx < InfoRows.size(); infoIdx++)
 	{
-		QTableWidgetItem *item = new QTableWidgetItem(QString::number(infoTotals[infoIdx]));
+		QTableWidgetItem *item = new QTableWidgetItem(QString::number(InfoTotals[infoIdx]));
 		item->setTextAlignment(Qt::AlignCenter);
-		table->setItem(infoIdx, numColors + 1, item);
+		table->setItem(infoIdx, NumColors + 1, item);
 	}
 
-	for (int colorIdx = 0; colorIdx < numColors; colorIdx++)
+	for (int colorIdx = 0; colorIdx < NumColors; colorIdx++)
 	{
-		QTableWidgetItem *item = new QTableWidgetItem(QString::number(colorTotals[colorIdx]));
+		QTableWidgetItem *item = new QTableWidgetItem(QString::number(ColorTotals[colorIdx]));
 		item->setTextAlignment(Qt::AlignCenter);
-		table->setItem(numInfos, colorIdx + 1, item);
+		table->setItem(InfoRows.size(), colorIdx + 1, item);
 	}
 
 	QTableWidgetItem *item = new QTableWidgetItem(QString::number(total));
 	item->setTextAlignment(Qt::AlignCenter);
-	table->setItem(numInfos, numColors + 1, item);
-
-	delete[] colorColumns;
-	delete[] colorsUsed;
-	delete[] infoRows;
+	table->setItem(InfoRows.size(), NumColors + 1, item);
 }
 
 lcQPropertiesDialog::~lcQPropertiesDialog()

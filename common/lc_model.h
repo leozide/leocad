@@ -85,13 +85,6 @@ struct lcModelHistoryEntry
 	QString Description;
 };
 
-struct lcPartsListEntry
-{
-	PieceInfo* Info;
-	int ColorIndex;
-	int Count;
-};
-
 struct lcModelPartsEntry
 {
 	lcMatrix44 WorldMatrix;
@@ -238,8 +231,8 @@ public:
 	lcObject* GetFocusObject() const;
 	bool GetSelectionCenter(lcVector3& Center) const;
 	bool GetPiecesBoundingBox(lcVector3& Min, lcVector3& Max) const;
-	void GetPartsList(int DefaultColorIndex, lcArray<lcPartsListEntry>& PartsList) const;
-	void GetPartsListForStep(lcStep Step, int DefaultColorIndex, lcArray<lcPartsListEntry>& PartsList) const;
+	void GetPartsList(int DefaultColorIndex, lcPartsList& PartsList) const;
+	void GetPartsListForStep(lcStep Step, int DefaultColorIndex, lcPartsList& PartsList) const;
 	void GetModelParts(const lcMatrix44& WorldMatrix, int DefaultColorIndex, lcArray<lcModelPartsEntry>& ModelParts) const;
 	void GetSelectionInformation(int* Flags, lcArray<lcObject*>& Selection, lcObject** Focus) const;
 

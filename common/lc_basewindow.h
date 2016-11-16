@@ -41,7 +41,7 @@ struct lcPropertiesDialogOptions
 	lcModelProperties Properties;
 	bool SetDefault;
 
-	lcArray<lcPartsListEntry> PartsList;
+	lcPartsList PartsList;
 };
 
 struct lcPreferencesDialogOptions

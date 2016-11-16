@@ -290,7 +290,7 @@ void PieceInfo::AddRenderMesh(lcScene& Scene)
 		Scene.mTranslucentMeshes.Add(RenderMesh);
 }
 
-void PieceInfo::AddRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, int ColorIndex, bool Focused, bool Selected)
+void PieceInfo::AddRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, int ColorIndex, bool Focused, bool Selected) const
 {
 	if (mMesh || (mFlags & LC_PIECE_PLACEHOLDER))
 	{
@@ -316,28 +316,12 @@ void PieceInfo::AddRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, i
 		mModel->SubModelAddRenderMeshes(Scene, WorldMatrix, ColorIndex, Focused, Selected);
 }
 
-void PieceInfo::GetPartsList(int DefaultColorIndex, lcArray<lcPartsListEntry>& PartsList) const
+void PieceInfo::GetPartsList(int DefaultColorIndex, lcPartsList& PartsList) const
 {
 	if (mFlags & LC_PIECE_MODEL)
-	{
 		mModel->GetPartsList(DefaultColorIndex, PartsList);
-		return;
-	}
-
-	for (int UsedIdx = 0; UsedIdx < PartsList.GetSize(); UsedIdx++)
-	{
-		if (PartsList[UsedIdx].Info != this || PartsList[UsedIdx].ColorIndex != DefaultColorIndex)
-			continue;
-
-		PartsList[UsedIdx].Count++;
-		return;
-	}
-
-	lcPartsListEntry& PartsListEntry = PartsList.Add();
-
-	PartsListEntry.Info = const_cast<PieceInfo*>(this);
-	PartsListEntry.ColorIndex = DefaultColorIndex;
-	PartsListEntry.Count = 1;
+	else
+		PartsList[this][DefaultColorIndex]++;
 }
 
 void PieceInfo::GetModelParts(const lcMatrix44& WorldMatrix, int DefaultColorIndex, lcArray<lcModelPartsEntry>& ModelParts) const

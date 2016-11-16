@@ -925,12 +925,12 @@ void Project::Export3DStudio(const QString& FileName)
 
 void Project::ExportBrickLink()
 {
-	lcArray<lcPartsListEntry> PartsList;
+	lcPartsList PartsList;
 
 	if (!mModels.IsEmpty())
 		mModels[0]->GetPartsList(gDefaultColor, PartsList);
 
-	if (PartsList.IsEmpty())
+	if (PartsList.isEmpty())
 	{
 		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Nothing to export."));
 		return;
@@ -953,29 +953,34 @@ void Project::ExportBrickLink()
 	const char* OldLocale = setlocale(LC_NUMERIC, "C");
 	BrickLinkFile.WriteLine("<INVENTORY>\n");
 
-	for (int PieceIdx = 0; PieceIdx < PartsList.GetSize(); PieceIdx++)
+	for (QMap<const PieceInfo*, QMap<int, int>>::const_iterator PartIt = PartsList.constBegin(); PartIt != PartsList.constEnd(); PartIt++)
 	{
-		BrickLinkFile.WriteLine("  <ITEM>\n");
-		BrickLinkFile.WriteLine("    <ITEMTYPE>P</ITEMTYPE>\n");
+		const PieceInfo* Info = PartIt.key();
 
-		sprintf(Line, "    <ITEMID>%s</ITEMID>\n", PartsList[PieceIdx].Info->m_strName);
-		BrickLinkFile.WriteLine(Line);
-
-		int Count = PartsList[PieceIdx].Count;
-		if (Count > 1)
+		for (QMap<int, int>::const_iterator ColorIt = PartIt.value().constBegin(); ColorIt != PartIt.value().constEnd(); ColorIt++)
 		{
-			sprintf(Line, "    <MINQTY>%d</MINQTY>\n", Count);
-			BrickLinkFile.WriteLine(Line);
-		}
+			BrickLinkFile.WriteLine("  <ITEM>\n");
+			BrickLinkFile.WriteLine("    <ITEMTYPE>P</ITEMTYPE>\n");
 
-		int Color = lcGetBrickLinkColor(PartsList[PieceIdx].ColorIndex);
-		if (Color)
-		{
-			sprintf(Line, "    <COLOR>%d</COLOR>\n", Color);
+			sprintf(Line, "    <ITEMID>%s</ITEMID>\n", Info->m_strName);
 			BrickLinkFile.WriteLine(Line);
-		}
 
-		BrickLinkFile.WriteLine("  </ITEM>\n");
+			int Count = ColorIt.value();
+			if (Count > 1)
+			{
+				sprintf(Line, "    <MINQTY>%d</MINQTY>\n", Count);
+				BrickLinkFile.WriteLine(Line);
+			}
+
+			int Color = lcGetBrickLinkColor(ColorIt.key());
+			if (Color)
+			{
+				sprintf(Line, "    <COLOR>%d</COLOR>\n", Color);
+				BrickLinkFile.WriteLine(Line);
+			}
+
+			BrickLinkFile.WriteLine("  </ITEM>\n");
+		}
 	}
 
 	BrickLinkFile.WriteLine("</INVENTORY>\n");
@@ -985,12 +990,12 @@ void Project::ExportBrickLink()
 
 void Project::ExportCSV()
 {
-	lcArray<lcPartsListEntry> PartsList;
+	lcPartsList PartsList;
 
 	if (!mModels.IsEmpty())
 		mModels[0]->GetPartsList(gDefaultColor, PartsList);
 
-	if (PartsList.IsEmpty())
+	if (PartsList.isEmpty())
 	{
 		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Nothing to export."));
 		return;
@@ -1013,11 +1018,16 @@ void Project::ExportCSV()
 	const char* OldLocale = setlocale(LC_NUMERIC, "C");
 	CSVFile.WriteLine("Part Name,Color,Quantity,Part ID,Color Code\n");
 
-	for (int PieceIdx = 0; PieceIdx < PartsList.GetSize(); PieceIdx++)
+	for (QMap<const PieceInfo*, QMap<int, int>>::const_iterator PartIt = PartsList.constBegin(); PartIt != PartsList.constEnd(); PartIt++)
 	{
-		sprintf(Line, "\"%s\",\"%s\",%d,%s,%d\n", PartsList[PieceIdx].Info->m_strDescription, gColorList[PartsList[PieceIdx].ColorIndex].Name,
-				PartsList[PieceIdx].Count, PartsList[PieceIdx].Info->m_strName, gColorList[PartsList[PieceIdx].ColorIndex].Code);
-		CSVFile.WriteLine(Line);
+		const PieceInfo* Info = PartIt.key();
+
+		for (QMap<int, int>::const_iterator ColorIt = PartIt.value().constBegin(); ColorIt != PartIt.value().constEnd(); ColorIt++)
+		{
+			sprintf(Line, "\"%s\",\"%s\",%d,%s,%d\n", Info->m_strDescription, gColorList[ColorIt.key()].Name,
+					ColorIt.value(), Info->m_strName, gColorList[ColorIt.key()].Code);
+			CSVFile.WriteLine(Line);
+		}
 	}
 
 	setlocale(LC_NUMERIC, OldLocale);
@@ -1025,20 +1035,19 @@ void Project::ExportCSV()
 
 void Project::CreateHTMLPieceList(QTextStream& Stream, lcModel* Model, lcStep Step, bool Images)
 {
-	int* ColorsUsed = new int[gColorList.GetSize()];
-	memset(ColorsUsed, 0, sizeof(ColorsUsed[0]) * gColorList.GetSize());
-	int* PiecesUsed = new int[gColorList.GetSize()];
+	QVector<int> ColorsUsed(gColorList.GetSize());
 	int NumColors = 0;
 
-	lcArray<lcPartsListEntry> PartsList;
+	lcPartsList PartsList;
 
 	if (Step == 0)
 		Model->GetPartsList(gDefaultColor, PartsList);
 	else
 		Model->GetPartsListForStep(Step, gDefaultColor, PartsList);
 
-	for (int PieceIdx = 0; PieceIdx < PartsList.GetSize(); PieceIdx++)
-		ColorsUsed[PartsList[PieceIdx].ColorIndex]++;
+	for (QMap<const PieceInfo*, QMap<int, int>>::const_iterator PartIt = PartsList.constBegin(); PartIt != PartsList.constEnd(); PartIt++)
+		for (QMap<int, int>::const_iterator ColorIt = PartIt.value().constBegin(); ColorIt != PartIt.value().constEnd(); ColorIt++)
+			ColorsUsed[ColorIt.key()]++;
 
 	Stream << QLatin1String("<br><table border=1><tr><td><center>Piece</center></td>\r\n");
 
@@ -1046,65 +1055,44 @@ void Project::CreateHTMLPieceList(QTextStream& Stream, lcModel* Model, lcStep St
 	{
 		if (ColorsUsed[ColorIdx])
 		{
-			ColorsUsed[ColorIdx] = NumColors;
-			NumColors++;
+			ColorsUsed[ColorIdx] = NumColors++;
 			Stream << QString("<td><center>%1</center></td>\n").arg(gColorList[ColorIdx].Name);
 		}
 	}
 	NumColors++;
 	Stream << QLatin1String("</tr>\n");
 
-	for (int j = 0; j < lcGetPiecesLibrary()->mPieces.GetSize(); j++)
+	for (QMap<const PieceInfo*, QMap<int, int>>::const_iterator PartIt = PartsList.constBegin(); PartIt != PartsList.constEnd(); PartIt++)
 	{
-		bool Add = false;
-		memset(PiecesUsed, 0, sizeof(PiecesUsed[0]) * gColorList.GetSize());
-		PieceInfo* pInfo = lcGetPiecesLibrary()->mPieces[j];
+		const PieceInfo* Info = PartIt.key();
 
-		for (int PieceIdx = 0; PieceIdx < PartsList.GetSize(); PieceIdx++)
+		if (Images)
+			Stream << QString("<tr><td><IMG SRC=\"%1.png\" ALT=\"%2\"></td>\n").arg(Info->m_strName, Info->m_strDescription);
+		else
+			Stream << QString("<tr><td>%1</td>\r\n").arg(Info->m_strDescription);
+
+		int CurrentColumn = 1;
+		for (QMap<int, int>::const_iterator ColorIt = PartIt.value().constBegin(); ColorIt != PartIt.value().constEnd(); ColorIt++)
 		{
-			if (PartsList[PieceIdx].Info == pInfo)
-			{
-				PiecesUsed[PartsList[PieceIdx].ColorIndex] += PartsList[PieceIdx].Count;
-				Add = true;
-			}
-		}
-
-		if (Add)
-		{
-			if (Images)
-				Stream << QString("<tr><td><IMG SRC=\"%1.png\" ALT=\"%2\"></td>\n").arg(pInfo->m_strName, pInfo->m_strDescription);
-			else
-				Stream << QString("<tr><td>%1</td>\r\n").arg(pInfo->m_strDescription);
-
-			int curcol = 1;
-			for (int ColorIdx = 0; ColorIdx < gColorList.GetSize(); ColorIdx++)
-			{
-				if (PiecesUsed[ColorIdx])
-				{
-					while (curcol != ColorsUsed[ColorIdx] + 1)
-					{
-						Stream << QLatin1String("<td><center>-</center></td>\r\n");
-						curcol++;
-					}
-
-					Stream << QString("<td><center>%1</center></td>\r\n").arg(QString::number(PiecesUsed[ColorIdx]));
-					curcol++;
-				}
-			}
-
-			while (curcol != NumColors)
+			while (CurrentColumn != ColorsUsed[ColorIt.key()] + 1)
 			{
 				Stream << QLatin1String("<td><center>-</center></td>\r\n");
-				curcol++;
+				CurrentColumn++;
 			}
 
-			Stream << QLatin1String("</tr>\r\n");
+			Stream << QString("<td><center>%1</center></td>\r\n").arg(QString::number(ColorIt.value()));
+			CurrentColumn++;
 		}
+
+		while (CurrentColumn != NumColors)
+		{
+			Stream << QLatin1String("<td><center>-</center></td>\r\n");
+			CurrentColumn++;
+		}
+
+		Stream << QLatin1String("</tr>\r\n");
 	}
 	Stream << QLatin1String("</table>\r\n<br>");
-
-	delete[] PiecesUsed;
-	delete[] ColorsUsed;
 }
 
 void Project::ExportHTML()
@@ -1331,7 +1319,7 @@ void Project::ExportHTML()
 			float aspect = (float)Width / (float)Height;
 			Context->SetViewport(0, 0, Width, Height);
 
-			lcArray<lcPartsListEntry> PartsList;
+			lcPartsList PartsList;
 			Model->GetPartsList(gDefaultColor, PartsList);
 
 			lcMatrix44 ProjectionMatrix = lcMatrix44Perspective(30.0f, aspect, 1.0f, 2500.0f);
@@ -1341,9 +1329,9 @@ void Project::ExportHTML()
 			Context->SetProjectionMatrix(ProjectionMatrix);
 			Context->SetProgram(LC_PROGRAM_SIMPLE);
 
-			for (int PieceIdx = 0; PieceIdx < PartsList.GetSize(); PieceIdx++)
+			for (QMap<const PieceInfo*, QMap<int, int>>::const_iterator PartIt = PartsList.constBegin(); PartIt != PartsList.constEnd(); PartIt++)
 			{
-				PieceInfo* Info = PartsList[PieceIdx].Info;
+				const PieceInfo* Info = PartIt.key();
 
 				glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
 				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

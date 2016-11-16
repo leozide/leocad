@@ -133,7 +133,7 @@ public:
 
 	void ZoomExtents(const lcMatrix44& ProjectionMatrix, lcMatrix44& ViewMatrix, float* EyePos = NULL) const;
 	void AddRenderMesh(lcScene& Scene);
-	void AddRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, int ColorIndex, bool Focused, bool Selected);
+	void AddRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, int ColorIndex, bool Focused, bool Selected) const;
 
 	void CreatePlaceholder(const char* Name);
 
@@ -142,7 +142,7 @@ public:
 	bool IncludesModel(const lcModel* Model) const;
 	bool MinIntersectDist(const lcVector3& Start, const lcVector3& End, float& MinDistance) const;
 	bool BoxTest(const lcMatrix44& WorldMatrix, const lcVector4 Planes[6]) const;
-	void GetPartsList(int DefaultColorIndex, lcArray<lcPartsListEntry>& PartsList) const;
+	void GetPartsList(int DefaultColorIndex, lcPartsList& PartsList) const;
 	void GetModelParts(const lcMatrix44& WorldMatrix, int DefaultColorIndex, lcArray<lcModelPartsEntry>& ModelParts) const;
 	void UpdateBoundingBox(lcArray<lcModel*>& UpdatedModels);
 

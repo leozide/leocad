@@ -3016,7 +3016,7 @@ bool lcModel::GetPiecesBoundingBox(lcVector3& Min, lcVector3& Max) const
 	return true;
 }
 
-void lcModel::GetPartsList(int DefaultColorIndex, lcArray<lcPartsListEntry>& PartsList) const
+void lcModel::GetPartsList(int DefaultColorIndex, lcPartsList& PartsList) const
 {
 	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 	{
@@ -3027,23 +3027,11 @@ void lcModel::GetPartsList(int DefaultColorIndex, lcArray<lcPartsListEntry>& Par
 		if (ColorIndex == gDefaultColor)
 			ColorIndex = DefaultColorIndex;
 
-		int UsedIdx;
-
-		for (UsedIdx = 0; UsedIdx < PartsList.GetSize(); UsedIdx++)
-		{
-			if (PartsList[UsedIdx].Info != Piece->mPieceInfo || PartsList[UsedIdx].ColorIndex != ColorIndex)
-				continue;
-
-			PartsList[UsedIdx].Count++;
-			break;
-		}
-
-		if (UsedIdx == PartsList.GetSize())
-			Piece->mPieceInfo->GetPartsList(ColorIndex, PartsList);
+		Piece->mPieceInfo->GetPartsList(ColorIndex, PartsList);
 	}
 }
 
-void lcModel::GetPartsListForStep(lcStep Step, int DefaultColorIndex, lcArray<lcPartsListEntry>& PartsList) const
+void lcModel::GetPartsListForStep(lcStep Step, int DefaultColorIndex, lcPartsList& PartsList) const
 {
 	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 	{
@@ -3057,19 +3045,7 @@ void lcModel::GetPartsListForStep(lcStep Step, int DefaultColorIndex, lcArray<lc
 		if (ColorIndex == gDefaultColor)
 			ColorIndex = DefaultColorIndex;
 
-		int UsedIdx;
-
-		for (UsedIdx = 0; UsedIdx < PartsList.GetSize(); UsedIdx++)
-		{
-			if (PartsList[UsedIdx].Info != Piece->mPieceInfo || PartsList[UsedIdx].ColorIndex != ColorIndex)
-				continue;
-
-			PartsList[UsedIdx].Count++;
-			break;
-		}
-
-		if (UsedIdx == PartsList.GetSize())
-			Piece->mPieceInfo->GetPartsList(ColorIndex, PartsList);
+		Piece->mPieceInfo->GetPartsList(ColorIndex, PartsList);
 	}
 }
 

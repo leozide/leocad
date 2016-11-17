@@ -1421,15 +1421,21 @@ void Project::ExportPOVRay()
 
 	char Line[1024];
 
-	lcPiecesLibrary* Library = lcGetPiecesLibrary();
-	char* PieceTable = new char[Library->mPieces.GetSize() * LC_PIECE_NAME_LEN];
-	int* PieceFlags = new int[Library->mPieces.GetSize()];
-	int NumColors = gColorList.GetSize();
-	char* ColorTable = new char[NumColors * LC_MAX_COLOR_NAME];
+	struct lcPieceTableEntry
+	{
+		char Name[LC_PIECE_NAME_LEN];
+		int Flags;
+	};
 
-	memset(PieceTable, 0, Library->mPieces.GetSize() * LC_PIECE_NAME_LEN);
-	memset(PieceFlags, 0, Library->mPieces.GetSize() * sizeof(int));
-	memset(ColorTable, 0, NumColors * LC_MAX_COLOR_NAME);
+	struct lcColorTableEntry
+	{
+		char Name[LC_MAX_COLOR_NAME];
+	};
+
+	lcPiecesLibrary* Library = lcGetPiecesLibrary();
+	QMap<PieceInfo*, lcPieceTableEntry> PieceTable;
+	int NumColors = gColorList.GetSize();
+	QVector<lcColorTableEntry> ColorTable(NumColors);
 
 	enum
 	{
@@ -1455,8 +1461,6 @@ void Project::ExportPOVRay()
 
 		if (!TableFile.Open(QFileInfo(QDir(Dialog.mLGEOPath), QLatin1String("lg_elements.lst")).absoluteFilePath(), "rt"))
 		{
-			delete[] PieceTable;
-			delete[] PieceFlags;
 			QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Could not find LGEO files in folder '%1'.").arg(Dialog.mLGEOPath));
 			return;
 		}
@@ -1477,28 +1481,30 @@ void Project::ExportPOVRay()
 			if (!Info)
 				continue;
 
-			int Index = Library->mPieces.FindIndex(Info);
-
 			if (strchr(Flags, 'L'))
 			{
-				PieceFlags[Index] |= LGEO_PIECE_LGEO;
-				sprintf(PieceTable + Index * LC_PIECE_NAME_LEN, "lg_%s", Dst);
+				lcPieceTableEntry& Entry = PieceTable[Info];
+				Entry.Flags |= LGEO_PIECE_LGEO;
+				sprintf(Entry.Name, "lg_%s", Dst);
 			}
 
 			if (strchr(Flags, 'A'))
 			{
-				PieceFlags[Index] |= LGEO_PIECE_AR;
-				sprintf(PieceTable + Index * LC_PIECE_NAME_LEN, "ar_%s", Dst);
+				lcPieceTableEntry& Entry = PieceTable[Info];
+				Entry.Flags |= LGEO_PIECE_AR;
+				sprintf(Entry.Name, "ar_%s", Dst);
 			}
 
 			if (strchr(Flags, 'S'))
-				PieceFlags[Index] |= LGEO_PIECE_SLOPE;
+			{
+				lcPieceTableEntry& Entry = PieceTable[Info];
+				Entry.Flags |= LGEO_PIECE_SLOPE;
+				Entry.Name[0] = 0;
+			}
 		}
 
 		if (!ColorFile.Open(QFileInfo(QDir(Dialog.mLGEOPath), QLatin1String("lg_colors.lst")).absoluteFilePath(), "rt"))
 		{
-			delete[] PieceTable;
-			delete[] PieceFlags;
 			QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Could not find LGEO files in folder '%1'.").arg(Dialog.mLGEOPath));
 			return;
 		}
@@ -1518,7 +1524,7 @@ void Project::ExportPOVRay()
 			if (Color >= NumColors)
 				continue;
 
-			strcpy(&ColorTable[Color * LC_MAX_COLOR_NAME], Name);
+			strcpy(ColorTable[Color].Name, Name);
 		}
 	}
 
@@ -1540,11 +1546,11 @@ void Project::ExportPOVRay()
 				if (CheckIdx != PartIdx)
 					break;
 
-				int Index = Library->mPieces.FindIndex(Info);
+				const lcPieceTableEntry& Entry = PieceTable.value(Info);
 
-				if (PieceTable[Index * LC_PIECE_NAME_LEN])
+				if (Entry.Name[0])
 				{
-					sprintf(Line, "#include \"%s.inc\"\n", PieceTable + Index * LC_PIECE_NAME_LEN);
+					sprintf(Line, "#include \"%s.inc\"\n", Entry.Name);
 					POVFile.WriteLine(Line);
 				}
 
@@ -1569,24 +1575,29 @@ void Project::ExportPOVRay()
 		else
 		{
 			sprintf(Line, "#declare lc_%s = texture { pigment { rgb <%f, %f, %f> } finish { ambient 0.1 phong 0.2 phong_size 20 } }\n",
-				   Color->SafeName, Color->Value[0], Color->Value[1], Color->Value[2]);
+					Color->SafeName, Color->Value[0], Color->Value[1], Color->Value[2]);
 		}
 
 		POVFile.WriteLine(Line);
 
-		if (!ColorTable[ColorIdx * LC_MAX_COLOR_NAME])
-			sprintf(&ColorTable[ColorIdx * LC_MAX_COLOR_NAME], "lc_%s", Color->SafeName);
+		if (!ColorTable[ColorIdx].Name[0])
+			sprintf(ColorTable[ColorIdx].Name, "lc_%s", Color->SafeName);
 	}
 
 	POVFile.WriteLine("\n");
+
+	lcArray<const char*> ColorTablePointer;
+	ColorTablePointer.SetSize(NumColors);
+	for (int ColorIdx = 0; ColorIdx < NumColors; ColorIdx++)
+		ColorTablePointer[ColorIdx] = ColorTable[ColorIdx].Name;
 
 	for (int PartIdx = 0; PartIdx < ModelParts.GetSize(); PartIdx++)
 	{
 		PieceInfo* Info = ModelParts[PartIdx].Info;
 		lcMesh* Mesh = Info->GetMesh();
-		int Index = Library->mPieces.FindIndex(Info);
+		lcPieceTableEntry& Entry = PieceTable[Info];
 
-		if (!Mesh || PieceTable[Index * LC_PIECE_NAME_LEN])
+		if (!Mesh || Entry.Name[0])
 			continue;
 
 		char Name[LC_PIECE_NAME_LEN];
@@ -1596,9 +1607,9 @@ void Project::ExportPOVRay()
 		while ((Ptr = strchr(Name, '-')))
 			*Ptr = '_';
 
-		sprintf(PieceTable + Index * LC_PIECE_NAME_LEN, "lc_%s", Name);
+		sprintf(Entry.Name, "lc_%s", Name);
 
-		Mesh->ExportPOVRay(POVFile, Name, ColorTable);
+		Mesh->ExportPOVRay(POVFile, Name, &ColorTablePointer[0]);
 
 		POVFile.WriteLine("}\n\n");
 
@@ -1621,7 +1632,7 @@ void Project::ExportPOVRay()
 
 	for (int PartIdx = 0; PartIdx < ModelParts.GetSize(); PartIdx++)
 	{
-		int Index = Library->mPieces.FindIndex(ModelParts[PartIdx].Info);
+		lcPieceTableEntry& Entry = PieceTable[ModelParts[PartIdx].Info];
 		int Color;
 
 		Color = ModelParts[PartIdx].ColorIndex;
@@ -1629,25 +1640,23 @@ void Project::ExportPOVRay()
 
 		const float* f = ModelParts[PartIdx].WorldMatrix;
 
-		if (PieceFlags[Index] & LGEO_PIECE_SLOPE)
+		if (Entry.Flags & LGEO_PIECE_SLOPE)
 		{
 			sprintf(Line, "merge {\n object {\n  %s%s\n  texture { %s }\n }\n"
 					" object {\n  %s_slope\n  texture { %s normal { bumps 0.3 scale 0.02 } }\n }\n"
 					" matrix <%.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f>\n}\n",
-					PieceTable + Index * LC_PIECE_NAME_LEN, Suffix, &ColorTable[Color * LC_MAX_COLOR_NAME], PieceTable + Index * LC_PIECE_NAME_LEN, &ColorTable[Color * LC_MAX_COLOR_NAME],
+					Entry.Name, Suffix, ColorTable[Color].Name, Entry.Name, ColorTable[Color].Name,
 					-f[5], -f[4], -f[6], -f[1], -f[0], -f[2], f[9], f[8], f[10], f[13] / 25.0f, f[12] / 25.0f, f[14] / 25.0f);
 		}
 		else
 		{
 			sprintf(Line, "object {\n %s%s\n texture { %s }\n matrix <%.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f>\n}\n",
-					PieceTable + Index * LC_PIECE_NAME_LEN, Suffix, &ColorTable[Color * LC_MAX_COLOR_NAME], -f[5], -f[4], -f[6], -f[1], -f[0], -f[2], f[9], f[8], f[10], f[13] / 25.0f, f[12] / 25.0f, f[14] / 25.0f);
+					Entry.Name, Suffix, ColorTable[Color].Name, -f[5], -f[4], -f[6], -f[1], -f[0], -f[2], f[9], f[8], f[10], f[13] / 25.0f, f[12] / 25.0f, f[14] / 25.0f);
 		}
 
 		POVFile.WriteLine(Line);
 	}
 
-	delete[] PieceTable;
-	delete[] PieceFlags;
 	setlocale(LC_NUMERIC, OldLocale);
 	POVFile.Close();
 

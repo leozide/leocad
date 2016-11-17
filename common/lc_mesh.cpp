@@ -208,7 +208,7 @@ bool lcMesh::IntersectsPlanes(const lcVector4 Planes[6])
 }
 
 template<typename IndexType>
-void lcMesh::ExportPOVRay(lcFile& File, const char* MeshName, const char* ColorTable)
+void lcMesh::ExportPOVRay(lcFile& File, const char* MeshName, const char** ColorTable)
 {
 	char Line[1024];
 
@@ -239,7 +239,7 @@ void lcMesh::ExportPOVRay(lcFile& File, const char* MeshName, const char* ColorT
 
 		if (Section->ColorIndex != gDefaultColor)
 		{
-			sprintf(Line, "material { texture { %s normal { bumps 0.1 scale 2 } } }", &ColorTable[Section->ColorIndex * LC_MAX_COLOR_NAME]);
+			sprintf(Line, "material { texture { %s normal { bumps 0.1 scale 2 } } }", ColorTable[Section->ColorIndex]);
 			File.WriteLine(Line);
 		}
 
@@ -247,7 +247,7 @@ void lcMesh::ExportPOVRay(lcFile& File, const char* MeshName, const char* ColorT
 	}
 }
 
-void lcMesh::ExportPOVRay(lcFile& File, const char* MeshName, const char* ColorTable)
+void lcMesh::ExportPOVRay(lcFile& File, const char* MeshName, const char** ColorTable)
 {
 	if (mIndexType == GL_UNSIGNED_SHORT)
 		ExportPOVRay<GLushort>(File, MeshName, ColorTable);

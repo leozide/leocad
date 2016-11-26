@@ -63,7 +63,7 @@ void MinifigWizard::OnInitialUpdate()
 	{
 		mMinifig.Colors[i] = lcGetColorIndex(ColorCodes[i]);
 
-		PieceInfo* Info = lcGetPiecesLibrary()->FindPiece(Pieces[i], NULL, false);
+		PieceInfo* Info = lcGetPiecesLibrary()->FindPiece(Pieces[i], NULL, false, false);
 		if (Info)
 		{
 			mMinifig.Parts[i] = Info;
@@ -78,7 +78,7 @@ MinifigWizard::~MinifigWizard()
 {
 	for (int i = 0; i < LC_MFW_NUMITEMS; i++)
 		if (mMinifig.Parts[i])
-			mMinifig.Parts[i]->Release(true);
+			mMinifig.Parts[i]->Release();
 }
 
 void MinifigWizard::ParseSettings(lcFile& Settings)
@@ -173,7 +173,7 @@ void MinifigWizard::ParseSettings(lcFile& Settings)
 					*Ext = 0;
 			}
 
-			PieceInfo* Info = lcGetPiecesLibrary()->FindPiece(NameStart, NULL, false);
+			PieceInfo* Info = lcGetPiecesLibrary()->FindPiece(NameStart, NULL, false, false);
 			if (!Info && *NameStart)
 				continue;
 
@@ -550,7 +550,7 @@ void MinifigWizard::SetSelectionIndex(int Type, int Index)
 	MakeCurrent();
 
 	if (mMinifig.Parts[Type])
-		mMinifig.Parts[Type]->Release(true);
+		mMinifig.Parts[Type]->Release();
 
 	mMinifig.Parts[Type] = mSettings[Type][Index].Info;
 

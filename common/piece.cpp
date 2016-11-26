@@ -37,7 +37,7 @@ lcPiece::lcPiece(PieceInfo* Info)
 lcPiece::~lcPiece()
 {
 	if (mPieceInfo)
-		mPieceInfo->Release(false);
+		mPieceInfo->Release();
 
 	delete mMesh;
 }
@@ -265,7 +265,7 @@ bool lcPiece::FileLoad(lcFile& file)
   else
 	  file.ReadBuffer(name, LC_PIECE_NAME_LEN);
 
-	PieceInfo* pInfo = lcGetPiecesLibrary()->FindPiece(name, NULL, true);
+	PieceInfo* pInfo = lcGetPiecesLibrary()->FindPiece(name, NULL, true, false);
 	SetPieceInfo(pInfo);
 
 	// 11 (0.77)

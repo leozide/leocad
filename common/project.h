@@ -42,6 +42,11 @@ public:
 		return mActiveModel;
 	}
 
+	lcModel* GetMainModel() const
+	{
+		return !mModels.IsEmpty() ? mModels[0] : NULL;
+	}
+
 	bool IsModified() const;
 	QString GetTitle() const;
 
@@ -55,7 +60,6 @@ public:
 	lcModel* CreateNewModel(bool ShowModel);
 	QString GetNewModelName(QWidget* ParentWidget, const QString& DialogTitle, const QString& CurrentName, const QStringList& ExistingModels) const;
 	void ShowModelListDialog();
-	void InlineAllModels();
 
 	bool Load(const QString& FileName);
 	bool Save(const QString& FileName);
@@ -69,6 +73,8 @@ public:
 	void ExportHTML();
 	void ExportPOVRay();
 	void ExportWavefront(const QString& FileName);
+
+	void UpdatePieceInfo(PieceInfo* Info) const;
 
 protected:
 	QString GetExportFileName(const QString& FileName, const QString& DefaultExtension, const QString& DialogTitle, const QString& DialogFilter) const;

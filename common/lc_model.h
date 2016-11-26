@@ -181,7 +181,6 @@ public:
 	void SetPieceSteps(const QList<QPair<lcPiece*, lcStep>>& PieceSteps);
 
 	void MoveSelectionToModel(lcModel* Model);
-	void InlineAllModels();
 	void InlineSelectedModels();
 
 	lcGroup* AddGroup(const QString& Prefix, lcGroup* Parent);
@@ -196,6 +195,7 @@ public:
 	void SaveLDraw(QTextStream& Stream, bool SelectedOnly) const;
 	void LoadLDraw(QIODevice& Device, Project* Project);
 	bool LoadBinary(lcFile* File);
+	void SplitMPD(QIODevice& Device);
 	void Merge(lcModel* Other);
 
 	void SetSaved()

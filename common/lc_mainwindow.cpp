@@ -1822,8 +1822,6 @@ void lcMainWindow::NewProject()
 	if (!SaveProjectIfModified())
 		return;
 
-	lcGetPiecesLibrary()->SetCurrentModelPath(QString());
-
 	Project* NewProject = new Project();
 	g_App->SetProject(NewProject);
 	lcGetPiecesLibrary()->UnloadUnusedParts();

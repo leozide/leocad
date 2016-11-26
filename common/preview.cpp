@@ -20,7 +20,7 @@ PiecePreview::PiecePreview()
 PiecePreview::~PiecePreview()
 {
 	if (m_PieceInfo)
-		m_PieceInfo->Release(true);
+		m_PieceInfo->Release();
 }
 
 void PiecePreview::OnDraw()
@@ -84,7 +84,7 @@ void PiecePreview::SetCurrentPiece(PieceInfo *pInfo)
 	MakeCurrent();
 
 	if (m_PieceInfo != NULL)
-		m_PieceInfo->Release(true);
+		m_PieceInfo->Release();
 
 	m_PieceInfo = pInfo;
 
@@ -98,7 +98,7 @@ void PiecePreview::SetCurrentPiece(PieceInfo *pInfo)
 void PiecePreview::SetDefaultPiece()
 {
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
-	PieceInfo* Info = Library->FindPiece("3005", NULL, false);
+	PieceInfo* Info = Library->FindPiece("3005", NULL, false, false);
 
 	if (!Info)
 		Info = Library->mPieces[0];

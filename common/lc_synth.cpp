@@ -45,7 +45,7 @@ void lcSynthInit()
 
 	for (unsigned int InfoIdx = 0; InfoIdx < sizeof(HoseInfo) / sizeof(HoseInfo[0]); InfoIdx++)
 	{
-		PieceInfo* Info = Library->FindPiece(HoseInfo[InfoIdx].PartID, NULL, false);
+		PieceInfo* Info = Library->FindPiece(HoseInfo[InfoIdx].PartID, NULL, false, false);
 
 		if (Info)
 			Info->SetSynthInfo(new lcSynthInfo(HoseInfo[InfoIdx].Type, HoseInfo[InfoIdx].Length, HoseInfo[InfoIdx].NumSections, Info));

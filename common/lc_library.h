@@ -69,6 +69,15 @@ public:
 			mSections[MeshDataIdx].DeleteAll();
 	}
 
+	bool IsEmpty() const
+	{
+		for (int MeshDataIdx = 0; MeshDataIdx < LC_NUM_MESHDATA_TYPES; MeshDataIdx++)
+			if (!mSections[MeshDataIdx].IsEmpty())
+				return false;
+
+		return true;
+	}
+
 	lcLibraryMeshSection* AddSection(lcMeshDataType MeshDataType, lcMeshPrimitiveType PrimitiveType, lcuint32 ColorCode, lcTexture* Texture);
 	void AddVertices(lcMeshDataType MeshDataType, int VertexCount, int* BaseVertex, lcVertex** VertexBuffer);
 	void AddIndices(lcMeshDataType MeshDataType, lcMeshPrimitiveType PrimitiveType, lcuint32 ColorCode, int IndexCount, lcuint32** IndexBuffer);
@@ -125,7 +134,7 @@ public:
 	void RemoveTemporaryPieces();
 	void RemovePiece(PieceInfo* Info);
 
-	PieceInfo* FindPiece(const char* PieceName, Project* Project, bool CreatePlaceholder);
+	PieceInfo* FindPiece(const char* PieceName, Project* Project, bool CreatePlaceholder, bool SearchProjectFolder);
 	bool LoadPiece(PieceInfo* Info);
 	bool LoadBuiltinPieces();
 
@@ -147,11 +156,6 @@ public:
 	{
 		if (mZipFiles[LC_ZIPFILE_OFFICIAL])
 			mNumOfficialPieces = mPieces.GetSize();
-	}
-
-	void SetCurrentModelPath(const QString& ModelPath)
-	{
-		mCurrentModelPath = ModelPath;
 	}
 
 	bool ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform, lcuint32 CurrentColorCode, lcArray<lcLibraryTextureMap>& TextureStack, lcLibraryMeshData& MeshData, lcMeshDataType MeshDataType, bool Optimize);
@@ -186,10 +190,8 @@ protected:
 
 	int FindPrimitiveIndex(const char* Name) const;
 	bool LoadPrimitive(int PrimitiveIndex);
-	bool LoadAndInlineFile(const char* FileName, lcMemFile& File);
 
 	QString mCachePath;
-	QString mCurrentModelPath;
 	qint64 mArchiveCheckSum[4];
 	char mLibraryFileName[LC_MAXPATH];
 	char mUnofficialFileName[LC_MAXPATH];

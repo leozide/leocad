@@ -11,6 +11,7 @@
 #define LC_PIECE_HAS_LINES          0x08 // Piece has lines
 #define LC_PIECE_PLACEHOLDER        0x10 // Placeholder for a piece not in the library
 #define LC_PIECE_MODEL              0x20 // Piece is a model
+#define LC_PIECE_PROJECT            0x40 // Piece is a project
 
 #define LC_PIECE_NAME_LEN 256
 
@@ -68,11 +69,11 @@ public:
 			Load();
 	}
 
-	void Release(bool AllowUnload)
+	void Release()
 	{
 		mRefCount--;
 
-		if (!mRefCount && AllowUnload)
+		if (!mRefCount)
 			Unload();
 	}
 
@@ -97,9 +98,14 @@ public:
 		return (mFlags & LC_PIECE_MODEL) != 0;
 	}
 
+	bool IsProject() const
+	{
+		return (mFlags & LC_PIECE_PROJECT) != 0;
+	}
+
 	bool IsTemporary() const
 	{
-		return (mFlags & (LC_PIECE_PLACEHOLDER | LC_PIECE_MODEL)) != 0;
+		return (mFlags & (LC_PIECE_PLACEHOLDER | LC_PIECE_MODEL | LC_PIECE_PROJECT)) != 0;
 	}
 
 	void SetZipFile(int ZipFileType, int ZipFileIndex)
@@ -139,6 +145,7 @@ public:
 
 	void SetPlaceholder();
 	void SetModel(lcModel* Model, bool UpdateMesh);
+	void SetProject(Project* Project, const char* PieceName);
 	bool IncludesModel(const lcModel* Model) const;
 	bool MinIntersectDist(const lcVector3& Start, const lcVector3& End, float& MinDistance) const;
 	bool BoxTest(const lcMatrix44& WorldMatrix, const lcVector4 Planes[6]) const;
@@ -158,6 +165,7 @@ protected:
 	bool mLoaded;
 	int mRefCount;
 	lcModel* mModel;
+	Project* mProject;
 	lcMesh* mMesh;
 	lcBoundingBox mBoundingBox;
 	lcSynthInfo* mSynthInfo;

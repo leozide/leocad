@@ -169,7 +169,7 @@ lcModel::~lcModel()
 
 		if (mPieceInfo->GetModel() == this)
 			mPieceInfo->SetPlaceholder();
-		mPieceInfo->Release(true);
+		mPieceInfo->Release();
 	}
 
 	DeleteModel();
@@ -226,7 +226,7 @@ void lcModel::DeleteModel()
 
 void lcModel::CreatePieceInfo(Project* Project)
 {
-	mPieceInfo = lcGetPiecesLibrary()->FindPiece(mProperties.mName.toUpper().toLatin1().constData(), Project, true);
+	mPieceInfo = lcGetPiecesLibrary()->FindPiece(mProperties.mName.toUpper().toLatin1().constData(), Project, true, false);
 	mPieceInfo->SetModel(this, true);
 	mPieceInfo->AddRef();
 }
@@ -427,6 +427,40 @@ void lcModel::SaveLDraw(QTextStream& Stream, bool SelectedOnly) const
 	Stream.flush();
 }
 
+void lcModel::SplitMPD(QIODevice& Device)
+{
+	while (!Device.atEnd())
+	{
+		qint64 Pos = Device.pos();
+		QString OriginalLine = Device.readLine();
+		QString Line = OriginalLine.trimmed();
+		QTextStream LineStream(&Line, QIODevice::ReadOnly);
+
+		QString Token;
+		LineStream >> Token;
+
+		if (Token == QLatin1String("0"))
+		{
+			LineStream >> Token;
+
+			if (Token == QLatin1String("FILE"))
+			{
+				if (!mProperties.mName.isEmpty())
+				{
+					Device.seek(Pos);
+					break;
+				}
+
+				mProperties.mName = LineStream.readAll().trimmed();
+			}
+			else if (Token == QLatin1String("NOFILE"))
+			{
+				break;
+			}
+		}
+	}
+}
+
 void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 {
 	lcPiece* Piece = NULL;
@@ -589,10 +623,10 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 				if (!CurrentGroups.IsEmpty())
 					Piece->SetGroup(CurrentGroups[CurrentGroups.GetSize() - 1]);
 
-				PieceInfo* Info = Library->FindPiece(PartID.toLatin1().constData(), Project, false);
+				PieceInfo* Info = Library->FindPiece(PartID.toLatin1().constData(), Project, false, true);
 
 				if (!Info)
-					Info = Library->FindPiece(File.toLatin1().constData(), Project, true);
+					Info = Library->FindPiece(File.toLatin1().constData(), Project, true, true);
 
 				float* Matrix = IncludeTransform;
 				lcMatrix44 Transform(lcVector4(Matrix[0], Matrix[2], -Matrix[1], 0.0f), lcVector4(Matrix[8], Matrix[10], -Matrix[9], 0.0f),
@@ -696,7 +730,7 @@ bool lcModel::LoadBinary(lcFile* file)
 			lcMatrix44 WorldMatrix = lcMul(lcMatrix44RotationZ(rot[2] * LC_DTOR), lcMul(lcMatrix44RotationY(rot[1] * LC_DTOR), lcMatrix44RotationX(rot[0] * LC_DTOR)));
 			WorldMatrix.SetTranslation(pos);
 
-			PieceInfo* pInfo = Library->FindPiece(name, NULL, true);
+			PieceInfo* pInfo = Library->FindPiece(name, NULL, true, false);
 			lcPiece* pPiece = new lcPiece(pInfo);
 
 			pPiece->Initialize(WorldMatrix, step);
@@ -1304,6 +1338,15 @@ void lcModel::SaveCheckpoint(const QString& Description)
 
 void lcModel::LoadCheckPoint(lcModelHistoryEntry* CheckPoint)
 {
+	lcArray<PieceInfo*> Infos;
+
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+	{
+		PieceInfo* Info = mPieces[PieceIdx]->mPieceInfo;
+		Info->AddRef();
+		Infos.Add(Info);
+	}
+
 	DeleteModel();
 
 	QBuffer Buffer(&CheckPoint->File);
@@ -1315,6 +1358,9 @@ void lcModel::LoadCheckPoint(lcModelHistoryEntry* CheckPoint)
 	gMainWindow->UpdateCurrentStep();
 	gMainWindow->UpdateSelectedObjects(true);
 	gMainWindow->UpdateAllViews();
+
+	for (int InfoIdx = 0; InfoIdx < Infos.GetSize(); InfoIdx++)
+		Infos[InfoIdx]->Release();
 }
 
 void lcModel::SetActive(bool Active)
@@ -2180,50 +2226,6 @@ void lcModel::MoveSelectionToModel(lcModel* Model)
 	ClearSelectionAndSetFocus(ModelPiece, LC_PIECE_SECTION_POSITION);
 }
 
-void lcModel::InlineAllModels()
-{
-	for (;;)
-	{
-		bool Inlined = false;
-
-		for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); )
-		{
-			lcPiece* Piece = mPieces[PieceIdx];
-
-			if (!Piece->mPieceInfo->IsModel())
-			{
-				PieceIdx++;
-				continue;
-			}
-
-			mPieces.RemoveIndex(PieceIdx);
-
-			lcArray<lcModelPartsEntry> ModelParts;
-			Piece->mPieceInfo->GetModelParts(Piece->mModelWorld, Piece->mColorIndex, ModelParts);
-
-			for (int InsertIdx = 0; InsertIdx < ModelParts.GetSize(); InsertIdx++)
-			{
-				lcModelPartsEntry& Entry = ModelParts[InsertIdx];
-
-				lcPiece* NewPiece = new lcPiece(Entry.Info);
-
-				NewPiece->Initialize(Entry.WorldMatrix, Piece->GetStepShow());
-				NewPiece->SetColorIndex(Entry.ColorIndex);
-				NewPiece->UpdatePosition(mCurrentStep);
-
-				InsertPiece(NewPiece, PieceIdx);
-				PieceIdx++;
-			}
-
-			delete Piece;
-			Inlined = true;
-		}
-
-		if (!Inlined)
-			break;
-	}
-}
-
 void lcModel::InlineSelectedModels()
 {
 	lcArray<lcObject*> NewPieces;
@@ -2570,7 +2572,7 @@ void lcModel::SetSelectedPiecesPieceInfo(PieceInfo* Info)
 
 		if (Piece->IsSelected() && Piece->mPieceInfo != Info)
 		{
-			Piece->mPieceInfo->Release(true);
+			Piece->mPieceInfo->Release();
 			Piece->SetPieceInfo(Info);
 			Modified = true;
 		}

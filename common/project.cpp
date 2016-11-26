@@ -237,10 +237,10 @@ bool Project::Load(const QString& FileName)
 	}
 
 	mModels.DeleteAll();
+	mFileName = FileName;
 	QFileInfo FileInfo(FileName);
 	QString Extension = FileInfo.suffix().toLower();
 
-	lcGetPiecesLibrary()->SetCurrentModelPath(FileInfo.absolutePath());
 	QByteArray FileData = File.readAll();
 	bool LoadDAT;
 
@@ -259,15 +259,21 @@ bool Project::Load(const QString& FileName)
 		while (!Buffer.atEnd())
 		{
 			lcModel* Model = new lcModel(QString());
-			Model->LoadLDraw(Buffer, this);
+			Model->SplitMPD(Buffer);
 
 			if (mModels.IsEmpty() || !Model->GetProperties().mName.isEmpty())
-			{
 				mModels.Add(Model);
-				Model->SetSaved();
-			}
 			else
 				delete Model;
+		}
+
+		Buffer.seek(0);
+
+		for (int ModelIdx = 0; ModelIdx < mModels.GetSize(); ModelIdx++)
+		{
+			lcModel* Model = mModels[ModelIdx];
+			Model->LoadLDraw(Buffer, this);
+			Model->SetSaved();
 		}
 	}
 	else
@@ -307,7 +313,6 @@ bool Project::Load(const QString& FileName)
 	for (int ModelIdx = 0; ModelIdx < mModels.GetSize(); ModelIdx++)
 		mModels[ModelIdx]->UpdatePieceInfo(UpdatedModels);
 
-	mFileName = FileName;
 	mModified = false;
 
 	return true;
@@ -322,8 +327,6 @@ bool Project::Save(const QString& FileName)
 		QMessageBox::warning(gMainWindow, tr("Error"), tr("Error writing to file '%1':\n%2").arg(FileName, File.errorString()));
 		return false;
 	}
-
-	lcGetPiecesLibrary()->SetCurrentModelPath(QFileInfo(FileName).absolutePath());
 
 	QTextStream Stream(&File);
 	bool Success = Save(Stream);
@@ -386,16 +389,6 @@ void Project::Merge(Project* Other)
 	}
 
 	mModified = true;
-}
-
-void Project::InlineAllModels()
-{
-	mModels[0]->InlineAllModels();
-
-	for (int ModelIdx = 1; ModelIdx < mModels.GetSize(); ModelIdx++)
-		delete mModels[ModelIdx];
-
-	mModels.SetSize(1);
 }
 
 void Project::GetModelParts(lcArray<lcModelPartsEntry>& ModelParts)
@@ -1477,7 +1470,7 @@ void Project::ExportPOVRay()
 
 			strupr(Src);
 
-			PieceInfo* Info = Library->FindPiece(Src, NULL, false);
+			PieceInfo* Info = Library->FindPiece(Src, NULL, false, false);
 			if (!Info)
 				continue;
 
@@ -1796,4 +1789,16 @@ void Project::SaveImage()
 		Dialog.mFileName = Dialog.mFileName.insert(Dialog.mFileName.length() - Extension.length() - 1, QLatin1String("%1"));
 
 	mActiveModel->SaveStepImages(Dialog.mFileName, Dialog.mWidth, Dialog.mHeight, Dialog.mStart, Dialog.mEnd);
+}
+
+void Project::UpdatePieceInfo(PieceInfo* Info) const
+{
+	if (!mModels.IsEmpty())
+	{
+		lcArray<lcModel*> UpdatedModels;
+		mModels[0]->UpdatePieceInfo(UpdatedModels);
+
+		lcBoundingBox BoundingBox = mModels[0]->GetPieceInfo()->GetBoundingBox();
+		Info->SetBoundingBox(BoundingBox.Min, BoundingBox.Max);
+	}
 }

@@ -95,8 +95,17 @@ void lcPiecesLibrary::RemovePiece(PieceInfo* Info)
 	delete Info;
 }
 
-PieceInfo* lcPiecesLibrary::FindPiece(const char* PieceName, Project* Project, bool CreatePlaceholder)
+PieceInfo* lcPiecesLibrary::FindPiece(const char* PieceName, Project* CurrentProject, bool CreatePlaceholder, bool SearchProjectFolder)
 {
+	QString ProjectPath;
+	if (SearchProjectFolder)
+	{
+		QString FileName = CurrentProject->GetFileName();
+
+		if (!FileName.isEmpty())
+			ProjectPath = QFileInfo(FileName).absolutePath();
+	}
+
 	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 	{
 		PieceInfo* Info = mPieces[PieceIdx];
@@ -104,10 +113,35 @@ PieceInfo* lcPiecesLibrary::FindPiece(const char* PieceName, Project* Project, b
 		if (strcmp(PieceName, Info->m_strName))
 			continue;
 
-		if (Project && Info->IsModel() && Project->GetModels().FindIndex(Info->GetModel()) == -1)
+		if (CurrentProject && Info->IsModel() && CurrentProject->GetModels().FindIndex(Info->GetModel()) == -1)
+			continue;
+
+		if (ProjectPath.isEmpty() && Info->IsProject())
 			continue;
 
 		return Info;
+	}
+
+	if (!ProjectPath.isEmpty())
+	{
+		QFileInfo ProjectFile = QFileInfo(ProjectPath + QDir::separator() + PieceName);
+
+		if (ProjectFile.isFile())
+		{
+			Project* NewProject = new Project();
+
+			if (NewProject->Load(ProjectFile.absoluteFilePath()))
+			{
+				PieceInfo* Info = new PieceInfo();
+
+				Info->SetProject(NewProject, PieceName);
+				mPieces.Add(Info);
+
+				return Info;
+			}
+			else
+				delete NewProject;
+		}
 	}
 
 	if (CreatePlaceholder)
@@ -270,7 +304,7 @@ bool lcPiecesLibrary::OpenArchive(lcFile* File, const char* FileName, lcZipFileT
 
 			if (memcmp(Name, "S/", 2))
 			{
-				PieceInfo* Info = FindPiece(Name, NULL, false);
+				PieceInfo* Info = FindPiece(Name, NULL, false, false);
 
 				if (!Info)
 				{
@@ -918,19 +952,7 @@ bool lcPiecesLibrary::LoadPiece(PieceInfo* Info)
 			setlocale(LC_NUMERIC, OldLocale);
 		}
 	}
-
-	if (!Loaded && !mCurrentModelPath.isEmpty())
-	{
-		lcMemFile PieceFile;
-		if (LoadAndInlineFile(Info->m_strName, PieceFile))
-		{
-			const char* OldLocale = setlocale(LC_NUMERIC, "C");
-			Loaded = ReadMeshData(PieceFile, lcMatrix44Identity(), 16, TextureStack, MeshData, LC_MESHDATA_SHARED, false);
-			setlocale(LC_NUMERIC, OldLocale);
-			UpdateBoundingBox = true;
-		}
-	}
-
+	
 	if (!Loaded)
 		return false;
 
@@ -1406,32 +1428,6 @@ bool lcPiecesLibrary::LoadPrimitive(int PrimitiveIndex)
 	return true;
 }
 
-bool lcPiecesLibrary::LoadAndInlineFile(const char* FileName, lcMemFile& File)
-{
-	QFileInfo FileInfo(QDir(mCurrentModelPath), FileName);
-
-	if (!FileInfo.isFile())
-		return false;
-
-	Project TempProject;
-
-	if (!TempProject.Load(FileInfo.absoluteFilePath()))
-		return false;
-
-	TempProject.InlineAllModels();
-
-	QByteArray Data;
-	QTextStream Stream(&Data);
-	TempProject.Save(Stream);
-	Stream.flush();
-
-	File.Seek(0, SEEK_SET);
-	File.WriteBuffer(Data.constData(), Data.size());
-	File.Seek(0, SEEK_SET);
-
-	return true;
-}
-
 bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform, lcuint32 CurrentColorCode, lcArray<lcLibraryTextureMap>& TextureStack, lcLibraryMeshData& MeshData, lcMeshDataType MeshDataType, bool Optimize)
 {
 	char Buffer[1024];
@@ -1713,17 +1709,6 @@ bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransf
 						}
 
 						break;
-					}
-
-					if (!Loaded && !mCurrentModelPath.isEmpty())
-					{
-						lcMemFile IncludeFile;
-						if (LoadAndInlineFile(OriginalFileName, IncludeFile))
-						{
-							const char* OldLocale = setlocale(LC_NUMERIC, "C");
-							Loaded = ReadMeshData(File, IncludeTransform, ColorCode, TextureStack, MeshData, MeshDataType, Optimize);
-							setlocale(LC_NUMERIC, OldLocale);
-						}
 					}
 				}
 			} break;
@@ -2368,7 +2353,7 @@ void lcPiecesLibrary::GetCategoryEntries(const String& CategoryKeywords, bool Gr
 			strcpy(ParentName, Info->m_strName);
 			*strchr(ParentName, 'P') = '\0';
 
-			Parent = FindPiece(ParentName, NULL, false);
+			Parent = FindPiece(ParentName, NULL, false, false);
 
 			if (Parent)
 			{

@@ -43,8 +43,8 @@ int stricmp(const char* str1, const char* str2);
 // Version number.
 #define LC_VERSION_MAJOR 0
 #define LC_VERSION_MINOR 83
-#define LC_VERSION_PATCH 1
-#define LC_VERSION_TEXT "0.83.1"
+#define LC_VERSION_PATCH 2
+#define LC_VERSION_TEXT "0.83.2"
 
 // Forward declarations.
 class Project;

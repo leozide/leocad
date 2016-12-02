@@ -59,8 +59,8 @@ void lcSynthInit()
 lcSynthInfo::lcSynthInfo(lcSynthType Type, float Length, int NumSections, PieceInfo* Info)
 	: mPieceInfo(Info), mType(Type), mLength(Length), mNumSections(NumSections)
 {
-	float EdgeSectionLength;
-	float MidSectionLength;
+	float EdgeSectionLength = 0.0f;
+	float MidSectionLength = 0.0f;
 
 	switch (mType)
 	{
@@ -115,7 +115,7 @@ void lcSynthInfo::GetDefaultControlPoints(lcArray<lcPieceControlPoint>& ControlP
 {
 	ControlPoints.SetSize(2);
 
-	float Scale;
+	float Scale = 1.0f;
 
 	switch (mType)
 	{

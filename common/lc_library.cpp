@@ -1678,8 +1678,6 @@ bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransf
 				}
 				else
 				{
-					bool Loaded = false;
-
 					for (int PieceInfoIndex = 0; PieceInfoIndex < mPieces.GetSize(); PieceInfoIndex++)
 					{
 						PieceInfo* Info = mPieces[PieceInfoIndex];
@@ -1692,7 +1690,7 @@ bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransf
 							lcMemFile IncludeFile;
 
 							if (mZipFiles[Info->mZipFileType]->ExtractFile(Info->mZipFileIndex, IncludeFile))
-								Loaded = ReadMeshData(IncludeFile, IncludeTransform, ColorCode, TextureStack, MeshData, MeshDataType, Optimize);
+								ReadMeshData(IncludeFile, IncludeTransform, ColorCode, TextureStack, MeshData, MeshDataType, Optimize);
 						}
 						else
 						{
@@ -1705,7 +1703,7 @@ bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransf
 							sprintf(FileName, "%sparts/%s.dat", mLibraryPath, Name);
 
 							if (IncludeFile.Open(FileName, "rt"))
-								Loaded = ReadMeshData(IncludeFile, IncludeTransform, ColorCode, TextureStack, MeshData, MeshDataType, Optimize);
+								ReadMeshData(IncludeFile, IncludeTransform, ColorCode, TextureStack, MeshData, MeshDataType, Optimize);
 						}
 
 						break;

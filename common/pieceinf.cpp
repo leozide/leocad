@@ -367,7 +367,7 @@ void PieceInfo::GetPartsList(int DefaultColorIndex, lcPartsList& PartsList) cons
 		if (Model)
 			Model->GetPartsList(DefaultColorIndex, PartsList);
 	}
-	else
+	else if (DefaultColorIndex < gNumUserColors)
 		PartsList[this][DefaultColorIndex]++;
 }
 

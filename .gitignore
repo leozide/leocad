@@ -20,3 +20,4 @@ Makefile
 library.bin
 leocad_plugin_import.cpp
 *.qm
+/uic_wrapper.bat

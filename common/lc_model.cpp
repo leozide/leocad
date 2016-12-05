@@ -488,13 +488,14 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 
 			if (Token == QLatin1String("FILE"))
 			{
-				if (!mProperties.mName.isEmpty())
+				QString Name = LineStream.readAll().trimmed();
+
+				if (mProperties.mName != Name)
 				{
 					Device.seek(Pos);
 					break;
 				}
 
-				mProperties.mName = LineStream.readAll().trimmed();
 				continue;
 			}
 			else if (Token == QLatin1String("NOFILE"))

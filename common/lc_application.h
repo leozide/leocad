@@ -42,7 +42,7 @@ public:
 	~lcApplication();
 
 	void SetProject(Project* Project);
-	bool Initialize(int argc, char *argv[], const char* LibraryInstallPath, const char* LDrawPath);
+	bool Initialize(int argc, char *argv[], const char* LibraryInstallPath, const char* LDrawPath, bool& ShowWindow);
 	void Shutdown();
 	void ShowPreferencesDialog();
 

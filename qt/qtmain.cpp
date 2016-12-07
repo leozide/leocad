@@ -170,23 +170,29 @@ int main(int argc, char *argv[])
 	const char* LDrawPath = NULL;
 #endif
 
-	if (!g_App->Initialize(argc, argv, libPath, LDrawPath))
+	bool ShowWindow;
+	if (!g_App->Initialize(argc, argv, libPath, LDrawPath, ShowWindow))
 		return 1;
 
-	gMainWindow->SetColorIndex(lcGetColorIndex(4));
-	gMainWindow->UpdateRecentFiles();
-	gMainWindow->show();
+	int ExecReturn = 0;
+
+	if (ShowWindow)
+	{
+		gMainWindow->SetColorIndex(lcGetColorIndex(4));
+		gMainWindow->UpdateRecentFiles();
+		gMainWindow->show();
 
 #if !LC_DISABLE_UPDATE_CHECK
-	lcDoInitialUpdateCheck();
+		lcDoInitialUpdateCheck();
 #endif
 
-	int execReturn = app.exec();
+		ExecReturn = app.exec();
+	}
 
 	delete gMainWindow;
 	gMainWindow = NULL;
 	delete g_App;
 	g_App = NULL;
 
-	return execReturn;
+	return ExecReturn;
 }

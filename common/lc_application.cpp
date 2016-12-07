@@ -185,7 +185,7 @@ void lcApplication::ParseStringArgument(int* CurArg, int argc, char* argv[], cha
 	}
 }
 
-bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstallPath, const char* LDrawPath)
+bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstallPath, const char* LDrawPath, bool& ShowWindow)
 {
 	char* LibPath = NULL;
 
@@ -271,7 +271,8 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 				printf("LeoCAD Version " LC_VERSION_TEXT "\n");
 				printf("Compiled " __DATE__ "\n");
 
-				return false;
+				ShowWindow = false;
+				return true;
 			}
 			else if ((strcmp(Param, "-?") == 0) || (strcmp(Param, "--help") == 0))
 			{
@@ -288,7 +289,8 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 				printf("  -3ds, --export-3ds <outfile.3ds>: Exports the model to 3DS format.\n");
 				printf("  \n");
 
-				return false;
+				ShowWindow = false;
+				return true;
 			}
 			else
 				printf("Unknown parameter: %s\n", Param);
@@ -303,20 +305,21 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 	lcLoadDefaultKeyboardShortcuts();
 	lcLoadDefaultMouseShortcuts();
 
+	ShowWindow = !SaveImage && !SaveWavefront && !Save3DS;
+
 	if (!LoadPiecesLibrary(LibPath, LibraryInstallPath, LDrawPath))
 	{
-		if (SaveImage || SaveWavefront || Save3DS)
-		{
-			fprintf(stderr, "ERROR: Cannot load pieces library.");
-			return false;
-		}
+		QString Message;
 
 		if (mLibrary->LoadBuiltinPieces())
-			QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("LeoCAD could not find a compatible Parts Library so only a small number of parts will be available.\n\n"
-			                         "Please visit http://www.leocad.org for information on how to download and install a library."));
+			Message = tr("LeoCAD could not find a compatible Parts Library so only a small number of parts will be available.\n\nPlease visit http://www.leocad.org for information on how to download and install a library.");
 		else
-			QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("LeoCAD could not load Parts Library.\n\n"
-			                         "Please visit http://www.leocad.org for information on how to download and install a library."));
+			Message = tr("LeoCAD could not load Parts Library.\n\nPlease visit http://www.leocad.org for information on how to download and install a library.");
+
+		if (ShowWindow)
+			QMessageBox::information(gMainWindow, tr("LeoCAD"), Message);
+		else
+			fprintf(stderr, Message.toLatin1().constData());
 	}
 
 	gMainWindow->CreateWidgets();
@@ -434,9 +437,6 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 			mProject->Export3DStudio(FileName);
 		}
 	}
-
-	if (SaveImage || SaveWavefront || Save3DS)
-		return false;
 
 	return true;
 }

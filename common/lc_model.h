@@ -213,7 +213,7 @@ public:
 	void GetScene(lcScene& Scene, lcCamera* ViewCamera, bool DrawInterface) const;
 	void SubModelAddRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, int DefaultColorIndex, bool Focused, bool Selected) const;
 	void DrawBackground(lcContext* Context);
-	void SaveStepImages(const QString& BaseName, int Width, int Height, lcStep Start, lcStep End);
+	void SaveStepImages(const QString& BaseName, bool AddStepSuffix, int Width, int Height, lcStep Start, lcStep End);
 
 	void RayTest(lcObjectRayTest& ObjectRayTest) const;
 	void BoxTest(lcObjectBoxTest& ObjectBoxTest) const;

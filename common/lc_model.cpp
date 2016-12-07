@@ -1182,7 +1182,7 @@ void lcModel::DrawBackground(lcContext* Context)
 	glDepthMask(GL_TRUE);
 }
 
-void lcModel::SaveStepImages(const QString& BaseName, int Width, int Height, lcStep Start, lcStep End)
+void lcModel::SaveStepImages(const QString& BaseName, bool AddStepSuffix, int Width, int Height, lcStep Start, lcStep End)
 {
 	gMainWindow->mPreviewWidget->MakeCurrent();
 	lcContext* Context = gMainWindow->mPreviewWidget->mContext;
@@ -1206,7 +1206,12 @@ void lcModel::SaveStepImages(const QString& BaseName, int Width, int Height, lcS
 		SetTemporaryStep(Step);
 		View.OnDraw();
 
-		QString FileName = BaseName.arg(Step, 2, 10, QLatin1Char('0'));
+		QString FileName;
+
+		if (AddStepSuffix)
+			FileName = BaseName.arg(Step, 2, 10, QLatin1Char('0'));
+		else
+			FileName = BaseName;
 
 		if (!Context->SaveRenderToTextureImage(FileName, Width, Height))
 			break;

@@ -1182,7 +1182,7 @@ void lcModel::DrawBackground(lcContext* Context)
 	glDepthMask(GL_TRUE);
 }
 
-void lcModel::SaveStepImages(const QString& BaseName, bool AddStepSuffix, int Width, int Height, lcStep Start, lcStep End)
+void lcModel::SaveStepImages(const QString& BaseName, bool AddStepSuffix, bool Zoom, int Width, int Height, lcStep Start, lcStep End)
 {
 	gMainWindow->mPreviewWidget->MakeCurrent();
 	lcContext* Context = gMainWindow->mPreviewWidget->mContext;
@@ -1195,8 +1195,12 @@ void lcModel::SaveStepImages(const QString& BaseName, bool AddStepSuffix, int Wi
 
 	lcStep CurrentStep = mCurrentStep;
 
+	lcCamera* Camera = gMainWindow->GetActiveView()->mCamera;
+	if (Zoom)
+		ZoomExtents(Camera, (float)Width / (float)Height);
+
 	View View(this);
-	View.SetCamera(gMainWindow->GetActiveView()->mCamera, false);
+	View.SetCamera(Camera, false);
 	View.mWidth = Width;
 	View.mHeight = Height;
 	View.SetContext(Context);

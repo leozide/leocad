@@ -43,6 +43,8 @@ public:
 		mInputState.x = 0;
 		mInputState.y = 0;
 		mInputState.Modifiers = Qt::NoModifier;
+		mWidth = 1;
+		mHeight = 1;
 		mContext = new lcContext();
 		mDeleteContext = true;
 	}

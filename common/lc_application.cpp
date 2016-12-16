@@ -319,7 +319,7 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 		if (ShowWindow)
 			QMessageBox::information(gMainWindow, tr("LeoCAD"), Message);
 		else
-			fprintf(stderr, Message.toLatin1().constData());
+			fprintf(stderr, "%s", Message.toLatin1().constData());
 	}
 
 	gMainWindow->CreateWidgets();

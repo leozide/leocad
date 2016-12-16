@@ -157,7 +157,7 @@ public:
 		return mRelativeTransform;
 	}
 
-	PieceInfo* lcMainWindow::GetCurrentPieceInfo() const
+	PieceInfo* GetCurrentPieceInfo() const
 	{
 		return mCurrentPieceInfo;
 	}

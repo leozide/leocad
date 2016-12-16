@@ -42,7 +42,6 @@ class lcPartSelectionListModel : public QAbstractListModel
 
 public:
 	lcPartSelectionListModel(QObject* Parent);
-	~lcPartSelectionListModel();
 
 	virtual int rowCount(const QModelIndex& Parent = QModelIndex()) const;
 	virtual QVariant data(const QModelIndex& Index, int Role = Qt::DisplayRole) const;
@@ -60,7 +59,7 @@ public:
 	}
 
 	void SetCategory(int CategoryIndex);
-	void RequestPreview(int InfoIndex);
+	void DrawPreview(int InfoIndex);
 
 protected:
 	QVector<QPair<PieceInfo*, QPixmap>> mParts;
@@ -103,7 +102,6 @@ class lcPartSelectionWidget : public QWidget
 
 public:
 	lcPartSelectionWidget(QWidget* Parent);
-	~lcPartSelectionWidget();
 
 protected slots:
 	void FilterChanged(const QString& Text);

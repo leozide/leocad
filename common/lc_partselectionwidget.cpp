@@ -24,18 +24,37 @@ void lcPartSelectionFilterModel::SetFilter(const QString& Filter)
 
 bool lcPartSelectionFilterModel::filterAcceptsRow(int SourceRow, const QModelIndex& SourceParent) const
 {
+	Q_UNUSED(SourceParent);
+
 	if (mFilter.isEmpty())
 		return true;
 
 	lcPartSelectionListModel* SourceModel = (lcPartSelectionListModel*)sourceModel();
 	PieceInfo* Info = SourceModel->GetPieceInfo(SourceRow);
 
-	return strstr(Info->m_strDescription, mFilter);
+	char Description[sizeof(Info->m_strDescription)];
+	char* Src = Info->m_strDescription;
+	char* Dst = Description;
+
+	for (;;)
+	{
+		*Dst = *Src;
+
+		if (*Src == ' ' && *(Src + 1) == ' ')
+			Src++;
+		else if (*Src == 0)
+			break;
+
+		Src++;
+		Dst++;
+	}
+
+	return strcasestr(Description, mFilter) || strcasestr(Info->m_strName, mFilter);
 }
 
 void lcPartSelectionItemDelegate::paint(QPainter* Painter, const QStyleOptionViewItem& Option, const QModelIndex& Index) const
 {
-	mListModel->RequestPreview(mFilterModel->mapToSource(Index).row());
+	mListModel->DrawPreview(mFilterModel->mapToSource(Index).row());
 	QStyledItemDelegate::paint(Painter, Option, Index);
 }
 
@@ -46,10 +65,6 @@ QSize lcPartSelectionItemDelegate::sizeHint(const QStyleOptionViewItem& Option, 
 
 lcPartSelectionListModel::lcPartSelectionListModel(QObject* Parent)
 	: QAbstractListModel(Parent)
-{
-}
-
-lcPartSelectionListModel::~lcPartSelectionListModel()
 {
 }
 
@@ -84,7 +99,10 @@ QVariant lcPartSelectionListModel::data(const QModelIndex& Index, int Role) cons
 	if (Index.isValid() && InfoIndex < mParts.size())
 	{
 		if (Role == Qt::ToolTipRole)
-			return QVariant(QString::fromLatin1(mParts[InfoIndex].first->m_strDescription));
+		{
+			PieceInfo* Info = mParts[InfoIndex].first;
+			return QVariant(QString("%1 (%2)").arg(QString::fromLatin1(Info->m_strDescription), QString::fromLatin1(Info->m_strName)));
+		}
 		else if (Role == Qt::DecorationRole)
 		{
 			if (!mParts[InfoIndex].second.isNull())
@@ -114,11 +132,10 @@ Qt::ItemFlags lcPartSelectionListModel::flags(const QModelIndex& Index) const
 		return DefaultFlags;
 }
 
-
 #include "lc_mainwindow.h"
 #include "preview.h"
 
-void lcPartSelectionListModel::RequestPreview(int InfoIndex)
+void lcPartSelectionListModel::DrawPreview(int InfoIndex)
 {
 	if (mParts[InfoIndex].second.isNull())
 	{
@@ -249,10 +266,6 @@ lcPartSelectionWidget::lcPartSelectionWidget(QWidget* Parent)
 	connect(mPartsWidget->selectionModel(), &QItemSelectionModel::currentChanged, this, &lcPartSelectionWidget::PartChanged);
 	connect(mFilterWidget, &QLineEdit::textEdited, this, &lcPartSelectionWidget::FilterChanged);
 	connect(mCategoriesWidget, &QTreeWidget::currentItemChanged, this, &lcPartSelectionWidget::CategoryChanged);
-}
-
-lcPartSelectionWidget::~lcPartSelectionWidget()
-{
 }
 
 void lcPartSelectionWidget::resizeEvent(QResizeEvent* Event)

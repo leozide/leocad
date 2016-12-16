@@ -2,6 +2,7 @@
 #include "lc_mainwindow.h"
 #include <QPrintDialog>
 #include <QPrintPreviewDialog>
+#include "lc_partselectionwidget.h"
 #include "lc_timelinewidget.h"
 #include "lc_qglwidget.h"
 #include "lc_qpartstree.h"
@@ -41,6 +42,7 @@ lcMainWindow::lcMainWindow()
 	mLockY = false;
 	mLockZ = false;
 	mRelativeTransform = true;
+	mCurrentPieceInfo = NULL;
 
 	memset(&mSearchOptions, 0, sizeof(mSearchOptions));
 
@@ -52,6 +54,12 @@ lcMainWindow::lcMainWindow()
 
 lcMainWindow::~lcMainWindow()
 {
+	if (mCurrentPieceInfo)
+	{
+		mCurrentPieceInfo->Release();
+		mCurrentPieceInfo = NULL;
+	}
+
 	for (int FileIdx = 0; FileIdx < LC_MAX_RECENT_FILES; FileIdx++)
 		lcSetProfileString((LC_PROFILE_KEY)(LC_PROFILE_RECENT_FILE1 + FileIdx), mRecentFiles[FileIdx]);
 
@@ -400,6 +408,7 @@ void lcMainWindow::CreateMenus()
 	ViewMenu->addAction(mActions[LC_VIEW_RESET_VIEWS]);
 	ViewMenu->addSeparator();
 	QMenu* ToolBarsMenu = ViewMenu->addMenu(tr("T&oolbars"));
+	ToolBarsMenu->addAction(mPartSelectionToolBar->toggleViewAction());
 	ToolBarsMenu->addAction(mPartsToolBar->toggleViewAction());
 	ToolBarsMenu->addAction(mPropertiesToolBar->toggleViewAction());
 	ToolBarsMenu->addAction(mTimelineToolBar->toggleViewAction());
@@ -568,6 +577,12 @@ void lcMainWindow::CreateToolBars()
 	mTimeToolBar->addAction(mActions[LC_PIECE_SHOW_LATER]);
 	mTimeToolBar->addAction(mActions[LC_VIEW_TIME_ADD_KEYS]);
 	// TODO: add missing menu items
+
+	mPartSelectionToolBar = new QDockWidget(tr("Parts"), this);
+	mPartSelectionToolBar->setObjectName("PartSelectionToolbar");
+	mPartSelectionWidget = new lcPartSelectionWidget(this);
+	mPartSelectionToolBar->setWidget(mPartSelectionWidget);
+	addDockWidget(Qt::RightDockWidgetArea, mPartSelectionToolBar);
 
 	mPartsToolBar = new QDockWidget(tr("Parts"), this);
 	mPartsToolBar->setObjectName("PartsToolbar");
@@ -1346,6 +1361,19 @@ void lcMainWindow::SetTransformType(lcTransformType TransformType)
 	}
 }
 
+void lcMainWindow::SetCurrentPieceInfo(PieceInfo* Info)
+{
+	mPreviewWidget->MakeCurrent();
+
+	if (mCurrentPieceInfo)
+		mCurrentPieceInfo->Release();
+
+	mCurrentPieceInfo = Info;
+
+	if (mCurrentPieceInfo)
+		mCurrentPieceInfo->AddRef();
+}
+
 lcVector3 lcMainWindow::GetTransformAmount()
 {
 	lcVector3 Transform;
@@ -1771,8 +1799,8 @@ void lcMainWindow::UpdateModels()
 
 	mPartsTree->UpdateModels();
 
-	PieceInfo* CurPiece = mPreviewWidget->GetCurrentPiece();
-	if (CurPiece->GetModel() == CurrentModel)
+	PieceInfo* CurPiece = GetCurrentPieceInfo();
+	if (CurPiece && CurPiece->GetModel() == CurrentModel)
 		mPreviewWidget->SetDefaultPiece();
 }
 

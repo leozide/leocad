@@ -141,6 +141,7 @@ public:
 
 	bool BeginRenderToTexture(int Width, int Height);
 	void EndRenderToTexture();
+	QImage GetRenderToTextureImage(int Width, int Height);
 	bool SaveRenderToTextureImage(const QString& FileName, int Width, int Height);
 
 	lcVertexBuffer CreateVertexBuffer(int Size, const void* Data);

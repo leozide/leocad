@@ -466,24 +466,25 @@ void lcContext::EndRenderToTexture()
 	}
 }
 
-bool lcContext::SaveRenderToTextureImage(const QString& FileName, int Width, int Height)
+QImage lcContext::GetRenderToTextureImage(int Width, int Height)
 {
-	lcuint8* Buffer = (lcuint8*)malloc(Width * Height * 4);
+	QImage Image(Width, Height, QImage::Format_ARGB32);
+	quint8* Buffer = Image.bits();
 
 	glFinish();
 	glReadPixels(0, 0, Width, Height, GL_RGBA, GL_UNSIGNED_BYTE, Buffer);
 
 	for (int y = 0; y < (Height + 1) / 2; y++)
 	{
-		lcuint8* Top = Buffer + ((Height - y - 1) * Width * 4);
-		lcuint8* Bottom = Buffer + y * Width * 4;
+		quint8* Top = Buffer + ((Height - y - 1) * Width * 4);
+		quint8* Bottom = Buffer + y * Width * 4;
 
 		for (int x = 0; x < Width; x++)
 		{
-			lcuint8 Red = Top[0];
-			lcuint8 Green = Top[1];
-			lcuint8 Blue = Top[2];
-			lcuint8 Alpha = Top[3];
+			quint8 Red = Top[0];
+			quint8 Green = Top[1];
+			quint8 Blue = Top[2];
+			quint8 Alpha = Top[3];
 
 			Top[0] = Bottom[2];
 			Top[1] = Bottom[1];
@@ -496,17 +497,22 @@ bool lcContext::SaveRenderToTextureImage(const QString& FileName, int Width, int
 			Bottom[3] = Alpha;
 
 			Top += 4;
-			Bottom +=4;
+			Bottom += 4;
 		}
 	}
 
+	return Image;
+}
+
+bool lcContext::SaveRenderToTextureImage(const QString& FileName, int Width, int Height)
+{
+	QImage Image = GetRenderToTextureImage(Width, Height);
     QImageWriter Writer(FileName);
-    bool Result = Writer.write(QImage(Buffer, Width, Height, QImage::Format_ARGB32));
+
+	bool Result = Writer.write(Image);
 
 	if (!Result)
 		QMessageBox::information(gMainWindow, tr("Error"), tr("Error writing to file '%1':\n%2").arg(FileName, Writer.errorString()));
-
-	free(Buffer);
 
 	return Result;
 }

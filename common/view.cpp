@@ -7,7 +7,6 @@
 #include "tr.h"
 #include "texfont.h"
 #include "lc_texture.h"
-#include "preview.h"
 #include "piece.h"
 #include "pieceinf.h"
 #include "lc_synth.h"
@@ -419,7 +418,7 @@ lcVector3 View::GetMoveDirection(const lcVector3& Direction) const
 
 lcMatrix44 View::GetPieceInsertPosition() const
 {
-	PieceInfo* CurPiece = gMainWindow->mPreviewWidget->GetCurrentPiece();
+	PieceInfo* CurPiece = gMainWindow->GetCurrentPieceInfo();
 	lcPiece* HitPiece = (lcPiece*)FindObjectUnderPointer(true).Object;
 
 	if (HitPiece)
@@ -554,7 +553,7 @@ void View::OnDraw()
 
 	if (DrawInterface && mTrackTool == LC_TRACKTOOL_INSERT)
 	{
-		PieceInfo* Info = gMainWindow->mPreviewWidget->GetCurrentPiece();
+		PieceInfo* Info = gMainWindow->GetCurrentPieceInfo();
 
 		if (Info)
 			Info->AddRenderMeshes(mScene, GetPieceInsertPosition(), gMainWindow->mColorIndex, true, true);
@@ -1307,7 +1306,7 @@ void View::DrawGrid()
 
 	if (mTrackTool == LC_TRACKTOOL_INSERT)
 	{
-		PieceInfo* CurPiece = gMainWindow->mPreviewWidget->GetCurrentPiece();
+		PieceInfo* CurPiece = gMainWindow->GetCurrentPieceInfo();
 
 		if (CurPiece)
 		{
@@ -2380,7 +2379,7 @@ void View::OnButtonDown(lcTrackButton TrackButton)
 
 	case LC_TRACKTOOL_INSERT:
 		{
-			PieceInfo* CurPiece = gMainWindow->mPreviewWidget->GetCurrentPiece();
+			PieceInfo* CurPiece = gMainWindow->GetCurrentPieceInfo();
 
 			if (!CurPiece)
 				break;

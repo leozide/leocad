@@ -2320,7 +2320,8 @@ bool lcPiecesLibrary::PieceInCategory(PieceInfo* Info, const String& CategoryKey
 
 void lcPiecesLibrary::GetCategoryEntries(int CategoryIndex, bool GroupPieces, lcArray<PieceInfo*>& SinglePieces, lcArray<PieceInfo*>& GroupedPieces)
 {
-	GetCategoryEntries(gCategories[CategoryIndex].Keywords, GroupPieces, SinglePieces, GroupedPieces);
+	if (CategoryIndex >= 0 && CategoryIndex < gCategories.GetSize())
+		GetCategoryEntries(gCategories[CategoryIndex].Keywords, GroupPieces, SinglePieces, GroupedPieces);
 }
 
 void lcPiecesLibrary::GetCategoryEntries(const String& CategoryKeywords, bool GroupPieces, lcArray<PieceInfo*>& SinglePieces, lcArray<PieceInfo*>& GroupedPieces)

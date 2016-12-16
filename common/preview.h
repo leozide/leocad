@@ -19,17 +19,10 @@ public:
 	void OnRightButtonUp();
 	void OnMouseMove();
 
-	PieceInfo* GetCurrentPiece() const
-	{
-		return m_PieceInfo;
-	}
-
 	void SetCurrentPiece(PieceInfo* Info);
 	void SetDefaultPiece();
 
 protected:
-	PieceInfo* m_PieceInfo;
-
 	// Mouse tracking.
 	int m_Tracking;
 	int m_DownX;

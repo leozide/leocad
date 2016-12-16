@@ -164,7 +164,7 @@ lcModel::~lcModel()
 {
 	if (mPieceInfo)
 	{
-		if (gMainWindow && gMainWindow->mPreviewWidget->GetCurrentPiece() == mPieceInfo)
+		if (gMainWindow && gMainWindow->GetCurrentPieceInfo() == mPieceInfo)
 			gMainWindow->mPreviewWidget->SetDefaultPiece();
 
 		if (mPieceInfo->GetModel() == this)
@@ -1922,7 +1922,7 @@ lcMatrix33 lcModel::GetRelativeRotation() const
 
 void lcModel::AddPiece()
 {
-	PieceInfo* CurPiece = gMainWindow->mPreviewWidget->GetCurrentPiece();
+	PieceInfo* CurPiece = gMainWindow->GetCurrentPieceInfo();
 
 	if (!CurPiece)
 		return;
@@ -3545,7 +3545,7 @@ void lcModel::EndMouseTool(lcTool Tool, bool Accept)
 
 void lcModel::InsertPieceToolClicked(const lcMatrix44& WorldMatrix)
 {
-	lcPiece* Piece = new lcPiece(gMainWindow->mPreviewWidget->GetCurrentPiece());
+	lcPiece* Piece = new lcPiece(gMainWindow->GetCurrentPieceInfo());
 	Piece->Initialize(WorldMatrix, mCurrentStep);
 	Piece->SetColorIndex(gMainWindow->mColorIndex);
 	Piece->UpdatePosition(mCurrentStep);

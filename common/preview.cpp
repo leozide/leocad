@@ -9,7 +9,6 @@
 
 PiecePreview::PiecePreview()
 {
-	m_PieceInfo = NULL;
 	m_RotateX = 60.0f;
 	m_RotateZ = 225.0f;
 	m_Distance = 10.0f;
@@ -19,13 +18,13 @@ PiecePreview::PiecePreview()
 
 PiecePreview::~PiecePreview()
 {
-	if (m_PieceInfo)
-		m_PieceInfo->Release();
 }
 
 void PiecePreview::OnDraw()
 {
-	if (m_PieceInfo == NULL)
+	PieceInfo* Info = gMainWindow->GetCurrentPieceInfo();
+
+	if (Info == NULL)
 		return;
 
 	mContext->SetDefaultState();
@@ -45,13 +44,13 @@ void PiecePreview::OnDraw()
 	lcMatrix44 ProjectionMatrix = lcMatrix44Perspective(30.0f, aspect, 1.0f, 2500.0f);
 	lcMatrix44 ViewMatrix;
 
-	const lcBoundingBox& BoundingBox = m_PieceInfo->GetBoundingBox();
+	const lcBoundingBox& BoundingBox = Info->GetBoundingBox();
 	lcVector3 Center = (BoundingBox.Min + BoundingBox.Max) / 2.0f;
 
 	if (m_AutoZoom)
 	{
 		Eye = Eye * 100.0f;
-		m_PieceInfo->ZoomExtents(ProjectionMatrix, ViewMatrix, Eye);
+		Info->ZoomExtents(ProjectionMatrix, ViewMatrix, Eye);
 
 		// Update the new camera distance.
 		lcVector3 d = Eye - Center;
@@ -69,7 +68,7 @@ void PiecePreview::OnDraw()
 	lcScene Scene;
 	Scene.Begin(ViewMatrix);
 
-	m_PieceInfo->AddRenderMeshes(Scene, lcMatrix44Identity(), gMainWindow->mColorIndex, false, false);
+	Info->AddRenderMeshes(Scene, lcMatrix44Identity(), gMainWindow->mColorIndex, false, false);
 
 	Scene.End();
 
@@ -81,6 +80,7 @@ void PiecePreview::OnDraw()
 
 void PiecePreview::SetCurrentPiece(PieceInfo *pInfo)
 {
+	/*
 	MakeCurrent();
 
 	if (m_PieceInfo != NULL)
@@ -93,6 +93,7 @@ void PiecePreview::SetCurrentPiece(PieceInfo *pInfo)
 		m_PieceInfo->AddRef();
 		Redraw();
 	}
+	*/
 }
 
 void PiecePreview::SetDefaultPiece()

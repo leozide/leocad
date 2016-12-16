@@ -173,6 +173,7 @@ SOURCES += common/view.cpp \
     qt/lc_qcolorlist.cpp \
     qt/lc_qfinddialog.cpp \
     qt/lc_qmodellistdialog.cpp \
+	common/lc_partselectionwidget.cpp \
     common/lc_timelinewidget.cpp
 HEADERS += \
     common/view.h \
@@ -234,6 +235,7 @@ HEADERS += \
     qt/lc_qcolorlist.h \
     qt/lc_qfinddialog.h \
     qt/lc_qmodellistdialog.h \
+	common/lc_partselectionwidget.h \
     common/lc_timelinewidget.h
 FORMS += \ 
     qt/lc_qpovraydialog.ui \

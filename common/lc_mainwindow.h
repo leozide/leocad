@@ -7,6 +7,7 @@
 #include "lc_model.h"
 
 class View;
+class lcPartSelectionWidget;
 class PiecePreview;
 class lcQGLWidget;
 class lcQPartsTree;
@@ -156,6 +157,11 @@ public:
 		return mRelativeTransform;
 	}
 
+	PieceInfo* lcMainWindow::GetCurrentPieceInfo() const
+	{
+		return mCurrentPieceInfo;
+	}
+
 	View* GetActiveView() const
 	{
 		lcModelTabWidget* CurrentTab = (lcModelTabWidget*)mModelTabWidget->currentWidget();
@@ -214,6 +220,7 @@ public:
 	void SetLockY(bool LockY);
 	void SetLockZ(bool LockZ);
 	void SetRelativeTransform(bool RelativeTransform);
+	void SetCurrentPieceInfo(PieceInfo* Info);
 
 	void NewProject();
 	bool OpenProject(const QString& FileName);
@@ -313,6 +320,7 @@ protected:
 	bool mLockY;
 	bool mLockZ;
 	bool mRelativeTransform;
+	PieceInfo* mCurrentPieceInfo;
 
 	QAction* mActionFileRecentSeparator;
 
@@ -320,10 +328,12 @@ protected:
 	QToolBar* mStandardToolBar;
 	QToolBar* mToolsToolBar;
 	QToolBar* mTimeToolBar;
+	QDockWidget* mPartSelectionToolBar;
 	QDockWidget* mPartsToolBar;
 	QDockWidget* mPropertiesToolBar;
 	QDockWidget* mTimelineToolBar;
 
+	lcPartSelectionWidget* mPartSelectionWidget;
 	lcQGLWidget* mPiecePreviewWidget;
 	lcQPartsTree* mPartsTree;
 	QLineEdit* mPartSearchEdit;

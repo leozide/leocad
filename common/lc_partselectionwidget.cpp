@@ -143,7 +143,7 @@ QVariant lcPartSelectionListModel::headerData(int Section, Qt::Orientation Orien
 	Q_UNUSED(Section);
 	Q_UNUSED(Orientation);
 
-	return Role == Qt::DisplayRole ? QVariant(QStringLiteral("Image")) : QVariant();
+	return Role == Qt::DisplayRole ? QVariant(QLatin1String("Image")) : QVariant();
 }
 
 Qt::ItemFlags lcPartSelectionListModel::flags(const QModelIndex& Index) const
@@ -210,7 +210,11 @@ void lcPartSelectionListModel::DrawPreview(int InfoIndex)
 
 	Context->EndRenderToTexture();
 
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 2, 0))
 	emit dataChanged(index(InfoIndex, 0), index(InfoIndex, 0), QVector<int>() << Qt::DecorationRole);
+#else
+	emit dataChanged(index(InfoIndex, 0), index(InfoIndex, 0));
+#endif
 }
 
 lcPartSelectionListView::lcPartSelectionListView(QWidget* Parent)
@@ -270,7 +274,9 @@ lcPartSelectionWidget::lcPartSelectionWidget(QWidget* Parent)
 
 	mFilterWidget = new QLineEdit(PartsGroupWidget);
 	mFilterWidget->setPlaceholderText(tr("Search Parts"));
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 2, 0))
 	mFilterWidget->addAction(QIcon(":/resources/parts_search.png"), QLineEdit::TrailingPosition);
+#endif
 	PartsLayout->addWidget(mFilterWidget);
 
 	mPartsWidget = new lcPartSelectionListView(PartsGroupWidget);
@@ -281,9 +287,9 @@ lcPartSelectionWidget::lcPartSelectionWidget(QWidget* Parent)
 	Layout->addWidget(mSplitter);
 	setLayout(Layout);
 
-	connect(mPartsWidget->selectionModel(), &QItemSelectionModel::currentChanged, this, &lcPartSelectionWidget::PartChanged);
-	connect(mFilterWidget, &QLineEdit::textEdited, this, &lcPartSelectionWidget::FilterChanged);
-	connect(mCategoriesWidget, &QTreeWidget::currentItemChanged, this, &lcPartSelectionWidget::CategoryChanged);
+	connect(mPartsWidget->selectionModel(), SIGNAL(currentChanged(const QModelIndex&, const QModelIndex&)), this, SLOT(PartChanged(const QModelIndex&, const QModelIndex&)));
+	connect(mFilterWidget, SIGNAL(textEdited(const QString&)), this, SLOT(FilterChanged(const QString&)));
+	connect(mCategoriesWidget, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), this, SLOT(CategoryChanged(QTreeWidgetItem*, QTreeWidgetItem*)));
 
 	UpdateCategories();
 }

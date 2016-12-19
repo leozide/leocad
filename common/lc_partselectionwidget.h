@@ -59,6 +59,7 @@ public:
 	}
 
 	void SetCategory(int CategoryIndex);
+	void SetModelsCategory();
 	void DrawPreview(int InfoIndex);
 
 protected:
@@ -103,6 +104,8 @@ class lcPartSelectionWidget : public QWidget
 public:
 	lcPartSelectionWidget(QWidget* Parent);
 
+	void UpdateModels();
+
 protected slots:
 	void FilterChanged(const QString& Text);
 	void CategoryChanged(QTreeWidgetItem* Current, QTreeWidgetItem* Previous);
@@ -111,7 +114,10 @@ protected slots:
 protected:
 	virtual void resizeEvent(QResizeEvent* Event);
 
+	void UpdateCategories();
+
 	QTreeWidget* mCategoriesWidget;
+	QTreeWidgetItem* mModelsCategoryItem;
 	QLineEdit* mFilterWidget;
 	lcPartSelectionListView* mPartsWidget;
 	QSplitter* mSplitter;

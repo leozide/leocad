@@ -1798,6 +1798,7 @@ void lcMainWindow::UpdateModels()
 	}
 
 	mPartsTree->UpdateModels();
+	mPartSelectionWidget->UpdateModels();
 
 	PieceInfo* CurPiece = GetCurrentPieceInfo();
 	if (CurPiece && CurPiece->GetModel() == CurrentModel)

@@ -2,6 +2,8 @@
 #include "lc_partselectionwidget.h"
 #include "lc_application.h"
 #include "lc_library.h"
+#include "lc_model.h"
+#include "project.h"
 #include "pieceinf.h"
 
 static const int gIconSize = 64;
@@ -81,7 +83,27 @@ void lcPartSelectionListModel::SetCategory(int CategoryIndex)
 	mParts.resize(SingleParts.GetSize());
 
 	for (int PartIdx = 0; PartIdx < SingleParts.GetSize(); PartIdx++)
-		mParts[PartIdx] = (QPair<PieceInfo*, QPixmap>(SingleParts[PartIdx], QPixmap()));
+		mParts[PartIdx] = QPair<PieceInfo*, QPixmap>(SingleParts[PartIdx], QPixmap());
+
+	endResetModel();
+}
+
+void lcPartSelectionListModel::SetModelsCategory()
+{
+	beginResetModel();
+
+	mParts.clear();
+
+	const lcArray<lcModel*>& Models = lcGetActiveProject()->GetModels();
+	lcModel* CurrentModel = lcGetActiveModel();
+
+	for (int ModelIdx = 0; ModelIdx < Models.GetSize(); ModelIdx++)
+	{
+		lcModel* Model = Models[ModelIdx];
+
+		if (!Model->IncludesModel(CurrentModel))
+			mParts.append(QPair<PieceInfo*, QPixmap>(Model->GetPieceInfo(), QPixmap()));
+	}
 
 	endResetModel();
 }
@@ -89,6 +111,7 @@ void lcPartSelectionListModel::SetCategory(int CategoryIndex)
 int lcPartSelectionListModel::rowCount(const QModelIndex& Parent) const
 {
 	Q_UNUSED(Parent);
+
 	return mParts.size();
 }
 
@@ -119,6 +142,7 @@ QVariant lcPartSelectionListModel::headerData(int Section, Qt::Orientation Orien
 {
 	Q_UNUSED(Section);
 	Q_UNUSED(Orientation);
+
 	return Role == Qt::DisplayRole ? QVariant(QStringLiteral("Image")) : QVariant();
 }
 
@@ -137,56 +161,56 @@ Qt::ItemFlags lcPartSelectionListModel::flags(const QModelIndex& Index) const
 
 void lcPartSelectionListModel::DrawPreview(int InfoIndex)
 {
-	if (mParts[InfoIndex].second.isNull())
-	{
-		gMainWindow->mPreviewWidget->MakeCurrent();
-		lcContext* Context = gMainWindow->mPreviewWidget->mContext;
-		int Width = gIconSize;
-		int Height = gIconSize;
+	if (!mParts[InfoIndex].second.isNull())
+		return;
 
-		if (!Context->BeginRenderToTexture(Width, Height))
-			return;
+	gMainWindow->mPreviewWidget->MakeCurrent();
+	lcContext* Context = gMainWindow->mPreviewWidget->mContext;
+	int Width = gIconSize;
+	int Height = gIconSize;
 
-		float aspect = (float)Width / (float)Height;
-		Context->SetViewport(0, 0, Width, Height);
+	if (!Context->BeginRenderToTexture(Width, Height))
+		return;
 
-		lcMatrix44 ProjectionMatrix = lcMatrix44Perspective(30.0f, aspect, 1.0f, 2500.0f);
-		lcMatrix44 ViewMatrix;
+	float Aspect = (float)Width / (float)Height;
+	Context->SetViewport(0, 0, Width, Height);
 
-		Context->SetDefaultState();
-		Context->SetProjectionMatrix(ProjectionMatrix);
-		Context->SetProgram(LC_PROGRAM_SIMPLE);
+	lcMatrix44 ProjectionMatrix = lcMatrix44Perspective(30.0f, Aspect, 1.0f, 2500.0f);
+	lcMatrix44 ViewMatrix;
 
-		PieceInfo* Info = mParts[InfoIndex].first;
-		Info->AddRef();
+	Context->SetDefaultState();
+	Context->SetProjectionMatrix(ProjectionMatrix);
+	Context->SetProgram(LC_PROGRAM_SIMPLE);
 
-		glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	PieceInfo* Info = mParts[InfoIndex].first;
+	Info->AddRef();
+
+	glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
-		lcVector3 CameraPosition(-100.0f, -100.0f, 75.0f);
-		Info->ZoomExtents(ProjectionMatrix, ViewMatrix, CameraPosition);
+	lcVector3 CameraPosition(-100.0f, -100.0f, 75.0f);
+	Info->ZoomExtents(ProjectionMatrix, ViewMatrix, CameraPosition);
 
-		lcScene Scene;
-		Scene.Begin(ViewMatrix);
+	lcScene Scene;
+	Scene.Begin(ViewMatrix);
 
-		Info->AddRenderMeshes(Scene, lcMatrix44Identity(), gDefaultColor, false, false);
+	Info->AddRenderMeshes(Scene, lcMatrix44Identity(), gDefaultColor, false, false);
 
-		Scene.End();
+	Scene.End();
 
-		Context->SetViewMatrix(ViewMatrix);
-		Context->DrawOpaqueMeshes(Scene.mOpaqueMeshes);
-		Context->DrawTranslucentMeshes(Scene.mTranslucentMeshes);
+	Context->SetViewMatrix(ViewMatrix);
+	Context->DrawOpaqueMeshes(Scene.mOpaqueMeshes);
+	Context->DrawTranslucentMeshes(Scene.mTranslucentMeshes);
 
-		Context->UnbindMesh(); // context remove
+	Context->UnbindMesh(); // context remove
 		
-		Info->Release();
+	Info->Release();
 
-		mParts[InfoIndex].second = QPixmap::fromImage(Context->GetRenderToTextureImage(Width, Height));
+	mParts[InfoIndex].second = QPixmap::fromImage(Context->GetRenderToTextureImage(Width, Height));
 
-		Context->EndRenderToTexture();
+	Context->EndRenderToTexture();
 
-		emit dataChanged(index(InfoIndex, 0), index(InfoIndex, 0), QVector<int>() << Qt::DecorationRole);
-	}
+	emit dataChanged(index(InfoIndex, 0), index(InfoIndex, 0), QVector<int>() << Qt::DecorationRole);
 }
 
 lcPartSelectionListView::lcPartSelectionListView(QWidget* Parent)
@@ -238,12 +262,6 @@ lcPartSelectionWidget::lcPartSelectionWidget(QWidget* Parent)
 	mCategoriesWidget->setUniformRowHeights(true);
 	mCategoriesWidget->setRootIsDecorated(false);
 
-	for (int CategoryIdx = 0; CategoryIdx < gCategories.GetSize(); CategoryIdx++)
-	{
-		QTreeWidgetItem* CategoryItem = new QTreeWidgetItem(mCategoriesWidget, QStringList((const char*)gCategories[CategoryIdx].Name));
-//		CategoryItem->setCheckState(0, Qt::Unchecked);
-	}
-
 	QWidget* PartsGroupWidget = new QWidget(mSplitter);
 
 	QVBoxLayout* PartsLayout = new QVBoxLayout();
@@ -266,6 +284,8 @@ lcPartSelectionWidget::lcPartSelectionWidget(QWidget* Parent)
 	connect(mPartsWidget->selectionModel(), &QItemSelectionModel::currentChanged, this, &lcPartSelectionWidget::PartChanged);
 	connect(mFilterWidget, &QLineEdit::textEdited, this, &lcPartSelectionWidget::FilterChanged);
 	connect(mCategoriesWidget, &QTreeWidget::currentItemChanged, this, &lcPartSelectionWidget::CategoryChanged);
+
+	UpdateCategories();
 }
 
 void lcPartSelectionWidget::resizeEvent(QResizeEvent* Event)
@@ -286,11 +306,35 @@ void lcPartSelectionWidget::FilterChanged(const QString& Text)
 void lcPartSelectionWidget::CategoryChanged(QTreeWidgetItem* Current, QTreeWidgetItem* Previous)
 {
 	Q_UNUSED(Previous);
-	mPartsWidget->GetListModel()->SetCategory(mCategoriesWidget->indexOfTopLevelItem(Current));
+
+	if (Current != mModelsCategoryItem)
+		mPartsWidget->GetListModel()->SetCategory(mCategoriesWidget->indexOfTopLevelItem(Current));
+	else
+		mPartsWidget->GetListModel()->SetModelsCategory();
+
 	mPartsWidget->setCurrentIndex(mPartsWidget->GetFilterModel()->index(0, 0));
 }
 
 void lcPartSelectionWidget::PartChanged(const QModelIndex& Current, const QModelIndex& Previous)
 {
+	Q_UNUSED(Current);
+	Q_UNUSED(Previous);
+
 	gMainWindow->SetCurrentPieceInfo(mPartsWidget->GetCurrentPart());
+}
+
+void lcPartSelectionWidget::UpdateCategories()
+{
+	mCategoriesWidget->clear();
+
+	for (int CategoryIdx = 0; CategoryIdx < gCategories.GetSize(); CategoryIdx++)
+		new QTreeWidgetItem(mCategoriesWidget, QStringList((const char*)gCategories[CategoryIdx].Name));
+
+	mModelsCategoryItem = new QTreeWidgetItem(mCategoriesWidget, QStringList(tr("Models")));
+}
+
+void lcPartSelectionWidget::UpdateModels()
+{
+	if (mCategoriesWidget->currentItem() == mModelsCategoryItem)
+		mPartsWidget->GetListModel()->SetModelsCategory();
 }

@@ -2,7 +2,7 @@
 #include "lc_zipfile.h"
 #include "lc_file.h"
 #include "lc_math.h"
-#include <zlib.h>
+#include <QtZlib/zlib.h>
 #include <time.h>
 
 #if MAX_MEM_LEVEL >= 8

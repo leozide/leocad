@@ -1,12 +1,11 @@
 #include "lc_global.h"
 #include "lc_partselectionwidget.h"
+#include "lc_profile.h"
 #include "lc_application.h"
 #include "lc_library.h"
 #include "lc_model.h"
 #include "project.h"
 #include "pieceinf.h"
-
-static const int gIconSize = 64;
 
 static int lcPartSortFunc(PieceInfo* const& a, PieceInfo* const& b)
 {
@@ -68,6 +67,7 @@ QSize lcPartSelectionItemDelegate::sizeHint(const QStyleOptionViewItem& Option, 
 lcPartSelectionListModel::lcPartSelectionListModel(QObject* Parent)
 	: QAbstractListModel(Parent)
 {
+	mIconSize = 0;
 }
 
 void lcPartSelectionListModel::SetCategory(int CategoryIndex)
@@ -121,17 +121,29 @@ QVariant lcPartSelectionListModel::data(const QModelIndex& Index, int Role) cons
 
 	if (Index.isValid() && InfoIndex < mParts.size())
 	{
-		if (Role == Qt::ToolTipRole)
+		PieceInfo* Info = mParts[InfoIndex].first;
+
+		switch (Role)
 		{
-			PieceInfo* Info = mParts[InfoIndex].first;
+		case Qt::DisplayRole:
+			if (!mIconSize)
+			{
+				PieceInfo* Info = mParts[InfoIndex].first;
+				return QVariant(QString::fromLatin1(Info->m_strDescription));
+			}
+			break;
+
+		case Qt::ToolTipRole:
 			return QVariant(QString("%1 (%2)").arg(QString::fromLatin1(Info->m_strDescription), QString::fromLatin1(Info->m_strName)));
-		}
-		else if (Role == Qt::DecorationRole)
-		{
+
+		case Qt::DecorationRole:
 			if (!mParts[InfoIndex].second.isNull())
 				return QVariant(mParts[InfoIndex].second);
 			else
 				return QVariant(QColor(0, 0, 0, 0));
+
+		default:
+			break;
 		}
 	}
 
@@ -161,13 +173,13 @@ Qt::ItemFlags lcPartSelectionListModel::flags(const QModelIndex& Index) const
 
 void lcPartSelectionListModel::DrawPreview(int InfoIndex)
 {
-	if (!mParts[InfoIndex].second.isNull())
+	if (!mIconSize || !mParts[InfoIndex].second.isNull())
 		return;
 
 	gMainWindow->mPreviewWidget->MakeCurrent();
 	lcContext* Context = gMainWindow->mPreviewWidget->mContext;
-	int Width = gIconSize;
-	int Height = gIconSize;
+	int Width = mIconSize;
+	int Height = mIconSize;
 
 	if (!Context->BeginRenderToTexture(Width, Height))
 		return;
@@ -217,14 +229,28 @@ void lcPartSelectionListModel::DrawPreview(int InfoIndex)
 #endif
 }
 
+void lcPartSelectionListModel::SetIconSize(int Size)
+{
+	if (Size == mIconSize)
+		return;
+
+	mIconSize = Size;
+
+	beginResetModel();
+
+	for (int PartIdx = 0; PartIdx < mParts.size(); PartIdx++)
+		mParts[PartIdx].second = QPixmap();
+
+	endResetModel();
+}
+
 lcPartSelectionListView::lcPartSelectionListView(QWidget* Parent)
 	: QListView(Parent)
 {
 	setUniformItemSizes(true);
-	setViewMode(QListView::IconMode);
-	setIconSize(QSize(gIconSize, gIconSize));
 	setResizeMode(QListView::Adjust);
 	setDragEnabled(true);
+	setContextMenuPolicy(Qt::CustomContextMenu);
 
 	mListModel = new lcPartSelectionListModel(this);
 	mFilterModel = new lcPartSelectionFilterModel(this);
@@ -232,6 +258,50 @@ lcPartSelectionListView::lcPartSelectionListView(QWidget* Parent)
 	setModel(mFilterModel);
 	lcPartSelectionItemDelegate* ItemDelegate = new lcPartSelectionItemDelegate(this, mListModel, mFilterModel);
 	setItemDelegate(ItemDelegate);
+
+	connect(this, SIGNAL(customContextMenuRequested(QPoint)), SLOT(CustomContextMenuRequested(QPoint)));
+
+	SetIconSize(lcGetProfileInt(LC_PROFILE_PARTS_LIST_ICONS));
+}
+
+void lcPartSelectionListView::CustomContextMenuRequested(QPoint Pos)
+{
+	QMenu* Menu = new QMenu(this);
+
+	Menu->addAction("Small Icons", this, SLOT(SetSmallIcons()));
+	Menu->addAction("Medium Icons", this, SLOT(SetMediumIcons()));
+	Menu->addAction("Large Icons", this, SLOT(SetLargeIcons()));
+	Menu->addAction("Text", this, SLOT(SetText()));
+
+	Menu->popup(viewport()->mapToGlobal(Pos));
+}
+
+void lcPartSelectionListView::SetSmallIcons()
+{
+	SetIconSize(32);
+}
+
+void lcPartSelectionListView::SetMediumIcons()
+{
+	SetIconSize(64);
+}
+
+void lcPartSelectionListView::SetLargeIcons()
+{
+	SetIconSize(96);
+}
+
+void lcPartSelectionListView::SetText()
+{
+	SetIconSize(0);
+}
+
+void lcPartSelectionListView::SetIconSize(int Size)
+{
+	setViewMode(Size ? QListView::IconMode : QListView::ListMode);
+	setIconSize(QSize(Size, Size));
+	lcSetProfileInt(LC_PROFILE_PARTS_LIST_ICONS, Size);
+	mListModel->SetIconSize(Size);
 }
 
 void lcPartSelectionListView::startDrag(Qt::DropActions SupportedActions)

@@ -85,6 +85,7 @@ lcProfileEntry gProfileEntries[LC_NUM_PROFILE_KEYS] =
 	lcProfileEntry("Settings", "ImageExtension", ".png"),                            // LC_PROFILE_IMAGE_EXTENSION
 	lcProfileEntry("Settings", "PrintRows", 1),                                      // LC_PROFILE_PRINT_ROWS
 	lcProfileEntry("Settings", "PrintColumns", 1),                                   // LC_PROFILE_PRINT_COLUMNS
+	lcProfileEntry("Settings", "PartsListIcons", 64),                                // LC_PROFILE_PARTS_LIST_ICONS
 
 	lcProfileEntry("Defaults", "Author", ""),                                        // LC_PROFILE_DEFAULT_AUTHOR_NAME
 	lcProfileEntry("Defaults", "FloorColor", LC_RGB(0, 191, 0)),                     // LC_PROFILE_DEFAULT_FLOOR_COLOR

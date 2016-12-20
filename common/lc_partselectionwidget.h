@@ -61,9 +61,11 @@ public:
 	void SetCategory(int CategoryIndex);
 	void SetModelsCategory();
 	void DrawPreview(int InfoIndex);
+	void SetIconSize(int Size);
 
 protected:
 	QVector<QPair<PieceInfo*, QPixmap>> mParts;
+	int mIconSize;
 };
 
 class lcPartSelectionListView : public QListView
@@ -90,7 +92,16 @@ public:
 		return mFilterModel;
 	}
 
+protected slots:
+	void CustomContextMenuRequested(QPoint Pos);
+	void SetSmallIcons();
+	void SetMediumIcons();
+	void SetLargeIcons();
+	void SetText();
+
 protected:
+	void SetIconSize(int Size);
+
 	lcPartSelectionListModel* mListModel;
 	lcPartSelectionFilterModel* mFilterModel;
 

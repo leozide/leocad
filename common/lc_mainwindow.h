@@ -274,10 +274,7 @@ protected slots:
 	void ModelTabChanged(int Index);
 	void ClipboardChanged();
 	void ActionTriggered();
-	void PartsTreeItemChanged(QTreeWidgetItem* Current, QTreeWidgetItem* Previous);
 	void ColorChanged(int ColorIndex);
-	void PartSearchReturn();
-	void PartSearchChanged(const QString& Text);
 	void Print(QPrinter* Printer);
 
 protected:
@@ -328,15 +325,13 @@ protected:
 	QToolBar* mStandardToolBar;
 	QToolBar* mToolsToolBar;
 	QToolBar* mTimeToolBar;
-	QDockWidget* mPartSelectionToolBar;
 	QDockWidget* mPartsToolBar;
+	QDockWidget* mColorsToolBar;
 	QDockWidget* mPropertiesToolBar;
 	QDockWidget* mTimelineToolBar;
 
 	lcPartSelectionWidget* mPartSelectionWidget;
 	lcQGLWidget* mPiecePreviewWidget;
-	lcQPartsTree* mPartsTree;
-	QLineEdit* mPartSearchEdit;
 	lcQColorList* mColorList;
 	lcQPropertiesTree* mPropertiesWidget;
 	lcTimelineWidget* mTimelineWidget;

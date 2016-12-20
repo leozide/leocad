@@ -105,6 +105,7 @@ public:
 	lcPartSelectionWidget(QWidget* Parent);
 
 	void UpdateModels();
+	void UpdateCategories();
 
 protected slots:
 	void FilterChanged(const QString& Text);
@@ -113,8 +114,6 @@ protected slots:
 
 protected:
 	virtual void resizeEvent(QResizeEvent* Event);
-
-	void UpdateCategories();
 
 	QTreeWidget* mCategoriesWidget;
 	QTreeWidgetItem* mModelsCategoryItem;

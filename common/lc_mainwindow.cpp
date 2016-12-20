@@ -408,8 +408,8 @@ void lcMainWindow::CreateMenus()
 	ViewMenu->addAction(mActions[LC_VIEW_RESET_VIEWS]);
 	ViewMenu->addSeparator();
 	QMenu* ToolBarsMenu = ViewMenu->addMenu(tr("T&oolbars"));
-	ToolBarsMenu->addAction(mPartSelectionToolBar->toggleViewAction());
 	ToolBarsMenu->addAction(mPartsToolBar->toggleViewAction());
+	ToolBarsMenu->addAction(mColorsToolBar->toggleViewAction());
 	ToolBarsMenu->addAction(mPropertiesToolBar->toggleViewAction());
 	ToolBarsMenu->addAction(mTimelineToolBar->toggleViewAction());
 	ToolBarsMenu->addSeparator();
@@ -578,15 +578,15 @@ void lcMainWindow::CreateToolBars()
 	mTimeToolBar->addAction(mActions[LC_VIEW_TIME_ADD_KEYS]);
 	// TODO: add missing menu items
 
-	mPartSelectionToolBar = new QDockWidget(tr("Parts"), this);
-	mPartSelectionToolBar->setObjectName("PartSelectionToolbar");
-	mPartSelectionWidget = new lcPartSelectionWidget(this);
-	mPartSelectionToolBar->setWidget(mPartSelectionWidget);
-	addDockWidget(Qt::RightDockWidgetArea, mPartSelectionToolBar);
-
 	mPartsToolBar = new QDockWidget(tr("Parts"), this);
 	mPartsToolBar->setObjectName("PartsToolbar");
-	mPartsToolBar->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+	mPartSelectionWidget = new lcPartSelectionWidget(this);
+	mPartsToolBar->setWidget(mPartSelectionWidget);
+	addDockWidget(Qt::RightDockWidgetArea, mPartsToolBar);
+
+	mColorsToolBar = new QDockWidget(tr("Colors"), this);
+	mColorsToolBar->setObjectName("ColorsToolbar");
+	mColorsToolBar->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 	QWidget* PartsContents = new QWidget();
 	QGridLayout* PartsLayout = new QGridLayout(PartsContents);
 	PartsLayout->setSpacing(6);
@@ -613,22 +613,6 @@ void lcMainWindow::CreateToolBars()
 	mPiecePreviewWidget->preferredSize = QSize(200, 100);
 	PreviewLayout->addWidget(mPiecePreviewWidget, 0, 0, 1, 1);
 
-	QSizePolicy treePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
-	treePolicy.setVerticalStretch(1);
-
-	mPartsTree = new lcQPartsTree(PartsSplitter);
-	mPartsTree->setSizePolicy(treePolicy);
-	connect(mPartsTree, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), this, SLOT(PartsTreeItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)));
-
-	mPartSearchEdit = new QLineEdit(PartsSplitter);
-	connect(mPartSearchEdit, SIGNAL(returnPressed()), this, SLOT(PartSearchReturn()));
-	connect(mPartSearchEdit, SIGNAL(textChanged(QString)), this, SLOT(PartSearchChanged(QString)));
-
-	QCompleter* Completer = new QCompleter(this);
-	Completer->setModel(new lcQPartsListModel(Completer));
-	Completer->setCaseSensitivity(Qt::CaseInsensitive);
-	mPartSearchEdit->setCompleter(Completer);
-
 	QFrame* ColorFrame = new QFrame(PartsSplitter);
 	ColorFrame->setFrameShape(QFrame::StyledPanel);
 	ColorFrame->setFrameShadow(QFrame::Sunken);
@@ -642,8 +626,8 @@ void lcMainWindow::CreateToolBars()
 
 	PartsLayout->addWidget(PartsSplitter, 0, 0, 1, 1);
 
-	mPartsToolBar->setWidget(PartsContents);
-	addDockWidget(Qt::RightDockWidgetArea, mPartsToolBar);
+	mColorsToolBar->setWidget(PartsContents);
+	addDockWidget(Qt::RightDockWidgetArea, mColorsToolBar);
 
 	mPropertiesToolBar = new QDockWidget(tr("Properties"), this);
 	mPropertiesToolBar->setObjectName("PropertiesToolbar");
@@ -664,9 +648,9 @@ void lcMainWindow::CreateToolBars()
 	mTimelineToolBar->setWidget(mTimelineWidget);
 	addDockWidget(Qt::RightDockWidgetArea, mTimelineToolBar);
 
-	tabifyDockWidget(mPartsToolBar, mPropertiesToolBar);
+	tabifyDockWidget(mColorsToolBar, mPropertiesToolBar);
 	tabifyDockWidget(mPropertiesToolBar, mTimelineToolBar);
-	mPartsToolBar->raise();
+	mColorsToolBar->raise();
 }
 
 void lcMainWindow::CreateStatusBar()
@@ -722,6 +706,7 @@ QMenu* lcMainWindow::createPopupMenu()
 	QMenu* Menu = new QMenu(this);
 
 	Menu->addAction(mPartsToolBar->toggleViewAction());
+	Menu->addAction(mColorsToolBar->toggleViewAction());
 	Menu->addAction(mPropertiesToolBar->toggleViewAction());
 	Menu->addAction(mTimelineToolBar->toggleViewAction());
 	Menu->addSeparator();
@@ -771,59 +756,9 @@ void lcMainWindow::ActionTriggered()
 	}
 }
 
-void lcMainWindow::PartsTreeItemChanged(QTreeWidgetItem* Current, QTreeWidgetItem* Previous)
-{
-	Q_UNUSED(Previous);
-
-	if (!Current)
-		return;
-
-	PieceInfo* Info = (PieceInfo*)Current->data(0, lcQPartsTree::PieceInfoRole).value<void*>();
-
-	if (Info)
-		mPreviewWidget->SetCurrentPiece(Info);
-}
-
 void lcMainWindow::ColorChanged(int ColorIndex)
 {
 	SetColorIndex(ColorIndex);
-}
-
-void lcMainWindow::PartSearchReturn()
-{
-	mPartsTree->searchParts(mPartSearchEdit->text());
-}
-
-void lcMainWindow::PartSearchChanged(const QString& Text)
-{
-	const QByteArray TextConv = Text.toLocal8Bit();
-	const char* SearchString = TextConv.data();
-	size_t Length = strlen(SearchString);
-
-	if (!Length)
-		return;
-
-	lcPiecesLibrary* Library = lcGetPiecesLibrary();
-	PieceInfo* BestMatch = NULL;
-
-	for (int PartIdx = 0; PartIdx < Library->mPieces.GetSize(); PartIdx++)
-	{
-		PieceInfo* Info = Library->mPieces[PartIdx];
-
-		if (strncasecmp(SearchString, Info->m_strDescription, Length) == 0)
-		{
-			if (!BestMatch || strcasecmp(BestMatch->m_strDescription, Info->m_strDescription) > 0)
-				BestMatch = Info;
-		}
-		else if (strncasecmp(SearchString, Info->m_strName, Length) == 0)
-		{
-			if (!BestMatch || strcasecmp(BestMatch->m_strName, Info->m_strName) > 0)
-				BestMatch = Info;
-		}
-	}
-
-	if (BestMatch)
-		mPartsTree->setCurrentPart(BestMatch);
 }
 
 void lcMainWindow::Print(QPrinter* Printer)
@@ -1797,7 +1732,6 @@ void lcMainWindow::UpdateModels()
 			delete TabWidget;
 	}
 
-	mPartsTree->UpdateModels();
 	mPartSelectionWidget->UpdateModels();
 
 	PieceInfo* CurPiece = GetCurrentPieceInfo();
@@ -1807,7 +1741,7 @@ void lcMainWindow::UpdateModels()
 
 void lcMainWindow::UpdateCategories()
 {
-	mPartsTree->updateCategories();
+	mPartSelectionWidget->UpdateCategories();
 }
 
 void lcMainWindow::UpdateTitle()

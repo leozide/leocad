@@ -95,34 +95,3 @@ bool lcQTreeWidgetColumnStretcher::eventFilter(QObject *obj, QEvent *ev)
 	}
 	return false;
 }
-
-lcQPartsListModel::lcQPartsListModel(QObject *parent)
-	: QAbstractListModel(parent)
-{
-}
-
-int lcQPartsListModel::rowCount(const QModelIndex &parent) const
-{
-	if (parent.isValid())
-		return 0;
-
-	return lcGetPiecesLibrary()->mPieces.GetSize() * 2;
-}
-
-QVariant lcQPartsListModel::data(const QModelIndex &index, int role) const
-{
-	int partIndex = index.row() / 2;
-
-	if (partIndex < 0 || partIndex >= lcGetPiecesLibrary()->mPieces.GetSize())
-		return QVariant();
-
-	if (role == Qt::DisplayRole || role == Qt::EditRole)
-	{
-		if (index.row() & 1)
-			return QString(lcGetPiecesLibrary()->mPieces[partIndex]->m_strName);
-		else
-			return QString(lcGetPiecesLibrary()->mPieces[partIndex]->m_strDescription);
-	}
-
-	return QVariant();
-}

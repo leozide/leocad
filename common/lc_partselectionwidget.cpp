@@ -266,7 +266,12 @@ lcPartSelectionWidget::lcPartSelectionWidget(QWidget* Parent)
 	mCategoriesWidget->setUniformRowHeights(true);
 	mCategoriesWidget->setRootIsDecorated(false);
 
+	QSizePolicy PartsWidgetPolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+	PartsWidgetPolicy.setHorizontalStretch(1);
+	PartsWidgetPolicy.setVerticalStretch(1);
+
 	QWidget* PartsGroupWidget = new QWidget(mSplitter);
+	PartsGroupWidget->setSizePolicy(PartsWidgetPolicy);
 
 	QVBoxLayout* PartsLayout = new QVBoxLayout();
 	PartsLayout->setContentsMargins(0, 0, 0, 0);
@@ -296,7 +301,7 @@ lcPartSelectionWidget::lcPartSelectionWidget(QWidget* Parent)
 
 void lcPartSelectionWidget::resizeEvent(QResizeEvent* Event)
 {
-	if (width() > height())
+	if (Event->size().width() > Event->size().height())
 		mSplitter->setOrientation(Qt::Horizontal);
 	else
 		mSplitter->setOrientation(Qt::Vertical);

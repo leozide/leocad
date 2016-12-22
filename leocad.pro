@@ -2,24 +2,24 @@ QT += core gui opengl network
 TEMPLATE = app
 
 greaterThan(QT_MAJOR_VERSION, 4) {
-#	DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0
+        DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0
 	QT *= printsupport
 }
 
 INCLUDEPATH += qt common
 CONFIG += precompile_header incremental c++11
 win32 { 
-	PRECOMPILED_HEADER = lc_global.h
+        PRECOMPILED_HEADER = common/lc_global.h
 	QMAKE_CXXFLAGS_WARN_ON += -wd4100
 	DEFINES += _CRT_SECURE_NO_WARNINGS _CRT_SECURE_NO_DEPRECATE=1 _CRT_NONSTDC_NO_WARNINGS=1
 	INCLUDEPATH += $$[QT_INSTALL_PREFIX]/src/3rdparty/zlib
 	QMAKE_LFLAGS += /INCREMENTAL
 	PRECOMPILED_SOURCE = common/lc_global.cpp
 	RC_FILE = qt/leocad.rc
-	LIBS += -ladvapi32 -lshell32
+        LIBS += -ladvapi32 -lshell32 -lopengl32
 } else {
 	PRECOMPILED_HEADER = common/lc_global.h
-	LIBS += -lz
+        LIBS += -lz -lopengl32
 	QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-parameter
 }
 

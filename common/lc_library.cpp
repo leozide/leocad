@@ -186,7 +186,9 @@ bool lcPiecesLibrary::Load(const char* LibraryPath)
 		strcpy(UnofficialFileName, mLibraryPath);
 		strcat(UnofficialFileName, "/ldrawunf.zip");
 
-		OpenArchive(UnofficialFileName, LC_ZIPFILE_UNOFFICIAL);
+		if (!OpenArchive(UnofficialFileName, LC_ZIPFILE_UNOFFICIAL))
+			UnofficialFileName[0] = 0;
+
 
 		ReadArchiveDescriptions(LibraryPath, UnofficialFileName);
 	}
@@ -347,19 +349,28 @@ void lcPiecesLibrary::ReadArchiveDescriptions(const QString& OfficialFileName, c
 {
 	QFileInfo OfficialInfo(OfficialFileName);
 	QFileInfo UnofficialInfo(UnofficialFileName);
-	
+
 	mArchiveCheckSum[0] = OfficialInfo.size();
 #if (QT_VERSION >= QT_VERSION_CHECK(4, 7, 0))
 	mArchiveCheckSum[1] = OfficialInfo.lastModified().toMSecsSinceEpoch();
 #else
 	mArchiveCheckSum[1] = OfficialInfo.lastModified().toTime_t();
 #endif
-	mArchiveCheckSum[2] = UnofficialInfo.size();
+	if (!UnofficialFileName.isEmpty())
+	{
+		mArchiveCheckSum[2] = UnofficialInfo.size();
 #if (QT_VERSION >= QT_VERSION_CHECK(4, 7, 0))
-	mArchiveCheckSum[3] = UnofficialInfo.lastModified().toMSecsSinceEpoch();
+		mArchiveCheckSum[3] = UnofficialInfo.lastModified().toMSecsSinceEpoch();
 #else
-	mArchiveCheckSum[3] = UnofficialInfo.lastModified().toTime_t();
+		mArchiveCheckSum[3] = UnofficialInfo.lastModified().toTime_t();
 #endif
+	}
+	else
+	{
+		mArchiveCheckSum[2] = 0;
+		mArchiveCheckSum[3] = 0;
+	}
+
 
 	QString IndexFileName = QFileInfo(QDir(mCachePath), QLatin1String("index")).absoluteFilePath();
 

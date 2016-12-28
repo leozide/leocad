@@ -188,6 +188,11 @@ public:
 		return NULL;
 	}
 
+	lcPartSelectionWidget* GetPartSelectionWidget() const
+	{
+		return mPartSelectionWidget;
+	}
+
 	QMenu* GetCameraMenu() const
 	{
 		return mCameraMenu;
@@ -264,7 +269,6 @@ public:
 	lcVector3 GetTransformAmount();
 
 	QString mRecentFiles[LC_MAX_RECENT_FILES];
-	PiecePreview* mPreviewWidget;
 	int mColorIndex;
 	lcSearchOptions mSearchOptions;
 	QAction* mActions[LC_NUM_COMMANDS];
@@ -331,7 +335,6 @@ protected:
 	QDockWidget* mTimelineToolBar;
 
 	lcPartSelectionWidget* mPartSelectionWidget;
-	lcQGLWidget* mPiecePreviewWidget;
 	lcQColorList* mColorList;
 	lcQPropertiesTree* mPropertiesWidget;
 	lcTimelineWidget* mTimelineWidget;

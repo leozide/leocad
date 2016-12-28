@@ -1259,6 +1259,13 @@ lcMesh* lcPiecesLibrary::CreateMesh(PieceInfo* Info, lcLibraryMeshData& MeshData
 	return Mesh;
 }
 
+void lcPiecesLibrary::ReleaseBuffers(lcContext* Context)
+{
+	Context->DestroyVertexBuffer(mVertexBuffer);
+	Context->DestroyIndexBuffer(mIndexBuffer);
+	mBuffersDirty = true;
+}
+
 void lcPiecesLibrary::UpdateBuffers(lcContext* Context)
 {
 	if (!gSupportsVertexBufferObject || !mBuffersDirty)

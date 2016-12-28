@@ -169,15 +169,16 @@ Qt::ItemFlags lcPartSelectionListModel::flags(const QModelIndex& Index) const
 }
 
 #include "lc_mainwindow.h"
-#include "preview.h"
+#include "view.h"
 
 void lcPartSelectionListModel::DrawPreview(int InfoIndex)
 {
 	if (!mIconSize || !mParts[InfoIndex].second.isNull())
 		return;
 
-	gMainWindow->mPreviewWidget->MakeCurrent();
-	lcContext* Context = gMainWindow->mPreviewWidget->mContext;
+	View* View = gMainWindow->GetActiveView();
+	View->MakeCurrent();
+	lcContext* Context = View->mContext;
 	int Width = mIconSize;
 	int Height = mIconSize;
 
@@ -402,6 +403,24 @@ void lcPartSelectionWidget::PartChanged(const QModelIndex& Current, const QModel
 	Q_UNUSED(Previous);
 
 	gMainWindow->SetCurrentPieceInfo(mPartsWidget->GetCurrentPart());
+}
+
+void lcPartSelectionWidget::Redraw()
+{
+}
+
+void lcPartSelectionWidget::SetDefaultPart()
+{
+	for (int CategoryIdx = 0; CategoryIdx < mCategoriesWidget->topLevelItemCount(); CategoryIdx++)
+	{
+		QTreeWidgetItem* CategoryItem = mCategoriesWidget->topLevelItem(CategoryIdx);
+
+		if (CategoryItem->text(0) == "Brick")
+		{
+			mCategoriesWidget->setCurrentItem(CategoryItem);
+			break;
+		}
+	}
 }
 
 void lcPartSelectionWidget::UpdateCategories()

@@ -2,7 +2,7 @@
 #include "lc_qaboutdialog.h"
 #include "ui_lc_qaboutdialog.h"
 #include "lc_mainwindow.h"
-#include "preview.h"
+#include "view.h"
 #include "lc_glextensions.h"
 
 lcQAboutDialog::lcQAboutDialog(QWidget *parent) :
@@ -13,7 +13,7 @@ lcQAboutDialog::lcQAboutDialog(QWidget *parent) :
 
 	ui->version->setText(tr("LeoCAD Version %1").arg(QString::fromLatin1(LC_VERSION_TEXT)));
 
-	gMainWindow->mPreviewWidget->MakeCurrent();
+	gMainWindow->GetActiveView()->MakeCurrent();
 
 	GLint Red, Green, Blue, Alpha, Depth, Stencil;
 	GLboolean DoubleBuffer, RGBA;

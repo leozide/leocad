@@ -11,8 +11,9 @@
 #include "texfont.h"
 #include "lc_texture.h"
 #include "lc_mesh.h"
+#include "lc_profile.h"
 
-static int gWidgetCount;
+static QList<QGLWidget*> gWidgetList;
 
 void lcGLWidget::MakeCurrent()
 {
@@ -76,8 +77,8 @@ void lcGLWidget::SetCursor(LC_CURSOR_TYPE CursorType)
 	}
 }
 
-lcQGLWidget::lcQGLWidget(QWidget *parent, lcQGLWidget *share, lcGLWidget *owner, bool view)
-	: QGLWidget(parent, share)
+lcQGLWidget::lcQGLWidget(QWidget *parent, lcGLWidget *owner, bool view)
+	: QGLWidget(parent, gWidgetList.isEmpty() ? NULL : gWidgetList.first())
 {
 	mWheelAccumulator = 0;
 	widget = owner;
@@ -90,7 +91,7 @@ lcQGLWidget::lcQGLWidget(QWidget *parent, lcQGLWidget *share, lcGLWidget *owner,
 
 	// TODO: Find a better place for the grid texture and font
 	gTexFont.Load();
-	if (!gWidgetCount)
+	if (gWidgetList.isEmpty())
 	{
 		lcInitializeGLExtensions(context());
 		lcContext::CreateResources();
@@ -98,8 +99,17 @@ lcQGLWidget::lcQGLWidget(QWidget *parent, lcQGLWidget *share, lcGLWidget *owner,
 
 		gPlaceholderMesh = new lcMesh;
 		gPlaceholderMesh->CreateBox();
+
+		int AASamples = lcGetProfileInt(LC_PROFILE_ANTIALIASING_SAMPLES);
+		if (AASamples > 1)
+		{
+			QGLFormat format;
+			format.setSampleBuffers(true);
+			format.setSamples(AASamples);
+			QGLFormat::setDefaultFormat(format);
+		}
 	}
-	gWidgetCount++;
+	gWidgetList.append(this);
 
 	widget->OnInitialUpdate();
 
@@ -116,11 +126,12 @@ lcQGLWidget::lcQGLWidget(QWidget *parent, lcQGLWidget *share, lcGLWidget *owner,
 
 lcQGLWidget::~lcQGLWidget()
 {
-	gWidgetCount--;
+	gWidgetList.removeOne(this);
 	gTexFont.Release();
 	makeCurrent();
-	if (!gWidgetCount)
+	if (gWidgetList.isEmpty())
 	{
+		lcGetPiecesLibrary()->ReleaseBuffers(widget->mContext);
 		View::DestroyResources(widget->mContext);
 		lcContext::DestroyResources();
 

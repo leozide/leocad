@@ -13,7 +13,6 @@
 #include "lc_file.h"
 #include "pieceinf.h"
 #include "view.h"
-#include "preview.h"
 #include "minifig.h"
 #include "lc_qarraydialog.h"
 #include "lc_qselectdialog.h"
@@ -165,7 +164,7 @@ lcModel::~lcModel()
 	if (mPieceInfo)
 	{
 		if (gMainWindow && gMainWindow->GetCurrentPieceInfo() == mPieceInfo)
-			gMainWindow->mPreviewWidget->SetDefaultPiece();
+			gMainWindow->SetCurrentPieceInfo(NULL);
 
 		if (mPieceInfo->GetModel() == this)
 			mPieceInfo->SetPlaceholder();
@@ -1184,8 +1183,9 @@ void lcModel::DrawBackground(lcContext* Context)
 
 void lcModel::SaveStepImages(const QString& BaseName, bool AddStepSuffix, bool Zoom, int Width, int Height, lcStep Start, lcStep End)
 {
-	gMainWindow->mPreviewWidget->MakeCurrent();
-	lcContext* Context = gMainWindow->mPreviewWidget->mContext;
+	View* ActiveView = gMainWindow->GetActiveView();
+	ActiveView->MakeCurrent();
+	lcContext* Context = ActiveView->mContext;
 
 	if (!Context->BeginRenderToTexture(Width, Height))
 	{
@@ -3923,7 +3923,7 @@ void lcModel::ShowMinifigDialog()
 	if (Dialog.exec() != QDialog::Accepted)
 		return;
 
-	gMainWindow->mPreviewWidget->MakeCurrent();
+	gMainWindow->GetActiveView()->MakeCurrent();
 
 	lcGroup* Group = AddGroup(tr("Minifig #"), NULL);
 	lcArray<lcObject*> Pieces(LC_MFW_NUMITEMS);

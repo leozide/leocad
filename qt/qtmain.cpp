@@ -4,6 +4,7 @@
 #include "lc_mainwindow.h"
 #include "project.h"
 #include "lc_colors.h"
+#include "lc_partselectionwidget.h"
 #include <QApplication>
 
 #ifdef Q_OS_WIN
@@ -179,6 +180,7 @@ int main(int argc, char *argv[])
 	if (ShowWindow)
 	{
 		gMainWindow->SetColorIndex(lcGetColorIndex(4));
+		gMainWindow->GetPartSelectionWidget()->SetDefaultPart();
 		gMainWindow->UpdateRecentFiles();
 		gMainWindow->show();
 

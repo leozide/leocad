@@ -160,6 +160,7 @@ public:
 
 	bool ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform, lcuint32 CurrentColorCode, lcArray<lcLibraryTextureMap>& TextureStack, lcLibraryMeshData& MeshData, lcMeshDataType MeshDataType, bool Optimize);
 	lcMesh* CreateMesh(PieceInfo* Info, lcLibraryMeshData& MeshData);
+	void ReleaseBuffers(lcContext* Context);
 	void UpdateBuffers(lcContext* Context);
 	void UnloadUnusedParts();
 

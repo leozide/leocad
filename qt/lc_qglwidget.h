@@ -7,7 +7,7 @@ class lcGLWidget;
 class lcQGLWidget : public QGLWidget
 {
 public:
-	lcQGLWidget(QWidget *parent, lcQGLWidget *share, lcGLWidget *owner, bool view);
+	lcQGLWidget(QWidget *parent, lcGLWidget *owner, bool view);
 	~lcQGLWidget();
 
 	QSize sizeHint() const;

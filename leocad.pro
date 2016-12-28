@@ -128,7 +128,6 @@ SOURCES += common/view.cpp \
     common/texfont.cpp \
     common/str.cpp \
     common/project.cpp \
-    common/preview.cpp \
     common/pieceinf.cpp \
     common/piece.cpp \
     common/object.cpp \
@@ -186,7 +185,6 @@ HEADERS += \
     common/system.h \
     common/str.h \
     common/project.h \
-    common/preview.h \
     common/pieceinf.h \
     common/piece.h \
     common/object.h \

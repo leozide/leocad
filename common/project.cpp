@@ -12,7 +12,6 @@
 #include "lc_application.h"
 #include "lc_profile.h"
 #include "lc_file.h"
-#include "preview.h"
 #include "lc_qimagedialog.h"
 #include "lc_qmodellistdialog.h"
 #include "lc_qpovraydialog.h"
@@ -1298,8 +1297,9 @@ void Project::ExportHTML()
 
 		if (Options.PartsListImages)
 		{
-			gMainWindow->mPreviewWidget->MakeCurrent();
-			lcContext* Context = gMainWindow->mPreviewWidget->mContext;
+			View* View = gMainWindow->GetActiveView();
+			View->MakeCurrent();
+			lcContext* Context = View->mContext;
 			int Width = Options.PartImagesWidth;
 			int Height = Options.PartImagesHeight;
 

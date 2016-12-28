@@ -115,6 +115,8 @@ class lcPartSelectionWidget : public QWidget
 public:
 	lcPartSelectionWidget(QWidget* Parent);
 
+	void Redraw();
+	void SetDefaultPart();
 	void UpdateModels();
 	void UpdateCategories();
 

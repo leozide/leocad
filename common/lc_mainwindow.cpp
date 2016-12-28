@@ -12,7 +12,6 @@
 #include "lc_qupdatedialog.h"
 #include "lc_qaboutdialog.h"
 #include "lc_profile.h"
-#include "preview.h"
 #include "view.h"
 #include "project.h"
 #include "piece.h"
@@ -27,7 +26,6 @@ lcMainWindow::lcMainWindow()
 {
 	memset(mActions, 0, sizeof(mActions));
 
-	mPreviewWidget = NULL;
 	mTransformType = LC_TRANSFORM_RELATIVE_TRANSLATION;
 
 	mColorIndex = lcGetColorIndex(4);
@@ -92,10 +90,6 @@ void lcMainWindow::CreateWidgets()
 
 	connect(QApplication::clipboard(), SIGNAL(dataChanged()), this, SLOT(ClipboardChanged()));
 	ClipboardChanged();
-
-	PiecePreview* Preview = (PiecePreview*)mPiecePreviewWidget->widget;
-	mPreviewWidget = Preview;
-	mPreviewWidget->SetDefaultPiece();
 
 	QSettings Settings;
 	Settings.beginGroup("MainWindow");
@@ -586,47 +580,10 @@ void lcMainWindow::CreateToolBars()
 
 	mColorsToolBar = new QDockWidget(tr("Colors"), this);
 	mColorsToolBar->setObjectName("ColorsToolbar");
-	mColorsToolBar->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-	QWidget* PartsContents = new QWidget();
-	QGridLayout* PartsLayout = new QGridLayout(PartsContents);
-	PartsLayout->setSpacing(6);
-	PartsLayout->setContentsMargins(6, 6, 6, 6);
-	QSplitter* PartsSplitter = new QSplitter(Qt::Vertical, PartsContents);
 
-	QFrame* PreviewFrame = new QFrame(PartsSplitter);
-	PreviewFrame->setFrameShape(QFrame::StyledPanel);
-	PreviewFrame->setFrameShadow(QFrame::Sunken);
-
-	QGridLayout* PreviewLayout = new QGridLayout(PreviewFrame);
-	PreviewLayout->setContentsMargins(0, 0, 0, 0);
-
-	int AASamples = lcGetProfileInt(LC_PROFILE_ANTIALIASING_SAMPLES);
-	if (AASamples > 1)
-	{
-		QGLFormat format;
-		format.setSampleBuffers(true);
-		format.setSamples(AASamples);
-		QGLFormat::setDefaultFormat(format);
-	}
-
-	mPiecePreviewWidget = new lcQGLWidget(PreviewFrame, NULL, new PiecePreview(), false);
-	mPiecePreviewWidget->preferredSize = QSize(200, 100);
-	PreviewLayout->addWidget(mPiecePreviewWidget, 0, 0, 1, 1);
-
-	QFrame* ColorFrame = new QFrame(PartsSplitter);
-	ColorFrame->setFrameShape(QFrame::StyledPanel);
-	ColorFrame->setFrameShadow(QFrame::Sunken);
-
-	QGridLayout* ColorLayout = new QGridLayout(ColorFrame);
-	ColorLayout->setContentsMargins(0, 0, 0, 0);
-
-	mColorList = new lcQColorList(PartsSplitter);
-	ColorLayout->addWidget(mColorList);
+	mColorList = new lcQColorList();
 	connect(mColorList, SIGNAL(colorChanged(int)), this, SLOT(ColorChanged(int)));
-
-	PartsLayout->addWidget(PartsSplitter, 0, 0, 1, 1);
-
-	mColorsToolBar->setWidget(PartsContents);
+	mColorsToolBar->setWidget(mColorList);
 	addDockWidget(Qt::RightDockWidgetArea, mColorsToolBar);
 
 	mPropertiesToolBar = new QDockWidget(tr("Properties"), this);
@@ -719,7 +676,8 @@ QMenu* lcMainWindow::createPopupMenu()
 
 void lcMainWindow::ModelTabClosed(int Index)
 {
-	delete mModelTabWidget->widget(Index);
+	if (mModelTabWidget->count() != 1)
+		delete mModelTabWidget->widget(Index);
 }
 
 void lcMainWindow::ModelTabChanged(int Index)
@@ -811,8 +769,8 @@ void lcMainWindow::Print(QPrinter* Printer)
 		Ascending = false;
 	}
 
-	mPreviewWidget->MakeCurrent();
-	lcContext* Context = mPreviewWidget->mContext;
+	GetActiveView()->MakeCurrent();
+	lcContext* Context = GetActiveView()->mContext;
 
 	QRect PageRect = Printer->pageRect();
 
@@ -1125,7 +1083,7 @@ void lcMainWindow::SetCurrentModelTab(lcModel* Model)
 	CentralLayout->setContentsMargins(0, 0, 0, 0);
 
 	View* NewView = new View(Model);
-	QWidget* ViewWidget = new lcQGLWidget(TabWidget, mPiecePreviewWidget, NewView, true);
+	QWidget* ViewWidget = new lcQGLWidget(TabWidget, NewView, true);
 	CentralLayout->addWidget(ViewWidget, 0, 0, 1, 1);
 	ViewWidget->show();
 	ViewWidget->setFocus();
@@ -1216,8 +1174,8 @@ void lcMainWindow::SetColorIndex(int ColorIndex)
 {
 	mColorIndex = ColorIndex;
 
-	if (mPreviewWidget)
-		mPreviewWidget->Redraw();
+	if (mPartSelectionWidget)
+		mPartSelectionWidget->Redraw();
 
 	UpdateColor();
 }
@@ -1298,7 +1256,7 @@ void lcMainWindow::SetTransformType(lcTransformType TransformType)
 
 void lcMainWindow::SetCurrentPieceInfo(PieceInfo* Info)
 {
-	mPreviewWidget->MakeCurrent();
+	GetActiveView()->MakeCurrent();
 
 	if (mCurrentPieceInfo)
 		mCurrentPieceInfo->Release();
@@ -1336,7 +1294,7 @@ void lcMainWindow::SplitView(Qt::Orientation Orientation)
 		Splitter = new QSplitter(Orientation, Parent);
 		Parent->layout()->addWidget(Splitter);
 		Splitter->addWidget(Focus);
-		Splitter->addWidget(new lcQGLWidget(mModelTabWidget->currentWidget(), mPiecePreviewWidget, new View(lcGetActiveModel()), true));
+		Splitter->addWidget(new lcQGLWidget(mModelTabWidget->currentWidget(), new View(lcGetActiveModel()), true));
 	}
 	else
 	{
@@ -1347,7 +1305,7 @@ void lcMainWindow::SplitView(Qt::Orientation Orientation)
 		Splitter = new QSplitter(Orientation, Parent);
 		ParentSplitter->insertWidget(FocusIndex, Splitter);
 		Splitter->addWidget(Focus);
-		Splitter->addWidget(new lcQGLWidget(mModelTabWidget->currentWidget(), mPiecePreviewWidget, new View(lcGetActiveModel()), true));
+		Splitter->addWidget(new lcQGLWidget(mModelTabWidget->currentWidget(), new View(lcGetActiveModel()), true));
 
 		ParentSplitter->setSizes(Sizes);
 	}
@@ -1417,7 +1375,7 @@ void lcMainWindow::ResetViews()
 	TabLayout->removeWidget(TopWidget);
 	TopWidget->deleteLater();
 	View* NewView = new View(lcGetActiveModel());
-	QWidget* ViewWidget = new lcQGLWidget(TabWidget, mPiecePreviewWidget, NewView, true);
+	QWidget* ViewWidget = new lcQGLWidget(TabWidget, NewView, true);
 	TabLayout->addWidget(ViewWidget);
 	ViewWidget->show();
 	ViewWidget->setFocus();
@@ -1734,9 +1692,8 @@ void lcMainWindow::UpdateModels()
 
 	mPartSelectionWidget->UpdateModels();
 
-	PieceInfo* CurPiece = GetCurrentPieceInfo();
-	if (CurPiece && CurPiece->GetModel() == CurrentModel)
-		mPreviewWidget->SetDefaultPiece();
+	if (mCurrentPieceInfo && mCurrentPieceInfo->IsModel())
+		SetCurrentPieceInfo(NULL);
 }
 
 void lcMainWindow::UpdateCategories()

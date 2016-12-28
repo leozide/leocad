@@ -5,7 +5,6 @@
 #include "lc_qcolorpicker.h"
 #include "minifig.h"
 #include "lc_mainwindow.h"
-#include "preview.h"
 
 lcQMinifigDialog::lcQMinifigDialog(QWidget *parent) :
 	QDialog(parent),
@@ -18,7 +17,7 @@ lcQMinifigDialog::lcQMinifigDialog(QWidget *parent) :
 
 	mMinifigWidget = new MinifigWizard();
 
-	lcQGLWidget *minifigWidget = new lcQGLWidget(NULL, (lcQGLWidget*)gMainWindow->mPreviewWidget->mWidget, mMinifigWidget, false);
+	lcQGLWidget *minifigWidget = new lcQGLWidget(NULL, mMinifigWidget, false);
 	minifigWidget->setMinimumWidth(100);
 	previewLayout->addWidget(minifigWidget);
 

@@ -58,6 +58,7 @@ public:
 		return mParts[Row].first;
 	}
 
+	void Redraw();
 	void SetCategory(int CategoryIndex);
 	void SetModelsCategory();
 	void DrawPreview(int InfoIndex);

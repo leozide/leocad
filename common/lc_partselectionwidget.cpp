@@ -70,6 +70,16 @@ lcPartSelectionListModel::lcPartSelectionListModel(QObject* Parent)
 	mIconSize = 0;
 }
 
+void lcPartSelectionListModel::Redraw()
+{
+	beginResetModel();
+
+	for (int PartIdx = 0; PartIdx < mParts.size(); PartIdx++)
+		mParts[PartIdx].second = QPixmap();
+
+	endResetModel();
+}
+
 void lcPartSelectionListModel::SetCategory(int CategoryIndex)
 {
 	beginResetModel();
@@ -207,7 +217,7 @@ void lcPartSelectionListModel::DrawPreview(int InfoIndex)
 	lcScene Scene;
 	Scene.Begin(ViewMatrix);
 
-	Info->AddRenderMeshes(Scene, lcMatrix44Identity(), gDefaultColor, false, false);
+	Info->AddRenderMeshes(Scene, lcMatrix44Identity(), gMainWindow->mColorIndex, false, false);
 
 	Scene.End();
 
@@ -407,6 +417,7 @@ void lcPartSelectionWidget::PartChanged(const QModelIndex& Current, const QModel
 
 void lcPartSelectionWidget::Redraw()
 {
+	mPartsWidget->GetListModel()->Redraw();
 }
 
 void lcPartSelectionWidget::SetDefaultPart()

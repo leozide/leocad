@@ -581,9 +581,18 @@ void lcMainWindow::CreateToolBars()
 	mColorsToolBar = new QDockWidget(tr("Colors"), this);
 	mColorsToolBar->setObjectName("ColorsToolbar");
 
-	mColorList = new lcQColorList();
+	QFrame* ColorFrame = new QFrame(mColorsToolBar);
+	ColorFrame->setFrameShape(QFrame::StyledPanel);
+	ColorFrame->setFrameShadow(QFrame::Sunken);
+
+	QGridLayout* ColorLayout = new QGridLayout(ColorFrame);
+	ColorLayout->setContentsMargins(0, 0, 0, 0);
+
+	mColorList = new lcQColorList(ColorFrame);
+	ColorLayout->addWidget(mColorList);
 	connect(mColorList, SIGNAL(colorChanged(int)), this, SLOT(ColorChanged(int)));
-	mColorsToolBar->setWidget(mColorList);
+
+	mColorsToolBar->setWidget(ColorFrame);
 	addDockWidget(Qt::RightDockWidgetArea, mColorsToolBar);
 
 	mPropertiesToolBar = new QDockWidget(tr("Properties"), this);

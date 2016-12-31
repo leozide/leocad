@@ -1031,8 +1031,8 @@ void lcModel::Paste()
 	Merge(Model);
 	SaveCheckpoint(tr("Pasting"));
 
-	if (PastedPieces.GetSize() == 1)
-		ClearSelectionAndSetFocus(PastedPieces[0], LC_PIECE_SECTION_POSITION);
+	if (SelectedObjects.GetSize() == 1)
+		ClearSelectionAndSetFocus(SelectedObjects[0], LC_PIECE_SECTION_POSITION);
 	else
 		SetSelectionAndFocus(SelectedObjects, NULL, 0);
 

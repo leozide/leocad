@@ -12,6 +12,9 @@
 *.suo
 *.vspx
 *.xcodeproj
+*.qm
+*.ldr
+*.dat
 build
 debug
 release
@@ -19,5 +22,4 @@ ipch
 Makefile
 library.bin
 leocad_plugin_import.cpp
-*.qm
-/uic_wrapper.bat
+uic_wrapper.bat

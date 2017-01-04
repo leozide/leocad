@@ -55,7 +55,7 @@ bool lcPartSelectionFilterModel::filterAcceptsRow(int SourceRow, const QModelInd
 
 void lcPartSelectionItemDelegate::paint(QPainter* Painter, const QStyleOptionViewItem& Option, const QModelIndex& Index) const
 {
-	mListModel->DrawPreview(mFilterModel->mapToSource(Index).row());
+	mListModel->RequestPreview(mFilterModel->mapToSource(Index).row());
 	QStyledItemDelegate::paint(Painter, Option, Index);
 }
 
@@ -68,6 +68,7 @@ lcPartSelectionListModel::lcPartSelectionListModel(QObject* Parent)
 	: QAbstractListModel(Parent)
 {
 	mIconSize = 0;
+	mLastDrawTime = QDateTime::currentDateTime();
 }
 
 void lcPartSelectionListModel::Redraw()
@@ -76,6 +77,8 @@ void lcPartSelectionListModel::Redraw()
 
 	for (int PartIdx = 0; PartIdx < mParts.size(); PartIdx++)
 		mParts[PartIdx].second = QPixmap();
+
+	mRequestedPreviews.clear();
 
 	endResetModel();
 }
@@ -95,6 +98,8 @@ void lcPartSelectionListModel::SetCategory(int CategoryIndex)
 	for (int PartIdx = 0; PartIdx < SingleParts.GetSize(); PartIdx++)
 		mParts[PartIdx] = QPair<PieceInfo*, QPixmap>(SingleParts[PartIdx], QPixmap());
 
+	mRequestedPreviews.clear();
+
 	endResetModel();
 }
 
@@ -103,6 +108,7 @@ void lcPartSelectionListModel::SetModelsCategory()
 	beginResetModel();
 
 	mParts.clear();
+	mRequestedPreviews.clear();
 
 	const lcArray<lcModel*>& Models = lcGetActiveProject()->GetModels();
 	lcModel* CurrentModel = lcGetActiveModel();
@@ -181,10 +187,41 @@ Qt::ItemFlags lcPartSelectionListModel::flags(const QModelIndex& Index) const
 #include "lc_mainwindow.h"
 #include "view.h"
 
-void lcPartSelectionListModel::DrawPreview(int InfoIndex)
+void lcPartSelectionListModel::RequestPreview(int InfoIndex)
 {
 	if (!mIconSize || !mParts[InfoIndex].second.isNull())
 		return;
+
+	mRequestedPreviews.removeOne(InfoIndex);
+	mRequestedPreviews.append(InfoIndex);
+	DrawPreview();
+}
+
+void lcPartSelectionListModel::DrawPreview()
+{
+	qint64 Elapsed = mLastDrawTime.msecsTo(QDateTime::currentDateTime());
+
+	if (Elapsed < 100)
+	{
+		QTimer::singleShot(100 - Elapsed, this, &lcPartSelectionListModel::DrawPreview);
+		return;
+	}
+
+	lcPartSelectionListView* ListView = (lcPartSelectionListView*)parent();
+	QRegion VisibleRegion = ListView->viewport()->visibleRegion();
+	int InfoIndex;
+
+	for (;;)
+	{
+		if (mRequestedPreviews.isEmpty())
+			return;
+
+		InfoIndex = mRequestedPreviews.takeLast();
+		QRect ItemRect = ListView->visualRect(ListView->GetFilterModel()->mapFromSource(index(InfoIndex, 0)));
+
+		if (VisibleRegion.contains(ItemRect) || VisibleRegion.intersects(ItemRect))
+			break;
+	}
 
 	View* View = gMainWindow->GetActiveView();
 	View->MakeCurrent();
@@ -232,6 +269,9 @@ void lcPartSelectionListModel::DrawPreview(int InfoIndex)
 	mParts[InfoIndex].second = QPixmap::fromImage(Context->GetRenderToTextureImage(Width, Height));
 
 	Context->EndRenderToTexture();
+
+	mLastDrawTime = QDateTime::currentDateTime();
+	QTimer::singleShot(100, this, &lcPartSelectionListModel::DrawPreview);
 
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 2, 0))
 	emit dataChanged(index(InfoIndex, 0), index(InfoIndex, 0), QVector<int>() << Qt::DecorationRole);

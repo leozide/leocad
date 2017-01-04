@@ -61,11 +61,15 @@ public:
 	void Redraw();
 	void SetCategory(int CategoryIndex);
 	void SetModelsCategory();
-	void DrawPreview(int InfoIndex);
+	void RequestPreview(int InfoIndex);
 	void SetIconSize(int Size);
 
 protected:
+	void DrawPreview();
+
 	QVector<QPair<PieceInfo*, QPixmap>> mParts;
+	QList<int> mRequestedPreviews;
+	QDateTime mLastDrawTime;
 	int mIconSize;
 };
 

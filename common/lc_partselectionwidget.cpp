@@ -67,6 +67,7 @@ QSize lcPartSelectionItemDelegate::sizeHint(const QStyleOptionViewItem& Option, 
 lcPartSelectionListModel::lcPartSelectionListModel(QObject* Parent)
 	: QAbstractListModel(Parent)
 {
+	mListView = (lcPartSelectionListView*)Parent;
 	mIconSize = 0;
 	mLastDrawTime = QDateTime::currentDateTime();
 }
@@ -203,12 +204,11 @@ void lcPartSelectionListModel::DrawPreview()
 
 	if (Elapsed < 100)
 	{
-		QTimer::singleShot(100 - Elapsed, this, &lcPartSelectionListModel::DrawPreview);
+		QTimer::singleShot(100 - Elapsed, this, SLOT(DrawPreview()));
 		return;
 	}
 
-	lcPartSelectionListView* ListView = (lcPartSelectionListView*)parent();
-	QRegion VisibleRegion = ListView->viewport()->visibleRegion();
+	QRegion VisibleRegion = mListView->viewport()->visibleRegion();
 	int InfoIndex;
 
 	for (;;)
@@ -217,7 +217,7 @@ void lcPartSelectionListModel::DrawPreview()
 			return;
 
 		InfoIndex = mRequestedPreviews.takeLast();
-		QRect ItemRect = ListView->visualRect(ListView->GetFilterModel()->mapFromSource(index(InfoIndex, 0)));
+		QRect ItemRect = mListView->visualRect(mListView->GetFilterModel()->mapFromSource(index(InfoIndex, 0)));
 
 		if (VisibleRegion.contains(ItemRect) || VisibleRegion.intersects(ItemRect))
 			break;
@@ -271,7 +271,7 @@ void lcPartSelectionListModel::DrawPreview()
 	Context->EndRenderToTexture();
 
 	mLastDrawTime = QDateTime::currentDateTime();
-	QTimer::singleShot(100, this, &lcPartSelectionListModel::DrawPreview);
+	QTimer::singleShot(100, this, SLOT(DrawPreview()));
 
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 2, 0))
 	emit dataChanged(index(InfoIndex, 0), index(InfoIndex, 0), QVector<int>() << Qt::DecorationRole);

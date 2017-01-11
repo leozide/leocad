@@ -2,6 +2,7 @@
 #define _LC_PARTSELECTIONWIDGET_H_
 
 class lcPartSelectionListModel;
+class lcPartSelectionListView;
 
 class lcPartSelectionFilterModel : public QSortFilterProxyModel
 {
@@ -64,9 +65,11 @@ public:
 	void RequestPreview(int InfoIndex);
 	void SetIconSize(int Size);
 
-protected:
+protected slots:
 	void DrawPreview();
 
+protected:
+	lcPartSelectionListView* mListView;
 	QVector<QPair<PieceInfo*, QPixmap>> mParts;
 	QList<int> mRequestedPreviews;
 	QDateTime mLastDrawTime;

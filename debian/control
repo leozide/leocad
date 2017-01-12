@@ -1,0 +1,17 @@
+Source: leocad
+Section: graphics
+Maintainer: Peter Bartfai <pbartfai@stardust.hu>
+Priority: optional
+#Qt4.x
+Build-Depends: debhelper (>= 4.1.6), libqt4-dev, libgl1-mesa-dev, libpng-dev
+#Qt5.x
+#Build-Depends: debhelper (>= 4.1.6), qtbase5-dev (>= 5.4.0), qt5-qmake, libqt5opengl5-dev, libgl1-mesa-dev, libpng-dev
+Homepage: http://www.leocad.org
+Standards-Version: 3.9.4
+
+Package: leocad
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: leocad
+  LeoCAD is a CAD program for creating virtual LEGO models.
+

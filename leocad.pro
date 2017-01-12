@@ -88,7 +88,7 @@ unix:!macx {
 	docs.path = $$DOCS_DIR
 	docs.files = docs/README.txt docs/CREDITS.txt docs/COPYING.txt
 	man.path = $$MAN_DIR
-	man.files = leocad.1
+	man.files = docs/leocad.1
 	desktop.path = $$DESKTOP_DIR
 	desktop.files = qt/leocad.desktop
 	icon.path = $$ICON_DIR

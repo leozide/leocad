@@ -1,0 +1,64 @@
+language: cpp
+
+matrix:
+ include:
+  - os: linux
+    dist: trusty
+    sudo: required
+    compiler: gcc
+    env:
+     - QT_BASE=48
+  - os: linux
+    dist: trusty
+    sudo: required
+    compiler: gcc
+    env:
+     - QT_BASE=57
+  - os: osx
+    compiler: clang
+    env:
+     - QT_BASE=57
+
+before_install:
+  - if [ "$QT_BASE" = "48" ]; then sudo add-apt-repository ppa:beineri/opt-qt487-trusty -y; fi
+  - if [ "$QT_BASE" = "51" ]; then sudo add-apt-repository ppa:beineri/opt-qt511-trusty -y; fi
+  - if [ "$QT_BASE" = "52" ]; then sudo add-apt-repository ppa:beineri/opt-qt521-trusty -y; fi
+  - if [ "$QT_BASE" = "53" ]; then sudo add-apt-repository ppa:beineri/opt-qt532-trusty -y; fi
+  - if [ "$QT_BASE" = "54" ]; then sudo add-apt-repository ppa:beineri/opt-qt542-trusty -y; fi
+  - if [[ "$QT_BASE" = "55" && "$TRAVIS_OS_NAME" = "linux" ]]; then sudo add-apt-repository ppa:beineri/opt-qt551-trusty -y; fi
+  - if [ "$QT_BASE" = "56" ]; then sudo add-apt-repository ppa:beineri/opt-qt562-trusty -y; fi
+  - if [[ "$QT_BASE" = "57" && "$TRAVIS_OS_NAME" = "linux" ]]; then sudo add-apt-repository ppa:beineri/opt-qt571-trusty -y; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then 
+      sudo apt-get update -qq;
+    else
+      brew update;
+    fi
+
+install:
+  - if [ "$QT_BASE" = "48" ]; then sudo apt-get install -qq opt-qt4-qmake opt-qt4-dev-tools; source /opt/qt-4.8/bin/qt-4.8-env.sh; fi
+  - if [ "$QT_BASE" = "51" ]; then sudo apt-get install -qq qt51base; source /opt/qt51/bin/qt51-env.sh; fi
+  - if [ "$QT_BASE" = "52" ]; then sudo apt-get install -qq qt52base; source /opt/qt52/bin/qt52-env.sh; fi
+  - if [ "$QT_BASE" = "53" ]; then sudo apt-get install -qq qt53base; source /opt/qt53/bin/qt53-env.sh; fi
+  - if [ "$QT_BASE" = "54" ]; then sudo apt-get install -qq qt54base; source /opt/qt54/bin/qt54-env.sh; fi
+  - if [ "$QT_BASE" = "55" ]; then
+      if [ "$TRAVIS_OS_NAME" = "linux" ]; then 
+        sudo apt-get install -qq qt55base; source /opt/qt55/bin/qt55-env.sh; 
+      else
+        brew install qt55;
+        brew link --force qt55;
+      fi
+    fi
+  - if [ "$QT_BASE" = "56" ]; then sudo apt-get install -qq qt56base; source /opt/qt56/bin/qt56-env.sh; fi
+  - if [ "$QT_BASE" = "57" ]; then
+      if [ "$TRAVIS_OS_NAME" = "linux" ]; then 
+        sudo apt-get install -qq qt57base; source /opt/qt57/bin/qt57-env.sh; 
+      else
+        brew install qt5;
+        brew link --force qt5;
+      fi
+    fi
+
+script:
+  - qmake -v
+  - qmake -r
+  - make

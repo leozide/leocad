@@ -58,7 +58,7 @@ install:
       fi
     fi
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then 
-      wget https://github.com/leozide/leocad/releases/download/v0.83.2/Library-Linux-9306.zip -O library.bin
+      wget https://github.com/leozide/leocad/releases/download/v0.83.2/Library-Linux-9306.zip -O library.bin;
     fi
 
 script:

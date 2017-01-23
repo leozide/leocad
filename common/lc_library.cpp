@@ -904,6 +904,15 @@ static void lcLoadPieceFuture(lcPiecesLibrary* Library)
 	Library->LoadQueuedPiece();
 }
 
+class lcSleeper : public QThread
+{
+public:
+	static void msleep(unsigned long Msecs)
+	{
+		QThread::msleep(Msecs);
+	}
+};
+
 void lcPiecesLibrary::LoadPieceInfo(PieceInfo* Info, bool Wait, bool Priority)
 {
 	QMutexLocker LoadLock(&mLoadMutex);
@@ -924,7 +933,7 @@ void lcPiecesLibrary::LoadPieceInfo(PieceInfo* Info, bool Wait, bool Priority)
 				LoadLock.unlock();
 
 				while (Info->mState != LC_PIECEINFO_LOADED)
-					QThread::msleep(10);
+					lcSleeper::msleep(10);
 			}
 		}
 	}

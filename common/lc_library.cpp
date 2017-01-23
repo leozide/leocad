@@ -14,7 +14,9 @@
 #include <ctype.h>
 #include <locale.h>
 #include <zlib.h>
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
 #include <QtConcurrent>
+#endif
 
 #if MAX_MEM_LEVEL >= 8
 #  define DEF_MEM_LEVEL 8

@@ -14,7 +14,7 @@
 #include <ctype.h>
 #include <locale.h>
 #include <zlib.h>
-#include  <QtConcurrent/QtConcurrent>
+#include <QtConcurrent>
 
 #if MAX_MEM_LEVEL >= 8
 #  define DEF_MEM_LEVEL 8

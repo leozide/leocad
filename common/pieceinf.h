@@ -15,6 +15,13 @@
 
 #define LC_PIECE_NAME_LEN 256
 
+enum lcPieceInfoState
+{
+	LC_PIECEINFO_UNLOADED,
+	LC_PIECEINFO_LOADING,
+	LC_PIECEINFO_LOADED
+};
+
 class lcSynthInfo;
 
 class PieceInfo
@@ -56,36 +63,23 @@ public:
 		return mModel;
 	}
 
-	void SetMesh(lcMesh* Mesh)
-	{
-		mMesh = Mesh;
-	}
+	void SetMesh(lcMesh* Mesh);
 
-	void AddRef()
+	int AddRef()
 	{
 		mRefCount++;
-
-		if (!mLoaded)
-			Load();
+		return mRefCount;
 	}
 
-	void Release()
+	int Release()
 	{
 		mRefCount--;
-
-		if (!mRefCount)
-			Unload();
+		return mRefCount;
 	}
 
-	void UnloadIfUnused()
+	int GetRefCount() const
 	{
-		if (!mRefCount && mLoaded)
-			Unload();
-	}
-
-	bool IsLoaded() const
-	{
-		return mLoaded;
+		return mRefCount;
 	}
 
 	bool IsPlaceholder() const
@@ -153,25 +147,24 @@ public:
 	void GetModelParts(const lcMatrix44& WorldMatrix, int DefaultColorIndex, lcArray<lcModelPartsEntry>& ModelParts) const;
 	void UpdateBoundingBox(lcArray<lcModel*>& UpdatedModels);
 
+	void Load();
+	void Unload();
+
 public:
-	// Attributes
 	char m_strName[LC_PIECE_NAME_LEN];
 	char m_strDescription[128];
 	int mZipFileType;
 	int mZipFileIndex;
 	lcuint32 mFlags;
+	lcPieceInfoState mState;
 
 protected:
-	bool mLoaded;
 	int mRefCount;
 	lcModel* mModel;
 	Project* mProject;
 	lcMesh* mMesh;
 	lcBoundingBox mBoundingBox;
 	lcSynthInfo* mSynthInfo;
-
-	void Load();
-	void Unload();
 };
 
 #endif // _PIECEINF_H_

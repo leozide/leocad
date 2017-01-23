@@ -123,8 +123,10 @@ public:
 	lcLibraryMeshData mMeshData;
 };
 
-class lcPiecesLibrary
+class lcPiecesLibrary : public QObject
 {
+	Q_OBJECT
+
 public:
 	lcPiecesLibrary();
 	~lcPiecesLibrary();
@@ -135,8 +137,12 @@ public:
 	void RemovePiece(PieceInfo* Info);
 
 	PieceInfo* FindPiece(const char* PieceName, Project* Project, bool CreatePlaceholder, bool SearchProjectFolder);
-	bool LoadPiece(PieceInfo* Info);
+	void LoadPieceInfo(PieceInfo* Info, bool Wait, bool Priority);
+	void ReleasePieceInfo(PieceInfo* Info);
 	bool LoadBuiltinPieces();
+	bool LoadPieceData(PieceInfo* Info);
+	void LoadQueuedPiece();
+	void WaitForLoadQueue();
 
 	lcTexture* FindTexture(const char* TextureName);
 	bool LoadTexture(lcTexture* Texture);
@@ -176,6 +182,9 @@ public:
 	lcVertexBuffer mVertexBuffer;
 	lcIndexBuffer mIndexBuffer;
 
+signals:
+	void PartLoaded(PieceInfo* Info);
+
 protected:
 	bool OpenArchive(const char* FileName, lcZipFileType ZipFileType);
 	bool OpenArchive(lcFile* File, const char* FileName, lcZipFileType ZipFileType);
@@ -191,6 +200,10 @@ protected:
 
 	int FindPrimitiveIndex(const char* Name) const;
 	bool LoadPrimitive(int PrimitiveIndex);
+
+	QMutex mLoadMutex;
+	QList<QFuture<void>> mLoadFutures;
+	QList<PieceInfo*> mLoadQueue;
 
 	QString mCachePath;
 	qint64 mArchiveCheckSum[4];

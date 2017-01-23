@@ -14,6 +14,7 @@
 #include <ctype.h>
 #include <locale.h>
 #include <zlib.h>
+#include  <QtConcurrent/QtConcurrent>
 
 #if MAX_MEM_LEVEL >= 8
 #  define DEF_MEM_LEVEL 8
@@ -26,6 +27,7 @@
 #define LC_LIBRARY_CACHE_DIRECTORY 0x0002
 
 lcPiecesLibrary::lcPiecesLibrary()
+	: mLoadMutex(QMutex::Recursive)
 {
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
 	QStringList cachePathList = QStandardPaths::standardLocations(QStandardPaths::CacheLocation);
@@ -48,6 +50,10 @@ lcPiecesLibrary::lcPiecesLibrary()
 
 lcPiecesLibrary::~lcPiecesLibrary()
 {
+	mLoadMutex.lock();
+	mLoadQueue.clear();
+	mLoadMutex.unlock();
+	WaitForLoadQueue();
 	Unload();
 }
 
@@ -74,6 +80,8 @@ void lcPiecesLibrary::Unload()
 
 void lcPiecesLibrary::RemoveTemporaryPieces()
 {
+	QMutexLocker LoadLock(&mLoadMutex);
+
 	for (int PieceIdx = mPieces.GetSize() - 1; PieceIdx >= 0; PieceIdx--)
 	{
 		PieceInfo* Info = mPieces[PieceIdx];
@@ -81,7 +89,7 @@ void lcPiecesLibrary::RemoveTemporaryPieces()
 		if (!Info->IsTemporary())
 			break;
 
-		if (!Info->IsLoaded())
+		if (Info->GetRefCount() == 0)
 		{
 			mPieces.RemoveIndex(PieceIdx);
 			delete Info;
@@ -233,6 +241,11 @@ bool lcPiecesLibrary::OpenArchive(const char* FileName, lcZipFileType ZipFileTyp
 	return true;
 }
 
+static int lcPrimitiveCompare(lcLibraryPrimitive* const& a, lcLibraryPrimitive* const& b)
+{
+	return strcmp(a->mName, b->mName);
+}
+
 bool lcPiecesLibrary::OpenArchive(lcFile* File, const char* FileName, lcZipFileType ZipFileType)
 {
 	lcZipFile* ZipFile = new lcZipFile();
@@ -324,7 +337,7 @@ bool lcPiecesLibrary::OpenArchive(lcFile* File, const char* FileName, lcZipFileT
 				int PrimitiveIndex = FindPrimitiveIndex(Name);
 
 				if (PrimitiveIndex == -1)
-					mPrimitives.Add(new lcLibraryPrimitive(Name, ZipFileType, FileIdx, false, true));
+					mPrimitives.AddSorted(new lcLibraryPrimitive(Name, ZipFileType, FileIdx, false, true), lcPrimitiveCompare);
 				else
 					mPrimitives[PrimitiveIndex]->SetZipFile(ZipFileType, FileIdx);
 			}
@@ -336,7 +349,7 @@ bool lcPiecesLibrary::OpenArchive(lcFile* File, const char* FileName, lcZipFileT
 			int PrimitiveIndex = FindPrimitiveIndex(Name);
 
 			if (PrimitiveIndex == -1)
-				mPrimitives.Add(new lcLibraryPrimitive(Name, ZipFileType, FileIdx, (memcmp(Name, "STU", 3) == 0), false));
+				mPrimitives.AddSorted(new lcLibraryPrimitive(Name, ZipFileType, FileIdx, (memcmp(Name, "STU", 3) == 0), false), lcPrimitiveCompare);
 			else
 				mPrimitives[PrimitiveIndex]->SetZipFile(ZipFileType, FileIdx);
 		}
@@ -586,7 +599,7 @@ bool lcPiecesLibrary::OpenDirectory(const char* Path)
 
 			bool SubFile = SubFileDirectories[DirectoryIdx];
 			lcLibraryPrimitive* Prim = new lcLibraryPrimitive(Name, LC_NUM_ZIPFILES, 0, !SubFile && (memcmp(Name, "STU", 3) == 0), SubFile);
-			mPrimitives.Add(Prim);
+			mPrimitives.AddSorted(Prim, lcPrimitiveCompare);
 		}
 	}
 
@@ -849,16 +862,23 @@ bool lcPiecesLibrary::LoadCachePiece(PieceInfo* Info)
 	if (!ReadCacheFile(FileName, MeshData))
 		return false;
 
-	lcMesh* Mesh = new lcMesh;
-	Info->SetMesh(Mesh);
-
 	quint32 Flags;
 	if (MeshData.ReadBuffer((char*)&Flags, sizeof(Flags)) == 0)
 		return false;
 
 	Info->mFlags = Flags;
 
-	return Mesh->FileLoad(MeshData);
+	lcMesh* Mesh = new lcMesh;
+	if (Mesh->FileLoad(MeshData))
+	{
+		Info->SetMesh(Mesh);
+		return true;
+	}
+	else
+	{
+		delete Mesh;
+		return false;
+	}
 }
 
 bool lcPiecesLibrary::SaveCachePiece(PieceInfo* Info)
@@ -875,6 +895,89 @@ bool lcPiecesLibrary::SaveCachePiece(PieceInfo* Info)
 	QString FileName = QFileInfo(QDir(mCachePath), QString::fromLatin1(Info->m_strName)).absoluteFilePath();
 
 	return WriteCacheFile(FileName, MeshData);
+}
+
+static void lcLoadPieceFuture(lcPiecesLibrary* Library)
+{
+	Library->LoadQueuedPiece();
+}
+
+void lcPiecesLibrary::LoadPieceInfo(PieceInfo* Info, bool Wait, bool Priority)
+{
+	QMutexLocker LoadLock(&mLoadMutex);
+
+	if (Wait)
+	{
+		if (Info->AddRef() == 1)
+			Info->Load();
+		else
+		{
+			if (Info->mState == LC_PIECEINFO_UNLOADED)
+			{
+				Info->Load();
+				emit PartLoaded(Info);
+			}
+			else
+			{
+				LoadLock.unlock();
+
+				while (Info->mState != LC_PIECEINFO_LOADED)
+					QThread::msleep(10);
+			}
+		}
+	}
+	else
+	{
+		if (Info->AddRef() == 1)
+		{
+			if (Priority)
+				mLoadQueue.prepend(Info);
+			else
+				mLoadQueue.append(Info);
+
+			mLoadFutures.append(QtConcurrent::run(lcLoadPieceFuture, this));
+		}
+	}
+}
+
+void lcPiecesLibrary::ReleasePieceInfo(PieceInfo* Info)
+{
+	QMutexLocker LoadLock(&mLoadMutex);
+
+	if (Info->GetRefCount() == 0 || Info->Release() == 0)
+		Info->Unload();
+}
+
+void lcPiecesLibrary::LoadQueuedPiece()
+{
+	mLoadMutex.lock();
+
+	PieceInfo* Info = NULL;
+
+	while (!mLoadQueue.isEmpty())
+	{
+		Info = mLoadQueue.takeFirst();
+
+		if (Info->mState == LC_PIECEINFO_UNLOADED && Info->GetRefCount() > 0)
+		{
+			Info->mState = LC_PIECEINFO_LOADING;
+			break;
+		}
+	}
+
+	mLoadMutex.unlock();
+
+	if (Info)
+		Info->Load();
+
+	emit PartLoaded(Info);
+}
+
+void lcPiecesLibrary::WaitForLoadQueue()
+{
+	for (QFuture<void>& Future : mLoadFutures)
+		Future.waitForFinished();
+	mLoadFutures.clear();
 }
 
 struct lcMergeSection
@@ -920,14 +1023,13 @@ static int LibraryMeshSectionCompare(lcMergeSection const& First, lcMergeSection
 	return a->mColor > b->mColor ? -1 : 1;
 }
 
-bool lcPiecesLibrary::LoadPiece(PieceInfo* Info)
+bool lcPiecesLibrary::LoadPieceData(PieceInfo* Info)
 {
 	lcLibraryMeshData MeshData;
 	lcArray<lcLibraryTextureMap> TextureStack;
 
 	bool Loaded = false;
 	bool SaveCache = false;
-	bool UpdateBoundingBox = false;
 
 	if (Info->mZipFileType != LC_NUM_ZIPFILES && mZipFiles[Info->mZipFileType])
 	{
@@ -967,10 +1069,7 @@ bool lcPiecesLibrary::LoadPiece(PieceInfo* Info)
 	if (!Loaded)
 		return false;
 
-	lcMesh* Mesh = CreateMesh(Info, MeshData);
-
-	if (UpdateBoundingBox)
-		Info->SetBoundingBox(Mesh->mBoundingBox.Min, Mesh->mBoundingBox.Max);
+	CreateMesh(Info, MeshData);
 
 	if (SaveCache)
 		SaveCachePiece(Info);
@@ -1332,8 +1431,14 @@ void lcPiecesLibrary::UpdateBuffers(lcContext* Context)
 
 void lcPiecesLibrary::UnloadUnusedParts()
 {
+	QMutexLocker LoadLock(&mLoadMutex);
+
 	for (int PieceInfoIndex = 0; PieceInfoIndex < mPieces.GetSize(); PieceInfoIndex++)
-		mPieces[PieceInfoIndex]->UnloadIfUnused();
+	{
+		PieceInfo* Info = mPieces[PieceInfoIndex];
+		if (Info->GetRefCount() == 0 && Info->mState != LC_PIECEINFO_UNLOADED)
+			ReleasePieceInfo(Info);
+	}
 }
 
 bool lcPiecesLibrary::LoadTexture(lcTexture* Texture)
@@ -1369,15 +1474,37 @@ bool lcPiecesLibrary::LoadTexture(lcTexture* Texture)
 
 int lcPiecesLibrary::FindPrimitiveIndex(const char* Name) const
 {
-	for (int PrimitiveIndex = 0; PrimitiveIndex < mPrimitives.GetSize(); PrimitiveIndex++)
-		if (!strcmp(mPrimitives[PrimitiveIndex]->mName, Name))
-			return PrimitiveIndex;
+	int Count = mPrimitives.GetSize();
+	int Begin = 0;
+	int Middle;
 
-	return -1;
+	if (Count == 0)
+		return -1;
+
+	while (Count > 0)
+	{
+		int Half = Count >> 1;
+		Middle = Begin + Half;
+		if (strcmp(mPrimitives[Middle]->mName, Name) < 0)
+		{
+			Begin = Middle + 1;
+			Count -= Half + 1;
+		}
+		else
+		{
+			Count = Half;
+		}
+	}
+	if (Begin != mPrimitives.GetSize() && !strcmp(mPrimitives[Begin]->mName, Name))
+		return Begin;
+	else
+		return -1;
 }
 
 bool lcPiecesLibrary::LoadPrimitive(int PrimitiveIndex)
 {
+	QMutexLocker LoadLock(&mLoadMutex);
+
 	lcLibraryPrimitive* Primitive = mPrimitives[PrimitiveIndex];
 	lcArray<lcLibraryTextureMap> TextureStack;
 

@@ -18,7 +18,7 @@ PieceInfo::PieceInfo()
 	mZipFileType = LC_NUM_ZIPFILES;
 	mZipFileIndex = -1;
 	mFlags = 0;
-	mLoaded = false;
+	mState = LC_PIECEINFO_UNLOADED;
 	mRefCount = 0;
 	mMesh = NULL;
 	mModel = NULL;
@@ -30,7 +30,7 @@ PieceInfo::~PieceInfo()
 {
 	delete mSynthInfo;
 
-	if (mLoaded)
+	if (mState == LC_PIECEINFO_LOADED)
 		Unload();
 }
 
@@ -40,6 +40,12 @@ QString PieceInfo::GetSaveID() const
 		return QString::fromLatin1(m_strName);
 
 	return QString::fromLatin1(m_strName) + QLatin1String(".DAT");
+}
+
+void PieceInfo::SetMesh(lcMesh* Mesh)
+{
+	mBoundingBox = Mesh->mBoundingBox;
+	mMesh = Mesh;
 }
 
 void PieceInfo::SetPlaceholder()
@@ -100,7 +106,7 @@ void PieceInfo::SetProject(Project* Project, const char* PieceName)
 	{
 		mFlags = LC_PIECE_PROJECT;
 		mProject = Project;
-		mLoaded = true;
+		mState = LC_PIECEINFO_LOADED;
 	}
 
 	strncpy(m_strName, PieceName, sizeof(m_strName));
@@ -134,25 +140,25 @@ void PieceInfo::CreatePlaceholder(const char* Name)
 
 void PieceInfo::Load()
 {
-	mLoaded = true;
+	if ((mFlags & (LC_PIECE_MODEL | LC_PIECE_PROJECT)) == 0)
+	{
+		mState = LC_PIECEINFO_LOADING; // todo: mutex lock when changing load state
 
-	if (mFlags & (LC_PIECE_MODEL | LC_PIECE_PROJECT))
-		return;
-	else if (mFlags & LC_PIECE_PLACEHOLDER)
-	{
-		if (lcGetPiecesLibrary()->LoadPiece(this))
-			mFlags &= ~LC_PIECE_PLACEHOLDER;
-		else
+		if (mFlags & LC_PIECE_PLACEHOLDER)
 		{
-			mFlags |= LC_PIECE_HAS_DEFAULT | LC_PIECE_HAS_LINES;
-			mBoundingBox = gPlaceholderMesh->mBoundingBox;
+			if (lcGetPiecesLibrary()->LoadPieceData(this))
+				mFlags &= ~LC_PIECE_PLACEHOLDER;
+			else
+			{
+				mFlags |= LC_PIECE_HAS_DEFAULT | LC_PIECE_HAS_LINES;
+				mBoundingBox = gPlaceholderMesh->mBoundingBox;
+			}
 		}
+		else
+			lcGetPiecesLibrary()->LoadPieceData(this);
 	}
-	else
-	{
-		lcGetPiecesLibrary()->LoadPiece(this);
-		mBoundingBox = mMesh->mBoundingBox;
-	}
+
+	mState = LC_PIECEINFO_LOADED;
 }
 
 void PieceInfo::Unload()
@@ -174,7 +180,7 @@ void PieceInfo::Unload()
 		mMesh = NULL;
 	}
 
-	mLoaded = false;
+	mState = LC_PIECEINFO_UNLOADED;
 	mModel = NULL;
 
 	if (IsModel())

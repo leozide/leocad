@@ -54,7 +54,8 @@ lcMainWindow::~lcMainWindow()
 {
 	if (mCurrentPieceInfo)
 	{
-		mCurrentPieceInfo->Release();
+		lcPiecesLibrary* Library = lcGetPiecesLibrary();
+		Library->ReleasePieceInfo(mCurrentPieceInfo);
 		mCurrentPieceInfo = NULL;
 	}
 
@@ -1265,15 +1266,16 @@ void lcMainWindow::SetTransformType(lcTransformType TransformType)
 
 void lcMainWindow::SetCurrentPieceInfo(PieceInfo* Info)
 {
+	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 	GetActiveView()->MakeCurrent();
 
 	if (mCurrentPieceInfo)
-		mCurrentPieceInfo->Release();
+		Library->ReleasePieceInfo(mCurrentPieceInfo);
 
 	mCurrentPieceInfo = Info;
 
 	if (mCurrentPieceInfo)
-		mCurrentPieceInfo->AddRef();
+		Library->LoadPieceInfo(mCurrentPieceInfo, true, true);
 }
 
 lcVector3 lcMainWindow::GetTransformAmount()

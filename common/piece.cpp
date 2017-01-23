@@ -20,7 +20,7 @@ lcPiece::lcPiece(PieceInfo* Info)
 	: lcObject(LC_OBJECT_PIECE)
 {
 	mMesh = NULL;
-	SetPieceInfo(Info);
+	SetPieceInfo(Info, true);
 	mState = 0;
 	mColorIndex = gDefaultColor;
 	mColorCode = 16;
@@ -37,16 +37,21 @@ lcPiece::lcPiece(PieceInfo* Info)
 lcPiece::~lcPiece()
 {
 	if (mPieceInfo)
-		mPieceInfo->Release();
+	{
+		lcPiecesLibrary* Library = lcGetPiecesLibrary();
+		Library->ReleasePieceInfo(mPieceInfo);
+	}
 
 	delete mMesh;
 }
 
-void lcPiece::SetPieceInfo(PieceInfo* Info)
+void lcPiece::SetPieceInfo(PieceInfo* Info, bool Wait)
 {
+	lcPiecesLibrary* Library = lcGetPiecesLibrary();
+
 	mPieceInfo = Info;
 	if (mPieceInfo)
-		mPieceInfo->AddRef();
+		Library->LoadPieceInfo(mPieceInfo, Wait, true);
 
 	mControlPoints.RemoveAll();
 	delete mMesh;
@@ -266,7 +271,7 @@ bool lcPiece::FileLoad(lcFile& file)
 	  file.ReadBuffer(name, LC_PIECE_NAME_LEN);
 
 	PieceInfo* pInfo = lcGetPiecesLibrary()->FindPiece(name, NULL, true, false);
-	SetPieceInfo(pInfo);
+	SetPieceInfo(pInfo, true);
 
 	// 11 (0.77)
 	if (version < 11)

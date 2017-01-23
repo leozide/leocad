@@ -58,27 +58,31 @@ void MinifigWizard::OnInitialUpdate()
 
 	const int ColorCodes[LC_MFW_NUMITEMS] = { 4, 7, 14, 7, 1, 0, 7, 4, 4, 14, 14, 7, 7, 0, 0, 7, 7 };
 	const char* Pieces[LC_MFW_NUMITEMS] = { "3624", "None", "3626BP01", "None", "973", "3815", "None", "3819", "3818", "3820", "3820", "None", "None", "3817", "3816", "None", "None" };
+	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 
 	for (int i = 0; i < LC_MFW_NUMITEMS; i++)
 	{
 		mMinifig.Colors[i] = lcGetColorIndex(ColorCodes[i]);
 
-		PieceInfo* Info = lcGetPiecesLibrary()->FindPiece(Pieces[i], NULL, false, false);
+		PieceInfo* Info = Library->FindPiece(Pieces[i], NULL, false, false);
 		if (Info)
 		{
 			mMinifig.Parts[i] = Info;
-			Info->AddRef();
+			Library->LoadPieceInfo(Info, false, true);
 		}
 	}
 
+	Library->WaitForLoadQueue();
 	Calculate();
 }
 
 MinifigWizard::~MinifigWizard()
 {
+	lcPiecesLibrary* Library = lcGetPiecesLibrary();
+
 	for (int i = 0; i < LC_MFW_NUMITEMS; i++)
 		if (mMinifig.Parts[i])
-			mMinifig.Parts[i]->Release();
+			Library->ReleasePieceInfo(mMinifig.Parts[i]);
 }
 
 void MinifigWizard::ParseSettings(lcFile& Settings)
@@ -547,15 +551,16 @@ int MinifigWizard::GetSelectionIndex(int Type) const
 
 void MinifigWizard::SetSelectionIndex(int Type, int Index)
 {
+	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 	MakeCurrent();
 
 	if (mMinifig.Parts[Type])
-		mMinifig.Parts[Type]->Release();
+		Library->ReleasePieceInfo(mMinifig.Parts[Type]);
 
 	mMinifig.Parts[Type] = mSettings[Type][Index].Info;
 
 	if (mMinifig.Parts[Type])
-		mMinifig.Parts[Type]->AddRef();
+		Library->LoadPieceInfo(mMinifig.Parts[Type], true, true);
 
 	Calculate();
 }

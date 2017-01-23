@@ -43,6 +43,7 @@ class lcPartSelectionListModel : public QAbstractListModel
 
 public:
 	lcPartSelectionListModel(QObject* Parent);
+	virtual ~lcPartSelectionListModel();
 
 	virtual int rowCount(const QModelIndex& Parent = QModelIndex()) const;
 	virtual QVariant data(const QModelIndex& Index, int Role = Qt::DisplayRole) const;
@@ -66,13 +67,15 @@ public:
 	void SetIconSize(int Size);
 
 protected slots:
-	void DrawPreview();
+	void PartLoaded(PieceInfo* Info);
 
 protected:
+	void ClearRequests();
+	void DrawPreview(int InfoIndex);
+
 	lcPartSelectionListView* mListView;
 	QVector<QPair<PieceInfo*, QPixmap>> mParts;
 	QList<int> mRequestedPreviews;
-	QDateTime mLastDrawTime;
 	int mIconSize;
 };
 

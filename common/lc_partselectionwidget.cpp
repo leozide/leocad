@@ -69,23 +69,44 @@ lcPartSelectionListModel::lcPartSelectionListModel(QObject* Parent)
 {
 	mListView = (lcPartSelectionListView*)Parent;
 	mIconSize = 0;
-	mLastDrawTime = QDateTime::currentDateTime();
+
+	connect(lcGetPiecesLibrary(), SIGNAL(PartLoaded(PieceInfo*)), this, SLOT(PartLoaded(PieceInfo*)));
+}
+
+lcPartSelectionListModel::~lcPartSelectionListModel()
+{
+	ClearRequests();
+}
+
+void lcPartSelectionListModel::ClearRequests()
+{
+	lcPiecesLibrary* Library = lcGetPiecesLibrary();
+
+	foreach(int RequestIdx, mRequestedPreviews)
+	{
+		PieceInfo* Info = mParts[RequestIdx].first;
+		Library->ReleasePieceInfo(Info);
+	}
+
+	mRequestedPreviews.clear();
 }
 
 void lcPartSelectionListModel::Redraw()
 {
+	ClearRequests();
+
 	beginResetModel();
 
 	for (int PartIdx = 0; PartIdx < mParts.size(); PartIdx++)
 		mParts[PartIdx].second = QPixmap();
-
-	mRequestedPreviews.clear();
 
 	endResetModel();
 }
 
 void lcPartSelectionListModel::SetCategory(int CategoryIndex)
 {
+	ClearRequests();
+
 	beginResetModel();
 
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
@@ -99,17 +120,16 @@ void lcPartSelectionListModel::SetCategory(int CategoryIndex)
 	for (int PartIdx = 0; PartIdx < SingleParts.GetSize(); PartIdx++)
 		mParts[PartIdx] = QPair<PieceInfo*, QPixmap>(SingleParts[PartIdx], QPixmap());
 
-	mRequestedPreviews.clear();
-
 	endResetModel();
 }
 
 void lcPartSelectionListModel::SetModelsCategory()
 {
+	ClearRequests();
+
 	beginResetModel();
 
 	mParts.clear();
-	mRequestedPreviews.clear();
 
 	const lcArray<lcModel*>& Models = lcGetActiveProject()->GetModels();
 	lcModel* CurrentModel = lcGetActiveModel();
@@ -193,21 +213,34 @@ void lcPartSelectionListModel::RequestPreview(int InfoIndex)
 	if (!mIconSize || !mParts[InfoIndex].second.isNull())
 		return;
 
-	mRequestedPreviews.removeOne(InfoIndex);
-	mRequestedPreviews.append(InfoIndex);
-	DrawPreview();
+	if (mRequestedPreviews.indexOf(InfoIndex) != -1)
+		return;
+
+	PieceInfo* Info = mParts[InfoIndex].first;
+	lcGetPiecesLibrary()->LoadPieceInfo(Info, false, false);
+
+	if (Info->mState == LC_PIECEINFO_LOADED)
+		DrawPreview(InfoIndex);
+	else
+		mRequestedPreviews.append(InfoIndex);
 }
 
-void lcPartSelectionListModel::DrawPreview()
+void lcPartSelectionListModel::PartLoaded(PieceInfo* Info)
 {
-	qint64 Elapsed = mLastDrawTime.msecsTo(QDateTime::currentDateTime());
-
-	if (Elapsed < 100)
+	for (int PartIdx = 0; PartIdx < mParts.size(); PartIdx++)
 	{
-		QTimer::singleShot(100 - Elapsed, this, SLOT(DrawPreview()));
-		return;
+		if (mParts[PartIdx].first == Info)
+		{
+			DrawPreview(PartIdx);
+			mRequestedPreviews.removeOne(PartIdx);
+			break;
+		}
 	}
+}
 
+void lcPartSelectionListModel::DrawPreview(int InfoIndex)
+{
+	/*
 	QRegion VisibleRegion = mListView->viewport()->visibleRegion();
 	int InfoIndex;
 
@@ -216,18 +249,18 @@ void lcPartSelectionListModel::DrawPreview()
 		if (mRequestedPreviews.isEmpty())
 			return;
 
-		InfoIndex = mRequestedPreviews.takeLast();
+		InfoIndex = mRequestedPreviews.takeFirst();
 		QRect ItemRect = mListView->visualRect(mListView->GetFilterModel()->mapFromSource(index(InfoIndex, 0)));
 
 		if (VisibleRegion.contains(ItemRect) || VisibleRegion.intersects(ItemRect))
 			break;
 	}
-
+*/
 	View* View = gMainWindow->GetActiveView();
 	View->MakeCurrent();
 	lcContext* Context = View->mContext;
-	int Width = mIconSize;
-	int Height = mIconSize;
+	int Width = 128;
+	int Height = 128;
 
 	if (!Context->BeginRenderToTexture(Width, Height))
 		return;
@@ -235,15 +268,15 @@ void lcPartSelectionListModel::DrawPreview()
 	float Aspect = (float)Width / (float)Height;
 	Context->SetViewport(0, 0, Width, Height);
 
-	lcMatrix44 ProjectionMatrix = lcMatrix44Perspective(30.0f, Aspect, 1.0f, 2500.0f);
+	lcMatrix44 ProjectionMatrix = lcMatrix44Perspective(20.0f, Aspect, 1.0f, 12500.0f);
 	lcMatrix44 ViewMatrix;
 
 	Context->SetDefaultState();
 	Context->SetProjectionMatrix(ProjectionMatrix);
 	Context->SetProgram(LC_PROGRAM_SIMPLE);
 
+	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 	PieceInfo* Info = mParts[InfoIndex].first;
-	Info->AddRef();
 
 	glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -264,14 +297,11 @@ void lcPartSelectionListModel::DrawPreview()
 
 	Context->UnbindMesh(); // context remove
 		
-	Info->Release();
+	Library->ReleasePieceInfo(Info);
 
-	mParts[InfoIndex].second = QPixmap::fromImage(Context->GetRenderToTextureImage(Width, Height));
+	mParts[InfoIndex].second = QPixmap::fromImage(Context->GetRenderToTextureImage(Width, Height)).scaled(mIconSize, mIconSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 
 	Context->EndRenderToTexture();
-
-	mLastDrawTime = QDateTime::currentDateTime();
-	QTimer::singleShot(100, this, SLOT(DrawPreview()));
 
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 2, 0))
 	emit dataChanged(index(InfoIndex, 0), index(InfoIndex, 0), QVector<int>() << Qt::DecorationRole);

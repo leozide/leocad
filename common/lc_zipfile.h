@@ -59,19 +59,17 @@ public:
 
 	bool ExtractFile(int FileIndex, lcMemFile& File, lcuint32 MaxLength = 0xffffffff);
 	bool ExtractFile(const char* FileName, lcMemFile& File, lcuint32 MaxLength = 0xffffffff);
-	bool AddFile(const char* FileName, lcMemFile& File);
-	bool DeleteFile(const char* FileName);
 
 	lcArray<lcZipFileInfo> mFiles;
 
 protected:
 	bool Open();
-	void Flush();
 	bool ReadCentralDir();
 	lcuint64 SearchCentralDir();
 	lcuint64 SearchCentralDir64();
 	bool CheckFileCoherencyHeader(int FileIndex, lcuint32* SizeVar, lcuint64* OffsetLocalExtraField, lcuint32* SizeLocalExtraField);
 
+	QMutex mMutex;
 	lcFile* mFile;
 
 	bool mModified;

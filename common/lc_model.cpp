@@ -168,7 +168,9 @@ lcModel::~lcModel()
 
 		if (mPieceInfo->GetModel() == this)
 			mPieceInfo->SetPlaceholder();
-		mPieceInfo->Release();
+
+		lcPiecesLibrary* Library = lcGetPiecesLibrary();
+		Library->ReleasePieceInfo(mPieceInfo);
 	}
 
 	DeleteModel();
@@ -225,9 +227,10 @@ void lcModel::DeleteModel()
 
 void lcModel::CreatePieceInfo(Project* Project)
 {
-	mPieceInfo = lcGetPiecesLibrary()->FindPiece(mProperties.mName.toUpper().toLatin1().constData(), Project, true, false);
+	lcPiecesLibrary* Library = lcGetPiecesLibrary();
+	mPieceInfo = Library->FindPiece(mProperties.mName.toUpper().toLatin1().constData(), Project, true, false);
 	mPieceInfo->SetModel(this, true);
-	mPieceInfo->AddRef();
+	Library->LoadPieceInfo(mPieceInfo, true, true);
 }
 
 void lcModel::UpdatePieceInfo(lcArray<lcModel*>& UpdatedModels)
@@ -468,6 +471,7 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 	lcArray<lcGroup*> CurrentGroups;
 	lcArray<lcPieceControlPoint> ControlPoints;
 	int CurrentStep = 1;
+	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 
 	mProperties.mAuthor.clear();
 
@@ -609,8 +613,6 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 			if (PartID.endsWith(QLatin1String(".DAT")))
 				PartID = PartID.left(PartID.size() - 4);
 
-			lcPiecesLibrary* Library = lcGetPiecesLibrary();
-
 			if (Library->IsPrimitive(PartID.toLatin1().constData()))
 			{
 				mFileLines.append(OriginalLine); 
@@ -633,7 +635,7 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 									 lcVector4(-Matrix[4], -Matrix[6], Matrix[5], 0.0f), lcVector4(Matrix[12], Matrix[14], -Matrix[13], 1.0f));
 
 				Piece->SetFileLine(mFileLines.size());
-				Piece->SetPieceInfo(Info);
+				Piece->SetPieceInfo(Info, false);
 				Piece->Initialize(Transform, CurrentStep);
 				Piece->SetColorCode(ColorCode);
 				Piece->SetControlPoints(ControlPoints);
@@ -648,7 +650,9 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 	mCurrentStep = CurrentStep;
 	CalculateStep(mCurrentStep);
 	UpdateBackgroundTexture();
-	lcGetPiecesLibrary()->UnloadUnusedParts();
+	Library->WaitForLoadQueue();
+	Library->mBuffersDirty = true;
+	Library->UnloadUnusedParts();
 
 	delete Piece;
 	delete Camera;
@@ -1348,12 +1352,13 @@ void lcModel::SaveCheckpoint(const QString& Description)
 
 void lcModel::LoadCheckPoint(lcModelHistoryEntry* CheckPoint)
 {
+	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 	lcArray<PieceInfo*> Infos;
 
 	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 	{
 		PieceInfo* Info = mPieces[PieceIdx]->mPieceInfo;
-		Info->AddRef();
+		Library->LoadPieceInfo(Info, true, true);
 		Infos.Add(Info);
 	}
 
@@ -1370,7 +1375,7 @@ void lcModel::LoadCheckPoint(lcModelHistoryEntry* CheckPoint)
 	gMainWindow->UpdateAllViews();
 
 	for (int InfoIdx = 0; InfoIdx < Infos.GetSize(); InfoIdx++)
-		Infos[InfoIdx]->Release();
+		Library->ReleasePieceInfo(Infos[InfoIdx]);
 }
 
 void lcModel::SetActive(bool Active)
@@ -1989,7 +1994,7 @@ void lcModel::InsertPiece(lcPiece* Piece, int Index)
 	{
 		lcMesh* Mesh = Info->IsTemporary() ? gPlaceholderMesh : Info->GetMesh();
 
-		if (Mesh->mVertexCacheOffset == -1)
+		if (Mesh && Mesh->mVertexCacheOffset == -1)
 			lcGetPiecesLibrary()->mBuffersDirty = true;
 	}
 
@@ -2582,8 +2587,9 @@ void lcModel::SetSelectedPiecesPieceInfo(PieceInfo* Info)
 
 		if (Piece->IsSelected() && Piece->mPieceInfo != Info)
 		{
-			Piece->mPieceInfo->Release();
-			Piece->SetPieceInfo(Info);
+			lcPiecesLibrary* Library = lcGetPiecesLibrary();
+			Library->ReleasePieceInfo(Piece->mPieceInfo);
+			Piece->SetPieceInfo(Info, true);
 			Modified = true;
 		}
 	}

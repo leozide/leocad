@@ -388,7 +388,7 @@ public:
 	void Initialize(const lcMatrix44& WorldMatrix, lcStep Step);
 	const lcBoundingBox& GetBoundingBox() const;
 	void CompareBoundingBox(lcVector3& Min, lcVector3& Max) const;
-	void SetPieceInfo(PieceInfo* Info);
+	void SetPieceInfo(PieceInfo* Info, bool Wait);
 	bool FileLoad(lcFile& file);
 
 	void UpdatePosition(lcStep Step);

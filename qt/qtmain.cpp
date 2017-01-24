@@ -6,6 +6,7 @@
 #include "lc_colors.h"
 #include "lc_partselectionwidget.h"
 #include <QApplication>
+#include <locale.h>
 
 #ifdef Q_OS_WIN
 

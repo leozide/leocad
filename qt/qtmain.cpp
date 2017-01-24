@@ -170,6 +170,8 @@ int main(int argc, char *argv[])
 #else
 	const char* LDrawPath = NULL;
 #endif
+	
+	setlocale(LC_NUMERIC, "C");
 
 	bool ShowWindow;
 	if (!g_App->Initialize(argc, argv, libPath, LDrawPath, ShowWindow))

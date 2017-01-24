@@ -1052,11 +1052,7 @@ bool lcPiecesLibrary::LoadPieceData(PieceInfo* Info)
 		lcMemFile PieceFile;
 
 		if (mZipFiles[Info->mZipFileType]->ExtractFile(Info->mZipFileIndex, PieceFile))
-		{
-			const char* OldLocale = setlocale(LC_NUMERIC, "C");
 			Loaded = ReadMeshData(PieceFile, lcMatrix44Identity(), 16, TextureStack, MeshData, LC_MESHDATA_SHARED, true);
-			setlocale(LC_NUMERIC, OldLocale);
-		}
 
 		SaveCache = Loaded && (Info->mZipFileType == LC_ZIPFILE_OFFICIAL);
 	}
@@ -1072,11 +1068,7 @@ bool lcPiecesLibrary::LoadPieceData(PieceInfo* Info)
 		sprintf(FileName, "%sparts/%s.dat", mLibraryPath, Name);
 
 		if (PieceFile.Open(FileName, "rt"))
-		{
-			const char* OldLocale = setlocale(LC_NUMERIC, "C");
 			Loaded = ReadMeshData(PieceFile, lcMatrix44Identity(), 16, TextureStack, MeshData, LC_MESHDATA_SHARED, true);
-			setlocale(LC_NUMERIC, OldLocale);
-		}
 	}
 	
 	if (!Loaded)

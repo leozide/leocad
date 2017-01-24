@@ -91,9 +91,7 @@ void PieceInfo::SetModel(lcModel* Model, bool UpdateMesh)
 		lcArray<lcLibraryTextureMap> TextureStack;
 		PieceFile.Seek(0, SEEK_SET);
 
-		const char* OldLocale = setlocale(LC_NUMERIC, "C");
 		bool Ret = lcGetPiecesLibrary()->ReadMeshData(PieceFile, lcMatrix44Identity(), 16, TextureStack, MeshData, LC_MESHDATA_SHARED, true);
-		setlocale(LC_NUMERIC, OldLocale);
 
 		if (Ret && !MeshData.IsEmpty())
 			lcGetPiecesLibrary()->CreateMesh(this, MeshData);

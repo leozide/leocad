@@ -634,7 +634,6 @@ lcMesh* lcSynthInfo::CreateMesh(const lcArray<lcPieceControlPoint>& ControlPoint
 
 	lcLibraryMeshData MeshData;
 	lcMemFile File; // todo: rewrite this to pass the parts directly
-	const char* OldLocale = setlocale(LC_NUMERIC, "C");
 
 	switch (mType)
 	{
@@ -660,10 +659,7 @@ lcMesh* lcSynthInfo::CreateMesh(const lcArray<lcPieceControlPoint>& ControlPoint
 	lcArray<lcLibraryTextureMap> TextureStack;
 	File.Seek(0, SEEK_SET);
 
-	bool Ret = lcGetPiecesLibrary()->ReadMeshData(File, lcMatrix44Identity(), 16, TextureStack, MeshData, LC_MESHDATA_SHARED, false);
-	setlocale(LC_NUMERIC, OldLocale);
-
-	if (Ret)
+	if (lcGetPiecesLibrary()->ReadMeshData(File, lcMatrix44Identity(), 16, TextureStack, MeshData, LC_MESHDATA_SHARED, false))
 		return lcGetPiecesLibrary()->CreateMesh(NULL, MeshData);
 
 	return NULL;

@@ -942,7 +942,6 @@ void Project::ExportBrickLink()
 		return;
 	}
 
-	const char* OldLocale = setlocale(LC_NUMERIC, "C");
 	BrickLinkFile.WriteLine("<INVENTORY>\n");
 
 	for (QMap<const PieceInfo*, QMap<int, int>>::const_iterator PartIt = PartsList.constBegin(); PartIt != PartsList.constEnd(); PartIt++)
@@ -976,8 +975,6 @@ void Project::ExportBrickLink()
 	}
 
 	BrickLinkFile.WriteLine("</INVENTORY>\n");
-
-	setlocale(LC_NUMERIC, OldLocale);
 }
 
 void Project::ExportCSV()
@@ -1007,7 +1004,6 @@ void Project::ExportCSV()
 		return;
 	}
 
-	const char* OldLocale = setlocale(LC_NUMERIC, "C");
 	CSVFile.WriteLine("Part Name,Color,Quantity,Part ID,Color Code\n");
 
 	for (QMap<const PieceInfo*, QMap<int, int>>::const_iterator PartIt = PartsList.constBegin(); PartIt != PartsList.constEnd(); PartIt++)
@@ -1021,8 +1017,6 @@ void Project::ExportCSV()
 			CSVFile.WriteLine(Line);
 		}
 	}
-
-	setlocale(LC_NUMERIC, OldLocale);
 }
 
 void Project::CreateHTMLPieceList(QTextStream& Stream, lcModel* Model, lcStep Step, bool Images)
@@ -1521,8 +1515,6 @@ void Project::ExportPOVRay()
 		}
 	}
 
-	const char* OldLocale = setlocale(LC_NUMERIC, "C");
-
 	if (!Dialog.mLGEOPath.isEmpty())
 	{
 		POVFile.WriteLine("#include \"lg_defs.inc\"\n#include \"lg_color.inc\"\n\n");
@@ -1650,7 +1642,6 @@ void Project::ExportPOVRay()
 		POVFile.WriteLine(Line);
 	}
 
-	setlocale(LC_NUMERIC, OldLocale);
 	POVFile.Close();
 
 	if (Dialog.mRender)
@@ -1699,8 +1690,6 @@ void Project::ExportWavefront(const QString& FileName)
 
 	char buf[LC_MAXPATH], *ptr;
 	lcuint32 vert = 1;
-
-	const char* OldLocale = setlocale(LC_NUMERIC, "C");
 
 	OBJFile.WriteLine("# Model exported from LeoCAD\n");
 
@@ -1769,8 +1758,6 @@ void Project::ExportWavefront(const QString& FileName)
 			vert += Mesh->mNumVertices;
 		}
 	}
-
-	setlocale(LC_NUMERIC, OldLocale);
 }
 
 void Project::SaveImage()

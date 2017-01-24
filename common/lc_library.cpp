@@ -974,6 +974,8 @@ void lcPiecesLibrary::LoadQueuedPiece()
 			Info->mState = LC_PIECEINFO_LOADING;
 			break;
 		}
+
+		Info = NULL;
 	}
 
 	mLoadMutex.unlock();

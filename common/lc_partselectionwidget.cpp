@@ -231,8 +231,8 @@ void lcPartSelectionListModel::PartLoaded(PieceInfo* Info)
 	{
 		if (mParts[PartIdx].first == Info)
 		{
-			DrawPreview(PartIdx);
-			mRequestedPreviews.removeOne(PartIdx);
+			if (mRequestedPreviews.removeOne(PartIdx))
+				DrawPreview(PartIdx);
 			break;
 		}
 	}

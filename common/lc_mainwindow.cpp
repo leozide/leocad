@@ -1267,7 +1267,6 @@ void lcMainWindow::SetTransformType(lcTransformType TransformType)
 void lcMainWindow::SetCurrentPieceInfo(PieceInfo* Info)
 {
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
-	GetActiveView()->MakeCurrent();
 
 	if (mCurrentPieceInfo)
 		Library->ReleasePieceInfo(mCurrentPieceInfo);

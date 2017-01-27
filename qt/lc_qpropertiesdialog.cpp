@@ -59,7 +59,7 @@ lcQPropertiesDialog::lcQPropertiesDialog(QWidget *parent, void *data) :
 
 	QVector<bool> ColorsUsed(gNumUserColors);
 
-	for (QMap<const PieceInfo*, QMap<int, int>>::const_iterator PartIt = PartsList.constBegin(); PartIt != PartsList.constEnd(); PartIt++)
+	for (lcPartsList::const_iterator PartIt = PartsList.constBegin(); PartIt != PartsList.constEnd(); PartIt++)
 		for (QMap<int, int>::const_iterator ColorIt = PartIt.value().constBegin(); ColorIt != PartIt.value().constEnd(); ColorIt++)
 			ColorsUsed[ColorIt.key()] = true;
 
@@ -94,7 +94,7 @@ lcQPropertiesDialog::lcQPropertiesDialog(QWidget *parent, void *data) :
 	QVector<int> ColorTotals(NumColors);
 	int Row = 0, Total = 0;
 
-	for (QMap<const PieceInfo*, QMap<int, int>>::const_iterator PartIt = PartsList.constBegin(); PartIt != PartsList.constEnd(); PartIt++, Row++)
+	for (lcPartsList::const_iterator PartIt = PartsList.constBegin(); PartIt != PartsList.constEnd(); PartIt++, Row++)
 	{
 		table->setItem(Row, 0, new QTableWidgetItem(PartIt.key()->m_strDescription));
 

@@ -63,6 +63,7 @@ public:
 	void Redraw();
 	void SetCategory(int CategoryIndex);
 	void SetModelsCategory();
+	void SetCurrentModelCategory();
 	void RequestPreview(int InfoIndex);
 	void SetIconSize(int Size);
 
@@ -140,6 +141,7 @@ protected:
 	virtual void resizeEvent(QResizeEvent* Event);
 
 	QTreeWidget* mCategoriesWidget;
+	QTreeWidgetItem* mCurrentModelCategoryItem;
 	QTreeWidgetItem* mModelsCategoryItem;
 	QLineEdit* mFilterWidget;
 	lcPartSelectionListView* mPartsWidget;

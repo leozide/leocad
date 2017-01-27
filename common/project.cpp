@@ -944,7 +944,7 @@ void Project::ExportBrickLink()
 
 	BrickLinkFile.WriteLine("<INVENTORY>\n");
 
-	for (QMap<const PieceInfo*, QMap<int, int>>::const_iterator PartIt = PartsList.constBegin(); PartIt != PartsList.constEnd(); PartIt++)
+	for (lcPartsList::const_iterator PartIt = PartsList.constBegin(); PartIt != PartsList.constEnd(); PartIt++)
 	{
 		const PieceInfo* Info = PartIt.key();
 
@@ -1006,7 +1006,7 @@ void Project::ExportCSV()
 
 	CSVFile.WriteLine("Part Name,Color,Quantity,Part ID,Color Code\n");
 
-	for (QMap<const PieceInfo*, QMap<int, int>>::const_iterator PartIt = PartsList.constBegin(); PartIt != PartsList.constEnd(); PartIt++)
+	for (lcPartsList::const_iterator PartIt = PartsList.constBegin(); PartIt != PartsList.constEnd(); PartIt++)
 	{
 		const PieceInfo* Info = PartIt.key();
 
@@ -1031,7 +1031,7 @@ void Project::CreateHTMLPieceList(QTextStream& Stream, lcModel* Model, lcStep St
 	else
 		Model->GetPartsListForStep(Step, gDefaultColor, PartsList);
 
-	for (QMap<const PieceInfo*, QMap<int, int>>::const_iterator PartIt = PartsList.constBegin(); PartIt != PartsList.constEnd(); PartIt++)
+	for (lcPartsList::const_iterator PartIt = PartsList.constBegin(); PartIt != PartsList.constEnd(); PartIt++)
 		for (QMap<int, int>::const_iterator ColorIt = PartIt.value().constBegin(); ColorIt != PartIt.value().constEnd(); ColorIt++)
 			ColorsUsed[ColorIt.key()]++;
 
@@ -1048,7 +1048,7 @@ void Project::CreateHTMLPieceList(QTextStream& Stream, lcModel* Model, lcStep St
 	NumColors++;
 	Stream << QLatin1String("</tr>\n");
 
-	for (QMap<const PieceInfo*, QMap<int, int>>::const_iterator PartIt = PartsList.constBegin(); PartIt != PartsList.constEnd(); PartIt++)
+	for (lcPartsList::const_iterator PartIt = PartsList.constBegin(); PartIt != PartsList.constEnd(); PartIt++)
 	{
 		const PieceInfo* Info = PartIt.key();
 
@@ -1316,7 +1316,7 @@ void Project::ExportHTML()
 			Context->SetProjectionMatrix(ProjectionMatrix);
 			Context->SetProgram(LC_PROGRAM_SIMPLE);
 
-			for (QMap<const PieceInfo*, QMap<int, int>>::const_iterator PartIt = PartsList.constBegin(); PartIt != PartsList.constEnd(); PartIt++)
+			for (lcPartsList::const_iterator PartIt = PartsList.constBegin(); PartIt != PartsList.constEnd(); PartIt++)
 			{
 				const PieceInfo* Info = PartIt.key();
 

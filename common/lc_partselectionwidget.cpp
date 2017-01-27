@@ -145,6 +145,24 @@ void lcPartSelectionListModel::SetModelsCategory()
 	endResetModel();
 }
 
+void lcPartSelectionListModel::SetCurrentModelCategory()
+{
+	ClearRequests();
+
+	beginResetModel();
+
+	mParts.clear();
+
+	lcModel* CurrentModel = lcGetActiveModel();
+	lcPartsList PartsList;
+	CurrentModel->GetPartsList(gDefaultColor, PartsList);
+
+	for (lcPartsList::const_iterator PartIt = PartsList.constBegin(); PartIt != PartsList.constEnd(); PartIt++)
+		mParts.append(QPair<PieceInfo*, QPixmap>((PieceInfo*)PartIt.key(), QPixmap()));
+
+	endResetModel();
+}
+
 int lcPartSelectionListModel::rowCount(const QModelIndex& Parent) const
 {
 	Q_UNUSED(Parent);
@@ -468,11 +486,14 @@ void lcPartSelectionWidget::FilterChanged(const QString& Text)
 void lcPartSelectionWidget::CategoryChanged(QTreeWidgetItem* Current, QTreeWidgetItem* Previous)
 {
 	Q_UNUSED(Previous);
+	lcPartSelectionListModel* ListModel = mPartsWidget->GetListModel();
 
-	if (Current != mModelsCategoryItem)
-		mPartsWidget->GetListModel()->SetCategory(mCategoriesWidget->indexOfTopLevelItem(Current));
+	if (Current == mModelsCategoryItem)
+		ListModel->SetModelsCategory();
+	else if (Current == mCurrentModelCategoryItem)
+		ListModel->SetCurrentModelCategory();
 	else
-		mPartsWidget->GetListModel()->SetModelsCategory();
+		ListModel->SetCategory(mCategoriesWidget->indexOfTopLevelItem(Current));
 
 	mPartsWidget->setCurrentIndex(mPartsWidget->GetFilterModel()->index(0, 0));
 }
@@ -506,12 +527,18 @@ void lcPartSelectionWidget::SetDefaultPart()
 
 void lcPartSelectionWidget::UpdateCategories()
 {
+	int CurrentIndex = mCategoriesWidget->indexOfTopLevelItem(mCategoriesWidget->currentItem());
+
 	mCategoriesWidget->clear();
 
 	for (int CategoryIdx = 0; CategoryIdx < gCategories.GetSize(); CategoryIdx++)
 		new QTreeWidgetItem(mCategoriesWidget, QStringList((const char*)gCategories[CategoryIdx].Name));
 
+	mCurrentModelCategoryItem = new QTreeWidgetItem(mCategoriesWidget, QStringList(tr("Current Model")));
 	mModelsCategoryItem = new QTreeWidgetItem(mCategoriesWidget, QStringList(tr("Models")));
+
+	if (CurrentIndex != -1)
+		mCategoriesWidget->setCurrentItem(mCategoriesWidget->topLevelItem(CurrentIndex));
 }
 
 void lcPartSelectionWidget::UpdateModels()

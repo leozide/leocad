@@ -12,11 +12,18 @@ public:
 	lcPartSelectionFilterModel(QObject* Parent);
 
 	void SetFilter(const QString& Filter);
+	void SetShowPatternedParts(bool Show);
+
+	bool GetShowPatternedParts() const
+	{
+		return mShowPatternedParts;
+	}
 
 protected:
 	virtual bool filterAcceptsRow(int SourceRow, const QModelIndex& SourceParent) const;
 
 	QByteArray mFilter;
+	bool mShowPatternedParts;
 };
 
 class lcPartSelectionItemDelegate : public QStyledItemDelegate
@@ -60,12 +67,23 @@ public:
 		return mParts[Row].first;
 	}
 
+	int GetIconSize() const
+	{
+		return mIconSize;
+	}
+
+	bool GetShowPartNames() const
+	{
+		return mShowPartNames;
+	}
+
 	void Redraw();
 	void SetCategory(int CategoryIndex);
 	void SetModelsCategory();
 	void SetCurrentModelCategory();
 	void RequestPreview(int InfoIndex);
 	void SetIconSize(int Size);
+	void SetShowPartNames(bool Show);
 
 protected slots:
 	void PartLoaded(PieceInfo* Info);
@@ -78,6 +96,7 @@ protected:
 	QVector<QPair<PieceInfo*, QPixmap>> mParts;
 	QList<int> mRequestedPreviews;
 	int mIconSize;
+	bool mShowPartNames;
 };
 
 class lcPartSelectionListView : public QListView
@@ -106,10 +125,12 @@ public:
 
 protected slots:
 	void CustomContextMenuRequested(QPoint Pos);
+	void SetNoIcons();
 	void SetSmallIcons();
 	void SetMediumIcons();
 	void SetLargeIcons();
-	void SetText();
+	void TogglePartNames();
+	void TogglePatternedParts();
 
 protected:
 	void SetIconSize(int Size);

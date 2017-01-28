@@ -15,6 +15,7 @@ static int lcPartSortFunc(PieceInfo* const& a, PieceInfo* const& b)
 lcPartSelectionFilterModel::lcPartSelectionFilterModel(QObject* Parent)
 	: QSortFilterProxyModel(Parent)
 {
+	mShowPatternedParts = lcGetProfileInt(LC_PROFILE_PARTS_LIST_PATTERNS);
 }
 
 void lcPartSelectionFilterModel::SetFilter(const QString& Filter)
@@ -23,15 +24,28 @@ void lcPartSelectionFilterModel::SetFilter(const QString& Filter)
 	invalidateFilter();
 }
 
+void lcPartSelectionFilterModel::SetShowPatternedParts(bool Show)
+{
+	if (Show == mShowPatternedParts)
+		return;
+
+	mShowPatternedParts = Show;
+
+	invalidateFilter();
+}
+
 bool lcPartSelectionFilterModel::filterAcceptsRow(int SourceRow, const QModelIndex& SourceParent) const
 {
 	Q_UNUSED(SourceParent);
 
-	if (mFilter.isEmpty())
-		return true;
-
 	lcPartSelectionListModel* SourceModel = (lcPartSelectionListModel*)sourceModel();
 	PieceInfo* Info = SourceModel->GetPieceInfo(SourceRow);
+
+	if (!mShowPatternedParts && Info->IsPatterned())
+		return false;
+
+	if (mFilter.isEmpty())
+		return true;
 
 	char Description[sizeof(Info->m_strDescription)];
 	char* Src = Info->m_strDescription;
@@ -69,6 +83,7 @@ lcPartSelectionListModel::lcPartSelectionListModel(QObject* Parent)
 {
 	mListView = (lcPartSelectionListView*)Parent;
 	mIconSize = 0;
+	mShowPartNames = lcGetProfileInt(LC_PROFILE_PARTS_LIST_NAMES);
 
 	connect(lcGetPiecesLibrary(), SIGNAL(PartLoaded(PieceInfo*)), this, SLOT(PartLoaded(PieceInfo*)));
 }
@@ -181,7 +196,7 @@ QVariant lcPartSelectionListModel::data(const QModelIndex& Index, int Role) cons
 		switch (Role)
 		{
 		case Qt::DisplayRole:
-			if (!mIconSize)
+			if (!mIconSize || mShowPartNames)
 			{
 				PieceInfo* Info = mParts[InfoIndex].first;
 				return QVariant(QString::fromLatin1(Info->m_strDescription));
@@ -192,7 +207,7 @@ QVariant lcPartSelectionListModel::data(const QModelIndex& Index, int Role) cons
 			return QVariant(QString("%1 (%2)").arg(QString::fromLatin1(Info->m_strDescription), QString::fromLatin1(Info->m_strName)));
 
 		case Qt::DecorationRole:
-			if (!mParts[InfoIndex].second.isNull())
+			if (!mParts[InfoIndex].second.isNull() && mIconSize)
 				return QVariant(mParts[InfoIndex].second);
 			else
 				return QVariant(QColor(0, 0, 0, 0));
@@ -258,22 +273,6 @@ void lcPartSelectionListModel::PartLoaded(PieceInfo* Info)
 
 void lcPartSelectionListModel::DrawPreview(int InfoIndex)
 {
-	/*
-	QRegion VisibleRegion = mListView->viewport()->visibleRegion();
-	int InfoIndex;
-
-	for (;;)
-	{
-		if (mRequestedPreviews.isEmpty())
-			return;
-
-		InfoIndex = mRequestedPreviews.takeFirst();
-		QRect ItemRect = mListView->visualRect(mListView->GetFilterModel()->mapFromSource(index(InfoIndex, 0)));
-
-		if (VisibleRegion.contains(ItemRect) || VisibleRegion.intersects(ItemRect))
-			break;
-	}
-*/
 	View* View = gMainWindow->GetActiveView();
 	View->MakeCurrent();
 	lcContext* Context = View->mContext;
@@ -334,12 +333,24 @@ void lcPartSelectionListModel::SetIconSize(int Size)
 		return;
 
 	mIconSize = Size;
+	mListView->setWordWrap(Size != 0);
 
 	beginResetModel();
 
 	for (int PartIdx = 0; PartIdx < mParts.size(); PartIdx++)
 		mParts[PartIdx].second = QPixmap();
 
+	endResetModel();
+}
+
+void lcPartSelectionListModel::SetShowPartNames(bool Show)
+{
+	if (Show == mShowPartNames)
+		return;
+
+	mShowPartNames = Show;
+
+	beginResetModel();
 	endResetModel();
 }
 
@@ -367,12 +378,47 @@ void lcPartSelectionListView::CustomContextMenuRequested(QPoint Pos)
 {
 	QMenu* Menu = new QMenu(this);
 
-	Menu->addAction("Small Icons", this, SLOT(SetSmallIcons()));
-	Menu->addAction("Medium Icons", this, SLOT(SetMediumIcons()));
-	Menu->addAction("Large Icons", this, SLOT(SetLargeIcons()));
-	Menu->addAction("Text", this, SLOT(SetText()));
+	QActionGroup* IconGroup = new QActionGroup(Menu);
+
+	QAction* NoIcons = Menu->addAction(tr("No Icons"), this, SLOT(SetNoIcons()));
+	NoIcons->setCheckable(true);
+	NoIcons->setChecked(mListModel->GetIconSize() == 0);
+	IconGroup->addAction(NoIcons);
+
+	QAction* SmallIcons = Menu->addAction(tr("Small Icons"), this, SLOT(SetSmallIcons()));
+	SmallIcons->setCheckable(true);
+	SmallIcons->setChecked(mListModel->GetIconSize() == 32);
+	IconGroup->addAction(SmallIcons);
+
+	QAction* MediumIcons = Menu->addAction(tr("Medium Icons"), this, SLOT(SetMediumIcons()));
+	MediumIcons->setCheckable(true);
+	MediumIcons->setChecked(mListModel->GetIconSize() == 64);
+	IconGroup->addAction(MediumIcons);
+
+	QAction* LargeIcons = Menu->addAction(tr("Large Icons"), this, SLOT(SetLargeIcons()));
+	LargeIcons->setCheckable(true);
+	LargeIcons->setChecked(mListModel->GetIconSize() == 96);
+	IconGroup->addAction(LargeIcons);
+
+	Menu->addSeparator();
+
+	if (mListModel->GetIconSize() != 0)
+	{
+		QAction* PartNames = Menu->addAction(tr("Part Names"), this, SLOT(TogglePartNames()));
+		PartNames->setCheckable(true);
+		PartNames->setChecked(mListModel->GetShowPartNames());
+	}
+
+	QAction* PatternedParts = Menu->addAction(tr("Patterned Parts"), this, SLOT(TogglePatternedParts()));
+	PatternedParts->setCheckable(true);
+	PatternedParts->setChecked(mFilterModel->GetShowPatternedParts());
 
 	Menu->popup(viewport()->mapToGlobal(Pos));
+}
+
+void lcPartSelectionListView::SetNoIcons()
+{
+	SetIconSize(0);
 }
 
 void lcPartSelectionListView::SetSmallIcons()
@@ -390,9 +436,18 @@ void lcPartSelectionListView::SetLargeIcons()
 	SetIconSize(96);
 }
 
-void lcPartSelectionListView::SetText()
+void lcPartSelectionListView::TogglePartNames()
 {
-	SetIconSize(0);
+	bool Show = !mListModel->GetShowPartNames();
+	mListModel->SetShowPartNames(Show);
+	lcSetProfileInt(LC_PROFILE_PARTS_LIST_NAMES, Show);
+}
+
+void lcPartSelectionListView::TogglePatternedParts()
+{
+	bool Show = !mFilterModel->GetShowPatternedParts();
+	mFilterModel->SetShowPatternedParts(Show);
+	lcSetProfileInt(LC_PROFILE_PARTS_LIST_PATTERNS, Show);
 }
 
 void lcPartSelectionListView::SetIconSize(int Size)
@@ -449,11 +504,13 @@ lcPartSelectionWidget::lcPartSelectionWidget(QWidget* Parent)
 	mFilterWidget = new QLineEdit(PartsGroupWidget);
 	mFilterWidget->setPlaceholderText(tr("Search Parts"));
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 2, 0))
-	mFilterWidget->addAction(QIcon(":/resources/parts_search.png"), QLineEdit::TrailingPosition);
+	mFilterWidget->addAction(QIcon(":/resources/parts_search.png"), QLineEdit::LeadingPosition);
 #endif
 	PartsLayout->addWidget(mFilterWidget);
 
 	mPartsWidget = new lcPartSelectionListView(PartsGroupWidget);
+	mPartsWidget->setUniformItemSizes(true);
+	mPartsWidget->setTextElideMode(Qt::ElideMiddle);
 	PartsLayout->addWidget(mPartsWidget);
 
 	QHBoxLayout* Layout = new QHBoxLayout(this);

@@ -562,7 +562,7 @@ void View::OnDraw()
 	mContext->SetDefaultState();
 	mContext->SetViewport(0, 0, mWidth, mHeight);
 
-	mModel->DrawBackground(mContext);
+	mModel->DrawBackground(this);
 
 	const lcPreferences& Preferences = lcGetPreferences();
 	const lcModelProperties& Properties = mModel->GetProperties();

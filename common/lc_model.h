@@ -19,6 +19,8 @@
 #define LC_SEL_CAN_ADD_CONTROL_POINT    0x0800 // Can add control points to focused piece
 #define LC_SEL_CAN_REMOVE_CONTROL_POINT 0x1000 // Can remove control points from focused piece
 
+class lcGLWidget;
+
 enum lcTransformType
 {
 	LC_TRANSFORM_ABSOLUTE_TRANSLATION,
@@ -212,7 +214,7 @@ public:
 
 	void GetScene(lcScene& Scene, lcCamera* ViewCamera, bool DrawInterface) const;
 	void SubModelAddRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, int DefaultColorIndex, bool Focused, bool Selected) const;
-	void DrawBackground(lcContext* Context);
+	void DrawBackground(lcGLWidget* Widget);
 	void SaveStepImages(const QString& BaseName, bool AddStepSuffix, bool Zoom, int Width, int Height, lcStep Start, lcStep End);
 
 	void RayTest(lcObjectRayTest& ObjectRayTest) const;

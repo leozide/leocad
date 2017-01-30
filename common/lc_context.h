@@ -88,16 +88,6 @@ public:
 	lcContext();
 	~lcContext();
 
-	int GetViewportWidth() const
-	{
-		return mViewportWidth;
-	}
-
-	int GetViewportHeight() const
-	{
-		return mViewportHeight;
-	}
-
 	static void CreateResources();
 	static void DestroyResources();
 
@@ -185,11 +175,6 @@ protected:
 	lcTexture* mTexture;
 	float mLineWidth;
 	int mMatrixMode;
-
-	int mViewportX;
-	int mViewportY;
-	int mViewportWidth;
-	int mViewportHeight;
 
 	lcVector4 mColor;
 	lcMatrix44 mWorldMatrix;

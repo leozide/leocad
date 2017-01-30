@@ -75,11 +75,6 @@ lcContext::lcContext()
 	mFramebufferTexture = 0;
 	mDepthRenderbufferObject = 0;
 
-	mViewportX = 0;
-	mViewportY = 0;
-	mViewportWidth = 1;
-	mViewportHeight = 1;
-
 	mColor = lcVector4(0.0f, 0.0f, 0.0f, 0.0f);
 	mWorldMatrix = lcMatrix44Identity();
 	mViewMatrix = lcMatrix44Identity();
@@ -330,15 +325,7 @@ void lcContext::SetProgram(lcProgramType ProgramType)
 
 void lcContext::SetViewport(int x, int y, int Width, int Height)
 {
-	if (mViewportX == x && mViewportY == y && mViewportWidth == Width && mViewportHeight == Height)
-		return;
-
 	glViewport(x, y, Width, Height);
-
-	mViewportX = x;
-	mViewportY = y;
-	mViewportWidth = Width;
-	mViewportHeight = Height;
 }
 
 void lcContext::SetLineWidth(float LineWidth)

@@ -223,7 +223,7 @@ void MinifigWizard::OnDraw()
 	float Aspect = (float)mWidth/(float)mHeight;
 	mContext->SetViewport(0, 0, mWidth, mHeight);
 
-	lcGetActiveModel()->DrawBackground(mContext);
+	lcGetActiveModel()->DrawBackground(this);
 
 	lcVector3 Min(FLT_MAX, FLT_MAX, FLT_MAX), Max(-FLT_MAX, -FLT_MAX, -FLT_MAX);
 

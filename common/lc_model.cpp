@@ -1100,7 +1100,7 @@ void lcModel::SubModelAddRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMat
 	}
 }
 
-void lcModel::DrawBackground(lcContext* Context)
+void lcModel::DrawBackground(lcGLWidget* Widget)
 {
 	if (mProperties.mBackgroundType == LC_BACKGROUND_SOLID)
 	{
@@ -1115,9 +1115,10 @@ void lcModel::DrawBackground(lcContext* Context)
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_LIGHTING);
 
-	float ViewWidth = (float)Context->GetViewportWidth();
-	float ViewHeight = (float)Context->GetViewportHeight();
+	float ViewWidth = (float)Widget->mWidth;
+	float ViewHeight = (float)Widget->mHeight;
 
+	lcContext* Context = Widget->mContext;
 	Context->SetWorldMatrix(lcMatrix44Identity());
 	Context->SetViewMatrix(lcMatrix44Translation(lcVector3(0.375, 0.375, 0.0)));
 	Context->SetProjectionMatrix(lcMatrix44Ortho(0.0f, ViewWidth, 0.0f, ViewHeight, -1.0f, 1.0f));

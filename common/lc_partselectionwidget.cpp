@@ -127,7 +127,10 @@ void lcPartSelectionListModel::SetCategory(int CategoryIndex)
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 	lcArray<PieceInfo*> SingleParts, GroupedParts;
 
-	Library->GetCategoryEntries(CategoryIndex, false, SingleParts, GroupedParts);
+	if (CategoryIndex != -1)
+		Library->GetCategoryEntries(CategoryIndex, false, SingleParts, GroupedParts);
+	else
+		Library->GetParts(SingleParts);
 
 	SingleParts.Sort(lcPartSortFunc);
 	mParts.resize(SingleParts.GetSize());
@@ -481,7 +484,7 @@ void lcPartSelectionListView::startDrag(Qt::DropActions SupportedActions)
 }
 
 lcPartSelectionWidget::lcPartSelectionWidget(QWidget* Parent)
-	: QWidget(Parent)
+	: QWidget(Parent), mFilterAction(NULL)
 {
 	mSplitter = new QSplitter(this);
 
@@ -504,7 +507,8 @@ lcPartSelectionWidget::lcPartSelectionWidget(QWidget* Parent)
 	mFilterWidget = new QLineEdit(PartsGroupWidget);
 	mFilterWidget->setPlaceholderText(tr("Search Parts"));
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 2, 0))
-	mFilterWidget->addAction(QIcon(":/resources/parts_search.png"), QLineEdit::LeadingPosition);
+	mFilterAction = mFilterWidget->addAction(QIcon(":/resources/parts_search.png"), QLineEdit::TrailingPosition);
+	connect(mFilterAction, SIGNAL(triggered()), this, SLOT(FilterTriggered()));
 #endif
 	PartsLayout->addWidget(mFilterWidget);
 
@@ -519,7 +523,7 @@ lcPartSelectionWidget::lcPartSelectionWidget(QWidget* Parent)
 	setLayout(Layout);
 
 	connect(mPartsWidget->selectionModel(), SIGNAL(currentChanged(const QModelIndex&, const QModelIndex&)), this, SLOT(PartChanged(const QModelIndex&, const QModelIndex&)));
-	connect(mFilterWidget, SIGNAL(textEdited(const QString&)), this, SLOT(FilterChanged(const QString&)));
+	connect(mFilterWidget, SIGNAL(textChanged(const QString&)), this, SLOT(FilterChanged(const QString&)));
 	connect(mCategoriesWidget, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), this, SLOT(CategoryChanged(QTreeWidgetItem*, QTreeWidgetItem*)));
 
 	UpdateCategories();
@@ -537,7 +541,20 @@ void lcPartSelectionWidget::resizeEvent(QResizeEvent* Event)
 
 void lcPartSelectionWidget::FilterChanged(const QString& Text)
 {
+	if (mFilterAction)
+	{
+		if (Text.isEmpty())
+			mFilterAction->setIcon(QIcon(":/resources/parts_search.png"));
+		else
+			mFilterAction->setIcon(QIcon(":/resources/parts_cancel.png"));
+	}
+
 	mPartsWidget->GetFilterModel()->SetFilter(Text);
+}
+
+void lcPartSelectionWidget::FilterTriggered()
+{
+	mFilterWidget->clear();
 }
 
 void lcPartSelectionWidget::CategoryChanged(QTreeWidgetItem* Current, QTreeWidgetItem* Previous)
@@ -549,8 +566,10 @@ void lcPartSelectionWidget::CategoryChanged(QTreeWidgetItem* Current, QTreeWidge
 		ListModel->SetModelsCategory();
 	else if (Current == mCurrentModelCategoryItem)
 		ListModel->SetCurrentModelCategory();
+	else if (Current == mAllPartsCategoryItem)
+		ListModel->SetCategory(-1);
 	else
-		ListModel->SetCategory(mCategoriesWidget->indexOfTopLevelItem(Current));
+		ListModel->SetCategory(mCategoriesWidget->indexOfTopLevelItem(Current) - 2);
 
 	mPartsWidget->setCurrentIndex(mPartsWidget->GetFilterModel()->index(0, 0));
 }
@@ -588,10 +607,12 @@ void lcPartSelectionWidget::UpdateCategories()
 
 	mCategoriesWidget->clear();
 
+	mAllPartsCategoryItem = new QTreeWidgetItem(mCategoriesWidget, QStringList(tr("All Parts")));
+	mCurrentModelCategoryItem = new QTreeWidgetItem(mCategoriesWidget, QStringList(tr("Parts In Use")));
+
 	for (int CategoryIdx = 0; CategoryIdx < gCategories.GetSize(); CategoryIdx++)
 		new QTreeWidgetItem(mCategoriesWidget, QStringList((const char*)gCategories[CategoryIdx].Name));
 
-	mCurrentModelCategoryItem = new QTreeWidgetItem(mCategoriesWidget, QStringList(tr("Current Model")));
 	mModelsCategoryItem = new QTreeWidgetItem(mCategoriesWidget, QStringList(tr("Models")));
 
 	if (CurrentIndex != -1)

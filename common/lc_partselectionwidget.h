@@ -155,6 +155,7 @@ public:
 
 protected slots:
 	void FilterChanged(const QString& Text);
+	void FilterTriggered();
 	void CategoryChanged(QTreeWidgetItem* Current, QTreeWidgetItem* Previous);
 	void PartChanged(const QModelIndex& Current, const QModelIndex& Previous);
 
@@ -162,9 +163,11 @@ protected:
 	virtual void resizeEvent(QResizeEvent* Event);
 
 	QTreeWidget* mCategoriesWidget;
+	QTreeWidgetItem* mAllPartsCategoryItem;
 	QTreeWidgetItem* mCurrentModelCategoryItem;
 	QTreeWidgetItem* mModelsCategoryItem;
 	QLineEdit* mFilterWidget;
+	QAction* mFilterAction;
 	lcPartSelectionListView* mPartsWidget;
 	QSplitter* mSplitter;
 };

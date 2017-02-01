@@ -2598,6 +2598,11 @@ void lcPiecesLibrary::GetPatternedPieces(PieceInfo* Parent, lcArray<PieceInfo*>&
 	}
 }
 
+void lcPiecesLibrary::GetParts(lcArray<PieceInfo*>& Parts)
+{
+	Parts = mPieces;
+}
+
 bool lcPiecesLibrary::LoadBuiltinPieces()
 {
 	QResource Resource(":/resources/library.zip");

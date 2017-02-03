@@ -75,7 +75,18 @@ void lcPartSelectionItemDelegate::paint(QPainter* Painter, const QStyleOptionVie
 
 QSize lcPartSelectionItemDelegate::sizeHint(const QStyleOptionViewItem& Option, const QModelIndex& Index) const
 {
-	return QStyledItemDelegate::sizeHint(Option, Index);
+	QSize Size = QStyledItemDelegate::sizeHint(Option, Index);
+	int IconSize = mListModel->GetIconSize();
+
+	if (IconSize)
+	{
+		QWidget* Widget = (QWidget*)parent();
+		const int PixmapMargin = Widget->style()->pixelMetric(QStyle::PM_FocusFrameHMargin, &Option, Widget) + 1;
+		int PixmapWidth = IconSize + 2 * PixmapMargin;
+		Size.setWidth(qMin(PixmapWidth, Size.width()));
+	}
+
+	return Size;
 }
 
 lcPartSelectionListModel::lcPartSelectionListModel(QObject* Parent)
@@ -336,7 +347,6 @@ void lcPartSelectionListModel::SetIconSize(int Size)
 		return;
 
 	mIconSize = Size;
-	mListView->setWordWrap(Size != 0);
 
 	beginResetModel();
 
@@ -362,6 +372,7 @@ lcPartSelectionListView::lcPartSelectionListView(QWidget* Parent)
 {
 	setUniformItemSizes(true);
 	setResizeMode(QListView::Adjust);
+	setWordWrap(false);
 	setDragEnabled(true);
 	setContextMenuPolicy(Qt::CustomContextMenu);
 
@@ -513,8 +524,6 @@ lcPartSelectionWidget::lcPartSelectionWidget(QWidget* Parent)
 	PartsLayout->addWidget(mFilterWidget);
 
 	mPartsWidget = new lcPartSelectionListView(PartsGroupWidget);
-	mPartsWidget->setUniformItemSizes(true);
-	mPartsWidget->setTextElideMode(Qt::ElideMiddle);
 	PartsLayout->addWidget(mPartsWidget);
 
 	QHBoxLayout* Layout = new QHBoxLayout(this);

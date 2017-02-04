@@ -12,18 +12,18 @@ public:
 	lcPartSelectionFilterModel(QObject* Parent);
 
 	void SetFilter(const QString& Filter);
-	void SetShowPatternedParts(bool Show);
+	void SetShowDecoratedParts(bool Show);
 
-	bool GetShowPatternedParts() const
+	bool GetShowDecoratedParts() const
 	{
-		return mShowPatternedParts;
+		return mShowDecoratedParts;
 	}
 
 protected:
 	virtual bool filterAcceptsRow(int SourceRow, const QModelIndex& SourceParent) const;
 
 	QByteArray mFilter;
-	bool mShowPatternedParts;
+	bool mShowDecoratedParts;
 };
 
 class lcPartSelectionItemDelegate : public QStyledItemDelegate
@@ -77,7 +77,14 @@ public:
 		return mShowPartNames;
 	}
 
+	bool IsColorLocked() const
+	{
+		return mColorLocked;
+	}
+
 	void Redraw();
+	void SetColorIndex(int ColorIndex);
+	void ToggleColorLocked();
 	void SetCategory(int CategoryIndex);
 	void SetModelsCategory();
 	void SetCurrentModelCategory();
@@ -96,6 +103,8 @@ protected:
 	QVector<QPair<PieceInfo*, QPixmap>> mParts;
 	QList<int> mRequestedPreviews;
 	int mIconSize;
+	bool mColorLocked;
+	int mColorIndex;
 	bool mShowPartNames;
 };
 
@@ -130,7 +139,8 @@ protected slots:
 	void SetMediumIcons();
 	void SetLargeIcons();
 	void TogglePartNames();
-	void TogglePatternedParts();
+	void ToggleDecoratedParts();
+	void ToggleFixedColor();
 
 protected:
 	void SetIconSize(int Size);
@@ -152,6 +162,11 @@ public:
 	void SetDefaultPart();
 	void UpdateModels();
 	void UpdateCategories();
+
+	void SetColorIndex(int ColorIndex)
+	{
+		mPartsWidget->GetListModel()->SetColorIndex(ColorIndex);
+	}
 
 protected slots:
 	void FilterChanged(const QString& Text);

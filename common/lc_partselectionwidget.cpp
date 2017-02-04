@@ -2,6 +2,7 @@
 #include "lc_partselectionwidget.h"
 #include "lc_profile.h"
 #include "lc_application.h"
+#include "lc_mainwindow.h"
 #include "lc_library.h"
 #include "lc_model.h"
 #include "project.h"
@@ -15,7 +16,7 @@ static int lcPartSortFunc(PieceInfo* const& a, PieceInfo* const& b)
 lcPartSelectionFilterModel::lcPartSelectionFilterModel(QObject* Parent)
 	: QSortFilterProxyModel(Parent)
 {
-	mShowPatternedParts = lcGetProfileInt(LC_PROFILE_PARTS_LIST_PATTERNS);
+	mShowDecoratedParts = lcGetProfileInt(LC_PROFILE_PARTS_LIST_DECORATED);
 }
 
 void lcPartSelectionFilterModel::SetFilter(const QString& Filter)
@@ -24,12 +25,12 @@ void lcPartSelectionFilterModel::SetFilter(const QString& Filter)
 	invalidateFilter();
 }
 
-void lcPartSelectionFilterModel::SetShowPatternedParts(bool Show)
+void lcPartSelectionFilterModel::SetShowDecoratedParts(bool Show)
 {
-	if (Show == mShowPatternedParts)
+	if (Show == mShowDecoratedParts)
 		return;
 
-	mShowPatternedParts = Show;
+	mShowDecoratedParts = Show;
 
 	invalidateFilter();
 }
@@ -41,7 +42,7 @@ bool lcPartSelectionFilterModel::filterAcceptsRow(int SourceRow, const QModelInd
 	lcPartSelectionListModel* SourceModel = (lcPartSelectionListModel*)sourceModel();
 	PieceInfo* Info = SourceModel->GetPieceInfo(SourceRow);
 
-	if (!mShowPatternedParts && Info->IsPatterned())
+	if (!mShowDecoratedParts && Info->IsPatterned())
 		return false;
 
 	if (mFilter.isEmpty())
@@ -96,6 +97,15 @@ lcPartSelectionListModel::lcPartSelectionListModel(QObject* Parent)
 	mIconSize = 0;
 	mShowPartNames = lcGetProfileInt(LC_PROFILE_PARTS_LIST_NAMES);
 
+	int ColorCode = lcGetProfileInt(LC_PROFILE_PARTS_LIST_COLOR);
+	if (ColorCode == -1)
+		mColorLocked = false;
+	else
+	{
+		mColorIndex = lcGetColorIndex(ColorCode);
+		mColorLocked = true;
+	}
+
 	connect(lcGetPiecesLibrary(), SIGNAL(PartLoaded(PieceInfo*)), this, SLOT(PartLoaded(PieceInfo*)));
 }
 
@@ -127,6 +137,23 @@ void lcPartSelectionListModel::Redraw()
 		mParts[PartIdx].second = QPixmap();
 
 	endResetModel();
+}
+
+void lcPartSelectionListModel::SetColorIndex(int ColorIndex)
+{
+	if (mColorLocked || ColorIndex == mColorIndex)
+		return;
+
+	mColorIndex = ColorIndex;
+	Redraw();
+}
+
+void lcPartSelectionListModel::ToggleColorLocked()
+{
+	mColorLocked = !mColorLocked;
+
+	SetColorIndex(gMainWindow->mColorIndex);
+	lcSetProfileInt(LC_PROFILE_PARTS_LIST_COLOR, mColorLocked ? lcGetColorCode(mColorIndex) : -1);
 }
 
 void lcPartSelectionListModel::SetCategory(int CategoryIndex)
@@ -318,7 +345,7 @@ void lcPartSelectionListModel::DrawPreview(int InfoIndex)
 	lcScene Scene;
 	Scene.Begin(ViewMatrix);
 
-	Info->AddRenderMeshes(Scene, lcMatrix44Identity(), gMainWindow->mColorIndex, false, false);
+	Info->AddRenderMeshes(Scene, lcMatrix44Identity(), mColorIndex, false, false);
 
 	Scene.End();
 
@@ -418,14 +445,18 @@ void lcPartSelectionListView::CustomContextMenuRequested(QPoint Pos)
 
 	if (mListModel->GetIconSize() != 0)
 	{
-		QAction* PartNames = Menu->addAction(tr("Part Names"), this, SLOT(TogglePartNames()));
+		QAction* PartNames = Menu->addAction(tr("Show Part Names"), this, SLOT(TogglePartNames()));
 		PartNames->setCheckable(true);
 		PartNames->setChecked(mListModel->GetShowPartNames());
 	}
 
-	QAction* PatternedParts = Menu->addAction(tr("Patterned Parts"), this, SLOT(TogglePatternedParts()));
-	PatternedParts->setCheckable(true);
-	PatternedParts->setChecked(mFilterModel->GetShowPatternedParts());
+	QAction* DecoratedParts = Menu->addAction(tr("Show Decorated Parts"), this, SLOT(ToggleDecoratedParts()));
+	DecoratedParts->setCheckable(true);
+	DecoratedParts->setChecked(mFilterModel->GetShowDecoratedParts());
+
+	QAction* FixedColor = Menu->addAction(tr("Lock Preview Color"), this, SLOT(ToggleFixedColor()));
+	FixedColor->setCheckable(true);
+	FixedColor->setChecked(mListModel->IsColorLocked());
 
 	Menu->popup(viewport()->mapToGlobal(Pos));
 }
@@ -457,11 +488,16 @@ void lcPartSelectionListView::TogglePartNames()
 	lcSetProfileInt(LC_PROFILE_PARTS_LIST_NAMES, Show);
 }
 
-void lcPartSelectionListView::TogglePatternedParts()
+void lcPartSelectionListView::ToggleDecoratedParts()
 {
-	bool Show = !mFilterModel->GetShowPatternedParts();
-	mFilterModel->SetShowPatternedParts(Show);
-	lcSetProfileInt(LC_PROFILE_PARTS_LIST_PATTERNS, Show);
+	bool Show = !mFilterModel->GetShowDecoratedParts();
+	mFilterModel->SetShowDecoratedParts(Show);
+	lcSetProfileInt(LC_PROFILE_PARTS_LIST_DECORATED, Show);
+}
+
+void lcPartSelectionListView::ToggleFixedColor()
+{
+	mListModel->ToggleColorLocked();
 }
 
 void lcPartSelectionListView::SetIconSize(int Size)

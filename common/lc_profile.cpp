@@ -87,7 +87,8 @@ lcProfileEntry gProfileEntries[LC_NUM_PROFILE_KEYS] =
 	lcProfileEntry("Settings", "PrintColumns", 1),                                   // LC_PROFILE_PRINT_COLUMNS
 	lcProfileEntry("Settings", "PartsListIcons", 64),                                // LC_PROFILE_PARTS_LIST_ICONS
 	lcProfileEntry("Settings", "PartsListNames", 0),                                 // LC_PROFILE_PARTS_LIST_NAMES
-	lcProfileEntry("Settings", "PartsListPatterns", 1),                              // LC_PROFILE_PARTS_LIST_PATTERNS
+	lcProfileEntry("Settings", "PartsListFixedColor", -1),                           // LC_PROFILE_PARTS_LIST_FIXED_COLOR
+	lcProfileEntry("Settings", "PartsListDecorated", 1),                             // LC_PROFILE_PARTS_LIST_DECORATED
 
 	lcProfileEntry("Defaults", "Author", ""),                                        // LC_PROFILE_DEFAULT_AUTHOR_NAME
 	lcProfileEntry("Defaults", "FloorColor", LC_RGB(0, 191, 0)),                     // LC_PROFILE_DEFAULT_FLOOR_COLOR

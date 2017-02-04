@@ -1183,7 +1183,7 @@ void lcMainWindow::SetColorIndex(int ColorIndex)
 	mColorIndex = ColorIndex;
 
 	if (mPartSelectionWidget)
-		mPartSelectionWidget->Redraw();
+		mPartSelectionWidget->SetColorIndex(ColorIndex);
 
 	UpdateColor();
 }

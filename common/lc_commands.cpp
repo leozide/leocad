@@ -868,15 +868,15 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 	// LC_VIEW_TIME_INSERT
 	{
 		QT_TRANSLATE_NOOP("Action", "View.Time.Insert"),
-		QT_TRANSLATE_NOOP("Menu", "Insert"),
+		QT_TRANSLATE_NOOP("Menu", "Insert Step"),
 		QT_TRANSLATE_NOOP("Status", "Insert new step"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
 	// LC_VIEW_TIME_DELETE
 	{
 		QT_TRANSLATE_NOOP("Action", "View.Time.Delete"),
-		QT_TRANSLATE_NOOP("Menu", "Delete"),
-		QT_TRANSLATE_NOOP("Status", "Delete current step"),
+		QT_TRANSLATE_NOOP("Menu", "Remove Step"),
+		QT_TRANSLATE_NOOP("Status", "Remove current step"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
 	// LC_VIEW_TIME_ADD_KEYS
@@ -1389,6 +1389,34 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 		QT_TRANSLATE_NOOP("Menu", "&About..."),
 		QT_TRANSLATE_NOOP("Status", "Display program version number and system information"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
+	// LC_TIMELINE_INSERT
+	{
+		"",
+		QT_TRANSLATE_NOOP("Menu", "Insert Step"),
+		QT_TRANSLATE_NOOP("Status", "Insert new step"),
+		""
+	},
+	// LC_TIMELINE_DELETE
+	{
+		"",
+		QT_TRANSLATE_NOOP("Menu", "Remove Step"),
+		QT_TRANSLATE_NOOP("Status", "Remove current step"),
+		""
+	},
+	// LC_TIMELINE_MOVE_SELECTION
+	{
+		"",
+		QT_TRANSLATE_NOOP("Menu", "Move Selection Here"),
+		QT_TRANSLATE_NOOP("Status", "Move the selected parts into this step"),
+		""
+	},
+	// LC_TIMELINE_SET_CURRENT
+	{
+		"",
+		QT_TRANSLATE_NOOP("Menu", "Set Current Step"),
+		QT_TRANSLATE_NOOP("Status", "View the model at this point in the timeline"),
+		""
 	}
 };
 

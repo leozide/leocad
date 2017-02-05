@@ -45,10 +45,11 @@ void lcTimelineWidget::CustomMenuRequested(QPoint Pos)
 		}
 	}
 
-	QAction* InsertStepAction = Menu->addAction(gMainWindow->mActions[LC_VIEW_TIME_INSERT]->text(), this, SLOT(InsertStep()));
-	InsertStepAction->setStatusTip(gMainWindow->mActions[LC_VIEW_TIME_INSERT]->statusTip());
-	QAction* RemoveStepAction = Menu->addAction(gMainWindow->mActions[LC_VIEW_TIME_DELETE]->text(), this, SLOT(RemoveStep()));
-	RemoveStepAction->setStatusTip(gMainWindow->mActions[LC_VIEW_TIME_DELETE]->statusTip());
+	Menu->addAction(gMainWindow->mActions[LC_TIMELINE_SET_CURRENT]);
+	Menu->addAction(gMainWindow->mActions[LC_TIMELINE_INSERT]);
+	Menu->addAction(gMainWindow->mActions[LC_TIMELINE_DELETE]);
+	Menu->addAction(gMainWindow->mActions[LC_TIMELINE_MOVE_SELECTION]);
+
 	Menu->addSeparator();
 
 	Menu->addAction(gMainWindow->mActions[LC_PIECE_HIDE_SELECTED]);
@@ -292,6 +293,55 @@ void lcTimelineWidget::RemoveStep()
 	lcGetActiveModel()->RemoveStep(Step + 1);
 }
 
+void lcTimelineWidget::MoveSelection()
+{
+	QTreeWidgetItem* CurrentItem = currentItem();
+
+	if (!CurrentItem)
+		return;
+
+	if (CurrentItem->parent())
+		CurrentItem = CurrentItem->parent();
+
+	int Step = indexOfTopLevelItem(CurrentItem);
+
+	if (Step == -1)
+		return;
+
+	QList<QTreeWidgetItem*> SelectedItems = selectedItems();
+
+	foreach(QTreeWidgetItem* PieceItem, SelectedItems)
+	{
+		QTreeWidgetItem* Parent = PieceItem->parent();
+
+		if (!Parent)
+			continue;
+
+		int ChildIndex = Parent->indexOfChild(PieceItem);
+		CurrentItem->addChild(Parent->takeChild(ChildIndex));
+	}
+
+	UpdateModel();
+}
+
+void lcTimelineWidget::SetCurrentStep()
+{
+	QTreeWidgetItem* CurrentItem = currentItem();
+
+	if (!CurrentItem)
+		return;
+
+	if (CurrentItem->parent())
+		CurrentItem = CurrentItem->parent();
+
+	int Step = indexOfTopLevelItem(CurrentItem);
+
+	if (Step == -1)
+		return;
+
+	lcGetActiveModel()->SetCurrentStep(Step + 1);
+}
+
 void lcTimelineWidget::ItemSelectionChanged()
 {
 	lcArray<lcObject*> Selection;
@@ -322,7 +372,27 @@ void lcTimelineWidget::ItemSelectionChanged()
 void lcTimelineWidget::dropEvent(QDropEvent* Event)
 {
 	QTreeWidget::dropEvent(Event);
+	UpdateModel();
+}
 
+void lcTimelineWidget::mousePressEvent(QMouseEvent* Event)
+{
+	if (Event->button() == Qt::RightButton)
+	{
+		QItemSelection Selection = selectionModel()->selection();
+
+		bool Blocked = blockSignals(true);
+		QTreeWidget::mousePressEvent(Event);
+		blockSignals(Blocked);
+
+		selectionModel()->select(Selection, QItemSelectionModel::ClearAndSelect);
+	}
+	else
+		QTreeWidget::mousePressEvent(Event);
+}
+
+void lcTimelineWidget::UpdateModel()
+{
 	QList<QPair<lcPiece*, lcStep>> PieceSteps;
 
 	for (int TopLevelItemIdx = 0; TopLevelItemIdx < topLevelItemCount(); TopLevelItemIdx++)

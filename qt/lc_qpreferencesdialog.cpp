@@ -431,6 +431,9 @@ void lcQPreferencesDialog::updateCommandList()
 
 	for (int actionIdx = 0; actionIdx < LC_NUM_COMMANDS; actionIdx++)
 	{
+		if (!gCommands[actionIdx].ID[0])
+			continue;
+
 		const QString identifier = tr(gCommands[actionIdx].ID);
 
 		int pos = identifier.indexOf(QLatin1Char('.'));

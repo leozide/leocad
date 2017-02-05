@@ -1489,6 +1489,7 @@ void lcMainWindow::UpdateSelectedObjects(bool SelectionChanged)
 		mActions[LC_PIECE_GROUP_EDIT]->setEnabled((Flags & LC_SEL_NO_PIECES) == 0);
 		mActions[LC_PIECE_SHOW_EARLIER]->setEnabled(Flags & LC_SEL_PIECE); // FIXME: disable if current step is 1
 		mActions[LC_PIECE_SHOW_LATER]->setEnabled(Flags & LC_SEL_PIECE);
+		mActions[LC_TIMELINE_MOVE_SELECTION]->setEnabled(Flags & LC_SEL_PIECE);
 	}
 
 	mPropertiesWidget->Update(Selection, Focus);
@@ -2541,6 +2542,22 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 	case LC_EDIT_CANCEL:
 		if (ActiveView)
 			ActiveView->CancelTrackingOrClearSelection();
+		break;
+
+	case LC_TIMELINE_INSERT:
+		mTimelineWidget->InsertStep();
+		break;
+
+	case LC_TIMELINE_DELETE:
+		mTimelineWidget->RemoveStep();
+		break;
+
+	case LC_TIMELINE_MOVE_SELECTION:
+		mTimelineWidget->MoveSelection();
+		break;
+
+	case LC_TIMELINE_SET_CURRENT:
+		mTimelineWidget->SetCurrentStep();
 		break;
 
 	case LC_NUM_COMMANDS:

@@ -15,6 +15,7 @@
 *.qm
 *.ldr
 *.dat
+!/resources/*.ldr
 build
 debug
 release

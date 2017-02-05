@@ -99,7 +99,10 @@ lcPartSelectionListModel::lcPartSelectionListModel(QObject* Parent)
 
 	int ColorCode = lcGetProfileInt(LC_PROFILE_PARTS_LIST_COLOR);
 	if (ColorCode == -1)
+	{
+		mColorIndex = gMainWindow->mColorIndex;
 		mColorLocked = false;
+	}
 	else
 	{
 		mColorIndex = lcGetColorIndex(ColorCode);

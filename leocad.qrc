@@ -91,6 +91,7 @@
         <file>resources/parts_search.png</file>
         <file>resources/parts_cancel.png</file>
         <file>resources/library.zip</file>
+        <file>resources/ldconfig.ldr</file>
         <file>resources/minifig.ini</file>
         <file>resources/leocad_fr.qm</file>
         <file>resources/leocad_pt.qm</file>

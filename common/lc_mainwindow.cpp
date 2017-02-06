@@ -98,6 +98,7 @@ void lcMainWindow::CreateWidgets()
 	move(QPoint(200, 200));
 	restoreGeometry(Settings.value("Geometry").toByteArray());
 	restoreState(Settings.value("State").toByteArray());
+	mPartSelectionWidget->LoadState(Settings);
 	Settings.endGroup();
 }
 
@@ -575,7 +576,7 @@ void lcMainWindow::CreateToolBars()
 
 	mPartsToolBar = new QDockWidget(tr("Parts"), this);
 	mPartsToolBar->setObjectName("PartsToolbar");
-	mPartSelectionWidget = new lcPartSelectionWidget(this);
+	mPartSelectionWidget = new lcPartSelectionWidget(mPartsToolBar);
 	mPartsToolBar->setWidget(mPartSelectionWidget);
 	addDockWidget(Qt::RightDockWidgetArea, mPartsToolBar);
 
@@ -613,9 +614,9 @@ void lcMainWindow::CreateToolBars()
 	mTimelineToolBar->setWidget(mTimelineWidget);
 	addDockWidget(Qt::RightDockWidgetArea, mTimelineToolBar);
 
-	tabifyDockWidget(mColorsToolBar, mPropertiesToolBar);
+	tabifyDockWidget(mPartsToolBar, mPropertiesToolBar);
 	tabifyDockWidget(mPropertiesToolBar, mTimelineToolBar);
-	mColorsToolBar->raise();
+	mPartsToolBar->raise();
 }
 
 void lcMainWindow::CreateStatusBar()
@@ -636,20 +637,21 @@ void lcMainWindow::CreateStatusBar()
 	StatusBar->addPermanentWidget(mStatusTimeLabel);
 }
 
-void lcMainWindow::closeEvent(QCloseEvent *event)
+void lcMainWindow::closeEvent(QCloseEvent* Event)
 {
 	if (SaveProjectIfModified())
 	{
-		event->accept();
+		Event->accept();
 
-		QSettings settings;
-		settings.beginGroup("MainWindow");
-		settings.setValue("Geometry", saveGeometry());
-		settings.setValue("State", saveState());
-		settings.endGroup();
+		QSettings Settings;
+		Settings.beginGroup("MainWindow");
+		Settings.setValue("Geometry", saveGeometry());
+		Settings.setValue("State", saveState());
+		mPartSelectionWidget->SaveState(Settings);
+		Settings.endGroup();
 	}
 	else
-		event->ignore();
+		Event->ignore();
 }
 
 void lcMainWindow::dragEnterEvent(QDragEnterEvent* Event)

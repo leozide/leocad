@@ -162,6 +162,8 @@ public:
 	void SetDefaultPart();
 	void UpdateModels();
 	void UpdateCategories();
+	void LoadState(QSettings& Settings);
+	void SaveState(QSettings& Settings);
 
 	void SetColorIndex(int ColorIndex)
 	{
@@ -169,6 +171,7 @@ public:
 	}
 
 protected slots:
+	void DockLocationChanged(Qt::DockWidgetArea Area);
 	void FilterChanged(const QString& Text);
 	void FilterTriggered();
 	void CategoryChanged(QTreeWidgetItem* Current, QTreeWidgetItem* Previous);

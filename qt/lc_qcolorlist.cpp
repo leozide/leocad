@@ -42,6 +42,7 @@ lcQColorList::lcQColorList(QWidget *parent)
 	mPreferredHeight = TextHeight + 10 * mRows;
 
 	setFocusPolicy(Qt::StrongFocus);
+	setMinimumHeight(TextHeight + 5 * mRows);
 }
 
 lcQColorList::~lcQColorList()

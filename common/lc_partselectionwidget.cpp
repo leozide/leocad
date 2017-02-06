@@ -537,18 +537,14 @@ lcPartSelectionWidget::lcPartSelectionWidget(QWidget* Parent)
 	: QWidget(Parent), mFilterAction(NULL)
 {
 	mSplitter = new QSplitter(this);
+	mSplitter->setOrientation(Qt::Vertical);
 
 	mCategoriesWidget = new QTreeWidget(mSplitter);
 	mCategoriesWidget->setHeaderHidden(true);
 	mCategoriesWidget->setUniformRowHeights(true);
 	mCategoriesWidget->setRootIsDecorated(false);
 
-	QSizePolicy PartsWidgetPolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
-	PartsWidgetPolicy.setHorizontalStretch(1);
-	PartsWidgetPolicy.setVerticalStretch(1);
-
 	QWidget* PartsGroupWidget = new QWidget(mSplitter);
-	PartsGroupWidget->setSizePolicy(PartsWidgetPolicy);
 
 	QVBoxLayout* PartsLayout = new QVBoxLayout();
 	PartsLayout->setContentsMargins(0, 0, 0, 0);
@@ -575,15 +571,52 @@ lcPartSelectionWidget::lcPartSelectionWidget(QWidget* Parent)
 	connect(mCategoriesWidget, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), this, SLOT(CategoryChanged(QTreeWidgetItem*, QTreeWidgetItem*)));
 
 	UpdateCategories();
+
+	mSplitter->setStretchFactor(0, 0);
+	mSplitter->setStretchFactor(1, 1);
+
+	connect(Parent, SIGNAL(dockLocationChanged(Qt::DockWidgetArea)), this, SLOT(DockLocationChanged(Qt::DockWidgetArea)));
+
+	qRegisterMetaTypeStreamOperators<QList<int> >("QList<int>");
+}
+
+void lcPartSelectionWidget::LoadState(QSettings& Settings)
+{
+	QList<int> Sizes = Settings.value("PartSelectionSplitter").value<QList<int>>();
+
+	if (Sizes.size() != 2)
+	{
+		int Length = mSplitter->orientation() == Qt::Horizontal ? mSplitter->width() : mSplitter->height();
+		Sizes << Length / 3 << 2 * Length / 3;
+	}
+
+	mSplitter->setSizes(Sizes);
+}
+
+void lcPartSelectionWidget::SaveState(QSettings& Settings)
+{
+	QList<int> Sizes = mSplitter->sizes();
+	Settings.setValue("PartSelectionSplitter", QVariant::fromValue(Sizes));
+}
+
+void lcPartSelectionWidget::DockLocationChanged(Qt::DockWidgetArea Area)
+{
+	if (Area == Qt::LeftDockWidgetArea || Area == Qt::RightDockWidgetArea)
+		mSplitter->setOrientation(Qt::Vertical);
+	else
+		mSplitter->setOrientation(Qt::Horizontal);
 }
 
 void lcPartSelectionWidget::resizeEvent(QResizeEvent* Event)
 {
-	if (Event->size().width() > Event->size().height())
-		mSplitter->setOrientation(Qt::Horizontal);
-	else
-		mSplitter->setOrientation(Qt::Vertical);
-	
+	if (((QDockWidget*)parent())->isFloating())
+	{
+		if (Event->size().width() > Event->size().height())
+			mSplitter->setOrientation(Qt::Horizontal);
+		else
+			mSplitter->setOrientation(Qt::Vertical);
+	}
+
 	QWidget::resizeEvent(Event);
 }
 

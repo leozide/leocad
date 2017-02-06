@@ -7,6 +7,9 @@
 #include "lc_model.h"
 #include "project.h"
 #include "pieceinf.h"
+#include "view.h"
+
+ Q_DECLARE_METATYPE(QList<int>)
 
 static int lcPartSortFunc(PieceInfo* const& a, PieceInfo* const& b)
 {
@@ -281,9 +284,6 @@ Qt::ItemFlags lcPartSelectionListModel::flags(const QModelIndex& Index) const
 	else
 		return DefaultFlags;
 }
-
-#include "lc_mainwindow.h"
-#include "view.h"
 
 void lcPartSelectionListModel::RequestPreview(int InfoIndex)
 {
@@ -576,8 +576,6 @@ lcPartSelectionWidget::lcPartSelectionWidget(QWidget* Parent)
 	mSplitter->setStretchFactor(1, 1);
 
 	connect(Parent, SIGNAL(dockLocationChanged(Qt::DockWidgetArea)), this, SLOT(DockLocationChanged(Qt::DockWidgetArea)));
-
-	qRegisterMetaTypeStreamOperators<QList<int> >("QList<int>");
 }
 
 void lcPartSelectionWidget::LoadState(QSettings& Settings)

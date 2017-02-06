@@ -144,6 +144,8 @@ int main(int argc, char *argv[])
 	Translator.load(QString("leocad_") + QLocale::system().name().section('_', 0, 0) + ".qm", ":/resources");
 	app.installTranslator(&Translator);
 
+	qRegisterMetaTypeStreamOperators<QList<int> >("QList<int>");
+
 	g_App = new lcApplication();
 
 #if defined(Q_OS_WIN)

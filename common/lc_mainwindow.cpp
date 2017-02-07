@@ -5,7 +5,6 @@
 #include "lc_partselectionwidget.h"
 #include "lc_timelinewidget.h"
 #include "lc_qglwidget.h"
-#include "lc_qpartstree.h"
 #include "lc_qcolorlist.h"
 #include "lc_qpropertiestree.h"
 #include "lc_qutils.h"

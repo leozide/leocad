@@ -159,7 +159,6 @@ SOURCES += common/view.cpp \
     qt/lc_qarraydialog.cpp \
     qt/lc_qgroupdialog.cpp \
     qt/lc_qaboutdialog.cpp \
-    qt/lc_qpartstree.cpp \
     qt/lc_qeditgroupsdialog.cpp \
     qt/lc_qselectdialog.cpp \
     qt/lc_qpropertiesdialog.cpp \
@@ -220,7 +219,6 @@ HEADERS += \
     qt/lc_qarraydialog.h \
     qt/lc_qgroupdialog.h \
     qt/lc_qaboutdialog.h \
-    qt/lc_qpartstree.h \
     qt/lc_qeditgroupsdialog.h \
     qt/lc_qselectdialog.h \
     qt/lc_qpropertiesdialog.h \

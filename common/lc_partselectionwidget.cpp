@@ -578,6 +578,37 @@ lcPartSelectionWidget::lcPartSelectionWidget(QWidget* Parent)
 	connect(Parent, SIGNAL(dockLocationChanged(Qt::DockWidgetArea)), this, SLOT(DockLocationChanged(Qt::DockWidgetArea)));
 }
 
+bool lcPartSelectionWidget::event(QEvent* Event)
+{
+	if (Event->type() == QEvent::ShortcutOverride)
+	{
+		QKeyEvent* KeyEvent = (QKeyEvent*)Event;
+		int Key = KeyEvent->key();
+
+		if (KeyEvent->modifiers() == Qt::NoModifier && Key >= Qt::Key_A && Key <= Qt::Key_Z)
+			Event->accept();
+
+		switch (Key)
+		{
+		case Qt::Key_Down:
+		case Qt::Key_Up:
+		case Qt::Key_Left:
+		case Qt::Key_Right:
+		case Qt::Key_Home:
+		case Qt::Key_End:
+		case Qt::Key_PageUp:
+		case Qt::Key_PageDown:
+		case Qt::Key_Asterisk:
+		case Qt::Key_Plus:
+		case Qt::Key_Minus:
+			Event->accept();
+			break;
+		}
+	}
+
+	return QWidget::event(Event);
+}
+
 void lcPartSelectionWidget::LoadState(QSettings& Settings)
 {
 	QList<int> Sizes = Settings.value("PartSelectionSplitter").value<QList<int>>();

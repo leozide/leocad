@@ -179,6 +179,7 @@ protected slots:
 
 protected:
 	virtual void resizeEvent(QResizeEvent* Event);
+	virtual bool event(QEvent* Event);
 
 	QTreeWidget* mCategoriesWidget;
 	QTreeWidgetItem* mAllPartsCategoryItem;

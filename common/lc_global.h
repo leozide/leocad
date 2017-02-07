@@ -30,14 +30,10 @@ typedef quint64 lcuint64;
 typedef quintptr lcuintptr;
 
 #ifdef Q_OS_WIN
-#define snprintf _snprintf
-#define strcasecmp stricmp
-#define strncasecmp strnicmp
 char* strcasestr(const char *s, const char *find);
 #else
 char* strupr(char* string);
 char* strlwr(char* string);
-int stricmp(const char* str1, const char* str2);
 #endif
 
 // Version number.

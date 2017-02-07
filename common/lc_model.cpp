@@ -753,10 +753,11 @@ bool lcModel::LoadBinary(lcFile* file)
 			file->Seek(sh, SEEK_CUR);
 		else
 		{
-			String Author;
-			file->ReadBuffer(Author.GetBuffer(sh), sh);
-			Author.Buffer()[sh] = 0;
-			mProperties.mAuthor = QString::fromUtf8(Author.Buffer());
+			QByteArray Author;
+			Author.resize(sh + 1);
+			file->ReadBuffer(Author.data(), sh);
+			Author[sh] = 0;
+			mProperties.mAuthor = QString::fromUtf8(Author);
 		}
 
 		file->ReadBuffer(&ch, 1);
@@ -765,10 +766,11 @@ bool lcModel::LoadBinary(lcFile* file)
 			file->Seek(sh, SEEK_CUR);
 		else
 		{
-			String Description;
-			file->ReadBuffer(Description.GetBuffer(sh), sh);
-			Description.Buffer()[sh] = 0;
-			mProperties.mDescription = QString::fromUtf8(Description.Buffer());
+			QByteArray Description;
+			Description.resize(sh + 1);
+			file->ReadBuffer(Description.data(), sh);
+			Description[sh] = 0;
+			mProperties.mDescription = QString::fromUtf8(Description);
 		}
 
 		file->ReadBuffer(&ch, 1);
@@ -777,10 +779,11 @@ bool lcModel::LoadBinary(lcFile* file)
 			file->Seek(sh, SEEK_CUR);
 		else
 		{
-			String Comments;
-			file->ReadBuffer(Comments.GetBuffer(sh), sh);
-			Comments.Buffer()[sh] = 0;
-			mProperties.mComments = QString::fromUtf8(Comments.Buffer());
+			QByteArray Comments;
+			Comments.resize(sh + 1);
+			file->ReadBuffer(Comments.data(), sh);
+			Comments[sh] = 0;
+			mProperties.mComments = QString::fromUtf8(Comments);
 			mProperties.mComments.replace(QLatin1String("\r\n"), QLatin1String("\n"));
 		}
 	}

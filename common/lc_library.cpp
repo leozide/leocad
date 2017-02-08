@@ -199,7 +199,6 @@ bool lcPiecesLibrary::Load(const char* LibraryPath)
 		if (!OpenArchive(UnofficialFileName, LC_ZIPFILE_UNOFFICIAL))
 			UnofficialFileName[0] = 0;
 
-
 		ReadArchiveDescriptions(LibraryPath, UnofficialFileName);
 	}
 	else
@@ -2467,7 +2466,7 @@ bool lcPiecesLibrary::PieceInCategory(PieceInfo* Info, const char* CategoryKeywo
 void lcPiecesLibrary::GetCategoryEntries(int CategoryIndex, bool GroupPieces, lcArray<PieceInfo*>& SinglePieces, lcArray<PieceInfo*>& GroupedPieces)
 {
 	if (CategoryIndex >= 0 && CategoryIndex < gCategories.GetSize())
-		GetCategoryEntries(gCategories[CategoryIndex].Keywords.c_str(), GroupPieces, SinglePieces, GroupedPieces);
+		GetCategoryEntries(gCategories[CategoryIndex].Keywords.constData(), GroupPieces, SinglePieces, GroupedPieces);
 }
 
 void lcPiecesLibrary::GetCategoryEntries(const char* CategoryKeywords, bool GroupPieces, lcArray<PieceInfo*>& SinglePieces, lcArray<PieceInfo*>& GroupedPieces)

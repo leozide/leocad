@@ -5,8 +5,8 @@
 
 struct lcLibraryCategory
 {
-	std::string Name;
-	std::string Keywords;
+	QString Name;
+	QByteArray Keywords;
 };
 
 extern lcArray<lcLibraryCategory> gCategories;

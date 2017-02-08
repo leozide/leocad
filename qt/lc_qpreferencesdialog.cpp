@@ -210,7 +210,7 @@ void lcQPreferencesDialog::updateCategories()
 
 	for (int categoryIndex = 0; categoryIndex < options->Categories.GetSize(); categoryIndex++)
 	{
-		categoryItem = new QTreeWidgetItem(tree, QStringList(QString::fromStdString(options->Categories[categoryIndex].Name)));
+		categoryItem = new QTreeWidgetItem(tree, QStringList(options->Categories[categoryIndex].Name));
 		categoryItem->setData(0, CategoryRole, QVariant(categoryIndex));
 	}
 
@@ -237,7 +237,7 @@ void lcQPreferencesDialog::updateParts()
 	{
 		lcArray<PieceInfo*> singleParts, groupedParts;
 
-		library->GetCategoryEntries(options->Categories[categoryIndex].Keywords.c_str(), false, singleParts, groupedParts);
+		library->GetCategoryEntries(options->Categories[categoryIndex].Keywords.constData(), false, singleParts, groupedParts);
 
 		for (int partIndex = 0; partIndex < singleParts.GetSize(); partIndex++)
 		{
@@ -257,7 +257,7 @@ void lcQPreferencesDialog::updateParts()
 
 			for (categoryIndex = 0; categoryIndex < options->Categories.GetSize(); categoryIndex++)
 			{
-				if (library->PieceInCategory(info, options->Categories[categoryIndex].Keywords.c_str()))
+				if (library->PieceInCategory(info, options->Categories[categoryIndex].Keywords.constData()))
 					break;
 			}
 
@@ -328,7 +328,7 @@ void lcQPreferencesDialog::on_deleteCategory_clicked()
 	if (categoryIndex == -1)
 		return;
 
-	QString question = tr("Are you sure you want to delete the category '%1'?").arg(QString::fromStdString(options->Categories[categoryIndex].Name));
+	QString question = tr("Are you sure you want to delete the category '%1'?").arg(options->Categories[categoryIndex].Name);
 	if (QMessageBox::question(this, "LeoCAD", question, QMessageBox::Yes | QMessageBox::No) != QMessageBox::Yes)
 		return;
 

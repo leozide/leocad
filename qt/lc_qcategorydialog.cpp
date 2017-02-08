@@ -11,13 +11,13 @@ lcQCategoryDialog::lcQCategoryDialog(QWidget *parent, void *data) :
 
 	options = (lcLibraryCategory*)data;
 
-	if (options->Name[0])
+	if (!options->Name.isEmpty())
 		setWindowTitle(tr("Edit Category"));
 	else
 		setWindowTitle(tr("New Category"));
 
-	ui->name->setText(QString::fromStdString(options->Name));
-	ui->keywords->setText(QString::fromStdString(options->Keywords));
+	ui->name->setText(options->Name);
+	ui->keywords->setText(options->Keywords);
 }
 
 lcQCategoryDialog::~lcQCategoryDialog()
@@ -43,8 +43,8 @@ void lcQCategoryDialog::accept()
 		return;
 	}
 
-	options->Name = name.toLocal8Bit().data();
-	options->Keywords = keywords.toLocal8Bit().data();
+	options->Name = name;
+	options->Keywords = keywords.toLatin1();
 
 	QDialog::accept();
 }

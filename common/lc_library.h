@@ -5,7 +5,6 @@
 #include "lc_mesh.h"
 #include "lc_math.h"
 #include "lc_array.h"
-#include "str.h"
 
 class PieceInfo;
 class lcZipFile;
@@ -147,10 +146,9 @@ public:
 	lcTexture* FindTexture(const char* TextureName);
 	bool LoadTexture(lcTexture* Texture);
 
-	bool PieceInCategory(PieceInfo* Info, const String& CategoryKeywords) const;
-	void SearchPieces(const char* Keyword, lcArray<PieceInfo*>& Pieces) const;
+	bool PieceInCategory(PieceInfo* Info, const char* CategoryKeywords) const;
 	void GetCategoryEntries(int CategoryIndex, bool GroupPieces, lcArray<PieceInfo*>& SinglePieces, lcArray<PieceInfo*>& GroupedPieces);
-	void GetCategoryEntries(const String& CategoryKeywords, bool GroupPieces, lcArray<PieceInfo*>& SinglePieces, lcArray<PieceInfo*>& GroupedPieces);
+	void GetCategoryEntries(const char* CategoryKeywords, bool GroupPieces, lcArray<PieceInfo*>& SinglePieces, lcArray<PieceInfo*>& GroupedPieces);
 	void GetPatternedPieces(PieceInfo* Parent, lcArray<PieceInfo*>& Pieces) const;
 	void GetParts(lcArray<PieceInfo*>& Parts);
 

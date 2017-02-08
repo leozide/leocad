@@ -721,7 +721,7 @@ void lcPartSelectionWidget::UpdateCategories()
 	mCurrentModelCategoryItem = new QTreeWidgetItem(mCategoriesWidget, QStringList(tr("Parts In Use")));
 
 	for (int CategoryIdx = 0; CategoryIdx < gCategories.GetSize(); CategoryIdx++)
-		new QTreeWidgetItem(mCategoriesWidget, QStringList((const char*)gCategories[CategoryIdx].Name));
+		new QTreeWidgetItem(mCategoriesWidget, QStringList(QString::fromStdString(gCategories[CategoryIdx].Name)));
 
 	mModelsCategoryItem = new QTreeWidgetItem(mCategoriesWidget, QStringList(tr("Models")));
 

@@ -126,7 +126,6 @@ macx {
 SOURCES += common/view.cpp \
     common/tr.cpp \
     common/texfont.cpp \
-    common/str.cpp \
     common/project.cpp \
     common/pieceinf.cpp \
     common/piece.cpp \
@@ -182,7 +181,6 @@ HEADERS += \
     common/tr.h \
     common/texfont.h \
     common/system.h \
-    common/str.h \
     common/project.h \
     common/pieceinf.h \
     common/piece.h \

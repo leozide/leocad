@@ -1,13 +1,12 @@
 #ifndef _LC_CATEGORY_H_
 #define _LC_CATEGORY_H_
 
-#include "str.h"
 #include "lc_array.h"
 
 struct lcLibraryCategory
 {
-	String Name;
-	String Keywords;
+	std::string Name;
+	std::string Keywords;
 };
 
 extern lcArray<lcLibraryCategory> gCategories;
@@ -21,5 +20,7 @@ bool lcLoadCategories(const QString& FileName, lcArray<lcLibraryCategory>& Categ
 bool lcLoadCategories(const QByteArray& Buffer, lcArray<lcLibraryCategory>& Categories);
 bool lcSaveCategories(const QString& FileName, const lcArray<lcLibraryCategory>& Categories);
 bool lcSaveCategories(QTextStream& Stream, const lcArray<lcLibraryCategory>& Categories);
+
+bool lcMatchCategory(const char* PieceName, const char* Expression);
 
 #endif // _LC_CATEGORY_H_

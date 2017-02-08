@@ -81,7 +81,7 @@ void lcApplication::ExportClipboard(const QByteArray& Clipboard)
 	SetClipboard(Clipboard);
 }
 
-void lcApplication::GetFileList(const char* Path, lcArray<String>& FileList)
+void lcApplication::GetFileList(const char* Path, lcArray<std::string>& FileList)
 {
 	QDir Dir(Path);
 	Dir.setFilter(QDir::Files | QDir::Hidden | QDir::Readable);
@@ -93,7 +93,7 @@ void lcApplication::GetFileList(const char* Path, lcArray<String>& FileList)
 	{
 		QString AbsolutePath = Dir.absoluteFilePath(Files[FileIdx]);
 
-		FileList.Add(AbsolutePath.toLocal8Bit().data());
+		FileList.Add(AbsolutePath.toStdString());
 	}
 }
 

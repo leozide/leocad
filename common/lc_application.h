@@ -5,7 +5,6 @@
 
 class Project;
 class lcPiecesLibrary;
-class String;
 
 enum lcLightingMode
 {
@@ -48,7 +47,7 @@ public:
 
 	bool LoadPiecesLibrary(const char* LibPath, const char* LibraryInstallPath, const char* LDrawPath);
 
-	void GetFileList(const char* Path, lcArray<String>& FileList);
+	void GetFileList(const char* Path, lcArray<std::string>& FileList);
 	void SetClipboard(const QByteArray& Clipboard);
 	void ExportClipboard(const QByteArray& Clipboard);
 

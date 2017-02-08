@@ -424,7 +424,7 @@ void lcPiecesLibrary::ReadArchiveDescriptions(const QString& OfficialFileName, c
 bool lcPiecesLibrary::OpenDirectory(const char* Path)
 {
 	char FileName[LC_MAXPATH];
-	lcArray<String> FileList;
+	lcArray<std::string> FileList;
 
 	strcpy(FileName, Path);
 	strcat(FileName, "parts.lst");
@@ -501,7 +501,7 @@ bool lcPiecesLibrary::OpenDirectory(const char* Path)
 		for (int FileIdx = 0; FileIdx < FileList.GetSize(); FileIdx++)
 		{
 			char Name[LC_PIECE_NAME_LEN];
-			const char* Src = (const char*)FileList[FileIdx] + PathLength;
+			const char* Src = (const char*)FileList[FileIdx].c_str() + PathLength;
 			char* Dst = Name;
 
 			while (*Src && Dst - Name < (int)sizeof(Name))
@@ -526,7 +526,7 @@ bool lcPiecesLibrary::OpenDirectory(const char* Path)
 			*Dst = 0;
 
 			lcDiskFile PieceFile;
-			if (!PieceFile.Open(FileList[FileIdx], "rt"))
+			if (!PieceFile.Open(FileList[FileIdx].c_str(), "rt"))
 				continue;
 
 			char Line[1024];
@@ -575,7 +575,7 @@ bool lcPiecesLibrary::OpenDirectory(const char* Path)
 		for (int FileIdx = 0; FileIdx < FileList.GetSize(); FileIdx++)
 		{
 			char Name[LC_PIECE_NAME_LEN];
-			const char* Src = (const char*)FileList[FileIdx] + PathLength;
+			const char* Src = (const char*)FileList[FileIdx].c_str() + PathLength;
 			char* Dst = Name;
 
 			while (*Src && Dst - Name < (int)sizeof(Name))
@@ -616,7 +616,7 @@ bool lcPiecesLibrary::OpenDirectory(const char* Path)
 	for (int FileIdx = 0; FileIdx < FileList.GetSize(); FileIdx++)
 	{
 		char Name[LC_MAXPATH];
-		const char* Src = (const char*)FileList[FileIdx] + PathLength;
+		const char* Src = (const char*)FileList[FileIdx].c_str() + PathLength;
 		char* Dst = Name;
 
 		while (*Src && Dst - Name < (int)sizeof(Name))
@@ -2450,31 +2450,27 @@ void lcLibraryMeshData::AddMeshDataNoDuplicateCheck(const lcLibraryMeshData& Dat
 	}
 }
 
-bool lcPiecesLibrary::PieceInCategory(PieceInfo* Info, const String& CategoryKeywords) const
+bool lcPiecesLibrary::PieceInCategory(PieceInfo* Info, const char* CategoryKeywords) const
 {
 	if (Info->IsTemporary())
 		return false;
 
-	String PieceName;
+	const char* PieceName;
 	if (Info->m_strDescription[0] == '~' || Info->m_strDescription[0] == '_')
 		PieceName = Info->m_strDescription + 1;
 	else
 		PieceName = Info->m_strDescription;
-	PieceName.MakeLower();
 
-	String Keywords = CategoryKeywords;
-	Keywords.MakeLower();
-
-	return PieceName.Match(Keywords);
+	return lcMatchCategory(PieceName, CategoryKeywords);
 }
 
 void lcPiecesLibrary::GetCategoryEntries(int CategoryIndex, bool GroupPieces, lcArray<PieceInfo*>& SinglePieces, lcArray<PieceInfo*>& GroupedPieces)
 {
 	if (CategoryIndex >= 0 && CategoryIndex < gCategories.GetSize())
-		GetCategoryEntries(gCategories[CategoryIndex].Keywords, GroupPieces, SinglePieces, GroupedPieces);
+		GetCategoryEntries(gCategories[CategoryIndex].Keywords.c_str(), GroupPieces, SinglePieces, GroupedPieces);
 }
 
-void lcPiecesLibrary::GetCategoryEntries(const String& CategoryKeywords, bool GroupPieces, lcArray<PieceInfo*>& SinglePieces, lcArray<PieceInfo*>& GroupedPieces)
+void lcPiecesLibrary::GetCategoryEntries(const char* CategoryKeywords, bool GroupPieces, lcArray<PieceInfo*>& SinglePieces, lcArray<PieceInfo*>& GroupedPieces)
 {
 	SinglePieces.RemoveAll();
 	GroupedPieces.RemoveAll();
@@ -2531,36 +2527,6 @@ void lcPiecesLibrary::GetCategoryEntries(const String& CategoryKeywords, bool Gr
 			if (Index == -1)
 				SinglePieces.Add(Info);
 		}
-	}
-}
-
-void lcPiecesLibrary::SearchPieces(const char* Keyword, lcArray<PieceInfo*>& Pieces) const
-{
-	Pieces.RemoveAll();
-
-	String LowerKeyword = Keyword;
-	LowerKeyword.MakeLower();
-
-	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-	{
-		PieceInfo* Info = mPieces[PieceIdx];
-
-		char LowerName[sizeof(Info->m_strName)];
-		strcpy(LowerName, Info->m_strName);
-		strlwr(LowerName);
-
-		if (strstr(LowerName, LowerKeyword))
-		{
-			Pieces.Add(Info);
-			continue;
-		}
-
-		char LowerDescription[sizeof(Info->m_strDescription)];
-		strcpy(LowerDescription, Info->m_strDescription);
-		strlwr(LowerDescription);
-
-		if (strstr(LowerDescription, LowerKeyword))
-			Pieces.Add(Info);
 	}
 }
 

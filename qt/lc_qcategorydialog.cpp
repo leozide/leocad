@@ -16,8 +16,8 @@ lcQCategoryDialog::lcQCategoryDialog(QWidget *parent, void *data) :
 	else
 		setWindowTitle(tr("New Category"));
 
-	ui->name->setText((const char*)options->Name);
-	ui->keywords->setText((const char*)options->Keywords);
+	ui->name->setText(QString::fromStdString(options->Name));
+	ui->keywords->setText(QString::fromStdString(options->Keywords));
 }
 
 lcQCategoryDialog::~lcQCategoryDialog()

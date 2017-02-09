@@ -81,22 +81,6 @@ void lcApplication::ExportClipboard(const QByteArray& Clipboard)
 	SetClipboard(Clipboard);
 }
 
-void lcApplication::GetFileList(const char* Path, lcArray<std::string>& FileList)
-{
-	QDir Dir(Path);
-	Dir.setFilter(QDir::Files | QDir::Hidden | QDir::Readable);
-
-	FileList.RemoveAll();
-	QStringList Files = Dir.entryList();
-
-	for (int FileIdx = 0; FileIdx < Files.size(); FileIdx++)
-	{
-		QString AbsolutePath = Dir.absoluteFilePath(Files[FileIdx]);
-
-		FileList.Add(AbsolutePath.toStdString());
-	}
-}
-
 bool lcApplication::LoadPiecesLibrary(const char* LibPath, const char* LibraryInstallPath, const char* LDrawPath)
 {
 	if (mLibrary == NULL)

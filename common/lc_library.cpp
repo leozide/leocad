@@ -423,8 +423,6 @@ void lcPiecesLibrary::ReadArchiveDescriptions(const QString& OfficialFileName, c
 bool lcPiecesLibrary::OpenDirectory(const char* Path)
 {
 	char FileName[LC_MAXPATH];
-	lcArray<std::string> FileList;
-
 	strcpy(FileName, Path);
 	strcat(FileName, "parts.lst");
 
@@ -491,16 +489,16 @@ bool lcPiecesLibrary::OpenDirectory(const char* Path)
 	{
 		strcpy(FileName, Path);
 		strcat(FileName, "parts/");
-		size_t PathLength = strlen(FileName);
 
-		g_App->GetFileList(FileName, FileList);
+		QDir Dir(FileName, "*.dat", QDir::SortFlags(QDir::Name | QDir::IgnoreCase), QDir::Files | QDir::Hidden | QDir::Readable);
+		QStringList FileList = Dir.entryList();
+		mPieces.AllocGrow(FileList.size());
 
-		mPieces.AllocGrow(FileList.GetSize());
-
-		for (int FileIdx = 0; FileIdx < FileList.GetSize(); FileIdx++)
+		for (int FileIdx = 0; FileIdx < FileList.size(); FileIdx++)
 		{
 			char Name[LC_PIECE_NAME_LEN];
-			const char* Src = (const char*)FileList[FileIdx].c_str() + PathLength;
+			QByteArray FileString = FileList[FileIdx].toLatin1();
+			const char* Src = FileString;
 			char* Dst = Name;
 
 			while (*Src && Dst - Name < (int)sizeof(Name))
@@ -525,7 +523,7 @@ bool lcPiecesLibrary::OpenDirectory(const char* Path)
 			*Dst = 0;
 
 			lcDiskFile PieceFile;
-			if (!PieceFile.Open(FileList[FileIdx].c_str(), "rt"))
+			if (!PieceFile.Open(Dir.absoluteFilePath(FileList[FileIdx]), "rt"))
 				continue;
 
 			char Line[1024];
@@ -564,18 +562,20 @@ bool lcPiecesLibrary::OpenDirectory(const char* Path)
 	for (int DirectoryIdx = 0; DirectoryIdx < (int)(sizeof(PrimitiveDirectories) / sizeof(PrimitiveDirectories[0])); DirectoryIdx++)
 	{
 		strcpy(FileName, Path);
-		size_t PathLength = strlen(FileName);
-
 		strcat(FileName, PrimitiveDirectories[DirectoryIdx]);
-		PathLength += strchr(PrimitiveDirectories[DirectoryIdx], '/') - PrimitiveDirectories[DirectoryIdx] + 1;
 
-		g_App->GetFileList(FileName, FileList);
+		QDir Dir(FileName, "*.dat", QDir::SortFlags(QDir::Name | QDir::IgnoreCase), QDir::Files | QDir::Hidden | QDir::Readable);
+		QStringList FileList = Dir.entryList();
 
-		for (int FileIdx = 0; FileIdx < FileList.GetSize(); FileIdx++)
+		for (int FileIdx = 0; FileIdx < FileList.size(); FileIdx++)
 		{
 			char Name[LC_PIECE_NAME_LEN];
-			const char* Src = (const char*)FileList[FileIdx].c_str() + PathLength;
-			char* Dst = Name;
+			QByteArray FileString = FileList[FileIdx].toLatin1();
+			const char* Src = FileString;
+
+			strcpy(Name, strchr(PrimitiveDirectories[DirectoryIdx], '/') + 1);
+			strupr(Name);
+			char* Dst = Name + strlen(Name);
 
 			while (*Src && Dst - Name < (int)sizeof(Name))
 			{
@@ -606,16 +606,17 @@ bool lcPiecesLibrary::OpenDirectory(const char* Path)
 
 	strcpy(FileName, Path);
 	strcat(FileName, "parts/textures/");
-	size_t PathLength = strlen(FileName);
 
-	g_App->GetFileList(FileName, FileList);
+	QDir Dir(FileName, "*.png", QDir::SortFlags(QDir::Name | QDir::IgnoreCase), QDir::Files | QDir::Hidden | QDir::Readable);
+	QStringList FileList = Dir.entryList();
 
-	mTextures.AllocGrow(FileList.GetSize());
+	mTextures.AllocGrow(FileList.size());
 
-	for (int FileIdx = 0; FileIdx < FileList.GetSize(); FileIdx++)
+	for (int FileIdx = 0; FileIdx < FileList.size(); FileIdx++)
 	{
 		char Name[LC_MAXPATH];
-		const char* Src = (const char*)FileList[FileIdx].c_str() + PathLength;
+		QByteArray FileString = FileList[FileIdx].toLatin1();
+		const char* Src = FileString;
 		char* Dst = Name;
 
 		while (*Src && Dst - Name < (int)sizeof(Name))

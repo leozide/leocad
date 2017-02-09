@@ -143,7 +143,7 @@ void lcQUpdateDialog::replyFinished(QNetworkReply *reply)
 
 			if (updateAvailable)
 			{
-				status += tr("<p>Visit <a href=\"http://www.leocad.org/files/\">http://www.leocad.org/files/</a> to download.</p>");
+				status += tr("<p>Visit <a href=\"https://github.com/leozide/leocad/releases\">https://github.com/leozide/leocad/releases</a> to download.</p>");
 			}
 
 			ui->status->setText(status);

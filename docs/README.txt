@@ -36,7 +36,7 @@ rendering.
   icon to open the archive and copy LeoCAD.app to your Applications folder.
 
 New users should take a look at the online tutorial located at
-http://www.leocad.org/trac/wiki/BasicTutorial/ to learn how to use LeoCAD.
+http://www.leocad.org/docs/tutorial1.html to learn how to use LeoCAD.
 
 
 Online Resources
@@ -45,18 +45,11 @@ Online Resources
 - Website:
   http://www.leocad.org/
 
-- Mailing lists:
-  http://gerf.org/mailman/listinfo
+- Mailing list:
+  https://lists.leocad.org/listinfo/leocad
 
-- LUGNET Newsgroup:
-  http://news.lugnet.com/cad/leocad/
-  news://lugnet.com/lugnet.cad.leocad
-
-- Subversion access:
-  http://svn.leocad.org/
-
-- Bug database:
-  http://www.leocad.org/trac/report
+- GitHub page:
+  https://github.com/leozide/leocad
 
 
 Legal Disclaimer

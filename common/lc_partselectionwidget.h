@@ -138,6 +138,7 @@ protected slots:
 	void SetSmallIcons();
 	void SetMediumIcons();
 	void SetLargeIcons();
+	void SetExtraLargeIcons();
 	void TogglePartNames();
 	void ToggleDecoratedParts();
 	void ToggleFixedColor();

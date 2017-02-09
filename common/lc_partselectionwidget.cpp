@@ -320,8 +320,8 @@ void lcPartSelectionListModel::DrawPreview(int InfoIndex)
 	View* View = gMainWindow->GetActiveView();
 	View->MakeCurrent();
 	lcContext* Context = View->mContext;
-	int Width = 128;
-	int Height = 128;
+	int Width = mIconSize * 2;
+	int Height = mIconSize * 2;
 
 	if (!Context->BeginRenderToTexture(Width, Height))
 		return;
@@ -444,6 +444,11 @@ void lcPartSelectionListView::CustomContextMenuRequested(QPoint Pos)
 	LargeIcons->setChecked(mListModel->GetIconSize() == 96);
 	IconGroup->addAction(LargeIcons);
 
+	QAction* ExtraLargeIcons = Menu->addAction(tr("Extra Large Icons"), this, SLOT(SetExtraLargeIcons()));
+	ExtraLargeIcons->setCheckable(true);
+	ExtraLargeIcons->setChecked(mListModel->GetIconSize() == 192);
+	IconGroup->addAction(ExtraLargeIcons);
+
 	Menu->addSeparator();
 
 	if (mListModel->GetIconSize() != 0)
@@ -482,6 +487,11 @@ void lcPartSelectionListView::SetMediumIcons()
 void lcPartSelectionListView::SetLargeIcons()
 {
 	SetIconSize(96);
+}
+
+void lcPartSelectionListView::SetExtraLargeIcons()
+{
+	SetIconSize(192);
 }
 
 void lcPartSelectionListView::TogglePartNames()

@@ -186,7 +186,7 @@ void TexFont::PrintText(lcContext* Context, float Left, float Top, float Z, cons
 	if (!Length)
 		return;
 
-	float* Verts = new float[4 * 5 * Length];
+	float* Verts = new float[6 * 5 * Length];
 	float* CurVert = Verts;
 
 	while (*Text)
@@ -212,9 +212,21 @@ void TexFont::PrintText(lcContext* Context, float Left, float Top, float Z, cons
 		*CurVert++ = mGlyphs[ch].bottom;
 
 		*CurVert++ = Left + mGlyphs[ch].width;
+		*CurVert++ = Top - mFontHeight;
+		*CurVert++ = Z;
+		*CurVert++ = mGlyphs[ch].right;
+		*CurVert++ = mGlyphs[ch].bottom;
+
+		*CurVert++ = Left + mGlyphs[ch].width;
 		*CurVert++ = Top;
 		*CurVert++ = Z;
 		*CurVert++ = mGlyphs[ch].right;
+		*CurVert++ = mGlyphs[ch].top;
+
+		*CurVert++ = Left;
+		*CurVert++ = Top;
+		*CurVert++ = Z;
+		*CurVert++ = mGlyphs[ch].left;
 		*CurVert++ = mGlyphs[ch].top;
 
 		Left += mGlyphs[ch].width;
@@ -224,14 +236,14 @@ void TexFont::PrintText(lcContext* Context, float Left, float Top, float Z, cons
 	Context->SetVertexBufferPointer(Verts);
 	Context->SetVertexFormat(0, 3, 2, 0);
 
-	Context->DrawPrimitives(GL_QUADS, 0, 4 * (GLsizei)Length);
+	Context->DrawPrimitives(GL_TRIANGLES, 0, 6 * (GLsizei)Length);
 
 	Context->ClearVertexBuffer(); // context remove
 
 	delete[] Verts;
 }
 
-void TexFont::GetGlyphQuad(float Left, float Top, float Z, int Glyph, float* Buffer) const
+void TexFont::GetGlyphTriangles(float Left, float Top, float Z, int Glyph, float* Buffer) const
 {
 	Left -= mGlyphs[Glyph].width / 2.0f;
 	Top += mFontHeight / 2.0f;
@@ -255,8 +267,20 @@ void TexFont::GetGlyphQuad(float Left, float Top, float Z, int Glyph, float* Buf
 	*Buffer++ = mGlyphs[Glyph].bottom;
 
 	*Buffer++ = Left + mGlyphs[Glyph].width;
+	*Buffer++ = Top - mFontHeight;
+	*Buffer++ = Z;
+	*Buffer++ = mGlyphs[Glyph].right;
+	*Buffer++ = mGlyphs[Glyph].bottom;
+
+	*Buffer++ = Left + mGlyphs[Glyph].width;
 	*Buffer++ = Top;
 	*Buffer++ = Z;
 	*Buffer++ = mGlyphs[Glyph].right;
+	*Buffer++ = mGlyphs[Glyph].top;
+
+	*Buffer++ = Left;
+	*Buffer++ = Top;
+	*Buffer++ = Z;
+	*Buffer++ = mGlyphs[Glyph].left;
 	*Buffer++ = mGlyphs[Glyph].top;
 }

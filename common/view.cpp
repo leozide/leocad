@@ -1384,16 +1384,16 @@ void View::DrawGrid()
 			*CurVert++ = 0.0f;
 
 			*CurVert++ = Right;
-			*CurVert++ = Bottom;
-			*CurVert++ = Z;
-			*CurVert++ = U;
-			*CurVert++ = 0.0f;
-
-			*CurVert++ = Right;
 			*CurVert++ = Top;
 			*CurVert++ = Z;
 			*CurVert++ = U;
 			*CurVert++ = V;
+
+			*CurVert++ = Right;
+			*CurVert++ = Bottom;
+			*CurVert++ = Z;
+			*CurVert++ = U;
+			*CurVert++ = 0.0f;
 		}
 
 		if (Preferences.mDrawGridLines)
@@ -1449,7 +1449,7 @@ void View::DrawGrid()
 		mContext->SetColor(lcVector4FromColor(Preferences.mGridStudColor));
 
 		mContext->SetVertexFormat(0, 3, 2, 0);
-		mContext->DrawPrimitives(GL_QUADS, 0, 4);
+		mContext->DrawPrimitives(GL_TRIANGLE_STRIP, 0, 4);
 
 		glDisable(GL_TEXTURE_2D);
 		glDisable(GL_BLEND);
@@ -1526,19 +1526,19 @@ void View::DrawAxes()
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_BLEND);
 
-	float TextBuffer[4 * 5 * 3];
+	float TextBuffer[6 * 5 * 3];
 	lcVector3 PosX = lcMul30(lcVector3(25.0f, 0.0f, 0.0f), WorldViewMatrix);
-	gTexFont.GetGlyphQuad(PosX.x, PosX.y, PosX.z, 'X', TextBuffer);
+	gTexFont.GetGlyphTriangles(PosX.x, PosX.y, PosX.z, 'X', TextBuffer);
 	lcVector3 PosY = lcMul30(lcVector3(0.0f, 25.0f, 0.0f), WorldViewMatrix);
-	gTexFont.GetGlyphQuad(PosY.x, PosY.y, PosY.z, 'Y', TextBuffer + 5 * 4);
+	gTexFont.GetGlyphTriangles(PosY.x, PosY.y, PosY.z, 'Y', TextBuffer + 5 * 6);
 	lcVector3 PosZ = lcMul30(lcVector3(0.0f, 0.0f, 25.0f), WorldViewMatrix);
-	gTexFont.GetGlyphQuad(PosZ.x, PosZ.y, PosZ.z, 'Z', TextBuffer + 5 * 4 * 2);
+	gTexFont.GetGlyphTriangles(PosZ.x, PosZ.y, PosZ.z, 'Z', TextBuffer + 5 * 6 * 2);
 
 	mContext->SetVertexBufferPointer(TextBuffer);
 	mContext->SetVertexFormat(0, 3, 2, 0);
 
 	mContext->SetColor(0.0f, 0.0f, 0.0f, 1.0f);
-	mContext->DrawPrimitives(GL_QUADS, 0, 4 * 3);
+	mContext->DrawPrimitives(GL_TRIANGLES, 0, 6 * 3);
 
 	glDisable(GL_BLEND);
 	glDisable(GL_TEXTURE_2D);

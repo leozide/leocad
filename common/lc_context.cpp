@@ -7,6 +7,17 @@
 #include "lc_mainwindow.h"
 #include "lc_library.h"
 
+#ifdef LC_OPENGLES
+#define glEnableClientState(...)
+#define glDisableClientState(...)
+#define glVertexPointer(...)
+#define glTexCoordPointer(...)
+#define glColorPointer(...)
+#define GL_ARRAY_BUFFER_ARB GL_ARRAY_BUFFER
+#define GL_ELEMENT_ARRAY_BUFFER_ARB GL_ELEMENT_ARRAY_BUFFER
+#define GL_STATIC_DRAW_ARB GL_STATIC_DRAW
+#endif
+
 lcProgram lcContext::mPrograms[LC_NUM_PROGRAMS];
 
 static int lcOpaqueRenderMeshCompare(const void* Elem1, const void* Elem2)
@@ -69,7 +80,9 @@ lcContext::lcContext()
 
 	mTexture = NULL;
 	mLineWidth = 1.0f;
+#ifndef LC_OPENGLES
 	mMatrixMode = GL_MODELVIEW;
+#endif
 
 	mFramebufferObject = 0;
 	mFramebufferTexture = 0;
@@ -95,21 +108,35 @@ lcContext::~lcContext()
 
 void lcContext::CreateShaderPrograms()
 {
+#ifndef LC_OPENGLES
+#define LC_SHADER_VERSION "#version 110\n"
+#define LC_VERTEX_INPUT "attribute "
+#define LC_VERTEX_OUTPUT "varying "
+#define LC_PIXEL_INPUT "varying "
+#define LC_PIXEL_OUTPUT
+#else
+#define LC_SHADER_VERSION "#version 300 es\n#define texture2D texture\n"
+#define LC_VERTEX_INPUT "in "
+#define LC_VERTEX_OUTPUT "out "
+#define LC_PIXEL_INPUT "in mediump "
+#define LC_PIXEL_OUTPUT "#define gl_FragColor FragColor\nout mediump vec4 gl_FragColor;\n"
+#endif
+	
 	const char* VertexShaders[LC_NUM_PROGRAMS] =
 	{
 		// LC_PROGRAM_SIMPLE
-		"#version 110\n"
-		"attribute vec3 VertexPosition;\n"
+		LC_SHADER_VERSION
+		LC_VERTEX_INPUT "vec3 VertexPosition;\n"
 		"uniform mat4 WorldViewProjectionMatrix;\n"
 		"void main()\n"
 		"{\n"
 		"	gl_Position = WorldViewProjectionMatrix * vec4(VertexPosition, 1.0);\n"
 		"}\n",
 		// LC_PROGRAM_TEXTURE
-		"#version 110\n"
-		"attribute vec3 VertexPosition;\n"
-		"attribute vec2 VertexTexCoord;\n"
-		"varying vec2 PixelTexCoord;\n"
+		LC_SHADER_VERSION
+		LC_VERTEX_INPUT "vec3 VertexPosition;\n"
+		LC_VERTEX_INPUT "vec2 VertexTexCoord;\n"
+		LC_VERTEX_OUTPUT "vec2 PixelTexCoord;\n"
 		"uniform mat4 WorldViewProjectionMatrix;\n"
 		"void main()\n"
 		"{\n"
@@ -117,10 +144,10 @@ void lcContext::CreateShaderPrograms()
 		"	PixelTexCoord = VertexTexCoord;\n"
 		"}\n",
 		// LC_PROGRAM_VERTEX_COLOR
-		"#version 110\n"
-		"attribute vec3 VertexPosition;\n"
-		"attribute vec4 VertexColor;\n"
-		"varying vec4 PixelColor;\n"
+		LC_SHADER_VERSION
+		LC_VERTEX_INPUT "vec3 VertexPosition;\n"
+		LC_VERTEX_INPUT "vec4 VertexColor;\n"
+		LC_VERTEX_OUTPUT "vec4 PixelColor;\n"
 		"uniform mat4 WorldViewProjectionMatrix;\n"
 		"void main()\n"
 		"{\n"
@@ -132,24 +159,27 @@ void lcContext::CreateShaderPrograms()
 	const char* FragmentShaders[LC_NUM_PROGRAMS] =
 	{
 		// LC_PROGRAM_SIMPLE
-		"#version 110\n"
-		"uniform vec4 Color;\n"
+		LC_SHADER_VERSION
+		LC_PIXEL_OUTPUT
+		"uniform mediump vec4 Color;\n"
 		"void main()\n"
 		"{\n"
 		"	gl_FragColor = Color;\n"
 		"}\n",
 		// LC_PROGRAM_TEXTURE
-		"#version 110\n"
-		"varying vec2 PixelTexCoord;\n"
-		"uniform vec4 Color;\n"
+		LC_SHADER_VERSION
+		LC_PIXEL_INPUT "vec2 PixelTexCoord;\n"
+		LC_PIXEL_OUTPUT
+		"uniform mediump vec4 Color;\n"
 		"uniform sampler2D Texture;\n"
 		"void main()\n"
 		"{\n"
 		"	gl_FragColor = texture2D(Texture, PixelTexCoord) * Color;\n"
 		"}\n",
 		// LC_PROGRAM_VERTEX_COLOR
-		"#version 110\n"
-		"varying vec4 PixelColor;\n"
+		LC_SHADER_VERSION
+		LC_PIXEL_INPUT "vec4 PixelColor;\n"
+		LC_PIXEL_OUTPUT
 		"void main()\n"
 		"{\n"
 		"	gl_FragColor = PixelColor;\n"
@@ -307,8 +337,10 @@ void lcContext::SetDefaultState()
 	}
 	else
 	{
+#ifndef LC_OPENGLES
 		glMatrixMode(GL_MODELVIEW);
 		mMatrixMode = GL_MODELVIEW;
+#endif
 	}
 }
 
@@ -404,6 +436,7 @@ bool lcContext::BeginRenderToTexture(int Width, int Height)
 		return true;
 	}
 
+#ifndef LC_OPENGLES
 	if (gSupportsFramebufferObjectEXT)
 	{
 		glGenFramebuffersEXT(1, &mFramebufferObject); 
@@ -435,7 +468,8 @@ bool lcContext::BeginRenderToTexture(int Width, int Height)
 
 		return true;
 	}
-
+#endif
+	
 	return false;
 }
 
@@ -453,6 +487,7 @@ void lcContext::EndRenderToTexture()
 		return;
 	}
 
+#ifndef LC_OPENGLES
 	if (gSupportsFramebufferObjectEXT)
 	{
 		glDeleteFramebuffersEXT(1, &mFramebufferObject);
@@ -462,6 +497,7 @@ void lcContext::EndRenderToTexture()
 		glDeleteRenderbuffersEXT(1, &mDepthRenderbufferObject);
 		mDepthRenderbufferObject = 0;
 	}
+#endif
 }
 
 QImage lcContext::GetRenderToTextureImage(int Width, int Height)
@@ -879,6 +915,7 @@ void lcContext::FlushState()
 	}
 	else
 	{
+#ifndef LC_OPENGLES
 		glColor4fv(mColor);
 
 		if (mWorldMatrixDirty || mViewMatrixDirty)
@@ -905,6 +942,7 @@ void lcContext::FlushState()
 			glLoadMatrixf(mProjectionMatrix);
 			mProjectionMatrixDirty = false;
 		}
+#endif
 	}
 }
 

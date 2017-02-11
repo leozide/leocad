@@ -331,4 +331,10 @@ void lcInitializeGLExtensions(const QGLContext* Context)
 #endif
 		gSupportsShaderObjects = true;
 	}
+	
+#ifdef LC_OPENGLES
+	gSupportsVertexBufferObject = true;
+	gSupportsFramebufferObjectARB = true;
+	gSupportsShaderObjects = true;
+#endif
 }

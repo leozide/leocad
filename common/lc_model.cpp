@@ -1116,7 +1116,9 @@ void lcModel::DrawBackground(lcGLWidget* Widget)
 
 	glDepthMask(GL_FALSE);
 	glDisable(GL_DEPTH_TEST);
+#ifndef LC_OPENGLES
 	glDisable(GL_LIGHTING);
+#endif
 
 	float ViewWidth = (float)Widget->mWidth;
 	float ViewHeight = (float)Widget->mHeight;
@@ -1128,7 +1130,9 @@ void lcModel::DrawBackground(lcGLWidget* Widget)
 
 	if (mProperties.mBackgroundType == LC_BACKGROUND_GRADIENT)
 	{
+#ifndef LC_OPENGLES
 		glShadeModel(GL_SMOOTH);
+#endif
 
 		const lcVector3& Color1 = mProperties.mBackgroundGradientColor1;
 		const lcVector3& Color2 = mProperties.mBackgroundGradientColor2;
@@ -1149,7 +1153,9 @@ void lcModel::DrawBackground(lcGLWidget* Widget)
 
 		Context->ClearVertexBuffer(); // context remove
 
+#ifndef LC_OPENGLES
 		glShadeModel(GL_FLAT);
+#endif
 	}
 	else if (mProperties.mBackgroundType == LC_BACKGROUND_IMAGE)
 	{

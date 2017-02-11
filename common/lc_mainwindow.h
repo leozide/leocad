@@ -14,6 +14,9 @@ class lcQPartsTree;
 class lcQColorList;
 class lcQPropertiesTree;
 class lcTimelineWidget;
+#ifdef QT_NO_PRINTER
+class QPrinter;
+#endif
 
 #define LC_MAX_RECENT_FILES 4
 

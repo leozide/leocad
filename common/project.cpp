@@ -1658,7 +1658,9 @@ void Project::ExportPOVRay()
 
 		Arguments.append(QString::fromLatin1("/EXIT"));
 
+#ifndef QT_NO_PROCESS
 		QProcess::execute(Dialog.mPOVRayPath, Arguments);
+#endif
 	}
 }
 

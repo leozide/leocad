@@ -16,7 +16,7 @@ lcQAboutDialog::lcQAboutDialog(QWidget *parent) :
 	gMainWindow->GetActiveView()->MakeCurrent();
 
 	GLint Red, Green, Blue, Alpha, Depth, Stencil;
-	GLboolean DoubleBuffer, RGBA;
+	GLboolean DoubleBuffer = GL_TRUE, RGBA = GL_TRUE;
 
 	glGetIntegerv(GL_RED_BITS, &Red);
 	glGetIntegerv(GL_GREEN_BITS, &Green);
@@ -24,8 +24,10 @@ lcQAboutDialog::lcQAboutDialog(QWidget *parent) :
 	glGetIntegerv(GL_ALPHA_BITS, &Alpha);
 	glGetIntegerv(GL_DEPTH_BITS, &Depth);
 	glGetIntegerv(GL_STENCIL_BITS, &Stencil);
+#ifndef LC_OPENGLES
 	glGetBooleanv(GL_DOUBLEBUFFER, &DoubleBuffer);
 	glGetBooleanv(GL_RGBA_MODE, &RGBA);
+#endif
 
 	QString VersionFormat = tr("OpenGL Version %1 (GLSL %2)\n%3 - %4\n\n");
 	QString Version = VersionFormat.arg(QString((const char*)glGetString(GL_VERSION)), QString((const char*)glGetString(GL_SHADING_LANGUAGE_VERSION)), QString((const char*)glGetString(GL_RENDERER)), QString((const char*)glGetString(GL_VENDOR)));

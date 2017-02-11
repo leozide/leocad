@@ -730,6 +730,7 @@ void lcMainWindow::ColorChanged(int ColorIndex)
 
 void lcMainWindow::Print(QPrinter* Printer)
 {
+#ifndef QT_NO_PRINTER
 	lcModel* Model = lcGetActiveModel();
 	int DocCopies;
 	int PageCopies;
@@ -993,6 +994,7 @@ void lcMainWindow::Print(QPrinter* Printer)
 	Model->SetTemporaryStep(PreviousTime);
 
 	Context->EndRenderToTexture();
+#endif
 }
 
 void lcMainWindow::ShowUpdatesDialog()
@@ -1009,6 +1011,7 @@ void lcMainWindow::ShowAboutDialog()
 
 void lcMainWindow::ShowPrintDialog()
 {
+#ifndef QT_NO_PRINTER
 	lcModel* Model = lcGetActiveModel();
 	int Rows = lcGetProfileInt(LC_PROFILE_PRINT_ROWS);
 	int Columns = lcGetProfileInt(LC_PROFILE_PRINT_COLUMNS);
@@ -1022,6 +1025,7 @@ void lcMainWindow::ShowPrintDialog()
 
 	if (PrintDialog.exec() == QDialog::Accepted)
 		Print(&Printer);
+#endif
 }
 
 // todo: call dialogs directly
@@ -1394,6 +1398,7 @@ void lcMainWindow::ResetViews()
 
 void lcMainWindow::TogglePrintPreview()
 {
+#ifndef QT_NO_PRINTER
 	// todo: print preview inside main window
 
 	lcModel* Model = lcGetActiveModel();
@@ -1408,6 +1413,7 @@ void lcMainWindow::TogglePrintPreview()
 	QPrintPreviewDialog Preview(&Printer, this);
 	connect(&Preview, SIGNAL(paintRequested(QPrinter*)), SLOT(Print(QPrinter*)));
 	Preview.exec();
+#endif
 }
 
 void lcMainWindow::ToggleFullScreen()

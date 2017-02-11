@@ -20,6 +20,9 @@ build
 debug
 release
 ipch
+Debug*
+.DS_Store
+.qmake.stash
 Makefile
 library.bin
 leocad_plugin_import.cpp

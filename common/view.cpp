@@ -565,12 +565,13 @@ void View::OnDraw()
 	mModel->DrawBackground(this);
 
 	const lcPreferences& Preferences = lcGetPreferences();
-	const lcModelProperties& Properties = mModel->GetProperties();
 
 	mContext->SetViewMatrix(mCamera->mWorldView);
 	mContext->SetProjectionMatrix(GetProjectionMatrix());
 	mContext->SetProgram(LC_PROGRAM_SIMPLE); // todo: lighting
 
+#ifndef LC_OPENGLES
+	const lcModelProperties& Properties = mModel->GetProperties();
 	if (Preferences.mLightingMode != LC_LIGHTING_FLAT)
 	{
 		glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT);
@@ -603,7 +604,8 @@ void View::OnDraw()
 		glFogfv(GL_FOG_COLOR, lcVector4(Properties.mFogColor, 1.0f));
 		glEnable(GL_FOG);
 	}
-
+#endif
+	
 	mContext->SetLineWidth(Preferences.mLineWidth);
 
 	mContext->DrawOpaqueMeshes(mScene.mOpaqueMeshes);
@@ -611,6 +613,7 @@ void View::OnDraw()
 
 	mContext->UnbindMesh(); // context remove
 
+#ifndef LC_OPENGLES
 	if (Preferences.mLightingMode != LC_LIGHTING_FLAT)
 	{
 		glDisable(GL_LIGHTING);
@@ -620,6 +623,7 @@ void View::OnDraw()
 
 	if (Properties.mFogEnabled)
 		glDisable(GL_FOG);
+#endif
 
 	if (DrawInterface)
 	{
@@ -1554,7 +1558,9 @@ void View::DrawViewport()
 
 	glDepthMask(GL_FALSE);
 	glDisable(GL_DEPTH_TEST);
+#ifndef LC_OPENGLES
 	glDisable(GL_LIGHTING);
+#endif
 
 	if (gMainWindow->GetActiveView() == this)
 	{

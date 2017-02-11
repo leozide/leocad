@@ -528,6 +528,7 @@ void lcLight::DrawPointLight(lcContext* Context) const
 
 bool lcLight::Setup(int LightIndex)
 {
+#ifndef LC_OPENGLES
 	GLenum LightName = (GLenum)(GL_LIGHT0 + LightIndex);
 
 	if (mState & LC_LIGHT_DISABLED)
@@ -567,6 +568,7 @@ bool lcLight::Setup(int LightIndex)
 		glLightf(LightName, GL_SPOT_EXPONENT, mSpotExponent);
 		glLightfv(LightName, GL_SPOT_DIRECTION, Dir);
 	}
+#endif
 
 	return true;
 }

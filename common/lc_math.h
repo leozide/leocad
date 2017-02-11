@@ -904,16 +904,8 @@ inline lcMatrix44 lcMatrix44LookAt(const lcVector3& Eye, const lcVector3& Target
 	return m;
 }
 
-inline lcMatrix44 lcMatrix44Perspective(float FoVy, float Aspect, float Near, float Far)
+inline lcMatrix44 lcMatrix44Frustum(float Left, float Right, float Bottom, float Top, float Near, float Far)
 {
-	float Left, Right, Bottom, Top;
-
-	Top = Near * (float)tan(FoVy * LC_PI / 360.0f);
-	Bottom = -Top;
-
-	Left = Bottom * Aspect;
-	Right = Top * Aspect;
-
 	if ((Near <= 0.0f) || (Far <= 0.0f) || (Near == Far) || (Left == Right) || (Top == Bottom))
 		return lcMatrix44Identity();
 
@@ -928,12 +920,25 @@ inline lcMatrix44 lcMatrix44Perspective(float FoVy, float Aspect, float Near, fl
 
 	lcMatrix44 m;
 
-	m.r[0] = lcVector4(x, 0, 0,  0);
-	m.r[1] = lcVector4(0, y, 0,  0);
+	m.r[0] = lcVector4(x, 0, 0, 0);
+	m.r[1] = lcVector4(0, y, 0, 0);
 	m.r[2] = lcVector4(a, b, c, -1);
-	m.r[3] = lcVector4(0, 0, d,  0);
+	m.r[3] = lcVector4(0, 0, d, 0);
 
 	return m;
+}
+
+inline lcMatrix44 lcMatrix44Perspective(float FoVy, float Aspect, float Near, float Far)
+{
+	float Left, Right, Bottom, Top;
+
+	Top = Near * (float)tan(FoVy * LC_PI / 360.0f);
+	Bottom = -Top;
+
+	Left = Bottom * Aspect;
+	Right = Top * Aspect;
+
+	return lcMatrix44Frustum(Left, Right, Bottom, Top, Near, Far);
 }
 
 inline lcMatrix44 lcMatrix44Ortho(float Left, float Right, float Bottom, float Top, float Near, float Far)

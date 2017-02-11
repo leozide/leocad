@@ -82,6 +82,13 @@ struct lcProgram
 	GLint ColorLocation;
 };
 
+enum lcTextureMode
+{
+	LC_TEXTURE_DECAL,
+	LC_TEXTURE_REPLACE,
+	LC_TEXTURE_MODULATE
+};
+
 class lcContext
 {
 public:
@@ -116,6 +123,7 @@ public:
 	void SetProgram(lcProgramType ProgramType);
 	void SetViewport(int x, int y, int Width, int Height);
 	void SetLineWidth(float LineWidth);
+	void SetTextureMode(lcTextureMode TextureMode);
 
 	void SetColor(const lcVector4& Color)
 	{

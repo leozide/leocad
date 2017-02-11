@@ -337,6 +337,17 @@ void lcContext::SetLineWidth(float LineWidth)
 	mLineWidth = LineWidth;
 }
 
+void lcContext::SetTextureMode(lcTextureMode TextureMode)
+{
+#ifndef LC_OPENGLES
+	if (!gSupportsShaderObjects)
+	{
+		const GLenum ModeTable[] = { GL_DECAL, GL_REPLACE, GL_MODULATE };
+		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, ModeTable[TextureMode]);
+	}
+#endif
+}
+
 void lcContext::SetColor(float Red, float Green, float Blue, float Alpha)
 {
 	SetColor(lcVector4(Red, Green, Blue, Alpha));
@@ -938,7 +949,7 @@ void lcContext::DrawMeshSection(lcMesh* Mesh, lcMeshSection* Section)
 
 			if (!mTexture)
 			{
-				glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
+				SetTextureMode(LC_TEXTURE_DECAL);
 				glEnable(GL_TEXTURE_2D);
 			}
 

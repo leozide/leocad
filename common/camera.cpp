@@ -964,7 +964,7 @@ void lcCamera::SetViewpoint(lcViewpoint Viewpoint)
 void lcCamera::StartTiledRendering(int tw, int th, int iw, int ih, float AspectRatio)
 {
 	m_pTR = new TiledRender();
-	m_pTR->TileSize(tw, th, 0);
+	m_pTR->TileSize(tw, th);
 	m_pTR->ImageSize(iw, ih);
 
 	if (IsOrtho())
@@ -982,10 +982,10 @@ void lcCamera::GetTileInfo(int* row, int* col, int* width, int* height)
 {
 	if (m_pTR != NULL)
 	{
-		*row = m_pTR->m_Rows - m_pTR->m_CurrentRow - 1;
-		*col = m_pTR->m_CurrentColumn;
-		*width = m_pTR->m_CurrentTileWidth;
-		*height = m_pTR->m_CurrentTileHeight;
+		*row = m_pTR->mRows - m_pTR->mCurrentRow - 1;
+		*col = m_pTR->mCurrentColumn;
+		*width = m_pTR->mCurrentTileWidth;
+		*height = m_pTR->mCurrentTileHeight;
 	}
 }
 

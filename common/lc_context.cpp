@@ -109,7 +109,7 @@ lcContext::~lcContext()
 void lcContext::CreateShaderPrograms()
 {
 #ifndef LC_OPENGLES
-#define LC_SHADER_VERSION "#version 110\n"
+#define LC_SHADER_VERSION "#version 110\n#define mediump\n"
 #define LC_VERTEX_INPUT "attribute "
 #define LC_VERTEX_OUTPUT "varying "
 #define LC_PIXEL_INPUT "varying "

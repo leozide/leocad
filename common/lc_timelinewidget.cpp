@@ -146,26 +146,29 @@ void lcTimelineWidget::Update(bool Clear, bool UpdateItems)
 		QTreeWidgetItem* PieceItem = mItems.value(Piece);
 		bool UpdateItem = UpdateItems;
 
-		if (!PieceItem)
+		if (StepItem)
 		{
-			PieceItem = new QTreeWidgetItem();
-			PieceItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsDragEnabled);
-			PieceItem->setData(0, Qt::UserRole, qVariantFromValue<uintptr_t>((uintptr_t)Piece));
-			StepItem->insertChild(PieceItemIndex, PieceItem);
-			mItems[Piece] = PieceItem;
-
-			UpdateItem = true;
-		}
-		else
-		{
-			if (PieceItemIndex >= StepItem->childCount() || PieceItem != StepItem->child(PieceItemIndex))
+			if (!PieceItem)
 			{
-				QTreeWidgetItem* PieceParent = PieceItem->parent();
-
-				if (PieceParent)
-					PieceParent->removeChild(PieceItem);
-
+				PieceItem = new QTreeWidgetItem();
+				PieceItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsDragEnabled);
+				PieceItem->setData(0, Qt::UserRole, qVariantFromValue<uintptr_t>((uintptr_t)Piece));
 				StepItem->insertChild(PieceItemIndex, PieceItem);
+				mItems[Piece] = PieceItem;
+
+				UpdateItem = true;
+			}
+			else
+			{
+				if (PieceItemIndex >= StepItem->childCount() || PieceItem != StepItem->child(PieceItemIndex))
+				{
+					QTreeWidgetItem* PieceParent = PieceItem->parent();
+
+					if (PieceParent)
+						PieceParent->removeChild(PieceItem);
+
+					StepItem->insertChild(PieceItemIndex, PieceItem);
+				}
 			}
 		}
 
@@ -207,7 +210,7 @@ void lcTimelineWidget::Update(bool Clear, bool UpdateItems)
 		StepItem = topLevelItem(0);
 	}
 
-	while (Step <= LastStep)
+	while (Step <= LastStep && StepItem)
 	{
 		while (PieceItemIndex < StepItem->childCount())
 		{

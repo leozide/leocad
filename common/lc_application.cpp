@@ -147,7 +147,10 @@ void lcApplication::ParseIntegerArgument(int* CurArg, int argc, char* argv[], in
 		if ((sscanf(argv[(*CurArg)], "%d", &val) == 1) && (val > 0))
 			*Value = val;
 		else
+		{
+			*Value = 0;
 			printf("Invalid value specified for the %s argument.", argv[(*CurArg) - 1]);
+		}
 	}
 	else
 	{

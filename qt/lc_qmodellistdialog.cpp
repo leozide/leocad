@@ -1,3 +1,4 @@
+#include "lc_global.h"
 #include "lc_qmodellistdialog.h"
 #include "ui_lc_qmodellistdialog.h"
 #include "project.h"

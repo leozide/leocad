@@ -193,6 +193,9 @@ void lcQPropertiesDialog::colorClicked()
 		title = tr("Select Ambient Light Color");
 	}
 
+	if (!color)
+		return;
+
 	QColor oldColor = QColor(color[0] * 255, color[1] * 255, color[2] * 255);
 	QColor newColor = QColorDialog::getColor(oldColor, this, title);
 

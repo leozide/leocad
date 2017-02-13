@@ -1,3 +1,4 @@
+#include "lc_global.h"
 #include "lc_qfinddialog.h"
 #include "ui_lc_qfinddialog.h"
 #include "lc_mainwindow.h"

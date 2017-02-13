@@ -632,8 +632,7 @@ void View::OnDraw()
 
 		mContext->SetLineWidth(1.0f);
 
-		if (Preferences.mDrawGridStuds || Preferences.mDrawGridLines)
-			DrawGrid();
+		DrawGrid();
 
 		if (Preferences.mDrawAxes)
 			DrawAxes();
@@ -1299,6 +1298,8 @@ void View::DrawRotateViewOverlay()
 void View::DrawGrid()
 {
 	const lcPreferences& Preferences = lcGetPreferences();
+	if (!Preferences.mDrawGridStuds && !Preferences.mDrawGridLines)
+		return;
 
 	mContext->SetWorldMatrix(lcMatrix44Identity());
 

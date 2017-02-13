@@ -143,7 +143,7 @@ void lcQPropertiesTreeDelegate::paint(QPainter *painter, const QStyleOptionViewI
 
 	opt.state &= ~QStyle::State_HasFocus;
 
-	if (index.column() == 1)
+	if (index.column() == 1 && m_treeWidget)
 	{
 		QTreeWidgetItem *item = m_treeWidget->indexToItem(index);
 		if (m_editedItem && m_editedItem == item)

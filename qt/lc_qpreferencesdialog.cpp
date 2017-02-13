@@ -166,6 +166,8 @@ void lcQPreferencesDialog::colorClicked()
 		title = tr("Select Grid Line Color");
 		dialogOptions = 0;
 	}
+	else
+		return;
 
 	QColor oldColor = QColor(LC_RGBA_RED(*color), LC_RGBA_GREEN(*color), LC_RGBA_BLUE(*color), LC_RGBA_ALPHA(*color));
 	QColor newColor = QColorDialog::getColor(oldColor, this, title, dialogOptions);

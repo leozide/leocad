@@ -1722,7 +1722,7 @@ void Project::ExportWavefront(const QString& FileName)
 	{
 		lcColor* Color = &gColorList[ColorIdx];
 		if (Color->Translucent)
-			fprintf(mat, "newmtl %s\nD 0.2\nKd %.2f %.2f %.2f\n\n", Color->SafeName, Color->Value[0], Color->Value[1], Color->Value[2]);
+			fprintf(mat, "newmtl %s\nKd %.2f %.2f %.2f\nD %.2f\n\n", Color->SafeName, Color->Value[0], Color->Value[1], Color->Value[2], Color->Value[3]);
 		else
 			fprintf(mat, "newmtl %s\nKd %.2f %.2f %.2f\n\n", Color->SafeName, Color->Value[0], Color->Value[1], Color->Value[2]);
 	}

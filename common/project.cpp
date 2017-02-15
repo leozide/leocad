@@ -2,6 +2,7 @@
 #include "lc_math.h"
 #include "lc_mesh.h"
 #include <locale.h>
+#include <string.h>
 #include "pieceinf.h"
 #include "camera.h"
 #include "project.h"
@@ -1717,11 +1718,14 @@ void Project::ExportWavefront(const QString& FileName)
 	OBJFile.WriteLine(Line);
 
 	FILE* mat = fopen(buf, "wt");
-	fputs("# Colors used by LeoCAD\n# You need to add transparency values\n#\n\n", mat);
+	fputs("# Colors used by LeoCAD\n\n", mat);
 	for (int ColorIdx = 0; ColorIdx < gColorList.GetSize(); ColorIdx++)
 	{
 		lcColor* Color = &gColorList[ColorIdx];
-		fprintf(mat, "newmtl %s\nKd %.2f %.2f %.2f\n\n", Color->SafeName, Color->Value[0], Color->Value[1], Color->Value[2]);
+		if (Color->Translucent)
+			fprintf(mat, "newmtl %s\nD 0.2\nKd %.2f %.2f %.2f\n\n", Color->SafeName, Color->Value[0], Color->Value[1], Color->Value[2]);
+		else
+			fprintf(mat, "newmtl %s\nKd %.2f %.2f %.2f\n\n", Color->SafeName, Color->Value[0], Color->Value[1], Color->Value[2]);
 	}
 	fclose(mat);
 

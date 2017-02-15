@@ -2,7 +2,6 @@
 #include "lc_math.h"
 #include "lc_mesh.h"
 #include <locale.h>
-#include <string.h>
 #include "pieceinf.h"
 #include "camera.h"
 #include "project.h"

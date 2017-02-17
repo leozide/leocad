@@ -19,6 +19,7 @@
 #include "lc_qminifigdialog.h"
 #include "lc_qgroupdialog.h"
 #include "lc_qeditgroupsdialog.h"
+#include "lc_selectbycolordialog.h"
 #include "lc_qutils.h"
 
 void lcModelProperties::LoadDefaults()
@@ -1852,9 +1853,15 @@ lcVector3 lcModel::SnapPosition(const lcVector3& Distance) const
 		float Leftover = NewDistance[0] - (SnapXY * i);
 
 		if (Leftover > SnapXY / 2)
+		{
+			Leftover -= SnapXY;
 			i++;
+		}
 		else if (Leftover < -SnapXY / 2)
+		{
+			Leftover += SnapXY;
 			i--;
+		}
 
 		NewDistance[0] = SnapXY * i;
 
@@ -1862,9 +1869,15 @@ lcVector3 lcModel::SnapPosition(const lcVector3& Distance) const
 		Leftover = NewDistance[1] - (SnapXY * i);
 
 		if (Leftover > SnapXY / 2)
+		{
+			Leftover -= SnapXY;
 			i++;
+		}
 		else if (Leftover < -SnapXY / 2)
+		{
+			Leftover += SnapXY;
 			i--;
+		}
 
 		NewDistance[1] = SnapXY * i;
 	}
@@ -1876,9 +1889,15 @@ lcVector3 lcModel::SnapPosition(const lcVector3& Distance) const
 		float Leftover = NewDistance[2] - (SnapZ * i);
 
 		if (Leftover > SnapZ / 2)
+		{
+			Leftover -= SnapZ;
 			i++;
+		}
 		else if (Leftover < -SnapZ / 2)
+		{
+			Leftover += SnapZ;
 			i--;
+		}
 
 		NewDistance[2] = SnapZ * i;
 	}
@@ -3838,6 +3857,40 @@ void lcModel::ShowSelectByNameDialog()
 		return;
 
 	SetSelectionAndFocus(Dialog.mObjects, NULL, 0);
+}
+
+void lcModel::ShowSelectByColorDialog()
+{
+	if (mPieces.IsEmpty())
+	{
+		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Nothing to select."));
+		return;
+	}
+
+	int ColorIndex = gMainWindow->mColorIndex;
+
+	lcObject* Focus = GetFocusObject();
+
+	if (Focus && Focus->IsPiece())
+		ColorIndex = ((lcPiece*)Focus)->mColorIndex;
+
+	lcSelectByColorDialog Dialog(gMainWindow, ColorIndex);
+
+	if (Dialog.exec() != QDialog::Accepted)
+		return;
+
+	ColorIndex = Dialog.mColorIndex;
+	lcArray<lcObject*> Selection;
+
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+	{
+		lcPiece* Piece = mPieces[PieceIdx];
+
+		if (Piece->IsVisible(mCurrentStep) && Piece->mColorIndex == ColorIndex)
+			Selection.Add(Piece);
+	}
+
+	SetSelectionAndFocus(Selection, NULL, 0);
 }
 
 void lcModel::ShowArrayDialog()

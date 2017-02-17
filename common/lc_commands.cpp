@@ -228,6 +228,13 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 		QT_TRANSLATE_NOOP("Status", "Select objects by name"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
+	// LC_EDIT_SELECT_BY_COLOR
+	{
+		QT_TRANSLATE_NOOP("Action", "Edit.SelectByColor"),
+		QT_TRANSLATE_NOOP("Menu", "Select by Col&or..."),
+		QT_TRANSLATE_NOOP("Status", "Select pieces by color"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
 	// LC_EDIT_LOCK_X
 	{
 		QT_TRANSLATE_NOOP("Action", "Edit.Lock.LockX"),

@@ -311,6 +311,7 @@ public:
 
 	void ShowPropertiesDialog();
 	void ShowSelectByNameDialog();
+	void ShowSelectByColorDialog();
 	void ShowArrayDialog();
 	void ShowMinifigDialog();
 	void UpdateInterface();

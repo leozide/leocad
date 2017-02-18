@@ -1,6 +1,6 @@
 #include "lc_global.h"
 #include "lc_profile.h"
-#include "lc_application.h"
+#include "lc_context.h"
 #include "image.h"
 #include "lc_model.h"
 #include "project.h"
@@ -58,7 +58,7 @@ lcProfileEntry gProfileEntries[LC_NUM_PROFILE_KEYS] =
 {
 	lcProfileEntry("Settings", "FixedAxes", false),                                  // LC_PROFILE_FIXED_AXES
 	lcProfileEntry("Settings", "LineWidth", 1.0f),                                   // LC_PROFILE_LINE_WIDTH
-	lcProfileEntry("Settings", "LightingMode", LC_LIGHTING_FLAT),                    // LC_PROFILE_LIGHTING_MODE
+	lcProfileEntry("Settings", "LightingMode", LC_LIGHTING_UNLIT),                   // LC_PROFILE_LIGHTING_MODE
 	lcProfileEntry("Settings", "DrawAxes", 0),                                       // LC_PROFILE_DRAW_AXES
 	lcProfileEntry("Settings", "DrawEdgeLines", 1),                                  // LC_PROFILE_DRAW_EDGE_LINES
 	lcProfileEntry("Settings", "GridStuds", 1),                                      // LC_PROFILE_GRID_STUDS

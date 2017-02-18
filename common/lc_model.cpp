@@ -1117,14 +1117,12 @@ void lcModel::DrawBackground(lcGLWidget* Widget)
 
 	glDepthMask(GL_FALSE);
 	glDisable(GL_DEPTH_TEST);
-#ifndef LC_OPENGLES
-	glDisable(GL_LIGHTING);
-#endif
 
 	float ViewWidth = (float)Widget->mWidth;
 	float ViewHeight = (float)Widget->mHeight;
 
 	lcContext* Context = Widget->mContext;
+	Context->SetLightingMode(LC_LIGHTING_UNLIT);
 	Context->SetWorldMatrix(lcMatrix44Identity());
 	Context->SetViewMatrix(lcMatrix44Translation(lcVector3(0.375, 0.375, 0.0)));
 	Context->SetProjectionMatrix(lcMatrix44Ortho(0.0f, ViewWidth, 0.0f, ViewHeight, -1.0f, 1.0f));
@@ -1148,7 +1146,7 @@ void lcModel::DrawBackground(lcGLWidget* Widget)
 
 		Context->SetProgram(LC_PROGRAM_VERTEX_COLOR);
 		Context->SetVertexBufferPointer(Verts);
-		Context->SetVertexFormat(0, 2, 0, 4);
+		Context->SetVertexFormat(0, 2, 0, 0, 4);
 
 		Context->DrawPrimitives(GL_TRIANGLE_FAN, 0, 4);
 
@@ -1183,7 +1181,7 @@ void lcModel::DrawBackground(lcGLWidget* Widget)
 
 		Context->SetProgram(LC_PROGRAM_TEXTURE);
 		Context->SetVertexBufferPointer(Verts);
-		Context->SetVertexFormat(0, 2, 2, 0);
+		Context->SetVertexFormat(0, 2, 0, 2, 0);
 
 		Context->DrawPrimitives(GL_TRIANGLE_FAN, 0, 4);
 

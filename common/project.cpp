@@ -787,13 +787,12 @@ void Project::Export3DStudio(const QString& FileName)
 
 		File.WriteU16(Mesh->mNumVertices);
 
-		float* Verts = (float*)Mesh->mVertexData;
+		lcVertex* Verts = (lcVertex*)Mesh->mVertexData;
 		const lcMatrix44& ModelWorld = ModelParts[PartIdx].WorldMatrix;
 
 		for (int VertexIdx = 0; VertexIdx < Mesh->mNumVertices; VertexIdx++)
 		{
-			lcVector3 Pos(Verts[VertexIdx * 3], Verts[VertexIdx * 3 + 1], Verts[VertexIdx * 3 + 2]);
-			Pos = lcMul31(Pos, ModelWorld);
+			lcVector3 Pos = lcMul31(Verts[VertexIdx].Position, ModelWorld);
 			File.WriteFloat(Pos[0]);
 			File.WriteFloat(Pos[1]);
 			File.WriteFloat(Pos[2]);
@@ -1736,11 +1735,11 @@ void Project::ExportWavefront(const QString& FileName)
 			continue;
 
 		const lcMatrix44& ModelWorld = ModelParts[PartIdx].WorldMatrix;
-		float* Verts = (float*)Mesh->mVertexData;
+		lcVertex* Verts = (lcVertex*)Mesh->mVertexData;
 
-		for (int i = 0; i < Mesh->mNumVertices * 3; i += 3)
+		for (int VertexIdx = 0; VertexIdx < Mesh->mNumVertices; VertexIdx++)
 		{
-			lcVector3 Vertex = lcMul31(lcVector3(Verts[i], Verts[i+1], Verts[i+2]), ModelWorld);
+			lcVector3 Vertex = lcMul31(Verts[VertexIdx].Position, ModelWorld);
 			sprintf(Line, "v %.2f %.2f %.2f\n", Vertex[0], Vertex[1], Vertex[2]);
 			OBJFile.WriteLine(Line);
 		}

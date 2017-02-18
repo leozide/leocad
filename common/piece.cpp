@@ -529,7 +529,7 @@ void lcPiece::DrawInterface(lcContext* Context) const
 		Context->SetInterfaceColor(LC_COLOR_SELECTED);
 
 	Context->SetVertexBufferPointer(Verts);
-	Context->SetVertexFormat(0, 3, 0, 0);
+	Context->SetVertexFormat(0, 3, 0, 0, 0);
 
 	Context->DrawPrimitives(GL_LINES, 0, 48);
 
@@ -550,7 +550,7 @@ void lcPiece::DrawInterface(lcContext* Context) const
 		Context->SetWorldMatrix(lcMul(mPivotMatrix, mModelWorld));
 
 		Context->SetVertexBufferPointer(Verts);
-		Context->SetVertexFormat(0, 3, 0, 0);
+		Context->SetVertexFormat(0, 3, 0, 0, 0);
 		Context->SetIndexBufferPointer(Indices);
 
 		Context->DrawIndexedPrimitives(GL_LINES, 24, GL_UNSIGNED_SHORT, 0);
@@ -588,7 +588,7 @@ void lcPiece::DrawInterface(lcContext* Context) const
 			Context->SetWorldMatrix(lcMul(mControlPoints[ControlPointIdx].Transform, mModelWorld));
 
 			Context->SetVertexBufferPointer(Verts);
-			Context->SetVertexFormat(0, 3, 0, 0);
+			Context->SetVertexFormat(0, 3, 0, 0, 0);
 			Context->SetIndexBufferPointer(Indices);
 
 			if (IsFocused(LC_PIECE_SECTION_CONTROL_POINT_1 + ControlPointIdx))

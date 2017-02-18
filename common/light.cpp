@@ -370,7 +370,7 @@ void lcLight::DrawSpotLight(lcContext* Context) const
 	};
 
 	Context->SetVertexBufferPointer(Verts);
-	Context->SetVertexFormat(0, 3, 0, 0);
+	Context->SetVertexFormat(0, 3, 0, 0, 0);
 	Context->SetIndexBufferPointer(Indices);
 
 	float LineWidth = lcGetPreferences().mLineWidth;
@@ -521,7 +521,7 @@ void lcLight::DrawPointLight(lcContext* Context) const
 		Context->SetInterfaceColor(LC_COLOR_LIGHT);
 
 	Context->SetVertexBufferPointer(Vertices);
-	Context->SetVertexFormat(0, 3, 0, 0);
+	Context->SetVertexFormat(0, 3, 0, 0, 0);
 	Context->SetIndexBufferPointer(Indices);
 	Context->DrawIndexedPrimitives(GL_TRIANGLES, NumIndices, GL_UNSIGNED_SHORT, 0);
 }

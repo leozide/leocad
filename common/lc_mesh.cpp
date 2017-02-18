@@ -78,17 +78,17 @@ void lcMesh::CreateBox()
 	mBoundingBox.Min = Min;
 	mBoundingBox.Max = Max;
 
-	float* Verts = (float*)mVertexData;
+	lcVertex* Verts = (lcVertex*)mVertexData;
 	lcuint16* Indices = (lcuint16*)mIndexData;
 
-	*Verts++ = Min[0]; *Verts++ = Min[1]; *Verts++ = Min[2];
-	*Verts++ = Min[0]; *Verts++ = Max[1]; *Verts++ = Min[2];
-	*Verts++ = Max[0]; *Verts++ = Max[1]; *Verts++ = Min[2];
-	*Verts++ = Max[0]; *Verts++ = Min[1]; *Verts++ = Min[2];
-	*Verts++ = Min[0]; *Verts++ = Min[1]; *Verts++ = Max[2];
-	*Verts++ = Min[0]; *Verts++ = Max[1]; *Verts++ = Max[2];
-	*Verts++ = Max[0]; *Verts++ = Max[1]; *Verts++ = Max[2];
-	*Verts++ = Max[0]; *Verts++ = Min[1]; *Verts++ = Max[2];
+	Verts[0].Position = lcVector3(Min[0], Min[1], Min[2]);
+	Verts[1].Position = lcVector3(Min[0], Max[1], Min[2]);
+	Verts[2].Position = lcVector3(Max[0], Max[1], Min[2]);
+	Verts[3].Position = lcVector3(Max[0], Min[1], Min[2]);
+	Verts[4].Position = lcVector3(Min[0], Min[1], Max[2]);
+	Verts[5].Position = lcVector3(Min[0], Max[1], Max[2]);
+	Verts[6].Position = lcVector3(Max[0], Max[1], Max[2]);
+	Verts[7].Position = lcVector3(Max[0], Min[1], Max[2]);
 
 	lcMeshSection* Section = &mLods[LC_MESH_LOD_HIGH].Sections[0];
 	Section->ColorIndex = gDefaultColor;
@@ -139,7 +139,7 @@ bool lcMesh::MinIntersectDist(const lcVector3& Start, const lcVector3& End, floa
 	if (!lcBoundingBoxRayIntersectDistance(mBoundingBox.Min, mBoundingBox.Max, Start, End, &Distance, NULL) || (Distance >= MinDistance))
 		return false;
 
-	float* Verts = (float*)mVertexData;
+	lcVertex* Verts = (lcVertex*)mVertexData;
 	bool Hit = false;
 	lcVector3 Intersection;
 
@@ -154,12 +154,9 @@ bool lcMesh::MinIntersectDist(const lcVector3& Start, const lcVector3& End, floa
 
 		for (int Idx = 0; Idx < Section->NumIndices; Idx += 3)
 		{
-			float* p1 = Verts + Indices[Idx + 0] * 3;
-			float* p2 = Verts + Indices[Idx + 1] * 3;
-			float* p3 = Verts + Indices[Idx + 2] * 3;
-			lcVector3 v1(p1[0], p1[1], p1[2]);
-			lcVector3 v2(p2[0], p2[1], p2[2]);
-			lcVector3 v3(p3[0], p3[1], p3[2]);
+			const lcVector3& v1 = Verts[Indices[Idx]].Position;
+			const lcVector3& v2 = Verts[Indices[Idx + 1]].Position;
+			const lcVector3& v3 = Verts[Indices[Idx + 2]].Position;
 
 			if (lcLineTriangleMinIntersection(v1, v2, v3, Start, End, &MinDistance, &Intersection))
 				Hit = true;
@@ -180,7 +177,7 @@ bool lcMesh::MinIntersectDist(const lcVector3& Start, const lcVector3& End, floa
 template<typename IndexType>
 bool lcMesh::IntersectsPlanes(const lcVector4 Planes[6])
 {
-	float* Verts = (float*)mVertexData;
+	lcVertex* Verts = (lcVertex*)mVertexData;
 
 	for (int SectionIdx = 0; SectionIdx < mLods[LC_MESH_LOD_HIGH].NumSections; SectionIdx++)
 	{
@@ -192,7 +189,7 @@ bool lcMesh::IntersectsPlanes(const lcVector4 Planes[6])
 		IndexType* Indices = (IndexType*)mIndexData + Section->IndexOffset / sizeof(IndexType);
 
 		for (int Idx = 0; Idx < Section->NumIndices; Idx += 3)
-			if (lcTriangleIntersectsPlanes(&Verts[Indices[Idx]*3], &Verts[Indices[Idx+1]*3], &Verts[Indices[Idx+2]*3], Planes))
+			if (lcTriangleIntersectsPlanes(Verts[Indices[Idx]].Position, Verts[Indices[Idx+1]].Position, Verts[Indices[Idx+2]].Position, Planes))
 				return true;
 	}
 
@@ -215,7 +212,7 @@ void lcMesh::ExportPOVRay(lcFile& File, const char* MeshName, const char** Color
 	sprintf(Line, "#declare lc_%s = union {\n", MeshName);
 	File.WriteLine(Line);
 
-	float* Verts = (float*)mVertexData;
+	lcVertex* Verts = (lcVertex*)mVertexData;
 
 	for (int SectionIdx = 0; SectionIdx < mLods[LC_MESH_LOD_HIGH].NumSections; SectionIdx++)
 	{
@@ -230,10 +227,11 @@ void lcMesh::ExportPOVRay(lcFile& File, const char* MeshName, const char** Color
 
 		for (int Idx = 0; Idx < Section->NumIndices; Idx += 3)
 		{
-			sprintf(Line, "  triangle { <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f> }\n",
-				-Verts[Indices[Idx+0]*3+1] / 25.0f, -Verts[Indices[Idx+0]*3] / 25.0f, Verts[Indices[Idx+0]*3+2] / 25.0f,
-				-Verts[Indices[Idx+1]*3+1] / 25.0f, -Verts[Indices[Idx+1]*3] / 25.0f, Verts[Indices[Idx+1]*3+2] / 25.0f,
-				-Verts[Indices[Idx+2]*3+1] / 25.0f, -Verts[Indices[Idx+2]*3] / 25.0f, Verts[Indices[Idx+2]*3+2] / 25.0f);
+			lcVector3& v1 = Verts[Indices[Idx]].Position;
+			lcVector3& v2 = Verts[Indices[Idx + 1]].Position;
+			lcVector3& v3 = Verts[Indices[Idx + 2]].Position;
+
+			sprintf(Line, "  triangle { <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f> }\n", -v1.y / 25.0f, -v1.x / 25.0f, v1.z / 25.0f, -v2.y / 25.0f, -v2.x / 25.0f, v2.z / 25.0f, -v3.y / 25.0f, -v3.x / 25.0f, v3.z / 25.0f);
 			File.WriteLine(Line);
 		}
 
@@ -355,7 +353,7 @@ bool lcMesh::FileLoad(lcMemFile& File)
 		}
 	}
 
-	File.ReadFloats((float*)mVertexData, 3 * mNumVertices + 5 * mNumTexturedVertices);
+	File.ReadBuffer(mVertexData, mNumVertices * sizeof(lcVertex) + mNumTexturedVertices * sizeof(lcVertexTextured));
 	if (mIndexType == GL_UNSIGNED_SHORT)
 		File.ReadU16((lcuint16*)mIndexData, mIndexDataSize / 2);
 	else
@@ -403,7 +401,7 @@ bool lcMesh::FileSave(lcMemFile& File)
 		}
 	}
 
-	File.WriteFloats((float*)mVertexData, 3 * mNumVertices + 5 * mNumTexturedVertices);
+	File.WriteBuffer(mVertexData, mNumVertices * sizeof(lcVertex) + mNumTexturedVertices * sizeof(lcVertexTextured));
 	if (mIndexType == GL_UNSIGNED_SHORT)
 		File.WriteU16((lcuint16*)mIndexData, mIndexDataSize / 2);
 	else

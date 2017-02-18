@@ -1648,10 +1648,10 @@ inline void lcPolygonPlaneClip(lcVector3* InPoints, int NumInPoints, lcVector3* 
 }
 
 // Return true if a polygon intersects a set of planes.
-inline bool lcTriangleIntersectsPlanes(float* p1, float* p2, float* p3, const lcVector4 Planes[6])
+inline bool lcTriangleIntersectsPlanes(const float* p1, const float* p2, const float* p3, const lcVector4 Planes[6])
 {
 	const int NumPlanes = 6;
-	float* Points[3] = { p1, p2, p3 };
+	const float* Points[3] = { p1, p2, p3 };
 	int Outcodes[3] = { 0, 0, 0 }, i;
 	int NumPoints = 3;
 

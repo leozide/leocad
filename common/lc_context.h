@@ -60,6 +60,13 @@ public:
 	};
 };
 
+enum lcLightingMode : int
+{
+	LC_LIGHTING_UNLIT,
+	LC_LIGHTING_FAKE,
+	LC_LIGHTING_FULL
+};
+
 enum lcProgramType
 {
 	LC_PROGRAM_SIMPLE,
@@ -70,8 +77,9 @@ enum lcProgramType
 
 enum lcProgramAttrib
 {
-	LC_ATTRIB_POSITION, 
-	LC_ATTRIB_TEXCOORD, 
+	LC_ATTRIB_POSITION,
+	LC_ATTRIB_NORMAL,
+	LC_ATTRIB_TEXCOORD,
 	LC_ATTRIB_COLOR
 };
 
@@ -120,6 +128,7 @@ public:
 		mViewProjectionMatrixDirty = true;
 	}
 
+	void SetLightingMode(lcLightingMode LightingMode);
 	void SetProgram(lcProgramType ProgramType);
 	void SetViewport(int x, int y, int Width, int Height);
 	void SetLineWidth(float LineWidth);
@@ -155,7 +164,7 @@ public:
 	void SetIndexBuffer(lcIndexBuffer IndexBuffer);
 	void SetIndexBufferPointer(const void* IndexBuffer);
 
-	void SetVertexFormat(int BufferOffset, int PositionSize, int TexCoordSize, int ColorSize);
+	void SetVertexFormat(int BufferOffset, int PositionSize, int NormalSize, int TexCoordSize, int ColorSize);
 	void DrawPrimitives(GLenum Mode, GLint First, GLsizei Count);
 	void DrawIndexedPrimitives(GLenum Mode, GLsizei Count, GLenum Type, int Offset);
 
@@ -176,7 +185,9 @@ protected:
 	char* mIndexBufferPointer;
 	char* mVertexBufferOffset;
 
+	lcLightingMode mLightingMode;
 	lcProgramType mProgramType; 
+	bool mNormalEnabled;
 	bool mTexCoordEnabled;
 	bool mColorEnabled;
 

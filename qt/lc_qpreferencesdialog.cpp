@@ -46,7 +46,7 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget *parent, void *data) :
 	ui->gridLines->setChecked(options->Preferences.mDrawGridLines);
 	ui->gridLineSpacing->setText(QString::number(options->Preferences.mGridLineSpacing));
 	ui->axisIcon->setChecked(options->Preferences.mDrawAxes);
-	ui->enableLighting->setChecked(options->Preferences.mLightingMode != LC_LIGHTING_FLAT);
+	ui->enableLighting->setChecked(options->Preferences.mLightingMode != LC_LIGHTING_UNLIT);
 
 	QPixmap pix(12, 12);
 
@@ -112,7 +112,7 @@ void lcQPreferencesDialog::accept()
 	options->Preferences.mGridLineSpacing = gridLineSpacing;
 
 	options->Preferences.mDrawAxes = ui->axisIcon->isChecked();
-	options->Preferences.mLightingMode = ui->enableLighting->isChecked() ? LC_LIGHTING_FULL : LC_LIGHTING_FLAT;
+	options->Preferences.mLightingMode = ui->enableLighting->isChecked() ? LC_LIGHTING_FULL : LC_LIGHTING_UNLIT;
 
 	QDialog::accept();
 }

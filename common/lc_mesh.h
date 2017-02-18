@@ -4,7 +4,7 @@
 #include "lc_math.h"
 
 #define LC_MESH_FILE_ID      LC_FOURCC('M', 'E', 'S', 'H')
-#define LC_MESH_FILE_VERSION 0x0111
+#define LC_MESH_FILE_VERSION 0x0112
 
 enum lcMeshPrimitiveType
 {
@@ -19,11 +19,13 @@ enum lcMeshPrimitiveType
 struct lcVertex
 {
 	lcVector3 Position;
+	quint32 Normal;
 };
 
 struct lcVertexTextured
 {
 	lcVector3 Position;
+	quint32 Normal;
 	lcVector2 TexCoord;
 };
 

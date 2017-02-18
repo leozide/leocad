@@ -75,6 +75,7 @@ lcContext::lcContext()
 	mIndexBufferPointer = NULL;
 	mVertexBufferOffset = (char*)~0;
 
+	mNormalEnabled = false;
 	mTexCoordEnabled = false;
 	mColorEnabled = false;
 
@@ -99,6 +100,7 @@ lcContext::lcContext()
 	mProjectionMatrixDirty = false;
 	mViewProjectionMatrixDirty = false;
 
+	mLightingMode = LC_LIGHTING_UNLIT;
 	mProgramType = LC_NUM_PROGRAMS;
 }
 
@@ -301,20 +303,24 @@ void lcContext::SetDefaultState()
 	if (gSupportsShaderObjects)
 	{
 		glEnableVertexAttribArray(LC_ATTRIB_POSITION);
+		glDisableVertexAttribArray(LC_ATTRIB_NORMAL);
 		glDisableVertexAttribArray(LC_ATTRIB_TEXCOORD);
 		glDisableVertexAttribArray(LC_ATTRIB_COLOR);
 	}
 	else
 	{
 		glEnableClientState(GL_VERTEX_ARRAY);
+		glDisableClientState(GL_NORMAL_ARRAY);
 		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 		glDisableClientState(GL_COLOR_ARRAY);
 
 		glVertexPointer(3, GL_FLOAT, 0, NULL);
+		glNormalPointer(GL_INT_2_10_10_10_REV, 0, NULL);
 		glTexCoordPointer(2, GL_FLOAT, 0, NULL);
 		glColorPointer(4, GL_FLOAT, 0, NULL);
 	}
 
+	mNormalEnabled = false;
 	mTexCoordEnabled = false;
 	mColorEnabled = false;
 
@@ -340,8 +346,17 @@ void lcContext::SetDefaultState()
 #ifndef LC_OPENGLES
 		glMatrixMode(GL_MODELVIEW);
 		mMatrixMode = GL_MODELVIEW;
+		glShadeModel(GL_FLAT);
 #endif
 	}
+}
+
+void lcContext::SetLightingMode(lcLightingMode LightingMode)
+{
+	if (mLightingMode == LightingMode)
+		return;
+
+	mLightingMode = LightingMode;
 }
 
 void lcContext::SetProgram(lcProgramType ProgramType)
@@ -652,6 +667,9 @@ void lcContext::ClearVertexBuffer()
 		mVertexBufferObject = 0;
 	}
 
+	if (mNormalEnabled)
+		glDisableClientState(GL_NORMAL_ARRAY);
+
 	if (mTexCoordEnabled)
 		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 
@@ -692,9 +710,9 @@ void lcContext::SetVertexBufferPointer(const void* VertexBuffer)
 	mVertexBufferOffset = (char*)~0;
 }
 
-void lcContext::SetVertexFormat(int BufferOffset, int PositionSize, int TexCoordSize, int ColorSize)
+void lcContext::SetVertexFormat(int BufferOffset, int PositionSize, int NormalSize, int TexCoordSize, int ColorSize)
 {
-	int VertexSize = (PositionSize + TexCoordSize + ColorSize) * sizeof(float);
+	int VertexSize = (PositionSize + TexCoordSize + ColorSize) * sizeof(float) + NormalSize * sizeof(quint32);
 	char* VertexBufferPointer = mVertexBufferPointer + BufferOffset;
 
 	if (mVertexBufferOffset != VertexBufferPointer)
@@ -707,11 +725,47 @@ void lcContext::SetVertexFormat(int BufferOffset, int PositionSize, int TexCoord
 		mVertexBufferOffset = VertexBufferPointer;
 	}
 
+	int Offset = PositionSize * sizeof(float);
+
+	if (NormalSize && mLightingMode != LC_LIGHTING_UNLIT)
+	{
+		if (gSupportsShaderObjects)
+		{
+			glVertexAttribPointer(LC_ATTRIB_NORMAL, 4, GL_INT_2_10_10_10_REV, true, VertexSize, VertexBufferPointer + Offset);
+
+			if (!mNormalEnabled)
+			{
+				glEnableVertexAttribArray(LC_ATTRIB_NORMAL);
+				mNormalEnabled = true;
+			}
+		}
+		else
+		{
+			glNormalPointer(GL_INT_2_10_10_10_REV, VertexSize, VertexBufferPointer + Offset);
+
+			if (!mNormalEnabled)
+			{
+				glEnableClientState(GL_NORMAL_ARRAY);
+				mNormalEnabled = true;
+			}
+		}
+	}
+	else
+	{
+		if (gSupportsShaderObjects)
+			glDisableVertexAttribArray(LC_ATTRIB_NORMAL);
+		else
+			glDisableClientState(GL_NORMAL_ARRAY);
+		mNormalEnabled = false;
+	}
+
+	Offset += NormalSize * sizeof(quint32);
+
 	if (TexCoordSize)
 	{
 		if (gSupportsShaderObjects)
 		{
-			glVertexAttribPointer(LC_ATTRIB_TEXCOORD, TexCoordSize, GL_FLOAT, false, VertexSize, VertexBufferPointer + PositionSize * sizeof(float));
+			glVertexAttribPointer(LC_ATTRIB_TEXCOORD, TexCoordSize, GL_FLOAT, false, VertexSize, VertexBufferPointer + Offset);
 
 			if (!mTexCoordEnabled)
 			{
@@ -721,7 +775,7 @@ void lcContext::SetVertexFormat(int BufferOffset, int PositionSize, int TexCoord
 		}
 		else
 		{
-			glTexCoordPointer(TexCoordSize, GL_FLOAT, VertexSize, VertexBufferPointer + PositionSize * sizeof(float));
+			glTexCoordPointer(TexCoordSize, GL_FLOAT, VertexSize, VertexBufferPointer + Offset);
 
 			if (!mTexCoordEnabled)
 			{
@@ -729,6 +783,8 @@ void lcContext::SetVertexFormat(int BufferOffset, int PositionSize, int TexCoord
 				mTexCoordEnabled = true;
 			}
 		}
+
+		Offset += 2 * sizeof(float);
 	}
 	else if (mTexCoordEnabled)
 	{
@@ -743,7 +799,7 @@ void lcContext::SetVertexFormat(int BufferOffset, int PositionSize, int TexCoord
 	{
 		if (gSupportsShaderObjects)
 		{
-			glVertexAttribPointer(LC_ATTRIB_COLOR, ColorSize, GL_FLOAT, false, VertexSize, VertexBufferPointer + (PositionSize + TexCoordSize) * sizeof(float));
+			glVertexAttribPointer(LC_ATTRIB_COLOR, ColorSize, GL_FLOAT, false, VertexSize, VertexBufferPointer + Offset);
 
 			if (!mColorEnabled)
 			{
@@ -753,7 +809,7 @@ void lcContext::SetVertexFormat(int BufferOffset, int PositionSize, int TexCoord
 		}
 		else
 		{
-			glColorPointer(ColorSize, GL_FLOAT, VertexSize, VertexBufferPointer + (PositionSize + TexCoordSize) * sizeof(float));
+			glColorPointer(ColorSize, GL_FLOAT, VertexSize, VertexBufferPointer + Offset);
 
 			if (!mColorEnabled)
 			{
@@ -878,13 +934,17 @@ void lcContext::UnbindMesh()
 	if (gSupportsShaderObjects)
 	{
 		glDisableVertexAttribArray(LC_ATTRIB_TEXCOORD);
+		glDisableVertexAttribArray(LC_ATTRIB_NORMAL);
 		glDisableVertexAttribArray(LC_ATTRIB_COLOR);
 	}
 	else
 	{
 		glVertexPointer(3, GL_FLOAT, 0, NULL);
+		glNormalPointer(GL_INT_2_10_10_10_REV, 0, NULL);
 		glTexCoordPointer(2, GL_FLOAT, 0, NULL);
 	}
+
+	mNormalEnabled = false;
 	mTexCoordEnabled = false;
 	mColorEnabled = false;
 }
@@ -967,7 +1027,7 @@ void lcContext::DrawMeshSection(lcMesh* Mesh, lcMeshSection* Section)
 	if (!Texture)
 	{
 		SetProgram(LC_PROGRAM_SIMPLE);
-		SetVertexFormat(VertexBufferOffset, 3, 0, 0);
+		SetVertexFormat(VertexBufferOffset, 3, 1, 0, 0);
 
 		if (mTexture)
 		{
@@ -979,7 +1039,7 @@ void lcContext::DrawMeshSection(lcMesh* Mesh, lcMeshSection* Section)
 	{
 		VertexBufferOffset += Mesh->mNumVertices * sizeof(lcVertex);
 		SetProgram(LC_PROGRAM_TEXTURE);
-		SetVertexFormat(VertexBufferOffset, 3, 2, 0);
+		SetVertexFormat(VertexBufferOffset, 3, 1, 2, 0);
 
 		if (Texture != mTexture)
 		{
@@ -1006,7 +1066,7 @@ void lcContext::DrawMeshSection(lcMesh* Mesh, lcMeshSection* Section)
 	{
 		FlushState();
 		lcMatrix44 WorldViewProjectionMatrix = lcMul(mWorldMatrix, mViewProjectionMatrix);
-		float* VertexBuffer = (float*)Mesh->mVertexData;
+		lcVertex* VertexBuffer = (lcVertex*)Mesh->mVertexData;
 
 		if (Mesh->mIndexType == GL_UNSIGNED_SHORT)
 		{
@@ -1014,10 +1074,10 @@ void lcContext::DrawMeshSection(lcMesh* Mesh, lcMeshSection* Section)
 
 			for (int i = 0; i < Section->NumIndices; i += 4)
 			{
-				lcVector3 p1 = lcMul31(lcVector3(VertexBuffer[Indices[i] * 3], VertexBuffer[Indices[i] * 3 + 1], VertexBuffer[Indices[i] * 3 + 2]), WorldViewProjectionMatrix);
-				lcVector3 p2 = lcMul31(lcVector3(VertexBuffer[Indices[i + 1] * 3], VertexBuffer[Indices[i + 1] * 3 + 1], VertexBuffer[Indices[i + 1] * 3 + 2]), WorldViewProjectionMatrix);
-				lcVector3 p3 = lcMul31(lcVector3(VertexBuffer[Indices[i + 2] * 3], VertexBuffer[Indices[i + 2] * 3 + 1], VertexBuffer[Indices[i + 2] * 3 + 2]), WorldViewProjectionMatrix);
-				lcVector3 p4 = lcMul31(lcVector3(VertexBuffer[Indices[i + 3] * 3], VertexBuffer[Indices[i + 3] * 3 + 1], VertexBuffer[Indices[i + 3] * 3 + 2]), WorldViewProjectionMatrix);
+				lcVector3 p1 = lcMul31(VertexBuffer[Indices[i + 0]].Position, WorldViewProjectionMatrix);
+				lcVector3 p2 = lcMul31(VertexBuffer[Indices[i + 1]].Position, WorldViewProjectionMatrix);
+				lcVector3 p3 = lcMul31(VertexBuffer[Indices[i + 2]].Position, WorldViewProjectionMatrix);
+				lcVector3 p4 = lcMul31(VertexBuffer[Indices[i + 3]].Position, WorldViewProjectionMatrix);
 
 				if (((p1.y - p2.y) * (p3.x - p1.x) + (p2.x - p1.x) * (p3.y - p1.y)) * ((p1.y - p2.y) * (p4.x - p1.x) + (p2.x - p1.x) * (p4.y - p1.y)) >= 0)
 					DrawIndexedPrimitives(GL_LINES, 2, Mesh->mIndexType, IndexBufferOffset + Section->IndexOffset + i * sizeof(lcuint16));
@@ -1029,10 +1089,10 @@ void lcContext::DrawMeshSection(lcMesh* Mesh, lcMeshSection* Section)
 
 			for (int i = 0; i < Section->NumIndices; i += 4)
 			{
-				lcVector3 p1 = lcMul31(lcVector3(VertexBuffer[Indices[i] * 3], VertexBuffer[Indices[i] * 3 + 1], VertexBuffer[Indices[i] * 3 + 2]), WorldViewProjectionMatrix);
-				lcVector3 p2 = lcMul31(lcVector3(VertexBuffer[Indices[i + 1] * 3], VertexBuffer[Indices[i + 1] * 3 + 1], VertexBuffer[Indices[i + 1] * 3 + 2]), WorldViewProjectionMatrix);
-				lcVector3 p3 = lcMul31(lcVector3(VertexBuffer[Indices[i + 2] * 3], VertexBuffer[Indices[i + 2] * 3 + 1], VertexBuffer[Indices[i + 2] * 3 + 2]), WorldViewProjectionMatrix);
-				lcVector3 p4 = lcMul31(lcVector3(VertexBuffer[Indices[i + 3] * 3], VertexBuffer[Indices[i + 3] * 3 + 1], VertexBuffer[Indices[i + 3] * 3 + 2]), WorldViewProjectionMatrix);
+				lcVector3 p1 = lcMul31(VertexBuffer[Indices[i + 0]].Position, WorldViewProjectionMatrix);
+				lcVector3 p2 = lcMul31(VertexBuffer[Indices[i + 1]].Position, WorldViewProjectionMatrix);
+				lcVector3 p3 = lcMul31(VertexBuffer[Indices[i + 2]].Position, WorldViewProjectionMatrix);
+				lcVector3 p4 = lcMul31(VertexBuffer[Indices[i + 3]].Position, WorldViewProjectionMatrix);
 
 				if (((p1.y - p2.y) * (p3.x - p1.x) + (p2.x - p1.x) * (p3.y - p1.y)) * ((p1.y - p2.y) * (p4.x - p1.x) + (p2.x - p1.x) * (p4.y - p1.y)) >= 0)
 					DrawIndexedPrimitives(GL_LINES, 2, Mesh->mIndexType, IndexBufferOffset + Section->IndexOffset + i * sizeof(lcuint32));

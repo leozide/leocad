@@ -1582,7 +1582,6 @@ bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransf
 {
 	char Buffer[1024];
 	char* Line;
-	int Certified = -1;
 	bool InvertNext = false;
 	bool WindingCCW = !InvertWinding;
 
@@ -1724,11 +1723,7 @@ bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransf
 					LastToken = (*End == 0);
 					*End = 0;
 
-					if (!strcmp(Token, "CERTIFY"))
-						Certified = 1;
-					else if (!strcmp(Token, "NOCERTIFY"))
-						Certified = 0;
-					else if (!strcmp(Token, "INVERTNEXT"))
+					if (!strcmp(Token, "INVERTNEXT"))
 						InvertNext = true;
 					else if (!strcmp(Token, "CCW"))
 						WindingCCW = !InvertWinding;

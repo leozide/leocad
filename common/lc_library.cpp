@@ -1052,7 +1052,7 @@ bool lcPiecesLibrary::LoadPieceData(PieceInfo* Info)
 		lcMemFile PieceFile;
 
 		if (mZipFiles[Info->mZipFileType]->ExtractFile(Info->mZipFileIndex, PieceFile))
-			Loaded = ReadMeshData(PieceFile, lcMatrix44Identity(), 16, TextureStack, MeshData, LC_MESHDATA_SHARED, true);
+			Loaded = ReadMeshData(PieceFile, lcMatrix44Identity(), 16, false, TextureStack, MeshData, LC_MESHDATA_SHARED, true);
 
 		SaveCache = Loaded && (Info->mZipFileType == LC_ZIPFILE_OFFICIAL);
 	}
@@ -1068,7 +1068,7 @@ bool lcPiecesLibrary::LoadPieceData(PieceInfo* Info)
 		sprintf(FileName, "%sparts/%s.dat", mLibraryPath, Name);
 
 		if (PieceFile.Open(FileName, "rt"))
-			Loaded = ReadMeshData(PieceFile, lcMatrix44Identity(), 16, TextureStack, MeshData, LC_MESHDATA_SHARED, true);
+			Loaded = ReadMeshData(PieceFile, lcMatrix44Identity(), 16, false, TextureStack, MeshData, LC_MESHDATA_SHARED, true);
 	}
 	
 	if (!Loaded)
@@ -1533,12 +1533,12 @@ bool lcPiecesLibrary::LoadPrimitive(int PrimitiveIndex)
 
 		if (LowPrimitiveIndex == -1)
 		{
-			if (!ReadMeshData(PrimFile, lcMatrix44Identity(), 16, TextureStack, Primitive->mMeshData, LC_MESHDATA_SHARED, true))
+			if (!ReadMeshData(PrimFile, lcMatrix44Identity(), 16, false, TextureStack, Primitive->mMeshData, LC_MESHDATA_SHARED, true))
 				return false;
 		}
 		else
 		{
-			if (!ReadMeshData(PrimFile, lcMatrix44Identity(), 16, TextureStack, Primitive->mMeshData, LC_MESHDATA_HIGH, true))
+			if (!ReadMeshData(PrimFile, lcMatrix44Identity(), 16, false, TextureStack, Primitive->mMeshData, LC_MESHDATA_HIGH, true))
 				return false;
 
 			lcLibraryPrimitive* LowPrimitive = mPrimitives[LowPrimitiveIndex];
@@ -1548,7 +1548,7 @@ bool lcPiecesLibrary::LoadPrimitive(int PrimitiveIndex)
 
 			TextureStack.RemoveAll();
 
-			if (!ReadMeshData(PrimFile, lcMatrix44Identity(), 16, TextureStack, Primitive->mMeshData, LC_MESHDATA_LOW, true))
+			if (!ReadMeshData(PrimFile, lcMatrix44Identity(), 16, false, TextureStack, Primitive->mMeshData, LC_MESHDATA_LOW, true))
 				return false;
 		}
 	}
@@ -1569,7 +1569,7 @@ bool lcPiecesLibrary::LoadPrimitive(int PrimitiveIndex)
 		if (!PrimFile.Open(FileName, "rt"))
 			return false;
 
-		if (!ReadMeshData(PrimFile, lcMatrix44Identity(), 16, TextureStack, Primitive->mMeshData, LC_MESHDATA_SHARED, true))
+		if (!ReadMeshData(PrimFile, lcMatrix44Identity(), 16, false, TextureStack, Primitive->mMeshData, LC_MESHDATA_SHARED, true))
 			return false;
 	}
 
@@ -1578,14 +1578,18 @@ bool lcPiecesLibrary::LoadPrimitive(int PrimitiveIndex)
 	return true;
 }
 
-bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform, lcuint32 CurrentColorCode, lcArray<lcLibraryTextureMap>& TextureStack, lcLibraryMeshData& MeshData, lcMeshDataType MeshDataType, bool Optimize)
+bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform, lcuint32 CurrentColorCode, bool InvertWinding, lcArray<lcLibraryTextureMap>& TextureStack, lcLibraryMeshData& MeshData, lcMeshDataType MeshDataType, bool Optimize)
 {
 	char Buffer[1024];
 	char* Line;
+	int Certified = -1;
+	bool InvertNext = false;
+	bool WindingCCW = !InvertWinding;
 
 	while (File.ReadLine(Buffer, sizeof(Buffer)))
 	{
 		lcuint32 ColorCode, ColorCodeHex;
+		bool LastToken = false;
 		int LineType;
 
 		Line = Buffer;
@@ -1608,6 +1612,8 @@ bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransf
 			char* End = Token;
 			while (*End && *End > 32)
 				End++;
+
+			LastToken = (*End == 0);
 			*End = 0;
 
 			if (!strcmp(Token, "!TEXMAP"))
@@ -1702,6 +1708,34 @@ bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransf
 
 				continue;
 			}
+			else if (!strcmp(Token, "BFC"))
+			{
+				while (!LastToken)
+				{
+					Token = End + 1;
+
+					while (*Token && *Token <= 32)
+						Token++;
+
+					End = Token;
+					while (*End && *End > 32)
+						End++;
+
+					LastToken = (*End == 0);
+					*End = 0;
+
+					if (!strcmp(Token, "CERTIFY"))
+						Certified = 1;
+					else if (!strcmp(Token, "NOCERTIFY"))
+						Certified = 0;
+					else if (!strcmp(Token, "INVERTNEXT"))
+						InvertNext = true;
+					else if (!strcmp(Token, "CCW"))
+						WindingCCW = !InvertWinding;
+					else if (!strcmp(Token, "CW"))
+						WindingCCW = InvertWinding;
+				}
+			}
 			else if (!strcmp(Token, "!:"))
 			{
 				Token += 3;
@@ -1776,22 +1810,23 @@ bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransf
 				int PrimitiveIndex = FindPrimitiveIndex(FileName);
 				lcMatrix44 IncludeTransform(lcVector4(fm[3], fm[6], fm[9], 0.0f), lcVector4(fm[4], fm[7], fm[10], 0.0f), lcVector4(fm[5], fm[8], fm[11], 0.0f), lcVector4(fm[0], fm[1], fm[2], 1.0f));
 				IncludeTransform = lcMul(IncludeTransform, CurrentTransform);
+				bool Mirror = IncludeTransform.Determinant() < 0.0f;
 
 				if (PrimitiveIndex != -1)
 				{
 					lcLibraryPrimitive* Primitive = mPrimitives[PrimitiveIndex];
 
 					if (!Primitive->mLoaded && !LoadPrimitive(PrimitiveIndex))
-						continue;
+						break;
 
 					if (Primitive->mStud)
-						MeshData.AddMeshDataNoDuplicateCheck(Primitive->mMeshData, IncludeTransform, ColorCode, TextureMap, MeshDataType);
+						MeshData.AddMeshDataNoDuplicateCheck(Primitive->mMeshData, IncludeTransform, ColorCode, Mirror ^ InvertNext, TextureMap, MeshDataType);
 					else if (!Primitive->mSubFile)
 					{
 						if (Optimize)
-							MeshData.AddMeshData(Primitive->mMeshData, IncludeTransform, ColorCode, TextureMap, MeshDataType);
+							MeshData.AddMeshData(Primitive->mMeshData, IncludeTransform, ColorCode, Mirror ^ InvertNext, TextureMap, MeshDataType);
 						else
-							MeshData.AddMeshDataNoDuplicateCheck(Primitive->mMeshData, IncludeTransform, ColorCode, TextureMap, MeshDataType);
+							MeshData.AddMeshDataNoDuplicateCheck(Primitive->mMeshData, IncludeTransform, ColorCode, Mirror ^ InvertNext, TextureMap, MeshDataType);
 					}
 					else
 					{
@@ -1799,11 +1834,8 @@ bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransf
 						{
 							lcMemFile IncludeFile;
 
-							if (!mZipFiles[Primitive->mZipFileType]->ExtractFile(Primitive->mZipFileIndex, IncludeFile))
-								continue;
-
-							if (!ReadMeshData(IncludeFile, IncludeTransform, ColorCode, TextureStack, MeshData, MeshDataType, Optimize))
-								continue;
+							if (mZipFiles[Primitive->mZipFileType]->ExtractFile(Primitive->mZipFileIndex, IncludeFile))
+								ReadMeshData(IncludeFile, IncludeTransform, ColorCode, Mirror ^ InvertNext, TextureStack, MeshData, MeshDataType, Optimize);
 						}
 						else
 						{
@@ -1818,11 +1850,8 @@ bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransf
 							else
 								sprintf(FileName, "%sp/%s.dat", mLibraryPath, Name);
 
-							if (!IncludeFile.Open(FileName, "rt"))
-								continue;
-
-							if (!ReadMeshData(IncludeFile, IncludeTransform, ColorCode, TextureStack, MeshData, MeshDataType, Optimize))
-								continue;
+							if (IncludeFile.Open(FileName, "rt"))
+								ReadMeshData(IncludeFile, IncludeTransform, ColorCode, Mirror ^ InvertNext, TextureStack, MeshData, MeshDataType, Optimize);
 						}
 					}
 				}
@@ -1840,7 +1869,7 @@ bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransf
 							lcMemFile IncludeFile;
 
 							if (mZipFiles[Info->mZipFileType]->ExtractFile(Info->mZipFileIndex, IncludeFile))
-								ReadMeshData(IncludeFile, IncludeTransform, ColorCode, TextureStack, MeshData, MeshDataType, Optimize);
+								ReadMeshData(IncludeFile, IncludeTransform, ColorCode, Mirror ^ InvertNext, TextureStack, MeshData, MeshDataType, Optimize);
 						}
 						else
 						{
@@ -1853,7 +1882,7 @@ bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransf
 							sprintf(FileName, "%sparts/%s.dat", mLibraryPath, Name);
 
 							if (IncludeFile.Open(FileName, "rt"))
-								ReadMeshData(IncludeFile, IncludeTransform, ColorCode, TextureStack, MeshData, MeshDataType, Optimize);
+								ReadMeshData(IncludeFile, IncludeTransform, ColorCode, Mirror ^ InvertNext, TextureStack, MeshData, MeshDataType, Optimize);
 						}
 
 						break;
@@ -1862,77 +1891,75 @@ bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransf
 			} break;
 
 		case 2:
+			sscanf(Line, "%d %i %f %f %f %f %f %f", &LineType, &Dummy, &Points[0].x, &Points[0].y, &Points[0].z, &Points[1].x, &Points[1].y, &Points[1].z);
+
+			Points[0] = lcMul31(Points[0], CurrentTransform);
+			Points[1] = lcMul31(Points[1], CurrentTransform);
+
+			if (TextureMap)
 			{
-				sscanf(Line, "%d %i %f %f %f %f %f %f", &LineType, &Dummy, &Points[0].x, &Points[0].y, &Points[0].z, &Points[1].x, &Points[1].y, &Points[1].z);
+				MeshData.AddTexturedLine(MeshDataType, LineType, ColorCode, WindingCCW, *TextureMap, Points, Optimize);
 
-				Points[0] = lcMul31(Points[0], CurrentTransform);
-				Points[1] = lcMul31(Points[1], CurrentTransform);
-
-				if (TextureMap)
-				{
-					MeshData.AddTexturedLine(MeshDataType, LineType, ColorCode, *TextureMap, Points, Optimize);
-
-					if (TextureMap->Next)
-						TextureStack.RemoveIndex(TextureStack.GetSize() - 1);
-				}
-				else
-					MeshData.AddLine(MeshDataType, LineType, ColorCode, Points, Optimize);
-			} break;
+				if (TextureMap->Next)
+					TextureStack.RemoveIndex(TextureStack.GetSize() - 1);
+			}
+			else
+				MeshData.AddLine(MeshDataType, LineType, ColorCode, WindingCCW, Points, Optimize);
+			break;
 
 		case 3:
+			sscanf(Line, "%d %i %f %f %f %f %f %f %f %f %f", &LineType, &Dummy, &Points[0].x, &Points[0].y, &Points[0].z,
+			       &Points[1].x, &Points[1].y, &Points[1].z, &Points[2].x, &Points[2].y, &Points[2].z);
+
+			Points[0] = lcMul31(Points[0], CurrentTransform);
+			Points[1] = lcMul31(Points[1], CurrentTransform);
+			Points[2] = lcMul31(Points[2], CurrentTransform);
+
+			if (TextureMap)
 			{
-				sscanf(Line, "%d %i %f %f %f %f %f %f %f %f %f", &LineType, &Dummy, &Points[0].x, &Points[0].y, &Points[0].z,
-				       &Points[1].x, &Points[1].y, &Points[1].z, &Points[2].x, &Points[2].y, &Points[2].z);
+				MeshData.AddTexturedLine(MeshDataType, LineType, ColorCode, WindingCCW, *TextureMap, Points, Optimize);
 
-				Points[0] = lcMul31(Points[0], CurrentTransform);
-				Points[1] = lcMul31(Points[1], CurrentTransform);
-				Points[2] = lcMul31(Points[2], CurrentTransform);
-
-				if (TextureMap)
-				{
-					MeshData.AddTexturedLine(MeshDataType, LineType, ColorCode, *TextureMap, Points, Optimize);
-
-					if (TextureMap->Next)
-						TextureStack.RemoveIndex(TextureStack.GetSize() - 1);
-				}
-				else
-					MeshData.AddLine(MeshDataType, LineType, ColorCode, Points, Optimize);
-			} break;
+				if (TextureMap->Next)
+					TextureStack.RemoveIndex(TextureStack.GetSize() - 1);
+			}
+			else
+				MeshData.AddLine(MeshDataType, LineType, ColorCode, WindingCCW, Points, Optimize);
+			break;
 
 		case 4:
+			sscanf(Line, "%d %i %f %f %f %f %f %f %f %f %f %f %f %f", &LineType, &Dummy, &Points[0].x, &Points[0].y, &Points[0].z,
+			       &Points[1].x, &Points[1].y, &Points[1].z, &Points[2].x, &Points[2].y, &Points[2].z, &Points[3].x, &Points[3].y, &Points[3].z);
+
+			Points[0] = lcMul31(Points[0], CurrentTransform);
+			Points[1] = lcMul31(Points[1], CurrentTransform);
+			Points[2] = lcMul31(Points[2], CurrentTransform);
+			Points[3] = lcMul31(Points[3], CurrentTransform);
+
+			if (TextureMap)
 			{
-				sscanf(Line, "%d %i %f %f %f %f %f %f %f %f %f %f %f %f", &LineType, &Dummy, &Points[0].x, &Points[0].y, &Points[0].z,
-				       &Points[1].x, &Points[1].y, &Points[1].z, &Points[2].x, &Points[2].y, &Points[2].z, &Points[3].x, &Points[3].y, &Points[3].z);
+				MeshData.AddTexturedLine(MeshDataType, LineType, ColorCode, WindingCCW, *TextureMap, Points, Optimize);
 
-				Points[0] = lcMul31(Points[0], CurrentTransform);
-				Points[1] = lcMul31(Points[1], CurrentTransform);
-				Points[2] = lcMul31(Points[2], CurrentTransform);
-				Points[3] = lcMul31(Points[3], CurrentTransform);
-
-				if (TextureMap)
-				{
-					MeshData.AddTexturedLine(MeshDataType, LineType, ColorCode, *TextureMap, Points, Optimize);
-
-					if (TextureMap->Next)
-						TextureStack.RemoveIndex(TextureStack.GetSize() - 1);
-				}
-				else
-					MeshData.AddLine(MeshDataType, LineType, ColorCode, Points, Optimize);
-			} break;
+				if (TextureMap->Next)
+					TextureStack.RemoveIndex(TextureStack.GetSize() - 1);
+			}
+			else
+				MeshData.AddLine(MeshDataType, LineType, ColorCode, WindingCCW, Points, Optimize);
+			break;
 
 		case 5:
-			{
-				sscanf(Line, "%d %i %f %f %f %f %f %f %f %f %f %f %f %f", &LineType, &Dummy, &Points[0].x, &Points[0].y, &Points[0].z,
-				       &Points[1].x, &Points[1].y, &Points[1].z, &Points[2].x, &Points[2].y, &Points[2].z, &Points[3].x, &Points[3].y, &Points[3].z);
+			sscanf(Line, "%d %i %f %f %f %f %f %f %f %f %f %f %f %f", &LineType, &Dummy, &Points[0].x, &Points[0].y, &Points[0].z,
+			       &Points[1].x, &Points[1].y, &Points[1].z, &Points[2].x, &Points[2].y, &Points[2].z, &Points[3].x, &Points[3].y, &Points[3].z);
 
-				Points[0] = lcMul31(Points[0], CurrentTransform);
-				Points[1] = lcMul31(Points[1], CurrentTransform);
-				Points[2] = lcMul31(Points[2], CurrentTransform);
-				Points[3] = lcMul31(Points[3], CurrentTransform);
+			Points[0] = lcMul31(Points[0], CurrentTransform);
+			Points[1] = lcMul31(Points[1], CurrentTransform);
+			Points[2] = lcMul31(Points[2], CurrentTransform);
+			Points[3] = lcMul31(Points[3], CurrentTransform);
 
-				MeshData.AddLine(MeshDataType, LineType, ColorCode, Points, Optimize);
-			} break;
+			MeshData.AddLine(MeshDataType, LineType, ColorCode, WindingCCW, Points, Optimize);
+			break;
 		}
+
+		InvertNext = false;
 	}
 
 	return true;
@@ -2018,7 +2045,7 @@ void lcLibraryMeshData::AddIndices(lcMeshDataType MeshDataType, lcMeshPrimitiveT
 	*IndexBuffer = &Indices[CurrentSize];
 }
 
-void lcLibraryMeshData::AddLine(lcMeshDataType MeshDataType, int LineType, lcuint32 ColorCode, const lcVector3* Vertices, bool Optimize)
+void lcLibraryMeshData::AddLine(lcMeshDataType MeshDataType, int LineType, lcuint32 ColorCode, bool WindingCCW, const lcVector3* Vertices, bool Optimize)
 {
 	lcMeshPrimitiveType PrimitiveTypes[4] = { LC_MESH_LINES, LC_MESH_TRIANGLES, LC_MESH_TRIANGLES, LC_MESH_CONDITIONAL_LINES };
 	lcMeshPrimitiveType PrimitiveType = PrimitiveTypes[LineType - 2];
@@ -2073,17 +2100,35 @@ void lcLibraryMeshData::AddLine(lcMeshDataType MeshDataType, int LineType, lcuin
 	case 4:
 		if (Indices[0] != Indices[2] && Indices[0] != Indices[3] && Indices[2] != Indices[3])
 		{
-			Section->mIndices.Add(Indices[2]);
-			Section->mIndices.Add(Indices[3]);
-			Section->mIndices.Add(Indices[0]);
+			if (WindingCCW)
+			{
+				Section->mIndices.Add(Indices[2]);
+				Section->mIndices.Add(Indices[3]);
+				Section->mIndices.Add(Indices[0]);
+			}
+			else
+			{
+				Section->mIndices.Add(Indices[0]);
+				Section->mIndices.Add(Indices[3]);
+				Section->mIndices.Add(Indices[2]);
+			}
 		}
 
 	case 3:
 		if (Indices[0] != Indices[1] && Indices[0] != Indices[2] && Indices[1] != Indices[2])
 		{
-			Section->mIndices.Add(Indices[0]);
-			Section->mIndices.Add(Indices[1]);
-			Section->mIndices.Add(Indices[2]);
+			if (WindingCCW)
+			{
+				Section->mIndices.Add(Indices[0]);
+				Section->mIndices.Add(Indices[1]);
+				Section->mIndices.Add(Indices[2]);
+			}
+			else
+			{
+				Section->mIndices.Add(Indices[2]);
+				Section->mIndices.Add(Indices[1]);
+				Section->mIndices.Add(Indices[0]);
+			}
 		}
 		break;
 
@@ -2097,7 +2142,7 @@ void lcLibraryMeshData::AddLine(lcMeshDataType MeshDataType, int LineType, lcuin
 	}
 }
 
-void lcLibraryMeshData::AddTexturedLine(lcMeshDataType MeshDataType, int LineType, lcuint32 ColorCode, const lcLibraryTextureMap& Map, const lcVector3* Vertices, bool Optimize)
+void lcLibraryMeshData::AddTexturedLine(lcMeshDataType MeshDataType, int LineType, lcuint32 ColorCode, bool WindingCCW, const lcLibraryTextureMap& Map, const lcVector3* Vertices, bool Optimize)
 {
 	lcMeshPrimitiveType PrimitiveType = (LineType == 2) ? LC_MESH_TEXTURED_LINES : LC_MESH_TEXTURED_TRIANGLES;
 	lcLibraryMeshSection* Section = AddSection(MeshDataType, PrimitiveType, ColorCode, Map.Texture);
@@ -2144,16 +2189,34 @@ void lcLibraryMeshData::AddTexturedLine(lcMeshDataType MeshDataType, int LineTyp
 	case 4:
 		if (Indices[0] != Indices[2] && Indices[0] != Indices[3] && Indices[2] != Indices[3])
 		{
-			Section->mIndices.Add(Indices[2]);
-			Section->mIndices.Add(Indices[3]);
-			Section->mIndices.Add(Indices[0]);
+			if (WindingCCW)
+			{
+				Section->mIndices.Add(Indices[2]);
+				Section->mIndices.Add(Indices[3]);
+				Section->mIndices.Add(Indices[0]);
+			}
+			else
+			{
+				Section->mIndices.Add(Indices[0]);
+				Section->mIndices.Add(Indices[3]);
+				Section->mIndices.Add(Indices[2]);
+			}
 		}
 	case 3:
 		if (Indices[0] != Indices[1] && Indices[0] != Indices[2] && Indices[1] != Indices[2])
 		{
-			Section->mIndices.Add(Indices[0]);
-			Section->mIndices.Add(Indices[1]);
-			Section->mIndices.Add(Indices[2]);
+			if (WindingCCW)
+			{
+				Section->mIndices.Add(Indices[0]);
+				Section->mIndices.Add(Indices[1]);
+				Section->mIndices.Add(Indices[2]);
+			}
+			else
+			{
+				Section->mIndices.Add(Indices[2]);
+				Section->mIndices.Add(Indices[1]);
+				Section->mIndices.Add(Indices[0]);
+			}
 		}
 		break;
 	case 2:
@@ -2166,7 +2229,7 @@ void lcLibraryMeshData::AddTexturedLine(lcMeshDataType MeshDataType, int LineTyp
 	}
 }
 
-void lcLibraryMeshData::AddMeshData(const lcLibraryMeshData& Data, const lcMatrix44& Transform, lcuint32 CurrentColorCode, lcLibraryTextureMap* TextureMap, lcMeshDataType OverrideDestIndex)
+void lcLibraryMeshData::AddMeshData(const lcLibraryMeshData& Data, const lcMatrix44& Transform, lcuint32 CurrentColorCode, bool InvertWinding, lcLibraryTextureMap* TextureMap, lcMeshDataType OverrideDestIndex)
 {
 	for (int MeshDataIdx = 0; MeshDataIdx < LC_NUM_MESHDATA_TYPES; MeshDataIdx++)
 	{
@@ -2325,19 +2388,43 @@ void lcLibraryMeshData::AddMeshData(const lcLibraryMeshData& Data, const lcMatri
 
 			if (!SrcSection->mTexture)
 			{
-				for (int IndexIdx = 0; IndexIdx < SrcSection->mIndices.GetSize(); IndexIdx++)
-					DstSection->mIndices.Add(IndexRemap[SrcSection->mIndices[IndexIdx]]);
+				if (!InvertWinding || (SrcSection->mPrimitiveType != LC_MESH_TRIANGLES && SrcSection->mPrimitiveType != LC_MESH_TEXTURED_TRIANGLES))
+				{
+					for (int IndexIdx = 0; IndexIdx < SrcSection->mIndices.GetSize(); IndexIdx++)
+						DstSection->mIndices.Add(IndexRemap[SrcSection->mIndices[IndexIdx]]);
+				}
+				else
+				{
+					for (int IndexIdx = 0; IndexIdx < SrcSection->mIndices.GetSize(); IndexIdx += 3)
+					{
+						DstSection->mIndices.Add(IndexRemap[SrcSection->mIndices[IndexIdx + 2]]);
+						DstSection->mIndices.Add(IndexRemap[SrcSection->mIndices[IndexIdx + 1]]);
+						DstSection->mIndices.Add(IndexRemap[SrcSection->mIndices[IndexIdx + 0]]);
+					}
+				}
 			}
 			else
 			{
-				for (int IndexIdx = 0; IndexIdx < SrcSection->mIndices.GetSize(); IndexIdx++)
-					DstSection->mIndices.Add(TexturedIndexRemap[SrcSection->mIndices[IndexIdx]]);
+				if (!InvertWinding || (SrcSection->mPrimitiveType != LC_MESH_TRIANGLES && SrcSection->mPrimitiveType != LC_MESH_TEXTURED_TRIANGLES))
+				{
+					for (int IndexIdx = 0; IndexIdx < SrcSection->mIndices.GetSize(); IndexIdx++)
+						DstSection->mIndices.Add(TexturedIndexRemap[SrcSection->mIndices[IndexIdx]]);
+				}
+				else
+				{
+					for (int IndexIdx = 0; IndexIdx < SrcSection->mIndices.GetSize(); IndexIdx += 3)
+					{
+						DstSection->mIndices.Add(TexturedIndexRemap[SrcSection->mIndices[IndexIdx + 2]]);
+						DstSection->mIndices.Add(TexturedIndexRemap[SrcSection->mIndices[IndexIdx + 1]]);
+						DstSection->mIndices.Add(TexturedIndexRemap[SrcSection->mIndices[IndexIdx + 0]]);
+					}
+				}
 			}
 		}
 	}
 }
 
-void lcLibraryMeshData::AddMeshDataNoDuplicateCheck(const lcLibraryMeshData& Data, const lcMatrix44& Transform, lcuint32 CurrentColorCode, lcLibraryTextureMap* TextureMap, lcMeshDataType OverrideDestIndex)
+void lcLibraryMeshData::AddMeshDataNoDuplicateCheck(const lcLibraryMeshData& Data, const lcMatrix44& Transform, lcuint32 CurrentColorCode, bool InvertWinding, lcLibraryTextureMap* TextureMap, lcMeshDataType OverrideDestIndex)
 {
 	for (int MeshDataIdx = 0; MeshDataIdx < LC_NUM_MESHDATA_TYPES; MeshDataIdx++)
 	{
@@ -2438,13 +2525,37 @@ void lcLibraryMeshData::AddMeshDataNoDuplicateCheck(const lcLibraryMeshData& Dat
 
 			if (!SrcSection->mTexture)
 			{
-				for (int IndexIdx = 0; IndexIdx < SrcSection->mIndices.GetSize(); IndexIdx++)
-					DstSection->mIndices.Add(BaseIndex + SrcSection->mIndices[IndexIdx]);
+				if (!InvertWinding || (SrcSection->mPrimitiveType != LC_MESH_TRIANGLES && SrcSection->mPrimitiveType != LC_MESH_TEXTURED_TRIANGLES))
+				{
+					for (int IndexIdx = 0; IndexIdx < SrcSection->mIndices.GetSize(); IndexIdx++)
+						DstSection->mIndices.Add(BaseIndex + SrcSection->mIndices[IndexIdx]);
+				}
+				else
+				{
+					for (int IndexIdx = 0; IndexIdx < SrcSection->mIndices.GetSize(); IndexIdx += 3)
+					{
+						DstSection->mIndices.Add(BaseIndex + SrcSection->mIndices[IndexIdx + 2]);
+						DstSection->mIndices.Add(BaseIndex + SrcSection->mIndices[IndexIdx + 1]);
+						DstSection->mIndices.Add(BaseIndex + SrcSection->mIndices[IndexIdx + 0]);
+					}
+				}
 			}
 			else
 			{
-				for (int IndexIdx = 0; IndexIdx < SrcSection->mIndices.GetSize(); IndexIdx++)
-					DstSection->mIndices.Add(BaseTexturedIndex + SrcSection->mIndices[IndexIdx]);
+				if (!InvertWinding || (SrcSection->mPrimitiveType != LC_MESH_TRIANGLES && SrcSection->mPrimitiveType != LC_MESH_TEXTURED_TRIANGLES))
+				{
+					for (int IndexIdx = 0; IndexIdx < SrcSection->mIndices.GetSize(); IndexIdx++)
+						DstSection->mIndices.Add(BaseTexturedIndex + SrcSection->mIndices[IndexIdx]);
+				}
+				else
+				{
+					for (int IndexIdx = 0; IndexIdx < SrcSection->mIndices.GetSize(); IndexIdx += 3)
+					{
+						DstSection->mIndices.Add(BaseTexturedIndex + SrcSection->mIndices[IndexIdx + 2]);
+						DstSection->mIndices.Add(BaseTexturedIndex + SrcSection->mIndices[IndexIdx + 1]);
+						DstSection->mIndices.Add(BaseTexturedIndex + SrcSection->mIndices[IndexIdx + 0]);
+					}
+				}
 			}
 		}
 	}

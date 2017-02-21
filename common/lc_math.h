@@ -253,6 +253,8 @@ public:
 		return r[i];
 	}
 
+	float Determinant() const;
+
 	lcVector4 r[4];
 };
 
@@ -798,6 +800,13 @@ inline lcVector3 lcMatrix33ToEulerAngles(const lcMatrix33& RotMat)
 	return Rot;
 }
 
+inline float lcMatrix44::Determinant() const
+{
+	return r[0][0] * r[1][1] * r[2][2] + r[0][1] * r[1][2] * r[2][0] +
+	       r[0][2] * r[1][0] * r[2][1] - r[0][0] * r[1][2] * r[2][1] -
+	       r[0][1] * r[1][0] * r[2][2] - r[0][2] * r[1][1] * r[2][0];
+}
+
 inline lcMatrix44 lcMatrix44Identity()
 {
 	lcMatrix44 m;
@@ -994,12 +1003,7 @@ inline lcVector4 lcMatrix44ToAxisAngle(const lcMatrix44& m)
 	Rows[1] = lcNormalize(lcVector3(m.r[1][0], m.r[1][1], m.r[1][2]));
 	Rows[2] = lcNormalize(lcVector3(m.r[2][0], m.r[2][1], m.r[2][2]));
 
-	// Determinant should be 1 for rotation matrices.
-	float Determinant = Rows[0][0] * Rows[1][1] * Rows[2][2] + Rows[0][1] * Rows[1][2] * Rows[2][0] +
-	                    Rows[0][2] * Rows[1][0] * Rows[2][1] - Rows[0][0] * Rows[1][2] * Rows[2][1] - 
-	                    Rows[0][1] * Rows[1][0] * Rows[2][2] - Rows[0][2] * Rows[1][1] * Rows[2][0];
-
-	if (Determinant < 0.0f)
+	if (m.Determinant() < 0.0f)
 		Rows[0] *= -1.0f;
 
 	float Trace = Rows[0][0] + Rows[1][1] + Rows[2][2];

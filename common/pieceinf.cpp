@@ -91,7 +91,7 @@ void PieceInfo::SetModel(lcModel* Model, bool UpdateMesh)
 		lcArray<lcLibraryTextureMap> TextureStack;
 		PieceFile.Seek(0, SEEK_SET);
 
-		bool Ret = lcGetPiecesLibrary()->ReadMeshData(PieceFile, lcMatrix44Identity(), 16, TextureStack, MeshData, LC_MESHDATA_SHARED, true);
+		bool Ret = lcGetPiecesLibrary()->ReadMeshData(PieceFile, lcMatrix44Identity(), 16, false, TextureStack, MeshData, LC_MESHDATA_SHARED, true);
 
 		if (Ret && !MeshData.IsEmpty())
 			lcGetPiecesLibrary()->CreateMesh(this, MeshData);

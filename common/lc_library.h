@@ -80,10 +80,10 @@ public:
 	lcLibraryMeshSection* AddSection(lcMeshDataType MeshDataType, lcMeshPrimitiveType PrimitiveType, lcuint32 ColorCode, lcTexture* Texture);
 	void AddVertices(lcMeshDataType MeshDataType, int VertexCount, int* BaseVertex, lcVertex** VertexBuffer);
 	void AddIndices(lcMeshDataType MeshDataType, lcMeshPrimitiveType PrimitiveType, lcuint32 ColorCode, int IndexCount, lcuint32** IndexBuffer);
-	void AddLine(lcMeshDataType MeshDataType, int LineType, lcuint32 ColorCode, const lcVector3* Vertices, bool Optimize);
-	void AddTexturedLine(lcMeshDataType MeshDataType, int LineType, lcuint32 ColorCode, const lcLibraryTextureMap& Map, const lcVector3* Vertices, bool Optimize);
-	void AddMeshData(const lcLibraryMeshData& Data, const lcMatrix44& Transform, lcuint32 CurrentColorCode, lcLibraryTextureMap* TextureMap, lcMeshDataType OverrideDestIndex);
-	void AddMeshDataNoDuplicateCheck(const lcLibraryMeshData& Data, const lcMatrix44& Transform, lcuint32 CurrentColorCode, lcLibraryTextureMap* TextureMap, lcMeshDataType OverrideDestIndex);
+	void AddLine(lcMeshDataType MeshDataType, int LineType, lcuint32 ColorCode, bool WindingCCW, const lcVector3* Vertices, bool Optimize);
+	void AddTexturedLine(lcMeshDataType MeshDataType, int LineType, lcuint32 ColorCode, bool WindingCCW, const lcLibraryTextureMap& Map, const lcVector3* Vertices, bool Optimize);
+	void AddMeshData(const lcLibraryMeshData& Data, const lcMatrix44& Transform, lcuint32 CurrentColorCode, bool InvertWinding, lcLibraryTextureMap* TextureMap, lcMeshDataType OverrideDestIndex);
+	void AddMeshDataNoDuplicateCheck(const lcLibraryMeshData& Data, const lcMatrix44& Transform, lcuint32 CurrentColorCode, bool InvertWinding, lcLibraryTextureMap* TextureMap, lcMeshDataType OverrideDestIndex);
 	void TestQuad(int* QuadIndices, const lcVector3* Vertices);
 	void ResequenceQuad(int* QuadIndices, int a, int b, int c, int d);
 
@@ -163,7 +163,7 @@ public:
 			mNumOfficialPieces = mPieces.GetSize();
 	}
 
-	bool ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform, lcuint32 CurrentColorCode, lcArray<lcLibraryTextureMap>& TextureStack, lcLibraryMeshData& MeshData, lcMeshDataType MeshDataType, bool Optimize);
+	bool ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform, lcuint32 CurrentColorCode, bool InvertWinding, lcArray<lcLibraryTextureMap>& TextureStack, lcLibraryMeshData& MeshData, lcMeshDataType MeshDataType, bool Optimize);
 	lcMesh* CreateMesh(PieceInfo* Info, lcLibraryMeshData& MeshData);
 	void ReleaseBuffers(lcContext* Context);
 	void UpdateBuffers(lcContext* Context);

@@ -62,6 +62,23 @@ install:
     fi
 
 script:
-  - qmake -v
-  - qmake -r
-  - make
+  - qmake PREFIX=/usr -v
+  - qmake PREFIX=/usr -r
+  - make -j4
+  - if [ "$TRAVIS_OS_NAME" != "linux" ] ; then exit 0 ; fi
+  - sudo apt-get -y install checkinstall
+  - rm ./*.spec # Otherwise the next line fails
+  - sudo checkinstall --pkgname=app --pkgversion="1" --pkgrelease="1" --backup=no --fstrans=no --default --deldoc 
+  - mkdir appdir ; cd appdir
+  - dpkg -x ../app_1-1_amd64.deb . ; find .
+  - cp ../qt/leocad.desktop .
+  - sed -i -e 's|\.svg||g' leocad.desktop # Workaround
+  - cp ../resources/leocad.png .
+  - cd .. 
+  - wget -c "https://github.com/probonopd/linuxdeployqt/releases/download/3/linuxdeployqt-3-x86_64.AppImage" 
+  - chmod a+x linuxdeployqt*.AppImage 
+  - unset QTDIR; unset QT_PLUGIN_PATH ; unset LD_LIBRARY_PATH
+  - ./linuxdeployqt*.AppImage ./appdir/usr/bin/leocad -bundle-non-qt-libs
+  - ./linuxdeployqt*.AppImage ./appdir/usr/bin/leocad -appimage 
+  - curl --upload-file ./LeoCAD-*.AppImage https://transfer.sh/LeoCAD-git.$(git rev-parse --short HEAD).qt$QT_BASE-x86_64.AppImage 
+  

@@ -108,6 +108,13 @@ Requires(post): desktop-file-utils
 
 %if 0%{?mageia}
 BuildRequires: libqt4-devel
+%if 0%{?opensuse_bs}
+%ifarch x86_64
+BuildRequires: lib64uuid-devel
+%else
+BuildRequires: libuuid-devel
+%endif
+%endif
 %endif
 
 %if 0%{?mdkversion}
@@ -248,7 +255,11 @@ install -m 644 resources/leocad.svg \
 %{_datadir}/applications/leocad.desktop
 %{_datadir}/icons/hicolor/scalable/mimetypes/application-vnd.leocad.svg
 %{_datadir}/icons/hicolor/scalable/apps/leocad.svg
+%if 0%{?mdkversion} || 0%{?mageia}
+%{_mandir}/man1/leocad.1.xz
+%else
 %{_mandir}/man1/leocad.1.gz
+%endif
 
 %clean
 rm -rf $RPM_BUILD_ROOT

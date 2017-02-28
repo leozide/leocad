@@ -292,7 +292,7 @@ void MinifigWizard::OnDraw()
 
 	Scene.End();
 
-	mContext->SetProgram(LC_PROGRAM_SIMPLE);
+	mContext->SetMaterial(LC_MATERIAL_SIMPLE);
 	mContext->DrawOpaqueMeshes(Scene.mOpaqueMeshes);
 	mContext->DrawTranslucentMeshes(Scene.mTranslucentMeshes);
 

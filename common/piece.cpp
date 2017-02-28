@@ -520,7 +520,7 @@ void lcPiece::DrawInterface(lcContext* Context) const
 		{ Min[0], Min[1], Min[2] }, { Min[0], Min[1], Min[2] + Edge[2] },
 	};
 
-	Context->SetProgram(LC_PROGRAM_SIMPLE);
+	Context->SetMaterial(LC_MATERIAL_SIMPLE);
 	Context->SetWorldMatrix(mModelWorld);
 
 	if (IsFocused(LC_PIECE_SECTION_POSITION))

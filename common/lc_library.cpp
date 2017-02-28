@@ -2176,7 +2176,7 @@ void lcLibraryMeshData::AddLine(lcMeshDataType MeshDataType, int LineType, lcuin
 		if (LineType == 4)
 			TestQuad(QuadIndices, Vertices);
 
-		lcVector3 Normal = lcCross(Vertices[1] - Vertices[0], Vertices[2] - Vertices[0]);
+		lcVector3 Normal = lcNormalize(lcCross(Vertices[1] - Vertices[0], Vertices[2] - Vertices[0]));
 
 		if (!WindingCCW)
 			Normal = -Normal;
@@ -2266,7 +2266,7 @@ void lcLibraryMeshData::AddTexturedLine(lcMeshDataType MeshDataType, int LineTyp
 		if (LineType == 4)
 			TestQuad(QuadIndices, Vertices);
 
-		lcVector3 Normal = lcCross(Vertices[1] - Vertices[0], Vertices[2] - Vertices[0]);
+		lcVector3 Normal = lcNormalize(lcCross(Vertices[1] - Vertices[0], Vertices[2] - Vertices[0]));
 
 		if (!WindingCCW)
 			Normal = -Normal;
@@ -2360,7 +2360,7 @@ void lcLibraryMeshData::AddMeshData(const lcLibraryMeshData& Data, const lcMatri
 					Index = AddVertex((lcMeshDataType)MeshDataIdx, Position, true);
 				else
 				{
-					lcVector3 Normal = lcMul30(DataVertices[SrcVertexIdx].Normal, Transform);
+					lcVector3 Normal = lcNormalize(lcMul30(DataVertices[SrcVertexIdx].Normal, Transform));
 					Index = AddVertex((lcMeshDataType)MeshDataIdx, Position, Normal, true);
 				}
 
@@ -2383,7 +2383,7 @@ void lcLibraryMeshData::AddMeshData(const lcLibraryMeshData& Data, const lcMatri
 					Index = AddTexturedVertex((lcMeshDataType)MeshDataIdx, Position, TexCoord, true);
 				else
 				{
-					lcVector3 Normal = lcMul30(DataVertices[SrcVertexIdx].Normal, Transform);
+					lcVector3 Normal = lcNormalize(lcMul30(DataVertices[SrcVertexIdx].Normal, Transform));
 					Index = AddTexturedVertex((lcMeshDataType)MeshDataIdx, Position, Normal, TexCoord, true);
 				}
 
@@ -2409,7 +2409,7 @@ void lcLibraryMeshData::AddMeshData(const lcLibraryMeshData& Data, const lcMatri
 					Index = AddTexturedVertex((lcMeshDataType)MeshDataIdx, Position, SrcVertex.TexCoord, true);
 				else
 				{
-					lcVector3 Normal = lcMul30(DataVertices[SrcVertexIdx].Normal, Transform);
+					lcVector3 Normal = lcNormalize(lcMul30(DataVertices[SrcVertexIdx].Normal, Transform));
 					Index = AddTexturedVertex((lcMeshDataType)MeshDataIdx, Position, Normal, SrcVertex.TexCoord, true);
 				}
 
@@ -2514,7 +2514,7 @@ void lcLibraryMeshData::AddMeshDataNoDuplicateCheck(const lcLibraryMeshData& Dat
 				const lcLibraryMeshVertex& SrcVertex = DataVertices[SrcVertexIdx];
 				lcLibraryMeshVertex& DstVertex = Vertices.Add();
 				DstVertex.Position = lcMul31(SrcVertex.Position, Transform);
-				DstVertex.Normal = lcMul30(SrcVertex.Normal, Transform);
+				DstVertex.Normal = lcNormalize(lcMul30(SrcVertex.Normal, Transform));
 				DstVertex.NormalWeight = SrcVertex.NormalWeight;
 			}
 		}
@@ -2534,7 +2534,7 @@ void lcLibraryMeshData::AddMeshDataNoDuplicateCheck(const lcLibraryMeshData& Dat
 								   lcDot3(lcVector3(Position.x, Position.y, Position.z), TextureMap->Params[1]) + TextureMap->Params[1].w);
 
 				DstVertex.Position = Position;
-				DstVertex.Normal = lcMul30(SrcVertex.Normal, Transform);
+				DstVertex.Normal = lcNormalize(lcMul30(SrcVertex.Normal, Transform));
 				DstVertex.NormalWeight = SrcVertex.NormalWeight;
 				DstVertex.TexCoord = TexCoord;
 			}

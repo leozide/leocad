@@ -1144,7 +1144,7 @@ void lcModel::DrawBackground(lcGLWidget* Widget)
 			ViewWidth, 0.0f,       Color2[0], Color2[1], Color2[2], 1.0f
 		};
 
-		Context->SetProgram(LC_PROGRAM_VERTEX_COLOR);
+		Context->SetMaterial(LC_MATERIAL_VERTEX_COLOR);
 		Context->SetVertexBufferPointer(Verts);
 		Context->SetVertexFormat(0, 2, 0, 0, 4);
 
@@ -1179,7 +1179,7 @@ void lcModel::DrawBackground(lcGLWidget* Widget)
 			0.0f,      0.0f,       0.0f,      TileHeight
 		};
 
-		Context->SetProgram(LC_PROGRAM_TEXTURE);
+		Context->SetMaterial(LC_MATERIAL_TEXTURE);
 		Context->SetVertexBufferPointer(Verts);
 		Context->SetVertexFormat(0, 2, 0, 2, 0);
 

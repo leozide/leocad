@@ -64,15 +64,16 @@ enum lcLightingMode : int
 {
 	LC_LIGHTING_UNLIT,
 	LC_LIGHTING_FAKE,
-	LC_LIGHTING_FULL
+	LC_LIGHTING_FULL,
+	LC_NUM_LIGHTING_MODES
 };
 
-enum lcProgramType
+enum lcMaterialType
 {
-	LC_PROGRAM_SIMPLE,
-	LC_PROGRAM_TEXTURE,
-	LC_PROGRAM_VERTEX_COLOR,
-	LC_NUM_PROGRAMS
+	LC_MATERIAL_SIMPLE,
+	LC_MATERIAL_TEXTURE,
+	LC_MATERIAL_VERTEX_COLOR,
+	LC_NUM_MATERIALS
 };
 
 enum lcProgramAttrib
@@ -129,7 +130,7 @@ public:
 	}
 
 	void SetLightingMode(lcLightingMode LightingMode);
-	void SetProgram(lcProgramType ProgramType);
+	void SetMaterial(lcMaterialType MaterialType);
 	void SetViewport(int x, int y, int Width, int Height);
 	void SetLineWidth(float LineWidth);
 	void SetTextureMode(lcTextureMode TextureMode);
@@ -186,7 +187,7 @@ protected:
 	char* mVertexBufferOffset;
 
 	lcLightingMode mLightingMode;
-	lcProgramType mProgramType; 
+	lcMaterialType mMaterialType;
 	bool mNormalEnabled;
 	bool mTexCoordEnabled;
 	bool mColorEnabled;
@@ -210,7 +211,7 @@ protected:
 	GLuint mFramebufferTexture;
 	GLuint mDepthRenderbufferObject;
 
-	static lcProgram mPrograms[LC_NUM_PROGRAMS];
+	static lcProgram mPrograms[LC_NUM_LIGHTING_MODES][LC_NUM_MATERIALS];
 
 	Q_DECLARE_TR_FUNCTIONS(lcContext);
 };

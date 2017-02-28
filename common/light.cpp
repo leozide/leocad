@@ -284,7 +284,7 @@ void lcLight::UpdatePosition(lcStep Step)
 
 void lcLight::DrawInterface(lcContext* Context) const
 {
-	Context->SetProgram(LC_PROGRAM_SIMPLE);
+	Context->SetMaterial(LC_MATERIAL_SIMPLE);
 
 	if (IsPointLight())
 		DrawPointLight(Context);

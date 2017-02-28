@@ -1313,7 +1313,7 @@ void Project::ExportHTML()
 
 			Context->SetDefaultState();
 			Context->SetProjectionMatrix(ProjectionMatrix);
-			Context->SetProgram(LC_PROGRAM_SIMPLE);
+			Context->SetMaterial(LC_MATERIAL_SIMPLE);
 
 			for (lcPartsList::const_iterator PartIt = PartsList.constBegin(); PartIt != PartsList.constEnd(); PartIt++)
 			{

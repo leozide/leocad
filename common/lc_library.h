@@ -16,6 +16,21 @@ enum lcZipFileType
 	LC_NUM_ZIPFILES
 };
 
+struct lcLibraryMeshVertex
+{
+	lcVector3 Position;
+	lcVector3 Normal;
+	float NormalWeight;
+};
+
+struct lcLibraryMeshVertexTextured
+{
+	lcVector3 Position;
+	lcVector3 Normal;
+	float NormalWeight;
+	lcVector2 TexCoord;
+};
+
 class lcLibraryMeshSection
 {
 public:
@@ -78,7 +93,11 @@ public:
 	}
 
 	lcLibraryMeshSection* AddSection(lcMeshDataType MeshDataType, lcMeshPrimitiveType PrimitiveType, lcuint32 ColorCode, lcTexture* Texture);
-	void AddVertices(lcMeshDataType MeshDataType, int VertexCount, int* BaseVertex, lcVertex** VertexBuffer);
+	lcuint32 AddVertex(lcMeshDataType MeshDataType, const lcVector3& Position, bool Optimize);
+	lcuint32 AddVertex(lcMeshDataType MeshDataType, const lcVector3& Position, const lcVector3& Normal, bool Optimize);
+	lcuint32 AddTexturedVertex(lcMeshDataType MeshDataType, const lcVector3& Position, const lcVector2& TexCoord, bool Optimize);
+	lcuint32 AddTexturedVertex(lcMeshDataType MeshDataType, const lcVector3& Position, const lcVector3& Normal, const lcVector2& TexCoord, bool Optimize);
+	void AddVertices(lcMeshDataType MeshDataType, int VertexCount, int* BaseVertex, lcLibraryMeshVertex** VertexBuffer);
 	void AddIndices(lcMeshDataType MeshDataType, lcMeshPrimitiveType PrimitiveType, lcuint32 ColorCode, int IndexCount, lcuint32** IndexBuffer);
 	void AddLine(lcMeshDataType MeshDataType, int LineType, lcuint32 ColorCode, bool WindingCCW, const lcVector3* Vertices, bool Optimize);
 	void AddTexturedLine(lcMeshDataType MeshDataType, int LineType, lcuint32 ColorCode, bool WindingCCW, const lcLibraryTextureMap& Map, const lcVector3* Vertices, bool Optimize);
@@ -88,8 +107,8 @@ public:
 	void ResequenceQuad(int* QuadIndices, int a, int b, int c, int d);
 
 	lcArray<lcLibraryMeshSection*> mSections[LC_NUM_MESHDATA_TYPES];
-	lcArray<lcVertex> mVertices[LC_NUM_MESHDATA_TYPES];
-	lcArray<lcVertexTextured> mTexturedVertices[LC_NUM_MESHDATA_TYPES];
+	lcArray<lcLibraryMeshVertex> mVertices[LC_NUM_MESHDATA_TYPES];
+	lcArray<lcLibraryMeshVertexTextured> mTexturedVertices[LC_NUM_MESHDATA_TYPES];
 };
 
 class lcLibraryPrimitive

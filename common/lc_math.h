@@ -532,6 +532,17 @@ inline lcVector4& operator/=(lcVector4& a, float b)
 	return a;
 }
 
+inline qint32 lcPackNormal(const lcVector3& Normal)
+{
+	qint32 Packed = 0;
+
+	Packed |= ((int)(Normal.x * 511.0f)) << 0;
+	Packed |= ((int)(Normal.y * 511.0f)) << 10;
+	Packed |= ((int)(Normal.z * 511.0f)) << 20;
+
+	return Packed;
+}
+
 inline lcVector3 lcVector3LDrawToLeoCAD(const lcVector3& Vector)
 {
 	return lcVector3(Vector[0], Vector[2], -Vector[1]);

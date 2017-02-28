@@ -1166,19 +1166,19 @@ lcMesh* lcPiecesLibrary::CreateMesh(PieceInfo* Info, lcLibraryMeshData& MeshData
 
 	for (int MeshDataIdx = 0; MeshDataIdx < LC_NUM_MESHDATA_TYPES; MeshDataIdx++)
 	{
-		const lcArray<lcVertex>& Vertices = MeshData.mVertices[MeshDataIdx];
+		const lcArray<lcLibraryMeshVertex>& Vertices = MeshData.mVertices[MeshDataIdx];
 
 		for (int VertexIdx = 0; VertexIdx < Vertices.GetSize(); VertexIdx++)
 		{
 			lcVertex& DstVertex = *DstVerts++;
+			const lcLibraryMeshVertex& SrcVertex = Vertices[VertexIdx];
 
-			const lcVector3& SrcPosition = Vertices[VertexIdx].Position;
-			lcVector3& DstPosition = DstVertex.Position;
+			DstVertex.Position = lcVector3LDrawToLeoCAD(SrcVertex.Position);
+			DstVertex.Normal = lcPackNormal(lcVector3LDrawToLeoCAD(SrcVertex.Normal));
 
-			DstPosition = lcVector3(SrcPosition.x, SrcPosition.z, -SrcPosition.y);
-
-			Min = lcMin(Min, DstPosition);
-			Max = lcMax(Max, DstPosition);
+			lcVector3& Position = DstVertex.Position;
+			Min = lcMin(Min, Position);
+			Max = lcMax(Max, Position);
 		}
 	}
 
@@ -1186,21 +1186,20 @@ lcMesh* lcPiecesLibrary::CreateMesh(PieceInfo* Info, lcLibraryMeshData& MeshData
 
 	for (int MeshDataIdx = 0; MeshDataIdx < LC_NUM_MESHDATA_TYPES; MeshDataIdx++)
 	{
-		const lcArray<lcVertexTextured>& TexturedVertices = MeshData.mTexturedVertices[MeshDataIdx];
+		const lcArray<lcLibraryMeshVertexTextured>& TexturedVertices = MeshData.mTexturedVertices[MeshDataIdx];
 
 		for (int VertexIdx = 0; VertexIdx < TexturedVertices.GetSize(); VertexIdx++)
 		{
 			lcVertexTextured& DstVertex = *DstTexturedVerts++;
-			const lcVertexTextured& SrcVertex = TexturedVertices[VertexIdx];
+			const lcLibraryMeshVertexTextured& SrcVertex = TexturedVertices[VertexIdx];
 
-			const lcVector3& SrcPosition = SrcVertex.Position;
-			lcVector3& DstPosition = DstVertex.Position;
-
-			DstPosition = lcVector3(SrcPosition.x, SrcPosition.z, -SrcPosition.y);
+			DstVertex.Position = lcVector3LDrawToLeoCAD(SrcVertex.Position);
+			DstVertex.Normal = lcPackNormal(lcVector3LDrawToLeoCAD(SrcVertex.Normal));
 			DstVertex.TexCoord = SrcVertex.TexCoord;
 
-			Min = lcMin(Min, DstPosition);
-			Max = lcMax(Max, DstPosition);
+			lcVector3& Position = DstVertex.Position;
+			Min = lcMin(Min, Position);
+			Max = lcMax(Max, Position);
 		}
 	}
 
@@ -2018,15 +2017,138 @@ lcLibraryMeshSection* lcLibraryMeshData::AddSection(lcMeshDataType MeshDataType,
 	return Section;
 }
 
-void lcLibraryMeshData::AddVertices(lcMeshDataType MeshDataType, int VertexCount, int* BaseVertex, lcVertex** VertexBuffer)
+void lcLibraryMeshData::AddVertices(lcMeshDataType MeshDataType, int VertexCount, int* BaseVertex, lcLibraryMeshVertex** VertexBuffer)
 {
-	lcArray<lcVertex>& Vertices = mVertices[MeshDataType];
+	lcArray<lcLibraryMeshVertex>& Vertices = mVertices[MeshDataType];
 	int CurrentSize = Vertices.GetSize();
 
 	Vertices.SetSize(CurrentSize + VertexCount);
 
 	*BaseVertex = CurrentSize;
 	*VertexBuffer = &Vertices[CurrentSize];
+}
+
+lcuint32 lcLibraryMeshData::AddVertex(lcMeshDataType MeshDataType, const lcVector3& Position, bool Optimize)
+{
+	lcArray<lcLibraryMeshVertex>& VertexArray = mVertices[MeshDataType];
+
+	if (Optimize)
+	{
+		for (int VertexIdx = VertexArray.GetSize() - 1; VertexIdx >= 0; VertexIdx--)
+		{
+			lcLibraryMeshVertex& Vertex = VertexArray[VertexIdx];
+
+			if (Position == Vertex.Position)
+				return VertexIdx;
+		}
+	}
+
+	lcLibraryMeshVertex& Vertex = VertexArray.Add();
+	Vertex.Position = Position;
+	Vertex.Normal = lcVector3(0.0f, 0.0f, 0.0f);
+	Vertex.NormalWeight = 0.0f;
+
+	return VertexArray.GetSize() - 1;
+}
+
+const float DistanceEpsilon = 0.05f;
+
+lcuint32 lcLibraryMeshData::AddVertex(lcMeshDataType MeshDataType, const lcVector3& Position, const lcVector3& Normal, bool Optimize)
+{
+	lcArray<lcLibraryMeshVertex>& VertexArray = mVertices[MeshDataType];
+
+	if (Optimize)
+	{
+		for (int VertexIdx = VertexArray.GetSize() - 1; VertexIdx >= 0; VertexIdx--)
+		{
+			lcLibraryMeshVertex& Vertex = VertexArray[VertexIdx];
+
+			if (fabsf(Position.x - Vertex.Position.x) < DistanceEpsilon && fabsf(Position.y - Vertex.Position.y) < DistanceEpsilon && fabsf(Position.z - Vertex.Position.z) < DistanceEpsilon)
+//			if (Position == Vertex.Position)
+			{
+				if (Vertex.NormalWeight == 0.0f)
+				{
+					Vertex.Normal = Normal;
+					Vertex.NormalWeight = 1.0f;
+					return VertexIdx;
+				}
+				else if (lcDot(Normal, Vertex.Normal) > 0.5f)
+				{
+					Vertex.Normal = lcNormalize(Vertex.Normal * Vertex.NormalWeight + Normal);
+					Vertex.NormalWeight += 1.0f;
+					return VertexIdx;
+				}
+			}
+		}
+	}
+
+	lcLibraryMeshVertex& Vertex = VertexArray.Add();
+	Vertex.Position = Position;
+	Vertex.Normal = Normal;
+	Vertex.NormalWeight = 1.0f;
+
+	return VertexArray.GetSize() - 1;
+}
+
+lcuint32 lcLibraryMeshData::AddTexturedVertex(lcMeshDataType MeshDataType, const lcVector3& Position, const lcVector2& TexCoord, bool Optimize)
+{
+	lcArray<lcLibraryMeshVertexTextured>& VertexArray = mTexturedVertices[MeshDataType];
+
+	if (Optimize)
+	{
+		for (int VertexIdx = VertexArray.GetSize() - 1; VertexIdx >= 0; VertexIdx--)
+		{
+			lcLibraryMeshVertexTextured& Vertex = VertexArray[VertexIdx];
+
+			if (Position == Vertex.Position && TexCoord == Vertex.TexCoord)
+				return VertexIdx;
+		}
+	}
+
+	lcLibraryMeshVertexTextured& Vertex = VertexArray.Add();
+	Vertex.Position = Position;
+	Vertex.Normal = lcVector3(0.0f, 0.0f, 0.0f);
+	Vertex.NormalWeight = 0.0f;
+	Vertex.TexCoord = TexCoord;
+
+	return VertexArray.GetSize() - 1;
+}
+
+lcuint32 lcLibraryMeshData::AddTexturedVertex(lcMeshDataType MeshDataType, const lcVector3& Position, const lcVector3& Normal, const lcVector2& TexCoord, bool Optimize)
+{
+	lcArray<lcLibraryMeshVertexTextured>& VertexArray = mTexturedVertices[MeshDataType];
+
+	if (Optimize)
+	{
+		for (int VertexIdx = VertexArray.GetSize() - 1; VertexIdx >= 0; VertexIdx--)
+		{
+			lcLibraryMeshVertexTextured& Vertex = VertexArray[VertexIdx];
+
+			if (Position == Vertex.Position && TexCoord == Vertex.TexCoord)
+			{
+				if (Vertex.NormalWeight == 0.0f)
+				{
+					Vertex.Normal = Normal;
+					Vertex.NormalWeight = 1.0f;
+					return VertexIdx;
+				}
+				else if (lcDot(Normal, Vertex.Normal) > 0.5f)
+				{
+					Vertex.Normal = lcNormalize(Vertex.Normal * Vertex.NormalWeight + Normal);
+					Vertex.NormalWeight += 1.0f;
+					return VertexIdx;
+				}
+			}
+		}
+	}
+
+	lcLibraryMeshVertexTextured& Vertex = VertexArray.Add();
+	Vertex.Position = Position;
+	Vertex.Normal = Normal;
+	Vertex.NormalWeight = 1.0f;
+	Vertex.TexCoord = TexCoord;
+
+	return VertexArray.GetSize() - 1;
 }
 
 void lcLibraryMeshData::AddIndices(lcMeshDataType MeshDataType, lcMeshPrimitiveType PrimitiveType, lcuint32 ColorCode, int IndexCount, lcuint32** IndexBuffer)
@@ -2047,36 +2169,30 @@ void lcLibraryMeshData::AddLine(lcMeshDataType MeshDataType, int LineType, lcuin
 	lcLibraryMeshSection* Section = AddSection(MeshDataType, PrimitiveType, ColorCode, NULL);
 
 	int QuadIndices[4] = { 0, 1, 2, 3 };
-
-	if (LineType == 4)
-		TestQuad(QuadIndices, Vertices);
-
 	int Indices[4] = { -1, -1, -1, -1 };
 
-	for (int IndexIdx = 0; IndexIdx < lcMin(LineType, 4); IndexIdx++)
+	if (LineType == 3 || LineType == 4)
 	{
-		const lcVector3& Position = Vertices[QuadIndices[IndexIdx]];
-		lcArray<lcVertex>& VertexArray = mVertices[MeshDataType];
+		if (LineType == 4)
+			TestQuad(QuadIndices, Vertices);
 
-		if (Optimize)
+		lcVector3 Normal = lcCross(Vertices[1] - Vertices[0], Vertices[2] - Vertices[0]);
+
+		if (!WindingCCW)
+			Normal = -Normal;
+
+		for (int IndexIdx = 0; IndexIdx < lcMin(LineType, 4); IndexIdx++)
 		{
-			for (int VertexIdx = VertexArray.GetSize() - 1; VertexIdx >= 0; VertexIdx--)
-			{
-				lcVertex& DstVertex = VertexArray[VertexIdx];
-
-				if (Position == DstVertex.Position)
-				{
-					Indices[IndexIdx] = VertexIdx;
-					break;
-				}
-			}
+			const lcVector3& Position = Vertices[QuadIndices[IndexIdx]];
+			Indices[IndexIdx] = AddVertex(MeshDataType, Position, Normal, Optimize);
 		}
-
-		if (Indices[IndexIdx] == -1)
+	}
+	else
+	{
+		for (int IndexIdx = 0; IndexIdx < lcMin(LineType, 4); IndexIdx++)
 		{
-			Indices[IndexIdx] = VertexArray.GetSize();
-			lcVertex& DstVertex = VertexArray.Add();
-			DstVertex.Position = Position;
+			const lcVector3& Position = Vertices[QuadIndices[IndexIdx]];
+			Indices[IndexIdx] = AddVertex(MeshDataType, Position, Optimize);
 		}
 	}
 
@@ -2143,39 +2259,34 @@ void lcLibraryMeshData::AddTexturedLine(lcMeshDataType MeshDataType, int LineTyp
 	lcLibraryMeshSection* Section = AddSection(MeshDataType, PrimitiveType, ColorCode, Map.Texture);
 
 	int QuadIndices[4] = { 0, 1, 2, 3 };
-
-	if (LineType == 4)
-		TestQuad(QuadIndices, Vertices);
-
 	int Indices[4] = { -1, -1, -1, -1 };
 
-	for (int IndexIdx = 0; IndexIdx < LineType; IndexIdx++)
+	if (LineType == 3 || LineType == 4)
 	{
-		const lcVector3& Position = Vertices[QuadIndices[IndexIdx]];
-		lcVector2 TexCoord(lcDot3(lcVector3(Position.x, Position.y, Position.z), Map.Params[0]) + Map.Params[0].w,
-						   lcDot3(lcVector3(Position.x, Position.y, Position.z), Map.Params[1]) + Map.Params[1].w);
-		lcArray<lcVertexTextured>& VertexArray = mTexturedVertices[MeshDataType];
+		if (LineType == 4)
+			TestQuad(QuadIndices, Vertices);
 
-		if (Optimize)
+		lcVector3 Normal = lcCross(Vertices[1] - Vertices[0], Vertices[2] - Vertices[0]);
+
+		if (!WindingCCW)
+			Normal = -Normal;
+
+		for (int IndexIdx = 0; IndexIdx < lcMin(LineType, 4); IndexIdx++)
 		{
-			for (int VertexIdx = VertexArray.GetSize() - 1; VertexIdx >= 0; VertexIdx--)
-			{
-				lcVertexTextured& DstVertex = VertexArray[VertexIdx];
-
-				if (Position == DstVertex.Position && TexCoord == DstVertex.TexCoord)
-				{
-					Indices[IndexIdx] = VertexIdx;
-					break;
-				}
-			}
+			const lcVector3& Position = Vertices[QuadIndices[IndexIdx]];
+			lcVector2 TexCoord(lcDot3(lcVector3(Position.x, Position.y, Position.z), Map.Params[0]) + Map.Params[0].w,
+							   lcDot3(lcVector3(Position.x, Position.y, Position.z), Map.Params[1]) + Map.Params[1].w);
+			Indices[IndexIdx] = AddTexturedVertex(MeshDataType, Position, Normal, TexCoord, Optimize);
 		}
-
-		if (Indices[IndexIdx] == -1)
+	}
+	else
+	{
+		for (int IndexIdx = 0; IndexIdx < lcMin(LineType, 4); IndexIdx++)
 		{
-			Indices[IndexIdx] = VertexArray.GetSize();
-			lcVertexTextured& DstVertex = VertexArray.Add();
-			DstVertex.Position = Position;
-			DstVertex.TexCoord = TexCoord;
+			const lcVector3& Position = Vertices[QuadIndices[IndexIdx]];
+			lcVector2 TexCoord(lcDot3(lcVector3(Position.x, Position.y, Position.z), Map.Params[0]) + Map.Params[0].w,
+							   lcDot3(lcVector3(Position.x, Position.y, Position.z), Map.Params[1]) + Map.Params[1].w);
+			Indices[IndexIdx] = AddTexturedVertex(MeshDataType, Position, TexCoord, Optimize);
 		}
 	}
 
@@ -2229,13 +2340,12 @@ void lcLibraryMeshData::AddMeshData(const lcLibraryMeshData& Data, const lcMatri
 	for (int MeshDataIdx = 0; MeshDataIdx < LC_NUM_MESHDATA_TYPES; MeshDataIdx++)
 	{
 		int DestIndex = OverrideDestIndex == LC_MESHDATA_SHARED ? MeshDataIdx : OverrideDestIndex;
-		const lcArray<lcVertex>& DataVertices = Data.mVertices[MeshDataIdx];
-		lcArray<lcVertex>& Vertices = mVertices[DestIndex];
-		lcArray<lcVertexTextured>& TexturedVertices = mTexturedVertices[DestIndex];
+		const lcArray<lcLibraryMeshVertex>& DataVertices = Data.mVertices[MeshDataIdx];
+		lcArray<lcLibraryMeshVertex>& Vertices = mVertices[DestIndex];
+		lcArray<lcLibraryMeshVertexTextured>& TexturedVertices = mTexturedVertices[DestIndex];
 
 		int VertexCount = DataVertices.GetSize();
 		lcArray<lcuint32> IndexRemap(VertexCount);
-		const float DistanceEpsilon = 0.05f;
 
 		if (!TextureMap)
 		{
@@ -2244,25 +2354,14 @@ void lcLibraryMeshData::AddMeshData(const lcLibraryMeshData& Data, const lcMatri
 			for (int SrcVertexIdx = 0; SrcVertexIdx < VertexCount; SrcVertexIdx++)
 			{
 				lcVector3 Position = lcMul31(DataVertices[SrcVertexIdx].Position, Transform);
-				int Index = -1;
+				int Index;
 
-				for (int DstVertexIdx = Vertices.GetSize() - 1; DstVertexIdx >= 0; DstVertexIdx--)
+				if (DataVertices[SrcVertexIdx].NormalWeight == 0.0f)
+					Index = AddVertex((lcMeshDataType)MeshDataIdx, Position, true);
+				else
 				{
-					lcVertex& DstVertex = Vertices[DstVertexIdx];
-
-	//				if (Vertex == Vertices[DstVertexIdx])
-					if (fabsf(Position.x - DstVertex.Position.x) < DistanceEpsilon && fabsf(Position.y - DstVertex.Position.y) < DistanceEpsilon && fabsf(Position.z - DstVertex.Position.z) < DistanceEpsilon)
-					{
-						Index = DstVertexIdx;
-						break;
-					}
-				}
-
-				if (Index == -1)
-				{
-					Index = Vertices.GetSize();
-					lcVertex& DstVertex = Vertices.Add();
-					DstVertex.Position = Position;
+					lcVector3 Normal = lcMul30(DataVertices[SrcVertexIdx].Normal, Transform);
+					Index = AddVertex((lcMeshDataType)MeshDataIdx, Position, Normal, true);
 				}
 
 				IndexRemap.Add(Index);
@@ -2274,38 +2373,25 @@ void lcLibraryMeshData::AddMeshData(const lcLibraryMeshData& Data, const lcMatri
 
 			for (int SrcVertexIdx = 0; SrcVertexIdx < VertexCount; SrcVertexIdx++)
 			{
-				const lcVertex& SrcVertex = DataVertices[SrcVertexIdx];
+				const lcLibraryMeshVertex& SrcVertex = DataVertices[SrcVertexIdx];
 				lcVector3 Position = lcMul31(SrcVertex.Position, Transform);
 				lcVector2 TexCoord(lcDot3(lcVector3(Position.x, Position.y, Position.z), TextureMap->Params[0]) + TextureMap->Params[0].w,
 								   lcDot3(lcVector3(Position.x, Position.y, Position.z), TextureMap->Params[1]) + TextureMap->Params[1].w);
-				int Index = -1;
+				int Index;
 
-				for (int DstVertexIdx = TexturedVertices.GetSize() - 1; DstVertexIdx >= 0; DstVertexIdx--)
+				if (DataVertices[SrcVertexIdx].NormalWeight == 0.0f)
+					Index = AddTexturedVertex((lcMeshDataType)MeshDataIdx, Position, TexCoord, true);
+				else
 				{
-					lcVertexTextured& DstVertex = TexturedVertices[DstVertexIdx];
-
-	//				if (Vertex == mTexturedVertices[DstVertexIdx])
-					if (fabsf(Position.x - DstVertex.Position.x) < DistanceEpsilon && fabsf(Position.y - DstVertex.Position.y) < DistanceEpsilon && fabsf(Position.z - DstVertex.Position.z) < DistanceEpsilon &&
-						fabsf(TexCoord.x - DstVertex.TexCoord.x) < 0.01f && fabsf(TexCoord.y - DstVertex.TexCoord.y) < 0.01f)
-					{
-						Index = DstVertexIdx;
-						break;
-					}
-				}
-
-				if (Index == -1)
-				{
-					Index = TexturedVertices.GetSize();
-					lcVertexTextured& DstVertex = TexturedVertices.Add();
-					DstVertex.Position = Position;
-					DstVertex.TexCoord = TexCoord;
+					lcVector3 Normal = lcMul30(DataVertices[SrcVertexIdx].Normal, Transform);
+					Index = AddTexturedVertex((lcMeshDataType)MeshDataIdx, Position, Normal, TexCoord, true);
 				}
 
 				IndexRemap.Add(Index);
 			}
 		}
 
-		const lcArray<lcVertexTextured>& DataTexturedVertices = Data.mTexturedVertices[MeshDataIdx];
+		const lcArray<lcLibraryMeshVertexTextured>& DataTexturedVertices = Data.mTexturedVertices[MeshDataIdx];
 		int TexturedVertexCount = DataTexturedVertices.GetSize();
 		lcArray<lcuint32> TexturedIndexRemap(TexturedVertexCount);
 
@@ -2315,29 +2401,16 @@ void lcLibraryMeshData::AddMeshData(const lcLibraryMeshData& Data, const lcMatri
 
 			for (int SrcVertexIdx = 0; SrcVertexIdx < TexturedVertexCount; SrcVertexIdx++)
 			{
-				const lcVertexTextured& SrcVertex = DataTexturedVertices[SrcVertexIdx];
+				const lcLibraryMeshVertexTextured& SrcVertex = DataTexturedVertices[SrcVertexIdx];
 				lcVector3 Position = lcMul31(SrcVertex.Position, Transform);
-				int Index = -1;
+				int Index;
 
-				for (int DstVertexIdx = TexturedVertices.GetSize() - 1; DstVertexIdx >= 0; DstVertexIdx--)
+				if (DataVertices[SrcVertexIdx].NormalWeight == 0.0f)
+					Index = AddTexturedVertex((lcMeshDataType)MeshDataIdx, Position, SrcVertex.TexCoord, true);
+				else
 				{
-					lcVertexTextured& DstVertex = TexturedVertices[DstVertexIdx];
-
-	//				if (Vertex == mTexturedVertices[DstVertexIdx])
-					if (fabsf(Position.x - DstVertex.Position.x) < 0.1f && fabsf(Position.y - DstVertex.Position.y) < 0.1f && fabsf(Position.z - DstVertex.Position.z) < 0.1f &&
-						fabsf(SrcVertex.TexCoord.x - DstVertex.TexCoord.x) < 0.01f && fabsf(SrcVertex.TexCoord.y - DstVertex.TexCoord.y) < 0.01f)
-					{
-						Index = DstVertexIdx;
-						break;
-					}
-				}
-
-				if (Index == -1)
-				{
-					Index = TexturedVertices.GetSize();
-					lcVertexTextured& DstVertex = TexturedVertices.Add();
-					DstVertex.Position = Position;
-					DstVertex.TexCoord = SrcVertex.TexCoord;
+					lcVector3 Normal = lcMul30(DataVertices[SrcVertexIdx].Normal, Transform);
+					Index = AddTexturedVertex((lcMeshDataType)MeshDataIdx, Position, Normal, SrcVertex.TexCoord, true);
 				}
 
 				TexturedIndexRemap.Add(Index);
@@ -2424,9 +2497,9 @@ void lcLibraryMeshData::AddMeshDataNoDuplicateCheck(const lcLibraryMeshData& Dat
 	for (int MeshDataIdx = 0; MeshDataIdx < LC_NUM_MESHDATA_TYPES; MeshDataIdx++)
 	{
 		int DestIndex = OverrideDestIndex == LC_MESHDATA_SHARED ? MeshDataIdx : OverrideDestIndex;
-		const lcArray<lcVertex>& DataVertices = Data.mVertices[MeshDataIdx];
-		lcArray<lcVertex>& Vertices = mVertices[DestIndex];
-		lcArray<lcVertexTextured>& TexturedVertices = mTexturedVertices[DestIndex];
+		const lcArray<lcLibraryMeshVertex>& DataVertices = Data.mVertices[MeshDataIdx];
+		lcArray<lcLibraryMeshVertex>& Vertices = mVertices[DestIndex];
+		lcArray<lcLibraryMeshVertexTextured>& TexturedVertices = mTexturedVertices[DestIndex];
 		lcuint32 BaseIndex;
 
 		if (!TextureMap)
@@ -2438,8 +2511,11 @@ void lcLibraryMeshData::AddMeshDataNoDuplicateCheck(const lcLibraryMeshData& Dat
 
 			for (int SrcVertexIdx = 0; SrcVertexIdx < DataVertices.GetSize(); SrcVertexIdx++)
 			{
-				lcVertex& Vertex = Vertices.Add();
-				Vertex.Position = lcMul31(DataVertices[SrcVertexIdx].Position, Transform);
+				const lcLibraryMeshVertex& SrcVertex = DataVertices[SrcVertexIdx];
+				lcLibraryMeshVertex& DstVertex = Vertices.Add();
+				DstVertex.Position = lcMul31(SrcVertex.Position, Transform);
+				DstVertex.Normal = lcMul30(SrcVertex.Normal, Transform);
+				DstVertex.NormalWeight = SrcVertex.NormalWeight;
 			}
 		}
 		else
@@ -2450,19 +2526,21 @@ void lcLibraryMeshData::AddMeshDataNoDuplicateCheck(const lcLibraryMeshData& Dat
 
 			for (int SrcVertexIdx = 0; SrcVertexIdx < DataVertices.GetSize(); SrcVertexIdx++)
 			{
-				const lcVertex& SrcVertex = DataVertices[SrcVertexIdx];
-				lcVertexTextured& DstVertex = TexturedVertices.Add();
+				const lcLibraryMeshVertex& SrcVertex = DataVertices[SrcVertexIdx];
+				lcLibraryMeshVertexTextured& DstVertex = TexturedVertices.Add();
 
 				lcVector3 Position = lcMul31(SrcVertex.Position, Transform);
 				lcVector2 TexCoord(lcDot3(lcVector3(Position.x, Position.y, Position.z), TextureMap->Params[0]) + TextureMap->Params[0].w,
 								   lcDot3(lcVector3(Position.x, Position.y, Position.z), TextureMap->Params[1]) + TextureMap->Params[1].w);
 
 				DstVertex.Position = Position;
+				DstVertex.Normal = lcMul30(SrcVertex.Normal, Transform);
+				DstVertex.NormalWeight = SrcVertex.NormalWeight;
 				DstVertex.TexCoord = TexCoord;
 			}
 		}
 
-		const lcArray<lcVertexTextured>& DataTexturedVertices = Data.mTexturedVertices[MeshDataIdx];
+		const lcArray<lcLibraryMeshVertexTextured>& DataTexturedVertices = Data.mTexturedVertices[MeshDataIdx];
 
 		int TexturedVertexCount = DataTexturedVertices.GetSize();
 		lcuint32 BaseTexturedIndex = TexturedVertices.GetSize();
@@ -2473,9 +2551,11 @@ void lcLibraryMeshData::AddMeshDataNoDuplicateCheck(const lcLibraryMeshData& Dat
 
 			for (int SrcVertexIdx = 0; SrcVertexIdx < TexturedVertexCount; SrcVertexIdx++)
 			{
-				const lcVertexTextured& SrcVertex = DataTexturedVertices[SrcVertexIdx];
-				lcVertexTextured& DstVertex = TexturedVertices.Add();
+				const lcLibraryMeshVertexTextured& SrcVertex = DataTexturedVertices[SrcVertexIdx];
+				lcLibraryMeshVertexTextured& DstVertex = TexturedVertices.Add();
 				DstVertex.Position = lcMul31(SrcVertex.Position, Transform);
+				DstVertex.Normal = SrcVertex.Normal;
+				DstVertex.NormalWeight = SrcVertex.NormalWeight;
 				DstVertex.TexCoord = SrcVertex.TexCoord;
 			}
 		}

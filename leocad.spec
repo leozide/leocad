@@ -34,7 +34,7 @@ Group: Amusements/Graphics
 %endif
 Version: 0.83.2
 Release: 1%{?dist}
-%if 0%{?mdkversion} || 0%{?rhel_version} || 0%{?fedora} || 0%{?centos_version} || 0%{?scientificlinux_version}
+%if 0%{?mdkversion} || 0%{?rhel_version} || 0%{?fedora} || 0%{?centos_version} || 0%{?scientificlinux_version} || 0%{?mageia}
 License: GPLv2+
 %endif
 %if 0%{?suse_version} || 0%{?sles_version}
@@ -104,6 +104,10 @@ BuildRequires:	-post-build-checks
 BuildRequires:	-post-build-checks
 %endif
 Requires(post): desktop-file-utils
+%endif
+
+%if 0%{?mageia}
+BuildRequires: libqt4-devel
 %endif
 
 %if 0%{?mdkversion}

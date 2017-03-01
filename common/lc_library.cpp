@@ -2357,11 +2357,11 @@ void lcLibraryMeshData::AddMeshData(const lcLibraryMeshData& Data, const lcMatri
 				int Index;
 
 				if (DataVertices[SrcVertexIdx].NormalWeight == 0.0f)
-					Index = AddVertex((lcMeshDataType)MeshDataIdx, Position, true);
+					Index = AddVertex((lcMeshDataType)DestIndex, Position, true);
 				else
 				{
 					lcVector3 Normal = lcNormalize(lcMul30(DataVertices[SrcVertexIdx].Normal, Transform));
-					Index = AddVertex((lcMeshDataType)MeshDataIdx, Position, Normal, true);
+					Index = AddVertex((lcMeshDataType)DestIndex, Position, Normal, true);
 				}
 
 				IndexRemap.Add(Index);
@@ -2380,11 +2380,11 @@ void lcLibraryMeshData::AddMeshData(const lcLibraryMeshData& Data, const lcMatri
 				int Index;
 
 				if (DataVertices[SrcVertexIdx].NormalWeight == 0.0f)
-					Index = AddTexturedVertex((lcMeshDataType)MeshDataIdx, Position, TexCoord, true);
+					Index = AddTexturedVertex((lcMeshDataType)DestIndex, Position, TexCoord, true);
 				else
 				{
 					lcVector3 Normal = lcNormalize(lcMul30(DataVertices[SrcVertexIdx].Normal, Transform));
-					Index = AddTexturedVertex((lcMeshDataType)MeshDataIdx, Position, Normal, TexCoord, true);
+					Index = AddTexturedVertex((lcMeshDataType)DestIndex, Position, Normal, TexCoord, true);
 				}
 
 				IndexRemap.Add(Index);
@@ -2406,11 +2406,11 @@ void lcLibraryMeshData::AddMeshData(const lcLibraryMeshData& Data, const lcMatri
 				int Index;
 
 				if (DataVertices[SrcVertexIdx].NormalWeight == 0.0f)
-					Index = AddTexturedVertex((lcMeshDataType)MeshDataIdx, Position, SrcVertex.TexCoord, true);
+					Index = AddTexturedVertex((lcMeshDataType)DestIndex, Position, SrcVertex.TexCoord, true);
 				else
 				{
 					lcVector3 Normal = lcNormalize(lcMul30(DataVertices[SrcVertexIdx].Normal, Transform));
-					Index = AddTexturedVertex((lcMeshDataType)MeshDataIdx, Position, Normal, SrcVertex.TexCoord, true);
+					Index = AddTexturedVertex((lcMeshDataType)DestIndex, Position, Normal, SrcVertex.TexCoord, true);
 				}
 
 				TexturedIndexRemap.Add(Index);

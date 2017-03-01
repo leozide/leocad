@@ -107,12 +107,28 @@ Requires(post): desktop-file-utils
 %endif
 
 %if 0%{?mageia}
+%if 0%{?qt5}
+BuildRequires: qttools5
+%ifarch x86_64
+BuildRequires: lib64qt5base5-devel
+%else
+BuildRequires: libqt5base5-devel
+%endif
+%if 0%{?opensuse_bs}
+%ifarch x86_64
+BuildRequires: lib64sane1, lib64proxy-webkit
+%else
+BuildRequires: libsane1, libproxy-webkit
+%endif
+%endif
+%else
 BuildRequires: libqt4-devel
 %if 0%{?opensuse_bs}
 %ifarch x86_64
-BuildRequires: lib64uuid-devel
+BuildRequires: lib64sane1, lib64uuid-devel, lib64proxy-webkit
 %else
-BuildRequires: libuuid-devel
+BuildRequires: libsane1, libuuid-devel, libproxy-webkit
+%endif
 %endif
 %endif
 %endif

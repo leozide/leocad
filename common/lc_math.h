@@ -536,9 +536,15 @@ inline qint32 lcPackNormal(const lcVector3& Normal)
 {
 	qint32 Packed = 0;
 
-	Packed |= ((int)(Normal.x * 511.0f)) << 0;
-	Packed |= ((int)(Normal.y * 511.0f)) << 10;
-	Packed |= ((int)(Normal.z * 511.0f)) << 20;
+	Packed |= ((int)(fabsf(Normal.x) * 511.0f)) << 0;
+	if (Normal.x < 0.0f)
+		Packed |= 1 << 9;
+	Packed |= ((int)(fabsf(Normal.y) * 511.0f)) << 10;
+	if (Normal.y < 0.0f)
+		Packed |= 1 << 19;
+	Packed |= ((int)(fabsf(Normal.z) * 511.0f)) << 20;
+	if (Normal.z < 0.0f)
+		Packed |= 1 << 29;
 
 	return Packed;
 }

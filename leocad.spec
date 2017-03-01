@@ -8,11 +8,7 @@
 %define dist .SUSE%(echo %{sles_version} | sed 's/0$//')
 %endif
 
-%if "%{vendor}" == "obs://build.opensuse.org/home:pbartfai"
-%define opensuse_bs 1
-%endif
-
-%if "%{vendor}" == "obs://private/home:pbartfai"
+%if %(if [[ "%{vendor}" == obs://* ]] ; then echo 1 ; else echo 0 ; fi)
 %define opensuse_bs 1
 %endif
 

@@ -29,7 +29,11 @@ Group: Graphics
 Group: Amusements/Graphics
 %endif
 Version: 0.83.2
+%if 0%{?opensuse_bs}
+Release: <CI_CNT>.<B_CNT>%{?dist}
+%else
 Release: 1%{?dist}
+%endif
 %if 0%{?mdkversion} || 0%{?rhel_version} || 0%{?fedora} || 0%{?centos_version} || 0%{?scientificlinux_version} || 0%{?mageia}
 License: GPLv2+
 %endif

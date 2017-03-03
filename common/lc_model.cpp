@@ -3027,21 +3027,22 @@ bool lcModel::GetSelectionCenter(lcVector3& Center) const
 
 bool lcModel::GetPiecesBoundingBox(lcVector3& Min, lcVector3& Max) const
 {
+	bool Valid = false;
 	Min = lcVector3(FLT_MAX, FLT_MAX, FLT_MAX);
 	Max = lcVector3(-FLT_MAX, -FLT_MAX, -FLT_MAX);
-
-	if (mPieces.IsEmpty())
-		return false;
 
 	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 	{
 		lcPiece* Piece = mPieces[PieceIdx];
 
 		if (Piece->IsVisible(mCurrentStep))
+		{
 			Piece->CompareBoundingBox(Min, Max);
+			Valid = true;
+		}
 	}
 
-	return true;
+	return Valid;
 }
 
 void lcModel::GetPartsList(int DefaultColorIndex, lcPartsList& PartsList) const

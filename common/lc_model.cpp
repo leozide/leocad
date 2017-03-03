@@ -2214,6 +2214,7 @@ void lcModel::MoveSelectionToModel(lcModel* Model)
 
 	lcArray<lcPiece*> Pieces;
 	lcPiece* ModelPiece = NULL;
+	lcStep FirstStep = LC_STEP_MAX;
 
 	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); )
 	{
@@ -2224,6 +2225,7 @@ void lcModel::MoveSelectionToModel(lcModel* Model)
 			mPieces.RemoveIndex(PieceIdx);
 			Piece->SetGroup(NULL); // todo: copy groups
 			Pieces.Add(Piece);
+			FirstStep = qMin(FirstStep, Piece->GetStepShow());
 
 			if (!ModelPiece)
 			{
@@ -2239,7 +2241,11 @@ void lcModel::MoveSelectionToModel(lcModel* Model)
 	}
 
 	for (int PieceIdx = 0; PieceIdx < Pieces.GetSize(); PieceIdx++)
-		Model->AddPiece(Pieces[PieceIdx]);
+	{
+		lcPiece* Piece = Pieces[PieceIdx];
+		Piece->SetStepShow(Piece->GetStepShow() - FirstStep + 1);
+		Model->AddPiece(Piece);
+	}
 
 	lcArray<lcModel*> UpdatedModels;
 	Model->UpdatePieceInfo(UpdatedModels);

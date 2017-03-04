@@ -499,11 +499,11 @@ void lcQPropertiesTree::updateColorEditor(QPushButton *editor, int value) const
 	img.fill(0);
 
 	lcColor* color = &gColorList[value];
-	QRgb rgb = qRgb(color->Value[0] * 255, color->Value[1] * 255, color->Value[2] * 255);
-	QBrush b(rgb);
 	QPainter painter(&img);
 	painter.setCompositionMode(QPainter::CompositionMode_Source);
-	painter.fillRect(0, 0, img.width(), img.height(), b);
+	painter.setPen(Qt::darkGray);
+	painter.setBrush(QColor::fromRgbF(color->Value[0], color->Value[1], color->Value[2]));
+	painter.drawRect(0, 0, img.width() - 1, img.height() - 1);
 	painter.end();
 
 	editor->setStyleSheet("Text-align:left");
@@ -909,11 +909,11 @@ void lcQPropertiesTree::SetPiece(const lcArray<lcObject*>& Selection, lcObject* 
 	img.fill(0);
 
 	lcColor* color = &gColorList[ColorIndex];
-	QRgb rgb = qRgb(color->Value[0] * 255, color->Value[1] * 255, color->Value[2] * 255);
-	QBrush b(rgb);
 	QPainter painter(&img);
 	painter.setCompositionMode(QPainter::CompositionMode_Source);
-	painter.fillRect(0, 0, img.width(), img.height(), b);
+	painter.setPen(Qt::darkGray);
+	painter.setBrush(QColor::fromRgbF(color->Value[0], color->Value[1], color->Value[2]));
+	painter.drawRect(0, 0, img.width() - 1, img.height() - 1);
 	painter.end();
 
 	partColor->setIcon(1, QIcon(QPixmap::fromImage(img)));

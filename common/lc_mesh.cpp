@@ -70,7 +70,7 @@ void lcMesh::CreateBox()
 	memset(NumSections, 0, sizeof(NumSections));
 	NumSections[LC_MESH_LOD_HIGH] = 2;
 
-	Create(NumSections, 8, 0, 36 + 24);
+	Create(NumSections, 24, 0, 36 + 24);
 
 	lcVector3 Min(-10.0f, -10.0f, -24.0f);
 	lcVector3 Max(10.0f, 10.0f, 4.0f);
@@ -82,13 +82,55 @@ void lcMesh::CreateBox()
 	lcuint16* Indices = (lcuint16*)mIndexData;
 
 	Verts[0].Position = lcVector3(Min[0], Min[1], Min[2]);
+	Verts[0].Normal = lcPackNormal(lcVector3(0.0f, 0.0f, -1.0f));
 	Verts[1].Position = lcVector3(Min[0], Max[1], Min[2]);
+	Verts[1].Normal = lcPackNormal(lcVector3(0.0f, 0.0f, -1.0f));
 	Verts[2].Position = lcVector3(Max[0], Max[1], Min[2]);
+	Verts[2].Normal = lcPackNormal(lcVector3(0.0f, 0.0f, -1.0f));
 	Verts[3].Position = lcVector3(Max[0], Min[1], Min[2]);
+	Verts[3].Normal = lcPackNormal(lcVector3(0.0f, 0.0f, -1.0f));
 	Verts[4].Position = lcVector3(Min[0], Min[1], Max[2]);
+	Verts[4].Normal = lcPackNormal(lcVector3(0.0f, 0.0f, 1.0f));
 	Verts[5].Position = lcVector3(Min[0], Max[1], Max[2]);
+	Verts[5].Normal = lcPackNormal(lcVector3(0.0f, 0.0f, 1.0f));
 	Verts[6].Position = lcVector3(Max[0], Max[1], Max[2]);
+	Verts[6].Normal = lcPackNormal(lcVector3(0.0f, 0.0f, 1.0f));
 	Verts[7].Position = lcVector3(Max[0], Min[1], Max[2]);
+	Verts[7].Normal = lcPackNormal(lcVector3(0.0f, 0.0f, 1.0f));
+
+	Verts[8].Position = lcVector3(Min[0], Min[1], Min[2]);
+	Verts[8].Normal = lcPackNormal(lcVector3(-1.0f, 0.0f, 0.0f));
+	Verts[9].Position = lcVector3(Min[0], Min[1], Max[2]);
+	Verts[9].Normal = lcPackNormal(lcVector3(-1.0f, 0.0f, 0.0f));
+	Verts[10].Position = lcVector3(Min[0], Max[1], Max[2]);
+	Verts[10].Normal = lcPackNormal(lcVector3(-1.0f, 0.0f, 0.0f));
+	Verts[11].Position = lcVector3(Min[0], Max[1], Min[2]);
+	Verts[11].Normal = lcPackNormal(lcVector3(-1.0f, 0.0f, 0.0f));
+	Verts[12].Position = lcVector3(Max[0], Min[1], Min[2]);
+	Verts[12].Normal = lcPackNormal(lcVector3(1.0f, 0.0f, 0.0f));
+	Verts[13].Position = lcVector3(Max[0], Min[1], Max[2]);
+	Verts[13].Normal = lcPackNormal(lcVector3(1.0f, 0.0f, 0.0f));
+	Verts[14].Position = lcVector3(Max[0], Max[1], Max[2]);
+	Verts[14].Normal = lcPackNormal(lcVector3(1.0f, 0.0f, 0.0f));
+	Verts[15].Position = lcVector3(Max[0], Max[1], Min[2]);
+	Verts[15].Normal = lcPackNormal(lcVector3(1.0f, 0.0f, 0.0f));
+
+	Verts[16].Position = lcVector3(Min[0], Min[1], Min[2]);
+	Verts[16].Normal = lcPackNormal(lcVector3(0.0f, -1.0f, 0.0f));
+	Verts[17].Position = lcVector3(Min[0], Min[1], Max[2]);
+	Verts[17].Normal = lcPackNormal(lcVector3(0.0f, -1.0f, 0.0f));
+	Verts[18].Position = lcVector3(Max[0], Min[1], Max[2]);
+	Verts[18].Normal = lcPackNormal(lcVector3(0.0f, -1.0f, 0.0f));
+	Verts[19].Position = lcVector3(Max[0], Min[1], Min[2]);
+	Verts[19].Normal = lcPackNormal(lcVector3(0.0f, -1.0f, 0.0f));
+	Verts[20].Position = lcVector3(Min[0], Max[1], Min[2]);
+	Verts[20].Normal = lcPackNormal(lcVector3(0.0f, 1.0f, 0.0f));
+	Verts[21].Position = lcVector3(Min[0], Max[1], Max[2]);
+	Verts[21].Normal = lcPackNormal(lcVector3(0.0f, 1.0f, 0.0f));
+	Verts[22].Position = lcVector3(Max[0], Max[1], Max[2]);
+	Verts[22].Normal = lcPackNormal(lcVector3(0.0f, 1.0f, 0.0f));
+	Verts[23].Position = lcVector3(Max[0], Max[1], Min[2]);
+	Verts[23].Normal = lcPackNormal(lcVector3(0.0f, 1.0f, 0.0f));
 
 	lcMeshSection* Section = &mLods[LC_MESH_LOD_HIGH].Sections[0];
 	Section->ColorIndex = gDefaultColor;
@@ -103,17 +145,18 @@ void lcMesh::CreateBox()
 	*Indices++ = 7; *Indices++ = 6; *Indices++ = 5;
 	*Indices++ = 7; *Indices++ = 5; *Indices++ = 4;
 
-	*Indices++ = 0; *Indices++ = 1; *Indices++ = 5;
-	*Indices++ = 0; *Indices++ = 5; *Indices++ = 4;
+	*Indices++ = 8; *Indices++ = 9; *Indices++ = 10;
+	*Indices++ = 8; *Indices++ = 10; *Indices++ = 11;
 
-	*Indices++ = 2; *Indices++ = 3; *Indices++ = 7;
-	*Indices++ = 2; *Indices++ = 7; *Indices++ = 6;
+	*Indices++ = 15; *Indices++ = 14; *Indices++ = 13;
+	*Indices++ = 15; *Indices++ = 13; *Indices++ = 12;
 
-	*Indices++ = 0; *Indices++ = 3; *Indices++ = 7;
-	*Indices++ = 0; *Indices++ = 7; *Indices++ = 4;
+	*Indices++ = 16; *Indices++ = 17; *Indices++ = 18;
+	*Indices++ = 16; *Indices++ = 18; *Indices++ = 19;
 
-	*Indices++ = 1; *Indices++ = 2; *Indices++ = 6;
-	*Indices++ = 1; *Indices++ = 6; *Indices++ = 5;
+	*Indices++ = 23; *Indices++ = 22; *Indices++ = 21;
+	*Indices++ = 23; *Indices++ = 21; *Indices++ = 20;
+
 
 	Section = &mLods[LC_MESH_LOD_HIGH].Sections[1];
 	Section->ColorIndex = gEdgeColor;

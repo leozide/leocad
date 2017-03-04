@@ -185,9 +185,9 @@ void lcTimelineWidget::Update(bool Clear, bool UpdateItems)
 				Image.fill(0);
 				float* Color = gColorList[ColorIndex].Value;
 				QPainter Painter(&Image);
-				Painter.setPen(Qt::NoPen);
+				Painter.setPen(Qt::darkGray);
 				Painter.setBrush(QColor::fromRgbF(Color[0], Color[1], Color[2]));
-				Painter.drawEllipse(QPoint(Size / 2, Size / 2), Size / 2, Size / 2);
+				Painter.drawEllipse(0, 0, Size - 1, Size - 1);
 
 				mIcons[ColorIndex] = QIcon(QPixmap::fromImage(Image));
 			}

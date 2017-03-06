@@ -140,14 +140,15 @@ void lcQColorPicker::updateIcon()
 {
 	int iconSize = style()->pixelMetric(QStyle::PM_SmallIconSize);
 	QPixmap pix(iconSize, iconSize);
-	pix.fill(palette().button().color());
 
 	QPainter p(&pix);
 
 	lcColor* color = &gColorList[currentColorIndex];
-	QRgb rgb = qRgb(color->Value[0] * 255, color->Value[1] * 255, color->Value[2] * 255);
+	p.setPen(Qt::darkGray);
+	p.setBrush(QColor::fromRgbF(color->Value[0], color->Value[1], color->Value[2]));
+	p.drawRect(0, 0, pix.width() - 1, pix.height() - 1);
+	p.end();
 
-	p.fillRect(0, 0, pix.width(), pix.height(), rgb);
 	setIcon(QIcon(pix));
 }
 

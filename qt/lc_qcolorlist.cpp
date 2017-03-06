@@ -82,8 +82,12 @@ bool lcQColorList::event(QEvent *event)
 			lcColor* color = &gColorList[mCellColors[CellIdx]];
 			QRgb rgb = qRgb(color->Value[0] * 255, color->Value[1] * 255, color->Value[2] * 255);
 
-			QImage image(1, 1, QImage::Format_RGB888);
-			image.setPixel(0, 0, rgb);
+			QImage image(16, 16, QImage::Format_RGB888);
+			image.fill(rgb);
+			QPainter painter(&image);
+			painter.setPen(Qt::darkGray);
+			painter.drawRect(0, 0, image.width() - 1, image.height() - 1);
+			painter.end();
 
 			QByteArray ba;
 			QBuffer buffer(&ba);
@@ -91,7 +95,7 @@ bool lcQColorList::event(QEvent *event)
 			image.save(&buffer, "PNG");
 
 			int colorIndex = mCellColors[CellIdx];
-			const char* format = "<table><tr><td style=\"vertical-align:middle\"><img height=16 src=\"data:image/png;base64,%1\"></td><td>%2 (%3)</td></tr></table>";
+			const char* format = "<table><tr><td style=\"vertical-align:middle\"><img src=\"data:image/png;base64,%1\"/></td><td>%2 (%3)</td></tr></table>";
 			QString text = QString(format).arg(QString(buffer.data().toBase64()), gColorList[colorIndex].Name, QString::number(gColorList[colorIndex].Code));
 
 			QToolTip::showText(helpEvent->globalPos(), text);

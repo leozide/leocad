@@ -89,6 +89,7 @@ struct lcProgram
 	GLuint Object;
 	GLint MatrixLocation;
 	GLint ColorLocation;
+	GLint LightDirectionLocation;
 };
 
 enum lcTextureMode

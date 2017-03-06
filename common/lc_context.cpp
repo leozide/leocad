@@ -274,9 +274,14 @@ void lcContext::CreateShaderPrograms()
 			LC_PIXEL_INPUT "vec3 PixelNormal;\n"
 			LC_PIXEL_OUTPUT
 			"uniform mediump vec4 Color;\n"
+			"uniform mediump vec3 LightDirection[2];\n"
 			"void main()\n"
 			"{\n"
-			"	gl_FragColor = vec4(PixelNormal, 1.0);\n"
+			"	vec3 Normal = normalize(PixelNormal);\n"
+			"	float Diffuse = abs(dot(Normal, LightDirection[0])) * 0.5;\n"
+			"	Diffuse += abs(dot(Normal, LightDirection[1])) * 0.5;\n"
+			"	Diffuse = clamp(Diffuse, 0.0, 1.0);\n"
+			"	gl_FragColor = vec4(Diffuse, Diffuse, Diffuse, 1.0);\n"
 			"}\n",
 			// LC_MATERIAL_TEXTURE
 			LC_SHADER_VERSION
@@ -411,6 +416,7 @@ void lcContext::CreateShaderPrograms()
 			mPrograms[LightingMode][MaterialType].Object = Program;
 			mPrograms[LightingMode][MaterialType].MatrixLocation = glGetUniformLocation(Program, "WorldViewProjectionMatrix");
 			mPrograms[LightingMode][MaterialType].ColorLocation = glGetUniformLocation(Program, "Color");
+			mPrograms[LightingMode][MaterialType].LightDirectionLocation = glGetUniformLocation(Program, "LightDirection");
 		}
 	}
 }
@@ -462,7 +468,7 @@ void lcContext::SetDefaultState()
 		glDisableClientState(GL_COLOR_ARRAY);
 
 		glVertexPointer(3, GL_FLOAT, 0, NULL);
-		glNormalPointer(GL_INT_2_10_10_10_REV, 0, NULL);
+		glNormalPointer(GL_BYTE, 0, NULL);
 		glTexCoordPointer(2, GL_FLOAT, 0, NULL);
 		glColorPointer(4, GL_FLOAT, 0, NULL);
 	}
@@ -879,7 +885,7 @@ void lcContext::SetVertexFormat(int BufferOffset, int PositionSize, int NormalSi
 	{
 		if (gSupportsShaderObjects)
 		{
-			glVertexAttribPointer(LC_ATTRIB_NORMAL, 4, GL_INT_2_10_10_10_REV, true, VertexSize, VertexBufferPointer + Offset);
+			glVertexAttribPointer(LC_ATTRIB_NORMAL, 4, GL_BYTE, true, VertexSize, VertexBufferPointer + Offset);
 
 			if (!mNormalEnabled)
 			{
@@ -889,7 +895,7 @@ void lcContext::SetVertexFormat(int BufferOffset, int PositionSize, int NormalSi
 		}
 		else
 		{
-			glNormalPointer(GL_INT_2_10_10_10_REV, VertexSize, VertexBufferPointer + Offset);
+			glNormalPointer(GL_BYTE, VertexSize, VertexBufferPointer + Offset);
 
 			if (!mNormalEnabled)
 			{
@@ -1088,7 +1094,7 @@ void lcContext::UnbindMesh()
 	else
 	{
 		glVertexPointer(3, GL_FLOAT, 0, NULL);
-		glNormalPointer(GL_INT_2_10_10_10_REV, 0, NULL);
+		glNormalPointer(GL_BYTE, 0, NULL);
 		glTexCoordPointer(2, GL_FLOAT, 0, NULL);
 	}
 
@@ -1109,6 +1115,16 @@ void lcContext::FlushState()
 			{
 				mViewProjectionMatrix = lcMul(mViewMatrix, mProjectionMatrix);
 				mViewProjectionMatrixDirty = false;
+			}
+
+			if (mWorldMatrixDirty && Program.LightDirectionLocation != -1)
+			{
+				lcVector3 LightDirection[2] =
+				{
+					lcMul30(lcVector3(1.0f, 0.0f, 0.0f), lcMatrix44AffineInverse(mWorldMatrix)),
+					lcMul30(lcVector3(0.0f, 1.0f, 0.0f), lcMatrix44AffineInverse(mWorldMatrix))
+				};
+				glUniform3fv(Program.LightDirectionLocation, 2, LightDirection[0]);
 			}
 
 			glUniformMatrix4fv(Program.MatrixLocation, 1, false, lcMul(mWorldMatrix, mViewProjectionMatrix));
@@ -1205,7 +1221,7 @@ void lcContext::DrawMeshSection(lcMesh* Mesh, lcMeshSection* Section)
 		}
 	}
 
-	bool DrawConditional = false;
+	const bool DrawConditional = false;
 
 	if (Section->PrimitiveType != LC_MESH_CONDITIONAL_LINES)
 	{
@@ -1321,6 +1337,25 @@ void lcContext::DrawOpaqueMeshes(const lcArray<lcRenderMesh>& OpaqueMeshes)
 			}
 
 			DrawMeshSection(Mesh, Section);
+		}
+
+		const bool DrawNormals = false;
+
+		if (DrawNormals)
+		{
+			lcVertex* VertexBuffer = (lcVertex*)Mesh->mVertexData;
+			lcVector3* Vertices = (lcVector3*)malloc(Mesh->mNumVertices * 2 * sizeof(lcVector3));
+
+			for (int VertexIdx = 0; VertexIdx < Mesh->mNumVertices; VertexIdx++)
+			{
+				Vertices[VertexIdx * 2] = VertexBuffer[VertexIdx].Position;
+				Vertices[VertexIdx * 2 + 1] = VertexBuffer[VertexIdx].Position + lcUnpackNormal(VertexBuffer[VertexIdx].Normal);
+			}
+
+			SetVertexBufferPointer(Vertices);
+			SetVertexFormat(0, 3, 0, 0, 0);
+			DrawPrimitives(GL_LINES, 0, Mesh->mNumVertices * 2);
+			free(Vertices);
 		}
 	}
 }

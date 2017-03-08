@@ -179,6 +179,13 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 		QT_TRANSLATE_NOOP("Status", "Insert Clipboard contents"),
 		QT_TRANSLATE_NOOP("Shortcut", "Ctrl+V")
 	},
+	// LC_EDIT_DUPLICATE
+	{
+		QT_TRANSLATE_NOOP("Action", "Edit.Duplicate"),
+		QT_TRANSLATE_NOOP("Menu", "&Duplicate"),
+		QT_TRANSLATE_NOOP("Status", "Create a copy of the selected pieces"),
+		QT_TRANSLATE_NOOP("Shortcut", "Ctrl+D")
+	},
 	// LC_EDIT_FIND
 	{
 		QT_TRANSLATE_NOOP("Action", "Edit.Find"),

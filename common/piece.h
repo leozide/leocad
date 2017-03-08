@@ -56,6 +56,7 @@ class lcPiece : public lcObject
 {
 public:
 	lcPiece(PieceInfo* Info);
+	lcPiece(const lcPiece& Other);
 	~lcPiece();
 
 	virtual bool IsSelected() const

@@ -211,6 +211,7 @@ public:
 	void Cut();
 	void Copy();
 	void Paste();
+	void DuplicateSelectedPieces();
 
 	void GetScene(lcScene& Scene, lcCamera* ViewCamera, bool DrawInterface) const;
 	void SubModelAddRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, int DefaultColorIndex, bool Focused, bool Selected) const;

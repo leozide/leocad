@@ -34,6 +34,27 @@ lcPiece::lcPiece(PieceInfo* Info)
 	ChangeKey(mRotationKeys, lcMatrix33Identity(), 1, true);
 }
 
+lcPiece::lcPiece(const lcPiece& Other)
+	: lcObject(LC_OBJECT_PIECE)
+{
+	mMesh = NULL;
+	SetPieceInfo(Other.mPieceInfo, true);
+	mState = 0;
+	mColorIndex = Other.mColorIndex;
+	mColorCode = Other.mColorCode;
+	mStepShow = Other.mStepShow;
+	mStepHide = Other.mStepHide;
+	mGroup = Other.mGroup;
+	mFileLine = -1;
+	mPivotMatrix = Other.mPivotMatrix;
+
+	mPositionKeys = Other.mPositionKeys;
+	mRotationKeys = Other.mRotationKeys;
+	mControlPoints = Other.mControlPoints;
+
+	UpdateMesh();
+}
+
 lcPiece::~lcPiece()
 {
 	if (mPieceInfo)

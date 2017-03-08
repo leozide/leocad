@@ -996,7 +996,7 @@ void lcModel::Cut()
 		gMainWindow->UpdateTimeline(false, false);
 		gMainWindow->UpdateSelectedObjects(true);
 		gMainWindow->UpdateAllViews();
-		SaveCheckpoint("Cutting");
+		SaveCheckpoint(tr("Cutting"));
 	}
 }
 
@@ -1047,6 +1047,33 @@ void lcModel::Paste()
 	CalculateStep(mCurrentStep);
 	gMainWindow->UpdateTimeline(false, false);
 	gMainWindow->UpdateAllViews();
+}
+
+void lcModel::DuplicateSelectedPieces()
+{
+	lcArray<lcObject*> NewPieces;
+
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+	{
+		lcPiece* Piece = mPieces[PieceIdx];
+
+		if (!Piece->IsSelected())
+			continue;
+
+		lcPiece* NewPiece = new lcPiece(*Piece);
+		NewPiece->UpdatePosition(mCurrentStep);
+		NewPieces.Add(NewPiece);
+
+		PieceIdx++;
+		InsertPiece(NewPiece, PieceIdx);
+	}
+
+	if (NewPieces.IsEmpty())
+		return;
+
+	gMainWindow->UpdateTimeline(false, false);
+	SetSelectionAndFocus(NewPieces, NULL, 0);
+	SaveCheckpoint(tr("Duplicating Pieces"));
 }
 
 void lcModel::GetScene(lcScene& Scene, lcCamera* ViewCamera, bool DrawInterface) const
@@ -1978,7 +2005,7 @@ void lcModel::AddPiece()
 	gMainWindow->UpdateTimeline(false, false);
 	ClearSelectionAndSetFocus(Piece, LC_PIECE_SECTION_POSITION);
 
-	SaveCheckpoint("Adding Piece");
+	SaveCheckpoint(tr("Adding Piece"));
 }
 
 void lcModel::AddPiece(lcPiece* Piece)
@@ -2020,7 +2047,7 @@ void lcModel::DeleteAllCameras()
 	gMainWindow->UpdateCameraMenu();
 	gMainWindow->UpdateSelectedObjects(true);
 	gMainWindow->UpdateAllViews();
-	SaveCheckpoint("Reseting Cameras");
+	SaveCheckpoint(tr("Reseting Cameras"));
 }
 
 void lcModel::DeleteSelectedObjects()
@@ -2030,7 +2057,7 @@ void lcModel::DeleteSelectedObjects()
 		gMainWindow->UpdateTimeline(false, false);
 		gMainWindow->UpdateSelectedObjects(true);
 		gMainWindow->UpdateAllViews();
-		SaveCheckpoint("Deleting");
+		SaveCheckpoint(tr("Deleting"));
 	}
 }
 
@@ -2061,7 +2088,7 @@ void lcModel::InsertControlPoint()
 
 	if (Piece->InsertControlPoint(Start, End))
 	{
-		SaveCheckpoint("Modifying");
+		SaveCheckpoint(tr("Modifying"));
 		gMainWindow->UpdateSelectedObjects(true);
 		gMainWindow->UpdateAllViews();
 	}
@@ -2078,7 +2105,7 @@ void lcModel::RemoveFocusedControlPoint()
 
 	if (Piece->RemoveFocusedControlPoint())
 	{
-		SaveCheckpoint("Modifying");
+		SaveCheckpoint(tr("Modifying"));
 		gMainWindow->UpdateSelectedObjects(true);
 		gMainWindow->UpdateAllViews();
 	}
@@ -2120,7 +2147,7 @@ void lcModel::ShowSelectedPiecesEarlier()
 		AddPiece(Piece);
 	}
 
-	SaveCheckpoint("Modifying");
+	SaveCheckpoint(tr("Modifying"));
 	gMainWindow->UpdateTimeline(false, false);
 	gMainWindow->UpdateSelectedObjects(true);
 	gMainWindow->UpdateAllViews();
@@ -2165,7 +2192,7 @@ void lcModel::ShowSelectedPiecesLater()
 		AddPiece(Piece);
 	}
 
-	SaveCheckpoint("Modifying");
+	SaveCheckpoint(tr("Modifying"));
 	gMainWindow->UpdateTimeline(false, false);
 	gMainWindow->UpdateSelectedObjects(true);
 	gMainWindow->UpdateAllViews();
@@ -2200,7 +2227,7 @@ void lcModel::SetPieceSteps(const QList<QPair<lcPiece*, lcStep>>& PieceSteps)
 
 	if (Modified)
 	{
-		SaveCheckpoint("Modifying");
+		SaveCheckpoint(tr("Modifying"));
 		gMainWindow->UpdateAllViews();
 		gMainWindow->UpdateTimeline(false, false);
 		gMainWindow->UpdateSelectedObjects(true);
@@ -2252,7 +2279,7 @@ void lcModel::MoveSelectionToModel(lcModel* Model)
 	if (ModelPiece)
 		ModelPiece->UpdatePosition(mCurrentStep);
 
-	SaveCheckpoint("New Model");
+	SaveCheckpoint(tr("New Model"));
 	gMainWindow->UpdateTimeline(false, false);
 	ClearSelectionAndSetFocus(ModelPiece, LC_PIECE_SECTION_POSITION);
 }
@@ -2302,7 +2329,7 @@ void lcModel::InlineSelectedModels()
 		return;
 	}
 
-	SaveCheckpoint("Inlining");
+	SaveCheckpoint(tr("Inlining"));
 	gMainWindow->UpdateTimeline(false, false);
 	SetSelectionAndFocus(NewPieces, NULL, 0);
 }
@@ -2449,7 +2476,7 @@ void lcModel::MoveSelectedObjects(const lcVector3& PieceDistance, const lcVector
 	{
 		gMainWindow->UpdateAllViews();
 		if (Checkpoint)
-			SaveCheckpoint("Moving");
+			SaveCheckpoint(tr("Moving"));
 		gMainWindow->UpdateSelectedObjects(false);
 	}
 }
@@ -2515,7 +2542,7 @@ void lcModel::RotateSelectedPieces(const lcVector3& Angles, bool Relative, bool 
 	{
 		gMainWindow->UpdateAllViews();
 		if (Checkpoint)
-			SaveCheckpoint("Rotating");
+			SaveCheckpoint(tr("Rotating"));
 		gMainWindow->UpdateSelectedObjects(false);
 	}
 }
@@ -2541,7 +2568,7 @@ void lcModel::ScaleSelectedPieces(const float Scale, bool Update, bool Checkpoin
 		{
 			gMainWindow->UpdateAllViews();
 			if (Checkpoint)
-				SaveCheckpoint("Scaling");
+				SaveCheckpoint(tr("Scaling"));
 			gMainWindow->UpdateSelectedObjects(false);
 		}
 	}

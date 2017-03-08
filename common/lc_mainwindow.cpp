@@ -366,6 +366,7 @@ void lcMainWindow::CreateMenus()
 	EditMenu->addAction(mActions[LC_EDIT_CUT]);
 	EditMenu->addAction(mActions[LC_EDIT_COPY]);
 	EditMenu->addAction(mActions[LC_EDIT_PASTE]);
+	EditMenu->addAction(mActions[LC_EDIT_DUPLICATE]);
 	EditMenu->addSeparator();
 	EditMenu->addAction(mActions[LC_EDIT_FIND]);
 
@@ -1470,6 +1471,7 @@ void lcMainWindow::UpdateSelectedObjects(bool SelectionChanged)
 
 		mActions[LC_EDIT_CUT]->setEnabled(Flags & LC_SEL_SELECTED);
 		mActions[LC_EDIT_COPY]->setEnabled(Flags & LC_SEL_SELECTED);
+		mActions[LC_EDIT_DUPLICATE]->setEnabled(Flags & LC_SEL_SELECTED);
 		mActions[LC_EDIT_FIND]->setEnabled((Flags & LC_SEL_NO_PIECES) == 0);
 		mActions[LC_EDIT_FIND_NEXT]->setEnabled((Flags & LC_SEL_NO_PIECES) == 0);
 		mActions[LC_EDIT_FIND_PREVIOUS]->setEnabled((Flags & LC_SEL_NO_PIECES) == 0);
@@ -2032,6 +2034,10 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 
 	case LC_EDIT_PASTE:
 		lcGetActiveModel()->Paste();
+		break;
+
+	case LC_EDIT_DUPLICATE:
+		lcGetActiveModel()->DuplicateSelectedPieces();
 		break;
 
 	case LC_EDIT_FIND:

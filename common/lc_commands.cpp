@@ -958,7 +958,7 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 	},
 	// LC_PIECE_DUPLICATE
 	{
-		QT_TRANSLATE_NOOP("Action", "Edit.Duplicate"),
+		QT_TRANSLATE_NOOP("Action", "Piece.Duplicate"),
 		QT_TRANSLATE_NOOP("Menu", "&Duplicate"),
 		QT_TRANSLATE_NOOP("Status", "Create a copy of the selected pieces"),
 		QT_TRANSLATE_NOOP("Shortcut", "Ctrl+D")

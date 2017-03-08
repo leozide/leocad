@@ -366,7 +366,6 @@ void lcMainWindow::CreateMenus()
 	EditMenu->addAction(mActions[LC_EDIT_CUT]);
 	EditMenu->addAction(mActions[LC_EDIT_COPY]);
 	EditMenu->addAction(mActions[LC_EDIT_PASTE]);
-	EditMenu->addAction(mActions[LC_EDIT_DUPLICATE]);
 	EditMenu->addSeparator();
 	EditMenu->addAction(mActions[LC_EDIT_FIND]);
 
@@ -418,6 +417,7 @@ void lcMainWindow::CreateMenus()
 	QMenu* PieceMenu = menuBar()->addMenu(tr("&Piece"));
 	PieceMenu->addAction(mActions[LC_PIECE_INSERT]);
 	PieceMenu->addAction(mActions[LC_PIECE_DELETE]);
+	PieceMenu->addAction(mActions[LC_PIECE_DUPLICATE]);
 	PieceMenu->addAction(mActions[LC_PIECE_RESET_PIVOT_POINT]);
 	PieceMenu->addAction(mActions[LC_PIECE_ARRAY]);
 	PieceMenu->addAction(mActions[LC_PIECE_MINIFIG_WIZARD]);
@@ -1471,7 +1471,6 @@ void lcMainWindow::UpdateSelectedObjects(bool SelectionChanged)
 
 		mActions[LC_EDIT_CUT]->setEnabled(Flags & LC_SEL_SELECTED);
 		mActions[LC_EDIT_COPY]->setEnabled(Flags & LC_SEL_SELECTED);
-		mActions[LC_EDIT_DUPLICATE]->setEnabled(Flags & LC_SEL_SELECTED);
 		mActions[LC_EDIT_FIND]->setEnabled((Flags & LC_SEL_NO_PIECES) == 0);
 		mActions[LC_EDIT_FIND_NEXT]->setEnabled((Flags & LC_SEL_NO_PIECES) == 0);
 		mActions[LC_EDIT_FIND_PREVIOUS]->setEnabled((Flags & LC_SEL_NO_PIECES) == 0);
@@ -1482,6 +1481,7 @@ void lcMainWindow::UpdateSelectedObjects(bool SelectionChanged)
 		mActions[LC_EDIT_SELECT_ALL]->setEnabled(Flags & LC_SEL_UNSELECTED);
 
 		mActions[LC_PIECE_DELETE]->setEnabled(Flags & LC_SEL_SELECTED);
+		mActions[LC_PIECE_DUPLICATE]->setEnabled(Flags & LC_SEL_SELECTED);
 		mActions[LC_PIECE_RESET_PIVOT_POINT]->setEnabled(Flags & LC_SEL_SELECTED);
 		mActions[LC_PIECE_ARRAY]->setEnabled(Flags & LC_SEL_PIECE);
 		mActions[LC_PIECE_CONTROL_POINT_INSERT]->setEnabled(Flags & LC_SEL_CAN_ADD_CONTROL_POINT);
@@ -2036,10 +2036,6 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		lcGetActiveModel()->Paste();
 		break;
 
-	case LC_EDIT_DUPLICATE:
-		lcGetActiveModel()->DuplicateSelectedPieces();
-		break;
-
 	case LC_EDIT_FIND:
 		if (DoDialog(LC_DIALOG_FIND, &mSearchOptions))
 			lcGetActiveModel()->FindPiece(true, true);
@@ -2109,6 +2105,10 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 
 	case LC_PIECE_DELETE:
 		lcGetActiveModel()->DeleteSelectedObjects();
+		break;
+
+	case LC_PIECE_DUPLICATE:
+		lcGetActiveModel()->DuplicateSelectedPieces();
 		break;
 
 	case LC_PIECE_RESET_PIVOT_POINT:

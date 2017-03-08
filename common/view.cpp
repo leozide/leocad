@@ -341,7 +341,7 @@ void View::ShowContextMenu() const
 	Popup->addAction(Actions[LC_EDIT_CUT]);
 	Popup->addAction(Actions[LC_EDIT_COPY]);
 	Popup->addAction(Actions[LC_EDIT_PASTE]);
-	Popup->addAction(Actions[LC_EDIT_DUPLICATE]);
+	Popup->addAction(Actions[LC_PIECE_DUPLICATE]);
 
 	Popup->addSeparator();
 

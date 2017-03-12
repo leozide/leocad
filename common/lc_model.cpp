@@ -1171,7 +1171,7 @@ void lcModel::DrawBackground(lcGLWidget* Widget)
 			ViewWidth, 0.0f,       Color2[0], Color2[1], Color2[2], 1.0f
 		};
 
-		Context->SetMaterial(LC_MATERIAL_VERTEX_COLOR);
+		Context->SetMaterial(LC_MATERIAL_UNLIT_VERTEX_COLOR);
 		Context->SetVertexBufferPointer(Verts);
 		Context->SetVertexFormat(0, 2, 0, 0, 4);
 
@@ -1187,7 +1187,7 @@ void lcModel::DrawBackground(lcGLWidget* Widget)
 	{
 		glEnable(GL_TEXTURE_2D);
 
-		Context->SetTextureMode(LC_TEXTURE_REPLACE);
+		Context->SetTextureMode(LC_TEXTURE_MODULATE);
 		glBindTexture(GL_TEXTURE_2D, mBackgroundTexture->mTexture);
 
 		float TileWidth = 1.0f, TileHeight = 1.0f;
@@ -1206,7 +1206,8 @@ void lcModel::DrawBackground(lcGLWidget* Widget)
 			0.0f,      0.0f,       0.0f,      TileHeight
 		};
 
-		Context->SetMaterial(LC_MATERIAL_TEXTURE);
+		Context->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+		Context->SetMaterial(LC_MATERIAL_UNLIT_TEXTURE_MODULATE);
 		Context->SetVertexBufferPointer(Verts);
 		Context->SetVertexFormat(0, 2, 0, 2, 0);
 

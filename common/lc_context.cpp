@@ -18,7 +18,7 @@
 #define GL_STATIC_DRAW_ARB GL_STATIC_DRAW
 #endif
 
-lcProgram lcContext::mPrograms[LC_NUM_LIGHTING_MODES][LC_NUM_MATERIALS];
+lcProgram lcContext::mPrograms[LC_NUM_MATERIALS];
 
 static int lcOpaqueRenderMeshCompare(const void* Elem1, const void* Elem2)
 {
@@ -133,324 +133,237 @@ void lcContext::CreateShaderPrograms()
 	"	vec3 SpecularColor = vec3(Specular, Specular, Specular);\n" \
 	"	float Diffuse = min(abs(dot(Normal, LightDirection)) * 0.6 + 0.65, 1.0);\n"
 
-	const char* VertexShaders[LC_NUM_LIGHTING_MODES][LC_NUM_MATERIALS] =
+	const char* VertexShaders[LC_NUM_MATERIALS] =
 	{
-		// LC_LIGHTING_UNLIT
-		{
-			// LC_MATERIAL_SIMPLE
-			LC_SHADER_VERSION
-			LC_VERTEX_INPUT "vec3 VertexPosition;\n"
-			"uniform mat4 WorldViewProjectionMatrix;\n"
-			"void main()\n"
-			"{\n"
-			"	gl_Position = WorldViewProjectionMatrix * vec4(VertexPosition, 1.0);\n"
-			"}\n",
-			// LC_MATERIAL_TEXTURE
-			LC_SHADER_VERSION
-			LC_VERTEX_INPUT "vec3 VertexPosition;\n"
-			LC_VERTEX_INPUT "vec2 VertexTexCoord;\n"
-			LC_VERTEX_OUTPUT "vec2 PixelTexCoord;\n"
-			"uniform mat4 WorldViewProjectionMatrix;\n"
-			"void main()\n"
-			"{\n"
-			"	gl_Position = WorldViewProjectionMatrix * vec4(VertexPosition, 1.0);\n"
-			"	PixelTexCoord = VertexTexCoord;\n"
-			"}\n",
-			// LC_MATERIAL_VERTEX_COLOR
-			LC_SHADER_VERSION
-			LC_VERTEX_INPUT "vec3 VertexPosition;\n"
-			LC_VERTEX_INPUT "vec4 VertexColor;\n"
-			LC_VERTEX_OUTPUT "vec4 PixelColor;\n"
-			"uniform mat4 WorldViewProjectionMatrix;\n"
-			"void main()\n"
-			"{\n"
-			"	gl_Position = WorldViewProjectionMatrix * vec4(VertexPosition, 1.0);\n"
-			"	PixelColor = VertexColor;\n"
-			"}\n"
-		},
-		// LC_LIGHTING_FAKE
-		{
-			// LC_MATERIAL_SIMPLE
-			LC_SHADER_VERSION
-			LC_VERTEX_INPUT "vec3 VertexPosition;\n"
-			LC_VERTEX_INPUT "vec3 VertexNormal;\n"
-			LC_VERTEX_OUTPUT "vec3 PixelPosition;\n"
-			LC_VERTEX_OUTPUT "vec3 PixelNormal;\n"
-			"uniform mat4 WorldViewProjectionMatrix;\n"
-			"uniform mat4 WorldMatrix;\n"
-			"void main()\n"
-			"{\n"
-			"	PixelPosition = (WorldMatrix * vec4(VertexPosition, 1.0)).xyz;\n"
-			"   PixelNormal = (WorldMatrix * vec4(VertexNormal, 0.0)).xyz;\n"
-			"	gl_Position = WorldViewProjectionMatrix * vec4(VertexPosition, 1.0);\n"
-			"}\n",
-			// LC_MATERIAL_TEXTURE
-			LC_SHADER_VERSION
-			LC_VERTEX_INPUT "vec3 VertexPosition;\n"
-			LC_VERTEX_INPUT "vec3 VertexNormal;\n"
-			LC_VERTEX_INPUT "vec2 VertexTexCoord;\n"
-			LC_VERTEX_OUTPUT "vec3 PixelPosition;\n"
-			LC_VERTEX_OUTPUT "vec3 PixelNormal;\n"
-			LC_VERTEX_OUTPUT "vec2 PixelTexCoord;\n"
-			"uniform mat4 WorldViewProjectionMatrix;\n"
-			"uniform mat4 WorldMatrix;\n"
-			"void main()\n"
-			"{\n"
-			"	PixelPosition = (WorldMatrix * vec4(VertexPosition, 1.0)).xyz;\n"
-			"   PixelNormal = (WorldMatrix * vec4(VertexNormal, 0.0)).xyz;\n"
-			"	gl_Position = WorldViewProjectionMatrix * vec4(VertexPosition, 1.0);\n"
-			"	PixelTexCoord = VertexTexCoord;\n"
-			"}\n",
-			// LC_MATERIAL_VERTEX_COLOR
-			LC_SHADER_VERSION
-			LC_VERTEX_INPUT "vec3 VertexPosition;\n"
-			LC_VERTEX_INPUT "vec3 VertexNormal;\n"
-			LC_VERTEX_INPUT "vec4 VertexColor;\n"
-			LC_VERTEX_OUTPUT "vec3 PixelPosition;\n"
-			LC_VERTEX_OUTPUT "vec3 PixelNormal;\n"
-			LC_VERTEX_OUTPUT "vec4 PixelColor;\n"
-			"uniform mat4 WorldViewProjectionMatrix;\n"
-			"uniform mat4 WorldMatrix;\n"
-			"void main()\n"
-			"{\n"
-			"	PixelPosition = (WorldMatrix * vec4(VertexPosition, 1.0)).xyz;\n"
-			"   PixelNormal = (WorldMatrix * vec4(VertexNormal, 0.0)).xyz;\n"
-			"	gl_Position = WorldViewProjectionMatrix * vec4(VertexPosition, 1.0);\n"
-			"	PixelColor = VertexColor;\n"
-			"}\n"
-		},
-		// LC_LIGHTING_FULL
-		{
-			// LC_MATERIAL_SIMPLE
-			LC_SHADER_VERSION
-			LC_VERTEX_INPUT "vec3 VertexPosition;\n"
-			"uniform mat4 WorldViewProjectionMatrix;\n"
-			"void main()\n"
-			"{\n"
-			"	gl_Position = WorldViewProjectionMatrix * vec4(VertexPosition, 1.0);\n"
-			"}\n",
-			// LC_MATERIAL_TEXTURE
-			LC_SHADER_VERSION
-			LC_VERTEX_INPUT "vec3 VertexPosition;\n"
-			LC_VERTEX_INPUT "vec2 VertexTexCoord;\n"
-			LC_VERTEX_OUTPUT "vec2 PixelTexCoord;\n"
-			"uniform mat4 WorldViewProjectionMatrix;\n"
-			"void main()\n"
-			"{\n"
-			"	gl_Position = WorldViewProjectionMatrix * vec4(VertexPosition, 1.0);\n"
-			"	PixelTexCoord = VertexTexCoord;\n"
-			"}\n",
-			// LC_MATERIAL_VERTEX_COLOR
-			LC_SHADER_VERSION
-			LC_VERTEX_INPUT "vec3 VertexPosition;\n"
-			LC_VERTEX_INPUT "vec4 VertexColor;\n"
-			LC_VERTEX_OUTPUT "vec4 PixelColor;\n"
-			"uniform mat4 WorldViewProjectionMatrix;\n"
-			"void main()\n"
-			"{\n"
-			"	gl_Position = WorldViewProjectionMatrix * vec4(VertexPosition, 1.0);\n"
-			"	PixelColor = VertexColor;\n"
-			"}\n"
-		}
+		// LC_MATERIAL_UNLIT_COLOR
+		LC_SHADER_VERSION
+		LC_VERTEX_INPUT "vec3 VertexPosition;\n"
+		"uniform mat4 WorldViewProjectionMatrix;\n"
+		"void main()\n"
+		"{\n"
+		"	gl_Position = WorldViewProjectionMatrix * vec4(VertexPosition, 1.0);\n"
+		"}\n",
+		// LC_MATERIAL_UNLIT_TEXTURE_MODULATE
+		LC_SHADER_VERSION
+		LC_VERTEX_INPUT "vec3 VertexPosition;\n"
+		LC_VERTEX_INPUT "vec2 VertexTexCoord;\n"
+		LC_VERTEX_OUTPUT "vec2 PixelTexCoord;\n"
+		"uniform mat4 WorldViewProjectionMatrix;\n"
+		"void main()\n"
+		"{\n"
+		"	gl_Position = WorldViewProjectionMatrix * vec4(VertexPosition, 1.0);\n"
+		"	PixelTexCoord = VertexTexCoord;\n"
+		"}\n",
+		// LC_MATERIAL_UNLIT_TEXTURE_DECAL
+		LC_SHADER_VERSION
+		LC_VERTEX_INPUT "vec3 VertexPosition;\n"
+		LC_VERTEX_INPUT "vec2 VertexTexCoord;\n"
+		LC_VERTEX_OUTPUT "vec2 PixelTexCoord;\n"
+		"uniform mat4 WorldViewProjectionMatrix;\n"
+		"void main()\n"
+		"{\n"
+		"	gl_Position = WorldViewProjectionMatrix * vec4(VertexPosition, 1.0);\n"
+		"	PixelTexCoord = VertexTexCoord;\n"
+		"}\n",
+		// LC_MATERIAL_UNLIT_VERTEX_COLOR
+		LC_SHADER_VERSION
+		LC_VERTEX_INPUT "vec3 VertexPosition;\n"
+		LC_VERTEX_INPUT "vec4 VertexColor;\n"
+		LC_VERTEX_OUTPUT "vec4 PixelColor;\n"
+		"uniform mat4 WorldViewProjectionMatrix;\n"
+		"void main()\n"
+		"{\n"
+		"	gl_Position = WorldViewProjectionMatrix * vec4(VertexPosition, 1.0);\n"
+		"	PixelColor = VertexColor;\n"
+		"}\n",
+		// LC_MATERIAL_FAKELIT_COLOR
+		LC_SHADER_VERSION
+		LC_VERTEX_INPUT "vec3 VertexPosition;\n"
+		LC_VERTEX_INPUT "vec3 VertexNormal;\n"
+		LC_VERTEX_OUTPUT "vec3 PixelPosition;\n"
+		LC_VERTEX_OUTPUT "vec3 PixelNormal;\n"
+		"uniform mat4 WorldViewProjectionMatrix;\n"
+		"uniform mat4 WorldMatrix;\n"
+		"void main()\n"
+		"{\n"
+		"	PixelPosition = (WorldMatrix * vec4(VertexPosition, 1.0)).xyz;\n"
+		"   PixelNormal = (WorldMatrix * vec4(VertexNormal, 0.0)).xyz;\n"
+		"	gl_Position = WorldViewProjectionMatrix * vec4(VertexPosition, 1.0);\n"
+		"}\n",
+		// LC_MATERIAL_FAKELIT_TEXTURE_DECAL
+		LC_SHADER_VERSION
+		LC_VERTEX_INPUT "vec3 VertexPosition;\n"
+		LC_VERTEX_INPUT "vec3 VertexNormal;\n"
+		LC_VERTEX_INPUT "vec2 VertexTexCoord;\n"
+		LC_VERTEX_OUTPUT "vec3 PixelPosition;\n"
+		LC_VERTEX_OUTPUT "vec3 PixelNormal;\n"
+		LC_VERTEX_OUTPUT "vec2 PixelTexCoord;\n"
+		"uniform mat4 WorldViewProjectionMatrix;\n"
+		"uniform mat4 WorldMatrix;\n"
+		"void main()\n"
+		"{\n"
+		"	PixelPosition = (WorldMatrix * vec4(VertexPosition, 1.0)).xyz;\n"
+		"   PixelNormal = (WorldMatrix * vec4(VertexNormal, 0.0)).xyz;\n"
+		"	gl_Position = WorldViewProjectionMatrix * vec4(VertexPosition, 1.0);\n"
+		"	PixelTexCoord = VertexTexCoord;\n"
+		"}\n"
 	};
 
-	const char* FragmentShaders[LC_NUM_LIGHTING_MODES][LC_NUM_MATERIALS] =
+	const char* FragmentShaders[LC_NUM_MATERIALS] =
 	{
-		// LC_LIGHTING_UNLIT
-		{
-			// LC_MATERIAL_SIMPLE
-			LC_SHADER_VERSION
-			LC_PIXEL_OUTPUT
-			"uniform mediump vec4 MaterialColor;\n"
-			"void main()\n"
-			"{\n"
-			"	gl_FragColor = MaterialColor;\n"
-			"}\n",
-			// LC_MATERIAL_TEXTURE
-			LC_SHADER_VERSION
-			LC_PIXEL_INPUT "vec2 PixelTexCoord;\n"
-			LC_PIXEL_OUTPUT
-			"uniform mediump vec4 MaterialColor;\n"
-			"uniform sampler2D Texture;\n"
-			"void main()\n"
-			"{\n"
-			"	vec4 TexelColor = texture2D(Texture, PixelTexCoord);"
-			"	gl_FragColor = vec4(MaterialColor.rgb, TexelColor.a * MaterialColor.a);\n"//vec4(mix(MaterialColor.xyz, TexelColor.xyz, TexelColor.a), MaterialColor.a);\n" // TODO: we need to support different texture modes, this shader is used by the overlay font, base grid and texmap pieces.
-			"}\n",
-			// LC_MATERIAL_VERTEX_COLOR
-			LC_SHADER_VERSION
-			LC_PIXEL_INPUT "vec4 PixelColor;\n"
-			LC_PIXEL_OUTPUT
-			"void main()\n"
-			"{\n"
-			"	gl_FragColor = PixelColor;\n"
-			"}\n"
-		},
-		// LC_LIGHTING_FAKE
-		{
-			// LC_MATERIAL_SIMPLE
-			LC_SHADER_VERSION
-			LC_PIXEL_INPUT "vec3 PixelPosition;\n"
-			LC_PIXEL_INPUT "vec3 PixelNormal;\n"
-			LC_PIXEL_OUTPUT
-			"uniform mediump vec4 MaterialColor;\n"
-			"uniform mediump vec3 LightPosition;\n"
-			"uniform mediump vec3 EyePosition;\n"
-			"void main()\n"
-			"{\n"
-			LC_PIXEL_FAKE_LIGHTING
-			"	vec3 DiffuseColor = MaterialColor.rgb * Diffuse;\n"
-			"	gl_FragColor = vec4(DiffuseColor + SpecularColor, MaterialColor.a);\n"
-			"}\n",
-			// LC_MATERIAL_TEXTURE
-			LC_SHADER_VERSION
-			LC_PIXEL_INPUT "vec3 PixelPosition;\n"
-			LC_PIXEL_INPUT "vec3 PixelNormal;\n"
-			LC_PIXEL_INPUT "vec2 PixelTexCoord;\n"
-			LC_PIXEL_OUTPUT
-			"uniform mediump vec4 MaterialColor;\n"
-			"uniform mediump vec3 LightPosition;\n"
-			"uniform mediump vec3 EyePosition;\n"
-			"uniform sampler2D Texture;\n"
-			"void main()\n"
-			"{\n"
-			LC_PIXEL_FAKE_LIGHTING
-			"	vec4 TexelColor = texture2D(Texture, PixelTexCoord);"
-			"	vec3 DiffuseColor = mix(MaterialColor.xyz, TexelColor.xyz, TexelColor.a) * Diffuse;\n"
-			"	gl_FragColor = vec4(DiffuseColor + SpecularColor, MaterialColor.a);\n"
-			"}\n",
-			// LC_MATERIAL_VERTEX_COLOR
-			LC_SHADER_VERSION
-			LC_PIXEL_INPUT "vec3 PixelPosition;\n"
-			LC_PIXEL_INPUT "vec3 PixelNormal;\n"
-			LC_PIXEL_INPUT "vec4 PixelColor;\n"
-			LC_PIXEL_OUTPUT
-			"uniform mediump vec3 LightPosition;\n"
-			"uniform mediump vec3 EyePosition;\n"
-			"void main()\n"
-			"{\n"
-			LC_PIXEL_FAKE_LIGHTING
-			"	vec3 DiffuseColor = PixelColor.rgb * Diffuse;\n"
-			"	gl_FragColor = vec4(DiffuseColor + SpecularColor, PixelColor.a);\n"
-			"}\n"
-		},
-		// LC_LIGHTING_FULL
-		{
-			// LC_MATERIAL_SIMPLE
-			LC_SHADER_VERSION
-			LC_PIXEL_OUTPUT
-			"uniform mediump vec4 MaterialColor;\n"
-			"void main()\n"
-			"{\n"
-			"	gl_FragColor = MaterialColor;\n"
-			"}\n",
-			// LC_MATERIAL_TEXTURE
-			LC_SHADER_VERSION
-			LC_PIXEL_INPUT "vec2 PixelTexCoord;\n"
-			LC_PIXEL_OUTPUT
-			"uniform mediump vec4 MaterialColor;\n"
-			"uniform sampler2D Texture;\n"
-			"void main()\n"
-			"{\n"
-			"	vec4 TexelColor = texture2D(Texture, PixelTexCoord);"
-			"	gl_FragColor = vec4(mix(MaterialColor.xyz, TexelColor.xyz, TexelColor.a), MaterialColor.a);\n"
-			"}\n",
-			// LC_MATERIAL_VERTEX_COLOR
-			LC_SHADER_VERSION
-			LC_PIXEL_INPUT "vec4 PixelColor;\n"
-			LC_PIXEL_OUTPUT
-			"void main()\n"
-			"{\n"
-			"	gl_FragColor = PixelColor;\n"
-			"}\n"
-		}
+		// LC_MATERIAL_UNLIT_COLOR
+		LC_SHADER_VERSION
+		LC_PIXEL_OUTPUT
+		"uniform mediump vec4 MaterialColor;\n"
+		"void main()\n"
+		"{\n"
+		"	gl_FragColor = MaterialColor;\n"
+		"}\n",
+		// LC_MATERIAL_UNLIT_TEXTURE_MODULATE
+		LC_SHADER_VERSION
+		LC_PIXEL_INPUT "vec2 PixelTexCoord;\n"
+		LC_PIXEL_OUTPUT
+		"uniform mediump vec4 MaterialColor;\n"
+		"uniform sampler2D Texture;\n"
+		"void main()\n"
+		"{\n"
+		"	vec4 TexelColor = texture2D(Texture, PixelTexCoord);"
+		"	gl_FragColor = vec4(MaterialColor.rgb, TexelColor.a * MaterialColor.a);\n"
+		"}\n",
+		// LC_MATERIAL_UNLIT_TEXTURE_DECAL
+		LC_SHADER_VERSION
+		LC_PIXEL_INPUT "vec2 PixelTexCoord;\n"
+		LC_PIXEL_OUTPUT
+		"uniform mediump vec4 MaterialColor;\n"
+		"uniform sampler2D Texture;\n"
+		"void main()\n"
+		"{\n"
+		"	vec4 TexelColor = texture2D(Texture, PixelTexCoord);"
+		"	gl_FragColor = vec4(mix(MaterialColor.xyz, TexelColor.xyz, TexelColor.a), MaterialColor.a);\n"
+		"}\n",
+		// LC_MATERIAL_UNLIT_VERTEX_COLOR
+		LC_SHADER_VERSION
+		LC_PIXEL_INPUT "vec4 PixelColor;\n"
+		LC_PIXEL_OUTPUT
+		"void main()\n"
+		"{\n"
+		"	gl_FragColor = PixelColor;\n"
+		"}\n",
+		// LC_MATERIAL_FAKELIT_COLOR
+		LC_SHADER_VERSION
+		LC_PIXEL_INPUT "vec3 PixelPosition;\n"
+		LC_PIXEL_INPUT "vec3 PixelNormal;\n"
+		LC_PIXEL_OUTPUT
+		"uniform mediump vec4 MaterialColor;\n"
+		"uniform mediump vec3 LightPosition;\n"
+		"uniform mediump vec3 EyePosition;\n"
+		"void main()\n"
+		"{\n"
+		LC_PIXEL_FAKE_LIGHTING
+		"	vec3 DiffuseColor = MaterialColor.rgb * Diffuse;\n"
+		"	gl_FragColor = vec4(DiffuseColor + SpecularColor, MaterialColor.a);\n"
+		"}\n",
+		// LC_MATERIAL_FAKELIT_TEXTURE_DECAL
+		LC_SHADER_VERSION
+		LC_PIXEL_INPUT "vec3 PixelPosition;\n"
+		LC_PIXEL_INPUT "vec3 PixelNormal;\n"
+		LC_PIXEL_INPUT "vec2 PixelTexCoord;\n"
+		LC_PIXEL_OUTPUT
+		"uniform mediump vec4 MaterialColor;\n"
+		"uniform mediump vec3 LightPosition;\n"
+		"uniform mediump vec3 EyePosition;\n"
+		"uniform sampler2D Texture;\n"
+		"void main()\n"
+		"{\n"
+		LC_PIXEL_FAKE_LIGHTING
+		"	vec4 TexelColor = texture2D(Texture, PixelTexCoord);"
+		"	vec3 DiffuseColor = mix(MaterialColor.xyz, TexelColor.xyz, TexelColor.a) * Diffuse;\n"
+		"	gl_FragColor = vec4(DiffuseColor + SpecularColor, MaterialColor.a);\n"
+		"}\n"
 	};
 
-	for (int LightingMode = 0; LightingMode < LC_NUM_LIGHTING_MODES; LightingMode++)
+	for (int MaterialType = 0; MaterialType < LC_NUM_MATERIALS; MaterialType++)
 	{
-		for (int MaterialType = 0; MaterialType < LC_NUM_MATERIALS; MaterialType++)
+		GLuint VertexShader = glCreateShader(GL_VERTEX_SHADER);
+		glShaderSource(VertexShader, 1, &VertexShaders[MaterialType], NULL);
+		glCompileShader(VertexShader);
+
+#ifndef QT_NO_DEBUG
+		GLint VertexShaderCompiled = 0;
+		glGetShaderiv(VertexShader, GL_COMPILE_STATUS, &VertexShaderCompiled);
+
+		if (VertexShaderCompiled == GL_FALSE)
 		{
-			GLuint VertexShader = glCreateShader(GL_VERTEX_SHADER);
-			glShaderSource(VertexShader, 1, &VertexShaders[LightingMode][MaterialType], NULL);
-			glCompileShader(VertexShader);
+			GLint Length = 0;
+			glGetShaderiv(VertexShader, GL_INFO_LOG_LENGTH, &Length);
 
-#ifndef QT_NO_DEBUG
-			GLint VertexShaderCompiled = 0;
-			glGetShaderiv(VertexShader, GL_COMPILE_STATUS, &VertexShaderCompiled);
+			QByteArray InfoLog;
+			InfoLog.resize(Length);
+			glGetShaderInfoLog(VertexShader, Length, &Length, InfoLog.data());
 
-			if (VertexShaderCompiled == GL_FALSE)
-			{
-				GLint Length = 0;
-				glGetShaderiv(VertexShader, GL_INFO_LOG_LENGTH, &Length);
-
-				QByteArray InfoLog;
-				InfoLog.resize(Length);
-				glGetShaderInfoLog(VertexShader, Length, &Length, InfoLog.data());
-
-				qDebug() << InfoLog;
-			}
-#endif
-
-			GLuint FragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-			glShaderSource(FragmentShader, 1, &FragmentShaders[LightingMode][MaterialType], NULL);
-			glCompileShader(FragmentShader);
-
-#ifndef QT_NO_DEBUG
-			GLint FragmentShaderCompiled = 0;
-			glGetShaderiv(FragmentShader, GL_COMPILE_STATUS, &FragmentShaderCompiled);
-
-			if (FragmentShaderCompiled == GL_FALSE)
-			{
-				GLint Length = 0;
-				glGetShaderiv(FragmentShader, GL_INFO_LOG_LENGTH, &Length);
-
-				QByteArray InfoLog;
-				InfoLog.resize(Length);
-				glGetShaderInfoLog(FragmentShader, Length, &Length, InfoLog.data());
-
-				qDebug() << InfoLog;
-			}
-#endif
-
-			GLuint Program = glCreateProgram();
-
-			glAttachShader(Program, VertexShader);
-			glAttachShader(Program, FragmentShader);
-
-			glBindAttribLocation(Program, LC_ATTRIB_POSITION, "VertexPosition");
-			glBindAttribLocation(Program, LC_ATTRIB_NORMAL, "VertexNormal");
-			glBindAttribLocation(Program, LC_ATTRIB_TEXCOORD, "VertexTexCoord");
-			glBindAttribLocation(Program, LC_ATTRIB_COLOR, "VertexColor");
-
-			glLinkProgram(Program);
-
-			glDetachShader(Program, VertexShader);
-			glDetachShader(Program, FragmentShader);
-			glDeleteShader(VertexShader);
-			glDeleteShader(FragmentShader);
-
-			GLint IsLinked = 0;
-			glGetProgramiv(Program, GL_LINK_STATUS, &IsLinked);
-			if (IsLinked == GL_FALSE)
-			{
-				GLint Length = 0;
-				glGetProgramiv(Program, GL_INFO_LOG_LENGTH, &Length);
-
-				QByteArray InfoLog;
-				InfoLog.resize(Length);
-				glGetProgramInfoLog(Program, Length, &Length, InfoLog.data());
-
-				glDeleteProgram(Program);
-				Program = 0;
-			}
-
-			mPrograms[LightingMode][MaterialType].Object = Program;
-			mPrograms[LightingMode][MaterialType].WorldViewProjectionMatrixLocation = glGetUniformLocation(Program, "WorldViewProjectionMatrix");
-			mPrograms[LightingMode][MaterialType].WorldMatrixLocation = glGetUniformLocation(Program, "WorldMatrix");
-			mPrograms[LightingMode][MaterialType].MaterialColorLocation = glGetUniformLocation(Program, "MaterialColor");
-			mPrograms[LightingMode][MaterialType].LightPositionLocation = glGetUniformLocation(Program, "LightPosition");
-			mPrograms[LightingMode][MaterialType].EyePositionLocation = glGetUniformLocation(Program, "EyePosition");
+			qDebug() << InfoLog;
 		}
+#endif
+
+		GLuint FragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+		glShaderSource(FragmentShader, 1, &FragmentShaders[MaterialType], NULL);
+		glCompileShader(FragmentShader);
+
+#ifndef QT_NO_DEBUG
+		GLint FragmentShaderCompiled = 0;
+		glGetShaderiv(FragmentShader, GL_COMPILE_STATUS, &FragmentShaderCompiled);
+
+		if (FragmentShaderCompiled == GL_FALSE)
+		{
+			GLint Length = 0;
+			glGetShaderiv(FragmentShader, GL_INFO_LOG_LENGTH, &Length);
+
+			QByteArray InfoLog;
+			InfoLog.resize(Length);
+			glGetShaderInfoLog(FragmentShader, Length, &Length, InfoLog.data());
+
+			qDebug() << InfoLog;
+		}
+#endif
+
+		GLuint Program = glCreateProgram();
+
+		glAttachShader(Program, VertexShader);
+		glAttachShader(Program, FragmentShader);
+
+		glBindAttribLocation(Program, LC_ATTRIB_POSITION, "VertexPosition");
+		glBindAttribLocation(Program, LC_ATTRIB_NORMAL, "VertexNormal");
+		glBindAttribLocation(Program, LC_ATTRIB_TEXCOORD, "VertexTexCoord");
+		glBindAttribLocation(Program, LC_ATTRIB_COLOR, "VertexColor");
+
+		glLinkProgram(Program);
+
+		glDetachShader(Program, VertexShader);
+		glDetachShader(Program, FragmentShader);
+		glDeleteShader(VertexShader);
+		glDeleteShader(FragmentShader);
+
+		GLint IsLinked = 0;
+		glGetProgramiv(Program, GL_LINK_STATUS, &IsLinked);
+		if (IsLinked == GL_FALSE)
+		{
+			GLint Length = 0;
+			glGetProgramiv(Program, GL_INFO_LOG_LENGTH, &Length);
+
+			QByteArray InfoLog;
+			InfoLog.resize(Length);
+			glGetProgramInfoLog(Program, Length, &Length, InfoLog.data());
+
+			glDeleteProgram(Program);
+			Program = 0;
+		}
+
+		mPrograms[MaterialType].Object = Program;
+		mPrograms[MaterialType].WorldViewProjectionMatrixLocation = glGetUniformLocation(Program, "WorldViewProjectionMatrix");
+		mPrograms[MaterialType].WorldMatrixLocation = glGetUniformLocation(Program, "WorldMatrix");
+		mPrograms[MaterialType].MaterialColorLocation = glGetUniformLocation(Program, "MaterialColor");
+		mPrograms[MaterialType].LightPositionLocation = glGetUniformLocation(Program, "LightPosition");
+		mPrograms[MaterialType].EyePositionLocation = glGetUniformLocation(Program, "EyePosition");
 	}
 }
 
@@ -467,9 +380,11 @@ void lcContext::DestroyResources()
 	if (!gSupportsShaderObjects)
 		return;
 
-	for (int LightingMode = 0; LightingMode < LC_NUM_LIGHTING_MODES; LightingMode++)
-		for (int MaterialType = 0; MaterialType < LC_NUM_MATERIALS; MaterialType++)
-			glDeleteProgram(mPrograms[LightingMode][MaterialType].Object);
+	for (int MaterialType = 0; MaterialType < LC_NUM_MATERIALS; MaterialType++)
+	{
+		glDeleteProgram(mPrograms[MaterialType].Object);
+		mPrograms[MaterialType].Object = 0;
+	}
 }
 
 void lcContext::SetDefaultState()
@@ -551,10 +466,10 @@ void lcContext::SetMaterial(lcMaterialType MaterialType)
 	if (!gSupportsShaderObjects || mMaterialType == MaterialType)
 		return;
 
-	glUseProgram(mPrograms[mLightingMode][MaterialType].Object);
+	glUseProgram(mPrograms[MaterialType].Object);
 	mMaterialType = MaterialType;
 	mColorDirty = true;
-	mWorldMatrixDirty = true;
+	mWorldMatrixDirty = true; // todo: change dirty to a bitfield and set the lighting constants dirty here
 }
 
 void lcContext::SetViewport(int x, int y, int Width, int Height)
@@ -1140,7 +1055,7 @@ void lcContext::FlushState()
 {
 	if (gSupportsShaderObjects)
 	{
-		const lcProgram& Program = mPrograms[mLightingMode][mMaterialType];
+		const lcProgram& Program = mPrograms[mMaterialType];
 
 		if (mWorldMatrixDirty || mViewMatrixDirty || mProjectionMatrixDirty)
 		{
@@ -1236,7 +1151,7 @@ void lcContext::DrawMeshSection(lcMesh* Mesh, lcMeshSection* Section)
 
 	if (!Texture)
 	{
-		SetMaterial(LC_MATERIAL_SIMPLE);
+		SetMaterial(mLightingMode == LC_LIGHTING_UNLIT ? LC_MATERIAL_UNLIT_COLOR : LC_MATERIAL_FAKELIT_COLOR);
 		SetVertexFormat(VertexBufferOffset, 3, 1, 0, 0);
 
 		if (mTexture)
@@ -1248,7 +1163,7 @@ void lcContext::DrawMeshSection(lcMesh* Mesh, lcMeshSection* Section)
 	else
 	{
 		VertexBufferOffset += Mesh->mNumVertices * sizeof(lcVertex);
-		SetMaterial(LC_MATERIAL_TEXTURE);
+		SetMaterial(mLightingMode == LC_LIGHTING_UNLIT ? LC_MATERIAL_UNLIT_TEXTURE_DECAL : LC_MATERIAL_FAKELIT_TEXTURE_DECAL);
 		SetVertexFormat(VertexBufferOffset, 3, 1, 2, 0);
 
 		if (Texture != mTexture)

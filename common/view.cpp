@@ -570,7 +570,6 @@ void View::OnDraw()
 	mContext->SetViewMatrix(mCamera->mWorldView);
 	mContext->SetProjectionMatrix(GetProjectionMatrix());
 	mContext->SetLightingMode(Preferences.mLightingMode);
-	mContext->SetMaterial(LC_MATERIAL_SIMPLE);
 
 #ifndef LC_OPENGLES
 	const lcModelProperties& Properties = mModel->GetProperties();
@@ -599,7 +598,6 @@ void View::OnDraw()
 	if (DrawInterface)
 	{
 		mContext->SetLightingMode(LC_LIGHTING_UNLIT);
-		mContext->SetMaterial(LC_MATERIAL_SIMPLE);
 		mContext->DrawInterfaceObjects(mScene.mInterfaceObjects);
 
 		mContext->SetLineWidth(1.0f);
@@ -628,7 +626,7 @@ void View::OnDraw()
 
 void View::DrawSelectMoveOverlay()
 {
-	mContext->SetMaterial(LC_MATERIAL_SIMPLE);
+	mContext->SetMaterial(LC_MATERIAL_UNLIT_COLOR);
 	mContext->SetViewMatrix(mCamera->mWorldView);
 	mContext->SetProjectionMatrix(GetProjectionMatrix());
 
@@ -819,7 +817,7 @@ void View::DrawRotateOverlay()
 	const float OverlayScale = GetOverlayScale();
 	const float OverlayRotateRadius = 2.0f;
 
-	mContext->SetMaterial(LC_MATERIAL_SIMPLE);
+	mContext->SetMaterial(LC_MATERIAL_UNLIT_COLOR);
 	mContext->SetViewMatrix(mCamera->mWorldView);
 	mContext->SetProjectionMatrix(GetProjectionMatrix());
 
@@ -1090,7 +1088,7 @@ void View::DrawRotateOverlay()
 		// Draw text.
 		lcVector3 ScreenPos = ProjectPoint(OverlayCenter);
 
-		mContext->SetMaterial(LC_MATERIAL_TEXTURE);
+		mContext->SetMaterial(LC_MATERIAL_UNLIT_TEXTURE_MODULATE);
 		mContext->SetWorldMatrix(lcMatrix44Identity());
 		mContext->SetViewMatrix(lcMatrix44Translation(lcVector3(0.375, 0.375, 0.0)));
 		mContext->SetProjectionMatrix(lcMatrix44Ortho(0.0f, mWidth, 0.0f, mHeight, -1.0f, 1.0f));
@@ -1119,7 +1117,7 @@ void View::DrawRotateOverlay()
 
 void View::DrawSelectZoomRegionOverlay()
 {
-	mContext->SetMaterial(LC_MATERIAL_SIMPLE);
+	mContext->SetMaterial(LC_MATERIAL_UNLIT_COLOR);
 	mContext->SetWorldMatrix(lcMatrix44Identity());
 	mContext->SetViewMatrix(lcMatrix44Translation(lcVector3(0.375, 0.375, 0.0)));
 	mContext->SetProjectionMatrix(lcMatrix44Ortho(0.0f, mWidth, 0.0f, mHeight, -1.0f, 1.0f));
@@ -1208,7 +1206,7 @@ void View::DrawRotateViewOverlay()
 	w = mWidth;
 	h = mHeight;
 
-	mContext->SetMaterial(LC_MATERIAL_SIMPLE);
+	mContext->SetMaterial(LC_MATERIAL_UNLIT_COLOR);
 	mContext->SetWorldMatrix(lcMatrix44Identity());
 	mContext->SetViewMatrix(lcMatrix44Translation(lcVector3(0.375, 0.375, 0.0)));
 	mContext->SetProjectionMatrix(lcMatrix44Ortho(0, w, 0, h, -1, 1));
@@ -1422,7 +1420,7 @@ void View::DrawGrid()
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_BLEND);
 
-		mContext->SetMaterial(LC_MATERIAL_TEXTURE);
+		mContext->SetMaterial(LC_MATERIAL_UNLIT_TEXTURE_MODULATE);
 		mContext->SetColor(lcVector4FromColor(Preferences.mGridStudColor));
 
 		mContext->SetVertexFormat(0, 3, 0, 2, 0);
@@ -1437,7 +1435,7 @@ void View::DrawGrid()
 	if (Preferences.mDrawGridLines)
 	{
 		mContext->SetLineWidth(1.0f);
-		mContext->SetMaterial(LC_MATERIAL_SIMPLE);
+		mContext->SetMaterial(LC_MATERIAL_UNLIT_COLOR);
 		mContext->SetColor(lcVector4FromColor(Preferences.mGridLineColor));
 
 		int NumVerts = 2 * (MaxX - MinX + MaxY - MinY + 2);
@@ -1476,7 +1474,7 @@ void View::DrawAxes()
 	lcMatrix44 WorldViewMatrix = mCamera->mWorldView;
 	WorldViewMatrix.SetTranslation(lcVector3(0, 0, 0));
 
-	mContext->SetMaterial(LC_MATERIAL_SIMPLE);
+	mContext->SetMaterial(LC_MATERIAL_UNLIT_COLOR);
 	mContext->SetWorldMatrix(lcMatrix44Identity());
 	mContext->SetViewMatrix(lcMul(WorldViewMatrix, TranslationMatrix));
 	mContext->SetProjectionMatrix(lcMatrix44Ortho(0, mWidth, 0, mHeight, -50, 50));
@@ -1495,7 +1493,7 @@ void View::DrawAxes()
 	mContext->SetColor(0.0f, 0.0f, 0.8f, 1.0f);
 	mContext->DrawIndexedPrimitives(GL_TRIANGLES, 24, GL_UNSIGNED_SHORT, (6 + 48) * 2);
 
-	mContext->SetMaterial(LC_MATERIAL_TEXTURE);
+	mContext->SetMaterial(LC_MATERIAL_UNLIT_TEXTURE_MODULATE);
 	mContext->SetViewMatrix(TranslationMatrix);
 	mContext->SetTextureMode(LC_TEXTURE_MODULATE);
 	gTexFont.MakeCurrent();
@@ -1535,7 +1533,7 @@ void View::DrawViewport()
 
 	if (gMainWindow->GetActiveView() == this)
 	{
-		mContext->SetMaterial(LC_MATERIAL_SIMPLE);
+		mContext->SetMaterial(LC_MATERIAL_UNLIT_COLOR);
 		mContext->SetColor(1.0f, 0.0f, 0.0f, 1.0f);
 		float Verts[8] = { 0.0f, 0.0f, mWidth - 1.0f, 0.0f, mWidth - 1.0f, mHeight - 1.0f, 0.0f, mHeight - 1.0f };
 
@@ -1550,7 +1548,7 @@ void View::DrawViewport()
 
 	if (CameraName[0])
 	{
-		mContext->SetMaterial(LC_MATERIAL_TEXTURE);
+		mContext->SetMaterial(LC_MATERIAL_UNLIT_TEXTURE_MODULATE);
 		mContext->SetColor(0.0f, 0.0f, 0.0f, 1.0f);
 
 		glEnable(GL_TEXTURE_2D);

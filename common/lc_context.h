@@ -70,9 +70,12 @@ enum lcLightingMode : int
 
 enum lcMaterialType
 {
-	LC_MATERIAL_SIMPLE,
-	LC_MATERIAL_TEXTURE,
-	LC_MATERIAL_VERTEX_COLOR,
+	LC_MATERIAL_UNLIT_COLOR,
+	LC_MATERIAL_UNLIT_TEXTURE_MODULATE,
+	LC_MATERIAL_UNLIT_TEXTURE_DECAL,
+	LC_MATERIAL_UNLIT_VERTEX_COLOR,
+	LC_MATERIAL_FAKELIT_COLOR,
+	LC_MATERIAL_FAKELIT_TEXTURE_DECAL,
 	LC_NUM_MATERIALS
 };
 
@@ -97,7 +100,6 @@ struct lcProgram
 enum lcTextureMode
 {
 	LC_TEXTURE_DECAL,
-	LC_TEXTURE_REPLACE,
 	LC_TEXTURE_MODULATE
 };
 
@@ -214,7 +216,7 @@ protected:
 	GLuint mFramebufferTexture;
 	GLuint mDepthRenderbufferObject;
 
-	static lcProgram mPrograms[LC_NUM_LIGHTING_MODES][LC_NUM_MATERIALS];
+	static lcProgram mPrograms[LC_NUM_MATERIALS];
 
 	Q_DECLARE_TR_FUNCTIONS(lcContext);
 };

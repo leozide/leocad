@@ -468,7 +468,7 @@ void lcCamera::CopyPosition(const lcCamera* camera)
 
 void lcCamera::DrawInterface(lcContext* Context) const
 {
-	Context->SetMaterial(LC_MATERIAL_SIMPLE);
+	Context->SetMaterial(LC_MATERIAL_UNLIT_COLOR);
 
 	lcMatrix44 ViewWorldMatrix = lcMatrix44AffineInverse(mWorldView);
 	ViewWorldMatrix.SetTranslation(lcVector3(0, 0, 0));

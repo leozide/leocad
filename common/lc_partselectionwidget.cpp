@@ -334,8 +334,8 @@ void lcPartSelectionListModel::DrawPreview(int InfoIndex)
 
 	Context->SetDefaultState();
 	Context->SetProjectionMatrix(ProjectionMatrix);
-	Context->SetLightingMode(LC_LIGHTING_UNLIT);
-	Context->SetMaterial(LC_MATERIAL_SIMPLE);
+	const lcPreferences& Preferences = lcGetPreferences();
+	Context->SetLightingMode(Preferences.mLightingMode);
 
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 	PieceInfo* Info = mParts[InfoIndex].first;

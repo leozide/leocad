@@ -292,8 +292,8 @@ void MinifigWizard::OnDraw()
 
 	Scene.End();
 
-	mContext->SetLightingMode(LC_LIGHTING_UNLIT);
-	mContext->SetMaterial(LC_MATERIAL_SIMPLE);
+	const lcPreferences& Preferences = lcGetPreferences();
+	mContext->SetLightingMode(Preferences.mLightingMode);
 	mContext->DrawOpaqueMeshes(Scene.mOpaqueMeshes);
 	mContext->DrawTranslucentMeshes(Scene.mTranslucentMeshes);
 

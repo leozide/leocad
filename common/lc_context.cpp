@@ -275,7 +275,7 @@ void lcContext::CreateShaderPrograms()
 			"void main()\n"
 			"{\n"
 			"	vec4 TexelColor = texture2D(Texture, PixelTexCoord);"
-			"	gl_FragColor = TexelColor * MaterialColor;\n"//vec4(mix(MaterialColor.xyz, TexelColor.xyz, TexelColor.a), MaterialColor.a);\n" // TODO: we need to support different texture modes, this shader is used by the overlay font, base grid and texmap pieces.
+			"	gl_FragColor = vec4(MaterialColor.rgb, TexelColor.a * MaterialColor.a);\n"//vec4(mix(MaterialColor.xyz, TexelColor.xyz, TexelColor.a), MaterialColor.a);\n" // TODO: we need to support different texture modes, this shader is used by the overlay font, base grid and texmap pieces.
 			"}\n",
 			// LC_MATERIAL_VERTEX_COLOR
 			LC_SHADER_VERSION

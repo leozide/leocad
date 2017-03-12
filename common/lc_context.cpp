@@ -123,7 +123,16 @@ void lcContext::CreateShaderPrograms()
 #define LC_PIXEL_INPUT "in mediump "
 #define LC_PIXEL_OUTPUT "#define gl_FragColor FragColor\nout mediump vec4 gl_FragColor;\n"
 #endif
-	
+#define LC_PIXEL_FAKE_LIGHTING \
+	"	vec3 Normal = normalize(PixelNormal);\n" \
+	"	vec3 LightDirection = normalize(PixelPosition - LightPosition);" \
+	"	vec3 VertexToEye = normalize(EyePosition - PixelPosition);\n" \
+	"	vec3 LightReflect = normalize(reflect(-LightDirection, Normal));\n" \
+	"	float Specular = abs(dot(VertexToEye, LightReflect));\n" \
+	"	Specular = min(pow(Specular, 8.0), 1.0) * 0.25;\n" \
+	"	vec3 SpecularColor = vec3(Specular, Specular, Specular);\n" \
+	"	float Diffuse = min(abs(dot(Normal, LightDirection)) * 0.6 + 0.65, 1.0);\n"
+
 	const char* VertexShaders[LC_NUM_LIGHTING_MODES][LC_NUM_MATERIALS] =
 	{
 		// LC_LIGHTING_UNLIT
@@ -165,11 +174,14 @@ void lcContext::CreateShaderPrograms()
 			LC_SHADER_VERSION
 			LC_VERTEX_INPUT "vec3 VertexPosition;\n"
 			LC_VERTEX_INPUT "vec3 VertexNormal;\n"
+			LC_VERTEX_OUTPUT "vec3 PixelPosition;\n"
 			LC_VERTEX_OUTPUT "vec3 PixelNormal;\n"
 			"uniform mat4 WorldViewProjectionMatrix;\n"
+			"uniform mat4 WorldMatrix;\n"
 			"void main()\n"
 			"{\n"
-			"   PixelNormal = VertexNormal;\n"
+			"	PixelPosition = (WorldMatrix * vec4(VertexPosition, 1.0)).xyz;\n"
+			"   PixelNormal = (WorldMatrix * vec4(VertexNormal, 0.0)).xyz;\n"
 			"	gl_Position = WorldViewProjectionMatrix * vec4(VertexPosition, 1.0);\n"
 			"}\n",
 			// LC_MATERIAL_TEXTURE
@@ -177,12 +189,15 @@ void lcContext::CreateShaderPrograms()
 			LC_VERTEX_INPUT "vec3 VertexPosition;\n"
 			LC_VERTEX_INPUT "vec3 VertexNormal;\n"
 			LC_VERTEX_INPUT "vec2 VertexTexCoord;\n"
+			LC_VERTEX_OUTPUT "vec3 PixelPosition;\n"
 			LC_VERTEX_OUTPUT "vec3 PixelNormal;\n"
 			LC_VERTEX_OUTPUT "vec2 PixelTexCoord;\n"
 			"uniform mat4 WorldViewProjectionMatrix;\n"
+			"uniform mat4 WorldMatrix;\n"
 			"void main()\n"
 			"{\n"
-			"   PixelNormal = VertexNormal;\n"
+			"	PixelPosition = (WorldMatrix * vec4(VertexPosition, 1.0)).xyz;\n"
+			"   PixelNormal = (WorldMatrix * vec4(VertexNormal, 0.0)).xyz;\n"
 			"	gl_Position = WorldViewProjectionMatrix * vec4(VertexPosition, 1.0);\n"
 			"	PixelTexCoord = VertexTexCoord;\n"
 			"}\n",
@@ -191,12 +206,15 @@ void lcContext::CreateShaderPrograms()
 			LC_VERTEX_INPUT "vec3 VertexPosition;\n"
 			LC_VERTEX_INPUT "vec3 VertexNormal;\n"
 			LC_VERTEX_INPUT "vec4 VertexColor;\n"
+			LC_VERTEX_OUTPUT "vec3 PixelPosition;\n"
 			LC_VERTEX_OUTPUT "vec3 PixelNormal;\n"
 			LC_VERTEX_OUTPUT "vec4 PixelColor;\n"
 			"uniform mat4 WorldViewProjectionMatrix;\n"
+			"uniform mat4 WorldMatrix;\n"
 			"void main()\n"
 			"{\n"
-			"   PixelNormal = VertexNormal;\n"
+			"	PixelPosition = (WorldMatrix * vec4(VertexPosition, 1.0)).xyz;\n"
+			"   PixelNormal = (WorldMatrix * vec4(VertexNormal, 0.0)).xyz;\n"
 			"	gl_Position = WorldViewProjectionMatrix * vec4(VertexPosition, 1.0);\n"
 			"	PixelColor = VertexColor;\n"
 			"}\n"
@@ -243,20 +261,21 @@ void lcContext::CreateShaderPrograms()
 			// LC_MATERIAL_SIMPLE
 			LC_SHADER_VERSION
 			LC_PIXEL_OUTPUT
-			"uniform mediump vec4 Color;\n"
+			"uniform mediump vec4 MaterialColor;\n"
 			"void main()\n"
 			"{\n"
-			"	gl_FragColor = Color;\n"
+			"	gl_FragColor = MaterialColor;\n"
 			"}\n",
 			// LC_MATERIAL_TEXTURE
 			LC_SHADER_VERSION
 			LC_PIXEL_INPUT "vec2 PixelTexCoord;\n"
 			LC_PIXEL_OUTPUT
-			"uniform mediump vec4 Color;\n"
+			"uniform mediump vec4 MaterialColor;\n"
 			"uniform sampler2D Texture;\n"
 			"void main()\n"
 			"{\n"
-			"	gl_FragColor = texture2D(Texture, PixelTexCoord) * Color;\n"
+			"	vec4 TexelColor = texture2D(Texture, PixelTexCoord);"
+			"	gl_FragColor = TexelColor * MaterialColor;\n"//vec4(mix(MaterialColor.xyz, TexelColor.xyz, TexelColor.a), MaterialColor.a);\n" // TODO: we need to support different texture modes, this shader is used by the overlay font, base grid and texmap pieces.
 			"}\n",
 			// LC_MATERIAL_VERTEX_COLOR
 			LC_SHADER_VERSION
@@ -271,37 +290,48 @@ void lcContext::CreateShaderPrograms()
 		{
 			// LC_MATERIAL_SIMPLE
 			LC_SHADER_VERSION
+			LC_PIXEL_INPUT "vec3 PixelPosition;\n"
 			LC_PIXEL_INPUT "vec3 PixelNormal;\n"
 			LC_PIXEL_OUTPUT
-			"uniform mediump vec4 Color;\n"
-			"uniform mediump vec3 LightDirection[2];\n"
+			"uniform mediump vec4 MaterialColor;\n"
+			"uniform mediump vec3 LightPosition;\n"
+			"uniform mediump vec3 EyePosition;\n"
 			"void main()\n"
 			"{\n"
-			"	vec3 Normal = normalize(PixelNormal);\n"
-			"	float Diffuse = abs(dot(Normal, LightDirection[0])) * 0.5;\n"
-			"	Diffuse += abs(dot(Normal, LightDirection[1])) * 0.5;\n"
-			"	Diffuse = clamp(Diffuse, 0.0, 1.0);\n"
-			"	gl_FragColor = vec4(Diffuse, Diffuse, Diffuse, 1.0);\n"
+			LC_PIXEL_FAKE_LIGHTING
+			"	vec3 DiffuseColor = MaterialColor.rgb * Diffuse;\n"
+			"	gl_FragColor = vec4(DiffuseColor + SpecularColor, MaterialColor.a);\n"
 			"}\n",
 			// LC_MATERIAL_TEXTURE
 			LC_SHADER_VERSION
+			LC_PIXEL_INPUT "vec3 PixelPosition;\n"
 			LC_PIXEL_INPUT "vec3 PixelNormal;\n"
 			LC_PIXEL_INPUT "vec2 PixelTexCoord;\n"
 			LC_PIXEL_OUTPUT
-			"uniform mediump vec4 Color;\n"
+			"uniform mediump vec4 MaterialColor;\n"
+			"uniform mediump vec3 LightPosition;\n"
+			"uniform mediump vec3 EyePosition;\n"
 			"uniform sampler2D Texture;\n"
 			"void main()\n"
 			"{\n"
-			"	gl_FragColor = vec4(PixelNormal, 1.0);\n"
+			LC_PIXEL_FAKE_LIGHTING
+			"	vec4 TexelColor = texture2D(Texture, PixelTexCoord);"
+			"	vec3 DiffuseColor = mix(MaterialColor.xyz, TexelColor.xyz, TexelColor.a) * Diffuse;\n"
+			"	gl_FragColor = vec4(DiffuseColor + SpecularColor, MaterialColor.a);\n"
 			"}\n",
 			// LC_MATERIAL_VERTEX_COLOR
 			LC_SHADER_VERSION
+			LC_PIXEL_INPUT "vec3 PixelPosition;\n"
 			LC_PIXEL_INPUT "vec3 PixelNormal;\n"
 			LC_PIXEL_INPUT "vec4 PixelColor;\n"
 			LC_PIXEL_OUTPUT
+			"uniform mediump vec3 LightPosition;\n"
+			"uniform mediump vec3 EyePosition;\n"
 			"void main()\n"
 			"{\n"
-			"	gl_FragColor = vec4(PixelNormal, 1.0);\n"
+			LC_PIXEL_FAKE_LIGHTING
+			"	vec3 DiffuseColor = PixelColor.rgb * Diffuse;\n"
+			"	gl_FragColor = vec4(DiffuseColor + SpecularColor, PixelColor.a);\n"
 			"}\n"
 		},
 		// LC_LIGHTING_FULL
@@ -309,20 +339,21 @@ void lcContext::CreateShaderPrograms()
 			// LC_MATERIAL_SIMPLE
 			LC_SHADER_VERSION
 			LC_PIXEL_OUTPUT
-			"uniform mediump vec4 Color;\n"
+			"uniform mediump vec4 MaterialColor;\n"
 			"void main()\n"
 			"{\n"
-			"	gl_FragColor = Color;\n"
+			"	gl_FragColor = MaterialColor;\n"
 			"}\n",
 			// LC_MATERIAL_TEXTURE
 			LC_SHADER_VERSION
 			LC_PIXEL_INPUT "vec2 PixelTexCoord;\n"
 			LC_PIXEL_OUTPUT
-			"uniform mediump vec4 Color;\n"
+			"uniform mediump vec4 MaterialColor;\n"
 			"uniform sampler2D Texture;\n"
 			"void main()\n"
 			"{\n"
-			"	gl_FragColor = texture2D(Texture, PixelTexCoord) * Color;\n"
+			"	vec4 TexelColor = texture2D(Texture, PixelTexCoord);"
+			"	gl_FragColor = vec4(mix(MaterialColor.xyz, TexelColor.xyz, TexelColor.a), MaterialColor.a);\n"
 			"}\n",
 			// LC_MATERIAL_VERTEX_COLOR
 			LC_SHADER_VERSION
@@ -414,9 +445,11 @@ void lcContext::CreateShaderPrograms()
 			}
 
 			mPrograms[LightingMode][MaterialType].Object = Program;
-			mPrograms[LightingMode][MaterialType].MatrixLocation = glGetUniformLocation(Program, "WorldViewProjectionMatrix");
-			mPrograms[LightingMode][MaterialType].ColorLocation = glGetUniformLocation(Program, "Color");
-			mPrograms[LightingMode][MaterialType].LightDirectionLocation = glGetUniformLocation(Program, "LightDirection");
+			mPrograms[LightingMode][MaterialType].WorldViewProjectionMatrixLocation = glGetUniformLocation(Program, "WorldViewProjectionMatrix");
+			mPrograms[LightingMode][MaterialType].WorldMatrixLocation = glGetUniformLocation(Program, "WorldMatrix");
+			mPrograms[LightingMode][MaterialType].MaterialColorLocation = glGetUniformLocation(Program, "MaterialColor");
+			mPrograms[LightingMode][MaterialType].LightPositionLocation = glGetUniformLocation(Program, "LightPosition");
+			mPrograms[LightingMode][MaterialType].EyePositionLocation = glGetUniformLocation(Program, "EyePosition");
 		}
 	}
 }
@@ -1117,25 +1150,36 @@ void lcContext::FlushState()
 				mViewProjectionMatrixDirty = false;
 			}
 
-			if (mWorldMatrixDirty && Program.LightDirectionLocation != -1)
+			if (mWorldMatrixDirty)
 			{
-				lcVector3 LightDirection[2] =
-				{
-					lcMul30(lcVector3(1.0f, 0.0f, 0.0f), lcMatrix44AffineInverse(mWorldMatrix)),
-					lcMul30(lcVector3(0.0f, 1.0f, 0.0f), lcMatrix44AffineInverse(mWorldMatrix))
-				};
-				glUniform3fv(Program.LightDirectionLocation, 2, LightDirection[0]);
+				if (Program.WorldMatrixLocation != -1)
+					glUniformMatrix4fv(Program.WorldMatrixLocation, 1, false, mWorldMatrix);
 			}
 
-			glUniformMatrix4fv(Program.MatrixLocation, 1, false, lcMul(mWorldMatrix, mViewProjectionMatrix));
+			if (mViewMatrixDirty)
+			{
+				lcMatrix44 InverseViewMatrix = lcMatrix44AffineInverse(mViewMatrix);
+				lcVector3 ViewPosition = lcMul30(-mViewMatrix.GetTranslation(), InverseViewMatrix);
+
+				if (Program.LightPositionLocation != -1)
+				{
+					lcVector3 LightPosition = ViewPosition + lcMul30(lcVector3(300.0f, 300.0f, 0.0f), InverseViewMatrix);
+					glUniform3fv(Program.LightPositionLocation, 1, LightPosition);
+				}
+
+				if (Program.EyePositionLocation != -1)
+					glUniform3fv(Program.EyePositionLocation, 1, ViewPosition);
+			}
+
+			glUniformMatrix4fv(Program.WorldViewProjectionMatrixLocation, 1, false, lcMul(mWorldMatrix, mViewProjectionMatrix));
 			mWorldMatrixDirty = false;
 			mViewMatrixDirty = false;
 			mProjectionMatrixDirty = false;
 		}
 
-		if (mColorDirty && Program.ColorLocation != -1)
+		if (mColorDirty && Program.MaterialColorLocation != -1)
 		{
-			glUniform4fv(Program.ColorLocation, 1, mColor);
+			glUniform4fv(Program.MaterialColorLocation, 1, mColor);
 			mColorDirty = false;
 		}
 	}

@@ -87,9 +87,11 @@ enum lcProgramAttrib
 struct lcProgram
 {
 	GLuint Object;
-	GLint MatrixLocation;
-	GLint ColorLocation;
-	GLint LightDirectionLocation;
+	GLint WorldViewProjectionMatrixLocation;
+	GLint WorldMatrixLocation;
+	GLint MaterialColorLocation;
+	GLint LightPositionLocation;
+	GLint EyePositionLocation;
 };
 
 enum lcTextureMode

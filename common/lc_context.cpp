@@ -100,7 +100,6 @@ lcContext::lcContext()
 	mProjectionMatrixDirty = false;
 	mViewProjectionMatrixDirty = false;
 
-	mLightingMode = LC_NUM_LIGHTING_MODES;
 	mMaterialType = LC_NUM_MATERIALS;
 }
 
@@ -450,15 +449,6 @@ void lcContext::SetDefaultState()
 		glShadeModel(GL_FLAT);
 #endif
 	}
-}
-
-void lcContext::SetLightingMode(lcLightingMode LightingMode)
-{
-	if (mLightingMode == LightingMode)
-		return;
-
-	mLightingMode = LightingMode;
-	mMaterialType = LC_NUM_MATERIALS;
 }
 
 void lcContext::SetMaterial(lcMaterialType MaterialType)
@@ -828,8 +818,9 @@ void lcContext::SetVertexFormat(int BufferOffset, int PositionSize, int NormalSi
 	}
 
 	int Offset = PositionSize * sizeof(float);
+	lcLightingMode LightingMode = lcGetPreferences().mLightingMode;
 
-	if (NormalSize && mLightingMode != LC_LIGHTING_UNLIT)
+	if (NormalSize && LightingMode != LC_LIGHTING_UNLIT)
 	{
 		if (gSupportsShaderObjects)
 		{
@@ -1148,10 +1139,11 @@ void lcContext::DrawMeshSection(lcMesh* Mesh, lcMeshSection* Section)
 	lcTexture* Texture = Section->Texture;
 	int VertexBufferOffset = Mesh->mVertexCacheOffset != -1 ? Mesh->mVertexCacheOffset : 0;
 	int IndexBufferOffset = Mesh->mIndexCacheOffset != -1 ? Mesh->mIndexCacheOffset : 0;
+	lcLightingMode LightingMode = lcGetPreferences().mLightingMode;
 
 	if (!Texture)
 	{
-		SetMaterial(mLightingMode == LC_LIGHTING_UNLIT ? LC_MATERIAL_UNLIT_COLOR : LC_MATERIAL_FAKELIT_COLOR);
+		SetMaterial(LightingMode == LC_LIGHTING_UNLIT ? LC_MATERIAL_UNLIT_COLOR : LC_MATERIAL_FAKELIT_COLOR);
 		SetVertexFormat(VertexBufferOffset, 3, 1, 0, 0);
 
 		if (mTexture)
@@ -1163,7 +1155,7 @@ void lcContext::DrawMeshSection(lcMesh* Mesh, lcMeshSection* Section)
 	else
 	{
 		VertexBufferOffset += Mesh->mNumVertices * sizeof(lcVertex);
-		SetMaterial(mLightingMode == LC_LIGHTING_UNLIT ? LC_MATERIAL_UNLIT_TEXTURE_DECAL : LC_MATERIAL_FAKELIT_TEXTURE_DECAL);
+		SetMaterial(LightingMode == LC_LIGHTING_UNLIT ? LC_MATERIAL_UNLIT_TEXTURE_DECAL : LC_MATERIAL_FAKELIT_TEXTURE_DECAL);
 		SetVertexFormat(VertexBufferOffset, 3, 1, 2, 0);
 
 		if (Texture != mTexture)
@@ -1372,6 +1364,12 @@ void lcContext::DrawTranslucentMeshes(const lcArray<lcRenderMesh>& TranslucentMe
 
 	glDepthMask(GL_TRUE);
 	glDisable(GL_BLEND);
+}
+
+void lcContext::DrawScene(const lcScene& Scene)
+{
+	DrawOpaqueMeshes(Scene.mOpaqueMeshes);
+	DrawTranslucentMeshes(Scene.mTranslucentMeshes);
 }
 
 void lcContext::DrawInterfaceObjects(const lcArray<const lcObject*>& InterfaceObjects)

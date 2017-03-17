@@ -5,7 +5,14 @@
 
 class Project;
 class lcPiecesLibrary;
-enum lcLightingMode : int;
+
+enum lcLightingMode
+{
+	LC_LIGHTING_UNLIT,
+	LC_LIGHTING_FAKE,
+	LC_LIGHTING_FULL,
+	LC_NUM_LIGHTING_MODES
+};
 
 class lcPreferences
 {

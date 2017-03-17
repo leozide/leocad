@@ -1332,8 +1332,7 @@ void Project::ExportHTML()
 				Scene.End();
 
 				Context->SetViewMatrix(ViewMatrix);
-				Context->DrawOpaqueMeshes(Scene.mOpaqueMeshes);
-				Context->DrawTranslucentMeshes(Scene.mTranslucentMeshes);
+				Context->DrawScene(Scene);
 
 				Context->UnbindMesh(); // context remove
 

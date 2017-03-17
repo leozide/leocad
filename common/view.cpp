@@ -569,7 +569,6 @@ void View::OnDraw()
 
 	mContext->SetViewMatrix(mCamera->mWorldView);
 	mContext->SetProjectionMatrix(GetProjectionMatrix());
-	mContext->SetLightingMode(Preferences.mLightingMode);
 
 #ifndef LC_OPENGLES
 	const lcModelProperties& Properties = mModel->GetProperties();
@@ -585,8 +584,7 @@ void View::OnDraw()
 	
 	mContext->SetLineWidth(Preferences.mLineWidth);
 
-	mContext->DrawOpaqueMeshes(mScene.mOpaqueMeshes);
-	mContext->DrawTranslucentMeshes(mScene.mTranslucentMeshes);
+	mContext->DrawScene(mScene);
 
 	mContext->UnbindMesh(); // context remove
 
@@ -597,7 +595,6 @@ void View::OnDraw()
 
 	if (DrawInterface)
 	{
-		mContext->SetLightingMode(LC_LIGHTING_UNLIT);
 		mContext->DrawInterfaceObjects(mScene.mInterfaceObjects);
 
 		mContext->SetLineWidth(1.0f);
@@ -1526,7 +1523,6 @@ void View::DrawViewport()
 	mContext->SetWorldMatrix(lcMatrix44Identity());
 	mContext->SetViewMatrix(lcMatrix44Translation(lcVector3(0.375, 0.375, 0.0)));
 	mContext->SetProjectionMatrix(lcMatrix44Ortho(0.0f, mWidth, 0.0f, mHeight, -1.0f, 1.0f));
-	mContext->SetLightingMode(LC_LIGHTING_UNLIT);
 
 	glDepthMask(GL_FALSE);
 	glDisable(GL_DEPTH_TEST);

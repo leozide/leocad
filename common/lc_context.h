@@ -60,13 +60,6 @@ public:
 	};
 };
 
-enum lcLightingMode : int
-{
-	LC_LIGHTING_UNLIT,
-	LC_LIGHTING_FAKE,
-	LC_LIGHTING_FULL,
-	LC_NUM_LIGHTING_MODES
-};
 
 enum lcMaterialType
 {
@@ -134,7 +127,6 @@ public:
 		mViewProjectionMatrixDirty = true;
 	}
 
-	void SetLightingMode(lcLightingMode LightingMode);
 	void SetMaterial(lcMaterialType MaterialType);
 	void SetViewport(int x, int y, int Width, int Height);
 	void SetLineWidth(float LineWidth);
@@ -175,9 +167,7 @@ public:
 	void DrawIndexedPrimitives(GLenum Mode, GLsizei Count, GLenum Type, int Offset);
 
 	void UnbindMesh();
-	void DrawMeshSection(lcMesh* Mesh, lcMeshSection* Section);
-	void DrawOpaqueMeshes(const lcArray<lcRenderMesh>& OpaqueMeshes);
-	void DrawTranslucentMeshes(const lcArray<lcRenderMesh>& TranslucentMeshes);
+	void DrawScene(const lcScene& Scene);
 	void DrawInterfaceObjects(const lcArray<const lcObject*>& InterfaceObjects);
 
 protected:
@@ -185,13 +175,16 @@ protected:
 	void BindMesh(lcMesh* Mesh);
 	void FlushState();
 
+	void DrawMeshSection(lcMesh* Mesh, lcMeshSection* Section);
+	void DrawOpaqueMeshes(const lcArray<lcRenderMesh>& OpaqueMeshes);
+	void DrawTranslucentMeshes(const lcArray<lcRenderMesh>& TranslucentMeshes);
+
 	GLuint mVertexBufferObject;
 	GLuint mIndexBufferObject;
 	char* mVertexBufferPointer;
 	char* mIndexBufferPointer;
 	char* mVertexBufferOffset;
 
-	lcLightingMode mLightingMode;
 	lcMaterialType mMaterialType;
 	bool mNormalEnabled;
 	bool mTexCoordEnabled;

@@ -334,8 +334,6 @@ void lcPartSelectionListModel::DrawPreview(int InfoIndex)
 
 	Context->SetDefaultState();
 	Context->SetProjectionMatrix(ProjectionMatrix);
-	const lcPreferences& Preferences = lcGetPreferences();
-	Context->SetLightingMode(Preferences.mLightingMode);
 
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 	PieceInfo* Info = mParts[InfoIndex].first;
@@ -354,8 +352,7 @@ void lcPartSelectionListModel::DrawPreview(int InfoIndex)
 	Scene.End();
 
 	Context->SetViewMatrix(ViewMatrix);
-	Context->DrawOpaqueMeshes(Scene.mOpaqueMeshes);
-	Context->DrawTranslucentMeshes(Scene.mTranslucentMeshes);
+	Context->DrawScene(Scene);
 
 	Context->UnbindMesh(); // context remove
 		

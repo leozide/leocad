@@ -1149,7 +1149,6 @@ void lcModel::DrawBackground(lcGLWidget* Widget)
 	float ViewHeight = (float)Widget->mHeight;
 
 	lcContext* Context = Widget->mContext;
-	Context->SetLightingMode(LC_LIGHTING_UNLIT);
 	Context->SetWorldMatrix(lcMatrix44Identity());
 	Context->SetViewMatrix(lcMatrix44Translation(lcVector3(0.375, 0.375, 0.0)));
 	Context->SetProjectionMatrix(lcMatrix44Ortho(0.0f, ViewWidth, 0.0f, ViewHeight, -1.0f, 1.0f));

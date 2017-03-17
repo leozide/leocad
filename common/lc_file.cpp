@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 #include "lc_file.h"
 
 // =============================================================================
@@ -210,14 +211,11 @@ void lcDiskFile::SetLength(size_t NewLength)
 
 size_t lcDiskFile::GetLength() const
 {
-	long Length, Current;
+	struct stat st;
+	if (fstat(fileno(mFile), &st) < 0 || !S_ISREG(st.st_mode))
+		return 0;
 
-	Current = ftell(mFile);
-	fseek(mFile, 0, SEEK_END);
-	Length = ftell(mFile);
-	fseek(mFile, Current, SEEK_SET);
-
-	return Length;
+	return st.st_size;
 }
 
 void lcDiskFile::Flush()

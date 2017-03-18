@@ -9,7 +9,8 @@ enum lcSynthType
 	LC_SYNTH_PIECE_RIBBED_HOSE,
 	LC_SYNTH_PIECE_FLEXIBLE_AXLE,
 	LC_SYNTH_PIECE_STRING_BRAIDED,
-	LC_SYNTH_PIECE_SHOCK_ABSORBER
+	LC_SYNTH_PIECE_SHOCK_ABSORBER,
+	LC_SYNTH_PIECE_ACTUATOR
 };
 
 struct lcSynthComponent
@@ -47,6 +48,7 @@ protected:
 	void AddFlexibleAxleParts(lcMemFile& File, lcLibraryMeshData& MeshData, const lcArray<lcMatrix44>& Sections) const;
 	void AddStringBraidedParts(lcMemFile& File, lcLibraryMeshData& MeshData, lcArray<lcMatrix44>& Sections) const;
 	void AddShockAbsorberParts(lcMemFile& File, lcArray<lcMatrix44>& Sections) const;
+	void AddActuatorParts(lcMemFile& File, lcArray<lcMatrix44>& Sections) const;
 
 	PieceInfo* mPieceInfo;
 	lcSynthType mType;

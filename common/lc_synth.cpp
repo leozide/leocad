@@ -40,7 +40,9 @@ void lcSynthInit()
 		{ "73129",  LC_SYNTH_PIECE_SHOCK_ABSORBER, 110.00f,   1 }, // Technic Shock Absorber 6.5L 
 		{ "41838",  LC_SYNTH_PIECE_SHOCK_ABSORBER, 110.00f,   1 }, // Technic Shock Absorber 6.5L Soft
 		{ "76138",  LC_SYNTH_PIECE_SHOCK_ABSORBER, 110.00f,   1 }, // Technic Shock Absorber 6.5L Stiff
-		{ "76537",  LC_SYNTH_PIECE_SHOCK_ABSORBER, 110.00f,   1 }  // Technic Shock Absorber 6.5L Extra Stiff
+		{ "76537",  LC_SYNTH_PIECE_SHOCK_ABSORBER, 110.00f,   1 }, // Technic Shock Absorber 6.5L Extra Stiff
+		{ "61927C01", LC_SYNTH_PIECE_ACTUATOR,     270.00f,   1 }, // Technic Power Functions Linear Actuator (Extended)
+		{ "61927",  LC_SYNTH_PIECE_ACTUATOR,       170.00f,   1 }  // Technic Power Functions Linear Actuator (Contracted)
 	};
 
 	for (unsigned int InfoIdx = 0; InfoIdx < sizeof(HoseInfo) / sizeof(HoseInfo[0]); InfoIdx++)
@@ -86,6 +88,7 @@ lcSynthInfo::lcSynthInfo(lcSynthType Type, float Length, int NumSections, PieceI
 		break;
 
 	case LC_SYNTH_PIECE_SHOCK_ABSORBER:
+	case LC_SYNTH_PIECE_ACTUATOR:
 		EdgeSectionLength = 0.0f;
 		MidSectionLength = 0.0f;
 		mRigidEdges = false;
@@ -93,7 +96,7 @@ lcSynthInfo::lcSynthInfo(lcSynthType Type, float Length, int NumSections, PieceI
 		break;
 	}
 
-	if (mType != LC_SYNTH_PIECE_SHOCK_ABSORBER)
+	if (mType != LC_SYNTH_PIECE_SHOCK_ABSORBER && mType != LC_SYNTH_PIECE_ACTUATOR)
 	{
 		mStart.Transform = lcMatrix44(lcMatrix33(lcVector3(0.0f, 0.0f, 1.0f), lcVector3(1.0f, 0.0f, 0.0f), lcVector3(0.0f, 1.0f, 0.0f)), lcVector3(0.0f, 0.0f, 0.0f));
 		mMiddle.Transform = lcMatrix44Identity();
@@ -132,6 +135,7 @@ void lcSynthInfo::GetDefaultControlPoints(lcArray<lcPieceControlPoint>& ControlP
 		break;
 
 	case LC_SYNTH_PIECE_SHOCK_ABSORBER:
+	case LC_SYNTH_PIECE_ACTUATOR:
 		Scale = 1.0f;
 		break;
 	}
@@ -139,15 +143,22 @@ void lcSynthInfo::GetDefaultControlPoints(lcArray<lcPieceControlPoint>& ControlP
 	float HalfLength = mLength / 2.0f;
 	Scale = lcMin(Scale, HalfLength);
 
-	if (mType != LC_SYNTH_PIECE_SHOCK_ABSORBER)
+	switch (mType)
 	{
+	default:
 		ControlPoints[0].Transform = lcMatrix44Translation(lcVector3(-HalfLength, 0.0f, 0.0f));
 		ControlPoints[1].Transform = lcMatrix44Translation(lcVector3( HalfLength, 0.0f, 0.0f));
-	}
-	else
-	{
+		break;
+
+	case LC_SYNTH_PIECE_SHOCK_ABSORBER:
 		ControlPoints[0].Transform = lcMatrix44Translation(lcVector3(0.0f, 0.0f, -mLength));
 		ControlPoints[1].Transform = lcMatrix44Translation(lcVector3(0.0f, 0.0f, 0.0f));
+		break;
+
+	case LC_SYNTH_PIECE_ACTUATOR:
+		ControlPoints[0].Transform = lcMatrix44(lcMatrix33(lcVector3(1.0f, 0.0f, 0.0f), lcVector3(0.0f, 0.0f, -1.0f), lcVector3(0.0f, 1.0f, 0.0f)), lcVector3(0.0f, 0.0f, 0.0f));
+		ControlPoints[1].Transform = lcMatrix44(lcMatrix33(lcVector3(1.0f, 0.0f, 0.0f), lcVector3(0.0f, 0.0f, -1.0f), lcVector3(0.0f, 1.0f, 0.0f)), lcVector3(0.0f, mLength, 0.0f));
+		break;
 	}
 
 	ControlPoints[0].Scale = Scale;
@@ -623,6 +634,22 @@ void lcSynthInfo::AddShockAbsorberParts(lcMemFile& File, lcArray<lcMatrix44>& Se
 	File.WriteBuffer(Line, strlen(Line));
 }
 
+void lcSynthInfo::AddActuatorParts(lcMemFile& File, lcArray<lcMatrix44>& Sections) const
+{
+	char Line[256];
+	lcVector3 Offset;
+
+	Offset = Sections[0].GetTranslation();
+	sprintf(Line, "1 25 %f %f %f 0 1 0 -1 0 0 0 0 1 47157.DAT\n", Offset[0], Offset[1], Offset[2]);
+	File.WriteBuffer(Line, strlen(Line));
+	sprintf(Line, "1 16 %f %f %f 1 0 0 0 1 0 0 0 1 62271c01.DAT\n", Offset[0], Offset[1], Offset[2]);
+	File.WriteBuffer(Line, strlen(Line));
+
+	Offset = Sections[1].GetTranslation();
+	sprintf(Line, "1 72 %f %f %f 1 0 0 0 1 0 0 0 1 62274c01.DAT\n", Offset[0], Offset[1], Offset[2]);
+	File.WriteBuffer(Line, strlen(Line));
+}
+
 lcMesh* lcSynthInfo::CreateMesh(const lcArray<lcPieceControlPoint>& ControlPoints) const
 {
 	lcArray<lcMatrix44> Sections;
@@ -651,6 +678,10 @@ lcMesh* lcSynthInfo::CreateMesh(const lcArray<lcPieceControlPoint>& ControlPoint
 
 	case LC_SYNTH_PIECE_SHOCK_ABSORBER:
 		AddShockAbsorberParts(File, Sections);
+		break;
+
+	case LC_SYNTH_PIECE_ACTUATOR:
+		AddActuatorParts(File, Sections);
 		break;
 	}
 

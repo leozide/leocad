@@ -278,12 +278,10 @@ void lcModel::SaveLDraw(QTextStream& Stream, bool SelectedOnly) const
 
 	mProperties.SaveLDraw(Stream);
 
-	if (mCurrentStep != GetLastStep())
-		Stream << QLatin1String("0 !LEOCAD MODEL CURRENT_STEP") << mCurrentStep << LineEnding;
-
 	lcArray<lcGroup*> CurrentGroups;
 	lcStep Step = 1;
 	int CurrentLine = 0;
+	int AddedSteps = 0;
 
 	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 	{
@@ -315,13 +313,18 @@ void lcModel::SaveLDraw(QTextStream& Stream, bool SelectedOnly) const
 			}
 
 			if (!Skip)
+			{
 				Stream << mFileLines[CurrentLine];
+				if (AddedSteps > 0)
+					AddedSteps--;
+			}
 			CurrentLine++;
 		}
 
 		while (Piece->GetStepShow() > Step)
 		{
 			Stream << QLatin1String("0 STEP\r\n");
+			AddedSteps++;
 			Step++;
 		}
 
@@ -401,7 +404,23 @@ void lcModel::SaveLDraw(QTextStream& Stream, bool SelectedOnly) const
 
 	while (CurrentLine < mFileLines.size())
 	{
-		Stream << mFileLines[CurrentLine];
+		QString Line = mFileLines[CurrentLine];
+		QTextStream LineStream(&Line, QIODevice::ReadOnly);
+
+		QString Token;
+		LineStream >> Token;
+		bool Skip = false;
+
+		if (Token == QLatin1String("0"))
+		{
+			LineStream >> Token;
+
+			if (Token == QLatin1String("STEP") && AddedSteps-- > 0)
+				Skip = true;
+		}
+
+		if (!Skip)
+			Stream << mFileLines[CurrentLine];
 		CurrentLine++;
 	}
 
@@ -1030,6 +1049,7 @@ void lcModel::Paste()
 		lcPiece* Piece = PastedPieces[PieceIdx];
 		lcStep Step = Piece->GetStepShow();
 
+		Piece->SetFileLine(-1);
 		if (Step > mCurrentStep)
 			Piece->SetStepShow(mCurrentStep);
 
@@ -2270,6 +2290,7 @@ void lcModel::MoveSelectionToModel(lcModel* Model)
 	for (int PieceIdx = 0; PieceIdx < Pieces.GetSize(); PieceIdx++)
 	{
 		lcPiece* Piece = Pieces[PieceIdx];
+		Piece->SetFileLine(-1);
 		Piece->SetStepShow(Piece->GetStepShow() - FirstStep + 1);
 		Model->AddPiece(Piece);
 	}

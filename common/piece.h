@@ -439,8 +439,11 @@ public:
 		if (Step == LC_STEP_MAX)
 			Step = LC_STEP_MAX - 1;
 
-		mFileLine = -1;
-		mStepShow = Step;
+		if (mStepShow != Step)
+		{
+			mFileLine = -1;
+			mStepShow = Step;
+		}
 
 		if (mStepHide <= mStepShow)
 			mStepHide = mStepShow + 1;

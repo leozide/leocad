@@ -48,6 +48,7 @@ lcPiecesLibrary::lcPiecesLibrary()
 	mZipFiles[LC_ZIPFILE_OFFICIAL] = NULL;
 	mZipFiles[LC_ZIPFILE_UNOFFICIAL] = NULL;
 	mBuffersDirty = false;
+	mHasUnofficial = false;
 }
 
 lcPiecesLibrary::~lcPiecesLibrary()
@@ -485,122 +486,158 @@ bool lcPiecesLibrary::OpenDirectory(const char* Path)
 		}
 	}
 
+	const char* BaseFolders[] = { "unofficial/", "" };
+
 	if (!mPieces.GetSize())
 	{
-		strcpy(FileName, Path);
-		strcat(FileName, "parts/");
-
-		QDir Dir(FileName, "*.dat", QDir::SortFlags(QDir::Name | QDir::IgnoreCase), QDir::Files | QDir::Hidden | QDir::Readable);
-		QStringList FileList = Dir.entryList();
-		mPieces.AllocGrow(FileList.size());
-
-		for (int FileIdx = 0; FileIdx < FileList.size(); FileIdx++)
+		for (int BaseFolderIdx = 0; BaseFolderIdx < sizeof(BaseFolders) / sizeof(BaseFolders[0]); BaseFolderIdx++)
 		{
-			char Name[LC_PIECE_NAME_LEN];
-			QByteArray FileString = FileList[FileIdx].toLatin1();
-			const char* Src = FileString;
-			char* Dst = Name;
+			strcpy(FileName, Path);
+			strcat(FileName, BaseFolders[BaseFolderIdx]);
+			strcat(FileName, "parts/");
 
-			while (*Src && Dst - Name < (int)sizeof(Name))
+			QDir Dir(FileName, "*.dat", QDir::SortFlags(QDir::Name | QDir::IgnoreCase), QDir::Files | QDir::Hidden | QDir::Readable);
+			QStringList FileList = Dir.entryList();
+			mPieces.AllocGrow(FileList.size());
+
+			for (int FileIdx = 0; FileIdx < FileList.size(); FileIdx++)
 			{
-				if (*Src >= 'a' && *Src <= 'z')
-					*Dst = *Src + 'A' - 'a';
-				else if (*Src == '\\')
-					*Dst = '/';
-				else
-					*Dst = *Src;
+				char Name[LC_PIECE_NAME_LEN];
+				QByteArray FileString = FileList[FileIdx].toLatin1();
+				const char* Src = FileString;
+				char* Dst = Name;
 
-				Src++;
-				Dst++;
-			}
-
-			if (Dst - Name <= 4)
-				continue;
-
-			Dst -= 4;
-			if (memcmp(Dst, ".DAT", 4))
-				continue;
-			*Dst = 0;
-
-			lcDiskFile PieceFile;
-			if (!PieceFile.Open(Dir.absoluteFilePath(FileList[FileIdx]), "rt"))
-				continue;
-
-			char Line[1024];
-			if (!PieceFile.ReadLine(Line, sizeof(Line)))
-				continue;
-
-			PieceInfo* Info = new PieceInfo();
-			mPieces.Add(Info);
-
-			Src = (char*)Line + 2;
-			Dst = Info->m_strDescription;
-
-			for (;;)
-			{
-				if (*Src != '\r' && *Src != '\n' && *Src && Dst - Info->m_strDescription < (int)sizeof(Info->m_strDescription) - 1)
+				while (*Src && Dst - Name < (int)sizeof(Name))
 				{
-					*Dst++ = *Src++;
-					continue;
+					if (*Src >= 'a' && *Src <= 'z')
+						*Dst = *Src + 'A' - 'a';
+					else if (*Src == '\\')
+						*Dst = '/';
+					else
+						*Dst = *Src;
+
+					Src++;
+					Dst++;
 				}
 
-				*Dst = 0;
-				break;
-			}
+				if (Dst - Name <= 4)
+					continue;
 
-			strncpy(Info->m_strName, Name, sizeof(Info->m_strName));
-			Info->m_strName[sizeof(Info->m_strName) - 1] = 0;
+				Dst -= 4;
+				if (memcmp(Dst, ".DAT", 4))
+					continue;
+				*Dst = 0;
+
+				if (mHasUnofficial)
+				{
+					bool Skip = false;
+
+					for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+					{
+						if (!strcmp(Name, mPieces[PieceIdx]->m_strName))
+						{
+							Skip = true;
+							break;
+						}
+					}
+
+					if (Skip)
+						continue;
+				}
+
+				lcDiskFile PieceFile;
+				if (!PieceFile.Open(Dir.absoluteFilePath(FileList[FileIdx]), "rt"))
+					continue;
+
+				char Line[1024];
+				if (!PieceFile.ReadLine(Line, sizeof(Line)))
+					continue;
+
+				PieceInfo* Info = new PieceInfo();
+				mPieces.Add(Info);
+
+				if (BaseFolderIdx == 0)
+					mHasUnofficial = true;
+
+				Src = (char*)Line + 2;
+				Dst = Info->m_strDescription;
+
+				for (;;)
+				{
+					if (*Src != '\r' && *Src != '\n' && *Src && Dst - Info->m_strDescription < (int)sizeof(Info->m_strDescription) - 1)
+					{
+						*Dst++ = *Src++;
+						continue;
+					}
+
+					*Dst = 0;
+					break;
+				}
+
+				strncpy(Info->m_strName, Name, sizeof(Info->m_strName));
+				Info->m_strName[sizeof(Info->m_strName) - 1] = 0;
+			}
 		}
 	}
 
 	if (!mPieces.GetSize())
 		return false;
 
-	const char* PrimitiveDirectories[] = { "p/", "p/48/", "parts/s/" };
-	bool SubFileDirectories[] = { false, false, true };
-
-	for (int DirectoryIdx = 0; DirectoryIdx < (int)(sizeof(PrimitiveDirectories) / sizeof(PrimitiveDirectories[0])); DirectoryIdx++)
+	for (int BaseFolderIdx = 0; BaseFolderIdx < sizeof(BaseFolders) / sizeof(BaseFolders[0]); BaseFolderIdx++)
 	{
-		strcpy(FileName, Path);
-		strcat(FileName, PrimitiveDirectories[DirectoryIdx]);
+		const char* PrimitiveDirectories[] = { "p/", "p/48/", "parts/s/" };
+		bool SubFileDirectories[] = { false, false, true };
 
-		QDir Dir(FileName, "*.dat", QDir::SortFlags(QDir::Name | QDir::IgnoreCase), QDir::Files | QDir::Hidden | QDir::Readable);
-		QStringList FileList = Dir.entryList();
-
-		for (int FileIdx = 0; FileIdx < FileList.size(); FileIdx++)
+		for (int DirectoryIdx = 0; DirectoryIdx < (int)(sizeof(PrimitiveDirectories) / sizeof(PrimitiveDirectories[0])); DirectoryIdx++)
 		{
-			char Name[LC_PIECE_NAME_LEN];
-			QByteArray FileString = FileList[FileIdx].toLatin1();
-			const char* Src = FileString;
+			strcpy(FileName, Path);
+			strcat(FileName, BaseFolders[BaseFolderIdx]);
+			strcat(FileName, PrimitiveDirectories[DirectoryIdx]);
 
-			strcpy(Name, strchr(PrimitiveDirectories[DirectoryIdx], '/') + 1);
-			strupr(Name);
-			char* Dst = Name + strlen(Name);
+			QDir Dir(FileName, "*.dat", QDir::SortFlags(QDir::Name | QDir::IgnoreCase), QDir::Files | QDir::Hidden | QDir::Readable);
+			QStringList FileList = Dir.entryList();
 
-			while (*Src && Dst - Name < (int)sizeof(Name))
+			for (int FileIdx = 0; FileIdx < FileList.size(); FileIdx++)
 			{
-				if (*Src >= 'a' && *Src <= 'z')
-					*Dst = *Src + 'A' - 'a';
-				else if (*Src == '\\')
-					*Dst = '/';
-				else
-					*Dst = *Src;
+				char Name[LC_PIECE_NAME_LEN];
+				QByteArray FileString = FileList[FileIdx].toLatin1();
+				const char* Src = FileString;
 
-				Src++;
-				Dst++;
+				strcpy(Name, strchr(PrimitiveDirectories[DirectoryIdx], '/') + 1);
+				strupr(Name);
+				char* Dst = Name + strlen(Name);
+
+				while (*Src && Dst - Name < (int)sizeof(Name))
+				{
+					if (*Src >= 'a' && *Src <= 'z')
+						*Dst = *Src + 'A' - 'a';
+					else if (*Src == '\\')
+						*Dst = '/';
+					else
+						*Dst = *Src;
+
+					Src++;
+					Dst++;
+				}
+
+				if (Dst - Name <= 4)
+					continue;
+
+				Dst -= 4;
+				if (memcmp(Dst, ".DAT", 4))
+					continue;
+				*Dst = 0;
+
+				if (mHasUnofficial && FindPrimitiveIndex(Name) != -1)
+					continue;
+
+				if (BaseFolderIdx == 0)
+					mHasUnofficial = true;
+
+				bool SubFile = SubFileDirectories[DirectoryIdx];
+				lcLibraryPrimitive* Prim = new lcLibraryPrimitive(Name, LC_NUM_ZIPFILES, 0, !SubFile && (memcmp(Name, "STU", 3) == 0), SubFile);
+				mPrimitives.AddSorted(Prim, lcPrimitiveCompare);
 			}
-
-			if (Dst - Name <= 4)
-				continue;
-
-			Dst -= 4;
-			if (memcmp(Dst, ".DAT", 4))
-				continue;
-			*Dst = 0;
-
-			bool SubFile = SubFileDirectories[DirectoryIdx];
-			lcLibraryPrimitive* Prim = new lcLibraryPrimitive(Name, LC_NUM_ZIPFILES, 0, !SubFile && (memcmp(Name, "STU", 3) == 0), SubFile);
-			mPrimitives.AddSorted(Prim, lcPrimitiveCompare);
 		}
 	}
 
@@ -1065,10 +1102,21 @@ bool lcPiecesLibrary::LoadPieceData(PieceInfo* Info)
 		char FileName[LC_MAXPATH];
 		lcDiskFile PieceFile;
 
-		sprintf(FileName, "%sparts/%s.dat", mLibraryPath, Name);
+		if (mHasUnofficial)
+		{
+			sprintf(FileName, "%sunofficial/parts/%s.dat", mLibraryPath, Name);
 
-		if (PieceFile.Open(FileName, "rt"))
-			Loaded = ReadMeshData(PieceFile, lcMatrix44Identity(), 16, false, TextureStack, MeshData, LC_MESHDATA_SHARED, true);
+			if (PieceFile.Open(FileName, "rt"))
+				Loaded = ReadMeshData(PieceFile, lcMatrix44Identity(), 16, false, TextureStack, MeshData, LC_MESHDATA_SHARED, true);
+		}
+
+		if (!Loaded)
+		{
+			sprintf(FileName, "%sparts/%s.dat", mLibraryPath, Name);
+
+			if (PieceFile.Open(FileName, "rt"))
+				Loaded = ReadMeshData(PieceFile, lcMatrix44Identity(), 16, false, TextureStack, MeshData, LC_MESHDATA_SHARED, true);
+		}
 	}
 	
 	if (!Loaded)
@@ -1559,16 +1607,29 @@ bool lcPiecesLibrary::LoadPrimitive(int PrimitiveIndex)
 
 		char FileName[LC_MAXPATH];
 		lcDiskFile PrimFile;
+		bool Found = false;
 
-		if (Primitive->mSubFile)
-			sprintf(FileName, "%sparts/%s.dat", mLibraryPath, Name);
-		else
-			sprintf(FileName, "%sp/%s.dat", mLibraryPath, Name);
+		if (mHasUnofficial)
+		{
+			if (Primitive->mSubFile)
+				sprintf(FileName, "%sunofficial/parts/%s.dat", mLibraryPath, Name);
+			else
+				sprintf(FileName, "%sunofficial/p/%s.dat", mLibraryPath, Name);
 
-		if (!PrimFile.Open(FileName, "rt"))
-			return false;
+			Found = PrimFile.Open(FileName, "rt");
+		}
 
-		if (!ReadMeshData(PrimFile, lcMatrix44Identity(), 16, false, TextureStack, Primitive->mMeshData, LC_MESHDATA_SHARED, true))
+		if (!Found)
+		{
+			if (Primitive->mSubFile)
+				sprintf(FileName, "%sparts/%s.dat", mLibraryPath, Name);
+			else
+				sprintf(FileName, "%sp/%s.dat", mLibraryPath, Name);
+
+			Found = PrimFile.Open(FileName, "rt");
+		}
+
+		if (!Found || !ReadMeshData(PrimFile, lcMatrix44Identity(), 16, false, TextureStack, Primitive->mMeshData, LC_MESHDATA_SHARED, true))
 			return false;
 	}
 
@@ -1838,13 +1899,29 @@ bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransf
 							strlwr(Name);
 
 							lcDiskFile IncludeFile;
+							bool Found = false;
 
-							if (Primitive->mSubFile)
-								sprintf(FileName, "%sparts/%s.dat", mLibraryPath, Name);
-							else
-								sprintf(FileName, "%sp/%s.dat", mLibraryPath, Name);
+							if (mHasUnofficial)
+							{
+								if (Primitive->mSubFile)
+									sprintf(FileName, "%sunofficial/parts/%s.dat", mLibraryPath, Name);
+								else
+									sprintf(FileName, "%sunofficial/p/%s.dat", mLibraryPath, Name);
 
-							if (IncludeFile.Open(FileName, "rt"))
+								Found = IncludeFile.Open(FileName, "rt");
+							}
+
+							if (!Found)
+							{
+								if (Primitive->mSubFile)
+									sprintf(FileName, "%sparts/%s.dat", mLibraryPath, Name);
+								else
+									sprintf(FileName, "%sp/%s.dat", mLibraryPath, Name);
+
+								Found = IncludeFile.Open(FileName, "rt");
+							}
+
+							if (Found)
 								ReadMeshData(IncludeFile, IncludeTransform, ColorCode, Mirror ^ InvertNext, TextureStack, MeshData, MeshDataType, Optimize);
 						}
 					}
@@ -1872,10 +1949,21 @@ bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransf
 							strlwr(Name);
 
 							lcDiskFile IncludeFile;
+							bool Found = false;
 
-							sprintf(FileName, "%sparts/%s.dat", mLibraryPath, Name);
+							if (mHasUnofficial)
+							{
+								sprintf(FileName, "%sunofficial/parts/%s.dat", mLibraryPath, Name);
+								Found = IncludeFile.Open(FileName, "rt");
+							}
 
-							if (IncludeFile.Open(FileName, "rt"))
+							if (!Found)
+							{
+								sprintf(FileName, "%sparts/%s.dat", mLibraryPath, Name);
+								Found = IncludeFile.Open(FileName, "rt");
+							}
+
+							if (Found)
 								ReadMeshData(IncludeFile, IncludeTransform, ColorCode, Mirror ^ InvertNext, TextureStack, MeshData, MeshDataType, Optimize);
 						}
 

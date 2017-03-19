@@ -228,6 +228,7 @@ protected:
 	char mLibraryFileName[LC_MAXPATH];
 	char mUnofficialFileName[LC_MAXPATH];
 	lcZipFile* mZipFiles[LC_NUM_ZIPFILES];
+	bool mHasUnofficial;
 };
 
 #endif // _LC_LIBRARY_H_

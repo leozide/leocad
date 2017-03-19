@@ -246,6 +246,42 @@ void lcQColorList::resizeEvent(QResizeEvent *event)
 	float CellWidth = (float)(width() + 1) / (float)mColumns;
 	float CellHeight = (float)(height() - TextHeight) / (float)mRows;
 
+	while (CellWidth / CellHeight > 1.5f)
+	{
+		mColumns++;
+		mRows = 0;
+
+		for (int GroupIdx = 0; GroupIdx < LC_NUM_COLORGROUPS; GroupIdx++)
+		{
+			lcColorGroup* Group = &gColorGroups[GroupIdx];
+			mRows += (Group->Colors.GetSize() + mColumns - 1) / mColumns;
+		}
+
+		CellWidth = (float)(width() + 1) / (float)mColumns;
+		CellHeight = (float)(height() - TextHeight) / (float)mRows;
+
+		if (mRows <= LC_NUM_COLORGROUPS)
+			break;
+	}
+
+	while (CellHeight / CellWidth > 1.5f)
+	{
+		mColumns--;
+		mRows = 0;
+
+		for (int GroupIdx = 0; GroupIdx < LC_NUM_COLORGROUPS; GroupIdx++)
+		{
+			lcColorGroup* Group = &gColorGroups[GroupIdx];
+			mRows += (Group->Colors.GetSize() + mColumns - 1) / mColumns;
+		}
+
+		CellWidth = (float)(width() + 1) / (float)mColumns;
+		CellHeight = (float)(height() - TextHeight) / (float)mRows;
+
+		if (mColumns <= 5)
+			break;
+	}
+
 	int CurCell = 0;
 	float GroupY = 0.0f;
 	int TotalRows = 1;

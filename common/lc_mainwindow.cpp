@@ -583,6 +583,7 @@ void lcMainWindow::CreateToolBars()
 
 	mColorsToolBar = new QDockWidget(tr("Colors"), this);
 	mColorsToolBar->setObjectName("ColorsToolbar");
+	mColorsToolBar->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
 
 	QFrame* ColorFrame = new QFrame(mColorsToolBar);
 	ColorFrame->setFrameShape(QFrame::StyledPanel);

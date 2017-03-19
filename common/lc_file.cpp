@@ -212,7 +212,7 @@ void lcDiskFile::SetLength(size_t NewLength)
 size_t lcDiskFile::GetLength() const
 {
 	struct stat st;
-	if (fstat(fileno(mFile), &st) < 0 || (st.st_mode & S_IFMT) == S_IFREG)
+	if (fstat(fileno(mFile), &st) < 0 || (st.st_mode & S_IFMT) != S_IFREG)
 		return 0;
 
 	return st.st_size;

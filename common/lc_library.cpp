@@ -490,7 +490,7 @@ bool lcPiecesLibrary::OpenDirectory(const char* Path)
 
 	if (!mPieces.GetSize())
 	{
-		for (int BaseFolderIdx = 0; BaseFolderIdx < sizeof(BaseFolders) / sizeof(BaseFolders[0]); BaseFolderIdx++)
+		for (unsigned int BaseFolderIdx = 0; BaseFolderIdx < sizeof(BaseFolders) / sizeof(BaseFolders[0]); BaseFolderIdx++)
 		{
 			strcpy(FileName, Path);
 			strcat(FileName, BaseFolders[BaseFolderIdx]);
@@ -583,7 +583,7 @@ bool lcPiecesLibrary::OpenDirectory(const char* Path)
 	if (!mPieces.GetSize())
 		return false;
 
-	for (int BaseFolderIdx = 0; BaseFolderIdx < sizeof(BaseFolders) / sizeof(BaseFolders[0]); BaseFolderIdx++)
+	for (unsigned int BaseFolderIdx = 0; BaseFolderIdx < sizeof(BaseFolders) / sizeof(BaseFolders[0]); BaseFolderIdx++)
 	{
 		const char* PrimitiveDirectories[] = { "p/", "p/48/", "parts/s/" };
 		bool SubFileDirectories[] = { false, false, true };

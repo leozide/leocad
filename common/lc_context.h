@@ -15,8 +15,9 @@ public:
 	void End();
 
 	lcMatrix44 mViewMatrix;
-	lcArray<lcRenderMesh> mOpaqueMeshes;
-	lcArray<lcRenderMesh> mTranslucentMeshes;
+	lcArray<lcRenderMesh> mRenderMeshes;
+	lcArray<int> mOpaqueMeshes;
+	lcArray<int> mTranslucentMeshes;
 	lcArray<const lcObject*> mInterfaceObjects;
 };
 
@@ -176,8 +177,8 @@ protected:
 	void FlushState();
 
 	void DrawMeshSection(lcMesh* Mesh, lcMeshSection* Section);
-	void DrawOpaqueMeshes(const lcArray<lcRenderMesh>& OpaqueMeshes);
-	void DrawTranslucentMeshes(const lcArray<lcRenderMesh>& TranslucentMeshes);
+	void DrawOpaqueMeshes(const lcScene& Scene);
+	void DrawTranslucentMeshes(const lcScene& Scene);
 
 	GLuint mVertexBufferObject;
 	GLuint mIndexBufferObject;

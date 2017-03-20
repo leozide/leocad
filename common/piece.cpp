@@ -644,7 +644,7 @@ void lcPiece::AddRenderMeshes(lcScene& Scene, bool DrawInterface) const
 		mPieceInfo->AddRenderMeshes(Scene, mModelWorld, mColorIndex, Focused, Selected);
 	else
 	{
-		lcRenderMesh RenderMesh;
+		lcRenderMesh& RenderMesh = Scene.mRenderMeshes.Add();
 
 		RenderMesh.WorldMatrix = mModelWorld;
 		RenderMesh.Mesh = mMesh;
@@ -656,10 +656,10 @@ void lcPiece::AddRenderMeshes(lcScene& Scene, bool DrawInterface) const
 		bool Translucent = lcIsColorTranslucent(mColorIndex);
 
 		if ((mPieceInfo->mFlags & (LC_PIECE_HAS_SOLID | LC_PIECE_HAS_LINES)) || ((mPieceInfo->mFlags & LC_PIECE_HAS_DEFAULT) && !Translucent))
-			Scene.mOpaqueMeshes.Add(RenderMesh);
+			Scene.mOpaqueMeshes.Add(Scene.mRenderMeshes.GetSize() - 1);
 
 		if ((mPieceInfo->mFlags & LC_PIECE_HAS_TRANSLUCENT) || ((mPieceInfo->mFlags & LC_PIECE_HAS_DEFAULT) && Translucent))
-			Scene.mTranslucentMeshes.Add(RenderMesh);
+			Scene.mTranslucentMeshes.Add(Scene.mRenderMeshes.GetSize() - 1);
 	}
 
 	if (Selected)

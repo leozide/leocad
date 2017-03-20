@@ -313,7 +313,7 @@ void PieceInfo::AddRenderMesh(lcScene& Scene)
 	if (!mMesh)
 		return;
 
-	lcRenderMesh RenderMesh;
+	lcRenderMesh& RenderMesh = Scene.mRenderMeshes.Add();
 
 	RenderMesh.WorldMatrix = lcMatrix44Identity();
 	RenderMesh.Mesh = mMesh;
@@ -323,17 +323,17 @@ void PieceInfo::AddRenderMesh(lcScene& Scene)
 	RenderMesh.LodIndex = mMesh->GetLodIndex(RenderMesh.Distance);
 
 	if (mFlags & (LC_PIECE_HAS_SOLID | LC_PIECE_HAS_DEFAULT | LC_PIECE_HAS_LINES))
-		Scene.mOpaqueMeshes.Add(RenderMesh);
+		Scene.mOpaqueMeshes.Add(Scene.mRenderMeshes.GetSize() - 1);
 
 	if (mFlags & LC_PIECE_HAS_TRANSLUCENT)
-		Scene.mTranslucentMeshes.Add(RenderMesh);
+		Scene.mTranslucentMeshes.Add(Scene.mRenderMeshes.GetSize() - 1);
 }
 
 void PieceInfo::AddRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, int ColorIndex, bool Focused, bool Selected) const
 {
 	if (mMesh || (mFlags & LC_PIECE_PLACEHOLDER))
 	{
-		lcRenderMesh RenderMesh;
+		lcRenderMesh& RenderMesh = Scene.mRenderMeshes.Add();
 
 		RenderMesh.WorldMatrix = WorldMatrix;
 		RenderMesh.Mesh = (mFlags & LC_PIECE_PLACEHOLDER) ? gPlaceholderMesh : mMesh;
@@ -345,10 +345,10 @@ void PieceInfo::AddRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, i
 		bool Translucent = lcIsColorTranslucent(ColorIndex);
 
 		if ((mFlags & (LC_PIECE_HAS_SOLID | LC_PIECE_HAS_LINES)) || ((mFlags & LC_PIECE_HAS_DEFAULT) && !Translucent))
-			Scene.mOpaqueMeshes.Add(RenderMesh);
+			Scene.mOpaqueMeshes.Add(Scene.mRenderMeshes.GetSize() - 1);
 
 		if ((mFlags & LC_PIECE_HAS_TRANSLUCENT) || ((mFlags & LC_PIECE_HAS_DEFAULT) && Translucent))
-			Scene.mTranslucentMeshes.Add(RenderMesh);
+			Scene.mTranslucentMeshes.Add(Scene.mRenderMeshes.GetSize() - 1);
 	}
 
 	if (mFlags & LC_PIECE_MODEL)

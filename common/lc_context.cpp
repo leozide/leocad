@@ -20,42 +20,51 @@
 
 lcProgram lcContext::mPrograms[LC_NUM_MATERIALS];
 
-static int lcOpaqueRenderMeshCompare(const void* Elem1, const void* Elem2)
+struct lcOpaqueMeshSorter
 {
-	lcRenderMesh* Mesh1 = (lcRenderMesh*)Elem1;
-	lcRenderMesh* Mesh2 = (lcRenderMesh*)Elem2;
+	lcOpaqueMeshSorter(lcScene* Scene)
+		: mScene(Scene)
+	{
+	}
 
-	if (Mesh1->Mesh < Mesh2->Mesh)
-		return -1;
+	bool operator() (int Index1, int Index2)
+	{
+		lcRenderMesh& Mesh1 = mScene->mRenderMeshes[Index1];
+		lcRenderMesh& Mesh2 = mScene->mRenderMeshes[Index2];
 
-	if (Mesh1->Mesh > Mesh2->Mesh)
-		return 1;
+		return Mesh1.Mesh < Mesh2.Mesh;
+	}
 
-	return 0;
-}
+	lcScene* mScene;
+};
 
-static int lcTranslucentRenderMeshCompare(const void* Elem1, const void* Elem2)
+struct lcTranslucentMeshSorter
 {
-	lcRenderMesh* Mesh1 = (lcRenderMesh*)Elem1;
-	lcRenderMesh* Mesh2 = (lcRenderMesh*)Elem2;
+	lcTranslucentMeshSorter(lcScene* Scene)
+		: mScene(Scene)
+	{
+	}
 
-	if (Mesh1->Distance < Mesh2->Distance)
-		return 1;
+	bool operator() (int Index1, int Index2)
+	{
+		lcRenderMesh& Mesh1 = mScene->mRenderMeshes[Index1];
+		lcRenderMesh& Mesh2 = mScene->mRenderMeshes[Index2];
 
-	if (Mesh1->Distance > Mesh2->Distance)
-		return -1;
+		return Mesh1.Distance < Mesh2.Distance;
+	}
 
-	return 0;
-}
+	lcScene* mScene;
+};
 
 lcScene::lcScene()
-	: mOpaqueMeshes(0, 1024), mTranslucentMeshes(0, 1024), mInterfaceObjects(0, 1024)
+	: mRenderMeshes(0, 1024), mOpaqueMeshes(0, 1024), mTranslucentMeshes(0, 1024), mInterfaceObjects(0, 1024)
 {
 }
 
 void lcScene::Begin(const lcMatrix44& ViewMatrix)
 {
 	mViewMatrix = ViewMatrix;
+	mRenderMeshes.RemoveAll();
 	mOpaqueMeshes.RemoveAll();
 	mTranslucentMeshes.RemoveAll();
 	mInterfaceObjects.RemoveAll();
@@ -63,8 +72,8 @@ void lcScene::Begin(const lcMatrix44& ViewMatrix)
 
 void lcScene::End()
 {
-	qsort(&mOpaqueMeshes[0], mOpaqueMeshes.GetSize(), sizeof(mOpaqueMeshes[0]), lcOpaqueRenderMeshCompare);
-	qsort(&mTranslucentMeshes[0], mTranslucentMeshes.GetSize(), sizeof(mTranslucentMeshes[0]), lcTranslucentRenderMeshCompare);
+	std::sort(&mOpaqueMeshes[0], &mOpaqueMeshes[0] + mOpaqueMeshes.GetSize(), lcOpaqueMeshSorter(this));
+	std::sort(&mTranslucentMeshes[0], &mTranslucentMeshes[0] + mTranslucentMeshes.GetSize(), lcTranslucentMeshSorter(this));
 }
 
 lcContext::lcContext()
@@ -1218,15 +1227,15 @@ void lcContext::DrawMeshSection(lcMesh* Mesh, lcMeshSection* Section)
 	}
 }
 
-void lcContext::DrawOpaqueMeshes(const lcArray<lcRenderMesh>& OpaqueMeshes)
+void lcContext::DrawOpaqueMeshes(const lcScene& Scene)
 {
 	bool DrawLines = lcGetPreferences().mDrawEdgeLines;
-
-	lcGetPiecesLibrary()->UpdateBuffers(this); // TODO: find a better place for this update
+	const lcArray<lcRenderMesh>& RenderMeshes = Scene.mRenderMeshes;
+	const lcArray<int>& OpaqueMeshes = Scene.mOpaqueMeshes;
 
 	for (int MeshIdx = 0; MeshIdx < OpaqueMeshes.GetSize(); MeshIdx++)
 	{
-		const lcRenderMesh& RenderMesh = OpaqueMeshes[MeshIdx];
+		const lcRenderMesh& RenderMesh = RenderMeshes[OpaqueMeshes[MeshIdx]];
 		lcMesh* Mesh = RenderMesh.Mesh;
 		int LodIndex = RenderMesh.LodIndex;
 
@@ -1311,8 +1320,11 @@ void lcContext::DrawOpaqueMeshes(const lcArray<lcRenderMesh>& OpaqueMeshes)
 	}
 }
 
-void lcContext::DrawTranslucentMeshes(const lcArray<lcRenderMesh>& TranslucentMeshes)
+void lcContext::DrawTranslucentMeshes(const lcScene& Scene)
 {
+	const lcArray<lcRenderMesh>& RenderMeshes = Scene.mRenderMeshes;
+	const lcArray<int>& TranslucentMeshes = Scene.mTranslucentMeshes;
+
 	if (TranslucentMeshes.IsEmpty())
 		return;
 
@@ -1322,7 +1334,7 @@ void lcContext::DrawTranslucentMeshes(const lcArray<lcRenderMesh>& TranslucentMe
 
 	for (int MeshIdx = 0; MeshIdx < TranslucentMeshes.GetSize(); MeshIdx++)
 	{
-		const lcRenderMesh& RenderMesh = TranslucentMeshes[MeshIdx];
+		const lcRenderMesh& RenderMesh = RenderMeshes[TranslucentMeshes[MeshIdx]];
 		lcMesh* Mesh = RenderMesh.Mesh;
 		int LodIndex = RenderMesh.LodIndex;
 
@@ -1368,8 +1380,10 @@ void lcContext::DrawTranslucentMeshes(const lcArray<lcRenderMesh>& TranslucentMe
 
 void lcContext::DrawScene(const lcScene& Scene)
 {
-	DrawOpaqueMeshes(Scene.mOpaqueMeshes);
-	DrawTranslucentMeshes(Scene.mTranslucentMeshes);
+	lcGetPiecesLibrary()->UpdateBuffers(this); // TODO: find a better place for this update
+
+	DrawOpaqueMeshes(Scene);
+	DrawTranslucentMeshes(Scene);
 }
 
 void lcContext::DrawInterfaceObjects(const lcArray<const lcObject*>& InterfaceObjects)

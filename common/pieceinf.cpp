@@ -310,46 +310,14 @@ void PieceInfo::ZoomExtents(const lcMatrix44& ProjectionMatrix, lcMatrix44& View
 
 void PieceInfo::AddRenderMesh(lcScene& Scene)
 {
-	if (!mMesh)
-		return;
-
-	lcRenderMesh& RenderMesh = Scene.mRenderMeshes.Add();
-
-	RenderMesh.WorldMatrix = lcMatrix44Identity();
-	RenderMesh.Mesh = mMesh;
-	RenderMesh.ColorIndex = gDefaultColor;
-	RenderMesh.State = LC_RENDERMESH_NONE;
-	RenderMesh.Distance = fabsf(Scene.mViewMatrix.r[3].z);
-	RenderMesh.LodIndex = mMesh->GetLodIndex(RenderMesh.Distance);
-
-	if (mFlags & (LC_PIECE_HAS_SOLID | LC_PIECE_HAS_DEFAULT | LC_PIECE_HAS_LINES))
-		Scene.mOpaqueMeshes.Add(Scene.mRenderMeshes.GetSize() - 1);
-
-	if (mFlags & LC_PIECE_HAS_TRANSLUCENT)
-		Scene.mTranslucentMeshes.Add(Scene.mRenderMeshes.GetSize() - 1);
+	if (mMesh)
+		Scene.AddMesh(mMesh, lcMatrix44Identity(), gDefaultColor, LC_RENDERMESH_NONE, mFlags);
 }
 
 void PieceInfo::AddRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, int ColorIndex, bool Focused, bool Selected) const
 {
 	if (mMesh || (mFlags & LC_PIECE_PLACEHOLDER))
-	{
-		lcRenderMesh& RenderMesh = Scene.mRenderMeshes.Add();
-
-		RenderMesh.WorldMatrix = WorldMatrix;
-		RenderMesh.Mesh = (mFlags & LC_PIECE_PLACEHOLDER) ? gPlaceholderMesh : mMesh;
-		RenderMesh.ColorIndex = ColorIndex;
-		RenderMesh.State = Focused ? LC_RENDERMESH_FOCUSED : (Selected ? LC_RENDERMESH_SELECTED : LC_RENDERMESH_NONE);
-		RenderMesh.Distance = fabsf(lcMul31(WorldMatrix[3], Scene.mViewMatrix).z);
-		RenderMesh.LodIndex = RenderMesh.Mesh->GetLodIndex(RenderMesh.Distance);
-
-		bool Translucent = lcIsColorTranslucent(ColorIndex);
-
-		if ((mFlags & (LC_PIECE_HAS_SOLID | LC_PIECE_HAS_LINES)) || ((mFlags & LC_PIECE_HAS_DEFAULT) && !Translucent))
-			Scene.mOpaqueMeshes.Add(Scene.mRenderMeshes.GetSize() - 1);
-
-		if ((mFlags & LC_PIECE_HAS_TRANSLUCENT) || ((mFlags & LC_PIECE_HAS_DEFAULT) && Translucent))
-			Scene.mTranslucentMeshes.Add(Scene.mRenderMeshes.GetSize() - 1);
-	}
+		Scene.AddMesh((mFlags & LC_PIECE_PLACEHOLDER) ? gPlaceholderMesh : mMesh, WorldMatrix, ColorIndex, Focused ? LC_RENDERMESH_FOCUSED : (Selected ? LC_RENDERMESH_SELECTED : LC_RENDERMESH_NONE), mFlags);
 
 	if (mFlags & LC_PIECE_MODEL)
 		mModel->SubModelAddRenderMeshes(Scene, WorldMatrix, ColorIndex, Focused, Selected);

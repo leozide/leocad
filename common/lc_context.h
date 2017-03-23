@@ -13,12 +13,14 @@ public:
 
 	void Begin(const lcMatrix44& ViewMatrix);
 	void End();
+	void AddMesh(lcMesh* Mesh, const lcMatrix44& WorldMatrix, int ColorIndex, lcRenderMeshState State, int Flags);
 
 	lcMatrix44 mViewMatrix;
 	lcArray<lcRenderMesh> mRenderMeshes;
 	lcArray<int> mOpaqueMeshes;
 	lcArray<int> mTranslucentMeshes;
 	lcArray<const lcObject*> mInterfaceObjects;
+	bool mHasTexture;
 };
 
 class lcVertexBuffer
@@ -179,6 +181,7 @@ protected:
 	void DrawMeshSection(lcMesh* Mesh, lcMeshSection* Section);
 	void DrawOpaqueMeshes(const lcScene& Scene);
 	void DrawTranslucentMeshes(const lcScene& Scene);
+	void DrawRenderMeshes(const lcArray<lcRenderMesh>& RenderMeshes, const lcArray<int>& Meshes, lcMeshPrimitiveType PrimitiveType, bool DrawTranslucent, bool DrawTextured);
 
 	GLuint mVertexBufferObject;
 	GLuint mIndexBufferObject;

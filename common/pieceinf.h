@@ -12,6 +12,7 @@
 #define LC_PIECE_PLACEHOLDER        0x10 // Placeholder for a piece not in the library
 #define LC_PIECE_MODEL              0x20 // Piece is a model
 #define LC_PIECE_PROJECT            0x40 // Piece is a project
+#define LC_PIECE_HAS_TEXTURE        0x80 // Piece has sections using textures
 
 #define LC_PIECE_NAME_LEN 256
 

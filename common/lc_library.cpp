@@ -1347,6 +1347,9 @@ lcMesh* lcPiecesLibrary::CreateMesh(PieceInfo* Info, lcLibraryMeshData& MeshData
 				}
 				else
 					Info->mFlags |= LC_PIECE_HAS_LINES;
+
+				if (DstSection.PrimitiveType == LC_MESH_TEXTURED_TRIANGLES || DstSection.PrimitiveType == LC_MESH_TEXTURED_LINES)
+					Info->mFlags |= LC_PIECE_HAS_TEXTURE;
 			}
 
 			NumIndices += DstSection.NumIndices;

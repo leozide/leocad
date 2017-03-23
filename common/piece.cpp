@@ -643,24 +643,7 @@ void lcPiece::AddRenderMeshes(lcScene& Scene, bool DrawInterface) const
 	if (!mMesh)
 		mPieceInfo->AddRenderMeshes(Scene, mModelWorld, mColorIndex, Focused, Selected);
 	else
-	{
-		lcRenderMesh& RenderMesh = Scene.mRenderMeshes.Add();
-
-		RenderMesh.WorldMatrix = mModelWorld;
-		RenderMesh.Mesh = mMesh;
-		RenderMesh.ColorIndex = mColorIndex;
-		RenderMesh.State = Focused ? LC_RENDERMESH_FOCUSED : (Selected ? LC_RENDERMESH_SELECTED : LC_RENDERMESH_NONE);
-		RenderMesh.Distance = fabsf(lcMul31(mModelWorld[3], Scene.mViewMatrix).z);
-		RenderMesh.LodIndex = RenderMesh.Mesh->GetLodIndex(RenderMesh.Distance);
-
-		bool Translucent = lcIsColorTranslucent(mColorIndex);
-
-		if ((mPieceInfo->mFlags & (LC_PIECE_HAS_SOLID | LC_PIECE_HAS_LINES)) || ((mPieceInfo->mFlags & LC_PIECE_HAS_DEFAULT) && !Translucent))
-			Scene.mOpaqueMeshes.Add(Scene.mRenderMeshes.GetSize() - 1);
-
-		if ((mPieceInfo->mFlags & LC_PIECE_HAS_TRANSLUCENT) || ((mPieceInfo->mFlags & LC_PIECE_HAS_DEFAULT) && Translucent))
-			Scene.mTranslucentMeshes.Add(Scene.mRenderMeshes.GetSize() - 1);
-	}
+		Scene.AddMesh(mMesh, mModelWorld, mColorIndex, Focused ? LC_RENDERMESH_FOCUSED : (Selected ? LC_RENDERMESH_SELECTED : LC_RENDERMESH_NONE), mPieceInfo->mFlags);
 
 	if (Selected)
 		Scene.mInterfaceObjects.Add(this);

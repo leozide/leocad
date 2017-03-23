@@ -298,107 +298,71 @@ void lcSynthInit()
 lcSynthInfo::lcSynthInfo(lcSynthType Type, float Length, int NumSections)
 	: mType(Type), mLength(Length), mNumSections(NumSections)
 {
-	float EdgeSectionLength = 0.0f;
-	float MidSectionLength = 0.0f;
-	mCenterLength = 0.0f;
+	mStart.Transform = lcMatrix44Identity();
+	mMiddle.Transform = lcMatrix44Identity();
+	mEnd.Transform = lcMatrix44Identity();
 
-	switch (mType)
-	{
-	case lcSynthType::HOSE_FLEXIBLE:
-		EdgeSectionLength = 5.0f;
-		MidSectionLength = 2.56f;
-		mCenterLength = 4.56f;
-		mRigidEdges = true;
-		mCurve = true;
-		break;
-
-	case lcSynthType::FLEX_SYSTEM_HOSE:
-		EdgeSectionLength = 1.0f;
-		MidSectionLength = 2.0f;
-		mRigidEdges = true;
-		mCurve = true;
-		break;
-
-	case lcSynthType::RIBBED_HOSE:
-		EdgeSectionLength = 6.25f;
-		MidSectionLength = 6.25f;
-		mRigidEdges = false;
-		break;
-
-	case lcSynthType::FLEXIBLE_AXLE:
-		EdgeSectionLength = 30.0f;
-		MidSectionLength = 4.0f;
-		mRigidEdges = true;
-		break;
-
-	case lcSynthType::STRING_BRAIDED:
-		EdgeSectionLength = 8.0f;
-		MidSectionLength = 4.0f;
-		mRigidEdges = true;
-		break;
-
-	case lcSynthType::SHOCK_ABSORBER:
-	case lcSynthType::ACTUATOR:
-		EdgeSectionLength = 0.0f;
-		MidSectionLength = 0.0f;
-		mRigidEdges = false;
-		break;
-	}
-
-	switch (mType)
-	{
-	case lcSynthType::HOSE_FLEXIBLE:
-	case lcSynthType::RIBBED_HOSE:
-	case lcSynthType::FLEXIBLE_AXLE:
-		mStart.Transform = lcMatrix44(lcMatrix33(lcVector3(0.0f, 0.0f, 1.0f), lcVector3(1.0f, 0.0f, 0.0f), lcVector3(0.0f, 1.0f, 0.0f)), lcVector3(0.0f, 0.0f, 0.0f));
-		mMiddle.Transform = lcMatrix44Identity();
-		mEnd.Transform = lcMatrix44(lcMatrix33(lcVector3(0.0f, 0.0f, 1.0f), lcVector3(1.0f, 0.0f, 0.0f), lcVector3(0.0f, 1.0f, 0.0f)), lcVector3(0.0f, 0.0f, 0.0f));
-		break;
-
-	case lcSynthType::FLEX_SYSTEM_HOSE:
-	case lcSynthType::SHOCK_ABSORBER:
-	case lcSynthType::ACTUATOR:
-	case lcSynthType::STRING_BRAIDED:
-		mStart.Transform = lcMatrix44Identity();
-		mMiddle.Transform = lcMatrix44Identity();
-		mEnd.Transform = lcMatrix44Identity();
-		break;
-	}
-
-	mStart.Length = EdgeSectionLength;
-	mMiddle.Length = MidSectionLength;
-	mEnd.Length = EdgeSectionLength;
+	mStart.Length = 0.0f;
+	mMiddle.Length = 0.0f;
+	mEnd.Length = 0.0f;
 }
 
 lcSynthInfoCurved::lcSynthInfoCurved(lcSynthType Type, float Length, int NumSections)
 	: lcSynthInfo(Type, Length, NumSections)
 {
 	mCurve = true;
+
+	mStart.Transform = lcMatrix44(lcMatrix33(lcVector3(0.0f, 0.0f, 1.0f), lcVector3(1.0f, 0.0f, 0.0f), lcVector3(0.0f, 1.0f, 0.0f)), lcVector3(0.0f, 0.0f, 0.0f));
+	mEnd.Transform = lcMatrix44(lcMatrix33(lcVector3(0.0f, 0.0f, 1.0f), lcVector3(1.0f, 0.0f, 0.0f), lcVector3(0.0f, 1.0f, 0.0f)), lcVector3(0.0f, 0.0f, 0.0f));
 }
 
 lcSynthInfoFlexibleHose::lcSynthInfoFlexibleHose(float Length, int NumSections, const char* EdgePart2)
 	: lcSynthInfoCurved(lcSynthType::HOSE_FLEXIBLE, Length, NumSections), mEdgePart2(EdgePart2)
 {
+	mRigidEdges = true;
+	mStart.Length = 5.0f;
+	mMiddle.Length = 2.56f;
+	mEnd.Length = 5.0f;
+	mCenterLength = 4.56f;
 }
 
 lcSynthInfoFlexSystemHose::lcSynthInfoFlexSystemHose(float Length, int NumSections)
 	: lcSynthInfoCurved(lcSynthType::FLEX_SYSTEM_HOSE, Length, NumSections)
 {
+	mRigidEdges = true;
+	mStart.Transform = lcMatrix44Identity();
+	mEnd.Transform = lcMatrix44Identity();
+	mStart.Length = 1.0f;
+	mMiddle.Length = 2.0f;
+	mEnd.Length = 1.0f;
 }
 
 lcSynthInfoRibbedHose::lcSynthInfoRibbedHose(float Length, int NumSections)
 	: lcSynthInfoCurved(lcSynthType::RIBBED_HOSE, Length, NumSections)
 {
+	mStart.Length = 6.25f;
+	mMiddle.Length = 6.25f;
+	mEnd.Length = 6.25f;
 }
 
 lcSynthInfoFlexibleAxle::lcSynthInfoFlexibleAxle(float Length, int NumSections)
 	: lcSynthInfoCurved(lcSynthType::FLEXIBLE_AXLE, Length, NumSections)
 {
+	mRigidEdges = true;
+	mStart.Length = 30.0f;
+	mMiddle.Length = 4.0f;
+	mEnd.Length = 30.0f;
 }
 
 lcSynthInfoBraidedString::lcSynthInfoBraidedString(float Length, int NumSections)
 	: lcSynthInfoCurved(lcSynthType::STRING_BRAIDED, Length, NumSections)
 {
+	mRigidEdges = true;
+	mStart.Transform = lcMatrix44Identity();
+	mEnd.Transform = lcMatrix44Identity();
+	mStart.Length = 8.0f;
+	mMiddle.Length = 4.0f;
+	mEnd.Length = 8.0f;
 }
 
 lcSynthInfoStraight::lcSynthInfoStraight(lcSynthType Type, float Length)

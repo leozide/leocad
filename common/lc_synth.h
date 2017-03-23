@@ -53,9 +53,9 @@ protected:
 	lcSynthComponent mEnd;
 	bool mCurve = false;
 	float mLength;
-	float mCenterLength;
+	float mCenterLength = 0.0f;
 	int mNumSections;
-	bool mRigidEdges;
+	bool mRigidEdges = false;
 };
 
 void lcSynthInit();

@@ -37,10 +37,29 @@ void lcSynthInit()
 		float Length;
 		int NumSections;
 	}
-	CurvedPieces[] =
+	FlexibleHoses[] =
 	{
 		{ "73590a.dat",   lcSynthType::HOSE_FLEXIBLE,    140.0f,   51 }, // Hose Flexible  8.5L without Tabs
 		{ "73590b.dat",   lcSynthType::HOSE_FLEXIBLE,    140.0f,   51 }, // Hose Flexible  8.5L with Tabs
+	};
+
+	for (const auto& HoseInfo: FlexibleHoses)
+	{
+		PieceInfo* Info = Library->FindPiece(HoseInfo.PartID, nullptr, false, false);
+
+		if (Info)
+			Info->SetSynthInfo(new lcSynthInfoCurved(HoseInfo.Type, HoseInfo.Length, HoseInfo.NumSections, Info));
+	}
+
+	static const struct
+	{
+		char PartID[16];
+		lcSynthType Type;
+		float Length;
+		int NumSections;
+	}
+	FlexSystemHoses[] =
+	{
 		{ "76263.dat",    lcSynthType::FLEX_SYSTEM_HOSE,   60.0f,  29 }, // Technic Flex-System Hose  3L (60LDU)
 		{ "76250.dat",    lcSynthType::FLEX_SYSTEM_HOSE,   80.0f,  39 }, // Technic Flex-System Hose  4L (80LDU)
 		{ "76307.dat",    lcSynthType::FLEX_SYSTEM_HOSE,  100.0f,  49 }, // Technic Flex-System Hose  5L (100LDU)
@@ -74,6 +93,25 @@ void lcSynthInit()
 		{ "46305.dat",    lcSynthType::FLEX_SYSTEM_HOSE,  800.0f, 399 }, // Technic Flex-System Hose 40L (800LDU)
 		{ "76281.dat",    lcSynthType::FLEX_SYSTEM_HOSE,  900.0f, 449 }, // Technic Flex-System Hose 45L (900LDU)
 		{ "22296.dat",    lcSynthType::FLEX_SYSTEM_HOSE, 1060.0f, 529 }, // Technic Flex-System Hose 53L (1060LDU)
+	};
+
+	for (const auto& HoseInfo: FlexSystemHoses)
+	{
+		PieceInfo* Info = Library->FindPiece(HoseInfo.PartID, nullptr, false, false);
+
+		if (Info)
+			Info->SetSynthInfo(new lcSynthInfoCurved(HoseInfo.Type, HoseInfo.Length, HoseInfo.NumSections, Info));
+	}
+
+	static const struct
+	{
+		char PartID[16];
+		lcSynthType Type;
+		float Length;
+		int NumSections;
+	}
+	RibbedHoses[] =
+	{
 		{ "72504.dat",    lcSynthType::RIBBED_HOSE,       31.25f,   4 }, // Technic Ribbed Hose  2L
 		{ "72706.dat",    lcSynthType::RIBBED_HOSE,       50.00f,   7 }, // Technic Ribbed Hose  3L
 		{ "71952.dat",    lcSynthType::RIBBED_HOSE,       75.00f,  11 }, // Technic Ribbed Hose  4L
@@ -93,19 +131,9 @@ void lcSynthInit()
 		{ "43675.dat",    lcSynthType::RIBBED_HOSE,      375.00f,  58 }, // Technic Ribbed Hose 19L
 		{ "23397.dat",    lcSynthType::RIBBED_HOSE,      468.75f,  74 }, // Technic Ribbed Hose 24L
 		{ "33763.dat",    lcSynthType::RIBBED_HOSE,      512.50f,  81 }, // Technic Ribbed Hose 26L
-		{ "32580.dat",    lcSynthType::FLEXIBLE_AXLE,    120.00f,  15 }, // Technic Axle Flexible  7
-		{ "32199.dat",    lcSynthType::FLEXIBLE_AXLE,    200.00f,  35 }, // Technic Axle Flexible 11
-		{ "55709.dat",    lcSynthType::FLEXIBLE_AXLE,    200.00f,  35 }, // Technic Axle Flexible 11
-		{ "32200.dat",    lcSynthType::FLEXIBLE_AXLE,    220.00f,  40 }, // Technic Axle Flexible 12
-		{ "32201.dat",    lcSynthType::FLEXIBLE_AXLE,    260.00f,  50 }, // Technic Axle Flexible 14
-		{ "32202.dat",    lcSynthType::FLEXIBLE_AXLE,    300.00f,  60 }, // Technic Axle Flexible 16
-		{ "32235.dat",    lcSynthType::FLEXIBLE_AXLE,    360.00f,  75 }, // Technic Axle Flexible 19
-		{ "76384.dat",    lcSynthType::STRING_BRAIDED,   200.00f,  46 }, // String Braided 11L with End Studs
-		{ "75924.dat",    lcSynthType::STRING_BRAIDED,   400.00f,  96 }, // String Braided 21L with End Studs
-		{ "572C02.dat",   lcSynthType::STRING_BRAIDED,   800.00f, 196 }, // String Braided 41L with End Studs
 	};
 
-	for (const auto& HoseInfo: CurvedPieces)
+	for (const auto& HoseInfo: RibbedHoses)
 	{
 		PieceInfo* Info = Library->FindPiece(HoseInfo.PartID, nullptr, false, false);
 
@@ -118,23 +146,89 @@ void lcSynthInit()
 		char PartID[16];
 		lcSynthType Type;
 		float Length;
+		int NumSections;
 	}
-	StraigthPieces[] =
+	FlexibleAxles[] =
+	{
+		{ "32580.dat",    lcSynthType::FLEXIBLE_AXLE,  120.00f,  15 }, // Technic Axle Flexible  7
+		{ "32199.dat",    lcSynthType::FLEXIBLE_AXLE,  200.00f,  35 }, // Technic Axle Flexible 11
+		{ "55709.dat",    lcSynthType::FLEXIBLE_AXLE,  200.00f,  35 }, // Technic Axle Flexible 11
+		{ "32200.dat",    lcSynthType::FLEXIBLE_AXLE,  220.00f,  40 }, // Technic Axle Flexible 12
+		{ "32201.dat",    lcSynthType::FLEXIBLE_AXLE,  260.00f,  50 }, // Technic Axle Flexible 14
+		{ "32202.dat",    lcSynthType::FLEXIBLE_AXLE,  300.00f,  60 }, // Technic Axle Flexible 16
+		{ "32235.dat",    lcSynthType::FLEXIBLE_AXLE,  360.00f,  75 }, // Technic Axle Flexible 19
+	};
+
+	for (const auto& AxleInfo: FlexibleAxles)
+	{
+		PieceInfo* Info = Library->FindPiece(AxleInfo.PartID, nullptr, false, false);
+
+		if (Info)
+			Info->SetSynthInfo(new lcSynthInfoCurved(AxleInfo.Type, AxleInfo.Length, AxleInfo.NumSections, Info));
+	}
+
+	static const struct
+	{
+		char PartID[16];
+		lcSynthType Type;
+		float Length;
+		int NumSections;
+	}
+	BraidedStrings[] =
+	{
+		{ "76384.dat",    lcSynthType::STRING_BRAIDED, 200.00f,  46 }, // String Braided 11L with End Studs
+		{ "75924.dat",    lcSynthType::STRING_BRAIDED, 400.00f,  96 }, // String Braided 21L with End Studs
+		{ "572C02.dat",   lcSynthType::STRING_BRAIDED, 800.00f, 196 }, // String Braided 41L with End Studs
+	};
+
+	for (const auto& StringInfo: BraidedStrings)
+	{
+		PieceInfo* Info = Library->FindPiece(StringInfo.PartID, nullptr, false, false);
+
+		if (Info)
+			Info->SetSynthInfo(new lcSynthInfoCurved(StringInfo.Type, StringInfo.Length, StringInfo.NumSections, Info));
+	}
+
+	static const struct
+	{
+		char PartID[16];
+		lcSynthType Type;
+		float Length;
+	}
+	ShockAbsorbers[] =
 	{
 		{ "73129.dat",    lcSynthType::SHOCK_ABSORBER, 110.00f }, // Technic Shock Absorber 6.5L
 		{ "41838.dat",    lcSynthType::SHOCK_ABSORBER, 110.00f }, // Technic Shock Absorber 6.5L Soft
 		{ "76138.dat",    lcSynthType::SHOCK_ABSORBER, 110.00f }, // Technic Shock Absorber 6.5L Stiff
 		{ "76537.dat",    lcSynthType::SHOCK_ABSORBER, 110.00f }, // Technic Shock Absorber 6.5L Extra Stiff
+	};
+
+	for (const auto& AbsorberInfo: ShockAbsorbers)
+	{
+		PieceInfo* Info = Library->FindPiece(AbsorberInfo.PartID, nullptr, false, false);
+
+		if (Info)
+			Info->SetSynthInfo(new lcSynthInfoStraight(AbsorberInfo.Type, AbsorberInfo.Length, Info));
+	}
+
+	static const struct
+	{
+		char PartID[16];
+		lcSynthType Type;
+		float Length;
+	}
+	Actuators[] =
+	{
 		{ "61927C01.dat", lcSynthType::ACTUATOR,       270.00f }, // Technic Power Functions Linear Actuator (Extended)
 		{ "61927.dat",    lcSynthType::ACTUATOR,       170.00f }  // Technic Power Functions Linear Actuator (Contracted)
 	};
 
-	for (const auto& StraightInfo: StraigthPieces)
+	for (const auto& ActuatorInfo: Actuators)
 	{
-		PieceInfo* Info = Library->FindPiece(StraightInfo.PartID, nullptr, false, false);
+		PieceInfo* Info = Library->FindPiece(ActuatorInfo.PartID, nullptr, false, false);
 
 		if (Info)
-			Info->SetSynthInfo(new lcSynthInfoStraight(StraightInfo.Type, StraightInfo.Length, Info));
+			Info->SetSynthInfo(new lcSynthInfoStraight(ActuatorInfo.Type, ActuatorInfo.Length, Info));
 	}
 
 //	"758C01" // Hose Flexible  12L

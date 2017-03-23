@@ -21,30 +21,45 @@ class lcSynthInfoFlexibleHose : public lcSynthInfoCurved
 {
 public:
 	lcSynthInfoFlexibleHose(float Length, int NumSections, PieceInfo* Info);
+
+protected:
+	void AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const lcArray<lcMatrix44>& Sections) const override;
 };
 
 class lcSynthInfoFlexSystemHose : public lcSynthInfoCurved
 {
 public:
 	lcSynthInfoFlexSystemHose(float Length, int NumSections, PieceInfo* Info);
+
+protected:
+	void AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const lcArray<lcMatrix44>& Sections) const override;
 };
 
 class lcSynthInfoRibbedHose : public lcSynthInfoCurved
 {
 public:
 	lcSynthInfoRibbedHose(float Length, int NumSections, PieceInfo* Info);
+
+protected:
+	void AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const lcArray<lcMatrix44>& Sections) const override;
 };
 
 class lcSynthInfoFlexibleAxle : public lcSynthInfoCurved
 {
 public:
 	lcSynthInfoFlexibleAxle(float Length, int NumSections, PieceInfo* Info);
+
+protected:
+	void AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const lcArray<lcMatrix44>& Sections) const override;
 };
 
 class lcSynthInfoBraidedString : public lcSynthInfoCurved
 {
 public:
 	lcSynthInfoBraidedString(float Length, int NumSections, PieceInfo* Info);
+
+protected:
+	void AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const lcArray<lcMatrix44>& Sections) const override;
 };
 
 class lcSynthInfoStraight : public lcSynthInfo
@@ -60,12 +75,18 @@ class lcSynthInfoShockAbsorber : public lcSynthInfoStraight
 {
 public:
 	lcSynthInfoShockAbsorber(float Length, PieceInfo* Info);
+
+protected:
+	void AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const lcArray<lcMatrix44>& Sections) const override;
 };
 
 class lcSynthInfoActuator : public lcSynthInfoStraight
 {
 public:
 	lcSynthInfoActuator(float Length, PieceInfo* Info);
+
+protected:
+	void AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const lcArray<lcMatrix44>& Sections) const override;
 };
 
 void lcSynthInit()
@@ -663,7 +684,7 @@ void lcSynthInfoStraight::CalculateSections(const lcArray<lcPieceControlPoint>& 
 	}
 }
 
-void lcSynthInfo::AddHoseFlexibleParts(lcMemFile& File, const lcArray<lcMatrix44>& Sections) const
+void lcSynthInfoFlexibleHose::AddParts(lcMemFile& File, lcLibraryMeshData&, const lcArray<lcMatrix44>& Sections) const
 {
 	char Line[256];
 	const int NumEdgeParts = 2;
@@ -731,7 +752,7 @@ void lcSynthInfo::AddHoseFlexibleParts(lcMemFile& File, const lcArray<lcMatrix44
 	}
 }
 
-void lcSynthInfo::AddFlexHoseParts(lcMemFile& File, lcLibraryMeshData& MeshData, const lcArray<lcMatrix44>& Sections) const
+void lcSynthInfoFlexSystemHose::AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const lcArray<lcMatrix44>& Sections) const
 {
 	char Line[256];
 
@@ -839,7 +860,7 @@ void lcSynthInfo::AddFlexHoseParts(lcMemFile& File, lcLibraryMeshData& MeshData,
 	AddSectionVertices(InsideSectionVertices, LC_ARRAY_COUNT(InsideSectionVertices));
 }
 
-void lcSynthInfo::AddRibbedHoseParts(lcMemFile& File, const lcArray<lcMatrix44>& Sections) const
+void lcSynthInfoRibbedHose::AddParts(lcMemFile& File, lcLibraryMeshData&, const lcArray<lcMatrix44>& Sections) const
 {
 	char Line[256];
 
@@ -876,7 +897,7 @@ void lcSynthInfo::AddRibbedHoseParts(lcMemFile& File, const lcArray<lcMatrix44>&
 	}
 }
 
-void lcSynthInfo::AddFlexibleAxleParts(lcMemFile& File, lcLibraryMeshData& MeshData, const lcArray<lcMatrix44>& Sections) const
+void lcSynthInfoFlexibleAxle::AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const lcArray<lcMatrix44>& Sections) const
 {
 	char Line[256];
 	const int NumEdgeParts = 6;
@@ -1006,12 +1027,15 @@ void lcSynthInfo::AddFlexibleAxleParts(lcMemFile& File, lcLibraryMeshData& MeshD
 	}
 }
 
-void lcSynthInfo::AddStringBraidedParts(lcMemFile& File, lcLibraryMeshData& MeshData, lcArray<lcMatrix44>& Sections) const
+void lcSynthInfoBraidedString::AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const lcArray<lcMatrix44>& SectionsIn) const
 {
+	lcArray<lcMatrix44> Sections;
+	Sections.SetSize(SectionsIn.GetSize());
+
 	for (int SectionIdx = 0; SectionIdx < Sections.GetSize(); SectionIdx++)
 	{
-		lcMatrix33 Transform(lcMul(lcMatrix33Scale(lcVector3(1.0f, -1.0f, 1.0f)), lcMatrix33(Sections[SectionIdx])));
-		lcVector3 Offset = Sections[SectionIdx].GetTranslation();
+		lcMatrix33 Transform(lcMul(lcMatrix33Scale(lcVector3(1.0f, -1.0f, 1.0f)), lcMatrix33(SectionsIn[SectionIdx])));
+		lcVector3 Offset = SectionsIn[SectionIdx].GetTranslation();
 		Sections[SectionIdx] = lcMatrix44(Transform, Offset);
 	}
 
@@ -1136,7 +1160,7 @@ void lcSynthInfo::AddStringBraidedParts(lcMemFile& File, lcLibraryMeshData& Mesh
 	}
 }
 
-void lcSynthInfo::AddShockAbsorberParts(lcMemFile& File, lcArray<lcMatrix44>& Sections) const
+void lcSynthInfoShockAbsorber::AddParts(lcMemFile& File, lcLibraryMeshData&, const lcArray<lcMatrix44>& Sections) const
 {
 	char Line[256];
 	lcVector3 Offset;
@@ -1169,7 +1193,7 @@ void lcSynthInfo::AddShockAbsorberParts(lcMemFile& File, lcArray<lcMatrix44>& Se
 	File.WriteBuffer(Line, strlen(Line));
 }
 
-void lcSynthInfo::AddActuatorParts(lcMemFile& File, lcArray<lcMatrix44>& Sections) const
+void lcSynthInfoActuator::AddParts(lcMemFile& File, lcLibraryMeshData&, const lcArray<lcMatrix44>& Sections) const
 {
 	char Line[256];
 	lcVector3 Offset;
@@ -1194,36 +1218,7 @@ lcMesh* lcSynthInfo::CreateMesh(const lcArray<lcPieceControlPoint>& ControlPoint
 	lcLibraryMeshData MeshData;
 	lcMemFile File; // todo: rewrite this to pass the parts directly
 
-	switch (mType)
-	{
-	case lcSynthType::HOSE_FLEXIBLE:
-		AddHoseFlexibleParts(File, Sections);
-		break;
-
-	case lcSynthType::FLEX_SYSTEM_HOSE:
-		AddFlexHoseParts(File, MeshData, Sections);
-		break;
-
-	case lcSynthType::RIBBED_HOSE:
-		AddRibbedHoseParts(File, Sections);
-		break;
-
-	case lcSynthType::FLEXIBLE_AXLE:
-		AddFlexibleAxleParts(File, MeshData, Sections);
-		break;
-
-	case lcSynthType::STRING_BRAIDED:
-		AddStringBraidedParts(File, MeshData, Sections);
-		break;
-
-	case lcSynthType::SHOCK_ABSORBER:
-		AddShockAbsorberParts(File, Sections);
-		break;
-
-	case lcSynthType::ACTUATOR:
-		AddActuatorParts(File, Sections);
-		break;
-	}
+	AddParts(File, MeshData, Sections);
 
 	File.WriteU8(0);
 

@@ -45,13 +45,7 @@ public:
 protected:
 	using SectionCallbackFunc = std::function<void(const lcVector3& CurvePoint, int SegmentIndex, float t)>;
 	virtual void CalculateSections(const lcArray<lcPieceControlPoint>& ControlPoints, lcArray<lcMatrix44>& Sections, SectionCallbackFunc SectionCallback) const = 0;
-	void AddHoseFlexibleParts(lcMemFile& File, const lcArray<lcMatrix44>& Sections) const;
-	void AddFlexHoseParts(lcMemFile& File, lcLibraryMeshData& MeshData, const lcArray<lcMatrix44>& Sections) const;
-	void AddRibbedHoseParts(lcMemFile& File, const lcArray<lcMatrix44>& Sections) const;
-	void AddFlexibleAxleParts(lcMemFile& File, lcLibraryMeshData& MeshData, const lcArray<lcMatrix44>& Sections) const;
-	void AddStringBraidedParts(lcMemFile& File, lcLibraryMeshData& MeshData, lcArray<lcMatrix44>& Sections) const;
-	void AddShockAbsorberParts(lcMemFile& File, lcArray<lcMatrix44>& Sections) const;
-	void AddActuatorParts(lcMemFile& File, lcArray<lcMatrix44>& Sections) const;
+	virtual void AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const lcArray<lcMatrix44>& Sections) const = 0;
 
 	PieceInfo* mPieceInfo;
 	lcSynthType mType;

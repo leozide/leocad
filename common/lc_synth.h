@@ -3,23 +3,12 @@
 #include "lc_math.h"
 #include "piece.h"
 
-enum class lcSynthType
-{
-	HOSE_FLEXIBLE,
-	FLEX_SYSTEM_HOSE,
-	RIBBED_HOSE,
-	FLEXIBLE_AXLE,
-	STRING_BRAIDED,
-	SHOCK_ABSORBER,
-	ACTUATOR
-};
-
 class lcLibraryMeshData;
 
 class lcSynthInfo
 {
 public:
-	lcSynthInfo(lcSynthType Type, float Length);
+	explicit lcSynthInfo(float Length);
 	virtual ~lcSynthInfo() = default;
 
 	bool CanAddControlPoints() const
@@ -41,7 +30,6 @@ protected:
 	virtual void CalculateSections(const lcArray<lcPieceControlPoint>& ControlPoints, lcArray<lcMatrix44>& Sections, SectionCallbackFunc SectionCallback) const = 0;
 	virtual void AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const lcArray<lcMatrix44>& Sections) const = 0;
 
-	lcSynthType mType;
 	bool mCurve = false;
 	float mLength;
 };

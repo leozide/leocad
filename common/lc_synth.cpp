@@ -10,7 +10,7 @@
 class lcSynthInfoCurved : public lcSynthInfo
 {
 public:
-	lcSynthInfoCurved(lcSynthType Type, float Length, float DefaultScale, int NumSections, bool RigidEdges);
+	lcSynthInfoCurved(float Length, float DefaultScale, int NumSections, bool RigidEdges);
 
 	void GetDefaultControlPoints(lcArray<lcPieceControlPoint>& ControlPoints) const override;
 
@@ -86,7 +86,7 @@ protected:
 class lcSynthInfoStraight : public lcSynthInfo
 {
 public:
-	lcSynthInfoStraight(lcSynthType Type, float Length);
+	explicit lcSynthInfoStraight(float Length);
 
 protected:
 	void CalculateSections(const lcArray<lcPieceControlPoint>& ControlPoints, lcArray<lcMatrix44>& Sections, SectionCallbackFunc SectionCallback) const override;
@@ -318,13 +318,13 @@ void lcSynthInit()
 //	"758C01" // Hose Flexible  12L
 }
 
-lcSynthInfo::lcSynthInfo(lcSynthType Type, float Length)
-	: mType(Type), mLength(Length)
+lcSynthInfo::lcSynthInfo(float Length)
+	: mLength(Length)
 {
 }
 
-lcSynthInfoCurved::lcSynthInfoCurved(lcSynthType Type, float Length, float DefaultScale, int NumSections, bool RigidEdges)
-	: lcSynthInfo(Type, Length), mNumSections(NumSections), mDefaultScale(DefaultScale), mRigidEdges(RigidEdges)
+lcSynthInfoCurved::lcSynthInfoCurved(float Length, float DefaultScale, int NumSections, bool RigidEdges)
+	: lcSynthInfo(Length), mNumSections(NumSections), mDefaultScale(DefaultScale), mRigidEdges(RigidEdges)
 {
 	mCurve = true;
 
@@ -333,7 +333,7 @@ lcSynthInfoCurved::lcSynthInfoCurved(lcSynthType Type, float Length, float Defau
 }
 
 lcSynthInfoFlexibleHose::lcSynthInfoFlexibleHose(float Length, int NumSections, const char* EdgePart2)
-	: lcSynthInfoCurved(lcSynthType::HOSE_FLEXIBLE, Length, 12.f, NumSections, true),
+	: lcSynthInfoCurved(Length, 12.f, NumSections, true),
 	mEdgePart2(EdgePart2)
 {
 	mStart.Length = 5.0f;
@@ -343,7 +343,7 @@ lcSynthInfoFlexibleHose::lcSynthInfoFlexibleHose(float Length, int NumSections, 
 }
 
 lcSynthInfoFlexSystemHose::lcSynthInfoFlexSystemHose(float Length, int NumSections)
-	: lcSynthInfoCurved(lcSynthType::FLEX_SYSTEM_HOSE, Length, 12.f, NumSections, true)
+	: lcSynthInfoCurved(Length, 12.f, NumSections, true)
 {
 	mStart.Transform = lcMatrix44Identity();
 	mEnd.Transform = lcMatrix44Identity();
@@ -353,7 +353,7 @@ lcSynthInfoFlexSystemHose::lcSynthInfoFlexSystemHose(float Length, int NumSectio
 }
 
 lcSynthInfoRibbedHose::lcSynthInfoRibbedHose(float Length, int NumSections)
-	: lcSynthInfoCurved(lcSynthType::RIBBED_HOSE, Length, 80.0f, NumSections, false)
+	: lcSynthInfoCurved(Length, 80.0f, NumSections, false)
 {
 	mStart.Length = 6.25f;
 	mMiddle.Length = 6.25f;
@@ -361,7 +361,7 @@ lcSynthInfoRibbedHose::lcSynthInfoRibbedHose(float Length, int NumSections)
 }
 
 lcSynthInfoFlexibleAxle::lcSynthInfoFlexibleAxle(float Length, int NumSections)
-	: lcSynthInfoCurved(lcSynthType::FLEXIBLE_AXLE, Length, 12.0f, NumSections, true)
+	: lcSynthInfoCurved(Length, 12.0f, NumSections, true)
 {
 	mStart.Length = 30.0f;
 	mMiddle.Length = 4.0f;
@@ -369,7 +369,7 @@ lcSynthInfoFlexibleAxle::lcSynthInfoFlexibleAxle(float Length, int NumSections)
 }
 
 lcSynthInfoBraidedString::lcSynthInfoBraidedString(float Length, int NumSections)
-	: lcSynthInfoCurved(lcSynthType::STRING_BRAIDED, Length, 12.0f, NumSections, true)
+	: lcSynthInfoCurved(Length, 12.0f, NumSections, true)
 {
 	mStart.Transform = lcMatrix44Identity();
 	mEnd.Transform = lcMatrix44Identity();
@@ -378,18 +378,18 @@ lcSynthInfoBraidedString::lcSynthInfoBraidedString(float Length, int NumSections
 	mEnd.Length = 8.0f;
 }
 
-lcSynthInfoStraight::lcSynthInfoStraight(lcSynthType Type, float Length)
-	: lcSynthInfo(Type, Length)
+lcSynthInfoStraight::lcSynthInfoStraight(float Length)
+	: lcSynthInfo(Length)
 {
 }
 
 lcSynthInfoShockAbsorber::lcSynthInfoShockAbsorber(const char* SpringPart)
-	: lcSynthInfoStraight(lcSynthType::SHOCK_ABSORBER, 110.00f), mSpringPart(SpringPart)
+	: lcSynthInfoStraight(110.00f), mSpringPart(SpringPart)
 {
 }
 
 lcSynthInfoActuator::lcSynthInfoActuator(float Length)
-	: lcSynthInfoStraight(lcSynthType::ACTUATOR, Length)
+	: lcSynthInfoStraight(Length)
 {
 }
 

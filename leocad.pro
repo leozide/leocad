@@ -151,7 +151,6 @@ SOURCES += common/view.cpp \
     common/lc_zipfile.cpp \
     common/image.cpp \
     common/group.cpp \
-    common/debug.cpp \
     common/camera.cpp \
     qt/system.cpp \
     qt/qtmain.cpp \
@@ -213,7 +212,6 @@ HEADERS += \
     common/lc_zipfile.h \
     common/image.h \
     common/group.h \
-    common/debug.h \
     common/camera.h \
     qt/lc_qpovraydialog.h \
     qt/lc_qarraydialog.h \

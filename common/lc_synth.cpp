@@ -76,12 +76,12 @@ protected:
 class lcSynthInfoShockAbsorber : public lcSynthInfoStraight
 {
 public:
-	lcSynthInfoShockAbsorber(float Length, PieceInfo* Info);
+	explicit lcSynthInfoShockAbsorber(const char* SpringPart);
 
 protected:
 	void AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const lcArray<lcMatrix44>& Sections) const override;
 
-	PieceInfo* mPieceInfo;
+	const char* mSpringPart;
 };
 
 class lcSynthInfoActuator : public lcSynthInfoStraight
@@ -254,14 +254,14 @@ void lcSynthInit()
 	static const struct
 	{
 		char PartID[16];
-		float Length;
+		char SpringPart[16];
 	}
 	ShockAbsorbers[] =
 	{
-		{ "73129.dat",    110.00f }, // Technic Shock Absorber 6.5L
-		{ "41838.dat",    110.00f }, // Technic Shock Absorber 6.5L Soft
-		{ "76138.dat",    110.00f }, // Technic Shock Absorber 6.5L Stiff
-		{ "76537.dat",    110.00f }, // Technic Shock Absorber 6.5L Extra Stiff
+		{ "73129.dat", "70038.dat" }, // Technic Shock Absorber 6.5L
+		{ "41838.dat", "41837.dat" }, // Technic Shock Absorber 6.5L Soft
+		{ "76138.dat", "71953.dat" }, // Technic Shock Absorber 6.5L Stiff
+		{ "76537.dat", "22977.dat" }, // Technic Shock Absorber 6.5L Extra Stiff
 	};
 
 	for (const auto& AbsorberInfo: ShockAbsorbers)
@@ -269,7 +269,7 @@ void lcSynthInit()
 		PieceInfo* Info = Library->FindPiece(AbsorberInfo.PartID, nullptr, false, false);
 
 		if (Info)
-			Info->SetSynthInfo(new lcSynthInfoShockAbsorber(AbsorberInfo.Length, Info));
+			Info->SetSynthInfo(new lcSynthInfoShockAbsorber(AbsorberInfo.SpringPart));
 	}
 
 	static const struct
@@ -405,8 +405,8 @@ lcSynthInfoStraight::lcSynthInfoStraight(lcSynthType Type, float Length)
 {
 }
 
-lcSynthInfoShockAbsorber::lcSynthInfoShockAbsorber(float Length, PieceInfo* Info)
-	: lcSynthInfoStraight(lcSynthType::SHOCK_ABSORBER, Length), mPieceInfo(Info)
+lcSynthInfoShockAbsorber::lcSynthInfoShockAbsorber(const char* SpringPart)
+	: lcSynthInfoStraight(lcSynthType::SHOCK_ABSORBER, 110.00f), mSpringPart(SpringPart)
 {
 }
 
@@ -1179,21 +1179,9 @@ void lcSynthInfoShockAbsorber::AddParts(lcMemFile& File, lcLibraryMeshData&, con
 
 	float Distance = Sections[0].GetTranslation().y - Sections[1].GetTranslation().y;
 	float Scale = (Distance - 66.0f) / 44.0f;
-	const char* SpringPart;
-
-	if (!qstricmp(mPieceInfo->mFileName, "73129.dat"))
-		SpringPart = "70038";
-	else if (!qstricmp(mPieceInfo->mFileName, "41838.dat"))
-		SpringPart = "41837";
-	else if (!qstricmp(mPieceInfo->mFileName, "76138.dat"))
-		SpringPart = "71953";
-	else if (!qstricmp(mPieceInfo->mFileName, "76537.dat"))
-		SpringPart = "22977";
-	else
-		return;
 
 	Offset = Sections[0].GetTranslation();
-	sprintf(Line, "1 494 %f %f %f 1 0 0 0 %f 0 0 0 1 %s.dat\n", Offset[0], Offset[1] - 10 - 44.0f * Scale, Offset[2], Scale, SpringPart);
+	sprintf(Line, "1 494 %f %f %f 1 0 0 0 %f 0 0 0 1 %s\n", Offset[0], Offset[1] - 10 - 44.0f * Scale, Offset[2], Scale, mSpringPart);
 	File.WriteBuffer(Line, strlen(Line));
 }
 

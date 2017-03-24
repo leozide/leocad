@@ -38,7 +38,7 @@ public:
 		return mCurve;
 	}
 
-	void GetDefaultControlPoints(lcArray<lcPieceControlPoint>& ControlPoints) const;
+	virtual void GetDefaultControlPoints(lcArray<lcPieceControlPoint>& ControlPoints) const = 0;
 	int InsertControlPoint(lcArray<lcPieceControlPoint>& ControlPoints, const lcVector3& Start, const lcVector3& End) const;
 	lcMesh* CreateMesh(const lcArray<lcPieceControlPoint>& ControlPoints) const;
 

@@ -10,11 +10,15 @@
 class lcSynthInfoCurved : public lcSynthInfo
 {
 public:
-	lcSynthInfoCurved(lcSynthType Type, float Length, int NumSections);
+	lcSynthInfoCurved(lcSynthType Type, float Length, float DefaultScale, int NumSections);
+
+	void GetDefaultControlPoints(lcArray<lcPieceControlPoint>& ControlPoints) const override;
 
 protected:
 	float GetSectionTwist(const lcMatrix44& StartTransform, const lcMatrix44& EndTransform) const;
 	void CalculateSections(const lcArray<lcPieceControlPoint>& ControlPoints, lcArray<lcMatrix44>& Sections, SectionCallbackFunc SectionCallback) const override;
+
+	float mDefaultScale;
 };
 
 class lcSynthInfoFlexibleHose : public lcSynthInfoCurved
@@ -32,6 +36,8 @@ class lcSynthInfoFlexSystemHose : public lcSynthInfoCurved
 {
 public:
 	lcSynthInfoFlexSystemHose(float Length, int NumSections);
+
+	void GetDefaultControlPoints(lcArray<lcPieceControlPoint>& ControlPoints) const override;
 
 protected:
 	void AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const lcArray<lcMatrix44>& Sections) const override;
@@ -78,6 +84,8 @@ class lcSynthInfoShockAbsorber : public lcSynthInfoStraight
 public:
 	explicit lcSynthInfoShockAbsorber(const char* SpringPart);
 
+	void GetDefaultControlPoints(lcArray<lcPieceControlPoint>& ControlPoints) const override;
+
 protected:
 	void AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const lcArray<lcMatrix44>& Sections) const override;
 
@@ -88,6 +96,8 @@ class lcSynthInfoActuator : public lcSynthInfoStraight
 {
 public:
 	explicit lcSynthInfoActuator(float Length);
+
+	void GetDefaultControlPoints(lcArray<lcPieceControlPoint>& ControlPoints) const override;
 
 protected:
 	void AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const lcArray<lcMatrix44>& Sections) const override;
@@ -307,8 +317,8 @@ lcSynthInfo::lcSynthInfo(lcSynthType Type, float Length, int NumSections)
 	mEnd.Length = 0.0f;
 }
 
-lcSynthInfoCurved::lcSynthInfoCurved(lcSynthType Type, float Length, int NumSections)
-	: lcSynthInfo(Type, Length, NumSections)
+lcSynthInfoCurved::lcSynthInfoCurved(lcSynthType Type, float Length, float DefaultScale, int NumSections)
+	: lcSynthInfo(Type, Length, NumSections), mDefaultScale(DefaultScale)
 {
 	mCurve = true;
 
@@ -317,7 +327,7 @@ lcSynthInfoCurved::lcSynthInfoCurved(lcSynthType Type, float Length, int NumSect
 }
 
 lcSynthInfoFlexibleHose::lcSynthInfoFlexibleHose(float Length, int NumSections, const char* EdgePart2)
-	: lcSynthInfoCurved(lcSynthType::HOSE_FLEXIBLE, Length, NumSections), mEdgePart2(EdgePart2)
+	: lcSynthInfoCurved(lcSynthType::HOSE_FLEXIBLE, Length, 12.f, NumSections), mEdgePart2(EdgePart2)
 {
 	mRigidEdges = true;
 	mStart.Length = 5.0f;
@@ -327,7 +337,7 @@ lcSynthInfoFlexibleHose::lcSynthInfoFlexibleHose(float Length, int NumSections, 
 }
 
 lcSynthInfoFlexSystemHose::lcSynthInfoFlexSystemHose(float Length, int NumSections)
-	: lcSynthInfoCurved(lcSynthType::FLEX_SYSTEM_HOSE, Length, NumSections)
+	: lcSynthInfoCurved(lcSynthType::FLEX_SYSTEM_HOSE, Length, 12.f, NumSections)
 {
 	mRigidEdges = true;
 	mStart.Transform = lcMatrix44Identity();
@@ -338,7 +348,7 @@ lcSynthInfoFlexSystemHose::lcSynthInfoFlexSystemHose(float Length, int NumSectio
 }
 
 lcSynthInfoRibbedHose::lcSynthInfoRibbedHose(float Length, int NumSections)
-	: lcSynthInfoCurved(lcSynthType::RIBBED_HOSE, Length, NumSections)
+	: lcSynthInfoCurved(lcSynthType::RIBBED_HOSE, Length, 80.0f, NumSections)
 {
 	mStart.Length = 6.25f;
 	mMiddle.Length = 6.25f;
@@ -346,7 +356,7 @@ lcSynthInfoRibbedHose::lcSynthInfoRibbedHose(float Length, int NumSections)
 }
 
 lcSynthInfoFlexibleAxle::lcSynthInfoFlexibleAxle(float Length, int NumSections)
-	: lcSynthInfoCurved(lcSynthType::FLEXIBLE_AXLE, Length, NumSections)
+	: lcSynthInfoCurved(lcSynthType::FLEXIBLE_AXLE, Length, 12.0f, NumSections)
 {
 	mRigidEdges = true;
 	mStart.Length = 30.0f;
@@ -355,7 +365,7 @@ lcSynthInfoFlexibleAxle::lcSynthInfoFlexibleAxle(float Length, int NumSections)
 }
 
 lcSynthInfoBraidedString::lcSynthInfoBraidedString(float Length, int NumSections)
-	: lcSynthInfoCurved(lcSynthType::STRING_BRAIDED, Length, NumSections)
+	: lcSynthInfoCurved(lcSynthType::STRING_BRAIDED, Length, 12.0f, NumSections)
 {
 	mRigidEdges = true;
 	mStart.Transform = lcMatrix44Identity();
@@ -380,68 +390,48 @@ lcSynthInfoActuator::lcSynthInfoActuator(float Length)
 {
 }
 
-void lcSynthInfo::GetDefaultControlPoints(lcArray<lcPieceControlPoint>& ControlPoints) const
+void lcSynthInfoCurved::GetDefaultControlPoints(lcArray<lcPieceControlPoint>& ControlPoints) const
 {
 	ControlPoints.SetSize(2);
 
-	float Scale = 1.0f;
-
-	switch (mType)
-	{
-	case lcSynthType::HOSE_FLEXIBLE:
-		Scale = 12.0f;
-		break;
-
-	case lcSynthType::FLEX_SYSTEM_HOSE:
-		Scale = 12.0f;
-		break;
-
-	case lcSynthType::RIBBED_HOSE:
-		Scale = 80.0f;
-		break;
-
-	case lcSynthType::FLEXIBLE_AXLE:
-		Scale = 12.0f;
-		break;
-
-	case lcSynthType::STRING_BRAIDED:
-		Scale = 12.0f;
-		break;
-
-	case lcSynthType::SHOCK_ABSORBER:
-	case lcSynthType::ACTUATOR:
-		Scale = 1.0f;
-		break;
-	}
-
 	float HalfLength = mLength / 2.0f;
-	Scale = lcMin(Scale, HalfLength);
+	float Scale = lcMin(mDefaultScale, HalfLength);
 
-	switch (mType)
-	{
-	default:
-		ControlPoints[0].Transform = lcMatrix44Translation(lcVector3(-HalfLength, 0.0f, 0.0f));
-		ControlPoints[1].Transform = lcMatrix44Translation(lcVector3( HalfLength, 0.0f, 0.0f));
-		break;
-
-	case lcSynthType::FLEX_SYSTEM_HOSE:
-		ControlPoints[0].Transform = lcMatrix44Translation(lcVector3(0.0f, 0.0f, -mLength));
-		ControlPoints[1].Transform = lcMatrix44Translation(lcVector3(0.0f, 0.0f, 0.0f));
-		break;
-
-	case lcSynthType::SHOCK_ABSORBER:
-		ControlPoints[0].Transform = lcMatrix44Translation(lcVector3(0.0f, 0.0f, -mLength));
-		ControlPoints[1].Transform = lcMatrix44Translation(lcVector3(0.0f, 0.0f, 0.0f));
-		break;
-
-	case lcSynthType::ACTUATOR:
-		ControlPoints[0].Transform = lcMatrix44(lcMatrix33(lcVector3(1.0f, 0.0f, 0.0f), lcVector3(0.0f, 0.0f, -1.0f), lcVector3(0.0f, 1.0f, 0.0f)), lcVector3(0.0f, 0.0f, 0.0f));
-		ControlPoints[1].Transform = lcMatrix44(lcMatrix33(lcVector3(1.0f, 0.0f, 0.0f), lcVector3(0.0f, 0.0f, -1.0f), lcVector3(0.0f, 1.0f, 0.0f)), lcVector3(0.0f, mLength, 0.0f));
-		break;
-	}
+	ControlPoints[0].Transform = lcMatrix44Translation(lcVector3(-HalfLength, 0.0f, 0.0f));
+	ControlPoints[1].Transform = lcMatrix44Translation(lcVector3( HalfLength, 0.0f, 0.0f));
 
 	ControlPoints[0].Scale = Scale;
 	ControlPoints[1].Scale = Scale;
+}
+
+void lcSynthInfoFlexSystemHose::GetDefaultControlPoints(lcArray<lcPieceControlPoint>& ControlPoints) const
+{
+	lcSynthInfoCurved::GetDefaultControlPoints(ControlPoints);
+
+	ControlPoints[0].Transform = lcMatrix44Translation(lcVector3(0.0f, 0.0f, -mLength));
+	ControlPoints[1].Transform = lcMatrix44Translation(lcVector3(0.0f, 0.0f, 0.0f));
+}
+
+void lcSynthInfoShockAbsorber::GetDefaultControlPoints(lcArray<lcPieceControlPoint>& ControlPoints) const
+{
+	ControlPoints.SetSize(2);
+
+	ControlPoints[0].Transform = lcMatrix44Translation(lcVector3(0.0f, 0.0f, -mLength));
+	ControlPoints[1].Transform = lcMatrix44Translation(lcVector3(0.0f, 0.0f, 0.0f));
+
+	ControlPoints[0].Scale = 1.0f;
+	ControlPoints[1].Scale = 1.0f;
+}
+
+void lcSynthInfoActuator::GetDefaultControlPoints(lcArray<lcPieceControlPoint>& ControlPoints) const
+{
+	ControlPoints.SetSize(2);
+
+	ControlPoints[0].Transform = lcMatrix44(lcMatrix33(lcVector3(1.0f, 0.0f, 0.0f), lcVector3(0.0f, 0.0f, -1.0f), lcVector3(0.0f, 1.0f, 0.0f)), lcVector3(0.0f, 0.0f, 0.0f));
+	ControlPoints[1].Transform = lcMatrix44(lcMatrix33(lcVector3(1.0f, 0.0f, 0.0f), lcVector3(0.0f, 0.0f, -1.0f), lcVector3(0.0f, 1.0f, 0.0f)), lcVector3(0.0f, mLength, 0.0f));
+
+	ControlPoints[0].Scale = 1.0f;
+	ControlPoints[1].Scale = 1.0f;
 }
 
 float lcSynthInfoCurved::GetSectionTwist(const lcMatrix44& StartTransform, const lcMatrix44& EndTransform) const

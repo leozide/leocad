@@ -232,7 +232,7 @@ void TexFont::PrintText(lcContext* Context, float Left, float Top, float Z, cons
 	}
 
 	Context->SetVertexBufferPointer(Verts);
-	Context->SetVertexFormat(0, 3, 0, 2, 0);
+	Context->SetVertexFormat(0, 3, 0, 2, 0, false);
 
 	Context->DrawPrimitives(GL_TRIANGLES, 0, 6 * (GLsizei)Length);
 

@@ -643,7 +643,7 @@ void View::DrawSelectMoveOverlay()
 
 	mContext->SetIndexBuffer(mRotateMoveIndexBuffer);
 	mContext->SetVertexBuffer(mRotateMoveVertexBuffer);
-	mContext->SetVertexFormat(0, 3, 0, 0, 0);
+	mContext->SetVertexFormatPosition(3);
 
 	lcObject* Focus = mModel->GetFocusObject();
 	lcuint32 AllowedTransforms = Focus ? Focus->GetAllowedTransforms() : LC_OBJECT_TRANSFORM_MOVE_X | LC_OBJECT_TRANSFORM_MOVE_Y | LC_OBJECT_TRANSFORM_MOVE_Z | LC_OBJECT_TRANSFORM_ROTATE_X | LC_OBJECT_TRANSFORM_ROTATE_Y | LC_OBJECT_TRANSFORM_ROTATE_Z;
@@ -796,7 +796,7 @@ void View::DrawSelectMoveOverlay()
 
 			mContext->SetVertexBufferPointer(Verts);
 			mContext->ClearIndexBuffer();
-			mContext->SetVertexFormat(0, 3, 0, 0, 0);
+			mContext->SetVertexFormatPosition(3);
 
 			mContext->DrawPrimitives(GL_LINES, 0, 2);
 			mContext->DrawPrimitives(GL_TRIANGLE_STRIP, 2, 18);
@@ -884,7 +884,7 @@ void View::DrawRotateOverlay()
 			int NumVerts = 1;
 
 			mContext->SetVertexBufferPointer(Verts);
-			mContext->SetVertexFormat(0, 3, 0, 0, 0);
+			mContext->SetVertexFormatPosition(3);
 
 			float StartAngle;
 			int i = 0;
@@ -946,7 +946,7 @@ void View::DrawRotateOverlay()
 		mContext->SetWorldMatrix(lcMatrix44Identity());
 
 		mContext->SetVertexBufferPointer(Verts);
-		mContext->SetVertexFormat(0, 3, 0, 0, 0);
+		mContext->SetVertexFormatPosition(3);
 
 		mContext->DrawPrimitives(GL_LINE_LOOP, 0, 32);
 	}
@@ -1019,7 +1019,7 @@ void View::DrawRotateOverlay()
 		}
 
 		mContext->SetVertexBufferPointer(Verts);
-		mContext->SetVertexFormat(0, 3, 0, 0, 0);
+		mContext->SetVertexFormatPosition(3);
 
 		mContext->DrawPrimitives(GL_LINES, 0, NumVerts);
 	}
@@ -1077,7 +1077,7 @@ void View::DrawRotateOverlay()
 			Verts[5] = lcVector3(0.0f, StartY - OverlayScale * OverlayRotateArrowCapSize, EndZ + TipZ);
 
 			mContext->SetVertexBufferPointer(Verts);
-			mContext->SetVertexFormat(0, 3, 0, 0, 0);
+			mContext->SetVertexFormatPosition(3);
 
 			mContext->DrawPrimitives(GL_LINES, 0, 6);
 		}
@@ -1180,7 +1180,7 @@ void View::DrawSelectZoomRegionOverlay()
 	glEnable(GL_BLEND);
 
 	mContext->SetVertexBufferPointer(Verts);
-	mContext->SetVertexFormat(0, 2, 0, 0, 0);
+	mContext->SetVertexFormatPosition(2);
 
 	mContext->SetColor(0.25f, 0.25f, 1.0f, 1.0f);
 	mContext->DrawPrimitives(GL_TRIANGLE_STRIP, 0, 10);
@@ -1244,7 +1244,7 @@ void View::DrawRotateViewOverlay()
 	*CurVert++ = cx - r + OverlayCameraSquareSize; *CurVert++ = cy - OverlayCameraSquareSize;
 
 	mContext->SetVertexBufferPointer(Verts);
-	mContext->SetVertexFormat(0, 2, 0, 0, 0);
+	mContext->SetVertexFormatPosition(2);
 
 	GLushort Indices[64 + 32] = 
 	{
@@ -1420,7 +1420,7 @@ void View::DrawGrid()
 		mContext->SetMaterial(LC_MATERIAL_UNLIT_TEXTURE_MODULATE);
 		mContext->SetColor(lcVector4FromColor(Preferences.mGridStudColor));
 
-		mContext->SetVertexFormat(0, 3, 0, 2, 0);
+		mContext->SetVertexFormat(0, 3, 0, 2, 0, false);
 		mContext->DrawPrimitives(GL_TRIANGLE_STRIP, 0, 4);
 
 		glDisable(GL_TEXTURE_2D);
@@ -1437,7 +1437,7 @@ void View::DrawGrid()
 
 		int NumVerts = 2 * (MaxX - MinX + MaxY - MinY + 2);
 
-		mContext->SetVertexFormat(BufferOffset, 3, 0, 0, 0);
+		mContext->SetVertexFormat(BufferOffset, 3, 0, 0, 0, false);
 		mContext->DrawPrimitives(GL_LINES, 0, NumVerts);
 	}
 
@@ -1477,7 +1477,7 @@ void View::DrawAxes()
 	mContext->SetProjectionMatrix(lcMatrix44Ortho(0, mWidth, 0, mHeight, -50, 50));
 
 	mContext->SetVertexBufferPointer(Verts);
-	mContext->SetVertexFormat(0, 3, 0, 0, 0);
+	mContext->SetVertexFormatPosition(3);
 	mContext->SetIndexBufferPointer(Indices);
 
 	mContext->SetColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -1507,7 +1507,7 @@ void View::DrawAxes()
 	gTexFont.GetGlyphTriangles(PosZ.x, PosZ.y, PosZ.z, 'Z', TextBuffer + 5 * 6 * 2);
 
 	mContext->SetVertexBufferPointer(TextBuffer);
-	mContext->SetVertexFormat(0, 3, 0, 2, 0);
+	mContext->SetVertexFormat(0, 3, 0, 2, 0, false);
 
 	mContext->SetColor(0.0f, 0.0f, 0.0f, 1.0f);
 	mContext->DrawPrimitives(GL_TRIANGLES, 0, 6 * 3);
@@ -1534,7 +1534,7 @@ void View::DrawViewport()
 		float Verts[8] = { 0.0f, 0.0f, mWidth - 1.0f, 0.0f, mWidth - 1.0f, mHeight - 1.0f, 0.0f, mHeight - 1.0f };
 
 		mContext->SetVertexBufferPointer(Verts);
-		mContext->SetVertexFormat(0, 2, 0, 0, 0);
+		mContext->SetVertexFormatPosition(2);
 		mContext->DrawPrimitives(GL_LINE_LOOP, 0, 4);
 	}
 

@@ -165,7 +165,8 @@ public:
 	void SetIndexBuffer(lcIndexBuffer IndexBuffer);
 	void SetIndexBufferPointer(const void* IndexBuffer);
 
-	void SetVertexFormat(int BufferOffset, int PositionSize, int NormalSize, int TexCoordSize, int ColorSize);
+	void SetVertexFormat(int BufferOffset, int PositionSize, int NormalSize, int TexCoordSize, int ColorSize, bool EnableNormals);
+	void SetVertexFormatPosition(int PositionSize);
 	void DrawPrimitives(GLenum Mode, GLint First, GLsizei Count);
 	void DrawIndexedPrimitives(GLenum Mode, GLsizei Count, GLenum Type, int Offset);
 
@@ -181,7 +182,7 @@ protected:
 	void DrawMeshSection(lcMesh* Mesh, lcMeshSection* Section);
 	void DrawOpaqueMeshes(const lcScene& Scene);
 	void DrawTranslucentMeshes(const lcScene& Scene);
-	void DrawRenderMeshes(const lcArray<lcRenderMesh>& RenderMeshes, const lcArray<int>& Meshes, lcMeshPrimitiveType PrimitiveType, bool DrawTranslucent, bool DrawTextured);
+	void DrawRenderMeshes(const lcArray<lcRenderMesh>& RenderMeshes, const lcArray<int>& Meshes, lcMeshPrimitiveType PrimitiveType, bool EnableNormals, bool DrawTranslucent, bool DrawTextured);
 
 	GLuint mVertexBufferObject;
 	GLuint mIndexBufferObject;

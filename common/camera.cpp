@@ -535,7 +535,7 @@ void lcCamera::DrawInterface(lcContext* Context) const
 	};
 
 	Context->SetVertexBufferPointer(Verts);
-	Context->SetVertexFormat(0, 3, 0, 0, 0);
+	Context->SetVertexFormatPosition(3);
 	Context->SetIndexBufferPointer(Indices);
 
 	float LineWidth = lcGetPreferences().mLineWidth;

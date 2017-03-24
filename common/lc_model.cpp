@@ -1192,7 +1192,7 @@ void lcModel::DrawBackground(lcGLWidget* Widget)
 
 		Context->SetMaterial(LC_MATERIAL_UNLIT_VERTEX_COLOR);
 		Context->SetVertexBufferPointer(Verts);
-		Context->SetVertexFormat(0, 2, 0, 0, 4);
+		Context->SetVertexFormat(0, 2, 0, 0, 4, false);
 
 		Context->DrawPrimitives(GL_TRIANGLE_FAN, 0, 4);
 
@@ -1228,7 +1228,7 @@ void lcModel::DrawBackground(lcGLWidget* Widget)
 		Context->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 		Context->SetMaterial(LC_MATERIAL_UNLIT_TEXTURE_MODULATE);
 		Context->SetVertexBufferPointer(Verts);
-		Context->SetVertexFormat(0, 2, 0, 2, 0);
+		Context->SetVertexFormat(0, 2, 0, 2, 0, false);
 
 		Context->DrawPrimitives(GL_TRIANGLE_FAN, 0, 4);
 

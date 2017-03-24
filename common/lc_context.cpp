@@ -812,27 +812,81 @@ void lcContext::SetVertexBufferPointer(const void* VertexBuffer)
 	mVertexBufferOffset = (char*)~0;
 }
 
-void lcContext::SetVertexFormat(int BufferOffset, int PositionSize, int NormalSize, int TexCoordSize, int ColorSize)
+void lcContext::SetVertexFormatPosition(int PositionSize)
+{
+	int VertexSize = PositionSize * sizeof(float);
+	char* VertexBufferPointer = mVertexBufferPointer;
+
+	if (gSupportsShaderObjects)
+	{
+		if (mVertexBufferOffset != mVertexBufferPointer)
+		{
+			glVertexAttribPointer(LC_ATTRIB_POSITION, PositionSize, GL_FLOAT, false, VertexSize, VertexBufferPointer);
+			mVertexBufferOffset = VertexBufferPointer;
+		}
+
+		if (mNormalEnabled)
+		{
+			glDisableVertexAttribArray(LC_ATTRIB_NORMAL);
+			mNormalEnabled = false;
+		}
+
+		if (mTexCoordEnabled)
+		{
+			glDisableVertexAttribArray(LC_ATTRIB_TEXCOORD);
+			mTexCoordEnabled = false;
+		}
+
+		if (mColorEnabled)
+		{
+			glDisableVertexAttribArray(LC_ATTRIB_COLOR);
+			mColorEnabled = false;
+		}
+	}
+	else
+	{
+		if (mVertexBufferOffset != mVertexBufferPointer)
+		{
+			glVertexPointer(PositionSize, GL_FLOAT, VertexSize, VertexBufferPointer);
+			mVertexBufferOffset = VertexBufferPointer;
+		}
+
+		if (mNormalEnabled)
+		{
+			glDisableClientState(GL_NORMAL_ARRAY);
+			mNormalEnabled = false;
+		}
+
+		if (mTexCoordEnabled)
+		{
+			glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+			mTexCoordEnabled = false;
+		}
+
+		if (mColorEnabled)
+		{
+			glDisableClientState(GL_COLOR_ARRAY);
+			mColorEnabled = false;
+		}
+	}
+}
+
+void lcContext::SetVertexFormat(int BufferOffset, int PositionSize, int NormalSize, int TexCoordSize, int ColorSize, bool EnableNormals)
 {
 	int VertexSize = (PositionSize + TexCoordSize + ColorSize) * sizeof(float) + NormalSize * sizeof(quint32);
 	char* VertexBufferPointer = mVertexBufferPointer + BufferOffset;
 
-	if (mVertexBufferOffset != VertexBufferPointer)
+	if (gSupportsShaderObjects)
 	{
-		if (gSupportsShaderObjects)
+		if (mVertexBufferOffset != VertexBufferPointer)
+		{
 			glVertexAttribPointer(LC_ATTRIB_POSITION, PositionSize, GL_FLOAT, false, VertexSize, VertexBufferPointer);
-		else
-			glVertexPointer(PositionSize, GL_FLOAT, VertexSize, VertexBufferPointer);
+			mVertexBufferOffset = VertexBufferPointer;
+		}
 
-		mVertexBufferOffset = VertexBufferPointer;
-	}
+		int Offset = PositionSize * sizeof(float);
 
-	int Offset = PositionSize * sizeof(float);
-	lcLightingMode LightingMode = lcGetPreferences().mLightingMode;
-
-	if (NormalSize && LightingMode != LC_LIGHTING_UNLIT)
-	{
-		if (gSupportsShaderObjects)
+		if (NormalSize && EnableNormals)
 		{
 			glVertexAttribPointer(LC_ATTRIB_NORMAL, 4, GL_BYTE, true, VertexSize, VertexBufferPointer + Offset);
 
@@ -842,31 +896,15 @@ void lcContext::SetVertexFormat(int BufferOffset, int PositionSize, int NormalSi
 				mNormalEnabled = true;
 			}
 		}
-		else
+		else if (mNormalEnabled)
 		{
-			glNormalPointer(GL_BYTE, VertexSize, VertexBufferPointer + Offset);
-
-			if (!mNormalEnabled)
-			{
-				glEnableClientState(GL_NORMAL_ARRAY);
-				mNormalEnabled = true;
-			}
-		}
-	}
-	else
-	{
-		if (gSupportsShaderObjects)
-			glDisableVertexAttribArray(LC_ATTRIB_NORMAL);
-		else
 			glDisableClientState(GL_NORMAL_ARRAY);
-		mNormalEnabled = false;
-	}
+			mNormalEnabled = false;
+		}
 
-	Offset += NormalSize * sizeof(quint32);
+		Offset += NormalSize * sizeof(quint32);
 
-	if (TexCoordSize)
-	{
-		if (gSupportsShaderObjects)
+		if (TexCoordSize)
 		{
 			glVertexAttribPointer(LC_ATTRIB_TEXCOORD, TexCoordSize, GL_FLOAT, false, VertexSize, VertexBufferPointer + Offset);
 
@@ -875,32 +913,16 @@ void lcContext::SetVertexFormat(int BufferOffset, int PositionSize, int NormalSi
 				glEnableVertexAttribArray(LC_ATTRIB_TEXCOORD);
 				mTexCoordEnabled = true;
 			}
+
+			Offset += 2 * sizeof(float);
 		}
-		else
+		else if (mTexCoordEnabled)
 		{
-			glTexCoordPointer(TexCoordSize, GL_FLOAT, VertexSize, VertexBufferPointer + Offset);
-
-			if (!mTexCoordEnabled)
-			{
-				glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-				mTexCoordEnabled = true;
-			}
+			glDisableVertexAttribArray(LC_ATTRIB_TEXCOORD);
+			mTexCoordEnabled = false;
 		}
 
-		Offset += 2 * sizeof(float);
-	}
-	else if (mTexCoordEnabled)
-	{
-		if (gSupportsShaderObjects)
-			glDisableVertexAttribArray(LC_ATTRIB_TEXCOORD);
-		else
-			glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-		mTexCoordEnabled = false;
-	}
-
-	if (ColorSize)
-	{
-		if (gSupportsShaderObjects)
+		if (ColorSize)
 		{
 			glVertexAttribPointer(LC_ATTRIB_COLOR, ColorSize, GL_FLOAT, false, VertexSize, VertexBufferPointer + Offset);
 
@@ -910,7 +932,59 @@ void lcContext::SetVertexFormat(int BufferOffset, int PositionSize, int NormalSi
 				mColorEnabled = true;
 			}
 		}
-		else
+		else if (mColorEnabled)
+		{
+			glDisableVertexAttribArray(LC_ATTRIB_COLOR);
+			mColorEnabled = false;
+		}
+	}
+	else
+	{
+		if (mVertexBufferOffset != VertexBufferPointer)
+		{
+			glVertexPointer(PositionSize, GL_FLOAT, VertexSize, VertexBufferPointer);
+			mVertexBufferOffset = VertexBufferPointer;
+		}
+
+		int Offset = PositionSize * sizeof(float);
+
+		if (NormalSize && EnableNormals)
+		{
+			glNormalPointer(GL_BYTE, VertexSize, VertexBufferPointer + Offset);
+
+			if (!mNormalEnabled)
+			{
+				glEnableClientState(GL_NORMAL_ARRAY);
+				mNormalEnabled = true;
+			}
+		}
+		else if (mNormalEnabled)
+		{
+			glDisableClientState(GL_NORMAL_ARRAY);
+			mNormalEnabled = false;
+		}
+
+		Offset += NormalSize * sizeof(quint32);
+
+		if (TexCoordSize)
+		{
+			glTexCoordPointer(TexCoordSize, GL_FLOAT, VertexSize, VertexBufferPointer + Offset);
+
+			if (!mTexCoordEnabled)
+			{
+				glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+				mTexCoordEnabled = true;
+			}
+
+			Offset += 2 * sizeof(float);
+		}
+		else if (mTexCoordEnabled)
+		{
+			glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+			mTexCoordEnabled = false;
+		}
+
+		if (ColorSize)
 		{
 			glColorPointer(ColorSize, GL_FLOAT, VertexSize, VertexBufferPointer + Offset);
 
@@ -920,14 +994,11 @@ void lcContext::SetVertexFormat(int BufferOffset, int PositionSize, int NormalSi
 				mColorEnabled = true;
 			}
 		}
-	}
-	else if (mColorEnabled)
-	{
-		if (gSupportsShaderObjects)
-			glDisableVertexAttribArray(LC_ATTRIB_COLOR);
-		else
+		else if (mColorEnabled)
+		{
 			glDisableClientState(GL_COLOR_ARRAY);
-		mColorEnabled = false;
+			mColorEnabled = false;
+		}
 	}
 }
 
@@ -1154,7 +1225,7 @@ void lcContext::DrawMeshSection(lcMesh* Mesh, lcMeshSection* Section)
 	if (!Texture)
 	{
 		SetMaterial(LightingMode == LC_LIGHTING_UNLIT ? LC_MATERIAL_UNLIT_COLOR : LC_MATERIAL_FAKELIT_COLOR);
-		SetVertexFormat(VertexBufferOffset, 3, 1, 0, 0);
+		SetVertexFormat(VertexBufferOffset, 3, 1, 0, 0, LightingMode != LC_LIGHTING_UNLIT);
 
 		if (mTexture)
 		{
@@ -1166,7 +1237,7 @@ void lcContext::DrawMeshSection(lcMesh* Mesh, lcMeshSection* Section)
 	{
 		VertexBufferOffset += Mesh->mNumVertices * sizeof(lcVertex);
 		SetMaterial(LightingMode == LC_LIGHTING_UNLIT ? LC_MATERIAL_UNLIT_TEXTURE_DECAL : LC_MATERIAL_FAKELIT_TEXTURE_DECAL);
-		SetVertexFormat(VertexBufferOffset, 3, 1, 2, 0);
+		SetVertexFormat(VertexBufferOffset, 3, 1, 2, 0, LightingMode != LC_LIGHTING_UNLIT);
 
 		if (Texture != mTexture)
 		{
@@ -1314,7 +1385,7 @@ void lcContext::DrawOpaqueMeshes(const lcScene& Scene)
 			}
 
 			SetVertexBufferPointer(Vertices);
-			SetVertexFormat(0, 3, 0, 0, 0);
+			SetVertexFormatPosition(3);
 			DrawPrimitives(GL_LINES, 0, Mesh->mNumVertices * 2);
 			free(Vertices);
 		}
@@ -1379,7 +1450,7 @@ void lcContext::DrawTranslucentMeshes(const lcScene& Scene)
 	glDisable(GL_BLEND);
 }
 
-void lcContext::DrawRenderMeshes(const lcArray<lcRenderMesh>& RenderMeshes, const lcArray<int>& Meshes, lcMeshPrimitiveType PrimitiveType, bool DrawTranslucent, bool DrawTextured)
+void lcContext::DrawRenderMeshes(const lcArray<lcRenderMesh>& RenderMeshes, const lcArray<int>& Meshes, lcMeshPrimitiveType PrimitiveType, bool EnableNormals, bool DrawTranslucent, bool DrawTextured)
 {
 	for (int MeshIdx = 0; MeshIdx < Meshes.GetSize(); MeshIdx++)
 	{
@@ -1449,12 +1520,12 @@ void lcContext::DrawRenderMeshes(const lcArray<lcRenderMesh>& RenderMeshes, cons
 
 			if (!Texture)
 			{
-				SetVertexFormat(VertexBufferOffset, 3, 1, 0, 0); //todo: pass lighting mode so we don't enable normals for lines
+				SetVertexFormat(VertexBufferOffset, 3, 1, 0, 0, EnableNormals);
 			}
 			else
 			{
 				VertexBufferOffset += Mesh->mNumVertices * sizeof(lcVertex);
-				SetVertexFormat(VertexBufferOffset, 3, 1, 2, 0);
+				SetVertexFormat(VertexBufferOffset, 3, 1, 2, 0, EnableNormals);
 
 				if (Texture != mTexture)
 				{
@@ -1481,7 +1552,7 @@ void lcContext::DrawRenderMeshes(const lcArray<lcRenderMesh>& RenderMeshes, cons
 			}
 
 			SetVertexBufferPointer(Vertices);
-			SetVertexFormat(0, 3, 0, 0, 0);
+			SetVertexFormatPosition(3);
 			DrawPrimitives(GL_LINES, 0, Mesh->mNumVertices * 2);
 			free(Vertices);
 		}
@@ -1506,11 +1577,11 @@ void lcContext::DrawScene(const lcScene& Scene)
 		if (DrawLines)
 		{
 			SetMaterial(LC_MATERIAL_UNLIT_COLOR);
-			DrawRenderMeshes(Scene.mRenderMeshes, Scene.mOpaqueMeshes, LC_MESH_LINES, false, false);
+			DrawRenderMeshes(Scene.mRenderMeshes, Scene.mOpaqueMeshes, LC_MESH_LINES, false, false, false);
 		}
 
 		SetMaterial(LC_MATERIAL_FAKELIT_COLOR);
-		DrawRenderMeshes(Scene.mRenderMeshes, Scene.mOpaqueMeshes, LC_MESH_TRIANGLES, false, false);
+		DrawRenderMeshes(Scene.mRenderMeshes, Scene.mOpaqueMeshes, LC_MESH_TRIANGLES, true, false, false);
 
 		if (!Scene.mTranslucentMeshes.IsEmpty())
 		{
@@ -1518,7 +1589,7 @@ void lcContext::DrawScene(const lcScene& Scene)
 			glEnable(GL_BLEND);
 			glDepthMask(GL_FALSE);
 
-			DrawRenderMeshes(Scene.mRenderMeshes, Scene.mTranslucentMeshes, LC_MESH_TRIANGLES, true, false);
+			DrawRenderMeshes(Scene.mRenderMeshes, Scene.mTranslucentMeshes, LC_MESH_TRIANGLES, true, true, false);
 
 			glDepthMask(GL_TRUE);
 			glDisable(GL_BLEND);
@@ -1532,11 +1603,11 @@ void lcContext::DrawScene(const lcScene& Scene)
 			if (DrawLines)
 			{
 				SetMaterial(LC_MATERIAL_UNLIT_TEXTURE_DECAL);
-				DrawRenderMeshes(Scene.mRenderMeshes, Scene.mOpaqueMeshes, LC_MESH_TEXTURED_LINES, false, true);
+				DrawRenderMeshes(Scene.mRenderMeshes, Scene.mOpaqueMeshes, LC_MESH_TEXTURED_LINES, false, false, true);
 			}
 
 			SetMaterial(LC_MATERIAL_FAKELIT_TEXTURE_DECAL);
-			DrawRenderMeshes(Scene.mRenderMeshes, Scene.mOpaqueMeshes, LC_MESH_TEXTURED_TRIANGLES, false, true);
+			DrawRenderMeshes(Scene.mRenderMeshes, Scene.mOpaqueMeshes, LC_MESH_TEXTURED_TRIANGLES, true, false, true);
 
 			if (!Scene.mTranslucentMeshes.IsEmpty())
 			{
@@ -1544,7 +1615,7 @@ void lcContext::DrawScene(const lcScene& Scene)
 				glEnable(GL_BLEND);
 				glDepthMask(GL_FALSE);
 
-				DrawRenderMeshes(Scene.mRenderMeshes, Scene.mTranslucentMeshes, LC_MESH_TEXTURED_TRIANGLES, true, true);
+				DrawRenderMeshes(Scene.mRenderMeshes, Scene.mTranslucentMeshes, LC_MESH_TEXTURED_TRIANGLES, true, true, true);
 
 				glDepthMask(GL_TRUE);
 				glDisable(GL_BLEND);

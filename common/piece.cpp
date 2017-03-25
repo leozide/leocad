@@ -600,7 +600,6 @@ void lcPiece::DrawInterface(lcContext* Context) const
 			7, 3, 2, 6, 7, 2, 0, 3, 7, 0, 7, 4, 6, 2, 1, 5, 6, 1
 		};
 
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_BLEND);
 		glEnable(GL_CULL_FACE);
 

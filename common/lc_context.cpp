@@ -400,6 +400,8 @@ void lcContext::SetDefaultState()
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
 
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 	glEnable(GL_POLYGON_OFFSET_FILL);
 	glPolygonOffset(0.5f, 0.1f);
 
@@ -1414,7 +1416,6 @@ void lcContext::DrawTranslucentMeshes(const lcScene& Scene)
 	if (TranslucentMeshes.IsEmpty())
 		return;
 
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_BLEND);
 	glDepthMask(GL_FALSE);
 
@@ -1599,7 +1600,6 @@ void lcContext::DrawScene(const lcScene& Scene)
 
 		if (!Scene.mTranslucentMeshes.IsEmpty())
 		{
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			glEnable(GL_BLEND);
 			glDepthMask(GL_FALSE);
 
@@ -1624,7 +1624,6 @@ void lcContext::DrawScene(const lcScene& Scene)
 
 			if (!Scene.mTranslucentMeshes.IsEmpty())
 			{
-				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 				glEnable(GL_BLEND);
 				glDepthMask(GL_FALSE);
 

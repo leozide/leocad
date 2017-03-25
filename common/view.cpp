@@ -728,7 +728,6 @@ void View::DrawSelectMoveOverlay()
 
 	if ((mTrackTool == LC_TRACKTOOL_MOVE_XY) || (mTrackTool == LC_TRACKTOOL_MOVE_XZ) || (mTrackTool == LC_TRACKTOOL_MOVE_YZ))
 	{
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_BLEND);
 
 		mContext->SetColor(0.8f, 0.8f, 0.0f, 0.3f);
@@ -876,7 +875,6 @@ void View::DrawRotateOverlay()
 
 			mContext->SetWorldMatrix(WorldMatrix);
 
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			glEnable(GL_BLEND);
 
 			lcVector3 Verts[33];
@@ -1092,7 +1090,6 @@ void View::DrawRotateOverlay()
 
 		gTexFont.MakeCurrent();
 		glEnable(GL_TEXTURE_2D);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_BLEND);
 
 		char buf[32];
@@ -1175,7 +1172,6 @@ void View::DrawSelectZoomRegionOverlay()
 		{ Right - BorderX, Top - BorderY },
 	};
 
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_BLEND);
 
 	mContext->SetVertexBufferPointer(Verts);
@@ -1412,7 +1408,6 @@ void View::DrawGrid()
 	{
 		glBindTexture(GL_TEXTURE_2D, gGridTexture->mTexture);
 		glEnable(GL_TEXTURE_2D);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_BLEND);
 
 		mContext->SetMaterial(LC_MATERIAL_UNLIT_TEXTURE_MODULATE);
@@ -1492,7 +1487,6 @@ void View::DrawAxes()
 	mContext->SetViewMatrix(TranslationMatrix);
 	gTexFont.MakeCurrent();
 	glEnable(GL_TEXTURE_2D);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_BLEND);
 
 	float TextBuffer[6 * 5 * 3];
@@ -1546,7 +1540,6 @@ void View::DrawViewport()
 
 		glEnable(GL_TEXTURE_2D);
 		gTexFont.MakeCurrent();
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_BLEND);
 
 		gTexFont.PrintText(mContext, 3.0f, (float)mHeight - 1.0f - 6.0f, 0.0f, CameraName);

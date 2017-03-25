@@ -586,8 +586,6 @@ void View::OnDraw()
 
 	mContext->DrawScene(mScene);
 
-	mContext->UnbindMesh(); // context remove
-
 #ifndef LC_OPENGLES
 	if (Properties.mFogEnabled)
 		glDisable(GL_FOG);
@@ -619,6 +617,8 @@ void View::OnDraw()
 
 		DrawViewport();
 	}
+
+	mContext->ClearResources();
 }
 
 void View::DrawSelectMoveOverlay()
@@ -804,8 +804,6 @@ void View::DrawSelectMoveOverlay()
 	}
 
 	glEnable(GL_DEPTH_TEST);
-
-	mContext->ClearIndexBuffer(); // context remove
 }
 
 void View::DrawRotateOverlay()
@@ -1087,9 +1085,7 @@ void View::DrawRotateOverlay()
 		mContext->SetWorldMatrix(lcMatrix44Identity());
 		mContext->SetViewMatrix(lcMatrix44Translation(lcVector3(0.375, 0.375, 0.0)));
 		mContext->SetProjectionMatrix(lcMatrix44Ortho(0.0f, mWidth, 0.0f, mHeight, -1.0f, 1.0f));
-
-		gTexFont.MakeCurrent();
-		glEnable(GL_TEXTURE_2D);
+		mContext->SetTexture(gTexFont.GetTexture());
 		glEnable(GL_BLEND);
 
 		char buf[32];
@@ -1102,7 +1098,6 @@ void View::DrawRotateOverlay()
 		gTexFont.PrintText(mContext, ScreenPos[0] - (cx / 2), ScreenPos[1] + (cy / 2), 0.0f, buf);
 
 		glDisable(GL_BLEND);
-		glDisable(GL_TEXTURE_2D);
 	}
 
 	glEnable(GL_DEPTH_TEST);
@@ -1185,8 +1180,6 @@ void View::DrawSelectZoomRegionOverlay()
 
 	glDisable(GL_BLEND);
 	glEnable(GL_DEPTH_TEST);
-
-	mContext->ClearVertexBuffer(); // context remove
 }
 
 void View::DrawRotateViewOverlay()
@@ -1253,8 +1246,6 @@ void View::DrawRotateViewOverlay()
 	mContext->DrawIndexedPrimitives(GL_LINES, 96, GL_UNSIGNED_SHORT, 0);
 
 	glEnable(GL_DEPTH_TEST);
-
-	mContext->ClearVertexBuffer(); // context remove
 }
 
 void View::DrawGrid()
@@ -1406,8 +1397,7 @@ void View::DrawGrid()
 
 	if (Preferences.mDrawGridStuds)
 	{
-		glBindTexture(GL_TEXTURE_2D, gGridTexture->mTexture);
-		glEnable(GL_TEXTURE_2D);
+		mContext->SetTexture(gGridTexture->mTexture);
 		glEnable(GL_BLEND);
 
 		mContext->SetMaterial(LC_MATERIAL_UNLIT_TEXTURE_MODULATE);
@@ -1416,7 +1406,6 @@ void View::DrawGrid()
 		mContext->SetVertexFormat(0, 3, 0, 2, 0, false);
 		mContext->DrawPrimitives(GL_TRIANGLE_STRIP, 0, 4);
 
-		glDisable(GL_TEXTURE_2D);
 		glDisable(GL_BLEND);
 
 		BufferOffset = 4 * 5 * sizeof(float);
@@ -1433,8 +1422,6 @@ void View::DrawGrid()
 		mContext->SetVertexFormat(BufferOffset, 3, 0, 0, 0, false);
 		mContext->DrawPrimitives(GL_LINES, 0, NumVerts);
 	}
-
-	mContext->ClearVertexBuffer(); // context remove
 }
 
 void View::DrawAxes()
@@ -1485,8 +1472,7 @@ void View::DrawAxes()
 
 	mContext->SetMaterial(LC_MATERIAL_UNLIT_TEXTURE_MODULATE);
 	mContext->SetViewMatrix(TranslationMatrix);
-	gTexFont.MakeCurrent();
-	glEnable(GL_TEXTURE_2D);
+	mContext->SetTexture(gTexFont.GetTexture());
 	glEnable(GL_BLEND);
 
 	float TextBuffer[6 * 5 * 3];
@@ -1504,9 +1490,6 @@ void View::DrawAxes()
 	mContext->DrawPrimitives(GL_TRIANGLES, 0, 6 * 3);
 
 	glDisable(GL_BLEND);
-	glDisable(GL_TEXTURE_2D);
-
-	mContext->ClearVertexBuffer(); // context remove
 }
 
 void View::DrawViewport()
@@ -1529,23 +1512,19 @@ void View::DrawViewport()
 		mContext->DrawPrimitives(GL_LINE_LOOP, 0, 4);
 	}
 
-	mContext->ClearVertexBuffer(); // context remove
-
 	const char* CameraName = mCamera->GetName();
 
 	if (CameraName[0])
 	{
 		mContext->SetMaterial(LC_MATERIAL_UNLIT_TEXTURE_MODULATE);
 		mContext->SetColor(0.0f, 0.0f, 0.0f, 1.0f);
+		mContext->SetTexture(gTexFont.GetTexture());
 
-		glEnable(GL_TEXTURE_2D);
-		gTexFont.MakeCurrent();
 		glEnable(GL_BLEND);
 
 		gTexFont.PrintText(mContext, 3.0f, (float)mHeight - 1.0f - 6.0f, 0.0f, CameraName);
 
 		glDisable(GL_BLEND);
-		glDisable(GL_TEXTURE_2D);
 	}
 
 	glDepthMask(GL_TRUE);

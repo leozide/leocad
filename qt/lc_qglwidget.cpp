@@ -90,7 +90,7 @@ lcQGLWidget::lcQGLWidget(QWidget *parent, lcGLWidget *owner, bool view)
 	widget->MakeCurrent();
 
 	// TODO: Find a better place for the grid texture and font
-	gTexFont.Load();
+	gTexFont.Load(widget->mContext);
 	if (gWidgetList.isEmpty())
 	{
 		lcInitializeGLExtensions(context());

@@ -430,8 +430,6 @@ void lcLight::DrawSpotLight(lcContext* Context) const
 
 		Context->DrawIndexedPrimitives(GL_LINES, 2 + 40, GL_UNSIGNED_SHORT, (56 + 24) * 2);
 	}
-
-	Context->ClearVertexBuffer(); // context remove
 }
 
 void lcLight::DrawPointLight(lcContext* Context) const

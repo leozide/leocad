@@ -826,6 +826,7 @@ void lcMainWindow::Print(QPrinter* Printer)
 					free(Buffer);
 					Model->SetTemporaryStep(PreviousTime);
 					Context->EndRenderToTexture();
+					Context->ClearResources();
 					return;
 				}
 
@@ -997,6 +998,7 @@ void lcMainWindow::Print(QPrinter* Printer)
 	Model->SetTemporaryStep(PreviousTime);
 
 	Context->EndRenderToTexture();
+	Context->ClearResources();
 #endif
 }
 

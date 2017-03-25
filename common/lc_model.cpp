@@ -1196,16 +1196,13 @@ void lcModel::DrawBackground(lcGLWidget* Widget)
 
 		Context->DrawPrimitives(GL_TRIANGLE_FAN, 0, 4);
 
-		Context->ClearVertexBuffer(); // context remove
-
 #ifndef LC_OPENGLES
 		glShadeModel(GL_FLAT);
 #endif
 	}
 	else if (mProperties.mBackgroundType == LC_BACKGROUND_IMAGE)
 	{
-		glEnable(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D, mBackgroundTexture->mTexture);
+		Context->SetTexture(mBackgroundTexture->mTexture);
 
 		float TileWidth = 1.0f, TileHeight = 1.0f;
 
@@ -1224,15 +1221,11 @@ void lcModel::DrawBackground(lcGLWidget* Widget)
 		};
 
 		Context->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
-		Context->SetMaterial(LC_MATERIAL_UNLIT_TEXTURE_MODULATE);
+		Context->SetMaterial(LC_MATERIAL_UNLIT_TEXTURE_DECAL);
 		Context->SetVertexBufferPointer(Verts);
 		Context->SetVertexFormat(0, 2, 0, 2, 0, false);
 
 		Context->DrawPrimitives(GL_TRIANGLE_FAN, 0, 4);
-
-		Context->ClearVertexBuffer(); // context remove
-
-		glDisable(GL_TEXTURE_2D);
 	}
 
 	glEnable(GL_DEPTH_TEST);
@@ -1280,6 +1273,7 @@ void lcModel::SaveStepImages(const QString& BaseName, bool AddStepSuffix, bool Z
 	}
 
 	Context->EndRenderToTexture();
+	Context->ClearResources();
 
 	SetTemporaryStep(CurrentStep);
 

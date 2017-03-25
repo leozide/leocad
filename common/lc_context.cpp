@@ -92,6 +92,7 @@ lcContext::lcContext()
 	mLineWidth = 1.0f;
 #ifndef LC_OPENGLES
 	mMatrixMode = GL_MODELVIEW;
+	mTextureEnabled = false;
 #endif
 
 	mFramebufferObject = 0;
@@ -441,8 +442,8 @@ void lcContext::SetDefaultState()
 	mIndexBufferPointer = NULL;
 	mVertexBufferOffset = (char*)~0;
 
-	glDisable(GL_TEXTURE_2D);
-	mTexture = NULL;
+	glBindTexture(GL_TEXTURE_2D, 0);
+	mTexture = 0;
 
 	glLineWidth(1.0f);
 	mLineWidth = 1.0f;
@@ -458,8 +459,18 @@ void lcContext::SetDefaultState()
 		glMatrixMode(GL_MODELVIEW);
 		mMatrixMode = GL_MODELVIEW;
 		glShadeModel(GL_FLAT);
+
+		glDisable(GL_TEXTURE_2D);
+		mTextureEnabled = false;
 #endif
 	}
+}
+
+void lcContext::ClearResources()
+{
+	ClearVertexBuffer();
+	ClearIndexBuffer();
+	SetTexture(0);
 }
 
 void lcContext::SetMaterial(lcMaterialType MaterialType)
@@ -483,16 +494,35 @@ void lcContext::SetMaterial(lcMaterialType MaterialType)
 		{
 		case LC_MATERIAL_UNLIT_TEXTURE_MODULATE:
 			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+
+			if (!mTextureEnabled)
+			{
+				glEnable(GL_TEXTURE_2D);
+				mTextureEnabled = true;
+			}
 			break;
 
 		case LC_MATERIAL_FAKELIT_TEXTURE_DECAL:
 		case LC_MATERIAL_UNLIT_TEXTURE_DECAL:
 			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
+
+			if (!mTextureEnabled)
+			{
+				glEnable(GL_TEXTURE_2D);
+				mTextureEnabled = true;
+			}
 			break;
 
 		case LC_MATERIAL_UNLIT_COLOR:
 		case LC_MATERIAL_UNLIT_VERTEX_COLOR:
 		case LC_MATERIAL_FAKELIT_COLOR:
+			if (mTextureEnabled)
+			{
+				glDisable(GL_TEXTURE_2D);
+				mTextureEnabled = false;
+			}
+			break;
+
 		case LC_NUM_MATERIALS:
 			break;
 		}
@@ -512,6 +542,15 @@ void lcContext::SetLineWidth(float LineWidth)
 
 	glLineWidth(LineWidth);
 	mLineWidth = LineWidth;
+}
+
+void lcContext::SetTexture(GLuint Texture)
+{
+	if (mTexture == Texture)
+		return;
+
+	glBindTexture(GL_TEXTURE_2D, Texture);
+	mTexture = Texture;
 }
 
 void lcContext::SetColor(float Red, float Green, float Blue, float Alpha)
@@ -549,7 +588,7 @@ bool lcContext::BeginRenderToTexture(int Width, int Height)
 
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mFramebufferObject);
 
-		glBindTexture(GL_TEXTURE_2D, mFramebufferTexture);
+		SetTexture(mFramebufferTexture);
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Width, Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mFramebufferTexture, 0);
@@ -558,7 +597,7 @@ bool lcContext::BeginRenderToTexture(int Width, int Height)
 		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, Width, Height);
 		glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, mDepthRenderbufferObject);
 
-		glBindTexture(GL_TEXTURE_2D, 0);
+		SetTexture(0);
 		glBindFramebuffer(GL_FRAMEBUFFER, mFramebufferObject);
 
 		if (glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
@@ -576,7 +615,7 @@ bool lcContext::BeginRenderToTexture(int Width, int Height)
 		glGenFramebuffersEXT(1, &mFramebufferObject); 
 		glGenTextures(1, &mFramebufferTexture); 
 
-		glBindTexture(GL_TEXTURE_2D, mFramebufferTexture); 
+		SetTexture(mFramebufferTexture); 
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, Width, Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL); 
 
@@ -591,7 +630,7 @@ bool lcContext::BeginRenderToTexture(int Width, int Height)
 
 		glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, mDepthRenderbufferObject); 
 
-		glBindTexture(GL_TEXTURE_2D, 0);
+		SetTexture(0);
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, mFramebufferObject);
 
 		if (glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT) != GL_FRAMEBUFFER_COMPLETE_EXT)
@@ -786,14 +825,38 @@ void lcContext::ClearVertexBuffer()
 		mVertexBufferObject = 0;
 	}
 
-	if (mNormalEnabled)
-		glDisableClientState(GL_NORMAL_ARRAY);
+	if (gSupportsShaderObjects)
+	{
+		if (mNormalEnabled)
+			glDisableVertexAttribArray(LC_ATTRIB_NORMAL);
 
-	if (mTexCoordEnabled)
-		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+		if (mTexCoordEnabled)
+			glDisableVertexAttribArray(LC_ATTRIB_TEXCOORD);
 
-	if (mColorEnabled)
-		glDisableClientState(GL_COLOR_ARRAY);
+		if (mColorEnabled)
+			glDisableVertexAttribArray(LC_ATTRIB_COLOR);
+
+		glVertexAttribPointer(LC_ATTRIB_POSITION, 3, GL_FLOAT, false, 0, NULL);
+		glVertexAttribPointer(LC_ATTRIB_NORMAL, 4, GL_FLOAT, false, 0, NULL);
+		glVertexAttribPointer(LC_ATTRIB_TEXCOORD, 2, GL_FLOAT, false, 0, NULL);
+		glVertexAttribPointer(LC_ATTRIB_COLOR, 4, GL_FLOAT, false, 0, NULL);
+	}
+	else
+	{
+		if (mNormalEnabled)
+			glDisableClientState(GL_NORMAL_ARRAY);
+
+		if (mTexCoordEnabled)
+			glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+
+		if (mColorEnabled)
+			glDisableClientState(GL_COLOR_ARRAY);
+
+		glVertexPointer(3, GL_FLOAT, 0, NULL);
+		glNormalPointer(GL_BYTE, 0, NULL);
+		glTexCoordPointer(2, GL_FLOAT, 0, NULL);
+		glColorPointer(4, GL_FLOAT, 0, NULL);
+	}
 }
 
 void lcContext::SetVertexBuffer(lcVertexBuffer VertexBuffer)
@@ -1102,44 +1165,6 @@ void lcContext::BindMesh(lcMesh* Mesh)
 	}
 }
 
-void lcContext::UnbindMesh()
-{
-	if (mTexture)
-	{
-		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-		glDisable(GL_TEXTURE_2D);
-		mTexture = NULL;
-	}
-
-	if (gSupportsVertexBufferObject)
-	{
-		glBindBuffer(GL_ARRAY_BUFFER_ARB, 0);
-		mVertexBufferObject = 0;
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
-		mIndexBufferObject = 0;
-	}
-
-	mVertexBufferPointer = NULL;
-	mIndexBufferPointer = NULL;
-
-	if (gSupportsShaderObjects)
-	{
-		glDisableVertexAttribArray(LC_ATTRIB_TEXCOORD);
-		glDisableVertexAttribArray(LC_ATTRIB_NORMAL);
-		glDisableVertexAttribArray(LC_ATTRIB_COLOR);
-	}
-	else
-	{
-		glVertexPointer(3, GL_FLOAT, 0, NULL);
-		glNormalPointer(GL_BYTE, 0, NULL);
-		glTexCoordPointer(2, GL_FLOAT, 0, NULL);
-	}
-
-	mNormalEnabled = false;
-	mTexCoordEnabled = false;
-	mColorEnabled = false;
-}
-
 void lcContext::FlushState()
 {
 	if (gSupportsShaderObjects)
@@ -1243,30 +1268,14 @@ void lcContext::DrawMeshSection(lcMesh* Mesh, lcMeshSection* Section)
 	{
 		SetMaterial(LightingMode == LC_LIGHTING_UNLIT ? LC_MATERIAL_UNLIT_COLOR : LC_MATERIAL_FAKELIT_COLOR);
 		SetVertexFormat(VertexBufferOffset, 3, 1, 0, 0, LightingMode != LC_LIGHTING_UNLIT);
-
-		if (mTexture)
-		{
-			glDisable(GL_TEXTURE_2D);
-			mTexture = NULL;
-		}
+		SetTexture(0);
 	}
 	else
 	{
 		VertexBufferOffset += Mesh->mNumVertices * sizeof(lcVertex);
 		SetMaterial(LightingMode == LC_LIGHTING_UNLIT ? LC_MATERIAL_UNLIT_TEXTURE_DECAL : LC_MATERIAL_FAKELIT_TEXTURE_DECAL);
 		SetVertexFormat(VertexBufferOffset, 3, 1, 2, 0, LightingMode != LC_LIGHTING_UNLIT);
-
-		if (Texture != mTexture)
-		{
-			glBindTexture(GL_TEXTURE_2D, Texture->mTexture);
-
-			if (!mTexture)
-			{
-				glEnable(GL_TEXTURE_2D);
-			}
-
-			mTexture = Texture;
-		}
+		SetTexture(Texture->mTexture);
 	}
 
 	const bool DrawConditional = false;
@@ -1541,12 +1550,7 @@ void lcContext::DrawRenderMeshes(const lcArray<lcRenderMesh>& RenderMeshes, cons
 			{
 				VertexBufferOffset += Mesh->mNumVertices * sizeof(lcVertex);
 				SetVertexFormat(VertexBufferOffset, 3, 1, 2, 0, EnableNormals);
-
-				if (Texture != mTexture)
-				{
-					glBindTexture(GL_TEXTURE_2D, Texture->mTexture);
-					mTexture = Texture;
-				}
+				SetTexture(Texture->mTexture);
 			}
 
 			GLenum DrawPrimitiveType = (PrimitiveType == LC_MESH_TRIANGLES || PrimitiveType == LC_MESH_TEXTURED_TRIANGLES) ? GL_TRIANGLES : GL_LINES;
@@ -1588,6 +1592,7 @@ void lcContext::DrawScene(const lcScene& Scene)
 	else
 	{
 		bool DrawLines = lcGetPreferences().mDrawEdgeLines;
+		SetTexture(0);
 
 		if (DrawLines)
 		{
@@ -1611,8 +1616,6 @@ void lcContext::DrawScene(const lcScene& Scene)
 
 		if (Scene.mHasTexture)
 		{
-			glEnable(GL_TEXTURE_2D);
-
 			if (DrawLines)
 			{
 				SetMaterial(LC_MATERIAL_UNLIT_TEXTURE_DECAL);
@@ -1633,9 +1636,7 @@ void lcContext::DrawScene(const lcScene& Scene)
 				glDisable(GL_BLEND);
 			}
 
-			glDisable(GL_TEXTURE_2D);
-			glBindTexture(GL_TEXTURE_2D, 0);
-			mTexture = NULL;
+			SetTexture(0);
 		}
 	}
 }

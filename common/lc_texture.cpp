@@ -181,7 +181,7 @@ bool lcTexture::Load(lcMemFile& File, int Flags)
 	return Load(image, Flags);
 }
 
-bool lcTexture::Load(Image* images, int NumLevels, int Flags)
+bool lcTexture::Load(Image* images, int NumLevels, int Flags) // todo: this should be part of lcContext, it can be called from multiple threads 
 {
 	mWidth = images[0].mWidth;
 	mHeight = images[0].mHeight;

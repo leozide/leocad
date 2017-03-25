@@ -63,7 +63,6 @@ public:
 	};
 };
 
-
 enum lcMaterialType
 {
 	LC_MATERIAL_UNLIT_COLOR,
@@ -103,6 +102,7 @@ public:
 	static void DestroyResources();
 
 	void SetDefaultState();
+	void ClearResources();
 
 	void SetWorldMatrix(const lcMatrix44& WorldMatrix)
 	{
@@ -127,6 +127,7 @@ public:
 	void SetMaterial(lcMaterialType MaterialType);
 	void SetViewport(int x, int y, int Width, int Height);
 	void SetLineWidth(float LineWidth);
+	void SetTexture(GLuint Texture);
 
 	void SetColor(const lcVector4& Color)
 	{
@@ -163,7 +164,6 @@ public:
 	void DrawPrimitives(GLenum Mode, GLint First, GLsizei Count);
 	void DrawIndexedPrimitives(GLenum Mode, GLsizei Count, GLenum Type, int Offset);
 
-	void UnbindMesh();
 	void DrawScene(const lcScene& Scene);
 	void DrawInterfaceObjects(const lcArray<const lcObject*>& InterfaceObjects);
 
@@ -188,9 +188,10 @@ protected:
 	bool mTexCoordEnabled;
 	bool mColorEnabled;
 
-	lcTexture* mTexture;
+	GLuint mTexture;
 	float mLineWidth;
 	int mMatrixMode;
+	bool mTextureEnabled;
 
 	lcVector4 mColor;
 	lcMatrix44 mWorldMatrix;

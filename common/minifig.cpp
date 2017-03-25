@@ -294,7 +294,7 @@ void MinifigWizard::OnDraw()
 
 	mContext->DrawScene(Scene);
 
-	mContext->UnbindMesh(); // context remove
+	mContext->ClearResources();
 }
 
 void MinifigWizard::OnLeftButtonDown()

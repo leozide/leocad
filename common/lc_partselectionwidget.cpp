@@ -354,13 +354,12 @@ void lcPartSelectionListModel::DrawPreview(int InfoIndex)
 	Context->SetViewMatrix(ViewMatrix);
 	Context->DrawScene(Scene);
 
-	Context->UnbindMesh(); // context remove
-		
-	Library->ReleasePieceInfo(Info);
-
 	mParts[InfoIndex].second = QPixmap::fromImage(Context->GetRenderToTextureImage(Width, Height)).scaled(mIconSize, mIconSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 
+	Library->ReleasePieceInfo(Info);
+
 	Context->EndRenderToTexture();
+	Context->ClearResources();
 
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 2, 0))
 	emit dataChanged(index(InfoIndex, 0), index(InfoIndex, 0), QVector<int>() << Qt::DecorationRole);

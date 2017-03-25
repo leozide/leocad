@@ -102,7 +102,7 @@ TexFont::~TexFont()
 {
 }
 
-bool TexFont::Load()
+bool TexFont::Load(lcContext* Context)
 {
 	mRefCount++;
 
@@ -112,7 +112,7 @@ bool TexFont::Load()
 	mFontHeight = 16;
 
 	glGenTextures(1, &mTexture);
-	glBindTexture(GL_TEXTURE_2D, mTexture);
+	Context->SetTexture(mTexture);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -235,8 +235,6 @@ void TexFont::PrintText(lcContext* Context, float Left, float Top, float Z, cons
 	Context->SetVertexFormat(0, 3, 0, 2, 0, false);
 
 	Context->DrawPrimitives(GL_TRIANGLES, 0, 6 * (GLsizei)Length);
-
-	Context->ClearVertexBuffer(); // context remove
 
 	delete[] Verts;
 }

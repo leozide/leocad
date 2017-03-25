@@ -1334,13 +1334,12 @@ void Project::ExportHTML()
 				Context->SetViewMatrix(ViewMatrix);
 				Context->DrawScene(Scene);
 
-				Context->UnbindMesh(); // context remove
-
 				QString FileName = QFileInfo(Dir, QLatin1String(Info->m_strName) + QLatin1String(".png")).absoluteFilePath();
 				if (!Context->SaveRenderToTextureImage(FileName, Width, Height))
 					break;
 			}
 			Context->EndRenderToTexture();
+			Context->ClearResources();
 		}
 	}
 

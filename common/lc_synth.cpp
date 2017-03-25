@@ -119,6 +119,22 @@ protected:
 	void AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const lcArray<lcMatrix44>& Sections) const override;
 };
 
+class lcSynthInfoUniversalJoint : public lcSynthInfo
+{
+public:
+	lcSynthInfoUniversalJoint(float Length, const char* EndPart, const char* CenterPart);
+
+	void GetDefaultControlPoints(lcArray<lcPieceControlPoint>& ControlPoints) const override;
+	void VerifyControlPoints(lcArray<lcPieceControlPoint>& ControlPoints) const override;
+
+protected:
+	void CalculateSections(const lcArray<lcPieceControlPoint>& ControlPoints, lcArray<lcMatrix44>& Sections, SectionCallbackFunc SectionCallback) const override;
+	void AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const lcArray<lcMatrix44>& Sections) const override;
+
+	const char* mEndPart;
+	const char* mCenterPart;
+};
+
 void lcSynthInit()
 {
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
@@ -318,6 +334,26 @@ void lcSynthInit()
 			Info->SetSynthInfo(new lcSynthInfoActuator(ActuatorInfo.Length));
 	}
 
+	static const struct
+	{
+		char PartID[16];
+		float Length;
+		char EndPart[16];
+		char CenterPart[16];
+	}
+	UniversalJoints[] =
+	{
+		{ "61903.dat",  60.00f, "62520.dat", "62519.dat" }  // Technic Universal Joint 3L
+	};
+
+	for (const auto& JointInfo: UniversalJoints)
+	{
+		PieceInfo* Info = Library->FindPiece(JointInfo.PartID, nullptr, false, false);
+
+		if (Info)
+			Info->SetSynthInfo(new lcSynthInfoUniversalJoint(JointInfo.Length, JointInfo.EndPart, JointInfo.CenterPart));
+	}
+
 //	"758C01" // Hose Flexible  12L
 }
 
@@ -396,6 +432,11 @@ lcSynthInfoActuator::lcSynthInfoActuator(float Length)
 {
 }
 
+lcSynthInfoUniversalJoint::lcSynthInfoUniversalJoint(float Length, const char* EndPart, const char* CenterPart)
+	: lcSynthInfo(Length), mEndPart(EndPart), mCenterPart(CenterPart)
+{
+}
+
 void lcSynthInfoCurved::GetDefaultControlPoints(lcArray<lcPieceControlPoint>& ControlPoints) const
 {
 	ControlPoints.SetSize(2);
@@ -452,6 +493,23 @@ void lcSynthInfoActuator::GetDefaultControlPoints(lcArray<lcPieceControlPoint>& 
 
 	ControlPoints[0].Scale = 1.0f;
 	ControlPoints[1].Scale = 1.0f;
+}
+
+void lcSynthInfoUniversalJoint::GetDefaultControlPoints(lcArray<lcPieceControlPoint>& ControlPoints) const
+{
+	ControlPoints.SetSize(1);
+	float HalfLength = mLength / 2;
+
+	ControlPoints[0].Transform = lcMatrix44Translation(lcVector3(0.0f, HalfLength, 0.0f));
+	ControlPoints[0].Scale = 1.0f;
+}
+
+void lcSynthInfoUniversalJoint::VerifyControlPoints(lcArray<lcPieceControlPoint>& ControlPoints) const
+{
+	if (ControlPoints.IsEmpty())
+		GetDefaultControlPoints(ControlPoints);
+	else
+		ControlPoints.SetSize(1);
 }
 
 float lcSynthInfoCurved::GetSectionTwist(const lcMatrix44& StartTransform, const lcMatrix44& EndTransform) const
@@ -744,6 +802,18 @@ void lcSynthInfoBraidedString::CalculateSections(const lcArray<lcPieceControlPoi
 }
 
 void lcSynthInfoStraight::CalculateSections(const lcArray<lcPieceControlPoint>& ControlPoints, lcArray<lcMatrix44>& Sections, SectionCallbackFunc SectionCallback) const
+{
+	for (int ControlPointIdx = 0; ControlPointIdx < ControlPoints.GetSize(); ControlPointIdx++)
+	{
+		lcMatrix44 Transform = lcMatrix44LeoCADToLDraw(ControlPoints[ControlPointIdx].Transform);
+		Sections.Add(Transform);
+
+		if (SectionCallback)
+			SectionCallback(Transform.GetTranslation(), ControlPointIdx, 1.0f);
+	}
+}
+
+void lcSynthInfoUniversalJoint::CalculateSections(const lcArray<lcPieceControlPoint>& ControlPoints, lcArray<lcMatrix44>& Sections, SectionCallbackFunc SectionCallback) const
 {
 	for (int ControlPointIdx = 0; ControlPointIdx < ControlPoints.GetSize(); ControlPointIdx++)
 	{
@@ -1258,6 +1328,31 @@ void lcSynthInfoActuator::AddParts(lcMemFile& File, lcLibraryMeshData&, const lc
 
 	Offset = Sections[1].GetTranslation();
 	sprintf(Line, "1 72 %f %f %f 1 0 0 0 1 0 0 0 1 62274c01.dat\n", Offset[0], Offset[1], Offset[2]);
+	File.WriteBuffer(Line, strlen(Line));
+}
+
+void lcSynthInfoUniversalJoint::AddParts(lcMemFile& File, lcLibraryMeshData&, const lcArray<lcMatrix44>& Sections) const
+{
+	char Line[256];
+	lcVector3 Offset = Sections[0].GetTranslation();
+
+	float Angle = atan2f(Offset.x, Offset.z);
+	lcMatrix44 Rotation = lcMatrix44RotationZ(Angle);
+	lcMatrix44 Transform = lcMatrix44LeoCADToLDraw(Rotation);
+
+	sprintf(Line, "1 16 0 0 0 %f %f %f %f %f %f %f %f %f %s\n", Transform[0][0], Transform[1][0], Transform[2][0],
+			Transform[0][1], Transform[1][1], Transform[2][1], Transform[0][2], Transform[1][2], Transform[2][2], mCenterPart);
+	File.WriteBuffer(Line, strlen(Line));
+
+	Angle = atan2f(Offset.y, hypotf(Offset.x, Offset.z));
+	Rotation = lcMul(Rotation, lcMatrix44RotationX(Angle));
+	Transform = lcMatrix44LeoCADToLDraw(Rotation);
+
+	sprintf(Line, "1 16 0 0 0 %f %f %f %f %f %f %f %f %f %s\n", Transform[0][0], Transform[1][0], Transform[2][0],
+			Transform[0][1], Transform[1][1], Transform[2][1], Transform[0][2], Transform[1][2], Transform[2][2], mEndPart);
+	File.WriteBuffer(Line, strlen(Line));
+
+	sprintf(Line, "1 16 0 0 0 0 -1 0 -1 0 0 0 0 -1 %s\n", mEndPart);
 	File.WriteBuffer(Line, strlen(Line));
 }
 

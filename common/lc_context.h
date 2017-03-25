@@ -93,12 +93,6 @@ struct lcProgram
 	GLint EyePositionLocation;
 };
 
-enum lcTextureMode
-{
-	LC_TEXTURE_DECAL,
-	LC_TEXTURE_MODULATE
-};
-
 class lcContext
 {
 public:
@@ -133,7 +127,6 @@ public:
 	void SetMaterial(lcMaterialType MaterialType);
 	void SetViewport(int x, int y, int Width, int Height);
 	void SetLineWidth(float LineWidth);
-	void SetTextureMode(lcTextureMode TextureMode);
 
 	void SetColor(const lcVector4& Color)
 	{

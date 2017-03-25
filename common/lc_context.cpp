@@ -462,14 +462,40 @@ void lcContext::SetDefaultState()
 
 void lcContext::SetMaterial(lcMaterialType MaterialType)
 {
-	if (!gSupportsShaderObjects || mMaterialType == MaterialType)
+	if (MaterialType == mMaterialType)
 		return;
 
-	glUseProgram(mPrograms[MaterialType].Object);
 	mMaterialType = MaterialType;
-	mColorDirty = true;
-	mWorldMatrixDirty = true; // todo: change dirty to a bitfield and set the lighting constants dirty here
-	mViewMatrixDirty = true;
+
+	if (gSupportsShaderObjects)
+	{
+		glUseProgram(mPrograms[MaterialType].Object);
+		mColorDirty = true;
+		mWorldMatrixDirty = true; // todo: change dirty to a bitfield and set the lighting constants dirty here
+		mViewMatrixDirty = true;
+	}
+	else
+	{
+#ifndef LC_OPENGLES
+		switch (MaterialType)
+		{
+		case LC_MATERIAL_UNLIT_TEXTURE_MODULATE:
+			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+			break;
+
+		case LC_MATERIAL_FAKELIT_TEXTURE_DECAL:
+		case LC_MATERIAL_UNLIT_TEXTURE_DECAL:
+			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
+			break;
+
+		case LC_MATERIAL_UNLIT_COLOR:
+		case LC_MATERIAL_UNLIT_VERTEX_COLOR:
+		case LC_MATERIAL_FAKELIT_COLOR:
+		case LC_NUM_MATERIALS:
+			break;
+		}
+#endif
+	}
 }
 
 void lcContext::SetViewport(int x, int y, int Width, int Height)
@@ -484,17 +510,6 @@ void lcContext::SetLineWidth(float LineWidth)
 
 	glLineWidth(LineWidth);
 	mLineWidth = LineWidth;
-}
-
-void lcContext::SetTextureMode(lcTextureMode TextureMode)
-{
-#ifndef LC_OPENGLES
-	if (!gSupportsShaderObjects)
-	{
-		const GLenum ModeTable[] = { GL_DECAL, GL_REPLACE, GL_MODULATE };
-		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, ModeTable[TextureMode]);
-	}
-#endif
 }
 
 void lcContext::SetColor(float Red, float Green, float Blue, float Alpha)
@@ -1245,7 +1260,6 @@ void lcContext::DrawMeshSection(lcMesh* Mesh, lcMeshSection* Section)
 
 			if (!mTexture)
 			{
-				SetTextureMode(LC_TEXTURE_DECAL);
 				glEnable(GL_TEXTURE_2D);
 			}
 
@@ -1597,7 +1611,6 @@ void lcContext::DrawScene(const lcScene& Scene)
 
 		if (Scene.mHasTexture)
 		{
-			SetTextureMode(LC_TEXTURE_DECAL);
 			glEnable(GL_TEXTURE_2D);
 
 			if (DrawLines)

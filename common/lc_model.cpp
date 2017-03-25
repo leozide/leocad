@@ -1205,8 +1205,6 @@ void lcModel::DrawBackground(lcGLWidget* Widget)
 	else if (mProperties.mBackgroundType == LC_BACKGROUND_IMAGE)
 	{
 		glEnable(GL_TEXTURE_2D);
-
-		Context->SetTextureMode(LC_TEXTURE_MODULATE);
 		glBindTexture(GL_TEXTURE_2D, mBackgroundTexture->mTexture);
 
 		float TileWidth = 1.0f, TileHeight = 1.0f;

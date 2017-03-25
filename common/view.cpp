@@ -1090,7 +1090,6 @@ void View::DrawRotateOverlay()
 		mContext->SetViewMatrix(lcMatrix44Translation(lcVector3(0.375, 0.375, 0.0)));
 		mContext->SetProjectionMatrix(lcMatrix44Ortho(0.0f, mWidth, 0.0f, mHeight, -1.0f, 1.0f));
 
-		mContext->SetTextureMode(LC_TEXTURE_MODULATE);
 		gTexFont.MakeCurrent();
 		glEnable(GL_TEXTURE_2D);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -1411,7 +1410,6 @@ void View::DrawGrid()
 
 	if (Preferences.mDrawGridStuds)
 	{
-		mContext->SetTextureMode(LC_TEXTURE_MODULATE);
 		glBindTexture(GL_TEXTURE_2D, gGridTexture->mTexture);
 		glEnable(GL_TEXTURE_2D);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -1492,7 +1490,6 @@ void View::DrawAxes()
 
 	mContext->SetMaterial(LC_MATERIAL_UNLIT_TEXTURE_MODULATE);
 	mContext->SetViewMatrix(TranslationMatrix);
-	mContext->SetTextureMode(LC_TEXTURE_MODULATE);
 	gTexFont.MakeCurrent();
 	glEnable(GL_TEXTURE_2D);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -1548,7 +1545,6 @@ void View::DrawViewport()
 		mContext->SetColor(0.0f, 0.0f, 0.0f, 1.0f);
 
 		glEnable(GL_TEXTURE_2D);
-		mContext->SetTextureMode(LC_TEXTURE_MODULATE);
 		gTexFont.MakeCurrent();
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_BLEND);

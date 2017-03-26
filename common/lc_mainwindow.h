@@ -41,6 +41,18 @@ public:
 		mActiveView = NULL;
 	}
 
+	void ResetLayout();
+
+	QWidget* GetAnyViewWidget()
+	{
+		QWidget* Widget = layout()->itemAt(0)->widget();
+
+		while (Widget->metaObject() == &QSplitter::staticMetaObject)
+			Widget = ((QSplitter*)Widget)->widget(0);
+
+		return Widget;
+	}
+
 	View* GetActiveView() const
 	{
 		return mActiveView;

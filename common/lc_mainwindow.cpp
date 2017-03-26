@@ -21,6 +21,24 @@
 
 lcMainWindow* gMainWindow;
 
+void lcModelTabWidget::ResetLayout()
+{
+	QLayout* TabLayout = layout();
+	QWidget* TopWidget = TabLayout->itemAt(0)->widget();
+
+	if (TopWidget->metaObject() == &lcQGLWidget::staticMetaObject)
+		return;
+
+	QWidget* Widget = GetAnyViewWidget();
+
+	TabLayout->addWidget(Widget);
+	TabLayout->removeWidget(TopWidget);
+	TopWidget->deleteLater();
+
+	Widget->setFocus();
+	SetActiveView((View*)((lcQGLWidget*)Widget)->widget);
+}
+
 lcMainWindow::lcMainWindow()
 {
 	memset(mActions, 0, sizeof(mActions));
@@ -1332,6 +1350,7 @@ void lcMainWindow::SplitView(Qt::Orientation Orientation)
 	Sizes.append(10);
 	Sizes.append(10);
 	Splitter->setSizes(Sizes);
+	Focus->setFocus();
 }
 
 void lcMainWindow::SplitHorizontal()
@@ -1359,46 +1378,49 @@ void lcMainWindow::RemoveActiveView()
 	QWidget* ParentParentWidget = Parent->parentWidget();
 	QSplitter* ParentSplitter = (QSplitter*)Parent;
 	int FocusIndex = ParentSplitter->indexOf(Focus);
+	QWidget* OtherWidget = ParentSplitter->widget(!FocusIndex);
 
 	if (ParentParentWidget->metaObject() == &lcModelTabWidget::staticMetaObject)
 	{
 		QLayout* CentralLayout = ParentParentWidget->layout();
 
-		CentralLayout->addWidget(ParentSplitter->widget(!FocusIndex));
+		CentralLayout->addWidget(OtherWidget);
 		CentralLayout->removeWidget(Parent);
+	}
+	else
+	{
+		QSplitter* ParentParentSplitter = (QSplitter*)ParentParentWidget;
+		QList<int> Sizes = ParentParentSplitter->sizes();
 
-		return;
+		int ParentIndex = ParentParentSplitter->indexOf(Parent);
+		ParentParentSplitter->insertWidget(ParentIndex, OtherWidget);
+
+		ParentParentSplitter->setSizes(Sizes);
 	}
 
-	QSplitter* ParentParentSplitter = (QSplitter*)ParentParentWidget;
-	QList<int> Sizes = ParentParentSplitter->sizes();
+	Parent->deleteLater();
 
-	int ParentIndex = ParentParentSplitter->indexOf(Parent);
-	ParentParentSplitter->insertWidget(!ParentIndex, Focus);
+	if (OtherWidget->metaObject() != &lcQGLWidget::staticMetaObject)
+	{
+		lcModelTabWidget* TabWidget = (lcModelTabWidget*)mModelTabWidget->currentWidget();
 
-	delete Parent;
+		if (TabWidget)
+			OtherWidget = TabWidget->GetAnyViewWidget();
+	}
 
-	ParentParentSplitter->setSizes(Sizes);
+	OtherWidget->setFocus();
+	SetActiveView((View*)((lcQGLWidget*)OtherWidget)->widget);
 }
 
 void lcMainWindow::ResetViews()
 {
-	QWidget* TabWidget = mModelTabWidget->currentWidget();
+	lcModelTabWidget* TabWidget = (lcModelTabWidget*)mModelTabWidget->currentWidget();
 
 	if (!TabWidget)
 		return;
 
-	QLayout* TabLayout = TabWidget->layout();
-	QWidget* TopWidget = TabLayout->itemAt(0)->widget();
-	TabLayout->removeWidget(TopWidget);
-	TopWidget->deleteLater();
-	View* NewView = new View(lcGetActiveModel());
-	QWidget* ViewWidget = new lcQGLWidget(TabWidget, NewView, true);
-	TabLayout->addWidget(ViewWidget);
-	ViewWidget->show();
-	ViewWidget->setFocus();
-	NewView->ZoomExtents();
-	SetActiveView(NewView);
+	TabWidget->ResetLayout();
+	TabWidget->GetActiveView()->SetViewpoint(LC_VIEWPOINT_HOME);
 }
 
 void lcMainWindow::TogglePrintPreview()

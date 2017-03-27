@@ -1141,16 +1141,8 @@ void lcModel::SubModelAddRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMat
 	{
 		lcPiece* Piece = mPieces[PieceIdx];
 
-		if (Piece->GetStepHide() != LC_STEP_MAX)
-			continue;
-
-		int ColorIndex = Piece->mColorIndex;
-
-		if (ColorIndex == gDefaultColor)
-			ColorIndex = DefaultColorIndex;
-
-		PieceInfo* Info = Piece->mPieceInfo;
-		Info->AddRenderMeshes(Scene, lcMul(Piece->mModelWorld, WorldMatrix), ColorIndex, Focused, Selected);
+		if (Piece->GetStepHide() == LC_STEP_MAX)
+			Piece->SubModelAddRenderMeshes(Scene, WorldMatrix, DefaultColorIndex, Focused, Selected);
 	}
 }
 

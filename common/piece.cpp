@@ -648,6 +648,19 @@ void lcPiece::AddRenderMeshes(lcScene& Scene, bool DrawInterface) const
 		Scene.mInterfaceObjects.Add(this);
 }
 
+void lcPiece::SubModelAddRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, int DefaultColorIndex, bool Focused, bool Selected) const
+{
+	int ColorIndex = mColorIndex;
+
+	if (ColorIndex == gDefaultColor)
+		ColorIndex = DefaultColorIndex;
+
+	if (!mMesh)
+		mPieceInfo->AddRenderMeshes(Scene, lcMul(mModelWorld, WorldMatrix), ColorIndex, Focused, Selected);
+	else
+		Scene.AddMesh(mMesh, lcMul(mModelWorld, WorldMatrix), ColorIndex, Focused ? LC_RENDERMESH_FOCUSED : (Selected ? LC_RENDERMESH_SELECTED : LC_RENDERMESH_NONE), mPieceInfo->mFlags);
+}
+
 void lcPiece::Move(lcStep Step, bool AddKey, const lcVector3& Distance)
 {
 	lcuint32 Section = GetFocusSection();

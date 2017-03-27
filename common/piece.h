@@ -347,6 +347,7 @@ public:
 	virtual void DrawInterface(lcContext* Context) const;
 
 	void AddRenderMeshes(lcScene& Scene, bool DrawInterface) const;
+	void SubModelAddRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, int DefaultColorIndex, bool Focused, bool Selected) const;
 
 	void InsertTime(lcStep Start, lcStep Time);
 	void RemoveTime(lcStep Start, lcStep Time);

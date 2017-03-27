@@ -99,15 +99,6 @@ lcQGLWidget::lcQGLWidget(QWidget *parent, lcGLWidget *owner, bool view)
 
 		gPlaceholderMesh = new lcMesh;
 		gPlaceholderMesh->CreateBox();
-
-		int AASamples = lcGetProfileInt(LC_PROFILE_ANTIALIASING_SAMPLES);
-		if (AASamples > 1)
-		{
-			QGLFormat format;
-			format.setSampleBuffers(true);
-			format.setSamples(AASamples);
-			QGLFormat::setDefaultFormat(format);
-		}
 	}
 	gWidgetList.append(this);
 

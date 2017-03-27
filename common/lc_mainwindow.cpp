@@ -104,6 +104,15 @@ void lcMainWindow::CreateWidgets()
 	CreateMenus();
 	CreateStatusBar();
 
+	int AASamples = lcGetProfileInt(LC_PROFILE_ANTIALIASING_SAMPLES);
+	if (AASamples > 1)
+	{
+		QGLFormat format;
+		format.setSampleBuffers(true);
+		format.setSamples(AASamples);
+		QGLFormat::setDefaultFormat(format);
+	}
+
 	mModelTabWidget = new QTabWidget();
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
     mModelTabWidget->tabBar()->setMovable(true);

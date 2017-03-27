@@ -745,7 +745,7 @@ void View::DrawSelectMoveOverlay()
 		lcPiece* Piece = (lcPiece*)Focus;
 		lcuint32 Section = Piece->GetFocusSection();
 
-		if (Section >= LC_PIECE_SECTION_CONTROL_POINT_1 && Section <= LC_PIECE_SECTION_CONTROL_POINT_8 && Piece->mPieceInfo->GetSynthInfo()->IsCurve())
+		if (Section >= LC_PIECE_SECTION_CONTROL_POINT_1 && Section <= LC_PIECE_SECTION_CONTROL_POINT_8 && Piece->mPieceInfo->GetSynthInfo() && Piece->mPieceInfo->GetSynthInfo()->IsCurve())
 		{
 			int ControlPointIndex = Section - LC_PIECE_SECTION_CONTROL_POINT_1;
 			float Strength = Piece->GetControlPoints()[ControlPointIndex].Scale;
@@ -1796,7 +1796,7 @@ void View::UpdateTrackTool()
 
 				lcPiece* Piece = (lcPiece*)Focus;
 
-				if (ControlPointIndex != -1 && Piece->mPieceInfo->GetSynthInfo()->IsCurve())
+				if (ControlPointIndex != -1 && Piece->mPieceInfo->GetSynthInfo() && Piece->mPieceInfo->GetSynthInfo()->IsCurve())
 				{
 					float Strength = Piece->GetControlPoints()[ControlPointIndex].Scale;
 					const float ScaleStart = (2.0f - OverlayScaleRadius) * OverlayScale + Strength;

@@ -88,7 +88,7 @@ lcContext::lcContext()
 	mTexCoordEnabled = false;
 	mColorEnabled = false;
 
-	mTexture = NULL;
+	mTexture = 0;
 	mLineWidth = 1.0f;
 #ifndef LC_OPENGLES
 	mMatrixMode = GL_MODELVIEW;

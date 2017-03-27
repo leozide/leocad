@@ -39,6 +39,17 @@ void lcModelTabWidget::ResetLayout()
 	SetActiveView((View*)((lcQGLWidget*)Widget)->widget);
 }
 
+void lcModelTabWidget::Clear()
+{
+	ResetLayout();
+	mModel = NULL;
+	mViews.RemoveAll();
+	mActiveView = NULL;
+	lcQGLWidget* Widget = (lcQGLWidget*)layout()->itemAt(0)->widget();
+	delete Widget->widget;
+	Widget->widget = NULL;
+}
+
 lcMainWindow::lcMainWindow()
 {
 	memset(mActions, 0, sizeof(mActions));
@@ -1091,15 +1102,23 @@ bool lcMainWindow::DoDialog(LC_DIALOG_TYPE Type, void* Data)
 
 void lcMainWindow::RemoveAllModelTabs()
 {
-	while (mModelTabWidget->count())
+	while (mModelTabWidget->count() > 1)
 	{
 		QWidget* TabWidget = mModelTabWidget->widget(0);
 		delete TabWidget;
+	}
+
+	if (mModelTabWidget->count())
+	{
+		lcModelTabWidget* TabWidget = (lcModelTabWidget*)mModelTabWidget->widget(0);
+		TabWidget->Clear();
 	}
 }
 
 void lcMainWindow::SetCurrentModelTab(lcModel* Model)
 {
+	lcModelTabWidget* EmptyWidget = NULL;
+
 	for (int TabIdx = 0; TabIdx < mModelTabWidget->count(); TabIdx++)
 	{
 		lcModelTabWidget* TabWidget = (lcModelTabWidget*)mModelTabWidget->widget(TabIdx);
@@ -1109,18 +1128,43 @@ void lcMainWindow::SetCurrentModelTab(lcModel* Model)
 			mModelTabWidget->setCurrentIndex(TabIdx);
 			return;
 		}
+
+		if (!TabWidget->GetModel())
+			EmptyWidget = TabWidget;
 	}
 
-	lcModelTabWidget* TabWidget = new lcModelTabWidget(Model);
-	mModelTabWidget->addTab(TabWidget, Model->GetProperties().mName);
-	mModelTabWidget->setCurrentWidget(TabWidget);
+	lcModelTabWidget* TabWidget;
+	lcQGLWidget* ViewWidget;
+	View* NewView;
 
-	QGridLayout* CentralLayout = new QGridLayout(TabWidget);
-	CentralLayout->setContentsMargins(0, 0, 0, 0);
+	if (!EmptyWidget)
+	{
+		TabWidget = new lcModelTabWidget(Model);
+		mModelTabWidget->addTab(TabWidget, Model->GetProperties().mName);
+		mModelTabWidget->setCurrentWidget(TabWidget);
 
-	View* NewView = new View(Model);
-	QWidget* ViewWidget = new lcQGLWidget(TabWidget, NewView, true);
-	CentralLayout->addWidget(ViewWidget, 0, 0, 1, 1);
+		QGridLayout* CentralLayout = new QGridLayout(TabWidget);
+		CentralLayout->setContentsMargins(0, 0, 0, 0);
+
+		NewView = new View(Model);
+		ViewWidget = new lcQGLWidget(TabWidget, NewView, true);
+		CentralLayout->addWidget(ViewWidget, 0, 0, 1, 1);
+	}
+	else
+	{
+		TabWidget = EmptyWidget;
+		TabWidget->SetModel(Model);
+		mModelTabWidget->setCurrentWidget(TabWidget);
+
+		NewView = new View(Model);
+		ViewWidget = (lcQGLWidget*)TabWidget->layout()->itemAt(0)->widget();
+		ViewWidget->widget = NewView;
+		NewView->mWidget = ViewWidget;
+		NewView->mWidth = ViewWidget->width();
+		NewView->mHeight = ViewWidget->height();
+		AddView(NewView);
+	}
+
 	ViewWidget->show();
 	ViewWidget->setFocus();
 	NewView->ZoomExtents();
@@ -1726,7 +1770,9 @@ void lcMainWindow::UpdateModels()
 		lcModelTabWidget* TabWidget = (lcModelTabWidget*)mModelTabWidget->widget(TabIdx);
 		lcModel* Model = TabWidget->GetModel();
 
-		if (Models.FindIndex(Model) != -1)
+		if (!Model)
+			TabIdx++;
+		else if (Models.FindIndex(Model) != -1)
 		{
 			mModelTabWidget->setTabText(TabIdx, Model->GetProperties().mName);
 			TabIdx++;

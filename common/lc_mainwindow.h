@@ -42,6 +42,7 @@ public:
 	}
 
 	void ResetLayout();
+	void Clear();
 
 	QWidget* GetAnyViewWidget()
 	{
@@ -79,6 +80,11 @@ public:
 	lcModel* GetModel() const
 	{
 		return mModel;
+	}
+
+	void SetModel(lcModel* Model)
+	{
+		mModel = Model;
 	}
 
 	const lcArray<View*>* GetViews() const

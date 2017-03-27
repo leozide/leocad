@@ -21,6 +21,16 @@ public:
 		return mCurve;
 	}
 
+	bool IsUnidirectional() const
+	{
+		return mUnidirectional;
+	}
+
+	bool IsNondirectional() const
+	{
+		return mNondirectional;
+	}
+
 	virtual void GetDefaultControlPoints(lcArray<lcPieceControlPoint>& ControlPoints) const = 0;
 	virtual void VerifyControlPoints(lcArray<lcPieceControlPoint>& ControlPoints) const = 0;
 	int InsertControlPoint(lcArray<lcPieceControlPoint>& ControlPoints, const lcVector3& Start, const lcVector3& End) const;
@@ -32,6 +42,8 @@ protected:
 	virtual void AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const lcArray<lcMatrix44>& Sections) const = 0;
 
 	bool mCurve = false;
+	bool mUnidirectional = false;
+	bool mNondirectional = false;
 	float mLength;
 };
 

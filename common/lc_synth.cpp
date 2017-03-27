@@ -420,6 +420,7 @@ lcSynthInfoBraidedString::lcSynthInfoBraidedString(float Length, int NumSections
 lcSynthInfoStraight::lcSynthInfoStraight(float Length)
 	: lcSynthInfo(Length)
 {
+	mUnidirectional = true;
 }
 
 lcSynthInfoShockAbsorber::lcSynthInfoShockAbsorber(const char* SpringPart)
@@ -435,6 +436,7 @@ lcSynthInfoActuator::lcSynthInfoActuator(float Length)
 lcSynthInfoUniversalJoint::lcSynthInfoUniversalJoint(float Length, const char* EndPart, const char* CenterPart)
 	: lcSynthInfo(Length), mEndPart(EndPart), mCenterPart(CenterPart)
 {
+	mNondirectional = true;
 }
 
 void lcSynthInfoCurved::GetDefaultControlPoints(lcArray<lcPieceControlPoint>& ControlPoints) const

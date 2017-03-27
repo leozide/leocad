@@ -797,19 +797,27 @@ void lcPiece::RotatePivotPoint(const lcMatrix33& RotationMatrix)
 
 quint32 lcPiece::GetAllowedTransforms() const
 {
+	const quint32 Move = LC_OBJECT_TRANSFORM_MOVE_X | LC_OBJECT_TRANSFORM_MOVE_Y | LC_OBJECT_TRANSFORM_MOVE_Z;
+	const quint32 Rotate = LC_OBJECT_TRANSFORM_ROTATE_X | LC_OBJECT_TRANSFORM_ROTATE_Y | LC_OBJECT_TRANSFORM_ROTATE_Z;
 	quint32 Section = GetFocusSection();
 
 	if (Section == LC_PIECE_SECTION_POSITION || Section == LC_PIECE_SECTION_INVALID)
-		return LC_OBJECT_TRANSFORM_MOVE_X | LC_OBJECT_TRANSFORM_MOVE_Y | LC_OBJECT_TRANSFORM_MOVE_Z | LC_OBJECT_TRANSFORM_ROTATE_X | LC_OBJECT_TRANSFORM_ROTATE_Y | LC_OBJECT_TRANSFORM_ROTATE_Z;
+		return Move | Rotate;
 
 	lcSynthInfo* SynthInfo = mPieceInfo->GetSynthInfo();
-	if (!SynthInfo)
-		return 0;
+	if (SynthInfo)
+	{
+		if (SynthInfo->IsUnidirectional())
+			return LC_OBJECT_TRANSFORM_MOVE_Z;
 
-	if (SynthInfo->IsCurve())
-		return LC_OBJECT_TRANSFORM_MOVE_X | LC_OBJECT_TRANSFORM_MOVE_Y | LC_OBJECT_TRANSFORM_MOVE_Z | LC_OBJECT_TRANSFORM_ROTATE_X | LC_OBJECT_TRANSFORM_ROTATE_Y | LC_OBJECT_TRANSFORM_ROTATE_Z | LC_OBJECT_TRANSFORM_SCALE_X;
-	else
-		return LC_OBJECT_TRANSFORM_MOVE_Z;
+		if (SynthInfo->IsCurve())
+			return Move | Rotate | LC_OBJECT_TRANSFORM_SCALE_X;
+
+		if (SynthInfo->IsNondirectional())
+			return Move;
+	}
+
+	return 0;
 }
 
 bool lcPiece::CanAddControlPoint() const

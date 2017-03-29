@@ -96,7 +96,7 @@ lcMainWindow::~lcMainWindow()
 void lcMainWindow::CreateWidgets()
 {
 	setAcceptDrops(true);
-	setWindowIcon(QIcon(":/resources/icon64.png"));
+	setWindowIcon(QIcon(":/resources/leocad.png"));
 	setWindowFilePath(QString());
 
 	CreateActions();

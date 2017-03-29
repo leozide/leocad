@@ -67,7 +67,7 @@ void lcCamera::Initialize()
 {
 	m_fovy = 30.0f;
 	m_zNear = 25.0f;
-	m_zFar = 12500.0f;
+	m_zFar = 50000.0f;
 
 	mState = 0;
 

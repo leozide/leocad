@@ -3,6 +3,7 @@
 
 #include "lc_glwidget.h"
 #include "camera.h"
+#include "lc_scene.h"
 
 enum lcTrackButton
 {

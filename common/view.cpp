@@ -567,7 +567,6 @@ void View::OnDraw()
 
 	const lcPreferences& Preferences = lcGetPreferences();
 
-	mContext->SetViewMatrix(mCamera->mWorldView);
 	mContext->SetProjectionMatrix(GetProjectionMatrix());
 
 #ifndef LC_OPENGLES
@@ -584,7 +583,7 @@ void View::OnDraw()
 	
 	mContext->SetLineWidth(Preferences.mLineWidth);
 
-	mContext->DrawScene(mScene);
+	mScene.Draw(mContext);
 
 #ifndef LC_OPENGLES
 	if (Properties.mFogEnabled)
@@ -593,7 +592,7 @@ void View::OnDraw()
 
 	if (DrawInterface)
 	{
-		mContext->DrawInterfaceObjects(mScene.mInterfaceObjects);
+		mScene.DrawInterfaceObjects(mContext);
 
 		mContext->SetLineWidth(1.0f);
 
@@ -1085,7 +1084,7 @@ void View::DrawRotateOverlay()
 		mContext->SetWorldMatrix(lcMatrix44Identity());
 		mContext->SetViewMatrix(lcMatrix44Translation(lcVector3(0.375, 0.375, 0.0)));
 		mContext->SetProjectionMatrix(lcMatrix44Ortho(0.0f, mWidth, 0.0f, mHeight, -1.0f, 1.0f));
-		mContext->SetTexture(gTexFont.GetTexture());
+		mContext->BindTexture(gTexFont.GetTexture());
 		glEnable(GL_BLEND);
 
 		char buf[32];
@@ -1397,7 +1396,7 @@ void View::DrawGrid()
 
 	if (Preferences.mDrawGridStuds)
 	{
-		mContext->SetTexture(gGridTexture->mTexture);
+		mContext->BindTexture(gGridTexture->mTexture);
 		glEnable(GL_BLEND);
 
 		mContext->SetMaterial(LC_MATERIAL_UNLIT_TEXTURE_MODULATE);
@@ -1472,7 +1471,7 @@ void View::DrawAxes()
 
 	mContext->SetMaterial(LC_MATERIAL_UNLIT_TEXTURE_MODULATE);
 	mContext->SetViewMatrix(TranslationMatrix);
-	mContext->SetTexture(gTexFont.GetTexture());
+	mContext->BindTexture(gTexFont.GetTexture());
 	glEnable(GL_BLEND);
 
 	float TextBuffer[6 * 5 * 3];
@@ -1518,7 +1517,7 @@ void View::DrawViewport()
 	{
 		mContext->SetMaterial(LC_MATERIAL_UNLIT_TEXTURE_MODULATE);
 		mContext->SetColor(0.0f, 0.0f, 0.0f, 1.0f);
-		mContext->SetTexture(gTexFont.GetTexture());
+		mContext->BindTexture(gTexFont.GetTexture());
 
 		glEnable(GL_BLEND);
 

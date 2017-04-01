@@ -351,8 +351,7 @@ void lcPartSelectionListModel::DrawPreview(int InfoIndex)
 
 	Scene.End();
 
-	Context->SetViewMatrix(ViewMatrix);
-	Context->DrawScene(Scene);
+	Scene.Draw(Context);
 
 	mParts[InfoIndex].second = QPixmap::fromImage(Context->GetRenderToTextureImage(Width, Height)).scaled(mIconSize, mIconSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 

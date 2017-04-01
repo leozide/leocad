@@ -1120,7 +1120,7 @@ void lcModel::GetScene(lcScene& Scene, lcCamera* ViewCamera, bool DrawInterface)
 			lcCamera* Camera = mCameras[CameraIdx];
 
 			if (Camera != ViewCamera && Camera->IsVisible())
-				Scene.mInterfaceObjects.Add(Camera);
+				Scene.AddInterfaceObject(Camera);
 		}
 
 		for (int LightIdx = 0; LightIdx < mLights.GetSize(); LightIdx++)
@@ -1128,7 +1128,7 @@ void lcModel::GetScene(lcScene& Scene, lcCamera* ViewCamera, bool DrawInterface)
 			lcLight* Light = mLights[LightIdx];
 
 			if (Light->IsVisible())
-				Scene.mInterfaceObjects.Add(Light);
+				Scene.AddInterfaceObject(Light);
 		}
 	}
 
@@ -1197,7 +1197,7 @@ void lcModel::DrawBackground(lcGLWidget* Widget)
 	}
 	else if (mProperties.mBackgroundType == LC_BACKGROUND_IMAGE)
 	{
-		Context->SetTexture(mBackgroundTexture->mTexture);
+		Context->BindTexture(mBackgroundTexture->mTexture);
 
 		float TileWidth = 1.0f, TileHeight = 1.0f;
 

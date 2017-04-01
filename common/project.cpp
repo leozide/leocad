@@ -1331,8 +1331,7 @@ void Project::ExportHTML()
 
 				Scene.End();
 
-				Context->SetViewMatrix(ViewMatrix);
-				Context->DrawScene(Scene);
+				Scene.Draw(Context);
 
 				QString FileName = QFileInfo(Dir, QLatin1String(Info->m_strName) + QLatin1String(".png")).absoluteFilePath();
 				if (!Context->SaveRenderToTextureImage(FileName, Width, Height))

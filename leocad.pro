@@ -144,6 +144,7 @@ SOURCES += common/view.cpp \
     common/lc_mesh.cpp \
     common/lc_model.cpp \
     common/lc_profile.cpp \
+    common/lc_scene.cpp \
     common/lc_selectbycolordialog.cpp \
     common/lc_shortcuts.cpp \
     common/lc_synth.cpp \
@@ -205,6 +206,7 @@ HEADERS += \
     common/lc_mesh.h \
     common/lc_model.h \
     common/lc_profile.h \
+    common/lc_scene.h \
     common/lc_selectbycolordialog.h \
     common/lc_shortcuts.h \
     common/lc_synth.h \

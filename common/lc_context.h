@@ -6,23 +6,6 @@
 #include "lc_colors.h"
 #include "lc_mesh.h"
 
-class lcScene
-{
-public:
-	lcScene();
-
-	void Begin(const lcMatrix44& ViewMatrix);
-	void End();
-	void AddMesh(lcMesh* Mesh, const lcMatrix44& WorldMatrix, int ColorIndex, lcRenderMeshState State, int Flags);
-
-	lcMatrix44 mViewMatrix;
-	lcArray<lcRenderMesh> mRenderMeshes;
-	lcArray<int> mOpaqueMeshes;
-	lcArray<int> mTranslucentMeshes;
-	lcArray<const lcObject*> mInterfaceObjects;
-	bool mHasTexture;
-};
-
 class lcVertexBuffer
 {
 public:
@@ -124,10 +107,15 @@ public:
 		mViewProjectionMatrixDirty = true;
 	}
 
+	const lcMatrix44& GetProjectionMatrix()
+	{
+		return mProjectionMatrix;
+	}
+
 	void SetMaterial(lcMaterialType MaterialType);
 	void SetViewport(int x, int y, int Width, int Height);
 	void SetLineWidth(float LineWidth);
-	void SetTexture(GLuint Texture);
+	void BindTexture(GLuint Texture);
 
 	void SetColor(const lcVector4& Color)
 	{
@@ -164,18 +152,11 @@ public:
 	void DrawPrimitives(GLenum Mode, GLint First, GLsizei Count);
 	void DrawIndexedPrimitives(GLenum Mode, GLsizei Count, GLenum Type, int Offset);
 
-	void DrawScene(const lcScene& Scene);
-	void DrawInterfaceObjects(const lcArray<const lcObject*>& InterfaceObjects);
+	void BindMesh(const lcMesh* Mesh);
 
 protected:
 	static void CreateShaderPrograms();
-	void BindMesh(lcMesh* Mesh);
 	void FlushState();
-
-	void DrawMeshSection(lcMesh* Mesh, lcMeshSection* Section);
-	void DrawOpaqueMeshes(const lcScene& Scene);
-	void DrawTranslucentMeshes(const lcScene& Scene);
-	void DrawRenderMeshes(const lcArray<lcRenderMesh>& RenderMeshes, const lcArray<int>& Meshes, lcMeshPrimitiveType PrimitiveType, bool EnableNormals, bool DrawTranslucent, bool DrawTextured);
 
 	GLuint mVertexBufferObject;
 	GLuint mIndexBufferObject;

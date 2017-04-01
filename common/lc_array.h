@@ -77,6 +77,16 @@ public:
 		return true;
 	}
 
+	T* begin() const
+	{
+		return &mData[0];
+	}
+
+	T* end() const
+	{
+		return &mData[0] + mLength;
+	}
+
 	bool IsEmpty() const
 	{
 		return mLength == 0;

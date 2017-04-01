@@ -11,6 +11,7 @@
 #include "lc_application.h"
 #include "lc_library.h"
 #include "lc_context.h"
+#include "lc_scene.h"
 #include "lc_qutils.h"
 #include "lc_synth.h"
 
@@ -645,7 +646,7 @@ void lcPiece::AddRenderMeshes(lcScene& Scene, bool DrawInterface) const
 		Scene.AddMesh(mMesh, mModelWorld, mColorIndex, Focused ? LC_RENDERMESH_FOCUSED : (Selected ? LC_RENDERMESH_SELECTED : LC_RENDERMESH_NONE), mPieceInfo->mFlags);
 
 	if (Selected)
-		Scene.mInterfaceObjects.Add(this);
+		Scene.AddInterfaceObject(this);
 }
 
 void lcPiece::SubModelAddRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, int DefaultColorIndex, bool Focused, bool Selected) const

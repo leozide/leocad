@@ -8,7 +8,7 @@
 #include "lc_application.h"
 #include "lc_model.h"
 #include "project.h"
-#include "lc_context.h"
+#include "lc_scene.h"
 #include "lc_synth.h"
 #include "lc_file.h"
 #include <locale.h>

@@ -1361,7 +1361,7 @@ void Project::ExportHTML()
 		for (int ModelIdx = 0; ModelIdx < Models.GetSize(); ModelIdx++)
 		{
 			lcModel* Model = Models[ModelIdx];
-			QString BaseName = ProjectTitle.left(ProjectTitle.length() - QFileInfo(ProjectTitle).suffix().length() - 1) + '-' + Model->GetProperties().mName;
+			BaseName = ProjectTitle.left(ProjectTitle.length() - QFileInfo(ProjectTitle).suffix().length() - 1) + '-' + Model->GetProperties().mName;
 			BaseName.replace('#', '_');
 
 			if (Options.SinglePage)

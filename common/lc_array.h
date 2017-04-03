@@ -77,12 +77,22 @@ public:
 		return true;
 	}
 
-	T* begin() const
+	T* begin()
 	{
 		return &mData[0];
 	}
 
-	T* end() const
+	T* end()
+	{
+		return &mData[0] + mLength;
+	}
+
+	const T* begin() const
+	{
+		return &mData[0];
+	}
+
+	const T* end() const
 	{
 		return &mData[0] + mLength;
 	}

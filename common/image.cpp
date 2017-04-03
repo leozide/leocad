@@ -126,18 +126,21 @@ void Image::Resize(int width, int height)
 	{
 		bits = (unsigned char*)malloc(BufferSize);
 
-		for (j = 0; j < mHeight; j++)
+		if (bits)
 		{
-			accumy = (float)height*j/(float)mHeight;
-			sty = (int)floor(accumy);
-
-			for (i = 0; i < mWidth; i++)
+			for (j = 0; j < mHeight; j++)
 			{
-				accumx = (float)width*i/(float)mWidth;
-				stx = (int)floor(accumx);
+				accumy = (float)height*j / (float)mHeight;
+				sty = (int)floor(accumy);
 
-				for (k = 0; k < components; k++)
-					bits[(stx+sty*width)*components+k] = mData[(i+j*mWidth)*components+k];
+				for (i = 0; i < mWidth; i++)
+				{
+					accumx = (float)width*i / (float)mWidth;
+					stx = (int)floor(accumx);
+
+					for (k = 0; k < components; k++)
+						bits[(stx + sty*width)*components + k] = mData[(i + j * mWidth) * components + k];
+				}
 			}
 		}
 	}

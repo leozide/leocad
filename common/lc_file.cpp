@@ -123,8 +123,15 @@ void lcMemFile::GrowFile(size_t NewLength)
 
 	NewLength = ((NewLength + mGrowBytes - 1) / mGrowBytes) * mGrowBytes;
 
-	if (mBuffer != NULL)
-		mBuffer = (unsigned char*)realloc(mBuffer, NewLength);
+	if (mBuffer)
+	{
+		unsigned char* NewBuffer = (unsigned char*)realloc(mBuffer, NewLength);
+
+		if (!NewBuffer)
+			return;
+
+		mBuffer = NewBuffer;
+	}
 	else
 		mBuffer = (unsigned char*)malloc(NewLength);
 

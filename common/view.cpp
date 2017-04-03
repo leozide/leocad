@@ -952,8 +952,7 @@ void View::DrawRotateOverlay()
 	// Transform ViewDir to local space.
 	ViewDir = lcMul(ViewDir, lcMatrix33AffineInverse(RelativeRotation));
 
-	lcMatrix44 WorldMatrix = lcMatrix44(RelativeRotation, OverlayCenter);
-	mContext->SetWorldMatrix(WorldMatrix);
+	mContext->SetWorldMatrix(lcMatrix44(RelativeRotation, OverlayCenter));
 
 	// Draw each axis circle.
 	for (int i = 0; i < 3; i++)
@@ -1316,6 +1315,8 @@ void View::DrawGrid()
 			VertexBufferSize += 2 * (MaxX - MinX + MaxY - MinY + 2) * 3 * sizeof(float);
 
 		float* Verts = (float*)malloc(VertexBufferSize);
+		if (!Verts)
+			return;
 		float* CurVert = Verts;
 
 		if (Preferences.mDrawGridStuds)

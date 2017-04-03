@@ -244,10 +244,7 @@ QVariant lcPartSelectionListModel::data(const QModelIndex& Index, int Role) cons
 		{
 		case Qt::DisplayRole:
 			if (!mIconSize || mShowPartNames)
-			{
-				PieceInfo* Info = mParts[InfoIndex].first;
 				return QVariant(QString::fromLatin1(Info->m_strDescription));
-			}
 			break;
 
 		case Qt::ToolTipRole:

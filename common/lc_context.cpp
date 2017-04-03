@@ -684,7 +684,8 @@ lcVertexBuffer lcContext::CreateVertexBuffer(int Size, const void* Data)
 	else
 	{
 		VertexBuffer.Pointer = malloc(Size);
-		memcpy(VertexBuffer.Pointer, Data, Size);
+		if (VertexBuffer.Pointer)
+			memcpy(VertexBuffer.Pointer, Data, Size);
 	}
 
 	return VertexBuffer;
@@ -729,7 +730,8 @@ lcIndexBuffer lcContext::CreateIndexBuffer(int Size, const void* Data)
 	else
 	{
 		IndexBuffer.Pointer = malloc(Size);
-		memcpy(IndexBuffer.Pointer, Data, Size);
+		if (IndexBuffer.Pointer)
+			memcpy(IndexBuffer.Pointer, Data, Size);
 	}
 
 	return IndexBuffer;

@@ -507,7 +507,7 @@ void lcPiece::DrawInterface(lcContext* Context) const
 	const lcVector3& Max = BoundingBox.Max;
 	lcVector3 Edge((Max - Min) * 0.33f);
 
-	float Verts[48][3] =
+	float LineVerts[48][3] =
 	{
 		{ Max[0], Max[1], Max[2] }, { Max[0] - Edge[0], Max[1], Max[2] },
 		{ Max[0], Max[1], Max[2] }, { Max[0], Max[1] - Edge[1], Max[2] },
@@ -550,7 +550,7 @@ void lcPiece::DrawInterface(lcContext* Context) const
 	else
 		Context->SetInterfaceColor(LC_COLOR_SELECTED);
 
-	Context->SetVertexBufferPointer(Verts);
+	Context->SetVertexBufferPointer(LineVerts);
 	Context->SetVertexFormatPosition(3);
 
 	Context->DrawPrimitives(GL_LINES, 0, 48);

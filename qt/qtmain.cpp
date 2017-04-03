@@ -119,7 +119,7 @@ static void lcRegisterShellFileTypes()
 		if (RegCreateKeyEx(HKEY_CLASSES_ROOT, TEXT(".lcd\\ShellNew"), 0, REG_NONE, REG_OPTION_NON_VOLATILE, KEY_WRITE | KEY_READ, NULL, &key, &disposition) != ERROR_SUCCESS)
 			return;
 
-		LONG result = RegSetValueEx(key, TEXT("NullFile"), 0, REG_SZ, (CONST BYTE*)TEXT(""), (lstrlen(TEXT("")) + 1) * sizeof(TCHAR));
+		result = RegSetValueEx(key, TEXT("NullFile"), 0, REG_SZ, (CONST BYTE*)TEXT(""), (lstrlen(TEXT("")) + 1) * sizeof(TCHAR));
 
 		if (RegCloseKey(key) != ERROR_SUCCESS || result != ERROR_SUCCESS)
 			return;

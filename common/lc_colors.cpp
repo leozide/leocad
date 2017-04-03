@@ -269,7 +269,8 @@ bool lcLoadColorFile(lcFile& File)
 					Token[0] = ' ';
 
 				int Value;
-				sscanf(Token, "%x", &Value);
+				if (sscanf(Token, "%x", &Value) != 1)
+					Value = 0;
 
 				Color.Value[2] = (float)(Value & 0xff) / 255.0f;
 				Value >>= 8;
@@ -284,7 +285,8 @@ bool lcLoadColorFile(lcFile& File)
 					Token[0] = ' ';
 
 				int Value;
-				sscanf(Token, "%x", &Value);
+				if (sscanf(Token, "%x", &Value) != 1)
+					Value = 0;
 
 				Color.Edge[2] = (float)(Value & 0xff) / 255.0f;
 				Value >>= 8;

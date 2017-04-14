@@ -20,29 +20,29 @@ void lcSynthInit()
 
 	lcHoseInfo HoseInfo[] =
 	{
-		{ "72504",  LC_SYNTH_PIECE_RIBBED_HOSE,     31.25f,   4 }, // Technic Ribbed Hose  2L
-		{ "72706",  LC_SYNTH_PIECE_RIBBED_HOSE,     50.00f,   7 }, // Technic Ribbed Hose  3L
-		{ "71952",  LC_SYNTH_PIECE_RIBBED_HOSE,     75.00f,  11 }, // Technic Ribbed Hose  4L
-		{ "71944",  LC_SYNTH_PIECE_RIBBED_HOSE,    112.50f,  17 }, // Technic Ribbed Hose  6L
-		{ "71951",  LC_SYNTH_PIECE_RIBBED_HOSE,    143.75f,  22 }, // Technic Ribbed Hose  8L
-		{ "71986",  LC_SYNTH_PIECE_RIBBED_HOSE,    212.50f,  33 }, // Technic Ribbed Hose 11L
-		{ "43675",  LC_SYNTH_PIECE_RIBBED_HOSE,    375.00f,  58 }, // Technic Ribbed Hose 19L
-		{ "32580",  LC_SYNTH_PIECE_FLEXIBLE_AXLE,  120.00f,  15 }, // Technic Axle Flexible  7
-		{ "32199",  LC_SYNTH_PIECE_FLEXIBLE_AXLE,  200.00f,  35 }, // Technic Axle Flexible 11
-		{ "55709",  LC_SYNTH_PIECE_FLEXIBLE_AXLE,  200.00f,  35 }, // Technic Axle Flexible 11
-		{ "32200",  LC_SYNTH_PIECE_FLEXIBLE_AXLE,  220.00f,  40 }, // Technic Axle Flexible 12
-		{ "32201",  LC_SYNTH_PIECE_FLEXIBLE_AXLE,  260.00f,  50 }, // Technic Axle Flexible 14
-		{ "32202",  LC_SYNTH_PIECE_FLEXIBLE_AXLE,  300.00f,  60 }, // Technic Axle Flexible 16
-		{ "32235",  LC_SYNTH_PIECE_FLEXIBLE_AXLE,  360.00f,  75 }, // Technic Axle Flexible 19
-		{ "76384",  LC_SYNTH_PIECE_STRING_BRAIDED, 200.00f,  46 }, // String Braided 11L with End Studs
-		{ "75924",  LC_SYNTH_PIECE_STRING_BRAIDED, 400.00f,  96 }, // String Braided 21L with End Studs
-		{ "572C02", LC_SYNTH_PIECE_STRING_BRAIDED, 800.00f, 196 }, // String Braided 41L with End Studs
-		{ "73129",  LC_SYNTH_PIECE_SHOCK_ABSORBER, 110.00f,   1 }, // Technic Shock Absorber 6.5L 
-		{ "41838",  LC_SYNTH_PIECE_SHOCK_ABSORBER, 110.00f,   1 }, // Technic Shock Absorber 6.5L Soft
-		{ "76138",  LC_SYNTH_PIECE_SHOCK_ABSORBER, 110.00f,   1 }, // Technic Shock Absorber 6.5L Stiff
-		{ "76537",  LC_SYNTH_PIECE_SHOCK_ABSORBER, 110.00f,   1 }, // Technic Shock Absorber 6.5L Extra Stiff
-		{ "61927C01", LC_SYNTH_PIECE_ACTUATOR,     270.00f,   1 }, // Technic Power Functions Linear Actuator (Extended)
-		{ "61927",  LC_SYNTH_PIECE_ACTUATOR,       170.00f,   1 }  // Technic Power Functions Linear Actuator (Contracted)
+		{ "72504",    lcSynthType::RIBBED_HOSE,     31.25f,   4 }, // Technic Ribbed Hose  2L
+		{ "72706",    lcSynthType::RIBBED_HOSE,     50.00f,   7 }, // Technic Ribbed Hose  3L
+		{ "71952",    lcSynthType::RIBBED_HOSE,     75.00f,  11 }, // Technic Ribbed Hose  4L
+		{ "71944",    lcSynthType::RIBBED_HOSE,    112.50f,  17 }, // Technic Ribbed Hose  6L
+		{ "71951",    lcSynthType::RIBBED_HOSE,    143.75f,  22 }, // Technic Ribbed Hose  8L
+		{ "71986",    lcSynthType::RIBBED_HOSE,    212.50f,  33 }, // Technic Ribbed Hose 11L
+		{ "43675",    lcSynthType::RIBBED_HOSE,    375.00f,  58 }, // Technic Ribbed Hose 19L
+		{ "32580",    lcSynthType::FLEXIBLE_AXLE,  120.00f,  15 }, // Technic Axle Flexible  7
+		{ "32199",    lcSynthType::FLEXIBLE_AXLE,  200.00f,  35 }, // Technic Axle Flexible 11
+		{ "55709",    lcSynthType::FLEXIBLE_AXLE,  200.00f,  35 }, // Technic Axle Flexible 11
+		{ "32200",    lcSynthType::FLEXIBLE_AXLE,  220.00f,  40 }, // Technic Axle Flexible 12
+		{ "32201",    lcSynthType::FLEXIBLE_AXLE,  260.00f,  50 }, // Technic Axle Flexible 14
+		{ "32202",    lcSynthType::FLEXIBLE_AXLE,  300.00f,  60 }, // Technic Axle Flexible 16
+		{ "32235",    lcSynthType::FLEXIBLE_AXLE,  360.00f,  75 }, // Technic Axle Flexible 19
+		{ "76384",    lcSynthType::STRING_BRAIDED, 200.00f,  46 }, // String Braided 11L with End Studs
+		{ "75924",    lcSynthType::STRING_BRAIDED, 400.00f,  96 }, // String Braided 21L with End Studs
+		{ "572C02",   lcSynthType::STRING_BRAIDED, 800.00f, 196 }, // String Braided 41L with End Studs
+		{ "73129",    lcSynthType::SHOCK_ABSORBER, 110.00f,   1 }, // Technic Shock Absorber 6.5L
+		{ "41838",    lcSynthType::SHOCK_ABSORBER, 110.00f,   1 }, // Technic Shock Absorber 6.5L Soft
+		{ "76138",    lcSynthType::SHOCK_ABSORBER, 110.00f,   1 }, // Technic Shock Absorber 6.5L Stiff
+		{ "76537",    lcSynthType::SHOCK_ABSORBER, 110.00f,   1 }, // Technic Shock Absorber 6.5L Extra Stiff
+		{ "61927C01", lcSynthType::ACTUATOR,       270.00f,   1 }, // Technic Power Functions Linear Actuator (Extended)
+		{ "61927",    lcSynthType::ACTUATOR,       170.00f,   1 }  // Technic Power Functions Linear Actuator (Contracted)
 	};
 
 	for (unsigned int InfoIdx = 0; InfoIdx < sizeof(HoseInfo) / sizeof(HoseInfo[0]); InfoIdx++)
@@ -66,29 +66,29 @@ lcSynthInfo::lcSynthInfo(lcSynthType Type, float Length, int NumSections, PieceI
 
 	switch (mType)
 	{
-	case LC_SYNTH_PIECE_RIBBED_HOSE:
+	case lcSynthType::RIBBED_HOSE:
 		EdgeSectionLength = 6.25f;
 		MidSectionLength = 6.25f;
 		mRigidEdges = false;
 		mCurve = true;
 		break;
 
-	case LC_SYNTH_PIECE_FLEXIBLE_AXLE:
+	case lcSynthType::FLEXIBLE_AXLE:
 		EdgeSectionLength = 30.0f;
 		MidSectionLength = 4.0f;
 		mRigidEdges = true;
 		mCurve = true;
 		break;
 
-	case LC_SYNTH_PIECE_STRING_BRAIDED:
+	case lcSynthType::STRING_BRAIDED:
 		EdgeSectionLength = 8.0f;
 		MidSectionLength = 4.0f;
 		mRigidEdges = true;
 		mCurve = true;
 		break;
 
-	case LC_SYNTH_PIECE_SHOCK_ABSORBER:
-	case LC_SYNTH_PIECE_ACTUATOR:
+	case lcSynthType::SHOCK_ABSORBER:
+	case lcSynthType::ACTUATOR:
 		EdgeSectionLength = 0.0f;
 		MidSectionLength = 0.0f;
 		mRigidEdges = false;
@@ -96,7 +96,7 @@ lcSynthInfo::lcSynthInfo(lcSynthType Type, float Length, int NumSections, PieceI
 		break;
 	}
 
-	if (mType != LC_SYNTH_PIECE_SHOCK_ABSORBER && mType != LC_SYNTH_PIECE_ACTUATOR)
+	if (mType != lcSynthType::SHOCK_ABSORBER && mType != lcSynthType::ACTUATOR)
 	{
 		mStart.Transform = lcMatrix44(lcMatrix33(lcVector3(0.0f, 0.0f, 1.0f), lcVector3(1.0f, 0.0f, 0.0f), lcVector3(0.0f, 1.0f, 0.0f)), lcVector3(0.0f, 0.0f, 0.0f));
 		mMiddle.Transform = lcMatrix44Identity();
@@ -122,20 +122,20 @@ void lcSynthInfo::GetDefaultControlPoints(lcArray<lcPieceControlPoint>& ControlP
 
 	switch (mType)
 	{
-	case LC_SYNTH_PIECE_RIBBED_HOSE:
+	case lcSynthType::RIBBED_HOSE:
 		Scale = 80.0f;
 		break;
 
-	case LC_SYNTH_PIECE_FLEXIBLE_AXLE:
+	case lcSynthType::FLEXIBLE_AXLE:
 		Scale = 12.0f;
 		break;
 
-	case LC_SYNTH_PIECE_STRING_BRAIDED:
+	case lcSynthType::STRING_BRAIDED:
 		Scale = 12.0f;
 		break;
 
-	case LC_SYNTH_PIECE_SHOCK_ABSORBER:
-	case LC_SYNTH_PIECE_ACTUATOR:
+	case lcSynthType::SHOCK_ABSORBER:
+	case lcSynthType::ACTUATOR:
 		Scale = 1.0f;
 		break;
 	}
@@ -150,12 +150,12 @@ void lcSynthInfo::GetDefaultControlPoints(lcArray<lcPieceControlPoint>& ControlP
 		ControlPoints[1].Transform = lcMatrix44Translation(lcVector3( HalfLength, 0.0f, 0.0f));
 		break;
 
-	case LC_SYNTH_PIECE_SHOCK_ABSORBER:
+	case lcSynthType::SHOCK_ABSORBER:
 		ControlPoints[0].Transform = lcMatrix44Translation(lcVector3(0.0f, 0.0f, -mLength));
 		ControlPoints[1].Transform = lcMatrix44Translation(lcVector3(0.0f, 0.0f, 0.0f));
 		break;
 
-	case LC_SYNTH_PIECE_ACTUATOR:
+	case lcSynthType::ACTUATOR:
 		ControlPoints[0].Transform = lcMatrix44(lcMatrix33(lcVector3(1.0f, 0.0f, 0.0f), lcVector3(0.0f, 0.0f, -1.0f), lcVector3(0.0f, 1.0f, 0.0f)), lcVector3(0.0f, 0.0f, 0.0f));
 		ControlPoints[1].Transform = lcMatrix44(lcMatrix33(lcVector3(1.0f, 0.0f, 0.0f), lcVector3(0.0f, 0.0f, -1.0f), lcVector3(0.0f, 1.0f, 0.0f)), lcVector3(0.0f, mLength, 0.0f));
 		break;
@@ -664,23 +664,23 @@ lcMesh* lcSynthInfo::CreateMesh(const lcArray<lcPieceControlPoint>& ControlPoint
 
 	switch (mType)
 	{
-	case LC_SYNTH_PIECE_RIBBED_HOSE:
+	case lcSynthType::RIBBED_HOSE:
 		AddRibbedHoseParts(File, Sections);
 		break;
 
-	case LC_SYNTH_PIECE_FLEXIBLE_AXLE:
+	case lcSynthType::FLEXIBLE_AXLE:
 		AddFlexibleAxleParts(File, MeshData, Sections);
 		break;
 
-	case LC_SYNTH_PIECE_STRING_BRAIDED:
+	case lcSynthType::STRING_BRAIDED:
 		AddStringBraidedParts(File, MeshData, Sections);
 		break;
 
-	case LC_SYNTH_PIECE_SHOCK_ABSORBER:
+	case lcSynthType::SHOCK_ABSORBER:
 		AddShockAbsorberParts(File, Sections);
 		break;
 
-	case LC_SYNTH_PIECE_ACTUATOR:
+	case lcSynthType::ACTUATOR:
 		AddActuatorParts(File, Sections);
 		break;
 	}

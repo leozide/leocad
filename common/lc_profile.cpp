@@ -105,7 +105,7 @@ lcProfileEntry gProfileEntries[LC_NUM_PROFILE_KEYS] =
 	lcProfileEntry("Defaults", "BackgroundTile", 0),                                 // LC_PROFILE_DEFAULT_BACKGROUND_TILE
 
 	lcProfileEntry("HTML", "Options", LC_HTML_SINGLEPAGE),                           // LC_PROFILE_HTML_OPTIONS
-	lcProfileEntry("HTML", "ImageOptions", LC_IMAGE_PNG | LC_IMAGE_TRANSPARENT),     // LC_PROFILE_HTML_IMAGE_OPTIONS
+	lcProfileEntry("HTML", "ImageOptions", LC_IMAGE_TRANSPARENT),                    // LC_PROFILE_HTML_IMAGE_OPTIONS
 	lcProfileEntry("HTML", "ImageWidth", 640),                                       // LC_PROFILE_HTML_IMAGE_WIDTH
 	lcProfileEntry("HTML", "ImageHeight", 480),                                      // LC_PROFILE_HTML_IMAGE_HEIGHT
 	lcProfileEntry("HTML", "PartsColor", 16),                                        // LC_PROFILE_HTML_PARTS_COLOR

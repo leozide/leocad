@@ -4,13 +4,13 @@
 #include "lc_math.h"
 #include "piece.h"
 
-enum lcSynthType
+enum class lcSynthType
 {
-	LC_SYNTH_PIECE_RIBBED_HOSE,
-	LC_SYNTH_PIECE_FLEXIBLE_AXLE,
-	LC_SYNTH_PIECE_STRING_BRAIDED,
-	LC_SYNTH_PIECE_SHOCK_ABSORBER,
-	LC_SYNTH_PIECE_ACTUATOR
+	RIBBED_HOSE,
+	FLEXIBLE_AXLE,
+	STRING_BRAIDED,
+	SHOCK_ABSORBER,
+	ACTUATOR
 };
 
 struct lcSynthComponent

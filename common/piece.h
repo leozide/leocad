@@ -59,7 +59,7 @@ public:
 	lcPiece(const lcPiece& Other);
 	~lcPiece();
 
-	virtual bool IsSelected() const
+	virtual bool IsSelected() const override
 	{
 		return (mState & LC_PIECE_SELECTION_MASK) != 0;
 	}

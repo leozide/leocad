@@ -20,7 +20,7 @@
 lcPiece::lcPiece(PieceInfo* Info)
 	: lcObject(LC_OBJECT_PIECE)
 {
-	mMesh = NULL;
+	mMesh = nullptr;
 	SetPieceInfo(Info, true);
 	mState = 0;
 	mColorIndex = gDefaultColor;

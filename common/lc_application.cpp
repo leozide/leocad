@@ -41,9 +41,9 @@ void lcPreferences::SaveDefaults()
 
 lcApplication::lcApplication()
 {
-	mProject = NULL;
-	mLibrary = NULL;
-	mClipboard = NULL;
+	mProject = nullptr;
+	mLibrary = nullptr;
+	mClipboard = nullptr;
 
 	mPreferences.LoadDefaults();
 }
@@ -83,7 +83,7 @@ void lcApplication::ExportClipboard(const QByteArray& Clipboard)
 
 bool lcApplication::LoadPiecesLibrary(const char* LibPath, const char* LibraryInstallPath, const char* LDrawPath)
 {
-	if (mLibrary == NULL)
+	if (mLibrary == nullptr)
 		mLibrary = new lcPiecesLibrary();
 
 	if (LibPath && LibPath[0])
@@ -174,7 +174,7 @@ void lcApplication::ParseStringArgument(int* CurArg, int argc, char* argv[], cha
 
 bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstallPath, const char* LDrawPath, bool& ShowWindow)
 {
-	char* LibPath = NULL;
+	char* LibPath = nullptr;
 
 	// Image output options.
 	bool SaveImage = false;
@@ -185,10 +185,10 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 	int ImageHeight = lcGetProfileInt(LC_PROFILE_IMAGE_HEIGHT);
 	lcStep ImageStart = 0;
 	lcStep ImageEnd = 0;
-	char* ImageName = NULL;
-	char* ProjectName = NULL;
-	char* SaveWavefrontName = NULL;
-	char* Save3DSName = NULL;
+	char* ImageName = nullptr;
+	char* ProjectName = nullptr;
+	char* SaveWavefrontName = nullptr;
+	char* Save3DSName = nullptr;
 
 	// Parse the command line arguments.
 	for (int i = 1; i < argc; i++)
@@ -431,7 +431,7 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 void lcApplication::Shutdown()
 {
 	delete mLibrary;
-	mLibrary = NULL;
+	mLibrary = nullptr;
 }
 
 void lcApplication::ShowPreferencesDialog()

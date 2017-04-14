@@ -38,7 +38,7 @@ public:
 	lcModelTabWidget(lcModel* Model)
 	{
 		mModel = Model;
-		mActiveView = NULL;
+		mActiveView = nullptr;
 	}
 
 	void ResetLayout();
@@ -72,7 +72,7 @@ public:
 	void RemoveView(View* View)
 	{
 		if (View == mActiveView)
-			mActiveView = NULL;
+			mActiveView = nullptr;
 
 		mViews.Remove(View);
 	}
@@ -186,13 +186,13 @@ public:
 	View* GetActiveView() const
 	{
 		lcModelTabWidget* CurrentTab = (lcModelTabWidget*)mModelTabWidget->currentWidget();
-		return CurrentTab ? CurrentTab->GetActiveView() : NULL;
+		return CurrentTab ? CurrentTab->GetActiveView() : nullptr;
 	}
 
 	const lcArray<View*>* GetViewsForModel(lcModel* Model) const
 	{
 		lcModelTabWidget* TabWidget = GetTabWidgetForModel(Model);
-		return TabWidget ? TabWidget->GetViews() : NULL;
+		return TabWidget ? TabWidget->GetViews() : nullptr;
 	}
 
 	lcModelTabWidget* GetTabForView(View* View) const
@@ -206,7 +206,7 @@ public:
 				return TabWidget;
 		}
 
-		return NULL;
+		return nullptr;
 	}
 
 	lcPartSelectionWidget* GetPartSelectionWidget() const
@@ -327,7 +327,7 @@ protected:
 				return TabWidget;
 		}
 
-		return NULL;
+		return nullptr;
 	}
 
 	bool mAddKeys;

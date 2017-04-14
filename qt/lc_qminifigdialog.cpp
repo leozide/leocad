@@ -17,7 +17,7 @@ lcQMinifigDialog::lcQMinifigDialog(QWidget *parent) :
 
 	mMinifigWidget = new MinifigWizard();
 
-	lcQGLWidget *minifigWidget = new lcQGLWidget(NULL, mMinifigWidget, false);
+	lcQGLWidget *minifigWidget = new lcQGLWidget(nullptr, mMinifigWidget, false);
 	minifigWidget->setMinimumWidth(100);
 	previewLayout->addWidget(minifigWidget);
 
@@ -173,7 +173,7 @@ QComboBox *lcQMinifigDialog::getTypeComboBox(int type)
 		return ui->llegaType;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 int lcQMinifigDialog::getTypeIndex(QObject *widget)
@@ -256,7 +256,7 @@ lcQColorPicker* lcQMinifigDialog::getColorPicker(int type)
 		return ui->llegaColor;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 int lcQMinifigDialog::getColorIndex(QObject *widget)

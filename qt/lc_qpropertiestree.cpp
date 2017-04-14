@@ -93,8 +93,8 @@ void lcQPropertiesTreeDelegate::slotEditorDestroyed(QObject *object)
 {
 	if (m_editedWidget == object)
 	{
-		m_editedWidget = NULL;
-		m_editedItem = NULL;
+		m_editedWidget = nullptr;
+		m_editedItem = nullptr;
 	}
 }
 
@@ -124,7 +124,7 @@ QWidget *lcQPropertiesTreeDelegate::createEditor(QWidget *parent, const QStyleOp
 		}
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 void lcQPropertiesTreeDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &index) const
@@ -405,7 +405,7 @@ QWidget *lcQPropertiesTree::createEditor(QWidget *parent, QTreeWidgetItem *item)
 	switch (propertyType)
 	{
 	case PropertyGroup:
-		return NULL;
+		return nullptr;
 
 	case PropertyBool:
 		{
@@ -490,7 +490,7 @@ QWidget *lcQPropertiesTree::createEditor(QWidget *parent, QTreeWidgetItem *item)
 		}
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 void lcQPropertiesTree::updateColorEditor(QPushButton *editor, int value) const
@@ -540,7 +540,7 @@ void lcQPropertiesTree::slotReturnPressed()
 
 	if (mWidgetMode == LC_PROPERTY_WIDGET_PIECE)
 	{
-		lcPiece* Piece = (mFocus && mFocus->IsPiece()) ? (lcPiece*)mFocus : NULL;
+		lcPiece* Piece = (mFocus && mFocus->IsPiece()) ? (lcPiece*)mFocus : nullptr;
 
 		if (Item == partPositionX || Item == partPositionY || Item == partPositionZ)
 		{
@@ -596,7 +596,7 @@ void lcQPropertiesTree::slotReturnPressed()
 	}
 	else if (mWidgetMode == LC_PROPERTY_WIDGET_CAMERA)
 	{
-		lcCamera* Camera = (mFocus && mFocus->IsCamera()) ? (lcCamera*)mFocus : NULL;
+		lcCamera* Camera = (mFocus && mFocus->IsCamera()) ? (lcCamera*)mFocus : nullptr;
 
 		if (Camera)
 		{
@@ -758,42 +758,42 @@ void lcQPropertiesTree::SetEmpty()
 {
 	clear();
 
-	partPosition = NULL;
-	partPositionX = NULL;
-	partPositionY = NULL;
-	partPositionZ = NULL;
-	partRotation = NULL;
-	partRotationX = NULL;
-	partRotationY = NULL;
-	partRotationZ = NULL;
-	partVisibility = NULL;
-	partShow = NULL;
-	partHide = NULL;
-	partAppearance = NULL;
-	partColor = NULL;
-	partID = NULL;
+	partPosition = nullptr;
+	partPositionX = nullptr;
+	partPositionY = nullptr;
+	partPositionZ = nullptr;
+	partRotation = nullptr;
+	partRotationX = nullptr;
+	partRotationY = nullptr;
+	partRotationZ = nullptr;
+	partVisibility = nullptr;
+	partShow = nullptr;
+	partHide = nullptr;
+	partAppearance = nullptr;
+	partColor = nullptr;
+	partID = nullptr;
 
-	cameraPosition = NULL;
-	cameraPositionX = NULL;
-	cameraPositionY = NULL;
-	cameraPositionZ = NULL;
-	cameraTarget = NULL;
-	cameraTargetX = NULL;
-	cameraTargetY = NULL;
-	cameraTargetZ = NULL;
-	cameraUp = NULL;
-	cameraUpX = NULL;
-	cameraUpY = NULL;
-	cameraUpZ = NULL;
-	cameraSettings = NULL;
-	cameraOrtho = NULL;
-	cameraFOV = NULL;
-	cameraNear = NULL;
-	cameraFar = NULL;
-	cameraName = NULL;
+	cameraPosition = nullptr;
+	cameraPositionX = nullptr;
+	cameraPositionY = nullptr;
+	cameraPositionZ = nullptr;
+	cameraTarget = nullptr;
+	cameraTargetX = nullptr;
+	cameraTargetY = nullptr;
+	cameraTargetZ = nullptr;
+	cameraUp = nullptr;
+	cameraUpX = nullptr;
+	cameraUpY = nullptr;
+	cameraUpZ = nullptr;
+	cameraSettings = nullptr;
+	cameraOrtho = nullptr;
+	cameraFOV = nullptr;
+	cameraNear = nullptr;
+	cameraFar = nullptr;
+	cameraName = nullptr;
 
 	mWidgetMode = LC_PROPERTY_WIDGET_EMPTY;
-	mFocus = NULL;
+	mFocus = nullptr;
 }
 
 void lcQPropertiesTree::SetPiece(const lcArray<lcObject*>& Selection, lcObject* Focus)
@@ -802,21 +802,21 @@ void lcQPropertiesTree::SetPiece(const lcArray<lcObject*>& Selection, lcObject* 
 	{
 		SetEmpty();
 
-		partPosition = addProperty(NULL, tr("Position"), PropertyGroup);
+		partPosition = addProperty(nullptr, tr("Position"), PropertyGroup);
 		partPositionX = addProperty(partPosition, tr("X"), PropertyFloat);
 		partPositionY = addProperty(partPosition, tr("Y"), PropertyFloat);
 		partPositionZ = addProperty(partPosition, tr("Z"), PropertyFloat);
 
-		partRotation = addProperty(NULL, tr("Rotation"), PropertyGroup);
+		partRotation = addProperty(nullptr, tr("Rotation"), PropertyGroup);
 		partRotationX = addProperty(partRotation, tr("X"), PropertyFloat);
 		partRotationY = addProperty(partRotation, tr("Y"), PropertyFloat);
 		partRotationZ = addProperty(partRotation, tr("Z"), PropertyFloat);
 
-		partVisibility = addProperty(NULL, tr("Visibility"), PropertyGroup);
+		partVisibility = addProperty(nullptr, tr("Visibility"), PropertyGroup);
 		partShow = addProperty(partVisibility, tr("Show"), PropertyInt);
 		partHide = addProperty(partVisibility, tr("Hide"), PropertyInt);
 
-		partAppearance = addProperty(NULL, tr("Appearance"), PropertyGroup);
+		partAppearance = addProperty(nullptr, tr("Appearance"), PropertyGroup);
 		partColor = addProperty(partAppearance, tr("Color"), PropertyColor);
 		partID = addProperty(partAppearance, tr("Part"), PropertyPart);
 
@@ -824,7 +824,7 @@ void lcQPropertiesTree::SetPiece(const lcArray<lcObject*>& Selection, lcObject* 
 	}
 
 	lcModel* Model = lcGetActiveModel();
-	lcPiece* Piece = (Focus && Focus->IsPiece()) ? (lcPiece*)Focus : NULL;
+	lcPiece* Piece = (Focus && Focus->IsPiece()) ? (lcPiece*)Focus : nullptr;
 	mFocus = Piece;
 
 	lcVector3 Position;
@@ -852,7 +852,7 @@ void lcQPropertiesTree::SetPiece(const lcArray<lcObject*>& Selection, lcObject* 
 	lcStep Show = 0;
 	lcStep Hide = 0;
 	int ColorIndex = gDefaultColor;
-	PieceInfo* Info = NULL;
+	PieceInfo* Info = nullptr;
 
 	if (Piece)
 	{
@@ -895,7 +895,7 @@ void lcQPropertiesTree::SetPiece(const lcArray<lcObject*>& Selection, lcObject* 
 					ColorIndex = gDefaultColor;
 
 				if (SelectedPiece->mPieceInfo != Info)
-					Info = NULL;
+					Info = nullptr;
 			}
 		}
 	}
@@ -932,22 +932,22 @@ void lcQPropertiesTree::SetCamera(lcObject* Focus)
 	{
 		SetEmpty();
 
-		cameraPosition = addProperty(NULL, tr("Position"), PropertyGroup);
+		cameraPosition = addProperty(nullptr, tr("Position"), PropertyGroup);
 		cameraPositionX = addProperty(cameraPosition, tr("X"), PropertyFloat);
 		cameraPositionY = addProperty(cameraPosition, tr("Y"), PropertyFloat);
 		cameraPositionZ = addProperty(cameraPosition, tr("Z"), PropertyFloat);
 
-		cameraTarget = addProperty(NULL, tr("Target"), PropertyGroup);
+		cameraTarget = addProperty(nullptr, tr("Target"), PropertyGroup);
 		cameraTargetX = addProperty(cameraTarget, tr("X"), PropertyFloat);
 		cameraTargetY = addProperty(cameraTarget, tr("Y"), PropertyFloat);
 		cameraTargetZ = addProperty(cameraTarget, tr("Z"), PropertyFloat);
 
-		cameraUp = addProperty(NULL, tr("Up"), PropertyGroup);
+		cameraUp = addProperty(nullptr, tr("Up"), PropertyGroup);
 		cameraUpX = addProperty(cameraUp, tr("X"), PropertyFloat);
 		cameraUpY = addProperty(cameraUp, tr("Y"), PropertyFloat);
 		cameraUpZ = addProperty(cameraUp, tr("Z"), PropertyFloat);
 
-		cameraSettings = addProperty(NULL, tr("Up"), PropertyGroup);
+		cameraSettings = addProperty(nullptr, tr("Up"), PropertyGroup);
 		cameraOrtho = addProperty(cameraSettings, tr("Orthographic"), PropertyBool);
 		cameraFOV = addProperty(cameraSettings, tr("FOV"), PropertyFloat);
 		cameraNear = addProperty(cameraSettings, tr("Near"), PropertyFloat);
@@ -957,7 +957,7 @@ void lcQPropertiesTree::SetCamera(lcObject* Focus)
 		mWidgetMode = LC_PROPERTY_WIDGET_CAMERA;
 	}
 
-	lcCamera* Camera = (Focus && Focus->IsCamera()) ? (lcCamera*)Focus : NULL;
+	lcCamera* Camera = (Focus && Focus->IsCamera()) ? (lcCamera*)Focus : nullptr;
 	mFocus = Camera;
 
 	lcVector3 Position(0.0f, 0.0f, 0.0f);
@@ -1021,7 +1021,7 @@ void lcQPropertiesTree::SetLight(lcObject* Focus)
 	Q_UNUSED(Focus);
 
 	SetEmpty();
-	mFocus = NULL;
+	mFocus = nullptr;
 
 	// todo: light properties
 }
@@ -1032,12 +1032,12 @@ void lcQPropertiesTree::SetMultiple()
 	{
 		SetEmpty();
 
-		addProperty(NULL, tr("Multiple Objects Selected"), PropertyGroup);
+		addProperty(nullptr, tr("Multiple Objects Selected"), PropertyGroup);
 
 		mWidgetMode = LC_PROPERTY_WIDGET_MULTIPLE;
 	}
 
-	mFocus = NULL;
+	mFocus = nullptr;
 }
 
 bool lcQPropertiesTree::lastColumn(int column) const

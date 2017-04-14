@@ -17,7 +17,7 @@ lcIndexBuffer View::mRotateMoveIndexBuffer;
 View::View(lcModel* Model)
 {
 	mModel = Model;
-	mCamera = NULL;
+	mCamera = nullptr;
 	memset(mGridSettings, 0, sizeof(mGridSettings));
 
 	mDragState = LC_DRAGSTATE_NONE;
@@ -199,7 +199,7 @@ void View::CreateSelectMoveOverlayMesh(lcContext* Context)
 void View::DestroyResources(lcContext* Context)
 {
 	delete gGridTexture;
-	gGridTexture = NULL;
+	gGridTexture = nullptr;
 
 	Context->DestroyVertexBuffer(mRotateMoveVertexBuffer);
 	Context->DestroyIndexBuffer(mRotateMoveIndexBuffer);
@@ -478,7 +478,7 @@ lcObjectSection View::FindObjectUnderPointer(bool PiecesOnly) const
 	ObjectRayTest.Start = StartEnd[0];
 	ObjectRayTest.End = StartEnd[1];
 	ObjectRayTest.Distance = FLT_MAX;
-	ObjectRayTest.ObjectSection.Object = NULL;
+	ObjectRayTest.ObjectSection.Object = nullptr;
 	ObjectRayTest.ObjectSection.Section = 0;;
 
 	mModel->RayTest(ObjectRayTest);
@@ -548,7 +548,7 @@ lcArray<lcObject*> View::FindObjectsInBox(float x1, float y1, float x2, float y2
 
 void View::OnDraw()
 {
-	bool DrawInterface = mWidget != NULL;
+	bool DrawInterface = mWidget != nullptr;
 
 	mModel->GetScene(mScene, mCamera, DrawInterface);
 
@@ -2241,7 +2241,7 @@ void View::StopTracking(bool Accept)
 			if (mInputState.Modifiers & Qt::ControlModifier)
 				mModel->AddToSelection(Objects);
 			else
-				mModel->SetSelectionAndFocus(Objects, NULL, 0);
+				mModel->SetSelectionAndFocus(Objects, nullptr, 0);
 		}
 		break;
 
@@ -2589,10 +2589,10 @@ void View::OnMouseMove()
 				Direction = lcMul(Direction, RelativeRotation);
 
 				lcVector3 Intersection;
-				lcClosestPointsBetweenLines(Center, Center + Direction, CurrentStart, CurrentEnd, &Intersection, NULL);
+				lcClosestPointsBetweenLines(Center, Center + Direction, CurrentStart, CurrentEnd, &Intersection, nullptr);
 
 				lcVector3 MoveStart;
-				lcClosestPointsBetweenLines(Center, Center + Direction, MouseDownStart, MouseDownEnd, &MoveStart, NULL);
+				lcClosestPointsBetweenLines(Center, Center + Direction, MouseDownStart, MouseDownEnd, &MoveStart, nullptr);
 
 				lcVector3 Distance = Intersection - MoveStart;
 				Distance = lcMul(Distance, lcMatrix33AffineInverse(RelativeRotation));
@@ -2636,7 +2636,7 @@ void View::OnMouseMove()
 				Direction = lcMul(Direction, RelativeRotation);
 
 				lcVector3 Intersection;
-				lcClosestPointsBetweenLines(Center, Center + Direction, CurrentStart, CurrentEnd, &Intersection, NULL);
+				lcClosestPointsBetweenLines(Center, Center + Direction, CurrentStart, CurrentEnd, &Intersection, nullptr);
 
 				lcObject* Focus = mModel->GetFocusObject();
 				if (Focus && Focus->IsPiece())

@@ -64,14 +64,14 @@ public:
 		return (mState & LC_PIECE_SELECTION_MASK) != 0;
 	}
 
-	virtual bool IsSelected(lcuint32 Section) const
+	virtual bool IsSelected(lcuint32 Section) const override
 	{
 		Q_UNUSED(Section);
 
 		return (mState & LC_PIECE_SELECTION_MASK) != 0;
 	}
 
-	virtual void SetSelected(bool Selected)
+	virtual void SetSelected(bool Selected) override
 	{
 		if (Selected)
 			mState |= LC_PIECE_SELECTION_MASK;
@@ -79,7 +79,7 @@ public:
 			mState &= ~(LC_PIECE_SELECTION_MASK | LC_PIECE_FOCUS_MASK);
 	}
 
-	virtual void SetSelected(lcuint32 Section, bool Selected)
+	virtual void SetSelected(lcuint32 Section, bool Selected) override
 	{
 		switch (Section)
 		{
@@ -148,12 +148,12 @@ public:
 		}
 	}
 
-	virtual bool IsFocused() const
+	virtual bool IsFocused() const override
 	{
 		return (mState & LC_PIECE_FOCUS_MASK) != 0;
 	}
 
-	virtual bool IsFocused(lcuint32 Section) const
+	virtual bool IsFocused(lcuint32 Section) const override
 	{
 		switch (Section)
 		{
@@ -188,7 +188,7 @@ public:
 		return false;
 	}
 
-	virtual void SetFocused(lcuint32 Section, bool Focused)
+	virtual void SetFocused(lcuint32 Section, bool Focused) override
 	{
 		switch (Section)
 		{
@@ -257,7 +257,7 @@ public:
 		}
 	}
 
-	virtual lcuint32 GetFocusSection() const
+	virtual lcuint32 GetFocusSection() const override
 	{
 		if (mState & LC_PIECE_POSITION_FOCUSED)
 			return LC_PIECE_SECTION_POSITION;
@@ -289,9 +289,9 @@ public:
 		return LC_PIECE_SECTION_INVALID;
 	}
 
-	virtual lcuint32 GetAllowedTransforms() const;
+	virtual lcuint32 GetAllowedTransforms() const override;
 
-	virtual lcVector3 GetSectionPosition(lcuint32 Section) const
+	virtual lcVector3 GetSectionPosition(lcuint32 Section) const override
 	{
 		switch (Section)
 		{
@@ -342,9 +342,9 @@ public:
 		return mFileLine;
 	}
 
-	virtual void RayTest(lcObjectRayTest& ObjectRayTest) const;
-	virtual void BoxTest(lcObjectBoxTest& ObjectBoxTest) const;
-	virtual void DrawInterface(lcContext* Context) const;
+	virtual void RayTest(lcObjectRayTest& ObjectRayTest) const override;
+	virtual void BoxTest(lcObjectBoxTest& ObjectBoxTest) const override;
+	virtual void DrawInterface(lcContext* Context) const override;
 
 	void AddRenderMeshes(lcScene& Scene, bool DrawInterface) const;
 	void SubModelAddRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, int DefaultColorIndex, bool Focused, bool Selected) const;

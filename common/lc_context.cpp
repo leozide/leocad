@@ -24,8 +24,8 @@ lcContext::lcContext()
 {
 	mVertexBufferObject = 0;
 	mIndexBufferObject = 0;
-	mVertexBufferPointer = NULL;
-	mIndexBufferPointer = NULL;
+	mVertexBufferPointer = nullptr;
+	mIndexBufferPointer = nullptr;
 	mVertexBufferOffset = (char*)~0;
 
 	mNormalEnabled = false;
@@ -238,7 +238,7 @@ void lcContext::CreateShaderPrograms()
 	for (int MaterialType = 0; MaterialType < LC_NUM_MATERIALS; MaterialType++)
 	{
 		GLuint VertexShader = glCreateShader(GL_VERTEX_SHADER);
-		glShaderSource(VertexShader, 1, &VertexShaders[MaterialType], NULL);
+		glShaderSource(VertexShader, 1, &VertexShaders[MaterialType], nullptr);
 		glCompileShader(VertexShader);
 
 #ifndef QT_NO_DEBUG
@@ -259,7 +259,7 @@ void lcContext::CreateShaderPrograms()
 #endif
 
 		GLuint FragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-		glShaderSource(FragmentShader, 1, &FragmentShaders[MaterialType], NULL);
+		glShaderSource(FragmentShader, 1, &FragmentShaders[MaterialType], nullptr);
 		glCompileShader(FragmentShader);
 
 #ifndef QT_NO_DEBUG
@@ -370,10 +370,10 @@ void lcContext::SetDefaultState()
 		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 		glDisableClientState(GL_COLOR_ARRAY);
 
-		glVertexPointer(3, GL_FLOAT, 0, NULL);
-		glNormalPointer(GL_BYTE, 0, NULL);
-		glTexCoordPointer(2, GL_FLOAT, 0, NULL);
-		glColorPointer(4, GL_FLOAT, 0, NULL);
+		glVertexPointer(3, GL_FLOAT, 0, nullptr);
+		glNormalPointer(GL_BYTE, 0, nullptr);
+		glTexCoordPointer(2, GL_FLOAT, 0, nullptr);
+		glColorPointer(4, GL_FLOAT, 0, nullptr);
 	}
 
 	mNormalEnabled = false;
@@ -382,8 +382,8 @@ void lcContext::SetDefaultState()
 
 	mVertexBufferObject = 0;
 	mIndexBufferObject = 0;
-	mVertexBufferPointer = NULL;
-	mIndexBufferPointer = NULL;
+	mVertexBufferPointer = nullptr;
+	mIndexBufferPointer = nullptr;
 	mVertexBufferOffset = (char*)~0;
 
 	glBindTexture(GL_TEXTURE_2D, 0);
@@ -534,7 +534,7 @@ bool lcContext::BeginRenderToTexture(int Width, int Height)
 
 		BindTexture(mFramebufferTexture);
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Width, Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Width, Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mFramebufferTexture, 0);
 
 		glBindRenderbuffer(GL_RENDERBUFFER, mDepthRenderbufferObject);
@@ -561,7 +561,7 @@ bool lcContext::BeginRenderToTexture(int Width, int Height)
 
 		BindTexture(mFramebufferTexture); 
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, Width, Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL); 
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, Width, Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, mFramebufferObject); 
 		glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, mFramebufferTexture, 0); 
@@ -711,7 +711,7 @@ void lcContext::DestroyVertexBuffer(lcVertexBuffer& VertexBuffer)
 		free(VertexBuffer.Pointer);
 	}
 
-	VertexBuffer.Pointer = NULL;
+	VertexBuffer.Pointer = nullptr;
 }
 
 lcIndexBuffer lcContext::CreateIndexBuffer(int Size, const void* Data)
@@ -757,12 +757,12 @@ void lcContext::DestroyIndexBuffer(lcIndexBuffer& IndexBuffer)
 		free(IndexBuffer.Pointer);
 	}
 
-	IndexBuffer.Pointer = NULL;
+	IndexBuffer.Pointer = nullptr;
 }
 
 void lcContext::ClearVertexBuffer()
 {
-	mVertexBufferPointer = NULL;
+	mVertexBufferPointer = nullptr;
 	mVertexBufferOffset = (char*)~0;
 
 	if (mVertexBufferObject)
@@ -782,10 +782,10 @@ void lcContext::ClearVertexBuffer()
 		if (mColorEnabled)
 			glDisableVertexAttribArray(LC_ATTRIB_COLOR);
 
-		glVertexAttribPointer(LC_ATTRIB_POSITION, 3, GL_FLOAT, false, 0, NULL);
-		glVertexAttribPointer(LC_ATTRIB_NORMAL, 4, GL_FLOAT, false, 0, NULL);
-		glVertexAttribPointer(LC_ATTRIB_TEXCOORD, 2, GL_FLOAT, false, 0, NULL);
-		glVertexAttribPointer(LC_ATTRIB_COLOR, 4, GL_FLOAT, false, 0, NULL);
+		glVertexAttribPointer(LC_ATTRIB_POSITION, 3, GL_FLOAT, false, 0, nullptr);
+		glVertexAttribPointer(LC_ATTRIB_NORMAL, 4, GL_FLOAT, false, 0, nullptr);
+		glVertexAttribPointer(LC_ATTRIB_TEXCOORD, 2, GL_FLOAT, false, 0, nullptr);
+		glVertexAttribPointer(LC_ATTRIB_COLOR, 4, GL_FLOAT, false, 0, nullptr);
 	}
 	else
 	{
@@ -798,10 +798,10 @@ void lcContext::ClearVertexBuffer()
 		if (mColorEnabled)
 			glDisableClientState(GL_COLOR_ARRAY);
 
-		glVertexPointer(3, GL_FLOAT, 0, NULL);
-		glNormalPointer(GL_BYTE, 0, NULL);
-		glTexCoordPointer(2, GL_FLOAT, 0, NULL);
-		glColorPointer(4, GL_FLOAT, 0, NULL);
+		glVertexPointer(3, GL_FLOAT, 0, nullptr);
+		glNormalPointer(GL_BYTE, 0, nullptr);
+		glTexCoordPointer(2, GL_FLOAT, 0, nullptr);
+		glColorPointer(4, GL_FLOAT, 0, nullptr);
 	}
 }
 
@@ -810,7 +810,7 @@ void lcContext::SetVertexBuffer(lcVertexBuffer VertexBuffer)
 	if (gSupportsVertexBufferObject)
 	{
 		GLuint VertexBufferObject = VertexBuffer.Object;
-		mVertexBufferPointer = NULL;
+		mVertexBufferPointer = nullptr;
 
 		if (VertexBufferObject != mVertexBufferObject)
 		{
@@ -1042,7 +1042,7 @@ void lcContext::SetIndexBuffer(lcIndexBuffer IndexBuffer)
 	if (gSupportsVertexBufferObject)
 	{
 		GLuint IndexBufferObject = IndexBuffer.Object;
-		mIndexBufferPointer = NULL;
+		mIndexBufferPointer = nullptr;
 
 		if (IndexBufferObject != mIndexBufferObject)
 		{
@@ -1080,7 +1080,7 @@ void lcContext::BindMesh(const lcMesh* Mesh)
 		{
 			glBindBuffer(GL_ARRAY_BUFFER_ARB, VertexBufferObject);
 			mVertexBufferObject = VertexBufferObject;
-			mVertexBufferPointer = NULL;
+			mVertexBufferPointer = nullptr;
 			mVertexBufferOffset = (char*)~0;
 		}
 
@@ -1088,7 +1088,7 @@ void lcContext::BindMesh(const lcMesh* Mesh)
 		{
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER_ARB, IndexBufferObject);
 			mIndexBufferObject = IndexBufferObject;
-			mIndexBufferPointer = NULL;
+			mIndexBufferPointer = nullptr;
 		}
 	}
 	else

@@ -182,7 +182,7 @@ void lcInitializeGLExtensions(const QGLContext* Context)
 
         if (DebugMessageCallback)
 		{
-			DebugMessageCallback((GLDEBUGPROCARB)&lcGLDebugCallback, NULL);
+			DebugMessageCallback((GLDEBUGPROCARB)&lcGLDebugCallback, nullptr);
 			glEnable(GL_DEBUG_OUTPUT);
 			glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
 		}

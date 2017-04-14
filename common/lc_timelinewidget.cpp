@@ -108,7 +108,7 @@ void lcTimelineWidget::Update(bool Clear, bool UpdateItems)
 	}
 
 	const lcArray<lcPiece*>& Pieces = Model->GetPieces();
-	QTreeWidgetItem* StepItem = NULL;
+	QTreeWidgetItem* StepItem = nullptr;
 	int PieceItemIndex = 0;
 	lcStep Step = 0;
 
@@ -357,7 +357,7 @@ void lcTimelineWidget::ItemSelectionChanged()
 		Selection.Add(Piece);
 	}
 
-	lcPiece* CurrentPiece = NULL;
+	lcPiece* CurrentPiece = nullptr;
 	QTreeWidgetItem* CurrentItem = currentItem();
 	if (CurrentItem && CurrentItem->isSelected())
 		CurrentPiece = (lcPiece*)CurrentItem->data(0, Qt::UserRole).value<uintptr_t>();

@@ -45,8 +45,8 @@ lcPiecesLibrary::lcPiecesLibrary()
 	mLibraryPath[0] = 0;
 	mLibraryFileName[0] = 0;
 	mUnofficialFileName[0] = 0;
-	mZipFiles[LC_ZIPFILE_OFFICIAL] = NULL;
-	mZipFiles[LC_ZIPFILE_UNOFFICIAL] = NULL;
+	mZipFiles[LC_ZIPFILE_OFFICIAL] = nullptr;
+	mZipFiles[LC_ZIPFILE_UNOFFICIAL] = nullptr;
 	mBuffersDirty = false;
 	mHasUnofficial = false;
 }
@@ -76,9 +76,9 @@ void lcPiecesLibrary::Unload()
 
 	mNumOfficialPieces = 0;
 	delete mZipFiles[LC_ZIPFILE_OFFICIAL];
-	mZipFiles[LC_ZIPFILE_OFFICIAL] = NULL;
+	mZipFiles[LC_ZIPFILE_OFFICIAL] = nullptr;
 	delete mZipFiles[LC_ZIPFILE_UNOFFICIAL];
-	mZipFiles[LC_ZIPFILE_UNOFFICIAL] = NULL;
+	mZipFiles[LC_ZIPFILE_UNOFFICIAL] = nullptr;
 }
 
 void lcPiecesLibrary::RemoveTemporaryPieces()
@@ -165,7 +165,7 @@ PieceInfo* lcPiecesLibrary::FindPiece(const char* PieceName, Project* CurrentPro
 		return Info;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 lcTexture* lcPiecesLibrary::FindTexture(const char* TextureName)
@@ -174,7 +174,7 @@ lcTexture* lcPiecesLibrary::FindTexture(const char* TextureName)
 		if (!strcmp(TextureName, mTextures[TextureIdx]->mName))
 			return mTextures[TextureIdx];
 
-	return NULL;
+	return nullptr;
 }
 
 bool lcPiecesLibrary::Load(const char* LibraryPath)
@@ -321,7 +321,7 @@ bool lcPiecesLibrary::OpenArchive(lcFile* File, const char* FileName, lcZipFileT
 
 			if (memcmp(Name, "S/", 2))
 			{
-				PieceInfo* Info = FindPiece(Name, NULL, false, false);
+				PieceInfo* Info = FindPiece(Name, nullptr, false, false);
 
 				if (!Info)
 				{
@@ -436,7 +436,7 @@ bool lcPiecesLibrary::OpenDirectory(const char* Path)
 		while (PartsList.ReadLine(Line, sizeof(Line)))
 		{
 			char* Chr = Line;
-			char* Ext = NULL;
+			char* Ext = nullptr;
 
 			while (*Chr)
 			{
@@ -1000,7 +1000,7 @@ void lcPiecesLibrary::LoadQueuedPiece()
 {
 	mLoadMutex.lock();
 
-	PieceInfo* Info = NULL;
+	PieceInfo* Info = nullptr;
 
 	while (!mLoadQueue.isEmpty())
 	{
@@ -1012,7 +1012,7 @@ void lcPiecesLibrary::LoadQueuedPiece()
 			break;
 		}
 
-		Info = NULL;
+		Info = nullptr;
 	}
 
 	mLoadMutex.unlock();
@@ -1172,7 +1172,7 @@ lcMesh* lcPiecesLibrary::CreateMesh(PieceInfo* Info, lcLibraryMeshData& MeshData
 
 			lcMergeSection& MergeSection = MergeSections[LodIdx].Add();
 			MergeSection.Shared = SharedSection;
-			MergeSection.Lod = NULL;
+			MergeSection.Lod = nullptr;
 		}
 
 		for (int SectionIdx = 0; SectionIdx < Sections.GetSize(); SectionIdx++)
@@ -1198,7 +1198,7 @@ lcMesh* lcPiecesLibrary::CreateMesh(PieceInfo* Info, lcLibraryMeshData& MeshData
 			if (!Found)
 			{
 				lcMergeSection& MergeSection = MergeSections[LodIdx].Add();
-				MergeSection.Shared = NULL;
+				MergeSection.Shared = nullptr;
 				MergeSection.Lod = Section;
 			}
 		}
@@ -1824,7 +1824,7 @@ bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransf
 		if (ColorCode == 16)
 			ColorCode = CurrentColorCode;
 
-		lcLibraryTextureMap* TextureMap = NULL;
+		lcLibraryTextureMap* TextureMap = nullptr;
 
 		if (TextureStack.GetSize())
 		{
@@ -2244,7 +2244,7 @@ lcuint32 lcLibraryMeshData::AddTexturedVertex(lcMeshDataType MeshDataType, const
 
 void lcLibraryMeshData::AddIndices(lcMeshDataType MeshDataType, lcMeshPrimitiveType PrimitiveType, lcuint32 ColorCode, int IndexCount, lcuint32** IndexBuffer)
 {
-	lcLibraryMeshSection* Section = AddSection(MeshDataType, PrimitiveType, ColorCode, NULL);
+	lcLibraryMeshSection* Section = AddSection(MeshDataType, PrimitiveType, ColorCode, nullptr);
 	lcArray<lcuint32>& Indices = Section->mIndices;
 	int CurrentSize = Indices.GetSize();
 
@@ -2257,7 +2257,7 @@ void lcLibraryMeshData::AddLine(lcMeshDataType MeshDataType, int LineType, lcuin
 {
 	lcMeshPrimitiveType PrimitiveTypes[4] = { LC_MESH_LINES, LC_MESH_TRIANGLES, LC_MESH_TRIANGLES, LC_MESH_CONDITIONAL_LINES };
 	lcMeshPrimitiveType PrimitiveType = PrimitiveTypes[LineType - 2];
-	lcLibraryMeshSection* Section = AddSection(MeshDataType, PrimitiveType, ColorCode, NULL);
+	lcLibraryMeshSection* Section = AddSection(MeshDataType, PrimitiveType, ColorCode, nullptr);
 
 	int QuadIndices[4] = { 0, 1, 2, 3 };
 	int Indices[4] = { -1, -1, -1, -1 };
@@ -2520,7 +2520,7 @@ void lcLibraryMeshData::AddMeshData(const lcLibraryMeshData& Data, const lcMatri
 		for (int SrcSectionIdx = 0; SrcSectionIdx < DataSections.GetSize(); SrcSectionIdx++)
 		{
 			lcLibraryMeshSection* SrcSection = DataSections[SrcSectionIdx];
-			lcLibraryMeshSection* DstSection = NULL;
+			lcLibraryMeshSection* DstSection = nullptr;
 			lcuint32 ColorCode = SrcSection->mColor == 16 ? CurrentColorCode : SrcSection->mColor;
 			lcTexture* Texture;
 
@@ -2529,7 +2529,7 @@ void lcLibraryMeshData::AddMeshData(const lcLibraryMeshData& Data, const lcMatri
 			else if (TextureMap)
 				Texture = TextureMap->Texture;
 			else
-				Texture = NULL;
+				Texture = nullptr;
 
 			for (int DstSectionIdx = 0; DstSectionIdx < Sections.GetSize(); DstSectionIdx++)
 			{
@@ -2669,7 +2669,7 @@ void lcLibraryMeshData::AddMeshDataNoDuplicateCheck(const lcLibraryMeshData& Dat
 		for (int SrcSectionIdx = 0; SrcSectionIdx < DataSections.GetSize(); SrcSectionIdx++)
 		{
 			lcLibraryMeshSection* SrcSection = DataSections[SrcSectionIdx];
-			lcLibraryMeshSection* DstSection = NULL;
+			lcLibraryMeshSection* DstSection = nullptr;
 			lcuint32 ColorCode = SrcSection->mColor == 16 ? CurrentColorCode : SrcSection->mColor;
 			lcTexture* Texture;
 
@@ -2678,7 +2678,7 @@ void lcLibraryMeshData::AddMeshDataNoDuplicateCheck(const lcLibraryMeshData& Dat
 			else if (TextureMap)
 				Texture = TextureMap->Texture;
 			else
-				Texture = NULL;
+				Texture = nullptr;
 
 			for (int DstSectionIdx = 0; DstSectionIdx < Sections.GetSize(); DstSectionIdx++)
 			{
@@ -2787,7 +2787,7 @@ void lcPiecesLibrary::GetCategoryEntries(const char* CategoryKeywords, bool Grou
 			strcpy(ParentName, Info->m_strName);
 			*strchr(ParentName, 'P') = '\0';
 
-			Parent = FindPiece(ParentName, NULL, false, false);
+			Parent = FindPiece(ParentName, nullptr, false, false);
 
 			if (Parent)
 			{

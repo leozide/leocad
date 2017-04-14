@@ -25,7 +25,7 @@ lcQColorPickerPopup::lcQColorPickerPopup(QWidget *parent, int colorIndex)
 	colorList->setCurrentColor(colorIndex);
 	colorList->blockSignals(false);
 
-	eventLoop = NULL;
+	eventLoop = nullptr;
 }
 
 lcQColorPickerPopup::~lcQColorPickerPopup()
@@ -41,7 +41,7 @@ void lcQColorPickerPopup::exec()
 	QEventLoop e;
 	eventLoop = &e;
 	(void) e.exec();
-	eventLoop = NULL;
+	eventLoop = nullptr;
 }
 
 void lcQColorPickerPopup::mouseReleaseEvent(QMouseEvent *e)

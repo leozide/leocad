@@ -27,7 +27,7 @@ static void CopyFromQImage(const QImage& Src, Image& Dest)
 
 Image::Image()
 {
-	mData = NULL;
+	mData = nullptr;
 	mWidth = 0;
 	mHeight = 0;
 	mFormat = LC_PIXEL_FORMAT_INVALID;
@@ -79,7 +79,7 @@ bool Image::HasAlpha() const
 void Image::FreeData()
 {
 	free(mData);
-	mData = NULL;
+	mData = nullptr;
 	mWidth = 0;
 	mHeight = 0;
 	mFormat = LC_PIXEL_FORMAT_INVALID;
@@ -117,7 +117,7 @@ void Image::Resize(int width, int height)
 {
 	int i, j, k, components, stx, sty;
 	float accumx, accumy;
-	unsigned char* bits = NULL;
+	unsigned char* bits = nullptr;
 
 	components = GetBPP();
 	int BufferSize = width * height * components;

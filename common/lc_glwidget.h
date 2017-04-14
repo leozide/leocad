@@ -39,7 +39,7 @@ public:
 	lcGLWidget()
 	{
 		mCursorType = LC_CURSOR_DEFAULT;
-		mWidget = NULL;
+		mWidget = nullptr;
 		mInputState.x = 0;
 		mInputState.y = 0;
 		mInputState.Modifiers = Qt::NoModifier;

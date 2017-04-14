@@ -44,7 +44,7 @@ public:
 
 	lcModel* GetMainModel() const
 	{
-		return !mModels.IsEmpty() ? mModels[0] : NULL;
+		return !mModels.IsEmpty() ? mModels[0] : nullptr;
 	}
 
 	bool IsModified() const;
@@ -93,7 +93,7 @@ protected:
 inline lcModel* lcGetActiveModel()
 {
 	Project* Project = lcGetActiveProject();
-	return Project ? Project->GetActiveModel() : NULL;
+	return Project ? Project->GetActiveModel() : nullptr;
 }
 
 #endif // _PROJECT_H_

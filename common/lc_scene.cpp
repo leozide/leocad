@@ -79,7 +79,7 @@ void lcScene::DrawRenderMeshes(lcContext* Context, int PrimitiveTypes, bool Enab
 		{
 			lcMeshSection* Section = &Mesh->mLods[LodIndex].Sections[SectionIdx];
 
-			if ((Section->PrimitiveType & PrimitiveTypes) == 0 || (Section->Texture != NULL) != DrawTextured)
+			if ((Section->PrimitiveType & PrimitiveTypes) == 0 || (Section->Texture != nullptr) != DrawTextured)
 				continue;
 
 			int ColorIndex = Section->ColorIndex;

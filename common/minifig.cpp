@@ -65,7 +65,7 @@ void MinifigWizard::OnInitialUpdate()
 	{
 		mMinifig.Colors[i] = lcGetColorIndex(ColorCodes[i]);
 
-		PieceInfo* Info = Library->FindPiece(Pieces[i], NULL, false, false);
+		PieceInfo* Info = Library->FindPiece(Pieces[i], nullptr, false, false);
 		if (Info)
 		{
 			mMinifig.Parts[i] = Info;
@@ -138,7 +138,7 @@ void MinifigWizard::ParseSettings(lcFile& Settings)
 			strncpy(MinifigInfo.Description, "None", sizeof(MinifigInfo.Description));
 			MinifigInfo.Description[sizeof(MinifigInfo.Description)-1] = 0;
 			MinifigInfo.Offset = lcMatrix44Identity();
-			MinifigInfo.Info = NULL;
+			MinifigInfo.Info = nullptr;
 
 			InfoArray.Add(MinifigInfo);
 			continue;
@@ -172,13 +172,13 @@ void MinifigWizard::ParseSettings(lcFile& Settings)
 
 			strupr(NameStart);
 			char* Ext = strrchr(NameStart, '.');
-			if (Ext != NULL)
+			if (Ext != nullptr)
 			{
 				if (!strcmp(Ext, ".DAT"))
 					*Ext = 0;
 			}
 
-			PieceInfo* Info = lcGetPiecesLibrary()->FindPiece(NameStart, NULL, false, false);
+			PieceInfo* Info = lcGetPiecesLibrary()->FindPiece(NameStart, nullptr, false, false);
 			if (!Info && *NameStart)
 				continue;
 

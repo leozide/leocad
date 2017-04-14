@@ -13,16 +13,16 @@ lcMesh::lcMesh()
 {
 	for (int LodIdx = 0; LodIdx < LC_NUM_MESH_LODS; LodIdx++)
 	{
-		mLods[LodIdx].Sections = NULL;
+		mLods[LodIdx].Sections = nullptr;
 		mLods[LodIdx].NumSections = 0;
 	}
 
 	mNumVertices = 0;
 	mNumTexturedVertices = 0;
 	mIndexType = 0;
-	mVertexData = NULL;
+	mVertexData = nullptr;
 	mVertexDataSize = 0;
-	mIndexData = NULL;
+	mIndexData = nullptr;
 	mIndexDataSize = 0;
 	mVertexCacheOffset = -1;
 	mIndexCacheOffset = -1;
@@ -137,7 +137,7 @@ void lcMesh::CreateBox()
 	Section->IndexOffset = 0;
 	Section->NumIndices = 36;
 	Section->PrimitiveType = LC_MESH_TRIANGLES;
-	Section->Texture = NULL;
+	Section->Texture = nullptr;
 
 	*Indices++ = 0; *Indices++ = 1; *Indices++ = 2;
 	*Indices++ = 0; *Indices++ = 2; *Indices++ = 3;
@@ -163,7 +163,7 @@ void lcMesh::CreateBox()
 	Section->IndexOffset = 36 * 2;
 	Section->NumIndices = 24;
 	Section->PrimitiveType = LC_MESH_LINES;
-	Section->Texture = NULL;
+	Section->Texture = nullptr;
 
 	*Indices++ = 0; *Indices++ = 1; *Indices++ = 1; *Indices++ = 2;
 	*Indices++ = 2; *Indices++ = 3; *Indices++ = 3; *Indices++ = 0;
@@ -179,7 +179,7 @@ template<typename IndexType>
 bool lcMesh::MinIntersectDist(const lcVector3& Start, const lcVector3& End, float& MinDistance)
 {
 	float Distance;
-	if (!lcBoundingBoxRayIntersectDistance(mBoundingBox.Min, mBoundingBox.Max, Start, End, &Distance, NULL) || (Distance >= MinDistance))
+	if (!lcBoundingBoxRayIntersectDistance(mBoundingBox.Min, mBoundingBox.Max, Start, End, &Distance, nullptr) || (Distance >= MinDistance))
 		return false;
 
 	lcVertex* Verts = (lcVertex*)mVertexData;
@@ -392,7 +392,7 @@ bool lcMesh::FileLoad(lcMemFile& File)
 				Section.Texture = lcGetPiecesLibrary()->FindTexture(FileName);
 			}
 			else
-				Section.Texture = NULL;
+				Section.Texture = nullptr;
 		}
 	}
 

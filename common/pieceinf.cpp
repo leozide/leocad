@@ -20,10 +20,10 @@ PieceInfo::PieceInfo()
 	mFlags = 0;
 	mState = LC_PIECEINFO_UNLOADED;
 	mRefCount = 0;
-	mMesh = NULL;
-	mModel = NULL;
-	mProject = NULL;
-	mSynthInfo = NULL;
+	mMesh = nullptr;
+	mModel = nullptr;
+	mProject = nullptr;
+	mSynthInfo = nullptr;
 }
 
 PieceInfo::~PieceInfo()
@@ -54,11 +54,11 @@ void PieceInfo::SetPlaceholder()
 	mBoundingBox.Max = lcVector3(10.0f, 10.0f, 4.0f);
 
 	mFlags = LC_PIECE_PLACEHOLDER | LC_PIECE_HAS_DEFAULT | LC_PIECE_HAS_LINES;
-	mModel = NULL;
-	mProject = NULL;
+	mModel = nullptr;
+	mProject = nullptr;
 
 	delete mMesh;
-	mMesh = NULL;
+	mMesh = nullptr;
 }
 
 void PieceInfo::SetModel(lcModel* Model, bool UpdateMesh)
@@ -175,18 +175,18 @@ void PieceInfo::Unload()
 		}
 
 		delete mMesh;
-		mMesh = NULL;
+		mMesh = nullptr;
 	}
 
 	mState = LC_PIECEINFO_UNLOADED;
-	mModel = NULL;
+	mModel = nullptr;
 
 	if (IsModel())
 		lcGetPiecesLibrary()->RemovePiece(this);
 	else if (IsProject())
 	{
 		delete mProject;
-		mProject = NULL;
+		mProject = nullptr;
 		lcGetPiecesLibrary()->RemovePiece(this);
 	}
 }
@@ -198,7 +198,7 @@ bool PieceInfo::MinIntersectDist(const lcVector3& Start, const lcVector3& End, f
 	if (mFlags & (LC_PIECE_PLACEHOLDER | LC_PIECE_MODEL | LC_PIECE_PROJECT))
 	{
 		float Distance;
-		if (!lcBoundingBoxRayIntersectDistance(mBoundingBox.Min, mBoundingBox.Max, Start, End, &Distance, NULL) || (Distance >= MinDistance))
+		if (!lcBoundingBoxRayIntersectDistance(mBoundingBox.Min, mBoundingBox.Max, Start, End, &Distance, nullptr) || (Distance >= MinDistance))
 			return false;
 
 		if (mFlags & LC_PIECE_PLACEHOLDER)

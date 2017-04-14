@@ -159,8 +159,8 @@ lcModel::lcModel(const QString& Name)
 
 	mActive = false;
 	mCurrentStep = 1;
-	mBackgroundTexture = NULL;
-	mPieceInfo = NULL;
+	mBackgroundTexture = nullptr;
+	mPieceInfo = nullptr;
 }
 
 lcModel::~lcModel()
@@ -168,7 +168,7 @@ lcModel::~lcModel()
 	if (mPieceInfo)
 	{
 		if (gMainWindow && gMainWindow->GetCurrentPieceInfo() == mPieceInfo)
-			gMainWindow->SetCurrentPieceInfo(NULL);
+			gMainWindow->SetCurrentPieceInfo(nullptr);
 
 		if (mPieceInfo->GetModel() == this)
 			mPieceInfo->SetPlaceholder();
@@ -202,7 +202,7 @@ void lcModel::DeleteHistory()
 void lcModel::DeleteModel()
 {
 	lcReleaseTexture(mBackgroundTexture);
-	mBackgroundTexture = NULL;
+	mBackgroundTexture = nullptr;
 
 	if (gMainWindow)
 	{
@@ -488,9 +488,9 @@ void lcModel::SplitMPD(QIODevice& Device)
 
 void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 {
-	lcPiece* Piece = NULL;
-	lcCamera* Camera = NULL;
-	lcLight* Light = NULL;
+	lcPiece* Piece = nullptr;
+	lcCamera* Camera = nullptr;
+	lcLight* Light = nullptr;
 	lcArray<lcGroup*> CurrentGroups;
 	lcArray<lcPieceControlPoint> ControlPoints;
 	int CurrentStep = 1;
@@ -550,7 +550,7 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 			else if (Token == QLatin1String("PIECE"))
 			{
 				if (!Piece)
-					Piece = new lcPiece(NULL);
+					Piece = new lcPiece(nullptr);
 
 				Piece->ParseLDrawLine(LineStream);
 			}
@@ -563,7 +563,7 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 				{
 					Camera->CreateName(mCameras);
 					mCameras.Add(Camera);
-					Camera = NULL;
+					Camera = nullptr;
 				}
 			}
 			else if (Token == QLatin1String("LIGHT"))
@@ -581,7 +581,7 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 					if (!CurrentGroups.IsEmpty())
 						Group->mGroup = CurrentGroups[CurrentGroups.GetSize() - 1];
 					else
-						Group->mGroup = NULL;
+						Group->mGroup = nullptr;
 					CurrentGroups.Add(Group);
 				}
 				else if (Token == QLatin1String("END"))
@@ -643,7 +643,7 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 			else
 			{
 				if (!Piece)
-					Piece = new lcPiece(NULL);
+					Piece = new lcPiece(nullptr);
 
 				if (!CurrentGroups.IsEmpty())
 					Piece->SetGroup(CurrentGroups[CurrentGroups.GetSize() - 1]);
@@ -663,7 +663,7 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 				Piece->SetColorCode(ColorCode);
 				Piece->SetControlPoints(ControlPoints);
 				AddPiece(Piece);
-				Piece = NULL;
+				Piece = nullptr;
 			}
 		}
 		else
@@ -736,7 +736,7 @@ bool lcModel::LoadBinary(lcFile* file)
 	{
 		if (fv > 0.4f)
 		{
-			lcPiece* pPiece = new lcPiece(NULL);
+			lcPiece* pPiece = new lcPiece(nullptr);
 			pPiece->FileLoad(*file);
 			AddPiece(pPiece);
 		}
@@ -757,7 +757,7 @@ bool lcModel::LoadBinary(lcFile* file)
 			lcMatrix44 WorldMatrix = lcMul(lcMatrix44RotationZ(rot[2] * LC_DTOR), lcMul(lcMatrix44RotationY(rot[1] * LC_DTOR), lcMatrix44RotationX(rot[0] * LC_DTOR)));
 			WorldMatrix.SetTranslation(pos);
 
-			PieceInfo* pInfo = Library->FindPiece(name, NULL, true, false);
+			PieceInfo* pInfo = Library->FindPiece(name, nullptr, true, false);
 			lcPiece* pPiece = new lcPiece(pInfo);
 
 			pPiece->Initialize(WorldMatrix, step);
@@ -840,7 +840,7 @@ bool lcModel::LoadBinary(lcFile* file)
 			lcGroup* Group = mGroups[GroupIdx];
 
 			i = LC_POINTER_TO_INT(Group->mGroup);
-			Group->mGroup = NULL;
+			Group->mGroup = nullptr;
 
 			if (i > 0xFFFF || i == -1)
 				continue;
@@ -853,7 +853,7 @@ bool lcModel::LoadBinary(lcFile* file)
 			lcPiece* Piece = mPieces[PieceIdx];
 
 			i = LC_POINTER_TO_INT(Piece->GetGroup());
-			Piece->SetGroup(NULL);
+			Piece->SetGroup(nullptr);
 
 			if (i > 0xFFFF || i == -1)
 				continue;
@@ -1065,7 +1065,7 @@ void lcModel::Paste()
 	if (SelectedObjects.GetSize() == 1)
 		ClearSelectionAndSetFocus(SelectedObjects[0], LC_PIECE_SECTION_POSITION);
 	else
-		SetSelectionAndFocus(SelectedObjects, NULL, 0);
+		SetSelectionAndFocus(SelectedObjects, nullptr, 0);
 
 	CalculateStep(mCurrentStep);
 	gMainWindow->UpdateTimeline(false, false);
@@ -1095,7 +1095,7 @@ void lcModel::DuplicateSelectedPieces()
 		return;
 
 	gMainWindow->UpdateTimeline(false, false);
-	SetSelectionAndFocus(NewPieces, NULL, 0);
+	SetSelectionAndFocus(NewPieces, nullptr, 0);
 	SaveCheckpoint(tr("Duplicating Pieces"));
 }
 
@@ -1279,7 +1279,7 @@ void lcModel::SaveStepImages(const QString& BaseName, bool AddStepSuffix, bool Z
 void lcModel::UpdateBackgroundTexture()
 {
 	lcReleaseTexture(mBackgroundTexture);
-	mBackgroundTexture = NULL;
+	mBackgroundTexture = nullptr;
 
 	if (mProperties.mBackgroundType == LC_BACKGROUND_IMAGE)
 	{
@@ -1589,7 +1589,7 @@ lcGroup* lcModel::GetGroup(const QString& Name, bool CreateIfMissing)
 		return Group;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 void lcModel::RemoveGroup(lcGroup* Group)
@@ -1656,7 +1656,7 @@ void lcModel::UngroupSelection()
 		lcGroup* Group = Piece->GetGroup();
 
 		if (SelectedGroups.FindIndex(Group) != -1)
-			Piece->SetGroup(NULL);
+			Piece->SetGroup(nullptr);
 	}
 
 	for (int GroupIdx = 0; GroupIdx < mGroups.GetSize(); GroupIdx++)
@@ -1664,7 +1664,7 @@ void lcModel::UngroupSelection()
 		lcGroup* Group = mGroups[GroupIdx];
 
 		if (SelectedGroups.FindIndex(Group->mGroup) != -1)
-			Group->mGroup = NULL;
+			Group->mGroup = nullptr;
 	}
 
 	SelectedGroups.DeleteAll();
@@ -1675,7 +1675,7 @@ void lcModel::UngroupSelection()
 
 void lcModel::AddSelectedPiecesToGroup()
 {
-	lcGroup* Group = NULL;
+	lcGroup* Group = nullptr;
 
 	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 	{
@@ -1715,7 +1715,7 @@ void lcModel::RemoveFocusPieceFromGroup()
 
 		if (Piece->IsFocused())
 		{
-			Piece->SetGroup(NULL);
+			Piece->SetGroup(nullptr);
 			break;
 		}
 	}
@@ -1975,7 +1975,7 @@ void lcModel::AddPiece()
 	if (!CurPiece)
 		return;
 
-	lcPiece* Last = mPieces.IsEmpty() ? NULL : mPieces[mPieces.GetSize() - 1];
+	lcPiece* Last = mPieces.IsEmpty() ? nullptr : mPieces[mPieces.GetSize() - 1];
 
 	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 	{
@@ -2247,7 +2247,7 @@ void lcModel::MoveSelectionToModel(lcModel* Model)
 		return;
 
 	lcArray<lcPiece*> Pieces;
-	lcPiece* ModelPiece = NULL;
+	lcPiece* ModelPiece = nullptr;
 	lcStep FirstStep = LC_STEP_MAX;
 
 	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); )
@@ -2257,7 +2257,7 @@ void lcModel::MoveSelectionToModel(lcModel* Model)
 		if (Piece->IsSelected())
 		{
 			mPieces.RemoveIndex(PieceIdx);
-			Piece->SetGroup(NULL); // todo: copy groups
+			Piece->SetGroup(nullptr); // todo: copy groups
 			Pieces.Add(Piece);
 			FirstStep = qMin(FirstStep, Piece->GetStepShow());
 
@@ -2339,7 +2339,7 @@ void lcModel::InlineSelectedModels()
 
 	SaveCheckpoint(tr("Inlining"));
 	gMainWindow->UpdateTimeline(false, false);
-	SetSelectionAndFocus(NewPieces, NULL, 0);
+	SetSelectionAndFocus(NewPieces, nullptr, 0);
 }
 
 bool lcModel::RemoveSelectedObjects()
@@ -2833,7 +2833,7 @@ lcObject* lcModel::GetFocusObject() const
 			return Light;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 lcModel* lcModel::GetFirstSelectedSubmodel() const
@@ -2846,7 +2846,7 @@ lcModel* lcModel::GetFirstSelectedSubmodel() const
 			return Piece->mPieceInfo->GetModel();
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 void lcModel::GetSubModels(lcArray<lcModel*> SubModels) const
@@ -2945,7 +2945,7 @@ bool lcModel::GetMoveRotateTransform(lcVector3& Center, lcMatrix33& RelativeRota
 bool lcModel::GetPieceFocusOrSelectionCenter(lcVector3& Center) const
 {
 	lcVector3 Min(FLT_MAX, FLT_MAX, FLT_MAX), Max(-FLT_MAX, -FLT_MAX, -FLT_MAX);
-	lcPiece* Selected = NULL;
+	lcPiece* Selected = nullptr;
 	int NumSelected = 0;
 
 	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
@@ -3012,7 +3012,7 @@ bool lcModel::GetFocusPosition(lcVector3& Position) const
 bool lcModel::GetSelectionCenter(lcVector3& Center) const
 {
 	lcVector3 Min(FLT_MAX, FLT_MAX, FLT_MAX), Max(-FLT_MAX, -FLT_MAX, -FLT_MAX);
-	lcPiece* SelectedPiece = NULL;
+	lcPiece* SelectedPiece = nullptr;
 	bool SinglePieceSelected = true;
 	bool Selected = false;
 
@@ -3137,13 +3137,13 @@ void lcModel::GetModelParts(const lcMatrix44& WorldMatrix, int DefaultColorIndex
 void lcModel::GetSelectionInformation(int* Flags, lcArray<lcObject*>& Selection, lcObject** Focus) const
 {
 	*Flags = 0;
-	*Focus = NULL;
+	*Focus = nullptr;
 
 	if (mPieces.IsEmpty())
 		*Flags |= LC_SEL_NO_PIECES;
 	else
 	{
-		lcGroup* Group = NULL;
+		lcGroup* Group = nullptr;
 		bool First = true;
 
 		for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
@@ -3178,7 +3178,7 @@ void lcModel::GetSelectionInformation(int* Flags, lcArray<lcObject*>& Selection,
 						*Flags |= LC_SEL_CAN_REMOVE_CONTROL_POINT;
 				}
 
-				if (Piece->GetGroup() != NULL)
+				if (Piece->GetGroup() != nullptr)
 				{
 					*Flags |= LC_SEL_GROUPED;
 					if (Piece->IsFocused())
@@ -3195,7 +3195,7 @@ void lcModel::GetSelectionInformation(int* Flags, lcArray<lcObject*>& Selection,
 					if (Group != Piece->GetGroup())
 						*Flags |= LC_SEL_CAN_GROUP;
 					else
-						if (Group == NULL)
+						if (Group == nullptr)
 							*Flags |= LC_SEL_CAN_GROUP;
 				}
 			}
@@ -3465,7 +3465,7 @@ void lcModel::FindPiece(bool FindFirst, bool SearchForward)
 	}
 
 	int CurrentIdx = StartIdx;
-	lcObject* Focus = NULL;
+	lcObject* Focus = nullptr;
 	const lcSearchOptions& SearchOptions = gMainWindow->mSearchOptions;
 
 	for (;;)
@@ -3512,7 +3512,7 @@ void lcModel::UndoAction()
 	LoadCheckPoint(mUndoHistory[0]);
 
 	gMainWindow->UpdateModified(IsModified());
-	gMainWindow->UpdateUndoRedo(mUndoHistory.GetSize() > 1 ? mUndoHistory[0]->Description : NULL, !mRedoHistory.IsEmpty() ? mRedoHistory[0]->Description : NULL);
+	gMainWindow->UpdateUndoRedo(mUndoHistory.GetSize() > 1 ? mUndoHistory[0]->Description : nullptr, !mRedoHistory.IsEmpty() ? mRedoHistory[0]->Description : nullptr);
 }
 
 void lcModel::RedoAction()
@@ -3527,7 +3527,7 @@ void lcModel::RedoAction()
 	LoadCheckPoint(Redo);
 
 	gMainWindow->UpdateModified(IsModified());
-	gMainWindow->UpdateUndoRedo(mUndoHistory.GetSize() > 1 ? mUndoHistory[0]->Description : NULL, !mRedoHistory.IsEmpty() ? mRedoHistory[0]->Description : NULL);
+	gMainWindow->UpdateUndoRedo(mUndoHistory.GetSize() > 1 ? mUndoHistory[0]->Description : nullptr, !mRedoHistory.IsEmpty() ? mRedoHistory[0]->Description : nullptr);
 }
 
 void lcModel::BeginMouseTool()
@@ -3896,7 +3896,7 @@ void lcModel::ShowSelectByNameDialog()
 	if (Dialog.exec() != QDialog::Accepted)
 		return;
 
-	SetSelectionAndFocus(Dialog.mObjects, NULL, 0);
+	SetSelectionAndFocus(Dialog.mObjects, nullptr, 0);
 }
 
 void lcModel::ShowSelectByColorDialog()
@@ -3930,7 +3930,7 @@ void lcModel::ShowSelectByColorDialog()
 			Selection.Add(Piece);
 	}
 
-	SetSelectionAndFocus(Selection, NULL, 0);
+	SetSelectionAndFocus(Selection, nullptr, 0);
 }
 
 void lcModel::ShowArrayDialog()
@@ -4017,13 +4017,13 @@ void lcModel::ShowMinifigDialog()
 
 	gMainWindow->GetActiveView()->MakeCurrent();
 
-	lcGroup* Group = AddGroup(tr("Minifig #"), NULL);
+	lcGroup* Group = AddGroup(tr("Minifig #"), nullptr);
 	lcArray<lcObject*> Pieces(LC_MFW_NUMITEMS);
 	lcMinifig& Minifig = Dialog.mMinifigWidget->mMinifig;
 
 	for (int PartIdx = 0; PartIdx < LC_MFW_NUMITEMS; PartIdx++)
 	{
-		if (Minifig.Parts[PartIdx] == NULL)
+		if (Minifig.Parts[PartIdx] == nullptr)
 			continue;
 
 		lcPiece* Piece = new lcPiece(Minifig.Parts[PartIdx]);
@@ -4037,7 +4037,7 @@ void lcModel::ShowMinifigDialog()
 		Pieces.Add(Piece);
 	}
 
-	SetSelectionAndFocus(Pieces, NULL, 0);
+	SetSelectionAndFocus(Pieces, nullptr, 0);
 	gMainWindow->UpdateTimeline(false, false);
 	SaveCheckpoint(tr("Minifig"));
 }
@@ -4045,7 +4045,7 @@ void lcModel::ShowMinifigDialog()
 void lcModel::UpdateInterface()
 {
 	gMainWindow->UpdateTimeline(true, false);
-	gMainWindow->UpdateUndoRedo(mUndoHistory.GetSize() > 1 ? mUndoHistory[0]->Description : NULL, !mRedoHistory.IsEmpty() ? mRedoHistory[0]->Description : NULL);
+	gMainWindow->UpdateUndoRedo(mUndoHistory.GetSize() > 1 ? mUndoHistory[0]->Description : nullptr, !mRedoHistory.IsEmpty() ? mRedoHistory[0]->Description : nullptr);
 	gMainWindow->UpdatePaste(!g_App->mClipboard.isEmpty());
 	gMainWindow->UpdateCategories();
 	gMainWindow->UpdateTitle();

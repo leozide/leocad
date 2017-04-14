@@ -34,10 +34,10 @@ static LONG WINAPI lcSehHandler(PEXCEPTION_POINTERS exceptionPointers)
 
 	HMODULE dbgHelp = LoadLibrary(TEXT("dbghelp.dll"));
 
-	if (dbgHelp == NULL)
+	if (dbgHelp == nullptr)
 		return EXCEPTION_EXECUTE_HANDLER;
 
-	HANDLE file = CreateFile(minidumpPath, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+	HANDLE file = CreateFile(minidumpPath, GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
 
 	if (file == INVALID_HANDLE_VALUE)
 		return EXCEPTION_EXECUTE_HANDLER;
@@ -53,7 +53,7 @@ static LONG WINAPI lcSehHandler(PEXCEPTION_POINTERS exceptionPointers)
 	mei.ExceptionPointers = exceptionPointers;
 	mei.ClientPointers = TRUE;
 
-	BOOL writeDump = miniDumpWriteDump(GetCurrentProcess(), GetCurrentProcessId(), file, MiniDumpNormal, exceptionPointers ? &mei : NULL, NULL, NULL);
+	BOOL writeDump = miniDumpWriteDump(GetCurrentProcess(), GetCurrentProcessId(), file, MiniDumpNormal, exceptionPointers ? &mei : nullptr, nullptr, nullptr);
 
 	CloseHandle(file);
 	FreeLibrary(dbgHelp);
@@ -65,7 +65,7 @@ static LONG WINAPI lcSehHandler(PEXCEPTION_POINTERS exceptionPointers)
 		lstrcat(message, minidumpPath);
 		lstrcat(message, TEXT("', please send it to the developers for debugging."));
 
-		MessageBox(NULL, message, TEXT("LeoCAD"), MB_OK);
+		MessageBox(nullptr, message, TEXT("LeoCAD"), MB_OK);
 	}
 
 	return EXCEPTION_EXECUTE_HANDLER;
@@ -73,7 +73,7 @@ static LONG WINAPI lcSehHandler(PEXCEPTION_POINTERS exceptionPointers)
 
 static void lcSehInit()
 {
-	if (SHGetFolderPath(NULL, CSIDL_LOCAL_APPDATA | CSIDL_FLAG_CREATE, NULL, SHGFP_TYPE_CURRENT, minidumpPath) == S_OK)
+	if (SHGetFolderPath(nullptr, CSIDL_LOCAL_APPDATA | CSIDL_FLAG_CREATE, nullptr, SHGFP_TYPE_CURRENT, minidumpPath) == S_OK)
 	{
 		lstrcat(minidumpPath, TEXT("\\LeoCAD\\"));
 		_tmkdir(minidumpPath);
@@ -88,7 +88,7 @@ static void lcRegisterShellFileTypes()
 	TCHAR modulePath[_MAX_PATH], longModulePath[_MAX_PATH];
 	TCHAR temp[2*_MAX_PATH];
 
-	GetModuleFileName(NULL, longModulePath, _MAX_PATH);
+	GetModuleFileName(nullptr, longModulePath, _MAX_PATH);
 	if (GetShortPathName(longModulePath, modulePath, _MAX_PATH) == 0)
 		lstrcpy(modulePath, longModulePath);
 
@@ -116,7 +116,7 @@ static void lcRegisterShellFileTypes()
 		HKEY key;
 		DWORD disposition = 0;
 
-		if (RegCreateKeyEx(HKEY_CLASSES_ROOT, TEXT(".lcd\\ShellNew"), 0, REG_NONE, REG_OPTION_NON_VOLATILE, KEY_WRITE | KEY_READ, NULL, &key, &disposition) != ERROR_SUCCESS)
+		if (RegCreateKeyEx(HKEY_CLASSES_ROOT, TEXT(".lcd\\ShellNew"), 0, REG_NONE, REG_OPTION_NON_VOLATILE, KEY_WRITE | KEY_READ, nullptr, &key, &disposition) != ERROR_SUCCESS)
 			return;
 
 		result = RegSetValueEx(key, TEXT("NullFile"), 0, REG_SZ, (CONST BYTE*)TEXT(""), (lstrlen(TEXT("")) + 1) * sizeof(TCHAR));
@@ -171,7 +171,7 @@ int main(int argc, char *argv[])
 #ifdef LC_LDRAW_LIBRARY_PATH
 	const char* LDrawPath = LC_LDRAW_LIBRARY_PATH;
 #else
-	const char* LDrawPath = NULL;
+	const char* LDrawPath = nullptr;
 #endif
 	
 	setlocale(LC_NUMERIC, "C");
@@ -197,9 +197,9 @@ int main(int argc, char *argv[])
 	}
 
 	delete gMainWindow;
-	gMainWindow = NULL;
+	gMainWindow = nullptr;
 	delete g_App;
-	g_App = NULL;
+	g_App = nullptr;
 
 	return ExecReturn;
 }

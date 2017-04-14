@@ -70,12 +70,12 @@ public:
 			mState &= ~LC_CAMERA_ORTHO;
 	}
 
-	virtual bool IsSelected() const
+	virtual bool IsSelected() const override
 	{
 		return (mState & LC_CAMERA_SELECTION_MASK) != 0;
 	}
 
-	virtual bool IsSelected(lcuint32 Section) const
+	virtual bool IsSelected(lcuint32 Section) const override
 	{
 		switch (Section)
 		{
@@ -94,7 +94,7 @@ public:
 		return false;
 	}
 
-	virtual void SetSelected(bool Selected)
+	virtual void SetSelected(bool Selected) override
 	{
 		if (Selected)
 			mState |= LC_CAMERA_SELECTION_MASK;
@@ -102,7 +102,7 @@ public:
 			mState &= ~(LC_CAMERA_SELECTION_MASK | LC_CAMERA_FOCUS_MASK);
 	}
 
-	virtual void SetSelected(lcuint32 Section, bool Selected)
+	virtual void SetSelected(lcuint32 Section, bool Selected) override
 	{
 		switch (Section)
 		{
@@ -129,12 +129,12 @@ public:
 		}
 	}
 
-	virtual bool IsFocused() const
+	virtual bool IsFocused() const override
 	{
 		return (mState & LC_CAMERA_FOCUS_MASK) != 0;
 	}
 
-	virtual bool IsFocused(lcuint32 Section) const
+	virtual bool IsFocused(lcuint32 Section) const override
 	{
 		switch (Section)
 		{
@@ -153,7 +153,7 @@ public:
 		return false;
 	}
 
-	virtual void SetFocused(lcuint32 Section, bool Focus)
+	virtual void SetFocused(lcuint32 Section, bool Focus) override
 	{
 		switch (Section)
 		{
@@ -180,7 +180,7 @@ public:
 		}
 	}
 
-	virtual lcuint32 GetFocusSection() const
+	virtual lcuint32 GetFocusSection() const override
 	{
 		if (mState & LC_CAMERA_POSITION_FOCUSED)
 			return LC_CAMERA_SECTION_POSITION;
@@ -194,12 +194,12 @@ public:
 		return ~0;
 	}
 
-	virtual lcuint32 GetAllowedTransforms() const
+	virtual lcuint32 GetAllowedTransforms() const override
 	{
 		return LC_OBJECT_TRANSFORM_MOVE_X | LC_OBJECT_TRANSFORM_MOVE_Y | LC_OBJECT_TRANSFORM_MOVE_Z;
 	}
 
-	virtual lcVector3 GetSectionPosition(lcuint32 Section) const
+	virtual lcVector3 GetSectionPosition(lcuint32 Section) const override
 	{
 		switch (Section)
 		{
@@ -262,9 +262,9 @@ public:
 	}
 
 public:
-	virtual void RayTest(lcObjectRayTest& ObjectRayTest) const;
-	virtual void BoxTest(lcObjectBoxTest& ObjectBoxTest) const;
-	virtual void DrawInterface(lcContext* Context) const;
+	virtual void RayTest(lcObjectRayTest& ObjectRayTest) const override;
+	virtual void BoxTest(lcObjectBoxTest& ObjectBoxTest) const override;
+	virtual void DrawInterface(lcContext* Context) const override;
 
 	void InsertTime(lcStep Start, lcStep Time);
 	void RemoveTime(lcStep Start, lcStep Time);

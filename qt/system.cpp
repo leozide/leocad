@@ -17,7 +17,7 @@ char* strcasestr(const char *s, const char *find)
 			do
 			{
 				if ((sc = *s++) == 0)
-					return (NULL);
+					return (nullptr);
 			} while ((char)tolower((unsigned char)sc) != c);
 		} while (qstrnicmp(s, find, len) != 0);
 		s--;

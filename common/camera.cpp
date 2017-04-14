@@ -71,7 +71,7 @@ void lcCamera::Initialize()
 
 	mState = 0;
 
-	m_pTR = NULL;
+	m_pTR = nullptr;
 	memset(m_strName, 0, sizeof(m_strName));
 }
 
@@ -621,7 +621,7 @@ void lcCamera::RayTest(lcObjectRayTest& ObjectRayTest) const
 	lcVector3 End = lcMul31(ObjectRayTest.End, mWorldView);
 
 	float Distance;
-	if (lcBoundingBoxRayIntersectDistance(Min, Max, Start, End, &Distance, NULL) && (Distance < ObjectRayTest.Distance))
+	if (lcBoundingBoxRayIntersectDistance(Min, Max, Start, End, &Distance, nullptr) && (Distance < ObjectRayTest.Distance))
 	{
 		ObjectRayTest.ObjectSection.Object = const_cast<lcCamera*>(this);
 		ObjectRayTest.ObjectSection.Section = LC_CAMERA_SECTION_POSITION;
@@ -637,7 +637,7 @@ void lcCamera::RayTest(lcObjectRayTest& ObjectRayTest) const
 	Start = lcMul31(ObjectRayTest.Start, WorldView);
 	End = lcMul31(ObjectRayTest.End, WorldView);
 
-	if (lcBoundingBoxRayIntersectDistance(Min, Max, Start, End, &Distance, NULL) && (Distance < ObjectRayTest.Distance))
+	if (lcBoundingBoxRayIntersectDistance(Min, Max, Start, End, &Distance, nullptr) && (Distance < ObjectRayTest.Distance))
 	{
 		ObjectRayTest.ObjectSection.Object = const_cast<lcCamera*>(this);
 		ObjectRayTest.ObjectSection.Section = LC_CAMERA_SECTION_TARGET;
@@ -653,7 +653,7 @@ void lcCamera::RayTest(lcObjectRayTest& ObjectRayTest) const
 	Start = lcMul31(ObjectRayTest.Start, WorldView);
 	End = lcMul31(ObjectRayTest.End, WorldView);
 
-	if (lcBoundingBoxRayIntersectDistance(Min, Max, Start, End, &Distance, NULL) && (Distance < ObjectRayTest.Distance))
+	if (lcBoundingBoxRayIntersectDistance(Min, Max, Start, End, &Distance, nullptr) && (Distance < ObjectRayTest.Distance))
 	{
 		ObjectRayTest.ObjectSection.Object = const_cast<lcCamera*>(this);
 		ObjectRayTest.ObjectSection.Section = LC_CAMERA_SECTION_UPVECTOR;
@@ -980,7 +980,7 @@ void lcCamera::StartTiledRendering(int tw, int th, int iw, int ih, float AspectR
 
 void lcCamera::GetTileInfo(int* row, int* col, int* width, int* height)
 {
-	if (m_pTR != NULL)
+	if (m_pTR != nullptr)
 	{
 		*row = m_pTR->mRows - m_pTR->mCurrentRow - 1;
 		*col = m_pTR->mCurrentColumn;
@@ -991,13 +991,13 @@ void lcCamera::GetTileInfo(int* row, int* col, int* width, int* height)
 
 bool lcCamera::EndTile()
 {
-	if (m_pTR != NULL)
+	if (m_pTR != nullptr)
 	{
 		if (m_pTR->EndTile())
 			return true;
 
 		delete m_pTR;
-		m_pTR = NULL;
+		m_pTR = nullptr;
 	}
 
 	return false;

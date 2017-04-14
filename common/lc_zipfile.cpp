@@ -14,7 +14,7 @@
 lcZipFile::lcZipFile()
 {
 	mModified = false;
-	mFile = NULL;
+	mFile = nullptr;
 }
 
 lcZipFile::~lcZipFile()
@@ -30,7 +30,7 @@ bool lcZipFile::OpenRead(const char* FilePath)
 	if (!File->Open(FilePath, "rb") || !Open())
 	{
 		delete File;
-		mFile = NULL;
+		mFile = nullptr;
 		return false;
 	}
 
@@ -43,7 +43,7 @@ bool lcZipFile::OpenRead(lcFile* File)
 
 	if (!Open())
 	{
-		mFile = NULL;
+		mFile = nullptr;
 		return false;
 	}
 
@@ -60,7 +60,7 @@ bool lcZipFile::OpenWrite(const char* FilePath, bool Append)
 		if (!File->Open(FilePath, "r+b") || !Open())
 		{
 			delete File;
-			mFile = NULL;
+			mFile = nullptr;
 			return false;
 		}
 	}
@@ -75,7 +75,7 @@ bool lcZipFile::OpenWrite(const char* FilePath, bool Append)
 		if (!File->Open(FilePath, "wb"))
 		{
 			delete File;
-			mFile = NULL;
+			mFile = nullptr;
 			return false;
 		}
 	}
@@ -382,7 +382,7 @@ bool lcZipFile::ReadCentralDir()
 		lcZipFileInfo& FileInfo = mFiles.Add();
 		long Seek = 0;
 
-		FileInfo.write_buffer = NULL;
+		FileInfo.write_buffer = nullptr;
 		FileInfo.deleted = false;
 
 		if (mFile->ReadU32(&Magic, 1) != 1 || Magic != 0x02014b50)
@@ -466,7 +466,7 @@ bool lcZipFile::ReadCentralDir()
 		Seek -= SizeRead;
 /*
 		// Read extrafield
-		if ((err==UNZ_OK) && (extraField!=NULL))
+		if ((err==UNZ_OK) && (extraField!=nullptr))
 		{
 			ZPOS64_T uSizeRead ;
 			if (file_info.size_file_extra<extraFieldBufferSize)
@@ -554,7 +554,7 @@ bool lcZipFile::ReadCentralDir()
 			}
 		}
 /*
-		if ((err==UNZ_OK) && (szComment!=NULL))
+		if ((err==UNZ_OK) && (szComment!=nullptr))
 		{
 			uLong uSizeRead ;
 			if (file_info.size_file_comment<commentBufferSize)
@@ -713,7 +713,7 @@ bool lcZipFile::ExtractFile(int FileIndex, lcMemFile& File, lcuint32 MaxLength)
 
 			int err = inflate(&Stream,flush);
 
-			if ((err >= 0) && (Stream.msg != NULL))
+			if ((err >= 0) && (Stream.msg != nullptr))
 				err = Z_DATA_ERROR;
 
 			TotalOutAfter = Stream.total_out;

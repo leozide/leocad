@@ -27,7 +27,7 @@ lcPiece::lcPiece(PieceInfo* Info)
 	mColorCode = 16;
 	mStepShow = 1;
 	mStepHide = LC_STEP_MAX;
-	mGroup = NULL;
+	mGroup = nullptr;
 	mFileLine = -1;
 	mPivotMatrix = lcMatrix44Identity();
 
@@ -38,7 +38,7 @@ lcPiece::lcPiece(PieceInfo* Info)
 lcPiece::lcPiece(const lcPiece& Other)
 	: lcObject(LC_OBJECT_PIECE)
 {
-	mMesh = NULL;
+	mMesh = nullptr;
 	SetPieceInfo(Other.mPieceInfo, true);
 	mState = 0;
 	mColorIndex = Other.mColorIndex;
@@ -77,9 +77,9 @@ void lcPiece::SetPieceInfo(PieceInfo* Info, bool Wait)
 
 	mControlPoints.RemoveAll();
 	delete mMesh;
-	mMesh = NULL;
+	mMesh = nullptr;
 
-	lcSynthInfo* SynthInfo = mPieceInfo ? mPieceInfo->GetSynthInfo() : NULL;
+	lcSynthInfo* SynthInfo = mPieceInfo ? mPieceInfo->GetSynthInfo() : nullptr;
 
 	if (SynthInfo)
 	{
@@ -292,7 +292,7 @@ bool lcPiece::FileLoad(lcFile& file)
   else
 	  file.ReadBuffer(name, LC_PIECE_NAME_LEN);
 
-	PieceInfo* pInfo = lcGetPiecesLibrary()->FindPiece(name, NULL, true, false);
+	PieceInfo* pInfo = lcGetPiecesLibrary()->FindPiece(name, nullptr, true, false);
 	SetPieceInfo(pInfo, true);
 
 	// 11 (0.77)
@@ -481,7 +481,7 @@ void lcPiece::RayTest(lcObjectRayTest& ObjectRayTest) const
 			lcVector3 PointEnd = lcMul31(End, InverseTransform);
 
 			float Distance;
-			if (!lcBoundingBoxRayIntersectDistance(Min, Max, PointStart, PointEnd, &Distance, NULL) || (Distance >= ObjectRayTest.Distance))
+			if (!lcBoundingBoxRayIntersectDistance(Min, Max, PointStart, PointEnd, &Distance, nullptr) || (Distance >= ObjectRayTest.Distance))
 				continue;
 
 			ObjectRayTest.ObjectSection.Object = const_cast<lcPiece*>(this);
@@ -846,7 +846,7 @@ void lcPiece::CompareBoundingBox(lcVector3& Min, lcVector3& Max) const
 
 lcGroup* lcPiece::GetTopGroup()
 {
-	return mGroup ? mGroup->GetTopGroup() : NULL;
+	return mGroup ? mGroup->GetTopGroup() : nullptr;
 }
 
 void lcPiece::UpdatePosition(lcStep Step)
@@ -861,5 +861,5 @@ void lcPiece::UpdateMesh()
 {
 	delete mMesh;
 	lcSynthInfo* SynthInfo = mPieceInfo->GetSynthInfo();
-	mMesh = SynthInfo ? SynthInfo->CreateMesh(mControlPoints) : NULL;
+	mMesh = SynthInfo ? SynthInfo->CreateMesh(mControlPoints) : nullptr;
 }

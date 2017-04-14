@@ -42,12 +42,12 @@ void lcModelTabWidget::ResetLayout()
 void lcModelTabWidget::Clear()
 {
 	ResetLayout();
-	mModel = NULL;
+	mModel = nullptr;
 	mViews.RemoveAll();
-	mActiveView = NULL;
+	mActiveView = nullptr;
 	lcQGLWidget* Widget = (lcQGLWidget*)layout()->itemAt(0)->widget();
 	delete Widget->widget;
-	Widget->widget = NULL;
+	Widget->widget = nullptr;
 }
 
 lcMainWindow::lcMainWindow()
@@ -68,7 +68,7 @@ lcMainWindow::lcMainWindow()
 	mLockY = false;
 	mLockZ = false;
 	mRelativeTransform = true;
-	mCurrentPieceInfo = NULL;
+	mCurrentPieceInfo = nullptr;
 
 	memset(&mSearchOptions, 0, sizeof(mSearchOptions));
 
@@ -84,13 +84,13 @@ lcMainWindow::~lcMainWindow()
 	{
 		lcPiecesLibrary* Library = lcGetPiecesLibrary();
 		Library->ReleasePieceInfo(mCurrentPieceInfo);
-		mCurrentPieceInfo = NULL;
+		mCurrentPieceInfo = nullptr;
 	}
 
 	for (int FileIdx = 0; FileIdx < LC_MAX_RECENT_FILES; FileIdx++)
 		lcSetProfileString((LC_PROFILE_KEY)(LC_PROFILE_RECENT_FILE1 + FileIdx), mRecentFiles[FileIdx]);
 
-	gMainWindow = NULL;
+	gMainWindow = nullptr;
 }
 
 void lcMainWindow::CreateWidgets()
@@ -735,7 +735,7 @@ void lcMainWindow::ModelTabChanged(int Index)
 	Project* Project = lcGetActiveProject();
 	lcModelTabWidget* CurrentTab = (lcModelTabWidget*)mModelTabWidget->widget(Index);
 
-	Project->SetActiveModel(Project->GetModels().FindIndex(CurrentTab ? CurrentTab->GetModel() : NULL));
+	Project->SetActiveModel(Project->GetModels().FindIndex(CurrentTab ? CurrentTab->GetModel() : nullptr));
 }
 
 void lcMainWindow::ClipboardChanged()
@@ -1126,7 +1126,7 @@ void lcMainWindow::RemoveAllModelTabs()
 
 void lcMainWindow::SetCurrentModelTab(lcModel* Model)
 {
-	lcModelTabWidget* EmptyWidget = NULL;
+	lcModelTabWidget* EmptyWidget = nullptr;
 
 	for (int TabIdx = 0; TabIdx < mModelTabWidget->count(); TabIdx++)
 	{
@@ -1708,7 +1708,7 @@ void lcMainWindow::UpdateCameraMenu()
 {
 	const lcArray<lcCamera*>& Cameras = lcGetActiveModel()->GetCameras();
 	View* ActiveView = GetActiveView();
-	lcCamera* CurrentCamera = ActiveView ? ActiveView->mCamera : NULL;
+	lcCamera* CurrentCamera = ActiveView ? ActiveView->mCamera : nullptr;
 	int CurrentIndex = -1;
 
 	for (int ActionIdx = LC_VIEW_CAMERA_FIRST; ActionIdx <= LC_VIEW_CAMERA_LAST; ActionIdx++)
@@ -1793,7 +1793,7 @@ void lcMainWindow::UpdateModels()
 	mPartSelectionWidget->UpdateModels();
 
 	if (mCurrentPieceInfo && mCurrentPieceInfo->IsModel())
-		SetCurrentPieceInfo(NULL);
+		SetCurrentPieceInfo(nullptr);
 }
 
 void lcMainWindow::UpdateCategories()

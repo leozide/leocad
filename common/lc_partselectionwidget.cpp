@@ -537,7 +537,7 @@ void lcPartSelectionListView::startDrag(Qt::DropActions SupportedActions)
 }
 
 lcPartSelectionWidget::lcPartSelectionWidget(QWidget* Parent)
-	: QWidget(Parent), mFilterAction(NULL)
+	: QWidget(Parent), mFilterAction(nullptr)
 {
 	mSplitter = new QSplitter(this);
 	mSplitter->setOrientation(Qt::Vertical);

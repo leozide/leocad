@@ -10,13 +10,13 @@ class lcVertexBuffer
 {
 public:
 	lcVertexBuffer()
-		: Pointer(NULL)
+		: Pointer(nullptr)
 	{
 	}
 
 	bool IsValid() const
 	{
-		return Pointer != NULL;
+		return Pointer != nullptr;
 	}
 
 	union
@@ -30,13 +30,13 @@ class lcIndexBuffer
 {
 public:
 	lcIndexBuffer()
-		: Pointer(NULL)
+		: Pointer(nullptr)
 	{
 	}
 
 	bool IsValid() const
 	{
-		return Pointer != NULL;
+		return Pointer != nullptr;
 	}
 
 	union

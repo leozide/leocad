@@ -165,7 +165,7 @@ void lcQPropertiesDialog::colorClicked()
 {
 	QObject *button = sender();
 	QString title;
-	float *color = NULL;
+	float *color = nullptr;
 
 	if (button == ui->solidColorButton)
 	{

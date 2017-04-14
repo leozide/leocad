@@ -47,7 +47,7 @@ void lcSynthInit()
 
 	for (unsigned int InfoIdx = 0; InfoIdx < sizeof(HoseInfo) / sizeof(HoseInfo[0]); InfoIdx++)
 	{
-		PieceInfo* Info = Library->FindPiece(HoseInfo[InfoIdx].PartID, NULL, false, false);
+		PieceInfo* Info = Library->FindPiece(HoseInfo[InfoIdx].PartID, nullptr, false, false);
 
 		if (Info)
 			Info->SetSynthInfo(new lcSynthInfo(HoseInfo[InfoIdx].Type, HoseInfo[InfoIdx].Length, HoseInfo[InfoIdx].NumSections, Info));
@@ -655,9 +655,9 @@ lcMesh* lcSynthInfo::CreateMesh(const lcArray<lcPieceControlPoint>& ControlPoint
 	lcArray<lcMatrix44> Sections;
 
 	if (mCurve)
-		CalculateCurveSections(ControlPoints, Sections, NULL, NULL);
+		CalculateCurveSections(ControlPoints, Sections, nullptr, nullptr);
 	else
-		CalculateLineSections(ControlPoints, Sections, NULL, NULL);
+		CalculateLineSections(ControlPoints, Sections, nullptr, nullptr);
 
 	lcLibraryMeshData MeshData;
 	lcMemFile File; // todo: rewrite this to pass the parts directly
@@ -691,9 +691,9 @@ lcMesh* lcSynthInfo::CreateMesh(const lcArray<lcPieceControlPoint>& ControlPoint
 	File.Seek(0, SEEK_SET);
 
 	if (lcGetPiecesLibrary()->ReadMeshData(File, lcMatrix44Identity(), 16, false, TextureStack, MeshData, LC_MESHDATA_SHARED, false))
-		return lcGetPiecesLibrary()->CreateMesh(NULL, MeshData);
+		return lcGetPiecesLibrary()->CreateMesh(nullptr, MeshData);
 
-	return NULL;
+	return nullptr;
 }
 
 struct lcSynthInsertParam

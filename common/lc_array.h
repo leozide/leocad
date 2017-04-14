@@ -9,7 +9,7 @@ public:
 
 	lcArray(int Size = 0, int Grow = 16)
 	{
-		mData = NULL;
+		mData = nullptr;
 		mLength = 0;
 		mAlloc = 0;
 		mGrow = Grow;
@@ -20,7 +20,7 @@ public:
 
 	lcArray(const lcArray<T>& Array)
 	{
-		mData = NULL;
+		mData = nullptr;
 		*this = Array;
 	}
 

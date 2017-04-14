@@ -11,7 +11,7 @@
 lcQEditGroupsDialog::lcQEditGroupsDialog(QWidget* Parent, const QMap<lcPiece*, lcGroup*>& PieceParents, const QMap<lcGroup*, lcGroup*>& GroupParents)
 	: QDialog(Parent), mPieceParents(PieceParents), mGroupParents(GroupParents)
 {
-	mLastItemClicked = NULL;
+	mLastItemClicked = nullptr;
 	ui = new Ui::lcQEditGroupsDialog;
 
 	ui->setupUi(this);
@@ -21,7 +21,7 @@ lcQEditGroupsDialog::lcQEditGroupsDialog(QWidget* Parent, const QMap<lcPiece*, l
 	QPushButton *newGroup = ui->buttonBox->addButton(tr("New Group"), QDialogButtonBox::ActionRole);
 	connect(newGroup, SIGNAL(clicked()), this, SLOT(on_newGroup_clicked()));
 
-	AddChildren(ui->treeWidget->invisibleRootItem(), NULL);
+	AddChildren(ui->treeWidget->invisibleRootItem(), nullptr);
 	ui->treeWidget->expandAll();
 }
 
@@ -32,7 +32,7 @@ lcQEditGroupsDialog::~lcQEditGroupsDialog()
 
 void lcQEditGroupsDialog::accept()
 {
-	UpdateParents(ui->treeWidget->invisibleRootItem(), NULL);
+	UpdateParents(ui->treeWidget->invisibleRootItem(), nullptr);
 
 	QDialog::accept();
 }

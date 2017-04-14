@@ -149,7 +149,7 @@ lcModel* Project::CreateNewModel(bool ShowModel)
 	QString Name = GetNewModelName(gMainWindow, tr("New Model"), QString(), ModelNames);
 
 	if (Name.isEmpty())
-		return NULL;
+		return nullptr;
 
 	mModified = true;
 	lcModel* Model = new lcModel(Name);
@@ -1459,7 +1459,7 @@ void Project::ExportPOVRay()
 
 			strupr(Src);
 
-			PieceInfo* Info = Library->FindPiece(Src, NULL, false, false);
+			PieceInfo* Info = Library->FindPiece(Src, nullptr, false, false);
 			if (!Info)
 				continue;
 

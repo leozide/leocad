@@ -5,7 +5,7 @@
 
 lcGroup::lcGroup()
 {
-	mGroup = NULL;
+	mGroup = nullptr;
 }
 
 lcGroup::~lcGroup()

@@ -15,7 +15,7 @@ lcTexture* lcLoadTexture(const QString& FileName, int Flags)
 	if (!Texture->Load(FileName.toLatin1().constData(), Flags)) // todo: qstring
 	{
 		delete Texture;
-		Texture = NULL;
+		Texture = nullptr;
 	}
 
 	return Texture;
@@ -42,7 +42,7 @@ void lcTexture::CreateGridTexture()
 {
 	const int NumLevels = 9;
 	Image GridImages[NumLevels];
-	lcuint8* Previous = NULL;
+	lcuint8* Previous = nullptr;
 
 	for (int ImageLevel = 0; ImageLevel < NumLevels; ImageLevel++)
 	{

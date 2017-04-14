@@ -27,7 +27,7 @@ void lcDoInitialUpdateCheck()
 			return;
 	}
 
-	new lcQUpdateDialog(NULL, true);
+	new lcQUpdateDialog(nullptr, true);
 }
 
 lcQUpdateDialog::lcQUpdateDialog(QWidget* Parent, bool InitialUpdate)
@@ -73,7 +73,7 @@ void lcQUpdateDialog::reject()
 	{
 		updateReply->abort();
 		updateReply->deleteLater();
-		updateReply = NULL;
+		updateReply = nullptr;
 	}
 
 	QDialog::reject();
@@ -157,7 +157,7 @@ void lcQUpdateDialog::replyFinished(QNetworkReply *reply)
 		settings.setValue("Updates/LastCheck", QDateTime::currentDateTime());
 #endif
 
-		updateReply = NULL;
+		updateReply = nullptr;
 		reply->deleteLater();
 	}
 	else

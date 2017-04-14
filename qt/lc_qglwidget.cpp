@@ -78,7 +78,7 @@ void lcGLWidget::SetCursor(LC_CURSOR_TYPE CursorType)
 }
 
 lcQGLWidget::lcQGLWidget(QWidget *parent, lcGLWidget *owner, bool view)
-	: QGLWidget(parent, gWidgetList.isEmpty() ? NULL : gWidgetList.first())
+	: QGLWidget(parent, gWidgetList.isEmpty() ? nullptr : gWidgetList.first())
 {
 	mWheelAccumulator = 0;
 	widget = owner;
@@ -127,7 +127,7 @@ lcQGLWidget::~lcQGLWidget()
 		lcContext::DestroyResources();
 
 		delete gPlaceholderMesh;
-		gPlaceholderMesh = NULL;
+		gPlaceholderMesh = nullptr;
 	}
 
 	delete widget;

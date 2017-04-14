@@ -59,7 +59,7 @@ public:
 
 	PieceInfo* GetPieceInfo(QModelIndex Index) const
 	{
-		return Index.isValid() ? mParts[Index.row()].first : NULL;
+		return Index.isValid() ? mParts[Index.row()].first : nullptr;
 	}
 
 	PieceInfo* GetPieceInfo(int Row) const

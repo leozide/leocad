@@ -66,11 +66,11 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget *parent, void *data) :
 
 	updateCommandList();
 	new lcQTreeWidgetColumnStretcher(ui->commandList, 0);
-	commandChanged(NULL);
+	commandChanged(nullptr);
 
 	UpdateMouseTree();
 	new lcQTreeWidgetColumnStretcher(ui->mouseTree, 0);
-	MouseTreeItemChanged(NULL);
+	MouseTreeItemChanged(nullptr);
 }
 
 lcQPreferencesDialog::~lcQPreferencesDialog()
@@ -151,7 +151,7 @@ void lcQPreferencesDialog::colorClicked()
 {
 	QObject *button = sender();
 	QString title;
-	lcuint32 *color = NULL;
+	lcuint32 *color = nullptr;
 	QColorDialog::ColorDialogOptions dialogOptions;
 
 	if (button == ui->gridStudColor)

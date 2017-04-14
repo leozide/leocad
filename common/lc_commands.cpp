@@ -1434,7 +1434,7 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 	}
 };
 
-LC_CASSERT(sizeof(gCommands)/sizeof(gCommands[0]) == LC_NUM_COMMANDS);
+static_assert(sizeof(gCommands)/sizeof(gCommands[0]) == LC_NUM_COMMANDS, "Array size mismatch.");
 
 const char* gToolNames[LC_NUM_TOOLS] =
 {
@@ -1454,4 +1454,4 @@ const char* gToolNames[LC_NUM_TOOLS] =
 	QT_TRANSLATE_NOOP("Mouse", "ZoomRegion")     // LC_TOOL_ZOOM_REGION
 };
 
-LC_CASSERT(sizeof(gToolNames) / sizeof(gToolNames[0]) == LC_NUM_TOOLS);
+static_assert(sizeof(gToolNames) / sizeof(gToolNames[0]) == LC_NUM_TOOLS, "Array size mismatch.");

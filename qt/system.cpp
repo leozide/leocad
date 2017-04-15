@@ -1,5 +1,4 @@
 #include "lc_global.h"
-#include "system.h"
 
 #ifdef WIN32
 

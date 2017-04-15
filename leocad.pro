@@ -181,7 +181,6 @@ HEADERS += \
     common/view.h \
     common/tr.h \
     common/texfont.h \
-    common/system.h \
     common/project.h \
     common/pieceinf.h \
     common/piece.h \

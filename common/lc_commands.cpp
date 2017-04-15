@@ -1,6 +1,5 @@
 #include "lc_global.h"
 #include "lc_commands.h"
-#include "system.h"
 
 lcCommand gCommands[LC_NUM_COMMANDS] =
 {

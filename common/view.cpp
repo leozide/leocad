@@ -3,7 +3,6 @@
 #include "lc_mainwindow.h"
 #include "camera.h"
 #include "view.h"
-#include "system.h"
 #include "tr.h"
 #include "texfont.h"
 #include "lc_texture.h"
@@ -2146,8 +2145,6 @@ bool View::IsTrackToolAllowed(lcTrackTool TrackTool, lcuint32 AllowedTransforms)
 
 void View::StartTracking(lcTrackButton TrackButton)
 {
-	LC_ASSERT(mTrackButton == LC_TRACKBUTTON_NONE);
-
 	mTrackButton = TrackButton;
 	mTrackUpdated = false;
 	mMouseDownX = mInputState.x;

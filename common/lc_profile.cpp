@@ -4,7 +4,6 @@
 #include "image.h"
 #include "lc_model.h"
 #include "project.h"
-#include "system.h"
 
 lcProfileEntry::lcProfileEntry(const char* Section, const char* Key, int DefaultValue)
 {
@@ -145,8 +144,6 @@ int lcGetProfileInt(LC_PROFILE_KEY Key)
 	lcProfileEntry& Entry = gProfileEntries[Key];
 	QSettings Settings;
 
-	LC_ASSERT(Entry.mType == LC_PROFILE_ENTRY_INT);
-
 	return Settings.value(QString("%1/%2").arg(Entry.mSection, Entry.mKey), Entry.mDefault.IntValue).toInt();
 }
 
@@ -154,8 +151,6 @@ float lcGetProfileFloat(LC_PROFILE_KEY Key)
 {
 	lcProfileEntry& Entry = gProfileEntries[Key];
 	QSettings Settings;
-
-	LC_ASSERT(Entry.mType == LC_PROFILE_ENTRY_FLOAT);
 
 	return Settings.value(QString("%1/%2").arg(Entry.mSection, Entry.mKey), Entry.mDefault.FloatValue).toFloat();
 }
@@ -165,8 +160,6 @@ QString lcGetProfileString(LC_PROFILE_KEY Key)
 	lcProfileEntry& Entry = gProfileEntries[Key];
 	QSettings Settings;
 
-	LC_ASSERT(Entry.mType == LC_PROFILE_ENTRY_STRING);
-
 	return Settings.value(QString("%1/%2").arg(Entry.mSection, Entry.mKey), Entry.mDefault.StringValue).toString();
 }
 
@@ -174,8 +167,6 @@ QStringList lcGetProfileStringList(LC_PROFILE_KEY Key)
 {
 	lcProfileEntry& Entry = gProfileEntries[Key];
 	QSettings Settings;
-
-	LC_ASSERT(Entry.mType == LC_PROFILE_ENTRY_STRINGLIST);
 
 	return Settings.value(QString("%1/%2").arg(Entry.mSection, Entry.mKey), QStringList()).toStringList();
 }
@@ -185,8 +176,6 @@ QByteArray lcGetProfileBuffer(LC_PROFILE_KEY Key)
 	lcProfileEntry& Entry = gProfileEntries[Key];
 	QSettings Settings;
 
-	LC_ASSERT(Entry.mType == LC_PROFILE_ENTRY_BUFFER);
-
 	return Settings.value(QString("%1/%2").arg(Entry.mSection, Entry.mKey)).toByteArray();
 }
 
@@ -194,8 +183,6 @@ void lcSetProfileInt(LC_PROFILE_KEY Key, int Value)
 {
 	lcProfileEntry& Entry = gProfileEntries[Key];
 	QSettings Settings;
-
-	LC_ASSERT(Entry.mType == LC_PROFILE_ENTRY_INT);
 
 	Settings.setValue(QString("%1/%2").arg(Entry.mSection, Entry.mKey), Value);
 }
@@ -205,8 +192,6 @@ void lcSetProfileFloat(LC_PROFILE_KEY Key, float Value)
 	lcProfileEntry& Entry = gProfileEntries[Key];
 	QSettings Settings;
 
-	LC_ASSERT(Entry.mType == LC_PROFILE_ENTRY_FLOAT);
-
 	Settings.setValue(QString("%1/%2").arg(Entry.mSection, Entry.mKey), Value);
 }
 
@@ -214,8 +199,6 @@ void lcSetProfileString(LC_PROFILE_KEY Key, const QString& Value)
 {
 	lcProfileEntry& Entry = gProfileEntries[Key];
 	QSettings Settings;
-
-	LC_ASSERT(Entry.mType == LC_PROFILE_ENTRY_STRING);
 
 	Settings.setValue(QString("%1/%2").arg(Entry.mSection, Entry.mKey), Value);
 }
@@ -225,8 +208,6 @@ void lcSetProfileStringList(LC_PROFILE_KEY Key, const QStringList& Value)
 	lcProfileEntry& Entry = gProfileEntries[Key];
 	QSettings Settings;
 
-	LC_ASSERT(Entry.mType == LC_PROFILE_ENTRY_STRINGLIST);
-
 	Settings.setValue(QString("%1/%2").arg(Entry.mSection, Entry.mKey), Value);
 }
 
@@ -234,8 +215,6 @@ void lcSetProfileBuffer(LC_PROFILE_KEY Key, const QByteArray& Buffer)
 {
 	lcProfileEntry& Entry = gProfileEntries[Key];
 	QSettings Settings;
-
-	LC_ASSERT(Entry.mType == LC_PROFILE_ENTRY_BUFFER);
 
 	Settings.setValue(QString("%1/%2").arg(Entry.mSection, Entry.mKey), Buffer);
 }

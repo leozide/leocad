@@ -219,8 +219,8 @@ void lcPartSelectionListModel::SetCurrentModelCategory()
 	lcPartsList PartsList;
 	CurrentModel->GetPartsList(gDefaultColor, PartsList);
 
-	for (lcPartsList::const_iterator PartIt = PartsList.constBegin(); PartIt != PartsList.constEnd(); PartIt++)
-		mParts.append(QPair<PieceInfo*, QPixmap>((PieceInfo*)PartIt.key(), QPixmap()));
+	for (const auto& PartIt : PartsList)
+		mParts.append(QPair<PieceInfo*, QPixmap>((PieceInfo*)PartIt.first, QPixmap()));
 
 	endResetModel();
 }

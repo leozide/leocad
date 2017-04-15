@@ -59,9 +59,9 @@ lcQPropertiesDialog::lcQPropertiesDialog(QWidget *parent, void *data) :
 
 	QVector<bool> ColorsUsed(gNumUserColors);
 
-	for (lcPartsList::const_iterator PartIt = PartsList.constBegin(); PartIt != PartsList.constEnd(); PartIt++)
-		for (QMap<int, int>::const_iterator ColorIt = PartIt.value().constBegin(); ColorIt != PartIt.value().constEnd(); ColorIt++)
-			ColorsUsed[ColorIt.key()] = true;
+	for (const auto& PartIt : PartsList)
+		for (const auto& ColorIt : PartIt.second)
+			ColorsUsed[ColorIt.first] = true;
 
 	QVector<int> ColorColumns(gNumUserColors);
 	int NumColors = 0;
@@ -94,14 +94,14 @@ lcQPropertiesDialog::lcQPropertiesDialog(QWidget *parent, void *data) :
 	QVector<int> ColorTotals(NumColors);
 	int Row = 0, Total = 0;
 
-	for (lcPartsList::const_iterator PartIt = PartsList.constBegin(); PartIt != PartsList.constEnd(); PartIt++, Row++)
+	for (const auto& PartIt : PartsList)
 	{
-		table->setItem(Row, 0, new QTableWidgetItem(PartIt.key()->m_strDescription));
+		table->setItem(Row, 0, new QTableWidgetItem(PartIt.first->m_strDescription));
 
-		for (QMap<int, int>::const_iterator ColorIt = PartIt.value().constBegin(); ColorIt != PartIt.value().constEnd(); ColorIt++)
+		for (const auto& ColorIt : PartIt.second)
 		{
-			int ColorIndex = ColorIt.key();
-			int Count = ColorIt.value();
+			int ColorIndex = ColorIt.first;
+			int Count = ColorIt.second;
 
 			QTableWidgetItem* Item = new QTableWidgetItem(QString::number(Count));
 			Item->setTextAlignment(Qt::AlignCenter);
@@ -111,6 +111,8 @@ lcQPropertiesDialog::lcQPropertiesDialog(QWidget *parent, void *data) :
 			ColorTotals[ColorColumns[ColorIndex]] += Count;
 			Total += Count;
 		}
+
+		Row++;
 	}
 
 	table->setItem(InfoTotals.size(), 0, new QTableWidgetItem(tr("Total")));

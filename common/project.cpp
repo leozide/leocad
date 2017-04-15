@@ -921,7 +921,7 @@ void Project::ExportBrickLink()
 	if (!mModels.IsEmpty())
 		mModels[0]->GetPartsList(gDefaultColor, PartsList);
 
-	if (PartsList.isEmpty())
+	if (PartsList.empty())
 	{
 		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Nothing to export."));
 		return;
@@ -943,11 +943,11 @@ void Project::ExportBrickLink()
 
 	BrickLinkFile.WriteLine("<INVENTORY>\n");
 
-	for (lcPartsList::const_iterator PartIt = PartsList.constBegin(); PartIt != PartsList.constEnd(); PartIt++)
+	for (const auto& PartIt : PartsList)
 	{
-		const PieceInfo* Info = PartIt.key();
+		const PieceInfo* Info = PartIt.first;
 
-		for (QMap<int, int>::const_iterator ColorIt = PartIt.value().constBegin(); ColorIt != PartIt.value().constEnd(); ColorIt++)
+		for (const auto& ColorIt : PartIt.second)
 		{
 			BrickLinkFile.WriteLine("  <ITEM>\n");
 			BrickLinkFile.WriteLine("    <ITEMTYPE>P</ITEMTYPE>\n");
@@ -955,14 +955,14 @@ void Project::ExportBrickLink()
 			sprintf(Line, "    <ITEMID>%s</ITEMID>\n", Info->m_strName);
 			BrickLinkFile.WriteLine(Line);
 
-			int Count = ColorIt.value();
+			int Count = ColorIt.second;
 			if (Count > 1)
 			{
 				sprintf(Line, "    <MINQTY>%d</MINQTY>\n", Count);
 				BrickLinkFile.WriteLine(Line);
 			}
 
-			int Color = lcGetBrickLinkColor(ColorIt.key());
+			int Color = lcGetBrickLinkColor(ColorIt.first);
 			if (Color)
 			{
 				sprintf(Line, "    <COLOR>%d</COLOR>\n", Color);
@@ -983,7 +983,7 @@ void Project::ExportCSV()
 	if (!mModels.IsEmpty())
 		mModels[0]->GetPartsList(gDefaultColor, PartsList);
 
-	if (PartsList.isEmpty())
+	if (PartsList.empty())
 	{
 		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Nothing to export."));
 		return;
@@ -1005,14 +1005,13 @@ void Project::ExportCSV()
 
 	CSVFile.WriteLine("Part Name,Color,Quantity,Part ID,Color Code\n");
 
-	for (lcPartsList::const_iterator PartIt = PartsList.constBegin(); PartIt != PartsList.constEnd(); PartIt++)
+	for (const auto& PartIt : PartsList)
 	{
-		const PieceInfo* Info = PartIt.key();
+		const PieceInfo* Info = PartIt.first;
 
-		for (QMap<int, int>::const_iterator ColorIt = PartIt.value().constBegin(); ColorIt != PartIt.value().constEnd(); ColorIt++)
+		for (const auto& ColorIt : PartIt.second)
 		{
-			sprintf(Line, "\"%s\",\"%s\",%d,%s,%d\n", Info->m_strDescription, gColorList[ColorIt.key()].Name,
-					ColorIt.value(), Info->m_strName, gColorList[ColorIt.key()].Code);
+			sprintf(Line, "\"%s\",\"%s\",%d,%s,%d\n", Info->m_strDescription, gColorList[ColorIt.first].Name, ColorIt.second, Info->m_strName, gColorList[ColorIt.first].Code);
 			CSVFile.WriteLine(Line);
 		}
 	}
@@ -1020,7 +1019,7 @@ void Project::ExportCSV()
 
 void Project::CreateHTMLPieceList(QTextStream& Stream, lcModel* Model, lcStep Step, bool Images)
 {
-	QVector<int> ColorsUsed(gColorList.GetSize());
+	std::vector<int> ColorsUsed(gColorList.GetSize(), 0);
 	int NumColors = 0;
 
 	lcPartsList PartsList;
@@ -1030,9 +1029,9 @@ void Project::CreateHTMLPieceList(QTextStream& Stream, lcModel* Model, lcStep St
 	else
 		Model->GetPartsListForStep(Step, gDefaultColor, PartsList);
 
-	for (lcPartsList::const_iterator PartIt = PartsList.constBegin(); PartIt != PartsList.constEnd(); PartIt++)
-		for (QMap<int, int>::const_iterator ColorIt = PartIt.value().constBegin(); ColorIt != PartIt.value().constEnd(); ColorIt++)
-			ColorsUsed[ColorIt.key()]++;
+	for (const auto& PartIt : PartsList)
+		for (const auto& ColorIt : PartIt.second)
+			ColorsUsed[ColorIt.first]++;
 
 	Stream << QLatin1String("<br><table border=1><tr><td><center>Piece</center></td>\r\n");
 
@@ -1047,9 +1046,9 @@ void Project::CreateHTMLPieceList(QTextStream& Stream, lcModel* Model, lcStep St
 	NumColors++;
 	Stream << QLatin1String("</tr>\n");
 
-	for (lcPartsList::const_iterator PartIt = PartsList.constBegin(); PartIt != PartsList.constEnd(); PartIt++)
+	for (const auto& PartIt : PartsList)
 	{
-		const PieceInfo* Info = PartIt.key();
+		const PieceInfo* Info = PartIt.first;
 
 		if (Images)
 			Stream << QString("<tr><td><IMG SRC=\"%1.png\" ALT=\"%2\"></td>\n").arg(Info->m_strName, Info->m_strDescription);
@@ -1057,15 +1056,15 @@ void Project::CreateHTMLPieceList(QTextStream& Stream, lcModel* Model, lcStep St
 			Stream << QString("<tr><td>%1</td>\r\n").arg(Info->m_strDescription);
 
 		int CurrentColumn = 1;
-		for (QMap<int, int>::const_iterator ColorIt = PartIt.value().constBegin(); ColorIt != PartIt.value().constEnd(); ColorIt++)
+		for (const auto& ColorIt : PartIt.second)
 		{
-			while (CurrentColumn != ColorsUsed[ColorIt.key()] + 1)
+			while (CurrentColumn != ColorsUsed[ColorIt.first] + 1)
 			{
 				Stream << QLatin1String("<td><center>-</center></td>\r\n");
 				CurrentColumn++;
 			}
 
-			Stream << QString("<td><center>%1</center></td>\r\n").arg(QString::number(ColorIt.value()));
+			Stream << QString("<td><center>%1</center></td>\r\n").arg(QString::number(ColorIt.second));
 			CurrentColumn++;
 		}
 
@@ -1314,9 +1313,9 @@ void Project::ExportHTML()
 			Context->SetDefaultState();
 			Context->SetProjectionMatrix(ProjectionMatrix);
 
-			for (lcPartsList::const_iterator PartIt = PartsList.constBegin(); PartIt != PartsList.constEnd(); PartIt++)
+			for (const auto& PartIt : PartsList)
 			{
-				const PieceInfo* Info = PartIt.key();
+				const PieceInfo* Info = PartIt.first;
 
 				glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
 				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -1403,21 +1402,10 @@ void Project::ExportPOVRay()
 
 	char Line[1024];
 
-	struct lcPieceTableEntry
-	{
-		char Name[LC_PIECE_NAME_LEN];
-		int Flags;
-	};
-
-	struct lcColorTableEntry
-	{
-		char Name[LC_MAX_COLOR_NAME];
-	};
-
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
-	QMap<PieceInfo*, lcPieceTableEntry> PieceTable;
+	std::map<PieceInfo*, std::pair<char[LC_PIECE_NAME_LEN], int>> PieceTable;
 	int NumColors = gColorList.GetSize();
-	QVector<lcColorTableEntry> ColorTable(NumColors);
+	std::vector<char[LC_MAX_COLOR_NAME]> ColorTable(NumColors);
 
 	enum
 	{
@@ -1465,23 +1453,23 @@ void Project::ExportPOVRay()
 
 			if (strchr(Flags, 'L'))
 			{
-				lcPieceTableEntry& Entry = PieceTable[Info];
-				Entry.Flags |= LGEO_PIECE_LGEO;
-				sprintf(Entry.Name, "lg_%s", Dst);
+				std::pair<char[LC_PIECE_NAME_LEN], int>& Entry = PieceTable[Info];
+				Entry.second |= LGEO_PIECE_LGEO;
+				sprintf(Entry.first, "lg_%s", Dst);
 			}
 
 			if (strchr(Flags, 'A'))
 			{
-				lcPieceTableEntry& Entry = PieceTable[Info];
-				Entry.Flags |= LGEO_PIECE_AR;
-				sprintf(Entry.Name, "ar_%s", Dst);
+				std::pair<char[LC_PIECE_NAME_LEN], int>& Entry = PieceTable[Info];
+				Entry.second |= LGEO_PIECE_AR;
+				sprintf(Entry.first, "ar_%s", Dst);
 			}
 
 			if (strchr(Flags, 'S'))
 			{
-				lcPieceTableEntry& Entry = PieceTable[Info];
-				Entry.Flags |= LGEO_PIECE_SLOPE;
-				Entry.Name[0] = 0;
+				std::pair<char[LC_PIECE_NAME_LEN], int>& Entry = PieceTable[Info];
+				Entry.second |= LGEO_PIECE_SLOPE;
+				Entry.first[0] = 0;
 			}
 		}
 
@@ -1506,7 +1494,7 @@ void Project::ExportPOVRay()
 			if (Color >= NumColors)
 				continue;
 
-			strcpy(ColorTable[Color].Name, Name);
+			strcpy(ColorTable[Color], Name);
 		}
 	}
 
@@ -1526,12 +1514,16 @@ void Project::ExportPOVRay()
 				if (CheckIdx != PartIdx)
 					break;
 
-				const lcPieceTableEntry& Entry = PieceTable.value(Info);
+				auto Search = PieceTable.find(Info);
 
-				if (Entry.Name[0])
+				if (Search != PieceTable.end())
 				{
-					sprintf(Line, "#include \"%s.inc\"\n", Entry.Name);
-					POVFile.WriteLine(Line);
+					const std::pair<char[LC_PIECE_NAME_LEN], int>& Entry = Search->second;
+					if (Entry.first[0])
+					{
+						sprintf(Line, "#include \"%s.inc\"\n", Entry.first);
+						POVFile.WriteLine(Line);
+					}
 				}
 
 				break;
@@ -1560,8 +1552,8 @@ void Project::ExportPOVRay()
 
 		POVFile.WriteLine(Line);
 
-		if (!ColorTable[ColorIdx].Name[0])
-			sprintf(ColorTable[ColorIdx].Name, "lc_%s", Color->SafeName);
+		if (!*ColorTable[ColorIdx])
+			sprintf(ColorTable[ColorIdx], "lc_%s", Color->SafeName);
 	}
 
 	POVFile.WriteLine("\n");
@@ -1569,15 +1561,15 @@ void Project::ExportPOVRay()
 	lcArray<const char*> ColorTablePointer;
 	ColorTablePointer.SetSize(NumColors);
 	for (int ColorIdx = 0; ColorIdx < NumColors; ColorIdx++)
-		ColorTablePointer[ColorIdx] = ColorTable[ColorIdx].Name;
+		ColorTablePointer[ColorIdx] = ColorTable[ColorIdx];
 
 	for (int PartIdx = 0; PartIdx < ModelParts.GetSize(); PartIdx++)
 	{
 		PieceInfo* Info = ModelParts[PartIdx].Info;
 		lcMesh* Mesh = Info->GetMesh();
-		lcPieceTableEntry& Entry = PieceTable[Info];
+		std::pair<char[LC_PIECE_NAME_LEN], int>& Entry = PieceTable[Info];
 
-		if (!Mesh || Entry.Name[0])
+		if (!Mesh || Entry.first[0])
 			continue;
 
 		char Name[LC_PIECE_NAME_LEN];
@@ -1587,7 +1579,7 @@ void Project::ExportPOVRay()
 		while ((Ptr = strchr(Name, '-')))
 			*Ptr = '_';
 
-		sprintf(Entry.Name, "lc_%s", Name);
+		sprintf(Entry.first, "lc_%s", Name);
 
 		Mesh->ExportPOVRay(POVFile, Name, &ColorTablePointer[0]);
 
@@ -1612,7 +1604,7 @@ void Project::ExportPOVRay()
 
 	for (int PartIdx = 0; PartIdx < ModelParts.GetSize(); PartIdx++)
 	{
-		lcPieceTableEntry& Entry = PieceTable[ModelParts[PartIdx].Info];
+		std::pair<char[LC_PIECE_NAME_LEN], int>& Entry = PieceTable[ModelParts[PartIdx].Info];
 		int Color;
 
 		Color = ModelParts[PartIdx].ColorIndex;
@@ -1620,18 +1612,18 @@ void Project::ExportPOVRay()
 
 		const float* f = ModelParts[PartIdx].WorldMatrix;
 
-		if (Entry.Flags & LGEO_PIECE_SLOPE)
+		if (Entry.second & LGEO_PIECE_SLOPE)
 		{
 			sprintf(Line, "merge {\n object {\n  %s%s\n  texture { %s }\n }\n"
 					" object {\n  %s_slope\n  texture { %s normal { bumps 0.3 scale 0.02 } }\n }\n"
 					" matrix <%.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f>\n}\n",
-					Entry.Name, Suffix, ColorTable[Color].Name, Entry.Name, ColorTable[Color].Name,
+					Entry.first, Suffix, ColorTable[Color], Entry.first, ColorTable[Color],
 					-f[5], -f[4], -f[6], -f[1], -f[0], -f[2], f[9], f[8], f[10], f[13] / 25.0f, f[12] / 25.0f, f[14] / 25.0f);
 		}
 		else
 		{
 			sprintf(Line, "object {\n %s%s\n texture { %s }\n matrix <%.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f>\n}\n",
-					Entry.Name, Suffix, ColorTable[Color].Name, -f[5], -f[4], -f[6], -f[1], -f[0], -f[2], f[9], f[8], f[10], f[13] / 25.0f, f[12] / 25.0f, f[14] / 25.0f);
+					Entry.first, Suffix, ColorTable[Color], -f[5], -f[4], -f[6], -f[1], -f[0], -f[2], f[9], f[8], f[10], f[13] / 25.0f, f[12] / 25.0f, f[14] / 25.0f);
 		}
 
 		POVFile.WriteLine(Line);

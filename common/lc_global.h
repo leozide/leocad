@@ -55,7 +55,7 @@ class lcCamera;
 class lcLight;
 class lcGroup;
 class PieceInfo;
-typedef QMap<const PieceInfo*, QMap<int, int>> lcPartsList;
+typedef std::map<const PieceInfo*, std::map<int, int>> lcPartsList;
 struct lcModelPartsEntry;
 
 class lcVector2;

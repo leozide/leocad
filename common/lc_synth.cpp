@@ -7,19 +7,37 @@
 #include "pieceinf.h"
 #include <locale.h>
 
+class lcSynthInfoCurved : public lcSynthInfo
+{
+public:
+	lcSynthInfoCurved(lcSynthType Type, float Length, int NumSections, PieceInfo* Info);
+
+protected:
+	float GetSectionTwist(const lcMatrix44& StartTransform, const lcMatrix44& EndTransform) const;
+	void CalculateSections(const lcArray<lcPieceControlPoint>& ControlPoints, lcArray<lcMatrix44>& Sections, SectionCallbackFunc SectionCallback) const override;
+};
+
+class lcSynthInfoStraight : public lcSynthInfo
+{
+public:
+	lcSynthInfoStraight(lcSynthType Type, float Length, PieceInfo* Info);
+
+protected:
+	void CalculateSections(const lcArray<lcPieceControlPoint>& ControlPoints, lcArray<lcMatrix44>& Sections, SectionCallbackFunc SectionCallback) const override;
+};
+
 void lcSynthInit()
 {
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 
-	struct lcHoseInfo
+	static const struct
 	{
-		const char* PartID;
+		char PartID[16];
 		lcSynthType Type;
 		float Length;
 		int NumSections;
-	};
-
-	lcHoseInfo HoseInfo[] =
+	}
+	CurvedPieces[] =
 	{
 		{ "73590a.dat",   lcSynthType::HOSE_FLEXIBLE,    140.0f,   51 }, // Hose Flexible  8.5L without Tabs
 		{ "73590b.dat",   lcSynthType::HOSE_FLEXIBLE,    140.0f,   51 }, // Hose Flexible  8.5L with Tabs
@@ -85,20 +103,38 @@ void lcSynthInit()
 		{ "76384.dat",    lcSynthType::STRING_BRAIDED,   200.00f,  46 }, // String Braided 11L with End Studs
 		{ "75924.dat",    lcSynthType::STRING_BRAIDED,   400.00f,  96 }, // String Braided 21L with End Studs
 		{ "572C02.dat",   lcSynthType::STRING_BRAIDED,   800.00f, 196 }, // String Braided 41L with End Studs
-		{ "73129.dat",    lcSynthType::SHOCK_ABSORBER,   110.00f,   1 }, // Technic Shock Absorber 6.5L
-		{ "41838.dat",    lcSynthType::SHOCK_ABSORBER,   110.00f,   1 }, // Technic Shock Absorber 6.5L Soft
-		{ "76138.dat",    lcSynthType::SHOCK_ABSORBER,   110.00f,   1 }, // Technic Shock Absorber 6.5L Stiff
-		{ "76537.dat",    lcSynthType::SHOCK_ABSORBER,   110.00f,   1 }, // Technic Shock Absorber 6.5L Extra Stiff
-		{ "61927C01.dat", lcSynthType::ACTUATOR,         270.00f,   1 }, // Technic Power Functions Linear Actuator (Extended)
-		{ "61927.dat",    lcSynthType::ACTUATOR,         170.00f,   1 }  // Technic Power Functions Linear Actuator (Contracted)
 	};
 
-	for (unsigned int InfoIdx = 0; InfoIdx < LC_ARRAY_COUNT(HoseInfo); InfoIdx++)
+	for (const auto& HoseInfo: CurvedPieces)
 	{
-		PieceInfo* Info = Library->FindPiece(HoseInfo[InfoIdx].PartID, nullptr, false, false);
+		PieceInfo* Info = Library->FindPiece(HoseInfo.PartID, nullptr, false, false);
 
 		if (Info)
-			Info->SetSynthInfo(new lcSynthInfo(HoseInfo[InfoIdx].Type, HoseInfo[InfoIdx].Length, HoseInfo[InfoIdx].NumSections, Info));
+			Info->SetSynthInfo(new lcSynthInfoCurved(HoseInfo.Type, HoseInfo.Length, HoseInfo.NumSections, Info));
+	}
+
+	static const struct
+	{
+		char PartID[16];
+		lcSynthType Type;
+		float Length;
+	}
+	StraigthPieces[] =
+	{
+		{ "73129.dat",    lcSynthType::SHOCK_ABSORBER, 110.00f }, // Technic Shock Absorber 6.5L
+		{ "41838.dat",    lcSynthType::SHOCK_ABSORBER, 110.00f }, // Technic Shock Absorber 6.5L Soft
+		{ "76138.dat",    lcSynthType::SHOCK_ABSORBER, 110.00f }, // Technic Shock Absorber 6.5L Stiff
+		{ "76537.dat",    lcSynthType::SHOCK_ABSORBER, 110.00f }, // Technic Shock Absorber 6.5L Extra Stiff
+		{ "61927C01.dat", lcSynthType::ACTUATOR,       270.00f }, // Technic Power Functions Linear Actuator (Extended)
+		{ "61927.dat",    lcSynthType::ACTUATOR,       170.00f }  // Technic Power Functions Linear Actuator (Contracted)
+	};
+
+	for (const auto& StraightInfo: StraigthPieces)
+	{
+		PieceInfo* Info = Library->FindPiece(StraightInfo.PartID, nullptr, false, false);
+
+		if (Info)
+			Info->SetSynthInfo(new lcSynthInfoStraight(StraightInfo.Type, StraightInfo.Length, Info));
 	}
 
 //	"758C01" // Hose Flexible  12L
@@ -132,21 +168,18 @@ lcSynthInfo::lcSynthInfo(lcSynthType Type, float Length, int NumSections, PieceI
 		EdgeSectionLength = 6.25f;
 		MidSectionLength = 6.25f;
 		mRigidEdges = false;
-		mCurve = true;
 		break;
 
 	case lcSynthType::FLEXIBLE_AXLE:
 		EdgeSectionLength = 30.0f;
 		MidSectionLength = 4.0f;
 		mRigidEdges = true;
-		mCurve = true;
 		break;
 
 	case lcSynthType::STRING_BRAIDED:
 		EdgeSectionLength = 8.0f;
 		MidSectionLength = 4.0f;
 		mRigidEdges = true;
-		mCurve = true;
 		break;
 
 	case lcSynthType::SHOCK_ABSORBER:
@@ -154,7 +187,6 @@ lcSynthInfo::lcSynthInfo(lcSynthType Type, float Length, int NumSections, PieceI
 		EdgeSectionLength = 0.0f;
 		MidSectionLength = 0.0f;
 		mRigidEdges = false;
-		mCurve = false;
 		break;
 	}
 
@@ -181,6 +213,17 @@ lcSynthInfo::lcSynthInfo(lcSynthType Type, float Length, int NumSections, PieceI
 	mStart.Length = EdgeSectionLength;
 	mMiddle.Length = MidSectionLength;
 	mEnd.Length = EdgeSectionLength;
+}
+
+lcSynthInfoCurved::lcSynthInfoCurved(lcSynthType Type, float Length, int NumSections, PieceInfo* Info)
+	: lcSynthInfo(Type, Length, NumSections, Info)
+{
+	mCurve = true;
+}
+
+lcSynthInfoStraight::lcSynthInfoStraight(lcSynthType Type, float Length, PieceInfo* Info)
+	: lcSynthInfo(Type, Length, 1, Info)
+{
 }
 
 void lcSynthInfo::GetDefaultControlPoints(lcArray<lcPieceControlPoint>& ControlPoints) const
@@ -247,7 +290,7 @@ void lcSynthInfo::GetDefaultControlPoints(lcArray<lcPieceControlPoint>& ControlP
 	ControlPoints[1].Scale = Scale;
 }
 
-float lcSynthInfo::GetSectionTwist(const lcMatrix44& StartTransform, const lcMatrix44& EndTransform) const
+float lcSynthInfoCurved::GetSectionTwist(const lcMatrix44& StartTransform, const lcMatrix44& EndTransform) const
 {
 	lcVector3 StartTangent(StartTransform[1].x, StartTransform[1].y, StartTransform[1].z);
 	lcVector3 EndTangent(EndTransform[1].x, EndTransform[1].y, EndTransform[1].z);
@@ -292,7 +335,7 @@ float lcSynthInfo::GetSectionTwist(const lcMatrix44& StartTransform, const lcMat
 	return 0.0f;
 }
 
-void lcSynthInfo::CalculateCurveSections(const lcArray<lcPieceControlPoint>& ControlPoints, lcArray<lcMatrix44>& Sections, SectionCallbackFunc SectionCallback) const
+void lcSynthInfoCurved::CalculateSections(const lcArray<lcPieceControlPoint>& ControlPoints, lcArray<lcMatrix44>& Sections, SectionCallbackFunc SectionCallback) const
 {
 	float SectionLength = 0.0f;
 
@@ -444,7 +487,7 @@ void lcSynthInfo::CalculateCurveSections(const lcArray<lcPieceControlPoint>& Con
 	}
 }
 
-void lcSynthInfo::CalculateLineSections(const lcArray<lcPieceControlPoint>& ControlPoints, lcArray<lcMatrix44>& Sections, SectionCallbackFunc SectionCallback) const
+void lcSynthInfoStraight::CalculateSections(const lcArray<lcPieceControlPoint>& ControlPoints, lcArray<lcMatrix44>& Sections, SectionCallbackFunc SectionCallback) const
 {
 	for (int ControlPointIdx = 0; ControlPointIdx < ControlPoints.GetSize(); ControlPointIdx++)
 	{
@@ -982,10 +1025,7 @@ lcMesh* lcSynthInfo::CreateMesh(const lcArray<lcPieceControlPoint>& ControlPoint
 {
 	lcArray<lcMatrix44> Sections;
 
-	if (mCurve)
-		CalculateCurveSections(ControlPoints, Sections, nullptr);
-	else
-		CalculateLineSections(ControlPoints, Sections, nullptr);
+	CalculateSections(ControlPoints, Sections, nullptr);
 
 	lcLibraryMeshData MeshData;
 	lcMemFile File; // todo: rewrite this to pass the parts directly
@@ -1042,7 +1082,7 @@ int lcSynthInfo::InsertControlPoint(lcArray<lcPieceControlPoint>& ControlPoints,
 	float BestDistance = FLT_MAX;
 	lcVector3 BestPosition;
 
-	CalculateCurveSections(ControlPoints, Sections,
+	CalculateSections(ControlPoints, Sections,
 		[&](const lcVector3& CurvePoint, int SegmentIndex, float t)
 		{
 			float Distance = lcRayPointDistance(CurvePoint, Start, End);

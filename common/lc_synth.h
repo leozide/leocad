@@ -26,6 +26,7 @@ class lcSynthInfo
 {
 public:
 	lcSynthInfo(lcSynthType Type, float Length, int NumSections, PieceInfo* Info);
+	virtual ~lcSynthInfo() = default;
 
 	bool CanAddControlPoints() const
 	{
@@ -42,10 +43,8 @@ public:
 	lcMesh* CreateMesh(const lcArray<lcPieceControlPoint>& ControlPoints) const;
 
 protected:
-	float GetSectionTwist(const lcMatrix44& StartTransform, const lcMatrix44& EndTransform) const;
 	using SectionCallbackFunc = std::function<void(const lcVector3& CurvePoint, int SegmentIndex, float t)>;
-	void CalculateCurveSections(const lcArray<lcPieceControlPoint>& ControlPoints, lcArray<lcMatrix44>& Sections, SectionCallbackFunc SectionCallback) const;
-	void CalculateLineSections(const lcArray<lcPieceControlPoint>& ControlPoints, lcArray<lcMatrix44>& Sections, SectionCallbackFunc SectionCallback) const;
+	virtual void CalculateSections(const lcArray<lcPieceControlPoint>& ControlPoints, lcArray<lcMatrix44>& Sections, SectionCallbackFunc SectionCallback) const = 0;
 	void AddHoseFlexibleParts(lcMemFile& File, const lcArray<lcMatrix44>& Sections) const;
 	void AddFlexHoseParts(lcMemFile& File, lcLibraryMeshData& MeshData, const lcArray<lcMatrix44>& Sections) const;
 	void AddRibbedHoseParts(lcMemFile& File, const lcArray<lcMatrix44>& Sections) const;
@@ -59,7 +58,7 @@ protected:
 	lcSynthComponent mStart;
 	lcSynthComponent mMiddle;
 	lcSynthComponent mEnd;
-	bool mCurve;
+	bool mCurve = false;
 	float mLength;
 	float mCenterLength;
 	int mNumSections;

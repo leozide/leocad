@@ -423,7 +423,7 @@ bool lcQPreferencesDialog::eventFilter(QObject *object, QEvent *event)
 		return true;
 	}
 
-	return false;
+	return QDialog::eventFilter(object, event);
 }
 
 void lcQPreferencesDialog::updateCommandList()

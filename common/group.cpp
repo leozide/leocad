@@ -54,7 +54,7 @@ void lcGroup::CreateName(const lcArray<lcGroup*>& Groups)
 		if (Name.startsWith(Prefix))
 		{
 			bool Ok = false;
-			int GroupNumber = Name.midRef(Length).toInt(&Ok);
+			int GroupNumber = Name.mid(Length).toInt(&Ok);
 			if (Ok && GroupNumber > Max)
 				Max = GroupNumber;
 		}

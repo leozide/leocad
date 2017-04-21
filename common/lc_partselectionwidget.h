@@ -57,7 +57,7 @@ public:
 	virtual QVariant headerData(int Section, Qt::Orientation Orientation, int Role = Qt::DisplayRole) const;
 	virtual Qt::ItemFlags flags(const QModelIndex& Index) const;
 
-	PieceInfo* GetPieceInfo(QModelIndex Index) const
+	PieceInfo* GetPieceInfo(const QModelIndex& Index) const
 	{
 		return Index.isValid() ? mParts[Index.row()].first : nullptr;
 	}

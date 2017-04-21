@@ -720,46 +720,6 @@ void Project::Export3DStudio(const QString& FileName)
 		File.WriteU32(6);
 	}
 
-	File.WriteU16(0x2200); // CHK_FOG
-	File.WriteU32(46);
-
-	File.WriteFloat(0.0f);
-	File.WriteFloat(0.0f);
-	File.WriteFloat(1000.0f);
-	File.WriteFloat(100.0f);
-
-	File.WriteU16(0x0010); // CHK_COLOR_F
-	File.WriteU32(18);
-
-	File.WriteFloats(Properties.mFogColor, 3);
-
-	File.WriteU16(0x2210); // CHK_FOG_BGND
-	File.WriteU32(6);
-
-	File.WriteU16(0x2302); // CHK_LAYER_FOG
-	File.WriteU32(40);
-
-	File.WriteFloat(0.0f);
-	File.WriteFloat(100.0f);
-	File.WriteFloat(50.0f);
-	File.WriteU32(0x00100000);
-
-	File.WriteU16(0x0010); // CHK_COLOR_F
-	File.WriteU32(18);
-
-	File.WriteFloats(Properties.mFogColor, 3);
-
-	File.WriteU16(0x2300); // CHK_DISTANCE_CUE
-	File.WriteU32(28);
-
-	File.WriteFloat(0.0f);
-	File.WriteFloat(0.0f);
-	File.WriteFloat(1000.0f);
-	File.WriteFloat(100.0f);
-
-	File.WriteU16(0x2310); // CHK_DICHK_DCUE_BGNDSTANCE_CUE
-	File.WriteU32(6);
-
 	int NumPieces = 0;
 	for (int PartIdx = 0; PartIdx < ModelParts.GetSize(); PartIdx++)
 	{

@@ -568,26 +568,9 @@ void View::OnDraw()
 
 	mContext->SetProjectionMatrix(GetProjectionMatrix());
 
-#ifndef LC_OPENGLES
-	const lcModelProperties& Properties = mModel->GetProperties();
-
-	if (Properties.mFogEnabled)
-	{
-		glFogi(GL_FOG_MODE, GL_EXP);
-		glFogf(GL_FOG_DENSITY, Properties.mFogDensity);
-		glFogfv(GL_FOG_COLOR, lcVector4(Properties.mFogColor, 1.0f));
-		glEnable(GL_FOG);
-	}
-#endif
-	
 	mContext->SetLineWidth(Preferences.mLineWidth);
 
 	mScene.Draw(mContext);
-
-#ifndef LC_OPENGLES
-	if (Properties.mFogEnabled)
-		glDisable(GL_FOG);
-#endif
 
 	if (DrawInterface)
 	{

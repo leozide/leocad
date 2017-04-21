@@ -13,12 +13,9 @@ lcQPropertiesDialog::lcQPropertiesDialog(QWidget *parent, void *data) :
 {
 	ui->setupUi(this);
 
-	ui->fogDensityEdit->setValidator(new QDoubleValidator(ui->fogDensityEdit));
-
 	connect(ui->solidColorButton, SIGNAL(clicked()), this, SLOT(colorClicked()));
 	connect(ui->gradient1ColorButton, SIGNAL(clicked()), this, SLOT(colorClicked()));
 	connect(ui->gradient2ColorButton, SIGNAL(clicked()), this, SLOT(colorClicked()));
-	connect(ui->fogColorButton, SIGNAL(clicked()), this, SLOT(colorClicked()));
 	connect(ui->ambientColorButton, SIGNAL(clicked()), this, SLOT(colorClicked()));
 
 	options = (lcPropertiesDialogOptions*)data;
@@ -38,8 +35,6 @@ lcQPropertiesDialog::lcQPropertiesDialog(QWidget *parent, void *data) :
 
 	ui->imageNameEdit->setText(options->Properties.mBackgroundImage);
 	ui->imageTileCheckBox->setChecked(options->Properties.mBackgroundImageTile);
-	ui->fogCheckBox->setChecked(options->Properties.mFogEnabled);
-	ui->fogDensityEdit->setText(lcFormatValueLocalized(options->Properties.mFogDensity));
 
 	QPixmap pix(12, 12);
 
@@ -49,8 +44,6 @@ lcQPropertiesDialog::lcQPropertiesDialog(QWidget *parent, void *data) :
 	ui->gradient1ColorButton->setIcon(pix);
 	pix.fill(QColor(options->Properties.mBackgroundGradientColor2[0] * 255, options->Properties.mBackgroundGradientColor2[1] * 255, options->Properties.mBackgroundGradientColor2[2] * 255));
 	ui->gradient2ColorButton->setIcon(pix);
-	pix.fill(QColor(options->Properties.mFogColor[0] * 255, options->Properties.mFogColor[1] * 255, options->Properties.mFogColor[2] * 255));
-	ui->fogColorButton->setIcon(pix);
 	pix.fill(QColor(options->Properties.mAmbientColor[0] * 255, options->Properties.mAmbientColor[1] * 255, options->Properties.mAmbientColor[2] * 255));
 	ui->ambientColorButton->setIcon(pix);
 
@@ -156,8 +149,6 @@ void lcQPropertiesDialog::accept()
 
 	options->Properties.mBackgroundImage = ui->imageNameEdit->text();
 	options->Properties.mBackgroundImageTile = ui->imageTileCheckBox->isChecked();
-	options->Properties.mFogEnabled = ui->fogCheckBox->isChecked();
-	options->Properties.mFogDensity = lcParseValueLocalized(ui->fogDensityEdit->text());
 	options->SetDefault = ui->setDefaultCheckBox->isChecked();
 
 	QDialog::accept();
@@ -183,11 +174,6 @@ void lcQPropertiesDialog::colorClicked()
 	{
 		color = options->Properties.mBackgroundGradientColor2;
 		title = tr("Select Background Bottom Color");
-	}
-	else if (button == ui->fogColorButton)
-	{
-		color = options->Properties.mFogColor;
-		title = tr("Select Fog Color");
 	}
 	else if (button == ui->ambientColorButton)
 	{

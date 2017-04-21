@@ -53,8 +53,7 @@ public:
 			mBackgroundImage != Properties.mBackgroundImage || mBackgroundImageTile != Properties.mBackgroundImageTile)
 			return false;
 
-		if (mFogEnabled != Properties.mFogEnabled || mFogDensity != Properties.mFogDensity ||
-			mFogColor != Properties.mFogColor || mAmbientColor != Properties.mAmbientColor)
+		if (mAmbientColor != Properties.mAmbientColor)
 			return false;
 
 		return true;
@@ -75,9 +74,6 @@ public:
 	QString mBackgroundImage;
 	bool mBackgroundImageTile;
 
-	bool mFogEnabled;
-	float mFogDensity;
-	lcVector3 mFogColor;
 	lcVector3 mAmbientColor;
 };
 

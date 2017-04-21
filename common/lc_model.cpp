@@ -33,9 +33,6 @@ void lcModelProperties::LoadDefaults()
 	mBackgroundImage = lcGetProfileString(LC_PROFILE_DEFAULT_BACKGROUND_TEXTURE);
 	mBackgroundImageTile = lcGetProfileInt(LC_PROFILE_DEFAULT_BACKGROUND_TILE);
 
-	mFogEnabled = lcGetProfileInt(LC_PROFILE_DEFAULT_FOG_ENABLED);
-	mFogDensity = lcGetProfileFloat(LC_PROFILE_DEFAULT_FOG_DENSITY);
-	mFogColor = lcVector3FromColor(lcGetProfileInt(LC_PROFILE_DEFAULT_FOG_COLOR));
 	mAmbientColor = lcVector3FromColor(lcGetProfileInt(LC_PROFILE_DEFAULT_AMBIENT_COLOR));
 }
 
@@ -48,9 +45,6 @@ void lcModelProperties::SaveDefaults()
 	lcSetProfileString(LC_PROFILE_DEFAULT_BACKGROUND_TEXTURE, mBackgroundImage);
 	lcSetProfileInt(LC_PROFILE_DEFAULT_BACKGROUND_TILE, mBackgroundImageTile);
 
-	lcSetProfileInt(LC_PROFILE_DEFAULT_FOG_ENABLED, mFogEnabled);
-	lcSetProfileFloat(LC_PROFILE_DEFAULT_FOG_DENSITY, mFogDensity);
-	lcSetProfileInt(LC_PROFILE_DEFAULT_FOG_COLOR, lcColorFromVector3(mFogColor));
 	lcSetProfileInt(LC_PROFILE_DEFAULT_AMBIENT_COLOR, lcColorFromVector3(mAmbientColor));
 }
 
@@ -97,9 +91,6 @@ void lcModelProperties::SaveLDraw(QTextStream& Stream) const
 		break;
 	}
 
-//	bool mFogEnabled;
-//	float mFogDensity;
-//	lcVector3 mFogColor;
 //	lcVector3 mAmbientColor;
 }
 
@@ -891,20 +882,7 @@ bool lcModel::LoadBinary(lcFile* file)
 
 	if (fv >= 0.7f)
 	{
-		file->Seek(16, SEEK_CUR);
-
-		file->ReadU32(&rgb, 1);
-		mProperties.mFogColor[0] = (float)((unsigned char) (rgb))/255;
-		mProperties.mFogColor[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
-		mProperties.mFogColor[2] = (float)((unsigned char) ((rgb) >> 16))/255;
-
-		if (fv < 1.0f)
-		{
-			file->ReadU32(&rgb, 1);
-			mProperties.mFogDensity = (float)rgb/100;
-		}
-		else
-			file->ReadFloats(&mProperties.mFogDensity, 1);
+		file->Seek(24, SEEK_CUR);
 
 		if (fv < 1.3f)
 		{

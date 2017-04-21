@@ -92,9 +92,6 @@ lcProfileEntry gProfileEntries[LC_NUM_PROFILE_KEYS] =
 	lcProfileEntry("Defaults", "Author", ""),                                        // LC_PROFILE_DEFAULT_AUTHOR_NAME
 	lcProfileEntry("Defaults", "FloorColor", LC_RGB(0, 191, 0)),                     // LC_PROFILE_DEFAULT_FLOOR_COLOR
 	lcProfileEntry("Defaults", "FloorTexture", ""),                                  // LC_PROFILE_DEFAULT_FLOOR_TEXTURE
-	lcProfileEntry("Defaults", "FogEnabled", 0),                                     // LC_PROFILE_DEFAULT_FOG_ENABLED
-	lcProfileEntry("Defaults", "FogDensity", 0.1f),                                  // LC_PROFILE_DEFAULT_FOG_DENSITY
-	lcProfileEntry("Defaults", "FogColor", LC_RGB(255, 255, 255)),                   // LC_PROFILE_DEFAULT_FOG_COLOR
 	lcProfileEntry("Defaults", "AmbientColor", LC_RGB(75, 75, 75)),                  // LC_PROFILE_DEFAULT_AMBIENT_COLOR
 	lcProfileEntry("Defaults", "BackgroundType", LC_BACKGROUND_SOLID),               // LC_PROFILE_DEFAULT_BACKGROUND_TYPE
 	lcProfileEntry("Defaults", "BackgroundColor", LC_RGB(255, 255, 255)),            // LC_PROFILE_DEFAULT_BACKGROUND_COLOR

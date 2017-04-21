@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>500</width>
-    <height>362</height>
+    <height>442</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,7 +17,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="tabSummary">
       <attribute name="title">
@@ -105,7 +105,7 @@
           <item row="0" column="0">
            <widget class="QRadioButton" name="solidRadio">
             <property name="text">
-             <string>Solid Color</string>
+             <string>So&amp;lid Color</string>
             </property>
            </widget>
           </item>
@@ -119,7 +119,7 @@
           <item row="1" column="0">
            <widget class="QRadioButton" name="gradientRadio">
             <property name="text">
-             <string>Gradient</string>
+             <string>&amp;Gradient</string>
             </property>
            </widget>
           </item>
@@ -178,61 +178,13 @@
          </property>
          <layout class="QGridLayout" name="gridLayout_2">
           <item row="0" column="0">
-           <widget class="QCheckBox" name="fogCheckBox">
-            <property name="text">
-             <string>Fog</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <layout class="QHBoxLayout" name="horizontalLayout_4">
-            <item>
-             <widget class="QToolButton" name="fogColorButton">
-              <property name="text">
-               <string/>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLabel" name="label_19">
-              <property name="text">
-               <string>Density</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="fogDensityEdit">
-              <property name="maximumSize">
-               <size>
-                <width>75</width>
-                <height>16777215</height>
-               </size>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <spacer name="horizontalSpacer_3">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-           </layout>
-          </item>
-          <item row="1" column="0">
            <widget class="QLabel" name="label_20">
             <property name="text">
              <string>Ambient Light</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="1">
+          <item row="0" column="1">
            <layout class="QHBoxLayout" name="horizontalLayout_5">
             <item>
              <widget class="QToolButton" name="ambientColorButton">
@@ -257,8 +209,6 @@
            </layout>
           </item>
          </layout>
-         <zorder>label_20</zorder>
-         <zorder>fogCheckBox</zorder>
         </widget>
        </item>
        <item>
@@ -335,9 +285,6 @@
   <tabstop>imageNameEdit</tabstop>
   <tabstop>imageNameButton</tabstop>
   <tabstop>imageTileCheckBox</tabstop>
-  <tabstop>fogCheckBox</tabstop>
-  <tabstop>fogColorButton</tabstop>
-  <tabstop>fogDensityEdit</tabstop>
   <tabstop>ambientColorButton</tabstop>
   <tabstop>setDefaultCheckBox</tabstop>
   <tabstop>partsTable</tabstop>

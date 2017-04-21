@@ -52,11 +52,6 @@ public:
 	{
 	}
 
-	lcVector2(const lcVector2& a)
-		: x(a.x), y(a.y)
-	{
-	}
-
 	operator const float*() const
 	{
 		return (const float*)this;

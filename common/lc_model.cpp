@@ -1791,7 +1791,7 @@ QString lcModel::GetGroupName(const QString& Prefix)
 		if (Name.startsWith(Prefix))
 		{
 			bool Ok = false;
-			int GroupNumber = Name.mid(Length).toInt(&Ok);
+			int GroupNumber = Name.midRef(Length).toInt(&Ok);
 			if (Ok && GroupNumber > Max)
 				Max = GroupNumber;
 		}

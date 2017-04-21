@@ -385,7 +385,7 @@ public:
 		UpdateMesh();
 	}
 
-	const char* GetName() const;
+	const char* GetName() const override;
 	bool IsVisible(lcStep Step);
 	void Initialize(const lcMatrix44& WorldMatrix, lcStep Step);
 	const lcBoundingBox& GetBoundingBox() const;

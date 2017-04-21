@@ -186,7 +186,7 @@ public:
 	bool IsVisible() const
 	{ return (mState & LC_LIGHT_HIDDEN) == 0; }
 
-	const char* GetName() const
+	const char* GetName() const override
 	{ return m_strName; }
 
 	void CompareBoundingBox(lcVector3& Min, lcVector3& Max);

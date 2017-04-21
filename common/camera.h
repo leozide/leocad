@@ -45,7 +45,7 @@ public:
 	lcCamera(float ex, float ey, float ez, float tx, float ty, float tz);
 	virtual ~lcCamera();
 
-	const char* GetName() const
+	const char* GetName() const override
 	{
 		return m_strName;
 	}

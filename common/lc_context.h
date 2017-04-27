@@ -115,6 +115,7 @@ public:
 	void SetMaterial(lcMaterialType MaterialType);
 	void SetViewport(int x, int y, int Width, int Height);
 	void SetLineWidth(float LineWidth);
+	void SetSmoothShading(bool Smooth);
 	void BindTexture(GLuint Texture);
 
 	void SetColor(const lcVector4& Color)

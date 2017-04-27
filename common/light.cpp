@@ -526,47 +526,7 @@ void lcLight::DrawPointLight(lcContext* Context) const
 
 bool lcLight::Setup(int LightIndex)
 {
-#ifndef LC_OPENGLES
-	GLenum LightName = (GLenum)(GL_LIGHT0 + LightIndex);
-
-	if (mState & LC_LIGHT_DISABLED)
-		return false;
-
-	glEnable(LightName);
-
-	glLightfv(LightName, GL_AMBIENT, mAmbientColor);
-	glLightfv(LightName, GL_DIFFUSE, mDiffuseColor);
-	glLightfv(LightName, GL_SPECULAR, mSpecularColor);
-
-	if (!IsDirectionalLight())
-	{
-		glLightf(LightName, GL_CONSTANT_ATTENUATION, mAttenuation[0]);
-		glLightf(LightName, GL_LINEAR_ATTENUATION, mAttenuation[1]);
-		glLightf(LightName, GL_QUADRATIC_ATTENUATION, mAttenuation[2]);
-
-		lcVector4 Position(mPosition, 1.0f);
-		glLightfv(LightName, GL_POSITION, Position);
-	}
-	else
-	{
-		lcVector4 Position(mPosition, 0.0f);
-		glLightfv(LightName, GL_POSITION, Position);
-	}
-
-	if (IsPointLight())
-	{
-		glLightf(LightName, GL_SPOT_CUTOFF, 180.0f);
-	}
-	else if (IsSpotLight())
-	{
-		lcVector3 Dir(mTargetPosition - mPosition);
-		Dir.Normalize();
-
-		glLightf(LightName, GL_SPOT_CUTOFF, mSpotCutoff);
-		glLightf(LightName, GL_SPOT_EXPONENT, mSpotExponent);
-		glLightfv(LightName, GL_SPOT_DIRECTION, Dir);
-	}
-#endif
+	Q_UNUSED(LightIndex);
 
 	return true;
 }

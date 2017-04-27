@@ -488,6 +488,14 @@ void lcContext::SetLineWidth(float LineWidth)
 	mLineWidth = LineWidth;
 }
 
+void lcContext::SetSmoothShading(bool Smooth)
+{
+#ifndef LC_OPENGLES
+	if (gSupportsShaderObjects)
+		glShadeModel(Smooth ? GL_SMOOTH : GL_FLAT);
+#endif
+}
+
 void lcContext::BindTexture(GLuint Texture)
 {
 	if (mTexture == Texture)

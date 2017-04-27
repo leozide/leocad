@@ -1148,9 +1148,7 @@ void lcModel::DrawBackground(lcGLWidget* Widget)
 
 	if (mProperties.mBackgroundType == LC_BACKGROUND_GRADIENT)
 	{
-#ifndef LC_OPENGLES
-		glShadeModel(GL_SMOOTH);
-#endif
+		Context->SetSmoothShading(true);
 
 		const lcVector3& Color1 = mProperties.mBackgroundGradientColor1;
 		const lcVector3& Color2 = mProperties.mBackgroundGradientColor2;
@@ -1169,9 +1167,7 @@ void lcModel::DrawBackground(lcGLWidget* Widget)
 
 		Context->DrawPrimitives(GL_TRIANGLE_FAN, 0, 4);
 
-#ifndef LC_OPENGLES
-		glShadeModel(GL_FLAT);
-#endif
+		Context->SetSmoothShading(false);
 	}
 	else if (mProperties.mBackgroundType == LC_BACKGROUND_IMAGE)
 	{

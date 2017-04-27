@@ -97,6 +97,9 @@ lcQGLWidget::lcQGLWidget(QWidget *parent, lcGLWidget *owner, bool view)
 		lcContext::CreateResources();
 		View::CreateResources(widget->mContext);
 
+		if (!gSupportsShaderObjects)
+			lcGetPreferences().mLightingMode = LC_LIGHTING_UNLIT;
+
 		gPlaceholderMesh = new lcMesh;
 		gPlaceholderMesh->CreateBox();
 	}

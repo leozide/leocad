@@ -7,6 +7,7 @@
 #include "lc_library.h"
 #include "lc_application.h"
 #include "lc_qutils.h"
+#include "lc_glextensions.h"
 #include "pieceinf.h"
 
 lcQPreferencesDialog::lcQPreferencesDialog(QWidget *parent, void *data) :
@@ -46,7 +47,8 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget *parent, void *data) :
 	ui->gridLines->setChecked(options->Preferences.mDrawGridLines);
 	ui->gridLineSpacing->setText(QString::number(options->Preferences.mGridLineSpacing));
 	ui->axisIcon->setChecked(options->Preferences.mDrawAxes);
-	ui->enableLighting->setChecked(options->Preferences.mLightingMode != LC_LIGHTING_UNLIT);
+	ui->enableLighting->setChecked(options->Preferences.mLightingMode != LC_LIGHTING_UNLIT && gSupportsShaderObjects);
+	ui->enableLighting->setEnabled(gSupportsShaderObjects);
 
 	QPixmap pix(12, 12);
 

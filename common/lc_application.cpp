@@ -99,7 +99,7 @@ bool lcApplication::LoadPiecesLibrary(const char* LibPath, const char* LibraryIn
 	QString CustomPath = lcGetProfileString(LC_PROFILE_PARTS_LIBRARY);
 
 	if (!CustomPath.isEmpty())
-		return mLibrary->Load(CustomPath.toLatin1().constData()); // todo: qstring
+		return mLibrary->Load(CustomPath);
 
 	if (LibraryInstallPath && LibraryInstallPath[0])
 	{
@@ -174,6 +174,7 @@ void lcApplication::ParseStringArgument(int* CurArg, int argc, char* argv[], cha
 
 bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstallPath, const char* LDrawPath, bool& ShowWindow)
 {
+	// todo: parse command line using Qt to handle multibyte strings.
 	char* LibPath = nullptr;
 
 	// Image output options.

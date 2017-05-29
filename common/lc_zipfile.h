@@ -53,9 +53,9 @@ public:
 	lcZipFile();
 	~lcZipFile();
 
-	bool OpenRead(const char* FilePath);
+	bool OpenRead(const QString& FileName);
 	bool OpenRead(lcFile* File);
-	bool OpenWrite(const char* FilePath, bool Append);
+	bool OpenWrite(const QString& FileName);
 
 	bool ExtractFile(int FileIndex, lcMemFile& File, lcuint32 MaxLength = 0xffffffff);
 	bool ExtractFile(const char* FileName, lcMemFile& File, lcuint32 MaxLength = 0xffffffff);

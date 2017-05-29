@@ -11,7 +11,7 @@ lcTexture* lcLoadTexture(const QString& FileName, int Flags)
 {
 	lcTexture* Texture = new lcTexture();
 
-	if (!Texture->Load(FileName.toLatin1().constData(), Flags)) // todo: qstring
+	if (!Texture->Load(FileName, Flags))
 	{
 		delete Texture;
 		Texture = nullptr;
@@ -160,7 +160,7 @@ bool lcTexture::Load()
 	return lcGetPiecesLibrary()->LoadTexture(this);
 }
 
-bool lcTexture::Load(const char* FileName, int Flags)
+bool lcTexture::Load(const QString& FileName, int Flags)
 {
 	Image image;
 

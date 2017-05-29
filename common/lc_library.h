@@ -149,7 +149,7 @@ public:
 	lcPiecesLibrary();
 	~lcPiecesLibrary();
 
-	bool Load(const char* LibraryPath);
+	bool Load(const QString& LibraryPath);
 	void Unload();
 	void RemoveTemporaryPieces();
 	void RemovePiece(PieceInfo* Info);
@@ -194,7 +194,7 @@ public:
 
 	lcArray<lcTexture*> mTextures;
 
-	char mLibraryPath[LC_MAXPATH];
+	QDir mLibraryDir;
 
 	bool mBuffersDirty;
 	lcVertexBuffer mVertexBuffer;
@@ -204,9 +204,9 @@ signals:
 	void PartLoaded(PieceInfo* Info);
 
 protected:
-	bool OpenArchive(const char* FileName, lcZipFileType ZipFileType);
-	bool OpenArchive(lcFile* File, const char* FileName, lcZipFileType ZipFileType);
-	bool OpenDirectory(const char* Path);
+	bool OpenArchive(const QString& FileName, lcZipFileType ZipFileType);
+	bool OpenArchive(lcFile* File, const QString& FileName, lcZipFileType ZipFileType);
+	bool OpenDirectory(const QDir& LibraryDir);
 	void ReadArchiveDescriptions(const QString& OfficialFileName, const QString& UnofficialFileName);
 
 	bool ReadCacheFile(const QString& FileName, lcMemFile& CacheFile);
@@ -225,8 +225,8 @@ protected:
 
 	QString mCachePath;
 	qint64 mArchiveCheckSum[4];
-	char mLibraryFileName[LC_MAXPATH];
-	char mUnofficialFileName[LC_MAXPATH];
+	QString mLibraryFileName;
+	QString mUnofficialFileName;
 	lcZipFile* mZipFiles[LC_NUM_ZIPFILES];
 	bool mHasUnofficial;
 };

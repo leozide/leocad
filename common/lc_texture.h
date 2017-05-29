@@ -25,7 +25,7 @@ public:
 
 	void CreateGridTexture();
 
-	bool Load(const char* FileName, int Flags = 0);
+	bool Load(const QString& FileName, int Flags = 0);
 	bool Load(lcMemFile& File, int Flags = 0);
 	bool Load(Image& image, int Flags);
 	bool Load(Image* images, int NumLevels, int Flags);

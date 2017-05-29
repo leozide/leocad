@@ -24,7 +24,7 @@ public:
 	bool HasAlpha() const;
 
 	bool FileLoad(lcMemFile& File);
-	bool FileLoad(const char* FileName);
+	bool FileLoad(const QString& FileName);
 
 	void Resize(int Width, int Height);
 	void ResizePow2();

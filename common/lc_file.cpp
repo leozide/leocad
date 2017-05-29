@@ -5,20 +5,6 @@
 #include <sys/stat.h>
 #include "lc_file.h"
 
-// =============================================================================
-// lcFile
-
-lcFile::lcFile()
-{
-}
-
-lcFile::~lcFile()
-{
-}
-
-// =============================================================================
-// lcMemFile
-
 lcMemFile::lcMemFile()
 {
 	mGrowBytes = 1024;
@@ -62,10 +48,6 @@ void lcMemFile::SetLength(size_t NewLength)
 size_t lcMemFile::GetLength() const
 {
 	return mFileSize;
-}
-
-void lcMemFile::Flush()
-{
 }
 
 void lcMemFile::Close()
@@ -164,120 +146,4 @@ char* lcMemFile::ReadLine(char* Buffer, size_t BufferSize)
 
 	Buffer[BytesRead] = 0;
 	return Buffer;
-}
-
-void lcMemFile::CopyFrom(lcFile& Source)
-{
-	size_t Length = Source.GetLength();
-
-	SetLength(Length);
-	Seek(0, SEEK_SET);
-
-	Source.Seek(0, SEEK_SET);
-	Source.ReadBuffer(mBuffer, Length);
-}
-
-void lcMemFile::CopyFrom(lcMemFile& Source)
-{
-	size_t Length = Source.GetLength();
-
-	SetLength(Length);
-	Seek(0, SEEK_SET);
-
-	Source.Seek(0, SEEK_SET);
-	Source.ReadBuffer(mBuffer, Length);
-}
-
-// =============================================================================
-// lcDiskFile
-
-lcDiskFile::lcDiskFile()
-{
-	mFile = nullptr;
-}
-
-lcDiskFile::~lcDiskFile()
-{
-	Close();
-}
-
-long lcDiskFile::GetPosition() const
-{
-	return ftell(mFile);
-}
-
-void lcDiskFile::Seek(long Offset, int From)
-{
-	fseek(mFile, Offset, From);
-}
-
-void lcDiskFile::SetLength(size_t NewLength)
-{
-	fseek(mFile, (int)NewLength, SEEK_SET);
-}
-
-size_t lcDiskFile::GetLength() const
-{
-	struct stat st;
-	if (fstat(fileno(mFile), &st) < 0 || (st.st_mode & S_IFMT) != S_IFREG)
-		return 0;
-
-	return st.st_size;
-}
-
-void lcDiskFile::Flush()
-{
-	if (mFile == nullptr)
-		return;
-
-	fflush(mFile);
-}
-
-void lcDiskFile::Close()
-{
-	if (mFile == nullptr)
-		return;
-
-	fclose(mFile);
-	mFile = nullptr;
-}
-
-size_t lcDiskFile::ReadBuffer(void* Buffer, size_t Bytes)
-{
-	return fread(Buffer, 1, Bytes, mFile);
-}
-
-size_t lcDiskFile::WriteBuffer(const void* Buffer, size_t Bytes)
-{
-	return fwrite(Buffer, 1, Bytes, mFile);
-}
-
-bool lcDiskFile::Open(const QString& FileName, const char* Mode)
-{
-	return Open(FileName.toLatin1().constData(), Mode); // todo: qstring
-}
-
-bool lcDiskFile::Open(const char* FileName, const char* Mode)
-{
-	if (*FileName == 0)
-		return false;
-
-	Close();
-
-	mFile = fopen(FileName, Mode);
-
-	return (mFile != nullptr);
-}
-
-char* lcDiskFile::ReadLine(char* Buffer, size_t BufferSize)
-{
-	return fgets(Buffer, (int)BufferSize, mFile);
-}
-
-void lcDiskFile::CopyFrom(lcMemFile& Source)
-{
-	size_t Length = Source.GetLength();
-
-	Seek(0, SEEK_SET);
-	WriteBuffer(Source.mBuffer, Length);
 }

@@ -11,15 +11,18 @@
 class lcFile
 {
 public:
-	lcFile();
-	virtual ~lcFile();
+	lcFile()
+	{
+	}
+
+	virtual ~lcFile()
+	{
+	}
 
 	virtual long GetPosition() const = 0;
 	virtual void Seek(long Offset, int From) = 0;
-	virtual void SetLength(size_t NewLength) = 0;
 	virtual size_t GetLength() const = 0;
 
-	virtual void Flush() = 0;
 	virtual void Close() = 0;
 
 	virtual char* ReadLine(char* Buffer, size_t BufferSize) = 0;
@@ -30,7 +33,6 @@ public:
 
 	virtual size_t ReadBuffer(void* Buffer, size_t Bytes) = 0;
 	virtual size_t WriteBuffer(const void* Buffer, size_t Bytes) = 0;
-	virtual void CopyFrom(lcMemFile& Source) = 0;
 
 	lcuint8 ReadU8()
 	{
@@ -438,20 +440,17 @@ public:
 	lcMemFile();
 	virtual ~lcMemFile();
 
-	long GetPosition() const;
-	void Seek(long Offset, int From);
+	long GetPosition() const override;
+	void Seek(long Offset, int From) override;
 	void SetLength(size_t NewLength);
-	size_t GetLength() const;
+	size_t GetLength() const override;
 
-	void Flush();
-	void Close();
+	void Close() override;
 
-	char* ReadLine(char* Buffer, size_t BufferSize);
-	size_t ReadBuffer(void* Buffer, size_t Bytes);
-	size_t WriteBuffer(const void* Buffer, size_t Bytes);
+	char* ReadLine(char* Buffer, size_t BufferSize) override;
+	size_t ReadBuffer(void* Buffer, size_t Bytes) override;
+	size_t WriteBuffer(const void* Buffer, size_t Bytes) override;
 
-	void CopyFrom(lcFile& Source);
-	void CopyFrom(lcMemFile& Source);
 	void GrowFile(size_t NewLength);
 
 	size_t mGrowBytes;
@@ -464,27 +463,78 @@ public:
 class lcDiskFile : public lcFile
 {
 public:
-	lcDiskFile();
-	virtual ~lcDiskFile();
+	lcDiskFile()
+	{
+	}
 
-	long GetPosition() const;
-	void Seek(long Offset, int From);
-	void SetLength(size_t NewLength);
-	size_t GetLength() const;
+	lcDiskFile(const QString& FileName)
+		: mFile(FileName)
+	{
+	}
 
-	void Flush();
-	void Close();
+	virtual ~lcDiskFile()
+	{
+		Close();
+	}
 
-	char* ReadLine(char* Buffer, size_t BufferSize);
-	size_t ReadBuffer(void* Buffer, size_t Bytes);
-	size_t WriteBuffer(const void* Buffer, size_t Bytes);
+	void SetFileName(const QString& FileName)
+	{
+		mFile.setFileName(FileName);
+	}
 
-	void CopyFrom(lcMemFile& Source);
+	long GetPosition() const override
+	{
+		return mFile.pos();
+	}
 
-	bool Open(const char* FileName, const char* Mode);
-	bool Open(const QString& FileName, const char* Mode);
+	void Seek(long Offset, int From) override
+	{
+		switch (From)
+		{
+		case SEEK_CUR:
+			Offset += mFile.pos();
+			break;
+		case SEEK_END:
+			Offset += mFile.size();
+			break;
+		}
 
-	FILE* mFile;
+		mFile.seek(Offset);
+	}
+
+	size_t GetLength() const override
+	{
+		return mFile.size();
+	}
+
+	void Close() override
+	{
+		mFile.close();
+	}
+
+	char* ReadLine(char* Buffer, size_t BufferSize) override
+	{
+		qint64 LineLength = mFile.readLine(Buffer, BufferSize);
+		return LineLength != -1 ? Buffer : nullptr;
+	}
+
+	size_t ReadBuffer(void* Buffer, size_t Bytes) override
+	{
+		return mFile.read((char*)Buffer, Bytes);
+	}
+
+	size_t WriteBuffer(const void* Buffer, size_t Bytes) override
+	{
+		return mFile.write((const char*)Buffer, Bytes);
+	}
+
+	bool Open(QIODevice::OpenMode Flags)
+	{
+		return mFile.open(Flags);
+	}
+
+protected:
+	QFile mFile;
 };
 
 #endif // _FILE_H_

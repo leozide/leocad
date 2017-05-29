@@ -15,15 +15,10 @@
 
 MinifigWizard::MinifigWizard()
 {
-	char Filename[LC_MAXPATH];
-	strcpy(Filename, lcGetPiecesLibrary()->mLibraryPath);
-	strcat(Filename, "mlcad.ini");
+	lcDiskFile DiskSettings(lcGetPiecesLibrary()->mLibraryDir.absoluteFilePath(QLatin1String("mlcad.ini")));
 
-	lcDiskFile DiskSettings;
-	if (DiskSettings.Open(Filename, "rt"))
-	{
+	if (DiskSettings.Open(QIODevice::ReadOnly))
 		ParseSettings(DiskSettings);
-	}
 	else
 	{
 		QResource Resource(":/resources/minifig.ini");

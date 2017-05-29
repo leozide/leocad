@@ -166,7 +166,7 @@ bool Image::FileLoad(lcMemFile& File)
 	return true;
 }
 
-bool Image::FileLoad(const char* FileName)
+bool Image::FileLoad(const QString& FileName)
 {
 	QImage Image;
 

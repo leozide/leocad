@@ -445,9 +445,9 @@ void Project::Export3DStudio(const QString& FileName)
 	if (SaveFileName.isEmpty())
 		return;
 
-	lcDiskFile File;
+	lcDiskFile File(SaveFileName);
 
-	if (!File.Open(SaveFileName, "wb"))
+	if (!File.Open(QIODevice::WriteOnly))
 	{
 		QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Could not open file '%1' for writing.").arg(FileName));
 		return;
@@ -892,10 +892,10 @@ void Project::ExportBrickLink()
 	if (SaveFileName.isEmpty())
 		return;
 
-	lcDiskFile BrickLinkFile;
+	lcDiskFile BrickLinkFile(SaveFileName);
 	char Line[1024];
 
-	if (!BrickLinkFile.Open(SaveFileName, "wt"))
+	if (!BrickLinkFile.Open(QIODevice::WriteOnly))
 	{
 		QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Could not open file '%1' for writing.").arg(SaveFileName));
 		return;
@@ -954,10 +954,10 @@ void Project::ExportCSV()
 	if (SaveFileName.isEmpty())
 		return;
 
-	lcDiskFile CSVFile;
+	lcDiskFile CSVFile(SaveFileName);
 	char Line[1024];
 
-	if (!CSVFile.Open(SaveFileName, "wt"))
+	if (!CSVFile.Open(QIODevice::WriteOnly))
 	{
 		QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Could not open file '%1' for writing.").arg(SaveFileName));
 		return;
@@ -1357,9 +1357,9 @@ void Project::ExportPOVRay()
 	if (Dialog.exec() != QDialog::Accepted)
 		return;
 
-	lcDiskFile POVFile;
+	lcDiskFile POVFile(Dialog.mFileName);
 
-	if (!POVFile.Open(Dialog.mFileName, "wt"))
+	if (!POVFile.Open(QIODevice::WriteOnly))
 	{
 		QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Could not open file '%1' for writing.").arg(Dialog.mFileName));
 		return;
@@ -1392,9 +1392,9 @@ void Project::ExportPOVRay()
 
 	if (!Dialog.mLGEOPath.isEmpty())
 	{
-		lcDiskFile TableFile, ColorFile;
+		lcDiskFile TableFile(QFileInfo(QDir(Dialog.mLGEOPath), QLatin1String("lg_elements.lst")).absoluteFilePath());
 
-		if (!TableFile.Open(QFileInfo(QDir(Dialog.mLGEOPath), QLatin1String("lg_elements.lst")).absoluteFilePath(), "rt"))
+		if (!TableFile.Open(QIODevice::ReadOnly))
 		{
 			QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Could not find LGEO files in folder '%1'.").arg(Dialog.mLGEOPath));
 			return;
@@ -1438,7 +1438,9 @@ void Project::ExportPOVRay()
 			}
 		}
 
-		if (!ColorFile.Open(QFileInfo(QDir(Dialog.mLGEOPath), QLatin1String("lg_colors.lst")).absoluteFilePath(), "rt"))
+		lcDiskFile ColorFile(QFileInfo(QDir(Dialog.mLGEOPath), QLatin1String("lg_colors.lst")).absoluteFilePath());
+
+		if (!ColorFile.Open(QIODevice::ReadOnly))
 		{
 			QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Could not find LGEO files in folder '%1'.").arg(Dialog.mLGEOPath));
 			return;
@@ -1628,57 +1630,47 @@ void Project::ExportWavefront(const QString& FileName)
 		return;
 	}
 
-	QString SaveFileName = GetExportFileName(FileName, "obj", tr("Export Wavefront"), tr("Wavefront Files (*.obj);;All Files (*.*)"));
+	QString SaveFileName = GetExportFileName(FileName, QLatin1String("obj"), tr("Export Wavefront"), tr("Wavefront Files (*.obj);;All Files (*.*)"));
 
 	if (SaveFileName.isEmpty())
 		return;
 
-	lcDiskFile OBJFile;
+	lcDiskFile OBJFile(SaveFileName);
 	char Line[1024];
 
-	if (!OBJFile.Open(SaveFileName, "wt"))
+	if (!OBJFile.Open(QIODevice::WriteOnly))
 	{
 		QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Could not open file '%1' for writing.").arg(SaveFileName));
 		return;
 	}
 
-	char buf[LC_MAXPATH], *ptr;
 	lcuint32 vert = 1;
 
 	OBJFile.WriteLine("# Model exported from LeoCAD\n");
 
-	strcpy(buf, SaveFileName.toLatin1().constData());
-	ptr = strrchr(buf, '.');
-	if (ptr)
-		*ptr = 0;
+	QFileInfo SaveInfo(SaveFileName);
+	QString MaterialFileName = QDir(SaveInfo.absolutePath()).absoluteFilePath(SaveInfo.completeBaseName() + QLatin1String(".mtl"));
 
-	strcat(buf, ".mtl");
-	ptr = strrchr(buf, '\\');
-	if (ptr)
-		ptr++;
-	else
-	{
-		ptr = strrchr(buf, '/');
-		if (ptr)
-			ptr++;
-		else
-			ptr = buf;
-	}
-
-	sprintf(Line, "#\n\nmtllib %s\n\n", ptr);
+	sprintf(Line, "#\n\nmtllib %s\n\n", QFileInfo(MaterialFileName).fileName().toLatin1().constData());
 	OBJFile.WriteLine(Line);
 
-	FILE* mat = fopen(buf, "wt");
-	fputs("# Colors used by LeoCAD\n\n", mat);
+	lcDiskFile MaterialFile(MaterialFileName);
+	if (!MaterialFile.Open(QIODevice::WriteOnly))
+	{
+		QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Could not open file '%1' for writing.").arg(MaterialFileName));
+		return;
+	}
+
+	MaterialFile.WriteLine("# Colors used by LeoCAD\n\n");
 	for (int ColorIdx = 0; ColorIdx < gColorList.GetSize(); ColorIdx++)
 	{
 		lcColor* Color = &gColorList[ColorIdx];
 		if (Color->Translucent)
-			fprintf(mat, "newmtl %s\nKd %.2f %.2f %.2f\nD %.2f\n\n", Color->SafeName, Color->Value[0], Color->Value[1], Color->Value[2], Color->Value[3]);
+			sprintf(Line, "newmtl %s\nKd %.2f %.2f %.2f\nD %.2f\n\n", Color->SafeName, Color->Value[0], Color->Value[1], Color->Value[2], Color->Value[3]);
 		else
-			fprintf(mat, "newmtl %s\nKd %.2f %.2f %.2f\n\n", Color->SafeName, Color->Value[0], Color->Value[1], Color->Value[2]);
+			sprintf(Line, "newmtl %s\nKd %.2f %.2f %.2f\n\n", Color->SafeName, Color->Value[0], Color->Value[1], Color->Value[2]);
+		MaterialFile.WriteLine(Line);
 	}
-	fclose(mat);
 
 	for (int PartIdx = 0; PartIdx < ModelParts.GetSize(); PartIdx++)
 	{

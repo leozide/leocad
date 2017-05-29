@@ -22,12 +22,12 @@ lcZipFile::~lcZipFile()
 	delete mFile;
 }
 
-bool lcZipFile::OpenRead(const char* FilePath)
+bool lcZipFile::OpenRead(const QString& FileName)
 {
-	lcDiskFile* File = new lcDiskFile();
+	lcDiskFile* File = new lcDiskFile(FileName);
 	mFile = File;
 
-	if (!File->Open(FilePath, "rb") || !Open())
+	if (!File->Open(QIODevice::ReadOnly) || !Open())
 	{
 		delete File;
 		mFile = nullptr;
@@ -50,34 +50,22 @@ bool lcZipFile::OpenRead(lcFile* File)
 	return true;
 }
 
-bool lcZipFile::OpenWrite(const char* FilePath, bool Append)
+bool lcZipFile::OpenWrite(const QString& FileName)
 {
-	lcDiskFile* File = new lcDiskFile();
+	lcDiskFile* File = new lcDiskFile(FileName);
 	mFile = File;
 
-	if (Append)
-	{
-		if (!File->Open(FilePath, "r+b") || !Open())
-		{
-			delete File;
-			mFile = nullptr;
-			return false;
-		}
-	}
-	else
-	{
-		mNumEntries = 0;
-		mCentralDirSize = 0;
-		mCentralDirOffset = 0;
-		mBytesBeforeZipFile = 0;
-		mCentralPos = 0;
+	mNumEntries = 0;
+	mCentralDirSize = 0;
+	mCentralDirOffset = 0;
+	mBytesBeforeZipFile = 0;
+	mCentralPos = 0;
 
-		if (!File->Open(FilePath, "wb"))
-		{
-			delete File;
-			mFile = nullptr;
-			return false;
-		}
+	if (!File->Open(QIODevice::WriteOnly))
+	{
+		delete File;
+		mFile = nullptr;
+		return false;
 	}
 
 	return true;

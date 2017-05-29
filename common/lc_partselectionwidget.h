@@ -82,9 +82,15 @@ public:
 		return mColorLocked;
 	}
 
+	bool IsListMode() const
+	{
+		return mListMode;
+	}
+
 	void Redraw();
 	void SetColorIndex(int ColorIndex);
 	void ToggleColorLocked();
+	void ToggleListMode();
 	void SetCategory(int CategoryIndex);
 	void SetModelsCategory();
 	void SetCurrentModelCategory();
@@ -106,6 +112,7 @@ protected:
 	bool mColorLocked;
 	int mColorIndex;
 	bool mShowPartNames;
+	bool mListMode;
 };
 
 class lcPartSelectionListView : public QListView
@@ -132,6 +139,8 @@ public:
 		return mFilterModel;
 	}
 
+	void UpdateViewMode();
+
 protected slots:
 	void CustomContextMenuRequested(QPoint Pos);
 	void SetNoIcons();
@@ -141,6 +150,7 @@ protected slots:
 	void SetExtraLargeIcons();
 	void TogglePartNames();
 	void ToggleDecoratedParts();
+	void ToggleListMode();
 	void ToggleFixedColor();
 
 protected:
@@ -148,8 +158,6 @@ protected:
 
 	lcPartSelectionListModel* mListModel;
 	lcPartSelectionFilterModel* mFilterModel;
-
-//	QSize sizeHint() const;
 };
 
 class lcPartSelectionWidget : public QWidget

@@ -99,6 +99,7 @@ lcPartSelectionListModel::lcPartSelectionListModel(QObject* Parent)
 	mListView = (lcPartSelectionListView*)Parent;
 	mIconSize = 0;
 	mShowPartNames = lcGetProfileInt(LC_PROFILE_PARTS_LIST_NAMES);
+	mListMode = lcGetProfileInt(LC_PROFILE_PARTS_LIST_LISTMODE);
 
 	int ColorCode = lcGetProfileInt(LC_PROFILE_PARTS_LIST_COLOR);
 	if (ColorCode == -1)
@@ -160,6 +161,14 @@ void lcPartSelectionListModel::ToggleColorLocked()
 
 	SetColorIndex(gMainWindow->mColorIndex);
 	lcSetProfileInt(LC_PROFILE_PARTS_LIST_COLOR, mColorLocked ? lcGetColorCode(mColorIndex) : -1);
+}
+
+void lcPartSelectionListModel::ToggleListMode()
+{
+	mListMode = !mListMode;
+
+	mListView->UpdateViewMode();
+	lcSetProfileInt(LC_PROFILE_PARTS_LIST_LISTMODE, mListMode);
 }
 
 void lcPartSelectionListModel::SetCategory(int CategoryIndex)
@@ -243,7 +252,7 @@ QVariant lcPartSelectionListModel::data(const QModelIndex& Index, int Role) cons
 		switch (Role)
 		{
 		case Qt::DisplayRole:
-			if (!mIconSize || mShowPartNames)
+			if (!mIconSize || mShowPartNames || mListMode)
 				return QVariant(QString::fromLatin1(Info->m_strDescription));
 			break;
 
@@ -444,7 +453,7 @@ void lcPartSelectionListView::CustomContextMenuRequested(QPoint Pos)
 
 	Menu->addSeparator();
 
-	if (mListModel->GetIconSize() != 0)
+	if (mListModel->GetIconSize() != 0 && !mListModel->IsListMode())
 	{
 		QAction* PartNames = Menu->addAction(tr("Show Part Names"), this, SLOT(TogglePartNames()));
 		PartNames->setCheckable(true);
@@ -454,6 +463,10 @@ void lcPartSelectionListView::CustomContextMenuRequested(QPoint Pos)
 	QAction* DecoratedParts = Menu->addAction(tr("Show Decorated Parts"), this, SLOT(ToggleDecoratedParts()));
 	DecoratedParts->setCheckable(true);
 	DecoratedParts->setChecked(mFilterModel->GetShowDecoratedParts());
+
+	QAction* ListMode = Menu->addAction(tr("List Mode"), this, SLOT(ToggleListMode()));
+	ListMode->setCheckable(true);
+	ListMode->setChecked(mListModel->IsListMode());
 
 	QAction* FixedColor = Menu->addAction(tr("Lock Preview Color"), this, SLOT(ToggleFixedColor()));
 	FixedColor->setCheckable(true);
@@ -501,17 +514,28 @@ void lcPartSelectionListView::ToggleDecoratedParts()
 	lcSetProfileInt(LC_PROFILE_PARTS_LIST_DECORATED, Show);
 }
 
+void lcPartSelectionListView::ToggleListMode()
+{
+	mListModel->ToggleListMode();
+}
+
 void lcPartSelectionListView::ToggleFixedColor()
 {
 	mListModel->ToggleColorLocked();
 }
 
+void lcPartSelectionListView::UpdateViewMode()
+{
+	setViewMode(mListModel->GetIconSize() && !mListModel->IsListMode() ? QListView::IconMode : QListView::ListMode);
+	setWordWrap(mListModel->IsListMode());
+}
+
 void lcPartSelectionListView::SetIconSize(int Size)
 {
-	setViewMode(Size ? QListView::IconMode : QListView::ListMode);
 	setIconSize(QSize(Size, Size));
 	lcSetProfileInt(LC_PROFILE_PARTS_LIST_ICONS, Size);
 	mListModel->SetIconSize(Size);
+	UpdateViewMode();
 }
 
 void lcPartSelectionListView::startDrag(Qt::DropActions SupportedActions)

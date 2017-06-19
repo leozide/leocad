@@ -155,11 +155,20 @@ bool lcCamera::ParseLDrawLine(QTextStream& Stream)
 		else if (Token == QLatin1String("ZFAR"))
 			Stream >> m_zFar;
 		else if (Token == QLatin1String("POSITION"))
+		{
 			Stream >> mPosition[0] >> mPosition[1] >> mPosition[2];
+			ChangeKey(mPositionKeys, mPosition, 1, true);
+		}
 		else if (Token == QLatin1String("TARGET_POSITION"))
+		{
 			Stream >> mTargetPosition[0] >> mTargetPosition[1] >> mTargetPosition[2];
+			ChangeKey(mTargetPositionKeys, mTargetPosition, 1, true);
+		}
 		else if (Token == QLatin1String("UP_VECTOR"))
+		{
 			Stream >> mUpVector[0] >> mUpVector[1] >> mUpVector[2];
+			ChangeKey(mUpVectorKeys, mUpVector, 1, true);
+		}
 		else if (Token == QLatin1String("POSITION_KEY"))
 			LoadKeysLDraw(Stream, mPositionKeys);
 		else if (Token == QLatin1String("TARGET_POSITION_KEY"))

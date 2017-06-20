@@ -59,6 +59,11 @@ public:
 	View(lcModel* Model);
 	virtual ~View();
 
+	void SetHighlight(bool Highlight)
+	{
+		mHighlight = Highlight;
+	}
+
 	static void CreateResources(lcContext* Context);
 	static void DestroyResources(lcContext* Context);
 
@@ -148,6 +153,7 @@ protected:
 	bool mTrackUpdated;
 	int mMouseDownX;
 	int mMouseDownY;
+	bool mHighlight;
 
 	lcVertexBuffer mGridBuffer;
 	int mGridSettings[7];

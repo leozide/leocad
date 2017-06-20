@@ -1245,7 +1245,7 @@ void Project::ExportHTML()
 		}
 
 		QString StepImageBaseName = QFileInfo(Dir, BaseName + QLatin1String("-%1.png")).absoluteFilePath();
-		Model->SaveStepImages(StepImageBaseName, true, false, Options.StepImagesWidth, Options.StepImagesHeight, 1, LastStep);
+		Model->SaveStepImages(StepImageBaseName, true, false, Options.HighlightNewParts, Options.StepImagesWidth, Options.StepImagesHeight, 1, LastStep);
 
 		if (Options.PartsListImages)
 		{
@@ -1724,7 +1724,7 @@ void Project::SaveImage()
 	if (Dialog.mStart != Dialog.mEnd)
 		Dialog.mFileName = Dialog.mFileName.insert(Dialog.mFileName.length() - Extension.length() - 1, QLatin1String("%1"));
 
-	mActiveModel->SaveStepImages(Dialog.mFileName, Dialog.mStart != Dialog.mEnd, false, Dialog.mWidth, Dialog.mHeight, Dialog.mStart, Dialog.mEnd);
+	mActiveModel->SaveStepImages(Dialog.mFileName, Dialog.mStart != Dialog.mEnd, false, false, Dialog.mWidth, Dialog.mHeight, Dialog.mStart, Dialog.mEnd);
 }
 
 void Project::UpdatePieceInfo(PieceInfo* Info) const

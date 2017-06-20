@@ -1077,7 +1077,7 @@ void lcModel::DuplicateSelectedPieces()
 	SaveCheckpoint(tr("Duplicating Pieces"));
 }
 
-void lcModel::GetScene(lcScene& Scene, lcCamera* ViewCamera, bool DrawInterface) const
+void lcModel::GetScene(lcScene& Scene, lcCamera* ViewCamera, bool DrawInterface, bool Highlight) const
 {
 	Scene.Begin(ViewCamera->mWorldView);
 
@@ -1088,7 +1088,7 @@ void lcModel::GetScene(lcScene& Scene, lcCamera* ViewCamera, bool DrawInterface)
 		lcPiece* Piece = mPieces[PieceIdx];
 
 		if (Piece->IsVisible(mCurrentStep))
-			Piece->AddRenderMeshes(Scene, DrawInterface, Piece->GetStepShow()==mCurrentStep);
+			Piece->AddRenderMeshes(Scene, DrawInterface, Highlight && Piece->GetStepShow() == mCurrentStep);
 	}
 
 	if (DrawInterface)
@@ -1201,7 +1201,7 @@ void lcModel::DrawBackground(lcGLWidget* Widget)
 	glDepthMask(GL_TRUE);
 }
 
-void lcModel::SaveStepImages(const QString& BaseName, bool AddStepSuffix, bool Zoom, int Width, int Height, lcStep Start, lcStep End)
+void lcModel::SaveStepImages(const QString& BaseName, bool AddStepSuffix, bool Zoom, bool Highlight, int Width, int Height, lcStep Start, lcStep End)
 {
 	View* ActiveView = gMainWindow->GetActiveView();
 	ActiveView->MakeCurrent();
@@ -1220,6 +1220,7 @@ void lcModel::SaveStepImages(const QString& BaseName, bool AddStepSuffix, bool Z
 		ZoomExtents(Camera, (float)Width / (float)Height);
 
 	View View(this);
+	View.SetHighlight(Highlight);
 	View.SetCamera(Camera, false);
 	View.mWidth = Width;
 	View.mHeight = Height;

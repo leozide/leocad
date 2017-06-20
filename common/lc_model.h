@@ -209,10 +209,10 @@ public:
 	void Paste();
 	void DuplicateSelectedPieces();
 
-	void GetScene(lcScene& Scene, lcCamera* ViewCamera, bool DrawInterface) const;
+	void GetScene(lcScene& Scene, lcCamera* ViewCamera, bool DrawInterface, bool Highlight) const;
 	void SubModelAddRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, int DefaultColorIndex, bool Focused, bool Selected) const;
 	void DrawBackground(lcGLWidget* Widget);
-	void SaveStepImages(const QString& BaseName, bool AddStepSuffix, bool Zoom, int Width, int Height, lcStep Start, lcStep End);
+	void SaveStepImages(const QString& BaseName, bool AddStepSuffix, bool Zoom, bool Highlight, int Width, int Height, lcStep Start, lcStep End);
 
 	void RayTest(lcObjectRayTest& ObjectRayTest) const;
 	void BoxTest(lcObjectBoxTest& ObjectBoxTest) const;

@@ -17,6 +17,7 @@ View::View(lcModel* Model)
 {
 	mModel = Model;
 	mCamera = nullptr;
+	mHighlight = false;
 	memset(mGridSettings, 0, sizeof(mGridSettings));
 
 	mDragState = LC_DRAGSTATE_NONE;
@@ -549,7 +550,7 @@ void View::OnDraw()
 {
 	bool DrawInterface = mWidget != nullptr;
 
-	mModel->GetScene(mScene, mCamera, DrawInterface);
+	mModel->GetScene(mScene, mCamera, DrawInterface, mHighlight);
 
 	if (DrawInterface && mTrackTool == LC_TRACKTOOL_INSERT)
 	{

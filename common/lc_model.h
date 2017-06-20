@@ -140,6 +140,11 @@ public:
 		mProperties.mName = Name;
 	}
 
+	const QString& GetName()
+	{
+		return mProperties.mName;
+	}
+
 	const QStringList& GetFileLines() const
 	{
 		return mFileLines;

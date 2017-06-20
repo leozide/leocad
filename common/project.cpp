@@ -69,6 +69,17 @@ void Project::SetActiveModel(int ModelIndex)
 	mActiveModel->UpdateInterface();
 }
 
+void Project::SetActiveModel(const QString& ModelName)
+{
+	for (int ModelIdx = 0; ModelIdx < mModels.GetSize(); ModelIdx++) {
+		if(ModelName.compare(mModels[ModelIdx]->GetName(), Qt::CaseInsensitive) == 0) {
+			SetActiveModel(ModelIdx);
+			return;
+		}
+	}
+
+}
+
 QString Project::GetNewModelName(QWidget* ParentWidget, const QString& DialogTitle, const QString& CurrentName, const QStringList& ExistingModels) const
 {
 	QString Name = CurrentName;

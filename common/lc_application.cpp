@@ -6,6 +6,7 @@
 #include "project.h"
 #include "lc_mainwindow.h"
 #include "lc_shortcuts.h"
+#include "view.h"
 
 lcApplication* g_App;
 
@@ -187,6 +188,8 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 	lcStep ImageStart = 0;
 	lcStep ImageEnd = 0;
 	char* ImageName = nullptr;
+	char* ModelName = nullptr;
+	char* CameraName = nullptr;
 	char* ProjectName = nullptr;
 	char* SaveWavefrontName = nullptr;
 	char* Save3DSName = nullptr;
@@ -231,6 +234,22 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 				int Step;
 				ParseIntegerArgument(&i, argc, argv, &Step);
 				ImageEnd = Step;
+			}
+			else if ((strcmp(Param, "-m") == 0) || (strcmp(Param, "--model") == 0))
+			{
+				if ((argc > (i+1)) && (argv[i+1][0] != '-'))
+				{
+					i++;
+					ModelName = argv[i];
+				}
+			}
+			else if ((strcmp(Param, "-c") == 0) || (strcmp(Param, "--camera") == 0))
+			{
+				if ((argc > (i+1)) && (argv[i+1][0] != '-'))
+				{
+					i++;
+					CameraName = argv[i];
+				}
 			}
 			else if (strcmp(Param, "--highlight") == 0)
 				ImageHighlight = true;
@@ -319,6 +338,12 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 	// Load project.
 	if (ProjectName && gMainWindow->OpenProject(ProjectName))
 	{
+		if(ModelName)
+			lcGetActiveProject()->SetActiveModel(QString::fromUtf8(ModelName));
+
+		if(CameraName)
+			gMainWindow->GetActiveView()->SetCamera(QString::fromUtf8(CameraName));
+
 		if (SaveImage)
 		{
 			QString FileName;

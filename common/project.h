@@ -55,6 +55,7 @@ public:
 	}
 
 	void SetActiveModel(int ModelIndex);
+	void SetActiveModel(const QString& ModelName);
 
 	lcModel* CreateNewModel(bool ShowModel);
 	QString GetNewModelName(QWidget* ParentWidget, const QString& DialogTitle, const QString& CurrentName, const QStringList& ExistingModels) const;

@@ -92,6 +92,7 @@ public:
 
 	void RemoveCamera();
 	void SetCamera(lcCamera* Camera, bool ForceCopy);
+	void SetCamera(const QString& CameraName);
 	void SetCameraIndex(int Index);
 	void SetViewpoint(lcViewpoint Viewpoint);
 	void SetDefaultCamera();

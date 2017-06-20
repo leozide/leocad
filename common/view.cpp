@@ -240,6 +240,18 @@ void View::SetCamera(lcCamera* Camera, bool ForceCopy)
 	}
 }
 
+void View::SetCamera(const QString& CameraName)
+{
+	const lcArray<lcCamera*>& Cameras = mModel->GetCameras();
+
+	for (int CameraIdx = 0; CameraIdx < Cameras.GetSize(); CameraIdx++) {
+		if(CameraName.compare(QString::fromUtf8(Cameras[CameraIdx]->m_strName), Qt::CaseInsensitive) == 0) {
+			SetCameraIndex(CameraIdx);
+			return;
+		}
+	}
+}
+
 void View::SetCameraIndex(int Index)
 {
 	const lcArray<lcCamera*>& Cameras = mModel->GetCameras();

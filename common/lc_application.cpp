@@ -291,6 +291,9 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 				printf("  -h, --height <height>: Sets the picture height.\n");
 				printf("  -f, --from <time>: Sets the first frame or step to save pictures.\n");
 				printf("  -t, --to <time>: Sets the last frame or step to save pictures.\n");
+				printf("  -m, --model <model>: Sets the active submodel.\n");
+				printf("  -c, --camera <camera>: Sets the active camera.\n");
+				printf("  -t, --to <time>: Sets the last frame or step to save pictures.\n");
 				printf("  --highlight: Highlight pieces in the steps they appear.\n");
 				printf("  -wf, --export-wavefront <outfile.obj>: Exports the model to Wavefront format.\n");
 				printf("  -3ds, --export-3ds <outfile.3ds>: Exports the model to 3DS format.\n");

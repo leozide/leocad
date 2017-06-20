@@ -556,7 +556,7 @@ void View::OnDraw()
 		PieceInfo* Info = gMainWindow->GetCurrentPieceInfo();
 
 		if (Info)
-			Info->AddRenderMeshes(mScene, GetPieceInsertPosition(), gMainWindow->mColorIndex, true, true);
+			Info->AddRenderMeshes(mScene, GetPieceInsertPosition(), gMainWindow->mColorIndex, true, true, false);
 	}
 
 	mContext->SetDefaultState();

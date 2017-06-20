@@ -1286,7 +1286,7 @@ void Project::ExportHTML()
 				lcScene Scene;
 				Scene.Begin(ViewMatrix);
 
-				Info->AddRenderMeshes(Scene, lcMatrix44Identity(), Options.PartImagesColor, false, false);
+				Info->AddRenderMeshes(Scene, lcMatrix44Identity(), Options.PartImagesColor, false, false, false);
 
 				Scene.End();
 

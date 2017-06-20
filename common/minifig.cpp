@@ -282,7 +282,7 @@ void MinifigWizard::OnDraw()
 
 	for (int PieceIdx = 0; PieceIdx < LC_MFW_NUMITEMS; PieceIdx++)
 		if (mMinifig.Parts[PieceIdx])
-			mMinifig.Parts[PieceIdx]->AddRenderMeshes(Scene, mMinifig.Matrices[PieceIdx], mMinifig.Colors[PieceIdx], false, false);
+			mMinifig.Parts[PieceIdx]->AddRenderMeshes(Scene, mMinifig.Matrices[PieceIdx], mMinifig.Colors[PieceIdx], false, false, false);
 
 	Scene.End();
 

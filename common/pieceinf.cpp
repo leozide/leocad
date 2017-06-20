@@ -314,10 +314,10 @@ void PieceInfo::AddRenderMesh(lcScene& Scene)
 		Scene.AddMesh(mMesh, lcMatrix44Identity(), gDefaultColor, LC_RENDERMESH_NONE, mFlags);
 }
 
-void PieceInfo::AddRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, int ColorIndex, bool Focused, bool Selected) const
+void PieceInfo::AddRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, int ColorIndex, bool Focused, bool Selected, bool Highlight) const
 {
-	if (mMesh || (mFlags & LC_PIECE_PLACEHOLDER))
-		Scene.AddMesh((mFlags & LC_PIECE_PLACEHOLDER) ? gPlaceholderMesh : mMesh, WorldMatrix, ColorIndex, Focused ? LC_RENDERMESH_FOCUSED : (Selected ? LC_RENDERMESH_SELECTED : LC_RENDERMESH_NONE), mFlags);
+	if ((mMesh) || (mFlags & LC_PIECE_PLACEHOLDER))
+		Scene.AddMesh((mFlags & LC_PIECE_PLACEHOLDER) ? gPlaceholderMesh : mMesh, WorldMatrix, ColorIndex, Focused ? LC_RENDERMESH_FOCUSED : (Selected ? LC_RENDERMESH_SELECTED : (Highlight ? LC_RENDERMESH_HIGHLIGHT : LC_RENDERMESH_NONE)), mFlags);
 
 	if (mFlags & LC_PIECE_MODEL)
 		mModel->SubModelAddRenderMeshes(Scene, WorldMatrix, ColorIndex, Focused, Selected);

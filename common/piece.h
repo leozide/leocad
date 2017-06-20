@@ -346,7 +346,7 @@ public:
 	virtual void BoxTest(lcObjectBoxTest& ObjectBoxTest) const override;
 	virtual void DrawInterface(lcContext* Context) const override;
 
-	void AddRenderMeshes(lcScene& Scene, bool DrawInterface) const;
+	void AddRenderMeshes(lcScene& Scene, bool DrawInterface, bool Highlight) const;
 	void SubModelAddRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, int DefaultColorIndex, bool Focused, bool Selected) const;
 
 	void InsertTime(lcStep Start, lcStep Time);

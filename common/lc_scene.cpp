@@ -95,6 +95,7 @@ void lcScene::DrawRenderMeshes(lcContext* Context, int PrimitiveTypes, bool Enab
 				switch (RenderMesh.State)
 				{
 				case LC_RENDERMESH_NONE:
+				case LC_RENDERMESH_HIGHLIGHT:
 					Context->SetColorIndex(ColorIndex);
 					break;
 
@@ -124,6 +125,10 @@ void lcScene::DrawRenderMeshes(lcContext* Context, int PrimitiveTypes, bool Enab
 
 				case LC_RENDERMESH_FOCUSED:
 					Context->SetInterfaceColor(LC_COLOR_FOCUSED);
+					break;
+
+				case LC_RENDERMESH_HIGHLIGHT:
+					Context->SetInterfaceColor(LC_COLOR_HIGHLIGHT);
 					break;
 				}
 			}

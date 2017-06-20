@@ -1088,7 +1088,7 @@ void lcModel::GetScene(lcScene& Scene, lcCamera* ViewCamera, bool DrawInterface)
 		lcPiece* Piece = mPieces[PieceIdx];
 
 		if (Piece->IsVisible(mCurrentStep))
-			Piece->AddRenderMeshes(Scene, DrawInterface);
+			Piece->AddRenderMeshes(Scene, DrawInterface, Piece->GetStepShow()==mCurrentStep);
 	}
 
 	if (DrawInterface)

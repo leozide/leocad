@@ -402,7 +402,7 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 			else
 				Frame = FileName;
 
-			lcGetActiveModel()->SaveStepImages(Frame, ImageStart != ImageEnd, true, ImageHighlight, ImageWidth, ImageHeight, ImageStart, ImageEnd);
+			lcGetActiveModel()->SaveStepImages(Frame, ImageStart != ImageEnd, CameraName == nullptr, ImageHighlight, ImageWidth, ImageHeight, ImageStart, ImageEnd);
 		}
 
 		if (SaveWavefront)

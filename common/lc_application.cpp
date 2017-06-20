@@ -181,7 +181,7 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 	bool SaveImage = false;
 	bool SaveWavefront = false;
 	bool Save3DS = false;
-//	bool ImageHighlight = false;
+	bool ImageHighlight = false;
 	int ImageWidth = lcGetProfileInt(LC_PROFILE_IMAGE_WIDTH);
 	int ImageHeight = lcGetProfileInt(LC_PROFILE_IMAGE_HEIGHT);
 	lcStep ImageStart = 0;
@@ -232,8 +232,8 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 				ParseIntegerArgument(&i, argc, argv, &Step);
 				ImageEnd = Step;
 			}
-//			else if (strcmp(Param, "--highlight") == 0)
-//				ImageHighlight = true;
+			else if (strcmp(Param, "--highlight") == 0)
+				ImageHighlight = true;
 			else if ((strcmp(Param, "-wf") == 0) || (strcmp(Param, "--export-wavefront") == 0))
 			{
 				SaveWavefront = true;
@@ -272,7 +272,7 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 				printf("  -h, --height <height>: Sets the picture height.\n");
 				printf("  -f, --from <time>: Sets the first frame or step to save pictures.\n");
 				printf("  -t, --to <time>: Sets the last frame or step to save pictures.\n");
-//				printf("  --highlight: Highlight pieces in the steps they appear.\n");
+				printf("  --highlight: Highlight pieces in the steps they appear.\n");
 				printf("  -wf, --export-wavefront <outfile.obj>: Exports the model to Wavefront format.\n");
 				printf("  -3ds, --export-3ds <outfile.3ds>: Exports the model to 3DS format.\n");
 				printf("  \n");
@@ -374,7 +374,7 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 			else
 				Frame = FileName;
 
-			lcGetActiveModel()->SaveStepImages(Frame, ImageStart != ImageEnd, true, false, ImageWidth, ImageHeight, ImageStart, ImageEnd);
+			lcGetActiveModel()->SaveStepImages(Frame, ImageStart != ImageEnd, true, ImageHighlight, ImageWidth, ImageHeight, ImageStart, ImageEnd);
 		}
 
 		if (SaveWavefront)

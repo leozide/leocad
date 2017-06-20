@@ -625,7 +625,7 @@ void lcPiece::DrawInterface(lcContext* Context) const
 	}
 }
 
-void lcPiece::AddRenderMeshes(lcScene& Scene, bool DrawInterface) const
+void lcPiece::AddRenderMeshes(lcScene& Scene, bool DrawInterface, bool Highlight) const
 {
 	bool Focused, Selected;
 
@@ -641,7 +641,7 @@ void lcPiece::AddRenderMeshes(lcScene& Scene, bool DrawInterface) const
 	}
 
 	if (!mMesh)
-		mPieceInfo->AddRenderMeshes(Scene, mModelWorld, mColorIndex, Focused, Selected);
+		mPieceInfo->AddRenderMeshes(Scene, mModelWorld, mColorIndex, Focused, Selected, Highlight);
 	else
 		Scene.AddMesh(mMesh, mModelWorld, mColorIndex, Focused ? LC_RENDERMESH_FOCUSED : (Selected ? LC_RENDERMESH_SELECTED : LC_RENDERMESH_NONE), mPieceInfo->mFlags);
 
@@ -657,7 +657,7 @@ void lcPiece::SubModelAddRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMat
 		ColorIndex = DefaultColorIndex;
 
 	if (!mMesh)
-		mPieceInfo->AddRenderMeshes(Scene, lcMul(mModelWorld, WorldMatrix), ColorIndex, Focused, Selected);
+		mPieceInfo->AddRenderMeshes(Scene, lcMul(mModelWorld, WorldMatrix), ColorIndex, Focused, Selected, false);
 	else
 		Scene.AddMesh(mMesh, lcMul(mModelWorld, WorldMatrix), ColorIndex, Focused ? LC_RENDERMESH_FOCUSED : (Selected ? LC_RENDERMESH_SELECTED : LC_RENDERMESH_NONE), mPieceInfo->mFlags);
 }

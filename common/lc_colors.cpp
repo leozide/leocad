@@ -16,7 +16,8 @@ lcVector4 gInterfaceColors[LC_NUM_INTERFACECOLORS] = // todo: make the colors co
 	lcVector4(0.500f, 0.800f, 0.500f, 1.000f), // LC_COLOR_CAMERA
 	lcVector4(0.500f, 0.800f, 0.500f, 1.000f), // LC_COLOR_LIGHT
 	lcVector4(0.500f, 0.800f, 0.500f, 0.500f), // LC_COLOR_CONTROL_POINT
-	lcVector4(0.400f, 0.298f, 0.898f, 0.500f)  // LC_COLOR_CONTROL_POINT_FOCUSED
+	lcVector4(0.400f, 0.298f, 0.898f, 0.500f), // LC_COLOR_CONTROL_POINT_FOCUSED
+	lcVector4(0.098f, 0.898f, 0.500f, 1.000f)  // LC_COLOR_HIGHLIGHT
 };
 
 static void GetToken(char*& Ptr, char* Token)

@@ -134,7 +134,7 @@ public:
 
 	void ZoomExtents(const lcMatrix44& ProjectionMatrix, lcMatrix44& ViewMatrix, float* EyePos = nullptr) const;
 	void AddRenderMesh(lcScene& Scene);
-	void AddRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, int ColorIndex, bool Focused, bool Selected) const;
+	void AddRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, int ColorIndex, bool Focused, bool Selected, bool Highlight) const;
 
 	void CreatePlaceholder(const char* Name);
 

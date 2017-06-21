@@ -341,11 +341,11 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 	// Load project.
 	if (ProjectName && gMainWindow->OpenProject(ProjectName))
 	{
-		if(ModelName)
+		if (ModelName)
 			lcGetActiveProject()->SetActiveModel(QString::fromUtf8(ModelName));
 
-		if(CameraName)
-			gMainWindow->GetActiveView()->SetCamera(QString::fromUtf8(CameraName));
+		if (CameraName)
+			gMainWindow->GetActiveView()->SetCamera(CameraName);
 
 		if (SaveImage)
 		{

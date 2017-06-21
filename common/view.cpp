@@ -240,12 +240,14 @@ void View::SetCamera(lcCamera* Camera, bool ForceCopy)
 	}
 }
 
-void View::SetCamera(const QString& CameraName)
+void View::SetCamera(const char* CameraName)
 {
 	const lcArray<lcCamera*>& Cameras = mModel->GetCameras();
 
-	for (int CameraIdx = 0; CameraIdx < Cameras.GetSize(); CameraIdx++) {
-		if(CameraName.compare(QString::fromUtf8(Cameras[CameraIdx]->m_strName), Qt::CaseInsensitive) == 0) {
+	for (int CameraIdx = 0; CameraIdx < Cameras.GetSize(); CameraIdx++)
+	{
+		if (qstricmp(CameraName, Cameras[CameraIdx]->m_strName) == 0)
+		{
 			SetCameraIndex(CameraIdx);
 			return;
 		}

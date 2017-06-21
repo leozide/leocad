@@ -71,8 +71,10 @@ void Project::SetActiveModel(int ModelIndex)
 
 void Project::SetActiveModel(const QString& ModelName)
 {
-	for (int ModelIdx = 0; ModelIdx < mModels.GetSize(); ModelIdx++) {
-		if(ModelName.compare(mModels[ModelIdx]->GetName(), Qt::CaseInsensitive) == 0) {
+	for (int ModelIdx = 0; ModelIdx < mModels.GetSize(); ModelIdx++)
+	{
+		if (ModelName.compare(mModels[ModelIdx]->GetName(), Qt::CaseInsensitive) == 0)
+		{
 			SetActiveModel(ModelIdx);
 			return;
 		}

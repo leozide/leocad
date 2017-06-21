@@ -182,6 +182,7 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 	bool SaveImage = false;
 	bool SaveWavefront = false;
 	bool Save3DS = false;
+	bool Orthographic = false;
 	bool ImageHighlight = false;
 	int ImageWidth = lcGetProfileInt(LC_PROFILE_IMAGE_WIDTH);
 	int ImageHeight = lcGetProfileInt(LC_PROFILE_IMAGE_HEIGHT);
@@ -190,6 +191,7 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 	char* ImageName = nullptr;
 	char* ModelName = nullptr;
 	char* CameraName = nullptr;
+	char* Viewpoint = nullptr;
 	char* ProjectName = nullptr;
 	char* SaveWavefrontName = nullptr;
 	char* Save3DSName = nullptr;
@@ -251,6 +253,16 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 					CameraName = argv[i];
 				}
 			}
+			else if (strcmp(Param, "--viewpoint") == 0)
+			{
+				if ((argc > (i+1)) && (argv[i+1][0] != '-'))
+				{
+					i++;
+					Viewpoint = argv[i];
+				}
+			}
+			else if (strcmp(Param, "--orthographic") == 0)
+				Orthographic = true;
 			else if (strcmp(Param, "--highlight") == 0)
 				ImageHighlight = true;
 			else if ((strcmp(Param, "-wf") == 0) || (strcmp(Param, "--export-wavefront") == 0))
@@ -293,6 +305,8 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 				printf("  -t, --to <time>: Sets the last frame or step to save pictures.\n");
 				printf("  -m, --model <model>: Sets the active submodel.\n");
 				printf("  -c, --camera <camera>: Sets the active camera.\n");
+				printf("  --viewpoint (front|back|left|right|top|bottom|home): Sets the viewpoint.\n");
+				printf("  --orthographic: Make the view orthographic.\n");
 				printf("  --highlight: Highlight pieces in the steps they appear.\n");
 				printf("  -wf, --export-wavefront <outfile.obj>: Exports the model to Wavefront format.\n");
 				printf("  -3ds, --export-3ds <outfile.3ds>: Exports the model to 3DS format.\n");
@@ -346,7 +360,34 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 			lcGetActiveProject()->SetActiveModel(QString::fromUtf8(ModelName));
 
 		if (CameraName)
+		{
 			gMainWindow->GetActiveView()->SetCamera(CameraName);
+			if (Viewpoint || Orthographic)
+				printf("Warning: --viewpoint and --orthographic are ignored when --camera is set.\n");
+		}
+		else
+		{
+			if (Viewpoint)
+			{
+				if (strcmp(Viewpoint, "front") == 0)
+					gMainWindow->GetActiveView()->SetViewpoint(LC_VIEWPOINT_FRONT);
+				else if (strcmp(Viewpoint, "back") == 0)
+					gMainWindow->GetActiveView()->SetViewpoint(LC_VIEWPOINT_BACK);
+				else if (strcmp(Viewpoint, "top") == 0)
+					gMainWindow->GetActiveView()->SetViewpoint(LC_VIEWPOINT_TOP);
+				else if (strcmp(Viewpoint, "bottom") == 0)
+					gMainWindow->GetActiveView()->SetViewpoint(LC_VIEWPOINT_BOTTOM);
+				else if (strcmp(Viewpoint, "left") == 0)
+					gMainWindow->GetActiveView()->SetViewpoint(LC_VIEWPOINT_LEFT);
+				else if (strcmp(Viewpoint, "right") == 0)
+					gMainWindow->GetActiveView()->SetViewpoint(LC_VIEWPOINT_RIGHT);
+				else if (strcmp(Viewpoint, "home") == 0)
+					gMainWindow->GetActiveView()->SetViewpoint(LC_VIEWPOINT_HOME);
+				else
+					printf("Unknown viewpoint: %s\n", Viewpoint);
+			}
+			gMainWindow->GetActiveView()->SetProjection(Orthographic);
+		}
 
 		if (SaveImage)
 		{

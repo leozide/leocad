@@ -296,6 +296,8 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 				printf("  --highlight: Highlight pieces in the steps they appear.\n");
 				printf("  -wf, --export-wavefront <outfile.obj>: Exports the model to Wavefront format.\n");
 				printf("  -3ds, --export-3ds <outfile.3ds>: Exports the model to 3DS format.\n");
+				printf("  -v, --version: Output version information and exit.\n");
+				printf("  -?, --help: Display this help and exit.\n");
 				printf("  \n");
 
 				ShowWindow = false;

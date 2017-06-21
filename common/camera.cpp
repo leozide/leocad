@@ -473,6 +473,7 @@ void lcCamera::CopyPosition(const lcCamera* camera)
 	mPosition = camera->mPosition;
 	mTargetPosition = camera->mTargetPosition;
 	mUpVector = camera->mUpVector;
+	mState |= (camera->mState&LC_CAMERA_ORTHO);
 }
 
 void lcCamera::DrawInterface(lcContext* Context) const

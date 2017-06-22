@@ -141,7 +141,7 @@ public:
 
 	void UpdateViewMode();
 
-protected slots:
+public slots:
 	void CustomContextMenuRequested(QPoint Pos);
 	void SetNoIcons();
 	void SetSmallIcons();
@@ -173,6 +173,7 @@ public:
 	void UpdateCategories();
 	void LoadState(QSettings& Settings);
 	void SaveState(QSettings& Settings);
+	void DisableIconMode();
 
 	void SetColorIndex(int ColorIndex)
 	{

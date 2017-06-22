@@ -6,6 +6,7 @@
 #include "lc_library.h"
 #include "lc_application.h"
 #include "lc_mainwindow.h"
+#include "lc_partselectionwidget.h"
 #include "lc_context.h"
 #include "view.h"
 #include "texfont.h"
@@ -99,6 +100,9 @@ lcQGLWidget::lcQGLWidget(QWidget *parent, lcGLWidget *owner, bool view)
 
 		if (!gSupportsShaderObjects)
 			lcGetPreferences().mLightingMode = LC_LIGHTING_UNLIT;
+
+		if (!gSupportsFramebufferObjectARB && !gSupportsFramebufferObjectEXT)
+			gMainWindow->GetPartSelectionWidget()->DisableIconMode();
 
 		gPlaceholderMesh = new lcMesh;
 		gPlaceholderMesh->CreateBox();

@@ -8,6 +8,7 @@
 #include "project.h"
 #include "pieceinf.h"
 #include "view.h"
+#include "lc_glextensions.h"
 
  Q_DECLARE_METATYPE(QList<int>)
 
@@ -424,34 +425,37 @@ void lcPartSelectionListView::CustomContextMenuRequested(QPoint Pos)
 {
 	QMenu* Menu = new QMenu(this);
 
-	QActionGroup* IconGroup = new QActionGroup(Menu);
+	if (gSupportsFramebufferObjectARB || gSupportsFramebufferObjectEXT)
+	{
+		QActionGroup* IconGroup = new QActionGroup(Menu);
 
-	QAction* NoIcons = Menu->addAction(tr("No Icons"), this, SLOT(SetNoIcons()));
-	NoIcons->setCheckable(true);
-	NoIcons->setChecked(mListModel->GetIconSize() == 0);
-	IconGroup->addAction(NoIcons);
+		QAction* NoIcons = Menu->addAction(tr("No Icons"), this, SLOT(SetNoIcons()));
+		NoIcons->setCheckable(true);
+		NoIcons->setChecked(mListModel->GetIconSize() == 0);
+		IconGroup->addAction(NoIcons);
 
-	QAction* SmallIcons = Menu->addAction(tr("Small Icons"), this, SLOT(SetSmallIcons()));
-	SmallIcons->setCheckable(true);
-	SmallIcons->setChecked(mListModel->GetIconSize() == 32);
-	IconGroup->addAction(SmallIcons);
+		QAction* SmallIcons = Menu->addAction(tr("Small Icons"), this, SLOT(SetSmallIcons()));
+		SmallIcons->setCheckable(true);
+		SmallIcons->setChecked(mListModel->GetIconSize() == 32);
+		IconGroup->addAction(SmallIcons);
 
-	QAction* MediumIcons = Menu->addAction(tr("Medium Icons"), this, SLOT(SetMediumIcons()));
-	MediumIcons->setCheckable(true);
-	MediumIcons->setChecked(mListModel->GetIconSize() == 64);
-	IconGroup->addAction(MediumIcons);
+		QAction* MediumIcons = Menu->addAction(tr("Medium Icons"), this, SLOT(SetMediumIcons()));
+		MediumIcons->setCheckable(true);
+		MediumIcons->setChecked(mListModel->GetIconSize() == 64);
+		IconGroup->addAction(MediumIcons);
 
-	QAction* LargeIcons = Menu->addAction(tr("Large Icons"), this, SLOT(SetLargeIcons()));
-	LargeIcons->setCheckable(true);
-	LargeIcons->setChecked(mListModel->GetIconSize() == 96);
-	IconGroup->addAction(LargeIcons);
+		QAction* LargeIcons = Menu->addAction(tr("Large Icons"), this, SLOT(SetLargeIcons()));
+		LargeIcons->setCheckable(true);
+		LargeIcons->setChecked(mListModel->GetIconSize() == 96);
+		IconGroup->addAction(LargeIcons);
 
-	QAction* ExtraLargeIcons = Menu->addAction(tr("Extra Large Icons"), this, SLOT(SetExtraLargeIcons()));
-	ExtraLargeIcons->setCheckable(true);
-	ExtraLargeIcons->setChecked(mListModel->GetIconSize() == 192);
-	IconGroup->addAction(ExtraLargeIcons);
+		QAction* ExtraLargeIcons = Menu->addAction(tr("Extra Large Icons"), this, SLOT(SetExtraLargeIcons()));
+		ExtraLargeIcons->setCheckable(true);
+		ExtraLargeIcons->setChecked(mListModel->GetIconSize() == 192);
+		IconGroup->addAction(ExtraLargeIcons);
 
-	Menu->addSeparator();
+		Menu->addSeparator();
+	}
 
 	if (mListModel->GetIconSize() != 0 && !mListModel->IsListMode())
 	{
@@ -464,13 +468,16 @@ void lcPartSelectionListView::CustomContextMenuRequested(QPoint Pos)
 	DecoratedParts->setCheckable(true);
 	DecoratedParts->setChecked(mFilterModel->GetShowDecoratedParts());
 
-	QAction* ListMode = Menu->addAction(tr("List Mode"), this, SLOT(ToggleListMode()));
-	ListMode->setCheckable(true);
-	ListMode->setChecked(mListModel->IsListMode());
+	if (mListModel->GetIconSize() != 0)
+	{
+		QAction* ListMode = Menu->addAction(tr("List Mode"), this, SLOT(ToggleListMode()));
+		ListMode->setCheckable(true);
+		ListMode->setChecked(mListModel->IsListMode());
 
-	QAction* FixedColor = Menu->addAction(tr("Lock Preview Color"), this, SLOT(ToggleFixedColor()));
-	FixedColor->setCheckable(true);
-	FixedColor->setChecked(mListModel->IsColorLocked());
+		QAction* FixedColor = Menu->addAction(tr("Lock Preview Color"), this, SLOT(ToggleFixedColor()));
+		FixedColor->setCheckable(true);
+		FixedColor->setChecked(mListModel->IsColorLocked());
+	}
 
 	Menu->popup(viewport()->mapToGlobal(Pos));
 }
@@ -653,6 +660,11 @@ void lcPartSelectionWidget::SaveState(QSettings& Settings)
 {
 	QList<int> Sizes = mSplitter->sizes();
 	Settings.setValue("PartSelectionSplitter", QVariant::fromValue(Sizes));
+}
+
+void lcPartSelectionWidget::DisableIconMode()
+{
+	mPartsWidget->SetNoIcons();
 }
 
 void lcPartSelectionWidget::DockLocationChanged(Qt::DockWidgetArea Area)

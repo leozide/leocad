@@ -3,7 +3,7 @@
  environment:
    matrix:
     - name: win32
-      platform: amd64_x86
+      platform: x86
       qt: 5.7\msvc2015
  
  init:

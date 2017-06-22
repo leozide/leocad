@@ -6,9 +6,9 @@
  
  init:
   - set PATH=C:\Qt\%qt%\bin;%PATH%
-  - call "%ProgramFiles(x86)%\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" %platform%
+  - call "%ProgramFiles(x86)%\Microsoft Visual Studio 14.0\VC\vcvarsall.bat"
  
  install:
   - qmake -v
   - qmake
-  - nmake /k
+  - nmake /NOLOG

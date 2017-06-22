@@ -1,0 +1,16 @@
+ version: 17.02.{build}
+ 
+ environment:
+   matrix:
+    - name: win32
+      platform: amd64_x86
+      qt: 5.7\msvc2015
+ 
+ init:
+  - set PATH=C:\Qt\%qt%\bin;%PATH%
+  - call "%ProgramFiles(x86)%\Microsoft Visual Studio 14.0\VC\vcvarsall.bat"
+ 
+ install:
+  - qmake -v
+  - qmake
+  - nmake /NOLOGO

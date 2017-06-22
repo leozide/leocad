@@ -9,5 +9,6 @@
   - call "%ProgramFiles(x86)%\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" %platform%
  
  install:
+  - qmake -v
   - qmake
-  - %make%
+  - nmake

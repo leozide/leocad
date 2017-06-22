@@ -12,5 +12,5 @@
  
  install:
   - qmake -v
-  - qmake
-  - nmake /NOLOGO
+  - qmake -tp vc
+  - msbuild /t:Rebuild /p:Configuration=Release

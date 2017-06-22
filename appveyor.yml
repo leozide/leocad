@@ -1,3 +1,5 @@
+ version: 0.80.{build}
+ 
  environment:
    matrix:
     - name: win32
@@ -11,4 +13,4 @@
  install:
   - qmake -v
   - qmake
-  - nmake /NOLOG
+  - nmake /NOLOGO

@@ -1,0 +1,11 @@
+ matrix:
+  - name: win32
+    platform: amd64_x86
+    qt: 5.6\msvc2015
+ 
+ init:
+  - set PATH=C:\Qt\%qt%\bin;%PATH%
+ 
+ install:
+  - qmake
+  - nmake

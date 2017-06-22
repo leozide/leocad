@@ -9,4 +9,4 @@
  
  install:
   - qmake
-  - nmake
+  - %make%

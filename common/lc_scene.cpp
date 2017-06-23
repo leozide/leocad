@@ -138,6 +138,9 @@ void lcScene::DrawRenderMeshes(lcContext* Context, int PrimitiveTypes, bool Enab
 				lcVertex* VertexBuffer = (lcVertex*)Mesh->mVertexData;
 				int IndexBufferOffset = Mesh->mIndexCacheOffset != -1 ? Mesh->mIndexCacheOffset : 0;
 
+				int VertexBufferOffset = Mesh->mVertexCacheOffset != -1 ? Mesh->mVertexCacheOffset : 0;
+				Context->SetVertexFormat(VertexBufferOffset, 3, 1, 0, 0, EnableNormals);
+
 				if (Mesh->mIndexType == GL_UNSIGNED_SHORT)
 				{
 					lcuint16* Indices = (lcuint16*)((char*)Mesh->mIndexData + Section->IndexOffset);
@@ -168,6 +171,8 @@ void lcScene::DrawRenderMeshes(lcContext* Context, int PrimitiveTypes, bool Enab
 							Context->DrawIndexedPrimitives(GL_LINES, 2, Mesh->mIndexType, IndexBufferOffset + Section->IndexOffset + i * sizeof(lcuint32));
 					}
 				}
+
+				continue;
 			}
 
 			lcTexture* Texture = Section->Texture;
@@ -218,6 +223,8 @@ void lcScene::Draw(lcContext* Context) const
 
 	Context->SetViewMatrix(mViewMatrix);
 
+	const bool DrawConditional = false;
+
 	if (lcGetPreferences().mLightingMode == LC_LIGHTING_UNLIT)
 	{
 		bool DrawLines = lcGetPreferences().mDrawEdgeLines;
@@ -225,10 +232,17 @@ void lcScene::Draw(lcContext* Context) const
 
 		Context->SetMaterial(LC_MATERIAL_UNLIT_COLOR);
 
+		int UntexturedPrimitives = LC_MESH_TRIANGLES;
+
 		if (DrawLines)
-			DrawRenderMeshes(Context, LC_MESH_LINES | LC_MESH_TRIANGLES, false, false, false);
-		else
-			DrawRenderMeshes(Context, LC_MESH_TRIANGLES, false, false, false);
+		{
+			UntexturedPrimitives |= LC_MESH_LINES;
+
+			if (DrawConditional)
+				UntexturedPrimitives |= LC_MESH_CONDITIONAL_LINES;
+		}
+
+		DrawRenderMeshes(Context, UntexturedPrimitives, false, false, false);
 
 		if (!mTranslucentMeshes.IsEmpty())
 		{
@@ -271,8 +285,13 @@ void lcScene::Draw(lcContext* Context) const
 
 		if (DrawLines)
 		{
+			int LinePrimitives = LC_MESH_LINES;
+
+			if (DrawConditional)
+				LinePrimitives |= LC_MESH_CONDITIONAL_LINES;
+
 			Context->SetMaterial(LC_MATERIAL_UNLIT_COLOR);
-			DrawRenderMeshes(Context, LC_MESH_LINES, false, false, false);
+			DrawRenderMeshes(Context, LinePrimitives, false, false, false);
 		}
 
 		Context->SetMaterial(LC_MATERIAL_FAKELIT_COLOR);

@@ -61,6 +61,28 @@ Start saving pictures at the step \fItime\fR.
 Save pictures until the step \fItime\fR.
 
 .TP
+.BI "\-m "model
+.ns
+.TP
+.BI "\-\-model "model
+Sets the active submodel to \fImodel\fR.
+
+.TP
+.BI "\-c "camera
+.ns
+.TP
+.BI "\-\-camera "camera
+Sets the active camera to \fIcamera\fR.
+
+.TP
+.BI "\-\-viewpoint "front\ back\ left\ right\ top\ bottom\ home
+Sets the viewpoint to one of the predefined angles.
+
+.TP
+.B \-\-orthographic
+Use an orthographic projection.
+
+.TP
 .B \-\-highlight
 Adds a border around the pieces in the step they appear when saving pictures.
 
@@ -71,6 +93,14 @@ Adds a border around the pieces in the step they appear when saving pictures.
 .BI "\-\-libpath "path
 Use alternate parts library found in \fIpath \fR.  The Debian version
 of \fILeoCAD \fRuses /usr/share/leocad/ as the default.
+
+.TP
+.BI "\-wf [" outfile.obj ]
+Exports the model to wavefront format.
+
+.TP
+.BI "\-3ds [" outfile.3ds ]
+Exports the model to 3DS format.
 
 .SH ENVIRONMENT
 ``LEOCAD_LIB'' may be set to the path of the parts library.

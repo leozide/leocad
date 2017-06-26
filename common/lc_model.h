@@ -198,6 +198,7 @@ public:
 	void SaveLDraw(QTextStream& Stream, bool SelectedOnly) const;
 	void LoadLDraw(QIODevice& Device, Project* Project);
 	bool LoadBinary(lcFile* File);
+	bool LoadLDD(const QString& FileData);
 	void SplitMPD(QIODevice& Device);
 	void Merge(lcModel* Other);
 

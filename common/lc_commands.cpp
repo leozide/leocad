@@ -45,6 +45,13 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 		QT_TRANSLATE_NOOP("Status", "Save a picture of the current view"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
+	// LC_FILE_IMPORT_LDD
+	{
+		QT_TRANSLATE_NOOP("Action", "File.Import.LDD"),
+		QT_TRANSLATE_NOOP("Menu", "&LEGO Digital Designer..."),
+		QT_TRANSLATE_NOOP("Status", "Import a file in LEGO Digital Designer LXF format"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
 	// LC_FILE_EXPORT_3DS
 	{
 		QT_TRANSLATE_NOOP("Action", "File.Export.3DS"),

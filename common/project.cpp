@@ -12,6 +12,7 @@
 #include "lc_application.h"
 #include "lc_profile.h"
 #include "lc_file.h"
+#include "lc_zipfile.h"
 #include "lc_qimagedialog.h"
 #include "lc_qmodellistdialog.h"
 #include "lc_qpovraydialog.h"
@@ -401,6 +402,53 @@ void Project::Merge(Project* Other)
 	}
 
 	mModified = true;
+}
+
+bool Project::ImportLDD(const QString& FileName)
+{
+	lcZipFile ZipFile;
+
+	if (!ZipFile.OpenRead(FileName))
+		return false;
+
+	lcMemFile XMLFile;
+	if (!ZipFile.ExtractFile("IMAGE100.LXFML", XMLFile))
+		return false;
+
+	mModels.DeleteAll();
+	lcModel* Model = new lcModel(QString());
+
+	if (Model->LoadLDD(QString::fromUtf8((const char*)XMLFile.mBuffer)))
+	{
+		mModels.Add(Model);
+		Model->SetSaved();
+	}
+	else
+		delete Model;
+
+	if (mModels.IsEmpty())
+		return false;
+
+	if (mModels.GetSize() == 1)
+	{
+		lcModel* Model = mModels[0];
+
+		if (Model->GetProperties().mName.isEmpty())
+			Model->SetName(QFileInfo(FileName).completeBaseName());
+	}
+
+	for (int ModelIdx = 0; ModelIdx < mModels.GetSize(); ModelIdx++)
+		mModels[ModelIdx]->CreatePieceInfo(this);
+
+	lcArray<lcModel*> UpdatedModels;
+	UpdatedModels.AllocGrow(mModels.GetSize());
+
+	for (int ModelIdx = 0; ModelIdx < mModels.GetSize(); ModelIdx++)
+		mModels[ModelIdx]->UpdatePieceInfo(UpdatedModels);
+
+	mModified = false;
+
+	return true;
 }
 
 void Project::GetModelParts(lcArray<lcModelPartsEntry>& ModelParts)

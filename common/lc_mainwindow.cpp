@@ -378,6 +378,8 @@ void lcMainWindow::CreateMenus()
 	FileMenu->addAction(mActions[LC_FILE_SAVE]);
 	FileMenu->addAction(mActions[LC_FILE_SAVEAS]);
 	FileMenu->addAction(mActions[LC_FILE_SAVE_IMAGE]);
+	QMenu* ImportMenu = FileMenu->addMenu(tr("&Import"));
+	ImportMenu->addAction(mActions[LC_FILE_IMPORT_LDD]);
 	QMenu* ExportMenu = FileMenu->addMenu(tr("&Export"));
 	ExportMenu->addAction(mActions[LC_FILE_EXPORT_3DS]);
 	ExportMenu->addAction(mActions[LC_FILE_EXPORT_BRICKLINK]);
@@ -1922,6 +1924,26 @@ void lcMainWindow::MergeProject()
 	}
 }
 
+void lcMainWindow::ImportLDD()
+{
+	if (!SaveProjectIfModified())
+		return;
+
+	QString LoadFileName = QFileDialog::getOpenFileName(this, tr("Import"), QString(), tr("LEGO Diginal Designer Files (*.lxf);;All Files (*.*)"));
+	if (LoadFileName.isEmpty())
+		return;
+
+	Project* NewProject = new Project();
+
+	if (NewProject->ImportLDD(LoadFileName))
+	{
+		g_App->SetProject(NewProject);
+		UpdateAllViews();
+	}
+	else
+		delete NewProject;
+}
+
 bool lcMainWindow::SaveProject(const QString& FileName)
 {
 	QString SaveFileName;
@@ -2046,6 +2068,10 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 
 	case LC_FILE_SAVE_IMAGE:
 		lcGetActiveProject()->SaveImage();
+		break;
+
+	case LC_FILE_IMPORT_LDD:
+		ImportLDD();
 		break;
 
 	case LC_FILE_EXPORT_3DS:

@@ -251,6 +251,7 @@ public:
 	void NewProject();
 	bool OpenProject(const QString& FileName);
 	void MergeProject();
+	void ImportLDD();
 	bool SaveProject(const QString& FileName);
 	bool SaveProjectIfModified();
 	bool SetModelFromFocus();

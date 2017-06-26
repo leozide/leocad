@@ -21,6 +21,7 @@
 #include "lc_qeditgroupsdialog.h"
 #include "lc_selectbycolordialog.h"
 #include "lc_qutils.h"
+#include "lc_lxf.h"
 
 void lcModelProperties::LoadDefaults()
 {
@@ -940,6 +941,33 @@ bool lcModel::LoadBinary(lcFile* file)
 	UpdateBackgroundTexture();
 	CalculateStep(mCurrentStep);
 	lcGetPiecesLibrary()->UnloadUnusedParts();
+
+	return true;
+}
+
+bool lcModel::LoadLDD(const QString& FileData)
+{
+	lcArray<lcPiece*> Pieces;
+	lcArray<lcArray<lcPiece*>> Groups;
+	
+	if (!lcImportLDDFile(FileData, Pieces, Groups))
+		return false;
+
+	for (lcPiece* Piece : Pieces)
+		AddPiece(Piece);
+
+	for (const lcArray<lcPiece*>& Group : Groups)
+	{
+		lcGroup* NewGroup = AddGroup(tr("Group #"), nullptr);
+		for (lcPiece* Piece : Group)
+			Piece->SetGroup(NewGroup);
+	}
+
+	lcPiecesLibrary* Library = lcGetPiecesLibrary();
+	CalculateStep(mCurrentStep);
+	Library->WaitForLoadQueue();
+	Library->mBuffersDirty = true;
+	Library->UnloadUnusedParts();
 
 	return true;
 }

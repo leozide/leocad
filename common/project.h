@@ -65,6 +65,7 @@ public:
 	bool Save(const QString& FileName);
 	bool Save(QTextStream& Stream);
 	void Merge(Project* Other);
+	bool ImportLDD(const QString& FileName);
 
 	void SaveImage();
 	void Export3DStudio(const QString& FileName);

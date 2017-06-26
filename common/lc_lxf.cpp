@@ -8,6 +8,7 @@
 
 // Based on https://gitlab.com/sylvainls/lxf2ldr
 
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
 #define LC_READ_XML_INT(attribute, variable) \
 	variable = Reader.attributes().value(attribute).toInt(&Ok); \
 	if (!Ok) \
@@ -16,6 +17,16 @@
 	variable = Reader.attributes().value(attribute).toFloat(&Ok); \
 	if (!Ok) \
 		return false;
+#else
+#define LC_READ_XML_INT(attribute, variable) \
+	variable = Reader.attributes().value(attribute).string()->toInt(&Ok); \
+	if (!Ok) \
+		return false;
+#define LC_READ_XML_FLOAT(attribute, variable) \
+	variable = Reader.attributes().value(attribute).string()->toFloat(&Ok); \
+	if (!Ok) \
+		return false;
+#endif
 
 inline QMatrix4x4 lcLDDRotationMatrix(double ax, double ay, double az, double Angle)
 {
@@ -309,18 +320,18 @@ static bool lcLDDReadDecors(QMap<int, DecorMatch>& DecorationTable)
 			}
 			else
 			{
-				static const QMap<QString, QMatrix4x4> RotationTable =
+				static const std::map<QString, QMatrix4x4> RotationTable =
 				{
-					{ "x",     lcLDDRotationMatrix(1, 0, 0,   90) },
-					{ "xx",    lcLDDRotationMatrix(1, 0, 0,  180) },
-					{ "xxx",   lcLDDRotationMatrix(1, 0, 0,  -90) },
-					{ "y",     lcLDDRotationMatrix(0, 1, 0,   90) },
-					{ "yy",    lcLDDRotationMatrix(0, 1, 0,  180) },
-					{ "yyy",   lcLDDRotationMatrix(0, 1, 0,  -90) },
-					{ "y7p/6", lcLDDRotationMatrix(0, 1, 0,  210) },
-					{ "z",     lcLDDRotationMatrix(0, 0, 1,   90) },
-					{ "zz",    lcLDDRotationMatrix(0, 0, 1,  180) },
-					{ "zzz",   lcLDDRotationMatrix(0, 0, 1,  -90) },
+					{ QString("x"),     lcLDDRotationMatrix(1, 0, 0,   90) },
+					{ QString("xx"),    lcLDDRotationMatrix(1, 0, 0,  180) },
+					{ QString("xxx"),   lcLDDRotationMatrix(1, 0, 0,  -90) },
+					{ QString("y"),     lcLDDRotationMatrix(0, 1, 0,   90) },
+					{ QString("yy"),    lcLDDRotationMatrix(0, 1, 0,  180) },
+					{ QString("yyy"),   lcLDDRotationMatrix(0, 1, 0,  -90) },
+					{ QString("y7p/6"), lcLDDRotationMatrix(0, 1, 0,  210) },
+					{ QString("z"),     lcLDDRotationMatrix(0, 0, 1,   90) },
+					{ QString("zz"),    lcLDDRotationMatrix(0, 0, 1,  180) },
+					{ QString("zzz"),   lcLDDRotationMatrix(0, 0, 1,  -90) },
 				};
 
 				char* Separator = strchr(Line, ':');
@@ -345,8 +356,9 @@ static bool lcLDDReadDecors(QMap<int, DecorMatch>& DecorationTable)
 				QString Rotation;
 				if (SubList.size() > 1)
 					Rotation = SubList.at(1);
-				if (RotationTable.contains(Rotation))
-					Decorations.insert(Key, lcLDDSubstitute(LDrawFile, new lcLDDTransformation(QVector3D(), RotationTable[Rotation])));
+				auto RotationEntry = RotationTable.find(Rotation);
+				if (RotationEntry != RotationTable.cend())
+					Decorations.insert(Key, lcLDDSubstitute(LDrawFile, new lcLDDTransformation(QVector3D(), RotationEntry->second)));
 				else
 					Decorations.insert(Key, lcLDDSubstitute(LDrawFile, 0));
 			}
@@ -367,7 +379,7 @@ static bool lcLDDReadDecors(QMap<int, DecorMatch>& DecorationTable)
 				QString LDrawFile = SimpleList.first().toLower();
 				bool Overwrite = false;
 				if (SimpleList.size() > 1)
-					Overwrite = SimpleList.at(1).toUpper() == QStringLiteral("OW");
+					Overwrite = SimpleList.at(1).toUpper() == QLatin1String("OW");
 
 				if (!Colors.empty())
 					Colors.last().insert(LegoColor, lcLDDSimpleSubstitute(LDrawFile, Overwrite));
@@ -517,7 +529,7 @@ bool lcImportLDDFile(const QString& FileData, lcArray<lcPiece*>& Pieces, lcArray
 
 
 							lcMatrix44 LDrawMatrix(lcVector4(ldr_rot(0, 0), ldr_rot(1, 0), ldr_rot(2, 0), 0.0f), lcVector4(ldr_rot(0, 1), ldr_rot(1, 1), ldr_rot(2, 1), 0.0f),
-												   lcVector4(ldr_rot(0, 2), ldr_rot(1, 2), ldr_rot(2, 2), 0.0f), lcVector4(ldr_pos[0], ldr_pos[1], ldr_pos[2], 1.0f));
+												   lcVector4(ldr_rot(0, 2), ldr_rot(1, 2), ldr_rot(2, 2), 0.0f), lcVector4(ldr_pos.x(), ldr_pos.y(), ldr_pos.z(), 1.0f));
 
 							float* Matrix = LDrawMatrix;
 							lcMatrix44 Transform(lcVector4(Matrix[0], Matrix[2], -Matrix[1], 0.0f), lcVector4(Matrix[8], Matrix[10], -Matrix[9], 0.0f),

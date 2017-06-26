@@ -140,6 +140,7 @@ SOURCES += common/view.cpp \
     common/lc_file.cpp \
     common/lc_glextensions.cpp \
     common/lc_library.cpp \
+	common/lc_lxf.cpp \
     common/lc_mainwindow.cpp \
     common/lc_mesh.cpp \
     common/lc_model.cpp \
@@ -200,6 +201,7 @@ HEADERS += \
     common/lc_global.h \
     common/lc_glwidget.h \
     common/lc_library.h \
+	common/lc_lxf.h \
     common/lc_mainwindow.h \
     common/lc_math.h \
     common/lc_mesh.h \

@@ -1141,7 +1141,7 @@ void Project::CreatePartsListImage(lcModel* Model, lcStep Step, const QString& F
 		{
 			for (int y = 0; y < Height; y++)
 			{
-				if (Thumbnail.pixelColor(x, y).alpha())
+				if (qAlpha(Thumbnail.pixel(x, y)))
 				{
 					MinX = qMin(x, MinX);
 					MinY = qMin(y, MinY);

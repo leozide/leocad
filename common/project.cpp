@@ -16,6 +16,9 @@
 #include "lc_qimagedialog.h"
 #include "lc_qmodellistdialog.h"
 #include "lc_qpovraydialog.h"
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+#include <QtConcurrent>
+#endif
 
 Project::Project()
 {
@@ -1038,6 +1041,148 @@ void Project::ExportCSV()
 	}
 }
 
+void Project::CreatePartsListImage(lcModel* Model, lcStep Step, const QString& FileName)
+{
+	lcPartsList PartsList;
+	if (Step == 0)
+		Model->GetPartsList(gDefaultColor, PartsList);
+	else
+		Model->GetPartsListForStep(Step, gDefaultColor, PartsList);
+
+	if (PartsList.empty())
+		return;
+
+	struct lcPartsListImage
+	{
+		QImage Thumbnail;
+		const PieceInfo* Info;
+		int ColorIndex;
+		int Count;
+		QRect Bounds;
+	};
+
+	std::vector<lcPartsListImage> Images;
+
+	for (const auto& PartIt : PartsList)
+	{
+		for (const auto& ColorIt : PartIt.second)
+		{
+			Images.push_back(lcPartsListImage());
+			lcPartsListImage& Image = Images.back();
+			Image.Info = PartIt.first;
+			Image.ColorIndex = ColorIt.first;
+			Image.Count = ColorIt.second;
+		}
+	}
+
+	auto ImageCompare = [this](const lcPartsListImage& Image1, const lcPartsListImage& Image2)
+	{
+		if (Image1.ColorIndex != Image2.ColorIndex)
+			return Image1.ColorIndex < Image2.ColorIndex;
+
+		return strcmp(Image1.Info->m_strDescription, Image2.Info->m_strDescription) < 0;
+	};
+
+	std::sort(Images.begin(), Images.end(), ImageCompare);
+
+	View* View = gMainWindow->GetActiveView();
+	View->MakeCurrent();
+	lcContext* Context = View->mContext;
+	const int ThumbnailWidth = 512;
+	const int ThumbnailHeight = 512;
+
+	if (!Context->BeginRenderToTexture(ThumbnailWidth, ThumbnailHeight))
+	{
+		QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Error creating images."));
+		return;
+	}
+
+	float Aspect = (float)ThumbnailWidth / (float)ThumbnailHeight;
+	Context->SetViewport(0, 0, ThumbnailWidth, ThumbnailHeight);
+
+	lcMatrix44 ProjectionMatrix = lcMatrix44Perspective(30.0f, Aspect, 1.0f, 2500.0f);
+	lcMatrix44 ViewMatrix = lcMatrix44LookAt(lcVector3(-100.0f, -100.0f, 75.0f), lcVector3(0.0f, 0.0f, 0.0f), lcVector3(0.0f, 0.0f, 1.0f));
+
+	Context->SetDefaultState();
+	Context->SetProjectionMatrix(ProjectionMatrix);
+
+	for (lcPartsListImage& Image : Images)
+	{
+		glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		lcScene Scene;
+		Scene.Begin(ViewMatrix);
+
+		Image.Info->AddRenderMeshes(Scene, lcMatrix44Identity(), Image.ColorIndex, false, false, false);
+
+		Scene.End();
+
+		Scene.Draw(Context);
+
+		Image.Thumbnail = Context->GetRenderToTextureImage(ThumbnailWidth, ThumbnailHeight);
+	}
+
+	Context->EndRenderToTexture();
+	Context->ClearResources();
+
+	auto CalculateImageBounds = [](lcPartsListImage& Image)
+	{
+		QImage& Thumbnail = Image.Thumbnail;
+		int Width = Thumbnail.width();
+		int Height = Thumbnail.height();
+
+		int MinX = Width;
+		int MinY = Height;
+		int MaxX = 0;
+		int MaxY = 0;
+
+		for (int x = 0; x < Width; x++)
+		{
+			for (int y = 0; y < Height; y++)
+			{
+				if (Thumbnail.pixelColor(x, y).alpha())
+				{
+					MinX = qMin(x, MinX);
+					MinY = qMin(y, MinY);
+					MaxX = qMax(x, MaxX);
+					MaxY = qMax(y, MaxY);
+				}
+			}
+		}
+
+		Image.Bounds = QRect(QPoint(MinX, MinY), QPoint(MaxX, MaxY));
+	};
+
+	QtConcurrent::blockingMap(Images, CalculateImageBounds);
+
+
+	int Width = 0;
+	int Height = 0;
+
+	for (lcPartsListImage& Image : Images)
+	{
+		Width = qMax(Width, Image.Bounds.width());
+		Height += Image.Bounds.height();
+	}
+
+	QImage Image(Width, Height, QImage::Format_ARGB32);
+	Image.fill(QColor(255, 255, 255, 0));
+
+	QPainter Painter(&Image);
+	int CurrentY = 0;
+
+	for (lcPartsListImage& Image : Images)
+	{
+		Painter.drawImage(QPoint(0, CurrentY), Image.Thumbnail, Image.Bounds);
+		CurrentY += Image.Bounds.height();
+	}
+
+	Painter.end();
+
+	Image.save(FileName);
+}
+
 void Project::CreateHTMLPieceList(QTextStream& Stream, lcModel* Model, lcStep Step, bool Images)
 {
 	std::vector<int> ColorsUsed(gColorList.GetSize(), 0);
@@ -1394,6 +1539,10 @@ void Project::ExportHTML()
 
 		Stream << QLatin1String("</CENTER>\n<BR><HR><BR><B><I>Created by <A HREF=\"http://www.leocad.org\">LeoCAD</A></B></I><BR></HTML>\r\n");
 	}
+
+	QString BaseName = ProjectTitle.left(ProjectTitle.length() - QFileInfo(ProjectTitle).suffix().length() - 1);
+	QString FileName = QFileInfo(Dir, BaseName + QLatin1String("-parts.png")).absoluteFilePath();
+	CreatePartsListImage(Models[0], 0, FileName);
 }
 
 struct lcColorName

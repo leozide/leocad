@@ -1041,7 +1041,7 @@ void Project::ExportCSV()
 	}
 }
 
-void Project::CreatePartsListImage(lcModel* Model, lcStep Step, const QString& FileName)
+void Project::CreatePartsListImage(lcModel* Model, lcStep Step, QPainter& Painter)
 {
 	lcPartsList PartsList;
 	if (Step == 0)
@@ -1098,11 +1098,13 @@ void Project::CreatePartsListImage(lcModel* Model, lcStep Step, const QString& F
 	}
 
 	float Aspect = (float)ThumbnailWidth / (float)ThumbnailHeight;
-	Context->SetViewport(0, 0, ThumbnailWidth, ThumbnailHeight);
+	float OrthoHeight = 100.0f;
+	float OrthoWidth = OrthoHeight * Aspect;
 
-	lcMatrix44 ProjectionMatrix = lcMatrix44Perspective(30.0f, Aspect, 1.0f, 2500.0f);
+	lcMatrix44 ProjectionMatrix = lcMatrix44Ortho(-OrthoWidth, OrthoWidth, -OrthoHeight, OrthoHeight, 1.0f, 50000.0f);
 	lcMatrix44 ViewMatrix = lcMatrix44LookAt(lcVector3(-100.0f, -100.0f, 75.0f), lcVector3(0.0f, 0.0f, 0.0f), lcVector3(0.0f, 0.0f, 1.0f));
 
+	Context->SetViewport(0, 0, ThumbnailWidth, ThumbnailHeight);
 	Context->SetDefaultState();
 	Context->SetProjectionMatrix(ProjectionMatrix);
 
@@ -1156,31 +1158,36 @@ void Project::CreatePartsListImage(lcModel* Model, lcStep Step, const QString& F
 
 	QtConcurrent::blockingMap(Images, CalculateImageBounds);
 
+	QFont Font("helvetica", 24, QFont::Bold);
+	Painter.setFont(Font);
+	QFontMetrics FontMetrics = Painter.fontMetrics();
 
-	int Width = 0;
-	int Height = 0;
-
-	for (lcPartsListImage& Image : Images)
-	{
-		Width = qMax(Width, Image.Bounds.width());
-		Height += Image.Bounds.height();
-	}
-
-	QImage Image(Width, Height, QImage::Format_ARGB32);
-	Image.fill(QColor(255, 255, 255, 0));
-
-	QPainter Painter(&Image);
+	int CurrentX = 0;
 	int CurrentY = 0;
+	int ColumnWidth = 0;
+	int Ascent = FontMetrics.ascent();
+	int Spacing = 20;
 
 	for (lcPartsListImage& Image : Images)
 	{
-		Painter.drawImage(QPoint(0, CurrentY), Image.Thumbnail, Image.Bounds);
+		if (CurrentY + Image.Bounds.height() + Ascent > Painter.device()->height())
+		{
+			CurrentY = 0;
+			CurrentX += ColumnWidth + Spacing;
+			ColumnWidth = 0;
+		}
+
+		Painter.drawImage(QPoint(CurrentX, CurrentY), Image.Thumbnail, Image.Bounds);
 		CurrentY += Image.Bounds.height();
+
+		CurrentY += Ascent;
+		Painter.drawText(QPoint(CurrentX, CurrentY), QString::number(Image.Count) + 'x');
+
+		ColumnWidth = qMax(ColumnWidth, Image.Bounds.width());
+		CurrentY += Spacing;
 	}
 
 	Painter.end();
-
-	Image.save(FileName);
 }
 
 void Project::CreateHTMLPieceList(QTextStream& Stream, lcModel* Model, lcStep Step, bool Images)
@@ -1540,9 +1547,16 @@ void Project::ExportHTML()
 		Stream << QLatin1String("</CENTER>\n<BR><HR><BR><B><I>Created by <A HREF=\"http://www.leocad.org\">LeoCAD</A></B></I><BR></HTML>\r\n");
 	}
 
+	QImage Image(2048, 2048, QImage::Format_ARGB32);
+	Image.fill(QColor(255, 255, 255, 0));
+
+	QPainter Painter(&Image);
+	CreatePartsListImage(Models[0], 0, Painter);
+
 	QString BaseName = ProjectTitle.left(ProjectTitle.length() - QFileInfo(ProjectTitle).suffix().length() - 1);
 	QString FileName = QFileInfo(Dir, BaseName + QLatin1String("-parts.png")).absoluteFilePath();
-	CreatePartsListImage(Models[0], 0, FileName);
+
+	Image.save(FileName);
 }
 
 struct lcColorName

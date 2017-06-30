@@ -80,7 +80,7 @@ public:
 protected:
 	QString GetExportFileName(const QString& FileName, const QString& DefaultExtension, const QString& DialogTitle, const QString& DialogFilter) const;
 	void GetModelParts(lcArray<lcModelPartsEntry>& ModelParts);
-	void CreatePartsListImage(lcModel* Model, lcStep Step, const QString& FileName);
+	void CreatePartsListImage(lcModel* Model, lcStep Step, QPainter& Painter);
 	void CreateHTMLPieceList(QTextStream& Stream, lcModel* Model, lcStep Step, bool Images);
 
 	bool mModified;

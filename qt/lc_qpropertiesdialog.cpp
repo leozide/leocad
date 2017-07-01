@@ -16,7 +16,6 @@ lcQPropertiesDialog::lcQPropertiesDialog(QWidget *parent, void *data) :
 	connect(ui->solidColorButton, SIGNAL(clicked()), this, SLOT(colorClicked()));
 	connect(ui->gradient1ColorButton, SIGNAL(clicked()), this, SLOT(colorClicked()));
 	connect(ui->gradient2ColorButton, SIGNAL(clicked()), this, SLOT(colorClicked()));
-	connect(ui->ambientColorButton, SIGNAL(clicked()), this, SLOT(colorClicked()));
 
 	options = (lcPropertiesDialogOptions*)data;
 
@@ -44,8 +43,6 @@ lcQPropertiesDialog::lcQPropertiesDialog(QWidget *parent, void *data) :
 	ui->gradient1ColorButton->setIcon(pix);
 	pix.fill(QColor(options->Properties.mBackgroundGradientColor2[0] * 255, options->Properties.mBackgroundGradientColor2[1] * 255, options->Properties.mBackgroundGradientColor2[2] * 255));
 	ui->gradient2ColorButton->setIcon(pix);
-	pix.fill(QColor(options->Properties.mAmbientColor[0] * 255, options->Properties.mAmbientColor[1] * 255, options->Properties.mAmbientColor[2] * 255));
-	ui->ambientColorButton->setIcon(pix);
 
 	const lcPartsList& PartsList = options->PartsList;
 	QStringList horizontalLabels;
@@ -174,11 +171,6 @@ void lcQPropertiesDialog::colorClicked()
 	{
 		color = options->Properties.mBackgroundGradientColor2;
 		title = tr("Select Background Bottom Color");
-	}
-	else if (button == ui->ambientColorButton)
-	{
-		color = options->Properties.mAmbientColor;
-		title = tr("Select Ambient Light Color");
 	}
 
 	if (!color)

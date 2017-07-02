@@ -1041,7 +1041,7 @@ void Project::ExportCSV()
 	}
 }
 
-void Project::CreatePartsListImage(lcModel* Model, lcStep Step, QPainter& Painter)
+QImage Project::CreatePartsListImage(lcModel* Model, lcStep Step)
 {
 	lcPartsList PartsList;
 	if (Step == 0)
@@ -1050,7 +1050,7 @@ void Project::CreatePartsListImage(lcModel* Model, lcStep Step, QPainter& Painte
 		Model->GetPartsListForStep(Step, gDefaultColor, PartsList);
 
 	if (PartsList.empty())
-		return;
+		return QImage();
 
 	struct lcPartsListImage
 	{
@@ -1059,6 +1059,7 @@ void Project::CreatePartsListImage(lcModel* Model, lcStep Step, QPainter& Painte
 		int ColorIndex;
 		int Count;
 		QRect Bounds;
+		QPoint Position;
 	};
 
 	std::vector<lcPartsListImage> Images;
@@ -1094,11 +1095,11 @@ void Project::CreatePartsListImage(lcModel* Model, lcStep Step, QPainter& Painte
 	if (!Context->BeginRenderToTexture(ThumbnailWidth, ThumbnailHeight))
 	{
 		QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Error creating images."));
-		return;
+		return QImage();
 	}
 
 	float Aspect = (float)ThumbnailWidth / (float)ThumbnailHeight;
-	float OrthoHeight = 100.0f;
+	float OrthoHeight = 200.0f;
 	float OrthoWidth = OrthoHeight * Aspect;
 
 	lcMatrix44 ProjectionMatrix = lcMatrix44Ortho(-OrthoWidth, OrthoWidth, -OrthoHeight, OrthoHeight, 1.0f, 50000.0f);
@@ -1158,36 +1159,75 @@ void Project::CreatePartsListImage(lcModel* Model, lcStep Step, QPainter& Painte
 
 	QtConcurrent::blockingMap(Images, CalculateImageBounds);
 
-	QFont Font("helvetica", 24, QFont::Bold);
-	Painter.setFont(Font);
-	QFontMetrics FontMetrics = Painter.fontMetrics();
+	QImage DummyImage(16, 16, QImage::Format_ARGB32);
+	QPainter DummyPainter(&DummyImage);
 
-	int CurrentX = 0;
-	int CurrentY = 0;
-	int ColumnWidth = 0;
+	QFont Font("helvetica", 20, QFont::Bold);
+	DummyPainter.setFont(Font);
+	QFontMetrics FontMetrics = DummyPainter.fontMetrics();
 	int Ascent = FontMetrics.ascent();
-	int Spacing = 20;
+
+	int CurrentHeight = 0;
+	int MaxWidth = 1024;
 
 	for (lcPartsListImage& Image : Images)
 	{
-		if (CurrentY + Image.Bounds.height() + Ascent > Painter.device()->height())
+		CurrentHeight = qMax(Image.Bounds.height() + Ascent, CurrentHeight);
+		MaxWidth = qMax(MaxWidth, Image.Bounds.height());
+	}
+
+	for (;;)
+	{
+		int CurrentWidth = 0;
+		int CurrentX = 0;
+		int CurrentY = 0;
+		int ColumnWidth = 0;
+		int Spacing = 20;
+		int NextHeightIncrease = INT_MAX;
+
+		for (lcPartsListImage& Image : Images)
 		{
-			CurrentY = 0;
-			CurrentX += ColumnWidth + Spacing;
-			ColumnWidth = 0;
+			if (CurrentY + Image.Bounds.height() + Ascent > CurrentHeight)
+			{
+				int NeededSpace = Image.Bounds.height() + Ascent - (CurrentHeight - CurrentY);
+				NextHeightIncrease = qMin(NeededSpace, NextHeightIncrease);
+
+				CurrentY = 0;
+				CurrentX += ColumnWidth + Spacing;
+				ColumnWidth = 0;
+			}
+
+			Image.Position = QPoint(CurrentX, CurrentY);
+			CurrentY += Image.Bounds.height() + Ascent + Spacing;
+			CurrentWidth = qMax(CurrentWidth, CurrentX + Image.Bounds.width());
+			ColumnWidth = qMax(ColumnWidth, Image.Bounds.width());
 		}
 
-		Painter.drawImage(QPoint(CurrentX, CurrentY), Image.Thumbnail, Image.Bounds);
-		CurrentY += Image.Bounds.height();
+		if (CurrentWidth < MaxWidth)
+		{
+			MaxWidth = CurrentWidth;
+			break;
+		}
 
-		CurrentY += Ascent;
-		Painter.drawText(QPoint(CurrentX, CurrentY), QString::number(Image.Count) + 'x');
+		CurrentHeight += NextHeightIncrease;
+	}
 
-		ColumnWidth = qMax(ColumnWidth, Image.Bounds.width());
-		CurrentY += Spacing;
+	QImage Image(MaxWidth + 40, CurrentHeight + 40, QImage::Format_ARGB32);
+	Image.fill(QColor(255, 255, 255, 0));
+
+	QPainter Painter(&Image);
+	Painter.setFont(Font);
+
+	for (lcPartsListImage& Image : Images)
+	{
+		QPoint Position = Image.Position + QPoint(20, 20);
+		Painter.drawImage(Position, Image.Thumbnail, Image.Bounds);
+		Painter.drawText(QPoint(Position.x(), Position.y() + Image.Bounds.height() + Ascent), QString::number(Image.Count) + 'x');
 	}
 
 	Painter.end();
+
+	return Image;
 }
 
 void Project::CreateHTMLPieceList(QTextStream& Stream, lcModel* Model, lcStep Step, bool Images)
@@ -1324,6 +1364,21 @@ void Project::ExportHTML()
 
 	QString ProjectTitle = GetTitle();
 
+	auto AddPartsListImage = [this, &ProjectTitle, &Dir](QTextStream& Stream, lcModel* Model, lcStep Step)
+	{
+		QImage Image = CreatePartsListImage(Model, Step);
+
+		if (!Image.isNull())
+		{
+			QString BaseName = ProjectTitle.left(ProjectTitle.length() - QFileInfo(ProjectTitle).suffix().length() - 1);
+			QString FileName = QFileInfo(Dir, BaseName + QLatin1String("-parts.png")).absoluteFilePath();
+
+			Image.save(FileName);
+
+			Stream << QString::fromLatin1("<IMG SRC=\"%1\" />\r\n").arg(FileName);
+		}
+	};
+
 	for (int ModelIdx = 0; ModelIdx < Models.GetSize(); ModelIdx++)
 	{
 		lcModel* Model = mModels[ModelIdx];
@@ -1365,7 +1420,7 @@ void Project::ExportHTML()
 			}
 
 			if (Options.PartsListEnd)
-				CreateHTMLPieceList(Stream, Model, 0, Options.PartsListImages);
+				AddPartsListImage(Stream, Model, 0);
 
 			Stream << QLatin1String("</CENTER>\n<BR><HR><BR><B><I>Created by <A HREF=\"http://www.leocad.org\">LeoCAD</A></B></I><BR></HTML>\r\n");
 		}
@@ -1445,7 +1500,7 @@ void Project::ExportHTML()
 
 				Stream << QString::fromLatin1("<HTML>\r\n<HEAD>\r\n<TITLE>Pieces used by %1</TITLE>\r\n</HEAD>\r\n<BR>\r\n<CENTER>\n").arg(PageTitle);
 
-				CreateHTMLPieceList(Stream, Model, 0, Options.PartsListImages);
+				AddPartsListImage(Stream, Model, 0);
 
 				Stream << QLatin1String("</CENTER>\n<BR><HR><BR>");
 				Stream << QString::fromLatin1("<A HREF=\"%1-%2.html\">Previous</A> ").arg(BaseName, QString("%1").arg(LastStep, 2, 10, QLatin1Char('0')));
@@ -1546,17 +1601,6 @@ void Project::ExportHTML()
 
 		Stream << QLatin1String("</CENTER>\n<BR><HR><BR><B><I>Created by <A HREF=\"http://www.leocad.org\">LeoCAD</A></B></I><BR></HTML>\r\n");
 	}
-
-	QImage Image(2048, 2048, QImage::Format_ARGB32);
-	Image.fill(QColor(255, 255, 255, 0));
-
-	QPainter Painter(&Image);
-	CreatePartsListImage(Models[0], 0, Painter);
-
-	QString BaseName = ProjectTitle.left(ProjectTitle.length() - QFileInfo(ProjectTitle).suffix().length() - 1);
-	QString FileName = QFileInfo(Dir, BaseName + QLatin1String("-parts.png")).absoluteFilePath();
-
-	Image.save(FileName);
 }
 
 struct lcColorName

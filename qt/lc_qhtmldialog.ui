@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>617</height>
+    <height>629</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -179,61 +179,7 @@
       <string>Parts List</string>
      </property>
      <layout class="QFormLayout" name="formLayout">
-      <item row="4" column="1">
-       <widget class="QLineEdit" name="partImagesWidth">
-        <property name="maximumSize">
-         <size>
-          <width>75</width>
-          <height>16777215</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item row="7" column="1">
-       <widget class="QLineEdit" name="partImagesHeight">
-        <property name="maximumSize">
-         <size>
-          <width>75</width>
-          <height>16777215</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0" colspan="2">
-       <widget class="QCheckBox" name="partsAtTheEnd">
-        <property name="text">
-         <string>At the end</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0" colspan="2">
-       <widget class="QCheckBox" name="partsAfterEachStep">
-        <property name="text">
-         <string>After each step</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="0">
-       <widget class="QLabel" name="label_3">
-        <property name="text">
-         <string>Width:</string>
-        </property>
-        <property name="buddy">
-         <cstring>partImagesWidth</cstring>
-        </property>
-       </widget>
-      </item>
-      <item row="7" column="0">
-       <widget class="QLabel" name="label_4">
-        <property name="text">
-         <string>Height:</string>
-        </property>
-        <property name="buddy">
-         <cstring>partImagesHeight</cstring>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
+      <item row="5" column="0">
        <widget class="QLabel" name="label_5">
         <property name="text">
          <string>Color:</string>
@@ -243,14 +189,7 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="0" colspan="2">
-       <widget class="QCheckBox" name="partImages">
-        <property name="text">
-         <string>Create images</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="1">
+      <item row="5" column="1">
        <layout class="QHBoxLayout" name="horizontalLayout_2">
         <item>
          <widget class="lcQColorPicker" name="partColor">
@@ -273,6 +212,67 @@
          </spacer>
         </item>
        </layout>
+      </item>
+      <item row="6" column="0">
+       <widget class="QLabel" name="label_3">
+        <property name="text">
+         <string>Width:</string>
+        </property>
+        <property name="buddy">
+         <cstring>partImagesWidth</cstring>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="1">
+       <widget class="QLineEdit" name="partImagesWidth">
+        <property name="maximumSize">
+         <size>
+          <width>75</width>
+          <height>16777215</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item row="9" column="0">
+       <widget class="QLabel" name="label_4">
+        <property name="text">
+         <string>Height:</string>
+        </property>
+        <property name="buddy">
+         <cstring>partImagesHeight</cstring>
+        </property>
+       </widget>
+      </item>
+      <item row="9" column="1">
+       <widget class="QLineEdit" name="partImagesHeight">
+        <property name="maximumSize">
+         <size>
+          <width>75</width>
+          <height>16777215</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QCheckBox" name="partsAfterEachStep">
+        <property name="text">
+         <string>After each step</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QCheckBox" name="partImages">
+        <property name="text">
+         <string>Create images</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QCheckBox" name="partsAtTheEnd">
+        <property name="text">
+         <string>At the end</string>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>
@@ -319,8 +319,8 @@
   <tabstop>stepWidth</tabstop>
   <tabstop>stepHeight</tabstop>
   <tabstop>highlightNewParts</tabstop>
-  <tabstop>partsAfterEachStep</tabstop>
   <tabstop>partsAtTheEnd</tabstop>
+  <tabstop>partsAfterEachStep</tabstop>
   <tabstop>partImages</tabstop>
   <tabstop>partColor</tabstop>
   <tabstop>partImagesWidth</tabstop>

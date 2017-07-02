@@ -1,7 +1,7 @@
 <LDrawMapping versionMajor="1" versionMinor="7" comment="LDD 4.3.10 Brick ver 2248.1">
 
   <!--
-    2017-06-19
+    2017-06-30
 
     See http://www.eurobricks.com/forum/index.php?showtopic=137193
     Download latest version: http://slswww.free.fr/ldraw.xml
@@ -3713,6 +3713,10 @@
   <!-- M13  96491 -->
   <Transformation ldraw="96491.dat" tx="0" ty="-0.22" tz="0" ax="0" ay="1" az="0" angle="0" />
 
+  <!-- Minifig Crown with  4 Spikes  18165.dat -->
+  <!-- HELMET NO. 57  18165 -->
+  <Transformation ldraw="18165.dat" tx="0" ty="0" tz="0" ax="0" ay="1" az="0" angle="0.785398" />
+
   <!-- Minifig Cup  3899.dat -->
   <!-- MUG  3899 -->
   <Transformation ldraw="3899.dat" tx="0" ty="-.96" tz="0" ax="0" ay="1" az="0" angle="4.712389" />
@@ -4141,11 +4145,12 @@
   <!-- HANDLEBAR W/3.2 SHAFT/BAR ENDS  98397 -->
   <Transformation ldraw="98397.dat" tx="0" ty="0" tz="0" ax="0" ay="1" az="0" angle="0" />
 
-  <!-- Minifig Harpoon  57467.dat -->
+  <!-- Minifig Harpoon with Smooth Bar  18041.dat -->
   <!-- HARPOON SPIKE  18041 -->
-  <Brick ldraw="57467.dat" lego="18041" /> <!-- No LDraw variant -->
+  <Transformation ldraw="18041.dat" tx="0" ty="0" tz="0" ax="0" ay="1" az="0" angle="0" />
+
+  <!-- Minifig Harpoon  57467.dat -->
   <!-- SILVER HARPOON HEARDS  57467 -->
-  <Brick ldraw="57467.dat" lego="57467" />
   <Transformation ldraw="57467.dat" tx="0" ty="0" tz="0" ax="0" ay="1" az="0" angle="0" />
 
   <!-- Minifig Hat Beret  90386.dat -->
@@ -4897,6 +4902,10 @@
   <!-- TRIANGLE W. Ø3.2 SHAFT  88049 -->
   <Brick ldraw="87748.dat" lego="88049" />
   <Transformation ldraw="87748.dat" tx="0" ty="-0.56" tz="0" ax="0" ay="1" az="0" angle="3.141593" />
+
+  <!-- Minifig Robot Arm  15341.dat -->
+  <!-- MINI ROBOT ARM  15341 -->
+  <Transformation ldraw="15341.dat" tx="0" ty="0" tz="0" ax="0" ay="1" az="0" angle="0" />
 
   <!-- Minifig Robot Leg  1 x  2 x  1.667 with Pin  17486.dat -->
   <!-- LEG 1X2X2 WITH SNAP  17486 -->
@@ -11945,11 +11954,6 @@
   <Brick ldraw="12613.dat" lego="12613" />
   <Transformation ldraw="12613.dat" tx="0" ty="0" tz="0" ax="0" ay="1" az="0" angle="0" />
 
-  <!-- (BrickLink) Arm Mechanical, Hero Factory  ??.dat -->
-  <!-- MINI ROBOT ARM  15341 -->
-  <Brick ldraw="15341.dat" lego="15341" />
-  <Transformation ldraw="15341.dat" tx="0" ty="0" tz="0" ax="0" ay="1" az="0" angle="0" />
-
   <!-- (BrickLink) Arm Mechanical, Super Battle Droid  ??.dat -->
   <!-- BATTLE DROID ARM  41890 -->
   <Brick ldraw="41890.dat" lego="41890" />
@@ -14499,11 +14503,6 @@
   <!-- MINI PAINTER CAP  11258 -->
   <Brick ldraw="11258.dat" lego="11258" />
   <Transformation ldraw="11258.dat" tx="0" ty="0" tz="0" ax="0" ay="1" az="0" angle="0" />
-
-  <!-- (BrickLink) Minifig, Headgear Crown with 4 Tall Spikes  ??.dat -->
-  <!-- HELMET NO. 57  18165 -->
-  <Brick ldraw="18165.dat" lego="18165" />
-  <Transformation ldraw="18165.dat" tx="0" ty="0" tz="0" ax="0" ay="1" az="0" angle="0" />
 
   <!-- (BrickLink) Minifig, Headgear Fencing Mask with Silver Mesh Pattern | 18830pb01  ??.dat -->
   <!-- MINI HELMET NO. 61  18830 -->

@@ -162,8 +162,9 @@ public:
 	void LoadQueuedPiece();
 	void WaitForLoadQueue();
 
-	lcTexture* FindTexture(const char* TextureName);
+	lcTexture* FindTexture(const char* TextureName, Project* CurrentProject, bool SearchProjectFolder);
 	bool LoadTexture(lcTexture* Texture);
+	void ReleaseTexture(lcTexture* Texture);
 
 	bool PieceInCategory(PieceInfo* Info, const char* CategoryKeywords) const;
 	void GetCategoryEntries(int CategoryIndex, bool GroupPieces, lcArray<PieceInfo*>& SinglePieces, lcArray<PieceInfo*>& GroupedPieces);
@@ -182,7 +183,7 @@ public:
 			mNumOfficialPieces = mPieces.GetSize();
 	}
 
-	bool ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform, lcuint32 CurrentColorCode, bool InvertWinding, lcArray<lcLibraryTextureMap>& TextureStack, lcLibraryMeshData& MeshData, lcMeshDataType MeshDataType, bool Optimize);
+	bool ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform, lcuint32 CurrentColorCode, bool InvertWinding, lcArray<lcLibraryTextureMap>& TextureStack, lcLibraryMeshData& MeshData, lcMeshDataType MeshDataType, bool Optimize, Project* CurrentProject, bool SearchProjectFolder);
 	lcMesh* CreateMesh(PieceInfo* Info, lcLibraryMeshData& MeshData);
 	void ReleaseBuffers(lcContext* Context);
 	void UpdateBuffers(lcContext* Context);

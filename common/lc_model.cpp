@@ -225,7 +225,7 @@ void lcModel::CreatePieceInfo(Project* Project)
 {
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 	mPieceInfo = Library->FindPiece(mProperties.mName.toUpper().toLatin1().constData(), Project, true, false);
-	mPieceInfo->SetModel(this, true);
+	mPieceInfo->SetModel(this, true, Project, true);
 	Library->LoadPieceInfo(mPieceInfo, true, true);
 }
 
@@ -234,7 +234,7 @@ void lcModel::UpdatePieceInfo(lcArray<lcModel*>& UpdatedModels)
 	if (UpdatedModels.FindIndex(this) != -1)
 		return;
 
-	mPieceInfo->SetModel(this, false);
+	mPieceInfo->SetModel(this, false, nullptr, false);
 	UpdatedModels.Add(this);
 
 	lcMesh* Mesh = mPieceInfo->GetMesh();

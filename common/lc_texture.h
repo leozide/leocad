@@ -51,6 +51,16 @@ public:
 		return mRefCount;
 	}
 
+	void SetTemporary(bool Temporary)
+	{
+		mTemporary = Temporary;
+	}
+
+	bool IsTemporary() const
+	{
+		return mTemporary;
+	}
+
 	int mWidth;
 	int mHeight;
 	char mName[LC_TEXTURE_NAME_LEN];
@@ -59,6 +69,7 @@ public:
 protected:
 	bool Load();
 
+	bool mTemporary;
 	int mRefCount;
 };
 

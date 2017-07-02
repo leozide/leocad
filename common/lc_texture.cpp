@@ -16,6 +16,11 @@ lcTexture* lcLoadTexture(const QString& FileName, int Flags)
 		delete Texture;
 		Texture = nullptr;
 	}
+	else
+	{
+		strcpy(Texture->mName, QFileInfo(FileName).baseName().toLatin1());
+		Texture->SetTemporary(true);
+	}
 
 	return Texture;
 }
@@ -30,6 +35,7 @@ lcTexture::lcTexture()
 {
 	mTexture = 0;
 	mRefCount = 0;
+	mTemporary = false;
 }
 
 lcTexture::~lcTexture()

@@ -45,6 +45,7 @@ QString PieceInfo::GetSaveID() const
 void PieceInfo::SetMesh(lcMesh* Mesh)
 {
 	mBoundingBox = Mesh->mBoundingBox;
+	ReleaseMesh();
 	mMesh = Mesh;
 }
 
@@ -52,16 +53,14 @@ void PieceInfo::SetPlaceholder()
 {
 	mBoundingBox.Min = lcVector3(-10.0f, -10.0f, -24.0f);
 	mBoundingBox.Max = lcVector3(10.0f, 10.0f, 4.0f);
+	ReleaseMesh();
 
 	mFlags = LC_PIECE_PLACEHOLDER | LC_PIECE_HAS_DEFAULT | LC_PIECE_HAS_LINES;
 	mModel = nullptr;
 	mProject = nullptr;
-
-	delete mMesh;
-	mMesh = nullptr;
 }
 
-void PieceInfo::SetModel(lcModel* Model, bool UpdateMesh)
+void PieceInfo::SetModel(lcModel* Model, bool UpdateMesh, Project* CurrentProject, bool SearchProjectFolder)
 {
 	if (mModel != Model)
 	{
@@ -91,7 +90,7 @@ void PieceInfo::SetModel(lcModel* Model, bool UpdateMesh)
 		lcArray<lcLibraryTextureMap> TextureStack;
 		PieceFile.Seek(0, SEEK_SET);
 
-		bool Ret = lcGetPiecesLibrary()->ReadMeshData(PieceFile, lcMatrix44Identity(), 16, false, TextureStack, MeshData, LC_MESHDATA_SHARED, true);
+		bool Ret = lcGetPiecesLibrary()->ReadMeshData(PieceFile, lcMatrix44Identity(), 16, false, TextureStack, MeshData, LC_MESHDATA_SHARED, true, CurrentProject, SearchProjectFolder);
 
 		if (Ret && !MeshData.IsEmpty())
 			lcGetPiecesLibrary()->CreateMesh(this, MeshData);
@@ -159,7 +158,7 @@ void PieceInfo::Load()
 	mState = LC_PIECEINFO_LOADED;
 }
 
-void PieceInfo::Unload()
+void PieceInfo::ReleaseMesh()
 {
 	if (mMesh)
 	{
@@ -170,14 +169,18 @@ void PieceInfo::Unload()
 				lcMeshSection& Section = mMesh->mLods[LodIdx].Sections[SectionIdx];
 
 				if (Section.Texture)
-					Section.Texture->Release();
+					lcGetPiecesLibrary()->ReleaseTexture(Section.Texture);
 			}
 		}
 
 		delete mMesh;
 		mMesh = nullptr;
 	}
+}
 
+void PieceInfo::Unload()
+{
+	ReleaseMesh();
 	mState = LC_PIECEINFO_UNLOADED;
 	mModel = nullptr;
 

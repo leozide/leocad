@@ -165,11 +165,36 @@ PieceInfo* lcPiecesLibrary::FindPiece(const char* PieceName, Project* CurrentPro
 	return nullptr;
 }
 
-lcTexture* lcPiecesLibrary::FindTexture(const char* TextureName)
+lcTexture* lcPiecesLibrary::FindTexture(const char* TextureName, Project* CurrentProject, bool SearchProjectFolder)
 {
 	for (int TextureIdx = 0; TextureIdx < mTextures.GetSize(); TextureIdx++)
 		if (!strcmp(TextureName, mTextures[TextureIdx]->mName))
 			return mTextures[TextureIdx];
+
+	QString ProjectPath;
+	if (SearchProjectFolder)
+	{
+		QString FileName = CurrentProject->GetFileName();
+
+		if (!FileName.isEmpty())
+			ProjectPath = QFileInfo(FileName).absolutePath();
+	}
+
+	if (!ProjectPath.isEmpty())
+	{
+		QFileInfo TextureFile = QFileInfo(ProjectPath + QDir::separator() + TextureName + ".png");
+
+		if (TextureFile.isFile())
+		{
+			lcTexture* Texture = lcLoadTexture(TextureFile.absoluteFilePath(), LC_TEXTURE_WRAPU | LC_TEXTURE_WRAPV);
+
+			if (Texture)
+			{
+				mTextures.Add(Texture);
+				return Texture;
+			}
+		}
+	}
 
 	return nullptr;
 }
@@ -1059,7 +1084,7 @@ bool lcPiecesLibrary::LoadPieceData(PieceInfo* Info)
 		lcMemFile PieceFile;
 
 		if (mZipFiles[Info->mZipFileType]->ExtractFile(Info->mZipFileIndex, PieceFile))
-			Loaded = ReadMeshData(PieceFile, lcMatrix44Identity(), 16, false, TextureStack, MeshData, LC_MESHDATA_SHARED, true);
+			Loaded = ReadMeshData(PieceFile, lcMatrix44Identity(), 16, false, TextureStack, MeshData, LC_MESHDATA_SHARED, true, nullptr, false);
 
 		SaveCache = Loaded && (Info->mZipFileType == LC_ZIPFILE_OFFICIAL);
 	}
@@ -1077,7 +1102,7 @@ bool lcPiecesLibrary::LoadPieceData(PieceInfo* Info)
 			sprintf(FileName, "unofficial/parts/%s.dat", Name);
 			PieceFile.SetFileName(mLibraryDir.absoluteFilePath(QLatin1String(FileName)));
 			if (PieceFile.Open(QIODevice::ReadOnly))
-				Loaded = ReadMeshData(PieceFile, lcMatrix44Identity(), 16, false, TextureStack, MeshData, LC_MESHDATA_SHARED, true);
+				Loaded = ReadMeshData(PieceFile, lcMatrix44Identity(), 16, false, TextureStack, MeshData, LC_MESHDATA_SHARED, true, nullptr, false);
 		}
 
 		if (!Loaded)
@@ -1085,7 +1110,7 @@ bool lcPiecesLibrary::LoadPieceData(PieceInfo* Info)
 			sprintf(FileName, "parts/%s.dat", Name);
 			PieceFile.SetFileName(mLibraryDir.absoluteFilePath(QLatin1String(FileName)));
 			if (PieceFile.Open(QIODevice::ReadOnly))
-				Loaded = ReadMeshData(PieceFile, lcMatrix44Identity(), 16, false, TextureStack, MeshData, LC_MESHDATA_SHARED, true);
+				Loaded = ReadMeshData(PieceFile, lcMatrix44Identity(), 16, false, TextureStack, MeshData, LC_MESHDATA_SHARED, true, nullptr, false);
 		}
 	}
 	
@@ -1497,6 +1522,17 @@ bool lcPiecesLibrary::LoadTexture(lcTexture* Texture)
 	return true;
 }
 
+void lcPiecesLibrary::ReleaseTexture(lcTexture* Texture)
+{
+	QMutexLocker LoadLock(&mLoadMutex);
+
+	if (Texture->Release() == 0 && Texture->IsTemporary())
+	{
+		mTextures.Remove(Texture);
+		delete Texture;
+	}
+}
+
 int lcPiecesLibrary::FindPrimitiveIndex(const char* Name) const
 {
 	int Count = mPrimitives.GetSize();
@@ -1553,12 +1589,12 @@ bool lcPiecesLibrary::LoadPrimitive(int PrimitiveIndex)
 
 		if (LowPrimitiveIndex == -1)
 		{
-			if (!ReadMeshData(PrimFile, lcMatrix44Identity(), 16, false, TextureStack, Primitive->mMeshData, LC_MESHDATA_SHARED, true))
+			if (!ReadMeshData(PrimFile, lcMatrix44Identity(), 16, false, TextureStack, Primitive->mMeshData, LC_MESHDATA_SHARED, true, nullptr, false))
 				return false;
 		}
 		else
 		{
-			if (!ReadMeshData(PrimFile, lcMatrix44Identity(), 16, false, TextureStack, Primitive->mMeshData, LC_MESHDATA_HIGH, true))
+			if (!ReadMeshData(PrimFile, lcMatrix44Identity(), 16, false, TextureStack, Primitive->mMeshData, LC_MESHDATA_HIGH, true, nullptr, false))
 				return false;
 
 			lcLibraryPrimitive* LowPrimitive = mPrimitives[LowPrimitiveIndex];
@@ -1568,7 +1604,7 @@ bool lcPiecesLibrary::LoadPrimitive(int PrimitiveIndex)
 
 			TextureStack.RemoveAll();
 
-			if (!ReadMeshData(PrimFile, lcMatrix44Identity(), 16, false, TextureStack, Primitive->mMeshData, LC_MESHDATA_LOW, true))
+			if (!ReadMeshData(PrimFile, lcMatrix44Identity(), 16, false, TextureStack, Primitive->mMeshData, LC_MESHDATA_LOW, true, nullptr, false))
 				return false;
 		}
 	}
@@ -1602,7 +1638,7 @@ bool lcPiecesLibrary::LoadPrimitive(int PrimitiveIndex)
 			Found = PrimFile.Open(QIODevice::ReadOnly);
 		}
 
-		if (!Found || !ReadMeshData(PrimFile, lcMatrix44Identity(), 16, false, TextureStack, Primitive->mMeshData, LC_MESHDATA_SHARED, true))
+		if (!Found || !ReadMeshData(PrimFile, lcMatrix44Identity(), 16, false, TextureStack, Primitive->mMeshData, LC_MESHDATA_SHARED, true, nullptr, false))
 			return false;
 	}
 
@@ -1611,7 +1647,7 @@ bool lcPiecesLibrary::LoadPrimitive(int PrimitiveIndex)
 	return true;
 }
 
-bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform, lcuint32 CurrentColorCode, bool InvertWinding, lcArray<lcLibraryTextureMap>& TextureStack, lcLibraryMeshData& MeshData, lcMeshDataType MeshDataType, bool Optimize)
+bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform, lcuint32 CurrentColorCode, bool InvertWinding, lcArray<lcLibraryTextureMap>& TextureStack, lcLibraryMeshData& MeshData, lcMeshDataType MeshDataType, bool Optimize, Project* CurrentProject, bool SearchProjectFolder)
 {
 	char Buffer[1024];
 	char* Line;
@@ -1712,7 +1748,7 @@ bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransf
 						lcLibraryTextureMap& Map = TextureStack.Add();
 						Map.Next = false;
 						Map.Fallback = false;
-						Map.Texture = FindTexture(FileName);
+						Map.Texture = FindTexture(FileName, CurrentProject, SearchProjectFolder);
 
 						for (int EdgeIdx = 0; EdgeIdx < 2; EdgeIdx++)
 						{
@@ -1863,7 +1899,7 @@ bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransf
 							lcMemFile IncludeFile;
 
 							if (mZipFiles[Primitive->mZipFileType]->ExtractFile(Primitive->mZipFileIndex, IncludeFile))
-								ReadMeshData(IncludeFile, IncludeTransform, ColorCode, Mirror ^ InvertNext, TextureStack, MeshData, MeshDataType, Optimize);
+								ReadMeshData(IncludeFile, IncludeTransform, ColorCode, Mirror ^ InvertNext, TextureStack, MeshData, MeshDataType, Optimize, CurrentProject, SearchProjectFolder);
 						}
 						else
 						{
@@ -1894,7 +1930,7 @@ bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransf
 								Found = IncludeFile.Open(QIODevice::ReadOnly);
 							}
 							if (Found)
-								ReadMeshData(IncludeFile, IncludeTransform, ColorCode, Mirror ^ InvertNext, TextureStack, MeshData, MeshDataType, Optimize);
+								ReadMeshData(IncludeFile, IncludeTransform, ColorCode, Mirror ^ InvertNext, TextureStack, MeshData, MeshDataType, Optimize, CurrentProject, SearchProjectFolder);
 						}
 					}
 				}
@@ -1912,7 +1948,7 @@ bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransf
 							lcMemFile IncludeFile;
 
 							if (mZipFiles[Info->mZipFileType]->ExtractFile(Info->mZipFileIndex, IncludeFile))
-								ReadMeshData(IncludeFile, IncludeTransform, ColorCode, Mirror ^ InvertNext, TextureStack, MeshData, MeshDataType, Optimize);
+								ReadMeshData(IncludeFile, IncludeTransform, ColorCode, Mirror ^ InvertNext, TextureStack, MeshData, MeshDataType, Optimize, CurrentProject, SearchProjectFolder);
 						}
 						else
 						{
@@ -1938,7 +1974,7 @@ bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransf
 							}
 
 							if (Found)
-								ReadMeshData(IncludeFile, IncludeTransform, ColorCode, Mirror ^ InvertNext, TextureStack, MeshData, MeshDataType, Optimize);
+								ReadMeshData(IncludeFile, IncludeTransform, ColorCode, Mirror ^ InvertNext, TextureStack, MeshData, MeshDataType, Optimize, CurrentProject, SearchProjectFolder);
 						}
 
 						break;

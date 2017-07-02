@@ -139,7 +139,7 @@ public:
 	void CreatePlaceholder(const char* Name);
 
 	void SetPlaceholder();
-	void SetModel(lcModel* Model, bool UpdateMesh);
+	void SetModel(lcModel* Model, bool UpdateMesh, Project* CurrentProject, bool SearchProjectFolder);
 	void SetProject(Project* Project, const char* PieceName);
 	bool IncludesModel(const lcModel* Model) const;
 	bool MinIntersectDist(const lcVector3& Start, const lcVector3& End, float& MinDistance) const;
@@ -160,6 +160,8 @@ public:
 	lcPieceInfoState mState;
 
 protected:
+	void ReleaseMesh();
+
 	int mRefCount;
 	lcModel* mModel;
 	Project* mProject;

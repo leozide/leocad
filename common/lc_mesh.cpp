@@ -389,7 +389,7 @@ bool lcMesh::FileLoad(lcMemFile& File)
 				File.ReadBuffer(FileName, Length);
 				FileName[Length] = 0;
 
-				Section.Texture = lcGetPiecesLibrary()->FindTexture(FileName);
+				Section.Texture = lcGetPiecesLibrary()->FindTexture(FileName, nullptr, false);
 			}
 			else
 				Section.Texture = nullptr;

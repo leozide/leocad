@@ -690,7 +690,7 @@ lcMesh* lcSynthInfo::CreateMesh(const lcArray<lcPieceControlPoint>& ControlPoint
 	lcArray<lcLibraryTextureMap> TextureStack;
 	File.Seek(0, SEEK_SET);
 
-	if (lcGetPiecesLibrary()->ReadMeshData(File, lcMatrix44Identity(), 16, false, TextureStack, MeshData, LC_MESHDATA_SHARED, false))
+	if (lcGetPiecesLibrary()->ReadMeshData(File, lcMatrix44Identity(), 16, false, TextureStack, MeshData, LC_MESHDATA_SHARED, false, nullptr, false))
 		return lcGetPiecesLibrary()->CreateMesh(nullptr, MeshData);
 
 	return nullptr;

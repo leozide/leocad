@@ -926,8 +926,6 @@ void lcQPropertiesTree::SetPiece(const lcArray<lcObject*>& Selection, lcObject* 
 
 void lcQPropertiesTree::SetCamera(lcObject* Focus)
 {
-	Q_UNUSED(Focus);
-
 	if (mWidgetMode != LC_PROPERTY_WIDGET_CAMERA)
 	{
 		SetEmpty();
@@ -969,7 +967,7 @@ void lcQPropertiesTree::SetCamera(lcObject* Focus)
 	float ZFar = 100.0f;
 	const char* Name = "";
 
-	if (Focus)
+	if (Camera)
 	{
 		Position = Camera->mPosition;
 		Target = Camera->mTargetPosition;

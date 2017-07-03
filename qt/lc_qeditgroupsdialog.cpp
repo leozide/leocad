@@ -126,7 +126,8 @@ void lcQEditGroupsDialog::UpdateParents(QTreeWidgetItem* ParentItem, lcGroup* Pa
 			lcGroup* Group = (lcGroup*)ChildItem->data(0, GroupRole).value<uintptr_t>();
 
 			// todo: validate unique group name
-			Group->mName = ChildItem->text(0);
+			if (Group)
+				Group->mName = ChildItem->text(0);
 
 			mGroupParents[Group] = ParentGroup;
 

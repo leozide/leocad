@@ -1746,6 +1746,7 @@ inline bool lcBoundingBoxRayIntersectDistance(const lcVector3& Min, const lcVect
 		else
 		{
 			MiddleQuadrant[i] = true;
+			CandidatePlane[i] = 0.0f;
 		}
 	}
 
@@ -1754,7 +1755,7 @@ inline bool lcBoundingBoxRayIntersectDistance(const lcVector3& Min, const lcVect
 	{
 		*Dist = 0;
 
-		if (*Intersection)
+		if (Intersection)
 			*Intersection = Start;
 
 		return true;
@@ -1797,7 +1798,7 @@ inline bool lcBoundingBoxRayIntersectDistance(const lcVector3& Min, const lcVect
 
 	*Dist = lcLength(Point - Start);
 
-	if (*Intersection)
+	if (Intersection)
 		*Intersection = Point;
 
 	return true;

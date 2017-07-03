@@ -1888,15 +1888,9 @@ lcVector3 lcModel::SnapPosition(const lcVector3& Distance) const
 		float Leftover = NewDistance[0] - (SnapXY * i);
 
 		if (Leftover > SnapXY / 2)
-		{
-			Leftover -= SnapXY;
 			i++;
-		}
 		else if (Leftover < -SnapXY / 2)
-		{
-			Leftover += SnapXY;
 			i--;
-		}
 
 		NewDistance[0] = SnapXY * i;
 
@@ -1904,15 +1898,9 @@ lcVector3 lcModel::SnapPosition(const lcVector3& Distance) const
 		Leftover = NewDistance[1] - (SnapXY * i);
 
 		if (Leftover > SnapXY / 2)
-		{
-			Leftover -= SnapXY;
 			i++;
-		}
 		else if (Leftover < -SnapXY / 2)
-		{
-			Leftover += SnapXY;
 			i--;
-		}
 
 		NewDistance[1] = SnapXY * i;
 	}
@@ -1924,15 +1912,9 @@ lcVector3 lcModel::SnapPosition(const lcVector3& Distance) const
 		float Leftover = NewDistance[2] - (SnapZ * i);
 
 		if (Leftover > SnapZ / 2)
-		{
-			Leftover -= SnapZ;
 			i++;
-		}
 		else if (Leftover < -SnapZ / 2)
-		{
-			Leftover += SnapZ;
 			i--;
-		}
 
 		NewDistance[2] = SnapZ * i;
 	}

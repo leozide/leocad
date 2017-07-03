@@ -245,7 +245,7 @@ void lcTimelineWidget::UpdateSelection()
 			QTreeWidgetItem* PieceItem = StepItem->child(PieceItemIdx);
 			lcPiece* Piece = (lcPiece*)PieceItem->data(0, Qt::UserRole).value<uintptr_t>();
 
-			if (Piece->IsSelected())
+			if (Piece && Piece->IsSelected())
 			{
 				QModelIndex Index = indexFromItem(PieceItem);
 				ItemSelection.select(Index, Index);
@@ -353,8 +353,11 @@ void lcTimelineWidget::ItemSelectionChanged()
 	foreach (QTreeWidgetItem* PieceItem, selectedItems())
 	{
 		lcPiece* Piece = (lcPiece*)PieceItem->data(0, Qt::UserRole).value<uintptr_t>();
-		LastStep = lcMax(LastStep, Piece->GetStepShow());
-		Selection.Add(Piece);
+		if (Piece)
+		{
+			LastStep = lcMax(LastStep, Piece->GetStepShow());
+			Selection.Add(Piece);
+		}
 	}
 
 	lcPiece* CurrentPiece = nullptr;

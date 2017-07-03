@@ -236,19 +236,19 @@ static bool lcLDDReadDecors(QMap<int, DecorMatch>& DecorationTable)
 	{
 		QResource Resource(":/resources/decors_lxf2ldr.yaml");
 
-		if (Resource.isValid())
-		{
-			QByteArray Data;
+		if (!Resource.isValid())
+			return false;
 
-			if (Resource.isCompressed())
-				Data = qUncompress(Resource.data(), Resource.size());
-			else
-				Data = QByteArray::fromRawData((const char*)Resource.data(), Resource.size());
+		QByteArray Data;
 
-			MemFile.WriteBuffer(Data.constData(), Data.size());
-			MemFile.Seek(0, SEEK_SET);
-			File = &MemFile;
-		}
+		if (Resource.isCompressed())
+			Data = qUncompress(Resource.data(), Resource.size());
+		else
+			Data = QByteArray::fromRawData((const char*)Resource.data(), Resource.size());
+
+		MemFile.WriteBuffer(Data.constData(), Data.size());
+		MemFile.Seek(0, SEEK_SET);
+		File = &MemFile;
 	}
 
 	char Line[1024];

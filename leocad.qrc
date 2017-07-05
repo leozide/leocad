@@ -93,8 +93,6 @@
         <file>resources/library.zip</file>
         <file>resources/ldconfig.ldr</file>
         <file>resources/minifig.ini</file>
-        <file>resources/ldraw.xml</file>
-        <file>resources/decors_lxf2ldr.yaml</file>
         <file>resources/leocad_fr.qm</file>
         <file>resources/leocad_pt.qm</file>
     </qresource>

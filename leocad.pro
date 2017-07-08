@@ -1,9 +1,9 @@
-QT += core gui opengl network
+QT += core gui opengl network xml
 TEMPLATE = app
 
 greaterThan(QT_MAJOR_VERSION, 4) {
         QT *= printsupport
-        QT += concurrent xml
+        QT += concurrent
 }
 
 INCLUDEPATH += qt common

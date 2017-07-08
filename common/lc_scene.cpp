@@ -261,15 +261,15 @@ void lcScene::Draw(lcContext* Context) const
 
 			if (DrawLines)
 				DrawRenderMeshes(Context, LC_MESH_TEXTURED_LINES | LC_MESH_TEXTURED_TRIANGLES, false, false, false);
-			else
-				DrawRenderMeshes(Context, LC_MESH_TEXTURED_TRIANGLES, false, false, false);
+
+			DrawRenderMeshes(Context, LC_MESH_TEXTURED_TRIANGLES, false, false, true);
 
 			if (!mTranslucentMeshes.IsEmpty())
 			{
 				glEnable(GL_BLEND); // todo: remove GL calls
 				glDepthMask(GL_FALSE);
 
-				DrawRenderMeshes(Context, LC_MESH_TEXTURED_TRIANGLES, false, true, false);
+				DrawRenderMeshes(Context, LC_MESH_TEXTURED_TRIANGLES, false, true, true);
 
 				glDepthMask(GL_TRUE);
 				glDisable(GL_BLEND);

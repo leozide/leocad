@@ -3,7 +3,7 @@ TEMPLATE = app
 
 greaterThan(QT_MAJOR_VERSION, 4) {
         QT *= printsupport
-        QT += concurrent
+        QT += concurrent xml
 }
 
 INCLUDEPATH += qt common

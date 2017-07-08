@@ -950,7 +950,7 @@ bool lcModel::LoadLDD(const QString& FileData)
 	lcArray<lcPiece*> Pieces;
 	lcArray<lcArray<lcPiece*>> Groups;
 	
-	if (!lcImportLDDFile(FileData, Pieces, Groups))
+	if (!lcImportLXFMLFile(FileData, Pieces, Groups))
 		return false;
 
 	for (lcPiece* Piece : Pieces)

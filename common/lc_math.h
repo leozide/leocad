@@ -755,6 +755,17 @@ inline lcMatrix33 lcMatrix33FromAxisAngle(const lcVector3& Axis, const float Rad
 	return m;
 }
 
+inline lcMatrix33 lcMatrix33Transpose(const lcMatrix33& m)
+{
+	lcMatrix33 t;
+
+	t.r[0] = lcVector3(m[0][0], m[1][0], m[2][0]);
+	t.r[1] = lcVector3(m[0][1], m[1][1], m[2][1]);
+	t.r[2] = lcVector3(m[0][2], m[1][2], m[2][2]);
+
+	return t;
+}
+
 inline lcMatrix33 lcMatrix33AffineInverse(const lcMatrix33& m)
 {
 	lcMatrix33 Inv;
@@ -1309,9 +1320,9 @@ inline lcMatrix44 lcMatrix44LDrawToLeoCAD(const lcMatrix44& Matrix)
 {
 	lcMatrix44 m;
 
-	m.r[0] = lcVector4(Matrix[0][0], Matrix[2][0], -Matrix[1][0], 0.0f);
-	m.r[1] = lcVector4(Matrix[0][2], Matrix[2][2], -Matrix[1][2], 0.0f);
-	m.r[2] = lcVector4(-Matrix[0][1], -Matrix[2][1], Matrix[1][1], 0.0f);
+	m.r[0] = lcVector4(Matrix[0][0], Matrix[0][2], -Matrix[0][1], 0.0f);
+	m.r[1] = lcVector4(Matrix[2][0], Matrix[2][2], -Matrix[2][1], 0.0f);
+	m.r[2] = lcVector4(-Matrix[1][0], -Matrix[1][2], Matrix[1][1], 0.0f);
 	m.r[3] = lcVector4(Matrix[3][0], Matrix[3][2], -Matrix[3][1], 1.0f);
 
 	return m;

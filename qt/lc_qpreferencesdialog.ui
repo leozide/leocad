@@ -652,7 +652,12 @@
                 </column>
                 <column>
                  <property name="text">
-                  <string>Shortcut</string>
+                  <string>Shortcut 1</string>
+                 </property>
+                </column>
+                <column>
+                 <property name="text">
+                  <string>Shortcut 2</string>
                  </property>
                 </column>
                </widget>

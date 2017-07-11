@@ -31,8 +31,10 @@ public:
 
 	struct
 	{
-		Qt::KeyboardModifiers Modifiers;
-		Qt::MouseButton Button;
+		Qt::KeyboardModifiers Modifiers1;
+		Qt::MouseButton Button1;
+		Qt::KeyboardModifiers Modifiers2;
+		Qt::MouseButton Button2;
 	}
 	mShortcuts[LC_NUM_TOOLS];
 };

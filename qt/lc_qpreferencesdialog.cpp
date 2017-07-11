@@ -71,7 +71,15 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget *parent, void *data) :
 	commandChanged(nullptr);
 
 	UpdateMouseTree();
-	new lcQTreeWidgetColumnStretcher(ui->mouseTree, 0);
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+	ui->mouseTree->header()->setSectionResizeMode(0, QHeaderView::Stretch);
+	ui->mouseTree->header()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
+	ui->mouseTree->header()->setSectionResizeMode(2, QHeaderView::ResizeToContents);
+#else
+	ui->mouseTree->header()->setResizeMode(0, QHeaderView::Stretch);
+	ui->mouseTree->header()->setResizeMode(1, QHeaderView::ResizeToContents);
+	ui->mouseTree->header()->setResizeMode(2, QHeaderView::ResizeToContents);
+#endif
 	MouseTreeItemChanged(nullptr);
 }
 
@@ -605,35 +613,44 @@ void lcQPreferencesDialog::UpdateMouseTree()
 
 void lcQPreferencesDialog::UpdateMouseTreeItem(int ItemIndex)
 {
-	Qt::MouseButton Button = options->MouseShortcuts.mShortcuts[ItemIndex].Button;
-	QString Shortcut = QKeySequence(options->MouseShortcuts.mShortcuts[ItemIndex].Modifiers).toString(QKeySequence::NativeText);
-
-	switch (Button)
+	auto GetShortcutText = [](Qt::MouseButton Button, Qt::KeyboardModifiers Modifiers)
 	{
-	case Qt::LeftButton:
-		Shortcut += tr("Left Button");
-		break;
+		QString Shortcut = QKeySequence(Modifiers).toString(QKeySequence::NativeText);
+
+		switch (Button)
+		{
+		case Qt::LeftButton:
+			Shortcut += tr("Left Button");
+			break;
 
 #if (QT_VERSION >= QT_VERSION_CHECK(4, 7, 0))
-	case Qt::MiddleButton:
-		Shortcut += tr("Middle Button");
-		break;
+		case Qt::MiddleButton:
+			Shortcut += tr("Middle Button");
+			break;
 #endif
 
-	case Qt::RightButton:
-		Shortcut += tr("Right Button");
-		break;
+		case Qt::RightButton:
+			Shortcut += tr("Right Button");
+			break;
 
-	default:
-		Shortcut.clear();
-	}
+		default:
+			Shortcut.clear();
+		}
+		return Shortcut;
+	};
+
+	QString Shortcut1 = GetShortcutText(options->MouseShortcuts.mShortcuts[ItemIndex].Button1, options->MouseShortcuts.mShortcuts[ItemIndex].Modifiers1);
+	QString Shortcut2 = GetShortcutText(options->MouseShortcuts.mShortcuts[ItemIndex].Button2, options->MouseShortcuts.mShortcuts[ItemIndex].Modifiers2);
 
 	QTreeWidgetItem* Item = ui->mouseTree->topLevelItem(ItemIndex);
 
 	if (Item)
-		Item->setText(1, Shortcut);
+	{
+		Item->setText(1, Shortcut1);
+		Item->setText(2, Shortcut2);
+	}
 	else
-		new QTreeWidgetItem(ui->mouseTree, QStringList() << tr(gToolNames[ItemIndex]) << Shortcut);
+		new QTreeWidgetItem(ui->mouseTree, QStringList() << tr(gToolNames[ItemIndex]) << Shortcut1 << Shortcut2);
 }
 
 void lcQPreferencesDialog::on_mouseAssign_clicked()
@@ -677,20 +694,36 @@ void lcQPreferencesDialog::on_mouseAssign_clicked()
 
 		for (int ToolIdx = 0; ToolIdx < LC_NUM_TOOLS; ToolIdx++)
 		{
-			if (ToolIdx != ButtonIndex && options->MouseShortcuts.mShortcuts[ToolIdx].Button == Button && options->MouseShortcuts.mShortcuts[ToolIdx].Modifiers == Modifiers)
+			if (ToolIdx == ButtonIndex)
+				continue;
+
+			if (options->MouseShortcuts.mShortcuts[ToolIdx].Button2 == Button && options->MouseShortcuts.mShortcuts[ToolIdx].Modifiers2 == Modifiers)
 			{
 				if (QMessageBox::question(this, tr("Override Shortcut"), tr("This shortcut is already assigned to '%1', do you want to replace it?").arg(tr(gToolNames[ToolIdx])), QMessageBox::Yes | QMessageBox::No) == QMessageBox::No)
 					return;
 
-				options->MouseShortcuts.mShortcuts[ToolIdx].Button = Qt::NoButton;
-				options->MouseShortcuts.mShortcuts[ToolIdx].Modifiers = Qt::NoModifier;
+				options->MouseShortcuts.mShortcuts[ToolIdx].Button2 = Qt::NoButton;
+				options->MouseShortcuts.mShortcuts[ToolIdx].Modifiers2 = Qt::NoModifier;
+			}
+
+			if (options->MouseShortcuts.mShortcuts[ToolIdx].Button1 == Button && options->MouseShortcuts.mShortcuts[ToolIdx].Modifiers1 == Modifiers)
+			{
+				if (QMessageBox::question(this, tr("Override Shortcut"), tr("This shortcut is already assigned to '%1', do you want to replace it?").arg(tr(gToolNames[ToolIdx])), QMessageBox::Yes | QMessageBox::No) == QMessageBox::No)
+					return;
+
+				options->MouseShortcuts.mShortcuts[ToolIdx].Button1 = options->MouseShortcuts.mShortcuts[ToolIdx].Button2;
+				options->MouseShortcuts.mShortcuts[ToolIdx].Modifiers1 = options->MouseShortcuts.mShortcuts[ToolIdx].Modifiers2;
+				options->MouseShortcuts.mShortcuts[ToolIdx].Button2 = Qt::NoButton;
+				options->MouseShortcuts.mShortcuts[ToolIdx].Modifiers2 = Qt::NoModifier;
 			}
 		}
 	}
 
 	int ItemIndex = ui->mouseTree->indexOfTopLevelItem(Current);
-	options->MouseShortcuts.mShortcuts[ItemIndex].Button = Button;
-	options->MouseShortcuts.mShortcuts[ItemIndex].Modifiers = Modifiers;
+	options->MouseShortcuts.mShortcuts[ItemIndex].Button2 = options->MouseShortcuts.mShortcuts[ItemIndex].Button1;
+	options->MouseShortcuts.mShortcuts[ItemIndex].Modifiers2 = options->MouseShortcuts.mShortcuts[ItemIndex].Modifiers1;
+	options->MouseShortcuts.mShortcuts[ItemIndex].Button1 = Button;
+	options->MouseShortcuts.mShortcuts[ItemIndex].Modifiers1 = Modifiers;
 
 	options->MouseShortcutsModified = true;
 	options->MouseShortcutsDefault = false;
@@ -706,13 +739,16 @@ void lcQPreferencesDialog::on_mouseRemove_clicked()
 		return;
 
 	int ItemIndex = ui->mouseTree->indexOfTopLevelItem(Current);
-	options->MouseShortcuts.mShortcuts[ItemIndex].Button = Qt::NoButton;
-	options->MouseShortcuts.mShortcuts[ItemIndex].Modifiers = Qt::NoModifier;
+	options->MouseShortcuts.mShortcuts[ItemIndex].Button1 = options->MouseShortcuts.mShortcuts[ItemIndex].Button2;
+	options->MouseShortcuts.mShortcuts[ItemIndex].Modifiers1 = options->MouseShortcuts.mShortcuts[ItemIndex].Modifiers2;
+	options->MouseShortcuts.mShortcuts[ItemIndex].Button2 = Qt::NoButton;
+	options->MouseShortcuts.mShortcuts[ItemIndex].Modifiers2 = Qt::NoModifier;
 
 	options->MouseShortcutsModified = true;
 	options->MouseShortcutsDefault = false;
 
 	UpdateMouseTreeItem(ItemIndex);
+	MouseTreeItemChanged(Current);
 }
 
 void lcQPreferencesDialog::on_mouseReset_clicked()
@@ -739,7 +775,7 @@ void lcQPreferencesDialog::MouseTreeItemChanged(QTreeWidgetItem* Current)
 
 	int ToolIndex = ui->mouseTree->indexOfTopLevelItem(Current);
 
-	Qt::MouseButton Button = options->MouseShortcuts.mShortcuts[ToolIndex].Button;
+	Qt::MouseButton Button = options->MouseShortcuts.mShortcuts[ToolIndex].Button1;
 
 	switch (Button)
 	{
@@ -762,7 +798,7 @@ void lcQPreferencesDialog::MouseTreeItemChanged(QTreeWidgetItem* Current)
 		break;
 	}
 
-	Qt::KeyboardModifiers Modifiers = options->MouseShortcuts.mShortcuts[ToolIndex].Modifiers;
+	Qt::KeyboardModifiers Modifiers = options->MouseShortcuts.mShortcuts[ToolIndex].Modifiers1;
 	ui->mouseControl->setChecked((Modifiers & Qt::ControlModifier) != 0);
 	ui->mouseShift->setChecked((Modifiers & Qt::ShiftModifier) != 0);
 	ui->mouseAlt->setChecked((Modifiers & Qt::AltModifier) != 0);

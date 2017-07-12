@@ -12,69 +12,9 @@
 
  Q_DECLARE_METATYPE(QList<int>)
 
-static int lcPartSortFunc(PieceInfo* const& a, PieceInfo* const& b)
-{
-	return strcmp(a->m_strDescription, b->m_strDescription);
-}
-
-lcPartSelectionFilterModel::lcPartSelectionFilterModel(QObject* Parent)
-	: QSortFilterProxyModel(Parent)
-{
-	mShowDecoratedParts = lcGetProfileInt(LC_PROFILE_PARTS_LIST_DECORATED);
-}
-
-void lcPartSelectionFilterModel::SetFilter(const QString& Filter)
-{
-	mFilter = Filter.toLatin1();
-	invalidateFilter();
-}
-
-void lcPartSelectionFilterModel::SetShowDecoratedParts(bool Show)
-{
-	if (Show == mShowDecoratedParts)
-		return;
-
-	mShowDecoratedParts = Show;
-
-	invalidateFilter();
-}
-
-bool lcPartSelectionFilterModel::filterAcceptsRow(int SourceRow, const QModelIndex& SourceParent) const
-{
-	Q_UNUSED(SourceParent);
-
-	lcPartSelectionListModel* SourceModel = (lcPartSelectionListModel*)sourceModel();
-	PieceInfo* Info = SourceModel->GetPieceInfo(SourceRow);
-
-	if (!mShowDecoratedParts && Info->IsPatterned())
-		return false;
-
-	if (mFilter.isEmpty())
-		return true;
-
-	char Description[sizeof(Info->m_strDescription)];
-	char* Src = Info->m_strDescription;
-	char* Dst = Description;
-
-	for (;;)
-	{
-		*Dst = *Src;
-
-		if (*Src == ' ' && *(Src + 1) == ' ')
-			Src++;
-		else if (*Src == 0)
-			break;
-
-		Src++;
-		Dst++;
-	}
-
-	return strcasestr(Description, mFilter) || strcasestr(Info->m_strName, mFilter);
-}
-
 void lcPartSelectionItemDelegate::paint(QPainter* Painter, const QStyleOptionViewItem& Option, const QModelIndex& Index) const
 {
-	mListModel->RequestPreview(mFilterModel->mapToSource(Index).row());
+	mListModel->RequestPreview(Index.row());
 	QStyledItemDelegate::paint(Painter, Option, Index);
 }
 
@@ -101,6 +41,7 @@ lcPartSelectionListModel::lcPartSelectionListModel(QObject* Parent)
 	mIconSize = 0;
 	mShowPartNames = lcGetProfileInt(LC_PROFILE_PARTS_LIST_NAMES);
 	mListMode = lcGetProfileInt(LC_PROFILE_PARTS_LIST_LISTMODE);
+	mShowDecoratedParts = lcGetProfileInt(LC_PROFILE_PARTS_LIST_DECORATED);
 
 	int ColorCode = lcGetProfileInt(LC_PROFILE_PARTS_LIST_COLOR);
 	if (ColorCode == -1)
@@ -186,6 +127,11 @@ void lcPartSelectionListModel::SetCategory(int CategoryIndex)
 	else
 		Library->GetParts(SingleParts);
 
+	auto lcPartSortFunc=[](PieceInfo* const& a, PieceInfo* const& b)
+	{
+		return strcmp(a->m_strDescription, b->m_strDescription);
+	};
+
 	SingleParts.Sort(lcPartSortFunc);
 	mParts.resize(SingleParts.GetSize());
 
@@ -193,6 +139,8 @@ void lcPartSelectionListModel::SetCategory(int CategoryIndex)
 		mParts[PartIdx] = QPair<PieceInfo*, QPixmap>(SingleParts[PartIdx], QPixmap());
 
 	endResetModel();
+
+	SetFilter(mFilter);
 }
 
 void lcPartSelectionListModel::SetModelsCategory()
@@ -215,6 +163,8 @@ void lcPartSelectionListModel::SetModelsCategory()
 	}
 
 	endResetModel();
+
+	SetFilter(mFilter);
 }
 
 void lcPartSelectionListModel::SetCurrentModelCategory()
@@ -233,6 +183,47 @@ void lcPartSelectionListModel::SetCurrentModelCategory()
 		mParts.append(QPair<PieceInfo*, QPixmap>((PieceInfo*)PartIt.first, QPixmap()));
 
 	endResetModel();
+
+	SetFilter(mFilter);
+}
+
+void lcPartSelectionListModel::SetFilter(const QString& Filter)
+{
+	mFilter = Filter.toLatin1();
+
+	for (int PartIdx = 0; PartIdx < mParts.size(); PartIdx++)
+	{
+		PieceInfo* Info = mParts[PartIdx].first;
+		bool Visible;
+
+		if (!mShowDecoratedParts && Info->IsPatterned())
+			Visible = false;
+		else if (mFilter.isEmpty())
+			Visible = true;
+		else
+		{
+			char Description[sizeof(Info->m_strDescription)];
+			char* Src = Info->m_strDescription;
+			char* Dst = Description;
+
+			for (;;)
+			{
+				*Dst = *Src;
+
+				if (*Src == ' ' && *(Src + 1) == ' ')
+					Src++;
+				else if (*Src == 0)
+					break;
+
+				Src++;
+				Dst++;
+			}
+
+			Visible = strcasestr(Description, mFilter) || strcasestr(Info->m_strName, mFilter);
+		}
+
+		mListView->setRowHidden(PartIdx, !Visible);
+	}
 }
 
 int lcPartSelectionListModel::rowCount(const QModelIndex& Parent) const
@@ -374,6 +365,16 @@ void lcPartSelectionListModel::DrawPreview(int InfoIndex)
 #endif
 }
 
+void lcPartSelectionListModel::SetShowDecoratedParts(bool Show)
+{
+	if (Show == mShowDecoratedParts)
+		return;
+
+	mShowDecoratedParts = Show;
+
+	SetFilter(mFilter);
+}
+
 void lcPartSelectionListModel::SetIconSize(int Size)
 {
 	if (Size == mIconSize)
@@ -410,10 +411,8 @@ lcPartSelectionListView::lcPartSelectionListView(QWidget* Parent)
 	setContextMenuPolicy(Qt::CustomContextMenu);
 
 	mListModel = new lcPartSelectionListModel(this);
-	mFilterModel = new lcPartSelectionFilterModel(this);
-	mFilterModel->setSourceModel(mListModel);
-	setModel(mFilterModel);
-	lcPartSelectionItemDelegate* ItemDelegate = new lcPartSelectionItemDelegate(this, mListModel, mFilterModel);
+	setModel(mListModel);
+	lcPartSelectionItemDelegate* ItemDelegate = new lcPartSelectionItemDelegate(this, mListModel);
 	setItemDelegate(ItemDelegate);
 
 	connect(this, SIGNAL(customContextMenuRequested(QPoint)), SLOT(CustomContextMenuRequested(QPoint)));
@@ -466,7 +465,7 @@ void lcPartSelectionListView::CustomContextMenuRequested(QPoint Pos)
 
 	QAction* DecoratedParts = Menu->addAction(tr("Show Decorated Parts"), this, SLOT(ToggleDecoratedParts()));
 	DecoratedParts->setCheckable(true);
-	DecoratedParts->setChecked(mFilterModel->GetShowDecoratedParts());
+	DecoratedParts->setChecked(mListModel->GetShowDecoratedParts());
 
 	if (mListModel->GetIconSize() != 0)
 	{
@@ -516,8 +515,8 @@ void lcPartSelectionListView::TogglePartNames()
 
 void lcPartSelectionListView::ToggleDecoratedParts()
 {
-	bool Show = !mFilterModel->GetShowDecoratedParts();
-	mFilterModel->SetShowDecoratedParts(Show);
+	bool Show = !mListModel->GetShowDecoratedParts();
+	mListModel->SetShowDecoratedParts(Show);
 	lcSetProfileInt(LC_PROFILE_PARTS_LIST_DECORATED, Show);
 }
 
@@ -698,7 +697,7 @@ void lcPartSelectionWidget::FilterChanged(const QString& Text)
 			mFilterAction->setIcon(QIcon(":/resources/parts_cancel.png"));
 	}
 
-	mPartsWidget->GetFilterModel()->SetFilter(Text);
+	mPartsWidget->GetListModel()->SetFilter(Text);
 }
 
 void lcPartSelectionWidget::FilterTriggered()
@@ -720,7 +719,7 @@ void lcPartSelectionWidget::CategoryChanged(QTreeWidgetItem* Current, QTreeWidge
 	else
 		ListModel->SetCategory(mCategoriesWidget->indexOfTopLevelItem(Current) - 2);
 
-	mPartsWidget->setCurrentIndex(mPartsWidget->GetFilterModel()->index(0, 0));
+	mPartsWidget->setCurrentIndex(ListModel->index(0, 0));
 }
 
 void lcPartSelectionWidget::PartChanged(const QModelIndex& Current, const QModelIndex& Previous)

@@ -4,35 +4,13 @@
 class lcPartSelectionListModel;
 class lcPartSelectionListView;
 
-class lcPartSelectionFilterModel : public QSortFilterProxyModel
-{
-	Q_OBJECT
-
-public:
-	lcPartSelectionFilterModel(QObject* Parent);
-
-	void SetFilter(const QString& Filter);
-	void SetShowDecoratedParts(bool Show);
-
-	bool GetShowDecoratedParts() const
-	{
-		return mShowDecoratedParts;
-	}
-
-protected:
-	virtual bool filterAcceptsRow(int SourceRow, const QModelIndex& SourceParent) const;
-
-	QByteArray mFilter;
-	bool mShowDecoratedParts;
-};
-
 class lcPartSelectionItemDelegate : public QStyledItemDelegate
 {
 	Q_OBJECT
 
 public:
-	lcPartSelectionItemDelegate(QObject* Parent, lcPartSelectionListModel* ListModel, lcPartSelectionFilterModel* FilterModel)
-		: QStyledItemDelegate(Parent), mListModel(ListModel), mFilterModel(FilterModel)
+	lcPartSelectionItemDelegate(QObject* Parent, lcPartSelectionListModel* ListModel)
+		: QStyledItemDelegate(Parent), mListModel(ListModel)
 	{
 	}
 
@@ -41,7 +19,6 @@ public:
 
 protected:
 	lcPartSelectionListModel* mListModel;
-	lcPartSelectionFilterModel* mFilterModel;
 };
 
 class lcPartSelectionListModel : public QAbstractListModel
@@ -65,6 +42,11 @@ public:
 	PieceInfo* GetPieceInfo(int Row) const
 	{
 		return mParts[Row].first;
+	}
+
+	bool GetShowDecoratedParts() const
+	{
+		return mShowDecoratedParts;
 	}
 
 	int GetIconSize() const
@@ -94,7 +76,9 @@ public:
 	void SetCategory(int CategoryIndex);
 	void SetModelsCategory();
 	void SetCurrentModelCategory();
+	void SetFilter(const QString& Filter);
 	void RequestPreview(int InfoIndex);
+	void SetShowDecoratedParts(bool Show);
 	void SetIconSize(int Size);
 	void SetShowPartNames(bool Show);
 
@@ -113,6 +97,8 @@ protected:
 	int mColorIndex;
 	bool mShowPartNames;
 	bool mListMode;
+	bool mShowDecoratedParts;
+	QByteArray mFilter;
 };
 
 class lcPartSelectionListView : public QListView
@@ -126,17 +112,12 @@ public:
 
 	PieceInfo* GetCurrentPart() const
 	{
-		return mListModel->GetPieceInfo(mFilterModel->mapToSource(currentIndex()));
+		return mListModel->GetPieceInfo(currentIndex());
 	}
 
 	lcPartSelectionListModel* GetListModel() const
 	{
 		return mListModel;
-	}
-
-	lcPartSelectionFilterModel* GetFilterModel() const
-	{
-		return mFilterModel;
 	}
 
 	void UpdateViewMode();
@@ -157,7 +138,6 @@ protected:
 	void SetIconSize(int Size);
 
 	lcPartSelectionListModel* mListModel;
-	lcPartSelectionFilterModel* mFilterModel;
 };
 
 class lcPartSelectionWidget : public QWidget

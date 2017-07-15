@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <title>Getting Started | LeoCAD</title>
+    <title>Texture Mapping | LeoCAD</title>
     <link rel="stylesheet" href="../main.css">
   </head>
   <body>
@@ -31,7 +31,7 @@
   <div class="nav-docs-section">
     <h3>General Information</h3>
     <ul>
-      <li><a href="start.html" class="active">Getting Started</a></li>
+      <li><a href="start.html">Getting Started</a></li>
       <li><a href="library.html">Parts Library</a></li>
       <li><a href="compiling.html">Compiling Guide</a></li>
       <li><a href="license.html">License</a></li>
@@ -61,19 +61,44 @@
     <h3>Reference</h3>
     <ul>
       <li><a href="meta.html">Meta Commands</a></li>
-      <li><a href="texmap.html">Texture Mapping</a></li>
+      <li><a href="texmap.html" class="active">Texture Mapping</a></li>
     </ul>
   </div>
 </div>
 <!-- docbar end -->
 
 <div class="inner-content">
-<h2>Getting Started</h2>
-<p>If you haven't installed LeoCAD yet, visit the <a href="../download.html">Download Page</a> for information on how to get the latest version of LeoCAD installed on your computer.</p>
-<p>Once you're ready to start creating models take a look at the basic tutorial for a quick guide on how to create a simple model.</p>
-<p>The pages on the left will have information on more advanced topics.</p>
 
-        </div>
+    <h2>Texture Mapping</h2>
+    <div class="subHeader"></div>
+    <p>LeoCAD supports texture mapped primitives through the <a href="http://www.ldraw.org/documentation/ldraw-org-file-format-standards/language-extension-for-texture-mapping.html">LDraw TEXMAP extension</a>.</p>
+
+    <h4>Example</h4>
+
+    <p>One of the uses for texture mapping could be to use photos or images as reference images to your model while building it.</p>
+
+    <p class="centerImage"><img src="texmap-01.png" /></p>
+
+    <p>The planes in the image above are drawn using PNG files as textures using the following code in the file:</p>
+
+    <div class="highlight">
+        <code>
+            0 !TEXMAP START PLANAR 100 10 100 100 10 -100 -100 10 100 bottom.png<br />
+            4 16 100 1 -100 100 1 100 -100 1 100 -100 1 -100<br />
+            0 !TEXMAP END<br />
+            <br />
+            0 !TEXMAP START PLANAR -100 -200 10 100 -200 10 -100 0 10 side.png<br />
+            4 16 100 -200 120 100 0 120 -100 0 120 -100 -200 120<br />
+            0 !TEXMAP END<br />
+            <br />
+            0 !TEXMAP START PLANAR 0 -200 100 0 -200 -100 0 0 100 side.png<br />
+            4 16 120 -200 100 120 0 100 120 0 -100 120 -200 -100<br />
+            0 !TEXMAP END<br />
+        </code>
+    </div>
+
+
+    </div>
       </section>
 <!-- footer start -->
 <footer class="wrap"><div class="right"> &copy; LeoCAD.org </div></footer>

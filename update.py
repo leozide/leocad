@@ -40,7 +40,6 @@ docbar = """<!-- docbar start -->
       Keyframing
       POV-Ray
 	  Pivot points
-	  Texture map
  -->
       <li><a href="tutorial1.html">Basic Tutorial</a></li>
     </ul>
@@ -52,6 +51,7 @@ docbar = """<!-- docbar start -->
     <h3>Reference</h3>
     <ul>
       <li><a href="meta.html">Meta Commands</a></li>
+      <li><a href="texmap.html">Texture Mapping</a></li>
     </ul>
   </div>
 </div>

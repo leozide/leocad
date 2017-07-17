@@ -80,7 +80,7 @@ bool lcQColorList::event(QEvent *event)
 				continue;
 
 			lcColor* color = &gColorList[mCellColors[CellIdx]];
-			QRgb rgb = qRgb(color->Value[0] * 255, color->Value[1] * 255, color->Value[2] * 255);
+			QColor rgb(color->Value[0] * 255, color->Value[1] * 255, color->Value[2] * 255);
 
 			QImage image(16, 16, QImage::Format_RGB888);
 			image.fill(rgb);
@@ -93,6 +93,7 @@ bool lcQColorList::event(QEvent *event)
 			QBuffer buffer(&ba);
 			buffer.open(QIODevice::WriteOnly);
 			image.save(&buffer, "PNG");
+			buffer.close();
 
 			int colorIndex = mCellColors[CellIdx];
 			const char* format = "<table><tr><td style=\"vertical-align:middle\"><img src=\"data:image/png;base64,%1\"/></td><td>%2 (%3)</td></tr></table>";

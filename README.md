@@ -1,9 +1,9 @@
 About LeoCAD
 ------------
 
-LeoCAD is a CAD program for creating virtual LEGO models. It's available
-or free under the GNU Public License v2 and works on the Windows, Linux
-and Mac OSX Operating Systems.
+LeoCAD is a CAD program for creating virtual models that can be constructed
+in real life using LEGO® bricks. It's available or free under the GNU Public
+License v2 and works on the Windows, Linux and Mac OSX Operating Systems.
 
 
 Installation
@@ -55,5 +55,5 @@ Online Resources
 Legal Disclaimer
 ----------------
 
-LEGO is a trademark of the LEGO Group of companies which does not sponsor,
+LEGO® is a trademark of the LEGO Group of companies which does not sponsor,
 authorize or endorse this software.

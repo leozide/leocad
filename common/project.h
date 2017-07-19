@@ -1,5 +1,4 @@
-#ifndef _PROJECT_H_
-#define _PROJECT_H_
+#pragma once
 
 #include "object.h"
 #include "lc_array.h"
@@ -98,4 +97,3 @@ inline lcModel* lcGetActiveModel()
 	return Project ? Project->GetActiveModel() : nullptr;
 }
 
-#endif // _PROJECT_H_

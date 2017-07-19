@@ -1,5 +1,4 @@
-#ifndef _VIEW_H_
-#define _VIEW_H_
+#pragma once
 
 #include "lc_glwidget.h"
 #include "camera.h"
@@ -163,4 +162,3 @@ protected:
 	static lcIndexBuffer mRotateMoveIndexBuffer;
 };
 
-#endif // _VIEW_H_

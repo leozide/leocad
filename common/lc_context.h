@@ -1,5 +1,4 @@
-#ifndef _LC_CONTEXT_H_
-#define _LC_CONTEXT_H_
+#pragma once
 
 #include "lc_array.h"
 #include "lc_math.h"
@@ -195,4 +194,3 @@ protected:
 	Q_DECLARE_TR_FUNCTIONS(lcContext);
 };
 
-#endif // _LC_CONTEXT_H_

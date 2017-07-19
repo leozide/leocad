@@ -1,5 +1,4 @@
-#ifndef _LC_MATH_H_
-#define _LC_MATH_H_
+#pragma once
 
 #include <math.h>
 #include <float.h>
@@ -1963,4 +1962,3 @@ bool SphereIntersectsVolume(const Vector3& Center, float Radius, const Vector4* 
 	return true;
 }*/
 
-#endif // _LC_MATH_H_

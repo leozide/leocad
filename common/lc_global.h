@@ -1,5 +1,4 @@
-#ifndef _LC_GLOBAL_H_
-#define _LC_GLOBAL_H_
+#pragma once
 
 #include <QtGlobal>
 #include <QWidget>
@@ -75,4 +74,3 @@ class lcFile;
 class lcMemFile;
 class lcDiskFile;
 
-#endif // _LC_GLOBAL_H_

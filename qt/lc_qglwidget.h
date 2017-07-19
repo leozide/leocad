@@ -1,5 +1,4 @@
-#ifndef _LC_QGLWIDGET_H_
-#define _LC_QGLWIDGET_H_
+#pragma once
 
 #include <QGLWidget>
 class lcGLWidget;
@@ -46,4 +45,3 @@ protected:
 	int mWheelAccumulator;
 };
 
-#endif // _LC_VIEWWIDGET_H_

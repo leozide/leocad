@@ -1,5 +1,4 @@
-#ifndef _LC_QPOVRAYDIALOG_H_
-#define _LC_QPOVRAYDIALOG_H_
+#pragma once
 
 #include <QDialog>
 
@@ -30,4 +29,3 @@ private:
 	Ui::lcQPOVRayDialog *ui;
 };
 
-#endif // _LC_QPOVRAYDIALOG_H_

@@ -1,5 +1,4 @@
-#ifndef LC_QPREFERENCESDIALOG_H
-#define LC_QPREFERENCESDIALOG_H
+#pragma once
 
 #include <QDialog>
 struct lcPreferencesDialogOptions;
@@ -63,4 +62,3 @@ private:
 	void setShortcutModified(QTreeWidgetItem *treeItem, bool modified);
 };
 
-#endif // LC_QPREFERENCESDIALOG_H

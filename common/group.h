@@ -1,5 +1,4 @@
-#ifndef _GROUP_H_
-#define _GROUP_H_
+#pragma once
 
 #include "lc_array.h"
 
@@ -23,4 +22,3 @@ public:
 	QString mName;
 };
 
-#endif // _GROUP_H_

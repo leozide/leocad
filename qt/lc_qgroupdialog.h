@@ -1,5 +1,4 @@
-#ifndef _LC_QGROUPDIALOG_H_
-#define _LC_QGROUPDIALOG_H_
+#pragma once
 
 #include <QDialog>
 
@@ -24,4 +23,3 @@ private:
 	Ui::lcQGroupDialog *ui;
 };
 
-#endif // _LC_QGROUPDIALOG_H_

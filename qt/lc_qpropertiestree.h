@@ -1,5 +1,4 @@
-#ifndef _LC_QPROPERTIESWIDGET_H_
-#define _LC_QPROPERTIESWIDGET_H_
+#pragma once
 
 #include "lc_array.h"
 
@@ -163,4 +162,3 @@ private:
 	mutable bool m_disablePainting;
 };
 
-#endif // _LC_QPROPERTIESWIDGET_H_

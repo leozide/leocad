@@ -1,5 +1,4 @@
-#ifndef _LC_APPLICATION_H_
-#define _LC_APPLICATION_H_
+#pragma once
 
 #include "lc_array.h"
 
@@ -78,4 +77,3 @@ inline lcPreferences& lcGetPreferences()
 	return g_App->mPreferences;
 }
 
-#endif // _LC_APPLICATION_H_

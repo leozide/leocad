@@ -1,5 +1,4 @@
-#ifndef _LC_QPROPERTIESDIALOG_H_
-#define _LC_QPROPERTIESDIALOG_H_
+#pragma once
 
 #include <QDialog>
 struct lcPropertiesDialogOptions;
@@ -27,4 +26,3 @@ private:
 	Ui::lcQPropertiesDialog *ui;
 };
 
-#endif // _LC_QPROPERTIESDIALOG_H_

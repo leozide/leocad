@@ -1,5 +1,4 @@
-#ifndef LC_PROFILE_H
-#define LC_PROFILE_H
+#pragma once
 
 enum LC_PROFILE_KEY
 {
@@ -118,4 +117,3 @@ void lcSetProfileString(LC_PROFILE_KEY Key, const QString& Value);
 void lcSetProfileStringList(LC_PROFILE_KEY Key, const QStringList& Value);
 void lcSetProfileBuffer(LC_PROFILE_KEY Key, const QByteArray& Buffer);
 
-#endif // LC_PROFILE_H

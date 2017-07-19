@@ -1,5 +1,4 @@
-#ifndef _LC_CATEGORY_H_
-#define _LC_CATEGORY_H_
+#pragma once
 
 #include "lc_array.h"
 
@@ -23,4 +22,3 @@ bool lcSaveCategories(QTextStream& Stream, const lcArray<lcLibraryCategory>& Cat
 
 bool lcMatchCategory(const char* PieceName, const char* Expression);
 
-#endif // _LC_CATEGORY_H_

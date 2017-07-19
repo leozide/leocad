@@ -1,5 +1,4 @@
-#ifndef _LC_LIBRARY_H_
-#define _LC_LIBRARY_H_
+#pragma once
 
 #include "lc_context.h"
 #include "lc_mesh.h"
@@ -232,4 +231,3 @@ protected:
 	bool mHasUnofficial;
 };
 
-#endif // _LC_LIBRARY_H_

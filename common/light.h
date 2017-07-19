@@ -1,5 +1,4 @@
-#ifndef _LIGHT_H_
-#define _LIGHT_H_
+#pragma once
 
 #include "object.h"
 #include "lc_math.h"
@@ -225,4 +224,3 @@ protected:
 	char m_strName[81];
 };
 
-#endif // _LIGHT_H_

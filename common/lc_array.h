@@ -1,5 +1,4 @@
-#ifndef _LC_ARRAY_H_
-#define _LC_ARRAY_H_
+#pragma once
 
 template <class T>
 class lcArray
@@ -268,4 +267,3 @@ protected:
 	int mGrow;
 };
 
-#endif // _LC_ARRAY_H_

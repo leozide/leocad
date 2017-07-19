@@ -1,5 +1,4 @@
-#ifndef _LC_TEXTURE_H_
-#define _LC_TEXTURE_H_
+#pragma once
 
 #define LC_TEXTURE_WRAPU         0x01
 #define LC_TEXTURE_WRAPV         0x02
@@ -78,4 +77,3 @@ void lcReleaseTexture(lcTexture* Texture);
 
 extern lcTexture* gGridTexture;
 
-#endif // _LC_TEXTURE_H_

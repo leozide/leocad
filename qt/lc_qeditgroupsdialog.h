@@ -1,5 +1,4 @@
-#ifndef LC_QEDITGROUPSDIALOG_H
-#define LC_QEDITGROUPSDIALOG_H
+#pragma once
 
 #include <QDialog>
 
@@ -46,4 +45,3 @@ private:
 	QBasicTimer mClickTimer;
 };
 
-#endif // LC_QEDITGROUPSDIALOG_H

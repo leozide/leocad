@@ -1,5 +1,4 @@
-#ifndef LC_QIMAGEDIALOG_H
-#define LC_QIMAGEDIALOG_H
+#pragma once
 
 #include <QDialog>
 
@@ -29,4 +28,3 @@ private:
 	Ui::lcQImageDialog *ui;
 };
 
-#endif // LC_QIMAGEDIALOG_H

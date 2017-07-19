@@ -1,5 +1,4 @@
-#ifndef _LC_QARRAYDIALOG_H_
-#define _LC_QARRAYDIALOG_H_
+#pragma once
 
 #include <QDialog>
 #include "lc_math.h"
@@ -27,4 +26,3 @@ private:
 	Ui::lcQArrayDialog *ui;
 };
 
-#endif // _LC_QARRAYDIALOG_H_

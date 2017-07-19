@@ -1,5 +1,4 @@
-#ifndef LC_QUPDATEDIALOG_H
-#define LC_QUPDATEDIALOG_H
+#pragma once
 
 #include <QDialog>
 #include <QNetworkReply>
@@ -35,4 +34,3 @@ private:
 	bool mInitialUpdate;
 };
 
-#endif // LC_QUPDATEDIALOG_H

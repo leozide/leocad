@@ -1,5 +1,4 @@
-#ifndef LC_QCATEGORYDIALOG_H
-#define LC_QCATEGORYDIALOG_H
+#pragma once
 
 #include <QDialog>
 struct lcLibraryCategory;
@@ -25,4 +24,3 @@ private:
 	Ui::lcQCategoryDialog *ui;
 };
 
-#endif // LC_QCATEGORYDIALOG_H

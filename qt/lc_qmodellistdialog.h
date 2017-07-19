@@ -1,5 +1,4 @@
-#ifndef _LC_QMODELLISTDIALOG_H_
-#define _LC_QMODELLISTDIALOG_H_
+#pragma once
 
 #include <QDialog>
 
@@ -31,4 +30,3 @@ private:
 	Ui::lcQModelListDialog* ui;
 };
 
-#endif // _LC_QMODELLISTDIALOG_H_

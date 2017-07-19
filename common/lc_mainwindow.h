@@ -1,5 +1,4 @@
-#ifndef _LC_MAINWINDOW_H_
-#define _LC_MAINWINDOW_H_
+#pragma once
 
 #include "lc_basewindow.h"
 #include "lc_array.h"
@@ -375,4 +374,3 @@ protected:
 
 extern class lcMainWindow* gMainWindow;
 
-#endif // _LC_MAINWND_H_

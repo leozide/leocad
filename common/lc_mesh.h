@@ -1,5 +1,4 @@
-#ifndef _LC_MESH_H_
-#define _LC_MESH_H_
+#pragma once
 
 #include "lc_math.h"
 
@@ -117,4 +116,3 @@ struct lcRenderMesh
 
 extern lcMesh* gPlaceholderMesh;
 
-#endif // _LC_MESH_H_

@@ -1,5 +1,4 @@
-#ifndef _OBJECT_H_
-#define _OBJECT_H_
+#pragma once
 
 #include "lc_math.h"
 #include "lc_array.h"
@@ -244,4 +243,3 @@ private:
 	lcObjectType mObjectType;
 };
 
-#endif

@@ -1,5 +1,4 @@
-#ifndef _IMAGE_H_
-#define _IMAGE_H_
+#pragma once
 
 // Image Options
 #define LC_IMAGE_TRANSPARENT	0x2000
@@ -37,4 +36,3 @@ public:
 	unsigned char* mData;
 };
 
-#endif // _IMAGE_H_

@@ -1,5 +1,4 @@
-#ifndef LC_QFINDDIALOG_H
-#define LC_QFINDDIALOG_H
+#pragma once
 
 #include <QDialog>
 struct lcSearchOptions;
@@ -25,4 +24,3 @@ private:
 	Ui::lcQFindDialog *ui;
 };
 
-#endif // LC_QFINDDIALOG_H

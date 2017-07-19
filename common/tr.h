@@ -2,8 +2,7 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#ifndef _TR_H_
-#define _TR_H_
+#pragma once
 
 class TiledRender
 {
@@ -43,4 +42,3 @@ public:
 	GLint mViewportSave[4];
 };
 
-#endif // _TR_H_

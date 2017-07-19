@@ -1,5 +1,4 @@
-#ifndef _FILE_H_
-#define _FILE_H_
+#pragma once
 
 #include <stdio.h>
 #include <string.h>
@@ -537,4 +536,3 @@ protected:
 	QFile mFile;
 };
 
-#endif // _FILE_H_

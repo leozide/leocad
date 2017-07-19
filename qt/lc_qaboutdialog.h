@@ -1,5 +1,4 @@
-#ifndef _LC_QABOUTDIALOG_H_
-#define _LC_QABOUTDIALOG_H_
+#pragma once
 
 #include <QDialog>
 
@@ -19,4 +18,3 @@ private:
 	Ui::lcQAboutDialog *ui;
 };
 
-#endif // _LC_QABOUTDIALOG_H_

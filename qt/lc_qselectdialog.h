@@ -1,5 +1,4 @@
-#ifndef _LC_QSELECTDIALOG_H_
-#define _LC_QSELECTDIALOG_H_
+#pragma once
 
 #include <QDialog>
 #include "lc_array.h"
@@ -36,4 +35,3 @@ private:
 	void AddChildren(QTreeWidgetItem* ParentItem, lcGroup* ParentGroup);
 };
 
-#endif // _LC_QSELECTDIALOG_H_

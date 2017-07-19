@@ -1,5 +1,4 @@
-#ifndef _CAMERA_H_
-#define _CAMERA_H_
+#pragma once
 
 #include "object.h"
 #include "lc_math.h"
@@ -312,4 +311,3 @@ protected:
 	lcuint32 mState;
 };
 
-#endif // _CAMERA_H_

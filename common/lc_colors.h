@@ -1,5 +1,4 @@
-#ifndef _LC_COLORS_H_
-#define _LC_COLORS_H_
+#pragma once
 
 #include "lc_array.h"
 #include "lc_math.h"
@@ -77,4 +76,3 @@ inline bool lcIsColorTranslucent(int ColorIndex)
 	return gColorList[ColorIndex].Translucent;
 }
 
-#endif // _LC_COLORS_H_

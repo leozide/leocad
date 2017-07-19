@@ -1,5 +1,4 @@
-#ifndef _TEXFONT_H_
-#define _TEXFONT_H_
+#pragma once
 
 class TexFont
 {
@@ -40,4 +39,3 @@ protected:
 
 extern TexFont gTexFont;
 
-#endif // _TEXFONT_H_

@@ -1,5 +1,4 @@
-#ifndef LC_QMINIFIGDIALOG_H
-#define LC_QMINIFIGDIALOG_H
+#pragma once
 
 #include <QDialog>
 struct lcMinifig;
@@ -36,4 +35,3 @@ private:
 	int getAngleIndex(QObject *widget);
 };
 
-#endif // LC_QMINIFIGDIALOG_H

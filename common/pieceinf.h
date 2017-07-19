@@ -1,5 +1,4 @@
-#ifndef _PIECEINF_H_
-#define _PIECEINF_H_
+#pragma once
 
 #include <stdio.h>
 #include "lc_math.h"
@@ -170,4 +169,3 @@ protected:
 	lcSynthInfo* mSynthInfo;
 };
 
-#endif // _PIECEINF_H_

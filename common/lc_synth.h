@@ -1,5 +1,4 @@
-#ifndef _LC_SYNTH_H_
-#define _LC_SYNTH_H_
+#pragma once
 
 #include "lc_math.h"
 #include "piece.h"
@@ -63,4 +62,3 @@ protected:
 
 void lcSynthInit();
 
-#endif // _LC_SYNTH_H_

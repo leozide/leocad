@@ -1,5 +1,4 @@
-#ifndef _LC_MODEL_H_
-#define _LC_MODEL_H_
+#pragma once
 
 #include "lc_math.h"
 #include "object.h"
@@ -357,4 +356,3 @@ protected:
 	Q_DECLARE_TR_FUNCTIONS(lcModel);
 };
 
-#endif // _LC_MODEL_H_

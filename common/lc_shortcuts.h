@@ -1,5 +1,4 @@
-#ifndef _LC_SHORTCUTS_H_
-#define _LC_SHORTCUTS_H_
+#pragma once
 
 #include "lc_commands.h"
 
@@ -45,4 +44,3 @@ void lcLoadDefaultMouseShortcuts();
 void lcSaveDefaultMouseShortcuts();
 void lcResetDefaultMouseShortcuts();
 
-#endif // _LC_SHORTCUTS_H_

@@ -1,5 +1,4 @@
-#ifndef _LC_GLWIDGET_H_
-#define _LC_GLWIDGET_H_
+#pragma once
 
 #include "lc_context.h"
 
@@ -94,4 +93,3 @@ public:
 	bool mDeleteContext;
 };
 
-#endif // _LC_GLWIDGET_H_

@@ -1,5 +1,4 @@
-#ifndef _LC_QCOLORLIST_H_
-#define _LC_QCOLORLIST_H_
+#pragma once
 
 #include <QWidget>
 #include "lc_colors.h"
@@ -43,4 +42,3 @@ protected:
 	int mCurCell;
 };
 
-#endif // _LC_QCOLORLIST_H_

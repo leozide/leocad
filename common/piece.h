@@ -1,5 +1,4 @@
-#ifndef _PIECE_H_
-#define _PIECE_H_
+#pragma once
 
 class PieceInfo;
 
@@ -564,4 +563,3 @@ protected:
 	lcMesh* mMesh;
 };
 
-#endif // _PIECE_H_

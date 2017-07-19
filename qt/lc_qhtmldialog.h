@@ -1,5 +1,4 @@
-#ifndef LC_QHTMLDIALOG_H
-#define LC_QHTMLDIALOG_H
+#pragma once
 
 #include <QDialog>
 struct lcHTMLDialogOptions;
@@ -26,4 +25,3 @@ private:
 	Ui::lcQHTMLDialog *ui;
 };
 
-#endif // LC_QHTMLDIALOG_H

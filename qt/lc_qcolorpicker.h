@@ -1,5 +1,4 @@
-#ifndef _LC_QCOLORPICKER_H_
-#define _LC_QCOLORPICKER_H_
+#pragma once
 
 #include <QObject>
 class lcQColorList;
@@ -63,4 +62,3 @@ private:
 	int initialColorIndex;
 };
 
-#endif // _LC_QCOLORPICKER_H_

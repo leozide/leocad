@@ -1,5 +1,4 @@
-#ifndef _LC_PARTSELECTIONWIDGET_H_
-#define _LC_PARTSELECTIONWIDGET_H_
+#pragma once
 
 class lcPartSelectionListModel;
 class lcPartSelectionListView;
@@ -181,4 +180,3 @@ protected:
 	QSplitter* mSplitter;
 };
 
-#endif // _LC_PARTSELECTIONWIDGET_H_

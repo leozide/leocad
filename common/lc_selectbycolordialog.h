@@ -1,5 +1,4 @@
-#ifndef _LC_SELECTBYCOLORDIALOG_H_
-#define _LC_SELECTBYCOLORDIALOG_H_
+#pragma once
 
 #include "lc_array.h"
 class lcQColorPicker;
@@ -22,4 +21,3 @@ protected:
 	lcQColorPicker* mColorPicker;
 };
 
-#endif

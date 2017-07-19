@@ -1,5 +1,4 @@
-#ifndef _LC_COMMANDS_H_
-#define _LC_COMMANDS_H_
+#pragma once
 
 enum lcCommandId
 {
@@ -252,4 +251,3 @@ enum lcTool
 
 extern const char* gToolNames[LC_NUM_TOOLS];
 
-#endif // _LC_COMMANDS_H_

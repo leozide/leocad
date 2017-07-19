@@ -1,5 +1,4 @@
-#ifndef _LC_GLEXTENSIONS_H_
-#define _LC_GLEXTENSIONS_H_
+#pragma once
 
 void lcInitializeGLExtensions(const QGLContext* Context);
 
@@ -226,4 +225,3 @@ extern PFNGLVERTEXATTRIBPOINTERPROC lcVertexAttribPointer;
 
 #endif
 
-#endif

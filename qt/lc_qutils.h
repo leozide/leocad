@@ -1,5 +1,4 @@
-#ifndef _LC_QUTILS_H_
-#define _LC_QUTILS_H_
+#pragma once
 
 #include <QObject>
 
@@ -17,4 +16,3 @@ public:
 	const int m_columnToStretch;
 };
 
-#endif // _LC_QUTILS_H_

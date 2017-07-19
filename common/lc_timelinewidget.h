@@ -1,5 +1,4 @@
-#ifndef _LC_TIMELINEWIDGET_H_
-#define _LC_TIMELINEWIDGET_H_
+#pragma once
 
 class lcTimelineWidget : public QTreeWidget
 {
@@ -31,4 +30,3 @@ protected:
 	bool mIgnoreUpdates;
 };
 
-#endif // _LC_TIMELINEWIDGET_H_

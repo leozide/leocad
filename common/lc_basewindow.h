@@ -1,5 +1,4 @@
-#ifndef _LC_BASEWINDOW_H_
-#define _LC_BASEWINDOW_H_
+#pragma once
 
 #include "lc_math.h"
 #include "lc_array.h"
@@ -69,4 +68,3 @@ struct lcPreferencesDialogOptions
 	bool MouseShortcutsDefault;
 };
 
-#endif // _LC_BASEWINDOW_H_

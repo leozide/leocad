@@ -1,5 +1,4 @@
-#ifndef _LC_ZIPFILE_H_
-#define _LC_ZIPFILE_H_
+#pragma once
 
 #include "lc_array.h"
 
@@ -81,4 +80,3 @@ protected:
 	lcuint64 mCentralPos;
 };
 
-#endif // _LC_ZIPFILE_H_

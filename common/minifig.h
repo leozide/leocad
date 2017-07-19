@@ -1,5 +1,4 @@
-#ifndef _MINIFIG_H_
-#define _MINIFIG_H_
+#pragma once
 
 #include "lc_glwidget.h"
 #include "lc_math.h"
@@ -79,4 +78,3 @@ public:
 	bool mAutoZoom;
 };
 
-#endif // _MINIFIG_H_

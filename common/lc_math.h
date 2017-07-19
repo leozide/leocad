@@ -363,9 +363,32 @@ inline bool operator!=(const lcVector3& a, const lcVector3& b)
 
 #ifndef QT_NO_DEBUG
 
-inline QDebug operator<<(QDebug d, const lcVector3& v)
+inline QDebug operator<<(QDebug Debug, const lcVector3& v)
 {
-	return d << v.x << v.y << v.z;
+	QDebugStateSaver Saver(Debug);
+	Debug.nospace() << '(' << v.x << ", " << v.y << ", " << v.z << ')';
+	return Debug;
+}
+
+inline QDebug operator<<(QDebug Debug, const lcVector4& v)
+{
+	QDebugStateSaver Saver(Debug);
+	Debug.nospace() << '(' << v.x << ", " << v.y << ", " << v.z << ", " << v.w << ')';
+	return Debug;
+}
+
+inline QDebug operator<<(QDebug Debug, const lcMatrix33& m)
+{
+	QDebugStateSaver Saver(Debug);
+	Debug.nospace() << '[' << m[0] << ", " << m[1] << ", " << m[2] << ']';
+	return Debug;
+}
+
+inline QDebug operator<<(QDebug Debug, const lcMatrix44& m)
+{
+	QDebugStateSaver Saver(Debug);
+	Debug.nospace() << '[' << m[0] << ", " << m[1] << ", " << m[2] << ", " << m[3] << ']';
+	return Debug;
 }
 
 #endif

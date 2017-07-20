@@ -18,7 +18,7 @@ rendering.
 
 - LeoCAD for Windows:
 
-  Download LeoCAD-0.80.0-7439.exe to your computer, double click on the 
+  Download latest LeoCAD-*.exe to your computer, double click on the 
   icon to launch the installer and follow the intructions.
 
 - LeoCAD for Linux and FreeBSD:
@@ -30,14 +30,25 @@ rendering.
   Parts Library separately and follow the installation instructions. More
   information is available at http://www.leocad.org
 
-- LeoCAD for Mac OSX:
+- LeoCAD for macOS:
 
-  Download LeoCAD-0.80.0-7439.dmg to your computer, double click on the 
+  Download latest LeoCAD-*.dmg to your computer, double click on the 
   icon to open the archive and copy LeoCAD.app to your Applications folder.
 
 New users should take a look at the online tutorial located at
 http://www.leocad.org/docs/tutorial1.html to learn how to use LeoCAD.
 
+Unstable builds
+---------------
+
+For many Linux distributions there is OBS build system, that produce 'nightly' builds:
+
+- Go to
+  http://download.opensuse.org/repositories/home:/pbartfai/
+- Navigate in folders according Linux  disribution name you use and it's architecture (i386 or amd64)
+- Download latest leocad-*.deb (if you use xUbuntu, or other package if you use other distributive)
+
+Those builds of LeoCAD not include whole Parts Library, so you must install LDraw library parts separatly.
 
 Online Resources
 ----------------
@@ -55,5 +66,5 @@ Online Resources
 Legal Disclaimer
 ----------------
 
-LEGO is a trademark of the LEGO Group of companies which does not sponsor,
+LEGO® is a trademark of the LEGO Group of companies which does not sponsor,
 authorize or endorse this software.

@@ -3,10 +3,10 @@
 #include <math.h>
 #include <float.h>
 
-#define LC_DTOR 0.017453f
-#define LC_RTOD 57.29578f
-#define LC_PI   3.141592f
-#define LC_2PI  6.283185f
+#define LC_DTOR (M_PI / 180.0)
+#define LC_RTOD (180.0 / M_PI)
+#define LC_PI   (M_PI)
+#define LC_2PI  (2.0 * M_PI)
 
 #define LC_RGB(r,g,b) LC_RGBA(r,g,b,255)
 #define LC_RGBA(r,g,b,a) ((lcuint32)(((lcuint8) (r) | ((lcuint16) (g) << 8)) | (((lcuint32) (lcuint8) (b)) << 16) | (((lcuint32) (lcuint8) (a)) << 24))) 

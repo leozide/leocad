@@ -39,7 +39,7 @@ QString PieceInfo::GetSaveID() const
 	if (mFlags & (LC_PIECE_MODEL | LC_PIECE_PROJECT))
 		return QString::fromLatin1(m_strName);
 
-	return QString::fromLatin1(m_strName) + QLatin1String(".DAT");
+	return QString::fromLatin1(m_strName) + QLatin1String(".dat");
 }
 
 void PieceInfo::SetMesh(lcMesh* Mesh)

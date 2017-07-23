@@ -621,7 +621,8 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 			lcMatrix44 IncludeTransform(lcVector4(IncludeMatrix[3], IncludeMatrix[6], IncludeMatrix[9], 0.0f), lcVector4(IncludeMatrix[4], IncludeMatrix[7], IncludeMatrix[10], 0.0f),
 										lcVector4(IncludeMatrix[5], IncludeMatrix[8], IncludeMatrix[11], 0.0f), lcVector4(IncludeMatrix[0], IncludeMatrix[1], IncludeMatrix[2], 1.0f));
 
-			QString File = LineStream.readAll().trimmed().toUpper();
+			QString OriginalID = LineStream.readAll().trimmed();
+			QString File = OriginalID.toUpper();
 			QString PartID = File;
 			PartID.replace('\\', '/');
 
@@ -650,7 +651,7 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 									 lcVector4(-Matrix[4], -Matrix[6], Matrix[5], 0.0f), lcVector4(Matrix[12], Matrix[14], -Matrix[13], 1.0f));
 
 				Piece->SetFileLine(mFileLines.size());
-				Piece->SetPieceInfo(Info, false);
+				Piece->SetPieceInfo(Info, OriginalID, false);
 				Piece->Initialize(Transform, CurrentStep);
 				Piece->SetColorCode(ColorCode);
 				Piece->SetControlPoints(ControlPoints);
@@ -2293,19 +2294,22 @@ void lcModel::InlineSelectedModels()
 
 		mPieces.RemoveIndex(PieceIdx);
 
-		lcArray<lcModelPartsEntry> ModelParts;
-		Piece->mPieceInfo->GetModelParts(Piece->mModelWorld, Piece->mColorIndex, ModelParts);
+		lcModel* Model = Piece->mPieceInfo->GetModel();
 
-		for (int InsertIdx = 0; InsertIdx < ModelParts.GetSize(); InsertIdx++)
+		for (const lcPiece* ModelPiece : Model->mPieces)
 		{
-			lcModelPartsEntry& Entry = ModelParts[InsertIdx];
-
-			lcPiece* NewPiece = new lcPiece(Entry.Info);
+			lcPiece* NewPiece = new lcPiece(nullptr);
 
 			// todo: recreate in groups in the current model
 
-			NewPiece->Initialize(Entry.WorldMatrix, Piece->GetStepShow());
-			NewPiece->SetColorIndex(Entry.ColorIndex);
+			int ColorIndex = ModelPiece->mColorIndex;
+
+			if (ColorIndex == gDefaultColor)
+				ColorIndex = Piece->mColorIndex;
+
+			NewPiece->SetPieceInfo(ModelPiece->mPieceInfo, ModelPiece->GetID(), true);
+			NewPiece->Initialize(lcMul(ModelPiece->mModelWorld, Piece->mModelWorld), Piece->GetStepShow());
+			NewPiece->SetColorIndex(ColorIndex);
 			NewPiece->UpdatePosition(mCurrentStep);
 
 			NewPieces.Add(NewPiece);
@@ -2625,7 +2629,7 @@ void lcModel::SetSelectedPiecesPieceInfo(PieceInfo* Info)
 		{
 			lcPiecesLibrary* Library = lcGetPiecesLibrary();
 			Library->ReleasePieceInfo(Piece->mPieceInfo);
-			Piece->SetPieceInfo(Info, true);
+			Piece->SetPieceInfo(Info, QString(), true);
 			Modified = true;
 		}
 	}
@@ -3971,7 +3975,8 @@ void lcModel::ShowArrayDialog()
 					Position = lcVector3(ModelWorld.r[3].x, ModelWorld.r[3].y, ModelWorld.r[3].z);
 					ModelWorld.SetTranslation(Position + Offset);
 
-					lcPiece* NewPiece = new lcPiece(Piece->mPieceInfo);
+					lcPiece* NewPiece = new lcPiece(nullptr);
+					NewPiece->SetPieceInfo(Piece->mPieceInfo, Piece->GetID(), true);
 					NewPiece->Initialize(ModelWorld, mCurrentStep);
 					NewPiece->SetColorIndex(Piece->mColorIndex);
 

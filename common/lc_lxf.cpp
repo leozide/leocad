@@ -186,7 +186,7 @@ bool lcImportLXFMLFile(const QString& FileData, lcArray<lcPiece*>& Pieces, lcArr
 										 lcVector4(-WorldMatrix[2][0], WorldMatrix[2][1], WorldMatrix[2][2], 0.0f), lcVector4(WorldMatrix[3][0] * 25.0f, -WorldMatrix[3][1] * 25.0f, -WorldMatrix[3][2] * 25.0f, 1.0f));
 
 				lcPiece* Piece = new lcPiece(nullptr);
-				Piece->SetPieceInfo(Info, false);
+				Piece->SetPieceInfo(Info, QString(), false);
 				Piece->Initialize(lcMatrix44LDrawToLeoCAD(WorldMatrix), 1);
 				Piece->SetColorCode(ColorCode);
 				Pieces.Add(Piece);

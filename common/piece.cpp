@@ -21,7 +21,7 @@ lcPiece::lcPiece(PieceInfo* Info)
 	: lcObject(LC_OBJECT_PIECE)
 {
 	mMesh = nullptr;
-	SetPieceInfo(Info, true);
+	SetPieceInfo(Info, QString(), true);
 	mState = 0;
 	mColorIndex = gDefaultColor;
 	mColorCode = 16;
@@ -39,7 +39,7 @@ lcPiece::lcPiece(const lcPiece& Other)
 	: lcObject(LC_OBJECT_PIECE)
 {
 	mMesh = nullptr;
-	SetPieceInfo(Other.mPieceInfo, true);
+	SetPieceInfo(Other.mPieceInfo, Other.mID, true);
 	mState = 0;
 	mColorIndex = Other.mColorIndex;
 	mColorCode = Other.mColorCode;
@@ -67,13 +67,20 @@ lcPiece::~lcPiece()
 	delete mMesh;
 }
 
-void lcPiece::SetPieceInfo(PieceInfo* Info, bool Wait)
+void lcPiece::SetPieceInfo(PieceInfo* Info, const QString& ID, bool Wait)
 {
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 
 	mPieceInfo = Info;
 	if (mPieceInfo)
 		Library->LoadPieceInfo(mPieceInfo, Wait, true);
+
+	if (!ID.isEmpty())
+		mID = ID;
+	else if (mPieceInfo)
+		mID = mPieceInfo->GetSaveID();
+	else
+		mID.clear();
 
 	mControlPoints.RemoveAll();
 	delete mMesh;
@@ -125,7 +132,7 @@ void lcPiece::SaveLDraw(QTextStream& Stream) const
 	for (int NumberIdx = 0; NumberIdx < 12; NumberIdx++)
 		Stream << lcFormatValue(Numbers[NumberIdx]) << ' ';
 
-	Stream << mPieceInfo->GetSaveID() << LineEnding;
+	Stream << mID << LineEnding;
 }
 
 bool lcPiece::ParseLDrawLine(QTextStream& Stream)
@@ -293,7 +300,7 @@ bool lcPiece::FileLoad(lcFile& file)
 	  file.ReadBuffer(name, LC_PIECE_NAME_LEN);
 
 	PieceInfo* pInfo = lcGetPiecesLibrary()->FindPiece(name, nullptr, true, false);
-	SetPieceInfo(pInfo, true);
+	SetPieceInfo(pInfo, QString(), true);
 
 	// 11 (0.77)
 	if (version < 11)

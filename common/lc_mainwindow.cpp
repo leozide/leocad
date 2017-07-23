@@ -1590,7 +1590,7 @@ void lcMainWindow::UpdateSelectedObjects(bool SelectionChanged)
 	if ((Selection.GetSize() == 1) && Focus)
 	{
 		if (Focus->IsPiece())
-			Message = tr("%1 (ID: %2)").arg(Focus->GetName(), ((lcPiece*)Focus)->mPieceInfo->m_strName);
+			Message = tr("%1 (ID: %2)").arg(Focus->GetName(), ((lcPiece*)Focus)->GetID());
 		else
 			Message = Focus->GetName();
 	}
@@ -1600,7 +1600,7 @@ void lcMainWindow::UpdateSelectedObjects(bool SelectionChanged)
 
 		if (Focus && Focus->IsPiece())
 		{
-			Message.append(tr(" - %1 (ID: %2)").arg(Focus->GetName(), ((lcPiece*)Focus)->mPieceInfo->m_strName));
+			Message.append(tr(" - %1 (ID: %2)").arg(Focus->GetName(), ((lcPiece*)Focus)->GetID()));
 
 			const lcGroup* Group = ((lcPiece*)Focus)->GetGroup();
 			if (Group && !Group->mName.isEmpty())

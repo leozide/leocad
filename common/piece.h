@@ -384,12 +384,17 @@ public:
 		UpdateMesh();
 	}
 
+	const QString& GetID() const
+	{
+		return mID;
+	}
+
 	const char* GetName() const override;
 	bool IsVisible(lcStep Step);
 	void Initialize(const lcMatrix44& WorldMatrix, lcStep Step);
 	const lcBoundingBox& GetBoundingBox() const;
 	void CompareBoundingBox(lcVector3& Min, lcVector3& Max) const;
-	void SetPieceInfo(PieceInfo* Info, bool Wait);
+	void SetPieceInfo(PieceInfo* Info, const QString& ID, bool Wait);
 	bool FileLoad(lcFile& file);
 
 	void UpdatePosition(lcStep Step);
@@ -552,6 +557,7 @@ protected:
 	lcArray<lcObjectKey<lcMatrix33>> mRotationKeys;
 
 	int mFileLine;
+	QString mID;
 
 	lcGroup* mGroup;
 
@@ -562,4 +568,3 @@ protected:
 	lcArray<lcPieceControlPoint> mControlPoints;
 	lcMesh* mMesh;
 };
-

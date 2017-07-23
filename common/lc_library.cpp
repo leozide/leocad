@@ -63,9 +63,9 @@ void lcPiecesLibrary::Unload()
 		delete mPieces[PieceIdx];
 	mPieces.RemoveAll();
 
-	for (int PrimitiveIdx = 0; PrimitiveIdx < mPrimitives.GetSize(); PrimitiveIdx++)
-		delete mPrimitives[PrimitiveIdx];
-	mPrimitives.RemoveAll();
+	for (const auto PrimitiveIt : mPrimitives)
+		delete PrimitiveIt.second;
+	mPrimitives.clear();
 
 	for (int TextureIdx = 0; TextureIdx < mTextures.GetSize(); TextureIdx++)
 		delete mTextures[TextureIdx];
@@ -252,11 +252,6 @@ bool lcPiecesLibrary::OpenArchive(const QString& FileName, lcZipFileType ZipFile
 	return true;
 }
 
-static int lcPrimitiveCompare(lcLibraryPrimitive* const& a, lcLibraryPrimitive* const& b)
-{
-	return strcmp(a->mName, b->mName);
-}
-
 bool lcPiecesLibrary::OpenArchive(lcFile* File, const QString& FileName, lcZipFileType ZipFileType)
 {
 	lcZipFile* ZipFile = new lcZipFile();
@@ -345,24 +340,24 @@ bool lcPiecesLibrary::OpenArchive(lcFile* File, const QString& FileName, lcZipFi
 			}
 			else
 			{
-				int PrimitiveIndex = FindPrimitiveIndex(Name);
+				lcLibraryPrimitive* Primitive = FindPrimitive(Name);
 
-				if (PrimitiveIndex == -1)
-					mPrimitives.AddSorted(new lcLibraryPrimitive(Name, ZipFileType, FileIdx, false, true), lcPrimitiveCompare);
+				if (!Primitive)
+					mPrimitives[Name] = new lcLibraryPrimitive(Name, ZipFileType, FileIdx, false, true);
 				else
-					mPrimitives[PrimitiveIndex]->SetZipFile(ZipFileType, FileIdx);
+					Primitive->SetZipFile(ZipFileType, FileIdx);
 			}
 		}
 		else if (!memcmp(Name, "P/", 2))
 		{
 			Name += 2;
 
-			int PrimitiveIndex = FindPrimitiveIndex(Name);
+			lcLibraryPrimitive* Primitive = FindPrimitive(Name);
 
-			if (PrimitiveIndex == -1)
-				mPrimitives.AddSorted(new lcLibraryPrimitive(Name, ZipFileType, FileIdx, (memcmp(Name, "STU", 3) == 0), false), lcPrimitiveCompare);
+			if (!Primitive)
+				mPrimitives[Name] = new lcLibraryPrimitive(Name, ZipFileType, FileIdx, (memcmp(Name, "STU", 3) == 0), false);
 			else
-				mPrimitives[PrimitiveIndex]->SetZipFile(ZipFileType, FileIdx);
+				Primitive->SetZipFile(ZipFileType, FileIdx);
 		}
 	}
 
@@ -626,15 +621,14 @@ bool lcPiecesLibrary::OpenDirectory(const QDir& LibraryDir)
 					continue;
 				*Dst = 0;
 
-				if (mHasUnofficial && FindPrimitiveIndex(Name) != -1)
+				if (mHasUnofficial && IsPrimitive(Name))
 					continue;
 
 				if (BaseFolderIdx == 0)
 					mHasUnofficial = true;
 
 				bool SubFile = SubFileDirectories[DirectoryIdx];
-				lcLibraryPrimitive* Prim = new lcLibraryPrimitive(Name, LC_NUM_ZIPFILES, 0, !SubFile && (memcmp(Name, "STU", 3) == 0), SubFile);
-				mPrimitives.AddSorted(Prim, lcPrimitiveCompare);
+				mPrimitives[Name] = new lcLibraryPrimitive(Name, LC_NUM_ZIPFILES, 0, !SubFile && (memcmp(Name, "STU", 3) == 0), SubFile);
 			}
 		}
 	}
@@ -1533,45 +1527,15 @@ void lcPiecesLibrary::ReleaseTexture(lcTexture* Texture)
 	}
 }
 
-int lcPiecesLibrary::FindPrimitiveIndex(const char* Name) const
-{
-	int Count = mPrimitives.GetSize();
-	int Begin = 0;
-	int Middle;
-
-	if (Count == 0)
-		return -1;
-
-	while (Count > 0)
-	{
-		int Half = Count >> 1;
-		Middle = Begin + Half;
-		if (strcmp(mPrimitives[Middle]->mName, Name) < 0)
-		{
-			Begin = Middle + 1;
-			Count -= Half + 1;
-		}
-		else
-		{
-			Count = Half;
-		}
-	}
-	if (Begin != mPrimitives.GetSize() && !strcmp(mPrimitives[Begin]->mName, Name))
-		return Begin;
-	else
-		return -1;
-}
-
-bool lcPiecesLibrary::LoadPrimitive(int PrimitiveIndex)
+bool lcPiecesLibrary::LoadPrimitive(lcLibraryPrimitive* Primitive)
 {
 	QMutexLocker LoadLock(&mLoadMutex);
 
-	lcLibraryPrimitive* Primitive = mPrimitives[PrimitiveIndex];
 	lcArray<lcLibraryTextureMap> TextureStack;
 
 	if (mZipFiles[LC_ZIPFILE_OFFICIAL])
 	{
-		int LowPrimitiveIndex = -1;
+		lcLibraryPrimitive* LowPrimitive = nullptr;
 
 		if (Primitive->mStud && strncmp(Primitive->mName, "8/", 2))
 		{
@@ -1579,7 +1543,7 @@ bool lcPiecesLibrary::LoadPrimitive(int PrimitiveIndex)
 			strcpy(Name, "8/");
 			strcat(Name, Primitive->mName);
 
-			LowPrimitiveIndex = FindPrimitiveIndex(Name);
+			LowPrimitive = FindPrimitive(Name);
 		}
 
 		lcMemFile PrimFile;
@@ -1587,7 +1551,7 @@ bool lcPiecesLibrary::LoadPrimitive(int PrimitiveIndex)
 		if (!mZipFiles[Primitive->mZipFileType]->ExtractFile(Primitive->mZipFileIndex, PrimFile))
 			return false;
 
-		if (LowPrimitiveIndex == -1)
+		if (!LowPrimitive)
 		{
 			if (!ReadMeshData(PrimFile, lcMatrix44Identity(), 16, false, TextureStack, Primitive->mMeshData, LC_MESHDATA_SHARED, true, nullptr, false))
 				return false;
@@ -1596,8 +1560,6 @@ bool lcPiecesLibrary::LoadPrimitive(int PrimitiveIndex)
 		{
 			if (!ReadMeshData(PrimFile, lcMatrix44Identity(), 16, false, TextureStack, Primitive->mMeshData, LC_MESHDATA_HIGH, true, nullptr, false))
 				return false;
-
-			lcLibraryPrimitive* LowPrimitive = mPrimitives[LowPrimitiveIndex];
 
 			if (!mZipFiles[LowPrimitive->mZipFileType]->ExtractFile(LowPrimitive->mZipFileIndex, PrimFile))
 				return false;
@@ -1871,16 +1833,14 @@ bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransf
 						*Ch = 0;
 				}
 
-				int PrimitiveIndex = FindPrimitiveIndex(FileName);
+				lcLibraryPrimitive* Primitive = FindPrimitive(FileName);
 				lcMatrix44 IncludeTransform(lcVector4(fm[3], fm[6], fm[9], 0.0f), lcVector4(fm[4], fm[7], fm[10], 0.0f), lcVector4(fm[5], fm[8], fm[11], 0.0f), lcVector4(fm[0], fm[1], fm[2], 1.0f));
 				IncludeTransform = lcMul(IncludeTransform, CurrentTransform);
 				bool Mirror = IncludeTransform.Determinant() < 0.0f;
 
-				if (PrimitiveIndex != -1)
+				if (Primitive)
 				{
-					lcLibraryPrimitive* Primitive = mPrimitives[PrimitiveIndex];
-
-					if (!Primitive->mLoaded && !LoadPrimitive(PrimitiveIndex))
+					if (!Primitive->mLoaded && !LoadPrimitive(Primitive))
 						break;
 
 					if (Primitive->mStud)

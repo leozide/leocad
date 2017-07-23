@@ -173,7 +173,7 @@ public:
 
 	bool IsPrimitive(const char* Name) const
 	{
-		return FindPrimitiveIndex(Name) != -1;
+		return mPrimitives.find(Name) != mPrimitives.end();
 	}
 
 	void SetOfficialPieces()
@@ -189,7 +189,7 @@ public:
 	void UnloadUnusedParts();
 
 	lcArray<PieceInfo*> mPieces;
-	lcArray<lcLibraryPrimitive*> mPrimitives;
+	std::map<std::string, lcLibraryPrimitive*> mPrimitives;
 	int mNumOfficialPieces;
 
 	lcArray<lcTexture*> mTextures;
@@ -216,8 +216,13 @@ protected:
 	bool LoadCachePiece(PieceInfo* Info);
 	bool SaveCachePiece(PieceInfo* Info);
 
-	int FindPrimitiveIndex(const char* Name) const;
-	bool LoadPrimitive(int PrimitiveIndex);
+	lcLibraryPrimitive* FindPrimitive(const char* Name) const
+	{
+		const auto PrimitiveIt = mPrimitives.find(Name);
+		return PrimitiveIt != mPrimitives.end() ? PrimitiveIt->second : nullptr;
+	}
+
+	bool LoadPrimitive(lcLibraryPrimitive* Primitive);
 
 	QMutex mLoadMutex;
 	QList<QFuture<void>> mLoadFutures;

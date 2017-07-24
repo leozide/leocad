@@ -6,7 +6,7 @@
 
 QString lcFormatValue(float Value)
 {
-	QString String = QString::number(Value, 'f', 6);
+	QString String = QString::number(Value, 'f', 4);
 	int Dot = String.indexOf('.');
 
 	if (Dot != -1)

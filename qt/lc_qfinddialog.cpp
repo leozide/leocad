@@ -16,10 +16,9 @@ lcQFindDialog::lcQFindDialog(QWidget *parent, void *data) :
 	parts->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
 	parts->setMinimumContentsLength(1);
 
-	lcPiecesLibrary* library = lcGetPiecesLibrary();
-	for (int partIdx = 0; partIdx < library->mPieces.GetSize(); partIdx++)
-		parts->addItem(library->mPieces[partIdx]->m_strDescription, qVariantFromValue((void*)library->mPieces[partIdx]));
-	parts->model()->sort(0);
+	lcPiecesLibrary* Library = lcGetPiecesLibrary();
+	for (const auto PartIt : Library->mPieces)
+		parts->addItem(PartIt.second->m_strDescription, qVariantFromValue((void*)PartIt.second));
 
 	options = (lcSearchOptions*)data;
 

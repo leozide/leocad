@@ -476,10 +476,9 @@ QWidget *lcQPropertiesTree::createEditor(QWidget *parent, QTreeWidgetItem *item)
 			editor->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
 			editor->setMinimumContentsLength(1);
 
-			lcPiecesLibrary* library = lcGetPiecesLibrary();
-			for (int partIdx = 0; partIdx < library->mPieces.GetSize(); partIdx++)
-				editor->addItem(library->mPieces[partIdx]->m_strDescription, qVariantFromValue((void*)library->mPieces[partIdx]));
-			editor->model()->sort(0);
+			lcPiecesLibrary* Library = lcGetPiecesLibrary();
+			for (const auto PartIt : Library->mPieces)
+				editor->addItem(PartIt.second->m_strDescription, qVariantFromValue((void*)PartIt.second));
 
 			PieceInfo *info = (PieceInfo*)item->data(0, PropertyValueRole).value<void*>();
 			editor->setCurrentIndex(editor->findData(qVariantFromValue((void*)info)));

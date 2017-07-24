@@ -389,6 +389,8 @@ public:
 		return mID;
 	}
 
+	void UpdateID();
+
 	const char* GetName() const override;
 	bool IsVisible(lcStep Step);
 	void Initialize(const lcMatrix44& WorldMatrix, lcStep Step);

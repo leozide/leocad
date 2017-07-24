@@ -181,6 +181,7 @@ public:
 	void ShowSelectedPiecesEarlier();
 	void ShowSelectedPiecesLater();
 	void SetPieceSteps(const QList<QPair<lcPiece*, lcStep>>& PieceSteps);
+	void RenamePiece(PieceInfo* Info);
 
 	void MoveSelectionToModel(lcModel* Model);
 	void InlineSelectedModels();

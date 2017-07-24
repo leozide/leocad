@@ -232,7 +232,7 @@ void lcQPreferencesDialog::updateCategories()
 
 void lcQPreferencesDialog::updateParts()
 {
-	lcPiecesLibrary *library = lcGetPiecesLibrary();
+	lcPiecesLibrary *Library = lcGetPiecesLibrary();
 	QTreeWidget *tree = ui->partsTree;
 
 	tree->clear();
@@ -249,7 +249,7 @@ void lcQPreferencesDialog::updateParts()
 	{
 		lcArray<PieceInfo*> singleParts, groupedParts;
 
-		library->GetCategoryEntries(options->Categories[categoryIndex].Keywords.constData(), false, singleParts, groupedParts);
+		Library->GetCategoryEntries(options->Categories[categoryIndex].Keywords.constData(), false, singleParts, groupedParts);
 
 		for (int partIndex = 0; partIndex < singleParts.GetSize(); partIndex++)
 		{
@@ -263,20 +263,20 @@ void lcQPreferencesDialog::updateParts()
 	}
 	else
 	{
-		for (int partIndex = 0; partIndex < library->mPieces.GetSize(); partIndex++)
+		for (const auto PartIt : Library->mPieces)
 		{
-			PieceInfo *info = library->mPieces[partIndex];
+			PieceInfo* Info = PartIt.second;
 
 			for (categoryIndex = 0; categoryIndex < options->Categories.GetSize(); categoryIndex++)
 			{
-				if (library->PieceInCategory(info, options->Categories[categoryIndex].Keywords.constData()))
+				if (Library->PieceInCategory(Info, options->Categories[categoryIndex].Keywords.constData()))
 					break;
 			}
 
 			if (categoryIndex == options->Categories.GetSize())
 			{
-				QStringList rowList(info->m_strDescription);
-				rowList.append(info->m_strName);
+				QStringList rowList(Info->m_strDescription);
+				rowList.append(Info->m_strName);
 
 				new QTreeWidgetItem(tree, rowList);
 			}

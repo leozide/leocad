@@ -153,6 +153,7 @@ public:
 	void RemoveTemporaryPieces();
 	void RemovePiece(PieceInfo* Info);
 
+	void RenamePiece(PieceInfo* Info, const char* NewName);
 	PieceInfo* FindPiece(const char* PieceName, Project* Project, bool CreatePlaceholder, bool SearchProjectFolder);
 	void LoadPieceInfo(PieceInfo* Info, bool Wait, bool Priority);
 	void ReleasePieceInfo(PieceInfo* Info);
@@ -179,7 +180,7 @@ public:
 	void SetOfficialPieces()
 	{
 		if (mZipFiles[LC_ZIPFILE_OFFICIAL])
-			mNumOfficialPieces = mPieces.GetSize();
+			mNumOfficialPieces = mPieces.size();
 	}
 
 	bool ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform, lcuint32 CurrentColorCode, bool InvertWinding, lcArray<lcLibraryTextureMap>& TextureStack, lcLibraryMeshData& MeshData, lcMeshDataType MeshDataType, bool Optimize, Project* CurrentProject, bool SearchProjectFolder);
@@ -188,7 +189,7 @@ public:
 	void UpdateBuffers(lcContext* Context);
 	void UnloadUnusedParts();
 
-	lcArray<PieceInfo*> mPieces;
+	std::map<std::string, PieceInfo*> mPieces;
 	std::map<std::string, lcLibraryPrimitive*> mPrimitives;
 	int mNumOfficialPieces;
 

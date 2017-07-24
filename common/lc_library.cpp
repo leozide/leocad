@@ -59,9 +59,9 @@ lcPiecesLibrary::~lcPiecesLibrary()
 
 void lcPiecesLibrary::Unload()
 {
-	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-		delete mPieces[PieceIdx];
-	mPieces.RemoveAll();
+	for (const auto PieceIt : mPieces)
+		delete PieceIt.second;
+	mPieces.clear();
 
 	for (const auto PrimitiveIt : mPrimitives)
 		delete PrimitiveIt.second;
@@ -82,25 +82,38 @@ void lcPiecesLibrary::RemoveTemporaryPieces()
 {
 	QMutexLocker LoadLock(&mLoadMutex);
 
-	for (int PieceIdx = mPieces.GetSize() - 1; PieceIdx >= 0; PieceIdx--)
+	for (auto PieceIt = mPieces.begin(); PieceIt != mPieces.end();)
 	{
-		PieceInfo* Info = mPieces[PieceIdx];
+		PieceInfo* Info = PieceIt->second;
 
-		if (!Info->IsTemporary())
-			break;
-
-		if (Info->GetRefCount() == 0)
+		if (Info->IsTemporary() && Info->GetRefCount() == 0)
 		{
-			mPieces.RemoveIndex(PieceIdx);
+			PieceIt = mPieces.erase(PieceIt);
 			delete Info;
 		}
+		else
+			PieceIt++;
 	}
 }
 
 void lcPiecesLibrary::RemovePiece(PieceInfo* Info)
 {
-	mPieces.Remove(Info);
+	for (auto PieceIt = mPieces.begin(); PieceIt != mPieces.end(); PieceIt++)
+	{
+		if (PieceIt->second == Info)
+		{
+			mPieces.erase(PieceIt);
+			break;
+		}
+	}
 	delete Info;
+}
+
+void lcPiecesLibrary::RenamePiece(PieceInfo* Info, const char* NewName)
+{
+	mPieces.erase(Info->m_strName);
+	strcpy(Info->m_strName, NewName);
+	mPieces[Info->m_strName] = Info;
 }
 
 PieceInfo* lcPiecesLibrary::FindPiece(const char* PieceName, Project* CurrentProject, bool CreatePlaceholder, bool SearchProjectFolder)
@@ -114,20 +127,14 @@ PieceInfo* lcPiecesLibrary::FindPiece(const char* PieceName, Project* CurrentPro
 			ProjectPath = QFileInfo(FileName).absolutePath();
 	}
 
-	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+	const auto PieceIt = mPieces.find(PieceName);
+
+	if (PieceIt != mPieces.end())
 	{
-		PieceInfo* Info = mPieces[PieceIdx];
+		PieceInfo* Info = PieceIt->second;
 
-		if (strcmp(PieceName, Info->m_strName))
-			continue;
-
-		if (CurrentProject && Info->IsModel() && CurrentProject->GetModels().FindIndex(Info->GetModel()) == -1)
-			continue;
-
-		if (ProjectPath.isEmpty() && Info->IsProject())
-			continue;
-
-		return Info;
+		if ((!CurrentProject || !Info->IsModel() || CurrentProject->GetModels().FindIndex(Info->GetModel()) != -1) && (!ProjectPath.isEmpty() || !Info->IsProject()))
+			return Info;
 	}
 
 	if (!ProjectPath.isEmpty())
@@ -143,7 +150,7 @@ PieceInfo* lcPiecesLibrary::FindPiece(const char* PieceName, Project* CurrentPro
 				PieceInfo* Info = new PieceInfo();
 
 				Info->SetProject(NewProject, PieceName);
-				mPieces.Add(Info);
+				mPieces[Info->m_strName] = Info;
 
 				return Info;
 			}
@@ -157,7 +164,7 @@ PieceInfo* lcPiecesLibrary::FindPiece(const char* PieceName, Project* CurrentPro
 		PieceInfo* Info = new PieceInfo();
 
 		Info->CreatePlaceholder(PieceName);
-		mPieces.Add(Info);
+		mPieces[Info->m_strName] = Info;
 
 		return Info;
 	}
@@ -330,10 +337,11 @@ bool lcPiecesLibrary::OpenArchive(lcFile* File, const QString& FileName, lcZipFi
 				if (!Info)
 				{
 					Info = new PieceInfo();
-					mPieces.Add(Info);
 
 					strncpy(Info->m_strName, Name, sizeof(Info->m_strName));
 					Info->m_strName[sizeof(Info->m_strName) - 1] = 0;
+
+					mPieces[Info->m_strName] = Info;
 				}
 
 				Info->SetZipFile(ZipFileType, FileIdx);
@@ -390,16 +398,15 @@ void lcPiecesLibrary::ReadArchiveDescriptions(const QString& OfficialFileName, c
 		mArchiveCheckSum[3] = 0;
 	}
 
-
 	QString IndexFileName = QFileInfo(QDir(mCachePath), QLatin1String("index")).absoluteFilePath();
 
 	if (!LoadCacheIndex(IndexFileName))
 	{
 		lcMemFile PieceFile;
 
-		for (int PieceInfoIndex = 0; PieceInfoIndex < mPieces.GetSize(); PieceInfoIndex++)
+		for (const auto PieceIt : mPieces)
 		{
-			PieceInfo* Info = mPieces[PieceInfoIndex];
+			PieceInfo* Info = PieceIt.second;
 
 			mZipFiles[Info->mZipFileType]->ExtractFile(Info->mZipFileIndex, PieceFile, 256);
 			PieceFile.Seek(0, SEEK_END);
@@ -476,25 +483,25 @@ bool lcPiecesLibrary::OpenDirectory(const QDir& LibraryDir)
 				continue;
 
 			PieceInfo* Info = new PieceInfo();
-			mPieces.Add(Info);
 
 			strncpy(Info->m_strName, Line, sizeof(Info->m_strName));
 			Info->m_strName[sizeof(Info->m_strName) - 1] = 0;
 
 			strncpy(Info->m_strDescription, Description, sizeof(Info->m_strDescription));
 			Info->m_strDescription[sizeof(Info->m_strDescription) - 1] = 0;
+
+			mPieces[Info->m_strName] = Info;
 		}
 	}
 
 	const QLatin1String BaseFolders[] = { QLatin1String("unofficial/"), QLatin1String("") };
 
-	if (!mPieces.GetSize())
+	if (mPieces.empty())
 	{
 		for (unsigned int BaseFolderIdx = 0; BaseFolderIdx < sizeof(BaseFolders) / sizeof(BaseFolders[0]); BaseFolderIdx++)
 		{
 			QDir Dir(QDir(LibraryDir.absoluteFilePath(BaseFolders[BaseFolderIdx])).absoluteFilePath(QLatin1String("parts/")), QLatin1String("*.dat"), QDir::SortFlags(QDir::Name | QDir::IgnoreCase), QDir::Files | QDir::Hidden | QDir::Readable);
 			QStringList FileList = Dir.entryList();
-			mPieces.AllocGrow(FileList.size());
 
 			for (int FileIdx = 0; FileIdx < FileList.size(); FileIdx++)
 			{
@@ -524,22 +531,8 @@ bool lcPiecesLibrary::OpenDirectory(const QDir& LibraryDir)
 					continue;
 				*Dst = 0;
 
-				if (mHasUnofficial)
-				{
-					bool Skip = false;
-
-					for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-					{
-						if (!strcmp(Name, mPieces[PieceIdx]->m_strName))
-						{
-							Skip = true;
-							break;
-						}
-					}
-
-					if (Skip)
-						continue;
-				}
+				if (mHasUnofficial && mPieces.find(Name) != mPieces.end())
+					continue;
 
 				lcDiskFile PieceFile(Dir.absoluteFilePath(FileList[FileIdx]));
 				if (!PieceFile.Open(QIODevice::ReadOnly))
@@ -550,7 +543,6 @@ bool lcPiecesLibrary::OpenDirectory(const QDir& LibraryDir)
 					continue;
 
 				PieceInfo* Info = new PieceInfo();
-				mPieces.Add(Info);
 
 				if (BaseFolderIdx == 0)
 					mHasUnofficial = true;
@@ -572,11 +564,13 @@ bool lcPiecesLibrary::OpenDirectory(const QDir& LibraryDir)
 
 				strncpy(Info->m_strName, Name, sizeof(Info->m_strName));
 				Info->m_strName[sizeof(Info->m_strName) - 1] = 0;
+
+				mPieces[Info->m_strName] = Info;
 			}
 		}
 	}
 
-	if (!mPieces.GetSize())
+	if (mPieces.empty())
 		return false;
 
 	for (unsigned int BaseFolderIdx = 0; BaseFolderIdx < sizeof(BaseFolders) / sizeof(BaseFolders[0]); BaseFolderIdx++)
@@ -838,12 +832,12 @@ bool lcPiecesLibrary::LoadCacheIndex(const QString& FileName)
 
 	qint32 NumFiles;
 
-	if (IndexFile.ReadBuffer((char*)&NumFiles, sizeof(NumFiles)) == 0 || NumFiles != mPieces.GetSize())
+	if (IndexFile.ReadBuffer((char*)&NumFiles, sizeof(NumFiles)) == 0 || NumFiles != mPieces.size())
 		return false;
 
-	for (int PieceInfoIndex = 0; PieceInfoIndex < mPieces.GetSize(); PieceInfoIndex++)
+	for (const auto PieceIt : mPieces)
 	{
-		PieceInfo* Info = mPieces[PieceInfoIndex];
+		PieceInfo* Info = PieceIt.second;
 		quint8 Length;
 
 		if (IndexFile.ReadBuffer((char*)&Length, sizeof(Length)) == 0 || Length >= sizeof(Info->m_strDescription))
@@ -862,14 +856,14 @@ bool lcPiecesLibrary::SaveCacheIndex(const QString& FileName)
 {
 	lcMemFile IndexFile;
 
-	qint32 NumFiles = mPieces.GetSize();
+	qint32 NumFiles = mPieces.size();
 
 	if (IndexFile.WriteBuffer((char*)&NumFiles, sizeof(NumFiles)) == 0)
 		return false;
 
-	for (int PieceInfoIndex = 0; PieceInfoIndex < mPieces.GetSize(); PieceInfoIndex++)
+	for (const auto PieceIt : mPieces)
 	{
-		PieceInfo* Info = mPieces[PieceInfoIndex];
+		PieceInfo* Info = PieceIt.second;
 		quint8 Length = (quint8)strlen(Info->m_strDescription);
 
 		if (IndexFile.WriteBuffer((char*)&Length, sizeof(Length)) == 0)
@@ -1417,9 +1411,9 @@ void lcPiecesLibrary::UpdateBuffers(lcContext* Context)
 	int VertexDataSize = 0;
 	int IndexDataSize = 0;
 
-	for (int PieceInfoIndex = 0; PieceInfoIndex < mPieces.GetSize(); PieceInfoIndex++)
+	for (const auto PieceIt : mPieces)
 	{
-		PieceInfo* Info = mPieces[PieceInfoIndex];
+		PieceInfo* Info = PieceIt.second;
 		lcMesh* Mesh = Info->IsPlaceholder() ? gPlaceholderMesh : Info->GetMesh();
 
 		if (!Mesh)
@@ -1444,9 +1438,9 @@ void lcPiecesLibrary::UpdateBuffers(lcContext* Context)
 	VertexDataSize = 0;
 	IndexDataSize = 0;
 
-	for (int PieceInfoIndex = 0; PieceInfoIndex < mPieces.GetSize(); PieceInfoIndex++)
+	for (const auto PieceIt : mPieces)
 	{
-		PieceInfo* Info = mPieces[PieceInfoIndex];
+		PieceInfo* Info = PieceIt.second;
 		lcMesh* Mesh = Info->IsPlaceholder() ? gPlaceholderMesh : Info->GetMesh();
 
 		if (!Mesh)
@@ -1477,9 +1471,9 @@ void lcPiecesLibrary::UnloadUnusedParts()
 {
 	QMutexLocker LoadLock(&mLoadMutex);
 
-	for (int PieceInfoIndex = 0; PieceInfoIndex < mPieces.GetSize(); PieceInfoIndex++)
+	for (const auto PieceIt : mPieces)
 	{
-		PieceInfo* Info = mPieces[PieceInfoIndex];
+		PieceInfo* Info = PieceIt.second;
 		if (Info->GetRefCount() == 0 && Info->mState != LC_PIECEINFO_UNLOADED)
 			ReleasePieceInfo(Info);
 	}
@@ -1896,12 +1890,11 @@ bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransf
 				}
 				else
 				{
-					for (int PieceInfoIndex = 0; PieceInfoIndex < mPieces.GetSize(); PieceInfoIndex++)
-					{
-						PieceInfo* Info = mPieces[PieceInfoIndex];
+					const auto PieceIt = mPieces.find(FileName);
 
-						if (strcmp(Info->m_strName, FileName))
-							continue;
+					if (PieceIt != mPieces.end())
+					{
+						PieceInfo* Info = PieceIt->second;
 
 						if (mZipFiles[LC_ZIPFILE_OFFICIAL] && Info->mZipFileType != LC_NUM_ZIPFILES)
 						{
@@ -2731,9 +2724,9 @@ void lcPiecesLibrary::GetCategoryEntries(const char* CategoryKeywords, bool Grou
 	SinglePieces.RemoveAll();
 	GroupedPieces.RemoveAll();
 
-	for (int i = 0; i < mPieces.GetSize(); i++)
+	for (const auto PieceIt : mPieces)
 	{
-		PieceInfo* Info = mPieces[i];
+		PieceInfo* Info = PieceIt.second;
 
 		if (!PieceInCategory(Info, CategoryKeywords))
 			continue;
@@ -2794,9 +2787,9 @@ void lcPiecesLibrary::GetPatternedPieces(PieceInfo* Parent, lcArray<PieceInfo*>&
 
 	Pieces.RemoveAll();
 
-	for (int i = 0; i < mPieces.GetSize(); i++)
+	for (const auto PieceIt : mPieces)
 	{
-		PieceInfo* Info = mPieces[i];
+		PieceInfo* Info = PieceIt.second;
 
 		if (strncmp(Name, Info->m_strName, strlen(Name)) == 0)
 			Pieces.Add(Info);
@@ -2810,9 +2803,9 @@ void lcPiecesLibrary::GetPatternedPieces(PieceInfo* Parent, lcArray<PieceInfo*>&
 		if (Name[Len-1] < '0' || Name[Len-1] > '9')
 			Name[Len-1] = 'P';
 
-		for (int i = 0; i < mPieces.GetSize(); i++)
+		for (const auto PieceIt : mPieces)
 		{
-			PieceInfo* Info = mPieces[i];
+			PieceInfo* Info = PieceIt.second;
 
 			if (strncmp(Name, Info->m_strName, strlen(Name)) == 0)
 				Pieces.Add(Info);
@@ -2822,7 +2815,11 @@ void lcPiecesLibrary::GetPatternedPieces(PieceInfo* Parent, lcArray<PieceInfo*>&
 
 void lcPiecesLibrary::GetParts(lcArray<PieceInfo*>& Parts)
 {
-	Parts = mPieces;
+	Parts.SetSize(0);
+	Parts.AllocGrow(mPieces.size());
+
+	for (const auto PartIt : mPieces)
+		Parts.Add(PartIt.second);
 }
 
 bool lcPiecesLibrary::LoadBuiltinPieces()
@@ -2843,9 +2840,9 @@ bool lcPiecesLibrary::LoadBuiltinPieces()
 
 	lcMemFile PieceFile;
 
-	for (int PieceInfoIndex = 0; PieceInfoIndex < mPieces.GetSize(); PieceInfoIndex++)
+	for (const auto PieceIt : mPieces)
 	{
-		PieceInfo* Info = mPieces[PieceInfoIndex];
+		PieceInfo* Info = PieceIt.second;
 
 		mZipFiles[Info->mZipFileType]->ExtractFile(Info->mZipFileIndex, PieceFile, 256);
 		PieceFile.Seek(0, SEEK_END);

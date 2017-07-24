@@ -2227,6 +2227,13 @@ void lcModel::SetPieceSteps(const QList<QPair<lcPiece*, lcStep>>& PieceSteps)
 	}
 }
 
+void lcModel::RenamePiece(PieceInfo* Info)
+{
+	for (lcPiece* Piece : mPieces)
+		if (Piece->mPieceInfo == Info)
+			Piece->UpdateID();
+}
+
 void lcModel::MoveSelectionToModel(lcModel* Model)
 {
 	if (!Model)

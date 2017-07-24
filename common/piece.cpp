@@ -95,6 +95,11 @@ void lcPiece::SetPieceInfo(PieceInfo* Info, const QString& ID, bool Wait)
 	}
 }
 
+void lcPiece::UpdateID()
+{
+	mID = mPieceInfo->GetSaveID();
+}
+
 void lcPiece::SaveLDraw(QTextStream& Stream) const
 {
 	QLatin1String LineEnding("\r\n");

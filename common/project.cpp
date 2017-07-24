@@ -219,6 +219,11 @@ void Project::ShowModelListDialog()
 		else if (Model->GetProperties().mName != it->first)
 		{
 			Model->SetName(it->first);
+			lcGetPiecesLibrary()->RenamePiece(Model->GetPieceInfo(), it->first.toUpper().toLatin1().constData());
+
+			for (lcModel* CheckModel : mModels)
+				CheckModel->RenamePiece(Model->GetPieceInfo());
+
 			mModified = true;
 		}
 

@@ -647,6 +647,7 @@ bool lcPiecesLibrary::OpenDirectory(const QDir& LibraryDir)
 					Src++;
 					Dst++;
 				}
+				*Dst = 0;
 
 				if (Dst - Name <= 4)
 					continue;
@@ -1602,10 +1603,6 @@ bool lcPiecesLibrary::LoadPrimitive(lcLibraryPrimitive* Primitive)
 	}
 	else
 	{
-		char Name[LC_PIECE_NAME_LEN];
-		strcpy(Name, Primitive->mName);
-		strlwr(Name);
-
 		char FileName[LC_MAXPATH];
 		lcDiskFile PrimFile;
 		bool Found = false;
@@ -1613,9 +1610,9 @@ bool lcPiecesLibrary::LoadPrimitive(lcLibraryPrimitive* Primitive)
 		if (mHasUnofficial)
 		{
 			if (Primitive->mSubFile)
-				sprintf(FileName, "unofficial/parts/%s.dat", Name);
+				sprintf(FileName, "unofficial/parts/%s", Primitive->mName);
 			else
-				sprintf(FileName, "unofficial/p/%s.dat", Name);
+				sprintf(FileName, "unofficial/p/%s", Primitive->mName);
 			PrimFile.SetFileName(mLibraryDir.absoluteFilePath(QLatin1String(FileName)));
 			Found = PrimFile.Open(QIODevice::ReadOnly);
 		}
@@ -1623,9 +1620,9 @@ bool lcPiecesLibrary::LoadPrimitive(lcLibraryPrimitive* Primitive)
 		if (!Found)
 		{
 			if (Primitive->mSubFile)
-				sprintf(FileName, "parts/%s.dat", Name);
+				sprintf(FileName, "parts/%s", Primitive->mName);
 			else
-				sprintf(FileName, "p/%s.dat", Name);
+				sprintf(FileName, "p/%s", Primitive->mName);
 			PrimFile.SetFileName(mLibraryDir.absoluteFilePath(QLatin1String(FileName)));
 			Found = PrimFile.Open(QIODevice::ReadOnly);
 		}

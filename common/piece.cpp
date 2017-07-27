@@ -118,7 +118,7 @@ void lcPiece::SaveLDraw(QTextStream& Stream) const
 		Stream << QLatin1String("0 !LEOCAD PIECE PIVOT ");
 
 		for (int NumberIdx = 0; NumberIdx < 12; NumberIdx++)
-			Stream << ' ' << lcFormatValue(PivotNumbers[NumberIdx]);
+			Stream << ' ' << lcFormatValue(PivotNumbers[NumberIdx], NumberIdx < 3 ? 4 : 6);
 
 		Stream << LineEnding;
 	}
@@ -135,7 +135,7 @@ void lcPiece::SaveLDraw(QTextStream& Stream) const
 	float Numbers[12] = { Matrix[12], -Matrix[14], Matrix[13], Matrix[0], -Matrix[8], Matrix[4], -Matrix[2], Matrix[10], -Matrix[6], Matrix[1], -Matrix[9], Matrix[5] };
 
 	for (int NumberIdx = 0; NumberIdx < 12; NumberIdx++)
-		Stream << lcFormatValue(Numbers[NumberIdx]) << ' ';
+		Stream << lcFormatValue(Numbers[NumberIdx], NumberIdx < 3 ? 4 : 6) << ' ';
 
 	Stream << mID << LineEnding;
 }

@@ -2,7 +2,7 @@
 
 #include <QObject>
 
-QString lcFormatValue(float Value);
+QString lcFormatValue(float Value, int Precision);
 QString lcFormatValueLocalized(float Value);
 float lcParseValueLocalized(const QString& Value);
 

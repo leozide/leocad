@@ -4,9 +4,9 @@
 #include "lc_library.h"
 #include "pieceinf.h"
 
-QString lcFormatValue(float Value)
+QString lcFormatValue(float Value, int Precision)
 {
-	QString String = QString::number(Value, 'f', 4);
+	QString String = QString::number(Value, 'f', Precision);
 	int Dot = String.indexOf('.');
 
 	if (Dot != -1)

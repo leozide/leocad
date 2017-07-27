@@ -385,7 +385,7 @@ void lcModel::SaveLDraw(QTextStream& Stream, bool SelectedOnly) const
 				float Numbers[13] = { FloatMatrix[12], -FloatMatrix[14], FloatMatrix[13], FloatMatrix[0], -FloatMatrix[8], FloatMatrix[4], -FloatMatrix[2], FloatMatrix[10], -FloatMatrix[6], FloatMatrix[1], -FloatMatrix[9], FloatMatrix[5], ControlPoint.Scale };
 
 				for (int NumberIdx = 0; NumberIdx < 13; NumberIdx++)
-					Stream << ' ' << lcFormatValue(Numbers[NumberIdx]);
+					Stream << ' ' << lcFormatValue(Numbers[NumberIdx], NumberIdx < 3 ? 4 : 6);
 
 				Stream << LineEnding;
 			}

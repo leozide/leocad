@@ -219,7 +219,7 @@ void Project::ShowModelListDialog()
 		else if (Model->GetProperties().mName != it->first)
 		{
 			Model->SetName(it->first);
-			lcGetPiecesLibrary()->RenamePiece(Model->GetPieceInfo(), it->first.toUpper().toLatin1().constData());
+			lcGetPiecesLibrary()->RenamePiece(Model->GetPieceInfo(), it->first.toLatin1().constData());
 
 			for (lcModel* CheckModel : mModels)
 				CheckModel->RenamePiece(Model->GetPieceInfo());
@@ -981,7 +981,13 @@ void Project::ExportBrickLink()
 			BrickLinkFile.WriteLine("  <ITEM>\n");
 			BrickLinkFile.WriteLine("    <ITEMTYPE>P</ITEMTYPE>\n");
 
-			sprintf(Line, "    <ITEMID>%s</ITEMID>\n", Info->m_strName);
+			char FileName[LC_PIECE_NAME_LEN];
+			strcpy(FileName, Info->mFileName);
+			char* Ext = strchr(FileName, '.');
+			if (Ext)
+				*Ext = 0;
+
+			sprintf(Line, "    <ITEMID>%s</ITEMID>\n", FileName);
 			BrickLinkFile.WriteLine(Line);
 
 			int Count = ColorIt.second;
@@ -1040,7 +1046,7 @@ void Project::ExportCSV()
 
 		for (const auto& ColorIt : PartIt.second)
 		{
-			sprintf(Line, "\"%s\",\"%s\",%d,%s,%d\n", Info->m_strDescription, gColorList[ColorIt.first].Name, ColorIt.second, Info->m_strName, gColorList[ColorIt.first].Code);
+			sprintf(Line, "\"%s\",\"%s\",%d,%s,%d\n", Info->m_strDescription, gColorList[ColorIt.first].Name, ColorIt.second, Info->mFileName, gColorList[ColorIt.first].Code);
 			CSVFile.WriteLine(Line);
 		}
 	}
@@ -1269,7 +1275,7 @@ void Project::CreateHTMLPieceList(QTextStream& Stream, lcModel* Model, lcStep St
 		const PieceInfo* Info = PartIt.first;
 
 		if (Images)
-			Stream << QString("<tr><td><IMG SRC=\"%1.png\" ALT=\"%2\"></td>\n").arg(Info->m_strName, Info->m_strDescription);
+			Stream << QString("<tr><td><IMG SRC=\"%1.png\" ALT=\"%2\"></td>\n").arg(Info->mFileName, Info->m_strDescription);
 		else
 			Stream << QString("<tr><td>%1</td>\r\n").arg(Info->m_strDescription);
 
@@ -1565,7 +1571,7 @@ void Project::ExportHTML()
 
 				Scene.Draw(Context);
 
-				QString FileName = QFileInfo(Dir, QLatin1String(Info->m_strName) + QLatin1String(".png")).absoluteFilePath();
+				QString FileName = QFileInfo(Dir, QLatin1String(Info->mFileName) + QLatin1String(".png")).absoluteFilePath();
 				if (!Context->SaveRenderToTextureImage(FileName, Width, Height))
 					break;
 			}
@@ -1683,7 +1689,7 @@ void Project::ExportPOVRay()
 			if (sscanf(Line,"%s%s%s", Src, Dst, Flags) != 3)
 				continue;
 
-			strupr(Src);
+			strcat(Src, ".dat");
 
 			PieceInfo* Info = Library->FindPiece(Src, nullptr, false, false);
 			if (!Info)
@@ -1815,8 +1821,10 @@ void Project::ExportPOVRay()
 		char Name[LC_PIECE_NAME_LEN];
 		char* Ptr;
 
-		strcpy(Name, Info->m_strName);
+		strcpy(Name, Info->mFileName);
 		while ((Ptr = strchr(Name, '-')))
+			*Ptr = '_';
+		while ((Ptr = strchr(Name, '.')))
 			*Ptr = '_';
 
 		sprintf(Entry.first, "lc_%s", Name);

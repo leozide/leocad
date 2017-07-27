@@ -111,9 +111,25 @@ void lcPiecesLibrary::RemovePiece(PieceInfo* Info)
 
 void lcPiecesLibrary::RenamePiece(PieceInfo* Info, const char* NewName)
 {
-	mPieces.erase(Info->m_strName);
-	strcpy(Info->m_strName, NewName);
-	mPieces[Info->m_strName] = Info;
+	for (auto PieceIt = mPieces.begin(); PieceIt != mPieces.end(); PieceIt++)
+	{
+		if (PieceIt->second == Info)
+		{
+			mPieces.erase(PieceIt);
+			break;
+		}
+	}
+
+	strncpy(Info->mFileName, NewName, sizeof(Info->mFileName));
+	Info->mFileName[sizeof(Info->mFileName) - 1] = 0;
+	strncpy(Info->m_strDescription, NewName, sizeof(Info->m_strDescription));
+	Info->m_strDescription[sizeof(Info->m_strDescription) - 1] = 0;
+
+	char PieceName[LC_PIECE_NAME_LEN];
+	strcpy(PieceName, Info->mFileName);
+	strupr(PieceName);
+
+	mPieces[PieceName] = Info;
 }
 
 PieceInfo* lcPiecesLibrary::FindPiece(const char* PieceName, Project* CurrentProject, bool CreatePlaceholder, bool SearchProjectFolder)
@@ -127,7 +143,25 @@ PieceInfo* lcPiecesLibrary::FindPiece(const char* PieceName, Project* CurrentPro
 			ProjectPath = QFileInfo(FileName).absolutePath();
 	}
 
-	const auto PieceIt = mPieces.find(PieceName);
+	char CleanName[LC_PIECE_NAME_LEN];
+	const char* Src = PieceName;
+	char* Dst = CleanName;
+
+	while (*Src && Dst - CleanName != sizeof(CleanName))
+	{
+		if (*Src == '\\')
+			*Dst = '/';
+		else if (*Src >= 'a' && *Src <= 'z')
+			*Dst = *Src + 'A' - 'a';
+		else
+			*Dst = *Src;
+
+		Src++;
+		Dst++;
+	}
+	*Dst = 0;
+
+	const auto PieceIt = mPieces.find(CleanName);
 
 	if (PieceIt != mPieces.end())
 	{
@@ -149,8 +183,8 @@ PieceInfo* lcPiecesLibrary::FindPiece(const char* PieceName, Project* CurrentPro
 			{
 				PieceInfo* Info = new PieceInfo();
 
-				Info->SetProject(NewProject, PieceName);
-				mPieces[Info->m_strName] = Info;
+				Info->CreateProject(NewProject, PieceName);
+				mPieces[CleanName] = Info;
 
 				return Info;
 			}
@@ -164,7 +198,7 @@ PieceInfo* lcPiecesLibrary::FindPiece(const char* PieceName, Project* CurrentPro
 		PieceInfo* Info = new PieceInfo();
 
 		Info->CreatePlaceholder(PieceName);
-		mPieces[Info->m_strName] = Info;
+		mPieces[CleanName] = Info;
 
 		return Info;
 	}
@@ -301,6 +335,7 @@ bool lcPiecesLibrary::OpenArchive(lcFile* File, const QString& FileName, lcZipFi
 		if (Dst - Name <= 4)
 			continue;
 
+		*Dst = 0;
 		Dst -= 4;
 		if (memcmp(Dst, ".DAT", 4))
 		{
@@ -316,7 +351,6 @@ bool lcPiecesLibrary::OpenArchive(lcFile* File, const QString& FileName, lcZipFi
 
 			continue;
 		}
-		*Dst = 0;
 
 		if (ZipFileType == LC_ZIPFILE_OFFICIAL)
 		{
@@ -338,10 +372,10 @@ bool lcPiecesLibrary::OpenArchive(lcFile* File, const QString& FileName, lcZipFi
 				{
 					Info = new PieceInfo();
 
-					strncpy(Info->m_strName, Name, sizeof(Info->m_strName));
-					Info->m_strName[sizeof(Info->m_strName) - 1] = 0;
+					strncpy(Info->mFileName, FileInfo.file_name + (Name - NameBuffer), sizeof(Info->mFileName));
+					Info->mFileName[sizeof(Info->mFileName) - 1] = 0;
 
-					mPieces[Info->m_strName] = Info;
+					mPieces[Name] = Info;
 				}
 
 				Info->SetZipFile(ZipFileType, FileIdx);
@@ -351,7 +385,7 @@ bool lcPiecesLibrary::OpenArchive(lcFile* File, const QString& FileName, lcZipFi
 				lcLibraryPrimitive* Primitive = FindPrimitive(Name);
 
 				if (!Primitive)
-					mPrimitives[Name] = new lcLibraryPrimitive(Name, ZipFileType, FileIdx, false, true);
+					mPrimitives[Name] = new lcLibraryPrimitive(FileInfo.file_name + (Name - NameBuffer), ZipFileType, FileIdx, false, true);
 				else
 					Primitive->SetZipFile(ZipFileType, FileIdx);
 			}
@@ -363,7 +397,7 @@ bool lcPiecesLibrary::OpenArchive(lcFile* File, const QString& FileName, lcZipFi
 			lcLibraryPrimitive* Primitive = FindPrimitive(Name);
 
 			if (!Primitive)
-				mPrimitives[Name] = new lcLibraryPrimitive(Name, ZipFileType, FileIdx, (memcmp(Name, "STU", 3) == 0), false);
+				mPrimitives[Name] = new lcLibraryPrimitive(FileInfo.file_name + (Name - NameBuffer), ZipFileType, FileIdx, (memcmp(Name, "STU", 3) == 0), false);
 			else
 				Primitive->SetZipFile(ZipFileType, FileIdx);
 		}
@@ -442,6 +476,9 @@ bool lcPiecesLibrary::OpenDirectory(const QDir& LibraryDir)
 
 		while (PartsList.ReadLine(Line, sizeof(Line)))
 		{
+			char OriginalLine[1024];
+			strcpy(OriginalLine, Line);
+
 			char* Chr = Line;
 			char* Ext = nullptr;
 
@@ -461,7 +498,12 @@ bool lcPiecesLibrary::OpenDirectory(const QDir& LibraryDir)
 			}
 
 			if (Ext && !strcmp(Ext, ".DAT"))
+			{
 				*Ext = 0;
+				OriginalLine[Ext - Line + 4] = 0;
+			}
+			else
+				continue;
 
 			while (*Chr && isspace(*Chr))
 				Chr++;
@@ -484,13 +526,13 @@ bool lcPiecesLibrary::OpenDirectory(const QDir& LibraryDir)
 
 			PieceInfo* Info = new PieceInfo();
 
-			strncpy(Info->m_strName, Line, sizeof(Info->m_strName));
-			Info->m_strName[sizeof(Info->m_strName) - 1] = 0;
+			strncpy(Info->mFileName, OriginalLine, sizeof(Info->mFileName));
+			Info->mFileName[sizeof(Info->mFileName) - 1] = 0;
 
 			strncpy(Info->m_strDescription, Description, sizeof(Info->m_strDescription));
 			Info->m_strDescription[sizeof(Info->m_strDescription) - 1] = 0;
 
-			mPieces[Info->m_strName] = Info;
+			mPieces[Line] = Info;
 		}
 	}
 
@@ -529,7 +571,6 @@ bool lcPiecesLibrary::OpenDirectory(const QDir& LibraryDir)
 				Dst -= 4;
 				if (memcmp(Dst, ".DAT", 4))
 					continue;
-				*Dst = 0;
 
 				if (mHasUnofficial && mPieces.find(Name) != mPieces.end())
 					continue;
@@ -562,10 +603,10 @@ bool lcPiecesLibrary::OpenDirectory(const QDir& LibraryDir)
 					break;
 				}
 
-				strncpy(Info->m_strName, Name, sizeof(Info->m_strName));
-				Info->m_strName[sizeof(Info->m_strName) - 1] = 0;
+				strncpy(Info->mFileName, FileString, sizeof(Info->mFileName));
+				Info->mFileName[sizeof(Info->mFileName) - 1] = 0;
 
-				mPieces[Info->m_strName] = Info;
+				mPieces[Name] = Info;
 			}
 		}
 	}
@@ -613,7 +654,6 @@ bool lcPiecesLibrary::OpenDirectory(const QDir& LibraryDir)
 				Dst -= 4;
 				if (memcmp(Dst, ".DAT", 4))
 					continue;
-				*Dst = 0;
 
 				if (mHasUnofficial && IsPrimitive(Name))
 					continue;
@@ -622,7 +662,7 @@ bool lcPiecesLibrary::OpenDirectory(const QDir& LibraryDir)
 					mHasUnofficial = true;
 
 				bool SubFile = SubFileDirectories[DirectoryIdx];
-				mPrimitives[Name] = new lcLibraryPrimitive(Name, LC_NUM_ZIPFILES, 0, !SubFile && (memcmp(Name, "STU", 3) == 0), SubFile);
+				mPrimitives[Name] = new lcLibraryPrimitive((strchr(PrimitiveDirectories[DirectoryIdx], '/') + 1) + FileString, LC_NUM_ZIPFILES, 0, !SubFile && (memcmp(Name, "STU", 3) == 0), SubFile);
 			}
 		}
 	}
@@ -878,7 +918,7 @@ bool lcPiecesLibrary::SaveCacheIndex(const QString& FileName)
 
 bool lcPiecesLibrary::LoadCachePiece(PieceInfo* Info)
 {
-	QString FileName = QFileInfo(QDir(mCachePath), QString::fromLatin1(Info->m_strName)).absoluteFilePath();
+	QString FileName = QFileInfo(QDir(mCachePath), QString::fromLatin1(Info->mFileName)).absoluteFilePath();
 	lcMemFile MeshData;
 
 	if (!ReadCacheFile(FileName, MeshData))
@@ -914,7 +954,7 @@ bool lcPiecesLibrary::SaveCachePiece(PieceInfo* Info)
 	if (!Info->GetMesh()->FileSave(MeshData))
 		return false;
 
-	QString FileName = QFileInfo(QDir(mCachePath), QString::fromLatin1(Info->m_strName)).absoluteFilePath();
+	QString FileName = QFileInfo(QDir(mCachePath), QString::fromLatin1(Info->mFileName)).absoluteFilePath();
 
 	return WriteCacheFile(FileName, MeshData);
 }
@@ -1078,16 +1118,12 @@ bool lcPiecesLibrary::LoadPieceData(PieceInfo* Info)
 	}
 	else
 	{
-		char Name[LC_PIECE_NAME_LEN];
-		strcpy(Name, Info->m_strName);
-		strlwr(Name);
-
 		char FileName[LC_MAXPATH];
 		lcDiskFile PieceFile;
 
 		if (mHasUnofficial)
 		{
-			sprintf(FileName, "unofficial/parts/%s.dat", Name);
+			sprintf(FileName, "unofficial/parts/%s", Info->mFileName);
 			PieceFile.SetFileName(mLibraryDir.absoluteFilePath(QLatin1String(FileName)));
 			if (PieceFile.Open(QIODevice::ReadOnly))
 				Loaded = ReadMeshData(PieceFile, lcMatrix44Identity(), 16, false, TextureStack, MeshData, LC_MESHDATA_SHARED, true, nullptr, false);
@@ -1095,7 +1131,7 @@ bool lcPiecesLibrary::LoadPieceData(PieceInfo* Info)
 
 		if (!Loaded)
 		{
-			sprintf(FileName, "parts/%s.dat", Name);
+			sprintf(FileName, "parts/%s", Info->mFileName);
 			PieceFile.SetFileName(mLibraryDir.absoluteFilePath(QLatin1String(FileName)));
 			if (PieceFile.Open(QIODevice::ReadOnly))
 				Loaded = ReadMeshData(PieceFile, lcMatrix44Identity(), 16, false, TextureStack, MeshData, LC_MESHDATA_SHARED, true, nullptr, false);
@@ -1820,13 +1856,6 @@ bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransf
 						*Ch = '/';
 				}
 
-				if (Ch - FileName > 4)
-				{
-					Ch -= 4;
-					if (!memcmp(Ch, ".DAT", 4))
-						*Ch = 0;
-				}
-
 				lcLibraryPrimitive* Primitive = FindPrimitive(FileName);
 				lcMatrix44 IncludeTransform(lcVector4(fm[3], fm[6], fm[9], 0.0f), lcVector4(fm[4], fm[7], fm[10], 0.0f), lcVector4(fm[5], fm[8], fm[11], 0.0f), lcVector4(fm[0], fm[1], fm[2], 1.0f));
 				IncludeTransform = lcMul(IncludeTransform, CurrentTransform);
@@ -1905,23 +1934,19 @@ bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransf
 						}
 						else
 						{
-							char Name[LC_PIECE_NAME_LEN];
-							strcpy(Name, Info->m_strName);
-							strlwr(Name);
-
 							lcDiskFile IncludeFile;
 							bool Found = false;
 
 							if (mHasUnofficial)
 							{
-								sprintf(FileName, "unofficial/parts/%s.dat", Name);
+								sprintf(FileName, "unofficial/parts/%s", Info->mFileName);
 								IncludeFile.SetFileName(mLibraryDir.absoluteFilePath(QLatin1String(FileName)));
 								Found = IncludeFile.Open(QIODevice::ReadOnly);
 							}
 
 							if (!Found)
 							{
-								sprintf(FileName, "parts/%s.dat", Name);
+								sprintf(FileName, "parts/%s", Info->mFileName);
 								IncludeFile.SetFileName(mLibraryDir.absoluteFilePath(QLatin1String(FileName)));
 								Found = IncludeFile.Open(QIODevice::ReadOnly);
 							}
@@ -2744,8 +2769,9 @@ void lcPiecesLibrary::GetCategoryEntries(const char* CategoryKeywords, bool Grou
 
 			// Find the parent of this patterned piece.
 			char ParentName[LC_PIECE_NAME_LEN];
-			strcpy(ParentName, Info->m_strName);
+			strcpy(ParentName, Info->mFileName);
 			*strchr(ParentName, 'P') = '\0';
+			strcat(ParentName, ".dat");
 
 			Parent = FindPiece(ParentName, nullptr, false, false);
 
@@ -2782,34 +2808,33 @@ void lcPiecesLibrary::GetCategoryEntries(const char* CategoryKeywords, bool Grou
 void lcPiecesLibrary::GetPatternedPieces(PieceInfo* Parent, lcArray<PieceInfo*>& Pieces) const
 {
 	char Name[LC_PIECE_NAME_LEN];
-	strcpy(Name, Parent->m_strName);
+	strcpy(Name, Parent->mFileName);
+	char* Ext = strchr(Name, '.');
+	if (Ext)
+		*Ext = 0;
 	strcat(Name, "P");
+	strupr(Name);
 
 	Pieces.RemoveAll();
 
 	for (const auto PieceIt : mPieces)
-	{
-		PieceInfo* Info = PieceIt.second;
-
-		if (strncmp(Name, Info->m_strName, strlen(Name)) == 0)
-			Pieces.Add(Info);
-	}
+		if (strncmp(Name, PieceIt.first.c_str(), strlen(Name)) == 0)
+			Pieces.Add(PieceIt.second);
 
 	// Sometimes pieces with A and B versions don't follow the same convention (for example, 3040Pxx instead of 3040BPxx).
 	if (Pieces.GetSize() == 0)
 	{
-		strcpy(Name, Parent->m_strName);
+		strcpy(Name, Parent->mFileName);
+		Ext = strchr(Name, '.');
+		if (Ext)
+			*Ext = 0;
 		size_t Len = strlen(Name);
 		if (Name[Len-1] < '0' || Name[Len-1] > '9')
 			Name[Len-1] = 'P';
 
 		for (const auto PieceIt : mPieces)
-		{
-			PieceInfo* Info = PieceIt.second;
-
-			if (strncmp(Name, Info->m_strName, strlen(Name)) == 0)
-				Pieces.Add(Info);
-		}
+			if (strncmp(Name, PieceIt.first.c_str(), strlen(Name)) == 0)
+				Pieces.Add(PieceIt.second);
 	}
 }
 

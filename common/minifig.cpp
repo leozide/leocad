@@ -53,7 +53,7 @@ void MinifigWizard::OnInitialUpdate()
 	memset(&mMinifig, 0, sizeof(lcMinifig));
 
 	const int ColorCodes[LC_MFW_NUMITEMS] = { 4, 7, 14, 7, 1, 0, 7, 4, 4, 14, 14, 7, 7, 0, 0, 7, 7 };
-	const char* Pieces[LC_MFW_NUMITEMS] = { "3624", "None", "3626BP01", "None", "973", "3815", "None", "3819", "3818", "3820", "3820", "None", "None", "3817", "3816", "None", "None" };
+	const char* Pieces[LC_MFW_NUMITEMS] = { "3624.dat", "", "3626bp01.dat", "", "973.dat", "3815.dat", "", "3819.dat", "3818.dat", "3820.dat", "3820.dat", "", "", "3817.dat", "3816.dat", "", "" };
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 
 	for (int i = 0; i < LC_MFW_NUMITEMS; i++)
@@ -164,14 +164,6 @@ void MinifigWizard::ParseSettings(lcFile& Settings)
 				continue;
 			*NameEnd = 0;
 			NameEnd++;
-
-			strupr(NameStart);
-			char* Ext = strrchr(NameStart, '.');
-			if (Ext != nullptr)
-			{
-				if (!strcmp(Ext, ".DAT"))
-					*Ext = 0;
-			}
 
 			PieceInfo* Info = lcGetPiecesLibrary()->FindPiece(NameStart, nullptr, false, false);
 			if (!Info && *NameStart)
@@ -372,8 +364,8 @@ void MinifigWizard::Calculate()
 	float* Angles = mMinifig.Angles;
 	lcMatrix44* Matrices = mMinifig.Matrices;
 
-	bool DroidTorso = Parts[LC_MFW_BODY] && !strcmp(Parts[LC_MFW_BODY]->m_strName, "30375");
-	bool SkeletonTorso = Parts[LC_MFW_BODY] && !strcmp(Parts[LC_MFW_BODY]->m_strName, "6260");
+	bool DroidTorso = Parts[LC_MFW_BODY] && !stricmp(Parts[LC_MFW_BODY]->mFileName, "30375.dat");
+	bool SkeletonTorso = Parts[LC_MFW_BODY] && !stricmp(Parts[LC_MFW_BODY]->mFileName, "6260.dat");
 
 	if (Parts[LC_MFW_BODY3])
 		Root = lcMatrix44Translation(lcVector3(0, 0, 74.0f));

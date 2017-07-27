@@ -78,7 +78,7 @@ void lcPiece::SetPieceInfo(PieceInfo* Info, const QString& ID, bool Wait)
 	if (!ID.isEmpty())
 		mID = ID;
 	else if (mPieceInfo)
-		mID = mPieceInfo->GetSaveID();
+		mID = mPieceInfo->mFileName;
 	else
 		mID.clear();
 
@@ -97,7 +97,7 @@ void lcPiece::SetPieceInfo(PieceInfo* Info, const QString& ID, bool Wait)
 
 void lcPiece::UpdateID()
 {
-	mID = mPieceInfo->GetSaveID();
+	mID = mPieceInfo->mFileName;
 }
 
 void lcPiece::SaveLDraw(QTextStream& Stream) const
@@ -303,6 +303,7 @@ bool lcPiece::FileLoad(lcFile& file)
   }
   else
 	  file.ReadBuffer(name, LC_PIECE_NAME_LEN);
+  strcat(name, ".dat");
 
 	PieceInfo* pInfo = lcGetPiecesLibrary()->FindPiece(name, nullptr, true, false);
 	SetPieceInfo(pInfo, QString(), true);

@@ -219,7 +219,7 @@ void lcPartSelectionListModel::SetFilter(const QString& Filter)
 				Dst++;
 			}
 
-			Visible = strcasestr(Description, mFilter) || strcasestr(Info->m_strName, mFilter);
+			Visible = strcasestr(Description, mFilter) || strcasestr(Info->mFileName, mFilter);
 		}
 
 		mListView->setRowHidden(PartIdx, !Visible);
@@ -249,7 +249,7 @@ QVariant lcPartSelectionListModel::data(const QModelIndex& Index, int Role) cons
 			break;
 
 		case Qt::ToolTipRole:
-			return QVariant(QString("%1 (%2)").arg(QString::fromLatin1(Info->m_strDescription), QString::fromLatin1(Info->m_strName)));
+			return QVariant(QString("%1 (%2)").arg(QString::fromLatin1(Info->m_strDescription), QString::fromLatin1(Info->mFileName)));
 
 		case Qt::DecorationRole:
 			if (!mParts[InfoIndex].second.isNull() && mIconSize)
@@ -555,7 +555,7 @@ void lcPartSelectionListView::startDrag(Qt::DropActions SupportedActions)
 
 	QByteArray ItemData;
 	QDataStream DataStream(&ItemData, QIODevice::WriteOnly);
-	DataStream << QString(Info->m_strName);
+	DataStream << QString(Info->mFileName);
 
 	QMimeData* MimeData = new QMimeData;
 	MimeData->setData("application/vnd.leocad-part", ItemData);

@@ -224,7 +224,7 @@ void lcModel::DeleteModel()
 void lcModel::CreatePieceInfo(Project* Project)
 {
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
-	mPieceInfo = Library->FindPiece(mProperties.mName.toUpper().toLatin1().constData(), Project, true, false);
+	mPieceInfo = Library->FindPiece(mProperties.mName.toLatin1().constData(), Project, true, false);
 	mPieceInfo->SetModel(this, true, Project, true);
 	Library->LoadPieceInfo(mPieceInfo, true, true);
 }
@@ -621,15 +621,9 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 			lcMatrix44 IncludeTransform(lcVector4(IncludeMatrix[3], IncludeMatrix[6], IncludeMatrix[9], 0.0f), lcVector4(IncludeMatrix[4], IncludeMatrix[7], IncludeMatrix[10], 0.0f),
 										lcVector4(IncludeMatrix[5], IncludeMatrix[8], IncludeMatrix[11], 0.0f), lcVector4(IncludeMatrix[0], IncludeMatrix[1], IncludeMatrix[2], 1.0f));
 
-			QString OriginalID = LineStream.readAll().trimmed();
-			QString File = OriginalID.toUpper();
-			QString PartID = File;
-			PartID.replace('\\', '/');
+			QByteArray PartID = LineStream.readAll().trimmed().toLatin1();
 
-			if (PartID.endsWith(QLatin1String(".DAT")))
-				PartID = PartID.left(PartID.size() - 4);
-
-			if (Library->IsPrimitive(PartID.toLatin1().constData()))
+			if (Library->IsPrimitive(PartID.constData()))
 			{
 				mFileLines.append(OriginalLine); 
 			}
@@ -641,17 +635,14 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 				if (!CurrentGroups.IsEmpty())
 					Piece->SetGroup(CurrentGroups[CurrentGroups.GetSize() - 1]);
 
-				PieceInfo* Info = Library->FindPiece(PartID.toLatin1().constData(), Project, false, true);
-
-				if (!Info)
-					Info = Library->FindPiece(File.toLatin1().constData(), Project, true, true);
+				PieceInfo* Info = Library->FindPiece(PartID.constData(), Project, true, true);
 
 				float* Matrix = IncludeTransform;
 				lcMatrix44 Transform(lcVector4(Matrix[0], Matrix[2], -Matrix[1], 0.0f), lcVector4(Matrix[8], Matrix[10], -Matrix[9], 0.0f),
 									 lcVector4(-Matrix[4], -Matrix[6], Matrix[5], 0.0f), lcVector4(Matrix[12], Matrix[14], -Matrix[13], 1.0f));
 
 				Piece->SetFileLine(mFileLines.size());
-				Piece->SetPieceInfo(Info, OriginalID, false);
+				Piece->SetPieceInfo(Info, PartID, false);
 				Piece->Initialize(Transform, CurrentStep);
 				Piece->SetColorCode(ColorCode);
 				Piece->SetControlPoints(ControlPoints);
@@ -743,6 +734,7 @@ bool lcModel::LoadBinary(lcFile* file)
 			file->ReadFloats(rot, 3);
 			file->ReadU8(&color, 1);
 			file->ReadBuffer(name, 9);
+			strcat(name, ".dat");
 			file->ReadU8(&step, 1);
 			file->ReadU8(&group, 1);
 
@@ -1427,21 +1419,7 @@ void lcModel::LoadCheckPoint(lcModelHistoryEntry* CheckPoint)
 
 void lcModel::SetActive(bool Active)
 {
-	if (Active)
-	{
-		CalculateStep(mCurrentStep);
-	}
-	else
-	{
-		CalculateStep(LC_STEP_MAX);
-
-		strncpy(mPieceInfo->m_strName, mProperties.mName.toLatin1().constData(), sizeof(mPieceInfo->m_strName));
-		strupr(mPieceInfo->m_strName);
-		mPieceInfo->m_strName[sizeof(mPieceInfo->m_strName) - 1] = 0;
-		strncpy(mPieceInfo->m_strDescription, mProperties.mName.toLatin1().constData(), sizeof(mPieceInfo->m_strDescription));
-		mPieceInfo->m_strDescription[sizeof(mPieceInfo->m_strDescription) - 1] = 0;
-	}
-
+	CalculateStep(Active ? mCurrentStep : LC_STEP_MAX);
 	mActive = Active;
 }
 

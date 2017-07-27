@@ -30,8 +30,6 @@ public:
 	PieceInfo();
 	~PieceInfo();
 
-	QString GetSaveID() const;
-
 	const lcBoundingBox& GetBoundingBox() const
 	{
 		return mBoundingBox;
@@ -110,7 +108,7 @@ public:
 
 	bool IsPatterned() const
 	{
-		const char* Name = m_strName;
+		const char* Name = mFileName;
 
 		while (*Name)
 		{
@@ -120,7 +118,7 @@ public:
 			Name++;
 		}
 
-		if (*Name == 'P')
+		if (*Name == 'P' || *Name == 'p')
 			return true;
 
 		return false;
@@ -139,7 +137,7 @@ public:
 
 	void SetPlaceholder();
 	void SetModel(lcModel* Model, bool UpdateMesh, Project* CurrentProject, bool SearchProjectFolder);
-	void SetProject(Project* Project, const char* PieceName);
+	void CreateProject(Project* Project, const char* PieceName);
 	bool IncludesModel(const lcModel* Model) const;
 	bool MinIntersectDist(const lcVector3& Start, const lcVector3& End, float& MinDistance) const;
 	bool BoxTest(const lcMatrix44& WorldMatrix, const lcVector4 Planes[6]) const;
@@ -151,7 +149,7 @@ public:
 	void Unload();
 
 public:
-	char m_strName[LC_PIECE_NAME_LEN];
+	char mFileName[LC_PIECE_NAME_LEN];
 	char m_strDescription[128];
 	int mZipFileType;
 	int mZipFileIndex;

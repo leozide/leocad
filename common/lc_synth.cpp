@@ -20,29 +20,29 @@ void lcSynthInit()
 
 	lcHoseInfo HoseInfo[] =
 	{
-		{ "72504",    lcSynthType::RIBBED_HOSE,     31.25f,   4 }, // Technic Ribbed Hose  2L
-		{ "72706",    lcSynthType::RIBBED_HOSE,     50.00f,   7 }, // Technic Ribbed Hose  3L
-		{ "71952",    lcSynthType::RIBBED_HOSE,     75.00f,  11 }, // Technic Ribbed Hose  4L
-		{ "71944",    lcSynthType::RIBBED_HOSE,    112.50f,  17 }, // Technic Ribbed Hose  6L
-		{ "71951",    lcSynthType::RIBBED_HOSE,    143.75f,  22 }, // Technic Ribbed Hose  8L
-		{ "71986",    lcSynthType::RIBBED_HOSE,    212.50f,  33 }, // Technic Ribbed Hose 11L
-		{ "43675",    lcSynthType::RIBBED_HOSE,    375.00f,  58 }, // Technic Ribbed Hose 19L
-		{ "32580",    lcSynthType::FLEXIBLE_AXLE,  120.00f,  15 }, // Technic Axle Flexible  7
-		{ "32199",    lcSynthType::FLEXIBLE_AXLE,  200.00f,  35 }, // Technic Axle Flexible 11
-		{ "55709",    lcSynthType::FLEXIBLE_AXLE,  200.00f,  35 }, // Technic Axle Flexible 11
-		{ "32200",    lcSynthType::FLEXIBLE_AXLE,  220.00f,  40 }, // Technic Axle Flexible 12
-		{ "32201",    lcSynthType::FLEXIBLE_AXLE,  260.00f,  50 }, // Technic Axle Flexible 14
-		{ "32202",    lcSynthType::FLEXIBLE_AXLE,  300.00f,  60 }, // Technic Axle Flexible 16
-		{ "32235",    lcSynthType::FLEXIBLE_AXLE,  360.00f,  75 }, // Technic Axle Flexible 19
-		{ "76384",    lcSynthType::STRING_BRAIDED, 200.00f,  46 }, // String Braided 11L with End Studs
-		{ "75924",    lcSynthType::STRING_BRAIDED, 400.00f,  96 }, // String Braided 21L with End Studs
-		{ "572C02",   lcSynthType::STRING_BRAIDED, 800.00f, 196 }, // String Braided 41L with End Studs
-		{ "73129",    lcSynthType::SHOCK_ABSORBER, 110.00f,   1 }, // Technic Shock Absorber 6.5L
-		{ "41838",    lcSynthType::SHOCK_ABSORBER, 110.00f,   1 }, // Technic Shock Absorber 6.5L Soft
-		{ "76138",    lcSynthType::SHOCK_ABSORBER, 110.00f,   1 }, // Technic Shock Absorber 6.5L Stiff
-		{ "76537",    lcSynthType::SHOCK_ABSORBER, 110.00f,   1 }, // Technic Shock Absorber 6.5L Extra Stiff
-		{ "61927C01", lcSynthType::ACTUATOR,       270.00f,   1 }, // Technic Power Functions Linear Actuator (Extended)
-		{ "61927",    lcSynthType::ACTUATOR,       170.00f,   1 }  // Technic Power Functions Linear Actuator (Contracted)
+		{ "72504.dat",    lcSynthType::RIBBED_HOSE,     31.25f,   4 }, // Technic Ribbed Hose  2L
+		{ "72706.dat",    lcSynthType::RIBBED_HOSE,     50.00f,   7 }, // Technic Ribbed Hose  3L
+		{ "71952.dat",    lcSynthType::RIBBED_HOSE,     75.00f,  11 }, // Technic Ribbed Hose  4L
+		{ "71944.dat",    lcSynthType::RIBBED_HOSE,    112.50f,  17 }, // Technic Ribbed Hose  6L
+		{ "71951.dat",    lcSynthType::RIBBED_HOSE,    143.75f,  22 }, // Technic Ribbed Hose  8L
+		{ "71986.dat",    lcSynthType::RIBBED_HOSE,    212.50f,  33 }, // Technic Ribbed Hose 11L
+		{ "43675.dat",    lcSynthType::RIBBED_HOSE,    375.00f,  58 }, // Technic Ribbed Hose 19L
+		{ "32580.dat",    lcSynthType::FLEXIBLE_AXLE,  120.00f,  15 }, // Technic Axle Flexible  7
+		{ "32199.dat",    lcSynthType::FLEXIBLE_AXLE,  200.00f,  35 }, // Technic Axle Flexible 11
+		{ "55709.dat",    lcSynthType::FLEXIBLE_AXLE,  200.00f,  35 }, // Technic Axle Flexible 11
+		{ "32200.dat",    lcSynthType::FLEXIBLE_AXLE,  220.00f,  40 }, // Technic Axle Flexible 12
+		{ "32201.dat",    lcSynthType::FLEXIBLE_AXLE,  260.00f,  50 }, // Technic Axle Flexible 14
+		{ "32202.dat",    lcSynthType::FLEXIBLE_AXLE,  300.00f,  60 }, // Technic Axle Flexible 16
+		{ "32235.dat",    lcSynthType::FLEXIBLE_AXLE,  360.00f,  75 }, // Technic Axle Flexible 19
+		{ "76384.dat",    lcSynthType::STRING_BRAIDED, 200.00f,  46 }, // String Braided 11L with End Studs
+		{ "75924.dat",    lcSynthType::STRING_BRAIDED, 400.00f,  96 }, // String Braided 21L with End Studs
+		{ "572C02.dat",   lcSynthType::STRING_BRAIDED, 800.00f, 196 }, // String Braided 41L with End Studs
+		{ "73129.dat",    lcSynthType::SHOCK_ABSORBER, 110.00f,   1 }, // Technic Shock Absorber 6.5L
+		{ "41838.dat",    lcSynthType::SHOCK_ABSORBER, 110.00f,   1 }, // Technic Shock Absorber 6.5L Soft
+		{ "76138.dat",    lcSynthType::SHOCK_ABSORBER, 110.00f,   1 }, // Technic Shock Absorber 6.5L Stiff
+		{ "76537.dat",    lcSynthType::SHOCK_ABSORBER, 110.00f,   1 }, // Technic Shock Absorber 6.5L Extra Stiff
+		{ "61927C01.dat", lcSynthType::ACTUATOR,       270.00f,   1 }, // Technic Power Functions Linear Actuator (Extended)
+		{ "61927.dat",    lcSynthType::ACTUATOR,       170.00f,   1 }  // Technic Power Functions Linear Actuator (Contracted)
 	};
 
 	for (unsigned int InfoIdx = 0; InfoIdx < sizeof(HoseInfo) / sizeof(HoseInfo[0]); InfoIdx++)
@@ -345,7 +345,7 @@ void lcSynthInfo::AddRibbedHoseParts(lcMemFile& File, const lcArray<lcMatrix44>&
 		lcMatrix33 Transform(lcMul(lcMatrix33Scale(lcVector3(1.0f, -1.0f, 1.0f)), lcMatrix33(Sections[SectionIdx])));
 		lcVector3 Offset = Sections[SectionIdx].GetTranslation();
 
-		sprintf(Line, "1 16 %f %f %f %f %f %f %f %f %f %f %f %f 79.DAT\n", Offset[0], Offset[1], Offset[2], Transform[0][0], Transform[1][0], Transform[2][0],
+		sprintf(Line, "1 16 %f %f %f %f %f %f %f %f %f %f %f %f 79.dat\n", Offset[0], Offset[1], Offset[2], Transform[0][0], Transform[1][0], Transform[2][0],
 				Transform[0][1], Transform[1][1], Transform[2][1], Transform[0][2], Transform[1][2], Transform[2][2]);
 
 		File.WriteBuffer(Line, strlen(Line));
@@ -355,7 +355,7 @@ void lcSynthInfo::AddRibbedHoseParts(lcMemFile& File, const lcArray<lcMatrix44>&
 	{
 		const lcMatrix44& Transform = Sections[SectionIdx];
 
-		sprintf(Line, "1 16 %f %f %f %f %f %f %f %f %f %f %f %f 80.DAT\n", Transform[3][0], Transform[3][1], Transform[3][2], Transform[0][0], Transform[1][0], Transform[2][0],
+		sprintf(Line, "1 16 %f %f %f %f %f %f %f %f %f %f %f %f 80.dat\n", Transform[3][0], Transform[3][1], Transform[3][2], Transform[0][0], Transform[1][0], Transform[2][0],
 				Transform[0][1], Transform[1][1], Transform[2][1], Transform[0][2], Transform[1][2], Transform[2][2]);
 
 		File.WriteBuffer(Line, strlen(Line));
@@ -366,7 +366,7 @@ void lcSynthInfo::AddRibbedHoseParts(lcMemFile& File, const lcArray<lcMatrix44>&
 		lcMatrix33 Transform(Sections[SectionIdx]);
 		lcVector3 Offset = lcMul31(lcVector3(0.0f, -6.25f, 0.0f), Sections[SectionIdx]);
 
-		sprintf(Line, "1 16 %f %f %f %f %f %f %f %f %f %f %f %f 79.DAT\n", Offset[0], Offset[1], Offset[2], Transform[0][0], Transform[1][0], Transform[2][0],
+		sprintf(Line, "1 16 %f %f %f %f %f %f %f %f %f %f %f %f 79.dat\n", Offset[0], Offset[1], Offset[2], Transform[0][0], Transform[1][0], Transform[2][0],
 				Transform[0][1], Transform[1][1], Transform[2][1], Transform[0][2], Transform[1][2], Transform[2][2]);
 
 		File.WriteBuffer(Line, strlen(Line));
@@ -390,7 +390,7 @@ void lcSynthInfo::AddFlexibleAxleParts(lcMemFile& File, lcLibraryMeshData& MeshD
 
 	const char* EdgeParts[6] =
 	{
-		"STUD3A.DAT", "S/FAXLE1.DAT", "S/FAXLE2.DAT", "S/FAXLE3.DAT", "S/FAXLE4.DAT", "S/FAXLE5.DAT"
+		"stud3a.dat", "s/faxle1.dat", "s/faxle2.dat", "s/faxle3.dat", "s/faxle4.dat", "s/faxle5.dat"
 	};
 
 	for (int PartIdx = 0; PartIdx < NumEdgeParts; PartIdx++)
@@ -491,7 +491,7 @@ void lcSynthInfo::AddStringBraidedParts(lcMemFile& File, lcLibraryMeshData& Mesh
 		lcMatrix33 Transform(Sections[SectionIdx]);
 		lcVector3 Offset = lcMul31(lcVector3(-8.0f, 0.0f, 0.0f), Sections[SectionIdx]);
 
-		sprintf(Line, "1 16 %f %f %f %f %f %f %f %f %f %f %f %f 572A.DAT\n", Offset[0], Offset[1], Offset[2], Transform[0][0], Transform[1][0], Transform[2][0],
+		sprintf(Line, "1 16 %f %f %f %f %f %f %f %f %f %f %f %f 572A.dat\n", Offset[0], Offset[1], Offset[2], Transform[0][0], Transform[1][0], Transform[2][0],
 				Transform[0][1], Transform[1][1], Transform[2][1], Transform[0][2], Transform[1][2], Transform[2][2]);
 
 		File.WriteBuffer(Line, strlen(Line));
@@ -594,7 +594,7 @@ void lcSynthInfo::AddStringBraidedParts(lcMemFile& File, lcLibraryMeshData& Mesh
 		lcMatrix33 Transform(Sections[SectionIdx]);
 		lcVector3 Offset = lcMul31(lcVector3(8.0f, 0.0f, 0.0f), Sections[SectionIdx]);
 
-		sprintf(Line, "1 16 %f %f %f %f %f %f %f %f %f %f %f %f 572A.DAT\n", Offset[0], Offset[1], Offset[2], Transform[0][0], Transform[1][0], Transform[2][0],
+		sprintf(Line, "1 16 %f %f %f %f %f %f %f %f %f %f %f %f 572A.dat\n", Offset[0], Offset[1], Offset[2], Transform[0][0], Transform[1][0], Transform[2][0],
 				Transform[0][1], Transform[1][1], Transform[2][1], Transform[0][2], Transform[1][2], Transform[2][2]);
 
 		File.WriteBuffer(Line, strlen(Line));
@@ -607,30 +607,30 @@ void lcSynthInfo::AddShockAbsorberParts(lcMemFile& File, lcArray<lcMatrix44>& Se
 	lcVector3 Offset;
 
 	Offset = Sections[0].GetTranslation();
-	sprintf(Line, "1 0 %f %f %f 1 0 0 0 1 0 0 0 1 4254.DAT\n", Offset[0], Offset[1], Offset[2]);
+	sprintf(Line, "1 0 %f %f %f 1 0 0 0 1 0 0 0 1 4254.dat\n", Offset[0], Offset[1], Offset[2]);
 	File.WriteBuffer(Line, strlen(Line));
 
 	Offset = Sections[1].GetTranslation();
-	sprintf(Line, "1 16 %f %f %f 1 0 0 0 1 0 0 0 1 4255.DAT\n", Offset[0], Offset[1], Offset[2]);
+	sprintf(Line, "1 16 %f %f %f 1 0 0 0 1 0 0 0 1 4255.dat\n", Offset[0], Offset[1], Offset[2]);
 	File.WriteBuffer(Line, strlen(Line));
 
 	float Distance = Sections[0].GetTranslation().y - Sections[1].GetTranslation().y;
 	float Scale = (Distance - 66.0f) / 44.0f;
 	const char* SpringPart;
 
-	if (!strcmp(mPieceInfo->m_strName, "73129"))
+	if (!stricmp(mPieceInfo->mFileName, "73129.dat"))
 		SpringPart = "70038";
-	else if (!strcmp(mPieceInfo->m_strName, "41838"))
+	else if (!stricmp(mPieceInfo->mFileName, "41838"))
 		SpringPart = "41837";
-	else if (!strcmp(mPieceInfo->m_strName, "76138"))
+	else if (!stricmp(mPieceInfo->mFileName, "76138"))
 		SpringPart = "71953";
-	else if (!strcmp(mPieceInfo->m_strName, "76537"))
+	else if (!stricmp(mPieceInfo->mFileName, "76537"))
 		SpringPart = "22977";
 	else
 		return;
 
 	Offset = Sections[0].GetTranslation();
-	sprintf(Line, "1 494 %f %f %f 1 0 0 0 %f 0 0 0 1 %s.DAT\n", Offset[0], Offset[1] - 10 - 44.0f * Scale, Offset[2], Scale, SpringPart);
+	sprintf(Line, "1 494 %f %f %f 1 0 0 0 %f 0 0 0 1 %s.dat\n", Offset[0], Offset[1] - 10 - 44.0f * Scale, Offset[2], Scale, SpringPart);
 	File.WriteBuffer(Line, strlen(Line));
 }
 
@@ -640,13 +640,13 @@ void lcSynthInfo::AddActuatorParts(lcMemFile& File, lcArray<lcMatrix44>& Section
 	lcVector3 Offset;
 
 	Offset = Sections[0].GetTranslation();
-	sprintf(Line, "1 25 %f %f %f 0 1 0 -1 0 0 0 0 1 47157.DAT\n", Offset[0], Offset[1], Offset[2]);
+	sprintf(Line, "1 25 %f %f %f 0 1 0 -1 0 0 0 0 1 47157.dat\n", Offset[0], Offset[1], Offset[2]);
 	File.WriteBuffer(Line, strlen(Line));
-	sprintf(Line, "1 16 %f %f %f 1 0 0 0 1 0 0 0 1 62271c01.DAT\n", Offset[0], Offset[1], Offset[2]);
+	sprintf(Line, "1 16 %f %f %f 1 0 0 0 1 0 0 0 1 62271c01.dat\n", Offset[0], Offset[1], Offset[2]);
 	File.WriteBuffer(Line, strlen(Line));
 
 	Offset = Sections[1].GetTranslation();
-	sprintf(Line, "1 72 %f %f %f 1 0 0 0 1 0 0 0 1 62274c01.DAT\n", Offset[0], Offset[1], Offset[2]);
+	sprintf(Line, "1 72 %f %f %f 1 0 0 0 1 0 0 0 1 62274c01.dat\n", Offset[0], Offset[1], Offset[2]);
 	File.WriteBuffer(Line, strlen(Line));
 }
 

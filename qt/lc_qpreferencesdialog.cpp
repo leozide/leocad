@@ -256,7 +256,7 @@ void lcQPreferencesDialog::updateParts()
 			PieceInfo *info = singleParts[partIndex];
 
 			QStringList rowList(info->m_strDescription);
-			rowList.append(info->m_strName);
+			rowList.append(info->mFileName);
 
 			new QTreeWidgetItem(tree, rowList);
 		}
@@ -276,7 +276,7 @@ void lcQPreferencesDialog::updateParts()
 			if (categoryIndex == options->Categories.GetSize())
 			{
 				QStringList rowList(Info->m_strDescription);
-				rowList.append(Info->m_strName);
+				rowList.append(Info->mFileName);
 
 				new QTreeWidgetItem(tree, rowList);
 			}

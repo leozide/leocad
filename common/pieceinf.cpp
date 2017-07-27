@@ -34,14 +34,6 @@ PieceInfo::~PieceInfo()
 		Unload();
 }
 
-QString PieceInfo::GetSaveID() const
-{
-	if (mFlags & (LC_PIECE_MODEL | LC_PIECE_PROJECT))
-		return QString::fromLatin1(m_strName);
-
-	return QString::fromLatin1(m_strName) + QLatin1String(".dat");
-}
-
 void PieceInfo::SetMesh(lcMesh* Mesh)
 {
 	mBoundingBox = Mesh->mBoundingBox;
@@ -68,8 +60,8 @@ void PieceInfo::SetModel(lcModel* Model, bool UpdateMesh, Project* CurrentProjec
 		mModel = Model;
 	}
 
-	strncpy(m_strName, Model->GetProperties().mName.toUpper().toLatin1().data(), sizeof(m_strName));
-	m_strName[sizeof(m_strName)-1] = 0;
+	strncpy(mFileName, Model->GetProperties().mName.toLatin1().data(), sizeof(mFileName));
+	mFileName[sizeof(mFileName)-1] = 0;
 	strncpy(m_strDescription, Model->GetProperties().mName.toLatin1().data(), sizeof(m_strDescription));
 	m_strDescription[sizeof(m_strDescription)-1] = 0;
 
@@ -97,7 +89,7 @@ void PieceInfo::SetModel(lcModel* Model, bool UpdateMesh, Project* CurrentProjec
 	}
 }
 
-void PieceInfo::SetProject(Project* Project, const char* PieceName)
+void PieceInfo::CreateProject(Project* Project, const char* PieceName)
 {
 	if (mProject != Project)
 	{
@@ -106,10 +98,10 @@ void PieceInfo::SetProject(Project* Project, const char* PieceName)
 		mState = LC_PIECEINFO_LOADED;
 	}
 
-	strncpy(m_strName, PieceName, sizeof(m_strName));
-	m_strName[sizeof(m_strName)-1] = 0;
+	strncpy(mFileName, PieceName, sizeof(mFileName));
+	mFileName[sizeof(mFileName) - 1] = 0;
 	strncpy(m_strDescription, Project->GetFileName().toLatin1().data(), sizeof(m_strDescription));
-	m_strDescription[sizeof(m_strDescription)-1] = 0;
+	m_strDescription[sizeof(m_strDescription) - 1] = 0;
 }
 
 bool PieceInfo::IncludesModel(const lcModel* Model) const
@@ -127,10 +119,10 @@ bool PieceInfo::IncludesModel(const lcModel* Model) const
 
 void PieceInfo::CreatePlaceholder(const char* Name)
 {
-	strncpy(m_strName, Name, sizeof(m_strName));
-	m_strName[sizeof(m_strName)-1] = 0;
+	strncpy(mFileName, Name, sizeof(mFileName));
+	mFileName[sizeof(mFileName) - 1] = 0;
 	strncpy(m_strDescription, Name, sizeof(m_strDescription));
-	m_strDescription[sizeof(m_strDescription)-1] = 0;
+	m_strDescription[sizeof(m_strDescription) - 1] = 0;
 
 	SetPlaceholder();
 }

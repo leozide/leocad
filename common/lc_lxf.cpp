@@ -51,15 +51,14 @@ static bool lcLoadLDrawXML(std::map<int, int>& MaterialTable, std::map<int, std:
 		}
 		else if (ElementName == QLatin1String("Brick"))
 		{
-			QString LDrawID = Element.attribute(QLatin1String("ldraw")).toUpper();
-			LDrawID.chop(4);
+			QString LDrawID = Element.attribute(QLatin1String("ldraw"));
 			int LegoID = Element.attribute(QLatin1String("lego")).toInt();
 
 			BrickTable.insert(std::make_pair(LegoID, std::move(LDrawID.toStdString())));
 		}
 		else if (ElementName == QLatin1String("Transformation"))
 		{
-			QString LDrawID = Element.attribute(QLatin1String("ldraw")).toUpper();
+			QString LDrawID = Element.attribute(QLatin1String("ldraw"));
 			LDrawID.chop(4);
 
 			lcVector3 Translation;
@@ -163,7 +162,7 @@ bool lcImportLXFMLFile(const QString& FileData, lcArray<lcPiece*>& Pieces, lcArr
 				if (BrickIt != BrickTable.end())
 					Info = lcGetPiecesLibrary()->FindPiece(BrickIt->second.c_str(), nullptr, true, false);
 				else
-					Info = lcGetPiecesLibrary()->FindPiece(LegoID.toLatin1(), nullptr, true, false);
+					Info = lcGetPiecesLibrary()->FindPiece(LegoID.toLatin1() + ".dat", nullptr, true, false);
 
 				const auto ColorIt = MaterialTable.find(Material);
 				int ColorCode = 16;

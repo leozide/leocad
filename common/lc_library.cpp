@@ -870,7 +870,7 @@ bool lcPiecesLibrary::LoadCacheIndex(const QString& FileName)
 	if (!ReadCacheFile(FileName, IndexFile))
 		return false;
 
-	qint32 NumFiles;
+	quint32 NumFiles;
 
 	if (IndexFile.ReadBuffer((char*)&NumFiles, sizeof(NumFiles)) == 0 || NumFiles != mPieces.size())
 		return false;
@@ -896,7 +896,7 @@ bool lcPiecesLibrary::SaveCacheIndex(const QString& FileName)
 {
 	lcMemFile IndexFile;
 
-	qint32 NumFiles = mPieces.size();
+	quint32 NumFiles = mPieces.size();
 
 	if (IndexFile.WriteBuffer((char*)&NumFiles, sizeof(NumFiles)) == 0)
 		return false;

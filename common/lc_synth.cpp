@@ -618,13 +618,13 @@ void lcSynthInfo::AddShockAbsorberParts(lcMemFile& File, lcArray<lcMatrix44>& Se
 	float Scale = (Distance - 66.0f) / 44.0f;
 	const char* SpringPart;
 
-	if (!stricmp(mPieceInfo->mFileName, "73129.dat"))
+	if (!qstricmp(mPieceInfo->mFileName, "73129.dat"))
 		SpringPart = "70038";
-	else if (!stricmp(mPieceInfo->mFileName, "41838"))
+	else if (!qstricmp(mPieceInfo->mFileName, "41838"))
 		SpringPart = "41837";
-	else if (!stricmp(mPieceInfo->mFileName, "76138"))
+	else if (!qstricmp(mPieceInfo->mFileName, "76138"))
 		SpringPart = "71953";
-	else if (!stricmp(mPieceInfo->mFileName, "76537"))
+	else if (!qstricmp(mPieceInfo->mFileName, "76537"))
 		SpringPart = "22977";
 	else
 		return;

@@ -364,8 +364,8 @@ void MinifigWizard::Calculate()
 	float* Angles = mMinifig.Angles;
 	lcMatrix44* Matrices = mMinifig.Matrices;
 
-	bool DroidTorso = Parts[LC_MFW_BODY] && !stricmp(Parts[LC_MFW_BODY]->mFileName, "30375.dat");
-	bool SkeletonTorso = Parts[LC_MFW_BODY] && !stricmp(Parts[LC_MFW_BODY]->mFileName, "6260.dat");
+	bool DroidTorso = Parts[LC_MFW_BODY] && !qstricmp(Parts[LC_MFW_BODY]->mFileName, "30375.dat");
+	bool SkeletonTorso = Parts[LC_MFW_BODY] && !qstricmp(Parts[LC_MFW_BODY]->mFileName, "6260.dat");
 
 	if (Parts[LC_MFW_BODY3])
 		Root = lcMatrix44Translation(lcVector3(0, 0, 74.0f));

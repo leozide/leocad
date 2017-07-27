@@ -471,8 +471,6 @@ void lcMainWindow::CreateMenus()
 	PieceMenu->addAction(mActions[LC_PIECE_GROUP_REMOVE]);
 	PieceMenu->addAction(mActions[LC_PIECE_GROUP_ADD]);
 	PieceMenu->addAction(mActions[LC_PIECE_GROUP_EDIT]);
-//	LC_PIECE_SHOW_EARLIER,
-//	LC_PIECE_SHOW_LATER,
 	PieceMenu->addSeparator();
 	PieceMenu->addAction(mActions[LC_PIECE_HIDE_SELECTED]);
 	PieceMenu->addAction(mActions[LC_PIECE_HIDE_UNSELECTED]);
@@ -610,8 +608,6 @@ void lcMainWindow::CreateToolBars()
 	mTimeToolBar->addAction(mActions[LC_VIEW_TIME_PREVIOUS]);
 	mTimeToolBar->addAction(mActions[LC_VIEW_TIME_NEXT]);
 	mTimeToolBar->addAction(mActions[LC_VIEW_TIME_LAST]);
-	mTimeToolBar->addAction(mActions[LC_PIECE_SHOW_EARLIER]);
-	mTimeToolBar->addAction(mActions[LC_PIECE_SHOW_LATER]);
 	mTimeToolBar->addAction(mActions[LC_VIEW_TIME_ADD_KEYS]);
 	// TODO: add missing menu items
 

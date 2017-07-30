@@ -104,10 +104,12 @@
 </li></ul>
 
 <h4>Camera</h4>
-<p>Camera commands can be grouped in the same line, they don't need to be on separate lines.</p>
+<p>Camera commands can be grouped in the same line, they don't need to be on separate lines.
+A camera must contain either a set of position, target position and up vector or a set of keys for those parameters.</p>
 <ul><li>0 !LEOCAD CAMERA HIDDEN
 <p>Hides the camera, it can be made visible again using the Piece menu.</p>
 </li><li>0 !LEOCAD CAMERA ORTHOGRAPHIC
+<p>Sets the camera to use an orthographic projection, if not present it will use a perspective projection.</p>
 </li><li>0 !LEOCAD CAMERA FOV &lt;angle&gt;
 <p>Sets the field of view for the camera.</p>
 </li><li>0 !LEOCAD CAMERA ZNEAR &lt;distance&gt;
@@ -125,7 +127,7 @@
 </li><li>0 !LEOCAD CAMERA UP_VECTOR_KEY &lt;time x y z&gt;
 <p>Adds a key frame at a given time.</p>
 </li><li>0 !LEOCAD CAMERA NAME &lt;name&gt;
-<p>Creates a new camera.</p>
+<p>Creates a new camera with all the parameters listed up to this statement.</p>
 </li></ul>
 
 <h4>Group</h4>

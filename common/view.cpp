@@ -560,6 +560,33 @@ lcArray<lcObject*> View::FindObjectsInBox(float x1, float y1, float x2, float y2
 	return ObjectBoxTest.Objects;
 }
 
+bool View::BeginRenderToImage(int Width, int Height)
+{
+	GLint MaxTexture;
+	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &MaxTexture);
+
+	MaxTexture = qMin(MaxTexture, 2048);
+
+	int TileWidth = qMin(Width, MaxTexture);
+	int TileHeight = qMin(Height, MaxTexture);
+
+	mWidth = TileWidth;
+	mHeight = TileHeight;
+
+	if (Width > TileWidth || Height > TileHeight)
+		mRenderImage = QImage(Width, Height, QImage::Format_ARGB32);
+	else
+		mRenderImage = QImage(TileWidth, TileHeight, QImage::Format_ARGB32);
+
+	return mContext->BeginRenderToTexture(TileWidth, TileHeight);
+}
+
+void View::EndRenderToImage()
+{
+	mRenderImage = QImage();
+	mContext->EndRenderToTexture();
+}
+
 void View::OnDraw()
 {
 	bool DrawInterface = mWidget != nullptr;
@@ -574,18 +601,78 @@ void View::OnDraw()
 			Info->AddRenderMeshes(mScene, GetPieceInsertPosition(), gMainWindow->mColorIndex, true, true, false);
 	}
 
-	mContext->SetDefaultState();
-	mContext->SetViewport(0, 0, mWidth, mHeight);
+	if (!mRenderImage.isNull())
+	{
+		int Width = mRenderImage.width();
+		int Height = mRenderImage.height();
 
-	mModel->DrawBackground(this);
+		if (Width > mWidth || Height > mHeight)
+		{
+			float AspectRatio = (float)mRenderImage.width() / (float)mRenderImage.height();
+			mCamera->StartTiledRendering(mWidth, mHeight, Width, Height, AspectRatio);
+		}
+	}
 
 	const lcPreferences& Preferences = lcGetPreferences();
 
-	mContext->SetProjectionMatrix(GetProjectionMatrix());
+	do
+	{
+		mContext->SetDefaultState();
+		mContext->SetViewport(0, 0, mWidth, mHeight);
 
-	mContext->SetLineWidth(Preferences.mLineWidth);
+		mModel->DrawBackground(this);
 
-	mScene.Draw(mContext);
+		mContext->SetProjectionMatrix(GetProjectionMatrix());
+		mContext->SetLineWidth(Preferences.mLineWidth);
+
+		mScene.Draw(mContext);
+
+		if (!mRenderImage.isNull())
+		{
+			lcuint8* Buffer = (lcuint8*)malloc(mWidth * mHeight * 4);
+			uchar* ImageBuffer = mRenderImage.bits();
+
+			int TileRow, TileColumn, CurrentTileWidth, CurrentTileHeight;
+
+			if (mCamera->m_pTR)
+				mCamera->GetTileInfo(&TileRow, &TileColumn, &CurrentTileWidth, &CurrentTileHeight);
+			else
+			{
+				TileRow = 0;
+				TileColumn = 0;
+				CurrentTileWidth = mWidth;
+				CurrentTileHeight = mHeight;
+			}
+
+			glFinish();
+			glReadPixels(0, 0, CurrentTileWidth, CurrentTileHeight, GL_RGBA, GL_UNSIGNED_BYTE, Buffer);
+
+			lcuint32 TileY = 0;
+			if (TileRow != 0)
+				TileY = TileRow * mHeight - (mHeight - mRenderImage.height() % mHeight);
+
+			lcuint32 TileStart = ((TileColumn * mWidth) + (TileY * mRenderImage.width())) * 4;
+
+			for (int y = 0; y < CurrentTileHeight; y++)
+			{
+				lcuint8* src = Buffer + (CurrentTileHeight - y - 1) * CurrentTileWidth * 4;
+				lcuint8* dst = ImageBuffer + TileStart + y * mRenderImage.width() * 4;
+
+				for (int x = 0; x < CurrentTileWidth; x++)
+				{
+					*dst++ = src[2];
+					*dst++ = src[1];
+					*dst++ = src[0];
+					*dst++ = src[3];
+
+					src += 4;
+				}
+			}
+
+			free(Buffer);
+		}
+	}
+	while (mCamera->EndTile());
 
 	if (DrawInterface)
 	{

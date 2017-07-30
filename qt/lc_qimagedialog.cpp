@@ -11,8 +11,8 @@ lcQImageDialog::lcQImageDialog(QWidget* Parent)
 {
 	ui->setupUi(this);
 
-	ui->width->setValidator(new QIntValidator(1, 2048, this));
-	ui->height->setValidator(new QIntValidator(1, 2048, this));
+	ui->width->setValidator(new QIntValidator(1, 32768, this));
+	ui->height->setValidator(new QIntValidator(1, 32768, this));
 	ui->firstStep->setValidator(new QIntValidator(this));
 	ui->lastStep->setValidator(new QIntValidator(this));
 
@@ -56,17 +56,17 @@ void lcQImageDialog::accept()
 
 	int width = ui->width->text().toInt();
 
-	if (width < 1 || width > 2048)
+	if (width < 1 || width > 32768)
 	{
-		QMessageBox::information(this, tr("Error"), tr("Please enter a width between 1 and 2048."));
+		QMessageBox::information(this, tr("Error"), tr("Please enter a width between 1 and 32768."));
 		return;
 	}
 
 	int height = ui->height->text().toInt();
 
-	if (height < 1 || height > 2048)
+	if (height < 1 || height > 32768)
 	{
-		QMessageBox::information(this, tr("Error"), tr("Please enter a height between 1 and 2048."));
+		QMessageBox::information(this, tr("Error"), tr("Please enter a height between 1 and 32768."));
 		return;
 	}
 

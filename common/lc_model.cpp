@@ -1228,12 +1228,6 @@ void lcModel::SaveStepImages(const QString& BaseName, bool AddStepSuffix, bool Z
 	ActiveView->MakeCurrent();
 	lcContext* Context = ActiveView->mContext;
 
-	if (!Context->BeginRenderToTexture(Width, Height))
-	{
-		QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Error creating images."));
-		return;
-	}
-
 	lcStep CurrentStep = mCurrentStep;
 
 	lcCamera* Camera = gMainWindow->GetActiveView()->mCamera;
@@ -1243,9 +1237,13 @@ void lcModel::SaveStepImages(const QString& BaseName, bool AddStepSuffix, bool Z
 	View View(this);
 	View.SetHighlight(Highlight);
 	View.SetCamera(Camera, false);
-	View.mWidth = Width;
-	View.mHeight = Height;
 	View.SetContext(Context);
+
+	if (!View.BeginRenderToImage(Width, Height))
+	{
+		QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Error creating images."));
+		return;
+	}
 
 	for (lcStep Step = Start; Step <= End; Step++)
 	{
@@ -1259,11 +1257,16 @@ void lcModel::SaveStepImages(const QString& BaseName, bool AddStepSuffix, bool Z
 		else
 			FileName = BaseName;
 
-		if (!Context->SaveRenderToTextureImage(FileName, Width, Height))
+		QImageWriter Writer(FileName);
+
+		if (!Writer.write(View.GetRenderImage()))
+		{
+			QMessageBox::information(gMainWindow, tr("Error"), tr("Error writing to file '%1':\n%2").arg(FileName, Writer.errorString()));
 			break;
+		}
 	}
 
-	Context->EndRenderToTexture();
+	View.EndRenderToImage();
 	Context->ClearResources();
 
 	SetTemporaryStep(CurrentStep);

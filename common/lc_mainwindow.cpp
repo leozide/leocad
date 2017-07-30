@@ -826,27 +826,14 @@ void lcMainWindow::Print(QPrinter* Printer)
 	int StepWidth = PageRect.width() / Columns;
 	int StepHeight = PageRect.height() / Rows;
 
-	GLint MaxTexture;
-	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &MaxTexture);
-
-	MaxTexture = qMin(MaxTexture, 2048);
-
-	int TileWidth = qMin(StepWidth, MaxTexture);
-	int TileHeight = qMin(StepHeight, MaxTexture);
-	float AspectRatio = (float)StepWidth / (float)StepHeight;
-
 	View View(Model);
 	View.SetCamera(GetActiveView()->mCamera, false);
-	View.mWidth = TileWidth;
-	View.mHeight = TileHeight;
 	View.SetContext(Context);
-
-	Context->BeginRenderToTexture(TileWidth, TileHeight);
+	View.BeginRenderToImage(StepWidth, StepHeight);
 
 	lcStep PreviousTime = Model->GetCurrentStep();
 
 	QPainter Painter(Printer);
-	lcuint8* Buffer = (lcuint8*)malloc(TileWidth * TileHeight * 4);
 	// TODO: option to print background
 
 	for (int DocCopy = 0; DocCopy < DocCopies; DocCopy++)
@@ -859,9 +846,8 @@ void lcMainWindow::Print(QPrinter* Printer)
 			{
 				if (Printer->printerState() == QPrinter::Aborted || Printer->printerState() == QPrinter::Error)
 				{
-					free(Buffer);
 					Model->SetTemporaryStep(PreviousTime);
-					Context->EndRenderToTexture();
+					View.EndRenderToImage();
 					Context->ClearResources();
 					return;
 				}
@@ -877,97 +863,13 @@ void lcMainWindow::Print(QPrinter* Printer)
 
 						Model->SetTemporaryStep(CurrentStep);
 
-						if (StepWidth > TileWidth || StepHeight > TileHeight)
-						{
-							lcuint8* ImageBuffer = (lcuint8*)malloc(StepWidth * StepHeight * 4);
+						View.OnDraw();
 
-							lcCamera* Camera = View.mCamera;
-							Camera->StartTiledRendering(TileWidth, TileHeight, StepWidth, StepHeight, AspectRatio);
-							do 
-							{
-								View.OnDraw();
+						QRect rect = Painter.viewport();
+						int left = rect.x() + (StepWidth * Column);
+						int bottom = rect.y() + (StepHeight * Row);
 
-								int TileRow, TileColumn, CurrentTileWidth, CurrentTileHeight;
-								Camera->GetTileInfo(&TileRow, &TileColumn, &CurrentTileWidth, &CurrentTileHeight);
-
-								glFinish();
-								glReadPixels(0, 0, CurrentTileWidth, CurrentTileHeight, GL_RGBA, GL_UNSIGNED_BYTE, Buffer);
-
-								lcuint32 TileY = 0;
-								if (TileRow != 0)
-									TileY = TileRow * TileHeight - (TileHeight - StepHeight % TileHeight);
-
-								lcuint32 tileStart = ((TileColumn * TileWidth) + (TileY * StepWidth)) * 4;
-
-								for (int y = 0; y < CurrentTileHeight; y++)
-								{
-									lcuint8* src = Buffer + (CurrentTileHeight - y - 1) * CurrentTileWidth * 4;
-									lcuint8* dst = ImageBuffer + tileStart + y * StepWidth * 4;
-
-									for (int x = 0; x < CurrentTileWidth; x++)
-									{
-										*dst++ = src[2];
-										*dst++ = src[1];
-										*dst++ = src[0];
-										*dst++ = 255;
-
-										src += 4;
-									}
-								}
-							} while (Camera->EndTile());
-
-							QImage Image = QImage((const lcuint8*)ImageBuffer, StepWidth, StepHeight, QImage::Format_ARGB32_Premultiplied);
-
-							QRect Rect = Painter.viewport();
-							int Left = Rect.x() + (StepWidth * Column);
-							int Bottom = Rect.y() + (StepHeight * Row);
-
-							Painter.drawImage(Left, Bottom, Image);
-
-							free(ImageBuffer);
-						}
-						else
-						{
-							View.OnDraw();
-
-							glFinish();
-							glReadPixels(0, 0, TileWidth, TileHeight, GL_RGBA, GL_UNSIGNED_BYTE, Buffer);
-
-							for (int y = 0; y < (TileHeight + 1) / 2; y++)
-							{
-								lcuint8* Top = (lcuint8*)Buffer + ((TileHeight - y - 1) * TileWidth * 4);
-								lcuint8* Bottom = (lcuint8*)Buffer + y * TileWidth * 4;
-
-								for (int x = 0; x < TileWidth; x++)
-								{
-									lcuint8 Red = Top[0];
-									lcuint8 Green = Top[1];
-									lcuint8 Blue = Top[2];
-									lcuint8 Alpha = 255;//top[3];
-
-									Top[0] = Bottom[2];
-									Top[1] = Bottom[1];
-									Top[2] = Bottom[0];
-									Top[3] = 255;//Bottom[3];
-
-									Bottom[0] = Blue;
-									Bottom[1] = Green;
-									Bottom[2] = Red;
-									Bottom[3] = Alpha;
-
-									Top += 4;
-									Bottom +=4;
-								}
-							}
-
-							QImage image = QImage((const lcuint8*)Buffer, TileWidth, TileHeight, QImage::Format_ARGB32);
-
-							QRect rect = Painter.viewport();
-							int left = rect.x() + (StepWidth * Column);
-							int bottom = rect.y() + (StepHeight * Row);
-
-							Painter.drawImage(left, bottom, image);
-						}
+						Painter.drawImage(left, bottom, View.GetRenderImage());
 
 						// TODO: add print options somewhere but Qt doesn't allow changes to the page setup dialog
 //						DWORD dwPrint = theApp.GetProfileInt("Settings","Print", PRINT_NUMBERS|PRINT_BORDER);
@@ -1029,11 +931,9 @@ void lcMainWindow::Print(QPrinter* Printer)
 			Printer->newPage();
 	}
 
-	free(Buffer);
-
 	Model->SetTemporaryStep(PreviousTime);
 
-	Context->EndRenderToTexture();
+	View.EndRenderToImage();
 	Context->ClearResources();
 #endif
 }

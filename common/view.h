@@ -126,6 +126,14 @@ public:
 		lcUnprojectPoints(Points, NumPoints, mCamera->mWorldView, GetProjectionMatrix(), Viewport);
 	}
 
+	bool BeginRenderToImage(int Width, int Height);
+	void EndRenderToImage();
+
+	QImage GetRenderImage() const
+	{
+		return mRenderImage;
+	}
+
 protected:
 	static void CreateSelectMoveOverlayMesh(lcContext* Context);
 
@@ -154,6 +162,7 @@ protected:
 	int mMouseDownX;
 	int mMouseDownY;
 	bool mHighlight;
+	QImage mRenderImage;
 
 	lcVertexBuffer mGridBuffer;
 	int mGridSettings[7];

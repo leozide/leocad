@@ -305,7 +305,7 @@ lcMatrix44 View::GetTileProjectionMatrix(int CurrentRow, int CurrentColumn, int 
 	int ImageWidth = mRenderImage.width();
 	int ImageHeight = mRenderImage.height();
 
-	double mLeft, mRight, mBottom, mTop, mNear, mFar;
+	double ImageLeft, ImageRight, ImageBottom, ImageTop, Near, Far;
 	double AspectRatio = (double)ImageWidth / (double)ImageHeight;
 
 	if (mCamera->IsOrtho())
@@ -313,12 +313,12 @@ lcMatrix44 View::GetTileProjectionMatrix(int CurrentRow, int CurrentColumn, int 
 		float OrthoHeight = mCamera->GetOrthoHeight() / 2.0f;
 		float OrthoWidth = OrthoHeight * AspectRatio;
 
-		mLeft = -OrthoWidth;
-		mRight = OrthoWidth;
-		mBottom = -OrthoHeight;
-		mTop = OrthoHeight;
-		mNear = mCamera->m_zNear;
-		mFar = mCamera->m_zFar * 4;
+		ImageLeft = -OrthoWidth;
+		ImageRight = OrthoWidth;
+		ImageBottom = -OrthoHeight;
+		ImageTop = OrthoHeight;
+		Near = mCamera->m_zNear;
+		Far = mCamera->m_zFar * 4;
 	}
 	else
 	{
@@ -328,23 +328,23 @@ lcMatrix44 View::GetTileProjectionMatrix(int CurrentRow, int CurrentColumn, int 
 		xmin = ymin * AspectRatio;
 		xmax = ymax * AspectRatio;
 
-		mLeft = xmin;
-		mRight = xmax;
-		mBottom = ymin;
-		mTop = ymax;
-		mNear = mCamera->m_zNear;
-		mFar = mCamera->m_zFar * 4;
+		ImageLeft = xmin;
+		ImageRight = xmax;
+		ImageBottom = ymin;
+		ImageTop = ymax;
+		Near = mCamera->m_zNear;
+		Far = mCamera->m_zFar;
 	}
 
-	double Left = mLeft + (mRight - mLeft) * (CurrentColumn * mWidth) / ImageWidth;
-	double Right = Left + (mRight - mLeft) * CurrentTileWidth / ImageWidth;
-	double Bottom = mBottom + (mTop - mBottom) * (CurrentRow * mHeight) / ImageHeight;
-	double Top = Bottom + (mTop - mBottom) * CurrentTileHeight / ImageHeight;
+	double Left = ImageLeft + (ImageRight - ImageLeft) * (CurrentColumn * mWidth) / ImageWidth;
+	double Right = Left + (ImageRight - ImageLeft) * CurrentTileWidth / ImageWidth;
+	double Bottom = ImageBottom + (ImageTop - ImageBottom) * (CurrentRow * mHeight) / ImageHeight;
+	double Top = Bottom + (ImageTop - ImageBottom) * CurrentTileHeight / ImageHeight;
 
 	if (mCamera->IsOrtho())
-		return lcMatrix44Ortho(Left, Right, Bottom, Top, mNear, mFar);
+		return lcMatrix44Ortho(Left, Right, Bottom, Top, Near, Far);
 	else
-		return lcMatrix44Frustum(Left, Right, Bottom, Top, mNear, mFar);
+		return lcMatrix44Frustum(Left, Right, Bottom, Top, Near, Far);
 }
 
 LC_CURSOR_TYPE View::GetCursor() const

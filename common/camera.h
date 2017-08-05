@@ -4,8 +4,6 @@
 #include "lc_math.h"
 #include "lc_array.h"
 
-class TiledRender;
-
 #define LC_CAMERA_HIDDEN            0x0001
 #define LC_CAMERA_SIMPLE            0x0002
 #define LC_CAMERA_ORTHO             0x0004
@@ -285,10 +283,6 @@ public:
 	void Move(lcStep Step, bool AddKey, const lcVector3& Distance);
 	void SetViewpoint(lcViewpoint Viewpoint);
 
-	void StartTiledRendering(int tw, int th, int iw, int ih, float fAspect);
-	void GetTileInfo(int* row, int* col, int* width, int* height);
-	bool EndTile();
-
 	char m_strName[81];
 
 	float m_fovy;
@@ -299,7 +293,6 @@ public:
 	lcVector3 mPosition;
 	lcVector3 mTargetPosition;
 	lcVector3 mUpVector;
-	TiledRender* m_pTR;
 
 protected:
 	lcArray<lcObjectKey<lcVector3>> mPositionKeys;

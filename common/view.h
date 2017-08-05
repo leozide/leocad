@@ -153,6 +153,7 @@ protected:
 	void StartTracking(lcTrackButton TrackButton);
 	void StopTracking(bool Accept);
 	void OnButtonDown(lcTrackButton TrackButton);
+	lcMatrix44 GetTileProjectionMatrix(int CurrentRow, int CurrentColumn, int CurrentTileWidth, int CurrentTileHeight) const;
 
 	lcScene mScene;
 	lcDragState mDragState;

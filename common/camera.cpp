@@ -7,7 +7,6 @@
 #include <float.h>
 #include "lc_file.h"
 #include "camera.h"
-#include "tr.h"
 #include "lc_application.h"
 #include "lc_context.h"
 
@@ -68,10 +67,7 @@ void lcCamera::Initialize()
 	m_fovy = 30.0f;
 	m_zNear = 25.0f;
 	m_zFar = 50000.0f;
-
 	mState = 0;
-
-	m_pTR = nullptr;
 	memset(m_strName, 0, sizeof(m_strName));
 }
 
@@ -969,46 +965,4 @@ void lcCamera::SetViewpoint(lcViewpoint Viewpoint)
 	ChangeKey(mUpVectorKeys, mUpVector, 1, false);
 
 	UpdatePosition(1);
-}
-
-void lcCamera::StartTiledRendering(int tw, int th, int iw, int ih, float AspectRatio)
-{
-	m_pTR = new TiledRender();
-	m_pTR->TileSize(tw, th);
-	m_pTR->ImageSize(iw, ih);
-
-	if (IsOrtho())
-	{
-		float OrthoHeight = GetOrthoHeight() / 2.0f;
-		float OrthoWidth = OrthoHeight * AspectRatio;
-
-		m_pTR->Ortho(-OrthoWidth, OrthoWidth, -OrthoHeight, OrthoHeight, m_zNear, m_zFar * 4);
-	}
-	else
-		m_pTR->Perspective(m_fovy, AspectRatio, m_zNear, m_zFar);
-}
-
-void lcCamera::GetTileInfo(int* row, int* col, int* width, int* height)
-{
-	if (m_pTR != nullptr)
-	{
-		*row = m_pTR->mRows - m_pTR->mCurrentRow - 1;
-		*col = m_pTR->mCurrentColumn;
-		*width = m_pTR->mCurrentTileWidth;
-		*height = m_pTR->mCurrentTileHeight;
-	}
-}
-
-bool lcCamera::EndTile()
-{
-	if (m_pTR != nullptr)
-	{
-		if (m_pTR->EndTile())
-			return true;
-
-		delete m_pTR;
-		m_pTR = nullptr;
-	}
-
-	return false;
 }

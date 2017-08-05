@@ -3,7 +3,6 @@
 #include "lc_mainwindow.h"
 #include "camera.h"
 #include "view.h"
-#include "tr.h"
 #include "texfont.h"
 #include "lc_texture.h"
 #include "piece.h"
@@ -290,9 +289,6 @@ lcMatrix44 View::GetProjectionMatrix() const
 {
 	float AspectRatio = (float)mWidth / (float)mHeight;
 
-	if (mCamera->m_pTR)
-		return mCamera->m_pTR->BeginTile();
-
 	if (mCamera->IsOrtho())
 	{
 		float OrthoHeight = mCamera->GetOrthoHeight() / 2.0f;
@@ -302,6 +298,53 @@ lcMatrix44 View::GetProjectionMatrix() const
 	}
 	else
 		return lcMatrix44Perspective(mCamera->m_fovy, AspectRatio, mCamera->m_zNear, mCamera->m_zFar);
+}
+
+lcMatrix44 View::GetTileProjectionMatrix(int CurrentRow, int CurrentColumn, int CurrentTileWidth, int CurrentTileHeight) const
+{
+	int ImageWidth = mRenderImage.width();
+	int ImageHeight = mRenderImage.height();
+
+	double mLeft, mRight, mBottom, mTop, mNear, mFar;
+	double AspectRatio = (double)ImageWidth / (double)ImageHeight;
+
+	if (mCamera->IsOrtho())
+	{
+		float OrthoHeight = mCamera->GetOrthoHeight() / 2.0f;
+		float OrthoWidth = OrthoHeight * AspectRatio;
+
+		mLeft = -OrthoWidth;
+		mRight = OrthoWidth;
+		mBottom = -OrthoHeight;
+		mTop = OrthoHeight;
+		mNear = mCamera->m_zNear;
+		mFar = mCamera->m_zFar * 4;
+	}
+	else
+	{
+		double xmin, xmax, ymin, ymax;
+		ymax = mCamera->m_zNear * tan(mCamera->m_fovy * 3.14159265 / 360.0);
+		ymin = -ymax;
+		xmin = ymin * AspectRatio;
+		xmax = ymax * AspectRatio;
+
+		mLeft = xmin;
+		mRight = xmax;
+		mBottom = ymin;
+		mTop = ymax;
+		mNear = mCamera->m_zNear;
+		mFar = mCamera->m_zFar * 4;
+	}
+
+	double Left = mLeft + (mRight - mLeft) * (CurrentColumn * mWidth) / ImageWidth;
+	double Right = Left + (mRight - mLeft) * CurrentTileWidth / ImageWidth;
+	double Bottom = mBottom + (mTop - mBottom) * (CurrentRow * mHeight) / ImageHeight;
+	double Top = Bottom + (mTop - mBottom) * CurrentTileHeight / ImageHeight;
+
+	if (mCamera->IsOrtho())
+		return lcMatrix44Ortho(Left, Right, Bottom, Top, mNear, mFar);
+	else
+		return lcMatrix44Frustum(Left, Right, Bottom, Top, mNear, mFar);
 }
 
 LC_CURSOR_TYPE View::GetCursor() const
@@ -601,78 +644,95 @@ void View::OnDraw()
 			Info->AddRenderMeshes(mScene, GetPieceInsertPosition(), gMainWindow->mColorIndex, true, true, false);
 	}
 
+	int TotalTileRows = 1;
+	int TotalTileColumns = 1;
+
 	if (!mRenderImage.isNull())
 	{
-		int Width = mRenderImage.width();
-		int Height = mRenderImage.height();
+		int ImageWidth = mRenderImage.width();
+		int ImageHeight = mRenderImage.height();
 
-		if (Width > mWidth || Height > mHeight)
+		if (ImageWidth > mWidth || ImageHeight > mHeight)
 		{
-			float AspectRatio = (float)mRenderImage.width() / (float)mRenderImage.height();
-			mCamera->StartTiledRendering(mWidth, mHeight, Width, Height, AspectRatio);
+			TotalTileColumns = (mWidth + ImageWidth - 1) / mWidth;
+			TotalTileRows = (mHeight + ImageHeight - 1) / mHeight;
 		}
 	}
 
 	const lcPreferences& Preferences = lcGetPreferences();
 
-	do
+	for (int CurrentTileRow = 0; CurrentTileRow < TotalTileRows; CurrentTileRow++)
 	{
-		mContext->SetDefaultState();
-		mContext->SetViewport(0, 0, mWidth, mHeight);
-
-		mModel->DrawBackground(this);
-
-		mContext->SetProjectionMatrix(GetProjectionMatrix());
-		mContext->SetLineWidth(Preferences.mLineWidth);
-
-		mScene.Draw(mContext);
-
-		if (!mRenderImage.isNull())
+		for (int CurrentTileColumn = 0; CurrentTileColumn < TotalTileColumns; CurrentTileColumn++)
 		{
-			lcuint8* Buffer = (lcuint8*)malloc(mWidth * mHeight * 4);
-			uchar* ImageBuffer = mRenderImage.bits();
+			mContext->SetDefaultState();
+			mContext->SetViewport(0, 0, mWidth, mHeight);
 
-			int TileRow, TileColumn, CurrentTileWidth, CurrentTileHeight;
+			mModel->DrawBackground(this);
 
-			if (mCamera->m_pTR)
-				mCamera->GetTileInfo(&TileRow, &TileColumn, &CurrentTileWidth, &CurrentTileHeight);
+			int CurrentTileWidth, CurrentTileHeight;
+
+			if (!mRenderImage.isNull() && (TotalTileRows > 1 || TotalTileColumns > 1))
+			{
+				if (CurrentTileRow < TotalTileRows - 1)
+					CurrentTileHeight = mHeight;
+				else
+					CurrentTileHeight = mRenderImage.height() - (TotalTileRows - 1) * (mHeight);
+
+				if (CurrentTileColumn < TotalTileColumns - 1)
+					CurrentTileWidth = mWidth;
+				else
+					CurrentTileWidth = mRenderImage.width() - (TotalTileColumns - 1) * (mWidth);
+
+				mContext->SetViewport(0, 0, CurrentTileWidth, CurrentTileHeight);
+				mContext->SetProjectionMatrix(GetTileProjectionMatrix(CurrentTileRow, CurrentTileColumn, CurrentTileWidth, CurrentTileHeight));
+			}
 			else
 			{
-				TileRow = 0;
-				TileColumn = 0;
 				CurrentTileWidth = mWidth;
 				CurrentTileHeight = mHeight;
+
+				mContext->SetProjectionMatrix(GetProjectionMatrix());
 			}
 
-			glFinish();
-			glReadPixels(0, 0, CurrentTileWidth, CurrentTileHeight, GL_RGBA, GL_UNSIGNED_BYTE, Buffer);
+			mContext->SetLineWidth(Preferences.mLineWidth);
 
-			lcuint32 TileY = 0;
-			if (TileRow != 0)
-				TileY = TileRow * mHeight - (mHeight - mRenderImage.height() % mHeight);
+			mScene.Draw(mContext);
 
-			lcuint32 TileStart = ((TileColumn * mWidth) + (TileY * mRenderImage.width())) * 4;
-
-			for (int y = 0; y < CurrentTileHeight; y++)
+			if (!mRenderImage.isNull())
 			{
-				lcuint8* src = Buffer + (CurrentTileHeight - y - 1) * CurrentTileWidth * 4;
-				lcuint8* dst = ImageBuffer + TileStart + y * mRenderImage.width() * 4;
+				lcuint8* Buffer = (lcuint8*)malloc(mWidth * mHeight * 4);
+				uchar* ImageBuffer = mRenderImage.bits();
 
-				for (int x = 0; x < CurrentTileWidth; x++)
+				glFinish();
+				glReadPixels(0, 0, CurrentTileWidth, CurrentTileHeight, GL_RGBA, GL_UNSIGNED_BYTE, Buffer);
+
+				lcuint32 TileY = 0;
+				if (CurrentTileRow != TotalTileRows - 1)
+					TileY = (TotalTileRows - CurrentTileRow - 1) * mHeight - (mHeight - mRenderImage.height() % mHeight);
+
+				lcuint32 TileStart = ((CurrentTileColumn * mWidth) + (TileY * mRenderImage.width())) * 4;
+
+				for (int y = 0; y < CurrentTileHeight; y++)
 				{
-					*dst++ = src[2];
-					*dst++ = src[1];
-					*dst++ = src[0];
-					*dst++ = src[3];
+					lcuint8* src = Buffer + (CurrentTileHeight - y - 1) * CurrentTileWidth * 4;
+					lcuint8* dst = ImageBuffer + TileStart + y * mRenderImage.width() * 4;
 
-					src += 4;
+					for (int x = 0; x < CurrentTileWidth; x++)
+					{
+						*dst++ = src[2];
+						*dst++ = src[1];
+						*dst++ = src[0];
+						*dst++ = src[3];
+
+						src += 4;
+					}
 				}
-			}
 
-			free(Buffer);
+				free(Buffer);
+			}
 		}
 	}
-	while (mCamera->EndTile());
 
 	if (DrawInterface)
 	{

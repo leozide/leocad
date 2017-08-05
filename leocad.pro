@@ -124,7 +124,6 @@ macx {
 }
 
 SOURCES += common/view.cpp \
-    common/tr.cpp \
     common/texfont.cpp \
     common/project.cpp \
     common/pieceinf.cpp \
@@ -180,7 +179,6 @@ SOURCES += common/view.cpp \
     common/lc_timelinewidget.cpp
 HEADERS += \
     common/view.h \
-    common/tr.h \
     common/texfont.h \
     common/project.h \
     common/pieceinf.h \

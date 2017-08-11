@@ -383,6 +383,7 @@ void lcMainWindow::CreateMenus()
 	QMenu* ExportMenu = FileMenu->addMenu(tr("&Export"));
 	ExportMenu->addAction(mActions[LC_FILE_EXPORT_3DS]);
 	ExportMenu->addAction(mActions[LC_FILE_EXPORT_BRICKLINK]);
+	ExportMenu->addAction(mActions[LC_FILE_EXPORT_COLLADA]);
 	ExportMenu->addAction(mActions[LC_FILE_EXPORT_CSV]);
 	ExportMenu->addAction(mActions[LC_FILE_EXPORT_HTML]);
 	ExportMenu->addAction(mActions[LC_FILE_EXPORT_POVRAY]);
@@ -1972,6 +1973,10 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 
 	case LC_FILE_EXPORT_3DS:
 		lcGetActiveProject()->Export3DStudio(QString());
+		break;
+
+	case LC_FILE_EXPORT_COLLADA:
+		lcGetActiveProject()->ExportCOLLADA();
 		break;
 
 	case LC_FILE_EXPORT_HTML:

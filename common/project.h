@@ -69,6 +69,7 @@ public:
 	void SaveImage();
 	void Export3DStudio(const QString& FileName);
 	void ExportBrickLink();
+	void ExportCOLLADA();
 	void ExportCSV();
 	void ExportHTML();
 	void ExportPOVRay();

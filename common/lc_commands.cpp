@@ -59,6 +59,13 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 		QT_TRANSLATE_NOOP("Status", "Export the project in 3D Studio 3DS format"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
+	// LC_FILE_EXPORT_COLLADA
+	{
+		QT_TRANSLATE_NOOP("Action", "File.Export.COLLADA"),
+		QT_TRANSLATE_NOOP("Menu", "&COLLADA..."),
+		QT_TRANSLATE_NOOP("Status", "Export the project in COLLADA DAE format"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
 	// LC_FILE_EXPORT_HTML
 	{
 		QT_TRANSLATE_NOOP("Action", "File.Export.HTML"),

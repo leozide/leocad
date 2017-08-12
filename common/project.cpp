@@ -1054,35 +1054,35 @@ void Project::ExportCOLLADA()
 	{
 		const char* ColorName = Color.SafeName;
 
-		Stream << QString("<effect id=\"%1-phong\">\r\n").arg(ColorName);
-		Stream << "<profile_COMMON>\r\n";
-		Stream << "<technique sid=\"phong1\">\r\n";
-		Stream << "<phong>\r\n";
-		Stream << "<emission>\r\n";
-		Stream << "<color>0.0 0.0 0.0 0.0</color>\r\n";
-		Stream << "</emission>\r\n";
-		Stream << "<ambient>\r\n";
-		Stream << QString("<color>%1 %2 %3 1.0</color>\r\n").arg(QString::number(Color.Value[0]), QString::number(Color.Value[1]), QString::number(Color.Value[2]));
-		Stream << "</ambient>\r\n";
-		Stream << "<diffuse>\r\n";
-		Stream << QString("<color>%1 %2 %3 1.0</color>\r\n").arg(QString::number(Color.Value[0]), QString::number(Color.Value[1]), QString::number(Color.Value[2]));
-		Stream << "</diffuse>\r\n";
-		Stream << "<specular>\r\n";
-		Stream << "<color>0.9 0.9 0.9 1.0</color>\r\n";
-		Stream << "</specular>\r\n";
-		Stream << "<shininess>\r\n";
-		Stream << "<float>20.0</float>\r\n";
-		Stream << "</shininess>\r\n";
-		Stream << "<transparent>\r\n";
-		Stream << QString("<color>%1 %2 %3 %4</color>\r\n").arg(QString::number(Color.Value[0]), QString::number(Color.Value[1]), QString::number(Color.Value[2]), QString::number(Color.Value[3]));
-		Stream << "</transparent>\r\n";
-		Stream << "<transparency>\r\n";
-		Stream << "<float>1.0</float>\r\n";
-		Stream << "</transparency>\r\n";
-		Stream << "</phong>\r\n";
-		Stream << "</technique>\r\n\r\n";
-		Stream << "</profile_COMMON>\r\n";
-		Stream << "</effect>\r\n";
+		Stream << QString("\t<effect id=\"%1-phong\">\r\n").arg(ColorName);
+		Stream << "\t\t<profile_COMMON>\r\n";
+		Stream << "\t\t\t<technique sid=\"phong1\">\r\n";
+		Stream << "\t\t\t\t<phong>\r\n";
+		Stream << "\t\t\t\t\t<emission>\r\n";
+		Stream << "\t\t\t\t\t\t<color>0.0 0.0 0.0 0.0</color>\r\n";
+		Stream << "\t\t\t\t\t</emission>\r\n";
+		Stream << "\t\t\t\t\t<ambient>\r\n";
+		Stream << QString("\t\t\t\t\t\t<color>%1 %2 %3 1.0</color>\r\n").arg(QString::number(Color.Value[0]), QString::number(Color.Value[1]), QString::number(Color.Value[2]));
+		Stream << "\t\t\t\t\t</ambient>\r\n";
+		Stream << "\t\t\t\t\t<diffuse>\r\n";
+		Stream << QString("\t\t\t\t\t\t<color>%1 %2 %3 1.0</color>\r\n").arg(QString::number(Color.Value[0]), QString::number(Color.Value[1]), QString::number(Color.Value[2]));
+		Stream << "\t\t\t\t\t</diffuse>\r\n";
+		Stream << "\t\t\t\t\t<specular>\r\n";
+		Stream << "\t\t\t\t\t\t<color>0.9 0.9 0.9 1.0</color>\r\n";
+		Stream << "\t\t\t\t\t</specular>\r\n";
+		Stream << "\t\t\t\t\t<shininess>\r\n";
+		Stream << "\t\t\t\t\t\t<float>20.0</float>\r\n";
+		Stream << "\t\t\t\t\t</shininess>\r\n";
+		Stream << "\t\t\t\t\t<transparent>\r\n";
+		Stream << QString("\t\t\t\t\t\t<color>%1 %2 %3 %4</color>\r\n").arg(QString::number(Color.Value[0]), QString::number(Color.Value[1]), QString::number(Color.Value[2]), QString::number(Color.Value[3]));
+		Stream << "\t\t\t\t\t</transparent>\r\n";
+		Stream << "\t\t\t\t\t<transparency>\r\n";
+		Stream << "\t\t\t\t\t\t<float>1.0</float>\r\n";
+		Stream << "\t\t\t\t\t</transparency>\r\n";
+		Stream << "\t\t\t\t</phong>\r\n";
+		Stream << "\t\t\t</technique>\r\n";
+		Stream << "\t\t</profile_COMMON>\r\n";
+		Stream << "\t</effect>\r\n";
 	}
 
 	Stream << "</library_effects>\r\n";
@@ -1091,9 +1091,9 @@ void Project::ExportCOLLADA()
 	for (const lcColor& Color : gColorList)
 	{
 		const char* ColorName = Color.SafeName;
-		Stream << QString("<material id=\"%1-material\">\r\n").arg(ColorName);
-		Stream << QString("<instance_effect url=\"#%1-phong\" />\r\n").arg(ColorName);
-		Stream << "</material>\r\n";
+		Stream << QString("\t<material id=\"%1-material\">\r\n").arg(ColorName);
+		Stream << QString("\t\t<instance_effect url=\"#%1-phong\" />\r\n").arg(ColorName);
+		Stream << "\t</material>\r\n";
 	}
 
 	Stream << "</library_materials>\r\n";
@@ -1172,9 +1172,9 @@ void Project::ExportCOLLADA()
 				quint16* Indices = (quint16*)Mesh->mIndexData + Section->IndexOffset / sizeof(quint16);
 
 				Stream << QString("\t\t\t<triangles count=\"%1\" material=\"%2\">\r\n").arg(QString::number(Section->NumIndices / 3), ColorName);
-				Stream << QString("\t\t\t<input semantic=\"VERTEX\" source=\"#%1-vertices\" offset=\"0\"/>\r\n").arg(ID);
-				Stream << QString("\t\t\t<input semantic=\"NORMAL\" source=\"#%1-normal\" offset=\"0\"/>\r\n").arg(ID);
-				Stream << "\t\t\t\t<p>\r\n";
+				Stream << QString("\t\t\t<input semantic=\"VERTEX\" source=\"#%1-vertices\" offset=\"0\" />\r\n").arg(ID);
+				Stream << QString("\t\t\t<input semantic=\"NORMAL\" source=\"#%1-normal\" offset=\"0\" />\r\n").arg(ID);
+				Stream << "\t\t\t<p>\r\n";
 
 				for (int Idx = 0; Idx < Section->NumIndices; Idx += 3)
 				{
@@ -1190,9 +1190,9 @@ void Project::ExportCOLLADA()
 				quint32* Indices = (quint32*)Mesh->mIndexData + Section->IndexOffset / sizeof(quint32);
 
 				Stream << QString("\t\t\t<triangles count=\"%1\" material=\"%2\">\r\n").arg(QString::number(Section->NumIndices / 3), ColorName);
-				Stream << QString("\t\t\t<input semantic=\"VERTEX\" source=\"#%1-vertices\" offset=\"0\"/>\r\n").arg(ID);
-				Stream << QString("\t\t\t<input semantic=\"NORMAL\" source=\"#%1-normal\" offset=\"0\"/>\r\n").arg(ID);
-				Stream << "\t\t\t\t<p>\r\n";
+				Stream << QString("\t\t\t<input semantic=\"VERTEX\" source=\"#%1-vertices\" offset=\"0\" />\r\n").arg(ID);
+				Stream << QString("\t\t\t<input semantic=\"NORMAL\" source=\"#%1-normal\" offset=\"0\" />\r\n").arg(ID);
+				Stream << "\t\t\t<p>\r\n";
 
 				for (int Idx = 0; Idx < Section->NumIndices; Idx += 3)
 				{
@@ -1205,9 +1205,9 @@ void Project::ExportCOLLADA()
 			}
 
 			Stream << "\t\t\t\t</p>\r\n";
+			Stream << "\t\t\t</triangles>\r\n";
 		}
 
-		Stream << "\t\t\t</triangles>\r\n";
 		Stream << "\t\t</mesh>\r\n";
 		Stream << "\t</geometry>\r\n";
 	}

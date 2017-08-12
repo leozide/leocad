@@ -16,6 +16,9 @@
 *.ldr
 *.dat
 !/resources/*.ldr
+*.dae
+*.3ds
+*.obj
 build
 debug
 release

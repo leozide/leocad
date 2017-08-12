@@ -1037,74 +1037,67 @@ void Project::ExportCOLLADA()
 	}
 
 	QTextStream Stream(&File);
-	QLatin1String LineEnding("\r\n");
 
-	Stream << "<?xml version=\"1.0\" encoding=\"utf-8\"?>" << LineEnding;
-	Stream << "<COLLADA xmlns=\"http://www.collada.org/2005/11/COLLADASchema\" version=\"1.4.1\">" << LineEnding;
-	Stream << "<asset>" << LineEnding;
-	Stream << "\t<created>" << QDateTime::currentDateTime().toString(Qt::ISODate) << "</created>" << LineEnding;
-	Stream << "\t<modified>" << QDateTime::currentDateTime().toString(Qt::ISODate) << "</modified>" << LineEnding;
-//	<unit name="nautical_league" meter="5556.0" />
-	Stream << "\t<up_axis>Z_UP</up_axis>" << LineEnding;
-	Stream << "</asset>" << LineEnding;
+	Stream << "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n";
+	Stream << "<COLLADA xmlns=\"http://www.collada.org/2005/11/COLLADASchema\" version=\"1.4.1\">\r\n";
 
-	Stream << "<library_effects>" << LineEnding;
+	Stream << "<asset>\r\n";
+	Stream << "\t<created>" << QDateTime::currentDateTime().toString(Qt::ISODate) << "</created>\r\n";
+	Stream << "\t<modified>" << QDateTime::currentDateTime().toString(Qt::ISODate) << "</modified>\r\n";
+	Stream << "<unit name=\"LeoCAD\" meter=\"0.0004\" />\r\n";
+	Stream << "\t<up_axis>Z_UP</up_axis>\r\n";
+	Stream << "</asset>\r\n";
 
-	for (const lcColor& Color : gColorList)
-	{
-		const char* ColorName = Color.SafeName;
-
-		Stream << QString("<effect id=\"%1-phong\">").arg(ColorName) << LineEnding;
-
-		Stream << "<profile_COMMON>" << LineEnding;
-		Stream << "<technique sid=\"phong1\">" << LineEnding;
-		Stream << "<phong>" << LineEnding;
-		Stream << "<emission>" << LineEnding;
-		Stream << "<color>1.0 1.0 1.0 1.0</color>" << LineEnding;
-		Stream << "</emission>" << LineEnding;
-		Stream << "<ambient>" << LineEnding;
-		Stream << "<color>1.0 1.0 1.0 1.0</color>" << LineEnding;
-		Stream << "</ambient>" << LineEnding;
-		Stream << "<diffuse>" << LineEnding;
-		Stream << "<color>1.0 1.0 1.0 1.0</color>" << LineEnding;
-		Stream << "</diffuse>" << LineEnding;
-		Stream << "<specular>" << LineEnding;
-		Stream << "<color>1.0 1.0 1.0 1.0</color>" << LineEnding;
-		Stream << "</specular>" << LineEnding;
-		Stream << "<shininess>" << LineEnding;
-		Stream << "<float>20.0</float>" << LineEnding;
-		Stream << "</shininess>" << LineEnding;
-		Stream << "<reflective>" << LineEnding;
-		Stream << "<color>1.0 1.0 1.0 1.0</color>" << LineEnding;
-		Stream << "</reflective>" << LineEnding;
-		Stream << "<reflectivity>" << LineEnding;
-		Stream << "<float>0.5</float>" << LineEnding;
-		Stream << "</reflectivity>" << LineEnding;
-		Stream << "<transparent>" << LineEnding;
-		Stream << "<color>1.0 1.0 1.0 1.0</color>" << LineEnding;
-		Stream << "</transparent>" << LineEnding;
-		Stream << "<transparency>" << LineEnding;
-		Stream << "<float>1.0</float>" << LineEnding;
-		Stream << "</transparency>" << LineEnding;
-		Stream << "</phong>" << LineEnding;
-		Stream << "</technique>" << LineEnding;
-		Stream << "</profile_COMMON>" << LineEnding;
-		Stream << "</effect>" << LineEnding;
-	}
-
-	Stream << "</library_effects>" << LineEnding;
-	Stream << "<library_materials>" << LineEnding;
+	Stream << "<library_effects>\r\n";
 
 	for (const lcColor& Color : gColorList)
 	{
 		const char* ColorName = Color.SafeName;
-		Stream << QString("<material id=\"%1-material\">").arg(ColorName) << LineEnding;
-		Stream << QString("<instance_effect url=\"#%1-phong\" />").arg(ColorName) << LineEnding;
-		Stream << "</material>" << LineEnding;
+
+		Stream << QString("<effect id=\"%1-phong\">\r\n").arg(ColorName);
+		Stream << "<profile_COMMON>\r\n";
+		Stream << "<technique sid=\"phong1\">\r\n";
+		Stream << "<phong>\r\n";
+		Stream << "<emission>\r\n";
+		Stream << "<color>0.0 0.0 0.0 0.0</color>\r\n";
+		Stream << "</emission>\r\n";
+		Stream << "<ambient>\r\n";
+		Stream << QString("<color>%1 %2 %3 1.0</color>\r\n").arg(QString::number(Color.Value[0]), QString::number(Color.Value[1]), QString::number(Color.Value[2]));
+		Stream << "</ambient>\r\n";
+		Stream << "<diffuse>\r\n";
+		Stream << QString("<color>%1 %2 %3 1.0</color>\r\n").arg(QString::number(Color.Value[0]), QString::number(Color.Value[1]), QString::number(Color.Value[2]));
+		Stream << "</diffuse>\r\n";
+		Stream << "<specular>\r\n";
+		Stream << "<color>0.9 0.9 0.9 1.0</color>\r\n";
+		Stream << "</specular>\r\n";
+		Stream << "<shininess>\r\n";
+		Stream << "<float>20.0</float>\r\n";
+		Stream << "</shininess>\r\n";
+		Stream << "<transparent>\r\n";
+		Stream << QString("<color>%1 %2 %3 %4</color>\r\n").arg(QString::number(Color.Value[0]), QString::number(Color.Value[1]), QString::number(Color.Value[2]), QString::number(Color.Value[3]));
+		Stream << "</transparent>\r\n";
+		Stream << "<transparency>\r\n";
+		Stream << "<float>1.0</float>\r\n";
+		Stream << "</transparency>\r\n";
+		Stream << "</phong>\r\n";
+		Stream << "</technique>\r\n\r\n";
+		Stream << "</profile_COMMON>\r\n";
+		Stream << "</effect>\r\n";
 	}
 
-	Stream << "</library_materials>" << LineEnding;
-	Stream << "<library_geometries>" << LineEnding;
+	Stream << "</library_effects>\r\n";
+	Stream << "<library_materials>\r\n";
+
+	for (const lcColor& Color : gColorList)
+	{
+		const char* ColorName = Color.SafeName;
+		Stream << QString("<material id=\"%1-material\">\r\n").arg(ColorName);
+		Stream << QString("<instance_effect url=\"#%1-phong\" />\r\n").arg(ColorName);
+		Stream << "</material>\r\n";
+	}
+
+	Stream << "</library_materials>\r\n";
+	Stream << "<library_geometries>\r\n";
 	QSet<PieceInfo*> AddedPieces;
 
 	for (const lcModelPartsEntry& Entry : ModelParts)
@@ -1118,52 +1111,52 @@ void Project::ExportCOLLADA()
 		QString ID = QString(Info->mFileName).replace('.', '_');
 		lcMesh* Mesh = Info->GetMesh();
 
-		Stream << QString("\t<geometry id=\"%1\">").arg(ID) << LineEnding;
-		Stream << "\t\t<mesh>" << LineEnding;
+		Stream << QString("\t<geometry id=\"%1\">\r\n").arg(ID);
+		Stream << "\t\t<mesh>\r\n";
 
-		Stream << QString("\t\t\t<source id=\"%1-pos\">").arg(ID) << LineEnding;
-		Stream << QString("\t\t\t\t<float_array id=\"%1-pos-array\" count=\"%2\">").arg(ID, QString::number(Mesh->mNumVertices)) << LineEnding;
+		Stream << QString("\t\t\t<source id=\"%1-pos\">\r\n").arg(ID);
+		Stream << QString("\t\t\t\t<float_array id=\"%1-pos-array\" count=\"%2\">\r\n").arg(ID, QString::number(Mesh->mNumVertices));
 
 		lcVertex* Verts = (lcVertex*)Mesh->mVertexData;
 
 		for (int VertexIdx = 0; VertexIdx < Mesh->mNumVertices; VertexIdx++)
 		{
 			lcVector3& Position = Verts[VertexIdx].Position;
-			Stream << QString("\t\t\t\t\t%1 %2 %3").arg(QString::number(Position.x), QString::number(Position.y), QString::number(Position.z)) << LineEnding;
+			Stream << QString("\t\t\t\t\t%1 %2 %3\r\n").arg(QString::number(Position.x), QString::number(Position.y), QString::number(Position.z));
 		}
 
-		Stream << "\t\t\t\t</float_array>" << LineEnding;
-		Stream << "\t\t\t\t<technique_common>" << LineEnding;
-		Stream << QString("\t\t\t\t\t<accessor source=\"#%1-pos-array\" count=\"%2\" stride=\"3\">").arg(ID, QString::number(Mesh->mNumVertices)) << LineEnding;
-		Stream << "\t\t\t\t\t\t<param name=\"X\" type=\"float\" />" << LineEnding;
-		Stream << "\t\t\t\t\t\t<param name=\"Y\" type=\"float\" />" << LineEnding;
-		Stream << "\t\t\t\t\t\t<param name=\"Z\" type=\"float\" />" << LineEnding;
-		Stream << "\t\t\t\t\t</accessor>" << LineEnding;
-		Stream << "\t\t\t\t</technique_common>" << LineEnding;
-		Stream << "\t\t\t</source>" << LineEnding;
+		Stream << "\t\t\t\t</float_array>\r\n";
+		Stream << "\t\t\t\t<technique_common>\r\n";
+		Stream << QString("\t\t\t\t\t<accessor source=\"#%1-pos-array\" count=\"%2\" stride=\"3\">\r\n").arg(ID, QString::number(Mesh->mNumVertices));
+		Stream << "\t\t\t\t\t\t<param name=\"X\" type=\"float\" />\r\n";
+		Stream << "\t\t\t\t\t\t<param name=\"Y\" type=\"float\" />\r\n";
+		Stream << "\t\t\t\t\t\t<param name=\"Z\" type=\"float\" />\r\n";
+		Stream << "\t\t\t\t\t</accessor>\r\n";
+		Stream << "\t\t\t\t</technique_common>\r\n";
+		Stream << "\t\t\t</source>\r\n";
 
-		Stream << QString("\t\t\t<source id=\"%1-normal\">").arg(ID) << LineEnding;
-		Stream << QString("\t\t\t\t<float_array id=\"%1-normal-array\" count=\"%2\">").arg(ID, QString::number(Mesh->mNumVertices)) << LineEnding;
+		Stream << QString("\t\t\t<source id=\"%1-normal\">\r\n").arg(ID);
+		Stream << QString("\t\t\t\t<float_array id=\"%1-normal-array\" count=\"%2\">\r\n").arg(ID, QString::number(Mesh->mNumVertices));
 
 		for (int VertexIdx = 0; VertexIdx < Mesh->mNumVertices; VertexIdx++)
 		{
 			lcVector3 Normal = lcUnpackNormal(Verts[VertexIdx].Normal);
-			Stream << QString("\t\t\t\t\t%1 %2 %3").arg(QString::number(Normal.x), QString::number(Normal.y), QString::number(Normal.z)) << LineEnding;
+			Stream << QString("\t\t\t\t\t%1 %2 %3\r\n").arg(QString::number(Normal.x), QString::number(Normal.y), QString::number(Normal.z));
 		}
 
-		Stream << "\t\t\t\t</float_array>" << LineEnding;
-		Stream << "\t\t\t\t<technique_common>" << LineEnding;
-		Stream << QString("\t\t\t\t\t<accessor source=\"#%1-normal-array\" count=\"%2\" stride=\"3\">").arg(ID, QString::number(Mesh->mNumVertices)) << LineEnding;
-		Stream << "\t\t\t\t\t\t<param name=\"X\" type=\"float\" />" << LineEnding;
-		Stream << "\t\t\t\t\t\t<param name=\"Y\" type=\"float\" />" << LineEnding;
-		Stream << "\t\t\t\t\t\t<param name=\"Z\" type=\"float\" />" << LineEnding;
-		Stream << "\t\t\t\t\t</accessor>" << LineEnding;
-		Stream << "\t\t\t\t</technique_common>" << LineEnding;
-		Stream << "\t\t\t</source>" << LineEnding;
+		Stream << "\t\t\t\t</float_array>\r\n";
+		Stream << "\t\t\t\t<technique_common>\r\n";
+		Stream << QString("\t\t\t\t\t<accessor source=\"#%1-normal-array\" count=\"%2\" stride=\"3\">\r\n").arg(ID, QString::number(Mesh->mNumVertices));
+		Stream << "\t\t\t\t\t\t<param name=\"X\" type=\"float\" />\r\n";
+		Stream << "\t\t\t\t\t\t<param name=\"Y\" type=\"float\" />\r\n";
+		Stream << "\t\t\t\t\t\t<param name=\"Z\" type=\"float\" />\r\n";
+		Stream << "\t\t\t\t\t</accessor>\r\n";
+		Stream << "\t\t\t\t</technique_common>\r\n";
+		Stream << "\t\t\t</source>\r\n";
 
-		Stream << QString("\t\t\t<vertices id=\"%1-vertices\">").arg(ID) << LineEnding;
-		Stream << QString("\t\t\t\t<input semantic=\"POSITION\" source=\"#%1-pos\"/>").arg(ID) << LineEnding;
-		Stream << "\t\t\t</vertices>" << LineEnding;
+		Stream << QString("\t\t\t<vertices id=\"%1-vertices\">\r\n").arg(ID);
+		Stream << QString("\t\t\t\t<input semantic=\"POSITION\" source=\"#%1-pos\"/>\r\n").arg(ID);
+		Stream << "\t\t\t</vertices>\r\n";
 
 		for (int SectionIdx = 0; SectionIdx < Mesh->mLods[LC_MESH_LOD_HIGH].NumSections; SectionIdx++)
 		{
@@ -1171,54 +1164,76 @@ void Project::ExportCOLLADA()
 
 			if (Section->PrimitiveType != LC_MESH_TRIANGLES && Section->PrimitiveType != LC_MESH_TEXTURED_TRIANGLES)
 				continue;
-#define IndexType lcuint16
-			IndexType* Indices = (IndexType*)Mesh->mIndexData + Section->IndexOffset / sizeof(IndexType);
 
 			const char* ColorName = gColorList[Section->ColorIndex].SafeName;
-			Stream << QString("\t\t\t<triangles count=\"%1\" material=\"%2\">").arg(QString::number(Section->NumIndices / 3), ColorName) << LineEnding;
-			Stream << QString("\t\t\t<input semantic=\"VERTEX\" source=\"#%1-vertices\" offset=\"0\"/>").arg(ID) << LineEnding;
-			Stream << QString("\t\t\t<input semantic=\"NORMAL\" source=\"#%1-normal\" offset=\"0\"/>").arg(ID) << LineEnding;
-			Stream << "\t\t\t\t<p>" << LineEnding;
 
-			for (int Idx = 0; Idx < Section->NumIndices; Idx += 3)
+			if (Mesh->mIndexType == GL_UNSIGNED_SHORT)
 			{
-				QString idx1 = QString::number(Indices[Idx + 0]);
-				QString idx2 = QString::number(Indices[Idx + 1]);
-				QString idx3 = QString::number(Indices[Idx + 2]);
+				quint16* Indices = (quint16*)Mesh->mIndexData + Section->IndexOffset / sizeof(quint16);
 
-				Stream << QString("\t\t\t\t %1 %2 %3").arg(idx1, idx2, idx3) << LineEnding;
+				Stream << QString("\t\t\t<triangles count=\"%1\" material=\"%2\">\r\n").arg(QString::number(Section->NumIndices / 3), ColorName);
+				Stream << QString("\t\t\t<input semantic=\"VERTEX\" source=\"#%1-vertices\" offset=\"0\"/>\r\n").arg(ID);
+				Stream << QString("\t\t\t<input semantic=\"NORMAL\" source=\"#%1-normal\" offset=\"0\"/>\r\n").arg(ID);
+				Stream << "\t\t\t\t<p>\r\n";
+
+				for (int Idx = 0; Idx < Section->NumIndices; Idx += 3)
+				{
+					QString idx1 = QString::number(Indices[Idx + 0]);
+					QString idx2 = QString::number(Indices[Idx + 1]);
+					QString idx3 = QString::number(Indices[Idx + 2]);
+
+					Stream << QString("\t\t\t\t %1 %2 %3\r\n").arg(idx1, idx2, idx3);
+				}
+			}
+			else
+			{
+				quint32* Indices = (quint32*)Mesh->mIndexData + Section->IndexOffset / sizeof(quint32);
+
+				Stream << QString("\t\t\t<triangles count=\"%1\" material=\"%2\">\r\n").arg(QString::number(Section->NumIndices / 3), ColorName);
+				Stream << QString("\t\t\t<input semantic=\"VERTEX\" source=\"#%1-vertices\" offset=\"0\"/>\r\n").arg(ID);
+				Stream << QString("\t\t\t<input semantic=\"NORMAL\" source=\"#%1-normal\" offset=\"0\"/>\r\n").arg(ID);
+				Stream << "\t\t\t\t<p>\r\n";
+
+				for (int Idx = 0; Idx < Section->NumIndices; Idx += 3)
+				{
+					QString idx1 = QString::number(Indices[Idx + 0]);
+					QString idx2 = QString::number(Indices[Idx + 1]);
+					QString idx3 = QString::number(Indices[Idx + 2]);
+
+					Stream << QString("\t\t\t\t %1 %2 %3\r\n").arg(idx1, idx2, idx3);
+				}
 			}
 
-			Stream << "\t\t\t\t</p>" << LineEnding;
+			Stream << "\t\t\t\t</p>\r\n";
 		}
 
-		Stream << "\t\t\t</triangles>" << LineEnding;
-		Stream << "\t\t</mesh>" << LineEnding;
-		Stream << "\t</geometry>" << LineEnding;
+		Stream << "\t\t\t</triangles>\r\n";
+		Stream << "\t\t</mesh>\r\n";
+		Stream << "\t</geometry>\r\n";
 	}
 
-	Stream << "</library_geometries>" << LineEnding;
-	Stream << "<library_visual_scenes>" << LineEnding;
-	Stream << "\t<visual_scene id=\"DefaultScene\">" << LineEnding;
+	Stream << "</library_geometries>\r\n";
+	Stream << "<library_visual_scenes>\r\n";
+	Stream << "\t<visual_scene id=\"DefaultScene\">\r\n";
 
 	for (const lcModelPartsEntry& Entry : ModelParts)
 	{
 		PieceInfo* Info = Entry.Info;
 		QString ID = QString(Info->mFileName).replace('.', '_');
 
-		Stream << "\t\t<node>" << LineEnding;
-		Stream << "\t\t\t<matrix>" << LineEnding;
+		Stream << "\t\t<node>\r\n";
+		Stream << "\t\t\t<matrix>\r\n";
 
 		const lcMatrix44& Matrix = Entry.WorldMatrix;
-		Stream << QString("\t\t\t\t%1 %2 %3 %4").arg(QString::number(Matrix[0][0]), QString::number(Matrix[1][0]), QString::number(Matrix[2][0]), QString::number(Matrix[3][0])) << LineEnding;
-		Stream << QString("\t\t\t\t%1 %2 %3 %4").arg(QString::number(Matrix[0][1]), QString::number(Matrix[1][1]), QString::number(Matrix[2][1]), QString::number(Matrix[3][1])) << LineEnding;
-		Stream << QString("\t\t\t\t%1 %2 %3 %4").arg(QString::number(Matrix[0][2]), QString::number(Matrix[1][2]), QString::number(Matrix[2][2]), QString::number(Matrix[3][2])) << LineEnding;
-		Stream << QString("\t\t\t\t%1 %2 %3 %4").arg(QString::number(Matrix[0][3]), QString::number(Matrix[1][3]), QString::number(Matrix[2][3]), QString::number(Matrix[3][3])) << LineEnding;
+		Stream << QString("\t\t\t\t%1 %2 %3 %4\r\n").arg(QString::number(Matrix[0][0]), QString::number(Matrix[1][0]), QString::number(Matrix[2][0]), QString::number(Matrix[3][0]));
+		Stream << QString("\t\t\t\t%1 %2 %3 %4\r\n").arg(QString::number(Matrix[0][1]), QString::number(Matrix[1][1]), QString::number(Matrix[2][1]), QString::number(Matrix[3][1]));
+		Stream << QString("\t\t\t\t%1 %2 %3 %4\r\n").arg(QString::number(Matrix[0][2]), QString::number(Matrix[1][2]), QString::number(Matrix[2][2]), QString::number(Matrix[3][2]));
+		Stream << QString("\t\t\t\t%1 %2 %3 %4\r\n").arg(QString::number(Matrix[0][3]), QString::number(Matrix[1][3]), QString::number(Matrix[2][3]), QString::number(Matrix[3][3]));
 
-		Stream << "\t\t\t</matrix>" << LineEnding;
-		Stream << QString("\t\t\t<instance_geometry url=\"#%1\">").arg(ID) << LineEnding;
-		Stream << "\t\t\t\t<bind_material>" << LineEnding;
-		Stream << "\t\t\t\t\t<technique_common>" << LineEnding;
+		Stream << "\t\t\t</matrix>\r\n";
+		Stream << QString("\t\t\t<instance_geometry url=\"#%1\">\r\n").arg(ID);
+		Stream << "\t\t\t\t<bind_material>\r\n";
+		Stream << "\t\t\t\t\t<technique_common>\r\n";
 
 		lcMesh* Mesh = Info->GetMesh();
 
@@ -1236,22 +1251,22 @@ void Project::ExportCOLLADA()
 			else
 				TargetColorName = gColorList[Section->ColorIndex].SafeName;
 
-			Stream << QString("\t\t\t\t\t\t<instance_material symbol=\"%1\" target=\"#%2-material\"/>").arg(SourceColorName, TargetColorName) << LineEnding;
+			Stream << QString("\t\t\t\t\t\t<instance_material symbol=\"%1\" target=\"#%2-material\"/>\r\n").arg(SourceColorName, TargetColorName);
 		}
 
-		Stream << "\t\t\t\t\t</technique_common>" << LineEnding;
-		Stream << "\t\t\t\t</bind_material>" << LineEnding;
-		Stream << "\t\t\t</instance_geometry>" << LineEnding;
-		Stream << "\t\t</node>" << LineEnding;
+		Stream << "\t\t\t\t\t</technique_common>\r\n";
+		Stream << "\t\t\t\t</bind_material>\r\n";
+		Stream << "\t\t\t</instance_geometry>\r\n";
+		Stream << "\t\t</node>\r\n";
 	}
 
-	Stream << "\t</visual_scene>" << LineEnding;
-	Stream << "</library_visual_scenes>" << LineEnding;
-	Stream << "<scene>" << LineEnding;
-	Stream << "\t<instance_visual_scene url=\"#DefaultScene\"/>" << LineEnding;
-	Stream << "</scene>" << LineEnding;
+	Stream << "\t</visual_scene>\r\n";
+	Stream << "</library_visual_scenes>\r\n";
+	Stream << "<scene>\r\n";
+	Stream << "\t<instance_visual_scene url=\"#DefaultScene\"/>\r\n";
+	Stream << "</scene>\r\n";
 
-	Stream << "</COLLADA>" << LineEnding;
+	Stream << "</COLLADA>\r\n";
 }
 
 void Project::ExportCSV()

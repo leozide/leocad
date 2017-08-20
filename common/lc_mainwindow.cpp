@@ -10,6 +10,7 @@
 #include "lc_qutils.h"
 #include "lc_qupdatedialog.h"
 #include "lc_qaboutdialog.h"
+#include "lc_setsdatabasedialog.h"
 #include "lc_profile.h"
 #include "view.h"
 #include "project.h"
@@ -380,6 +381,7 @@ void lcMainWindow::CreateMenus()
 	FileMenu->addAction(mActions[LC_FILE_SAVE_IMAGE]);
 	QMenu* ImportMenu = FileMenu->addMenu(tr("&Import"));
 	ImportMenu->addAction(mActions[LC_FILE_IMPORT_LDD]);
+	ImportMenu->addAction(mActions[LC_FILE_IMPORT_INVENTORY]);
 	QMenu* ExportMenu = FileMenu->addMenu(tr("&Export"));
 	ExportMenu->addAction(mActions[LC_FILE_EXPORT_3DS]);
 	ExportMenu->addAction(mActions[LC_FILE_EXPORT_BRICKLINK]);
@@ -1841,6 +1843,26 @@ void lcMainWindow::ImportLDD()
 		delete NewProject;
 }
 
+void lcMainWindow::ImportInventory()
+{
+	if (!SaveProjectIfModified())
+		return;
+
+	lcSetsDatabaseDialog Dialog(this);
+	if (Dialog.exec() != QDialog::Accepted)
+		return;
+
+	Project* NewProject = new Project();
+
+	if (NewProject->ImportInventory(Dialog.GetSetInventory(), Dialog.GetSetName(), Dialog.GetSetDescription()))
+	{
+		g_App->SetProject(NewProject);
+		UpdateAllViews();
+	}
+	else
+		delete NewProject;
+}
+
 bool lcMainWindow::SaveProject(const QString& FileName)
 {
 	QString SaveFileName;
@@ -1969,6 +1991,10 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 
 	case LC_FILE_IMPORT_LDD:
 		ImportLDD();
+		break;
+
+	case LC_FILE_IMPORT_INVENTORY:
+		ImportInventory();
 		break;
 
 	case LC_FILE_EXPORT_3DS:

@@ -144,6 +144,11 @@ public:
 		return mProperties.mName;
 	}
 
+	void SetDescription(const QString& Description)
+	{
+		mProperties.mDescription = Description;
+	}
+
 	const QStringList& GetFileLines() const
 	{
 		return mFileLines;
@@ -199,6 +204,7 @@ public:
 	void LoadLDraw(QIODevice& Device, Project* Project);
 	bool LoadBinary(lcFile* File);
 	bool LoadLDD(const QString& FileData);
+	bool LoadInventory(const QByteArray& Inventory);
 	void SplitMPD(QIODevice& Device);
 	void Merge(lcModel* Other);
 

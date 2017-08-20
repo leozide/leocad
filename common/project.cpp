@@ -459,6 +459,47 @@ bool Project::ImportLDD(const QString& FileName)
 	return true;
 }
 
+bool Project::ImportInventory(const QByteArray& Inventory, const QString& Name, const QString& Description)
+{
+	if (Inventory.isEmpty())
+		return false;
+
+	mModels.DeleteAll();
+	lcModel* Model = new lcModel(QString());
+
+	if (Model->LoadInventory(Inventory))
+	{
+		mModels.Add(Model);
+		Model->SetSaved();
+	}
+	else
+		delete Model;
+
+	if (mModels.IsEmpty())
+		return false;
+
+	if (mModels.GetSize() == 1)
+	{
+		lcModel* Model = mModels[0];
+
+		Model->SetName(Name);
+		Model->SetDescription(Description);
+	}
+
+	for (int ModelIdx = 0; ModelIdx < mModels.GetSize(); ModelIdx++)
+		mModels[ModelIdx]->CreatePieceInfo(this);
+
+	lcArray<lcModel*> UpdatedModels;
+	UpdatedModels.AllocGrow(mModels.GetSize());
+
+	for (int ModelIdx = 0; ModelIdx < mModels.GetSize(); ModelIdx++)
+		mModels[ModelIdx]->UpdatePieceInfo(UpdatedModels);
+
+	mModified = false;
+
+	return true;
+}
+
 void Project::GetModelParts(lcArray<lcModelPartsEntry>& ModelParts)
 {
 	if (mModels.IsEmpty())

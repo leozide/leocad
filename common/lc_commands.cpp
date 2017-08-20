@@ -52,6 +52,13 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 		QT_TRANSLATE_NOOP("Status", "Import a file in LEGO Digital Designer LXF format"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
+	// LC_FILE_IMPORT_INVENTORY
+	{
+		QT_TRANSLATE_NOOP("Action", "File.Import.Inventory"),
+		QT_TRANSLATE_NOOP("Menu", "Set &Inventory..."),
+		QT_TRANSLATE_NOOP("Status", "Import all parts from an official set"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
 	// LC_FILE_EXPORT_3DS
 	{
 		QT_TRANSLATE_NOOP("Action", "File.Export.3DS"),

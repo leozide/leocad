@@ -965,6 +965,43 @@ bool lcModel::LoadLDD(const QString& FileData)
 	return true;
 }
 
+bool lcModel::LoadInventory(const QByteArray& Inventory)
+{
+	QJsonDocument Document = QJsonDocument::fromJson(Inventory);
+	QJsonObject Root = Document.object();
+	QJsonArray Parts = Root["results"].toArray();
+	lcPiecesLibrary* Library = lcGetPiecesLibrary();
+
+	for (const QJsonValue& Part : Parts)
+	{
+		QJsonObject PartObject = Part.toObject();
+		QByteArray PartID = PartObject["part"].toObject()["part_num"].toString().toLatin1();
+		int Quantity = PartObject["quantity"].toInt();
+		int ColorCode = 16;
+		QJsonArray ColorArray = PartObject["color"].toObject()["external_ids"].toObject()["LDraw"].toObject()["ext_ids"].toArray();
+		if (!ColorArray.isEmpty())
+			ColorCode = ColorArray.first().toInt();
+
+		PieceInfo* Info = Library->FindPiece(PartID + ".dat", nullptr, true, false);
+
+		while (Quantity--)
+		{
+			lcPiece* Piece = new lcPiece(nullptr);
+			Piece->SetPieceInfo(Info, QString(), false);
+			Piece->Initialize(lcMatrix44Identity(), 1);
+			Piece->SetColorCode(ColorCode);
+			AddPiece(Piece);
+		}
+	}
+
+	CalculateStep(mCurrentStep);
+	Library->WaitForLoadQueue();
+	Library->mBuffersDirty = true;
+	Library->UnloadUnusedParts();
+
+	return true;
+}
+
 void lcModel::Merge(lcModel* Other)
 {
 	for (int PieceIdx = 0; PieceIdx < Other->mPieces.GetSize(); PieceIdx++)

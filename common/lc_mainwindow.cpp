@@ -381,7 +381,9 @@ void lcMainWindow::CreateMenus()
 	FileMenu->addAction(mActions[LC_FILE_SAVE_IMAGE]);
 	QMenu* ImportMenu = FileMenu->addMenu(tr("&Import"));
 	ImportMenu->addAction(mActions[LC_FILE_IMPORT_LDD]);
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
 	ImportMenu->addAction(mActions[LC_FILE_IMPORT_INVENTORY]);
+#endif
 	QMenu* ExportMenu = FileMenu->addMenu(tr("&Export"));
 	ExportMenu->addAction(mActions[LC_FILE_EXPORT_3DS]);
 	ExportMenu->addAction(mActions[LC_FILE_EXPORT_BRICKLINK]);

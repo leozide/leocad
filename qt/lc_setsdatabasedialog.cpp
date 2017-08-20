@@ -135,6 +135,7 @@ void lcSetsDatabaseDialog::on_SearchButton_clicked()
 
 void lcSetsDatabaseDialog::DownloadFinished(QNetworkReply* Reply)
 {
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
 	if (Reply == mKeyListReply)
 	{
 		if (!Reply->error())
@@ -206,6 +207,7 @@ void lcSetsDatabaseDialog::DownloadFinished(QNetworkReply* Reply)
 
 		mInventoryReply = nullptr;
 	}
+#endif
 
 	Reply->deleteLater();
 }

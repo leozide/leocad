@@ -23,6 +23,8 @@ public:
 		return mInventory;
 	}
 
+	virtual bool eventFilter(QObject* Object, QEvent* Event) override;
+
 public slots:
 	void DownloadFinished(QNetworkReply* Reply);
 	void on_SearchButton_clicked();

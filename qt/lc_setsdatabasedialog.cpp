@@ -8,8 +8,8 @@ lcSetsDatabaseDialog::lcSetsDatabaseDialog(QWidget* Parent)
     ui(new Ui::lcSetsDatabaseDialog)
 {
 	ui->setupUi(this);
+	ui->SearchEdit->installEventFilter(this);
 
-	connect(ui->SearchEdit, SIGNAL(returnPressed()), this, SLOT(on_SearchButton_clicked()));
 	connect(ui->SetsTree, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)), this, SLOT(accept()));
 	connect(this, SIGNAL(finished(int)), this, SLOT(Finished(int)));
 	connect(&mNetworkManager, SIGNAL(finished(QNetworkReply*)), SLOT(DownloadFinished(QNetworkReply*)));
@@ -32,6 +32,24 @@ QString lcSetsDatabaseDialog::GetSetDescription() const
 {
 	QTreeWidgetItem* Current = ui->SetsTree->currentItem();
 	return Current ? Current->text(1) : QString();
+}
+
+bool lcSetsDatabaseDialog::eventFilter(QObject* Object, QEvent* Event)
+{
+	if (Event->type() == QEvent::KeyPress)
+	{
+		QKeyEvent* KeyEvent = static_cast<QKeyEvent*>(Event);
+
+		int Key = KeyEvent->key();
+		if (Key == Qt::Key_Return || Key == Qt::Key_Enter)
+		{
+			KeyEvent->accept();
+			on_SearchButton_clicked();
+			return true;
+		}
+	}
+
+	return QDialog::eventFilter(Object, Event);
 }
 
 void lcSetsDatabaseDialog::accept()

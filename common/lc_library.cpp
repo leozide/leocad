@@ -564,6 +564,7 @@ bool lcPiecesLibrary::OpenDirectory(const QDir& LibraryDir)
 					Src++;
 					Dst++;
 				}
+				*Dst = 0;
 
 				if (Dst - Name <= 4)
 					continue;

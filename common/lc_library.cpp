@@ -1891,9 +1891,9 @@ bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransf
 							if (mHasUnofficial)
 							{
 								if (Primitive->mSubFile)
-									sprintf(FileName, "unofficial/parts/%s.dat", Name);
+									sprintf(FileName, "unofficial/parts/%s", Name);
 								else
-									sprintf(FileName, "unofficial/p/%s.dat", Name);
+									sprintf(FileName, "unofficial/p/%s", Name);
 								IncludeFile.SetFileName(mLibraryDir.absoluteFilePath(QLatin1String(FileName)));
 								Found = IncludeFile.Open(QIODevice::ReadOnly);
 							}
@@ -1901,9 +1901,9 @@ bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransf
 							if (!Found)
 							{
 								if (Primitive->mSubFile)
-									sprintf(FileName, "parts/%s.dat", Name);
+									sprintf(FileName, "parts/%s", Name);
 								else
-									sprintf(FileName, "p/%s.dat", Name);
+									sprintf(FileName, "p/%s", Name);
 								IncludeFile.SetFileName(mLibraryDir.absoluteFilePath(QLatin1String(FileName)));
 								Found = IncludeFile.Open(QIODevice::ReadOnly);
 							}

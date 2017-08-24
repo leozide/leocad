@@ -2143,7 +2143,7 @@ lcuint32 lcLibraryMeshData::AddVertex(lcMeshDataType MeshDataType, const lcVecto
 					Vertex.NormalWeight = 1.0f;
 					return VertexIdx;
 				}
-				else if (lcDot(Normal, Vertex.Normal) > 0.5f)
+				else if (lcDot(Normal, Vertex.Normal) > 0.707f)
 				{
 					Vertex.Normal = lcNormalize(Vertex.Normal * Vertex.NormalWeight + Normal);
 					Vertex.NormalWeight += 1.0f;
@@ -2203,7 +2203,7 @@ lcuint32 lcLibraryMeshData::AddTexturedVertex(lcMeshDataType MeshDataType, const
 					Vertex.NormalWeight = 1.0f;
 					return VertexIdx;
 				}
-				else if (lcDot(Normal, Vertex.Normal) > 0.5f)
+				else if (lcDot(Normal, Vertex.Normal) > 0.707f)
 				{
 					Vertex.Normal = lcNormalize(Vertex.Normal * Vertex.NormalWeight + Normal);
 					Vertex.NormalWeight += 1.0f;

@@ -498,10 +498,7 @@ bool lcPiecesLibrary::OpenDirectory(const QDir& LibraryDir)
 			}
 
 			if (Ext && !strcmp(Ext, ".DAT"))
-			{
-				*Ext = 0;
 				OriginalLine[Ext - Line + 4] = 0;
-			}
 			else
 				continue;
 

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>550</width>
+    <width>598</width>
     <height>450</height>
    </rect>
   </property>
@@ -67,7 +67,7 @@
        <item row="4" column="0">
         <widget class="QLabel" name="label_8">
          <property name="text">
-          <string>POV-Ray Executable:</string>
+          <string>PO&amp;V-Ray Executable:</string>
          </property>
          <property name="buddy">
           <cstring>povrayExecutable</cstring>
@@ -91,7 +91,7 @@
        <item row="5" column="0">
         <widget class="QLabel" name="label_9">
          <property name="text">
-          <string>LGEO Path:</string>
+          <string>&amp;LGEO Path:</string>
          </property>
          <property name="buddy">
           <cstring>lgeoPath</cstring>
@@ -158,48 +158,10 @@
        <item>
         <widget class="QWidget" name="widget" native="true">
          <layout class="QGridLayout" name="gridLayout">
-          <item row="1" column="1">
-           <widget class="QLineEdit" name="lineWidth">
-            <property name="maximumSize">
-             <size>
-              <width>75</width>
-              <height>16777215</height>
-             </size>
-            </property>
-           </widget>
-          </item>
           <item row="1" column="0">
            <widget class="QCheckBox" name="edgeLines">
             <property name="text">
              <string>Edge lines</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QCheckBox" name="axisIcon">
-            <property name="text">
-             <string>Axis icon</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="2">
-           <widget class="QLabel" name="label_2">
-            <property name="text">
-             <string>width</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0">
-           <widget class="QCheckBox" name="antiAliasing">
-            <property name="text">
-             <string>Anti-aliasing</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="0">
-           <widget class="QCheckBox" name="enableLighting">
-            <property name="text">
-             <string>Enable lighting</string>
             </property>
            </widget>
           </item>
@@ -222,6 +184,23 @@
             </item>
            </widget>
           </item>
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="lineWidth">
+            <property name="maximumSize">
+             <size>
+              <width>75</width>
+              <height>16777215</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QCheckBox" name="axisIcon">
+            <property name="text">
+             <string>Axis icon</string>
+            </property>
+           </widget>
+          </item>
           <item row="0" column="3">
            <spacer name="horizontalSpacer_2">
             <property name="orientation">
@@ -234,6 +213,46 @@
              </size>
             </property>
            </spacer>
+          </item>
+          <item row="0" column="0">
+           <widget class="QCheckBox" name="antiAliasing">
+            <property name="text">
+             <string>Anti-aliasing</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2">
+           <widget class="QLabel" name="label_2">
+            <property name="text">
+             <string>width</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="label_3">
+            <property name="text">
+             <string>Shading Mode:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1" colspan="2">
+           <widget class="QComboBox" name="ShadingMode">
+            <item>
+             <property name="text">
+              <string>Wireframe</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Flat Shading</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Default Lights</string>
+             </property>
+            </item>
+           </widget>
           </item>
          </layout>
         </widget>
@@ -582,7 +601,7 @@
               <item>
                <widget class="QLabel" name="label_7">
                 <property name="text">
-                 <string>Key sequence:</string>
+                 <string>Key se&amp;quence:</string>
                 </property>
                 <property name="buddy">
                  <cstring>shortcutEdit</cstring>
@@ -834,7 +853,6 @@
  </widget>
  <tabstops>
   <tabstop>tabWidget</tabstop>
-  <tabstop>buttonBox</tabstop>
   <tabstop>authorName</tabstop>
   <tabstop>partsLibrary</tabstop>
   <tabstop>partsLibraryBrowse</tabstop>
@@ -849,7 +867,7 @@
   <tabstop>edgeLines</tabstop>
   <tabstop>lineWidth</tabstop>
   <tabstop>axisIcon</tabstop>
-  <tabstop>enableLighting</tabstop>
+  <tabstop>ShadingMode</tabstop>
   <tabstop>gridStuds</tabstop>
   <tabstop>gridStudColor</tabstop>
   <tabstop>gridLines</tabstop>
@@ -870,6 +888,15 @@
   <tabstop>shortcutEdit</tabstop>
   <tabstop>shortcutAssign</tabstop>
   <tabstop>shortcutRemove</tabstop>
+  <tabstop>mouseTree</tabstop>
+  <tabstop>mouseReset</tabstop>
+  <tabstop>mouseButton</tabstop>
+  <tabstop>mouseControl</tabstop>
+  <tabstop>mouseAlt</tabstop>
+  <tabstop>mouseShift</tabstop>
+  <tabstop>mouseAssign</tabstop>
+  <tabstop>mouseRemove</tabstop>
+  <tabstop>mouseSensitivity</tabstop>
  </tabstops>
  <resources/>
  <connections>

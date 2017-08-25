@@ -948,6 +948,27 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 		QT_TRANSLATE_NOOP("Status", "Toggle fullscreen mode"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
+	// LC_VIEW_SHADE_WIREFRAME
+	{
+		QT_TRANSLATE_NOOP("Action", "View.Shade.Wireframe"),
+		QT_TRANSLATE_NOOP("Menu", "&Wireframe"),
+		QT_TRANSLATE_NOOP("Status", "Display the scene as wireframe"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
+	// LC_VIEW_SHADE_FLAT
+	{
+		QT_TRANSLATE_NOOP("Action", "View.Shade.Flat"),
+		QT_TRANSLATE_NOOP("Menu", "&Flat Shading"),
+		QT_TRANSLATE_NOOP("Status", "Display the scene without any shading or lights"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
+	// LC_VIEW_SHADE_DEFAULT_LIGHTS
+	{
+		QT_TRANSLATE_NOOP("Action", "View.Shade.DefaultLights"),
+		QT_TRANSLATE_NOOP("Menu", "&Default Lights"),
+		QT_TRANSLATE_NOOP("Status", "Display the scene with the default lights"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
 	// LC_VIEW_PROJECTION_PERSPECTIVE
 	{
 		QT_TRANSLATE_NOOP("Action", "View.Projection.Perspective"),

@@ -334,6 +334,13 @@ void lcMainWindow::CreateActions()
 		ActionPerspectiveGroup->addAction(mActions[ActionIdx]);
 	}
 
+	QActionGroup* ActionShadingGroup = new QActionGroup(this);
+	for (int ActionIdx = LC_VIEW_SHADING_FIRST; ActionIdx <= LC_VIEW_SHADING_LAST; ActionIdx++)
+	{
+		mActions[ActionIdx]->setCheckable(true);
+		ActionShadingGroup->addAction(mActions[ActionIdx]);
+	}
+
 	QActionGroup* ModelGroup = new QActionGroup(this);
 	for (int ActionIdx = LC_MODEL_FIRST; ActionIdx <= LC_MODEL_LAST; ActionIdx++)
 	{
@@ -434,6 +441,10 @@ void lcMainWindow::CreateMenus()
 	QMenu* PerspectiveMenu = ViewMenu->addMenu(tr("Projection"));
 	PerspectiveMenu->addAction(mActions[LC_VIEW_PROJECTION_PERSPECTIVE]);
 	PerspectiveMenu->addAction(mActions[LC_VIEW_PROJECTION_ORTHO]);
+	QMenu* ShadingMenu = ViewMenu->addMenu(tr("Sh&ading"));
+	ShadingMenu->addAction(mActions[LC_VIEW_SHADING_WIREFRAME]);
+	ShadingMenu->addAction(mActions[LC_VIEW_SHADING_FLAT]);
+	ShadingMenu->addAction(mActions[LC_VIEW_SHADING_DEFAULT_LIGHTS]);
 	QMenu* StepMenu = ViewMenu->addMenu(tr("Ste&p"));
 	StepMenu->addAction(mActions[LC_VIEW_TIME_FIRST]);
 	StepMenu->addAction(mActions[LC_VIEW_TIME_PREVIOUS]);
@@ -1657,6 +1668,11 @@ void lcMainWindow::UpdatePerspective()
 	}
 }
 
+void lcMainWindow::UpdateShadingMode()
+{
+	mActions[LC_VIEW_SHADING_FIRST + lcGetPreferences().mShadingMode]->setChecked(true);
+}
+
 void lcMainWindow::UpdateModels()
 {
 	const lcArray<lcModel*>& Models = lcGetActiveProject()->GetModels();
@@ -2122,6 +2138,18 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 
 	case LC_VIEW_FULLSCREEN:
 		ToggleFullScreen();
+		break;
+
+	case LC_VIEW_SHADING_WIREFRAME:
+		SetShadingMode(LC_SHADING_WIREFRAME);
+		break;
+
+	case LC_VIEW_SHADING_FLAT:
+		SetShadingMode(LC_SHADING_FLAT);
+		break;
+
+	case LC_VIEW_SHADING_DEFAULT_LIGHTS:
+		SetShadingMode(LC_SHADING_DEFAULT_LIGHTS);
 		break;
 
 	case LC_VIEW_PROJECTION_PERSPECTIVE:

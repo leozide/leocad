@@ -225,8 +225,13 @@ void lcScene::Draw(lcContext* Context) const
 
 	const bool DrawConditional = false;
 
-	if (lcGetPreferences().mLightingMode == LC_LIGHTING_UNLIT)
+	lcShadingMode ShadingMode = lcGetPreferences().mShadingMode;
+
+	if (ShadingMode == LC_SHADING_FLAT || ShadingMode == LC_SHADING_WIREFRAME)
 	{
+		if (ShadingMode == LC_SHADING_WIREFRAME)
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
 		bool DrawLines = lcGetPreferences().mDrawEdgeLines;
 		Context->BindTexture(0);
 
@@ -277,6 +282,9 @@ void lcScene::Draw(lcContext* Context) const
 
 			Context->BindTexture(0);
 		}
+
+		if (ShadingMode == LC_SHADING_WIREFRAME)
+			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
 	else
 	{

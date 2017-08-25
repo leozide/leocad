@@ -281,6 +281,7 @@ public:
 	void UpdateCurrentCamera(int CameraIndex);
 	void UpdatePerspective();
 	void UpdateCameraMenu();
+	void UpdateShadingMode();
 	void UpdateModels();
 	void UpdateCategories();
 	void UpdateTitle();
@@ -329,6 +330,13 @@ protected:
 		}
 
 		return nullptr;
+	}
+
+	void SetShadingMode(lcShadingMode ShadingMode)
+	{
+		lcGetPreferences().mShadingMode = ShadingMode;
+		UpdateShadingMode();
+		UpdateAllViews();
 	}
 
 	bool mAddKeys;

@@ -4077,5 +4077,6 @@ void lcModel::UpdateInterface()
 	gMainWindow->UpdateCameraMenu();
 	gMainWindow->UpdateModels();
 	gMainWindow->UpdatePerspective();
+	gMainWindow->UpdateShadingMode();
 	gMainWindow->UpdateCurrentStep();
 }

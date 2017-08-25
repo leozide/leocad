@@ -5,12 +5,13 @@
 class Project;
 class lcPiecesLibrary;
 
-enum lcLightingMode
+enum lcShadingMode
 {
-	LC_LIGHTING_UNLIT,
-	LC_LIGHTING_FAKE,
-	LC_LIGHTING_FULL,
-	LC_NUM_LIGHTING_MODES
+	LC_SHADING_WIREFRAME,
+	LC_SHADING_FLAT,
+	LC_SHADING_DEFAULT_LIGHTS,
+	LC_SHADING_FULL,
+	LC_NUM_SHADING_MODES
 };
 
 class lcPreferences
@@ -20,7 +21,7 @@ public:
 	void SaveDefaults();
 
 	int mMouseSensitivity;
-	lcLightingMode mLightingMode;
+	lcShadingMode mShadingMode;
 	bool mDrawAxes;
 	bool mDrawEdgeLines;
 	float mLineWidth;

@@ -47,8 +47,10 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget *parent, void *data) :
 	ui->gridLines->setChecked(options->Preferences.mDrawGridLines);
 	ui->gridLineSpacing->setText(QString::number(options->Preferences.mGridLineSpacing));
 	ui->axisIcon->setChecked(options->Preferences.mDrawAxes);
-	ui->enableLighting->setChecked(options->Preferences.mLightingMode != LC_LIGHTING_UNLIT && gSupportsShaderObjects);
-	ui->enableLighting->setEnabled(gSupportsShaderObjects);
+
+	if (!gSupportsShaderObjects)
+		ui->ShadingMode->removeItem(LC_SHADING_DEFAULT_LIGHTS);
+	ui->ShadingMode->setCurrentIndex(options->Preferences.mShadingMode);
 
 	QPixmap pix(12, 12);
 
@@ -122,7 +124,7 @@ void lcQPreferencesDialog::accept()
 	options->Preferences.mGridLineSpacing = gridLineSpacing;
 
 	options->Preferences.mDrawAxes = ui->axisIcon->isChecked();
-	options->Preferences.mLightingMode = ui->enableLighting->isChecked() ? LC_LIGHTING_FAKE : LC_LIGHTING_UNLIT;
+	options->Preferences.mShadingMode = (lcShadingMode)ui->ShadingMode->currentIndex();
 
 	QDialog::accept();
 }

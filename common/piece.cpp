@@ -832,7 +832,7 @@ bool lcPiece::IsVisible(lcStep Step)
 	if (mState & LC_PIECE_HIDDEN)
 		return false;
 
-	return (mStepShow <= Step) && (mStepHide > Step);
+	return (mStepShow <= Step) && (mStepHide > Step || mStepHide == LC_STEP_MAX);
 }
 
 const lcBoundingBox& lcPiece::GetBoundingBox() const

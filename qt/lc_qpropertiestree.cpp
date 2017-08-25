@@ -477,8 +477,21 @@ QWidget *lcQPropertiesTree::createEditor(QWidget *parent, QTreeWidgetItem *item)
 			editor->setMinimumContentsLength(1);
 
 			lcPiecesLibrary* Library = lcGetPiecesLibrary();
+			std::vector<PieceInfo*> SortedPieces;
+			SortedPieces.reserve(Library->mPieces.size());
+
 			for (const auto PartIt : Library->mPieces)
-				editor->addItem(PartIt.second->m_strDescription, qVariantFromValue((void*)PartIt.second));
+				SortedPieces.push_back(PartIt.second);
+
+			auto PieceCompare = [](PieceInfo* Info1, PieceInfo* Info2)
+			{
+				return strcmp(Info1->m_strDescription, Info2->m_strDescription) < 0;
+			};
+
+			std::sort(&SortedPieces.front(), &SortedPieces.back(), PieceCompare);
+
+			for (PieceInfo* Info : SortedPieces)
+				editor->addItem(Info->m_strDescription, qVariantFromValue((void*)Info));
 
 			PieceInfo *info = (PieceInfo*)item->data(0, PropertyValueRole).value<void*>();
 			editor->setCurrentIndex(editor->findData(qVariantFromValue((void*)info)));

@@ -2020,7 +2020,7 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		break;
 
 	case LC_FILE_EXPORT_COLLADA:
-		lcGetActiveProject()->ExportCOLLADA();
+		lcGetActiveProject()->ExportCOLLADA(QString());
 		break;
 
 	case LC_FILE_EXPORT_HTML:

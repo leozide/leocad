@@ -1052,7 +1052,7 @@ void Project::ExportBrickLink()
 	BrickLinkFile.WriteLine("</INVENTORY>\n");
 }
 
-void Project::ExportCOLLADA()
+void Project::ExportCOLLADA(const QString& FileName)
 {
 	lcArray<lcModelPartsEntry> ModelParts;
 
@@ -1064,7 +1064,7 @@ void Project::ExportCOLLADA()
 		return;
 	}
 
-	QString SaveFileName = GetExportFileName(QString(), "dae", tr("Export COLLADA"), tr("COLLADA Files (*.dae);;All Files (*.*)"));
+	QString SaveFileName = GetExportFileName(FileName, "dae", tr("Export COLLADA"), tr("COLLADA Files (*.dae);;All Files (*.*)"));
 
 	if (SaveFileName.isEmpty())
 		return;
@@ -1151,6 +1151,9 @@ void Project::ExportCOLLADA()
 
 		QString ID = QString(Info->mFileName).replace('.', '_');
 		lcMesh* Mesh = Info->GetMesh();
+
+		if (!Mesh)
+			Mesh = gPlaceholderMesh;
 
 		Stream << QString("\t<geometry id=\"%1\">\r\n").arg(ID);
 		Stream << "\t\t<mesh>\r\n";
@@ -1277,6 +1280,9 @@ void Project::ExportCOLLADA()
 		Stream << "\t\t\t\t\t<technique_common>\r\n";
 
 		lcMesh* Mesh = Info->GetMesh();
+
+		if (!Mesh)
+			Mesh = gPlaceholderMesh;
 
 		for (int SectionIdx = 0; SectionIdx < Mesh->mLods[LC_MESH_LOD_HIGH].NumSections; SectionIdx++)
 		{

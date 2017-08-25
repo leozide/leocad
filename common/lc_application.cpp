@@ -182,6 +182,7 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 	bool SaveImage = false;
 	bool SaveWavefront = false;
 	bool Save3DS = false;
+	bool SaveCOLLADA = false;
 	bool Orthographic = false;
 	bool ImageHighlight = false;
 	int ImageWidth = lcGetProfileInt(LC_PROFILE_IMAGE_WIDTH);
@@ -195,6 +196,7 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 	char* ProjectName = nullptr;
 	char* SaveWavefrontName = nullptr;
 	char* Save3DSName = nullptr;
+	char* SaveCOLLADAName = nullptr;
 
 	// Parse the command line arguments.
 	for (int i = 1; i < argc; i++)
@@ -265,7 +267,7 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 				Orthographic = true;
 			else if (strcmp(Param, "--highlight") == 0)
 				ImageHighlight = true;
-			else if ((strcmp(Param, "-wf") == 0) || (strcmp(Param, "--export-wavefront") == 0))
+			else if ((strcmp(Param, "-obj") == 0) || (strcmp(Param, "--export-wavefront") == 0))
 			{
 				SaveWavefront = true;
 
@@ -283,6 +285,16 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 				{
 					i++;
 					Save3DSName = argv[i];
+				}
+			}
+			else if ((strcmp(Param, "-dae") == 0) || (strcmp(Param, "--export-collada") == 0))
+			{
+				SaveCOLLADA = true;
+
+				if ((argc > (i+1)) && (argv[i+1][0] != '-'))
+				{
+					i++;
+					SaveCOLLADAName = argv[i];
 				}
 			}
 			else if ((strcmp(Param, "-v") == 0) || (strcmp(Param, "--version") == 0))
@@ -308,8 +320,9 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 				printf("  --viewpoint (front|back|left|right|top|bottom|home): Sets the viewpoint.\n");
 				printf("  --orthographic: Make the view orthographic.\n");
 				printf("  --highlight: Highlight pieces in the steps they appear.\n");
-				printf("  -wf, --export-wavefront <outfile.obj>: Exports the model to Wavefront format.\n");
-				printf("  -3ds, --export-3ds <outfile.3ds>: Exports the model to 3DS format.\n");
+				printf("  -obj, --export-wavefront <outfile.obj>: Exports the model to Wavefront OBJ format.\n");
+				printf("  -3ds, --export-3ds <outfile.3ds>: Exports the model to 3D Studio 3DS format.\n");
+				printf("  -dae, --export-collada <outfile.dae>: Exports the model to COLLADA DAE format.\n");
 				printf("  -v, --version: Output version information and exit.\n");
 				printf("  -?, --help: Display this help and exit.\n");
 				printf("  \n");
@@ -330,7 +343,7 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 	lcLoadDefaultKeyboardShortcuts();
 	lcLoadDefaultMouseShortcuts();
 
-	ShowWindow = !SaveImage && !SaveWavefront && !Save3DS;
+	ShowWindow = !SaveImage && !SaveWavefront && !Save3DS && !SaveCOLLADA;
 
 	if (!LoadPiecesLibrary(LibPath, LibraryInstallPath, LDrawPath))
 	{
@@ -493,6 +506,30 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 			}
 
 			mProject->Export3DStudio(FileName);
+		}
+
+		if (SaveCOLLADA)
+		{
+			QString FileName;
+
+			if (SaveCOLLADAName)
+				FileName = SaveCOLLADAName;
+			else
+				FileName = ProjectName;
+
+			QString Extension = QFileInfo(FileName).suffix().toLower();
+
+			if (Extension.isEmpty())
+			{
+				FileName += ".dae";
+			}
+			else if (Extension != "dae")
+			{
+				FileName = FileName.left(FileName.length() - Extension.length() - 1);
+				FileName += ".dae";
+			}
+
+			mProject->ExportCOLLADA(FileName);
 		}
 	}
 

@@ -70,7 +70,7 @@ public:
 	void SaveImage();
 	void Export3DStudio(const QString& FileName);
 	void ExportBrickLink();
-	void ExportCOLLADA();
+	void ExportCOLLADA(const QString& FileName);
 	void ExportCSV();
 	void ExportHTML();
 	void ExportPOVRay();

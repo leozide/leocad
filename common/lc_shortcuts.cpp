@@ -205,7 +205,7 @@ bool lcMouseShortcuts::Load(const QStringList& Shortcuts)
 
 		for (const QString& Shortcut : Shortcuts)
 		{
-			QKeySequence KeySequence(Shortcut.mid(Equals + 1));
+			QKeySequence KeySequence(Shortcut);
 
 			if (KeySequence.isEmpty())
 				continue;

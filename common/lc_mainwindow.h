@@ -318,6 +318,7 @@ protected:
 	void ShowUpdatesDialog();
 	void ShowAboutDialog();
 	void ShowPrintDialog();
+	void SetShadingMode(lcShadingMode ShadingMode);
 
 	lcModelTabWidget* GetTabWidgetForModel(lcModel* Model) const
 	{
@@ -330,13 +331,6 @@ protected:
 		}
 
 		return nullptr;
-	}
-
-	void SetShadingMode(lcShadingMode ShadingMode)
-	{
-		lcGetPreferences().mShadingMode = ShadingMode;
-		UpdateShadingMode();
-		UpdateAllViews();
 	}
 
 	bool mAddKeys;

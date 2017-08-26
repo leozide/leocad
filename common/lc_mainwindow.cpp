@@ -985,6 +985,15 @@ void lcMainWindow::ShowPrintDialog()
 #endif
 }
 
+void lcMainWindow::SetShadingMode(lcShadingMode ShadingMode)
+{
+	lcGetPreferences().mShadingMode = ShadingMode;
+	UpdateShadingMode();
+	UpdateAllViews();
+	if (mPartSelectionWidget)
+		mPartSelectionWidget->Redraw();
+}
+
 // todo: call dialogs directly
 #include "lc_qhtmldialog.h"
 #include "lc_qpropertiesdialog.h"

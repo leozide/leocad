@@ -1489,7 +1489,7 @@ QImage Project::CreatePartsListImage(lcModel* Model, lcStep Step)
 	for (lcPartsListImage& Image : Images)
 	{
 		CurrentHeight = qMax(Image.Bounds.height() + Ascent, CurrentHeight);
-		MaxWidth = qMax(MaxWidth, Image.Bounds.height());
+		MaxWidth = qMax(MaxWidth, Image.Bounds.width());
 	}
 
 	for (;;)

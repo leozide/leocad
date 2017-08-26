@@ -995,10 +995,47 @@ bool lcModel::LoadInventory(const QByteArray& Inventory)
 		}
 	}
 
-	CalculateStep(mCurrentStep);
+	if (mPieces.IsEmpty())
+		return false;
+
 	Library->WaitForLoadQueue();
 	Library->mBuffersDirty = true;
 	Library->UnloadUnusedParts();
+
+	auto RoundBounds = [](float& Value)
+	{
+		Value = ((Value < 0.0f) ? floor((Value - 5.0f) / 10.0f) : ceil((Value + 5.0f) / 10.0f)) * 10.0f;
+	};
+
+	const float TargetHeight = 800.0f;
+	float CurrentX = 0.0f;
+	float CurrentY = 0.0f;
+	float ColumnWidth = 0.0f;
+
+	for (lcPiece* Piece : mPieces)
+	{
+		lcBoundingBox BoundingBox = Piece->mPieceInfo->GetBoundingBox();
+		RoundBounds(BoundingBox.Min.x);
+		RoundBounds(BoundingBox.Min.y);
+		RoundBounds(BoundingBox.Max.x);
+		RoundBounds(BoundingBox.Max.y);
+
+		float PieceWidth = BoundingBox.Max.x - BoundingBox.Min.x;
+		float PieceHeight = BoundingBox.Max.y - BoundingBox.Min.y;
+
+		if (CurrentY + PieceHeight > TargetHeight)
+		{
+			CurrentY = 0.0f;
+			CurrentX += ColumnWidth;
+			ColumnWidth = 0.0f;
+		}
+
+		Piece->SetPosition(lcVector3(CurrentX + PieceWidth / 2.0f, CurrentY + PieceHeight / 2.0f, 0.0f), 1, false);
+		CurrentY += PieceHeight;
+		ColumnWidth = qMax(ColumnWidth, PieceWidth);
+	}
+
+	CalculateStep(mCurrentStep);
 
 	return true;
 #else

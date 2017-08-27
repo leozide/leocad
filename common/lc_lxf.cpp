@@ -54,7 +54,7 @@ static bool lcLoadLDrawXML(std::map<int, int>& MaterialTable, std::map<int, std:
 			QString LDrawID = Element.attribute(QLatin1String("ldraw"));
 			int LegoID = Element.attribute(QLatin1String("lego")).toInt();
 
-			BrickTable.insert(std::make_pair(LegoID, std::move(LDrawID.toStdString())));
+			BrickTable.insert(std::make_pair(LegoID, LDrawID.toStdString()));
 		}
 		else if (ElementName == QLatin1String("Transformation"))
 		{
@@ -72,7 +72,7 @@ static bool lcLoadLDrawXML(std::map<int, int>& MaterialTable, std::map<int, std:
 			AxisAngle[2] = Element.attribute(QLatin1String("az")).toFloat();
 			AxisAngle[3] = Element.attribute(QLatin1String("angle")).toFloat();
 
-			TransformTable.insert(std::make_pair(std::move(LDrawID.toStdString()), std::make_pair(Translation, AxisAngle)));
+			TransformTable.insert(std::make_pair(LDrawID.toStdString(), std::make_pair(Translation, AxisAngle)));
 		}
 	}
 

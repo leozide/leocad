@@ -28,7 +28,7 @@ public:
 public slots:
 	void DownloadFinished(QNetworkReply* Reply);
 	void on_SearchButton_clicked();
-	void accept();
+	void accept() override;
 	void Finished(int Result);
 
 private:

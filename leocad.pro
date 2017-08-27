@@ -121,6 +121,7 @@ macx {
 	library.path = Contents/Resources
 
 	QMAKE_BUNDLE_DATA += document_icon library
+    DEFINES += LC_DISABLE_UPDATE_CHECK=1
 }
 
 SOURCES += common/view.cpp \

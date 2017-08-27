@@ -661,7 +661,7 @@ bool lcPiecesLibrary::OpenDirectory(const QDir& LibraryDir)
 					mHasUnofficial = true;
 
 				bool SubFile = SubFileDirectories[DirectoryIdx];
-				mPrimitives[Name] = new lcLibraryPrimitive((strchr(PrimitiveDirectories[DirectoryIdx], '/') + 1) + FileString, LC_NUM_ZIPFILES, 0, !SubFile && (memcmp(Name, "STU", 3) == 0), SubFile);
+				mPrimitives[Name] = new lcLibraryPrimitive(QByteArray(strchr(PrimitiveDirectories[DirectoryIdx], '/') + 1) + FileString, LC_NUM_ZIPFILES, 0, !SubFile && (memcmp(Name, "STU", 3) == 0), SubFile);
 			}
 		}
 	}

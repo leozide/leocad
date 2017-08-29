@@ -165,11 +165,11 @@ int main(int argc, char *argv[])
 #endif
 
 #ifdef LC_INSTALL_PREFIX
-	LibraryPaths += qMakePair(QLatin1String(LC_INSTALL_PREFIX "/share/leocad/"), false);
+	LibraryPaths += qMakePair(QString::fromLatin1(LC_INSTALL_PREFIX "/share/leocad/"), false);
 #endif
 
 #ifdef LC_LDRAW_LIBRARY_PATH
-	LibraryPaths += qMakePair(QLatin1String(LC_LDRAW_LIBRARY_PATH), false);
+	LibraryPaths += qMakePair(QString::fromLatin1(LC_LDRAW_LIBRARY_PATH), false);
 #endif
 	
 	setlocale(LC_NUMERIC, "C");

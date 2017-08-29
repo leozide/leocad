@@ -15,6 +15,7 @@
 *.qm
 *.ldr
 *.dat
+*.mpd
 !/resources/*.ldr
 *.dae
 *.3ds

@@ -42,11 +42,11 @@ public:
 	~lcApplication();
 
 	void SetProject(Project* Project);
-	bool Initialize(int argc, char *argv[], const char* LibraryInstallPath, const char* LDrawPath, bool& ShowWindow);
+	bool Initialize(int argc, char *argv[], QList<QPair<QString, bool>>& LibraryPaths, bool& ShowWindow);
 	void Shutdown();
 	void ShowPreferencesDialog();
 
-	bool LoadPiecesLibrary(const char* LibPath, const char* LibraryInstallPath, const char* LDrawPath);
+	bool LoadPiecesLibrary(const QList<QPair<QString, bool>>& LibraryPaths);
 
 	void SetClipboard(const QByteArray& Clipboard);
 	void ExportClipboard(const QByteArray& Clipboard);
@@ -57,8 +57,8 @@ public:
 	QByteArray mClipboard;
 
 protected:
-	void ParseIntegerArgument(int* CurArg, int argc, char* argv[], int* Value);
-	void ParseStringArgument(int* CurArg, int argc, char* argv[], char** Value);
+	void ParseIntegerArgument(int* CurArg, int argc, char* argv[], int* Value) const;
+	void ParseStringArgument(int* CurArg, int argc, char* argv[], const char** Value) const;
 };
 
 extern lcApplication* g_App;

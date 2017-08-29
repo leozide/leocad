@@ -147,37 +147,35 @@ int main(int argc, char *argv[])
 	qRegisterMetaTypeStreamOperators<QList<int> >("QList<int>");
 
 	g_App = new lcApplication();
+	QList<QPair<QString, bool>> LibraryPaths;
 
-#if defined(Q_OS_WIN)
-	char libPath[LC_MAXPATH], *ptr;
-	strcpy(libPath, argv[0]);
-	ptr = strrchr(libPath,'\\');
-	if (ptr)
-		*(++ptr) = 0;
-
+#ifdef Q_OS_WIN
 	lcRegisterShellFileTypes();
 	lcSehInit();
-#elif defined(Q_OS_MAC)
-	QDir bundlePath = QDir(QCoreApplication::applicationDirPath());
-	bundlePath.cdUp();
-	bundlePath.cdUp();
-	bundlePath = QDir::cleanPath(bundlePath.absolutePath() + "/Contents/Resources/");
-	QByteArray pathArray = bundlePath.absolutePath().toLocal8Bit();
-	const char* libPath = pathArray.data();
-#else
-	const char* libPath = LC_INSTALL_PREFIX "/share/leocad/";
+
+	LibraryPaths += qMakePair(QDir::cleanPath(QCoreApplication::applicationDirPath() + "/library.bin"), true);
+#endif
+
+#ifdef Q_OS_LINUX
+	LibraryPaths += qMakePair(QDir::cleanPath(QCoreApplication::applicationDirPath() + "/../share/leocad/library.bin"), true);
+#endif
+
+#ifdef Q_OS_MAC
+	LibraryPaths += qMakePair(QDir::cleanPath(QCoreApplication::applicationDirPath() + "/../../Contents/Resources/library.bin"), true);
+#endif
+
+#ifdef LC_INSTALL_PREFIX
+	LibraryPaths += qMakePair(QLatin1String(LC_INSTALL_PREFIX "/share/leocad/"), false);
 #endif
 
 #ifdef LC_LDRAW_LIBRARY_PATH
-	const char* LDrawPath = LC_LDRAW_LIBRARY_PATH;
-#else
-	const char* LDrawPath = nullptr;
+	LibraryPaths += qMakePair(QLatin1String(LC_LDRAW_LIBRARY_PATH), false);
 #endif
 	
 	setlocale(LC_NUMERIC, "C");
 
 	bool ShowWindow;
-	if (!g_App->Initialize(argc, argv, libPath, LDrawPath, ShowWindow))
+	if (!g_App->Initialize(argc, argv, LibraryPaths, ShowWindow))
 		return 1;
 
 	int ExecReturn = 0;

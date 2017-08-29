@@ -82,63 +82,36 @@ void lcApplication::ExportClipboard(const QByteArray& Clipboard)
 	SetClipboard(Clipboard);
 }
 
-bool lcApplication::LoadPiecesLibrary(const char* LibPath, const char* LibraryInstallPath, const char* LDrawPath)
+bool lcApplication::LoadPiecesLibrary(const QList<QPair<QString, bool>>& LibraryPaths)
 {
 	if (mLibrary == nullptr)
 		mLibrary = new lcPiecesLibrary();
 
-	if (LibPath && LibPath[0])
-		return mLibrary->Load(LibPath);
-
 	char* EnvPath = getenv("LEOCAD_LIB");
 
 	if (EnvPath && EnvPath[0])
-	{
 		return mLibrary->Load(EnvPath);
-	}
 
 	QString CustomPath = lcGetProfileString(LC_PROFILE_PARTS_LIBRARY);
 
 	if (!CustomPath.isEmpty())
 		return mLibrary->Load(CustomPath);
 
-	if (LibraryInstallPath && LibraryInstallPath[0])
+	for (const QPair<QString, bool>& LibraryPathEntry : LibraryPaths)
 	{
-		char LibraryPath[LC_MAXPATH];
-
-		strcpy(LibraryPath, LibraryInstallPath);
-
-		size_t i = strlen(LibraryPath) - 1;
-		if ((LibraryPath[i] != '\\') && (LibraryPath[i] != '/'))
-			strcat(LibraryPath, "/");
-
-		strcat(LibraryPath, "library.bin");
-
-		if (mLibrary->Load(LibraryPath))
+		if (mLibrary->Load(LibraryPathEntry.first))
 		{
-			mLibrary->SetOfficialPieces();
+			if (LibraryPathEntry.second)
+				mLibrary->SetOfficialPieces();
+
 			return true;
 		}
-	}
-
-	if (LDrawPath && LDrawPath[0])
-	{
-		char LibraryPath[LC_MAXPATH];
-
-		strcpy(LibraryPath, LDrawPath);
-
-		size_t i = strlen(LibraryPath) - 1;
-		if ((LibraryPath[i] != '\\') && (LibraryPath[i] != '/'))
-			strcat(LibraryPath, "/");
-
-		if (mLibrary->Load(LibraryPath))
-			return true;
 	}
 
 	return false;
 }
 
-void lcApplication::ParseIntegerArgument(int* CurArg, int argc, char* argv[], int* Value)
+void lcApplication::ParseIntegerArgument(int* CurArg, int argc, char* argv[], int* Value) const
 {
 	if (argc > (*CurArg + 1))
 	{
@@ -160,7 +133,7 @@ void lcApplication::ParseIntegerArgument(int* CurArg, int argc, char* argv[], in
 	}
 }
 
-void lcApplication::ParseStringArgument(int* CurArg, int argc, char* argv[], char** Value)
+void lcApplication::ParseStringArgument(int* CurArg, int argc, char* argv[], const char** Value) const
 {
 	if (argc > (*CurArg + 1))
 	{
@@ -173,12 +146,9 @@ void lcApplication::ParseStringArgument(int* CurArg, int argc, char* argv[], cha
 	}
 }
 
-bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstallPath, const char* LDrawPath, bool& ShowWindow)
+bool lcApplication::Initialize(int argc, char* argv[], QList<QPair<QString, bool>>& LibraryPaths, bool& ShowWindow)
 {
 	// todo: parse command line using Qt to handle multibyte strings.
-	char* LibPath = nullptr;
-
-	// Image output options.
 	bool SaveImage = false;
 	bool SaveWavefront = false;
 	bool Save3DS = false;
@@ -198,7 +168,6 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 	char* Save3DSName = nullptr;
 	char* SaveCOLLADAName = nullptr;
 
-	// Parse the command line arguments.
 	for (int i = 1; i < argc; i++)
 	{
 		char* Param = argv[i];
@@ -207,7 +176,13 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 		{
 			if ((strcmp(Param, "-l") == 0) || (strcmp(Param, "--libpath") == 0))
 			{
+				const char* LibPath = nullptr;
 				ParseStringArgument(&i, argc, argv, &LibPath);
+				if (LibPath && LibPath[0])
+				{
+					LibraryPaths.clear();
+					LibraryPaths += qMakePair<QString, bool>(LibPath, false);
+				}
 			}
 			else if ((strcmp(Param, "-i") == 0) || (strcmp(Param, "--image") == 0))
 			{
@@ -345,7 +320,7 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 
 	ShowWindow = !SaveImage && !SaveWavefront && !Save3DS && !SaveCOLLADA;
 
-	if (!LoadPiecesLibrary(LibPath, LibraryInstallPath, LDrawPath))
+	if (!LoadPiecesLibrary(LibraryPaths))
 	{
 		QString Message;
 

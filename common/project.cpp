@@ -283,7 +283,10 @@ bool Project::Load(const QString& FileName)
 			Model->SplitMPD(Buffer);
 
 			if (mModels.IsEmpty() || !Model->GetProperties().mName.isEmpty())
+			{
 				mModels.Add(Model);
+				Model->CreatePieceInfo(this);
+			}
 			else
 				delete Model;
 		}
@@ -308,6 +311,7 @@ bool Project::Load(const QString& FileName)
 		if (Model->LoadBinary(&MemFile))
 		{
 			mModels.Add(Model);
+			Model->CreatePieceInfo(this);
 			Model->SetSaved();
 		}
 		else
@@ -322,11 +326,11 @@ bool Project::Load(const QString& FileName)
 		lcModel* Model = mModels[0];
 
 		if (Model->GetProperties().mName.isEmpty())
+		{
 			Model->SetName(FileInfo.fileName());
+			lcGetPiecesLibrary()->RenamePiece(Model->GetPieceInfo(), FileInfo.fileName().toLatin1());
+		}
 	}
-
-	for (int ModelIdx = 0; ModelIdx < mModels.GetSize(); ModelIdx++)
-		mModels[ModelIdx]->CreatePieceInfo(this);
 
 	lcArray<lcModel*> UpdatedModels;
 	UpdatedModels.AllocGrow(mModels.GetSize());

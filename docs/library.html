@@ -96,9 +96,8 @@ $ set LEOCAD_LIB=C:\User\Downloads\complete.zip
 <h2>Default Library Path</h2>
 <p>The default library path is different for each OS:</p>
 <p>Windows: The application looks for library.bin in the same folder where LeoCAD.exe is located.</p>
-<p>Linux: This is set at compile time but it's usually either '/usr/share/leocad/library.bin' or '/usr/local/share/leocad/library.bin'.</p>
-<p>FreeBSD: The default is '/usr/local/share/leocad/library.bin'.</p>
-<p>macOS: The 'library.bin' file in the Contents/Resources folder inside the application bundle.</p>
+<p>Linux: The path is '../share/leocad/library.bin' relative to the binary folder. If you have the LeoCAD binary in '/usr/bin/leocad', the application will look for the library in '/usr/share/leocad/library.bin'.</p>
+<p>macOS: The application bundle should have a 'library.bin' file in the 'Contents/Resources' folder.</p>
 <p>On Linux you can set the install path prefix at compile time by passing it to qmake:</p>
 <div class="highlight"><code>$ qmake INSTALL_PREFIX=/my/path<br></code></div>
 <p>This will change the default library path to /my/path/leocad/library.bin</p>

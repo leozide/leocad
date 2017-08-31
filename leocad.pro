@@ -100,8 +100,6 @@ unix:!macx {
 
 	INSTALLS += target docs man desktop icon mime mime_icon
 
-	DEFINES += LC_INSTALL_PREFIX=\\\"$$INSTALL_PREFIX\\\"
-
 	!isEmpty(DISABLE_UPDATE_CHECK) {
 		DEFINES += LC_DISABLE_UPDATE_CHECK=$$DISABLE_UPDATE_CHECK
 	}

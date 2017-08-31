@@ -164,10 +164,6 @@ int main(int argc, char *argv[])
 	LibraryPaths += qMakePair(QDir::cleanPath(QCoreApplication::applicationDirPath() + "/../../Contents/Resources/library.bin"), true);
 #endif
 
-#ifdef LC_INSTALL_PREFIX
-	LibraryPaths += qMakePair(QString::fromLatin1(LC_INSTALL_PREFIX "/share/leocad/"), false);
-#endif
-
 #ifdef LC_LDRAW_LIBRARY_PATH
 	LibraryPaths += qMakePair(QString::fromLatin1(LC_LDRAW_LIBRARY_PATH), false);
 #endif

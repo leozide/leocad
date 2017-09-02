@@ -488,7 +488,7 @@ QWidget *lcQPropertiesTree::createEditor(QWidget *parent, QTreeWidgetItem *item)
 				return strcmp(Info1->m_strDescription, Info2->m_strDescription) < 0;
 			};
 
-			std::sort(&SortedPieces.front(), &SortedPieces.back(), PieceCompare);
+			std::sort(SortedPieces.begin(), SortedPieces.end(), PieceCompare);
 
 			for (PieceInfo* Info : SortedPieces)
 				editor->addItem(Info->m_strDescription, qVariantFromValue((void*)Info));

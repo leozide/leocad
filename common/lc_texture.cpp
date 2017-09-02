@@ -236,6 +236,7 @@ bool lcTexture::Load(Image* images, int NumLevels, int Flags) // todo: this shou
 
 	void* Data = images[0].mData;
 	glTexImage2D(GL_TEXTURE_2D, 0, Format, mWidth, mHeight, 0, Format, GL_UNSIGNED_BYTE, Data);
+	int MaxLevel = 0;
 
 	if (Flags & LC_TEXTURE_MIPMAPS)
 	{
@@ -265,9 +266,11 @@ bool lcTexture::Load(Image* images, int NumLevels, int Flags) // todo: this shou
 				Data = images[Level].mData;
 
 			glTexImage2D(GL_TEXTURE_2D, Level, Format, Width, Height, 0, Format, GL_UNSIGNED_BYTE, Data);
+			MaxLevel++;
 		}
 	}
 
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, MaxLevel);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	return true;

@@ -431,6 +431,7 @@ void MinifigWizard::Calculate()
 		Mat = lcMatrix44RotationZ(LC_DTOR * Angles[LC_MFW_RHANDA]);
 		Mat.SetTranslation(lcVector3(0, -10.0f, 0));
 		Mat = lcMul(mSettings[LC_MFW_RHANDA][GetSelectionIndex(LC_MFW_RHANDA)].Offset, Mat);
+		Mat = lcMul(Mat, lcMatrix44RotationX(LC_DTOR * 15.0f));
 		Matrices[LC_MFW_RHANDA] = lcMul(Mat, Matrices[LC_MFW_RHAND]);
 	}
 
@@ -464,6 +465,7 @@ void MinifigWizard::Calculate()
 		Mat = lcMatrix44RotationZ(LC_DTOR * Angles[LC_MFW_LHANDA]);
 		Mat.SetTranslation(lcVector3(0, -10.0f, 0));
 		Mat = lcMul(mSettings[LC_MFW_LHANDA][GetSelectionIndex(LC_MFW_LHANDA)].Offset, Mat);
+		Mat = lcMul(Mat, lcMatrix44RotationX(LC_DTOR * 15.0f));
 		Matrices[LC_MFW_LHANDA] = lcMul(Mat, Matrices[LC_MFW_LHAND]);
 	}
 

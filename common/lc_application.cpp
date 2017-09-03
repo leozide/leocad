@@ -123,13 +123,13 @@ void lcApplication::ParseIntegerArgument(int* CurArg, int argc, char* argv[], in
 		else
 		{
 			*Value = 0;
-			printf("Invalid value specified for the %s argument.", argv[(*CurArg) - 1]);
+			printf("Invalid value specified for the %s argument.\n", argv[(*CurArg) - 1]);
 		}
 	}
 	else
 	{
 		*Value = 0;
-		printf("Not enough parameters for the %s argument.", argv[(*CurArg) - 1]);
+		printf("Not enough parameters for the %s argument.\n", argv[(*CurArg)]);
 	}
 }
 
@@ -142,7 +142,7 @@ void lcApplication::ParseStringArgument(int* CurArg, int argc, char* argv[], con
 	}
 	else
 	{
-		printf("No path specified after the %s argument.", argv[(*CurArg) - 1]);
+		printf("No path specified after the %s argument.\n", argv[(*CurArg)]);
 	}
 }
 

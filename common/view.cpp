@@ -482,7 +482,12 @@ lcMatrix44 View::GetPieceInsertPosition() const
 	if (HitPiece)
 	{
 		lcVector3 Position(0, 0, HitPiece->GetBoundingBox().Max.z - CurPiece->GetBoundingBox().Min.z);
-		Position = mModel->SnapPosition(lcMul31(Position, HitPiece->mModelWorld));
+
+		if (gMainWindow->GetRelativeTransform())
+			Position = lcMul31(mModel->SnapPosition(Position), HitPiece->mModelWorld);
+		else
+			Position = mModel->SnapPosition(lcMul31(Position, HitPiece->mModelWorld));
+
 		lcMatrix44 WorldMatrix = HitPiece->mModelWorld;
 		WorldMatrix.SetTranslation(Position);
 

@@ -2284,6 +2284,26 @@ void Project::ExportWavefront(const QString& FileName)
 
 	for (int PartIdx = 0; PartIdx < ModelParts.GetSize(); PartIdx++)
 	{
+		lcMesh* Mesh = ModelParts[PartIdx].Info->GetMesh();
+
+		if (!Mesh)
+			continue;
+
+		const lcMatrix44& ModelWorld = ModelParts[PartIdx].WorldMatrix;
+		lcVertex* Verts = (lcVertex*)Mesh->mVertexData;
+
+		for (int VertexIdx = 0; VertexIdx < Mesh->mNumVertices; VertexIdx++)
+		{
+			lcVector3 Normal = lcMul30(lcUnpackNormal(Verts[VertexIdx].Normal), ModelWorld);
+			sprintf(Line, "vn %.2f %.2f %.2f\n", Normal[0], Normal[1], Normal[2]);
+			OBJFile.WriteLine(Line);
+		}
+
+		OBJFile.WriteLine("#\n\n");
+	}
+
+	for (int PartIdx = 0; PartIdx < ModelParts.GetSize(); PartIdx++)
+	{
 		PieceInfo* Info = ModelParts[PartIdx].Info;
 
 		sprintf(Line, "g Piece%.3d\n", PartIdx);

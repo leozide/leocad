@@ -270,11 +270,15 @@ void lcMesh::ExportPOVRay(lcFile& File, const char* MeshName, const char** Color
 
 		for (int Idx = 0; Idx < Section->NumIndices; Idx += 3)
 		{
-			lcVector3& v1 = Verts[Indices[Idx]].Position;
-			lcVector3& v2 = Verts[Indices[Idx + 1]].Position;
-			lcVector3& v3 = Verts[Indices[Idx + 2]].Position;
+			const lcVector3 v1 = Verts[Indices[Idx]].Position / 25.0f;
+			const lcVector3 v2 = Verts[Indices[Idx + 1]].Position / 25.0f;
+			const lcVector3 v3 = Verts[Indices[Idx + 2]].Position / 25.0f;
+			const lcVector3 n1 = lcUnpackNormal(Verts[Indices[Idx]].Normal);
+			const lcVector3 n2 = lcUnpackNormal(Verts[Indices[Idx + 1]].Normal);
+			const lcVector3 n3 = lcUnpackNormal(Verts[Indices[Idx + 2]].Normal);
 
-			sprintf(Line, "  triangle { <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f> }\n", -v1.y / 25.0f, -v1.x / 25.0f, v1.z / 25.0f, -v2.y / 25.0f, -v2.x / 25.0f, v2.z / 25.0f, -v3.y / 25.0f, -v3.x / 25.0f, v3.z / 25.0f);
+			sprintf(Line, "  smooth_triangle { <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f>, <%.2f, %.2f, %.2f> }\n",
+			        -v1.y, -v1.x, v1.z, -n1.y, -n1.x, n1.z, -v2.y, -v2.x, v2.z, -n2.y, -n2.x, n2.z, -v3.y, -v3.x, v3.z, -n3.y, -n3.x, n3.z);
 			File.WriteLine(Line);
 		}
 
@@ -323,7 +327,7 @@ void lcMesh::ExportWavefrontIndices(lcFile& File, int DefaultColorIndex, int Ver
 			long int idx3 = Indices[Idx + 2] + VertexOffset;
 
 			if (idx1 != idx2 && idx1 != idx3 && idx2 != idx3)
-				sprintf(Line, "f %ld %ld %ld\n", idx1, idx2, idx3);
+				sprintf(Line, "f %ld//%ld %ld//%ld %ld//%ld\n", idx1, idx1, idx2, idx2, idx3, idx3);
 			File.WriteLine(Line);
 		}
 	}

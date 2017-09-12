@@ -86,6 +86,8 @@ void lcPartSelectionListModel::Redraw()
 		mParts[PartIdx].second = QPixmap();
 
 	endResetModel();
+
+	SetFilter(mFilter);
 }
 
 void lcPartSelectionListModel::SetColorIndex(int ColorIndex)
@@ -388,6 +390,8 @@ void lcPartSelectionListModel::SetIconSize(int Size)
 		mParts[PartIdx].second = QPixmap();
 
 	endResetModel();
+
+	SetFilter(mFilter);
 }
 
 void lcPartSelectionListModel::SetShowPartNames(bool Show)
@@ -399,6 +403,8 @@ void lcPartSelectionListModel::SetShowPartNames(bool Show)
 
 	beginResetModel();
 	endResetModel();
+
+	SetFilter(mFilter);
 }
 
 lcPartSelectionListView::lcPartSelectionListView(QWidget* Parent)

@@ -246,6 +246,7 @@ public:
 	void SetLockZ(bool LockZ);
 	void SetRelativeTransform(bool RelativeTransform);
 	void SetCurrentPieceInfo(PieceInfo* Info);
+	void SetShadingMode(lcShadingMode ShadingMode);
 
 	void NewProject();
 	bool OpenProject(const QString& FileName);
@@ -318,7 +319,6 @@ protected:
 	void ShowUpdatesDialog();
 	void ShowAboutDialog();
 	void ShowPrintDialog();
-	void SetShadingMode(lcShadingMode ShadingMode);
 
 	lcModelTabWidget* GetTabWidgetForModel(lcModel* Model) const
 	{

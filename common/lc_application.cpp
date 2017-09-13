@@ -610,5 +610,6 @@ void lcApplication::ShowPreferencesDialog()
 	strcpy(opts.strHeader, m_strHeader);
 	*/
 
+	gMainWindow->SetShadingMode(Options.Preferences.mShadingMode);
 	gMainWindow->UpdateAllViews();
 }

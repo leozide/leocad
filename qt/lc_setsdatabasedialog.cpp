@@ -72,7 +72,7 @@ void lcSetsDatabaseDialog::accept()
 	ProgressDialog.show();
 
 	int KeyIndex = QTime::currentTime().msec() % mKeys.size();
-	QString DownloadUrl = QString("http://rebrickable.com/api/v3/lego/sets/%1/parts/?key=%2").arg(SetNum, mKeys[KeyIndex]);
+	QString DownloadUrl = QString("https://rebrickable.com/api/v3/lego/sets/%1/parts/?key=%2").arg(SetNum, mKeys[KeyIndex]);
 
 	mInventoryReply = mNetworkManager.get(QNetworkRequest(QUrl(DownloadUrl)));
 
@@ -133,7 +133,7 @@ void lcSetsDatabaseDialog::on_SearchButton_clicked()
 		return;
 
 	int KeyIndex = QTime::currentTime().msec() % mKeys.size();
-	QString SearchUrl = QString("http://rebrickable.com/api/v3/lego/sets/?search=%1&key=%2").arg(Keyword, mKeys[KeyIndex]);
+	QString SearchUrl = QString("https://rebrickable.com/api/v3/lego/sets/?search=%1&key=%2").arg(Keyword, mKeys[KeyIndex]);
 
 	mSearchReply = mNetworkManager.get(QNetworkRequest(QUrl(SearchUrl)));
 

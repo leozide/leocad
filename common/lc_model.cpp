@@ -977,6 +977,9 @@ bool lcModel::LoadInventory(const QByteArray& Inventory)
 	{
 		QJsonObject PartObject = Part.toObject();
 		QByteArray PartID = PartObject["part"].toObject()["part_num"].toString().toLatin1();
+		QJsonArray PartIDArray = PartObject["part"].toObject()["external_ids"].toObject()["LDraw"].toArray();
+		if (!PartIDArray.isEmpty())
+			PartID = PartIDArray.first().toString().toLatin1();
 		int Quantity = PartObject["quantity"].toInt();
 		int ColorCode = 16;
 		QJsonArray ColorArray = PartObject["color"].toObject()["external_ids"].toObject()["LDraw"].toObject()["ext_ids"].toArray();

@@ -20,7 +20,7 @@ win32 {
 	QMAKE_LFLAGS += /INCREMENTAL
 	PRECOMPILED_SOURCE = common/lc_global.cpp
 	RC_FILE = qt/leocad.rc
-	LIBS += -ladvapi32 -lshell32 -lopengl32
+	LIBS += -ladvapi32 -lshell32 -lopengl32 -lwininet.lib
 } else {
 	PRECOMPILED_HEADER = common/lc_global.h
 	LIBS += -lz

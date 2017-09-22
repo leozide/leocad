@@ -9,8 +9,10 @@ lcRenderDialog::lcRenderDialog(QWidget* Parent)
     ui(new Ui::lcRenderDialog)
 {
 	mProcess = nullptr;
+#ifdef Q_OS_WIN
 	mMapFile = NULL;
 	mBuffer = nullptr;
+#endif
 
 	ui->setupUi(this);
 	connect(&mUpdateTimer, SIGNAL(timeout()), this, SLOT(Update()));
@@ -80,7 +82,7 @@ void lcRenderDialog::Update()
 			mProcess = nullptr;
 		}
 	}
-
+#ifdef Q_OS_WIN
 	if (mMapFile == NULL)
 	{
 		mMapFile = OpenFileMappingA(FILE_MAP_ALL_ACCESS, FALSE, "leocad-povray");
@@ -140,10 +142,12 @@ void lcRenderDialog::Update()
 	Header->PixelsRead = PixelsRead;
 
 	ui->label->setPixmap(QPixmap::fromImage(Image));
+#endif
 }
 
 void lcRenderDialog::CloseSharedMemory()
 {
+#ifdef Q_OS_WIN
 	if (mBuffer)
 	{
 		UnmapViewOfFile(mBuffer);
@@ -155,4 +159,5 @@ void lcRenderDialog::CloseSharedMemory()
 		CloseHandle(mMapFile);
 		mMapFile = NULL;
 	}
+#endif
 }

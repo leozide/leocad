@@ -11,6 +11,7 @@
 #include "lc_qupdatedialog.h"
 #include "lc_qaboutdialog.h"
 #include "lc_setsdatabasedialog.h"
+#include "lc_renderdialog.h"
 #include "lc_profile.h"
 #include "view.h"
 #include "project.h"
@@ -400,6 +401,7 @@ void lcMainWindow::CreateMenus()
 	ExportMenu->addAction(mActions[LC_FILE_EXPORT_POVRAY]);
 	ExportMenu->addAction(mActions[LC_FILE_EXPORT_WAVEFRONT]);
 	FileMenu->addSeparator();
+	FileMenu->addAction(mActions[LC_FILE_RENDER]);
 	FileMenu->addAction(mActions[LC_FILE_PRINT]);
 	FileMenu->addAction(mActions[LC_FILE_PRINT_PREVIEW]);
 //	FileMenu->addAction(mActions[LC_FILE_PRINT_BOM]);
@@ -963,6 +965,12 @@ void lcMainWindow::ShowUpdatesDialog()
 void lcMainWindow::ShowAboutDialog()
 {
 	lcQAboutDialog Dialog(this);
+	Dialog.exec();
+}
+
+void lcMainWindow::ShowRenderDialog()
+{
+	lcRenderDialog Dialog(this);
 	Dialog.exec();
 }
 
@@ -2045,11 +2053,15 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		break;
 
 	case LC_FILE_EXPORT_POVRAY:
-		lcGetActiveProject()->ExportPOVRay();
+		lcGetActiveProject()->ExportPOVRay(QString());
 		break;
 
 	case LC_FILE_EXPORT_WAVEFRONT:
 		lcGetActiveProject()->ExportWavefront(QString());
+		break;
+
+	case LC_FILE_RENDER:
+		ShowRenderDialog();
 		break;
 
 	case LC_FILE_PRINT_PREVIEW:

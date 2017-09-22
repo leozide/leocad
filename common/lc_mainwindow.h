@@ -318,6 +318,7 @@ protected:
 	void SplitView(Qt::Orientation Orientation);
 	void ShowUpdatesDialog();
 	void ShowAboutDialog();
+	void ShowRenderDialog();
 	void ShowPrintDialog();
 
 	lcModelTabWidget* GetTabWidgetForModel(lcModel* Model) const

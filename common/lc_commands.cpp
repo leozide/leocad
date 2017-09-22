@@ -108,6 +108,13 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 		QT_TRANSLATE_NOOP("Status", "Export the project in Wavefront OBJ format"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
+	// LC_FILE_RENDER
+	{
+		QT_TRANSLATE_NOOP("Action", "File.Render"),
+		QT_TRANSLATE_NOOP("Menu", "&Render..."),
+		QT_TRANSLATE_NOOP("Status", "Render the project using POV-Ray"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
 	// LC_FILE_PRINT
 	{
 		QT_TRANSLATE_NOOP("Action", "File.Print"),

@@ -1923,12 +1923,7 @@ void Project::ExportHTML()
 	}
 }
 
-struct lcColorName
-{
-	char Name[LC_MAX_COLOR_NAME];
-};
-
-void Project::ExportPOVRay()
+bool Project::ExportPOVRay(const QString& FileName)
 {
 	lcArray<lcModelPartsEntry> ModelParts;
 
@@ -1937,20 +1932,20 @@ void Project::ExportPOVRay()
 	if (ModelParts.IsEmpty())
 	{
 		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Nothing to export."));
-		return;
+		return false;
 	}
 
-	lcQPOVRayDialog Dialog(gMainWindow);
+	QString SaveFileName = GetExportFileName(FileName, QLatin1String("pov"), tr("Export POV-Ray"), tr("POV-Ray Files (*.pov);;All Files (*.*)"));
 
-	if (Dialog.exec() != QDialog::Accepted)
-		return;
+	if (SaveFileName.isEmpty())
+		return false;
 
-	lcDiskFile POVFile(Dialog.mFileName);
+	lcDiskFile POVFile(SaveFileName);
 
 	if (!POVFile.Open(QIODevice::WriteOnly))
 	{
-		QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Could not open file '%1' for writing.").arg(Dialog.mFileName));
-		return;
+		QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Could not open file '%1' for writing.").arg(SaveFileName));
+		return false;
 	}
 
 	char Line[1024];
@@ -1958,7 +1953,7 @@ void Project::ExportPOVRay()
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 	std::map<PieceInfo*, std::pair<char[LC_PIECE_NAME_LEN], int>> PieceTable;
 	int NumColors = gColorList.GetSize();
-	std::vector<lcColorName> ColorTable(NumColors);
+	std::vector<char[LC_MAX_COLOR_NAME]> ColorTable(NumColors);
 
 	enum
 	{
@@ -1978,14 +1973,16 @@ void Project::ExportPOVRay()
 		LGEO_COLOR_GLITTER     = 0x40
 	};
 
-	if (!Dialog.mLGEOPath.isEmpty())
+	QString LGEOPath; // todo: load lgeo from registry and make sure it still works
+
+	if (!LGEOPath.isEmpty())
 	{
-		lcDiskFile TableFile(QFileInfo(QDir(Dialog.mLGEOPath), QLatin1String("lg_elements.lst")).absoluteFilePath());
+		lcDiskFile TableFile(QFileInfo(QDir(LGEOPath), QLatin1String("lg_elements.lst")).absoluteFilePath());
 
 		if (!TableFile.Open(QIODevice::ReadOnly))
 		{
-			QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Could not find LGEO files in folder '%1'.").arg(Dialog.mLGEOPath));
-			return;
+			QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Could not find LGEO files in folder '%1'.").arg(LGEOPath));
+			return false;
 		}
 
 		while (TableFile.ReadLine(Line, sizeof(Line)))
@@ -2026,12 +2023,12 @@ void Project::ExportPOVRay()
 			}
 		}
 
-		lcDiskFile ColorFile(QFileInfo(QDir(Dialog.mLGEOPath), QLatin1String("lg_colors.lst")).absoluteFilePath());
+		lcDiskFile ColorFile(QFileInfo(QDir(LGEOPath), QLatin1String("lg_colors.lst")).absoluteFilePath());
 
 		if (!ColorFile.Open(QIODevice::ReadOnly))
 		{
-			QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Could not find LGEO files in folder '%1'.").arg(Dialog.mLGEOPath));
-			return;
+			QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Could not find LGEO files in folder '%1'.").arg(LGEOPath));
+			return false;
 		}
 
 		while (ColorFile.ReadLine(Line, sizeof(Line)))
@@ -2049,11 +2046,11 @@ void Project::ExportPOVRay()
 			if (Color >= NumColors)
 				continue;
 
-			strcpy(ColorTable[Color].Name, Name);
+			strcpy(ColorTable[Color], Name);
 		}
 	}
 
-	if (!Dialog.mLGEOPath.isEmpty())
+	if (!LGEOPath.isEmpty())
 	{
 		POVFile.WriteLine("#include \"lg_defs.inc\"\n#include \"lg_color.inc\"\n\n");
 
@@ -2107,8 +2104,8 @@ void Project::ExportPOVRay()
 
 		POVFile.WriteLine(Line);
 
-		if (!*ColorTable[ColorIdx].Name)
-			sprintf(ColorTable[ColorIdx].Name, "lc_%s", Color->SafeName);
+		if (!*ColorTable[ColorIdx])
+			sprintf(ColorTable[ColorIdx], "lc_%s", Color->SafeName);
 	}
 
 	POVFile.WriteLine("\n");
@@ -2116,7 +2113,7 @@ void Project::ExportPOVRay()
 	lcArray<const char*> ColorTablePointer;
 	ColorTablePointer.SetSize(NumColors);
 	for (int ColorIdx = 0; ColorIdx < NumColors; ColorIdx++)
-		ColorTablePointer[ColorIdx] = ColorTable[ColorIdx].Name;
+		ColorTablePointer[ColorIdx] = ColorTable[ColorIdx];
 
 	for (int PartIdx = 0; PartIdx < ModelParts.GetSize(); PartIdx++)
 	{
@@ -2174,20 +2171,20 @@ void Project::ExportPOVRay()
 			sprintf(Line, "merge {\n object {\n  %s%s\n  texture { %s }\n }\n"
 					" object {\n  %s_slope\n  texture { %s normal { bumps 0.3 scale 0.02 } }\n }\n"
 					" matrix <%.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f>\n}\n",
-					Entry.first, Suffix, ColorTable[Color].Name, Entry.first, ColorTable[Color].Name,
+					Entry.first, Suffix, ColorTable[Color], Entry.first, ColorTable[Color],
 					-f[5], -f[4], -f[6], -f[1], -f[0], -f[2], f[9], f[8], f[10], f[13] / 25.0f, f[12] / 25.0f, f[14] / 25.0f);
 		}
 		else
 		{
 			sprintf(Line, "object {\n %s%s\n texture { %s }\n matrix <%.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f>\n}\n",
-					Entry.first, Suffix, ColorTable[Color].Name, -f[5], -f[4], -f[6], -f[1], -f[0], -f[2], f[9], f[8], f[10], f[13] / 25.0f, f[12] / 25.0f, f[14] / 25.0f);
+					Entry.first, Suffix, ColorTable[Color], -f[5], -f[4], -f[6], -f[1], -f[0], -f[2], f[9], f[8], f[10], f[13] / 25.0f, f[12] / 25.0f, f[14] / 25.0f);
 		}
 
 		POVFile.WriteLine(Line);
 	}
 
 	POVFile.Close();
-
+/*
 	if (Dialog.mRender)
 	{
 		QStringList Arguments;
@@ -2206,6 +2203,8 @@ void Project::ExportPOVRay()
 		QProcess::execute(Dialog.mPOVRayPath, Arguments);
 #endif
 	}
+	*/
+	return true;
 }
 
 void Project::ExportWavefront(const QString& FileName)

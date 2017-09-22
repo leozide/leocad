@@ -73,7 +73,7 @@ public:
 	void ExportCOLLADA(const QString& FileName);
 	void ExportCSV();
 	void ExportHTML();
-	void ExportPOVRay();
+	bool ExportPOVRay(const QString& FileName);
 	void ExportWavefront(const QString& FileName);
 
 	void UpdatePieceInfo(PieceInfo* Info) const;

@@ -1953,7 +1953,7 @@ bool Project::ExportPOVRay(const QString& FileName)
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 	std::map<PieceInfo*, std::pair<char[LC_PIECE_NAME_LEN], int>> PieceTable;
 	int NumColors = gColorList.GetSize();
-	std::vector<char[LC_MAX_COLOR_NAME]> ColorTable(NumColors);
+	std::vector<std::array<char, LC_MAX_COLOR_NAME>> ColorTable(NumColors);
 
 	enum
 	{
@@ -2046,7 +2046,7 @@ bool Project::ExportPOVRay(const QString& FileName)
 			if (Color >= NumColors)
 				continue;
 
-			strcpy(ColorTable[Color], Name);
+			strcpy(ColorTable[Color].data(), Name);
 		}
 	}
 
@@ -2104,8 +2104,8 @@ bool Project::ExportPOVRay(const QString& FileName)
 
 		POVFile.WriteLine(Line);
 
-		if (!*ColorTable[ColorIdx])
-			sprintf(ColorTable[ColorIdx], "lc_%s", Color->SafeName);
+		if (!ColorTable[ColorIdx][0])
+			sprintf(ColorTable[ColorIdx].data(), "lc_%s", Color->SafeName);
 	}
 
 	POVFile.WriteLine("\n");
@@ -2113,7 +2113,7 @@ bool Project::ExportPOVRay(const QString& FileName)
 	lcArray<const char*> ColorTablePointer;
 	ColorTablePointer.SetSize(NumColors);
 	for (int ColorIdx = 0; ColorIdx < NumColors; ColorIdx++)
-		ColorTablePointer[ColorIdx] = ColorTable[ColorIdx];
+		ColorTablePointer[ColorIdx] = ColorTable[ColorIdx].data();
 
 	for (int PartIdx = 0; PartIdx < ModelParts.GetSize(); PartIdx++)
 	{
@@ -2171,13 +2171,13 @@ bool Project::ExportPOVRay(const QString& FileName)
 			sprintf(Line, "merge {\n object {\n  %s%s\n  texture { %s }\n }\n"
 					" object {\n  %s_slope\n  texture { %s normal { bumps 0.3 scale 0.02 } }\n }\n"
 					" matrix <%.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f>\n}\n",
-					Entry.first, Suffix, ColorTable[Color], Entry.first, ColorTable[Color],
+					Entry.first, Suffix, ColorTable[Color].data(), Entry.first, ColorTable[Color].data(),
 					-f[5], -f[4], -f[6], -f[1], -f[0], -f[2], f[9], f[8], f[10], f[13] / 25.0f, f[12] / 25.0f, f[14] / 25.0f);
 		}
 		else
 		{
 			sprintf(Line, "object {\n %s%s\n texture { %s }\n matrix <%.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f>\n}\n",
-					Entry.first, Suffix, ColorTable[Color], -f[5], -f[4], -f[6], -f[1], -f[0], -f[2], f[9], f[8], f[10], f[13] / 25.0f, f[12] / 25.0f, f[14] / 25.0f);
+					Entry.first, Suffix, ColorTable[Color].data(), -f[5], -f[4], -f[6], -f[1], -f[0], -f[2], f[9], f[8], f[10], f[13] / 25.0f, f[12] / 25.0f, f[14] / 25.0f);
 		}
 
 		POVFile.WriteLine(Line);

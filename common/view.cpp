@@ -413,8 +413,10 @@ void View::ShowContextMenu() const
 
 	Popup->addSeparator();
 
-	Popup->addMenu(gMainWindow->GetCameraMenu());
 	Popup->addMenu(gMainWindow->GetViewpointMenu());
+	Popup->addMenu(gMainWindow->GetCameraMenu());
+	Popup->addMenu(gMainWindow->GetProjectionMenu());
+	Popup->addMenu(gMainWindow->GetShadingMenu());
 
 	Popup->addSeparator();
 

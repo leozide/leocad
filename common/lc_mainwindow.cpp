@@ -379,6 +379,15 @@ void lcMainWindow::CreateMenus()
 	mViewpointMenu->addAction(mActions[LC_VIEW_VIEWPOINT_BOTTOM]);
 	mViewpointMenu->addAction(mActions[LC_VIEW_VIEWPOINT_HOME]);
 
+	mProjectionMenu = new QMenu(tr("Projection"), this);
+	mProjectionMenu->addAction(mActions[LC_VIEW_PROJECTION_PERSPECTIVE]);
+	mProjectionMenu->addAction(mActions[LC_VIEW_PROJECTION_ORTHO]);
+
+	mShadingMenu = new QMenu(tr("Sh&ading"), this);
+	mShadingMenu->addAction(mActions[LC_VIEW_SHADING_WIREFRAME]);
+	mShadingMenu->addAction(mActions[LC_VIEW_SHADING_FLAT]);
+	mShadingMenu->addAction(mActions[LC_VIEW_SHADING_DEFAULT_LIGHTS]);
+
 	QMenu* FileMenu = menuBar()->addMenu(tr("&File"));
 	FileMenu->addAction(mActions[LC_FILE_NEW]);
 	FileMenu->addAction(mActions[LC_FILE_OPEN]);
@@ -440,13 +449,8 @@ void lcMainWindow::CreateMenus()
 	ViewMenu->addAction(mActions[LC_VIEW_LOOK_AT]);
 	ViewMenu->addMenu(mViewpointMenu);
 	ViewMenu->addMenu(mCameraMenu);
-	QMenu* PerspectiveMenu = ViewMenu->addMenu(tr("Projection"));
-	PerspectiveMenu->addAction(mActions[LC_VIEW_PROJECTION_PERSPECTIVE]);
-	PerspectiveMenu->addAction(mActions[LC_VIEW_PROJECTION_ORTHO]);
-	QMenu* ShadingMenu = ViewMenu->addMenu(tr("Sh&ading"));
-	ShadingMenu->addAction(mActions[LC_VIEW_SHADING_WIREFRAME]);
-	ShadingMenu->addAction(mActions[LC_VIEW_SHADING_FLAT]);
-	ShadingMenu->addAction(mActions[LC_VIEW_SHADING_DEFAULT_LIGHTS]);
+	ViewMenu->addMenu(mProjectionMenu);
+	ViewMenu->addMenu(mShadingMenu);
 	QMenu* StepMenu = ViewMenu->addMenu(tr("Ste&p"));
 	StepMenu->addAction(mActions[LC_VIEW_TIME_FIRST]);
 	StepMenu->addAction(mActions[LC_VIEW_TIME_PREVIOUS]);

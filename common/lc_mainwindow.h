@@ -213,14 +213,24 @@ public:
 		return mPartSelectionWidget;
 	}
 
+	QMenu* GetViewpointMenu() const
+	{
+		return mViewpointMenu;
+	}
+
 	QMenu* GetCameraMenu() const
 	{
 		return mCameraMenu;
 	}
 
-	QMenu* GetViewpointMenu() const
+	QMenu* GetProjectionMenu() const
 	{
-		return mViewpointMenu;
+		return mProjectionMenu;
+	}
+
+	QMenu* GetShadingMenu() const
+	{
+		return mShadingMenu;
 	}
 
 	bool DoDialog(LC_DIALOG_TYPE Type, void* Data);
@@ -372,8 +382,10 @@ protected:
 	QLabel* mStatusSnapLabel;
 	QLabel* mStatusTimeLabel;
 
-	QMenu* mCameraMenu;
 	QMenu* mViewpointMenu;
+	QMenu* mCameraMenu;
+	QMenu* mProjectionMenu;
+	QMenu* mShadingMenu;
 };
 
 extern class lcMainWindow* gMainWindow;

@@ -154,7 +154,6 @@ SOURCES += common/view.cpp \
     common/camera.cpp \
     qt/system.cpp \
     qt/qtmain.cpp \
-    qt/lc_qpovraydialog.cpp \
     qt/lc_qarraydialog.cpp \
     qt/lc_qgroupdialog.cpp \
     qt/lc_qaboutdialog.cpp \
@@ -215,7 +214,6 @@ HEADERS += \
     common/image.h \
     common/group.h \
     common/camera.h \
-    qt/lc_qpovraydialog.h \
     qt/lc_qarraydialog.h \
     qt/lc_qgroupdialog.h \
     qt/lc_qaboutdialog.h \
@@ -240,7 +238,6 @@ HEADERS += \
     qt/lc_renderdialog.h \
     qt/lc_setsdatabasedialog.h
 FORMS += \ 
-    qt/lc_qpovraydialog.ui \
     qt/lc_qarraydialog.ui \
     qt/lc_qgroupdialog.ui \
     qt/lc_qaboutdialog.ui \

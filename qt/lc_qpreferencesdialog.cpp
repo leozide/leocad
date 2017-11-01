@@ -16,6 +16,14 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget *parent, void *data) :
 {
     ui->setupUi(this);
 
+#if defined(Q_OS_WIN) || defined(Q_OS_MACOS)
+	ui->povrayLabel->hide();
+	ui->povrayExecutable->hide();
+	ui->povrayExecutableBrowse->hide();
+	delete ui->povrayLabel;
+	delete ui->povrayLayout;
+#endif
+
 	ui->lineWidth->setValidator(new QDoubleValidator(ui->lineWidth));
 	connect(ui->gridStudColor, SIGNAL(clicked()), this, SLOT(colorClicked()));
 	connect(ui->gridLineColor, SIGNAL(clicked()), this, SLOT(colorClicked()));

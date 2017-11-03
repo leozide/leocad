@@ -2084,8 +2084,6 @@ bool Project::ExportPOVRay(const QString& FileName)
 
 		POVFile.WriteLine("\n");
 	}
-	else
-		POVFile.WriteLine("#include \"colors.inc\"\n\n");
 
 	for (int ColorIdx = 0; ColorIdx < gColorList.GetSize(); ColorIdx++)
 	{
@@ -2152,7 +2150,7 @@ bool Project::ExportPOVRay(const QString& FileName)
 	sprintf(Line, "camera {\n  sky<%1g,%1g,%1g>\n  location <%1g, %1g, %1g>\n  look_at <%1g, %1g, %1g>\n  angle %.0f\n}\n\n",
 			Up[0], Up[1], Up[2], Position[1] / 25.0f, Position[0] / 25.0f, Position[2] / 25.0f, Target[1] / 25.0f, Target[0] / 25.0f, Target[2] / 25.0f, Camera->m_fovy);
 	POVFile.WriteLine(Line);
-	sprintf(Line, "background { color rgb <%1g, %1g, %1g> }\n\nlight_source { <0, 0, 20> White shadowless }\n\n",
+	sprintf(Line, "background { color rgb <%1g, %1g, %1g> }\n\nlight_source { <0, 0, 20> rgb<1, 1, 1, 1> }\n\n",
 			Properties.mBackgroundSolidColor[0], Properties.mBackgroundSolidColor[1], Properties.mBackgroundSolidColor[2]);
 	POVFile.WriteLine(Line);
 

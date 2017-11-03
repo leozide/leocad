@@ -3,6 +3,7 @@
 #include "ui_lc_renderdialog.h"
 #include "project.h"
 #include "lc_application.h"
+#include "lc_profile.h"
 
 lcRenderDialog::lcRenderDialog(QWidget* Parent)
 	: QDialog(Parent),
@@ -26,6 +27,11 @@ lcRenderDialog::~lcRenderDialog()
 	delete ui;
 }
 
+QString lcRenderDialog::GetPOVFileName() const
+{
+	return QDir(QDir::tempPath()).absoluteFilePath("leocad-render.pov");
+}
+
 void lcRenderDialog::on_RenderButton_clicked()
 {
 	if (mProcess)
@@ -34,7 +40,7 @@ void lcRenderDialog::on_RenderButton_clicked()
 return;
 	}
 
-	QString FileName = QDir(QDir::tempPath()).absoluteFilePath("leocad-render.pov");
+	QString FileName = GetPOVFileName();
 
 	if (!lcGetActiveProject()->ExportPOVRay(FileName))
 		return;
@@ -42,9 +48,7 @@ return;
 	QStringList Arguments;
 
 	Arguments.append(QString::fromLatin1("+I%1").arg(FileName));
-//	Arguments.append("-pause");
-//	Arguments.append("+IC:\\Users\\leo\\Projects\\leocad\\test.pov");
-	Arguments.append("+OC:\\Users\\leo\\Projects\\leocad\\test.png");
+//	Arguments.append("+OC:\\Users\\leo\\Projects\\leocad\\test.png");
 	Arguments.append("+W800");
 	Arguments.append("+H600");
 
@@ -63,11 +67,35 @@ return;
 	*/
 
 	//+LC:\Users\leo\Documents\POV-Ray\v3.7\include +IC:\Users\leo\Projects\leocad\test.pov +OC:\Users\leo\Projects\leocad\test.png
-	Arguments.append("+LC:\\Users\\leo\\Documents\\POV-Ray\\v3.7\\include");
-	QString POVRayPath = "C:\\Users\\leo\\Projects\\povray\\windows\\vs2015\\bin32\\povconsole32-sse2.exe";
+
+	QString POVRayPath;
+
+#ifdef Q_OS_WIN
+	POVRayPath = QDir::cleanPath(QCoreApplication::applicationDirPath() + QLatin1String("/povray/povconsole32-sse2.exe"));
+#endif
+
+#ifdef Q_OS_LINUX
+	POVRayPath = lcGetProfileString(LC_PROFILE_POVRAY_PATH);
+	Arguments.append("+FC");
+	Arguments.append("-O-");
+	Arguments.append("-D");
+#endif
+
+#ifdef Q_OS_MACOS
+	POVRayPath = QDir::cleanPath(QCoreApplication::applicationDirPath() + QLatin1String("/povray/povconsole"));
+#endif
 
 	mProcess = new QProcess(this);
 	mProcess->start(POVRayPath, Arguments);
+
+	if (!mProcess->waitForStarted())
+	{
+		QMessageBox::warning(this, tr("Error"), tr("Error starting POV-Ray."));
+
+		delete mProcess;
+		mProcess = nullptr;
+		QFile::remove(FileName);
+	}
 }
 
 void lcRenderDialog::Update()
@@ -76,12 +104,20 @@ void lcRenderDialog::Update()
 	{
 		if (mProcess->state() == QProcess::NotRunning)
 		{
-			QString Output = mProcess->readAllStandardError() + mProcess->readAllStandardOutput();
-			QMessageBox::information(this, "LeoCAD", Output);
+//			QString Output = mProcess->readAllStandardError();
+//			QMessageBox::information(this, "LeoCAD", Output);
+
+#ifdef Q_OS_LINUX
+			QByteArray Output = mProcess->readAllStandardOutput();
+			QImage Image = QImage::fromData(Output);
+			ui->label->setPixmap(QPixmap::fromImage(Image));
+#endif
 			delete mProcess;
 			mProcess = nullptr;
+			QFile::remove(GetPOVFileName());
 		}
 	}
+
 #ifdef Q_OS_WIN
 	if (mMapFile == NULL)
 	{

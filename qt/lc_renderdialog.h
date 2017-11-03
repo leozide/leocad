@@ -23,6 +23,7 @@ protected:
 	QProcess* mProcess;
 	Ui::lcRenderDialog* ui;
 
+	QString GetPOVFileName() const;
 	void CloseSharedMemory();
 #ifdef Q_OS_WIN
 	HANDLE mMapFile;

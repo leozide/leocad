@@ -110,7 +110,9 @@ lcProfileEntry gProfileEntries[LC_NUM_PROFILE_KEYS] =
 	lcProfileEntry("HTML", "PartsHeight", 128),                                      // LC_PROFILE_HTML_PARTS_HEIGHT
 
 	lcProfileEntry("POVRay", "Path", ""),                                            // LC_PROFILE_POVRAY_PATH
-	lcProfileEntry("POVRay", "LGEOPath", "/usr/bin/povray")                          // LC_PROFILE_POVRAY_LGEO_PATH
+	lcProfileEntry("POVRay", "LGEOPath", "/usr/bin/povray"),                         // LC_PROFILE_POVRAY_LGEO_PATH
+	lcProfileEntry("POVRay", "Width", 1280),                                         // LC_PROFILE_POVRAY_WIDTH
+	lcProfileEntry("POVRay", "Height", 720)                                          // LC_PROFILE_POVRAY_HEIGHT
 };
 
 void lcRemoveProfileKey(LC_PROFILE_KEY Key)

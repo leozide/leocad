@@ -16,6 +16,12 @@ lcRenderDialog::lcRenderDialog(QWidget* Parent)
 #endif
 
 	ui->setupUi(this);
+
+	ui->WidthEdit->setText(QString::number(lcGetProfileInt(LC_PROFILE_POVRAY_WIDTH)));
+	ui->WidthEdit->setValidator(new QIntValidator(16, INT_MAX));
+	ui->HeightEdit->setText(QString::number(lcGetProfileInt(LC_PROFILE_POVRAY_HEIGHT)));
+	ui->HeightEdit->setValidator(new QIntValidator(16, INT_MAX));
+
 	connect(&mUpdateTimer, SIGNAL(timeout()), this, SLOT(Update()));
 	mUpdateTimer.start(100);
 }
@@ -31,6 +37,13 @@ QString lcRenderDialog::GetPOVFileName() const
 {
 	return QDir(QDir::tempPath()).absoluteFilePath("leocad-render.pov");
 }
+
+/*
+void lcRenderDialog::reject()
+{
+// todo: cancel
+}
+*/
 
 void lcRenderDialog::on_RenderButton_clicked()
 {
@@ -49,8 +62,8 @@ return;
 
 	Arguments.append(QString::fromLatin1("+I%1").arg(FileName));
 //	Arguments.append("+OC:\\Users\\leo\\Projects\\leocad\\test.png");
-	Arguments.append("+W800");
-	Arguments.append("+H600");
+	Arguments.append(QString::fromLatin1("+W%1").arg(ui->WidthEdit->text()));
+	Arguments.append(QString::fromLatin1("+H%1").arg(ui->HeightEdit->text()));
 
 	Arguments.append("+Q11");
 	Arguments.append("+R3");
@@ -65,8 +78,6 @@ return;
 	}
 	Arguments.append(QString::fromLatin1("/EXIT"));
 	*/
-
-	//+LC:\Users\leo\Documents\POV-Ray\v3.7\include +IC:\Users\leo\Projects\leocad\test.pov +OC:\Users\leo\Projects\leocad\test.png
 
 	QString POVRayPath;
 
@@ -96,6 +107,8 @@ return;
 		mProcess = nullptr;
 		QFile::remove(FileName);
 	}
+	else
+		ui->RenderButton->setText(tr("Cancel"));
 }
 
 void lcRenderDialog::Update()
@@ -110,11 +123,12 @@ void lcRenderDialog::Update()
 #ifdef Q_OS_LINUX
 			QByteArray Output = mProcess->readAllStandardOutput();
 			QImage Image = QImage::fromData(Output);
-			ui->label->setPixmap(QPixmap::fromImage(Image));
+			ui->label->setPixmap(QPixmap::fromImage(Image.scaled(768, 432, Qt::KeepAspectRatio, Qt::SmoothTransformation)));
 #endif
 			delete mProcess;
 			mProcess = nullptr;
 			QFile::remove(GetPOVFileName());
+			ui->RenderButton->setText(tr("Render"));
 		}
 	}
 

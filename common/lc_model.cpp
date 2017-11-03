@@ -1155,6 +1155,7 @@ void lcModel::Paste()
 void lcModel::DuplicateSelectedPieces()
 {
 	lcArray<lcObject*> NewPieces;
+	lcPiece* Focus = nullptr;
 
 	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 	{
@@ -1167,6 +1168,9 @@ void lcModel::DuplicateSelectedPieces()
 		NewPiece->UpdatePosition(mCurrentStep);
 		NewPieces.Add(NewPiece);
 
+		if (Piece->IsFocused())
+			Focus = NewPiece;
+
 		PieceIdx++;
 		InsertPiece(NewPiece, PieceIdx);
 	}
@@ -1175,7 +1179,7 @@ void lcModel::DuplicateSelectedPieces()
 		return;
 
 	gMainWindow->UpdateTimeline(false, false);
-	SetSelectionAndFocus(NewPieces, nullptr, 0);
+	SetSelectionAndFocus(NewPieces, Focus, LC_PIECE_SECTION_POSITION);
 	SaveCheckpoint(tr("Duplicating Pieces"));
 }
 

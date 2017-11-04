@@ -1948,6 +1948,8 @@ bool Project::ExportPOVRay(const QString& FileName)
 		return false;
 	}
 
+	POVFile.WriteLine("#version 3.7;\n\nglobal_settings {\n  assumed_gamma 1.0\n}\n\n");
+
 	char Line[1024];
 
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
@@ -2135,8 +2137,6 @@ bool Project::ExportPOVRay(const QString& FileName)
 
 		Mesh->ExportPOVRay(POVFile, Name, &ColorTablePointer[0]);
 
-		POVFile.WriteLine("}\n\n");
-
 		sprintf(Line, "#declare lc_%s_clear = lc_%s\n\n", Name, Name);
 		POVFile.WriteLine(Line);
 	}
@@ -2150,7 +2150,7 @@ bool Project::ExportPOVRay(const QString& FileName)
 	sprintf(Line, "camera {\n  perspective\n  right x * image_width / image_height\n  sky<%1g,%1g,%1g>\n  location <%1g, %1g, %1g>\n  look_at <%1g, %1g, %1g>\n  angle %.0f * image_width / image_height\n}\n\n",
 			Up[1], Up[0], Up[2], Position[1] / 25.0f, Position[0] / 25.0f, Position[2] / 25.0f, Target[1] / 25.0f, Target[0] / 25.0f, Target[2] / 25.0f, Camera->m_fovy);
 	POVFile.WriteLine(Line);
-	sprintf(Line, "background { color rgb <%1g, %1g, %1g> }\n\nlight_source { <0, 0, 20> rgb<1, 1, 1, 1> }\n\n",
+	sprintf(Line, "background { color rgb <%1g, %1g, %1g> }\n\nlight_source { <0, 0, 20> rgb<1, 1, 1> }\n\n",
 			Properties.mBackgroundSolidColor[0], Properties.mBackgroundSolidColor[1], Properties.mBackgroundSolidColor[2]);
 	POVFile.WriteLine(Line);
 
@@ -2182,26 +2182,7 @@ bool Project::ExportPOVRay(const QString& FileName)
 	}
 
 	POVFile.Close();
-/*
-	if (Dialog.mRender)
-	{
-		QStringList Arguments;
 
-		Arguments.append(QString::fromLatin1("+I%1").arg(Dialog.mFileName));
-
-		if (!Dialog.mLGEOPath.isEmpty())
-		{
-			Arguments.append(QString::fromLatin1("+L%1lg/").arg(Dialog.mLGEOPath));
-			Arguments.append(QString::fromLatin1("+L%1ar/").arg(Dialog.mLGEOPath));
-		}
-
-		Arguments.append(QString::fromLatin1("/EXIT"));
-
-#ifndef QT_NO_PROCESS
-		QProcess::execute(Dialog.mPOVRayPath, Arguments);
-#endif
-	}
-	*/
 	return true;
 }
 

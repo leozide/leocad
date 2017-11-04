@@ -252,7 +252,20 @@ void lcMesh::ExportPOVRay(lcFile& File, const char* MeshName, const char** Color
 {
 	char Line[1024];
 
-	sprintf(Line, "#declare lc_%s = union {\n", MeshName);
+	int NumSections = 0;
+
+	for (int SectionIdx = 0; SectionIdx < mLods[LC_MESH_LOD_HIGH].NumSections; SectionIdx++)
+	{
+		lcMeshSection* Section = &mLods[LC_MESH_LOD_HIGH].Sections[SectionIdx];
+
+		if (Section->PrimitiveType == LC_MESH_TRIANGLES || Section->PrimitiveType == LC_MESH_TEXTURED_TRIANGLES)
+			NumSections++;
+	}
+
+	if (NumSections > 1)
+		sprintf(Line, "#declare lc_%s = union {\n", MeshName);
+	else
+		sprintf(Line, "#declare lc_%s = mesh {\n", MeshName);
 	File.WriteLine(Line);
 
 	lcVertex* Verts = (lcVertex*)mVertexData;
@@ -266,7 +279,8 @@ void lcMesh::ExportPOVRay(lcFile& File, const char* MeshName, const char** Color
 
 		IndexType* Indices = (IndexType*)mIndexData + Section->IndexOffset / sizeof(IndexType);
 
-		File.WriteLine(" mesh {\n");
+		if (NumSections > 1)
+			File.WriteLine(" mesh {\n");
 
 		for (int Idx = 0; Idx < Section->NumIndices; Idx += 3)
 		{
@@ -288,8 +302,11 @@ void lcMesh::ExportPOVRay(lcFile& File, const char* MeshName, const char** Color
 			File.WriteLine(Line);
 		}
 
-		File.WriteLine(" }\n");
+		if (NumSections > 1)
+			File.WriteLine(" }\n");
 	}
+
+	File.WriteLine("}\n\n");
 }
 
 void lcMesh::ExportPOVRay(lcFile& File, const char* MeshName, const char** ColorTable)

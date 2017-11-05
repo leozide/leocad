@@ -15,18 +15,18 @@ public:
 	~lcRenderDialog();
 
 public slots:
+	void reject();
 	void on_RenderButton_clicked();
 	void Update();
 
 protected:
-	QTimer mUpdateTimer;
-	QProcess* mProcess;
-	Ui::lcRenderDialog* ui;
-
 	QString GetPOVFileName() const;
-	void CloseSharedMemory();
-#ifdef Q_OS_WIN
-	HANDLE mMapFile;
-	void* mBuffer;
-#endif
+	void CloseProcess();
+	bool PromptCancel();
+
+	QProcess* mProcess;
+	QTimer mUpdateTimer;
+	QSharedMemory mSharedMemory;
+
+	Ui::lcRenderDialog* ui;
 };

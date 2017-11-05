@@ -5,15 +5,15 @@
 #include "lc_application.h"
 #include "lc_profile.h"
 
+#define LC_POVRAY_PREVIEW_WIDTH 768
+#define LC_POVRAY_PREVIEW_HEIGHT 432
+
 lcRenderDialog::lcRenderDialog(QWidget* Parent)
 	: QDialog(Parent),
     ui(new Ui::lcRenderDialog)
 {
 	mProcess = nullptr;
-#ifdef Q_OS_WIN
-	mMapFile = NULL;
-	mBuffer = nullptr;
-#endif
+	mSharedMemory.setNativeKey("leocad-povray");
 
 	ui->setupUi(this);
 
@@ -22,13 +22,17 @@ lcRenderDialog::lcRenderDialog(QWidget* Parent)
 	ui->HeightEdit->setText(QString::number(lcGetProfileInt(LC_PROFILE_POVRAY_HEIGHT)));
 	ui->HeightEdit->setValidator(new QIntValidator(16, INT_MAX));
 
+	QImage Image(LC_POVRAY_PREVIEW_WIDTH, LC_POVRAY_PREVIEW_HEIGHT, QImage::Format_RGB32);
+	Image.fill(QColor(255, 255, 255));
+	ui->label->setPixmap(QPixmap::fromImage(Image));
+
 	connect(&mUpdateTimer, SIGNAL(timeout()), this, SLOT(Update()));
 	mUpdateTimer.start(100);
 }
 
 lcRenderDialog::~lcRenderDialog()
 {
-	CloseSharedMemory();
+	mSharedMemory.detach();
 
 	delete ui;
 }
@@ -38,20 +42,45 @@ QString lcRenderDialog::GetPOVFileName() const
 	return QDir(QDir::tempPath()).absoluteFilePath("leocad-render.pov");
 }
 
-/*
-void lcRenderDialog::reject()
+void lcRenderDialog::CloseProcess()
 {
-// todo: cancel
-}
-*/
+	delete mProcess;
+	mProcess = nullptr;
 
-void lcRenderDialog::on_RenderButton_clicked()
+	QFile::remove(GetPOVFileName());
+
+	ui->RenderButton->setText(tr("Render"));
+}
+
+bool lcRenderDialog::PromptCancel()
 {
 	if (mProcess)
 	{
-// todo: cancel
-return;
+		if (QMessageBox::question(this, tr("Cancel Render"), tr("Are you sure you want to cancel the current render?"), QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes)
+		{
+			if (mProcess)
+			{
+				mProcess->kill();
+				CloseProcess();
+			}
+		}
+		else
+			return false;
 	}
+
+	return true;
+}
+
+void lcRenderDialog::reject()
+{
+	if (PromptCancel())
+		QDialog::reject();
+}
+
+void lcRenderDialog::on_RenderButton_clicked()
+{
+	if (!PromptCancel())
+		return;
 
 	QString FileName = GetPOVFileName();
 
@@ -61,9 +90,9 @@ return;
 	QStringList Arguments;
 
 	Arguments.append(QString::fromLatin1("+I%1").arg(FileName));
-//	Arguments.append("+OC:\\Users\\leo\\Projects\\leocad\\test.png");
 	Arguments.append(QString::fromLatin1("+W%1").arg(ui->WidthEdit->text()));
 	Arguments.append(QString::fromLatin1("+H%1").arg(ui->HeightEdit->text()));
+	Arguments.append("-O-");
 
 	Arguments.append("+Q11");
 	Arguments.append("+R3");
@@ -76,7 +105,6 @@ return;
 		Arguments.append(QString::fromLatin1("+L%1lg/").arg(LGEOPath));
 		Arguments.append(QString::fromLatin1("+L%1ar/").arg(LGEOPath));
 	}
-	Arguments.append(QString::fromLatin1("/EXIT"));
 	*/
 
 	QString POVRayPath;
@@ -88,7 +116,6 @@ return;
 #ifdef Q_OS_LINUX
 	POVRayPath = lcGetProfileString(LC_PROFILE_POVRAY_PATH);
 	Arguments.append("+FC");
-	Arguments.append("-O-");
 	Arguments.append("-D");
 #endif
 
@@ -99,16 +126,13 @@ return;
 	mProcess = new QProcess(this);
 	mProcess->start(POVRayPath, Arguments);
 
-	if (!mProcess->waitForStarted())
+	if (mProcess->waitForStarted())
+		ui->RenderButton->setText(tr("Cancel"));
+	else
 	{
 		QMessageBox::warning(this, tr("Error"), tr("Error starting POV-Ray."));
-
-		delete mProcess;
-		mProcess = nullptr;
-		QFile::remove(FileName);
+		CloseProcess();
 	}
-	else
-		ui->RenderButton->setText(tr("Cancel"));
 }
 
 void lcRenderDialog::Update()
@@ -123,42 +147,23 @@ void lcRenderDialog::Update()
 #ifdef Q_OS_LINUX
 			QByteArray Output = mProcess->readAllStandardOutput();
 			QImage Image = QImage::fromData(Output);
-			ui->label->setPixmap(QPixmap::fromImage(Image.scaled(768, 432, Qt::KeepAspectRatio, Qt::SmoothTransformation)));
+			ui->label->setPixmap(QPixmap::fromImage(Image.scaled(LC_POVRAY_PREVIEW_WIDTH, LC_POVRAY_PREVIEW_HEIGHT, Qt::KeepAspectRatio, Qt::SmoothTransformation)));
 #endif
-			delete mProcess;
-			mProcess = nullptr;
-			QFile::remove(GetPOVFileName());
-			ui->RenderButton->setText(tr("Render"));
+			CloseProcess();
 		}
 	}
 
 #ifdef Q_OS_WIN
-	if (mMapFile == NULL)
-	{
-		mMapFile = OpenFileMappingA(FILE_MAP_ALL_ACCESS, FALSE, "leocad-povray");
-
-		if (!mMapFile)
-			return;
-
-		mBuffer = MapViewOfFile(mMapFile, FILE_MAP_ALL_ACCESS, 0, 0, 0);
-
-		if (!mBuffer)
-		{
-			CloseHandle(mMapFile);
-			mMapFile = NULL;
-			return;
-		}
-
-		uint32_t* Header = (uint32_t*)mBuffer;
-		if (Header[0] != 1)
-		{
-			CloseSharedMemory();
-			return;
-		}
-	}
-
-	if (!mBuffer)
+	if (!mSharedMemory.isAttached() && !mSharedMemory.attach())
 		return;
+
+	void* Buffer = mSharedMemory.data();
+
+	if (!Buffer)
+	{
+		mSharedMemory.detach();
+		return;
+	}
 
 	struct lcSharedMemoryHeader
 	{
@@ -169,7 +174,7 @@ void lcRenderDialog::Update()
 		uint32_t PixelsRead;
 	};
 
-	lcSharedMemoryHeader* Header = (lcSharedMemoryHeader*)mBuffer;
+	lcSharedMemoryHeader* Header = (lcSharedMemoryHeader*)Buffer;
 
 	int Width = Header->Width;
 	int Height = Header->Height;
@@ -191,23 +196,6 @@ void lcRenderDialog::Update()
 
 	Header->PixelsRead = PixelsRead;
 
-	ui->label->setPixmap(QPixmap::fromImage(Image));
-#endif
-}
-
-void lcRenderDialog::CloseSharedMemory()
-{
-#ifdef Q_OS_WIN
-	if (mBuffer)
-	{
-		UnmapViewOfFile(mBuffer);
-		mBuffer = NULL;
-	}
-
-	if (mMapFile)
-	{
-		CloseHandle(mMapFile);
-		mMapFile = NULL;
-	}
+	ui->label->setPixmap(QPixmap::fromImage(Image.scaled(LC_POVRAY_PREVIEW_WIDTH, LC_POVRAY_PREVIEW_HEIGHT, Qt::KeepAspectRatio, Qt::SmoothTransformation)));
 #endif
 }

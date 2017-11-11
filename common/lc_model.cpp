@@ -1928,22 +1928,6 @@ void lcModel::RemoveEmptyGroups()
 	while (Removed);
 }
 
-lcVector3 lcModel::LockVector(const lcVector3& Vector) const
-{
-	lcVector3 NewVector(Vector);
-
-	if (gMainWindow->GetLockX())
-		NewVector[0] = 0;
-
-	if (gMainWindow->GetLockY())
-		NewVector[1] = 0;
-
-	if (gMainWindow->GetLockZ())
-		NewVector[2] = 0;
-
-	return NewVector;
-}
-
 lcVector3 lcModel::SnapPosition(const lcVector3& Distance) const
 {
 	lcVector3 NewDistance(Distance);
@@ -3736,7 +3720,7 @@ void lcModel::UpdateCameraTool(const lcVector3& Position)
 
 void lcModel::UpdateMoveTool(const lcVector3& Distance, bool AlternateButtonDrag)
 {
-	lcVector3 PieceDistance = LockVector(SnapPosition(Distance) - SnapPosition(mMouseToolDistance));
+	lcVector3 PieceDistance = SnapPosition(Distance) - SnapPosition(mMouseToolDistance);
 	lcVector3 ObjectDistance = Distance - mMouseToolDistance;
 
 	MoveSelectedObjects(PieceDistance, ObjectDistance, true, AlternateButtonDrag, true, false);
@@ -3748,7 +3732,7 @@ void lcModel::UpdateMoveTool(const lcVector3& Distance, bool AlternateButtonDrag
 
 void lcModel::UpdateRotateTool(const lcVector3& Angles, bool AlternateButtonDrag)
 {
-	lcVector3 Delta = LockVector(SnapRotation(Angles) - SnapRotation(mMouseToolDistance));
+	lcVector3 Delta = SnapRotation(Angles) - SnapRotation(mMouseToolDistance);
 	RotateSelectedPieces(Delta, true, AlternateButtonDrag, false, false);
 	mMouseToolDistance = Angles;
 

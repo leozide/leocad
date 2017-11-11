@@ -262,34 +262,6 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 		QT_TRANSLATE_NOOP("Status", "Select pieces by color"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
-	// LC_EDIT_LOCK_X
-	{
-		QT_TRANSLATE_NOOP("Action", "Edit.Lock.LockX"),
-		QT_TRANSLATE_NOOP("Menu", "Lock X"),
-		QT_TRANSLATE_NOOP("Status", "Prevents movement and rotation along the X axis"),
-		QT_TRANSLATE_NOOP("Shortcut", "")
-	},
-	// LC_EDIT_LOCK_Y
-	{
-		QT_TRANSLATE_NOOP("Action", "Edit.Lock.LockY"),
-		QT_TRANSLATE_NOOP("Menu", "Lock Y"),
-		QT_TRANSLATE_NOOP("Status", "Prevents movement and rotation along the Y axis"),
-		QT_TRANSLATE_NOOP("Shortcut", "")
-	},
-	// LC_EDIT_LOCK_Z
-	{
-		QT_TRANSLATE_NOOP("Action", "Edit.Lock.LockZ"),
-		QT_TRANSLATE_NOOP("Menu", "Lock Z"),
-		QT_TRANSLATE_NOOP("Status", "Prevents movement and rotation along the Z axis"),
-		QT_TRANSLATE_NOOP("Shortcut", "")
-	},
-	// LC_EDIT_LOCK_NONE
-	{
-		QT_TRANSLATE_NOOP("Action", "Edit.Lock.None"),
-		QT_TRANSLATE_NOOP("Menu", "Unlock All"),
-		QT_TRANSLATE_NOOP("Status", "Allows movement and rotation in all directions"),
-		QT_TRANSLATE_NOOP("Shortcut", "")
-	},
 	// LC_EDIT_TRANSFORM_RELATIVE
 	{
 		QT_TRANSLATE_NOOP("Action", "Edit.TransformRelative"),

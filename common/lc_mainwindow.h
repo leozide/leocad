@@ -157,21 +157,6 @@ public:
 		return mAngleSnapEnabled ? QString::number(GetAngleSnap()) : tr("None");
 	}
 
-	bool GetLockX() const
-	{
-		return mLockX;
-	}
-
-	bool GetLockY() const
-	{
-		return mLockY;
-	}
-
-	bool GetLockZ() const
-	{
-		return mLockZ;
-	}
-
 	bool GetRelativeTransform() const
 	{
 		return mRelativeTransform;
@@ -251,9 +236,6 @@ public:
 	void SetMoveXYSnapIndex(int Index);
 	void SetMoveZSnapIndex(int Index);
 	void SetAngleSnapIndex(int Index);
-	void SetLockX(bool LockX);
-	void SetLockY(bool LockY);
-	void SetLockZ(bool LockZ);
 	void SetRelativeTransform(bool RelativeTransform);
 	void SetCurrentPieceInfo(PieceInfo* Info);
 	void SetShadingMode(lcShadingMode ShadingMode);
@@ -352,9 +334,6 @@ protected:
 	int mMoveXYSnapIndex;
 	int mMoveZSnapIndex;
 	int mAngleSnapIndex;
-	bool mLockX;
-	bool mLockY;
-	bool mLockZ;
 	bool mRelativeTransform;
 	PieceInfo* mCurrentPieceInfo;
 

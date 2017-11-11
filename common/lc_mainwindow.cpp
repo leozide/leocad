@@ -66,9 +66,6 @@ lcMainWindow::lcMainWindow()
 	mMoveXYSnapIndex = 4;
 	mMoveZSnapIndex = 3;
 	mAngleSnapIndex = 5;
-	mLockX = false;
-	mLockY = false;
-	mLockZ = false;
 	mRelativeTransform = true;
 	mCurrentPieceInfo = nullptr;
 
@@ -276,9 +273,6 @@ void lcMainWindow::CreateActions()
 	mActions[LC_HELP_HOMEPAGE]->setIcon(QIcon(":/resources/help_homepage.png"));
 	mActions[LC_HELP_EMAIL]->setIcon(QIcon(":/resources/help_email.png"));
 
-	mActions[LC_EDIT_LOCK_X]->setCheckable(true);
-	mActions[LC_EDIT_LOCK_Y]->setCheckable(true);
-	mActions[LC_EDIT_LOCK_Z]->setCheckable(true);
 	mActions[LC_EDIT_TRANSFORM_RELATIVE]->setCheckable(true);
 	mActions[LC_EDIT_SNAP_MOVE_TOGGLE]->setCheckable(true);
 	mActions[LC_EDIT_SNAP_ANGLE_TOGGLE]->setCheckable(true);
@@ -518,17 +512,6 @@ void lcMainWindow::CreateMenus()
 
 void lcMainWindow::CreateToolBars()
 {
-	QMenu* LockMenu = new QMenu(tr("Lock Menu"), this);
-	LockMenu->addAction(mActions[LC_EDIT_LOCK_X]);
-	LockMenu->addAction(mActions[LC_EDIT_LOCK_Y]);
-	LockMenu->addAction(mActions[LC_EDIT_LOCK_Z]);
-	LockMenu->addAction(mActions[LC_EDIT_LOCK_NONE]);
-
-	QAction* LockAction = new QAction(tr("Lock Menu"), this);
-	LockAction->setStatusTip(tr("Toggle mouse movement on specific axes"));
-	LockAction->setIcon(QIcon(":/resources/edit_lock.png"));
-	LockAction->setMenu(LockMenu);
-
 	QMenu* SnapXYMenu = new QMenu(tr("Snap XY"), this);
 	for (int actionIdx = LC_EDIT_SNAP_MOVE_XY0; actionIdx <= LC_EDIT_SNAP_MOVE_XY9; actionIdx++)
 		SnapXYMenu->addAction(mActions[actionIdx]);
@@ -574,12 +557,10 @@ void lcMainWindow::CreateToolBars()
 	mStandardToolBar->addAction(mActions[LC_EDIT_PASTE]);
 	mStandardToolBar->addSeparator();
 	mStandardToolBar->addAction(mActions[LC_EDIT_TRANSFORM_RELATIVE]);
-	mStandardToolBar->addAction(LockAction);
 	mStandardToolBar->addAction(MoveAction);
 	mStandardToolBar->addAction(AngleAction);
 	mStandardToolBar->addSeparator();
 	mStandardToolBar->addAction(mActions[LC_EDIT_TRANSFORM]);
-	((QToolButton*)mStandardToolBar->widgetForAction(LockAction))->setPopupMode(QToolButton::InstantPopup);
 	((QToolButton*)mStandardToolBar->widgetForAction(MoveAction))->setPopupMode(QToolButton::InstantPopup);
 	((QToolButton*)mStandardToolBar->widgetForAction(AngleAction))->setPopupMode(QToolButton::InstantPopup);
 	((QToolButton*)mStandardToolBar->widgetForAction(mActions[LC_EDIT_TRANSFORM]))->setPopupMode(QToolButton::InstantPopup);
@@ -1234,24 +1215,6 @@ void lcMainWindow::SetAngleSnapIndex(int Index)
 	UpdateSnap();
 }
 
-void lcMainWindow::SetLockX(bool LockX)
-{
-	mLockX = LockX;
-	UpdateLockSnap();
-}
-
-void lcMainWindow::SetLockY(bool LockY)
-{
-	mLockY = LockY;
-	UpdateLockSnap();
-}
-
-void lcMainWindow::SetLockZ(bool LockZ)
-{
-	mLockZ = LockZ;
-	UpdateLockSnap();
-}
-
 void lcMainWindow::SetRelativeTransform(bool RelativeTransform)
 {
 	mRelativeTransform = RelativeTransform;
@@ -1590,9 +1553,6 @@ void lcMainWindow::SetAddKeys(bool AddKeys)
 void lcMainWindow::UpdateLockSnap()
 {
 	mActions[LC_EDIT_TRANSFORM_RELATIVE]->setChecked(GetRelativeTransform());
-	mActions[LC_EDIT_LOCK_X]->setChecked(GetLockX());
-	mActions[LC_EDIT_LOCK_Y]->setChecked(GetLockY());
-	mActions[LC_EDIT_LOCK_Z]->setChecked(GetLockZ());
 }
 
 void lcMainWindow::UpdateSnap()
@@ -2512,24 +2472,6 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 
 	case LC_EDIT_TRANSFORM_RELATIVE:
 		SetRelativeTransform(!GetRelativeTransform());
-		break;
-
-	case LC_EDIT_LOCK_X:
-		SetLockX(!GetLockX());
-		break;
-
-	case LC_EDIT_LOCK_Y:
-		SetLockY(!GetLockY());
-		break;
-
-	case LC_EDIT_LOCK_Z:
-		SetLockZ(!GetLockZ());
-		break;
-
-	case LC_EDIT_LOCK_NONE:
-		SetLockX(false);
-		SetLockY(false);
-		SetLockZ(false);
 		break;
 
 	case LC_EDIT_SNAP_MOVE_TOGGLE:

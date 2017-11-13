@@ -2315,6 +2315,7 @@ void View::StartTracking(lcTrackButton TrackButton)
 	mTrackUpdated = false;
 	mMouseDownX = mInputState.x;
 	mMouseDownY = mInputState.y;
+	mMouseDownPiece = nullptr;
 	lcTool Tool = GetCurrentTool();
 
 	switch (Tool)
@@ -2788,7 +2789,7 @@ void View::OnMouseMove()
 					}
 				}
 			}
-			else if (mTrackTool == LC_TRACKTOOL_MOVE_XYZ)
+			else if (mTrackTool == LC_TRACKTOOL_MOVE_XYZ && mMouseDownPiece)
 			{
 				lcMatrix44 NewPosition = GetPieceInsertPosition(true, mMouseDownPiece);
 				lcVector3 Distance = NewPosition.GetTranslation() - mMouseDownPosition;

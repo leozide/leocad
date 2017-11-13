@@ -1376,28 +1376,20 @@ void lcModel::UpdateBackgroundTexture()
 
 void lcModel::RayTest(lcObjectRayTest& ObjectRayTest) const
 {
-	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-	{
-		lcPiece* Piece = mPieces[PieceIdx];
-
-		if (Piece->IsVisible(mCurrentStep))
+	for (lcPiece* Piece : mPieces)
+		if (Piece->IsVisible(mCurrentStep) && (!ObjectRayTest.IgnoreSelected || !Piece->IsSelected()))
 			Piece->RayTest(ObjectRayTest);
-	}
 
 	if (ObjectRayTest.PiecesOnly)
 		return;
 
-	for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
-	{
-		lcCamera* Camera = mCameras[CameraIdx];
-
-		if (Camera != ObjectRayTest.ViewCamera && Camera->IsVisible())
+	for (lcCamera* Camera : mCameras)
+		if (Camera != ObjectRayTest.ViewCamera && Camera->IsVisible() && (!ObjectRayTest.IgnoreSelected || !Camera->IsSelected()))
 			Camera->RayTest(ObjectRayTest);
-	}
 
-	for (int LightIdx = 0; LightIdx < mLights.GetSize(); LightIdx++)
-		if (mLights[LightIdx]->IsVisible())
-			mLights[LightIdx]->RayTest(ObjectRayTest);
+	for (lcLight* Light : mLights)
+		if (Light->IsVisible() && (!ObjectRayTest.IgnoreSelected || !Light->IsSelected()))
+			Light->RayTest(ObjectRayTest);
 }
 
 void lcModel::BoxTest(lcObjectBoxTest& ObjectBoxTest) const

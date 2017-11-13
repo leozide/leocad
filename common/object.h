@@ -30,6 +30,7 @@ struct lcObjectRayTest
 {
 	lcCamera* ViewCamera;
 	bool PiecesOnly;
+	bool IgnoreSelected;
 	lcVector3 Start;
 	lcVector3 End;
 	float Distance;

@@ -476,14 +476,13 @@ lcVector3 View::GetMoveDirection(const lcVector3& Direction) const
 	return axis;
 }
 
-lcMatrix44 View::GetPieceInsertPosition() const
+lcMatrix44 View::GetPieceInsertPosition(bool IgnoreSelected, PieceInfo* Info) const
 {
-	PieceInfo* CurPiece = gMainWindow->GetCurrentPieceInfo();
-	lcPiece* HitPiece = (lcPiece*)FindObjectUnderPointer(true).Object;
+	lcPiece* HitPiece = (lcPiece*)FindObjectUnderPointer(true, IgnoreSelected).Object;
 
 	if (HitPiece)
 	{
-		lcVector3 Position(0, 0, HitPiece->GetBoundingBox().Max.z - CurPiece->GetBoundingBox().Min.z);
+		lcVector3 Position(0, 0, HitPiece->GetBoundingBox().Max.z - Info->GetBoundingBox().Min.z);
 
 		if (gMainWindow->GetRelativeTransform())
 			Position = lcMul31(mModel->SnapPosition(Position), HitPiece->mModelWorld);
@@ -501,7 +500,7 @@ lcMatrix44 View::GetPieceInsertPosition() const
 
 	lcVector3 Intersection;
 
-	const lcBoundingBox& BoundingBox = CurPiece->GetBoundingBox();
+	const lcBoundingBox& BoundingBox = Info->GetBoundingBox();
 	if (lcLinePlaneIntersection(&Intersection, ClickPoints[0], ClickPoints[1], lcVector4(0, 0, 1, BoundingBox.Min.z)))
 	{
 		Intersection = mModel->SnapPosition(Intersection);
@@ -525,7 +524,7 @@ void View::GetRayUnderPointer(lcVector3& Start, lcVector3& End) const
 	End = StartEnd[1];
 }
 
-lcObjectSection View::FindObjectUnderPointer(bool PiecesOnly) const
+lcObjectSection View::FindObjectUnderPointer(bool PiecesOnly, bool IgnoreSelected) const
 {
 	lcVector3 StartEnd[2] =
 	{
@@ -538,6 +537,7 @@ lcObjectSection View::FindObjectUnderPointer(bool PiecesOnly) const
 	lcObjectRayTest ObjectRayTest;
 
 	ObjectRayTest.PiecesOnly = PiecesOnly;
+	ObjectRayTest.IgnoreSelected = IgnoreSelected;
 	ObjectRayTest.ViewCamera = mCamera;
 	ObjectRayTest.Start = StartEnd[0];
 	ObjectRayTest.End = StartEnd[1];
@@ -648,7 +648,7 @@ void View::OnDraw()
 		PieceInfo* Info = gMainWindow->GetCurrentPieceInfo();
 
 		if (Info)
-			Info->AddRenderMeshes(mScene, GetPieceInsertPosition(), gMainWindow->mColorIndex, true, true, false);
+			Info->AddRenderMeshes(mScene, GetPieceInsertPosition(false, gMainWindow->GetCurrentPieceInfo()), gMainWindow->mColorIndex, true, true, false);
 	}
 
 	int TotalTileRows = 1;
@@ -1420,7 +1420,7 @@ void View::DrawGrid()
 			lcVector3 Points[8];
 			lcGetBoxCorners(CurPiece->GetBoundingBox(), Points);
 
-			lcMatrix44 WorldMatrix = GetPieceInsertPosition();
+			lcMatrix44 WorldMatrix = GetPieceInsertPosition(false, CurPiece);
 
 			for (int i = 0; i < 8; i++)
 			{
@@ -1781,7 +1781,7 @@ void View::BeginPieceDrag()
 void View::EndPieceDrag(bool Accept)
 {
 	if (Accept)
-		mModel->InsertPieceToolClicked(GetPieceInsertPosition());
+		mModel->InsertPieceToolClicked(GetPieceInsertPosition(false, gMainWindow->GetCurrentPieceInfo()));
 
 	mDragState = LC_DRAGSTATE_NONE;
 	UpdateTrackTool();
@@ -1992,6 +1992,20 @@ void View::UpdateTrackTool()
 							}
 						}
 					}
+				}
+			}
+
+			if (CurrentTool == LC_TOOL_SELECT && NewTrackTool == LC_TRACKTOOL_SELECT)
+			{
+				lcObjectSection ObjectSection = FindObjectUnderPointer(false, false);
+				lcObject* Object = ObjectSection.Object;
+
+				if (Object && Object->IsPiece() && ObjectSection.Section == LC_PIECE_SECTION_POSITION)
+				{
+					lcPiece* Piece = (lcPiece*)Object;
+					mMouseDownPosition = Piece->mModelWorld.GetTranslation();
+					mMouseDownPiece = Piece->mPieceInfo;
+					NewTrackTool = LC_TRACKTOOL_MOVE_XYZ;
 				}
 			}
 
@@ -2472,7 +2486,7 @@ void View::OnButtonDown(lcTrackButton TrackButton)
 			if (!CurPiece)
 				break;
 
-			mModel->InsertPieceToolClicked(GetPieceInsertPosition());
+			mModel->InsertPieceToolClicked(GetPieceInsertPosition(false, gMainWindow->GetCurrentPieceInfo()));
 
 			if ((mInputState.Modifiers & Qt::ControlModifier) == 0)
 				gMainWindow->SetTool(LC_TOOL_SELECT);
@@ -2499,7 +2513,7 @@ void View::OnButtonDown(lcTrackButton TrackButton)
 		
 	case LC_TRACKTOOL_SELECT:
 		{
-			lcObjectSection ObjectSection = FindObjectUnderPointer(false);
+			lcObjectSection ObjectSection = FindObjectUnderPointer(false, false);
 
 			if (mInputState.Modifiers & Qt::ControlModifier)
 				mModel->FocusOrDeselectObject(ObjectSection);
@@ -2537,11 +2551,11 @@ void View::OnButtonDown(lcTrackButton TrackButton)
 		break;
 
 	case LC_TRACKTOOL_ERASER:
-		mModel->EraserToolClicked(FindObjectUnderPointer(false).Object);
+		mModel->EraserToolClicked(FindObjectUnderPointer(false, false).Object);
 		break;
 
 	case LC_TRACKTOOL_PAINT:
-		mModel->PaintToolClicked(FindObjectUnderPointer(true).Object);
+		mModel->PaintToolClicked(FindObjectUnderPointer(true, false).Object);
 		break;
 
 	case LC_TRACKTOOL_ZOOM:
@@ -2586,7 +2600,7 @@ void View::OnLeftButtonDoubleClick()
 {
 	gMainWindow->SetActiveView(this);
 
-	lcObjectSection ObjectSection = FindObjectUnderPointer(false);
+	lcObjectSection ObjectSection = FindObjectUnderPointer(false, false);
 
 	if (mInputState.Modifiers & Qt::ControlModifier)
 		mModel->FocusOrDeselectObject(ObjectSection);
@@ -2773,6 +2787,12 @@ void View::OnMouseMove()
 						mModel->UpdateMoveTool(Distance, mTrackButton != LC_TRACKBUTTON_LEFT);
 					}
 				}
+			}
+			else if (mTrackTool == LC_TRACKTOOL_MOVE_XYZ)
+			{
+				lcMatrix44 NewPosition = GetPieceInsertPosition(true, mMouseDownPiece);
+				lcVector3 Distance = NewPosition.GetTranslation() - mMouseDownPosition;
+				mModel->UpdateMoveTool(Distance, mTrackButton != LC_TRACKBUTTON_LEFT);
 			}
 			else if (mTrackTool == LC_TRACKTOOL_SCALE_PLUS || mTrackTool == LC_TRACKTOOL_SCALE_MINUS)
 			{

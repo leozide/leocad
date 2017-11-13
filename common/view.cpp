@@ -1848,6 +1848,7 @@ void View::UpdateTrackTool()
 			const float OverlayScaleRadius = 0.125f;
 
 			NewTrackTool = (CurrentTool == LC_TOOL_MOVE) ? LC_TRACKTOOL_MOVE_XYZ : LC_TRACKTOOL_SELECT;
+			mMouseDownPiece = nullptr;
 
 			lcVector3 OverlayCenter;
 			lcMatrix33 RelativeRotation;
@@ -2315,7 +2316,6 @@ void View::StartTracking(lcTrackButton TrackButton)
 	mTrackUpdated = false;
 	mMouseDownX = mInputState.x;
 	mMouseDownY = mInputState.y;
-	mMouseDownPiece = nullptr;
 	lcTool Tool = GetCurrentTool();
 
 	switch (Tool)

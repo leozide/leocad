@@ -547,43 +547,23 @@ void lcMainWindow::CreateToolBars()
 	mStandardToolBar->addAction(mActions[LC_FILE_NEW]);
 	mStandardToolBar->addAction(mActions[LC_FILE_OPEN]);
 	mStandardToolBar->addAction(mActions[LC_FILE_SAVE]);
-	mStandardToolBar->addAction(mActions[LC_FILE_PRINT]);
-	mStandardToolBar->addAction(mActions[LC_FILE_PRINT_PREVIEW]);
 	mStandardToolBar->addSeparator();
 	mStandardToolBar->addAction(mActions[LC_EDIT_UNDO]);
 	mStandardToolBar->addAction(mActions[LC_EDIT_REDO]);
-	mStandardToolBar->addAction(mActions[LC_EDIT_CUT]);
-	mStandardToolBar->addAction(mActions[LC_EDIT_COPY]);
-	mStandardToolBar->addAction(mActions[LC_EDIT_PASTE]);
 	mStandardToolBar->addSeparator();
 	mStandardToolBar->addAction(mActions[LC_EDIT_TRANSFORM_RELATIVE]);
 	mStandardToolBar->addAction(MoveAction);
 	mStandardToolBar->addAction(AngleAction);
-	mStandardToolBar->addSeparator();
-	mStandardToolBar->addAction(mActions[LC_EDIT_TRANSFORM]);
 	((QToolButton*)mStandardToolBar->widgetForAction(MoveAction))->setPopupMode(QToolButton::InstantPopup);
 	((QToolButton*)mStandardToolBar->widgetForAction(AngleAction))->setPopupMode(QToolButton::InstantPopup);
-	((QToolButton*)mStandardToolBar->widgetForAction(mActions[LC_EDIT_TRANSFORM]))->setPopupMode(QToolButton::InstantPopup);
 
-	QHBoxLayout* TransformLayout = new QHBoxLayout;
-	QWidget* TransformWidget = new QWidget();
-	TransformWidget->setLayout(TransformLayout);
-
-	TransformLayout->setContentsMargins(5, 0, 5, 0);
-	mTransformXEdit = new QLineEdit();
-	mTransformXEdit->setMaximumWidth(75);
-	TransformLayout->addWidget(mTransformXEdit);
-	mTransformYEdit = new QLineEdit();
-	mTransformYEdit->setMaximumWidth(75);
-	TransformLayout->addWidget(mTransformYEdit);
-	mTransformZEdit = new QLineEdit();
-	mTransformZEdit->setMaximumWidth(75);
-	TransformLayout->addWidget(mTransformZEdit);
-	TransformLayout->addItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
-	mStandardToolBar->addWidget(TransformWidget);
-	connect(mTransformXEdit, SIGNAL(returnPressed()), mActions[LC_EDIT_TRANSFORM], SIGNAL(triggered()));
-	connect(mTransformYEdit, SIGNAL(returnPressed()), mActions[LC_EDIT_TRANSFORM], SIGNAL(triggered()));
-	connect(mTransformZEdit, SIGNAL(returnPressed()), mActions[LC_EDIT_TRANSFORM], SIGNAL(triggered()));
+	mTimeToolBar = addToolBar(tr("Time"));
+	mTimeToolBar->setObjectName("TimeToolbar");
+	mTimeToolBar->addAction(mActions[LC_VIEW_TIME_FIRST]);
+	mTimeToolBar->addAction(mActions[LC_VIEW_TIME_PREVIOUS]);
+	mTimeToolBar->addAction(mActions[LC_VIEW_TIME_NEXT]);
+	mTimeToolBar->addAction(mActions[LC_VIEW_TIME_LAST]);
+	mTimeToolBar->addAction(mActions[LC_VIEW_TIME_ADD_KEYS]);
 
 	mToolsToolBar = addToolBar(tr("Tools"));
 	mToolsToolBar->setObjectName("ToolsToolbar");
@@ -604,15 +584,7 @@ void lcMainWindow::CreateToolBars()
 	mToolsToolBar->addAction(mActions[LC_EDIT_ACTION_ROTATE_VIEW]);
 	mToolsToolBar->addAction(mActions[LC_EDIT_ACTION_ROLL]);
 	mToolsToolBar->addAction(mActions[LC_EDIT_ACTION_ZOOM_REGION]);
-
-	mTimeToolBar = addToolBar(tr("Time"));
-	mTimeToolBar->setObjectName("TimeToolbar");
-	mTimeToolBar->addAction(mActions[LC_VIEW_TIME_FIRST]);
-	mTimeToolBar->addAction(mActions[LC_VIEW_TIME_PREVIOUS]);
-	mTimeToolBar->addAction(mActions[LC_VIEW_TIME_NEXT]);
-	mTimeToolBar->addAction(mActions[LC_VIEW_TIME_LAST]);
-	mTimeToolBar->addAction(mActions[LC_VIEW_TIME_ADD_KEYS]);
-	// TODO: add missing menu items
+	mToolsToolBar->hide();
 
 	mPartsToolBar = new QDockWidget(tr("Parts"), this);
 	mPartsToolBar->setObjectName("PartsToolbar");
@@ -641,9 +613,37 @@ void lcMainWindow::CreateToolBars()
 	mPropertiesToolBar = new QDockWidget(tr("Properties"), this);
 	mPropertiesToolBar->setObjectName("PropertiesToolbar");
 
-	mPropertiesWidget = new lcQPropertiesTree(mPropertiesToolBar);
+	QWidget* PropertiesWidget = new QWidget(mPropertiesToolBar);
+	QVBoxLayout* PropertiesLayout = new QVBoxLayout(PropertiesWidget);
 
-	mPropertiesToolBar->setWidget(mPropertiesWidget);
+	mPropertiesWidget = new lcQPropertiesTree(PropertiesWidget);
+	PropertiesLayout->addWidget(mPropertiesWidget);
+
+	QHBoxLayout* TransformLayout = new QHBoxLayout;
+	QWidget* TransformWidget = new QWidget();
+	TransformWidget->setLayout(TransformLayout);
+
+	QToolButton* TransformButton = new QToolButton(TransformWidget);
+	TransformButton->setDefaultAction(mActions[LC_EDIT_TRANSFORM]);
+	TransformButton->setPopupMode(QToolButton::InstantPopup);
+	TransformLayout->addWidget(TransformButton);
+
+	mTransformXEdit = new QLineEdit();
+	mTransformXEdit->setMaximumWidth(75);
+	TransformLayout->addWidget(mTransformXEdit);
+	mTransformYEdit = new QLineEdit();
+	mTransformYEdit->setMaximumWidth(75);
+	TransformLayout->addWidget(mTransformYEdit);
+	mTransformZEdit = new QLineEdit();
+	mTransformZEdit->setMaximumWidth(75);
+	TransformLayout->addWidget(mTransformZEdit);
+	TransformLayout->addItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
+	PropertiesLayout->addWidget(TransformWidget);
+	connect(mTransformXEdit, SIGNAL(returnPressed()), mActions[LC_EDIT_TRANSFORM], SIGNAL(triggered()));
+	connect(mTransformYEdit, SIGNAL(returnPressed()), mActions[LC_EDIT_TRANSFORM], SIGNAL(triggered()));
+	connect(mTransformZEdit, SIGNAL(returnPressed()), mActions[LC_EDIT_TRANSFORM], SIGNAL(triggered()));
+
+	mPropertiesToolBar->setWidget(PropertiesWidget);
 	addDockWidget(Qt::RightDockWidgetArea, mPropertiesToolBar);
 
 	mTimelineToolBar = new QDockWidget(tr("Timeline"), this);

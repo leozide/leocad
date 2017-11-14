@@ -198,6 +198,11 @@ public:
 		return mPartSelectionWidget;
 	}
 
+	QMenu* GetToolsMenu() const
+	{
+		return mToolsMenu;
+	}
+
 	QMenu* GetViewpointMenu() const
 	{
 		return mViewpointMenu;
@@ -361,6 +366,7 @@ protected:
 	QLabel* mStatusSnapLabel;
 	QLabel* mStatusTimeLabel;
 
+	QMenu* mToolsMenu;
 	QMenu* mViewpointMenu;
 	QMenu* mCameraMenu;
 	QMenu* mProjectionMenu;

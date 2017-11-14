@@ -382,6 +382,24 @@ void lcMainWindow::CreateMenus()
 	mShadingMenu->addAction(mActions[LC_VIEW_SHADING_FLAT]);
 	mShadingMenu->addAction(mActions[LC_VIEW_SHADING_DEFAULT_LIGHTS]);
 
+	mToolsMenu = new QMenu(tr("Tools"), this);
+	mToolsMenu->addAction(mActions[LC_EDIT_ACTION_INSERT]);
+	mToolsMenu->addAction(mActions[LC_EDIT_ACTION_LIGHT]);
+	mToolsMenu->addAction(mActions[LC_EDIT_ACTION_SPOTLIGHT]);
+	mToolsMenu->addAction(mActions[LC_EDIT_ACTION_CAMERA]);
+	mToolsMenu->addSeparator();
+	mToolsMenu->addAction(mActions[LC_EDIT_ACTION_SELECT]);
+	mToolsMenu->addAction(mActions[LC_EDIT_ACTION_MOVE]);
+	mToolsMenu->addAction(mActions[LC_EDIT_ACTION_ROTATE]);
+	mToolsMenu->addAction(mActions[LC_EDIT_ACTION_DELETE]);
+	mToolsMenu->addAction(mActions[LC_EDIT_ACTION_PAINT]);
+	mToolsMenu->addSeparator();
+	mToolsMenu->addAction(mActions[LC_EDIT_ACTION_ZOOM]);
+	mToolsMenu->addAction(mActions[LC_EDIT_ACTION_PAN]);
+	mToolsMenu->addAction(mActions[LC_EDIT_ACTION_ROTATE_VIEW]);
+	mToolsMenu->addAction(mActions[LC_EDIT_ACTION_ROLL]);
+	mToolsMenu->addAction(mActions[LC_EDIT_ACTION_ZOOM_REGION]);
+
 	QMenu* FileMenu = menuBar()->addMenu(tr("&File"));
 	FileMenu->addAction(mActions[LC_FILE_NEW]);
 	FileMenu->addAction(mActions[LC_FILE_OPEN]);
@@ -435,6 +453,8 @@ void lcMainWindow::CreateMenus()
 	EditMenu->addAction(mActions[LC_EDIT_SELECT_INVERT]);
 	EditMenu->addAction(mActions[LC_EDIT_SELECT_BY_NAME]);
 	EditMenu->addAction(mActions[LC_EDIT_SELECT_BY_COLOR]);
+	EditMenu->addSeparator();
+	EditMenu->addMenu(mToolsMenu);
 
 	QMenu* ViewMenu = menuBar()->addMenu(tr("&View"));
 	ViewMenu->addAction(mActions[LC_VIEW_PREFERENCES]);

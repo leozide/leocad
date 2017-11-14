@@ -561,63 +561,63 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 		QT_TRANSLATE_NOOP("Action", "Edit.Tool.Select"),
 		QT_TRANSLATE_NOOP("Menu", "Select"),
 		QT_TRANSLATE_NOOP("Status", "Select objects (hold the CTRL key down or drag the mouse to select multiple objects)"),
-		QT_TRANSLATE_NOOP("Shortcut", "Shift+S")
+		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
 	// LC_EDIT_ACTION_MOVE
 	{
 		QT_TRANSLATE_NOOP("Action", "Edit.Tool.Move"),
 		QT_TRANSLATE_NOOP("Menu", "Move"),
 		QT_TRANSLATE_NOOP("Status", "Move selected objects"),
-		QT_TRANSLATE_NOOP("Shortcut", "Shift+M")
+		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
 	// LC_EDIT_ACTION_ROTATE
 	{
 		QT_TRANSLATE_NOOP("Action", "Edit.Tool.Rotate"),
 		QT_TRANSLATE_NOOP("Menu", "Rotate"),
 		QT_TRANSLATE_NOOP("Status", "Rotate selected pieces"),
-		QT_TRANSLATE_NOOP("Shortcut", "Shift+R")
+		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
 	// LC_EDIT_ACTION_DELETE
 	{
 		QT_TRANSLATE_NOOP("Action", "Edit.Tool.Delete"),
 		QT_TRANSLATE_NOOP("Menu", "Delete"),
 		QT_TRANSLATE_NOOP("Status", "Delete objects"),
-		QT_TRANSLATE_NOOP("Shortcut", "Shift+D")
+		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
 	// LC_EDIT_ACTION_PAINT
 	{
 		QT_TRANSLATE_NOOP("Action", "Edit.Tool.Paint"),
 		QT_TRANSLATE_NOOP("Menu", "Paint"),
 		QT_TRANSLATE_NOOP("Status", "Change piece color"),
-		QT_TRANSLATE_NOOP("Shortcut", "Shift+N")
+		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
 	// LC_EDIT_ACTION_ZOOM
 	{
 		QT_TRANSLATE_NOOP("Action", "Edit.Tool.Zoom"),
 		QT_TRANSLATE_NOOP("Menu", "Zoom"),
 		QT_TRANSLATE_NOOP("Status", "Zoom in or out"),
-		QT_TRANSLATE_NOOP("Shortcut", "Shift+Z")
+		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
 	// LC_EDIT_ACTION_PAN
 	{
 		QT_TRANSLATE_NOOP("Action", "Edit.Tool.Pan"),
 		QT_TRANSLATE_NOOP("Menu", "Pan"),
 		QT_TRANSLATE_NOOP("Status", "Pan the current view"),
-		QT_TRANSLATE_NOOP("Shortcut", "Shift+P")
+		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
 	// LC_EDIT_ACTION_ROTATE_VIEW
 	{
 		QT_TRANSLATE_NOOP("Action", "Edit.Tool.RotateView"),
 		QT_TRANSLATE_NOOP("Menu", "Rotate View"),
 		QT_TRANSLATE_NOOP("Status", "Rotate the current view"),
-		QT_TRANSLATE_NOOP("Shortcut", "Shift+T")
+		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
 	// LC_EDIT_ACTION_ROLL
 	{
 		QT_TRANSLATE_NOOP("Action", "Edit.Tool.Roll"),
 		QT_TRANSLATE_NOOP("Menu", "Roll"),
 		QT_TRANSLATE_NOOP("Status", "Roll the current view"),
-		QT_TRANSLATE_NOOP("Shortcut", "Shift+L")
+		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
 	// LC_EDIT_ACTION_ZOOM_REGION
 	{

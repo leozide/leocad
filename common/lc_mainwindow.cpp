@@ -628,17 +628,15 @@ void lcMainWindow::CreateToolBars()
 	TransformButton->setPopupMode(QToolButton::InstantPopup);
 	TransformLayout->addWidget(TransformButton);
 
-	mTransformXEdit = new QLineEdit();
-	mTransformXEdit->setMaximumWidth(75);
+	mTransformXEdit = new lcTransformLineEdit();
 	TransformLayout->addWidget(mTransformXEdit);
-	mTransformYEdit = new QLineEdit();
-	mTransformYEdit->setMaximumWidth(75);
+	mTransformYEdit = new lcTransformLineEdit();
 	TransformLayout->addWidget(mTransformYEdit);
-	mTransformZEdit = new QLineEdit();
-	mTransformZEdit->setMaximumWidth(75);
+	mTransformZEdit = new lcTransformLineEdit();
 	TransformLayout->addWidget(mTransformZEdit);
-	TransformLayout->addItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
+
 	PropertiesLayout->addWidget(TransformWidget);
+
 	connect(mTransformXEdit, SIGNAL(returnPressed()), mActions[LC_EDIT_TRANSFORM], SIGNAL(triggered()));
 	connect(mTransformYEdit, SIGNAL(returnPressed()), mActions[LC_EDIT_TRANSFORM], SIGNAL(triggered()));
 	connect(mTransformZEdit, SIGNAL(returnPressed()), mActions[LC_EDIT_TRANSFORM], SIGNAL(triggered()));

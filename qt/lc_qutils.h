@@ -16,3 +16,20 @@ public:
 	const int m_columnToStretch;
 };
 
+class lcTransformLineEdit : public QLineEdit
+{
+public:
+	lcTransformLineEdit()
+		: QLineEdit()
+	{
+	}
+
+	virtual QSize sizeHint() const
+	{
+		QFontMetrics FontMetrics(font());
+
+		int Width = FontMetrics.width(QLatin1Char('x')) * 10;
+
+		return QLineEdit::sizeHint() - QSize(Width, 0);
+	}
+};

@@ -3124,7 +3124,7 @@ bool lcModel::GetPiecesBoundingBox(lcVector3& Min, lcVector3& Max) const
 	return Valid;
 }
 
-void lcModel::GetPartsList(int DefaultColorIndex, lcPartsList& PartsList) const
+void lcModel::GetPartsList(int DefaultColorIndex, bool IncludeSubmodels, lcPartsList& PartsList) const
 {
 	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 	{
@@ -3135,7 +3135,7 @@ void lcModel::GetPartsList(int DefaultColorIndex, lcPartsList& PartsList) const
 		if (ColorIndex == gDefaultColor)
 			ColorIndex = DefaultColorIndex;
 
-		Piece->mPieceInfo->GetPartsList(ColorIndex, PartsList);
+		Piece->mPieceInfo->GetPartsList(ColorIndex, IncludeSubmodels, PartsList);
 	}
 }
 
@@ -3153,7 +3153,7 @@ void lcModel::GetPartsListForStep(lcStep Step, int DefaultColorIndex, lcPartsLis
 		if (ColorIndex == gDefaultColor)
 			ColorIndex = DefaultColorIndex;
 
-		Piece->mPieceInfo->GetPartsList(ColorIndex, PartsList);
+		Piece->mPieceInfo->GetPartsList(ColorIndex, true, PartsList);
 	}
 }
 
@@ -3903,7 +3903,7 @@ void lcModel::ShowPropertiesDialog()
 	Options.Properties = mProperties;
 	Options.SetDefault = false;
 
-	GetPartsList(gDefaultColor, Options.PartsList);
+	GetPartsList(gDefaultColor, true, Options.PartsList);
 
 	if (!gMainWindow->DoDialog(LC_DIALOG_PROPERTIES, &Options))
 		return;

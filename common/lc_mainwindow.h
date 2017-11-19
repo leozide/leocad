@@ -21,6 +21,7 @@ class QPrinter;
 
 struct lcSearchOptions
 {
+	bool SearchValid;
 	bool MatchInfo;
 	bool MatchColor;
 	bool MatchName;
@@ -313,6 +314,7 @@ protected:
 	void CreateToolBars();
 	void CreateStatusBar();
 	void SplitView(Qt::Orientation Orientation);
+	void ShowSearchDialog();
 	void ShowUpdatesDialog();
 	void ShowAboutDialog();
 	void ShowRenderDialog();

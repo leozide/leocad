@@ -8,6 +8,7 @@
 #include "lc_qcolorlist.h"
 #include "lc_qpropertiestree.h"
 #include "lc_qutils.h"
+#include "lc_qfinddialog.h"
 #include "lc_qupdatedialog.h"
 #include "lc_qaboutdialog.h"
 #include "lc_setsdatabasedialog.h"
@@ -959,6 +960,22 @@ void lcMainWindow::Print(QPrinter* Printer)
 #endif
 }
 
+void lcMainWindow::ShowSearchDialog()
+{
+	lcModel* Model = lcGetActiveModel();
+
+	if (!mSearchOptions.SearchValid)
+	{
+		lcObject* Focus = Model->GetFocusObject();
+		if (Focus && Focus->IsPiece())
+			mSearchOptions.Info = ((lcPiece*)Focus)->mPieceInfo;
+	}
+
+	lcQFindDialog Dialog(this, &mSearchOptions);
+	if (Dialog.exec() == QDialog::Accepted)
+		Model->FindPiece(true, true);
+}
+
 void lcMainWindow::ShowUpdatesDialog()
 {
 	lcQUpdateDialog Dialog(this, false);
@@ -1008,7 +1025,6 @@ void lcMainWindow::SetShadingMode(lcShadingMode ShadingMode)
 // todo: call dialogs directly
 #include "lc_qhtmldialog.h"
 #include "lc_qpropertiesdialog.h"
-#include "lc_qfinddialog.h"
 #include "lc_qpreferencesdialog.h"
 
 bool lcMainWindow::DoDialog(LC_DIALOG_TYPE Type, void* Data)
@@ -1024,12 +1040,6 @@ bool lcMainWindow::DoDialog(LC_DIALOG_TYPE Type, void* Data)
 	case LC_DIALOG_PROPERTIES:
 		{
 			lcQPropertiesDialog Dialog(this, Data);
-			return Dialog.exec() == QDialog::Accepted;
-		} break;
-
-	case LC_DIALOG_FIND:
-		{
-			lcQFindDialog Dialog(this, Data);
 			return Dialog.exec() == QDialog::Accepted;
 		} break;
 
@@ -2091,8 +2101,7 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		break;
 
 	case LC_EDIT_FIND:
-		if (DoDialog(LC_DIALOG_FIND, &mSearchOptions))
-			lcGetActiveModel()->FindPiece(true, true);
+		ShowSearchDialog();
 		break;
 
 	case LC_EDIT_FIND_NEXT:

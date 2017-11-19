@@ -242,7 +242,7 @@ public:
 	lcObject* GetFocusObject() const;
 	bool GetSelectionCenter(lcVector3& Center) const;
 	bool GetPiecesBoundingBox(lcVector3& Min, lcVector3& Max) const;
-	void GetPartsList(int DefaultColorIndex, lcPartsList& PartsList) const;
+	void GetPartsList(int DefaultColorIndex, bool IncludeSubmodels, lcPartsList& PartsList) const;
 	void GetPartsListForStep(lcStep Step, int DefaultColorIndex, lcPartsList& PartsList) const;
 	void GetModelParts(const lcMatrix44& WorldMatrix, int DefaultColorIndex, lcArray<lcModelPartsEntry>& ModelParts) const;
 	void GetSelectionInformation(int* Flags, lcArray<lcObject*>& Selection, lcObject** Focus) const;

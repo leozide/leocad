@@ -993,7 +993,7 @@ void Project::ExportBrickLink()
 	lcPartsList PartsList;
 
 	if (!mModels.IsEmpty())
-		mModels[0]->GetPartsList(gDefaultColor, PartsList);
+		mModels[0]->GetPartsList(gDefaultColor, true, PartsList);
 
 	if (PartsList.empty())
 	{
@@ -1325,7 +1325,7 @@ void Project::ExportCSV()
 	lcPartsList PartsList;
 
 	if (!mModels.IsEmpty())
-		mModels[0]->GetPartsList(gDefaultColor, PartsList);
+		mModels[0]->GetPartsList(gDefaultColor, true, PartsList);
 
 	if (PartsList.empty())
 	{
@@ -1365,7 +1365,7 @@ QImage Project::CreatePartsListImage(lcModel* Model, lcStep Step)
 {
 	lcPartsList PartsList;
 	if (Step == 0)
-		Model->GetPartsList(gDefaultColor, PartsList);
+		Model->GetPartsList(gDefaultColor, true, PartsList);
 	else
 		Model->GetPartsListForStep(Step, gDefaultColor, PartsList);
 
@@ -1558,7 +1558,7 @@ void Project::CreateHTMLPieceList(QTextStream& Stream, lcModel* Model, lcStep St
 	lcPartsList PartsList;
 
 	if (Step == 0)
-		Model->GetPartsList(gDefaultColor, PartsList);
+		Model->GetPartsList(gDefaultColor, true, PartsList);
 	else
 		Model->GetPartsListForStep(Step, gDefaultColor, PartsList);
 
@@ -1853,7 +1853,7 @@ void Project::ExportHTML()
 			Context->SetViewport(0, 0, Width, Height);
 
 			lcPartsList PartsList;
-			Model->GetPartsList(gDefaultColor, PartsList);
+			Model->GetPartsList(gDefaultColor, true, PartsList);
 
 			lcMatrix44 ProjectionMatrix = lcMatrix44Perspective(30.0f, aspect, 1.0f, 2500.0f);
 			lcMatrix44 ViewMatrix;

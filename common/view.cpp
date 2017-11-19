@@ -2002,7 +2002,7 @@ void View::UpdateTrackTool()
 				lcObjectSection ObjectSection = FindObjectUnderPointer(false, false);
 				lcObject* Object = ObjectSection.Object;
 
-				if (Object && Object->IsPiece() && ObjectSection.Section == LC_PIECE_SECTION_POSITION)
+				if (Object && Object->IsPiece() && ObjectSection.Section == LC_PIECE_SECTION_POSITION && Object->IsSelected())
 				{
 					lcPiece* Piece = (lcPiece*)Object;
 					mMouseDownPosition = Piece->mModelWorld.GetTranslation();

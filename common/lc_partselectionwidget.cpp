@@ -540,6 +540,7 @@ void lcPartSelectionListView::UpdateViewMode()
 {
 	setViewMode(mListModel->GetIconSize() && !mListModel->IsListMode() ? QListView::IconMode : QListView::ListMode);
 	setWordWrap(mListModel->IsListMode());
+	setDragEnabled(true);
 }
 
 void lcPartSelectionListView::SetIconSize(int Size)

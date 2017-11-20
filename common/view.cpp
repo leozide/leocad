@@ -349,8 +349,14 @@ lcMatrix44 View::GetTileProjectionMatrix(int CurrentRow, int CurrentColumn, int 
 
 LC_CURSOR_TYPE View::GetCursor() const
 {
-	if (mTrackTool == LC_TRACKTOOL_SELECT && (mInputState.Modifiers & Qt::ControlModifier))
-		return LC_CURSOR_SELECT_GROUP;
+	if (mTrackTool == LC_TRACKTOOL_SELECT)
+	{
+		if (mInputState.Modifiers & Qt::ControlModifier)
+			return LC_CURSOR_SELECT_ADD;
+
+		if (mInputState.Modifiers & Qt::ShiftModifier)
+			return LC_CURSOR_SELECT_REMOVE;
+	}
 
 	const LC_CURSOR_TYPE CursorFromTrackTool[] =
 	{
@@ -1997,7 +2003,7 @@ void View::UpdateTrackTool()
 				}
 			}
 
-			if (CurrentTool == LC_TOOL_SELECT && NewTrackTool == LC_TRACKTOOL_SELECT)
+			if (CurrentTool == LC_TOOL_SELECT && NewTrackTool == LC_TRACKTOOL_SELECT && mInputState.Modifiers == Qt::NoModifier)
 			{
 				lcObjectSection ObjectSection = FindObjectUnderPointer(false, false);
 				lcObject* Object = ObjectSection.Object;
@@ -2405,6 +2411,8 @@ void View::StopTracking(bool Accept)
 
 			if (mInputState.Modifiers & Qt::ControlModifier)
 				mModel->AddToSelection(Objects);
+			else if (mInputState.Modifiers & Qt::ShiftModifier)
+				mModel->RemoveFromSelection(Objects);
 			else
 				mModel->SetSelectionAndFocus(Objects, nullptr, 0);
 		}
@@ -2519,6 +2527,8 @@ void View::OnButtonDown(lcTrackButton TrackButton)
 
 			if (mInputState.Modifiers & Qt::ControlModifier)
 				mModel->FocusOrDeselectObject(ObjectSection);
+			else if (mInputState.Modifiers & Qt::ShiftModifier)
+				mModel->RemoveFromSelection(ObjectSection);
 			else
 				mModel->ClearSelectionAndSetFocus(ObjectSection);
 
@@ -2606,6 +2616,8 @@ void View::OnLeftButtonDoubleClick()
 
 	if (mInputState.Modifiers & Qt::ControlModifier)
 		mModel->FocusOrDeselectObject(ObjectSection);
+	else if (mInputState.Modifiers & Qt::ShiftModifier)
+		mModel->RemoveFromSelection(ObjectSection);
 	else
 		mModel->ClearSelectionAndSetFocus(ObjectSection);
 }

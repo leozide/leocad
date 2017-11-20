@@ -43,25 +43,28 @@ void lcGLWidget::SetCursor(LC_CURSOR_TYPE CursorType)
 
 	const lcCursorInfo Cursors[LC_CURSOR_COUNT] =
 	{
-		{  0,  0, "" },                                   // LC_CURSOR_DEFAULT
-		{  8,  3, ":/resources/cursor_insert" },          // LC_CURSOR_BRICK
-		{ 15, 15, ":/resources/cursor_light" },           // LC_CURSOR_LIGHT
-		{  7, 10, ":/resources/cursor_spotlight" },       // LC_CURSOR_SPOTLIGHT
-		{ 15,  9, ":/resources/cursor_camera" },          // LC_CURSOR_CAMERA
-		{  0,  2, ":/resources/cursor_select" },          // LC_CURSOR_SELECT
-		{  0,  2, ":/resources/cursor_select_multiple" }, // LC_CURSOR_SELECT_GROUP
-		{ 15, 15, ":/resources/cursor_move" },            // LC_CURSOR_MOVE
-		{ 15, 15, ":/resources/cursor_rotate" },          // LC_CURSOR_ROTATE
-		{ 15, 15, ":/resources/cursor_rotatex" },         // LC_CURSOR_ROTATEX
-		{ 15, 15, ":/resources/cursor_rotatey" },         // LC_CURSOR_ROTATEY
-		{  0, 10, ":/resources/cursor_delete" },          // LC_CURSOR_DELETE
-		{ 14, 14, ":/resources/cursor_paint" },           // LC_CURSOR_PAINT
-		{ 15, 15, ":/resources/cursor_zoom" },            // LC_CURSOR_ZOOM
-		{  9,  9, ":/resources/cursor_zoom_region" },     // LC_CURSOR_ZOOM_REGION
-		{ 15, 15, ":/resources/cursor_pan" },             // LC_CURSOR_PAN
-		{ 15, 15, ":/resources/cursor_roll" },            // LC_CURSOR_ROLL
-		{ 15, 15, ":/resources/cursor_rotate_view" },     // LC_CURSOR_ROTATE_VIEW
+		{  0,  0, "" },                                 // LC_CURSOR_DEFAULT
+		{  8,  3, ":/resources/cursor_insert" },        // LC_CURSOR_BRICK
+		{ 15, 15, ":/resources/cursor_light" },         // LC_CURSOR_LIGHT
+		{  7, 10, ":/resources/cursor_spotlight" },     // LC_CURSOR_SPOTLIGHT
+		{ 15,  9, ":/resources/cursor_camera" },        // LC_CURSOR_CAMERA
+		{  0,  2, ":/resources/cursor_select" },        // LC_CURSOR_SELECT
+		{  0,  2, ":/resources/cursor_select_add" },    // LC_CURSOR_SELECT_ADD
+		{  0,  2, ":/resources/cursor_select_remove" }, // LC_CURSOR_SELECT_REMOVE
+		{ 15, 15, ":/resources/cursor_move" },          // LC_CURSOR_MOVE
+		{ 15, 15, ":/resources/cursor_rotate" },        // LC_CURSOR_ROTATE
+		{ 15, 15, ":/resources/cursor_rotatex" },       // LC_CURSOR_ROTATEX
+		{ 15, 15, ":/resources/cursor_rotatey" },       // LC_CURSOR_ROTATEY
+		{  0, 10, ":/resources/cursor_delete" },        // LC_CURSOR_DELETE
+		{ 14, 14, ":/resources/cursor_paint" },         // LC_CURSOR_PAINT
+		{ 15, 15, ":/resources/cursor_zoom" },          // LC_CURSOR_ZOOM
+		{  9,  9, ":/resources/cursor_zoom_region" },   // LC_CURSOR_ZOOM_REGION
+		{ 15, 15, ":/resources/cursor_pan" },           // LC_CURSOR_PAN
+		{ 15, 15, ":/resources/cursor_roll" },          // LC_CURSOR_ROLL
+		{ 15, 15, ":/resources/cursor_rotate_view" },   // LC_CURSOR_ROTATE_VIEW
 	};
+
+	static_assert(sizeof(Cursors) / sizeof(Cursors[0]) == LC_CURSOR_COUNT, "Array size mismatch");
 
 	QGLWidget* widget = (QGLWidget*)mWidget;
 
@@ -171,7 +174,7 @@ void lcQGLWidget::paintGL()
 
 void lcQGLWidget::keyPressEvent(QKeyEvent *event)
 {
-	if (isView && event->key() == Qt::Key_Control)
+	if (isView && (event->key() == Qt::Key_Control || event->key() == Qt::Key_Shift))
 	{
 		widget->mInputState.Modifiers = event->modifiers();
 		widget->OnUpdateCursor();
@@ -182,7 +185,7 @@ void lcQGLWidget::keyPressEvent(QKeyEvent *event)
 
 void lcQGLWidget::keyReleaseEvent(QKeyEvent *event)
 {
-	if (isView && event->key() == Qt::Key_Control)
+	if (isView && (event->key() == Qt::Key_Control || event->key() == Qt::Key_Shift))
 	{
 		widget->mInputState.Modifiers = event->modifiers();
 		widget->OnUpdateCursor();

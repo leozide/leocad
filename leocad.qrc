@@ -50,7 +50,8 @@
         <file>resources/cursor_rotatey.png</file>
         <file>resources/cursor_rotate_view.png</file>
         <file>resources/cursor_select.png</file>
-        <file>resources/cursor_select_multiple.png</file>
+        <file>resources/cursor_select_add.png</file>
+        <file>resources/cursor_select_remove.png</file>
         <file>resources/cursor_spotlight.png</file>
         <file>resources/cursor_zoom.png</file>
         <file>resources/cursor_zoom_region.png</file>

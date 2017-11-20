@@ -3326,7 +3326,7 @@ void lcModel::FocusOrDeselectObject(const lcObjectSection& ObjectSection)
 			Object->SetFocused(Section, true);
 		}
 		else
-			Object->SetSelected(Section, false);
+			Object->SetFocused(Section, false);
 
 		bool IsSelected = Object->IsSelected();
 
@@ -3386,11 +3386,44 @@ void lcModel::AddToSelection(const lcArray<lcObject*>& Objects)
 		lcObject* Object = Objects[ObjectIdx];
 
 		bool WasSelected = Object->IsSelected();
-		Object->SetSelected(Objects[ObjectIdx]);
+		Object->SetSelected(true);
 
 		if (!WasSelected && Object->GetType() == LC_OBJECT_PIECE)
 			SelectGroup(((lcPiece*)Object)->GetTopGroup(), true);
 	}
+
+	gMainWindow->UpdateSelectedObjects(true);
+	gMainWindow->UpdateAllViews();
+}
+
+void lcModel::RemoveFromSelection(const lcArray<lcObject*>& Objects)
+{
+	for (int ObjectIdx = 0; ObjectIdx < Objects.GetSize(); ObjectIdx++)
+	{
+		lcObject* Object = Objects[ObjectIdx];
+
+		bool WasSelected = Object->IsSelected();
+		Object->SetSelected(false);
+
+		if (WasSelected && Object->GetType() == LC_OBJECT_PIECE)
+			SelectGroup(((lcPiece*)Object)->GetTopGroup(), false);
+	}
+
+	gMainWindow->UpdateSelectedObjects(true);
+	gMainWindow->UpdateAllViews();
+}
+
+void lcModel::RemoveFromSelection(const lcObjectSection& ObjectSection)
+{
+	lcObject* Object = ObjectSection.Object;
+
+	if (!Object)
+		return;
+
+	if (Object->IsFocused(ObjectSection.Section))
+		Object->SetSelected(ObjectSection.Section, false);
+	else
+		Object->SetSelected(false);
 
 	gMainWindow->UpdateSelectedObjects(true);
 	gMainWindow->UpdateAllViews();

@@ -447,15 +447,15 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 	// LC_EDIT_SNAP_ANGLE3
 	{
 		QT_TRANSLATE_NOOP("Action", "Edit.SnapAngle.Angle3"),
-		QT_TRANSLATE_NOOP("Menu", "10 Degrees"),
-		QT_TRANSLATE_NOOP("Status", "Snap rotations to 10 degrees"),
+		QT_TRANSLATE_NOOP("Menu", "15 Degrees"),
+		QT_TRANSLATE_NOOP("Status", "Snap rotations to 15 degrees"),
 		QT_TRANSLATE_NOOP("Shortcut", "Shift+3")
 	},
 	// LC_EDIT_SNAP_ANGLE4
 	{
 		QT_TRANSLATE_NOOP("Action", "Edit.SnapAngle.Angle4"),
-		QT_TRANSLATE_NOOP("Menu", "15 Degrees"),
-		QT_TRANSLATE_NOOP("Status", "Snap rotations to 15 degrees"),
+		QT_TRANSLATE_NOOP("Menu", "22.5 Degrees"),
+		QT_TRANSLATE_NOOP("Status", "Snap rotations to 22.5 degrees"),
 		QT_TRANSLATE_NOOP("Shortcut", "Shift+4")
 	},
 	// LC_EDIT_SNAP_ANGLE5

@@ -135,9 +135,9 @@ public:
 		return mMoveSnapEnabled ? SnapZTable[mMoveZSnapIndex] : 0.0f;
 	}
 
-	int GetAngleSnap() const
+	float GetAngleSnap() const
 	{
-		const int AngleTable[] = { 0, 1, 5, 10, 15, 30, 45, 60, 90, 180 };
+		const float AngleTable[] = { 0.0f, 1.0f, 5.0f, 15.0f, 22.5f, 30.0f, 45.0f, 60.0f, 90.0f, 180.0f };
 		return mAngleSnapEnabled ? AngleTable[mAngleSnapIndex] : 0.0f;
 	}
 

@@ -1967,15 +1967,15 @@ lcVector3 lcModel::SnapPosition(const lcVector3& Distance) const
 
 lcVector3 lcModel::SnapRotation(const lcVector3& Angles) const
 {
-	int AngleSnap = gMainWindow->GetAngleSnap();
+	float AngleSnap = gMainWindow->GetAngleSnap();
 	lcVector3 NewAngles(Angles);
 
-	if (AngleSnap)
+	if (AngleSnap != 0.0f)
 	{
 		int Snap[3];
 
 		for (int i = 0; i < 3; i++)
-			Snap[i] = (int)(Angles[i] / (float)AngleSnap);
+			Snap[i] = (int)(Angles[i] / AngleSnap);
 
 		NewAngles = lcVector3((float)(AngleSnap * Snap[0]), (float)(AngleSnap * Snap[1]), (float)(AngleSnap * Snap[2]));
 	}

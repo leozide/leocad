@@ -370,7 +370,7 @@ void lcTimelineWidget::ItemSelectionChanged()
 	lcModel* Model = lcGetActiveModel();
 	if (LastStep > Model->GetCurrentStep())
 		Model->SetCurrentStep(LastStep);
-	Model->SetSelectionAndFocus(Selection, CurrentPiece, LC_PIECE_SECTION_POSITION);
+	Model->SetSelectionAndFocus(Selection, CurrentPiece, LC_PIECE_SECTION_POSITION, false);
 	mIgnoreUpdates = false;
 	blockSignals(Blocked);
 }

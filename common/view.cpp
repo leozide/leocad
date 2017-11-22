@@ -2410,11 +2410,11 @@ void View::StopTracking(bool Accept)
 			lcArray<lcObject*> Objects = FindObjectsInBox(mMouseDownX, mMouseDownY, mInputState.x, mInputState.y);
 
 			if (mInputState.Modifiers & Qt::ControlModifier)
-				mModel->AddToSelection(Objects, true);
+				mModel->AddToSelection(Objects, true, true);
 			else if (mInputState.Modifiers & Qt::ShiftModifier)
 				mModel->RemoveFromSelection(Objects);
 			else
-				mModel->SetSelectionAndFocus(Objects, nullptr, 0);
+				mModel->SetSelectionAndFocus(Objects, nullptr, 0, true);
 		}
 		break;
 

@@ -69,6 +69,7 @@ lcMainWindow::lcMainWindow()
 	mAngleSnapIndex = 5;
 	mRelativeTransform = true;
 	mCurrentPieceInfo = nullptr;
+	mSelectionMode = lcSelectionMode::SINGLE;
 
 	memset(&mSearchOptions, 0, sizeof(mSearchOptions));
 
@@ -337,6 +338,13 @@ void lcMainWindow::CreateActions()
 		ActionShadingGroup->addAction(mActions[ActionIdx]);
 	}
 
+	QActionGroup* SelectionModeGroup = new QActionGroup(this);
+	for (int ActionIdx = LC_EDIT_SELECTION_MODE_FIRST; ActionIdx <= LC_EDIT_SELECTION_MODE_LAST; ActionIdx++)
+	{
+		mActions[ActionIdx]->setCheckable(true);
+		SelectionModeGroup->addAction(mActions[ActionIdx]);
+	}
+
 	QActionGroup* ModelGroup = new QActionGroup(this);
 	for (int ActionIdx = LC_MODEL_FIRST; ActionIdx <= LC_MODEL_LAST; ActionIdx++)
 	{
@@ -454,6 +462,9 @@ void lcMainWindow::CreateMenus()
 	EditMenu->addAction(mActions[LC_EDIT_SELECT_INVERT]);
 	EditMenu->addAction(mActions[LC_EDIT_SELECT_BY_NAME]);
 	EditMenu->addAction(mActions[LC_EDIT_SELECT_BY_COLOR]);
+	QMenu* SelectionModeMenu = EditMenu->addMenu(tr("Selection Mode"));
+	for (int ModeIdx = LC_EDIT_SELECTION_MODE_FIRST; ModeIdx <= LC_EDIT_SELECTION_MODE_LAST; ModeIdx++)
+		SelectionModeMenu->addAction(mActions[ModeIdx]);
 	EditMenu->addSeparator();
 	EditMenu->addMenu(mToolsMenu);
 
@@ -1020,6 +1031,12 @@ void lcMainWindow::SetShadingMode(lcShadingMode ShadingMode)
 	UpdateAllViews();
 	if (mPartSelectionWidget)
 		mPartSelectionWidget->Redraw();
+}
+
+void lcMainWindow::SetSelectionMode(lcSelectionMode SelectionMode)
+{
+	mSelectionMode = SelectionMode;
+	UpdateSelectionMode();
 }
 
 // todo: call dialogs directly
@@ -1682,6 +1699,28 @@ void lcMainWindow::UpdateShadingMode()
 	mActions[LC_VIEW_SHADING_FIRST + lcGetPreferences().mShadingMode]->setChecked(true);
 }
 
+void lcMainWindow::UpdateSelectionMode()
+{
+	switch (mSelectionMode)
+	{
+	case lcSelectionMode::SINGLE:
+		mActions[LC_EDIT_SELECTION_SINGLE]->setChecked(true);
+		break;
+
+	case lcSelectionMode::PIECE:
+		mActions[LC_EDIT_SELECTION_PIECE]->setChecked(true);
+		break;
+
+	case lcSelectionMode::COLOR:
+		mActions[LC_EDIT_SELECTION_COLOR]->setChecked(true);
+		break;
+
+	case lcSelectionMode::PIECE_COLOR:
+		mActions[LC_EDIT_SELECTION_PIECE_COLOR]->setChecked(true);
+		break;
+	}
+}
+
 void lcMainWindow::UpdateModels()
 {
 	const lcArray<lcModel*>& Models = lcGetActiveProject()->GetModels();
@@ -2130,6 +2169,22 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 
 	case LC_EDIT_SELECT_BY_COLOR:
 		lcGetActiveModel()->ShowSelectByColorDialog();
+		break;
+
+	case LC_EDIT_SELECTION_SINGLE:
+		SetSelectionMode(lcSelectionMode::SINGLE);
+		break;
+
+	case LC_EDIT_SELECTION_PIECE:
+		SetSelectionMode(lcSelectionMode::PIECE);
+		break;
+
+	case LC_EDIT_SELECTION_COLOR:
+		SetSelectionMode(lcSelectionMode::COLOR);
+		break;
+
+	case LC_EDIT_SELECTION_PIECE_COLOR:
+		SetSelectionMode(lcSelectionMode::PIECE_COLOR);
 		break;
 
 	case LC_VIEW_SPLIT_HORIZONTAL:

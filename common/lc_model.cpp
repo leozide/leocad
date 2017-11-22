@@ -1143,7 +1143,7 @@ void lcModel::Paste()
 	SaveCheckpoint(tr("Pasting"));
 
 	if (SelectedObjects.GetSize() == 1)
-		ClearSelectionAndSetFocus(SelectedObjects[0], LC_PIECE_SECTION_POSITION);
+		ClearSelectionAndSetFocus(SelectedObjects[0], LC_PIECE_SECTION_POSITION, false);
 	else
 		SetSelectionAndFocus(SelectedObjects, nullptr, 0);
 
@@ -2038,7 +2038,7 @@ void lcModel::AddPiece()
 	Piece->SetColorIndex(gMainWindow->mColorIndex);
 	AddPiece(Piece);
 	gMainWindow->UpdateTimeline(false, false);
-	ClearSelectionAndSetFocus(Piece, LC_PIECE_SECTION_POSITION);
+	ClearSelectionAndSetFocus(Piece, LC_PIECE_SECTION_POSITION, false);
 
 	SaveCheckpoint(tr("Adding Piece"));
 }
@@ -2324,7 +2324,7 @@ void lcModel::MoveSelectionToModel(lcModel* Model)
 
 	SaveCheckpoint(tr("New Model"));
 	gMainWindow->UpdateTimeline(false, false);
-	ClearSelectionAndSetFocus(ModelPiece, LC_PIECE_SECTION_POSITION);
+	ClearSelectionAndSetFocus(ModelPiece, LC_PIECE_SECTION_POSITION, false);
 }
 
 void lcModel::InlineSelectedModels()
@@ -3276,6 +3276,39 @@ void lcModel::GetSelectionInformation(int* Flags, lcArray<lcObject*>& Selection,
 	}
 }
 
+lcArray<lcObject*> lcModel::GetSelectionModePieces(lcPiece* SelectedPiece) const
+{
+	PieceInfo* Info = SelectedPiece->mPieceInfo;
+	int ColorIndex = SelectedPiece->mColorIndex;
+	lcArray<lcObject*> Pieces;
+
+	switch (gMainWindow->GetSelectionMode())
+	{
+	case lcSelectionMode::SINGLE:
+		break;
+
+	case lcSelectionMode::PIECE:
+		for (lcPiece* Piece : mPieces)
+			if (Piece->IsVisible(mCurrentStep) && Piece->mPieceInfo == Info && Piece != SelectedPiece)
+				Pieces.Add(Piece);
+		break;
+
+	case lcSelectionMode::COLOR:
+		for (lcPiece* Piece : mPieces)
+			if (Piece->IsVisible(mCurrentStep) && Piece->mColorIndex == ColorIndex && Piece != SelectedPiece)
+				Pieces.Add(Piece);
+		break;
+
+	case lcSelectionMode::PIECE_COLOR:
+		for (lcPiece* Piece : mPieces)
+			if (Piece->IsVisible(mCurrentStep) && Piece->mPieceInfo == Info && Piece->mColorIndex == ColorIndex && Piece != SelectedPiece)
+				Pieces.Add(Piece);
+		break;
+	}
+
+	return Pieces;
+}
+
 void lcModel::ClearSelection(bool UpdateInterface)
 {
 	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
@@ -3331,7 +3364,17 @@ void lcModel::FocusOrDeselectObject(const lcObjectSection& ObjectSection)
 		bool IsSelected = Object->IsSelected();
 
 		if (Object->IsPiece() && (WasSelected != IsSelected))
-			SelectGroup(((lcPiece*)Object)->GetTopGroup(), IsSelected);
+		{
+			lcPiece* Piece = (lcPiece*)Object;
+
+			if (gMainWindow->GetSelectionMode() == lcSelectionMode::SINGLE)
+				SelectGroup(Piece->GetTopGroup(), IsSelected);
+			else
+			{
+				lcArray<lcObject*> Pieces = GetSelectionModePieces(Piece);
+				AddToSelection(Pieces, false);
+			}
+		}
 	}
 	else
 	{
@@ -3343,7 +3386,7 @@ void lcModel::FocusOrDeselectObject(const lcObjectSection& ObjectSection)
 	gMainWindow->UpdateAllViews();
 }
 
-void lcModel::ClearSelectionAndSetFocus(lcObject* Object, lcuint32 Section)
+void lcModel::ClearSelectionAndSetFocus(lcObject* Object, lcuint32 Section, bool EnableSelectionMode)
 {
 	ClearSelection(false);
 
@@ -3353,15 +3396,21 @@ void lcModel::ClearSelectionAndSetFocus(lcObject* Object, lcuint32 Section)
 
 		if (Object->IsPiece())
 			SelectGroup(((lcPiece*)Object)->GetTopGroup(), true);
+
+		if (Object->IsPiece() && EnableSelectionMode)
+		{
+			lcArray<lcObject*> Pieces = GetSelectionModePieces((lcPiece*)Object);
+			AddToSelection(Pieces, false);
+		}
 	}
 
 	gMainWindow->UpdateSelectedObjects(true);
 	gMainWindow->UpdateAllViews();
 }
 
-void lcModel::ClearSelectionAndSetFocus(const lcObjectSection& ObjectSection)
+void lcModel::ClearSelectionAndSetFocus(const lcObjectSection& ObjectSection, bool EnableSelectionMode)
 {
-	ClearSelectionAndSetFocus(ObjectSection.Object, ObjectSection.Section);
+	ClearSelectionAndSetFocus(ObjectSection.Object, ObjectSection.Section, EnableSelectionMode);
 }
 
 void lcModel::SetSelectionAndFocus(const lcArray<lcObject*>& Selection, lcObject* Focus, lcuint32 Section)
@@ -3376,10 +3425,10 @@ void lcModel::SetSelectionAndFocus(const lcArray<lcObject*>& Selection, lcObject
 			SelectGroup(((lcPiece*)Focus)->GetTopGroup(), true);
 	}
 
-	AddToSelection(Selection);
+	AddToSelection(Selection, true);
 }
 
-void lcModel::AddToSelection(const lcArray<lcObject*>& Objects)
+void lcModel::AddToSelection(const lcArray<lcObject*>& Objects, bool UpdateInterface)
 {
 	for (int ObjectIdx = 0; ObjectIdx < Objects.GetSize(); ObjectIdx++)
 	{
@@ -3392,20 +3441,21 @@ void lcModel::AddToSelection(const lcArray<lcObject*>& Objects)
 			SelectGroup(((lcPiece*)Object)->GetTopGroup(), true);
 	}
 
-	gMainWindow->UpdateSelectedObjects(true);
-	gMainWindow->UpdateAllViews();
+	if (UpdateInterface)
+	{
+		gMainWindow->UpdateSelectedObjects(true);
+		gMainWindow->UpdateAllViews();
+	}
 }
 
 void lcModel::RemoveFromSelection(const lcArray<lcObject*>& Objects)
 {
-	for (int ObjectIdx = 0; ObjectIdx < Objects.GetSize(); ObjectIdx++)
+	for (lcObject* Object : Objects)
 	{
-		lcObject* Object = Objects[ObjectIdx];
-
 		bool WasSelected = Object->IsSelected();
 		Object->SetSelected(false);
 
-		if (WasSelected && Object->GetType() == LC_OBJECT_PIECE)
+		if (WasSelected && Object->IsPiece())
 			SelectGroup(((lcPiece*)Object)->GetTopGroup(), false);
 	}
 
@@ -3420,10 +3470,15 @@ void lcModel::RemoveFromSelection(const lcObjectSection& ObjectSection)
 	if (!Object)
 		return;
 
+	bool WasSelected = Object->IsSelected();
+
 	if (Object->IsFocused(ObjectSection.Section))
 		Object->SetSelected(ObjectSection.Section, false);
 	else
 		Object->SetSelected(false);
+
+	if (WasSelected && Object->IsPiece())
+		SelectGroup(((lcPiece*)Object)->GetTopGroup(), false);
 
 	gMainWindow->UpdateSelectedObjects(true);
 	gMainWindow->UpdateAllViews();
@@ -3568,7 +3623,7 @@ void lcModel::FindPiece(bool FindFirst, bool SearchForward)
 		}
 	}
 
-	ClearSelectionAndSetFocus(Focus, LC_PIECE_SECTION_POSITION);
+	ClearSelectionAndSetFocus(Focus, LC_PIECE_SECTION_POSITION, false);
 }
 
 void lcModel::UndoAction()
@@ -3681,7 +3736,7 @@ void lcModel::InsertPieceToolClicked(const lcMatrix44& WorldMatrix)
 	AddPiece(Piece);
 
 	gMainWindow->UpdateTimeline(false, false);
-	ClearSelectionAndSetFocus(Piece, LC_PIECE_SECTION_POSITION);
+	ClearSelectionAndSetFocus(Piece, LC_PIECE_SECTION_POSITION, false);
 
 	SaveCheckpoint(tr("Insert"));
 }
@@ -3692,7 +3747,7 @@ void lcModel::PointLightToolClicked(const lcVector3& Position)
 	Light->CreateName(mLights);
 	mLights.Add(Light);
 
-	ClearSelectionAndSetFocus(Light, LC_LIGHT_SECTION_POSITION);
+	ClearSelectionAndSetFocus(Light, LC_LIGHT_SECTION_POSITION, false);
 	SaveCheckpoint(tr("New Light"));
 }
 
@@ -3703,7 +3758,7 @@ void lcModel::BeginSpotLightTool(const lcVector3& Position, const lcVector3& Tar
 
 	mMouseToolDistance = Target;
 
-	ClearSelectionAndSetFocus(Light, LC_LIGHT_SECTION_TARGET);
+	ClearSelectionAndSetFocus(Light, LC_LIGHT_SECTION_TARGET, false);
 }
 
 void lcModel::UpdateSpotLightTool(const lcVector3& Position)
@@ -3727,7 +3782,7 @@ void lcModel::BeginCameraTool(const lcVector3& Position, const lcVector3& Target
 
 	mMouseToolDistance = Position;
 
-	ClearSelectionAndSetFocus(Camera, LC_CAMERA_SECTION_TARGET);
+	ClearSelectionAndSetFocus(Camera, LC_CAMERA_SECTION_TARGET, false);
 }
 
 void lcModel::UpdateCameraTool(const lcVector3& Position)
@@ -4075,7 +4130,7 @@ void lcModel::ShowArrayDialog()
 		AddPiece(Piece);
 	}
 
-	AddToSelection(NewPieces);
+	AddToSelection(NewPieces, true);
 	gMainWindow->UpdateTimeline(false, false);
 	SaveCheckpoint(tr("Array"));
 }
@@ -4132,4 +4187,5 @@ void lcModel::UpdateInterface()
 	gMainWindow->UpdatePerspective();
 	gMainWindow->UpdateShadingMode();
 	gMainWindow->UpdateCurrentStep();
+	gMainWindow->UpdateSelectionMode();
 }

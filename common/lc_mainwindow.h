@@ -163,6 +163,11 @@ public:
 		return mRelativeTransform;
 	}
 
+	lcSelectionMode GetSelectionMode() const
+	{
+		return mSelectionMode;
+	}
+
 	PieceInfo* GetCurrentPieceInfo() const
 	{
 		return mCurrentPieceInfo;
@@ -245,6 +250,7 @@ public:
 	void SetRelativeTransform(bool RelativeTransform);
 	void SetCurrentPieceInfo(PieceInfo* Info);
 	void SetShadingMode(lcShadingMode ShadingMode);
+	void SetSelectionMode(lcSelectionMode SelectionMode);
 
 	void NewProject();
 	bool OpenProject(const QString& FileName);
@@ -281,6 +287,7 @@ public:
 	void UpdatePerspective();
 	void UpdateCameraMenu();
 	void UpdateShadingMode();
+	void UpdateSelectionMode();
 	void UpdateModels();
 	void UpdateCategories();
 	void UpdateTitle();
@@ -343,6 +350,7 @@ protected:
 	int mAngleSnapIndex;
 	bool mRelativeTransform;
 	PieceInfo* mCurrentPieceInfo;
+	lcSelectionMode mSelectionMode;
 
 	QAction* mActionFileRecentSeparator;
 

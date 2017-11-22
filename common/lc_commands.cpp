@@ -262,6 +262,34 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 		QT_TRANSLATE_NOOP("Status", "Select pieces by color"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
+	// LC_EDIT_SELECT_SINGLE
+	{
+		QT_TRANSLATE_NOOP("Action", "Edit.SelectSingle"),
+		QT_TRANSLATE_NOOP("Menu", "Single Selection"),
+		QT_TRANSLATE_NOOP("Status", "Select one piece at a time"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
+	// LC_EDIT_SELECT_PIECE
+	{
+		QT_TRANSLATE_NOOP("Action", "Edit.SelectPiece"),
+		QT_TRANSLATE_NOOP("Menu", "Piece Selection"),
+		QT_TRANSLATE_NOOP("Status", "Select all pieces of the same type"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
+	// LC_EDIT_SELECT_COLOR
+	{
+		QT_TRANSLATE_NOOP("Action", "Edit.SelectColor"),
+		QT_TRANSLATE_NOOP("Menu", "Color Selection"),
+		QT_TRANSLATE_NOOP("Status", "Select all pieces of the same color"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
+	// LC_EDIT_SELECT_PIECE_COLOR
+	{
+		QT_TRANSLATE_NOOP("Action", "Edit.SelectPieceColor"),
+		QT_TRANSLATE_NOOP("Menu", "Piece and Color Selection"),
+		QT_TRANSLATE_NOOP("Status", "Select all pieces of the same type and color"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
 	// LC_EDIT_TRANSFORM_RELATIVE
 	{
 		QT_TRANSLATE_NOOP("Action", "Edit.TransformRelative"),

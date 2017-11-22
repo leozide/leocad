@@ -2410,7 +2410,7 @@ void View::StopTracking(bool Accept)
 			lcArray<lcObject*> Objects = FindObjectsInBox(mMouseDownX, mMouseDownY, mInputState.x, mInputState.y);
 
 			if (mInputState.Modifiers & Qt::ControlModifier)
-				mModel->AddToSelection(Objects);
+				mModel->AddToSelection(Objects, true);
 			else if (mInputState.Modifiers & Qt::ShiftModifier)
 				mModel->RemoveFromSelection(Objects);
 			else
@@ -2530,7 +2530,7 @@ void View::OnButtonDown(lcTrackButton TrackButton)
 			else if (mInputState.Modifiers & Qt::ShiftModifier)
 				mModel->RemoveFromSelection(ObjectSection);
 			else
-				mModel->ClearSelectionAndSetFocus(ObjectSection);
+				mModel->ClearSelectionAndSetFocus(ObjectSection, true);
 
 			StartTracking(TrackButton);
 		}
@@ -2619,7 +2619,7 @@ void View::OnLeftButtonDoubleClick()
 	else if (mInputState.Modifiers & Qt::ShiftModifier)
 		mModel->RemoveFromSelection(ObjectSection);
 	else
-		mModel->ClearSelectionAndSetFocus(ObjectSection);
+		mModel->ClearSelectionAndSetFocus(ObjectSection, true);
 }
 
 void View::OnMiddleButtonDown()

@@ -20,6 +20,14 @@
 
 class lcGLWidget;
 
+enum class lcSelectionMode
+{
+	SINGLE,
+	PIECE,
+	COLOR,
+	PIECE_COLOR
+};
+
 enum lcTransformType
 {
 	LC_TRANSFORM_ABSOLUTE_TRANSLATION,
@@ -246,13 +254,14 @@ public:
 	void GetPartsListForStep(lcStep Step, int DefaultColorIndex, lcPartsList& PartsList) const;
 	void GetModelParts(const lcMatrix44& WorldMatrix, int DefaultColorIndex, lcArray<lcModelPartsEntry>& ModelParts) const;
 	void GetSelectionInformation(int* Flags, lcArray<lcObject*>& Selection, lcObject** Focus) const;
+	lcArray<lcObject*> GetSelectionModePieces(lcPiece* SelectedPiece) const;
 
 	void FocusOrDeselectObject(const lcObjectSection& ObjectSection);
 	void ClearSelection(bool UpdateInterface);
-	void ClearSelectionAndSetFocus(lcObject* Object, lcuint32 Section);
-	void ClearSelectionAndSetFocus(const lcObjectSection& ObjectSection);
+	void ClearSelectionAndSetFocus(lcObject* Object, lcuint32 Section, bool EnableSelectionMode);
+	void ClearSelectionAndSetFocus(const lcObjectSection& ObjectSection, bool EnableSelectionMode);
 	void SetSelectionAndFocus(const lcArray<lcObject*>& Selection, lcObject* Focus, lcuint32 Section);
-	void AddToSelection(const lcArray<lcObject*>& Objects);
+	void AddToSelection(const lcArray<lcObject*>& Objects, bool UpdateInteface);
 	void RemoveFromSelection(const lcArray<lcObject*>& Objects);
 	void RemoveFromSelection(const lcObjectSection& ObjectSection);
 	void SelectAllPieces();

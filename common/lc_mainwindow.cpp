@@ -259,6 +259,7 @@ void lcMainWindow::CreateActions()
 	mActions[LC_EDIT_ACTION_ROTATE_VIEW]->setIcon(QIcon(":/resources/action_rotate_view.png"));
 	mActions[LC_EDIT_ACTION_ROLL]->setIcon(QIcon(":/resources/action_roll.png"));
 	mActions[LC_EDIT_ACTION_ZOOM_REGION]->setIcon(QIcon(":/resources/action_zoom_region.png"));
+	mActions[LC_EDIT_FIND]->setIcon(QIcon(":/resources/edit_find.png"));
 	mActions[LC_EDIT_TRANSFORM_RELATIVE]->setIcon(QIcon(":/resources/edit_transform_relative.png"));
 	mActions[LC_PIECE_SHOW_EARLIER]->setIcon(QIcon(":/resources/piece_show_earlier.png"));
 	mActions[LC_PIECE_SHOW_LATER]->setIcon(QIcon(":/resources/piece_show_later.png"));
@@ -453,7 +454,6 @@ void lcMainWindow::CreateMenus()
 	EditMenu->addSeparator();
 	EditMenu->addAction(mActions[LC_EDIT_FIND]);
 
-	mActions[LC_EDIT_FIND]->setIcon(QIcon(":/resources/edit_find.png"));
 	EditMenu->addAction(mActions[LC_EDIT_FIND_NEXT]);
 	EditMenu->addAction(mActions[LC_EDIT_FIND_PREVIOUS]);
 	EditMenu->addSeparator();
@@ -462,9 +462,7 @@ void lcMainWindow::CreateMenus()
 	EditMenu->addAction(mActions[LC_EDIT_SELECT_INVERT]);
 	EditMenu->addAction(mActions[LC_EDIT_SELECT_BY_NAME]);
 	EditMenu->addAction(mActions[LC_EDIT_SELECT_BY_COLOR]);
-	QMenu* SelectionModeMenu = EditMenu->addMenu(tr("Selection Mode"));
-	for (int ModeIdx = LC_EDIT_SELECTION_MODE_FIRST; ModeIdx <= LC_EDIT_SELECTION_MODE_LAST; ModeIdx++)
-		SelectionModeMenu->addAction(mActions[ModeIdx]);
+	EditMenu->addMenu(mSelectionModeMenu);
 	EditMenu->addSeparator();
 	EditMenu->addMenu(mToolsMenu);
 
@@ -544,6 +542,15 @@ void lcMainWindow::CreateMenus()
 
 void lcMainWindow::CreateToolBars()
 {
+	mSelectionModeMenu = new QMenu(tr("Selection Mode"), this);
+	for (int ModeIdx = LC_EDIT_SELECTION_MODE_FIRST; ModeIdx <= LC_EDIT_SELECTION_MODE_LAST; ModeIdx++)
+		mSelectionModeMenu->addAction(mActions[ModeIdx]);
+
+	QAction* SelectionModeAction = new QAction(tr("Selection Mode"), this);
+	SelectionModeAction->setStatusTip(tr("Change selection mode"));
+	SelectionModeAction->setIcon(QIcon(":/resources/action_select.png"));
+	SelectionModeAction->setMenu(mSelectionModeMenu);
+
 	QMenu* SnapXYMenu = new QMenu(tr("Snap XY"), this);
 	for (int actionIdx = LC_EDIT_SNAP_MOVE_XY0; actionIdx <= LC_EDIT_SNAP_MOVE_XY9; actionIdx++)
 		SnapXYMenu->addAction(mActions[actionIdx]);
@@ -583,9 +590,11 @@ void lcMainWindow::CreateToolBars()
 	mStandardToolBar->addAction(mActions[LC_EDIT_UNDO]);
 	mStandardToolBar->addAction(mActions[LC_EDIT_REDO]);
 	mStandardToolBar->addSeparator();
+	mStandardToolBar->addAction(SelectionModeAction);
 	mStandardToolBar->addAction(mActions[LC_EDIT_TRANSFORM_RELATIVE]);
 	mStandardToolBar->addAction(MoveAction);
 	mStandardToolBar->addAction(AngleAction);
+	((QToolButton*)mStandardToolBar->widgetForAction(SelectionModeAction))->setPopupMode(QToolButton::InstantPopup);
 	((QToolButton*)mStandardToolBar->widgetForAction(MoveAction))->setPopupMode(QToolButton::InstantPopup);
 	((QToolButton*)mStandardToolBar->widgetForAction(AngleAction))->setPopupMode(QToolButton::InstantPopup);
 

@@ -381,6 +381,7 @@ protected:
 	QMenu* mCameraMenu;
 	QMenu* mProjectionMenu;
 	QMenu* mShadingMenu;
+	QMenu* mSelectionModeMenu;
 };
 
 extern class lcMainWindow* gMainWindow;

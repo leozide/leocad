@@ -25,7 +25,11 @@ lcQImageDialog::lcQImageDialog(QWidget* Parent)
 	mFileName = Project->GetFileName();
 
 	if (!mFileName.isEmpty())
-		mFileName = QFileInfo(mFileName).completeBaseName();
+	{
+		QString Extension = QFileInfo(mFileName).suffix();
+		if (!Extension.isEmpty())
+			mFileName = mFileName.left(mFileName.length() - Extension.length() - 1);
+	}
 	else
 		mFileName = QLatin1String("image");
 

@@ -384,7 +384,9 @@ bool lcApplication::Initialize(int argc, char* argv[], QList<QPair<QString, bool
 			else
 			{
 				FileName = ProjectName;
-				FileName = FileName.left(FileName.length() - QFileInfo(FileName).suffix().length() - 1);
+				QString Extension = QFileInfo(FileName).suffix();
+				if (!Extension.isEmpty())
+					FileName = FileName.left(FileName.length() - Extension.length() - 1);
 				FileName += lcGetProfileString(LC_PROFILE_IMAGE_EXTENSION);
 			}
 

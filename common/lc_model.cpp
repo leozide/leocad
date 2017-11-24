@@ -1344,6 +1344,9 @@ void lcModel::SaveStepImages(const QString& BaseName, bool AddStepSuffix, bool Z
 
 		QImageWriter Writer(FileName);
 
+		if (Writer.format().isEmpty())
+			Writer.setFormat("png");
+
 		if (!Writer.write(View.GetRenderImage()))
 		{
 			QMessageBox::information(gMainWindow, tr("Error"), tr("Error writing to file '%1':\n%2").arg(FileName, Writer.errorString()));

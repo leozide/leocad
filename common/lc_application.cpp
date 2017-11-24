@@ -337,11 +337,9 @@ bool lcApplication::Initialize(int argc, char* argv[], QList<QPair<QString, bool
 
 	gMainWindow->CreateWidgets();
 
-	// Create a new project.
 	Project* NewProject = new Project();
 	SetProject(NewProject);
 
-	// Load project.
 	if (ProjectName && gMainWindow->OpenProject(ProjectName))
 	{
 		if (ModelName)
@@ -384,17 +382,9 @@ bool lcApplication::Initialize(int argc, char* argv[], QList<QPair<QString, bool
 			if (ImageName)
 				FileName = ImageName;
 			else
+			{
 				FileName = ProjectName;
-
-			QString Extension = QFileInfo(FileName).suffix().toLower();
-
-			if (Extension.isEmpty())
-			{
-				FileName += lcGetProfileString(LC_PROFILE_IMAGE_EXTENSION);
-			}
-			else if (Extension != "bmp" && Extension != "jpg" && Extension != "jpeg" && Extension != "png")
-			{
-				FileName = FileName.left(FileName.length() - Extension.length() - 1);
+				FileName = FileName.left(FileName.length() - QFileInfo(FileName).suffix().length() - 1);
 				FileName += lcGetProfileString(LC_PROFILE_IMAGE_EXTENSION);
 			}
 
@@ -404,17 +394,11 @@ bool lcApplication::Initialize(int argc, char* argv[], QList<QPair<QString, bool
 				ImageStart = ImageEnd;
 
 			if ((ImageStart == 0) && (ImageEnd == 0))
-			{
 				ImageStart = ImageEnd = mProject->GetActiveModel()->GetCurrentStep();
-			}
 			else if ((ImageStart == 0) && (ImageEnd != 0))
-			{
 				ImageStart = ImageEnd;
-			}
 			else if ((ImageStart != 0) && (ImageEnd == 0))
-			{
 				ImageEnd = ImageStart;
-			}
 
 			if (ImageStart > 255)
 				ImageStart = 255;

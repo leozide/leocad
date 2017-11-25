@@ -1597,7 +1597,21 @@ void lcPiecesLibrary::ReleaseTexture(lcTexture* Texture)
 
 bool lcPiecesLibrary::LoadPrimitive(lcLibraryPrimitive* Primitive)
 {
-	QMutexLocker LoadLock(&mLoadMutex);
+	mLoadMutex.lock();
+
+	if (Primitive->mState == lcPrimitiveState::NOT_LOADED)
+		Primitive->mState = lcPrimitiveState::LOADING;
+	else
+	{
+		mLoadMutex.unlock();
+
+		while (Primitive->mState == lcPrimitiveState::LOADING)
+			lcSleeper::msleep(5);
+
+		return Primitive->mState == lcPrimitiveState::LOADED;
+	}
+
+	mLoadMutex.unlock();
 
 	lcArray<lcLibraryTextureMap> TextureStack;
 
@@ -1668,7 +1682,9 @@ bool lcPiecesLibrary::LoadPrimitive(lcLibraryPrimitive* Primitive)
 			return false;
 	}
 
-	Primitive->mLoaded = true;
+	mLoadMutex.lock();
+	Primitive->mState = lcPrimitiveState::LOADED;
+	mLoadMutex.unlock();
 
 	return true;
 }
@@ -1897,7 +1913,7 @@ bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransf
 
 				if (Primitive)
 				{
-					if (!Primitive->mLoaded && !LoadPrimitive(Primitive))
+					if (Primitive->mState != lcPrimitiveState::LOADED && !LoadPrimitive(Primitive))
 						break;
 
 					if (Primitive->mStud)

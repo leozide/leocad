@@ -67,6 +67,13 @@ enum lcMeshDataType
 	LC_NUM_MESHDATA_TYPES
 };
 
+enum class lcPrimitiveState
+{
+	NOT_LOADED,
+	LOADING,
+	LOADED
+};
+
 class lcLibraryMeshData
 {
 public:
@@ -120,7 +127,7 @@ public:
 
 		mZipFileType = ZipFileType;
 		mZipFileIndex = ZipFileIndex;
-		mLoaded = false;
+		mState = lcPrimitiveState::NOT_LOADED;
 		mStud = Stud;
 		mSubFile = SubFile;
 	}
@@ -134,7 +141,7 @@ public:
 	char mName[LC_MAXPATH];
 	lcZipFileType mZipFileType;
 	lcuint32 mZipFileIndex;
-	bool mLoaded;
+	lcPrimitiveState mState;
 	bool mStud;
 	bool mSubFile;
 	lcLibraryMeshData mMeshData;

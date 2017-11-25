@@ -46,6 +46,7 @@ lcPiecesLibrary::lcPiecesLibrary()
 	mZipFiles[LC_ZIPFILE_UNOFFICIAL] = nullptr;
 	mBuffersDirty = false;
 	mHasUnofficial = false;
+	mCancelLoading = false;
 }
 
 lcPiecesLibrary::~lcPiecesLibrary()
@@ -53,6 +54,7 @@ lcPiecesLibrary::~lcPiecesLibrary()
 	mLoadMutex.lock();
 	mLoadQueue.clear();
 	mLoadMutex.unlock();
+	mCancelLoading = true;
 	WaitForLoadQueue();
 	Unload();
 }
@@ -1180,7 +1182,7 @@ bool lcPiecesLibrary::LoadPieceData(PieceInfo* Info)
 		}
 	}
 	
-	if (!Loaded)
+	if (!Loaded || mCancelLoading)
 		return false;
 
 	CreateMesh(Info, MeshData);
@@ -1702,6 +1704,9 @@ bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransf
 
 	while (File.ReadLine(Buffer, sizeof(Buffer)))
 	{
+		if (mCancelLoading)
+			return false;
+
 		lcuint32 ColorCode, ColorCodeHex;
 		bool LastToken = false;
 		int LineType;

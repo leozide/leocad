@@ -242,5 +242,6 @@ protected:
 	QString mUnofficialFileName;
 	lcZipFile* mZipFiles[LC_NUM_ZIPFILES];
 	bool mHasUnofficial;
+	bool mCancelLoading;
 };
 

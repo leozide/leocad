@@ -227,11 +227,30 @@ void lcScene::Draw(lcContext* Context) const
 
 	lcShadingMode ShadingMode = lcGetPreferences().mShadingMode;
 
-	if (ShadingMode == LC_SHADING_FLAT || ShadingMode == LC_SHADING_WIREFRAME)
+	if (ShadingMode == LC_SHADING_WIREFRAME)
 	{
-		if (ShadingMode == LC_SHADING_WIREFRAME)
-			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		Context->BindTexture(0);
 
+		Context->SetMaterial(LC_MATERIAL_UNLIT_COLOR);
+
+		int UntexturedPrimitives = LC_MESH_LINES;
+
+		if (DrawConditional)
+			UntexturedPrimitives |= LC_MESH_CONDITIONAL_LINES;
+
+		DrawRenderMeshes(Context, UntexturedPrimitives, false, false, false);
+
+		if (mHasTexture)
+		{
+			Context->SetMaterial(LC_MATERIAL_UNLIT_TEXTURE_DECAL);
+
+			DrawRenderMeshes(Context, LC_MESH_TEXTURED_LINES, false, false, false);
+
+			Context->BindTexture(0);
+		}
+	}
+	else if (ShadingMode == LC_SHADING_FLAT)
+	{
 		bool DrawLines = lcGetPreferences().mDrawEdgeLines;
 		Context->BindTexture(0);
 
@@ -265,7 +284,7 @@ void lcScene::Draw(lcContext* Context) const
 			Context->SetMaterial(LC_MATERIAL_UNLIT_TEXTURE_DECAL);
 
 			if (DrawLines)
-				DrawRenderMeshes(Context, LC_MESH_TEXTURED_LINES | LC_MESH_TEXTURED_TRIANGLES, false, false, false);
+				DrawRenderMeshes(Context, LC_MESH_TEXTURED_LINES, false, false, false);
 
 			DrawRenderMeshes(Context, LC_MESH_TEXTURED_TRIANGLES, false, false, true);
 
@@ -282,9 +301,6 @@ void lcScene::Draw(lcContext* Context) const
 
 			Context->BindTexture(0);
 		}
-
-		if (ShadingMode == LC_SHADING_WIREFRAME)
-			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
 	else
 	{

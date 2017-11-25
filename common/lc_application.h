@@ -46,7 +46,7 @@ public:
 	void Shutdown();
 	void ShowPreferencesDialog();
 
-	bool LoadPiecesLibrary(const QList<QPair<QString, bool>>& LibraryPaths);
+	bool LoadPartsLibrary(const QList<QPair<QString, bool>>& LibraryPaths, bool OnlyUsePaths);
 
 	void SetClipboard(const QByteArray& Clipboard);
 	void ExportClipboard(const QByteArray& Clipboard);

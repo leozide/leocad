@@ -5,6 +5,7 @@
 #include "lc_profile.h"
 #include "project.h"
 #include "lc_mainwindow.h"
+#include "lc_partselectionwidget.h"
 #include "lc_shortcuts.h"
 #include "view.h"
 
@@ -82,20 +83,23 @@ void lcApplication::ExportClipboard(const QByteArray& Clipboard)
 	SetClipboard(Clipboard);
 }
 
-bool lcApplication::LoadPiecesLibrary(const QList<QPair<QString, bool>>& LibraryPaths)
+bool lcApplication::LoadPartsLibrary(const QList<QPair<QString, bool>>& LibraryPaths, bool OnlyUsePaths)
 {
 	if (mLibrary == nullptr)
 		mLibrary = new lcPiecesLibrary();
 
-	char* EnvPath = getenv("LEOCAD_LIB");
+	if (!OnlyUsePaths)
+	{
+		char* EnvPath = getenv("LEOCAD_LIB");
 
-	if (EnvPath && EnvPath[0])
-		return mLibrary->Load(EnvPath);
+		if (EnvPath && EnvPath[0])
+			return mLibrary->Load(EnvPath);
 
-	QString CustomPath = lcGetProfileString(LC_PROFILE_PARTS_LIBRARY);
+		QString CustomPath = lcGetProfileString(LC_PROFILE_PARTS_LIBRARY);
 
-	if (!CustomPath.isEmpty())
-		return mLibrary->Load(CustomPath);
+		if (!CustomPath.isEmpty())
+			return mLibrary->Load(CustomPath);
+	}
 
 	for (const QPair<QString, bool>& LibraryPathEntry : LibraryPaths)
 	{
@@ -149,6 +153,7 @@ void lcApplication::ParseStringArgument(int* CurArg, int argc, char* argv[], con
 bool lcApplication::Initialize(int argc, char* argv[], QList<QPair<QString, bool>>& LibraryPaths, bool& ShowWindow)
 {
 	// todo: parse command line using Qt to handle multibyte strings.
+	bool OnlyUseLibraryPaths = false;
 	bool SaveImage = false;
 	bool SaveWavefront = false;
 	bool Save3DS = false;
@@ -182,6 +187,7 @@ bool lcApplication::Initialize(int argc, char* argv[], QList<QPair<QString, bool
 				{
 					LibraryPaths.clear();
 					LibraryPaths += qMakePair<QString, bool>(LibPath, false);
+					OnlyUseLibraryPaths = true;
 				}
 			}
 			else if ((strcmp(Param, "-i") == 0) || (strcmp(Param, "--image") == 0))
@@ -320,7 +326,7 @@ bool lcApplication::Initialize(int argc, char* argv[], QList<QPair<QString, bool
 
 	ShowWindow = !SaveImage && !SaveWavefront && !Save3DS && !SaveCOLLADA;
 
-	if (!LoadPiecesLibrary(LibraryPaths))
+	if (!LoadPartsLibrary(LibraryPaths, OnlyUseLibraryPaths))
 	{
 		QString Message;
 
@@ -492,6 +498,14 @@ bool lcApplication::Initialize(int argc, char* argv[], QList<QPair<QString, bool
 
 			mProject->ExportCOLLADA(FileName);
 		}
+	}
+
+	if (ShowWindow)
+	{
+		gMainWindow->SetColorIndex(lcGetColorIndex(4));
+		gMainWindow->GetPartSelectionWidget()->SetDefaultPart();
+		gMainWindow->UpdateRecentFiles();
+		gMainWindow->show();
 	}
 
 	return true;

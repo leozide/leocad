@@ -534,12 +534,16 @@ bool lcPiecesLibrary::OpenDirectory(const QDir& LibraryDir)
 	}
 
 	const QLatin1String BaseFolders[] = { QLatin1String("unofficial/"), QLatin1String("") };
+	const int NumBaseFolders = sizeof(BaseFolders) / sizeof(BaseFolders[0]);
 
 	if (mPieces.empty())
 	{
-		for (unsigned int BaseFolderIdx = 0; BaseFolderIdx < sizeof(BaseFolders) / sizeof(BaseFolders[0]); BaseFolderIdx++)
+		QDir BaseDirs[NumBaseFolders];
+
+		for (unsigned int BaseFolderIdx = 0; BaseFolderIdx < NumBaseFolders; BaseFolderIdx++)
 		{
-			QDir Dir(QDir(LibraryDir.absoluteFilePath(BaseFolders[BaseFolderIdx])).absoluteFilePath(QLatin1String("parts/")), QLatin1String("*.dat"), QDir::SortFlags(QDir::Name | QDir::IgnoreCase), QDir::Files | QDir::Hidden | QDir::Readable);
+			BaseDirs[BaseFolderIdx] = QDir(QDir(LibraryDir.absoluteFilePath(BaseFolders[BaseFolderIdx])).absoluteFilePath(QLatin1String("parts/")), QLatin1String("*.dat"), QDir::SortFlags(QDir::Name | QDir::IgnoreCase), QDir::Files | QDir::Hidden | QDir::Readable);
+			QDir& Dir = BaseDirs[BaseFolderIdx];
 			QStringList FileList = Dir.entryList();
 
 			for (int FileIdx = 0; FileIdx < FileList.size(); FileIdx++)
@@ -573,21 +577,40 @@ bool lcPiecesLibrary::OpenDirectory(const QDir& LibraryDir)
 				if (mHasUnofficial && mPieces.find(Name) != mPieces.end())
 					continue;
 
-				lcDiskFile PieceFile(Dir.absoluteFilePath(FileList[FileIdx]));
-				if (!PieceFile.Open(QIODevice::ReadOnly))
-					continue;
-
-				char Line[1024];
-				if (!PieceFile.ReadLine(Line, sizeof(Line)))
-					continue;
-
 				PieceInfo* Info = new PieceInfo();
 
 				if (BaseFolderIdx == 0)
 					mHasUnofficial = true;
 
-				Src = (char*)Line + 2;
-				Dst = Info->m_strDescription;
+				strncpy(Info->mFileName, FileString, sizeof(Info->mFileName));
+				Info->mFileName[sizeof(Info->mFileName) - 1] = 0;
+				Info->mUnofficial = (BaseFolderIdx == 0);
+
+				mPieces[Name] = Info;
+			}
+		}
+
+		if (!mPieces.empty())
+		{
+			QAtomicInt FilesLoaded;
+
+			auto ReadDescriptions = [&BaseDirs, &FilesLoaded](const std::pair<std::string, PieceInfo*>& Entry)
+			{
+				PieceInfo* Info = Entry.second;
+				FilesLoaded += 1;
+
+				QDir& Dir = BaseDirs[Info->mUnofficial ? 0 : 1];
+				lcDiskFile PieceFile(Dir.absoluteFilePath(Info->mFileName));
+				char Line[1024];
+
+				if (!PieceFile.Open(QIODevice::ReadOnly) || !PieceFile.ReadLine(Line, sizeof(Line)))
+				{
+					strcpy(Info->m_strDescription, "Unknown");
+					return;
+				}
+
+				const char* Src = Line + 2;
+				char* Dst = Info->m_strDescription;
 
 				for (;;)
 				{
@@ -600,12 +623,28 @@ bool lcPiecesLibrary::OpenDirectory(const QDir& LibraryDir)
 					*Dst = 0;
 					break;
 				}
+			};
 
-				strncpy(Info->mFileName, FileString, sizeof(Info->mFileName));
-				Info->mFileName[sizeof(Info->mFileName) - 1] = 0;
+			QProgressDialog* ProgressDialog = new QProgressDialog(nullptr);
+			ProgressDialog->setWindowFlags(ProgressDialog->windowFlags() & ~Qt::WindowCloseButtonHint);
+			ProgressDialog->setWindowTitle(tr("Initializing"));
+			ProgressDialog->setLabelText(tr("Loading Parts Library"));
+			ProgressDialog->setMaximum(mPieces.size());
+			ProgressDialog->setMinimum(0);
+			ProgressDialog->setValue(0);
+			ProgressDialog->setCancelButton(nullptr);
+			ProgressDialog->show();
 
-				mPieces[Name] = Info;
+			QFuture<void> LoadFuture = QtConcurrent::map(mPieces, ReadDescriptions);
+
+			while (!LoadFuture.isFinished())
+			{
+				ProgressDialog->setValue(FilesLoaded);
+
+				QApplication::processEvents();
 			}
+
+			ProgressDialog->deleteLater();
 		}
 	}
 

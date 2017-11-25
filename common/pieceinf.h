@@ -155,6 +155,7 @@ public:
 	int mZipFileIndex;
 	lcuint32 mFlags;
 	lcPieceInfoState mState;
+	bool mUnofficial;
 
 protected:
 	void ReleaseMesh();

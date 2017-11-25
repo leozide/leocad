@@ -2,9 +2,6 @@
 #include "lc_application.h"
 #include "lc_qupdatedialog.h"
 #include "lc_mainwindow.h"
-#include "project.h"
-#include "lc_colors.h"
-#include "lc_partselectionwidget.h"
 #include <QApplication>
 #include <locale.h>
 
@@ -178,11 +175,6 @@ int main(int argc, char *argv[])
 
 	if (ShowWindow)
 	{
-		gMainWindow->SetColorIndex(lcGetColorIndex(4));
-		gMainWindow->GetPartSelectionWidget()->SetDefaultPart();
-		gMainWindow->UpdateRecentFiles();
-		gMainWindow->show();
-
 #if !LC_DISABLE_UPDATE_CHECK
 		lcDoInitialUpdateCheck();
 #endif

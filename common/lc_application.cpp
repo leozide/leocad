@@ -83,7 +83,7 @@ void lcApplication::ExportClipboard(const QByteArray& Clipboard)
 	SetClipboard(Clipboard);
 }
 
-bool lcApplication::LoadPartsLibrary(const QList<QPair<QString, bool>>& LibraryPaths, bool OnlyUsePaths)
+bool lcApplication::LoadPartsLibrary(const QList<QPair<QString, bool>>& LibraryPaths, bool OnlyUsePaths, bool ShowProgress)
 {
 	if (mLibrary == nullptr)
 		mLibrary = new lcPiecesLibrary();
@@ -93,17 +93,17 @@ bool lcApplication::LoadPartsLibrary(const QList<QPair<QString, bool>>& LibraryP
 		char* EnvPath = getenv("LEOCAD_LIB");
 
 		if (EnvPath && EnvPath[0])
-			return mLibrary->Load(EnvPath);
+			return mLibrary->Load(EnvPath, ShowProgress);
 
 		QString CustomPath = lcGetProfileString(LC_PROFILE_PARTS_LIBRARY);
 
 		if (!CustomPath.isEmpty())
-			return mLibrary->Load(CustomPath);
+			return mLibrary->Load(CustomPath, ShowProgress);
 	}
 
 	for (const QPair<QString, bool>& LibraryPathEntry : LibraryPaths)
 	{
-		if (mLibrary->Load(LibraryPathEntry.first))
+		if (mLibrary->Load(LibraryPathEntry.first, ShowProgress))
 		{
 			if (LibraryPathEntry.second)
 				mLibrary->SetOfficialPieces();
@@ -326,7 +326,7 @@ bool lcApplication::Initialize(int argc, char* argv[], QList<QPair<QString, bool
 
 	ShowWindow = !SaveImage && !SaveWavefront && !Save3DS && !SaveCOLLADA;
 
-	if (!LoadPartsLibrary(LibraryPaths, OnlyUseLibraryPaths))
+	if (!LoadPartsLibrary(LibraryPaths, OnlyUseLibraryPaths, ShowWindow))
 	{
 		QString Message;
 

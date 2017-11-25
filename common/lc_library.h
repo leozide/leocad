@@ -155,7 +155,7 @@ public:
 	lcPiecesLibrary();
 	~lcPiecesLibrary();
 
-	bool Load(const QString& LibraryPath);
+	bool Load(const QString& LibraryPath, bool ShowProgress);
 	void Unload();
 	void RemoveTemporaryPieces();
 	void RemovePiece(PieceInfo* Info);
@@ -214,7 +214,7 @@ signals:
 protected:
 	bool OpenArchive(const QString& FileName, lcZipFileType ZipFileType);
 	bool OpenArchive(lcFile* File, const QString& FileName, lcZipFileType ZipFileType);
-	bool OpenDirectory(const QDir& LibraryDir);
+	bool OpenDirectory(const QDir& LibraryDir, bool ShowProgress);
 	void ReadArchiveDescriptions(const QString& OfficialFileName, const QString& UnofficialFileName);
 
 	bool ReadCacheFile(const QString& FileName, lcMemFile& CacheFile);

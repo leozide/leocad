@@ -240,7 +240,7 @@ lcTexture* lcPiecesLibrary::FindTexture(const char* TextureName, Project* Curren
 	return nullptr;
 }
 
-bool lcPiecesLibrary::Load(const QString& LibraryPath)
+bool lcPiecesLibrary::Load(const QString& LibraryPath, bool ShowProgress)
 {
 	Unload();
 
@@ -263,7 +263,7 @@ bool lcPiecesLibrary::Load(const QString& LibraryPath)
 	{
 		mLibraryDir = LibraryPath;
 
-		if (OpenDirectory(mLibraryDir))
+		if (OpenDirectory(mLibraryDir, ShowProgress))
 		{
 			lcDiskFile ColorFile(mLibraryDir.absoluteFilePath(QLatin1String("ldconfig.ldr")));
 
@@ -466,7 +466,7 @@ void lcPiecesLibrary::ReadArchiveDescriptions(const QString& OfficialFileName, c
 	}
 }
 
-bool lcPiecesLibrary::OpenDirectory(const QDir& LibraryDir)
+bool lcPiecesLibrary::OpenDirectory(const QDir& LibraryDir, bool ShowProgress)
 {
 	lcDiskFile PartsList(LibraryDir.absoluteFilePath(QLatin1String("parts.lst")));
 
@@ -597,7 +597,7 @@ bool lcPiecesLibrary::OpenDirectory(const QDir& LibraryDir)
 			auto ReadDescriptions = [&BaseDirs, &FilesLoaded](const std::pair<std::string, PieceInfo*>& Entry)
 			{
 				PieceInfo* Info = Entry.second;
-				FilesLoaded += 1;
+				FilesLoaded.ref();
 
 				QDir& Dir = BaseDirs[Info->mUnofficial ? 0 : 1];
 				lcDiskFile PieceFile(Dir.absoluteFilePath(Info->mFileName));
@@ -633,16 +633,20 @@ bool lcPiecesLibrary::OpenDirectory(const QDir& LibraryDir)
 			ProgressDialog->setMinimum(0);
 			ProgressDialog->setValue(0);
 			ProgressDialog->setCancelButton(nullptr);
-			ProgressDialog->show();
+			ProgressDialog->setAutoReset(false);
+			if (ShowProgress)
+				ProgressDialog->show();
 
 			QFuture<void> LoadFuture = QtConcurrent::map(mPieces, ReadDescriptions);
 
 			while (!LoadFuture.isFinished())
 			{
 				ProgressDialog->setValue(FilesLoaded);
-
-				QApplication::processEvents();
+				QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
 			}
+
+			ProgressDialog->setValue(FilesLoaded);
+			QApplication::processEvents();
 
 			ProgressDialog->deleteLater();
 		}

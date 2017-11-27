@@ -464,198 +464,29 @@ void lcPiecesLibrary::ReadArchiveDescriptions(const QString& OfficialFileName, c
 			}
 		}
 
-		SaveCacheIndex(IndexFileName);
+		SaveArchiveCacheIndex(IndexFileName);
 	}
 }
 
 bool lcPiecesLibrary::OpenDirectory(const QDir& LibraryDir, bool ShowProgress)
 {
-	lcDiskFile PartsList(LibraryDir.absoluteFilePath(QLatin1String("parts.lst")));
-
-	if (PartsList.Open(QIODevice::ReadOnly))
-	{
-		char Line[1024];
-
-		while (PartsList.ReadLine(Line, sizeof(Line)))
-		{
-			char OriginalLine[1024];
-			strcpy(OriginalLine, Line);
-
-			char* Chr = Line;
-			char* Ext = nullptr;
-
-			while (*Chr)
-			{
-				if (*Chr >= 'a' && *Chr <= 'z')
-					*Chr = *Chr + 'A' - 'a';
-				else if (*Chr == '.')
-					Ext = Chr;
-				else if (isspace(*Chr))
-				{
-					*Chr++ = 0;
-					break;
-				}
-
-				Chr++;
-			}
-
-			if (Ext && !strcmp(Ext, ".DAT"))
-				OriginalLine[Ext - Line + 4] = 0;
-			else
-				continue;
-
-			while (*Chr && isspace(*Chr))
-				Chr++;
-
-			char* Description = Chr;
-
-			while (*Chr)
-			{
-				if (*Chr == '\r' || *Chr == '\n')
-				{
-					*Chr = 0;
-					break;
-				}
-
-				Chr++;
-			}
-
-			if (!*Line || !*Description)
-				continue;
-
-			PieceInfo* Info = new PieceInfo();
-
-			strncpy(Info->mFileName, OriginalLine, sizeof(Info->mFileName));
-			Info->mFileName[sizeof(Info->mFileName) - 1] = 0;
-
-			strncpy(Info->m_strDescription, Description, sizeof(Info->m_strDescription));
-			Info->m_strDescription[sizeof(Info->m_strDescription) - 1] = 0;
-
-			mPieces[Line] = Info;
-		}
-	}
-
-	const QLatin1String BaseFolders[] = { QLatin1String("unofficial/"), QLatin1String("") };
+	const QLatin1String BaseFolders[LC_NUM_FOLDERTYPES] = { QLatin1String("unofficial/"), QLatin1String("") };
 	const int NumBaseFolders = sizeof(BaseFolders) / sizeof(BaseFolders[0]);
 
-	if (mPieces.empty())
+	QFileInfoList FileLists[NumBaseFolders];
+
+	for (unsigned int BaseFolderIdx = 0; BaseFolderIdx < NumBaseFolders; BaseFolderIdx++)
 	{
-		QDir BaseDirs[NumBaseFolders];
-
-		for (unsigned int BaseFolderIdx = 0; BaseFolderIdx < NumBaseFolders; BaseFolderIdx++)
-		{
-			BaseDirs[BaseFolderIdx] = QDir(QDir(LibraryDir.absoluteFilePath(BaseFolders[BaseFolderIdx])).absoluteFilePath(QLatin1String("parts/")), QLatin1String("*.dat"), QDir::SortFlags(QDir::Name | QDir::IgnoreCase), QDir::Files | QDir::Hidden | QDir::Readable);
-			QDir& Dir = BaseDirs[BaseFolderIdx];
-			QStringList FileList = Dir.entryList();
-
-			for (int FileIdx = 0; FileIdx < FileList.size(); FileIdx++)
-			{
-				char Name[LC_PIECE_NAME_LEN];
-				QByteArray FileString = FileList[FileIdx].toLatin1();
-				const char* Src = FileString;
-				char* Dst = Name;
-
-				while (*Src && Dst - Name < (int)sizeof(Name))
-				{
-					if (*Src >= 'a' && *Src <= 'z')
-						*Dst = *Src + 'A' - 'a';
-					else if (*Src == '\\')
-						*Dst = '/';
-					else
-						*Dst = *Src;
-
-					Src++;
-					Dst++;
-				}
-				*Dst = 0;
-
-				if (Dst - Name <= 4)
-					continue;
-
-				Dst -= 4;
-				if (memcmp(Dst, ".DAT", 4))
-					continue;
-
-				if (mHasUnofficial && mPieces.find(Name) != mPieces.end())
-					continue;
-
-				PieceInfo* Info = new PieceInfo();
-
-				if (BaseFolderIdx == 0)
-					mHasUnofficial = true;
-
-				strncpy(Info->mFileName, FileString, sizeof(Info->mFileName));
-				Info->mFileName[sizeof(Info->mFileName) - 1] = 0;
-				Info->mUnofficial = (BaseFolderIdx == 0);
-
-				mPieces[Name] = Info;
-			}
-		}
-
-		if (!mPieces.empty())
-		{
-			QAtomicInt FilesLoaded;
-
-			auto ReadDescriptions = [&BaseDirs, &FilesLoaded](const std::pair<std::string, PieceInfo*>& Entry)
-			{
-				PieceInfo* Info = Entry.second;
-				FilesLoaded.ref();
-
-				QDir& Dir = BaseDirs[Info->mUnofficial ? 0 : 1];
-				lcDiskFile PieceFile(Dir.absoluteFilePath(Info->mFileName));
-				char Line[1024];
-
-				if (!PieceFile.Open(QIODevice::ReadOnly) || !PieceFile.ReadLine(Line, sizeof(Line)))
-				{
-					strcpy(Info->m_strDescription, "Unknown");
-					return;
-				}
-
-				const char* Src = Line + 2;
-				char* Dst = Info->m_strDescription;
-
-				for (;;)
-				{
-					if (*Src != '\r' && *Src != '\n' && *Src && Dst - Info->m_strDescription < (int)sizeof(Info->m_strDescription) - 1)
-					{
-						*Dst++ = *Src++;
-						continue;
-					}
-
-					*Dst = 0;
-					break;
-				}
-			};
-
-			QProgressDialog* ProgressDialog = new QProgressDialog(nullptr);
-			ProgressDialog->setWindowFlags(ProgressDialog->windowFlags() & ~Qt::WindowCloseButtonHint);
-			ProgressDialog->setWindowTitle(tr("Initializing"));
-			ProgressDialog->setLabelText(tr("Loading Parts Library"));
-			ProgressDialog->setMaximum(mPieces.size());
-			ProgressDialog->setMinimum(0);
-			ProgressDialog->setValue(0);
-			ProgressDialog->setCancelButton(nullptr);
-			ProgressDialog->setAutoReset(false);
-			if (ShowProgress)
-				ProgressDialog->show();
-
-			QFuture<void> LoadFuture = QtConcurrent::map(mPieces, ReadDescriptions);
-
-			while (!LoadFuture.isFinished())
-			{
-				ProgressDialog->setValue(FilesLoaded);
-				QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-			}
-
-			ProgressDialog->setValue(FilesLoaded);
-			QApplication::processEvents();
-
-			ProgressDialog->deleteLater();
-		}
+		QString ParstPath = QDir(LibraryDir.absoluteFilePath(BaseFolders[BaseFolderIdx])).absoluteFilePath(QLatin1String("parts/"));
+		QDir Dir = QDir(ParstPath, QLatin1String("*.dat"), QDir::SortFlags(QDir::Name | QDir::IgnoreCase), QDir::Files | QDir::Hidden | QDir::Readable);
+		FileLists[BaseFolderIdx] = Dir.entryInfoList();
 	}
 
-	if (mPieces.empty())
+	if (FileLists[LC_FOLDER_OFFICIAL].isEmpty())
 		return false;
+
+	mHasUnofficial = !FileLists[LC_FOLDER_UNOFFICIAL].isEmpty();
+	ReadDirectoryDescriptions(FileLists, ShowProgress);
 
 	for (unsigned int BaseFolderIdx = 0; BaseFolderIdx < sizeof(BaseFolders) / sizeof(BaseFolders[0]); BaseFolderIdx++)
 	{
@@ -754,7 +585,195 @@ bool lcPiecesLibrary::OpenDirectory(const QDir& LibraryDir, bool ShowProgress)
 	return true;
 }
 
-bool lcPiecesLibrary::ReadCacheFile(const QString& FileName, lcMemFile& CacheFile)
+void lcPiecesLibrary::ReadDirectoryDescriptions(const QFileInfoList (&FileLists)[LC_NUM_FOLDERTYPES], bool ShowProgress)
+{
+	QString IndexFileName = QFileInfo(QDir(mCachePath), QLatin1String("index")).absoluteFilePath();
+	lcMemFile IndexFile;
+	std::vector<const char*> CachedDescriptions;
+
+	if (ReadDirectoryCacheFile(IndexFileName, IndexFile))
+	{
+		QString LibraryPath = IndexFile.ReadQString();
+
+		if (LibraryPath == mLibraryDir.absolutePath())
+		{
+			int NumDescriptions = IndexFile.ReadU32();
+			CachedDescriptions.reserve(NumDescriptions);
+
+			while (NumDescriptions--)
+			{
+				const char* FileName = (const char*)IndexFile.mBuffer + IndexFile.GetPosition();
+				CachedDescriptions.push_back(FileName);
+				IndexFile.Seek(strlen(FileName) + 1, SEEK_CUR);
+				const char* Description = (const char*)IndexFile.mBuffer + IndexFile.GetPosition(); 
+				IndexFile.Seek(strlen(Description) + 1, SEEK_CUR);
+				IndexFile.Seek(4 + 1 + 8, SEEK_CUR);
+			}
+		}
+	}
+
+	for (int FolderIdx = 0; FolderIdx < LC_NUM_FOLDERTYPES; FolderIdx++)
+	{
+		const QFileInfoList& FileList = FileLists[FolderIdx];
+
+		for (int FileIdx = 0; FileIdx < FileList.size(); FileIdx++)
+		{
+			char Name[LC_PIECE_NAME_LEN];
+			QByteArray FileString = FileList[FileIdx].fileName().toLatin1();
+			const char* Src = FileString;
+			char* Dst = Name;
+
+			while (*Src && Dst - Name < (int)sizeof(Name))
+			{
+				if (*Src >= 'a' && *Src <= 'z')
+					*Dst = *Src + 'A' - 'a';
+				else if (*Src == '\\')
+					*Dst = '/';
+				else
+					*Dst = *Src;
+
+				Src++;
+				Dst++;
+			}
+			*Dst = 0;
+
+			if (FolderIdx == LC_FOLDER_OFFICIAL && mHasUnofficial && mPieces.find(Name) != mPieces.end())
+				continue;
+
+			PieceInfo* Info = new PieceInfo();
+
+			strncpy(Info->mFileName, FileString, sizeof(Info->mFileName));
+			Info->mFileName[sizeof(Info->mFileName) - 1] = 0;
+			Info->mFolderType = FolderIdx;
+			Info->mFolderIndex = FileIdx;
+
+			mPieces[Name] = Info;
+		}
+	}
+
+	QAtomicInt FilesLoaded;
+	bool Modified = false;
+
+	auto ReadDescriptions = [&FileLists, &CachedDescriptions, &FilesLoaded, &Modified](const std::pair<std::string, PieceInfo*>& Entry)
+	{
+		PieceInfo* Info = Entry.second;
+		FilesLoaded.ref();
+
+		lcDiskFile PieceFile(FileLists[Info->mFolderType][Info->mFolderIndex].absoluteFilePath());
+		char Line[1024];
+
+		if (!CachedDescriptions.empty())
+		{
+			auto DescriptionCompare = [](const void* Key, const void* Element)
+			{
+				return strcmp((const char*)Key, *(const char**)Element);
+			};
+
+			void* CachedDescription = bsearch(Info->mFileName, &CachedDescriptions.front(), CachedDescriptions.size(), sizeof(char*), DescriptionCompare);
+
+			if (CachedDescription)
+			{
+				const char* FileName = *(const char**)CachedDescription;
+				const char* Description = FileName + strlen(FileName) + 1;
+				strcpy(Info->m_strDescription, Description);
+				return;
+			}
+		}
+
+		if (!PieceFile.Open(QIODevice::ReadOnly) || !PieceFile.ReadLine(Line, sizeof(Line)))
+		{
+			strcpy(Info->m_strDescription, "Unknown");
+			return;
+		}
+
+		const char* Src = Line + 2;
+		char* Dst = Info->m_strDescription;
+
+		for (;;)
+		{
+			if (*Src != '\r' && *Src != '\n' && *Src && Dst - Info->m_strDescription < (int)sizeof(Info->m_strDescription) - 1)
+			{
+				*Dst++ = *Src++;
+				continue;
+			}
+
+			*Dst = 0;
+			break;
+		}
+
+		Modified = true;
+	};
+
+	QProgressDialog* ProgressDialog = new QProgressDialog(nullptr);
+	ProgressDialog->setWindowFlags(ProgressDialog->windowFlags() & ~Qt::WindowCloseButtonHint);
+	ProgressDialog->setWindowTitle(tr("Initializing"));
+	ProgressDialog->setLabelText(tr("Loading Parts Library"));
+	ProgressDialog->setMaximum(mPieces.size());
+	ProgressDialog->setMinimum(0);
+	ProgressDialog->setValue(0);
+	ProgressDialog->setCancelButton(nullptr);
+	ProgressDialog->setAutoReset(false);
+	if (ShowProgress)
+		ProgressDialog->show();
+
+	QFuture<void> LoadFuture = QtConcurrent::map(mPieces, ReadDescriptions);
+
+	while (!LoadFuture.isFinished())
+	{
+		ProgressDialog->setValue(FilesLoaded);
+		QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+	}
+
+	ProgressDialog->setValue(FilesLoaded);
+	QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+
+	ProgressDialog->deleteLater();
+
+	if (Modified)
+	{
+		lcMemFile IndexFile;
+
+		IndexFile.WriteQString(mLibraryDir.absolutePath());
+
+		IndexFile.WriteU32(mPieces.size());
+
+		std::vector<PieceInfo*> SortedPieces;
+		SortedPieces.reserve(mPieces.size());
+		for (const auto PieceIt : mPieces)
+			SortedPieces.push_back(PieceIt.second);
+
+		auto PieceInfoCompare = [](PieceInfo* Info1, PieceInfo* Info2)
+		{
+			return strcmp(Info1->mFileName, Info2->mFileName) < 0;
+		};
+
+		std::sort(SortedPieces.begin(), SortedPieces.end(), PieceInfoCompare);
+
+		for (const PieceInfo* Info : SortedPieces)
+		{
+			if (IndexFile.WriteBuffer(Info->mFileName, strlen(Info->mFileName) + 1) == 0)
+				return;
+
+			if (IndexFile.WriteBuffer(Info->m_strDescription, strlen(Info->m_strDescription) + 1) == 0)
+				return;
+
+			IndexFile.WriteU32(Info->mFlags);
+			IndexFile.WriteU8(Info->mFolderType);
+
+#if (QT_VERSION >= QT_VERSION_CHECK(4, 7, 0))
+			uint64_t FileTime = FileLists[Info->mFolderType][Info->mFolderIndex].lastModified().toMSecsSinceEpoch();
+#else
+			uint64_t FileTime = FileLists[Info->mFolderType][Info->mFolderIndex].lastModified().toTime_t();
+#endif
+		
+			IndexFile.WriteU64(FileTime);
+		}
+
+		WriteDirectoryCacheFile(IndexFileName, IndexFile);
+	}
+}
+
+bool lcPiecesLibrary::ReadArchiveCacheFile(const QString& FileName, lcMemFile& CacheFile)
 {
 	QFile File(FileName);
 
@@ -842,7 +861,7 @@ bool lcPiecesLibrary::ReadCacheFile(const QString& FileName, lcMemFile& CacheFil
 	return ret == Z_STREAM_END;
 }
 
-bool lcPiecesLibrary::WriteCacheFile(const QString& FileName, lcMemFile& CacheFile)
+bool lcPiecesLibrary::WriteArchiveCacheFile(const QString& FileName, lcMemFile& CacheFile)
 {
 	QFile File(FileName);
 
@@ -907,11 +926,67 @@ bool lcPiecesLibrary::WriteCacheFile(const QString& FileName, lcMemFile& CacheFi
 	return true;
 }
 
+bool lcPiecesLibrary::ReadDirectoryCacheFile(const QString& FileName, lcMemFile& CacheFile)
+{
+	QFile File(FileName);
+
+	if (!File.open(QIODevice::ReadOnly))
+		return false;
+
+	quint32 CacheVersion, CacheFlags;
+
+	if (File.read((char*)&CacheVersion, sizeof(CacheVersion)) == -1 || CacheVersion != LC_LIBRARY_CACHE_VERSION)
+		return false;
+
+	if (File.read((char*)&CacheFlags, sizeof(CacheFlags)) == -1 || CacheFlags != LC_LIBRARY_CACHE_DIRECTORY)
+		return false;
+
+	quint32 UncompressedSize;
+
+	if (File.read((char*)&UncompressedSize, sizeof(UncompressedSize)) == -1)
+		return false;
+
+	QByteArray Data = qUncompress(File.readAll());
+	if (Data.isEmpty())
+		return false;
+
+	CacheFile.SetLength(Data.size());
+	CacheFile.Seek(0, SEEK_SET);
+	CacheFile.WriteBuffer(Data.constData(), Data.size());
+	CacheFile.Seek(0, SEEK_SET);
+
+	return true;
+}
+
+bool lcPiecesLibrary::WriteDirectoryCacheFile(const QString& FileName, lcMemFile& CacheFile)
+{
+	QFile File(FileName);
+
+	if (!File.open(QIODevice::WriteOnly))
+		return false;
+
+	quint32 CacheVersion = LC_LIBRARY_CACHE_VERSION;
+	if (File.write((char*)&CacheVersion, sizeof(CacheVersion)) == -1)
+		return false;
+
+	quint32 CacheFlags = LC_LIBRARY_CACHE_DIRECTORY;
+	if (File.write((char*)&CacheFlags, sizeof(CacheFlags)) == -1)
+		return false;
+
+	quint32 UncompressedSize = (quint32)CacheFile.GetLength();
+	if (File.write((char*)&UncompressedSize, sizeof(UncompressedSize)) == -1)
+		return false;
+
+	File.write(qCompress(CacheFile.mBuffer, CacheFile.GetLength()));
+
+	return true;
+}
+
 bool lcPiecesLibrary::LoadCacheIndex(const QString& FileName)
 {
 	lcMemFile IndexFile;
 
-	if (!ReadCacheFile(FileName, IndexFile))
+	if (!ReadArchiveCacheFile(FileName, IndexFile))
 		return false;
 
 	quint32 NumFiles;
@@ -936,7 +1011,7 @@ bool lcPiecesLibrary::LoadCacheIndex(const QString& FileName)
 	return true;
 }
 
-bool lcPiecesLibrary::SaveCacheIndex(const QString& FileName)
+bool lcPiecesLibrary::SaveArchiveCacheIndex(const QString& FileName)
 {
 	lcMemFile IndexFile;
 
@@ -957,7 +1032,7 @@ bool lcPiecesLibrary::SaveCacheIndex(const QString& FileName)
 			return false;
 	}
 
-	return WriteCacheFile(FileName, IndexFile);
+	return WriteArchiveCacheFile(FileName, IndexFile);
 }
 
 bool lcPiecesLibrary::LoadCachePiece(PieceInfo* Info)
@@ -965,7 +1040,7 @@ bool lcPiecesLibrary::LoadCachePiece(PieceInfo* Info)
 	QString FileName = QFileInfo(QDir(mCachePath), QString::fromLatin1(Info->mFileName)).absoluteFilePath();
 	lcMemFile MeshData;
 
-	if (!ReadCacheFile(FileName, MeshData))
+	if (!ReadArchiveCacheFile(FileName, MeshData))
 		return false;
 
 	quint32 Flags;
@@ -1000,7 +1075,7 @@ bool lcPiecesLibrary::SaveCachePiece(PieceInfo* Info)
 
 	QString FileName = QFileInfo(QDir(mCachePath), QString::fromLatin1(Info->mFileName)).absoluteFilePath();
 
-	return WriteCacheFile(FileName, MeshData);
+	return WriteArchiveCacheFile(FileName, MeshData);
 }
 
 static void lcLoadPieceFuture(lcPiecesLibrary* Library)

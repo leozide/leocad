@@ -160,6 +160,16 @@ public:
 		return Read64(Buffer, Count);
 	}
 
+	QString ReadQString()
+	{
+		uint32_t Size = ReadU32();
+		char* Buffer = new char[Size];
+		ReadBuffer(Buffer, Size);
+		QString String = QString::fromUtf8(Buffer, Size);
+		delete[] Buffer;
+		return String;
+	}
+
 	void WriteU8(const lcuint8& Value)
 	{
 		Write8(&Value, 1);
@@ -263,6 +273,13 @@ public:
 	void WriteVector3(const lcVector3& Vector)
 	{
 		WriteFloats(Vector, 3);
+	}
+
+	void WriteQString(const QString& String)
+	{
+		QByteArray Data = String.toUtf8();
+		WriteU32(Data.size());
+		WriteBuffer(Data, Data.size());
 	}
 
 protected:

@@ -15,6 +15,13 @@ enum lcZipFileType
 	LC_NUM_ZIPFILES
 };
 
+enum lcLibraryFolderType
+{
+	LC_FOLDER_UNOFFICIAL,
+	LC_FOLDER_OFFICIAL,
+	LC_NUM_FOLDERTYPES
+};
+
 struct lcLibraryMeshVertex
 {
 	lcVector3 Position;
@@ -216,13 +223,16 @@ protected:
 	bool OpenArchive(lcFile* File, const QString& FileName, lcZipFileType ZipFileType);
 	bool OpenDirectory(const QDir& LibraryDir, bool ShowProgress);
 	void ReadArchiveDescriptions(const QString& OfficialFileName, const QString& UnofficialFileName);
+	void ReadDirectoryDescriptions(const QFileInfoList (&FileLists)[LC_NUM_FOLDERTYPES], bool ShowProgress);
 
-	bool ReadCacheFile(const QString& FileName, lcMemFile& CacheFile);
-	bool WriteCacheFile(const QString& FileName, lcMemFile& CacheFile);
+	bool ReadArchiveCacheFile(const QString& FileName, lcMemFile& CacheFile);
+	bool WriteArchiveCacheFile(const QString& FileName, lcMemFile& CacheFile);
 	bool LoadCacheIndex(const QString& FileName);
-	bool SaveCacheIndex(const QString& FileName);
+	bool SaveArchiveCacheIndex(const QString& FileName);
 	bool LoadCachePiece(PieceInfo* Info);
 	bool SaveCachePiece(PieceInfo* Info);
+	bool ReadDirectoryCacheFile(const QString& FileName, lcMemFile& CacheFile);
+	bool WriteDirectoryCacheFile(const QString& FileName, lcMemFile& CacheFile);
 
 	lcLibraryPrimitive* FindPrimitive(const char* Name) const
 	{

@@ -21,8 +21,6 @@
 // Old defines and declarations.
 #define LC_MAXPATH 1024
 
-#define LC_POINTER_TO_INT(p) ((qint32) (quintptr) (p))
-
 #ifdef Q_OS_WIN
 char* strcasestr(const char *s, const char *find);
 #else

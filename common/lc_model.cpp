@@ -824,7 +824,7 @@ bool lcModel::LoadBinary(lcFile* file)
 		{
 			lcGroup* Group = mGroups[GroupIdx];
 
-			i = LC_POINTER_TO_INT(Group->mGroup);
+			i = (qint32)(quintptr)(Group->mGroup);
 			Group->mGroup = nullptr;
 
 			if (i > 0xFFFF || i == -1)
@@ -837,7 +837,7 @@ bool lcModel::LoadBinary(lcFile* file)
 		{
 			lcPiece* Piece = mPieces[PieceIdx];
 
-			i = LC_POINTER_TO_INT(Piece->GetGroup());
+			i = (qint32)(quintptr)(Piece->GetGroup());
 			Piece->SetGroup(nullptr);
 
 			if (i > 0xFFFF || i == -1)

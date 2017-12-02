@@ -47,7 +47,7 @@ void lcTexture::CreateGridTexture()
 {
 	const int NumLevels = 9;
 	Image GridImages[NumLevels];
-	lcuint8* Previous = nullptr;
+	quint8* Previous = nullptr;
 
 	for (int ImageLevel = 0; ImageLevel < NumLevels; ImageLevel++)
 	{
@@ -63,24 +63,24 @@ void lcTexture::CreateGridTexture()
 			{
 				for (int x = 0; x < GridSize - 1; x++)
 				{
-					lcuint8 a = Previous[x * 2 + y * 2 * PreviousGridSize] > 64 ? 255 : 0;
-					lcuint8 b = Previous[x * 2 + 1 + y * 2 * PreviousGridSize] > 64 ? 255 : 0;
-					lcuint8 c = Previous[x * 2 + (y * 2 + 1) * PreviousGridSize] > 64 ? 255 : 0;
-					lcuint8 d = Previous[x * 2 + 1 + (y * 2 + 1) * PreviousGridSize] > 64 ? 255 : 0;
+					quint8 a = Previous[x * 2 + y * 2 * PreviousGridSize] > 64 ? 255 : 0;
+					quint8 b = Previous[x * 2 + 1 + y * 2 * PreviousGridSize] > 64 ? 255 : 0;
+					quint8 c = Previous[x * 2 + (y * 2 + 1) * PreviousGridSize] > 64 ? 255 : 0;
+					quint8 d = Previous[x * 2 + 1 + (y * 2 + 1) * PreviousGridSize] > 64 ? 255 : 0;
 					GridImage.mData[x + y * GridSize] = (a + b + c + d) / 4;
 				}
 
 				int x = GridSize - 1;
-				lcuint8 a = Previous[x * 2 + y * 2 * PreviousGridSize];
-				lcuint8 c = Previous[x * 2 + (y * 2 + 1) * PreviousGridSize];
+				quint8 a = Previous[x * 2 + y * 2 * PreviousGridSize];
+				quint8 c = Previous[x * 2 + (y * 2 + 1) * PreviousGridSize];
 				GridImage.mData[x + y * GridSize] = (a + c) / 2;
 			}
 
 			int y = GridSize - 1;
 			for (int x = 0; x < GridSize - 1; x++)
 			{
-				lcuint8 a = Previous[x * 2 + y * 2 * PreviousGridSize];
-				lcuint8 b = Previous[x * 2 + 1 + y * 2 * PreviousGridSize];
+				quint8 a = Previous[x * 2 + y * 2 * PreviousGridSize];
+				quint8 b = Previous[x * 2 + 1 + y * 2 * PreviousGridSize];
 				GridImage.mData[x + y * GridSize] = (a + b) / 2;
 			}
 
@@ -91,11 +91,11 @@ void lcTexture::CreateGridTexture()
 		{
 			const float Radius1 = (80 >> ImageLevel) * (80 >> ImageLevel);
 			const float Radius2 = (72 >> ImageLevel) * (72 >> ImageLevel);
-			lcuint8* TempBuffer = new lcuint8[GridSize * GridSize];
+			quint8* TempBuffer = new quint8[GridSize * GridSize];
 
 			for (int y = 0; y < GridSize; y++)
 			{
-				lcuint8* Pixel = TempBuffer + y * GridSize;
+				quint8* Pixel = TempBuffer + y * GridSize;
 				memset(Pixel, 0, GridSize);
 
 				const float y2 = (y - GridSize / 2) * (y - GridSize / 2);
@@ -127,24 +127,24 @@ void lcTexture::CreateGridTexture()
 			{
 				for (int x = 0; x < GridSize - 1; x++)
 				{
-					lcuint8 a = TempBuffer[x + y * GridSize];
-					lcuint8 b = TempBuffer[x + 1 + y * GridSize];
-					lcuint8 c = TempBuffer[x + (y + 1) * GridSize];
-					lcuint8 d = TempBuffer[x + 1 + (y + 1) * GridSize];
+					quint8 a = TempBuffer[x + y * GridSize];
+					quint8 b = TempBuffer[x + 1 + y * GridSize];
+					quint8 c = TempBuffer[x + (y + 1) * GridSize];
+					quint8 d = TempBuffer[x + 1 + (y + 1) * GridSize];
 					GridImage.mData[x + y * GridSize] = (a + b + c + d) / 4;
 				}
 
 				int x = GridSize - 1;
-				lcuint8 a = TempBuffer[x + y * GridSize];
-				lcuint8 c = TempBuffer[x + (y + 1) * GridSize];
+				quint8 a = TempBuffer[x + y * GridSize];
+				quint8 c = TempBuffer[x + (y + 1) * GridSize];
 				GridImage.mData[x + y * GridSize] = (a + c) / 2;
 			}
 
 			int y = GridSize - 1;
 			for (int x = 0; x < GridSize - 1; x++)
 			{
-				lcuint8 a = TempBuffer[x + y * GridSize];
-				lcuint8 b = TempBuffer[x + 1 + y * GridSize];
+				quint8 a = TempBuffer[x + y * GridSize];
+				quint8 b = TempBuffer[x + 1 + y * GridSize];
 				GridImage.mData[x + y * GridSize] = (a + b) / 2;
 			}
 

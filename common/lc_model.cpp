@@ -668,12 +668,12 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 
 bool lcModel::LoadBinary(lcFile* file)
 {
-	lcint32 i, count;
+	qint32 i, count;
 	char id[32];
-	lcuint32 rgb;
+	quint32 rgb;
 	float fv = 0.4f;
-	lcuint8 ch;
-	lcuint16 sh;
+	quint8 ch;
+	quint16 sh;
 
 	file->Seek(0, SEEK_SET);
 	file->ReadBuffer(id, 32);
@@ -728,7 +728,7 @@ bool lcModel::LoadBinary(lcFile* file)
 		{
 			char name[LC_PIECE_NAME_LEN];
 			lcVector3 pos, rot;
-			lcuint8 color, step, group;
+			quint8 color, step, group;
 
 			file->ReadFloats(pos, 3);
 			file->ReadFloats(rot, 3);
@@ -2606,7 +2606,7 @@ void lcModel::ScaleSelectedPieces(const float Scale, bool Update, bool Checkpoin
 		return;
 
 	lcPiece* Piece = (lcPiece*)Focus;
-	lcuint32 Section = Piece->GetFocusSection();
+	quint32 Section = Piece->GetFocusSection();
 
 	if (Section >= LC_PIECE_SECTION_CONTROL_POINT_1 && Section <= LC_PIECE_SECTION_CONTROL_POINT_8)
 	{
@@ -3213,7 +3213,7 @@ void lcModel::GetSelectionInformation(int* Flags, lcArray<lcObject*>& Selection,
 				{
 					*Flags |= LC_SEL_CAN_ADD_CONTROL_POINT;
 
-					lcuint32 Section = Piece->GetFocusSection();
+					quint32 Section = Piece->GetFocusSection();
 
 					if (Section >= LC_PIECE_SECTION_CONTROL_POINT_1 && Section <= LC_PIECE_SECTION_CONTROL_POINT_8 && Piece->GetControlPoints().GetSize() > 2)
 						*Flags |= LC_SEL_CAN_REMOVE_CONTROL_POINT;
@@ -3348,7 +3348,7 @@ void lcModel::FocusOrDeselectObject(const lcObjectSection& ObjectSection)
 {
 	lcObject* FocusObject = GetFocusObject();
 	lcObject* Object = ObjectSection.Object;
-	lcuint32 Section = ObjectSection.Section;
+	quint32 Section = ObjectSection.Section;
 
 	if (Object)
 	{
@@ -3389,7 +3389,7 @@ void lcModel::FocusOrDeselectObject(const lcObjectSection& ObjectSection)
 	gMainWindow->UpdateAllViews();
 }
 
-void lcModel::ClearSelectionAndSetFocus(lcObject* Object, lcuint32 Section, bool EnableSelectionMode)
+void lcModel::ClearSelectionAndSetFocus(lcObject* Object, quint32 Section, bool EnableSelectionMode)
 {
 	ClearSelection(false);
 
@@ -3418,7 +3418,7 @@ void lcModel::ClearSelectionAndSetFocus(const lcObjectSection& ObjectSection, bo
 	ClearSelectionAndSetFocus(ObjectSection.Object, ObjectSection.Section, EnableSelectionMode);
 }
 
-void lcModel::SetSelectionAndFocus(const lcArray<lcObject*>& Selection, lcObject* Focus, lcuint32 Section, bool EnableSelectionMode)
+void lcModel::SetSelectionAndFocus(const lcArray<lcObject*>& Selection, lcObject* Focus, quint32 Section, bool EnableSelectionMode)
 {
 	ClearSelection(false);
 

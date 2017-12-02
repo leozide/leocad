@@ -71,11 +71,11 @@ bool lcZipFile::OpenWrite(const QString& FileName)
 	return true;
 }
 
-lcuint64 lcZipFile::SearchCentralDir()
+quint64 lcZipFile::SearchCentralDir()
 {
-	lcuint64 SizeFile, MaxBack, BackRead, PosFound;
+	quint64 SizeFile, MaxBack, BackRead, PosFound;
 	const int CommentBufferSize = 1024;
-	lcuint8 buf[CommentBufferSize + 4];
+	quint8 buf[CommentBufferSize + 4];
 
 	SizeFile = mFile->GetLength();
 	MaxBack = lcMin(SizeFile, 0xffffULL);
@@ -84,7 +84,7 @@ lcuint64 lcZipFile::SearchCentralDir()
 
 	while (BackRead < MaxBack)
 	{
-		lcuint64 ReadPos, ReadSize;
+		quint64 ReadPos, ReadSize;
 
 		if (BackRead + CommentBufferSize > MaxBack)
 			BackRead = MaxBack;
@@ -114,11 +114,11 @@ lcuint64 lcZipFile::SearchCentralDir()
 	return PosFound;
 }
 
-lcuint64 lcZipFile::SearchCentralDir64()
+quint64 lcZipFile::SearchCentralDir64()
 {
-	lcuint64 SizeFile, MaxBack, BackRead, PosFound;
+	quint64 SizeFile, MaxBack, BackRead, PosFound;
 	const int CommentBufferSize = 1024;
-	lcuint8 buf[CommentBufferSize + 4];
+	quint8 buf[CommentBufferSize + 4];
 
 	SizeFile = mFile->GetLength();
 	MaxBack = lcMin(SizeFile, 0xffffULL);
@@ -127,7 +127,7 @@ lcuint64 lcZipFile::SearchCentralDir64()
 
 	while (BackRead < MaxBack)
 	{
-		lcuint64 ReadPos, ReadSize;
+		quint64 ReadPos, ReadSize;
 
 		if (BackRead + CommentBufferSize > MaxBack)
 			BackRead = MaxBack;
@@ -159,8 +159,8 @@ lcuint64 lcZipFile::SearchCentralDir64()
 
 	mFile->Seek((long)PosFound, SEEK_SET);
 
-	lcuint32 Number;
-	lcuint64 RelativeOffset;
+	quint32 Number;
+	quint64 RelativeOffset;
 
 	// Signature.
 	if (mFile->ReadU32(&Number, 1) != 1)
@@ -197,11 +197,11 @@ lcuint64 lcZipFile::SearchCentralDir64()
 	return RelativeOffset;
 }
 
-bool lcZipFile::CheckFileCoherencyHeader(int FileIndex, lcuint32* SizeVar, lcuint64* OffsetLocalExtraField, lcuint32* SizeLocalExtraField)
+bool lcZipFile::CheckFileCoherencyHeader(int FileIndex, quint32* SizeVar, quint64* OffsetLocalExtraField, quint32* SizeLocalExtraField)
 {
-	lcuint16 Number16, Flags;
-	lcuint32 Number32, Magic;
-	lcuint16 SizeFilename, SizeExtraField;
+	quint16 Number16, Flags;
+	quint32 Number32, Magic;
+	quint16 SizeFilename, SizeExtraField;
 	const lcZipFileInfo& FileInfo = mFiles[FileIndex];
 
 	*SizeVar = 0;
@@ -255,13 +255,13 @@ bool lcZipFile::CheckFileCoherencyHeader(int FileIndex, lcuint32* SizeVar, lcuin
 
 bool lcZipFile::Open()
 {
-	lcuint64 NumberEntriesCD, CentralPos;
+	quint64 NumberEntriesCD, CentralPos;
 
 	CentralPos = SearchCentralDir64();
 
 	if (CentralPos)
 	{
-		lcuint32 NumberDisk, NumberDiskWithCD;
+		quint32 NumberDisk, NumberDiskWithCD;
 
 		mZip64 = true;
 
@@ -299,9 +299,9 @@ bool lcZipFile::Open()
 	}
 	else
 	{
-		lcuint16 NumberDisk, NumberDiskWithCD;
-		lcuint16 Number16;
-		lcuint32 Number32;
+		quint16 NumberDisk, NumberDiskWithCD;
+		quint16 Number16;
+		quint32 Number32;
 
 		CentralPos = SearchCentralDir();
 		if (CentralPos == 0)
@@ -359,14 +359,14 @@ bool lcZipFile::Open()
 
 bool lcZipFile::ReadCentralDir()
 {
-	lcuint64 PosInCentralDir = mCentralDirOffset;
+	quint64 PosInCentralDir = mCentralDirOffset;
 
 	mFile->Seek((long)(PosInCentralDir + mBytesBeforeZipFile), SEEK_SET);
 	mFiles.AllocGrow((int)mNumEntries);
 
-	for (lcuint64 FileNum = 0; FileNum < mNumEntries; FileNum++)
+	for (quint64 FileNum = 0; FileNum < mNumEntries; FileNum++)
 	{
-		lcuint32 Magic, Number32;
+		quint32 Magic, Number32;
 		lcZipFileInfo& FileInfo = mFiles.Add();
 		long Seek = 0;
 
@@ -391,14 +391,14 @@ bool lcZipFile::ReadCentralDir()
 		if (mFile->ReadU32(&FileInfo.dosDate, 1) != 1)
 			return false;
 
-		lcuint32 Date = FileInfo.dosDate >> 16;
-		FileInfo.tmu_date.tm_mday = (lcuint32)(Date & 0x1f);
-		FileInfo.tmu_date.tm_mon = (lcuint32)((((Date) & 0x1E0) / 0x20) - 1);
-		FileInfo.tmu_date.tm_year = (lcuint32)(((Date & 0x0FE00) / 0x0200) + 1980);
+		quint32 Date = FileInfo.dosDate >> 16;
+		FileInfo.tmu_date.tm_mday = (quint32)(Date & 0x1f);
+		FileInfo.tmu_date.tm_mon = (quint32)((((Date) & 0x1E0) / 0x20) - 1);
+		FileInfo.tmu_date.tm_year = (quint32)(((Date & 0x0FE00) / 0x0200) + 1980);
 
-		FileInfo.tmu_date.tm_hour = (lcuint32)((FileInfo.dosDate & 0xF800) / 0x800);
-		FileInfo.tmu_date.tm_min = (lcuint32)((FileInfo.dosDate & 0x7E0) / 0x20);
-		FileInfo.tmu_date.tm_sec = (lcuint32)(2*(FileInfo.dosDate & 0x1f));
+		FileInfo.tmu_date.tm_hour = (quint32)((FileInfo.dosDate & 0xF800) / 0x800);
+		FileInfo.tmu_date.tm_min = (quint32)((FileInfo.dosDate & 0x7E0) / 0x20);
+		FileInfo.tmu_date.tm_sec = (quint32)(2*(FileInfo.dosDate & 0x1f));
 
 		if (mFile->ReadU32(&FileInfo.crc, 1) != 1)
 			return false;
@@ -436,7 +436,7 @@ bool lcZipFile::ReadCentralDir()
 
 		Seek += FileInfo.size_filename;
 
-		lcuint32 SizeRead;
+		quint32 SizeRead;
 		if (FileInfo.size_filename < sizeof(FileInfo.file_name) - 1)
 		{
 			*(FileInfo.file_name + FileInfo.size_filename) = '\0';
@@ -483,7 +483,7 @@ bool lcZipFile::ReadCentralDir()
 
 		if (FileInfo.size_file_extra != 0)
 		{
-			lcuint32 acc = 0;
+			quint32 acc = 0;
 
 			// since lSeek now points to after the extra field we need to move back
 			Seek -= FileInfo.size_file_extra;
@@ -496,7 +496,7 @@ bool lcZipFile::ReadCentralDir()
 
 			while (acc < FileInfo.size_file_extra)
 			{
-				lcuint16 HeaderId, DataSize;
+				quint16 HeaderId, DataSize;
 
 				if (mFile->ReadU16(&HeaderId, 1) != 1)
 					return false;
@@ -507,26 +507,26 @@ bool lcZipFile::ReadCentralDir()
 				// ZIP64 extra fields.
 				if (HeaderId == 0x0001)
 				{
-					if (FileInfo.uncompressed_size == (lcuint64)(unsigned long)-1)
+					if (FileInfo.uncompressed_size == (quint64)(unsigned long)-1)
 					{
 						if (mFile->ReadU64(&FileInfo.uncompressed_size, 1) != 1)
 							return false;
 					}
 
-					if (FileInfo.compressed_size == (lcuint64)(unsigned long)-1)
+					if (FileInfo.compressed_size == (quint64)(unsigned long)-1)
 					{
 						if (mFile->ReadU64(&FileInfo.compressed_size, 1) != 1)
 							return false;
 					}
 
-					if (FileInfo.offset_curfile == (lcuint64)-1)
+					if (FileInfo.offset_curfile == (quint64)-1)
 					{
 						// Relative Header offset.
 						if (mFile->ReadU64(&FileInfo.offset_curfile, 1) != 1)
 							return false;
 					}
 
-					if (FileInfo.disk_num_start == (lcuint16)-1)
+					if (FileInfo.disk_num_start == (quint16)-1)
 					{
 						// Disk Start Number.
 						if (mFile->ReadU32(&Number32, 1) != 1)
@@ -577,7 +577,7 @@ bool lcZipFile::ReadCentralDir()
 	return true;
 }
 
-bool lcZipFile::ExtractFile(const char* FileName, lcMemFile& File, lcuint32 MaxLength)
+bool lcZipFile::ExtractFile(const char* FileName, lcMemFile& File, quint32 MaxLength)
 {
 	for (int FileIdx = 0; FileIdx < mFiles.GetSize(); FileIdx++)
 	{
@@ -590,13 +590,13 @@ bool lcZipFile::ExtractFile(const char* FileName, lcMemFile& File, lcuint32 MaxL
 	return false;
 }
 
-bool lcZipFile::ExtractFile(int FileIndex, lcMemFile& File, lcuint32 MaxLength)
+bool lcZipFile::ExtractFile(int FileIndex, lcMemFile& File, quint32 MaxLength)
 {
 	QMutexLocker Lock(&mMutex);
 
-	lcuint32 SizeVar;
-	lcuint64 OffsetLocalExtraField;
-	lcuint32 SizeLocalExtraField;
+	quint32 SizeVar;
+	quint64 OffsetLocalExtraField;
+	quint32 SizeLocalExtraField;
 	const lcZipFileInfo& FileInfo = mFiles[FileIndex];
 
 	if (!CheckFileCoherencyHeader(FileIndex, &SizeVar, &OffsetLocalExtraField, &SizeLocalExtraField))
@@ -605,10 +605,10 @@ bool lcZipFile::ExtractFile(int FileIndex, lcMemFile& File, lcuint32 MaxLength)
 	const int BufferSize = 16384;
 	char ReadBuffer[BufferSize];
 	z_stream Stream;
-	lcuint32 Crc32;
-	lcuint64 PosInZipfile;
-	lcuint64 RestReadCompressed;
-	lcuint64 RestReadUncompressed;
+	quint32 Crc32;
+	quint64 PosInZipfile;
+	quint64 RestReadCompressed;
+	quint64 RestReadUncompressed;
 
 	Crc32 = 0;
 	Stream.total_out = 0;
@@ -632,23 +632,23 @@ bool lcZipFile::ExtractFile(int FileIndex, lcMemFile& File, lcuint32 MaxLength)
 
 	Stream.avail_in = (uInt)0;
 
-	lcuint32 Length = lcMin((lcuint32)FileInfo.uncompressed_size, MaxLength);
+	quint32 Length = lcMin((quint32)FileInfo.uncompressed_size, MaxLength);
 	File.SetLength(Length);
 	File.Seek(0, SEEK_SET);
 
 	Stream.next_out = (Bytef*)File.mBuffer;
 	Stream.avail_out = Length;
 
-	lcuint32 Read = 0;
+	quint32 Read = 0;
 
 	while (Stream.avail_out > 0)
 	{
 		if ((Stream.avail_in == 0) && (RestReadCompressed > 0))
 		{
-			lcuint32 ReadThis = BufferSize;
+			quint32 ReadThis = BufferSize;
 
 			if (RestReadCompressed < ReadThis)
-				ReadThis = (lcuint32)RestReadCompressed;
+				ReadThis = (quint32)RestReadCompressed;
 
 			if (ReadThis == 0)
 				return false;
@@ -667,7 +667,7 @@ bool lcZipFile::ExtractFile(int FileIndex, lcMemFile& File, lcuint32 MaxLength)
 
 		if (FileInfo.compression_method == 0)
 		{
-			lcuint32 DoCopy, i;
+			quint32 DoCopy, i;
 
 			if ((Stream.avail_in == 0) && (RestReadCompressed == 0))
 				return (Read == 0) ? false : true;
@@ -691,9 +691,9 @@ bool lcZipFile::ExtractFile(int FileIndex, lcMemFile& File, lcuint32 MaxLength)
 		}
 		else
 		{
-			lcuint64 TotalOutBefore, TotalOutAfter;
+			quint64 TotalOutBefore, TotalOutAfter;
 			const Bytef *bufBefore;
-			lcuint64 OutThis;
+			quint64 OutThis;
 			int flush = Z_SYNC_FLUSH;
 
 			TotalOutBefore = Stream.total_out;

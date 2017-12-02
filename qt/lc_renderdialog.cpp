@@ -167,11 +167,11 @@ void lcRenderDialog::Update()
 
 	struct lcSharedMemoryHeader
 	{
-		uint32_t Version;
-		uint32_t Width;
-		uint32_t Height;
-		uint32_t PixelsWritten;
-		uint32_t PixelsRead;
+		quint32 Version;
+		quint32 Width;
+		quint32 Height;
+		quint32 PixelsWritten;
+		quint32 PixelsRead;
 	};
 
 	lcSharedMemoryHeader* Header = (lcSharedMemoryHeader*)Buffer;
@@ -183,7 +183,7 @@ void lcRenderDialog::Update()
 //		if (width != expected) ...
 
 	QImage Image(Width, Height, QImage::Format_ARGB32);
-	uint8_t* Pixels = (uint8_t*)(Header + 1);
+	quint8* Pixels = (quint8*)(Header + 1);
 
 	for (int y = 0; y < Height; y++)
 	{

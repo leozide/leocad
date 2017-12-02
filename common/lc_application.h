@@ -26,10 +26,10 @@ public:
 	bool mDrawEdgeLines;
 	float mLineWidth;
 	bool mDrawGridStuds;
-	lcuint32 mGridStudColor;
+	quint32 mGridStudColor;
 	bool mDrawGridLines;
 	int mGridLineSpacing;
-	lcuint32 mGridLineColor;
+	quint32 mGridLineColor;
 	bool mFixedAxes;
 };
 

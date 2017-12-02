@@ -36,7 +36,7 @@ lcMesh::~lcMesh()
 		delete[] mLods[LodIdx].Sections;
 }
 
-void lcMesh::Create(lcuint16 NumSections[LC_NUM_MESH_LODS], int NumVertices, int NumTexturedVertices, int NumIndices)
+void lcMesh::Create(quint16 NumSections[LC_NUM_MESH_LODS], int NumVertices, int NumTexturedVertices, int NumIndices)
 {
 	for (int LodIdx = 0; LodIdx < LC_NUM_MESH_LODS; LodIdx++)
 	{
@@ -66,7 +66,7 @@ void lcMesh::Create(lcuint16 NumSections[LC_NUM_MESH_LODS], int NumVertices, int
 
 void lcMesh::CreateBox()
 {
-	lcuint16 NumSections[LC_NUM_MESH_LODS];
+	quint16 NumSections[LC_NUM_MESH_LODS];
 	memset(NumSections, 0, sizeof(NumSections));
 	NumSections[LC_MESH_LOD_HIGH] = 2;
 
@@ -79,7 +79,7 @@ void lcMesh::CreateBox()
 	mBoundingBox.Max = Max;
 
 	lcVertex* Verts = (lcVertex*)mVertexData;
-	lcuint16* Indices = (lcuint16*)mIndexData;
+	quint16* Indices = (quint16*)mIndexData;
 
 	Verts[0].Position = lcVector3(Min[0], Min[1], Min[2]);
 	Verts[0].Normal = lcPackNormal(lcVector3(0.0f, 0.0f, -1.0f));
@@ -369,8 +369,8 @@ bool lcMesh::FileLoad(lcMemFile& File)
 	mBoundingBox.Max = File.ReadVector3();
 	mRadius = File.ReadFloat();
 
-	lcuint32 NumVertices, NumTexturedVertices, NumIndices;
-	lcuint16 NumLods, NumSections[LC_NUM_MESH_LODS];
+	quint32 NumVertices, NumTexturedVertices, NumIndices;
+	quint16 NumLods, NumSections[LC_NUM_MESH_LODS];
 
 	if (!File.ReadU32(&NumVertices, 1) || !File.ReadU32(&NumTexturedVertices, 1) || !File.ReadU32(&NumIndices, 1))
 		return false;
@@ -386,8 +386,8 @@ bool lcMesh::FileLoad(lcMemFile& File)
 		{
 			lcMeshSection& Section = mLods[LodIdx].Sections[SectionIdx];
 
-			lcuint32 ColorCode, IndexOffset;
-			lcuint16 PrimtiveType, Length;
+			quint32 ColorCode, IndexOffset;
+			quint16 PrimtiveType, Length;
 
 			if (!File.ReadU32(&ColorCode, 1) || !File.ReadU32(&IndexOffset, 1) || !File.ReadU32(&NumIndices, 1) || !File.ReadU16(&PrimtiveType, 1))
 				return false;
@@ -419,9 +419,9 @@ bool lcMesh::FileLoad(lcMemFile& File)
 
 	File.ReadBuffer(mVertexData, mNumVertices * sizeof(lcVertex) + mNumTexturedVertices * sizeof(lcVertexTextured));
 	if (mIndexType == GL_UNSIGNED_SHORT)
-		File.ReadU16((lcuint16*)mIndexData, mIndexDataSize / 2);
+		File.ReadU16((quint16*)mIndexData, mIndexDataSize / 2);
 	else
-		File.ReadU32((lcuint32*)mIndexData, mIndexDataSize / 4);
+		File.ReadU32((quint32*)mIndexData, mIndexDataSize / 4);
 
 	return true;
 }
@@ -456,7 +456,7 @@ bool lcMesh::FileSave(lcMemFile& File)
 
 			if (Section.Texture)
 			{
-				lcuint16 Length = (lcuint16)strlen(Section.Texture->mName);
+				quint16 Length = (quint16)strlen(Section.Texture->mName);
 				File.WriteU16(Length);
 				File.WriteBuffer(Section.Texture->mName, Length);
 			}
@@ -467,9 +467,9 @@ bool lcMesh::FileSave(lcMemFile& File)
 
 	File.WriteBuffer(mVertexData, mNumVertices * sizeof(lcVertex) + mNumTexturedVertices * sizeof(lcVertexTextured));
 	if (mIndexType == GL_UNSIGNED_SHORT)
-		File.WriteU16((lcuint16*)mIndexData, mIndexDataSize / 2);
+		File.WriteU16((quint16*)mIndexData, mIndexDataSize / 2);
 	else
-		File.WriteU32((lcuint32*)mIndexData, mIndexDataSize / 4);
+		File.WriteU32((quint32*)mIndexData, mIndexDataSize / 4);
 
 	return true;
 }

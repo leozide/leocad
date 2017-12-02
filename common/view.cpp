@@ -715,22 +715,22 @@ void View::OnDraw()
 
 			if (!mRenderImage.isNull())
 			{
-				lcuint8* Buffer = (lcuint8*)malloc(mWidth * mHeight * 4);
+				quint8* Buffer = (quint8*)malloc(mWidth * mHeight * 4);
 				uchar* ImageBuffer = mRenderImage.bits();
 
 				glFinish();
 				glReadPixels(0, 0, CurrentTileWidth, CurrentTileHeight, GL_RGBA, GL_UNSIGNED_BYTE, Buffer);
 
-				lcuint32 TileY = 0;
+				quint32 TileY = 0;
 				if (CurrentTileRow != TotalTileRows - 1)
 					TileY = (TotalTileRows - CurrentTileRow - 1) * mHeight - (mHeight - mRenderImage.height() % mHeight);
 
-				lcuint32 TileStart = ((CurrentTileColumn * mWidth) + (TileY * mRenderImage.width())) * 4;
+				quint32 TileStart = ((CurrentTileColumn * mWidth) + (TileY * mRenderImage.width())) * 4;
 
 				for (int y = 0; y < CurrentTileHeight; y++)
 				{
-					lcuint8* src = Buffer + (CurrentTileHeight - y - 1) * CurrentTileWidth * 4;
-					lcuint8* dst = ImageBuffer + TileStart + y * mRenderImage.width() * 4;
+					quint8* src = Buffer + (CurrentTileHeight - y - 1) * CurrentTileWidth * 4;
+					quint8* dst = ImageBuffer + TileStart + y * mRenderImage.width() * 4;
 
 					for (int x = 0; x < CurrentTileWidth; x++)
 					{
@@ -803,7 +803,7 @@ void View::DrawSelectMoveOverlay()
 	mContext->SetVertexFormatPosition(3);
 
 	lcObject* Focus = mModel->GetFocusObject();
-	lcuint32 AllowedTransforms = Focus ? Focus->GetAllowedTransforms() : LC_OBJECT_TRANSFORM_MOVE_X | LC_OBJECT_TRANSFORM_MOVE_Y | LC_OBJECT_TRANSFORM_MOVE_Z | LC_OBJECT_TRANSFORM_ROTATE_X | LC_OBJECT_TRANSFORM_ROTATE_Y | LC_OBJECT_TRANSFORM_ROTATE_Z;
+	quint32 AllowedTransforms = Focus ? Focus->GetAllowedTransforms() : LC_OBJECT_TRANSFORM_MOVE_X | LC_OBJECT_TRANSFORM_MOVE_Y | LC_OBJECT_TRANSFORM_MOVE_Z | LC_OBJECT_TRANSFORM_ROTATE_X | LC_OBJECT_TRANSFORM_ROTATE_Y | LC_OBJECT_TRANSFORM_ROTATE_Z;
 
 	if (mTrackButton == LC_TRACKBUTTON_NONE || (mTrackTool >= LC_TRACKTOOL_MOVE_X && mTrackTool <= LC_TRACKTOOL_MOVE_XYZ))
 	{
@@ -902,7 +902,7 @@ void View::DrawSelectMoveOverlay()
 	if (Focus && Focus->IsPiece())
 	{
 		lcPiece* Piece = (lcPiece*)Focus;
-		lcuint32 Section = Piece->GetFocusSection();
+		quint32 Section = Piece->GetFocusSection();
 
 		if (Section >= LC_PIECE_SECTION_CONTROL_POINT_1 && Section <= LC_PIECE_SECTION_CONTROL_POINT_8 && Piece->mPieceInfo->GetSynthInfo() && Piece->mPieceInfo->GetSynthInfo()->IsCurve())
 		{
@@ -1884,13 +1884,13 @@ void View::UpdateTrackTool()
 			if (Focus && Focus->IsPiece())
 			{
 				lcPiece* Piece = (lcPiece*)Focus;
-				lcuint32 Section = Piece->GetFocusSection();
+				quint32 Section = Piece->GetFocusSection();
 
 				if (Section >= LC_PIECE_SECTION_CONTROL_POINT_1 && Section <= LC_PIECE_SECTION_CONTROL_POINT_8)
 					ControlPointIndex = Section - LC_PIECE_SECTION_CONTROL_POINT_1;
 			}
 
-			lcuint32 AllowedTransforms = Focus ? Focus->GetAllowedTransforms() : LC_OBJECT_TRANSFORM_MOVE_X | LC_OBJECT_TRANSFORM_MOVE_Y | LC_OBJECT_TRANSFORM_MOVE_Z | LC_OBJECT_TRANSFORM_ROTATE_X | LC_OBJECT_TRANSFORM_ROTATE_Y | LC_OBJECT_TRANSFORM_ROTATE_Z;
+			quint32 AllowedTransforms = Focus ? Focus->GetAllowedTransforms() : LC_OBJECT_TRANSFORM_MOVE_X | LC_OBJECT_TRANSFORM_MOVE_Y | LC_OBJECT_TRANSFORM_MOVE_Z | LC_OBJECT_TRANSFORM_ROTATE_X | LC_OBJECT_TRANSFORM_ROTATE_Y | LC_OBJECT_TRANSFORM_ROTATE_Z;
 
 			for (int AxisIndex = 0; AxisIndex < 3; AxisIndex++)
 			{
@@ -2250,7 +2250,7 @@ void View::UpdateTrackTool()
 	}
 }
 
-bool View::IsTrackToolAllowed(lcTrackTool TrackTool, lcuint32 AllowedTransforms) const
+bool View::IsTrackToolAllowed(lcTrackTool TrackTool, quint32 AllowedTransforms) const
 {
 	switch (TrackTool)
 	{
@@ -2825,7 +2825,7 @@ void View::OnMouseMove()
 				if (Focus && Focus->IsPiece())
 				{
 					lcPiece* Piece = (lcPiece*)Focus;
-					lcuint32 Section = Piece->GetFocusSection();
+					quint32 Section = Piece->GetFocusSection();
 
 					if (Section >= LC_PIECE_SECTION_CONTROL_POINT_1 && Section <= LC_PIECE_SECTION_CONTROL_POINT_8)
 					{

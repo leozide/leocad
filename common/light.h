@@ -48,7 +48,7 @@ public:
 		return (mState & LC_LIGHT_SELECTION_MASK) != 0;
 	}
 
-	virtual bool IsSelected(lcuint32 Section) const override
+	virtual bool IsSelected(quint32 Section) const override
 	{
 		switch (Section)
 		{
@@ -76,7 +76,7 @@ public:
 			mState &= ~(LC_LIGHT_SELECTION_MASK | LC_LIGHT_FOCUS_MASK);
 	}
 
-	virtual void SetSelected(lcuint32 Section, bool Selected) override
+	virtual void SetSelected(quint32 Section, bool Selected) override
 	{
 		switch (Section)
 		{
@@ -104,7 +104,7 @@ public:
 		return (mState & LC_LIGHT_FOCUS_MASK) != 0;
 	}
 
-	virtual bool IsFocused(lcuint32 Section) const override
+	virtual bool IsFocused(quint32 Section) const override
 	{
 		switch (Section)
 		{
@@ -119,7 +119,7 @@ public:
 		return false;
 	}
 
-	virtual void SetFocused(lcuint32 Section, bool Focused) override
+	virtual void SetFocused(quint32 Section, bool Focused) override
 	{
 		switch (Section)
 		{
@@ -142,7 +142,7 @@ public:
 		}
 	}
 
-	virtual lcuint32 GetFocusSection() const override
+	virtual quint32 GetFocusSection() const override
 	{
 		if (mState & LC_LIGHT_POSITION_FOCUSED)
 			return LC_LIGHT_SECTION_POSITION;
@@ -153,12 +153,12 @@ public:
 		return ~0;
 	}
 
-	virtual lcuint32 GetAllowedTransforms() const override
+	virtual quint32 GetAllowedTransforms() const override
 	{
 		return LC_OBJECT_TRANSFORM_MOVE_X | LC_OBJECT_TRANSFORM_MOVE_Y | LC_OBJECT_TRANSFORM_MOVE_Z;
 	}
 
-	virtual lcVector3 GetSectionPosition(lcuint32 Section) const override
+	virtual lcVector3 GetSectionPosition(quint32 Section) const override
 	{
 		switch (Section)
 		{
@@ -220,7 +220,7 @@ protected:
 	void DrawPointLight(lcContext* Context) const;
 	void DrawSpotLight(lcContext* Context) const;
 
-	lcuint32 mState;
+	quint32 mState;
 	char m_strName[81];
 };
 

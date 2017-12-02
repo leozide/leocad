@@ -435,7 +435,7 @@ QWidget *lcQPropertiesTree::createEditor(QWidget *parent, QTreeWidgetItem *item)
 	case PropertyInt:
 		{
 			QLineEdit *editor = new QLineEdit(parent);
-			lcuint32 value = item->data(0, PropertyValueRole).toUInt();
+			quint32 value = item->data(0, PropertyValueRole).toUInt();
 
 			editor->setValidator(new QIntValidator());
 			editor->setText(QString::number(value));

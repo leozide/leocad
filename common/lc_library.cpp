@@ -761,9 +761,9 @@ void lcPiecesLibrary::ReadDirectoryDescriptions(const QFileInfoList (&FileLists)
 			IndexFile.WriteU8(Info->mFolderType);
 
 #if (QT_VERSION >= QT_VERSION_CHECK(4, 7, 0))
-			uint64_t FileTime = FileLists[Info->mFolderType][Info->mFolderIndex].lastModified().toMSecsSinceEpoch();
+			quint64 FileTime = FileLists[Info->mFolderType][Info->mFolderIndex].lastModified().toMSecsSinceEpoch();
 #else
-			uint64_t FileTime = FileLists[Info->mFolderType][Info->mFolderIndex].lastModified().toTime_t();
+			quint64 FileTime = FileLists[Info->mFolderType][Info->mFolderIndex].lastModified().toTime_t();
 #endif
 		
 			IndexFile.WriteU64(FileTime);
@@ -888,7 +888,7 @@ bool lcPiecesLibrary::WriteArchiveCacheFile(const QString& FileName, lcMemFile& 
 	const size_t BufferSize = 16384;
 	char WriteBuffer[BufferSize];
 	z_stream Stream;
-	lcuint32 Crc32 = 0;
+	quint32 Crc32 = 0;
 
 	CacheFile.Seek(0, SEEK_SET);
 
@@ -1293,7 +1293,7 @@ lcMesh* lcPiecesLibrary::CreateMesh(PieceInfo* Info, lcLibraryMeshData& MeshData
 		NumTexturedVertices += MeshData.mTexturedVertices[MeshDataIdx].GetSize();
 	}
 
-	lcuint16 NumSections[LC_NUM_MESH_LODS];
+	quint16 NumSections[LC_NUM_MESH_LODS];
 	int NumIndices = 0;
 
 	lcArray<lcMergeSection> MergeSections[LC_NUM_MESH_LODS];
@@ -1416,11 +1416,11 @@ lcMesh* lcPiecesLibrary::CreateMesh(PieceInfo* Info, lcLibraryMeshData& MeshData
 			{
 				DstSection.IndexOffset = NumIndices * 2;
 
-				lcuint16* Index = (lcuint16*)Mesh->mIndexData + NumIndices;
+				quint16* Index = (quint16*)Mesh->mIndexData + NumIndices;
 
 				if (MergeSection.Shared)
 				{
-					lcuint16 BaseVertex = DstSection.Texture ? BaseTexturedVertices[LC_MESHDATA_SHARED] : BaseVertices[LC_MESHDATA_SHARED];
+					quint16 BaseVertex = DstSection.Texture ? BaseTexturedVertices[LC_MESHDATA_SHARED] : BaseVertices[LC_MESHDATA_SHARED];
 					lcLibraryMeshSection* SrcSection = MergeSection.Shared;
 
 					for (int IndexIdx = 0; IndexIdx < SrcSection->mIndices.GetSize(); IndexIdx++)
@@ -1431,7 +1431,7 @@ lcMesh* lcPiecesLibrary::CreateMesh(PieceInfo* Info, lcLibraryMeshData& MeshData
 
 				if (MergeSection.Lod)
 				{
-					lcuint16 BaseVertex = DstSection.Texture ? BaseTexturedVertices[LodIdx] : BaseVertices[LodIdx];
+					quint16 BaseVertex = DstSection.Texture ? BaseTexturedVertices[LodIdx] : BaseVertices[LodIdx];
 					lcLibraryMeshSection* SrcSection = MergeSection.Lod;
 
 					for (int IndexIdx = 0; IndexIdx < SrcSection->mIndices.GetSize(); IndexIdx++)
@@ -1444,11 +1444,11 @@ lcMesh* lcPiecesLibrary::CreateMesh(PieceInfo* Info, lcLibraryMeshData& MeshData
 			{
 				DstSection.IndexOffset = NumIndices * 4;
 
-				lcuint32* Index = (lcuint32*)Mesh->mIndexData + NumIndices;
+				quint32* Index = (quint32*)Mesh->mIndexData + NumIndices;
 
 				if (MergeSection.Shared)
 				{
-					lcuint32 BaseVertex = DstSection.Texture ? BaseTexturedVertices[LC_MESHDATA_SHARED] : BaseVertices[LC_MESHDATA_SHARED];
+					quint32 BaseVertex = DstSection.Texture ? BaseTexturedVertices[LC_MESHDATA_SHARED] : BaseVertices[LC_MESHDATA_SHARED];
 					lcLibraryMeshSection* SrcSection = MergeSection.Shared;
 
 					for (int IndexIdx = 0; IndexIdx < SrcSection->mIndices.GetSize(); IndexIdx++)
@@ -1459,7 +1459,7 @@ lcMesh* lcPiecesLibrary::CreateMesh(PieceInfo* Info, lcLibraryMeshData& MeshData
 
 				if (MergeSection.Lod)
 				{
-					lcuint32 BaseVertex = DstSection.Texture ? BaseTexturedVertices[LodIdx] : BaseVertices[LodIdx];
+					quint32 BaseVertex = DstSection.Texture ? BaseTexturedVertices[LodIdx] : BaseVertices[LodIdx];
 					lcLibraryMeshSection* SrcSection = MergeSection.Lod;
 
 					for (int IndexIdx = 0; IndexIdx < SrcSection->mIndices.GetSize(); IndexIdx++)
@@ -1511,7 +1511,7 @@ lcMesh* lcPiecesLibrary::CreateMesh(PieceInfo* Info, lcLibraryMeshData& MeshData
 		{
 			DstSection.IndexOffset = NumIndices * 2;
 
-			lcuint16* Index = (lcuint16*)Mesh->mIndexData + NumIndices;
+			quint16* Index = (quint16*)Mesh->mIndexData + NumIndices;
 
 			for (int IndexIdx = 0; IndexIdx < DstSection.NumIndices; IndexIdx++)
 				*Index++ = SrcSection->mIndices[IndexIdx];
@@ -1520,7 +1520,7 @@ lcMesh* lcPiecesLibrary::CreateMesh(PieceInfo* Info, lcLibraryMeshData& MeshData
 		{
 			DstSection.IndexOffset = NumIndices * 4;
 
-			lcuint32* Index = (lcuint32*)Mesh->mIndexData + NumIndices;
+			quint32* Index = (quint32*)Mesh->mIndexData + NumIndices;
 
 			for (int IndexIdx = 0; IndexIdx < DstSection.NumIndices; IndexIdx++)
 				*Index++ = SrcSection->mIndices[IndexIdx];
@@ -1770,7 +1770,7 @@ bool lcPiecesLibrary::LoadPrimitive(lcLibraryPrimitive* Primitive)
 	return true;
 }
 
-bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform, lcuint32 CurrentColorCode, bool InvertWinding, lcArray<lcLibraryTextureMap>& TextureStack, lcLibraryMeshData& MeshData, lcMeshDataType MeshDataType, bool Optimize, Project* CurrentProject, bool SearchProjectFolder)
+bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform, quint32 CurrentColorCode, bool InvertWinding, lcArray<lcLibraryTextureMap>& TextureStack, lcLibraryMeshData& MeshData, lcMeshDataType MeshDataType, bool Optimize, Project* CurrentProject, bool SearchProjectFolder)
 {
 	char Buffer[1024];
 	char* Line;
@@ -1782,7 +1782,7 @@ bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransf
 		if (mCancelLoading)
 			return false;
 
-		lcuint32 ColorCode, ColorCodeHex;
+		quint32 ColorCode, ColorCodeHex;
 		bool LastToken = false;
 		int LineType;
 
@@ -2208,7 +2208,7 @@ void lcLibraryMeshData::TestQuad(int* QuadIndices, const lcVector3* Vertices)
 	}
 }
 
-lcLibraryMeshSection* lcLibraryMeshData::AddSection(lcMeshDataType MeshDataType, lcMeshPrimitiveType PrimitiveType, lcuint32 ColorCode, lcTexture* Texture)
+lcLibraryMeshSection* lcLibraryMeshData::AddSection(lcMeshDataType MeshDataType, lcMeshPrimitiveType PrimitiveType, quint32 ColorCode, lcTexture* Texture)
 {
 	lcArray<lcLibraryMeshSection*>& Sections = mSections[MeshDataType];
 	lcLibraryMeshSection* Section;
@@ -2238,7 +2238,7 @@ void lcLibraryMeshData::AddVertices(lcMeshDataType MeshDataType, int VertexCount
 	*VertexBuffer = &Vertices[CurrentSize];
 }
 
-lcuint32 lcLibraryMeshData::AddVertex(lcMeshDataType MeshDataType, const lcVector3& Position, bool Optimize)
+quint32 lcLibraryMeshData::AddVertex(lcMeshDataType MeshDataType, const lcVector3& Position, bool Optimize)
 {
 	lcArray<lcLibraryMeshVertex>& VertexArray = mVertices[MeshDataType];
 
@@ -2263,7 +2263,7 @@ lcuint32 lcLibraryMeshData::AddVertex(lcMeshDataType MeshDataType, const lcVecto
 
 const float DistanceEpsilon = 0.05f;
 
-lcuint32 lcLibraryMeshData::AddVertex(lcMeshDataType MeshDataType, const lcVector3& Position, const lcVector3& Normal, bool Optimize)
+quint32 lcLibraryMeshData::AddVertex(lcMeshDataType MeshDataType, const lcVector3& Position, const lcVector3& Normal, bool Optimize)
 {
 	lcArray<lcLibraryMeshVertex>& VertexArray = mVertices[MeshDataType];
 
@@ -2300,7 +2300,7 @@ lcuint32 lcLibraryMeshData::AddVertex(lcMeshDataType MeshDataType, const lcVecto
 	return VertexArray.GetSize() - 1;
 }
 
-lcuint32 lcLibraryMeshData::AddTexturedVertex(lcMeshDataType MeshDataType, const lcVector3& Position, const lcVector2& TexCoord, bool Optimize)
+quint32 lcLibraryMeshData::AddTexturedVertex(lcMeshDataType MeshDataType, const lcVector3& Position, const lcVector2& TexCoord, bool Optimize)
 {
 	lcArray<lcLibraryMeshVertexTextured>& VertexArray = mTexturedVertices[MeshDataType];
 
@@ -2324,7 +2324,7 @@ lcuint32 lcLibraryMeshData::AddTexturedVertex(lcMeshDataType MeshDataType, const
 	return VertexArray.GetSize() - 1;
 }
 
-lcuint32 lcLibraryMeshData::AddTexturedVertex(lcMeshDataType MeshDataType, const lcVector3& Position, const lcVector3& Normal, const lcVector2& TexCoord, bool Optimize)
+quint32 lcLibraryMeshData::AddTexturedVertex(lcMeshDataType MeshDataType, const lcVector3& Position, const lcVector3& Normal, const lcVector2& TexCoord, bool Optimize)
 {
 	lcArray<lcLibraryMeshVertexTextured>& VertexArray = mTexturedVertices[MeshDataType];
 
@@ -2361,10 +2361,10 @@ lcuint32 lcLibraryMeshData::AddTexturedVertex(lcMeshDataType MeshDataType, const
 	return VertexArray.GetSize() - 1;
 }
 
-void lcLibraryMeshData::AddIndices(lcMeshDataType MeshDataType, lcMeshPrimitiveType PrimitiveType, lcuint32 ColorCode, int IndexCount, lcuint32** IndexBuffer)
+void lcLibraryMeshData::AddIndices(lcMeshDataType MeshDataType, lcMeshPrimitiveType PrimitiveType, quint32 ColorCode, int IndexCount, quint32** IndexBuffer)
 {
 	lcLibraryMeshSection* Section = AddSection(MeshDataType, PrimitiveType, ColorCode, nullptr);
-	lcArray<lcuint32>& Indices = Section->mIndices;
+	lcArray<quint32>& Indices = Section->mIndices;
 	int CurrentSize = Indices.GetSize();
 
 	Indices.SetSize(CurrentSize + IndexCount);
@@ -2372,7 +2372,7 @@ void lcLibraryMeshData::AddIndices(lcMeshDataType MeshDataType, lcMeshPrimitiveT
 	*IndexBuffer = &Indices[CurrentSize];
 }
 
-void lcLibraryMeshData::AddLine(lcMeshDataType MeshDataType, int LineType, lcuint32 ColorCode, bool WindingCCW, const lcVector3* Vertices, bool Optimize)
+void lcLibraryMeshData::AddLine(lcMeshDataType MeshDataType, int LineType, quint32 ColorCode, bool WindingCCW, const lcVector3* Vertices, bool Optimize)
 {
 	lcMeshPrimitiveType PrimitiveTypes[4] = { LC_MESH_LINES, LC_MESH_TRIANGLES, LC_MESH_TRIANGLES, LC_MESH_CONDITIONAL_LINES };
 	lcMeshPrimitiveType PrimitiveType = PrimitiveTypes[LineType - 2];
@@ -2463,7 +2463,7 @@ void lcLibraryMeshData::AddLine(lcMeshDataType MeshDataType, int LineType, lcuin
 	}
 }
 
-void lcLibraryMeshData::AddTexturedLine(lcMeshDataType MeshDataType, int LineType, lcuint32 ColorCode, bool WindingCCW, const lcLibraryTextureMap& Map, const lcVector3* Vertices, bool Optimize)
+void lcLibraryMeshData::AddTexturedLine(lcMeshDataType MeshDataType, int LineType, quint32 ColorCode, bool WindingCCW, const lcLibraryTextureMap& Map, const lcVector3* Vertices, bool Optimize)
 {
 	lcMeshPrimitiveType PrimitiveType = (LineType == 2) ? LC_MESH_TEXTURED_LINES : LC_MESH_TEXTURED_TRIANGLES;
 	lcLibraryMeshSection* Section = AddSection(MeshDataType, PrimitiveType, ColorCode, Map.Texture);
@@ -2545,7 +2545,7 @@ void lcLibraryMeshData::AddTexturedLine(lcMeshDataType MeshDataType, int LineTyp
 	}
 }
 
-void lcLibraryMeshData::AddMeshData(const lcLibraryMeshData& Data, const lcMatrix44& Transform, lcuint32 CurrentColorCode, bool InvertWinding, bool InvertNormals, lcLibraryTextureMap* TextureMap, lcMeshDataType OverrideDestIndex)
+void lcLibraryMeshData::AddMeshData(const lcLibraryMeshData& Data, const lcMatrix44& Transform, quint32 CurrentColorCode, bool InvertWinding, bool InvertNormals, lcLibraryTextureMap* TextureMap, lcMeshDataType OverrideDestIndex)
 {
 	for (int MeshDataIdx = 0; MeshDataIdx < LC_NUM_MESHDATA_TYPES; MeshDataIdx++)
 	{
@@ -2555,7 +2555,7 @@ void lcLibraryMeshData::AddMeshData(const lcLibraryMeshData& Data, const lcMatri
 		lcArray<lcLibraryMeshVertexTextured>& TexturedVertices = mTexturedVertices[DestIndex];
 
 		int VertexCount = DataVertices.GetSize();
-		lcArray<lcuint32> IndexRemap(VertexCount);
+		lcArray<quint32> IndexRemap(VertexCount);
 
 		if (!TextureMap)
 		{
@@ -2607,7 +2607,7 @@ void lcLibraryMeshData::AddMeshData(const lcLibraryMeshData& Data, const lcMatri
 
 		const lcArray<lcLibraryMeshVertexTextured>& DataTexturedVertices = Data.mTexturedVertices[MeshDataIdx];
 		int TexturedVertexCount = DataTexturedVertices.GetSize();
-		lcArray<lcuint32> TexturedIndexRemap(TexturedVertexCount);
+		lcArray<quint32> TexturedIndexRemap(TexturedVertexCount);
 
 		if (TexturedVertexCount)
 		{
@@ -2640,7 +2640,7 @@ void lcLibraryMeshData::AddMeshData(const lcLibraryMeshData& Data, const lcMatri
 		{
 			lcLibraryMeshSection* SrcSection = DataSections[SrcSectionIdx];
 			lcLibraryMeshSection* DstSection = nullptr;
-			lcuint32 ColorCode = SrcSection->mColor == 16 ? CurrentColorCode : SrcSection->mColor;
+			quint32 ColorCode = SrcSection->mColor == 16 ? CurrentColorCode : SrcSection->mColor;
 			lcTexture* Texture;
 
 			if (SrcSection->mTexture)
@@ -2708,7 +2708,7 @@ void lcLibraryMeshData::AddMeshData(const lcLibraryMeshData& Data, const lcMatri
 	}
 }
 
-void lcLibraryMeshData::AddMeshDataNoDuplicateCheck(const lcLibraryMeshData& Data, const lcMatrix44& Transform, lcuint32 CurrentColorCode, bool InvertWinding, bool InvertNormals, lcLibraryTextureMap* TextureMap, lcMeshDataType OverrideDestIndex)
+void lcLibraryMeshData::AddMeshDataNoDuplicateCheck(const lcLibraryMeshData& Data, const lcMatrix44& Transform, quint32 CurrentColorCode, bool InvertWinding, bool InvertNormals, lcLibraryTextureMap* TextureMap, lcMeshDataType OverrideDestIndex)
 {
 	for (int MeshDataIdx = 0; MeshDataIdx < LC_NUM_MESHDATA_TYPES; MeshDataIdx++)
 	{
@@ -2716,7 +2716,7 @@ void lcLibraryMeshData::AddMeshDataNoDuplicateCheck(const lcLibraryMeshData& Dat
 		const lcArray<lcLibraryMeshVertex>& DataVertices = Data.mVertices[MeshDataIdx];
 		lcArray<lcLibraryMeshVertex>& Vertices = mVertices[DestIndex];
 		lcArray<lcLibraryMeshVertexTextured>& TexturedVertices = mTexturedVertices[DestIndex];
-		lcuint32 BaseIndex;
+		quint32 BaseIndex;
 
 		if (!TextureMap)
 		{
@@ -2763,7 +2763,7 @@ void lcLibraryMeshData::AddMeshDataNoDuplicateCheck(const lcLibraryMeshData& Dat
 		const lcArray<lcLibraryMeshVertexTextured>& DataTexturedVertices = Data.mTexturedVertices[MeshDataIdx];
 
 		int TexturedVertexCount = DataTexturedVertices.GetSize();
-		lcuint32 BaseTexturedIndex = TexturedVertices.GetSize();
+		quint32 BaseTexturedIndex = TexturedVertices.GetSize();
 
 		if (TexturedVertexCount)
 		{
@@ -2789,7 +2789,7 @@ void lcLibraryMeshData::AddMeshDataNoDuplicateCheck(const lcLibraryMeshData& Dat
 		{
 			lcLibraryMeshSection* SrcSection = DataSections[SrcSectionIdx];
 			lcLibraryMeshSection* DstSection = nullptr;
-			lcuint32 ColorCode = SrcSection->mColor == 16 ? CurrentColorCode : SrcSection->mColor;
+			quint32 ColorCode = SrcSection->mColor == 16 ? CurrentColorCode : SrcSection->mColor;
 			lcTexture* Texture;
 
 			if (SrcSection->mTexture)

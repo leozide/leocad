@@ -4,8 +4,8 @@
 #include <string.h>
 #include "lc_math.h"
 
-#define LC_FOURCC(ch0, ch1, ch2, ch3) (lcuint32)((lcuint32)(lcuint8)(ch0) | ((lcuint32)(lcuint8)(ch1) << 8) | \
-												((lcuint32)(lcuint8)(ch2) << 16) | ((lcuint32)(lcuint8)(ch3) << 24 ))
+#define LC_FOURCC(ch0, ch1, ch2, ch3) (quint32)((quint32)(quint8)(ch0) | ((quint32)(quint8)(ch1) << 8) | \
+												((quint32)(quint8)(ch2) << 16) | ((quint32)(quint8)(ch3) << 24 ))
 
 class lcFile
 {
@@ -33,98 +33,98 @@ public:
 	virtual size_t ReadBuffer(void* Buffer, size_t Bytes) = 0;
 	virtual size_t WriteBuffer(const void* Buffer, size_t Bytes) = 0;
 
-	lcuint8 ReadU8()
+	quint8 ReadU8()
 	{
-		lcuint8 Value;
+		quint8 Value;
 		Read8(&Value, 1);
 		return Value;
 	}
 
-	size_t ReadU8(lcuint8* Buffer, size_t Count)
+	size_t ReadU8(quint8* Buffer, size_t Count)
 	{
 		return Read8(Buffer, Count);
 	}
 
-	lcint8 ReadS8()
+	qint8 ReadS8()
 	{
-		lcint8 Value;
+		qint8 Value;
 		Read8(&Value, 1);
 		return Value;
 	}
 
-	size_t ReadS8(lcint8* Buffer, size_t Count)
+	size_t ReadS8(qint8* Buffer, size_t Count)
 	{
 		return Read8(Buffer, Count);
 	}
 
-	lcuint16 ReadU16()
+	quint16 ReadU16()
 	{
-		lcuint16 Value;
+		quint16 Value;
 		Read16(&Value, 1);
 		return Value;
 	}
 
-	size_t ReadU16(lcuint16* Buffer, size_t Count)
+	size_t ReadU16(quint16* Buffer, size_t Count)
 	{
 		return Read16(Buffer, Count);
 	}
 
-	lcint16 ReadS16()
+	qint16 ReadS16()
 	{
-		lcint16 Value;
+		qint16 Value;
 		Read16(&Value, 1);
 		return Value;
 	}
 
-	size_t ReadS16(lcint16* Buffer, size_t Count)
+	size_t ReadS16(qint16* Buffer, size_t Count)
 	{
 		return Read16(Buffer, Count);
 	}
 
-	lcuint32 ReadU32()
+	quint32 ReadU32()
 	{
-		lcuint32 Value;
+		quint32 Value;
 		Read32(&Value, 1);
 		return Value;
 	}
 
-	size_t ReadU32(lcuint32* Buffer, size_t Count)
+	size_t ReadU32(quint32* Buffer, size_t Count)
 	{
 		return Read32(Buffer, Count);
 	}
 
-	lcint32 ReadS32()
+	qint32 ReadS32()
 	{
-		lcint32 Value;
+		qint32 Value;
 		Read32(&Value, 1);
 		return Value;
 	}
 
-	size_t ReadS32(lcint32* Buffer, size_t Count)
+	size_t ReadS32(qint32* Buffer, size_t Count)
 	{
 		return Read32(Buffer, Count);
 	}
 
-	lcuint64 ReadU64()
+	quint64 ReadU64()
 	{
-		lcuint64 Value;
+		quint64 Value;
 		Read64(&Value, 1);
 		return Value;
 	}
 
-	size_t ReadU64(lcuint64* Buffer, size_t Count)
+	size_t ReadU64(quint64* Buffer, size_t Count)
 	{
 		return Read64(Buffer, Count);
 	}
 
-	lcint64 ReadS64()
+	qint64 ReadS64()
 	{
-		lcint64 Value;
+		qint64 Value;
 		Read64(&Value, 1);
 		return Value;
 	}
 
-	size_t ReadS64(lcint64* Buffer, size_t Count)
+	size_t ReadS64(qint64* Buffer, size_t Count)
 	{
 		return Read64(Buffer, Count);
 	}
@@ -162,7 +162,7 @@ public:
 
 	QString ReadQString()
 	{
-		uint32_t Size = ReadU32();
+		quint32 Size = ReadU32();
 		char* Buffer = new char[Size];
 		ReadBuffer(Buffer, Size);
 		QString String = QString::fromUtf8(Buffer, Size);
@@ -170,82 +170,82 @@ public:
 		return String;
 	}
 
-	void WriteU8(const lcuint8& Value)
+	void WriteU8(const quint8& Value)
 	{
 		Write8(&Value, 1);
 	}
 
-	size_t WriteU8(const lcuint8* Buffer, size_t Count)
+	size_t WriteU8(const quint8* Buffer, size_t Count)
 	{
 		return Write8(Buffer, Count);
 	}
 
-	void WriteS8(const lcint8& Value)
+	void WriteS8(const qint8& Value)
 	{
 		Write8(&Value, 1);
 	}
 
-	size_t WriteS8(const lcint8* Buffer, size_t Count)
+	size_t WriteS8(const qint8* Buffer, size_t Count)
 	{
 		return Write8(Buffer, Count);
 	}
 
-	void WriteU16(const lcuint16& Value)
+	void WriteU16(const quint16& Value)
 	{
 		Write16(&Value, 1);
 	}
 
-	size_t WriteU16(const lcuint16* Buffer, size_t Count)
+	size_t WriteU16(const quint16* Buffer, size_t Count)
 	{
 		return Write16(Buffer, Count);
 	}
 
-	void WriteS16(const lcint16& Value)
+	void WriteS16(const qint16& Value)
 	{
 		Write16(&Value, 1);
 	}
 
-	size_t WriteS16(const lcint16* Buffer, size_t Count)
+	size_t WriteS16(const qint16* Buffer, size_t Count)
 	{
 		return Write16(Buffer, Count);
 	}
 
-	void WriteU32(const lcuint32& Value)
+	void WriteU32(const quint32& Value)
 	{
 		Write32(&Value, 1);
 	}
 
-	size_t WriteU32(const lcuint32* Buffer, size_t Count)
+	size_t WriteU32(const quint32* Buffer, size_t Count)
 	{
 		return Write32(Buffer, Count);
 	}
 
-	void WriteS32(const lcint32& Value)
+	void WriteS32(const qint32& Value)
 	{
 		Write32(&Value, 1);
 	}
 
-	size_t WriteS32(const lcint32* Buffer, size_t Count)
+	size_t WriteS32(const qint32* Buffer, size_t Count)
 	{
 		return Write32(Buffer, Count);
 	}
 
-	void WriteU64(const lcuint64& Value)
+	void WriteU64(const quint64& Value)
 	{
 		Write64(&Value, 1);
 	}
 
-	size_t WriteU64(const lcuint64* Buffer, size_t Count)
+	size_t WriteU64(const quint64* Buffer, size_t Count)
 	{
 		return Write64(Buffer, Count);
 	}
 
-	void WriteS64(const lcint64& Value)
+	void WriteS64(const qint64& Value)
 	{
 		Write64(&Value, 1);
 	}
 
-	size_t WriteS64(const lcint64* Buffer, size_t Count)
+	size_t WriteS64(const qint64* Buffer, size_t Count)
 	{
 		return Write64(Buffer, Count);
 	}
@@ -295,8 +295,8 @@ protected:
 		NumRead = ReadBuffer(Buffer, Count * 2) / 2;
 
 #if Q_BYTE_ORDER == Q_BIG_ENDIAN
-		lcuint8 Temp[2];
-		lcuint8* Bytes = (lcuint8*)Buffer;
+		quint8 Temp[2];
+		quint8* Bytes = (quint8*)Buffer;
 
 		for (size_t Idx = 0; Idx < NumRead; Idx++)
 		{
@@ -318,8 +318,8 @@ protected:
 		NumRead = ReadBuffer(Buffer, Count * 4) / 4;
 
 #if Q_BYTE_ORDER == Q_BIG_ENDIAN
-		lcuint8 Temp[4];
-		lcuint8* Bytes = (lcuint8*)Buffer;
+		quint8 Temp[4];
+		quint8* Bytes = (quint8*)Buffer;
 
 		for (size_t Idx = 0; Idx < NumRead; Idx++)
 		{
@@ -345,8 +345,8 @@ protected:
 		NumRead = ReadBuffer(Buffer, Count * 8) / 8;
 
 #if Q_BYTE_ORDER == Q_BIG_ENDIAN
-		lcuint8 Temp[8];
-		lcuint8* Bytes = (lcuint8*)Buffer;
+		quint8 Temp[8];
+		quint8* Bytes = (quint8*)Buffer;
 
 		for (size_t Idx = 0; Idx < NumRead; Idx++)
 		{
@@ -382,8 +382,8 @@ protected:
 	{
 #if Q_BYTE_ORDER == Q_BIG_ENDIAN
 		size_t BytesWritten = 0;
-		lcuint8 Temp[2];
-		lcuint8* Bytes = (lcuint8*)Buffer;
+		quint8 Temp[2];
+		quint8* Bytes = (quint8*)Buffer;
 
 		for (size_t Idx = 0; Idx < Count; Idx++)
 		{
@@ -403,8 +403,8 @@ protected:
 	{
 #if Q_BYTE_ORDER == Q_BIG_ENDIAN
 		size_t BytesWritten = 0;
-		lcuint8 Temp[4];
-		lcuint8* Bytes = (lcuint8*)Buffer;
+		quint8 Temp[4];
+		quint8* Bytes = (quint8*)Buffer;
 
 		for (size_t Idx = 0; Idx < Count; Idx++)
 		{
@@ -426,8 +426,8 @@ protected:
 	{
 #if Q_BYTE_ORDER == Q_BIG_ENDIAN
 		size_t BytesWritten = 0;
-		lcuint8 Temp[8];
-		lcuint8* Bytes = (lcuint8*)Buffer;
+		quint8 Temp[8];
+		quint8* Bytes = (quint8*)Buffer;
 
 		for (size_t Idx = 0; Idx < Count; Idx++)
 		{

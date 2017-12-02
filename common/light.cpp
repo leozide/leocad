@@ -439,10 +439,10 @@ void lcLight::DrawPointLight(lcContext* Context) const
 	const int NumVertices = (Slices - 1) * Slices + 2;
 	const float Radius = LC_LIGHT_SPHERE_RADIUS;
 	lcVector3 Vertices[NumVertices];
-	lcuint16 Indices[NumIndices];
+	quint16 Indices[NumIndices];
 
 	lcVector3* Vertex = Vertices;
-	lcuint16* Index = Indices;
+	quint16* Index = Indices;
 
 	*Vertex++ = lcVector3(0, 0, Radius);
 

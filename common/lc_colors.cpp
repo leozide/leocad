@@ -321,7 +321,7 @@ bool lcLoadColorFile(lcFile& File)
 		}
 
 		// Check if the new color is valid.
-		if (Color.Code == (lcuint32)-1 || Color.Value[0] == FLT_MAX)
+		if (Color.Code == (quint32)-1 || Color.Value[0] == FLT_MAX)
 			continue;
 
 		if (Color.Edge[0] == FLT_MAX)
@@ -402,7 +402,7 @@ void lcLoadDefaultColors()
 	lcLoadColorFile(MemSettings);
 }
 
-int lcGetColorIndex(lcuint32 ColorCode)
+int lcGetColorIndex(quint32 ColorCode)
 {
 	for (int ColorIdx = 0; ColorIdx < gColorList.GetSize(); ColorIdx++)
 		if (gColorList[ColorIdx].Code == ColorCode)

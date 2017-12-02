@@ -7,7 +7,7 @@ static void CopyFromQImage(const QImage& Src, Image& Dest)
 	bool Alpha = Src.hasAlphaChannel();
 	Dest.Allocate(Src.width(), Src.height(), Alpha ? LC_PIXEL_FORMAT_R8G8B8A8 : LC_PIXEL_FORMAT_R8G8B8);
 
-	lcuint8* Bytes = (lcuint8*)Dest.mData;
+	quint8* Bytes = (quint8*)Dest.mData;
 
 	for (int y = 0; y < Dest.mHeight; y++)
 	{

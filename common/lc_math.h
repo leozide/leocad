@@ -9,11 +9,11 @@
 #define LC_2PI (static_cast<float>(2 * M_PI))
 
 #define LC_RGB(r,g,b) LC_RGBA(r,g,b,255)
-#define LC_RGBA(r,g,b,a) ((lcuint32)(((lcuint8) (r) | ((lcuint16) (g) << 8)) | (((lcuint32) (lcuint8) (b)) << 16) | (((lcuint32) (lcuint8) (a)) << 24))) 
-#define LC_RGBA_RED(rgba)   ((lcuint8)(((rgba) >>  0) & 0xff))
-#define LC_RGBA_GREEN(rgba) ((lcuint8)(((rgba) >>  8) & 0xff))
-#define LC_RGBA_BLUE(rgba)  ((lcuint8)(((rgba) >> 16) & 0xff))
-#define LC_RGBA_ALPHA(rgba) ((lcuint8)(((rgba) >> 24) & 0xff))
+#define LC_RGBA(r,g,b,a) ((quint32)(((quint8) (r) | ((quint16) (g) << 8)) | (((quint32) (quint8) (b)) << 16) | (((quint32) (quint8) (a)) << 24))) 
+#define LC_RGBA_RED(rgba)   ((quint8)(((rgba) >>  0) & 0xff))
+#define LC_RGBA_GREEN(rgba) ((quint8)(((rgba) >>  8) & 0xff))
+#define LC_RGBA_BLUE(rgba)  ((quint8)(((rgba) >> 16) & 0xff))
+#define LC_RGBA_ALPHA(rgba) ((quint8)(((rgba) >> 24) & 0xff))
 #define LC_FLOATRGB(f) LC_RGB(f[0]*255, f[1]*255, f[2]*255)
 
 template<typename T>
@@ -576,21 +576,21 @@ inline lcVector3 lcVector3LDrawToLeoCAD(const lcVector3& Vector)
 	return lcVector3(Vector[0], Vector[2], -Vector[1]);
 }
 
-inline lcVector3 lcVector3FromColor(lcuint32 Color)
+inline lcVector3 lcVector3FromColor(quint32 Color)
 {
 	lcVector3 v(LC_RGBA_RED(Color), LC_RGBA_GREEN(Color), LC_RGBA_BLUE(Color));
 	v /= 255.0f;
 	return v;
 }
 
-inline lcVector4 lcVector4FromColor(lcuint32 Color)
+inline lcVector4 lcVector4FromColor(quint32 Color)
 {
 	lcVector4 v(LC_RGBA_RED(Color), LC_RGBA_GREEN(Color), LC_RGBA_BLUE(Color), LC_RGBA_ALPHA(Color));
 	v /= 255.0f;
 	return v;
 }
 
-inline lcuint32 lcColorFromVector3(const lcVector3& Color)
+inline quint32 lcColorFromVector3(const lcVector3& Color)
 {
 	return LC_RGB(Color[0] * 255, Color[1] * 255, Color[2] * 255);
 }

@@ -657,7 +657,7 @@ void Project::Export3DStudio(const QString& FileName)
 		File.WriteU16(0x0030); // CHK_INT_PERCENTAGE
 		File.WriteU32(8);
 
-		File.WriteS16((lcuint8)floor(100.0 * 0.25 + 0.5));
+		File.WriteS16((quint8)floor(100.0 * 0.25 + 0.5));
 
 		File.WriteU16(0xA041); // CHK_MAT_SHIN2PCT
 		File.WriteU32(14);
@@ -665,7 +665,7 @@ void Project::Export3DStudio(const QString& FileName)
 		File.WriteU16(0x0030); // CHK_INT_PERCENTAGE
 		File.WriteU32(8);
 
-		File.WriteS16((lcuint8)floor(100.0 * 0.05 + 0.5));
+		File.WriteS16((quint8)floor(100.0 * 0.05 + 0.5));
 
 		File.WriteU16(0xA050); // CHK_MAT_TRANSPARENCY
 		File.WriteU32(14);
@@ -673,7 +673,7 @@ void Project::Export3DStudio(const QString& FileName)
 		File.WriteU16(0x0030); // CHK_INT_PERCENTAGE
 		File.WriteU32(8);
 
-		File.WriteS16((lcuint8)floor(100.0 * (1.0f - Color->Value[3]) + 0.5));
+		File.WriteS16((quint8)floor(100.0 * (1.0f - Color->Value[3]) + 0.5));
 
 		File.WriteU16(0xA052); // CHK_MAT_XPFALL
 		File.WriteU32(14);
@@ -681,7 +681,7 @@ void Project::Export3DStudio(const QString& FileName)
 		File.WriteU16(0x0030); // CHK_INT_PERCENTAGE
 		File.WriteU32(8);
 
-		File.WriteS16((lcuint8)floor(100.0 * 0.0 + 0.5));
+		File.WriteS16((quint8)floor(100.0 * 0.0 + 0.5));
 
 		File.WriteU16(0xA053); // CHK_MAT_REFBLUR
 		File.WriteU32(14);
@@ -689,7 +689,7 @@ void Project::Export3DStudio(const QString& FileName)
 		File.WriteU16(0x0030); // CHK_INT_PERCENTAGE
 		File.WriteU32(8);
 
-		File.WriteS16((lcuint8)floor(100.0 * 0.2 + 0.5));
+		File.WriteS16((quint8)floor(100.0 * 0.2 + 0.5));
 
 		File.WriteU16(0xA100); // CHK_MAT_SHADING
 		File.WriteU32(8);
@@ -702,7 +702,7 @@ void Project::Export3DStudio(const QString& FileName)
 		File.WriteU16(0x0030); // CHK_INT_PERCENTAGE
 		File.WriteU32(8);
 
-		File.WriteS16((lcuint8)floor(100.0 * 0.0 + 0.5));
+		File.WriteS16((quint8)floor(100.0 * 0.0 + 0.5));
 
 		File.WriteU16(0xA081); // CHK_MAT_TWO_SIDE
 		File.WriteU32(6);
@@ -780,7 +780,7 @@ void Project::Export3DStudio(const QString& FileName)
 
 	File.WriteU16(0x1100); // CHK_BIT_MAP
 	QByteArray BackgroundImage = Properties.mBackgroundImage.toLatin1();
-	File.WriteU32(6 + 1 + (lcuint32)strlen(BackgroundImage.constData()));
+	File.WriteU32(6 + 1 + (quint32)strlen(BackgroundImage.constData()));
 	File.WriteBuffer(BackgroundImage.constData(), strlen(BackgroundImage.constData()) + 1);
 
 	File.WriteU16(0x1300); // CHK_V_GRADIENT
@@ -911,7 +911,7 @@ void Project::Export3DStudio(const QString& FileName)
 			if (Section->PrimitiveType != LC_MESH_TRIANGLES && Section->PrimitiveType != LC_MESH_TEXTURED_TRIANGLES)
 				continue;
 
-			lcuint16* Indices = (lcuint16*)Mesh->mIndexData + Section->IndexOffset / sizeof(lcuint16);
+			quint16* Indices = (quint16*)Mesh->mIndexData + Section->IndexOffset / sizeof(quint16);
 
 			for (int IndexIdx = 0; IndexIdx < Section->NumIndices; IndexIdx += 3)
 			{
@@ -2212,7 +2212,7 @@ void Project::ExportWavefront(const QString& FileName)
 		return;
 	}
 
-	lcuint32 vert = 1;
+	quint32 vert = 1;
 
 	OBJFile.WriteLine("# Model exported from LeoCAD\n");
 

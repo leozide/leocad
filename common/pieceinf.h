@@ -153,7 +153,7 @@ public:
 	char m_strDescription[128];
 	int mZipFileType;
 	int mZipFileIndex;
-	lcuint32 mFlags;
+	quint32 mFlags;
 	lcPieceInfoState mState;
 	int mFolderType;
 	int mFolderIndex;

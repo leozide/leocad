@@ -171,7 +171,7 @@ void lcQPreferencesDialog::colorClicked()
 {
 	QObject *button = sender();
 	QString title;
-	lcuint32 *color = nullptr;
+	quint32 *color = nullptr;
 	QColorDialog::ColorDialogOptions dialogOptions;
 
 	if (button == ui->gridStudColor)

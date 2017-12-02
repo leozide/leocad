@@ -427,7 +427,7 @@ void lcSynthInfo::AddFlexibleAxleParts(lcMemFile& File, lcLibraryMeshData& MeshD
 
 	int BaseVertex;
 	lcLibraryMeshVertex* VertexBuffer;
-	lcuint32* IndexBuffer;
+	quint32* IndexBuffer;
 	MeshData.AddVertices(LC_MESHDATA_SHARED, 16 * (Sections.GetSize() - 1), &BaseVertex, &VertexBuffer);
 	MeshData.AddIndices(LC_MESHDATA_SHARED, LC_MESH_LINES, 24, 2 * 12 * (Sections.GetSize() - 2), &IndexBuffer);
 
@@ -506,7 +506,7 @@ void lcSynthInfo::AddStringBraidedParts(lcMemFile& File, lcLibraryMeshData& Mesh
 
 	int BaseVertex;
 	lcLibraryMeshVertex* VertexBuffer;
-	lcuint32* IndexBuffer;
+	quint32* IndexBuffer;
 	MeshData.AddVertices(LC_MESHDATA_SHARED, NumBraids * ((Sections.GetSize() - 2) * NumSegments + 1), &BaseVertex, &VertexBuffer);
 	MeshData.AddIndices(LC_MESHDATA_SHARED, LC_MESH_LINES, 24, NumBraids * (Sections.GetSize() - 2) * NumSegments * 2, &IndexBuffer);
 

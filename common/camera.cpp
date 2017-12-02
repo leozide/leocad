@@ -189,7 +189,7 @@ bool lcCamera::ParseLDrawLine(QTextStream& Stream)
 
 bool lcCamera::FileLoad(lcFile& file)
 {
-	lcuint8 version, ch;
+	quint8 version, ch;
 
 	version = file.ReadU8();
 
@@ -201,10 +201,10 @@ bool lcCamera::FileLoad(lcFile& file)
 		if (file.ReadU8() != 1)
 			return false;
 
-		lcuint16 time;
+		quint16 time;
 		float param[4];
-		lcuint8 type;
-		lcuint32 n;
+		quint8 type;
+		quint32 n;
 
 		file.ReadU32(&n, 1);
 		while (n--)
@@ -274,7 +274,7 @@ bool lcCamera::FileLoad(lcFile& file)
 
 		while (ch--)
 		{
-			lcuint8 step;
+			quint8 step;
 			double eye[3], target[3], up[3];
 			float f[3];
 
@@ -314,13 +314,13 @@ bool lcCamera::FileLoad(lcFile& file)
 	}
 	else
 	{
-		lcint32 n;
+		qint32 n;
 
 		if (version < 6)
 		{
-			lcuint16 time;
+			quint16 time;
 			float param[4];
-			lcuint8 type;
+			quint8 type;
 
 			n = file.ReadS32();
 			while (n--)
@@ -367,8 +367,8 @@ bool lcCamera::FileLoad(lcFile& file)
 
 	if ((version > 1) && (version < 4))
 	{
-		lcuint32 show;
-		lcint32 user;
+		quint32 show;
+		qint32 user;
 
 		file.ReadU32(&show, 1);
 //		if (version > 2)

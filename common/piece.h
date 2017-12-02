@@ -63,7 +63,7 @@ public:
 		return (mState & LC_PIECE_SELECTION_MASK) != 0;
 	}
 
-	virtual bool IsSelected(lcuint32 Section) const override
+	virtual bool IsSelected(quint32 Section) const override
 	{
 		Q_UNUSED(Section);
 
@@ -78,7 +78,7 @@ public:
 			mState &= ~(LC_PIECE_SELECTION_MASK | LC_PIECE_FOCUS_MASK);
 	}
 
-	virtual void SetSelected(lcuint32 Section, bool Selected) override
+	virtual void SetSelected(quint32 Section, bool Selected) override
 	{
 		switch (Section)
 		{
@@ -152,7 +152,7 @@ public:
 		return (mState & LC_PIECE_FOCUS_MASK) != 0;
 	}
 
-	virtual bool IsFocused(lcuint32 Section) const override
+	virtual bool IsFocused(quint32 Section) const override
 	{
 		switch (Section)
 		{
@@ -187,7 +187,7 @@ public:
 		return false;
 	}
 
-	virtual void SetFocused(lcuint32 Section, bool Focused) override
+	virtual void SetFocused(quint32 Section, bool Focused) override
 	{
 		switch (Section)
 		{
@@ -256,7 +256,7 @@ public:
 		}
 	}
 
-	virtual lcuint32 GetFocusSection() const override
+	virtual quint32 GetFocusSection() const override
 	{
 		if (mState & LC_PIECE_POSITION_FOCUSED)
 			return LC_PIECE_SECTION_POSITION;
@@ -288,9 +288,9 @@ public:
 		return LC_PIECE_SECTION_INVALID;
 	}
 
-	virtual lcuint32 GetAllowedTransforms() const override;
+	virtual quint32 GetAllowedTransforms() const override;
 
-	virtual lcVector3 GetSectionPosition(lcuint32 Section) const override
+	virtual lcVector3 GetSectionPosition(quint32 Section) const override
 	{
 		switch (Section)
 		{
@@ -456,7 +456,7 @@ public:
 			mStepHide = mStepShow + 1;
 	}
 
-	void SetColorCode(lcuint32 ColorCode)
+	void SetColorCode(quint32 ColorCode)
 	{
 		mColorCode = ColorCode;
 		mColorIndex = lcGetColorIndex(ColorCode);
@@ -480,7 +480,7 @@ public:
 
 	lcVector3 GetRotationCenter() const
 	{
-		lcuint32 Section = GetFocusSection();
+		quint32 Section = GetFocusSection();
 
 		if (Section == LC_PIECE_SECTION_POSITION || Section == LC_PIECE_SECTION_INVALID)
 		{
@@ -505,7 +505,7 @@ public:
 
 	lcMatrix33 GetRelativeRotation() const
 	{
-		lcuint32 Section = GetFocusSection();
+		quint32 Section = GetFocusSection();
 
 		if (Section == LC_PIECE_SECTION_POSITION || Section == LC_PIECE_SECTION_INVALID)
 		{
@@ -537,7 +537,7 @@ public:
 	PieceInfo* mPieceInfo;
 
 	int mColorIndex;
-	lcuint32 mColorCode;
+	quint32 mColorCode;
 
 	lcMatrix44 mModelWorld;
 	lcMatrix44 mPivotMatrix;
@@ -566,7 +566,7 @@ protected:
 	lcStep mStepShow;
 	lcStep mStepHide;
 
-	lcuint32 mState;
+	quint32 mState;
 	lcArray<lcPieceControlPoint> mControlPoints;
 	lcMesh* mMesh;
 };

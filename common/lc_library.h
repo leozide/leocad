@@ -40,7 +40,7 @@ struct lcLibraryMeshVertexTextured
 class lcLibraryMeshSection
 {
 public:
-	lcLibraryMeshSection(lcMeshPrimitiveType PrimitiveType, lcuint32 Color, lcTexture* Texture)
+	lcLibraryMeshSection(lcMeshPrimitiveType PrimitiveType, quint32 Color, lcTexture* Texture)
 		: mIndices(1024, 1024)
 	{
 		mPrimitiveType = PrimitiveType;
@@ -53,9 +53,9 @@ public:
 	}
 
 	lcMeshPrimitiveType mPrimitiveType;
-	lcuint32 mColor;
+	quint32 mColor;
 	lcTexture* mTexture;
-	lcArray<lcuint32> mIndices;
+	lcArray<quint32> mIndices;
 };
 
 struct lcLibraryTextureMap
@@ -105,17 +105,17 @@ public:
 		return true;
 	}
 
-	lcLibraryMeshSection* AddSection(lcMeshDataType MeshDataType, lcMeshPrimitiveType PrimitiveType, lcuint32 ColorCode, lcTexture* Texture);
-	lcuint32 AddVertex(lcMeshDataType MeshDataType, const lcVector3& Position, bool Optimize);
-	lcuint32 AddVertex(lcMeshDataType MeshDataType, const lcVector3& Position, const lcVector3& Normal, bool Optimize);
-	lcuint32 AddTexturedVertex(lcMeshDataType MeshDataType, const lcVector3& Position, const lcVector2& TexCoord, bool Optimize);
-	lcuint32 AddTexturedVertex(lcMeshDataType MeshDataType, const lcVector3& Position, const lcVector3& Normal, const lcVector2& TexCoord, bool Optimize);
+	lcLibraryMeshSection* AddSection(lcMeshDataType MeshDataType, lcMeshPrimitiveType PrimitiveType, quint32 ColorCode, lcTexture* Texture);
+	quint32 AddVertex(lcMeshDataType MeshDataType, const lcVector3& Position, bool Optimize);
+	quint32 AddVertex(lcMeshDataType MeshDataType, const lcVector3& Position, const lcVector3& Normal, bool Optimize);
+	quint32 AddTexturedVertex(lcMeshDataType MeshDataType, const lcVector3& Position, const lcVector2& TexCoord, bool Optimize);
+	quint32 AddTexturedVertex(lcMeshDataType MeshDataType, const lcVector3& Position, const lcVector3& Normal, const lcVector2& TexCoord, bool Optimize);
 	void AddVertices(lcMeshDataType MeshDataType, int VertexCount, int* BaseVertex, lcLibraryMeshVertex** VertexBuffer);
-	void AddIndices(lcMeshDataType MeshDataType, lcMeshPrimitiveType PrimitiveType, lcuint32 ColorCode, int IndexCount, lcuint32** IndexBuffer);
-	void AddLine(lcMeshDataType MeshDataType, int LineType, lcuint32 ColorCode, bool WindingCCW, const lcVector3* Vertices, bool Optimize);
-	void AddTexturedLine(lcMeshDataType MeshDataType, int LineType, lcuint32 ColorCode, bool WindingCCW, const lcLibraryTextureMap& Map, const lcVector3* Vertices, bool Optimize);
-	void AddMeshData(const lcLibraryMeshData& Data, const lcMatrix44& Transform, lcuint32 CurrentColorCode, bool InvertWinding, bool InvertNormals, lcLibraryTextureMap* TextureMap, lcMeshDataType OverrideDestIndex);
-	void AddMeshDataNoDuplicateCheck(const lcLibraryMeshData& Data, const lcMatrix44& Transform, lcuint32 CurrentColorCode, bool InvertWinding, bool InvertNormals, lcLibraryTextureMap* TextureMap, lcMeshDataType OverrideDestIndex);
+	void AddIndices(lcMeshDataType MeshDataType, lcMeshPrimitiveType PrimitiveType, quint32 ColorCode, int IndexCount, quint32** IndexBuffer);
+	void AddLine(lcMeshDataType MeshDataType, int LineType, quint32 ColorCode, bool WindingCCW, const lcVector3* Vertices, bool Optimize);
+	void AddTexturedLine(lcMeshDataType MeshDataType, int LineType, quint32 ColorCode, bool WindingCCW, const lcLibraryTextureMap& Map, const lcVector3* Vertices, bool Optimize);
+	void AddMeshData(const lcLibraryMeshData& Data, const lcMatrix44& Transform, quint32 CurrentColorCode, bool InvertWinding, bool InvertNormals, lcLibraryTextureMap* TextureMap, lcMeshDataType OverrideDestIndex);
+	void AddMeshDataNoDuplicateCheck(const lcLibraryMeshData& Data, const lcMatrix44& Transform, quint32 CurrentColorCode, bool InvertWinding, bool InvertNormals, lcLibraryTextureMap* TextureMap, lcMeshDataType OverrideDestIndex);
 	void TestQuad(int* QuadIndices, const lcVector3* Vertices);
 	void ResequenceQuad(int* QuadIndices, int a, int b, int c, int d);
 
@@ -127,7 +127,7 @@ public:
 class lcLibraryPrimitive
 {
 public:
-	lcLibraryPrimitive(const char* Name, lcZipFileType ZipFileType,lcuint32 ZipFileIndex, bool Stud, bool SubFile)
+	lcLibraryPrimitive(const char* Name, lcZipFileType ZipFileType,quint32 ZipFileIndex, bool Stud, bool SubFile)
 	{
 		strncpy(mName, Name, sizeof(mName));
 		mName[sizeof(mName) - 1] = 0;
@@ -139,7 +139,7 @@ public:
 		mSubFile = SubFile;
 	}
 
-	void SetZipFile(lcZipFileType ZipFileType,lcuint32 ZipFileIndex)
+	void SetZipFile(lcZipFileType ZipFileType,quint32 ZipFileIndex)
 	{
 		mZipFileType = ZipFileType;
 		mZipFileIndex = ZipFileIndex;
@@ -147,7 +147,7 @@ public:
 
 	char mName[LC_MAXPATH];
 	lcZipFileType mZipFileType;
-	lcuint32 mZipFileIndex;
+	quint32 mZipFileIndex;
 	lcPrimitiveState mState;
 	bool mStud;
 	bool mSubFile;
@@ -197,7 +197,7 @@ public:
 			mNumOfficialPieces = mPieces.size();
 	}
 
-	bool ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform, lcuint32 CurrentColorCode, bool InvertWinding, lcArray<lcLibraryTextureMap>& TextureStack, lcLibraryMeshData& MeshData, lcMeshDataType MeshDataType, bool Optimize, Project* CurrentProject, bool SearchProjectFolder);
+	bool ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform, quint32 CurrentColorCode, bool InvertWinding, lcArray<lcLibraryTextureMap>& TextureStack, lcLibraryMeshData& MeshData, lcMeshDataType MeshDataType, bool Optimize, Project* CurrentProject, bool SearchProjectFolder);
 	lcMesh* CreateMesh(PieceInfo* Info, lcLibraryMeshData& MeshData);
 	void ReleaseBuffers(lcContext* Context);
 	void UpdateBuffers(lcContext* Context);

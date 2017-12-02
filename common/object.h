@@ -3,7 +3,7 @@
 #include "lc_math.h"
 #include "lc_array.h"
 
-typedef lcuint32 lcStep;
+typedef quint32 lcStep;
 #define LC_STEP_MAX 0xffffffff
 
 enum lcObjectType
@@ -23,7 +23,7 @@ struct lcObjectKey
 struct lcObjectSection
 {
 	lcObject* Object;
-	lcuint32 Section;
+	quint32 Section;
 };
 
 struct lcObjectRayTest
@@ -82,16 +82,16 @@ public:
 	}
 
 	virtual bool IsSelected() const = 0;
-	virtual bool IsSelected(lcuint32 Section) const = 0;
+	virtual bool IsSelected(quint32 Section) const = 0;
 	virtual void SetSelected(bool Selected) = 0;
-	virtual void SetSelected(lcuint32 Section, bool Selected) = 0;
+	virtual void SetSelected(quint32 Section, bool Selected) = 0;
 	virtual bool IsFocused() const = 0;
-	virtual bool IsFocused(lcuint32 Section) const = 0;
-	virtual void SetFocused(lcuint32 Section, bool Focused) = 0;
-	virtual lcuint32 GetFocusSection() const = 0;
+	virtual bool IsFocused(quint32 Section) const = 0;
+	virtual void SetFocused(quint32 Section, bool Focused) = 0;
+	virtual quint32 GetFocusSection() const = 0;
 
-	virtual lcuint32 GetAllowedTransforms() const = 0;
-	virtual lcVector3 GetSectionPosition(lcuint32 Section) const = 0;
+	virtual quint32 GetAllowedTransforms() const = 0;
+	virtual lcVector3 GetSectionPosition(quint32 Section) const = 0;
 	virtual void RayTest(lcObjectRayTest& ObjectRayTest) const = 0;
 	virtual void BoxTest(lcObjectBoxTest& ObjectBoxTest) const = 0;
 	virtual void DrawInterface(lcContext* Context) const = 0;

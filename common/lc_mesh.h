@@ -56,7 +56,7 @@ public:
 	lcMesh();
 	~lcMesh();
 
-	void Create(lcuint16 NumSections[LC_NUM_MESH_LODS], int NumVertices, int NumTexturedVertices, int NumIndices);
+	void Create(quint16 NumSections[LC_NUM_MESH_LODS], int NumVertices, int NumTexturedVertices, int NumIndices);
 	void CreateBox();
 
 	bool FileLoad(lcMemFile& File);

@@ -14,7 +14,7 @@ lcGroup::~lcGroup()
 
 void lcGroup::FileLoad(lcFile* File)
 {
-	lcint32 GroupIndex;
+	qint32 GroupIndex;
 	char Name[LC_MAX_GROUP_NAME + 1];
 
 	File->ReadU8();

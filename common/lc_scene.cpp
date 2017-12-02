@@ -143,7 +143,7 @@ void lcScene::DrawRenderMeshes(lcContext* Context, int PrimitiveTypes, bool Enab
 
 				if (Mesh->mIndexType == GL_UNSIGNED_SHORT)
 				{
-					lcuint16* Indices = (lcuint16*)((char*)Mesh->mIndexData + Section->IndexOffset);
+					quint16* Indices = (quint16*)((char*)Mesh->mIndexData + Section->IndexOffset);
 
 					for (int i = 0; i < Section->NumIndices; i += 4)
 					{
@@ -153,12 +153,12 @@ void lcScene::DrawRenderMeshes(lcContext* Context, int PrimitiveTypes, bool Enab
 						lcVector3 p4 = lcMul31(VertexBuffer[Indices[i + 3]].Position, WorldViewProjectionMatrix);
 
 						if (((p1.y - p2.y) * (p3.x - p1.x) + (p2.x - p1.x) * (p3.y - p1.y)) * ((p1.y - p2.y) * (p4.x - p1.x) + (p2.x - p1.x) * (p4.y - p1.y)) >= 0)
-							Context->DrawIndexedPrimitives(GL_LINES, 2, Mesh->mIndexType, IndexBufferOffset + Section->IndexOffset + i * sizeof(lcuint16));
+							Context->DrawIndexedPrimitives(GL_LINES, 2, Mesh->mIndexType, IndexBufferOffset + Section->IndexOffset + i * sizeof(quint16));
 					}
 				}
 				else
 				{
-					lcuint32* Indices = (lcuint32*)((char*)Mesh->mIndexData + Section->IndexOffset);
+					quint32* Indices = (quint32*)((char*)Mesh->mIndexData + Section->IndexOffset);
 
 					for (int i = 0; i < Section->NumIndices; i += 4)
 					{
@@ -168,7 +168,7 @@ void lcScene::DrawRenderMeshes(lcContext* Context, int PrimitiveTypes, bool Enab
 						lcVector3 p4 = lcMul31(VertexBuffer[Indices[i + 3]].Position, WorldViewProjectionMatrix);
 
 						if (((p1.y - p2.y) * (p3.x - p1.x) + (p2.x - p1.x) * (p3.y - p1.y)) * ((p1.y - p2.y) * (p4.x - p1.x) + (p2.x - p1.x) * (p4.y - p1.y)) >= 0)
-							Context->DrawIndexedPrimitives(GL_LINES, 2, Mesh->mIndexType, IndexBufferOffset + Section->IndexOffset + i * sizeof(lcuint32));
+							Context->DrawIndexedPrimitives(GL_LINES, 2, Mesh->mIndexType, IndexBufferOffset + Section->IndexOffset + i * sizeof(quint32));
 					}
 				}
 

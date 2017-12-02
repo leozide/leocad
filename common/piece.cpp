@@ -174,7 +174,7 @@ bool lcPiece::ParseLDrawLine(QTextStream& Stream)
 
 bool lcPiece::FileLoad(lcFile& file)
 {
-	lcuint8 version, ch;
+	quint8 version, ch;
 
 	version = file.ReadU8();
 
@@ -186,10 +186,10 @@ bool lcPiece::FileLoad(lcFile& file)
 		if (file.ReadU8() != 1)
 			return false;
 
-		lcuint16 time;
+		quint16 time;
 		float param[4];
-		lcuint8 type;
-		lcuint32 n;
+		quint8 type;
+		quint32 n;
 
 		file.ReadU32(&n, 1);
 		while (n--)
@@ -215,12 +215,12 @@ bool lcPiece::FileLoad(lcFile& file)
 
   if (version < 9)
   {
-    lcuint16 time;
-    lcuint8 type;
+    quint16 time;
+    quint8 type;
 
     if (version > 5)
     {
-      lcuint32 keys;
+      quint32 keys;
       float param[4];
 
       file.ReadU32(&keys, 1);
@@ -268,14 +268,14 @@ bool lcPiece::FileLoad(lcFile& file)
 				ModelWorld = lcMul(lcMatrix44RotationZ(Rotation[2] * LC_DTOR), lcMul(lcMatrix44RotationY(Rotation[1] * LC_DTOR), lcMul(lcMatrix44RotationX(Rotation[0] * LC_DTOR), ModelWorld)));
 			}
 
-			lcuint8 b;
+			quint8 b;
 			file.ReadU8(&b, 1);
 			time = b;
 
 			ChangeKey(mPositionKeys, ModelWorld.GetTranslation(), 1, true);
 			ChangeKey(mRotationKeys, lcMatrix33(ModelWorld), time, true);
 
-			lcint32 bl;
+			qint32 bl;
 			file.ReadS32(&bl, 1);
         }
       }
@@ -311,7 +311,7 @@ bool lcPiece::FileLoad(lcFile& file)
 	// 11 (0.77)
 	if (version < 11)
 	{
-		lcuint8 Color;
+		quint8 Color;
 
 		file.ReadU8(&Color, 1);
 
@@ -324,7 +324,7 @@ bool lcPiece::FileLoad(lcFile& file)
 		file.ReadU32(&mColorCode, 1);
 	mColorIndex = lcGetColorIndex(mColorCode);
 
-  lcuint8 Step;
+  quint8 Step;
   file.ReadU8(&Step, 1);
   mStepShow = Step;
   if (version > 1)
@@ -342,7 +342,7 @@ bool lcPiece::FileLoad(lcFile& file)
 
     if (version > 7)
     {
-      lcuint8 Hidden;
+      quint8 Hidden;
       file.ReadU8(&Hidden, 1);
 	  if (Hidden & 1)
 		  mState |= LC_PIECE_HIDDEN;
@@ -351,7 +351,7 @@ bool lcPiece::FileLoad(lcFile& file)
     }
     else
     {
-      lcint32 hide;
+      qint32 hide;
       file.ReadS32(&hide, 1);
       if (hide != 0)
         mState |= LC_PIECE_HIDDEN;
@@ -359,7 +359,7 @@ bool lcPiece::FileLoad(lcFile& file)
     }
 
     // 7 (0.64)
-    lcint32 i = -1;
+    qint32 i = -1;
     if (version > 6)
       file.ReadS32(&i, 1);
     mGroup = (lcGroup*)(quintptr)i;
@@ -677,7 +677,7 @@ void lcPiece::SubModelAddRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMat
 
 void lcPiece::Move(lcStep Step, bool AddKey, const lcVector3& Distance)
 {
-	lcuint32 Section = GetFocusSection();
+	quint32 Section = GetFocusSection();
 
 	if (Section == LC_PIECE_SECTION_POSITION || Section == LC_PIECE_SECTION_INVALID)
 	{
@@ -705,7 +705,7 @@ void lcPiece::Move(lcStep Step, bool AddKey, const lcVector3& Distance)
 
 void lcPiece::Rotate(lcStep Step, bool AddKey, const lcMatrix33& RotationMatrix, const lcVector3& Center, const lcMatrix33& RotationFrame)
 {
-	lcuint32 Section = GetFocusSection();
+	quint32 Section = GetFocusSection();
 
 	if (Section == LC_PIECE_SECTION_POSITION || Section == LC_PIECE_SECTION_INVALID)
 	{
@@ -767,9 +767,9 @@ void lcPiece::RotatePivotPoint(const lcMatrix33& RotationMatrix)
 	mState |= LC_PIECE_PIVOT_POINT_VALID;
 }
 
-lcuint32 lcPiece::GetAllowedTransforms() const
+quint32 lcPiece::GetAllowedTransforms() const
 {
-	lcuint32 Section = GetFocusSection();
+	quint32 Section = GetFocusSection();
 
 	if (Section == LC_PIECE_SECTION_POSITION || Section == LC_PIECE_SECTION_INVALID)
 		return LC_OBJECT_TRANSFORM_MOVE_X | LC_OBJECT_TRANSFORM_MOVE_Y | LC_OBJECT_TRANSFORM_MOVE_Z | LC_OBJECT_TRANSFORM_ROTATE_X | LC_OBJECT_TRANSFORM_ROTATE_Y | LC_OBJECT_TRANSFORM_ROTATE_Z;

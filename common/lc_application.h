@@ -33,16 +33,16 @@ public:
 	bool mFixedAxes;
 };
 
-class lcApplication
+class lcApplication : public QApplication
 {
-	Q_DECLARE_TR_FUNCTIONS(lcApplication);
+	Q_OBJECT
 
 public:
-	lcApplication();
+	lcApplication(int Argc, char** Argv);
 	~lcApplication();
 
 	void SetProject(Project* Project);
-	bool Initialize(int argc, char *argv[], QList<QPair<QString, bool>>& LibraryPaths, bool& ShowWindow);
+	bool Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& ShowWindow);
 	void Shutdown();
 	void ShowPreferencesDialog();
 
@@ -55,26 +55,22 @@ public:
 	lcPiecesLibrary* mLibrary;
 	lcPreferences mPreferences;
 	QByteArray mClipboard;
-
-protected:
-	void ParseIntegerArgument(int* CurArg, int argc, char* argv[], int* Value) const;
-	void ParseStringArgument(int* CurArg, int argc, char* argv[], const char** Value) const;
 };
 
-extern lcApplication* g_App;
+extern lcApplication* gApplication;
 
 inline lcPiecesLibrary* lcGetPiecesLibrary()
 {
-	return g_App->mLibrary;
+	return gApplication->mLibrary;
 }
 
 inline Project* lcGetActiveProject()
 {
-	return g_App->mProject;
+	return gApplication->mProject;
 }
 
 inline lcPreferences& lcGetPreferences()
 {
-	return g_App->mPreferences;
+	return gApplication->mPreferences;
 }
 

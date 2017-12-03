@@ -9,7 +9,7 @@
 #include "lc_shortcuts.h"
 #include "view.h"
 
-lcApplication* g_App;
+lcApplication* gApplication;
 
 void lcPreferences::LoadDefaults()
 {
@@ -41,11 +41,21 @@ void lcPreferences::SaveDefaults()
 	lcSetProfileInt(LC_PROFILE_GRID_LINE_COLOR, mGridLineColor);
 }
 
-lcApplication::lcApplication()
+lcApplication::lcApplication(int Argc, char** Argv)
+	: QApplication(Argc, Argv)
 {
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+	setApplicationDisplayName("LeoCAD");
+#endif
+
+	setOrganizationDomain("leocad.org");
+	setOrganizationName("LeoCAD Software");
+	setApplicationName("LeoCAD");
+	setApplicationVersion(LC_VERSION_TEXT);
+
+	gApplication = this;
 	mProject = nullptr;
 	mLibrary = nullptr;
-	mClipboard = nullptr;
 
 	mPreferences.LoadDefaults();
 }
@@ -54,6 +64,7 @@ lcApplication::~lcApplication()
 {
     delete mProject;
     delete mLibrary;
+	gApplication = nullptr;
 }
 
 void lcApplication::SetProject(Project* Project)
@@ -115,44 +126,8 @@ bool lcApplication::LoadPartsLibrary(const QList<QPair<QString, bool>>& LibraryP
 	return false;
 }
 
-void lcApplication::ParseIntegerArgument(int* CurArg, int argc, char* argv[], int* Value) const
+bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& ShowWindow)
 {
-	if (argc > (*CurArg + 1))
-	{
-		(*CurArg)++;
-		int val;
-
-		if ((sscanf(argv[(*CurArg)], "%d", &val) == 1) && (val > 0))
-			*Value = val;
-		else
-		{
-			*Value = 0;
-			printf("Invalid value specified for the %s argument.\n", argv[(*CurArg) - 1]);
-		}
-	}
-	else
-	{
-		*Value = 0;
-		printf("Not enough parameters for the %s argument.\n", argv[(*CurArg)]);
-	}
-}
-
-void lcApplication::ParseStringArgument(int* CurArg, int argc, char* argv[], const char** Value) const
-{
-	if (argc > (*CurArg + 1))
-	{
-		(*CurArg)++;
-		*Value = argv[(*CurArg)];
-	}
-	else
-	{
-		printf("No path specified after the %s argument.\n", argv[(*CurArg)]);
-	}
-}
-
-bool lcApplication::Initialize(int argc, char* argv[], QList<QPair<QString, bool>>& LibraryPaths, bool& ShowWindow)
-{
-	// todo: parse command line using Qt to handle multibyte strings.
 	bool OnlyUseLibraryPaths = false;
 	bool SaveImage = false;
 	bool SaveWavefront = false;
@@ -162,162 +137,142 @@ bool lcApplication::Initialize(int argc, char* argv[], QList<QPair<QString, bool
 	bool ImageHighlight = false;
 	int ImageWidth = lcGetProfileInt(LC_PROFILE_IMAGE_WIDTH);
 	int ImageHeight = lcGetProfileInt(LC_PROFILE_IMAGE_HEIGHT);
-	lcStep ImageStart = 0;
-	lcStep ImageEnd = 0;
-	char* ImageName = nullptr;
-	char* ModelName = nullptr;
-	char* CameraName = nullptr;
-	char* Viewpoint = nullptr;
-	char* ProjectName = nullptr;
-	char* SaveWavefrontName = nullptr;
-	char* Save3DSName = nullptr;
-	char* SaveCOLLADAName = nullptr;
+	int ImageStart = 0;
+	int ImageEnd = 0;
+	QString ImageName;
+	QString ModelName;
+	QString CameraName;
+	QString ViewpointName;
+	QString ProjectName;
+	QString SaveWavefrontName;
+	QString Save3DSName;
+	QString SaveCOLLADAName;
 
-	for (int i = 1; i < argc; i++)
+	QStringList Arguments = arguments();
+	const int NumArguments = Arguments.size();
+
+	for (int ArgIdx = 1; ArgIdx < NumArguments; ArgIdx++)
 	{
-		char* Param = argv[i];
+		const QString& Param = Arguments[ArgIdx];
 
-		if (Param[0] == '-')
-		{
-			if ((strcmp(Param, "-l") == 0) || (strcmp(Param, "--libpath") == 0))
-			{
-				const char* LibPath = nullptr;
-				ParseStringArgument(&i, argc, argv, &LibPath);
-				if (LibPath && LibPath[0])
-				{
-					LibraryPaths.clear();
-					LibraryPaths += qMakePair<QString, bool>(LibPath, false);
-					OnlyUseLibraryPaths = true;
-				}
-			}
-			else if ((strcmp(Param, "-i") == 0) || (strcmp(Param, "--image") == 0))
-			{
-				SaveImage = true;
-
-				if ((argc > (i+1)) && (argv[i+1][0] != '-'))
-				{
-					i++;
-					ImageName = argv[i];
-				}
-			}
-			else if ((strcmp(Param, "-w") == 0) || (strcmp(Param, "--width") == 0))
-			{
-				ParseIntegerArgument(&i, argc, argv, &ImageWidth);
-			}
-			else if ((strcmp(Param, "-h") == 0) || (strcmp(Param, "--height") == 0))
-			{
-				ParseIntegerArgument(&i, argc, argv, &ImageHeight);
-			}
-			else if ((strcmp(Param, "-f") == 0) || (strcmp(Param, "--from") == 0))
-			{
-				int Step;
-				ParseIntegerArgument(&i, argc, argv, &Step);
-				ImageStart = Step;
-			}
-			else if ((strcmp(Param, "-t") == 0) || (strcmp(Param, "--to") == 0))
-			{
-				int Step;
-				ParseIntegerArgument(&i, argc, argv, &Step);
-				ImageEnd = Step;
-			}
-			else if ((strcmp(Param, "-m") == 0) || (strcmp(Param, "--model") == 0))
-			{
-				if ((argc > (i+1)) && (argv[i+1][0] != '-'))
-				{
-					i++;
-					ModelName = argv[i];
-				}
-			}
-			else if ((strcmp(Param, "-c") == 0) || (strcmp(Param, "--camera") == 0))
-			{
-				if ((argc > (i+1)) && (argv[i+1][0] != '-'))
-				{
-					i++;
-					CameraName = argv[i];
-				}
-			}
-			else if (strcmp(Param, "--viewpoint") == 0)
-			{
-				if ((argc > (i+1)) && (argv[i+1][0] != '-'))
-				{
-					i++;
-					Viewpoint = argv[i];
-				}
-			}
-			else if (strcmp(Param, "--orthographic") == 0)
-				Orthographic = true;
-			else if (strcmp(Param, "--highlight") == 0)
-				ImageHighlight = true;
-			else if ((strcmp(Param, "-obj") == 0) || (strcmp(Param, "--export-wavefront") == 0))
-			{
-				SaveWavefront = true;
-
-				if ((argc > (i+1)) && (argv[i+1][0] != '-'))
-				{
-					i++;
-					SaveWavefrontName = argv[i];
-				}
-			}
-			else if ((strcmp(Param, "-3ds") == 0) || (strcmp(Param, "--export-3ds") == 0))
-			{
-				Save3DS = true;
-
-				if ((argc > (i+1)) && (argv[i+1][0] != '-'))
-				{
-					i++;
-					Save3DSName = argv[i];
-				}
-			}
-			else if ((strcmp(Param, "-dae") == 0) || (strcmp(Param, "--export-collada") == 0))
-			{
-				SaveCOLLADA = true;
-
-				if ((argc > (i+1)) && (argv[i+1][0] != '-'))
-				{
-					i++;
-					SaveCOLLADAName = argv[i];
-				}
-			}
-			else if ((strcmp(Param, "-v") == 0) || (strcmp(Param, "--version") == 0))
-			{
-				printf("LeoCAD Version " LC_VERSION_TEXT "\n");
-				printf("Compiled " __DATE__ "\n");
-
-				ShowWindow = false;
-				return true;
-			}
-			else if ((strcmp(Param, "-?") == 0) || (strcmp(Param, "--help") == 0))
-			{
-				printf("Usage: leocad [options] [file]\n");
-				printf("  [options] can be:\n");
-				printf("  -l, --libpath <path>: Loads the Pieces Library from path.\n");
-				printf("  -i, --image <outfile.ext>: Saves a picture in the format specified by ext.\n");
-				printf("  -w, --width <width>: Sets the picture width.\n");
-				printf("  -h, --height <height>: Sets the picture height.\n");
-				printf("  -f, --from <time>: Sets the first frame or step to save pictures.\n");
-				printf("  -t, --to <time>: Sets the last frame or step to save pictures.\n");
-				printf("  -m, --model <model>: Sets the active submodel.\n");
-				printf("  -c, --camera <camera>: Sets the active camera.\n");
-				printf("  --viewpoint (front|back|left|right|top|bottom|home): Sets the viewpoint.\n");
-				printf("  --orthographic: Make the view orthographic.\n");
-				printf("  --highlight: Highlight pieces in the steps they appear.\n");
-				printf("  -obj, --export-wavefront <outfile.obj>: Exports the model to Wavefront OBJ format.\n");
-				printf("  -3ds, --export-3ds <outfile.3ds>: Exports the model to 3D Studio 3DS format.\n");
-				printf("  -dae, --export-collada <outfile.dae>: Exports the model to COLLADA DAE format.\n");
-				printf("  -v, --version: Output version information and exit.\n");
-				printf("  -?, --help: Display this help and exit.\n");
-				printf("  \n");
-
-				ShowWindow = false;
-				return true;
-			}
-			else
-				printf("Unknown parameter: %s\n", Param);
-		}
-		else
+		if (Param[0] != '-')
 		{
 			ProjectName = Param;
+			continue;
 		}
+
+		auto ParseString = [&ArgIdx, &Arguments, NumArguments](QString& Value, bool Required)
+		{
+			if (ArgIdx < NumArguments - 1 && Arguments[ArgIdx + 1][0] != '-')
+			{
+				ArgIdx++;
+				Value = Arguments[ArgIdx];
+			}
+			else if (Required)
+				printf("Not enough parameters for the '%s' argument.\n", Arguments[ArgIdx].toLatin1().constData());
+		};
+
+		auto ParseInteger = [&ArgIdx, &Arguments, NumArguments](int& Value)
+		{
+			if (ArgIdx < NumArguments - 1 && Arguments[ArgIdx + 1][0] != '-')
+			{
+				bool Ok = false;
+				ArgIdx++;
+				int NewValue = Arguments[ArgIdx].toInt(&Ok);
+
+				if (Ok)
+					Value = NewValue;
+				else
+					printf("Invalid value specified for the '%s' argument.\n", Arguments[ArgIdx - 1].toLatin1().constData());
+			}
+			else
+				printf("Not enough parameters for the '%s' argument.\n", Arguments[ArgIdx].toLatin1().constData());
+		};
+
+		if (Param == QLatin1String("-l") || Param == QLatin1String("--libpath"))
+		{
+			QString LibPath;
+			ParseString(LibPath, true);
+			if (!LibPath.isEmpty())
+			{
+				LibraryPaths.clear();
+				LibraryPaths += qMakePair<QString, bool>(LibPath, false);
+				OnlyUseLibraryPaths = true;
+			}
+		}
+		else if (Param == QLatin1String("-i") || Param == QLatin1String("--image"))
+		{
+			SaveImage = true;
+			ParseString(ImageName, false);
+		}
+		else if (Param == QLatin1String("-w") || Param == QLatin1String("--width"))
+			ParseInteger(ImageWidth);
+		else if (Param == QLatin1String("-h") || Param == QLatin1String("--height"))
+			ParseInteger(ImageHeight);
+		else if (Param == QLatin1String("-f") || Param == QLatin1String("--from"))
+			ParseInteger(ImageStart);
+		else if (Param == QLatin1String("-t") || Param == QLatin1String("--to"))
+			ParseInteger(ImageEnd);
+		else if (Param == QLatin1String("-m") || Param == QLatin1String("--model"))
+			ParseString(ModelName, true);
+		else if (Param == QLatin1String("-c") || Param == QLatin1String("--camera"))
+			ParseString(CameraName, true);
+		else if (Param == QLatin1String("--viewpoint"))
+			ParseString(ViewpointName, true);
+		else if (Param == QLatin1String("--orthographic"))
+			Orthographic = true;
+		else if (Param == QLatin1String("--highlight"))
+			ImageHighlight = true;
+		else if (Param == QLatin1String("-obj") || Param == QLatin1String("--export-wavefront"))
+		{
+			SaveWavefront = true;
+			ParseString(SaveWavefrontName, false);
+		}
+		else if (Param == QLatin1String("-3ds") || Param == QLatin1String("--export-3ds"))
+		{
+			Save3DS = true;
+			ParseString(Save3DSName, false);
+		}
+		else if (Param == QLatin1String("-dae") || Param == QLatin1String("--export-collada"))
+		{
+			SaveCOLLADA = true;
+			ParseString(SaveCOLLADAName, false);
+		}
+		else if (Param == QLatin1String("-v") || Param == QLatin1String("--version"))
+		{
+			printf("LeoCAD Version " LC_VERSION_TEXT "\n");
+			printf("Compiled " __DATE__ "\n");
+
+			ShowWindow = false;
+			return true;
+		}
+		else if (Param == QLatin1String("-?") || Param == QLatin1String("--help"))
+		{
+			printf("Usage: leocad [options] [file]\n");
+			printf("  [options] can be:\n");
+			printf("  -l, --libpath <path>: Loads the Pieces Library from path.\n");
+			printf("  -i, --image <outfile.ext>: Saves a picture in the format specified by ext.\n");
+			printf("  -w, --width <width>: Sets the picture width.\n");
+			printf("  -h, --height <height>: Sets the picture height.\n");
+			printf("  -f, --from <time>: Sets the first frame or step to save pictures.\n");
+			printf("  -t, --to <time>: Sets the last frame or step to save pictures.\n");
+			printf("  -m, --model <model>: Sets the active submodel.\n");
+			printf("  -c, --camera <camera>: Sets the active camera.\n");
+			printf("  --viewpoint (front|back|left|right|top|bottom|home): Sets the viewpoint.\n");
+			printf("  --orthographic: Make the view orthographic.\n");
+			printf("  --highlight: Highlight pieces in the steps they appear.\n");
+			printf("  -obj, --export-wavefront <outfile.obj>: Exports the model to Wavefront OBJ format.\n");
+			printf("  -3ds, --export-3ds <outfile.3ds>: Exports the model to 3D Studio 3DS format.\n");
+			printf("  -dae, --export-collada <outfile.dae>: Exports the model to COLLADA DAE format.\n");
+			printf("  -v, --version: Output version information and exit.\n");
+			printf("  -?, --help: Display this help and exit.\n");
+			printf("  \n");
+
+			ShowWindow = false;
+			return true;
+		}
+		else
+			printf("Unknown parameter: '%s'\n", Param.toLatin1().constData());
 	}
 
 	gMainWindow = new lcMainWindow();
@@ -346,37 +301,37 @@ bool lcApplication::Initialize(int argc, char* argv[], QList<QPair<QString, bool
 	Project* NewProject = new Project();
 	SetProject(NewProject);
 
-	if (ProjectName && gMainWindow->OpenProject(ProjectName))
+	if (!ProjectName.isEmpty() && gMainWindow->OpenProject(ProjectName))
 	{
-		if (ModelName)
-			lcGetActiveProject()->SetActiveModel(QString::fromUtf8(ModelName));
+		if (!ModelName.isEmpty())
+			lcGetActiveProject()->SetActiveModel(ModelName);
 
-		if (CameraName)
+		if (!CameraName.isEmpty())
 		{
-			gMainWindow->GetActiveView()->SetCamera(CameraName);
-			if (Viewpoint || Orthographic)
+			gMainWindow->GetActiveView()->SetCamera(CameraName.toLatin1()); // todo: qstring
+			if (!ViewpointName.isEmpty() || Orthographic)
 				printf("Warning: --viewpoint and --orthographic are ignored when --camera is set.\n");
 		}
 		else
 		{
-			if (Viewpoint)
+			if (!ViewpointName.isEmpty())
 			{
-				if (strcmp(Viewpoint, "front") == 0)
+				if (ViewpointName == QLatin1String("front"))
 					gMainWindow->GetActiveView()->SetViewpoint(LC_VIEWPOINT_FRONT);
-				else if (strcmp(Viewpoint, "back") == 0)
+				else if (ViewpointName == QLatin1String("back"))
 					gMainWindow->GetActiveView()->SetViewpoint(LC_VIEWPOINT_BACK);
-				else if (strcmp(Viewpoint, "top") == 0)
+				else if (ViewpointName == QLatin1String("top"))
 					gMainWindow->GetActiveView()->SetViewpoint(LC_VIEWPOINT_TOP);
-				else if (strcmp(Viewpoint, "bottom") == 0)
+				else if (ViewpointName == QLatin1String("bottom"))
 					gMainWindow->GetActiveView()->SetViewpoint(LC_VIEWPOINT_BOTTOM);
-				else if (strcmp(Viewpoint, "left") == 0)
+				else if (ViewpointName == QLatin1String("left"))
 					gMainWindow->GetActiveView()->SetViewpoint(LC_VIEWPOINT_LEFT);
-				else if (strcmp(Viewpoint, "right") == 0)
+				else if (ViewpointName == QLatin1String("right"))
 					gMainWindow->GetActiveView()->SetViewpoint(LC_VIEWPOINT_RIGHT);
-				else if (strcmp(Viewpoint, "home") == 0)
+				else if (ViewpointName == QLatin1String("home"))
 					gMainWindow->GetActiveView()->SetViewpoint(LC_VIEWPOINT_HOME);
 				else
-					printf("Unknown viewpoint: %s\n", Viewpoint);
+					printf("Unknown viewpoint: '%s'\n", ViewpointName.toLatin1().constData());
 			}
 			gMainWindow->GetActiveView()->SetProjection(Orthographic);
 		}
@@ -385,7 +340,7 @@ bool lcApplication::Initialize(int argc, char* argv[], QList<QPair<QString, bool
 		{
 			QString FileName;
 
-			if (ImageName)
+			if (!ImageName.isEmpty())
 				FileName = ImageName;
 			else
 			{
@@ -431,7 +386,7 @@ bool lcApplication::Initialize(int argc, char* argv[], QList<QPair<QString, bool
 		{
 			QString FileName;
 
-			if (SaveWavefrontName)
+			if (!SaveWavefrontName.isEmpty())
 				FileName = SaveWavefrontName;
 			else
 				FileName = ProjectName;
@@ -455,7 +410,7 @@ bool lcApplication::Initialize(int argc, char* argv[], QList<QPair<QString, bool
 		{
 			QString FileName;
 
-			if (Save3DSName)
+			if (!Save3DSName.isEmpty())
 				FileName = Save3DSName;
 			else
 				FileName = ProjectName;
@@ -479,7 +434,7 @@ bool lcApplication::Initialize(int argc, char* argv[], QList<QPair<QString, bool
 		{
 			QString FileName;
 
-			if (SaveCOLLADAName)
+			if (!SaveCOLLADAName.isEmpty())
 				FileName = SaveCOLLADAName;
 			else
 				FileName = ProjectName;

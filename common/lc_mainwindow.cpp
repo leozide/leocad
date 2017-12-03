@@ -787,7 +787,7 @@ void lcMainWindow::ClipboardChanged()
 	if (MimeData->hasFormat(MimeType))
 		ClipboardData = MimeData->data(MimeType);
 
-	g_App->SetClipboard(ClipboardData);
+	gApplication->SetClipboard(ClipboardData);
 }
 
 void lcMainWindow::ActionTriggered()
@@ -1819,7 +1819,7 @@ void lcMainWindow::NewProject()
 		return;
 
 	Project* NewProject = new Project();
-	g_App->SetProject(NewProject);
+	gApplication->SetProject(NewProject);
 	lcGetPiecesLibrary()->UnloadUnusedParts();
 }
 
@@ -1849,7 +1849,7 @@ bool lcMainWindow::OpenProject(const QString& FileName)
 
 	if (NewProject->Load(LoadFileName))
 	{
-		g_App->SetProject(NewProject);
+		gApplication->SetProject(NewProject);
 		AddRecentFile(LoadFileName);
 		UpdateAllViews();
 
@@ -1911,7 +1911,7 @@ void lcMainWindow::ImportLDD()
 
 	if (NewProject->ImportLDD(LoadFileName))
 	{
-		g_App->SetProject(NewProject);
+		gApplication->SetProject(NewProject);
 		UpdateAllViews();
 	}
 	else
@@ -1931,7 +1931,7 @@ void lcMainWindow::ImportInventory()
 
 	if (NewProject->ImportInventory(Dialog.GetSetInventory(), Dialog.GetSetName(), Dialog.GetSetDescription()))
 	{
-		g_App->SetProject(NewProject);
+		gApplication->SetProject(NewProject);
 		UpdateAllViews();
 	}
 	else
@@ -2387,7 +2387,7 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		break;
 
 	case LC_VIEW_PREFERENCES:
-		g_App->ShowPreferencesDialog();
+		gApplication->ShowPreferencesDialog();
 		break;
 
 	case LC_VIEW_ZOOM_IN:

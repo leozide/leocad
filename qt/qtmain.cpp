@@ -127,23 +127,14 @@ static void lcRegisterShellFileTypes()
 
 int main(int argc, char *argv[])
 {
-	QApplication app(argc, argv);
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
-	app.setApplicationDisplayName("LeoCAD");
-#endif
-
-	QCoreApplication::setOrganizationDomain("leocad.org");
-	QCoreApplication::setOrganizationName("LeoCAD Software");
-	QCoreApplication::setApplicationName("LeoCAD");
-	QCoreApplication::setApplicationVersion(LC_VERSION_TEXT);
+	lcApplication Application(argc, argv);
 
 	QTranslator Translator;
 	Translator.load(QString("leocad_") + QLocale::system().name().section('_', 0, 0) + ".qm", ":/resources");
-	app.installTranslator(&Translator);
+	Application.installTranslator(&Translator);
 
 	qRegisterMetaTypeStreamOperators<QList<int> >("QList<int>");
 
-	g_App = new lcApplication();
 	QList<QPair<QString, bool>> LibraryPaths;
 
 #ifdef Q_OS_WIN
@@ -168,7 +159,7 @@ int main(int argc, char *argv[])
 	setlocale(LC_NUMERIC, "C");
 
 	bool ShowWindow;
-	if (!g_App->Initialize(argc, argv, LibraryPaths, ShowWindow))
+	if (!Application.Initialize(LibraryPaths, ShowWindow))
 		return 1;
 
 	int ExecReturn = 0;
@@ -179,13 +170,11 @@ int main(int argc, char *argv[])
 		lcDoInitialUpdateCheck();
 #endif
 
-		ExecReturn = app.exec();
+		ExecReturn = Application.exec();
 	}
 
 	delete gMainWindow;
 	gMainWindow = nullptr;
-	delete g_App;
-	g_App = nullptr;
 
 	return ExecReturn;
 }

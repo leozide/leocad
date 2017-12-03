@@ -1109,17 +1109,17 @@ void lcModel::Copy()
 
 	SaveLDraw(Stream, true);
 
-	g_App->ExportClipboard(File);
+	gApplication->ExportClipboard(File);
 }
 
 void lcModel::Paste()
 {
-	if (g_App->mClipboard.isEmpty())
+	if (gApplication->mClipboard.isEmpty())
 		return;
 
 	lcModel* Model = new lcModel(QString());
 
-	QBuffer Buffer(&g_App->mClipboard);
+	QBuffer Buffer(&gApplication->mClipboard);
 	Buffer.open(QIODevice::ReadOnly);
 	Model->LoadLDraw(Buffer, lcGetActiveProject());
 
@@ -4230,7 +4230,7 @@ void lcModel::UpdateInterface()
 {
 	gMainWindow->UpdateTimeline(true, false);
 	gMainWindow->UpdateUndoRedo(mUndoHistory.GetSize() > 1 ? mUndoHistory[0]->Description : nullptr, !mRedoHistory.IsEmpty() ? mRedoHistory[0]->Description : nullptr);
-	gMainWindow->UpdatePaste(!g_App->mClipboard.isEmpty());
+	gMainWindow->UpdatePaste(!gApplication->mClipboard.isEmpty());
 	gMainWindow->UpdateCategories();
 	gMainWindow->UpdateTitle();
 	gMainWindow->SetTool(gMainWindow->GetTool());

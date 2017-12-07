@@ -24,7 +24,9 @@ protected:
 	void CloseProcess();
 	bool PromptCancel();
 
+#ifndef QT_NO_PROCESS
 	QProcess* mProcess;
+#endif
 	QTimer mUpdateTimer;
 	QSharedMemory mSharedMemory;
 

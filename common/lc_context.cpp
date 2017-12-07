@@ -365,6 +365,7 @@ void lcContext::SetDefaultState()
 	}
 	else
 	{
+#ifndef LC_OPENGLES
 		glEnableClientState(GL_VERTEX_ARRAY);
 		glDisableClientState(GL_NORMAL_ARRAY);
 		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
@@ -374,6 +375,7 @@ void lcContext::SetDefaultState()
 		glNormalPointer(GL_BYTE, 0, nullptr);
 		glTexCoordPointer(2, GL_FLOAT, 0, nullptr);
 		glColorPointer(4, GL_FLOAT, 0, nullptr);
+#endif
 	}
 
 	mNormalEnabled = false;
@@ -797,6 +799,7 @@ void lcContext::ClearVertexBuffer()
 	}
 	else
 	{
+#ifndef LC_OPENGLES
 		if (mNormalEnabled)
 			glDisableClientState(GL_NORMAL_ARRAY);
 
@@ -810,6 +813,7 @@ void lcContext::ClearVertexBuffer()
 		glNormalPointer(GL_BYTE, 0, nullptr);
 		glTexCoordPointer(2, GL_FLOAT, 0, nullptr);
 		glColorPointer(4, GL_FLOAT, 0, nullptr);
+#endif
 	}
 }
 
@@ -974,6 +978,7 @@ void lcContext::SetVertexFormat(int BufferOffset, int PositionSize, int NormalSi
 	}
 	else
 	{
+#ifndef LC_OPENGLES
 		if (mVertexBufferOffset != VertexBufferPointer)
 		{
 			glVertexPointer(PositionSize, GL_FLOAT, VertexSize, VertexBufferPointer);
@@ -1033,6 +1038,7 @@ void lcContext::SetVertexFormat(int BufferOffset, int PositionSize, int NormalSi
 			glDisableClientState(GL_COLOR_ARRAY);
 			mColorEnabled = false;
 		}
+#endif
 	}
 }
 

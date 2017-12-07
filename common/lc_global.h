@@ -8,7 +8,7 @@
 #include <QtGui>
 #include <QPrinter>
 
-#if !defined(EGL_VERSION_1_0) && !defined(GL_ES_VERSION_2_0) && !defined(GL_ES_VERSION_3_0)
+#if !defined(EGL_VERSION_1_0) && !defined(GL_ES_VERSION_2_0) && !defined(GL_ES_VERSION_3_0) && !defined(QT_OPENGL_ES)
 #undef GL_LINES_ADJACENCY_EXT
 #undef GL_LINE_STRIP_ADJACENCY_EXT
 #undef GL_TRIANGLES_ADJACENCY_EXT

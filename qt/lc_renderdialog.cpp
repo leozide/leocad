@@ -12,7 +12,9 @@ lcRenderDialog::lcRenderDialog(QWidget* Parent)
 	: QDialog(Parent),
     ui(new Ui::lcRenderDialog)
 {
+#ifndef QT_NO_PROCESS
 	mProcess = nullptr;
+#endif
 	mSharedMemory.setNativeKey("leocad-povray");
 
 	ui->setupUi(this);
@@ -44,9 +46,11 @@ QString lcRenderDialog::GetPOVFileName() const
 
 void lcRenderDialog::CloseProcess()
 {
+#ifndef QT_NO_PROCESS
 	delete mProcess;
 	mProcess = nullptr;
-
+#endif
+	
 	QFile::remove(GetPOVFileName());
 
 	ui->RenderButton->setText(tr("Render"));
@@ -54,6 +58,7 @@ void lcRenderDialog::CloseProcess()
 
 bool lcRenderDialog::PromptCancel()
 {
+#ifndef QT_NO_PROCESS
 	if (mProcess)
 	{
 		if (QMessageBox::question(this, tr("Cancel Render"), tr("Are you sure you want to cancel the current render?"), QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes)
@@ -67,7 +72,8 @@ bool lcRenderDialog::PromptCancel()
 		else
 			return false;
 	}
-
+#endif
+	
 	return true;
 }
 
@@ -79,6 +85,7 @@ void lcRenderDialog::reject()
 
 void lcRenderDialog::on_RenderButton_clicked()
 {
+#ifndef QT_NO_PROCESS
 	if (!PromptCancel())
 		return;
 
@@ -133,10 +140,12 @@ void lcRenderDialog::on_RenderButton_clicked()
 		QMessageBox::warning(this, tr("Error"), tr("Error starting POV-Ray."));
 		CloseProcess();
 	}
+#endif
 }
 
 void lcRenderDialog::Update()
 {
+#ifndef QT_NO_PROCESS
 	if (mProcess)
 	{
 		if (mProcess->state() == QProcess::NotRunning)
@@ -152,6 +161,7 @@ void lcRenderDialog::Update()
 			CloseProcess();
 		}
 	}
+#endif
 
 #ifdef Q_OS_WIN
 	if (!mSharedMemory.isAttached() && !mSharedMemory.attach())

@@ -2150,8 +2150,38 @@ bool Project::ExportPOVRay(const QString& FileName)
 	sprintf(Line, "camera {\n  perspective\n  right x * image_width / image_height\n  sky<%1g,%1g,%1g>\n  location <%1g, %1g, %1g>\n  look_at <%1g, %1g, %1g>\n  angle %.0f * image_width / image_height\n}\n\n",
 			Up[1], Up[0], Up[2], Position[1] / 25.0f, Position[0] / 25.0f, Position[2] / 25.0f, Target[1] / 25.0f, Target[0] / 25.0f, Target[2] / 25.0f, Camera->m_fovy);
 	POVFile.WriteLine(Line);
-	sprintf(Line, "background { color rgb <%1g, %1g, %1g> }\n\nlight_source { <0, 0, 20> rgb<1, 1, 1> }\n\n",
-			Properties.mBackgroundSolidColor[0], Properties.mBackgroundSolidColor[1], Properties.mBackgroundSolidColor[2]);
+	sprintf(Line, "background { color rgb <%1g, %1g, %1g> }\n\n", Properties.mBackgroundSolidColor[0], Properties.mBackgroundSolidColor[1], Properties.mBackgroundSolidColor[2]);
+	POVFile.WriteLine(Line);
+
+	lcVector3 Min(FLT_MAX, FLT_MAX, FLT_MAX);
+	lcVector3 Max(-FLT_MAX, -FLT_MAX, -FLT_MAX);
+
+	for (const lcModelPartsEntry& ModelPart : ModelParts)
+	{
+		lcVector3 Points[8];
+		
+		lcGetBoxCorners(ModelPart.Info->GetBoundingBox(), Points);
+
+		for (int PointIdx = 0; PointIdx < 8; PointIdx++)
+		{
+			lcVector3 Point = lcMul31(Points[PointIdx], ModelPart.WorldMatrix);
+
+			Min = lcMin(Point, Min);
+			Max = lcMax(Point, Max);
+		}
+	}
+
+	lcVector3 Center = (Min + Max) / 2.0f;
+	float Radius = (Max - Center).Length() / 25.0f;
+	Center = lcVector3(Center[1], Center[0], Center[2]) / 25.0f;
+
+	sprintf(Line, "light_source{ <%f, %f, %f>\n  color rgb 0.75\n  area_light 200, 200, 10, 10\n  jitter\n}\n\n", 0.0f * Radius + Center.x, -1.5f * Radius + Center.y, -1.5f * Radius + Center.z);
+	POVFile.WriteLine(Line);
+	sprintf(Line, "light_source{ <%f, %f, %f>\n  color rgb 0.75\n  area_light 200, 200, 10, 10\n  jitter\n}\n\n", 1.5f * Radius + Center.x, -1.0f * Radius + Center.y, 0.866026f * Radius + Center.z);
+	POVFile.WriteLine(Line);
+	sprintf(Line, "light_source{ <%f, %f, %f>\n  color rgb 0.5\n  area_light 200, 200, 10, 10\n  jitter\n}\n\n", 0.0f * Radius + Center.x, -2.0f * Radius + Center.y, 0.0f * Radius + Center.z);
+	POVFile.WriteLine(Line);
+	sprintf(Line, "light_source{ <%f, %f, %f>\n  color rgb 0.5\n  area_light 200, 200, 10, 10\n  jitter\n}\n\n", 2.0f * Radius + Center.x, 0.0f * Radius + Center.y, -2.0f * Radius + Center.z);
 	POVFile.WriteLine(Line);
 
 	for (int PartIdx = 0; PartIdx < ModelParts.GetSize(); PartIdx++)

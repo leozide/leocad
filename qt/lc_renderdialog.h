@@ -29,6 +29,7 @@ protected:
 #endif
 	QTimer mUpdateTimer;
 	QSharedMemory mSharedMemory;
+	QImage mImage;
 
 	Ui::lcRenderDialog* ui;
 };

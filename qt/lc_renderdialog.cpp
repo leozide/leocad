@@ -29,7 +29,7 @@ lcRenderDialog::lcRenderDialog(QWidget* Parent)
 	ui->label->setPixmap(QPixmap::fromImage(Image));
 
 	connect(&mUpdateTimer, SIGNAL(timeout()), this, SLOT(Update()));
-	mUpdateTimer.start(100);
+	mUpdateTimer.start(500);
 }
 
 lcRenderDialog::~lcRenderDialog()
@@ -86,8 +86,11 @@ void lcRenderDialog::reject()
 void lcRenderDialog::on_RenderButton_clicked()
 {
 #ifndef QT_NO_PROCESS
-	if (!PromptCancel())
+	if (mProcess)
+	{
+		PromptCancel();
 		return;
+	}
 
 	QString FileName = GetPOVFileName();
 
@@ -146,20 +149,20 @@ void lcRenderDialog::on_RenderButton_clicked()
 void lcRenderDialog::Update()
 {
 #ifndef QT_NO_PROCESS
-	if (mProcess)
+	if (!mProcess)
+		return;
+
+	if (mProcess->state() == QProcess::NotRunning)
 	{
-		if (mProcess->state() == QProcess::NotRunning)
-		{
-//			QString Output = mProcess->readAllStandardError();
-//			QMessageBox::information(this, "LeoCAD", Output);
+//		QString Output = mProcess->readAllStandardError();
+//		QMessageBox::information(this, "LeoCAD", Output);
 
 #ifdef Q_OS_LINUX
-			QByteArray Output = mProcess->readAllStandardOutput();
-			QImage Image = QImage::fromData(Output);
-			ui->label->setPixmap(QPixmap::fromImage(Image.scaled(LC_POVRAY_PREVIEW_WIDTH, LC_POVRAY_PREVIEW_HEIGHT, Qt::KeepAspectRatio, Qt::SmoothTransformation)));
+		QByteArray Output = mProcess->readAllStandardOutput();
+		QImage Image = QImage::fromData(Output);
+		ui->label->setPixmap(QPixmap::fromImage(Image.scaled(LC_POVRAY_PREVIEW_WIDTH, LC_POVRAY_PREVIEW_HEIGHT, Qt::KeepAspectRatio, Qt::SmoothTransformation)));
 #endif
-			CloseProcess();
-		}
+		CloseProcess();
 	}
 #endif
 
@@ -186,26 +189,29 @@ void lcRenderDialog::Update()
 
 	lcSharedMemoryHeader* Header = (lcSharedMemoryHeader*)Buffer;
 
+	if (Header->PixelsWritten == Header->PixelsRead)
+		return;
+
 	int Width = Header->Width;
 	int Height = Header->Height;
-	int PixelsRead = Header->PixelsWritten;
+	int PixelsWritten = Header->PixelsWritten;
 
-//		if (width != expected) ...
+	if (!Header->PixelsRead)
+		mImage = QImage(Width, Height, QImage::Format_ARGB32);
 
-	QImage Image(Width, Height, QImage::Format_ARGB32);
 	quint8* Pixels = (quint8*)(Header + 1);
 
 	for (int y = 0; y < Height; y++)
 	{
 		for (int x = 0; x < Width; x++)
 		{
-			Image.setPixelColor(x, y, QColor::fromRgb(Pixels[0], Pixels[1], Pixels[2], Pixels[3]));
+			mImage.setPixelColor(x, y, QColor::fromRgb(Pixels[0], Pixels[1], Pixels[2], Pixels[3]));
 			Pixels += 4;
 		}
 	}
 
-	Header->PixelsRead = PixelsRead;
+	Header->PixelsRead = PixelsWritten;
 
-	ui->label->setPixmap(QPixmap::fromImage(Image.scaled(LC_POVRAY_PREVIEW_WIDTH, LC_POVRAY_PREVIEW_HEIGHT, Qt::KeepAspectRatio, Qt::SmoothTransformation)));
+	ui->label->setPixmap(QPixmap::fromImage(mImage.scaled(LC_POVRAY_PREVIEW_WIDTH, LC_POVRAY_PREVIEW_HEIGHT, Qt::KeepAspectRatio, Qt::SmoothTransformation)));
 #endif
 }

@@ -7,35 +7,35 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 	{
 		QT_TRANSLATE_NOOP("Action", "File.New"),
 		QT_TRANSLATE_NOOP("Menu", "&New"),
-		QT_TRANSLATE_NOOP("Status", "Create a new project"),
+		QT_TRANSLATE_NOOP("Status", "Create a new model"),
 		QT_TRANSLATE_NOOP("Shortcut", "Ctrl+N")
 	},
 	// LC_FILE_OPEN
 	{
 		QT_TRANSLATE_NOOP("Action", "File.Open"),
 		QT_TRANSLATE_NOOP("Menu", "&Open..."),
-		QT_TRANSLATE_NOOP("Status", "Open an existing project"),
+		QT_TRANSLATE_NOOP("Status", "Open an existing model"),
 		QT_TRANSLATE_NOOP("Shortcut", "Ctrl+O")
 	},
 	// LC_FILE_MERGE
 	{
 		QT_TRANSLATE_NOOP("Action", "File.Merge"),
 		QT_TRANSLATE_NOOP("Menu", "&Merge..."),
-		QT_TRANSLATE_NOOP("Status", "Merge the contents of another project with the current one"),
+		QT_TRANSLATE_NOOP("Status", "Merge the contents of another file with the current one"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
 	// LC_FILE_SAVE
 	{
 		QT_TRANSLATE_NOOP("Action", "File.Save"),
 		QT_TRANSLATE_NOOP("Menu", "&Save"),
-		QT_TRANSLATE_NOOP("Status", "Save the active project"),
+		QT_TRANSLATE_NOOP("Status", "Save the current model"),
 		QT_TRANSLATE_NOOP("Shortcut", "Ctrl+S")
 	},
 	// LC_FILE_SAVEAS
 	{
 		QT_TRANSLATE_NOOP("Action", "File.SaveAs"),
 		QT_TRANSLATE_NOOP("Menu", "Save &As..."),
-		QT_TRANSLATE_NOOP("Status", "Save the active project with a new name"),
+		QT_TRANSLATE_NOOP("Status", "Save the current model with a new name"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
 	// LC_FILE_SAVE_IMAGE
@@ -63,21 +63,21 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 	{
 		QT_TRANSLATE_NOOP("Action", "File.Export.3DS"),
 		QT_TRANSLATE_NOOP("Menu", "3D &Studio..."),
-		QT_TRANSLATE_NOOP("Status", "Export the project in 3D Studio 3DS format"),
+		QT_TRANSLATE_NOOP("Status", "Export the current model in 3D Studio 3DS format"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
 	// LC_FILE_EXPORT_COLLADA
 	{
 		QT_TRANSLATE_NOOP("Action", "File.Export.COLLADA"),
 		QT_TRANSLATE_NOOP("Menu", "&COLLADA..."),
-		QT_TRANSLATE_NOOP("Status", "Export the project in COLLADA DAE format"),
+		QT_TRANSLATE_NOOP("Status", "Export the current model in COLLADA DAE format"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
 	// LC_FILE_EXPORT_HTML
 	{
 		QT_TRANSLATE_NOOP("Action", "File.Export.HTML"),
 		QT_TRANSLATE_NOOP("Menu", "&HTML..."),
-		QT_TRANSLATE_NOOP("Status", "Create an HTML page for this project"),
+		QT_TRANSLATE_NOOP("Status", "Create an HTML page for the current model"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
 	// LC_FILE_EXPORT_BRICKLINK
@@ -98,35 +98,35 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 	{
 		QT_TRANSLATE_NOOP("Action", "File.Export.POVRay"),
 		QT_TRANSLATE_NOOP("Menu", "&POV-Ray..."),
-		QT_TRANSLATE_NOOP("Status", "Export the project in POV-Ray format"),
+		QT_TRANSLATE_NOOP("Status", "Export the current model in POV-Ray format"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
 	// LC_FILE_EXPORT_WAVEFRONT
 	{
 		QT_TRANSLATE_NOOP("Action", "File.Export.Wavefront"),
 		QT_TRANSLATE_NOOP("Menu", "&Wavefront..."),
-		QT_TRANSLATE_NOOP("Status", "Export the project in Wavefront OBJ format"),
+		QT_TRANSLATE_NOOP("Status", "Export the current model in Wavefront OBJ format"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
 	// LC_FILE_RENDER
 	{
 		QT_TRANSLATE_NOOP("Action", "File.Render"),
 		QT_TRANSLATE_NOOP("Menu", "&Render..."),
-		QT_TRANSLATE_NOOP("Status", "Render the project using POV-Ray"),
+		QT_TRANSLATE_NOOP("Status", "Render the current model using POV-Ray"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
 	// LC_FILE_PRINT
 	{
 		QT_TRANSLATE_NOOP("Action", "File.Print"),
 		QT_TRANSLATE_NOOP("Menu", "&Print..."),
-		QT_TRANSLATE_NOOP("Status", "Print the active project"),
+		QT_TRANSLATE_NOOP("Status", "Print the current model"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
 	// LC_FILE_PRINT_PREVIEW
 	{
 		QT_TRANSLATE_NOOP("Action", "File.PrintPreview"),
 		QT_TRANSLATE_NOOP("Menu", "Print Pre&view..."),
-		QT_TRANSLATE_NOOP("Status", "Display how the project would look if printed"),
+		QT_TRANSLATE_NOOP("Status", "Display how the model would look if printed"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
 	// LC_FILE_PRINT_BOM
@@ -140,35 +140,35 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 	{
 		QT_TRANSLATE_NOOP("Action", "File.Recent1"),
 		QT_TRANSLATE_NOOP("Menu", "&Recent1"),
-		QT_TRANSLATE_NOOP("Status", "Open this document"),
+		QT_TRANSLATE_NOOP("Status", "Open this model"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
 	// LC_FILE_RECENT2
 	{
 		QT_TRANSLATE_NOOP("Action", "File.Recent2"),
 		QT_TRANSLATE_NOOP("Menu", "&Recent2"),
-		QT_TRANSLATE_NOOP("Status", "Open this document"),
+		QT_TRANSLATE_NOOP("Status", "Open this model"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
 	// LC_FILE_RECENT3
 	{
 		QT_TRANSLATE_NOOP("Action", "File.Recent3"),
 		QT_TRANSLATE_NOOP("Menu", "&Recent3"),
-		QT_TRANSLATE_NOOP("Status", "Open this document"),
+		QT_TRANSLATE_NOOP("Status", "Open this model"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
 	// LC_FILE_RECENT4
 	{
 		QT_TRANSLATE_NOOP("Action", "File.Recent4"),
 		QT_TRANSLATE_NOOP("Menu", "&Recent4"),
-		QT_TRANSLATE_NOOP("Status", "Open this document"),
+		QT_TRANSLATE_NOOP("Status", "Open this model"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
 	// LC_FILE_EXIT
 	{
 		QT_TRANSLATE_NOOP("Action", "File.Exit"),
 		QT_TRANSLATE_NOOP("Menu", "E&xit"),
-		QT_TRANSLATE_NOOP("Status", "Quit the application; prompts to save project"),
+		QT_TRANSLATE_NOOP("Status", "Quit the application; prompts to save model"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
 	// LC_EDIT_UNDO
@@ -231,7 +231,7 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 	{
 		QT_TRANSLATE_NOOP("Action", "Edit.SelectAll"),
 		QT_TRANSLATE_NOOP("Menu", "Select &All"),
-		QT_TRANSLATE_NOOP("Status", "Select all pieces in the project"),
+		QT_TRANSLATE_NOOP("Status", "Select all pieces in the model"),
 		QT_TRANSLATE_NOOP("Shortcut", "Ctrl+A")
 	},
 	// LC_EDIT_SELECT_NONE
@@ -1231,197 +1231,197 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 	// LC_MODEL_NEW
 	{
 		QT_TRANSLATE_NOOP("Action", "Model.New"),
-		QT_TRANSLATE_NOOP("Menu", "New Model..."),
-		QT_TRANSLATE_NOOP("Status", "Add a new model to the project"),
+		QT_TRANSLATE_NOOP("Menu", "New Submodel..."),
+		QT_TRANSLATE_NOOP("Status", "Create a new submodel"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
 	// LC_MODEL_PROPERTIES
 	{
 		QT_TRANSLATE_NOOP("Action", "Model.Properties"),
 		QT_TRANSLATE_NOOP("Menu", "Prope&rties..."),
-		QT_TRANSLATE_NOOP("Status", "Display the properties of the current model"),
+		QT_TRANSLATE_NOOP("Status", "Display the properties of the current submodel"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
 	// LC_MODEL_EDIT_FOCUS
 	{
 		QT_TRANSLATE_NOOP("Action", "Model.SwitchToFocus"),
-		QT_TRANSLATE_NOOP("Menu", "Switch to Model"),
-		QT_TRANSLATE_NOOP("Status", "Switch to the model corresponding to the piece with focus"),
+		QT_TRANSLATE_NOOP("Menu", "Switch to Submodel"),
+		QT_TRANSLATE_NOOP("Status", "Switch to the submodel corresponding to the piece with focus"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
 	// LC_MODEL_LIST
 	{
 		QT_TRANSLATE_NOOP("Action", "Model.List"),
-		QT_TRANSLATE_NOOP("Menu", "Models..."),
-		QT_TRANSLATE_NOOP("Status", "Show a list of all models in this project"),
+		QT_TRANSLATE_NOOP("Menu", "Submodels..."),
+		QT_TRANSLATE_NOOP("Status", "Show a list of all submodels"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
 	// LC_MODEL_01
 	{
 		QT_TRANSLATE_NOOP("Action", "Model.Model01"),
 		QT_TRANSLATE_NOOP("Menu", ""),
-		QT_TRANSLATE_NOOP("Status", "Switch to this model"),
+		QT_TRANSLATE_NOOP("Status", "Switch to this submodel"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
 	// LC_MODEL_02
 	{
 		QT_TRANSLATE_NOOP("Action", "Model.Model02"),
 		QT_TRANSLATE_NOOP("Menu", ""),
-		QT_TRANSLATE_NOOP("Status", "Switch to this model"),
+		QT_TRANSLATE_NOOP("Status", "Switch to this submodel"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
 	// LC_MODEL_03
 	{
 		QT_TRANSLATE_NOOP("Action", "Model.Model03"),
 		QT_TRANSLATE_NOOP("Menu", ""),
-		QT_TRANSLATE_NOOP("Status", "Switch to this model"),
+		QT_TRANSLATE_NOOP("Status", "Switch to this submodel"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
 	// LC_MODEL_04
 	{
 		QT_TRANSLATE_NOOP("Action", "Model.Model04"),
 		QT_TRANSLATE_NOOP("Menu", ""),
-		QT_TRANSLATE_NOOP("Status", "Switch to this model"),
+		QT_TRANSLATE_NOOP("Status", "Switch to this submodel"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
 	// LC_MODEL_05
 	{
 		QT_TRANSLATE_NOOP("Action", "Model.Model05"),
 		QT_TRANSLATE_NOOP("Menu", ""),
-		QT_TRANSLATE_NOOP("Status", "Switch to this model"),
+		QT_TRANSLATE_NOOP("Status", "Switch to this submodel"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
 	// LC_MODEL_06
 	{
 		QT_TRANSLATE_NOOP("Action", "Model.Model06"),
 		QT_TRANSLATE_NOOP("Menu", ""),
-		QT_TRANSLATE_NOOP("Status", "Switch to this model"),
+		QT_TRANSLATE_NOOP("Status", "Switch to this submodel"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
 	// LC_MODEL_07
 	{
 		QT_TRANSLATE_NOOP("Action", "Model.Model07"),
 		QT_TRANSLATE_NOOP("Menu", ""),
-		QT_TRANSLATE_NOOP("Status", "Switch to this model"),
+		QT_TRANSLATE_NOOP("Status", "Switch to this submodel"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
 	// LC_MODEL_08
 	{
 		QT_TRANSLATE_NOOP("Action", "Model.Model08"),
 		QT_TRANSLATE_NOOP("Menu", ""),
-		QT_TRANSLATE_NOOP("Status", "Switch to this model"),
+		QT_TRANSLATE_NOOP("Status", "Switch to this submodel"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
 	// LC_MODEL_09
 	{
 		QT_TRANSLATE_NOOP("Action", "Model.Model09"),
 		QT_TRANSLATE_NOOP("Menu", ""),
-		QT_TRANSLATE_NOOP("Status", "Switch to this model"),
+		QT_TRANSLATE_NOOP("Status", "Switch to this submodel"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
 	// LC_MODEL_10
 	{
 		QT_TRANSLATE_NOOP("Action", "Model.Model10"),
 		QT_TRANSLATE_NOOP("Menu", ""),
-		QT_TRANSLATE_NOOP("Status", "Switch to this model"),
+		QT_TRANSLATE_NOOP("Status", "Switch to this submodel"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
 	// LC_MODEL_11
 	{
 		QT_TRANSLATE_NOOP("Action", "Model.Model11"),
 		QT_TRANSLATE_NOOP("Menu", ""),
-		QT_TRANSLATE_NOOP("Status", "Switch to this model"),
+		QT_TRANSLATE_NOOP("Status", "Switch to this submodel"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
 	// LC_MODEL_12
 	{
 		QT_TRANSLATE_NOOP("Action", "Model.Model12"),
 		QT_TRANSLATE_NOOP("Menu", ""),
-		QT_TRANSLATE_NOOP("Status", "Switch to this model"),
+		QT_TRANSLATE_NOOP("Status", "Switch to this submodel"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
 	// LC_MODEL_13
 	{
 		QT_TRANSLATE_NOOP("Action", "Model.Model13"),
 		QT_TRANSLATE_NOOP("Menu", ""),
-		QT_TRANSLATE_NOOP("Status", "Switch to this model"),
+		QT_TRANSLATE_NOOP("Status", "Switch to this submodel"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
 	// LC_MODEL_14
 	{
 		QT_TRANSLATE_NOOP("Action", "Model.Model14"),
 		QT_TRANSLATE_NOOP("Menu", ""),
-		QT_TRANSLATE_NOOP("Status", "Switch to this model"),
+		QT_TRANSLATE_NOOP("Status", "Switch to this submodel"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
 	// LC_MODEL_15
 	{
 		QT_TRANSLATE_NOOP("Action", "Model.Model15"),
 		QT_TRANSLATE_NOOP("Menu", ""),
-		QT_TRANSLATE_NOOP("Status", "Switch to this model"),
+		QT_TRANSLATE_NOOP("Status", "Switch to this submodel"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
 	// LC_MODEL_16
 	{
 		QT_TRANSLATE_NOOP("Action", "Model.Model16"),
 		QT_TRANSLATE_NOOP("Menu", ""),
-		QT_TRANSLATE_NOOP("Status", "Switch to this model"),
+		QT_TRANSLATE_NOOP("Status", "Switch to this submodel"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
 	// LC_MODEL_17
 	{
 		QT_TRANSLATE_NOOP("Action", "Model.Model17"),
 		QT_TRANSLATE_NOOP("Menu", ""),
-		QT_TRANSLATE_NOOP("Status", "Switch to this model"),
+		QT_TRANSLATE_NOOP("Status", "Switch to this submodel"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
 	// LC_MODEL_18
 	{
 		QT_TRANSLATE_NOOP("Action", "Model.Model18"),
 		QT_TRANSLATE_NOOP("Menu", ""),
-		QT_TRANSLATE_NOOP("Status", "Switch to this model"),
+		QT_TRANSLATE_NOOP("Status", "Switch to this submodel"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
 	// LC_MODEL_19
 	{
 		QT_TRANSLATE_NOOP("Action", "Model.Model19"),
 		QT_TRANSLATE_NOOP("Menu", ""),
-		QT_TRANSLATE_NOOP("Status", "Switch to this model"),
+		QT_TRANSLATE_NOOP("Status", "Switch to this submodel"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
 	// LC_MODEL_20
 	{
 		QT_TRANSLATE_NOOP("Action", "Model.Model20"),
 		QT_TRANSLATE_NOOP("Menu", ""),
-		QT_TRANSLATE_NOOP("Status", "Switch to this model"),
+		QT_TRANSLATE_NOOP("Status", "Switch to this submodel"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
 	// LC_MODEL_21
 	{
 		QT_TRANSLATE_NOOP("Action", "Model.Model21"),
 		QT_TRANSLATE_NOOP("Menu", ""),
-		QT_TRANSLATE_NOOP("Status", "Switch to this model"),
+		QT_TRANSLATE_NOOP("Status", "Switch to this submodel"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
 	// LC_MODEL_22
 	{
 		QT_TRANSLATE_NOOP("Action", "Model.Model22"),
 		QT_TRANSLATE_NOOP("Menu", ""),
-		QT_TRANSLATE_NOOP("Status", "Switch to this model"),
+		QT_TRANSLATE_NOOP("Status", "Switch to this submodel"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
 	// LC_MODEL_23
 	{
 		QT_TRANSLATE_NOOP("Action", "Model.Model23"),
 		QT_TRANSLATE_NOOP("Menu", ""),
-		QT_TRANSLATE_NOOP("Status", "Switch to this model"),
+		QT_TRANSLATE_NOOP("Status", "Switch to this submodel"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
 	// LC_MODEL_24
 	{
 		QT_TRANSLATE_NOOP("Action", "Model.Model24"),
 		QT_TRANSLATE_NOOP("Menu", ""),
-		QT_TRANSLATE_NOOP("Status", "Switch to this model"),
+		QT_TRANSLATE_NOOP("Status", "Switch to this submodel"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
 	// LC_HELP_HOMEPAGE

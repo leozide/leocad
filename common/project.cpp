@@ -23,7 +23,7 @@
 Project::Project()
 {
 	mModified = false;
-	mActiveModel = new lcModel(tr("Model #1.ldr"));
+	mActiveModel = new lcModel(tr("New Model.ldr"));
 	mActiveModel->CreatePieceInfo(this);
 	mActiveModel->SetSaved();
 	mModels.Add(mActiveModel);
@@ -51,7 +51,7 @@ QString Project::GetTitle() const
 	if (!mFileName.isEmpty())
 		return QFileInfo(mFileName).fileName();
 
-	return mModels.GetSize() == 1 ? tr("New Project.ldr") : tr("New Project.mpd");
+	return mModels.GetSize() == 1 ? tr("New Model.ldr") : tr("New Model.mpd");
 }
 
 void Project::SetActiveModel(int ModelIndex)
@@ -92,7 +92,7 @@ QString Project::GetNewModelName(QWidget* ParentWidget, const QString& DialogTit
 
 	if (Name.isEmpty())
 	{
-		const QString Prefix = tr("Model #");
+		const QString Prefix = tr("Submodel #");
 		int Max = 0;
 
 		for (int ModelIdx = 0; ModelIdx < ExistingModels.size(); ModelIdx++)
@@ -116,14 +116,14 @@ QString Project::GetNewModelName(QWidget* ParentWidget, const QString& DialogTit
 	{
 		bool Ok = false;
 
-		Name = QInputDialog::getText(ParentWidget, DialogTitle, tr("Model Name:"), QLineEdit::Normal, Name, &Ok);
+		Name = QInputDialog::getText(ParentWidget, DialogTitle, tr("Submodel Name:"), QLineEdit::Normal, Name, &Ok);
 
 		if (!Ok)
 			return QString();
 
 		if (Name.isEmpty())
 		{
-			QMessageBox::information(ParentWidget, tr("Empty Name"), tr("The model name cannot be empty."));
+			QMessageBox::information(ParentWidget, tr("Empty Name"), tr("The submodel name cannot be empty."));
 			continue;
 		}
 
@@ -139,14 +139,11 @@ QString Project::GetNewModelName(QWidget* ParentWidget, const QString& DialogTit
 		}
 
 		if (!ExtensionValid)
-		{
-			QMessageBox::information(ParentWidget, tr("Invalid Extension"), tr("The model name must end with '.ldr', '.dat' or '.mpd'."));
-			continue;
-		}
+			Name += ".ldr";
 
 		if (ExistingModels.contains(Name, Qt::CaseInsensitive) && Name != CurrentName)
 		{
-			QMessageBox::information(ParentWidget, tr("Duplicate Model"), tr("A model named '%1' already exists, please enter an unique name.").arg(Name));
+			QMessageBox::information(ParentWidget, tr("Duplicate Submodel"), tr("A submodel named '%1' already exists, please enter an unique name.").arg(Name));
 			continue;
 		}
 
@@ -163,7 +160,7 @@ lcModel* Project::CreateNewModel(bool ShowModel)
 	for (int ModelIdx = 0; ModelIdx < mModels.GetSize(); ModelIdx++)
 		ModelNames.append(mModels[ModelIdx]->GetProperties().mName);
 
-	QString Name = GetNewModelName(gMainWindow, tr("New Model"), QString(), ModelNames);
+	QString Name = GetNewModelName(gMainWindow, tr("New Submodel"), QString(), ModelNames);
 
 	if (Name.isEmpty())
 		return nullptr;
@@ -515,6 +512,23 @@ void Project::GetModelParts(lcArray<lcModelPartsEntry>& ModelParts)
 	mModels[0]->GetModelParts(lcMatrix44Identity(), gDefaultColor, ModelParts);
 
 	SetActiveModel(mModels.FindIndex(mActiveModel));
+}
+
+bool Project::ExportModel(const QString& FileName, lcModel* Model)
+{
+	QFile File(FileName);
+
+	if (!File.open(QIODevice::WriteOnly))
+	{
+		QMessageBox::warning(gMainWindow, tr("Error"), tr("Error writing to file '%1':\n%2").arg(FileName, File.errorString()));
+		return false;
+	}
+
+	QTextStream Stream(&File);
+
+	Model->SaveLDraw(Stream, false);
+
+	return true;
 }
 
 QString Project::GetExportFileName(const QString& FileName, const QString& DefaultExtension, const QString& DialogTitle, const QString& DialogFilter) const

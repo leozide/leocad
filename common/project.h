@@ -40,6 +40,11 @@ public:
 		return mActiveModel;
 	}
 
+	int GetActiveModelIndex() const
+	{
+		return mModels.FindIndex(mActiveModel);
+	}
+
 	lcModel* GetMainModel() const
 	{
 		return !mModels.IsEmpty() ? mModels[0] : nullptr;
@@ -68,6 +73,7 @@ public:
 	bool ImportInventory(const QByteArray& Inventory, const QString& Name, const QString& Description);
 
 	void SaveImage();
+	bool ExportModel(const QString& FileName, lcModel* Model);
 	void Export3DStudio(const QString& FileName);
 	void ExportBrickLink();
 	void ExportCOLLADA(const QString& FileName);

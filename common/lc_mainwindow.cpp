@@ -151,9 +151,9 @@ void lcMainWindow::CreateActions()
 		mActions[CommandIdx] = Action;
 	}
 
-	mActions[LC_FILE_NEW]->setToolTip(tr("New Project"));
-	mActions[LC_FILE_OPEN]->setToolTip(tr("Open Project"));
-	mActions[LC_FILE_SAVE]->setToolTip(tr("Save Project"));
+	mActions[LC_FILE_NEW]->setToolTip(tr("New Model"));
+	mActions[LC_FILE_OPEN]->setToolTip(tr("Open Model"));
+	mActions[LC_FILE_SAVE]->setToolTip(tr("Save Model"));
 
 	QIcon FileNewIcon;
 	FileNewIcon.addFile(":/resources/file_new.png");
@@ -522,7 +522,7 @@ void lcMainWindow::CreateMenus()
 	PieceMenu->addAction(mActions[LC_PIECE_HIDE_UNSELECTED]);
 	PieceMenu->addAction(mActions[LC_PIECE_UNHIDE_ALL]);
 
-	QMenu* ModelMenu = menuBar()->addMenu(tr("&Model"));
+	QMenu* ModelMenu = menuBar()->addMenu(tr("Sub&model"));
 	ModelMenu->addAction(mActions[LC_MODEL_PROPERTIES]);
 	ModelMenu->addAction(mActions[LC_MODEL_NEW]);
 	ModelMenu->addSeparator();
@@ -1837,7 +1837,7 @@ bool lcMainWindow::OpenProject(const QString& FileName)
 		if (LoadFileName.isEmpty())
 			LoadFileName = lcGetProfileString(LC_PROFILE_PROJECTS_PATH);
 
-		LoadFileName = QFileDialog::getOpenFileName(this, tr("Open Project"), LoadFileName, tr("Supported Files (*.lcd *.ldr *.dat *.mpd);;All Files (*.*)"));
+		LoadFileName = QFileDialog::getOpenFileName(this, tr("Open Model"), LoadFileName, tr("Supported Files (*.lcd *.ldr *.dat *.mpd);;All Files (*.*)"));
 
 		if (LoadFileName.isEmpty())
 			return false;
@@ -1869,7 +1869,7 @@ void lcMainWindow::MergeProject()
 	if (LoadFileName.isEmpty())
 		LoadFileName = lcGetProfileString(LC_PROFILE_PROJECTS_PATH);
 
-	LoadFileName = QFileDialog::getOpenFileName(this, tr("Merge Project"), LoadFileName, tr("Supported Files (*.lcd *.ldr *.dat *.mpd);;All Files (*.*)"));
+	LoadFileName = QFileDialog::getOpenFileName(this, tr("Merge Model"), LoadFileName, tr("Supported Files (*.lcd *.ldr *.dat *.mpd);;All Files (*.*)"));
 
 	if (LoadFileName.isEmpty())
 		return;
@@ -1885,9 +1885,9 @@ void lcMainWindow::MergeProject()
 		lcGetActiveProject()->Merge(NewProject);
 
 		if (NumModels == 1)
-			QMessageBox::information(this, tr("LeoCAD"), tr("Merged 1 model."));
+			QMessageBox::information(this, tr("LeoCAD"), tr("Merged 1 submodel."));
 		else
-			QMessageBox::information(this, tr("LeoCAD"), tr("Merged %1 models.").arg(NumModels));
+			QMessageBox::information(this, tr("LeoCAD"), tr("Merged %1 submodels.").arg(NumModels));
 
 		UpdateModels();
 	}
@@ -1954,7 +1954,7 @@ bool lcMainWindow::SaveProject(const QString& FileName)
 
 		QString Filter = (Project->GetModels().GetSize() > 1) ? tr("Supported Files (*.mpd);;All Files (*.*)") : tr("Supported Files (*.ldr *.dat *.mpd);;All Files (*.*)");
 
-		SaveFileName = QFileDialog::getSaveFileName(this, tr("Save Project"), SaveFileName, Filter);
+		SaveFileName = QFileDialog::getSaveFileName(this, tr("Save Model"), SaveFileName, Filter);
 
 		if (SaveFileName.isEmpty())
 			return false;
@@ -1983,7 +1983,7 @@ bool lcMainWindow::SaveProjectIfModified()
 	if (!Project->IsModified())
 		return true;
 
-	switch (QMessageBox::question(this, tr("Save Project"), tr("Save changes to '%1'?").arg(Project->GetTitle()), QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel))
+	switch (QMessageBox::question(this, tr("Save Model"), tr("Save changes to '%1'?").arg(Project->GetTitle()), QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel))
 	{
 	default:
 	case QMessageBox::Cancel:

@@ -59,7 +59,6 @@ static bool lcLoadLDrawXML(std::map<int, int>& MaterialTable, std::map<int, std:
 		else if (ElementName == QLatin1String("Transformation"))
 		{
 			QString LDrawID = Element.attribute(QLatin1String("ldraw"));
-			LDrawID.chop(4);
 
 			lcVector3 Translation;
 			lcVector4 AxisAngle;

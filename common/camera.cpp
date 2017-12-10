@@ -942,18 +942,18 @@ void lcCamera::SetViewpoint(lcViewpoint Viewpoint)
 		lcVector3(    0.0f,     0.0f, -1250.0f), // LC_VIEWPOINT_BOTTOM
 		lcVector3( 1250.0f,     0.0f,     0.0f), // LC_VIEWPOINT_LEFT
 		lcVector3(-1250.0f,     0.0f,     0.0f), // LC_VIEWPOINT_RIGHT
-		lcVector3( -375.0f,  -375.0f,   187.5f)  // LC_VIEWPOINT_HOME
+		lcVector3(  375.0f,  -375.0f,   187.5f)  // LC_VIEWPOINT_HOME
 	};
 
 	lcVector3 Ups[] =
 	{
-		lcVector3( 0.0f, 0.0f, 1.0f),
-		lcVector3( 0.0f, 0.0f, 1.0f),
-		lcVector3( 0.0f, 1.0f, 0.0f),
-		lcVector3( 0.0f,-1.0f, 0.0f),
-		lcVector3( 0.0f, 0.0f, 1.0f),
-		lcVector3( 0.0f, 0.0f, 1.0f),
-		lcVector3(-0.2357f, -0.2357f, 0.94281f)
+		lcVector3(0.0f, 0.0f, 1.0f),
+		lcVector3(0.0f, 0.0f, 1.0f),
+		lcVector3(0.0f, 1.0f, 0.0f),
+		lcVector3(0.0f,-1.0f, 0.0f),
+		lcVector3(0.0f, 0.0f, 1.0f),
+		lcVector3(0.0f, 0.0f, 1.0f),
+		lcVector3(0.2357f, -0.2357f, 0.94281f)
 	};
 
 	mPosition = Positions[Viewpoint];

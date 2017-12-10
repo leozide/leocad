@@ -38,7 +38,7 @@ class lcApplication : public QApplication
 	Q_OBJECT
 
 public:
-	lcApplication(int Argc, char** Argv);
+	lcApplication(int& Argc, char** Argv);
 	~lcApplication();
 
 	void SetProject(Project* Project);

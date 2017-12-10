@@ -41,7 +41,7 @@ void lcPreferences::SaveDefaults()
 	lcSetProfileInt(LC_PROFILE_GRID_LINE_COLOR, mGridLineColor);
 }
 
-lcApplication::lcApplication(int Argc, char** Argv)
+lcApplication::lcApplication(int& Argc, char** Argv)
 	: QApplication(Argc, Argv)
 {
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))

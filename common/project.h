@@ -4,8 +4,6 @@
 #include "lc_array.h"
 #include "lc_application.h"
 
-struct lcHTMLDialogOptions;
-
 #define LC_SCENE_BG				0x010	// Draw bg image
 #define LC_SCENE_BG_TILE		0x040	// Tile bg image
 #define LC_SCENE_GRADIENT		0x100	// Draw gradient
@@ -18,6 +16,29 @@ struct lcHTMLDialogOptions;
 #define LC_HTML_HIGHLIGHT     0x20
 #define LC_HTML_SUBMODELS     0x40
 #define LC_HTML_CURRENT_ONLY  0x80
+
+class lcHTMLExportOptions
+{
+public:
+	lcHTMLExportOptions(const Project* Project);
+	void SaveDefaults();
+
+	QString PathName;
+	bool TransparentImages;
+	bool SubModels;
+	bool CurrentOnly;
+	bool SinglePage;
+	bool IndexPage;
+	int StepImagesWidth;
+	int StepImagesHeight;
+	bool HighlightNewParts;
+	bool PartsListStep;
+	bool PartsListEnd;
+	bool PartsListImages;
+	int PartImagesColor;
+	int PartImagesWidth;
+	int PartImagesHeight;
+};
 
 enum LC_MOUSE_TRACK
 {
@@ -80,7 +101,7 @@ public:
 	void ExportBrickLink();
 	void ExportCOLLADA(const QString& FileName);
 	void ExportCSV();
-	void ExportHTML(const lcHTMLDialogOptions& Options);
+	void ExportHTML(const lcHTMLExportOptions& Options);
 	bool ExportPOVRay(const QString& FileName);
 	void ExportWavefront(const QString& FileName);
 

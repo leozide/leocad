@@ -1,11 +1,10 @@
 #include "lc_global.h"
 #include "lc_qhtmldialog.h"
 #include "ui_lc_qhtmldialog.h"
-#include "lc_basewindow.h"
+#include "project.h"
 
-lcQHTMLDialog::lcQHTMLDialog(QWidget *parent, void *data) :
-    QDialog(parent),
-    ui(new Ui::lcQHTMLDialog)
+lcQHTMLDialog::lcQHTMLDialog(QWidget* Parent, lcHTMLExportOptions* Options)
+	: QDialog(Parent), ui(new Ui::lcQHTMLDialog)
 {
     ui->setupUi(this);
 
@@ -14,30 +13,30 @@ lcQHTMLDialog::lcQHTMLDialog(QWidget *parent, void *data) :
 	ui->partImagesWidth->setValidator(new QIntValidator(0, 2048, ui->partImagesWidth));
 	ui->partImagesHeight->setValidator(new QIntValidator(0, 2048, ui->partImagesHeight));
 
-	options = (lcHTMLDialogOptions*)data;
+	mOptions = Options;
 
-	ui->outputFolder->setText(QDir::toNativeSeparators(options->PathName));
+	ui->outputFolder->setText(QDir::toNativeSeparators(mOptions->PathName));
 
-	if (options->CurrentOnly)
+	if (mOptions->CurrentOnly)
 		ui->currentModelOnly->setChecked(true);
-	else if (options->SubModels)
+	else if (mOptions->SubModels)
 		ui->currentModelSubmodels->setChecked(true);
 	else
 		ui->allModels->setChecked(true);
 
-	ui->transparentImages->setChecked(options->TransparentImages);
-	ui->singlePage->setChecked(options->SinglePage);
-	ui->oneStepPerPage->setChecked(!options->SinglePage);
-	ui->indexPage->setChecked(options->SinglePage);
-	ui->stepWidth->setText(QString::number(options->StepImagesWidth));
-	ui->stepHeight->setText(QString::number(options->StepImagesHeight));
-	ui->highlightNewParts->setChecked(options->HighlightNewParts);
-	ui->partsAfterEachStep->setChecked(options->PartsListStep);
-	ui->partsAtTheEnd->setChecked(options->PartsListEnd);
-	ui->partImages->setChecked(options->PartsListImages);
-	ui->partColor->setCurrentColor(options->PartImagesColor);
-	ui->partImagesWidth->setText(QString::number(options->PartImagesWidth));
-	ui->partImagesHeight->setText(QString::number(options->PartImagesHeight));
+	ui->transparentImages->setChecked(mOptions->TransparentImages);
+	ui->singlePage->setChecked(mOptions->SinglePage);
+	ui->oneStepPerPage->setChecked(!mOptions->SinglePage);
+	ui->indexPage->setChecked(mOptions->SinglePage);
+	ui->stepWidth->setText(QString::number(mOptions->StepImagesWidth));
+	ui->stepHeight->setText(QString::number(mOptions->StepImagesHeight));
+	ui->highlightNewParts->setChecked(mOptions->HighlightNewParts);
+	ui->partsAfterEachStep->setChecked(mOptions->PartsListStep);
+	ui->partsAtTheEnd->setChecked(mOptions->PartsListEnd);
+	ui->partImages->setChecked(mOptions->PartsListImages);
+	ui->partColor->setCurrentColor(mOptions->PartImagesColor);
+	ui->partImagesWidth->setText(QString::number(mOptions->PartImagesWidth));
+	ui->partImagesHeight->setText(QString::number(mOptions->PartImagesHeight));
 }
 
 lcQHTMLDialog::~lcQHTMLDialog()
@@ -55,21 +54,21 @@ void lcQHTMLDialog::accept()
 		return;
 	}
 
-	options->PathName = pathName;
-	options->SubModels = ui->currentModelSubmodels->isChecked();
-	options->CurrentOnly = ui->currentModelOnly->isChecked();
-	options->TransparentImages = ui->transparentImages->isChecked();
-	options->SinglePage = ui->singlePage->isChecked();
-	options->IndexPage = ui->indexPage->isChecked();
-	options->StepImagesWidth = ui->stepWidth->text().toInt();
-	options->StepImagesHeight = ui->stepHeight->text().toInt();
-	options->HighlightNewParts = ui->highlightNewParts->isChecked();
-	options->PartsListStep = ui->partsAfterEachStep->isChecked();
-	options->PartsListEnd = ui->partsAtTheEnd->isChecked();
-	options->PartsListImages = ui->partImages->isChecked();
-	options->PartImagesColor = ui->partColor->currentColor();
-	options->PartImagesWidth = ui->partImagesWidth->text().toInt();
-	options->PartImagesHeight = ui->partImagesHeight->text().toInt();
+	mOptions->PathName = pathName;
+	mOptions->SubModels = ui->currentModelSubmodels->isChecked();
+	mOptions->CurrentOnly = ui->currentModelOnly->isChecked();
+	mOptions->TransparentImages = ui->transparentImages->isChecked();
+	mOptions->SinglePage = ui->singlePage->isChecked();
+	mOptions->IndexPage = ui->indexPage->isChecked();
+	mOptions->StepImagesWidth = ui->stepWidth->text().toInt();
+	mOptions->StepImagesHeight = ui->stepHeight->text().toInt();
+	mOptions->HighlightNewParts = ui->highlightNewParts->isChecked();
+	mOptions->PartsListStep = ui->partsAfterEachStep->isChecked();
+	mOptions->PartsListEnd = ui->partsAtTheEnd->isChecked();
+	mOptions->PartsListImages = ui->partImages->isChecked();
+	mOptions->PartImagesColor = ui->partColor->currentColor();
+	mOptions->PartImagesWidth = ui->partImagesWidth->text().toInt();
+	mOptions->PartImagesHeight = ui->partImagesHeight->text().toInt();
 
 	QDialog::accept();
 }

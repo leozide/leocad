@@ -8,25 +8,6 @@
 #include "lc_shortcuts.h"
 #include "image.h"
 
-struct lcHTMLDialogOptions
-{
-	QString PathName;
-	bool TransparentImages;
-	bool SubModels;
-	bool CurrentOnly;
-	bool SinglePage;
-	bool IndexPage;
-	int StepImagesWidth;
-	int StepImagesHeight;
-	bool HighlightNewParts;
-	bool PartsListStep;
-	bool PartsListEnd;
-	bool PartsListImages;
-	int PartImagesColor;
-	int PartImagesWidth;
-	int PartImagesHeight;
-};
-
 struct lcPropertiesDialogOptions
 {
 	lcModelProperties Properties;

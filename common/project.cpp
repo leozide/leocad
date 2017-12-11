@@ -20,6 +20,62 @@
 #include <QtConcurrent>
 #endif
 
+lcHTMLExportOptions::lcHTMLExportOptions(const Project* Project)
+{
+	QString FileName = Project->GetFileName();
+
+	if (!FileName.isEmpty())
+		PathName = QFileInfo(FileName).canonicalPath();
+
+	int ImageOptions = lcGetProfileInt(LC_PROFILE_HTML_IMAGE_OPTIONS);
+	int HTMLOptions = lcGetProfileInt(LC_PROFILE_HTML_OPTIONS);
+
+	TransparentImages = (ImageOptions & LC_IMAGE_TRANSPARENT) != 0;
+	SubModels = (HTMLOptions & (LC_HTML_SUBMODELS)) != 0;
+	CurrentOnly = (HTMLOptions & LC_HTML_CURRENT_ONLY) != 0;
+	SinglePage = (HTMLOptions & LC_HTML_SINGLEPAGE) != 0;
+	IndexPage = (HTMLOptions & LC_HTML_INDEX) != 0;
+	StepImagesWidth = lcGetProfileInt(LC_PROFILE_HTML_IMAGE_WIDTH);
+	StepImagesHeight = lcGetProfileInt(LC_PROFILE_HTML_IMAGE_HEIGHT);
+	HighlightNewParts = (HTMLOptions & LC_HTML_HIGHLIGHT) != 0;
+	PartsListStep = (HTMLOptions & LC_HTML_LISTSTEP) != 0;
+	PartsListEnd = (HTMLOptions & LC_HTML_LISTEND) != 0;
+	PartsListImages = (HTMLOptions & LC_HTML_IMAGES) != 0;
+	PartImagesColor = lcGetColorIndex(lcGetProfileInt(LC_PROFILE_HTML_PARTS_COLOR));
+	PartImagesWidth = lcGetProfileInt(LC_PROFILE_HTML_PARTS_WIDTH);
+	PartImagesHeight = lcGetProfileInt(LC_PROFILE_HTML_PARTS_HEIGHT);
+}
+
+void lcHTMLExportOptions::SaveDefaults()
+{
+	int HTMLOptions = 0;
+
+	if (SubModels)
+		HTMLOptions |= LC_HTML_SUBMODELS;
+	if (CurrentOnly)
+		HTMLOptions |= LC_HTML_CURRENT_ONLY;
+	if (SinglePage)
+		HTMLOptions |= LC_HTML_SINGLEPAGE;
+	if (IndexPage)
+		HTMLOptions |= LC_HTML_INDEX;
+	if (HighlightNewParts)
+		HTMLOptions |= LC_HTML_HIGHLIGHT;
+	if (PartsListStep)
+		HTMLOptions |= LC_HTML_LISTSTEP;
+	if (PartsListEnd)
+		HTMLOptions |= LC_HTML_LISTEND;
+	if (PartsListImages)
+		HTMLOptions |= LC_HTML_IMAGES;
+
+	lcSetProfileInt(LC_PROFILE_HTML_IMAGE_OPTIONS, TransparentImages ? LC_IMAGE_TRANSPARENT : 0);
+	lcSetProfileInt(LC_PROFILE_HTML_OPTIONS, HTMLOptions);
+	lcSetProfileInt(LC_PROFILE_HTML_IMAGE_WIDTH, StepImagesWidth);
+	lcSetProfileInt(LC_PROFILE_HTML_IMAGE_HEIGHT, StepImagesHeight);
+	lcSetProfileInt(LC_PROFILE_HTML_PARTS_COLOR, lcGetColorCode(PartImagesColor));
+	lcSetProfileInt(LC_PROFILE_HTML_PARTS_WIDTH, PartImagesWidth);
+	lcSetProfileInt(LC_PROFILE_HTML_PARTS_HEIGHT, PartImagesHeight);
+}
+
 Project::Project()
 {
 	mModified = false;
@@ -1626,7 +1682,7 @@ void Project::CreateHTMLPieceList(QTextStream& Stream, lcModel* Model, lcStep St
 	Stream << QLatin1String("</table>\r\n<br>");
 }
 
-void Project::ExportHTML(const lcHTMLDialogOptions& Options)
+void Project::ExportHTML(const lcHTMLExportOptions& Options)
 {
 	QDir Dir(Options.PathName);
 	Dir.mkpath(QLatin1String("."));

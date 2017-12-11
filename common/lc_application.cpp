@@ -134,6 +134,7 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 	bool SaveWavefront = false;
 	bool Save3DS = false;
 	bool SaveCOLLADA = false;
+	bool SaveHTML = false;
 	bool Orthographic = false;
 	bool ImageHighlight = false;
 	int ImageWidth = lcGetProfileInt(LC_PROFILE_IMAGE_WIDTH);
@@ -148,6 +149,7 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 	QString SaveWavefrontName;
 	QString Save3DSName;
 	QString SaveCOLLADAName;
+	QString SaveHTMLName;
 
 	QStringList Arguments = arguments();
 	const int NumArguments = Arguments.size();
@@ -239,6 +241,11 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 			SaveCOLLADA = true;
 			ParseString(SaveCOLLADAName, false);
 		}
+		else if (Param == QLatin1String("-html") || Param == QLatin1String("--export-html"))
+		{
+			SaveHTML = true;
+			ParseString(SaveHTMLName, false);
+		}
 		else if (Param == QLatin1String("-v") || Param == QLatin1String("--version"))
 		{
 			printf("LeoCAD Version " LC_VERSION_TEXT "\n");
@@ -280,7 +287,7 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 	lcLoadDefaultKeyboardShortcuts();
 	lcLoadDefaultMouseShortcuts();
 
-	ShowWindow = !SaveImage && !SaveWavefront && !Save3DS && !SaveCOLLADA;
+	ShowWindow = !SaveImage && !SaveWavefront && !Save3DS && !SaveCOLLADA && !SaveHTML;
 
 	if (!LoadPartsLibrary(LibraryPaths, OnlyUseLibraryPaths, ShowWindow))
 	{
@@ -453,6 +460,16 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 			}
 
 			mProject->ExportCOLLADA(FileName);
+		}
+
+		if (SaveHTML)
+		{
+			lcHTMLExportOptions Options(mProject);
+
+			if (!SaveHTMLName.isEmpty())
+				Options.PathName = SaveHTMLName;
+
+			mProject->ExportHTML(Options);
 		}
 	}
 

@@ -5,6 +5,7 @@
 #include "lc_profile.h"
 #include "project.h"
 #include "lc_mainwindow.h"
+#include "lc_qpreferencesdialog.h"
 #include "lc_partselectionwidget.h"
 #include "lc_shortcuts.h"
 #include "view.h"
@@ -498,7 +499,8 @@ void lcApplication::ShowPreferencesDialog()
 	Options.MouseShortcutsModified = false;
 	Options.MouseShortcutsDefault = false;
 
-	if (!gMainWindow->DoDialog(LC_DIALOG_PREFERENCES, &Options))
+	lcQPreferencesDialog Dialog(gMainWindow, &Options);
+	if (Dialog.exec() != QDialog::Accepted)
 		return;
 
 	bool LibraryChanged = Options.LibraryPath != lcGetProfileString(LC_PROFILE_PARTS_LIBRARY);

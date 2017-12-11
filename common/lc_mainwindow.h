@@ -229,8 +229,6 @@ public:
 		return mShadingMenu;
 	}
 
-	bool DoDialog(LC_DIALOG_TYPE Type, void* Data);
-
 	void RemoveAllModelTabs();
 	void SetCurrentModelTab(lcModel* Model);
 	void ResetCameras();
@@ -324,6 +322,7 @@ protected:
 	void ShowSearchDialog();
 	void ShowUpdatesDialog();
 	void ShowAboutDialog();
+	void ShowHTMLDialog();
 	void ShowRenderDialog();
 	void ShowPrintDialog();
 

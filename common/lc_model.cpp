@@ -20,6 +20,7 @@
 #include "lc_qgroupdialog.h"
 #include "lc_qeditgroupsdialog.h"
 #include "lc_selectbycolordialog.h"
+#include "lc_qpropertiesdialog.h"
 #include "lc_qutils.h"
 #include "lc_lxf.h"
 
@@ -4050,7 +4051,8 @@ void lcModel::ShowPropertiesDialog()
 
 	GetPartsList(gDefaultColor, true, Options.PartsList);
 
-	if (!gMainWindow->DoDialog(LC_DIALOG_PROPERTIES, &Options))
+	lcQPropertiesDialog Dialog(gMainWindow, &Options);
+	if (Dialog.exec() != QDialog::Accepted)
 		return;
 
 	if (Options.SetDefault)

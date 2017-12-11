@@ -4,6 +4,8 @@
 #include "lc_array.h"
 #include "lc_application.h"
 
+struct lcHTMLDialogOptions;
+
 #define LC_SCENE_BG				0x010	// Draw bg image
 #define LC_SCENE_BG_TILE		0x040	// Tile bg image
 #define LC_SCENE_GRADIENT		0x100	// Draw gradient
@@ -78,7 +80,7 @@ public:
 	void ExportBrickLink();
 	void ExportCOLLADA(const QString& FileName);
 	void ExportCSV();
-	void ExportHTML();
+	void ExportHTML(const lcHTMLDialogOptions& Options);
 	bool ExportPOVRay(const QString& FileName);
 	void ExportWavefront(const QString& FileName);
 

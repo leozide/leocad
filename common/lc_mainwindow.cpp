@@ -12,6 +12,7 @@
 #include "lc_qupdatedialog.h"
 #include "lc_qaboutdialog.h"
 #include "lc_setsdatabasedialog.h"
+#include "lc_qhtmldialog.h"
 #include "lc_renderdialog.h"
 #include "lc_profile.h"
 #include "view.h"
@@ -1008,6 +1009,67 @@ void lcMainWindow::ShowAboutDialog()
 	Dialog.exec();
 }
 
+void lcMainWindow::ShowHTMLDialog()
+{
+	lcHTMLDialogOptions Options;
+
+	QString FileName = lcGetActiveProject()->GetFileName();
+
+	if (!FileName.isEmpty())
+		Options.PathName = QFileInfo(FileName).canonicalPath();
+
+	int ImageOptions = lcGetProfileInt(LC_PROFILE_HTML_IMAGE_OPTIONS);
+	int HTMLOptions = lcGetProfileInt(LC_PROFILE_HTML_OPTIONS);
+
+	Options.TransparentImages = (ImageOptions & LC_IMAGE_TRANSPARENT) != 0;
+	Options.SubModels = (HTMLOptions & (LC_HTML_SUBMODELS)) != 0;
+	Options.CurrentOnly = (HTMLOptions & LC_HTML_CURRENT_ONLY) != 0;
+	Options.SinglePage = (HTMLOptions & LC_HTML_SINGLEPAGE) != 0;
+	Options.IndexPage = (HTMLOptions & LC_HTML_INDEX) != 0;
+	Options.StepImagesWidth = lcGetProfileInt(LC_PROFILE_HTML_IMAGE_WIDTH);
+	Options.StepImagesHeight = lcGetProfileInt(LC_PROFILE_HTML_IMAGE_HEIGHT);
+	Options.HighlightNewParts = (HTMLOptions & LC_HTML_HIGHLIGHT) != 0;
+	Options.PartsListStep = (HTMLOptions & LC_HTML_LISTSTEP) != 0;
+	Options.PartsListEnd = (HTMLOptions & LC_HTML_LISTEND) != 0;
+	Options.PartsListImages = (HTMLOptions & LC_HTML_IMAGES) != 0;
+	Options.PartImagesColor = lcGetColorIndex(lcGetProfileInt(LC_PROFILE_HTML_PARTS_COLOR));
+	Options.PartImagesWidth = lcGetProfileInt(LC_PROFILE_HTML_PARTS_WIDTH);
+	Options.PartImagesHeight = lcGetProfileInt(LC_PROFILE_HTML_PARTS_HEIGHT);
+
+	lcQHTMLDialog Dialog(this, &Options);
+	if (Dialog.exec() != QDialog::Accepted)
+		return;
+
+	HTMLOptions = 0;
+
+	if (Options.SubModels)
+		HTMLOptions |= LC_HTML_SUBMODELS;
+	if (Options.CurrentOnly)
+		HTMLOptions |= LC_HTML_CURRENT_ONLY;
+	if (Options.SinglePage)
+		HTMLOptions |= LC_HTML_SINGLEPAGE;
+	if (Options.IndexPage)
+		HTMLOptions |= LC_HTML_INDEX;
+	if (Options.HighlightNewParts)
+		HTMLOptions |= LC_HTML_HIGHLIGHT;
+	if (Options.PartsListStep)
+		HTMLOptions |= LC_HTML_LISTSTEP;
+	if (Options.PartsListEnd)
+		HTMLOptions |= LC_HTML_LISTEND;
+	if (Options.PartsListImages)
+		HTMLOptions |= LC_HTML_IMAGES;
+
+	lcSetProfileInt(LC_PROFILE_HTML_IMAGE_OPTIONS, Options.TransparentImages ? LC_IMAGE_TRANSPARENT : 0);
+	lcSetProfileInt(LC_PROFILE_HTML_OPTIONS, HTMLOptions);
+	lcSetProfileInt(LC_PROFILE_HTML_IMAGE_WIDTH, Options.StepImagesWidth);
+	lcSetProfileInt(LC_PROFILE_HTML_IMAGE_HEIGHT, Options.StepImagesHeight);
+	lcSetProfileInt(LC_PROFILE_HTML_PARTS_COLOR, lcGetColorCode(Options.PartImagesColor));
+	lcSetProfileInt(LC_PROFILE_HTML_PARTS_WIDTH, Options.PartImagesWidth);
+	lcSetProfileInt(LC_PROFILE_HTML_PARTS_HEIGHT, Options.PartImagesHeight);
+
+	lcGetActiveProject()->ExportHTML(Options);
+}
+
 void lcMainWindow::ShowRenderDialog()
 {
 	lcRenderDialog Dialog(this);
@@ -1046,37 +1108,6 @@ void lcMainWindow::SetSelectionMode(lcSelectionMode SelectionMode)
 {
 	mSelectionMode = SelectionMode;
 	UpdateSelectionMode();
-}
-
-// todo: call dialogs directly
-#include "lc_qhtmldialog.h"
-#include "lc_qpropertiesdialog.h"
-#include "lc_qpreferencesdialog.h"
-
-bool lcMainWindow::DoDialog(LC_DIALOG_TYPE Type, void* Data)
-{
-	switch (Type)
-	{
-	case LC_DIALOG_EXPORT_HTML:
-		{
-			lcQHTMLDialog Dialog(this, Data);
-			return Dialog.exec() == QDialog::Accepted;
-		} break;
-
-	case LC_DIALOG_PROPERTIES:
-		{
-			lcQPropertiesDialog Dialog(this, Data);
-			return Dialog.exec() == QDialog::Accepted;
-		} break;
-
-	case LC_DIALOG_PREFERENCES:
-		{
-			lcQPreferencesDialog Dialog(this, Data);
-			return Dialog.exec() == QDialog::Accepted;
-		} break;
-	}
-
-	return false;
 }
 
 void lcMainWindow::RemoveAllModelTabs()
@@ -2081,7 +2112,7 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		break;
 
 	case LC_FILE_EXPORT_HTML:
-		lcGetActiveProject()->ExportHTML();
+		ShowHTMLDialog();
 		break;
 
 	case LC_FILE_EXPORT_BRICKLINK:

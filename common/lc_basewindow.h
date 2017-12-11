@@ -8,13 +8,6 @@
 #include "lc_shortcuts.h"
 #include "image.h"
 
-enum LC_DIALOG_TYPE
-{
-	LC_DIALOG_EXPORT_HTML,
-	LC_DIALOG_PROPERTIES,
-	LC_DIALOG_PREFERENCES
-};
-
 struct lcHTMLDialogOptions
 {
 	QString PathName;

@@ -1626,61 +1626,8 @@ void Project::CreateHTMLPieceList(QTextStream& Stream, lcModel* Model, lcStep St
 	Stream << QLatin1String("</table>\r\n<br>");
 }
 
-void Project::ExportHTML()
+void Project::ExportHTML(const lcHTMLDialogOptions& Options)
 {
-	lcHTMLDialogOptions Options;
-
-	if (!mFileName.isEmpty())
-		Options.PathName = QFileInfo(mFileName).canonicalPath();
-
-	int ImageOptions = lcGetProfileInt(LC_PROFILE_HTML_IMAGE_OPTIONS);
-	int HTMLOptions = lcGetProfileInt(LC_PROFILE_HTML_OPTIONS);
-
-	Options.TransparentImages = (ImageOptions & LC_IMAGE_TRANSPARENT) != 0;
-	Options.SubModels = (HTMLOptions & (LC_HTML_SUBMODELS)) != 0;
-	Options.CurrentOnly = (HTMLOptions & LC_HTML_CURRENT_ONLY) != 0;
-	Options.SinglePage = (HTMLOptions & LC_HTML_SINGLEPAGE) != 0;
-	Options.IndexPage = (HTMLOptions & LC_HTML_INDEX) != 0;
-	Options.StepImagesWidth = lcGetProfileInt(LC_PROFILE_HTML_IMAGE_WIDTH);
-	Options.StepImagesHeight = lcGetProfileInt(LC_PROFILE_HTML_IMAGE_HEIGHT);
-	Options.HighlightNewParts = (HTMLOptions & LC_HTML_HIGHLIGHT) != 0;
-	Options.PartsListStep = (HTMLOptions & LC_HTML_LISTSTEP) != 0;
-	Options.PartsListEnd = (HTMLOptions & LC_HTML_LISTEND) != 0;
-	Options.PartsListImages = (HTMLOptions & LC_HTML_IMAGES) != 0;
-	Options.PartImagesColor = lcGetColorIndex(lcGetProfileInt(LC_PROFILE_HTML_PARTS_COLOR));
-	Options.PartImagesWidth = lcGetProfileInt(LC_PROFILE_HTML_PARTS_WIDTH);
-	Options.PartImagesHeight = lcGetProfileInt(LC_PROFILE_HTML_PARTS_HEIGHT);
-
-	if (!gMainWindow->DoDialog(LC_DIALOG_EXPORT_HTML, &Options))
-		return;
-
-	HTMLOptions = 0;
-
-	if (Options.SubModels)
-		HTMLOptions |= LC_HTML_SUBMODELS;
-	if (Options.CurrentOnly)
-		HTMLOptions |= LC_HTML_CURRENT_ONLY;
-	if (Options.SinglePage)
-		HTMLOptions |= LC_HTML_SINGLEPAGE;
-	if (Options.IndexPage)
-		HTMLOptions |= LC_HTML_INDEX;
-	if (Options.HighlightNewParts)
-		HTMLOptions |= LC_HTML_HIGHLIGHT;
-	if (Options.PartsListStep)
-		HTMLOptions |= LC_HTML_LISTSTEP;
-	if (Options.PartsListEnd)
-		HTMLOptions |= LC_HTML_LISTEND;
-	if (Options.PartsListImages)
-		HTMLOptions |= LC_HTML_IMAGES;
-
-	lcSetProfileInt(LC_PROFILE_HTML_IMAGE_OPTIONS, Options.TransparentImages ? LC_IMAGE_TRANSPARENT : 0);
-	lcSetProfileInt(LC_PROFILE_HTML_OPTIONS, HTMLOptions);
-	lcSetProfileInt(LC_PROFILE_HTML_IMAGE_WIDTH, Options.StepImagesWidth);
-	lcSetProfileInt(LC_PROFILE_HTML_IMAGE_HEIGHT, Options.StepImagesHeight);
-	lcSetProfileInt(LC_PROFILE_HTML_PARTS_COLOR, lcGetColorCode(Options.PartImagesColor));
-	lcSetProfileInt(LC_PROFILE_HTML_PARTS_WIDTH, Options.PartImagesWidth);
-	lcSetProfileInt(LC_PROFILE_HTML_PARTS_HEIGHT, Options.PartImagesHeight);
-
 	QDir Dir(Options.PathName);
 	Dir.mkpath(QLatin1String("."));
 

@@ -272,6 +272,7 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 			printf("  -obj, --export-wavefront <outfile.obj>: Exports the model to Wavefront OBJ format.\n");
 			printf("  -3ds, --export-3ds <outfile.3ds>: Exports the model to 3D Studio 3DS format.\n");
 			printf("  -dae, --export-collada <outfile.dae>: Exports the model to COLLADA DAE format.\n");
+			printf("  -html, --export-html <folder>: Creates an HTML page for the model.\n");
 			printf("  -v, --version: Output version information and exit.\n");
 			printf("  -?, --help: Display this help and exit.\n");
 			printf("  \n");

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <QDialog>
-struct lcHTMLExportOptions;
+class lcHTMLExportOptions;
 
 namespace Ui {
 class lcQHTMLDialog;

@@ -235,7 +235,7 @@ bool lcLoadColorFile(lcFile& File)
 		bool GroupTranslucent = false;
 		bool GroupSpecial = false;
 
-		Color.Code = -1;
+		Color.Code = ~0U;
 		Color.Translucent = false;
 		Color.Value[0] = FLT_MAX;
 		Color.Value[1] = FLT_MAX;
@@ -320,8 +320,7 @@ bool lcLoadColorFile(lcFile& File)
 			}
 		}
 
-		// Check if the new color is valid.
-		if (Color.Code == (quint32)-1 || Color.Value[0] == FLT_MAX)
+		if (Color.Code == ~0U || Color.Value[0] == FLT_MAX)
 			continue;
 
 		if (Color.Edge[0] == FLT_MAX)
@@ -331,7 +330,6 @@ bool lcLoadColorFile(lcFile& File)
 			Color.Edge[2] = 33.0f / 255.0f;
 		}
 
-		// Check for duplicates.
 		bool Duplicate = false;
 
 		for (int i = 0; i < Colors.GetSize(); i++)

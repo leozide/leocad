@@ -188,7 +188,7 @@ public:
 		if (mState & LC_CAMERA_UPVECTOR_FOCUSED)
 			return LC_CAMERA_SECTION_UPVECTOR;
 
-		return ~0;
+		return ~0U;
 	}
 
 	virtual quint32 GetAllowedTransforms() const override

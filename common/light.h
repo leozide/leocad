@@ -150,7 +150,7 @@ public:
 		if (!IsPointLight() && (mState & LC_LIGHT_TARGET_FOCUSED))
 			return LC_LIGHT_SECTION_TARGET;
 
-		return ~0;
+		return ~0U;
 	}
 
 	virtual quint32 GetAllowedTransforms() const override

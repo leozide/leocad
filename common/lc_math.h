@@ -549,7 +549,7 @@ inline lcVector4& operator/=(lcVector4& a, float b)
 	return a;
 }
 
-inline qint32 lcPackNormal(const lcVector3& Normal)
+inline quint32 lcPackNormal(const lcVector3& Normal)
 {
 	quint32 Packed = 0;
 
@@ -560,7 +560,7 @@ inline qint32 lcPackNormal(const lcVector3& Normal)
 	return Packed;
 }
 
-inline lcVector3 lcUnpackNormal(qint32 Packed)
+inline lcVector3 lcUnpackNormal(quint32 Packed)
 {
 	lcVector3 Normal;
 

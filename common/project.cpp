@@ -1643,18 +1643,18 @@ void Project::CreateHTMLPieceList(QTextStream& Stream, lcModel* Model, lcStep St
 		if (ColorsUsed[ColorIdx])
 		{
 			ColorsUsed[ColorIdx] = NumColors++;
-			Stream << QString("<td><center>%1</center></td>\n").arg(gColorList[ColorIdx].Name);
+			Stream << QString("<td><center>%1</center></td>\r\n").arg(gColorList[ColorIdx].Name);
 		}
 	}
 	NumColors++;
-	Stream << QLatin1String("</tr>\n");
+	Stream << QLatin1String("</tr>\r\n");
 
 	for (const auto& PartIt : PartsList)
 	{
 		const PieceInfo* Info = PartIt.first;
 
 		if (Images)
-			Stream << QString("<tr><td><IMG SRC=\"%1.png\" ALT=\"%2\"></td>\n").arg(Info->mFileName, Info->m_strDescription);
+			Stream << QString("<tr><td><IMG SRC=\"%1.png\" ALT=\"%2\"></td>\r\n").arg(Info->mFileName, Info->m_strDescription);
 		else
 			Stream << QString("<tr><td>%1</td>\r\n").arg(Info->m_strDescription);
 
@@ -1701,18 +1701,18 @@ void Project::ExportHTML(const lcHTMLExportOptions& Options)
 
 	QString ProjectTitle = GetTitle();
 
-	auto AddPartsListImage = [this, &ProjectTitle, &Dir](QTextStream& Stream, lcModel* Model, lcStep Step)
+	auto AddPartsListImage = [this, &Dir](QTextStream& Stream, lcModel* Model, lcStep Step, const QString& BaseName)
 	{
 		QImage Image = CreatePartsListImage(Model, Step);
 
 		if (!Image.isNull())
 		{
-			QString BaseName = ProjectTitle.left(ProjectTitle.length() - QFileInfo(ProjectTitle).suffix().length() - 1);
-			QString FileName = QFileInfo(Dir, BaseName + QLatin1String("-parts.png")).absoluteFilePath();
+			QString ImageName = BaseName + QLatin1String("-parts.png");
+			QString FileName = QFileInfo(Dir, ImageName).absoluteFilePath();
 
 			Image.save(FileName);
 
-			Stream << QString::fromLatin1("<IMG SRC=\"%1\" />\r\n").arg(FileName);
+			Stream << QString::fromLatin1("<IMG SRC=\"%1\" />\r\n").arg(ImageName);
 		}
 	};
 
@@ -1757,9 +1757,9 @@ void Project::ExportHTML(const lcHTMLExportOptions& Options)
 			}
 
 			if (Options.PartsListEnd)
-				AddPartsListImage(Stream, Model, 0);
+				AddPartsListImage(Stream, Model, 0, BaseName);
 
-			Stream << QLatin1String("</CENTER>\n<BR><HR><BR><B><I>Created by <A HREF=\"http://www.leocad.org\">LeoCAD</A></B></I><BR></HTML>\r\n");
+			Stream << QLatin1String("</CENTER>\r\n<BR><HR><BR><B><I>Created by <A HREF=\"http://www.leocad.org\">LeoCAD</A></I></B><BR></HTML>\r\n");
 		}
 		else
 		{
@@ -1837,9 +1837,9 @@ void Project::ExportHTML(const lcHTMLExportOptions& Options)
 
 				Stream << QString::fromLatin1("<HTML>\r\n<HEAD>\r\n<TITLE>Pieces used by %1</TITLE>\r\n</HEAD>\r\n<BR>\r\n<CENTER>\n").arg(PageTitle);
 
-				AddPartsListImage(Stream, Model, 0);
+				AddPartsListImage(Stream, Model, 0, BaseName);
 
-				Stream << QLatin1String("</CENTER>\n<BR><HR><BR>");
+				Stream << QLatin1String("</CENTER>\r\n<BR><HR><BR>");
 				Stream << QString::fromLatin1("<A HREF=\"%1-%2.html\">Previous</A> ").arg(BaseName, QString("%1").arg(LastStep, 2, 10, QLatin1Char('0')));
 
 				if (Options.IndexPage)
@@ -1936,7 +1936,7 @@ void Project::ExportHTML(const lcHTMLExportOptions& Options)
 			Stream << QString::fromLatin1("<p><a href=\"%1\">%2</a>").arg(FileName, Model->GetProperties().mName);
 		}
 
-		Stream << QLatin1String("</CENTER>\n<BR><HR><BR><B><I>Created by <A HREF=\"http://www.leocad.org\">LeoCAD</A></B></I><BR></HTML>\r\n");
+		Stream << QLatin1String("</CENTER>\r\n<BR><HR><BR><B><I>Created by <A HREF=\"http://www.leocad.org\">LeoCAD</A></B></I><BR></HTML>\r\n");
 	}
 }
 

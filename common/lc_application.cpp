@@ -141,6 +141,8 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 	int ImageHeight = lcGetProfileInt(LC_PROFILE_IMAGE_HEIGHT);
 	int ImageStart = 0;
 	int ImageEnd = 0;
+	int PartImagesWidth = -1;
+	int PartImagesHeight = -1;
 	QString ImageName;
 	QString ModelName;
 	QString CameraName;
@@ -246,6 +248,10 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 			SaveHTML = true;
 			ParseString(SaveHTMLName, false);
 		}
+		else if (Param == QLatin1String("--html-parts-width"))
+			ParseInteger(PartImagesWidth);
+		else if (Param == QLatin1String("--html-parts-height"))
+			ParseInteger(PartImagesHeight);
 		else if (Param == QLatin1String("-v") || Param == QLatin1String("--version"))
 		{
 			printf("LeoCAD Version " LC_VERSION_TEXT "\n");
@@ -273,6 +279,8 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 			printf("  -3ds, --export-3ds <outfile.3ds>: Exports the model to 3D Studio 3DS format.\n");
 			printf("  -dae, --export-collada <outfile.dae>: Exports the model to COLLADA DAE format.\n");
 			printf("  -html, --export-html <folder>: Creates an HTML page for the model.\n");
+			printf("  --html-parts-width <width>: Sets the part pictures width.\n");
+			printf("  --html-parts-height <height>: Sets the part pictures height.\n");
 			printf("  -v, --version: Output version information and exit.\n");
 			printf("  -?, --help: Display this help and exit.\n");
 			printf("  \n");
@@ -469,6 +477,12 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 
 			if (!SaveHTMLName.isEmpty())
 				Options.PathName = SaveHTMLName;
+
+			if (PartImagesWidth > 0)
+				Options.PartImagesWidth = PartImagesWidth;
+
+			if (PartImagesHeight > 0)
+				Options.PartImagesHeight = PartImagesHeight;
 
 			mProject->ExportHTML(Options);
 		}

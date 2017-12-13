@@ -1929,11 +1929,27 @@ void Project::ExportHTML(const lcHTMLExportOptions& Options)
 			BaseName.replace('#', '_');
 
 			if (Options.SinglePage)
+			{
 				FileName = BaseName + QLatin1String(".html");
-			else
+				Stream << QString::fromLatin1("<p><a href=\"%1\">%2</a>").arg(FileName, Model->GetProperties().mName);
+			}
+			else if (Options.IndexPage)
+			{
 				FileName = BaseName + QLatin1String("-index.html");
+				Stream << QString::fromLatin1("<p><a href=\"%1\">%2</a>").arg(FileName, Model->GetProperties().mName);
+			}
+			else
+			{
+				lcStep LastStep = Model->GetLastStep();
 
-			Stream << QString::fromLatin1("<p><a href=\"%1\">%2</a>").arg(FileName, Model->GetProperties().mName);
+				Stream << QString::fromLatin1("<p>%1</p>").arg(Model->GetProperties().mName);
+
+				for (lcStep Step = 1; Step <= LastStep; Step++)
+					Stream << QString::fromLatin1("<A HREF=\"%1-%2.html\">Step %3<BR>\r\n</A>").arg(BaseName, QString("%1").arg(Step, 2, 10, QLatin1Char('0')), QString::number(Step));
+
+				if (Options.PartsListEnd)
+					Stream << QString::fromLatin1("<A HREF=\"%1-pieces.html\">Pieces Used</A><BR>\r\n").arg(BaseName);
+			}
 		}
 
 		Stream << QLatin1String("</CENTER>\r\n<BR><HR><BR><B><I>Created by <A HREF=\"http://www.leocad.org\">LeoCAD</A></B></I><BR></HTML>\r\n");

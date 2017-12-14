@@ -277,6 +277,16 @@ void View::SetViewpoint(lcViewpoint Viewpoint)
 	Redraw();
 }
 
+void View::SetCameraAngles(float Latitude, float Longitude)
+{
+	if (!mCamera || !mCamera->IsSimple())
+		mCamera = new lcCamera(true);
+
+	mCamera->SetAngles(Latitude, Longitude);
+	ZoomExtents();
+	Redraw();
+}
+
 void View::SetDefaultCamera()
 {
 	if (!mCamera || !mCamera->IsSimple())

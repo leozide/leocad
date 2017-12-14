@@ -282,6 +282,7 @@ public:
 	void Center(lcVector3& point, lcStep Step, bool AddKey);
 	void Move(lcStep Step, bool AddKey, const lcVector3& Distance);
 	void SetViewpoint(lcViewpoint Viewpoint);
+	void SetAngles(float Latitude, float Longitude);
 
 	char m_strName[81];
 

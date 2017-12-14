@@ -966,3 +966,24 @@ void lcCamera::SetViewpoint(lcViewpoint Viewpoint)
 
 	UpdatePosition(1);
 }
+
+void lcCamera::SetAngles(float Latitude, float Longitude)
+{
+	mPosition = lcVector3(0, -1, 0);
+	mTargetPosition = lcVector3(0, 0, 0);
+	mUpVector = lcVector3(0, 0, 1);
+
+	lcMatrix33 LongitudeMatrix = lcMatrix33RotationZ(LC_DTOR * Longitude);
+	mPosition = lcMul(mPosition, LongitudeMatrix);
+
+	lcVector3 SideVector = lcMul(lcVector3(-1, 0, 0), LongitudeMatrix);
+	lcMatrix33 LatitudeMatrix = lcMatrix33FromAxisAngle(SideVector, LC_DTOR * Latitude);
+	mPosition = lcMul(mPosition, LatitudeMatrix);
+	mUpVector = lcMul(mUpVector, LatitudeMatrix);
+
+	ChangeKey(mPositionKeys, mPosition, 1, false);
+	ChangeKey(mTargetPositionKeys, mTargetPosition, 1, false);
+	ChangeKey(mUpVectorKeys, mUpVector, 1, false);
+
+	UpdatePosition(1);
+}

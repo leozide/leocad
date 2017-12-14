@@ -135,6 +135,7 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 	bool Save3DS = false;
 	bool SaveCOLLADA = false;
 	bool SaveHTML = false;
+	bool SetCameraAngles = false;
 	bool Orthographic = false;
 	bool ImageHighlight = false;
 	int ImageWidth = lcGetProfileInt(LC_PROFILE_IMAGE_WIDTH);
@@ -143,6 +144,7 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 	int ImageEnd = 0;
 	int PartImagesWidth = -1;
 	int PartImagesHeight = -1;
+	float CameraLatitude, CameraLongitude;
 	QString ImageName;
 	QString ModelName;
 	QString CameraName;
@@ -194,6 +196,32 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 				printf("Not enough parameters for the '%s' argument.\n", Arguments[ArgIdx].toLatin1().constData());
 		};
 
+		auto ParseVector2 = [&ArgIdx, &Arguments, NumArguments](float& Value1, float& Value2)
+		{
+			if (ArgIdx < NumArguments - 2 && Arguments[ArgIdx + 1][0] != '-' && Arguments[ArgIdx + 2][0] != '-')
+			{
+				bool Ok1 = false, Ok2 = false;
+
+				ArgIdx++;
+				float NewValue1 = Arguments[ArgIdx].toFloat(&Ok1);
+				ArgIdx++;
+				float NewValue2 = Arguments[ArgIdx].toFloat(&Ok2);
+
+				if (Ok1 && Ok2)
+				{
+					Value1 = NewValue1;
+					Value2 = NewValue2;
+					return true;
+				}
+				else
+					printf("Invalid value specified for the '%s' argument.\n", Arguments[ArgIdx - 2].toLatin1().constData());
+			}
+			else
+				printf("Not enough parameters for the '%s' argument.\n", Arguments[ArgIdx].toLatin1().constData());
+
+			return false;
+		};
+
 		if (Param == QLatin1String("-l") || Param == QLatin1String("--libpath"))
 		{
 			QString LibPath;
@@ -218,12 +246,14 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 			ParseInteger(ImageStart);
 		else if (Param == QLatin1String("-t") || Param == QLatin1String("--to"))
 			ParseInteger(ImageEnd);
-		else if (Param == QLatin1String("-m") || Param == QLatin1String("--model"))
+		else if (Param == QLatin1String("-s") || Param == QLatin1String("--submodel"))
 			ParseString(ModelName, true);
 		else if (Param == QLatin1String("-c") || Param == QLatin1String("--camera"))
 			ParseString(CameraName, true);
 		else if (Param == QLatin1String("--viewpoint"))
 			ParseString(ViewpointName, true);
+		else if (Param == QLatin1String("--camera-angles"))
+			SetCameraAngles = ParseVector2(CameraLatitude, CameraLongitude);
 		else if (Param == QLatin1String("--orthographic"))
 			Orthographic = true;
 		else if (Param == QLatin1String("--highlight"))
@@ -264,25 +294,26 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 		{
 			printf("Usage: leocad [options] [file]\n");
 			printf("  [options] can be:\n");
-			printf("  -l, --libpath <path>: Loads the Pieces Library from path.\n");
-			printf("  -i, --image <outfile.ext>: Saves a picture in the format specified by ext.\n");
-			printf("  -w, --width <width>: Sets the picture width.\n");
-			printf("  -h, --height <height>: Sets the picture height.\n");
-			printf("  -f, --from <time>: Sets the first frame or step to save pictures.\n");
-			printf("  -t, --to <time>: Sets the last frame or step to save pictures.\n");
-			printf("  -m, --model <model>: Sets the active submodel.\n");
-			printf("  -c, --camera <camera>: Sets the active camera.\n");
-			printf("  --viewpoint (front|back|left|right|top|bottom|home): Sets the viewpoint.\n");
+			printf("  -l, --libpath <path>: Set the Parts Library location to path.\n");
+			printf("  -i, --image <outfile.ext>: Save a picture in the format specified by ext.\n");
+			printf("  -w, --width <width>: Set the picture width.\n");
+			printf("  -h, --height <height>: Set the picture height.\n");
+			printf("  -f, --from <time>: Set the first step to save pictures.\n");
+			printf("  -t, --to <time>: Set the last step to save pictures.\n");
+			printf("  -s, --submodel <submodel>: Set the active submodel.\n");
+			printf("  -c, --camera <camera>: Set the active camera.\n");
+			printf("  --viewpoint <front|back|left|right|top|bottom|home>: Set the viewpoint.\n");
+			printf("  --camera-angles <latitude> <longitude>: Set the camera angles in degrees around the model.\n");
 			printf("  --orthographic: Make the view orthographic.\n");
 			printf("  --highlight: Highlight pieces in the steps they appear.\n");
-			printf("  -obj, --export-wavefront <outfile.obj>: Exports the model to Wavefront OBJ format.\n");
-			printf("  -3ds, --export-3ds <outfile.3ds>: Exports the model to 3D Studio 3DS format.\n");
-			printf("  -dae, --export-collada <outfile.dae>: Exports the model to COLLADA DAE format.\n");
-			printf("  -html, --export-html <folder>: Creates an HTML page for the model.\n");
-			printf("  --html-parts-width <width>: Sets the part pictures width.\n");
-			printf("  --html-parts-height <height>: Sets the part pictures height.\n");
+			printf("  -obj, --export-wavefront <outfile.obj>: Export the model to Wavefront OBJ format.\n");
+			printf("  -3ds, --export-3ds <outfile.3ds>: Export the model to 3D Studio 3DS format.\n");
+			printf("  -dae, --export-collada <outfile.dae>: Export the model to COLLADA DAE format.\n");
+			printf("  -html, --export-html <folder>: Create an HTML page for the model.\n");
+			printf("  --html-parts-width <width>: Set the HTML part pictures width.\n");
+			printf("  --html-parts-height <height>: Set the HTML part pictures height.\n");
 			printf("  -v, --version: Output version information and exit.\n");
-			printf("  -?, --help: Display this help and exit.\n");
+			printf("  -?, --help: Display this help message and exit.\n");
 			printf("  \n");
 
 			ShowWindow = false;
@@ -323,34 +354,49 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 		if (!ModelName.isEmpty())
 			lcGetActiveProject()->SetActiveModel(ModelName);
 
+		View* ActiveView = gMainWindow->GetActiveView();
+
 		if (!CameraName.isEmpty())
 		{
-			gMainWindow->GetActiveView()->SetCamera(CameraName.toLatin1()); // todo: qstring
-			if (!ViewpointName.isEmpty() || Orthographic)
-				printf("Warning: --viewpoint and --orthographic are ignored when --camera is set.\n");
+			ActiveView->SetCamera(CameraName.toLatin1()); // todo: qstring
+
+			if (!ViewpointName.isEmpty())
+				printf("Warning: --viewpoint is ignored when --camera is set.\n");
+
+			if (Orthographic)
+				printf("Warning: --orthographic is ignored when --camera is set.\n");
+
+			if (SetCameraAngles)
+				printf("Warning: --camera-angles is ignored when --camera is set.\n");
 		}
 		else
 		{
 			if (!ViewpointName.isEmpty())
 			{
 				if (ViewpointName == QLatin1String("front"))
-					gMainWindow->GetActiveView()->SetViewpoint(LC_VIEWPOINT_FRONT);
+					ActiveView->SetViewpoint(LC_VIEWPOINT_FRONT);
 				else if (ViewpointName == QLatin1String("back"))
-					gMainWindow->GetActiveView()->SetViewpoint(LC_VIEWPOINT_BACK);
+					ActiveView->SetViewpoint(LC_VIEWPOINT_BACK);
 				else if (ViewpointName == QLatin1String("top"))
-					gMainWindow->GetActiveView()->SetViewpoint(LC_VIEWPOINT_TOP);
+					ActiveView->SetViewpoint(LC_VIEWPOINT_TOP);
 				else if (ViewpointName == QLatin1String("bottom"))
-					gMainWindow->GetActiveView()->SetViewpoint(LC_VIEWPOINT_BOTTOM);
+					ActiveView->SetViewpoint(LC_VIEWPOINT_BOTTOM);
 				else if (ViewpointName == QLatin1String("left"))
-					gMainWindow->GetActiveView()->SetViewpoint(LC_VIEWPOINT_LEFT);
+					ActiveView->SetViewpoint(LC_VIEWPOINT_LEFT);
 				else if (ViewpointName == QLatin1String("right"))
-					gMainWindow->GetActiveView()->SetViewpoint(LC_VIEWPOINT_RIGHT);
+					ActiveView->SetViewpoint(LC_VIEWPOINT_RIGHT);
 				else if (ViewpointName == QLatin1String("home"))
-					gMainWindow->GetActiveView()->SetViewpoint(LC_VIEWPOINT_HOME);
+					ActiveView->SetViewpoint(LC_VIEWPOINT_HOME);
 				else
 					printf("Unknown viewpoint: '%s'\n", ViewpointName.toLatin1().constData());
+
+				if (SetCameraAngles)
+					printf("Warning: --camera-angles is ignored when --viewpoint is set.\n");
 			}
-			gMainWindow->GetActiveView()->SetProjection(Orthographic);
+			else if (SetCameraAngles)
+				ActiveView->SetCameraAngles(CameraLatitude, CameraLongitude);
+
+			ActiveView->SetProjection(Orthographic);
 		}
 
 		if (SaveImage)

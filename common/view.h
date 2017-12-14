@@ -94,6 +94,7 @@ public:
 	void SetCamera(const char* CameraName);
 	void SetCameraIndex(int Index);
 	void SetViewpoint(lcViewpoint Viewpoint);
+	void SetCameraAngles(float Latitude, float Longitude);
 	void SetDefaultCamera();
 	lcMatrix44 GetProjectionMatrix() const;
 	LC_CURSOR_TYPE GetCursor() const;

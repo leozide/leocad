@@ -127,7 +127,21 @@ void lcPartSelectionListModel::SetCategory(int CategoryIndex)
 	if (CategoryIndex != -1)
 		Library->GetCategoryEntries(CategoryIndex, false, SingleParts, GroupedParts);
 	else
+	{
 		Library->GetParts(SingleParts);
+
+		lcModel* CurrentModel = lcGetActiveModel();
+
+		for (int PartIdx = 0; PartIdx < SingleParts.GetSize(); )
+		{
+			PieceInfo* Info = SingleParts[PartIdx];
+
+			if (!Info->IsModel() || !Info->GetModel()->IncludesModel(CurrentModel))
+				PartIdx++;
+			else
+				SingleParts.RemoveIndex(PartIdx);
+		}
+	}
 
 	auto lcPartSortFunc=[](PieceInfo* const& a, PieceInfo* const& b)
 	{

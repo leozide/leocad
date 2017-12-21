@@ -205,7 +205,7 @@ void lcRenderDialog::Update()
 	{
 		for (int x = 0; x < Width; x++)
 		{
-			mImage.setPixelColor(x, y, QColor::fromRgb(Pixels[0], Pixels[1], Pixels[2], Pixels[3]));
+			mImage.setPixel(x, y, qRgba(Pixels[0], Pixels[1], Pixels[2], Pixels[3]));
 			Pixels += 4;
 		}
 	}

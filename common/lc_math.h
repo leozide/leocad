@@ -1517,36 +1517,46 @@ inline void lcGetFrustumPlanes(const lcMatrix44& WorldView, const lcMatrix44& Pr
 	}
 }
 
-inline lcVector3 lcZoomExtents(const lcVector3& Position, const lcMatrix44& WorldView, const lcMatrix44& Projection, const lcVector3* Points, int NumPoints)
+inline std::tuple<lcVector3, float> lcZoomExtents(const lcVector3& Position, const lcMatrix44& WorldView, const lcMatrix44& Projection, const lcVector3* Points, int NumPoints)
 {
 	if (!NumPoints)
-		return Position;
+		return std::make_tuple(Position, 2500.0f);
 
 	lcVector4 Planes[6];
 	lcGetFrustumPlanes(WorldView, Projection, Planes);
 
 	lcVector3 Front(WorldView[0][2], WorldView[1][2], WorldView[2][2]);
 
-	// Calculate the position that is as close as possible to the model and has all pieces visible.
 	float SmallestDistance = FLT_MAX;
 
-	for (int p = 0; p < 4; p++)
+	for (int PlaneIdx = 0; PlaneIdx < 4; PlaneIdx++)
 	{
-		lcVector3 Plane(Planes[p][0], Planes[p][1], Planes[p][2]);
+		lcVector3 Plane(Planes[PlaneIdx][0], Planes[PlaneIdx][1], Planes[PlaneIdx][2]);
 		float ep = lcDot(Position, Plane);
 		float fp = lcDot(Front, Plane);
 
-		for (int j = 0; j < NumPoints; j++)
+		for (int PointIdx = 0; PointIdx < NumPoints; PointIdx++)
 		{
-			// Intersect the camera line with the plane that contains this point, NewEye = Eye + u * (Target - Eye)
-			float u = (ep - lcDot(Points[j], Plane)) / fp;
+			float u = (ep - lcDot(Points[PointIdx], Plane)) / fp;
 
 			if (u < SmallestDistance)
 				SmallestDistance = u;
 		}
 	}
 
-	return Position - (Front * SmallestDistance);
+	lcVector3 NewPosition = Position - (Front * SmallestDistance);
+
+	float FarDistance = 2500.0f;
+
+	for (int PointIdx = 0; PointIdx < NumPoints; PointIdx++)
+	{
+		float Distance = lcDot(Points[PointIdx], Front);
+
+		if (Distance > FarDistance)
+			FarDistance = Distance;
+	}
+
+	return std::make_tuple(NewPosition, FarDistance + lcDot(NewPosition, Front));
 }
 
 inline void lcClosestPointsBetweenLines(const lcVector3& Line1a, const lcVector3& Line1b, const lcVector3& Line2a, const lcVector3& Line2b, lcVector3* Intersection1, lcVector3* Intersection2)

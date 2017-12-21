@@ -1866,17 +1866,15 @@ void Project::ExportHTML(const lcHTMLExportOptions& Options)
 				return;
 			}
 
-			float aspect = (float)Width / (float)Height;
+			float AspectRatio = (float)Width / (float)Height;
 			Context->SetViewport(0, 0, Width, Height);
 
 			lcPartsList PartsList;
 			Model->GetPartsList(gDefaultColor, true, PartsList);
 
-			lcMatrix44 ProjectionMatrix = lcMatrix44Perspective(30.0f, aspect, 1.0f, 2500.0f);
-			lcMatrix44 ViewMatrix;
+			lcMatrix44 ProjectionMatrix, ViewMatrix;
 
 			Context->SetDefaultState();
-			Context->SetProjectionMatrix(ProjectionMatrix);
 
 			for (const auto& PartIt : PartsList)
 			{
@@ -1885,8 +1883,9 @@ void Project::ExportHTML(const lcHTMLExportOptions& Options)
 				glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
 				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-				lcVector3 CameraPosition(-100.0f, -100.0f, 75.0f);
-				Info->ZoomExtents(ProjectionMatrix, ViewMatrix, CameraPosition);
+				Info->ZoomExtents(30.0f, AspectRatio, ProjectionMatrix, ViewMatrix);
+
+				Context->SetProjectionMatrix(ProjectionMatrix);
 
 				lcScene Scene;
 				Scene.Begin(ViewMatrix);

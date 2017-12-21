@@ -276,31 +276,20 @@ bool PieceInfo::BoxTest(const lcMatrix44& WorldMatrix, const lcVector4 WorldPlan
 	return false;
 }
 
-// Zoom extents for the preview window and print catalog
-void PieceInfo::ZoomExtents(const lcMatrix44& ProjectionMatrix, lcMatrix44& ViewMatrix, float* EyePos) const
+void PieceInfo::ZoomExtents(float FoV, float AspectRatio, lcMatrix44& ProjectionMatrix, lcMatrix44& ViewMatrix) const
 {
 	lcVector3 Points[8];
 	lcGetBoxCorners(mBoundingBox, Points);
 
 	lcVector3 Center = (mBoundingBox.Min + mBoundingBox.Max) / 2.0f;
-	lcVector3 Position;
+	lcVector3 Position = Center + lcVector3(100.0f, -100.0f, 75.0f);
 
-	if (EyePos)
-		Position = lcVector3(EyePos[0], EyePos[1], EyePos[2]);
-	else
-		Position = lcVector3(-250.0f, -250.0f, 75.0f);
-	Position += Center;
-
+	ProjectionMatrix = lcMatrix44Perspective(FoV, AspectRatio, 1.0f, 12500.0f);
 	lcMatrix44 ModelView = lcMatrix44LookAt(Position, Center, lcVector3(0, 0, 1));
-	Position = lcZoomExtents(Position, ModelView, ProjectionMatrix, Points, 8);
+	float FarDistance;
+	std::tie(Position, FarDistance) = lcZoomExtents(Position, ModelView, ProjectionMatrix, Points, 8);
 	ViewMatrix = lcMatrix44LookAt(Position, Center, lcVector3(0, 0, 1));
-
-	if (EyePos)
-	{
-		EyePos[0] = Position[0];
-		EyePos[1] = Position[1];
-		EyePos[2] = Position[2];
-	}
+	ProjectionMatrix = lcMatrix44Perspective(FoV, AspectRatio, 1.0f, FarDistance);
 }
 
 void PieceInfo::AddRenderMesh(lcScene& Scene)

@@ -254,11 +254,10 @@ void MinifigWizard::OnDraw()
 		Eye += Center;
 
 		lcMatrix44 ModelView = lcMatrix44LookAt(Eye, Center, lcVector3(0, 0, 1));
-		Eye = lcZoomExtents(Eye, ModelView, Projection, Points, 8);
+		std::tie(Eye, std::ignore) = lcZoomExtents(Eye, ModelView, Projection, Points, 8);
 
 		ViewMatrix = lcMatrix44LookAt(Eye, Center, lcVector3(0, 0, 1));
 
-		// Update the new camera distance.
 		lcVector3 d = Eye - Center;
 		mDistance = d.Length();
 	}

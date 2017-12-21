@@ -329,11 +329,7 @@ void lcPartSelectionListModel::DrawPreview(int InfoIndex)
 	float Aspect = (float)Width / (float)Height;
 	Context->SetViewport(0, 0, Width, Height);
 
-	lcMatrix44 ProjectionMatrix = lcMatrix44Perspective(20.0f, Aspect, 1.0f, 12500.0f);
-	lcMatrix44 ViewMatrix;
-
 	Context->SetDefaultState();
-	Context->SetProjectionMatrix(ProjectionMatrix);
 
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 	PieceInfo* Info = mParts[InfoIndex].first;
@@ -341,8 +337,11 @@ void lcPartSelectionListModel::DrawPreview(int InfoIndex)
 	glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
-	lcVector3 CameraPosition(-100.0f, -100.0f, 75.0f);
-	Info->ZoomExtents(ProjectionMatrix, ViewMatrix, CameraPosition);
+	lcMatrix44 ProjectionMatrix, ViewMatrix;
+
+	Info->ZoomExtents(20.0f, Aspect, ProjectionMatrix, ViewMatrix);
+
+	Context->SetProjectionMatrix(ProjectionMatrix);
 
 	lcScene Scene;
 	Scene.Begin(ViewMatrix);

@@ -770,7 +770,7 @@ void lcCamera::ZoomExtents(float AspectRatio, const lcVector3& Center, const lcV
 		lcVector3 Position(mPosition + Center - mTargetPosition);
 		lcMatrix44 ProjectionMatrix = lcMatrix44Perspective(m_fovy, AspectRatio, m_zNear, m_zFar);
 
-		mPosition = lcZoomExtents(Position, mWorldView, ProjectionMatrix, Points, NumPoints);
+		std::tie(mPosition, std::ignore) = lcZoomExtents(Position, mWorldView, ProjectionMatrix, Points, NumPoints);
 		mTargetPosition = Center;
 	}
 
@@ -816,7 +816,7 @@ void lcCamera::ZoomRegion(float AspectRatio, const lcVector3& Position, const lc
 		lcMatrix44 WorldView = lcMatrix44LookAt(Position, TargetPosition, mUpVector);
 		lcMatrix44 ProjectionMatrix = lcMatrix44Perspective(m_fovy, AspectRatio, m_zNear, m_zFar);
 
-		mPosition = lcZoomExtents(Position, WorldView, ProjectionMatrix, Corners, 2);
+		std::tie(mPosition, std::ignore) = lcZoomExtents(Position, WorldView, ProjectionMatrix, Corners, 2);
 		mTargetPosition = TargetPosition;
 	}
 

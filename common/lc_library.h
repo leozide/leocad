@@ -179,6 +179,8 @@ public:
 	lcTexture* FindTexture(const char* TextureName, Project* CurrentProject, bool SearchProjectFolder);
 	bool LoadTexture(lcTexture* Texture);
 	void ReleaseTexture(lcTexture* Texture);
+	void QueueTextureUpload(lcTexture* Texture);
+	void UploadTextures();
 
 	bool PieceInCategory(PieceInfo* Info, const char* CategoryKeywords) const;
 	void GetCategoryEntries(int CategoryIndex, bool GroupPieces, lcArray<PieceInfo*>& SinglePieces, lcArray<PieceInfo*>& GroupedPieces);
@@ -245,6 +247,9 @@ protected:
 	QMutex mLoadMutex;
 	QList<QFuture<void>> mLoadFutures;
 	QList<PieceInfo*> mLoadQueue;
+
+	QMutex mTextureMutex;
+	std::vector<lcTexture*> mTextureUploads;
 
 	QString mCachePath;
 	qint64 mArchiveCheckSum[4];

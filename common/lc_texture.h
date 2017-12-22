@@ -14,7 +14,7 @@
 
 #define LC_TEXTURE_NAME_LEN 256
 
-class Image;
+#include "image.h"
 
 class lcTexture
 {
@@ -26,28 +26,25 @@ public:
 
 	bool Load(const QString& FileName, int Flags = 0);
 	bool Load(lcMemFile& File, int Flags = 0);
-	bool Load(Image& image, int Flags);
-	bool Load(Image* images, int NumLevels, int Flags);
+	void Upload();
 	void Unload();
 
-	int AddRef()
+	void AddRef()
 	{
-		mRefCount++;
+		mRefCount.ref();
 
 		if (mRefCount == 1)
 			Load();
-
-		return mRefCount;
 	}
 
-	int Release()
+	bool Release()
 	{
-		mRefCount--;
+		bool InUse = mRefCount.deref();
 
-		if (!mRefCount)
+		if (!InUse)
 			Unload();
 
-		return mRefCount;
+		return InUse;
 	}
 
 	void SetTemporary(bool Temporary)
@@ -67,9 +64,12 @@ public:
 
 protected:
 	bool Load();
+	bool Load(int Flags);
 
 	bool mTemporary;
-	int mRefCount;
+	QAtomicInt mRefCount;
+	std::vector<Image> mImages;
+	int mFlags;
 };
 
 lcTexture* lcLoadTexture(const QString& FileName, int Flags);

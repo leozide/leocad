@@ -219,7 +219,9 @@ void lcScene::DrawRenderMeshes(lcContext* Context, int PrimitiveTypes, bool Enab
 
 void lcScene::Draw(lcContext* Context) const
 {
-	lcGetPiecesLibrary()->UpdateBuffers(Context); // TODO: find a better place for this update
+	// TODO: find a better place for these updates
+	lcGetPiecesLibrary()->UpdateBuffers(Context);
+	lcGetPiecesLibrary()->UploadTextures();
 
 	Context->SetViewMatrix(mViewMatrix);
 

@@ -1687,6 +1687,22 @@ void lcPiecesLibrary::ReleaseTexture(lcTexture* Texture)
 	}
 }
 
+void lcPiecesLibrary::QueueTextureUpload(lcTexture* Texture)
+{
+	QMutexLocker Lock(&mTextureMutex);
+	mTextureUploads.push_back(Texture);
+}
+
+void lcPiecesLibrary::UploadTextures()
+{
+	QMutexLocker Lock(&mTextureMutex);
+
+	for (lcTexture* Texture : mTextureUploads)
+		Texture->Upload();
+
+	mTextureUploads.clear();
+}
+
 bool lcPiecesLibrary::LoadPrimitive(lcLibraryPrimitive* Primitive)
 {
 	mLoadMutex.lock();

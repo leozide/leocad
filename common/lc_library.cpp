@@ -341,14 +341,18 @@ bool lcPiecesLibrary::OpenArchive(lcFile* File, const QString& FileName, lcZipFi
 		Dst -= 4;
 		if (memcmp(Dst, ".DAT", 4))
 		{
-			if (!memcmp(Dst, ".PNG", 4) && !memcmp(Name, "LDRAW/PARTS/TEXTURES/", 21))
+			if (!memcmp(Dst, ".PNG", 4))
 			{
-				lcTexture* Texture = new lcTexture();
-				mTextures.Add(Texture);
+				if ((ZipFileType == LC_ZIPFILE_OFFICIAL && !memcmp(Name, "LDRAW/PARTS/TEXTURES/", 21)) ||
+				    (ZipFileType == LC_ZIPFILE_UNOFFICIAL && !memcmp(Name, "PARTS/TEXTURES/", 15)))
+				{
+					lcTexture* Texture = new lcTexture();
+					mTextures.Add(Texture);
 
-				*Dst = 0;
-				strncpy(Texture->mName, Name + 21, sizeof(Texture->mName));
-				Texture->mName[sizeof(Texture->mName) - 1] = 0;
+					*Dst = 0;
+					strncpy(Texture->mName, Name + (ZipFileType == LC_ZIPFILE_OFFICIAL ? 21 : 15), sizeof(Texture->mName));
+					Texture->mName[sizeof(Texture->mName) - 1] = 0;
+				}
 			}
 
 			continue;
@@ -1086,11 +1090,6 @@ bool lcPiecesLibrary::SaveCachePiece(PieceInfo* Info)
 	return WriteArchiveCacheFile(FileName, MeshData);
 }
 
-static void lcLoadPieceFuture(lcPiecesLibrary* Library)
-{
-	Library->LoadQueuedPiece();
-}
-
 class lcSleeper : public QThread
 {
 public:
@@ -1133,7 +1132,7 @@ void lcPiecesLibrary::LoadPieceInfo(PieceInfo* Info, bool Wait, bool Priority)
 			else
 				mLoadQueue.append(Info);
 
-			mLoadFutures.append(QtConcurrent::run(lcLoadPieceFuture, this));
+			mLoadFutures.append(QtConcurrent::run([this]() { LoadQueuedPiece(); }));
 		}
 	}
 }
@@ -1653,11 +1652,15 @@ bool lcPiecesLibrary::LoadTexture(lcTexture* Texture)
 	{
 		lcMemFile TextureFile;
 
-		sprintf(FileName, "ldraw/parts/textures/%s.png", Name);
+		sprintf(FileName, "parts/textures/%s.png", Name);
 
 		if (!mZipFiles[LC_ZIPFILE_UNOFFICIAL] || !mZipFiles[LC_ZIPFILE_UNOFFICIAL]->ExtractFile(FileName, TextureFile))
+		{
+			sprintf(FileName, "ldraw/parts/textures/%s.png", Name);
+
 			if (!mZipFiles[LC_ZIPFILE_OFFICIAL]->ExtractFile(FileName, TextureFile))
 				return false;
+		}
 
 		if (!Texture->Load(TextureFile))
 			return false;

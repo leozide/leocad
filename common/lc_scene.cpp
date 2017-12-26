@@ -187,7 +187,7 @@ void lcScene::DrawRenderMeshes(lcContext* Context, int PrimitiveTypes, bool Enab
 			{
 				VertexBufferOffset += Mesh->mNumVertices * sizeof(lcVertex);
 				Context->SetVertexFormat(VertexBufferOffset, 3, 1, 2, 0, EnableNormals);
-				Context->BindTexture(Texture->mTexture);
+				Context->BindTexture2D(Texture->mTexture);
 			}
 
 			GLenum DrawPrimitiveType = Section->PrimitiveType & (LC_MESH_TRIANGLES | LC_MESH_TEXTURED_TRIANGLES) ? GL_TRIANGLES : GL_LINES;
@@ -231,7 +231,7 @@ void lcScene::Draw(lcContext* Context) const
 
 	if (ShadingMode == LC_SHADING_WIREFRAME)
 	{
-		Context->BindTexture(0);
+		Context->BindTexture2D(0);
 
 		Context->SetMaterial(LC_MATERIAL_UNLIT_COLOR);
 
@@ -248,13 +248,13 @@ void lcScene::Draw(lcContext* Context) const
 
 			DrawRenderMeshes(Context, LC_MESH_TEXTURED_LINES, false, false, false);
 
-			Context->BindTexture(0);
+			Context->BindTexture2D(0);
 		}
 	}
 	else if (ShadingMode == LC_SHADING_FLAT)
 	{
 		bool DrawLines = lcGetPreferences().mDrawEdgeLines;
-		Context->BindTexture(0);
+		Context->BindTexture2D(0);
 
 		Context->SetMaterial(LC_MATERIAL_UNLIT_COLOR);
 
@@ -301,13 +301,13 @@ void lcScene::Draw(lcContext* Context) const
 				glDisable(GL_BLEND);
 			}
 
-			Context->BindTexture(0);
+			Context->BindTexture2D(0);
 		}
 	}
 	else
 	{
 		bool DrawLines = lcGetPreferences().mDrawEdgeLines;
-		Context->BindTexture(0);
+		Context->BindTexture2D(0);
 
 		if (DrawLines)
 		{
@@ -356,7 +356,7 @@ void lcScene::Draw(lcContext* Context) const
 				glDisable(GL_BLEND);
 			}
 
-			Context->BindTexture(0);
+			Context->BindTexture2D(0);
 		}
 	}
 }

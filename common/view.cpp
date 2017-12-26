@@ -728,29 +728,22 @@ void View::OnDraw()
 				quint8* Buffer = (quint8*)malloc(mWidth * mHeight * 4);
 				uchar* ImageBuffer = mRenderImage.bits();
 
-				glFinish();
-				glReadPixels(0, 0, CurrentTileWidth, CurrentTileHeight, GL_RGBA, GL_UNSIGNED_BYTE, Buffer);
+				mContext->GetRenderToTextureImage(mWidth, mHeight, Buffer);
 
-				quint32 TileY = 0;
+				quint32 TileY = 0, SrcY = 0;
 				if (CurrentTileRow != TotalTileRows - 1)
 					TileY = (TotalTileRows - CurrentTileRow - 1) * mHeight - (mHeight - mRenderImage.height() % mHeight);
-
+				else
+					SrcY = mHeight - mRenderImage.height() % mHeight;
+				qDebug() << SrcY << TileY;
 				quint32 TileStart = ((CurrentTileColumn * mWidth) + (TileY * mRenderImage.width())) * 4;
 
 				for (int y = 0; y < CurrentTileHeight; y++)
 				{
-					quint8* src = Buffer + (CurrentTileHeight - y - 1) * CurrentTileWidth * 4;
+					quint8* src = Buffer + (SrcY + y) * CurrentTileWidth * 4;
 					quint8* dst = ImageBuffer + TileStart + y * mRenderImage.width() * 4;
 
-					for (int x = 0; x < CurrentTileWidth; x++)
-					{
-						*dst++ = src[2];
-						*dst++ = src[1];
-						*dst++ = src[0];
-						*dst++ = src[3];
-
-						src += 4;
-					}
+					memcpy(dst, src, CurrentTileWidth * 4);
 				}
 
 				free(Buffer);
@@ -1251,7 +1244,7 @@ void View::DrawRotateOverlay()
 		mContext->SetWorldMatrix(lcMatrix44Identity());
 		mContext->SetViewMatrix(lcMatrix44Translation(lcVector3(0.375, 0.375, 0.0)));
 		mContext->SetProjectionMatrix(lcMatrix44Ortho(0.0f, mWidth, 0.0f, mHeight, -1.0f, 1.0f));
-		mContext->BindTexture(gTexFont.GetTexture());
+		mContext->BindTexture2D(gTexFont.GetTexture());
 		glEnable(GL_BLEND);
 
 		char buf[32];
@@ -1565,7 +1558,7 @@ void View::DrawGrid()
 
 	if (Preferences.mDrawGridStuds)
 	{
-		mContext->BindTexture(gGridTexture->mTexture);
+		mContext->BindTexture2D(gGridTexture->mTexture);
 		glEnable(GL_BLEND);
 
 		mContext->SetMaterial(LC_MATERIAL_UNLIT_TEXTURE_MODULATE);
@@ -1640,7 +1633,7 @@ void View::DrawAxes()
 
 	mContext->SetMaterial(LC_MATERIAL_UNLIT_TEXTURE_MODULATE);
 	mContext->SetViewMatrix(TranslationMatrix);
-	mContext->BindTexture(gTexFont.GetTexture());
+	mContext->BindTexture2D(gTexFont.GetTexture());
 	glEnable(GL_BLEND);
 
 	float TextBuffer[6 * 5 * 3];
@@ -1686,7 +1679,7 @@ void View::DrawViewport()
 	{
 		mContext->SetMaterial(LC_MATERIAL_UNLIT_TEXTURE_MODULATE);
 		mContext->SetColor(0.0f, 0.0f, 0.0f, 1.0f);
-		mContext->BindTexture(gTexFont.GetTexture());
+		mContext->BindTexture2D(gTexFont.GetTexture());
 
 		glEnable(GL_BLEND);
 

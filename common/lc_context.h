@@ -115,7 +115,8 @@ public:
 	void SetViewport(int x, int y, int Width, int Height);
 	void SetLineWidth(float LineWidth);
 	void SetSmoothShading(bool Smooth);
-	void BindTexture(GLuint Texture);
+	void BindTexture2D(GLuint Texture);
+	void BindTexture2DMS(GLuint Texture);
 
 	void SetColor(const lcVector4& Color)
 	{
@@ -132,6 +133,7 @@ public:
 	bool BeginRenderToTexture(int Width, int Height);
 	void EndRenderToTexture();
 	QImage GetRenderToTextureImage(int Width, int Height);
+	void GetRenderToTextureImage(int Width, int Height, quint8* Buffer);
 	bool SaveRenderToTextureImage(const QString& FileName, int Width, int Height);
 
 	lcVertexBuffer CreateVertexBuffer(int Size, const void* Data);
@@ -169,7 +171,8 @@ protected:
 	bool mTexCoordEnabled;
 	bool mColorEnabled;
 
-	GLuint mTexture;
+	GLuint mTexture2D;
+	GLuint mTexture2DMS;
 	float mLineWidth;
 	int mMatrixMode;
 	bool mTextureEnabled;
@@ -187,6 +190,8 @@ protected:
 
 	GLuint mFramebufferObject;
 	GLuint mFramebufferTexture;
+	GLuint mFramebufferObjectMS;
+	GLuint mFramebufferTextureMS;
 	GLuint mDepthRenderbufferObject;
 
 	static lcProgram mPrograms[LC_NUM_MATERIALS];

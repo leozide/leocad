@@ -5,6 +5,7 @@ bool gSupportsShaderObjects;
 bool gSupportsVertexBufferObject;
 bool gSupportsFramebufferObjectARB;
 bool gSupportsFramebufferObjectEXT;
+bool gSupportsTexImage2DMultisample;
 bool gSupportsAnisotropic;
 GLfloat gMaxAnisotropy;
 
@@ -113,6 +114,9 @@ PFNGLUNIFORMMATRIX3FVPROC lcUniformMatrix3fv;
 PFNGLUNIFORMMATRIX4FVPROC lcUniformMatrix4fv;
 PFNGLVALIDATEPROGRAMPROC lcValidateProgram;
 PFNGLVERTEXATTRIBPOINTERPROC lcVertexAttribPointer;
+
+PFNGLTEXIMAGE2DMULTISAMPLEPROC lcTexImage2DMultisample;
+PFNGLBLITFRAMEBUFFERPROC lcBlitFrameBuffer;
 
 #endif
 
@@ -331,7 +335,15 @@ void lcInitializeGLExtensions(const QGLContext* Context)
 #endif
 		gSupportsShaderObjects = true;
 	}
-	
+
+	if (VersionMajor > 3 || (VersionMajor == 3 && VersionMinor >= 2))
+	{
+		lcTexImage2DMultisample = (PFNGLTEXIMAGE2DMULTISAMPLEPROC)Context->getProcAddress("glTexImage2DMultisample");
+		lcBlitFrameBuffer = (PFNGLBLITFRAMEBUFFERPROC)Context->getProcAddress("glBlitFramebuffer");
+
+		gSupportsTexImage2DMultisample = true;
+	}
+
 #ifdef LC_OPENGLES
 	gSupportsVertexBufferObject = true;
 	gSupportsFramebufferObjectARB = true;

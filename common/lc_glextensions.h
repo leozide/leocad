@@ -6,6 +6,7 @@ extern bool gSupportsShaderObjects;
 extern bool gSupportsVertexBufferObject;
 extern bool gSupportsFramebufferObjectARB;
 extern bool gSupportsFramebufferObjectEXT;
+extern bool gSupportsTexImage2DMultisample;
 extern bool gSupportsAnisotropic;
 extern GLfloat gMaxAnisotropy;
 
@@ -119,6 +120,9 @@ extern PFNGLUNIFORMMATRIX4FVPROC lcUniformMatrix4fv;
 extern PFNGLVALIDATEPROGRAMPROC lcValidateProgram;
 extern PFNGLVERTEXATTRIBPOINTERPROC lcVertexAttribPointer;
 
+extern PFNGLTEXIMAGE2DMULTISAMPLEPROC lcTexImage2DMultisample;
+extern PFNGLBLITFRAMEBUFFERPROC lcBlitFrameBuffer;
+
 #define glBindBuffer lcBindBufferARB
 #define glDeleteBuffers lcDeleteBuffersARB
 #define glGenBuffers lcGenBuffersARB
@@ -223,5 +227,7 @@ extern PFNGLVERTEXATTRIBPOINTERPROC lcVertexAttribPointer;
 #define glValidateProgram lcValidateProgram
 #define glVertexAttribPointer lcVertexAttribPointer
 
-#endif
+#define glTexImage2DMultisample lcTexImage2DMultisample
+#define glBlitFrameBuffer lcBlitFrameBuffer
 
+#endif

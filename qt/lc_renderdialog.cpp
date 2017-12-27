@@ -23,6 +23,7 @@ lcRenderDialog::lcRenderDialog(QWidget* Parent)
 	ui->WidthEdit->setValidator(new QIntValidator(16, INT_MAX));
 	ui->HeightEdit->setText(QString::number(lcGetProfileInt(LC_PROFILE_POVRAY_HEIGHT)));
 	ui->HeightEdit->setValidator(new QIntValidator(16, INT_MAX));
+	ui->OutputEdit->setText(lcGetActiveProject()->GetImageFileName());
 
 	QImage Image(LC_POVRAY_PREVIEW_WIDTH, LC_POVRAY_PREVIEW_HEIGHT, QImage::Format_RGB32);
 	Image.fill(QColor(255, 255, 255));
@@ -104,10 +105,25 @@ void lcRenderDialog::on_RenderButton_clicked()
 	Arguments.append(QString::fromLatin1("+H%1").arg(ui->HeightEdit->text()));
 	Arguments.append("-O-");
 
-	Arguments.append("+Q11");
-	Arguments.append("+R3");
-	Arguments.append("+A0.1");
-	Arguments.append("+J0.5");
+	int Quality = ui->QualityComboBox->currentIndex();
+
+	switch (Quality)
+	{
+	case 0:
+		Arguments.append("+Q11");
+		Arguments.append("+R3");
+		Arguments.append("+A0.1");
+		Arguments.append("+J0.5");
+		break;
+
+	case 1:
+		Arguments.append("+Q5");
+		Arguments.append("+A0.1");
+		break;
+
+	case 2:
+		break;
+	}
 
 	/*
 	if (!LGEOPath.isEmpty())
@@ -213,5 +229,29 @@ void lcRenderDialog::Update()
 	Header->PixelsRead = PixelsWritten;
 
 	ui->label->setPixmap(QPixmap::fromImage(mImage.scaled(LC_POVRAY_PREVIEW_WIDTH, LC_POVRAY_PREVIEW_HEIGHT, Qt::KeepAspectRatio, Qt::SmoothTransformation)));
+
+	if (PixelsWritten == Width * Height)
+	{
+		QString FileName = ui->OutputEdit->text();
+
+		if (!FileName.isEmpty())
+		{
+			QImageWriter Writer(FileName);
+
+			bool Result = Writer.write(mImage);
+
+			if (!Result)
+				QMessageBox::information(this, tr("Error"), tr("Error writing to file '%1':\n%2").arg(FileName, Writer.errorString()));
+		}
+	}
 #endif
+}
+
+void lcRenderDialog::on_OutputBrowseButton_clicked()
+{
+	QString Result = QFileDialog::getSaveFileName(this, tr("Select Output File"), ui->OutputEdit->text(), tr("Supported Image Files (*.bmp *.png *.jpg);;BMP Files (*.bmp);;PNG Files (*.png);;JPEG Files (*.jpg);;All Files (*.*)"));
+
+	if (!Result.isEmpty())
+		ui->OutputEdit->setText(QDir::toNativeSeparators(Result));
+
 }

@@ -110,6 +110,22 @@ QString Project::GetTitle() const
 	return mModels.GetSize() == 1 ? tr("New Model.ldr") : tr("New Model.mpd");
 }
 
+QString Project::GetImageFileName() const
+{
+	QString FileName = QDir::toNativeSeparators(GetFileName());
+
+	if (!FileName.isEmpty())
+	{
+		QString Extension = QFileInfo(FileName).suffix();
+		if (!Extension.isEmpty())
+			FileName = FileName.left(FileName.length() - Extension.length() - 1);
+	}
+	else
+		FileName = QLatin1String("image");
+
+	return FileName + lcGetProfileString(LC_PROFILE_IMAGE_EXTENSION);
+}
+
 void Project::SetActiveModel(int ModelIndex)
 {
 	if (ModelIndex < 0 || ModelIndex >= mModels.GetSize())

@@ -17,6 +17,7 @@ public:
 public slots:
 	void reject();
 	void on_RenderButton_clicked();
+	void on_OutputBrowseButton_clicked();
 	void Update();
 
 protected:

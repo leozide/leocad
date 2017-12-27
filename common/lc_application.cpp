@@ -352,7 +352,7 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 	if (!ProjectName.isEmpty() && gMainWindow->OpenProject(ProjectName))
 	{
 		if (!ModelName.isEmpty())
-			lcGetActiveProject()->SetActiveModel(ModelName);
+			mProject->SetActiveModel(ModelName);
 
 		View* ActiveView = gMainWindow->GetActiveView();
 
@@ -401,18 +401,8 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 
 		if (SaveImage)
 		{
-			QString FileName;
-
-			if (!ImageName.isEmpty())
-				FileName = ImageName;
-			else
-			{
-				FileName = ProjectName;
-				QString Extension = QFileInfo(FileName).suffix();
-				if (!Extension.isEmpty())
-					FileName = FileName.left(FileName.length() - Extension.length() - 1);
-				FileName += lcGetProfileString(LC_PROFILE_IMAGE_EXTENSION);
-			}
+			if (ImageName.isEmpty())
+				ImageName = mProject->GetImageFileName();
 
 			if (ImageEnd < ImageStart)
 				ImageEnd = ImageStart;
@@ -436,11 +426,11 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 
 			if (ImageStart != ImageEnd)
 			{
-				QString Extension = QFileInfo(FileName).suffix();
-				Frame = FileName.left(FileName.length() - Extension.length() - 1) + QLatin1String("%1.") + Extension;
+				QString Extension = QFileInfo(ImageName).suffix();
+				Frame = ImageName.left(ImageName.length() - Extension.length() - 1) + QLatin1String("%1.") + Extension;
 			}
 			else
-				Frame = FileName;
+				Frame = ImageName;
 
 			lcGetActiveModel()->SaveStepImages(Frame, ImageStart != ImageEnd, CameraName == nullptr, ImageHighlight, ImageWidth, ImageHeight, ImageStart, ImageEnd);
 		}

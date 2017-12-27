@@ -22,18 +22,7 @@ lcQImageDialog::lcQImageDialog(QWidget* Parent)
 	mHeight = lcGetProfileInt(LC_PROFILE_IMAGE_HEIGHT);
 	mStart = Model->GetCurrentStep();
 	mEnd = Model->GetLastStep();
-	mFileName = Project->GetFileName();
-
-	if (!mFileName.isEmpty())
-	{
-		QString Extension = QFileInfo(mFileName).suffix();
-		if (!Extension.isEmpty())
-			mFileName = mFileName.left(mFileName.length() - Extension.length() - 1);
-	}
-	else
-		mFileName = QLatin1String("image");
-
-	mFileName += lcGetProfileString(LC_PROFILE_IMAGE_EXTENSION);
+	mFileName = Project->GetImageFileName();
 
 	ui->fileName->setText(mFileName);
 	ui->width->setText(QString::number(mWidth));

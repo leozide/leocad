@@ -41,10 +41,6 @@ lcContext::lcContext()
 #endif
 
 	mFramebufferObject = 0;
-	mFramebufferObjectMS = 0;
-	mFramebufferTexture = 0;
-	mFramebufferTextureMS = 0;
-	mDepthRenderbufferObject = 0;
 
 	mColor = lcVector4(0.0f, 0.0f, 0.0f, 0.0f);
 	mWorldMatrix = lcMatrix44Identity();
@@ -547,155 +543,186 @@ void lcContext::SetInterfaceColor(lcInterfaceColor InterfaceColor)
 	SetColor(gInterfaceColors[InterfaceColor]);
 }
 
-bool lcContext::BeginRenderToTexture(int Width, int Height)
+void lcContext::ClearFramebuffer()
 {
+	if (!mFramebufferObject)
+		return;
+
+	if (gSupportsFramebufferObjectARB)
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+#ifndef LC_OPENGLES
+	else if (gSupportsFramebufferObjectEXT)
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+#endif
+
+	mFramebufferObject = 0;
+}
+
+lcFramebuffer lcContext::CreateFramebuffer(int Width, int Height, bool Depth, bool Multisample)
+{
+	lcFramebuffer Framebuffer(Width, Height);
+
 	if (gSupportsFramebufferObjectARB)
 	{
-		int Samples = gSupportsTexImage2DMultisample ? QGLFormat::defaultFormat().samples() : 1;
+		int Samples = (Multisample && gSupportsTexImage2DMultisample) ? QGLFormat::defaultFormat().samples() : 1;
 
-		glGenFramebuffers(1, &mFramebufferObject);
-		glBindFramebuffer(GL_FRAMEBUFFER, mFramebufferObject);
+		glGenFramebuffers(1, &Framebuffer.mObject);
+		glBindFramebuffer(GL_FRAMEBUFFER, Framebuffer.mObject);
 
-		glGenTextures(1, &mFramebufferTexture);
-		BindTexture2D(mFramebufferTexture);
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Width, Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-		BindTexture2D(0);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mFramebufferTexture, 0);
-
-		glGenRenderbuffers(1, &mDepthRenderbufferObject);
+		glGenTextures(1, &Framebuffer.mColorTexture);
+		if (Depth)
+			glGenRenderbuffers(1, &Framebuffer.mDepthRenderbuffer);
 
 		if (Samples == 1)
 		{
-			glBindRenderbuffer(GL_RENDERBUFFER, mDepthRenderbufferObject);
-			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, Width, Height);
-			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, mDepthRenderbufferObject);
+			BindTexture2D(Framebuffer.mColorTexture);
+			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Width, Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+			BindTexture2D(0);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, Framebuffer.mColorTexture, 0);
+
+			if (Depth)
+			{
+				glBindRenderbuffer(GL_RENDERBUFFER, Framebuffer.mDepthRenderbuffer);
+				glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, Width, Height);
+				glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, Framebuffer.mDepthRenderbuffer);
+			}
 		}
 		else
 		{
-			if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-			{
-				EndRenderToTexture();
-				return false;
-			}
-
-			glGenFramebuffers(1, &mFramebufferObjectMS);
-			glBindFramebuffer(GL_FRAMEBUFFER, mFramebufferObjectMS);
-
-			glGenTextures(1, &mFramebufferTextureMS);
-			BindTexture2DMS(mFramebufferTextureMS);
+			BindTexture2DMS(Framebuffer.mColorTexture);
 			glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, Samples, GL_RGBA, Width, Height, GL_TRUE);
 			BindTexture2DMS(0);
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, mFramebufferTextureMS, 0);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, Framebuffer.mColorTexture, 0);
 
-			glBindRenderbuffer(GL_RENDERBUFFER, mDepthRenderbufferObject);
-			glRenderbufferStorageMultisample(GL_RENDERBUFFER, Samples, GL_DEPTH_COMPONENT24, Width, Height);
-			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, mDepthRenderbufferObject);
+			if (Depth)
+			{
+				glBindRenderbuffer(GL_RENDERBUFFER, Framebuffer.mDepthRenderbuffer);
+				glRenderbufferStorageMultisample(GL_RENDERBUFFER, Samples, GL_DEPTH_COMPONENT24, Width, Height);
+				glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, Framebuffer.mDepthRenderbuffer);
+			}
 		}
 
 		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		{
-			EndRenderToTexture();
-			return false;
-		}
+			DestroyFramebuffer(Framebuffer);
 
-		return true;
+		glBindFramebuffer(GL_FRAMEBUFFER, mFramebufferObject);
 	}
-
 #ifndef LC_OPENGLES
-	if (gSupportsFramebufferObjectEXT)
+	else if (gSupportsFramebufferObjectEXT)
 	{
-		glGenFramebuffersEXT(1, &mFramebufferObject); 
-		glGenTextures(1, &mFramebufferTexture); 
+		glGenFramebuffersEXT(1, &Framebuffer.mObject);
+		glGenTextures(1, &Framebuffer.mColorTexture);
 
-		BindTexture2D(mFramebufferTexture); 
+		BindTexture2D(Framebuffer.mColorTexture);
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, Width, Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, mFramebufferObject); 
-		glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, mFramebufferTexture, 0); 
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, Framebuffer.mObject);
+		glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, Framebuffer.mColorTexture, 0);
 
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, mFramebufferObject);
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, Framebuffer.mObject);
 
-		glGenRenderbuffersEXT(1, &mDepthRenderbufferObject); 
-		glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, mDepthRenderbufferObject); 
+		glGenRenderbuffersEXT(1, &Framebuffer.mDepthRenderbuffer);
+		glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, Framebuffer.mDepthRenderbuffer);
 		glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT24, Width, Height);
 
-		glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, mDepthRenderbufferObject); 
+		glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, Framebuffer.mDepthRenderbuffer);
 
 		BindTexture2D(0);
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, mFramebufferObject);
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, Framebuffer.mObject);
 
 		if (glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT) != GL_FRAMEBUFFER_COMPLETE_EXT)
-		{
-			EndRenderToTexture();
-			return false;
-		}
+			DestroyFramebuffer(Framebuffer);
 
-		return true;
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, mFramebufferObject);
 	}
 #endif
-	
-	return false;
+
+	return Framebuffer;
 }
 
-void lcContext::EndRenderToTexture()
+void lcContext::DestroyFramebuffer(lcFramebuffer& Framebuffer)
 {
 	if (gSupportsFramebufferObjectARB)
 	{
-		glDeleteFramebuffers(1, &mFramebufferObject);
-		mFramebufferObject = 0;
-		glDeleteTextures(1, &mFramebufferTexture);
-		mFramebufferTexture = 0;
-		glDeleteFramebuffers(1, &mFramebufferObjectMS);
-		mFramebufferObjectMS = 0;
-		glDeleteTextures(1, &mFramebufferTextureMS);
-		mFramebufferTextureMS = 0;
-		glDeleteRenderbuffers(1, &mDepthRenderbufferObject);
-		mDepthRenderbufferObject = 0;
-
-		return;
+		glDeleteFramebuffers(1, &Framebuffer.mObject);
+		glDeleteTextures(1, &Framebuffer.mColorTexture);
+		glDeleteRenderbuffers(1, &Framebuffer.mDepthRenderbuffer);
 	}
-
 #ifndef LC_OPENGLES
-	if (gSupportsFramebufferObjectEXT)
+	else if (gSupportsFramebufferObjectEXT)
 	{
-		glDeleteFramebuffersEXT(1, &mFramebufferObject);
-		mFramebufferObject = 0;
-		glDeleteTextures(1, &mFramebufferTexture);
-		mFramebufferTexture = 0;
-		glDeleteRenderbuffersEXT(1, &mDepthRenderbufferObject);
-		mDepthRenderbufferObject = 0;
+		glDeleteFramebuffersEXT(1, &Framebuffer.mObject);
+		glDeleteTextures(1, &Framebuffer.mColorTexture);
+		glDeleteRenderbuffersEXT(1, &Framebuffer.mDepthRenderbuffer);
 	}
 #endif
+
+	Framebuffer.mObject = 0;
+	Framebuffer.mColorTexture = 0;
+	Framebuffer.mDepthRenderbuffer = 0;
+	Framebuffer.mWidth = 0;
+	Framebuffer.mHeight = 0;
 }
 
-QImage lcContext::GetRenderToTextureImage(int Width, int Height)
+void lcContext::BindFramebuffer(GLuint FramebufferObject)
 {
-	QImage Image(Width, Height, QImage::Format_ARGB32);
+	if (FramebufferObject == mFramebufferObject)
+		return;
 
-	GetRenderToTextureImage(Width, Height, Image.bits());
+	if (gSupportsFramebufferObjectARB)
+		glBindFramebuffer(GL_FRAMEBUFFER, FramebufferObject);
+#ifndef LC_OPENGLES
+	else if (gSupportsFramebufferObjectEXT)
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, FramebufferObject);
+#endif
+
+	mFramebufferObject = FramebufferObject;
+}
+
+std::pair<lcFramebuffer, lcFramebuffer> lcContext::CreateRenderFramebuffer(int Width, int Height)
+{
+	if (gSupportsFramebufferObjectARB && QGLFormat::defaultFormat().samples() > 1)
+		return std::make_pair(CreateFramebuffer(Width, Height, true, true), CreateFramebuffer(Width, Height, false, false));
+	else
+		return std::make_pair(CreateFramebuffer(Width, Height, false, true), lcFramebuffer());
+}
+
+void lcContext::DestroyRenderFramebuffer(std::pair<lcFramebuffer, lcFramebuffer>& RenderFramebuffer)
+{
+	DestroyFramebuffer(RenderFramebuffer.first);
+	DestroyFramebuffer(RenderFramebuffer.second);
+}
+
+QImage lcContext::GetRenderFramebufferImage(const std::pair<lcFramebuffer, lcFramebuffer>& RenderFramebuffer)
+{
+	QImage Image(RenderFramebuffer.first.mWidth, RenderFramebuffer.first.mHeight, QImage::Format_ARGB32);
+
+	GetRenderFramebufferImage(RenderFramebuffer, Image.bits());
 
 	return Image;
 }
 
-void lcContext::GetRenderToTextureImage(int Width, int Height, quint8* Buffer)
+void lcContext::GetRenderFramebufferImage(const std::pair<lcFramebuffer, lcFramebuffer>& RenderFramebuffer, quint8* Buffer)
 {
-	if (mFramebufferTextureMS)
+	const int Width = RenderFramebuffer.first.mWidth;
+	const int Height = RenderFramebuffer.first.mHeight;
+	GLuint SavedFramebuffer = mFramebufferObject;
+
+	if (RenderFramebuffer.second.IsValid())
 	{
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, mFramebufferObjectMS);
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mFramebufferObject);
-
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, RenderFramebuffer.second.mObject);
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, RenderFramebuffer.first.mObject);
 		glBlitFrameBuffer(0, 0, Width, Height, 0, 0, Width, Height, GL_COLOR_BUFFER_BIT, GL_LINEAR);
-
-		glBindFramebuffer(GL_FRAMEBUFFER, mFramebufferObject);
+		BindFramebuffer(RenderFramebuffer.second);
 	}
+	else
+		BindFramebuffer(RenderFramebuffer.first);
 
 	glFinish();
 	glReadPixels(0, 0, Width, Height, GL_RGBA, GL_UNSIGNED_BYTE, Buffer);
-
-	if (mFramebufferTextureMS)
-		glBindFramebuffer(GL_FRAMEBUFFER, mFramebufferObjectMS);
+	BindFramebuffer(SavedFramebuffer);
 
 	for (int y = 0; y < (Height + 1) / 2; y++)
 	{
@@ -714,19 +741,6 @@ void lcContext::GetRenderToTextureImage(int Width, int Height, quint8* Buffer)
 			Bottom += 4;
 		}
 	}
-}
-
-bool lcContext::SaveRenderToTextureImage(const QString& FileName, int Width, int Height)
-{
-	QImage Image = GetRenderToTextureImage(Width, Height);
-    QImageWriter Writer(FileName);
-
-	bool Result = Writer.write(Image);
-
-	if (!Result)
-		QMessageBox::information(gMainWindow, tr("Error"), tr("Error writing to file '%1':\n%2").arg(FileName, Writer.errorString()));
-
-	return Result;
 }
 
 lcVertexBuffer lcContext::CreateVertexBuffer(int Size, const void* Data)

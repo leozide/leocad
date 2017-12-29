@@ -337,13 +337,20 @@ void lcPartSelectionListModel::DrawPreview(int InfoIndex)
 	int Width = mIconSize * 2;
 	int Height = mIconSize * 2;
 
-	if (!Context->BeginRenderToTexture(Width, Height))
+	if (mRenderFramebuffer.first.mWidth != Width || mRenderFramebuffer.first.mHeight != Height)
+	{
+		Context->DestroyRenderFramebuffer(mRenderFramebuffer);
+		mRenderFramebuffer = Context->CreateRenderFramebuffer(Width, Height);
+	}
+
+	if (!mRenderFramebuffer.first.IsValid())
 		return;
 
 	float Aspect = (float)Width / (float)Height;
 	Context->SetViewport(0, 0, Width, Height);
 
 	Context->SetDefaultState();
+	Context->BindFramebuffer(mRenderFramebuffer.first);
 
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 	PieceInfo* Info = mParts[InfoIndex].first;
@@ -366,11 +373,11 @@ void lcPartSelectionListModel::DrawPreview(int InfoIndex)
 
 	Scene.Draw(Context);
 
-	mParts[InfoIndex].second = QPixmap::fromImage(Context->GetRenderToTextureImage(Width, Height)).scaled(mIconSize, mIconSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+	mParts[InfoIndex].second = QPixmap::fromImage(Context->GetRenderFramebufferImage(mRenderFramebuffer)).scaled(mIconSize, mIconSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 
 	Library->ReleasePieceInfo(Info);
 
-	Context->EndRenderToTexture();
+	Context->ClearFramebuffer();
 	Context->ClearResources();
 
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 2, 0))

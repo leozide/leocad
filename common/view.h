@@ -167,6 +167,7 @@ protected:
 	PieceInfo* mMouseDownPiece;
 	bool mHighlight;
 	QImage mRenderImage;
+	std::pair<lcFramebuffer, lcFramebuffer> mRenderFramebuffer;
 
 	lcVertexBuffer mGridBuffer;
 	int mGridSettings[7];

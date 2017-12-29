@@ -1,5 +1,7 @@
 #pragma once
 
+#include "lc_context.h"
+
 class lcPartSelectionListModel;
 class lcPartSelectionListView;
 
@@ -98,6 +100,7 @@ protected:
 	bool mListMode;
 	bool mShowDecoratedParts;
 	QByteArray mFilter;
+	std::pair<lcFramebuffer, lcFramebuffer> mRenderFramebuffer;
 };
 
 class lcPartSelectionListView : public QListView
@@ -179,4 +182,3 @@ protected:
 	lcPartSelectionListView* mPartsWidget;
 	QSplitter* mSplitter;
 };
-

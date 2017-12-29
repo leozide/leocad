@@ -1498,11 +1498,15 @@ QImage Project::CreatePartsListImage(lcModel* Model, lcStep Step)
 	const int ThumbnailWidth = 512;
 	const int ThumbnailHeight = 512;
 
-	if (!Context->BeginRenderToTexture(ThumbnailWidth, ThumbnailHeight))
+	std::pair<lcFramebuffer, lcFramebuffer> RenderFramebuffer = Context->CreateRenderFramebuffer(ThumbnailWidth, ThumbnailHeight);
+
+	if (!RenderFramebuffer.first.IsValid())
 	{
 		QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Error creating images."));
 		return QImage();
 	}
+
+	Context->BindFramebuffer(RenderFramebuffer.first);
 
 	float Aspect = (float)ThumbnailWidth / (float)ThumbnailHeight;
 	float OrthoHeight = 200.0f;
@@ -1529,10 +1533,11 @@ QImage Project::CreatePartsListImage(lcModel* Model, lcStep Step)
 
 		Scene.Draw(Context);
 
-		Image.Thumbnail = Context->GetRenderToTextureImage(ThumbnailWidth, ThumbnailHeight);
+		Image.Thumbnail = Context->GetRenderFramebufferImage(RenderFramebuffer);
 	}
 
-	Context->EndRenderToTexture();
+	Context->ClearFramebuffer();
+	Context->DestroyRenderFramebuffer(RenderFramebuffer);
 	Context->ClearResources();
 
 	auto CalculateImageBounds = [](lcPartsListImage& Image)
@@ -1876,11 +1881,15 @@ void Project::ExportHTML(const lcHTMLExportOptions& Options)
 			int Width = Options.PartImagesWidth;
 			int Height = Options.PartImagesHeight;
 
-			if (!Context->BeginRenderToTexture(Width, Height))
+			std::pair<lcFramebuffer, lcFramebuffer> RenderFramebuffer = Context->CreateRenderFramebuffer(Width, Height);
+
+			if (!RenderFramebuffer.first.IsValid())
 			{
 				QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Error creating images."));
 				return;
 			}
+
+			Context->BindFramebuffer(RenderFramebuffer.first);
 
 			float AspectRatio = (float)Width / (float)Height;
 			Context->SetViewport(0, 0, Width, Height);
@@ -1913,10 +1922,19 @@ void Project::ExportHTML(const lcHTMLExportOptions& Options)
 				Scene.Draw(Context);
 
 				QString FileName = QFileInfo(Dir, QLatin1String(Info->mFileName) + QLatin1String(".png")).absoluteFilePath();
-				if (!Context->SaveRenderToTextureImage(FileName, Width, Height))
+				QImage Image = Context->GetRenderFramebufferImage(RenderFramebuffer);
+
+				QImageWriter Writer(FileName);
+
+				if (!Writer.write(Image))
+				{
+					QMessageBox::information(gMainWindow, tr("Error"), tr("Error writing to file '%1':\n%2").arg(FileName, Writer.errorString()));
 					break;
+				}
 			}
-			Context->EndRenderToTexture();
+
+			Context->ClearFramebuffer();
+			Context->DestroyRenderFramebuffer(RenderFramebuffer);
 			Context->ClearResources();
 		}
 	}

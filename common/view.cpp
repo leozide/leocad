@@ -645,13 +645,16 @@ bool View::BeginRenderToImage(int Width, int Height)
 	else
 		mRenderImage = QImage(TileWidth, TileHeight, QImage::Format_ARGB32);
 
-	return mContext->BeginRenderToTexture(TileWidth, TileHeight);
+	mRenderFramebuffer = mContext->CreateRenderFramebuffer(Width, Height);
+	mContext->BindFramebuffer(mRenderFramebuffer.first);
+	return mRenderFramebuffer.first.IsValid();
 }
 
 void View::EndRenderToImage()
 {
 	mRenderImage = QImage();
-	mContext->EndRenderToTexture();
+	mContext->DestroyRenderFramebuffer(mRenderFramebuffer);
+	mContext->ClearFramebuffer();
 }
 
 void View::OnDraw()
@@ -728,14 +731,14 @@ void View::OnDraw()
 				quint8* Buffer = (quint8*)malloc(mWidth * mHeight * 4);
 				uchar* ImageBuffer = mRenderImage.bits();
 
-				mContext->GetRenderToTextureImage(mWidth, mHeight, Buffer);
+				mContext->GetRenderFramebufferImage(mRenderFramebuffer, Buffer);
 
 				quint32 TileY = 0, SrcY = 0;
 				if (CurrentTileRow != TotalTileRows - 1)
 					TileY = (TotalTileRows - CurrentTileRow - 1) * mHeight - (mHeight - mRenderImage.height() % mHeight);
-				else
+				else if (TotalTileRows > 1 || TotalTileColumns > 1)
 					SrcY = mHeight - mRenderImage.height() % mHeight;
-				qDebug() << SrcY << TileY;
+
 				quint32 TileStart = ((CurrentTileColumn * mWidth) + (TileY * mRenderImage.width())) * 4;
 
 				for (int y = 0; y < CurrentTileHeight; y++)

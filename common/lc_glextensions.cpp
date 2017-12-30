@@ -116,7 +116,7 @@ PFNGLVALIDATEPROGRAMPROC lcValidateProgram;
 PFNGLVERTEXATTRIBPOINTERPROC lcVertexAttribPointer;
 
 PFNGLTEXIMAGE2DMULTISAMPLEPROC lcTexImage2DMultisample;
-PFNGLBLITFRAMEBUFFERPROC lcBlitFrameBuffer;
+PFNGLBLITFRAMEBUFFERPROC lcBlitFramebuffer;
 
 #endif
 
@@ -339,8 +339,10 @@ void lcInitializeGLExtensions(const QGLContext* Context)
 #ifndef LC_OPENGLES
 	if (VersionMajor > 3 || (VersionMajor == 3 && VersionMinor >= 2))
 	{
+#ifdef LC_LOAD_GLEXTENSIONS
 		lcTexImage2DMultisample = (PFNGLTEXIMAGE2DMULTISAMPLEPROC)Context->getProcAddress("glTexImage2DMultisample");
-		lcBlitFrameBuffer = (PFNGLBLITFRAMEBUFFERPROC)Context->getProcAddress("glBlitFramebuffer");
+		lcBlitFramebuffer = (PFNGLBLITFRAMEBUFFERPROC)Context->getProcAddress("glBlitFramebuffer");
+#endif
 
 		gSupportsTexImage2DMultisample = true;
 	}

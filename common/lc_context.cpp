@@ -723,7 +723,7 @@ void lcContext::GetRenderFramebufferImage(const std::pair<lcFramebuffer, lcFrame
 #ifndef LC_OPENGLES
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, RenderFramebuffer.second.mObject);
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, RenderFramebuffer.first.mObject);
-		glBlitFrameBuffer(0, 0, Width, Height, 0, 0, Width, Height, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+		glBlitFramebuffer(0, 0, Width, Height, 0, 0, Width, Height, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 		BindFramebuffer(RenderFramebuffer.second);
 #endif
 	}

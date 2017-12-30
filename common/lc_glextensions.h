@@ -121,7 +121,7 @@ extern PFNGLVALIDATEPROGRAMPROC lcValidateProgram;
 extern PFNGLVERTEXATTRIBPOINTERPROC lcVertexAttribPointer;
 
 extern PFNGLTEXIMAGE2DMULTISAMPLEPROC lcTexImage2DMultisample;
-extern PFNGLBLITFRAMEBUFFERPROC lcBlitFrameBuffer;
+extern PFNGLBLITFRAMEBUFFERPROC lcBlitFramebuffer;
 
 #define glBindBuffer lcBindBufferARB
 #define glDeleteBuffers lcDeleteBuffersARB
@@ -228,6 +228,6 @@ extern PFNGLBLITFRAMEBUFFERPROC lcBlitFrameBuffer;
 #define glVertexAttribPointer lcVertexAttribPointer
 
 #define glTexImage2DMultisample lcTexImage2DMultisample
-#define glBlitFrameBuffer lcBlitFrameBuffer
+#define glBlitFramebuffer lcBlitFramebuffer
 
 #endif

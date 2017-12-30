@@ -68,22 +68,24 @@ void lcContext::CreateShaderPrograms()
 #define LC_VERTEX_OUTPUT "varying "
 #define LC_PIXEL_INPUT "varying "
 #define LC_PIXEL_OUTPUT
+#define LC_SHADER_PRECISION
 #else
 #define LC_SHADER_VERSION "#version 300 es\n#define texture2D texture\n"
 #define LC_VERTEX_INPUT "in "
 #define LC_VERTEX_OUTPUT "out "
 #define LC_PIXEL_INPUT "in mediump "
 #define LC_PIXEL_OUTPUT "#define gl_FragColor FragColor\nout mediump vec4 gl_FragColor;\n"
+#define LC_SHADER_PRECISION "mediump "
 #endif
 #define LC_PIXEL_FAKE_LIGHTING \
-	"	vec3 Normal = normalize(PixelNormal);\n" \
-	"	vec3 LightDirection = normalize(PixelPosition - LightPosition);" \
-	"	vec3 VertexToEye = normalize(EyePosition - PixelPosition);\n" \
-	"	vec3 LightReflect = normalize(reflect(-LightDirection, Normal));\n" \
-	"	float Specular = abs(dot(VertexToEye, LightReflect));\n" \
+	LC_SHADER_PRECISION "	vec3 Normal = normalize(PixelNormal);\n" \
+	LC_SHADER_PRECISION "	vec3 LightDirection = normalize(PixelPosition - LightPosition);" \
+	LC_SHADER_PRECISION "	vec3 VertexToEye = normalize(EyePosition - PixelPosition);\n" \
+	LC_SHADER_PRECISION "	vec3 LightReflect = normalize(reflect(-LightDirection, Normal));\n" \
+	LC_SHADER_PRECISION "	float Specular = abs(dot(VertexToEye, LightReflect));\n" \
 	"	Specular = min(pow(Specular, 8.0), 1.0) * 0.25;\n" \
-	"	vec3 SpecularColor = vec3(Specular, Specular, Specular);\n" \
-	"	float Diffuse = min(abs(dot(Normal, LightDirection)) * 0.6 + 0.65, 1.0);\n"
+	LC_SHADER_PRECISION "	vec3 SpecularColor = vec3(Specular, Specular, Specular);\n" \
+	LC_SHADER_PRECISION "	float Diffuse = min(abs(dot(Normal, LightDirection)) * 0.6 + 0.65, 1.0);\n"
 
 	const char* VertexShaders[LC_NUM_MATERIALS] =
 	{
@@ -179,7 +181,7 @@ void lcContext::CreateShaderPrograms()
 		"uniform sampler2D Texture;\n"
 		"void main()\n"
 		"{\n"
-		"	vec4 TexelColor = texture2D(Texture, PixelTexCoord);"
+		LC_SHADER_PRECISION "	vec4 TexelColor = texture2D(Texture, PixelTexCoord);"
 		"	gl_FragColor = vec4(MaterialColor.rgb, TexelColor.a * MaterialColor.a);\n"
 		"}\n",
 		// LC_MATERIAL_UNLIT_TEXTURE_DECAL
@@ -190,7 +192,7 @@ void lcContext::CreateShaderPrograms()
 		"uniform sampler2D Texture;\n"
 		"void main()\n"
 		"{\n"
-		"	vec4 TexelColor = texture2D(Texture, PixelTexCoord);"
+		LC_SHADER_PRECISION "	vec4 TexelColor = texture2D(Texture, PixelTexCoord);"
 		"	gl_FragColor = vec4(mix(MaterialColor.xyz, TexelColor.xyz, TexelColor.a), MaterialColor.a);\n"
 		"}\n",
 		// LC_MATERIAL_UNLIT_VERTEX_COLOR
@@ -212,7 +214,7 @@ void lcContext::CreateShaderPrograms()
 		"void main()\n"
 		"{\n"
 		LC_PIXEL_FAKE_LIGHTING
-		"	vec3 DiffuseColor = MaterialColor.rgb * Diffuse;\n"
+		LC_SHADER_PRECISION "	vec3 DiffuseColor = MaterialColor.rgb * Diffuse;\n"
 		"	gl_FragColor = vec4(DiffuseColor + SpecularColor, MaterialColor.a);\n"
 		"}\n",
 		// LC_MATERIAL_FAKELIT_TEXTURE_DECAL
@@ -228,8 +230,8 @@ void lcContext::CreateShaderPrograms()
 		"void main()\n"
 		"{\n"
 		LC_PIXEL_FAKE_LIGHTING
-		"	vec4 TexelColor = texture2D(Texture, PixelTexCoord);"
-		"	vec3 DiffuseColor = mix(MaterialColor.xyz, TexelColor.xyz, TexelColor.a) * Diffuse;\n"
+		LC_SHADER_PRECISION "	vec4 TexelColor = texture2D(Texture, PixelTexCoord);"
+		LC_SHADER_PRECISION "	vec3 DiffuseColor = mix(MaterialColor.xyz, TexelColor.xyz, TexelColor.a) * Diffuse;\n"
 		"	gl_FragColor = vec4(DiffuseColor + SpecularColor, MaterialColor.a);\n"
 		"}\n"
 	};
@@ -389,8 +391,10 @@ void lcContext::SetDefaultState()
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 	mTexture2D = 0;
+#ifndef LC_OPENGLES
 	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
 	mTexture2DMS = 0;
+#endif
 
 	glLineWidth(1.0f);
 	mLineWidth = 1.0f;
@@ -514,8 +518,10 @@ void lcContext::BindTexture2DMS(GLuint Texture)
 	if (mTexture2DMS == Texture)
 		return;
 
+#ifndef LC_OPENGLES
 	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, Texture);
 	mTexture2DMS = Texture;
+#endif
 }
 
 void lcContext::SetColor(float Red, float Green, float Blue, float Alpha)
@@ -588,6 +594,7 @@ lcFramebuffer lcContext::CreateFramebuffer(int Width, int Height, bool Depth, bo
 				glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, Framebuffer.mDepthRenderbuffer);
 			}
 		}
+#ifndef LC_OPENGLES
 		else
 		{
 			BindTexture2DMS(Framebuffer.mColorTexture);
@@ -602,7 +609,8 @@ lcFramebuffer lcContext::CreateFramebuffer(int Width, int Height, bool Depth, bo
 				glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, Framebuffer.mDepthRenderbuffer);
 			}
 		}
-
+#endif
+		
 		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 			DestroyFramebuffer(Framebuffer);
 
@@ -712,10 +720,12 @@ void lcContext::GetRenderFramebufferImage(const std::pair<lcFramebuffer, lcFrame
 
 	if (RenderFramebuffer.second.IsValid())
 	{
+#ifndef LC_OPENGLES
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, RenderFramebuffer.second.mObject);
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, RenderFramebuffer.first.mObject);
 		glBlitFrameBuffer(0, 0, Width, Height, 0, 0, Width, Height, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 		BindFramebuffer(RenderFramebuffer.second);
+#endif
 	}
 	else
 		BindFramebuffer(RenderFramebuffer.first);

@@ -336,6 +336,7 @@ void lcInitializeGLExtensions(const QGLContext* Context)
 		gSupportsShaderObjects = true;
 	}
 
+#ifndef LC_OPENGLES
 	if (VersionMajor > 3 || (VersionMajor == 3 && VersionMinor >= 2))
 	{
 		lcTexImage2DMultisample = (PFNGLTEXIMAGE2DMULTISAMPLEPROC)Context->getProcAddress("glTexImage2DMultisample");
@@ -343,6 +344,7 @@ void lcInitializeGLExtensions(const QGLContext* Context)
 
 		gSupportsTexImage2DMultisample = true;
 	}
+#endif
 
 #ifdef LC_OPENGLES
 	gSupportsVertexBufferObject = true;

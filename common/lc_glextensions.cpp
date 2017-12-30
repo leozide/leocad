@@ -116,7 +116,6 @@ PFNGLVALIDATEPROGRAMPROC lcValidateProgram;
 PFNGLVERTEXATTRIBPOINTERPROC lcVertexAttribPointer;
 
 PFNGLTEXIMAGE2DMULTISAMPLEPROC lcTexImage2DMultisample;
-PFNGLBLITFRAMEBUFFERPROC lcBlitFramebuffer;
 
 #endif
 
@@ -341,7 +340,6 @@ void lcInitializeGLExtensions(const QGLContext* Context)
 	{
 #ifdef LC_LOAD_GLEXTENSIONS
 		lcTexImage2DMultisample = (PFNGLTEXIMAGE2DMULTISAMPLEPROC)Context->getProcAddress("glTexImage2DMultisample");
-		lcBlitFramebuffer = (PFNGLBLITFRAMEBUFFERPROC)Context->getProcAddress("glBlitFramebuffer");
 #endif
 
 		gSupportsTexImage2DMultisample = true;

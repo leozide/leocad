@@ -392,8 +392,11 @@ void lcContext::SetDefaultState()
 	glBindTexture(GL_TEXTURE_2D, 0);
 	mTexture2D = 0;
 #ifndef LC_OPENGLES
-	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
-	mTexture2DMS = 0;
+	if (gSupportsTexImage2DMultisample)
+	{
+		glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
+		mTexture2DMS = 0;
+	}
 #endif
 
 	glLineWidth(1.0f);
@@ -519,8 +522,11 @@ void lcContext::BindTexture2DMS(GLuint Texture)
 		return;
 
 #ifndef LC_OPENGLES
-	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, Texture);
-	mTexture2DMS = Texture;
+	if (gSupportsTexImage2DMultisample)
+	{
+		glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, Texture);
+		mTexture2DMS = Texture;
+	}
 #endif
 }
 
@@ -694,7 +700,7 @@ std::pair<lcFramebuffer, lcFramebuffer> lcContext::CreateRenderFramebuffer(int W
 	if (gSupportsFramebufferObjectARB && QGLFormat::defaultFormat().samples() > 1)
 		return std::make_pair(CreateFramebuffer(Width, Height, true, true), CreateFramebuffer(Width, Height, false, false));
 	else
-		return std::make_pair(CreateFramebuffer(Width, Height, false, true), lcFramebuffer());
+		return std::make_pair(CreateFramebuffer(Width, Height, true, false), lcFramebuffer());
 }
 
 void lcContext::DestroyRenderFramebuffer(std::pair<lcFramebuffer, lcFramebuffer>& RenderFramebuffer)

@@ -24,12 +24,44 @@ public:
 	{
 	}
 
-	virtual QSize sizeHint() const
+	virtual QSize sizeHint() const override
 	{
 		QFontMetrics FontMetrics(font());
 
 		int Width = FontMetrics.width(QLatin1Char('x')) * 10;
 
 		return QLineEdit::sizeHint() - QSize(Width, 0);
+	}
+
+protected:
+	virtual bool event(QEvent* Event) override
+	{
+		if (Event->type() == QEvent::ShortcutOverride)
+		{
+			QKeyEvent* KeyEvent = (QKeyEvent*)Event;
+			int Key = KeyEvent->key();
+
+			if (KeyEvent->modifiers() == Qt::NoModifier && Key >= Qt::Key_A && Key <= Qt::Key_Z)
+				Event->accept();
+
+			switch (Key)
+			{
+			case Qt::Key_Down:
+			case Qt::Key_Up:
+			case Qt::Key_Left:
+			case Qt::Key_Right:
+			case Qt::Key_Home:
+			case Qt::Key_End:
+			case Qt::Key_PageUp:
+			case Qt::Key_PageDown:
+			case Qt::Key_Plus:
+			case Qt::Key_Minus:
+			case Qt::Key_Enter:
+				Event->accept();
+				break;
+			}
+		}
+
+		return QLineEdit::event(Event);
 	}
 };

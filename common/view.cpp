@@ -633,19 +633,16 @@ bool View::BeginRenderToImage(int Width, int Height)
 	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &MaxTexture);
 
 	MaxTexture = qMin(MaxTexture, 2048);
+	MaxTexture /= QGLFormat::defaultFormat().samples();
 
 	int TileWidth = qMin(Width, MaxTexture);
 	int TileHeight = qMin(Height, MaxTexture);
 
 	mWidth = TileWidth;
 	mHeight = TileHeight;
+	mRenderImage = QImage(Width, Height, QImage::Format_ARGB32);
 
-	if (Width > TileWidth || Height > TileHeight)
-		mRenderImage = QImage(Width, Height, QImage::Format_ARGB32);
-	else
-		mRenderImage = QImage(TileWidth, TileHeight, QImage::Format_ARGB32);
-
-	mRenderFramebuffer = mContext->CreateRenderFramebuffer(Width, Height);
+	mRenderFramebuffer = mContext->CreateRenderFramebuffer(TileWidth, TileHeight);
 	mContext->BindFramebuffer(mRenderFramebuffer.first);
 	return mRenderFramebuffer.first.IsValid();
 }

@@ -29,10 +29,10 @@ char* strlwr(char* string);
 #endif
 
 // Version number.
-#define LC_VERSION_MAJOR 17
-#define LC_VERSION_MINOR 07
+#define LC_VERSION_MAJOR 18
+#define LC_VERSION_MINOR 01
 #define LC_VERSION_PATCH 0
-#define LC_VERSION_TEXT "17.07"
+#define LC_VERSION_TEXT "18.01"
 
 // Forward declarations.
 class Project;

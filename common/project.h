@@ -114,9 +114,12 @@ protected:
 	void GetModelParts(lcArray<lcModelPartsEntry>& ModelParts);
 	QImage CreatePartsListImage(lcModel* Model, lcStep Step);
 	void CreateHTMLPieceList(QTextStream& Stream, lcModel* Model, lcStep Step, bool Images);
+	void SetFileName(const QString& FileName);
+	void FileChanged();
 
 	bool mModified;
 	QString mFileName;
+	QFileSystemWatcher mFileWatcher;
 
 	lcArray<lcModel*> mModels;
 	lcModel* mActiveModel;

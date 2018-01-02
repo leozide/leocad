@@ -83,6 +83,8 @@ Project::Project()
 	mActiveModel->CreatePieceInfo(this);
 	mActiveModel->SetSaved();
 	mModels.Add(mActiveModel);
+
+	QObject::connect(&mFileWatcher, &QFileSystemWatcher::fileChanged, [&](const QString& Path) { Q_UNUSED(Path); FileChanged(); });
 }
 
 Project::~Project()
@@ -316,6 +318,31 @@ void Project::ShowModelListDialog()
 	gMainWindow->UpdateTitle();
 }
 
+void Project::SetFileName(const QString& FileName)
+{
+	if (!mFileName.isEmpty())
+		mFileWatcher.removePath(mFileName);
+
+	if (!FileName.isEmpty())
+		mFileWatcher.addPath(FileName);
+
+	mFileName = FileName;
+}
+
+void Project::FileChanged()
+{
+	QString Text = tr("The file '%1' has been modified by another application, do you want to reload it?").arg(mFileName);
+
+	if (QMessageBox::question(gMainWindow, tr("File Changed"), Text, QMessageBox::Yes | QMessageBox::No) != QMessageBox::Yes)
+		return;
+
+	// todo: don't close tabs
+	Load(mFileName);
+	gMainWindow->RemoveAllModelTabs();
+	SetActiveModel(0);
+	lcGetPiecesLibrary()->RemoveTemporaryPieces();
+}
+
 bool Project::Load(const QString& FileName)
 {
 	QFile File(FileName);
@@ -327,7 +354,7 @@ bool Project::Load(const QString& FileName)
 	}
 
 	mModels.DeleteAll();
-	mFileName = FileName;
+	SetFileName(FileName);
 	QFileInfo FileInfo(FileName);
 	QString Extension = FileInfo.suffix().toLower();
 
@@ -414,6 +441,8 @@ bool Project::Load(const QString& FileName)
 
 bool Project::Save(const QString& FileName)
 {
+	SetFileName(QString());
+
 	QFile File(FileName);
 
 	if (!File.open(QIODevice::WriteOnly))
@@ -424,8 +453,9 @@ bool Project::Save(const QString& FileName)
 
 	QTextStream Stream(&File);
 	bool Success = Save(Stream);
+	File.close();
 
-	mFileName = FileName;
+	SetFileName(FileName);
 	mModified = false;
 
 	return Success;

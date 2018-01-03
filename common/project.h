@@ -58,6 +58,8 @@ public:
 		return mModels;
 	}
 
+	lcModel* GetModel(const QString& Name) const;
+
 	lcModel* GetActiveModel() const
 	{
 		return mActiveModel;
@@ -115,7 +117,6 @@ protected:
 	QImage CreatePartsListImage(lcModel* Model, lcStep Step);
 	void CreateHTMLPieceList(QTextStream& Stream, lcModel* Model, lcStep Step, bool Images);
 	void SetFileName(const QString& FileName);
-	void FileChanged();
 
 	bool mModified;
 	QString mFileName;

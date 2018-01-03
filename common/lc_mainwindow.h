@@ -229,6 +229,8 @@ public:
 		return mShadingMenu;
 	}
 
+	QByteArray SaveTabLayout();
+	void RestoreTabLayout(const QByteArray& TabLayout);
 	void RemoveAllModelTabs();
 	void SetCurrentModelTab(lcModel* Model);
 	void ResetCameras();
@@ -299,6 +301,9 @@ public:
 	int mColorIndex;
 	lcSearchOptions mSearchOptions;
 	QAction* mActions[LC_NUM_COMMANDS];
+
+public slots:
+	void ProjectFileChanged(const QString& Path);
 
 protected slots:
 	void ModelTabClosed(int Index);

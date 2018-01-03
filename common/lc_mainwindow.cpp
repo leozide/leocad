@@ -810,6 +810,41 @@ void lcMainWindow::ColorChanged(int ColorIndex)
 	SetColorIndex(ColorIndex);
 }
 
+void lcMainWindow::ProjectFileChanged(const QString& Path)
+{
+	static bool Ignore;
+
+	if (Ignore)
+		return;
+
+	QString Text = tr("The file '%1' has been modified by another application, do you want to reload it?").arg(Path);
+
+	Ignore = true;
+
+	if (QMessageBox::question(this, tr("File Changed"), Text, QMessageBox::Yes | QMessageBox::No) != QMessageBox::Yes)
+	{
+		Ignore = false;
+		return;
+	}
+
+	Ignore = false;
+
+	Project* NewProject = new Project;
+
+	if (NewProject->Load(Path))
+	{
+		QByteArray TabLayout = SaveTabLayout();
+		gApplication->SetProject(NewProject);
+		RestoreTabLayout(TabLayout);
+		UpdateAllViews();
+	}
+	else
+	{
+		QMessageBox::information(this, tr("LeoCAD"), tr("Error loading '%1'.").arg(Path));
+		delete NewProject;
+	}
+}
+
 void lcMainWindow::Print(QPrinter* Printer)
 {
 #ifndef QT_NO_PRINTER
@@ -1059,6 +1094,177 @@ void lcMainWindow::SetSelectionMode(lcSelectionMode SelectionMode)
 {
 	mSelectionMode = SelectionMode;
 	UpdateSelectionMode();
+}
+
+QByteArray lcMainWindow::SaveTabLayout()
+{
+	QByteArray TabLayout;
+	QDataStream DataStream(&TabLayout, QIODevice::WriteOnly);
+
+	// todo: save version number and focus view
+
+	qint32 NumTabs = mModelTabWidget->count();
+	DataStream << NumTabs;
+	DataStream << ((lcModelTabWidget*)mModelTabWidget->currentWidget())->GetModel()->GetProperties().mName;
+
+	for (int TabIdx = 0; TabIdx < NumTabs; TabIdx++)
+	{
+		lcModelTabWidget* TabWidget = (lcModelTabWidget*)mModelTabWidget->widget(TabIdx);
+
+		DataStream << TabWidget->GetModel()->GetProperties().mName;
+
+		std::function<void (QWidget*)> SaveWidget = [&DataStream, &SaveWidget](QWidget* Widget)
+		{
+			if (Widget->metaObject() == &lcQGLWidget::staticMetaObject)
+			{
+				DataStream << (qint32)0;
+
+				lcCamera* Camera = ((View*)((lcQGLWidget*)Widget)->widget)->mCamera;
+
+				if (Camera->IsSimple())
+				{
+					DataStream << (qint32)0;
+					DataStream << Camera->m_fovy;
+					DataStream << Camera->m_zNear;
+					DataStream << Camera->m_zFar;
+					DataStream << Camera->mPosition;
+					DataStream << Camera->mTargetPosition;
+					DataStream << Camera->mUpVector;
+				}
+				else
+				{
+					DataStream << (qint32)1;
+					DataStream << QByteArray::fromRawData(Camera->m_strName, sizeof(Camera->m_strName));
+				}
+			}
+			else
+			{
+				QSplitter* Splitter = (QSplitter*)Widget;
+
+				DataStream << (qint32)(Splitter->orientation() == Qt::Horizontal ? 1 : 2);
+				DataStream << Splitter->sizes();
+
+				SaveWidget(Splitter->widget(0));
+				SaveWidget(Splitter->widget(1));
+			}
+		};
+
+		QLayout* TabLayout = TabWidget->layout();
+		SaveWidget(TabLayout->itemAt(0)->widget());
+	}
+
+	return TabLayout;
+}
+
+void lcMainWindow::RestoreTabLayout(const QByteArray& TabLayout)
+{
+	QDataStream DataStream(TabLayout);
+
+	qint32 NumTabs;
+	DataStream >> NumTabs;
+	QString CurrentTabName;
+	DataStream >> CurrentTabName;
+
+	RemoveAllModelTabs();
+
+	for (int TabIdx = 0; TabIdx < NumTabs; TabIdx++)
+	{
+		QString ModelName;
+		DataStream >> ModelName;
+
+		lcModel* Model = lcGetActiveProject()->GetModel(ModelName);
+		lcModelTabWidget* TabWidget = nullptr;
+
+		if (Model)
+		{
+			SetCurrentModelTab(Model);
+			TabWidget = (lcModelTabWidget*)mModelTabWidget->widget(mModelTabWidget->count() - 1);
+		}
+
+		std::function<void(QWidget*)> LoadWidget = [&DataStream, &LoadWidget, Model, this](QWidget* ParentWidget)
+		{
+			qint32 WidgetType;
+			DataStream >> WidgetType;
+
+			if (WidgetType == 0)
+			{
+				qint32 CameraType;
+				DataStream >> CameraType;
+
+				View* CurrentView = nullptr;
+				
+				if (ParentWidget)
+					CurrentView = (View*)((lcQGLWidget*)ParentWidget)->widget;
+
+				if (CameraType == 0)
+				{
+					float FoV, ZNear, ZFar;
+					lcVector3 Position, TargetPosition, UpVector;
+
+					DataStream >> FoV;
+					DataStream >> ZNear;
+					DataStream >> ZFar;
+					DataStream >> Position;
+					DataStream >> TargetPosition;
+					DataStream >> UpVector;
+
+					if (CurrentView)
+					{
+						lcCamera* Camera = CurrentView->mCamera;
+						Camera->m_fovy = FoV;
+						Camera->m_zNear = ZNear;
+						Camera->m_zFar = ZFar;
+						Camera->mPosition = Position;
+						Camera->mTargetPosition = TargetPosition;
+						Camera->mUpVector = UpVector;
+						Camera->UpdatePosition(1);
+					}
+				}
+				else
+				{
+					QByteArray CameraName;
+					DataStream >> CameraName;
+
+					if (CurrentView)
+						CurrentView->SetCamera(CameraName);
+				}
+			}
+			else
+			{
+				QList<int> Sizes;
+				DataStream >> Sizes;
+
+				if (ParentWidget)
+				{
+					ParentWidget->setFocus();
+
+					if (WidgetType == 1)
+						SplitVertical();
+					else
+						SplitHorizontal();
+
+					QSplitter* Splitter = (QSplitter*)ParentWidget->parentWidget();
+					Splitter->setSizes(Sizes);
+
+					LoadWidget(Splitter->widget(0));
+					LoadWidget(Splitter->widget(1));
+				}
+				else
+				{
+					LoadWidget(nullptr);
+					LoadWidget(nullptr);
+				}
+			}
+		};
+
+		QLayout* TabLayout = TabWidget->layout();
+		LoadWidget(TabLayout->itemAt(0)->widget());
+	}
+
+	if (!mModelTabWidget->count())
+		lcGetActiveProject()->SetActiveModel(0);
+	else
+		lcGetActiveProject()->SetActiveModel(CurrentTabName);
 }
 
 void lcMainWindow::RemoveAllModelTabs()

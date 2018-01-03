@@ -84,14 +84,21 @@ Project::Project()
 	mActiveModel->SetSaved();
 	mModels.Add(mActiveModel);
 
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
-	QObject::connect(&mFileWatcher, &QFileSystemWatcher::fileChanged, [&](const QString& Path) { Q_UNUSED(Path); FileChanged(); });
-#endif
+	QObject::connect(&mFileWatcher, SIGNAL(fileChanged(const QString&)), gMainWindow, SLOT(ProjectFileChanged(const QString&)));
 }
 
 Project::~Project()
 {
 	mModels.DeleteAll();
+}
+
+lcModel* Project::GetModel(const QString& Name) const
+{
+	for (lcModel* Model : mModels)
+		if (Model->GetProperties().mName == Name)
+			return Model;
+
+	return nullptr;
 }
 
 bool Project::IsModified() const
@@ -159,7 +166,6 @@ void Project::SetActiveModel(const QString& ModelName)
 			return;
 		}
 	}
-
 }
 
 QString Project::GetNewModelName(QWidget* ParentWidget, const QString& DialogTitle, const QString& CurrentName, const QStringList& ExistingModels) const
@@ -329,20 +335,6 @@ void Project::SetFileName(const QString& FileName)
 		mFileWatcher.addPath(FileName);
 
 	mFileName = FileName;
-}
-
-void Project::FileChanged()
-{
-	QString Text = tr("The file '%1' has been modified by another application, do you want to reload it?").arg(mFileName);
-
-	if (QMessageBox::question(gMainWindow, tr("File Changed"), Text, QMessageBox::Yes | QMessageBox::No) != QMessageBox::Yes)
-		return;
-
-	// todo: don't close tabs
-	Load(mFileName);
-	gMainWindow->RemoveAllModelTabs();
-	SetActiveModel(0);
-	lcGetPiecesLibrary()->RemoveTemporaryPieces();
 }
 
 bool Project::Load(const QString& FileName)

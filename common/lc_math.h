@@ -393,6 +393,30 @@ inline QDebug operator<<(QDebug Debug, const lcMatrix44& m)
 
 #endif
 
+inline QDataStream& operator<<(QDataStream& Stream, const lcVector3& v)
+{
+	Stream << v.x << v.y << v.z;
+	return Stream;
+}
+
+inline QDataStream& operator>>(QDataStream& Stream, lcVector3& v)
+{
+	Stream >> v.x >> v.y >> v.z;
+	return Stream;
+}
+
+inline QDataStream& operator<<(QDataStream& Stream, const lcVector4& v)
+{
+	Stream << v.x << v.y << v.z << v.w;
+	return Stream;
+}
+
+inline QDataStream& operator >> (QDataStream& Stream, lcVector4& v)
+{
+	Stream >> v.x >> v.y >> v.z >> v.w;
+	return Stream;
+}
+
 inline void lcVector3::Normalize()
 {
 	float InvLength = 1.0f / Length();

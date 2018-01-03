@@ -22,6 +22,7 @@
 #include "pieceinf.h"
 #include "lc_library.h"
 #include "lc_colors.h"
+#include <functional>
 
 lcMainWindow* gMainWindow;
 

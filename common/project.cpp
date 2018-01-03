@@ -84,7 +84,9 @@ Project::Project()
 	mActiveModel->SetSaved();
 	mModels.Add(mActiveModel);
 
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
 	QObject::connect(&mFileWatcher, &QFileSystemWatcher::fileChanged, [&](const QString& Path) { Q_UNUSED(Path); FileChanged(); });
+#endif
 }
 
 Project::~Project()

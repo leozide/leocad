@@ -732,15 +732,15 @@ void View::OnDraw()
 
 				quint32 TileY = 0, SrcY = 0;
 				if (CurrentTileRow != TotalTileRows - 1)
-					TileY = (TotalTileRows - CurrentTileRow - 1) * mHeight - (mHeight - mRenderImage.height() % mHeight);
-				else if (TotalTileRows > 1 || TotalTileColumns > 1)
-					SrcY = mHeight - mRenderImage.height() % mHeight;
+					TileY = (TotalTileRows - CurrentTileRow - 1) * mHeight - ((mHeight - mRenderImage.height() % mHeight) % mHeight);
+				else if (TotalTileRows > 1)
+					SrcY = (mHeight - mRenderImage.height() % mHeight) % mHeight;
 
 				quint32 TileStart = ((CurrentTileColumn * mWidth) + (TileY * mRenderImage.width())) * 4;
 
 				for (int y = 0; y < CurrentTileHeight; y++)
 				{
-					quint8* src = Buffer + (SrcY + y) * CurrentTileWidth * 4;
+					quint8* src = Buffer + (SrcY + y) * mWidth * 4;
 					quint8* dst = ImageBuffer + TileStart + y * mRenderImage.width() * 4;
 
 					memcpy(dst, src, CurrentTileWidth * 4);

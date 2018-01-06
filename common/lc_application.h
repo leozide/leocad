@@ -45,6 +45,7 @@ public:
 	bool Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& ShowWindow);
 	void Shutdown();
 	void ShowPreferencesDialog();
+	void SaveTabLayout() const;
 
 	bool LoadPartsLibrary(const QList<QPair<QString, bool>>& LibraryPaths, bool OnlyUsePaths, bool ShowProgress);
 
@@ -55,6 +56,9 @@ public:
 	lcPiecesLibrary* mLibrary;
 	lcPreferences mPreferences;
 	QByteArray mClipboard;
+
+protected:
+	QString GetTabLayoutKey() const;
 };
 
 extern lcApplication* gApplication;

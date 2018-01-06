@@ -229,7 +229,7 @@ public:
 		return mShadingMenu;
 	}
 
-	QByteArray SaveTabLayout();
+	QByteArray GetTabLayout();
 	void RestoreTabLayout(const QByteArray& TabLayout);
 	void RemoveAllModelTabs();
 	void SetCurrentModelTab(lcModel* Model);

@@ -68,8 +68,37 @@ lcApplication::~lcApplication()
 	gApplication = nullptr;
 }
 
+void lcApplication::SaveTabLayout() const
+{
+	if (!mProject || mProject->GetFileName().isEmpty())
+		return;
+
+	QSettings Settings;
+	QByteArray TabLayout = gMainWindow->GetTabLayout();
+
+	Settings.setValue(GetTabLayoutKey(), TabLayout);
+}
+
+QString lcApplication::GetTabLayoutKey() const
+{
+	if (mProject)
+	{
+		QString FileName = mProject->GetFileName();
+		if (!FileName.isEmpty())
+		{
+			FileName.replace('\\', '?');
+			FileName.replace('/', '?');
+			return QString("TabLayouts/%1").arg(FileName);
+		}
+	}
+
+	return QString();
+}
+
 void lcApplication::SetProject(Project* Project)
 {
+	SaveTabLayout();
+
 	delete mProject;
 	mProject = Project;
 
@@ -77,6 +106,14 @@ void lcApplication::SetProject(Project* Project)
 
 	Project->SetActiveModel(0);
 	lcGetPiecesLibrary()->RemoveTemporaryPieces();
+
+	if (mProject && !mProject->GetFileName().isEmpty())
+	{
+		QSettings Settings;
+		QByteArray TabLayout = Settings.value(GetTabLayoutKey()).toByteArray();
+
+		gMainWindow->RestoreTabLayout(TabLayout);
+	}
 }
 
 void lcApplication::SetClipboard(const QByteArray& Clipboard)

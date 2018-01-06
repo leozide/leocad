@@ -656,6 +656,9 @@ void View::EndRenderToImage()
 
 void View::OnDraw()
 {
+	if (!mModel)
+		return;
+
 	bool DrawInterface = mWidget != nullptr;
 
 	mModel->GetScene(mScene, mCamera, DrawInterface, mHighlight);
@@ -2695,6 +2698,9 @@ void View::OnForwardButtonUp()
 
 void View::OnMouseMove()
 {
+	if (!mModel)
+		return;
+
 	if (mTrackButton == LC_TRACKBUTTON_NONE)
 	{
 		UpdateTrackTool();

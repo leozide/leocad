@@ -25,6 +25,7 @@
 #include <functional>
 
 lcMainWindow* gMainWindow;
+#define LC_TAB_LAYOUT_VERSION 0x0001
 
 void lcModelTabWidget::ResetLayout()
 {
@@ -48,6 +49,8 @@ void lcModelTabWidget::Clear()
 {
 	ResetLayout();
 	mModel = nullptr;
+	for (View* View : mViews)
+		View->mModel = nullptr;
 	mViews.RemoveAll();
 	mActiveView = nullptr;
 	lcQGLWidget* Widget = (lcQGLWidget*)layout()->itemAt(0)->widget();
@@ -731,6 +734,8 @@ void lcMainWindow::closeEvent(QCloseEvent* Event)
 		Settings.setValue("State", saveState());
 		mPartSelectionWidget->SaveState(Settings);
 		Settings.endGroup();
+
+		gApplication->SaveTabLayout();
 	}
 	else
 		Event->ignore();
@@ -839,7 +844,7 @@ void lcMainWindow::ProjectFileChanged(const QString& Path)
 
 		if (NewProject->Load(Path))
 		{
-			QByteArray TabLayout = SaveTabLayout();
+			QByteArray TabLayout = GetTabLayout();
 			gApplication->SetProject(NewProject);
 			RestoreTabLayout(TabLayout);
 			UpdateAllViews();
@@ -1110,13 +1115,12 @@ void lcMainWindow::SetSelectionMode(lcSelectionMode SelectionMode)
 	UpdateSelectionMode();
 }
 
-QByteArray lcMainWindow::SaveTabLayout()
+QByteArray lcMainWindow::GetTabLayout()
 {
 	QByteArray TabLayout;
 	QDataStream DataStream(&TabLayout, QIODevice::WriteOnly);
 
-	// todo: save version number and focus view
-
+	DataStream << (quint32)LC_TAB_LAYOUT_VERSION;
 	qint32 NumTabs = mModelTabWidget->count();
 	DataStream << NumTabs;
 	DataStream << ((lcModelTabWidget*)mModelTabWidget->currentWidget())->GetModel()->GetProperties().mName;
@@ -1127,13 +1131,16 @@ QByteArray lcMainWindow::SaveTabLayout()
 
 		DataStream << TabWidget->GetModel()->GetProperties().mName;
 
-		std::function<void (QWidget*)> SaveWidget = [&DataStream, &SaveWidget](QWidget* Widget)
+		std::function<void (QWidget*)> SaveWidget = [&DataStream, &SaveWidget, &TabWidget](QWidget* Widget)
 		{
 			if (Widget->metaObject() == &lcQGLWidget::staticMetaObject)
 			{
-				DataStream << (qint32)0;
+				View* CurrentView = (View*)((lcQGLWidget*)Widget)->widget;
 
-				lcCamera* Camera = ((View*)((lcQGLWidget*)Widget)->widget)->mCamera;
+				DataStream << (qint32)0;
+				DataStream << (qint32)(TabWidget->GetActiveView() == CurrentView ? 1 : 0);
+
+				lcCamera* Camera = CurrentView->mCamera;
 
 				if (Camera->IsSimple())
 				{
@@ -1172,7 +1179,16 @@ QByteArray lcMainWindow::SaveTabLayout()
 
 void lcMainWindow::RestoreTabLayout(const QByteArray& TabLayout)
 {
+	if (TabLayout.isEmpty())
+		return;
+
 	QDataStream DataStream(TabLayout);
+
+	quint32 Version;
+	DataStream >> Version;
+
+	if (Version != LC_TAB_LAYOUT_VERSION)
+		return;
 
 	qint32 NumTabs;
 	DataStream >> NumTabs;
@@ -1195,13 +1211,21 @@ void lcMainWindow::RestoreTabLayout(const QByteArray& TabLayout)
 			TabWidget = (lcModelTabWidget*)mModelTabWidget->widget(mModelTabWidget->count() - 1);
 		}
 
-		std::function<void(QWidget*)> LoadWidget = [&DataStream, &LoadWidget, Model, this](QWidget* ParentWidget)
+		QWidget* ActiveWidget;
+
+		std::function<void(QWidget*)> LoadWidget = [&DataStream, &LoadWidget, Model, &ActiveWidget, this](QWidget* ParentWidget)
 		{
 			qint32 WidgetType;
 			DataStream >> WidgetType;
 
 			if (WidgetType == 0)
 			{
+				qint32 IsActive;
+				DataStream >> IsActive;
+
+				if (IsActive)
+					ActiveWidget = ParentWidget;
+
 				qint32 CameraType;
 				DataStream >> CameraType;
 
@@ -1272,6 +1296,12 @@ void lcMainWindow::RestoreTabLayout(const QByteArray& TabLayout)
 		};
 
 		LoadWidget(TabWidget ? TabWidget->layout()->itemAt(0)->widget() : nullptr);
+
+		if (ActiveWidget)
+		{
+			View* ActiveView = (View*)((lcQGLWidget*)ActiveWidget)->widget;
+			TabWidget->SetActiveView(ActiveView);
+		}
 	}
 
 	if (!mModelTabWidget->count())

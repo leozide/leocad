@@ -818,7 +818,7 @@ void lcMainWindow::ProjectFileChanged(const QString& Path)
 	if (Ignore)
 		return;
 
-	QString Text = tr("The file '%1' has been modified by another application, do you want to reload it?").arg(Path);
+	QString Text = tr("The file '%1' has been modified by another application, do you want to reload it?").arg(QDir::toNativeSeparators(Path));
 
 	Ignore = true;
 
@@ -830,19 +830,32 @@ void lcMainWindow::ProjectFileChanged(const QString& Path)
 
 	Ignore = false;
 
-	Project* NewProject = new Project;
+	QFileInfo FileInfo(Path);
+	Project* CurrentProject = lcGetActiveProject();
 
-	if (NewProject->Load(Path))
+	if (FileInfo == QFileInfo(CurrentProject->GetFileName()))
 	{
-		QByteArray TabLayout = SaveTabLayout();
-		gApplication->SetProject(NewProject);
-		RestoreTabLayout(TabLayout);
-		UpdateAllViews();
+		Project* NewProject = new Project;
+
+		if (NewProject->Load(Path))
+		{
+			QByteArray TabLayout = SaveTabLayout();
+			gApplication->SetProject(NewProject);
+			RestoreTabLayout(TabLayout);
+			UpdateAllViews();
+		}
+		else
+		{
+			QMessageBox::information(this, tr("LeoCAD"), tr("Error loading '%1'.").arg(Path));
+			delete NewProject;
+		}
 	}
 	else
 	{
-		QMessageBox::information(this, tr("LeoCAD"), tr("Error loading '%1'.").arg(Path));
-		delete NewProject;
+		PieceInfo* Info = lcGetPiecesLibrary()->FindPiece(FileInfo.fileName().toLatin1(), CurrentProject, false, true);
+
+		if (Info)
+			Info->GetProject()->Load(Path);
 	}
 }
 
@@ -1258,8 +1271,7 @@ void lcMainWindow::RestoreTabLayout(const QByteArray& TabLayout)
 			}
 		};
 
-		QLayout* TabLayout = TabWidget->layout();
-		LoadWidget(TabLayout->itemAt(0)->widget());
+		LoadWidget(TabWidget ? TabWidget->layout()->itemAt(0)->widget() : nullptr);
 	}
 
 	if (!mModelTabWidget->count())

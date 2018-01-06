@@ -61,6 +61,11 @@ public:
 		return mModel;
 	}
 
+	Project* GetProject() const
+	{
+		return mProject;
+	}
+
 	void SetMesh(lcMesh* Mesh);
 
 	int AddRef()

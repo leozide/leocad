@@ -306,6 +306,9 @@ public slots:
 	void ProjectFileChanged(const QString& Path);
 
 protected slots:
+	void ModelTabContextMenuRequested(const QPoint& Point);
+	void ModelTabCloseOtherTabs();
+	void ModelTabResetViews();
 	void ModelTabClosed(int Index);
 	void ModelTabChanged(int Index);
 	void ClipboardChanged();
@@ -355,6 +358,7 @@ protected:
 	bool mRelativeTransform;
 	PieceInfo* mCurrentPieceInfo;
 	lcSelectionMode mSelectionMode;
+	int mModelTabWidgetContextMenuIndex;
 
 	QAction* mActionFileRecentSeparator;
 
@@ -389,4 +393,3 @@ protected:
 };
 
 extern class lcMainWindow* gMainWindow;
-

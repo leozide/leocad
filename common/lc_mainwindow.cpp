@@ -123,11 +123,15 @@ void lcMainWindow::CreateWidgets()
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
     mModelTabWidget->tabBar()->setMovable(true);
 	mModelTabWidget->tabBar()->setTabsClosable(true);
-    connect(mModelTabWidget->tabBar(), SIGNAL(tabCloseRequested(int)), this, SLOT(ModelTabClosed(int)));
+	mModelTabWidget->tabBar()->setContextMenuPolicy(Qt::CustomContextMenu);
+	connect(mModelTabWidget->tabBar(), SIGNAL(tabCloseRequested(int)), this, SLOT(ModelTabClosed(int)));
+	connect(mModelTabWidget->tabBar(), SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(ModelTabContextMenuRequested(const QPoint&)));
 #else
     mModelTabWidget->setMovable(true);
     mModelTabWidget->setTabsClosable(true);
-    connect(mModelTabWidget, SIGNAL(tabCloseRequested(int)), this, SLOT(ModelTabClosed(int)));
+	mModelTabWidget->setContextMenuPolicy(Qt::CustomContextMenu);
+	connect(mModelTabWidget, SIGNAL(tabCloseRequested(int)), this, SLOT(ModelTabClosed(int)));
+	connect(mModelTabWidget, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(ModelTabContextMenuRequested(const QPoint&)));
 #endif
 	setCentralWidget(mModelTabWidget);
 	connect(mModelTabWidget, SIGNAL(currentChanged(int)), this, SLOT(ModelTabChanged(int)));
@@ -769,6 +773,37 @@ QMenu* lcMainWindow::createPopupMenu()
 	Menu->addAction(mTimeToolBar->toggleViewAction());
 
 	return Menu;
+}
+
+void lcMainWindow::ModelTabContextMenuRequested(const QPoint& Point)
+{
+	QMenu* Menu = new QMenu;
+
+	mModelTabWidgetContextMenuIndex = mModelTabWidget->tabBar()->tabAt(Point);
+
+	if (mModelTabWidget->count() > 1)
+		Menu->addAction(tr("Close Other Tabs"), this, SLOT(ModelTabCloseOtherTabs()));
+	if (mModelTabWidgetContextMenuIndex == mModelTabWidget->currentIndex())
+		Menu->addAction(tr("Reset Views"), this, SLOT(ModelTabResetViews()));
+
+	Menu->exec(QCursor::pos());
+}
+
+void lcMainWindow::ModelTabCloseOtherTabs()
+{
+	if (mModelTabWidgetContextMenuIndex == -1)
+		return;
+
+	while (mModelTabWidget->count() - 1 > mModelTabWidgetContextMenuIndex)
+		delete mModelTabWidget->widget(mModelTabWidgetContextMenuIndex + 1);
+
+	while (mModelTabWidget->count() > 1)
+		delete mModelTabWidget->widget(0);
+}
+
+void lcMainWindow::ModelTabResetViews()
+{
+	ResetViews();
 }
 
 void lcMainWindow::ModelTabClosed(int Index)

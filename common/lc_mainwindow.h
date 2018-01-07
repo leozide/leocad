@@ -30,6 +30,19 @@ struct lcSearchOptions
 	char Name[256];
 };
 
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+typedef QTabWidget lcTabWidget;
+#else
+class lcTabWidget : public QTabWidget
+{
+public:
+	QTabBar* tabBar()
+	{
+		return QTabWidget::tabBar();
+	}
+};
+#endif
+
 class lcModelTabWidget : public QWidget
 {
 	Q_OBJECT
@@ -362,7 +375,7 @@ protected:
 
 	QAction* mActionFileRecentSeparator;
 
-	QTabWidget* mModelTabWidget;
+	lcTabWidget* mModelTabWidget;
 	QToolBar* mStandardToolBar;
 	QToolBar* mToolsToolBar;
 	QToolBar* mTimeToolBar;

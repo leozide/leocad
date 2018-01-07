@@ -119,9 +119,9 @@ void lcMainWindow::CreateWidgets()
 		QGLFormat::setDefaultFormat(format);
 	}
 
-	mModelTabWidget = new QTabWidget();
+	mModelTabWidget = new lcTabWidget();
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
-    mModelTabWidget->tabBar()->setMovable(true);
+	mModelTabWidget->tabBar()->setMovable(true);
 	mModelTabWidget->tabBar()->setTabsClosable(true);
 	mModelTabWidget->tabBar()->setContextMenuPolicy(Qt::CustomContextMenu);
 	connect(mModelTabWidget->tabBar(), SIGNAL(tabCloseRequested(int)), this, SLOT(ModelTabClosed(int)));

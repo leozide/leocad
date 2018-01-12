@@ -19,7 +19,7 @@ View::View(lcModel* Model)
 	mHighlight = false;
 	memset(mGridSettings, 0, sizeof(mGridSettings));
 
-	mDragState = LC_DRAGSTATE_NONE;
+	mDragState = lcDragState::NONE;
 	mTrackButton = LC_TRACKBUTTON_NONE;
 	mTrackTool = LC_TRACKTOOL_NONE;
 	mTrackToolFromOverlay = false;
@@ -1789,18 +1789,32 @@ float View::GetOverlayScale() const
 	return Dist.Length() * 5.0f;
 }
 
-void View::BeginPieceDrag()
+void View::BeginDrag(lcDragState DragState)
 {
-	mDragState = LC_DRAGSTATE_PIECE;
+	mDragState = DragState;
 	UpdateTrackTool();
 }
 
-void View::EndPieceDrag(bool Accept)
+void View::EndDrag(bool Accept)
 {
 	if (Accept)
-		mModel->InsertPieceToolClicked(GetPieceInsertPosition(false, gMainWindow->GetCurrentPieceInfo()));
+	{
+		switch (mDragState)
+		{
+		case lcDragState::NONE:
+			break;
 
-	mDragState = LC_DRAGSTATE_NONE;
+		case lcDragState::PIECE:
+			mModel->InsertPieceToolClicked(GetPieceInsertPosition(false, gMainWindow->GetCurrentPieceInfo()));
+			break;
+
+		case lcDragState::COLOR:
+			mModel->PaintToolClicked(FindObjectUnderPointer(true, false).Object);
+			break;
+		}
+	}
+
+	mDragState = lcDragState::NONE;
 	UpdateTrackTool();
 }
 
@@ -2254,12 +2268,16 @@ void View::UpdateTrackTool()
 
 	switch (mDragState)
 	{
-	case LC_DRAGSTATE_NONE:
+	case lcDragState::NONE:
 		break;
 
-	case LC_DRAGSTATE_PIECE:
+	case lcDragState::PIECE:
 		NewTrackTool = LC_TRACKTOOL_INSERT;
 		Redraw = true;
+		break;
+
+	case lcDragState::COLOR:
+		NewTrackTool = LC_TRACKTOOL_PAINT;
 		break;
 	}
 

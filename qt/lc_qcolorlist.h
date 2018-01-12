@@ -20,11 +20,12 @@ signals:
 	void colorSelected(int colorIndex);
 
 protected:
-	bool event(QEvent *event);
-	void paintEvent(QPaintEvent *event);
-	void resizeEvent(QResizeEvent *event);
-	void mousePressEvent(QMouseEvent *event);
-	void keyPressEvent(QKeyEvent *event);
+	virtual bool event(QEvent* Event) override;
+	virtual void paintEvent(QPaintEvent* PaintEvent) override;
+	virtual void resizeEvent(QResizeEvent* ResizeEvent) override;
+	virtual void mousePressEvent(QMouseEvent* MouseEvent) override;
+	virtual void mouseMoveEvent(QMouseEvent* MouseEvent) override;
+	virtual void keyPressEvent(QKeyEvent* KeyEvent) override;
 
 	void SelectCell(int CellIdx);
 
@@ -40,5 +41,6 @@ protected:
 	int mPreferredHeight;
 
 	int mCurCell;
+	QPoint mDragStartPosition;
 };
 

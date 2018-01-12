@@ -130,11 +130,11 @@ bool lcQColorList::event(QEvent *event)
 	return QWidget::event(event);
 }
 
-void lcQColorList::mousePressEvent(QMouseEvent *event)
+void lcQColorList::mousePressEvent(QMouseEvent* MouseEvent)
 {
 	for (int CellIdx = 0; CellIdx < mNumCells; CellIdx++)
 	{
-		if (!mCellRects[CellIdx].contains(event->pos()))
+		if (!mCellRects[CellIdx].contains(MouseEvent->pos()))
 			continue;
 
 		SelectCell(CellIdx);
@@ -142,6 +142,25 @@ void lcQColorList::mousePressEvent(QMouseEvent *event)
 
 		break;
 	}
+
+	mDragStartPosition = MouseEvent->pos();
+}
+
+void lcQColorList::mouseMoveEvent(QMouseEvent* MouseEvent)
+{
+	if (!(MouseEvent->buttons() & Qt::LeftButton))
+		return;
+
+	if ((MouseEvent->pos() - mDragStartPosition).manhattanLength() < QApplication::startDragDistance())
+		return;
+
+	QMimeData* MimeData = new QMimeData;
+	MimeData->setData("application/vnd.leocad-color", QString::number(mCellColors[mCurCell]).toLatin1());
+
+	QDrag* Drag = new QDrag(this);
+	Drag->setMimeData(MimeData);
+
+	Drag->exec(Qt::CopyAction);
 }
 
 void lcQColorList::keyPressEvent(QKeyEvent *event)

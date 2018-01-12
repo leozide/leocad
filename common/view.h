@@ -45,11 +45,11 @@ enum lcTrackTool
 	LC_TRACKTOOL_ZOOM_REGION
 };
 
-enum lcDragState
+enum class lcDragState
 {
-	LC_DRAGSTATE_NONE,
-	LC_DRAGSTATE_PIECE
-//	LC_DRAGSTATE_COLOR
+	NONE,
+	PIECE,
+	COLOR
 };
 
 class View : public lcGLWidget
@@ -82,8 +82,8 @@ public:
 	void OnMouseWheel(float Direction);
 
 	void CancelTrackingOrClearSelection();
-	void BeginPieceDrag();
-	void EndPieceDrag(bool Accept);
+	void BeginDrag(lcDragState DragState);
+	void EndDrag(bool Accept);
 
 	void SetProjection(bool Ortho);
 	void LookAt();

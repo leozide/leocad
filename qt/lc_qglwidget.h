@@ -13,7 +13,7 @@ public:
 
 	lcGLWidget *widget;
 	QSize preferredSize;
-	bool isView;
+	bool mIsView;
 
 	float deviceScale()
 	{

@@ -117,8 +117,8 @@ lcQGLWidget::lcQGLWidget(QWidget *parent, lcGLWidget *owner, bool view)
 	preferredSize = QSize(0, 0);
 	setMouseTracking(true);
 
-	isView = view;
-	if (isView)
+	mIsView = view;
+	if (mIsView)
 	{
 		setFocusPolicy(Qt::StrongFocus);
 		setAcceptDrops(true);
@@ -174,7 +174,7 @@ void lcQGLWidget::paintGL()
 
 void lcQGLWidget::keyPressEvent(QKeyEvent *event)
 {
-	if (isView && (event->key() == Qt::Key_Control || event->key() == Qt::Key_Shift))
+	if (mIsView && (event->key() == Qt::Key_Control || event->key() == Qt::Key_Shift))
 	{
 		widget->mInputState.Modifiers = event->modifiers();
 		widget->OnUpdateCursor();
@@ -185,7 +185,7 @@ void lcQGLWidget::keyPressEvent(QKeyEvent *event)
 
 void lcQGLWidget::keyReleaseEvent(QKeyEvent *event)
 {
-	if (isView && (event->key() == Qt::Key_Control || event->key() == Qt::Key_Shift))
+	if (mIsView && (event->key() == Qt::Key_Control || event->key() == Qt::Key_Shift))
 	{
 		widget->mInputState.Modifiers = event->modifiers();
 		widget->OnUpdateCursor();
@@ -327,57 +327,76 @@ void lcQGLWidget::wheelEvent(QWheelEvent *event)
 	event->accept();
 }
 
-void lcQGLWidget::dragEnterEvent(QDragEnterEvent *event)
+void lcQGLWidget::dragEnterEvent(QDragEnterEvent* DragEnterEvent)
 {
-	if (isView && event->mimeData()->hasFormat("application/vnd.leocad-part"))
+	if (mIsView)
 	{
-		event->acceptProposedAction();
+		const QMimeData* MimeData = DragEnterEvent->mimeData();
 
-		QByteArray pieceData = event->mimeData()->data("application/vnd.leocad-part");
-		QDataStream dataStream(&pieceData, QIODevice::ReadOnly);
-		QString id;
-
-		dataStream >> id;
-
-		((View*)widget)->BeginPieceDrag();
+		if (MimeData->hasFormat("application/vnd.leocad-part"))
+		{
+			DragEnterEvent->acceptProposedAction();
+			((View*)widget)->BeginDrag(lcDragState::PIECE);
+		}
+		else if (MimeData->hasFormat("application/vnd.leocad-color"))
+		{
+			DragEnterEvent->acceptProposedAction();
+			((View*)widget)->BeginDrag(lcDragState::COLOR);
+		}
 	}
 	else
-		event->ignore();
+		DragEnterEvent->ignore();
 }
 
 void lcQGLWidget::dragLeaveEvent(QDragLeaveEvent *event)
 {
-	if (!isView)
+	if (!mIsView)
 		return;
 
-	((View*)widget)->EndPieceDrag(false);
+	((View*)widget)->EndDrag(false);
 
 	event->accept();
 }
 
-void lcQGLWidget::dragMoveEvent(QDragMoveEvent *event)
+void lcQGLWidget::dragMoveEvent(QDragMoveEvent* DragMoveEvent)
 {
-	if (!isView || !event->mimeData()->hasFormat("application/vnd.leocad-part"))
-		return;
+	if (mIsView)
+	{
+		const QMimeData* MimeData = DragMoveEvent->mimeData();
 
-	float scale = deviceScale();
+		if (MimeData->hasFormat("application/vnd.leocad-part") || MimeData->hasFormat("application/vnd.leocad-color"))
+		{
+			float scale = deviceScale();
 
-	widget->mInputState.x = event->pos().x() * scale;
-	widget->mInputState.y = widget->mHeight - event->pos().y() * scale - 1;
-	widget->mInputState.Modifiers = event->keyboardModifiers();
+			widget->mInputState.x = DragMoveEvent->pos().x() * scale;
+			widget->mInputState.y = widget->mHeight - DragMoveEvent->pos().y() * scale - 1;
+			widget->mInputState.Modifiers = DragMoveEvent->keyboardModifiers();
 
-	widget->OnMouseMove();
+			widget->OnMouseMove();
 
-	event->accept();
+			DragMoveEvent->accept();
+			return;
+		}
+	}
+
+	QGLWidget::dragMoveEvent(DragMoveEvent);
 }
 
-void lcQGLWidget::dropEvent(QDropEvent *event)
+void lcQGLWidget::dropEvent(QDropEvent* DropEvent)
 {
-	if (!isView || !event->mimeData()->hasFormat("application/vnd.leocad-part"))
-		return;
+	if (mIsView)
+	{
+		const QMimeData* MimeData = DropEvent->mimeData();
 
-	((View*)widget)->EndPieceDrag(true);
-	setFocus(Qt::MouseFocusReason);
+		if (MimeData->hasFormat("application/vnd.leocad-part") || MimeData->hasFormat("application/vnd.leocad-color"))
+		{
+			((View*)widget)->EndDrag(true);
+			setFocus(Qt::MouseFocusReason);
 
-	event->accept();
+			DropEvent->accept();
+			return;
+		}
+	}
+
+	QGLWidget::dropEvent(DropEvent);
 }

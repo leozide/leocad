@@ -159,7 +159,7 @@ void lcRenderDialog::on_RenderButton_clicked()
 
 #ifdef Q_OS_LINUX
 	POVRayPath = lcGetProfileString(LC_PROFILE_POVRAY_PATH);
-	Arguments.append("+FC");
+	Arguments.append("+FN");
 	Arguments.append("-D");
 #endif
 

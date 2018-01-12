@@ -129,9 +129,7 @@ void lcMainWindow::CreateWidgets()
 #else
     mModelTabWidget->setMovable(true);
     mModelTabWidget->setTabsClosable(true);
-	mModelTabWidget->setContextMenuPolicy(Qt::CustomContextMenu);
 	connect(mModelTabWidget, SIGNAL(tabCloseRequested(int)), this, SLOT(ModelTabClosed(int)));
-	connect(mModelTabWidget, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(ModelTabContextMenuRequested(const QPoint&)));
 #endif
 	setCentralWidget(mModelTabWidget);
 	connect(mModelTabWidget, SIGNAL(currentChanged(int)), this, SLOT(ModelTabChanged(int)));

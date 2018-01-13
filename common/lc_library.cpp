@@ -2583,6 +2583,7 @@ void lcLibraryMeshData::AddMeshData(const lcLibraryMeshData& Data, const lcMatri
 
 		int VertexCount = DataVertices.GetSize();
 		lcArray<quint32> IndexRemap(VertexCount);
+		lcArray<quint32> TexturedIndexRemap;
 
 		if (!TextureMap)
 		{
@@ -2609,6 +2610,7 @@ void lcLibraryMeshData::AddMeshData(const lcLibraryMeshData& Data, const lcMatri
 		else
 		{
 			TexturedVertices.AllocGrow(VertexCount);
+			TexturedIndexRemap.AllocGrow(VertexCount);
 
 			for (int SrcVertexIdx = 0; SrcVertexIdx < VertexCount; SrcVertexIdx++)
 			{
@@ -2628,13 +2630,13 @@ void lcLibraryMeshData::AddMeshData(const lcLibraryMeshData& Data, const lcMatri
 					Index = AddTexturedVertex((lcMeshDataType)DestIndex, Position, Normal, TexCoord, true);
 				}
 
-				IndexRemap.Add(Index);
+				TexturedIndexRemap.Add(Index);
 			}
 		}
 
 		const lcArray<lcLibraryMeshVertexTextured>& DataTexturedVertices = Data.mTexturedVertices[MeshDataIdx];
 		int TexturedVertexCount = DataTexturedVertices.GetSize();
-		lcArray<quint32> TexturedIndexRemap(TexturedVertexCount);
+		TexturedIndexRemap.AllocGrow(TexturedVertexCount);
 
 		if (TexturedVertexCount)
 		{
@@ -2669,11 +2671,19 @@ void lcLibraryMeshData::AddMeshData(const lcLibraryMeshData& Data, const lcMatri
 			lcLibraryMeshSection* DstSection = nullptr;
 			quint32 ColorCode = SrcSection->mColor == 16 ? CurrentColorCode : SrcSection->mColor;
 			lcTexture* Texture;
+			lcMeshPrimitiveType PrimitiveType = SrcSection->mPrimitiveType;
 
 			if (SrcSection->mTexture)
 				Texture = SrcSection->mTexture;
 			else if (TextureMap)
+			{
 				Texture = TextureMap->Texture;
+
+				if (SrcSection->mPrimitiveType == LC_MESH_TRIANGLES)
+					PrimitiveType = LC_MESH_TEXTURED_TRIANGLES;
+				else if (SrcSection->mPrimitiveType == LC_MESH_LINES)
+					PrimitiveType = LC_MESH_TEXTURED_LINES;
+			}
 			else
 				Texture = nullptr;
 
@@ -2681,7 +2691,7 @@ void lcLibraryMeshData::AddMeshData(const lcLibraryMeshData& Data, const lcMatri
 			{
 				lcLibraryMeshSection* Section = Sections[DstSectionIdx];
 
-				if (Section->mColor == ColorCode && Section->mPrimitiveType == SrcSection->mPrimitiveType && Section->mTexture == Texture)
+				if (Section->mColor == ColorCode && Section->mPrimitiveType == PrimitiveType && Section->mTexture == Texture)
 				{
 					DstSection = Section;
 					break;
@@ -2690,16 +2700,16 @@ void lcLibraryMeshData::AddMeshData(const lcLibraryMeshData& Data, const lcMatri
 
 			if (!DstSection)
 			{
-				DstSection = new lcLibraryMeshSection(SrcSection->mPrimitiveType, ColorCode, Texture);
+				DstSection = new lcLibraryMeshSection(PrimitiveType, ColorCode, Texture);
 
 				Sections.Add(DstSection);
 			}
 
 			DstSection->mIndices.AllocGrow(SrcSection->mIndices.GetSize());
 
-			if (!SrcSection->mTexture)
+			if (!Texture)
 			{
-				if (!InvertWinding || (SrcSection->mPrimitiveType != LC_MESH_TRIANGLES && SrcSection->mPrimitiveType != LC_MESH_TEXTURED_TRIANGLES))
+				if (!InvertWinding || (PrimitiveType != LC_MESH_TRIANGLES && PrimitiveType != LC_MESH_TEXTURED_TRIANGLES))
 				{
 					for (int IndexIdx = 0; IndexIdx < SrcSection->mIndices.GetSize(); IndexIdx++)
 						DstSection->mIndices.Add(IndexRemap[SrcSection->mIndices[IndexIdx]]);
@@ -2716,7 +2726,7 @@ void lcLibraryMeshData::AddMeshData(const lcLibraryMeshData& Data, const lcMatri
 			}
 			else
 			{
-				if (!InvertWinding || (SrcSection->mPrimitiveType != LC_MESH_TRIANGLES && SrcSection->mPrimitiveType != LC_MESH_TEXTURED_TRIANGLES))
+				if (!InvertWinding || (PrimitiveType != LC_MESH_TRIANGLES && PrimitiveType != LC_MESH_TEXTURED_TRIANGLES))
 				{
 					for (int IndexIdx = 0; IndexIdx < SrcSection->mIndices.GetSize(); IndexIdx++)
 						DstSection->mIndices.Add(TexturedIndexRemap[SrcSection->mIndices[IndexIdx]]);

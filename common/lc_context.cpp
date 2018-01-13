@@ -193,7 +193,7 @@ void lcContext::CreateShaderPrograms()
 		"void main()\n"
 		"{\n"
 		LC_SHADER_PRECISION "	vec4 TexelColor = texture2D(Texture, PixelTexCoord);"
-		"	gl_FragColor = vec4(mix(MaterialColor.xyz, TexelColor.xyz, TexelColor.a), MaterialColor.a);\n"
+		"	gl_FragColor = mix(MaterialColor, TexelColor, TexelColor.a);\n"
 		"}\n",
 		// LC_MATERIAL_UNLIT_VERTEX_COLOR
 		LC_SHADER_VERSION
@@ -231,8 +231,8 @@ void lcContext::CreateShaderPrograms()
 		"{\n"
 		LC_PIXEL_FAKE_LIGHTING
 		LC_SHADER_PRECISION "	vec4 TexelColor = texture2D(Texture, PixelTexCoord);"
-		LC_SHADER_PRECISION "	vec3 DiffuseColor = mix(MaterialColor.xyz, TexelColor.xyz, TexelColor.a) * Diffuse;\n"
-		"	gl_FragColor = vec4(DiffuseColor + SpecularColor, MaterialColor.a);\n"
+		LC_SHADER_PRECISION "	vec4 DiffuseColor = mix(MaterialColor, TexelColor, TexelColor.a);\n"
+		"	gl_FragColor = vec4(vec3(DiffuseColor) * Diffuse + SpecularColor, DiffuseColor.a);\n"
 		"}\n"
 	};
 

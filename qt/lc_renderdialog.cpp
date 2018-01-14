@@ -137,6 +137,7 @@ void lcRenderDialog::on_RenderButton_clicked()
 
 #ifdef Q_OS_WIN
 	POVRayPath = QDir::cleanPath(QCoreApplication::applicationDirPath() + QLatin1String("/povray/povconsole32-sse2.exe"));
+	Arguments.append("+SMleocad-povray");
 #endif
 
 #ifdef Q_OS_LINUX
@@ -147,6 +148,7 @@ void lcRenderDialog::on_RenderButton_clicked()
 
 #ifdef Q_OS_MACOS
 	POVRayPath = QDir::cleanPath(QCoreApplication::applicationDirPath() + QLatin1String("/povray/povconsole"));
+	Arguments.append("+SMleocad-povray");
 #endif
 
 	mProcess = new QProcess(this);

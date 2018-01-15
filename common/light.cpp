@@ -203,7 +203,7 @@ void lcLight::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
 	}
 }
 
-void lcLight::Move(lcStep Step, bool AddKey, const lcVector3& Distance)
+void lcLight::MoveSelected(lcStep Step, bool AddKey, const lcVector3& Distance)
 {
 	if (IsSelected(LC_LIGHT_SECTION_POSITION))
 	{

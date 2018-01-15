@@ -2485,7 +2485,7 @@ void lcModel::MoveSelectedObjects(const lcVector3& PieceDistance, const lcVector
 
 				if (Piece->IsSelected())
 				{
-					Piece->Move(mCurrentStep, gMainWindow->GetAddKeys(), TransformedPieceDistance);
+					Piece->MoveSelected(mCurrentStep, gMainWindow->GetAddKeys(), TransformedPieceDistance);
 					Piece->UpdatePosition(mCurrentStep);
 					Moved = true;
 				}
@@ -2503,7 +2503,7 @@ void lcModel::MoveSelectedObjects(const lcVector3& PieceDistance, const lcVector
 
 			if (Camera->IsSelected())
 			{
-				Camera->Move(mCurrentStep, gMainWindow->GetAddKeys(), TransformedObjectDistance);
+				Camera->MoveSelected(mCurrentStep, gMainWindow->GetAddKeys(), TransformedObjectDistance);
 				Camera->UpdatePosition(mCurrentStep);
 				Moved = true;
 			}
@@ -2515,7 +2515,7 @@ void lcModel::MoveSelectedObjects(const lcVector3& PieceDistance, const lcVector
 
 			if (Light->IsSelected())
 			{
-				Light->Move(mCurrentStep, gMainWindow->GetAddKeys(), TransformedObjectDistance);
+				Light->MoveSelected(mCurrentStep, gMainWindow->GetAddKeys(), TransformedObjectDistance);
 				Light->UpdatePosition(mCurrentStep);
 				Moved = true;
 			}
@@ -3823,7 +3823,7 @@ void lcModel::UpdateSpotLightTool(const lcVector3& Position)
 {
 	lcLight* Light = mLights[mLights.GetSize() - 1];
 
-	Light->Move(1, false, Position - mMouseToolDistance);
+	Light->MoveSelected(1, false, Position - mMouseToolDistance);
 	Light->UpdatePosition(1);
 
 	mMouseToolDistance = Position;
@@ -3847,7 +3847,7 @@ void lcModel::UpdateCameraTool(const lcVector3& Position)
 {
 	lcCamera* Camera = mCameras[mCameras.GetSize() - 1];
 
-	Camera->Move(1, false, Position - mMouseToolDistance);
+	Camera->MoveSelected(1, false, Position - mMouseToolDistance);
 	Camera->UpdatePosition(1);
 
 	mMouseToolDistance = Position;
@@ -4009,6 +4009,16 @@ void lcModel::LookAt(lcCamera* Camera)
 
 	if (!Camera->IsSimple())
 		SaveCheckpoint(tr("Look At"));
+}
+
+void lcModel::MoveCamera(lcCamera* Camera, const lcVector3& Direction)
+{
+	Camera->MoveRelative(Direction, mCurrentStep, gMainWindow->GetAddKeys());
+	gMainWindow->UpdateSelectedObjects(false);
+	gMainWindow->UpdateAllViews();
+
+	if (!Camera->IsSimple())
+		SaveCheckpoint(tr("Moving Camera"));
 }
 
 void lcModel::ZoomExtents(lcCamera* Camera, float Aspect)

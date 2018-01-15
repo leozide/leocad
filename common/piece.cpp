@@ -675,7 +675,7 @@ void lcPiece::SubModelAddRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMat
 		Scene.AddMesh(mMesh, lcMul(mModelWorld, WorldMatrix), ColorIndex, Focused ? LC_RENDERMESH_FOCUSED : (Selected ? LC_RENDERMESH_SELECTED : LC_RENDERMESH_NONE), mPieceInfo->mFlags);
 }
 
-void lcPiece::Move(lcStep Step, bool AddKey, const lcVector3& Distance)
+void lcPiece::MoveSelected(lcStep Step, bool AddKey, const lcVector3& Distance)
 {
 	quint32 Section = GetFocusSection();
 

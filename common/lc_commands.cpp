@@ -696,6 +696,48 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 		QT_TRANSLATE_NOOP("Status", "Rotate view so selected pieces are at center"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
+	// LC_VIEW_MOVE_FORWARD
+	{
+		QT_TRANSLATE_NOOP("Action", "View.MoveForward"),
+		QT_TRANSLATE_NOOP("Menu", "Move Forward"),
+		QT_TRANSLATE_NOOP("Status", "Move the current view forward"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
+	// LC_VIEW_MOVE_BACKWARD
+	{
+		QT_TRANSLATE_NOOP("Action", "View.MoveBackward"),
+		QT_TRANSLATE_NOOP("Menu", "Move Backward"),
+		QT_TRANSLATE_NOOP("Status", "Move the current view backward"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
+	// LC_VIEW_MOVE_LEFT
+	{
+		QT_TRANSLATE_NOOP("Action", "View.MoveLeft"),
+		QT_TRANSLATE_NOOP("Menu", "Move Left"),
+		QT_TRANSLATE_NOOP("Status", "Move the current view to the left"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
+	// LC_VIEW_MOVE_RIGHT
+	{
+		QT_TRANSLATE_NOOP("Action", "View.MoveRight"),
+		QT_TRANSLATE_NOOP("Menu", "Move Right"),
+		QT_TRANSLATE_NOOP("Status", "Move the current view to the right"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
+	// LC_VIEW_MOVE_UP
+	{
+		QT_TRANSLATE_NOOP("Action", "View.MoveUp"),
+		QT_TRANSLATE_NOOP("Menu", "Move Up"),
+		QT_TRANSLATE_NOOP("Status", "Move the current view up"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
+	// LC_VIEW_MOVE_DOWN
+	{
+		QT_TRANSLATE_NOOP("Action", "View.MoveDown"),
+		QT_TRANSLATE_NOOP("Menu", "Move Down"),
+		QT_TRANSLATE_NOOP("Status", "Move the current view down"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
 	// LC_VIEW_VIEWPOINT_FRONT
 	{
 		QT_TRANSLATE_NOOP("Action", "View.Viewpoint.Front"),

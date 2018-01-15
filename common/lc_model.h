@@ -305,6 +305,7 @@ public:
 	void UpdateRollTool(lcCamera* Camera, float Mouse);
 	void ZoomRegionToolClicked(lcCamera* Camera, float AspectRatio, const lcVector3& Position, const lcVector3& TargetPosition, const lcVector3* Corners);
 	void LookAt(lcCamera* Camera);
+	void MoveCamera(lcCamera* Camera, const lcVector3& Direction);
 	void ZoomExtents(lcCamera* Camera, float Aspect);
 	void Zoom(lcCamera* Camera, float Amount);
 

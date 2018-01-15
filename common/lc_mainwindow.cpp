@@ -2674,6 +2674,36 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 			ActiveView->LookAt();
 		break;
 
+	case LC_VIEW_MOVE_FORWARD:
+		if (ActiveView)
+			ActiveView->MoveCamera(lcVector3(0.0f, 0.0f, -1.0f));
+		break;
+
+	case LC_VIEW_MOVE_BACKWARD:
+		if (ActiveView)
+			ActiveView->MoveCamera(lcVector3(0.0f, 0.0f, 1.0f));
+		break;
+
+	case LC_VIEW_MOVE_LEFT:
+		if (ActiveView)
+			ActiveView->MoveCamera(lcVector3(-1.0f, 0.0f, 0.0f));
+		break;
+
+	case LC_VIEW_MOVE_RIGHT:
+		if (ActiveView)
+			ActiveView->MoveCamera(lcVector3(1.0f, 0.0f, 0.0f));
+		break;
+
+	case LC_VIEW_MOVE_UP:
+		if (ActiveView)
+			ActiveView->MoveCamera(lcVector3(0.0f, 1.0f, 0.0f));
+		break;
+
+	case LC_VIEW_MOVE_DOWN:
+		if (ActiveView)
+			ActiveView->MoveCamera(lcVector3(0.0f, -1.0f, 0.0f));
+		break;
+
 	case LC_VIEW_TIME_NEXT:
 		lcGetActiveModel()->ShowNextStep();
 		break;

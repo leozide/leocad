@@ -88,6 +88,7 @@ public:
 	void SetProjection(bool Ortho);
 	void LookAt();
 	void ZoomExtents();
+	void MoveCamera(const lcVector3& Direction);
 
 	void RemoveCamera();
 	void SetCamera(lcCamera* Camera, bool ForceCopy);

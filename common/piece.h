@@ -400,7 +400,7 @@ public:
 	bool FileLoad(lcFile& file);
 
 	void UpdatePosition(lcStep Step);
-	void Move(lcStep Step, bool AddKey, const lcVector3& Distance);
+	void MoveSelected(lcStep Step, bool AddKey, const lcVector3& Distance);
 	void Rotate(lcStep Step, bool AddKey, const lcMatrix33& RotationMatrix, const lcVector3& Center, const lcMatrix33& RotationFrame);
 	void MovePivotPoint(const lcVector3& Distance);
 	void RotatePivotPoint(const lcMatrix33& RotationMatrix);

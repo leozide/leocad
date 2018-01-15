@@ -1823,6 +1823,11 @@ void View::ZoomExtents()
 	mModel->ZoomExtents(mCamera, (float)mWidth / (float)mHeight);
 }
 
+void View::MoveCamera(const lcVector3& Direction)
+{
+	mModel->MoveCamera(mCamera, Direction);
+}
+
 void View::UpdateTrackTool()
 {
 	lcTool CurrentTool = gMainWindow->GetTool();

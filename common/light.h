@@ -190,7 +190,7 @@ public:
 
 	void CompareBoundingBox(lcVector3& Min, lcVector3& Max);
 	void UpdatePosition(lcStep Step);
-	void Move(lcStep Step, bool AddKey, const lcVector3& Distance);
+	void MoveSelected(lcStep Step, bool AddKey, const lcVector3& Distance);
 	bool Setup(int LightIndex);
 	void CreateName(const lcArray<lcLight*>& Lights);
 

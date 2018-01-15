@@ -410,7 +410,7 @@ void lcCamera::CompareBoundingBox(lcVector3& Min, lcVector3& Max)
 	}
 }
 
-void lcCamera::Move(lcStep Step, bool AddKey, const lcVector3& Distance)
+void lcCamera::MoveSelected(lcStep Step, bool AddKey, const lcVector3& Distance)
 {
 	if (IsSimple())
 		AddKey = false;
@@ -441,6 +441,22 @@ void lcCamera::Move(lcStep Step, bool AddKey, const lcVector3& Distance)
 
 	mUpVector = lcCross(SideVector, FrontVector);
 	mUpVector.Normalize();
+}
+
+void lcCamera::MoveRelative(const lcVector3& Distance, lcStep Step, bool AddKey)
+{
+	if (IsSimple())
+		AddKey = false;
+
+	lcVector3 Relative = lcMul30(Distance, lcMatrix44Transpose(mWorldView)) * 5.0f;
+
+	mPosition += Relative;
+	ChangeKey(mPositionKeys, mPosition, Step, AddKey);
+
+	mTargetPosition += Relative;
+	ChangeKey(mTargetPositionKeys, mTargetPosition, Step, AddKey);
+
+	UpdatePosition(Step);
 }
 
 void lcCamera::UpdatePosition(lcStep Step)

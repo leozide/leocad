@@ -13,12 +13,12 @@
 
 lcRenderDialog::lcRenderDialog(QWidget* Parent)
 	: QDialog(Parent),
-	ui(new Ui::lcRenderDialog),
-	mOutputBuffer(nullptr)
+    ui(new Ui::lcRenderDialog)
 {
 #ifndef QT_NO_PROCESS
 	mProcess = nullptr;
 #endif
+	mOutputBuffer = nullptr;
 
 	ui->setupUi(this);
 
@@ -164,7 +164,7 @@ void lcRenderDialog::on_RenderButton_clicked()
 #endif
 
 #ifdef Q_OS_MACOS
-	POVRayPath = QDir::cleanPath(QCoreApplication::applicationDirPath() + QLatin1String("/povray/povconsole"));
+	POVRayPath = QDir::cleanPath(QCoreApplication::applicationDirPath() + QLatin1String("/povray"));
 #endif
 
 	mProcess = new QProcess(this);

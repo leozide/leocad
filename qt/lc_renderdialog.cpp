@@ -7,15 +7,18 @@
 
 #define LC_POVRAY_PREVIEW_WIDTH 768
 #define LC_POVRAY_PREVIEW_HEIGHT 432
+#if defined(Q_OS_WIN) || defined(Q_OS_MACOS)
+#define LC_POVRAY_MEMORY_MAPPED_FILE 1
+#endif
 
 lcRenderDialog::lcRenderDialog(QWidget* Parent)
 	: QDialog(Parent),
-    ui(new Ui::lcRenderDialog)
+	ui(new Ui::lcRenderDialog),
+	mOutputBuffer(nullptr)
 {
 #ifndef QT_NO_PROCESS
 	mProcess = nullptr;
 #endif
-	mSharedMemory.setNativeKey("leocad-povray");
 
 	ui->setupUi(this);
 
@@ -35,9 +38,12 @@ lcRenderDialog::lcRenderDialog(QWidget* Parent)
 
 lcRenderDialog::~lcRenderDialog()
 {
-	mSharedMemory.detach();
-
 	delete ui;
+}
+
+QString lcRenderDialog::GetOutputFileName() const
+{
+	return QDir(QDir::tempPath()).absoluteFilePath("leocad-render.out");
 }
 
 QString lcRenderDialog::GetPOVFileName() const
@@ -51,7 +57,15 @@ void lcRenderDialog::CloseProcess()
 	delete mProcess;
 	mProcess = nullptr;
 #endif
-	
+
+#if LC_POVRAY_MEMORY_MAPPED_FILE
+	mOutputFile.unmap((uchar*)mOutputBuffer);
+	mOutputBuffer = nullptr;
+	mOutputFile.close();
+
+	QFile::remove(GetOutputFileName());
+#endif
+
 	QFile::remove(GetPOVFileName());
 
 	ui->RenderButton->setText(tr("Render"));
@@ -105,6 +119,10 @@ void lcRenderDialog::on_RenderButton_clicked()
 	Arguments.append(QString::fromLatin1("+H%1").arg(ui->HeightEdit->text()));
 	Arguments.append("-O-");
 
+#if LC_POVRAY_MEMORY_MAPPED_FILE
+	Arguments.append(QString::fromLatin1("+SM%1").arg(GetOutputFileName()));
+#endif
+
 	int Quality = ui->QualityComboBox->currentIndex();
 
 	switch (Quality)
@@ -137,7 +155,6 @@ void lcRenderDialog::on_RenderButton_clicked()
 
 #ifdef Q_OS_WIN
 	POVRayPath = QDir::cleanPath(QCoreApplication::applicationDirPath() + QLatin1String("/povray/povconsole32-sse2.exe"));
-	Arguments.append("+SMleocad-povray");
 #endif
 
 #ifdef Q_OS_LINUX
@@ -148,7 +165,6 @@ void lcRenderDialog::on_RenderButton_clicked()
 
 #ifdef Q_OS_MACOS
 	POVRayPath = QDir::cleanPath(QCoreApplication::applicationDirPath() + QLatin1String("/povray/povconsole"));
-	Arguments.append("+SMleocad-povray");
 #endif
 
 	mProcess = new QProcess(this);
@@ -184,16 +200,21 @@ void lcRenderDialog::Update()
 	}
 #endif
 
-#ifdef Q_OS_WIN
-	if (!mSharedMemory.isAttached() && !mSharedMemory.attach())
-		return;
-
-	void* Buffer = mSharedMemory.data();
-
-	if (!Buffer)
+#if LC_POVRAY_MEMORY_MAPPED_FILE
+	if (!mOutputBuffer)
 	{
-		mSharedMemory.detach();
-		return;
+		mOutputFile.setFileName(GetOutputFileName());
+
+		if (!mOutputFile.open(QFile::ReadWrite))
+			return;
+
+		mOutputBuffer = mOutputFile.map(0, mOutputFile.size());
+
+		if (!mOutputBuffer)
+		{
+			mOutputFile.close();
+			return;
+		}
 	}
 
 	struct lcSharedMemoryHeader
@@ -205,7 +226,7 @@ void lcRenderDialog::Update()
 		quint32 PixelsRead;
 	};
 
-	lcSharedMemoryHeader* Header = (lcSharedMemoryHeader*)Buffer;
+	lcSharedMemoryHeader* Header = (lcSharedMemoryHeader*)mOutputBuffer;
 
 	if (Header->PixelsWritten == Header->PixelsRead)
 		return;

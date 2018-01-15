@@ -21,6 +21,7 @@ public slots:
 	void Update();
 
 protected:
+	QString GetOutputFileName() const;
 	QString GetPOVFileName() const;
 	void CloseProcess();
 	bool PromptCancel();
@@ -29,7 +30,8 @@ protected:
 	QProcess* mProcess;
 #endif
 	QTimer mUpdateTimer;
-	QSharedMemory mSharedMemory;
+	QFile mOutputFile;
+	void* mOutputBuffer;
 	QImage mImage;
 
 	Ui::lcRenderDialog* ui;

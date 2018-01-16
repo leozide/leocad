@@ -61,6 +61,7 @@ Section "LeoCAD" SecLeoCAD
   ;File "LeoCAD.cnt"
   File "..\..\docs\ReadMe.txt"
   File "..\..\library.bin"
+  File "..\povray\povconsole32-sse2.exe"
 
   ;Register file extension
   WriteRegStr HKCR ".lcd" "" "LeoCAD.Project"
@@ -107,11 +108,7 @@ Section "Uninstall"
   Delete "$INSTDIR\LeoCAD.cnt"
   Delete "$INSTDIR\readme.txt"
   Delete "$INSTDIR\library.bin"
-  ;Delete "$INSTDIR\pieces.bin"
-  ;Delete "$INSTDIR\pieces.idx"
-  ;Delete "$INSTDIR\textures.bin"
-  ;Delete "$INSTDIR\textures.idx"
-  ;Delete "$INSTDIR\sysfont.txf"
+  Delete "$INSTDIR\povconsole32-sse2.exe"
 
   RMDir "$INSTDIR"
 

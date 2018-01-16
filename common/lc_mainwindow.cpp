@@ -1229,6 +1229,7 @@ void lcMainWindow::RestoreTabLayout(const QByteArray& TabLayout)
 	DataStream >> CurrentTabName;
 
 	RemoveAllModelTabs();
+	bool ModelAdded = false;
 
 	for (int TabIdx = 0; TabIdx < NumTabs; TabIdx++)
 	{
@@ -1242,6 +1243,7 @@ void lcMainWindow::RestoreTabLayout(const QByteArray& TabLayout)
 		{
 			SetCurrentModelTab(Model);
 			TabWidget = (lcModelTabWidget*)mModelTabWidget->widget(mModelTabWidget->count() - 1);
+			ModelAdded = true;
 		}
 
 		QWidget* ActiveWidget;
@@ -1337,7 +1339,7 @@ void lcMainWindow::RestoreTabLayout(const QByteArray& TabLayout)
 		}
 	}
 
-	if (!mModelTabWidget->count())
+	if (!ModelAdded)
 		lcGetActiveProject()->SetActiveModel(0);
 	else
 		lcGetActiveProject()->SetActiveModel(CurrentTabName);

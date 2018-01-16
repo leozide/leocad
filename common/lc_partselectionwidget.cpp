@@ -331,9 +331,12 @@ void lcPartSelectionListModel::PartLoaded(PieceInfo* Info)
 
 void lcPartSelectionListModel::DrawPreview(int InfoIndex)
 {
-	View* View = gMainWindow->GetActiveView();
-	View->MakeCurrent();
-	lcContext* Context = View->mContext;
+	View* ActiveView = gMainWindow->GetActiveView();
+	if (!ActiveView)
+		return;
+
+	ActiveView->MakeCurrent();
+	lcContext* Context = ActiveView->mContext;
 	int Width = mIconSize * 2;
 	int Height = mIconSize * 2;
 

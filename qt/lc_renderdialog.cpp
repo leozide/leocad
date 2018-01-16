@@ -154,7 +154,7 @@ void lcRenderDialog::on_RenderButton_clicked()
 	QString POVRayPath;
 
 #ifdef Q_OS_WIN
-	POVRayPath = QDir::cleanPath(QCoreApplication::applicationDirPath() + QLatin1String("/povray/povconsole32-sse2.exe"));
+	POVRayPath = QDir::cleanPath(QCoreApplication::applicationDirPath() + QLatin1String("/povconsole32-sse2.exe"));
 #endif
 
 #ifdef Q_OS_LINUX

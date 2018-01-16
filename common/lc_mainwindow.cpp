@@ -1246,7 +1246,7 @@ void lcMainWindow::RestoreTabLayout(const QByteArray& TabLayout)
 			ModelAdded = true;
 		}
 
-		QWidget* ActiveWidget;
+		QWidget* ActiveWidget = nullptr;
 
 		std::function<void(QWidget*)> LoadWidget = [&DataStream, &LoadWidget, Model, &ActiveWidget, this](QWidget* ParentWidget)
 		{
@@ -1332,7 +1332,7 @@ void lcMainWindow::RestoreTabLayout(const QByteArray& TabLayout)
 
 		LoadWidget(TabWidget ? TabWidget->layout()->itemAt(0)->widget() : nullptr);
 
-		if (ActiveWidget)
+		if (ActiveWidget && TabWidget)
 		{
 			View* ActiveView = (View*)((lcQGLWidget*)ActiveWidget)->widget;
 			TabWidget->SetActiveView(ActiveView);

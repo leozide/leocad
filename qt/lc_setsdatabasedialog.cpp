@@ -1,3 +1,4 @@
+#include "lc_global.h"
 #include "lc_setsdatabasedialog.h"
 #include "ui_lc_setsdatabasedialog.h"
 #include <QNetworkRequest>

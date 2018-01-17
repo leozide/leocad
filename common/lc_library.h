@@ -58,10 +58,19 @@ public:
 	lcArray<quint32> mIndices;
 };
 
+enum class lcLibraryTextureMapType
+{
+	PLANAR,
+	CYLINDRICAL,
+	SPHERICAL
+};
+
 struct lcLibraryTextureMap
 {
-	lcVector4 Params[2];
 	lcTexture* Texture;
+	lcVector4 Params[4];
+	float Angle;
+	lcLibraryTextureMapType Type;
 	bool Fallback;
 	bool Next;
 };

@@ -28,6 +28,31 @@
 #define LC_LIBRARY_CACHE_ARCHIVE   0x0001
 #define LC_LIBRARY_CACHE_DIRECTORY 0x0002
 
+static lcVector2 lcCalculateTexCoord(const lcVector3& Position, const lcLibraryTextureMap* TextureMap)
+{
+	if (TextureMap->Type == lcLibraryTextureMapType::PLANAR)
+		return lcVector2(lcDot3(Position, TextureMap->Params[0]) + TextureMap->Params[0].w, lcDot3(Position, TextureMap->Params[1]) + TextureMap->Params[1].w);
+
+	lcVector3& Up = (lcVector3&)TextureMap->Params[0];
+	lcVector3& Front = (lcVector3&)TextureMap->Params[1];
+	lcVector3& Base = (lcVector3&)TextureMap->Params[2];
+	lcVector2 TexCoord;
+
+	lcVector3 VertexDir = Position - Base;
+
+	TexCoord.y = (lcDot(VertexDir, Up)) / TextureMap->Params[0].w;
+
+	lcVector3 VertexDirPlane = lcNormalize(VertexDir - (Up * TexCoord.y));
+	float Angle = acos(lcDot(Front, VertexDirPlane));
+
+	if (lcDot(TextureMap->Params[3], lcVector4(Position, 1.0f)) > 0.0f)
+		TexCoord.x = 0.5f + 0.5f * Angle / TextureMap->Angle;
+	else
+		TexCoord.x = 0.5f - 0.5f * Angle / TextureMap->Angle;
+
+	return TexCoord;
+}
+
 lcPiecesLibrary::lcPiecesLibrary()
 	: mLoadMutex(QMutex::Recursive)
 {
@@ -1873,15 +1898,8 @@ bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransf
 						End++;
 					*End = 0;
 
-					if (!strcmp(Token, "PLANAR"))
+					auto CleanTextureName = [](char* FileName)
 					{
-						Token += 7;
-
-						char FileName[LC_MAXPATH];
-						lcVector3 Points[3];
-
-						sscanf(Token, "%f %f %f %f %f %f %f %f %f %s", &Points[0].x, &Points[0].y, &Points[0].z, &Points[1].x, &Points[1].y, &Points[1].z, &Points[2].x, &Points[2].y, &Points[2].z, FileName);
-
 						char* Ch;
 						for (Ch = FileName; *Ch; Ch++)
 						{
@@ -1897,11 +1915,24 @@ bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransf
 							if (!memcmp(Ch, ".PNG", 4))
 								*Ch = 0;
 						}
+					};
+
+					if (!strcmp(Token, "PLANAR"))
+					{
+						Token += 7;
+
+						char FileName[LC_MAXPATH];
+						lcVector3 Points[3];
+
+						sscanf(Token, "%f %f %f %f %f %f %f %f %f %s", &Points[0].x, &Points[0].y, &Points[0].z, &Points[1].x, &Points[1].y, &Points[1].z, &Points[2].x, &Points[2].y, &Points[2].z, FileName);
+
+						CleanTextureName(FileName);
 
 						lcLibraryTextureMap& Map = TextureStack.Add();
 						Map.Next = false;
 						Map.Fallback = false;
 						Map.Texture = FindTexture(FileName, CurrentProject, SearchProjectFolder);
+						Map.Type = lcLibraryTextureMapType::PLANAR;
 
 						for (int EdgeIdx = 0; EdgeIdx < 2; EdgeIdx++)
 						{
@@ -1914,6 +1945,37 @@ bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransf
 							Map.Params[EdgeIdx].z = Normal.z / Length;
 							Map.Params[EdgeIdx].w = -lcDot(Normal, Points[0]) / Length;
 						}
+					}
+					else if (!strcmp(Token, "CYLINDRICAL"))
+					{
+						Token += 12;
+
+						char FileName[LC_MAXPATH];
+						lcVector3 Points[3];
+						float Angle;
+
+						sscanf(Token, "%f %f %f %f %f %f %f %f %f %f %s", &Points[0].x, &Points[0].y, &Points[0].z, &Points[1].x, &Points[1].y, &Points[1].z, &Points[2].x, &Points[2].y, &Points[2].z, &Angle, FileName);
+
+						CleanTextureName(FileName);
+
+						lcLibraryTextureMap& Map = TextureStack.Add();
+						Map.Next = false;
+						Map.Fallback = false;
+						Map.Texture = FindTexture(FileName, CurrentProject, SearchProjectFolder);
+						Map.Type = lcLibraryTextureMapType::CYLINDRICAL;
+
+						lcVector3 Up = Points[0] - Points[1];
+						float UpLength = lcLength(Up);
+						lcVector3 Front = lcNormalize(Points[2] - Points[1]);
+						lcVector3 PlaneNormal = lcCross(Up, Front);
+						Map.Params[0] = lcVector4(Up / UpLength, UpLength);
+						Map.Params[1] = lcVector4(Front, 0.0f);
+						Map.Params[2] = lcVector4(Points[1], 0.0f);
+						Map.Params[3] = lcVector4(PlaneNormal, -lcDot(PlaneNormal, Points[0]));
+						Map.Angle = Angle * LC_DTOR;
+					}
+					else if (!strcmp(Token, "SPHERICAL"))
+					{
 					}
 				}
 				else if (!strcmp(Token, "FALLBACK"))
@@ -2616,8 +2678,7 @@ void lcLibraryMeshData::AddMeshData(const lcLibraryMeshData& Data, const lcMatri
 			{
 				const lcLibraryMeshVertex& SrcVertex = DataVertices[SrcVertexIdx];
 				lcVector3 Position = lcMul31(SrcVertex.Position, Transform);
-				lcVector2 TexCoord(lcDot3(lcVector3(Position.x, Position.y, Position.z), TextureMap->Params[0]) + TextureMap->Params[0].w,
-								   lcDot3(lcVector3(Position.x, Position.y, Position.z), TextureMap->Params[1]) + TextureMap->Params[1].w);
+				lcVector2 TexCoord = lcCalculateTexCoord(Position, TextureMap);
 				int Index;
 
 				if (DataVertices[SrcVertexIdx].NormalWeight == 0.0f)
@@ -2785,8 +2846,7 @@ void lcLibraryMeshData::AddMeshDataNoDuplicateCheck(const lcLibraryMeshData& Dat
 				lcLibraryMeshVertexTextured& DstVertex = TexturedVertices.Add();
 
 				lcVector3 Position = lcMul31(SrcVertex.Position, Transform);
-				lcVector2 TexCoord(lcDot3(lcVector3(Position.x, Position.y, Position.z), TextureMap->Params[0]) + TextureMap->Params[0].w,
-								   lcDot3(lcVector3(Position.x, Position.y, Position.z), TextureMap->Params[1]) + TextureMap->Params[1].w);
+				lcVector2 TexCoord = lcCalculateTexCoord(Position, TextureMap);
 
 				DstVertex.Position = Position;
 				DstVertex.Normal = lcNormalize(lcMul30(SrcVertex.Normal, Transform));

@@ -18,7 +18,7 @@ rendering.
 
 - LeoCAD for Windows:
 
-  Download LeoCAD-Windows-18.01-10289.exe to your computer, double click on the 
+  Download `LeoCAD-Windows-*.exe` to your computer, double click on the 
   icon to launch the installer and follow the intructions.
 
 - LeoCAD for Linux and FreeBSD:
@@ -27,15 +27,15 @@ rendering.
   see if it's already available and install from there.
   
   Most distributions have older releases, so you may prefer to download
-  LeoCAD-Linux-18.01-10289-x86_64.AppImage and run it instead.
+  `LeoCAD-Linux-*.AppImage` and run it instead.
 
   If you decide to compile it yourself you will also need to download the
   Parts Library separately and follow the installation instructions. More
   information is available at http://www.leocad.org
 
-- LeoCAD for Mac OSX:
+- LeoCAD for macOS:
 
-  Download LeoCAD-macOS-18.01-10289.dmg to your computer, double click on the 
+  Download `LeoCAD-macOS-*.dmg` to your computer, double click on the 
   icon to open the archive and copy LeoCAD.app to your Applications folder.
 
 New users should take a look at the online tutorial located at

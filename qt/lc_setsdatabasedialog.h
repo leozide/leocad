@@ -68,7 +68,9 @@ public:
 	virtual bool eventFilter(QObject* Object, QEvent* Event) override;
 
 public slots:
+#ifndef Q_OS_WIN
 	void DownloadFinished(QNetworkReply* Reply);
+#endif
 	void on_SearchButton_clicked();
 	void accept() override;
 	void Finished(int Result);

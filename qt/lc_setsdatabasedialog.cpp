@@ -221,10 +221,12 @@ void lcSetsDatabaseDialog::on_SearchButton_clicked()
 	}
 }
 
+#ifndef Q_OS_WIN
 void lcSetsDatabaseDialog::DownloadFinished(QNetworkReply* Reply)
 {
 	ProcessReply(Reply);
 }
+#endif
 
 void lcSetsDatabaseDialog::ProcessReply(lcHttpReply* Reply)
 {

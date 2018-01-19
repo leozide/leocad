@@ -69,7 +69,7 @@ lcSetsDatabaseDialog::lcSetsDatabaseDialog(QWidget* Parent)
 	connect(ui->SetsTree, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)), this, SLOT(accept()));
 	connect(this, SIGNAL(finished(int)), this, SLOT(Finished(int)));
 #ifndef Q_OS_WIN
-	connect(&mNetworkManager, SIGNAL(finished(QNetworkReply*)), SLOT(DownloadFinished(lcHttpReply*)));
+	connect(&mNetworkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(DownloadFinished(QNetworkReply*)));
 #endif
 
 	mKeyListReply = RequestURL("http://www.leocad.org/rebrickable.json");
@@ -84,7 +84,7 @@ lcHttpReply* lcSetsDatabaseDialog::RequestURL(const QString& URL)
 {
 #ifdef Q_OS_WIN
 	lcHttpReply* Reply = new lcHttpReply(this, URL);
-	connect(Reply, &QThread::finished, [this, Reply] { DownloadFinished(Reply); });
+	connect(Reply, &QThread::finished, [this, Reply] { ProcessReply(Reply); });
 	Reply->start();
 	return Reply;
 #else
@@ -221,7 +221,12 @@ void lcSetsDatabaseDialog::on_SearchButton_clicked()
 	}
 }
 
-void lcSetsDatabaseDialog::DownloadFinished(lcHttpReply* Reply)
+void lcSetsDatabaseDialog::DownloadFinished(QNetworkReply* Reply)
+{
+	ProcessReply(Reply);
+}
+
+void lcSetsDatabaseDialog::ProcessReply(lcHttpReply* Reply)
 {
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
 	if (Reply == mKeyListReply)

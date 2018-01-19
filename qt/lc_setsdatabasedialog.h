@@ -68,13 +68,14 @@ public:
 	virtual bool eventFilter(QObject* Object, QEvent* Event) override;
 
 public slots:
-	void DownloadFinished(lcHttpReply* Reply);
+	void DownloadFinished(QNetworkReply* Reply);
 	void on_SearchButton_clicked();
 	void accept() override;
 	void Finished(int Result);
 
 protected:
 	lcHttpReply* RequestURL(const QString& URL);
+	void ProcessReply(lcHttpReply* Reply);
 
 #ifndef Q_OS_WIN
 	QNetworkAccessManager mNetworkManager;

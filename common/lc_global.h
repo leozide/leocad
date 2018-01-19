@@ -1,4 +1,5 @@
-#pragma once
+#ifndef LC_GLOBAL_H
+#define LC_GLOBAL_H
 
 #ifdef __cplusplus
 
@@ -65,3 +66,5 @@ class lcMemFile;
 class lcDiskFile;
 
 #endif
+
+#endif // LC_GLOBAL_H

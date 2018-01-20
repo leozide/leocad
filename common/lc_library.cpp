@@ -2327,6 +2327,20 @@ void lcLibraryMeshData::AddVertices(lcMeshDataType MeshDataType, int VertexCount
 	*VertexBuffer = &Vertices[CurrentSize];
 }
 
+const float lcDistanceEpsilon = 0.01f; // Maximum value for 50591.dat
+const float lcTexCoordEpsilon = 0.01f;
+
+inline bool lcCompareVertices(const lcVector3& Position1, const lcVector3& Position2)
+{
+	return fabsf(Position1.x - Position2.x) < lcDistanceEpsilon && fabsf(Position1.y - Position2.y) < lcDistanceEpsilon && fabsf(Position1.z - Position2.z) < lcDistanceEpsilon;
+}
+
+inline bool lcCompareVertices(const lcVector3& Position1, const lcVector2& TexCoord1, const lcVector3& Position2, const lcVector2& TexCoord2)
+{
+	return fabsf(Position1.x - Position2.x) < lcDistanceEpsilon && fabsf(Position1.y - Position2.y) < lcDistanceEpsilon && fabsf(Position1.z - Position2.z) < lcDistanceEpsilon &&
+	       fabsf(TexCoord1.x - TexCoord2.x) < lcTexCoordEpsilon && fabsf(TexCoord1.y - TexCoord2.y) < lcTexCoordEpsilon;
+}
+
 quint32 lcLibraryMeshData::AddVertex(lcMeshDataType MeshDataType, const lcVector3& Position, bool Optimize)
 {
 	lcArray<lcLibraryMeshVertex>& VertexArray = mVertices[MeshDataType];
@@ -2337,7 +2351,7 @@ quint32 lcLibraryMeshData::AddVertex(lcMeshDataType MeshDataType, const lcVector
 		{
 			lcLibraryMeshVertex& Vertex = VertexArray[VertexIdx];
 
-			if (Position == Vertex.Position)
+			if (lcCompareVertices(Position, Vertex.Position))
 				return VertexIdx;
 		}
 	}
@@ -2350,8 +2364,6 @@ quint32 lcLibraryMeshData::AddVertex(lcMeshDataType MeshDataType, const lcVector
 	return VertexArray.GetSize() - 1;
 }
 
-const float DistanceEpsilon = 0.01f; // Maximum value for 50591.dat
-
 quint32 lcLibraryMeshData::AddVertex(lcMeshDataType MeshDataType, const lcVector3& Position, const lcVector3& Normal, bool Optimize)
 {
 	lcArray<lcLibraryMeshVertex>& VertexArray = mVertices[MeshDataType];
@@ -2362,8 +2374,7 @@ quint32 lcLibraryMeshData::AddVertex(lcMeshDataType MeshDataType, const lcVector
 		{
 			lcLibraryMeshVertex& Vertex = VertexArray[VertexIdx];
 
-			if (fabsf(Position.x - Vertex.Position.x) < DistanceEpsilon && fabsf(Position.y - Vertex.Position.y) < DistanceEpsilon && fabsf(Position.z - Vertex.Position.z) < DistanceEpsilon)
-//			if (Position == Vertex.Position)
+			if (lcCompareVertices(Position, Vertex.Position))
 			{
 				if (Vertex.NormalWeight == 0.0f)
 				{
@@ -2399,7 +2410,7 @@ quint32 lcLibraryMeshData::AddTexturedVertex(lcMeshDataType MeshDataType, const 
 		{
 			lcLibraryMeshVertexTextured& Vertex = VertexArray[VertexIdx];
 
-			if (Position == Vertex.Position && TexCoord == Vertex.TexCoord)
+			if (lcCompareVertices(Position, TexCoord, Vertex.Position, Vertex.TexCoord))
 				return VertexIdx;
 		}
 	}
@@ -2423,7 +2434,7 @@ quint32 lcLibraryMeshData::AddTexturedVertex(lcMeshDataType MeshDataType, const 
 		{
 			lcLibraryMeshVertexTextured& Vertex = VertexArray[VertexIdx];
 
-			if (Position == Vertex.Position && TexCoord == Vertex.TexCoord)
+			if (lcCompareVertices(Position, TexCoord, Vertex.Position, Vertex.TexCoord))
 			{
 				if (Vertex.NormalWeight == 0.0f)
 				{

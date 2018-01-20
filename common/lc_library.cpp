@@ -2350,7 +2350,7 @@ quint32 lcLibraryMeshData::AddVertex(lcMeshDataType MeshDataType, const lcVector
 	return VertexArray.GetSize() - 1;
 }
 
-const float DistanceEpsilon = 0.05f;
+const float DistanceEpsilon = 0.01f; // Maximum value for 50591.dat
 
 quint32 lcLibraryMeshData::AddVertex(lcMeshDataType MeshDataType, const lcVector3& Position, const lcVector3& Normal, bool Optimize)
 {

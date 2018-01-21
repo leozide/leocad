@@ -1393,10 +1393,19 @@ lcMesh* lcPiecesLibrary::CreateMesh(PieceInfo* Info, lcLibraryMeshData& MeshData
 
 			DstVertex.Position = lcVector3LDrawToLeoCAD(SrcVertex.Position);
 			DstVertex.Normal = lcPackNormal(lcVector3LDrawToLeoCAD(SrcVertex.Normal));
+		}
 
-			lcVector3& Position = DstVertex.Position;
-			Min = lcMin(Min, Position);
-			Max = lcMax(Max, Position);
+		for (const lcLibraryMeshSection* Section : MeshData.mSections[MeshDataIdx])
+		{
+			if (Section->mPrimitiveType != LC_MESH_TRIANGLES)
+				continue;
+
+			for (quint32 Index : Section->mIndices)
+			{
+				lcVector3 Position = lcVector3LDrawToLeoCAD(Vertices[Index].Position);
+				Min = lcMin(Min, Position);
+				Max = lcMax(Max, Position);
+			}
 		}
 	}
 

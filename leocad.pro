@@ -2,8 +2,8 @@ QT += core gui opengl network xml
 TEMPLATE = app
 
 greaterThan(QT_MAJOR_VERSION, 4) {
-        QT *= printsupport
-        QT += concurrent
+    QT *= printsupport
+    QT += concurrent
 }
 
 INCLUDEPATH += qt common
@@ -20,7 +20,7 @@ win32 {
 	QMAKE_LFLAGS += /INCREMENTAL
 	PRECOMPILED_SOURCE = common/lc_global.cpp
 	RC_FILE = qt/leocad.rc
-	LIBS += -ladvapi32 -lshell32 -lopengl32 -lwininet
+	LIBS += -ladvapi32 -lshell32 -lopengl32 -lwininet -luser32
 } else {
 	PRECOMPILED_HEADER = common/lc_global.h
 	LIBS += -lz

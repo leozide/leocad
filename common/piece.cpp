@@ -751,7 +751,7 @@ void lcPiece::MovePivotPoint(const lcVector3& Distance)
 	if (!IsFocused(LC_PIECE_SECTION_POSITION))
 		return;
 
-	mPivotMatrix.SetTranslation(mPivotMatrix.GetTranslation() + Distance);
+	mPivotMatrix.SetTranslation(mPivotMatrix.GetTranslation() + lcMul30(Distance, lcMatrix44AffineInverse(mModelWorld)));
 	mState |= LC_PIECE_PIVOT_POINT_VALID;
 }
 

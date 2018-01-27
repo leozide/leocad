@@ -69,7 +69,8 @@ struct lcLibraryTextureMap
 {
 	lcTexture* Texture;
 	lcVector4 Params[4];
-	float Angle;
+	float Angle1;
+	float Angle2;
 	lcLibraryTextureMapType Type;
 	bool Fallback;
 	bool Next;

@@ -30,27 +30,59 @@
 
 static lcVector2 lcCalculateTexCoord(const lcVector3& Position, const lcLibraryTextureMap* TextureMap)
 {
-	if (TextureMap->Type == lcLibraryTextureMapType::PLANAR)
+	switch (TextureMap->Type)
+	{
+	case lcLibraryTextureMapType::PLANAR:
 		return lcVector2(lcDot3(Position, TextureMap->Params[0]) + TextureMap->Params[0].w, lcDot3(Position, TextureMap->Params[1]) + TextureMap->Params[1].w);
 
-	lcVector3& Up = (lcVector3&)TextureMap->Params[0];
-	lcVector3& Front = (lcVector3&)TextureMap->Params[1];
-	lcVector3& Base = (lcVector3&)TextureMap->Params[2];
-	lcVector2 TexCoord;
+	case lcLibraryTextureMapType::CYLINDRICAL:
+		{
+			const lcVector3& Up = (lcVector3&)TextureMap->Params[0];
+			const lcVector3& Front = (lcVector3&)TextureMap->Params[1];
+			const lcVector3& Base = (lcVector3&)TextureMap->Params[2];
+			lcVector2 TexCoord;
 
-	lcVector3 VertexDir = Position - Base;
+			lcVector3 VertexDir = Position - Base;
 
-	TexCoord.y = (lcDot(VertexDir, Up)) / TextureMap->Params[0].w;
+			TexCoord.y = (lcDot(VertexDir, Up)) / TextureMap->Params[0].w;
 
-	lcVector3 VertexDirPlane = lcNormalize(VertexDir - (Up * TexCoord.y));
-	float Angle = acos(lcDot(Front, VertexDirPlane));
+			lcVector3 VertexDirPlane = lcNormalize(VertexDir - (Up * TexCoord.y));
+			float Angle = acos(lcDot(Front, VertexDirPlane));
 
-	if (lcDot(TextureMap->Params[3], lcVector4(Position, 1.0f)) > 0.0f)
-		TexCoord.x = 0.5f + 0.5f * Angle / TextureMap->Angle;
-	else
-		TexCoord.x = 0.5f - 0.5f * Angle / TextureMap->Angle;
+			if (lcDot(TextureMap->Params[3], lcVector4(Position, 1.0f)) > 0.0f)
+				TexCoord.x = 0.5f + 0.5f * Angle / TextureMap->Angle1;
+			else
+				TexCoord.x = 0.5f - 0.5f * Angle / TextureMap->Angle1;
 
-	return TexCoord;
+			return TexCoord;
+		}
+
+	case lcLibraryTextureMapType::SPHERICAL:
+		{
+			const lcVector4& FrontPlane = TextureMap->Params[0];
+			const lcVector3& Center = (const lcVector3&)TextureMap->Params[1];
+			const lcVector4& Plane1 = TextureMap->Params[2];
+			const lcVector4& Plane2 = TextureMap->Params[3];
+			lcVector2 TexCoord;
+
+			lcVector3 VertexDir = Position - Center;
+			
+			float DotPlane1 = lcDot(lcVector4(Position, 1.0f), Plane1);
+			lcVector3 PointInPlane1 = Position - lcVector3(Plane1) * DotPlane1;
+			float DotFrontPlane = lcDot(lcVector4(PointInPlane1, 1.0f), FrontPlane);
+			float DotPlane2 = lcDot(lcVector4(PointInPlane1, 1.0f), Plane2);
+
+			float Angle1 = atan2f(DotPlane2, DotFrontPlane) / LC_PI * TextureMap->Angle1;
+			TexCoord.x = 0.5f + 0.5f * Angle1;
+
+			float Angle2 = asinf(DotPlane1 / lcLength(VertexDir)) / LC_PI * TextureMap->Angle2;
+			TexCoord.y = 0.5f - Angle2;
+
+			return TexCoord;
+		}
+	}
+
+	return lcVector2(0.0f, 0.0f);
 }
 
 lcPiecesLibrary::lcPiecesLibrary()
@@ -1981,10 +2013,35 @@ bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransf
 						Map.Params[1] = lcVector4(Front, 0.0f);
 						Map.Params[2] = lcVector4(Points[1], 0.0f);
 						Map.Params[3] = lcVector4(PlaneNormal, -lcDot(PlaneNormal, Points[0]));
-						Map.Angle = Angle * LC_DTOR;
+						Map.Angle1 = Angle * LC_DTOR;
 					}
 					else if (!strcmp(Token, "SPHERICAL"))
 					{
+						Token += 10;
+
+						char FileName[LC_MAXPATH];
+						lcVector3 Points[3];
+						float Angle1, Angle2;
+
+						sscanf(Token, "%f %f %f %f %f %f %f %f %f %f %f %s", &Points[0].x, &Points[0].y, &Points[0].z, &Points[1].x, &Points[1].y, &Points[1].z, &Points[2].x, &Points[2].y, &Points[2].z, &Angle1, &Angle2, FileName);
+
+						CleanTextureName(FileName);
+
+						lcLibraryTextureMap& Map = TextureStack.Add();
+						Map.Next = false;
+						Map.Fallback = false;
+						Map.Texture = FindTexture(FileName, CurrentProject, SearchProjectFolder);
+						Map.Type = lcLibraryTextureMapType::SPHERICAL;
+
+						lcVector3 Front = lcNormalize(Points[1] - Points[0]);
+						lcVector3 Plane1Normal = lcNormalize(lcCross(Front, Points[2] - Points[0]));
+						lcVector3 Plane2Normal = lcNormalize(lcCross(Plane1Normal, Front));
+						Map.Params[0] = lcVector4(Front, -lcDot(Front, Points[0]));
+						Map.Params[1] = lcVector4(Points[0], 0.0f);
+						Map.Params[2] = lcVector4(Plane1Normal, -lcDot(Plane1Normal, Points[0]));
+						Map.Params[3] = lcVector4(Plane2Normal, -lcDot(Plane2Normal, Points[0]));
+						Map.Angle1 = 360.0f / Angle1;
+						Map.Angle2 = 180.0f / Angle2;
 					}
 				}
 				else if (!strcmp(Token, "FALLBACK"))
@@ -2593,8 +2650,7 @@ void lcLibraryMeshData::AddTexturedLine(lcMeshDataType MeshDataType, int LineTyp
 		for (int IndexIdx = 0; IndexIdx < lcMin(LineType, 4); IndexIdx++)
 		{
 			const lcVector3& Position = Vertices[QuadIndices[IndexIdx]];
-			lcVector2 TexCoord(lcDot3(lcVector3(Position.x, Position.y, Position.z), Map.Params[0]) + Map.Params[0].w,
-							   lcDot3(lcVector3(Position.x, Position.y, Position.z), Map.Params[1]) + Map.Params[1].w);
+			lcVector2 TexCoord = lcCalculateTexCoord(Position, &Map); 
 			Indices[IndexIdx] = AddTexturedVertex(MeshDataType, Position, Normal, TexCoord, Optimize);
 		}
 	}
@@ -2603,8 +2659,7 @@ void lcLibraryMeshData::AddTexturedLine(lcMeshDataType MeshDataType, int LineTyp
 		for (int IndexIdx = 0; IndexIdx < lcMin(LineType, 4); IndexIdx++)
 		{
 			const lcVector3& Position = Vertices[QuadIndices[IndexIdx]];
-			lcVector2 TexCoord(lcDot3(lcVector3(Position.x, Position.y, Position.z), Map.Params[0]) + Map.Params[0].w,
-							   lcDot3(lcVector3(Position.x, Position.y, Position.z), Map.Params[1]) + Map.Params[1].w);
+			lcVector2 TexCoord = lcCalculateTexCoord(Position, &Map);
 			Indices[IndexIdx] = AddTexturedVertex(MeshDataType, Position, TexCoord, Optimize);
 		}
 	}

@@ -86,6 +86,8 @@ public:
 	{
 	}
 
+	explicit lcVector3(const lcVector4& v);
+
 	operator const float*() const
 	{
 		return (const float*)this;
@@ -252,6 +254,11 @@ public:
 	lcVector4 r[4];
 };
 
+inline lcVector3::lcVector3(const lcVector4& v)
+	: x(v.x), y(v.y), z(v.z)
+{
+}
+
 inline lcVector3 operator+(const lcVector3& a, const lcVector3& b)
 {
 	return lcVector3(a.x + b.x, a.y + b.y, a.z + b.z);
@@ -362,6 +369,13 @@ inline bool operator!=(const lcVector3& a, const lcVector3& b)
 }
 
 #ifndef QT_NO_DEBUG
+
+inline QDebug operator<<(QDebug Debug, const lcVector2& v)
+{
+	QDebugStateSaver Saver(Debug);
+	Debug.nospace() << '(' << v.x << ", " << v.y << ')';
+	return Debug;
+}
 
 inline QDebug operator<<(QDebug Debug, const lcVector3& v)
 {

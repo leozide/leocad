@@ -2781,6 +2781,48 @@ void lcLibraryMeshData::AddTexturedLine(lcMeshDataType MeshDataType, int LineTyp
 
 			if (LineType == 4)
 				CheckTexCoordsWrap(QuadIndices[2], QuadIndices[3], QuadIndices[0]);
+
+			auto CheckTexCoordsPole = [&TexCoords, &Vertices, &TextureMap](int Index1, int Index2, int Index3)
+			{
+				const lcVector4& FrontPlane = TextureMap.Params[0];
+				const lcVector4& Plane2 = TextureMap.Params[3];
+				int PoleIndex;
+				int EdgeIndex1, EdgeIndex2;
+
+				if (fabsf(lcDot(lcVector4(Vertices[Index1], 1.0f), FrontPlane)) < 0.01f && fabsf(lcDot(lcVector4(Vertices[Index1], 1.0f), Plane2)) < 0.01f)
+				{
+					PoleIndex = Index1;
+					EdgeIndex1 = Index2;
+					EdgeIndex2 = Index3;
+				}
+				else if (fabsf(lcDot(lcVector4(Vertices[Index2], 1.0f), FrontPlane)) < 0.01f && fabsf(lcDot(lcVector4(Vertices[Index2], 1.0f), Plane2)) < 0.01f)
+				{
+					PoleIndex = Index2;
+					EdgeIndex1 = Index1;
+					EdgeIndex2 = Index3;
+				}
+				else if (fabsf(lcDot(lcVector4(Vertices[Index3], 1.0f), FrontPlane)) < 0.01f && fabsf(lcDot(lcVector4(Vertices[Index3], 1.0f), Plane2)) < 0.01f)
+				{
+					PoleIndex = Index3;
+					EdgeIndex1 = Index1;
+					EdgeIndex2 = Index2;
+				}
+				else
+					return;
+
+				lcVector3 OppositeEdge = Vertices[EdgeIndex2] - Vertices[EdgeIndex1];
+				lcVector3 SideEdge = Vertices[PoleIndex] - Vertices[EdgeIndex1];
+
+				float OppositeLength = lcLength(OppositeEdge);
+				float Projection = lcDot(OppositeEdge, SideEdge) / (OppositeLength * OppositeLength);
+
+				TexCoords[PoleIndex].x = TexCoords[EdgeIndex1].x + (TexCoords[EdgeIndex2].x - TexCoords[EdgeIndex1].x) * Projection;
+			};
+
+			CheckTexCoordsPole(QuadIndices[0], QuadIndices[1], QuadIndices[2]);
+
+			if (LineType == 4)
+				CheckTexCoordsPole(QuadIndices[2], QuadIndices[3], QuadIndices[0]);
 		}
 
 		for (int IndexIdx = 0; IndexIdx < lcMin(LineType, 4); IndexIdx++)

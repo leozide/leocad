@@ -2145,7 +2145,7 @@ bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransf
 						*Ch = '/';
 				}
 
-				lcLibraryPrimitive* Primitive = FindPrimitive(FileName);
+				lcLibraryPrimitive* Primitive = !TextureMap ? FindPrimitive(FileName) : nullptr;
 				lcMatrix44 IncludeTransform(lcVector4(fm[3], fm[6], fm[9], 0.0f), lcVector4(fm[4], fm[7], fm[10], 0.0f), lcVector4(fm[5], fm[8], fm[11], 0.0f), lcVector4(fm[0], fm[1], fm[2], 1.0f));
 				IncludeTransform = lcMul(IncludeTransform, CurrentTransform);
 				bool Mirror = IncludeTransform.Determinant() < 0.0f;
@@ -2245,6 +2245,72 @@ bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransf
 						}
 
 						break;
+					}
+					else
+					{
+						bool Found = false;
+
+						if (mZipFiles[LC_ZIPFILE_OFFICIAL])
+						{
+							lcMemFile IncludeFile;
+
+							auto LoadIncludeFile = [&IncludeFile, &FileName, this](const char* Folder, int ZipFileIndex)
+							{
+								char IncludeFileName[LC_MAXPATH];
+								sprintf(IncludeFileName, Folder, FileName);
+								return mZipFiles[ZipFileIndex]->ExtractFile(IncludeFileName, IncludeFile);
+							};
+
+							if (mHasUnofficial)
+							{
+								Found = LoadIncludeFile("parts/%s", LC_ZIPFILE_UNOFFICIAL);
+
+								if (!Found)
+									Found = LoadIncludeFile("p/%s", LC_ZIPFILE_UNOFFICIAL);
+							}
+
+							if (!Found)
+							{
+								Found = LoadIncludeFile("ldraw/parts/%s", LC_ZIPFILE_OFFICIAL);
+
+								if (!Found)
+									Found = LoadIncludeFile("ldraw/p/%s", LC_ZIPFILE_OFFICIAL);
+							}
+
+							if (Found)
+								ReadMeshData(IncludeFile, IncludeTransform, ColorCode, Mirror ^ InvertNext, TextureStack, MeshData, MeshDataType, Optimize, CurrentProject, SearchProjectFolder);
+						}
+						else
+						{
+							lcDiskFile IncludeFile;
+
+							auto LoadIncludeFile = [&IncludeFile, &FileName, this](const char* Folder)
+							{
+								char IncludeFileName[LC_MAXPATH];
+								sprintf(IncludeFileName, Folder, FileName);
+								IncludeFile.SetFileName(mLibraryDir.absoluteFilePath(QLatin1String(IncludeFileName)));
+								return IncludeFile.Open(QIODevice::ReadOnly);
+							};
+
+							if (mHasUnofficial)
+							{
+								Found = LoadIncludeFile("unofficial/parts/%s");
+
+								if (!Found)
+									Found = LoadIncludeFile("unofficial/p/%s");
+							}
+
+							if (!Found)
+							{
+								Found = LoadIncludeFile("parts/%s");
+
+								if (!Found)
+									Found = LoadIncludeFile("p/%s");
+							}
+
+							if (Found)
+								ReadMeshData(IncludeFile, IncludeTransform, ColorCode, Mirror ^ InvertNext, TextureStack, MeshData, MeshDataType, Optimize, CurrentProject, SearchProjectFolder);
+						}
 					}
 				}
 			} break;
@@ -2629,10 +2695,10 @@ void lcLibraryMeshData::AddLine(lcMeshDataType MeshDataType, int LineType, quint
 	}
 }
 
-void lcLibraryMeshData::AddTexturedLine(lcMeshDataType MeshDataType, int LineType, quint32 ColorCode, bool WindingCCW, const lcLibraryTextureMap& Map, const lcVector3* Vertices, bool Optimize)
+void lcLibraryMeshData::AddTexturedLine(lcMeshDataType MeshDataType, int LineType, quint32 ColorCode, bool WindingCCW, const lcLibraryTextureMap& TextureMap, const lcVector3* Vertices, bool Optimize)
 {
 	lcMeshPrimitiveType PrimitiveType = (LineType == 2) ? LC_MESH_TEXTURED_LINES : LC_MESH_TEXTURED_TRIANGLES;
-	lcLibraryMeshSection* Section = AddSection(MeshDataType, PrimitiveType, ColorCode, Map.Texture);
+	lcLibraryMeshSection* Section = AddSection(MeshDataType, PrimitiveType, ColorCode, TextureMap.Texture);
 
 	int QuadIndices[4] = { 0, 1, 2, 3 };
 	int Indices[4] = { -1, -1, -1, -1 };
@@ -2647,11 +2713,80 @@ void lcLibraryMeshData::AddTexturedLine(lcMeshDataType MeshDataType, int LineTyp
 		if (!WindingCCW)
 			Normal = -Normal;
 
+		lcVector2 TexCoords[4];
+
 		for (int IndexIdx = 0; IndexIdx < lcMin(LineType, 4); IndexIdx++)
 		{
 			const lcVector3& Position = Vertices[QuadIndices[IndexIdx]];
-			lcVector2 TexCoord = lcCalculateTexCoord(Position, &Map); 
-			Indices[IndexIdx] = AddTexturedVertex(MeshDataType, Position, Normal, TexCoord, Optimize);
+			TexCoords[QuadIndices[IndexIdx]] = lcCalculateTexCoord(Position, &TextureMap);
+		}
+
+		if (TextureMap.Type == lcLibraryTextureMapType::SPHERICAL)
+		{
+			auto CheckTexCoordsWrap = [&TexCoords, &Vertices, &TextureMap](int Index1, int Index2, int Index3)
+			{
+				float u12 = fabsf(TexCoords[Index1].x - TexCoords[Index2].x);
+				float u13 = fabsf(TexCoords[Index1].x - TexCoords[Index3].x);
+				float u23 = fabsf(TexCoords[Index2].x - TexCoords[Index3].x);
+
+				if (u12 < 0.5f && u13 < 0.5f && u23 < 0.5f)
+					return;
+
+				const lcVector4& Plane2 = TextureMap.Params[3];
+				float Dot1 = fabsf(lcDot(Plane2, lcVector4(Vertices[Index1], 1.0f)));
+				float Dot2 = fabsf(lcDot(Plane2, lcVector4(Vertices[Index2], 1.0f)));
+				float Dot3 = fabsf(lcDot(Plane2, lcVector4(Vertices[Index3], 1.0f)));
+
+				if (Dot1 > Dot2)
+				{
+					if (Dot1 > Dot3)
+					{
+						if (u12 > 0.5f)
+							TexCoords[Index2].x += TexCoords[Index2].x < 0.5f ? 1.0f : -1.0f;
+
+						if (u13 > 0.5f)
+							TexCoords[Index3].x += TexCoords[Index3].x < 0.5f ? 1.0f : -1.0f;
+					}
+					else
+					{
+						if (u13 > 0.5f)
+							TexCoords[Index1].x += TexCoords[Index1].x < 0.5f ? 1.0f : -1.0f;
+
+						if (u23 > 0.5f)
+							TexCoords[Index2].x += TexCoords[Index2].x < 0.5f ? 1.0f : -1.0f;
+					}
+				}
+				else
+				{
+					if (Dot2 > Dot3)
+					{
+						if (u12 > 0.5f)
+							TexCoords[Index1].x += TexCoords[Index1].x < 0.5f ? 1.0f : -1.0f;
+
+						if (u23 > 0.5f)
+							TexCoords[Index3].x += TexCoords[Index3].x < 0.5f ? 1.0f : -1.0f;
+					}
+					else
+					{
+						if (u13 > 0.5f)
+							TexCoords[Index1].x += TexCoords[Index1].x < 0.5f ? 1.0f : -1.0f;
+
+						if (u23 > 0.5f)
+							TexCoords[Index2].x += TexCoords[Index2].x < 0.5f ? 1.0f : -1.0f;
+					}
+				}
+			};
+
+			CheckTexCoordsWrap(QuadIndices[0], QuadIndices[1], QuadIndices[2]);
+
+			if (LineType == 4)
+				CheckTexCoordsWrap(QuadIndices[2], QuadIndices[3], QuadIndices[0]);
+		}
+
+		for (int IndexIdx = 0; IndexIdx < lcMin(LineType, 4); IndexIdx++)
+		{
+			const lcVector3& Position = Vertices[QuadIndices[IndexIdx]];
+			Indices[IndexIdx] = AddTexturedVertex(MeshDataType, Position, Normal, TexCoords[QuadIndices[IndexIdx]], Optimize);
 		}
 	}
 	else
@@ -2659,7 +2794,7 @@ void lcLibraryMeshData::AddTexturedLine(lcMeshDataType MeshDataType, int LineTyp
 		for (int IndexIdx = 0; IndexIdx < lcMin(LineType, 4); IndexIdx++)
 		{
 			const lcVector3& Position = Vertices[QuadIndices[IndexIdx]];
-			lcVector2 TexCoord = lcCalculateTexCoord(Position, &Map);
+			lcVector2 TexCoord = lcCalculateTexCoord(Position, &TextureMap);
 			Indices[IndexIdx] = AddTexturedVertex(MeshDataType, Position, TexCoord, Optimize);
 		}
 	}

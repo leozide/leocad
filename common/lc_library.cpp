@@ -736,8 +736,19 @@ void lcPiecesLibrary::ReadDirectoryDescriptions(const QFileInfoList (&FileLists)
 			{
 				const char* FileName = *(const char**)CachedDescription;
 				const char* Description = FileName + strlen(FileName) + 1;
-				strcpy(Info->m_strDescription, Description);
-				return;
+				uint64_t CachedFileTime = *(uint64_t*)(Description + strlen(Description) + 1 + 4 + 1);
+
+#if (QT_VERSION >= QT_VERSION_CHECK(4, 7, 0))
+				quint64 FileTime = FileLists[Info->mFolderType][Info->mFolderIndex].lastModified().toMSecsSinceEpoch();
+#else
+				quint64 FileTime = FileLists[Info->mFolderType][Info->mFolderIndex].lastModified().toTime_t();
+#endif
+
+				if (FileTime == CachedFileTime)
+				{
+					strcpy(Info->m_strDescription, Description);
+					return;
+				}
 			}
 		}
 
@@ -834,7 +845,7 @@ void lcPiecesLibrary::ReadDirectoryDescriptions(const QFileInfoList (&FileLists)
 #else
 			quint64 FileTime = FileLists[Info->mFolderType][Info->mFolderIndex].lastModified().toTime_t();
 #endif
-		
+
 			IndexFile.WriteU64(FileTime);
 		}
 
@@ -2288,6 +2299,12 @@ bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransf
 							{
 								char IncludeFileName[LC_MAXPATH];
 								sprintf(IncludeFileName, Folder, FileName);
+								IncludeFile.SetFileName(mLibraryDir.absoluteFilePath(QLatin1String(IncludeFileName)));
+								if (IncludeFile.Open(QIODevice::ReadOnly))
+									return true;
+
+								// todo: instead of using strlwr, search the parts/primitive lists and get the file name from there
+								strlwr(IncludeFileName);
 								IncludeFile.SetFileName(mLibraryDir.absoluteFilePath(QLatin1String(IncludeFileName)));
 								return IncludeFile.Open(QIODevice::ReadOnly);
 							};

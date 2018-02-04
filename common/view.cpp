@@ -518,7 +518,7 @@ lcMatrix44 View::GetPieceInsertPosition(bool IgnoreSelected, PieceInfo* Info) co
 	lcVector3 Intersection;
 
 	const lcBoundingBox& BoundingBox = Info->GetBoundingBox();
-	if (lcLinePlaneIntersection(&Intersection, ClickPoints[0], ClickPoints[1], lcVector4(0, 0, 1, BoundingBox.Min.z)))
+	if (lcLineSegmentPlaneIntersection(&Intersection, ClickPoints[0], ClickPoints[1], lcVector4(0, 0, 1, BoundingBox.Min.z)))
 	{
 		Intersection = mModel->SnapPosition(Intersection);
 		return lcMatrix44Translation(Intersection);
@@ -1908,7 +1908,7 @@ void View::UpdateTrackTool()
 				lcVector4 Plane(PlaneNormals[AxisIndex], -lcDot(PlaneNormals[AxisIndex], OverlayCenter));
 				lcVector3 Intersection;
 
-				if (!lcLinePlaneIntersection(&Intersection, Start, End, Plane))
+				if (!lcLineSegmentPlaneIntersection(&Intersection, Start, End, Plane))
 					continue;
 
 				float IntersectionDistance = lcLengthSquared(Intersection - Start);
@@ -2468,7 +2468,7 @@ void View::StopTracking(bool Accept)
 			lcVector4 Plane(PlaneNormal, -lcDot(PlaneNormal, Center));
 			lcVector3 Target, Corners[2];
 
-			if (lcLinePlaneIntersection(&Target, Points[0], Points[1], Plane) && lcLinePlaneIntersection(&Corners[0], Points[2], Points[3], Plane) && lcLinePlaneIntersection(&Corners[1], Points[3], Points[4], Plane))
+			if (lcLineSegmentPlaneIntersection(&Target, Points[0], Points[1], Plane) && lcLineSegmentPlaneIntersection(&Corners[0], Points[2], Points[3], Plane) && lcLineSegmentPlaneIntersection(&Corners[1], Points[3], Points[4], Plane))
 			{
 				float AspectRatio = (float)mWidth / (float)mHeight;
 				mModel->ZoomRegionToolClicked(mCamera, AspectRatio, Points[0], Target, Corners);
@@ -2804,11 +2804,11 @@ void View::OnMouseMove()
 				lcVector4 Plane(PlaneNormal, -lcDot(PlaneNormal, Center));
 				lcVector3 Intersection;
 
-				if (lcLinePlaneIntersection(&Intersection, CurrentStart, CurrentEnd, Plane))
+				if (lcLineSegmentPlaneIntersection(&Intersection, CurrentStart, CurrentEnd, Plane))
 				{
 					lcVector3 MoveStart;
 
-					if (lcLinePlaneIntersection(&MoveStart, MouseDownStart, MouseDownEnd, Plane))
+					if (lcLineSegmentPlaneIntersection(&MoveStart, MouseDownStart, MouseDownEnd, Plane))
 					{
 						lcVector3 Distance = Intersection - MoveStart;
 						Distance = lcMul(Distance, lcMatrix33AffineInverse(RelativeRotation));
@@ -2866,11 +2866,11 @@ void View::OnMouseMove()
 				lcVector4 Plane(PlaneNormal, -lcDot(PlaneNormal, Center));
 				lcVector3 Intersection;
 
-				if (lcLinePlaneIntersection(&Intersection, CurrentStart, CurrentEnd, Plane))
+				if (lcLineSegmentPlaneIntersection(&Intersection, CurrentStart, CurrentEnd, Plane))
 				{
 					lcVector3 MoveStart;
 
-					if (lcLinePlaneIntersection(&MoveStart, MouseDownStart, MouseDownEnd, Plane))
+					if (lcLineSegmentPlaneIntersection(&MoveStart, MouseDownStart, MouseDownEnd, Plane))
 					{
 						lcVector3 Distance = Intersection - MoveStart;
 						mModel->UpdateMoveTool(Distance, mTrackButton != LC_TRACKBUTTON_LEFT);
@@ -2983,15 +2983,18 @@ void View::OnMouseMove()
 
 			lcVector3 PlaneNormal(mCamera->mPosition - mCamera->mTargetPosition);
 			lcVector4 Plane(PlaneNormal, -lcDot(PlaneNormal, Center));
-			lcVector3 Intersection;
+			lcVector3 Intersection, MoveStart;
 
-			if (lcLinePlaneIntersection(&Intersection, CurrentStart, CurrentEnd, Plane))
+			if (!lcLineSegmentPlaneIntersection(&Intersection, CurrentStart, CurrentEnd, Plane) || !lcLineSegmentPlaneIntersection(&MoveStart, MouseDownStart, MouseDownEnd, Plane))
 			{
-				lcVector3 MoveStart;
+				Center = MouseDownStart + lcNormalize(MouseDownEnd - MouseDownStart) * 10.0f;
+				Plane = lcVector4(PlaneNormal, -lcDot(PlaneNormal, Center));
 
-				if (lcLinePlaneIntersection(&MoveStart, MouseDownStart, MouseDownEnd, Plane))
-					mModel->UpdatePanTool(mCamera, MoveStart - Intersection);
+				if (!lcLineSegmentPlaneIntersection(&Intersection, CurrentStart, CurrentEnd, Plane) || !lcLineSegmentPlaneIntersection(&MoveStart, MouseDownStart, MouseDownEnd, Plane))
+					break;
 			}
+
+			mModel->UpdatePanTool(mCamera, MoveStart - Intersection);
 		}
 		break;
 

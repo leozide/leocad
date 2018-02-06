@@ -22,6 +22,7 @@ View::View(lcModel* Model)
 	mDragState = LC_DRAGSTATE_NONE;
 	mTrackButton = LC_TRACKBUTTON_NONE;
 	mTrackTool = LC_TRACKTOOL_NONE;
+	mTrackToolFromOverlay = false;
 
 	View* ActiveView = gMainWindow->GetActiveView();
 	if (ActiveView)
@@ -1745,6 +1746,9 @@ lcTool View::GetCurrentTool() const
 
 lcTrackTool View::GetOverrideTrackTool(Qt::MouseButton Button) const
 {
+	if (mTrackToolFromOverlay)
+		return LC_TRACKTOOL_NONE;
+
 	lcTool OverrideTool = gMouseShortcuts.GetTool(Button, mInputState.Modifiers);
 
 	if (OverrideTool == LC_NUM_TOOLS)
@@ -1835,6 +1839,7 @@ void View::UpdateTrackTool()
 	int x = mInputState.x;
 	int y = mInputState.y;
 	bool Redraw = false;
+	mTrackToolFromOverlay = false;
 
 	switch (CurrentTool)
 	{
@@ -1873,7 +1878,6 @@ void View::UpdateTrackTool()
 			if (!mModel->GetMoveRotateTransform(OverlayCenter, RelativeRotation))
 				break;
 
-			// Intersect the mouse with the 3 planes.
 			lcVector3 PlaneNormals[3] =
 			{
 				lcVector3(1.0f, 0.0f, 0.0f),
@@ -2028,6 +2032,7 @@ void View::UpdateTrackTool()
 				}
 			}
 
+			mTrackToolFromOverlay = NewTrackTool != LC_TRACKTOOL_MOVE_XYZ && NewTrackTool != LC_TRACKTOOL_SELECT;
 			Redraw = true;
 		}
 		break;
@@ -2166,6 +2171,7 @@ void View::UpdateTrackTool()
 								break;
 							}
 
+							mTrackToolFromOverlay = true;
 							Dist *= r;
 							break;
 						}
@@ -2213,10 +2219,16 @@ void View::UpdateTrackTool()
 			if ((d < r + SquareSize) && (d > r - SquareSize))
 			{
 				if ((cx - x < SquareSize) && (cx - x > -SquareSize))
+				{
 					NewTrackTool = LC_TRACKTOOL_ORBIT_Y;
+					mTrackToolFromOverlay = true;
+				}
 
 				if ((cy - y < SquareSize) && (cy - y > -SquareSize))
+				{
 					NewTrackTool = LC_TRACKTOOL_ORBIT_X;
+					mTrackToolFromOverlay = true;
+				}
 			}
 			else
 			{

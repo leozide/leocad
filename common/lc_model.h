@@ -111,6 +111,7 @@ public:
 	bool IncludesModel(const lcModel* Model) const;
 	void CreatePieceInfo(Project* Project);
 	void UpdatePieceInfo(lcArray<lcModel*>& UpdatedModels);
+	void UpdateMesh();
 
 	PieceInfo* GetPieceInfo() const
 	{

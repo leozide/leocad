@@ -425,8 +425,11 @@ bool Project::Load(const QString& FileName)
 	lcArray<lcModel*> UpdatedModels;
 	UpdatedModels.AllocGrow(mModels.GetSize());
 
-	for (int ModelIdx = 0; ModelIdx < mModels.GetSize(); ModelIdx++)
-		mModels[ModelIdx]->UpdatePieceInfo(UpdatedModels);
+	for (lcModel* Model : mModels)
+	{
+		Model->UpdateMesh();
+		Model->UpdatePieceInfo(UpdatedModels);
+	}
 
 	mModified = false;
 

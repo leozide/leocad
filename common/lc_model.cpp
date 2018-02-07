@@ -230,6 +230,11 @@ void lcModel::CreatePieceInfo(Project* Project)
 	Library->LoadPieceInfo(mPieceInfo, true, true);
 }
 
+void lcModel::UpdateMesh()
+{
+	mPieceInfo->SetModel(this, true, nullptr, false);
+}
+
 void lcModel::UpdatePieceInfo(lcArray<lcModel*>& UpdatedModels)
 {
 	if (UpdatedModels.FindIndex(this) != -1)

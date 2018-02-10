@@ -3,7 +3,7 @@
 #include "lc_math.h"
 
 #define LC_MESH_FILE_ID      LC_FOURCC('M', 'E', 'S', 'H')
-#define LC_MESH_FILE_VERSION 0x0113
+#define LC_MESH_FILE_VERSION 0x0114
 
 enum lcMeshPrimitiveType
 {

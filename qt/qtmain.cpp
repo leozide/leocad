@@ -22,7 +22,7 @@
 
 #include <tchar.h>
 
-static TCHAR minidumpPath[_MAX_PATH];
+static TCHAR gMinidumpPath[_MAX_PATH];
 
 static LONG WINAPI lcSehHandler(PEXCEPTION_POINTERS exceptionPointers)
 { 
@@ -34,7 +34,7 @@ static LONG WINAPI lcSehHandler(PEXCEPTION_POINTERS exceptionPointers)
 	if (dbgHelp == nullptr)
 		return EXCEPTION_EXECUTE_HANDLER;
 
-	HANDLE file = CreateFile(minidumpPath, GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+	HANDLE file = CreateFile(gMinidumpPath, GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
 
 	if (file == INVALID_HANDLE_VALUE)
 		return EXCEPTION_EXECUTE_HANDLER;
@@ -59,7 +59,7 @@ static LONG WINAPI lcSehHandler(PEXCEPTION_POINTERS exceptionPointers)
 	{
 		TCHAR message[_MAX_PATH + 256];
 		lstrcpy(message, TEXT("LeoCAD just crashed. Crash information was saved to the file '"));
-		lstrcat(message, minidumpPath);
+		lstrcat(message, gMinidumpPath);
 		lstrcat(message, TEXT("', please send it to the developers for debugging."));
 
 		MessageBox(nullptr, message, TEXT("LeoCAD"), MB_OK);
@@ -70,12 +70,8 @@ static LONG WINAPI lcSehHandler(PEXCEPTION_POINTERS exceptionPointers)
 
 static void lcSehInit()
 {
-	if (SHGetFolderPath(nullptr, CSIDL_LOCAL_APPDATA | CSIDL_FLAG_CREATE, nullptr, SHGFP_TYPE_CURRENT, minidumpPath) == S_OK)
-	{
-		lstrcat(minidumpPath, TEXT("\\LeoCAD\\"));
-		_tmkdir(minidumpPath);
-		lstrcat(minidumpPath, TEXT("minidump.dmp"));
-	}
+	if (GetTempPath(sizeof(gMinidumpPath), gMinidumpPath))
+		lstrcat(gMinidumpPath, TEXT("leocad.dmp"));
 
 	SetUnhandledExceptionFilter(lcSehHandler);
 }

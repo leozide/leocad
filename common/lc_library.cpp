@@ -38,7 +38,6 @@ static lcVector2 lcCalculateTexCoord(const lcVector3& Position, const lcLibraryT
 	case lcLibraryTextureMapType::CYLINDRICAL:
 		{
 			const lcVector4& FrontPlane = TextureMap->Params[0];
-			const lcVector3& Center = (const lcVector3&)TextureMap->Params[1];
 			const lcVector4& Plane1 = TextureMap->Params[2];
 			const lcVector4& Plane2 = TextureMap->Params[3];
 			lcVector2 TexCoord;
@@ -49,10 +48,9 @@ static lcVector2 lcCalculateTexCoord(const lcVector3& Position, const lcLibraryT
 			float DotPlane2 = lcDot(lcVector4(PointInPlane1, 1.0f), Plane2);
 
 			float Angle1 = atan2f(DotPlane2, DotFrontPlane) / LC_PI * TextureMap->Angle1;
-			TexCoord.x = 0.5f + 0.5f * Angle1;
+			TexCoord.x = lcClamp(0.5f + 0.5f * Angle1, 0.0f, 1.0f);
 
-			lcVector3 VertexDir = Position - Center;
-			TexCoord.y = (lcDot(VertexDir, lcVector3(Plane1))) / TextureMap->Params[1].w;
+			TexCoord.y = DotPlane1 / TextureMap->Params[1].w;
 
 			return TexCoord;
 		}
@@ -2739,7 +2737,7 @@ void lcLibraryMeshData::AddTexturedLine(lcMeshDataType MeshDataType, int LineTyp
 			TexCoords[QuadIndices[IndexIdx]] = lcCalculateTexCoord(Position, &TextureMap);
 		}
 
-		if (TextureMap.Type == lcLibraryTextureMapType::SPHERICAL)
+		if (TextureMap.Type == lcLibraryTextureMapType::CYLINDRICAL || TextureMap.Type == lcLibraryTextureMapType::SPHERICAL)
 		{
 			auto CheckTexCoordsWrap = [&TexCoords, &Vertices, &TextureMap](int Index1, int Index2, int Index3)
 			{
@@ -2799,7 +2797,10 @@ void lcLibraryMeshData::AddTexturedLine(lcMeshDataType MeshDataType, int LineTyp
 
 			if (LineType == 4)
 				CheckTexCoordsWrap(QuadIndices[2], QuadIndices[3], QuadIndices[0]);
+		}
 
+		if (TextureMap.Type == lcLibraryTextureMapType::SPHERICAL)
+		{
 			auto CheckTexCoordsPole = [&TexCoords, &Vertices, &TextureMap](int Index1, int Index2, int Index3)
 			{
 				const lcVector4& FrontPlane = TextureMap.Params[0];

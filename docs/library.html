@@ -70,17 +70,17 @@
 <div class="inner-content">
 
 <h2>Parts Library</h2>
-<p>LeoCAD is completely compatible with LDraw's Parts Library. In fact, the library included in the installer packages is just a zip archive of LDraw's library without any changes.</p>
-<p>This is done mostly to simplify things so new users don't need to download and install a separate file or worry about updating their library. Many LeoCAD users are young people without a lot of computer experience so the setup process is kept as simple as possible.</p>
-<p>At the same time, there are experienced users who like to maintain their own libraries with unofficial parts that they create or download from the internet. Those people can still use their LDraw library with LeoCAD, all they need to do is tell LeoCAD where to find it.</p>
-<p>Note that there is a performance advantage for using a zip file for the library, the application will take less time to start and models will load faster.</p>
+<p>LeoCAD is completely compatible with LDraw's parts library. In fact, the library included in the installer packages is just a ZIP archive of LDraw's library without any changes.</p>
+<p>This is mostly done to simplify things so that new users do not need to download and install a separate file or worry about updating their library. Many LeoCAD users are young people without a lot of computer experience, so the setup process is kept as simple as possible.</p>
+<p>At the same time, there are also experienced users who like to maintain their own libraries with unofficial parts that they create or download from the internet. Those people can still use their LDraw library with LeoCAD, all they need to do is tell LeoCAD where to find it.</p>
+<p>Note that there is a performance advantage for using a zip file for the library, as the application will take less time to start, and the models will load faster.</p>
 
 <h2>Using a Custom Parts Library</h2>
 <p>There are several ways to specify a custom library folder or file (in order of priority):</p>
 <ul>
-<li>Use the -l command line option followed by the library path</li>
-<li>Set the LEOCAD_LIB environment variable</li>
-<li>Enter a new library path in the Preferences Dialog</li>
+<li>Use the &ldquo;-l&rdquo; command line option, followed by the library path.</li>
+<li>Set the &ldquo;LEOCAD_LIB&rdquo; environment variable.</li>
+<li>Enter a new library path in the &ldquo;Preferences&rdquo; menu.</li>
 </ul>
 <p>Note that LeoCAD can use either a zip file or a regular folder for its library. Here are some examples:</p>
 <div class="highlight"><code>
@@ -89,15 +89,15 @@ $ set LEOCAD_LIB=C:\User\Downloads\complete.zip
 </code></div>
 
 <h2>Unofficial Parts</h2>
-<p>You can easily use unnoficial LDraw parts with LeoCAD:</p>
-<p>If you're using LeoCAD's default library then you'll need to download the current unofficial parts from <a href="http://www.ldraw.org/library/unofficial/ldrawunf.zip">http://www.ldraw.org/library/unofficial/ldrawunf.zip</a>, place ldrawunf.zip in the same folder where library.bin is located and restart LeoCAD. The next time the application starts it will detect ldrawunf.zip and load it automatically.</p>
-<p>If you are using your own custom library with loose files then all you need to do is make sure you update or delete parts.lst and the parts should be visible next time you start LeoCAD.</p>
+<p>You can easily use unofficial LDraw parts with LeoCAD:</p>
+<p>If you are using LeoCAD's default library, then you will need to download the current unofficial parts from <a href="http://www.ldraw.org/library/unofficial/ldrawunf.zip">http://www.ldraw.org/library/unofficial/ldrawunf.zip</a> and then place &ldquo;ldrawunf.zip&rdquo; in the same folder where &ldquo; library.bin&rdquo; is located and restart LeoCAD. The next time the application starts, it will detect &ldquo;ldrawunf.zip&rdquo; and load it automatically.</p>
+<p>If you are using your own custom library with loose files, then all you need to do is place the files in the &ldquo;unofficial&rdquo; folder. The parts should be visible the next time you start LeoCAD</s>.</p>
 
 <h2>Default Library Path</h2>
-<p>The default library path is different for each OS:</p>
-<p>Windows: The application looks for library.bin in the same folder where LeoCAD.exe is located.</p>
-<p>Linux: The path is '../share/leocad/library.bin' relative to the application binary folder. If you have the LeoCAD executable '/usr/bin/leocad', the application will look for the library in '/usr/share/leocad/library.bin'.</p>
-<p>macOS: The application bundle should have a 'library.bin' file in the 'Contents/Resources' folder.</p>
+<p>The default library path is different for each operating system:</p>
+<p>Windows: The application looks for &ldquo;library.bin&rdquo; in the same folder where &ldquo;LeoCAD.exe&rdquo; is located.</p>
+<p>Linux: The path is &ldquo;../share/leocad/library.bin&rdquo;, which is relative to the application binary folder. If you have the LeoCAD executable &ldquo;/usr/bin/leocad&rdquo;, the application will look for the library in &ldquo;/usr/share/leocad/library.bin&rdquo;.</p>
+<p>macOS: The application bundle should have a &ldquo;library.bin&rdquo; file in the &ldquo;Contents/Resources&rdquo; folder.</p>
 
         </div>
       </section>

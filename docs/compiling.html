@@ -72,45 +72,46 @@
 <h2>Getting the Source Code</h2>
 <div class="subHeader"></div>
 <p>Users that need to compile their own binaries should get the source code for the latest release from the <a href="../download.html">Download Page</a>.</p>
-<p>If you're a programmer and plan to contribute with code fixes or if you're user that wants to use the latest version and accepts the risks of doing that, then you should download the source from the Git server at https://github.com/leozide/leocad.git.</p>
-<p>Typing this will download the latest revision to a directory called 'leocad' on your computer:</p>
+<p>If you are a programmer and plan to contribute with code fixes, or if you are a user that wants to use the latest version and accepts the risks of doing that, then you should download the source from the GitHub server at https://github.com/leozide/leocad.git.</p>
+<p>Typing the following will download the latest revision to a directory called &ldquo;leocad&rdquo; on your computer:</p>
+
 <div class="highlight"><code>$ git clone https://github.com/leozide/leocad.git</code></div>
 <p>Note: You can receive notifications of source code changes by watching the project on the <a href="https://github.com/leozide/leocad">Github Page</a>.</p>
 
 <h2>Required Libraries</h2>
-<p>LeoCAD requires Qt 4.8 or later (including Qt5) to compile. You can download the Qt SDK for all platforms from <a href="http://qt-project.org">http://qt-project.org</a>.</p>
-<p>Linux users may find it easier to just use their package manager instead:</p>
+<p>LeoCAD requires Qt 4.8 or later (including Qt5) to compile. You can download the Qt SDK for all platforms from the <a href="http://qt-project.org">Qt Project Homepage</a>.</p>
+<p>Linux users may find it easier to use their package manager instead with the following command:</p>
 <div class="highlight"><code>$ sudo apt-get install libqt4-dev libqt4-opengl-dev zlib1g-dev</code></div>
-<p>Although it's not required, you should also download and install a <a href="library.html">Parts Library</a>, otherwise only a very small set of basic parts will be available.</p>
+<p>Although it is not required, it is recommended to also download and install a <a href="library.html">parts library</a>, otherwise only a very small set of basic parts will be available.</p>
 
 <h2>Compiling</h2>
-<p>The easiest way to compile on any platform is to open 'leocad.pro' in Qt Creator and build it from there.</p>
+<p>The easiest way to compile on any platform is to open &ldquo;leocad.pro&rdquo; in Qt Creator and build it from there.</p>
 
 <h4>Linux</h4>
-<p>If you're not using Qt Creator, or if you prefer to compile from the command line you can generate a Makefile using qmake and then build and install it:</p>
+<p>If you are not using Qt Creator, or if you prefer to compile from the command line, you can generate a makefile by using &ldquo;qmake&rdquo;, then build and install the application with the following commands:</p>
 <div class="highlight"><code>leocad$ qmake leocad.pro<br>leocad$ make<br>leocad$ make install</code></div>
-<p>There are two options that can be passed to qmake to customize LeoCAD builds that distribution maintainers will be interested:</p>
+<p>Here are two options that can be utilized by &ldquo;qmake&rdquo; to customize LeoCAD builds that will interest distribution maintainers:</p>
 <ul>
-<li>DISABLE_UPDATE_CHECK=1: Disables update checks at startup and removes that option from the menu. This is recommended to be set for distributions that have their own way of updating applications to avoid confusing users.</li>
-<li>LDRAW_LIBRARY_PATH="path": Adds an extra path to be searched at startup for the LDraw library. The path should be the root folder of the LDraw library, for example: "/usr/share/ldraw".</li>
+<li>&ldquo;DISABLE_UPDATE_CHECK=1&rdquo;: disables update checks at startup and removes that option from the menu. This is recommended to be set for distributions that have their own way of updating applications to avoid confusing users.</li>
+<li>&ldquo;LDRAW_LIBRARY_PATH=path&rdquo;: adds an extra path to be searched at startup for the LDraw library. The path should be the root folder of the LDraw library. For example, &ldquo;/usr/share/ldraw&rdquo;.</li>
 </ul>
 
 <h4>Windows</h4>
-<p>Windows users also have the option to compile with Visual Studio, you just need to use qmake to generate the project files first:</p>
+<p>Windows users also have the option to compile with Visual Studio, but you need to use &ldquo;qmake&rdquo; to generate the project files first with the following command:</p>
 <div class="highlight"><code>C:\leocad> qmake -tp vc</code></div>
-<p>This will generate a file called 'leocad.vcxproj' that can be opened in Visual Studio.</p>
-<p>If you're using the precompiled Qt binaries, make sure to install the libraries corresponding to your compiler and the Qt source code.</p>
+<p>This will generate a file called &ldquo;leocad.vcxproj&rdquo; that can be opened in Visual Studio.</p>
+<p>If you are using the precompiled Qt binaries, make sure to install the libraries that correspond to your compiler and the Qt source code.</p>
 
 <h4>macOS</h4>
-<p>To compile for macOS you'll need to add a <a href="library.html">Parts Library</a> to the folder where you downloaded the source code. You can download the Linux library and unzip it there:</p>
+<p>To compile for macOS, you will need to add a <a href="library.html">parts library</a> to the folder where you downloaded the source code. You can download the Linux library and unzip it there with the following command:</p>
 <div class="highlight"><code>leocad$ unzip Library-Linux-7931.zip</code></div>
 
 <h4>iOS</h4>
-<p>To compile for iOS you'll need to add a <a href="library.html">Parts Library</a> to the folder where you downloaded the source code. You can download the Linux library and unzip it there:</p>
+<p>To compile for iOS, you will need to add a <a href="library.html">parts library</a> to the folder where you downloaded the source code. You can download the Linux library and unzip it there with the following command:</p>
 <div class="highlight"><code>leocad$ unzip Library-Linux-7931.zip</code></div>
-<p>Generate an Xcode project using qmake for iOS:</p>
+<p>Generate an Xcode project by using &ldquo;qmake&rdquo; for iOS with the following command:</p>
 <div class="highlight"><code>leocad$ ~/Qt5.8.0/5.8/ios/bin/qmake</code></div>
-<p>Now open the project in Xcode and build it. A (free) Apple developer account is required to install the app on a device.</p>
+<p>Now open the project in Xcode and build it. An Apple Developer account (free) is required to install the app on a device.<o:p></o:p></p>
   
         </div>
       </section>

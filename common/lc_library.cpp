@@ -1718,37 +1718,42 @@ void lcPiecesLibrary::UnloadUnusedParts()
 
 bool lcPiecesLibrary::LoadTexture(lcTexture* Texture)
 {
-	char Name[LC_MAXPATH], FileName[LC_MAXPATH];
-
-	strcpy(Name, Texture->mName);
-	strlwr(Name);
+	char FileName[LC_MAXPATH];
 
 	if (mZipFiles[LC_ZIPFILE_OFFICIAL])
 	{
 		lcMemFile TextureFile;
 
-		sprintf(FileName, "parts/textures/%s.png", Name);
+		sprintf(FileName, "parts/textures/%s.png", Texture->mName);
 
 		if (!mZipFiles[LC_ZIPFILE_UNOFFICIAL] || !mZipFiles[LC_ZIPFILE_UNOFFICIAL]->ExtractFile(FileName, TextureFile))
 		{
-			sprintf(FileName, "ldraw/parts/textures/%s.png", Name);
+			sprintf(FileName, "ldraw/parts/textures/%s.png", Texture->mName);
 
 			if (!mZipFiles[LC_ZIPFILE_OFFICIAL]->ExtractFile(FileName, TextureFile))
 				return false;
 		}
 
-		if (!Texture->Load(TextureFile))
-			return false;
+		return Texture->Load(TextureFile);
 	}
 	else
 	{
+		sprintf(FileName, "parts/textures/%s.png", Texture->mName);
+
+		if (Texture->Load(mLibraryDir.absoluteFilePath(QLatin1String(FileName))))
+			return true;
+
+#if defined(Q_OS_MACOS) || defined(Q_OS_LINUX)
+		char Name[LC_MAXPATH];
+
+		strcpy(Name, Texture->mName);
+		strlwr(Name);
+
 		sprintf(FileName, "parts/textures/%s.png", Name);
 
-		if (!Texture->Load(mLibraryDir.absoluteFilePath(QLatin1String(FileName))))
-			return false;
+		return Texture->Load(mLibraryDir.absoluteFilePath(QLatin1String(FileName)));
+#endif
 	}
-
-	return true;
 }
 
 void lcPiecesLibrary::ReleaseTexture(lcTexture* Texture)
@@ -2302,10 +2307,14 @@ bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransf
 								if (IncludeFile.Open(QIODevice::ReadOnly))
 									return true;
 
+#if defined(Q_OS_MACOS) || defined(Q_OS_LINUX)
 								// todo: instead of using strlwr, search the parts/primitive lists and get the file name from there
 								strlwr(IncludeFileName);
 								IncludeFile.SetFileName(mLibraryDir.absoluteFilePath(QLatin1String(IncludeFileName)));
 								return IncludeFile.Open(QIODevice::ReadOnly);
+#else
+								return false;
+#endif
 							};
 
 							if (mHasUnofficial)

@@ -1752,6 +1752,8 @@ bool lcPiecesLibrary::LoadTexture(lcTexture* Texture)
 		sprintf(FileName, "parts/textures/%s.png", Name);
 
 		return Texture->Load(mLibraryDir.absoluteFilePath(QLatin1String(FileName)));
+#else
+		return false;
 #endif
 	}
 }

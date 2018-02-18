@@ -276,6 +276,8 @@ void View::SetViewpoint(lcViewpoint Viewpoint)
 	mCamera->SetViewpoint(Viewpoint);
 	ZoomExtents();
 	Redraw();
+
+	gMainWindow->UpdateCurrentCamera(-1);
 }
 
 void View::SetCameraAngles(float Latitude, float Longitude)
@@ -294,6 +296,8 @@ void View::SetDefaultCamera()
 		mCamera = new lcCamera(true);
 
 	mCamera->SetViewpoint(LC_VIEWPOINT_HOME);
+
+	gMainWindow->UpdateCurrentCamera(-1);
 }
 
 lcMatrix44 View::GetProjectionMatrix() const

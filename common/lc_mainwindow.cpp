@@ -1664,6 +1664,7 @@ void lcMainWindow::RemoveActiveView()
 		QList<int> Sizes = ParentParentSplitter->sizes();
 
 		int ParentIndex = ParentParentSplitter->indexOf(Parent);
+		Parent->setParent(nullptr);
 		ParentParentSplitter->insertWidget(ParentIndex, OtherWidget);
 
 		ParentParentSplitter->setSizes(Sizes);

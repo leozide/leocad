@@ -11,7 +11,7 @@ public:
 	lcQColorList(QWidget *parent = 0);
 	~lcQColorList();
 
-	QSize sizeHint() const;
+	QSize sizeHint() const override;
 
 	void setCurrentColor(int colorIndex);
 

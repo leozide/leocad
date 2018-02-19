@@ -281,7 +281,6 @@ void lcMainWindow::CreateActions()
 	mActions[LC_VIEW_TIME_LAST]->setIcon(QIcon(":/resources/time_last.png"));
 	mActions[LC_VIEW_TIME_ADD_KEYS]->setIcon(QIcon(":/resources/time_add_keys.png"));
 	mActions[LC_HELP_HOMEPAGE]->setIcon(QIcon(":/resources/help_homepage.png"));
-	mActions[LC_HELP_EMAIL]->setIcon(QIcon(":/resources/help_email.png"));
 
 	mActions[LC_EDIT_TRANSFORM_RELATIVE]->setCheckable(true);
 	mActions[LC_EDIT_SNAP_MOVE_TOGGLE]->setCheckable(true);
@@ -539,11 +538,13 @@ void lcMainWindow::CreateMenus()
 
 	QMenu* HelpMenu = menuBar()->addMenu(tr("&Help"));
 	HelpMenu->addAction(mActions[LC_HELP_HOMEPAGE]);
-	HelpMenu->addAction(mActions[LC_HELP_EMAIL]);
+	HelpMenu->addAction(mActions[LC_HELP_BUG_REPORT]);
 #if !LC_DISABLE_UPDATE_CHECK
 	HelpMenu->addAction(mActions[LC_HELP_UPDATES]);
 #endif
+#ifndef Q_OS_MACOS
 	HelpMenu->addSeparator();
+#endif
 	HelpMenu->addAction(mActions[LC_HELP_ABOUT]);
 }
 
@@ -2842,8 +2843,8 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		QDesktopServices::openUrl(QUrl("http://www.leocad.org/"));
 		break;
 
-	case LC_HELP_EMAIL:
-		QDesktopServices::openUrl(QUrl("mailto:leozide@gmail.com?subject=LeoCAD"));
+	case LC_HELP_BUG_REPORT:
+		QDesktopServices::openUrl(QUrl("https://github.com/leozide/leocad/issues"));
 		break;
 
 	case LC_HELP_UPDATES:

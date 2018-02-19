@@ -1473,11 +1473,11 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 		QT_TRANSLATE_NOOP("Status", "Open LeoCAD's home page on the internet using your default web browser"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
-	// LC_HELP_EMAIL
+	// LC_HELP_BUG_REPORT
 	{
-		QT_TRANSLATE_NOOP("Action", "Help.Email"),
-		QT_TRANSLATE_NOOP("Menu", "Send Support &E-Mail"),
-		QT_TRANSLATE_NOOP("Status", "Send an e-mail message for help or support using your default e-mail client"),
+		QT_TRANSLATE_NOOP("Action", "Help.BugReport"),
+		QT_TRANSLATE_NOOP("Menu", "Report a Bug"),
+		QT_TRANSLATE_NOOP("Status", "Open LeoCAD's bug report form on your default web browser"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
 	// LC_HELP_UPDATES

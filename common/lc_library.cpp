@@ -2025,7 +2025,7 @@ bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransf
 						float UpLength = lcLength(Up);
 						lcVector3 Front = lcNormalize(Points[2] - Points[1]);
 						lcVector3 Plane1Normal = Up / UpLength;
-						lcVector3 Plane2Normal = lcNormalize(lcCross(Up, Front));
+						lcVector3 Plane2Normal = lcNormalize(lcCross(Front, Up));
 						Map.Params[0] = lcVector4(Front, -lcDot(Front, Points[1]));
 						Map.Params[1] = lcVector4(Points[1], UpLength);
 						Map.Params[2] = lcVector4(Plane1Normal, -lcDot(Plane1Normal, Points[1]));

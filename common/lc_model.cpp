@@ -1162,6 +1162,35 @@ void lcModel::DuplicateSelectedPieces()
 {
 	lcArray<lcObject*> NewPieces;
 	lcPiece* Focus = nullptr;
+	std::map<lcGroup*, lcGroup*> GroupMap;
+
+	std::function<lcGroup*(lcGroup*)> GetNewGroup = [this, &GroupMap, &GetNewGroup](lcGroup* Group)
+	{
+		const auto GroupIt = GroupMap.find(Group);
+		if (GroupIt != GroupMap.end())
+			return GroupIt->second;
+		else
+		{
+			lcGroup* Parent = Group->mGroup ? GetNewGroup(Group->mGroup) : nullptr;
+			QString GroupName = Group->mName;
+
+			while (!GroupName.isEmpty())
+			{
+				QCharRef Last = GroupName[GroupName.size() - 1];
+				if (Last.isDigit())
+					GroupName.chop(1);
+				else
+					break;
+			}
+
+			if (GroupName.isEmpty())
+				GroupName = Group->mName;
+
+			lcGroup* NewGroup = AddGroup(GroupName, Parent);
+			GroupMap[Group] = NewGroup;
+			return NewGroup;
+		}
+	};
 
 	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 	{
@@ -1179,6 +1208,10 @@ void lcModel::DuplicateSelectedPieces()
 
 		PieceIdx++;
 		InsertPiece(NewPiece, PieceIdx);
+
+		lcGroup* Group = Piece->GetGroup();
+		if (Group)
+			Piece->SetGroup(GetNewGroup(Group));
 	}
 
 	if (NewPieces.IsEmpty())

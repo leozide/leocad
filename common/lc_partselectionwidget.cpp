@@ -67,7 +67,7 @@ void lcPartSelectionListModel::ClearRequests()
 {
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 
-	foreach(int RequestIdx, mRequestedPreviews)
+	for (int RequestIdx : mRequestedPreviews)
 	{
 		PieceInfo* Info = mParts[RequestIdx].first;
 		Library->ReleasePieceInfo(Info);

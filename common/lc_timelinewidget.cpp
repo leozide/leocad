@@ -313,7 +313,7 @@ void lcTimelineWidget::MoveSelection()
 
 	QList<QTreeWidgetItem*> SelectedItems = selectedItems();
 
-	foreach(QTreeWidgetItem* PieceItem, SelectedItems)
+	for (QTreeWidgetItem* PieceItem : SelectedItems)
 	{
 		QTreeWidgetItem* Parent = PieceItem->parent();
 
@@ -350,7 +350,7 @@ void lcTimelineWidget::ItemSelectionChanged()
 	lcArray<lcObject*> Selection;
 	lcStep LastStep = 1;
 
-	foreach (QTreeWidgetItem* PieceItem, selectedItems())
+	for (QTreeWidgetItem* PieceItem : selectedItems())
 	{
 		lcPiece* Piece = (lcPiece*)PieceItem->data(0, Qt::UserRole).value<uintptr_t>();
 		if (Piece)

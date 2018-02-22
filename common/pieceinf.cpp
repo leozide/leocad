@@ -71,7 +71,7 @@ void PieceInfo::SetModel(lcModel* Model, bool UpdateMesh, Project* CurrentProjec
 	{
 		lcMemFile PieceFile;
 
-		foreach(const QString& Line, MeshLines)
+		for (const QString& Line : MeshLines)
 		{
 			QByteArray Buffer = Line.toLatin1();
 			PieceFile.WriteBuffer(Buffer.constData(), Buffer.size());

@@ -183,7 +183,7 @@ bool lcMouseShortcuts::Load(const QStringList& Shortcuts)
 {
 	memset(mShortcuts, 0, sizeof(mShortcuts));
 
-	foreach (const QString& Shortcut, Shortcuts)
+	for (const QString& Shortcut : Shortcuts)
 	{
 		int Equals = Shortcut.indexOf('=');
 

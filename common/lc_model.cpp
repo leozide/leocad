@@ -1,6 +1,7 @@
 #include "lc_global.h"
 #include "lc_model.h"
 #include <locale.h>
+#include <functional>
 #include "piece.h"
 #include "camera.h"
 #include "light.h"
@@ -63,7 +64,7 @@ void lcModelProperties::SaveLDraw(QTextStream& Stream) const
 	if (!mComments.isEmpty())
 	{
 		QStringList Comments = mComments.split('\n');
-		foreach (const QString& Comment, Comments)
+		for (const QString& Comment : Comments)
 			Stream << QLatin1String("0 !LEOCAD MODEL COMMENT ") << Comment << LineEnding;
 	}
 

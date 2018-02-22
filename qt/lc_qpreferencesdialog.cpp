@@ -273,7 +273,7 @@ void lcQPreferencesDialog::updateParts()
 	}
 	else
 	{
-		for (const auto PartIt : Library->mPieces)
+		for (const auto& PartIt : Library->mPieces)
 		{
 			PieceInfo* Info = PartIt.second;
 

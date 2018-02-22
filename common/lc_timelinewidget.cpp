@@ -349,8 +349,9 @@ void lcTimelineWidget::ItemSelectionChanged()
 {
 	lcArray<lcObject*> Selection;
 	lcStep LastStep = 1;
+	QList<QTreeWidgetItem*> SelectedItems = selectedItems();
 
-	for (QTreeWidgetItem* PieceItem : selectedItems())
+	for (QTreeWidgetItem* PieceItem : SelectedItems)
 	{
 		lcPiece* Piece = (lcPiece*)PieceItem->data(0, Qt::UserRole).value<uintptr_t>();
 		if (Piece)

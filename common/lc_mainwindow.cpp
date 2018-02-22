@@ -753,7 +753,8 @@ void lcMainWindow::dragEnterEvent(QDragEnterEvent* Event)
 void lcMainWindow::dropEvent(QDropEvent* Event)
 {
 	const QMimeData* MimeData = Event->mimeData();
-	for (const QUrl& Url : MimeData->urls())
+	const QList<QUrl> Urls = MimeData->urls();
+	for (const QUrl& Url : Urls)
 		if (OpenProject(Url.toLocalFile()))
 			break;
 }

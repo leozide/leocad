@@ -116,11 +116,11 @@ lcPiecesLibrary::~lcPiecesLibrary()
 
 void lcPiecesLibrary::Unload()
 {
-	for (const auto PieceIt : mPieces)
+	for (const auto& PieceIt : mPieces)
 		delete PieceIt.second;
 	mPieces.clear();
 
-	for (const auto PrimitiveIt : mPrimitives)
+	for (const auto& PrimitiveIt : mPrimitives)
 		delete PrimitiveIt.second;
 	mPrimitives.clear();
 
@@ -499,7 +499,7 @@ void lcPiecesLibrary::ReadArchiveDescriptions(const QString& OfficialFileName, c
 	{
 		lcMemFile PieceFile;
 
-		for (const auto PieceIt : mPieces)
+		for (const auto& PieceIt : mPieces)
 		{
 			PieceInfo* Info = PieceIt.second;
 
@@ -817,7 +817,7 @@ void lcPiecesLibrary::ReadDirectoryDescriptions(const QFileInfoList (&FileLists)
 
 		std::vector<PieceInfo*> SortedPieces;
 		SortedPieces.reserve(mPieces.size());
-		for (const auto PieceIt : mPieces)
+		for (const auto& PieceIt : mPieces)
 			SortedPieces.push_back(PieceIt.second);
 
 		auto PieceInfoCompare = [](PieceInfo* Info1, PieceInfo* Info2)
@@ -1072,7 +1072,7 @@ bool lcPiecesLibrary::LoadCacheIndex(const QString& FileName)
 	if (IndexFile.ReadBuffer((char*)&NumFiles, sizeof(NumFiles)) == 0 || NumFiles != mPieces.size())
 		return false;
 
-	for (const auto PieceIt : mPieces)
+	for (const auto& PieceIt : mPieces)
 	{
 		PieceInfo* Info = PieceIt.second;
 		quint8 Length;
@@ -1098,7 +1098,7 @@ bool lcPiecesLibrary::SaveArchiveCacheIndex(const QString& FileName)
 	if (IndexFile.WriteBuffer((char*)&NumFiles, sizeof(NumFiles)) == 0)
 		return false;
 
-	for (const auto PieceIt : mPieces)
+	for (const auto& PieceIt : mPieces)
 	{
 		PieceInfo* Info = PieceIt.second;
 		quint8 Length = (quint8)strlen(Info->m_strDescription);
@@ -1648,7 +1648,7 @@ void lcPiecesLibrary::UpdateBuffers(lcContext* Context)
 	int VertexDataSize = 0;
 	int IndexDataSize = 0;
 
-	for (const auto PieceIt : mPieces)
+	for (const auto& PieceIt : mPieces)
 	{
 		PieceInfo* Info = PieceIt.second;
 		lcMesh* Mesh = Info->IsPlaceholder() ? gPlaceholderMesh : Info->GetMesh();
@@ -1675,7 +1675,7 @@ void lcPiecesLibrary::UpdateBuffers(lcContext* Context)
 	VertexDataSize = 0;
 	IndexDataSize = 0;
 
-	for (const auto PieceIt : mPieces)
+	for (const auto& PieceIt : mPieces)
 	{
 		PieceInfo* Info = PieceIt.second;
 		lcMesh* Mesh = Info->IsPlaceholder() ? gPlaceholderMesh : Info->GetMesh();
@@ -1708,7 +1708,7 @@ void lcPiecesLibrary::UnloadUnusedParts()
 {
 	QMutexLocker LoadLock(&mLoadMutex);
 
-	for (const auto PieceIt : mPieces)
+	for (const auto& PieceIt : mPieces)
 	{
 		PieceInfo* Info = PieceIt.second;
 		if (Info->GetRefCount() == 0 && Info->mState != LC_PIECEINFO_UNLOADED)
@@ -3262,7 +3262,7 @@ void lcPiecesLibrary::GetCategoryEntries(const char* CategoryKeywords, bool Grou
 	SinglePieces.RemoveAll();
 	GroupedPieces.RemoveAll();
 
-	for (const auto PieceIt : mPieces)
+	for (const auto& PieceIt : mPieces)
 	{
 		PieceInfo* Info = PieceIt.second;
 
@@ -3330,7 +3330,7 @@ void lcPiecesLibrary::GetPatternedPieces(PieceInfo* Parent, lcArray<PieceInfo*>&
 
 	Pieces.RemoveAll();
 
-	for (const auto PieceIt : mPieces)
+	for (const auto& PieceIt : mPieces)
 		if (strncmp(Name, PieceIt.first.c_str(), strlen(Name)) == 0)
 			Pieces.Add(PieceIt.second);
 
@@ -3345,7 +3345,7 @@ void lcPiecesLibrary::GetPatternedPieces(PieceInfo* Parent, lcArray<PieceInfo*>&
 		if (Name[Len-1] < '0' || Name[Len-1] > '9')
 			Name[Len-1] = 'P';
 
-		for (const auto PieceIt : mPieces)
+		for (const auto& PieceIt : mPieces)
 			if (strncmp(Name, PieceIt.first.c_str(), strlen(Name)) == 0)
 				Pieces.Add(PieceIt.second);
 	}
@@ -3356,7 +3356,7 @@ void lcPiecesLibrary::GetParts(lcArray<PieceInfo*>& Parts)
 	Parts.SetSize(0);
 	Parts.AllocGrow(mPieces.size());
 
-	for (const auto PartIt : mPieces)
+	for (const auto& PartIt : mPieces)
 		Parts.Add(PartIt.second);
 }
 
@@ -3378,7 +3378,7 @@ bool lcPiecesLibrary::LoadBuiltinPieces()
 
 	lcMemFile PieceFile;
 
-	for (const auto PieceIt : mPieces)
+	for (const auto& PieceIt : mPieces)
 	{
 		PieceInfo* Info = PieceIt.second;
 

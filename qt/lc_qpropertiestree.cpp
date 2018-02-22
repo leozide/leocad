@@ -480,7 +480,7 @@ QWidget *lcQPropertiesTree::createEditor(QWidget *parent, QTreeWidgetItem *item)
 			std::vector<PieceInfo*> SortedPieces;
 			SortedPieces.reserve(Library->mPieces.size());
 
-			for (const auto PartIt : Library->mPieces)
+			for (const auto& PartIt : Library->mPieces)
 				SortedPieces.push_back(PartIt.second);
 
 			auto PieceCompare = [](PieceInfo* Info1, PieceInfo* Info2)

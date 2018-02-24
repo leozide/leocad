@@ -524,6 +524,33 @@ void lcLight::DrawPointLight(lcContext* Context) const
 	Context->DrawIndexedPrimitives(GL_TRIANGLES, NumIndices, GL_UNSIGNED_SHORT, 0);
 }
 
+void lcLight::RemoveKeyFrames()
+{
+	mPositionKeys.RemoveAll();
+	ChangeKey(mPositionKeys, mPosition, 1, true);
+
+	mTargetPositionKeys.RemoveAll();
+	ChangeKey(mTargetPositionKeys, mTargetPosition, 1, true);
+
+	mAmbientColorKeys.RemoveAll();
+	ChangeKey(mAmbientColorKeys, mAmbientColor, 1, true);
+
+	mDiffuseColorKeys.RemoveAll();
+	ChangeKey(mDiffuseColorKeys, mDiffuseColor, 1, true);
+
+	mSpecularColorKeys.RemoveAll();
+	ChangeKey(mSpecularColorKeys, mSpecularColor, 1, true);
+
+	mAttenuationKeys.RemoveAll();
+	ChangeKey(mAttenuationKeys, mAttenuation, 1, true);
+
+	mSpotCutoffKeys.RemoveAll();
+	ChangeKey(mSpotCutoffKeys, mSpotCutoff, 1, true);
+
+	mSpotExponentKeys.RemoveAll();
+	ChangeKey(mSpotExponentKeys, mSpotExponent, 1, true);
+}
+
 bool lcLight::Setup(int LightIndex)
 {
 	Q_UNUSED(LightIndex);

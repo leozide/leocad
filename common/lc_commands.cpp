@@ -1060,6 +1060,13 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 		QT_TRANSLATE_NOOP("Status", "Reset the pivot point of the selected pieces to their origin"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
+	// LC_PIECE_REMOVE_KEY_FRAMES
+	{
+		QT_TRANSLATE_NOOP("Action", "Piece.RemoveKeyFrames"),
+		QT_TRANSLATE_NOOP("Menu", "Remove &Key Frames"),
+		QT_TRANSLATE_NOOP("Status", "Remove all key frames from the selected pieces"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
 	// LC_PIECE_CONTROL_POINT_INSERT
 	{
 		QT_TRANSLATE_NOOP("Action", "Piece.ControlPoint.Insert"),

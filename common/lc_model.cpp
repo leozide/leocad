@@ -2152,6 +2152,24 @@ void lcModel::ResetSelectedPiecesPivotPoint()
 	gMainWindow->UpdateAllViews();
 }
 
+void lcModel::RemoveSelectedPiecesKeyFrames()
+{
+	for (lcPiece* Piece : mPieces)
+		if (Piece->IsSelected())
+			Piece->RemoveKeyFrames();
+
+	for (lcCamera* Camera : mCameras)
+		if (Camera->IsSelected())
+			Camera->RemoveKeyFrames();
+
+	for (lcLight* Light : mLights)
+		if (Light->IsSelected())
+			Light->RemoveKeyFrames();
+
+	gMainWindow->UpdateAllViews();
+	SaveCheckpoint(tr("Removing Key Frames"));
+}
+
 void lcModel::InsertControlPoint()
 {
 	lcObject* Focus = GetFocusObject();

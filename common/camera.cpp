@@ -634,6 +634,18 @@ void lcCamera::DrawInterface(lcContext* Context) const
 	}
 }
 
+void lcCamera::RemoveKeyFrames()
+{
+	mPositionKeys.RemoveAll();
+	ChangeKey(mPositionKeys, mPosition, 1, true);
+
+	mTargetPositionKeys.RemoveAll();
+	ChangeKey(mTargetPositionKeys, mTargetPosition, 1, true);
+
+	mUpVectorKeys.RemoveAll();
+	ChangeKey(mUpVectorKeys, mUpVector, 1, true);
+}
+
 void lcCamera::RayTest(lcObjectRayTest& ObjectRayTest) const
 {
 	lcVector3 Min = lcVector3(-LC_CAMERA_POSITION_EDGE, -LC_CAMERA_POSITION_EDGE, -LC_CAMERA_POSITION_EDGE);

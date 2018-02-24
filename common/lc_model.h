@@ -190,6 +190,7 @@ public:
 	void DeleteAllCameras();
 	void DeleteSelectedObjects();
 	void ResetSelectedPiecesPivotPoint();
+	void RemoveSelectedPiecesKeyFrames();
 	void InsertControlPoint();
 	void RemoveFocusedControlPoint();
 	void ShowSelectedPiecesEarlier();

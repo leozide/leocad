@@ -637,6 +637,15 @@ void lcPiece::DrawInterface(lcContext* Context) const
 	}
 }
 
+void lcPiece::RemoveKeyFrames()
+{
+	mPositionKeys.RemoveAll();
+	ChangeKey(mPositionKeys, mModelWorld.GetTranslation(), 1, true);
+
+	mRotationKeys.RemoveAll();
+	ChangeKey(mRotationKeys, lcMatrix33(mModelWorld), 1, true);
+}
+
 void lcPiece::AddRenderMeshes(lcScene& Scene, bool DrawInterface, bool Highlight) const
 {
 	bool Focused, Selected;

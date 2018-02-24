@@ -510,9 +510,10 @@ void lcMainWindow::CreateMenus()
 	PieceMenu->addAction(mActions[LC_PIECE_INSERT]);
 	PieceMenu->addAction(mActions[LC_PIECE_DELETE]);
 	PieceMenu->addAction(mActions[LC_PIECE_DUPLICATE]);
-	PieceMenu->addAction(mActions[LC_PIECE_RESET_PIVOT_POINT]);
 	PieceMenu->addAction(mActions[LC_PIECE_ARRAY]);
 	PieceMenu->addAction(mActions[LC_PIECE_MINIFIG_WIZARD]);
+	PieceMenu->addAction(mActions[LC_PIECE_RESET_PIVOT_POINT]);
+	PieceMenu->addAction(mActions[LC_PIECE_REMOVE_KEY_FRAMES]);
 	PieceMenu->addSeparator();
 	PieceMenu->addAction(mActions[LC_PIECE_VIEW_SELECTED_MODEL]);
 	PieceMenu->addAction(mActions[LC_PIECE_INLINE_SELECTED_MODELS]);
@@ -1782,6 +1783,7 @@ void lcMainWindow::UpdateSelectedObjects(bool SelectionChanged)
 		mActions[LC_PIECE_DELETE]->setEnabled(Flags & LC_SEL_SELECTED);
 		mActions[LC_PIECE_DUPLICATE]->setEnabled(Flags & LC_SEL_SELECTED);
 		mActions[LC_PIECE_RESET_PIVOT_POINT]->setEnabled(Flags & LC_SEL_SELECTED);
+		mActions[LC_PIECE_REMOVE_KEY_FRAMES]->setEnabled(Flags & LC_SEL_SELECTED);
 		mActions[LC_PIECE_ARRAY]->setEnabled(Flags & LC_SEL_PIECE);
 		mActions[LC_PIECE_CONTROL_POINT_INSERT]->setEnabled(Flags & LC_SEL_CAN_ADD_CONTROL_POINT);
 		mActions[LC_PIECE_CONTROL_POINT_REMOVE]->setEnabled(Flags & LC_SEL_CAN_REMOVE_CONTROL_POINT);
@@ -2521,6 +2523,10 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 
 	case LC_PIECE_RESET_PIVOT_POINT:
 		lcGetActiveModel()->ResetSelectedPiecesPivotPoint();
+		break;
+
+	case LC_PIECE_REMOVE_KEY_FRAMES:
+		lcGetActiveModel()->RemoveSelectedPiecesKeyFrames();
 		break;
 
 	case LC_PIECE_CONTROL_POINT_INSERT:

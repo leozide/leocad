@@ -30,9 +30,6 @@ lcPiece::lcPiece(PieceInfo* Info)
 	mGroup = nullptr;
 	mFileLine = -1;
 	mPivotMatrix = lcMatrix44Identity();
-
-	ChangeKey(mPositionKeys, lcVector3(0.0f, 0.0f, 0.0f), 1, true);
-	ChangeKey(mRotationKeys, lcMatrix33Identity(), 1, true);
 }
 
 lcPiece::lcPiece(const lcPiece& Other)
@@ -390,8 +387,10 @@ void lcPiece::Initialize(const lcMatrix44& WorldMatrix, lcStep Step)
 {
 	mStepShow = Step;
 
-	ChangeKey(mPositionKeys, WorldMatrix.GetTranslation(), 1, true);
-	ChangeKey(mRotationKeys, lcMatrix33(WorldMatrix), 1, true);
+	if (mPositionKeys.IsEmpty())
+		ChangeKey(mPositionKeys, WorldMatrix.GetTranslation(), 1, true);
+	if (mRotationKeys.IsEmpty())
+		ChangeKey(mRotationKeys, lcMatrix33(WorldMatrix), 1, true);
 
 	UpdatePosition(Step);
 }

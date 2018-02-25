@@ -39,9 +39,9 @@ docbar = """<!-- docbar start -->
       <li><a href="">Flexible Parts</a></li> 
       Keyframing
       POV-Ray
-	  Pivot points
  -->
       <li><a href="tutorial1.html">Basic Tutorial</a></li>
+      <li><a href="rotation.html">Rotation Center</a></li>
     </ul>
   </div>
 <!--      <li><a href="">Coordinate System</a></li>

@@ -1,0 +1,129 @@
+<!doctype html>
+<html>
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Pivot Points | LeoCAD</title>
+    <link rel="stylesheet" href="../main.css">
+  </head>
+  <body>
+    <div class="container">
+
+<!-- navbar start -->
+<div class="nav-main">
+  <div class="wrap">
+    <a class="nav-home" href="../index.html"><img class="nav-logo" src="../leocad-32.png" width="32" height="32"> LeoCAD </a>
+    <ul class="nav-site nav-site-internal">
+      <li><a href="../download.html">Download</a></li>
+      <li><a href="start.html" class="active">Documentation</a></li>
+<!--      <li><a href="../help.html">Help</a></li> -->
+    </ul>
+    <ul class="nav-site nav-site-external">
+      <li><a href="https://github.com/leozide/leocad">GitHub</a></li>
+    </ul>
+  </div>
+</div>
+<!-- navbar end -->
+
+<section class="content wrap documentationContent">
+
+<!-- docbar start -->
+<div class="nav-docs">
+  <div class="nav-docs-section">
+    <h3>General Information</h3>
+    <ul>
+      <li><a href="start.html">Getting Started</a></li>
+      <li><a href="library.html">Parts Library</a></li>
+      <li><a href="compiling.html">Compiling Guide</a></li>
+      <li><a href="license.html">License</a></li>
+      <li><a href="history.html">Version History</a></li>
+    </ul>
+  </div>
+  <div class="nav-docs-section">
+    <h3>Tutorials</h3>
+    <ul>
+<!--
+      <li><a href="">Choosing and Adding Pieces</a></li>
+      <li><a href="">Moving and Rotating Pieces</a></li>
+      <li><a href="camera.html">Camera and Viewport</a></li> 
+      <li><a href="">Models</a></li> 
+      <li><a href="">Flexible Parts</a></li> 
+      Keyframing
+      POV-Ray
+ -->
+      <li><a href="tutorial1.html">Basic Tutorial</a></li>
+      <li><a href="rotation.html" class="active">Rotation Center</a></li>
+    </ul>
+  </div>
+<!--      <li><a href="">Coordinate System</a></li>
+      <li><a href="">Configuration Shortcuts</a></li>
+  -->
+  <div class="nav-docs-section">
+    <h3>Reference</h3>
+    <ul>
+      <li><a href="meta.html">Meta Commands</a></li>
+      <li><a href="texmap.html">Texture Mapping</a></li>
+    </ul>
+  </div>
+</div>
+<!-- docbar end -->
+
+<div class="inner-content">
+
+    <h2>Rotation Center</h2>
+    <div class="subHeader"></div>
+    <p>LeoCAD has multiple ways of changing the center of rotation of any part in a model, so that you can more easily position them.</p>
+
+    <h4>Using a Helper Part</h4>
+
+    <p>Suppose that you are trying to build a flag like this one but decides that you want it at another angle instead.</p>
+
+    <p class="centerImage"><img src="rotation-01.png" /></p>
+
+    <hr />
+
+    <p>You select it and notice that the origin of the part is near its center and not at the center of clips. Rotating it like this will not yield proper results:</p>
+
+    <p class="centerImage"><img src="rotation-02.png" /></p>
+
+    <hr />
+
+    <p>Whenever a part has focus (blue tint), LeoCAD will use that part as the center of rotation for all selected parts. This means that we can often use a helper part to change the center of rotation of the part we want to rotate.</p>
+    <p>Let's try that with our flag: Select the flag and then the antenna with your mouse, while holding the CTRL key down. Notice that the center of rotation is now the antenna, and the flag can be rotated correctly:</p>
+
+    <p class="centerImage"><img src="rotation-03.png" /></p>
+
+    <hr />
+
+    <p>Note: If one or more parts are selected but none of them have focus, the center of rotation will be at the physical center of all selected parts:</p>
+
+    <p class="centerImage"><img src="rotation-04.png" /></p>
+
+    <hr />
+
+    <h4>Changing the Pivot Point</h4>
+
+    <p>Now let's look at a more complicated example of a towball and socket. In this case, neither part has its origin where we want to rotate it and we don't have a helper part to use:</p>
+
+    <p class="centerImage"><img src="rotation-05.png" /></p>
+
+    <hr />
+
+    <p>LeoCAD allows you to change pivot point of any part by clicking on the movement arrows with the right mouse button and dragging:</p>
+
+    <p class="centerImage"><img src="rotation-06.png" /></p>
+
+    <hr />
+
+    <p>Now that the pivot point is at the center of the socket that part can be rotated around it:</p>
+
+    <p class="centerImage"><img src="rotation-07.png" /></p>
+
+
+</div>
+      </section>
+<!-- footer start -->
+<footer class="wrap"><div class="right"> &copy; LeoCAD.org </div></footer>
+<!-- footer end -->
+    </div>
+  </body>
+</html>

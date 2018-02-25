@@ -576,7 +576,7 @@ lcFramebuffer lcContext::CreateFramebuffer(int Width, int Height, bool Depth, bo
 
 	if (gSupportsFramebufferObjectARB)
 	{
-		int Samples = (Multisample && gSupportsTexImage2DMultisample) ? QGLFormat::defaultFormat().samples() : 1;
+		int Samples = (Multisample && gSupportsTexImage2DMultisample && QGLFormat::defaultFormat().sampleBuffers()) ? QGLFormat::defaultFormat().samples() : 1;
 
 		glGenFramebuffers(1, &Framebuffer.mObject);
 		glBindFramebuffer(GL_FRAMEBUFFER, Framebuffer.mObject);
@@ -697,7 +697,7 @@ void lcContext::BindFramebuffer(GLuint FramebufferObject)
 
 std::pair<lcFramebuffer, lcFramebuffer> lcContext::CreateRenderFramebuffer(int Width, int Height)
 {
-	if (gSupportsFramebufferObjectARB && QGLFormat::defaultFormat().samples() > 1)
+	if (gSupportsFramebufferObjectARB && QGLFormat::defaultFormat().sampleBuffers() && QGLFormat::defaultFormat().samples() > 1)
 		return std::make_pair(CreateFramebuffer(Width, Height, true, true), CreateFramebuffer(Width, Height, false, false));
 	else
 		return std::make_pair(CreateFramebuffer(Width, Height, true, false), lcFramebuffer());

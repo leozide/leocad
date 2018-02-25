@@ -638,7 +638,7 @@ bool View::BeginRenderToImage(int Width, int Height)
 	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &MaxTexture);
 
 	MaxTexture = qMin(MaxTexture, 2048);
-	MaxTexture /= QGLFormat::defaultFormat().samples();
+	MaxTexture /= QGLFormat::defaultFormat().sampleBuffers() ? QGLFormat::defaultFormat().samples() : 1;
 
 	int TileWidth = qMin(Width, MaxTexture);
 	int TileHeight = qMin(Height, MaxTexture);

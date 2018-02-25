@@ -10,7 +10,7 @@ extern bool gSupportsTexImage2DMultisample;
 extern bool gSupportsAnisotropic;
 extern GLfloat gMaxAnisotropy;
 
-#ifndef Q_OS_MAC
+#if !defined(Q_OS_MAC) && !defined(QT_OPENGL_ES)
 #define LC_LOAD_GLEXTENSIONS
 #endif
 

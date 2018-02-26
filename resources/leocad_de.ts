@@ -2523,12 +2523,12 @@ Bitte lesen sie unter http://www.leocad.org nach wie man eine Bibliothek herunte
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="1953"/>
         <source>Saving files in LCD format is no longer supported, please use the LDR or MPD formats instead.</source>
-        <translation>Enregistrer les fichiers sous le format LCD n’est plus possible, SVP utiliser les formats LDR ou MPD à la place.</translation>
+        <translation>Speichern als LCD Format wird nicht mehr unterstützt, bitte LDR oder MPD Format verwenden.</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="1972"/>
         <source>Save changes to &apos;%1&apos;?</source>
-        <translation>Enregistrer les modifications à « %1 » ?</translation>
+        <translation>Änderungen an « %1 » speichern?</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.h" line="124"/>
@@ -2591,7 +2591,7 @@ Bitte lesen sie unter http://www.leocad.org nach wie man eine Bibliothek herunte
         <location filename="../common/lc_mainwindow.h" line="131"/>
         <location filename="../common/lc_mainwindow.h" line="136"/>
         <source>None</source>
-        <translation>Aucun</translation>
+        <translation>Keine</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.h" line="130"/>
@@ -2619,7 +2619,7 @@ Bitte lesen sie unter http://www.leocad.org nach wie man eine Bibliothek herunte
     <message>
         <location filename="../common/lc_model.cpp" line="994"/>
         <source>Pasting</source>
-        <translation>Collage</translation>
+        <translation>Pasting</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="1153"/>
@@ -2634,70 +2634,70 @@ Bitte lesen sie unter http://www.leocad.org nach wie man eine Bibliothek herunte
     <message>
         <location filename="../common/lc_model.cpp" line="1153"/>
         <source>Error creating images.</source>
-        <translation>Erreur à la création des images.</translation>
+        <translation>Fehler beim Bilder Erstellen.</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="1430"/>
         <source>Inserting Step</source>
-        <translation>Insértion d’une étape</translation>
+        <translation>Schritt einfügen</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="1450"/>
         <source>Removing Step</source>
-        <translation>Suppression d’une étape</translation>
+        <translation>Schritt löschen</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="1497"/>
         <location filename="../common/lc_model.cpp" line="3810"/>
         <source>No pieces selected.</source>
-        <translation>Aucune pièce sélectionnée.</translation>
+        <translation>Kein Teil ausgewählt.</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="1501"/>
         <source>Group #</source>
-        <translation>Groupe n°</translation>
+        <translation>Gruppe Nr.</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="1522"/>
         <location filename="../common/lc_model.cpp" line="1599"/>
         <source>Grouping</source>
-        <translation>Grouper</translation>
+        <translation>Gruppieren</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="1565"/>
         <location filename="../common/lc_model.cpp" line="1616"/>
         <source>Ungrouping</source>
-        <translation>Dégrouper</translation>
+        <translation>Gruppierung aufheben</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="1667"/>
         <source>Editing Groups</source>
-        <translation>Éditer les groupes</translation>
+        <translation>Gruppen bearbeiten</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="2530"/>
         <source>Setting Part</source>
-        <translation>Modification de pièce</translation>
+        <translation>Teil setzen</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="3456"/>
         <source>New SpotLight</source>
-        <translation>Nouvelle lumière projecteur</translation>
+        <translation>Neues Scheinwerferlicht</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="3461"/>
         <source>New Camera</source>
-        <translation>Nouvelle caméra</translation>
+        <translation>Neue Kamera</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="3468"/>
         <source>Move</source>
-        <translation>Déplacer</translation>
+        <translation>Bewegen</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="3472"/>
         <source>Rotate</source>
-        <translation>Tourner</translation>
+        <translation>Drehen</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="3481"/>
@@ -2705,105 +2705,105 @@ Bitte lesen sie unter http://www.leocad.org nach wie man eine Bibliothek herunte
         <location filename="../common/lc_model.cpp" line="3751"/>
         <location filename="../common/lc_model.cpp" line="3761"/>
         <source>Zoom</source>
-        <translation>Zoomer</translation>
+        <translation>Zoomen</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="3486"/>
         <source>Pan</source>
-        <translation>Glisser</translation>
+        <translation>Verschieben</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="3491"/>
         <source>Orbit</source>
-        <translation>Orbiter</translation>
+        <translation>Umkreisen</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="3496"/>
         <source>Roll</source>
-        <translation>Pivoter</translation>
+        <translation>Rollen</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="3518"/>
         <source>Insert</source>
-        <translation>Insérer</translation>
+        <translation>Einfügen</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="3528"/>
         <source>New Light</source>
-        <translation>Nouvelle lumière</translation>
+        <translation>Neues Licht</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="3647"/>
         <source>Deleting</source>
-        <translation>Suppression</translation>
+        <translation>Löschen</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="2505"/>
         <location filename="../common/lc_model.cpp" line="3661"/>
         <source>Painting</source>
-        <translation>Peindre</translation>
+        <translation>Farbgebung</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="2217"/>
         <source>No models selected.</source>
-        <translation>Aucun modèle sélectionné.</translation>
+        <translation>Kein Modell ausgewählt.</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="2562"/>
         <source>Showing Pieces</source>
-        <translation>Montre les pièces</translation>
+        <translation>Zeige Teile</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="2594"/>
         <source>Hiding Pieces</source>
-        <translation>Cache les pièces</translation>
+        <translation>Teile ausblenden</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="2609"/>
         <location filename="../common/lc_model.cpp" line="2634"/>
         <location filename="../common/lc_model.cpp" line="2646"/>
         <source>Editing Camera</source>
-        <translation>Édite la caméra</translation>
+        <translation>Kamera bearbeiten</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="2622"/>
         <source>Changing FOV</source>
-        <translation>Change le FOV</translation>
+        <translation>FOV ändern</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="2658"/>
         <source>Renaming Camera</source>
-        <translation>Renomme la caméra</translation>
+        <translation>Kamera umbenennen</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="3730"/>
         <source>Look At</source>
-        <translation>Viser le modèle</translation>
+        <translation>Modell betrachten</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="3786"/>
         <source>Changing Properties</source>
-        <translation>Change les propriétés</translation>
+        <translation>Eigenschaften ändern</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="3793"/>
         <source>Nothing to select.</source>
-        <translation>Rien à sélectionner.</translation>
+        <translation>Nichts auszuwählen.</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="3826"/>
         <source>Array only has 1 element or less, no pieces added.</source>
-        <translation>L’arrangement a seulement un élément ou moins, aucune pièce ajoutée.</translation>
+        <translation>Das Array hat nur 1 Element oder weniger, keine Teile zugefügt.</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="3881"/>
         <source>Array</source>
-        <translation>Arrangement</translation>
+        <translation>Array</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="3893"/>
         <source>Minifig #</source>
-        <translation>Minifig n°</translation>
+        <translation>Minifig Nr.</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="3914"/>
@@ -2816,7 +2816,7 @@ Bitte lesen sie unter http://www.leocad.org nach wie man eine Bibliothek herunte
     <message>
         <location filename="../qt/lc_qaboutdialog.ui" line="14"/>
         <source>About LeoCAD</source>
-        <translation>À propos de LeoCAD</translation>
+        <translation>Über LeoCAD</translation>
     </message>
     <message>
         <location filename="../qt/lc_qaboutdialog.ui" line="42"/>
@@ -2826,7 +2826,7 @@ Bitte lesen sie unter http://www.leocad.org nach wie man eine Bibliothek herunte
     <message>
         <location filename="../qt/lc_qaboutdialog.ui" line="49"/>
         <source>LeoCAD is a free application that can be used to create virtual LEGO models.</source>
-        <translation>LeoCAD est une application libre pour créer les modèles LEGO virtuels.</translation>
+        <translation>LeoCAD ist eine freie Anwendung zur gestaltung virtueller LEGO Modelle.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qaboutdialog.ui" line="59"/>
@@ -2836,7 +2836,7 @@ Bitte lesen sie unter http://www.leocad.org nach wie man eine Bibliothek herunte
     <message>
         <location filename="../qt/lc_qaboutdialog.ui" line="73"/>
         <source>System Information</source>
-        <translation>Informations système</translation>
+        <translation>Systeminformationen</translation>
     </message>
     <message>
         <location filename="../qt/lc_qaboutdialog.cpp" line="14"/>
@@ -2861,21 +2861,21 @@ Depth Buffer: %4 bits
 Stencil Buffer: %5 bits
 
 </source>
-        <translation>Color Buffer: %1 bits %2 %3
-Depth Buffer: %4 bits
-Stencil Buffer: %5 bits
+        <translation>Farbpuffer: %1 bits %2 %3
+Tiefenpuffer: %4 bits
+Schablonenpuffer: %5 bits
 
 </translation>
     </message>
     <message>
         <location filename="../qt/lc_qaboutdialog.cpp" line="33"/>
         <source>indexed</source>
-        <translation>indexé</translation>
+        <translation>indiziert</translation>
     </message>
     <message>
         <location filename="../qt/lc_qaboutdialog.cpp" line="33"/>
         <source>double buffered</source>
-        <translation>double tampon</translation>
+        <translation>doppelt gepuffert</translation>
     </message>
     <message>
         <location filename="../qt/lc_qaboutdialog.cpp" line="35"/>
@@ -2884,10 +2884,10 @@ GL_ARB_framebuffer_object extension: %2
 GL_EXT_framebuffer_object extension: %3
 GL_EXT_texture_filter_anisotropic extension: %4
 </source>
-        <translation>GL_ARB_vertex_buffer_object extension: %1
-GL_ARB_framebuffer_object extension: %2
-GL_EXT_framebuffer_object extension: %3
-GL_EXT_texture_filter_anisotropic extension: %4
+        <translation>GL_ARB_vertex_buffer_object Erweiterung: %1
+GL_ARB_framebuffer_object Erweiterung: %2
+GL_EXT_framebuffer_object Erweiterung: %3
+GL_EXT_texture_filter_anisotropic Erweiterung: %4
 </translation>
     </message>
     <message>
@@ -2895,7 +2895,7 @@ GL_EXT_texture_filter_anisotropic extension: %4
         <location filename="../qt/lc_qaboutdialog.cpp" line="37"/>
         <location filename="../qt/lc_qaboutdialog.cpp" line="38"/>
         <source>Supported</source>
-        <translation>Pris en charge</translation>
+        <translation>Unterstützt</translation>
     </message>
     <message>
         <location filename="../qt/lc_qaboutdialog.cpp" line="36"/>
@@ -2903,12 +2903,12 @@ GL_EXT_texture_filter_anisotropic extension: %4
         <location filename="../qt/lc_qaboutdialog.cpp" line="38"/>
         <location filename="../qt/lc_qaboutdialog.cpp" line="39"/>
         <source>Not supported</source>
-        <translation>Non pris en charge</translation>
+        <translation>Nicht unterstützt</translation>
     </message>
     <message>
         <location filename="../qt/lc_qaboutdialog.cpp" line="39"/>
         <source>Supported (max %1)</source>
-        <translation>Pris en charge (maximum %1)</translation>
+        <translation>Unterstützt (maximal %1)</translation>
     </message>
 </context>
 <context>
@@ -2916,27 +2916,27 @@ GL_EXT_texture_filter_anisotropic extension: %4
     <message>
         <location filename="../qt/lc_qarraydialog.ui" line="14"/>
         <source>Array</source>
-        <translation>Arrangement</translation>
+        <translation>Array</translation>
     </message>
     <message>
         <location filename="../qt/lc_qarraydialog.ui" line="22"/>
         <source>Dimensions</source>
-        <translation>Dimensions</translation>
+        <translation>Abmessungen</translation>
     </message>
     <message>
         <location filename="../qt/lc_qarraydialog.ui" line="65"/>
         <source>Offsets</source>
-        <translation>Décalages</translation>
+        <translation>Versatz</translation>
     </message>
     <message>
         <location filename="../qt/lc_qarraydialog.ui" line="101"/>
         <source>Rotations</source>
-        <translation>Rotations</translation>
+        <translation>Drehungen</translation>
     </message>
     <message>
         <location filename="../qt/lc_qarraydialog.cpp" line="71"/>
         <source>Array is empty.</source>
-        <translation>L’arrangement est vide.</translation>
+        <translation>Array ist leer.</translation>
     </message>
 </context>
 <context>
@@ -2944,37 +2944,37 @@ GL_EXT_texture_filter_anisotropic extension: %4
     <message>
         <location filename="../qt/lc_qcategorydialog.ui" line="14"/>
         <source>Category</source>
-        <translation>Catégorie</translation>
+        <translation>Kategorie</translation>
     </message>
     <message>
         <location filename="../qt/lc_qcategorydialog.ui" line="22"/>
         <source>Name:</source>
-        <translation>Nom :</translation>
+        <translation>Name:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qcategorydialog.ui" line="35"/>
         <source>Keywords:</source>
-        <translation>Mots clés :</translation>
+        <translation>Schlüsselwörter:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qcategorydialog.cpp" line="15"/>
         <source>Edit Category</source>
-        <translation>Éditer la catégorie</translation>
+        <translation>Kategorie bearbeiten</translation>
     </message>
     <message>
         <location filename="../qt/lc_qcategorydialog.cpp" line="17"/>
         <source>New Category</source>
-        <translation>Nouvelle catégorie</translation>
+        <translation>Neue Kategorie</translation>
     </message>
     <message>
         <location filename="../qt/lc_qcategorydialog.cpp" line="34"/>
         <source>Name cannot be empty.</source>
-        <translation>Le nom ne peut pas être vide.</translation>
+        <translation>Der Name kann nicht leer sein.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qcategorydialog.cpp" line="42"/>
         <source>Keywords cannot be empty.</source>
-        <translation>Le champ mots clés ne peut pas être vide.</translation>
+        <translation>Schlüsselwörter müssen vorhanden sein.</translation>
     </message>
 </context>
 <context>
@@ -2982,17 +2982,17 @@ GL_EXT_texture_filter_anisotropic extension: %4
     <message>
         <location filename="../qt/lc_qeditgroupsdialog.ui" line="14"/>
         <source>Edit Groups</source>
-        <translation>Édition des groupes</translation>
+        <translation>Gruppen bearbeiten</translation>
     </message>
     <message>
         <location filename="../qt/lc_qeditgroupsdialog.cpp" line="20"/>
         <source>New Group</source>
-        <translation>Nouveau groupe</translation>
+        <translation>Neue Gruppe</translation>
     </message>
     <message>
         <location filename="../qt/lc_qeditgroupsdialog.cpp" line="61"/>
         <source>Group #</source>
-        <translation>Groupe n°</translation>
+        <translation>Groupe Nr.</translation>
     </message>
 </context>
 <context>
@@ -3000,22 +3000,22 @@ GL_EXT_texture_filter_anisotropic extension: %4
     <message>
         <location filename="../qt/lc_qfinddialog.ui" line="14"/>
         <source>Find</source>
-        <translation>Rechercher</translation>
+        <translation>Suchen</translation>
     </message>
     <message>
         <location filename="../qt/lc_qfinddialog.ui" line="28"/>
         <source>Name</source>
-        <translation>Nom</translation>
+        <translation>Name</translation>
     </message>
     <message>
         <location filename="../qt/lc_qfinddialog.ui" line="35"/>
         <source>Part ID</source>
-        <translation>ID de pièce</translation>
+        <translation>ID des Teils</translation>
     </message>
     <message>
         <location filename="../qt/lc_qfinddialog.ui" line="42"/>
         <source>Color</source>
-        <translation>Couleur</translation>
+        <translation>Farbe</translation>
     </message>
 </context>
 <context>
@@ -3023,17 +3023,17 @@ GL_EXT_texture_filter_anisotropic extension: %4
     <message>
         <location filename="../qt/lc_qgroupdialog.ui" line="14"/>
         <source>Group</source>
-        <translation>Groupe</translation>
+        <translation>Gruppe</translation>
     </message>
     <message>
         <location filename="../qt/lc_qgroupdialog.ui" line="22"/>
         <source>Name</source>
-        <translation>Nom</translation>
+        <translation>Name</translation>
     </message>
     <message>
         <location filename="../qt/lc_qgroupdialog.cpp" line="26"/>
         <source>Name cannot be empty.</source>
-        <translation>Le nom ne peut pas être vide.</translation>
+        <translation>Der Name muss vorhanden sein.</translation>
     </message>
 </context>
 <context>
@@ -3041,17 +3041,17 @@ GL_EXT_texture_filter_anisotropic extension: %4
     <message>
         <location filename="../qt/lc_qhtmldialog.ui" line="20"/>
         <source>HTML Options</source>
-        <translation>Options HTML</translation>
+        <translation>HTML Optionen</translation>
     </message>
     <message>
         <location filename="../qt/lc_qhtmldialog.ui" line="32"/>
         <source>General</source>
-        <translation>Général</translation>
+        <translation>Allgemein</translation>
     </message>
     <message>
         <location filename="../qt/lc_qhtmldialog.ui" line="40"/>
         <source>Output folder:</source>
-        <translation>Dossier cible :</translation>
+        <translation>Ausgangsordner:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qhtmldialog.ui" line="53"/>
@@ -3061,79 +3061,79 @@ GL_EXT_texture_filter_anisotropic extension: %4
     <message>
         <location filename="../qt/lc_qhtmldialog.ui" line="62"/>
         <source>Transparent image background</source>
-        <translation>Fond d’image transparent</translation>
+        <translation>Transparentes Hintergrundbild</translation>
     </message>
     <message>
         <location filename="../qt/lc_qhtmldialog.ui" line="129"/>
         <location filename="../qt/lc_qhtmldialog.ui" line="219"/>
         <source>Width:</source>
-        <translation>Largeur :</translation>
+        <translation>Breite:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qhtmldialog.ui" line="149"/>
         <location filename="../qt/lc_qhtmldialog.ui" line="229"/>
         <source>Height:</source>
-        <translation>Hauteur :</translation>
+        <translation>Höhe:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qhtmldialog.ui" line="122"/>
         <source>Index page</source>
-        <translation>Page d’index</translation>
+        <translation>Registerblatt</translation>
     </message>
     <message>
         <location filename="../qt/lc_qhtmldialog.ui" line="72"/>
         <source>Models</source>
-        <translation>Modèles</translation>
+        <translation>Modell</translation>
     </message>
     <message>
         <location filename="../qt/lc_qhtmldialog.ui" line="78"/>
         <source>All Models</source>
-        <translation>Tous les modèles</translation>
+        <translation>Alle Modelle</translation>
     </message>
     <message>
         <location filename="../qt/lc_qhtmldialog.ui" line="85"/>
         <source>Current Model and Submodels</source>
-        <translation>Modèle courant et ses sous-modèles</translation>
+        <translation>Aktives Modell und Untermodelle</translation>
     </message>
     <message>
         <location filename="../qt/lc_qhtmldialog.ui" line="92"/>
         <source>Current Model Only</source>
-        <translation>Modèle courant seulement</translation>
+        <translation>Nur aktives Modell</translation>
     </message>
     <message>
         <location filename="../qt/lc_qhtmldialog.ui" line="102"/>
         <source>Steps</source>
-        <translation>Étapes</translation>
+        <translation>Schritte</translation>
     </message>
     <message>
         <location filename="../qt/lc_qhtmldialog.ui" line="108"/>
         <source>Single Page</source>
-        <translation>Une seule page</translation>
+        <translation>Einzelseite</translation>
     </message>
     <message>
         <location filename="../qt/lc_qhtmldialog.ui" line="115"/>
         <source>One Step per Page</source>
-        <translation>Une étape par page</translation>
+        <translation>Ein Schritt pro Seite</translation>
     </message>
     <message>
         <location filename="../qt/lc_qhtmldialog.ui" line="169"/>
         <source>Highlight new parts</source>
-        <translation>Mettre en évidence les nouvelles pièces</translation>
+        <translation>Neue Teile Markieren</translation>
     </message>
     <message>
         <location filename="../qt/lc_qhtmldialog.ui" line="179"/>
         <source>Parts List</source>
-        <translation>Liste de pièces</translation>
+        <translation>Teileliste</translation>
     </message>
     <message>
         <location filename="../qt/lc_qhtmldialog.ui" line="205"/>
         <source>At the end</source>
-        <translation>À la fin</translation>
+        <translation>Am Ende</translation>
     </message>
     <message>
         <location filename="../qt/lc_qhtmldialog.ui" line="212"/>
         <source>After each step</source>
-        <translation>Après chaque étape</translation>
+        <translation>Nach jedem Schritt</translation>
     </message>
     <message>
         <location filename="../qt/lc_qhtmldialog.ui" line="239"/>

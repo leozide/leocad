@@ -2317,7 +2317,7 @@ Bitte lesen sie unter http://www.leocad.org nach wie man eine Bibliothek herunte
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="399"/>
         <source>T&amp;oolbars</source>
-        <translation>Werkz&ampeuge</translation>
+        <translation>Werkz&amp;euge</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="409"/>
@@ -2518,7 +2518,7 @@ Bitte lesen sie unter http://www.leocad.org nach wie man eine Bibliothek herunte
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="1953"/>
         <source>Error</source>
-        <translation>Erreur</translation>
+        <translation>Fehler</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="1953"/>

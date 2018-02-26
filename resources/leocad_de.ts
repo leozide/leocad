@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.1" language="fr_FR">
+<TS version="2.1" language="de_DE">
 <context>
     <name>Menu</name>
     <message>
@@ -156,7 +156,7 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="199"/>
         <source>Find Pre&amp;vious</source>
-        <translation>Vorangehenden s&amp;uchen</translation>
+        <translation>Rückwärts s&amp;uchen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="206"/>
@@ -171,7 +171,7 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="220"/>
         <source>Select &amp;Invert</source>
-        <translation>&amp;Asuwahl umkehren</translation>
+        <translation>&amp;Auswahl umkehren</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="227"/>
@@ -467,7 +467,7 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="661"/>
         <source>Look At</source>
-        <translation>Schaue auf</translation>
+        <translation>Zentriert</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="668"/>
@@ -662,7 +662,7 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="1067"/>
         <source>A&amp;rray...</source>
-        <translation>&amp;Feld…</translation>
+        <translation>&amp;Vervielfachen…</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1074"/>
@@ -707,7 +707,7 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="1130"/>
         <source>&amp;Hide Selected</source>
-        <translation>Auswahl v&amp;ausbelnden</translation>
+        <translation>Auswahl &amp;ausblenden</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1137"/>
@@ -2302,7 +2302,7 @@ Bitte lesen sie unter http://www.leocad.org nach wie man eine Bibliothek herunte
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="320"/>
         <source>&amp;Viewpoints</source>
-        <translation>&amp;Blickpunkte</translation>
+        <translation>&amp;Ansichten</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="382"/>

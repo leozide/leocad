@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.1" language="de_DE">
+<TS version="2.1" language="de_DE"><!-- provided by Joachim Schwender -->
 <context>
     <name>Menu</name>
     <message>
@@ -712,7 +712,7 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="1137"/>
         <source>Hide &amp;Unselected</source>
-        <translation>Nichtausgewähltes verst&amp;ecken</translation>
+        <translation>Nichtausgewähltes aus&amp;blenden</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1144"/>
@@ -2378,7 +2378,7 @@ Bitte lesen sie unter http://www.leocad.org nach wie man eine Bibliothek herunte
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="488"/>
         <source>Rotation Snap</source>
-        <translation>Drehungsschritte</translation>
+        <translation>Einrasten für Drehung</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="489"/>

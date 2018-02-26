@@ -2063,82 +2063,82 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="1089"/>
         <source>Insert the contents of the selected model references into the current model</source>
-        <translation>Insérer le contenu des modèles sélectionnés dans le modèle courant</translation>
+        <translation>Inhalte der ausgewählten Modellreferenzen in eine neues Modell einfügen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1096"/>
         <source>Group selected pieces together</source>
-        <translation>Grouper les pièces sélectionnées</translation>
+        <translation>Ausgewählte Teile gruppieren</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1103"/>
         <source>Ungroup selected group</source>
-        <translation>Dégrouper le groupe sélectionné</translation>
+        <translation>Ausgewählte Gruppe auflösen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1110"/>
         <source>Add focused piece to selected group</source>
-        <translation>Ajouter la pièce qui a le focus au groupe sélectionné</translation>
+        <translation>Füge Teil mit Fokus zur ausgewählten Gruppe hinzu</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1117"/>
         <source>Remove focused piece from group</source>
-        <translation>Enlever du groupe la pièce qui a le focus</translation>
+        <translation>Entferne Teil mit Fokus aus der Gruppe</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1124"/>
         <source>Edit groups</source>
-        <translation>Éditer les groupes</translation>
+        <translation>Gruppe bearbeiten</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1131"/>
         <source>Hide selected objects</source>
-        <translation>Cacher les objets sélectionnés</translation>
+        <translation>Ausgewählte Teile ausblenden</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1138"/>
         <source>Hide objects that are not selected</source>
-        <translation>Cacher les objets qui ne sont pas sélectionnés</translation>
+        <translation>Nicht ausgewählte Teile ausblenden</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1145"/>
         <source>Show hidden objects that are selected</source>
-        <translation>Montrer les objets cachés qui sont sélectionnés</translation>
+        <translation>Zeige ausgeblendete Objekte die ausgewählt sind</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1152"/>
         <source>Show all hidden objects</source>
-        <translation>Montrer les objets cachés</translation>
+        <translation>Zeige alle ausgeblendeten Objekte</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1159"/>
         <source>Show selected pieces one step earlier</source>
-        <translation>Montrer les pièces sélectionnées une étape plus tôt</translation>
+        <translation>Zeige ausgewählte Teile einen Schritt vorher</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1166"/>
         <source>Show selected pieces one step later</source>
-        <translation>Montrer les pièces sélectionnées une étape plus tard</translation>
+        <translation>Zeige ausgewählte Teile einen Schritt danach</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1173"/>
         <source>Add a new model to the project</source>
-        <translation>Ajouter un nouveau modèle au projet</translation>
+        <translation>Füge eine neues Modell zum Projekt hinzu</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1180"/>
         <source>Display the properties of the current model</source>
-        <translation>Voir les propriétés du modèle courant</translation>
+        <translation>Eigenschaften des aktuellen Modells anzeigen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1187"/>
         <source>Switch to the model corresponding to the piece with focus</source>
-        <translation>Basculer vers le modèle correspondant à la pièce qui a le focus</translation>
+        <translation>Zum Modell entsprechend des Teils mit dem Focus wechseln</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1194"/>
         <source>Show a list of all models in this project</source>
-        <translation>Voir la liste de tous les modèles de ce projet</translation>
+        <translation>Eine Liste aller Modelle dieses Projekts anzeigen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1201"/>
@@ -2166,27 +2166,27 @@
         <location filename="../common/lc_commands.cpp" line="1355"/>
         <location filename="../common/lc_commands.cpp" line="1362"/>
         <source>Switch to this model</source>
-        <translation>Basculer vers ce modèle</translation>
+        <translation>Zu diesem Modell wechseln</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1369"/>
         <source>Open LeoCAD&apos;s home page on the internet using your default web browser</source>
-        <translation>Ouvrir la page d’accueil de LeoCAD avec votre navigateur web par défaut</translation>
+        <translation>LeoCAD&apos;s Homepage unter 'Verwendung des Standardbrowsers öffnen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1376"/>
         <source>Send an e-mail message for help or support using your default e-mail client</source>
-        <translation>Envoyer un courriel de soutien ou de demande d’aide avec votre client de messagerie par défaut</translation>
+        <translation>Sende aus dem Standard-Mailclient eine eMail um nach Hilfe oder Unterstützung zu bitten</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1383"/>
         <source>Check if a newer LeoCAD version or parts library has been released</source>
-        <translation>Vérifier si une nouvelle version de LeoCAD ou de la bibliothèque de pièces est disponible</translation>
+        <translation>VPrüfe ob eine aktualisierte Version von LeoCAD oder der Teilebibliothek verfügbar ist</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1390"/>
         <source>Display program version number and system information</source>
-        <translation>Voir la version du programme et des informations sur le système</translation>
+        <translation>Zeige die Programmversion und Systemversion</translation>
     </message>
 </context>
 <context>
@@ -2205,33 +2205,33 @@
         <source>LeoCAD could not find a compatible Parts Library so only a small number of parts will be available.
 
 Please visit http://www.leocad.org for information on how to download and install a library.</source>
-        <translation>LeoCAD n’a pas pu trouver une bibliothèque de pièces compatible donc seulement un petit nombre de pièces seront disponibles.
+        <translation>LeoCAD konnte keine Teilebibliothek finden, es wird nur eine kleine Anzahl an Teilen verfügbar sein.
 
-SVP visitez http://www.leocad.org pour apprendre comment télécharger et installer une bibliothèque.</translation>
+Bitte lesen sie unter http://www.leocad.org nach wie man eine Bibliothek herunterläd und installiert.</translation>
     </message>
     <message>
         <location filename="../common/lc_application.cpp" line="318"/>
         <source>LeoCAD could not load Parts Library.
 
 Please visit http://www.leocad.org for information on how to download and install a library.</source>
-        <translation>LeoCAD n’a pas pu charger la bibliothèque de pièces.
+        <translation>LeoCAD konnte die Teilebibliothek nicht laden.
 
-SVP visitez http://www.leocad.org pour apprendre comment télécharger et installer une bibliothèque.</translation>
+Bitte lesen sie unter http://www.leocad.org nach wie man eine Bibliothek herunterläd und installiert.</translation>
     </message>
     <message>
         <location filename="../common/lc_application.cpp" line="496"/>
         <source>Parts library and Anti-aliasing changes will only take effect the next time you start LeoCAD.</source>
-        <translation>Les changements concernant la bibliothèque de pièces et l’anti-aliasing ne prendront effet qu’au prochain lancement de LeoCAD.</translation>
+        <translation>Die Teilebibliothek und Einstellungen zu Aliasing werden erst nach Neustart von LeoCAD wirksam.</translation>
     </message>
     <message>
         <location filename="../common/lc_application.cpp" line="498"/>
         <source>Parts library changes will only take effect the next time you start LeoCAD.</source>
-        <translation>Les changement concernant la bibliothèque de pièces ne prendront effet qu’au prochain lancement de LeoCAD.</translation>
+        <translation>Die Teilebibliothek werden erst nach Neustart von LeoCAD wirksam.</translation>
     </message>
     <message>
         <location filename="../common/lc_application.cpp" line="500"/>
         <source>Anti-aliasing changes will only take effect the next time you start LeoCAD.</source>
-        <translation>Les changement concernant l’anti-aliasing ne prendront effet qu’au prochain lancement de LeoCAD.</translation>
+        <translation>Einstellungen zu Aliasing werden erst nach Neustart von LeoCAD wirksam.</translation>
     </message>
 </context>
 <context>
@@ -2239,13 +2239,13 @@ SVP visitez http://www.leocad.org pour apprendre comment télécharger et instal
     <message>
         <location filename="../common/lc_context.cpp" line="507"/>
         <source>Error</source>
-        <translation>Erreur</translation>
+        <translation>Fehler</translation>
     </message>
     <message>
         <location filename="../common/lc_context.cpp" line="507"/>
         <source>Error writing to file &apos;%1&apos;:
 %2</source>
-        <translation>Erreur en écrivant le fichier « %1 » :
+        <translation>Fehler beim Schreiben der Datei « %1 » :
 %2</translation>
     </message>
 </context>
@@ -2254,7 +2254,7 @@ SVP visitez http://www.leocad.org pour apprendre comment télécharger et instal
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="109"/>
         <source>New Project</source>
-        <translation>Nouveau projet</translation>
+        <translation>Neues Projekt</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="110"/>

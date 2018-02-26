@@ -95,5 +95,6 @@
         <file>resources/ldraw.xml</file>
         <file>resources/leocad_fr.qm</file>
         <file>resources/leocad_pt.qm</file>
+        <file>resources/leocad_de.qm</file>
     </qresource>
 </RCC>

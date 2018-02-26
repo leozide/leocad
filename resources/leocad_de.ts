@@ -365,7 +365,7 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="542"/>
         <source>Spotlight</source>
-        <translation></translation>
+        <translation>Punktstrahler</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="549"/>
@@ -386,388 +386,388 @@
         <location filename="../common/lc_commands.cpp" line="822"/>
         <location filename="../common/lc_commands.cpp" line="829"/>
         <source>Camera</source>
-        <translation>Caméra</translation>
+        <translation>Kamera</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="556"/>
         <source>Select</source>
-        <translation>Sélectionner</translation>
+        <translation>Wählen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="563"/>
         <source>Move</source>
-        <translation>Déplacer</translation>
+        <translation>Bewege</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="570"/>
         <source>Rotate</source>
-        <translation>Tourner</translation>
+        <translation>Drehe</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="577"/>
         <location filename="../common/lc_commands.cpp" line="878"/>
         <source>Delete</source>
-        <translation>Effacer</translation>
+        <translation>Lösche</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="584"/>
         <source>Paint</source>
-        <translation>Peindre</translation>
+        <translation>Male an</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="591"/>
         <source>Zoom</source>
-        <translation>Zoomer</translation>
+        <translation>Zoomen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="598"/>
         <source>Pan</source>
-        <translation>Glisser</translation>
+        <translation>Schwenke</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="605"/>
         <source>Rotate View</source>
-        <translation>Tourner la vue</translation>
+        <translation>Ansicht drehen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="612"/>
         <source>Roll</source>
-        <translation>Pivoter la vue</translation>
+        <translation>Rollen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="619"/>
         <source>Zoom Region</source>
-        <translation>Zoomer sur la région</translation>
+        <translation>Bereich zoomen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="626"/>
         <source>Cancel Action</source>
-        <translation>Annuler l’action</translation>
+        <translation>Aktion abbrechen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="633"/>
         <source>P&amp;references...</source>
-        <translation>P&amp;références…</translation>
+        <translation>E&amp;instellungen…</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="640"/>
         <source>Zoom In</source>
-        <translation>Zoomer</translation>
+        <translation>Einzoomen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="647"/>
         <source>Zoom Out</source>
-        <translation>Dézoomer</translation>
+        <translation>Auszoomen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="654"/>
         <source>Zoom E&amp;xtents</source>
-        <translation>&amp;Voir tout</translation>
+        <translation>&amp;Alles sehen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="661"/>
         <source>Look At</source>
-        <translation>Viser le modèle</translation>
+        <translation>Schaue auf</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="668"/>
         <source>&amp;Front</source>
-        <translation>&amp;Face</translation>
+        <translation>&amp;Vorderansicht</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="675"/>
         <source>&amp;Back</source>
-        <translation>&amp;Dos</translation>
+        <translation>&amp;Rückansicht</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="682"/>
         <source>&amp;Top</source>
-        <translation>De&amp;ssus</translation>
+        <translation>Dr&amp;aufsicht</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="689"/>
         <source>B&amp;ottom</source>
-        <translation>Dess&amp;ous</translation>
+        <translation>Ansicht &amp;von Unten</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="696"/>
         <source>&amp;Left</source>
-        <translation>&amp;Gauche</translation>
+        <translation>&amp;Links</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="703"/>
         <source>&amp;Right</source>
-        <translation>&amp;Droite</translation>
+        <translation>&amp;Rechts</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="710"/>
         <source>&amp;Home</source>
-        <translation>&amp;Trois-quarts</translation>
+        <translation>&amp;Ursprungsansicht</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="836"/>
         <source>Reset</source>
-        <translation>Réinitialiser</translation>
+        <translation>Rücksetzen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="843"/>
         <source>First</source>
-        <translation>Premier</translation>
+        <translation>Erst</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="850"/>
         <source>Previous</source>
-        <translation>Précédent</translation>
+        <translation>Vorangehend</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="857"/>
         <source>Next</source>
-        <translation>Suivant</translation>
+        <translation>Folgend</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="864"/>
         <source>Last</source>
-        <translation>Dernier</translation>
+        <translation>Letzt</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="885"/>
         <source>Add Keys</source>
-        <translation>Ajouter des clés</translation>
+        <translation>Schlüssel hinzufügen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="892"/>
         <source>Split &amp;Horizontal</source>
-        <translation>Scinder &amp;horizontalement</translation>
+        <translation>Horizontal T&amp;eilen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="899"/>
         <source>Split &amp;Vertical</source>
-        <translation>Scinder &amp;verticalement</translation>
+        <translation>Vertikal Teil&amp;en</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="906"/>
         <source>Re&amp;move View</source>
-        <translation>Suppri&amp;mer la vue</translation>
+        <translation>Ansicht &amp;entfernen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="913"/>
         <source>Rese&amp;t Views</source>
-        <translation>Réinitialiser &amp;toutes les vues</translation>
+        <translation>Ansicht z&amp;urücksetzen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="920"/>
         <source>&amp;Full Screen</source>
-        <translation>&amp;Plein écran</translation>
+        <translation>&amp;Vollbildansicht</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="927"/>
         <source>&amp;Perspective</source>
-        <translation>&amp;Perspective</translation>
+        <translation>&amp;Perspektive</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="934"/>
         <source>&amp;Orthographic</source>
-        <translation>&amp;Orthographique</translation>
+        <translation>&amp;Rechtwinkelig</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="941"/>
         <source>&amp;Insert</source>
-        <translation>&amp;Insérer</translation>
+        <translation>&amp;Einfügen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="948"/>
         <source>&amp;Delete</source>
-        <translation>&amp;Supprimer</translation>
+        <translation>&amp;Löschen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="955"/>
         <source>Reset &amp;Pivot Point</source>
-        <translation>Réinitialiser le &amp;point pivot</translation>
+        <translation>&amp;Ursprungspunkt zurücksetzen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="962"/>
         <source>Insert Control Point</source>
-        <translation>Insérer un point de contrôle</translation>
+        <translation>Steuerpunkt setzen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="969"/>
         <source>Remove Control Point</source>
-        <translation>Enlever le point de contrôle</translation>
+        <translation>Steuerpunkt entfernen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="976"/>
         <source>Move +X</source>
-        <translation>Déplacer +X</translation>
+        <translation>Bewege +X</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="983"/>
         <source>Move -X</source>
-        <translation>Déplacer -X</translation>
+        <translation>Bewege -X</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="990"/>
         <source>Move +Y</source>
-        <translation>Déplacer +Y</translation>
+        <translation>Bewege +Y</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="997"/>
         <source>Move -Y</source>
-        <translation>Déplacer -Y</translation>
+        <translation>Bewege -Y</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1004"/>
         <source>Move +Z</source>
-        <translation>Déplacer +Z</translation>
+        <translation>Bewege +Z</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1011"/>
         <source>Move -Z</source>
-        <translation>Déplacer -Z</translation>
+        <translation>Bewege -Z</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1018"/>
         <source>Rotate +X</source>
-        <translation>Tourner +X</translation>
+        <translation>Drehe +X</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1025"/>
         <source>Rotate -X</source>
-        <translation>Tourner -X</translation>
+        <translation>Drehe -X</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1032"/>
         <source>Rotate +Y</source>
-        <translation>Tourner +Y</translation>
+        <translation>Drehe +Y</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1039"/>
         <source>Rotate -Y</source>
-        <translation>Tourner -Y</translation>
+        <translation>Drehe -Y</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1046"/>
         <source>Rotate +Z</source>
-        <translation>Tourner +Z</translation>
+        <translation>Drehe +Z</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1053"/>
         <source>Rotate -Z</source>
-        <translation>Tourner -Z</translation>
+        <translation>Drehe -Z</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1060"/>
         <source>Minifig &amp;Wizard...</source>
-        <translation>&amp;Assistant de minifig…</translation>
+        <translation>&amp;Assistent minifig…</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1067"/>
         <source>A&amp;rray...</source>
-        <translation>&amp;Arrangement…</translation>
+        <translation>&amp;Feld…</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1074"/>
         <source>View Selected Model</source>
-        <translation>Voir le modèle sélectionné</translation>
+        <translation>Gewähltes Modell betrachten</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1081"/>
         <source>Move to New Model...</source>
-        <translation>Déplacer vers un nouveau modèle…</translation>
+        <translation>Neues Modell bewegen…</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1088"/>
         <source>Inline Selected Models</source>
-        <translation>Fusionner les modèles sélectionnés</translation>
+        <translation>ausgewählte Modelle zusammenfügen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1095"/>
         <source>&amp;Group...</source>
-        <translation>&amp;Grouper...</translation>
+        <translation>&amp;Gruppieren...</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1102"/>
         <source>&amp;Ungroup</source>
-        <translation>&amp;Dégrouper</translation>
+        <translation>&amp;Gruppierung aufheben</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1109"/>
         <source>&amp;Add to Group</source>
-        <translation>&amp;Ajouter au groupe</translation>
+        <translation>Zur Gru&amp;ppe hinzufügen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1116"/>
         <source>Re&amp;move from Group</source>
-        <translation>En&amp;lever du groupe</translation>
+        <translation>A&amp;us der Gruppe entfernen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1123"/>
         <source>&amp;Edit Groups...</source>
-        <translation>&amp;Éditer les groupes…</translation>
+        <translation>Grup&amp;pe Bearbeiten…</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1130"/>
         <source>&amp;Hide Selected</source>
-        <translation>&amp;Cache la sélection</translation>
+        <translation>Auswahl v&amp;ausbelnden</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1137"/>
         <source>Hide &amp;Unselected</source>
-        <translation>Cacher l’&amp;anti-sélection</translation>
+        <translation>Nichtausgewähltes verst&amp;ecken</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1144"/>
         <source>&amp;Unhide Selected</source>
-        <translation>&amp;Décacher la sélection</translation>
+        <translation>Auswahl einb&amp;lenden</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1151"/>
         <source>U&amp;nhide All</source>
-        <translation>Décacher &amp;tout</translation>
+        <translation>Alles einbl&amp;enden</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1158"/>
         <source>Show Earlier</source>
-        <translation>Montrer plus tôt</translation>
+        <translation>Früheres zeigen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1165"/>
         <source>Show Later</source>
-        <translation>Montrer plus tard</translation>
+        <translation>Späteres zeigen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1172"/>
         <source>New Model...</source>
-        <translation>Nouveau modèle…</translation>
+        <translation>Neues Modell…</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1186"/>
         <source>Switch to Model</source>
-        <translation>Basculer vers le modèle</translation>
+        <translation>Auf neues Modell wechseln</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1193"/>
         <source>Models...</source>
-        <translation>Modèles…</translation>
+        <translation>Modelle…</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1368"/>
         <source>LeoCAD &amp;Home Page</source>
-        <translation>&amp;Page d’accueil de LeoCAD</translation>
+        <translation>&amp;Homepage von LeoCAD</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1375"/>
         <source>Send Support &amp;E-Mail</source>
-        <translation>&amp;Envoyer un courriel de soutien</translation>
+        <translation>Support eM&amp;ail verschicken</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1382"/>
         <source>Check for &amp;Updates...</source>
-        <translation>Vérifier les &amp;mises à jour…</translation>
+        <translation>Auf Aktualisierungen prü&amp;fen…</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1389"/>
         <source>&amp;About...</source>
-        <translation>&amp;À propos...</translation>
+        <translation>&amp;Über…</translation>
     </message>
 </context>
 <context>
@@ -775,52 +775,52 @@
     <message>
         <location filename="../common/project.cpp" line="21"/>
         <source>Model #1</source>
-        <translation>Modèle n°1</translation>
+        <translation>Modell Nr 1</translation>
     </message>
     <message>
         <location filename="../common/project.cpp" line="49"/>
         <source>New Project.ldr</source>
-        <translation>Nouveau Projet.ldr</translation>
+        <translation>Neues Projekt.ldr</translation>
     </message>
     <message>
         <location filename="../common/project.cpp" line="49"/>
-        <source>New Project.mpd</source>
+        <source>Neues Projekt.mpd</source>
         <translation>Nouveau Projet.mpd</translation>
     </message>
     <message>
         <location filename="../common/project.cpp" line="85"/>
         <source>Model #</source>
-        <translation>Modèle n°</translation>
+        <translation>Modell Nr</translation>
     </message>
     <message>
         <location filename="../common/project.cpp" line="108"/>
         <source>New Model</source>
-        <translation>Nouveau modèle</translation>
+        <translation>Neues Modell</translation>
     </message>
     <message>
         <location filename="../common/project.cpp" line="108"/>
         <source>Name:</source>
-        <translation>Nom :</translation>
+        <translation>Name:</translation>
     </message>
     <message>
         <location filename="../common/project.cpp" line="117"/>
         <source>Empty Name</source>
-        <translation>Nom vide</translation>
+        <translation>Leerer Name</translation>
     </message>
     <message>
         <location filename="../common/project.cpp" line="117"/>
         <source>The model name cannot be empty.</source>
-        <translation>Le nom du modèle ne peut pas être vide.</translation>
+        <translation>Der Modellname kann nicht leer sein.</translation>
     </message>
     <message>
         <location filename="../common/project.cpp" line="119"/>
         <source>Duplicate Model</source>
-        <translation>Modèle déjà existant</translation>
+        <translation>Das Modell existiert bereits</translation>
     </message>
     <message>
         <location filename="../common/project.cpp" line="119"/>
         <source>A model named &apos;%1&apos; already exists in this project, please enter an unique name.</source>
-        <translation>Un modèle nommé « %1 » existe déjà dans ce projet, SVP entrez un nom unique.</translation>
+        <translation>Ein Modell mit dem Namen « %1 » existiert bereits in diesem Projekt, bitte geben sie einen eindeutigen Namen eine.</translation>
     </message>
     <message>
         <location filename="../common/project.cpp" line="205"/>
@@ -831,12 +831,12 @@
         <location filename="../common/project.cpp" line="1241"/>
         <location filename="../common/project.cpp" line="1329"/>
         <source>Error</source>
-        <translation>Erreur</translation>
+        <translation>Fehler</translation>
     </message>
     <message>
         <location filename="../common/project.cpp" line="337"/>
         <source>Merged </source>
-        <translation>Fusionné </translation>
+        <translation>Vereint </translation>
     </message>
     <message>
         <location filename="../common/project.cpp" line="393"/>
@@ -862,17 +862,17 @@
         <location filename="../common/project.cpp" line="1363"/>
         <location filename="../common/project.cpp" line="1646"/>
         <source>Nothing to export.</source>
-        <translation>Rien à exporter.</translation>
+        <translation>Nichts zu exportieren.</translation>
     </message>
     <message>
         <location filename="../common/project.cpp" line="397"/>
         <source>Export 3D Studio</source>
-        <translation>Exporter vers 3D Studio</translation>
+        <translation>Ins 3D Studio exportieren</translation>
     </message>
     <message>
         <location filename="../common/project.cpp" line="397"/>
         <source>3DS Files (*.3ds);;All Files (*.*)</source>
-        <translation>Fichiers 3DS (*.3ds);;Tous les fichiers (*.*)</translation>
+        <translation>3DS Datei (*.3ds);;Alle Dateien (*.*)</translation>
     </message>
     <message>
         <location filename="../common/project.cpp" line="406"/>
@@ -881,48 +881,48 @@
         <location filename="../common/project.cpp" line="1384"/>
         <location filename="../common/project.cpp" line="1660"/>
         <source>Could not open file &apos;%1&apos; for writing.</source>
-        <translation>N’a pas pu ouvrir le fichier « %1 » en écriture.</translation>
+        <translation>Konnte Datei « %1 » nicht zum Schreiben öffnen.</translation>
     </message>
     <message>
         <location filename="../common/project.cpp" line="885"/>
         <source>Export BrickLink</source>
-        <translation>Exporter vers BrickLink</translation>
+        <translation>Nach BrickLink exportieren</translation>
     </message>
     <message>
         <location filename="../common/project.cpp" line="885"/>
         <source>XML Files (*.xml);;All Files (*.*)</source>
-        <translation>Fichiers XML (*.xml);;Tous les fichiers (*.*)</translation>
+        <translation>XML Dateien (*.xml);;Alle Dateien (*.*)</translation>
     </message>
     <message>
         <location filename="../common/project.cpp" line="945"/>
         <source>Export CSV</source>
-        <translation>Exporter vers CSV</translation>
+        <translation>Nach CSV exportieren</translation>
     </message>
     <message>
         <location filename="../common/project.cpp" line="945"/>
         <source>CSV Files (*.csv);;All Files (*.*)</source>
-        <translation>Fichiers CSV (*.csv);;Tous les fichiers (*.*)</translation>
+        <translation>CSV Datei (*.csv);;Alle Dateien (*.*)</translation>
     </message>
     <message>
         <location filename="../common/project.cpp" line="1273"/>
         <source>Error creating images.</source>
-        <translation>Erreur à la création des images.</translation>
+        <translation>Fehler beim Erzeugen der Bilder.</translation>
     </message>
     <message>
         <location filename="../common/project.cpp" line="1426"/>
         <location filename="../common/project.cpp" line="1468"/>
         <source>Could not find LGEO files in folder &apos;%1&apos;.</source>
-        <translation>N’a pas pu trouver les fichiers LGEO dans le dossier « %1 ».</translation>
+        <translation>Konnte keine LGEO Dateien im Verzeichnis « %1 » finden.</translation>
     </message>
     <message>
         <location filename="../common/project.cpp" line="1650"/>
         <source>Export Wavefront</source>
-        <translation>Exporter vers Wavefront</translation>
+        <translation>Nach Wavefront exportieren</translation>
     </message>
     <message>
         <location filename="../common/project.cpp" line="1650"/>
         <source>Wavefront Files (*.obj);;All Files (*.*)</source>
-        <translation>Fichiers Wavefront (*.obj);;Tous les fichiers (*.*)</translation>
+        <translation>Wavefront Dateien (*.obj);;Alle Dateien (*.*)</translation>
     </message>
     <message>
         <location filename="../common/project.cpp" line="285"/>
@@ -933,14 +933,14 @@
         <location filename="../common/project.cpp" line="1329"/>
         <source>Error writing to file &apos;%1&apos;:
 %2</source>
-        <translation>Erreur en écrivant le fichier « %1 » :
+        <translation>Fehler beim Schreiben der Datei « %1 » :
 %2</translation>
     </message>
     <message>
         <location filename="../common/project.cpp" line="205"/>
         <source>Error reading file &apos;%1&apos;:
 %2</source>
-        <translation>Erreur en lisant le fichier « %1 » :
+        <translation>Fehler beim Lesen der Datei « %1 » :
 %2</translation>
     </message>
 </context>
@@ -949,25 +949,25 @@
     <message>
         <location filename="../common/group.cpp" line="47"/>
         <source>Group #</source>
-        <translation>Group n°</translation>
+        <translation>Gruppe Nr.</translation>
     </message>
     <message>
         <location filename="../common/lc_colors.cpp" line="366"/>
         <source>Solid Colors</source>
         <comment>Colors</comment>
-        <translation>Couleurs pleines</translation>
+        <translation>Farben</translation>
     </message>
     <message>
         <location filename="../common/lc_colors.cpp" line="367"/>
         <source>Translucent Colors</source>
         <comment>Colors</comment>
-        <translation>Couleurs transparentes</translation>
+        <translation>Durchscheinende Farben</translation>
     </message>
     <message>
         <location filename="../common/lc_colors.cpp" line="368"/>
         <source>Special Colors</source>
         <comment>Colors</comment>
-        <translation>Couleurs spéciales</translation>
+        <translation>Spezialfarben</translation>
     </message>
 </context>
 <context>
@@ -1025,7 +1025,7 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="201"/>
         <source>Shift+F3</source>
-        <translation>Maj+F3</translation>
+        <translation>Shift+F3</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="208"/>
@@ -1090,152 +1090,152 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="348"/>
         <source>Ctrl+Shift+0</source>
-        <translation>Ctrl+Maj+0</translation>
+        <translation>Ctrl+Shift+0</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="355"/>
         <source>Ctrl+Shift+1</source>
-        <translation>Ctrl+Maj+1</translation>
+        <translation>Ctrl+Shift+1</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="362"/>
         <source>Ctrl+Shift+2</source>
-        <translation>Ctrl+Maj+2</translation>
+        <translation>Ctrl+Shift+2</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="369"/>
         <source>Ctrl+Shift+3</source>
-        <translation>Ctrl+Maj+3</translation>
+        <translation>Ctrl+Shift+3</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="376"/>
         <source>Ctrl+Shift+4</source>
-        <translation>Ctrl+Maj+4</translation>
+        <translation>Ctrl+Shift+4</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="383"/>
         <source>Ctrl+Shift+5</source>
-        <translation>Ctrl+Maj+5</translation>
+        <translation>Ctrl+Shift+5</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="390"/>
         <source>Ctrl+Shift+6</source>
-        <translation>Ctrl+Maj+6</translation>
+        <translation>Ctrl+Shift+6</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="397"/>
         <source>Ctrl+Shift+7</source>
-        <translation>Ctrl+Maj+7</translation>
+        <translation>Ctrl+Shift+7</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="404"/>
         <source>Ctrl+Shift+8</source>
-        <translation>Ctrl+Maj+8</translation>
+        <translation>Ctrl+Shift+8</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="411"/>
         <source>Ctrl+Shift+9</source>
-        <translation>Ctrl+Maj+9</translation>
+        <translation>Ctrl+Shift+9</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="425"/>
         <source>Shift+0</source>
-        <translation>Maj+0</translation>
+        <translation>Shift+0</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="432"/>
         <source>Shift+1</source>
-        <translation>Maj+1</translation>
+        <translation>Shift+1</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="439"/>
         <source>Shift+2</source>
-        <translation>Maj+2</translation>
+        <translation>Shift+2</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="446"/>
         <source>Shift+3</source>
-        <translation>Maj+3</translation>
+        <translation>Shift+3</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="453"/>
         <source>Shift+4</source>
-        <translation>Maj+4</translation>
+        <translation>shift+4</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="460"/>
         <source>Shift+5</source>
-        <translation>Maj+5</translation>
+        <translation>Shift+5</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="467"/>
         <source>Shift+6</source>
-        <translation>Maj+6</translation>
+        <translation>Shift+6</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="474"/>
         <source>Shift+7</source>
-        <translation>Maj+7</translation>
+        <translation>Shift+7</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="481"/>
         <source>Shift+8</source>
-        <translation>Maj+8</translation>
+        <translation>Shift+8</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="488"/>
         <source>Shift+9</source>
-        <translation>Maj+9</translation>
+        <translation>Shift+9</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="558"/>
         <source>Shift+S</source>
-        <translation>Maj+S</translation>
+        <translation>Shift+S</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="565"/>
         <source>Shift+M</source>
-        <translation>Maj+M</translation>
+        <translation>Shift+M</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="572"/>
         <source>Shift+R</source>
-        <translation>Maj+R</translation>
+        <translation>Shift+R</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="579"/>
         <source>Shift+D</source>
-        <translation>Maj+D</translation>
+        <translation>Shift+D</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="586"/>
         <source>Shift+N</source>
-        <translation>Maj+N</translation>
+        <translation>Shift+N</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="593"/>
         <source>Shift+Z</source>
-        <translation>Maj+Z</translation>
+        <translation>Shift+Z</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="600"/>
         <source>Shift+P</source>
-        <translation>Maj+P</translation>
+        <translation>Shift+P</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="607"/>
         <source>Shift+T</source>
-        <translation>Maj+T</translation>
+        <translation>Shift+T</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="614"/>
         <source>Shift+L</source>
-        <translation>Maj+L</translation>
+        <translation>shift+L</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="628"/>
         <source>Esc</source>
-        <translation>Échap</translation>
+        <translation>Esc</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="642"/>
@@ -1285,92 +1285,92 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="845"/>
         <source>Alt+Up</source>
-        <translation>Alt+Up</translation>
+        <translation>Alt+Rauf</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="852"/>
         <source>Alt+Left</source>
-        <translation>Alt+Left</translation>
+        <translation>Alt+Links</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="859"/>
         <source>Alt+Right</source>
-        <translation>Alt+Right</translation>
+        <translation>Alt+Rechts</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="866"/>
         <source>Alt+Down</source>
-        <translation>Alt+Down</translation>
+        <translation>Alt+Runter</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="943"/>
         <source>Insert</source>
-        <translation>Inser</translation>
+        <translation>Einfügen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="950"/>
         <source>Delete</source>
-        <translation>Suppr</translation>
+        <translation>Löschen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="978"/>
         <source>Down</source>
-        <translation>Bas</translation>
+        <translation>Runter</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="985"/>
         <source>Up</source>
-        <translation>Haut</translation>
+        <translation>Rauf</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="992"/>
         <source>Right</source>
-        <translation>Droite</translation>
+        <translation>Rechts</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="999"/>
         <source>Left</source>
-        <translation>Gauche</translation>
+        <translation>Links</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1006"/>
         <source>PgUp</source>
-        <translation>Page préc</translation>
+        <translation>Bild auf</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1013"/>
         <source>PgDown</source>
-        <translation>Page suiv</translation>
+        <translation>Bild ab</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1020"/>
         <source>Shift+Down</source>
-        <translation>Maj+Bas</translation>
+        <translation>Shift+Runter</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1027"/>
         <source>Shift+Up</source>
-        <translation>Maj+Haut</translation>
+        <translation>Shift+Hoch</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1034"/>
         <source>Shift+Right</source>
-        <translation>Maj+Droite</translation>
+        <translation>shift+Rechts</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1041"/>
         <source>Shift+Left</source>
-        <translation>Maj+Gauche</translation>
+        <translation>Shift+Links</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1048"/>
         <source>Shift+PgUp</source>
-        <translation>Maj+Page préc</translation>
+        <translation>Shift+Bild auf</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1055"/>
         <source>Shift+PgDown</source>
-        <translation>Maj+Page suiv</translation>
+        <translation>Shift+Bild ab</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1097"/>
@@ -1393,77 +1393,77 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="11"/>
         <source>Create a new project</source>
-        <translation>Créer un nouveau projet</translation>
+        <translation>Neues Projekt anlegen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="18"/>
         <source>Open an existing project</source>
-        <translation>Ouvrir un projet existant</translation>
+        <translation>Bestehendes Projekt öffnen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="25"/>
         <source>Merge the contents of another project with the current one</source>
-        <translation>Fusionner le contenu d’un autre projet dans le projet courant</translation>
+        <translation>Inhalte eines anderen Projektes mit dem aktuellen vereinigen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="32"/>
         <source>Save the active project</source>
-        <translation>Enregistrer le projet actif</translation>
+        <translation>Aktives Projekt speichern</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="39"/>
         <source>Save the active project with a new name</source>
-        <translation>Enregistrer le projet actif sous un nouveau nom</translation>
+        <translation>Aktives Projekt unter anderem Namen speichern</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="46"/>
         <source>Save a picture of the current view</source>
-        <translation>Enregistrer une image de la vue courante</translation>
+        <translation>Aktuelle Ansicht als Bild speichern</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="53"/>
         <source>Export the project in 3D Studio 3DS format</source>
-        <translation>Exporter le projet dans le format 3DS de 3D Studio</translation>
+        <translation>Das Projekt im 3DS Format des 3D Studios exportieren</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="60"/>
         <source>Create an HTML page for this project</source>
-        <translation>Créer une page HTML pour ce projet</translation>
+        <translation>Für dieses Projekt eine HTML Seite erstellen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="67"/>
         <source>Export a list of parts used in BrickLink XML format</source>
-        <translation>Exporter une liste des pièces utilisées dans le format XML de BrickLink</translation>
+        <translation>Eine Teileliste im XML Format vom BrickLink exportieren</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="74"/>
         <source>Export a list of parts used in comma delimited file format</source>
-        <translation>Exporter une liste des pièces utilisées dans un fichier texte avec champs séparés par des virgules</translation>
+        <translation>Liste der verwendeten Teile in eine CSV Getrennte Datei exportieren</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="81"/>
         <source>Export the project in POV-Ray format</source>
-        <translation>Exporter le projet dans le format POV-Ray</translation>
+        <translation>Das Projekt im POV-Ray Format exportieren</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="88"/>
         <source>Export the project in Wavefront OBJ format</source>
-        <translation>Exporter le projet dans le format OBJ de Wavefront</translation>
+        <translation>Das Projekt im OBJ Format von Wavefront exportieren</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="95"/>
         <source>Print the active project</source>
-        <translation>Imprimer le projet actif</translation>
+        <translation>Aktive Projekt drucken</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="102"/>
         <source>Display how the project would look if printed</source>
-        <translation>Afficher un aperçu de l’impression du projet</translation>
+        <translation>Druckvorschau des Projektes</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="109"/>
         <source>Print a list of parts used</source>
-        <translation>Imprimer une liste des pièces utilisées</translation>
+        <translation>Liste der verwendeten Teile drucken</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="116"/>
@@ -1471,83 +1471,83 @@
         <location filename="../common/lc_commands.cpp" line="130"/>
         <location filename="../common/lc_commands.cpp" line="137"/>
         <source>Open this document</source>
-        <translation>Ouvrir ce document</translation>
+        <translation>Dieses Dokument öffnen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="144"/>
         <source>Quit the application; prompts to save project</source>
-        <translation>Quitter l’application ; invite à l’enregistrement du projet</translation>
+        <translation>Programm verlassen ; Fordert zum Speichern des Projektes auf</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="151"/>
         <source>Undo the last action</source>
-        <translation>Annuler la dernière action</translation>
+        <translation>Vorangehende Aktion rückgängig machen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="158"/>
         <source>Redo the previously undone action</source>
-        <translation>Refaire l’action précédemment annulée</translation>
+        <translation>Rückgängig gemachte Aktion wiederherstellen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="165"/>
         <source>Cut the selection and put it on the Clipboard</source>
-        <translation>Couper la sélection et la placer dans le presse-papier</translation>
+        <translation>Auswahl ausschneiden und in die Zwischenablage legen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="172"/>
         <source>Copy the selection and put it on the Clipboard</source>
-        <translation>Copier la sélection et la placer dans le presse-papier</translation>
+        <translation>Auswahl in die Zwischenablage kopieren</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="179"/>
         <source>Insert Clipboard contents</source>
-        <translation>Insérer le contenu de presse-papier</translation>
+        <translation>Aus Zwischenablage einfügen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="186"/>
         <location filename="../common/lc_commands.cpp" line="200"/>
         <source>Find object</source>
-        <translation>Trouver un objet</translation>
+        <translation>Objekt finden</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="193"/>
         <source>Find next object</source>
-        <translation>Trouver l’objet suivant</translation>
+        <translation>Nächstes Objekt finden</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="207"/>
         <source>Select all pieces in the project</source>
-        <translation>Sélectionner toutes les pièces du projet</translation>
+        <translation>Alle Teile des Projektes auswählen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="214"/>
         <source>De-select everything</source>
-        <translation>Vider la sélection</translation>
+        <translation>Auswahl aufheben</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="221"/>
         <source>Invert the current selection set</source>
-        <translation>Inverser la sélection courante</translation>
+        <translation>Auswahl invertieren</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="228"/>
         <source>Select objects by name</source>
-        <translation>Sélectionner des objets par leur nom</translation>
+        <translation>Objekte per Namen auswählen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="235"/>
         <source>Prevents movement and rotation along the X axis</source>
-        <translation>Empêcher les déplacements et rotations suivant l’axe X</translation>
+        <translation>Verschiebung und Drehung entlang der X-Achse blockieren</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="242"/>
         <source>Prevents movement and rotation along the Y axis</source>
-        <translation>Empêcher les déplacements et rotations suivant l’axe Y</translation>
+        <translation>Verschiebung und Drehung entlang der Y-Achse blockieren</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="249"/>
         <source>Prevents movement and rotation along the Z axis</source>
-        <translation>Empêcher les déplacements et rotations suivant l’axe Z</translation>
+        <translation>Verschiebung und Drehung entlang der Z-Achse blockieren</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="256"/>
@@ -1557,52 +1557,52 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="270"/>
         <source>Toggle snap axes</source>
-        <translation>Basculer l’usage de pas pour les déplacements</translation>
+        <translation>Einrasten an Achsen umschalten</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="417"/>
         <source>Snap rotations to fixed intervals</source>
-        <translation>Utiliser le pas pour les rotations</translation>
+        <translation>Drehung in festen Intervallen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="277"/>
         <source>Do not snap movement along the XY plane</source>
-        <translation>Ne pas utiliser les pas pour les déplacements sur le plan XY</translation>
+        <translation>Bewegung in der XY-Eben kontinuierlich</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="263"/>
         <source>Move and rotate objects relative to the one that currently has focus</source>
-        <translation>Déplacer et tourner les objets relativement à l’objet qui a le focus</translation>
+        <translation>Bewege und drehe Objekte relativ zum Teil mit dem Fokus</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="284"/>
         <source>Snap movement along the XY plane to 1/20 stud</source>
-        <translation>Fixer le pas pour les déplacements dans le plan XY à 1/20 de tenon</translation>
+        <translation>Bewegung mit Einrasten entlang der XY-Ebene in 1/20 Noppen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="291"/>
         <source>Snap movement along the XY plane to 1/4 stud</source>
-        <translation>Fixer le pas pour les déplacements dans le plan XY à 1/4 de tenon</translation>
+        <translation>Bewegung mit Einrasten entlang der XY-Ebene in 1/4 Noppen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="298"/>
         <source>Snap movement along the XY plane to 1 flat</source>
-        <translation>Fixer le pas pour les déplacements dans le plan XY à 1 plaque</translation>
+        <translation>Bewegung mit Einrasten entlang der XY-Ebene in 1 Fläche</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="305"/>
         <source>Snap movement along the XY plane to 1/2 stud</source>
-        <translation>Fixer le pas pour les déplacements dans le plan XY à 1/2 tenon</translation>
+        <translation>Bewegung mit Einrasten entlang der XY-Ebene in 1/2 Noppen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="312"/>
         <source>Snap movement along the XY plane to 1 stud</source>
-        <translation>Fixer le pas pour les déplacements dans le plan XY à 1 tenon</translation>
+        <translation>Bewegung mit Einrasten entlang der XY-Ebene in 1 Noppen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="319"/>
         <source>Snap movement along the XY plane to 2 studs</source>
-        <translation>Fixer le pas pour les déplacements dans le plan XY à 2 tenons</translation>
+        <translation>Bewegung mit Einrasten entlang der XY-Ebene in 2 Noppen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="326"/>
@@ -1612,277 +1612,277 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="333"/>
         <source>Snap movement along the XY plane to 4 studs</source>
-        <translation>Fixer le pas pour les déplacements dans le plan XY à 4 tenons</translation>
+        <translation>Bewegung mit Einrasten entlang der XY-Ebene in 4 Noppen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="340"/>
         <source>Snap movement along the XY plane to 8 studs</source>
-        <translation>Fixer le pas pour les déplacements dans le plan XY à 8 tenons</translation>
+        <translation>Bewegung mit Einrasten entlang der XY-Ebene in 8 Noppen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="347"/>
         <source>Do not snap movement along the Z axis</source>
-        <translation>Ne pas fixer les déplacements sur l’axe Z</translation>
+        <translation>Bewegung entlang der Z-Ache kontinuierlich</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="354"/>
         <source>Snap movement along the Z axis to 1/20 stud</source>
-        <translation>Fixer le pas pour les déplacements dans l’axe Z à 1/20 de tenon</translation>
+        <translation>Bewegung mit Einrasten entlang der Z-Achse in 1/20 Noppen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="361"/>
         <source>Snap movement along the Z axis to 1/4 stud</source>
-        <translation>Fixer le pas pour les déplacements dans l’axe Z à 1/4 de tenon</translation>
+        <translation>Bewegung mit Einrasten entlang der Z-Achse in 1/4 Noppen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="368"/>
         <source>Snap movement along the Z axis to 1 flat</source>
-        <translation>Fixer le pas pour les déplacements dans l’axe Z à 1 plaque</translation>
+        <translation>Bewegung mit Einrasten entlang der Z-Achse in 1 Fläche</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="375"/>
         <source>Snap movement along the Z axis to 1/2 stud</source>
-        <translation>Fixer le pas pour les déplacements dans l’axe Z à 1/2 tenon</translation>
+        <translation>Bewegung mit Einrasten entlang der Z-Achse in 1/2 Noppen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="382"/>
         <source>Snap movement along the Z axis to 1 stud</source>
-        <translation>Fixer le pas pour les déplacements dans l’axe Z à 1 tenon</translation>
+        <translation>Bewegung mit Einrasten entlang der Z-Achse in 1 Noppen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="389"/>
         <source>Snap movement along the Z axis to 1 brick</source>
-        <translation>Fixer le pas pour les déplacements dans l’axe Z à 1 brique</translation>
+        <translation>Bewegung mit Einrasten entlang der Z-Achse in 1 Stein</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="396"/>
         <source>Snap movement along the Z axis to 2 bricks</source>
-        <translation>Fixer le pas pour les déplacements dans l’axe Z à 2 briques</translation>
+        <translation>Bewegung mit Einrasten entlang der Z-Achse in 2 Steinen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="403"/>
         <source>Snap movement along the Z axis to 4 bricks</source>
-        <translation>Fixer le pas pour les déplacements dans l’axe Z à 4 briques</translation>
+        <translation>Bewegung mit Einrasten entlang der Z-Achse in 4 Steinen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="410"/>
         <source>Snap movement along the Z axis to 8 bricks</source>
-        <translation>Fixer le pas pour les déplacements dans l’axe Z à 8 briques</translation>
+        <translation>Bewegung mit Einrasten entlang der Z-Achse in 8 Steinen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="424"/>
         <source>Do not snap rotations</source>
-        <translation>Ne pas utiliser de pas pour les rotations</translation>
+        <translation>Drehung kontinuierlich</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="431"/>
         <source>Snap rotations to 1 degree</source>
-        <translation>Fixer le pas de rotation à 1 degré</translation>
+        <translation>Drehungen in 1 Grad Schritten</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="438"/>
         <source>Snap rotations to 5 degrees</source>
-        <translation>Fixer le pas de rotation à 5 degrés</translation>
+        <translation>Drehungen in 5 Grad Schritten</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="445"/>
         <source>Snap rotations to 10 degrees</source>
-        <translation>Fixer le pas de rotation à 10 degrés</translation>
+        <translation>Drehungen in 10 Grad Schritten</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="452"/>
         <source>Snap rotations to 15 degrees</source>
-        <translation>Fixer le pas de rotation à 15 degrés</translation>
+        <translation>Drehungen in 15 Grad Schritten</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="459"/>
         <source>Snap rotations to 30 degrees</source>
-        <translation>Fixer le pas de rotation à 30 degrés</translation>
+        <translation>Drehungen in 30 Grad Schritten</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="466"/>
         <source>Snap rotations to 45 degrees</source>
-        <translation>Fixer le pas de rotation à 45 degrés</translation>
+        <translation>Drehungen in 45 Grad Schritten</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="473"/>
         <source>Snap rotations to 60 degrees</source>
-        <translation>Fixer le pas de rotation à 60 degrés</translation>
+        <translation>Drehungen in 60 Grad Schritten</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="480"/>
         <source>Snap rotations to 90 degrees</source>
-        <translation>Fixer le pas de rotation à 90 degrés</translation>
+        <translation>Drehungen in 90 Grad Schritten</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="487"/>
         <source>Snap rotations to 180 degrees</source>
-        <translation>Fixer le pas de rotation à 180 degrés</translation>
+        <translation>Drehungen in 180 Grad Schritten</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="494"/>
         <source>Apply transform to selected objects</source>
-        <translation>Appliquer la transformation aux objets sélectionnés</translation>
+        <translation>Transformation auf ausgewählte Objekte anwenden</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="501"/>
         <source>Switch to absolute translation mode when applying transforms</source>
-        <translation>Basculer vers le mode translation absolue pour appliquer les transformations</translation>
+        <translation>Mit Anwendung der Transformation zum absoluten Bewegungsmodus wechseln</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="508"/>
         <source>Switch to relative translation mode when applying transforms</source>
-        <translation>Basculer vers le mode translation relative pour appliquer les transformations</translation>
+        <translation>Mit Anwendung der Transformation zum relativen Bewegungsmodus wechseln</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="515"/>
         <source>Switch to absolute rotation mode when applying transforms</source>
-        <translation>Basculer vers le mode rotation absolue pour appliquer les transformations</translation>
+        <translation>Mit Anwendung der Transformation zum absoluten Drehmodus wechseln</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="522"/>
         <source>Switch to relative rotation mode when applying transforms</source>
-        <translation>Basculer vers le mode rotation relative pour appliquer les transformations</translation>
+        <translation>Mit Anwendung der Transformation zum relativen Drehmodus wechseln</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="529"/>
         <source>Add new pieces to the model</source>
-        <translation>Ajouter des nouvelles pièces au modèle</translation>
+        <translation>Neue Teile zum Modell hinzufügen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="536"/>
         <source>Add new omni light sources to the model</source>
-        <translation>Ajouter des sources de lumière omnidirectionnelles au modèle</translation>
+        <translation>Neue Punktlichtquelle zum Modell hinzufügen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="543"/>
         <source>Add new spotlights to the model</source>
-        <translation>Ajouter des lumières projecteur au modèle</translation>
+        <translation>Neue Scheinwerferlichtquelle zum Modell hinzufügen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="550"/>
         <source>Create a new camera</source>
-        <translation>Créer une nouvelle caméra</translation>
+        <translation>Neue Kamera erzeugen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="557"/>
         <source>Select objects (hold the CTRL key down or drag the mouse to select multiple objects)</source>
-        <translation>Sélection des objets (maintenir la touche Ctrl enfoncée ou glisser la souris pour sélectionner plusieurs objets)</translation>
+        <translation>Objekte auswählen (strg gedrückt halten oder mit der Maus mehrere Objekte auswählen)</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="564"/>
         <source>Move selected objects</source>
-        <translation>Déplacer les objets sélectionnés</translation>
+        <translation>Ausgewählte Objekte bewegen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="571"/>
         <source>Rotate selected pieces</source>
-        <translation>Tourner les pièces sélectionnées</translation>
+        <translation>Ausgewählte Objekte drehen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="578"/>
         <source>Delete objects</source>
-        <translation>Supprimer des objets</translation>
+        <translation>Ausgewählte Objekte löschen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="585"/>
         <source>Change piece color</source>
-        <translation>Changer la couleur d’une pièce</translation>
+        <translation>Farbe des Teils ändern</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="592"/>
         <source>Zoom in or out</source>
-        <translation>Zoomer ou dézoomer</translation>
+        <translation>Ein- oder auszoomen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="599"/>
         <source>Pan the current view</source>
-        <translation>Glisser la vue courante</translation>
+        <translation>Ansicht verschieben</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="606"/>
         <source>Rotate the current view</source>
-        <translation>Tourner la vue courante</translation>
+        <translation>Ansicht drehen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="613"/>
         <source>Roll the current view</source>
-        <translation>Pivoter la vue courante</translation>
+        <translation>Ansicht rollen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="620"/>
         <source>Zoom into a region of the screen</source>
-        <translation>Zoomer une région de l’écran</translation>
+        <translation>In Teilbereich zoomen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="627"/>
         <source>Cancel current mouse action</source>
-        <translation>Annuler l’action courante de la souris</translation>
+        <translation>Derzeitige Mausaktion abbrechen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="634"/>
         <source>Change program settings</source>
-        <translation>Changer la configuration du programme</translation>
+        <translation>Programmeinstellungen ändern</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="641"/>
         <source>Zoom in</source>
-        <translation>Zoomer</translation>
+        <translation>Einzoomen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="648"/>
         <source>Zoom out</source>
-        <translation>Dézoomer</translation>
+        <translation>Auszoomen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="655"/>
         <source>Fit all pieces in current the view (hold the CTRL key down to zoom all views)</source>
-        <translation>Zoomer pour voir toutes les pièces dans la vue courante (maintenir la touche Ctrl enfoncée pour zoomer toutes les vues)</translation>
+        <translation>Ansicht für alle Teile anpassen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="662"/>
         <source>Rotate view so selected pieces are at center</source>
-        <translation>Tourner la vue pour que les pièces sélectionnées soient au centre</translation>
+        <translation>Ansicht durch Drehen um die selektierten Teile zentrieren</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="669"/>
         <source>View model from the front</source>
-        <translation>Voir le modèle de face</translation>
+        <translation>Vorderansicht des Modells</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="676"/>
         <source>View model from the back</source>
-        <translation>Voir le modèle de dos</translation>
+        <translation>Rückansicht des Modells</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="683"/>
         <source>View model from the top</source>
-        <translation>Voir le modèle du dessus</translation>
+        <translation>Draufsicht des Modells zeigen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="690"/>
         <source>View model from the bottom</source>
-        <translation>Voir le modèle du dessous</translation>
+        <translation>Ansicht von Unten zeigen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="697"/>
         <source>View model from the left</source>
-        <translation>Voir le modèle de la gauche</translation>
+        <translation>Linke Seitenansicht des Modells zeigen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="704"/>
         <source>View model from the right</source>
-        <translation>Voir le modèle de la droite</translation>
+        <translation>Rechte Seitenansicht des Modells zeigen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="711"/>
         <source>View model from the default position</source>
-        <translation>Voir le modèle depuis la position par défaut</translation>
+        <translation>Modell in der voreingestellten Ansicht zeigen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="718"/>
         <source>Do not use a camera</source>
-        <translation>Ne pas utiler de caméra</translation>
+        <translation>Kamera nicht benutzen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="725"/>
@@ -1902,163 +1902,163 @@
         <location filename="../common/lc_commands.cpp" line="823"/>
         <location filename="../common/lc_commands.cpp" line="830"/>
         <source>Use this camera</source>
-        <translation>Utiliser cette caméra</translation>
+        <translation>Diese Kamera benutzen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="837"/>
         <source>Reset views to their default positions</source>
-        <translation>Réinitialiser les vues à leur position par défaut</translation>
+        <translation>Alle Ansichten auf Voreinstellung zurücksetzen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="844"/>
         <source>Go to the first step of the model</source>
-        <translation>Aller à la première étape du modèle</translation>
+        <translation>Gehe zum ersten Schritt des Modells</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="851"/>
         <source>Go to the previous step</source>
-        <translation>Aller à l’étape précédente</translation>
+        <translation>Gehe zum vorangehenden Schritt</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="858"/>
         <source>Go to the next step</source>
-        <translation>Aller à l’étape suivante</translation>
+        <translation>Gehe zum folgenden Schritt</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="865"/>
         <source>Go to the last step of the model</source>
-        <translation>Aller à la dernière étape du modèle</translation>
+        <translation>Gehe zum letzten Schritt des Modells</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="872"/>
         <source>Insert new step</source>
-        <translation>Insérer une nouvelle étape</translation>
+        <translation>Einen neuen Schritt einfügen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="879"/>
         <source>Delete current step</source>
-        <translation>Supprimer l’étape courante</translation>
+        <translation>Aktuellen Schritt löschen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="886"/>
         <source>Toggle adding new animation keys</source>
-        <translation>Basculer l’ajout de nouvelles clés d’animation</translation>
+        <translation>Hinzufügen neuer Animationstasten umschalten</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="893"/>
         <source>Split the current view horizontally</source>
-        <translation>Scinder la vue courante horizontalement</translation>
+        <translation>Ansicht horizontal teilen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="900"/>
         <source>Split the current view vertically</source>
-        <translation>Scinder la vue courante verticalement</translation>
+        <translation>Ansicht vertikal teilen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="907"/>
         <source>Remove the current view</source>
-        <translation>Supprimer la vue courante</translation>
+        <translation>Aktuelle Ansicht entfernen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="914"/>
         <source>Reset all views</source>
-        <translation>Réinitialiser toutes les vues</translation>
+        <translation>Alle Ansichten zurücksetzen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="921"/>
         <source>Toggle fullscreen mode</source>
-        <translation>Basculer en mode plein-écran/fenêtre</translation>
+        <translation>Vollbildmodus umschalten</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="928"/>
         <source>Set the current camera to use a perspective projection</source>
-        <translation>Utiliser une projection perspective pour la caméra courante</translation>
+        <translation>Aktuelle Kamera auf perspektivische Projektion umstellen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="935"/>
         <source>Set the current camera to use an orthographic projection</source>
-        <translation>Utiliser une projection orthographique pour la caméra courante</translation>
+        <translation>Aktuelle Kamera auf orthografische Projektion umstellen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="942"/>
         <source>Add a new piece to the model</source>
-        <translation>Ajouter une nouvelle pièce au modèle</translation>
+        <translation>Ein neues Teil zum Modell hinzufügen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="949"/>
         <source>Delete selected objects</source>
-        <translation>Supprimer les objets sélectionnés</translation>
+        <translation>Ausgewählte Objekte entfernen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="956"/>
         <source>Reset the pivot point of the selected pieces to their origin</source>
-        <translation>Réinitialiser le point de pivot des pièces sélectionnées à leur origine</translation>
+        <translation>Drehpunkt der ausgewählten Teile auf deren Ursprung zurücksetzen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="963"/>
         <source>Insert a new control point</source>
-        <translation>Insérer un nouveau point de contrôle</translation>
+        <translation>Einen neuen Steuerungspunkt einfügen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="970"/>
         <source>Remove the currently selected control point</source>
-        <translation>Supprimer le point contrôle sélectionné</translation>
+        <translation>Ausgewählten Steuerungspunkt löschen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="977"/>
         <location filename="../common/lc_commands.cpp" line="984"/>
         <source>Move selected objects along the X axis</source>
-        <translation>Déplacer les objets sélectionnés sur l’axe X</translation>
+        <translation>Ausgewählte Teile entlang der X-Achse bewegen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="991"/>
         <location filename="../common/lc_commands.cpp" line="998"/>
         <source>Move selected objects along the Y axis</source>
-        <translation>Déplacer les objets sélectionnés sur l’axe Y</translation>
+        <translation>Ausgewählte Teile entlang der Y-Achse bewegen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1005"/>
         <location filename="../common/lc_commands.cpp" line="1012"/>
         <source>Move selected objects along the Z axis</source>
-        <translation>Déplacer les objets sélectionnés sur l’axe Z</translation>
+        <translation>Ausgewählte Teile entlang der Z-Achse bewegen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1019"/>
         <location filename="../common/lc_commands.cpp" line="1026"/>
         <source>Rotate selected objects along the X axis</source>
-        <translation>Tourner les objets sélections suivant l’axe X</translation>
+        <translation>Ausgewählte Teile entlang der X-Achse drehen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1033"/>
         <location filename="../common/lc_commands.cpp" line="1040"/>
         <source>Rotate selected objects along the Y axis</source>
-        <translation>Tourner les objets sélections suivant l’axe Y</translation>
+        <translation>Ausgewählte Teile entlang der Y-Achse drehen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1047"/>
         <location filename="../common/lc_commands.cpp" line="1054"/>
         <source>Rotate selected objects along the Z axis</source>
-        <translation>Tourner les objets sélections suivant l’axe Z</translation>
+        <translation>Ausgewählte Teile entlang der Z-Achse drehen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1061"/>
         <source>Add a new minifig to the model</source>
-        <translation>Ajouter une nouvelle minifig au modèle</translation>
+        <translation>Ein neues minifig zum Modell hinzufügen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1068"/>
         <source>Make copies of the selected pieces</source>
-        <translation>Faire des copies des pièces sélectionnées</translation>
+        <translation>Erstelle Kopien der ausgewählten Teile</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1075"/>
         <source>View the model referenced by the currently selected piece</source>
-        <translation>Voir le modèle référencé par la pièce sélectionnée</translation>
+        <translation>Zeige das Modell das durch das ausgewählte Teil referenziert wird</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1082"/>
         <source>Move the currently selected pieces to a new model and replaces them with a reference to the model</source>
-        <translation>Déplacer les pièces sélectionnées vers un nouveau modèle et les remplacer par une référence au nouveau modèle</translation>
+        <translation>Bewege die ausgewählten Teile in eine neues Modell und ersetze diese mit Referenzen zum Modell</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1089"/>

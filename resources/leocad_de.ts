@@ -2260,14 +2260,14 @@ Bitte lesen sie unter http://www.leocad.org nach wie man eine Bibliothek herunte
         <location filename="../common/lc_mainwindow.cpp" line="110"/>
         <location filename="../common/lc_mainwindow.cpp" line="1872"/>
         <source>Open Project</source>
-        <translation>Ouvrir un projet</translation>
+        <translation>Projekt öffnen</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="111"/>
         <location filename="../common/lc_mainwindow.cpp" line="1945"/>
         <location filename="../common/lc_mainwindow.cpp" line="1972"/>
         <source>Save Project</source>
-        <translation>Enregistrer le projet</translation>
+        <translation>Projekt speichern</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="304"/>
@@ -2277,113 +2277,113 @@ Bitte lesen sie unter http://www.leocad.org nach wie man eine Bibliothek herunte
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="311"/>
         <source>C&amp;ameras</source>
-        <translation>C&amp;améras</translation>
+        <translation>K&amp;ameras</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="329"/>
         <source>&amp;File</source>
-        <translation>&amp;Fichier</translation>
+        <translation>&amp;Datei</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="337"/>
         <source>&amp;Export</source>
-        <translation>&amp;Exporter</translation>
+        <translation>&amp;Exportieren</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="356"/>
         <source>&amp;Edit</source>
-        <translation>&amp;Éditer</translation>
+        <translation>&amp;Bearbeiten</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="375"/>
         <source>&amp;View</source>
-        <translation>&amp;Vue</translation>
+        <translation>&amp;Ansicht</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="320"/>
         <source>&amp;Viewpoints</source>
-        <translation>&amp;Points de vue</translation>
+        <translation>&amp;Blickpunkte</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="382"/>
         <source>Projection</source>
-        <translation>Projection</translation>
+        <translation>Projektion</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="385"/>
         <source>Ste&amp;p</source>
-        <translation>Éta&amp;pe</translation>
+        <translation>Schrit&amp;te</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="399"/>
         <source>T&amp;oolbars</source>
-        <translation>Barres d’&amp;outils</translation>
+        <translation>Werkz&ampeuge</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="409"/>
         <source>&amp;Piece</source>
-        <translation>&amp;Pièce</translation>
+        <translation>&amp;Teil</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="432"/>
         <source>&amp;Model</source>
-        <translation>&amp;Modèle</translation>
+        <translation>&amp;Modell</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="440"/>
         <source>&amp;Help</source>
-        <translation>&amp;Aide</translation>
+        <translation>&amp;Hilfe</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="452"/>
         <location filename="../common/lc_mainwindow.cpp" line="458"/>
         <source>Lock Menu</source>
-        <translation>Menu bloquer</translation>
+        <translation>Menü sperren</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="459"/>
         <source>Toggle mouse movement on specific axes</source>
-        <translation>(Dé)Bloquer le déplacement de la souris sur des axes précis</translation>
+        <translation>Mausbewegung auf bestimmten Achsen umschalten</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="463"/>
         <source>Snap XY</source>
-        <translation>Pas XY</translation>
+        <translation>Einrasten XY</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="467"/>
         <source>Snap Z</source>
-        <translation>Pas Z</translation>
+        <translation>Einrasten Z</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="471"/>
         <source>Snap Menu</source>
-        <translation>Menu pas</translation>
+        <translation>Schritte Menü</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="477"/>
         <source>Movement Snap</source>
-        <translation>Pas pour les déplacements</translation>
+        <translation>Einrasten für Bewegung</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="478"/>
         <source>Snap translations to fixed intervals</source>
-        <translation>Utiliser un pas donné pour les translations</translation>
+        <translation>Einrasten der Bewegung in festen Intervallen</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="482"/>
         <source>Snap Angle Menu</source>
-        <translation>Menu pas pour les angles</translation>
+        <translation>Winkelschritte Menü</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="488"/>
         <source>Rotation Snap</source>
-        <translation>Pas pour les rotations</translation>
+        <translation>Drehungsschritte</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="489"/>
         <source>Snap rotations to fixed intervals</source>
-        <translation>Utiliser un pas fixe pour les rotations</translation>
+        <translation>Einrasten der Drehung in festen Intervallen</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="493"/>
@@ -2393,27 +2393,27 @@ Bitte lesen sie unter http://www.leocad.org nach wie man eine Bibliothek herunte
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="538"/>
         <source>Tools</source>
-        <translation>Outils</translation>
+        <translation>Werkzeuge</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="558"/>
         <source>Time</source>
-        <translation>Temps</translation>
+        <translation>Zeit</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="569"/>
         <source>Parts</source>
-        <translation>Pièces</translation>
+        <translation>Teile</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="630"/>
         <source>Properties</source>
-        <translation>Propriétés</translation>
+        <translation>Eigenschaften</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="639"/>
         <source>Timeline</source>
-        <translation>Ligne temporelle</translation>
+        <translation>Zeitachse</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="1595"/>
@@ -2423,12 +2423,12 @@ Bitte lesen sie unter http://www.leocad.org nach wie man eine Bibliothek herunte
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="1602"/>
         <source>1 Object selected</source>
-        <translation>1 objet sélectionné</translation>
+        <translation>1 Objekt ausgewählt</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="1604"/>
         <source>%1 Objects selected</source>
-        <translation>%1 objets sélectionnés</translation>
+        <translation>%1 Objekte ausgewählt</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="1608"/>
@@ -2438,12 +2438,12 @@ Bitte lesen sie unter http://www.leocad.org nach wie man eine Bibliothek herunte
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="1612"/>
         <source> in group &apos;%1&apos;</source>
-        <translation> dans le groupe « %1 »</translation>
+        <translation> in der Gruppe « %1 »</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="1649"/>
         <source>Step %1</source>
-        <translation>Étape %1</translation>
+        <translation>Schritt %1</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="1678"/>
@@ -2453,28 +2453,28 @@ Bitte lesen sie unter http://www.leocad.org nach wie man eine Bibliothek herunte
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="1694"/>
         <source>&amp;Undo %1</source>
-        <translation>Ann&amp;uler %1</translation>
+        <translation>%1 rück&amp;gängig machen</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="1699"/>
         <source>&amp;Undo</source>
-        <translation>Ann&amp;uler</translation>
+        <translation>rückg&amp;ängig machen</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="1705"/>
         <source>&amp;Redo %1</source>
-        <translation>&amp;Refaire %1</translation>
+        <translation>%1 &amp;wiederherstellen</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="1710"/>
         <source>&amp;Redo</source>
-        <translation>&amp;Refaire</translation>
+        <translation>&amp;wiederherstellen</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="1872"/>
         <location filename="../common/lc_mainwindow.cpp" line="1902"/>
         <source>Supported Files (*.lcd *.ldr *.dat *.mpd);;All Files (*.*)</source>
-        <translation>Fichiers pris en charge (*.lcd *.ldr *.dat *.mpd);;Tous les fichiers (*.*)</translation>
+        <translation>Unterstützte Dateien (*.lcd *.ldr *.dat *.mpd);;Alle Dateien (*.*)</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="1889"/>
@@ -2488,32 +2488,32 @@ Bitte lesen sie unter http://www.leocad.org nach wie man eine Bibliothek herunte
         <location filename="../common/lc_mainwindow.cpp" line="1889"/>
         <location filename="../common/lc_mainwindow.cpp" line="1924"/>
         <source>Error loading &apos;%1&apos;.</source>
-        <translation>Erreur au chargement de « %1 ».</translation>
+        <translation>Fehler beim Laden von « %1 ».</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="1902"/>
         <source>Merge Project</source>
-        <translation>Fusionner un projet</translation>
+        <translation>Projekt zusammenführen</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="1916"/>
         <source>Merged 1 model.</source>
-        <translation>1 modèle fusionné.</translation>
+        <translation>1 Modell zusammengeführt.</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="1918"/>
         <source>Merged %1 models.</source>
-        <translation>%1 modèles fusionnés.</translation>
+        <translation>%1 Modelle zusammengeführt.</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="1943"/>
         <source>Supported Files (*.mpd);;All Files (*.*)</source>
-        <translation>Fichiers pris en charge (*.mpd);;Tous les fichiers (*.*)</translation>
+        <translation>Unterstützte Dateien (*.mpd);;Alle Dateien (*.*)</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="1943"/>
         <source>Supported Files (*.ldr *.dat *.mpd);;All Files (*.*)</source>
-        <translation>Fichiers pris en charge (*.ldr *.dat *.mpd);;Tous les fichiers (*.*)</translation>
+        <translation>Unterstützte Dateien (*.ldr *.dat *.mpd);;Alle Dateien (*.*)</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="1953"/>

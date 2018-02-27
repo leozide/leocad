@@ -769,6 +769,11 @@
         <source>&amp;About...</source>
         <translation>&amp;Über…</translation>
     </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1486"/>
+        <source>Report a Bug</source>
+        <translation>Einen Fehler melden</translation>
+    </message>
 </context>
 <context>
     <name>Project</name>
@@ -2396,6 +2401,31 @@ Bitte lesen sie unter http://www.leocad.org nach wie man eine Bibliothek herunte
         <translation>Werkzeuge</translation>
     </message>
     <message>
+        <location filename="../common/lc_mainwindow.cpp" line="554"/>
+        <source>Selection Mode</source>
+        <translation>Auswahlmodus</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_mainwindow.cpp" line="268"/>
+        <source>Single Selection</source>
+        <translation>Einzelauswahl</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_mainwindow.cpp" line="275"/>
+        <source>Piece Selection</source>
+        <translation>Teilauswahl</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_mainwindow.cpp" line="282"/>
+        <source>Color Selection</source>
+        <translation>Farbauswahl</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_mainwindow.cpp" line="268"/>
+        <source>Piece and Color Selection</source>
+        <translation>Teil und Farbauswahl</translation>
+    </message>
+    <message>
         <location filename="../common/lc_mainwindow.cpp" line="558"/>
         <source>Time</source>
         <translation>Zeit</translation>
@@ -2414,6 +2444,37 @@ Bitte lesen sie unter http://www.leocad.org nach wie man eine Bibliothek herunte
         <location filename="../common/lc_mainwindow.cpp" line="639"/>
         <source>Timeline</source>
         <translation>Zeitachse</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_mainwindow.cpp" line="1283"/>
+        <source>New Submodel</source>
+        <translation>Neues Untermodell</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_mainwindow.cpp" line="1284"/>
+        <source>Create a new Submodel</source>
+        <translation>Erzeuge neues Untermodell</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_mainwindow.cpp" line="1297"/>
+        <source>Switch to Submodel</source>
+        <translation>Wechsle zum Untermodell</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_mainwindow.cpp" line="1312"/>
+        <location filename="../common/lc_mainwindow.cpp" line="1319"/>
+        <location filename="../common/lc_mainwindow.cpp" line="1326"/>
+        <location filename="../common/lc_mainwindow.cpp" line="1333"/>
+        <location filename="../common/lc_mainwindow.cpp" line="1340"/>
+        <location filename="../common/lc_mainwindow.cpp" line="1347"/>
+        <location filename="../common/lc_mainwindow.cpp" line="1354"/>
+        <location filename="../common/lc_mainwindow.cpp" line="1361"/>
+        <location filename="../common/lc_mainwindow.cpp" line="1368"/>
+        <location filename="../common/lc_mainwindow.cpp" line="1375"/>
+        <location filename="../common/lc_mainwindow.cpp" line="1382"/>
+        <location filename="../common/lc_mainwindow.cpp" line="1382"/>
+      <source>Switch to this Submodel</source>
+        <translation>Wechsle zu diesem Untermodell</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="1595"/>

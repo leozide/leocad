@@ -2753,7 +2753,7 @@ Veja http://www.leocad.org para saber como descarragar e instalar uma biblioteca
     </message>
     <message>
         <location filename="../qt/lc_qaboutdialog.ui" line="49"/>
-        <source>LeoCAD is a free application that can be used to create virtual LEGO models.</source>
+        <source>LeoCAD is a free application for creating virtual LEGO models.</source>
         <translation>LeoCAD é um programa libre que pode servir para criar modelos LEGO virtuais.</translation>
     </message>
     <message>

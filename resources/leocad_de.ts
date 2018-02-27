@@ -820,7 +820,7 @@
     <message>
         <location filename="../common/project.cpp" line="119"/>
         <source>A model named &apos;%1&apos; already exists in this project, please enter an unique name.</source>
-        <translation>Ein Modell mit dem Namen « %1 » existiert bereits in diesem Projekt, bitte geben sie einen eindeutigen Namen eine.</translation>
+        <translation>Ein Modell mit dem Namen » %1 « existiert bereits in diesem Projekt, bitte geben sie einen eindeutigen Namen eine.</translation>
     </message>
     <message>
         <location filename="../common/project.cpp" line="205"/>
@@ -881,7 +881,7 @@
         <location filename="../common/project.cpp" line="1384"/>
         <location filename="../common/project.cpp" line="1660"/>
         <source>Could not open file &apos;%1&apos; for writing.</source>
-        <translation>Konnte Datei « %1 » nicht zum Schreiben öffnen.</translation>
+        <translation>Konnte Datei » %1 « nicht zum Schreiben öffnen.</translation>
     </message>
     <message>
         <location filename="../common/project.cpp" line="885"/>
@@ -912,7 +912,7 @@
         <location filename="../common/project.cpp" line="1426"/>
         <location filename="../common/project.cpp" line="1468"/>
         <source>Could not find LGEO files in folder &apos;%1&apos;.</source>
-        <translation>Konnte keine LGEO Dateien im Verzeichnis « %1 » finden.</translation>
+        <translation>Konnte keine LGEO Dateien im Verzeichnis » %1 « finden.</translation>
     </message>
     <message>
         <location filename="../common/project.cpp" line="1650"/>
@@ -933,14 +933,14 @@
         <location filename="../common/project.cpp" line="1329"/>
         <source>Error writing to file &apos;%1&apos;:
 %2</source>
-        <translation>Fehler beim Schreiben der Datei « %1 » :
+        <translation>Fehler beim Schreiben der Datei » %1 « :
 %2</translation>
     </message>
     <message>
         <location filename="../common/project.cpp" line="205"/>
         <source>Error reading file &apos;%1&apos;:
 %2</source>
-        <translation>Fehler beim Lesen der Datei « %1 » :
+        <translation>Fehler beim Lesen der Datei » %1 « :
 %2</translation>
     </message>
 </context>
@@ -2245,7 +2245,7 @@ Bitte lesen sie unter http://www.leocad.org nach wie man eine Bibliothek herunte
         <location filename="../common/lc_context.cpp" line="507"/>
         <source>Error writing to file &apos;%1&apos;:
 %2</source>
-        <translation>Fehler beim Schreiben der Datei « %1 » :
+        <translation>Fehler beim Schreiben der Datei » %1 « :
 %2</translation>
     </message>
 </context>
@@ -2438,7 +2438,7 @@ Bitte lesen sie unter http://www.leocad.org nach wie man eine Bibliothek herunte
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="1612"/>
         <source> in group &apos;%1&apos;</source>
-        <translation> in der Gruppe « %1 »</translation>
+        <translation> in der Gruppe » %1 «</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="1649"/>
@@ -2488,7 +2488,7 @@ Bitte lesen sie unter http://www.leocad.org nach wie man eine Bibliothek herunte
         <location filename="../common/lc_mainwindow.cpp" line="1889"/>
         <location filename="../common/lc_mainwindow.cpp" line="1924"/>
         <source>Error loading &apos;%1&apos;.</source>
-        <translation>Fehler beim Laden von « %1 ».</translation>
+        <translation>Fehler beim Laden von » %1 «.</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="1902"/>
@@ -2528,7 +2528,7 @@ Bitte lesen sie unter http://www.leocad.org nach wie man eine Bibliothek herunte
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="1972"/>
         <source>Save changes to &apos;%1&apos;?</source>
-        <translation>Änderungen an « %1 » speichern?</translation>
+        <translation>Änderungen an » %1 « speichern?</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.h" line="124"/>
@@ -3327,7 +3327,7 @@ GL_EXT_texture_filter_anisotropic Erweiterung: %4
     <message>
         <location filename="../qt/lc_qmodellistdialog.cpp" line="83"/>
         <source>Are you sure you want to delete the model &apos;%1&apos;?</source>
-        <translation>Sind sie sicher dass sie das Modell « %1 » löschen möchten?</translation>
+        <translation>Sind sie sicher dass sie das Modell » %1 « löschen möchten?</translation>
     </message>
     <message>
         <location filename="../qt/lc_qmodellistdialog.cpp" line="84"/>
@@ -3362,7 +3362,7 @@ GL_EXT_texture_filter_anisotropic Erweiterung: %4
     <message>
         <location filename="../qt/lc_qmodellistdialog.cpp" line="118"/>
         <source>A model named &apos;%1&apos; already exists in this project, please enter an unique name.</source>
-        <translation>Ein Modell mit Namen « %1 » existiert bereits in diesem Projekt, bitte geben sie einen eindeutigen Namen an.</translation>
+        <translation>Ein Modell mit Namen » %1 « existiert bereits in diesem Projekt, bitte geben sie einen eindeutigen Namen an.</translation>
     </message>
 </context>
 <context>
@@ -3801,7 +3801,7 @@ GL_EXT_texture_filter_anisotropic Erweiterung: %4
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="340"/>
         <source>Are you sure you want to delete the category &apos;%1&apos;?</source>
-        <translation>Sind sie sicher dass sie die Kategorie « %1 » löschen möchten?</translation>
+        <translation>Sind sie sicher dass sie die Kategorie » %1 « löschen möchten?</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="353"/>
@@ -4215,18 +4215,18 @@ GL_EXT_texture_filter_anisotropic Erweiterung: %4
     </message>
     <message>
         <location filename="../qt/lc_qupdatedialog.cpp" line="144"/>
-        <source>&lt;p&gt;Visit &lt;a href=&quot;http://www.leocad.org/files/&quot;&gt;http://www.leocad.org/files/&lt;/a&gt; to download.&lt;/p&gt;</source>
-        <translation>&lt;p&gt;Besuchen sie &lt;a href=&quot;http://www.leocad.org/file/&quot;&gt;http://www.leocad.org/files/&lt;/a&gt; zum herunterladen.&lt;/p&gt;</translation>
+        <source>&lt;p&gt;Visit &lt;a href=&quot;https://github.com/leozide/leocad/releases/&quot;&gt;https://github.com/leozide/leocad/releases/&lt;/a&gt; to download.&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Besuchen sie &lt;a href=&quot;https://github.com/leozide/leocad/releases/&quot;&gt;https://github.com/leozide/leocad/releases/&lt;/a&gt; zum herunterladen.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_qupdatedialog.cpp" line="150"/>
         <source>Error parsing update information.</source>
-        <translation>Erreur à la lecture des informations de mise à jour.</translation>
+        <translation>Fehler bei der Analyse der Aktualisierungsinformation.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qupdatedialog.cpp" line="158"/>
         <source>Error connecting to the update server.</source>
-        <translation>Erreur à la connexion au serveur de mise à jour.</translation>
+        <translation>Fehler bein Verbinden mit dem Aktualisierungsserver.</translation>
     </message>
 </context>
 <context>
@@ -4234,7 +4234,7 @@ GL_EXT_texture_filter_anisotropic Erweiterung: %4
     <message>
         <location filename="../common/lc_timelinewidget.cpp" line="103"/>
         <source>Step %1</source>
-        <translation>Étape %1</translation>
+        <translation>Schritt %1</translation>
     </message>
 </context>
 </TS>

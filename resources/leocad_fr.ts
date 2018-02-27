@@ -2,942 +2,2288 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="fr_FR">
 <context>
+    <name>Action</name>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="8"/>
+        <source>File.New</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="15"/>
+        <source>File.Open</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="22"/>
+        <source>File.Merge</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="29"/>
+        <source>File.Save</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="36"/>
+        <source>File.SaveAs</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="43"/>
+        <source>File.SaveImage</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="50"/>
+        <source>File.Import.LDD</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="57"/>
+        <source>File.Import.Inventory</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="64"/>
+        <source>File.Export.3DS</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="71"/>
+        <source>File.Export.COLLADA</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="78"/>
+        <source>File.Export.HTML</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="85"/>
+        <source>File.Export.BrickLink</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="92"/>
+        <source>File.Export.CSV</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="99"/>
+        <source>File.Export.POVRay</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="106"/>
+        <source>File.Export.Wavefront</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="113"/>
+        <source>File.Render</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="120"/>
+        <source>File.Print</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="127"/>
+        <source>File.PrintPreview</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="134"/>
+        <source>File.PrintBOM</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="141"/>
+        <source>File.Recent1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="148"/>
+        <source>File.Recent2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="155"/>
+        <source>File.Recent3</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="162"/>
+        <source>File.Recent4</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="169"/>
+        <source>File.Exit</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="176"/>
+        <source>Edit.Undo</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="183"/>
+        <source>Edit.Redo</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="190"/>
+        <source>Edit.Cut</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="197"/>
+        <source>Edit.Copy</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="204"/>
+        <source>Edit.Paste</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="211"/>
+        <source>Edit.Find</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="218"/>
+        <source>Edit.FindNext</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="225"/>
+        <source>Edit.FindPrevious</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="232"/>
+        <source>Edit.SelectAll</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="239"/>
+        <source>Edit.SelectNone</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="246"/>
+        <source>Edit.SelectInvert</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="253"/>
+        <source>Edit.SelectByName</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="260"/>
+        <source>Edit.SelectByColor</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="267"/>
+        <source>Edit.SelectSingle</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="274"/>
+        <source>Edit.SelectPiece</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="281"/>
+        <source>Edit.SelectColor</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="288"/>
+        <source>Edit.SelectPieceColor</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="295"/>
+        <source>Edit.TransformRelative</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="302"/>
+        <source>Edit.Snap.Toggle</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="309"/>
+        <source>Edit.SnapMove.XY0</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="316"/>
+        <source>Edit.SnapMove.XY1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="323"/>
+        <source>Edit.SnapMove.XY2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="330"/>
+        <source>Edit.SnapMove.XY3</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="337"/>
+        <source>Edit.SnapMove.XY4</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="344"/>
+        <source>Edit.SnapMove.XY5</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="351"/>
+        <source>Edit.SnapMove.XY6</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="358"/>
+        <source>Edit.SnapMove.XY7</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="365"/>
+        <source>Edit.SnapMove.XY8</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="372"/>
+        <source>Edit.SnapMove.XY9</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="379"/>
+        <source>Edit.SnapMove.Z0</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="386"/>
+        <source>Edit.SnapMove.Z1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="393"/>
+        <source>Edit.SnapMove.Z2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="400"/>
+        <source>Edit.SnapMove.Z3</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="407"/>
+        <source>Edit.SnapMove.Z4</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="414"/>
+        <source>Edit.SnapMove.Z5</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="421"/>
+        <source>Edit.SnapMove.Z6</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="428"/>
+        <source>Edit.SnapMove.Z7</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="435"/>
+        <source>Edit.SnapMove.Z8</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="442"/>
+        <source>Edit.SnapMove.Z9</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="449"/>
+        <source>Edit.SnapAngle.Toggle</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="456"/>
+        <source>Edit.SnapAngle.Angle0</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="463"/>
+        <source>Edit.SnapAngle.Angle1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="470"/>
+        <source>Edit.SnapAngle.Angle2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="477"/>
+        <source>Edit.SnapAngle.Angle3</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="484"/>
+        <source>Edit.SnapAngle.Angle4</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="491"/>
+        <source>Edit.SnapAngle.Angle5</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="498"/>
+        <source>Edit.SnapAngle.Angle6</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="505"/>
+        <source>Edit.SnapAngle.Angle7</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="512"/>
+        <source>Edit.SnapAngle.Angle8</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="519"/>
+        <source>Edit.SnapAngle.Angle9</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="526"/>
+        <source>Edit.Transform</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="533"/>
+        <source>Edit.TransformAbsoluteTranslation</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="540"/>
+        <source>Edit.TransformRelativeTranslation</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="547"/>
+        <source>Edit.TransformAbsoluteRotation</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="554"/>
+        <source>Edit.TransformRelativeRotation</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="561"/>
+        <source>Edit.Tool.Insert</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="568"/>
+        <source>Edit.Tool.Light</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="575"/>
+        <source>Edit.Tool.Spotlight</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="582"/>
+        <source>Edit.Tool.Camera</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="589"/>
+        <source>Edit.Tool.Select</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="596"/>
+        <source>Edit.Tool.Move</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="603"/>
+        <source>Edit.Tool.Rotate</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="610"/>
+        <source>Edit.Tool.Delete</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="617"/>
+        <source>Edit.Tool.Paint</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="624"/>
+        <source>Edit.Tool.Zoom</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="631"/>
+        <source>Edit.Tool.Pan</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="638"/>
+        <source>Edit.Tool.RotateView</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="645"/>
+        <source>Edit.Tool.Roll</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="652"/>
+        <source>Edit.Tool.ZoomRegion</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="659"/>
+        <source>Edit.Cancel</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="666"/>
+        <source>View.Preferences</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="673"/>
+        <source>View.ZoomIn</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="680"/>
+        <source>View.ZoomOut</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="687"/>
+        <source>View.ZoomExtents</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="694"/>
+        <source>View.LookAt</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="701"/>
+        <source>View.MoveForward</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="708"/>
+        <source>View.MoveBackward</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="715"/>
+        <source>View.MoveLeft</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="722"/>
+        <source>View.MoveRight</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="729"/>
+        <source>View.MoveUp</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="736"/>
+        <source>View.MoveDown</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="743"/>
+        <source>View.Viewpoint.Front</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="750"/>
+        <source>View.Viewpoint.Back</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="757"/>
+        <source>View.Viewpoint.Top</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="764"/>
+        <source>View.Viewpoint.Bottom</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="771"/>
+        <source>View.Viewpoint.Left</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="778"/>
+        <source>View.Viewpoint.Right</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="785"/>
+        <source>View.Viewpoint.Home</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="792"/>
+        <source>View.Cameras.None</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="799"/>
+        <source>View.Cameras.Camera01</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="806"/>
+        <source>View.Cameras.Camera02</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="813"/>
+        <source>View.Cameras.Camera03</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="820"/>
+        <source>View.Cameras.Camera04</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="827"/>
+        <source>View.Cameras.Camera05</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="834"/>
+        <source>View.Cameras.Camera06</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="841"/>
+        <source>View.Cameras.Camera07</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="848"/>
+        <source>View.Cameras.Camera08</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="855"/>
+        <source>View.Cameras.Camera09</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="862"/>
+        <source>View.Cameras.Camera10</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="869"/>
+        <source>View.Cameras.Camera11</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="876"/>
+        <source>View.Cameras.Camera12</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="883"/>
+        <source>View.Cameras.Camera13</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="890"/>
+        <source>View.Cameras.Camera14</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="897"/>
+        <source>View.Cameras.Camera15</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="904"/>
+        <source>View.Cameras.Camera16</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="911"/>
+        <source>View.Cameras.Reset</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="918"/>
+        <source>View.Time.First</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="925"/>
+        <source>View.Time.Previous</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="932"/>
+        <source>View.Time.Next</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="939"/>
+        <source>View.Time.Last</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="946"/>
+        <source>View.Time.Insert</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="953"/>
+        <source>View.Time.Delete</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="960"/>
+        <source>View.Time.AddKeys</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="967"/>
+        <source>View.SplitHorizontal</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="974"/>
+        <source>View.SplitVertical</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="981"/>
+        <source>View.RemoveView</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="988"/>
+        <source>View.ResetViews</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="995"/>
+        <source>View.FullScreen</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1002"/>
+        <source>View.Shade.Wireframe</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1009"/>
+        <source>View.Shade.Flat</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1016"/>
+        <source>View.Shade.DefaultLights</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1023"/>
+        <source>View.Projection.Perspective</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1030"/>
+        <source>View.Projection.Orthographic</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1037"/>
+        <source>Piece.Insert</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1044"/>
+        <source>Piece.Delete</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1051"/>
+        <source>Piece.Duplicate</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1058"/>
+        <source>Piece.ResetPivotPoint</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1065"/>
+        <source>Piece.RemoveKeyFrames</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1072"/>
+        <source>Piece.ControlPoint.Insert</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1079"/>
+        <source>Piece.ControlPoint.Remove</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1086"/>
+        <source>Piece.Move.PlusX</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1093"/>
+        <source>Piece.Move.MinusX</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1100"/>
+        <source>Piece.Move.PlusY</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1107"/>
+        <source>Piece.Move.MinusY</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1114"/>
+        <source>Piece.Move.PlusZ</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1121"/>
+        <source>Piece.Move.MinusZ</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1128"/>
+        <source>Piece.Rotate.PlusX</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1135"/>
+        <source>Piece.Rotate.MinusX</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1142"/>
+        <source>Piece.Rotate.PlusY</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1149"/>
+        <source>Piece.Rotate.MinusY</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1156"/>
+        <source>Piece.Rotate.PlusZ</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1163"/>
+        <source>Piece.Rotate.MinusZ</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1170"/>
+        <source>Piece.MinifigWizard</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1177"/>
+        <source>Piece.Array</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1184"/>
+        <source>Piece.ViewSelectedModel</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1191"/>
+        <source>Piece.MoveSelectionToModel</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1198"/>
+        <source>Piece.InlineSelectedModels</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1205"/>
+        <source>Piece.Group</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1212"/>
+        <source>Piece.Ungroup</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1219"/>
+        <source>Piece.GroupAdd</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1226"/>
+        <source>Piece.GroupRemove</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1233"/>
+        <source>Piece.GroupEdit</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1240"/>
+        <source>Piece.HideSelected</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1247"/>
+        <source>Piece.HideUnselected</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1254"/>
+        <source>Piece.UnhideSelected</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1261"/>
+        <source>Piece.UnhideAll</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1268"/>
+        <source>Piece.ShowEarlier</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1275"/>
+        <source>Piece.ShowLater</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1282"/>
+        <source>Model.New</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1289"/>
+        <source>Model.Properties</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1296"/>
+        <source>Model.SwitchToFocus</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1303"/>
+        <source>Model.List</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1310"/>
+        <source>Model.Model01</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1317"/>
+        <source>Model.Model02</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1324"/>
+        <source>Model.Model03</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1331"/>
+        <source>Model.Model04</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1338"/>
+        <source>Model.Model05</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1345"/>
+        <source>Model.Model06</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1352"/>
+        <source>Model.Model07</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1359"/>
+        <source>Model.Model08</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1366"/>
+        <source>Model.Model09</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1373"/>
+        <source>Model.Model10</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1380"/>
+        <source>Model.Model11</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1387"/>
+        <source>Model.Model12</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1394"/>
+        <source>Model.Model13</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1401"/>
+        <source>Model.Model14</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1408"/>
+        <source>Model.Model15</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1415"/>
+        <source>Model.Model16</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1422"/>
+        <source>Model.Model17</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1429"/>
+        <source>Model.Model18</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1436"/>
+        <source>Model.Model19</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1443"/>
+        <source>Model.Model20</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1450"/>
+        <source>Model.Model21</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1457"/>
+        <source>Model.Model22</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1464"/>
+        <source>Model.Model23</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1471"/>
+        <source>Model.Model24</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1478"/>
+        <source>Help.HomePage</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1485"/>
+        <source>Help.BugReport</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1492"/>
+        <source>Help.Updates</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1499"/>
+        <source>Help.About</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>Menu</name>
     <message>
-        <location filename="../common/lc_commands.cpp" line="10"/>
+        <location filename="../common/lc_commands.cpp" line="9"/>
         <source>&amp;New</source>
         <translation>&amp;Nouveau</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="17"/>
+        <location filename="../common/lc_commands.cpp" line="16"/>
         <source>&amp;Open...</source>
         <translation>&amp;Ouvrir...</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="24"/>
+        <location filename="../common/lc_commands.cpp" line="23"/>
         <source>&amp;Merge...</source>
         <translation>&amp;Fusionner...</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="31"/>
+        <location filename="../common/lc_commands.cpp" line="30"/>
         <source>&amp;Save</source>
         <translation>Enregi&amp;strer</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="38"/>
+        <location filename="../common/lc_commands.cpp" line="37"/>
         <source>Save &amp;As...</source>
         <translation>Enregistrer s&amp;ous...</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="45"/>
+        <location filename="../common/lc_commands.cpp" line="44"/>
         <source>Save &amp;Image...</source>
         <translation>Enregistrer l’&amp;image...</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="52"/>
+        <location filename="../common/lc_commands.cpp" line="65"/>
         <source>3D &amp;Studio...</source>
         <translation>3D &amp;Studio…</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="59"/>
+        <location filename="../common/lc_commands.cpp" line="79"/>
         <source>&amp;HTML...</source>
         <translation>&amp;HTML…</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="66"/>
+        <location filename="../common/lc_commands.cpp" line="86"/>
         <source>&amp;BrickLink...</source>
         <translation>&amp;BrickLink…</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="73"/>
+        <location filename="../common/lc_commands.cpp" line="93"/>
         <source>&amp;CSV...</source>
         <translation>&amp;CSV…</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="80"/>
+        <location filename="../common/lc_commands.cpp" line="100"/>
         <source>&amp;POV-Ray...</source>
         <translation>&amp;POV-Ray…</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="87"/>
+        <location filename="../common/lc_commands.cpp" line="107"/>
         <source>&amp;Wavefront...</source>
         <translation>&amp;Wavefront…</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="262"/>
+        <location filename="../common/lc_commands.cpp" line="261"/>
+        <source>Select by Col&amp;or...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="268"/>
+        <source>Single Selection</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="275"/>
+        <source>Piece Selection</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="282"/>
+        <source>Color Selection</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="289"/>
+        <source>Piece and Color Selection</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="296"/>
         <source>Relative Transforms</source>
         <translation>Transformations relatives</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="269"/>
+        <location filename="../common/lc_commands.cpp" line="303"/>
         <source>Move Snap Enabled</source>
         <translation>Pas pour les déplacements activé</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1179"/>
+        <location filename="../common/lc_commands.cpp" line="1283"/>
+        <source>New Submodel...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1290"/>
         <source>Prope&amp;rties...</source>
         <translation>Prop&amp;riétés…</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="94"/>
+        <location filename="../common/lc_commands.cpp" line="121"/>
         <source>&amp;Print...</source>
         <translation>Im&amp;primer...</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="101"/>
+        <location filename="../common/lc_commands.cpp" line="51"/>
+        <source>&amp;LEGO Digital Designer...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="58"/>
+        <source>Set &amp;Inventory...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="72"/>
+        <source>&amp;COLLADA...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="114"/>
+        <source>&amp;Render...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="128"/>
         <source>Print Pre&amp;view...</source>
         <translation>Ape&amp;rçu d&apos;impression...</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="108"/>
+        <location filename="../common/lc_commands.cpp" line="135"/>
         <source>Print &amp;Bill of Materials...</source>
         <translation>Imprimer &amp;liste de fournitures…</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="115"/>
+        <location filename="../common/lc_commands.cpp" line="142"/>
         <source>&amp;Recent1</source>
         <translation>&amp;Récent1</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="122"/>
+        <location filename="../common/lc_commands.cpp" line="149"/>
         <source>&amp;Recent2</source>
         <translation>&amp;Récent2</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="129"/>
+        <location filename="../common/lc_commands.cpp" line="156"/>
         <source>&amp;Recent3</source>
         <translation>&amp;Récent3</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="136"/>
+        <location filename="../common/lc_commands.cpp" line="163"/>
         <source>&amp;Recent4</source>
         <translation>&amp;Récent4</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="143"/>
+        <location filename="../common/lc_commands.cpp" line="170"/>
         <source>E&amp;xit</source>
         <translation>&amp;Quitter</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="150"/>
+        <location filename="../common/lc_commands.cpp" line="177"/>
         <source>&amp;Undo</source>
         <translation>Ann&amp;uler</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="157"/>
+        <location filename="../common/lc_commands.cpp" line="184"/>
         <source>&amp;Redo</source>
         <translation>&amp;Refaire</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="164"/>
+        <location filename="../common/lc_commands.cpp" line="191"/>
         <source>Cu&amp;t</source>
         <translation>&amp;Couper</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="171"/>
+        <location filename="../common/lc_commands.cpp" line="198"/>
         <source>&amp;Copy</source>
         <translation>Co&amp;pier</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="178"/>
+        <location filename="../common/lc_commands.cpp" line="205"/>
         <source>&amp;Paste</source>
         <translation>Co&amp;ller</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="185"/>
+        <location filename="../common/lc_commands.cpp" line="212"/>
         <source>&amp;Find...</source>
         <translation>&amp;Rechercher...</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="192"/>
+        <location filename="../common/lc_commands.cpp" line="219"/>
         <source>Find Ne&amp;xt</source>
         <translation>Rechercher le suiva&amp;nt</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="199"/>
+        <location filename="../common/lc_commands.cpp" line="226"/>
         <source>Find Pre&amp;vious</source>
         <translation>Rechercher le pré&amp;cédent</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="206"/>
+        <location filename="../common/lc_commands.cpp" line="233"/>
         <source>Select &amp;All</source>
         <translation>Sélectionner &amp;tout</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="213"/>
+        <location filename="../common/lc_commands.cpp" line="240"/>
         <source>Select &amp;None</source>
         <translation>Sélectionner &amp;aucun</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="220"/>
+        <location filename="../common/lc_commands.cpp" line="247"/>
         <source>Select &amp;Invert</source>
         <translation>&amp;Inverser la sélection</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="227"/>
+        <location filename="../common/lc_commands.cpp" line="254"/>
         <source>Select by Na&amp;me...</source>
         <translation>Sélection par no&amp;m…</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="234"/>
         <source>Lock X</source>
-        <translation>Bloquer X</translation>
+        <translation type="vanished">Bloquer X</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="241"/>
         <source>Lock Y</source>
-        <translation>Bloquer Y</translation>
+        <translation type="vanished">Bloquer Y</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="248"/>
         <source>Lock Z</source>
-        <translation>Bloquer Z</translation>
+        <translation type="vanished">Bloquer Z</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="255"/>
         <source>Unlock All</source>
-        <translation>Tout débloquer</translation>
+        <translation type="vanished">Tout débloquer</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="276"/>
-        <location filename="../common/lc_commands.cpp" line="346"/>
-        <location filename="../common/lc_commands.cpp" line="423"/>
-        <location filename="../common/lc_commands.cpp" line="717"/>
+        <location filename="../common/lc_commands.cpp" line="310"/>
+        <location filename="../common/lc_commands.cpp" line="380"/>
+        <location filename="../common/lc_commands.cpp" line="457"/>
+        <location filename="../common/lc_commands.cpp" line="793"/>
         <source>None</source>
         <translation>Aucun</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="283"/>
-        <location filename="../common/lc_commands.cpp" line="353"/>
+        <location filename="../common/lc_commands.cpp" line="317"/>
+        <location filename="../common/lc_commands.cpp" line="387"/>
         <source>1/20 Stud</source>
         <translation>1/20 tenon</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="290"/>
-        <location filename="../common/lc_commands.cpp" line="360"/>
+        <location filename="../common/lc_commands.cpp" line="324"/>
+        <location filename="../common/lc_commands.cpp" line="394"/>
         <source>1/4 Stud</source>
         <translation>1/4 tenon</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="297"/>
-        <location filename="../common/lc_commands.cpp" line="367"/>
+        <location filename="../common/lc_commands.cpp" line="331"/>
+        <location filename="../common/lc_commands.cpp" line="401"/>
         <source>1 Flat</source>
         <translation>1 plaque</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="304"/>
-        <location filename="../common/lc_commands.cpp" line="374"/>
+        <location filename="../common/lc_commands.cpp" line="338"/>
+        <location filename="../common/lc_commands.cpp" line="408"/>
         <source>1/2 Stud</source>
         <translation>1/2 tenon</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="311"/>
-        <location filename="../common/lc_commands.cpp" line="381"/>
+        <location filename="../common/lc_commands.cpp" line="345"/>
+        <location filename="../common/lc_commands.cpp" line="415"/>
         <source>1 Stud</source>
         <translation>1 tenon</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="318"/>
+        <location filename="../common/lc_commands.cpp" line="352"/>
         <source>2 Studs</source>
         <translation>2 tenons</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="325"/>
+        <location filename="../common/lc_commands.cpp" line="359"/>
         <source>3 Studs</source>
         <translation>3 tenons</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="332"/>
+        <location filename="../common/lc_commands.cpp" line="366"/>
         <source>4 Studs</source>
         <translation>4 tenons</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="339"/>
+        <location filename="../common/lc_commands.cpp" line="373"/>
         <source>8 Studs</source>
         <translation>8 tenons</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="388"/>
+        <location filename="../common/lc_commands.cpp" line="422"/>
         <source>1 Brick</source>
         <translation>1 brique</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="395"/>
+        <location filename="../common/lc_commands.cpp" line="429"/>
         <source>2 Bricks</source>
         <translation>2 briques</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="402"/>
+        <location filename="../common/lc_commands.cpp" line="436"/>
         <source>4 Bricks</source>
         <translation>4 briques</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="409"/>
+        <location filename="../common/lc_commands.cpp" line="443"/>
         <source>8 Bricks</source>
         <translation>8 briques</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="416"/>
+        <location filename="../common/lc_commands.cpp" line="450"/>
         <source>Rotation Snap Enabled</source>
         <translation>Pas pour les rotations activé</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="430"/>
+        <location filename="../common/lc_commands.cpp" line="464"/>
         <source>1 Degree</source>
         <translation>1 degré</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="437"/>
+        <location filename="../common/lc_commands.cpp" line="471"/>
         <source>5 Degrees</source>
         <translation>5 degrés</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="444"/>
         <source>10 Degrees</source>
-        <translation>10 degrés</translation>
+        <translation type="vanished">10 degrés</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="451"/>
+        <location filename="../common/lc_commands.cpp" line="478"/>
         <source>15 Degrees</source>
         <translation>15 degrés</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="458"/>
+        <location filename="../common/lc_commands.cpp" line="485"/>
+        <source>22.5 Degrees</source>
+        <translation type="unfinished">180 degrés {22.5 ?}</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="492"/>
         <source>30 Degrees</source>
         <translation>30 degrés</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="465"/>
+        <location filename="../common/lc_commands.cpp" line="499"/>
         <source>45 Degrees</source>
         <translation>45 degrés</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="472"/>
+        <location filename="../common/lc_commands.cpp" line="506"/>
         <source>60 Degrees</source>
         <translation>60 degrés</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="479"/>
+        <location filename="../common/lc_commands.cpp" line="513"/>
         <source>90 Degrees</source>
         <translation>90 degrés</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="486"/>
+        <location filename="../common/lc_commands.cpp" line="520"/>
         <source>180 Degrees</source>
         <translation>180 degrés</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="493"/>
+        <location filename="../common/lc_commands.cpp" line="527"/>
         <source>Transform</source>
         <translation>Transformation</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="500"/>
+        <location filename="../common/lc_commands.cpp" line="534"/>
         <source>Absolute Translation</source>
         <translation>Translation absolue</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="507"/>
+        <location filename="../common/lc_commands.cpp" line="541"/>
         <source>Relative Translation</source>
         <translation>Translation relative</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="514"/>
+        <location filename="../common/lc_commands.cpp" line="548"/>
         <source>Absolute Rotation</source>
         <translation>Rotation absolue</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="521"/>
+        <location filename="../common/lc_commands.cpp" line="555"/>
         <source>Relative Rotation</source>
         <translation>Rotation relative</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="528"/>
-        <location filename="../common/lc_commands.cpp" line="871"/>
+        <location filename="../common/lc_commands.cpp" line="562"/>
         <source>Insert</source>
         <translation>Insérer</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="535"/>
+        <location filename="../common/lc_commands.cpp" line="569"/>
         <source>Light</source>
         <translation>Lumière</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="542"/>
+        <location filename="../common/lc_commands.cpp" line="576"/>
         <source>Spotlight</source>
         <translation>Lumière projecteur</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="549"/>
-        <location filename="../common/lc_commands.cpp" line="724"/>
-        <location filename="../common/lc_commands.cpp" line="731"/>
-        <location filename="../common/lc_commands.cpp" line="738"/>
-        <location filename="../common/lc_commands.cpp" line="745"/>
-        <location filename="../common/lc_commands.cpp" line="752"/>
-        <location filename="../common/lc_commands.cpp" line="759"/>
-        <location filename="../common/lc_commands.cpp" line="766"/>
-        <location filename="../common/lc_commands.cpp" line="773"/>
-        <location filename="../common/lc_commands.cpp" line="780"/>
-        <location filename="../common/lc_commands.cpp" line="787"/>
-        <location filename="../common/lc_commands.cpp" line="794"/>
-        <location filename="../common/lc_commands.cpp" line="801"/>
-        <location filename="../common/lc_commands.cpp" line="808"/>
-        <location filename="../common/lc_commands.cpp" line="815"/>
-        <location filename="../common/lc_commands.cpp" line="822"/>
-        <location filename="../common/lc_commands.cpp" line="829"/>
+        <location filename="../common/lc_commands.cpp" line="583"/>
+        <location filename="../common/lc_commands.cpp" line="800"/>
+        <location filename="../common/lc_commands.cpp" line="807"/>
+        <location filename="../common/lc_commands.cpp" line="814"/>
+        <location filename="../common/lc_commands.cpp" line="821"/>
+        <location filename="../common/lc_commands.cpp" line="828"/>
+        <location filename="../common/lc_commands.cpp" line="835"/>
+        <location filename="../common/lc_commands.cpp" line="842"/>
+        <location filename="../common/lc_commands.cpp" line="849"/>
+        <location filename="../common/lc_commands.cpp" line="856"/>
+        <location filename="../common/lc_commands.cpp" line="863"/>
+        <location filename="../common/lc_commands.cpp" line="870"/>
+        <location filename="../common/lc_commands.cpp" line="877"/>
+        <location filename="../common/lc_commands.cpp" line="884"/>
+        <location filename="../common/lc_commands.cpp" line="891"/>
+        <location filename="../common/lc_commands.cpp" line="898"/>
+        <location filename="../common/lc_commands.cpp" line="905"/>
         <source>Camera</source>
         <translation>Caméra</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="556"/>
+        <location filename="../common/lc_commands.cpp" line="590"/>
         <source>Select</source>
         <translation>Sélectionner</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="563"/>
+        <location filename="../common/lc_commands.cpp" line="597"/>
         <source>Move</source>
         <translation>Déplacer</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="570"/>
+        <location filename="../common/lc_commands.cpp" line="604"/>
         <source>Rotate</source>
         <translation>Tourner</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="577"/>
-        <location filename="../common/lc_commands.cpp" line="878"/>
+        <location filename="../common/lc_commands.cpp" line="611"/>
         <source>Delete</source>
         <translation>Effacer</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="584"/>
+        <location filename="../common/lc_commands.cpp" line="618"/>
         <source>Paint</source>
         <translation>Peindre</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="591"/>
+        <location filename="../common/lc_commands.cpp" line="625"/>
         <source>Zoom</source>
         <translation>Zoomer</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="598"/>
+        <location filename="../common/lc_commands.cpp" line="632"/>
         <source>Pan</source>
         <translation>Glisser</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="605"/>
+        <location filename="../common/lc_commands.cpp" line="639"/>
         <source>Rotate View</source>
         <translation>Tourner la vue</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="612"/>
+        <location filename="../common/lc_commands.cpp" line="646"/>
         <source>Roll</source>
         <translation>Pivoter la vue</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="619"/>
+        <location filename="../common/lc_commands.cpp" line="653"/>
         <source>Zoom Region</source>
         <translation>Zoomer sur la région</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="626"/>
+        <location filename="../common/lc_commands.cpp" line="660"/>
         <source>Cancel Action</source>
         <translation>Annuler l’action</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="633"/>
+        <location filename="../common/lc_commands.cpp" line="667"/>
         <source>P&amp;references...</source>
         <translation>P&amp;références…</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="640"/>
+        <location filename="../common/lc_commands.cpp" line="674"/>
         <source>Zoom In</source>
         <translation>Zoomer</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="647"/>
+        <location filename="../common/lc_commands.cpp" line="681"/>
         <source>Zoom Out</source>
         <translation>Dézoomer</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="654"/>
+        <location filename="../common/lc_commands.cpp" line="688"/>
         <source>Zoom E&amp;xtents</source>
         <translation>&amp;Voir tout</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="661"/>
+        <location filename="../common/lc_commands.cpp" line="695"/>
         <source>Look At</source>
         <translation>Viser le modèle</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="668"/>
+        <location filename="../common/lc_commands.cpp" line="702"/>
+        <source>Move Forward</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="709"/>
+        <source>Move Backward</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="716"/>
+        <source>Move Left</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="723"/>
+        <source>Move Right</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="730"/>
+        <source>Move Up</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="737"/>
+        <source>Move Down</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="744"/>
         <source>&amp;Front</source>
         <translation>&amp;Face</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="675"/>
+        <location filename="../common/lc_commands.cpp" line="751"/>
         <source>&amp;Back</source>
         <translation>&amp;Dos</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="682"/>
+        <location filename="../common/lc_commands.cpp" line="758"/>
         <source>&amp;Top</source>
         <translation>De&amp;ssus</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="689"/>
+        <location filename="../common/lc_commands.cpp" line="765"/>
         <source>B&amp;ottom</source>
         <translation>Dess&amp;ous</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="696"/>
+        <location filename="../common/lc_commands.cpp" line="772"/>
         <source>&amp;Left</source>
         <translation>&amp;Gauche</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="703"/>
+        <location filename="../common/lc_commands.cpp" line="779"/>
         <source>&amp;Right</source>
         <translation>&amp;Droite</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="710"/>
+        <location filename="../common/lc_commands.cpp" line="786"/>
         <source>&amp;Home</source>
         <translation>&amp;Trois-quarts</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="836"/>
+        <location filename="../common/lc_commands.cpp" line="912"/>
         <source>Reset</source>
         <translation>Réinitialiser</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="843"/>
+        <location filename="../common/lc_commands.cpp" line="919"/>
         <source>First</source>
         <translation>Premier</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="850"/>
+        <location filename="../common/lc_commands.cpp" line="926"/>
         <source>Previous</source>
         <translation>Précédent</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="857"/>
+        <location filename="../common/lc_commands.cpp" line="933"/>
         <source>Next</source>
         <translation>Suivant</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="864"/>
+        <location filename="../common/lc_commands.cpp" line="940"/>
         <source>Last</source>
         <translation>Dernier</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="885"/>
+        <location filename="../common/lc_commands.cpp" line="947"/>
+        <location filename="../common/lc_commands.cpp" line="1507"/>
+        <source>Insert Step</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="954"/>
+        <location filename="../common/lc_commands.cpp" line="1514"/>
+        <source>Remove Step</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="961"/>
         <source>Add Keys</source>
         <translation>Ajouter des clés</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="892"/>
+        <location filename="../common/lc_commands.cpp" line="968"/>
         <source>Split &amp;Horizontal</source>
         <translation>Scinder &amp;horizontalement</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="899"/>
+        <location filename="../common/lc_commands.cpp" line="975"/>
         <source>Split &amp;Vertical</source>
         <translation>Scinder &amp;verticalement</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="906"/>
+        <location filename="../common/lc_commands.cpp" line="982"/>
         <source>Re&amp;move View</source>
         <translation>Suppri&amp;mer la vue</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="913"/>
+        <location filename="../common/lc_commands.cpp" line="989"/>
         <source>Rese&amp;t Views</source>
         <translation>Réinitialiser &amp;toutes les vues</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="920"/>
+        <location filename="../common/lc_commands.cpp" line="996"/>
         <source>&amp;Full Screen</source>
         <translation>&amp;Plein écran</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="927"/>
+        <location filename="../common/lc_commands.cpp" line="1003"/>
+        <source>&amp;Wireframe</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1010"/>
+        <source>&amp;Flat Shading</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1017"/>
+        <source>&amp;Default Lights</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1024"/>
         <source>&amp;Perspective</source>
         <translation>&amp;Perspective</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="934"/>
+        <location filename="../common/lc_commands.cpp" line="1031"/>
         <source>&amp;Orthographic</source>
         <translation>&amp;Orthographique</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="941"/>
+        <location filename="../common/lc_commands.cpp" line="1038"/>
         <source>&amp;Insert</source>
         <translation>&amp;Insérer</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="948"/>
+        <location filename="../common/lc_commands.cpp" line="1045"/>
         <source>&amp;Delete</source>
         <translation>&amp;Supprimer</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="955"/>
+        <location filename="../common/lc_commands.cpp" line="1052"/>
+        <source>&amp;Duplicate</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1059"/>
         <source>Reset &amp;Pivot Point</source>
         <translation>Réinitialiser le &amp;point pivot</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="962"/>
+        <location filename="../common/lc_commands.cpp" line="1066"/>
+        <source>Remove &amp;Key Frames</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1073"/>
         <source>Insert Control Point</source>
         <translation>Insérer un point de contrôle</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="969"/>
+        <location filename="../common/lc_commands.cpp" line="1080"/>
         <source>Remove Control Point</source>
         <translation>Enlever le point de contrôle</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="976"/>
+        <location filename="../common/lc_commands.cpp" line="1087"/>
         <source>Move +X</source>
         <translation>Déplacer +X</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="983"/>
+        <location filename="../common/lc_commands.cpp" line="1094"/>
         <source>Move -X</source>
         <translation>Déplacer -X</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="990"/>
+        <location filename="../common/lc_commands.cpp" line="1101"/>
         <source>Move +Y</source>
         <translation>Déplacer +Y</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="997"/>
+        <location filename="../common/lc_commands.cpp" line="1108"/>
         <source>Move -Y</source>
         <translation>Déplacer -Y</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1004"/>
+        <location filename="../common/lc_commands.cpp" line="1115"/>
         <source>Move +Z</source>
         <translation>Déplacer +Z</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1011"/>
+        <location filename="../common/lc_commands.cpp" line="1122"/>
         <source>Move -Z</source>
         <translation>Déplacer -Z</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1018"/>
+        <location filename="../common/lc_commands.cpp" line="1129"/>
         <source>Rotate +X</source>
         <translation>Tourner +X</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1025"/>
+        <location filename="../common/lc_commands.cpp" line="1136"/>
         <source>Rotate -X</source>
         <translation>Tourner -X</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1032"/>
+        <location filename="../common/lc_commands.cpp" line="1143"/>
         <source>Rotate +Y</source>
         <translation>Tourner +Y</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1039"/>
+        <location filename="../common/lc_commands.cpp" line="1150"/>
         <source>Rotate -Y</source>
         <translation>Tourner -Y</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1046"/>
+        <location filename="../common/lc_commands.cpp" line="1157"/>
         <source>Rotate +Z</source>
         <translation>Tourner +Z</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1053"/>
+        <location filename="../common/lc_commands.cpp" line="1164"/>
         <source>Rotate -Z</source>
         <translation>Tourner -Z</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1060"/>
+        <location filename="../common/lc_commands.cpp" line="1171"/>
         <source>Minifig &amp;Wizard...</source>
         <translation>&amp;Assistant de minifig…</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1067"/>
+        <location filename="../common/lc_commands.cpp" line="1178"/>
         <source>A&amp;rray...</source>
         <translation>&amp;Arrangement…</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1074"/>
+        <location filename="../common/lc_commands.cpp" line="1185"/>
         <source>View Selected Model</source>
         <translation>Voir le modèle sélectionné</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1081"/>
+        <location filename="../common/lc_commands.cpp" line="1192"/>
         <source>Move to New Model...</source>
         <translation>Déplacer vers un nouveau modèle…</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1088"/>
+        <location filename="../common/lc_commands.cpp" line="1199"/>
         <source>Inline Selected Models</source>
         <translation>Fusionner les modèles sélectionnés</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1095"/>
+        <location filename="../common/lc_commands.cpp" line="1206"/>
         <source>&amp;Group...</source>
         <translation>&amp;Grouper...</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1102"/>
+        <location filename="../common/lc_commands.cpp" line="1213"/>
         <source>&amp;Ungroup</source>
         <translation>&amp;Dégrouper</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1109"/>
+        <location filename="../common/lc_commands.cpp" line="1220"/>
         <source>&amp;Add to Group</source>
         <translation>&amp;Ajouter au groupe</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1116"/>
+        <location filename="../common/lc_commands.cpp" line="1227"/>
         <source>Re&amp;move from Group</source>
         <translation>En&amp;lever du groupe</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1123"/>
+        <location filename="../common/lc_commands.cpp" line="1234"/>
         <source>&amp;Edit Groups...</source>
         <translation>&amp;Éditer les groupes…</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1130"/>
+        <location filename="../common/lc_commands.cpp" line="1241"/>
         <source>&amp;Hide Selected</source>
         <translation>&amp;Cache la sélection</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1137"/>
+        <location filename="../common/lc_commands.cpp" line="1248"/>
         <source>Hide &amp;Unselected</source>
         <translation>Cacher l’&amp;anti-sélection</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1144"/>
+        <location filename="../common/lc_commands.cpp" line="1255"/>
         <source>&amp;Unhide Selected</source>
         <translation>&amp;Décacher la sélection</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1151"/>
+        <location filename="../common/lc_commands.cpp" line="1262"/>
         <source>U&amp;nhide All</source>
         <translation>Décacher &amp;tout</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1158"/>
+        <location filename="../common/lc_commands.cpp" line="1269"/>
         <source>Show Earlier</source>
         <translation>Montrer plus tôt</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1165"/>
+        <location filename="../common/lc_commands.cpp" line="1276"/>
         <source>Show Later</source>
         <translation>Montrer plus tard</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1172"/>
+        <location filename="../common/lc_commands.cpp" line="1297"/>
+        <source>Switch to Submodel</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1304"/>
+        <source>Submodels...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1486"/>
+        <source>Report a Bug</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1521"/>
+        <source>Move Selection Here</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1528"/>
+        <source>Set Current Step</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>New Model...</source>
-        <translation>Nouveau modèle…</translation>
+        <translation type="vanished">Nouveau modèle…</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1186"/>
         <source>Switch to Model</source>
-        <translation>Basculer vers le modèle</translation>
+        <translation type="vanished">Basculer vers le modèle</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1193"/>
         <source>Models...</source>
-        <translation>Modèles…</translation>
+        <translation type="vanished">Modèles…</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1368"/>
+        <location filename="../common/lc_commands.cpp" line="1479"/>
         <source>LeoCAD &amp;Home Page</source>
         <translation>&amp;Page d’accueil de LeoCAD</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1375"/>
         <source>Send Support &amp;E-Mail</source>
-        <translation>&amp;Envoyer un courriel de soutien</translation>
+        <translation type="vanished">&amp;Envoyer un courriel de soutien</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1382"/>
+        <location filename="../common/lc_commands.cpp" line="1493"/>
         <source>Check for &amp;Updates...</source>
         <translation>Vérifier les &amp;mises à jour…</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1389"/>
+        <location filename="../common/lc_commands.cpp" line="1500"/>
         <source>&amp;About...</source>
         <translation>&amp;À propos...</translation>
     </message>
 </context>
 <context>
+    <name>Mouse</name>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1538"/>
+        <source>NewPiece</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1539"/>
+        <source>NewPointLight</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1540"/>
+        <source>NewSpotLight</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1541"/>
+        <source>NewCamera</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1542"/>
+        <source>Select</source>
+        <translation type="unfinished">Sélectionner</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1543"/>
+        <source>Move</source>
+        <translation type="unfinished">Déplacer</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1544"/>
+        <source>Rotate</source>
+        <translation type="unfinished">Tourner</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1545"/>
+        <source>Delete</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1546"/>
+        <source>Paint</source>
+        <translation type="unfinished">Peindre</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1547"/>
+        <source>Zoom</source>
+        <translation type="unfinished">Zoomer</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1548"/>
+        <source>Pan</source>
+        <translation type="unfinished">Glisser</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1549"/>
+        <source>Orbit</source>
+        <translation type="unfinished">Orbiter</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1550"/>
+        <source>Roll</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1551"/>
+        <source>ZoomRegion</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>Project</name>
     <message>
-        <location filename="../common/project.cpp" line="21"/>
         <source>Model #1</source>
-        <translation>Modèle n°1</translation>
+        <translation type="vanished">Modèle n°1</translation>
     </message>
     <message>
-        <location filename="../common/project.cpp" line="49"/>
         <source>New Project.ldr</source>
-        <translation>Nouveau Projet.ldr</translation>
+        <translation type="vanished">Nouveau Projet.ldr</translation>
     </message>
     <message>
-        <location filename="../common/project.cpp" line="49"/>
         <source>New Project.mpd</source>
-        <translation>Nouveau Projet.mpd</translation>
+        <translation type="vanished">Nouveau Projet.mpd</translation>
     </message>
     <message>
-        <location filename="../common/project.cpp" line="85"/>
         <source>Model #</source>
-        <translation>Modèle n°</translation>
+        <translation type="vanished">Modèle n°</translation>
     </message>
     <message>
-        <location filename="../common/project.cpp" line="108"/>
         <source>New Model</source>
-        <translation>Nouveau modèle</translation>
+        <translation type="vanished">Nouveau modèle</translation>
     </message>
     <message>
-        <location filename="../common/project.cpp" line="108"/>
         <source>Name:</source>
-        <translation>Nom :</translation>
+        <translation type="vanished">Nom :</translation>
     </message>
     <message>
-        <location filename="../common/project.cpp" line="117"/>
+        <location filename="../common/project.cpp" line="208"/>
         <source>Empty Name</source>
         <translation>Nom vide</translation>
     </message>
     <message>
-        <location filename="../common/project.cpp" line="117"/>
         <source>The model name cannot be empty.</source>
-        <translation>Le nom du modèle ne peut pas être vide.</translation>
+        <translation type="vanished">Le nom du modèle ne peut pas être vide.</translation>
     </message>
     <message>
-        <location filename="../common/project.cpp" line="119"/>
         <source>Duplicate Model</source>
-        <translation>Modèle déjà existant</translation>
+        <translation type="vanished">Modèle déjà existant</translation>
     </message>
     <message>
-        <location filename="../common/project.cpp" line="119"/>
         <source>A model named &apos;%1&apos; already exists in this project, please enter an unique name.</source>
-        <translation>Un modèle nommé « %1 » existe déjà dans ce projet, SVP entrez un nom unique.</translation>
+        <translation type="vanished">Un modèle nommé « %1 » existe déjà dans ce projet, SVP entrez un nom unique.</translation>
     </message>
     <message>
-        <location filename="../common/project.cpp" line="205"/>
-        <location filename="../common/project.cpp" line="285"/>
-        <location filename="../common/project.cpp" line="1151"/>
-        <location filename="../common/project.cpp" line="1182"/>
-        <location filename="../common/project.cpp" line="1207"/>
-        <location filename="../common/project.cpp" line="1241"/>
-        <location filename="../common/project.cpp" line="1329"/>
+        <location filename="../common/project.cpp" line="346"/>
+        <location filename="../common/project.cpp" line="447"/>
+        <location filename="../common/project.cpp" line="622"/>
+        <location filename="../common/project.cpp" line="1790"/>
+        <location filename="../common/project.cpp" line="1821"/>
+        <location filename="../common/project.cpp" line="1846"/>
+        <location filename="../common/project.cpp" line="1880"/>
+        <location filename="../common/project.cpp" line="1958"/>
+        <location filename="../common/project.cpp" line="1977"/>
         <source>Error</source>
         <translation>Erreur</translation>
     </message>
     <message>
-        <location filename="../common/project.cpp" line="337"/>
+        <location filename="../common/project.cpp" line="505"/>
         <source>Merged </source>
         <translation>Fusionné </translation>
     </message>
     <message>
-        <location filename="../common/project.cpp" line="393"/>
-        <location filename="../common/project.cpp" line="406"/>
-        <location filename="../common/project.cpp" line="881"/>
-        <location filename="../common/project.cpp" line="895"/>
-        <location filename="../common/project.cpp" line="941"/>
-        <location filename="../common/project.cpp" line="955"/>
-        <location filename="../common/project.cpp" line="1273"/>
-        <location filename="../common/project.cpp" line="1363"/>
-        <location filename="../common/project.cpp" line="1384"/>
-        <location filename="../common/project.cpp" line="1426"/>
-        <location filename="../common/project.cpp" line="1468"/>
-        <location filename="../common/project.cpp" line="1646"/>
-        <location filename="../common/project.cpp" line="1660"/>
+        <location filename="../common/project.cpp" line="666"/>
+        <location filename="../common/project.cpp" line="679"/>
+        <location filename="../common/project.cpp" line="1113"/>
+        <location filename="../common/project.cpp" line="1127"/>
+        <location filename="../common/project.cpp" line="1180"/>
+        <location filename="../common/project.cpp" line="1193"/>
+        <location filename="../common/project.cpp" line="1445"/>
+        <location filename="../common/project.cpp" line="1459"/>
+        <location filename="../common/project.cpp" line="1532"/>
+        <location filename="../common/project.cpp" line="1915"/>
+        <location filename="../common/project.cpp" line="2027"/>
+        <location filename="../common/project.cpp" line="2040"/>
+        <location filename="../common/project.cpp" line="2079"/>
+        <location filename="../common/project.cpp" line="2125"/>
+        <location filename="../common/project.cpp" line="2320"/>
+        <location filename="../common/project.cpp" line="2334"/>
+        <location filename="../common/project.cpp" line="2351"/>
         <source>LeoCAD</source>
         <translation>LeoCAD</translation>
     </message>
     <message>
-        <location filename="../common/project.cpp" line="393"/>
-        <location filename="../common/project.cpp" line="881"/>
-        <location filename="../common/project.cpp" line="941"/>
-        <location filename="../common/project.cpp" line="1363"/>
-        <location filename="../common/project.cpp" line="1646"/>
+        <location filename="../common/project.cpp" line="666"/>
+        <location filename="../common/project.cpp" line="1113"/>
+        <location filename="../common/project.cpp" line="1180"/>
+        <location filename="../common/project.cpp" line="1445"/>
+        <location filename="../common/project.cpp" line="2027"/>
+        <location filename="../common/project.cpp" line="2320"/>
         <source>Nothing to export.</source>
         <translation>Rien à exporter.</translation>
     </message>
     <message>
-        <location filename="../common/project.cpp" line="397"/>
+        <location filename="../common/project.cpp" line="670"/>
         <source>Export 3D Studio</source>
         <translation>Exporter vers 3D Studio</translation>
     </message>
     <message>
-        <location filename="../common/project.cpp" line="397"/>
+        <location filename="../common/project.cpp" line="670"/>
         <source>3DS Files (*.3ds);;All Files (*.*)</source>
         <translation>Fichiers 3DS (*.3ds);;Tous les fichiers (*.*)</translation>
     </message>
     <message>
-        <location filename="../common/project.cpp" line="406"/>
-        <location filename="../common/project.cpp" line="895"/>
-        <location filename="../common/project.cpp" line="955"/>
-        <location filename="../common/project.cpp" line="1384"/>
-        <location filename="../common/project.cpp" line="1660"/>
+        <location filename="../common/project.cpp" line="679"/>
+        <location filename="../common/project.cpp" line="1127"/>
+        <location filename="../common/project.cpp" line="1193"/>
+        <location filename="../common/project.cpp" line="1459"/>
+        <location filename="../common/project.cpp" line="2040"/>
+        <location filename="../common/project.cpp" line="2334"/>
+        <location filename="../common/project.cpp" line="2351"/>
         <source>Could not open file &apos;%1&apos; for writing.</source>
         <translation>N’a pas pu ouvrir le fichier « %1 » en écriture.</translation>
     </message>
     <message>
-        <location filename="../common/project.cpp" line="885"/>
+        <location filename="../common/project.cpp" line="1117"/>
         <source>Export BrickLink</source>
         <translation>Exporter vers BrickLink</translation>
     </message>
     <message>
-        <location filename="../common/project.cpp" line="885"/>
+        <location filename="../common/project.cpp" line="1117"/>
         <source>XML Files (*.xml);;All Files (*.*)</source>
         <translation>Fichiers XML (*.xml);;Tous les fichiers (*.*)</translation>
     </message>
     <message>
-        <location filename="../common/project.cpp" line="945"/>
+        <location filename="../common/project.cpp" line="1184"/>
+        <source>Export COLLADA</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/project.cpp" line="1184"/>
+        <source>COLLADA Files (*.dae);;All Files (*.*)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/project.cpp" line="1449"/>
         <source>Export CSV</source>
         <translation>Exporter vers CSV</translation>
     </message>
     <message>
-        <location filename="../common/project.cpp" line="945"/>
+        <location filename="../common/project.cpp" line="1449"/>
         <source>CSV Files (*.csv);;All Files (*.*)</source>
         <translation>Fichiers CSV (*.csv);;Tous les fichiers (*.*)</translation>
     </message>
     <message>
-        <location filename="../common/project.cpp" line="1273"/>
+        <location filename="../common/project.cpp" line="1532"/>
+        <location filename="../common/project.cpp" line="1915"/>
         <source>Error creating images.</source>
         <translation>Erreur à la création des images.</translation>
     </message>
     <message>
-        <location filename="../common/project.cpp" line="1426"/>
-        <location filename="../common/project.cpp" line="1468"/>
+        <location filename="../common/project.cpp" line="2031"/>
+        <source>Export POV-Ray</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/project.cpp" line="2031"/>
+        <source>POV-Ray Files (*.pov);;All Files (*.*)</source>
+        <translation type="unfinished">Fichiers POV-Ray (*.pov);;Tous les fichiers (*.*)</translation>
+    </message>
+    <message>
+        <location filename="../common/project.cpp" line="2079"/>
+        <location filename="../common/project.cpp" line="2125"/>
         <source>Could not find LGEO files in folder &apos;%1&apos;.</source>
         <translation>N’a pas pu trouver les fichiers LGEO dans le dossier « %1 ».</translation>
     </message>
     <message>
-        <location filename="../common/project.cpp" line="1650"/>
+        <location filename="../common/project.cpp" line="2324"/>
         <source>Export Wavefront</source>
         <translation>Exporter vers Wavefront</translation>
     </message>
     <message>
-        <location filename="../common/project.cpp" line="1650"/>
+        <location filename="../common/project.cpp" line="2324"/>
         <source>Wavefront Files (*.obj);;All Files (*.*)</source>
         <translation>Fichiers Wavefront (*.obj);;Tous les fichiers (*.*)</translation>
     </message>
     <message>
-        <location filename="../common/project.cpp" line="285"/>
-        <location filename="../common/project.cpp" line="1151"/>
-        <location filename="../common/project.cpp" line="1182"/>
-        <location filename="../common/project.cpp" line="1207"/>
-        <location filename="../common/project.cpp" line="1241"/>
-        <location filename="../common/project.cpp" line="1329"/>
+        <location filename="../common/project.cpp" line="447"/>
+        <location filename="../common/project.cpp" line="622"/>
+        <location filename="../common/project.cpp" line="1790"/>
+        <location filename="../common/project.cpp" line="1821"/>
+        <location filename="../common/project.cpp" line="1846"/>
+        <location filename="../common/project.cpp" line="1880"/>
+        <location filename="../common/project.cpp" line="1958"/>
+        <location filename="../common/project.cpp" line="1977"/>
         <source>Error writing to file &apos;%1&apos;:
 %2</source>
         <translation>Erreur en écrivant le fichier « %1 » :
 %2</translation>
     </message>
     <message>
-        <location filename="../common/project.cpp" line="205"/>
+        <location filename="../common/project.cpp" line="82"/>
+        <location filename="../common/project.cpp" line="121"/>
+        <source>New Model.ldr</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/project.cpp" line="121"/>
+        <source>New Model.mpd</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/project.cpp" line="177"/>
+        <source>Submodel #</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/project.cpp" line="201"/>
+        <source>Submodel Name:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/project.cpp" line="208"/>
+        <source>The submodel name cannot be empty.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/project.cpp" line="228"/>
+        <source>Duplicate Submodel</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/project.cpp" line="228"/>
+        <source>A submodel named &apos;%1&apos; already exists, please enter a unique name.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/project.cpp" line="245"/>
+        <source>New Submodel</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/project.cpp" line="346"/>
         <source>Error reading file &apos;%1&apos;:
 %2</source>
         <translation>Erreur en lisant le fichier « %1 » :
@@ -952,19 +2298,19 @@
         <translation>Group n°</translation>
     </message>
     <message>
-        <location filename="../common/lc_colors.cpp" line="366"/>
+        <location filename="../common/lc_colors.cpp" line="192"/>
         <source>Solid Colors</source>
         <comment>Colors</comment>
         <translation>Couleurs pleines</translation>
     </message>
     <message>
-        <location filename="../common/lc_colors.cpp" line="367"/>
+        <location filename="../common/lc_colors.cpp" line="193"/>
         <source>Translucent Colors</source>
         <comment>Colors</comment>
         <translation>Couleurs transparentes</translation>
     </message>
     <message>
-        <location filename="../common/lc_colors.cpp" line="368"/>
+        <location filename="../common/lc_colors.cpp" line="194"/>
         <source>Special Colors</source>
         <comment>Colors</comment>
         <translation>Couleurs spéciales</translation>
@@ -973,417 +2319,413 @@
 <context>
     <name>Shortcut</name>
     <message>
-        <location filename="../common/lc_commands.cpp" line="12"/>
+        <location filename="../common/lc_commands.cpp" line="11"/>
         <source>Ctrl+N</source>
         <translation>Ctrl+N</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="19"/>
+        <location filename="../common/lc_commands.cpp" line="18"/>
         <source>Ctrl+O</source>
         <translation>Ctrl+O</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="33"/>
+        <location filename="../common/lc_commands.cpp" line="32"/>
         <source>Ctrl+S</source>
         <translation>Ctrl+S</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="152"/>
+        <location filename="../common/lc_commands.cpp" line="179"/>
         <source>Ctrl+Z</source>
         <translation>Ctrl+Z</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="159"/>
+        <location filename="../common/lc_commands.cpp" line="186"/>
         <source>Ctrl+Y</source>
         <translation>Ctrl+Y</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="166"/>
+        <location filename="../common/lc_commands.cpp" line="193"/>
         <source>Ctrl+X</source>
         <translation>Ctrl+X</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="173"/>
+        <location filename="../common/lc_commands.cpp" line="200"/>
         <source>Ctrl+C</source>
         <translation>Ctrl+C</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="180"/>
+        <location filename="../common/lc_commands.cpp" line="207"/>
         <source>Ctrl+V</source>
         <translation>Ctrl+V</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="187"/>
+        <location filename="../common/lc_commands.cpp" line="214"/>
         <source>Ctrl+F</source>
         <translation>Ctrl+F</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="194"/>
+        <location filename="../common/lc_commands.cpp" line="221"/>
         <source>F3</source>
         <translation>F3</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="201"/>
+        <location filename="../common/lc_commands.cpp" line="228"/>
         <source>Shift+F3</source>
         <translation>Maj+F3</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="208"/>
+        <location filename="../common/lc_commands.cpp" line="235"/>
         <source>Ctrl+A</source>
         <translation>Ctrl+A</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="222"/>
+        <location filename="../common/lc_commands.cpp" line="249"/>
         <source>Ctrl+I</source>
         <translation>Ctrl+I</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="278"/>
+        <location filename="../common/lc_commands.cpp" line="312"/>
         <source>0</source>
         <translation>8x {0?}</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="285"/>
+        <location filename="../common/lc_commands.cpp" line="319"/>
         <source>1</source>
         <translation>8x {1?}</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="292"/>
+        <location filename="../common/lc_commands.cpp" line="326"/>
         <source>2</source>
         <translation>8x {2?}</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="299"/>
+        <location filename="../common/lc_commands.cpp" line="333"/>
         <source>3</source>
         <translation>8x {3?}</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="306"/>
+        <location filename="../common/lc_commands.cpp" line="340"/>
         <source>4</source>
         <translation>8x {4?}</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="313"/>
+        <location filename="../common/lc_commands.cpp" line="347"/>
         <source>5</source>
         <translation>8x {5?}</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="320"/>
+        <location filename="../common/lc_commands.cpp" line="354"/>
         <source>6</source>
         <translation>8x {6?}</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="327"/>
+        <location filename="../common/lc_commands.cpp" line="361"/>
         <source>7</source>
         <translation>8x {7?}</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="334"/>
+        <location filename="../common/lc_commands.cpp" line="368"/>
         <source>8</source>
         <translation>8x {8?}</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="341"/>
+        <location filename="../common/lc_commands.cpp" line="375"/>
         <source>9</source>
         <translation>8x {9?}</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="348"/>
+        <location filename="../common/lc_commands.cpp" line="382"/>
         <source>Ctrl+Shift+0</source>
         <translation>Ctrl+Maj+0</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="355"/>
+        <location filename="../common/lc_commands.cpp" line="389"/>
         <source>Ctrl+Shift+1</source>
         <translation>Ctrl+Maj+1</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="362"/>
+        <location filename="../common/lc_commands.cpp" line="396"/>
         <source>Ctrl+Shift+2</source>
         <translation>Ctrl+Maj+2</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="369"/>
+        <location filename="../common/lc_commands.cpp" line="403"/>
         <source>Ctrl+Shift+3</source>
         <translation>Ctrl+Maj+3</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="376"/>
+        <location filename="../common/lc_commands.cpp" line="410"/>
         <source>Ctrl+Shift+4</source>
         <translation>Ctrl+Maj+4</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="383"/>
+        <location filename="../common/lc_commands.cpp" line="417"/>
         <source>Ctrl+Shift+5</source>
         <translation>Ctrl+Maj+5</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="390"/>
+        <location filename="../common/lc_commands.cpp" line="424"/>
         <source>Ctrl+Shift+6</source>
         <translation>Ctrl+Maj+6</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="397"/>
+        <location filename="../common/lc_commands.cpp" line="431"/>
         <source>Ctrl+Shift+7</source>
         <translation>Ctrl+Maj+7</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="404"/>
+        <location filename="../common/lc_commands.cpp" line="438"/>
         <source>Ctrl+Shift+8</source>
         <translation>Ctrl+Maj+8</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="411"/>
+        <location filename="../common/lc_commands.cpp" line="445"/>
         <source>Ctrl+Shift+9</source>
         <translation>Ctrl+Maj+9</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="425"/>
+        <location filename="../common/lc_commands.cpp" line="459"/>
         <source>Shift+0</source>
         <translation>Maj+0</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="432"/>
+        <location filename="../common/lc_commands.cpp" line="466"/>
         <source>Shift+1</source>
         <translation>Maj+1</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="439"/>
+        <location filename="../common/lc_commands.cpp" line="473"/>
         <source>Shift+2</source>
         <translation>Maj+2</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="446"/>
+        <location filename="../common/lc_commands.cpp" line="480"/>
         <source>Shift+3</source>
         <translation>Maj+3</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="453"/>
+        <location filename="../common/lc_commands.cpp" line="487"/>
         <source>Shift+4</source>
         <translation>Maj+4</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="460"/>
+        <location filename="../common/lc_commands.cpp" line="494"/>
         <source>Shift+5</source>
         <translation>Maj+5</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="467"/>
+        <location filename="../common/lc_commands.cpp" line="501"/>
         <source>Shift+6</source>
         <translation>Maj+6</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="474"/>
+        <location filename="../common/lc_commands.cpp" line="508"/>
         <source>Shift+7</source>
         <translation>Maj+7</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="481"/>
+        <location filename="../common/lc_commands.cpp" line="515"/>
         <source>Shift+8</source>
         <translation>Maj+8</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="488"/>
+        <location filename="../common/lc_commands.cpp" line="522"/>
         <source>Shift+9</source>
         <translation>Maj+9</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="558"/>
         <source>Shift+S</source>
-        <translation>Maj+S</translation>
+        <translation type="vanished">Maj+S</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="565"/>
         <source>Shift+M</source>
-        <translation>Maj+M</translation>
+        <translation type="vanished">Maj+M</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="572"/>
         <source>Shift+R</source>
-        <translation>Maj+R</translation>
+        <translation type="vanished">Maj+R</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="579"/>
         <source>Shift+D</source>
-        <translation>Maj+D</translation>
+        <translation type="vanished">Maj+D</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="586"/>
         <source>Shift+N</source>
-        <translation>Maj+N</translation>
+        <translation type="vanished">Maj+N</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="593"/>
         <source>Shift+Z</source>
-        <translation>Maj+Z</translation>
+        <translation type="vanished">Maj+Z</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="600"/>
         <source>Shift+P</source>
-        <translation>Maj+P</translation>
+        <translation type="vanished">Maj+P</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="607"/>
         <source>Shift+T</source>
-        <translation>Maj+T</translation>
+        <translation type="vanished">Maj+T</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="614"/>
         <source>Shift+L</source>
-        <translation>Maj+L</translation>
+        <translation type="vanished">Maj+L</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="628"/>
+        <location filename="../common/lc_commands.cpp" line="662"/>
         <source>Esc</source>
         <translation>Échap</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="642"/>
+        <location filename="../common/lc_commands.cpp" line="676"/>
         <source>+</source>
         <translation>+</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="649"/>
+        <location filename="../common/lc_commands.cpp" line="683"/>
         <source>-</source>
         <translation>-</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="670"/>
+        <location filename="../common/lc_commands.cpp" line="746"/>
         <source>F</source>
         <translation>F</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="677"/>
+        <location filename="../common/lc_commands.cpp" line="753"/>
         <source>B</source>
         <translation>B</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="684"/>
+        <location filename="../common/lc_commands.cpp" line="760"/>
         <source>T</source>
         <translation>T</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="691"/>
+        <location filename="../common/lc_commands.cpp" line="767"/>
         <source>O</source>
         <translation>O</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="698"/>
+        <location filename="../common/lc_commands.cpp" line="774"/>
         <source>L</source>
         <translation>L</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="705"/>
+        <location filename="../common/lc_commands.cpp" line="781"/>
         <source>R</source>
         <translation>R</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="712"/>
+        <location filename="../common/lc_commands.cpp" line="788"/>
         <source>H</source>
         <translation>H</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="845"/>
+        <location filename="../common/lc_commands.cpp" line="921"/>
         <source>Alt+Up</source>
         <translation>Alt+Up</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="852"/>
+        <location filename="../common/lc_commands.cpp" line="928"/>
         <source>Alt+Left</source>
         <translation>Alt+Left</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="859"/>
+        <location filename="../common/lc_commands.cpp" line="935"/>
         <source>Alt+Right</source>
         <translation>Alt+Right</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="866"/>
+        <location filename="../common/lc_commands.cpp" line="942"/>
         <source>Alt+Down</source>
         <translation>Alt+Down</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="943"/>
+        <location filename="../common/lc_commands.cpp" line="1040"/>
         <source>Insert</source>
         <translation>Inser</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="950"/>
+        <location filename="../common/lc_commands.cpp" line="1047"/>
         <source>Delete</source>
         <translation>Suppr</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="978"/>
+        <location filename="../common/lc_commands.cpp" line="1054"/>
+        <source>Ctrl+D</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1089"/>
         <source>Down</source>
         <translation>Bas</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="985"/>
+        <location filename="../common/lc_commands.cpp" line="1096"/>
         <source>Up</source>
         <translation>Haut</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="992"/>
+        <location filename="../common/lc_commands.cpp" line="1103"/>
         <source>Right</source>
         <translation>Droite</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="999"/>
+        <location filename="../common/lc_commands.cpp" line="1110"/>
         <source>Left</source>
         <translation>Gauche</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1006"/>
+        <location filename="../common/lc_commands.cpp" line="1117"/>
         <source>PgUp</source>
         <translation>Page préc</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1013"/>
+        <location filename="../common/lc_commands.cpp" line="1124"/>
         <source>PgDown</source>
         <translation>Page suiv</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1020"/>
+        <location filename="../common/lc_commands.cpp" line="1131"/>
         <source>Shift+Down</source>
         <translation>Maj+Bas</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1027"/>
+        <location filename="../common/lc_commands.cpp" line="1138"/>
         <source>Shift+Up</source>
         <translation>Maj+Haut</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1034"/>
+        <location filename="../common/lc_commands.cpp" line="1145"/>
         <source>Shift+Right</source>
         <translation>Maj+Droite</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1041"/>
+        <location filename="../common/lc_commands.cpp" line="1152"/>
         <source>Shift+Left</source>
         <translation>Maj+Gauche</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1048"/>
+        <location filename="../common/lc_commands.cpp" line="1159"/>
         <source>Shift+PgUp</source>
         <translation>Maj+Page préc</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1055"/>
+        <location filename="../common/lc_commands.cpp" line="1166"/>
         <source>Shift+PgDown</source>
         <translation>Maj+Page suiv</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1097"/>
+        <location filename="../common/lc_commands.cpp" line="1208"/>
         <source>Ctrl+G</source>
         <translation>Ctrl+G</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1104"/>
+        <location filename="../common/lc_commands.cpp" line="1215"/>
         <source>Ctrl+U</source>
         <translation>Ctrl+U</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1132"/>
+        <location filename="../common/lc_commands.cpp" line="1243"/>
         <source>Ctrl+H</source>
         <translation>Ctrl+H</translation>
     </message>
@@ -1391,800 +2733,1012 @@
 <context>
     <name>Status</name>
     <message>
-        <location filename="../common/lc_commands.cpp" line="11"/>
         <source>Create a new project</source>
-        <translation>Créer un nouveau projet</translation>
+        <translation type="vanished">Créer un nouveau projet</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="18"/>
         <source>Open an existing project</source>
-        <translation>Ouvrir un projet existant</translation>
+        <translation type="vanished">Ouvrir un projet existant</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="25"/>
         <source>Merge the contents of another project with the current one</source>
-        <translation>Fusionner le contenu d’un autre projet dans le projet courant</translation>
+        <translation type="vanished">Fusionner le contenu d’un autre projet dans le projet courant</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="32"/>
         <source>Save the active project</source>
-        <translation>Enregistrer le projet actif</translation>
+        <translation type="vanished">Enregistrer le projet actif</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="39"/>
         <source>Save the active project with a new name</source>
-        <translation>Enregistrer le projet actif sous un nouveau nom</translation>
+        <translation type="vanished">Enregistrer le projet actif sous un nouveau nom</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="46"/>
+        <location filename="../common/lc_commands.cpp" line="45"/>
         <source>Save a picture of the current view</source>
         <translation>Enregistrer une image de la vue courante</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="53"/>
         <source>Export the project in 3D Studio 3DS format</source>
-        <translation>Exporter le projet dans le format 3DS de 3D Studio</translation>
+        <translation type="vanished">Exporter le projet dans le format 3DS de 3D Studio</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="60"/>
         <source>Create an HTML page for this project</source>
-        <translation>Créer une page HTML pour ce projet</translation>
+        <translation type="vanished">Créer une page HTML pour ce projet</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="67"/>
+        <location filename="../common/lc_commands.cpp" line="87"/>
         <source>Export a list of parts used in BrickLink XML format</source>
         <translation>Exporter une liste des pièces utilisées dans le format XML de BrickLink</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="74"/>
+        <location filename="../common/lc_commands.cpp" line="94"/>
         <source>Export a list of parts used in comma delimited file format</source>
         <translation>Exporter une liste des pièces utilisées dans un fichier texte avec champs séparés par des virgules</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="81"/>
         <source>Export the project in POV-Ray format</source>
-        <translation>Exporter le projet dans le format POV-Ray</translation>
+        <translation type="vanished">Exporter le projet dans le format POV-Ray</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="88"/>
         <source>Export the project in Wavefront OBJ format</source>
-        <translation>Exporter le projet dans le format OBJ de Wavefront</translation>
+        <translation type="vanished">Exporter le projet dans le format OBJ de Wavefront</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="95"/>
         <source>Print the active project</source>
-        <translation>Imprimer le projet actif</translation>
+        <translation type="vanished">Imprimer le projet actif</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="102"/>
         <source>Display how the project would look if printed</source>
-        <translation>Afficher un aperçu de l’impression du projet</translation>
+        <translation type="vanished">Afficher un aperçu de l’impression du projet</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="109"/>
+        <location filename="../common/lc_commands.cpp" line="136"/>
         <source>Print a list of parts used</source>
         <translation>Imprimer une liste des pièces utilisées</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="116"/>
-        <location filename="../common/lc_commands.cpp" line="123"/>
-        <location filename="../common/lc_commands.cpp" line="130"/>
-        <location filename="../common/lc_commands.cpp" line="137"/>
         <source>Open this document</source>
-        <translation>Ouvrir ce document</translation>
+        <translation type="vanished">Ouvrir ce document</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="144"/>
         <source>Quit the application; prompts to save project</source>
-        <translation>Quitter l’application ; invite à l’enregistrement du projet</translation>
+        <translation type="vanished">Quitter l’application ; invite à l’enregistrement du projet</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="151"/>
+        <location filename="../common/lc_commands.cpp" line="178"/>
         <source>Undo the last action</source>
         <translation>Annuler la dernière action</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="158"/>
+        <location filename="../common/lc_commands.cpp" line="185"/>
         <source>Redo the previously undone action</source>
         <translation>Refaire l’action précédemment annulée</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="165"/>
+        <location filename="../common/lc_commands.cpp" line="192"/>
         <source>Cut the selection and put it on the Clipboard</source>
         <translation>Couper la sélection et la placer dans le presse-papier</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="172"/>
+        <location filename="../common/lc_commands.cpp" line="199"/>
         <source>Copy the selection and put it on the Clipboard</source>
         <translation>Copier la sélection et la placer dans le presse-papier</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="179"/>
+        <location filename="../common/lc_commands.cpp" line="206"/>
         <source>Insert Clipboard contents</source>
         <translation>Insérer le contenu de presse-papier</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="186"/>
-        <location filename="../common/lc_commands.cpp" line="200"/>
+        <location filename="../common/lc_commands.cpp" line="213"/>
+        <location filename="../common/lc_commands.cpp" line="227"/>
         <source>Find object</source>
         <translation>Trouver un objet</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="193"/>
+        <location filename="../common/lc_commands.cpp" line="220"/>
         <source>Find next object</source>
         <translation>Trouver l’objet suivant</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="207"/>
         <source>Select all pieces in the project</source>
-        <translation>Sélectionner toutes les pièces du projet</translation>
+        <translation type="vanished">Sélectionner toutes les pièces du projet</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="214"/>
+        <location filename="../common/lc_commands.cpp" line="241"/>
         <source>De-select everything</source>
         <translation>Vider la sélection</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="221"/>
+        <location filename="../common/lc_commands.cpp" line="248"/>
         <source>Invert the current selection set</source>
         <translation>Inverser la sélection courante</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="228"/>
+        <location filename="../common/lc_commands.cpp" line="255"/>
         <source>Select objects by name</source>
         <translation>Sélectionner des objets par leur nom</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="235"/>
         <source>Prevents movement and rotation along the X axis</source>
-        <translation>Empêcher les déplacements et rotations suivant l’axe X</translation>
+        <translation type="vanished">Empêcher les déplacements et rotations suivant l’axe X</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="242"/>
         <source>Prevents movement and rotation along the Y axis</source>
-        <translation>Empêcher les déplacements et rotations suivant l’axe Y</translation>
+        <translation type="vanished">Empêcher les déplacements et rotations suivant l’axe Y</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="249"/>
         <source>Prevents movement and rotation along the Z axis</source>
-        <translation>Empêcher les déplacements et rotations suivant l’axe Z</translation>
+        <translation type="vanished">Empêcher les déplacements et rotations suivant l’axe Z</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="256"/>
         <source>Allows movement and rotation in all directions</source>
-        <translation>Permettre les déplacements et rotations dans toutes les directions</translation>
+        <translation type="vanished">Permettre les déplacements et rotations dans toutes les directions</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="270"/>
+        <location filename="../common/lc_commands.cpp" line="304"/>
         <source>Toggle snap axes</source>
         <translation>Basculer l’usage de pas pour les déplacements</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="417"/>
+        <location filename="../common/lc_commands.cpp" line="451"/>
         <source>Snap rotations to fixed intervals</source>
         <translation>Utiliser le pas pour les rotations</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="277"/>
+        <location filename="../common/lc_commands.cpp" line="311"/>
         <source>Do not snap movement along the XY plane</source>
         <translation>Ne pas utiliser les pas pour les déplacements sur le plan XY</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="263"/>
         <source>Move and rotate objects relative to the one that currently has focus</source>
-        <translation>Déplacer et tourner les objets relativement à l’objet qui a le focus</translation>
+        <translation type="vanished">Déplacer et tourner les objets relativement à l’objet qui a le focus</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="284"/>
+        <location filename="../common/lc_commands.cpp" line="318"/>
         <source>Snap movement along the XY plane to 1/20 stud</source>
         <translation>Fixer le pas pour les déplacements dans le plan XY à 1/20 de tenon</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="291"/>
+        <location filename="../common/lc_commands.cpp" line="325"/>
         <source>Snap movement along the XY plane to 1/4 stud</source>
         <translation>Fixer le pas pour les déplacements dans le plan XY à 1/4 de tenon</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="298"/>
+        <location filename="../common/lc_commands.cpp" line="332"/>
         <source>Snap movement along the XY plane to 1 flat</source>
         <translation>Fixer le pas pour les déplacements dans le plan XY à 1 plaque</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="305"/>
+        <location filename="../common/lc_commands.cpp" line="339"/>
         <source>Snap movement along the XY plane to 1/2 stud</source>
         <translation>Fixer le pas pour les déplacements dans le plan XY à 1/2 tenon</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="312"/>
+        <location filename="../common/lc_commands.cpp" line="346"/>
         <source>Snap movement along the XY plane to 1 stud</source>
         <translation>Fixer le pas pour les déplacements dans le plan XY à 1 tenon</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="319"/>
+        <location filename="../common/lc_commands.cpp" line="353"/>
         <source>Snap movement along the XY plane to 2 studs</source>
         <translation>Fixer le pas pour les déplacements dans le plan XY à 2 tenons</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="326"/>
+        <location filename="../common/lc_commands.cpp" line="360"/>
         <source>Snap movement along the XY plane to 3 studs</source>
         <translation>Fixer le pas pour les déplacements dans le plan XY à 3 tenons</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="333"/>
+        <location filename="../common/lc_commands.cpp" line="367"/>
         <source>Snap movement along the XY plane to 4 studs</source>
         <translation>Fixer le pas pour les déplacements dans le plan XY à 4 tenons</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="340"/>
+        <location filename="../common/lc_commands.cpp" line="374"/>
         <source>Snap movement along the XY plane to 8 studs</source>
         <translation>Fixer le pas pour les déplacements dans le plan XY à 8 tenons</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="347"/>
+        <location filename="../common/lc_commands.cpp" line="381"/>
         <source>Do not snap movement along the Z axis</source>
         <translation>Ne pas fixer les déplacements sur l’axe Z</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="354"/>
+        <location filename="../common/lc_commands.cpp" line="388"/>
         <source>Snap movement along the Z axis to 1/20 stud</source>
         <translation>Fixer le pas pour les déplacements dans l’axe Z à 1/20 de tenon</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="361"/>
+        <location filename="../common/lc_commands.cpp" line="395"/>
         <source>Snap movement along the Z axis to 1/4 stud</source>
         <translation>Fixer le pas pour les déplacements dans l’axe Z à 1/4 de tenon</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="368"/>
+        <location filename="../common/lc_commands.cpp" line="402"/>
         <source>Snap movement along the Z axis to 1 flat</source>
         <translation>Fixer le pas pour les déplacements dans l’axe Z à 1 plaque</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="375"/>
+        <location filename="../common/lc_commands.cpp" line="409"/>
         <source>Snap movement along the Z axis to 1/2 stud</source>
         <translation>Fixer le pas pour les déplacements dans l’axe Z à 1/2 tenon</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="382"/>
+        <location filename="../common/lc_commands.cpp" line="416"/>
         <source>Snap movement along the Z axis to 1 stud</source>
         <translation>Fixer le pas pour les déplacements dans l’axe Z à 1 tenon</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="389"/>
+        <location filename="../common/lc_commands.cpp" line="423"/>
         <source>Snap movement along the Z axis to 1 brick</source>
         <translation>Fixer le pas pour les déplacements dans l’axe Z à 1 brique</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="396"/>
+        <location filename="../common/lc_commands.cpp" line="430"/>
         <source>Snap movement along the Z axis to 2 bricks</source>
         <translation>Fixer le pas pour les déplacements dans l’axe Z à 2 briques</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="403"/>
+        <location filename="../common/lc_commands.cpp" line="437"/>
         <source>Snap movement along the Z axis to 4 bricks</source>
         <translation>Fixer le pas pour les déplacements dans l’axe Z à 4 briques</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="410"/>
+        <location filename="../common/lc_commands.cpp" line="444"/>
         <source>Snap movement along the Z axis to 8 bricks</source>
         <translation>Fixer le pas pour les déplacements dans l’axe Z à 8 briques</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="424"/>
+        <location filename="../common/lc_commands.cpp" line="458"/>
         <source>Do not snap rotations</source>
         <translation>Ne pas utiliser de pas pour les rotations</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="431"/>
+        <location filename="../common/lc_commands.cpp" line="465"/>
         <source>Snap rotations to 1 degree</source>
         <translation>Fixer le pas de rotation à 1 degré</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="438"/>
+        <location filename="../common/lc_commands.cpp" line="472"/>
         <source>Snap rotations to 5 degrees</source>
         <translation>Fixer le pas de rotation à 5 degrés</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="445"/>
         <source>Snap rotations to 10 degrees</source>
-        <translation>Fixer le pas de rotation à 10 degrés</translation>
+        <translation type="vanished">Fixer le pas de rotation à 10 degrés</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="452"/>
+        <location filename="../common/lc_commands.cpp" line="10"/>
+        <source>Create a new model</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="17"/>
+        <source>Open an existing model</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="24"/>
+        <source>Merge the contents of another file with the current one</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="31"/>
+        <source>Save the current model</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="38"/>
+        <source>Save the current model with a new name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="52"/>
+        <source>Import a file in LEGO Digital Designer LXF format</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="59"/>
+        <source>Import all parts from an official set</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="66"/>
+        <source>Export the current model in 3D Studio 3DS format</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="73"/>
+        <source>Export the current model in COLLADA DAE format</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="80"/>
+        <source>Create an HTML page for the current model</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="101"/>
+        <source>Export the current model in POV-Ray format</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="108"/>
+        <source>Export the current model in Wavefront OBJ format</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="115"/>
+        <source>Render the current model using POV-Ray</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="122"/>
+        <source>Print the current model</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="129"/>
+        <source>Display how the model would look if printed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="143"/>
+        <location filename="../common/lc_commands.cpp" line="150"/>
+        <location filename="../common/lc_commands.cpp" line="157"/>
+        <location filename="../common/lc_commands.cpp" line="164"/>
+        <source>Open this model</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="171"/>
+        <source>Quit the application; prompts to save model</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="234"/>
+        <source>Select all pieces in the model</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="262"/>
+        <source>Select pieces by color</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="269"/>
+        <source>Select one piece at a time</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="276"/>
+        <source>Select all pieces of the same type</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="283"/>
+        <source>Select all pieces of the same color</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="290"/>
+        <source>Select all pieces of the same type and color</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="297"/>
+        <source>Move and rotate objects relative to the one that has focus</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="479"/>
         <source>Snap rotations to 15 degrees</source>
         <translation>Fixer le pas de rotation à 15 degrés</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="459"/>
+        <location filename="../common/lc_commands.cpp" line="486"/>
+        <source>Snap rotations to 22.5 degrees</source>
+        <translation type="unfinished">Fixer le pas de rotation à 180 degrés {22.5 ?}</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="493"/>
         <source>Snap rotations to 30 degrees</source>
         <translation>Fixer le pas de rotation à 30 degrés</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="466"/>
+        <location filename="../common/lc_commands.cpp" line="500"/>
         <source>Snap rotations to 45 degrees</source>
         <translation>Fixer le pas de rotation à 45 degrés</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="473"/>
+        <location filename="../common/lc_commands.cpp" line="507"/>
         <source>Snap rotations to 60 degrees</source>
         <translation>Fixer le pas de rotation à 60 degrés</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="480"/>
+        <location filename="../common/lc_commands.cpp" line="514"/>
         <source>Snap rotations to 90 degrees</source>
         <translation>Fixer le pas de rotation à 90 degrés</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="487"/>
+        <location filename="../common/lc_commands.cpp" line="521"/>
         <source>Snap rotations to 180 degrees</source>
         <translation>Fixer le pas de rotation à 180 degrés</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="494"/>
+        <location filename="../common/lc_commands.cpp" line="528"/>
         <source>Apply transform to selected objects</source>
         <translation>Appliquer la transformation aux objets sélectionnés</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="501"/>
+        <location filename="../common/lc_commands.cpp" line="535"/>
         <source>Switch to absolute translation mode when applying transforms</source>
         <translation>Basculer vers le mode translation absolue pour appliquer les transformations</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="508"/>
+        <location filename="../common/lc_commands.cpp" line="542"/>
         <source>Switch to relative translation mode when applying transforms</source>
         <translation>Basculer vers le mode translation relative pour appliquer les transformations</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="515"/>
+        <location filename="../common/lc_commands.cpp" line="549"/>
         <source>Switch to absolute rotation mode when applying transforms</source>
         <translation>Basculer vers le mode rotation absolue pour appliquer les transformations</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="522"/>
+        <location filename="../common/lc_commands.cpp" line="556"/>
         <source>Switch to relative rotation mode when applying transforms</source>
         <translation>Basculer vers le mode rotation relative pour appliquer les transformations</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="529"/>
+        <location filename="../common/lc_commands.cpp" line="563"/>
         <source>Add new pieces to the model</source>
         <translation>Ajouter des nouvelles pièces au modèle</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="536"/>
+        <location filename="../common/lc_commands.cpp" line="570"/>
         <source>Add new omni light sources to the model</source>
         <translation>Ajouter des sources de lumière omnidirectionnelles au modèle</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="543"/>
+        <location filename="../common/lc_commands.cpp" line="577"/>
         <source>Add new spotlights to the model</source>
         <translation>Ajouter des lumières projecteur au modèle</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="550"/>
+        <location filename="../common/lc_commands.cpp" line="584"/>
         <source>Create a new camera</source>
         <translation>Créer une nouvelle caméra</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="557"/>
+        <location filename="../common/lc_commands.cpp" line="591"/>
         <source>Select objects (hold the CTRL key down or drag the mouse to select multiple objects)</source>
         <translation>Sélection des objets (maintenir la touche Ctrl enfoncée ou glisser la souris pour sélectionner plusieurs objets)</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="564"/>
+        <location filename="../common/lc_commands.cpp" line="598"/>
         <source>Move selected objects</source>
         <translation>Déplacer les objets sélectionnés</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="571"/>
+        <location filename="../common/lc_commands.cpp" line="605"/>
         <source>Rotate selected pieces</source>
         <translation>Tourner les pièces sélectionnées</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="578"/>
+        <location filename="../common/lc_commands.cpp" line="612"/>
         <source>Delete objects</source>
         <translation>Supprimer des objets</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="585"/>
+        <location filename="../common/lc_commands.cpp" line="619"/>
         <source>Change piece color</source>
         <translation>Changer la couleur d’une pièce</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="592"/>
+        <location filename="../common/lc_commands.cpp" line="626"/>
         <source>Zoom in or out</source>
         <translation>Zoomer ou dézoomer</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="599"/>
+        <location filename="../common/lc_commands.cpp" line="633"/>
         <source>Pan the current view</source>
         <translation>Glisser la vue courante</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="606"/>
+        <location filename="../common/lc_commands.cpp" line="640"/>
         <source>Rotate the current view</source>
         <translation>Tourner la vue courante</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="613"/>
+        <location filename="../common/lc_commands.cpp" line="647"/>
         <source>Roll the current view</source>
         <translation>Pivoter la vue courante</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="620"/>
+        <location filename="../common/lc_commands.cpp" line="654"/>
         <source>Zoom into a region of the screen</source>
         <translation>Zoomer une région de l’écran</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="627"/>
+        <location filename="../common/lc_commands.cpp" line="661"/>
         <source>Cancel current mouse action</source>
         <translation>Annuler l’action courante de la souris</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="634"/>
+        <location filename="../common/lc_commands.cpp" line="668"/>
         <source>Change program settings</source>
         <translation>Changer la configuration du programme</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="641"/>
+        <location filename="../common/lc_commands.cpp" line="675"/>
         <source>Zoom in</source>
         <translation>Zoomer</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="648"/>
+        <location filename="../common/lc_commands.cpp" line="682"/>
         <source>Zoom out</source>
         <translation>Dézoomer</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="655"/>
+        <location filename="../common/lc_commands.cpp" line="689"/>
         <source>Fit all pieces in current the view (hold the CTRL key down to zoom all views)</source>
         <translation>Zoomer pour voir toutes les pièces dans la vue courante (maintenir la touche Ctrl enfoncée pour zoomer toutes les vues)</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="662"/>
+        <location filename="../common/lc_commands.cpp" line="696"/>
         <source>Rotate view so selected pieces are at center</source>
         <translation>Tourner la vue pour que les pièces sélectionnées soient au centre</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="669"/>
+        <location filename="../common/lc_commands.cpp" line="703"/>
+        <source>Move the current view forward</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="710"/>
+        <source>Move the current view backward</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="717"/>
+        <source>Move the current view to the left</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="724"/>
+        <source>Move the current view to the right</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="731"/>
+        <source>Move the current view up</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="738"/>
+        <source>Move the current view down</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="745"/>
         <source>View model from the front</source>
         <translation>Voir le modèle de face</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="676"/>
+        <location filename="../common/lc_commands.cpp" line="752"/>
         <source>View model from the back</source>
         <translation>Voir le modèle de dos</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="683"/>
+        <location filename="../common/lc_commands.cpp" line="759"/>
         <source>View model from the top</source>
         <translation>Voir le modèle du dessus</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="690"/>
+        <location filename="../common/lc_commands.cpp" line="766"/>
         <source>View model from the bottom</source>
         <translation>Voir le modèle du dessous</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="697"/>
+        <location filename="../common/lc_commands.cpp" line="773"/>
         <source>View model from the left</source>
         <translation>Voir le modèle de la gauche</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="704"/>
+        <location filename="../common/lc_commands.cpp" line="780"/>
         <source>View model from the right</source>
         <translation>Voir le modèle de la droite</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="711"/>
+        <location filename="../common/lc_commands.cpp" line="787"/>
         <source>View model from the default position</source>
         <translation>Voir le modèle depuis la position par défaut</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="718"/>
+        <location filename="../common/lc_commands.cpp" line="794"/>
         <source>Do not use a camera</source>
         <translation>Ne pas utiler de caméra</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="725"/>
-        <location filename="../common/lc_commands.cpp" line="732"/>
-        <location filename="../common/lc_commands.cpp" line="739"/>
-        <location filename="../common/lc_commands.cpp" line="746"/>
-        <location filename="../common/lc_commands.cpp" line="753"/>
-        <location filename="../common/lc_commands.cpp" line="760"/>
-        <location filename="../common/lc_commands.cpp" line="767"/>
-        <location filename="../common/lc_commands.cpp" line="774"/>
-        <location filename="../common/lc_commands.cpp" line="781"/>
-        <location filename="../common/lc_commands.cpp" line="788"/>
-        <location filename="../common/lc_commands.cpp" line="795"/>
-        <location filename="../common/lc_commands.cpp" line="802"/>
-        <location filename="../common/lc_commands.cpp" line="809"/>
-        <location filename="../common/lc_commands.cpp" line="816"/>
-        <location filename="../common/lc_commands.cpp" line="823"/>
-        <location filename="../common/lc_commands.cpp" line="830"/>
+        <location filename="../common/lc_commands.cpp" line="801"/>
+        <location filename="../common/lc_commands.cpp" line="808"/>
+        <location filename="../common/lc_commands.cpp" line="815"/>
+        <location filename="../common/lc_commands.cpp" line="822"/>
+        <location filename="../common/lc_commands.cpp" line="829"/>
+        <location filename="../common/lc_commands.cpp" line="836"/>
+        <location filename="../common/lc_commands.cpp" line="843"/>
+        <location filename="../common/lc_commands.cpp" line="850"/>
+        <location filename="../common/lc_commands.cpp" line="857"/>
+        <location filename="../common/lc_commands.cpp" line="864"/>
+        <location filename="../common/lc_commands.cpp" line="871"/>
+        <location filename="../common/lc_commands.cpp" line="878"/>
+        <location filename="../common/lc_commands.cpp" line="885"/>
+        <location filename="../common/lc_commands.cpp" line="892"/>
+        <location filename="../common/lc_commands.cpp" line="899"/>
+        <location filename="../common/lc_commands.cpp" line="906"/>
         <source>Use this camera</source>
         <translation>Utiliser cette caméra</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="837"/>
+        <location filename="../common/lc_commands.cpp" line="913"/>
         <source>Reset views to their default positions</source>
         <translation>Réinitialiser les vues à leur position par défaut</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="844"/>
+        <location filename="../common/lc_commands.cpp" line="920"/>
         <source>Go to the first step of the model</source>
         <translation>Aller à la première étape du modèle</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="851"/>
+        <location filename="../common/lc_commands.cpp" line="927"/>
         <source>Go to the previous step</source>
         <translation>Aller à l’étape précédente</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="858"/>
+        <location filename="../common/lc_commands.cpp" line="934"/>
         <source>Go to the next step</source>
         <translation>Aller à l’étape suivante</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="865"/>
+        <location filename="../common/lc_commands.cpp" line="941"/>
         <source>Go to the last step of the model</source>
         <translation>Aller à la dernière étape du modèle</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="872"/>
+        <location filename="../common/lc_commands.cpp" line="948"/>
+        <location filename="../common/lc_commands.cpp" line="1508"/>
         <source>Insert new step</source>
         <translation>Insérer une nouvelle étape</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="879"/>
-        <source>Delete current step</source>
-        <translation>Supprimer l’étape courante</translation>
+        <location filename="../common/lc_commands.cpp" line="955"/>
+        <location filename="../common/lc_commands.cpp" line="1515"/>
+        <source>Remove current step</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="886"/>
+        <location filename="../common/lc_commands.cpp" line="1081"/>
+        <source>Remove the selected control point</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1186"/>
+        <source>View the model referenced by the selected piece</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1193"/>
+        <source>Move the selected pieces to a new model and replace them with a reference to the model</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1284"/>
+        <source>Create a new submodel</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1291"/>
+        <source>Display the properties of the current submodel</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1298"/>
+        <source>Switch to the submodel corresponding to the piece with focus</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1305"/>
+        <source>Show a list of all submodels</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1312"/>
+        <location filename="../common/lc_commands.cpp" line="1319"/>
+        <location filename="../common/lc_commands.cpp" line="1326"/>
+        <location filename="../common/lc_commands.cpp" line="1333"/>
+        <location filename="../common/lc_commands.cpp" line="1340"/>
+        <location filename="../common/lc_commands.cpp" line="1347"/>
+        <location filename="../common/lc_commands.cpp" line="1354"/>
+        <location filename="../common/lc_commands.cpp" line="1361"/>
+        <location filename="../common/lc_commands.cpp" line="1368"/>
+        <location filename="../common/lc_commands.cpp" line="1375"/>
+        <location filename="../common/lc_commands.cpp" line="1382"/>
+        <location filename="../common/lc_commands.cpp" line="1389"/>
+        <location filename="../common/lc_commands.cpp" line="1396"/>
+        <location filename="../common/lc_commands.cpp" line="1403"/>
+        <location filename="../common/lc_commands.cpp" line="1410"/>
+        <location filename="../common/lc_commands.cpp" line="1417"/>
+        <location filename="../common/lc_commands.cpp" line="1424"/>
+        <location filename="../common/lc_commands.cpp" line="1431"/>
+        <location filename="../common/lc_commands.cpp" line="1438"/>
+        <location filename="../common/lc_commands.cpp" line="1445"/>
+        <location filename="../common/lc_commands.cpp" line="1452"/>
+        <location filename="../common/lc_commands.cpp" line="1459"/>
+        <location filename="../common/lc_commands.cpp" line="1466"/>
+        <location filename="../common/lc_commands.cpp" line="1473"/>
+        <source>Switch to this submodel</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1487"/>
+        <source>Open LeoCAD&apos;s bug report form on your default web browser</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1522"/>
+        <source>Move the selected parts into this step</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1529"/>
+        <source>View the model at this point in the timeline</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Delete current step</source>
+        <translation type="vanished">Supprimer l’étape courante</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="962"/>
         <source>Toggle adding new animation keys</source>
         <translation>Basculer l’ajout de nouvelles clés d’animation</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="893"/>
+        <location filename="../common/lc_commands.cpp" line="969"/>
         <source>Split the current view horizontally</source>
         <translation>Scinder la vue courante horizontalement</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="900"/>
+        <location filename="../common/lc_commands.cpp" line="976"/>
         <source>Split the current view vertically</source>
         <translation>Scinder la vue courante verticalement</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="907"/>
+        <location filename="../common/lc_commands.cpp" line="983"/>
         <source>Remove the current view</source>
         <translation>Supprimer la vue courante</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="914"/>
+        <location filename="../common/lc_commands.cpp" line="990"/>
         <source>Reset all views</source>
         <translation>Réinitialiser toutes les vues</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="921"/>
+        <location filename="../common/lc_commands.cpp" line="997"/>
         <source>Toggle fullscreen mode</source>
         <translation>Basculer en mode plein-écran/fenêtre</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="928"/>
+        <location filename="../common/lc_commands.cpp" line="1004"/>
+        <source>Display the scene as wireframe</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1011"/>
+        <source>Display the scene without any shading or lights</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1018"/>
+        <source>Display the scene with the default lights</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1025"/>
         <source>Set the current camera to use a perspective projection</source>
         <translation>Utiliser une projection perspective pour la caméra courante</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="935"/>
+        <location filename="../common/lc_commands.cpp" line="1032"/>
         <source>Set the current camera to use an orthographic projection</source>
         <translation>Utiliser une projection orthographique pour la caméra courante</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="942"/>
+        <location filename="../common/lc_commands.cpp" line="1039"/>
         <source>Add a new piece to the model</source>
         <translation>Ajouter une nouvelle pièce au modèle</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="949"/>
+        <location filename="../common/lc_commands.cpp" line="1046"/>
         <source>Delete selected objects</source>
         <translation>Supprimer les objets sélectionnés</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="956"/>
+        <location filename="../common/lc_commands.cpp" line="1053"/>
+        <source>Create a copy of the selected pieces</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1060"/>
         <source>Reset the pivot point of the selected pieces to their origin</source>
         <translation>Réinitialiser le point de pivot des pièces sélectionnées à leur origine</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="963"/>
+        <location filename="../common/lc_commands.cpp" line="1067"/>
+        <source>Remove all key frames from the selected pieces</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1074"/>
         <source>Insert a new control point</source>
         <translation>Insérer un nouveau point de contrôle</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="970"/>
         <source>Remove the currently selected control point</source>
-        <translation>Supprimer le point contrôle sélectionné</translation>
+        <translation type="vanished">Supprimer le point contrôle sélectionné</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="977"/>
-        <location filename="../common/lc_commands.cpp" line="984"/>
+        <location filename="../common/lc_commands.cpp" line="1088"/>
+        <location filename="../common/lc_commands.cpp" line="1095"/>
         <source>Move selected objects along the X axis</source>
         <translation>Déplacer les objets sélectionnés sur l’axe X</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="991"/>
-        <location filename="../common/lc_commands.cpp" line="998"/>
+        <location filename="../common/lc_commands.cpp" line="1102"/>
+        <location filename="../common/lc_commands.cpp" line="1109"/>
         <source>Move selected objects along the Y axis</source>
         <translation>Déplacer les objets sélectionnés sur l’axe Y</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1005"/>
-        <location filename="../common/lc_commands.cpp" line="1012"/>
+        <location filename="../common/lc_commands.cpp" line="1116"/>
+        <location filename="../common/lc_commands.cpp" line="1123"/>
         <source>Move selected objects along the Z axis</source>
         <translation>Déplacer les objets sélectionnés sur l’axe Z</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1019"/>
-        <location filename="../common/lc_commands.cpp" line="1026"/>
+        <location filename="../common/lc_commands.cpp" line="1130"/>
+        <location filename="../common/lc_commands.cpp" line="1137"/>
         <source>Rotate selected objects along the X axis</source>
         <translation>Tourner les objets sélections suivant l’axe X</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1033"/>
-        <location filename="../common/lc_commands.cpp" line="1040"/>
+        <location filename="../common/lc_commands.cpp" line="1144"/>
+        <location filename="../common/lc_commands.cpp" line="1151"/>
         <source>Rotate selected objects along the Y axis</source>
         <translation>Tourner les objets sélections suivant l’axe Y</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1047"/>
-        <location filename="../common/lc_commands.cpp" line="1054"/>
+        <location filename="../common/lc_commands.cpp" line="1158"/>
+        <location filename="../common/lc_commands.cpp" line="1165"/>
         <source>Rotate selected objects along the Z axis</source>
         <translation>Tourner les objets sélections suivant l’axe Z</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1061"/>
+        <location filename="../common/lc_commands.cpp" line="1172"/>
         <source>Add a new minifig to the model</source>
         <translation>Ajouter une nouvelle minifig au modèle</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1068"/>
+        <location filename="../common/lc_commands.cpp" line="1179"/>
         <source>Make copies of the selected pieces</source>
         <translation>Faire des copies des pièces sélectionnées</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1075"/>
         <source>View the model referenced by the currently selected piece</source>
-        <translation>Voir le modèle référencé par la pièce sélectionnée</translation>
+        <translation type="vanished">Voir le modèle référencé par la pièce sélectionnée</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1082"/>
         <source>Move the currently selected pieces to a new model and replaces them with a reference to the model</source>
-        <translation>Déplacer les pièces sélectionnées vers un nouveau modèle et les remplacer par une référence au nouveau modèle</translation>
+        <translation type="vanished">Déplacer les pièces sélectionnées vers un nouveau modèle et les remplacer par une référence au nouveau modèle</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1089"/>
+        <location filename="../common/lc_commands.cpp" line="1200"/>
         <source>Insert the contents of the selected model references into the current model</source>
         <translation>Insérer le contenu des modèles sélectionnés dans le modèle courant</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1096"/>
+        <location filename="../common/lc_commands.cpp" line="1207"/>
         <source>Group selected pieces together</source>
         <translation>Grouper les pièces sélectionnées</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1103"/>
+        <location filename="../common/lc_commands.cpp" line="1214"/>
         <source>Ungroup selected group</source>
         <translation>Dégrouper le groupe sélectionné</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1110"/>
+        <location filename="../common/lc_commands.cpp" line="1221"/>
         <source>Add focused piece to selected group</source>
         <translation>Ajouter la pièce qui a le focus au groupe sélectionné</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1117"/>
+        <location filename="../common/lc_commands.cpp" line="1228"/>
         <source>Remove focused piece from group</source>
         <translation>Enlever du groupe la pièce qui a le focus</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1124"/>
+        <location filename="../common/lc_commands.cpp" line="1235"/>
         <source>Edit groups</source>
         <translation>Éditer les groupes</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1131"/>
+        <location filename="../common/lc_commands.cpp" line="1242"/>
         <source>Hide selected objects</source>
         <translation>Cacher les objets sélectionnés</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1138"/>
+        <location filename="../common/lc_commands.cpp" line="1249"/>
         <source>Hide objects that are not selected</source>
         <translation>Cacher les objets qui ne sont pas sélectionnés</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1145"/>
+        <location filename="../common/lc_commands.cpp" line="1256"/>
         <source>Show hidden objects that are selected</source>
         <translation>Montrer les objets cachés qui sont sélectionnés</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1152"/>
+        <location filename="../common/lc_commands.cpp" line="1263"/>
         <source>Show all hidden objects</source>
         <translation>Montrer les objets cachés</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1159"/>
+        <location filename="../common/lc_commands.cpp" line="1270"/>
         <source>Show selected pieces one step earlier</source>
         <translation>Montrer les pièces sélectionnées une étape plus tôt</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1166"/>
+        <location filename="../common/lc_commands.cpp" line="1277"/>
         <source>Show selected pieces one step later</source>
         <translation>Montrer les pièces sélectionnées une étape plus tard</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1173"/>
         <source>Add a new model to the project</source>
-        <translation>Ajouter un nouveau modèle au projet</translation>
+        <translation type="vanished">Ajouter un nouveau modèle au projet</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1180"/>
         <source>Display the properties of the current model</source>
-        <translation>Voir les propriétés du modèle courant</translation>
+        <translation type="vanished">Voir les propriétés du modèle courant</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1187"/>
         <source>Switch to the model corresponding to the piece with focus</source>
-        <translation>Basculer vers le modèle correspondant à la pièce qui a le focus</translation>
+        <translation type="vanished">Basculer vers le modèle correspondant à la pièce qui a le focus</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1194"/>
         <source>Show a list of all models in this project</source>
-        <translation>Voir la liste de tous les modèles de ce projet</translation>
+        <translation type="vanished">Voir la liste de tous les modèles de ce projet</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1201"/>
-        <location filename="../common/lc_commands.cpp" line="1208"/>
-        <location filename="../common/lc_commands.cpp" line="1215"/>
-        <location filename="../common/lc_commands.cpp" line="1222"/>
-        <location filename="../common/lc_commands.cpp" line="1229"/>
-        <location filename="../common/lc_commands.cpp" line="1236"/>
-        <location filename="../common/lc_commands.cpp" line="1243"/>
-        <location filename="../common/lc_commands.cpp" line="1250"/>
-        <location filename="../common/lc_commands.cpp" line="1257"/>
-        <location filename="../common/lc_commands.cpp" line="1264"/>
-        <location filename="../common/lc_commands.cpp" line="1271"/>
-        <location filename="../common/lc_commands.cpp" line="1278"/>
-        <location filename="../common/lc_commands.cpp" line="1285"/>
-        <location filename="../common/lc_commands.cpp" line="1292"/>
-        <location filename="../common/lc_commands.cpp" line="1299"/>
-        <location filename="../common/lc_commands.cpp" line="1306"/>
-        <location filename="../common/lc_commands.cpp" line="1313"/>
-        <location filename="../common/lc_commands.cpp" line="1320"/>
-        <location filename="../common/lc_commands.cpp" line="1327"/>
-        <location filename="../common/lc_commands.cpp" line="1334"/>
-        <location filename="../common/lc_commands.cpp" line="1341"/>
-        <location filename="../common/lc_commands.cpp" line="1348"/>
-        <location filename="../common/lc_commands.cpp" line="1355"/>
-        <location filename="../common/lc_commands.cpp" line="1362"/>
         <source>Switch to this model</source>
-        <translation>Basculer vers ce modèle</translation>
+        <translation type="vanished">Basculer vers ce modèle</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1369"/>
+        <location filename="../common/lc_commands.cpp" line="1480"/>
         <source>Open LeoCAD&apos;s home page on the internet using your default web browser</source>
         <translation>Ouvrir la page d’accueil de LeoCAD avec votre navigateur web par défaut</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1376"/>
         <source>Send an e-mail message for help or support using your default e-mail client</source>
-        <translation>Envoyer un courriel de soutien ou de demande d’aide avec votre client de messagerie par défaut</translation>
+        <translation type="vanished">Envoyer un courriel de soutien ou de demande d’aide avec votre client de messagerie par défaut</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1383"/>
+        <location filename="../common/lc_commands.cpp" line="1494"/>
         <source>Check if a newer LeoCAD version or parts library has been released</source>
         <translation>Vérifier si une nouvelle version de LeoCAD ou de la bibliothèque de pièces est disponible</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1390"/>
+        <location filename="../common/lc_commands.cpp" line="1501"/>
         <source>Display program version number and system information</source>
         <translation>Voir la version du programme et des informations sur le système</translation>
     </message>
@@ -2192,16 +3746,15 @@
 <context>
     <name>lcApplication</name>
     <message>
-        <location filename="../common/lc_application.cpp" line="315"/>
-        <location filename="../common/lc_application.cpp" line="318"/>
-        <location filename="../common/lc_application.cpp" line="496"/>
-        <location filename="../common/lc_application.cpp" line="498"/>
-        <location filename="../common/lc_application.cpp" line="500"/>
+        <location filename="../common/lc_application.cpp" line="379"/>
+        <location filename="../common/lc_application.cpp" line="626"/>
+        <location filename="../common/lc_application.cpp" line="628"/>
+        <location filename="../common/lc_application.cpp" line="630"/>
         <source>LeoCAD</source>
         <translation>LeoCAD</translation>
     </message>
     <message>
-        <location filename="../common/lc_application.cpp" line="315"/>
+        <location filename="../common/lc_application.cpp" line="374"/>
         <source>LeoCAD could not find a compatible Parts Library so only a small number of parts will be available.
 
 Please visit http://www.leocad.org for information on how to download and install a library.</source>
@@ -2210,7 +3763,7 @@ Please visit http://www.leocad.org for information on how to download and instal
 SVP visitez http://www.leocad.org pour apprendre comment télécharger et installer une bibliothèque.</translation>
     </message>
     <message>
-        <location filename="../common/lc_application.cpp" line="318"/>
+        <location filename="../common/lc_application.cpp" line="376"/>
         <source>LeoCAD could not load Parts Library.
 
 Please visit http://www.leocad.org for information on how to download and install a library.</source>
@@ -2219,17 +3772,17 @@ Please visit http://www.leocad.org for information on how to download and instal
 SVP visitez http://www.leocad.org pour apprendre comment télécharger et installer une bibliothèque.</translation>
     </message>
     <message>
-        <location filename="../common/lc_application.cpp" line="496"/>
+        <location filename="../common/lc_application.cpp" line="626"/>
         <source>Parts library and Anti-aliasing changes will only take effect the next time you start LeoCAD.</source>
         <translation>Les changements concernant la bibliothèque de pièces et l’anti-aliasing ne prendront effet qu’au prochain lancement de LeoCAD.</translation>
     </message>
     <message>
-        <location filename="../common/lc_application.cpp" line="498"/>
+        <location filename="../common/lc_application.cpp" line="628"/>
         <source>Parts library changes will only take effect the next time you start LeoCAD.</source>
         <translation>Les changement concernant la bibliothèque de pièces ne prendront effet qu’au prochain lancement de LeoCAD.</translation>
     </message>
     <message>
-        <location filename="../common/lc_application.cpp" line="500"/>
+        <location filename="../common/lc_application.cpp" line="630"/>
         <source>Anti-aliasing changes will only take effect the next time you start LeoCAD.</source>
         <translation>Les changement concernant l’anti-aliasing ne prendront effet qu’au prochain lancement de LeoCAD.</translation>
     </message>
@@ -2237,379 +3790,467 @@ SVP visitez http://www.leocad.org pour apprendre comment télécharger et instal
 <context>
     <name>lcContext</name>
     <message>
-        <location filename="../common/lc_context.cpp" line="507"/>
         <source>Error</source>
-        <translation>Erreur</translation>
+        <translation type="vanished">Erreur</translation>
     </message>
     <message>
-        <location filename="../common/lc_context.cpp" line="507"/>
         <source>Error writing to file &apos;%1&apos;:
 %2</source>
-        <translation>Erreur en écrivant le fichier « %1 » :
+        <translation type="vanished">Erreur en écrivant le fichier « %1 » :
 %2</translation>
     </message>
 </context>
 <context>
     <name>lcMainWindow</name>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="109"/>
         <source>New Project</source>
-        <translation>Nouveau projet</translation>
+        <translation type="vanished">Nouveau projet</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="110"/>
-        <location filename="../common/lc_mainwindow.cpp" line="1872"/>
         <source>Open Project</source>
-        <translation>Ouvrir un projet</translation>
+        <translation type="vanished">Ouvrir un projet</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="111"/>
-        <location filename="../common/lc_mainwindow.cpp" line="1945"/>
-        <location filename="../common/lc_mainwindow.cpp" line="1972"/>
         <source>Save Project</source>
-        <translation>Enregistrer le projet</translation>
+        <translation type="vanished">Enregistrer le projet</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="304"/>
+        <location filename="../common/lc_mainwindow.cpp" line="367"/>
         <source>Transform</source>
         <translation>Transformation</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="311"/>
+        <location filename="../common/lc_mainwindow.cpp" line="374"/>
         <source>C&amp;ameras</source>
         <translation>C&amp;améras</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="329"/>
+        <location filename="../common/lc_mainwindow.cpp" line="419"/>
         <source>&amp;File</source>
         <translation>&amp;Fichier</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="337"/>
+        <location filename="../common/lc_mainwindow.cpp" line="432"/>
         <source>&amp;Export</source>
         <translation>&amp;Exporter</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="356"/>
+        <location filename="../common/lc_mainwindow.cpp" line="453"/>
         <source>&amp;Edit</source>
         <translation>&amp;Éditer</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="375"/>
+        <location filename="../common/lc_mainwindow.cpp" line="475"/>
         <source>&amp;View</source>
         <translation>&amp;Vue</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="320"/>
+        <location filename="../common/lc_mainwindow.cpp" line="383"/>
         <source>&amp;Viewpoints</source>
         <translation>&amp;Points de vue</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="382"/>
+        <location filename="../common/lc_mainwindow.cpp" line="392"/>
         <source>Projection</source>
         <translation>Projection</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="385"/>
+        <location filename="../common/lc_mainwindow.cpp" line="484"/>
         <source>Ste&amp;p</source>
         <translation>Éta&amp;pe</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="399"/>
+        <location filename="../common/lc_mainwindow.cpp" line="498"/>
         <source>T&amp;oolbars</source>
         <translation>Barres d’&amp;outils</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="409"/>
+        <location filename="../common/lc_mainwindow.cpp" line="509"/>
         <source>&amp;Piece</source>
         <translation>&amp;Pièce</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="432"/>
         <source>&amp;Model</source>
-        <translation>&amp;Modèle</translation>
+        <translation type="vanished">&amp;Modèle</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="440"/>
+        <location filename="../common/lc_mainwindow.cpp" line="540"/>
         <source>&amp;Help</source>
         <translation>&amp;Aide</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="452"/>
-        <location filename="../common/lc_mainwindow.cpp" line="458"/>
         <source>Lock Menu</source>
-        <translation>Menu bloquer</translation>
+        <translation type="vanished">Menu bloquer</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="459"/>
         <source>Toggle mouse movement on specific axes</source>
-        <translation>(Dé)Bloquer le déplacement de la souris sur des axes précis</translation>
+        <translation type="vanished">(Dé)Bloquer le déplacement de la souris sur des axes précis</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="463"/>
+        <location filename="../common/lc_mainwindow.cpp" line="563"/>
         <source>Snap XY</source>
         <translation>Pas XY</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="467"/>
+        <location filename="../common/lc_mainwindow.cpp" line="567"/>
         <source>Snap Z</source>
         <translation>Pas Z</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="471"/>
+        <location filename="../common/lc_mainwindow.cpp" line="571"/>
         <source>Snap Menu</source>
         <translation>Menu pas</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="477"/>
+        <location filename="../common/lc_mainwindow.cpp" line="577"/>
         <source>Movement Snap</source>
         <translation>Pas pour les déplacements</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="478"/>
+        <location filename="../common/lc_mainwindow.cpp" line="578"/>
         <source>Snap translations to fixed intervals</source>
         <translation>Utiliser un pas donné pour les translations</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="482"/>
+        <location filename="../common/lc_mainwindow.cpp" line="582"/>
         <source>Snap Angle Menu</source>
         <translation>Menu pas pour les angles</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="488"/>
+        <location filename="../common/lc_mainwindow.cpp" line="588"/>
         <source>Rotation Snap</source>
         <translation>Pas pour les rotations</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="489"/>
+        <location filename="../common/lc_mainwindow.cpp" line="589"/>
         <source>Snap rotations to fixed intervals</source>
         <translation>Utiliser un pas fixe pour les rotations</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="493"/>
+        <location filename="../common/lc_mainwindow.cpp" line="593"/>
         <source>Standard</source>
         <translation>Standard</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="538"/>
+        <location filename="../common/lc_mainwindow.cpp" line="401"/>
+        <location filename="../common/lc_mainwindow.cpp" line="618"/>
         <source>Tools</source>
         <translation>Outils</translation>
     </message>
     <message>
+        <location filename="../common/lc_mainwindow.cpp" line="161"/>
+        <source>New Model</source>
+        <translation type="unfinished">Nouveau modèle</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_mainwindow.cpp" line="162"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2111"/>
+        <source>Open Model</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_mainwindow.cpp" line="163"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2228"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2257"/>
+        <source>Save Model</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_mainwindow.cpp" line="396"/>
+        <source>Sh&amp;ading</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_mainwindow.cpp" line="427"/>
+        <source>&amp;Import</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_mainwindow.cpp" line="532"/>
+        <source>Sub&amp;model</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_mainwindow.cpp" line="554"/>
         <location filename="../common/lc_mainwindow.cpp" line="558"/>
+        <source>Selection Mode</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_mainwindow.cpp" line="559"/>
+        <source>Change selection mode</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_mainwindow.cpp" line="610"/>
         <source>Time</source>
         <translation>Temps</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="569"/>
+        <location filename="../common/lc_mainwindow.cpp" line="639"/>
         <source>Parts</source>
         <translation>Pièces</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="630"/>
+        <location filename="../common/lc_mainwindow.cpp" line="645"/>
+        <source>Colors</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_mainwindow.cpp" line="663"/>
         <source>Properties</source>
         <translation>Propriétés</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="639"/>
+        <location filename="../common/lc_mainwindow.cpp" line="697"/>
         <source>Timeline</source>
         <translation>Ligne temporelle</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="1595"/>
+        <location filename="../common/lc_mainwindow.cpp" line="786"/>
+        <source>Close Other Tabs</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_mainwindow.cpp" line="788"/>
+        <source>Reset Views</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_mainwindow.cpp" line="862"/>
+        <source>The file &apos;%1&apos; has been modified by another application, do you want to reload it?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_mainwindow.cpp" line="866"/>
+        <source>File Changed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_mainwindow.cpp" line="1814"/>
         <source>%1 (ID: %2)</source>
         <translation>%1 (ID : %2)</translation>
     </message>
+    <message numerus="yes">
+        <location filename="../common/lc_mainwindow.cpp" line="1820"/>
+        <source>%n Object(s) selected</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="1602"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2143"/>
+        <source>Merge Model</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_mainwindow.cpp" line="2159"/>
+        <source>Merged 1 submodel.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_mainwindow.cpp" line="2161"/>
+        <source>Merged %1 submodels.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_mainwindow.cpp" line="2177"/>
+        <source>Import</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_mainwindow.cpp" line="2177"/>
+        <source>LEGO Diginal Designer Files (*.lxf);;All Files (*.*)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>1 Object selected</source>
-        <translation>1 objet sélectionné</translation>
+        <translation type="vanished">1 objet sélectionné</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="1604"/>
         <source>%1 Objects selected</source>
-        <translation>%1 objets sélectionnés</translation>
+        <translation type="vanished">%1 objets sélectionnés</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="1608"/>
+        <location filename="../common/lc_mainwindow.cpp" line="1824"/>
         <source> - %1 (ID: %2)</source>
         <translation> - %1 (ID : %2)</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="1612"/>
+        <location filename="../common/lc_mainwindow.cpp" line="1828"/>
         <source> in group &apos;%1&apos;</source>
         <translation> dans le groupe « %1 »</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="1649"/>
+        <location filename="../common/lc_mainwindow.cpp" line="1865"/>
         <source>Step %1</source>
         <translation>Étape %1</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="1678"/>
+        <location filename="../common/lc_mainwindow.cpp" line="1891"/>
         <source> M: %1 %2 R: %3 </source>
         <translation> M : %1 %2 R : %3 </translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="1694"/>
+        <location filename="../common/lc_mainwindow.cpp" line="1907"/>
         <source>&amp;Undo %1</source>
         <translation>Ann&amp;uler %1</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="1699"/>
+        <location filename="../common/lc_mainwindow.cpp" line="1912"/>
         <source>&amp;Undo</source>
         <translation>Ann&amp;uler</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="1705"/>
+        <location filename="../common/lc_mainwindow.cpp" line="1918"/>
         <source>&amp;Redo %1</source>
         <translation>&amp;Refaire %1</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="1710"/>
+        <location filename="../common/lc_mainwindow.cpp" line="1923"/>
         <source>&amp;Redo</source>
         <translation>&amp;Refaire</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="1872"/>
-        <location filename="../common/lc_mainwindow.cpp" line="1902"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2111"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2143"/>
         <source>Supported Files (*.lcd *.ldr *.dat *.mpd);;All Files (*.*)</source>
         <translation>Fichiers pris en charge (*.lcd *.ldr *.dat *.mpd);;Tous les fichiers (*.*)</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="1889"/>
-        <location filename="../common/lc_mainwindow.cpp" line="1916"/>
-        <location filename="../common/lc_mainwindow.cpp" line="1918"/>
-        <location filename="../common/lc_mainwindow.cpp" line="1924"/>
+        <location filename="../common/lc_mainwindow.cpp" line="890"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2130"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2159"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2161"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2167"/>
         <source>LeoCAD</source>
         <translation>LeoCAD</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="1889"/>
-        <location filename="../common/lc_mainwindow.cpp" line="1924"/>
+        <location filename="../common/lc_mainwindow.cpp" line="890"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2130"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2167"/>
         <source>Error loading &apos;%1&apos;.</source>
         <translation>Erreur au chargement de « %1 ».</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="1902"/>
         <source>Merge Project</source>
-        <translation>Fusionner un projet</translation>
+        <translation type="vanished">Fusionner un projet</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="1916"/>
         <source>Merged 1 model.</source>
-        <translation>1 modèle fusionné.</translation>
+        <translation type="vanished">1 modèle fusionné.</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="1918"/>
         <source>Merged %1 models.</source>
-        <translation>%1 modèles fusionnés.</translation>
+        <translation type="vanished">%1 modèles fusionnés.</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="1943"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2226"/>
         <source>Supported Files (*.mpd);;All Files (*.*)</source>
         <translation>Fichiers pris en charge (*.mpd);;Tous les fichiers (*.*)</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="1943"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2226"/>
         <source>Supported Files (*.ldr *.dat *.mpd);;All Files (*.*)</source>
         <translation>Fichiers pris en charge (*.ldr *.dat *.mpd);;Tous les fichiers (*.*)</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="1953"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2238"/>
         <source>Error</source>
         <translation>Erreur</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="1953"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2238"/>
         <source>Saving files in LCD format is no longer supported, please use the LDR or MPD formats instead.</source>
         <translation>Enregistrer les fichiers sous le format LCD n’est plus possible, SVP utiliser les formats LDR ou MPD à la place.</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="1972"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2257"/>
         <source>Save changes to &apos;%1&apos;?</source>
         <translation>Enregistrer les modifications à « %1 » ?</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.h" line="124"/>
-        <location filename="../common/lc_mainwindow.h" line="130"/>
+        <location filename="../common/lc_mainwindow.h" line="159"/>
+        <location filename="../common/lc_mainwindow.h" line="165"/>
         <source>0</source>
         <translation>0</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.h" line="124"/>
-        <location filename="../common/lc_mainwindow.h" line="130"/>
+        <location filename="../common/lc_mainwindow.h" line="159"/>
+        <location filename="../common/lc_mainwindow.h" line="165"/>
         <source>1/20S</source>
         <translation>1/20T</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.h" line="124"/>
-        <location filename="../common/lc_mainwindow.h" line="130"/>
+        <location filename="../common/lc_mainwindow.h" line="159"/>
+        <location filename="../common/lc_mainwindow.h" line="165"/>
         <source>1/4S</source>
         <translation>1/4T</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.h" line="124"/>
-        <location filename="../common/lc_mainwindow.h" line="130"/>
+        <location filename="../common/lc_mainwindow.h" line="159"/>
+        <location filename="../common/lc_mainwindow.h" line="165"/>
         <source>1F</source>
         <translation>1P</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.h" line="124"/>
-        <location filename="../common/lc_mainwindow.h" line="130"/>
+        <location filename="../common/lc_mainwindow.h" line="159"/>
+        <location filename="../common/lc_mainwindow.h" line="165"/>
         <source>1/2S</source>
         <translation>1/2T</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.h" line="124"/>
-        <location filename="../common/lc_mainwindow.h" line="130"/>
+        <location filename="../common/lc_mainwindow.h" line="159"/>
+        <location filename="../common/lc_mainwindow.h" line="165"/>
         <source>1S</source>
         <translation>1T</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.h" line="124"/>
+        <location filename="../common/lc_mainwindow.h" line="159"/>
         <source>2S</source>
         <translation>2T</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.h" line="124"/>
+        <location filename="../common/lc_mainwindow.h" line="159"/>
         <source>3S</source>
         <translation>3T</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.h" line="124"/>
+        <location filename="../common/lc_mainwindow.h" line="159"/>
         <source>4S</source>
         <translation>4T</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.h" line="124"/>
+        <location filename="../common/lc_mainwindow.h" line="159"/>
         <source>8S</source>
         <translation>8T</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.h" line="125"/>
-        <location filename="../common/lc_mainwindow.h" line="131"/>
-        <location filename="../common/lc_mainwindow.h" line="136"/>
+        <location filename="../common/lc_mainwindow.h" line="160"/>
+        <location filename="../common/lc_mainwindow.h" line="166"/>
+        <location filename="../common/lc_mainwindow.h" line="171"/>
         <source>None</source>
         <translation>Aucun</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.h" line="130"/>
+        <location filename="../common/lc_mainwindow.h" line="165"/>
         <source>1B</source>
         <translation>1B</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.h" line="130"/>
+        <location filename="../common/lc_mainwindow.h" line="165"/>
         <source>2B</source>
         <translation>2B</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.h" line="130"/>
+        <location filename="../common/lc_mainwindow.h" line="165"/>
         <source>4B</source>
         <translation>4B</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.h" line="130"/>
+        <location filename="../common/lc_mainwindow.h" line="165"/>
         <source>8B</source>
         <translation>8B</translation>
     </message>
@@ -2617,198 +4258,362 @@ SVP visitez http://www.leocad.org pour apprendre comment télécharger et instal
 <context>
     <name>lcModel</name>
     <message>
-        <location filename="../common/lc_model.cpp" line="994"/>
+        <location filename="../common/lc_model.cpp" line="1150"/>
         <source>Pasting</source>
         <translation>Collage</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="1153"/>
-        <location filename="../common/lc_model.cpp" line="1497"/>
-        <location filename="../common/lc_model.cpp" line="2217"/>
-        <location filename="../common/lc_model.cpp" line="3793"/>
-        <location filename="../common/lc_model.cpp" line="3810"/>
-        <location filename="../common/lc_model.cpp" line="3826"/>
+        <location filename="../common/lc_model.cpp" line="1369"/>
+        <location filename="../common/lc_model.cpp" line="1710"/>
+        <location filename="../common/lc_model.cpp" line="2435"/>
+        <location filename="../common/lc_model.cpp" line="4142"/>
+        <location filename="../common/lc_model.cpp" line="4158"/>
+        <location filename="../common/lc_model.cpp" line="4194"/>
+        <location filename="../common/lc_model.cpp" line="4205"/>
         <source>LeoCAD</source>
         <translation>LeoCAD</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="1153"/>
+        <location filename="../common/lc_model.cpp" line="1369"/>
         <source>Error creating images.</source>
         <translation>Erreur à la création des images.</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="1430"/>
+        <location filename="../common/lc_model.cpp" line="1643"/>
         <source>Inserting Step</source>
         <translation>Insértion d’une étape</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="1450"/>
+        <location filename="../common/lc_model.cpp" line="1663"/>
         <source>Removing Step</source>
         <translation>Suppression d’une étape</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="1497"/>
-        <location filename="../common/lc_model.cpp" line="3810"/>
+        <location filename="../common/lc_model.cpp" line="1710"/>
+        <location filename="../common/lc_model.cpp" line="4194"/>
         <source>No pieces selected.</source>
         <translation>Aucune pièce sélectionnée.</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="1501"/>
+        <location filename="../common/lc_model.cpp" line="961"/>
+        <location filename="../common/lc_model.cpp" line="1714"/>
         <source>Group #</source>
         <translation>Groupe n°</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="1522"/>
-        <location filename="../common/lc_model.cpp" line="1599"/>
+        <location filename="../common/lc_model.cpp" line="1108"/>
+        <source>Cutting</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_model.cpp" line="1223"/>
+        <source>Duplicating Pieces</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_model.cpp" line="1392"/>
+        <source>Error</source>
+        <translation type="unfinished">Erreur</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_model.cpp" line="1392"/>
+        <source>Error writing to file &apos;%1&apos;:
+%2</source>
+        <translation type="unfinished">Erreur en écrivant le fichier « %1 » :
+%2</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_model.cpp" line="1735"/>
+        <location filename="../common/lc_model.cpp" line="1812"/>
         <source>Grouping</source>
         <translation>Grouper</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="1565"/>
-        <location filename="../common/lc_model.cpp" line="1616"/>
+        <location filename="../common/lc_model.cpp" line="1778"/>
+        <location filename="../common/lc_model.cpp" line="1829"/>
         <source>Ungrouping</source>
         <translation>Dégrouper</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="1667"/>
+        <location filename="../common/lc_model.cpp" line="1883"/>
         <source>Editing Groups</source>
         <translation>Éditer les groupes</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="2530"/>
+        <location filename="../common/lc_model.cpp" line="2086"/>
+        <source>Adding Piece</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_model.cpp" line="2128"/>
+        <source>Reseting Cameras</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_model.cpp" line="2170"/>
+        <source>Removing Key Frames</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_model.cpp" line="2187"/>
+        <location filename="../common/lc_model.cpp" line="2204"/>
+        <location filename="../common/lc_model.cpp" line="2246"/>
+        <location filename="../common/lc_model.cpp" line="2291"/>
+        <location filename="../common/lc_model.cpp" line="2326"/>
+        <source>Modifying</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_model.cpp" line="2386"/>
+        <source>New Model</source>
+        <translation type="unfinished">Nouveau modèle</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_model.cpp" line="2439"/>
+        <source>Inlining</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_model.cpp" line="2586"/>
+        <source>Moving</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_model.cpp" line="2652"/>
+        <source>Rotating</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_model.cpp" line="2678"/>
+        <source>Scaling</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_model.cpp" line="2749"/>
         <source>Setting Part</source>
         <translation>Modification de pièce</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="3456"/>
+        <location filename="../common/lc_model.cpp" line="3794"/>
         <source>New SpotLight</source>
         <translation>Nouvelle lumière projecteur</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="3461"/>
+        <location filename="../common/lc_model.cpp" line="3799"/>
         <source>New Camera</source>
         <translation>Nouvelle caméra</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="3468"/>
+        <location filename="../common/lc_model.cpp" line="3806"/>
         <source>Move</source>
         <translation>Déplacer</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="3472"/>
+        <location filename="../common/lc_model.cpp" line="3810"/>
         <source>Rotate</source>
         <translation>Tourner</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="3481"/>
-        <location filename="../common/lc_model.cpp" line="3707"/>
-        <location filename="../common/lc_model.cpp" line="3751"/>
-        <location filename="../common/lc_model.cpp" line="3761"/>
+        <location filename="../common/lc_model.cpp" line="3819"/>
+        <location filename="../common/lc_model.cpp" line="4045"/>
+        <location filename="../common/lc_model.cpp" line="4099"/>
+        <location filename="../common/lc_model.cpp" line="4109"/>
         <source>Zoom</source>
         <translation>Zoomer</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="3486"/>
+        <location filename="../common/lc_model.cpp" line="3824"/>
         <source>Pan</source>
         <translation>Glisser</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="3491"/>
+        <location filename="../common/lc_model.cpp" line="3829"/>
         <source>Orbit</source>
         <translation>Orbiter</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="3496"/>
+        <location filename="../common/lc_model.cpp" line="3834"/>
         <source>Roll</source>
         <translation>Pivoter</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="3518"/>
+        <location filename="../common/lc_model.cpp" line="3856"/>
         <source>Insert</source>
         <translation>Insérer</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="3528"/>
+        <location filename="../common/lc_model.cpp" line="3866"/>
         <source>New Light</source>
         <translation>Nouvelle lumière</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="3647"/>
+        <location filename="../common/lc_model.cpp" line="2138"/>
+        <location filename="../common/lc_model.cpp" line="3985"/>
         <source>Deleting</source>
         <translation>Suppression</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="2505"/>
-        <location filename="../common/lc_model.cpp" line="3661"/>
+        <location filename="../common/lc_model.cpp" line="2723"/>
+        <location filename="../common/lc_model.cpp" line="3999"/>
         <source>Painting</source>
         <translation>Peindre</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="2217"/>
+        <location filename="../common/lc_model.cpp" line="2435"/>
         <source>No models selected.</source>
         <translation>Aucun modèle sélectionné.</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="2562"/>
+        <location filename="../common/lc_model.cpp" line="2781"/>
         <source>Showing Pieces</source>
         <translation>Montre les pièces</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="2594"/>
+        <location filename="../common/lc_model.cpp" line="2813"/>
         <source>Hiding Pieces</source>
         <translation>Cache les pièces</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="2609"/>
-        <location filename="../common/lc_model.cpp" line="2634"/>
-        <location filename="../common/lc_model.cpp" line="2646"/>
+        <location filename="../common/lc_model.cpp" line="2828"/>
+        <location filename="../common/lc_model.cpp" line="2853"/>
+        <location filename="../common/lc_model.cpp" line="2865"/>
         <source>Editing Camera</source>
         <translation>Édite la caméra</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="2622"/>
+        <location filename="../common/lc_model.cpp" line="2841"/>
         <source>Changing FOV</source>
         <translation>Change le FOV</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="2658"/>
+        <location filename="../common/lc_model.cpp" line="2877"/>
         <source>Renaming Camera</source>
         <translation>Renomme la caméra</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="3730"/>
+        <location filename="../common/lc_model.cpp" line="4068"/>
         <source>Look At</source>
         <translation>Viser le modèle</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="3786"/>
+        <location filename="../common/lc_model.cpp" line="4078"/>
+        <source>Moving Camera</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_model.cpp" line="4135"/>
         <source>Changing Properties</source>
         <translation>Change les propriétés</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="3793"/>
+        <location filename="../common/lc_model.cpp" line="4142"/>
+        <location filename="../common/lc_model.cpp" line="4158"/>
         <source>Nothing to select.</source>
         <translation>Rien à sélectionner.</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="3826"/>
+        <location filename="../common/lc_model.cpp" line="4205"/>
         <source>Array only has 1 element or less, no pieces added.</source>
         <translation>L’arrangement a seulement un élément ou moins, aucune pièce ajoutée.</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="3881"/>
+        <location filename="../common/lc_model.cpp" line="4261"/>
         <source>Array</source>
         <translation>Arrangement</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="3893"/>
+        <location filename="../common/lc_model.cpp" line="4273"/>
         <source>Minifig #</source>
         <translation>Minifig n°</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="3914"/>
+        <location filename="../common/lc_model.cpp" line="4295"/>
         <source>Minifig</source>
         <translation>Minifig</translation>
+    </message>
+</context>
+<context>
+    <name>lcPartSelectionListView</name>
+    <message>
+        <location filename="../common/lc_partselectionwidget.cpp" line="460"/>
+        <source>No Icons</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_partselectionwidget.cpp" line="465"/>
+        <source>Small Icons</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_partselectionwidget.cpp" line="470"/>
+        <source>Medium Icons</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_partselectionwidget.cpp" line="475"/>
+        <source>Large Icons</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_partselectionwidget.cpp" line="480"/>
+        <source>Extra Large Icons</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_partselectionwidget.cpp" line="490"/>
+        <source>Show Part Names</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_partselectionwidget.cpp" line="495"/>
+        <source>Show Decorated Parts</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_partselectionwidget.cpp" line="501"/>
+        <source>List Mode</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_partselectionwidget.cpp" line="505"/>
+        <source>Lock Preview Color</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>lcPartSelectionWidget</name>
+    <message>
+        <location filename="../common/lc_partselectionwidget.cpp" line="617"/>
+        <source>Search Parts</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_partselectionwidget.cpp" line="788"/>
+        <source>All Parts</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_partselectionwidget.cpp" line="789"/>
+        <source>Parts In Use</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_partselectionwidget.cpp" line="794"/>
+        <source>Models</source>
+        <translation type="unfinished">Modèles</translation>
+    </message>
+</context>
+<context>
+    <name>lcPiecesLibrary</name>
+    <message>
+        <location filename="../common/lc_library.cpp" line="779"/>
+        <source>Initializing</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_library.cpp" line="780"/>
+        <source>Loading Parts Library</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -2844,7 +4649,7 @@ SVP visitez http://www.leocad.org pour apprendre comment télécharger et instal
         <translation>LeoCAD Version %1</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qaboutdialog.cpp" line="30"/>
+        <location filename="../qt/lc_qaboutdialog.cpp" line="21"/>
         <source>OpenGL Version %1 (GLSL %2)
 %3 - %4
 
@@ -2855,7 +4660,7 @@ SVP visitez http://www.leocad.org pour apprendre comment télécharger et instal
 </translation>
     </message>
     <message>
-        <location filename="../qt/lc_qaboutdialog.cpp" line="32"/>
+        <location filename="../qt/lc_qaboutdialog.cpp" line="23"/>
         <source>Color Buffer: %1 bits %2 %3
 Depth Buffer: %4 bits
 Stencil Buffer: %5 bits
@@ -2868,17 +4673,17 @@ Stencil Buffer: %5 bits
 </translation>
     </message>
     <message>
-        <location filename="../qt/lc_qaboutdialog.cpp" line="33"/>
+        <location filename="../qt/lc_qaboutdialog.cpp" line="24"/>
         <source>indexed</source>
         <translation>indexé</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qaboutdialog.cpp" line="33"/>
+        <location filename="../qt/lc_qaboutdialog.cpp" line="24"/>
         <source>double buffered</source>
         <translation>double tampon</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qaboutdialog.cpp" line="35"/>
+        <location filename="../qt/lc_qaboutdialog.cpp" line="26"/>
         <source>GL_ARB_vertex_buffer_object extension: %1
 GL_ARB_framebuffer_object extension: %2
 GL_EXT_framebuffer_object extension: %3
@@ -2891,22 +4696,22 @@ GL_EXT_texture_filter_anisotropic extension: %4
 </translation>
     </message>
     <message>
-        <location filename="../qt/lc_qaboutdialog.cpp" line="36"/>
-        <location filename="../qt/lc_qaboutdialog.cpp" line="37"/>
-        <location filename="../qt/lc_qaboutdialog.cpp" line="38"/>
+        <location filename="../qt/lc_qaboutdialog.cpp" line="27"/>
+        <location filename="../qt/lc_qaboutdialog.cpp" line="28"/>
+        <location filename="../qt/lc_qaboutdialog.cpp" line="29"/>
         <source>Supported</source>
         <translation>Pris en charge</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qaboutdialog.cpp" line="36"/>
-        <location filename="../qt/lc_qaboutdialog.cpp" line="37"/>
-        <location filename="../qt/lc_qaboutdialog.cpp" line="38"/>
-        <location filename="../qt/lc_qaboutdialog.cpp" line="39"/>
+        <location filename="../qt/lc_qaboutdialog.cpp" line="27"/>
+        <location filename="../qt/lc_qaboutdialog.cpp" line="28"/>
+        <location filename="../qt/lc_qaboutdialog.cpp" line="29"/>
+        <location filename="../qt/lc_qaboutdialog.cpp" line="30"/>
         <source>Not supported</source>
         <translation>Non pris en charge</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qaboutdialog.cpp" line="39"/>
+        <location filename="../qt/lc_qaboutdialog.cpp" line="30"/>
         <source>Supported (max %1)</source>
         <translation>Pris en charge (maximum %1)</translation>
     </message>
@@ -2934,7 +4739,7 @@ GL_EXT_texture_filter_anisotropic extension: %4
         <translation>Rotations</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qarraydialog.cpp" line="71"/>
+        <location filename="../qt/lc_qarraydialog.cpp" line="74"/>
         <source>Array is empty.</source>
         <translation>L’arrangement est vide.</translation>
     </message>
@@ -2985,12 +4790,12 @@ GL_EXT_texture_filter_anisotropic extension: %4
         <translation>Édition des groupes</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qeditgroupsdialog.cpp" line="20"/>
+        <location filename="../qt/lc_qeditgroupsdialog.cpp" line="21"/>
         <source>New Group</source>
         <translation>Nouveau groupe</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qeditgroupsdialog.cpp" line="61"/>
+        <location filename="../qt/lc_qeditgroupsdialog.cpp" line="60"/>
         <source>Group #</source>
         <translation>Groupe n°</translation>
     </message>
@@ -3071,7 +4876,7 @@ GL_EXT_texture_filter_anisotropic extension: %4
     </message>
     <message>
         <location filename="../qt/lc_qhtmldialog.ui" line="149"/>
-        <location filename="../qt/lc_qhtmldialog.ui" line="229"/>
+        <location filename="../qt/lc_qhtmldialog.ui" line="239"/>
         <source>Height:</source>
         <translation>Hauteur :</translation>
     </message>
@@ -3126,32 +4931,32 @@ GL_EXT_texture_filter_anisotropic extension: %4
         <translation>Liste de pièces</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qhtmldialog.ui" line="205"/>
+        <location filename="../qt/lc_qhtmldialog.ui" line="273"/>
         <source>At the end</source>
         <translation>À la fin</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qhtmldialog.ui" line="212"/>
+        <location filename="../qt/lc_qhtmldialog.ui" line="259"/>
         <source>After each step</source>
         <translation>Après chaque étape</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qhtmldialog.ui" line="239"/>
+        <location filename="../qt/lc_qhtmldialog.ui" line="185"/>
         <source>Color:</source>
         <translation>Couleur :</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qhtmldialog.ui" line="249"/>
+        <location filename="../qt/lc_qhtmldialog.ui" line="266"/>
         <source>Create images</source>
         <translation>Créer les images</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qhtmldialog.cpp" line="54"/>
+        <location filename="../qt/lc_qhtmldialog.cpp" line="53"/>
         <source>Output folder cannot be empty.</source>
         <translation>Le champ dossier cible ne peut être vide.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qhtmldialog.cpp" line="79"/>
+        <location filename="../qt/lc_qhtmldialog.cpp" line="78"/>
         <source>Select Output Folder</source>
         <translation>Sélectionner le dossier cible</translation>
     </message>
@@ -3219,52 +5024,60 @@ GL_EXT_texture_filter_anisotropic extension: %4
         <translation>...</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qimagedialog.cpp" line="40"/>
+        <location filename="../qt/lc_qimagedialog.cpp" line="46"/>
         <source>Output File cannot be empty.</source>
         <translation>Le champ fichier cible ne peut être vide.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qimagedialog.cpp" line="40"/>
-        <location filename="../qt/lc_qimagedialog.cpp" line="48"/>
-        <location filename="../qt/lc_qimagedialog.cpp" line="56"/>
-        <location filename="../qt/lc_qimagedialog.cpp" line="78"/>
-        <location filename="../qt/lc_qimagedialog.cpp" line="86"/>
+        <location filename="../qt/lc_qimagedialog.cpp" line="46"/>
+        <location filename="../qt/lc_qimagedialog.cpp" line="54"/>
+        <location filename="../qt/lc_qimagedialog.cpp" line="62"/>
+        <location filename="../qt/lc_qimagedialog.cpp" line="84"/>
         <location filename="../qt/lc_qimagedialog.cpp" line="92"/>
+        <location filename="../qt/lc_qimagedialog.cpp" line="98"/>
         <source>Error</source>
         <translation>Erreur</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qimagedialog.cpp" line="48"/>
         <source>Please enter a width between 1 and 2048.</source>
-        <translation>SVP entrez une largeur entre 1 et 2048.</translation>
+        <translation type="vanished">SVP entrez une largeur entre 1 et 2048.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qimagedialog.cpp" line="56"/>
         <source>Please enter a height between 1 and 2048.</source>
-        <translation>SVP entrez une hauteur entre 1 et 2048.</translation>
+        <translation type="vanished">SVP entrez une hauteur entre 1 et 2048.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qimagedialog.cpp" line="78"/>
+        <location filename="../qt/lc_qimagedialog.cpp" line="84"/>
         <source>First step must be between 1 and %1.</source>
         <translation>La première étape doit être comprise entre 1 et %1.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qimagedialog.cpp" line="86"/>
+        <location filename="../qt/lc_qimagedialog.cpp" line="92"/>
         <source>Last step must be between 1 and %1.</source>
         <translation>La dernière étape doit être comprise entre 1 et %1.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qimagedialog.cpp" line="108"/>
+        <location filename="../qt/lc_qimagedialog.cpp" line="117"/>
         <source>Supported Image Files (*.bmp *.png *.jpg);;BMP Files (*.bmp);;PNG Files (*.png);;JPEG Files (*.jpg);;All Files (*.*)</source>
         <translation>Fichiers images pris en charge (*.bmp *.png *.jpg);;Fichiers BMP (*.bmp);;Fichiers PNG (*.png);;Fichiers JPEG (*.jpg);;Tous les fichiers (*.*)</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qimagedialog.cpp" line="92"/>
+        <location filename="../qt/lc_qimagedialog.cpp" line="98"/>
         <source>Last step must be greater than first step.</source>
         <translation>La dernière étape doit être plus grande que la première.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qimagedialog.cpp" line="108"/>
+        <location filename="../qt/lc_qimagedialog.cpp" line="54"/>
+        <source>Please enter a width between 1 and 32768.</source>
+        <translation type="unfinished">SVP entrez une largeur entre 1 et 2048. {1 ?} {32768.?}</translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qimagedialog.cpp" line="62"/>
+        <source>Please enter a height between 1 and 32768.</source>
+        <translation type="unfinished">SVP entrez une hauteur entre 1 et 2048. {1 ?} {32768.?}</translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qimagedialog.cpp" line="117"/>
         <source>Save Image File</source>
         <translation>Enregistrer l’image</translation>
     </message>
@@ -3280,14 +5093,22 @@ GL_EXT_texture_filter_anisotropic extension: %4
 <context>
     <name>lcQModelListDialog</name>
     <message>
-        <location filename="../qt/lc_qmodellistdialog.ui" line="14"/>
         <source>Models</source>
-        <translation>Modèles</translation>
+        <translation type="vanished">Modèles</translation>
+    </message>
+    <message>
+        <source>&amp;New</source>
+        <translation type="vanished">&amp;Nouveau</translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qmodellistdialog.ui" line="14"/>
+        <source>Submodels</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qt/lc_qmodellistdialog.ui" line="27"/>
-        <source>&amp;New</source>
-        <translation>&amp;Nouveau</translation>
+        <source>&amp;New...</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qt/lc_qmodellistdialog.ui" line="34"/>
@@ -3301,151 +5122,174 @@ GL_EXT_texture_filter_anisotropic extension: %4
     </message>
     <message>
         <location filename="../qt/lc_qmodellistdialog.ui" line="48"/>
+        <source>Export...</source>
+        <translation type="unfinished">Exporter…</translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qmodellistdialog.ui" line="55"/>
         <source>Move &amp;Up</source>
         <translation>&amp;Monter</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qmodellistdialog.ui" line="55"/>
+        <location filename="../qt/lc_qmodellistdialog.ui" line="62"/>
         <source>Move &amp;Down</source>
         <translation>&amp;Descendre</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qmodellistdialog.cpp" line="43"/>
         <source>Model #</source>
-        <translation>Modèle n°</translation>
+        <translation type="vanished">Modèle n°</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qmodellistdialog.cpp" line="74"/>
+        <location filename="../qt/lc_qmodellistdialog.cpp" line="61"/>
+        <source>New Submodel</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qmodellistdialog.cpp" line="76"/>
         <source>Error</source>
         <translation>Erreur</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qmodellistdialog.cpp" line="74"/>
+        <location filename="../qt/lc_qmodellistdialog.cpp" line="76"/>
+        <source>The model cannot be empty.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qmodellistdialog.cpp" line="85"/>
+        <source>Are you sure you want to delete the submodel &apos;%1&apos;?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qmodellistdialog.cpp" line="86"/>
+        <source>Delete Submodel</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qmodellistdialog.cpp" line="105"/>
+        <source>Rename Submodel</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qmodellistdialog.cpp" line="122"/>
+        <source>LeoCAD</source>
+        <translation type="unfinished">LeoCAD</translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qmodellistdialog.cpp" line="122"/>
+        <source>Nothing to export.</source>
+        <translation type="unfinished">Rien à exporter.</translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qmodellistdialog.cpp" line="128"/>
+        <source>Save Model</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qmodellistdialog.cpp" line="128"/>
+        <source>Supported Files (*.ldr *.dat);;All Files (*.*)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>The project must have at least 1 model.</source>
-        <translation>Le projet doit avoir au moins un modèle.</translation>
+        <translation type="vanished">Le projet doit avoir au moins un modèle.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qmodellistdialog.cpp" line="83"/>
         <source>Are you sure you want to delete the model &apos;%1&apos;?</source>
-        <translation>Êtes-vous sûr de vouloir supprimer le modèle « %1 » ?</translation>
+        <translation type="vanished">Êtes-vous sûr de vouloir supprimer le modèle « %1 » ?</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qmodellistdialog.cpp" line="84"/>
         <source>Delete Model</source>
-        <translation>Supprimer le modèle</translation>
+        <translation type="vanished">Supprimer le modèle</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qmodellistdialog.cpp" line="102"/>
         <source>Rename Model</source>
-        <translation>Renommer le modèle</translation>
+        <translation type="vanished">Renommer le modèle</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qmodellistdialog.cpp" line="102"/>
         <source>Name:</source>
-        <translation>Nom :</translation>
+        <translation type="vanished">Nom :</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qmodellistdialog.cpp" line="109"/>
         <source>Empty Name</source>
-        <translation>Nom vide</translation>
+        <translation type="vanished">Nom vide</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qmodellistdialog.cpp" line="109"/>
         <source>The model name cannot be empty.</source>
-        <translation>Le nom du modèle ne peut pas être vide.</translation>
+        <translation type="vanished">Le nom du modèle ne peut pas être vide.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qmodellistdialog.cpp" line="118"/>
         <source>Duplicate Model</source>
-        <translation>Modèle déjà existant</translation>
+        <translation type="vanished">Modèle déjà existant</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qmodellistdialog.cpp" line="118"/>
         <source>A model named &apos;%1&apos; already exists in this project, please enter an unique name.</source>
-        <translation>Un modèle nommé « %1 » existe déjà dans ce projet, SVP entrez un nom unique.</translation>
+        <translation type="vanished">Un modèle nommé « %1 » existe déjà dans ce projet, SVP entrez un nom unique.</translation>
     </message>
 </context>
 <context>
     <name>lcQPOVRayDialog</name>
     <message>
-        <location filename="../qt/lc_qpovraydialog.ui" line="23"/>
         <source>POV-Ray Export</source>
-        <translation>Export POV-Ray</translation>
+        <translation type="vanished">Export POV-Ray</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpovraydialog.ui" line="44"/>
         <source>Output File</source>
-        <translation>Fichier cible</translation>
+        <translation type="vanished">Fichier cible</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpovraydialog.ui" line="54"/>
         <source>POV-Ray Executable</source>
-        <translation>Exécutable POV-Ray</translation>
+        <translation type="vanished">Exécutable POV-Ray</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpovraydialog.ui" line="64"/>
         <source>LGEO Path (optional)</source>
-        <translation>Chemin LGEO (facultatif)</translation>
+        <translation type="vanished">Chemin LGEO (facultatif)</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpovraydialog.ui" line="74"/>
         <source>Render Scene</source>
-        <translation>Lancer le rendu</translation>
+        <translation type="vanished">Lancer le rendu</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpovraydialog.ui" line="86"/>
-        <location filename="../qt/lc_qpovraydialog.ui" line="112"/>
-        <location filename="../qt/lc_qpovraydialog.ui" line="132"/>
         <source>...</source>
-        <translation>...</translation>
+        <translation type="vanished">...</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpovraydialog.cpp" line="31"/>
         <source>Output File cannot be empty.</source>
-        <translation>Le champ fichier cible ne peut être vide.</translation>
+        <translation type="vanished">Le champ fichier cible ne peut être vide.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpovraydialog.cpp" line="45"/>
         <source>Save POV-Ray File</source>
-        <translation>Enregistrer le fichier POV-Ray</translation>
+        <translation type="vanished">Enregistrer le fichier POV-Ray</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpovraydialog.cpp" line="45"/>
         <source>POV-Ray Files (*.pov);;All Files (*.*)</source>
-        <translation>Fichiers POV-Ray (*.pov);;Tous les fichiers (*.*)</translation>
+        <translation type="vanished">Fichiers POV-Ray (*.pov);;Tous les fichiers (*.*)</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpovraydialog.cpp" line="54"/>
         <source>Executable Files (*.exe);;All Files (*.*)</source>
-        <translation>Fichiers exécutables (*.exe);;Tous les fichiers (*.*)</translation>
+        <translation type="vanished">Fichiers exécutables (*.exe);;Tous les fichiers (*.*)</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpovraydialog.cpp" line="56"/>
         <source>All Files (*.*)</source>
-        <translation>Tous les fichiers (*.*)</translation>
+        <translation type="vanished">Tous les fichiers (*.*)</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpovraydialog.cpp" line="59"/>
         <source>Open POV-Ray Executable</source>
-        <translation>Lancer l’exécutable POV-Ray</translation>
+        <translation type="vanished">Lancer l’exécutable POV-Ray</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpovraydialog.cpp" line="67"/>
         <source>Open LGEO Folder</source>
-        <translation>Ouvrir le dossier LGEO</translation>
+        <translation type="vanished">Ouvrir le dossier LGEO</translation>
     </message>
 </context>
 <context>
     <name>lcQPartsTree</name>
     <message>
-        <location filename="../qt/lc_qpartstree.cpp" line="89"/>
         <source>Models</source>
-        <translation>Modèles</translation>
+        <translation type="vanished">Modèles</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpartstree.cpp" line="90"/>
         <source>Search Results</source>
-        <translation>Résultats de la recherche</translation>
+        <translation type="vanished">Résultats de la recherche</translation>
     </message>
 </context>
 <context>
@@ -3466,47 +5310,53 @@ GL_EXT_texture_filter_anisotropic extension: %4
         <translation>Auteur par défaut :</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="46"/>
         <source>Default projects folder:</source>
-        <translation>Dossier des projets par défaut :</translation>
+        <translation type="vanished">Dossier des projets par défaut :</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="61"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="85"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="109"/>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="133"/>
         <source>...</source>
         <translation>...</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="70"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="46"/>
         <source>Custom parts library:</source>
         <translation>Bibliothèque de pièces personnalisées :</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="94"/>
         <source>POV-Ray Executable:</source>
-        <translation>Éxécutable POV-Ray :</translation>
+        <translation type="vanished">Éxécutable POV-Ray :</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="118"/>
         <source>LGEO Path:</source>
-        <translation>Chemin LGEO :</translation>
+        <translation type="vanished">Chemin LGEO :</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="651"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="646"/>
         <source>Mouse</source>
         <translation>Souris</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="659"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="654"/>
         <source>Mouse Shortcuts</source>
         <translation>Raccourcis souris</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="674"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="669"/>
         <source>Action</source>
         <translation>Action</translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="674"/>
+        <source>Shortcut 1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="679"/>
+        <source>Shortcut 2</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="726"/>
@@ -3559,335 +5409,368 @@ GL_EXT_texture_filter_anisotropic extension: %4
         <translation>Sensibilité de la souris :</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="142"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="118"/>
         <source>Check for updates:</source>
         <translation>Vérifier les mises à jour :</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="153"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="70"/>
+        <source>PO&amp;V-Ray Executable:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="94"/>
+        <source>&amp;LGEO Path:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="129"/>
         <source>Never</source>
         <translation>Jamais</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="158"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="134"/>
         <source>Once a day</source>
         <translation>Tous les jours</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="163"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="139"/>
         <source>Once a week</source>
         <translation>Toutes les semaines</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="171"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="147"/>
         <source>Fixed direction keys</source>
         <translation>Touches de directions fixes</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="179"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="155"/>
         <source>Rendering</source>
         <translation>Rendu</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="198"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="164"/>
         <source>Edge lines</source>
         <translation>Bordures</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="205"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="200"/>
         <source>Axis icon</source>
         <translation>Icônes d’axes</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="212"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="227"/>
         <source>width</source>
         <translation>largeur</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="219"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="220"/>
         <source>Anti-aliasing</source>
         <translation>Anti-aliasing</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="226"/>
         <source>Enable lighting</source>
-        <translation>Activer l’éclairage</translation>
+        <translation type="vanished">Activer l’éclairage</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="234"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="172"/>
         <source>2x</source>
         <translation>2x</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="239"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="177"/>
         <source>4x</source>
         <translation>4x</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="244"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="182"/>
         <source>8x</source>
         <translation>8x</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="268"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="234"/>
+        <source>Shading Mode:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="242"/>
+        <source>Wireframe</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="247"/>
+        <source>Flat Shading</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="252"/>
+        <source>Default Lights</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="263"/>
         <source>Base Grid</source>
         <translation>Grille de base</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="304"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="299"/>
         <source>Draw studs</source>
         <translation>Dessiner les tenons</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="311"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="306"/>
         <source>studs</source>
         <translation>tenons</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="318"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="313"/>
         <source>Draw lines every</source>
         <translation>Dessine des lignes tous les</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="349"/>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="390"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="344"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="385"/>
         <source>Categories</source>
         <translation>Catégories</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="355"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="350"/>
         <source>Parts Library Categories</source>
         <translation>Catégories de la bibliothèque de pièces</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="424"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="419"/>
         <source>Name</source>
         <translation>Nom</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="429"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="424"/>
         <source>Number</source>
         <translation>Nombre</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="440"/>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="561"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="435"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="556"/>
         <source>Import...</source>
         <translation>Importer…</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="447"/>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="568"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="442"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="563"/>
         <source>Export...</source>
         <translation>Exporter…</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="454"/>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="575"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="449"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="570"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="689"/>
         <source>Reset...</source>
         <translation>Réinitialiser…</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="479"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="474"/>
         <source>Category</source>
         <translation>Catégorie</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="485"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="480"/>
         <source>New...</source>
         <translation>Nouveau…</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="492"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="487"/>
         <source>Edit...</source>
         <translation>Éditer…</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="499"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="494"/>
         <source>Delete...</source>
         <translation>Supprimer…</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="523"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="518"/>
         <source>Keyboard</source>
         <translation>Clavier</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="533"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="528"/>
         <source>Keyboard Shortcuts</source>
         <translation>Raccourcis clavier</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="546"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="541"/>
         <source>Command</source>
         <translation>Commande</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="551"/>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="603"/>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="679"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="546"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="598"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="718"/>
         <source>Shortcut</source>
         <translation>Raccourcis</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="609"/>
-        <source>Key sequence:</source>
-        <translation>Touches :</translation>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="604"/>
+        <source>Key se&amp;quence:</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="622"/>
+        <source>Key sequence:</source>
+        <translation type="vanished">Touches :</translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="617"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="785"/>
         <source>Assign</source>
         <translation>Attribuer</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="629"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="624"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="792"/>
         <source>Remove</source>
         <translation>Supprimer</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="86"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="106"/>
         <source>Grid spacing must be greater than 0.</source>
         <translation>L’espacement de la grille doit être plus grand que 0.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="123"/>
         <source>Open Projects Folder</source>
-        <translation>Ouvrir le dossier des projets</translation>
+        <translation type="vanished">Ouvrir le dossier des projets</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="131"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="142"/>
         <source>Open Parts Library Folder</source>
         <translation>Ouvrir le dossier de la bibliothèque de pièces</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="140"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="151"/>
         <source>Executable Files (*.exe);;All Files (*.*)</source>
         <translation>Fichiers exécutables (*.exe);;Tous les fichiers (*.*)</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="142"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="153"/>
         <source>All Files (*.*)</source>
         <translation>Tous les fichiers (*.*)</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="145"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="156"/>
         <source>Open POV-Ray Executable</source>
         <translation>Lancer l’exécutable POV-Ray</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="153"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="164"/>
         <source>Open LGEO Folder</source>
         <translation>Ouvrir le dossier LGEO</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="169"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="180"/>
         <source>Select Grid Stud Color</source>
         <translation>Choisir le couleur des tenons de la grille</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="175"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="186"/>
         <source>Select Grid Line Color</source>
         <translation>Choisir la couleur des lignes de la grille</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="226"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="239"/>
         <source>Unassigned</source>
         <translation>Non-attribué</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="340"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="353"/>
         <source>Are you sure you want to delete the category &apos;%1&apos;?</source>
         <translation>Êtes-vous sûr de vouloir supprimer la catégorie « %1 » ?</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="353"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="366"/>
         <source>Import Categories</source>
         <translation>Importer les catégories</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="353"/>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="372"/>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="556"/>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="576"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="366"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="385"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="572"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="592"/>
         <source>Text Files (*.txt);;All Files (*.*)</source>
         <translation>Fichiers texte (*.txt);;Tous les fichiers (*.*)</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="361"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="374"/>
         <source>Error loading categories file.</source>
         <translation>Erreur au chargement du fichier des catégories.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="372"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="385"/>
         <source>Export Categories</source>
         <translation>Exporter les catégories</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="379"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="392"/>
         <source>Error saving categories file.</source>
         <translation>Erreur à l’enregistrement du fichier des catégories.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="386"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="399"/>
         <source>Are you sure you want to load the default categories?</source>
         <translation>Êtes-vous sûr de vouloir charger les catégories par défaut ?</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="556"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="572"/>
         <source>Import shortcuts</source>
         <translation>Importer les raccourcis</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="564"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="580"/>
         <source>Error loading keyboard shortcuts file.</source>
         <translation>Erreur au chargement du fichier des raccourcis clavier.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="576"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="592"/>
         <source>Export shortcuts</source>
         <translation>Exporter les raccourcis</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="583"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="599"/>
         <source>Error saving keyboard shortcuts file.</source>
         <translation>Erreur à l’enregistrement du fichier des raccourcis clavier.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="590"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="606"/>
         <source>Are you sure you want to load the default keyboard shortcuts?</source>
         <translation>Êtes-vous sûr de vouloir charger les raccourcis clavier par défaut ?</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="616"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="633"/>
         <source>Left Button</source>
         <translation>Bouton gauche</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="620"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="638"/>
         <source>Middle Button</source>
         <translation>Bouton central</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="624"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="643"/>
         <source>Right Button</source>
         <translation>Bouton droit</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="680"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="712"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="721"/>
         <source>Override Shortcut</source>
         <translation>Écraser le raccourcis</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="680"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="712"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="721"/>
         <source>This shortcut is already assigned to &apos;%1&apos;, do you want to replace it?</source>
         <translation>Ce raccourcis est déjà attribué à « %1 », voulez-vous le remplacer ?</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="718"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="766"/>
         <source>Are you sure you want to load the default mouse shortcuts?</source>
         <translation>Êtes-vous sûr de vouloir charger les raccourcis souris par défaut ?</translation>
     </message>
@@ -3900,138 +5783,140 @@ GL_EXT_texture_filter_anisotropic extension: %4
         <translation>Propriétés</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiesdialog.ui" line="24"/>
+        <location filename="../qt/lc_qpropertiesdialog.ui" line="30"/>
         <source>Summary</source>
         <translation>Résumé</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiesdialog.ui" line="30"/>
+        <location filename="../qt/lc_qpropertiesdialog.ui" line="36"/>
         <source>Author:</source>
         <translation>Auteur :</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiesdialog.ui" line="40"/>
+        <location filename="../qt/lc_qpropertiesdialog.ui" line="46"/>
         <source>Description:</source>
         <translation>Description :</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiesdialog.ui" line="50"/>
+        <location filename="../qt/lc_qpropertiesdialog.ui" line="56"/>
         <source>Comments:</source>
         <translation>Commentaires :</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiesdialog.ui" line="65"/>
+        <location filename="../qt/lc_qpropertiesdialog.ui" line="77"/>
         <source>Scene</source>
         <translation>Scène</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiesdialog.ui" line="71"/>
+        <location filename="../qt/lc_qpropertiesdialog.ui" line="83"/>
         <source>Background</source>
         <translation>Fond</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiesdialog.ui" line="108"/>
-        <source>Solid Color</source>
-        <translation>Couleur pleine</translation>
+        <location filename="../qt/lc_qpropertiesdialog.ui" line="120"/>
+        <source>So&amp;lid Color</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiesdialog.ui" line="115"/>
+        <location filename="../qt/lc_qpropertiesdialog.ui" line="134"/>
+        <source>&amp;Gradient</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Solid Color</source>
+        <translation type="vanished">Couleur pleine</translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpropertiesdialog.ui" line="127"/>
         <source>Image</source>
         <translation>Image</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiesdialog.ui" line="122"/>
         <source>Gradient</source>
-        <translation>Dégradé</translation>
+        <translation type="vanished">Dégradé</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiesdialog.ui" line="134"/>
+        <location filename="../qt/lc_qpropertiesdialog.ui" line="146"/>
         <source>...</source>
         <translation>...</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiesdialog.ui" line="143"/>
+        <location filename="../qt/lc_qpropertiesdialog.ui" line="155"/>
         <source>Tile</source>
         <translation>Tuile</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiesdialog.ui" line="177"/>
         <source>Environment</source>
-        <translation>Environnement</translation>
+        <translation type="vanished">Environnement</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiesdialog.ui" line="183"/>
         <source>Fog</source>
-        <translation>Brouillard</translation>
+        <translation type="vanished">Brouillard</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiesdialog.ui" line="199"/>
         <source>Density</source>
-        <translation>Densité</translation>
+        <translation type="vanished">Densité</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiesdialog.ui" line="231"/>
         <source>Ambient Light</source>
-        <translation>Lumière ambiante</translation>
+        <translation type="vanished">Lumière ambiante</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiesdialog.ui" line="267"/>
+        <location filename="../qt/lc_qpropertiesdialog.ui" line="189"/>
         <source>Set default options for new projects</source>
         <translation>Attribuer les options par défauts aux nouveaux projets</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiesdialog.ui" line="275"/>
+        <location filename="../qt/lc_qpropertiesdialog.ui" line="210"/>
         <source>Parts Used</source>
         <translation>Pièces utilisées</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiesdialog.cpp" line="26"/>
+        <location filename="../qt/lc_qpropertiesdialog.cpp" line="22"/>
         <source>%1 Properties</source>
         <translation>%1 propriétés</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiesdialog.cpp" line="83"/>
+        <location filename="../qt/lc_qpropertiesdialog.cpp" line="59"/>
         <source>Part</source>
         <translation>Pièce</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiesdialog.cpp" line="94"/>
-        <location filename="../qt/lc_qpropertiesdialog.cpp" line="110"/>
+        <location filename="../qt/lc_qpropertiesdialog.cpp" line="70"/>
+        <location filename="../qt/lc_qpropertiesdialog.cpp" line="108"/>
         <source>Total</source>
         <translation>Total</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiesdialog.cpp" line="193"/>
+        <location filename="../qt/lc_qpropertiesdialog.cpp" line="163"/>
         <source>Select Background Color</source>
         <translation>Choisir la couleur de fond</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiesdialog.cpp" line="198"/>
+        <location filename="../qt/lc_qpropertiesdialog.cpp" line="168"/>
         <source>Select Background Top Color</source>
         <translation>Choisir la couleur du haut du fond</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiesdialog.cpp" line="203"/>
+        <location filename="../qt/lc_qpropertiesdialog.cpp" line="173"/>
         <source>Select Background Bottom Color</source>
         <translation>Choisir la couleur du bas du fond</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiesdialog.cpp" line="208"/>
         <source>Select Fog Color</source>
-        <translation>Choisir la couleur du brouillard</translation>
+        <translation type="vanished">Choisir la couleur du brouillard</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiesdialog.cpp" line="213"/>
         <source>Select Ambient Light Color</source>
-        <translation>Choisir la couleur de la lumière ambiante</translation>
+        <translation type="vanished">Choisir la couleur de la lumière ambiante</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiesdialog.cpp" line="234"/>
+        <location filename="../qt/lc_qpropertiesdialog.cpp" line="197"/>
         <source>Select Background Image</source>
         <translation>Choisir l’image de fond</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiesdialog.cpp" line="234"/>
+        <location filename="../qt/lc_qpropertiesdialog.cpp" line="197"/>
         <source>All Image Files (*.png *.jpg *.gif *.bmp);;PNG Files (*.png);;JPEG Files (*.jpg);;GIF Files (*.gif);;BMP Files (*.bmp);;All Files (*.*)</source>
         <translation>Tous les fichiers images (*.png *.jpg *.gif *.bmp);;Fichiers PNG (*.png);;Fichiers JPEG (*.jpg);;Fichiers GIF (*.gif);;Fichiers BMP (*.bmp);;Tous les fichiers (*.*)</translation>
     </message>
@@ -4049,111 +5934,111 @@ GL_EXT_texture_filter_anisotropic extension: %4
         <translation>Valeur</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiestree.cpp" line="805"/>
-        <location filename="../qt/lc_qpropertiestree.cpp" line="935"/>
+        <location filename="../qt/lc_qpropertiestree.cpp" line="817"/>
+        <location filename="../qt/lc_qpropertiestree.cpp" line="945"/>
         <source>Position</source>
         <translation>Position</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiestree.cpp" line="806"/>
-        <location filename="../qt/lc_qpropertiestree.cpp" line="811"/>
-        <location filename="../qt/lc_qpropertiestree.cpp" line="936"/>
-        <location filename="../qt/lc_qpropertiestree.cpp" line="941"/>
+        <location filename="../qt/lc_qpropertiestree.cpp" line="818"/>
+        <location filename="../qt/lc_qpropertiestree.cpp" line="823"/>
         <location filename="../qt/lc_qpropertiestree.cpp" line="946"/>
+        <location filename="../qt/lc_qpropertiestree.cpp" line="951"/>
+        <location filename="../qt/lc_qpropertiestree.cpp" line="956"/>
         <source>X</source>
         <translation>X</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiestree.cpp" line="807"/>
-        <location filename="../qt/lc_qpropertiestree.cpp" line="812"/>
-        <location filename="../qt/lc_qpropertiestree.cpp" line="937"/>
-        <location filename="../qt/lc_qpropertiestree.cpp" line="942"/>
+        <location filename="../qt/lc_qpropertiestree.cpp" line="819"/>
+        <location filename="../qt/lc_qpropertiestree.cpp" line="824"/>
         <location filename="../qt/lc_qpropertiestree.cpp" line="947"/>
+        <location filename="../qt/lc_qpropertiestree.cpp" line="952"/>
+        <location filename="../qt/lc_qpropertiestree.cpp" line="957"/>
         <source>Y</source>
         <translation>Y</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiestree.cpp" line="808"/>
-        <location filename="../qt/lc_qpropertiestree.cpp" line="813"/>
-        <location filename="../qt/lc_qpropertiestree.cpp" line="938"/>
-        <location filename="../qt/lc_qpropertiestree.cpp" line="943"/>
+        <location filename="../qt/lc_qpropertiestree.cpp" line="820"/>
+        <location filename="../qt/lc_qpropertiestree.cpp" line="825"/>
         <location filename="../qt/lc_qpropertiestree.cpp" line="948"/>
+        <location filename="../qt/lc_qpropertiestree.cpp" line="953"/>
+        <location filename="../qt/lc_qpropertiestree.cpp" line="958"/>
         <source>Z</source>
         <translation>Z</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiestree.cpp" line="810"/>
+        <location filename="../qt/lc_qpropertiestree.cpp" line="822"/>
         <source>Rotation</source>
         <translation>Rotation</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiestree.cpp" line="815"/>
+        <location filename="../qt/lc_qpropertiestree.cpp" line="827"/>
         <source>Visibility</source>
         <translation>Visibilité</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiestree.cpp" line="816"/>
+        <location filename="../qt/lc_qpropertiestree.cpp" line="828"/>
         <source>Show</source>
         <translation>Montrer</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiestree.cpp" line="817"/>
+        <location filename="../qt/lc_qpropertiestree.cpp" line="829"/>
         <source>Hide</source>
         <translation>Cacher</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiestree.cpp" line="819"/>
+        <location filename="../qt/lc_qpropertiestree.cpp" line="831"/>
         <source>Appearance</source>
         <translation>Apparence</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiestree.cpp" line="820"/>
+        <location filename="../qt/lc_qpropertiestree.cpp" line="832"/>
         <source>Color</source>
         <translation>Couleur</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiestree.cpp" line="821"/>
+        <location filename="../qt/lc_qpropertiestree.cpp" line="833"/>
         <source>Part</source>
         <translation>Pièce</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiestree.cpp" line="940"/>
+        <location filename="../qt/lc_qpropertiestree.cpp" line="950"/>
         <source>Target</source>
         <translation>Cible</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiestree.cpp" line="945"/>
-        <location filename="../qt/lc_qpropertiestree.cpp" line="950"/>
+        <location filename="../qt/lc_qpropertiestree.cpp" line="955"/>
+        <location filename="../qt/lc_qpropertiestree.cpp" line="960"/>
         <source>Up</source>
         <translation>Haut</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiestree.cpp" line="951"/>
+        <location filename="../qt/lc_qpropertiestree.cpp" line="961"/>
         <source>Orthographic</source>
         <translation>Orthographique</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiestree.cpp" line="952"/>
+        <location filename="../qt/lc_qpropertiestree.cpp" line="962"/>
         <source>FOV</source>
         <translation>FOV</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiestree.cpp" line="953"/>
+        <location filename="../qt/lc_qpropertiestree.cpp" line="963"/>
         <source>Near</source>
         <translation>Proche</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiestree.cpp" line="954"/>
+        <location filename="../qt/lc_qpropertiestree.cpp" line="964"/>
         <source>Far</source>
         <translation>Loin</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiestree.cpp" line="955"/>
+        <location filename="../qt/lc_qpropertiestree.cpp" line="965"/>
         <source>Name</source>
         <translation>Nom</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiestree.cpp" line="1035"/>
+        <location filename="../qt/lc_qpropertiestree.cpp" line="1045"/>
         <source>Multiple Objects Selected</source>
         <translation>Plusieurs objets sélectionnés</translation>
     </message>
@@ -4189,50 +6074,248 @@ GL_EXT_texture_filter_anisotropic extension: %4
         <translation>Mises à jour LeoCAD</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qupdatedialog.cpp" line="38"/>
+        <location filename="../qt/lc_qupdatedialog.cpp" line="40"/>
         <source>Connecting to update server...</source>
         <translation>Connexion au serveur de mise à jour…</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qupdatedialog.cpp" line="125"/>
+        <location filename="../qt/lc_qupdatedialog.cpp" line="127"/>
         <source>&lt;p&gt;There&apos;s a newer version of LeoCAD available for download (%1.%2.%3).&lt;/p&gt;</source>
         <translation>&lt;p&gt;Il y a une nouvelle version de LeoCAD disponible au téléchargement (%1.%2.%3).&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qupdatedialog.cpp" line="127"/>
+        <location filename="../qt/lc_qupdatedialog.cpp" line="129"/>
         <source>&lt;p&gt;You are using the latest LeoCAD version.&lt;/p&gt;</source>
         <translation>&lt;p&gt;Vous utilisez la dernière version de LeoCAD.&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qupdatedialog.cpp" line="135"/>
+        <location filename="../qt/lc_qupdatedialog.cpp" line="137"/>
         <source>&lt;p&gt;There are new parts available.&lt;/p&gt;</source>
         <translation>&lt;p&gt;Il y a de nouvelle pièces disponibles.&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qupdatedialog.cpp" line="139"/>
+        <location filename="../qt/lc_qupdatedialog.cpp" line="141"/>
         <source>&lt;p&gt;There are no new parts available at this time.&lt;/p&gt;</source>
         <translation>&lt;p&gt;Il n’y a pas de nouvelle pièces disponibles en ce moment.&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qupdatedialog.cpp" line="144"/>
-        <source>&lt;p&gt;Visit &lt;a href=&quot;http://www.leocad.org/files/&quot;&gt;http://www.leocad.org/files/&lt;/a&gt; to download.&lt;/p&gt;</source>
-        <translation>&lt;p&gt;Visitez &lt;a href=&quot;http://www.leocad.org/file/&quot;&gt;http://www.leocad.org/files/&lt;/a&gt; pour télécharger.&lt;/p&gt;</translation>
+        <location filename="../qt/lc_qupdatedialog.cpp" line="146"/>
+        <source>&lt;p&gt;Visit &lt;a href=&quot;https://github.com/leozide/leocad/releases&quot;&gt;https://github.com/leozide/leocad/releases&lt;/a&gt; to download.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qt/lc_qupdatedialog.cpp" line="150"/>
+        <source>&lt;p&gt;Visit &lt;a href=&quot;http://www.leocad.org/files/&quot;&gt;http://www.leocad.org/files/&lt;/a&gt; to download.&lt;/p&gt;</source>
+        <translation type="vanished">&lt;p&gt;Visitez &lt;a href=&quot;http://www.leocad.org/file/&quot;&gt;http://www.leocad.org/files/&lt;/a&gt; pour télécharger.&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qupdatedialog.cpp" line="152"/>
         <source>Error parsing update information.</source>
         <translation>Erreur à la lecture des informations de mise à jour.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qupdatedialog.cpp" line="158"/>
+        <location filename="../qt/lc_qupdatedialog.cpp" line="164"/>
         <source>Error connecting to the update server.</source>
         <translation>Erreur à la connexion au serveur de mise à jour.</translation>
     </message>
 </context>
 <context>
+    <name>lcRenderDialog</name>
+    <message>
+        <location filename="../qt/lc_renderdialog.ui" line="14"/>
+        <location filename="../qt/lc_renderdialog.ui" line="105"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="71"/>
+        <source>Render</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_renderdialog.ui" line="29"/>
+        <source>Settings</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_renderdialog.ui" line="41"/>
+        <source>Width:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_renderdialog.ui" line="48"/>
+        <source>Height:</source>
+        <translation type="unfinished">Hauteur :</translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_renderdialog.ui" line="56"/>
+        <source>High</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_renderdialog.ui" line="61"/>
+        <source>Medium</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_renderdialog.ui" line="66"/>
+        <source>Low</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_renderdialog.ui" line="74"/>
+        <source>Quality:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_renderdialog.ui" line="81"/>
+        <source>Output:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_renderdialog.ui" line="93"/>
+        <source>...</source>
+        <translation type="unfinished">...</translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_renderdialog.cpp" line="79"/>
+        <source>Cancel Render</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_renderdialog.cpp" line="79"/>
+        <source>Are you sure you want to cancel the current render?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_renderdialog.cpp" line="174"/>
+        <source>Cancel</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_renderdialog.cpp" line="177"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="267"/>
+        <source>Error</source>
+        <translation type="unfinished">Erreur</translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_renderdialog.cpp" line="177"/>
+        <source>Error starting POV-Ray.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_renderdialog.cpp" line="267"/>
+        <source>Error writing to file &apos;%1&apos;:
+%2</source>
+        <translation type="unfinished">Erreur en écrivant le fichier « %1 » :
+%2</translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_renderdialog.cpp" line="275"/>
+        <source>Select Output File</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_renderdialog.cpp" line="275"/>
+        <source>Supported Image Files (*.bmp *.png *.jpg);;BMP Files (*.bmp);;PNG Files (*.png);;JPEG Files (*.jpg);;All Files (*.*)</source>
+        <translation type="unfinished">Fichiers images pris en charge (*.bmp *.png *.jpg);;Fichiers BMP (*.bmp);;Fichiers PNG (*.png);;Fichiers JPEG (*.jpg);;Tous les fichiers (*.*)</translation>
+    </message>
+</context>
+<context>
+    <name>lcSelectByColorDialog</name>
+    <message>
+        <location filename="../common/lc_selectbycolordialog.cpp" line="8"/>
+        <source>Select By Color</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_selectbycolordialog.cpp" line="15"/>
+        <source>Color:</source>
+        <translation type="unfinished">Couleur :</translation>
+    </message>
+</context>
+<context>
+    <name>lcSetsDatabaseDialog</name>
+    <message>
+        <location filename="../qt/lc_setsdatabasedialog.ui" line="14"/>
+        <source>Sets Database</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_setsdatabasedialog.ui" line="22"/>
+        <source>Set Name or Number</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_setsdatabasedialog.ui" line="29"/>
+        <source>Search</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_setsdatabasedialog.ui" line="51"/>
+        <source>Number</source>
+        <translation type="unfinished">Nombre</translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_setsdatabasedialog.ui" line="56"/>
+        <source>Name</source>
+        <translation type="unfinished">Nom</translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_setsdatabasedialog.ui" line="61"/>
+        <source>Year</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_setsdatabasedialog.ui" line="66"/>
+        <source>Parts</source>
+        <translation type="unfinished">Pièces</translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_setsdatabasedialog.ui" line="74"/>
+        <source>Sets Database provided by &lt;a href=&quot;http://www.rebrickable.com&quot;&gt;Rebrickable&lt;/a&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_setsdatabasedialog.cpp" line="130"/>
+        <source>Please select a set from the list.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_setsdatabasedialog.cpp" line="137"/>
+        <source>Downloading</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_setsdatabasedialog.cpp" line="138"/>
+        <source>Downloading set inventory</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_setsdatabasedialog.cpp" line="182"/>
+        <source>Keyword cannot be empty.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_setsdatabasedialog.cpp" line="187"/>
+        <source>Searching</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_setsdatabasedialog.cpp" line="188"/>
+        <source>Connecting to server</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_setsdatabasedialog.cpp" line="254"/>
+        <source>Error connecting to server.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_setsdatabasedialog.cpp" line="301"/>
+        <source>Error downloading set inventory.</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>lcTimelineWidget</name>
     <message>
-        <location filename="../common/lc_timelinewidget.cpp" line="103"/>
+        <location filename="../common/lc_timelinewidget.cpp" line="104"/>
         <source>Step %1</source>
         <translation>Étape %1</translation>
     </message>

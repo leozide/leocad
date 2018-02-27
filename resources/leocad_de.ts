@@ -3138,22 +3138,22 @@ GL_EXT_texture_filter_anisotropic Erweiterung: %4
     <message>
         <location filename="../qt/lc_qhtmldialog.ui" line="239"/>
         <source>Color:</source>
-        <translation>Couleur :</translation>
+        <translation>Farbe:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qhtmldialog.ui" line="249"/>
         <source>Create images</source>
-        <translation>Créer les images</translation>
+        <translation>Bilder erzeugen</translation>
     </message>
     <message>
         <location filename="../qt/lc_qhtmldialog.cpp" line="54"/>
         <source>Output folder cannot be empty.</source>
-        <translation>Le champ dossier cible ne peut être vide.</translation>
+        <translation>Das Ausgangsverzeichnis darf nicht leer sein.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qhtmldialog.cpp" line="79"/>
         <source>Select Output Folder</source>
-        <translation>Sélectionner le dossier cible</translation>
+        <translation>Ausgangsordner auswählen</translation>
     </message>
 </context>
 <context>
@@ -3161,57 +3161,57 @@ GL_EXT_texture_filter_anisotropic Erweiterung: %4
     <message>
         <location filename="../qt/lc_qimagedialog.ui" line="14"/>
         <source>Save Image</source>
-        <translation>Enregistrer l’image</translation>
+        <translation>Bild speichern</translation>
     </message>
     <message>
         <location filename="../qt/lc_qimagedialog.ui" line="24"/>
         <source>File name:</source>
-        <translation>Nom de fichier :</translation>
+        <translation>Dateiname:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qimagedialog.ui" line="48"/>
         <source>Dimensions</source>
-        <translation>Dimensions</translation>
+        <translation>Abmessungen</translation>
     </message>
     <message>
         <location filename="../qt/lc_qimagedialog.ui" line="109"/>
         <source>Step Range</source>
-        <translation>Intervalle des étapes</translation>
+        <translation>Schrittweite</translation>
     </message>
     <message>
         <location filename="../qt/lc_qimagedialog.ui" line="115"/>
         <source>All Steps</source>
-        <translation>Toutes les étapes</translation>
+        <translation>Alle Schritte</translation>
     </message>
     <message>
         <location filename="../qt/lc_qimagedialog.ui" line="122"/>
         <source>Current Step</source>
-        <translation>Étape courante</translation>
+        <translation>Aktiver Schritt</translation>
     </message>
     <message>
         <location filename="../qt/lc_qimagedialog.ui" line="131"/>
         <source>Custom Range</source>
-        <translation>Intervalle personnalisé</translation>
+        <translation>Individualisierte Schrittweite</translation>
     </message>
     <message>
         <location filename="../qt/lc_qimagedialog.ui" line="138"/>
         <source>From:</source>
-        <translation>Depuis :</translation>
+        <translation>Von:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qimagedialog.ui" line="161"/>
         <source>To:</source>
-        <translation>Jusqu’à :</translation>
+        <translation>An:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qimagedialog.ui" line="54"/>
         <source>Width:</source>
-        <translation>Largueur :</translation>
+        <translation>Breite:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qimagedialog.ui" line="80"/>
         <source>Height:</source>
-        <translation>Hauteur :</translation>
+        <translation>Höhe:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qimagedialog.ui" line="37"/>
@@ -3221,7 +3221,7 @@ GL_EXT_texture_filter_anisotropic Erweiterung: %4
     <message>
         <location filename="../qt/lc_qimagedialog.cpp" line="40"/>
         <source>Output File cannot be empty.</source>
-        <translation>Le champ fichier cible ne peut être vide.</translation>
+        <translation>Ausgabedatei darf nicht leer sein.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qimagedialog.cpp" line="40"/>
@@ -3231,42 +3231,42 @@ GL_EXT_texture_filter_anisotropic Erweiterung: %4
         <location filename="../qt/lc_qimagedialog.cpp" line="86"/>
         <location filename="../qt/lc_qimagedialog.cpp" line="92"/>
         <source>Error</source>
-        <translation>Erreur</translation>
+        <translation>Fehler</translation>
     </message>
     <message>
         <location filename="../qt/lc_qimagedialog.cpp" line="48"/>
         <source>Please enter a width between 1 and 2048.</source>
-        <translation>SVP entrez une largeur entre 1 et 2048.</translation>
+        <translation>Bitte die Breite zwischen 1 und 2048 eingeben.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qimagedialog.cpp" line="56"/>
         <source>Please enter a height between 1 and 2048.</source>
-        <translation>SVP entrez une hauteur entre 1 et 2048.</translation>
+        <translation>Bitte die Höhe zwischen 1 und 2048 eingeben.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qimagedialog.cpp" line="78"/>
         <source>First step must be between 1 and %1.</source>
-        <translation>La première étape doit être comprise entre 1 et %1.</translation>
+        <translation>Der erste Schritt muss zwischen 1 und %1 sein.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qimagedialog.cpp" line="86"/>
         <source>Last step must be between 1 and %1.</source>
-        <translation>La dernière étape doit être comprise entre 1 et %1.</translation>
+        <translation>Der letzte Schritt muss zwischen 1 und %1 sein.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qimagedialog.cpp" line="108"/>
         <source>Supported Image Files (*.bmp *.png *.jpg);;BMP Files (*.bmp);;PNG Files (*.png);;JPEG Files (*.jpg);;All Files (*.*)</source>
-        <translation>Fichiers images pris en charge (*.bmp *.png *.jpg);;Fichiers BMP (*.bmp);;Fichiers PNG (*.png);;Fichiers JPEG (*.jpg);;Tous les fichiers (*.*)</translation>
+        <translation>Unterstützte Bilddateien (*.bmp *.png *.jpg);;BMP Dateien (*.bmp);;PNG Dateien (*.png);;JPEG Dateien (*.jpg);;Alle Dateien (*.*)</translation>
     </message>
     <message>
         <location filename="../qt/lc_qimagedialog.cpp" line="92"/>
         <source>Last step must be greater than first step.</source>
-        <translation>La dernière étape doit être plus grande que la première.</translation>
+        <translation>Der letzte Schritt muss grösser sein als der erste.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qimagedialog.cpp" line="108"/>
         <source>Save Image File</source>
-        <translation>Enregistrer l’image</translation>
+        <translation>Bilddatei speichern</translation>
     </message>
 </context>
 <context>
@@ -3274,7 +3274,7 @@ GL_EXT_texture_filter_anisotropic Erweiterung: %4
     <message>
         <location filename="../qt/lc_qminifigdialog.ui" line="14"/>
         <source>Minifig Wizard</source>
-        <translation>Assistant de minifig</translation>
+        <translation>minifig Assistent</translation>
     </message>
 </context>
 <context>
@@ -3282,87 +3282,87 @@ GL_EXT_texture_filter_anisotropic Erweiterung: %4
     <message>
         <location filename="../qt/lc_qmodellistdialog.ui" line="14"/>
         <source>Models</source>
-        <translation>Modèles</translation>
+        <translation>Modelle</translation>
     </message>
     <message>
         <location filename="../qt/lc_qmodellistdialog.ui" line="27"/>
         <source>&amp;New</source>
-        <translation>&amp;Nouveau</translation>
+        <translation>&amp;Neu</translation>
     </message>
     <message>
         <location filename="../qt/lc_qmodellistdialog.ui" line="34"/>
         <source>D&amp;elete...</source>
-        <translation>Su&amp;pprimer…</translation>
+        <translation>L&amp;öschen…</translation>
     </message>
     <message>
         <location filename="../qt/lc_qmodellistdialog.ui" line="41"/>
         <source>&amp;Rename...</source>
-        <translation>&amp;Renommer…</translation>
+        <translation>&amp;Umbenennen…</translation>
     </message>
     <message>
         <location filename="../qt/lc_qmodellistdialog.ui" line="48"/>
         <source>Move &amp;Up</source>
-        <translation>&amp;Monter</translation>
+        <translation>&amp;nach oben</translation>
     </message>
     <message>
         <location filename="../qt/lc_qmodellistdialog.ui" line="55"/>
         <source>Move &amp;Down</source>
-        <translation>&amp;Descendre</translation>
+        <translation>&amp;nach unten</translation>
     </message>
     <message>
         <location filename="../qt/lc_qmodellistdialog.cpp" line="43"/>
         <source>Model #</source>
-        <translation>Modèle n°</translation>
+        <translation>Modell Nr.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qmodellistdialog.cpp" line="74"/>
         <source>Error</source>
-        <translation>Erreur</translation>
+        <translation>Fehler</translation>
     </message>
     <message>
         <location filename="../qt/lc_qmodellistdialog.cpp" line="74"/>
         <source>The project must have at least 1 model.</source>
-        <translation>Le projet doit avoir au moins un modèle.</translation>
+        <translation>Das Projekt muss mindestens ein Modell enthalten.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qmodellistdialog.cpp" line="83"/>
         <source>Are you sure you want to delete the model &apos;%1&apos;?</source>
-        <translation>Êtes-vous sûr de vouloir supprimer le modèle « %1 » ?</translation>
+        <translation>Sind sie sicher dass sie das Modell « %1 » löschen möchten?</translation>
     </message>
     <message>
         <location filename="../qt/lc_qmodellistdialog.cpp" line="84"/>
         <source>Delete Model</source>
-        <translation>Supprimer le modèle</translation>
+        <translation>Modell löschen</translation>
     </message>
     <message>
         <location filename="../qt/lc_qmodellistdialog.cpp" line="102"/>
         <source>Rename Model</source>
-        <translation>Renommer le modèle</translation>
+        <translation>Modell umbenennen</translation>
     </message>
     <message>
         <location filename="../qt/lc_qmodellistdialog.cpp" line="102"/>
         <source>Name:</source>
-        <translation>Nom :</translation>
+        <translation>Name:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qmodellistdialog.cpp" line="109"/>
         <source>Empty Name</source>
-        <translation>Nom vide</translation>
+        <translation>Leerer Name</translation>
     </message>
     <message>
         <location filename="../qt/lc_qmodellistdialog.cpp" line="109"/>
         <source>The model name cannot be empty.</source>
-        <translation>Le nom du modèle ne peut pas être vide.</translation>
+        <translation>Der Name des Modells darf nicht leer sein.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qmodellistdialog.cpp" line="118"/>
         <source>Duplicate Model</source>
-        <translation>Modèle déjà existant</translation>
+        <translation>Modell bereits vorhanden</translation>
     </message>
     <message>
         <location filename="../qt/lc_qmodellistdialog.cpp" line="118"/>
         <source>A model named &apos;%1&apos; already exists in this project, please enter an unique name.</source>
-        <translation>Un modèle nommé « %1 » existe déjà dans ce projet, SVP entrez un nom unique.</translation>
+        <translation>Ein Modell mit Namen « %1 » existiert bereits in diesem Projekt, bitte geben sie einen eindeutigen Namen an.</translation>
     </message>
 </context>
 <context>
@@ -3370,27 +3370,27 @@ GL_EXT_texture_filter_anisotropic Erweiterung: %4
     <message>
         <location filename="../qt/lc_qpovraydialog.ui" line="23"/>
         <source>POV-Ray Export</source>
-        <translation>Export POV-Ray</translation>
+        <translation>POV-Ray Export</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpovraydialog.ui" line="44"/>
         <source>Output File</source>
-        <translation>Fichier cible</translation>
+        <translation>Ausgabedatei</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpovraydialog.ui" line="54"/>
         <source>POV-Ray Executable</source>
-        <translation>Exécutable POV-Ray</translation>
+        <translation>Ausführbare POV-Ray</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpovraydialog.ui" line="64"/>
         <source>LGEO Path (optional)</source>
-        <translation>Chemin LGEO (facultatif)</translation>
+        <translation>LGEO Pfad (optional)</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpovraydialog.ui" line="74"/>
         <source>Render Scene</source>
-        <translation>Lancer le rendu</translation>
+        <translation>Szene rendern</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpovraydialog.ui" line="86"/>
@@ -3402,37 +3402,37 @@ GL_EXT_texture_filter_anisotropic Erweiterung: %4
     <message>
         <location filename="../qt/lc_qpovraydialog.cpp" line="31"/>
         <source>Output File cannot be empty.</source>
-        <translation>Le champ fichier cible ne peut être vide.</translation>
+        <translation>Ausgabedatei darf nicht leer sein.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpovraydialog.cpp" line="45"/>
         <source>Save POV-Ray File</source>
-        <translation>Enregistrer le fichier POV-Ray</translation>
+        <translation>POV-Ray Datei speichern</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpovraydialog.cpp" line="45"/>
         <source>POV-Ray Files (*.pov);;All Files (*.*)</source>
-        <translation>Fichiers POV-Ray (*.pov);;Tous les fichiers (*.*)</translation>
+        <translation>POV-Ray Datei (*.pov);;Alle Dateien (*.*)</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpovraydialog.cpp" line="54"/>
         <source>Executable Files (*.exe);;All Files (*.*)</source>
-        <translation>Fichiers exécutables (*.exe);;Tous les fichiers (*.*)</translation>
+        <translation>Ausführbare Dateien (*.exe);;Alle Dateien (*.*)</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpovraydialog.cpp" line="56"/>
         <source>All Files (*.*)</source>
-        <translation>Tous les fichiers (*.*)</translation>
+        <translation>Alle Dateien (*.*)</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpovraydialog.cpp" line="59"/>
         <source>Open POV-Ray Executable</source>
-        <translation>Lancer l’exécutable POV-Ray</translation>
+        <translation>POV-Ray ausführen</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpovraydialog.cpp" line="67"/>
         <source>Open LGEO Folder</source>
-        <translation>Ouvrir le dossier LGEO</translation>
+        <translation>LGEO Ordner öffnen</translation>
     </message>
 </context>
 <context>
@@ -3440,12 +3440,12 @@ GL_EXT_texture_filter_anisotropic Erweiterung: %4
     <message>
         <location filename="../qt/lc_qpartstree.cpp" line="89"/>
         <source>Models</source>
-        <translation>Modèles</translation>
+        <translation>Modelle</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpartstree.cpp" line="90"/>
         <source>Search Results</source>
-        <translation>Résultats de la recherche</translation>
+        <translation>Suchergebnisse</translation>
     </message>
 </context>
 <context>
@@ -3453,22 +3453,22 @@ GL_EXT_texture_filter_anisotropic Erweiterung: %4
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="14"/>
         <source>Preferences</source>
-        <translation>Préférences</translation>
+        <translation>Einstellungen</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="24"/>
         <source>General</source>
-        <translation>Général</translation>
+        <translation>Allgemein</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="33"/>
         <source>Default author name:</source>
-        <translation>Auteur par défaut :</translation>
+        <translation>Voreinstellung für Autor:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="46"/>
         <source>Default projects folder:</source>
-        <translation>Dossier des projets par défaut :</translation>
+        <translation>Voreinstellung für den Projektordner:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="61"/>
@@ -3481,67 +3481,67 @@ GL_EXT_texture_filter_anisotropic Erweiterung: %4
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="70"/>
         <source>Custom parts library:</source>
-        <translation>Bibliothèque de pièces personnalisées :</translation>
+        <translation>Eigene Teilebibliothek:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="94"/>
         <source>POV-Ray Executable:</source>
-        <translation>Éxécutable POV-Ray :</translation>
+        <translation>Ausführbares POV-Ray:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="118"/>
         <source>LGEO Path:</source>
-        <translation>Chemin LGEO :</translation>
+        <translation>LGEO Pfad:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="651"/>
         <source>Mouse</source>
-        <translation>Souris</translation>
+        <translation>Maus</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="659"/>
         <source>Mouse Shortcuts</source>
-        <translation>Raccourcis souris</translation>
+        <translation>Maus-Kurzbefehle</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="674"/>
         <source>Action</source>
-        <translation>Action</translation>
+        <translation>Aktion</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="726"/>
         <source>Button:</source>
-        <translation>Bouton :</translation>
+        <translation>Schaltknopf:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="734"/>
         <source>None</source>
-        <translation>Aucun</translation>
+        <translation>Keine</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="739"/>
         <source>Left</source>
-        <translation>Gauche</translation>
+        <translation>Links</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="744"/>
         <source>Middle</source>
-        <translation>Central</translation>
+        <translation>Mitte</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="749"/>
         <source>Right</source>
-        <translation>Droit</translation>
+        <translation>Rechts</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="757"/>
         <source>Modifiers:</source>
-        <translation>Modificateurs :</translation>
+        <translation>Modifizierer:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="764"/>
         <source>Control</source>
-        <translation>Contrôle</translation>
+        <translation>Steuerung</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="771"/>
@@ -3551,57 +3551,57 @@ GL_EXT_texture_filter_anisotropic Erweiterung: %4
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="778"/>
         <source>Shift</source>
-        <translation>Maj</translation>
+        <translation>Shift</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="806"/>
         <source>Mouse sensitivity:</source>
-        <translation>Sensibilité de la souris :</translation>
+        <translation>Mausempfindlichkeit:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="142"/>
         <source>Check for updates:</source>
-        <translation>Vérifier les mises à jour :</translation>
+        <translation>Auf Aktualisierungen prüfen:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="153"/>
         <source>Never</source>
-        <translation>Jamais</translation>
+        <translation>Nie</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="158"/>
         <source>Once a day</source>
-        <translation>Tous les jours</translation>
+        <translation>einmal am Tag</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="163"/>
         <source>Once a week</source>
-        <translation>Toutes les semaines</translation>
+        <translation>einmal pro Woche</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="171"/>
         <source>Fixed direction keys</source>
-        <translation>Touches de directions fixes</translation>
+        <translation>Richtungstasten</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="179"/>
         <source>Rendering</source>
-        <translation>Rendu</translation>
+        <translation>Rendern</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="198"/>
         <source>Edge lines</source>
-        <translation>Bordures</translation>
+        <translation>Randlinien</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="205"/>
         <source>Axis icon</source>
-        <translation>Icônes d’axes</translation>
+        <translation>Ikonen an den Achsen</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="212"/>
         <source>width</source>
-        <translation>largeur</translation>
+        <translation>breite</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="219"/>
@@ -3611,7 +3611,7 @@ GL_EXT_texture_filter_anisotropic Erweiterung: %4
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="226"/>
         <source>Enable lighting</source>
-        <translation>Activer l’éclairage</translation>
+        <translation>Beleuchtung einschalten</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="234"/>
@@ -3631,97 +3631,97 @@ GL_EXT_texture_filter_anisotropic Erweiterung: %4
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="268"/>
         <source>Base Grid</source>
-        <translation>Grille de base</translation>
+        <translation>Grundraster</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="304"/>
         <source>Draw studs</source>
-        <translation>Dessiner les tenons</translation>
+        <translation>Noppen darstellen</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="311"/>
         <source>studs</source>
-        <translation>tenons</translation>
+        <translation>Noppen</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="318"/>
         <source>Draw lines every</source>
-        <translation>Dessine des lignes tous les</translation>
+        <translation>Linien Zeichnen alle</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="349"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="390"/>
         <source>Categories</source>
-        <translation>Catégories</translation>
+        <translation>Kategorie</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="355"/>
         <source>Parts Library Categories</source>
-        <translation>Catégories de la bibliothèque de pièces</translation>
+        <translation>Kategorie der Teilebibliothek</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="424"/>
         <source>Name</source>
-        <translation>Nom</translation>
+        <translation>Name</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="429"/>
         <source>Number</source>
-        <translation>Nombre</translation>
+        <translation>Nummer</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="440"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="561"/>
         <source>Import...</source>
-        <translation>Importer…</translation>
+        <translation>Importieren…</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="447"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="568"/>
         <source>Export...</source>
-        <translation>Exporter…</translation>
+        <translation>Exportieren…</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="454"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="575"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="689"/>
         <source>Reset...</source>
-        <translation>Réinitialiser…</translation>
+        <translation>Rücksetzen…</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="479"/>
         <source>Category</source>
-        <translation>Catégorie</translation>
+        <translation>Kategorie</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="485"/>
         <source>New...</source>
-        <translation>Nouveau…</translation>
+        <translation>Neu…</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="492"/>
         <source>Edit...</source>
-        <translation>Éditer…</translation>
+        <translation>Bearbeiten…</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="499"/>
         <source>Delete...</source>
-        <translation>Supprimer…</translation>
+        <translation>Löschen…</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="523"/>
         <source>Keyboard</source>
-        <translation>Clavier</translation>
+        <translation>Tastatur</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="533"/>
         <source>Keyboard Shortcuts</source>
-        <translation>Raccourcis clavier</translation>
+        <translation>Tastenkürzel</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="546"/>
         <source>Command</source>
-        <translation>Commande</translation>
+        <translation>Befehl</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="551"/>
@@ -3729,84 +3729,84 @@ GL_EXT_texture_filter_anisotropic Erweiterung: %4
         <location filename="../qt/lc_qpreferencesdialog.ui" line="679"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="718"/>
         <source>Shortcut</source>
-        <translation>Raccourcis</translation>
+        <translation>Kürzel</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="609"/>
         <source>Key sequence:</source>
-        <translation>Touches :</translation>
+        <translation>Tastenfolgen:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="622"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="785"/>
         <source>Assign</source>
-        <translation>Attribuer</translation>
+        <translation>Zuweisen</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="629"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="792"/>
         <source>Remove</source>
-        <translation>Supprimer</translation>
+        <translation>Entfernen</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="86"/>
         <source>Grid spacing must be greater than 0.</source>
-        <translation>L’espacement de la grille doit être plus grand que 0.</translation>
+        <translation>Rasterweite muss grösser als 0 sein.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="123"/>
         <source>Open Projects Folder</source>
-        <translation>Ouvrir le dossier des projets</translation>
+        <translation>Projektordner öffnen</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="131"/>
         <source>Open Parts Library Folder</source>
-        <translation>Ouvrir le dossier de la bibliothèque de pièces</translation>
+        <translation>Ordern der Teilebibliothek öffnen</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="140"/>
         <source>Executable Files (*.exe);;All Files (*.*)</source>
-        <translation>Fichiers exécutables (*.exe);;Tous les fichiers (*.*)</translation>
+        <translation>Asuführbare Dateien (*.exe);;Alle Dateien (*.*)</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="142"/>
         <source>All Files (*.*)</source>
-        <translation>Tous les fichiers (*.*)</translation>
+        <translation>Alle Dateien (*.*)</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="145"/>
         <source>Open POV-Ray Executable</source>
-        <translation>Lancer l’exécutable POV-Ray</translation>
+        <translation>Asuführbares POV-Ray öffnen</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="153"/>
         <source>Open LGEO Folder</source>
-        <translation>Ouvrir le dossier LGEO</translation>
+        <translation>LGEO Ordner öffnen</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="169"/>
         <source>Select Grid Stud Color</source>
-        <translation>Choisir le couleur des tenons de la grille</translation>
+        <translation>Farbe der Noppen im Gitter wählen</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="175"/>
         <source>Select Grid Line Color</source>
-        <translation>Choisir la couleur des lignes de la grille</translation>
+        <translation>Farbe der Gitterlinien wählen</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="226"/>
         <source>Unassigned</source>
-        <translation>Non-attribué</translation>
+        <translation>Unbestimmt</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="340"/>
         <source>Are you sure you want to delete the category &apos;%1&apos;?</source>
-        <translation>Êtes-vous sûr de vouloir supprimer la catégorie « %1 » ?</translation>
+        <translation>Sind sie sicher dass sie die Kategorie « %1 » löschen möchten?</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="353"/>
         <source>Import Categories</source>
-        <translation>Importer les catégories</translation>
+        <translation>Kategorien importieren</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="353"/>
@@ -3814,82 +3814,82 @@ GL_EXT_texture_filter_anisotropic Erweiterung: %4
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="556"/>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="576"/>
         <source>Text Files (*.txt);;All Files (*.*)</source>
-        <translation>Fichiers texte (*.txt);;Tous les fichiers (*.*)</translation>
+        <translation>Textdateien (*.txt);;Alle Dateien (*.*)</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="361"/>
         <source>Error loading categories file.</source>
-        <translation>Erreur au chargement du fichier des catégories.</translation>
+        <translation>Fehler beim Laden der Kategoriedatei.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="372"/>
         <source>Export Categories</source>
-        <translation>Exporter les catégories</translation>
+        <translation>Kategorien exportieren</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="379"/>
         <source>Error saving categories file.</source>
-        <translation>Erreur à l’enregistrement du fichier des catégories.</translation>
+        <translation>Fehler beim Speichern der Kategoriendatei.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="386"/>
         <source>Are you sure you want to load the default categories?</source>
-        <translation>Êtes-vous sûr de vouloir charger les catégories par défaut ?</translation>
+        <translation>Sind sie sicher dass sie die voreingestellten Kategorien laden möchten?</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="556"/>
         <source>Import shortcuts</source>
-        <translation>Importer les raccourcis</translation>
+        <translation>Tastenkürzel laden</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="564"/>
         <source>Error loading keyboard shortcuts file.</source>
-        <translation>Erreur au chargement du fichier des raccourcis clavier.</translation>
+        <translation>Fehler beim Laden der Tastaturkürzel-Datei.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="576"/>
         <source>Export shortcuts</source>
-        <translation>Exporter les raccourcis</translation>
+        <translation>Tastaturkürzel exportieren</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="583"/>
         <source>Error saving keyboard shortcuts file.</source>
-        <translation>Erreur à l’enregistrement du fichier des raccourcis clavier.</translation>
+        <translation>Fehler beim Speichern der Tastaturkürzel-Datei.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="590"/>
         <source>Are you sure you want to load the default keyboard shortcuts?</source>
-        <translation>Êtes-vous sûr de vouloir charger les raccourcis clavier par défaut ?</translation>
+        <translation>Sind sie sicher dass sie die voreingestellten Tastaturkürzel laden möchten?</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="616"/>
         <source>Left Button</source>
-        <translation>Bouton gauche</translation>
+        <translation>Schaltfeld links</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="620"/>
         <source>Middle Button</source>
-        <translation>Bouton central</translation>
+        <translation>Schaltfeld mitte</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="624"/>
         <source>Right Button</source>
-        <translation>Bouton droit</translation>
+        <translation>Schaltfeld rechts</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="680"/>
         <source>Override Shortcut</source>
-        <translation>Écraser le raccourcis</translation>
+        <translation>Tastaturkürzel ändern</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="680"/>
         <source>This shortcut is already assigned to &apos;%1&apos;, do you want to replace it?</source>
-        <translation>Ce raccourcis est déjà attribué à « %1 », voulez-vous le remplacer ?</translation>
+        <translation>Dieses Tastaturkürzel ist bereits » %1 « zugewiesen, möchten sie es ersetzen?</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="718"/>
         <source>Are you sure you want to load the default mouse shortcuts?</source>
-        <translation>Êtes-vous sûr de vouloir charger les raccourcis souris par défaut ?</translation>
+        <translation>Sind sie sicher dass sie die voreingestellten Mauskürzel laden möchten?</translation>
     </message>
 </context>
 <context>
@@ -3897,52 +3897,52 @@ GL_EXT_texture_filter_anisotropic Erweiterung: %4
     <message>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="14"/>
         <source>Properties</source>
-        <translation>Propriétés</translation>
+        <translation>Eigenschaften</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="24"/>
         <source>Summary</source>
-        <translation>Résumé</translation>
+        <translation>Zusammenfassung</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="30"/>
         <source>Author:</source>
-        <translation>Auteur :</translation>
+        <translation>Autor:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="40"/>
         <source>Description:</source>
-        <translation>Description :</translation>
+        <translation>Beschreibung :</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="50"/>
         <source>Comments:</source>
-        <translation>Commentaires :</translation>
+        <translation>Kommentare:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="65"/>
         <source>Scene</source>
-        <translation>Scène</translation>
+        <translation>Szene</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="71"/>
         <source>Background</source>
-        <translation>Fond</translation>
+        <translation>Hintergrund</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="108"/>
         <source>Solid Color</source>
-        <translation>Couleur pleine</translation>
+        <translation>Füllfarbe</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="115"/>
         <source>Image</source>
-        <translation>Image</translation>
+        <translation>Bild</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="122"/>
         <source>Gradient</source>
-        <translation>Dégradé</translation>
+        <translation>Verlauf</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="134"/>
@@ -3952,88 +3952,88 @@ GL_EXT_texture_filter_anisotropic Erweiterung: %4
     <message>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="143"/>
         <source>Tile</source>
-        <translation>Tuile</translation>
+        <translation>Kachel</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="177"/>
         <source>Environment</source>
-        <translation>Environnement</translation>
+        <translation>Umgebung</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="183"/>
         <source>Fog</source>
-        <translation>Brouillard</translation>
+        <translation>Nebel</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="199"/>
         <source>Density</source>
-        <translation>Densité</translation>
+        <translation>Dichte</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="231"/>
         <source>Ambient Light</source>
-        <translation>Lumière ambiante</translation>
+        <translation>Umgebungslicht</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="267"/>
         <source>Set default options for new projects</source>
-        <translation>Attribuer les options par défauts aux nouveaux projets</translation>
+        <translation>Voreinstellungen der Optionen für neue Projekte</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="275"/>
         <source>Parts Used</source>
-        <translation>Pièces utilisées</translation>
+        <translation>Verwendete Teile</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.cpp" line="26"/>
         <source>%1 Properties</source>
-        <translation>%1 propriétés</translation>
+        <translation>%1 Eigenschaften</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.cpp" line="83"/>
         <source>Part</source>
-        <translation>Pièce</translation>
+        <translation>Teil</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.cpp" line="94"/>
         <location filename="../qt/lc_qpropertiesdialog.cpp" line="110"/>
         <source>Total</source>
-        <translation>Total</translation>
+        <translation>Gesamt</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.cpp" line="193"/>
         <source>Select Background Color</source>
-        <translation>Choisir la couleur de fond</translation>
+        <translation>Hintergrundfarbe wählen</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.cpp" line="198"/>
         <source>Select Background Top Color</source>
-        <translation>Choisir la couleur du haut du fond</translation>
+        <translation>Hintergrundfarbe oben wählen</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.cpp" line="203"/>
         <source>Select Background Bottom Color</source>
-        <translation>Choisir la couleur du bas du fond</translation>
+        <translation>Hintergrundfarbe unten wählen</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.cpp" line="208"/>
         <source>Select Fog Color</source>
-        <translation>Choisir la couleur du brouillard</translation>
+        <translation>Nebelfarbe wählen</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.cpp" line="213"/>
         <source>Select Ambient Light Color</source>
-        <translation>Choisir la couleur de la lumière ambiante</translation>
+        <translation>Farbe des Umgebungslichts wählen</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.cpp" line="234"/>
         <source>Select Background Image</source>
-        <translation>Choisir l’image de fond</translation>
+        <translation>Hintergrundbicl wählen</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.cpp" line="234"/>
         <source>All Image Files (*.png *.jpg *.gif *.bmp);;PNG Files (*.png);;JPEG Files (*.jpg);;GIF Files (*.gif);;BMP Files (*.bmp);;All Files (*.*)</source>
-        <translation>Tous les fichiers images (*.png *.jpg *.gif *.bmp);;Fichiers PNG (*.png);;Fichiers JPEG (*.jpg);;Fichiers GIF (*.gif);;Fichiers BMP (*.bmp);;Tous les fichiers (*.*)</translation>
+        <translation>Alle Bilddateien (*.png *.jpg *.gif *.bmp);;PNG Dateien (*.png);;JPEG Datein (*.jpg);;GIF Dateien(*.gif);;BMP Dateien (*.bmp);;Alle Dateien (*.*)</translation>
     </message>
 </context>
 <context>
@@ -4041,12 +4041,12 @@ GL_EXT_texture_filter_anisotropic Erweiterung: %4
     <message>
         <location filename="../qt/lc_qpropertiestree.cpp" line="209"/>
         <source>Property</source>
-        <translation>Propriété</translation>
+        <translation>Eigenschaft</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiestree.cpp" line="210"/>
         <source>Value</source>
-        <translation>Valeur</translation>
+        <translation>Wert</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiestree.cpp" line="805"/>
@@ -4084,27 +4084,27 @@ GL_EXT_texture_filter_anisotropic Erweiterung: %4
     <message>
         <location filename="../qt/lc_qpropertiestree.cpp" line="810"/>
         <source>Rotation</source>
-        <translation>Rotation</translation>
+        <translation>Drehung</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiestree.cpp" line="815"/>
         <source>Visibility</source>
-        <translation>Visibilité</translation>
+        <translation>Sichtbarkeit</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiestree.cpp" line="816"/>
         <source>Show</source>
-        <translation>Montrer</translation>
+        <translation>Zeige</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiestree.cpp" line="817"/>
         <source>Hide</source>
-        <translation>Cacher</translation>
+        <translation>Ausblenden</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiestree.cpp" line="819"/>
         <source>Appearance</source>
-        <translation>Apparence</translation>
+        <translation>Erscheinungsbild</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiestree.cpp" line="820"/>
@@ -4114,23 +4114,23 @@ GL_EXT_texture_filter_anisotropic Erweiterung: %4
     <message>
         <location filename="../qt/lc_qpropertiestree.cpp" line="821"/>
         <source>Part</source>
-        <translation>Pièce</translation>
+        <translation>Teil</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiestree.cpp" line="940"/>
         <source>Target</source>
-        <translation>Cible</translation>
+        <translation>Ziel</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiestree.cpp" line="945"/>
         <location filename="../qt/lc_qpropertiestree.cpp" line="950"/>
         <source>Up</source>
-        <translation>Haut</translation>
+        <translation>Hoch</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiestree.cpp" line="951"/>
         <source>Orthographic</source>
-        <translation>Orthographique</translation>
+        <translation>Orhografisch</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiestree.cpp" line="952"/>
@@ -4140,22 +4140,22 @@ GL_EXT_texture_filter_anisotropic Erweiterung: %4
     <message>
         <location filename="../qt/lc_qpropertiestree.cpp" line="953"/>
         <source>Near</source>
-        <translation>Proche</translation>
+        <translation>Nah</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiestree.cpp" line="954"/>
         <source>Far</source>
-        <translation>Loin</translation>
+        <translation>Fern</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiestree.cpp" line="955"/>
         <source>Name</source>
-        <translation>Nom</translation>
+        <translation>Name</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiestree.cpp" line="1035"/>
         <source>Multiple Objects Selected</source>
-        <translation>Plusieurs objets sélectionnés</translation>
+        <translation>Mehrere Objekre ausgewählt</translation>
     </message>
 </context>
 <context>
@@ -4163,22 +4163,22 @@ GL_EXT_texture_filter_anisotropic Erweiterung: %4
     <message>
         <location filename="../qt/lc_qselectdialog.ui" line="14"/>
         <source>Select Objects</source>
-        <translation>Sélectionner des objets</translation>
+        <translation>Objekte auswählen</translation>
     </message>
     <message>
         <location filename="../qt/lc_qselectdialog.ui" line="34"/>
         <source>All</source>
-        <translation>Tous</translation>
+        <translation>Alle</translation>
     </message>
     <message>
         <location filename="../qt/lc_qselectdialog.ui" line="41"/>
         <source>None</source>
-        <translation>Aucun</translation>
+        <translation>Keine</translation>
     </message>
     <message>
         <location filename="../qt/lc_qselectdialog.ui" line="48"/>
         <source>Invert</source>
-        <translation>Inverser</translation>
+        <translation>Umkehren</translation>
     </message>
 </context>
 <context>
@@ -4186,37 +4186,37 @@ GL_EXT_texture_filter_anisotropic Erweiterung: %4
     <message>
         <location filename="../qt/lc_qupdatedialog.ui" line="14"/>
         <source>LeoCAD Updates</source>
-        <translation>Mises à jour LeoCAD</translation>
+        <translation>Aktualisierungen für LeoCAD</translation>
     </message>
     <message>
         <location filename="../qt/lc_qupdatedialog.cpp" line="38"/>
         <source>Connecting to update server...</source>
-        <translation>Connexion au serveur de mise à jour…</translation>
+        <translation>Verbinde zum Server für Aktualisierungen…</translation>
     </message>
     <message>
         <location filename="../qt/lc_qupdatedialog.cpp" line="125"/>
         <source>&lt;p&gt;There&apos;s a newer version of LeoCAD available for download (%1.%2.%3).&lt;/p&gt;</source>
-        <translation>&lt;p&gt;Il y a une nouvelle version de LeoCAD disponible au téléchargement (%1.%2.%3).&lt;/p&gt;</translation>
+        <translation>&lt;p&gt;Es ist einen neue Version von LeoCAD zum herunterladen verfügbar (%1.%2.%3).&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_qupdatedialog.cpp" line="127"/>
         <source>&lt;p&gt;You are using the latest LeoCAD version.&lt;/p&gt;</source>
-        <translation>&lt;p&gt;Vous utilisez la dernière version de LeoCAD.&lt;/p&gt;</translation>
+        <translation>&lt;p&gt;Sie benutzen die aktuelle Version von LeoCAD.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_qupdatedialog.cpp" line="135"/>
         <source>&lt;p&gt;There are new parts available.&lt;/p&gt;</source>
-        <translation>&lt;p&gt;Il y a de nouvelle pièces disponibles.&lt;/p&gt;</translation>
+        <translation>&lt;p&gt;Es sind neue Teile verfügbar.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_qupdatedialog.cpp" line="139"/>
         <source>&lt;p&gt;There are no new parts available at this time.&lt;/p&gt;</source>
-        <translation>&lt;p&gt;Il n’y a pas de nouvelle pièces disponibles en ce moment.&lt;/p&gt;</translation>
+        <translation>&lt;p&gt;Im Moment gibt es keine neuen Teile.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_qupdatedialog.cpp" line="144"/>
         <source>&lt;p&gt;Visit &lt;a href=&quot;http://www.leocad.org/files/&quot;&gt;http://www.leocad.org/files/&lt;/a&gt; to download.&lt;/p&gt;</source>
-        <translation>&lt;p&gt;Visitez &lt;a href=&quot;http://www.leocad.org/file/&quot;&gt;http://www.leocad.org/files/&lt;/a&gt; pour télécharger.&lt;/p&gt;</translation>
+        <translation>&lt;p&gt;Besuchen sie &lt;a href=&quot;http://www.leocad.org/file/&quot;&gt;http://www.leocad.org/files/&lt;/a&gt; zum herunterladen.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_qupdatedialog.cpp" line="150"/>

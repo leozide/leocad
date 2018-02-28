@@ -2004,27 +2004,27 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="1542"/>
         <source>Select</source>
-        <translation type="unfinished">Seleccionar</translation>
+        <translation>Seleccionar</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1543"/>
         <source>Move</source>
-        <translation type="unfinished">Mover</translation>
+        <translation>Mover</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1544"/>
         <source>Rotate</source>
-        <translation type="unfinished">Rodar</translation>
+        <translation>Rodar</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1545"/>
         <source>Delete</source>
-        <translation type="unfinished">Delete</translation>
+        <translation>Apagar</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1546"/>
         <source>Paint</source>
-        <translation type="unfinished">Pintar</translation>
+        <translation>Pintar</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1547"/>
@@ -2178,12 +2178,12 @@
     <message>
         <location filename="../common/project.cpp" line="1184"/>
         <source>Export COLLADA</source>
-        <translation type="unfinished"></translation>
+        <translation>Exportar COLLADA</translation>
     </message>
     <message>
         <location filename="../common/project.cpp" line="1184"/>
         <source>COLLADA Files (*.dae);;All Files (*.*)</source>
-        <translation type="unfinished"></translation>
+        <translation>Ficheiros COLLADA (*.dae);;Todos os Ficheiros (*.*)</translation>
     </message>
     <message>
         <location filename="../common/project.cpp" line="1449"/>
@@ -2204,12 +2204,12 @@
     <message>
         <location filename="../common/project.cpp" line="2031"/>
         <source>Export POV-Ray</source>
-        <translation type="unfinished"></translation>
+        <translation>Exportar POV-Ray</translation>
     </message>
     <message>
         <location filename="../common/project.cpp" line="2031"/>
         <source>POV-Ray Files (*.pov);;All Files (*.*)</source>
-        <translation type="unfinished">Ficheiros POV-Ray (*.pov);;Todos os Ficheiros (*.*)</translation>
+        <translation>Ficheiros POV-Ray (*.pov);;Todos os Ficheiros (*.*)</translation>
     </message>
     <message>
         <location filename="../common/project.cpp" line="2079"/>
@@ -2652,7 +2652,7 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="1054"/>
         <source>Ctrl+D</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+D</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1089"/>
@@ -3139,7 +3139,7 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="486"/>
         <source>Snap rotations to 22.5 degrees</source>
-        <translation type="unfinished">Fixa as rotações por 180 graus {22.5 ?}</translation>
+        <translation>Fixa as rotações por 22.5 graus</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="493"/>
@@ -3416,7 +3416,7 @@
         <location filename="../common/lc_commands.cpp" line="955"/>
         <location filename="../common/lc_commands.cpp" line="1515"/>
         <source>Remove current step</source>
-        <translation type="unfinished"></translation>
+        <translation>Apaga o passo actual</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1284"/>
@@ -3928,7 +3928,7 @@ Veja http://www.leocad.org para saber como descarragar e instalar uma biblioteca
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="161"/>
         <source>New Model</source>
-        <translation type="unfinished">Novo Modelo</translation>
+        <translation>Novo Modelo</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="162"/>
@@ -4421,13 +4421,13 @@ Veja http://www.leocad.org para saber como descarragar e instalar uma biblioteca
     <message>
         <location filename="../common/lc_model.cpp" line="1392"/>
         <source>Error</source>
-        <translation type="unfinished">Erro</translation>
+        <translation>Erro</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="1392"/>
         <source>Error writing to file &apos;%1&apos;:
 %2</source>
-        <translation type="unfinished">Erro ao escrever no ficheiro &apos;%1&apos;:
+        <translation>Erro ao escrever no ficheiro &apos;%1&apos;:
 %2</translation>
     </message>
     <message>
@@ -4457,7 +4457,7 @@ Veja http://www.leocad.org para saber como descarragar e instalar uma biblioteca
     <message>
         <location filename="../common/lc_model.cpp" line="2386"/>
         <source>New Model</source>
-        <translation type="unfinished">Novo Modelo</translation>
+        <translation>Novo Modelo</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="2435"/>
@@ -4612,7 +4612,7 @@ Veja http://www.leocad.org para saber como descarragar e instalar uma biblioteca
     <message>
         <location filename="../common/lc_partselectionwidget.cpp" line="794"/>
         <source>Models</source>
-        <translation type="unfinished">Modelos</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -4938,12 +4938,12 @@ GL_EXT_texture_filter_anisotropic extension: %4
     <message>
         <location filename="../qt/lc_qhtmldialog.ui" line="72"/>
         <source>Models</source>
-        <translation type="unfinished">Modelos</translation>
+        <translation>Modelos</translation>
     </message>
     <message>
         <location filename="../qt/lc_qhtmldialog.ui" line="78"/>
         <source>All Models</source>
-        <translation type="unfinished"></translation>
+        <translation>Todos os modelos</translation>
     </message>
     <message>
         <location filename="../qt/lc_qhtmldialog.ui" line="85"/>
@@ -4953,22 +4953,22 @@ GL_EXT_texture_filter_anisotropic extension: %4
     <message>
         <location filename="../qt/lc_qhtmldialog.ui" line="92"/>
         <source>Current Model Only</source>
-        <translation type="unfinished"></translation>
+        <translation>Apenas o modelo actual</translation>
     </message>
     <message>
         <location filename="../qt/lc_qhtmldialog.ui" line="102"/>
         <source>Steps</source>
-        <translation type="unfinished"></translation>
+        <translation>Passos</translation>
     </message>
     <message>
         <location filename="../qt/lc_qhtmldialog.ui" line="108"/>
         <source>Single Page</source>
-        <translation type="unfinished"></translation>
+        <translation>Página única</translation>
     </message>
     <message>
         <location filename="../qt/lc_qhtmldialog.ui" line="115"/>
         <source>One Step per Page</source>
-        <translation type="unfinished"></translation>
+        <translation>Um passo por página</translation>
     </message>
     <message>
         <location filename="../qt/lc_qhtmldialog.ui" line="169"/>
@@ -5119,12 +5119,12 @@ GL_EXT_texture_filter_anisotropic extension: %4
     <message>
         <location filename="../qt/lc_qimagedialog.cpp" line="54"/>
         <source>Please enter a width between 1 and 32768.</source>
-        <translation type="unfinished">É favor escolher uma largura entre 1 e 2048. {1 ?} {32768.?}</translation>
+        <translation>É favor escolher uma largura entre 1 e 32768.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qimagedialog.cpp" line="62"/>
         <source>Please enter a height between 1 and 32768.</source>
-        <translation type="unfinished">É favor escolher uma altura entre 1 e 2048. {1 ?} {32768.?}</translation>
+        <translation>É favor escolher uma altura entre 1 e 32768.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qimagedialog.cpp" line="117"/>
@@ -5158,7 +5158,7 @@ GL_EXT_texture_filter_anisotropic extension: %4
     <message>
         <location filename="../qt/lc_qmodellistdialog.ui" line="27"/>
         <source>&amp;New...</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Novo...</translation>
     </message>
     <message>
         <location filename="../qt/lc_qmodellistdialog.ui" line="34"/>
@@ -5173,7 +5173,7 @@ GL_EXT_texture_filter_anisotropic extension: %4
     <message>
         <location filename="../qt/lc_qmodellistdialog.ui" line="48"/>
         <source>Export...</source>
-        <translation type="unfinished">Exportar...</translation>
+        <translation>Exportar...</translation>
     </message>
     <message>
         <location filename="../qt/lc_qmodellistdialog.ui" line="55"/>
@@ -5222,12 +5222,12 @@ GL_EXT_texture_filter_anisotropic extension: %4
     <message>
         <location filename="../qt/lc_qmodellistdialog.cpp" line="122"/>
         <source>LeoCAD</source>
-        <translation type="unfinished">LeoCAD</translation>
+        <translation>LeoCAD</translation>
     </message>
     <message>
         <location filename="../qt/lc_qmodellistdialog.cpp" line="122"/>
         <source>Nothing to export.</source>
-        <translation type="unfinished">Nada a exportar.</translation>
+        <translation>Nada a exportar.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qmodellistdialog.cpp" line="128"/>
@@ -6181,12 +6181,12 @@ GL_EXT_texture_filter_anisotropic extension: %4
     <message>
         <location filename="../qt/lc_renderdialog.ui" line="41"/>
         <source>Width:</source>
-        <translation type="unfinished">Largura:</translation>
+        <translation>Largura:</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.ui" line="48"/>
         <source>Height:</source>
-        <translation type="unfinished">Altura:</translation>
+        <translation>Altura:</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.ui" line="56"/>
@@ -6237,7 +6237,7 @@ GL_EXT_texture_filter_anisotropic extension: %4
         <location filename="../qt/lc_renderdialog.cpp" line="177"/>
         <location filename="../qt/lc_renderdialog.cpp" line="267"/>
         <source>Error</source>
-        <translation type="unfinished">Erro</translation>
+        <translation>Erro</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="177"/>
@@ -6259,7 +6259,7 @@ GL_EXT_texture_filter_anisotropic extension: %4
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="275"/>
         <source>Supported Image Files (*.bmp *.png *.jpg);;BMP Files (*.bmp);;PNG Files (*.png);;JPEG Files (*.jpg);;All Files (*.*)</source>
-        <translation type="unfinished">Formatos de Imagem Suportados (*.bmp *.png *.jpg);;Ficheiros BMP (*.bmp);;Ficheiros PNG (*.png);;Ficheiros JPEG (*.jpg);;Todos os Ficheiros (*.*)</translation>
+        <translation>Formatos de Imagem Suportados (*.bmp *.png *.jpg);;Ficheiros BMP (*.bmp);;Ficheiros PNG (*.png);;Ficheiros JPEG (*.jpg);;Todos os Ficheiros (*.*)</translation>
     </message>
 </context>
 <context>
@@ -6267,12 +6267,12 @@ GL_EXT_texture_filter_anisotropic extension: %4
     <message>
         <location filename="../common/lc_selectbycolordialog.cpp" line="8"/>
         <source>Select By Color</source>
-        <translation type="unfinished"></translation>
+        <translation>Seleccionar Por Cor</translation>
     </message>
     <message>
         <location filename="../common/lc_selectbycolordialog.cpp" line="15"/>
         <source>Color:</source>
-        <translation type="unfinished">Cor:</translation>
+        <translation>Cor:</translation>
     </message>
 </context>
 <context>
@@ -6295,22 +6295,22 @@ GL_EXT_texture_filter_anisotropic extension: %4
     <message>
         <location filename="../qt/lc_setsdatabasedialog.ui" line="51"/>
         <source>Number</source>
-        <translation type="unfinished">Número</translation>
+        <translation>Número</translation>
     </message>
     <message>
         <location filename="../qt/lc_setsdatabasedialog.ui" line="56"/>
         <source>Name</source>
-        <translation type="unfinished">Nome</translation>
+        <translation>Nome</translation>
     </message>
     <message>
         <location filename="../qt/lc_setsdatabasedialog.ui" line="61"/>
         <source>Year</source>
-        <translation type="unfinished"></translation>
+        <translation>Ano</translation>
     </message>
     <message>
         <location filename="../qt/lc_setsdatabasedialog.ui" line="66"/>
         <source>Parts</source>
-        <translation type="unfinished">Peças</translation>
+        <translation>Peças</translation>
     </message>
     <message>
         <location filename="../qt/lc_setsdatabasedialog.ui" line="74"/>
@@ -6335,7 +6335,7 @@ GL_EXT_texture_filter_anisotropic extension: %4
     <message>
         <location filename="../qt/lc_setsdatabasedialog.cpp" line="182"/>
         <source>Keyword cannot be empty.</source>
-        <translation type="unfinished"></translation>
+        <translation>A palavra chave não podem ser vazia.</translation>
     </message>
     <message>
         <location filename="../qt/lc_setsdatabasedialog.cpp" line="187"/>

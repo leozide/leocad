@@ -2125,7 +2125,7 @@ void lcModel::DeleteAllCameras()
 	gMainWindow->UpdateCameraMenu();
 	gMainWindow->UpdateSelectedObjects(true);
 	gMainWindow->UpdateAllViews();
-	SaveCheckpoint(tr("Reseting Cameras"));
+	SaveCheckpoint(tr("Resetting Cameras"));
 }
 
 void lcModel::DeleteSelectedObjects()

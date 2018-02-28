@@ -3900,7 +3900,7 @@ Bitte lesen sie unter http://www.leocad.org nach wie man eine Bibliothek herunte
     <message numerus="yes">
         <location filename="../common/lc_mainwindow.cpp" line="1820"/>
         <source>%n Object(s) selected</source>
-        <translation>%n Objekte ausgewählt</translation>
+        <translation>Objekte ausgewählt</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="2143"/>

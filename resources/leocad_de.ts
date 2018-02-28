@@ -1760,7 +1760,7 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="1052"/>
         <source>&amp;Duplicate</source>
-        <translation">&amp;Duplizieren</translation>
+        <translation>&amp;Duplizieren</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1059"/>

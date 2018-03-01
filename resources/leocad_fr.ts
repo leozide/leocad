@@ -4346,7 +4346,7 @@ SVP visitez http://www.leocad.org pour apprendre comment télécharger et instal
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="2128"/>
-        <source>Reseting Cameras</source>
+        <source>Resetting Cameras</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

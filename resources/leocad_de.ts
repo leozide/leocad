@@ -1302,22 +1302,6 @@
         <translation>Auswahl per Na&amp;men…</translation>
     </message>
     <message>
-        <source>Lock X</source>
-        <translation type="vanished">X sperren</translation>
-    </message>
-    <message>
-        <source>Lock Y</source>
-        <translation type="vanished">Y sperren</translation>
-    </message>
-    <message>
-        <source>Lock Z</source>
-        <translation type="vanished">Z sperren</translation>
-    </message>
-    <message>
-        <source>Unlock All</source>
-        <translation type="vanished">Alles entsperren</translation>
-    </message>
-    <message>
         <location filename="../common/lc_commands.cpp" line="310"/>
         <location filename="../common/lc_commands.cpp" line="380"/>
         <location filename="../common/lc_commands.cpp" line="457"/>
@@ -1409,10 +1393,6 @@
         <location filename="../common/lc_commands.cpp" line="471"/>
         <source>5 Degrees</source>
         <translation>5 Grad</translation>
-    </message>
-    <message>
-        <source>10 Grad</source>
-        <translation type="vanished">10 degrés</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="478"/>
@@ -1943,25 +1923,9 @@
         <translation>Aktuelle Schrittweite festlegen</translation>
     </message>
     <message>
-        <source>New Model...</source>
-        <translation type="vanished">Neues Modell…</translation>
-    </message>
-    <message>
-        <source>Switch to Model</source>
-        <translation type="vanished">Auf neues Modell wechseln</translation>
-    </message>
-    <message>
-        <source>Models...</source>
-        <translation type="vanished">Modelle…</translation>
-    </message>
-    <message>
         <location filename="../common/lc_commands.cpp" line="1479"/>
         <source>LeoCAD &amp;Home Page</source>
         <translation>&amp;Homepage von LeoCAD</translation>
-    </message>
-    <message>
-        <source>Send Support &amp;E-Mail</source>
-        <translation type="vanished">Support eM&amp;ail verschicken</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1493"/>
@@ -2055,45 +2019,9 @@
 <context>
     <name>Project</name>
     <message>
-        <source>Model #1</source>
-        <translation type="vanished">Modell Nr 1</translation>
-    </message>
-    <message>
-        <source>New Project.ldr</source>
-        <translation type="vanished">Neues Projekt.ldr</translation>
-    </message>
-    <message>
-        <source>Neues Projekt.mpd</source>
-        <translation type="vanished">Nouveau Projet.mpd</translation>
-    </message>
-    <message>
-        <source>Model #</source>
-        <translation type="vanished">Modell Nr</translation>
-    </message>
-    <message>
-        <source>New Model</source>
-        <translation type="vanished">Neues Modell</translation>
-    </message>
-    <message>
-        <source>Name:</source>
-        <translation type="vanished">Name:</translation>
-    </message>
-    <message>
         <location filename="../common/project.cpp" line="208"/>
         <source>Empty Name</source>
         <translation>Leerer Name</translation>
-    </message>
-    <message>
-        <source>The model name cannot be empty.</source>
-        <translation type="vanished">Der Modellname kann nicht leer sein.</translation>
-    </message>
-    <message>
-        <source>Duplicate Model</source>
-        <translation type="vanished">Das Modell existiert bereits</translation>
-    </message>
-    <message>
-        <source>A model named &apos;%1&apos; already exists in this project, please enter an unique name.</source>
-        <translation type="vanished">Ein Modell mit dem Namen » %1 « existiert bereits in diesem Projekt, bitte geben sie einen eindeutigen Namen eine.</translation>
     </message>
     <message>
         <location filename="../common/project.cpp" line="346"/>
@@ -2534,42 +2462,6 @@
         <translation>Shift+9</translation>
     </message>
     <message>
-        <source>Shift+S</source>
-        <translation type="vanished">Shift+S</translation>
-    </message>
-    <message>
-        <source>Shift+M</source>
-        <translation type="vanished">Shift+M</translation>
-    </message>
-    <message>
-        <source>Shift+R</source>
-        <translation type="vanished">Shift+R</translation>
-    </message>
-    <message>
-        <source>Shift+D</source>
-        <translation type="vanished">Shift+D</translation>
-    </message>
-    <message>
-        <source>Shift+N</source>
-        <translation type="vanished">Shift+N</translation>
-    </message>
-    <message>
-        <source>Shift+Z</source>
-        <translation type="vanished">Shift+Z</translation>
-    </message>
-    <message>
-        <source>Shift+P</source>
-        <translation type="vanished">Shift+P</translation>
-    </message>
-    <message>
-        <source>Shift+T</source>
-        <translation type="vanished">Shift+T</translation>
-    </message>
-    <message>
-        <source>Shift+L</source>
-        <translation type="vanished">shift+L</translation>
-    </message>
-    <message>
         <location filename="../common/lc_commands.cpp" line="662"/>
         <source>Esc</source>
         <translation>Esc</translation>
@@ -2733,37 +2625,9 @@
 <context>
     <name>Status</name>
     <message>
-        <source>Create a new project</source>
-        <translation type="vanished">Neues Projekt anlegen</translation>
-    </message>
-    <message>
-        <source>Open an existing project</source>
-        <translation type="vanished">Bestehendes Projekt öffnen</translation>
-    </message>
-    <message>
-        <source>Merge the contents of another project with the current one</source>
-        <translation type="vanished">Inhalte eines anderen Projektes mit dem aktuellen vereinigen</translation>
-    </message>
-    <message>
-        <source>Save the active project</source>
-        <translation type="vanished">Aktives Projekt speichern</translation>
-    </message>
-    <message>
-        <source>Save the active project with a new name</source>
-        <translation type="vanished">Aktives Projekt unter anderem Namen speichern</translation>
-    </message>
-    <message>
         <location filename="../common/lc_commands.cpp" line="45"/>
         <source>Save a picture of the current view</source>
         <translation>Aktuelle Ansicht als Bild speichern</translation>
-    </message>
-    <message>
-        <source>Export the project in 3D Studio 3DS format</source>
-        <translation type="vanished">Das Projekt im 3DS Format des 3D Studios exportieren</translation>
-    </message>
-    <message>
-        <source>Create an HTML page for this project</source>
-        <translation type="vanished">Für dieses Projekt eine HTML Seite erstellen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="87"/>
@@ -2776,33 +2640,9 @@
         <translation>Liste der verwendeten Teile in eine CSV Getrennte Datei exportieren</translation>
     </message>
     <message>
-        <source>Export the project in POV-Ray format</source>
-        <translation type="vanished">Das Projekt im POV-Ray Format exportieren</translation>
-    </message>
-    <message>
-        <source>Export the project in Wavefront OBJ format</source>
-        <translation type="vanished">Das Projekt im OBJ Format von Wavefront exportieren</translation>
-    </message>
-    <message>
-        <source>Print the active project</source>
-        <translation type="vanished">Aktive Projekt drucken</translation>
-    </message>
-    <message>
-        <source>Display how the project would look if printed</source>
-        <translation type="vanished">Druckvorschau des Projektes</translation>
-    </message>
-    <message>
         <location filename="../common/lc_commands.cpp" line="136"/>
         <source>Print a list of parts used</source>
         <translation>Liste der verwendeten Teile drucken</translation>
-    </message>
-    <message>
-        <source>Open this document</source>
-        <translation type="vanished">Dieses Dokument öffnen</translation>
-    </message>
-    <message>
-        <source>Quit the application; prompts to save project</source>
-        <translation type="vanished">Programm verlassen ; Fordert zum Speichern des Projektes auf</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="178"/>
@@ -2841,10 +2681,6 @@
         <translation>Nächstes Objekt finden</translation>
     </message>
     <message>
-        <source>Select all pieces in the project</source>
-        <translation type="vanished">Alle Teile des Projektes auswählen</translation>
-    </message>
-    <message>
         <location filename="../common/lc_commands.cpp" line="241"/>
         <source>De-select everything</source>
         <translation>Auswahl aufheben</translation>
@@ -2860,22 +2696,6 @@
         <translation>Objekte per Namen auswählen</translation>
     </message>
     <message>
-        <source>Prevents movement and rotation along the X axis</source>
-        <translation type="vanished">Verschiebung und Drehung entlang der X-Achse blockieren</translation>
-    </message>
-    <message>
-        <source>Prevents movement and rotation along the Y axis</source>
-        <translation type="vanished">Verschiebung und Drehung entlang der Y-Achse blockieren</translation>
-    </message>
-    <message>
-        <source>Prevents movement and rotation along the Z axis</source>
-        <translation type="vanished">Verschiebung und Drehung entlang der Z-Achse blockieren</translation>
-    </message>
-    <message>
-        <source>Allows movement and rotation in all directions</source>
-        <translation type="vanished">Permettre les déplacements et rotations dans toutes les directions</translation>
-    </message>
-    <message>
         <location filename="../common/lc_commands.cpp" line="304"/>
         <source>Toggle snap axes</source>
         <translation>Einrasten an Achsen umschalten</translation>
@@ -2889,10 +2709,6 @@
         <location filename="../common/lc_commands.cpp" line="311"/>
         <source>Do not snap movement along the XY plane</source>
         <translation>Bewegung in der XY-Eben kontinuierlich</translation>
-    </message>
-    <message>
-        <source>Move and rotate objects relative to the one that currently has focus</source>
-        <translation type="vanished">Bewege und drehe Objekte relativ zum Teil mit dem Fokus</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="318"/>
@@ -3003,10 +2819,6 @@
         <location filename="../common/lc_commands.cpp" line="472"/>
         <source>Snap rotations to 5 degrees</source>
         <translation>Drehungen in 5 Grad Schritten</translation>
-    </message>
-    <message>
-        <source>Snap rotations to 10 degrees</source>
-        <translation type="vanished">Drehungen in 10 Grad Schritten</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="10"/>
@@ -3497,10 +3309,6 @@
         <translation>Zeige das Modell an diesem Punkt der Zeitachse</translation>
     </message>
     <message>
-        <source>Delete current step</source>
-        <translation type="vanished">Aktuellen Schritt löschen</translation>
-    </message>
-    <message>
         <location filename="../common/lc_commands.cpp" line="962"/>
         <source>Toggle adding new animation keys</source>
         <translation>Hinzufügen neuer Animationstasten umschalten</translation>
@@ -3586,10 +3394,6 @@
         <translation>Einen neuen Steuerungspunkt einfügen</translation>
     </message>
     <message>
-        <source>Remove the currently selected control point</source>
-        <translation type="vanished">Ausgewählten Steuerungspunkt löschen</translation>
-    </message>
-    <message>
         <location filename="../common/lc_commands.cpp" line="1088"/>
         <location filename="../common/lc_commands.cpp" line="1095"/>
         <source>Move selected objects along the X axis</source>
@@ -3634,14 +3438,6 @@
         <location filename="../common/lc_commands.cpp" line="1179"/>
         <source>Make copies of the selected pieces</source>
         <translation>Erstelle Kopien der ausgewählten Teile</translation>
-    </message>
-    <message>
-        <source>View the model referenced by the currently selected piece</source>
-        <translation type="vanished">Zeige das Modell das durch das ausgewählte Teil referenziert wird</translation>
-    </message>
-    <message>
-        <source>Move the currently selected pieces to a new model and replaces them with a reference to the model</source>
-        <translation type="vanished">Bewege die ausgewählten Teile in eine neues Modell und ersetze diese mit Referenzen zum Modell</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1200"/>
@@ -3704,33 +3500,9 @@
         <translation>Zeige ausgewählte Teile einen Schritt danach</translation>
     </message>
     <message>
-        <source>Add a new model to the project</source>
-        <translation type="vanished">Füge eine neues Modell zum Projekt hinzu</translation>
-    </message>
-    <message>
-        <source>Display the properties of the current model</source>
-        <translation type="vanished">Eigenschaften des aktuellen Modells anzeigen</translation>
-    </message>
-    <message>
-        <source>Switch to the model corresponding to the piece with focus</source>
-        <translation type="vanished">Zum Modell entsprechend des Teils mit dem Focus wechseln</translation>
-    </message>
-    <message>
-        <source>Show a list of all models in this project</source>
-        <translation type="vanished">Eine Liste aller Modelle dieses Projekts anzeigen</translation>
-    </message>
-    <message>
-        <source>Switch to this model</source>
-        <translation type="vanished">Zu diesem Modell wechseln</translation>
-    </message>
-    <message>
         <location filename="../common/lc_commands.cpp" line="1480"/>
         <source>Open LeoCAD&apos;s home page on the internet using your default web browser</source>
         <translation>LeoCAD&apos;s Homepage unter &apos;Verwendung des Standardbrowsers öffnen</translation>
-    </message>
-    <message>
-        <source>Send an e-mail message for help or support using your default e-mail client</source>
-        <translation type="vanished">Sende aus dem Standard-Mailclient eine eMail um nach Hilfe oder Unterstützung zu bitten</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1494"/>
@@ -3788,32 +3560,7 @@ Bitte lesen sie unter http://www.leocad.org nach wie man eine Bibliothek herunte
     </message>
 </context>
 <context>
-    <name>lcContext</name>
-    <message>
-        <source>Error</source>
-        <translation type="vanished">Fehler</translation>
-    </message>
-    <message>
-        <source>Error writing to file &apos;%1&apos;:
-%2</source>
-        <translation type="vanished">Fehler beim Schreiben der Datei » %1 « :
-%2</translation>
-    </message>
-</context>
-<context>
     <name>lcMainWindow</name>
-    <message>
-        <source>New Project</source>
-        <translation type="vanished">Neues Projekt</translation>
-    </message>
-    <message>
-        <source>Open Project</source>
-        <translation type="vanished">Projekt öffnen</translation>
-    </message>
-    <message>
-        <source>Save Project</source>
-        <translation type="vanished">Projekt speichern</translation>
-    </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="367"/>
         <source>Transform</source>
@@ -3928,21 +3675,9 @@ Bitte lesen sie unter http://www.leocad.org nach wie man eine Bibliothek herunte
         <translation>LEGO Diginal Designer Dateien (*.lxf);;Alle Dateien (*.*)</translation>
     </message>
     <message>
-        <source>&amp;Model</source>
-        <translation type="vanished">&amp;Modell</translation>
-    </message>
-    <message>
         <location filename="../common/lc_mainwindow.cpp" line="540"/>
         <source>&amp;Help</source>
         <translation>&amp;Hilfe</translation>
-    </message>
-    <message>
-        <source>Lock Menu</source>
-        <translation type="vanished">Menü sperren</translation>
-    </message>
-    <message>
-        <source>Toggle mouse movement on specific axes</source>
-        <translation type="vanished">Mausbewegung auf bestimmten Achsen umschalten</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="563"/>
@@ -4007,22 +3742,6 @@ Bitte lesen sie unter http://www.leocad.org nach wie man eine Bibliothek herunte
         <translation>Auswahlmodus</translation>
     </message>
     <message>
-        <source>Single Selection</source>
-        <translation type="vanished">Einzelauswahl</translation>
-    </message>
-    <message>
-        <source>Piece Selection</source>
-        <translation type="vanished">Teilauswahl</translation>
-    </message>
-    <message>
-        <source>Color Selection</source>
-        <translation type="vanished">Farbauswahl</translation>
-    </message>
-    <message>
-        <source>Piece and Color Selection</source>
-        <translation type="vanished">Teil und Farbauswahl</translation>
-    </message>
-    <message>
         <location filename="../common/lc_mainwindow.cpp" line="610"/>
         <source>Time</source>
         <translation>Zeit</translation>
@@ -4048,33 +3767,9 @@ Bitte lesen sie unter http://www.leocad.org nach wie man eine Bibliothek herunte
         <translation>Zeitachse</translation>
     </message>
     <message>
-        <source>New Submodel</source>
-        <translation type="vanished">Neues Untermodell</translation>
-    </message>
-    <message>
-        <source>Create a new Submodel</source>
-        <translation type="vanished">Erzeuge neues Untermodell</translation>
-    </message>
-    <message>
-        <source>Switch to Submodel</source>
-        <translation type="vanished">Wechsle zum Untermodell</translation>
-    </message>
-    <message>
-        <source>Switch to this Submodel</source>
-        <translation type="vanished">Wechsle zu diesem Untermodell</translation>
-    </message>
-    <message>
         <location filename="../common/lc_mainwindow.cpp" line="1814"/>
         <source>%1 (ID: %2)</source>
         <translation>%1 (ID : %2)</translation>
-    </message>
-    <message>
-        <source>1 Object selected</source>
-        <translation type="vanished">1 Objekt ausgewählt</translation>
-    </message>
-    <message>
-        <source>%1 Objects selected</source>
-        <translation type="vanished">%1 Objekte ausgewählt</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="1824"/>
@@ -4162,18 +3857,6 @@ Bitte lesen sie unter http://www.leocad.org nach wie man eine Bibliothek herunte
         <location filename="../common/lc_mainwindow.cpp" line="2167"/>
         <source>Error loading &apos;%1&apos;.</source>
         <translation>Fehler beim Laden von » %1 «.</translation>
-    </message>
-    <message>
-        <source>Merge Project</source>
-        <translation type="vanished">Projekt zusammenführen</translation>
-    </message>
-    <message>
-        <source>Merged 1 model.</source>
-        <translation type="vanished">1 Modell zusammengeführt.</translation>
-    </message>
-    <message>
-        <source>Merged %1 models.</source>
-        <translation type="vanished">%1 Modelle zusammengeführt.</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="2226"/>
@@ -5068,14 +4751,6 @@ GL_EXT_texture_filter_anisotropic Erweiterung: %4
         <translation>Fehler</translation>
     </message>
     <message>
-        <source>Please enter a width between 1 and 2048.</source>
-        <translation type="vanished">Bitte die Breite zwischen 1 und 2048 eingeben.</translation>
-    </message>
-    <message>
-        <source>Please enter a height between 1 and 2048.</source>
-        <translation type="vanished">Bitte die Höhe zwischen 1 und 2048 eingeben.</translation>
-    </message>
-    <message>
         <location filename="../qt/lc_qimagedialog.cpp" line="84"/>
         <source>First step must be between 1 and %1.</source>
         <translation>Der erste Schritt muss zwischen 1 und %1 sein.</translation>
@@ -5122,14 +4797,6 @@ GL_EXT_texture_filter_anisotropic Erweiterung: %4
 <context>
     <name>lcQModelListDialog</name>
     <message>
-        <source>Models</source>
-        <translation type="vanished">Modelle</translation>
-    </message>
-    <message>
-        <source>&amp;New</source>
-        <translation type="vanished">&amp;Neu</translation>
-    </message>
-    <message>
         <location filename="../qt/lc_qmodellistdialog.ui" line="14"/>
         <source>Submodels</source>
         <translation>Untermodelle</translation>
@@ -5163,10 +4830,6 @@ GL_EXT_texture_filter_anisotropic Erweiterung: %4
         <location filename="../qt/lc_qmodellistdialog.ui" line="62"/>
         <source>Move &amp;Down</source>
         <translation>&amp;nach unten</translation>
-    </message>
-    <message>
-        <source>Model #</source>
-        <translation type="vanished">Modell Nr.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qmodellistdialog.cpp" line="61"/>
@@ -5218,108 +4881,6 @@ GL_EXT_texture_filter_anisotropic Erweiterung: %4
         <source>Supported Files (*.ldr *.dat);;All Files (*.*)</source>
         <translation>Unterstützte Dateien (*.ldr *.dat);;Alle Dateien (*.*)</translation>
     </message>
-    <message>
-        <source>The project must have at least 1 model.</source>
-        <translation type="vanished">Das Projekt muss mindestens ein Modell enthalten.</translation>
-    </message>
-    <message>
-        <source>Are you sure you want to delete the model &apos;%1&apos;?</source>
-        <translation type="vanished">Sind sie sicher dass sie das Modell » %1 « löschen möchten?</translation>
-    </message>
-    <message>
-        <source>Delete Model</source>
-        <translation type="vanished">Modell löschen</translation>
-    </message>
-    <message>
-        <source>Rename Model</source>
-        <translation type="vanished">Modell umbenennen</translation>
-    </message>
-    <message>
-        <source>Name:</source>
-        <translation type="vanished">Name:</translation>
-    </message>
-    <message>
-        <source>Empty Name</source>
-        <translation type="vanished">Leerer Name</translation>
-    </message>
-    <message>
-        <source>The model name cannot be empty.</source>
-        <translation type="vanished">Der Name des Modells darf nicht leer sein.</translation>
-    </message>
-    <message>
-        <source>Duplicate Model</source>
-        <translation type="vanished">Modell bereits vorhanden</translation>
-    </message>
-    <message>
-        <source>A model named &apos;%1&apos; already exists in this project, please enter an unique name.</source>
-        <translation type="vanished">Ein Modell mit Namen » %1 « existiert bereits in diesem Projekt, bitte geben sie einen eindeutigen Namen an.</translation>
-    </message>
-</context>
-<context>
-    <name>lcQPOVRayDialog</name>
-    <message>
-        <source>POV-Ray Export</source>
-        <translation type="vanished">POV-Ray Export</translation>
-    </message>
-    <message>
-        <source>Output File</source>
-        <translation type="vanished">Ausgabedatei</translation>
-    </message>
-    <message>
-        <source>POV-Ray Executable</source>
-        <translation type="vanished">Ausführbare POV-Ray</translation>
-    </message>
-    <message>
-        <source>LGEO Path (optional)</source>
-        <translation type="vanished">LGEO Pfad (optional)</translation>
-    </message>
-    <message>
-        <source>Render Scene</source>
-        <translation type="vanished">Szene rendern</translation>
-    </message>
-    <message>
-        <source>...</source>
-        <translation type="vanished">...</translation>
-    </message>
-    <message>
-        <source>Output File cannot be empty.</source>
-        <translation type="vanished">Ausgabedatei darf nicht leer sein.</translation>
-    </message>
-    <message>
-        <source>Save POV-Ray File</source>
-        <translation type="vanished">POV-Ray Datei speichern</translation>
-    </message>
-    <message>
-        <source>POV-Ray Files (*.pov);;All Files (*.*)</source>
-        <translation type="vanished">POV-Ray Datei (*.pov);;Alle Dateien (*.*)</translation>
-    </message>
-    <message>
-        <source>Executable Files (*.exe);;All Files (*.*)</source>
-        <translation type="vanished">Ausführbare Dateien (*.exe);;Alle Dateien (*.*)</translation>
-    </message>
-    <message>
-        <source>All Files (*.*)</source>
-        <translation type="vanished">Alle Dateien (*.*)</translation>
-    </message>
-    <message>
-        <source>Open POV-Ray Executable</source>
-        <translation type="vanished">POV-Ray ausführen</translation>
-    </message>
-    <message>
-        <source>Open LGEO Folder</source>
-        <translation type="vanished">LGEO Ordner öffnen</translation>
-    </message>
-</context>
-<context>
-    <name>lcQPartsTree</name>
-    <message>
-        <source>Models</source>
-        <translation type="vanished">Modelle</translation>
-    </message>
-    <message>
-        <source>Search Results</source>
-        <translation type="vanished">Suchergebnisse</translation>
-    </message>
 </context>
 <context>
     <name>lcQPreferencesDialog</name>
@@ -5339,10 +4900,6 @@ GL_EXT_texture_filter_anisotropic Erweiterung: %4
         <translation>Voreinstellung für Autor:</translation>
     </message>
     <message>
-        <source>Default projects folder:</source>
-        <translation type="vanished">Voreinstellung für den Projektordner:</translation>
-    </message>
-    <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="61"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="85"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="109"/>
@@ -5353,14 +4910,6 @@ GL_EXT_texture_filter_anisotropic Erweiterung: %4
         <location filename="../qt/lc_qpreferencesdialog.ui" line="46"/>
         <source>Custom parts library:</source>
         <translation>Eigene Teilebibliothek:</translation>
-    </message>
-    <message>
-        <source>POV-Ray Executable:</source>
-        <translation type="vanished">Ausführbares POV-Ray:</translation>
-    </message>
-    <message>
-        <source>LGEO Path:</source>
-        <translation type="vanished">LGEO Pfad:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="646"/>
@@ -5496,10 +5045,6 @@ GL_EXT_texture_filter_anisotropic Erweiterung: %4
         <location filename="../qt/lc_qpreferencesdialog.ui" line="220"/>
         <source>Anti-aliasing</source>
         <translation>Anti-aliasing</translation>
-    </message>
-    <message>
-        <source>Enable lighting</source>
-        <translation type="vanished">Beleuchtung einschalten</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="172"/>
@@ -5659,10 +5204,6 @@ GL_EXT_texture_filter_anisotropic Erweiterung: %4
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="106"/>
         <source>Grid spacing must be greater than 0.</source>
         <translation>Rasterweite muss grösser als 0 sein.</translation>
-    </message>
-    <message>
-        <source>Open Projects Folder</source>
-        <translation type="vanished">Projektordner öffnen</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="142"/>
@@ -5848,17 +5389,9 @@ GL_EXT_texture_filter_anisotropic Erweiterung: %4
         <translation>&amp;Gradient</translation>
     </message>
     <message>
-        <source>Solid Color</source>
-        <translation type="vanished">Füllfarbe</translation>
-    </message>
-    <message>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="127"/>
         <source>Image</source>
         <translation>Bild</translation>
-    </message>
-    <message>
-        <source>Gradient</source>
-        <translation type="vanished">Verlauf</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="146"/>
@@ -5869,22 +5402,6 @@ GL_EXT_texture_filter_anisotropic Erweiterung: %4
         <location filename="../qt/lc_qpropertiesdialog.ui" line="155"/>
         <source>Tile</source>
         <translation>Kachel</translation>
-    </message>
-    <message>
-        <source>Environment</source>
-        <translation type="vanished">Umgebung</translation>
-    </message>
-    <message>
-        <source>Fog</source>
-        <translation type="vanished">Nebel</translation>
-    </message>
-    <message>
-        <source>Density</source>
-        <translation type="vanished">Dichte</translation>
-    </message>
-    <message>
-        <source>Ambient Light</source>
-        <translation type="vanished">Umgebungslicht</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="189"/>
@@ -5926,14 +5443,6 @@ GL_EXT_texture_filter_anisotropic Erweiterung: %4
         <location filename="../qt/lc_qpropertiesdialog.cpp" line="173"/>
         <source>Select Background Bottom Color</source>
         <translation>Hintergrundfarbe unten wählen</translation>
-    </message>
-    <message>
-        <source>Select Fog Color</source>
-        <translation type="vanished">Nebelfarbe wählen</translation>
-    </message>
-    <message>
-        <source>Select Ambient Light Color</source>
-        <translation type="vanished">Farbe des Umgebungslichts wählen</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.cpp" line="197"/>
@@ -6127,10 +5636,6 @@ GL_EXT_texture_filter_anisotropic Erweiterung: %4
         <location filename="../qt/lc_qupdatedialog.cpp" line="146"/>
         <source>&lt;p&gt;Visit &lt;a href=&quot;https://github.com/leozide/leocad/releases&quot;&gt;https://github.com/leozide/leocad/releases&lt;/a&gt; to download.&lt;/p&gt;</source>
         <translation>&lt;p&gt;Besuchen sie &lt;a href=&quot;https://github.com/leozide/leocad/releases&quot;&gt;https://github.com/leozide/leocad/releases&lt;/a&gt; zum downloaden.&lt;/p&gt;</translation>
-    </message>
-    <message>
-        <source>&lt;p&gt;Visit &lt;a href=&quot;https://github.com/leozide/leocad/releases/&quot;&gt;https://github.com/leozide/leocad/releases/&lt;/a&gt; to download.&lt;/p&gt;</source>
-        <translation type="vanished">&lt;p&gt;Besuchen sie &lt;a href=&quot;https://github.com/leozide/leocad/releases/&quot;&gt;https://github.com/leozide/leocad/releases/&lt;/a&gt; zum herunterladen.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_qupdatedialog.cpp" line="152"/>

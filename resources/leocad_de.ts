@@ -5068,14 +5068,6 @@ GL_EXT_texture_filter_anisotropic Erweiterung: %4
         <translation>Fehler</translation>
     </message>
     <message>
-        <source>Please enter a width between 1 and 2048.</source>
-        <translation type="vanished">Bitte die Breite zwischen 1 und 2048 eingeben.</translation>
-    </message>
-    <message>
-        <source>Please enter a height between 1 and 2048.</source>
-        <translation type="vanished">Bitte die Höhe zwischen 1 und 2048 eingeben.</translation>
-    </message>
-    <message>
         <location filename="../qt/lc_qimagedialog.cpp" line="84"/>
         <source>First step must be between 1 and %1.</source>
         <translation>Der erste Schritt muss zwischen 1 und %1 sein.</translation>

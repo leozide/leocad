@@ -4375,7 +4375,7 @@ Bitte lesen sie unter http://www.leocad.org nach wie man eine Bibliothek herunte
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="2128"/>
-        <source>Reseting Cameras</source>
+        <source>Resetting Cameras</source>
         <translation>Kameras zurücksetzen</translation>
     </message>
     <message>

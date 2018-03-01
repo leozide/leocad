@@ -4437,7 +4437,7 @@ Veja http://www.leocad.org para saber como descarragar e instalar uma biblioteca
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="2128"/>
-        <source>Reseting Cameras</source>
+        <source>Resetting Cameras</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

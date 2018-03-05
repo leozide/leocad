@@ -3622,7 +3622,7 @@ Bitte lesen sie unter http://www.leocad.org nach wie man eine Bibliothek herunte
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="396"/>
         <source>Sh&amp;ading</source>
-        <translation>Sch&amp;tten</translation>
+        <translation>Sch&amp;atten</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="427"/>

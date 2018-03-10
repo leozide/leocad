@@ -161,10 +161,10 @@ void lcQPreferencesDialog::on_povrayExecutableBrowse_clicked()
 
 void lcQPreferencesDialog::on_lgeoPathBrowse_clicked()
 {
-	QString result = QFileDialog::getExistingDirectory(this, tr("Open LGEO Folder"), ui->lgeoPathBrowse->text());
+	QString result = QFileDialog::getExistingDirectory(this, tr("Open LGEO Folder"), ui->lgeoPath->text());
 
 	if (!result.isEmpty())
-		ui->lgeoPathBrowse->setText(QDir::toNativeSeparators(result));
+		ui->lgeoPath->setText(QDir::toNativeSeparators(result));
 }
 
 void lcQPreferencesDialog::colorClicked()

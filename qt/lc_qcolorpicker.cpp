@@ -99,9 +99,19 @@ void lcQColorPicker::setCurrentColor(int colorIndex)
 	selected(colorIndex);
 }
 
+void lcQColorPicker::setCurrentColorCode(int colorCode)
+{
+	setCurrentColor(lcGetColorIndex(colorCode));
+}
+
 int lcQColorPicker::currentColor() const
 {
 	return currentColorIndex;
+}
+
+int lcQColorPicker::currentColorCode() const
+{
+	return gColorList[currentColorIndex].Code;
 }
 
 void lcQColorPicker::buttonPressed(bool toggled)

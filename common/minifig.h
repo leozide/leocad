@@ -41,11 +41,26 @@ struct lcMinifig
 	lcMatrix44 Matrices[LC_MFW_NUMITEMS];
 };
 
+struct lcMinifigTemplate
+{
+	QString Parts[LC_MFW_NUMITEMS];
+	int Colors[LC_MFW_NUMITEMS];
+	float Angles[LC_MFW_NUMITEMS];
+};
+
 class MinifigWizard : public lcGLWidget
 {
 public:
 	MinifigWizard();
 	~MinifigWizard();
+
+	const std::map<QString, lcMinifigTemplate>& GetTemplates() const
+	{
+		return mTemplates;
+	}
+
+	void SaveTemplate(const QString& TemplateName, const lcMinifigTemplate& Template);
+	void DeleteTemplate(const QString& TemplateName);
 
 	void OnDraw();
 	void OnLeftButtonDown();
@@ -76,5 +91,12 @@ public:
 	float mRotateX;
 	float mRotateZ;
 	bool mAutoZoom;
+
+protected:
+	void LoadTemplates();
+	void SaveTemplates();
+
+	std::map<QString, lcMinifigTemplate> mTemplates;
+	static const char* mSectionNames[LC_MFW_NUMITEMS];
 };
 

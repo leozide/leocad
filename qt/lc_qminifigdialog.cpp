@@ -5,6 +5,8 @@
 #include "lc_qcolorpicker.h"
 #include "minifig.h"
 #include "lc_mainwindow.h"
+#include "pieceinf.h"
+#include "lc_library.h"
 
 lcQMinifigDialog::lcQMinifigDialog(QWidget *parent) :
 	QDialog(parent),
@@ -102,7 +104,12 @@ lcQMinifigDialog::lcQMinifigDialog(QWidget *parent) :
 		colorPicker->blockSignals(false);
 	}
 
+#if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
+	ui->TemplateGroup->hide();
+#endif
+
 	mMinifigWidget->OnInitialUpdate();
+	UpdateTemplateCombo();
 }
 
 lcQMinifigDialog::~lcQMinifigDialog()
@@ -110,9 +117,85 @@ lcQMinifigDialog::~lcQMinifigDialog()
 	delete ui;
 }
 
-void lcQMinifigDialog::accept()
+void lcQMinifigDialog::UpdateTemplateCombo()
 {
-	QDialog::accept();
+	ui->TemplateComboBox->clear();
+
+	const auto& Templates = mMinifigWidget->GetTemplates();
+	for (const auto& Template : Templates)
+		ui->TemplateComboBox->addItem(Template.first);
+}
+
+void lcQMinifigDialog::on_TemplateComboBox_currentIndexChanged(const QString& TemplateName)
+{
+	const auto& Templates = mMinifigWidget->GetTemplates();
+	const auto& Position = Templates.find(TemplateName);
+	if (Position == Templates.end())
+		return;
+
+	const lcMinifigTemplate& Template = Position->second;
+
+	for (int PartIdx = 0; PartIdx < LC_MFW_NUMITEMS; PartIdx++)
+	{
+		PieceInfo* Info = lcGetPiecesLibrary()->FindPiece(Template.Parts[PartIdx].toLatin1(), nullptr, false, false);
+
+		if (Info)
+		{
+			for (const lcMinifigPieceInfo& MinifigPieceInfo : mMinifigWidget->mSettings[PartIdx])
+			{
+				if (Info == MinifigPieceInfo.Info)
+				{
+					getTypeComboBox(PartIdx)->setCurrentText(MinifigPieceInfo.Description);
+					break;
+				}
+			}
+		}
+
+		getColorPicker(PartIdx)->setCurrentColorCode(Template.Colors[PartIdx]);
+
+		QDoubleSpinBox* AngleSpinBox = getAngleEdit(PartIdx);
+		if (AngleSpinBox)
+			AngleSpinBox->setValue(Template.Angles[PartIdx]);
+	}
+}
+
+void lcQMinifigDialog::on_TemplateSaveButton_clicked()
+{
+	bool Ok;
+	QString TemplateName = QInputDialog::getText(this, tr("Save Template"), tr("Template Name:"), QLineEdit::Normal, ui->TemplateComboBox->currentText(), &Ok);
+
+	if (!Ok)
+		return;
+
+	if (TemplateName.isEmpty())
+	{
+		QMessageBox::information(this, tr("Save Template"), tr("Template name cannot be empty."));
+		return;
+	}
+
+	lcMinifigTemplate Template;
+
+	for (int PartIdx = 0; PartIdx < LC_MFW_NUMITEMS; PartIdx++)
+	{
+		Template.Parts[PartIdx] = mMinifigWidget->mSettings[PartIdx][getTypeComboBox(PartIdx)->currentIndex()].Info->mFileName;
+		Template.Colors[PartIdx] = getColorPicker(PartIdx)->currentColorCode();
+		QDoubleSpinBox* AngleSpinBox = getAngleEdit(PartIdx);
+		Template.Angles[PartIdx] = AngleSpinBox ? AngleSpinBox->value() : 0.0f;
+	}
+
+	mMinifigWidget->SaveTemplate(TemplateName, Template);
+
+	ui->TemplateComboBox->blockSignals(true);
+	UpdateTemplateCombo();
+	ui->TemplateComboBox->setCurrentText(TemplateName);
+	ui->TemplateComboBox->blockSignals(false);
+}
+
+void lcQMinifigDialog::on_TemplateDeleteButton_clicked()
+{
+	mMinifigWidget->DeleteTemplate(ui->TemplateComboBox->currentText());
+
+	UpdateTemplateCombo();
 }
 
 void lcQMinifigDialog::typeChanged(int index)
@@ -297,6 +380,49 @@ int lcQMinifigDialog::getColorIndex(QObject *widget)
 		return LC_MFW_LLEGA;
 
 	return -1;
+}
+
+QDoubleSpinBox* lcQMinifigDialog::getAngleEdit(int index)
+{
+	switch (index)
+	{
+	case LC_MFW_HATS:
+		return ui->hatsAngle;
+	case LC_MFW_HATS2:
+		return ui->hats2Angle;
+	case LC_MFW_HEAD:
+		return ui->headAngle;
+	case LC_MFW_NECK:
+		return nullptr;
+	case LC_MFW_BODY:
+		return nullptr;
+	case LC_MFW_BODY2:
+		return nullptr;
+	case LC_MFW_BODY3:
+		return nullptr;
+	case LC_MFW_RARM:
+		return ui->rarmAngle;
+	case LC_MFW_LARM:
+		return ui->larmAngle;
+	case LC_MFW_RHAND:
+		return ui->rhandAngle;
+	case LC_MFW_LHAND:
+		return ui->lhandAngle;
+	case LC_MFW_RHANDA:
+		return ui->rhandaAngle;
+	case LC_MFW_LHANDA:
+		return ui->lhandaAngle;
+	case LC_MFW_RLEG:
+		return ui->rlegAngle;
+	case LC_MFW_LLEG:
+		return ui->llegAngle;
+	case LC_MFW_RLEGA:
+		return ui->rlegaAngle;
+	case LC_MFW_LLEGA:
+		return ui->llegaAngle;
+	}
+
+	return nullptr;
 }
 
 int lcQMinifigDialog::getAngleIndex(QObject *widget)

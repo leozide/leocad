@@ -41,7 +41,9 @@ public:
 	~lcQColorPicker();
 
 	int currentColor() const;
+	int currentColorCode() const;
 	void setCurrentColor(int colorIndex);
+	void setCurrentColorCode(int colorCode);
 
 public slots:
 	void changed(int colorIndex);

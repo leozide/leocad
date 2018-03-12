@@ -20,18 +20,22 @@ public:
 	MinifigWizard* mMinifigWidget;
 
 public slots:
-	void accept();
+	void on_TemplateComboBox_currentIndexChanged(const QString& TemplateName);
+	void on_TemplateSaveButton_clicked();
+	void on_TemplateDeleteButton_clicked();
 	void typeChanged(int index);
 	void colorChanged(int index);
 	void angleChanged(double value);
 
-private:
+protected:
 	Ui::lcQMinifigDialog *ui;
 
+	void UpdateTemplateCombo();
 	QComboBox *getTypeComboBox(int type);
 	int getTypeIndex(QObject *widget);
 	lcQColorPicker* getColorPicker(int index);
 	int getColorIndex(QObject *widget);
+	QDoubleSpinBox* getAngleEdit(int index);
 	int getAngleIndex(QObject *widget);
 };
 

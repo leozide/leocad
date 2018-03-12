@@ -675,6 +675,45 @@
     </widget>
    </item>
    <item>
+    <widget class="QGroupBox" name="TemplateGroup">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="title">
+      <string>Templates</string>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <item>
+       <widget class="QComboBox" name="TemplateComboBox">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="TemplateSaveButton">
+        <property name="text">
+         <string>Save...</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="TemplateDeleteButton">
+        <property name="text">
+         <string>Delete...</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
     <widget class="QFrame" name="frame">
      <property name="frameShape">
       <enum>QFrame::HLine</enum>
@@ -703,6 +742,58 @@
    <header>lc_qcolorpicker.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>hatsType</tabstop>
+  <tabstop>hatsColor</tabstop>
+  <tabstop>hatsAngle</tabstop>
+  <tabstop>headAngle</tabstop>
+  <tabstop>headColor</tabstop>
+  <tabstop>headType</tabstop>
+  <tabstop>hats2Type</tabstop>
+  <tabstop>hats2Color</tabstop>
+  <tabstop>hats2Angle</tabstop>
+  <tabstop>neckType</tabstop>
+  <tabstop>neckColor</tabstop>
+  <tabstop>bodyColor</tabstop>
+  <tabstop>bodyType</tabstop>
+  <tabstop>larmType</tabstop>
+  <tabstop>larmColor</tabstop>
+  <tabstop>larmAngle</tabstop>
+  <tabstop>rarmAngle</tabstop>
+  <tabstop>rarmColor</tabstop>
+  <tabstop>rarmType</tabstop>
+  <tabstop>lhandType</tabstop>
+  <tabstop>lhandColor</tabstop>
+  <tabstop>lhandAngle</tabstop>
+  <tabstop>rhandAngle</tabstop>
+  <tabstop>rhandColor</tabstop>
+  <tabstop>rhandType</tabstop>
+  <tabstop>lhandaType</tabstop>
+  <tabstop>lhandaColor</tabstop>
+  <tabstop>lhandaAngle</tabstop>
+  <tabstop>rhandaAngle</tabstop>
+  <tabstop>rhandaColor</tabstop>
+  <tabstop>rhandaType</tabstop>
+  <tabstop>body2Type</tabstop>
+  <tabstop>body2Color</tabstop>
+  <tabstop>body3Color</tabstop>
+  <tabstop>body3Type</tabstop>
+  <tabstop>llegType</tabstop>
+  <tabstop>llegColor</tabstop>
+  <tabstop>llegAngle</tabstop>
+  <tabstop>rlegAngle</tabstop>
+  <tabstop>rlegColor</tabstop>
+  <tabstop>rlegType</tabstop>
+  <tabstop>llegaType</tabstop>
+  <tabstop>llegaColor</tabstop>
+  <tabstop>llegaAngle</tabstop>
+  <tabstop>rlegaAngle</tabstop>
+  <tabstop>rlegaColor</tabstop>
+  <tabstop>rlegaType</tabstop>
+  <tabstop>TemplateComboBox</tabstop>
+  <tabstop>TemplateSaveButton</tabstop>
+  <tabstop>TemplateDeleteButton</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>

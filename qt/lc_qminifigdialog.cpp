@@ -128,6 +128,7 @@ void lcQMinifigDialog::UpdateTemplateCombo()
 
 void lcQMinifigDialog::on_TemplateComboBox_currentIndexChanged(const QString& TemplateName)
 {
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
 	const auto& Templates = mMinifigWidget->GetTemplates();
 	const auto& Position = Templates.find(TemplateName);
 	if (Position == Templates.end())
@@ -157,10 +158,12 @@ void lcQMinifigDialog::on_TemplateComboBox_currentIndexChanged(const QString& Te
 		if (AngleSpinBox)
 			AngleSpinBox->setValue(Template.Angles[PartIdx]);
 	}
+#endif
 }
 
 void lcQMinifigDialog::on_TemplateSaveButton_clicked()
 {
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
 	bool Ok;
 	QString TemplateName = QInputDialog::getText(this, tr("Save Template"), tr("Template Name:"), QLineEdit::Normal, ui->TemplateComboBox->currentText(), &Ok);
 
@@ -189,6 +192,7 @@ void lcQMinifigDialog::on_TemplateSaveButton_clicked()
 	UpdateTemplateCombo();
 	ui->TemplateComboBox->setCurrentText(TemplateName);
 	ui->TemplateComboBox->blockSignals(false);
+#endif
 }
 
 void lcQMinifigDialog::on_TemplateDeleteButton_clicked()

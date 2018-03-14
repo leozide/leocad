@@ -4437,7 +4437,7 @@ Veja http://www.leocad.org para saber como descarragar e instalar uma biblioteca
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="2128"/>
-        <source>Reseting Cameras</source>
+        <source>Resetting Cameras</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -4644,10 +4644,6 @@ Veja http://www.leocad.org para saber como descarragar e instalar uma biblioteca
         <location filename="../qt/lc_qaboutdialog.ui" line="49"/>
         <source>LeoCAD is a free application for creating virtual LEGO models.</source>
         <translation>LeoCAD é um programa libre para criar modelos LEGO virtuais.</translation>
-    </message>
-    <message>
-        <source>LeoCAD is a free application that can be used to create virtual LEGO models.</source>
-        <translation type="vanished">LeoCAD é um programa libre que pode servir para criar modelos LEGO virtuais.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qaboutdialog.ui" line="59"/>

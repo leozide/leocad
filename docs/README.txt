@@ -10,7 +10,7 @@ Installation
 ------------
 
 You can download the latest version of LeoCAD and its Parts Library from
-the main website at http://www.leocad.org
+the main website at https://www.leocad.org
 
 It's recommended that you install the latest drivers for your video card
 since LeoCAD uses OpenGL to take advantage of hardware acceleration for
@@ -26,25 +26,27 @@ rendering.
   Download LeoCAD-Linux-18.02-x86_64.AppImage, make the file executable
   (chmod +x) and run it.
 
-  If you decide to compile it yourself you will also need to download the
-  Parts Library separately and follow the installation instructions. More
-  information on how to compile your own executable is available in the
-  Documentation section of http://www.leocad.org
+  If you prefer to compile LeoCAD yourself, go to the GitHub releases page
+  at https://github.com/leozide/leocad/releases/latest and download the 
+  source archive from there. If you do not already have a Parts Library
+  installed, you will need to download one and follow the installation
+  instructions. More information on how to compile your own executable is
+  available in the Documentation section of https://www.leocad.org
 
 - LeoCAD for Mac OSX:
 
   Download LeoCAD-macOS-18.02.dmg to your computer, double click on the
   icon to open the archive and copy LeoCAD.app to your Applications folder.
 
-New users should take a look at the online tutorial located at
-http://www.leocad.org/docs/tutorial1.html to learn how to use LeoCAD.
+New users should read the online tutorial located at
+https://www.leocad.org/docs/tutorial1.html to learn how to use LeoCAD.
 
 
 Online Resources
 ----------------
 
 - Website:
-  http://www.leocad.org/
+  https://www.leocad.org
 
 - GitHub page:
   https://github.com/leozide/leocad

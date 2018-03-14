@@ -4375,7 +4375,7 @@ Bitte lesen sie unter http://www.leocad.org nach wie man eine Bibliothek herunte
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="2128"/>
-        <source>Reseting Cameras</source>
+        <source>Resetting Cameras</source>
         <translation>Kameras zurücksetzen</translation>
     </message>
     <message>
@@ -5066,14 +5066,6 @@ GL_EXT_texture_filter_anisotropic Erweiterung: %4
         <location filename="../qt/lc_qimagedialog.cpp" line="98"/>
         <source>Error</source>
         <translation>Fehler</translation>
-    </message>
-    <message>
-        <source>Please enter a width between 1 and 2048.</source>
-        <translation type="vanished">Bitte die Breite zwischen 1 und 2048 eingeben.</translation>
-    </message>
-    <message>
-        <source>Please enter a height between 1 and 2048.</source>
-        <translation type="vanished">Bitte die Höhe zwischen 1 und 2048 eingeben.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qimagedialog.cpp" line="84"/>

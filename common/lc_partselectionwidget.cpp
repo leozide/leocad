@@ -791,7 +791,7 @@ void lcPartSelectionWidget::UpdateCategories()
 	for (int CategoryIdx = 0; CategoryIdx < gCategories.GetSize(); CategoryIdx++)
 		new QTreeWidgetItem(mCategoriesWidget, QStringList(gCategories[CategoryIdx].Name));
 
-	mModelsCategoryItem = new QTreeWidgetItem(mCategoriesWidget, QStringList(tr("Models")));
+	mModelsCategoryItem = new QTreeWidgetItem(mCategoriesWidget, QStringList(tr("Submodels")));
 
 	if (CurrentIndex != -1)
 		mCategoriesWidget->setCurrentItem(mCategoriesWidget->topLevelItem(CurrentIndex));

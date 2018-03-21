@@ -3757,19 +3757,19 @@
         <location filename="../common/lc_application.cpp" line="374"/>
         <source>LeoCAD could not find a compatible Parts Library so only a small number of parts will be available.
 
-Please visit http://www.leocad.org for information on how to download and install a library.</source>
+Please visit https://www.leocad.org for information on how to download and install a library.</source>
         <translation>LeoCAD n’a pas pu trouver une bibliothèque de pièces compatible donc seulement un petit nombre de pièces seront disponibles.
 
-SVP visitez http://www.leocad.org pour apprendre comment télécharger et installer une bibliothèque.</translation>
+SVP visitez https://www.leocad.org pour apprendre comment télécharger et installer une bibliothèque.</translation>
     </message>
     <message>
         <location filename="../common/lc_application.cpp" line="376"/>
         <source>LeoCAD could not load Parts Library.
 
-Please visit http://www.leocad.org for information on how to download and install a library.</source>
+Please visit https://www.leocad.org for information on how to download and install a library.</source>
         <translation>LeoCAD n’a pas pu charger la bibliothèque de pièces.
 
-SVP visitez http://www.leocad.org pour apprendre comment télécharger et installer une bibliothèque.</translation>
+SVP visitez https://www.leocad.org pour apprendre comment télécharger et installer une bibliothèque.</translation>
     </message>
     <message>
         <location filename="../common/lc_application.cpp" line="626"/>
@@ -4635,8 +4635,8 @@ SVP visitez http://www.leocad.org pour apprendre comment télécharger et instal
     </message>
     <message>
         <location filename="../qt/lc_qaboutdialog.ui" line="59"/>
-        <source>&lt;a href=&quot;http://www.leocad.org&quot;&gt;http://www.leocad.org&lt;/a&gt;</source>
-        <translation>&lt;a href=&quot;http://www.leocad.org&quot;&gt;http://www.leocad.org&lt;/a&gt;</translation>
+        <source>&lt;a href=&quot;https://www.leocad.org&quot;&gt;https://www.leocad.org&lt;/a&gt;</source>
+        <translation>&lt;a href=&quot;https://www.leocad.org&quot;&gt;https://www.leocad.org&lt;/a&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_qaboutdialog.ui" line="73"/>
@@ -6104,8 +6104,8 @@ GL_EXT_texture_filter_anisotropic extension: %4
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>&lt;p&gt;Visit &lt;a href=&quot;http://www.leocad.org/files/&quot;&gt;http://www.leocad.org/files/&lt;/a&gt; to download.&lt;/p&gt;</source>
-        <translation type="vanished">&lt;p&gt;Visitez &lt;a href=&quot;http://www.leocad.org/file/&quot;&gt;http://www.leocad.org/files/&lt;/a&gt; pour télécharger.&lt;/p&gt;</translation>
+        <source>&lt;p&gt;Visit &lt;a href=&quot;https://www.leocad.org/files/&quot;&gt;https://www.leocad.org/files/&lt;/a&gt; to download.&lt;/p&gt;</source>
+        <translation type="vanished">&lt;p&gt;Visitez &lt;a href=&quot;https://www.leocad.org/file/&quot;&gt;https://www.leocad.org/files/&lt;/a&gt; pour télécharger.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_qupdatedialog.cpp" line="152"/>
@@ -6268,7 +6268,7 @@ GL_EXT_texture_filter_anisotropic extension: %4
     </message>
     <message>
         <location filename="../qt/lc_setsdatabasedialog.ui" line="74"/>
-        <source>Sets Database provided by &lt;a href=&quot;http://www.rebrickable.com&quot;&gt;Rebrickable&lt;/a&gt;</source>
+        <source>Sets Database provided by &lt;a href=&quot;https://www.rebrickable.com&quot;&gt;Rebrickable&lt;/a&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

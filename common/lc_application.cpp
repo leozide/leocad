@@ -371,9 +371,9 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 		QString Message;
 
 		if (mLibrary->LoadBuiltinPieces())
-			Message = tr("LeoCAD could not find a compatible Parts Library so only a small number of parts will be available.\n\nPlease visit http://www.leocad.org for information on how to download and install a library.");
+			Message = tr("LeoCAD could not find a compatible Parts Library so only a small number of parts will be available.\n\nPlease visit https://www.leocad.org for information on how to download and install a library.");
 		else
-			Message = tr("LeoCAD could not load Parts Library.\n\nPlease visit http://www.leocad.org for information on how to download and install a library.");
+			Message = tr("LeoCAD could not load Parts Library.\n\nPlease visit https://www.leocad.org for information on how to download and install a library.");
 
 		if (ShowWindow)
 			QMessageBox::information(gMainWindow, tr("LeoCAD"), Message);

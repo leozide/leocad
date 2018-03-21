@@ -72,7 +72,7 @@ lcSetsDatabaseDialog::lcSetsDatabaseDialog(QWidget* Parent)
 	connect(&mNetworkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(DownloadFinished(QNetworkReply*)));
 #endif
 
-	mKeyListReply = RequestURL("http://www.leocad.org/rebrickable.json");
+	mKeyListReply = RequestURL("https://www.leocad.org/rebrickable.json");
 }
 
 lcSetsDatabaseDialog::~lcSetsDatabaseDialog()

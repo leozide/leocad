@@ -42,7 +42,7 @@ lcQUpdateDialog::lcQUpdateDialog(QWidget* Parent, bool InitialUpdate)
 	manager = new QNetworkAccessManager(this);
 	connect(manager, SIGNAL(finished(QNetworkReply*)), this, SLOT(replyFinished(QNetworkReply*)));
 
-	updateReply = manager->get(QNetworkRequest(QUrl("http://www.leocad.org/updates.txt")));
+	updateReply = manager->get(QNetworkRequest(QUrl("https://www.leocad.org/updates.txt")));
 }
 
 lcQUpdateDialog::~lcQUpdateDialog()

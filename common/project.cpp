@@ -1807,7 +1807,7 @@ void Project::ExportHTML(const lcHTMLExportOptions& Options)
 			if (Options.PartsListEnd)
 				AddPartsListImage(Stream, Model, 0, BaseName);
 
-			Stream << QLatin1String("</CENTER>\r\n<BR><HR><BR><B><I>Created by <A HREF=\"http://www.leocad.org\">LeoCAD</A></I></B><BR></HTML>\r\n");
+			Stream << QLatin1String("</CENTER>\r\n<BR><HR><BR><B><I>Created by <A HREF=\"https://www.leocad.org\">LeoCAD</A></I></B><BR></HTML>\r\n");
 		}
 		else
 		{
@@ -1832,7 +1832,7 @@ void Project::ExportHTML(const lcHTMLExportOptions& Options)
 				if (Options.PartsListEnd)
 					Stream << QString::fromLatin1("<A HREF=\"%1-pieces.html\">Pieces Used</A><BR>\r\n").arg(BaseName);
 
-				Stream << QLatin1String("</CENTER>\r\n<BR><HR><BR><B><I>Created by <A HREF=\"http://www.leocad.org\">LeoCAD</A></B></I><BR></HTML>\r\n");
+				Stream << QLatin1String("</CENTER>\r\n<BR><HR><BR><B><I>Created by <A HREF=\"https://www.leocad.org\">LeoCAD</A></B></I><BR></HTML>\r\n");
 			}
 
 			for (lcStep Step = 1; Step <= LastStep; Step++)
@@ -2012,7 +2012,7 @@ void Project::ExportHTML(const lcHTMLExportOptions& Options)
 			}
 		}
 
-		Stream << QLatin1String("</CENTER>\r\n<BR><HR><BR><B><I>Created by <A HREF=\"http://www.leocad.org\">LeoCAD</A></B></I><BR></HTML>\r\n");
+		Stream << QLatin1String("</CENTER>\r\n<BR><HR><BR><B><I>Created by <A HREF=\"https://www.leocad.org\">LeoCAD</A></B></I><BR></HTML>\r\n");
 	}
 }
 

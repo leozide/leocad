@@ -2847,7 +2847,7 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		break;
 
 	case LC_HELP_HOMEPAGE:
-		QDesktopServices::openUrl(QUrl("http://www.leocad.org/"));
+		QDesktopServices::openUrl(QUrl("https://www.leocad.org/"));
 		break;
 
 	case LC_HELP_BUG_REPORT:

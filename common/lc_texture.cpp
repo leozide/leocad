@@ -237,9 +237,8 @@ void lcTexture::Upload()
 
 	void* Data = mImages[0].mData;
 	glTexImage2D(GL_TEXTURE_2D, 0, Format, mWidth, mHeight, 0, Format, GL_UNSIGNED_BYTE, Data);
-	int MaxLevel = 0;
 
-	if (mFlags & LC_TEXTURE_MIPMAPS)
+	if (mFlags & LC_TEXTURE_MIPMAPS || FilterFlags >= LC_TEXTURE_BILINEAR)
 	{
 		int Width = mWidth;
 		int Height = mHeight;
@@ -267,11 +266,9 @@ void lcTexture::Upload()
 				Data = mImages[Level].mData;
 
 			glTexImage2D(GL_TEXTURE_2D, Level, Format, Width, Height, 0, Format, GL_UNSIGNED_BYTE, Data);
-			MaxLevel++;
 		}
 	}
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, MaxLevel);
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 

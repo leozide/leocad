@@ -58,6 +58,20 @@ public:
 	View(lcModel* Model);
 	virtual ~View();
 
+	void Clear()
+	{
+		mModel = nullptr;
+		mActiveSubmodelInstance = nullptr;
+	}
+
+	lcModel* GetModel() const
+	{
+		return mModel;
+	}
+
+	lcModel* GetActiveModel() const;
+	void SetSelectedSubmodelActive();
+
 	void SetHighlight(bool Highlight)
 	{
 		mHighlight = Highlight;
@@ -107,7 +121,6 @@ public:
 	lcObjectSection FindObjectUnderPointer(bool PiecesOnly, bool IgnoreSelected) const;
 	lcArray<lcObject*> FindObjectsInBox(float x1, float y1, float x2, float y2) const;
 
-	lcModel* mModel;
 	lcCamera* mCamera;
 
 	lcVector3 ProjectPoint(const lcVector3& Point) const
@@ -156,6 +169,10 @@ protected:
 	void StopTracking(bool Accept);
 	void OnButtonDown(lcTrackButton TrackButton);
 	lcMatrix44 GetTileProjectionMatrix(int CurrentRow, int CurrentColumn, int CurrentTileWidth, int CurrentTileHeight) const;
+
+	lcModel* mModel;
+	lcPiece* mActiveSubmodelInstance;
+	lcMatrix44 mActiveSubmodelMatrix;
 
 	lcScene mScene;
 	lcDragState mDragState;

@@ -104,6 +104,14 @@ void PieceInfo::CreateProject(Project* Project, const char* PieceName)
 	m_strDescription[sizeof(m_strDescription) - 1] = 0;
 }
 
+bool PieceInfo::GetPieceWorldMatrix(lcPiece* Piece, lcMatrix44& WorldMatrix) const
+{
+	if (mFlags & LC_PIECE_MODEL)
+		return mModel->GetPieceWorldMatrix(Piece, WorldMatrix);
+
+	return false;
+}
+
 bool PieceInfo::IncludesModel(const lcModel* Model) const
 {
 	if (mFlags & LC_PIECE_MODEL)
@@ -298,18 +306,18 @@ void PieceInfo::AddRenderMesh(lcScene& Scene)
 		Scene.AddMesh(mMesh, lcMatrix44Identity(), gDefaultColor, LC_RENDERMESH_NONE, mFlags);
 }
 
-void PieceInfo::AddRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, int ColorIndex, bool Focused, bool Selected, bool Highlight) const
+void PieceInfo::AddRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, int ColorIndex, bool Focused, bool Selected, bool Disabled, bool Highlight, lcPiece* ActiveSubmodelInstance) const
 {
 	if ((mMesh) || (mFlags & LC_PIECE_PLACEHOLDER))
-		Scene.AddMesh((mFlags & LC_PIECE_PLACEHOLDER) ? gPlaceholderMesh : mMesh, WorldMatrix, ColorIndex, Focused ? LC_RENDERMESH_FOCUSED : (Selected ? LC_RENDERMESH_SELECTED : (Highlight ? LC_RENDERMESH_HIGHLIGHT : LC_RENDERMESH_NONE)), mFlags);
+		Scene.AddMesh((mFlags & LC_PIECE_PLACEHOLDER) ? gPlaceholderMesh : mMesh, WorldMatrix, ColorIndex, Disabled ? LC_RENDERMESH_DISABLED : (Focused ? LC_RENDERMESH_FOCUSED : (Selected ? LC_RENDERMESH_SELECTED : (Highlight ? LC_RENDERMESH_HIGHLIGHT : LC_RENDERMESH_NONE))), mFlags);
 
 	if (mFlags & LC_PIECE_MODEL)
-		mModel->SubModelAddRenderMeshes(Scene, WorldMatrix, ColorIndex, Focused, Selected);
+		mModel->SubModelAddRenderMeshes(Scene, WorldMatrix, ColorIndex, Focused, Selected, Disabled, ActiveSubmodelInstance);
 	else if (mFlags & LC_PIECE_PROJECT)
 	{
 		lcModel* Model = mProject->GetMainModel();
 		if (Model)
-			Model->SubModelAddRenderMeshes(Scene, WorldMatrix, ColorIndex, Focused, Selected);
+			Model->SubModelAddRenderMeshes(Scene, WorldMatrix, ColorIndex, Focused, Selected, Disabled, ActiveSubmodelInstance);
 	}
 }
 

@@ -50,7 +50,7 @@ void lcModelTabWidget::Clear()
 	ResetLayout();
 	mModel = nullptr;
 	for (View* View : mViews)
-		View->mModel = nullptr;
+		View->Clear();
 	mViews.RemoveAll();
 	mActiveView = nullptr;
 	lcQGLWidget* Widget = (lcQGLWidget*)layout()->itemAt(0)->widget();
@@ -518,6 +518,7 @@ void lcMainWindow::CreateMenus()
 	PieceMenu->addAction(mActions[LC_PIECE_VIEW_SELECTED_MODEL]);
 	PieceMenu->addAction(mActions[LC_PIECE_INLINE_SELECTED_MODELS]);
 	PieceMenu->addAction(mActions[LC_PIECE_MOVE_SELECTION_TO_MODEL]);
+	PieceMenu->addAction(mActions[LC_PIECE_EDIT_SELECTED_SUBMODEL]);
 	PieceMenu->addSeparator();
 	PieceMenu->addAction(mActions[LC_PIECE_GROUP]);
 	PieceMenu->addAction(mActions[LC_PIECE_UNGROUP]);
@@ -1436,7 +1437,7 @@ void lcMainWindow::ResetCameras()
 
 void lcMainWindow::AddView(View* View)
 {
-	lcModelTabWidget* TabWidget = GetTabWidgetForModel(View->mModel);
+	lcModelTabWidget* TabWidget = GetTabWidgetForModel(View->GetModel());
 
 	if (!TabWidget)
 		return;
@@ -1794,6 +1795,7 @@ void lcMainWindow::UpdateSelectedObjects(bool SelectionChanged)
 		mActions[LC_PIECE_VIEW_SELECTED_MODEL]->setEnabled(Flags & LC_SEL_MODEL_SELECTED);
 		mActions[LC_PIECE_MOVE_SELECTION_TO_MODEL]->setEnabled(Flags & LC_SEL_PIECE);
 		mActions[LC_PIECE_INLINE_SELECTED_MODELS]->setEnabled(Flags & LC_SEL_MODEL_SELECTED);
+		mActions[LC_PIECE_EDIT_SELECTED_SUBMODEL]->setEnabled(Flags & LC_SEL_MODEL_SELECTED);
 		mActions[LC_PIECE_GROUP]->setEnabled(Flags & LC_SEL_CAN_GROUP);
 		mActions[LC_PIECE_UNGROUP]->setEnabled(Flags & LC_SEL_GROUPED);
 		mActions[LC_PIECE_GROUP_ADD]->setEnabled((Flags & (LC_SEL_GROUPED | LC_SEL_FOCUS_GROUPED)) == LC_SEL_GROUPED);
@@ -2615,6 +2617,10 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 
 	case LC_PIECE_INLINE_SELECTED_MODELS:
 		lcGetActiveModel()->InlineSelectedModels();
+		break;
+
+	case LC_PIECE_EDIT_SELECTED_SUBMODEL:
+		GetActiveView()->SetSelectedSubmodelActive();
 		break;
 
 	case LC_PIECE_GROUP:

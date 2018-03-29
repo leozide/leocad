@@ -100,11 +100,15 @@ void lcScene::DrawRenderMeshes(lcContext* Context, int PrimitiveTypes, bool Enab
 					break;
 
 				case LC_RENDERMESH_SELECTED:
-					Context->SetColorIndexTinted(ColorIndex, LC_COLOR_SELECTED);
+					Context->SetColorIndexTinted(ColorIndex, LC_COLOR_SELECTED, 0.5f);
 					break;
 
 				case LC_RENDERMESH_FOCUSED:
-					Context->SetColorIndexTinted(ColorIndex, LC_COLOR_FOCUSED);
+					Context->SetColorIndexTinted(ColorIndex, LC_COLOR_FOCUSED, 0.5f);
+					break;
+
+				case LC_RENDERMESH_DISABLED:
+					Context->SetColorIndexTinted(ColorIndex, LC_COLOR_DISABLED, 0.25f);
 					break;
 				}
 			}
@@ -129,6 +133,10 @@ void lcScene::DrawRenderMeshes(lcContext* Context, int PrimitiveTypes, bool Enab
 
 				case LC_RENDERMESH_HIGHLIGHT:
 					Context->SetInterfaceColor(LC_COLOR_HIGHLIGHT);
+					break;
+
+				case LC_RENDERMESH_DISABLED:
+					Context->SetInterfaceColor(LC_COLOR_DISABLED);
 					break;
 				}
 			}

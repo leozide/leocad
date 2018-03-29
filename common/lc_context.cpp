@@ -540,9 +540,10 @@ void lcContext::SetColorIndex(int ColorIndex)
 	SetColor(gColorList[ColorIndex].Value);
 }
 
-void lcContext::SetColorIndexTinted(int ColorIndex, lcInterfaceColor InterfaceColor)
+void lcContext::SetColorIndexTinted(int ColorIndex, lcInterfaceColor InterfaceColor, float Weight)
 {
-	SetColor((gColorList[ColorIndex].Value + gInterfaceColors[InterfaceColor]) * 0.5f);
+	lcVector3 Color(gColorList[ColorIndex].Value * Weight + gInterfaceColors[InterfaceColor] * (1.0f - Weight));
+	SetColor(lcVector4(Color, gColorList[ColorIndex].Value.w));
 }
 
 void lcContext::SetEdgeColorIndex(int ColorIndex)

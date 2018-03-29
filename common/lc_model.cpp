@@ -175,6 +175,33 @@ lcModel::~lcModel()
 	DeleteHistory();
 }
 
+bool lcModel::GetPieceWorldMatrix(lcPiece* Piece, lcMatrix44& ParentWorldMatrix) const
+{
+	for (lcPiece* ModelPiece : mPieces)
+	{
+		if (ModelPiece == Piece)
+		{
+			ParentWorldMatrix = lcMul(ModelPiece->mModelWorld, ParentWorldMatrix);
+			return true;
+		}
+
+		PieceInfo* Info = ModelPiece->mPieceInfo;
+
+		if (Info->IsModel())
+		{
+			lcMatrix44 WorldMatrix = lcMul(ModelPiece->mModelWorld, ParentWorldMatrix);
+
+			if (Info->GetPieceWorldMatrix(Piece, WorldMatrix))
+			{
+				ParentWorldMatrix = WorldMatrix;
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
 bool lcModel::IncludesModel(const lcModel* Model) const
 {
 	if (Model == this)
@@ -1224,21 +1251,17 @@ void lcModel::DuplicateSelectedPieces()
 	SaveCheckpoint(tr("Duplicating Pieces"));
 }
 
-void lcModel::GetScene(lcScene& Scene, lcCamera* ViewCamera, bool DrawInterface, bool Highlight) const
+void lcModel::GetScene(lcScene& Scene, lcCamera* ViewCamera, bool DrawInterface, bool Highlight, lcPiece* ActiveSubmodelInstance) const
 {
 	Scene.Begin(ViewCamera->mWorldView);
 
 	mPieceInfo->AddRenderMesh(Scene);
 
-	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-	{
-		lcPiece* Piece = mPieces[PieceIdx];
-
+	for (lcPiece* Piece : mPieces)
 		if (Piece->IsVisible(mCurrentStep))
-			Piece->AddRenderMeshes(Scene, DrawInterface, Highlight && Piece->GetStepShow() == mCurrentStep);
-	}
+			Piece->AddRenderMeshes(Scene, DrawInterface, Highlight && Piece->GetStepShow() == mCurrentStep, ActiveSubmodelInstance);
 
-	if (DrawInterface)
+	if (DrawInterface && !ActiveSubmodelInstance)
 	{
 		for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); CameraIdx++)
 		{
@@ -1260,15 +1283,11 @@ void lcModel::GetScene(lcScene& Scene, lcCamera* ViewCamera, bool DrawInterface,
 	Scene.End();
 }
 
-void lcModel::SubModelAddRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, int DefaultColorIndex, bool Focused, bool Selected) const
+void lcModel::SubModelAddRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, int DefaultColorIndex, bool Focused, bool Selected, bool Disabled, lcPiece* ActiveSubmodelInstance) const
 {
-	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-	{
-		lcPiece* Piece = mPieces[PieceIdx];
-
+	for (lcPiece* Piece : mPieces)
 		if (Piece->GetStepHide() == LC_STEP_MAX)
-			Piece->SubModelAddRenderMeshes(Scene, WorldMatrix, DefaultColorIndex, Focused, Selected);
-	}
+			Piece->SubModelAddRenderMeshes(Scene, WorldMatrix, DefaultColorIndex, Focused, Selected, Disabled, ActiveSubmodelInstance);
 }
 
 void lcModel::DrawBackground(lcGLWidget* Widget)

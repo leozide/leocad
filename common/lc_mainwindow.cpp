@@ -419,6 +419,11 @@ void lcMainWindow::CreateMenus()
 	QMenu* FileMenu = menuBar()->addMenu(tr("&File"));
 	FileMenu->addAction(mActions[LC_FILE_NEW]);
 	FileMenu->addAction(mActions[LC_FILE_OPEN]);
+	QMenu* RecentMenu = FileMenu->addMenu(tr("Open Recent"));
+	RecentMenu->addAction(mActions[LC_FILE_RECENT1]);
+	RecentMenu->addAction(mActions[LC_FILE_RECENT2]);
+	RecentMenu->addAction(mActions[LC_FILE_RECENT3]);
+	RecentMenu->addAction(mActions[LC_FILE_RECENT4]);
 	FileMenu->addAction(mActions[LC_FILE_MERGE]);
 	FileMenu->addSeparator();
 	FileMenu->addAction(mActions[LC_FILE_SAVE]);
@@ -443,11 +448,6 @@ void lcMainWindow::CreateMenus()
 	FileMenu->addAction(mActions[LC_FILE_PRINT_PREVIEW]);
 //	FileMenu->addAction(mActions[LC_FILE_PRINT_BOM]);
 	FileMenu->addSeparator();
-	FileMenu->addAction(mActions[LC_FILE_RECENT1]);
-	FileMenu->addAction(mActions[LC_FILE_RECENT2]);
-	FileMenu->addAction(mActions[LC_FILE_RECENT3]);
-	FileMenu->addAction(mActions[LC_FILE_RECENT4]);
-	mActionFileRecentSeparator = FileMenu->addSeparator();
 	FileMenu->addAction(mActions[LC_FILE_EXIT]);
 
 	QMenu* EditMenu = menuBar()->addMenu(tr("&Edit"));
@@ -2076,8 +2076,6 @@ void lcMainWindow::UpdateRecentFiles()
 		else
 			Action->setVisible(false);
 	}
-
-	mActionFileRecentSeparator->setVisible(!mRecentFiles[0].isEmpty());
 }
 
 void lcMainWindow::UpdateShortcuts()

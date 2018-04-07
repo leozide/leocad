@@ -11,6 +11,7 @@ lcScene::lcScene()
 	: mRenderMeshes(0, 1024), mOpaqueMeshes(0, 1024), mTranslucentMeshes(0, 1024), mInterfaceObjects(0, 1024)
 {
 	mActiveSubmodelInstance = nullptr;
+	mAllowWireframe = true;
 }
 
 void lcScene::Begin(const lcMatrix44& ViewMatrix)
@@ -239,6 +240,8 @@ void lcScene::Draw(lcContext* Context) const
 	const bool DrawConditional = false;
 
 	lcShadingMode ShadingMode = lcGetPreferences().mShadingMode;
+	if (ShadingMode == LC_SHADING_WIREFRAME && !mAllowWireframe)
+		ShadingMode = LC_SHADING_FLAT;
 
 	if (ShadingMode == LC_SHADING_WIREFRAME)
 	{

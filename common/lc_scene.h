@@ -28,6 +28,11 @@ public:
 		return mDrawInterface;
 	}
 
+	void SetAllowWireframe(bool AllowWireframe)
+	{
+		mAllowWireframe = AllowWireframe;
+	}
+
 	void Begin(const lcMatrix44& ViewMatrix);
 	void End();
 	void AddMesh(lcMesh* Mesh, const lcMatrix44& WorldMatrix, int ColorIndex, lcRenderMeshState State, int Flags);
@@ -46,6 +51,7 @@ protected:
 	lcMatrix44 mViewMatrix;
 	lcPiece* mActiveSubmodelInstance;
 	bool mDrawInterface;
+	bool mAllowWireframe;
 
 	lcArray<lcRenderMesh> mRenderMeshes;
 	lcArray<int> mOpaqueMeshes;

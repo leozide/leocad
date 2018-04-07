@@ -368,6 +368,7 @@ void lcPartSelectionListModel::DrawPreview(int InfoIndex)
 	Context->SetProjectionMatrix(ProjectionMatrix);
 
 	lcScene Scene;
+	Scene.SetAllowWireframe(false);
 	Scene.Begin(ViewMatrix);
 
 	Info->AddRenderMeshes(Scene, lcMatrix44Identity(), mColorIndex, lcRenderMeshState::NORMAL, true);

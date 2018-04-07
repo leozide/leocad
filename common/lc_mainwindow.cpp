@@ -2310,6 +2310,7 @@ void lcMainWindow::SetModelFromSelection()
 void lcMainWindow::HandleCommand(lcCommandId CommandId)
 {
 	View* ActiveView = GetActiveView();
+	lcModel* ActiveModel = ActiveView ? ActiveView->GetActiveModel() : nullptr;
 
 	switch (CommandId)
 	{
@@ -2402,23 +2403,28 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		break;
 
 	case LC_EDIT_UNDO:
-		lcGetActiveModel()->UndoAction();
+		if (ActiveModel)
+			ActiveModel->UndoAction();
 		break;
 
 	case LC_EDIT_REDO:
-		lcGetActiveModel()->RedoAction();
+		if (ActiveModel)
+			ActiveModel->RedoAction();
 		break;
 
 	case LC_EDIT_CUT:
-		lcGetActiveModel()->Cut();
+		if (ActiveModel)
+			ActiveModel->Cut();
 		break;
 
 	case LC_EDIT_COPY:
-		lcGetActiveModel()->Copy();
+		if (ActiveModel)
+			ActiveModel->Copy();
 		break;
 
 	case LC_EDIT_PASTE:
-		lcGetActiveModel()->Paste();
+		if (ActiveModel)
+			ActiveModel->Paste();
 		break;
 
 	case LC_EDIT_FIND:
@@ -2426,31 +2432,38 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		break;
 
 	case LC_EDIT_FIND_NEXT:
-		lcGetActiveModel()->FindPiece(false, true);
+		if (ActiveModel)
+			ActiveModel->FindPiece(false, true);
 		break;
 
 	case LC_EDIT_FIND_PREVIOUS:
-		lcGetActiveModel()->FindPiece(false, false);
+		if (ActiveModel)
+			ActiveModel->FindPiece(false, false);
 		break;
 
 	case LC_EDIT_SELECT_ALL:
-		lcGetActiveModel()->SelectAllPieces();
+		if (ActiveModel)
+			ActiveModel->SelectAllPieces();
 		break;
 
 	case LC_EDIT_SELECT_NONE:
-		lcGetActiveModel()->ClearSelection(true);
+		if (ActiveModel)
+			ActiveModel->ClearSelection(true);
 		break;
 
 	case LC_EDIT_SELECT_INVERT:
-		lcGetActiveModel()->InvertSelection();
+		if (ActiveModel)
+			ActiveModel->InvertSelection();
 		break;
 
 	case LC_EDIT_SELECT_BY_NAME:
-		lcGetActiveModel()->ShowSelectByNameDialog();
+		if (ActiveModel)
+			ActiveModel->ShowSelectByNameDialog();
 		break;
 
 	case LC_EDIT_SELECT_BY_COLOR:
-		lcGetActiveModel()->ShowSelectByColorDialog();
+		if (ActiveModel)
+			ActiveModel->ShowSelectByColorDialog();
 		break;
 
 	case LC_EDIT_SELECTION_SINGLE:
@@ -2512,99 +2525,108 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		break;
 
 	case LC_PIECE_INSERT:
-		lcGetActiveModel()->AddPiece();
+		if (ActiveModel)
+			ActiveModel->AddPiece();
 		break;
 
 	case LC_PIECE_DELETE:
-		lcGetActiveModel()->DeleteSelectedObjects();
+		if (ActiveModel)
+			ActiveModel->DeleteSelectedObjects();
 		break;
 
 	case LC_PIECE_DUPLICATE:
-		lcGetActiveModel()->DuplicateSelectedPieces();
+		if (ActiveModel)
+			ActiveModel->DuplicateSelectedPieces();
 		break;
 
 	case LC_PIECE_RESET_PIVOT_POINT:
-		lcGetActiveModel()->ResetSelectedPiecesPivotPoint();
+		if (ActiveModel)
+			ActiveModel->ResetSelectedPiecesPivotPoint();
 		break;
 
 	case LC_PIECE_REMOVE_KEY_FRAMES:
-		lcGetActiveModel()->RemoveSelectedPiecesKeyFrames();
+		if (ActiveModel)
+			ActiveModel->RemoveSelectedPiecesKeyFrames();
 		break;
 
 	case LC_PIECE_CONTROL_POINT_INSERT:
-		lcGetActiveModel()->InsertControlPoint();
+		if (ActiveModel)
+			ActiveModel->InsertControlPoint();
 		break;
 
 	case LC_PIECE_CONTROL_POINT_REMOVE:
-		lcGetActiveModel()->RemoveFocusedControlPoint();
+		if (ActiveModel)
+			ActiveModel->RemoveFocusedControlPoint();
 		break;
 
 	case LC_PIECE_MOVE_PLUSX:
-		if (ActiveView)
-			lcGetActiveModel()->MoveSelectedObjects(ActiveView->GetMoveDirection(lcVector3(lcMax(GetMoveXYSnap(), 0.1f), 0.0f, 0.0f)), true, false, true, true);
+		if (ActiveModel)
+			ActiveModel->MoveSelectedObjects(ActiveView->GetMoveDirection(lcVector3(lcMax(GetMoveXYSnap(), 0.1f), 0.0f, 0.0f)), true, false, true, true);
 		break;
 
 	case LC_PIECE_MOVE_MINUSX:
-		if (ActiveView)
-			lcGetActiveModel()->MoveSelectedObjects(ActiveView->GetMoveDirection(lcVector3(-lcMax(GetMoveXYSnap(), 0.1f), 0.0f, 0.0f)), true, false, true, true);
+		if (ActiveModel)
+			ActiveModel->MoveSelectedObjects(ActiveView->GetMoveDirection(lcVector3(-lcMax(GetMoveXYSnap(), 0.1f), 0.0f, 0.0f)), true, false, true, true);
 		break;
 
 	case LC_PIECE_MOVE_PLUSY:
-		if (ActiveView)
-			lcGetActiveModel()->MoveSelectedObjects(ActiveView->GetMoveDirection(lcVector3(0.0f, lcMax(GetMoveXYSnap(), 0.1f), 0.0f)), true, false, true, true);
+		if (ActiveModel)
+			ActiveModel->MoveSelectedObjects(ActiveView->GetMoveDirection(lcVector3(0.0f, lcMax(GetMoveXYSnap(), 0.1f), 0.0f)), true, false, true, true);
 		break;
 
 	case LC_PIECE_MOVE_MINUSY:
-		if (ActiveView)
-			lcGetActiveModel()->MoveSelectedObjects(ActiveView->GetMoveDirection(lcVector3(0.0f, -lcMax(GetMoveXYSnap(), 0.1f), 0.0f)), true, false, true, true);
+		if (ActiveModel)
+			ActiveModel->MoveSelectedObjects(ActiveView->GetMoveDirection(lcVector3(0.0f, -lcMax(GetMoveXYSnap(), 0.1f), 0.0f)), true, false, true, true);
 		break;
 
 	case LC_PIECE_MOVE_PLUSZ:
-		if (ActiveView)
-			lcGetActiveModel()->MoveSelectedObjects(ActiveView->GetMoveDirection(lcVector3(0.0f, 0.0f, lcMax(GetMoveZSnap(), 0.1f))), true, false, true, true);
+		if (ActiveModel)
+			ActiveModel->MoveSelectedObjects(ActiveView->GetMoveDirection(lcVector3(0.0f, 0.0f, lcMax(GetMoveZSnap(), 0.1f))), true, false, true, true);
 		break;
 
 	case LC_PIECE_MOVE_MINUSZ:
-		if (ActiveView)
-			lcGetActiveModel()->MoveSelectedObjects(ActiveView->GetMoveDirection(lcVector3(0.0f, 0.0f, -lcMax(GetMoveZSnap(), 0.1f))), true, false, true, true);
+		if (ActiveModel)
+			ActiveModel->MoveSelectedObjects(ActiveView->GetMoveDirection(lcVector3(0.0f, 0.0f, -lcMax(GetMoveZSnap(), 0.1f))), true, false, true, true);
 		break;
 
 	case LC_PIECE_ROTATE_PLUSX:
-		if (ActiveView)
-			lcGetActiveModel()->RotateSelectedPieces(ActiveView->GetMoveDirection(lcVector3(lcMax(GetAngleSnap(), 1.0f), 0.0f, 0.0f)), true, false, true, true);
+		if (ActiveModel)
+			ActiveModel->RotateSelectedPieces(ActiveView->GetMoveDirection(lcVector3(lcMax(GetAngleSnap(), 1.0f), 0.0f, 0.0f)), true, false, true, true);
 		break;
 
 	case LC_PIECE_ROTATE_MINUSX:
-		if (ActiveView)
-			lcGetActiveModel()->RotateSelectedPieces(ActiveView->GetMoveDirection(-lcVector3(lcMax(GetAngleSnap(), 1.0f), 0.0f, 0.0f)), true, false, true, true);
+		if (ActiveModel)
+			ActiveModel->RotateSelectedPieces(ActiveView->GetMoveDirection(-lcVector3(lcMax(GetAngleSnap(), 1.0f), 0.0f, 0.0f)), true, false, true, true);
 		break;
 
 	case LC_PIECE_ROTATE_PLUSY:
-		if (ActiveView)
-			lcGetActiveModel()->RotateSelectedPieces(ActiveView->GetMoveDirection(lcVector3(0.0f, lcMax(GetAngleSnap(), 1.0f), 0.0f)), true, false, true, true);
+		if (ActiveModel)
+			ActiveModel->RotateSelectedPieces(ActiveView->GetMoveDirection(lcVector3(0.0f, lcMax(GetAngleSnap(), 1.0f), 0.0f)), true, false, true, true);
 		break;
 
 	case LC_PIECE_ROTATE_MINUSY:
-		if (ActiveView)
-			lcGetActiveModel()->RotateSelectedPieces(ActiveView->GetMoveDirection(lcVector3(0.0f, -lcMax(GetAngleSnap(), 1.0f), 0.0f)), true, false, true, true);
+		if (ActiveModel)
+			ActiveModel->RotateSelectedPieces(ActiveView->GetMoveDirection(lcVector3(0.0f, -lcMax(GetAngleSnap(), 1.0f), 0.0f)), true, false, true, true);
 		break;
 
 	case LC_PIECE_ROTATE_PLUSZ:
-		if (ActiveView)
-			lcGetActiveModel()->RotateSelectedPieces(ActiveView->GetMoveDirection(lcVector3(0.0f, 0.0f, lcMax(GetAngleSnap(), 1.0f))), true, false, true, true);
+		if (ActiveModel)
+			ActiveModel->RotateSelectedPieces(ActiveView->GetMoveDirection(lcVector3(0.0f, 0.0f, lcMax(GetAngleSnap(), 1.0f))), true, false, true, true);
 		break;
 
 	case LC_PIECE_ROTATE_MINUSZ:
-		if (ActiveView)
-			lcGetActiveModel()->RotateSelectedPieces(ActiveView->GetMoveDirection(lcVector3(0.0f, 0.0f, -lcMax(GetAngleSnap(), 1.0f))), true, false, true, true);
+		if (ActiveModel)
+			ActiveModel->RotateSelectedPieces(ActiveView->GetMoveDirection(lcVector3(0.0f, 0.0f, -lcMax(GetAngleSnap(), 1.0f))), true, false, true, true);
 		break;
 
 	case LC_PIECE_MINIFIG_WIZARD:
-		lcGetActiveModel()->ShowMinifigDialog();
+		if (ActiveModel)
+			ActiveModel->ShowMinifigDialog();
 		break;
 
 	case LC_PIECE_ARRAY:
-		lcGetActiveModel()->ShowArrayDialog();
+		if (ActiveModel)
+			ActiveModel->ShowArrayDialog();
 		break;
 
 	case LC_PIECE_VIEW_SELECTED_MODEL:
@@ -2612,59 +2634,73 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		break;
 
 	case LC_PIECE_MOVE_SELECTION_TO_MODEL:
-		lcGetActiveModel()->MoveSelectionToModel(lcGetActiveProject()->CreateNewModel(false));
+		if (ActiveModel)
+			ActiveModel->MoveSelectionToModel(lcGetActiveProject()->CreateNewModel(false));
 		break;
 
 	case LC_PIECE_INLINE_SELECTED_MODELS:
-		lcGetActiveModel()->InlineSelectedModels();
+		if (ActiveModel)
+			ActiveModel->InlineSelectedModels();
 		break;
 
 	case LC_PIECE_EDIT_SELECTED_SUBMODEL:
-		GetActiveView()->SetSelectedSubmodelActive();
+		if (ActiveView)
+			ActiveView->SetSelectedSubmodelActive();
 		break;
 
 	case LC_PIECE_GROUP:
-		lcGetActiveModel()->GroupSelection();
+		if (ActiveModel)
+			ActiveModel->GroupSelection();
 		break;
 
 	case LC_PIECE_UNGROUP:
-		lcGetActiveModel()->UngroupSelection();
+		if (ActiveModel)
+			ActiveModel->UngroupSelection();
 		break;
 
 	case LC_PIECE_GROUP_ADD:
-		lcGetActiveModel()->AddSelectedPiecesToGroup();
+		if (ActiveModel)
+			ActiveModel->AddSelectedPiecesToGroup();
 		break;
 
 	case LC_PIECE_GROUP_REMOVE:
-		lcGetActiveModel()->RemoveFocusPieceFromGroup();
+		if (ActiveModel)
+			ActiveModel->RemoveFocusPieceFromGroup();
 		break;
 
 	case LC_PIECE_GROUP_EDIT:
-		lcGetActiveModel()->ShowEditGroupsDialog();
+		if (ActiveModel)
+			ActiveModel->ShowEditGroupsDialog();
 		break;
 
 	case LC_PIECE_HIDE_SELECTED:
-		lcGetActiveModel()->HideSelectedPieces();
+		if (ActiveModel)
+			ActiveModel->HideSelectedPieces();
 		break;
 
 	case LC_PIECE_HIDE_UNSELECTED:
-		lcGetActiveModel()->HideUnselectedPieces();
+		if (ActiveModel)
+			ActiveModel->HideUnselectedPieces();
 		break;
 
 	case LC_PIECE_UNHIDE_SELECTED:
-		lcGetActiveModel()->UnhideSelectedPieces();
+		if (ActiveModel)
+			ActiveModel->UnhideSelectedPieces();
 		break;
 
 	case LC_PIECE_UNHIDE_ALL:
-		lcGetActiveModel()->UnhideAllPieces();
+		if (ActiveModel)
+			ActiveModel->UnhideAllPieces();
 		break;
 
 	case LC_PIECE_SHOW_EARLIER:
-		lcGetActiveModel()->ShowSelectedPiecesEarlier();
+		if (ActiveModel)
+			ActiveModel->ShowSelectedPiecesEarlier();
 		break;
 
 	case LC_PIECE_SHOW_LATER:
-		lcGetActiveModel()->ShowSelectedPiecesLater();
+		if (ActiveModel)
+			ActiveModel->ShowSelectedPiecesLater();
 		break;
 
 	case LC_VIEW_PREFERENCES:
@@ -2722,19 +2758,23 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		break;
 
 	case LC_VIEW_TIME_NEXT:
-		lcGetActiveModel()->ShowNextStep();
+		if (ActiveModel)
+			ActiveModel->ShowNextStep();
 		break;
 
 	case LC_VIEW_TIME_PREVIOUS:
-		lcGetActiveModel()->ShowPreviousStep();
+		if (ActiveModel)
+			ActiveModel->ShowPreviousStep();
 		break;
 
 	case LC_VIEW_TIME_FIRST:
-		lcGetActiveModel()->ShowFirstStep();
+		if (ActiveModel)
+			ActiveModel->ShowFirstStep();
 		break;
 
 	case LC_VIEW_TIME_LAST:
-		lcGetActiveModel()->ShowLastStep();
+		if (ActiveModel)
+			ActiveModel->ShowLastStep();
 		break;
 
 	case LC_VIEW_TIME_INSERT:
@@ -2924,7 +2964,8 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		break;
 
 	case LC_EDIT_TRANSFORM:
-		lcGetActiveModel()->TransformSelectedObjects(GetTransformType(), GetTransformAmount());
+		if (ActiveModel)
+			ActiveModel->TransformSelectedObjects(GetTransformType(), GetTransformAmount());
 		break;
 
 	case LC_EDIT_TRANSFORM_ABSOLUTE_TRANSLATION:

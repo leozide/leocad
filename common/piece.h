@@ -1,6 +1,7 @@
 #pragma once
 
 class PieceInfo;
+enum class lcRenderMeshState : int;
 
 #include "object.h"
 #include "lc_colors.h"
@@ -346,8 +347,8 @@ public:
 	virtual void DrawInterface(lcContext* Context) const override;
 	virtual void RemoveKeyFrames() override;
 
-	void AddRenderMeshes(lcScene& Scene, bool DrawInterface, bool Highlight, lcPiece* ActiveSubmodelInstance) const;
-	void SubModelAddRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, int DefaultColorIndex, bool Focused, bool Selected, bool Disabled, lcPiece* ActiveSubmodelInstance) const;
+	void AddMainModelRenderMeshes(lcScene& Scene, bool Highlight) const;
+	void AddSubModelRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, int DefaultColorIndex, lcRenderMeshState RenderMeshState, bool ParentActive) const;
 
 	void InsertTime(lcStep Start, lcStep Time);
 	void RemoveTime(lcStep Start, lcStep Time);

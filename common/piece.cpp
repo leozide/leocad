@@ -646,46 +646,55 @@ void lcPiece::RemoveKeyFrames()
 	ChangeKey(mRotationKeys, lcMatrix33(mModelWorld), 1, true);
 }
 
-void lcPiece::AddRenderMeshes(lcScene& Scene, bool DrawInterface, bool Highlight, lcPiece* ActiveSubmodelInstance) const
+void lcPiece::AddMainModelRenderMeshes(lcScene& Scene, bool Highlight) const
 {
-	bool Focused, Selected, Disabled;
+	lcRenderMeshState RenderMeshState = lcRenderMeshState::NORMAL;
+	bool ParentActive = false;
 
-	if (DrawInterface)
+	if (Scene.GetDrawInterface())
 	{
-		Focused = IsFocused();
-		Selected = IsSelected();
-		Disabled = ActiveSubmodelInstance && (ActiveSubmodelInstance != this);
-	}
-	else
-	{
-		Focused = false;
-		Selected = false;
-		Disabled = false;
-	}
+		lcPiece* ActiveSubmodelInstance = Scene.GetActiveSubmodelInstance();
 
-	if (ActiveSubmodelInstance == this)
-		ActiveSubmodelInstance = nullptr;
+		if (!ActiveSubmodelInstance)
+			RenderMeshState = IsFocused() ? lcRenderMeshState::FOCUSED : (IsSelected() ? lcRenderMeshState::SELECTED : lcRenderMeshState::NORMAL);
+		else if (ActiveSubmodelInstance == this)
+			ParentActive = true;
+		else
+			RenderMeshState = lcRenderMeshState::DISABLED;
+	}
+	else if (Highlight)
+		RenderMeshState = lcRenderMeshState::HIGHLIGHT;
 
 	if (!mMesh)
-		mPieceInfo->AddRenderMeshes(Scene, mModelWorld, mColorIndex, Focused, Selected, Disabled, Highlight, ActiveSubmodelInstance);
+		mPieceInfo->AddRenderMeshes(Scene, mModelWorld, mColorIndex, RenderMeshState, ParentActive);
 	else
-		Scene.AddMesh(mMesh, mModelWorld, mColorIndex, Disabled ? LC_RENDERMESH_DISABLED : (Focused ? LC_RENDERMESH_FOCUSED : (Selected ? LC_RENDERMESH_SELECTED : LC_RENDERMESH_NONE)), mPieceInfo->mFlags);
+		Scene.AddMesh(mMesh, mModelWorld, mColorIndex, RenderMeshState, mPieceInfo->mFlags);
 
-	if (Selected)
+	if (RenderMeshState == lcRenderMeshState::FOCUSED || RenderMeshState == lcRenderMeshState::SELECTED)
 		Scene.AddInterfaceObject(this);
 }
 
-void lcPiece::SubModelAddRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, int DefaultColorIndex, bool Focused, bool Selected, bool Disabled, lcPiece* ActiveSubmodelInstance) const
+void lcPiece::AddSubModelRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, int DefaultColorIndex, lcRenderMeshState RenderMeshState, bool ParentActive) const
 {
 	int ColorIndex = mColorIndex;
 
 	if (ColorIndex == gDefaultColor)
 		ColorIndex = DefaultColorIndex;
 
+	lcPiece* ActiveSubmodelInstance = Scene.GetActiveSubmodelInstance();
+
+	if (ActiveSubmodelInstance == this)
+		RenderMeshState = lcRenderMeshState::NORMAL;
+	else if (ParentActive)
+		RenderMeshState = IsFocused() ? lcRenderMeshState::FOCUSED : (IsSelected() ? lcRenderMeshState::SELECTED : lcRenderMeshState::NORMAL);
+
 	if (!mMesh)
-		mPieceInfo->AddRenderMeshes(Scene, lcMul(mModelWorld, WorldMatrix), ColorIndex, Focused, Selected, Disabled, false, ActiveSubmodelInstance);
+		mPieceInfo->AddRenderMeshes(Scene, lcMul(mModelWorld, WorldMatrix), ColorIndex, RenderMeshState, ActiveSubmodelInstance == this);
 	else
-		Scene.AddMesh(mMesh, lcMul(mModelWorld, WorldMatrix), ColorIndex, Disabled ? LC_RENDERMESH_DISABLED : (Focused ? LC_RENDERMESH_FOCUSED : (Selected ? LC_RENDERMESH_SELECTED : LC_RENDERMESH_NONE)), mPieceInfo->mFlags);
+		Scene.AddMesh(mMesh, lcMul(mModelWorld, WorldMatrix), ColorIndex, RenderMeshState, mPieceInfo->mFlags);
+
+	if (ParentActive && (RenderMeshState == lcRenderMeshState::FOCUSED || RenderMeshState == lcRenderMeshState::SELECTED))
+		Scene.AddInterfaceObject(this);
 }
 
 void lcPiece::MoveSelected(lcStep Step, bool AddKey, const lcVector3& Distance)

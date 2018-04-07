@@ -54,7 +54,6 @@ void View::SetSelectedSubmodelActive()
 	{
 		lcModel* Model = mActiveSubmodelInstance->mPieceInfo->GetModel();
 		Model->SetActive(false);
-		Model->ClearSelection(true);
 		mActiveSubmodelInstance = nullptr;
 	}
 
@@ -67,13 +66,11 @@ void View::SetSelectedSubmodelActive()
 
 		if (Piece->mPieceInfo->IsModel())
 		{
-			ActiveModel->ClearSelection(false);
 			mActiveSubmodelMatrix = lcMatrix44Identity();
 			mModel->GetPieceWorldMatrix(Piece, mActiveSubmodelMatrix);
 			mActiveSubmodelInstance = Piece;
 			lcModel* Model = mActiveSubmodelInstance->mPieceInfo->GetModel();
 			Model->SetActive(true);
-			Model->ClearSelection(true);
 		}
 	}
 }
@@ -722,7 +719,7 @@ void View::OnDraw()
 		PieceInfo* Info = gMainWindow->GetCurrentPieceInfo();
 
 		if (Info)
-			Info->AddRenderMeshes(mScene, GetPieceInsertPosition(false, gMainWindow->GetCurrentPieceInfo()), gMainWindow->mColorIndex, true, true, false, false, nullptr);
+			Info->AddRenderMeshes(mScene, GetPieceInsertPosition(false, gMainWindow->GetCurrentPieceInfo()), gMainWindow->mColorIndex, lcRenderMeshState::FOCUSED, true);
 	}
 
 	int TotalTileRows = 1;

@@ -1254,12 +1254,14 @@ void lcModel::DuplicateSelectedPieces()
 void lcModel::GetScene(lcScene& Scene, lcCamera* ViewCamera, bool DrawInterface, bool Highlight, lcPiece* ActiveSubmodelInstance) const
 {
 	Scene.Begin(ViewCamera->mWorldView);
+	Scene.SetActiveSubmodelInstance(ActiveSubmodelInstance);
+	Scene.SetDrawInterface(DrawInterface);
 
 	mPieceInfo->AddRenderMesh(Scene);
 
 	for (lcPiece* Piece : mPieces)
 		if (Piece->IsVisible(mCurrentStep))
-			Piece->AddRenderMeshes(Scene, DrawInterface, Highlight && Piece->GetStepShow() == mCurrentStep, ActiveSubmodelInstance);
+			Piece->AddMainModelRenderMeshes(Scene, Highlight && Piece->GetStepShow() == mCurrentStep);
 
 	if (DrawInterface && !ActiveSubmodelInstance)
 	{
@@ -1283,11 +1285,11 @@ void lcModel::GetScene(lcScene& Scene, lcCamera* ViewCamera, bool DrawInterface,
 	Scene.End();
 }
 
-void lcModel::SubModelAddRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, int DefaultColorIndex, bool Focused, bool Selected, bool Disabled, lcPiece* ActiveSubmodelInstance) const
+void lcModel::AddSubModelRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, int DefaultColorIndex, lcRenderMeshState RenderMeshState, bool ParentActive) const
 {
 	for (lcPiece* Piece : mPieces)
 		if (Piece->GetStepHide() == LC_STEP_MAX)
-			Piece->SubModelAddRenderMeshes(Scene, WorldMatrix, DefaultColorIndex, Focused, Selected, Disabled, ActiveSubmodelInstance);
+			Piece->AddSubModelRenderMeshes(Scene, WorldMatrix, DefaultColorIndex, RenderMeshState, ParentActive);
 }
 
 void lcModel::DrawBackground(lcGLWidget* Widget)

@@ -8,6 +8,26 @@ class lcScene
 public:
 	lcScene();
 
+	void SetActiveSubmodelInstance(lcPiece* ActiveSubmodelInstance)
+	{
+		mActiveSubmodelInstance = ActiveSubmodelInstance;
+	}
+
+	lcPiece* GetActiveSubmodelInstance() const
+	{
+		return mActiveSubmodelInstance;
+	}
+
+	void SetDrawInterface(bool DrawInterface)
+	{
+		mDrawInterface = DrawInterface;
+	}
+
+	bool GetDrawInterface() const
+	{
+		return mDrawInterface;
+	}
+
 	void Begin(const lcMatrix44& ViewMatrix);
 	void End();
 	void AddMesh(lcMesh* Mesh, const lcMatrix44& WorldMatrix, int ColorIndex, lcRenderMeshState State, int Flags);
@@ -24,6 +44,9 @@ protected:
 	void DrawRenderMeshes(lcContext* Context, int PrimitiveTypes, bool EnableNormals, bool DrawTranslucent, bool DrawTextured) const;
 
 	lcMatrix44 mViewMatrix;
+	lcPiece* mActiveSubmodelInstance;
+	bool mDrawInterface;
+
 	lcArray<lcRenderMesh> mRenderMeshes;
 	lcArray<int> mOpaqueMeshes;
 	lcArray<int> mTranslucentMeshes;

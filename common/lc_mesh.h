@@ -96,13 +96,13 @@ public:
 	int mIndexType;
 };
 
-enum lcRenderMeshState
+enum class lcRenderMeshState : int
 {
-	LC_RENDERMESH_NONE,
-	LC_RENDERMESH_SELECTED,
-	LC_RENDERMESH_FOCUSED,
-	LC_RENDERMESH_DISABLED,
-	LC_RENDERMESH_HIGHLIGHT
+	NORMAL,
+	SELECTED,
+	FOCUSED,
+	DISABLED,
+	HIGHLIGHT
 };
 
 struct lcRenderMesh

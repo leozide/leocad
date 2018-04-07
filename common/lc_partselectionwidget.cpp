@@ -370,7 +370,7 @@ void lcPartSelectionListModel::DrawPreview(int InfoIndex)
 	lcScene Scene;
 	Scene.Begin(ViewMatrix);
 
-	Info->AddRenderMeshes(Scene, lcMatrix44Identity(), mColorIndex, false, false, false, false, nullptr);
+	Info->AddRenderMeshes(Scene, lcMatrix44Identity(), mColorIndex, lcRenderMeshState::NORMAL, true);
 
 	Scene.End();
 

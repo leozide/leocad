@@ -303,21 +303,21 @@ void PieceInfo::ZoomExtents(float FoV, float AspectRatio, lcMatrix44& Projection
 void PieceInfo::AddRenderMesh(lcScene& Scene)
 {
 	if (mMesh)
-		Scene.AddMesh(mMesh, lcMatrix44Identity(), gDefaultColor, LC_RENDERMESH_NONE, mFlags);
+		Scene.AddMesh(mMesh, lcMatrix44Identity(), gDefaultColor, lcRenderMeshState::NORMAL, mFlags);
 }
 
-void PieceInfo::AddRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, int ColorIndex, bool Focused, bool Selected, bool Disabled, bool Highlight, lcPiece* ActiveSubmodelInstance) const
+void PieceInfo::AddRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, int ColorIndex, lcRenderMeshState RenderMeshState, bool ParentActive) const
 {
 	if ((mMesh) || (mFlags & LC_PIECE_PLACEHOLDER))
-		Scene.AddMesh((mFlags & LC_PIECE_PLACEHOLDER) ? gPlaceholderMesh : mMesh, WorldMatrix, ColorIndex, Disabled ? LC_RENDERMESH_DISABLED : (Focused ? LC_RENDERMESH_FOCUSED : (Selected ? LC_RENDERMESH_SELECTED : (Highlight ? LC_RENDERMESH_HIGHLIGHT : LC_RENDERMESH_NONE))), mFlags);
+		Scene.AddMesh((mFlags & LC_PIECE_PLACEHOLDER) ? gPlaceholderMesh : mMesh, WorldMatrix, ColorIndex, RenderMeshState, mFlags);
 
 	if (mFlags & LC_PIECE_MODEL)
-		mModel->SubModelAddRenderMeshes(Scene, WorldMatrix, ColorIndex, Focused, Selected, Disabled, ActiveSubmodelInstance);
+		mModel->AddSubModelRenderMeshes(Scene, WorldMatrix, ColorIndex, RenderMeshState, ParentActive);
 	else if (mFlags & LC_PIECE_PROJECT)
 	{
 		lcModel* Model = mProject->GetMainModel();
 		if (Model)
-			Model->SubModelAddRenderMeshes(Scene, WorldMatrix, ColorIndex, Focused, Selected, Disabled, ActiveSubmodelInstance);
+			Model->AddSubModelRenderMeshes(Scene, WorldMatrix, ColorIndex, RenderMeshState, ParentActive);
 	}
 }
 

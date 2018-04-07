@@ -50,15 +50,15 @@ lcModel* View::GetActiveModel() const
 
 void View::SetSelectedSubmodelActive()
 {
+	lcModel* ActiveModel = GetActiveModel();
+	lcObject* Object = ActiveModel->GetFocusObject();
+
 	if (mActiveSubmodelInstance)
 	{
 		lcModel* Model = mActiveSubmodelInstance->mPieceInfo->GetModel();
 		Model->SetActive(false);
 		mActiveSubmodelInstance = nullptr;
 	}
-
-	lcModel* ActiveModel = GetActiveModel();
-	lcObject* Object = ActiveModel->GetFocusObject();
 
 	if (Object && Object->IsPiece())
 	{

@@ -1251,10 +1251,10 @@ void lcModel::DuplicateSelectedPieces()
 	SaveCheckpoint(tr("Duplicating Pieces"));
 }
 
-void lcModel::GetScene(lcScene& Scene, lcCamera* ViewCamera, bool DrawInterface, bool Highlight, lcPiece* ActiveSubmodelInstance) const
+void lcModel::GetScene(lcScene& Scene, lcCamera* ViewCamera, bool DrawInterface, bool Highlight, lcPiece* ActiveSubmodelInstance, const lcMatrix44& ActiveSubmodelTransform) const
 {
 	Scene.Begin(ViewCamera->mWorldView);
-	Scene.SetActiveSubmodelInstance(ActiveSubmodelInstance);
+	Scene.SetActiveSubmodelInstance(ActiveSubmodelInstance, ActiveSubmodelTransform);
 	Scene.SetDrawInterface(DrawInterface);
 
 	mPieceInfo->AddRenderMesh(Scene);

@@ -509,7 +509,7 @@ void lcPiece::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
 		ObjectBoxTest.Objects.Add(const_cast<lcPiece*>(this));
 }
 
-void lcPiece::DrawInterface(lcContext* Context) const
+void lcPiece::DrawInterface(lcContext* Context, const lcScene& Scene) const
 {
 	float LineWidth = lcGetPreferences().mLineWidth;
 	Context->SetLineWidth(2.0f * LineWidth);
@@ -554,8 +554,9 @@ void lcPiece::DrawInterface(lcContext* Context) const
 		{ Min[0], Min[1], Min[2] }, { Min[0], Min[1], Min[2] + Edge[2] },
 	};
 
+	lcMatrix44 WorldMatrix = Scene.ApplyActiveSubmodelTransform(mModelWorld);
 	Context->SetMaterial(LC_MATERIAL_UNLIT_COLOR);
-	Context->SetWorldMatrix(mModelWorld);
+	Context->SetWorldMatrix(WorldMatrix);
 
 	if (IsFocused(LC_PIECE_SECTION_POSITION))
 		Context->SetInterfaceColor(LC_COLOR_FOCUSED);
@@ -581,7 +582,7 @@ void lcPiece::DrawInterface(lcContext* Context) const
 			0, 1, 1, 2, 2, 3, 3, 0, 4, 5, 5, 6, 6, 7, 7, 4, 0, 4, 1, 5, 2, 6, 3, 7
 		};
 
-		Context->SetWorldMatrix(lcMul(mPivotMatrix, mModelWorld));
+		Context->SetWorldMatrix(lcMul(mPivotMatrix, WorldMatrix));
 
 		Context->SetVertexBufferPointer(Verts);
 		Context->SetVertexFormatPosition(3);
@@ -618,7 +619,7 @@ void lcPiece::DrawInterface(lcContext* Context) const
 
 		for (int ControlPointIdx = 0; ControlPointIdx < mControlPoints.GetSize(); ControlPointIdx++)
 		{
-			Context->SetWorldMatrix(lcMul(mControlPoints[ControlPointIdx].Transform, mModelWorld));
+			Context->SetWorldMatrix(lcMul(mControlPoints[ControlPointIdx].Transform, WorldMatrix));
 
 			Context->SetVertexBufferPointer(Verts);
 			Context->SetVertexFormatPosition(3);

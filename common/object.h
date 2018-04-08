@@ -94,7 +94,7 @@ public:
 	virtual lcVector3 GetSectionPosition(quint32 Section) const = 0;
 	virtual void RayTest(lcObjectRayTest& ObjectRayTest) const = 0;
 	virtual void BoxTest(lcObjectBoxTest& ObjectBoxTest) const = 0;
-	virtual void DrawInterface(lcContext* Context) const = 0;
+	virtual void DrawInterface(lcContext* Context, const lcScene& Scene) const = 0;
 	virtual void RemoveKeyFrames() = 0;
 	virtual const char* GetName() const = 0;
 

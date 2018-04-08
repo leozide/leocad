@@ -344,7 +344,7 @@ public:
 
 	virtual void RayTest(lcObjectRayTest& ObjectRayTest) const override;
 	virtual void BoxTest(lcObjectBoxTest& ObjectBoxTest) const override;
-	virtual void DrawInterface(lcContext* Context) const override;
+	virtual void DrawInterface(lcContext* Context, const lcScene& Scene) const override;
 	virtual void RemoveKeyFrames() override;
 
 	void AddMainModelRenderMeshes(lcScene& Scene, bool Highlight) const;

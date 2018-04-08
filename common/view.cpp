@@ -66,8 +66,8 @@ void View::SetSelectedSubmodelActive()
 
 		if (Piece->mPieceInfo->IsModel())
 		{
-			mActiveSubmodelMatrix = lcMatrix44Identity();
-			mModel->GetPieceWorldMatrix(Piece, mActiveSubmodelMatrix);
+			mActiveSubmodelTransform = lcMatrix44Identity();
+			mModel->GetPieceWorldMatrix(Piece, mActiveSubmodelTransform);
 			mActiveSubmodelInstance = Piece;
 			lcModel* Model = mActiveSubmodelInstance->mPieceInfo->GetModel();
 			Model->SetActive(true);
@@ -606,7 +606,7 @@ lcObjectSection View::FindObjectUnderPointer(bool PiecesOnly, bool IgnoreSelecte
 
 	if (ActiveModel != mModel)
 	{
-		lcMatrix44 InverseMatrix = lcMatrix44AffineInverse(mActiveSubmodelMatrix);
+		lcMatrix44 InverseMatrix = lcMatrix44AffineInverse(mActiveSubmodelTransform);
 
 		ObjectRayTest.Start = lcMul31(ObjectRayTest.Start, InverseMatrix);
 		ObjectRayTest.End = lcMul31(ObjectRayTest.End, InverseMatrix);
@@ -712,7 +712,7 @@ void View::OnDraw()
 
 	bool DrawInterface = mWidget != nullptr;
 
-	mModel->GetScene(mScene, mCamera, DrawInterface, mHighlight, mActiveSubmodelInstance);
+	mModel->GetScene(mScene, mCamera, DrawInterface, mHighlight, mActiveSubmodelInstance, mActiveSubmodelTransform);
 
 	if (DrawInterface && mTrackTool == LC_TRACKTOOL_INSERT)
 	{
@@ -853,7 +853,7 @@ void View::DrawSelectMoveOverlay()
 	lcMatrix44 WorldMatrix = lcMatrix44(RelativeRotation, OverlayCenter);
 
 	if (ActiveModel != mModel)
-		WorldMatrix = lcMul(WorldMatrix, mActiveSubmodelMatrix);
+		WorldMatrix = lcMul(WorldMatrix, mActiveSubmodelTransform);
 
 	const float OverlayScale = GetOverlayScale();
 	WorldMatrix = lcMul(lcMatrix44Scale(lcVector3(OverlayScale, OverlayScale, OverlayScale)), WorldMatrix);

@@ -488,8 +488,9 @@ void lcCamera::CopyPosition(const lcCamera* camera)
 	mState |= (camera->mState&LC_CAMERA_ORTHO);
 }
 
-void lcCamera::DrawInterface(lcContext* Context) const
+void lcCamera::DrawInterface(lcContext* Context, const lcScene& Scene) const
 {
+	Q_UNUSED(Scene);
 	Context->SetMaterial(LC_MATERIAL_UNLIT_COLOR);
 
 	lcMatrix44 ViewWorldMatrix = lcMatrix44AffineInverse(mWorldView);

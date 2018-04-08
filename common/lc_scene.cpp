@@ -378,5 +378,5 @@ void lcScene::Draw(lcContext* Context) const
 void lcScene::DrawInterfaceObjects(lcContext* Context) const
 {
 	for (const lcObject* Object : mInterfaceObjects)
-		Object->DrawInterface(Context);
+		Object->DrawInterface(Context, *this);
 }

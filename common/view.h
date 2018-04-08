@@ -172,7 +172,7 @@ protected:
 
 	lcModel* mModel;
 	lcPiece* mActiveSubmodelInstance;
-	lcMatrix44 mActiveSubmodelMatrix;
+	lcMatrix44 mActiveSubmodelTransform;
 
 	lcScene mScene;
 	lcDragState mDragState;

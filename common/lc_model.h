@@ -233,7 +233,7 @@ public:
 	void Paste();
 	void DuplicateSelectedPieces();
 
-	void GetScene(lcScene& Scene, lcCamera* ViewCamera, bool DrawInterface, bool Highlight, lcPiece* ActiveSubmodelInstance) const;
+	void GetScene(lcScene& Scene, lcCamera* ViewCamera, bool DrawInterface, bool Highlight, lcPiece* ActiveSubmodelInstance, const lcMatrix44& ActiveSubmodelTransform) const;
 	void AddSubModelRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, int DefaultColorIndex, lcRenderMeshState RenderMeshState, bool ParentActive) const;
 	void DrawBackground(lcGLWidget* Widget);
 	void SaveStepImages(const QString& BaseName, bool AddStepSuffix, bool Zoom, bool Highlight, int Width, int Height, lcStep Start, lcStep End);

@@ -177,7 +177,7 @@ public:
 public:
 	virtual void RayTest(lcObjectRayTest& ObjectRayTest) const override;
 	virtual void BoxTest(lcObjectBoxTest& ObjectBoxTest) const override;
-	virtual void DrawInterface(lcContext* Context) const override;
+	virtual void DrawInterface(lcContext* Context, const lcScene& Scene) const override;
 	virtual void RemoveKeyFrames() override;
 
 	void InsertTime(lcStep Start, lcStep Time);

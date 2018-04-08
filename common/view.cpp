@@ -55,8 +55,7 @@ void View::SetSelectedSubmodelActive()
 
 	if (mActiveSubmodelInstance)
 	{
-		lcModel* Model = mActiveSubmodelInstance->mPieceInfo->GetModel();
-		Model->SetActive(false);
+		ActiveModel->SetActive(false);
 		mActiveSubmodelInstance = nullptr;
 	}
 
@@ -69,10 +68,12 @@ void View::SetSelectedSubmodelActive()
 			mActiveSubmodelTransform = lcMatrix44Identity();
 			mModel->GetPieceWorldMatrix(Piece, mActiveSubmodelTransform);
 			mActiveSubmodelInstance = Piece;
-			lcModel* Model = mActiveSubmodelInstance->mPieceInfo->GetModel();
-			Model->SetActive(true);
+			ActiveModel = mActiveSubmodelInstance->mPieceInfo->GetModel();
+			ActiveModel->SetActive(true);
 		}
 	}
+
+	GetActiveModel()->UpdateInterface();
 }
 
 void View::CreateResources(lcContext* Context)
@@ -552,8 +553,16 @@ lcMatrix44 View::GetPieceInsertPosition(bool IgnoreSelected, PieceInfo* Info) co
 		return WorldMatrix;
 	}
 
-	lcVector3 ClickPoints[2] = { lcVector3((float)mInputState.x, (float)mInputState.y, 0.0f), lcVector3((float)mInputState.x, (float)mInputState.y, 1.0f) };
-	UnprojectPoints(ClickPoints, 2);
+	std::array<lcVector3, 2> ClickPoints = { lcVector3((float)mInputState.x, (float)mInputState.y, 0.0f), lcVector3((float)mInputState.x, (float)mInputState.y, 1.0f) };
+	UnprojectPoints(ClickPoints.data(), 2);
+
+	if (ActiveModel != mModel)
+	{
+		lcMatrix44 InverseMatrix = lcMatrix44AffineInverse(mActiveSubmodelTransform);
+
+		for (lcVector3& Point : ClickPoints)
+			Point = lcMul31(Point, InverseMatrix);
+	}
 
 	lcVector3 Intersection;
 
@@ -643,7 +652,7 @@ lcArray<lcObject*> View::FindObjectsInBox(float x1, float y1, float x2, float y2
 		Bottom = y1;
 	}
 
-	lcVector3 Corners[6] =
+	std::array<lcVector3, 6> Corners =
 	{
 		lcVector3(Left, Top, 0),
 		lcVector3(Left, Bottom, 0),
@@ -653,7 +662,17 @@ lcArray<lcObject*> View::FindObjectsInBox(float x1, float y1, float x2, float y2
 		lcVector3(Right, Bottom, 1)
 	};
 
-	UnprojectPoints(Corners, 6);
+	UnprojectPoints(Corners.data(), Corners.size());
+
+	lcModel* ActiveModel = GetActiveModel();
+
+	if (ActiveModel != mModel)
+	{
+		lcMatrix44 InverseMatrix = lcMatrix44AffineInverse(mActiveSubmodelTransform);
+
+		for (lcVector3& Point : Corners)
+			Point = lcMul31(Point, InverseMatrix);
+	}
 
 	lcVector3 PlaneNormals[6];
 	PlaneNormals[0] = lcNormalize(lcCross(Corners[4] - Corners[0], Corners[1] - Corners[0])); // Left
@@ -672,7 +691,6 @@ lcArray<lcObject*> View::FindObjectsInBox(float x1, float y1, float x2, float y2
 	ObjectBoxTest.Planes[4] = lcVector4(PlaneNormals[4], -lcDot(PlaneNormals[4], Corners[0]));
 	ObjectBoxTest.Planes[5] = lcVector4(PlaneNormals[5], -lcDot(PlaneNormals[5], Corners[5]));
 
-	lcModel* ActiveModel = GetActiveModel();
 	ActiveModel->BoxTest(ObjectBoxTest);
 
 	return ObjectBoxTest.Objects;
@@ -719,7 +737,14 @@ void View::OnDraw()
 		PieceInfo* Info = gMainWindow->GetCurrentPieceInfo();
 
 		if (Info)
-			Info->AddRenderMeshes(mScene, GetPieceInsertPosition(false, gMainWindow->GetCurrentPieceInfo()), gMainWindow->mColorIndex, lcRenderMeshState::FOCUSED, true);
+		{
+			lcMatrix44 WorldMatrix = GetPieceInsertPosition(false, gMainWindow->GetCurrentPieceInfo());
+
+			if (GetActiveModel() != mModel)
+				WorldMatrix = lcMul(WorldMatrix, mActiveSubmodelTransform);
+
+			Info->AddRenderMeshes(mScene, WorldMatrix, gMainWindow->mColorIndex, lcRenderMeshState::FOCUSED, true);
+		}
 	}
 
 	int TotalTileRows = 1;
@@ -1962,6 +1987,12 @@ void View::UpdateTrackTool()
 			if (!ActiveModel->GetMoveRotateTransform(OverlayCenter, RelativeRotation))
 				break;
 
+			lcMatrix44 WorldMatrix = lcMatrix44(RelativeRotation, OverlayCenter);
+
+			if (ActiveModel != mModel)
+				WorldMatrix = lcMul(WorldMatrix, mActiveSubmodelTransform);
+			OverlayCenter = WorldMatrix.GetTranslation();
+
 			lcVector3 PlaneNormals[3] =
 			{
 				lcVector3(1.0f, 0.0f, 0.0f),
@@ -1970,7 +2001,7 @@ void View::UpdateTrackTool()
 			};
 
 			for (int i = 0; i < 3; i++)
-				PlaneNormals[i] = lcMul(PlaneNormals[i], RelativeRotation);
+				PlaneNormals[i] = lcMul30(PlaneNormals[i], WorldMatrix);
 
 			lcVector3 StartEnd[2] = { lcVector3((float)x, (float)y, 0.0f), lcVector3((float)x, (float)y, 1.0f) };
 			UnprojectPoints(StartEnd, 2);

@@ -81,12 +81,12 @@ lcHttpManager::lcHttpManager(QObject* Owner)
 
 lcHttpReply* lcHttpManager::lcHttpManager::DownloadFile(const QString& Url)
 {
-	return mNetworkManager.get(QNetworkRequest(QUrl(Url)));
+	return (lcHttpReply*)get(QNetworkRequest(QUrl(Url)));
 }
 
 void lcHttpManager::Finished(QNetworkReply* Reply)
 {
-	emit DownloadFinished(Reply);
+	emit DownloadFinished((lcHttpReply*)Reply);
 }
 
 #endif

@@ -51,7 +51,15 @@ signals:
 
 #else
 
-typedef QNetworkReply lcHttpReply;
+class lcHttpReply : public QNetworkReply
+{
+	Q_OBJECT
+
+	lcHttpReply(QObject* Parent)
+		: QNetworkReply(Parent)
+	{
+	}
+};
 
 class lcHttpManager : public QNetworkAccessManager
 {

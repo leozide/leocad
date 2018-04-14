@@ -4,6 +4,7 @@
 #include "lc_application.h"
 #include "lc_library.h"
 #include "lc_profile.h"
+#include "lc_http.h"
 
 void lcDoInitialUpdateCheck()
 {
@@ -39,23 +40,14 @@ lcQUpdateDialog::lcQUpdateDialog(QWidget* Parent, bool InitialUpdate)
 
 	ui->status->setText(tr("Connecting to update server..."));
 
-	manager = new QNetworkAccessManager(this);
-	connect(manager, SIGNAL(finished(QNetworkReply*)), this, SLOT(replyFinished(QNetworkReply*)));
+	mHttpManager = new lcHttpManager(this);
+	connect(mHttpManager, SIGNAL(DownloadFinished(lcHttpReply*)), this, SLOT(DownloadFinished(lcHttpReply*)));
 
-	updateReply = manager->get(QNetworkRequest(QUrl("https://www.leocad.org/updates.txt")));
+	mHttpManager->DownloadFile(QLatin1String("https://www.leocad.org/updates.txt"));
 }
 
 lcQUpdateDialog::~lcQUpdateDialog()
 {
-	if (updateReply)
-	{
-		updateReply->abort();
-		updateReply->deleteLater();
-	}
-
-	if (manager)
-		manager->deleteLater();
-
 	delete ui;
 }
 
@@ -69,13 +61,6 @@ void lcQUpdateDialog::accept()
 
 void lcQUpdateDialog::reject()
 {
-	if (updateReply)
-	{
-		updateReply->abort();
-		updateReply->deleteLater();
-		updateReply = nullptr;
-	}
-
 	QDialog::reject();
 }
 
@@ -87,7 +72,7 @@ void lcQUpdateDialog::finished(int result)
 		deleteLater();
 }
 
-void lcQUpdateDialog::replyFinished(QNetworkReply *reply)
+void lcQUpdateDialog::DownloadFinished(lcHttpReply *reply)
 {
 	bool updateAvailable = false;
 
@@ -156,9 +141,6 @@ void lcQUpdateDialog::replyFinished(QNetworkReply *reply)
 #else
 		settings.setValue("Updates/LastCheck", QDateTime::currentDateTime());
 #endif
-
-		updateReply = nullptr;
-		reply->deleteLater();
 	}
 	else
 		ui->status->setText(tr("Error connecting to the update server."));

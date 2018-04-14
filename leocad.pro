@@ -139,8 +139,9 @@ SOURCES += common/view.cpp \
     common/lc_context.cpp \
     common/lc_file.cpp \
     common/lc_glextensions.cpp \
+    common/lc_http.cpp \
     common/lc_library.cpp \
-	common/lc_lxf.cpp \
+    common/lc_lxf.cpp \
     common/lc_mainwindow.cpp \
     common/lc_mesh.cpp \
     common/lc_model.cpp \
@@ -175,7 +176,7 @@ SOURCES += common/view.cpp \
     qt/lc_qcolorlist.cpp \
     qt/lc_qfinddialog.cpp \
     qt/lc_qmodellistdialog.cpp \
-	common/lc_partselectionwidget.cpp \
+    common/lc_partselectionwidget.cpp \
     common/lc_timelinewidget.cpp \
     qt/lc_renderdialog.cpp \
     qt/lc_setsdatabasedialog.cpp
@@ -200,8 +201,9 @@ HEADERS += \
     common/lc_glextensions.h \
     common/lc_global.h \
     common/lc_glwidget.h \
+    common/lc_http.h \
     common/lc_library.h \
-	common/lc_lxf.h \
+    common/lc_lxf.h \
     common/lc_mainwindow.h \
     common/lc_math.h \
     common/lc_mesh.h \
@@ -235,7 +237,7 @@ HEADERS += \
     qt/lc_qcolorlist.h \
     qt/lc_qfinddialog.h \
     qt/lc_qmodellistdialog.h \
-	common/lc_partselectionwidget.h \
+    common/lc_partselectionwidget.h \
     common/lc_timelinewidget.h \
     qt/lc_renderdialog.h \
     qt/lc_setsdatabasedialog.h

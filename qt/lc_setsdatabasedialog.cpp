@@ -1,63 +1,7 @@
 #include "lc_global.h"
 #include "lc_setsdatabasedialog.h"
 #include "ui_lc_setsdatabasedialog.h"
-#include <QNetworkRequest>
-#include <QNetworkReply>
-
-#ifdef Q_OS_WIN
-
-lcHttpReply::lcHttpReply(QObject* Parent, const QString& URL)
-	: QThread(Parent)
-{
-	mError = true;
-	mAbort = false;
-	mURL = URL;
-}
-
-void lcHttpReply::run()
-{
-	HINTERNET Session = nullptr;
-	HINTERNET Request = nullptr;
-
-	if (sizeof(wchar_t) != sizeof(QChar))
-		return;
-
-	Session = InternetOpen(L"LeoCAD", INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
-	if (!Session)
-		return;
-
-	Request = InternetOpenUrl(Session, (WCHAR*)mURL.data(), NULL, 0, 0, 0);
-	if (!Request)
-	{
-		InternetCloseHandle(Session);
-		return;
-	}
-
-	for (;;)
-	{
-		char Buffer[1024];
-		DWORD BytesRead;
-
-		if (mAbort)
-			break;
-
-		if (!InternetReadFile(Request, Buffer, sizeof(Buffer), &BytesRead))
-			break;
-
-		if (BytesRead)
-			mBuffer.append(Buffer, BytesRead);
-		else
-		{
-			mError = false;
-			break;
-		}
-	}
-
-	InternetCloseHandle(Request);
-	InternetCloseHandle(Session);
-}
-
-#endif
+#include "lc_http.h"
 
 lcSetsDatabaseDialog::lcSetsDatabaseDialog(QWidget* Parent)
 	: QDialog(Parent),
@@ -66,30 +10,18 @@ lcSetsDatabaseDialog::lcSetsDatabaseDialog(QWidget* Parent)
 	ui->setupUi(this);
 	ui->SearchEdit->installEventFilter(this);
 
+	mHttpManager = new lcHttpManager(this);
+
 	connect(ui->SetsTree, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)), this, SLOT(accept()));
 	connect(this, SIGNAL(finished(int)), this, SLOT(Finished(int)));
-#ifndef Q_OS_WIN
-	connect(&mNetworkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(DownloadFinished(QNetworkReply*)));
-#endif
+	connect(mHttpManager, SIGNAL(DownloadFinished(lcHttpReply*)), this, SLOT(DownloadFinished(lcHttpReply*)));
 
-	mKeyListReply = RequestURL("https://www.leocad.org/rebrickable.json");
+	mKeyListReply = mHttpManager->DownloadFile(QLatin1String("https://www.leocad.org/rebrickable.json"));
 }
 
 lcSetsDatabaseDialog::~lcSetsDatabaseDialog()
 {
 	delete ui;
-}
-
-lcHttpReply* lcSetsDatabaseDialog::RequestURL(const QString& URL)
-{
-#ifdef Q_OS_WIN
-	lcHttpReply* Reply = new lcHttpReply(this, URL);
-	connect(Reply, &QThread::finished, [this, Reply] { ProcessReply(Reply); });
-	Reply->start();
-	return Reply;
-#else
-	return mNetworkManager.get(QNetworkRequest(QUrl(URL)));
-#endif
 }
 
 QString lcSetsDatabaseDialog::GetSetName() const
@@ -144,7 +76,7 @@ void lcSetsDatabaseDialog::accept()
 	int KeyIndex = QTime::currentTime().msec() % mKeys.size();
 	QString DownloadUrl = QString("https://rebrickable.com/api/v3/lego/sets/%1/parts/?key=%2").arg(SetNum, mKeys[KeyIndex]);
 
-	mInventoryReply = RequestURL(DownloadUrl);
+	mInventoryReply = mHttpManager->DownloadFile(DownloadUrl);
 
 	while (mInventoryReply)
 	{
@@ -205,7 +137,7 @@ void lcSetsDatabaseDialog::on_SearchButton_clicked()
 	int KeyIndex = QTime::currentTime().msec() % mKeys.size();
 	QString SearchUrl = QString("https://rebrickable.com/api/v3/lego/sets/?search=%1&key=%2").arg(Keyword, mKeys[KeyIndex]);
 
-	mSearchReply = RequestURL(SearchUrl);
+	mSearchReply = mHttpManager->DownloadFile(SearchUrl);
 
 	while (mSearchReply)
 	{
@@ -221,14 +153,7 @@ void lcSetsDatabaseDialog::on_SearchButton_clicked()
 	}
 }
 
-#ifndef Q_OS_WIN
-void lcSetsDatabaseDialog::DownloadFinished(QNetworkReply* Reply)
-{
-	ProcessReply(Reply);
-}
-#endif
-
-void lcSetsDatabaseDialog::ProcessReply(lcHttpReply* Reply)
+void lcSetsDatabaseDialog::DownloadFinished(lcHttpReply* Reply)
 {
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
 	if (Reply == mKeyListReply)

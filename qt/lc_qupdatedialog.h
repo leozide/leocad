@@ -1,7 +1,9 @@
 #pragma once
 
 #include <QDialog>
-#include <QNetworkReply>
+
+class lcHttpReply;
+class lcHttpManager;
 
 namespace Ui {
 class lcQUpdateDialog;
@@ -20,7 +22,7 @@ public:
 	void parseUpdate(const char *update);
 
 public slots:
-	void replyFinished(QNetworkReply *reply);
+	void DownloadFinished(lcHttpReply* Reply);
 	void accept();
 	void reject();
 	void finished(int result);
@@ -28,8 +30,7 @@ public slots:
 private:
 	Ui::lcQUpdateDialog *ui;
 
-	QNetworkReply *updateReply;
-	QNetworkAccessManager *manager;
+	lcHttpManager* mHttpManager;
 	QByteArray versionData;
 	bool mInitialUpdate;
 };

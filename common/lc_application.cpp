@@ -439,7 +439,7 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 		if (SaveImage)
 		{
 			if (ImageName.isEmpty())
-				ImageName = mProject->GetImageFileName();
+				ImageName = mProject->GetImageFileName(true);
 
 			if (ImageEnd < ImageStart)
 				ImageEnd = ImageStart;

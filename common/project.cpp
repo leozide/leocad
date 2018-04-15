@@ -121,9 +121,9 @@ QString Project::GetTitle() const
 	return mModels.GetSize() == 1 ? tr("New Model.ldr") : tr("New Model.mpd");
 }
 
-QString Project::GetImageFileName() const
+QString Project::GetImageFileName(bool AllowCurrentFolder) const
 {
-	QString FileName = QDir::toNativeSeparators(GetFileName());
+	QString FileName = GetFileName();
 
 	if (!FileName.isEmpty())
 	{
@@ -132,9 +132,22 @@ QString Project::GetImageFileName() const
 			FileName = FileName.left(FileName.length() - Extension.length() - 1);
 	}
 	else
-		FileName = QLatin1String("image");
+	{
+		if (!AllowCurrentFolder)
+		{
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+			QStringList cachePathList = QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation);
+			FileName = cachePathList.first();
+#else
+			FileName = QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation);
+#endif
 
-	return FileName + lcGetProfileString(LC_PROFILE_IMAGE_EXTENSION);
+		}
+
+		FileName += QLatin1String("image");
+	}
+
+	return QDir::toNativeSeparators(FileName) + lcGetProfileString(LC_PROFILE_IMAGE_EXTENSION);
 }
 
 void Project::SetActiveModel(int ModelIndex)

@@ -83,7 +83,7 @@ public:
 		return mFileName;
 	}
 
-	QString GetImageFileName() const;
+	QString GetImageFileName(bool AllowCurrentFolder) const;
 
 	void SetActiveModel(int ModelIndex);
 	void SetActiveModel(const QString& ModelName);

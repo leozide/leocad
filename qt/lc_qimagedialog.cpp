@@ -22,7 +22,7 @@ lcQImageDialog::lcQImageDialog(QWidget* Parent)
 	mHeight = lcGetProfileInt(LC_PROFILE_IMAGE_HEIGHT);
 	mStart = Model->GetCurrentStep();
 	mEnd = Model->GetLastStep();
-	mFileName = Project->GetImageFileName();
+	mFileName = Project->GetImageFileName(false);
 
 	ui->fileName->setText(mFileName);
 	ui->width->setText(QString::number(mWidth));

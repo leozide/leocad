@@ -26,7 +26,7 @@ lcRenderDialog::lcRenderDialog(QWidget* Parent)
 	ui->WidthEdit->setValidator(new QIntValidator(16, INT_MAX));
 	ui->HeightEdit->setText(QString::number(lcGetProfileInt(LC_PROFILE_POVRAY_HEIGHT)));
 	ui->HeightEdit->setValidator(new QIntValidator(16, INT_MAX));
-	ui->OutputEdit->setText(lcGetActiveProject()->GetImageFileName());
+	ui->OutputEdit->setText(lcGetActiveProject()->GetImageFileName(false));
 
 	QImage Image(LC_POVRAY_PREVIEW_WIDTH, LC_POVRAY_PREVIEW_HEIGHT, QImage::Format_RGB32);
 	Image.fill(QColor(255, 255, 255));

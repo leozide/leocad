@@ -11,7 +11,7 @@ class lcQEditGroupsDialog : public QDialog
 	Q_OBJECT
 	
 public:
-	lcQEditGroupsDialog(QWidget* Parent, const QMap<lcPiece*, lcGroup*>& PieceParents, const QMap<lcGroup*, lcGroup*>& GroupParents);
+	lcQEditGroupsDialog(QWidget* Parent, const QMap<lcPiece*, lcGroup*>& PieceParents, const QMap<lcGroup*, lcGroup*>& GroupParents, lcModel* Model);
 	~lcQEditGroupsDialog();
 	
 	QMap<lcPiece*, lcGroup*> mPieceParents;
@@ -40,8 +40,8 @@ private:
 
 	void timerEvent(QTimerEvent* Event);
 
+	lcModel* mModel;
 	QTreeWidgetItem* mLastItemClicked;
 	bool mEditableDoubleClicked;
 	QBasicTimer mClickTimer;
 };
-

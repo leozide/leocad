@@ -1083,7 +1083,7 @@ void lcMainWindow::ShowSearchDialog()
 			mSearchOptions.Info = ((lcPiece*)Focus)->mPieceInfo;
 	}
 
-	lcQFindDialog Dialog(this, &mSearchOptions);
+	lcQFindDialog Dialog(this, &mSearchOptions, GetActiveModel());
 	if (Dialog.exec() == QDialog::Accepted)
 		Model->FindPiece(true, true);
 }
@@ -2305,6 +2305,12 @@ void lcMainWindow::SetModelFromSelection()
 		Project* Project = lcGetActiveProject();
 		Project->SetActiveModel(Project->GetModels().FindIndex(Model));
 	}
+}
+
+lcModel* lcMainWindow::GetActiveModel() const
+{
+	View* ActiveView = GetActiveView();
+	return ActiveView ? ActiveView->GetActiveModel() : nullptr;
 }
 
 void lcMainWindow::HandleCommand(lcCommandId CommandId)

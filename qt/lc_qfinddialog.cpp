@@ -3,13 +3,11 @@
 #include "ui_lc_qfinddialog.h"
 #include "lc_mainwindow.h"
 #include "pieceinf.h"
-#include "project.h"
 #include "lc_colors.h"
 #include "lc_model.h"
 
-lcQFindDialog::lcQFindDialog(QWidget *parent, void *data) :
-    QDialog(parent),
-    ui(new Ui::lcQFindDialog)
+lcQFindDialog::lcQFindDialog(QWidget* Parent, lcSearchOptions* SearchOptions, lcModel* Model)
+	: QDialog(Parent), ui(new Ui::lcQFindDialog)
 {
 	ui->setupUi(this);
 
@@ -18,20 +16,20 @@ lcQFindDialog::lcQFindDialog(QWidget *parent, void *data) :
 	parts->setMinimumContentsLength(1);
 
 	lcPartsList PartsList;
-	lcGetActiveModel()->GetPartsList(gDefaultColor, false, PartsList);
+	Model->GetPartsList(gDefaultColor, false, PartsList);
 
 	for (const auto& PartIt : PartsList)
 		parts->addItem(PartIt.first->m_strDescription, qVariantFromValue((void*)PartIt.first));
 	parts->model()->sort(0);
 
-	options = (lcSearchOptions*)data;
+	mSearchOptions = SearchOptions;
 
-	ui->findColor->setChecked(options->MatchColor);
-	ui->color->setCurrentColor(options->ColorIndex);
-	ui->findID->setChecked(options->MatchInfo);
-	parts->setCurrentIndex(parts->findData(qVariantFromValue((void*)options->Info)));
-	ui->findName->setChecked(options->MatchName);
-	ui->name->setText(options->Name);
+	ui->findColor->setChecked(mSearchOptions->MatchColor);
+	ui->color->setCurrentColor(mSearchOptions->ColorIndex);
+	ui->findID->setChecked(mSearchOptions->MatchInfo);
+	parts->setCurrentIndex(parts->findData(qVariantFromValue((void*)mSearchOptions->Info)));
+	ui->findName->setChecked(mSearchOptions->MatchName);
+	ui->name->setText(mSearchOptions->Name);
 }
 
 lcQFindDialog::~lcQFindDialog()
@@ -41,13 +39,13 @@ lcQFindDialog::~lcQFindDialog()
 
 void lcQFindDialog::accept()
 {
-	options->MatchColor = ui->findColor->isChecked();
-	options->ColorIndex = ui->color->currentColor();
-	options->MatchInfo= ui->findID->isChecked();
-	options->Info = (PieceInfo*)ui->ID->itemData(ui->ID->currentIndex()).value<void*>();
-	options->MatchName = ui->findName->isChecked();
+	mSearchOptions->MatchColor = ui->findColor->isChecked();
+	mSearchOptions->ColorIndex = ui->color->currentColor();
+	mSearchOptions->MatchInfo= ui->findID->isChecked();
+	mSearchOptions->Info = (PieceInfo*)ui->ID->itemData(ui->ID->currentIndex()).value<void*>();
+	mSearchOptions->MatchName = ui->findName->isChecked();
 	QString name = ui->name->text();
-	strcpy(options->Name, name.toLocal8Bit().data());
+	strcpy(mSearchOptions->Name, name.toLocal8Bit().data());
 
 	QDialog::accept();
 }

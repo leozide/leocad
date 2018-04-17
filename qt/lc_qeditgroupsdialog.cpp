@@ -2,16 +2,16 @@
 #include "lc_qeditgroupsdialog.h"
 #include "ui_lc_qeditgroupsdialog.h"
 #include "lc_application.h"
-#include "project.h"
 #include "lc_model.h"
 #include "piece.h"
 #include "group.h"
 #include "lc_basewindow.h"
 
-lcQEditGroupsDialog::lcQEditGroupsDialog(QWidget* Parent, const QMap<lcPiece*, lcGroup*>& PieceParents, const QMap<lcGroup*, lcGroup*>& GroupParents)
+lcQEditGroupsDialog::lcQEditGroupsDialog(QWidget* Parent, const QMap<lcPiece*, lcGroup*>& PieceParents, const QMap<lcGroup*, lcGroup*>& GroupParents, lcModel* Model)
 	: QDialog(Parent), mPieceParents(PieceParents), mGroupParents(GroupParents)
 {
 	mLastItemClicked = nullptr;
+	mModel = Model;
 	ui = new Ui::lcQEditGroupsDialog;
 
 	ui->setupUi(this);
@@ -40,7 +40,7 @@ void lcQEditGroupsDialog::accept()
 void lcQEditGroupsDialog::reject()
 {
 	for (int GroupIdx = 0; GroupIdx < mNewGroups.size(); GroupIdx++)
-		lcGetActiveModel()->RemoveGroup(mNewGroups[GroupIdx]);
+		mModel->RemoveGroup(mNewGroups[GroupIdx]);
 
 	QDialog::reject();
 }
@@ -57,7 +57,7 @@ void lcQEditGroupsDialog::on_newGroup_clicked()
 
 	lcGroup* ParentGroup = (lcGroup*)CurrentItem->data(0, GroupRole).value<uintptr_t>();
 
-	lcGroup* NewGroup = lcGetActiveModel()->AddGroup(tr("Group #"), ParentGroup);
+	lcGroup* NewGroup = mModel->AddGroup(tr("Group #"), ParentGroup);
 	mGroupParents[NewGroup] = ParentGroup;
 	mNewGroups.append(NewGroup);
 

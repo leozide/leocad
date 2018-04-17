@@ -2,19 +2,18 @@
 #include "lc_qselectdialog.h"
 #include "ui_lc_qselectdialog.h"
 #include "lc_application.h"
-#include "project.h"
 #include "lc_model.h"
 #include "piece.h"
 #include "camera.h"
 #include "light.h"
 #include "group.h"
 
-lcQSelectDialog::lcQSelectDialog(QWidget* Parent)
+lcQSelectDialog::lcQSelectDialog(QWidget* Parent, lcModel* Model)
 	: QDialog(Parent), ui(new Ui::lcQSelectDialog)
 {
 	ui->setupUi(this);
 
-	AddChildren(ui->treeWidget->invisibleRootItem(), nullptr);
+	AddChildren(ui->treeWidget->invisibleRootItem(), nullptr, Model);
 	ui->treeWidget->expandAll();
 
 	connect(ui->treeWidget, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this, SLOT(itemChanged(QTreeWidgetItem*, int)));
@@ -170,9 +169,8 @@ void lcQSelectDialog::itemChanged(QTreeWidgetItem *item, int column)
 	ui->treeWidget->blockSignals(false);
 }
 
-void lcQSelectDialog::AddChildren(QTreeWidgetItem* ParentItem, lcGroup* ParentGroup)
+void lcQSelectDialog::AddChildren(QTreeWidgetItem* ParentItem, lcGroup* ParentGroup, lcModel* Model)
 {
-	lcModel* Model = lcGetActiveModel();
 	const lcArray<lcGroup*>& Groups = Model->GetGroups();
 
 	for (int GroupIdx = 0; GroupIdx < Groups.GetSize(); GroupIdx++)
@@ -184,7 +182,7 @@ void lcQSelectDialog::AddChildren(QTreeWidgetItem* ParentItem, lcGroup* ParentGr
 
 		QTreeWidgetItem* GroupItem = new QTreeWidgetItem(ParentItem, QStringList(Group->mName));
 
-		AddChildren(GroupItem, Group);
+		AddChildren(GroupItem, Group, Model);
 	}
 
 	const lcArray<lcPiece*>& Pieces = Model->GetPieces();

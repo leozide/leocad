@@ -12,7 +12,7 @@ class lcQSelectDialog : public QDialog
 	Q_OBJECT
 	
 public:
-	lcQSelectDialog(QWidget* Parent);
+	lcQSelectDialog(QWidget* Parent, lcModel* Model);
 	~lcQSelectDialog();
 
 	lcArray<lcObject*> mObjects;
@@ -32,6 +32,6 @@ public slots:
 private:
 	Ui::lcQSelectDialog *ui;
 
-	void AddChildren(QTreeWidgetItem* ParentItem, lcGroup* ParentGroup);
+	void AddChildren(QTreeWidgetItem* ParentItem, lcGroup* ParentGroup, lcModel* Model);
 };
 

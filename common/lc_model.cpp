@@ -1868,7 +1868,7 @@ void lcModel::ShowEditGroupsDialog()
 		GroupParents[Group] = Group->mGroup;
 	}
 
-	lcQEditGroupsDialog Dialog(gMainWindow, PieceParents, GroupParents);
+	lcQEditGroupsDialog Dialog(gMainWindow, PieceParents, GroupParents, this);
 
 	if (Dialog.exec() != QDialog::Accepted)
 		return;
@@ -4165,7 +4165,7 @@ void lcModel::ShowSelectByNameDialog()
 		return;
 	}
 
-	lcQSelectDialog Dialog(gMainWindow);
+	lcQSelectDialog Dialog(gMainWindow, this);
 
 	if (Dialog.exec() != QDialog::Accepted)
 		return;

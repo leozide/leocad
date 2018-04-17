@@ -192,6 +192,14 @@ public:
 		return CurrentTab ? CurrentTab->GetActiveView() : nullptr;
 	}
 
+	lcModel* GetActiveModel() const;
+
+	lcModel* GetCurrentTabModel() const
+	{
+		lcModelTabWidget* CurrentTab = (lcModelTabWidget*)mModelTabWidget->currentWidget();
+		return CurrentTab ? CurrentTab->GetModel() : nullptr;
+	}
+
 	const lcArray<View*>* GetViewsForModel(lcModel* Model) const
 	{
 		lcModelTabWidget* TabWidget = GetTabWidgetForModel(Model);

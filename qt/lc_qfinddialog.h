@@ -12,10 +12,10 @@ class lcQFindDialog : public QDialog
 	Q_OBJECT
 	
 public:
-	explicit lcQFindDialog(QWidget *parent, void *data);
+	lcQFindDialog(QWidget* Parent, lcSearchOptions* SearchOptions, lcModel* Model);
 	~lcQFindDialog();
 
-	lcSearchOptions *options;
+	lcSearchOptions* mSearchOptions;
 	
 public slots:
 	void accept();

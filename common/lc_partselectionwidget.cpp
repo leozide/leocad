@@ -130,13 +130,13 @@ void lcPartSelectionListModel::SetCategory(int CategoryIndex)
 	{
 		Library->GetParts(SingleParts);
 
-		lcModel* CurrentModel = lcGetActiveModel();
+		lcModel* ActiveModel = gMainWindow->GetActiveModel();
 
 		for (int PartIdx = 0; PartIdx < SingleParts.GetSize(); )
 		{
 			PieceInfo* Info = SingleParts[PartIdx];
 
-			if (!Info->IsModel() || !Info->GetModel()->IncludesModel(CurrentModel))
+			if (!Info->IsModel() || !Info->GetModel()->IncludesModel(ActiveModel))
 				PartIdx++;
 			else
 				SingleParts.RemoveIndex(PartIdx);
@@ -168,13 +168,13 @@ void lcPartSelectionListModel::SetModelsCategory()
 	mParts.clear();
 
 	const lcArray<lcModel*>& Models = lcGetActiveProject()->GetModels();
-	lcModel* CurrentModel = lcGetActiveModel();
+	lcModel* ActiveModel = gMainWindow->GetActiveModel();
 
 	for (int ModelIdx = 0; ModelIdx < Models.GetSize(); ModelIdx++)
 	{
 		lcModel* Model = Models[ModelIdx];
 
-		if (!Model->IncludesModel(CurrentModel))
+		if (!Model->IncludesModel(ActiveModel))
 			mParts.append(QPair<PieceInfo*, QPixmap>(Model->GetPieceInfo(), QPixmap()));
 	}
 
@@ -191,9 +191,9 @@ void lcPartSelectionListModel::SetCurrentModelCategory()
 
 	mParts.clear();
 
-	lcModel* CurrentModel = lcGetActiveModel();
+	lcModel* ActiveModel = gMainWindow->GetActiveModel();
 	lcPartsList PartsList;
-	CurrentModel->GetPartsList(gDefaultColor, true, PartsList);
+	ActiveModel->GetPartsList(gDefaultColor, true, PartsList);
 
 	for (const auto& PartIt : PartsList)
 		mParts.append(QPair<PieceInfo*, QPixmap>((PieceInfo*)PartIt.first, QPixmap()));

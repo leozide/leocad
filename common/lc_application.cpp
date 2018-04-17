@@ -438,6 +438,8 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 
 		if (SaveImage)
 		{
+			lcModel* ActiveModel = mProject->GetActiveModel();
+
 			if (ImageName.isEmpty())
 				ImageName = mProject->GetImageFileName(true);
 
@@ -447,7 +449,7 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 				ImageStart = ImageEnd;
 
 			if ((ImageStart == 0) && (ImageEnd == 0))
-				ImageStart = ImageEnd = mProject->GetActiveModel()->GetCurrentStep();
+				ImageStart = ImageEnd = ActiveModel->GetCurrentStep();
 			else if ((ImageStart == 0) && (ImageEnd != 0))
 				ImageStart = ImageEnd;
 			else if ((ImageStart != 0) && (ImageEnd == 0))
@@ -469,7 +471,7 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 			else
 				Frame = ImageName;
 
-			lcGetActiveModel()->SaveStepImages(Frame, ImageStart != ImageEnd, CameraName == nullptr, ImageHighlight, ImageWidth, ImageHeight, ImageStart, ImageEnd);
+			ActiveModel->SaveStepImages(Frame, ImageStart != ImageEnd, CameraName == nullptr, ImageHighlight, ImageWidth, ImageHeight, ImageStart, ImageEnd);
 		}
 
 		if (SaveWavefront)

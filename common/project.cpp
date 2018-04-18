@@ -133,7 +133,9 @@ QString Project::GetImageFileName(bool AllowCurrentFolder) const
 	}
 	else
 	{
-		if (!AllowCurrentFolder)
+		if (AllowCurrentFolder)
+			FileName = QLatin1String("image");
+		else
 		{
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
 			QStringList cachePathList = QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation);
@@ -141,10 +143,8 @@ QString Project::GetImageFileName(bool AllowCurrentFolder) const
 #else
 			FileName = QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation);
 #endif
-
+			FileName = QDir(FileName).absoluteFilePath(QLatin1String("image"));
 		}
-
-		FileName += QLatin1String("image");
 	}
 
 	return QDir::toNativeSeparators(FileName) + lcGetProfileString(LC_PROFILE_IMAGE_EXTENSION);

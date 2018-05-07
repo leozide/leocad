@@ -1,7 +1,6 @@
 #include "lc_global.h"
 #include "lc_timelinewidget.h"
 #include "lc_model.h"
-#include "project.h"
 #include "piece.h"
 #include "pieceinf.h"
 #include "lc_mainwindow.h"
@@ -32,7 +31,7 @@ void lcTimelineWidget::CustomMenuRequested(QPoint Pos)
 {
 	QMenu* Menu = new QMenu(this);
 
-	lcObject* FocusObject = lcGetActiveModel()->GetFocusObject();
+	lcObject* FocusObject = gMainWindow->GetActiveModel()->GetFocusObject();
 
 	if (FocusObject && FocusObject->IsPiece())
 	{
@@ -40,7 +39,9 @@ void lcTimelineWidget::CustomMenuRequested(QPoint Pos)
 
 		if (Piece->mPieceInfo->IsModel())
 		{
-			Menu->addAction(gMainWindow->mActions[LC_MODEL_EDIT_FOCUS]);
+			Menu->addAction(gMainWindow->mActions[LC_PIECE_EDIT_SELECTED_SUBMODEL]);
+			Menu->addAction(gMainWindow->mActions[LC_PIECE_VIEW_SELECTED_MODEL]);
+			Menu->addAction(gMainWindow->mActions[LC_PIECE_INLINE_SELECTED_MODELS]);
 			Menu->addSeparator();
 		}
 	}
@@ -65,16 +66,17 @@ void lcTimelineWidget::Update(bool Clear, bool UpdateItems)
 	if (mIgnoreUpdates)
 		return;
 
-	lcModel* Model = lcGetActiveModel();
+	lcModel* Model = gMainWindow->GetActiveModel();
+
+	bool Blocked = blockSignals(true);
 
 	if (!Model)
 	{
 		mItems.clear();
 		clear();
+		blockSignals(Blocked);
 		return;
 	}
-
-	bool Blocked = blockSignals(true);
 
 	if (Clear)
 	{
@@ -275,7 +277,7 @@ void lcTimelineWidget::InsertStep()
 	if (Step == -1)
 		return;
 
-	lcGetActiveModel()->InsertStep(Step + 1);
+	gMainWindow->GetActiveModel()->InsertStep(Step + 1);
 }
 
 void lcTimelineWidget::RemoveStep()
@@ -293,7 +295,7 @@ void lcTimelineWidget::RemoveStep()
 	if (Step == -1)
 		return;
 
-	lcGetActiveModel()->RemoveStep(Step + 1);
+	gMainWindow->GetActiveModel()->RemoveStep(Step + 1);
 }
 
 void lcTimelineWidget::MoveSelection()
@@ -342,7 +344,7 @@ void lcTimelineWidget::SetCurrentStep()
 	if (Step == -1)
 		return;
 
-	lcGetActiveModel()->SetCurrentStep(Step + 1);
+	gMainWindow->GetActiveModel()->SetCurrentStep(Step + 1);
 }
 
 void lcTimelineWidget::ItemSelectionChanged()
@@ -368,7 +370,7 @@ void lcTimelineWidget::ItemSelectionChanged()
 
 	bool Blocked = blockSignals(true);
 	mIgnoreUpdates = true;
-	lcModel* Model = lcGetActiveModel();
+	lcModel* Model = gMainWindow->GetActiveModel();
 	if (LastStep > Model->GetCurrentStep())
 		Model->SetCurrentStep(LastStep);
 	Model->SetSelectionAndFocus(Selection, CurrentPiece, LC_PIECE_SECTION_POSITION, false);
@@ -416,6 +418,6 @@ void lcTimelineWidget::UpdateModel()
 	}
 
 	mIgnoreUpdates = true;
-	lcGetActiveModel()->SetPieceSteps(PieceSteps);
+	gMainWindow->GetActiveModel()->SetPieceSteps(PieceSteps);
 	mIgnoreUpdates = false;
 }

@@ -515,10 +515,10 @@ void lcMainWindow::CreateMenus()
 	PieceMenu->addAction(mActions[LC_PIECE_RESET_PIVOT_POINT]);
 	PieceMenu->addAction(mActions[LC_PIECE_REMOVE_KEY_FRAMES]);
 	PieceMenu->addSeparator();
+	PieceMenu->addAction(mActions[LC_PIECE_EDIT_SELECTED_SUBMODEL]);
 	PieceMenu->addAction(mActions[LC_PIECE_VIEW_SELECTED_MODEL]);
 	PieceMenu->addAction(mActions[LC_PIECE_INLINE_SELECTED_MODELS]);
 	PieceMenu->addAction(mActions[LC_PIECE_MOVE_SELECTION_TO_MODEL]);
-	PieceMenu->addAction(mActions[LC_PIECE_EDIT_SELECTED_SUBMODEL]);
 	PieceMenu->addSeparator();
 	PieceMenu->addAction(mActions[LC_PIECE_GROUP]);
 	PieceMenu->addAction(mActions[LC_PIECE_UNGROUP]);
@@ -2861,10 +2861,6 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 
 	case LC_MODEL_PROPERTIES:
 		lcGetActiveModel()->ShowPropertiesDialog();
-		break;
-
-	case LC_MODEL_EDIT_FOCUS:
-		SetModelFromFocus();
 		break;
 
 	case LC_MODEL_LIST:

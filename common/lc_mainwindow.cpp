@@ -1074,7 +1074,7 @@ void lcMainWindow::Print(QPrinter* Printer)
 
 void lcMainWindow::ShowSearchDialog()
 {
-	lcModel* Model = lcGetActiveModel();
+	lcModel* Model = GetActiveModel();
 
 	if (!mSearchOptions.SearchValid)
 	{
@@ -1083,7 +1083,7 @@ void lcMainWindow::ShowSearchDialog()
 			mSearchOptions.Info = ((lcPiece*)Focus)->mPieceInfo;
 	}
 
-	lcQFindDialog Dialog(this, &mSearchOptions, GetActiveModel());
+	lcQFindDialog Dialog(this, &mSearchOptions, Model);
 	if (Dialog.exec() == QDialog::Accepted)
 		Model->FindPiece(true, true);
 }
@@ -1605,7 +1605,7 @@ void lcMainWindow::SplitView(Qt::Orientation Orientation)
 		Splitter = new QSplitter(Orientation, Parent);
 		Parent->layout()->addWidget(Splitter);
 		Splitter->addWidget(Focus);
-		Splitter->addWidget(new lcQGLWidget(mModelTabWidget->currentWidget(), new View(lcGetActiveModel()), true));
+		Splitter->addWidget(new lcQGLWidget(mModelTabWidget->currentWidget(), new View(GetCurrentTabModel()), true));
 	}
 	else
 	{
@@ -1616,7 +1616,7 @@ void lcMainWindow::SplitView(Qt::Orientation Orientation)
 		Splitter = new QSplitter(Orientation, Parent);
 		ParentSplitter->insertWidget(FocusIndex, Splitter);
 		Splitter->addWidget(Focus);
-		Splitter->addWidget(new lcQGLWidget(mModelTabWidget->currentWidget(), new View(lcGetActiveModel()), true));
+		Splitter->addWidget(new lcQGLWidget(mModelTabWidget->currentWidget(), new View(GetCurrentTabModel()), true));
 
 		ParentSplitter->setSizes(Sizes);
 	}
@@ -2276,7 +2276,7 @@ bool lcMainWindow::SaveProjectIfModified()
 
 bool lcMainWindow::SetModelFromFocus()
 {
-	lcObject* FocusObject = lcGetActiveModel()->GetFocusObject();
+	lcObject* FocusObject = GetActiveModel()->GetFocusObject();
 
 	if (!FocusObject || !FocusObject->IsPiece())
 		return false;
@@ -2298,7 +2298,7 @@ void lcMainWindow::SetModelFromSelection()
 	if (SetModelFromFocus())
 		return;
 
-	lcModel* Model = lcGetActiveModel()->GetFirstSelectedSubmodel();
+	lcModel* Model = GetActiveModel()->GetFirstSelectedSubmodel();
 
 	if (Model)
 	{

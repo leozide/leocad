@@ -24,7 +24,7 @@
 #include "lc_colors.h"
 #include <functional>
 
-#if (QT_VERSION > QT_VERSION_CHECK(5, 7, 0))
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 8, 0))
 #include <QtGamepad/QGamepad>
 #endif
 
@@ -85,7 +85,7 @@ lcMainWindow::lcMainWindow()
 	for (int FileIdx = 0; FileIdx < LC_MAX_RECENT_FILES; FileIdx++)
 		mRecentFiles[FileIdx] = lcGetProfileString((LC_PROFILE_KEY)(LC_PROFILE_RECENT_FILE1 + FileIdx));
 
-#if (QT_VERSION > QT_VERSION_CHECK(5, 7, 0))
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 8, 0))
 	connect(&mGamepadTimer, &QTimer::timeout, this, &lcMainWindow::UpdateGamepads);
 	mLastGamepadUpdate = QDateTime::currentDateTime();
 	mGamepadTimer.start(33);
@@ -789,7 +789,7 @@ QMenu* lcMainWindow::createPopupMenu()
 
 void lcMainWindow::UpdateGamepads()
 {
-#if (QT_VERSION > QT_VERSION_CHECK(5, 7, 0))
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 8, 0))
 	QDateTime Now = QDateTime::currentDateTime();
 	quint64 Elapsed = mLastGamepadUpdate.msecsTo(Now);
 	mLastGamepadUpdate = Now;

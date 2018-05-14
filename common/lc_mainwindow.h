@@ -327,6 +327,7 @@ public slots:
 	void ProjectFileChanged(const QString& Path);
 
 protected slots:
+	void UpdateGamepads();
 	void ModelTabContextMenuRequested(const QPoint& Point);
 	void ModelTabCloseOtherTabs();
 	void ModelTabResetViews();
@@ -367,6 +368,9 @@ protected:
 
 		return nullptr;
 	}
+
+	QTimer mGamepadTimer;
+	QDateTime mLastGamepadUpdate;
 
 	bool mAddKeys;
 	lcTool mTool;

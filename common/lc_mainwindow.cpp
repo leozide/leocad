@@ -24,6 +24,10 @@
 #include "lc_colors.h"
 #include <functional>
 
+#if (QT_VERSION > QT_VERSION_CHECK(5, 7, 0))
+#include <QtGamepad/QGamepad>
+#endif
+
 lcMainWindow* gMainWindow;
 #define LC_TAB_LAYOUT_VERSION 0x0001
 
@@ -80,6 +84,12 @@ lcMainWindow::lcMainWindow()
 
 	for (int FileIdx = 0; FileIdx < LC_MAX_RECENT_FILES; FileIdx++)
 		mRecentFiles[FileIdx] = lcGetProfileString((LC_PROFILE_KEY)(LC_PROFILE_RECENT_FILE1 + FileIdx));
+
+#if (QT_VERSION > QT_VERSION_CHECK(5, 7, 0))
+	connect(&mGamepadTimer, &QTimer::timeout, this, &lcMainWindow::UpdateGamepads);
+	mLastGamepadUpdate = QDateTime::currentDateTime();
+	mGamepadTimer.start(33);
+#endif
 
 	gMainWindow = this;
 }
@@ -775,6 +785,34 @@ QMenu* lcMainWindow::createPopupMenu()
 	Menu->addAction(mTimeToolBar->toggleViewAction());
 
 	return Menu;
+}
+
+void lcMainWindow::UpdateGamepads()
+{
+#if (QT_VERSION > QT_VERSION_CHECK(5, 7, 0))
+	QDateTime Now = QDateTime::currentDateTime();
+	quint64 Elapsed = mLastGamepadUpdate.msecsTo(Now);
+	mLastGamepadUpdate = Now;
+
+	if (!gMainWindow)
+		return;
+
+	View* ActiveView = GetActiveView();
+	if (!ActiveView)
+		return;
+
+	const QList<int> Gamepads = QGamepadManager::instance()->connectedGamepads();
+	if (Gamepads.isEmpty())
+		return;
+
+	QGamepad Gamepad(Gamepads[0]);
+
+	float Scale = (float)Elapsed / 20.0f;
+	lcVector3 Distance(Scale * Gamepad.axisLeftX(), 0.0f, -Scale * Gamepad.axisLeftY());
+
+	if (fabsf(Distance.LengthSquared()) > 0.01f)
+		ActiveView->MoveCamera(Distance);
+#endif
 }
 
 void lcMainWindow::ModelTabContextMenuRequested(const QPoint& Point)

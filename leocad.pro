@@ -1,18 +1,16 @@
 QT += core gui opengl network xml
 TEMPLATE = app
 
-greaterThan(QT_MAJOR_VERSION, 4)
-{
+greaterThan(QT_MAJOR_VERSION, 4) {
     QT *= printsupport
     QT += concurrent
 }
 
-greaterThan(QT_MAJOR_VERSION, 5)
-{
-    QT += gamepad
+equals(QT_MAJOR_VERSION, 5) {
+	greaterThan(QT_MINOR_VERSION, 7) {
+		QT += gamepad
+	}
 }
-
-equals(QT_MAJOR_VERSION, 5) : greaterThan(QT_MINOR_VERSION, 7): QT += gamepad
 
 INCLUDEPATH += qt common
 CONFIG += precompile_header incremental c++11

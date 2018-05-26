@@ -1,10 +1,10 @@
- version: 17.02.{build}
+ version: ci.{build}
  
  environment:
    matrix:
     - name: win32
       platform: x86
-      qt: 5.7\msvc2015
+      qt: 5.10\msvc2015
  
  init:
   - set PATH=C:\Qt\%qt%\bin;%PATH%

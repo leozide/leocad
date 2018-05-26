@@ -417,25 +417,53 @@ void lcSynthInfo::AddFlexibleAxleParts(lcMemFile& File, lcLibraryMeshData& MeshD
 		File.WriteBuffer(Line, strlen(Line));
 	}
 
-	lcVector3 SectionVertices[16] =
+	lcLibraryMeshVertex SectionVertices[28] =
 	{
-		lcVector3(-6.000f, 0.0f,  0.000f), lcVector3(-5.602f, 0.0f,  2.000f), lcVector3(-2.000f, 0.0f,  2.000f), lcVector3(-2.000f, 0.0f,  5.602f),
-		lcVector3( 0.000f, 0.0f,  6.000f), lcVector3( 2.000f, 0.0f,  5.602f), lcVector3( 2.000f, 0.0f,  2.000f), lcVector3( 5.602f, 0.0f,  2.000f),
-		lcVector3( 6.000f, 0.0f,  0.000f), lcVector3( 5.602f, 0.0f, -2.000f), lcVector3( 2.000f, 0.0f, -2.000f), lcVector3( 2.000f, 0.0f, -5.602f),
-		lcVector3( 0.000f, 0.0f, -6.000f), lcVector3(-2.000f, 0.0f, -5.602f), lcVector3(-2.000f, 0.0f, -2.000f), lcVector3(-5.602f, 0.0f, -2.000f)
+		{ lcVector3(-6.000f, 0.0f,  0.000f), lcVector3(-1.000f, 0.0f,  0.000f), 2.0f },
+		{ lcVector3(-5.602f, 0.0f,  2.000f), lcVector3(-0.942f, 0.0f,  0.336f), 4.0f },
+		{ lcVector3(-5.602f, 0.0f,  2.000f), lcVector3( 0.000f, 0.0f,  1.000f), 4.0f },
+		{ lcVector3(-2.000f, 0.0f,  2.000f), lcVector3( 0.000f, 0.0f,  1.000f), 4.0f },
+		{ lcVector3(-2.000f, 0.0f,  2.000f), lcVector3(-1.000f, 0.0f,  0.000f), 4.0f },
+		{ lcVector3(-2.000f, 0.0f,  5.602f), lcVector3(-1.000f, 0.0f,  0.000f), 4.0f },
+		{ lcVector3(-2.000f, 0.0f,  5.602f), lcVector3(-0.336f, 0.0f,  0.942f), 4.0f },
+		{ lcVector3( 0.000f, 0.0f,  6.000f), lcVector3( 0.000f, 0.0f,  1.000f), 2.0f },
+		{ lcVector3( 2.000f, 0.0f,  5.602f), lcVector3( 0.336f, 0.0f,  0.942f), 4.0f },
+		{ lcVector3( 2.000f, 0.0f,  5.602f), lcVector3( 1.000f, 0.0f,  0.000f), 4.0f },
+		{ lcVector3( 2.000f, 0.0f,  2.000f), lcVector3( 1.000f, 0.0f,  0.000f), 4.0f },
+		{ lcVector3( 2.000f, 0.0f,  2.000f), lcVector3( 0.000f, 0.0f,  1.000f), 4.0f },
+		{ lcVector3( 5.602f, 0.0f,  2.000f), lcVector3( 0.000f, 0.0f,  1.000f), 4.0f },
+		{ lcVector3( 5.602f, 0.0f,  2.000f), lcVector3( 0.942f, 0.0f,  0.336f), 4.0f },
+		{ lcVector3( 6.000f, 0.0f,  0.000f), lcVector3( 1.000f, 0.0f,  0.000f), 2.0f },
+		{ lcVector3( 5.602f, 0.0f, -2.000f), lcVector3( 0.942f, 0.0f, -0.336f), 4.0f },
+		{ lcVector3( 5.602f, 0.0f, -2.000f), lcVector3( 0.000f, 0.0f, -1.000f), 4.0f },
+		{ lcVector3( 2.000f, 0.0f, -2.000f), lcVector3( 0.000f, 0.0f, -1.000f), 4.0f },
+		{ lcVector3( 2.000f, 0.0f, -2.000f), lcVector3( 1.000f, 0.0f,  0.000f), 4.0f },
+		{ lcVector3( 2.000f, 0.0f, -5.602f), lcVector3( 1.000f, 0.0f,  0.000f), 4.0f },
+		{ lcVector3( 2.000f, 0.0f, -5.602f), lcVector3( 0.336f, 0.0f, -0.942f), 4.0f },
+		{ lcVector3( 0.000f, 0.0f, -6.000f), lcVector3( 0.000f, 0.0f, -1.000f), 2.0f },
+		{ lcVector3(-2.000f, 0.0f, -5.602f), lcVector3(-0.336f, 0.0f, -0.942f), 4.0f },
+		{ lcVector3(-2.000f, 0.0f, -5.602f), lcVector3(-1.000f, 0.0f,  0.000f), 4.0f },
+		{ lcVector3(-2.000f, 0.0f, -2.000f), lcVector3(-1.000f, 0.0f,  0.000f), 4.0f },
+		{ lcVector3(-2.000f, 0.0f, -2.000f), lcVector3( 0.000f, 0.0f, -1.000f), 4.0f },
+		{ lcVector3(-5.602f, 0.0f, -2.000f), lcVector3( 0.000f, 0.0f, -1.000f), 4.0f },
+		{ lcVector3(-5.602f, 0.0f, -2.000f), lcVector3(-0.942f, 0.0f, -0.336f), 4.0f }
 	};
+
+	const int NumSectionVertices = sizeof(SectionVertices) / sizeof(SectionVertices[0]);
 
 	int BaseVertex;
 	lcLibraryMeshVertex* VertexBuffer;
 	quint32* IndexBuffer;
-	MeshData.AddVertices(LC_MESHDATA_SHARED, 16 * (Sections.GetSize() - 1), &BaseVertex, &VertexBuffer);
+	MeshData.AddVertices(LC_MESHDATA_SHARED, NumSectionVertices * (Sections.GetSize() - 1), &BaseVertex, &VertexBuffer);
 	MeshData.AddIndices(LC_MESHDATA_SHARED, LC_MESH_LINES, 24, 2 * 12 * (Sections.GetSize() - 2), &IndexBuffer);
 
 	for (int SectionIdx = 1; SectionIdx < Sections.GetSize(); SectionIdx++)
 	{
-		for (int VertexIdx = 0; VertexIdx < 16; VertexIdx++)
+		for (int VertexIdx = 0; VertexIdx < NumSectionVertices; VertexIdx++)
 		{
-			VertexBuffer->Position = lcMul31(SectionVertices[VertexIdx], Sections[SectionIdx]);
+			VertexBuffer->Position = lcMul31(SectionVertices[VertexIdx].Position, Sections[SectionIdx]);
+			VertexBuffer->Normal = lcMul30(SectionVertices[VertexIdx].Normal, Sections[SectionIdx]);
+			VertexBuffer->NormalWeight = SectionVertices[VertexIdx].NormalWeight;
 			VertexBuffer++;
 		}
 	}
@@ -444,34 +472,34 @@ void lcSynthInfo::AddFlexibleAxleParts(lcMemFile& File, lcLibraryMeshData& MeshD
 
 	for (int SectionIdx = 1; SectionIdx < Sections.GetSize() - 1; SectionIdx++)
 	{
-		for (int VertexIdx = 0; VertexIdx < 16; VertexIdx++)
+		const int Indices[] = { 1, 3, 5, 8, 10, 12, 15, 17, 19, 22, 24, 26 };
+	
+		for (int VertexIdx = 0; VertexIdx < 12; VertexIdx++)
 		{
-			if (VertexIdx % 4)
-			{
-				*IndexBuffer++ = BaseLinesVertex;
-				*IndexBuffer++ = BaseLinesVertex + 16;
-			}
-			BaseLinesVertex++;
+			*IndexBuffer++ = BaseLinesVertex + Indices[VertexIdx];
+			*IndexBuffer++ = BaseLinesVertex + Indices[VertexIdx] + NumSectionVertices;
 		}
+
+		BaseLinesVertex += NumSectionVertices;
 	}
 
-	MeshData.AddIndices(LC_MESHDATA_SHARED, LC_MESH_TRIANGLES, 16, 6 * 16 * (Sections.GetSize() - 2), &IndexBuffer);
+	MeshData.AddIndices(LC_MESHDATA_SHARED, LC_MESH_TRIANGLES, 16, 6 * NumSectionVertices * (Sections.GetSize() - 2), &IndexBuffer);
 
 	for (int SectionIdx = 1; SectionIdx < Sections.GetSize() - 1; SectionIdx++)
 	{
-		for (int VertexIdx = 0; VertexIdx < 16; VertexIdx++)
+		for (int VertexIdx = 0; VertexIdx < NumSectionVertices; VertexIdx++)
 		{
 			int Vertex1 = BaseVertex + VertexIdx;
-			int Vertex2 = BaseVertex + (VertexIdx + 1) % 16;
+			int Vertex2 = BaseVertex + (VertexIdx + 1) % NumSectionVertices;
 
 			*IndexBuffer++ = Vertex1;
 			*IndexBuffer++ = Vertex2;
-			*IndexBuffer++ = Vertex1 + 16;
+			*IndexBuffer++ = Vertex1 + NumSectionVertices;
 			*IndexBuffer++ = Vertex2;
-			*IndexBuffer++ = Vertex2 + 16;
-			*IndexBuffer++ = Vertex1 + 16;
+			*IndexBuffer++ = Vertex2 + NumSectionVertices;
+			*IndexBuffer++ = Vertex1 + NumSectionVertices;
 		}
-		BaseVertex += 16;
+		BaseVertex += NumSectionVertices;
 	}
 }
 

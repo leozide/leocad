@@ -23,10 +23,22 @@ void lcSynthInit()
 		{ "72504.dat",    lcSynthType::RIBBED_HOSE,     31.25f,   4 }, // Technic Ribbed Hose  2L
 		{ "72706.dat",    lcSynthType::RIBBED_HOSE,     50.00f,   7 }, // Technic Ribbed Hose  3L
 		{ "71952.dat",    lcSynthType::RIBBED_HOSE,     75.00f,  11 }, // Technic Ribbed Hose  4L
+		{ "72853.dat",    lcSynthType::RIBBED_HOSE,     93.75f,  14 }, // Technic Ribbed Hose  5L
 		{ "71944.dat",    lcSynthType::RIBBED_HOSE,    112.50f,  17 }, // Technic Ribbed Hose  6L
-		{ "71951.dat",    lcSynthType::RIBBED_HOSE,    143.75f,  22 }, // Technic Ribbed Hose  8L
+		{ "57719.dat",    lcSynthType::RIBBED_HOSE,    131.25f,  20 }, // Technic Ribbed Hose  7L
+		{ "71951.dat",    lcSynthType::RIBBED_HOSE,    150.00f,  23 }, // Technic Ribbed Hose  8L
+		{ "71917.dat",    lcSynthType::RIBBED_HOSE,    175.00f,  27 }, // Technic Ribbed Hose  9L
+		{ "71949.dat",    lcSynthType::RIBBED_HOSE,    193.75f,  30 }, // Technic Ribbed Hose 10L
 		{ "71986.dat",    lcSynthType::RIBBED_HOSE,    212.50f,  33 }, // Technic Ribbed Hose 11L
+		{ "71819.dat",    lcSynthType::RIBBED_HOSE,    231.25f,  36 }, // Technic Ribbed Hose 12L
+		{ "71923.dat",    lcSynthType::RIBBED_HOSE,    275.00f,  43 }, // Technic Ribbed Hose 14L
+		{ "71946.dat",    lcSynthType::RIBBED_HOSE,    293.75f,  46 }, // Technic Ribbed Hose 15L
+		{ "71947.dat",    lcSynthType::RIBBED_HOSE,    312.50f,  49 }, // Technic Ribbed Hose 16L
+		{ "22900.dat",    lcSynthType::RIBBED_HOSE,    331.25f,  52 }, // Technic Ribbed Hose 17L
+		{ "72039.dat",    lcSynthType::RIBBED_HOSE,    350.00f,  55 }, // Technic Ribbed Hose 18L
 		{ "43675.dat",    lcSynthType::RIBBED_HOSE,    375.00f,  58 }, // Technic Ribbed Hose 19L
+		{ "23397.dat",    lcSynthType::RIBBED_HOSE,    468.75f,  74 }, // Technic Ribbed Hose 24L
+		{ "33763.dat",    lcSynthType::RIBBED_HOSE,    512.50f,  81 }, // Technic Ribbed Hose 26L
 		{ "32580.dat",    lcSynthType::FLEXIBLE_AXLE,  120.00f,  15 }, // Technic Axle Flexible  7
 		{ "32199.dat",    lcSynthType::FLEXIBLE_AXLE,  200.00f,  35 }, // Technic Axle Flexible 11
 		{ "55709.dat",    lcSynthType::FLEXIBLE_AXLE,  200.00f,  35 }, // Technic Axle Flexible 11

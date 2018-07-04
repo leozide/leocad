@@ -7,6 +7,7 @@ extern bool gSupportsVertexBufferObject;
 extern bool gSupportsFramebufferObjectARB;
 extern bool gSupportsFramebufferObjectEXT;
 extern bool gSupportsTexImage2DMultisample;
+extern bool gSupportsBlendFuncSeparate;
 extern bool gSupportsAnisotropic;
 extern GLfloat gMaxAnisotropy;
 
@@ -122,6 +123,8 @@ extern PFNGLVERTEXATTRIBPOINTERPROC lcVertexAttribPointer;
 
 extern PFNGLTEXIMAGE2DMULTISAMPLEPROC lcTexImage2DMultisample;
 
+extern PFNGLBLENDFUNCSEPARATEPROC lcBlendFuncSeparate;
+
 #define glBindBuffer lcBindBufferARB
 #define glDeleteBuffers lcDeleteBuffersARB
 #define glGenBuffers lcGenBuffersARB
@@ -227,5 +230,7 @@ extern PFNGLTEXIMAGE2DMULTISAMPLEPROC lcTexImage2DMultisample;
 #define glVertexAttribPointer lcVertexAttribPointer
 
 #define glTexImage2DMultisample lcTexImage2DMultisample
+
+#define glBlendFuncSeparate lcBlendFuncSeparate
 
 #endif

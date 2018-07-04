@@ -23,12 +23,13 @@ lcQAboutDialog::lcQAboutDialog(QWidget *parent) :
 	QString BuffersFormat = tr("Color Buffer: %1 bits %2 %3\nDepth Buffer: %4 bits\nStencil Buffer: %5 bits\n\n");
 	QString Buffers = BuffersFormat.arg(QString::number(ColorDepth), Format.rgba() ? "RGBA" : tr("indexed"), Format.doubleBuffer() ? tr("double buffered") : QString(), QString::number(Format.depthBufferSize()), QString::number(Format.stencilBufferSize()));
 
-	QString ExtensionsFormat = tr("GL_ARB_vertex_buffer_object extension: %1\nGL_ARB_framebuffer_object extension: %2\nGL_EXT_framebuffer_object extension: %3\nGL_EXT_texture_filter_anisotropic extension: %4\n");
+	QString ExtensionsFormat = tr("GL_ARB_vertex_buffer_object extension: %1\nGL_ARB_framebuffer_object extension: %2\nGL_EXT_framebuffer_object extension: %3\nGL_EXT_blend_func_separate: %4\nGL_EXT_texture_filter_anisotropic extension: %5\n");
 	QString VertexBufferObject = gSupportsVertexBufferObject ? tr("Supported") : tr("Not supported");
 	QString FramebufferObjectARB = gSupportsFramebufferObjectARB ? tr("Supported") : tr("Not supported");
 	QString FramebufferObjectEXT = gSupportsFramebufferObjectEXT ? tr("Supported") : tr("Not supported");
+	QString BlendFuncSeparateEXT = gSupportsBlendFuncSeparate ? tr("Supported") : tr("Not supported");
 	QString Anisotropic = gSupportsAnisotropic ? tr("Supported (max %1)").arg(gMaxAnisotropy) : tr("Not supported");
-	QString Extensions = ExtensionsFormat.arg(VertexBufferObject, FramebufferObjectARB, FramebufferObjectEXT, Anisotropic);
+	QString Extensions = ExtensionsFormat.arg(VertexBufferObject, FramebufferObjectARB, FramebufferObjectEXT, BlendFuncSeparateEXT, Anisotropic);
 
 	ui->info->setText(Version + Buffers + Extensions);
 }

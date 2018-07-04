@@ -6,6 +6,7 @@ bool gSupportsVertexBufferObject;
 bool gSupportsFramebufferObjectARB;
 bool gSupportsFramebufferObjectEXT;
 bool gSupportsTexImage2DMultisample;
+bool gSupportsBlendFuncSeparate;
 bool gSupportsAnisotropic;
 GLfloat gMaxAnisotropy;
 
@@ -116,6 +117,8 @@ PFNGLVALIDATEPROGRAMPROC lcValidateProgram;
 PFNGLVERTEXATTRIBPOINTERPROC lcVertexAttribPointer;
 
 PFNGLTEXIMAGE2DMULTISAMPLEPROC lcTexImage2DMultisample;
+
+PFNGLBLENDFUNCSEPARATEPROC lcBlendFuncSeparate;
 
 #endif
 
@@ -270,6 +273,15 @@ void lcInitializeGLExtensions(const QGLContext* Context)
 		gSupportsFramebufferObjectEXT = true;
 	}
 
+	if (lcIsGLExtensionSupported(Extensions, "GL_EXT_blend_func_separate"))
+	{
+#ifdef LC_LOAD_GLEXTENSIONS
+		lcBlendFuncSeparate = (PFNGLBLENDFUNCSEPARATEPROC)Context->getProcAddress("glBlendFuncSeparateEXT");
+#endif
+
+		gSupportsBlendFuncSeparate = true;
+	}
+
 	const GLubyte* GLSLVersion = glGetString(GL_SHADING_LANGUAGE_VERSION);
 	int GLSLMajor = 0, GLSLMinor = 0;
 
@@ -343,6 +355,15 @@ void lcInitializeGLExtensions(const QGLContext* Context)
 #endif
 
 		gSupportsTexImage2DMultisample = true;
+	}
+
+	if (VersionMajor >= 4)
+	{
+#ifdef LC_LOAD_GLEXTENSIONS
+		lcBlendFuncSeparate = (PFNGLBLENDFUNCSEPARATEPROC)Context->getProcAddress("glBlendFuncSeparate");
+#endif
+
+		gSupportsBlendFuncSeparate = true;
 	}
 #endif
 

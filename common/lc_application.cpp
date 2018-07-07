@@ -438,7 +438,12 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 
 		if (SaveImage)
 		{
-			lcModel* ActiveModel = mProject->GetActiveModel();
+			lcModel* ActiveModel;
+
+			if (ModelName.isEmpty())
+				ActiveModel = mProject->GetMainModel();
+			else
+				ActiveModel = mProject->GetActiveModel();
 
 			if (ImageName.isEmpty())
 				ImageName = mProject->GetImageFileName(true);

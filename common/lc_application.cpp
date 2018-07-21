@@ -233,6 +233,23 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 				printf("Not enough parameters for the '%s' argument.\n", Arguments[ArgIdx].toLatin1().constData());
 		};
 
+		auto ParseFloat = [&ArgIdx, &Arguments, NumArguments](float& Value)
+		{
+			if (ArgIdx < NumArguments - 1 && Arguments[ArgIdx + 1][0] != '-')
+			{
+				bool Ok = false;
+				ArgIdx++;
+				int NewValue = Arguments[ArgIdx].toFloat(&Ok);
+
+				if (Ok)
+					Value = NewValue;
+				else
+					printf("Invalid value specified for the '%s' argument.\n", Arguments[ArgIdx - 1].toLatin1().constData());
+			}
+			else
+				printf("Not enough parameters for the '%s' argument.\n", Arguments[ArgIdx].toLatin1().constData());
+		};
+
 		auto ParseVector2 = [&ArgIdx, &Arguments, NumArguments](float& Value1, float& Value2)
 		{
 			if (ArgIdx < NumArguments - 2 && Arguments[ArgIdx + 1][0] != '-' && Arguments[ArgIdx + 2][0] != '-')
@@ -295,6 +312,22 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 			Orthographic = true;
 		else if (Param == QLatin1String("--highlight"))
 			ImageHighlight = true;
+		else if (Param == QLatin1String("--shading"))
+		{
+			QString ShadingString;
+			ParseString(ShadingString, true);
+
+			if (ShadingString == QLatin1String("wireframe"))
+				mPreferences.mShadingMode = LC_SHADING_WIREFRAME;
+			else if (ShadingString == QLatin1String("flat"))
+				mPreferences.mShadingMode = LC_SHADING_FLAT;
+			else if (ShadingString == QLatin1String("default"))
+				mPreferences.mShadingMode = LC_SHADING_DEFAULT_LIGHTS;
+			else if (ShadingString == QLatin1String("full"))
+				mPreferences.mShadingMode = LC_SHADING_FULL;
+		}
+		else if (Param == QLatin1String("--line-width"))
+			ParseFloat(mPreferences.mLineWidth);
 		else if (Param == QLatin1String("-obj") || Param == QLatin1String("--export-wavefront"))
 		{
 			SaveWavefront = true;
@@ -343,6 +376,8 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 			printf("  --camera-angles <latitude> <longitude>: Set the camera angles in degrees around the model.\n");
 			printf("  --orthographic: Make the view orthographic.\n");
 			printf("  --highlight: Highlight pieces in the steps they appear.\n");
+			printf("  --shading <wireframe|flat|default|full>: Select shading mode for rendering.\n");
+			printf("  --line-width <width>: Set the with of the edge lines.\n");
 			printf("  -obj, --export-wavefront <outfile.obj>: Export the model to Wavefront OBJ format.\n");
 			printf("  -3ds, --export-3ds <outfile.3ds>: Export the model to 3D Studio 3DS format.\n");
 			printf("  -dae, --export-collada <outfile.dae>: Export the model to COLLADA DAE format.\n");

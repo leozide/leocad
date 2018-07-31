@@ -238,8 +238,9 @@ void lcScene::Draw(lcContext* Context) const
 	Context->SetViewMatrix(mViewMatrix);
 
 	const bool DrawConditional = false;
+	const lcPreferences& Preferences = lcGetPreferences();
 
-	lcShadingMode ShadingMode = lcGetPreferences().mShadingMode;
+	lcShadingMode ShadingMode = Preferences.mShadingMode;
 	if (ShadingMode == LC_SHADING_WIREFRAME && !mAllowWireframe)
 		ShadingMode = LC_SHADING_FLAT;
 
@@ -267,7 +268,7 @@ void lcScene::Draw(lcContext* Context) const
 	}
 	else if (ShadingMode == LC_SHADING_FLAT)
 	{
-		bool DrawLines = lcGetPreferences().mDrawEdgeLines;
+		bool DrawLines = Preferences.mDrawEdgeLines && Preferences.mLineWidth != 0.0f;
 		Context->BindTexture2D(0);
 
 		Context->SetMaterial(LC_MATERIAL_UNLIT_COLOR);
@@ -320,7 +321,7 @@ void lcScene::Draw(lcContext* Context) const
 	}
 	else
 	{
-		bool DrawLines = lcGetPreferences().mDrawEdgeLines;
+		bool DrawLines = Preferences.mDrawEdgeLines && Preferences.mLineWidth != 0.0f;
 		Context->BindTexture2D(0);
 
 		if (DrawLines)

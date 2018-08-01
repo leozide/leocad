@@ -523,6 +523,8 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 
 	mProperties.mAuthor.clear();
+	mProperties.mDescription.clear();
+	mProperties.mComments.clear();
 
 	while (!Device.atEnd())
 	{

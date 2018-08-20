@@ -3,6 +3,8 @@
 #include "lc_glwidget.h"
 #include "camera.h"
 #include "lc_scene.h"
+#include "lc_viewcube.h"
+#include "lc_commands.h"
 
 enum lcTrackButton
 {
@@ -109,6 +111,7 @@ public:
 	void SetCamera(const char* CameraName);
 	void SetCameraIndex(int Index);
 	void SetViewpoint(lcViewpoint Viewpoint);
+	void SetViewpoint(const lcVector3& Position);
 	void SetCameraAngles(float Latitude, float Longitude);
 	void SetDefaultCamera();
 	lcMatrix44 GetProjectionMatrix() const;
@@ -187,6 +190,7 @@ protected:
 	bool mHighlight;
 	QImage mRenderImage;
 	std::pair<lcFramebuffer, lcFramebuffer> mRenderFramebuffer;
+	lcViewCube mViewCube;
 
 	lcVertexBuffer mGridBuffer;
 	int mGridSettings[7];

@@ -239,6 +239,73 @@ void TexFont::PrintText(lcContext* Context, float Left, float Top, float Z, cons
 	delete[] Verts;
 }
 
+void TexFont::GetTriangles(const lcMatrix44& Transform, const char* Text, float* Buffer) const
+{
+	float Width = 0.0f;
+
+	for (const char* ch = Text; *ch; ch++)
+		Width += mGlyphs[*ch].width;
+
+	float Left = -Width / 2.0f;
+	float Top = mFontHeight / 2.0f;
+	float Z = 0.0f;
+
+	while (*Text)
+	{
+		int ch = *Text;
+
+		lcVector3 Points[4] =
+		{
+			lcVector3(Left, Top, Z),
+			lcVector3(Left, Top - mFontHeight, Z),
+			lcVector3(Left + mGlyphs[ch].width, Top - mFontHeight, Z),
+			lcVector3(Left + mGlyphs[ch].width, Top, Z),
+		};
+
+		for (int PointIdx = 0; PointIdx < 4; PointIdx++)
+			Points[PointIdx] = lcMul31(Points[PointIdx], Transform);
+
+		*Buffer++ = Points[0].x;
+		*Buffer++ = Points[0].y;
+		*Buffer++ = Points[0].z;
+		*Buffer++ = mGlyphs[ch].left;
+		*Buffer++ = mGlyphs[ch].top;
+
+		*Buffer++ = Points[1].x;
+		*Buffer++ = Points[1].y;
+		*Buffer++ = Points[1].z;
+		*Buffer++ = mGlyphs[ch].left;
+		*Buffer++ = mGlyphs[ch].bottom;
+
+		*Buffer++ = Points[2].x;
+		*Buffer++ = Points[2].y;
+		*Buffer++ = Points[2].z;
+		*Buffer++ = mGlyphs[ch].right;
+		*Buffer++ = mGlyphs[ch].bottom;
+
+		*Buffer++ = Points[2].x;
+		*Buffer++ = Points[2].y;
+		*Buffer++ = Points[2].z;
+		*Buffer++ = mGlyphs[ch].right;
+		*Buffer++ = mGlyphs[ch].bottom;
+
+		*Buffer++ = Points[3].x;
+		*Buffer++ = Points[3].y;
+		*Buffer++ = Points[3].z;
+		*Buffer++ = mGlyphs[ch].right;
+		*Buffer++ = mGlyphs[ch].top;
+
+		*Buffer++ = Points[0].x;
+		*Buffer++ = Points[0].y;
+		*Buffer++ = Points[0].z;
+		*Buffer++ = mGlyphs[ch].left;
+		*Buffer++ = mGlyphs[ch].top;
+
+		Left += mGlyphs[ch].width;
+		Text++;
+	}
+}
+
 void TexFont::GetGlyphTriangles(float Left, float Top, float Z, int Glyph, float* Buffer) const
 {
 	Left -= mGlyphs[Glyph].width / 2.0f;

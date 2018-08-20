@@ -7,7 +7,7 @@ greaterThan(QT_MAJOR_VERSION, 4) {
 }
 
 equals(QT_MAJOR_VERSION, 5) {
-	greaterThan(QT_MINOR_VERSION, 7) {
+    greaterThan(QT_MINOR_VERSION, 9) {
 		QT += gamepad
 	}
 }
@@ -157,6 +157,7 @@ SOURCES += common/view.cpp \
     common/lc_shortcuts.cpp \
     common/lc_synth.cpp \
     common/lc_texture.cpp \
+    common/lc_viewcube.cpp \
     common/lc_zipfile.cpp \
     common/image.cpp \
     common/group.cpp \
@@ -220,6 +221,7 @@ HEADERS += \
     common/lc_shortcuts.h \
     common/lc_synth.h \
     common/lc_texture.h \
+    common/lc_viewcube.h \
     common/lc_zipfile.h \
     common/image.h \
     common/group.h \

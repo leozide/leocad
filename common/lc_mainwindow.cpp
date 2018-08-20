@@ -24,7 +24,9 @@
 #include "lc_colors.h"
 #include <functional>
 
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 8, 0))
+#define LC_ENABLE_GAMEPAD (QT_VERSION >= QT_VERSION_CHECK(5, 10, 0))
+
+#if LC_ENABLE_GAMEPAD
 #include <QtGamepad/QGamepad>
 #endif
 
@@ -789,7 +791,7 @@ QMenu* lcMainWindow::createPopupMenu()
 
 void lcMainWindow::UpdateGamepads()
 {
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 8, 0))
+#if LC_ENABLE_GAMEPAD
 	QDateTime Now = QDateTime::currentDateTime();
 	quint64 Elapsed = mLastGamepadUpdate.msecsTo(Now);
 	mLastGamepadUpdate = Now;

@@ -3625,13 +3625,9 @@ void lcModel::RemoveFromSelection(const lcObjectSection& ObjectSection)
 
 void lcModel::SelectAllPieces()
 {
-	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-	{
-		lcPiece* Piece = mPieces[PieceIdx];
-
+	for (lcPiece* Piece : mPieces)
 		if (Piece->IsVisible(mCurrentStep))
 			Piece->SetSelected(true);
-	}
 
 	gMainWindow->UpdateSelectedObjects(true);
 	gMainWindow->UpdateAllViews();
@@ -3639,13 +3635,9 @@ void lcModel::SelectAllPieces()
 
 void lcModel::InvertSelection()
 {
-	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-	{
-		lcPiece* Piece = mPieces[PieceIdx];
-
+	for (lcPiece* Piece : mPieces)
 		if (Piece->IsVisible(mCurrentStep))
 			Piece->SetSelected(!Piece->IsSelected());
-	}
 
 	gMainWindow->UpdateSelectedObjects(true);
 	gMainWindow->UpdateAllViews();
@@ -3653,60 +3645,95 @@ void lcModel::InvertSelection()
 
 void lcModel::HideSelectedPieces()
 {
-	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-	{
-		lcPiece* Piece = mPieces[PieceIdx];
+	bool Modified = false;
 
+	for (lcPiece* Piece : mPieces)
+	{
 		if (Piece->IsSelected())
 		{
 			Piece->SetHidden(true);
 			Piece->SetSelected(false);
+			Modified = true;
 		}
 	}
+
+	if (!Modified)
+		return;
 
 	gMainWindow->UpdateTimeline(false, true);
 	gMainWindow->UpdateSelectedObjects(true);
 	gMainWindow->UpdateAllViews();
+
+	SaveCheckpoint(tr("Hide"));
 }
 
 void lcModel::HideUnselectedPieces()
 {
-	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-	{
-		lcPiece* Piece = mPieces[PieceIdx];
+	bool Modified = false;
 
+	for (lcPiece* Piece : mPieces)
+	{
 		if (!Piece->IsSelected())
+		{
 			Piece->SetHidden(true);
+			Modified = true;
+		}
 	}
+
+	if (!Modified)
+		return;
 
 	gMainWindow->UpdateTimeline(false, true);
 	gMainWindow->UpdateSelectedObjects(true);
 	gMainWindow->UpdateAllViews();
+
+	SaveCheckpoint(tr("Hide"));
 }
 
 void lcModel::UnhideSelectedPieces()
 {
-	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-	{
-		lcPiece* Piece = mPieces[PieceIdx];
+	bool Modified = false;
 
-		if (Piece->IsSelected())
+	for (lcPiece* Piece : mPieces)
+	{
+		if (Piece->IsSelected() && Piece->IsHidden())
+		{
 			Piece->SetHidden(false);
+			Modified = true;
+		}
 	}
+
+	if (!Modified)
+		return;
 
 	gMainWindow->UpdateTimeline(false, true);
 	gMainWindow->UpdateSelectedObjects(true);
 	gMainWindow->UpdateAllViews();
+
+	SaveCheckpoint(tr("Unhide"));
 }
 
 void lcModel::UnhideAllPieces()
 {
-	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-		mPieces[PieceIdx]->SetHidden(false);
+	bool Modified = false;
+
+	for (lcPiece* Piece : mPieces)
+	{
+		if (Piece->IsHidden())
+		{
+			Piece->SetHidden(false);
+			Modified = true;
+		}
+	}
+
+	if (!Modified)
+		return;
 
 	gMainWindow->UpdateTimeline(false, true);
 	gMainWindow->UpdateSelectedObjects(true);
 	gMainWindow->UpdateAllViews();
+
+	SaveCheckpoint(tr("Unhide"));
 }
 
 void lcModel::FindPiece(bool FindFirst, bool SearchForward)

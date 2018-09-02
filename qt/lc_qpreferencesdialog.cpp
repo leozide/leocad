@@ -55,6 +55,8 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget *parent, void *data) :
 	ui->gridLines->setChecked(options->Preferences.mDrawGridLines);
 	ui->gridLineSpacing->setText(QString::number(options->Preferences.mGridLineSpacing));
 	ui->axisIcon->setChecked(options->Preferences.mDrawAxes);
+	ui->ViewCubeLocationCombo->setCurrentIndex((int)options->Preferences.mViewCubeLocation);
+	ui->ViewCubeSizeEdit->setText(QString::number(options->Preferences.mViewCubeSize));
 
 	if (!gSupportsShaderObjects)
 		ui->ShadingMode->removeItem(LC_SHADING_DEFAULT_LIGHTS);
@@ -132,6 +134,8 @@ void lcQPreferencesDialog::accept()
 	options->Preferences.mGridLineSpacing = gridLineSpacing;
 
 	options->Preferences.mDrawAxes = ui->axisIcon->isChecked();
+	options->Preferences.mViewCubeLocation = (lcViewCubeLocation)ui->ViewCubeLocationCombo->currentIndex();
+	options->Preferences.mViewCubeSize = ui->ViewCubeSizeEdit->text().toInt();
 	options->Preferences.mShadingMode = (lcShadingMode)ui->ShadingMode->currentIndex();
 
 	QDialog::accept();

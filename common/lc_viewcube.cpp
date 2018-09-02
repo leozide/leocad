@@ -3,9 +3,9 @@
 #include "view.h"
 #include "lc_context.h"
 #include "texfont.h"
+#include "lc_application.h"
 
-//todo: move these and add preferences
-const int ViewportSize = 100;
+//todo: move these
 const float BoxSize = 10.0f;
 
 lcViewCube::lcViewCube(View* View)
@@ -28,11 +28,20 @@ lcMatrix44 lcViewCube::GetProjectionMatrix() const
 
 void lcViewCube::Draw()
 {
+	const lcPreferences& Preferences = lcGetPreferences();
+	lcViewCubeLocation Location = Preferences.mViewCubeLocation;
+
+	if (Location == lcViewCubeLocation::DISABLED)
+		return;
+
 	lcContext* Context = mView->mContext;
 	int Width = mView->mWidth;
 	int Height = mView->mHeight;
+	int ViewportSize = Preferences.mViewCubeSize;
 
-	Context->SetViewport(Width - ViewportSize, Height - ViewportSize, ViewportSize, ViewportSize);
+	int Left = (Location == lcViewCubeLocation::BOTTOM_LEFT || Location == lcViewCubeLocation::TOP_LEFT) ? 0 : Width - ViewportSize;
+	int Bottom = (Location == lcViewCubeLocation::BOTTOM_LEFT || Location == lcViewCubeLocation::BOTTOM_RIGHT) ? 0 : Height - ViewportSize;
+	Context->SetViewport(Left, Bottom, ViewportSize, ViewportSize);
 
 	const lcVector3 BoxVerts[8] =
 	{
@@ -226,6 +235,10 @@ void lcViewCube::Draw()
 
 bool lcViewCube::OnLeftButtonUp()
 {
+	const lcPreferences& Preferences = lcGetPreferences();
+	if (Preferences.mViewCubeLocation == lcViewCubeLocation::DISABLED)
+		return false;
+
 	if (!mIntersectionFlags.any())
 		return false;
 
@@ -246,12 +259,21 @@ bool lcViewCube::OnLeftButtonUp()
 
 bool lcViewCube::OnMouseMove()
 {
-	int x = mView->mInputState.x;
-	int y = mView->mInputState.y;
+	const lcPreferences& Preferences = lcGetPreferences();
+	lcViewCubeLocation Location = Preferences.mViewCubeLocation;
+
+	if (Location == lcViewCubeLocation::DISABLED)
+		return false;
+
 	int Width = mView->mWidth;
 	int Height = mView->mHeight;
+	int ViewportSize = Preferences.mViewCubeSize;
+	int Left = (Location == lcViewCubeLocation::BOTTOM_LEFT || Location == lcViewCubeLocation::TOP_LEFT) ? 0 : Width - ViewportSize;
+	int Bottom = (Location == lcViewCubeLocation::BOTTOM_LEFT || Location == lcViewCubeLocation::BOTTOM_RIGHT) ? 0 : Height - ViewportSize;
+	int x = mView->mInputState.x - Left;
+	int y = mView->mInputState.y - Bottom;
 
-	if (x < Width - ViewportSize || x > Width || y < Height - ViewportSize || y > Height)
+	if (x < 0 || x > Width || y < 0 || y > Height)
 	{
 		if (mIntersectionFlags.any())
 		{
@@ -261,9 +283,6 @@ bool lcViewCube::OnMouseMove()
 
 		return false;
 	}
-
-	x -= Width - ViewportSize;
-	y -= Height - ViewportSize;
 
 	lcVector3 StartEnd[2] = { lcVector3(x, y, 0), lcVector3(x, y, 1) };
 	const int Viewport[4] = { 0, 0, ViewportSize, ViewportSize };

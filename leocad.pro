@@ -14,9 +14,12 @@ equals(QT_MAJOR_VERSION, 5) {
 
 INCLUDEPATH += qt common
 CONFIG += precompile_header incremental c++11
+
+win32-msvc* {
+	QMAKE_CXXFLAGS_WARN_ON += -wd4100
+}
 win32 {
 	PRECOMPILED_HEADER = common/lc_global.h
-	QMAKE_CXXFLAGS_WARN_ON += -wd4100
 	DEFINES += _CRT_SECURE_NO_WARNINGS _CRT_SECURE_NO_DEPRECATE=1 _CRT_NONSTDC_NO_WARNINGS=1
 	greaterThan(QT_MAJOR_VERSION, 4) {
 		INCLUDEPATH += $$[QT_INSTALL_HEADERS]/QtZlib

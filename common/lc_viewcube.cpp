@@ -13,7 +13,7 @@ const float CenterSize = BoxSize * 2.0f / 3.0f;
 lcViewCube::lcViewCube(View* View)
 	: mView(View)
 {
-	mIntersectionFlags = 0;
+	mMouseDown = false;
 }
 
 lcMatrix44 lcViewCube::GetViewMatrix() const
@@ -242,11 +242,32 @@ void lcViewCube::Draw()
 	Context->SetViewport(0, 0, Width, Height);
 }
 
+bool lcViewCube::OnLeftButtonDown()
+{
+	const lcPreferences& Preferences = lcGetPreferences();
+	if (Preferences.mViewCubeLocation == lcViewCubeLocation::DISABLED)
+		return false;
+
+	if (!mIntersectionFlags.any())
+		return false;
+
+	mMouseDownX = mView->mInputState.x;
+	mMouseDownY = mView->mInputState.y;
+	mMouseDown = true;
+
+	return true;
+}
+
 bool lcViewCube::OnLeftButtonUp()
 {
 	const lcPreferences& Preferences = lcGetPreferences();
 	if (Preferences.mViewCubeLocation == lcViewCubeLocation::DISABLED)
 		return false;
+
+	if (!mMouseDown)
+		return false;
+
+	mMouseDown = false;
 
 	if (!mIntersectionFlags.any())
 		return false;
@@ -256,9 +277,9 @@ bool lcViewCube::OnLeftButtonUp()
 	for (int AxisIdx = 0; AxisIdx < 3; AxisIdx++)
 	{
 		if (mIntersectionFlags.test(AxisIdx * 2))
-			Position[AxisIdx] = -BoxSize;
-		else if (mIntersectionFlags.test(AxisIdx * 2 + 1))
 			Position[AxisIdx] = BoxSize;
+		else if (mIntersectionFlags.test(AxisIdx * 2 + 1))
+			Position[AxisIdx] = -BoxSize;
 	}
 
 	mView->SetViewpoint(Position);
@@ -273,6 +294,13 @@ bool lcViewCube::OnMouseMove()
 
 	if (Location == lcViewCubeLocation::DISABLED)
 		return false;
+
+	if (mMouseDown)
+	{
+		if (qAbs(mMouseDownX - mView->mInputState.x) > 3 || qAbs(mMouseDownY - mView->mInputState.y) > 3)
+			mMouseDown = false;
+		// todo: switch to orbit mode
+	}
 
 	int Width = mView->mWidth;
 	int Height = mView->mHeight;

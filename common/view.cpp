@@ -2756,6 +2756,9 @@ void View::OnLeftButtonDown()
 
 	gMainWindow->SetActiveView(this);
 
+	if (mViewCube.OnLeftButtonDown())
+		return;
+
 	lcTrackTool OverrideTool = GetOverrideTrackTool(Qt::LeftButton);
 
 	if (OverrideTool != LC_TRACKTOOL_NONE)

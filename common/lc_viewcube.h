@@ -13,6 +13,7 @@ public:
 	void Draw();
 	bool OnMouseMove();
 	bool OnLeftButtonUp();
+	bool OnLeftButtonDown();
 
 protected:
 	lcMatrix44 GetViewMatrix() const;
@@ -21,4 +22,7 @@ protected:
 	View* mView;
 	lcVector3 mIntersection;
 	std::bitset<6> mIntersectionFlags;
+	int mMouseDownX;
+	int mMouseDownY;
+	bool mMouseDown;
 };

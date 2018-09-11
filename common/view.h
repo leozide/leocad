@@ -97,6 +97,12 @@ public:
 	void OnMouseMove();
 	void OnMouseWheel(float Direction);
 
+	bool IsTracking() const
+	{
+		return mTrackButton != LC_TRACKBUTTON_NONE;
+	}
+
+	void StartOrbitTracking();
 	void CancelTrackingOrClearSelection();
 	void BeginDrag(lcDragState DragState);
 	void EndDrag(bool Accept);

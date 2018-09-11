@@ -2473,6 +2473,13 @@ bool View::IsTrackToolAllowed(lcTrackTool TrackTool, quint32 AllowedTransforms) 
 	return false;
 }
 
+void View::StartOrbitTracking()
+{
+	mTrackTool = LC_TRACKTOOL_ORBIT_XY;
+	OnUpdateCursor();
+	OnButtonDown(LC_TRACKBUTTON_LEFT);
+}
+
 void View::StartTracking(lcTrackButton TrackButton)
 {
 	mTrackButton = TrackButton;

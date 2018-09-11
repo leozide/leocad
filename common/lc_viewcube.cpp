@@ -277,9 +277,9 @@ bool lcViewCube::OnLeftButtonUp()
 	for (int AxisIdx = 0; AxisIdx < 3; AxisIdx++)
 	{
 		if (mIntersectionFlags.test(AxisIdx * 2))
-			Position[AxisIdx] = BoxSize;
+			Position[AxisIdx] = 250.0f;
 		else if (mIntersectionFlags.test(AxisIdx * 2 + 1))
-			Position[AxisIdx] = -BoxSize;
+			Position[AxisIdx] = -250.0f;
 	}
 
 	mView->SetViewpoint(Position);
@@ -298,9 +298,16 @@ bool lcViewCube::OnMouseMove()
 	if (mMouseDown)
 	{
 		if (qAbs(mMouseDownX - mView->mInputState.x) > 3 || qAbs(mMouseDownY - mView->mInputState.y) > 3)
+		{
+			mIntersectionFlags.reset();
 			mMouseDown = false;
-		// todo: switch to orbit mode
+			mView->StartOrbitTracking();
+			return true;
+		}
 	}
+
+	if (mView->IsTracking())
+		return false;
 
 	int Width = mView->mWidth;
 	int Height = mView->mHeight;

@@ -209,7 +209,7 @@ void lcViewCube::Draw()
 			MaxText = Height;
 	}
 
-	float Scale = (BoxSize * 2.0f - 4.0f) / (float)MaxText;
+	float Scale = BoxSize * 4.0f / 3.0f / (float)MaxText;
 
 	lcMatrix44 ViewMatrices[6] =
 	{

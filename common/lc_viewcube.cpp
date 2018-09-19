@@ -248,6 +248,8 @@ bool lcViewCube::OnLeftButtonDown()
 	if (Preferences.mViewCubeLocation == lcViewCubeLocation::DISABLED)
 		return false;
 
+	mIntersectionFlags = GetIntersectionFlags(mIntersection);
+
 	if (!mIntersectionFlags.any())
 		return false;
 
@@ -277,9 +279,9 @@ bool lcViewCube::OnLeftButtonUp()
 	for (int AxisIdx = 0; AxisIdx < 3; AxisIdx++)
 	{
 		if (mIntersectionFlags.test(AxisIdx * 2))
-			Position[AxisIdx] = 250.0f;
+			Position[AxisIdx] = 1250.0f;
 		else if (mIntersectionFlags.test(AxisIdx * 2 + 1))
-			Position[AxisIdx] = -250.0f;
+			Position[AxisIdx] = -1250.0f;
 	}
 
 	mView->SetViewpoint(Position);
@@ -305,42 +307,7 @@ bool lcViewCube::OnMouseMove()
 	if (mView->IsTracking())
 		return false;
 
-	int Width = mView->mWidth;
-	int Height = mView->mHeight;
-	int ViewportSize = Preferences.mViewCubeSize;
-	int Left = (Location == lcViewCubeLocation::BOTTOM_LEFT || Location == lcViewCubeLocation::TOP_LEFT) ? 0 : Width - ViewportSize;
-	int Bottom = (Location == lcViewCubeLocation::BOTTOM_LEFT || Location == lcViewCubeLocation::BOTTOM_RIGHT) ? 0 : Height - ViewportSize;
-	int x = mView->mInputState.x - Left;
-	int y = mView->mInputState.y - Bottom;
-
-	if (x < 0 || x > Width || y < 0 || y > Height)
-	{
-		if (mIntersectionFlags.any())
-		{
-			mIntersectionFlags.reset();
-			mView->Redraw();
-		}
-
-		return false;
-	}
-
-	lcVector3 StartEnd[2] = { lcVector3(x, y, 0), lcVector3(x, y, 1) };
-	const int Viewport[4] = { 0, 0, ViewportSize, ViewportSize };
-
-	lcUnprojectPoints(StartEnd, 2, GetViewMatrix(), GetProjectionMatrix(), Viewport);
-	std::bitset<6> IntersectionFlags;
-
-	float Distance;
-	if (lcBoundingBoxRayIntersectDistance(lcVector3(-BoxSize, -BoxSize, -BoxSize), lcVector3(BoxSize, BoxSize, BoxSize), StartEnd[0], StartEnd[1], &Distance, &mIntersection))
-	{
-		for (int AxisIdx = 0; AxisIdx < 3; AxisIdx++)
-		{
-			if (mIntersection[AxisIdx] > BoxSize * 2 / 3)
-				IntersectionFlags.set(2 * AxisIdx);
-			else if (mIntersection[AxisIdx] < -BoxSize * 2 / 3)
-				IntersectionFlags.set(2 * AxisIdx + 1);
-		}
-	}
+	std::bitset<6> IntersectionFlags = GetIntersectionFlags(mIntersection);
 
 	if (IntersectionFlags != mIntersectionFlags)
 	{
@@ -354,4 +321,41 @@ bool lcViewCube::OnMouseMove()
 bool lcViewCube::IsDragging() const
 {
 	return mMouseDown && (qAbs(mMouseDownX - mView->mInputState.x) > 3 || qAbs(mMouseDownY - mView->mInputState.y) > 3);
+}
+
+std::bitset<6> lcViewCube::GetIntersectionFlags(lcVector3& Intersection) const
+{
+	const lcPreferences& Preferences = lcGetPreferences();
+	lcViewCubeLocation Location = Preferences.mViewCubeLocation;
+
+	int Width = mView->mWidth;
+	int Height = mView->mHeight;
+	int ViewportSize = Preferences.mViewCubeSize;
+	int Left = (Location == lcViewCubeLocation::BOTTOM_LEFT || Location == lcViewCubeLocation::TOP_LEFT) ? 0 : Width - ViewportSize;
+	int Bottom = (Location == lcViewCubeLocation::BOTTOM_LEFT || Location == lcViewCubeLocation::BOTTOM_RIGHT) ? 0 : Height - ViewportSize;
+	int x = mView->mInputState.x - Left;
+	int y = mView->mInputState.y - Bottom;
+	std::bitset<6> IntersectionFlags;
+
+	if (x < 0 || x > Width || y < 0 || y > Height)
+		return IntersectionFlags;
+
+	lcVector3 StartEnd[2] = { lcVector3(x, y, 0), lcVector3(x, y, 1) };
+	const int Viewport[4] = { 0, 0, ViewportSize, ViewportSize };
+
+	lcUnprojectPoints(StartEnd, 2, GetViewMatrix(), GetProjectionMatrix(), Viewport);
+
+	float Distance;
+	if (lcBoundingBoxRayIntersectDistance(lcVector3(-BoxSize, -BoxSize, -BoxSize), lcVector3(BoxSize, BoxSize, BoxSize), StartEnd[0], StartEnd[1], &Distance, &Intersection))
+	{
+		for (int AxisIdx = 0; AxisIdx < 3; AxisIdx++)
+		{
+			if (mIntersection[AxisIdx] > BoxSize * 2 / 3)
+				IntersectionFlags.set(2 * AxisIdx);
+			else if (mIntersection[AxisIdx] < -BoxSize * 2 / 3)
+				IntersectionFlags.set(2 * AxisIdx + 1);
+		}
+	}
+
+	return IntersectionFlags;
 }

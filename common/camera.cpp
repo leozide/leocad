@@ -1003,8 +1003,8 @@ void lcCamera::SetViewpoint(const lcVector3& Position)
 
 	lcVector3 UpVector(0, 0, 1), FrontVector(Position), SideVector;
 	FrontVector.Normalize();
-	if (FrontVector == UpVector)
-		SideVector = lcVector3(1, 0, 0);
+	if (fabsf(lcDot(UpVector, FrontVector)) > 0.99f)
+		SideVector = lcVector3(-1, 0, 0);
 	else
 		SideVector = lcCross(FrontVector, UpVector);
 	UpVector = lcCross(SideVector, FrontVector);

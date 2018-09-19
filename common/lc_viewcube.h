@@ -19,6 +19,7 @@ public:
 protected:
 	lcMatrix44 GetViewMatrix() const;
 	lcMatrix44 GetProjectionMatrix() const;
+	std::bitset<6> GetIntersectionFlags(lcVector3& Intersection) const;
 
 	View* mView;
 	lcVector3 mIntersection;

@@ -14,6 +14,7 @@ public:
 	bool OnMouseMove();
 	bool OnLeftButtonUp();
 	bool OnLeftButtonDown();
+	bool IsDragging() const;
 
 protected:
 	lcMatrix44 GetViewMatrix() const;

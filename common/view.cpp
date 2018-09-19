@@ -2878,7 +2878,17 @@ void View::OnMouseMove()
 	if (mTrackButton == LC_TRACKBUTTON_NONE)
 	{
 		if (mViewCube.OnMouseMove())
+		{
+			lcTrackTool NewTrackTool = mViewCube.IsDragging() ? LC_TRACKTOOL_ORBIT_XY : LC_TRACKTOOL_NONE;
+
+			if (NewTrackTool != mTrackTool)
+			{
+				mTrackTool = NewTrackTool;
+				OnUpdateCursor();
+			}
+
 			return;
+		}
 
 		UpdateTrackTool();
 

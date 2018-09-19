@@ -295,15 +295,11 @@ bool lcViewCube::OnMouseMove()
 	if (Location == lcViewCubeLocation::DISABLED)
 		return false;
 
-	if (mMouseDown)
+	if (IsDragging())
 	{
-		if (qAbs(mMouseDownX - mView->mInputState.x) > 3 || qAbs(mMouseDownY - mView->mInputState.y) > 3)
-		{
-			mIntersectionFlags.reset();
-			mMouseDown = false;
-			mView->StartOrbitTracking();
-			return true;
-		}
+		mIntersectionFlags.reset();
+		mView->StartOrbitTracking();
+		return true;
 	}
 
 	if (mView->IsTracking())
@@ -352,5 +348,10 @@ bool lcViewCube::OnMouseMove()
 		mView->Redraw();
 	}
 
-	return true;
+	return mIntersectionFlags.any();
+}
+
+bool lcViewCube::IsDragging() const
+{
+	return mMouseDown && (qAbs(mMouseDownX - mView->mInputState.x) > 3 || qAbs(mMouseDownY - mView->mInputState.y) > 3);
 }

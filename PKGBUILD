@@ -10,7 +10,7 @@ license=('GPL')
 depends=('qt4' 'libpng' 'libjpeg-turbo' 'mesa-libgl')
 #Qt5.x
 #depends=('qt5-base' 'qt5-tools' 'libpng' 'libjpeg-turbo' 'mesa-libgl')
-makedepends=('automoc4' 'glu' 'phonon-qt4-gstreamer' 'ca-certificates')
+makedepends=('glu' 'ca-certificates')
 conflicts=()
 replaces=()
 backup=()

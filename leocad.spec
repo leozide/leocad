@@ -55,7 +55,7 @@ BuildRequires: qt-devel >= 1:4.7.0
 %endif
 %if 0%{?fedora}
 %if 0%{?qt5}
-BuildRequires: qt5-qtbase-devel >= 5.4.0, qt5-linguist
+BuildRequires: qt5-qtbase-devel >= 5.4.0, qt5-linguist, qt5-qtgamepad-devel
 %else
 BuildRequires: qt-devel
 %endif

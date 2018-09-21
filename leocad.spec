@@ -28,7 +28,7 @@ Group: Graphics
 %if 0%{?fedora} || 0%{?centos_version}
 Group: Amusements/Graphics
 %endif
-Version: 17.07
+Version: 18.02
 %if 0%{?opensuse_bs}
 Release: <CI_CNT>.<B_CNT>%{?dist}
 %else

@@ -1,6 +1,6 @@
 # Maintainer: Peter Bartfai <pbartfai[at]stardust[dot]hu>
 pkgname=leocad
-pkgver=0.83.2
+pkgver=18.02
 pkgrel=1
 pkgdesc="LeoCAD is a CAD program for creating virtual LEGO models."
 url="http://leocad.org"

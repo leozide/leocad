@@ -9,7 +9,7 @@ license=('GPL')
 #Qt4.x
 depends=('qt4' 'libpng' 'libjpeg-turbo' 'mesa-libgl')
 #Qt5.x
-#depends=('qt5-base' 'qt5-tools' 'libpng' 'libjpeg-turbo' 'mesa-libgl')
+#depends=('qt5-base' 'qt5-tools' 'qt5-gamepad' 'libpng' 'libjpeg-turbo' 'mesa-libgl')
 makedepends=('glu' 'ca-certificates')
 conflicts=()
 replaces=()

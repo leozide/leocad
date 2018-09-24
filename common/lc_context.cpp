@@ -533,6 +533,15 @@ void lcContext::BindTexture2DMS(GLuint Texture)
 #endif
 }
 
+void lcContext::UnbindTexture2D(GLuint Texture)
+{
+	if (mTexture2D != Texture)
+		return;
+
+	glBindTexture(GL_TEXTURE_2D, 0);
+	mTexture2D = 0;
+}
+
 void lcContext::SetColor(float Red, float Green, float Blue, float Alpha)
 {
 	SetColor(lcVector4(Red, Green, Blue, Alpha));

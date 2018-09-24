@@ -2,7 +2,7 @@
 #include "lc_viewcube.h"
 #include "view.h"
 #include "lc_context.h"
-#include "texfont.h"
+#include "lc_stringcache.h"
 #include "lc_application.h"
 
 //todo: move these
@@ -185,24 +185,31 @@ void lcViewCube::Draw()
 		Context->DrawIndexedPrimitives(GL_TRIANGLES, 18, GL_UNSIGNED_SHORT, First * 2);
 	}
 
-	glDisable(GL_CULL_FACE);
 	glDepthFunc(GL_LEQUAL);
 
 	Context->SetColor(0.0f, 0.0f, 0.0f, 1.0f);
 	Context->DrawIndexedPrimitives(GL_LINES, 24, GL_UNSIGNED_SHORT, (36 + 144 + 144) * 2);
 
 	Context->SetMaterial(LC_MATERIAL_UNLIT_TEXTURE_MODULATE);
-	Context->BindTexture2D(gTexFont.GetTexture());
 	glEnable(GL_BLEND);
+	glDepthFunc(GL_ALWAYS);
 
-	const char* ViewNames[6] = { "Front", "Back", "Top", "Bottom", "Left", "Right" };
+	QStringList ViewNames =
+	{
+		QT_TRANSLATE_NOOP("ViewName", "Front"),
+		QT_TRANSLATE_NOOP("ViewName", "Back"),
+		QT_TRANSLATE_NOOP("ViewName", "Top"),
+		QT_TRANSLATE_NOOP("ViewName", "Bottom"),
+		QT_TRANSLATE_NOOP("ViewName", "Left"),
+		QT_TRANSLATE_NOOP("ViewName", "Right")
+	};
 
 	int MaxText = 0;
 
 	for (int FaceIdx = 0; FaceIdx < 6; FaceIdx++)
 	{
 		int Width, Height;
-		gTexFont.GetStringDimensions(&Width, &Height, ViewNames[FaceIdx]);
+		gStringCache.GetStringDimensions(&Width, &Height, ViewNames[FaceIdx]);
 		if (Width > MaxText)
 			MaxText = Width;
 		if (Height > MaxText)
@@ -221,23 +228,12 @@ void lcViewCube::Draw()
 		lcMatrix44(lcVector4(0.0f, -Scale, 0.0f, 0.0f), lcVector4(0.0f,  0.0f, Scale, 0.0f), lcVector4(1.0f, 0.0f, 0.0f, 0.0f), lcVector4(-BoxSize - 0.01f, 0.0f, 0.0f, 1.0f))
 	};
 
-	float TextBuffer[256 * 5 * 3];
-	int CharsWritten = 0;
-
-	for (int FaceIdx = 0; FaceIdx < 6; FaceIdx++)
-	{
-		const char* ViewName = ViewNames[FaceIdx];
-		gTexFont.GetTriangles(ViewMatrices[FaceIdx], ViewName, TextBuffer + CharsWritten * 2 * 3 * 5);
-		CharsWritten += strlen(ViewName);
-	}
-
-	Context->SetVertexBufferPointer(TextBuffer);
-	Context->SetVertexFormat(0, 3, 0, 2, 0, false);
-
-	Context->SetColor(0.0f, 0.0f, 0.0f, 1.0f);
-	Context->DrawPrimitives(GL_TRIANGLES, 0, CharsWritten * 2 * 3);
+	gStringCache.CacheStrings(Context, ViewNames);
+	gStringCache.DrawStrings(Context, ViewMatrices, ViewNames);
 
 	glDisable(GL_BLEND);
+	glDisable(GL_CULL_FACE);
+	glDepthFunc(GL_LEQUAL);
 
 	Context->SetViewport(0, 0, Width, Height);
 }

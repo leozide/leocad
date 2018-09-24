@@ -158,6 +158,7 @@ SOURCES += common/view.cpp \
     common/lc_scene.cpp \
     common/lc_selectbycolordialog.cpp \
     common/lc_shortcuts.cpp \
+    common/lc_stringcache.cpp \
     common/lc_synth.cpp \
     common/lc_texture.cpp \
     common/lc_viewcube.cpp \
@@ -222,6 +223,7 @@ HEADERS += \
     common/lc_scene.h \
     common/lc_selectbycolordialog.h \
     common/lc_shortcuts.h \
+    common/lc_stringcache.h \
     common/lc_synth.h \
     common/lc_texture.h \
     common/lc_viewcube.h \

@@ -10,6 +10,7 @@
 #include "lc_context.h"
 #include "view.h"
 #include "texfont.h"
+#include "lc_stringcache.h"
 #include "lc_texture.h"
 #include "lc_mesh.h"
 #include "lc_profile.h"
@@ -94,6 +95,7 @@ lcQGLWidget::lcQGLWidget(QWidget *parent, lcGLWidget *owner, bool view)
 	widget->MakeCurrent();
 
 	// TODO: Find a better place for the grid texture and font
+	gStringCache.AddRef(widget->mContext);
 	gTexFont.Load(widget->mContext);
 	if (gWidgetList.isEmpty())
 	{
@@ -128,6 +130,7 @@ lcQGLWidget::lcQGLWidget(QWidget *parent, lcGLWidget *owner, bool view)
 lcQGLWidget::~lcQGLWidget()
 {
 	gWidgetList.removeOne(this);
+	gStringCache.Release(widget->mContext);
 	gTexFont.Release();
 	makeCurrent();
 	if (gWidgetList.isEmpty())

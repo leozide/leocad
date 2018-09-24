@@ -140,6 +140,7 @@ public:
 	void SetLineWidth(float LineWidth);
 	void SetSmoothShading(bool Smooth);
 	void BindTexture2D(GLuint Texture);
+	void UnbindTexture2D(GLuint Texture);
 	void BindTexture2DMS(GLuint Texture);
 
 	void SetColor(const lcVector4& Color)

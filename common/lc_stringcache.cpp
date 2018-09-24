@@ -73,7 +73,7 @@ void lcStringCache::CacheStrings(lcContext* Context, const QStringList& Strings)
 	if (!Update)
 		return;
 
-	QImage Image(128, 128, QImage::Format_RGBA8888);
+	QImage Image(128, 128, QImage::Format_ARGB32);
 	QPainter Painter;
 	QFont Font("Helvetica", 20);
 	int DestX = 0, DestY = 0, DestHeight = 0;
@@ -113,13 +113,11 @@ void lcStringCache::CacheStrings(lcContext* Context, const QStringList& Strings)
 
 		for (int y = SourceRect.top(); y < SourceRect.bottom(); y++)
 		{
-			const unsigned char* Source = Image.constBits() + y * Image.width() * 4;
 			unsigned char* Dest = mBuffer + ((String.Top - y) * mTexture->mWidth + String.Left) * 2;
 
 			for (int x = SourceRect.left(); x < SourceRect.right(); x++)
 			{
-				*Dest = *(Dest + 1) = *Source;
-				Source += 4;
+				*Dest = *(Dest + 1) = qRed(Image.pixel(x, y));
 				Dest += 2;
 			}
 		}

@@ -81,6 +81,7 @@ lcMainWindow::lcMainWindow()
 	mRelativeTransform = true;
 	mCurrentPieceInfo = nullptr;
 	mSelectionMode = lcSelectionMode::SINGLE;
+	mModelTabWidget = nullptr;
 
 	memset(&mSearchOptions, 0, sizeof(mSearchOptions));
 

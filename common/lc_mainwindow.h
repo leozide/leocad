@@ -188,7 +188,7 @@ public:
 
 	View* GetActiveView() const
 	{
-		lcModelTabWidget* CurrentTab = (lcModelTabWidget*)mModelTabWidget->currentWidget();
+		lcModelTabWidget* CurrentTab = mModelTabWidget ? (lcModelTabWidget*)mModelTabWidget->currentWidget() : nullptr;
 		return CurrentTab ? CurrentTab->GetActiveView() : nullptr;
 	}
 

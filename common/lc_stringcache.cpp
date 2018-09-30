@@ -109,7 +109,7 @@ void lcStringCache::CacheStrings(const QStringList& Strings)
 		DestHeight = qMax(DestHeight, SourceRect.height());
 	}
 
-	mTexture->SetImage(&TextureImage, LC_TEXTURE_MIPMAPS | LC_TEXTURE_ANISOTROPIC);
+	mTexture->SetImage(&TextureImage, LC_TEXTURE_LINEAR);
 }
 
 void lcStringCache::GetStringDimensions(int* cx, int* cy, const QString& String) const

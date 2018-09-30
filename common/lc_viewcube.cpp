@@ -228,7 +228,7 @@ void lcViewCube::Draw()
 		lcMatrix44(lcVector4(0.0f, -Scale, 0.0f, 0.0f), lcVector4(0.0f,  0.0f, Scale, 0.0f), lcVector4(1.0f, 0.0f, 0.0f, 0.0f), lcVector4(-BoxSize - 0.01f, 0.0f, 0.0f, 1.0f))
 	};
 
-	gStringCache.CacheStrings(Context, ViewNames);
+	gStringCache.CacheStrings(ViewNames); // todo: precache earlier because the texture only gets uploaded on the next frame
 	gStringCache.DrawStrings(Context, ViewMatrices, ViewNames);
 
 	glDisable(GL_BLEND);

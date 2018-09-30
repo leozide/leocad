@@ -187,12 +187,21 @@ bool lcTexture::Load(lcMemFile& File, int Flags)
 	return Load(Flags);
 }
 
-void lcTexture::Upload()
+void lcTexture::SetImage(Image* Image, int Flags)
+{
+	mImages.clear();
+	mImages.emplace_back(std::move(*Image));
+
+	Load(Flags);
+}
+
+void lcTexture::Upload(lcContext* Context)
 {
 	mWidth = mImages[0].mWidth;
 	mHeight = mImages[0].mHeight;
 
-	glGenTextures(1, &mTexture);
+	if (!mTexture)
+		glGenTextures(1, &mTexture);
 
 	int Filters[2][5] = 
 	{
@@ -204,7 +213,7 @@ void lcTexture::Upload()
 	int FilterIndex = FilterFlags >> LC_TEXTURE_FILTER_SHIFT;
 	int MipIndex = mFlags & LC_TEXTURE_MIPMAPS ? 0 : 1;
 
-	glBindTexture(GL_TEXTURE_2D, mTexture);
+	Context->BindTexture2D(mTexture);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, (mFlags & LC_TEXTURE_WRAPU) ? GL_REPEAT : GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, (mFlags & LC_TEXTURE_WRAPV) ? GL_REPEAT : GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, Filters[MipIndex][FilterIndex]);
@@ -269,7 +278,7 @@ void lcTexture::Upload()
 		}
 	}
 
-	glBindTexture(GL_TEXTURE_2D, 0);
+	Context->UnbindTexture2D(mTexture);
 }
 
 bool lcTexture::Load(int Flags)

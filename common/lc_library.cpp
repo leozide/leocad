@@ -1777,12 +1777,12 @@ void lcPiecesLibrary::QueueTextureUpload(lcTexture* Texture)
 	mTextureUploads.push_back(Texture);
 }
 
-void lcPiecesLibrary::UploadTextures()
+void lcPiecesLibrary::UploadTextures(lcContext* Context)
 {
 	QMutexLocker Lock(&mTextureMutex);
 
 	for (lcTexture* Texture : mTextureUploads)
-		Texture->Upload();
+		Texture->Upload(Context);
 
 	mTextureUploads.clear();
 }

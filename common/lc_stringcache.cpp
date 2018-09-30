@@ -8,13 +8,11 @@ lcStringCache gStringCache;
 lcStringCache::lcStringCache()
 {
 	mTexture = nullptr;
-	mBuffer = nullptr;
 	mRefCount = 0;
 }
 
 lcStringCache::~lcStringCache()
 {
-	delete mBuffer;
 	delete mTexture;
 }
 
@@ -23,21 +21,7 @@ void lcStringCache::AddRef(lcContext* Context)
 	mRefCount++;
 
 	if (mRefCount == 1)
-	{
 		mTexture = new lcTexture();
-		mTexture->mWidth = 256;
-		mTexture->mHeight = 256;
-
-		glGenTextures(1, &mTexture->mTexture);
-		Context->BindTexture2D(mTexture->mTexture);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-		mBuffer = new unsigned char[mTexture->mWidth * mTexture->mHeight * 2];
-
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE_ALPHA, mTexture->mWidth, mTexture->mHeight, 0, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, mBuffer);
-	}
 }
 
 void lcStringCache::Release(lcContext* Context)
@@ -50,12 +34,10 @@ void lcStringCache::Release(lcContext* Context)
 
 		delete mTexture;
 		mTexture = nullptr;
-		delete mBuffer;
-		mBuffer = nullptr;
 	}
 }
 
-void lcStringCache::CacheStrings(lcContext* Context, const QStringList& Strings)
+void lcStringCache::CacheStrings(const QStringList& Strings)
 {
 	bool Update = false;
 
@@ -71,11 +53,14 @@ void lcStringCache::CacheStrings(lcContext* Context, const QStringList& Strings)
 	if (!Update)
 		return;
 
+	Image TextureImage;
+	TextureImage.Allocate(256, 256, LC_PIXEL_FORMAT_L8A8);
+
 	QImage Image(128, 128, QImage::Format_ARGB32);
 	QPainter Painter;
 	QFont Font("Helvetica", 20);
 	int DestX = 0, DestY = 0, DestHeight = 0;
-	memset(mBuffer, 0, mTexture->mWidth * mTexture->mHeight * 2);
+	memset(TextureImage.mData, 0, TextureImage.mWidth * TextureImage.mHeight * 2);
 
 	for (auto& Entry : mStrings)
 	{
@@ -89,29 +74,29 @@ void lcStringCache::CacheStrings(lcContext* Context, const QStringList& Strings)
 		Painter.drawText(0, 0, Image.width(), Image.height(), 0, Entry.first, &SourceRect);
 		Painter.end();
 
-		if (DestX + SourceRect.width() > mTexture->mWidth)
+		if (DestX + SourceRect.width() + 2 > TextureImage.mWidth)
 		{
 			DestX = 0;
-			DestY += DestHeight;
+			DestY += DestHeight + 2;
 			DestHeight = 0;
 		}
 
 		lcStringCacheEntry& String = Entry.second;
 
-		if (SourceRect.width() > mTexture->mWidth || DestY + SourceRect.height() > mTexture->mHeight)
+		if (SourceRect.width() + 2 > TextureImage.mWidth || DestY + SourceRect.height() + 2 > TextureImage.mHeight || DestY + SourceRect.height() + 2 > TextureImage.mHeight)
 		{
 			memset(&String, 0, sizeof(String));
 			break;
 		}
 
-		String.Top = mTexture->mHeight - DestY - 1;
-		String.Bottom = String.Top - SourceRect.height();
-		String.Left = DestX;
-		String.Right = DestX + SourceRect.width();
+		String.Top = TextureImage.mHeight - DestY - 2;
+		String.Bottom = String.Top - SourceRect.height() + 1;
+		String.Left = DestX + 1;
+		String.Right = String.Left + SourceRect.width() - 2;
 
 		for (int y = SourceRect.top(); y < SourceRect.bottom(); y++)
 		{
-			unsigned char* Dest = mBuffer + ((String.Top - y) * mTexture->mWidth + String.Left) * 2;
+			unsigned char* Dest = TextureImage.mData + ((String.Top - y) * TextureImage.mWidth + String.Left) * 2;
 
 			for (int x = SourceRect.left(); x < SourceRect.right(); x++)
 			{
@@ -120,12 +105,11 @@ void lcStringCache::CacheStrings(lcContext* Context, const QStringList& Strings)
 			}
 		}
 
-		DestX += SourceRect.width();
+		DestX += SourceRect.width() + 2;
 		DestHeight = qMax(DestHeight, SourceRect.height());
 	}
 
-	Context->BindTexture2D(mTexture->mTexture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE_ALPHA, mTexture->mWidth, mTexture->mHeight, 0, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, mBuffer);
+	mTexture->SetImage(&TextureImage, LC_TEXTURE_MIPMAPS | LC_TEXTURE_ANISOTROPIC);
 }
 
 void lcStringCache::GetStringDimensions(int* cx, int* cy, const QString& String) const

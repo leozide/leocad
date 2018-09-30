@@ -26,7 +26,8 @@ public:
 
 	bool Load(const QString& FileName, int Flags = 0);
 	bool Load(lcMemFile& File, int Flags = 0);
-	void Upload();
+	void SetImage(Image* Image, int Flags = 0);
+	void Upload(lcContext* Context);
 	void Unload();
 
 	void AddRef()

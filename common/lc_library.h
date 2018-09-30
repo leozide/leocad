@@ -190,7 +190,7 @@ public:
 	bool LoadTexture(lcTexture* Texture);
 	void ReleaseTexture(lcTexture* Texture);
 	void QueueTextureUpload(lcTexture* Texture);
-	void UploadTextures();
+	void UploadTextures(lcContext* Context);
 
 	bool PieceInCategory(PieceInfo* Info, const char* CategoryKeywords) const;
 	void GetCategoryEntries(int CategoryIndex, bool GroupPieces, lcArray<PieceInfo*>& SinglePieces, lcArray<PieceInfo*>& GroupedPieces);

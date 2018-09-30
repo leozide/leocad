@@ -17,6 +17,7 @@ class Image
 {
 public:
 	Image();
+	Image(Image&& Other);
 	virtual ~Image();
 
 	int GetBPP() const;

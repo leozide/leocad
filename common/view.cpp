@@ -49,6 +49,19 @@ lcModel* View::GetActiveModel() const
 	return !mActiveSubmodelInstance ? mModel : mActiveSubmodelInstance->mPieceInfo->GetModel();
 }
 
+void View::SetTopSubmodelActive()
+{
+	lcModel* ActiveModel = GetActiveModel();
+
+	if (mActiveSubmodelInstance)
+	{
+		ActiveModel->SetActive(false);
+		mActiveSubmodelInstance = nullptr;
+	}
+
+	GetActiveModel()->UpdateInterface();
+}
+
 void View::SetSelectedSubmodelActive()
 {
 	lcModel* ActiveModel = GetActiveModel();
@@ -475,6 +488,7 @@ void View::ShowContextMenu() const
 
 	Popup->addSeparator();
 
+	Popup->addAction(Actions[LC_PIECE_EDIT_TOP_SUBMODEL]);
 	Popup->addAction(Actions[LC_PIECE_EDIT_SELECTED_SUBMODEL]);
 	Popup->addAction(Actions[LC_PIECE_VIEW_SELECTED_MODEL]);
 	Popup->addAction(Actions[LC_PIECE_INLINE_SELECTED_MODELS]);

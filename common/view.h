@@ -72,6 +72,7 @@ public:
 	}
 
 	lcModel* GetActiveModel() const;
+	void SetTopSubmodelActive();
 	void SetSelectedSubmodelActive();
 
 	void SetHighlight(bool Highlight)

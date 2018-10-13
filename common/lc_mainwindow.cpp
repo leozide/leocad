@@ -528,6 +528,7 @@ void lcMainWindow::CreateMenus()
 	PieceMenu->addAction(mActions[LC_PIECE_RESET_PIVOT_POINT]);
 	PieceMenu->addAction(mActions[LC_PIECE_REMOVE_KEY_FRAMES]);
 	PieceMenu->addSeparator();
+	PieceMenu->addAction(mActions[LC_PIECE_EDIT_TOP_SUBMODEL]);
 	PieceMenu->addAction(mActions[LC_PIECE_EDIT_SELECTED_SUBMODEL]);
 	PieceMenu->addAction(mActions[LC_PIECE_VIEW_SELECTED_MODEL]);
 	PieceMenu->addAction(mActions[LC_PIECE_INLINE_SELECTED_MODELS]);
@@ -1801,11 +1802,13 @@ void lcMainWindow::RemoveRecentFile(int FileIndex)
 
 void lcMainWindow::UpdateSelectedObjects(bool SelectionChanged)
 {
-	int Flags;
+	int Flags = 0;
 	lcArray<lcObject*> Selection;
-	lcObject* Focus;
+	lcObject* Focus = nullptr;
 
-	lcGetActiveModel()->GetSelectionInformation(&Flags, Selection, &Focus);
+	lcModel* ActiveModel = GetActiveModel();
+	if (ActiveModel)
+		ActiveModel->GetSelectionInformation(&Flags, Selection, &Focus);
 
 	if (SelectionChanged)
 	{
@@ -1845,6 +1848,8 @@ void lcMainWindow::UpdateSelectedObjects(bool SelectionChanged)
 		mActions[LC_PIECE_SHOW_EARLIER]->setEnabled(Flags & LC_SEL_PIECE); // FIXME: disable if current step is 1
 		mActions[LC_PIECE_SHOW_LATER]->setEnabled(Flags & LC_SEL_PIECE);
 		mActions[LC_TIMELINE_MOVE_SELECTION]->setEnabled(Flags & LC_SEL_PIECE);
+
+		mActions[LC_PIECE_EDIT_TOP_SUBMODEL]->setEnabled(GetCurrentTabModel() != ActiveModel);
 	}
 
 	mPropertiesWidget->Update(Selection, Focus);
@@ -2688,6 +2693,11 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 	case LC_PIECE_INLINE_SELECTED_MODELS:
 		if (ActiveModel)
 			ActiveModel->InlineSelectedModels();
+		break;
+
+	case LC_PIECE_EDIT_TOP_SUBMODEL:
+		if (ActiveView)
+			ActiveView->SetTopSubmodelActive();
 		break;
 
 	case LC_PIECE_EDIT_SELECTED_SUBMODEL:

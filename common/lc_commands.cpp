@@ -1200,18 +1200,18 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 		QT_TRANSLATE_NOOP("Status", "Insert the contents of the selected model references into the current model"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
-	// LC_PIECE_EDIT_TOP_SUBMODEL
-	{
-		QT_TRANSLATE_NOOP("Action", "Piece.EditTopSubmodel"),
-		QT_TRANSLATE_NOOP("Menu", "Edit Top Submodel"),
-		QT_TRANSLATE_NOOP("Status", "Edit the top submodel"),
-		QT_TRANSLATE_NOOP("Shortcut", "")
-	},
 	// LC_PIECE_EDIT_SELECTED_SUBMODEL
 	{
 		QT_TRANSLATE_NOOP("Action", "Piece.EditSelectedSubmodel"),
 		QT_TRANSLATE_NOOP("Menu", "Edit Selected Submodel"),
-		QT_TRANSLATE_NOOP("Status", "Edit the currently selected submodel"),
+		QT_TRANSLATE_NOOP("Status", "Edit the currently selected submodel in-place"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
+	// LC_PIECE_EDIT_END_SUBMODEL
+	{
+		QT_TRANSLATE_NOOP("Action", "Piece.EditEndSubmodel"),
+		QT_TRANSLATE_NOOP("Menu", "End Submodel Editing"),
+		QT_TRANSLATE_NOOP("Status", "End in-place submodel editing"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
 	// LC_PIECE_GROUP

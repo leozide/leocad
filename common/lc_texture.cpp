@@ -195,6 +195,13 @@ void lcTexture::SetImage(Image* Image, int Flags)
 	Load(Flags);
 }
 
+void lcTexture::SetImage(std::vector<Image>&& Images, int Flags)
+{
+	mImages = std::move(Images);
+
+	Load(Flags);
+}
+
 void lcTexture::Upload(lcContext* Context)
 {
 	mWidth = mImages[0].mWidth;
@@ -213,15 +220,33 @@ void lcTexture::Upload(lcContext* Context)
 	int FilterIndex = FilterFlags >> LC_TEXTURE_FILTER_SHIFT;
 	int MipIndex = mFlags & LC_TEXTURE_MIPMAPS ? 0 : 1;
 
-	Context->BindTexture2D(mTexture);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, (mFlags & LC_TEXTURE_WRAPU) ? GL_REPEAT : GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, (mFlags & LC_TEXTURE_WRAPV) ? GL_REPEAT : GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, Filters[MipIndex][FilterIndex]);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, Filters[1][FilterIndex]);
+	int Faces, Target;
+
+	if ((mFlags & LC_TEXTURE_CUBEMAP) == 0)
+	{
+		Faces = 1;
+		Target = GL_TEXTURE_2D;
+		Context->BindTexture2D(mTexture);
+	}
+	else
+	{
+		Faces = 6;
+		Target = GL_TEXTURE_CUBE_MAP;
+		Context->BindTextureCubeMap(mTexture);
+	}
+
+	glTexParameteri(Target, GL_TEXTURE_WRAP_S, (mFlags & LC_TEXTURE_WRAPU) ? GL_REPEAT : GL_CLAMP_TO_EDGE);
+	glTexParameteri(Target, GL_TEXTURE_WRAP_T, (mFlags & LC_TEXTURE_WRAPV) ? GL_REPEAT : GL_CLAMP_TO_EDGE);
+	glTexParameteri(Target, GL_TEXTURE_MIN_FILTER, Filters[MipIndex][FilterIndex]);
+	glTexParameteri(Target, GL_TEXTURE_MAG_FILTER, Filters[1][FilterIndex]);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
 	if (gSupportsAnisotropic && FilterFlags == LC_TEXTURE_ANISOTROPIC)
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, lcMin(4.0f, gMaxAnisotropy));
+		glTexParameterf(Target, GL_TEXTURE_MAX_ANISOTROPY_EXT, lcMin(4.0f, gMaxAnisotropy));
 
 	int Format;
 	switch (mImages[0].mFormat)
@@ -244,41 +269,58 @@ void lcTexture::Upload(lcContext* Context)
 		break;
 	}
 
-	void* Data = mImages[0].mData;
-	glTexImage2D(GL_TEXTURE_2D, 0, Format, mWidth, mHeight, 0, Format, GL_UNSIGNED_BYTE, Data);
+	int CurrentImage = 0;
+	if (mFlags & LC_TEXTURE_CUBEMAP)
+		Target = GL_TEXTURE_CUBE_MAP_POSITIVE_X;
 
-	if (mFlags & LC_TEXTURE_MIPMAPS || FilterFlags >= LC_TEXTURE_BILINEAR)
+	for (int FaceIdx = 0; FaceIdx < Faces; FaceIdx++)
 	{
-		int Width = mWidth;
-		int Height = mHeight;
-		int Components = mImages[0].GetBPP();
+		void* Data = mImages[CurrentImage].mData;
+		glTexImage2D(Target, 0, Format, mWidth, mHeight, 0, Format, GL_UNSIGNED_BYTE, Data);
 
-		for (int Level = 1; ((Width != 1) || (Height != 1)); Level++)
+		if (mFlags & LC_TEXTURE_MIPMAPS || FilterFlags >= LC_TEXTURE_BILINEAR)
 		{
-			int RowStride = Width * Components;
+			int Width = mWidth;
+			int Height = mHeight;
+			int Components = mImages[CurrentImage].GetBPP();
 
-			Width = lcMax(1, Width >> 1);
-			Height = lcMax(1, Height >> 1);
-
-			if (mImages.size() == 1)
+			for (int Level = 1; ((Width != 1) || (Height != 1)); Level++)
 			{
-				GLubyte *Out, *In;
+				int RowStride = Width * Components;
 
-				In = Out = (GLubyte*)Data;
+				Width = lcMax(1, Width >> 1);
+				Height = lcMax(1, Height >> 1);
 
-				for (int y = 0; y < Height; y++, In += RowStride)
-					for (int x = 0; x < Width; x++, Out += Components, In += 2 * Components)
-						for (int c = 0; c < Components; c++)
-							Out[c] = (In[c] + In[c + Components] + In[RowStride] + In[c + RowStride + Components]) / 4;
+				if (mImages.size() == Faces)
+				{
+					GLubyte *Out, *In;
+
+					In = Out = (GLubyte*)Data;
+
+					for (int y = 0; y < Height; y++, In += RowStride)
+						for (int x = 0; x < Width; x++, Out += Components, In += 2 * Components)
+							for (int c = 0; c < Components; c++)
+								Out[c] = (In[c] + In[c + Components] + In[RowStride] + In[c + RowStride + Components]) / 4;
+				}
+				else
+					Data = mImages[++CurrentImage].mData;
+
+				glTexImage2D(Target, Level, Format, Width, Height, 0, Format, GL_UNSIGNED_BYTE, Data);
 			}
-			else
-				Data = mImages[Level].mData;
 
-			glTexImage2D(GL_TEXTURE_2D, Level, Format, Width, Height, 0, Format, GL_UNSIGNED_BYTE, Data);
+			if (mImages.size() == Faces)
+				CurrentImage++;
 		}
+		else
+			CurrentImage++;
+
+		Target++;
 	}
 
-	Context->UnbindTexture2D(mTexture);
+	if ((mFlags & LC_TEXTURE_CUBEMAP) == 0)
+		Context->UnbindTexture2D(mTexture);
+	else
+		Context->UnbindTextureCubeMap(mTexture);
 }
 
 bool lcTexture::Load(int Flags)

@@ -3,7 +3,7 @@
 #include "lc_glwidget.h"
 #include "camera.h"
 #include "lc_scene.h"
-#include "lc_viewcube.h"
+#include "lc_viewsphere.h"
 #include "lc_commands.h"
 
 enum lcTrackButton
@@ -197,7 +197,7 @@ protected:
 	bool mHighlight;
 	QImage mRenderImage;
 	std::pair<lcFramebuffer, lcFramebuffer> mRenderFramebuffer;
-	lcViewCube mViewCube;
+	lcViewSphere mViewSphere;
 
 	lcVertexBuffer mGridBuffer;
 	int mGridSettings[7];

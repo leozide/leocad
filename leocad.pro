@@ -161,7 +161,7 @@ SOURCES += common/view.cpp \
     common/lc_stringcache.cpp \
     common/lc_synth.cpp \
     common/lc_texture.cpp \
-    common/lc_viewcube.cpp \
+    common/lc_viewsphere.cpp \
     common/lc_zipfile.cpp \
     common/image.cpp \
     common/group.cpp \
@@ -226,7 +226,7 @@ HEADERS += \
     common/lc_stringcache.h \
     common/lc_synth.h \
     common/lc_texture.h \
-    common/lc_viewcube.h \
+    common/lc_viewsphere.h \
     common/lc_zipfile.h \
     common/image.h \
     common/group.h \

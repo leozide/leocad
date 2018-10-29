@@ -5,16 +5,19 @@
 
 class View;
 
-class lcViewCube
+class lcViewSphere
 {
 public:
-	lcViewCube(View* View);
+	lcViewSphere(View* View);
 
 	void Draw();
 	bool OnMouseMove();
 	bool OnLeftButtonUp();
 	bool OnLeftButtonDown();
 	bool IsDragging() const;
+
+	static void CreateResources();
+	static void DestroyResources();
 
 protected:
 	lcMatrix44 GetViewMatrix() const;
@@ -27,4 +30,6 @@ protected:
 	int mMouseDownX;
 	int mMouseDownY;
 	bool mMouseDown;
+
+	static lcTexture* mTexture;
 };

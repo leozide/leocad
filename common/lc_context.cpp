@@ -34,6 +34,7 @@ lcContext::lcContext()
 
 	mTexture2D = 0;
 	mTexture2DMS = 0;
+	mTextureCubeMap = 0;
 	mLineWidth = 1.0f;
 #ifndef LC_OPENGLES
 	mMatrixMode = GL_MODELVIEW;
@@ -47,11 +48,13 @@ lcContext::lcContext()
 	mViewMatrix = lcMatrix44Identity();
 	mProjectionMatrix = lcMatrix44Identity();
 	mViewProjectionMatrix = lcMatrix44Identity();
+	mHighlightColor = lcVector4(0.0f, 0.0f, 0.0f, 0.0f);
 	mColorDirty = false;
 	mWorldMatrixDirty = false;
 	mViewMatrixDirty = false;
 	mProjectionMatrixDirty = false;
 	mViewProjectionMatrixDirty = false;
+	mHighlightColorDirty = false;
 
 	mMaterialType = LC_NUM_MATERIALS;
 }
@@ -130,6 +133,16 @@ void lcContext::CreateShaderPrograms()
 		"	gl_Position = WorldViewProjectionMatrix * vec4(VertexPosition, 1.0);\n"
 		"	PixelColor = VertexColor;\n"
 		"}\n",
+		// LC_MATERIAL_UNLIT_VIEW_SPHERE
+		LC_SHADER_VERSION
+		LC_VERTEX_INPUT "vec3 VertexPosition;\n"
+		LC_VERTEX_OUTPUT "vec3 PixelNormal;\n"
+		"uniform mat4 WorldViewProjectionMatrix;\n"
+		"void main()\n"
+		"{\n"
+		"   PixelNormal = normalize(VertexPosition);\n"
+		"	gl_Position = WorldViewProjectionMatrix * vec4(VertexPosition, 1.0);\n"
+		"}\n",
 		// LC_MATERIAL_FAKELIT_COLOR
 		LC_SHADER_VERSION
 		LC_VERTEX_INPUT "vec3 VertexPosition;\n"
@@ -181,7 +194,7 @@ void lcContext::CreateShaderPrograms()
 		"uniform sampler2D Texture;\n"
 		"void main()\n"
 		"{\n"
-		LC_SHADER_PRECISION "	vec4 TexelColor = texture2D(Texture, PixelTexCoord);"
+		LC_SHADER_PRECISION "	vec4 TexelColor = texture2D(Texture, PixelTexCoord);\n"
 		"	gl_FragColor = vec4(MaterialColor.rgb, TexelColor.a * MaterialColor.a);\n"
 		"}\n",
 		// LC_MATERIAL_UNLIT_TEXTURE_DECAL
@@ -192,7 +205,7 @@ void lcContext::CreateShaderPrograms()
 		"uniform sampler2D Texture;\n"
 		"void main()\n"
 		"{\n"
-		LC_SHADER_PRECISION "	vec4 TexelColor = texture2D(Texture, PixelTexCoord);"
+		LC_SHADER_PRECISION "	vec4 TexelColor = texture2D(Texture, PixelTexCoord);\n"
 		"	gl_FragColor = mix(MaterialColor, TexelColor, TexelColor.a);\n"
 		"}\n",
 		// LC_MATERIAL_UNLIT_VERTEX_COLOR
@@ -202,6 +215,18 @@ void lcContext::CreateShaderPrograms()
 		"void main()\n"
 		"{\n"
 		"	gl_FragColor = PixelColor;\n"
+		"}\n",
+		// LC_MATERIAL_UNLIT_VIEW_SPHERE
+		LC_SHADER_VERSION
+		LC_PIXEL_INPUT "vec3 PixelNormal;\n"
+		LC_PIXEL_OUTPUT
+		"uniform mediump vec4 MaterialColor;\n"
+		"uniform mediump vec4 HighlightColor;\n"
+		"uniform samplerCube Texture;\n"
+		"void main()\n"
+		"{\n"
+		"	float TexelAlpha = textureCube(Texture, PixelNormal).a;\n"
+		"	gl_FragColor = mix(MaterialColor, HighlightColor, TexelAlpha);\n"
 		"}\n",
 		// LC_MATERIAL_FAKELIT_COLOR
 		LC_SHADER_VERSION
@@ -318,6 +343,7 @@ void lcContext::CreateShaderPrograms()
 		mPrograms[MaterialType].MaterialColorLocation = glGetUniformLocation(Program, "MaterialColor");
 		mPrograms[MaterialType].LightPositionLocation = glGetUniformLocation(Program, "LightPosition");
 		mPrograms[MaterialType].EyePositionLocation = glGetUniformLocation(Program, "EyePosition");
+		mPrograms[MaterialType].HighlightColorLocation = glGetUniformLocation(Program, "HighlightColor");
 	}
 }
 
@@ -401,6 +427,8 @@ void lcContext::SetDefaultState()
 		mTexture2DMS = 0;
 	}
 #endif
+	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+	mTextureCubeMap = 0;
 
 	glLineWidth(1.0f);
 	mLineWidth = 1.0f;
@@ -444,6 +472,7 @@ void lcContext::SetMaterial(lcMaterialType MaterialType)
 		mColorDirty = true;
 		mWorldMatrixDirty = true; // todo: change dirty to a bitfield and set the lighting constants dirty here
 		mViewMatrixDirty = true;
+		mHighlightColorDirty = true;
 	}
 	else
 	{
@@ -533,6 +562,15 @@ void lcContext::BindTexture2DMS(GLuint Texture)
 #endif
 }
 
+void lcContext::BindTextureCubeMap(GLuint Texture)
+{
+	if (mTextureCubeMap == Texture)
+		return;
+
+	glBindTexture(GL_TEXTURE_CUBE_MAP, Texture);
+	mTextureCubeMap = Texture;
+}
+
 void lcContext::UnbindTexture2D(GLuint Texture)
 {
 	if (mTexture2D != Texture)
@@ -540,6 +578,15 @@ void lcContext::UnbindTexture2D(GLuint Texture)
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 	mTexture2D = 0;
+}
+
+void lcContext::UnbindTextureCubeMap(GLuint Texture)
+{
+	if (mTextureCubeMap != Texture)
+		return;
+
+	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+	mTextureCubeMap = 0;
 }
 
 void lcContext::SetColor(float Red, float Green, float Blue, float Alpha)
@@ -1264,6 +1311,12 @@ void lcContext::FlushState()
 		{
 			glUniform4fv(Program.MaterialColorLocation, 1, mColor);
 			mColorDirty = false;
+		}
+
+		if (mHighlightColorDirty && Program.HighlightColorLocation != -1)
+		{
+			glUniform4fv(Program.HighlightColorLocation, 1, mHighlightColor);
+			mHighlightColorDirty = false;
 		}
 	}
 	else

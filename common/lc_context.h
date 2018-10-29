@@ -51,6 +51,7 @@ enum lcMaterialType
 	LC_MATERIAL_UNLIT_TEXTURE_MODULATE,
 	LC_MATERIAL_UNLIT_TEXTURE_DECAL,
 	LC_MATERIAL_UNLIT_VERTEX_COLOR,
+	LC_MATERIAL_UNLIT_VIEW_SPHERE,
 	LC_MATERIAL_FAKELIT_COLOR,
 	LC_MATERIAL_FAKELIT_TEXTURE_DECAL,
 	LC_NUM_MATERIALS
@@ -72,6 +73,7 @@ struct lcProgram
 	GLint MaterialColorLocation;
 	GLint LightPositionLocation;
 	GLint EyePositionLocation;
+	GLint HighlightColorLocation;
 };
 
 class lcFramebuffer
@@ -140,13 +142,21 @@ public:
 	void SetLineWidth(float LineWidth);
 	void SetSmoothShading(bool Smooth);
 	void BindTexture2D(GLuint Texture);
-	void UnbindTexture2D(GLuint Texture);
 	void BindTexture2DMS(GLuint Texture);
+	void BindTextureCubeMap(GLuint Texture);
+	void UnbindTexture2D(GLuint Texture);
+	void UnbindTextureCubeMap(GLuint Texture);
 
 	void SetColor(const lcVector4& Color)
 	{
 		mColor = Color;
 		mColorDirty = true;
+	}
+
+	void SetHighlightColor(const lcVector4& HighlightColor)
+	{
+		mHighlightColor = HighlightColor;
+		mHighlightColorDirty = true;
 	}
 
 	void SetColor(float Red, float Green, float Blue, float Alpha);
@@ -206,6 +216,7 @@ protected:
 
 	GLuint mTexture2D;
 	GLuint mTexture2DMS;
+	GLuint mTextureCubeMap;
 	float mLineWidth;
 	int mMatrixMode;
 	bool mTextureEnabled;
@@ -215,11 +226,13 @@ protected:
 	lcMatrix44 mViewMatrix;
 	lcMatrix44 mProjectionMatrix;
 	lcMatrix44 mViewProjectionMatrix;
+	lcVector4 mHighlightColor;
 	bool mColorDirty;
 	bool mWorldMatrixDirty;
 	bool mViewMatrixDirty;
 	bool mProjectionMatrixDirty;
 	bool mViewProjectionMatrixDirty;
+	bool mHighlightColorDirty;
 
 	GLuint mFramebufferObject;
 

@@ -10,6 +10,7 @@
 #include "lc_context.h"
 #include "view.h"
 #include "texfont.h"
+#include "lc_viewsphere.h"
 #include "lc_stringcache.h"
 #include "lc_texture.h"
 #include "lc_mesh.h"
@@ -102,6 +103,7 @@ lcQGLWidget::lcQGLWidget(QWidget *parent, lcGLWidget *owner, bool view)
 		lcInitializeGLExtensions(context());
 		lcContext::CreateResources();
 		View::CreateResources(widget->mContext);
+		lcViewSphere::CreateResources();
 
 		if (!gSupportsShaderObjects && lcGetPreferences().mShadingMode == LC_SHADING_DEFAULT_LIGHTS)
 			lcGetPreferences().mShadingMode = LC_SHADING_FLAT;
@@ -138,6 +140,7 @@ lcQGLWidget::~lcQGLWidget()
 		lcGetPiecesLibrary()->ReleaseBuffers(widget->mContext);
 		View::DestroyResources(widget->mContext);
 		lcContext::DestroyResources();
+		lcViewSphere::DestroyResources();
 
 		delete gPlaceholderMesh;
 		gPlaceholderMesh = nullptr;

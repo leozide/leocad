@@ -3,6 +3,7 @@
 #define LC_TEXTURE_WRAPU         0x01
 #define LC_TEXTURE_WRAPV         0x02
 #define LC_TEXTURE_MIPMAPS       0x04
+#define LC_TEXTURE_CUBEMAP       0x08
 
 #define LC_TEXTURE_POINT         0x00
 #define LC_TEXTURE_LINEAR        0x10
@@ -27,6 +28,7 @@ public:
 	bool Load(const QString& FileName, int Flags = 0);
 	bool Load(lcMemFile& File, int Flags = 0);
 	void SetImage(Image* Image, int Flags = 0);
+	void SetImage(std::vector<Image>&& Images, int Flags = 0);
 	void Upload(lcContext* Context);
 	void Unload();
 

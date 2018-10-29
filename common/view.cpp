@@ -13,7 +13,7 @@ lcVertexBuffer View::mRotateMoveVertexBuffer;
 lcIndexBuffer View::mRotateMoveIndexBuffer;
 
 View::View(lcModel* Model)
-	: mViewCube(this)
+	: mViewSphere(this)
 {
 	mModel = Model;
 	mActiveSubmodelInstance = nullptr;
@@ -882,7 +882,7 @@ void View::OnDraw()
 		else if (Tool == LC_TOOL_ROTATE_VIEW && mTrackButton == LC_TRACKBUTTON_NONE)
 			DrawRotateViewOverlay();
 
-		mViewCube.Draw();
+		mViewSphere.Draw();
 		DrawViewport();
 	}
 
@@ -2777,7 +2777,7 @@ void View::OnLeftButtonDown()
 
 	gMainWindow->SetActiveView(this);
 
-	if (mViewCube.OnLeftButtonDown())
+	if (mViewSphere.OnLeftButtonDown())
 		return;
 
 	lcTrackTool OverrideTool = GetOverrideTrackTool(Qt::LeftButton);
@@ -2795,7 +2795,7 @@ void View::OnLeftButtonUp()
 {
 	StopTracking(mTrackButton == LC_TRACKBUTTON_LEFT);
 
-	if (mViewCube.OnLeftButtonUp())
+	if (mViewSphere.OnLeftButtonUp())
 		return;
 }
 
@@ -2891,9 +2891,9 @@ void View::OnMouseMove()
 
 	if (mTrackButton == LC_TRACKBUTTON_NONE)
 	{
-		if (mViewCube.OnMouseMove())
+		if (mViewSphere.OnMouseMove())
 		{
-			lcTrackTool NewTrackTool = mViewCube.IsDragging() ? LC_TRACKTOOL_ORBIT_XY : LC_TRACKTOOL_NONE;
+			lcTrackTool NewTrackTool = mViewSphere.IsDragging() ? LC_TRACKTOOL_ORBIT_XY : LC_TRACKTOOL_NONE;
 
 			if (NewTrackTool != mTrackTool)
 			{

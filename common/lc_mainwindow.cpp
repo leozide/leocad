@@ -938,7 +938,7 @@ void lcMainWindow::ProjectFileChanged(const QString& Path)
 	{
 		PieceInfo* Info = lcGetPiecesLibrary()->FindPiece(FileInfo.fileName().toLatin1(), CurrentProject, false, true);
 
-		if (Info)
+		if (Info && Info->IsProject())
 			Info->GetProject()->Load(Path);
 	}
 }
@@ -2211,10 +2211,9 @@ void lcMainWindow::MergeProject()
 		UpdateModels();
 	}
 	else
-	{
 		QMessageBox::information(this, tr("LeoCAD"), tr("Error loading '%1'.").arg(LoadFileName));
-		delete NewProject;
-	}
+
+	delete NewProject;
 }
 
 void lcMainWindow::ImportLDD()

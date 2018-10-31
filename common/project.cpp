@@ -494,9 +494,8 @@ bool Project::Save(QTextStream& Stream)
 
 void Project::Merge(Project* Other)
 {
-	for (int ModelIdx = 0; ModelIdx < Other->mModels.GetSize(); ModelIdx++)
+	for (lcModel* Model : Other->mModels)
 	{
-		lcModel* Model = Other->mModels[ModelIdx];
 		QString Name = Model->GetProperties().mName;
 
 		for (;;)
@@ -522,6 +521,7 @@ void Project::Merge(Project* Other)
 		mModels.Add(Model);
 	}
 
+	Other->mModels.RemoveAll();
 	mModified = true;
 }
 

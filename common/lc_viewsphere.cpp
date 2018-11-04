@@ -8,9 +8,10 @@
 #include "lc_texture.h"
 
 lcTexture* lcViewSphere::mTexture;
-
-//todo: move these
-const float BoxSize = 10.0f;
+lcVertexBuffer lcViewSphere::mVertexBuffer;
+lcIndexBuffer lcViewSphere::mIndexBuffer;
+const float lcViewSphere::mRadius = 1.0f;
+const int lcViewSphere::mSubdivisions = 7;
 
 lcViewSphere::lcViewSphere(View* View)
 	: mView(View)
@@ -27,10 +28,10 @@ lcMatrix44 lcViewSphere::GetViewMatrix() const
 
 lcMatrix44 lcViewSphere::GetProjectionMatrix() const
 {
-	return lcMatrix44Ortho(-BoxSize * 2, BoxSize * 2, -BoxSize * 2, BoxSize * 2, -50, 50);
+	return lcMatrix44Ortho(-mRadius * 1.25f, mRadius * 1.25f, -mRadius * 1.25f, mRadius * 1.25f, -mRadius * 1.25f, mRadius * 1.25f);
 }
 
-void lcViewSphere::CreateResources()
+void lcViewSphere::CreateResources(lcContext* Context)
 {
 	const int ImageSize = 128;
 	mTexture = new lcTexture();
@@ -82,17 +83,74 @@ void lcViewSphere::CreateResources()
 	}
 
 	mTexture->SetImage(std::move(Images), LC_TEXTURE_CUBEMAP | LC_TEXTURE_LINEAR);
+
+	lcVector3 Verts[(mSubdivisions + 1) * (mSubdivisions + 1) * 6];
+	GLushort Indices[mSubdivisions * mSubdivisions * 6 * 6];
+
+	lcMatrix44 Transforms[6] =
+	{
+		lcMatrix44(lcVector4(0.0f,  1.0f, 0.0f, 0.0f), lcVector4(0.0f,  0.0f, 1.0f, 0.0f), lcVector4(1.0f, 0.0f, 0.0f, 0.0f), lcVector4(1.0f,  0.0f,  0.0f, 1.0f)),
+		lcMatrix44(lcVector4(0.0f, -1.0f, 0.0f, 0.0f), lcVector4(0.0f,  0.0f, 1.0f, 0.0f), lcVector4(1.0f, 0.0f, 0.0f, 0.0f), lcVector4(-1.0f,  0.0f,  0.0f, 1.0f)),
+		lcMatrix44(lcVector4(-1.0f,  0.0f, 0.0f, 0.0f), lcVector4(0.0f,  0.0f, 1.0f, 0.0f), lcVector4(0.0f, 1.0f, 0.0f, 0.0f), lcVector4(0.0f,  1.0f,  0.0f, 1.0f)),
+		lcMatrix44(lcVector4(1.0f,  0.0f, 0.0f, 0.0f), lcVector4(0.0f,  0.0f, 1.0f, 0.0f), lcVector4(0.0f, 1.0f, 0.0f, 0.0f), lcVector4(0.0f, -1.0f,  0.0f, 1.0f)),
+		lcMatrix44(lcVector4(1.0f,  0.0f, 0.0f, 0.0f), lcVector4(0.0f,  1.0f, 0.0f, 0.0f), lcVector4(0.0f, 0.0f, 1.0f, 0.0f), lcVector4(0.0f,  0.0f,  1.0f, 1.0f)),
+		lcMatrix44(lcVector4(1.0f,  0.0f, 0.0f, 0.0f), lcVector4(0.0f, -1.0f, 0.0f, 0.0f), lcVector4(0.0f, 0.0f, 1.0f, 0.0f), lcVector4(0.0f,  0.0f, -1.0f, 1.0f)),
+	};
+
+	const float Step = 2.0f / mSubdivisions;
+	lcVector3* CurVert = Verts;
+
+	for (int FaceIdx = 0; FaceIdx < 6; FaceIdx++)
+	{
+		for (int y = 0; y <= mSubdivisions; y++)
+		{
+			for (int x = 0; x <= mSubdivisions; x++)
+			{
+				lcVector3 Vert = lcMul31(lcVector3(Step * x - 1.0f, Step * y - 1.0f, 0.0f), Transforms[FaceIdx]);
+				lcVector3 Vert2 = Vert * Vert;
+
+				*CurVert++ = lcVector3(Vert.x * std::sqrt(1.0 - 0.5 * (Vert2.y + Vert2.z) + Vert2.y * Vert2.z / 3.0),
+									   Vert.y * std::sqrt(1.0 - 0.5 * (Vert2.z + Vert2.x) + Vert2.z * Vert2.x / 3.0),
+									   Vert.z * std::sqrt(1.0 - 0.5 * (Vert2.x + Vert2.y) + Vert2.x * Vert2.y / 3.0)
+				) * mRadius;
+			}
+		}
+	}
+
+	GLushort* CurIndex = Indices;
+
+	for (int FaceIdx = 0; FaceIdx < 6; FaceIdx++)
+	{
+		const int FaceBase = FaceIdx * (mSubdivisions + 1) * (mSubdivisions + 1);
+
+		for (int y = 0; y < mSubdivisions; y++)
+		{
+			int RowBase = FaceBase + (mSubdivisions + 1) * y;
+
+			for (int x = 0; x < mSubdivisions; x++)
+			{
+				*CurIndex++ = RowBase + x;
+				*CurIndex++ = RowBase + x + 1;
+				*CurIndex++ = RowBase + x + (mSubdivisions + 1);
+
+				*CurIndex++ = RowBase + x + 1;
+				*CurIndex++ = RowBase + x + 1 + (mSubdivisions + 1);
+				*CurIndex++ = RowBase + x + (mSubdivisions + 1);
+			}
+		}
+	}
+
+	mVertexBuffer = Context->CreateVertexBuffer(sizeof(Verts), Verts);
+	mIndexBuffer = Context->CreateIndexBuffer(sizeof(Indices), Indices);
 }
 
-void lcViewSphere::DestroyResources()
+void lcViewSphere::DestroyResources(lcContext* Context)
 {
 	delete mTexture;
 	mTexture = nullptr;
+	Context->DestroyVertexBuffer(mVertexBuffer);
+	Context->DestroyIndexBuffer(mIndexBuffer);
 }
-const int Subdivisions = 9;
-lcVector3 Verts[(Subdivisions + 1) * (Subdivisions + 1) * 6];
-const int NumIndices = Subdivisions * Subdivisions * 6 * 6;
-GLushort Indices[NumIndices];
 
 void lcViewSphere::Draw()
 {
@@ -121,80 +179,24 @@ void lcViewSphere::Draw()
 	glDepthFunc(GL_ALWAYS);
 	glEnable(GL_CULL_FACE);
 	
+	Context->SetVertexBuffer(mVertexBuffer);
+	Context->SetVertexFormatPosition(3);
+	Context->SetIndexBuffer(mIndexBuffer);
+
+	Context->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+	Context->SetHighlightColor(lcVector4(0.0f, 0.0f, 0.0f, 1.0f));
+	Context->DrawIndexedPrimitives(GL_TRIANGLES, mSubdivisions * mSubdivisions * 6 * 6, GL_UNSIGNED_SHORT, 0);
+
+	if (mIntersectionFlags.any())
 	{
-		lcMatrix44 Transforms[6] =
-		{
-			lcMatrix44(lcVector4( 0.0f,  1.0f, 0.0f, 0.0f), lcVector4(0.0f,  0.0f, 1.0f, 0.0f), lcVector4(1.0f, 0.0f, 0.0f, 0.0f), lcVector4( 1.0f,  0.0f,  0.0f, 1.0f)),
-			lcMatrix44(lcVector4( 0.0f, -1.0f, 0.0f, 0.0f), lcVector4(0.0f,  0.0f, 1.0f, 0.0f), lcVector4(1.0f, 0.0f, 0.0f, 0.0f), lcVector4(-1.0f,  0.0f,  0.0f, 1.0f)),
-			lcMatrix44(lcVector4(-1.0f,  0.0f, 0.0f, 0.0f), lcVector4(0.0f,  0.0f, 1.0f, 0.0f), lcVector4(0.0f, 1.0f, 0.0f, 0.0f), lcVector4( 0.0f,  1.0f,  0.0f, 1.0f)),
-			lcMatrix44(lcVector4( 1.0f,  0.0f, 0.0f, 0.0f), lcVector4(0.0f,  0.0f, 1.0f, 0.0f), lcVector4(0.0f, 1.0f, 0.0f, 0.0f), lcVector4( 0.0f, -1.0f,  0.0f, 1.0f)),
-			lcMatrix44(lcVector4( 1.0f,  0.0f, 0.0f, 0.0f), lcVector4(0.0f,  1.0f, 0.0f, 0.0f), lcVector4(0.0f, 0.0f, 1.0f, 0.0f), lcVector4( 0.0f,  0.0f,  1.0f, 1.0f)),
-			lcMatrix44(lcVector4( 1.0f,  0.0f, 0.0f, 0.0f), lcVector4(0.0f, -1.0f, 0.0f, 0.0f), lcVector4(0.0f, 0.0f, 1.0f, 0.0f), lcVector4( 0.0f,  0.0f, -1.0f, 1.0f)),
-		};
+		Context->SetHighlightColor(lcVector4(1.0, 0, 0, 1.0));
 
-		const float Step = 2.0f / Subdivisions;
-		lcVector3* CurVert = Verts;
-
-		for (int FaceIdx = 0; FaceIdx < 6; FaceIdx++)
+		for (int FlagIdx = 0; FlagIdx < 6; FlagIdx++)
 		{
-			for (int y = 0; y <= Subdivisions; y++)
+			if (mIntersectionFlags.test(FlagIdx))
 			{
-				for (int x = 0; x <= Subdivisions; x++)
-				{
-					lcVector3 Vert = lcMul31(lcVector3(Step * x - 1.0f, Step * y - 1.0f, 0.0f), Transforms[FaceIdx]);
-					lcVector3 Vert2 = Vert * Vert;
-
-					*CurVert++ = lcVector3(Vert.x * std::sqrt(1.0 - 0.5 * (Vert2.y + Vert2.z) + Vert2.y * Vert2.z / 3.0),
-						Vert.y * std::sqrt(1.0 - 0.5 * (Vert2.z + Vert2.x) + Vert2.z * Vert2.x / 3.0),
-						Vert.z * std::sqrt(1.0 - 0.5 * (Vert2.x + Vert2.y) + Vert2.x * Vert2.y / 3.0)
-					) * BoxSize;
-				}
-			}
-		}
-
-		GLushort* CurIndex = Indices;
-
-		for (int FaceIdx = 0; FaceIdx < 6; FaceIdx++)
-		{
-			const int FaceBase = FaceIdx * (Subdivisions + 1) * (Subdivisions + 1);
-
-			for (int y = 0; y < Subdivisions; y++)
-			{
-				int RowBase = FaceBase + (Subdivisions + 1) * y;
-
-				for (int x = 0; x < Subdivisions; x++)
-				{
-					*CurIndex++ = RowBase + x;
-					*CurIndex++ = RowBase + x + 1;
-					*CurIndex++ = RowBase + x + (Subdivisions + 1);
-
-					*CurIndex++ = RowBase + x + 1;
-					*CurIndex++ = RowBase + x + 1 + (Subdivisions + 1);
-					*CurIndex++ = RowBase + x + (Subdivisions + 1);
-				}
-			}
-		}
-
-		Context->SetVertexBufferPointer(Verts);
-		Context->SetVertexFormatPosition(3);
-		Context->SetIndexBufferPointer(Indices);
-
-		Context->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
-		Context->SetHighlightColor(lcVector4(0.0f, 0.0f, 0.0f, 1.0f));
-		Context->DrawIndexedPrimitives(GL_TRIANGLES, NumIndices, GL_UNSIGNED_SHORT, 0);
-
-		int IntersectionType = mIntersectionFlags.count();
-		if (IntersectionType == 1)
-		{
-			for (int FlagIdx = 0; FlagIdx < 6; FlagIdx++)
-			{
-				if (mIntersectionFlags.test(FlagIdx))
-				{
-					int FaceBase = FlagIdx * (Subdivisions) * (Subdivisions) * 6;
-					Context->SetHighlightColor(lcVector4(1.0, 0, 0, 1.0));
-					Context->DrawIndexedPrimitives(GL_TRIANGLES, Subdivisions * Subdivisions * 6, GL_UNSIGNED_SHORT, FaceBase * sizeof(GLushort));
-					break;
-				}
+				int FaceBase = FlagIdx * (mSubdivisions) * (mSubdivisions) * 6;
+				Context->DrawIndexedPrimitives(GL_TRIANGLES, mSubdivisions * mSubdivisions * 6, GL_UNSIGNED_SHORT, FaceBase * sizeof(GLushort));
 			}
 		}
 	}
@@ -309,11 +311,11 @@ std::bitset<6> lcViewSphere::GetIntersectionFlags(lcVector3& Intersection) const
 	lcUnprojectPoints(StartEnd, 2, GetViewMatrix(), GetProjectionMatrix(), Viewport);
 
 	float Distance;
-	if (lcSphereRayMinIntersectDistance(lcVector3(0.0f, 0.0f, 0.0f), BoxSize, StartEnd[0], StartEnd[1], &Distance))
+	if (lcSphereRayMinIntersectDistance(lcVector3(0.0f, 0.0f, 0.0f), mRadius, StartEnd[0], StartEnd[1], &Distance))
 	{
-		Intersection = (StartEnd[0] + (StartEnd[1] - StartEnd[0]) * Distance) / BoxSize;
+		Intersection = (StartEnd[0] + (StartEnd[1] - StartEnd[0]) * Distance) / mRadius;
 
-		const float Side = 0.6f;
+		const float Side = 0.5f;
 
 		for (int AxisIdx = 0; AxisIdx < 3; AxisIdx++)
 		{

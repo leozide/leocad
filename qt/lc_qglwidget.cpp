@@ -103,7 +103,7 @@ lcQGLWidget::lcQGLWidget(QWidget *parent, lcGLWidget *owner, bool view)
 		lcInitializeGLExtensions(context());
 		lcContext::CreateResources();
 		View::CreateResources(widget->mContext);
-		lcViewSphere::CreateResources();
+		lcViewSphere::CreateResources(widget->mContext);
 
 		if (!gSupportsShaderObjects && lcGetPreferences().mShadingMode == LC_SHADING_DEFAULT_LIGHTS)
 			lcGetPreferences().mShadingMode = LC_SHADING_FLAT;
@@ -140,7 +140,7 @@ lcQGLWidget::~lcQGLWidget()
 		lcGetPiecesLibrary()->ReleaseBuffers(widget->mContext);
 		View::DestroyResources(widget->mContext);
 		lcContext::DestroyResources();
-		lcViewSphere::DestroyResources();
+		lcViewSphere::DestroyResources(widget->mContext);
 
 		delete gPlaceholderMesh;
 		gPlaceholderMesh = nullptr;

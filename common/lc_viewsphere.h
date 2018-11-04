@@ -1,6 +1,7 @@
 #pragma once
 
 #include "lc_math.h"
+#include "lc_context.h"
 #include <bitset>
 
 class View;
@@ -16,8 +17,8 @@ public:
 	bool OnLeftButtonDown();
 	bool IsDragging() const;
 
-	static void CreateResources();
-	static void DestroyResources();
+	static void CreateResources(lcContext* Context);
+	static void DestroyResources(lcContext* Context);
 
 protected:
 	lcMatrix44 GetViewMatrix() const;
@@ -32,4 +33,8 @@ protected:
 	bool mMouseDown;
 
 	static lcTexture* mTexture;
+	static lcVertexBuffer mVertexBuffer;
+	static lcIndexBuffer mIndexBuffer;
+	static const float mRadius;
+	static const int mSubdivisions;
 };

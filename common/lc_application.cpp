@@ -103,10 +103,10 @@ void lcApplication::SetProject(Project* Project)
 {
 	SaveTabLayout();
 
+	gMainWindow->RemoveAllModelTabs();
+
 	delete mProject;
 	mProject = Project;
-
-	gMainWindow->RemoveAllModelTabs();
 
 	Project->SetActiveModel(0);
 	lcGetPiecesLibrary()->RemoveTemporaryPieces();

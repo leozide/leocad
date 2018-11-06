@@ -56,7 +56,7 @@ void lcViewSphere::CreateResources(lcContext* Context)
 	for (int ViewIdx = 0; ViewIdx < 6; ViewIdx++)
 	{
 		Image TextureImage;
-		TextureImage.Allocate(ImageSize, ImageSize, LC_PIXEL_FORMAT_L8A8);
+		TextureImage.Allocate(ImageSize, ImageSize, LC_PIXEL_FORMAT_A8);
 
 		Painter.begin(&PainterImage);
 		Painter.fillRect(0, 0, PainterImage.width(), PainterImage.height(), QColor(0, 0, 0));
@@ -69,14 +69,10 @@ void lcViewSphere::CreateResources(lcContext* Context)
 
 		for (int y = 0; y < ImageSize; y++)
 		{
-			unsigned char* Dest = TextureImage.mData + ((ImageSize - y - 1) * TextureImage.mWidth) * 2;
+			unsigned char* Dest = TextureImage.mData + (ImageSize - y - 1) * TextureImage.mWidth;
 
 			for (int x = 0; x < ImageSize; x++)
-			{
-				*Dest = 0;
-				*(Dest + 1) = qRed(PainterImage.pixel(x, y));
-				Dest += 2;
-			}
+				*Dest++ = qRed(PainterImage.pixel(x, y));
 		}
 
 		Images.emplace_back(std::move(TextureImage));

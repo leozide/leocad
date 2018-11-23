@@ -65,245 +65,105 @@ lcContext::~lcContext()
 
 void lcContext::CreateShaderPrograms()
 {
+	const char* ShaderPrefix =
+	{
 #ifndef LC_OPENGLES
-#define LC_SHADER_VERSION "#version 110\n#define mediump\n"
-#define LC_VERTEX_INPUT "attribute "
-#define LC_VERTEX_OUTPUT "varying "
-#define LC_PIXEL_INPUT "varying "
-#define LC_PIXEL_OUTPUT
-#define LC_SHADER_PRECISION
+"#version 110\n"
+"#define mediump\n"
+"#define LC_VERTEX_INPUT attribute\n"
+"#define LC_VERTEX_OUTPUT varying\n"
+"#define LC_PIXEL_INPUT varying\n"
+"#define LC_PIXEL_OUTPUT\n"
+"#define LC_SHADER_PRECISION\n"
 #else
-#define LC_SHADER_VERSION "#version 300 es\n#define texture2D texture\n"
-#define LC_VERTEX_INPUT "in "
-#define LC_VERTEX_OUTPUT "out "
-#define LC_PIXEL_INPUT "in mediump "
-#define LC_PIXEL_OUTPUT "#define gl_FragColor FragColor\nout mediump vec4 gl_FragColor;\n"
-#define LC_SHADER_PRECISION "mediump "
+"#version 300 es\n"
+"#define texture2D texture\n"
+"#define LC_VERTEX_INPUT in\n"
+"#define LC_VERTEX_OUTPUT out\n"
+"#define LC_PIXEL_INPUT in mediump\n"
+"#define gl_FragColor FragColor\n"
+"#define LC_PIXEL_OUTPUT out mediump vec4 gl_FragColor;\n"
+"#define LC_SHADER_PRECISION mediump\n"
 #endif
-#define LC_PIXEL_FAKE_LIGHTING \
-	LC_SHADER_PRECISION "	vec3 Normal = normalize(PixelNormal);\n" \
-	LC_SHADER_PRECISION "	vec3 LightDirection = normalize(PixelPosition - LightPosition);" \
-	LC_SHADER_PRECISION "	vec3 VertexToEye = normalize(EyePosition - PixelPosition);\n" \
-	LC_SHADER_PRECISION "	vec3 LightReflect = normalize(reflect(-LightDirection, Normal));\n" \
-	LC_SHADER_PRECISION "	float Specular = abs(dot(VertexToEye, LightReflect));\n" \
-	"	Specular = min(pow(Specular, 8.0), 1.0) * 0.25;\n" \
-	LC_SHADER_PRECISION "	vec3 SpecularColor = vec3(Specular, Specular, Specular);\n" \
-	LC_SHADER_PRECISION "	float Diffuse = min(abs(dot(Normal, LightDirection)) * 0.6 + 0.65, 1.0);\n"
+
+"#define LC_PIXEL_FAKE_LIGHTING \\\n"
+"		LC_SHADER_PRECISION vec3 Normal = normalize(PixelNormal); \\\n"
+"		LC_SHADER_PRECISION vec3 LightDirection = normalize(PixelPosition - LightPosition); \\\n"
+"		LC_SHADER_PRECISION vec3 VertexToEye = normalize(EyePosition - PixelPosition); \\\n"
+"		LC_SHADER_PRECISION vec3 LightReflect = normalize(reflect(-LightDirection, Normal)); \\\n"
+"		LC_SHADER_PRECISION float Specular = abs(dot(VertexToEye, LightReflect)); \\\n"
+"		Specular = min(pow(Specular, 8.0), 1.0) * 0.25; \\\n"
+"		LC_SHADER_PRECISION vec3 SpecularColor = vec3(Specular, Specular, Specular); \\\n"
+"		LC_SHADER_PRECISION float Diffuse = min(abs(dot(Normal, LightDirection)) * 0.6 + 0.65, 1.0);\n"
+	};
 
 	const char* VertexShaders[LC_NUM_MATERIALS] =
 	{
-		// LC_MATERIAL_UNLIT_COLOR
-		LC_SHADER_VERSION
-		LC_VERTEX_INPUT "vec3 VertexPosition;\n"
-		"uniform mat4 WorldViewProjectionMatrix;\n"
-		"void main()\n"
-		"{\n"
-		"	gl_Position = WorldViewProjectionMatrix * vec4(VertexPosition, 1.0);\n"
-		"}\n",
-		// LC_MATERIAL_UNLIT_TEXTURE_MODULATE
-		LC_SHADER_VERSION
-		LC_VERTEX_INPUT "vec3 VertexPosition;\n"
-		LC_VERTEX_INPUT "vec2 VertexTexCoord;\n"
-		LC_VERTEX_OUTPUT "vec2 PixelTexCoord;\n"
-		"uniform mat4 WorldViewProjectionMatrix;\n"
-		"void main()\n"
-		"{\n"
-		"	gl_Position = WorldViewProjectionMatrix * vec4(VertexPosition, 1.0);\n"
-		"	PixelTexCoord = VertexTexCoord;\n"
-		"}\n",
-		// LC_MATERIAL_UNLIT_TEXTURE_DECAL
-		LC_SHADER_VERSION
-		LC_VERTEX_INPUT "vec3 VertexPosition;\n"
-		LC_VERTEX_INPUT "vec2 VertexTexCoord;\n"
-		LC_VERTEX_OUTPUT "vec2 PixelTexCoord;\n"
-		"uniform mat4 WorldViewProjectionMatrix;\n"
-		"void main()\n"
-		"{\n"
-		"	gl_Position = WorldViewProjectionMatrix * vec4(VertexPosition, 1.0);\n"
-		"	PixelTexCoord = VertexTexCoord;\n"
-		"}\n",
-		// LC_MATERIAL_UNLIT_VERTEX_COLOR
-		LC_SHADER_VERSION
-		LC_VERTEX_INPUT "vec3 VertexPosition;\n"
-		LC_VERTEX_INPUT "vec4 VertexColor;\n"
-		LC_VERTEX_OUTPUT "vec4 PixelColor;\n"
-		"uniform mat4 WorldViewProjectionMatrix;\n"
-		"void main()\n"
-		"{\n"
-		"	gl_Position = WorldViewProjectionMatrix * vec4(VertexPosition, 1.0);\n"
-		"	PixelColor = VertexColor;\n"
-		"}\n",
-		// LC_MATERIAL_UNLIT_VIEW_SPHERE
-		LC_SHADER_VERSION
-		LC_VERTEX_INPUT "vec3 VertexPosition;\n"
-		LC_VERTEX_OUTPUT "vec3 PixelNormal;\n"
-		"uniform mat4 WorldViewProjectionMatrix;\n"
-		"void main()\n"
-		"{\n"
-		"   PixelNormal = normalize(VertexPosition);\n"
-		"	gl_Position = WorldViewProjectionMatrix * vec4(VertexPosition, 1.0);\n"
-		"}\n",
-		// LC_MATERIAL_FAKELIT_COLOR
-		LC_SHADER_VERSION
-		LC_VERTEX_INPUT "vec3 VertexPosition;\n"
-		LC_VERTEX_INPUT "vec3 VertexNormal;\n"
-		LC_VERTEX_OUTPUT "vec3 PixelPosition;\n"
-		LC_VERTEX_OUTPUT "vec3 PixelNormal;\n"
-		"uniform mat4 WorldViewProjectionMatrix;\n"
-		"uniform mat4 WorldMatrix;\n"
-		"void main()\n"
-		"{\n"
-		"	PixelPosition = (WorldMatrix * vec4(VertexPosition, 1.0)).xyz;\n"
-		"   PixelNormal = (WorldMatrix * vec4(VertexNormal, 0.0)).xyz;\n"
-		"	gl_Position = WorldViewProjectionMatrix * vec4(VertexPosition, 1.0);\n"
-		"}\n",
-		// LC_MATERIAL_FAKELIT_TEXTURE_DECAL
-		LC_SHADER_VERSION
-		LC_VERTEX_INPUT "vec3 VertexPosition;\n"
-		LC_VERTEX_INPUT "vec3 VertexNormal;\n"
-		LC_VERTEX_INPUT "vec2 VertexTexCoord;\n"
-		LC_VERTEX_OUTPUT "vec3 PixelPosition;\n"
-		LC_VERTEX_OUTPUT "vec3 PixelNormal;\n"
-		LC_VERTEX_OUTPUT "vec2 PixelTexCoord;\n"
-		"uniform mat4 WorldViewProjectionMatrix;\n"
-		"uniform mat4 WorldMatrix;\n"
-		"void main()\n"
-		"{\n"
-		"	PixelPosition = (WorldMatrix * vec4(VertexPosition, 1.0)).xyz;\n"
-		"   PixelNormal = (WorldMatrix * vec4(VertexNormal, 0.0)).xyz;\n"
-		"	gl_Position = WorldViewProjectionMatrix * vec4(VertexPosition, 1.0);\n"
-		"	PixelTexCoord = VertexTexCoord;\n"
-		"}\n"
+		":/resources/shaders/unlit_color_vs.glsl",            // LC_MATERIAL_UNLIT_COLOR
+		":/resources/shaders/unlit_texture_modulate_vs.glsl", // LC_MATERIAL_UNLIT_TEXTURE_MODULATE
+		":/resources/shaders/unlit_texture_decal_vs.glsl",    // LC_MATERIAL_UNLIT_TEXTURE_DECAL
+		":/resources/shaders/unlit_vertex_color_vs.glsl",     // LC_MATERIAL_UNLIT_VERTEX_COLOR
+		":/resources/shaders/unlit_view_sphere_vs.glsl",      // LC_MATERIAL_UNLIT_VIEW_SPHERE
+		":/resources/shaders/fakelit_color_vs.glsl",          // LC_MATERIAL_FAKELIT_COLOR
+		":/resources/shaders/fakelit_texture_decal_vs.glsl"   // LC_MATERIAL_FAKELIT_TEXTURE_DECAL
 	};
 
 	const char* FragmentShaders[LC_NUM_MATERIALS] =
 	{
-		// LC_MATERIAL_UNLIT_COLOR
-		LC_SHADER_VERSION
-		LC_PIXEL_OUTPUT
-		"uniform mediump vec4 MaterialColor;\n"
-		"void main()\n"
-		"{\n"
-		"	gl_FragColor = MaterialColor;\n"
-		"}\n",
-		// LC_MATERIAL_UNLIT_TEXTURE_MODULATE
-		LC_SHADER_VERSION
-		LC_PIXEL_INPUT "vec2 PixelTexCoord;\n"
-		LC_PIXEL_OUTPUT
-		"uniform mediump vec4 MaterialColor;\n"
-		"uniform sampler2D Texture;\n"
-		"void main()\n"
-		"{\n"
-		LC_SHADER_PRECISION "	vec4 TexelColor = texture2D(Texture, PixelTexCoord);\n"
-		"	gl_FragColor = vec4(MaterialColor.rgb, TexelColor.a * MaterialColor.a);\n"
-		"}\n",
-		// LC_MATERIAL_UNLIT_TEXTURE_DECAL
-		LC_SHADER_VERSION
-		LC_PIXEL_INPUT "vec2 PixelTexCoord;\n"
-		LC_PIXEL_OUTPUT
-		"uniform mediump vec4 MaterialColor;\n"
-		"uniform sampler2D Texture;\n"
-		"void main()\n"
-		"{\n"
-		LC_SHADER_PRECISION "	vec4 TexelColor = texture2D(Texture, PixelTexCoord);\n"
-		"	gl_FragColor = mix(MaterialColor, TexelColor, TexelColor.a);\n"
-		"}\n",
-		// LC_MATERIAL_UNLIT_VERTEX_COLOR
-		LC_SHADER_VERSION
-		LC_PIXEL_INPUT "vec4 PixelColor;\n"
-		LC_PIXEL_OUTPUT
-		"void main()\n"
-		"{\n"
-		"	gl_FragColor = PixelColor;\n"
-		"}\n",
-		// LC_MATERIAL_UNLIT_VIEW_SPHERE
-		LC_SHADER_VERSION
-		LC_PIXEL_INPUT "vec3 PixelNormal;\n"
-		LC_PIXEL_OUTPUT
-		"uniform mediump vec4 MaterialColor;\n"
-		"uniform mediump vec4 HighlightColor;\n"
-		"uniform samplerCube Texture;\n"
-		"void main()\n"
-		"{\n"
-		"	float TexelAlpha = textureCube(Texture, PixelNormal).a;\n"
-		"	gl_FragColor = mix(MaterialColor, HighlightColor, TexelAlpha);\n"
-		"}\n",
-		// LC_MATERIAL_FAKELIT_COLOR
-		LC_SHADER_VERSION
-		LC_PIXEL_INPUT "vec3 PixelPosition;\n"
-		LC_PIXEL_INPUT "vec3 PixelNormal;\n"
-		LC_PIXEL_OUTPUT
-		"uniform mediump vec4 MaterialColor;\n"
-		"uniform mediump vec3 LightPosition;\n"
-		"uniform mediump vec3 EyePosition;\n"
-		"void main()\n"
-		"{\n"
-		LC_PIXEL_FAKE_LIGHTING
-		LC_SHADER_PRECISION "	vec3 DiffuseColor = MaterialColor.rgb * Diffuse;\n"
-		"	gl_FragColor = vec4(DiffuseColor + SpecularColor, MaterialColor.a);\n"
-		"}\n",
-		// LC_MATERIAL_FAKELIT_TEXTURE_DECAL
-		LC_SHADER_VERSION
-		LC_PIXEL_INPUT "vec3 PixelPosition;\n"
-		LC_PIXEL_INPUT "vec3 PixelNormal;\n"
-		LC_PIXEL_INPUT "vec2 PixelTexCoord;\n"
-		LC_PIXEL_OUTPUT
-		"uniform mediump vec4 MaterialColor;\n"
-		"uniform mediump vec3 LightPosition;\n"
-		"uniform mediump vec3 EyePosition;\n"
-		"uniform sampler2D Texture;\n"
-		"void main()\n"
-		"{\n"
-		LC_PIXEL_FAKE_LIGHTING
-		LC_SHADER_PRECISION "	vec4 TexelColor = texture2D(Texture, PixelTexCoord);"
-		LC_SHADER_PRECISION "	vec4 DiffuseColor = mix(MaterialColor, TexelColor, TexelColor.a);\n"
-		"	gl_FragColor = vec4(vec3(DiffuseColor) * Diffuse + SpecularColor, DiffuseColor.a);\n"
-		"}\n"
+		":/resources/shaders/unlit_color_ps.glsl",            // LC_MATERIAL_UNLIT_COLOR
+		":/resources/shaders/unlit_texture_modulate_ps.glsl", // LC_MATERIAL_UNLIT_TEXTURE_MODULATE
+		":/resources/shaders/unlit_texture_decal_ps.glsl",    // LC_MATERIAL_UNLIT_TEXTURE_DECAL
+		":/resources/shaders/unlit_vertex_color_ps.glsl",     // LC_MATERIAL_UNLIT_VERTEX_COLOR
+		":/resources/shaders/unlit_view_sphere_ps.glsl",      // LC_MATERIAL_UNLIT_VIEW_SPHERE
+		":/resources/shaders/fakelit_color_ps.glsl",          // LC_MATERIAL_FAKELIT_COLOR
+		":/resources/shaders/fakelit_texture_decal_ps.glsl"   // LC_MATERIAL_FAKELIT_TEXTURE_DECAL
+	};
+
+	auto LoadShader = [ShaderPrefix](const char* FileName, GLuint ShaderType) -> GLuint
+	{
+		QResource Resource(FileName);
+
+		if (!Resource.isValid())
+			return 0;
+
+		QByteArray Data;
+
+		if (Resource.isCompressed())
+			Data = qUncompress(Resource.data(), Resource.size());
+		else
+			Data = QByteArray::fromRawData((const char*)Resource.data(), Resource.size());
+
+		Data = ShaderPrefix + Data;
+		const char* Source = Data.constData();
+
+		GLuint Shader = glCreateShader(ShaderType);
+		glShaderSource(Shader, 1, &Source, nullptr);
+		glCompileShader(Shader);
+
+#ifndef QT_NO_DEBUG
+		GLint ShaderCompiled = 0;
+		glGetShaderiv(Shader, GL_COMPILE_STATUS, &ShaderCompiled);
+
+		if (ShaderCompiled == GL_FALSE)
+		{
+			GLint Length = 0;
+			glGetShaderiv(Shader, GL_INFO_LOG_LENGTH, &Length);
+
+			QByteArray InfoLog;
+			InfoLog.resize(Length);
+			glGetShaderInfoLog(Shader, Length, &Length, InfoLog.data());
+
+			qDebug() << InfoLog;
+		}
+#endif
+
+		return Shader;
 	};
 
 	for (int MaterialType = 0; MaterialType < LC_NUM_MATERIALS; MaterialType++)
 	{
-		GLuint VertexShader = glCreateShader(GL_VERTEX_SHADER);
-		glShaderSource(VertexShader, 1, &VertexShaders[MaterialType], nullptr);
-		glCompileShader(VertexShader);
-
-#ifndef QT_NO_DEBUG
-		GLint VertexShaderCompiled = 0;
-		glGetShaderiv(VertexShader, GL_COMPILE_STATUS, &VertexShaderCompiled);
-
-		if (VertexShaderCompiled == GL_FALSE)
-		{
-			GLint Length = 0;
-			glGetShaderiv(VertexShader, GL_INFO_LOG_LENGTH, &Length);
-
-			QByteArray InfoLog;
-			InfoLog.resize(Length);
-			glGetShaderInfoLog(VertexShader, Length, &Length, InfoLog.data());
-
-			qDebug() << InfoLog;
-		}
-#endif
-
-		GLuint FragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-		glShaderSource(FragmentShader, 1, &FragmentShaders[MaterialType], nullptr);
-		glCompileShader(FragmentShader);
-
-#ifndef QT_NO_DEBUG
-		GLint FragmentShaderCompiled = 0;
-		glGetShaderiv(FragmentShader, GL_COMPILE_STATUS, &FragmentShaderCompiled);
-
-		if (FragmentShaderCompiled == GL_FALSE)
-		{
-			GLint Length = 0;
-			glGetShaderiv(FragmentShader, GL_INFO_LOG_LENGTH, &Length);
-
-			QByteArray InfoLog;
-			InfoLog.resize(Length);
-			glGetShaderInfoLog(FragmentShader, Length, &Length, InfoLog.data());
-
-			qDebug() << InfoLog;
-		}
-#endif
+		GLuint VertexShader = LoadShader(VertexShaders[MaterialType], GL_VERTEX_SHADER);
+		GLuint FragmentShader = LoadShader(FragmentShaders[MaterialType], GL_FRAGMENT_SHADER);
 
 		GLuint Program = glCreateProgram();
 
@@ -324,6 +184,7 @@ void lcContext::CreateShaderPrograms()
 
 		GLint IsLinked = 0;
 		glGetProgramiv(Program, GL_LINK_STATUS, &IsLinked);
+
 		if (IsLinked == GL_FALSE)
 		{
 			GLint Length = 0;

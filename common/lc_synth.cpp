@@ -10,7 +10,7 @@
 class lcSynthInfoCurved : public lcSynthInfo
 {
 public:
-	lcSynthInfoCurved(lcSynthType Type, float Length, float DefaultScale, int NumSections);
+	lcSynthInfoCurved(lcSynthType Type, float Length, float DefaultScale, int NumSections, bool RigidEdges);
 
 	void GetDefaultControlPoints(lcArray<lcPieceControlPoint>& ControlPoints) const override;
 
@@ -18,7 +18,19 @@ protected:
 	float GetSectionTwist(const lcMatrix44& StartTransform, const lcMatrix44& EndTransform) const;
 	void CalculateSections(const lcArray<lcPieceControlPoint>& ControlPoints, lcArray<lcMatrix44>& Sections, SectionCallbackFunc SectionCallback) const override;
 
+	struct lcSynthComponent
+	{
+		lcMatrix44 Transform;
+		float Length;
+	};
+
+	lcSynthComponent mStart;
+	lcSynthComponent mMiddle;
+	lcSynthComponent mEnd;
+	float mCenterLength = 0.0f;
+	int mNumSections;
 	float mDefaultScale;
+	bool mRigidEdges;
 };
 
 class lcSynthInfoFlexibleHose : public lcSynthInfoCurved
@@ -67,6 +79,7 @@ public:
 	lcSynthInfoBraidedString(float Length, int NumSections);
 
 protected:
+	void CalculateSections(const lcArray<lcPieceControlPoint>& ControlPoints, lcArray<lcMatrix44>& Sections, SectionCallbackFunc SectionCallback) const;
 	void AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const lcArray<lcMatrix44>& Sections) const override;
 };
 
@@ -305,20 +318,13 @@ void lcSynthInit()
 //	"758C01" // Hose Flexible  12L
 }
 
-lcSynthInfo::lcSynthInfo(lcSynthType Type, float Length, int NumSections)
-	: mType(Type), mLength(Length), mNumSections(NumSections)
+lcSynthInfo::lcSynthInfo(lcSynthType Type, float Length)
+	: mType(Type), mLength(Length)
 {
-	mStart.Transform = lcMatrix44Identity();
-	mMiddle.Transform = lcMatrix44Identity();
-	mEnd.Transform = lcMatrix44Identity();
-
-	mStart.Length = 0.0f;
-	mMiddle.Length = 0.0f;
-	mEnd.Length = 0.0f;
 }
 
-lcSynthInfoCurved::lcSynthInfoCurved(lcSynthType Type, float Length, float DefaultScale, int NumSections)
-	: lcSynthInfo(Type, Length, NumSections), mDefaultScale(DefaultScale)
+lcSynthInfoCurved::lcSynthInfoCurved(lcSynthType Type, float Length, float DefaultScale, int NumSections, bool RigidEdges)
+	: lcSynthInfo(Type, Length), mNumSections(NumSections), mDefaultScale(DefaultScale), mRigidEdges(RigidEdges)
 {
 	mCurve = true;
 
@@ -327,9 +333,9 @@ lcSynthInfoCurved::lcSynthInfoCurved(lcSynthType Type, float Length, float Defau
 }
 
 lcSynthInfoFlexibleHose::lcSynthInfoFlexibleHose(float Length, int NumSections, const char* EdgePart2)
-	: lcSynthInfoCurved(lcSynthType::HOSE_FLEXIBLE, Length, 12.f, NumSections), mEdgePart2(EdgePart2)
+	: lcSynthInfoCurved(lcSynthType::HOSE_FLEXIBLE, Length, 12.f, NumSections, true),
+	mEdgePart2(EdgePart2)
 {
-	mRigidEdges = true;
 	mStart.Length = 5.0f;
 	mMiddle.Length = 2.56f;
 	mEnd.Length = 5.0f;
@@ -337,9 +343,8 @@ lcSynthInfoFlexibleHose::lcSynthInfoFlexibleHose(float Length, int NumSections, 
 }
 
 lcSynthInfoFlexSystemHose::lcSynthInfoFlexSystemHose(float Length, int NumSections)
-	: lcSynthInfoCurved(lcSynthType::FLEX_SYSTEM_HOSE, Length, 12.f, NumSections)
+	: lcSynthInfoCurved(lcSynthType::FLEX_SYSTEM_HOSE, Length, 12.f, NumSections, true)
 {
-	mRigidEdges = true;
 	mStart.Transform = lcMatrix44Identity();
 	mEnd.Transform = lcMatrix44Identity();
 	mStart.Length = 1.0f;
@@ -348,7 +353,7 @@ lcSynthInfoFlexSystemHose::lcSynthInfoFlexSystemHose(float Length, int NumSectio
 }
 
 lcSynthInfoRibbedHose::lcSynthInfoRibbedHose(float Length, int NumSections)
-	: lcSynthInfoCurved(lcSynthType::RIBBED_HOSE, Length, 80.0f, NumSections)
+	: lcSynthInfoCurved(lcSynthType::RIBBED_HOSE, Length, 80.0f, NumSections, false)
 {
 	mStart.Length = 6.25f;
 	mMiddle.Length = 6.25f;
@@ -356,18 +361,16 @@ lcSynthInfoRibbedHose::lcSynthInfoRibbedHose(float Length, int NumSections)
 }
 
 lcSynthInfoFlexibleAxle::lcSynthInfoFlexibleAxle(float Length, int NumSections)
-	: lcSynthInfoCurved(lcSynthType::FLEXIBLE_AXLE, Length, 12.0f, NumSections)
+	: lcSynthInfoCurved(lcSynthType::FLEXIBLE_AXLE, Length, 12.0f, NumSections, true)
 {
-	mRigidEdges = true;
 	mStart.Length = 30.0f;
 	mMiddle.Length = 4.0f;
 	mEnd.Length = 30.0f;
 }
 
 lcSynthInfoBraidedString::lcSynthInfoBraidedString(float Length, int NumSections)
-	: lcSynthInfoCurved(lcSynthType::STRING_BRAIDED, Length, 12.0f, NumSections)
+	: lcSynthInfoCurved(lcSynthType::STRING_BRAIDED, Length, 12.0f, NumSections, true)
 {
-	mRigidEdges = true;
 	mStart.Transform = lcMatrix44Identity();
 	mEnd.Transform = lcMatrix44Identity();
 	mStart.Length = 8.0f;
@@ -376,7 +379,7 @@ lcSynthInfoBraidedString::lcSynthInfoBraidedString(float Length, int NumSections
 }
 
 lcSynthInfoStraight::lcSynthInfoStraight(lcSynthType Type, float Length)
-	: lcSynthInfo(Type, Length, 1)
+	: lcSynthInfo(Type, Length)
 {
 }
 
@@ -495,16 +498,7 @@ void lcSynthInfoCurved::CalculateSections(const lcArray<lcPieceControlPoint>& Co
 		{
 			if (mRigidEdges)
 			{
-				switch (mType)
-				{
-				default:
-					StartTransform.SetTranslation(lcMul30(lcVector3(0.0f, mStart.Length, 0.0f), StartTransform) + StartTransform.GetTranslation());
-					break;
-
-				case lcSynthType::STRING_BRAIDED:
-					StartTransform.SetTranslation(lcMul30(lcVector3(mStart.Length, 0.0f, 0.0f), StartTransform) + StartTransform.GetTranslation());
-					break;
-				}
+				StartTransform.SetTranslation(lcMul30(lcVector3(0.0f, mStart.Length, 0.0f), StartTransform) + StartTransform.GetTranslation());
 				SectionLength = 0.0f;
 			}
 			else
@@ -516,18 +510,8 @@ void lcSynthInfoCurved::CalculateSections(const lcArray<lcPieceControlPoint>& Co
 		EndTransform = lcMatrix44(lcMul(lcMul(lcMatrix33(mEnd.Transform), lcMatrix33(EndTransform)), lcMatrix33Scale(lcVector3(1.0f, -1.0f, 1.0f))), EndTransform.GetTranslation());
 
 		SegmentControlPoints[0] = StartTransform.GetTranslation();
-		switch (mType)
-		{
-		default:
-			SegmentControlPoints[1] = lcMul31(lcVector3(0.0f, ControlPoints[ControlPointIdx].Scale, 0.0f), StartTransform);
-			SegmentControlPoints[2] = lcMul31(lcVector3(0.0f, -ControlPoints[ControlPointIdx + 1].Scale, 0.0f), EndTransform);
-			break;
-
-		case lcSynthType::STRING_BRAIDED:
-			SegmentControlPoints[1] = lcMul31(lcVector3(ControlPoints[ControlPointIdx].Scale, 0.0f, 0.0f), StartTransform);
-			SegmentControlPoints[2] = lcMul31(lcVector3(-ControlPoints[ControlPointIdx + 1].Scale, 0.0f, 0.0f), EndTransform);
-			break;
-		}
+		SegmentControlPoints[1] = lcMul31(lcVector3(0.0f, ControlPoints[ControlPointIdx].Scale, 0.0f), StartTransform);
+		SegmentControlPoints[2] = lcMul31(lcVector3(0.0f, -ControlPoints[ControlPointIdx + 1].Scale, 0.0f), EndTransform);
 		SegmentControlPoints[3] = EndTransform.GetTranslation();
 
 		const int NumCurvePoints = 8192;
@@ -549,11 +533,7 @@ void lcSynthInfoCurved::CalculateSections(const lcArray<lcPieceControlPoint>& Co
 		for (int PointIdx = 0; PointIdx < CurvePoints.GetSize() - 1; PointIdx++)
 			TotalSegmentLength += lcLength(CurvePoints[PointIdx] - CurvePoints[PointIdx + 1]);
 
-		lcVector3 StartUp;
-		if (mType != lcSynthType::STRING_BRAIDED)
-			StartUp = lcMul30(lcVector3(1.0f, 0.0f, 0.0f), StartTransform);
-		else
-			StartUp = lcMul30(lcVector3(0.0f, 1.0f, 0.0f), StartTransform);
+		lcVector3 StartUp = lcMul30(lcVector3(1.0f, 0.0f, 0.0f), StartTransform);
 		float Twist = GetSectionTwist(StartTransform, EndTransform);
 		int CurrentPointIndex = 0;
 
@@ -585,10 +565,7 @@ void lcSynthInfoCurved::CalculateSections(const lcArray<lcPieceControlPoint>& Co
 			Up = lcNormalize(lcCross(Side, Tangent));
 			StartUp = Up;
 
-			if (mType != lcSynthType::STRING_BRAIDED)
-				Sections.Add(lcMatrix44(lcMatrix33(Up, Tangent, Side), CurvePoints[CurrentPointIndex]));
-			else
-				Sections.Add(lcMatrix44(lcMatrix33(Tangent, Up, -Side), CurvePoints[CurrentPointIndex]));
+			Sections.Add(lcMatrix44(lcMatrix33(Up, Tangent, Side), CurvePoints[CurrentPointIndex]));
 
 			if (SectionCallback)
 				SectionCallback(CurvePoints[CurrentPointIndex], ControlPointIdx, t);
@@ -610,11 +587,129 @@ void lcSynthInfoCurved::CalculateSections(const lcArray<lcPieceControlPoint>& Co
 	{
 		lcMatrix44 EndTransform = lcMatrix44LeoCADToLDraw(ControlPoints[ControlPoints.GetSize() - 1].Transform);
 		EndTransform = lcMatrix44(lcMul(lcMul(lcMatrix33(mEnd.Transform), lcMatrix33(EndTransform)), lcMatrix33Scale(lcVector3(1.0f, -1.0f, 1.0f))), EndTransform.GetTranslation());
-		lcVector3 Position;
-		if (mType != lcSynthType::STRING_BRAIDED)
-			Position = lcMul31(lcVector3(0.0f, SectionLength, 0.0f), EndTransform);
+		lcVector3 Position = lcMul31(lcVector3(0.0f, SectionLength, 0.0f), EndTransform);
+		EndTransform.SetTranslation(Position);
+		Sections.Add(EndTransform);
+
+		if (SectionCallback)
+			SectionCallback(Position, ControlPoints.GetSize() - 1, 1.0f);
+
+		if (mCenterLength != 0.0f && (Sections.GetSize() == mNumSections / 2 + 1))
+			SectionLength += mCenterLength;
 		else
-			Position = lcMul31(lcVector3(SectionLength, 0.0f, 0.0f), EndTransform);
+			SectionLength += mMiddle.Length;
+
+		if (Sections.GetSize() == mNumSections + 1 && !mRigidEdges)
+			SectionLength += mEnd.Length;
+	}
+}
+
+void lcSynthInfoBraidedString::CalculateSections(const lcArray<lcPieceControlPoint>& ControlPoints, lcArray<lcMatrix44>& Sections, SectionCallbackFunc SectionCallback) const
+{
+	float SectionLength = 0.0f;
+
+	for (int ControlPointIdx = 0; ControlPointIdx < ControlPoints.GetSize() - 1 && Sections.GetSize() < mNumSections + 2; ControlPointIdx++)
+	{
+		lcVector3 SegmentControlPoints[4];
+
+		lcMatrix44 StartTransform = lcMatrix44LeoCADToLDraw(ControlPoints[ControlPointIdx].Transform);
+		lcMatrix44 EndTransform = lcMatrix44LeoCADToLDraw(ControlPoints[ControlPointIdx + 1].Transform);
+		StartTransform = lcMatrix44(lcMul(lcMul(lcMatrix33(mStart.Transform), lcMatrix33(StartTransform)), lcMatrix33Scale(lcVector3(1.0f, -1.0f, 1.0f))), StartTransform.GetTranslation());
+
+		if (ControlPointIdx == 0)
+		{
+			if (mRigidEdges)
+			{
+				StartTransform.SetTranslation(lcMul30(lcVector3(mStart.Length, 0.0f, 0.0f), StartTransform) + StartTransform.GetTranslation());
+				SectionLength = 0.0f;
+			}
+			else
+				SectionLength = mStart.Length;
+
+			Sections.Add(StartTransform);
+		}
+
+		EndTransform = lcMatrix44(lcMul(lcMul(lcMatrix33(mEnd.Transform), lcMatrix33(EndTransform)), lcMatrix33Scale(lcVector3(1.0f, -1.0f, 1.0f))), EndTransform.GetTranslation());
+
+		SegmentControlPoints[0] = StartTransform.GetTranslation();
+		SegmentControlPoints[1] = lcMul31(lcVector3(ControlPoints[ControlPointIdx].Scale, 0.0f, 0.0f), StartTransform);
+		SegmentControlPoints[2] = lcMul31(lcVector3(-ControlPoints[ControlPointIdx + 1].Scale, 0.0f, 0.0f), EndTransform);
+		SegmentControlPoints[3] = EndTransform.GetTranslation();
+
+		const int NumCurvePoints = 8192;
+		lcArray<lcVector3> CurvePoints;
+		CurvePoints.AllocGrow(NumCurvePoints);
+
+		for (int PointIdx = 0; PointIdx < NumCurvePoints; PointIdx++)
+		{
+			float t = (float)PointIdx / (float)(NumCurvePoints - 1);
+			float it = 1.0f - t;
+
+			lcVector3 Position = it * it * it * SegmentControlPoints[0] + it * it * 3.0f * t * SegmentControlPoints[1] + it * 3.0 * t * t * SegmentControlPoints[2] + t * t * t * SegmentControlPoints[3];
+			CurvePoints.Add(Position);
+		}
+
+		float CurrentSegmentLength = 0.0f;
+		float TotalSegmentLength = 0.0f;
+
+		for (int PointIdx = 0; PointIdx < CurvePoints.GetSize() - 1; PointIdx++)
+			TotalSegmentLength += lcLength(CurvePoints[PointIdx] - CurvePoints[PointIdx + 1]);
+
+		lcVector3 StartUp = lcMul30(lcVector3(0.0f, 1.0f, 0.0f), StartTransform);
+		float Twist = GetSectionTwist(StartTransform, EndTransform);
+		int CurrentPointIndex = 0;
+
+		while (CurrentPointIndex < CurvePoints.GetSize() - 1)
+		{
+			float Length = lcLength(CurvePoints[CurrentPointIndex + 1] - CurvePoints[CurrentPointIndex]);
+			CurrentSegmentLength += Length;
+			SectionLength -= Length;
+			CurrentPointIndex++;
+
+			if (SectionLength > 0.0f)
+				continue;
+
+			float t = (float)CurrentPointIndex / (float)(NumCurvePoints - 1);
+			float it = 1.0f - t;
+
+			lcVector3 Tangent = lcNormalize(-3.0f * it * it * SegmentControlPoints[0] + (3.0f * it * it - 6.0f * t * it) * SegmentControlPoints[1] + (-3.0f * t * t + 6.0f * t * it) * SegmentControlPoints[2] + 3.0f * t * t * SegmentControlPoints[3]);
+			lcVector3 Up;
+
+			if (Twist)
+			{
+				Up = lcMul(StartUp, lcMatrix33FromAxisAngle(Tangent, Twist * (CurrentSegmentLength / TotalSegmentLength)));
+				CurrentSegmentLength = 0.0f;
+			}
+			else
+				Up = StartUp;
+
+			lcVector3 Side = lcNormalize(lcCross(Tangent, Up));
+			Up = lcNormalize(lcCross(Side, Tangent));
+			StartUp = Up;
+
+			Sections.Add(lcMatrix44(lcMatrix33(Tangent, Up, -Side), CurvePoints[CurrentPointIndex]));
+
+			if (SectionCallback)
+				SectionCallback(CurvePoints[CurrentPointIndex], ControlPointIdx, t);
+
+			if (Sections.GetSize() == mNumSections + 2)
+				break;
+
+			if (mCenterLength != 0.0f && (Sections.GetSize() == mNumSections / 2 + 1))
+				SectionLength += mCenterLength;
+			else
+				SectionLength += mMiddle.Length;
+
+			if (Sections.GetSize() == mNumSections + 1 && !mRigidEdges)
+				SectionLength += mEnd.Length;
+		}
+	}
+
+	while (Sections.GetSize() < mNumSections + 2)
+	{
+		lcMatrix44 EndTransform = lcMatrix44LeoCADToLDraw(ControlPoints[ControlPoints.GetSize() - 1].Transform);
+		EndTransform = lcMatrix44(lcMul(lcMul(lcMatrix33(mEnd.Transform), lcMatrix33(EndTransform)), lcMatrix33Scale(lcVector3(1.0f, -1.0f, 1.0f))), EndTransform.GetTranslation());
+		lcVector3 Position = lcMul31(lcVector3(SectionLength, 0.0f, 0.0f), EndTransform);
 		EndTransform.SetTranslation(Position);
 		Sections.Add(EndTransform);
 

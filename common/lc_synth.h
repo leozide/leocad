@@ -14,18 +14,12 @@ enum class lcSynthType
 	ACTUATOR
 };
 
-struct lcSynthComponent
-{
-	lcMatrix44 Transform;
-	float Length;
-};
-
 class lcLibraryMeshData;
 
 class lcSynthInfo
 {
 public:
-	lcSynthInfo(lcSynthType Type, float Length, int NumSections);
+	lcSynthInfo(lcSynthType Type, float Length);
 	virtual ~lcSynthInfo() = default;
 
 	bool CanAddControlPoints() const
@@ -48,14 +42,8 @@ protected:
 	virtual void AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const lcArray<lcMatrix44>& Sections) const = 0;
 
 	lcSynthType mType;
-	lcSynthComponent mStart;
-	lcSynthComponent mMiddle;
-	lcSynthComponent mEnd;
 	bool mCurve = false;
 	float mLength;
-	float mCenterLength = 0.0f;
-	int mNumSections;
-	bool mRigidEdges = false;
 };
 
 void lcSynthInit();

@@ -48,13 +48,15 @@ lcContext::lcContext()
 	mViewMatrix = lcMatrix44Identity();
 	mProjectionMatrix = lcMatrix44Identity();
 	mViewProjectionMatrix = lcMatrix44Identity();
-	mHighlightColor = lcVector4(0.0f, 0.0f, 0.0f, 0.0f);
+	mHighlightParams[0] = lcVector4(0.0f, 0.0f, 0.0f, 0.0f);
+	mHighlightParams[1] = lcVector4(0.0f, 0.0f, 0.0f, 0.0f);
+	mHighlightParams[2] = lcVector4(0.0f, 0.0f, 0.0f, 0.0f);
 	mColorDirty = false;
 	mWorldMatrixDirty = false;
 	mViewMatrixDirty = false;
 	mProjectionMatrixDirty = false;
 	mViewProjectionMatrixDirty = false;
-	mHighlightColorDirty = false;
+	mHighlightParamsDirty = false;
 
 	mMaterialType = LC_NUM_MATERIALS;
 }
@@ -204,7 +206,7 @@ void lcContext::CreateShaderPrograms()
 		mPrograms[MaterialType].MaterialColorLocation = glGetUniformLocation(Program, "MaterialColor");
 		mPrograms[MaterialType].LightPositionLocation = glGetUniformLocation(Program, "LightPosition");
 		mPrograms[MaterialType].EyePositionLocation = glGetUniformLocation(Program, "EyePosition");
-		mPrograms[MaterialType].HighlightColorLocation = glGetUniformLocation(Program, "HighlightColor");
+		mPrograms[MaterialType].HighlightParamsLocation = glGetUniformLocation(Program, "HighlightParams");
 	}
 }
 
@@ -333,7 +335,7 @@ void lcContext::SetMaterial(lcMaterialType MaterialType)
 		mColorDirty = true;
 		mWorldMatrixDirty = true; // todo: change dirty to a bitfield and set the lighting constants dirty here
 		mViewMatrixDirty = true;
-		mHighlightColorDirty = true;
+		mHighlightParamsDirty = true;
 	}
 	else
 	{
@@ -1174,10 +1176,10 @@ void lcContext::FlushState()
 			mColorDirty = false;
 		}
 
-		if (mHighlightColorDirty && Program.HighlightColorLocation != -1)
+		if (mHighlightParamsDirty && Program.HighlightParamsLocation != -1)
 		{
-			glUniform4fv(Program.HighlightColorLocation, 1, mHighlightColor);
-			mHighlightColorDirty = false;
+			glUniform4fv(Program.HighlightParamsLocation, 2, mHighlightParams[0]);
+			mHighlightParamsDirty = false;
 		}
 	}
 	else

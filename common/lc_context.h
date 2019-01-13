@@ -73,7 +73,7 @@ struct lcProgram
 	GLint MaterialColorLocation;
 	GLint LightPositionLocation;
 	GLint EyePositionLocation;
-	GLint HighlightColorLocation;
+	GLint HighlightParamsLocation;
 };
 
 class lcFramebuffer
@@ -153,10 +153,11 @@ public:
 		mColorDirty = true;
 	}
 
-	void SetHighlightColor(const lcVector4& HighlightColor)
+	void SetHighlightParams(const lcVector4& HighlightMin, const lcVector4& HighlightMax)
 	{
-		mHighlightColor = HighlightColor;
-		mHighlightColorDirty = true;
+		mHighlightParams[0] = HighlightMin;
+		mHighlightParams[1] = HighlightMax;
+		mHighlightParamsDirty = true;
 	}
 
 	void SetColor(float Red, float Green, float Blue, float Alpha);
@@ -226,13 +227,13 @@ protected:
 	lcMatrix44 mViewMatrix;
 	lcMatrix44 mProjectionMatrix;
 	lcMatrix44 mViewProjectionMatrix;
-	lcVector4 mHighlightColor;
+	lcVector4 mHighlightParams[3];
 	bool mColorDirty;
 	bool mWorldMatrixDirty;
 	bool mViewMatrixDirty;
 	bool mProjectionMatrixDirty;
 	bool mViewProjectionMatrixDirty;
-	bool mHighlightColorDirty;
+	bool mHighlightParamsDirty;
 
 	GLuint mFramebufferObject;
 

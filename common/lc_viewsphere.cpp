@@ -179,13 +179,28 @@ void lcViewSphere::Draw()
 	Context->SetVertexFormatPosition(3);
 	Context->SetIndexBuffer(mIndexBuffer);
 
-	Context->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
-	Context->SetHighlightColor(lcVector4(0.0f, 0.0f, 0.0f, 1.0f));
+	Context->SetHighlightParams(lcVector4(10.0f, 10.0f, 10.0f, 0.0f), lcVector4(-10.0f, -10.0f, -10.0f, 0.0f));
 	Context->DrawIndexedPrimitives(GL_TRIANGLES, mSubdivisions * mSubdivisions * 6 * 6, GL_UNSIGNED_SHORT, 0);
 
 	if (mIntersectionFlags.any())
 	{
-		Context->SetHighlightColor(lcVector4(1.0, 0, 0, 1.0));
+		lcVector4 HighlightMin(-10.0f, -10.0f, -10.0f, 0.0f), HighlightMax(10.0f, 10.0f, 10.0f, 0.0f);
+
+		for (int AxisIdx = 0; AxisIdx < 3; AxisIdx++)
+		{
+			if (mIntersectionFlags.test(2 * AxisIdx))
+			{
+				HighlightMin[AxisIdx] = 0.5f;
+				HighlightMax[AxisIdx] = 10.0f;
+			}
+			else if (mIntersectionFlags.test(2 * AxisIdx + 1))
+			{
+				HighlightMin[AxisIdx] = -10.0f;
+				HighlightMax[AxisIdx] = -0.5f;
+			}
+		}
+
+		Context->SetHighlightParams(HighlightMin, HighlightMax);
 
 		for (int FlagIdx = 0; FlagIdx < 6; FlagIdx++)
 		{

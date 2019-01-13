@@ -222,7 +222,7 @@ float lcSynthInfo::GetSectionTwist(const lcMatrix44& StartTransform, const lcMat
 	return 0.0f;
 }
 
-void lcSynthInfo::CalculateCurveSections(const lcArray<lcPieceControlPoint>& ControlPoints, lcArray<lcMatrix44>& Sections, void (*SectionCallback)(const lcVector3& CurvePoint, int SegmentIndex, float t, void* Param), void* CallbackParam) const
+void lcSynthInfo::CalculateCurveSections(const lcArray<lcPieceControlPoint>& ControlPoints, lcArray<lcMatrix44>& Sections, SectionCallbackFunc SectionCallback) const
 {
 	float SectionLength = 0.0f;
 
@@ -326,7 +326,7 @@ void lcSynthInfo::CalculateCurveSections(const lcArray<lcPieceControlPoint>& Con
 				Sections.Add(lcMatrix44(lcMatrix33(Tangent, Up, -Side), CurvePoints[CurrentPointIndex]));
 
 			if (SectionCallback)
-				SectionCallback(CurvePoints[CurrentPointIndex], ControlPointIdx, t, CallbackParam);
+				SectionCallback(CurvePoints[CurrentPointIndex], ControlPointIdx, t);
 
 			if (Sections.GetSize() == mNumSections + 2)
 				break;
@@ -350,7 +350,7 @@ void lcSynthInfo::CalculateCurveSections(const lcArray<lcPieceControlPoint>& Con
 		Sections.Add(EndTransform);
 
 		if (SectionCallback)
-			SectionCallback(Position, ControlPoints.GetSize() - 1, 1.0f, CallbackParam);
+			SectionCallback(Position, ControlPoints.GetSize() - 1, 1.0f);
 
 		SectionLength += mMiddle.Length;
 		if (Sections.GetSize() == mNumSections + 1 && !mRigidEdges)
@@ -358,7 +358,7 @@ void lcSynthInfo::CalculateCurveSections(const lcArray<lcPieceControlPoint>& Con
 	}
 }
 
-void lcSynthInfo::CalculateLineSections(const lcArray<lcPieceControlPoint>& ControlPoints, lcArray<lcMatrix44>& Sections, void(*SectionCallback)(const lcVector3& CurvePoint, int SegmentIndex, float t, void* Param), void* CallbackParam) const
+void lcSynthInfo::CalculateLineSections(const lcArray<lcPieceControlPoint>& ControlPoints, lcArray<lcMatrix44>& Sections, SectionCallbackFunc SectionCallback) const
 {
 	for (int ControlPointIdx = 0; ControlPointIdx < ControlPoints.GetSize(); ControlPointIdx++)
 	{
@@ -366,7 +366,7 @@ void lcSynthInfo::CalculateLineSections(const lcArray<lcPieceControlPoint>& Cont
 		Sections.Add(Transform);
 
 		if (SectionCallback)
-			SectionCallback(Transform.GetTranslation(), ControlPointIdx, 1.0f, CallbackParam);
+			SectionCallback(Transform.GetTranslation(), ControlPointIdx, 1.0f);
 	}
 }
 
@@ -721,9 +721,9 @@ lcMesh* lcSynthInfo::CreateMesh(const lcArray<lcPieceControlPoint>& ControlPoint
 	lcArray<lcMatrix44> Sections;
 
 	if (mCurve)
-		CalculateCurveSections(ControlPoints, Sections, nullptr, nullptr);
+		CalculateCurveSections(ControlPoints, Sections, nullptr);
 	else
-		CalculateLineSections(ControlPoints, Sections, nullptr, nullptr);
+		CalculateLineSections(ControlPoints, Sections, nullptr);
 
 	lcLibraryMeshData MeshData;
 	lcMemFile File; // todo: rewrite this to pass the parts directly
@@ -762,57 +762,42 @@ lcMesh* lcSynthInfo::CreateMesh(const lcArray<lcPieceControlPoint>& ControlPoint
 	return nullptr;
 }
 
-struct lcSynthInsertParam
-{
-	lcVector3 Start;
-	lcVector3 End;
-	int BestSegment;
-	float BestTime;
-	float BestDistance;
-	lcVector3 BestPosition;
-};
-
-static void lcSynthInsertCallback(const lcVector3& CurvePoint, int SegmentIndex, float t, void* Param)
-{
-	lcSynthInsertParam* SynthInsertParam = (lcSynthInsertParam*)Param;
-
-	float Distance = lcRayPointDistance(CurvePoint, SynthInsertParam->Start, SynthInsertParam->End);
-	if (Distance < SynthInsertParam->BestDistance)
-	{
-		SynthInsertParam->BestSegment = SegmentIndex;
-		SynthInsertParam->BestTime = t;
-		SynthInsertParam->BestDistance = Distance;
-		SynthInsertParam->BestPosition = lcVector3LDrawToLeoCAD(CurvePoint);
-	}
-}
-
 int lcSynthInfo::InsertControlPoint(lcArray<lcPieceControlPoint>& ControlPoints, const lcVector3& Start, const lcVector3& End) const
 {
 	lcArray<lcMatrix44> Sections;
-	lcSynthInsertParam SynthInsertParam;
 
-	SynthInsertParam.Start = Start;
-	SynthInsertParam.End = End;
-	SynthInsertParam.BestSegment = -1;
-	SynthInsertParam.BestDistance = FLT_MAX;
+	int BestSegment = -1;
+	float BestTime;
+	float BestDistance = FLT_MAX;
+	lcVector3 BestPosition;
 
-	CalculateCurveSections(ControlPoints, Sections, lcSynthInsertCallback, &SynthInsertParam);
-
-	if (SynthInsertParam.BestSegment != -1)
-	{
-		lcPieceControlPoint ControlPoint = ControlPoints[SynthInsertParam.BestSegment];
-		ControlPoint.Transform.SetTranslation(SynthInsertParam.BestPosition);
-
-		if (SynthInsertParam.BestSegment != ControlPoints.GetSize() - 1)
+	CalculateCurveSections(ControlPoints, Sections,
+		[&](const lcVector3& CurvePoint, int SegmentIndex, float t)
 		{
-			lcPieceControlPoint NextControlPoint = ControlPoints[SynthInsertParam.BestSegment + 1];
-			float t = SynthInsertParam.BestTime;
+			float Distance = lcRayPointDistance(CurvePoint, Start, End);
+			if (Distance < BestDistance)
+			{
+				BestSegment = SegmentIndex;
+				BestTime = t;
+				BestDistance = Distance;
+				BestPosition = lcVector3LDrawToLeoCAD(CurvePoint);
+			}
+		}
+	);
 
-			ControlPoint.Scale = ControlPoint.Scale * (1.0f - t) + NextControlPoint.Scale * t;
+	if (BestSegment != -1)
+	{
+		lcPieceControlPoint ControlPoint = ControlPoints[BestSegment];
+		ControlPoint.Transform.SetTranslation(BestPosition);
+
+		if (BestSegment != ControlPoints.GetSize() - 1)
+		{
+			lcPieceControlPoint NextControlPoint = ControlPoints[BestSegment + 1];
+			ControlPoint.Scale = ControlPoint.Scale * (1.0f - BestTime) + NextControlPoint.Scale * BestTime;
 		}
 
-		ControlPoints.InsertAt(SynthInsertParam.BestSegment + 1, ControlPoint);
+		ControlPoints.InsertAt(BestSegment + 1, ControlPoint);
 	}
 
-	return SynthInsertParam.BestSegment + 1;
+	return BestSegment + 1;
 }

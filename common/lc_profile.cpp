@@ -53,7 +53,7 @@ lcProfileEntry::lcProfileEntry(const char* Section, const char* Key)
 	mDefault.IntValue = 0;
 }
 
-lcProfileEntry gProfileEntries[LC_NUM_PROFILE_KEYS] =
+static lcProfileEntry gProfileEntries[LC_NUM_PROFILE_KEYS] =
 {
 	lcProfileEntry("Settings", "FixedAxes", false),                                         // LC_PROFILE_FIXED_AXES
 	lcProfileEntry("Settings", "LineWidth", 1.0f),                                          // LC_PROFILE_LINE_WIDTH
@@ -68,6 +68,9 @@ lcProfileEntry gProfileEntries[LC_NUM_PROFILE_KEYS] =
 	lcProfileEntry("Settings", "AASamples", 1),                                             // LC_PROFILE_ANTIALIASING_SAMPLES
 	lcProfileEntry("Settings", "ViewSphereLocation", (int)lcViewSphereLocation::TOP_RIGHT), // LC_PROFILE_VIEW_SPHERE_LOCATION
 	lcProfileEntry("Settings", "ViewSphereSize", 100),                                      // LC_PROFILE_VIEW_SPHERE_SIZE
+	lcProfileEntry("Settings", "ViewSphereColor", LC_RGBA(255, 255, 255, 255)),             // LC_PROFILE_VIEW_SPHERE_COLOR
+	lcProfileEntry("Settings", "ViewSphereTextColor", LC_RGBA(0, 0, 0, 255)),               // LC_PROFILE_VIEW_SPHERE_TEXT_COLOR
+	lcProfileEntry("Settings", "ViewSphereHighlightColor", LC_RGBA(255, 0, 0, 255)),        // LC_PROFILE_VIEW_SPHERE_HIGHLIGHT_COLOR
 
 	lcProfileEntry("Settings", "CheckUpdates", 1),                                          // LC_PROFILE_CHECK_UPDATES
 	lcProfileEntry("Settings", "ProjectsPath", ""),                                         // LC_PROFILE_PROJECTS_PATH

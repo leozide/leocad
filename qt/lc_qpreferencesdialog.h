@@ -29,11 +29,12 @@ public slots:
 	void on_partsLibraryBrowse_clicked();
 	void on_povrayExecutableBrowse_clicked();
 	void on_lgeoPathBrowse_clicked();
-	void colorClicked();
+	void ColorButtonClicked();
 	void on_antiAliasing_toggled();
 	void on_edgeLines_toggled();
 	void on_gridStuds_toggled();
 	void on_gridLines_toggled();
+	void on_ViewSphereSizeCombo_currentIndexChanged(int Index);
 	void updateParts();
 	void on_newCategory_clicked();
 	void on_editCategory_clicked();

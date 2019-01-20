@@ -16,7 +16,6 @@ enum lcShadingMode
 
 enum class lcViewSphereLocation
 {
-	DISABLED,
 	TOP_LEFT,
 	TOP_RIGHT,
 	BOTTOM_LEFT,
@@ -42,6 +41,9 @@ public:
 	bool mFixedAxes;
 	lcViewSphereLocation mViewSphereLocation;
 	int mViewSphereSize;
+	quint32 mViewSphereColor;
+	quint32 mViewSphereTextColor;
+	quint32 mViewSphereHighlightColor;
 };
 
 class lcApplication : public QApplication

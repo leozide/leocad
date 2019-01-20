@@ -15,6 +15,16 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
+    <widget class="QFrame" name="frame">
+     <property name="frameShape">
+      <enum>QFrame::HLine</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
       <number>0</number>
@@ -330,20 +340,94 @@
           <string>View Sphere</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_3">
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_6">
-            <property name="text">
-             <string>Location</string>
+          <item row="0" column="7">
+           <spacer name="horizontalSpacer_7">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
             </property>
-           </widget>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
           </item>
           <item row="0" column="1">
-           <widget class="QComboBox" name="ViewSphereLocationCombo">
+           <widget class="QComboBox" name="ViewSphereSizeCombo">
             <item>
              <property name="text">
               <string>Disabled</string>
              </property>
             </item>
+            <item>
+             <property name="text">
+              <string>Small</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Medium</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Large</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="2" column="5">
+           <widget class="QLabel" name="label_16">
+            <property name="text">
+             <string>Highlight Color:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_8">
+            <property name="text">
+             <string>Size:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QToolButton" name="ViewSphereColorButton">
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_14">
+            <property name="text">
+             <string>Color:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="3">
+           <widget class="QToolButton" name="ViewSphereTextColorButton">
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="2">
+           <widget class="QLabel" name="label_15">
+            <property name="text">
+             <string>Text Color:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QLabel" name="label_6">
+            <property name="text">
+             <string>Location:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="3">
+           <widget class="QComboBox" name="ViewSphereLocationCombo">
             <item>
              <property name="text">
               <string>Top Left</string>
@@ -366,15 +450,12 @@
             </item>
            </widget>
           </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_8">
+          <item row="2" column="6">
+           <widget class="QToolButton" name="ViewSphereHighlightColorButton">
             <property name="text">
-             <string>Size</string>
+             <string/>
             </property>
            </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QLineEdit" name="ViewSphereSizeEdit"/>
           </item>
          </layout>
         </widget>
@@ -885,16 +966,6 @@
     </widget>
    </item>
    <item>
-    <widget class="QFrame" name="frame">
-     <property name="frameShape">
-      <enum>QFrame::HLine</enum>
-     </property>
-     <property name="frameShadow">
-      <enum>QFrame::Raised</enum>
-     </property>
-    </widget>
-   </item>
-   <item>
     <widget class="QDialogButtonBox" name="buttonBox">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -928,8 +999,11 @@
   <tabstop>gridLines</tabstop>
   <tabstop>gridLineSpacing</tabstop>
   <tabstop>gridLineColor</tabstop>
+  <tabstop>ViewSphereSizeCombo</tabstop>
   <tabstop>ViewSphereLocationCombo</tabstop>
-  <tabstop>ViewSphereSizeEdit</tabstop>
+  <tabstop>ViewSphereColorButton</tabstop>
+  <tabstop>ViewSphereTextColorButton</tabstop>
+  <tabstop>ViewSphereHighlightColorButton</tabstop>
   <tabstop>categoriesTree</tabstop>
   <tabstop>partsTree</tabstop>
   <tabstop>importCategories</tabstop>

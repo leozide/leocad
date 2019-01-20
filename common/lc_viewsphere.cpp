@@ -152,15 +152,15 @@ void lcViewSphere::DestroyResources(lcContext* Context)
 void lcViewSphere::Draw()
 {
 	const lcPreferences& Preferences = lcGetPreferences();
-	lcViewSphereLocation Location = Preferences.mViewSphereLocation;
+	int ViewportSize = Preferences.mViewSphereSize;
 
-	if (Location == lcViewSphereLocation::DISABLED)
+	if (ViewportSize == 0)
 		return;
 
 	lcContext* Context = mView->mContext;
 	int Width = mView->mWidth;
 	int Height = mView->mHeight;
-	int ViewportSize = Preferences.mViewSphereSize;
+	lcViewSphereLocation Location = Preferences.mViewSphereLocation;
 
 	int Left = (Location == lcViewSphereLocation::BOTTOM_LEFT || Location == lcViewSphereLocation::TOP_LEFT) ? 0 : Width - ViewportSize;
 	int Bottom = (Location == lcViewSphereLocation::BOTTOM_LEFT || Location == lcViewSphereLocation::BOTTOM_RIGHT) ? 0 : Height - ViewportSize;
@@ -195,9 +195,9 @@ void lcViewSphere::Draw()
 		HighlightPosition = lcVector4(lcNormalize(lcVector3(HighlightPosition)), mHighlightRadius);
 	}
 
-	const lcVector4 TextColor(0.0, 0.0, 0.0, 1.0);
-	const lcVector4 BackgroundColor(1.0, 1.0, 1.0, 1.0);
-	const lcVector4 HighlightColor(1.0, 0.0, 0.0, 1.0);
+	const lcVector4 TextColor = lcVector4FromColor(Preferences.mViewSphereTextColor);
+	const lcVector4 BackgroundColor = lcVector4FromColor(Preferences.mViewSphereColor);
+	const lcVector4 HighlightColor = lcVector4FromColor(Preferences.mViewSphereHighlightColor);
 
 	Context->SetHighlightParams(HighlightPosition, TextColor, BackgroundColor, HighlightColor);
 	Context->DrawIndexedPrimitives(GL_TRIANGLES, mSubdivisions * mSubdivisions * 6 * 6, GL_UNSIGNED_SHORT, 0);
@@ -211,7 +211,7 @@ void lcViewSphere::Draw()
 bool lcViewSphere::OnLeftButtonDown()
 {
 	const lcPreferences& Preferences = lcGetPreferences();
-	if (Preferences.mViewSphereLocation == lcViewSphereLocation::DISABLED)
+	if (Preferences.mViewSphereSize == 0)
 		return false;
 
 	mIntersectionFlags = GetIntersectionFlags(mIntersection);
@@ -229,7 +229,7 @@ bool lcViewSphere::OnLeftButtonDown()
 bool lcViewSphere::OnLeftButtonUp()
 {
 	const lcPreferences& Preferences = lcGetPreferences();
-	if (Preferences.mViewSphereLocation == lcViewSphereLocation::DISABLED)
+	if (Preferences.mViewSphereSize == 0)
 		return false;
 
 	if (!mMouseDown)
@@ -258,9 +258,7 @@ bool lcViewSphere::OnLeftButtonUp()
 bool lcViewSphere::OnMouseMove()
 {
 	const lcPreferences& Preferences = lcGetPreferences();
-	lcViewSphereLocation Location = Preferences.mViewSphereLocation;
-
-	if (Location == lcViewSphereLocation::DISABLED)
+	if (Preferences.mViewSphereSize == 0)
 		return false;
 
 	if (IsDragging())

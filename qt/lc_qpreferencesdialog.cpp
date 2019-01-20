@@ -25,8 +25,11 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget *parent, void *data) :
 #endif
 
 	ui->lineWidth->setValidator(new QDoubleValidator(ui->lineWidth));
-	connect(ui->gridStudColor, SIGNAL(clicked()), this, SLOT(colorClicked()));
-	connect(ui->gridLineColor, SIGNAL(clicked()), this, SLOT(colorClicked()));
+	connect(ui->gridStudColor, SIGNAL(clicked()), this, SLOT(ColorButtonClicked()));
+	connect(ui->gridLineColor, SIGNAL(clicked()), this, SLOT(ColorButtonClicked()));
+	connect(ui->ViewSphereColorButton, SIGNAL(clicked()), this, SLOT(ColorButtonClicked()));
+	connect(ui->ViewSphereTextColorButton, SIGNAL(clicked()), this, SLOT(ColorButtonClicked()));
+	connect(ui->ViewSphereHighlightColorButton, SIGNAL(clicked()), this, SLOT(ColorButtonClicked()));
 	connect(ui->categoriesTree, SIGNAL(itemSelectionChanged()), this, SLOT(updateParts()));
 	ui->shortcutEdit->installEventFilter(this);
 	connect(ui->commandList, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), this, SLOT(commandChanged(QTreeWidgetItem*)));
@@ -55,8 +58,24 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget *parent, void *data) :
 	ui->gridLines->setChecked(options->Preferences.mDrawGridLines);
 	ui->gridLineSpacing->setText(QString::number(options->Preferences.mGridLineSpacing));
 	ui->axisIcon->setChecked(options->Preferences.mDrawAxes);
+
 	ui->ViewSphereLocationCombo->setCurrentIndex((int)options->Preferences.mViewSphereLocation);
-	ui->ViewSphereSizeEdit->setText(QString::number(options->Preferences.mViewSphereSize));
+
+	switch (options->Preferences.mViewSphereSize)
+	{
+	case 200:
+		ui->ViewSphereSizeCombo->setCurrentIndex(3);
+		break;
+	case 100:
+		ui->ViewSphereSizeCombo->setCurrentIndex(2);
+		break;
+	case 50:
+		ui->ViewSphereSizeCombo->setCurrentIndex(1);
+		break;
+	default:
+		ui->ViewSphereSizeCombo->setCurrentIndex(0);
+		break;
+	}
 
 	if (!gSupportsShaderObjects)
 		ui->ShadingMode->removeItem(LC_SHADING_DEFAULT_LIGHTS);
@@ -70,10 +89,20 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget *parent, void *data) :
 	pix.fill(QColor(LC_RGBA_RED(options->Preferences.mGridLineColor), LC_RGBA_GREEN(options->Preferences.mGridLineColor), LC_RGBA_BLUE(options->Preferences.mGridLineColor)));
 	ui->gridLineColor->setIcon(pix);
 
+	pix.fill(QColor(LC_RGBA_RED(options->Preferences.mViewSphereColor), LC_RGBA_GREEN(options->Preferences.mViewSphereColor), LC_RGBA_BLUE(options->Preferences.mViewSphereColor)));
+	ui->ViewSphereColorButton->setIcon(pix);
+
+	pix.fill(QColor(LC_RGBA_RED(options->Preferences.mViewSphereTextColor), LC_RGBA_GREEN(options->Preferences.mViewSphereTextColor), LC_RGBA_BLUE(options->Preferences.mViewSphereTextColor)));
+	ui->ViewSphereTextColorButton->setIcon(pix);
+
+	pix.fill(QColor(LC_RGBA_RED(options->Preferences.mViewSphereHighlightColor), LC_RGBA_GREEN(options->Preferences.mViewSphereHighlightColor), LC_RGBA_BLUE(options->Preferences.mViewSphereHighlightColor)));
+	ui->ViewSphereHighlightColorButton->setIcon(pix);
+
 	on_antiAliasing_toggled();
 	on_edgeLines_toggled();
 	on_gridStuds_toggled();
 	on_gridLines_toggled();
+	on_ViewSphereSizeCombo_currentIndexChanged((int)options->Preferences.mViewSphereLocation);
 
 	updateCategories();
 	ui->categoriesTree->setCurrentItem(ui->categoriesTree->topLevelItem(0));
@@ -135,7 +164,23 @@ void lcQPreferencesDialog::accept()
 
 	options->Preferences.mDrawAxes = ui->axisIcon->isChecked();
 	options->Preferences.mViewSphereLocation = (lcViewSphereLocation)ui->ViewSphereLocationCombo->currentIndex();
-	options->Preferences.mViewSphereSize = ui->ViewSphereSizeEdit->text().toInt();
+
+	switch (ui->ViewSphereSizeCombo->currentIndex())
+	{
+	case 3:
+		options->Preferences.mViewSphereSize = 200;
+		break;
+	case 2:
+		options->Preferences.mViewSphereSize = 100;
+		break;
+	case 1:
+		options->Preferences.mViewSphereSize = 50;
+		break;
+	default:
+		options->Preferences.mViewSphereSize = 0;
+		break;
+	}
+
 	options->Preferences.mShadingMode = (lcShadingMode)ui->ShadingMode->currentIndex();
 
 	QDialog::accept();
@@ -171,7 +216,7 @@ void lcQPreferencesDialog::on_lgeoPathBrowse_clicked()
 		ui->lgeoPath->setText(QDir::toNativeSeparators(result));
 }
 
-void lcQPreferencesDialog::colorClicked()
+void lcQPreferencesDialog::ColorButtonClicked()
 {
 	QObject *button = sender();
 	QString title;
@@ -188,6 +233,24 @@ void lcQPreferencesDialog::colorClicked()
 	{
 		color = &options->Preferences.mGridLineColor;
 		title = tr("Select Grid Line Color");
+		dialogOptions = 0;
+	}
+	else if (button == ui->ViewSphereColorButton)
+	{
+		color = &options->Preferences.mViewSphereColor;
+		title = tr("Select View Sphere Color");
+		dialogOptions = 0;
+	}
+	else if (button == ui->ViewSphereTextColorButton)
+	{
+		color = &options->Preferences.mViewSphereTextColor;
+		title = tr("Select View Sphere Text Color");
+		dialogOptions = 0;
+	}
+	else if (button == ui->ViewSphereHighlightColorButton)
+	{
+		color = &options->Preferences.mViewSphereHighlightColor;
+		title = tr("Select View Sphere Highlight Color");
 		dialogOptions = 0;
 	}
 	else
@@ -225,6 +288,17 @@ void lcQPreferencesDialog::on_gridStuds_toggled()
 void lcQPreferencesDialog::on_gridLines_toggled()
 {
 	ui->gridLineColor->setEnabled(ui->gridLines->isChecked());
+	ui->gridLineSpacing->setEnabled(ui->gridLines->isChecked());
+}
+
+void lcQPreferencesDialog::on_ViewSphereSizeCombo_currentIndexChanged(int Index)
+{
+	bool Enabled = Index != 0;
+
+	ui->ViewSphereLocationCombo->setEnabled(Enabled);
+	ui->ViewSphereColorButton->setEnabled(Enabled);
+	ui->ViewSphereTextColorButton->setEnabled(Enabled);
+	ui->ViewSphereHighlightColorButton->setEnabled(Enabled);
 }
 
 void lcQPreferencesDialog::updateCategories()

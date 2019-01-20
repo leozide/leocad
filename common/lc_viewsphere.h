@@ -36,5 +36,6 @@ protected:
 	static lcVertexBuffer mVertexBuffer;
 	static lcIndexBuffer mIndexBuffer;
 	static const float mRadius;
+	static const float mHighlightRadius;
 	static const int mSubdivisions;
 };

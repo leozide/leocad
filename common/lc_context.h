@@ -153,10 +153,12 @@ public:
 		mColorDirty = true;
 	}
 
-	void SetHighlightParams(const lcVector4& HighlightMin, const lcVector4& HighlightMax)
+	void SetHighlightParams(const lcVector4& HighlightPosition, const lcVector4& TextColor, const lcVector4& BackgroundColor, const lcVector4& HighlightColor)
 	{
-		mHighlightParams[0] = HighlightMin;
-		mHighlightParams[1] = HighlightMax;
+		mHighlightParams[0] = HighlightPosition;
+		mHighlightParams[1] = TextColor;
+		mHighlightParams[2] = BackgroundColor;
+		mHighlightParams[3] = HighlightColor;
 		mHighlightParamsDirty = true;
 	}
 
@@ -227,7 +229,7 @@ protected:
 	lcMatrix44 mViewMatrix;
 	lcMatrix44 mProjectionMatrix;
 	lcMatrix44 mViewProjectionMatrix;
-	lcVector4 mHighlightParams[3];
+	lcVector4 mHighlightParams[4];
 	bool mColorDirty;
 	bool mWorldMatrixDirty;
 	bool mViewMatrixDirty;

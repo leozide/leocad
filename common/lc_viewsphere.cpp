@@ -11,6 +11,7 @@ lcTexture* lcViewSphere::mTexture;
 lcVertexBuffer lcViewSphere::mVertexBuffer;
 lcIndexBuffer lcViewSphere::mIndexBuffer;
 const float lcViewSphere::mRadius = 1.0f;
+const float lcViewSphere::mHighlightRadius = 0.35f;
 const int lcViewSphere::mSubdivisions = 7;
 
 lcViewSphere::lcViewSphere(View* View)
@@ -179,38 +180,27 @@ void lcViewSphere::Draw()
 	Context->SetVertexFormatPosition(3);
 	Context->SetIndexBuffer(mIndexBuffer);
 
-	Context->SetHighlightParams(lcVector4(10.0f, 10.0f, 10.0f, 0.0f), lcVector4(-10.0f, -10.0f, -10.0f, 0.0f));
-	Context->DrawIndexedPrimitives(GL_TRIANGLES, mSubdivisions * mSubdivisions * 6 * 6, GL_UNSIGNED_SHORT, 0);
+	lcVector4 HighlightPosition(0.0f, 0.0f, 0.0f, 0.0f);
 
 	if (mIntersectionFlags.any())
 	{
-		lcVector4 HighlightMin(-10.0f, -10.0f, -10.0f, 0.0f), HighlightMax(10.0f, 10.0f, 10.0f, 0.0f);
-
 		for (int AxisIdx = 0; AxisIdx < 3; AxisIdx++)
 		{
 			if (mIntersectionFlags.test(2 * AxisIdx))
-			{
-				HighlightMin[AxisIdx] = 0.5f;
-				HighlightMax[AxisIdx] = 10.0f;
-			}
+				HighlightPosition[AxisIdx] = 1.0f;
 			else if (mIntersectionFlags.test(2 * AxisIdx + 1))
-			{
-				HighlightMin[AxisIdx] = -10.0f;
-				HighlightMax[AxisIdx] = -0.5f;
-			}
+				HighlightPosition[AxisIdx] = -1.0f;
 		}
 
-		Context->SetHighlightParams(HighlightMin, HighlightMax);
-
-		for (int FlagIdx = 0; FlagIdx < 6; FlagIdx++)
-		{
-			if (mIntersectionFlags.test(FlagIdx))
-			{
-				int FaceBase = FlagIdx * (mSubdivisions) * (mSubdivisions) * 6;
-				Context->DrawIndexedPrimitives(GL_TRIANGLES, mSubdivisions * mSubdivisions * 6, GL_UNSIGNED_SHORT, FaceBase * sizeof(GLushort));
-			}
-		}
+		HighlightPosition = lcVector4(lcNormalize(lcVector3(HighlightPosition)), mHighlightRadius);
 	}
+
+	const lcVector4 TextColor(0.0, 0.0, 0.0, 1.0);
+	const lcVector4 BackgroundColor(1.0, 1.0, 1.0, 1.0);
+	const lcVector4 HighlightColor(1.0, 0.0, 0.0, 1.0);
+
+	Context->SetHighlightParams(HighlightPosition, TextColor, BackgroundColor, HighlightColor);
+	Context->DrawIndexedPrimitives(GL_TRIANGLES, mSubdivisions * mSubdivisions * 6 * 6, GL_UNSIGNED_SHORT, 0);
 
 	glDisable(GL_CULL_FACE);
 	glDepthFunc(GL_LEQUAL);
@@ -326,15 +316,59 @@ std::bitset<6> lcViewSphere::GetIntersectionFlags(lcVector3& Intersection) const
 	{
 		Intersection = (StartEnd[0] + (StartEnd[1] - StartEnd[0]) * Distance) / mRadius;
 
-		const float Side = 0.5f;
-
-		for (int AxisIdx = 0; AxisIdx < 3; AxisIdx++)
+		auto CheckIntersection = [&]()
 		{
-			if (mIntersection[AxisIdx] > Side)
-				IntersectionFlags.set(2 * AxisIdx);
-			else if (mIntersection[AxisIdx] < -Side)
-				IntersectionFlags.set(2 * AxisIdx + 1);
-		}
+			for (int Axis1Idx = 0; Axis1Idx < 6; Axis1Idx++)
+			{
+				lcVector3 Point(0.0f, 0.0f, 0.0f);
+
+				Point[Axis1Idx / 2] = Axis1Idx % 2 ? -1.0f : 1.0f;
+
+				if (lcLengthSquared(Point - Intersection) < mHighlightRadius * mHighlightRadius)
+				{
+					IntersectionFlags.set(Axis1Idx);
+					return;
+				}
+
+				for (int Axis2Idx = 0; Axis2Idx < 6; Axis2Idx++)
+				{
+					if (Axis1Idx / 2 == Axis2Idx / 2)
+						continue;
+
+					lcVector3 Point(0.0f, 0.0f, 0.0f);
+					Point[Axis1Idx / 2] = Axis1Idx % 2 ? -0.70710678118f : 0.70710678118f;
+					Point[Axis2Idx / 2] = Axis2Idx % 2 ? -0.70710678118f : 0.70710678118f;
+
+					if (lcLengthSquared(Point - Intersection) < mHighlightRadius * mHighlightRadius)
+					{
+						IntersectionFlags.set(Axis1Idx);
+						IntersectionFlags.set(Axis2Idx);
+						return;
+					}
+
+					for (int Axis3Idx = 0; Axis3Idx < 6; Axis3Idx++)
+					{
+						if (Axis1Idx / 2 == Axis3Idx / 2 || Axis2Idx / 2 == Axis3Idx / 2)
+							continue;
+
+						lcVector3 Point(0.0f, 0.0f, 0.0f);
+						Point[Axis1Idx / 2] = Axis1Idx % 2 ? -0.57735026919f : 0.57735026919f;
+						Point[Axis2Idx / 2] = Axis2Idx % 2 ? -0.57735026919f : 0.57735026919f;
+						Point[Axis3Idx / 2] = Axis3Idx % 2 ? -0.57735026919f : 0.57735026919f;
+
+						if (lcLengthSquared(Point - Intersection) < mHighlightRadius * mHighlightRadius)
+						{
+							IntersectionFlags.set(Axis1Idx);
+							IntersectionFlags.set(Axis2Idx);
+							IntersectionFlags.set(Axis3Idx);
+							return;
+						}
+					}
+				}
+			}
+		};
+
+		CheckIntersection();
 	}
 
 	return IntersectionFlags;

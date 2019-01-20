@@ -51,6 +51,7 @@ lcContext::lcContext()
 	mHighlightParams[0] = lcVector4(0.0f, 0.0f, 0.0f, 0.0f);
 	mHighlightParams[1] = lcVector4(0.0f, 0.0f, 0.0f, 0.0f);
 	mHighlightParams[2] = lcVector4(0.0f, 0.0f, 0.0f, 0.0f);
+	mHighlightParams[3] = lcVector4(0.0f, 0.0f, 0.0f, 0.0f);
 	mColorDirty = false;
 	mWorldMatrixDirty = false;
 	mViewMatrixDirty = false;
@@ -1178,7 +1179,7 @@ void lcContext::FlushState()
 
 		if (mHighlightParamsDirty && Program.HighlightParamsLocation != -1)
 		{
-			glUniform4fv(Program.HighlightParamsLocation, 2, mHighlightParams[0]);
+			glUniform4fv(Program.HighlightParamsLocation, 4, mHighlightParams[0]);
 			mHighlightParamsDirty = false;
 		}
 	}

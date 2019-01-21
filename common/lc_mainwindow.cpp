@@ -1406,6 +1406,12 @@ void lcMainWindow::RemoveAllModelTabs()
 	}
 }
 
+void lcMainWindow::CloseCurrentModelTab()
+{
+	if (mModelTabWidget->count() > 1)
+		delete mModelTabWidget->currentWidget();
+}
+
 void lcMainWindow::SetCurrentModelTab(lcModel* Model)
 {
 	lcModelTabWidget* EmptyWidget = nullptr;
@@ -2551,6 +2557,10 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 
 	case LC_VIEW_FULLSCREEN:
 		ToggleFullScreen();
+		break;
+
+	case LC_VIEW_CLOSE_CURRENT_TAB:
+		CloseCurrentModelTab();
 		break;
 
 	case LC_VIEW_SHADING_WIREFRAME:

@@ -997,6 +997,13 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 		QT_TRANSLATE_NOOP("Status", "Toggle fullscreen mode"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
+	// LC_VIEW_CLOSE_CURRENT_TAB
+	{
+		QT_TRANSLATE_NOOP("Action", "View.CloseCurrentTab"),
+		QT_TRANSLATE_NOOP("Menu", "Close &Tab"),
+		QT_TRANSLATE_NOOP("Status", "Close current tab"),
+		QT_TRANSLATE_NOOP("Shortcut", "Ctrl+W")
+	},
 	// LC_VIEW_SHADE_WIREFRAME
 	{
 		QT_TRANSLATE_NOOP("Action", "View.Shade.Wireframe"),

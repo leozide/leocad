@@ -253,6 +253,7 @@ public:
 	QByteArray GetTabLayout();
 	void RestoreTabLayout(const QByteArray& TabLayout);
 	void RemoveAllModelTabs();
+	void CloseCurrentModelTab();
 	void SetCurrentModelTab(lcModel* Model);
 	void ResetCameras();
 	void AddView(View* View);

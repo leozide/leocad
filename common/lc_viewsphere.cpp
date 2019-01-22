@@ -166,19 +166,29 @@ void lcViewSphere::Draw()
 	int Bottom = (Location == lcViewSphereLocation::BOTTOM_LEFT || Location == lcViewSphereLocation::BOTTOM_RIGHT) ? 0 : Height - ViewportSize;
 	Context->SetViewport(Left, Bottom, ViewportSize, ViewportSize);
 
+	glDepthFunc(GL_ALWAYS);
+	glEnable(GL_CULL_FACE);
+
+	Context->SetVertexBuffer(mVertexBuffer);
+	Context->SetVertexFormatPosition(3);
+	Context->SetIndexBuffer(mIndexBuffer);
+
+	Context->SetMaterial(LC_MATERIAL_UNLIT_COLOR);
+	Context->SetColor(lcVector4(0.0f, 0.0f, 0.0f, 1.0f));
+
+	float Scale = 1.005f + 2.0f / (float)ViewportSize;
+	Context->SetWorldMatrix(lcMatrix44Scale(lcVector3(Scale, Scale, Scale)));
+	Context->SetViewMatrix(GetViewMatrix());
+	Context->SetProjectionMatrix(GetProjectionMatrix());
+
+	Context->DrawIndexedPrimitives(GL_TRIANGLES, mSubdivisions * mSubdivisions * 6 * 6, GL_UNSIGNED_SHORT, 0);
+
 	Context->SetMaterial(LC_MATERIAL_UNLIT_VIEW_SPHERE);
 	Context->BindTextureCubeMap(mTexture->mTexture);
 
 	Context->SetWorldMatrix(lcMatrix44Identity());
 	Context->SetViewMatrix(GetViewMatrix());
 	Context->SetProjectionMatrix(GetProjectionMatrix());
-
-	glDepthFunc(GL_ALWAYS);
-	glEnable(GL_CULL_FACE);
-	
-	Context->SetVertexBuffer(mVertexBuffer);
-	Context->SetVertexFormatPosition(3);
-	Context->SetIndexBuffer(mIndexBuffer);
 
 	lcVector4 HighlightPosition(0.0f, 0.0f, 0.0f, 0.0f);
 

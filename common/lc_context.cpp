@@ -374,6 +374,7 @@ void lcContext::SetMaterial(lcMaterialType MaterialType)
 			}
 			break;
 
+		case LC_MATERIAL_UNLIT_VIEW_SPHERE:
 		case LC_NUM_MATERIALS:
 			break;
 		}

@@ -220,7 +220,7 @@ void lcTexture::Upload(lcContext* Context)
 	int FilterIndex = FilterFlags >> LC_TEXTURE_FILTER_SHIFT;
 	int MipIndex = mFlags & LC_TEXTURE_MIPMAPS ? 0 : 1;
 
-	int Faces, Target;
+    unsigned int Faces, Target;
 
 	if ((mFlags & LC_TEXTURE_CUBEMAP) == 0)
 	{
@@ -273,7 +273,7 @@ void lcTexture::Upload(lcContext* Context)
 	if (mFlags & LC_TEXTURE_CUBEMAP)
 		Target = GL_TEXTURE_CUBE_MAP_POSITIVE_X;
 
-	for (int FaceIdx = 0; FaceIdx < Faces; FaceIdx++)
+    for (size_t FaceIdx = 0; FaceIdx < Faces; FaceIdx++)
 	{
 		void* Data = mImages[CurrentImage].mData;
 		glTexImage2D(Target, 0, Format, mWidth, mHeight, 0, Format, GL_UNSIGNED_BYTE, Data);

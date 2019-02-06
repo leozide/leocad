@@ -24,7 +24,7 @@
 #include "lc_colors.h"
 #include <functional>
 
-#define LC_ENABLE_GAMEPAD (QT_VERSION >= QT_VERSION_CHECK(5, 10, 0))
+#define LC_ENABLE_GAMEPAD (QT_VERSION >= QT_VERSION_CHECK(5, 12, 0))
 
 #if LC_ENABLE_GAMEPAD
 #include <QtGamepad/QGamepad>

@@ -84,8 +84,6 @@ void MinifigWizard::OnInitialUpdate()
 	MakeCurrent();
 	mContext->SetDefaultState();
 
-	memset(&mMinifig, 0, sizeof(lcMinifig));
-
 	static_assert(sizeof(MinifigWizard::mSectionNames) / sizeof(MinifigWizard::mSectionNames[0]) == LC_MFW_NUMITEMS, "Array size mismatch.");
 
 	const int ColorCodes[LC_MFW_NUMITEMS] = { 4, 7, 14, 7, 1, 0, 7, 4, 4, 14, 14, 7, 7, 0, 0, 7, 7 };
@@ -95,13 +93,13 @@ void MinifigWizard::OnInitialUpdate()
 	for (int i = 0; i < LC_MFW_NUMITEMS; i++)
 	{
 		mMinifig.Colors[i] = lcGetColorIndex(ColorCodes[i]);
+        mMinifig.Angles[i] = 0.0f;
+        mMinifig.Matrices[i] = lcMatrix44Identity();
 
 		PieceInfo* Info = Library->FindPiece(Pieces[i], nullptr, false, false);
-		if (Info)
-		{
-			mMinifig.Parts[i] = Info;
+        mMinifig.Parts[i] = Info;
+        if (Info)
 			Library->LoadPieceInfo(Info, false, true);
-		}
 	}
 
 	Library->WaitForLoadQueue();

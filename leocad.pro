@@ -7,7 +7,7 @@ greaterThan(QT_MAJOR_VERSION, 4) {
 }
 
 equals(QT_MAJOR_VERSION, 5) {
-    greaterThan(QT_MINOR_VERSION, 9) {
+    greaterThan(QT_MINOR_VERSION, 11) {
 		QT += gamepad
 	}
 }

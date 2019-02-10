@@ -84,6 +84,7 @@ void View::SetSelectedSubmodelActive()
 			mActiveSubmodelInstance = Piece;
 			ActiveModel = mActiveSubmodelInstance->mPieceInfo->GetModel();
 			ActiveModel->SetActive(true);
+			RemoveCamera();
 		}
 	}
 
@@ -1966,6 +1967,13 @@ void View::MoveCamera(const lcVector3& Direction)
 	lcModel* ActiveModel = GetActiveModel();
 	if (ActiveModel)
 		ActiveModel->MoveCamera(mCamera, Direction);
+}
+
+void View::Zoom(float Amount)
+{
+	lcModel* ActiveModel = GetActiveModel();
+	if (ActiveModel)
+		ActiveModel->Zoom(mCamera, Amount);
 }
 
 void View::UpdateTrackTool()

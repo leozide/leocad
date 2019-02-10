@@ -1512,9 +1512,13 @@ void lcMainWindow::RemoveView(View* View)
 void lcMainWindow::SetActiveView(View* ActiveView)
 {
 	lcModelTabWidget* TabWidget = GetTabForView(ActiveView);
+	View* CurrentActiveView = TabWidget->GetActiveView();
 
-	if (!TabWidget || TabWidget->GetActiveView() == ActiveView)
+	if (!TabWidget || CurrentActiveView == ActiveView)
 		return;
+
+	if (CurrentActiveView)
+		CurrentActiveView->SetTopSubmodelActive();
 
 	TabWidget->SetActiveView(ActiveView);
 

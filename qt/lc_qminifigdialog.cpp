@@ -197,7 +197,13 @@ void lcQMinifigDialog::on_TemplateSaveButton_clicked()
 
 void lcQMinifigDialog::on_TemplateDeleteButton_clicked()
 {
-	mMinifigWidget->DeleteTemplate(ui->TemplateComboBox->currentText());
+	QString Template = ui->TemplateComboBox->currentText();
+	QString Question = tr("Are you sure you want to delete the template '%1'?").arg(Template);
+
+	if (QMessageBox::question(this, tr("Delete Template"), Question, QMessageBox::Yes | QMessageBox::No) != QMessageBox::Yes)
+		return;
+
+	mMinifigWidget->DeleteTemplate(Template);
 
 	UpdateTemplateCombo();
 }

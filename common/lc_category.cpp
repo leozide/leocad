@@ -55,7 +55,6 @@ void lcResetCategories(lcArray<lcLibraryCategory>& Categories, bool BuiltInLibra
 		"Round=^%Cylinder | ^%Cone | ^%Dish | ^%Dome | ^%Hemisphere | ^%Round\n"
 		"Sign and Flag=^%Flag | ^%Roadsign | ^%Streetlight | ^%Flagpost | ^%Lamppost | ^%Signpost\n"
 		"Slope=^%Slope | ^%Roof\n"
-		"Space=^%Space\n"
 		"Sticker=^%Sticker\n"
 		"Support=^%Support\n"
 		"Technic=^%Technic | ^%Rack\n"

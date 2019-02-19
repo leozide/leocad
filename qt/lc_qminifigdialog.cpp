@@ -164,8 +164,9 @@ void lcQMinifigDialog::on_TemplateComboBox_currentIndexChanged(const QString& Te
 void lcQMinifigDialog::on_TemplateSaveButton_clicked()
 {
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+	QString CurrentName = ui->TemplateComboBox->currentText();
 	bool Ok;
-	QString TemplateName = QInputDialog::getText(this, tr("Save Template"), tr("Template Name:"), QLineEdit::Normal, ui->TemplateComboBox->currentText(), &Ok);
+	QString TemplateName = QInputDialog::getText(this, tr("Save Template"), tr("Template Name:"), QLineEdit::Normal, CurrentName, &Ok);
 
 	if (!Ok)
 		return;
@@ -174,6 +175,13 @@ void lcQMinifigDialog::on_TemplateSaveButton_clicked()
 	{
 		QMessageBox::information(this, tr("Save Template"), tr("Template name cannot be empty."));
 		return;
+	}
+
+	if (TemplateName == CurrentName)
+	{
+		QString Question = tr("Are you sure you want to overwrite the template '%1'?").arg(TemplateName);
+		if (QMessageBox::question(this, tr("Overwrite Template"), Question, QMessageBox::Yes | QMessageBox::No) != QMessageBox::Yes)
+			return;
 	}
 
 	lcMinifigTemplate Template;

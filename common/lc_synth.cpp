@@ -20,6 +20,39 @@ void lcSynthInit()
 
 	lcHoseInfo HoseInfo[] =
 	{
+		{ "76263.dat",    lcSynthType::FLEX_HOSE,       60.0f,   29 }, // Technic Flex-System Hose  3L (60LDU)
+		{ "76250.dat",    lcSynthType::FLEX_HOSE,       80.0f,   39 }, // Technic Flex-System Hose  4L (80LDU)
+		{ "76307.dat",    lcSynthType::FLEX_HOSE,      100.0f,   49 }, // Technic Flex-System Hose  5L (100LDU)
+		{ "76279.dat",    lcSynthType::FLEX_HOSE,      120.0f,   59 }, // Technic Flex-System Hose  6L (120LDU)
+		{ "76289.dat",    lcSynthType::FLEX_HOSE,      140.0f,   69 }, // Technic Flex-System Hose  7L (140LDU)
+		{ "76260.dat",    lcSynthType::FLEX_HOSE,      160.0f,   79 }, // Technic Flex-System Hose  8L (160LDU)
+		{ "76324.dat",    lcSynthType::FLEX_HOSE,      180.0f,   89 }, // Technic Flex-System Hose  9L (180LDU)
+		{ "76348.dat",    lcSynthType::FLEX_HOSE,      200.0f,   99 }, // Technic Flex-System Hose 10L (200LDU)
+		{ "71505.dat",    lcSynthType::FLEX_HOSE,      220.0f,  109 }, // Technic Flex-System Hose 11L (220LDU)
+		{ "71175.dat",    lcSynthType::FLEX_HOSE,      240.0f,  119 }, // Technic Flex-System Hose 12L (240LDU)
+		{ "71551.dat",    lcSynthType::FLEX_HOSE,      260.0f,  129 }, // Technic Flex-System Hose 13L (260LDU)
+		{ "71177.dat",    lcSynthType::FLEX_HOSE,      280.0f,  139 }, // Technic Flex-System Hose 14L (280LDU)
+		{ "71194.dat",    lcSynthType::FLEX_HOSE,      300.0f,  149 }, // Technic Flex-System Hose 15L (300LDU)
+		{ "71192.dat",    lcSynthType::FLEX_HOSE,      320.0f,  159 }, // Technic Flex-System Hose 16L (320LDU)
+		{ "76270.dat",    lcSynthType::FLEX_HOSE,      340.0f,  169 }, // Technic Flex-System Hose 17L (340LDU)
+		{ "71582.dat",    lcSynthType::FLEX_HOSE,      360.0f,  179 }, // Technic Flex-System Hose 18L (360LDU)
+		{ "22463.dat",    lcSynthType::FLEX_HOSE,      380.0f,  189 }, // Technic Flex-System Hose 19L (380LDU)
+		{ "76276.dat",    lcSynthType::FLEX_HOSE,      400.0f,  199 }, // Technic Flex-System Hose 20L (400LDU)
+		{ "70978.dat",    lcSynthType::FLEX_HOSE,      420.0f,  209 }, // Technic Flex-System Hose 21L (420LDU)
+		{ "76252.dat",    lcSynthType::FLEX_HOSE,      440.0f,  219 }, // Technic Flex-System Hose 22L (440LDU)
+		{ "76254.dat",    lcSynthType::FLEX_HOSE,      460.0f,  229 }, // Technic Flex-System Hose 23L (460LDU)
+		{ "76277.dat",    lcSynthType::FLEX_HOSE,      480.0f,  239 }, // Technic Flex-System Hose 24L (480LDU)
+		{ "53475.dat",    lcSynthType::FLEX_HOSE,      520.0f,  259 }, // Technic Flex-System Hose 26L (520LDU)
+		{ "76280.dat",    lcSynthType::FLEX_HOSE,      560.0f,  279 }, // Technic Flex-System Hose 28L (560LDU)
+		{ "76389.dat",    lcSynthType::FLEX_HOSE,      580.0f,  289 }, // Technic Flex-System Hose 29L (580LDU)
+		{ "76282.dat",    lcSynthType::FLEX_HOSE,      600.0f,  299 }, // Technic Flex-System Hose 30L (600LDU)
+		{ "76283.dat",    lcSynthType::FLEX_HOSE,      620.0f,  309 }, // Technic Flex-System Hose 31L (620LDU)
+		{ "57274.dat",    lcSynthType::FLEX_HOSE,      640.0f,  319 }, // Technic Flex-System Hose 32L (640LDU)
+		{ "42688.dat",    lcSynthType::FLEX_HOSE,      660.0f,  329 }, // Technic Flex-System Hose 33L (660LDU)
+		{ "22461.dat",    lcSynthType::FLEX_HOSE,      680.0f,  339 }, // Technic Flex-System Hose 34L (680LDU)
+		{ "46305.dat",    lcSynthType::FLEX_HOSE,      800.0f,  399 }, // Technic Flex-System Hose 40L (800LDU)
+		{ "76281.dat",    lcSynthType::FLEX_HOSE,      900.0f,  449 }, // Technic Flex-System Hose 45L (900LDU)
+		{ "22296.dat",    lcSynthType::FLEX_HOSE,     1060.0f,  529 }, // Technic Flex-System Hose 53L (1060LDU)
 		{ "72504.dat",    lcSynthType::RIBBED_HOSE,     31.25f,   4 }, // Technic Ribbed Hose  2L
 		{ "72706.dat",    lcSynthType::RIBBED_HOSE,     50.00f,   7 }, // Technic Ribbed Hose  3L
 		{ "71952.dat",    lcSynthType::RIBBED_HOSE,     75.00f,  11 }, // Technic Ribbed Hose  4L
@@ -78,6 +111,13 @@ lcSynthInfo::lcSynthInfo(lcSynthType Type, float Length, int NumSections, PieceI
 
 	switch (mType)
 	{
+	case lcSynthType::FLEX_HOSE:
+		EdgeSectionLength = 1.0f;
+		MidSectionLength = 2.0f;
+		mRigidEdges = true;
+		mCurve = true;
+		break;
+
 	case lcSynthType::RIBBED_HOSE:
 		EdgeSectionLength = 6.25f;
 		MidSectionLength = 6.25f;
@@ -108,17 +148,23 @@ lcSynthInfo::lcSynthInfo(lcSynthType Type, float Length, int NumSections, PieceI
 		break;
 	}
 
-	if (mType != lcSynthType::SHOCK_ABSORBER && mType != lcSynthType::ACTUATOR && mType != lcSynthType::STRING_BRAIDED)
+	switch (mType)
 	{
+	case lcSynthType::RIBBED_HOSE:
+	case lcSynthType::FLEXIBLE_AXLE:
 		mStart.Transform = lcMatrix44(lcMatrix33(lcVector3(0.0f, 0.0f, 1.0f), lcVector3(1.0f, 0.0f, 0.0f), lcVector3(0.0f, 1.0f, 0.0f)), lcVector3(0.0f, 0.0f, 0.0f));
 		mMiddle.Transform = lcMatrix44Identity();
 		mEnd.Transform = lcMatrix44(lcMatrix33(lcVector3(0.0f, 0.0f, 1.0f), lcVector3(1.0f, 0.0f, 0.0f), lcVector3(0.0f, 1.0f, 0.0f)), lcVector3(0.0f, 0.0f, 0.0f));
-	}
-	else
-	{
+		break;
+
+	case lcSynthType::FLEX_HOSE:
+	case lcSynthType::SHOCK_ABSORBER:
+	case lcSynthType::ACTUATOR:
+	case lcSynthType::STRING_BRAIDED:
 		mStart.Transform = lcMatrix44Identity();
 		mMiddle.Transform = lcMatrix44Identity();
 		mEnd.Transform = lcMatrix44Identity();
+		break;
 	}
 
 	mStart.Length = EdgeSectionLength;
@@ -134,6 +180,10 @@ void lcSynthInfo::GetDefaultControlPoints(lcArray<lcPieceControlPoint>& ControlP
 
 	switch (mType)
 	{
+	case lcSynthType::FLEX_HOSE:
+		Scale = 12.0f;
+		break;
+
 	case lcSynthType::RIBBED_HOSE:
 		Scale = 80.0f;
 		break;
@@ -160,6 +210,11 @@ void lcSynthInfo::GetDefaultControlPoints(lcArray<lcPieceControlPoint>& ControlP
 	default:
 		ControlPoints[0].Transform = lcMatrix44Translation(lcVector3(-HalfLength, 0.0f, 0.0f));
 		ControlPoints[1].Transform = lcMatrix44Translation(lcVector3( HalfLength, 0.0f, 0.0f));
+		break;
+
+	case lcSynthType::FLEX_HOSE:
+		ControlPoints[0].Transform = lcMatrix44Translation(lcVector3(0.0f, 0.0f, -mLength));
+		ControlPoints[1].Transform = lcMatrix44Translation(lcVector3(0.0f, 0.0f, 0.0f));
 		break;
 
 	case lcSynthType::SHOCK_ABSORBER:
@@ -238,10 +293,16 @@ void lcSynthInfo::CalculateCurveSections(const lcArray<lcPieceControlPoint>& Con
 		{
 			if (mRigidEdges)
 			{
-				if (mType != lcSynthType::STRING_BRAIDED)
+				switch (mType)
+				{
+				default:
 					StartTransform.SetTranslation(lcMul30(lcVector3(0.0f, mStart.Length, 0.0f), StartTransform) + StartTransform.GetTranslation());
-				else
+					break;
+
+				case lcSynthType::STRING_BRAIDED:
 					StartTransform.SetTranslation(lcMul30(lcVector3(mStart.Length, 0.0f, 0.0f), StartTransform) + StartTransform.GetTranslation());
+					break;
+				}
 				SectionLength = 0.0f;
 			}
 			else
@@ -253,15 +314,17 @@ void lcSynthInfo::CalculateCurveSections(const lcArray<lcPieceControlPoint>& Con
 		EndTransform = lcMatrix44(lcMul(lcMul(lcMatrix33(mEnd.Transform), lcMatrix33(EndTransform)), lcMatrix33Scale(lcVector3(1.0f, -1.0f, 1.0f))), EndTransform.GetTranslation());
 
 		SegmentControlPoints[0] = StartTransform.GetTranslation();
-		if (mType != lcSynthType::STRING_BRAIDED)
+		switch (mType)
 		{
+		default:
 			SegmentControlPoints[1] = lcMul31(lcVector3(0.0f, ControlPoints[ControlPointIdx].Scale, 0.0f), StartTransform);
 			SegmentControlPoints[2] = lcMul31(lcVector3(0.0f, -ControlPoints[ControlPointIdx + 1].Scale, 0.0f), EndTransform);
-		}
-		else
-		{
+			break;
+
+		case lcSynthType::STRING_BRAIDED:
 			SegmentControlPoints[1] = lcMul31(lcVector3(ControlPoints[ControlPointIdx].Scale, 0.0f, 0.0f), StartTransform);
 			SegmentControlPoints[2] = lcMul31(lcVector3(-ControlPoints[ControlPointIdx + 1].Scale, 0.0f, 0.0f), EndTransform);
+			break;
 		}
 		SegmentControlPoints[3] = EndTransform.GetTranslation();
 
@@ -368,6 +431,114 @@ void lcSynthInfo::CalculateLineSections(const lcArray<lcPieceControlPoint>& Cont
 		if (SectionCallback)
 			SectionCallback(Transform.GetTranslation(), ControlPointIdx, 1.0f);
 	}
+}
+
+void lcSynthInfo::AddFlexHoseParts(lcMemFile& File, lcLibraryMeshData& MeshData, const lcArray<lcMatrix44>& Sections) const
+{
+	char Line[256];
+
+	{
+		const int SectionIdx = 0;
+		lcMatrix33 Transform(lcMul(lcMatrix33Scale(lcVector3(-1.0f, 1.0f, 1.0f)), lcMatrix33(Sections[SectionIdx])));
+		lcVector3 Offset = lcMul31(lcVector3(0.0f, -1.0f, 0.0f), Sections[SectionIdx]);
+
+		sprintf(Line, "1 16 %f %f %f %f %f %f %f %f %f %f %f %f u9053.dat\n", Offset[0], Offset[1], Offset[2], Transform[0][0], Transform[1][0], Transform[2][0],
+				Transform[0][1], Transform[1][1], Transform[2][1], Transform[0][2], Transform[1][2], Transform[2][2]);
+
+		File.WriteBuffer(Line, strlen(Line));
+	}
+
+	{
+		const int SectionIdx = Sections.GetSize() - 1;
+		lcMatrix33 Transform(lcMul(lcMatrix33Scale(lcVector3(1.0f, -1.0f, 1.0f)), lcMatrix33(Sections[SectionIdx])));
+		lcVector3 Offset = lcMul31(lcVector3(0.0f, 1.0f, 0.0f), Sections[SectionIdx]);
+
+		sprintf(Line, "1 16 %f %f %f %f %f %f %f %f %f %f %f %f u9053.dat\n", Offset[0], Offset[1], Offset[2], Transform[0][0], Transform[1][0], Transform[2][0],
+				Transform[0][1], Transform[1][1], Transform[2][1], Transform[0][2], Transform[1][2], Transform[2][2]);
+
+		File.WriteBuffer(Line, strlen(Line));
+	}
+
+	const lcLibraryMeshVertex OutsideSectionVertices[16] =
+	{
+		{ lcVector3( 4.00000f, 0.0f,  0.00000f), lcVector3( 1.000000f, 0.0f,  0.000000f), 4.0f },
+		{ lcVector3( 3.69552f, 0.0f,  1.53073f), lcVector3( 0.923880f, 0.0f,  0.382683f), 4.0f },
+		{ lcVector3( 2.82843f, 0.0f,  2.82843f), lcVector3( 0.707107f, 0.0f,  0.707107f), 4.0f },
+		{ lcVector3( 1.53073f, 0.0f,  3.69552f), lcVector3( 0.382683f, 0.0f,  0.923880f), 4.0f },
+		{ lcVector3( 0.00000f, 0.0f,  4.00000f), lcVector3( 0.000000f, 0.0f,  1.000000f), 4.0f },
+		{ lcVector3(-1.53073f, 0.0f,  3.69552f), lcVector3(-0.382683f, 0.0f,  0.923880f), 4.0f },
+		{ lcVector3(-2.82843f, 0.0f,  2.82843f), lcVector3(-0.707107f, 0.0f,  0.707107f), 4.0f },
+		{ lcVector3(-3.69552f, 0.0f,  1.53073f), lcVector3(-0.923880f, 0.0f,  0.382683f), 4.0f },
+		{ lcVector3(-4.00000f, 0.0f,  0.00000f), lcVector3(-1.000000f, 0.0f,  0.000000f), 4.0f },
+		{ lcVector3(-3.69552f, 0.0f, -1.53073f), lcVector3(-0.923879f, 0.0f, -0.382684f), 4.0f },
+		{ lcVector3(-2.82843f, 0.0f, -2.82843f), lcVector3(-0.707107f, 0.0f, -0.707107f), 4.0f },
+		{ lcVector3(-1.53073f, 0.0f, -3.69552f), lcVector3(-0.382683f, 0.0f, -0.923880f), 4.0f },
+		{ lcVector3( 0.00000f, 0.0f, -4.00000f), lcVector3( 0.000000f, 0.0f, -1.000000f), 4.0f },
+		{ lcVector3( 1.53073f, 0.0f, -3.69552f), lcVector3( 0.382684f, 0.0f, -0.923879f), 4.0f },
+		{ lcVector3( 2.82843f, 0.0f, -2.82843f), lcVector3( 0.707107f, 0.0f, -0.707107f), 4.0f },
+		{ lcVector3( 3.69552f, 0.0f, -1.53073f), lcVector3( 0.923880f, 0.0f, -0.382683f), 4.0f },
+	};
+
+	const lcLibraryMeshVertex InsideSectionVertices[16] =
+	{
+		{ lcVector3( 2.00000f, 0.0f,  0.00000f), lcVector3(-1.00000f, 0.0f,  0.00000f), 4.0f },
+		{ lcVector3( 1.84776f, 0.0f,  0.76536f), lcVector3(-0.92388f, 0.0f, -0.38268f), 4.0f },
+		{ lcVector3( 1.41421f, 0.0f,  1.41421f), lcVector3(-0.70710f, 0.0f, -0.70710f), 4.0f },
+		{ lcVector3( 0.76536f, 0.0f,  1.84776f), lcVector3(-0.38268f, 0.0f, -0.92388f), 4.0f },
+		{ lcVector3( 0.00000f, 0.0f,  2.00000f), lcVector3( 0.00000f, 0.0f, -1.00000f), 4.0f },
+		{ lcVector3(-0.76536f, 0.0f,  1.84776f), lcVector3( 0.38268f, 0.0f, -0.92388f), 4.0f },
+		{ lcVector3(-1.41421f, 0.0f,  1.41421f), lcVector3( 0.70710f, 0.0f, -0.70710f), 4.0f },
+		{ lcVector3(-1.84776f, 0.0f,  0.76536f), lcVector3( 0.92388f, 0.0f, -0.38268f), 4.0f },
+		{ lcVector3(-2.00000f, 0.0f,  0.00000f), lcVector3( 1.00000f, 0.0f,  0.00000f), 4.0f },
+		{ lcVector3(-1.84776f, 0.0f, -0.76536f), lcVector3( 0.92387f, 0.0f,  0.38268f), 4.0f },
+		{ lcVector3(-1.41421f, 0.0f, -1.41421f), lcVector3( 0.70710f, 0.0f,  0.70710f), 4.0f },
+		{ lcVector3(-0.76536f, 0.0f, -1.84776f), lcVector3( 0.38268f, 0.0f,  0.92388f), 4.0f },
+		{ lcVector3( 0.00000f, 0.0f, -2.00000f), lcVector3( 0.00000f, 0.0f,  1.00000f), 4.0f },
+		{ lcVector3( 0.76536f, 0.0f, -1.84776f), lcVector3(-0.38268f, 0.0f,  0.92387f), 4.0f },
+		{ lcVector3( 1.41421f, 0.0f, -1.41421f), lcVector3(-0.70710f, 0.0f,  0.70710f), 4.0f },
+		{ lcVector3( 1.84776f, 0.0f, -0.76536f), lcVector3(-0.92388f, 0.0f,  0.38268f), 4.0f },
+	};
+
+	auto AddSectionVertices = [&MeshData, &Sections](const lcLibraryMeshVertex* SectionVertices, int NumSectionVertices)
+	{
+		int BaseVertex;
+		lcLibraryMeshVertex* VertexBuffer;
+		quint32* IndexBuffer;
+		MeshData.AddVertices(LC_MESHDATA_SHARED, NumSectionVertices * (Sections.GetSize() - 1), &BaseVertex, &VertexBuffer);
+
+		for (int SectionIdx = 1; SectionIdx < Sections.GetSize(); SectionIdx++)
+		{
+			for (int VertexIdx = 0; VertexIdx < NumSectionVertices; VertexIdx++)
+			{
+				VertexBuffer->Position = lcMul31(SectionVertices[VertexIdx].Position, Sections[SectionIdx]);
+				VertexBuffer->Normal = lcMul30(SectionVertices[VertexIdx].Normal, Sections[SectionIdx]);
+				VertexBuffer->NormalWeight = SectionVertices[VertexIdx].NormalWeight;
+				VertexBuffer++;
+			}
+		}
+
+		MeshData.AddIndices(LC_MESHDATA_SHARED, LC_MESH_TRIANGLES, 16, 6 * NumSectionVertices * (Sections.GetSize() - 2), &IndexBuffer);
+
+		for (int SectionIdx = 1; SectionIdx < Sections.GetSize() - 1; SectionIdx++)
+		{
+			for (int VertexIdx = 0; VertexIdx < NumSectionVertices; VertexIdx++)
+			{
+				int Vertex1 = BaseVertex + VertexIdx;
+				int Vertex2 = BaseVertex + (VertexIdx + 1) % NumSectionVertices;
+
+				*IndexBuffer++ = Vertex1;
+				*IndexBuffer++ = Vertex2;
+				*IndexBuffer++ = Vertex1 + NumSectionVertices;
+				*IndexBuffer++ = Vertex2;
+				*IndexBuffer++ = Vertex2 + NumSectionVertices;
+				*IndexBuffer++ = Vertex1 + NumSectionVertices;
+			}
+			BaseVertex += NumSectionVertices;
+		}
+	};
+
+	AddSectionVertices(OutsideSectionVertices, sizeof(OutsideSectionVertices) / sizeof(OutsideSectionVertices[0]));
+	AddSectionVertices(InsideSectionVertices, sizeof(InsideSectionVertices) / sizeof(InsideSectionVertices[0]));
 }
 
 void lcSynthInfo::AddRibbedHoseParts(lcMemFile& File, const lcArray<lcMatrix44>& Sections) const
@@ -730,6 +901,10 @@ lcMesh* lcSynthInfo::CreateMesh(const lcArray<lcPieceControlPoint>& ControlPoint
 
 	switch (mType)
 	{
+	case lcSynthType::FLEX_HOSE:
+		AddFlexHoseParts(File, MeshData, Sections);
+		break;
+
 	case lcSynthType::RIBBED_HOSE:
 		AddRibbedHoseParts(File, Sections);
 		break;

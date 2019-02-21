@@ -20,74 +20,76 @@ void lcSynthInit()
 
 	lcHoseInfo HoseInfo[] =
 	{
-		{ "76263.dat",    lcSynthType::FLEX_HOSE,       60.0f,   29 }, // Technic Flex-System Hose  3L (60LDU)
-		{ "76250.dat",    lcSynthType::FLEX_HOSE,       80.0f,   39 }, // Technic Flex-System Hose  4L (80LDU)
-		{ "76307.dat",    lcSynthType::FLEX_HOSE,      100.0f,   49 }, // Technic Flex-System Hose  5L (100LDU)
-		{ "76279.dat",    lcSynthType::FLEX_HOSE,      120.0f,   59 }, // Technic Flex-System Hose  6L (120LDU)
-		{ "76289.dat",    lcSynthType::FLEX_HOSE,      140.0f,   69 }, // Technic Flex-System Hose  7L (140LDU)
-		{ "76260.dat",    lcSynthType::FLEX_HOSE,      160.0f,   79 }, // Technic Flex-System Hose  8L (160LDU)
-		{ "76324.dat",    lcSynthType::FLEX_HOSE,      180.0f,   89 }, // Technic Flex-System Hose  9L (180LDU)
-		{ "76348.dat",    lcSynthType::FLEX_HOSE,      200.0f,   99 }, // Technic Flex-System Hose 10L (200LDU)
-		{ "71505.dat",    lcSynthType::FLEX_HOSE,      220.0f,  109 }, // Technic Flex-System Hose 11L (220LDU)
-		{ "71175.dat",    lcSynthType::FLEX_HOSE,      240.0f,  119 }, // Technic Flex-System Hose 12L (240LDU)
-		{ "71551.dat",    lcSynthType::FLEX_HOSE,      260.0f,  129 }, // Technic Flex-System Hose 13L (260LDU)
-		{ "71177.dat",    lcSynthType::FLEX_HOSE,      280.0f,  139 }, // Technic Flex-System Hose 14L (280LDU)
-		{ "71194.dat",    lcSynthType::FLEX_HOSE,      300.0f,  149 }, // Technic Flex-System Hose 15L (300LDU)
-		{ "71192.dat",    lcSynthType::FLEX_HOSE,      320.0f,  159 }, // Technic Flex-System Hose 16L (320LDU)
-		{ "76270.dat",    lcSynthType::FLEX_HOSE,      340.0f,  169 }, // Technic Flex-System Hose 17L (340LDU)
-		{ "71582.dat",    lcSynthType::FLEX_HOSE,      360.0f,  179 }, // Technic Flex-System Hose 18L (360LDU)
-		{ "22463.dat",    lcSynthType::FLEX_HOSE,      380.0f,  189 }, // Technic Flex-System Hose 19L (380LDU)
-		{ "76276.dat",    lcSynthType::FLEX_HOSE,      400.0f,  199 }, // Technic Flex-System Hose 20L (400LDU)
-		{ "70978.dat",    lcSynthType::FLEX_HOSE,      420.0f,  209 }, // Technic Flex-System Hose 21L (420LDU)
-		{ "76252.dat",    lcSynthType::FLEX_HOSE,      440.0f,  219 }, // Technic Flex-System Hose 22L (440LDU)
-		{ "76254.dat",    lcSynthType::FLEX_HOSE,      460.0f,  229 }, // Technic Flex-System Hose 23L (460LDU)
-		{ "76277.dat",    lcSynthType::FLEX_HOSE,      480.0f,  239 }, // Technic Flex-System Hose 24L (480LDU)
-		{ "53475.dat",    lcSynthType::FLEX_HOSE,      520.0f,  259 }, // Technic Flex-System Hose 26L (520LDU)
-		{ "76280.dat",    lcSynthType::FLEX_HOSE,      560.0f,  279 }, // Technic Flex-System Hose 28L (560LDU)
-		{ "76389.dat",    lcSynthType::FLEX_HOSE,      580.0f,  289 }, // Technic Flex-System Hose 29L (580LDU)
-		{ "76282.dat",    lcSynthType::FLEX_HOSE,      600.0f,  299 }, // Technic Flex-System Hose 30L (600LDU)
-		{ "76283.dat",    lcSynthType::FLEX_HOSE,      620.0f,  309 }, // Technic Flex-System Hose 31L (620LDU)
-		{ "57274.dat",    lcSynthType::FLEX_HOSE,      640.0f,  319 }, // Technic Flex-System Hose 32L (640LDU)
-		{ "42688.dat",    lcSynthType::FLEX_HOSE,      660.0f,  329 }, // Technic Flex-System Hose 33L (660LDU)
-		{ "22461.dat",    lcSynthType::FLEX_HOSE,      680.0f,  339 }, // Technic Flex-System Hose 34L (680LDU)
-		{ "46305.dat",    lcSynthType::FLEX_HOSE,      800.0f,  399 }, // Technic Flex-System Hose 40L (800LDU)
-		{ "76281.dat",    lcSynthType::FLEX_HOSE,      900.0f,  449 }, // Technic Flex-System Hose 45L (900LDU)
-		{ "22296.dat",    lcSynthType::FLEX_HOSE,     1060.0f,  529 }, // Technic Flex-System Hose 53L (1060LDU)
-		{ "72504.dat",    lcSynthType::RIBBED_HOSE,     31.25f,   4 }, // Technic Ribbed Hose  2L
-		{ "72706.dat",    lcSynthType::RIBBED_HOSE,     50.00f,   7 }, // Technic Ribbed Hose  3L
-		{ "71952.dat",    lcSynthType::RIBBED_HOSE,     75.00f,  11 }, // Technic Ribbed Hose  4L
-		{ "72853.dat",    lcSynthType::RIBBED_HOSE,     93.75f,  14 }, // Technic Ribbed Hose  5L
-		{ "71944.dat",    lcSynthType::RIBBED_HOSE,    112.50f,  17 }, // Technic Ribbed Hose  6L
-		{ "57719.dat",    lcSynthType::RIBBED_HOSE,    131.25f,  20 }, // Technic Ribbed Hose  7L
-		{ "71951.dat",    lcSynthType::RIBBED_HOSE,    150.00f,  23 }, // Technic Ribbed Hose  8L
-		{ "71917.dat",    lcSynthType::RIBBED_HOSE,    175.00f,  27 }, // Technic Ribbed Hose  9L
-		{ "71949.dat",    lcSynthType::RIBBED_HOSE,    193.75f,  30 }, // Technic Ribbed Hose 10L
-		{ "71986.dat",    lcSynthType::RIBBED_HOSE,    212.50f,  33 }, // Technic Ribbed Hose 11L
-		{ "71819.dat",    lcSynthType::RIBBED_HOSE,    231.25f,  36 }, // Technic Ribbed Hose 12L
-		{ "71923.dat",    lcSynthType::RIBBED_HOSE,    275.00f,  43 }, // Technic Ribbed Hose 14L
-		{ "71946.dat",    lcSynthType::RIBBED_HOSE,    293.75f,  46 }, // Technic Ribbed Hose 15L
-		{ "71947.dat",    lcSynthType::RIBBED_HOSE,    312.50f,  49 }, // Technic Ribbed Hose 16L
-		{ "22900.dat",    lcSynthType::RIBBED_HOSE,    331.25f,  52 }, // Technic Ribbed Hose 17L
-		{ "72039.dat",    lcSynthType::RIBBED_HOSE,    350.00f,  55 }, // Technic Ribbed Hose 18L
-		{ "43675.dat",    lcSynthType::RIBBED_HOSE,    375.00f,  58 }, // Technic Ribbed Hose 19L
-		{ "23397.dat",    lcSynthType::RIBBED_HOSE,    468.75f,  74 }, // Technic Ribbed Hose 24L
-		{ "33763.dat",    lcSynthType::RIBBED_HOSE,    512.50f,  81 }, // Technic Ribbed Hose 26L
-		{ "32580.dat",    lcSynthType::FLEXIBLE_AXLE,  120.00f,  15 }, // Technic Axle Flexible  7
-		{ "32199.dat",    lcSynthType::FLEXIBLE_AXLE,  200.00f,  35 }, // Technic Axle Flexible 11
-		{ "55709.dat",    lcSynthType::FLEXIBLE_AXLE,  200.00f,  35 }, // Technic Axle Flexible 11
-		{ "32200.dat",    lcSynthType::FLEXIBLE_AXLE,  220.00f,  40 }, // Technic Axle Flexible 12
-		{ "32201.dat",    lcSynthType::FLEXIBLE_AXLE,  260.00f,  50 }, // Technic Axle Flexible 14
-		{ "32202.dat",    lcSynthType::FLEXIBLE_AXLE,  300.00f,  60 }, // Technic Axle Flexible 16
-		{ "32235.dat",    lcSynthType::FLEXIBLE_AXLE,  360.00f,  75 }, // Technic Axle Flexible 19
-		{ "76384.dat",    lcSynthType::STRING_BRAIDED, 200.00f,  46 }, // String Braided 11L with End Studs
-		{ "75924.dat",    lcSynthType::STRING_BRAIDED, 400.00f,  96 }, // String Braided 21L with End Studs
-		{ "572C02.dat",   lcSynthType::STRING_BRAIDED, 800.00f, 196 }, // String Braided 41L with End Studs
-		{ "73129.dat",    lcSynthType::SHOCK_ABSORBER, 110.00f,   1 }, // Technic Shock Absorber 6.5L
-		{ "41838.dat",    lcSynthType::SHOCK_ABSORBER, 110.00f,   1 }, // Technic Shock Absorber 6.5L Soft
-		{ "76138.dat",    lcSynthType::SHOCK_ABSORBER, 110.00f,   1 }, // Technic Shock Absorber 6.5L Stiff
-		{ "76537.dat",    lcSynthType::SHOCK_ABSORBER, 110.00f,   1 }, // Technic Shock Absorber 6.5L Extra Stiff
-		{ "61927C01.dat", lcSynthType::ACTUATOR,       270.00f,   1 }, // Technic Power Functions Linear Actuator (Extended)
-		{ "61927.dat",    lcSynthType::ACTUATOR,       170.00f,   1 }  // Technic Power Functions Linear Actuator (Contracted)
+		{ "73590a.dat",   lcSynthType::HOSE_FLEXIBLE,    140.0f,   51 }, // Hose Flexible  8.5L without Tabs
+		{ "73590b.dat",   lcSynthType::HOSE_FLEXIBLE,    140.0f,   51 }, // Hose Flexible  8.5L with Tabs
+		{ "76263.dat",    lcSynthType::FLEX_SYSTEM_HOSE,   60.0f,  29 }, // Technic Flex-System Hose  3L (60LDU)
+		{ "76250.dat",    lcSynthType::FLEX_SYSTEM_HOSE,   80.0f,  39 }, // Technic Flex-System Hose  4L (80LDU)
+		{ "76307.dat",    lcSynthType::FLEX_SYSTEM_HOSE,  100.0f,  49 }, // Technic Flex-System Hose  5L (100LDU)
+		{ "76279.dat",    lcSynthType::FLEX_SYSTEM_HOSE,  120.0f,  59 }, // Technic Flex-System Hose  6L (120LDU)
+		{ "76289.dat",    lcSynthType::FLEX_SYSTEM_HOSE,  140.0f,  69 }, // Technic Flex-System Hose  7L (140LDU)
+		{ "76260.dat",    lcSynthType::FLEX_SYSTEM_HOSE,  160.0f,  79 }, // Technic Flex-System Hose  8L (160LDU)
+		{ "76324.dat",    lcSynthType::FLEX_SYSTEM_HOSE,  180.0f,  89 }, // Technic Flex-System Hose  9L (180LDU)
+		{ "76348.dat",    lcSynthType::FLEX_SYSTEM_HOSE,  200.0f,  99 }, // Technic Flex-System Hose 10L (200LDU)
+		{ "71505.dat",    lcSynthType::FLEX_SYSTEM_HOSE,  220.0f, 109 }, // Technic Flex-System Hose 11L (220LDU)
+		{ "71175.dat",    lcSynthType::FLEX_SYSTEM_HOSE,  240.0f, 119 }, // Technic Flex-System Hose 12L (240LDU)
+		{ "71551.dat",    lcSynthType::FLEX_SYSTEM_HOSE,  260.0f, 129 }, // Technic Flex-System Hose 13L (260LDU)
+		{ "71177.dat",    lcSynthType::FLEX_SYSTEM_HOSE,  280.0f, 139 }, // Technic Flex-System Hose 14L (280LDU)
+		{ "71194.dat",    lcSynthType::FLEX_SYSTEM_HOSE,  300.0f, 149 }, // Technic Flex-System Hose 15L (300LDU)
+		{ "71192.dat",    lcSynthType::FLEX_SYSTEM_HOSE,  320.0f, 159 }, // Technic Flex-System Hose 16L (320LDU)
+		{ "76270.dat",    lcSynthType::FLEX_SYSTEM_HOSE,  340.0f, 169 }, // Technic Flex-System Hose 17L (340LDU)
+		{ "71582.dat",    lcSynthType::FLEX_SYSTEM_HOSE,  360.0f, 179 }, // Technic Flex-System Hose 18L (360LDU)
+		{ "22463.dat",    lcSynthType::FLEX_SYSTEM_HOSE,  380.0f, 189 }, // Technic Flex-System Hose 19L (380LDU)
+		{ "76276.dat",    lcSynthType::FLEX_SYSTEM_HOSE,  400.0f, 199 }, // Technic Flex-System Hose 20L (400LDU)
+		{ "70978.dat",    lcSynthType::FLEX_SYSTEM_HOSE,  420.0f, 209 }, // Technic Flex-System Hose 21L (420LDU)
+		{ "76252.dat",    lcSynthType::FLEX_SYSTEM_HOSE,  440.0f, 219 }, // Technic Flex-System Hose 22L (440LDU)
+		{ "76254.dat",    lcSynthType::FLEX_SYSTEM_HOSE,  460.0f, 229 }, // Technic Flex-System Hose 23L (460LDU)
+		{ "76277.dat",    lcSynthType::FLEX_SYSTEM_HOSE,  480.0f, 239 }, // Technic Flex-System Hose 24L (480LDU)
+		{ "53475.dat",    lcSynthType::FLEX_SYSTEM_HOSE,  520.0f, 259 }, // Technic Flex-System Hose 26L (520LDU)
+		{ "76280.dat",    lcSynthType::FLEX_SYSTEM_HOSE,  560.0f, 279 }, // Technic Flex-System Hose 28L (560LDU)
+		{ "76389.dat",    lcSynthType::FLEX_SYSTEM_HOSE,  580.0f, 289 }, // Technic Flex-System Hose 29L (580LDU)
+		{ "76282.dat",    lcSynthType::FLEX_SYSTEM_HOSE,  600.0f, 299 }, // Technic Flex-System Hose 30L (600LDU)
+		{ "76283.dat",    lcSynthType::FLEX_SYSTEM_HOSE,  620.0f, 309 }, // Technic Flex-System Hose 31L (620LDU)
+		{ "57274.dat",    lcSynthType::FLEX_SYSTEM_HOSE,  640.0f, 319 }, // Technic Flex-System Hose 32L (640LDU)
+		{ "42688.dat",    lcSynthType::FLEX_SYSTEM_HOSE,  660.0f, 329 }, // Technic Flex-System Hose 33L (660LDU)
+		{ "22461.dat",    lcSynthType::FLEX_SYSTEM_HOSE,  680.0f, 339 }, // Technic Flex-System Hose 34L (680LDU)
+		{ "46305.dat",    lcSynthType::FLEX_SYSTEM_HOSE,  800.0f, 399 }, // Technic Flex-System Hose 40L (800LDU)
+		{ "76281.dat",    lcSynthType::FLEX_SYSTEM_HOSE,  900.0f, 449 }, // Technic Flex-System Hose 45L (900LDU)
+		{ "22296.dat",    lcSynthType::FLEX_SYSTEM_HOSE, 1060.0f, 529 }, // Technic Flex-System Hose 53L (1060LDU)
+		{ "72504.dat",    lcSynthType::RIBBED_HOSE,       31.25f,   4 }, // Technic Ribbed Hose  2L
+		{ "72706.dat",    lcSynthType::RIBBED_HOSE,       50.00f,   7 }, // Technic Ribbed Hose  3L
+		{ "71952.dat",    lcSynthType::RIBBED_HOSE,       75.00f,  11 }, // Technic Ribbed Hose  4L
+		{ "72853.dat",    lcSynthType::RIBBED_HOSE,       93.75f,  14 }, // Technic Ribbed Hose  5L
+		{ "71944.dat",    lcSynthType::RIBBED_HOSE,      112.50f,  17 }, // Technic Ribbed Hose  6L
+		{ "57719.dat",    lcSynthType::RIBBED_HOSE,      131.25f,  20 }, // Technic Ribbed Hose  7L
+		{ "71951.dat",    lcSynthType::RIBBED_HOSE,      150.00f,  23 }, // Technic Ribbed Hose  8L
+		{ "71917.dat",    lcSynthType::RIBBED_HOSE,      175.00f,  27 }, // Technic Ribbed Hose  9L
+		{ "71949.dat",    lcSynthType::RIBBED_HOSE,      193.75f,  30 }, // Technic Ribbed Hose 10L
+		{ "71986.dat",    lcSynthType::RIBBED_HOSE,      212.50f,  33 }, // Technic Ribbed Hose 11L
+		{ "71819.dat",    lcSynthType::RIBBED_HOSE,      231.25f,  36 }, // Technic Ribbed Hose 12L
+		{ "71923.dat",    lcSynthType::RIBBED_HOSE,      275.00f,  43 }, // Technic Ribbed Hose 14L
+		{ "71946.dat",    lcSynthType::RIBBED_HOSE,      293.75f,  46 }, // Technic Ribbed Hose 15L
+		{ "71947.dat",    lcSynthType::RIBBED_HOSE,      312.50f,  49 }, // Technic Ribbed Hose 16L
+		{ "22900.dat",    lcSynthType::RIBBED_HOSE,      331.25f,  52 }, // Technic Ribbed Hose 17L
+		{ "72039.dat",    lcSynthType::RIBBED_HOSE,      350.00f,  55 }, // Technic Ribbed Hose 18L
+		{ "43675.dat",    lcSynthType::RIBBED_HOSE,      375.00f,  58 }, // Technic Ribbed Hose 19L
+		{ "23397.dat",    lcSynthType::RIBBED_HOSE,      468.75f,  74 }, // Technic Ribbed Hose 24L
+		{ "33763.dat",    lcSynthType::RIBBED_HOSE,      512.50f,  81 }, // Technic Ribbed Hose 26L
+		{ "32580.dat",    lcSynthType::FLEXIBLE_AXLE,    120.00f,  15 }, // Technic Axle Flexible  7
+		{ "32199.dat",    lcSynthType::FLEXIBLE_AXLE,    200.00f,  35 }, // Technic Axle Flexible 11
+		{ "55709.dat",    lcSynthType::FLEXIBLE_AXLE,    200.00f,  35 }, // Technic Axle Flexible 11
+		{ "32200.dat",    lcSynthType::FLEXIBLE_AXLE,    220.00f,  40 }, // Technic Axle Flexible 12
+		{ "32201.dat",    lcSynthType::FLEXIBLE_AXLE,    260.00f,  50 }, // Technic Axle Flexible 14
+		{ "32202.dat",    lcSynthType::FLEXIBLE_AXLE,    300.00f,  60 }, // Technic Axle Flexible 16
+		{ "32235.dat",    lcSynthType::FLEXIBLE_AXLE,    360.00f,  75 }, // Technic Axle Flexible 19
+		{ "76384.dat",    lcSynthType::STRING_BRAIDED,   200.00f,  46 }, // String Braided 11L with End Studs
+		{ "75924.dat",    lcSynthType::STRING_BRAIDED,   400.00f,  96 }, // String Braided 21L with End Studs
+		{ "572C02.dat",   lcSynthType::STRING_BRAIDED,   800.00f, 196 }, // String Braided 41L with End Studs
+		{ "73129.dat",    lcSynthType::SHOCK_ABSORBER,   110.00f,   1 }, // Technic Shock Absorber 6.5L
+		{ "41838.dat",    lcSynthType::SHOCK_ABSORBER,   110.00f,   1 }, // Technic Shock Absorber 6.5L Soft
+		{ "76138.dat",    lcSynthType::SHOCK_ABSORBER,   110.00f,   1 }, // Technic Shock Absorber 6.5L Stiff
+		{ "76537.dat",    lcSynthType::SHOCK_ABSORBER,   110.00f,   1 }, // Technic Shock Absorber 6.5L Extra Stiff
+		{ "61927C01.dat", lcSynthType::ACTUATOR,         270.00f,   1 }, // Technic Power Functions Linear Actuator (Extended)
+		{ "61927.dat",    lcSynthType::ACTUATOR,         170.00f,   1 }  // Technic Power Functions Linear Actuator (Contracted)
 	};
 
 	for (unsigned int InfoIdx = 0; InfoIdx < sizeof(HoseInfo) / sizeof(HoseInfo[0]); InfoIdx++)
@@ -99,8 +101,6 @@ void lcSynthInit()
 	}
 
 //	"758C01" // Hose Flexible  12L
-//	"73590A" // Hose Flexible 8.5L without Tabs
-//	"73590B" // Hose Flexible 8.5L with Tabs
 }
 
 lcSynthInfo::lcSynthInfo(lcSynthType Type, float Length, int NumSections, PieceInfo* Info)
@@ -108,10 +108,19 @@ lcSynthInfo::lcSynthInfo(lcSynthType Type, float Length, int NumSections, PieceI
 {
 	float EdgeSectionLength = 0.0f;
 	float MidSectionLength = 0.0f;
+	mCenterLength = 0.0f;
 
 	switch (mType)
 	{
-	case lcSynthType::FLEX_HOSE:
+	case lcSynthType::HOSE_FLEXIBLE:
+		EdgeSectionLength = 5.0f;
+		MidSectionLength = 2.56f;
+		mCenterLength = 4.56f;
+		mRigidEdges = true;
+		mCurve = true;
+		break;
+
+	case lcSynthType::FLEX_SYSTEM_HOSE:
 		EdgeSectionLength = 1.0f;
 		MidSectionLength = 2.0f;
 		mRigidEdges = true;
@@ -150,6 +159,7 @@ lcSynthInfo::lcSynthInfo(lcSynthType Type, float Length, int NumSections, PieceI
 
 	switch (mType)
 	{
+	case lcSynthType::HOSE_FLEXIBLE:
 	case lcSynthType::RIBBED_HOSE:
 	case lcSynthType::FLEXIBLE_AXLE:
 		mStart.Transform = lcMatrix44(lcMatrix33(lcVector3(0.0f, 0.0f, 1.0f), lcVector3(1.0f, 0.0f, 0.0f), lcVector3(0.0f, 1.0f, 0.0f)), lcVector3(0.0f, 0.0f, 0.0f));
@@ -157,7 +167,7 @@ lcSynthInfo::lcSynthInfo(lcSynthType Type, float Length, int NumSections, PieceI
 		mEnd.Transform = lcMatrix44(lcMatrix33(lcVector3(0.0f, 0.0f, 1.0f), lcVector3(1.0f, 0.0f, 0.0f), lcVector3(0.0f, 1.0f, 0.0f)), lcVector3(0.0f, 0.0f, 0.0f));
 		break;
 
-	case lcSynthType::FLEX_HOSE:
+	case lcSynthType::FLEX_SYSTEM_HOSE:
 	case lcSynthType::SHOCK_ABSORBER:
 	case lcSynthType::ACTUATOR:
 	case lcSynthType::STRING_BRAIDED:
@@ -180,7 +190,11 @@ void lcSynthInfo::GetDefaultControlPoints(lcArray<lcPieceControlPoint>& ControlP
 
 	switch (mType)
 	{
-	case lcSynthType::FLEX_HOSE:
+	case lcSynthType::HOSE_FLEXIBLE:
+		Scale = 12.0f;
+		break;
+
+	case lcSynthType::FLEX_SYSTEM_HOSE:
 		Scale = 12.0f;
 		break;
 
@@ -212,7 +226,7 @@ void lcSynthInfo::GetDefaultControlPoints(lcArray<lcPieceControlPoint>& ControlP
 		ControlPoints[1].Transform = lcMatrix44Translation(lcVector3( HalfLength, 0.0f, 0.0f));
 		break;
 
-	case lcSynthType::FLEX_HOSE:
+	case lcSynthType::FLEX_SYSTEM_HOSE:
 		ControlPoints[0].Transform = lcMatrix44Translation(lcVector3(0.0f, 0.0f, -mLength));
 		ControlPoints[1].Transform = lcMatrix44Translation(lcVector3(0.0f, 0.0f, 0.0f));
 		break;
@@ -394,7 +408,11 @@ void lcSynthInfo::CalculateCurveSections(const lcArray<lcPieceControlPoint>& Con
 			if (Sections.GetSize() == mNumSections + 2)
 				break;
 
-			SectionLength += mMiddle.Length;
+			if (mCenterLength != 0.0f && (Sections.GetSize() == mNumSections / 2 + 1))
+				SectionLength += mCenterLength;
+			else
+				SectionLength += mMiddle.Length;
+
 			if (Sections.GetSize() == mNumSections + 1 && !mRigidEdges)
 				SectionLength += mEnd.Length;
 		}
@@ -415,7 +433,11 @@ void lcSynthInfo::CalculateCurveSections(const lcArray<lcPieceControlPoint>& Con
 		if (SectionCallback)
 			SectionCallback(Position, ControlPoints.GetSize() - 1, 1.0f);
 
-		SectionLength += mMiddle.Length;
+		if (mCenterLength != 0.0f && (Sections.GetSize() == mNumSections / 2 + 1))
+			SectionLength += mCenterLength;
+		else
+			SectionLength += mMiddle.Length;
+
 		if (Sections.GetSize() == mNumSections + 1 && !mRigidEdges)
 			SectionLength += mEnd.Length;
 	}
@@ -430,6 +452,74 @@ void lcSynthInfo::CalculateLineSections(const lcArray<lcPieceControlPoint>& Cont
 
 		if (SectionCallback)
 			SectionCallback(Transform.GetTranslation(), ControlPointIdx, 1.0f);
+	}
+}
+
+void lcSynthInfo::AddHoseFlexibleParts(lcMemFile& File, const lcArray<lcMatrix44>& Sections) const
+{
+	char Line[256];
+	const int NumEdgeParts = 2;
+
+	const lcMatrix33 EdgeTransforms[2] =
+	{
+		lcMatrix33(lcVector3(0.0f, 0.0f, -1.0f), lcVector3(0.0f, -1.0f, 0.0f), lcVector3(1.0f, 0.0f, 0.0f)),
+		lcMatrix33(lcVector3(0.0f, 0.0f, -1.0f), lcVector3(0.0f,  1.0f, 0.0f), lcVector3(1.0f, 0.0f, 0.0f))
+	};
+
+	const char* EdgePartsA[2] =
+	{
+		"755.dat", "752.dat"
+	};
+
+	const char* EdgePartsB[2] =
+	{
+		"755.dat", "750.dat"
+	};
+
+	const char** EdgeParts = !strcmp(mPieceInfo->mFileName, "73590a.dat") ? EdgePartsA : EdgePartsB;
+
+	for (int PartIdx = 0; PartIdx < NumEdgeParts; PartIdx++)
+	{
+		const int SectionIdx = 0;
+		lcMatrix33 Transform(lcMul(lcMul(EdgeTransforms[PartIdx], lcMatrix33Scale(lcVector3(1.0f, -1.0f, 1.0f))), lcMatrix33(Sections[SectionIdx])));
+		lcVector3 Offset = lcMul31(lcVector3(0.0f, -5.0f, 0.0f), Sections[SectionIdx]);
+
+		sprintf(Line, "1 16 %f %f %f %f %f %f %f %f %f %f %f %f %s\n", Offset[0], Offset[1], Offset[2], Transform[0][0], Transform[1][0], Transform[2][0],
+		        Transform[0][1], Transform[1][1], Transform[2][1], Transform[0][2], Transform[1][2], Transform[2][2], EdgeParts[PartIdx]);
+
+		File.WriteBuffer(Line, strlen(Line));
+	}
+
+	for (int SectionIdx = 1; SectionIdx < Sections.GetSize() - 1; SectionIdx++)
+	{
+		lcMatrix33 Transform = lcMatrix33(Sections[SectionIdx]);
+		lcVector3 Offset = Sections[SectionIdx].GetTranslation();
+
+		if (SectionIdx < Sections.GetSize() / 2)
+			Transform = lcMul(lcMatrix33(lcVector3(0.0f, 0.0f, -1.0f), lcVector3(0.0f, -1.0f, 0.0f), lcVector3(-1.0f, 0.0f, 0.0f)), Transform);
+		else if (SectionIdx != Sections.GetSize() / 2)
+			Transform = lcMul(lcMatrix33(lcVector3(0.0f, 0.0f, -1.0f), lcVector3(0.0f,  1.0f, 0.0f), lcVector3( 1.0f, 0.0f, 0.0f)), Transform);
+		else
+			Transform = lcMul(lcMatrix33(lcVector3(0.0f, 0.0f, -1.0f), lcVector3(0.0f,  1.0f, 0.0f), lcVector3( 1.0f, 0.0f, 0.0f)), Transform);
+
+		const char* Part = SectionIdx != Sections.GetSize() / 2 ? "754.dat" : "756.dat";
+
+		sprintf(Line, "1 16 %f %f %f %f %f %f %f %f %f %f %f %f %s\n", Offset[0], Offset[1], Offset[2], Transform[0][0], Transform[1][0], Transform[2][0],
+		        Transform[0][1], Transform[1][1], Transform[2][1], Transform[0][2], Transform[1][2], Transform[2][2], Part);
+
+		File.WriteBuffer(Line, strlen(Line));
+	}
+
+	for (int PartIdx = 0; PartIdx < NumEdgeParts; PartIdx++)
+	{
+		const int SectionIdx = Sections.GetSize() - 1;
+		lcMatrix33 Transform(lcMul(EdgeTransforms[PartIdx], lcMatrix33(Sections[SectionIdx])));
+		lcVector3 Offset = lcMul31(lcVector3(0.0f, 5.0f - 2.56f, 0.0f), Sections[SectionIdx]);
+
+		sprintf(Line, "1 16 %f %f %f %f %f %f %f %f %f %f %f %f %s\n", Offset[0], Offset[1], Offset[2], Transform[0][0], Transform[1][0], Transform[2][0],
+		        Transform[0][1], Transform[1][1], Transform[2][1], Transform[0][2], Transform[1][2], Transform[2][2], EdgeParts[PartIdx]);
+
+		File.WriteBuffer(Line, strlen(Line));
 	}
 }
 
@@ -901,7 +991,11 @@ lcMesh* lcSynthInfo::CreateMesh(const lcArray<lcPieceControlPoint>& ControlPoint
 
 	switch (mType)
 	{
-	case lcSynthType::FLEX_HOSE:
+	case lcSynthType::HOSE_FLEXIBLE:
+		AddHoseFlexibleParts(File, Sections);
+		break;
+
+	case lcSynthType::FLEX_SYSTEM_HOSE:
 		AddFlexHoseParts(File, MeshData, Sections);
 		break;
 

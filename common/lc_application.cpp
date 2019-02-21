@@ -209,6 +209,9 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 	{
 		const QString& Param = Arguments[ArgIdx];
 
+		if (Param.isEmpty())
+			continue;
+
 		if (Param[0] != '-')
 		{
 			ProjectName = Param;

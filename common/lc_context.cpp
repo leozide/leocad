@@ -400,12 +400,12 @@ void lcContext::SetPolygonOffset(lcPolygonOffset PolygonOffset)
 		break;
 
 	case LC_POLYGON_OFFSET_OPAQUE:
-		glPolygonOffset(0.25f, 0.1f);
+		glPolygonOffset(0.5f, 0.1f);
 		glEnable(GL_POLYGON_OFFSET_FILL);
 		break;
 
 	case LC_POLYGON_OFFSET_TRANSLUCENT:
-		glPolygonOffset(0.5f, 0.1f);
+		glPolygonOffset(0.25f, 0.1f);
 		glEnable(GL_POLYGON_OFFSET_FILL);
 		break;
 	}

@@ -404,6 +404,18 @@ void lcContext::SetSmoothShading(bool Smooth)
 #endif
 }
 
+void lcContext::BeginTranslucent()
+{
+	glEnable(GL_BLEND);
+	glDepthMask(GL_FALSE);
+}
+
+void lcContext::EndTranslucent()
+{
+	glDepthMask(GL_TRUE);
+	glDisable(GL_BLEND);
+}
+
 void lcContext::BindTexture2D(GLuint Texture)
 {
 	if (mTexture2D == Texture)

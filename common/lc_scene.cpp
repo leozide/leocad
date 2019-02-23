@@ -72,6 +72,8 @@ void lcScene::DrawRenderMeshes(lcContext* Context, int PrimitiveTypes, bool Enab
 
 	if (DrawTranslucent)
 		Context->BeginTranslucent();
+	else
+		Context->SetPolygonOffset(LC_POLYGON_OFFSET_OPAQUE);
 
 	for (int MeshIndex : Meshes)
 	{

@@ -35,6 +35,7 @@ lcContext::lcContext()
 	mTexture2D = 0;
 	mTexture2DMS = 0;
 	mTextureCubeMap = 0;
+	mPolygonOffset = LC_POLYGON_OFFSET_NONE;
 	mLineWidth = 1.0f;
 #ifndef LC_OPENGLES
 	mMatrixMode = GL_MODELVIEW;
@@ -241,9 +242,6 @@ void lcContext::SetDefaultState()
 	else
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	glDisable(GL_POLYGON_OFFSET_FILL);
-	glPolygonOffset(0.5f, 0.1f);
-
 	if (gSupportsVertexBufferObject)
 	{
 		glBindBuffer(GL_ARRAY_BUFFER_ARB, 0);
@@ -293,6 +291,9 @@ void lcContext::SetDefaultState()
 #endif
 	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 	mTextureCubeMap = 0;
+
+	glDisable(GL_POLYGON_OFFSET_FILL);
+	mPolygonOffset = LC_POLYGON_OFFSET_NONE;
 
 	glLineWidth(1.0f);
 	mLineWidth = 1.0f;
@@ -387,6 +388,31 @@ void lcContext::SetViewport(int x, int y, int Width, int Height)
 	glViewport(x, y, Width, Height);
 }
 
+void lcContext::SetPolygonOffset(lcPolygonOffset PolygonOffset)
+{
+	if (mPolygonOffset == PolygonOffset)
+		return;
+
+	switch (PolygonOffset)
+	{
+	case LC_POLYGON_OFFSET_NONE:
+		glDisable(GL_POLYGON_OFFSET_FILL);
+		break;
+
+	case LC_POLYGON_OFFSET_OPAQUE:
+		glPolygonOffset(0.25f, 0.1f);
+		glEnable(GL_POLYGON_OFFSET_FILL);
+		break;
+
+	case LC_POLYGON_OFFSET_TRANSLUCENT:
+		glPolygonOffset(0.5f, 0.1f);
+		glEnable(GL_POLYGON_OFFSET_FILL);
+		break;
+	}
+
+	mPolygonOffset = PolygonOffset;
+}
+
 void lcContext::SetLineWidth(float LineWidth)
 {
 	if (LineWidth == mLineWidth)
@@ -408,14 +434,14 @@ void lcContext::BeginTranslucent()
 {
 	glEnable(GL_BLEND);
 	glDepthMask(GL_FALSE);
-	glEnable(GL_POLYGON_OFFSET_FILL);
+	SetPolygonOffset(LC_POLYGON_OFFSET_TRANSLUCENT);
 }
 
 void lcContext::EndTranslucent()
 {
 	glDepthMask(GL_TRUE);
 	glDisable(GL_BLEND);
-	glDisable(GL_POLYGON_OFFSET_FILL);
+	SetPolygonOffset(LC_POLYGON_OFFSET_OPAQUE);
 }
 
 void lcContext::BindTexture2D(GLuint Texture)

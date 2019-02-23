@@ -100,6 +100,13 @@ public:
 	int mHeight = 0;
 };
 
+enum lcPolygonOffset
+{
+	LC_POLYGON_OFFSET_NONE,
+	LC_POLYGON_OFFSET_OPAQUE,
+	LC_POLYGON_OFFSET_TRANSLUCENT
+};
+
 class lcContext
 {
 public:
@@ -139,6 +146,7 @@ public:
 
 	void SetMaterial(lcMaterialType MaterialType);
 	void SetViewport(int x, int y, int Width, int Height);
+	void SetPolygonOffset(lcPolygonOffset PolygonOffset);
 	void SetLineWidth(float LineWidth);
 	void SetSmoothShading(bool Smooth);
 	void BeginTranslucent();
@@ -222,6 +230,7 @@ protected:
 	GLuint mTexture2D;
 	GLuint mTexture2DMS;
 	GLuint mTextureCubeMap;
+	lcPolygonOffset mPolygonOffset;
 	float mLineWidth;
 	int mMatrixMode;
 	bool mTextureEnabled;

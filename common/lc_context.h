@@ -141,6 +141,8 @@ public:
 	void SetViewport(int x, int y, int Width, int Height);
 	void SetLineWidth(float LineWidth);
 	void SetSmoothShading(bool Smooth);
+	void BeginTranslucent();
+	void EndTranslucent();
 	void BindTexture2D(GLuint Texture);
 	void BindTexture2DMS(GLuint Texture);
 	void BindTextureCubeMap(GLuint Texture);

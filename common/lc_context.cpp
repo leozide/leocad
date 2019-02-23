@@ -241,7 +241,7 @@ void lcContext::SetDefaultState()
 	else
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	glEnable(GL_POLYGON_OFFSET_FILL);
+	glDisable(GL_POLYGON_OFFSET_FILL);
 	glPolygonOffset(0.5f, 0.1f);
 
 	if (gSupportsVertexBufferObject)
@@ -402,6 +402,20 @@ void lcContext::SetSmoothShading(bool Smooth)
 	if (gSupportsShaderObjects)
 		glShadeModel(Smooth ? GL_SMOOTH : GL_FLAT);
 #endif
+}
+
+void lcContext::BeginTranslucent()
+{
+	glEnable(GL_BLEND);
+	glDepthMask(GL_FALSE);
+	glEnable(GL_POLYGON_OFFSET_FILL);
+}
+
+void lcContext::EndTranslucent()
+{
+	glDepthMask(GL_TRUE);
+	glDisable(GL_BLEND);
+	glDisable(GL_POLYGON_OFFSET_FILL);
 }
 
 void lcContext::BindTexture2D(GLuint Texture)

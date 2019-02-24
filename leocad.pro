@@ -15,10 +15,12 @@ equals(QT_MAJOR_VERSION, 5) {
 INCLUDEPATH += qt common
 CONFIG += precompile_header incremental c++11
 
+win32 {
+	RC_FILE = qt/leocad.rc
+	LIBS += -lwininet
+}
 win32-msvc* {
 	QMAKE_CXXFLAGS_WARN_ON += -wd4100
-}
-win32 {
 	PRECOMPILED_HEADER = common/lc_global.h
 	DEFINES += _CRT_SECURE_NO_WARNINGS _CRT_SECURE_NO_DEPRECATE=1 _CRT_NONSTDC_NO_WARNINGS=1
 	greaterThan(QT_MAJOR_VERSION, 4) {
@@ -28,8 +30,7 @@ win32 {
 	}
 	QMAKE_LFLAGS += /INCREMENTAL
 	PRECOMPILED_SOURCE = common/lc_global.cpp
-	RC_FILE = qt/leocad.rc
-	LIBS += -ladvapi32 -lshell32 -lopengl32 -lwininet -luser32
+	LIBS += -ladvapi32 -lshell32 -lopengl32 -luser32
 } else {
 	PRECOMPILED_HEADER = common/lc_global.h
 	LIBS += -lz

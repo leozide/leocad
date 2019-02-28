@@ -672,7 +672,7 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 				if (!CurrentGroups.IsEmpty())
 					Piece->SetGroup(CurrentGroups[CurrentGroups.GetSize() - 1]);
 
-				PieceInfo* Info = Library->FindPiece(CleanId.constData(), Project, true, true);
+				PieceInfo* Info = Library->FindPiece(PartId.toLatin1().constData(), Project, true, true);
 
 				float* Matrix = IncludeTransform;
 				lcMatrix44 Transform(lcVector4(Matrix[0], Matrix[2], -Matrix[1], 0.0f), lcVector4(Matrix[8], Matrix[10], -Matrix[9], 0.0f),

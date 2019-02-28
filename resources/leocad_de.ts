@@ -1149,7 +1149,7 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="261"/>
         <source>Select by Col&amp;or...</source>
-        <translation>Auswahl nach &amp;Farbe</translation>
+        <translation>Auswahl nach &amp;Farbe...</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="268"/>
@@ -1184,17 +1184,17 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="1192"/>
         <source>Open Selected Model</source>
-        <translation type="unfinished"></translation>
+        <translation>Öffne Ausgewähltes Modell</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1213"/>
         <source>Edit Selected Submodel</source>
-        <translation type="unfinished"></translation>
+        <translation>Bearbeite Ausgewähltes Untermodell</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1220"/>
         <source>End Submodel Editing</source>
-        <translation type="unfinished"></translation>
+        <translation>Beende Untermodell Bearbeitung</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1304"/>
@@ -1219,7 +1219,7 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="58"/>
         <source>Set &amp;Inventory...</source>
-        <translation>&amp;Inventarisieren</translation>
+        <translation>Setze &amp;Inventar...</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="72"/>
@@ -1427,7 +1427,7 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="485"/>
         <source>22.5 Degrees</source>
-        <translation type="unfinished">180 Grad {22.5 ?}</translation>
+        <translation>22.5 Grad</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="492"/>
@@ -1578,12 +1578,12 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="674"/>
         <source>Zoom In</source>
-        <translation>Einzoomen</translation>
+        <translation>Vergrößern</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="681"/>
         <source>Zoom Out</source>
-        <translation>Auszoomen</translation>
+        <translation>Verkleinern</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="688"/>
@@ -1668,22 +1668,22 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="919"/>
         <source>First</source>
-        <translation>Erst</translation>
+        <translation>Erster</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="926"/>
         <source>Previous</source>
-        <translation>Vorangehend</translation>
+        <translation>Vorheriger</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="933"/>
         <source>Next</source>
-        <translation>Folgend</translation>
+        <translation>Nächster</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="940"/>
         <source>Last</source>
-        <translation>Letzt</translation>
+        <translation>Letzter</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="947"/>
@@ -1730,12 +1730,12 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="1003"/>
         <source>Close &amp;Tab</source>
-        <translation type="unfinished"></translation>
+        <translation>Schließe &amp;Tab</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1010"/>
         <source>&amp;Wireframe</source>
-        <translation>Drahtrahmen</translation>
+        <translation>&amp;Drahtrahmen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1017"/>
@@ -1745,7 +1745,7 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="1024"/>
         <source>&amp;Default Lights</source>
-        <translation>Voreinstellung</translation>
+        <translation>&amp;Default Beleuchtung</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1031"/>
@@ -1755,7 +1755,7 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="1038"/>
         <source>&amp;Orthographic</source>
-        <translation>&amp;Rechtwinkelig</translation>
+        <translation>&amp;Rechtwinklig</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1045"/>
@@ -1855,7 +1855,7 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="1178"/>
         <source>Minifig &amp;Wizard...</source>
-        <translation>&amp;Assistent minifig…</translation>
+        <translation>Minifig &amp;Assistent…</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1185"/>
@@ -1870,7 +1870,7 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="1206"/>
         <source>Inline Selected Models</source>
-        <translation>ausgewählte Modelle zusammenfügen</translation>
+        <translation>Ausgewählte Modelle zusammenfügen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1227"/>
@@ -1895,7 +1895,7 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="1255"/>
         <source>&amp;Edit Groups...</source>
-        <translation>Grup&amp;pe Bearbeiten…</translation>
+        <translation>Grup&amp;pen Bearbeiten…</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1262"/>
@@ -1968,22 +1968,22 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="1552"/>
         <source>NewPiece</source>
-        <translation type="unfinished"></translation>
+        <translation>Neues Teil</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1553"/>
         <source>NewPointLight</source>
-        <translation type="unfinished"></translation>
+        <translation>Neues Punktlicht</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1554"/>
         <source>NewSpotLight</source>
-        <translation type="unfinished"></translation>
+        <translation>Neues Spotlicht</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1555"/>
         <source>NewCamera</source>
-        <translation type="unfinished"></translation>
+        <translation>Neue Kamera</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1556"/>
@@ -2033,7 +2033,7 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="1565"/>
         <source>ZoomRegion</source>
-        <translation type="unfinished"></translation>
+        <translation>Bereich zoomen</translation>
     </message>
 </context>
 <context>
@@ -2203,17 +2203,17 @@
     <message>
         <location filename="../common/project.cpp" line="190"/>
         <source>Submodel #</source>
-        <translation>Untermodell Nr.</translation>
+        <translation>Untermodell #</translation>
     </message>
     <message>
         <location filename="../common/project.cpp" line="214"/>
         <source>Submodel Name:</source>
-        <translation>Untermodellname</translation>
+        <translation>Untermodellname:</translation>
     </message>
     <message>
         <location filename="../common/project.cpp" line="221"/>
         <source>The submodel name cannot be empty.</source>
-        <translation>Das Untermodell kann nicht leer sein</translation>
+        <translation>Das Untermodell kann nicht leer sein.</translation>
     </message>
     <message>
         <location filename="../common/project.cpp" line="241"/>
@@ -2243,7 +2243,7 @@
     <message>
         <location filename="../common/group.cpp" line="47"/>
         <source>Group #</source>
-        <translation>Gruppe Nr.</translation>
+        <translation>Gruppe #</translation>
     </message>
     <message>
         <location filename="../common/lc_colors.cpp" line="193"/>
@@ -2554,7 +2554,7 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="1005"/>
         <source>Ctrl+W</source>
-        <translation type="unfinished"></translation>
+        <translation>Strg+W</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1047"/>
@@ -2662,7 +2662,7 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="94"/>
         <source>Export a list of parts used in comma delimited file format</source>
-        <translation>Liste der verwendeten Teile in eine CSV Getrennte Datei exportieren</translation>
+        <translation>Liste der verwendeten Teile in eine CSV getrennte Datei exportieren</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="136"/>
@@ -2768,7 +2768,7 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="360"/>
         <source>Snap movement along the XY plane to 3 studs</source>
-        <translation>Fixer le pas pour les déplacements dans le plan XY à 3 tenons</translation>
+        <translation>Bewegung mit Einrasten entlang der XY-Ebene in 3 Noppen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="367"/>
@@ -2783,7 +2783,7 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="381"/>
         <source>Do not snap movement along the Z axis</source>
-        <translation>Bewegung entlang der Z-Ache kontinuierlich</translation>
+        <translation>Bewegung entlang der Z-Achse kontinuierlich</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="388"/>
@@ -2961,12 +2961,12 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="290"/>
         <source>Select all pieces of the same type and color</source>
-        <translation>Auswahl aller Teile gleicher Farbe und gleichen Typs</translation>
+        <translation>Auswahl aller Teile gleichen Typs und gleicher Farbe</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="297"/>
         <source>Move and rotate objects relative to the one that has focus</source>
-        <translation>Bewege und drehe Objekte relativ zu dem das den Fokus hat</translation>
+        <translation>Bewege und drehe Objekte relativ zu dem welches den Fokus hat</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="479"/>
@@ -3051,7 +3051,7 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="591"/>
         <source>Select objects (hold the CTRL key down or drag the mouse to select multiple objects)</source>
-        <translation>Objekte auswählen (strg gedrückt halten oder mit der Maus mehrere Objekte auswählen)</translation>
+        <translation>Objekte auswählen (Strg gedrückt halten oder mit der Maus mehrere Objekte auswählen)</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="598"/>
@@ -3076,7 +3076,7 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="626"/>
         <source>Zoom in or out</source>
-        <translation>Ein- oder auszoomen</translation>
+        <translation>Vergrößern oder verkleinern</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="633"/>
@@ -3111,12 +3111,12 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="675"/>
         <source>Zoom in</source>
-        <translation>Einzoomen</translation>
+        <translation>Vergrößern</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="682"/>
         <source>Zoom out</source>
-        <translation>Auszoomen</translation>
+        <translation>Verkleinern</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="689"/>
@@ -3131,7 +3131,7 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="703"/>
         <source>Move the current view forward</source>
-        <translation type="unfinished"></translation>
+        <translation>Ansicht vorwärts bewegen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="710"/>
@@ -3253,12 +3253,12 @@
         <location filename="../common/lc_commands.cpp" line="955"/>
         <location filename="../common/lc_commands.cpp" line="1529"/>
         <source>Remove current step</source>
-        <translation type="unfinished"></translation>
+        <translation>Aktuellen Schritt entfernen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1004"/>
         <source>Close current tab</source>
-        <translation type="unfinished"></translation>
+        <translation>Aktuellen Tab schließen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1088"/>
@@ -3361,7 +3361,7 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="1011"/>
         <source>Display the scene as wireframe</source>
-        <translation type="unfinished"></translation>
+        <translation>Anzeige der Szene als Drahtgittermodell</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1018"/>
@@ -3462,22 +3462,22 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="1193"/>
         <source>Open the model referenced by the selected piece in a new tab</source>
-        <translation type="unfinished"></translation>
+        <translation>Öffne das vom ausgewählten Teil referenzierte Modell in einem neuen Tab</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1207"/>
         <source>Insert the contents of the selected model references into the current model</source>
-        <translation>Inhalte der ausgewählten Modellreferenzen in eine neues Modell einfügen</translation>
+        <translation>Inhalte der ausgewählten Modellreferenzen in ein neues Modell einfügen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1214"/>
         <source>Edit the currently selected submodel in-place</source>
-        <translation type="unfinished"></translation>
+        <translation>Bearbeite das ausgewählte Untermodell an Ort und Stelle</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1221"/>
         <source>End in-place submodel editing</source>
-        <translation type="unfinished"></translation>
+        <translation>Beende Untermodellbearbeitung an Ort und Stelle</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1228"/>
@@ -3542,7 +3542,7 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="1508"/>
         <source>Check if a newer LeoCAD version or parts library has been released</source>
-        <translation>VPrüfe ob eine aktualisierte Version von LeoCAD oder der Teilebibliothek verfügbar ist</translation>
+        <translation>Prüfe ob eine aktualisierte Version von LeoCAD oder der Teilebibliothek verfügbar ist</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1515"/>
@@ -3555,32 +3555,32 @@
     <message>
         <location filename="../common/lc_viewsphere.cpp" line="42"/>
         <source>Left</source>
-        <translation type="unfinished">Links</translation>
+        <translation>Links</translation>
     </message>
     <message>
         <location filename="../common/lc_viewsphere.cpp" line="42"/>
         <source>Right</source>
-        <translation type="unfinished">Rechts</translation>
+        <translation>Rechts</translation>
     </message>
     <message>
         <location filename="../common/lc_viewsphere.cpp" line="42"/>
         <source>Back</source>
-        <translation type="unfinished"></translation>
+        <translation>Hinten</translation>
     </message>
     <message>
         <location filename="../common/lc_viewsphere.cpp" line="43"/>
         <source>Front</source>
-        <translation type="unfinished"></translation>
+        <translation>Vorne</translation>
     </message>
     <message>
         <location filename="../common/lc_viewsphere.cpp" line="43"/>
         <source>Top</source>
-        <translation type="unfinished"></translation>
+        <translation>Oben</translation>
     </message>
     <message>
         <location filename="../common/lc_viewsphere.cpp" line="43"/>
         <source>Bottom</source>
-        <translation type="unfinished"></translation>
+        <translation>Unten</translation>
     </message>
 </context>
 <context>
@@ -3804,7 +3804,7 @@ Bitte lesen sie unter https://www.leocad.org nach wie man eine Bibliothek herunt
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="547"/>
         <source>Sub&amp;model</source>
-        <translation type="unfinished"></translation>
+        <translation>Unter&amp;modell</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="569"/>
@@ -3825,7 +3825,7 @@ Bitte lesen sie unter https://www.leocad.org nach wie man eine Bibliothek herunt
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="660"/>
         <source>Colors</source>
-        <translation type="unfinished"></translation>
+        <translation>Farben</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="678"/>
@@ -4081,7 +4081,7 @@ Bitte lesen sie unter https://www.leocad.org nach wie man eine Bibliothek herunt
         <location filename="../common/lc_model.cpp" line="991"/>
         <location filename="../common/lc_model.cpp" line="1738"/>
         <source>Group #</source>
-        <translation>Gruppe Nr.</translation>
+        <translation>Gruppe #</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="1138"/>
@@ -4180,13 +4180,13 @@ Bitte lesen sie unter https://www.leocad.org nach wie man eine Bibliothek herunt
         <location filename="../common/lc_model.cpp" line="3667"/>
         <location filename="../common/lc_model.cpp" line="3690"/>
         <source>Hide</source>
-        <translation type="unfinished">Ausblenden</translation>
+        <translation>Ausblenden</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="3713"/>
         <location filename="../common/lc_model.cpp" line="3736"/>
         <source>Unhide</source>
-        <translation type="unfinished"></translation>
+        <translation>Einblenden</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="3845"/>
@@ -4319,7 +4319,7 @@ Bitte lesen sie unter https://www.leocad.org nach wie man eine Bibliothek herunt
     <message>
         <location filename="../common/lc_model.cpp" line="4324"/>
         <source>Minifig #</source>
-        <translation>Minifig Nr.</translation>
+        <translation>Minifig #</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="4346"/>
@@ -4395,7 +4395,7 @@ Bitte lesen sie unter https://www.leocad.org nach wie man eine Bibliothek herunt
     <message>
         <location filename="../common/lc_partselectionwidget.cpp" line="795"/>
         <source>Submodels</source>
-        <translation type="unfinished">Untermodelle</translation>
+        <translation>Untermodelle</translation>
     </message>
 </context>
 <context>
@@ -4403,12 +4403,12 @@ Bitte lesen sie unter https://www.leocad.org nach wie man eine Bibliothek herunt
     <message>
         <location filename="../common/lc_library.cpp" line="779"/>
         <source>Initializing</source>
-        <translation>Initialisieren</translation>
+        <translation>Initialisiere</translation>
     </message>
     <message>
         <location filename="../common/lc_library.cpp" line="780"/>
         <source>Loading Parts Library</source>
-        <translation type="unfinished"></translation>
+        <translation>Lade Teile Bibliothek</translation>
     </message>
 </context>
 <context>
@@ -4431,7 +4431,7 @@ Bitte lesen sie unter https://www.leocad.org nach wie man eine Bibliothek herunt
     <message>
         <location filename="../qt/lc_qaboutdialog.ui" line="59"/>
         <source>&lt;a href=&quot;http://www.leocad.org&quot;&gt;http://www.leocad.org&lt;/a&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;a href=&quot;http://www.leocad.org&quot;&gt;http://www.leocad.org&lt;/a&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_qaboutdialog.ui" line="73"/>
@@ -4485,7 +4485,12 @@ GL_EXT_framebuffer_object extension: %3
 GL_EXT_blend_func_separate: %4
 GL_EXT_texture_filter_anisotropic extension: %5
 </source>
-        <translation type="unfinished"></translation>
+        <translation>GL_ARB_vertex_buffer_object extension: %1
+GL_ARB_framebuffer_object extension: %2
+GL_EXT_framebuffer_object extension: %3
+GL_EXT_blend_func_separate: %4
+GL_EXT_texture_filter_anisotropic extension: %5
+</translation>
     </message>
     <message>
         <location filename="../qt/lc_qaboutdialog.cpp" line="27"/>
@@ -4591,7 +4596,7 @@ GL_EXT_texture_filter_anisotropic extension: %5
     <message>
         <location filename="../qt/lc_qeditgroupsdialog.cpp" line="60"/>
         <source>Group #</source>
-        <translation>Groupe Nr.</translation>
+        <translation>Gruppe #</translation>
     </message>
 </context>
 <context>
@@ -4873,58 +4878,58 @@ GL_EXT_texture_filter_anisotropic extension: %5
     <message>
         <location filename="../qt/lc_qminifigdialog.ui" line="14"/>
         <source>Minifig Wizard</source>
-        <translation>minifig Assistent</translation>
+        <translation>Minifig Assistent</translation>
     </message>
     <message>
         <location filename="../qt/lc_qminifigdialog.ui" line="686"/>
         <source>Templates</source>
-        <translation type="unfinished"></translation>
+        <translation>Vorlagen</translation>
     </message>
     <message>
         <location filename="../qt/lc_qminifigdialog.ui" line="702"/>
         <source>Save...</source>
-        <translation type="unfinished"></translation>
+        <translation>Speichern...</translation>
     </message>
     <message>
         <location filename="../qt/lc_qminifigdialog.ui" line="709"/>
         <source>Delete...</source>
-        <translation type="unfinished">Löschen…</translation>
+        <translation>Löschen…</translation>
     </message>
     <message>
         <location filename="../qt/lc_qminifigdialog.cpp" line="169"/>
         <location filename="../qt/lc_qminifigdialog.cpp" line="176"/>
         <source>Save Template</source>
-        <translation type="unfinished"></translation>
+        <translation>Vorlage Speichern</translation>
     </message>
     <message>
         <location filename="../qt/lc_qminifigdialog.cpp" line="169"/>
         <source>Template Name:</source>
-        <translation type="unfinished"></translation>
+        <translation>Vorlagenname:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qminifigdialog.cpp" line="176"/>
         <source>Template name cannot be empty.</source>
-        <translation type="unfinished"></translation>
+        <translation>Vorlagenname darf nicht leer sein.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qminifigdialog.cpp" line="182"/>
         <source>Are you sure you want to overwrite the template &apos;%1&apos;?</source>
-        <translation type="unfinished"></translation>
+        <translation>Bist du sicher das du die Vorlage &apos;%1&apos; überschreiben willst?</translation>
     </message>
     <message>
         <location filename="../qt/lc_qminifigdialog.cpp" line="183"/>
         <source>Overwrite Template</source>
-        <translation type="unfinished"></translation>
+        <translation>Vorlage Überschreiben</translation>
     </message>
     <message>
         <location filename="../qt/lc_qminifigdialog.cpp" line="209"/>
         <source>Are you sure you want to delete the template &apos;%1&apos;?</source>
-        <translation type="unfinished"></translation>
+        <translation>Bist du sicher das du die Vorlage &apos;%1&apos; löschen willst?</translation>
     </message>
     <message>
         <location filename="../qt/lc_qminifigdialog.cpp" line="211"/>
         <source>Delete Template</source>
-        <translation type="unfinished"></translation>
+        <translation>Vorlage Löschen</translation>
     </message>
 </context>
 <context>
@@ -4937,7 +4942,7 @@ GL_EXT_texture_filter_anisotropic extension: %5
     <message>
         <location filename="../qt/lc_qmodellistdialog.ui" line="27"/>
         <source>&amp;New...</source>
-        <translation>&amp;Neu</translation>
+        <translation>&amp;Neu...</translation>
     </message>
     <message>
         <location filename="../qt/lc_qmodellistdialog.ui" line="34"/>
@@ -5127,12 +5132,12 @@ GL_EXT_texture_filter_anisotropic extension: %5
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="80"/>
         <source>PO&amp;V-Ray Executable:</source>
-        <translation>Ausführbares PO&amp;V-Ray</translation>
+        <translation>PO&amp;V-Ray Executable:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="104"/>
         <source>&amp;LGEO Path:</source>
-        <translation>&amp;LGEO Pfad</translation>
+        <translation>&amp;LGEO Pfad:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="139"/>
@@ -5197,7 +5202,7 @@ GL_EXT_texture_filter_anisotropic extension: %5
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="244"/>
         <source>Shading Mode:</source>
-        <translation>Schattenmodus</translation>
+        <translation>Schattenmodus:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="252"/>
@@ -5237,72 +5242,72 @@ GL_EXT_texture_filter_anisotropic extension: %5
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="340"/>
         <source>View Sphere</source>
-        <translation type="unfinished"></translation>
+        <translation>Ansichtskugel</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="360"/>
         <source>Disabled</source>
-        <translation type="unfinished"></translation>
+        <translation>Deaktiviert</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="365"/>
         <source>Small</source>
-        <translation type="unfinished"></translation>
+        <translation>Klein</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="370"/>
         <source>Medium</source>
-        <translation type="unfinished">Mittel</translation>
+        <translation>Mittel</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="375"/>
         <source>Large</source>
-        <translation type="unfinished"></translation>
+        <translation>Groß</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="383"/>
         <source>Highlight Color:</source>
-        <translation type="unfinished"></translation>
+        <translation>Hervorhebungsfarbe:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="390"/>
         <source>Size:</source>
-        <translation type="unfinished"></translation>
+        <translation>Größe:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="404"/>
         <source>Color:</source>
-        <translation type="unfinished">Farbe:</translation>
+        <translation>Farbe:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="418"/>
         <source>Text Color:</source>
-        <translation type="unfinished"></translation>
+        <translation>Textfarbe:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="425"/>
         <source>Location:</source>
-        <translation type="unfinished"></translation>
+        <translation>Position:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="433"/>
         <source>Top Left</source>
-        <translation type="unfinished"></translation>
+        <translation>Oben links</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="438"/>
         <source>Top Right</source>
-        <translation type="unfinished"></translation>
+        <translation>Oben rechts</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="443"/>
         <source>Bottom Left</source>
-        <translation type="unfinished"></translation>
+        <translation>Unten links</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="448"/>
         <source>Bottom Right</source>
-        <translation type="unfinished"></translation>
+        <translation>Oben rechts</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="480"/>
@@ -5446,17 +5451,17 @@ GL_EXT_texture_filter_anisotropic extension: %5
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="241"/>
         <source>Select View Sphere Color</source>
-        <translation type="unfinished"></translation>
+        <translation>Wähle Ansichtskugelfarbe</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="247"/>
         <source>Select View Sphere Text Color</source>
-        <translation type="unfinished"></translation>
+        <translation>Wähle Ansichtskugel Textfarbe</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="253"/>
         <source>Select View Sphere Highlight Color</source>
-        <translation type="unfinished"></translation>
+        <translation>Wähle Ansichtskugel Hervorhebungsfarbe</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="317"/>
@@ -6017,12 +6022,12 @@ GL_EXT_texture_filter_anisotropic extension: %5
     <message>
         <location filename="../qt/lc_setsdatabasedialog.ui" line="74"/>
         <source>Sets Database provided by &lt;a href=&quot;http://www.rebrickable.com&quot;&gt;Rebrickable&lt;/a&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>Sets Datenbank bereitgestellt von &lt;a href=&quot;http://www.rebrickable.com&quot;&gt;Rebrickable&lt;/a&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_setsdatabasedialog.cpp" line="62"/>
         <source>Please select a set from the list.</source>
-        <translation>Bitte wählen sie ein Set aus der Liste</translation>
+        <translation>Bitte wählen sie ein Set aus der Liste.</translation>
     </message>
     <message>
         <location filename="../qt/lc_setsdatabasedialog.cpp" line="69"/>

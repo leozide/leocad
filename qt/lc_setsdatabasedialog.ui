@@ -71,7 +71,7 @@
    <item>
     <widget class="QLabel" name="label">
      <property name="text">
-      <string>Sets Database provided by &lt;a href=&quot;http://www.rebrickable.com&quot;&gt;Rebrickable&lt;/a&gt;</string>
+      <string>Sets Database provided by &lt;a href=&quot;https://www.rebrickable.com&quot;&gt;Rebrickable&lt;/a&gt;</string>
      </property>
      <property name="openExternalLinks">
       <bool>true</bool>

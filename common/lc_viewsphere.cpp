@@ -39,8 +39,8 @@ void lcViewSphere::CreateResources(lcContext* Context)
 
 	const QString ViewNames[6] =
 	{
-		QT_TRANSLATE_NOOP("ViewName", "Left"), QT_TRANSLATE_NOOP("ViewName", "Right"), QT_TRANSLATE_NOOP("ViewName", "Back"),
-		QT_TRANSLATE_NOOP("ViewName", "Front"), QT_TRANSLATE_NOOP("ViewName", "Top"), QT_TRANSLATE_NOOP("ViewName", "Bottom")
+		QCoreApplication::translate("ViewName", "Left"), QCoreApplication::translate("ViewName", "Right"), QCoreApplication::translate("ViewName", "Back"),
+		QCoreApplication::translate("ViewName", "Front"), QCoreApplication::translate("ViewName", "Top"), QCoreApplication::translate("ViewName", "Bottom")
 	};
 
 	const QTransform ViewTransforms[6] =

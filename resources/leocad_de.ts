@@ -1663,7 +1663,7 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="912"/>
         <source>Reset</source>
-        <translation>Rücksetzen</translation>
+        <translation>Zurücksetzen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="919"/>
@@ -1700,17 +1700,17 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="961"/>
         <source>Add Keys</source>
-        <translation>Tasten hinzufügen</translation>
+        <translation>Schlüssel hinzufügen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="968"/>
         <source>Split &amp;Horizontal</source>
-        <translation>&amp;Horizontal Teilen</translation>
+        <translation>&amp;Horizontal teilen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="975"/>
         <source>Split &amp;Vertical</source>
-        <translation>&amp;Vertikal Teilen</translation>
+        <translation>&amp;Vertikal teilen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="982"/>
@@ -2334,52 +2334,52 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="312"/>
         <source>0</source>
-        <translation>8x {0?}</translation>
+        <translation>0</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="319"/>
         <source>1</source>
-        <translation>8x {1?}</translation>
+        <translation>1</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="326"/>
         <source>2</source>
-        <translation>8x {2?}</translation>
+        <translation>2</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="333"/>
         <source>3</source>
-        <translation>8x {3?}</translation>
+        <translation>3</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="340"/>
         <source>4</source>
-        <translation>8x {4?}</translation>
+        <translation>4</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="347"/>
         <source>5</source>
-        <translation>8x {5?}</translation>
+        <translation>5</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="354"/>
         <source>6</source>
-        <translation>8x {6?}</translation>
+        <translation>6</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="361"/>
         <source>7</source>
-        <translation>8x {7?}</translation>
+        <translation>7</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="368"/>
         <source>8</source>
-        <translation>8x {8?}</translation>
+        <translation>8</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="375"/>
         <source>9</source>
-        <translation>8x {9?}</translation>
+        <translation>9</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="382"/>
@@ -2534,7 +2534,7 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="921"/>
         <source>Alt+Up</source>
-        <translation>Alt+Rauf</translation>
+        <translation>Alt+Hoch</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="928"/>
@@ -2579,7 +2579,7 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="1103"/>
         <source>Up</source>
-        <translation>Rauf</translation>
+        <translation>Hoch</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1110"/>
@@ -3331,7 +3331,7 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="962"/>
         <source>Toggle adding new animation keys</source>
-        <translation>Hinzufügen neuer Animationstasten umschalten</translation>
+        <translation>Hinzufügen neuer Animationsschlüssel umschalten</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="969"/>
@@ -3537,7 +3537,7 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="1494"/>
         <source>Open LeoCAD&apos;s home page on the internet using your default web browser</source>
-        <translation>LeoCAD&apos;s Homepage unter &apos;Verwendung des Standardbrowsers öffnen</translation>
+        <translation>LeoCAD&apos;s Homepage im Standardbrowsers öffnen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1508"/>
@@ -3870,7 +3870,7 @@ Bitte lesen sie unter https://www.leocad.org nach wie man eine Bibliothek herunt
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="1970"/>
         <source>&amp;Undo</source>
-        <translation>rückg&amp;ängig machen</translation>
+        <translation>Rückg&amp;ängig machen</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="1976"/>
@@ -3880,7 +3880,7 @@ Bitte lesen sie unter https://www.leocad.org nach wie man eine Bibliothek herunt
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="1981"/>
         <source>&amp;Redo</source>
-        <translation>&amp;wiederherstellen</translation>
+        <translation>&amp;Wiederherstellen</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="2169"/>
@@ -4914,7 +4914,7 @@ GL_EXT_texture_filter_anisotropic extension: %5
     <message>
         <location filename="../qt/lc_qminifigdialog.cpp" line="182"/>
         <source>Are you sure you want to overwrite the template &apos;%1&apos;?</source>
-        <translation>Bist du sicher das du die Vorlage &apos;%1&apos; überschreiben willst?</translation>
+        <translation>Sind sie sicher das sie die Vorlage &apos;%1&apos; überschreiben wollen?</translation>
     </message>
     <message>
         <location filename="../qt/lc_qminifigdialog.cpp" line="183"/>
@@ -4924,7 +4924,7 @@ GL_EXT_texture_filter_anisotropic extension: %5
     <message>
         <location filename="../qt/lc_qminifigdialog.cpp" line="209"/>
         <source>Are you sure you want to delete the template &apos;%1&apos;?</source>
-        <translation>Bist du sicher das du die Vorlage &apos;%1&apos; löschen willst?</translation>
+        <translation>Sind sie sicher das sie die Vorlage &apos;%1&apos; löschen wollen?</translation>
     </message>
     <message>
         <location filename="../qt/lc_qminifigdialog.cpp" line="211"/>
@@ -5077,7 +5077,7 @@ GL_EXT_texture_filter_anisotropic extension: %5
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="862"/>
         <source>Button:</source>
-        <translation>Schaltknopf:</translation>
+        <translation>Maustaste:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="870"/>
@@ -5102,12 +5102,12 @@ GL_EXT_texture_filter_anisotropic extension: %5
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="893"/>
         <source>Modifiers:</source>
-        <translation>Modifizierer:</translation>
+        <translation>Sondertaste:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="900"/>
         <source>Control</source>
-        <translation>Steuerung</translation>
+        <translation>Strg</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="907"/>
@@ -5147,17 +5147,17 @@ GL_EXT_texture_filter_anisotropic extension: %5
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="144"/>
         <source>Once a day</source>
-        <translation>einmal am Tag</translation>
+        <translation>Einmal am Tag</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="149"/>
         <source>Once a week</source>
-        <translation>einmal pro Woche</translation>
+        <translation>Einmal pro Woche</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="157"/>
         <source>Fixed direction keys</source>
-        <translation>Richtungstasten</translation>
+        <translation>Feste Richtungstasten</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="165"/>
@@ -5172,12 +5172,12 @@ GL_EXT_texture_filter_anisotropic extension: %5
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="210"/>
         <source>Axis icon</source>
-        <translation>Ikonen an den Achsen</translation>
+        <translation>Achsenbeschriftung</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="237"/>
         <source>width</source>
-        <translation>breite</translation>
+        <translation>Breite</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="230"/>
@@ -5237,7 +5237,7 @@ GL_EXT_texture_filter_anisotropic extension: %5
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="323"/>
         <source>Draw lines every</source>
-        <translation>Linien Zeichnen alle</translation>
+        <translation>Linien zeichnen alle</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="340"/>
@@ -5347,7 +5347,7 @@ GL_EXT_texture_filter_anisotropic extension: %5
         <location filename="../qt/lc_qpreferencesdialog.ui" line="706"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="825"/>
         <source>Reset...</source>
-        <translation>Rücksetzen…</translation>
+        <translation>Zurücksetzen…</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="610"/>
@@ -5534,17 +5534,17 @@ GL_EXT_texture_filter_anisotropic extension: %5
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="711"/>
         <source>Left Button</source>
-        <translation>Schaltfeld links</translation>
+        <translation>Linke Maustaste</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="716"/>
         <source>Middle Button</source>
-        <translation>Schaltfeld mitte</translation>
+        <translation>Mittlere Maustaste</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="721"/>
         <source>Right Button</source>
-        <translation>Schaltfeld rechts</translation>
+        <translation>Rechte Maustaste</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="790"/>
@@ -5751,7 +5751,7 @@ GL_EXT_texture_filter_anisotropic extension: %5
     <message>
         <location filename="../qt/lc_qpropertiestree.cpp" line="832"/>
         <source>Color</source>
-        <translation>Couleur</translation>
+        <translation>Farbe</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiestree.cpp" line="833"/>

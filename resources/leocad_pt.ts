@@ -4429,11 +4429,6 @@ Veja https://www.leocad.org para saber como descarragar e instalar uma bibliotec
         <translation>LeoCAD é um programa libre para criar modelos LEGO virtuais.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qaboutdialog.ui" line="59"/>
-        <source>&lt;a href=&quot;http://www.leocad.org&quot;&gt;http://www.leocad.org&lt;/a&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../qt/lc_qaboutdialog.ui" line="73"/>
         <source>System Information</source>
         <translation>Informações do Sistema</translation>

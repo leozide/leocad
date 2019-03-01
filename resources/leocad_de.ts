@@ -4429,11 +4429,6 @@ Bitte lesen sie unter https://www.leocad.org nach wie man eine Bibliothek herunt
         <translation>LeoCAD ist eine freie Anwendung zur gestaltung virtueller LEGO Modelle.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qaboutdialog.ui" line="59"/>
-        <source>&lt;a href=&quot;http://www.leocad.org&quot;&gt;http://www.leocad.org&lt;/a&gt;</source>
-        <translation>&lt;a href=&quot;http://www.leocad.org&quot;&gt;http://www.leocad.org&lt;/a&gt;</translation>
-    </message>
-    <message>
         <location filename="../qt/lc_qaboutdialog.ui" line="73"/>
         <source>System Information</source>
         <translation>Systeminformationen</translation>

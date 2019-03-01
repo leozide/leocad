@@ -4429,11 +4429,6 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
         <translation>LeoCAD est une application libre pour créer les modèles LEGO virtuels.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qaboutdialog.ui" line="59"/>
-        <source>&lt;a href=&quot;http://www.leocad.org&quot;&gt;http://www.leocad.org&lt;/a&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../qt/lc_qaboutdialog.ui" line="73"/>
         <source>System Information</source>
         <translation>Informations système</translation>

@@ -2921,7 +2921,7 @@ void View::OnMouseMove()
 	}
 
 	mTrackUpdated = true;
-	const float MouseSensitivity = 1.0f / (21.0f - lcGetPreferences().mMouseSensitivity);
+	const float MouseSensitivity = 0.5f / (21.0f - lcGetPreferences().mMouseSensitivity);
 
 	switch (mTrackTool)
 	{

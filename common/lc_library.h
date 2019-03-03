@@ -155,7 +155,7 @@ public:
 		mZipFileIndex = ZipFileIndex;
 	}
 
-	char mName[LC_MAXPATH];
+	char mName[LC_MAXNAME];
 	lcZipFileType mZipFileType;
 	quint32 mZipFileIndex;
 	lcPrimitiveState mState;

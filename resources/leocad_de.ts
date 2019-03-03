@@ -1089,7 +1089,7 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="9"/>
         <source>&amp;New</source>
-        <translation>&amp;Neu</translation>
+        <translation type="unfinished">&amp;Neu</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="16"/>
@@ -1663,7 +1663,7 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="912"/>
         <source>Reset</source>
-        <translation>Rücksetzen</translation>
+        <translation>Zurücksetzen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="919"/>
@@ -1700,17 +1700,17 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="961"/>
         <source>Add Keys</source>
-        <translation>Tasten hinzufügen</translation>
+        <translation>Schlüssel hinzufügen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="968"/>
         <source>Split &amp;Horizontal</source>
-        <translation>&amp;Horizontal Teilen</translation>
+        <translation>&amp;Horizontal teilen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="975"/>
         <source>Split &amp;Vertical</source>
-        <translation>&amp;Vertikal Teilen</translation>
+        <translation>&amp;Vertikal teilen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="982"/>
@@ -2262,389 +2262,6 @@
         <source>Special Colors</source>
         <comment>Colors</comment>
         <translation>Spezialfarben</translation>
-    </message>
-</context>
-<context>
-    <name>Shortcut</name>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="11"/>
-        <source>Ctrl+N</source>
-        <translation>Strg+N</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="18"/>
-        <source>Ctrl+O</source>
-        <translation>Strg+O</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="32"/>
-        <source>Ctrl+S</source>
-        <translation>Strg+S</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="179"/>
-        <source>Ctrl+Z</source>
-        <translation>Strg+Z</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="186"/>
-        <source>Ctrl+Y</source>
-        <translation>Strg+Y</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="193"/>
-        <source>Ctrl+X</source>
-        <translation>Strg+X</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="200"/>
-        <source>Ctrl+C</source>
-        <translation>Strg+C</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="207"/>
-        <source>Ctrl+V</source>
-        <translation>Strg+V</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="214"/>
-        <source>Ctrl+F</source>
-        <translation>Strg+F</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="221"/>
-        <source>F3</source>
-        <translation>F3</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="228"/>
-        <source>Shift+F3</source>
-        <translation>Shift+F3</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="235"/>
-        <source>Ctrl+A</source>
-        <translation>Strg+A</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="249"/>
-        <source>Ctrl+I</source>
-        <translation>Strg+I</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="312"/>
-        <source>0</source>
-        <translation>8x {0?}</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="319"/>
-        <source>1</source>
-        <translation>8x {1?}</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="326"/>
-        <source>2</source>
-        <translation>8x {2?}</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="333"/>
-        <source>3</source>
-        <translation>8x {3?}</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="340"/>
-        <source>4</source>
-        <translation>8x {4?}</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="347"/>
-        <source>5</source>
-        <translation>8x {5?}</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="354"/>
-        <source>6</source>
-        <translation>8x {6?}</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="361"/>
-        <source>7</source>
-        <translation>8x {7?}</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="368"/>
-        <source>8</source>
-        <translation>8x {8?}</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="375"/>
-        <source>9</source>
-        <translation>8x {9?}</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="382"/>
-        <source>Ctrl+Shift+0</source>
-        <translation>Strg+Shift+0</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="389"/>
-        <source>Ctrl+Shift+1</source>
-        <translation>Strg+Shift+1</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="396"/>
-        <source>Ctrl+Shift+2</source>
-        <translation>Strg+Shift+2</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="403"/>
-        <source>Ctrl+Shift+3</source>
-        <translation>Strg+Shift+3</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="410"/>
-        <source>Ctrl+Shift+4</source>
-        <translation>Strg+Shift+4</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="417"/>
-        <source>Ctrl+Shift+5</source>
-        <translation>Strg+Shift+5</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="424"/>
-        <source>Ctrl+Shift+6</source>
-        <translation>Strg+Shift+6</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="431"/>
-        <source>Ctrl+Shift+7</source>
-        <translation>Strg+Shift+7</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="438"/>
-        <source>Ctrl+Shift+8</source>
-        <translation>Strg+Shift+8</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="445"/>
-        <source>Ctrl+Shift+9</source>
-        <translation>Strg+Shift+9</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="459"/>
-        <source>Shift+0</source>
-        <translation>Shift+0</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="466"/>
-        <source>Shift+1</source>
-        <translation>Shift+1</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="473"/>
-        <source>Shift+2</source>
-        <translation>Shift+2</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="480"/>
-        <source>Shift+3</source>
-        <translation>Shift+3</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="487"/>
-        <source>Shift+4</source>
-        <translation>Shift+4</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="494"/>
-        <source>Shift+5</source>
-        <translation>Shift+5</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="501"/>
-        <source>Shift+6</source>
-        <translation>Shift+6</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="508"/>
-        <source>Shift+7</source>
-        <translation>Shift+7</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="515"/>
-        <source>Shift+8</source>
-        <translation>Shift+8</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="522"/>
-        <source>Shift+9</source>
-        <translation>Shift+9</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="662"/>
-        <source>Esc</source>
-        <translation>Esc</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="676"/>
-        <source>+</source>
-        <translation>+</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="683"/>
-        <source>-</source>
-        <translation>-</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="746"/>
-        <source>F</source>
-        <translation>F</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="753"/>
-        <source>B</source>
-        <translation>B</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="760"/>
-        <source>T</source>
-        <translation>T</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="767"/>
-        <source>O</source>
-        <translation>O</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="774"/>
-        <source>L</source>
-        <translation>L</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="781"/>
-        <source>R</source>
-        <translation>R</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="788"/>
-        <source>H</source>
-        <translation>H</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="921"/>
-        <source>Alt+Up</source>
-        <translation>Alt+Rauf</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="928"/>
-        <source>Alt+Left</source>
-        <translation>Alt+Links</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="935"/>
-        <source>Alt+Right</source>
-        <translation>Alt+Rechts</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="942"/>
-        <source>Alt+Down</source>
-        <translation>Alt+Runter</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="1005"/>
-        <source>Ctrl+W</source>
-        <translation>Strg+W</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="1047"/>
-        <source>Insert</source>
-        <translation>Einfügen</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="1054"/>
-        <source>Delete</source>
-        <translation>Löschen</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="1061"/>
-        <source>Ctrl+D</source>
-        <translation>Strg+D</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="1096"/>
-        <source>Down</source>
-        <translation>Runter</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="1103"/>
-        <source>Up</source>
-        <translation>Rauf</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="1110"/>
-        <source>Right</source>
-        <translation>Rechts</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="1117"/>
-        <source>Left</source>
-        <translation>Links</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="1124"/>
-        <source>PgUp</source>
-        <translation>Bild auf</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="1131"/>
-        <source>PgDown</source>
-        <translation>Bild ab</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="1138"/>
-        <source>Shift+Down</source>
-        <translation>Shift+Runter</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="1145"/>
-        <source>Shift+Up</source>
-        <translation>Shift+Hoch</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="1152"/>
-        <source>Shift+Right</source>
-        <translation>Shift+Rechts</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="1159"/>
-        <source>Shift+Left</source>
-        <translation>Shift+Links</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="1166"/>
-        <source>Shift+PgUp</source>
-        <translation>Shift+Bild auf</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="1173"/>
-        <source>Shift+PgDown</source>
-        <translation>Shift+Bild ab</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="1229"/>
-        <source>Ctrl+G</source>
-        <translation>Strg+G</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="1236"/>
-        <source>Ctrl+U</source>
-        <translation>Strg+U</translation>
-    </message>
-    <message>
-        <location filename="../common/lc_commands.cpp" line="1264"/>
-        <source>Ctrl+H</source>
-        <translation>Strg+H</translation>
     </message>
 </context>
 <context>
@@ -3331,7 +2948,7 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="962"/>
         <source>Toggle adding new animation keys</source>
-        <translation>Hinzufügen neuer Animationstasten umschalten</translation>
+        <translation>Hinzufügen neuer Animationsschlüssel umschalten</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="969"/>
@@ -3537,7 +3154,7 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="1494"/>
         <source>Open LeoCAD&apos;s home page on the internet using your default web browser</source>
-        <translation>LeoCAD&apos;s Homepage unter &apos;Verwendung des Standardbrowsers öffnen</translation>
+        <translation>LeoCAD&apos;s Homepage im Standardbrowsers öffnen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1508"/>
@@ -3870,7 +3487,7 @@ Bitte lesen sie unter https://www.leocad.org nach wie man eine Bibliothek herunt
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="1970"/>
         <source>&amp;Undo</source>
-        <translation>rückg&amp;ängig machen</translation>
+        <translation>Rückg&amp;ängig machen</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="1976"/>
@@ -3880,7 +3497,7 @@ Bitte lesen sie unter https://www.leocad.org nach wie man eine Bibliothek herunt
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="1981"/>
         <source>&amp;Redo</source>
-        <translation>&amp;wiederherstellen</translation>
+        <translation>&amp;Wiederherstellen</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="2169"/>
@@ -4429,11 +4046,6 @@ Bitte lesen sie unter https://www.leocad.org nach wie man eine Bibliothek herunt
         <translation>LeoCAD ist eine freie Anwendung zur gestaltung virtueller LEGO Modelle.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qaboutdialog.ui" line="59"/>
-        <source>&lt;a href=&quot;http://www.leocad.org&quot;&gt;http://www.leocad.org&lt;/a&gt;</source>
-        <translation>&lt;a href=&quot;http://www.leocad.org&quot;&gt;http://www.leocad.org&lt;/a&gt;</translation>
-    </message>
-    <message>
         <location filename="../qt/lc_qaboutdialog.ui" line="73"/>
         <source>System Information</source>
         <translation>Systeminformationen</translation>
@@ -4914,7 +4526,7 @@ GL_EXT_texture_filter_anisotropic extension: %5
     <message>
         <location filename="../qt/lc_qminifigdialog.cpp" line="182"/>
         <source>Are you sure you want to overwrite the template &apos;%1&apos;?</source>
-        <translation>Bist du sicher das du die Vorlage &apos;%1&apos; überschreiben willst?</translation>
+        <translation>Sind sie sicher das sie die Vorlage &apos;%1&apos; überschreiben wollen?</translation>
     </message>
     <message>
         <location filename="../qt/lc_qminifigdialog.cpp" line="183"/>
@@ -4924,7 +4536,7 @@ GL_EXT_texture_filter_anisotropic extension: %5
     <message>
         <location filename="../qt/lc_qminifigdialog.cpp" line="209"/>
         <source>Are you sure you want to delete the template &apos;%1&apos;?</source>
-        <translation>Bist du sicher das du die Vorlage &apos;%1&apos; löschen willst?</translation>
+        <translation>Sind sie sicher das sie die Vorlage &apos;%1&apos; löschen wollen?</translation>
     </message>
     <message>
         <location filename="../qt/lc_qminifigdialog.cpp" line="211"/>
@@ -5077,7 +4689,7 @@ GL_EXT_texture_filter_anisotropic extension: %5
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="862"/>
         <source>Button:</source>
-        <translation>Schaltknopf:</translation>
+        <translation>Maustaste:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="870"/>
@@ -5102,12 +4714,12 @@ GL_EXT_texture_filter_anisotropic extension: %5
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="893"/>
         <source>Modifiers:</source>
-        <translation>Modifizierer:</translation>
+        <translation>Sondertaste:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="900"/>
         <source>Control</source>
-        <translation>Steuerung</translation>
+        <translation>Strg</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="907"/>
@@ -5147,17 +4759,17 @@ GL_EXT_texture_filter_anisotropic extension: %5
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="144"/>
         <source>Once a day</source>
-        <translation>einmal am Tag</translation>
+        <translation>Einmal am Tag</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="149"/>
         <source>Once a week</source>
-        <translation>einmal pro Woche</translation>
+        <translation>Einmal pro Woche</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="157"/>
         <source>Fixed direction keys</source>
-        <translation>Richtungstasten</translation>
+        <translation>Feste Richtungstasten</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="165"/>
@@ -5172,12 +4784,12 @@ GL_EXT_texture_filter_anisotropic extension: %5
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="210"/>
         <source>Axis icon</source>
-        <translation>Ikonen an den Achsen</translation>
+        <translation>Achsenbeschriftung</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="237"/>
         <source>width</source>
-        <translation>breite</translation>
+        <translation>Breite</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="230"/>
@@ -5237,7 +4849,7 @@ GL_EXT_texture_filter_anisotropic extension: %5
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="323"/>
         <source>Draw lines every</source>
-        <translation>Linien Zeichnen alle</translation>
+        <translation>Linien zeichnen alle</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="340"/>
@@ -5347,7 +4959,7 @@ GL_EXT_texture_filter_anisotropic extension: %5
         <location filename="../qt/lc_qpreferencesdialog.ui" line="706"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="825"/>
         <source>Reset...</source>
-        <translation>Rücksetzen…</translation>
+        <translation>Zurücksetzen…</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="610"/>
@@ -5534,17 +5146,17 @@ GL_EXT_texture_filter_anisotropic extension: %5
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="711"/>
         <source>Left Button</source>
-        <translation>Schaltfeld links</translation>
+        <translation>Linke Maustaste</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="716"/>
         <source>Middle Button</source>
-        <translation>Schaltfeld mitte</translation>
+        <translation>Mittlere Maustaste</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="721"/>
         <source>Right Button</source>
-        <translation>Schaltfeld rechts</translation>
+        <translation>Rechte Maustaste</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="790"/>
@@ -5751,7 +5363,7 @@ GL_EXT_texture_filter_anisotropic extension: %5
     <message>
         <location filename="../qt/lc_qpropertiestree.cpp" line="832"/>
         <source>Color</source>
-        <translation>Couleur</translation>
+        <translation>Farbe</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiestree.cpp" line="833"/>
@@ -6021,8 +5633,8 @@ GL_EXT_texture_filter_anisotropic extension: %5
     </message>
     <message>
         <location filename="../qt/lc_setsdatabasedialog.ui" line="74"/>
-        <source>Sets Database provided by &lt;a href=&quot;http://www.rebrickable.com&quot;&gt;Rebrickable&lt;/a&gt;</source>
-        <translation>Sets Datenbank bereitgestellt von &lt;a href=&quot;http://www.rebrickable.com&quot;&gt;Rebrickable&lt;/a&gt;</translation>
+        <source>Sets Database provided by &lt;a href=&quot;https://www.rebrickable.com&quot;&gt;Rebrickable&lt;/a&gt;</source>
+        <translation>Sets Datenbank bereitgestellt von &lt;a href=&quot;https://www.rebrickable.com&quot;&gt;Rebrickable&lt;/a&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_setsdatabasedialog.cpp" line="62"/>

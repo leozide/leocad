@@ -58,7 +58,7 @@ void lcResetDefaultMouseShortcuts()
 void lcKeyboardShortcuts::Reset()
 {
 	for (int CommandIdx = 0; CommandIdx < LC_NUM_COMMANDS; CommandIdx++)
-		mShortcuts[CommandIdx] = qApp->translate("Shortcut", gCommands[CommandIdx].DefaultShortcut);
+		mShortcuts[CommandIdx] = gCommands[CommandIdx].DefaultShortcut;
 }
 
 bool lcKeyboardShortcuts::Save(const QString& FileName)

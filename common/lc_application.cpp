@@ -191,7 +191,7 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 	int ImageEnd = 0;
 	int PartImagesWidth = -1;
 	int PartImagesHeight = -1;
-	float CameraLatitude, CameraLongitude;
+	float CameraLatitude = 0.0f, CameraLongitude = 0.0f;
 	QString ImageName;
 	QString ModelName;
 	QString CameraName;

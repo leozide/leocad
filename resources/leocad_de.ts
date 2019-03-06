@@ -1089,7 +1089,7 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="9"/>
         <source>&amp;New</source>
-        <translation type="unfinished">&amp;Neu</translation>
+        <translation>&amp;Neu</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="16"/>
@@ -1477,7 +1477,7 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="555"/>
         <source>Relative Rotation</source>
-        <translation>relative Drehung</translation>
+        <translation>Relative Drehung</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="562"/>
@@ -1865,7 +1865,7 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="1199"/>
         <source>Move to New Model...</source>
-        <translation>Neues Modell bewegen…</translation>
+        <translation>In Neues Modell verschieben…</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1206"/>
@@ -5495,7 +5495,7 @@ GL_EXT_texture_filter_anisotropic extension: %5
     <message>
         <location filename="../qt/lc_renderdialog.ui" line="29"/>
         <source>Settings</source>
-        <translation>Einstellwerte</translation>
+        <translation>Einstellungen</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.ui" line="41"/>

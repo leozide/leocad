@@ -67,8 +67,17 @@
          </item>
          <item>
           <widget class="QToolButton" name="partsLibraryBrowse">
-           <property name="text">
-            <string>...</string>
+           <property name="icon">
+            <iconset>
+             <normaloff>:/resources/file_open.png</normaloff>:/resources/file_open.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="partsArchiveBrowse">
+           <property name="icon">
+            <iconset>
+             <normaloff>:/resources/archive.png</normaloff>:/resources/archive.png</iconset>
            </property>
           </widget>
          </item>
@@ -982,6 +991,7 @@
   <tabstop>authorName</tabstop>
   <tabstop>partsLibrary</tabstop>
   <tabstop>partsLibraryBrowse</tabstop>
+  <tabstop>partsArchiveBrowse</tabstop>
   <tabstop>povrayExecutable</tabstop>
   <tabstop>povrayExecutableBrowse</tabstop>
   <tabstop>lgeoPath</tabstop>

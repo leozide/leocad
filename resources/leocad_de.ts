@@ -2076,9 +2076,9 @@
         <location filename="../common/project.cpp" line="2053"/>
         <location filename="../common/project.cpp" line="2092"/>
         <location filename="../common/project.cpp" line="2138"/>
-        <location filename="../common/project.cpp" line="2333"/>
-        <location filename="../common/project.cpp" line="2347"/>
-        <location filename="../common/project.cpp" line="2364"/>
+        <location filename="../common/project.cpp" line="2337"/>
+        <location filename="../common/project.cpp" line="2351"/>
+        <location filename="../common/project.cpp" line="2368"/>
         <source>LeoCAD</source>
         <translation>LeoCAD</translation>
     </message>
@@ -2088,7 +2088,7 @@
         <location filename="../common/project.cpp" line="1193"/>
         <location filename="../common/project.cpp" line="1458"/>
         <location filename="../common/project.cpp" line="2040"/>
-        <location filename="../common/project.cpp" line="2333"/>
+        <location filename="../common/project.cpp" line="2337"/>
         <source>Nothing to export.</source>
         <translation>Nichts zu exportieren.</translation>
     </message>
@@ -2108,8 +2108,8 @@
         <location filename="../common/project.cpp" line="1206"/>
         <location filename="../common/project.cpp" line="1472"/>
         <location filename="../common/project.cpp" line="2053"/>
-        <location filename="../common/project.cpp" line="2347"/>
-        <location filename="../common/project.cpp" line="2364"/>
+        <location filename="../common/project.cpp" line="2351"/>
+        <location filename="../common/project.cpp" line="2368"/>
         <source>Could not open file &apos;%1&apos; for writing.</source>
         <translation>Konnte Datei » %1 « nicht zum Schreiben öffnen.</translation>
     </message>
@@ -2166,12 +2166,12 @@
         <translation>Konnte keine LGEO Dateien im Verzeichnis » %1 « finden.</translation>
     </message>
     <message>
-        <location filename="../common/project.cpp" line="2337"/>
+        <location filename="../common/project.cpp" line="2341"/>
         <source>Export Wavefront</source>
         <translation>Nach Wavefront exportieren</translation>
     </message>
     <message>
-        <location filename="../common/project.cpp" line="2337"/>
+        <location filename="../common/project.cpp" line="2341"/>
         <source>Wavefront Files (*.obj);;All Files (*.*)</source>
         <translation>Wavefront Dateien (*.obj);;Alle Dateien (*.*)</translation>
     </message>
@@ -4650,9 +4650,8 @@ GL_EXT_texture_filter_anisotropic extension: %5
         <translation>Voreinstellung für Autor:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="71"/>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="95"/>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="119"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="104"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="128"/>
         <source>...</source>
         <translation>...</translation>
     </message>
@@ -4662,361 +4661,361 @@ GL_EXT_texture_filter_anisotropic extension: %5
         <translation>Eigene Teilebibliothek:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="782"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="791"/>
         <source>Mouse</source>
         <translation>Maus</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="790"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="799"/>
         <source>Mouse Shortcuts</source>
         <translation>Maus-Kurzbefehle</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="805"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="814"/>
         <source>Action</source>
         <translation>Aktion</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="810"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="819"/>
         <source>Shortcut 1</source>
         <translation>Tastenkürzel 1</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="815"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="824"/>
         <source>Shortcut 2</source>
         <translation>Tastenkürzel 2</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="862"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="871"/>
         <source>Button:</source>
         <translation>Maustaste:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="870"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="879"/>
         <source>None</source>
         <translation>Keine</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="875"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="884"/>
         <source>Left</source>
         <translation>Links</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="880"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="889"/>
         <source>Middle</source>
         <translation>Mitte</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="885"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="894"/>
         <source>Right</source>
         <translation>Rechts</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="893"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="902"/>
         <source>Modifiers:</source>
         <translation>Sondertaste:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="900"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="909"/>
         <source>Control</source>
         <translation>Strg</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="907"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="916"/>
         <source>Alt</source>
         <translation>Alt</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="914"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="923"/>
         <source>Shift</source>
         <translation>Shift</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="942"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="951"/>
         <source>Mouse sensitivity:</source>
         <translation>Mausempfindlichkeit:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="128"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="137"/>
         <source>Check for updates:</source>
         <translation>Auf Aktualisierungen prüfen:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="80"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="89"/>
         <source>PO&amp;V-Ray Executable:</source>
         <translation>PO&amp;V-Ray Executable:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="104"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="113"/>
         <source>&amp;LGEO Path:</source>
         <translation>&amp;LGEO Pfad:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="139"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="148"/>
         <source>Never</source>
         <translation>Nie</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="144"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="153"/>
         <source>Once a day</source>
         <translation>Einmal am Tag</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="149"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="158"/>
         <source>Once a week</source>
         <translation>Einmal pro Woche</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="157"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="166"/>
         <source>Fixed direction keys</source>
         <translation>Feste Richtungstasten</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="165"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="174"/>
         <source>Rendering</source>
         <translation>Rendern</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="174"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="183"/>
         <source>Edge lines</source>
         <translation>Randlinien</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="210"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="219"/>
         <source>Axis icon</source>
         <translation>Achsenbeschriftung</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="237"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="246"/>
         <source>width</source>
         <translation>Breite</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="230"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="239"/>
         <source>Anti-aliasing</source>
         <translation>Anti-aliasing</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="182"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="191"/>
         <source>2x</source>
         <translation>2x</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="187"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="196"/>
         <source>4x</source>
         <translation>4x</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="192"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="201"/>
         <source>8x</source>
         <translation>8x</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="244"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="253"/>
         <source>Shading Mode:</source>
         <translation>Schattenmodus:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="252"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="261"/>
         <source>Wireframe</source>
         <translation>Drahtmodell</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="257"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="266"/>
         <source>Flat Shading</source>
         <translation>Einfache Schatten</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="262"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="271"/>
         <source>Default Lights</source>
         <translation>Voreingestellte Beleuchtung</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="273"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="282"/>
         <source>Base Grid</source>
         <translation>Grundraster</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="309"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="318"/>
         <source>Draw studs</source>
         <translation>Noppen darstellen</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="316"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="325"/>
         <source>studs</source>
         <translation>Noppen</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="323"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="332"/>
         <source>Draw lines every</source>
         <translation>Linien zeichnen alle</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="340"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="349"/>
         <source>View Sphere</source>
         <translation>Ansichtskugel</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="360"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="369"/>
         <source>Disabled</source>
         <translation>Deaktiviert</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="365"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="374"/>
         <source>Small</source>
         <translation>Klein</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="370"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="379"/>
         <source>Medium</source>
         <translation>Mittel</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="375"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="384"/>
         <source>Large</source>
         <translation>Groß</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="383"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="392"/>
         <source>Highlight Color:</source>
         <translation>Hervorhebungsfarbe:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="390"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="399"/>
         <source>Size:</source>
         <translation>Größe:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="404"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="413"/>
         <source>Color:</source>
         <translation>Farbe:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="418"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="427"/>
         <source>Text Color:</source>
         <translation>Textfarbe:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="425"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="434"/>
         <source>Location:</source>
         <translation>Position:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="433"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="442"/>
         <source>Top Left</source>
         <translation>Oben links</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="438"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="447"/>
         <source>Top Right</source>
         <translation>Oben rechts</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="443"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="452"/>
         <source>Bottom Left</source>
         <translation>Unten links</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="448"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="457"/>
         <source>Bottom Right</source>
         <translation>Oben rechts</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="480"/>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="521"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="489"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="530"/>
         <source>Categories</source>
         <translation>Kategorie</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="486"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="495"/>
         <source>Parts Library Categories</source>
         <translation>Kategorie der Teilebibliothek</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="555"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="564"/>
         <source>Name</source>
         <translation>Name</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="560"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="569"/>
         <source>Number</source>
         <translation>Nummer</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="571"/>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="692"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="580"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="701"/>
         <source>Import...</source>
         <translation>Importieren…</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="578"/>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="699"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="587"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="708"/>
         <source>Export...</source>
         <translation>Exportieren…</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="585"/>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="706"/>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="825"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="594"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="715"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="834"/>
         <source>Reset...</source>
         <translation>Zurücksetzen…</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="610"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="619"/>
         <source>Category</source>
         <translation>Kategorie</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="616"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="625"/>
         <source>New...</source>
         <translation>Neu…</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="623"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="632"/>
         <source>Edit...</source>
         <translation>Bearbeiten…</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="630"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="639"/>
         <source>Delete...</source>
         <translation>Löschen…</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="654"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="663"/>
         <source>Keyboard</source>
         <translation>Tastatur</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="664"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="673"/>
         <source>Keyboard Shortcuts</source>
         <translation>Tastenkürzel</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="677"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="686"/>
         <source>Command</source>
         <translation>Befehl</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="682"/>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="734"/>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="854"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="691"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="743"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="863"/>
         <source>Shortcut</source>
         <translation>Kürzel</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="740"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="749"/>
         <source>Key se&amp;quence:</source>
         <translation>Tasten&amp;folge:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="753"/>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="921"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="762"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="930"/>
         <source>Assign</source>
         <translation>Zuweisen</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="760"/>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="928"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="769"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="937"/>
         <source>Remove</source>
         <translation>Entfernen</translation>
     </message>
@@ -5027,151 +5026,161 @@ GL_EXT_texture_filter_anisotropic extension: %5
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="191"/>
-        <source>Open Parts Library Folder</source>
-        <translation>Ordern der Teilebibliothek öffnen</translation>
+        <source>Select Parts Library Folder...</source>
+        <translation>Ordner der Teilebibliothek auswählen...</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="200"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="199"/>
+        <source>Select Parts Library Archive...</source>
+        <translation>Archiv der Teilebibliothek auswählen...</translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="199"/>
+        <source>Supported Archives (*.zip *.bin);;All Files (*.*)</source>
+        <translation>Unterstütze Bibliotheken (*.zip *.bin);;Alle Dateien (*.*)</translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="208"/>
         <source>Executable Files (*.exe);;All Files (*.*)</source>
         <translation>Asuführbare Dateien (*.exe);;Alle Dateien (*.*)</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="202"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="210"/>
         <source>All Files (*.*)</source>
         <translation>Alle Dateien (*.*)</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="205"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="213"/>
         <source>Open POV-Ray Executable</source>
         <translation>Asuführbares POV-Ray öffnen</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="213"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="221"/>
         <source>Open LGEO Folder</source>
         <translation>LGEO Ordner öffnen</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="229"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="237"/>
         <source>Select Grid Stud Color</source>
         <translation>Farbe der Noppen im Gitter wählen</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="235"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="243"/>
         <source>Select Grid Line Color</source>
         <translation>Farbe der Gitterlinien wählen</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="241"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="249"/>
         <source>Select View Sphere Color</source>
         <translation>Wähle Ansichtskugelfarbe</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="247"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="255"/>
         <source>Select View Sphere Text Color</source>
         <translation>Wähle Ansichtskugel Textfarbe</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="253"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="261"/>
         <source>Select View Sphere Highlight Color</source>
         <translation>Wähle Ansichtskugel Hervorhebungsfarbe</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="317"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="325"/>
         <source>Unassigned</source>
         <translation>Unbestimmt</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="431"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="439"/>
         <source>Are you sure you want to delete the category &apos;%1&apos;?</source>
         <translation>Sind sie sicher dass sie die Kategorie » %1 « löschen möchten?</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="444"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="452"/>
         <source>Import Categories</source>
         <translation>Kategorien importieren</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="444"/>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="463"/>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="650"/>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="670"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="452"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="471"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="658"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="678"/>
         <source>Text Files (*.txt);;All Files (*.*)</source>
         <translation>Textdateien (*.txt);;Alle Dateien (*.*)</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="452"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="460"/>
         <source>Error loading categories file.</source>
         <translation>Fehler beim Laden der Kategoriedatei.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="463"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="471"/>
         <source>Export Categories</source>
         <translation>Kategorien exportieren</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="470"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="478"/>
         <source>Error saving categories file.</source>
         <translation>Fehler beim Speichern der Kategoriendatei.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="477"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="485"/>
         <source>Are you sure you want to load the default categories?</source>
         <translation>Sind sie sicher dass sie die voreingestellten Kategorien laden möchten?</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="650"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="658"/>
         <source>Import shortcuts</source>
         <translation>Tastenkürzel laden</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="658"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="666"/>
         <source>Error loading keyboard shortcuts file.</source>
         <translation>Fehler beim Laden der Tastaturkürzel-Datei.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="670"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="678"/>
         <source>Export shortcuts</source>
         <translation>Tastaturkürzel exportieren</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="677"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="685"/>
         <source>Error saving keyboard shortcuts file.</source>
         <translation>Fehler beim Speichern der Tastaturkürzel-Datei.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="684"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="692"/>
         <source>Are you sure you want to load the default keyboard shortcuts?</source>
         <translation>Sind sie sicher dass sie die voreingestellten Tastaturkürzel laden möchten?</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="711"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="719"/>
         <source>Left Button</source>
         <translation>Linke Maustaste</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="716"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="724"/>
         <source>Middle Button</source>
         <translation>Mittlere Maustaste</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="721"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="729"/>
         <source>Right Button</source>
         <translation>Rechte Maustaste</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="790"/>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="799"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="798"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="807"/>
         <source>Override Shortcut</source>
         <translation>Tastaturkürzel ändern</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="790"/>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="799"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="798"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="807"/>
         <source>This shortcut is already assigned to &apos;%1&apos;, do you want to replace it?</source>
         <translation>Dieses Tastaturkürzel ist bereits » %1 « zugewiesen, möchten sie es ersetzen?</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="844"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="852"/>
         <source>Are you sure you want to load the default mouse shortcuts?</source>
         <translation>Sind sie sicher dass sie die voreingestellten Mauskürzel laden möchten?</translation>
     </message>
@@ -5304,34 +5313,34 @@ GL_EXT_texture_filter_anisotropic extension: %5
     </message>
     <message>
         <location filename="../qt/lc_qpropertiestree.cpp" line="817"/>
-        <location filename="../qt/lc_qpropertiestree.cpp" line="945"/>
+        <location filename="../qt/lc_qpropertiestree.cpp" line="947"/>
         <source>Position</source>
         <translation>Position</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiestree.cpp" line="818"/>
         <location filename="../qt/lc_qpropertiestree.cpp" line="823"/>
-        <location filename="../qt/lc_qpropertiestree.cpp" line="946"/>
-        <location filename="../qt/lc_qpropertiestree.cpp" line="951"/>
-        <location filename="../qt/lc_qpropertiestree.cpp" line="956"/>
+        <location filename="../qt/lc_qpropertiestree.cpp" line="948"/>
+        <location filename="../qt/lc_qpropertiestree.cpp" line="953"/>
+        <location filename="../qt/lc_qpropertiestree.cpp" line="958"/>
         <source>X</source>
         <translation>X</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiestree.cpp" line="819"/>
         <location filename="../qt/lc_qpropertiestree.cpp" line="824"/>
-        <location filename="../qt/lc_qpropertiestree.cpp" line="947"/>
-        <location filename="../qt/lc_qpropertiestree.cpp" line="952"/>
-        <location filename="../qt/lc_qpropertiestree.cpp" line="957"/>
+        <location filename="../qt/lc_qpropertiestree.cpp" line="949"/>
+        <location filename="../qt/lc_qpropertiestree.cpp" line="954"/>
+        <location filename="../qt/lc_qpropertiestree.cpp" line="959"/>
         <source>Y</source>
         <translation>Y</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiestree.cpp" line="820"/>
         <location filename="../qt/lc_qpropertiestree.cpp" line="825"/>
-        <location filename="../qt/lc_qpropertiestree.cpp" line="948"/>
-        <location filename="../qt/lc_qpropertiestree.cpp" line="953"/>
-        <location filename="../qt/lc_qpropertiestree.cpp" line="958"/>
+        <location filename="../qt/lc_qpropertiestree.cpp" line="950"/>
+        <location filename="../qt/lc_qpropertiestree.cpp" line="955"/>
+        <location filename="../qt/lc_qpropertiestree.cpp" line="960"/>
         <source>Z</source>
         <translation>Z</translation>
     </message>
@@ -5371,43 +5380,43 @@ GL_EXT_texture_filter_anisotropic extension: %5
         <translation>Teil</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiestree.cpp" line="950"/>
+        <location filename="../qt/lc_qpropertiestree.cpp" line="952"/>
         <source>Target</source>
         <translation>Ziel</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiestree.cpp" line="955"/>
-        <location filename="../qt/lc_qpropertiestree.cpp" line="960"/>
+        <location filename="../qt/lc_qpropertiestree.cpp" line="957"/>
+        <location filename="../qt/lc_qpropertiestree.cpp" line="962"/>
         <source>Up</source>
         <translation>Hoch</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiestree.cpp" line="961"/>
+        <location filename="../qt/lc_qpropertiestree.cpp" line="963"/>
         <source>Orthographic</source>
         <translation>Orhografisch</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiestree.cpp" line="962"/>
+        <location filename="../qt/lc_qpropertiestree.cpp" line="964"/>
         <source>FOV</source>
         <translation>FOV</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiestree.cpp" line="963"/>
+        <location filename="../qt/lc_qpropertiestree.cpp" line="965"/>
         <source>Near</source>
         <translation>Nah</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiestree.cpp" line="964"/>
+        <location filename="../qt/lc_qpropertiestree.cpp" line="966"/>
         <source>Far</source>
         <translation>Fern</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiestree.cpp" line="965"/>
+        <location filename="../qt/lc_qpropertiestree.cpp" line="967"/>
         <source>Name</source>
         <translation>Name</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiestree.cpp" line="1045"/>
+        <location filename="../qt/lc_qpropertiestree.cpp" line="1047"/>
         <source>Multiple Objects Selected</source>
         <translation>Mehrere Objekre ausgewählt</translation>
     </message>

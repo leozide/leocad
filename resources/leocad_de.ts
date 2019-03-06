@@ -3959,17 +3959,17 @@ Bitte lesen sie unter https://www.leocad.org nach wie man eine Bibliothek herunt
     <message>
         <location filename="../common/lc_partselectionwidget.cpp" line="471"/>
         <source>Medium Icons</source>
-        <translation>Mittelgrosse Symbole</translation>
+        <translation>Mittelgroße Symbole</translation>
     </message>
     <message>
         <location filename="../common/lc_partselectionwidget.cpp" line="476"/>
         <source>Large Icons</source>
-        <translation>Grosse Icons</translation>
+        <translation>Große Symbole</translation>
     </message>
     <message>
         <location filename="../common/lc_partselectionwidget.cpp" line="481"/>
         <source>Extra Large Icons</source>
-        <translation>Extragrosse Symbole</translation>
+        <translation>Extragroße Symbole</translation>
     </message>
     <message>
         <location filename="../common/lc_partselectionwidget.cpp" line="491"/>

@@ -2292,7 +2292,8 @@ bool Project::ExportPOVRay(const QString& FileName)
 
 	for (int PartIdx = 0; PartIdx < ModelParts.GetSize(); PartIdx++)
 	{
-		std::pair<char[LC_PIECE_NAME_LEN], int>& Entry = PieceTable[ModelParts[PartIdx].Info];
+		PieceInfo* Info = ModelParts[PartIdx].Info;
+		std::pair<char[LC_PIECE_NAME_LEN], int>& Entry = PieceTable[Info];
 		int Color;
 
 		Color = ModelParts[PartIdx].ColorIndex;
@@ -2310,6 +2311,9 @@ bool Project::ExportPOVRay(const QString& FileName)
 		}
 		else
 		{
+			if (!Info || !Info->GetMesh())
+				continue;
+
 			sprintf(Line, "object {\n %s%s\n texture { %s }\n matrix <%.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f>\n}\n",
 					Entry.first, Suffix, ColorTable[Color].data(), -f[5], -f[4], -f[6], -f[1], -f[0], -f[2], f[9], f[8], f[10], f[13] / 25.0f, f[12] / 25.0f, f[14] / 25.0f);
 		}

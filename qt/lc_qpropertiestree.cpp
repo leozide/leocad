@@ -932,7 +932,9 @@ void lcQPropertiesTree::SetPiece(const lcArray<lcObject*>& Selection, lcObject* 
 	partColor->setText(1, color->Name);
 	partColor->setData(0, PropertyValueRole, ColorIndex);
 
-	partID->setText(1, Info ? Info->m_strDescription : QString());
+	QString text = Info ? Info->m_strDescription : QString();
+	partID->setText(1, text);
+	partID->setToolTip(1, text);
 	partID->setData(0, PropertyValueRole, qVariantFromValue((void*)Info));
 }
 

@@ -43,7 +43,8 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget *parent, void *data) :
 	ui->lgeoPath->setText(options->LGEOPath);
 	ui->mouseSensitivity->setValue(options->Preferences.mMouseSensitivity);
 	ui->checkForUpdates->setCurrentIndex(options->CheckForUpdates);
-	ui->fixedDirectionKeys->setChecked((options->Preferences.mFixedAxes) != 0);
+	ui->fixedDirectionKeys->setChecked(options->Preferences.mFixedAxes);
+	ui->autoLoadMostRecent->setChecked(options->Preferences.autoLoadMostRecent);
 
 	ui->antiAliasing->setChecked(options->AASamples != 1);
 	if (options->AASamples == 8)
@@ -145,6 +146,7 @@ void lcQPreferencesDialog::accept()
 	options->Preferences.mMouseSensitivity = ui->mouseSensitivity->value();
 	options->CheckForUpdates = ui->checkForUpdates->currentIndex();
 	options->Preferences.mFixedAxes = ui->fixedDirectionKeys->isChecked();
+	options->Preferences.autoLoadMostRecent = ui->autoLoadMostRecent->isChecked();
 
 	if (!ui->antiAliasing->isChecked())
 		options->AASamples = 1;

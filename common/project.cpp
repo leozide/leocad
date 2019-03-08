@@ -2466,3 +2466,8 @@ void Project::UpdatePieceInfo(PieceInfo* Info) const
 		Info->SetBoundingBox(BoundingBox.Min, BoundingBox.Max);
 	}
 }
+
+void Project::MarkAsModified()
+{
+	mModified = true;
+}

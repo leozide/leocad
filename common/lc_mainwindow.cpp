@@ -904,18 +904,21 @@ void lcMainWindow::ProjectFileChanged(const QString& Path)
 
 	QString Text = tr("The file '%1' has been modified by another application, do you want to reload it?").arg(QDir::toNativeSeparators(Path));
 
+	Project* CurrentProject = lcGetActiveProject();
+
 	Ignore = true;
 
 	if (QMessageBox::question(this, tr("File Changed"), Text, QMessageBox::Yes | QMessageBox::No) != QMessageBox::Yes)
 	{
 		Ignore = false;
+		CurrentProject->MarkAsModified();
+		UpdateTitle();
 		return;
 	}
 
 	Ignore = false;
 
 	QFileInfo FileInfo(Path);
-	Project* CurrentProject = lcGetActiveProject();
 
 	if (FileInfo == QFileInfo(CurrentProject->GetFileName()))
 	{

@@ -5496,23 +5496,23 @@ GL_EXT_texture_filter_anisotropic extension: %5
     <name>lcRenderDialog</name>
     <message>
         <location filename="../qt/lc_renderdialog.ui" line="14"/>
-        <location filename="../qt/lc_renderdialog.ui" line="105"/>
+        <location filename="../qt/lc_renderdialog.ui" line="110"/>
         <location filename="../qt/lc_renderdialog.cpp" line="71"/>
         <source>Render</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.ui" line="29"/>
+        <location filename="../qt/lc_renderdialog.ui" line="22"/>
         <source>Settings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.ui" line="41"/>
+        <location filename="../qt/lc_renderdialog.ui" line="28"/>
         <source>Width:</source>
         <translation>Largura:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.ui" line="48"/>
+        <location filename="../qt/lc_renderdialog.ui" line="38"/>
         <source>Height:</source>
         <translation>Altura:</translation>
     </message>
@@ -5532,17 +5532,17 @@ GL_EXT_texture_filter_anisotropic extension: %5
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.ui" line="74"/>
+        <location filename="../qt/lc_renderdialog.ui" line="48"/>
         <source>Quality:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.ui" line="81"/>
+        <location filename="../qt/lc_renderdialog.ui" line="79"/>
         <source>Output:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.ui" line="93"/>
+        <location filename="../qt/lc_renderdialog.ui" line="89"/>
         <source>...</source>
         <translation type="unfinished">...</translation>
     </message>
@@ -5557,35 +5557,41 @@ GL_EXT_texture_filter_anisotropic extension: %5
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.cpp" line="174"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="176"/>
         <source>Cancel</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.cpp" line="177"/>
-        <location filename="../qt/lc_renderdialog.cpp" line="267"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="182"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="282"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="301"/>
         <source>Error</source>
         <translation>Erro</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.cpp" line="177"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="182"/>
         <source>Error starting POV-Ray.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.cpp" line="267"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="284"/>
+        <source>An error occurred while rendering. Check details or try again.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_renderdialog.cpp" line="301"/>
         <source>Error writing to file &apos;%1&apos;:
 %2</source>
         <translation type="unfinished">Erro ao escrever no ficheiro &apos;%1&apos;:
 %2</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.cpp" line="275"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="307"/>
         <source>Select Output File</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.cpp" line="275"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="307"/>
         <source>Supported Image Files (*.bmp *.png *.jpg);;BMP Files (*.bmp);;PNG Files (*.png);;JPEG Files (*.jpg);;All Files (*.*)</source>
         <translation>Formatos de Imagem Suportados (*.bmp *.png *.jpg);;Ficheiros BMP (*.bmp);;Ficheiros PNG (*.png);;Ficheiros JPEG (*.jpg);;Todos os Ficheiros (*.*)</translation>
     </message>

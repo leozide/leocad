@@ -138,7 +138,7 @@ int main(int argc, char *argv[])
 	}
 
 	QTranslator Translator;
-	if (Translator.load(QString("leocad_") + QLocale::system().name().section('_', 0, 0) + ".qm", ":/resources"))
+	if (Translator.load("leocad_" + QLocale::system().name(), ":/resources"))
 	{
 		Application.installTranslator(&Translator);
 	}

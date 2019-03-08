@@ -604,8 +604,7 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 				if (Token == QLatin1String("BEGIN"))
 				{
 					QString Name = LineStream.readAll().trimmed();
-					QByteArray NameUtf = Name.toUtf8(); // todo: replace with qstring
-					lcGroup* Group = GetGroup(NameUtf.constData(), true);
+					lcGroup* Group = GetGroup(Name, true);
 					if (!CurrentGroups.IsEmpty())
 						Group->mGroup = CurrentGroups[CurrentGroups.GetSize() - 1];
 					else

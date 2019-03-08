@@ -12,7 +12,7 @@
 #include <array>
 
 #ifndef Q_FALLTHROUGH
-#define Q_FALLTHROUGH(); [[fallthrough]];
+#define Q_FALLTHROUGH(); // fall through
 #endif
 
 #if !defined(EGL_VERSION_1_0) && !defined(GL_ES_VERSION_2_0) && !defined(GL_ES_VERSION_3_0) && !defined(QT_OPENGL_ES)

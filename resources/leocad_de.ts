@@ -5501,23 +5501,23 @@ GL_EXT_texture_filter_anisotropic extension: %5
     <name>lcRenderDialog</name>
     <message>
         <location filename="../qt/lc_renderdialog.ui" line="14"/>
-        <location filename="../qt/lc_renderdialog.ui" line="105"/>
+        <location filename="../qt/lc_renderdialog.ui" line="110"/>
         <location filename="../qt/lc_renderdialog.cpp" line="71"/>
         <source>Render</source>
         <translation>Render</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.ui" line="29"/>
+        <location filename="../qt/lc_renderdialog.ui" line="22"/>
         <source>Settings</source>
         <translation>Einstellungen</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.ui" line="41"/>
+        <location filename="../qt/lc_renderdialog.ui" line="28"/>
         <source>Width:</source>
         <translation>Breite:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.ui" line="48"/>
+        <location filename="../qt/lc_renderdialog.ui" line="38"/>
         <source>Height:</source>
         <translation>Höhe:</translation>
     </message>
@@ -5537,17 +5537,17 @@ GL_EXT_texture_filter_anisotropic extension: %5
         <translation>Niedrig</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.ui" line="74"/>
+        <location filename="../qt/lc_renderdialog.ui" line="48"/>
         <source>Quality:</source>
         <translation>Qualität:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.ui" line="81"/>
+        <location filename="../qt/lc_renderdialog.ui" line="79"/>
         <source>Output:</source>
         <translation>Ausgabe:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.ui" line="93"/>
+        <location filename="../qt/lc_renderdialog.ui" line="89"/>
         <source>...</source>
         <translation>...</translation>
     </message>
@@ -5562,35 +5562,41 @@ GL_EXT_texture_filter_anisotropic extension: %5
         <translation>Sind sie sicher dass sie das aktuelle Rendern abbrechen wollen?</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.cpp" line="174"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="176"/>
         <source>Cancel</source>
         <translation>Abbrechen</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.cpp" line="177"/>
-        <location filename="../qt/lc_renderdialog.cpp" line="267"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="182"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="282"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="301"/>
         <source>Error</source>
         <translation>Fehler</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.cpp" line="177"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="182"/>
         <source>Error starting POV-Ray.</source>
         <translation>Fehler beim Start von POV-Ray.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.cpp" line="267"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="284"/>
+        <source>An error occurred while rendering. Check details or try again.</source>
+        <translation>Beim Rendern ist ein Fehler aufgetreten. Siehe Details oder versuchen Sie es erneut.</translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_renderdialog.cpp" line="301"/>
         <source>Error writing to file &apos;%1&apos;:
 %2</source>
         <translation>Fehler beim Schreiben der Datei » %1 « :
 %2</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.cpp" line="275"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="307"/>
         <source>Select Output File</source>
         <translation>Wahl der Ausgabedatei</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.cpp" line="275"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="307"/>
         <source>Supported Image Files (*.bmp *.png *.jpg);;BMP Files (*.bmp);;PNG Files (*.png);;JPEG Files (*.jpg);;All Files (*.*)</source>
         <translation>Unterstützte Bilddateien (*.bmp *.png *.jpg);;BMP Dateien (*.bmp);;PNG Dateien (*.png);;JPEG Dateien (*.jpg);;Alle Dateien (*.*)</translation>
     </message>

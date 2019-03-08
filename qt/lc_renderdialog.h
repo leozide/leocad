@@ -20,11 +20,15 @@ public slots:
 	void on_OutputBrowseButton_clicked();
 	void Update();
 
+protected slots:
+	void ReadStdErr();
+
 protected:
 	QString GetOutputFileName() const;
 	QString GetPOVFileName() const;
 	void CloseProcess();
 	bool PromptCancel();
+	void ShowResult();
 
 #ifndef QT_NO_PROCESS
 	QProcess* mProcess;
@@ -33,6 +37,7 @@ protected:
 	QFile mOutputFile;
 	void* mOutputBuffer;
 	QImage mImage;
+	QStringList stdErrList;
 
 	Ui::lcRenderDialog* ui;
 };

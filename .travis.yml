@@ -9,7 +9,8 @@ matrix:
         sources:
           - sourceline: "ppa:beineri/opt-qt487-trusty"
         packages:
-          - opt-qt4-qmake opt-qt4-dev-tools
+          - opt-qt4-qmake
+          - opt-qt4-dev-tools
     sudo: required
     compiler: gcc
     env:
@@ -65,5 +66,5 @@ script:
   - export VERSION=$(git rev-parse --short HEAD)
   - ./linuxdeployqt*.AppImage ./appdir/usr/bin/leocad -bundle-non-qt-libs
   - ./linuxdeployqt*.AppImage ./appdir/usr/bin/leocad -appimage 
-  - curl --upload-file ./LeoCAD-*.AppImage https://transfer.sh/LeoCAD-git.$(VERSION).qt$QT_BASE-x86_64.AppImage 
+  - curl --upload-file ./LeoCAD-*.AppImage https://transfer.sh/LeoCAD-git.$VERSION.qt$QT_BASE-x86_64.AppImage 
   

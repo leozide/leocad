@@ -50,21 +50,15 @@ script:
   - qmake PREFIX=/usr -r
   - make -j4
   - if [ "$TRAVIS_OS_NAME" != "linux" ] ; then exit 0 ; fi
-  - #sudo apt-get -y install checkinstall
-  - rm ./*.spec # Otherwise the next line fails
-  - #sudo checkinstall --pkgname=app --pkgversion="1" --pkgrelease="1" --backup=no --fstrans=no --default --deldoc 
-  - make install INSTALL_ROOT=appdir
-  - mkdir appdir ; cd appdir
-  - #dpkg -x ../app_1-1_amd64.deb . ; find .
-  - cp ../qt/leocad.desktop .
-  - sed -i -e 's|\.svg||g' leocad.desktop # Workaround
-  - cp ../resources/leocad.png .
-  - cd .. 
+  - make install INSTALL_ROOT=AppDir
+  - cp qt/leocad.desktop AppDir
+  - sed -i -e 's|\.svg||g' AppDir/leocad.desktop # Workaround
+  - cp resources/leocad.png AppDir
   - wget -c "https://github.com/probonopd/linuxdeployqt/releases/download/6/linuxdeployqt-6-x86_64.AppImage" 
   - chmod a+x linuxdeployqt*.AppImage 
   - unset QTDIR; unset QT_PLUGIN_PATH ; unset LD_LIBRARY_PATH
   - export VERSION=$(git rev-parse --short HEAD)
-  - ./linuxdeployqt*.AppImage ./appdir/usr/bin/leocad -bundle-non-qt-libs
-  - ./linuxdeployqt*.AppImage ./appdir/usr/bin/leocad -appimage 
+  - ./linuxdeployqt*.AppImage ./AppDir/usr/bin/leocad -bundle-non-qt-libs
+  - ./linuxdeployqt*.AppImage ./AppDir/usr/bin/leocad -appimage 
   - curl --upload-file ./LeoCAD-*.AppImage https://transfer.sh/LeoCAD-git.$VERSION.qt$QT_BASE-x86_64.AppImage 
-  
+  - echo AppImage uploaded to https://transfer.sh/LeoCAD-git.$VERSION.qt$QT_BASE-x86_64.AppImage 

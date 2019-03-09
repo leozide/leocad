@@ -43,9 +43,7 @@ install:
     fi
 
 script:
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-      source /opt/qt510/bin/qt510-env.sh ;
-    fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then /opt/qt510/bin/qt510-env.sh; fi
   - qmake PREFIX=/usr -v
   - qmake PREFIX=/usr -r
   - make -j4

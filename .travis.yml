@@ -81,7 +81,7 @@ script:
   - sed -i -e 's|\.svg||g' leocad.desktop # Workaround
   - cp ../resources/leocad.png .
   - cd .. 
-  - wget -c "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage" 
+  - wget -c "https://github.com/probonopd/linuxdeployqt/releases/download/6/linuxdeployqt-6-x86_64.AppImage" 
   - chmod a+x linuxdeployqt*.AppImage 
   - unset QTDIR; unset QT_PLUGIN_PATH ; unset LD_LIBRARY_PATH
   - ./linuxdeployqt*.AppImage ./appdir/usr/bin/leocad -bundle-non-qt-libs

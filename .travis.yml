@@ -79,7 +79,6 @@ script:
   - mkdir appdir ; cd appdir
   - dpkg -x ../app_1-1_amd64.deb . ; find .
   - cp ../qt/leocad.desktop .
-  - sed -i -e 's|\.svg||g' leocad.desktop # Workaround
   - cp ../resources/leocad.png .
   - cd .. 
   - wget -c "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage" 

@@ -68,6 +68,7 @@ install:
     fi
 
 script:
+  - set -e
   - qmake PREFIX=/usr -v
   - qmake PREFIX=/usr -r
   - make -j4

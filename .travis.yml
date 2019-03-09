@@ -44,6 +44,7 @@ install:
     fi
 
 script:
+  - if [[ "$QT_BASE" = "48" && "$TRAVIS_OS_NAME" = "linux" ]]; then source /opt/qt-4.8/bin/qt-4.8-env.sh; fi
   - if [[ "$QT_BASE" = "510" && "$TRAVIS_OS_NAME" = "linux" ]]; then source /opt/qt510/bin/qt510-env.sh; fi
   - qmake PREFIX=/usr -v
   - qmake PREFIX=/usr -r
@@ -61,7 +62,8 @@ script:
   - wget -c "https://github.com/probonopd/linuxdeployqt/releases/download/6/linuxdeployqt-6-x86_64.AppImage" 
   - chmod a+x linuxdeployqt*.AppImage 
   - unset QTDIR; unset QT_PLUGIN_PATH ; unset LD_LIBRARY_PATH
+  - export VERSION=$(git rev-parse --short HEAD)
   - ./linuxdeployqt*.AppImage ./appdir/usr/bin/leocad -bundle-non-qt-libs
   - ./linuxdeployqt*.AppImage ./appdir/usr/bin/leocad -appimage 
-  - curl --upload-file ./LeoCAD-*.AppImage https://transfer.sh/LeoCAD-git.$(git rev-parse --short HEAD).qt$QT_BASE-x86_64.AppImage 
+  - curl --upload-file ./LeoCAD-*.AppImage https://transfer.sh/LeoCAD-git.$(VERSION).qt$QT_BASE-x86_64.AppImage 
   

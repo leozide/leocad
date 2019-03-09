@@ -9,8 +9,7 @@ matrix:
         sources:
           - sourceline: "ppa:beineri/opt-qt487-trusty"
         packages:
-          - opt-qt4-qmake
-          - opt-qt4-dev-tools
+          - opt-qt4-qmake opt-qt4-dev-tools opt-libqt4-dev opt-libqt4-dev-bin opt-libqt4-opengl
     sudo: required
     compiler: gcc
     env:

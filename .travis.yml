@@ -51,14 +51,14 @@ script:
   - make -j4
   - if [ "$TRAVIS_OS_NAME" != "linux" ] ; then exit 0 ; fi
   - make install INSTALL_ROOT=AppDir
-  - cp qt/leocad.desktop AppDir
-  - sed -i -e 's|\.svg||g' AppDir/leocad.desktop # Workaround
-  - cp resources/leocad.png AppDir
-  - wget -c "https://github.com/probonopd/linuxdeployqt/releases/download/6/linuxdeployqt-6-x86_64.AppImage" 
+  - sed -i -e 's|.svg||g' AppDir/usr/share/applications/leocad.desktop # FIXME; .svg should not be in the desktop file to begin with
+  - wget -c "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage" 
   - chmod a+x linuxdeployqt*.AppImage 
   - unset QTDIR; unset QT_PLUGIN_PATH ; unset LD_LIBRARY_PATH
   - export VERSION=$(git rev-parse --short HEAD)
-  - ./linuxdeployqt*.AppImage ./AppDir/usr/bin/leocad -bundle-non-qt-libs
-  - ./linuxdeployqt*.AppImage ./AppDir/usr/bin/leocad -appimage 
+- - ./linuxdeployqt*.AppImage ./AppDir/usr/share/applications/*.desktop -bundle-non-qt-libs
+  - ./linuxdeployqt*.AppImage --appimage-extract
+  - export PATH=$(readlink -f ./squashfs-root/usr/bin/):$PATH
+  - ./squashfs-root/usr/bin/appimagetool AppDir/
   - curl --upload-file ./LeoCAD-*.AppImage https://transfer.sh/LeoCAD-git.$VERSION.qt$QT_BASE-x86_64.AppImage 
   - echo AppImage uploaded to https://transfer.sh/LeoCAD-git.$VERSION.qt$QT_BASE-x86_64.AppImage 

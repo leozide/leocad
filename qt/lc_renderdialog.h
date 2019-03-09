@@ -40,6 +40,4 @@ protected:
 	QStringList stdErrList;
 
 	Ui::lcRenderDialog* ui;
-
-	static QRegularExpression regexPovRayProgress;
 };

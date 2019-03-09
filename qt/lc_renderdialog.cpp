@@ -185,17 +185,16 @@ void lcRenderDialog::on_RenderButton_clicked()
 #endif
 }
 
-QRegularExpression lcRenderDialog::regexPovRayProgress("Rendered (\\d+) of (\\d+) pixels.*", QRegularExpression::CaseInsensitiveOption);
-
 void lcRenderDialog::ReadStdErr()
 {
 	QString stdErr = QString(mProcess->readAllStandardError());
 	stdErrList.append(stdErr);
-	QRegularExpressionMatch match = regexPovRayProgress.match(stdErr);
-	if (match.hasMatch())
+	QRegExp regexPovRayProgress("Rendered (\\d+) of (\\d+) pixels.*");
+	regexPovRayProgress.setCaseSensitivity(Qt::CaseInsensitive);
+	if (regexPovRayProgress.indexIn(stdErr) == 0)
 	{
-		ui->RenderProgress->setMaximum(match.captured(2).toInt());
-		ui->RenderProgress->setValue(match.captured(1).toInt());
+		ui->RenderProgress->setMaximum(regexPovRayProgress.cap(2).toInt());
+		ui->RenderProgress->setValue(regexPovRayProgress.cap(1).toInt());
 	}
 }
 

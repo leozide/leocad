@@ -5,22 +5,23 @@ matrix:
   - os: linux
     dist: trusty
     addons:
-    apt:
-      sources:
-        - sourceline: 'ppa:beineri/opt-qt487-trusty'
-      packages:
-        - opt-qt4-qmake opt-qt4-dev-tools
+      apt:
+        sources:
+          - sourceline: "ppa:beineri/opt-qt487-trusty"
+        packages:
+          - opt-qt4-qmake opt-qt4-dev-tools
     sudo: required
     compiler: gcc
     env:
      - QT_BASE=48
   - os: linux
     dist: trusty
-    apt:
-      sources:
-        - sourceline: 'ppa:beineri/opt-qt-5.10.1-trusty'
-      packages:
-        - qt510base
+    addons:
+      apt:
+        sources:
+          - sourceline: "ppa:beineri/opt-qt-5.10.1-trusty"
+        packages:
+          - qt510base
     sudo: required
     compiler: gcc
     env:

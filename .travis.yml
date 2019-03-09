@@ -4,12 +4,23 @@ matrix:
  include:
   - os: linux
     dist: trusty
+    addons:
+    apt:
+      sources:
+        - sourceline: 'ppa:beineri/opt-qt487-trusty'
+      packages:
+        - opt-qt4-qmake opt-qt4-dev-tools
     sudo: required
     compiler: gcc
     env:
      - QT_BASE=48
   - os: linux
     dist: trusty
+    apt:
+      sources:
+        - sourceline: 'ppa:beineri/opt-qt-5.10.1-trusty'
+      packages:
+        - qt510base
     sudo: required
     compiler: gcc
     env:
@@ -20,22 +31,11 @@ matrix:
      - QT_BASE=57
 
 before_install:
-  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then 
-      if [[ "$QT_BASE" = "48" ]]; then sudo add-apt-repository ppa:beineri/opt-qt487-trusty -y; fi
-      if [[ "$QT_BASE" = "510" ]]; then sudo add-apt-repository ppa:beineri/opt-qt-5.10.1-trusty -y; fi
-      sudo apt-get update -qq;
-    fi
-
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then 
       brew update;
     fi
 
 install:
-  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then 
-      if [ "$QT_BASE" = "48" ]; then sudo apt-get --allow-unauthenticated install -qq opt-qt4-qmake opt-qt4-dev-tools; source /opt/qt-4.8/bin/qt-4.8-env.sh; fi
-      if [ "$QT_BASE" = "510" ]; then sudo apt-get install -qq qt510base; source /opt/qt510/bin/qt510-env.sh; fi
-    fi
-
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then 
       brew install qt5;
       brew link --force qt5;

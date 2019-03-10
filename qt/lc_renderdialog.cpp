@@ -30,7 +30,7 @@ lcRenderDialog::lcRenderDialog(QWidget* Parent)
 
 	QImage Image(LC_POVRAY_PREVIEW_WIDTH, LC_POVRAY_PREVIEW_HEIGHT, QImage::Format_RGB32);
 	Image.fill(QColor(255, 255, 255));
-	ui->label->setPixmap(QPixmap::fromImage(Image));
+	ui->preview->setPixmap(QPixmap::fromImage(Image));
 
 	connect(&mUpdateTimer, SIGNAL(timeout()), this, SLOT(Update()));
 	mUpdateTimer.start(500);
@@ -168,16 +168,34 @@ void lcRenderDialog::on_RenderButton_clicked()
 #endif
 
 	mProcess = new QProcess(this);
+	connect(mProcess, SIGNAL(readyReadStandardError()), this, SLOT(ReadStdErr()));
 	mProcess->start(POVRayPath, Arguments);
 
 	if (mProcess->waitForStarted())
+	{
 		ui->RenderButton->setText(tr("Cancel"));
+		ui->RenderProgress->setValue(ui->RenderProgress->minimum());
+		stdErrList.clear();
+	}
 	else
 	{
 		QMessageBox::warning(this, tr("Error"), tr("Error starting POV-Ray."));
 		CloseProcess();
 	}
 #endif
+}
+
+void lcRenderDialog::ReadStdErr()
+{
+	QString stdErr = QString(mProcess->readAllStandardError());
+	stdErrList.append(stdErr);
+	QRegExp regexPovRayProgress("Rendered (\\d+) of (\\d+) pixels.*");
+	regexPovRayProgress.setCaseSensitivity(Qt::CaseInsensitive);
+	if (regexPovRayProgress.indexIn(stdErr) == 0)
+	{
+		ui->RenderProgress->setMaximum(regexPovRayProgress.cap(2).toInt());
+		ui->RenderProgress->setValue(regexPovRayProgress.cap(1).toInt());
+	}
 }
 
 void lcRenderDialog::Update()
@@ -188,14 +206,12 @@ void lcRenderDialog::Update()
 
 	if (mProcess->state() == QProcess::NotRunning)
 	{
-//		QString Output = mProcess->readAllStandardError();
-//		QMessageBox::information(this, "LeoCAD", Output);
-
 #ifdef Q_OS_LINUX
 		QByteArray Output = mProcess->readAllStandardOutput();
-		QImage Image = QImage::fromData(Output);
-		ui->label->setPixmap(QPixmap::fromImage(Image.scaled(LC_POVRAY_PREVIEW_WIDTH, LC_POVRAY_PREVIEW_HEIGHT, Qt::KeepAspectRatio, Qt::SmoothTransformation)));
+		mImage = QImage::fromData(Output);
+		ShowResult();
 #endif
+
 		CloseProcess();
 	}
 #endif
@@ -251,23 +267,38 @@ void lcRenderDialog::Update()
 
 	Header->PixelsRead = PixelsWritten;
 
-	ui->label->setPixmap(QPixmap::fromImage(mImage.scaled(LC_POVRAY_PREVIEW_WIDTH, LC_POVRAY_PREVIEW_HEIGHT, Qt::KeepAspectRatio, Qt::SmoothTransformation)));
-
 	if (PixelsWritten == Width * Height)
-	{
-		QString FileName = ui->OutputEdit->text();
-
-		if (!FileName.isEmpty())
-		{
-			QImageWriter Writer(FileName);
-
-			bool Result = Writer.write(mImage);
-
-			if (!Result)
-				QMessageBox::information(this, tr("Error"), tr("Error writing to file '%1':\n%2").arg(FileName, Writer.errorString()));
-		}
-	}
+		ShowResult();
 #endif
+}
+
+void lcRenderDialog::ShowResult() {
+	ReadStdErr();
+	ui->RenderProgress->setValue(ui->RenderProgress->maximum());
+
+	if (mProcess->exitStatus() != QProcess::NormalExit || mProcess->exitCode() != 0) {
+		QMessageBox error;
+		error.setWindowTitle(tr("Error"));
+		error.setIcon(QMessageBox::Critical);
+		error.setText(tr("An error occurred while rendering. Check details or try again."));
+		error.setDetailedText(stdErrList.join(""));
+		error.exec();
+		return;
+	}
+
+	ui->preview->setPixmap(QPixmap::fromImage(mImage.scaled(LC_POVRAY_PREVIEW_WIDTH, LC_POVRAY_PREVIEW_HEIGHT, Qt::KeepAspectRatio, Qt::SmoothTransformation)));
+
+	QString FileName = ui->OutputEdit->text();
+
+	if (!FileName.isEmpty())
+	{
+		QImageWriter Writer(FileName);
+
+		bool Result = Writer.write(mImage);
+
+		if (!Result)
+			QMessageBox::information(this, tr("Error"), tr("Error writing to file '%1':\n%2").arg(FileName, Writer.errorString()));
+	}
 }
 
 void lcRenderDialog::on_OutputBrowseButton_clicked()

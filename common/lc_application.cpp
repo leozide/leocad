@@ -30,6 +30,7 @@ void lcPreferences::LoadDefaults()
 	mViewSphereColor = lcGetProfileInt(LC_PROFILE_VIEW_SPHERE_COLOR);
 	mViewSphereTextColor = lcGetProfileInt(LC_PROFILE_VIEW_SPHERE_TEXT_COLOR);
 	mViewSphereHighlightColor = lcGetProfileInt(LC_PROFILE_VIEW_SPHERE_HIGHLIGHT_COLOR);
+	autoLoadMostRecent = lcGetProfileInt(LC_PROFILE_AUTOLOAD_MOSTRECENT);
 }
 
 void lcPreferences::SaveDefaults()
@@ -50,6 +51,7 @@ void lcPreferences::SaveDefaults()
 	lcSetProfileInt(LC_PROFILE_VIEW_SPHERE_COLOR, mViewSphereColor);
 	lcSetProfileInt(LC_PROFILE_VIEW_SPHERE_TEXT_COLOR, mViewSphereTextColor);
 	lcSetProfileInt(LC_PROFILE_VIEW_SPHERE_HIGHLIGHT_COLOR, mViewSphereHighlightColor);
+	lcSetProfileInt(LC_PROFILE_AUTOLOAD_MOSTRECENT, autoLoadMostRecent);
 }
 
 lcApplication::lcApplication(int& Argc, char** Argv)
@@ -196,7 +198,7 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 	QString ModelName;
 	QString CameraName;
 	QString ViewpointName;
-	QString ProjectName;
+	QString ProjectName = lcGetProfileInt(LC_PROFILE_AUTOLOAD_MOSTRECENT) ? lcGetProfileString(LC_PROFILE_RECENT_FILE1) : QString();
 	QString SaveWavefrontName;
 	QString Save3DSName;
 	QString SaveCOLLADAName;

@@ -2707,7 +2707,14 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 
 	case LC_PIECE_EDIT_END_SUBMODEL:
 		if (ActiveView)
+		{
 			ActiveView->SetTopSubmodelActive();
+			if (ActiveModel)
+			{
+				lcArray<lcModel*> UpdatedModels;
+				ActiveModel->UpdatePieceInfo(UpdatedModels);
+			}
+		}
 		break;
 
 	case LC_PIECE_EDIT_SELECTED_SUBMODEL:

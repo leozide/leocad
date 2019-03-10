@@ -2338,7 +2338,8 @@ void lcModel::MoveSelectionToModel(lcModel* Model)
 
 	lcArray<lcModel*> UpdatedModels;
 	Model->UpdatePieceInfo(UpdatedModels);
-	if (ModelPiece) {
+	if (ModelPiece)
+	{
 		ModelPiece->Initialize(lcMatrix44Translation(ModelCenter), FirstStep);
 		ModelPiece->UpdatePosition(mCurrentStep);
 	}

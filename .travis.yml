@@ -51,7 +51,6 @@ script:
   - make -j4
   - if [ "$TRAVIS_OS_NAME" != "linux" ] ; then exit 0 ; fi
   - make install INSTALL_ROOT=AppDir
-  - sed -i -e 's|.svg||g' AppDir/usr/share/applications/leocad.desktop # FIXME; .svg should not be in the desktop file to begin with
   - wget -c "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
   - chmod a+x linuxdeployqt*.AppImage 
   - unset QTDIR; unset QT_PLUGIN_PATH ; unset LD_LIBRARY_PATH

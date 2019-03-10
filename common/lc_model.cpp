@@ -2298,6 +2298,7 @@ void lcModel::MoveSelectionToModel(lcModel* Model)
 	lcArray<lcPiece*> Pieces;
 	lcPiece* ModelPiece = nullptr;
 	lcStep FirstStep = LC_STEP_MAX;
+	lcVector3 Min(FLT_MAX, FLT_MAX, FLT_MAX), Max(-FLT_MAX, -FLT_MAX, -FLT_MAX);
 
 	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); )
 	{
@@ -2305,6 +2306,7 @@ void lcModel::MoveSelectionToModel(lcModel* Model)
 
 		if (Piece->IsSelected())
 		{
+			Piece->CompareBoundingBox(Min, Max);
 			mPieces.RemoveIndex(PieceIdx);
 			Piece->SetGroup(nullptr); // todo: copy groups
 			Pieces.Add(Piece);
@@ -2313,7 +2315,6 @@ void lcModel::MoveSelectionToModel(lcModel* Model)
 			if (!ModelPiece)
 			{
 				ModelPiece = new lcPiece(Model->mPieceInfo);
-				ModelPiece->Initialize(lcMatrix44Identity(), Piece->GetStepShow());
 				ModelPiece->SetColorIndex(gDefaultColor);
 				InsertPiece(ModelPiece, PieceIdx);
 				PieceIdx++;
@@ -2323,18 +2324,24 @@ void lcModel::MoveSelectionToModel(lcModel* Model)
 			PieceIdx++;
 	}
 
+	lcVector3 ModelCenter = (Min + Max) / 2.0f;
+	ModelCenter.z += (Min.z - Max.z) / 2.0f;
+
 	for (int PieceIdx = 0; PieceIdx < Pieces.GetSize(); PieceIdx++)
 	{
 		lcPiece* Piece = Pieces[PieceIdx];
 		Piece->SetFileLine(-1);
 		Piece->SetStepShow(Piece->GetStepShow() - FirstStep + 1);
+		Piece->MoveSelected(Piece->GetStepShow(), false, -ModelCenter);
 		Model->AddPiece(Piece);
 	}
 
 	lcArray<lcModel*> UpdatedModels;
 	Model->UpdatePieceInfo(UpdatedModels);
-	if (ModelPiece)
+	if (ModelPiece) {
+		ModelPiece->Initialize(lcMatrix44Translation(ModelCenter), FirstStep);
 		ModelPiece->UpdatePosition(mCurrentStep);
+	}
 
 	SaveCheckpoint(tr("New Model"));
 	gMainWindow->UpdateTimeline(false, false);

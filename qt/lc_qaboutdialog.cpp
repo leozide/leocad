@@ -18,6 +18,8 @@ lcQAboutDialog::lcQAboutDialog(QWidget *parent) :
 
 	int ColorDepth = Format.redBufferSize() + Format.greenBufferSize() + Format.blueBufferSize() + Format.alphaBufferSize();
 
+	QString QtVersionFormat = tr("Qt version %1 (compiled with %2)\n");
+	QString QtVersion = QtVersionFormat.arg(qVersion(), QT_VERSION_STR);
 	QString VersionFormat = tr("OpenGL Version %1 (GLSL %2)\n%3 - %4\n\n");
 	QString Version = VersionFormat.arg(QString((const char*)glGetString(GL_VERSION)), QString((const char*)glGetString(GL_SHADING_LANGUAGE_VERSION)), QString((const char*)glGetString(GL_RENDERER)), QString((const char*)glGetString(GL_VENDOR)));
 	QString BuffersFormat = tr("Color Buffer: %1 bits %2 %3\nDepth Buffer: %4 bits\nStencil Buffer: %5 bits\n\n");
@@ -31,7 +33,7 @@ lcQAboutDialog::lcQAboutDialog(QWidget *parent) :
 	QString Anisotropic = gSupportsAnisotropic ? tr("Supported (max %1)").arg(gMaxAnisotropy) : tr("Not supported");
 	QString Extensions = ExtensionsFormat.arg(VertexBufferObject, FramebufferObjectARB, FramebufferObjectEXT, BlendFuncSeparateEXT, Anisotropic);
 
-	ui->info->setText(Version + Buffers + Extensions);
+	ui->info->setText(QtVersion + Version + Buffers + Extensions);
 }
 
 lcQAboutDialog::~lcQAboutDialog()

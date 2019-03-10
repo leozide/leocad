@@ -76,6 +76,7 @@ public:
 	}
 
 	bool IsModified() const;
+	void MarkAsModified();
 	QString GetTitle() const;
 
 	QString GetFileName() const

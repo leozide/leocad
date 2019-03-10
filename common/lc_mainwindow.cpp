@@ -904,18 +904,21 @@ void lcMainWindow::ProjectFileChanged(const QString& Path)
 
 	QString Text = tr("The file '%1' has been modified by another application, do you want to reload it?").arg(QDir::toNativeSeparators(Path));
 
+	Project* CurrentProject = lcGetActiveProject();
+
 	Ignore = true;
 
 	if (QMessageBox::question(this, tr("File Changed"), Text, QMessageBox::Yes | QMessageBox::No) != QMessageBox::Yes)
 	{
 		Ignore = false;
+		CurrentProject->MarkAsModified();
+		UpdateTitle();
 		return;
 	}
 
 	Ignore = false;
 
 	QFileInfo FileInfo(Path);
-	Project* CurrentProject = lcGetActiveProject();
 
 	if (FileInfo == QFileInfo(CurrentProject->GetFileName()))
 	{
@@ -930,7 +933,7 @@ void lcMainWindow::ProjectFileChanged(const QString& Path)
 		}
 		else
 		{
-			QMessageBox::information(this, tr("LeoCAD"), tr("Error loading '%1'.").arg(Path));
+			QMessageBox::critical(this, tr("LeoCAD"), tr("Error loading '%1'.").arg(Path));
 			delete NewProject;
 		}
 	}
@@ -2185,7 +2188,7 @@ bool lcMainWindow::OpenProject(const QString& FileName)
 		return true;
 	}
 
-	QMessageBox::information(this, tr("LeoCAD"), tr("Error loading '%1'.").arg(LoadFileName));
+	QMessageBox::critical(this, tr("LeoCAD"), tr("Error loading '%1'.").arg(LoadFileName));
 	delete NewProject;
 
 	return false;
@@ -2221,7 +2224,7 @@ void lcMainWindow::MergeProject()
 		UpdateModels();
 	}
 	else
-		QMessageBox::information(this, tr("LeoCAD"), tr("Error loading '%1'.").arg(LoadFileName));
+		QMessageBox::critical(this, tr("LeoCAD"), tr("Error loading '%1'.").arg(LoadFileName));
 
 	delete NewProject;
 }

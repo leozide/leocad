@@ -355,10 +355,7 @@ bool Project::Load(const QString& FileName)
 	QFile File(FileName);
 
 	if (!File.open(QIODevice::ReadOnly))
-	{
-		QMessageBox::warning(gMainWindow, tr("Error"), tr("Error reading file '%1':\n%2").arg(FileName, File.errorString()));
 		return false;
-	}
 
 	mModels.DeleteAll();
 	SetFileName(FileName);
@@ -2465,4 +2462,9 @@ void Project::UpdatePieceInfo(PieceInfo* Info) const
 		lcBoundingBox BoundingBox = mModels[0]->GetPieceInfo()->GetBoundingBox();
 		Info->SetBoundingBox(BoundingBox.Min, BoundingBox.Max);
 	}
+}
+
+void Project::MarkAsModified()
+{
+	mModified = true;
 }

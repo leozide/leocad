@@ -337,6 +337,7 @@ void Project::ShowModelListDialog()
 
 	SetActiveModel(Dialog.mActiveModel);
 	gMainWindow->UpdateTitle();
+	gMainWindow->UpdateModels();
 }
 
 void Project::SetFileName(const QString& FileName)

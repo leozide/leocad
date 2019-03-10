@@ -355,7 +355,10 @@ bool Project::Load(const QString& FileName)
 	QFile File(FileName);
 
 	if (!File.open(QIODevice::ReadOnly))
+	{
+		QMessageBox::warning(gMainWindow, tr("Error"), tr("Error reading file '%1':\n%2").arg(FileName, File.errorString()));
 		return false;
+	}
 
 	mModels.DeleteAll();
 	SetFileName(FileName);
@@ -370,7 +373,7 @@ bool Project::Load(const QString& FileName)
 	else if (Extension == QLatin1String("lcd") || Extension == QLatin1String("leocad"))
 		LoadDAT = false;
 	else
-		LoadDAT = memcmp(FileData, "LeoCAD ", 7);
+		LoadDAT = FileData.size() > 7 && memcmp(FileData, "LeoCAD ", 7);
 
 	if (LoadDAT)
 	{
@@ -419,7 +422,10 @@ bool Project::Load(const QString& FileName)
 	}
 
 	if (mModels.IsEmpty())
+	{
+		QMessageBox::warning(gMainWindow, tr("Error"), tr("Error loading file '%1':\nFile format is not recognized.").arg(FileName));
 		return false;
+	}
 
 	if (mModels.GetSize() == 1)
 	{

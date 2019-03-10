@@ -198,7 +198,7 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 	QString ModelName;
 	QString CameraName;
 	QString ViewpointName;
-	QString ProjectName = lcGetProfileInt(LC_PROFILE_AUTOLOAD_MOSTRECENT) ? lcGetProfileString(LC_PROFILE_RECENT_FILE1) : QString();
+	QString ProjectName;
 	QString SaveWavefrontName;
 	QString Save3DSName;
 	QString SaveCOLLADAName;
@@ -435,6 +435,9 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 
 	Project* NewProject = new Project();
 	SetProject(NewProject);
+
+	if (ShowWindow && ProjectName.isEmpty() && lcGetProfileInt(LC_PROFILE_AUTOLOAD_MOSTRECENT))
+		ProjectName = lcGetProfileString(LC_PROFILE_RECENT_FILE1);
 
 	if (!ProjectName.isEmpty() && gMainWindow->OpenProject(ProjectName))
 	{

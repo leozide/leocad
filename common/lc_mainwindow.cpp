@@ -931,11 +931,6 @@ void lcMainWindow::ProjectFileChanged(const QString& Path)
 			RestoreTabLayout(TabLayout);
 			UpdateAllViews();
 		}
-		else
-		{
-			QMessageBox::critical(this, tr("LeoCAD"), tr("Error loading '%1'.").arg(Path));
-			delete NewProject;
-		}
 	}
 	else
 	{
@@ -2188,7 +2183,6 @@ bool lcMainWindow::OpenProject(const QString& FileName)
 		return true;
 	}
 
-	QMessageBox::critical(this, tr("LeoCAD"), tr("Error loading '%1'.").arg(LoadFileName));
 	delete NewProject;
 
 	return false;
@@ -2223,8 +2217,6 @@ void lcMainWindow::MergeProject()
 
 		UpdateModels();
 	}
-	else
-		QMessageBox::critical(this, tr("LeoCAD"), tr("Error loading '%1'.").arg(LoadFileName));
 
 	delete NewProject;
 }

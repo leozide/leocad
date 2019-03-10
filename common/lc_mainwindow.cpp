@@ -1436,7 +1436,6 @@ void lcMainWindow::SetCurrentModelTab(lcModel* Model)
 	{
 		TabWidget = new lcModelTabWidget(Model);
 		mModelTabWidget->addTab(TabWidget, Model->GetProperties().mName);
-		mModelTabWidget->setCurrentWidget(TabWidget);
 
 		QGridLayout* CentralLayout = new QGridLayout(TabWidget);
 		CentralLayout->setContentsMargins(0, 0, 0, 0);
@@ -1444,12 +1443,13 @@ void lcMainWindow::SetCurrentModelTab(lcModel* Model)
 		NewView = new View(Model);
 		ViewWidget = new lcQGLWidget(TabWidget, NewView, true);
 		CentralLayout->addWidget(ViewWidget, 0, 0, 1, 1);
+
+		mModelTabWidget->setCurrentWidget(TabWidget);
 	}
 	else
 	{
 		TabWidget = EmptyWidget;
 		TabWidget->SetModel(Model);
-		mModelTabWidget->setCurrentWidget(TabWidget);
 
 		NewView = new View(Model);
 		ViewWidget = (lcQGLWidget*)TabWidget->layout()->itemAt(0)->widget();
@@ -1458,6 +1458,8 @@ void lcMainWindow::SetCurrentModelTab(lcModel* Model)
 		NewView->mWidth = ViewWidget->width();
 		NewView->mHeight = ViewWidget->height();
 		AddView(NewView);
+
+		mModelTabWidget->setCurrentWidget(TabWidget);
 	}
 
 	ViewWidget->show();

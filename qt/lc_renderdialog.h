@@ -37,7 +37,7 @@ protected:
 	QFile mOutputFile;
 	void* mOutputBuffer;
 	QImage mImage;
-	QStringList stdErrList;
+	QStringList mStdErrList;
 
 	Ui::lcRenderDialog* ui;
 };

@@ -175,7 +175,7 @@ void lcRenderDialog::on_RenderButton_clicked()
 	{
 		ui->RenderButton->setText(tr("Cancel"));
 		ui->RenderProgress->setValue(ui->RenderProgress->minimum());
-		stdErrList.clear();
+		mStdErrList.clear();
 	}
 	else
 	{
@@ -187,14 +187,14 @@ void lcRenderDialog::on_RenderButton_clicked()
 
 void lcRenderDialog::ReadStdErr()
 {
-	QString stdErr = QString(mProcess->readAllStandardError());
-	stdErrList.append(stdErr);
-	QRegExp regexPovRayProgress("Rendered (\\d+) of (\\d+) pixels.*");
-	regexPovRayProgress.setCaseSensitivity(Qt::CaseInsensitive);
-	if (regexPovRayProgress.indexIn(stdErr) == 0)
+	QString StdErr = QString(mProcess->readAllStandardError());
+	mStdErrList.append(StdErr);
+	QRegExp RegexPovRayProgress("Rendered (\\d+) of (\\d+) pixels.*");
+	RegexPovRayProgress.setCaseSensitivity(Qt::CaseInsensitive);
+	if (RegexPovRayProgress.indexIn(StdErr) == 0)
 	{
-		ui->RenderProgress->setMaximum(regexPovRayProgress.cap(2).toInt());
-		ui->RenderProgress->setValue(regexPovRayProgress.cap(1).toInt());
+		ui->RenderProgress->setMaximum(RegexPovRayProgress.cap(2).toInt());
+		ui->RenderProgress->setValue(RegexPovRayProgress.cap(1).toInt());
 	}
 }
 
@@ -272,16 +272,18 @@ void lcRenderDialog::Update()
 #endif
 }
 
-void lcRenderDialog::ShowResult() {
+void lcRenderDialog::ShowResult()
+{
 	ReadStdErr();
 	ui->RenderProgress->setValue(ui->RenderProgress->maximum());
 
-	if (mProcess->exitStatus() != QProcess::NormalExit || mProcess->exitCode() != 0) {
+	if (mProcess->exitStatus() != QProcess::NormalExit || mProcess->exitCode() != 0)
+	{
 		QMessageBox error;
 		error.setWindowTitle(tr("Error"));
 		error.setIcon(QMessageBox::Critical);
 		error.setText(tr("An error occurred while rendering. Check details or try again."));
-		error.setDetailedText(stdErrList.join(""));
+		error.setDetailedText(mStdErrList.join(""));
 		error.exec();
 		return;
 	}

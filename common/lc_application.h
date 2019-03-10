@@ -44,7 +44,7 @@ public:
 	quint32 mViewSphereColor;
 	quint32 mViewSphereTextColor;
 	quint32 mViewSphereHighlightColor;
-	bool autoLoadMostRecent;
+	bool mAutoLoadMostRecent;
 };
 
 class lcApplication : public QApplication

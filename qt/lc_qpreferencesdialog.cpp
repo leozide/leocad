@@ -44,7 +44,7 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget *parent, void *data) :
 	ui->mouseSensitivity->setValue(options->Preferences.mMouseSensitivity);
 	ui->checkForUpdates->setCurrentIndex(options->CheckForUpdates);
 	ui->fixedDirectionKeys->setChecked(options->Preferences.mFixedAxes);
-	ui->autoLoadMostRecent->setChecked(options->Preferences.autoLoadMostRecent);
+	ui->autoLoadMostRecent->setChecked(options->Preferences.mAutoLoadMostRecent);
 
 	ui->antiAliasing->setChecked(options->AASamples != 1);
 	if (options->AASamples == 8)
@@ -146,7 +146,7 @@ void lcQPreferencesDialog::accept()
 	options->Preferences.mMouseSensitivity = ui->mouseSensitivity->value();
 	options->CheckForUpdates = ui->checkForUpdates->currentIndex();
 	options->Preferences.mFixedAxes = ui->fixedDirectionKeys->isChecked();
-	options->Preferences.autoLoadMostRecent = ui->autoLoadMostRecent->isChecked();
+	options->Preferences.mAutoLoadMostRecent = ui->autoLoadMostRecent->isChecked();
 
 	if (!ui->antiAliasing->isChecked())
 		options->AASamples = 1;
@@ -190,7 +190,7 @@ void lcQPreferencesDialog::accept()
 
 void lcQPreferencesDialog::on_partsLibraryBrowse_clicked()
 {
-	QString result = QFileDialog::getExistingDirectory(this, tr("Select Parts Library Folder..."), ui->partsLibrary->text());
+	QString result = QFileDialog::getExistingDirectory(this, tr("Select Parts Library Folder"), ui->partsLibrary->text());
 
 	if (!result.isEmpty())
 		ui->partsLibrary->setText(QDir::toNativeSeparators(result));
@@ -198,7 +198,7 @@ void lcQPreferencesDialog::on_partsLibraryBrowse_clicked()
 
 void lcQPreferencesDialog::on_partsArchiveBrowse_clicked()
 {
-	QString result = QFileDialog::getOpenFileName(this, tr("Select Parts Library Archive..."), ui->partsLibrary->text(), tr("Supported Archives (*.zip *.bin);;All Files (*.*)"));
+	QString result = QFileDialog::getOpenFileName(this, tr("Select Parts Library Archive"), ui->partsLibrary->text(), tr("Supported Archives (*.zip *.bin);;All Files (*.*)"));
 
 	if (!result.isEmpty())
 		ui->partsLibrary->setText(QDir::toNativeSeparators(result));

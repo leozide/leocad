@@ -75,9 +75,9 @@ lcQPropertiesDialog::lcQPropertiesDialog(QWidget *parent, void *data) :
 	table->setHorizontalHeaderLabels(horizontalLabels);
 
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
-	table->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
+	table->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
 #else
-	table->horizontalHeader()->setResizeMode(0, QHeaderView::ResizeToContents);
+	table->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
 #endif
 
 	QVector<int> InfoTotals(PartsList.size());

@@ -547,10 +547,10 @@ void lcMainWindow::CreateMenus()
 	QMenu* ModelMenu = menuBar()->addMenu(tr("Sub&model"));
 	ModelMenu->addAction(mActions[LC_MODEL_PROPERTIES]);
 	ModelMenu->addAction(mActions[LC_MODEL_NEW]);
+	ModelMenu->addAction(mActions[LC_MODEL_LIST]);
 	ModelMenu->addSeparator();
 	for (int ModelIdx = LC_MODEL_FIRST; ModelIdx <= LC_MODEL_LAST; ModelIdx++)
 		ModelMenu->addAction(mActions[ModelIdx]);
-	ModelMenu->addAction(mActions[LC_MODEL_LIST]);
 
 	QMenu* HelpMenu = menuBar()->addMenu(tr("&Help"));
 	HelpMenu->addAction(mActions[LC_HELP_HOMEPAGE]);

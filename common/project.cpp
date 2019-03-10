@@ -335,7 +335,6 @@ void Project::ShowModelListDialog()
 
 	mModels = NewModels;
 
-	SetActiveModel(Dialog.mActiveModel);
 	gMainWindow->UpdateTitle();
 	gMainWindow->UpdateModels();
 }

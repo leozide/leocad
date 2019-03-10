@@ -14,7 +14,6 @@ public:
 	lcQModelListDialog(QWidget* Parent, QList<QPair<QString, lcModel*>>& Models);
 	~lcQModelListDialog();
 
-	int mActiveModel;
 	QList<QPair<QString, lcModel*>>& mModels;
 
 public slots:

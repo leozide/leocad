@@ -44,10 +44,6 @@ void lcQModelListDialog::accept()
 		mModels.append(QPair<QString, lcModel*>(Item->text(), (lcModel*)Item->data(Qt::UserRole).value<uintptr_t>()));
 	}
 
-	mActiveModel = ui->ModelList->currentRow();
-	if (mActiveModel < 0)
-		mActiveModel = 0;
-
 	QDialog::accept();
 }
 

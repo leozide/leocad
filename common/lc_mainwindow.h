@@ -30,18 +30,24 @@ struct lcSearchOptions
 	char Name[256];
 };
 
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
-typedef QTabWidget lcTabWidget;
-#else
+class lcTabBar : public QTabBar
+{
+protected:
+	void mouseReleaseEvent(QMouseEvent *event);
+};
+
 class lcTabWidget : public QTabWidget
 {
 public:
+	lcTabWidget();
+	~lcTabWidget();
+#if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
 	QTabBar* tabBar()
 	{
 		return QTabWidget::tabBar();
 	}
-};
 #endif
+};
 
 class lcModelTabWidget : public QWidget
 {

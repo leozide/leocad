@@ -58,7 +58,7 @@ static lcVector2 lcCalculateTexCoord(const lcVector3& Position, const lcLibraryT
 	case lcLibraryTextureMapType::SPHERICAL:
 		{
 			const lcVector4& FrontPlane = TextureMap->Params[0];
-			const lcVector3& Center = (const lcVector3&)TextureMap->Params[1];
+			const lcVector3& Center = static_cast<lcVector3>(TextureMap->Params[1]);
 			const lcVector4& Plane1 = TextureMap->Params[2];
 			const lcVector4& Plane2 = TextureMap->Params[3];
 			lcVector2 TexCoord;

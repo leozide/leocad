@@ -50,6 +50,7 @@ script:
       qmake PREFIX=/usr -v
       qmake PREFIX=/usr -r
       make -j$(nproc)
+      if [[ "$QT_VERSION" != "510" ]]; then exit 0; fi
       make install INSTALL_ROOT=AppDir
       wget -c "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
       chmod a+x linuxdeployqt*.AppImage 
@@ -59,10 +60,12 @@ script:
       ./linuxdeployqt*.AppImage --appimage-extract
       export PATH=$(readlink -f ./squashfs-root/usr/bin/):$PATH
       ./squashfs-root/usr/bin/appimagetool AppDir/
+      mv ./LeoCAD-$VERSION-x86_64.AppImage ./LeoCAD-Linux-$VERSION-x86_64.AppImage 
     elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
       qmake PREFIX=/usr -v
       qmake PREFIX=/usr -r
       make -j$(sysctl -n hw.ncpu)
+      cd build/release
       macdeployqt LeoCAD.app -dmg
       mv LeoCAD.dmg LeoCAD-macOS-$(git rev-parse --short HEAD).dmg
     fi

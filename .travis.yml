@@ -59,5 +59,14 @@ script:
   - ./linuxdeployqt*.AppImage --appimage-extract
   - export PATH=$(readlink -f ./squashfs-root/usr/bin/):$PATH
   - ./squashfs-root/usr/bin/appimagetool AppDir/
-  - curl --upload-file ./LeoCAD-*.AppImage https://transfer.sh/LeoCAD-git.$VERSION.qt$QT_BASE-x86_64.AppImage 
-  - echo AppImage uploaded to https://transfer.sh/LeoCAD-git.$VERSION.qt$QT_BASE-x86_64.AppImage 
+
+after_success:
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+      wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh
+      bash upload.sh LeoCAD*.AppImage*
+    fi
+
+branches:
+  except:
+    - # Do not build tags that we create when we upload to GitHub Releases
+    - /^(?i:continuous)/

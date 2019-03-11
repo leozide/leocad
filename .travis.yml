@@ -61,7 +61,8 @@ script:
   - ./squashfs-root/usr/bin/appimagetool AppDir/
 
 after_success:
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+  - |
+    if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
       wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh
       bash upload.sh LeoCAD*.AppImage*
     fi

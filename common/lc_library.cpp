@@ -426,21 +426,7 @@ bool lcPiecesLibrary::OpenArchive(lcFile* File, const QString& FileName, lcZipFi
 			Name += 6;
 
 			if (memcmp(Name, "S/", 2))
-			{
-				PieceInfo* Info = FindPiece(Name, nullptr, false, false);
-
-				if (!Info)
-				{
-					Info = new PieceInfo();
-
-					strncpy(Info->mFileName, FileInfo.file_name + (Name - NameBuffer), sizeof(Info->mFileName));
-					Info->mFileName[sizeof(Info->mFileName) - 1] = 0;
-
-					mPieces[Name] = Info;
-				}
-
-				Info->SetZipFile(ZipFileType, FileIdx);
-			}
+				FindPiece(Name, nullptr, true, false)->SetZipFile(ZipFileType, FileIdx);
 			else
 			{
 				lcLibraryPrimitive* Primitive = FindPrimitive(Name);

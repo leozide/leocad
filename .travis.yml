@@ -50,7 +50,7 @@ script:
       qmake PREFIX=/usr -v
       qmake PREFIX=/usr -r
       make -j$(nproc)
-      if [[ "$QT_VERSION" != "510" ]]; then exit 0; fi
+      if [[ "$QT_BASE" != "510" ]]; then exit 0; fi
       make install INSTALL_ROOT=AppDir
       wget -c "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
       chmod a+x linuxdeployqt*.AppImage 

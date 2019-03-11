@@ -1292,7 +1292,7 @@ void lcMainWindow::RestoreTabLayout(const QByteArray& TabLayout)
 
 		QWidget* ActiveWidget = nullptr;
 
-		std::function<void(QWidget*)> LoadWidget = [&DataStream, &LoadWidget, Model, &ActiveWidget, this](QWidget* ParentWidget)
+		std::function<void(QWidget*)> LoadWidget = [&DataStream, &LoadWidget, &ActiveWidget, this](QWidget* ParentWidget)
 		{
 			qint32 WidgetType;
 			DataStream >> WidgetType;

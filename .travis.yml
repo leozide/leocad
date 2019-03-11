@@ -62,7 +62,7 @@ script:
 
 after_success:
   - |
-    if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+    if [[ "$QT_BASE" = "510" && "$TRAVIS_OS_NAME" = "linux" ]]; then
       wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh
       bash upload.sh LeoCAD*.AppImage*
     fi

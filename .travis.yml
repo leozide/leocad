@@ -40,31 +40,41 @@ install:
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then 
       brew install qt5;
       brew link --force qt5;
-      wget https://github.com/leozide/leocad/releases/download/v0.83.2/Library-Linux-9306.zip -O library.bin;
+      wget https://github.com/leozide/leocad/releases/download/v18.02/Library-Linux-11331.zip -O library.bin;
     fi
 
 script:
-  - if [[ "$QT_BASE" = "48" && "$TRAVIS_OS_NAME" = "linux" ]]; then source /opt/qt-4.8/bin/qt-4.8-env.sh; fi
-  - if [[ "$QT_BASE" = "510" && "$TRAVIS_OS_NAME" = "linux" ]]; then source /opt/qt510/bin/qt510-env.sh; fi
-  - qmake PREFIX=/usr -v
-  - qmake PREFIX=/usr -r
-  - make -j4
-  - if [ "$TRAVIS_OS_NAME" != "linux" ] ; then exit 0 ; fi
-  - make install INSTALL_ROOT=AppDir
-  - wget -c "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
-  - chmod a+x linuxdeployqt*.AppImage 
-  - unset QTDIR; unset QT_PLUGIN_PATH ; unset LD_LIBRARY_PATH
-  - export VERSION=$(git rev-parse --short HEAD)
-  - ./linuxdeployqt*.AppImage ./AppDir/usr/share/applications/*.desktop -bundle-non-qt-libs
-  - ./linuxdeployqt*.AppImage --appimage-extract
-  - export PATH=$(readlink -f ./squashfs-root/usr/bin/):$PATH
-  - ./squashfs-root/usr/bin/appimagetool AppDir/
+  - |
+    if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+      source /opt/qt*/bin/qt*-env.sh
+      qmake PREFIX=/usr -v
+      qmake PREFIX=/usr -r
+      make -j$(nproc)
+      make install INSTALL_ROOT=AppDir
+      wget -c "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
+      chmod a+x linuxdeployqt*.AppImage 
+      unset QTDIR; unset QT_PLUGIN_PATH ; unset LD_LIBRARY_PATH
+      export VERSION=$(git rev-parse --short HEAD)
+      ./linuxdeployqt*.AppImage ./AppDir/usr/share/applications/*.desktop -bundle-non-qt-libs
+      ./linuxdeployqt*.AppImage --appimage-extract
+      export PATH=$(readlink -f ./squashfs-root/usr/bin/):$PATH
+      ./squashfs-root/usr/bin/appimagetool AppDir/
+    elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+      qmake PREFIX=/usr -v
+      qmake PREFIX=/usr -r
+      make -j$(sysctl -n hw.ncpu)
+      macdeployqt LeoCAD.app -dmg
+      mv LeoCAD.dmg LeoCAD-macOS-$(git rev-parse --short HEAD).dmg
+    fi
 
 after_success:
   - |
     if [[ "$QT_BASE" = "510" && "$TRAVIS_OS_NAME" = "linux" ]]; then
       wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh
       bash upload.sh LeoCAD*.AppImage*
+    elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+      wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh
+      bash upload.sh LeoCAD*.dmg*
     fi
 
 branches:

@@ -32,16 +32,16 @@ matrix:
      - QT_BASE=57
 
 before_install:
-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then 
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then 
       brew update;
     fi
 
 install:
-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then 
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then 
       brew install qt5;
       brew link --force qt5;
       wget https://github.com/leozide/leocad/releases/download/v18.02/Library-Linux-11331.zip -O library.zip;
-      unzip library.zip
+      unzip library.zip;
     fi
 
 script:

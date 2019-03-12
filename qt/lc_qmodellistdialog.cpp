@@ -185,7 +185,7 @@ void lcQModelListDialog::on_SetActiveModel_clicked()
 
 void lcQModelListDialog::on_ModelList_itemDoubleClicked(QListWidgetItem* Item)
 {
-	Q_UNUSED(Item);
+	mActiveModelItem = Item;
 
 	accept();
 }

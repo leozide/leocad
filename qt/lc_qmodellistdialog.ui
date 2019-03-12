@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>300</height>
+    <height>312</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -60,6 +60,13 @@
         <widget class="QPushButton" name="MoveDown">
          <property name="text">
           <string>Move &amp;Down</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="SetActiveModel">
+         <property name="text">
+          <string>Set Active</string>
          </property>
         </widget>
        </item>

@@ -337,6 +337,10 @@ void Project::ShowModelListDialog()
 
 	gMainWindow->UpdateTitle();
 	gMainWindow->UpdateModels();
+
+	int ModelIndex = Dialog.GetActiveModelIndex();
+	if (ModelIndex != -1)
+		SetActiveModel(ModelIndex);
 }
 
 void Project::SetFileName(const QString& FileName)

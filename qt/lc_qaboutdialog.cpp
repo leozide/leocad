@@ -18,7 +18,7 @@ lcQAboutDialog::lcQAboutDialog(QWidget *parent) :
 
 	int ColorDepth = Format.redBufferSize() + Format.greenBufferSize() + Format.blueBufferSize() + Format.alphaBufferSize();
 
-	QString QtVersionFormat = tr("Qt version %1 (compiled with %2)\n");
+	QString QtVersionFormat = tr("Qt Version %1 (compiled with %2)\n\n");
 	QString QtVersion = QtVersionFormat.arg(qVersion(), QT_VERSION_STR);
 	QString VersionFormat = tr("OpenGL Version %1 (GLSL %2)\n%3 - %4\n\n");
 	QString Version = VersionFormat.arg(QString((const char*)glGetString(GL_VERSION)), QString((const char*)glGetString(GL_SHADING_LANGUAGE_VERSION)), QString((const char*)glGetString(GL_RENDERER)), QString((const char*)glGetString(GL_VENDOR)));

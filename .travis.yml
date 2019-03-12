@@ -75,8 +75,8 @@ after_success:
   - |
     GREP_PATH=grep;
     if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then GREP_PATH=ggrep; fi
-    curl -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/repos/olive-editor/olive/commits/master;
-    curl -s -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/repos/olive-editor/olive/commits/master -o repo.txt;
+    curl -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/repos/leozide/leocad/commits/master;
+    curl -s -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/repos/leozide/leocad/commits/master -o repo.txt;
     REMOTE=$($GREP_PATH -Po '(?<=: \")(([a-z0-9])\w+)(?=\")' -m 1 repo.txt);
     LOCAL=$(git rev-parse HEAD);
     if [[ "$REMOTE" != "$LOCAL" ]]; then echo "Build no longer current. $REMOTE vs $LOCAL - aborting upload."; exit 0; fi;

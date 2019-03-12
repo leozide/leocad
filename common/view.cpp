@@ -581,7 +581,7 @@ lcMatrix44 View::GetPieceInsertPosition(bool IgnoreSelected, PieceInfo* Info) co
 		return WorldMatrix;
 	}
 
-	std::array<lcVector3, 2> ClickPoints = { lcVector3((float)mInputState.x, (float)mInputState.y, 0.0f), lcVector3((float)mInputState.x, (float)mInputState.y, 1.0f) };
+	std::array<lcVector3, 2> ClickPoints = {{ lcVector3((float)mInputState.x, (float)mInputState.y, 0.0f), lcVector3((float)mInputState.x, (float)mInputState.y, 1.0f) }};
 	UnprojectPoints(ClickPoints.data(), 2);
 
 	if (ActiveModel != mModel)
@@ -681,14 +681,14 @@ lcArray<lcObject*> View::FindObjectsInBox(float x1, float y1, float x2, float y2
 	}
 
 	std::array<lcVector3, 6> Corners =
-	{
+	{{
 		lcVector3(Left, Top, 0),
 		lcVector3(Left, Bottom, 0),
 		lcVector3(Right, Bottom, 0),
 		lcVector3(Right, Top, 0),
 		lcVector3(Left, Top, 1),
 		lcVector3(Right, Bottom, 1)
-	};
+	}};
 
 	UnprojectPoints(Corners.data(), Corners.size());
 

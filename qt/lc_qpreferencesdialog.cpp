@@ -711,7 +711,7 @@ void lcQPreferencesDialog::UpdateMouseTree()
 
 void lcQPreferencesDialog::UpdateMouseTreeItem(int ItemIndex)
 {
-	auto GetShortcutText = [this](Qt::MouseButton Button, Qt::KeyboardModifiers Modifiers)
+	auto GetShortcutText = [](Qt::MouseButton Button, Qt::KeyboardModifiers Modifiers)
 	{
 		QString Shortcut = QKeySequence(Modifiers).toString(QKeySequence::NativeText);
 

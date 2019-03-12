@@ -1525,7 +1525,7 @@ QImage Project::CreatePartsListImage(lcModel* Model, lcStep Step)
 		}
 	}
 
-	auto ImageCompare = [this](const lcPartsListImage& Image1, const lcPartsListImage& Image2)
+	auto ImageCompare = [](const lcPartsListImage& Image1, const lcPartsListImage& Image2)
 	{
 		if (Image1.ColorIndex != Image2.ColorIndex)
 			return Image1.ColorIndex < Image2.ColorIndex;

@@ -3093,6 +3093,9 @@ void lcModel::GetPartsList(int DefaultColorIndex, bool IncludeSubmodels, lcParts
 {
 	for (lcPiece* Piece : mPieces)
 	{
+		if (!Piece->IsVisibleInSubModel())
+			continue;
+
 		int ColorIndex = Piece->mColorIndex;
 
 		if (ColorIndex == gDefaultColor)
@@ -3106,7 +3109,7 @@ void lcModel::GetPartsListForStep(lcStep Step, int DefaultColorIndex, lcPartsLis
 {
 	for (lcPiece* Piece : mPieces)
 	{
-		if (Piece->GetStepShow() != Step)
+		if (Piece->GetStepShow() != Step || Piece->IsHidden())
 			continue;
 
 		int ColorIndex = Piece->mColorIndex;
@@ -3122,6 +3125,9 @@ void lcModel::GetModelParts(const lcMatrix44& WorldMatrix, int DefaultColorIndex
 {
 	for (lcPiece* Piece : mPieces)
 	{
+		if (!Piece->IsVisibleInSubModel())
+			continue;
+
 		int ColorIndex = Piece->mColorIndex;
 
 		if (ColorIndex == gDefaultColor)

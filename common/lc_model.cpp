@@ -283,7 +283,7 @@ void lcModel::UpdatePieceInfo(lcArray<lcModel*>& UpdatedModels)
 
 	for (lcPiece* Piece : mPieces)
 	{
-		if (Piece->GetStepHide() == LC_STEP_MAX)
+		if (Piece->IsVisibleInSubModel())
 		{
 			Piece->mPieceInfo->UpdateBoundingBox(UpdatedModels);
 			Piece->CompareBoundingBox(Min, Max);
@@ -1269,7 +1269,7 @@ void lcModel::GetScene(lcScene& Scene, lcCamera* ViewCamera, bool DrawInterface,
 void lcModel::AddSubModelRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, int DefaultColorIndex, lcRenderMeshState RenderMeshState, bool ParentActive) const
 {
 	for (lcPiece* Piece : mPieces)
-		if (Piece->GetStepHide() == LC_STEP_MAX)
+		if (Piece->IsVisibleInSubModel())
 			Piece->AddSubModelRenderMeshes(Scene, WorldMatrix, DefaultColorIndex, RenderMeshState, ParentActive);
 }
 
@@ -1463,7 +1463,7 @@ bool lcModel::SubModelMinIntersectDist(const lcVector3& WorldStart, const lcVect
 		lcVector3 Start = lcMul31(WorldStart, InverseWorldMatrix);
 		lcVector3 End = lcMul31(WorldEnd, InverseWorldMatrix);
 
-		if (Piece->GetStepHide() == LC_STEP_MAX && Piece->mPieceInfo->MinIntersectDist(Start, End, MinDistance)) // todo: this should check for piece->mMesh first
+		if (Piece->IsVisibleInSubModel() && Piece->mPieceInfo->MinIntersectDist(Start, End, MinDistance)) // todo: this should check for piece->mMesh first
 			MinIntersect = true;
 	}
 
@@ -1473,13 +1473,8 @@ bool lcModel::SubModelMinIntersectDist(const lcVector3& WorldStart, const lcVect
 bool lcModel::SubModelBoxTest(const lcVector4 Planes[6]) const
 {
 	for (lcPiece* Piece : mPieces)
-	{
-		if (Piece->GetStepHide() != LC_STEP_MAX)
-			continue;
-
-		if (Piece->mPieceInfo->BoxTest(Piece->mModelWorld, Planes))
+		if (Piece->IsVisibleInSubModel() && Piece->mPieceInfo->BoxTest(Piece->mModelWorld, Planes))
 			return true;
-	}
 
 	return false;
 }

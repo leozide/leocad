@@ -850,12 +850,17 @@ const char* lcPiece::GetName() const
 	return mPieceInfo->m_strDescription;
 }
 
-bool lcPiece::IsVisible(lcStep Step)
+bool lcPiece::IsVisible(lcStep Step) const
 {
 	if (mState & LC_PIECE_HIDDEN)
 		return false;
 
 	return (mStepShow <= Step) && (mStepHide > Step || mStepHide == LC_STEP_MAX);
+}
+
+bool lcPiece::IsVisibleInSubModel() const
+{
+	return (mStepHide == LC_STEP_MAX) && !(mState & LC_PIECE_HIDDEN);
 }
 
 const lcBoundingBox& lcPiece::GetBoundingBox() const

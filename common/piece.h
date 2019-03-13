@@ -394,7 +394,8 @@ public:
 	void UpdateID();
 
 	const char* GetName() const override;
-	bool IsVisible(lcStep Step);
+	bool IsVisible(lcStep Step) const;
+	bool IsVisibleInSubModel() const;
 	void Initialize(const lcMatrix44& WorldMatrix, lcStep Step);
 	const lcBoundingBox& GetBoundingBox() const;
 	void CompareBoundingBox(lcVector3& Min, lcVector3& Max) const;

@@ -563,12 +563,14 @@ lcVector3 View::GetMoveDirection(const lcVector3& Direction) const
 
 lcMatrix44 View::GetPieceInsertPosition(bool IgnoreSelected, PieceInfo* Info) const
 {
-	lcPiece* HitPiece = (lcPiece*)FindObjectUnderPointer(true, IgnoreSelected).Object;
+	lcObjectSection ObjectSection = FindObjectUnderPointer(true, IgnoreSelected);
+	lcPiece* HitPiece = (lcPiece*)ObjectSection.Object;
 	lcModel* ActiveModel = GetActiveModel();
 
 	if (HitPiece)
 	{
-		lcVector3 Position(0, 0, HitPiece->GetBoundingBox().Max.z - Info->GetBoundingBox().Min.z);
+		lcVector3 Position(ObjectSection.Intersection);
+		Position.z += -Info->GetBoundingBox().Min.z;
 
 		if (gMainWindow->GetRelativeTransform())
 			Position = lcMul31(ActiveModel->SnapPosition(Position), HitPiece->mModelWorld);

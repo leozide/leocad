@@ -24,6 +24,7 @@ struct lcObjectSection
 {
 	lcObject* Object;
 	quint32 Section;
+	lcVector3 Intersection;
 };
 
 struct lcObjectRayTest

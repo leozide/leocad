@@ -194,7 +194,7 @@ void PieceInfo::Unload()
 	}
 }
 
-bool PieceInfo::MinIntersectDist(const lcVector3& Start, const lcVector3& End, float& MinDistance) const
+bool PieceInfo::MinIntersectDist(const lcVector3& Start, const lcVector3& End, float& MinDistance, lcVector3& Intersection) const
 {
 	bool Intersect = false;
 
@@ -208,17 +208,17 @@ bool PieceInfo::MinIntersectDist(const lcVector3& Start, const lcVector3& End, f
 			return true;
 
 		if (mFlags & LC_PIECE_MODEL)
-			Intersect |= mModel->SubModelMinIntersectDist(Start, End, MinDistance);
+			Intersect |= mModel->SubModelMinIntersectDist(Start, End, MinDistance, Intersection);
 		else if (mFlags & LC_PIECE_PROJECT)
 		{
 			lcModel* Model = mProject->GetMainModel();
 			if (Model)
-				Intersect |= Model->SubModelMinIntersectDist(Start, End, MinDistance);
+				Intersect |= Model->SubModelMinIntersectDist(Start, End, MinDistance, Intersection);
 		}
 	}
 
 	if (mMesh)
-		Intersect = mMesh->MinIntersectDist(Start, End, MinDistance);
+		Intersect = mMesh->MinIntersectDist(Start, End, MinDistance, Intersection);
 
 	return Intersect;
 }

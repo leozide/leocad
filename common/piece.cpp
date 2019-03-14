@@ -469,13 +469,13 @@ void lcPiece::RayTest(lcObjectRayTest& ObjectRayTest) const
 
 	if (mMesh)
 	{
-		if (mMesh->MinIntersectDist(Start, End, ObjectRayTest.Distance))
+		if (mMesh->MinIntersectDist(Start, End, ObjectRayTest.Distance, ObjectRayTest.ObjectSection.Intersection))
 		{
 			ObjectRayTest.ObjectSection.Object = const_cast<lcPiece*>(this);
 			ObjectRayTest.ObjectSection.Section = LC_PIECE_SECTION_POSITION;
 		}
 	}
-	else if (mPieceInfo->MinIntersectDist(Start, End, ObjectRayTest.Distance))
+	else if (mPieceInfo->MinIntersectDist(Start, End, ObjectRayTest.Distance, ObjectRayTest.ObjectSection.Intersection))
 	{
 		ObjectRayTest.ObjectSection.Object = const_cast<lcPiece*>(this);
 		ObjectRayTest.ObjectSection.Section = LC_PIECE_SECTION_POSITION;
@@ -493,12 +493,14 @@ void lcPiece::RayTest(lcObjectRayTest& ObjectRayTest) const
 			lcVector3 PointEnd = lcMul31(End, InverseTransform);
 
 			float Distance;
-			if (!lcBoundingBoxRayIntersectDistance(Min, Max, PointStart, PointEnd, &Distance, nullptr) || (Distance >= ObjectRayTest.Distance))
+			lcVector3 Intersection;
+			if (!lcBoundingBoxRayIntersectDistance(Min, Max, PointStart, PointEnd, &Distance, &Intersection) || (Distance >= ObjectRayTest.Distance))
 				continue;
 
 			ObjectRayTest.ObjectSection.Object = const_cast<lcPiece*>(this);
 			ObjectRayTest.ObjectSection.Section = LC_PIECE_SECTION_CONTROL_POINT_1 + ControlPointIdx;
 			ObjectRayTest.Distance = Distance;
+			ObjectRayTest.ObjectSection.Intersection = Intersection;
 		}
 	}
 }

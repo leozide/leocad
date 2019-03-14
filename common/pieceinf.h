@@ -145,7 +145,7 @@ public:
 	void CreateProject(Project* Project, const char* PieceName);
 	bool GetPieceWorldMatrix(lcPiece* Piece, lcMatrix44& WorldMatrix) const;
 	bool IncludesModel(const lcModel* Model) const;
-	bool MinIntersectDist(const lcVector3& Start, const lcVector3& End, float& MinDistance) const;
+	bool MinIntersectDist(const lcVector3& Start, const lcVector3& End, float& MinDistance, lcVector3& Intersection) const;
 	bool BoxTest(const lcMatrix44& WorldMatrix, const lcVector4 Planes[6]) const;
 	void GetPartsList(int DefaultColorIndex, bool IncludeSubmodels, lcPartsList& PartsList) const;
 	void GetModelParts(const lcMatrix44& WorldMatrix, int DefaultColorIndex, lcArray<lcModelPartsEntry>& ModelParts) const;

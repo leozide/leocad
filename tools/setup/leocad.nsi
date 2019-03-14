@@ -11,7 +11,6 @@
 
   ;Name and file
   Name "LeoCAD"
-  OutFile "LeoCAD-setup.exe"
 
   ;Default installation folder
   InstallDir "$PROGRAMFILES\LeoCAD"
@@ -56,10 +55,10 @@ Section "LeoCAD" SecLeoCAD
 
   SetOutPath "$INSTDIR"
 
-  File "..\..\build\release\LeoCAD.exe"
-  File "..\..\docs\ReadMe.txt"
-  File "..\..\library.bin"
-  File "..\povray\povconsole32-sse2.exe"
+  File /r "build\release\*"
+  File "docs\ReadMe.txt"
+  File "library.bin"
+  File "tools\povray\povconsole32-sse2.exe"
 
   ;Register file extension
   WriteRegStr HKCR ".lcd" "" "LeoCAD.Project"

@@ -57,11 +57,9 @@ Section "LeoCAD" SecLeoCAD
   SetOutPath "$INSTDIR"
 
   File "LeoCAD.exe"
-  ;File "LeoCAD.hlp"
-  ;File "LeoCAD.cnt"
-  File "..\..\docs\ReadMe.txt"
-  File "..\..\library.bin"
-  File "..\povray\povconsole32-sse2.exe"
+  File "docs\ReadMe.txt"
+  File "library.bin"
+  File "tools\povray\povconsole32-sse2.exe"
 
   ;Register file extension
   WriteRegStr HKCR ".lcd" "" "LeoCAD.Project"

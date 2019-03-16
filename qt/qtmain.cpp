@@ -127,21 +127,23 @@ int main(int argc, char *argv[])
 
 	QTranslator QtTranslator;
 	if (QtTranslator.load(QLocale::system(), "qt", "_", QLibraryInfo::location(QLibraryInfo::TranslationsPath)))
-	{
 		Application.installTranslator(&QtTranslator);
-	}
+#ifdef Q_OS_WIN
+	else if (QtTranslator.load(QLocale::system(), "qt", "_", qApp->applicationDirPath() + "/translations"))
+		Application.installTranslator(&QtTranslator);
+#endif
 
 	QTranslator QtBaseTranslator;
 	if (QtBaseTranslator.load("qtbase_" + QLocale::system().name(), QLibraryInfo::location(QLibraryInfo::TranslationsPath)))
-	{
 		Application.installTranslator(&QtBaseTranslator);
-	}
+#ifdef Q_OS_WIN
+	else if (QtBaseTranslator.load("qtbase_" + QLocale::system().name(), qApp->applicationDirPath() + "/translations"))
+		Application.installTranslator(&QtBaseTranslator);
+#endif
 
 	QTranslator Translator;
 	if (Translator.load("leocad_" + QLocale::system().name(), ":/resources"))
-	{
 		Application.installTranslator(&Translator);
-	}
 
 	qRegisterMetaTypeStreamOperators<QList<int> >("QList<int>");
 

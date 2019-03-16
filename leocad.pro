@@ -7,11 +7,9 @@ greaterThan(QT_MAJOR_VERSION, 4) {
 }
 
 equals(QT_MAJOR_VERSION, 5) {
-    greaterThan(QT_MINOR_VERSION, 11) {
-		qtHaveModule(gamepad) {
-			QT += gamepad
-			DEFINES += LC_ENABLE_GAMEPAD
-		}
+	qtHaveModule(gamepad) {
+		QT += gamepad
+		DEFINES += LC_ENABLE_GAMEPAD
 	}
 }
 

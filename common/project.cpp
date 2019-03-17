@@ -158,8 +158,8 @@ void Project::SetActiveModel(int ModelIndex)
 	for (int ModelIdx = 0; ModelIdx < mModels.GetSize(); ModelIdx++)
 		mModels[ModelIdx]->SetActive(ModelIdx == ModelIndex);
 
-	lcArray<lcModel*> UpdatedModels;
-	UpdatedModels.AllocGrow(mModels.GetSize());
+	std::vector<lcModel*> UpdatedModels;
+	UpdatedModels.reserve(mModels.GetSize());
 
 	for (int ModelIdx = 0; ModelIdx < mModels.GetSize(); ModelIdx++)
 		mModels[ModelIdx]->UpdatePieceInfo(UpdatedModels);
@@ -442,8 +442,8 @@ bool Project::Load(const QString& FileName)
 		}
 	}
 
-	lcArray<lcModel*> UpdatedModels;
-	UpdatedModels.AllocGrow(mModels.GetSize());
+	std::vector<lcModel*> UpdatedModels;
+	UpdatedModels.reserve(mModels.GetSize());
 
 	for (lcModel* Model : mModels)
 	{
@@ -568,8 +568,8 @@ bool Project::ImportLDD(const QString& FileName)
 	for (int ModelIdx = 0; ModelIdx < mModels.GetSize(); ModelIdx++)
 		mModels[ModelIdx]->CreatePieceInfo(this);
 
-	lcArray<lcModel*> UpdatedModels;
-	UpdatedModels.AllocGrow(mModels.GetSize());
+	std::vector<lcModel*> UpdatedModels;
+	UpdatedModels.reserve(mModels.GetSize());
 
 	for (int ModelIdx = 0; ModelIdx < mModels.GetSize(); ModelIdx++)
 		mModels[ModelIdx]->UpdatePieceInfo(UpdatedModels);
@@ -609,8 +609,8 @@ bool Project::ImportInventory(const QByteArray& Inventory, const QString& Name, 
 	for (int ModelIdx = 0; ModelIdx < mModels.GetSize(); ModelIdx++)
 		mModels[ModelIdx]->CreatePieceInfo(this);
 
-	lcArray<lcModel*> UpdatedModels;
-	UpdatedModels.AllocGrow(mModels.GetSize());
+	std::vector<lcModel*> UpdatedModels;
+	UpdatedModels.reserve(mModels.GetSize());
 
 	for (int ModelIdx = 0; ModelIdx < mModels.GetSize(); ModelIdx++)
 		mModels[ModelIdx]->UpdatePieceInfo(UpdatedModels);
@@ -2466,7 +2466,7 @@ void Project::UpdatePieceInfo(PieceInfo* Info) const
 {
 	if (!mModels.IsEmpty())
 	{
-		lcArray<lcModel*> UpdatedModels;
+		std::vector<lcModel*> UpdatedModels;
 		mModels[0]->UpdatePieceInfo(UpdatedModels);
 
 		lcBoundingBox BoundingBox = mModels[0]->GetPieceInfo()->GetBoundingBox();

@@ -356,7 +356,7 @@ void PieceInfo::GetModelParts(const lcMatrix44& WorldMatrix, int DefaultColorInd
 	ModelPartsEntry.Info = const_cast<PieceInfo*>(this);
 }
 
-void PieceInfo::UpdateBoundingBox(lcArray<lcModel*>& UpdatedModels)
+void PieceInfo::UpdateBoundingBox(std::vector<lcModel*>& UpdatedModels)
 {
 	if (mFlags & LC_PIECE_MODEL)
 		mModel->UpdatePieceInfo(UpdatedModels);

@@ -112,7 +112,7 @@ public:
 	bool GetPieceWorldMatrix(lcPiece* Piece, lcMatrix44& ParentWorldMatrix) const;
 	bool IncludesModel(const lcModel* Model) const;
 	void CreatePieceInfo(Project* Project);
-	void UpdatePieceInfo(lcArray<lcModel*>& UpdatedModels);
+	void UpdatePieceInfo(std::vector<lcModel*>& UpdatedModels);
 	void UpdateMesh();
 
 	PieceInfo* GetPieceInfo() const

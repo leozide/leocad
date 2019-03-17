@@ -2709,7 +2709,7 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 			ActiveView->SetTopSubmodelActive();
 			if (ActiveModel)
 			{
-				lcArray<lcModel*> UpdatedModels;
+				std::vector<lcModel*> UpdatedModels;
 				ActiveModel->UpdatePieceInfo(UpdatedModels);
 			}
 		}

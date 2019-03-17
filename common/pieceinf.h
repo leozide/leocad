@@ -149,7 +149,7 @@ public:
 	bool BoxTest(const lcMatrix44& WorldMatrix, const lcVector4 Planes[6]) const;
 	void GetPartsList(int DefaultColorIndex, bool IncludeSubmodels, lcPartsList& PartsList) const;
 	void GetModelParts(const lcMatrix44& WorldMatrix, int DefaultColorIndex, lcArray<lcModelPartsEntry>& ModelParts) const;
-	void UpdateBoundingBox(lcArray<lcModel*>& UpdatedModels);
+	void UpdateBoundingBox(std::vector<lcModel*>& UpdatedModels);
 
 	void Load();
 	void Unload();

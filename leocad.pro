@@ -61,12 +61,12 @@ isEmpty(QMAKE_LRELEASE) {
 
 TRAVIS_COMMIT = $$(TRAVIS_COMMIT)
 !isEmpty(TRAVIS_COMMIT) {
-	DEFINES += "LC_CONTINUOUS_BUILD=$$TRAVIS_COMMIT"
+	DEFINES += "LC_CONTINUOUS_BUILD=$$system(git rev-parse --short HEAD)"
 }
 
 APPVEYOR_REPO_COMMIT = $$(APPVEYOR_REPO_COMMIT)
 !isEmpty(APPVEYOR_REPO_COMMIT) {
-	DEFINES += "LC_CONTINUOUS_BUILD=$$APPVEYOR_REPO_COMMIT"
+	DEFINES += "LC_CONTINUOUS_BUILD=$$system(git rev-parse --short HEAD)"
 }
 
 TSFILES = resources/leocad_fr.ts resources/leocad_pt.ts resources/leocad_de.ts

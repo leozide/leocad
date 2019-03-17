@@ -369,6 +369,11 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 			ParseInteger(PartImagesHeight);
 		else if (Param == QLatin1String("-v") || Param == QLatin1String("--version"))
 		{
+#ifdef LC_CONTINUOUS_BUILD
+			printf("LeoCAD Continuous Build " QT_STRINGIFY(LC_CONTINUOUS_BUILD) "\n");
+#else
+			printf("LeoCAD Version " LC_VERSION_TEXT "\n");
+#endif
 			printf("LeoCAD Version " LC_VERSION_TEXT "\n");
 			printf("Compiled " __DATE__ "\n");
 

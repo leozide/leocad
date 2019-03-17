@@ -12,7 +12,7 @@ lcQAboutDialog::lcQAboutDialog(QWidget *parent) :
 	ui->setupUi(this);
 
 #ifdef LC_CONTINUOUS_BUILD
-	ui->version->setText(tr("LeoCAD Continuous Build\nfrom commit %1").arg(QString::fromLatin1(QT_STRINGIFY(LC_CONTINUOUS_BUILD))));
+	ui->version->setText(tr("LeoCAD Continuous Build %1").arg(QString::fromLatin1(QT_STRINGIFY(LC_CONTINUOUS_BUILD))));
 #else
 	ui->version->setText(tr("LeoCAD Version %1").arg(QString::fromLatin1(LC_VERSION_TEXT)));
 #endif

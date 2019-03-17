@@ -68,7 +68,35 @@ enum class lcLibraryTextureMapType
 struct lcLibraryTextureMap
 {
 	lcTexture* Texture;
-	lcVector4 Params[4];
+
+	union lcTextureMapParams
+	{
+		lcTextureMapParams()
+		{
+		}
+
+		struct lcTextureMapPlanarParams
+		{
+			lcVector4 Planes[2];
+		} Planar;
+
+		struct lcTextureMapCylindricalParams
+		{
+			lcVector4 FrontPlane;
+			float UpLength;
+			lcVector4 Plane1;
+			lcVector4 Plane2;
+		} Cylindrical;
+
+		struct lcTextureMapSphericalParams
+		{
+			lcVector4 FrontPlane;
+			lcVector3 Center;
+			lcVector4 Plane1;
+			lcVector4 Plane2;
+		} Spherical;
+	} Params;
+
 	float Angle1;
 	float Angle2;
 	lcLibraryTextureMapType Type;

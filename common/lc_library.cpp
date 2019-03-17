@@ -33,13 +33,13 @@ static lcVector2 lcCalculateTexCoord(const lcVector3& Position, const lcLibraryT
 	switch (TextureMap->Type)
 	{
 	case lcLibraryTextureMapType::PLANAR:
-		return lcVector2(lcDot3(Position, TextureMap->Params[0]) + TextureMap->Params[0].w, lcDot3(Position, TextureMap->Params[1]) + TextureMap->Params[1].w);
+		return lcVector2(lcDot3(Position, TextureMap->Params.Planar.Planes[0]) + TextureMap->Params.Planar.Planes[0].w, lcDot3(Position, TextureMap->Params.Planar.Planes[1]) + TextureMap->Params.Planar.Planes[1].w);
 
 	case lcLibraryTextureMapType::CYLINDRICAL:
 		{
-			const lcVector4& FrontPlane = TextureMap->Params[0];
-			const lcVector4& Plane1 = TextureMap->Params[2];
-			const lcVector4& Plane2 = TextureMap->Params[3];
+			const lcVector4& FrontPlane = TextureMap->Params.Cylindrical.FrontPlane;
+			const lcVector4& Plane1 = TextureMap->Params.Cylindrical.Plane1;
+			const lcVector4& Plane2 = TextureMap->Params.Cylindrical.Plane2;
 			lcVector2 TexCoord;
 
 			float DotPlane1 = lcDot(lcVector4(Position, 1.0f), Plane1);
@@ -50,17 +50,17 @@ static lcVector2 lcCalculateTexCoord(const lcVector3& Position, const lcLibraryT
 			float Angle1 = atan2f(DotPlane2, DotFrontPlane) / LC_PI * TextureMap->Angle1;
 			TexCoord.x = lcClamp(0.5f + 0.5f * Angle1, 0.0f, 1.0f);
 
-			TexCoord.y = DotPlane1 / TextureMap->Params[1].w;
+			TexCoord.y = DotPlane1 / TextureMap->Params.Cylindrical.UpLength;
 
 			return TexCoord;
 		}
 
 	case lcLibraryTextureMapType::SPHERICAL:
 		{
-			const lcVector4& FrontPlane = TextureMap->Params[0];
-			const lcVector3& Center = (const lcVector3&)TextureMap->Params[1];
-			const lcVector4& Plane1 = TextureMap->Params[2];
-			const lcVector4& Plane2 = TextureMap->Params[3];
+			const lcVector4& FrontPlane = TextureMap->Params.Spherical.FrontPlane;
+			const lcVector3& Center = TextureMap->Params.Spherical.Center;
+			const lcVector4& Plane1 = TextureMap->Params.Spherical.Plane1;
+			const lcVector4& Plane2 = TextureMap->Params.Spherical.Plane2;
 			lcVector2 TexCoord;
 
 			lcVector3 VertexDir = Position - Center;
@@ -2009,10 +2009,10 @@ bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransf
 							float Length = lcLength(Normal);
 							Normal /= Length;
 
-							Map.Params[EdgeIdx].x = Normal.x / Length;
-							Map.Params[EdgeIdx].y = Normal.y / Length;
-							Map.Params[EdgeIdx].z = Normal.z / Length;
-							Map.Params[EdgeIdx].w = -lcDot(Normal, Points[0]) / Length;
+							Map.Params.Planar.Planes[EdgeIdx].x = Normal.x / Length;
+							Map.Params.Planar.Planes[EdgeIdx].y = Normal.y / Length;
+							Map.Params.Planar.Planes[EdgeIdx].z = Normal.z / Length;
+							Map.Params.Planar.Planes[EdgeIdx].w = -lcDot(Normal, Points[0]) / Length;
 						}
 					}
 					else if (!strcmp(Token, "CYLINDRICAL"))
@@ -2042,10 +2042,10 @@ bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransf
 						lcVector3 Front = lcNormalize(Points[2] - Points[1]);
 						lcVector3 Plane1Normal = Up / UpLength;
 						lcVector3 Plane2Normal = lcNormalize(lcCross(Front, Up));
-						Map.Params[0] = lcVector4(Front, -lcDot(Front, Points[1]));
-						Map.Params[1] = lcVector4(Points[1], UpLength);
-						Map.Params[2] = lcVector4(Plane1Normal, -lcDot(Plane1Normal, Points[1]));
-						Map.Params[3] = lcVector4(Plane2Normal, -lcDot(Plane2Normal, Points[1]));
+						Map.Params.Cylindrical.FrontPlane = lcVector4(Front, -lcDot(Front, Points[1]));
+						Map.Params.Cylindrical.UpLength = UpLength;
+						Map.Params.Cylindrical.Plane1 = lcVector4(Plane1Normal, -lcDot(Plane1Normal, Points[1]));
+						Map.Params.Cylindrical.Plane2 = lcVector4(Plane2Normal, -lcDot(Plane2Normal, Points[1]));
 						Map.Angle1 = 360.0f / Angle;
 					}
 					else if (!strcmp(Token, "SPHERICAL"))
@@ -2073,10 +2073,10 @@ bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransf
 						lcVector3 Front = lcNormalize(Points[1] - Points[0]);
 						lcVector3 Plane1Normal = lcNormalize(lcCross(Front, Points[2] - Points[0]));
 						lcVector3 Plane2Normal = lcNormalize(lcCross(Plane1Normal, Front));
-						Map.Params[0] = lcVector4(Front, -lcDot(Front, Points[0]));
-						Map.Params[1] = lcVector4(Points[0], 0.0f);
-						Map.Params[2] = lcVector4(Plane1Normal, -lcDot(Plane1Normal, Points[0]));
-						Map.Params[3] = lcVector4(Plane2Normal, -lcDot(Plane2Normal, Points[0]));
+						Map.Params.Spherical.FrontPlane = lcVector4(Front, -lcDot(Front, Points[0]));
+						Map.Params.Spherical.Center = Points[0];
+						Map.Params.Spherical.Plane1 = lcVector4(Plane1Normal, -lcDot(Plane1Normal, Points[0]));
+						Map.Params.Spherical.Plane2 = lcVector4(Plane2Normal, -lcDot(Plane2Normal, Points[0]));
 						Map.Angle1 = 360.0f / Angle1;
 						Map.Angle2 = 180.0f / Angle2;
 					}
@@ -2790,7 +2790,7 @@ void lcLibraryMeshData::AddTexturedLine(lcMeshDataType MeshDataType, int LineTyp
 				if (u12 < 0.5f && u13 < 0.5f && u23 < 0.5f)
 					return;
 
-				const lcVector4& Plane2 = TextureMap.Params[3];
+				const lcVector4& Plane2 = (TextureMap.Type == lcLibraryTextureMapType::CYLINDRICAL) ? TextureMap.Params.Cylindrical.Plane2 : TextureMap.Params.Spherical.Plane2;
 				float Dot1 = fabsf(lcDot(Plane2, lcVector4(Vertices[Index1], 1.0f)));
 				float Dot2 = fabsf(lcDot(Plane2, lcVector4(Vertices[Index2], 1.0f)));
 				float Dot3 = fabsf(lcDot(Plane2, lcVector4(Vertices[Index3], 1.0f)));
@@ -2845,8 +2845,8 @@ void lcLibraryMeshData::AddTexturedLine(lcMeshDataType MeshDataType, int LineTyp
 		{
 			auto CheckTexCoordsPole = [&TexCoords, &Vertices, &TextureMap](int Index1, int Index2, int Index3)
 			{
-				const lcVector4& FrontPlane = TextureMap.Params[0];
-				const lcVector4& Plane2 = TextureMap.Params[3];
+				const lcVector4& FrontPlane = TextureMap.Params.Spherical.FrontPlane;
+				const lcVector4& Plane2 = TextureMap.Params.Spherical.Plane2;
 				int PoleIndex;
 				int EdgeIndex1, EdgeIndex2;
 

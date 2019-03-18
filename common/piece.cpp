@@ -722,6 +722,14 @@ void lcPiece::MoveSelected(lcStep Step, bool AddKey, const lcVector3& Distance)
 			lcMatrix44& Transform = mControlPoints[ControlPointIndex].Transform;
 
 			Transform.SetTranslation(Transform.GetTranslation() + lcMul(Distance, InverseWorldMatrix));
+
+			lcVector3 OldCenterPosition = mModelWorld.GetTranslation();
+			lcVector3 ControlPointsCenter = OldCenterPosition + mControlPoints[0].Transform.GetTranslation();
+			for (int c = 1; c < mControlPoints.GetSize(); c++)
+				ControlPointsCenter += (mControlPoints[c].Transform.GetTranslation() - mControlPoints[c-1].Transform.GetTranslation()) / 2;
+			for (int c = 0; c < mControlPoints.GetSize(); c++)
+				mControlPoints[c].Transform.SetTranslation(mControlPoints[c].Transform.GetTranslation() - ControlPointsCenter + OldCenterPosition);
+			this->SetPosition(ControlPointsCenter, Step, AddKey);
 		}
 
 		UpdateMesh();

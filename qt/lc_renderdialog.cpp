@@ -13,7 +13,7 @@
 
 lcRenderDialog::lcRenderDialog(QWidget* Parent)
 	: QDialog(Parent),
-    ui(new Ui::lcRenderDialog)
+	ui(new Ui::lcRenderDialog)
 {
 #ifndef QT_NO_PROCESS
 	mProcess = nullptr;
@@ -168,7 +168,9 @@ void lcRenderDialog::on_RenderButton_clicked()
 #endif
 
 	mProcess = new QProcess(this);
+#ifdef Q_OS_LINUX
 	connect(mProcess, SIGNAL(readyReadStandardError()), this, SLOT(ReadStdErr()));
+#endif
 	mProcess->start(POVRayPath, Arguments);
 
 	if (mProcess->waitForStarted())
@@ -189,6 +191,7 @@ void lcRenderDialog::ReadStdErr()
 {
 	QString StdErr = QString(mProcess->readAllStandardError());
 	mStdErrList.append(StdErr);
+#ifdef Q_OS_LINUX
 	QRegExp RegexPovRayProgress("Rendered (\\d+) of (\\d+) pixels.*");
 	RegexPovRayProgress.setCaseSensitivity(Qt::CaseInsensitive);
 	if (RegexPovRayProgress.indexIn(StdErr) == 0)
@@ -196,6 +199,7 @@ void lcRenderDialog::ReadStdErr()
 		ui->RenderProgress->setMaximum(RegexPovRayProgress.cap(2).toInt());
 		ui->RenderProgress->setValue(RegexPovRayProgress.cap(1).toInt());
 	}
+#endif
 }
 
 void lcRenderDialog::Update()
@@ -267,6 +271,11 @@ void lcRenderDialog::Update()
 
 	Header->PixelsRead = PixelsWritten;
 
+	ui->RenderProgress->setMaximum(mImage.width() * mImage.height());
+	ui->RenderProgress->setValue(int(Header->PixelsRead));
+
+	ui->preview->setPixmap(QPixmap::fromImage(mImage.scaled(LC_POVRAY_PREVIEW_WIDTH, LC_POVRAY_PREVIEW_HEIGHT, Qt::KeepAspectRatio, Qt::SmoothTransformation)));
+
 	if (PixelsWritten == Width * Height)
 		ShowResult();
 #endif
@@ -277,8 +286,10 @@ void lcRenderDialog::ShowResult()
 	ReadStdErr();
 	ui->RenderProgress->setValue(ui->RenderProgress->maximum());
 
-	if (mProcess->exitStatus() != QProcess::NormalExit || mProcess->exitCode() != 0)
+	bool Error = (mProcess->exitStatus() != QProcess::NormalExit || mProcess->exitCode() != 0);
+	if (Error)
 	{
+		WriteStdLog(Error);
 		QMessageBox error;
 		error.setWindowTitle(tr("Error"));
 		error.setIcon(QMessageBox::Critical);
@@ -300,6 +311,24 @@ void lcRenderDialog::ShowResult()
 
 		if (!Result)
 			QMessageBox::information(this, tr("Error"), tr("Error writing to file '%1':\n%2").arg(FileName, Writer.errorString()));
+	}
+
+	WriteStdLog();
+}
+
+void lcRenderDialog::WriteStdLog(bool Error){
+	QFile LogFile(QDir::toNativeSeparators(
+		QFileInfo(lcGetActiveProject()->GetFileName()).absolutePath() + "/" +
+		(Error ? "stderr-povrayrender" : "stdout-povrayrender")));
+	if (LogFile.open(QFile::WriteOnly | QIODevice::Truncate | QFile::Text)) {
+		QTextStream out(&LogFile);
+		foreach (QString line, mStdErrList) {
+			out << line;
+		}
+		LogFile.close();
+	} else {
+		QMessageBox::information(this, tr("Error"), tr("Error writing to %1 file '%2':\n%3")
+			.arg(Error ? "stderr" : "stdout").arg(LogFile.fileName(), LogFile.errorString()));
 	}
 }
 

@@ -22,6 +22,7 @@ public slots:
 
 protected slots:
 	void ReadStdErr();
+	void WriteStdLog(bool = false);
 
 protected:
 	QString GetOutputFileName() const;

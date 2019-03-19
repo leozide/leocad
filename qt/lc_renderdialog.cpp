@@ -316,17 +316,24 @@ void lcRenderDialog::ShowResult()
 	WriteStdLog();
 }
 
-void lcRenderDialog::WriteStdLog(bool Error){
-	QFile LogFile(QDir::toNativeSeparators(
-		QFileInfo(lcGetActiveProject()->GetFileName()).absolutePath() + "/" +
-		(Error ? "stderr-povrayrender" : "stdout-povrayrender")));
-	if (LogFile.open(QFile::WriteOnly | QIODevice::Truncate | QFile::Text)) {
-		QTextStream out(&LogFile);
-		foreach (QString line, mStdErrList) {
-			out << line;
-		}
+void lcRenderDialog::WriteStdLog(bool Error)
+{
+	QString FileName = lcGetActiveProject()->GetFileName();
+	if (FileName.isEmpty())
+		return;
+
+	QFile LogFile(QDir::toNativeSeparators(QFileInfo(FileName).absolutePath() + "/" +
+				  (Error ? "stderr-povrayrender" : "stdout-povrayrender")));
+
+	if (LogFile.open(QFile::WriteOnly | QIODevice::Truncate | QFile::Text))
+	{
+		QTextStream Out(&LogFile);
+		for (const QString& Line : mStdErrList)
+			Out << Line;
 		LogFile.close();
-	} else {
+	}
+	else
+	{
 		QMessageBox::information(this, tr("Error"), tr("Error writing to %1 file '%2':\n%3")
 			.arg(Error ? "stderr" : "stdout").arg(LogFile.fileName(), LogFile.errorString()));
 	}

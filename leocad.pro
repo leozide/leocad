@@ -69,7 +69,7 @@ APPVEYOR_REPO_COMMIT = $$(APPVEYOR_REPO_COMMIT)
 	DEFINES += "LC_CONTINUOUS_BUILD=$$system(git rev-parse --short HEAD)"
 }
 
-TSFILES = resources/leocad_fr.ts resources/leocad_pt.ts resources/leocad_de.ts
+TSFILES = resources/leocad_fr.ts resources/leocad_pt.ts resources/leocad_de.ts resources/leocad_uk.ts
 lrelease.input = TSFILES
 lrelease.output = ${QMAKE_FILE_PATH}/${QMAKE_FILE_BASE}.qm
 lrelease.commands = $$QMAKE_LRELEASE -silent ${QMAKE_FILE_IN} -qm ${QMAKE_FILE_PATH}/${QMAKE_FILE_BASE}.qm
@@ -286,6 +286,6 @@ FORMS += \
 OTHER_FILES += 
 RESOURCES += leocad.qrc
 
-!win32 { 
-    TRANSLATIONS = resources/leocad_pt.ts resources/leocad_fr.ts resources/leocad_de.ts
+!win32 {
+    TRANSLATIONS = resources/leocad_pt.ts resources/leocad_fr.ts resources/leocad_de.ts resources/leocad_uk.ts
 }

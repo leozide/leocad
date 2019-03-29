@@ -58,9 +58,10 @@ void lcLight::CreateName(const lcArray<lcLight*>& Lights)
 	if (m_strName[0])
 	{
 		bool Found = false;
-		for (int LightIdx = 0; LightIdx < Lights.GetSize(); LightIdx++)
+
+		for (lcLight* Light : Lights)
 		{
-			if (!strcmp(Lights[LightIdx]->m_strName, m_strName))
+			if (!strcmp(Light->m_strName, m_strName))
 			{
 				Found = true;
 				break;
@@ -73,13 +74,11 @@ void lcLight::CreateName(const lcArray<lcLight*>& Lights)
 
 	int i, max = 0;
 
-	for (int LightIdx = 0; LightIdx < Lights.GetSize(); LightIdx++)
+	for (lcLight* Light : Lights)
 	{
-		lcLight* pLight = Lights[LightIdx];
-
-		if (strncmp(pLight->m_strName, "Light ", 6) == 0)
+		if (strncmp(Light->m_strName, "Light ", 6) == 0)
 		{
-			if (sscanf(pLight->m_strName + 6, " #%d", &i) == 1)
+			if (sscanf(Light->m_strName + 6, " #%d", &i) == 1)
 			{
 				if (i > max)
 					max = i;

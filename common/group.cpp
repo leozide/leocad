@@ -30,9 +30,9 @@ void lcGroup::CreateName(const lcArray<lcGroup*>& Groups)
 	if (!mName.isEmpty())
 	{
 		bool Found = false;
-		for (int GroupIdx = 0; GroupIdx < Groups.GetSize(); GroupIdx++)
+		for (lcGroup* Group : Groups)
 		{
-			if (Groups[GroupIdx]->mName == mName)
+			if (Group->mName == mName)
 			{
 				Found = true;
 				break;
@@ -47,9 +47,9 @@ void lcGroup::CreateName(const lcArray<lcGroup*>& Groups)
 	QString Prefix = QApplication::tr("Group #");
 	int Length = Prefix.length();
 
-	for (int GroupIdx = 0; GroupIdx < Groups.GetSize(); GroupIdx++)
+	for (lcGroup* Group : Groups)
 	{
-		const QString& Name = Groups[GroupIdx]->mName;
+		const QString& Name = Group->mName;
 
 		if (Name.startsWith(Prefix))
 		{

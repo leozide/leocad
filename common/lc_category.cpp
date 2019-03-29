@@ -139,11 +139,8 @@ bool lcSaveCategories(QTextStream& Stream, const lcArray<lcLibraryCategory>& Cat
 {
 	QString Format("%1=%2\r\n");
 
-	for (int CategoryIdx = 0; CategoryIdx < Categories.GetSize(); CategoryIdx++)
-	{
-		const lcLibraryCategory& Category = Categories[CategoryIdx];
+	for (const lcLibraryCategory& Category : Categories)
 		Stream << Format.arg(Category.Name, QString::fromLatin1(Category.Keywords));
-	}
 
 	Stream.flush();
 

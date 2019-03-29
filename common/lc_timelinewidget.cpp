@@ -114,10 +114,8 @@ void lcTimelineWidget::Update(bool Clear, bool UpdateItems)
 	int PieceItemIndex = 0;
 	lcStep Step = 0;
 
-	for (int PieceIdx = 0; PieceIdx != Pieces.GetSize(); PieceIdx++)
+	for (lcPiece* Piece : Pieces)
 	{
-		lcPiece* Piece = Pieces[PieceIdx];
-
 		while (Step != Piece->GetStepShow())
 		{
 			if (StepItem)

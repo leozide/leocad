@@ -173,10 +173,8 @@ void lcQSelectDialog::AddChildren(QTreeWidgetItem* ParentItem, lcGroup* ParentGr
 {
 	const lcArray<lcGroup*>& Groups = Model->GetGroups();
 
-	for (int GroupIdx = 0; GroupIdx < Groups.GetSize(); GroupIdx++)
+	for (lcGroup* Group : Groups)
 	{
-		lcGroup* Group = Groups[GroupIdx];
-
 		if (Group->mGroup != ParentGroup)
 			continue;
 
@@ -188,10 +186,8 @@ void lcQSelectDialog::AddChildren(QTreeWidgetItem* ParentItem, lcGroup* ParentGr
 	const lcArray<lcPiece*>& Pieces = Model->GetPieces();
 	lcStep currentStep = Model->GetCurrentStep();
 
-	for (int PieceIdx = 0; PieceIdx < Pieces.GetSize(); PieceIdx++)
+	for (lcPiece* Piece : Pieces)
 	{
-		lcPiece* Piece = Pieces[PieceIdx];
-
 		if (Piece->GetGroup() != ParentGroup || !Piece->IsVisible(currentStep))
 			continue;
 
@@ -204,10 +200,8 @@ void lcQSelectDialog::AddChildren(QTreeWidgetItem* ParentItem, lcGroup* ParentGr
 	{
 		const lcArray<lcCamera*>& Cameras = Model->GetCameras();
 
-		for (int CameraIdx = 0; CameraIdx < Cameras.GetSize(); CameraIdx++)
+		for (lcCamera* Camera : Cameras)
 		{
-			lcCamera* Camera = Cameras[CameraIdx];
-
 			if (!Camera->IsVisible())
 				continue;
 
@@ -218,10 +212,8 @@ void lcQSelectDialog::AddChildren(QTreeWidgetItem* ParentItem, lcGroup* ParentGr
 
 		const lcArray<lcLight*>& Lights = Model->GetLights();
 
-		for (int LightIdx = 0; LightIdx < Lights.GetSize(); LightIdx++)
+		for (lcLight* Light : Lights)
 		{
-			lcLight* Light = Lights[LightIdx];
-
 			if (!Light->IsVisible())
 				continue;
 

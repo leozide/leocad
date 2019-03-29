@@ -33,14 +33,14 @@ void lcScene::End()
 		return mRenderMeshes[Index1].Mesh <  mRenderMeshes[Index2].Mesh;
 	};
 
-	std::sort(&mOpaqueMeshes[0], &mOpaqueMeshes[0] + mOpaqueMeshes.GetSize(), OpaqueMeshCompare);
+	std::sort(mOpaqueMeshes.begin(), mOpaqueMeshes.end(), OpaqueMeshCompare);
 
 	auto TranslucentMeshCompare = [this](int Index1, int Index2)
 	{
 		return mRenderMeshes[Index1].Distance <  mRenderMeshes[Index2].Distance;
 	};
 
-	std::sort(&mTranslucentMeshes[0], &mTranslucentMeshes[0] + mTranslucentMeshes.GetSize(), TranslucentMeshCompare);
+	std::sort(mTranslucentMeshes.begin(), mTranslucentMeshes.end(), TranslucentMeshCompare);
 }
 
 void lcScene::AddMesh(lcMesh* Mesh, const lcMatrix44& WorldMatrix, int ColorIndex, lcRenderMeshState State, int Flags)

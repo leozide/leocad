@@ -868,7 +868,7 @@ void lcMainWindow::ClipboardChanged()
 	const QMimeData* MimeData = QApplication::clipboard()->mimeData();
 	QByteArray ClipboardData;
 
-	if (MimeData->hasFormat(MimeType))
+	if (MimeData && MimeData->hasFormat(MimeType))
 		ClipboardData = MimeData->data(MimeType);
 
 	gApplication->SetClipboard(ClipboardData);

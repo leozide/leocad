@@ -104,6 +104,7 @@ unix:!macx {
 	isEmpty(DESKTOP_DIR):DESKTOP_DIR = $$INSTALL_PREFIX/share/applications
 	isEmpty(MIME_DIR):MIME_DIR = $$INSTALL_PREFIX/share/mime/packages
 	isEmpty(MIME_ICON_DIR):MIME_ICON_DIR = $$INSTALL_PREFIX/share/icons/hicolor/scalable/mimetypes
+	isEmpty(APPDATA_DIR):ICON_DIR = $$INSTALL_PREFIX/share/metainfo
 
 	target.path = $$BIN_DIR
 	docs.path = $$DOCS_DIR
@@ -118,8 +119,10 @@ unix:!macx {
 	mime.files = qt/leocad.xml
 	mime_icon.path = $$MIME_ICON_DIR
 	mime_icon.files = resources/application-vnd.leocad.svg
-
-	INSTALLS += target docs man desktop icon mime mime_icon
+	appdata.path = $$APPDATA_DIR
+	appdata.files = tools/setup/leocad.appdata.xml
+	
+	INSTALLS += target docs man desktop icon mime mime_icon appdata
 
 	!isEmpty(DISABLE_UPDATE_CHECK) {
 		DEFINES += LC_DISABLE_UPDATE_CHECK=$$DISABLE_UPDATE_CHECK

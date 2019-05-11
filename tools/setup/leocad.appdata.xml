@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+	<id>leocad</id>
+	<metadata_license>GPL-2.0</metadata_license>
+	<project_license>GPL-2.0</project_license>
+	<name>LeoCAD</name>
+	<summary>Design virtual models you can build with LEGO bricks</summary>
+	<description>
+		<p>LeoCAD is a CAD program for creating virtual LEGO models. It's available for free under the GNU Public License v2 and works on the Windows, Linux and macOS Operating Systems.</p>
+	</description>
+	<launchable type="desktop-id">leocad.desktop</launchable>
+	<url type="homepage">https://leocad.org/</url>
+	<screenshots>
+		<screenshot type="default">
+			<image>https://www.leocad.org/towerbridge.png</image>
+		</screenshot>
+	</screenshots>
+	<provides>
+		<id>leocad.desktop</id>
+	</provides>
+</component>

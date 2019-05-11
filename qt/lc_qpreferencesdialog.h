@@ -49,6 +49,7 @@ public slots:
 	void on_shortcutsExport_clicked();
 	void on_shortcutsReset_clicked();
 	void commandChanged(QTreeWidgetItem *current);
+	void on_KeyboardFilterEdit_textEdited(const QString& Text);
 	void on_mouseAssign_clicked();
 	void on_mouseRemove_clicked();
 	void on_mouseReset_clicked();

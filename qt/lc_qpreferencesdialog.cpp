@@ -630,6 +630,39 @@ void lcQPreferencesDialog::commandChanged(QTreeWidgetItem *current)
 	ui->shortcutEdit->setText(key.toString(QKeySequence::NativeText));
 }
 
+void lcQPreferencesDialog::on_KeyboardFilterEdit_textEdited(const QString& Text)
+{
+	if (Text.isEmpty())
+	{
+		std::function<void(QTreeWidgetItem*)> ShowItems = [&ShowItems](QTreeWidgetItem* ParentItem)
+		{
+			for (int ChildIdx = 0; ChildIdx < ParentItem->childCount(); ChildIdx++)
+				ShowItems(ParentItem->child(ChildIdx));
+
+			ParentItem->setHidden(false);
+		};
+
+		ShowItems(ui->commandList->invisibleRootItem());
+	}
+	else
+	{
+		std::function<bool(QTreeWidgetItem*,bool)> ShowItems = [&ShowItems, &Text](QTreeWidgetItem* ParentItem, bool ForceVisible)
+		{
+			ForceVisible |= ParentItem->text(0).contains(Text, Qt::CaseInsensitive) | ParentItem->text(1).contains(Text, Qt::CaseInsensitive);
+			bool Visible = ForceVisible;
+
+			for (int ChildIdx = 0; ChildIdx < ParentItem->childCount(); ChildIdx++)
+				Visible |= ShowItems(ParentItem->child(ChildIdx), ForceVisible);
+
+			ParentItem->setHidden(!Visible);
+
+			return Visible;
+		};
+
+		ShowItems(ui->commandList->invisibleRootItem(), false);
+	}
+}
+
 void lcQPreferencesDialog::on_shortcutAssign_clicked()
 {
     QTreeWidgetItem *current = ui->commandList->currentItem();

@@ -570,6 +570,10 @@ void lcPartSelectionListView::UpdateViewMode()
 void lcPartSelectionListView::SetIconSize(int Size)
 {
 	setIconSize(QSize(Size, Size));
+	int Width = Size + 2 * frameWidth() + 6;
+	if (verticalScrollBar())
+		Width += verticalScrollBar()->sizeHint().width();
+	setMinimumWidth(Width);
 	lcSetProfileInt(LC_PROFILE_PARTS_LIST_ICONS, Size);
 	mListModel->SetIconSize(Size);
 	UpdateViewMode();

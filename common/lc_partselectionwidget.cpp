@@ -570,13 +570,17 @@ void lcPartSelectionListView::UpdateViewMode()
 void lcPartSelectionListView::SetIconSize(int Size)
 {
 	setIconSize(QSize(Size, Size));
-	int Width = Size + 2 * frameWidth() + 6;
-	if (verticalScrollBar())
-		Width += verticalScrollBar()->sizeHint().width();
-	setMinimumWidth(Width);
 	lcSetProfileInt(LC_PROFILE_PARTS_LIST_ICONS, Size);
 	mListModel->SetIconSize(Size);
 	UpdateViewMode();
+
+	int Width = Size + 2 * frameWidth() + 6;
+	if (verticalScrollBar())
+		Width += verticalScrollBar()->sizeHint().width();
+	int Height = Size + 2 * frameWidth() + 2;
+	if (horizontalScrollBar())
+		Height += horizontalScrollBar()->sizeHint().height();
+	setMinimumSize(Width, Height);
 }
 
 void lcPartSelectionListView::startDrag(Qt::DropActions SupportedActions)

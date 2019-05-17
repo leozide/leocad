@@ -104,7 +104,7 @@ unix:!macx {
 	isEmpty(DESKTOP_DIR):DESKTOP_DIR = $$INSTALL_PREFIX/share/applications
 	isEmpty(MIME_DIR):MIME_DIR = $$INSTALL_PREFIX/share/mime/packages
 	isEmpty(MIME_ICON_DIR):MIME_ICON_DIR = $$INSTALL_PREFIX/share/icons/hicolor/scalable/mimetypes
-	isEmpty(APPDATA_DIR):ICON_DIR = $$INSTALL_PREFIX/share/metainfo
+    isEmpty(APPDATA_DIR):APPDATA_DIR = $$INSTALL_PREFIX/share/metainfo
 
 	target.path = $$BIN_DIR
 	docs.path = $$DOCS_DIR

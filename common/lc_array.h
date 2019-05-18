@@ -120,11 +120,11 @@ public:
 			mGrow = Grow;
 	}
 
-	void AllocGrow(int Grow)
+	void AllocGrow(size_t Grow)
 	{
 		if ((mLength + Grow) > mAlloc)
 		{
-			int NewSize = ((mLength + Grow + mGrow - 1) / mGrow) * mGrow;
+			size_t NewSize = ((mLength + Grow + mGrow - 1) / mGrow) * mGrow;
 			T* NewData = new T[NewSize];
 
 			for (int i = 0; i < mLength; i++)
@@ -263,7 +263,7 @@ public:
 protected:
 	T* mData;
 	int mLength;
-	int mAlloc;
+	size_t mAlloc;
 	int mGrow;
 };
 

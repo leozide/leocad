@@ -783,7 +783,7 @@ void lcPiecesLibrary::ReadDirectoryDescriptions(const QFileInfoList (&FileLists)
 	ProgressDialog->setWindowFlags(ProgressDialog->windowFlags() & ~Qt::WindowCloseButtonHint);
 	ProgressDialog->setWindowTitle(tr("Initializing"));
 	ProgressDialog->setLabelText(tr("Loading Parts Library"));
-	ProgressDialog->setMaximum(mPieces.size());
+	ProgressDialog->setMaximum((int)mPieces.size());
 	ProgressDialog->setMinimum(0);
 	ProgressDialog->setValue(0);
 	ProgressDialog->setCancelButton(nullptr);
@@ -814,11 +814,11 @@ void lcPiecesLibrary::ReadDirectoryDescriptions(const QFileInfoList (&FileLists)
 
 	if (Modified)
 	{
-		lcMemFile IndexFile;
+		lcMemFile NewIndexFile;
 
-		IndexFile.WriteQString(mLibraryDir.absolutePath());
+		NewIndexFile.WriteQString(mLibraryDir.absolutePath());
 
-		IndexFile.WriteU32(mPieces.size());
+		NewIndexFile.WriteU32((quint32)mPieces.size());
 
 		std::vector<PieceInfo*> SortedPieces;
 		SortedPieces.reserve(mPieces.size());
@@ -834,14 +834,14 @@ void lcPiecesLibrary::ReadDirectoryDescriptions(const QFileInfoList (&FileLists)
 
 		for (const PieceInfo* Info : SortedPieces)
 		{
-			if (IndexFile.WriteBuffer(Info->mFileName, strlen(Info->mFileName) + 1) == 0)
+			if (NewIndexFile.WriteBuffer(Info->mFileName, strlen(Info->mFileName) + 1) == 0)
 				return;
 
-			if (IndexFile.WriteBuffer(Info->m_strDescription, strlen(Info->m_strDescription) + 1) == 0)
+			if (NewIndexFile.WriteBuffer(Info->m_strDescription, strlen(Info->m_strDescription) + 1) == 0)
 				return;
 
-			IndexFile.WriteU32(Info->mFlags);
-			IndexFile.WriteU8(Info->mFolderType);
+			NewIndexFile.WriteU32(Info->mFlags);
+			NewIndexFile.WriteU8(Info->mFolderType);
 
 #if (QT_VERSION >= QT_VERSION_CHECK(4, 7, 0))
 			quint64 FileTime = FileLists[Info->mFolderType][Info->mFolderIndex].lastModified().toMSecsSinceEpoch();
@@ -849,10 +849,10 @@ void lcPiecesLibrary::ReadDirectoryDescriptions(const QFileInfoList (&FileLists)
 			quint64 FileTime = FileLists[Info->mFolderType][Info->mFolderIndex].lastModified().toTime_t();
 #endif
 
-			IndexFile.WriteU64(FileTime);
+			NewIndexFile.WriteU64(FileTime);
 		}
 
-		WriteDirectoryCacheFile(IndexFileName, IndexFile);
+		WriteDirectoryCacheFile(IndexFileName, NewIndexFile);
 	}
 }
 
@@ -1062,7 +1062,7 @@ bool lcPiecesLibrary::WriteDirectoryCacheFile(const QString& FileName, lcMemFile
 	if (File.write((char*)&UncompressedSize, sizeof(UncompressedSize)) == -1)
 		return false;
 
-	File.write(qCompress(CacheFile.mBuffer, CacheFile.GetLength()));
+	File.write(qCompress(CacheFile.mBuffer, (int)CacheFile.GetLength()));
 
 	return true;
 }
@@ -1100,7 +1100,7 @@ bool lcPiecesLibrary::SaveArchiveCacheIndex(const QString& FileName)
 {
 	lcMemFile IndexFile;
 
-	quint32 NumFiles = mPieces.size();
+	quint32 NumFiles = (quint32)mPieces.size();
 
 	if (IndexFile.WriteBuffer((char*)&NumFiles, sizeof(NumFiles)) == 0)
 		return false;

@@ -71,7 +71,7 @@ lcQPropertiesDialog::lcQPropertiesDialog(QWidget *parent, void *data) :
 
 	QTableWidget *table = ui->partsTable;
 	table->setColumnCount(NumColors + 2);
-	table->setRowCount(PartsList.size() + 1);
+	table->setRowCount((int)PartsList.size() + 1);
 	table->setHorizontalHeaderLabels(horizontalLabels);
 
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
@@ -80,8 +80,8 @@ lcQPropertiesDialog::lcQPropertiesDialog(QWidget *parent, void *data) :
 	table->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
 #endif
 
-	QVector<int> InfoTotals(PartsList.size());
-	QVector<int> ColorTotals(NumColors);
+	std::vector<int> InfoTotals(PartsList.size());
+	std::vector<int> ColorTotals(NumColors);
 	int Row = 0, Total = 0;
 
 	for (const auto& PartIt : PartsList)
@@ -105,7 +105,7 @@ lcQPropertiesDialog::lcQPropertiesDialog(QWidget *parent, void *data) :
 		Row++;
 	}
 
-	table->setItem(InfoTotals.size(), 0, new QTableWidgetItem(tr("Total")));
+	table->setItem((int)InfoTotals.size(), 0, new QTableWidgetItem(tr("Total")));
 
 	for (Row = 0; Row < InfoTotals.size(); Row++)
 	{
@@ -118,12 +118,12 @@ lcQPropertiesDialog::lcQPropertiesDialog(QWidget *parent, void *data) :
 	{
 		QTableWidgetItem *item = new QTableWidgetItem(QString::number(ColorTotals[colorIdx]));
 		item->setTextAlignment(Qt::AlignCenter);
-		table->setItem(InfoTotals.size(), colorIdx + 1, item);
+		table->setItem((int)InfoTotals.size(), colorIdx + 1, item);
 	}
 
 	QTableWidgetItem *item = new QTableWidgetItem(QString::number(Total));
 	item->setTextAlignment(Qt::AlignCenter);
-	table->setItem(InfoTotals.size(), NumColors + 1, item);
+	table->setItem((int)InfoTotals.size(), NumColors + 1, item);
 }
 
 lcQPropertiesDialog::~lcQPropertiesDialog()

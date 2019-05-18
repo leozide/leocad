@@ -192,11 +192,11 @@ QString Project::GetNewModelName(QWidget* ParentWidget, const QString& DialogTit
 
 		for (int ModelIdx = 0; ModelIdx < ExistingModels.size(); ModelIdx++)
 		{
-			const QString& Name = ExistingModels[ModelIdx];
+			const QString& ExistingName = ExistingModels[ModelIdx];
 
-			if (Name.startsWith(Prefix))
+			if (ExistingName.startsWith(Prefix))
 			{
-				QString NumberString = Name.mid(Prefix.length());
+				QString NumberString = ExistingName.mid(Prefix.length());
 				QTextStream Stream(&NumberString);
 				int Number;
 				Stream >> Number;
@@ -552,18 +552,13 @@ bool Project::ImportLDD(const QString& FileName)
 		Model->SetSaved();
 	}
 	else
-		delete Model;
-
-	if (mModels.IsEmpty())
-		return false;
-
-	if (mModels.GetSize() == 1)
 	{
-		lcModel* Model = mModels[0];
-
-		if (Model->GetProperties().mName.isEmpty())
-			Model->SetName(QFileInfo(FileName).completeBaseName());
+		delete Model;
+		return false;
 	}
+
+	if (Model->GetProperties().mName.isEmpty())
+		Model->SetName(QFileInfo(FileName).completeBaseName());
 
 	for (int ModelIdx = 0; ModelIdx < mModels.GetSize(); ModelIdx++)
 		mModels[ModelIdx]->CreatePieceInfo(this);
@@ -593,18 +588,13 @@ bool Project::ImportInventory(const QByteArray& Inventory, const QString& Name, 
 		Model->SetSaved();
 	}
 	else
-		delete Model;
-
-	if (mModels.IsEmpty())
-		return false;
-
-	if (mModels.GetSize() == 1)
 	{
-		lcModel* Model = mModels[0];
-
-		Model->SetName(Name);
-		Model->SetDescription(Description);
+		delete Model;
+		return false;
 	}
+
+	Model->SetName(Name);
+	Model->SetDescription(Description);
 
 	for (int ModelIdx = 0; ModelIdx < mModels.GetSize(); ModelIdx++)
 		mModels[ModelIdx]->CreatePieceInfo(this);
@@ -1670,10 +1660,10 @@ QImage Project::CreatePartsListImage(lcModel* Model, lcStep Step)
 		CurrentHeight += NextHeightIncrease;
 	}
 
-	QImage Image(MaxWidth + 40, CurrentHeight + 40, QImage::Format_ARGB32);
-	Image.fill(QColor(255, 255, 255, 0));
+	QImage PainterImage(MaxWidth + 40, CurrentHeight + 40, QImage::Format_ARGB32);
+	PainterImage.fill(QColor(255, 255, 255, 0));
 
-	QPainter Painter(&Image);
+	QPainter Painter(&PainterImage);
 	Painter.setFont(Font);
 
 	for (lcPartsListImage& Image : Images)
@@ -1685,7 +1675,7 @@ QImage Project::CreatePartsListImage(lcModel* Model, lcStep Step)
 
 	Painter.end();
 
-	return Image;
+	return PainterImage;
 }
 
 void Project::CreateHTMLPieceList(QTextStream& Stream, lcModel* Model, lcStep Step, bool Images)

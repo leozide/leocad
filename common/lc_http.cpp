@@ -18,8 +18,7 @@ void lcHttpReply::run()
 	HINTERNET Session = nullptr;
 	HINTERNET Request = nullptr;
 
-	if (sizeof(wchar_t) != sizeof(QChar))
-		return;
+	static_assert(sizeof(wchar_t) == sizeof(QChar), "Character size mismatch");
 
 	Session = InternetOpen(L"LeoCAD", INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
 	if (!Session)

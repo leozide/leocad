@@ -179,18 +179,18 @@ bool lcMouseShortcuts::Save(QStringList& Shortcuts)
 	return true;
 }
 
-bool lcMouseShortcuts::Load(const QStringList& Shortcuts)
+bool lcMouseShortcuts::Load(const QStringList& FullShortcuts)
 {
 	memset(mShortcuts, 0, sizeof(mShortcuts));
 
-	for (const QString& Shortcut : Shortcuts)
+	for (const QString& FullShortcut : FullShortcuts)
 	{
-		int Equals = Shortcut.indexOf('=');
+		int Equals = FullShortcut.indexOf('=');
 
 		if (Equals == -1)
 			continue;
 
-		QString Key = Shortcut.left(Equals);
+		QString Key = FullShortcut.left(Equals);
 
 		int ToolIdx;
 		for (ToolIdx = 0; ToolIdx < LC_NUM_TOOLS; ToolIdx++)
@@ -200,7 +200,7 @@ bool lcMouseShortcuts::Load(const QStringList& Shortcuts)
 		if (ToolIdx == LC_NUM_TOOLS)
 			continue;
 
-		QStringList Shortcuts = Shortcut.mid(Equals + 1).split(',');
+		QStringList Shortcuts = FullShortcut.mid(Equals + 1).split(',');
 		bool AddedShortcut = false;
 
 		for (const QString& Shortcut : Shortcuts)

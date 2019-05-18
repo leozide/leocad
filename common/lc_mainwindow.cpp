@@ -1192,8 +1192,8 @@ void lcMainWindow::SetSelectionMode(lcSelectionMode SelectionMode)
 
 QByteArray lcMainWindow::GetTabLayout()
 {
-	QByteArray TabLayout;
-	QDataStream DataStream(&TabLayout, QIODevice::WriteOnly);
+	QByteArray TabLayoutData;
+	QDataStream DataStream(&TabLayoutData, QIODevice::WriteOnly);
 
 	DataStream << (quint32)LC_TAB_LAYOUT_VERSION;
 	qint32 NumTabs = mModelTabWidget->count();
@@ -1249,7 +1249,7 @@ QByteArray lcMainWindow::GetTabLayout()
 		SaveWidget(TabLayout->itemAt(0)->widget());
 	}
 
-	return TabLayout;
+	return TabLayoutData;
 }
 
 void lcMainWindow::RestoreTabLayout(const QByteArray& TabLayout)

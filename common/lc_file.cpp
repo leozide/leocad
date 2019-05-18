@@ -19,7 +19,7 @@ lcMemFile::~lcMemFile()
 	Close();
 }
 
-void lcMemFile::Seek(long Offset, int From)
+void lcMemFile::Seek(qint64 Offset, int From)
 {
 	if (From == SEEK_SET)
 		mPosition = Offset;

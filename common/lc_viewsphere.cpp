@@ -328,11 +328,11 @@ std::bitset<6> lcViewSphere::GetIntersectionFlags(lcVector3& Intersection) const
 		{
 			for (int Axis1Idx = 0; Axis1Idx < 6; Axis1Idx++)
 			{
-				lcVector3 Point(0.0f, 0.0f, 0.0f);
+				lcVector3 Point1(0.0f, 0.0f, 0.0f);
 
-				Point[Axis1Idx / 2] = Axis1Idx % 2 ? -1.0f : 1.0f;
+				Point1[Axis1Idx / 2] = Axis1Idx % 2 ? -1.0f : 1.0f;
 
-				if (lcLengthSquared(Point - Intersection) < mHighlightRadius * mHighlightRadius)
+				if (lcLengthSquared(Point1 - Intersection) < mHighlightRadius * mHighlightRadius)
 				{
 					IntersectionFlags.set(Axis1Idx);
 					return;
@@ -343,11 +343,11 @@ std::bitset<6> lcViewSphere::GetIntersectionFlags(lcVector3& Intersection) const
 					if (Axis1Idx / 2 == Axis2Idx / 2)
 						continue;
 
-					lcVector3 Point(0.0f, 0.0f, 0.0f);
-					Point[Axis1Idx / 2] = Axis1Idx % 2 ? -0.70710678118f : 0.70710678118f;
-					Point[Axis2Idx / 2] = Axis2Idx % 2 ? -0.70710678118f : 0.70710678118f;
+					lcVector3 Point2(0.0f, 0.0f, 0.0f);
+					Point2[Axis1Idx / 2] = Axis1Idx % 2 ? -0.70710678118f : 0.70710678118f;
+					Point2[Axis2Idx / 2] = Axis2Idx % 2 ? -0.70710678118f : 0.70710678118f;
 
-					if (lcLengthSquared(Point - Intersection) < mHighlightRadius * mHighlightRadius)
+					if (lcLengthSquared(Point2 - Intersection) < mHighlightRadius * mHighlightRadius)
 					{
 						IntersectionFlags.set(Axis1Idx);
 						IntersectionFlags.set(Axis2Idx);
@@ -359,12 +359,12 @@ std::bitset<6> lcViewSphere::GetIntersectionFlags(lcVector3& Intersection) const
 						if (Axis1Idx / 2 == Axis3Idx / 2 || Axis2Idx / 2 == Axis3Idx / 2)
 							continue;
 
-						lcVector3 Point(0.0f, 0.0f, 0.0f);
-						Point[Axis1Idx / 2] = Axis1Idx % 2 ? -0.57735026919f : 0.57735026919f;
-						Point[Axis2Idx / 2] = Axis2Idx % 2 ? -0.57735026919f : 0.57735026919f;
-						Point[Axis3Idx / 2] = Axis3Idx % 2 ? -0.57735026919f : 0.57735026919f;
+						lcVector3 Point3(0.0f, 0.0f, 0.0f);
+						Point3[Axis1Idx / 2] = Axis1Idx % 2 ? -0.57735026919f : 0.57735026919f;
+						Point3[Axis2Idx / 2] = Axis2Idx % 2 ? -0.57735026919f : 0.57735026919f;
+						Point3[Axis3Idx / 2] = Axis3Idx % 2 ? -0.57735026919f : 0.57735026919f;
 
-						if (lcLengthSquared(Point - Intersection) < mHighlightRadius * mHighlightRadius)
+						if (lcLengthSquared(Point3 - Intersection) < mHighlightRadius * mHighlightRadius)
 						{
 							IntersectionFlags.set(Axis1Idx);
 							IntersectionFlags.set(Axis2Idx);

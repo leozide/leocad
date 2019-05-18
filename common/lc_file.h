@@ -19,7 +19,7 @@ public:
 	}
 
 	virtual long GetPosition() const = 0;
-	virtual void Seek(long Offset, int From) = 0;
+	virtual void Seek(qint64 Offset, int From) = 0;
 	virtual size_t GetLength() const = 0;
 
 	virtual void Close() = 0;
@@ -457,7 +457,7 @@ public:
 	virtual ~lcMemFile();
 
 	long GetPosition() const override;
-	void Seek(long Offset, int From) override;
+	void Seek(qint64 Offset, int From) override;
 	void SetLength(size_t NewLength);
 	size_t GetLength() const override;
 
@@ -503,7 +503,7 @@ public:
 		return mFile.pos();
 	}
 
-	void Seek(long Offset, int From) override
+	void Seek(qint64 Offset, int From) override
 	{
 		switch (From)
 		{

@@ -18,6 +18,8 @@ lcStringCache::~lcStringCache()
 
 void lcStringCache::AddRef(lcContext* Context)
 {
+	Q_UNUSED(Context);
+
 	mRefCount++;
 
 	if (mRefCount == 1)

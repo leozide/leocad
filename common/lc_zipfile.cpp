@@ -93,7 +93,7 @@ quint64 lcZipFile::SearchCentralDir()
 		ReadPos = SizeFile - BackRead;
 
 		ReadSize = ((CommentBufferSize + 4) < (SizeFile - ReadPos)) ? (CommentBufferSize + 4) : (SizeFile - ReadPos);
-		mFile->Seek((long)ReadPos, SEEK_SET);
+		mFile->Seek(ReadPos, SEEK_SET);
 
 		if (mFile->ReadBuffer(buf, (long)ReadSize) != ReadSize)
 			break;
@@ -136,7 +136,7 @@ quint64 lcZipFile::SearchCentralDir64()
 		ReadPos = SizeFile - BackRead;
 
 		ReadSize = ((CommentBufferSize + 4) < (SizeFile - ReadPos)) ? (CommentBufferSize + 4) : (SizeFile - ReadPos);
-		mFile->Seek((long)ReadPos, SEEK_SET);
+		mFile->Seek(ReadPos, SEEK_SET);
 
 		if (mFile->ReadBuffer(buf, (long)ReadSize) != ReadSize)
 			break;
@@ -157,7 +157,7 @@ quint64 lcZipFile::SearchCentralDir64()
 	if (PosFound == 0)
 		return 0;
 
-	mFile->Seek((long)PosFound, SEEK_SET);
+	mFile->Seek(PosFound, SEEK_SET);
 
 	quint32 Number;
 	quint64 RelativeOffset;
@@ -185,7 +185,7 @@ quint64 lcZipFile::SearchCentralDir64()
 		return 0;
 
 	// Go to end of central directory record.
-	mFile->Seek((long)RelativeOffset, SEEK_SET);
+	mFile->Seek(RelativeOffset, SEEK_SET);
 
 	// The signature.
 	if (mFile->ReadU32(&Number, 1) != 1)
@@ -208,7 +208,7 @@ bool lcZipFile::CheckFileCoherencyHeader(int FileIndex, quint32* SizeVar, quint6
 	*OffsetLocalExtraField = 0;
 	*SizeLocalExtraField = 0;
 
-	mFile->Seek((long)(FileInfo.offset_curfile + mBytesBeforeZipFile), SEEK_SET);
+	mFile->Seek(FileInfo.offset_curfile + mBytesBeforeZipFile, SEEK_SET);
 
 	if (mFile->ReadU32(&Magic, 1) != 1 || Magic != 0x04034b50)
 		return false;
@@ -266,7 +266,7 @@ bool lcZipFile::Open()
 		mZip64 = true;
 
 		// Skip signature, size and versions.
-		mFile->Seek((long)CentralPos + 4 + 8 + 2 + 2, SEEK_SET);
+		mFile->Seek(CentralPos + 4 + 8 + 2 + 2, SEEK_SET);
 
 		// Number of this disk.
 		if (mFile->ReadU32(&NumberDisk, 1) != 1)
@@ -310,7 +310,7 @@ bool lcZipFile::Open()
 		mZip64 = false;
 
 		// Skip signature.
-		mFile->Seek((long)CentralPos + 4, SEEK_SET);
+		mFile->Seek(CentralPos + 4, SEEK_SET);
 
 		// Number of this disk.
 		if (mFile->ReadU16(&NumberDisk, 1) != 1)
@@ -361,7 +361,7 @@ bool lcZipFile::ReadCentralDir()
 {
 	quint64 PosInCentralDir = mCentralDirOffset;
 
-	mFile->Seek((long)(PosInCentralDir + mBytesBeforeZipFile), SEEK_SET);
+	mFile->Seek(PosInCentralDir + mBytesBeforeZipFile, SEEK_SET);
 	mFiles.AllocGrow((int)mNumEntries);
 
 	for (quint64 FileNum = 0; FileNum < mNumEntries; FileNum++)
@@ -636,6 +636,7 @@ bool lcZipFile::ExtractFile(int FileIndex, lcMemFile& File, quint32 MaxLength)
 	File.SetLength(Length);
 	File.Seek(0, SEEK_SET);
 
+	Stream.next_in = (Bytef*)ReadBuffer;
 	Stream.next_out = (Bytef*)File.mBuffer;
 	Stream.avail_out = Length;
 
@@ -653,7 +654,7 @@ bool lcZipFile::ExtractFile(int FileIndex, lcMemFile& File, quint32 MaxLength)
 			if (ReadThis == 0)
 				return false;
 
-			mFile->Seek((long)(PosInZipfile + mBytesBeforeZipFile), SEEK_SET);
+			mFile->Seek(PosInZipfile + mBytesBeforeZipFile, SEEK_SET);
 			if (mFile->ReadBuffer(ReadBuffer, ReadThis) != ReadThis)
 				return false;
 

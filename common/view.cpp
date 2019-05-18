@@ -690,7 +690,7 @@ lcArray<lcObject*> View::FindObjectsInBox(float x1, float y1, float x2, float y2
 		lcVector3(Right, Bottom, 1)
 	}};
 
-	UnprojectPoints(Corners.data(), Corners.size());
+	UnprojectPoints(Corners.data(), (int)Corners.size());
 
 	lcModel* ActiveModel = GetActiveModel();
 

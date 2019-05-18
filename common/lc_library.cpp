@@ -325,7 +325,12 @@ bool lcPiecesLibrary::Load(const QString& LibraryPath, bool ShowProgress)
 			lcDiskFile ColorFile(mLibraryDir.absoluteFilePath(QLatin1String("ldconfig.ldr")));
 
 			if (!ColorFile.Open(QIODevice::ReadOnly) || !lcLoadColorFile(ColorFile))
-				lcLoadDefaultColors();
+			{
+				ColorFile.SetFileName(mLibraryDir.absoluteFilePath(QLatin1String("LDConfig.ldr")));
+
+				if (!ColorFile.Open(QIODevice::ReadOnly) || !lcLoadColorFile(ColorFile))
+					lcLoadDefaultColors();
+			}
 		}
 		else
 			return false;

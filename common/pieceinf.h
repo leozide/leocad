@@ -22,6 +22,14 @@ enum lcPieceInfoState
 	LC_PIECEINFO_LOADED
 };
 
+struct lcModelPartsEntry
+{
+	lcMatrix44 WorldMatrix;
+	PieceInfo* Info;
+	lcMesh* Mesh;
+	int ColorIndex;
+};
+
 class lcSynthInfo;
 
 class PieceInfo

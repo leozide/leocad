@@ -14,7 +14,7 @@ equals(QT_MAJOR_VERSION, 5) {
 }
 
 INCLUDEPATH += qt common
-CONFIG += precompile_header incremental c++11
+CONFIG += precompile_header incremental c++11 force_debug_info
 
 win32 {
 	RC_FILE = qt/leocad.rc

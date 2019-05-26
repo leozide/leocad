@@ -3124,17 +3124,7 @@ void lcModel::GetPartsListForStep(lcStep Step, int DefaultColorIndex, lcPartsLis
 void lcModel::GetModelParts(const lcMatrix44& WorldMatrix, int DefaultColorIndex, lcArray<lcModelPartsEntry>& ModelParts) const
 {
 	for (lcPiece* Piece : mPieces)
-	{
-		if (!Piece->IsVisibleInSubModel())
-			continue;
-
-		int ColorIndex = Piece->mColorIndex;
-
-		if (ColorIndex == gDefaultColor)
-			ColorIndex = DefaultColorIndex;
-
-		Piece->mPieceInfo->GetModelParts(lcMul(Piece->mModelWorld, WorldMatrix), ColorIndex, ModelParts);
-	}
+		Piece->GetModelParts(WorldMatrix, DefaultColorIndex, ModelParts);
 }
 
 void lcModel::GetSelectionInformation(int* Flags, lcArray<lcObject*>& Selection, lcObject** Focus) const

@@ -396,6 +396,7 @@ public:
 	const char* GetName() const override;
 	bool IsVisible(lcStep Step) const;
 	bool IsVisibleInSubModel() const;
+	void GetModelParts(const lcMatrix44& WorldMatrix, int DefaultColorIndex, lcArray<lcModelPartsEntry>& ModelParts) const;
 	void Initialize(const lcMatrix44& WorldMatrix, lcStep Step);
 	const lcBoundingBox& GetBoundingBox() const;
 	void CompareBoundingBox(lcVector3& Min, lcVector3& Max) const;

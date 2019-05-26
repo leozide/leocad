@@ -10,6 +10,7 @@
 #include <QtGui>
 #include <QPrinter>
 #include <array>
+#include <set>
 
 #ifndef Q_FALLTHROUGH
 #define Q_FALLTHROUGH(); // fall through

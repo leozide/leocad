@@ -91,13 +91,6 @@ struct lcModelHistoryEntry
 	QString Description;
 };
 
-struct lcModelPartsEntry
-{
-	lcMatrix44 WorldMatrix;
-	PieceInfo* Info;
-	int ColorIndex;
-};
-
 class lcModel
 {
 public:

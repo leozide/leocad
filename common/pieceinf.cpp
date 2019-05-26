@@ -354,6 +354,7 @@ void PieceInfo::GetModelParts(const lcMatrix44& WorldMatrix, int DefaultColorInd
 	ModelPartsEntry.WorldMatrix = WorldMatrix;
 	ModelPartsEntry.ColorIndex = DefaultColorIndex;
 	ModelPartsEntry.Info = const_cast<PieceInfo*>(this);
+	ModelPartsEntry.Mesh = nullptr;
 }
 
 void PieceInfo::UpdateBoundingBox(std::vector<lcModel*>& UpdatedModels)

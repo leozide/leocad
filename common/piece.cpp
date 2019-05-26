@@ -863,6 +863,28 @@ bool lcPiece::IsVisibleInSubModel() const
 	return (mStepHide == LC_STEP_MAX) && !(mState & LC_PIECE_HIDDEN);
 }
 
+void lcPiece::GetModelParts(const lcMatrix44& WorldMatrix, int DefaultColorIndex, lcArray<lcModelPartsEntry>& ModelParts) const
+{
+	if (!IsVisibleInSubModel())
+		return;
+
+	int ColorIndex = mColorIndex;
+
+	if (ColorIndex == gDefaultColor)
+		ColorIndex = DefaultColorIndex;
+
+	if (!mMesh)
+		mPieceInfo->GetModelParts(lcMul(mModelWorld, WorldMatrix), ColorIndex, ModelParts);
+	else
+	{
+		lcModelPartsEntry& ModelPartsEntry = ModelParts.Add();
+		ModelPartsEntry.WorldMatrix = WorldMatrix;
+		ModelPartsEntry.ColorIndex = DefaultColorIndex;
+		ModelPartsEntry.Info = const_cast<PieceInfo*>(mPieceInfo);
+		ModelPartsEntry.Mesh = mMesh;
+	}
+}
+
 const lcBoundingBox& lcPiece::GetBoundingBox() const
 {
 	if (!mMesh)

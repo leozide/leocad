@@ -106,7 +106,7 @@ public:
 		return mLength;
 	}
 
-	void SetSize(int NewSize)
+	void SetSize(size_t NewSize)
 	{
 		if (NewSize > mAlloc)
 			AllocGrow(NewSize - mLength);

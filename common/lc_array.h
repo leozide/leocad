@@ -111,7 +111,7 @@ public:
 		if (NewSize > mAlloc)
 			AllocGrow(NewSize - mLength);
 
-		mLength = NewSize;
+		mLength = (int)NewSize;
 	}
 
 	void SetGrow(int Grow)

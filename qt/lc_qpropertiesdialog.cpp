@@ -82,7 +82,7 @@ lcQPropertiesDialog::lcQPropertiesDialog(QWidget *parent, void *data) :
 
 	std::vector<int> InfoTotals(PartsList.size());
 	std::vector<int> ColorTotals(NumColors);
-	size_t Row = 0, Total = 0;
+	int Row = 0, Total = 0;
 
 	for (const auto& PartIt : PartsList)
 	{

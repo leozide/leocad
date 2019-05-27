@@ -22,19 +22,16 @@ enum lcLibraryFolderType
 	LC_NUM_FOLDERTYPES
 };
 
+#define LC_LIBRARY_VERTEX_UNTEXTURED 0x1
+#define LC_LIBRARY_VERTEX_TEXTURED   0x2
+
 struct lcLibraryMeshVertex
 {
 	lcVector3 Position;
 	lcVector3 Normal;
 	float NormalWeight;
-};
-
-struct lcLibraryMeshVertexTextured
-{
-	lcVector3 Position;
-	lcVector3 Normal;
-	float NormalWeight;
 	lcVector2 TexCoord;
+	quint32 Usage;
 };
 
 class lcLibraryMeshSection
@@ -124,6 +121,8 @@ class lcLibraryMeshData
 public:
 	lcLibraryMeshData()
 	{
+		mHasTextures = false;
+
 		for (int MeshDataIdx = 0; MeshDataIdx < LC_NUM_MESHDATA_TYPES; MeshDataIdx++)
 			mVertices[MeshDataIdx].SetGrow(1024);
 	}
@@ -159,7 +158,7 @@ public:
 
 	lcArray<lcLibraryMeshSection*> mSections[LC_NUM_MESHDATA_TYPES];
 	lcArray<lcLibraryMeshVertex> mVertices[LC_NUM_MESHDATA_TYPES];
-	lcArray<lcLibraryMeshVertexTextured> mTexturedVertices[LC_NUM_MESHDATA_TYPES];
+	bool mHasTextures;
 };
 
 class lcLibraryPrimitive

@@ -335,7 +335,7 @@ void PieceInfo::GetPartsList(int DefaultColorIndex, bool IncludeSubmodels, lcPar
 		PartsList[this][DefaultColorIndex]++;
 }
 
-void PieceInfo::GetModelParts(const lcMatrix44& WorldMatrix, int DefaultColorIndex, lcArray<lcModelPartsEntry>& ModelParts) const
+void PieceInfo::GetModelParts(const lcMatrix44& WorldMatrix, int DefaultColorIndex, std::vector<lcModelPartsEntry>& ModelParts) const
 {
 	if (mFlags & LC_PIECE_MODEL)
 	{
@@ -350,11 +350,7 @@ void PieceInfo::GetModelParts(const lcMatrix44& WorldMatrix, int DefaultColorInd
 		return;
 	}
 
-	lcModelPartsEntry& ModelPartsEntry = ModelParts.Add();
-	ModelPartsEntry.WorldMatrix = WorldMatrix;
-	ModelPartsEntry.ColorIndex = DefaultColorIndex;
-	ModelPartsEntry.Info = const_cast<PieceInfo*>(this);
-	ModelPartsEntry.Mesh = nullptr;
+	ModelParts.emplace_back(lcModelPartsEntry{ WorldMatrix, this, nullptr, DefaultColorIndex });
 }
 
 void PieceInfo::UpdateBoundingBox(std::vector<lcModel*>& UpdatedModels)

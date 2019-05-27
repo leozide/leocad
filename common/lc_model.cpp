@@ -3121,7 +3121,7 @@ void lcModel::GetPartsListForStep(lcStep Step, int DefaultColorIndex, lcPartsLis
 	}
 }
 
-void lcModel::GetModelParts(const lcMatrix44& WorldMatrix, int DefaultColorIndex, lcArray<lcModelPartsEntry>& ModelParts) const
+void lcModel::GetModelParts(const lcMatrix44& WorldMatrix, int DefaultColorIndex, std::vector<lcModelPartsEntry>& ModelParts) const
 {
 	for (lcPiece* Piece : mPieces)
 		Piece->GetModelParts(WorldMatrix, DefaultColorIndex, ModelParts);

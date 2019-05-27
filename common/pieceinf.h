@@ -25,7 +25,7 @@ enum lcPieceInfoState
 struct lcModelPartsEntry
 {
 	lcMatrix44 WorldMatrix;
-	PieceInfo* Info;
+	const PieceInfo* Info;
 	lcMesh* Mesh;
 	int ColorIndex;
 };
@@ -156,7 +156,7 @@ public:
 	bool MinIntersectDist(const lcVector3& Start, const lcVector3& End, float& MinDistance) const;
 	bool BoxTest(const lcMatrix44& WorldMatrix, const lcVector4 Planes[6]) const;
 	void GetPartsList(int DefaultColorIndex, bool IncludeSubmodels, lcPartsList& PartsList) const;
-	void GetModelParts(const lcMatrix44& WorldMatrix, int DefaultColorIndex, lcArray<lcModelPartsEntry>& ModelParts) const;
+	void GetModelParts(const lcMatrix44& WorldMatrix, int DefaultColorIndex, std::vector<lcModelPartsEntry>& ModelParts) const;
 	void UpdateBoundingBox(std::vector<lcModel*>& UpdatedModels);
 
 	void Load();

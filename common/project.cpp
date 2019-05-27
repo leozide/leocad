@@ -610,10 +610,12 @@ bool Project::ImportInventory(const QByteArray& Inventory, const QString& Name, 
 	return true;
 }
 
-void Project::GetModelParts(lcArray<lcModelPartsEntry>& ModelParts)
+std::vector<lcModelPartsEntry> Project::GetModelParts()
 {
+	std::vector<lcModelPartsEntry> ModelParts;
+
 	if (mModels.IsEmpty())
-		return;
+		return ModelParts;
 
 	for (lcModel* Model : mModels)
 		Model->CalculateStep(LC_STEP_MAX);
@@ -621,9 +623,11 @@ void Project::GetModelParts(lcArray<lcModelPartsEntry>& ModelParts)
 	mModels[0]->GetModelParts(lcMatrix44Identity(), gDefaultColor, ModelParts);
 
 	SetActiveModel(mModels.FindIndex(mActiveModel));
+
+	return ModelParts;
 }
 
-bool Project::ExportModel(const QString& FileName, lcModel* Model)
+bool Project::ExportModel(const QString& FileName, lcModel* Model) const
 {
 	QFile File(FileName);
 
@@ -667,11 +671,9 @@ QString Project::GetExportFileName(const QString& FileName, const QString& Defau
 
 void Project::Export3DStudio(const QString& FileName)
 {
-	lcArray<lcModelPartsEntry> ModelParts;
+	std::vector<lcModelPartsEntry> ModelParts = GetModelParts();
 
-	GetModelParts(ModelParts);
-
-	if (ModelParts.IsEmpty())
+	if (ModelParts.empty())
 	{
 		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Nothing to export."));
 		return;
@@ -1180,11 +1182,9 @@ void Project::ExportBrickLink()
 
 void Project::ExportCOLLADA(const QString& FileName)
 {
-	lcArray<lcModelPartsEntry> ModelParts;
+	std::vector<lcModelPartsEntry> ModelParts = GetModelParts();
 
-	GetModelParts(ModelParts);
-
-	if (ModelParts.IsEmpty())
+	if (ModelParts.empty())
 	{
 		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Nothing to export."));
 		return;
@@ -1269,7 +1269,7 @@ void Project::ExportCOLLADA(const QString& FileName)
 
 	auto GetMeshID = [](const lcModelPartsEntry& ModelPart)
 	{
-		PieceInfo* Info = ModelPart.Info;
+		const PieceInfo* Info = ModelPart.Info;
 		QString ID = QString(Info->mFileName).replace('.', '_');
 
 		if (ModelPart.Mesh)
@@ -2035,11 +2035,9 @@ void Project::ExportHTML(const lcHTMLExportOptions& Options)
 
 bool Project::ExportPOVRay(const QString& FileName)
 {
-	lcArray<lcModelPartsEntry> ModelParts;
+	std::vector<lcModelPartsEntry> ModelParts = GetModelParts();
 
-	GetModelParts(ModelParts);
-
-	if (ModelParts.IsEmpty())
+	if (ModelParts.empty())
 	{
 		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Nothing to export."));
 		return false;
@@ -2063,7 +2061,7 @@ bool Project::ExportPOVRay(const QString& FileName)
 	char Line[1024];
 
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
-	std::map<PieceInfo*, std::pair<char[LC_PIECE_NAME_LEN], int>> PieceTable;
+	std::map<const PieceInfo*, std::pair<char[LC_PIECE_NAME_LEN], int>> PieceTable;
 	int NumColors = gColorList.GetSize();
 	std::vector<std::array<char, LC_MAX_COLOR_NAME>> ColorTable(NumColors);
 
@@ -2355,11 +2353,9 @@ bool Project::ExportPOVRay(const QString& FileName)
 
 void Project::ExportWavefront(const QString& FileName)
 {
-	lcArray<lcModelPartsEntry> ModelParts;
+	std::vector<lcModelPartsEntry> ModelParts = GetModelParts();
 
-	GetModelParts(ModelParts);
-
-	if (ModelParts.IsEmpty())
+	if (ModelParts.empty())
 	{
 		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Nothing to export."));
 		return;
@@ -2447,7 +2443,7 @@ void Project::ExportWavefront(const QString& FileName)
 		OBJFile.WriteLine("#\n\n");
 	}
 
-	for (int PartIdx = 0; PartIdx < ModelParts.GetSize(); PartIdx++)
+	for (int PartIdx = 0; PartIdx < ModelParts.size(); PartIdx++)
 	{
 		sprintf(Line, "g Piece%.3d\n", PartIdx);
 		OBJFile.WriteLine(Line);

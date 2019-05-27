@@ -101,7 +101,7 @@ public:
 	bool ImportInventory(const QByteArray& Inventory, const QString& Name, const QString& Description);
 
 	void SaveImage();
-	bool ExportModel(const QString& FileName, lcModel* Model);
+	bool ExportModel(const QString& FileName, lcModel* Model) const;
 	void Export3DStudio(const QString& FileName);
 	void ExportBrickLink();
 	void ExportCOLLADA(const QString& FileName);
@@ -114,7 +114,7 @@ public:
 
 protected:
 	QString GetExportFileName(const QString& FileName, const QString& DefaultExtension, const QString& DialogTitle, const QString& DialogFilter) const;
-	void GetModelParts(lcArray<lcModelPartsEntry>& ModelParts);
+	std::vector<lcModelPartsEntry> GetModelParts();
 	QImage CreatePartsListImage(lcModel* Model, lcStep Step);
 	void CreateHTMLPieceList(QTextStream& Stream, lcModel* Model, lcStep Step, bool Images);
 	void SetFileName(const QString& FileName);

@@ -2443,12 +2443,12 @@ void Project::ExportWavefront(const QString& FileName)
 		OBJFile.WriteLine("#\n\n");
 	}
 
-	for (int PartIdx = 0; PartIdx < ModelParts.size(); PartIdx++)
+	int NumPieces = 0;
+	for (const lcModelPartsEntry& ModelPart : ModelParts)
 	{
-		sprintf(Line, "g Piece%.3d\n", PartIdx);
+		sprintf(Line, "g Piece%.3d\n", NumPieces++);
 		OBJFile.WriteLine(Line);
 
-		const lcModelPartsEntry& ModelPart = ModelParts[PartIdx];
 		lcMesh* Mesh = !ModelPart.Mesh ? ModelPart.Info->GetMesh() : ModelPart.Mesh;
 
 		if (Mesh)

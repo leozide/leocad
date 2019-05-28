@@ -82,7 +82,7 @@ void lcPartSelectionListModel::Redraw()
 
 	beginResetModel();
 
-	for (int PartIdx = 0; PartIdx < mParts.size(); PartIdx++)
+	for (size_t PartIdx = 0; PartIdx < mParts.size(); PartIdx++)
 		mParts[PartIdx].second = QPixmap();
 
 	endResetModel();
@@ -207,7 +207,7 @@ void lcPartSelectionListModel::SetFilter(const QString& Filter)
 {
 	mFilter = Filter.toLatin1();
 
-	for (int PartIdx = 0; PartIdx < mParts.size(); PartIdx++)
+	for (size_t PartIdx = 0; PartIdx < mParts.size(); PartIdx++)
 	{
 		PieceInfo* Info = mParts[PartIdx].first;
 		bool Visible;
@@ -251,7 +251,7 @@ int lcPartSelectionListModel::rowCount(const QModelIndex& Parent) const
 
 QVariant lcPartSelectionListModel::data(const QModelIndex& Index, int Role) const
 {
-	int InfoIndex = Index.row();
+	size_t InfoIndex = Index.row();
 
 	if (Index.isValid() && InfoIndex < mParts.size())
 	{
@@ -318,7 +318,7 @@ void lcPartSelectionListModel::RequestPreview(int InfoIndex)
 
 void lcPartSelectionListModel::PartLoaded(PieceInfo* Info)
 {
-	for (int PartIdx = 0; PartIdx < mParts.size(); PartIdx++)
+	for (size_t PartIdx = 0; PartIdx < mParts.size(); PartIdx++)
 	{
 		if (mParts[PartIdx].first == Info)
 		{
@@ -416,7 +416,7 @@ void lcPartSelectionListModel::SetIconSize(int Size)
 
 	beginResetModel();
 
-	for (int PartIdx = 0; PartIdx < mParts.size(); PartIdx++)
+	for (size_t PartIdx = 0; PartIdx < mParts.size(); PartIdx++)
 		mParts[PartIdx].second = QPixmap();
 
 	endResetModel();

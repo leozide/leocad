@@ -648,7 +648,7 @@ void lcQPreferencesDialog::on_KeyboardFilterEdit_textEdited(const QString& Text)
 	{
 		std::function<bool(QTreeWidgetItem*,bool)> ShowItems = [&ShowItems, &Text](QTreeWidgetItem* ParentItem, bool ForceVisible)
 		{
-			ForceVisible |= ParentItem->text(0).contains(Text, Qt::CaseInsensitive) | ParentItem->text(1).contains(Text, Qt::CaseInsensitive);
+			ForceVisible |= (bool)ParentItem->text(0).contains(Text, Qt::CaseInsensitive) | ParentItem->text(1).contains(Text, Qt::CaseInsensitive);
 			bool Visible = ForceVisible;
 
 			for (int ChildIdx = 0; ChildIdx < ParentItem->childCount(); ChildIdx++)

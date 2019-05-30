@@ -47,6 +47,7 @@ install:
 script:
   - |
     if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+      set -e
       source /opt/qt*/bin/qt*-env.sh
       qmake PREFIX=/usr -v
       qmake PREFIX=/usr -r

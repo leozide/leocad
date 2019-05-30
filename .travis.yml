@@ -47,12 +47,11 @@ install:
 script:
   - |
     if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-      set -e
       source /opt/qt*/bin/qt*-env.sh
       qmake PREFIX=/usr -v
       qmake PREFIX=/usr -r
-      make -j$(nproc)
-      if [[ "$QT_BASE" != "510" ]]; then exit 0; fi
+      make -j$(nproc); export COMPILE_RESULT=$?
+      if [[ "$QT_BASE" != "510" ]]; then exit $COMPILE_RESULT; fi
       make install INSTALL_ROOT=AppDir
       wget -c "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
       chmod a+x linuxdeployqt*.AppImage 

@@ -22,7 +22,6 @@
 #include "pieceinf.h"
 #include "lc_library.h"
 #include "lc_colors.h"
-#include <functional>
 
 #if LC_ENABLE_GAMEPAD
 #include <QtGamepad/QGamepad>

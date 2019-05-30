@@ -9,8 +9,11 @@
 #include <QGLWidget>
 #include <QtGui>
 #include <QPrinter>
+#include <map>
+#include <vector>
 #include <array>
 #include <set>
+#include <functional>
 
 #ifndef Q_FALLTHROUGH
 #define Q_FALLTHROUGH(); // fall through

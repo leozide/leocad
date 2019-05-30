@@ -1,6 +1,5 @@
 #pragma once
 
-#include <functional>
 #include "lc_math.h"
 #include "piece.h"
 

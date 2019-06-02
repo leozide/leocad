@@ -1505,10 +1505,10 @@ lcMesh* lcPiecesLibrary::CreateMesh(PieceInfo* Info, lcLibraryMeshData& MeshData
 		{
 			for (const lcLibraryMeshVertex& SrcVertex : MeshData.mVertices[MeshDataIdx])
 			{
-				lcVertex& DstVertex = *DstVerts++;
-
 				if ((SrcVertex.Usage & LC_LIBRARY_VERTEX_UNTEXTURED) == 0)
 					continue;
+
+				lcVertex& DstVertex = *DstVerts++;
 
 				DstVertex.Position = lcVector3LDrawToLeoCAD(SrcVertex.Position);
 				DstVertex.Normal = lcPackNormal(lcVector3LDrawToLeoCAD(SrcVertex.Normal));

@@ -451,7 +451,7 @@ bool lcPiecesLibrary::OpenArchive(lcFile* File, const QString& FileName, lcZipFi
 				lcLibraryPrimitive* Primitive = FindPrimitive(Name);
 
 				if (!Primitive)
-					mPrimitives[Name] = new lcLibraryPrimitive(FileInfo.file_name + (Name - NameBuffer), ZipFileType, FileIdx, false, true);
+					mPrimitives[Name] = new lcLibraryPrimitive(QString(), FileInfo.file_name + (Name - NameBuffer), ZipFileType, FileIdx, false, true);
 				else
 					Primitive->SetZipFile(ZipFileType, FileIdx);
 			}
@@ -463,7 +463,7 @@ bool lcPiecesLibrary::OpenArchive(lcFile* File, const QString& FileName, lcZipFi
 			lcLibraryPrimitive* Primitive = FindPrimitive(Name);
 
 			if (!Primitive)
-				mPrimitives[Name] = new lcLibraryPrimitive(FileInfo.file_name + (Name - NameBuffer), ZipFileType, FileIdx, (memcmp(Name, "STU", 3) == 0), false);
+				mPrimitives[Name] = new lcLibraryPrimitive(QString(), FileInfo.file_name + (Name - NameBuffer), ZipFileType, FileIdx, (memcmp(Name, "STU", 3) == 0), false);
 			else
 				Primitive->SetZipFile(ZipFileType, FileIdx);
 		}
@@ -554,24 +554,22 @@ bool lcPiecesLibrary::OpenDirectory(const QDir& LibraryDir, bool ShowProgress)
 
 	for (unsigned int BaseFolderIdx = 0; BaseFolderIdx < sizeof(BaseFolders) / sizeof(BaseFolders[0]); BaseFolderIdx++)
 	{
-		const char* PrimitiveDirectories[] = { "p/", "p/48/", "parts/s/" };
+		const char* PrimitiveDirectories[] = { "p/", "parts/s/" };
 		bool SubFileDirectories[] = { false, false, true };
 		QDir BaseDir(LibraryDir.absoluteFilePath(QLatin1String(BaseFolders[BaseFolderIdx])));
 
 		for (int DirectoryIdx = 0; DirectoryIdx < (int)(sizeof(PrimitiveDirectories) / sizeof(PrimitiveDirectories[0])); DirectoryIdx++)
 		{
-			QDir Dir(BaseDir.absoluteFilePath(QLatin1String(PrimitiveDirectories[DirectoryIdx])), QLatin1String("*.dat"), QDir::SortFlags(QDir::Name | QDir::IgnoreCase), QDir::Files | QDir::Hidden | QDir::Readable);
-			QStringList FileList = Dir.entryList();
+			QString ChildPath = BaseDir.absoluteFilePath(QLatin1String(PrimitiveDirectories[DirectoryIdx]));
+			QDirIterator DirIterator(ChildPath, QStringList() << QLatin1String("*.dat"), QDir::Files | QDir::Hidden | QDir::Readable, QDirIterator::Subdirectories);
 
-			for (int FileIdx = 0; FileIdx < FileList.size(); FileIdx++)
+			while (DirIterator.hasNext())
 			{
 				char Name[LC_PIECE_NAME_LEN];
-				QByteArray FileString = FileList[FileIdx].toLatin1();
-				const char* Src = FileString;
-
-				strcpy(Name, strchr(PrimitiveDirectories[DirectoryIdx], '/') + 1);
-				strupr(Name);
-				char* Dst = Name + strlen(Name);
+				QString FileName = DirIterator.next();
+				QByteArray FileString = BaseDir.relativeFilePath(FileName).toLatin1();
+				const char* Src = strchr(FileString, '/') + 1;
+				char* Dst = Name;
 
 				while (*Src && Dst - Name < (int)sizeof(Name))
 				{
@@ -601,7 +599,7 @@ bool lcPiecesLibrary::OpenDirectory(const QDir& LibraryDir, bool ShowProgress)
 					mHasUnofficial = true;
 
 				bool SubFile = SubFileDirectories[DirectoryIdx];
-				mPrimitives[Name] = new lcLibraryPrimitive(QByteArray(strchr(PrimitiveDirectories[DirectoryIdx], '/') + 1) + FileString, LC_NUM_ZIPFILES, 0, !SubFile && (memcmp(Name, "STU", 3) == 0), SubFile);
+				mPrimitives[Name] = new lcLibraryPrimitive(std::move(FileName), strchr(FileString, '/') + 1, LC_NUM_ZIPFILES, 0, !SubFile && (memcmp(Name, "STU", 3) == 0), SubFile);
 			}
 		}
 	}
@@ -1915,7 +1913,7 @@ bool lcPiecesLibrary::LoadPrimitive(lcLibraryPrimitive* Primitive)
 	{
 		lcLibraryPrimitive* LowPrimitive = nullptr;
 
-		if (Primitive->mStud && strncmp(Primitive->mName, "8/", 2))
+		if (Primitive->mStud && strncmp(Primitive->mName, "8/", 2)) // todo: this is currently the only place that uses mName so use mFileName instead. this should also be done for the loose file libraries.
 		{
 			char Name[LC_PIECE_NAME_LEN];
 			strcpy(Name, "8/");
@@ -1950,31 +1948,9 @@ bool lcPiecesLibrary::LoadPrimitive(lcLibraryPrimitive* Primitive)
 	}
 	else
 	{
-		char FileName[LC_MAXPATH];
-		lcDiskFile PrimFile;
-		bool Found = false;
+		lcDiskFile PrimFile(Primitive->mFileName);
 
-		if (mHasUnofficial)
-		{
-			if (Primitive->mSubFile)
-				sprintf(FileName, "unofficial/parts/%s", Primitive->mName);
-			else
-				sprintf(FileName, "unofficial/p/%s", Primitive->mName);
-			PrimFile.SetFileName(mLibraryDir.absoluteFilePath(QLatin1String(FileName)));
-			Found = PrimFile.Open(QIODevice::ReadOnly);
-		}
-
-		if (!Found)
-		{
-			if (Primitive->mSubFile)
-				sprintf(FileName, "parts/%s", Primitive->mName);
-			else
-				sprintf(FileName, "p/%s", Primitive->mName);
-			PrimFile.SetFileName(mLibraryDir.absoluteFilePath(QLatin1String(FileName)));
-			Found = PrimFile.Open(QIODevice::ReadOnly);
-		}
-
-		if (!Found || !ReadMeshData(PrimFile, lcMatrix44Identity(), 16, false, TextureStack, Primitive->mMeshData, LC_MESHDATA_SHARED, true, nullptr, false))
+		if (!PrimFile.Open(QIODevice::ReadOnly) || !ReadMeshData(PrimFile, lcMatrix44Identity(), 16, false, TextureStack, Primitive->mMeshData, LC_MESHDATA_SHARED, true, nullptr, false))
 			return false;
 	}
 
@@ -2320,33 +2296,9 @@ bool lcPiecesLibrary::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransf
 						}
 						else
 						{
-							char Name[LC_PIECE_NAME_LEN];
-							strcpy(Name, Primitive->mName);
-							strlwr(Name);
+							lcDiskFile IncludeFile(Primitive->mFileName);
 
-							lcDiskFile IncludeFile;
-							bool Found = false;
-
-							if (mHasUnofficial)
-							{
-								if (Primitive->mSubFile)
-									sprintf(FileName, "unofficial/parts/%s", Name);
-								else
-									sprintf(FileName, "unofficial/p/%s", Name);
-								IncludeFile.SetFileName(mLibraryDir.absoluteFilePath(QLatin1String(FileName)));
-								Found = IncludeFile.Open(QIODevice::ReadOnly);
-							}
-
-							if (!Found)
-							{
-								if (Primitive->mSubFile)
-									sprintf(FileName, "parts/%s", Name);
-								else
-									sprintf(FileName, "p/%s", Name);
-								IncludeFile.SetFileName(mLibraryDir.absoluteFilePath(QLatin1String(FileName)));
-								Found = IncludeFile.Open(QIODevice::ReadOnly);
-							}
-							if (Found)
+							if (IncludeFile.Open(QIODevice::ReadOnly))
 								ReadMeshData(IncludeFile, IncludeTransform, ColorCode, Mirror ^ InvertNext, TextureStack, MeshData, MeshDataType, Optimize, CurrentProject, SearchProjectFolder);
 						}
 					}

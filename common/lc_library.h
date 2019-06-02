@@ -164,7 +164,8 @@ public:
 class lcLibraryPrimitive
 {
 public:
-	lcLibraryPrimitive(const char* Name, lcZipFileType ZipFileType,quint32 ZipFileIndex, bool Stud, bool SubFile)
+	explicit lcLibraryPrimitive(QString&& FileName, const char* Name, lcZipFileType ZipFileType,quint32 ZipFileIndex, bool Stud, bool SubFile)
+		: mFileName(FileName)
 	{
 		strncpy(mName, Name, sizeof(mName));
 		mName[sizeof(mName) - 1] = 0;
@@ -182,6 +183,7 @@ public:
 		mZipFileIndex = ZipFileIndex;
 	}
 
+	QString mFileName;
 	char mName[LC_MAXNAME];
 	lcZipFileType mZipFileType;
 	quint32 mZipFileIndex;

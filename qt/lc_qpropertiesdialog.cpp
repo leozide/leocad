@@ -107,7 +107,7 @@ lcQPropertiesDialog::lcQPropertiesDialog(QWidget *parent, void *data) :
 
 	table->setItem((int)InfoTotals.size(), 0, new QTableWidgetItem(tr("Total")));
 
-	for (Row = 0; Row < InfoTotals.size(); Row++)
+	for (Row = 0; Row < (int)InfoTotals.size(); Row++)
 	{
 		QTableWidgetItem *item = new QTableWidgetItem(QString::number(InfoTotals[Row]));
 		item->setTextAlignment(Qt::AlignCenter);

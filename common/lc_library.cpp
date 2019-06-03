@@ -975,9 +975,9 @@ bool lcPiecesLibrary::WriteArchiveCacheFile(const QString& FileName, lcMemFile& 
 
 	CacheFile.Seek(0, SEEK_SET);
 
-	Stream.zalloc = (alloc_func)0;
-	Stream.zfree = (free_func)0;
-	Stream.opaque = (voidpf)0;
+	Stream.zalloc = nullptr;
+	Stream.zfree = nullptr;
+	Stream.opaque = nullptr;
 
 	if (deflateInit2(&Stream, Z_DEFAULT_COMPRESSION, Z_DEFLATED, -MAX_WBITS, DEF_MEM_LEVEL, Z_DEFAULT_STRATEGY) != Z_OK)
 		return false;
@@ -1822,7 +1822,7 @@ void lcPiecesLibrary::UnloadUnusedParts()
 
 bool lcPiecesLibrary::LoadTexture(lcTexture* Texture)
 {
-	char FileName[LC_MAXPATH];
+	char FileName[2*LC_MAXPATH];
 
 	if (mZipFiles[LC_ZIPFILE_OFFICIAL])
 	{

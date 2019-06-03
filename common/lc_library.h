@@ -165,7 +165,7 @@ class lcLibraryPrimitive
 {
 public:
 	explicit lcLibraryPrimitive(QString&& FileName, const char* Name, lcZipFileType ZipFileType,quint32 ZipFileIndex, bool Stud, bool SubFile)
-		: mFileName(FileName)
+		: mFileName(std::move(FileName))
 	{
 		strncpy(mName, Name, sizeof(mName));
 		mName[sizeof(mName) - 1] = 0;
@@ -177,7 +177,7 @@ public:
 		mSubFile = SubFile;
 	}
 
-	void SetZipFile(lcZipFileType ZipFileType,quint32 ZipFileIndex)
+	void SetZipFile(lcZipFileType ZipFileType, quint32 ZipFileIndex)
 	{
 		mZipFileType = ZipFileType;
 		mZipFileIndex = ZipFileIndex;

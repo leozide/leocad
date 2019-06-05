@@ -75,13 +75,13 @@ lcQMinifigDialog::lcQMinifigDialog(QWidget *parent) :
 
 	for (int ItemIndex = 0; ItemIndex < LC_MFW_NUMITEMS; ItemIndex++)
 	{
-		lcArray<lcMinifigPieceInfo>& PartList = mMinifigWidget->mSettings[ItemIndex];
+		std::vector<lcMinifigPieceInfo>& PartList = mMinifigWidget->mSettings[ItemIndex];
 		QStringList ItemStrings;
 		QVector<int> Separators;
 
-		for (int PartIndex = 0; PartIndex < PartList.GetSize(); PartIndex++)
+		for (const lcMinifigPieceInfo& MinifigPieceInfo : PartList)
 		{
-			const char* Description = PartList[PartIndex].Description;
+			const char* Description = MinifigPieceInfo.Description;
 
 			if (Description[0] != '-' || Description[1] != '-')
 				ItemStrings.append(Description);

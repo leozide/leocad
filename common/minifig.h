@@ -2,7 +2,6 @@
 
 #include "lc_glwidget.h"
 #include "lc_math.h"
-#include "lc_array.h"
 
 enum LC_MFW_TYPES
 {
@@ -79,7 +78,7 @@ public:
 
 	void ParseSettings(lcFile& Settings);
 
-	lcArray<lcMinifigPieceInfo> mSettings[LC_MFW_NUMITEMS];
+	std::vector<lcMinifigPieceInfo> mSettings[LC_MFW_NUMITEMS];
 
 	lcMinifig mMinifig;
 

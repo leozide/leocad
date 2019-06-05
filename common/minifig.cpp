@@ -110,9 +110,9 @@ void MinifigWizard::ParseSettings(lcFile& Settings)
 {
 	for (int SectionIndex = 0; SectionIndex < LC_MFW_NUMITEMS; SectionIndex++)
 	{
-		lcArray<lcMinifigPieceInfo>& InfoArray = mSettings[SectionIndex];
+		std::vector<lcMinifigPieceInfo>& InfoArray = mSettings[SectionIndex];
 
-		InfoArray.RemoveAll();
+		InfoArray.clear();
 		Settings.Seek(0, SEEK_SET);
 
 		char Line[1024];
@@ -138,7 +138,7 @@ void MinifigWizard::ParseSettings(lcFile& Settings)
 			MinifigInfo.Offset = lcMatrix44Identity();
 			MinifigInfo.Info = nullptr;
 
-			InfoArray.Add(MinifigInfo);
+			InfoArray.emplace_back(std::move(MinifigInfo));
 			continue;
 		}
 
@@ -201,7 +201,7 @@ void MinifigWizard::ParseSettings(lcFile& Settings)
 			MinifigInfo.Offset = Offset;
 			MinifigInfo.Info = Info;
 
-			InfoArray.Add(MinifigInfo);
+			InfoArray.emplace_back(std::move(MinifigInfo));
 		}
 	}
 }
@@ -600,9 +600,9 @@ void MinifigWizard::Calculate()
 
 int MinifigWizard::GetSelectionIndex(int Type) const
 {
-	const lcArray<lcMinifigPieceInfo>& InfoArray = mSettings[Type];
+	const std::vector<lcMinifigPieceInfo>& InfoArray = mSettings[Type];
 
-	for (int Index = 0; Index < InfoArray.GetSize(); Index++)
+	for (size_t Index = 0; Index < InfoArray.size(); Index++)
 		if (InfoArray[Index].Info == mMinifig.Parts[Type])
 			return Index;
 

@@ -1158,12 +1158,8 @@ void Project::ExportBrickLink()
 			sprintf(Line, "    <ITEMID>%s</ITEMID>\n", FileName);
 			BrickLinkFile.WriteLine(Line);
 
-			int Count = ColorIt.second;
-			if (Count > 1)
-			{
-				sprintf(Line, "    <MINQTY>%d</MINQTY>\n", Count);
-				BrickLinkFile.WriteLine(Line);
-			}
+			sprintf(Line, "    <MINQTY>%d</MINQTY>\n", ColorIt.second);
+			BrickLinkFile.WriteLine(Line);
 
 			int Color = lcGetBrickLinkColor(ColorIt.first);
 			if (Color)

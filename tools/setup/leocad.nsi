@@ -64,12 +64,13 @@ Section "LeoCAD" SecLeoCAD
   WriteRegStr HKCR "LeoCAD.Project\DefaultIcon" "" "$INSTDIR\LeoCAD.exe,0"
   WriteRegStr HKCR "LeoCAD.Project\shell" "" "open"
   WriteRegStr HKCR "LeoCAD.Project\shell\open\command" "" '"$INSTDIR\LeoCAD.exe" "%1"'
-  ;WriteRegStr HKCR "LeoCAD.Project\shell" "" "print"
-  ;WriteRegStr HKCR "LeoCAD.Project\shell\print\command" "" '"$INSTDIR\LeoCAD.exe" /p "%1"'
-  ;WriteRegStr HKCR "LeoCAD.Project\shell" "" "printto"
-  ;WriteRegStr HKCR "LeoCAD.Project\shell\printto\command" "" '"$INSTDIR\LeoCAD.exe" /pt "%1" "%2" "%3" "%4"'
   System::Call 'shell32.dll::SHChangeNotify(i, i, i, i) v (0x08000000, 0, 0, 0)'
-  
+
+  IfFileExists "$INSTDIR\vc_redist.x64.exe" VcRedist64Exists PastVcRedist64Check
+  VcRedist64Exists:
+    ExecWait '"$INSTDIR\vc_redist.x64.exe"  /quiet /norestart'
+  PastVcRedist64Check:
+
   ;Store installation folder
   ;WriteRegStr HKCU "Software\BT Software\LeoCAD" "InstallPath" $INSTDIR
   
@@ -103,6 +104,7 @@ Section "Uninstall"
   Delete "$INSTDIR\readme.txt"
   Delete "$INSTDIR\library.bin"
   Delete "$INSTDIR\povconsole32-sse2.exe"
+  Delete "$INSTDIR\vc_redist.x64.exe"
 
   RMDir "$INSTDIR"
 

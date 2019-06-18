@@ -156,6 +156,20 @@ int lcGetBrickLinkColor(int ColorIndex)
 		{ 462,  31 }, // Medium Orange
 		{ 484,  68 }, // Dark Orange
 		{ 503,  49 }, // Very Light Gray
+		{ 65,    3 }, // Rubber Yellow
+		{ 66,   19 }, // Rubber Trans Yellow
+		{ 67,   12 }, // Rubber Trans Clear
+		{ 256,  11 }, // Rubber Black
+		{ 273,   7 }, // Rubber Blue
+		{ 324,   5 }, // Rubber Red
+		{ 350,   4 }, // Rubber Orange
+		{ 375,   9 }, // Rubber Light Gray
+		{ 406,  63 }, // Rubber Dark Blue
+		{ 449,  24 }, // Rubber Purple
+		{ 490,  34 }, // Rubber Lime
+		{ 496,  86 }, // Rubber Light Bluish Gray
+		{ 504,  95 }, // Rubber Flat Silver
+		{ 511,   1 }, // Rubber White
 	};
 
 	int ColorCode = gColorList[ColorIndex].Code;

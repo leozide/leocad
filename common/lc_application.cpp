@@ -650,10 +650,12 @@ void lcApplication::ShowPreferencesDialog()
 
 	Options.Preferences = mPreferences;
 
-	Options.DefaultAuthor = lcGetProfileString(LC_PROFILE_DEFAULT_AUTHOR_NAME);
 	Options.LibraryPath = lcGetProfileString(LC_PROFILE_PARTS_LIBRARY);
+	Options.MinifigSettingsPath = lcGetProfileString(LC_PROFILE_MINIFIG_SETTINGS);
+	Options.ColorConfigPath = lcGetProfileString(LC_PROFILE_COLOR_CONFIG);
 	Options.POVRayPath = lcGetProfileString(LC_PROFILE_POVRAY_PATH);
 	Options.LGEOPath = lcGetProfileString(LC_PROFILE_POVRAY_LGEO_PATH);
+	Options.DefaultAuthor = lcGetProfileString(LC_PROFILE_DEFAULT_AUTHOR_NAME);
 	Options.CheckForUpdates = lcGetProfileInt(LC_PROFILE_CHECK_UPDATES);
 
 	Options.AASamples = CurrentAASamples;
@@ -674,6 +676,7 @@ void lcApplication::ShowPreferencesDialog()
 		return;
 
 	bool LibraryChanged = Options.LibraryPath != lcGetProfileString(LC_PROFILE_PARTS_LIBRARY);
+	bool ColorsChanged = Options.ColorConfigPath != lcGetProfileString(LC_PROFILE_COLOR_CONFIG);
 	bool AAChanged = CurrentAASamples != Options.AASamples;
 
 	mPreferences = Options.Preferences;
@@ -682,17 +685,15 @@ void lcApplication::ShowPreferencesDialog()
 
 	lcSetProfileString(LC_PROFILE_DEFAULT_AUTHOR_NAME, Options.DefaultAuthor);
 	lcSetProfileString(LC_PROFILE_PARTS_LIBRARY, Options.LibraryPath);
+	lcSetProfileString(LC_PROFILE_COLOR_CONFIG, Options.ColorConfigPath);
+	lcSetProfileString(LC_PROFILE_MINIFIG_SETTINGS, Options.MinifigSettingsPath);
 	lcSetProfileString(LC_PROFILE_POVRAY_PATH, Options.POVRayPath);
 	lcSetProfileString(LC_PROFILE_POVRAY_LGEO_PATH, Options.LGEOPath);
 	lcSetProfileInt(LC_PROFILE_CHECK_UPDATES, Options.CheckForUpdates);
 	lcSetProfileInt(LC_PROFILE_ANTIALIASING_SAMPLES, Options.AASamples);
 
-	if (LibraryChanged && AAChanged)
-		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Parts library and Anti-aliasing changes will only take effect the next time you start LeoCAD."));
-	else if (LibraryChanged)
-		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Parts library changes will only take effect the next time you start LeoCAD."));
-	else if (AAChanged)
-		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Anti-aliasing changes will only take effect the next time you start LeoCAD."));
+	if (LibraryChanged || ColorsChanged || AAChanged)
+		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Some changes will only take effect the next time you start LeoCAD."));
 
 	if (Options.CategoriesModified)
 	{

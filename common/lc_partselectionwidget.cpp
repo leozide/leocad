@@ -238,7 +238,7 @@ void lcPartSelectionListModel::SetFilter(const QString& Filter)
 			Visible = strcasestr(Description, mFilter) || strcasestr(Info->mFileName, mFilter);
 		}
 
-		mListView->setRowHidden(PartIdx, !Visible);
+		mListView->setRowHidden((int)PartIdx, !Visible);
 	}
 }
 
@@ -326,7 +326,7 @@ void lcPartSelectionListModel::PartLoaded(PieceInfo* Info)
 			if (PreviewIt != mRequestedPreviews.end())
 			{
 				mRequestedPreviews.erase(PreviewIt);
-				DrawPreview(PartIdx);
+				DrawPreview((int)PartIdx);
 			}
 			break;
 		}

@@ -75,6 +75,8 @@ static lcProfileEntry gProfileEntries[LC_NUM_PROFILE_KEYS] =
 	lcProfileEntry("Settings", "CheckUpdates", 1),                                          // LC_PROFILE_CHECK_UPDATES
 	lcProfileEntry("Settings", "ProjectsPath", ""),                                         // LC_PROFILE_PROJECTS_PATH
 	lcProfileEntry("Settings", "PartsLibrary", ""),                                         // LC_PROFILE_PARTS_LIBRARY
+	lcProfileEntry("Settings", "MinifigSettings", ""),                                      // LC_PROFILE_MINIFIG_SETTINGS
+	lcProfileEntry("Settings", "ColorConfig", ""),                                          // LC_PROFILE_COLOR_CONFIG
 	lcProfileEntry("Settings", "Shortcuts"),                                                // LC_PROFILE_KEYBOARD_SHORTCUTS
 	lcProfileEntry("Settings", "MouseShortcuts", QStringList()),                            // LC_PROFILE_MOUSE_SHORTCUTS
 	lcProfileEntry("Settings", "Categories"),                                               // LC_PROFILE_CATEGORIES

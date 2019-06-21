@@ -12,6 +12,7 @@
 #include "lc_context.h"
 #include "lc_scene.h"
 #include "lc_file.h"
+#include "lc_profile.h"
 
 const char* MinifigWizard::mSectionNames[LC_MFW_NUMITEMS] =
 {
@@ -36,29 +37,7 @@ const char* MinifigWizard::mSectionNames[LC_MFW_NUMITEMS] =
 
 MinifigWizard::MinifigWizard()
 {
-	lcDiskFile DiskSettings(lcGetPiecesLibrary()->mLibraryDir.absoluteFilePath(QLatin1String("mlcad.ini")));
-
-	if (DiskSettings.Open(QIODevice::ReadOnly))
-		ParseSettings(DiskSettings);
-	else
-	{
-		QResource Resource(":/resources/minifig.ini");
-
-		if (Resource.isValid())
-		{
-			QByteArray Data;
-
-			if (Resource.isCompressed())
-				Data = qUncompress(Resource.data(), Resource.size());
-			else
-				Data = QByteArray::fromRawData((const char*)Resource.data(), Resource.size());
-
-			lcMemFile MemSettings;
-			MemSettings.WriteBuffer(Data.constData(), Data.size());
-			ParseSettings(MemSettings);
-		}
-	}
-
+	LoadSettings();
 	LoadTemplates();
 
 	mRotateX = 75.0f;
@@ -77,6 +56,38 @@ MinifigWizard::~MinifigWizard()
 			Library->ReleasePieceInfo(mMinifig.Parts[i]);
 
 	SaveTemplates();
+}
+
+void MinifigWizard::LoadSettings()
+{
+	QString CustomSettingsPath = lcGetProfileString(LC_PROFILE_MINIFIG_SETTINGS);
+
+	if (!CustomSettingsPath.isEmpty())
+	{
+		lcDiskFile DiskSettings(CustomSettingsPath);
+
+		if (DiskSettings.Open(QIODevice::ReadOnly))
+		{
+			ParseSettings(DiskSettings);
+			return;
+		}
+	}
+
+	QResource Resource(":/resources/minifig.ini");
+
+	if (Resource.isValid())
+	{
+		QByteArray Data;
+
+		if (Resource.isCompressed())
+			Data = qUncompress(Resource.data(), Resource.size());
+		else
+			Data = QByteArray::fromRawData((const char*)Resource.data(), Resource.size());
+
+		lcMemFile MemSettings;
+		MemSettings.WriteBuffer(Data.constData(), Data.size());
+		ParseSettings(MemSettings);
+	}
 }
 
 void MinifigWizard::OnInitialUpdate()
@@ -604,7 +615,7 @@ int MinifigWizard::GetSelectionIndex(int Type) const
 
 	for (size_t Index = 0; Index < InfoArray.size(); Index++)
 		if (InfoArray[Index].Info == mMinifig.Parts[Type])
-			return Index;
+			return (int)Index;
 
 	return 0;
 }

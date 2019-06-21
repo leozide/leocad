@@ -11,6 +11,7 @@
 #include "lc_glextensions.h"
 #include "lc_synth.h"
 #include "project.h"
+#include "lc_profile.h"
 #include <ctype.h>
 #include <locale.h>
 #include <zlib.h>
@@ -301,12 +302,24 @@ bool lcPiecesLibrary::Load(const QString& LibraryPath, bool ShowProgress)
 {
 	Unload();
 
+	auto LoadCustomColors = []()
+	{
+		QString CustomColorsPath = lcGetProfileString(LC_PROFILE_COLOR_CONFIG);
+
+		if (CustomColorsPath.isEmpty())
+			return false;
+
+		lcDiskFile ColorFile(CustomColorsPath);
+		return ColorFile.Open(QIODevice::ReadOnly) && lcLoadColorFile(ColorFile);
+	};
+
 	if (OpenArchive(LibraryPath, LC_ZIPFILE_OFFICIAL))
 	{
 		lcMemFile ColorFile;
 
-		if (!mZipFiles[LC_ZIPFILE_OFFICIAL]->ExtractFile("ldraw/ldconfig.ldr", ColorFile) || !lcLoadColorFile(ColorFile))
-			lcLoadDefaultColors();
+		if (!LoadCustomColors())
+			if (!mZipFiles[LC_ZIPFILE_OFFICIAL]->ExtractFile("ldraw/ldconfig.ldr", ColorFile) || !lcLoadColorFile(ColorFile))
+				lcLoadDefaultColors();
 
 		mLibraryDir = QFileInfo(LibraryPath).absoluteDir();
 		QString UnofficialFileName = mLibraryDir.absoluteFilePath(QLatin1String("ldrawunf.zip"));
@@ -322,14 +335,17 @@ bool lcPiecesLibrary::Load(const QString& LibraryPath, bool ShowProgress)
 
 		if (OpenDirectory(mLibraryDir, ShowProgress))
 		{
-			lcDiskFile ColorFile(mLibraryDir.absoluteFilePath(QLatin1String("ldconfig.ldr")));
-
-			if (!ColorFile.Open(QIODevice::ReadOnly) || !lcLoadColorFile(ColorFile))
+			if (!LoadCustomColors())
 			{
-				ColorFile.SetFileName(mLibraryDir.absoluteFilePath(QLatin1String("LDConfig.ldr")));
+				lcDiskFile ColorFile(mLibraryDir.absoluteFilePath(QLatin1String("ldconfig.ldr")));
 
 				if (!ColorFile.Open(QIODevice::ReadOnly) || !lcLoadColorFile(ColorFile))
-					lcLoadDefaultColors();
+				{
+					ColorFile.SetFileName(mLibraryDir.absoluteFilePath(QLatin1String("LDConfig.ldr")));
+
+					if (!ColorFile.Open(QIODevice::ReadOnly) || !lcLoadColorFile(ColorFile))
+						lcLoadDefaultColors();
+				}
 			}
 		}
 		else

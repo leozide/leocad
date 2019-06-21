@@ -92,6 +92,7 @@ public:
 	bool mAutoZoom;
 
 protected:
+	void LoadSettings();
 	void LoadTemplates();
 	void SaveTemplates();
 

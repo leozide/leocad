@@ -12,10 +12,10 @@ class lcQPreferencesDialog : public QDialog
 	Q_OBJECT
     
 public:
-	explicit lcQPreferencesDialog(QWidget *parent, void *data);
+	lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogOptions* Options);
 	~lcQPreferencesDialog();
 
-	lcPreferencesDialogOptions *options;
+	lcPreferencesDialogOptions* mOptions;
 
 	enum
 	{
@@ -28,6 +28,8 @@ public slots:
 	void accept();
 	void on_partsLibraryBrowse_clicked();
 	void on_partsArchiveBrowse_clicked();
+	void on_ColorConfigBrowseButton_clicked();
+	void on_MinifigSettingsBrowseButton_clicked();
 	void on_povrayExecutableBrowse_clicked();
 	void on_lgeoPathBrowse_clicked();
 	void ColorButtonClicked();

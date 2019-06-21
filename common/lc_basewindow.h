@@ -20,10 +20,12 @@ struct lcPreferencesDialogOptions
 {
 	lcPreferences Preferences;
 
-	QString DefaultAuthor;
 	QString LibraryPath;
+	QString ColorConfigPath;
+	QString MinifigSettingsPath;
 	QString POVRayPath;
 	QString LGEOPath;
+	QString DefaultAuthor;
 	int CheckForUpdates;
 
 	int AASamples;

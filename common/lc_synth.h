@@ -25,7 +25,7 @@ class lcLibraryMeshData;
 class lcSynthInfo
 {
 public:
-	lcSynthInfo(lcSynthType Type, float Length, int NumSections, PieceInfo* Info);
+	lcSynthInfo(lcSynthType Type, float Length, int NumSections);
 	virtual ~lcSynthInfo() = default;
 
 	bool CanAddControlPoints() const
@@ -47,7 +47,6 @@ protected:
 	virtual void CalculateSections(const lcArray<lcPieceControlPoint>& ControlPoints, lcArray<lcMatrix44>& Sections, SectionCallbackFunc SectionCallback) const = 0;
 	virtual void AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const lcArray<lcMatrix44>& Sections) const = 0;
 
-	PieceInfo* mPieceInfo;
 	lcSynthType mType;
 	lcSynthComponent mStart;
 	lcSynthComponent mMiddle;

@@ -10,7 +10,7 @@
 class lcSynthInfoCurved : public lcSynthInfo
 {
 public:
-	lcSynthInfoCurved(lcSynthType Type, float Length, int NumSections, PieceInfo* Info);
+	lcSynthInfoCurved(lcSynthType Type, float Length, int NumSections);
 
 protected:
 	float GetSectionTwist(const lcMatrix44& StartTransform, const lcMatrix44& EndTransform) const;
@@ -24,12 +24,14 @@ public:
 
 protected:
 	void AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const lcArray<lcMatrix44>& Sections) const override;
+
+	PieceInfo* mPieceInfo;
 };
 
 class lcSynthInfoFlexSystemHose : public lcSynthInfoCurved
 {
 public:
-	lcSynthInfoFlexSystemHose(float Length, int NumSections, PieceInfo* Info);
+	lcSynthInfoFlexSystemHose(float Length, int NumSections);
 
 protected:
 	void AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const lcArray<lcMatrix44>& Sections) const override;
@@ -38,7 +40,7 @@ protected:
 class lcSynthInfoRibbedHose : public lcSynthInfoCurved
 {
 public:
-	lcSynthInfoRibbedHose(float Length, int NumSections, PieceInfo* Info);
+	lcSynthInfoRibbedHose(float Length, int NumSections);
 
 protected:
 	void AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const lcArray<lcMatrix44>& Sections) const override;
@@ -47,7 +49,7 @@ protected:
 class lcSynthInfoFlexibleAxle : public lcSynthInfoCurved
 {
 public:
-	lcSynthInfoFlexibleAxle(float Length, int NumSections, PieceInfo* Info);
+	lcSynthInfoFlexibleAxle(float Length, int NumSections);
 
 protected:
 	void AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const lcArray<lcMatrix44>& Sections) const override;
@@ -56,7 +58,7 @@ protected:
 class lcSynthInfoBraidedString : public lcSynthInfoCurved
 {
 public:
-	lcSynthInfoBraidedString(float Length, int NumSections, PieceInfo* Info);
+	lcSynthInfoBraidedString(float Length, int NumSections);
 
 protected:
 	void AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const lcArray<lcMatrix44>& Sections) const override;
@@ -65,7 +67,7 @@ protected:
 class lcSynthInfoStraight : public lcSynthInfo
 {
 public:
-	lcSynthInfoStraight(lcSynthType Type, float Length, PieceInfo* Info);
+	lcSynthInfoStraight(lcSynthType Type, float Length);
 
 protected:
 	void CalculateSections(const lcArray<lcPieceControlPoint>& ControlPoints, lcArray<lcMatrix44>& Sections, SectionCallbackFunc SectionCallback) const override;
@@ -78,12 +80,14 @@ public:
 
 protected:
 	void AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const lcArray<lcMatrix44>& Sections) const override;
+
+	PieceInfo* mPieceInfo;
 };
 
 class lcSynthInfoActuator : public lcSynthInfoStraight
 {
 public:
-	lcSynthInfoActuator(float Length, PieceInfo* Info);
+	explicit lcSynthInfoActuator(float Length);
 
 protected:
 	void AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const lcArray<lcMatrix44>& Sections) const override;
@@ -161,7 +165,7 @@ void lcSynthInit()
 		PieceInfo* Info = Library->FindPiece(HoseInfo.PartID, nullptr, false, false);
 
 		if (Info)
-			Info->SetSynthInfo(new lcSynthInfoFlexSystemHose(HoseInfo.Length, HoseInfo.NumSections, Info));
+			Info->SetSynthInfo(new lcSynthInfoFlexSystemHose(HoseInfo.Length, HoseInfo.NumSections));
 	}
 
 	static const struct
@@ -198,7 +202,7 @@ void lcSynthInit()
 		PieceInfo* Info = Library->FindPiece(HoseInfo.PartID, nullptr, false, false);
 
 		if (Info)
-			Info->SetSynthInfo(new lcSynthInfoRibbedHose(HoseInfo.Length, HoseInfo.NumSections, Info));
+			Info->SetSynthInfo(new lcSynthInfoRibbedHose(HoseInfo.Length, HoseInfo.NumSections));
 	}
 
 	static const struct
@@ -223,7 +227,7 @@ void lcSynthInit()
 		PieceInfo* Info = Library->FindPiece(AxleInfo.PartID, nullptr, false, false);
 
 		if (Info)
-			Info->SetSynthInfo(new lcSynthInfoFlexibleAxle(AxleInfo.Length, AxleInfo.NumSections, Info));
+			Info->SetSynthInfo(new lcSynthInfoFlexibleAxle(AxleInfo.Length, AxleInfo.NumSections));
 	}
 
 	static const struct
@@ -244,7 +248,7 @@ void lcSynthInit()
 		PieceInfo* Info = Library->FindPiece(StringInfo.PartID, nullptr, false, false);
 
 		if (Info)
-			Info->SetSynthInfo(new lcSynthInfoBraidedString(StringInfo.Length, StringInfo.NumSections, Info));
+			Info->SetSynthInfo(new lcSynthInfoBraidedString(StringInfo.Length, StringInfo.NumSections));
 	}
 
 	static const struct
@@ -284,14 +288,14 @@ void lcSynthInit()
 		PieceInfo* Info = Library->FindPiece(ActuatorInfo.PartID, nullptr, false, false);
 
 		if (Info)
-			Info->SetSynthInfo(new lcSynthInfoActuator(ActuatorInfo.Length, Info));
+			Info->SetSynthInfo(new lcSynthInfoActuator(ActuatorInfo.Length));
 	}
 
 //	"758C01" // Hose Flexible  12L
 }
 
-lcSynthInfo::lcSynthInfo(lcSynthType Type, float Length, int NumSections, PieceInfo* Info)
-	: mPieceInfo(Info), mType(Type), mLength(Length), mNumSections(NumSections)
+lcSynthInfo::lcSynthInfo(lcSynthType Type, float Length, int NumSections)
+	: mType(Type), mLength(Length), mNumSections(NumSections)
 {
 	float EdgeSectionLength = 0.0f;
 	float MidSectionLength = 0.0f;
@@ -365,49 +369,49 @@ lcSynthInfo::lcSynthInfo(lcSynthType Type, float Length, int NumSections, PieceI
 	mEnd.Length = EdgeSectionLength;
 }
 
-lcSynthInfoCurved::lcSynthInfoCurved(lcSynthType Type, float Length, int NumSections, PieceInfo* Info)
-	: lcSynthInfo(Type, Length, NumSections, Info)
+lcSynthInfoCurved::lcSynthInfoCurved(lcSynthType Type, float Length, int NumSections)
+	: lcSynthInfo(Type, Length, NumSections)
 {
 	mCurve = true;
 }
 
 lcSynthInfoFlexibleHose::lcSynthInfoFlexibleHose(float Length, int NumSections, PieceInfo* Info)
-	: lcSynthInfoCurved(lcSynthType::HOSE_FLEXIBLE, Length, NumSections, Info)
+	: lcSynthInfoCurved(lcSynthType::HOSE_FLEXIBLE, Length, NumSections), mPieceInfo(Info)
 {
 }
 
-lcSynthInfoFlexSystemHose::lcSynthInfoFlexSystemHose(float Length, int NumSections, PieceInfo* Info)
-	: lcSynthInfoCurved(lcSynthType::FLEX_SYSTEM_HOSE, Length, NumSections, Info)
+lcSynthInfoFlexSystemHose::lcSynthInfoFlexSystemHose(float Length, int NumSections)
+	: lcSynthInfoCurved(lcSynthType::FLEX_SYSTEM_HOSE, Length, NumSections)
 {
 }
 
-lcSynthInfoRibbedHose::lcSynthInfoRibbedHose(float Length, int NumSections, PieceInfo* Info)
-	: lcSynthInfoCurved(lcSynthType::RIBBED_HOSE, Length, NumSections, Info)
+lcSynthInfoRibbedHose::lcSynthInfoRibbedHose(float Length, int NumSections)
+	: lcSynthInfoCurved(lcSynthType::RIBBED_HOSE, Length, NumSections)
 {
 }
 
-lcSynthInfoFlexibleAxle::lcSynthInfoFlexibleAxle(float Length, int NumSections, PieceInfo* Info)
-	: lcSynthInfoCurved(lcSynthType::FLEXIBLE_AXLE, Length, NumSections, Info)
+lcSynthInfoFlexibleAxle::lcSynthInfoFlexibleAxle(float Length, int NumSections)
+	: lcSynthInfoCurved(lcSynthType::FLEXIBLE_AXLE, Length, NumSections)
 {
 }
 
-lcSynthInfoBraidedString::lcSynthInfoBraidedString(float Length, int NumSections, PieceInfo* Info)
-	: lcSynthInfoCurved(lcSynthType::STRING_BRAIDED, Length, NumSections, Info)
+lcSynthInfoBraidedString::lcSynthInfoBraidedString(float Length, int NumSections)
+	: lcSynthInfoCurved(lcSynthType::STRING_BRAIDED, Length, NumSections)
 {
 }
 
-lcSynthInfoStraight::lcSynthInfoStraight(lcSynthType Type, float Length, PieceInfo* Info)
-	: lcSynthInfo(Type, Length, 1, Info)
+lcSynthInfoStraight::lcSynthInfoStraight(lcSynthType Type, float Length)
+	: lcSynthInfo(Type, Length, 1)
 {
 }
 
 lcSynthInfoShockAbsorber::lcSynthInfoShockAbsorber(float Length, PieceInfo* Info)
-	: lcSynthInfoStraight(lcSynthType::SHOCK_ABSORBER, Length, Info)
+	: lcSynthInfoStraight(lcSynthType::SHOCK_ABSORBER, Length), mPieceInfo(Info)
 {
 }
 
-lcSynthInfoActuator::lcSynthInfoActuator(float Length, PieceInfo* Info)
-	: lcSynthInfoStraight(lcSynthType::ACTUATOR, Length, Info)
+lcSynthInfoActuator::lcSynthInfoActuator(float Length)
+	: lcSynthInfoStraight(lcSynthType::ACTUATOR, Length)
 {
 }
 

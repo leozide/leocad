@@ -828,6 +828,7 @@ void lcMainWindow::ModelTabContextMenuRequested(const QPoint& Point)
 		Menu->addAction(tr("Reset Views"), this, SLOT(ModelTabResetViews()));
 
 	Menu->exec(QCursor::pos());
+	delete Menu;
 }
 
 void lcMainWindow::ModelTabCloseOtherTabs()

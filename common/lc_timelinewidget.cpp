@@ -58,7 +58,8 @@ void lcTimelineWidget::CustomMenuRequested(QPoint Pos)
 	Menu->addAction(gMainWindow->mActions[LC_PIECE_UNHIDE_SELECTED]);
 	Menu->addAction(gMainWindow->mActions[LC_PIECE_UNHIDE_ALL]);
 
-	Menu->popup(viewport()->mapToGlobal(Pos));
+	Menu->exec(viewport()->mapToGlobal(Pos));
+	delete Menu;
 }
 
 void lcTimelineWidget::Update(bool Clear, bool UpdateItems)

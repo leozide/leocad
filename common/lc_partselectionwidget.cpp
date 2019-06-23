@@ -514,7 +514,8 @@ void lcPartSelectionListView::CustomContextMenuRequested(QPoint Pos)
 		FixedColor->setChecked(mListModel->IsColorLocked());
 	}
 
-	Menu->popup(viewport()->mapToGlobal(Pos));
+	Menu->exec(viewport()->mapToGlobal(Pos));
+	delete Menu;
 }
 
 void lcPartSelectionListView::SetNoIcons()

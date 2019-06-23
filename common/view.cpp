@@ -511,6 +511,7 @@ void View::ShowContextMenu() const
 	Popup->addAction(Actions[LC_VIEW_RESET_VIEWS]);
 
 	Popup->exec(QCursor::pos());
+	delete Popup;
 }
 
 lcVector3 View::GetMoveDirection(const lcVector3& Direction) const

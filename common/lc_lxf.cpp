@@ -168,7 +168,7 @@ bool lcImportLXFMLFile(const QString& FileData, lcArray<lcPiece*>& Pieces, lcArr
 				if (ColorIt != MaterialTable.end())
 					ColorCode = ColorIt->second;
 
-				const auto TransformIt = TransformTable.find(BrickIt != BrickTable.end() ? BrickIt->second : LegoID.toStdString());
+				const auto TransformIt = TransformTable.find(BrickIt != BrickTable.end() ? BrickIt->second : (LegoID.toStdString() + ".dat"));
 				if (TransformIt != TransformTable.end())
 				{
 					const lcVector4& AxisAngle = TransformIt->second.second;

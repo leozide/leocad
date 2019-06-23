@@ -947,11 +947,11 @@ void lcSynthInfo::AddShockAbsorberParts(lcMemFile& File, lcArray<lcMatrix44>& Se
 
 	if (!qstricmp(mPieceInfo->mFileName, "73129.dat"))
 		SpringPart = "70038";
-	else if (!qstricmp(mPieceInfo->mFileName, "41838"))
+	else if (!qstricmp(mPieceInfo->mFileName, "41838.dat"))
 		SpringPart = "41837";
-	else if (!qstricmp(mPieceInfo->mFileName, "76138"))
+	else if (!qstricmp(mPieceInfo->mFileName, "76138.dat"))
 		SpringPart = "71953";
-	else if (!qstricmp(mPieceInfo->mFileName, "76537"))
+	else if (!qstricmp(mPieceInfo->mFileName, "76537.dat"))
 		SpringPart = "22977";
 	else
 		return;

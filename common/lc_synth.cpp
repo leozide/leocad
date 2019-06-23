@@ -20,12 +20,12 @@ protected:
 class lcSynthInfoFlexibleHose : public lcSynthInfoCurved
 {
 public:
-	lcSynthInfoFlexibleHose(float Length, int NumSections, PieceInfo* Info);
+	lcSynthInfoFlexibleHose(float Length, int NumSections, const char* EdgePart2);
 
 protected:
 	void AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const lcArray<lcMatrix44>& Sections) const override;
 
-	PieceInfo* mPieceInfo;
+	const char* mEdgePart2;
 };
 
 class lcSynthInfoFlexSystemHose : public lcSynthInfoCurved
@@ -102,11 +102,12 @@ void lcSynthInit()
 		char PartID[16];
 		float Length;
 		int NumSections;
+		char EdgePart2[8];
 	}
 	FlexibleHoses[] =
 	{
-		{ "73590a.dat",   140.0f,   51 }, // Hose Flexible  8.5L without Tabs
-		{ "73590b.dat",   140.0f,   51 }, // Hose Flexible  8.5L with Tabs
+		{ "73590a.dat", 140.0f, 51, "752.dat" }, // Hose Flexible  8.5L without Tabs
+		{ "73590b.dat", 140.0f, 51, "750.dat" }, // Hose Flexible  8.5L with Tabs
 	};
 
 	for (const auto& HoseInfo: FlexibleHoses)
@@ -114,7 +115,7 @@ void lcSynthInit()
 		PieceInfo* Info = Library->FindPiece(HoseInfo.PartID, nullptr, false, false);
 
 		if (Info)
-			Info->SetSynthInfo(new lcSynthInfoFlexibleHose(HoseInfo.Length, HoseInfo.NumSections, Info));
+			Info->SetSynthInfo(new lcSynthInfoFlexibleHose(HoseInfo.Length, HoseInfo.NumSections, HoseInfo.EdgePart2));
 	}
 
 	static const struct
@@ -375,8 +376,8 @@ lcSynthInfoCurved::lcSynthInfoCurved(lcSynthType Type, float Length, int NumSect
 	mCurve = true;
 }
 
-lcSynthInfoFlexibleHose::lcSynthInfoFlexibleHose(float Length, int NumSections, PieceInfo* Info)
-	: lcSynthInfoCurved(lcSynthType::HOSE_FLEXIBLE, Length, NumSections), mPieceInfo(Info)
+lcSynthInfoFlexibleHose::lcSynthInfoFlexibleHose(float Length, int NumSections, const char* EdgePart2)
+	: lcSynthInfoCurved(lcSynthType::HOSE_FLEXIBLE, Length, NumSections), mEdgePart2(EdgePart2)
 {
 }
 
@@ -699,17 +700,10 @@ void lcSynthInfoFlexibleHose::AddParts(lcMemFile& File, lcLibraryMeshData&, cons
 		lcMatrix33(lcVector3(0.0f, 0.0f, -1.0f), lcVector3(0.0f,  1.0f, 0.0f), lcVector3(1.0f, 0.0f, 0.0f))
 	};
 
-	const char* EdgePartsA[2] =
+	const char* EdgeParts[2] =
 	{
-		"755.dat", "752.dat"
+		"755.dat", mEdgePart2
 	};
-
-	const char* EdgePartsB[2] =
-	{
-		"755.dat", "750.dat"
-	};
-
-	const char** EdgeParts = !strcmp(mPieceInfo->mFileName, "73590a.dat") ? EdgePartsA : EdgePartsB;
 
 	for (int PartIdx = 0; PartIdx < NumEdgeParts; PartIdx++)
 	{

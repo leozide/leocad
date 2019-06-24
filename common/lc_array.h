@@ -43,17 +43,6 @@ public:
 		return *this;
 	}
 
-	lcArray<T>& operator+=(const lcArray<T>& Array)
-	{
-		AllocGrow(Array.mLength);
-
-		for (int i = 0; i < Array.mLength; i++)
-			mData[mLength + i] = Array.mData[i];
-
-		mLength += Array.mLength;
-		return *this;
-	}
-
 	const T& operator[](int Index) const
 	{
 		return mData[Index];
@@ -146,20 +135,6 @@ public:
 	{
 		AllocGrow(1);
 		return mData[mLength++];
-	}
-
-	void AddSorted(const T& Obj, lcArrayCompareFunc CompareFunc)
-	{
-		for (int i = 0; i < mLength; i++)
-		{
-			if (CompareFunc(Obj, mData[i]) < 0)
-			{
-				InsertAt(i, Obj);
-				return;
-			}
-		}
-
-		Add(Obj);
 	}
 
 	T& InsertAt(int Index)

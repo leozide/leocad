@@ -215,8 +215,12 @@ bool lcModel::IncludesModel(const lcModel* Model) const
 
 void lcModel::DeleteHistory()
 {
-	mUndoHistory.DeleteAll();
-	mRedoHistory.DeleteAll();
+	for (lcModelHistoryEntry* Entry : mUndoHistory)
+		delete Entry;
+	mUndoHistory.clear();
+	for (lcModelHistoryEntry* Entry : mRedoHistory)
+		delete Entry;
+	mRedoHistory.clear();
 }
 
 void lcModel::DeleteModel()
@@ -1487,13 +1491,15 @@ void lcModel::SaveCheckpoint(const QString& Description)
 	QTextStream Stream(&ModelHistoryEntry->File);
 	SaveLDraw(Stream, false);
 
-	mUndoHistory.InsertAt(0, ModelHistoryEntry);
-	mRedoHistory.DeleteAll();
+	mUndoHistory.insert(mUndoHistory.begin(), ModelHistoryEntry);
+	for (lcModelHistoryEntry* Entry : mRedoHistory)
+		delete Entry;
+	mRedoHistory.clear();
 
 	if (!Description.isEmpty())
 	{
 		gMainWindow->UpdateModified(IsModified());
-		gMainWindow->UpdateUndoRedo(mUndoHistory.GetSize() > 1 ? mUndoHistory[0]->Description : QString(), !mRedoHistory.IsEmpty() ? mRedoHistory[0]->Description : QString());
+		gMainWindow->UpdateUndoRedo(mUndoHistory.size() > 1 ? mUndoHistory[0]->Description : QString(), !mRedoHistory.empty() ? mRedoHistory[0]->Description : QString());
 	}
 }
 
@@ -3653,32 +3659,32 @@ void lcModel::FindPiece(bool FindFirst, bool SearchForward)
 
 void lcModel::UndoAction()
 {
-	if (mUndoHistory.GetSize() < 2)
+	if (mUndoHistory.size() < 2)
 		return;
 
-	lcModelHistoryEntry* Undo = mUndoHistory[0];
-	mUndoHistory.RemoveIndex(0);
-	mRedoHistory.InsertAt(0, Undo);
+	lcModelHistoryEntry* Undo = mUndoHistory.front();
+	mUndoHistory.erase(mUndoHistory.begin());
+	mRedoHistory.insert(mRedoHistory.begin(), Undo);
 
 	LoadCheckPoint(mUndoHistory[0]);
 
 	gMainWindow->UpdateModified(IsModified());
-	gMainWindow->UpdateUndoRedo(mUndoHistory.GetSize() > 1 ? mUndoHistory[0]->Description : nullptr, !mRedoHistory.IsEmpty() ? mRedoHistory[0]->Description : nullptr);
+	gMainWindow->UpdateUndoRedo(mUndoHistory.size() > 1 ? mUndoHistory[0]->Description : nullptr, !mRedoHistory.empty() ? mRedoHistory[0]->Description : nullptr);
 }
 
 void lcModel::RedoAction()
 {
-	if (mRedoHistory.IsEmpty())
+	if (mRedoHistory.empty())
 		return;
 
-	lcModelHistoryEntry* Redo = mRedoHistory[0];
-	mRedoHistory.RemoveIndex(0);
-	mUndoHistory.InsertAt(0, Redo);
+	lcModelHistoryEntry* Redo = mRedoHistory.front();
+	mRedoHistory.erase(mRedoHistory.begin());
+	mUndoHistory.insert(mUndoHistory.begin(), Redo);
 
 	LoadCheckPoint(Redo);
 
 	gMainWindow->UpdateModified(IsModified());
-	gMainWindow->UpdateUndoRedo(mUndoHistory.GetSize() > 1 ? mUndoHistory[0]->Description : nullptr, !mRedoHistory.IsEmpty() ? mRedoHistory[0]->Description : nullptr);
+	gMainWindow->UpdateUndoRedo(mUndoHistory.size() > 1 ? mUndoHistory[0]->Description : nullptr, !mRedoHistory.empty() ? mRedoHistory[0]->Description : nullptr);
 }
 
 void lcModel::BeginMouseTool()
@@ -4202,7 +4208,7 @@ void lcModel::ShowMinifigDialog()
 void lcModel::UpdateInterface()
 {
 	gMainWindow->UpdateTimeline(true, false);
-	gMainWindow->UpdateUndoRedo(mUndoHistory.GetSize() > 1 ? mUndoHistory[0]->Description : nullptr, !mRedoHistory.IsEmpty() ? mRedoHistory[0]->Description : nullptr);
+	gMainWindow->UpdateUndoRedo(mUndoHistory.size() > 1 ? mUndoHistory[0]->Description : nullptr, !mRedoHistory.empty() ? mRedoHistory[0]->Description : nullptr);
 	gMainWindow->UpdatePaste(!gApplication->mClipboard.isEmpty());
 	gMainWindow->UpdateCategories();
 	gMainWindow->UpdateTitle();

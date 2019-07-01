@@ -30,6 +30,26 @@
 lcMainWindow* gMainWindow;
 #define LC_TAB_LAYOUT_VERSION 0x0001
 
+void lcTabBar::mouseReleaseEvent(QMouseEvent *event)
+{
+	if (event->type() == QEvent::MouseButtonRelease && event->button() == Qt::MidButton)
+		tabCloseRequested(tabAt(event->pos()));
+	else
+		QTabBar::mouseReleaseEvent(event);
+}
+
+lcTabWidget::lcTabWidget()
+	: QTabWidget()
+{
+	setTabBar(new lcTabBar());
+}
+
+lcTabWidget::~lcTabWidget()
+{
+	if (tabBar())
+		delete tabBar();
+}
+
 void lcModelTabWidget::ResetLayout()
 {
 	QLayout* TabLayout = layout();

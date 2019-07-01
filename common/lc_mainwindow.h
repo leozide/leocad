@@ -49,6 +49,13 @@ class lcTabWidget : public QTabWidget
 {
 public:
 	lcTabWidget();
+
+#if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
+	QTabBar* tabBar()
+	{
+		return QTabWidget::tabBar();
+	}
+#endif
 };
 
 class lcModelTabWidget : public QWidget

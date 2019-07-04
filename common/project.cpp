@@ -344,6 +344,9 @@ void Project::ShowModelListDialog()
 
 void Project::SetFileName(const QString& FileName)
 {
+	if (mFileName == FileName)
+		return;
+
 	if (!mFileName.isEmpty())
 		mFileWatcher.removePath(mFileName);
 
@@ -457,12 +460,11 @@ bool Project::Load(const QString& FileName)
 
 bool Project::Save(const QString& FileName)
 {
-	SetFileName(QString());
-
 	QFile File(FileName);
 
 	if (!File.open(QIODevice::WriteOnly))
 	{
+		SetFileName(QString());
 		QMessageBox::warning(gMainWindow, tr("Error"), tr("Error writing to file '%1':\n%2").arg(FileName, File.errorString()));
 		return false;
 	}
@@ -471,8 +473,11 @@ bool Project::Save(const QString& FileName)
 	bool Success = Save(Stream);
 	File.close();
 
-	SetFileName(FileName);
-	mModified = false;
+	if (Success)
+	{
+		SetFileName(FileName);
+		mModified = false;
+	}
 
 	return Success;
 }
@@ -481,10 +486,8 @@ bool Project::Save(QTextStream& Stream)
 {
 	bool MPD = mModels.GetSize() > 1;
 
-	for (int ModelIdx = 0; ModelIdx < mModels.GetSize(); ModelIdx++)
+	for (lcModel* Model : mModels)
 	{
-		lcModel* Model = mModels[ModelIdx];
-
 		if (MPD)
 			Stream << QLatin1String("0 FILE ") << Model->GetProperties().mName << QLatin1String("\r\n");
 

@@ -26,7 +26,7 @@ enum
 
 struct lcColorGroup
 {
-	lcArray<int> Colors;
+	std::vector<int> Colors;
 	QString Name;
 };
 
@@ -44,7 +44,7 @@ enum lcInterfaceColor
 };
 
 extern lcVector4 gInterfaceColors[LC_NUM_INTERFACECOLORS];
-extern lcArray<lcColor> gColorList;
+extern std::vector<lcColor> gColorList;
 extern lcColorGroup gColorGroups[LC_NUM_COLORGROUPS];
 extern int gNumUserColors;
 extern int gEdgeColor;

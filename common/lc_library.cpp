@@ -125,9 +125,9 @@ void lcPiecesLibrary::Unload()
 		delete PrimitiveIt.second;
 	mPrimitives.clear();
 
-	for (int TextureIdx = 0; TextureIdx < mTextures.GetSize(); TextureIdx++)
-		delete mTextures[TextureIdx];
-	mTextures.RemoveAll();
+	for (lcTexture* Texture : mTextures)
+		delete Texture;
+	mTextures.clear();
 
 	mNumOfficialPieces = 0;
 	delete mZipFiles[LC_ZIPFILE_OFFICIAL];
@@ -266,9 +266,9 @@ PieceInfo* lcPiecesLibrary::FindPiece(const char* PieceName, Project* CurrentPro
 
 lcTexture* lcPiecesLibrary::FindTexture(const char* TextureName, Project* CurrentProject, bool SearchProjectFolder)
 {
-	for (int TextureIdx = 0; TextureIdx < mTextures.GetSize(); TextureIdx++)
-		if (!strcmp(TextureName, mTextures[TextureIdx]->mName))
-			return mTextures[TextureIdx];
+	for (lcTexture* Texture : mTextures)
+		if (!strcmp(TextureName, Texture->mName))
+			return Texture;
 
 	QString ProjectPath;
 	if (SearchProjectFolder)
@@ -289,7 +289,7 @@ lcTexture* lcPiecesLibrary::FindTexture(const char* TextureName, Project* Curren
 
 			if (Texture)
 			{
-				mTextures.Add(Texture);
+				mTextures.push_back(Texture);
 				return Texture;
 			}
 		}
@@ -423,7 +423,7 @@ bool lcPiecesLibrary::OpenArchive(lcFile* File, const QString& FileName, lcZipFi
 				    (ZipFileType == LC_ZIPFILE_UNOFFICIAL && !memcmp(Name, "PARTS/TEXTURES/", 15)))
 				{
 					lcTexture* Texture = new lcTexture();
-					mTextures.Add(Texture);
+					mTextures.push_back(Texture);
 
 					*Dst = 0;
 					strncpy(Texture->mName, Name + (ZipFileType == LC_ZIPFILE_OFFICIAL ? 21 : 15), sizeof(Texture->mName));
@@ -623,7 +623,7 @@ bool lcPiecesLibrary::OpenDirectory(const QDir& LibraryDir, bool ShowProgress)
 	QDir Dir(LibraryDir.absoluteFilePath(QLatin1String("parts/textures/")), QLatin1String("*.png"), QDir::SortFlags(QDir::Name | QDir::IgnoreCase), QDir::Files | QDir::Hidden | QDir::Readable);
 	QStringList FileList = Dir.entryList();
 
-	mTextures.AllocGrow(FileList.size());
+	mTextures.reserve(FileList.size());
 
 	for (int FileIdx = 0; FileIdx < FileList.size(); FileIdx++)
 	{
@@ -654,7 +654,7 @@ bool lcPiecesLibrary::OpenDirectory(const QDir& LibraryDir, bool ShowProgress)
 		*Dst = 0;
 
 		lcTexture* Texture = new lcTexture();
-		mTextures.Add(Texture);
+		mTextures.push_back(Texture);
 
 		strncpy(Texture->mName, Name, sizeof(Texture->mName));
 		Texture->mName[sizeof(Texture->mName) - 1] = 0;
@@ -1884,7 +1884,9 @@ void lcPiecesLibrary::ReleaseTexture(lcTexture* Texture)
 
 	if (Texture->Release() == 0 && Texture->IsTemporary())
 	{
-		mTextures.Remove(Texture);
+		std::vector<lcTexture*>::iterator TextureIt = std::find(mTextures.begin(), mTextures.end(), Texture);
+		if (TextureIt != mTextures.end())
+			mTextures.erase(TextureIt);
 		delete Texture;
 	}
 }

@@ -1506,13 +1506,13 @@ void lcModel::SaveCheckpoint(const QString& Description)
 void lcModel::LoadCheckPoint(lcModelHistoryEntry* CheckPoint)
 {
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
-	lcArray<PieceInfo*> Infos;
+	std::vector<PieceInfo*> LoadedInfos;
 
 	for (lcPiece* Piece : mPieces)
 	{
 		PieceInfo* Info = Piece->mPieceInfo;
 		Library->LoadPieceInfo(Info, true, true);
-		Infos.Add(Info);
+		LoadedInfos.push_back(Info);
 	}
 
 	DeleteModel();
@@ -1527,8 +1527,8 @@ void lcModel::LoadCheckPoint(lcModelHistoryEntry* CheckPoint)
 	gMainWindow->UpdateSelectedObjects(true);
 	gMainWindow->UpdateAllViews();
 
-	for (int InfoIdx = 0; InfoIdx < Infos.GetSize(); InfoIdx++)
-		Library->ReleasePieceInfo(Infos[InfoIdx]);
+	for (PieceInfo* Info : LoadedInfos)
+		Library->ReleasePieceInfo(Info);
 }
 
 void lcModel::SetActive(bool Active)

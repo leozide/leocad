@@ -18,10 +18,10 @@ lcQColorList::lcQColorList(QWidget *parent)
 	{
 		lcColorGroup* Group = &gColorGroups[GroupIdx];
 
-		for (int ColorIdx = 0; ColorIdx < Group->Colors.GetSize(); ColorIdx++)
-			mCellColors[mNumCells++] = Group->Colors[ColorIdx];
+		for (int Color: Group->Colors)
+			mCellColors[mNumCells++] = Color;
 
-		mRows += (Group->Colors.GetSize() + mColumns - 1) / mColumns;
+		mRows += ((int)Group->Colors.size() + mColumns - 1) / mColumns;
 	}
 
 	mWidth = 0;
@@ -187,7 +187,7 @@ void lcQColorList::keyPressEvent(QKeyEvent *event)
 
 		for (CurGroup = 0; CurGroup < LC_NUM_COLORGROUPS; CurGroup++)
 		{
-			int NumColors = gColorGroups[CurGroup].Colors.GetSize();
+			int NumColors = (int)gColorGroups[CurGroup].Colors.size();
 
 			if (mCurCell < NumCells + NumColors)
 				break;
@@ -204,7 +204,7 @@ void lcQColorList::keyPressEvent(QKeyEvent *event)
 				NewCell = mCurCell - mColumns;
 			else if (CurGroup > 0)
 			{
-				int NumColors = gColorGroups[CurGroup - 1].Colors.GetSize();
+				size_t NumColors = gColorGroups[CurGroup - 1].Colors.size();
 				int NumColumns = NumColors % mColumns;
 
 				if (NumColumns <= Column + 1)
@@ -215,7 +215,7 @@ void lcQColorList::keyPressEvent(QKeyEvent *event)
 		}
 		else if (event->key() == Qt::Key_Down)
 		{
-			int NumColors = gColorGroups[CurGroup].Colors.GetSize();
+			size_t NumColors = gColorGroups[CurGroup].Colors.size();
 
 			if (mCurCell + mColumns < NumCells + NumColors)
 				NewCell = mCurCell + mColumns;
@@ -274,7 +274,7 @@ void lcQColorList::resizeEvent(QResizeEvent *event)
 		for (int GroupIdx = 0; GroupIdx < LC_NUM_COLORGROUPS; GroupIdx++)
 		{
 			lcColorGroup* Group = &gColorGroups[GroupIdx];
-			mRows += (Group->Colors.GetSize() + mColumns - 1) / mColumns;
+			mRows += ((int)Group->Colors.size() + mColumns - 1) / mColumns;
 		}
 
 		CellWidth = (float)(width() + 1) / (float)mColumns;
@@ -292,7 +292,7 @@ void lcQColorList::resizeEvent(QResizeEvent *event)
 		for (int GroupIdx = 0; GroupIdx < LC_NUM_COLORGROUPS; GroupIdx++)
 		{
 			lcColorGroup* Group = &gColorGroups[GroupIdx];
-			mRows += (Group->Colors.GetSize() + mColumns - 1) / mColumns;
+			mRows += ((int)Group->Colors.size() + mColumns - 1) / mColumns;
 		}
 
 		CellWidth = (float)(width() + 1) / (float)mColumns;
@@ -315,7 +315,7 @@ void lcQColorList::resizeEvent(QResizeEvent *event)
 		mGroupRects[GroupIdx] = QRect(0, (int)GroupY, width(), mGroupRects[GroupIdx].height());
 		GroupY += mGroupRects[GroupIdx].height();
 
-		for (int ColorIdx = 0; ColorIdx < Group->Colors.GetSize(); ColorIdx++)
+		for (size_t ColorIdx = 0; ColorIdx < Group->Colors.size(); ColorIdx++)
 		{
 			const int Left = CellWidth * CurColumn - 1;
 			const int Right = (CurColumn + 1) * CellWidth - 1;

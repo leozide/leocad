@@ -713,7 +713,7 @@ void Project::Export3DStudio(const QString& FileName)
 	const int MaterialNameLength = 11;
 	char MaterialName[32];
 
-	for (int ColorIdx = 0; ColorIdx < gColorList.GetSize(); ColorIdx++)
+	for (int ColorIdx = 0; ColorIdx < gColorList.size(); ColorIdx++)
 	{
 		lcColor* Color = &gColorList[ColorIdx];
 
@@ -1685,7 +1685,7 @@ QImage Project::CreatePartsListImage(lcModel* Model, lcStep Step)
 
 void Project::CreateHTMLPieceList(QTextStream& Stream, lcModel* Model, lcStep Step, bool Images)
 {
-	std::vector<int> ColorsUsed(gColorList.GetSize(), 0);
+	std::vector<int> ColorsUsed(gColorList.size(), 0);
 	int NumColors = 0;
 
 	lcPartsList PartsList;
@@ -1701,7 +1701,7 @@ void Project::CreateHTMLPieceList(QTextStream& Stream, lcModel* Model, lcStep St
 
 	Stream << QLatin1String("<br><table border=1><tr><td><center>Piece</center></td>\r\n");
 
-	for (int ColorIdx = 0; ColorIdx < gColorList.GetSize(); ColorIdx++)
+	for (int ColorIdx = 0; ColorIdx < gColorList.size(); ColorIdx++)
 	{
 		if (ColorsUsed[ColorIdx])
 		{
@@ -2060,7 +2060,7 @@ bool Project::ExportPOVRay(const QString& FileName)
 
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 	std::map<const PieceInfo*, std::pair<char[LC_PIECE_NAME_LEN], int>> PieceTable;
-	int NumColors = gColorList.GetSize();
+	size_t NumColors = gColorList.size();
 	std::vector<std::array<char, LC_MAX_COLOR_NAME>> ColorTable(NumColors);
 
 	enum
@@ -2192,7 +2192,7 @@ bool Project::ExportPOVRay(const QString& FileName)
 		POVFile.WriteLine("\n");
 	}
 
-	for (int ColorIdx = 0; ColorIdx < gColorList.GetSize(); ColorIdx++)
+	for (int ColorIdx = 0; ColorIdx < gColorList.size(); ColorIdx++)
 	{
 		lcColor* Color = &gColorList[ColorIdx];
 
@@ -2391,13 +2391,12 @@ void Project::ExportWavefront(const QString& FileName)
 	}
 
 	MaterialFile.WriteLine("# Colors used by LeoCAD\n\n");
-	for (int ColorIdx = 0; ColorIdx < gColorList.GetSize(); ColorIdx++)
+	for (const lcColor& Color : gColorList)
 	{
-		lcColor* Color = &gColorList[ColorIdx];
-		if (Color->Translucent)
-			sprintf(Line, "newmtl %s\nKd %.2f %.2f %.2f\nD %.2f\n\n", Color->SafeName, Color->Value[0], Color->Value[1], Color->Value[2], Color->Value[3]);
+		if (Color.Translucent)
+			sprintf(Line, "newmtl %s\nKd %.2f %.2f %.2f\nD %.2f\n\n", Color.SafeName, Color.Value[0], Color.Value[1], Color.Value[2], Color.Value[3]);
 		else
-			sprintf(Line, "newmtl %s\nKd %.2f %.2f %.2f\n\n", Color->SafeName, Color->Value[0], Color->Value[1], Color->Value[2]);
+			sprintf(Line, "newmtl %s\nKd %.2f %.2f %.2f\n\n", Color.SafeName, Color.Value[0], Color.Value[1], Color.Value[2]);
 		MaterialFile.WriteLine(Line);
 	}
 

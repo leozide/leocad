@@ -405,7 +405,7 @@ void lcLoadDefaultColors()
 
 int lcGetColorIndex(quint32 ColorCode)
 {
-	for (int ColorIdx = 0; ColorIdx < gColorList.size(); ColorIdx++)
+	for (size_t ColorIdx = 0; ColorIdx < gColorList.size(); ColorIdx++)
 		if (gColorList[ColorIdx].Code == ColorCode)
 			return ColorIdx;
 

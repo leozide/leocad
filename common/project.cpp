@@ -713,11 +713,11 @@ void Project::Export3DStudio(const QString& FileName)
 	const int MaterialNameLength = 11;
 	char MaterialName[32];
 
-	for (int ColorIdx = 0; ColorIdx < gColorList.size(); ColorIdx++)
+	for (size_t ColorIdx = 0; ColorIdx < gColorList.size(); ColorIdx++)
 	{
 		lcColor* Color = &gColorList[ColorIdx];
 
-		sprintf(MaterialName, "Material%03d", ColorIdx);
+		sprintf(MaterialName, "Material%03d", (int)ColorIdx);
 
 		long MaterialStart = File.GetPosition();
 		File.WriteU16(0xAFFF); // CHK_MAT_ENTRY
@@ -1701,7 +1701,7 @@ void Project::CreateHTMLPieceList(QTextStream& Stream, lcModel* Model, lcStep St
 
 	Stream << QLatin1String("<br><table border=1><tr><td><center>Piece</center></td>\r\n");
 
-	for (int ColorIdx = 0; ColorIdx < gColorList.size(); ColorIdx++)
+	for (size_t ColorIdx = 0; ColorIdx < gColorList.size(); ColorIdx++)
 	{
 		if (ColorsUsed[ColorIdx])
 		{
@@ -2150,7 +2150,7 @@ bool Project::ExportPOVRay(const QString& FileName)
 			if (sscanf(Line,"%d%s%s", &Code, Name, Flags) != 3)
 				continue;
 
-			int Color = lcGetColorIndex(Code);
+			size_t Color = lcGetColorIndex(Code);
 			if (Color >= NumColors)
 				continue;
 
@@ -2192,7 +2192,7 @@ bool Project::ExportPOVRay(const QString& FileName)
 		POVFile.WriteLine("\n");
 	}
 
-	for (int ColorIdx = 0; ColorIdx < gColorList.size(); ColorIdx++)
+	for (size_t ColorIdx = 0; ColorIdx < gColorList.size(); ColorIdx++)
 	{
 		lcColor* Color = &gColorList[ColorIdx];
 
@@ -2217,7 +2217,7 @@ bool Project::ExportPOVRay(const QString& FileName)
 
 	lcArray<const char*> ColorTablePointer;
 	ColorTablePointer.SetSize(NumColors);
-	for (int ColorIdx = 0; ColorIdx < NumColors; ColorIdx++)
+	for (size_t ColorIdx = 0; ColorIdx < NumColors; ColorIdx++)
 		ColorTablePointer[ColorIdx] = ColorTable[ColorIdx].data();
 
 	auto GetMeshName = [](const lcModelPartsEntry& ModelPart, char* Name)

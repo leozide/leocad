@@ -215,7 +215,7 @@ void lcQColorList::keyPressEvent(QKeyEvent *event)
 		}
 		else if (event->key() == Qt::Key_Down)
 		{
-			size_t NumColors = gColorGroups[CurGroup].Colors.size();
+			int NumColors = (int)gColorGroups[CurGroup].Colors.size();
 
 			if (mCurCell + mColumns < NumCells + NumColors)
 				NewCell = mCurCell + mColumns;

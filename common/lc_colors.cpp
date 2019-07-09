@@ -407,7 +407,7 @@ int lcGetColorIndex(quint32 ColorCode)
 {
 	for (size_t ColorIdx = 0; ColorIdx < gColorList.size(); ColorIdx++)
 		if (gColorList[ColorIdx].Code == ColorCode)
-			return ColorIdx;
+			return (int)ColorIdx;
 
 	lcColor Color;
 

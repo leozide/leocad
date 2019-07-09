@@ -2215,8 +2215,8 @@ bool Project::ExportPOVRay(const QString& FileName)
 
 	POVFile.WriteLine("\n");
 
-	lcArray<const char*> ColorTablePointer;
-	ColorTablePointer.SetSize(NumColors);
+	std::vector<const char*> ColorTablePointer;
+	ColorTablePointer.resize(NumColors);
 	for (size_t ColorIdx = 0; ColorIdx < NumColors; ColorIdx++)
 		ColorTablePointer[ColorIdx] = ColorTable[ColorIdx].data();
 

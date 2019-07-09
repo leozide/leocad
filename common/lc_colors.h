@@ -72,7 +72,7 @@ inline quint32 lcGetColorCode(int ColorIndex)
 	return gColorList[ColorIndex].Code;
 }
 
-inline bool lcIsColorTranslucent(int ColorIndex)
+inline bool lcIsColorTranslucent(size_t ColorIndex)
 {
 	return gColorList[ColorIndex].Translucent;
 }

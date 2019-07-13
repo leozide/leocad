@@ -71,6 +71,11 @@ public:
 		return ((float*)this)[i];
 	}
 
+	bool IsNan() const
+	{
+		return std::isnan(x) || std::isnan(y);
+	}
+
 	float x, y;
 };
 
@@ -106,6 +111,11 @@ public:
 	float& operator[](int i)
 	{
 		return ((float*)this)[i];
+	}
+
+	bool IsNan() const
+	{
+		return std::isnan(x) || std::isnan(y) || std::isnan(z);
 	}
 
 	void Normalize();
@@ -150,6 +160,11 @@ public:
 	float& operator[](int i)
 	{
 		return ((float*)this)[i];
+	}
+
+	bool IsNan() const
+	{
+		return std::isnan(x) || std::isnan(y) || std::isnan(z) || std::isnan(w);
 	}
 
 	float x, y, z, w;

@@ -53,6 +53,12 @@ script:
       make -j$(nproc); export COMPILE_RESULT=$?
       if [[ "$QT_BASE" != "510" ]]; then exit $COMPILE_RESULT; fi
       make install INSTALL_ROOT=AppDir
+	  if [[ "$TRAVIS_TAG" != "" ]]; then
+	    wget https://github.com/leozide/leocad/releases/download/v18.02/Library-Linux-11494.zip -O library.zip;
+		unzip library.zip
+		mkdir -p AppDir/usr/share/leocad
+		mv library.bin AppDir/usr/share/leocad/library.bin
+	  fi
       wget -c "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
       chmod a+x linuxdeployqt*.AppImage 
       unset QTDIR; unset QT_PLUGIN_PATH ; unset LD_LIBRARY_PATH

@@ -102,7 +102,7 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 	on_edgeLines_toggled();
 	on_gridStuds_toggled();
 	on_gridLines_toggled();
-	on_ViewSphereSizeCombo_currentIndexChanged((int)mOptions->Preferences.mViewSphereLocation);
+	on_ViewSphereSizeCombo_currentIndexChanged(ui->ViewSphereSizeCombo->currentIndex());
 
 	updateCategories();
 	ui->categoriesTree->setCurrentItem(ui->categoriesTree->topLevelItem(0));

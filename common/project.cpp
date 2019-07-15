@@ -460,11 +460,12 @@ bool Project::Load(const QString& FileName)
 
 bool Project::Save(const QString& FileName)
 {
+	SetFileName(QString());
+
 	QFile File(FileName);
 
 	if (!File.open(QIODevice::WriteOnly))
 	{
-		SetFileName(QString());
 		QMessageBox::warning(gMainWindow, tr("Error"), tr("Error writing to file '%1':\n%2").arg(FileName, File.errorString()));
 		return false;
 	}

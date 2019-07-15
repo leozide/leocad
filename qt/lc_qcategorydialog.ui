@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>103</height>
+    <height>95</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -43,16 +43,6 @@
       <widget class="QLineEdit" name="keywords"/>
      </item>
     </layout>
-   </item>
-   <item>
-    <widget class="QFrame" name="frame">
-     <property name="frameShape">
-      <enum>QFrame::HLine</enum>
-     </property>
-     <property name="frameShadow">
-      <enum>QFrame::Raised</enum>
-     </property>
-    </widget>
    </item>
    <item>
     <widget class="QDialogButtonBox" name="buttonBox">

@@ -21,12 +21,6 @@ lcSelectByColorDialog::lcSelectByColorDialog(QWidget* Parent, int ColorIndex)
 
 	MainLayout->addLayout(ColorLayout);
 	
-	QFrame* Frame = new QFrame(this);
-	Frame->setFrameShape(QFrame::HLine);
-	Frame->setFrameShadow(QFrame::Raised);
-
-	MainLayout->addWidget(Frame);
-
 	QDialogButtonBox* ButtonBox = new QDialogButtonBox(this);
 	ButtonBox->setOrientation(Qt::Horizontal);
 	ButtonBox->setStandardButtons(QDialogButtonBox::Cancel | QDialogButtonBox::Ok);

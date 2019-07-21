@@ -17,9 +17,9 @@ PieceInfo::PieceInfo()
 {
 	mZipFileType = LC_NUM_ZIPFILES;
 	mZipFileIndex = -1;
-	mFlags = 0;
 	mState = LC_PIECEINFO_UNLOADED;
 	mRefCount = 0;
+	mType = lcPieceInfoType::Part;
 	mMesh = nullptr;
 	mModel = nullptr;
 	mProject = nullptr;
@@ -47,7 +47,7 @@ void PieceInfo::SetPlaceholder()
 	mBoundingBox.Max = lcVector3(10.0f, 10.0f, 4.0f);
 	ReleaseMesh();
 
-	mFlags = LC_PIECE_PLACEHOLDER;
+	mType = lcPieceInfoType::Placeholder;
 	mModel = nullptr;
 	mProject = nullptr;
 }
@@ -56,7 +56,7 @@ void PieceInfo::SetModel(lcModel* Model, bool UpdateMesh, Project* CurrentProjec
 {
 	if (mModel != Model)
 	{
-		mFlags = LC_PIECE_MODEL;
+		mType = lcPieceInfoType::Model;
 		mModel = Model;
 	}
 
@@ -93,7 +93,7 @@ void PieceInfo::CreateProject(Project* Project, const char* PieceName)
 {
 	if (mProject != Project)
 	{
-		mFlags = LC_PIECE_PROJECT;
+		mType = lcPieceInfoType::Project;
 		mProject = Project;
 		mState = LC_PIECEINFO_LOADED;
 	}
@@ -106,7 +106,7 @@ void PieceInfo::CreateProject(Project* Project, const char* PieceName)
 
 bool PieceInfo::GetPieceWorldMatrix(lcPiece* Piece, lcMatrix44& WorldMatrix) const
 {
-	if (mFlags & LC_PIECE_MODEL)
+	if (IsModel())
 		return mModel->GetPieceWorldMatrix(Piece, WorldMatrix);
 
 	return false;
@@ -114,7 +114,7 @@ bool PieceInfo::GetPieceWorldMatrix(lcPiece* Piece, lcMatrix44& WorldMatrix) con
 
 bool PieceInfo::IncludesModel(const lcModel* Model) const
 {
-	if (mFlags & LC_PIECE_MODEL)
+	if (IsModel())
 	{
 		if (mModel == Model)
 			return true;
@@ -137,14 +137,14 @@ void PieceInfo::CreatePlaceholder(const char* Name)
 
 void PieceInfo::Load()
 {
-	if ((mFlags & (LC_PIECE_MODEL | LC_PIECE_PROJECT)) == 0)
+	if (!IsModel() && !IsProject())
 	{
 		mState = LC_PIECEINFO_LOADING; // todo: mutex lock when changing load state
 
-		if (mFlags & LC_PIECE_PLACEHOLDER)
+		if (IsPlaceholder())
 		{
 			if (lcGetPiecesLibrary()->LoadPieceData(this))
-				mFlags &= ~LC_PIECE_PLACEHOLDER;
+				mType = lcPieceInfoType::Part;
 			else
 				mBoundingBox = gPlaceholderMesh->mBoundingBox;
 		}
@@ -195,18 +195,18 @@ bool PieceInfo::MinIntersectDist(const lcVector3& Start, const lcVector3& End, f
 {
 	bool Intersect = false;
 
-	if (mFlags & (LC_PIECE_PLACEHOLDER | LC_PIECE_MODEL | LC_PIECE_PROJECT))
+	if (IsPlaceholder() || IsModel() || IsProject())
 	{
 		float Distance;
 		if (!lcBoundingBoxRayIntersectDistance(mBoundingBox.Min, mBoundingBox.Max, Start, End, &Distance, nullptr) || (Distance >= MinDistance))
 			return false;
 
-		if (mFlags & LC_PIECE_PLACEHOLDER)
+		if (IsPlaceholder())
 			return true;
 
-		if (mFlags & LC_PIECE_MODEL)
+		if (IsModel())
 			Intersect |= mModel->SubModelMinIntersectDist(Start, End, MinDistance);
-		else if (mFlags & LC_PIECE_PROJECT)
+		else if (IsProject())
 		{
 			lcModel* Model = mProject->GetMainModel();
 			if (Model)
@@ -264,15 +264,15 @@ bool PieceInfo::BoxTest(const lcMatrix44& WorldMatrix, const lcVector4 WorldPlan
 	if (OutcodesOR == 0)
 		return true;
 
-	if (mFlags & LC_PIECE_PLACEHOLDER)
+	if (IsPlaceholder())
 		return gPlaceholderMesh->IntersectsPlanes(LocalPlanes);
 
 	if (mMesh && mMesh->IntersectsPlanes(LocalPlanes))
 		return true;
 
-	if (mFlags & LC_PIECE_MODEL)
+	if (IsModel())
 		return mModel->SubModelBoxTest(LocalPlanes);
-	else if (mFlags & LC_PIECE_PROJECT)
+	else if (IsProject())
 	{
 		lcModel* Model = mProject->GetMainModel();
 		return Model ? Model->SubModelBoxTest(LocalPlanes) : false;
@@ -305,12 +305,12 @@ void PieceInfo::AddRenderMesh(lcScene& Scene)
 
 void PieceInfo::AddRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, int ColorIndex, lcRenderMeshState RenderMeshState, bool ParentActive) const
 {
-	if ((mMesh) || (mFlags & LC_PIECE_PLACEHOLDER))
-		Scene.AddMesh((mFlags & LC_PIECE_PLACEHOLDER) ? gPlaceholderMesh : mMesh, WorldMatrix, ColorIndex, RenderMeshState);
+	if (mMesh || IsPlaceholder())
+		Scene.AddMesh(IsPlaceholder() ? gPlaceholderMesh : mMesh, WorldMatrix, ColorIndex, RenderMeshState);
 
-	if (mFlags & LC_PIECE_MODEL)
+	if (IsModel())
 		mModel->AddSubModelRenderMeshes(Scene, WorldMatrix, ColorIndex, RenderMeshState, ParentActive);
-	else if (mFlags & LC_PIECE_PROJECT)
+	else if (IsProject())
 	{
 		lcModel* Model = mProject->GetMainModel();
 		if (Model)
@@ -320,9 +320,9 @@ void PieceInfo::AddRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, i
 
 void PieceInfo::GetPartsList(int DefaultColorIndex, bool IncludeSubmodels, lcPartsList& PartsList) const
 {
-	if (mFlags & LC_PIECE_MODEL && IncludeSubmodels)
+	if (IsModel() && IncludeSubmodels)
 		mModel->GetPartsList(DefaultColorIndex, IncludeSubmodels, PartsList);
-	else if (mFlags & LC_PIECE_PROJECT)
+	else if (IsProject())
 	{
 		lcModel* Model = mProject->GetMainModel();
 		if (Model)
@@ -334,12 +334,12 @@ void PieceInfo::GetPartsList(int DefaultColorIndex, bool IncludeSubmodels, lcPar
 
 void PieceInfo::GetModelParts(const lcMatrix44& WorldMatrix, int DefaultColorIndex, std::vector<lcModelPartsEntry>& ModelParts) const
 {
-	if (mFlags & LC_PIECE_MODEL)
+	if (IsModel())
 	{
 		mModel->GetModelParts(WorldMatrix, DefaultColorIndex, ModelParts);
 		return;
 	}
-	else if (mFlags & LC_PIECE_PROJECT)
+	else if (IsProject())
 	{
 		lcModel* Model = mProject->GetMainModel();
 		if (Model)
@@ -352,8 +352,8 @@ void PieceInfo::GetModelParts(const lcMatrix44& WorldMatrix, int DefaultColorInd
 
 void PieceInfo::UpdateBoundingBox(std::vector<lcModel*>& UpdatedModels)
 {
-	if (mFlags & LC_PIECE_MODEL)
+	if (IsModel())
 		mModel->UpdatePieceInfo(UpdatedModels);
-	else if (mFlags & LC_PIECE_PROJECT)
+	else if (IsProject())
 		mProject->UpdatePieceInfo(this);
 }

@@ -25,7 +25,7 @@
 #  define DEF_MEM_LEVEL  MAX_MEM_LEVEL
 #endif
 
-#define LC_LIBRARY_CACHE_VERSION   0x0106
+#define LC_LIBRARY_CACHE_VERSION   0x0107
 #define LC_LIBRARY_CACHE_ARCHIVE   0x0001
 #define LC_LIBRARY_CACHE_DIRECTORY 0x0002
 
@@ -854,7 +854,6 @@ void lcPiecesLibrary::ReadDirectoryDescriptions(const QFileInfoList (&FileLists)
 			if (NewIndexFile.WriteBuffer(Info->m_strDescription, strlen(Info->m_strDescription) + 1) == 0)
 				return;
 
-			NewIndexFile.WriteU32(Info->mFlags);
 			NewIndexFile.WriteU8(Info->mFolderType);
 
 #if (QT_VERSION >= QT_VERSION_CHECK(4, 7, 0))
@@ -1101,7 +1100,7 @@ bool lcPiecesLibrary::LoadCacheIndex(const QString& FileName)
 		if (IndexFile.ReadBuffer((char*)&Length, sizeof(Length)) == 0 || Length >= sizeof(Info->m_strDescription))
 			return false;
 
-		if (IndexFile.ReadBuffer((char*)Info->m_strDescription, Length) == 0 || IndexFile.ReadBuffer((char*)&Info->mFlags, sizeof(Info->mFlags)) == 0)
+		if (IndexFile.ReadBuffer((char*)Info->m_strDescription, Length) == 0)
 			return false;
 
 		Info->m_strDescription[Length] = 0;
@@ -1127,7 +1126,7 @@ bool lcPiecesLibrary::SaveArchiveCacheIndex(const QString& FileName)
 		if (IndexFile.WriteBuffer((char*)&Length, sizeof(Length)) == 0)
 			return false;
 
-		if (IndexFile.WriteBuffer((char*)Info->m_strDescription, Length) == 0 || IndexFile.WriteBuffer((char*)&Info->mFlags, sizeof(Info->mFlags)) == 0)
+		if (IndexFile.WriteBuffer((char*)Info->m_strDescription, Length) == 0)
 			return false;
 	}
 
@@ -1146,8 +1145,6 @@ bool lcPiecesLibrary::LoadCachePiece(PieceInfo* Info)
 	if (MeshData.ReadBuffer((char*)&Flags, sizeof(Flags)) == 0)
 		return false;
 
-	Info->mFlags = Flags;
-
 	lcMesh* Mesh = new lcMesh;
 	if (Mesh->FileLoad(MeshData))
 	{
@@ -1164,10 +1161,6 @@ bool lcPiecesLibrary::LoadCachePiece(PieceInfo* Info)
 bool lcPiecesLibrary::SaveCachePiece(PieceInfo* Info)
 {
 	lcMemFile MeshData;
-
-	quint32 Flags = Info->mFlags;
-	if (MeshData.WriteBuffer((char*)&Flags, sizeof(Flags)) == 0)
-		return false;
 
 	if (!Info->GetMesh()->FileSave(MeshData))
 		return false;

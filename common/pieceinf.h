@@ -4,9 +4,13 @@
 #include "lc_math.h"
 #include "lc_array.h"
 
-#define LC_PIECE_PLACEHOLDER        0x10 // Placeholder for a piece not in the library
-#define LC_PIECE_MODEL              0x20 // Piece is a model
-#define LC_PIECE_PROJECT            0x40 // Piece is a project
+enum class lcPieceInfoType
+{
+	Part,
+	Placeholder,
+	Model,
+	Project
+};
 
 #define LC_PIECE_NAME_LEN 256
 
@@ -90,22 +94,22 @@ public:
 
 	bool IsPlaceholder() const
 	{
-		return (mFlags & LC_PIECE_PLACEHOLDER) != 0;
+		return mType == lcPieceInfoType::Placeholder;
 	}
 
 	bool IsModel() const
 	{
-		return (mFlags & LC_PIECE_MODEL) != 0;
+		return mType == lcPieceInfoType::Model;
 	}
 
 	bool IsProject() const
 	{
-		return (mFlags & LC_PIECE_PROJECT) != 0;
+		return mType == lcPieceInfoType::Project;
 	}
 
 	bool IsTemporary() const
 	{
-		return (mFlags & (LC_PIECE_PLACEHOLDER | LC_PIECE_MODEL | LC_PIECE_PROJECT)) != 0;
+		return mType != lcPieceInfoType::Part;
 	}
 
 	void SetZipFile(int ZipFileType, int ZipFileIndex)
@@ -162,7 +166,6 @@ public:
 	char m_strDescription[128];
 	int mZipFileType;
 	int mZipFileIndex;
-	quint32 mFlags;
 	lcPieceInfoState mState;
 	int mFolderType;
 	int mFolderIndex;
@@ -171,6 +174,7 @@ protected:
 	void ReleaseMesh();
 
 	int mRefCount;
+	lcPieceInfoType mType;
 	lcModel* mModel;
 	Project* mProject;
 	lcMesh* mMesh;

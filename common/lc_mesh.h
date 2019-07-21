@@ -50,7 +50,11 @@ enum
 	LC_NUM_MESH_LODS
 };
 
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
 enum class lcMeshFlag
+#else
+enum lcMeshFlag
+#endif
 {
 	HasDefault     = 0x01, // Mesh has triangles using the default color
 	HasSolid       = 0x02, // Mesh has triangles using a solid color

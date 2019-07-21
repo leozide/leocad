@@ -43,7 +43,7 @@ void lcScene::End()
 	std::sort(mTranslucentMeshes.begin(), mTranslucentMeshes.end(), TranslucentMeshCompare);
 }
 
-void lcScene::AddMesh(lcMesh* Mesh, const lcMatrix44& WorldMatrix, int ColorIndex, lcRenderMeshState State, int Flags)
+void lcScene::AddMesh(lcMesh* Mesh, const lcMatrix44& WorldMatrix, int ColorIndex, lcRenderMeshState State)
 {
 	lcRenderMesh& RenderMesh = mRenderMeshes.Add();
 
@@ -55,14 +55,15 @@ void lcScene::AddMesh(lcMesh* Mesh, const lcMatrix44& WorldMatrix, int ColorInde
 	RenderMesh.LodIndex = RenderMesh.Mesh->GetLodIndex(RenderMesh.Distance);
 
 	bool Translucent = lcIsColorTranslucent(ColorIndex);
+	lcMeshFlags Flags = Mesh->mFlags;
 
-	if ((Flags & (LC_PIECE_HAS_SOLID | LC_PIECE_HAS_LINES)) || ((Flags & LC_PIECE_HAS_DEFAULT) && !Translucent))
+	if ((Flags & (lcMeshFlag::HasSolid | lcMeshFlag::HasLines)) || ((Flags & lcMeshFlag::HasDefault) && !Translucent))
 		mOpaqueMeshes.Add(mRenderMeshes.GetSize() - 1);
 
-	if ((Flags & LC_PIECE_HAS_TRANSLUCENT) || ((Flags & LC_PIECE_HAS_DEFAULT) && Translucent))
+	if ((Flags & lcMeshFlag::HasTranslucent) || ((Flags & lcMeshFlag::HasDefault) && Translucent))
 		mTranslucentMeshes.Add(mRenderMeshes.GetSize() - 1);
 
-	if (Flags & LC_PIECE_HAS_TEXTURE)
+	if (Flags & lcMeshFlag::HasTexture)
 		mHasTexture = true;
 }
 

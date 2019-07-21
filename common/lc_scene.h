@@ -41,7 +41,7 @@ public:
 
 	void Begin(const lcMatrix44& ViewMatrix);
 	void End();
-	void AddMesh(lcMesh* Mesh, const lcMatrix44& WorldMatrix, int ColorIndex, lcRenderMeshState State, int Flags);
+	void AddMesh(lcMesh* Mesh, const lcMatrix44& WorldMatrix, int ColorIndex, lcRenderMeshState State);
 
 	void AddInterfaceObject(const lcObject* Object)
 	{

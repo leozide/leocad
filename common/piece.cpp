@@ -669,7 +669,7 @@ void lcPiece::AddMainModelRenderMeshes(lcScene& Scene, bool Highlight) const
 	if (!mMesh)
 		mPieceInfo->AddRenderMeshes(Scene, mModelWorld, mColorIndex, RenderMeshState, ParentActive);
 	else
-		Scene.AddMesh(mMesh, mModelWorld, mColorIndex, RenderMeshState, mPieceInfo->mFlags);
+		Scene.AddMesh(mMesh, mModelWorld, mColorIndex, RenderMeshState);
 
 	if (RenderMeshState == lcRenderMeshState::FOCUSED || RenderMeshState == lcRenderMeshState::SELECTED)
 		Scene.AddInterfaceObject(this);
@@ -692,7 +692,7 @@ void lcPiece::AddSubModelRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMat
 	if (!mMesh)
 		mPieceInfo->AddRenderMeshes(Scene, lcMul(mModelWorld, WorldMatrix), ColorIndex, RenderMeshState, ActiveSubmodelInstance == this);
 	else
-		Scene.AddMesh(mMesh, lcMul(mModelWorld, WorldMatrix), ColorIndex, RenderMeshState, mPieceInfo->mFlags);
+		Scene.AddMesh(mMesh, lcMul(mModelWorld, WorldMatrix), ColorIndex, RenderMeshState);
 
 	if (ParentActive && (RenderMeshState == lcRenderMeshState::FOCUSED || RenderMeshState == lcRenderMeshState::SELECTED))
 		Scene.AddInterfaceObject(this);

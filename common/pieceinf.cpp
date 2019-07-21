@@ -47,7 +47,7 @@ void PieceInfo::SetPlaceholder()
 	mBoundingBox.Max = lcVector3(10.0f, 10.0f, 4.0f);
 	ReleaseMesh();
 
-	mFlags = LC_PIECE_PLACEHOLDER | LC_PIECE_HAS_DEFAULT | LC_PIECE_HAS_LINES;
+	mFlags = LC_PIECE_PLACEHOLDER;
 	mModel = nullptr;
 	mProject = nullptr;
 }
@@ -146,10 +146,7 @@ void PieceInfo::Load()
 			if (lcGetPiecesLibrary()->LoadPieceData(this))
 				mFlags &= ~LC_PIECE_PLACEHOLDER;
 			else
-			{
-				mFlags |= LC_PIECE_HAS_DEFAULT | LC_PIECE_HAS_LINES;
 				mBoundingBox = gPlaceholderMesh->mBoundingBox;
-			}
 		}
 		else
 			lcGetPiecesLibrary()->LoadPieceData(this);
@@ -303,13 +300,13 @@ void PieceInfo::ZoomExtents(float FoV, float AspectRatio, lcMatrix44& Projection
 void PieceInfo::AddRenderMesh(lcScene& Scene)
 {
 	if (mMesh)
-		Scene.AddMesh(mMesh, lcMatrix44Identity(), gDefaultColor, lcRenderMeshState::NORMAL, mFlags);
+		Scene.AddMesh(mMesh, lcMatrix44Identity(), gDefaultColor, lcRenderMeshState::NORMAL);
 }
 
 void PieceInfo::AddRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, int ColorIndex, lcRenderMeshState RenderMeshState, bool ParentActive) const
 {
 	if ((mMesh) || (mFlags & LC_PIECE_PLACEHOLDER))
-		Scene.AddMesh((mFlags & LC_PIECE_PLACEHOLDER) ? gPlaceholderMesh : mMesh, WorldMatrix, ColorIndex, RenderMeshState, mFlags);
+		Scene.AddMesh((mFlags & LC_PIECE_PLACEHOLDER) ? gPlaceholderMesh : mMesh, WorldMatrix, ColorIndex, RenderMeshState);
 
 	if (mFlags & LC_PIECE_MODEL)
 		mModel->AddSubModelRenderMeshes(Scene, WorldMatrix, ColorIndex, RenderMeshState, ParentActive);

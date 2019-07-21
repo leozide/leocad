@@ -26,6 +26,7 @@ lcMesh::lcMesh()
 	mIndexDataSize = 0;
 	mVertexCacheOffset = -1;
 	mIndexCacheOffset = -1;
+	mFlags = 0;
 }
 
 lcMesh::~lcMesh()
@@ -77,6 +78,7 @@ void lcMesh::CreateBox()
 	mRadius = lcLength(Max - Min) / 2.0f;
 	mBoundingBox.Min = Min;
 	mBoundingBox.Max = Max;
+	mFlags |= lcMeshFlag::HasDefault | lcMeshFlag::HasLines;
 
 	lcVertex* Verts = (lcVertex*)mVertexData;
 	quint16* Indices = (quint16*)mIndexData;
@@ -365,6 +367,7 @@ bool lcMesh::FileLoad(lcMemFile& File)
 	if (File.ReadU32() != LC_MESH_FILE_ID || File.ReadU32() != LC_MESH_FILE_VERSION)
 		return false;
 
+	mFlags = static_cast<lcMeshFlags>(File.ReadU32());
 	mBoundingBox.Min = File.ReadVector3();
 	mBoundingBox.Max = File.ReadVector3();
 	mRadius = File.ReadFloat();
@@ -431,6 +434,7 @@ bool lcMesh::FileSave(lcMemFile& File)
 	File.WriteU32(LC_MESH_FILE_ID);
 	File.WriteU32(LC_MESH_FILE_VERSION);
 
+	File.WriteU32(mFlags);
 	File.WriteVector3(mBoundingBox.Min);
 	File.WriteVector3(mBoundingBox.Max);
 	File.WriteFloat(mRadius);

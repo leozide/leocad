@@ -1671,26 +1671,23 @@ lcMesh* lcPiecesLibrary::CreateMesh(PieceInfo* Info, lcLibraryMeshData& MeshData
 				}
 			}
 
-			if (Info)
+			if (DstSection.PrimitiveType == LC_MESH_TRIANGLES || DstSection.PrimitiveType == LC_MESH_TEXTURED_TRIANGLES)
 			{
-				if (DstSection.PrimitiveType == LC_MESH_TRIANGLES || DstSection.PrimitiveType == LC_MESH_TEXTURED_TRIANGLES)
-				{
-					if (DstSection.ColorIndex == gDefaultColor)
-						Info->mFlags |= LC_PIECE_HAS_DEFAULT;
-					else
-					{
-						if (lcIsColorTranslucent(DstSection.ColorIndex))
-							Info->mFlags |= LC_PIECE_HAS_TRANSLUCENT;
-						else
-							Info->mFlags |= LC_PIECE_HAS_SOLID;
-					}
-				}
+				if (DstSection.ColorIndex == gDefaultColor)
+					Mesh->mFlags |= lcMeshFlag::HasDefault;
 				else
-					Info->mFlags |= LC_PIECE_HAS_LINES;
-
-				if (DstSection.PrimitiveType == LC_MESH_TEXTURED_TRIANGLES || DstSection.PrimitiveType == LC_MESH_TEXTURED_LINES)
-					Info->mFlags |= LC_PIECE_HAS_TEXTURE;
+				{
+					if (lcIsColorTranslucent(DstSection.ColorIndex))
+						Mesh->mFlags |= lcMeshFlag::HasTranslucent;
+					else
+						Mesh->mFlags |= lcMeshFlag::HasSolid;
+				}
 			}
+			else
+				Mesh->mFlags |= lcMeshFlag::HasLines;
+
+			if (DstSection.PrimitiveType == LC_MESH_TEXTURED_TRIANGLES || DstSection.PrimitiveType == LC_MESH_TEXTURED_LINES)
+				Mesh->mFlags |= lcMeshFlag::HasTexture;
 
 			NumIndices += DstSection.NumIndices;
 		}

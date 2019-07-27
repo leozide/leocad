@@ -175,6 +175,7 @@ SOURCES += common/view.cpp \
     common/lc_lxf.cpp \
     common/lc_mainwindow.cpp \
     common/lc_mesh.cpp \
+    common/lc_meshloader.cpp \
     common/lc_model.cpp \
     common/lc_profile.cpp \
     common/lc_scene.cpp \
@@ -240,6 +241,7 @@ HEADERS += \
     common/lc_mainwindow.h \
     common/lc_math.h \
     common/lc_mesh.h \
+    common/lc_meshloader.h \
     common/lc_model.h \
     common/lc_profile.h \
     common/lc_scene.h \

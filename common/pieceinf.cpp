@@ -1,6 +1,7 @@
 #include "lc_global.h"
 #include "lc_math.h"
 #include "lc_mesh.h"
+#include "lc_meshloader.h"
 #include "lc_colors.h"
 #include "lc_texture.h"
 #include "pieceinf.h"
@@ -82,10 +83,11 @@ void PieceInfo::SetModel(lcModel* Model, bool UpdateMesh, Project* CurrentProjec
 		lcArray<lcLibraryTextureMap> TextureStack;
 		PieceFile.Seek(0, SEEK_SET);
 
-		bool Ret = lcGetPiecesLibrary()->ReadMeshData(PieceFile, lcMatrix44Identity(), 16, false, TextureStack, MeshData, LC_MESHDATA_SHARED, true, CurrentProject, SearchProjectFolder);
+		lcMeshLoader MeshLoader(MeshData, true, CurrentProject, SearchProjectFolder);
+		bool Ret = MeshLoader.LoadMesh(PieceFile, LC_MESHDATA_SHARED);
 
 		if (Ret && !MeshData.IsEmpty())
-			lcGetPiecesLibrary()->CreateMesh(this, MeshData);
+			SetMesh(MeshData.CreateMesh());
 	}
 }
 

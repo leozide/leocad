@@ -3,6 +3,7 @@
 #include "lc_library.h"
 #include "lc_application.h"
 #include "lc_file.h"
+#include "lc_meshloader.h"
 #include "pieceinf.h"
 #include <locale.h>
 
@@ -1025,8 +1026,9 @@ lcMesh* lcSynthInfo::CreateMesh(const lcArray<lcPieceControlPoint>& ControlPoint
 	lcArray<lcLibraryTextureMap> TextureStack;
 	File.Seek(0, SEEK_SET);
 
-	if (lcGetPiecesLibrary()->ReadMeshData(File, lcMatrix44Identity(), 16, false, TextureStack, MeshData, LC_MESHDATA_SHARED, false, nullptr, false))
-		return lcGetPiecesLibrary()->CreateMesh(nullptr, MeshData);
+	lcMeshLoader MeshLoader(MeshData, false, nullptr, false);
+	if (MeshLoader.LoadMesh(File, LC_MESHDATA_SHARED))
+		return MeshData.CreateMesh();
 
 	return nullptr;
 }

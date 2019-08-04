@@ -42,6 +42,7 @@ lcPartSelectionListModel::lcPartSelectionListModel(QObject* Parent)
 	mShowPartNames = lcGetProfileInt(LC_PROFILE_PARTS_LIST_NAMES);
 	mListMode = lcGetProfileInt(LC_PROFILE_PARTS_LIST_LISTMODE);
 	mShowDecoratedParts = lcGetProfileInt(LC_PROFILE_PARTS_LIST_DECORATED);
+	mShowPartAliases = lcGetProfileInt(LC_PROFILE_PARTS_LIST_ALIASES);
 
 	int ColorCode = lcGetProfileInt(LC_PROFILE_PARTS_LIST_COLOR);
 	if (ColorCode == -1)
@@ -213,6 +214,8 @@ void lcPartSelectionListModel::SetFilter(const QString& Filter)
 		bool Visible;
 
 		if (!mShowDecoratedParts && Info->IsPatterned())
+			Visible = false;
+		else if (!mShowPartAliases && Info->m_strDescription[0] == '=')
 			Visible = false;
 		else if (mFilter.isEmpty())
 			Visible = true;
@@ -407,6 +410,16 @@ void lcPartSelectionListModel::SetShowDecoratedParts(bool Show)
 	SetFilter(mFilter);
 }
 
+void lcPartSelectionListModel::SetShowPartAliases(bool Show)
+{
+	if (Show == mShowPartAliases)
+		return;
+
+	mShowPartAliases = Show;
+
+	SetFilter(mFilter);
+}
+
 void lcPartSelectionListModel::SetIconSize(int Size)
 {
 	if (Size == mIconSize)
@@ -503,6 +516,10 @@ void lcPartSelectionListView::CustomContextMenuRequested(QPoint Pos)
 	DecoratedParts->setCheckable(true);
 	DecoratedParts->setChecked(mListModel->GetShowDecoratedParts());
 
+	QAction* PartAliases = Menu->addAction(tr("Show Part Aliases"), this, SLOT(TogglePartAliases()));
+	PartAliases->setCheckable(true);
+	PartAliases->setChecked(mListModel->GetShowPartAliases());
+
 	if (mListModel->GetIconSize() != 0)
 	{
 		QAction* ListMode = Menu->addAction(tr("List Mode"), this, SLOT(ToggleListMode()));
@@ -555,6 +572,13 @@ void lcPartSelectionListView::ToggleDecoratedParts()
 	bool Show = !mListModel->GetShowDecoratedParts();
 	mListModel->SetShowDecoratedParts(Show);
 	lcSetProfileInt(LC_PROFILE_PARTS_LIST_DECORATED, Show);
+}
+
+void lcPartSelectionListView::TogglePartAliases()
+{
+	bool Show = !mListModel->GetShowPartAliases();
+	mListModel->SetShowPartAliases(Show);
+	lcSetProfileInt(LC_PROFILE_PARTS_LIST_ALIASES, Show);
 }
 
 void lcPartSelectionListView::ToggleListMode()

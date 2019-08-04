@@ -96,6 +96,7 @@ static lcProfileEntry gProfileEntries[LC_NUM_PROFILE_KEYS] =
 	lcProfileEntry("Settings", "PartsListNames", 0),                                        // LC_PROFILE_PARTS_LIST_NAMES
 	lcProfileEntry("Settings", "PartsListFixedColor", -1),                                  // LC_PROFILE_PARTS_LIST_FIXED_COLOR
 	lcProfileEntry("Settings", "PartsListDecorated", 1),                                    // LC_PROFILE_PARTS_LIST_DECORATED
+	lcProfileEntry("Settings", "PartsListAliases", 1),                                      // LC_PROFILE_PARTS_LIST_ALIASES
 	lcProfileEntry("Settings", "PartsListListMode", 0),                                     // LC_PROFILE_PARTS_LIST_LISTMODE
 
 	lcProfileEntry("Defaults", "Author", ""),                                               // LC_PROFILE_DEFAULT_AUTHOR_NAME

@@ -50,6 +50,11 @@ public:
 		return mShowDecoratedParts;
 	}
 
+	bool GetShowPartAliases() const
+	{
+		return mShowPartAliases;
+	}
+
 	int GetIconSize() const
 	{
 		return mIconSize;
@@ -80,6 +85,7 @@ public:
 	void SetFilter(const QString& Filter);
 	void RequestPreview(int InfoIndex);
 	void SetShowDecoratedParts(bool Show);
+	void SetShowPartAliases(bool Show);
 	void SetIconSize(int Size);
 	void SetShowPartNames(bool Show);
 
@@ -99,6 +105,7 @@ protected:
 	bool mShowPartNames;
 	bool mListMode;
 	bool mShowDecoratedParts;
+	bool mShowPartAliases;
 	QByteArray mFilter;
 	std::pair<lcFramebuffer, lcFramebuffer> mRenderFramebuffer;
 };
@@ -133,6 +140,7 @@ public slots:
 	void SetExtraLargeIcons();
 	void TogglePartNames();
 	void ToggleDecoratedParts();
+	void TogglePartAliases();
 	void ToggleListMode();
 	void ToggleFixedColor();
 

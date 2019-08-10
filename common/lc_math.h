@@ -1930,7 +1930,7 @@ inline bool lcSphereRayMinIntersectDistance(const lcVector3& Center, float Radiu
 	}
 }
 
-inline float lcRayPointDistance(const lcVector3& Point, const lcVector3& Start, const lcVector3& End)
+inline lcVector3 lcRayPointClosestPoint(const lcVector3& Point, const lcVector3& Start, const lcVector3& End)
 {
 	lcVector3 Dir = Point - Start;
 	lcVector3 RayDir = End - Start;
@@ -1938,7 +1938,12 @@ inline float lcRayPointDistance(const lcVector3& Point, const lcVector3& Start, 
 	float t = lcDot(Dir, RayDir) / lcLengthSquared(RayDir);
 	t = lcClamp(t, 0.0f, 1.0f);
 
-	lcVector3 Closest = Start + t * RayDir;
+	return Start + t * RayDir;
+}
+
+inline float lcRayPointDistance(const lcVector3& Point, const lcVector3& Start, const lcVector3& End)
+{
+	lcVector3 Closest = lcRayPointClosestPoint(Point, Start, End);
 
 	return lcLength(Closest - Point);
 }

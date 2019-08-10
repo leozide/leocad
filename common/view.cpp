@@ -605,6 +605,32 @@ lcMatrix44 View::GetPieceInsertPosition(bool IgnoreSelected, PieceInfo* Info) co
 	return lcMatrix44Translation(UnprojectPoint(lcVector3((float)mInputState.x, (float)mInputState.y, 0.9f)));
 }
 
+lcVector3 View::GetCameraLightInsertPosition() const
+{
+	lcModel* ActiveModel = GetActiveModel();
+
+	std::array<lcVector3, 2> ClickPoints = { { lcVector3((float)mInputState.x, (float)mInputState.y, 0.0f), lcVector3((float)mInputState.x, (float)mInputState.y, 1.0f) } };
+	UnprojectPoints(ClickPoints.data(), 2);
+
+	if (ActiveModel != mModel)
+	{
+		lcMatrix44 InverseMatrix = lcMatrix44AffineInverse(mActiveSubmodelTransform);
+
+		for (lcVector3& Point : ClickPoints)
+			Point = lcMul31(Point, InverseMatrix);
+	}
+
+	lcVector3 Min, Max;
+	lcVector3 Center;
+
+	if (ActiveModel->GetPiecesBoundingBox(Min, Max))
+		Center = (Min + Max) / 2.0f;
+	else
+		Center = lcVector3(0.0f, 0.0f, 0.0f);
+
+	return lcRayPointClosestPoint(Center, ClickPoints[0], ClickPoints[1]);
+}
+
 void View::GetRayUnderPointer(lcVector3& Start, lcVector3& End) const
 {
 	lcVector3 StartEnd[2] =
@@ -2520,27 +2546,17 @@ void View::StartTracking(lcTrackButton TrackButton)
 
 	case LC_TOOL_SPOTLIGHT:
 		{
-			lcVector3 PositionTarget[2] =
-			{
-				lcVector3((float)mInputState.x, (float)mInputState.y, 0.9f),
-				lcVector3((float)mInputState.x + 1.0f, (float)mInputState.y - 1.0f, 0.9f)
-			};
-
-			UnprojectPoints(PositionTarget, 2);
-			ActiveModel->BeginSpotLightTool(PositionTarget[0], PositionTarget[1]);
+			lcVector3 Position = GetCameraLightInsertPosition();
+			lcVector3 Target = Position + lcVector3(0.1f, 0.1f, 0.1f);
+			ActiveModel->BeginSpotLightTool(Position, Target);
 		}
 		break;
 
 	case LC_TOOL_CAMERA:
 		{
-			lcVector3 PositionTarget[2] =
-			{
-				lcVector3((float)mInputState.x, (float)mInputState.y, 0.9f),
-				lcVector3((float)mInputState.x + 1.0f, (float)mInputState.y - 1.0f, 0.9f)
-			};
-
-			UnprojectPoints(PositionTarget, 2);
-			ActiveModel->BeginCameraTool(PositionTarget[0], PositionTarget[1]);
+			lcVector3 Position = GetCameraLightInsertPosition();
+			lcVector3 Target = Position + lcVector3(0.1f, 0.1f, 0.1f);
+			ActiveModel->BeginCameraTool(Position, Target);
 		}
 		break;
 
@@ -2701,7 +2717,7 @@ void View::OnButtonDown(lcTrackButton TrackButton)
 
 	case LC_TRACKTOOL_POINTLIGHT:
 		{
-			ActiveModel->PointLightToolClicked(UnprojectPoint(lcVector3((float)mInputState.x, (float)mInputState.y, 0.9f)));
+			ActiveModel->PointLightToolClicked(GetCameraLightInsertPosition());
 
 			if ((mInputState.Modifiers & Qt::ControlModifier) == 0)
 				gMainWindow->SetTool(LC_TOOL_SELECT);
@@ -2932,11 +2948,11 @@ void View::OnMouseMove()
 		break;
 
 	case LC_TRACKTOOL_SPOTLIGHT:
-		ActiveModel->UpdateSpotLightTool(UnprojectPoint(lcVector3((float)mInputState.x, (float)mInputState.y, 0.9f)));
+		ActiveModel->UpdateSpotLightTool(GetCameraLightInsertPosition());
 		break;
 
 	case LC_TRACKTOOL_CAMERA:
-		ActiveModel->UpdateCameraTool(UnprojectPoint(lcVector3((float)mInputState.x, (float)mInputState.y, 0.9f)));
+		ActiveModel->UpdateCameraTool(GetCameraLightInsertPosition());
 		break;
 
 	case LC_TRACKTOOL_SELECT:

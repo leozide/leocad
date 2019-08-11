@@ -320,7 +320,14 @@ void View::SetCameraIndex(int Index)
 void View::SetViewpoint(lcViewpoint Viewpoint)
 {
 	if (!mCamera || !mCamera->IsSimple())
+	{
+		lcCamera* OldCamera = mCamera;
+
 		mCamera = new lcCamera(true);
+
+		if (OldCamera)
+			mCamera->CopySettings(OldCamera);
+	}
 
 	mCamera->SetViewpoint(Viewpoint);
 	ZoomExtents();
@@ -332,7 +339,14 @@ void View::SetViewpoint(lcViewpoint Viewpoint)
 void View::SetViewpoint(const lcVector3& Position)
 {
 	if (!mCamera || !mCamera->IsSimple())
+	{
+		lcCamera* OldCamera = mCamera;
+
 		mCamera = new lcCamera(true);
+
+		if (OldCamera)
+			mCamera->CopySettings(OldCamera);
+	}
 
 	mCamera->SetViewpoint(Position);
 	ZoomExtents();
@@ -344,7 +358,14 @@ void View::SetViewpoint(const lcVector3& Position)
 void View::SetCameraAngles(float Latitude, float Longitude)
 {
 	if (!mCamera || !mCamera->IsSimple())
+	{
+		lcCamera* OldCamera = mCamera;
+
 		mCamera = new lcCamera(true);
+
+		if (OldCamera)
+			mCamera->CopySettings(OldCamera);
+	}
 
 	mCamera->SetAngles(Latitude, Longitude);
 	ZoomExtents();

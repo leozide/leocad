@@ -272,7 +272,8 @@ public:
 
 	void CompareBoundingBox(lcVector3& Min, lcVector3& Max);
 	void UpdatePosition(lcStep Step);
-	void CopyPosition(const lcCamera* camera);
+	void CopyPosition(const lcCamera* Camera);
+	void CopySettings(const lcCamera* Camera);
 
 	void ZoomExtents(float AspectRatio, const lcVector3& Center, const lcVector3* Points, int NumPoints, lcStep Step, bool AddKey);
 	void ZoomRegion(float AspectRatio, const lcVector3& Position, const lcVector3& TargetPosition, const lcVector3* Corners, lcStep Step, bool AddKey);

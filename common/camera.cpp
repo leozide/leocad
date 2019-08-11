@@ -475,17 +475,26 @@ void lcCamera::UpdatePosition(lcStep Step)
 	mWorldView = lcMatrix44LookAt(mPosition, mTargetPosition, mUpVector);
 }
 
-void lcCamera::CopyPosition(const lcCamera* camera)
+void lcCamera::CopyPosition(const lcCamera* Camera)
+{
+	m_fovy = Camera->m_fovy;
+	m_zNear = Camera->m_zNear;
+	m_zFar = Camera->m_zFar;
+
+	mWorldView = Camera->mWorldView;
+	mPosition = Camera->mPosition;
+	mTargetPosition = Camera->mTargetPosition;
+	mUpVector = Camera->mUpVector;
+	mState |= (Camera->mState & LC_CAMERA_ORTHO);
+}
+
+void lcCamera::CopySettings(const lcCamera* camera)
 {
 	m_fovy = camera->m_fovy;
 	m_zNear = camera->m_zNear;
 	m_zFar = camera->m_zFar;
 
-	mWorldView = camera->mWorldView;
-	mPosition = camera->mPosition;
-	mTargetPosition = camera->mTargetPosition;
-	mUpVector = camera->mUpVector;
-	mState |= (camera->mState&LC_CAMERA_ORTHO);
+	mState |= (camera->mState & LC_CAMERA_ORTHO);
 }
 
 void lcCamera::DrawInterface(lcContext* Context, const lcScene& Scene) const

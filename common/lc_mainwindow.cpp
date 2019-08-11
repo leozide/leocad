@@ -2045,6 +2045,7 @@ void lcMainWindow::UpdateCurrentCamera(int CameraIndex)
 		ActionIndex = LC_VIEW_CAMERA_NONE;
 
 	mActions[ActionIndex]->setChecked(true);
+	UpdatePerspective();
 }
 
 void lcMainWindow::UpdatePerspective()

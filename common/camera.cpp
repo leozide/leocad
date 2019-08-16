@@ -1047,3 +1047,22 @@ void lcCamera::SetAngles(float Latitude, float Longitude)
 
 	UpdatePosition(1);
 }
+
+void lcCamera::GetAngles(float& Latitude, float& Longitude, float& Distance) const
+{
+	lcVector3 FrontVector(mPosition - mTargetPosition);
+	lcVector3 X(1, 0, 0);
+	lcVector3 Y(0, 1, 0);
+	lcVector3 Z(0, 0, 1);
+
+	FrontVector.Normalize();
+	Latitude = acos(lcDot(-FrontVector, Z)) * LC_RTOD - 90.0f;
+
+	lcVector3 CameraXY = -lcNormalize(lcVector3(FrontVector.x, FrontVector.y, 0.0f));
+	Longitude = acos(lcDot(CameraXY, Y)) * LC_RTOD;
+
+	if (lcDot(CameraXY, X) > 0)
+		Longitude = -Longitude;
+
+	Distance = lcLength(mPosition);
+}

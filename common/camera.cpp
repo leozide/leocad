@@ -1027,7 +1027,7 @@ void lcCamera::SetViewpoint(const lcVector3& Position)
 	UpdatePosition(1);
 }
 
-void lcCamera::SetAngles(float Latitude, float Longitude)
+void lcCamera::SetAngles(float Latitude, float Longitude, float Distance)
 {
 	mPosition = lcVector3(0, -1, 0);
 	mTargetPosition = lcVector3(0, 0, 0);
@@ -1038,7 +1038,7 @@ void lcCamera::SetAngles(float Latitude, float Longitude)
 
 	lcVector3 SideVector = lcMul(lcVector3(-1, 0, 0), LongitudeMatrix);
 	lcMatrix33 LatitudeMatrix = lcMatrix33FromAxisAngle(SideVector, LC_DTOR * Latitude);
-	mPosition = lcMul(mPosition, LatitudeMatrix);
+	mPosition = lcMul(mPosition, LatitudeMatrix) * Distance;
 	mUpVector = lcMul(mUpVector, LatitudeMatrix);
 
 	ChangeKey(mPositionKeys, mPosition, 1, false);

@@ -367,7 +367,7 @@ void View::SetCameraAngles(float Latitude, float Longitude)
 			mCamera->CopySettings(OldCamera);
 	}
 
-	mCamera->SetAngles(Latitude, Longitude);
+	mCamera->SetAngles(Latitude, Longitude, 1.0f);
 	ZoomExtents();
 	Redraw();
 }

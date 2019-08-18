@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop-application">
 	<id>org.leocad.LeoCAD</id>
-	<metadata_license>GPL-2.0</metadata_license>
+	<metadata_license>MIT</metadata_license>
 	<project_license>GPL-2.0</project_license>
+	<content_rating type="oars-1.1" />
 	<name>LeoCAD</name>
 	<summary>Design virtual models you can build with LEGO bricks</summary>
 	<description>
@@ -18,4 +19,7 @@
 	<provides>
 		<id>leocad.desktop</id>
 	</provides>
+	<releases>
+		<release version="19.07.1" date="2019-07-14" />
+	</releases>
 </component>

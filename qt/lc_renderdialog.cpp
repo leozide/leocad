@@ -213,9 +213,9 @@ void lcRenderDialog::Update()
 #ifdef Q_OS_LINUX
 		QByteArray Output = mProcess->readAllStandardOutput();
 		mImage = QImage::fromData(Output);
-		ShowResult();
 #endif
 
+		ShowResult();
 		CloseProcess();
 	}
 #endif
@@ -275,9 +275,6 @@ void lcRenderDialog::Update()
 	ui->RenderProgress->setValue(int(Header->PixelsRead));
 
 	ui->preview->setPixmap(QPixmap::fromImage(mImage.scaled(LC_POVRAY_PREVIEW_WIDTH, LC_POVRAY_PREVIEW_HEIGHT, Qt::KeepAspectRatio, Qt::SmoothTransformation)));
-
-	if (PixelsWritten == Width * Height)
-		ShowResult();
 #endif
 }
 
@@ -290,12 +287,12 @@ void lcRenderDialog::ShowResult()
 	if (Error)
 	{
 		WriteStdLog(Error);
-		QMessageBox error;
-		error.setWindowTitle(tr("Error"));
-		error.setIcon(QMessageBox::Critical);
-		error.setText(tr("An error occurred while rendering. Check details or try again."));
-		error.setDetailedText(mStdErrList.join(""));
-		error.exec();
+		QMessageBox MessageBox;
+		MessageBox.setWindowTitle(tr("Error"));
+		MessageBox.setIcon(QMessageBox::Information);
+		MessageBox.setText(tr("An error occurred while rendering. Check details or try again."));
+		MessageBox.setDetailedText(mStdErrList.join(QString()));
+		MessageBox.exec();
 		return;
 	}
 

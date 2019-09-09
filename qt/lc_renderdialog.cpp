@@ -114,13 +114,13 @@ void lcRenderDialog::on_RenderButton_clicked()
 
 	QStringList Arguments;
 
-	Arguments.append(QString::fromLatin1("+I%1").arg(FileName));
+	Arguments.append(QString::fromLatin1("+I\"%1\"").arg(FileName));
 	Arguments.append(QString::fromLatin1("+W%1").arg(ui->WidthEdit->text()));
 	Arguments.append(QString::fromLatin1("+H%1").arg(ui->HeightEdit->text()));
 	Arguments.append("-O-");
 
 #if LC_POVRAY_MEMORY_MAPPED_FILE
-	Arguments.append(QString::fromLatin1("+SM%1").arg(GetOutputFileName()));
+	Arguments.append(QString::fromLatin1("+SM\"%1\"").arg(GetOutputFileName()));
 #endif
 
 	int Quality = ui->QualityComboBox->currentIndex();

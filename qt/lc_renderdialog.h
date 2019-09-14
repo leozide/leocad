@@ -6,6 +6,31 @@ namespace Ui {
 class lcRenderDialog;
 }
 
+class lcRenderPreviewWidget : public QWidget
+{
+	Q_OBJECT
+
+public:
+	lcRenderPreviewWidget(QWidget* Parent)
+		: QWidget(Parent)
+	{
+	}
+
+	void SetImage(QImage Image)
+	{
+		mImage = Image;
+		mScaledImage = QImage();
+		update();
+	}
+
+protected:
+	virtual void resizeEvent(QResizeEvent* Event) override;
+	virtual void paintEvent(QPaintEvent* PaintEvent) override;
+
+	QImage mImage;
+	QImage mScaledImage;
+};
+
 class lcRenderDialog : public QDialog
 {
 	Q_OBJECT

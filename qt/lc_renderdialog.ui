@@ -18,6 +18,12 @@
     <layout class="QVBoxLayout" name="topLayout">
      <item>
       <widget class="QGroupBox" name="groupBox">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="title">
         <string>Settings</string>
        </property>
@@ -113,17 +119,21 @@
        </item>
       </layout>
      </item>
+     <item>
+      <widget class="lcRenderPreviewWidget" name="preview" native="true"/>
+     </item>
     </layout>
-   </item>
-   <item>
-    <widget class="QLabel" name="preview">
-     <property name="text">
-      <string/>
-     </property>
-    </widget>
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>lcRenderPreviewWidget</class>
+   <extends>QWidget</extends>
+   <header>lc_renderdialog.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <tabstops>
   <tabstop>QualityComboBox</tabstop>
   <tabstop>OutputEdit</tabstop>

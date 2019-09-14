@@ -11,6 +11,32 @@
 #define LC_POVRAY_MEMORY_MAPPED_FILE 1
 #endif
 
+void lcRenderPreviewWidget::resizeEvent(QResizeEvent* Event)
+{
+	mScaledImage = QImage();
+
+	QWidget::resizeEvent(Event);
+}
+
+void lcRenderPreviewWidget::paintEvent(QPaintEvent* PaintEvent)
+{
+	Q_UNUSED(PaintEvent);
+
+	QPainter Painter(this);
+
+	if (!mImage.isNull())
+	{
+		QSize Size = size();
+
+		if (mScaledImage.isNull())
+			mScaledImage = mImage.scaled(Size, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+
+		Painter.drawImage((Size.width() - mScaledImage.width()) / 2, (Size.height() - mScaledImage.height()) / 2, mScaledImage);
+	}
+	else
+		Painter.fillRect(rect(), Qt::white);
+}
+
 lcRenderDialog::lcRenderDialog(QWidget* Parent)
 	: QDialog(Parent),
 	ui(new Ui::lcRenderDialog)
@@ -30,7 +56,7 @@ lcRenderDialog::lcRenderDialog(QWidget* Parent)
 
 	QImage Image(LC_POVRAY_PREVIEW_WIDTH, LC_POVRAY_PREVIEW_HEIGHT, QImage::Format_RGB32);
 	Image.fill(QColor(255, 255, 255));
-	ui->preview->setPixmap(QPixmap::fromImage(Image));
+	ui->preview->SetImage(Image);
 
 	connect(&mUpdateTimer, SIGNAL(timeout()), this, SLOT(Update()));
 	mUpdateTimer.start(500);
@@ -173,6 +199,10 @@ void lcRenderDialog::on_RenderButton_clicked()
 #endif
 	mProcess->start(POVRayPath, Arguments);
 
+	mImage = QImage(ui->WidthEdit->text().toInt(), ui->HeightEdit->text().toInt(), QImage::Format_ARGB32);
+	mImage.fill(QColor(255, 255, 255));
+	ui->preview->SetImage(mImage);
+
 	if (mProcess->waitForStarted())
 	{
 		ui->RenderButton->setText(tr("Cancel"));
@@ -255,9 +285,6 @@ void lcRenderDialog::Update()
 	int Height = Header->Height;
 	int PixelsWritten = Header->PixelsWritten;
 
-	if (!Header->PixelsRead)
-		mImage = QImage(Width, Height, QImage::Format_ARGB32);
-
 	quint8* Pixels = (quint8*)(Header + 1);
 
 	for (int y = 0; y < Height; y++)
@@ -274,7 +301,7 @@ void lcRenderDialog::Update()
 	ui->RenderProgress->setMaximum(mImage.width() * mImage.height());
 	ui->RenderProgress->setValue(int(Header->PixelsRead));
 
-	ui->preview->setPixmap(QPixmap::fromImage(mImage.scaled(LC_POVRAY_PREVIEW_WIDTH, LC_POVRAY_PREVIEW_HEIGHT, Qt::KeepAspectRatio, Qt::SmoothTransformation)));
+	ui->preview->SetImage(mImage);
 #endif
 }
 
@@ -296,7 +323,7 @@ void lcRenderDialog::ShowResult()
 		return;
 	}
 
-	ui->preview->setPixmap(QPixmap::fromImage(mImage.scaled(LC_POVRAY_PREVIEW_WIDTH, LC_POVRAY_PREVIEW_HEIGHT, Qt::KeepAspectRatio, Qt::SmoothTransformation)));
+	ui->preview->SetImage(mImage);
 
 	QString FileName = ui->OutputEdit->text();
 

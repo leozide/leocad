@@ -216,6 +216,46 @@ void lcQMinifigDialog::on_TemplateDeleteButton_clicked()
 	UpdateTemplateCombo();
 }
 
+void lcQMinifigDialog::on_TemplateImportButton_clicked()
+{
+	QString FileName = QFileDialog::getOpenFileName(this, tr("Import Templates"), "", tr("Minifig Template Files (*.minifig);;All Files (*.*)"));
+
+	if (FileName.isEmpty())
+		return;
+
+	QFile File(FileName);
+
+	if (!File.open(QIODevice::ReadOnly))
+	{
+		QMessageBox::warning(gMainWindow, tr("Error"), tr("Error reading file '%1':\n%2").arg(FileName, File.errorString()));
+		return;
+	}
+
+	QByteArray FileData = File.readAll();
+	mMinifigWidget->AddTemplatesJson(FileData);
+
+	UpdateTemplateCombo();
+}
+
+void lcQMinifigDialog::on_TemplateExportButton_clicked()
+{
+	QString FileName = QFileDialog::getSaveFileName(this, tr("Export Templates"), "", tr("Minifig Template Files (*.minifig);;All Files (*.*)"));
+
+	if (FileName.isEmpty())
+		return;
+
+	QFile File(FileName);
+
+	if (!File.open(QIODevice::WriteOnly))
+	{
+		QMessageBox::warning(gMainWindow, tr("Error"), tr("Error writing to file '%1':\n%2").arg(FileName, File.errorString()));
+		return;
+	}
+
+	QByteArray Templates = mMinifigWidget->GetTemplatesJson();
+	File.write(Templates);
+}
+
 void lcQMinifigDialog::typeChanged(int index)
 {
 	mMinifigWidget->SetSelectionIndex(getTypeIndex(sender()), index);

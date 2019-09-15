@@ -227,20 +227,25 @@ void MinifigWizard::DeleteTemplate(const QString& TemplateName)
 	mTemplates.erase(TemplateName);
 }
 
-void MinifigWizard::LoadTemplates()
+void MinifigWizard::AddTemplatesJson(const QByteArray& TemplateData)
 {
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
-	QSettings Settings;
-	Settings.beginGroup("Minifig");
-	QByteArray TemplateData = Settings.value("Templates").toByteArray();
-
-	mTemplates.clear();
-
 	QJsonDocument Document = QJsonDocument::fromJson(TemplateData);
 	QJsonObject RootObject = Document.object();
 
-	for (QJsonObject::const_iterator ElementIt = RootObject.constBegin(); ElementIt != RootObject.constEnd(); ElementIt++)
+	int Version = RootObject["Version"].toInt(0);
+	QJsonObject TemplatesObject;
+
+	if (Version > 0)
+		TemplatesObject = RootObject["Templates"].toObject();
+	else
+		TemplatesObject = RootObject;
+
+	for (QJsonObject::const_iterator ElementIt = TemplatesObject.constBegin(); ElementIt != TemplatesObject.constEnd(); ElementIt++)
 	{
+		if (!ElementIt.value().isObject())
+			continue;
+
 		QJsonObject TemplateObject = ElementIt.value().toObject();
 		lcMinifigTemplate Template;
 
@@ -258,10 +263,15 @@ void MinifigWizard::LoadTemplates()
 #endif
 }
 
-void MinifigWizard::SaveTemplates()
+QByteArray MinifigWizard::GetTemplatesJson() const
 {
+	QByteArray TemplateData;
+
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
 	QJsonObject RootObject;
+
+	RootObject["Version"] = 1;
+	QJsonObject TemplatesObject;
 
 	for (const auto& TemplateEntry : mTemplates)
 	{
@@ -279,14 +289,33 @@ void MinifigWizard::SaveTemplates()
 			TemplateObject[QLatin1String(mSectionNames[PartIdx])] = PartObject;
 		}
 
-		RootObject[TemplateEntry.first] = TemplateObject;
+		TemplatesObject[TemplateEntry.first] = TemplateObject;
 	}
 
-	QByteArray TemplateData = QJsonDocument(RootObject).toJson(QJsonDocument::Compact);
+	RootObject["Templates"] = TemplatesObject;
+	TemplateData = QJsonDocument(RootObject).toJson();
+#endif
+
+	return TemplateData;
+}
+
+void MinifigWizard::LoadTemplates()
+{
+	mTemplates.clear();
 
 	QSettings Settings;
 	Settings.beginGroup("Minifig");
-	Settings.setValue("Templates", TemplateData);
+	QByteArray TemplateData = Settings.value("Templates").toByteArray();
+
+	AddTemplatesJson(TemplateData);
+}
+
+void MinifigWizard::SaveTemplates()
+{
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+	QSettings Settings;
+	Settings.beginGroup("Minifig");
+	Settings.setValue("Templates", GetTemplatesJson());
 #endif
 }
 

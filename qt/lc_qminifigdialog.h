@@ -23,6 +23,8 @@ public slots:
 	void on_TemplateComboBox_currentIndexChanged(const QString& TemplateName);
 	void on_TemplateSaveButton_clicked();
 	void on_TemplateDeleteButton_clicked();
+	void on_TemplateImportButton_clicked();
+	void on_TemplateExportButton_clicked();
 	void typeChanged(int index);
 	void colorChanged(int index);
 	void angleChanged(double value);

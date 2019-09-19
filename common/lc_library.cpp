@@ -259,8 +259,6 @@ bool lcPiecesLibrary::Load(const QString& LibraryPath, bool ShowProgress)
 		return ColorFile.Open(QIODevice::ReadOnly) && lcLoadColorFile(ColorFile);
 	};
 
-	mUnofficialLibAvailable = QFileInfo(QDir(QFileInfo(LibraryPath).absoluteDir()).absoluteFilePath(QLatin1String("ldrawunf.zip"))).exists();
-
 	if (OpenArchive(LibraryPath, LC_ZIPFILE_OFFICIAL))
 	{
 		lcMemFile ColorFile;
@@ -1551,11 +1549,11 @@ void lcPiecesLibrary::UploadTextures(lcContext* Context)
 	mTextureUploads.clear();
 }
 
-void lcPiecesLibrary::GetStudLogo(lcMemFile& PrimFile, int StudLogo, bool OpenStud)
+bool lcPiecesLibrary::GetStudLogo(lcMemFile& PrimFile, int StudLogo, bool OpenStud)
 {
 	// validate logo choice and unofficial lib available
-	if (!StudLogo || !mUnofficialLibAvailable)
-		return;
+	if (!StudLogo || (!mZipFiles[LC_ZIPFILE_UNOFFICIAL] && !mHasUnofficial))
+		return false;
 
 	// construct logo reference line
 	QString Logo        = QString("%1").arg(StudLogo);
@@ -1569,11 +1567,13 @@ void lcPiecesLibrary::GetStudLogo(lcMemFile& PrimFile, int StudLogo, bool OpenSt
 	out << (OpenStud ? "0 Stud Open" : "0 Stud") << endl;
 	out << (OpenStud ? "0 Name: stud2.dat" : "0 Name: stud.dat") << endl;
 	out << "0 Author: James Jessiman" << endl;
+	out << "0 !LDRAW_ORG Primitive" << endl;
 	out << "0 BFC CERTIFY CCW" << endl;
 	out << LogoRefLine << endl;
 
 	PrimFile.WriteBuffer(FileData.constData(), size_t(FileData.size()));
 	PrimFile.Seek(0, SEEK_SET);
+	return true;
 }
 
 bool lcPiecesLibrary::LoadPrimitive(lcLibraryPrimitive* Primitive)
@@ -1596,15 +1596,16 @@ bool lcPiecesLibrary::LoadPrimitive(lcLibraryPrimitive* Primitive)
 
 	lcMeshLoader MeshLoader(Primitive->mMeshData, true, nullptr, false);
 
+	bool SetStudLogo = false;
+	int StudLogo     = lcGetProfileInt(LC_PROFILE_STUD_LOGO);
+
 	if (mZipFiles[LC_ZIPFILE_OFFICIAL])
 	{
 		lcLibraryPrimitive* LowPrimitive = nullptr;
 
-		bool SetStudLogo = false;
-
 		lcMemFile PrimFile;
 
-		if (Primitive->mStud )
+		if (Primitive->mStud)
 		{
 			if (strncmp(Primitive->mName, "8/", 2)) // todo: this is currently the only place that uses mName so use mFileName instead. this should also be done for the loose file libraries.
 			{
@@ -1615,13 +1616,12 @@ bool lcPiecesLibrary::LoadPrimitive(lcLibraryPrimitive* Primitive)
 				LowPrimitive = FindPrimitive(Name);
 			}
 
-			int StudLogo = lcGetProfileInt(LC_PROFILE_STUD_LOGO);
 			if (StudLogo)
 			{
 				bool OpenStud = !strcmp(Primitive->mName,"stud2.dat");
 				if ((SetStudLogo = (OpenStud || !strcmp(Primitive->mName,"stud.dat"))))
 				{
-					GetStudLogo(PrimFile,StudLogo,OpenStud);
+					SetStudLogo = GetStudLogo(PrimFile,StudLogo,OpenStud);
 				}
 			}
 		}
@@ -1648,10 +1648,25 @@ bool lcPiecesLibrary::LoadPrimitive(lcLibraryPrimitive* Primitive)
 	}
 	else
 	{
-		lcDiskFile PrimFile(Primitive->mFileName);
+		if (StudLogo && Primitive->mStud)
+		{
+			lcMemFile PrimFile;
 
-		if (!PrimFile.Open(QIODevice::ReadOnly) || !MeshLoader.LoadMesh(PrimFile, LC_MESHDATA_SHARED)) // todo: LOD like the zip files
-			return false;
+			bool OpenStud = !strcmp(Primitive->mName,"stud2.dat");
+			if ((SetStudLogo = (OpenStud || !strcmp(Primitive->mName,"stud.dat"))))
+			{
+				if ((SetStudLogo = GetStudLogo(PrimFile,StudLogo,OpenStud)))
+					SetStudLogo = MeshLoader.LoadMesh(PrimFile, LC_MESHDATA_SHARED);
+			}
+		}
+
+		if (!SetStudLogo)
+		{
+			lcDiskFile PrimFile(Primitive->mFileName);
+
+			if (!PrimFile.Open(QIODevice::ReadOnly) || !MeshLoader.LoadMesh(PrimFile, LC_MESHDATA_SHARED)) // todo: LOD like the zip files
+				return false;
+		}
 	}
 
 	mLoadMutex.lock();

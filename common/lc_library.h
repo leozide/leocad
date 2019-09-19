@@ -113,7 +113,7 @@ public:
 
 	bool LoadPrimitive(lcLibraryPrimitive* Primitive);
 
-	void GetStudLogo(lcMemFile& PrimFile, int StudLogo, bool OpenStud = false);
+    bool GetStudLogo(lcMemFile& PrimFile, int StudLogo, bool OpenStud = false);
 
 	void SetOfficialPieces()
 	{
@@ -139,7 +139,6 @@ public:
 	QDir mLibraryDir;
 
 	bool mBuffersDirty;
-	bool mUnofficialLibAvailable;
 	lcVertexBuffer mVertexBuffer;
 	lcIndexBuffer mIndexBuffer;
 

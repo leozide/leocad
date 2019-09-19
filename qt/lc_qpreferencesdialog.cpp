@@ -13,7 +13,7 @@
 lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogOptions* Options)
 	: QDialog(Parent), mOptions(Options), ui(new Ui::lcQPreferencesDialog)
 {
-    ui->setupUi(this);
+	ui->setupUi(this);
 
 #if defined(Q_OS_WIN) || defined(Q_OS_MACOS)
 	ui->povrayLabel->hide();
@@ -77,6 +77,12 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 		break;
 	}
 
+	ui->studLogo->setChecked(mOptions->StudLogo);
+	if (ui->studLogo->isChecked())
+		ui->studLogoCombo->setCurrentIndex(mOptions->StudLogo - 1);
+	else
+		ui->studLogoCombo->setCurrentIndex(mOptions->StudLogo);
+
 	if (!gSupportsShaderObjects)
 		ui->ShadingMode->removeItem(LC_SHADING_DEFAULT_LIGHTS);
 	ui->ShadingMode->setCurrentIndex(mOptions->Preferences.mShadingMode);
@@ -98,6 +104,7 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 	pix.fill(QColor(LC_RGBA_RED(mOptions->Preferences.mViewSphereHighlightColor), LC_RGBA_GREEN(mOptions->Preferences.mViewSphereHighlightColor), LC_RGBA_BLUE(mOptions->Preferences.mViewSphereHighlightColor)));
 	ui->ViewSphereHighlightColorButton->setIcon(pix);
 
+	on_studLogo_toggled();
 	on_antiAliasing_toggled();
 	on_edgeLines_toggled();
 	on_gridStuds_toggled();
@@ -126,7 +133,7 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 
 lcQPreferencesDialog::~lcQPreferencesDialog()
 {
-    delete ui;
+	delete ui;
 }
 
 void lcQPreferencesDialog::accept()
@@ -185,6 +192,11 @@ void lcQPreferencesDialog::accept()
 	}
 
 	mOptions->Preferences.mShadingMode = (lcShadingMode)ui->ShadingMode->currentIndex();
+
+	if (ui->studLogoCombo->isEnabled())
+		mOptions->StudLogo = ui->studLogoCombo->currentIndex() + 1;
+	else
+		mOptions->StudLogo = 0;
 
 	QDialog::accept();
 }
@@ -295,6 +307,11 @@ void lcQPreferencesDialog::ColorButtonClicked()
 
 	pix.fill(newColor);
 	((QToolButton*)button)->setIcon(pix);
+}
+
+void lcQPreferencesDialog::on_studLogo_toggled()
+{
+   ui->studLogoCombo->setEnabled(ui->studLogo->isChecked());
 }
 
 void lcQPreferencesDialog::on_antiAliasing_toggled()
@@ -682,7 +699,7 @@ void lcQPreferencesDialog::on_KeyboardFilterEdit_textEdited(const QString& Text)
 
 void lcQPreferencesDialog::on_shortcutAssign_clicked()
 {
-    QTreeWidgetItem *current = ui->commandList->currentItem();
+	QTreeWidgetItem *current = ui->commandList->currentItem();
 
 	if (!current || !current->data(0, Qt::UserRole).isValid())
 		return;

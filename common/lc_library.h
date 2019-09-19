@@ -113,6 +113,8 @@ public:
 
 	bool LoadPrimitive(lcLibraryPrimitive* Primitive);
 
+	void GetStudLogo(lcMemFile& PrimFile, int StudLogo, bool OpenStud = false);
+
 	void SetOfficialPieces()
 	{
 		if (mZipFiles[LC_ZIPFILE_OFFICIAL])
@@ -137,6 +139,7 @@ public:
 	QDir mLibraryDir;
 
 	bool mBuffersDirty;
+	bool mUnofficialLibAvailable;
 	lcVertexBuffer mVertexBuffer;
 	lcIndexBuffer mIndexBuffer;
 

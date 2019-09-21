@@ -75,8 +75,8 @@ lcApplication::lcApplication(int& Argc, char** Argv)
 
 lcApplication::~lcApplication()
 {
-    delete mProject;
-    delete mLibrary;
+	delete mProject;
+	delete mLibrary;
 	gApplication = nullptr;
 }
 
@@ -189,6 +189,7 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 	bool ImageHighlight = false;
 	int ImageWidth = lcGetProfileInt(LC_PROFILE_IMAGE_WIDTH);
 	int ImageHeight = lcGetProfileInt(LC_PROFILE_IMAGE_HEIGHT);
+	int StudLogo = lcGetProfileInt(LC_PROFILE_STUD_LOGO);
 	int ImageStart = 0;
 	int ImageEnd = 0;
 	int PartImagesWidth = -1;
@@ -343,6 +344,11 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 		}
 		else if (Param == QLatin1String("--line-width"))
 			ParseFloat(mPreferences.mLineWidth);
+		else if (Param == QLatin1String("-sl") || Param == QLatin1String("--stud-logo"))
+		{
+			ParseInteger(StudLogo);
+			lcSetProfileInt(LC_PROFILE_STUD_LOGO, StudLogo);
+		}
 		else if (Param == QLatin1String("-obj") || Param == QLatin1String("--export-wavefront"))
 		{
 			SaveWavefront = true;
@@ -392,6 +398,7 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 			printf("  -t, --to <time>: Set the last step to save pictures.\n");
 			printf("  -s, --submodel <submodel>: Set the active submodel.\n");
 			printf("  -c, --camera <camera>: Set the active camera.\n");
+			printf("  -sl --stud-logo <type>: Set the stud logo type 0 - 5, 0 is no logo.\n");
 			printf("  --viewpoint <front|back|left|right|top|bottom|home>: Set the viewpoint.\n");
 			printf("  --camera-angles <latitude> <longitude>: Set the camera angles in degrees around the model.\n");
 			printf("  --orthographic: Make the view orthographic.\n");
@@ -647,6 +654,7 @@ void lcApplication::ShowPreferencesDialog()
 {
 	lcPreferencesDialogOptions Options;
 	int CurrentAASamples = lcGetProfileInt(LC_PROFILE_ANTIALIASING_SAMPLES);
+	int CurrentStudLogo = lcGetProfileInt(LC_PROFILE_STUD_LOGO);
 
 	Options.Preferences = mPreferences;
 
@@ -659,6 +667,7 @@ void lcApplication::ShowPreferencesDialog()
 	Options.CheckForUpdates = lcGetProfileInt(LC_PROFILE_CHECK_UPDATES);
 
 	Options.AASamples = CurrentAASamples;
+	Options.StudLogo = CurrentStudLogo;
 
 	Options.Categories = gCategories;
 	Options.CategoriesModified = false;
@@ -678,6 +687,7 @@ void lcApplication::ShowPreferencesDialog()
 	bool LibraryChanged = Options.LibraryPath != lcGetProfileString(LC_PROFILE_PARTS_LIBRARY);
 	bool ColorsChanged = Options.ColorConfigPath != lcGetProfileString(LC_PROFILE_COLOR_CONFIG);
 	bool AAChanged = CurrentAASamples != Options.AASamples;
+	bool StudLogoChanged = CurrentStudLogo != Options.StudLogo;
 
 	mPreferences = Options.Preferences;
 
@@ -691,8 +701,9 @@ void lcApplication::ShowPreferencesDialog()
 	lcSetProfileString(LC_PROFILE_POVRAY_LGEO_PATH, Options.LGEOPath);
 	lcSetProfileInt(LC_PROFILE_CHECK_UPDATES, Options.CheckForUpdates);
 	lcSetProfileInt(LC_PROFILE_ANTIALIASING_SAMPLES, Options.AASamples);
+	lcSetProfileInt(LC_PROFILE_STUD_LOGO, Options.StudLogo);
 
-	if (LibraryChanged || ColorsChanged || AAChanged)
+	if (LibraryChanged || ColorsChanged || AAChanged || StudLogoChanged)
 		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Some changes will only take effect the next time you start LeoCAD."));
 
 	if (Options.CategoriesModified)

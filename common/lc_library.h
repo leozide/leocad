@@ -113,6 +113,8 @@ public:
 
 	bool LoadPrimitive(lcLibraryPrimitive* Primitive);
 
+    bool GetStudLogo(lcMemFile& PrimFile, int StudLogo, bool OpenStud = false);
+
 	void SetOfficialPieces()
 	{
 		if (mZipFiles[LC_ZIPFILE_OFFICIAL])

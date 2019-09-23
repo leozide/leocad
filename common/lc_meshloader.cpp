@@ -1623,11 +1623,22 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 
 			if (Primitive)
 			{
+				if (Primitive->mStud  &&
+					Primitive->mReloadStudLogo &&
+					Primitive->mState == lcPrimitiveState::LOADED )
+				{
+					Primitive->mMeshData.RemoveAll();
+					Primitive->mState = lcPrimitiveState::NOT_LOADED;
+				}
+
 				if (Primitive->mState != lcPrimitiveState::LOADED && !Library->LoadPrimitive(Primitive))
 					break;
 
 				if (Primitive->mStud)
+				{
+					mMeshData.mHasLogoStud = !strcmp(Primitive->mName,"stud2.dat") || !strcmp(Primitive->mName,"stud.dat");
 					mMeshData.AddMeshDataNoDuplicateCheck(Primitive->mMeshData, IncludeTransform, ColorCode, Mirror ^ InvertNext, InvertNext, TextureMap, MeshDataType);
+				}
 				else if (!Primitive->mSubFile)
 				{
 					if (mOptimize)

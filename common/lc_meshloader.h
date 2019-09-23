@@ -97,6 +97,7 @@ public:
 	lcLibraryMeshData()
 	{
 		mHasTextures = false;
+		mHasLogoStud = false;
 
 		for (int MeshDataIdx = 0; MeshDataIdx < LC_NUM_MESHDATA_TYPES; MeshDataIdx++)
 			mVertices[MeshDataIdx].SetGrow(1024);
@@ -117,6 +118,17 @@ public:
 		return true;
 	}
 
+	void RemoveAll()
+	{
+		for (int MeshDataIdx = 0; MeshDataIdx < LC_NUM_MESHDATA_TYPES; MeshDataIdx++)
+			mVertices[MeshDataIdx].RemoveAll();
+
+		for (int MeshDataIdx = 0; MeshDataIdx < LC_NUM_MESHDATA_TYPES; MeshDataIdx++)
+			mSections[MeshDataIdx].RemoveAll();
+
+		mHasTextures = false;
+	}
+
 	lcMesh* CreateMesh();
 	lcLibraryMeshSection* AddSection(lcMeshDataType MeshDataType, lcMeshPrimitiveType PrimitiveType, quint32 ColorCode, lcTexture* Texture);
 	quint32 AddVertex(lcMeshDataType MeshDataType, const lcVector3& Position, bool Optimize);
@@ -135,6 +147,7 @@ public:
 	lcArray<lcLibraryMeshSection*> mSections[LC_NUM_MESHDATA_TYPES];
 	lcArray<lcLibraryMeshVertex> mVertices[LC_NUM_MESHDATA_TYPES];
 	bool mHasTextures;
+	bool mHasLogoStud;
 };
 
 class lcMeshLoader

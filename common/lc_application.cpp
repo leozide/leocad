@@ -347,7 +347,10 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 		else if (Param == QLatin1String("-sl") || Param == QLatin1String("--stud-logo"))
 		{
 			ParseInteger(StudLogo);
-			lcSetProfileInt(LC_PROFILE_STUD_LOGO, StudLogo);
+			if (StudLogo != lcGetProfileInt(LC_PROFILE_STUD_LOGO))
+			{
+				lcGetPiecesLibrary()->SetStudLogo(StudLogo);
+			}
 		}
 		else if (Param == QLatin1String("-obj") || Param == QLatin1String("--export-wavefront"))
 		{
@@ -703,7 +706,7 @@ void lcApplication::ShowPreferencesDialog()
 	lcSetProfileInt(LC_PROFILE_ANTIALIASING_SAMPLES, Options.AASamples);
 	lcSetProfileInt(LC_PROFILE_STUD_LOGO, Options.StudLogo);
 
-	if (LibraryChanged || ColorsChanged || AAChanged || StudLogoChanged)
+	if (LibraryChanged || ColorsChanged || AAChanged)
 		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Some changes will only take effect the next time you start LeoCAD."));
 
 	if (Options.CategoriesModified)
@@ -741,6 +744,14 @@ void lcApplication::ShowPreferencesDialog()
 			gMouseShortcuts = Options.MouseShortcuts;
 			lcSaveDefaultMouseShortcuts();
 		}
+	}
+
+	if (StudLogoChanged) 
+	{
+		lcGetPiecesLibrary()->SetStudLogo(Options.StudLogo);
+		QString ProjectName = lcGetProfileString(LC_PROFILE_RECENT_FILE1);
+		if (!ProjectName.isEmpty())
+			gMainWindow->OpenProject(ProjectName);
 	}
 
 	// TODO: printing preferences

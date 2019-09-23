@@ -349,8 +349,7 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 			ParseInteger(StudLogo);
 			if (StudLogo != lcGetProfileInt(LC_PROFILE_STUD_LOGO))
 			{
-				lcSetProfileInt(LC_PROFILE_STUD_LOGO, StudLogo);
-				lcGetPiecesLibrary()->mReloadStudLogo = true;
+				lcGetPiecesLibrary()->SetStudLogo(StudLogo);
 			}
 		}
 		else if (Param == QLatin1String("-obj") || Param == QLatin1String("--export-wavefront"))
@@ -749,7 +748,7 @@ void lcApplication::ShowPreferencesDialog()
 
 	if (StudLogoChanged) 
 	{
-		lcGetPiecesLibrary()->mReloadStudLogo = true;
+		lcGetPiecesLibrary()->SetStudLogo(Options.StudLogo);
 		QString ProjectName = lcGetProfileString(LC_PROFILE_RECENT_FILE1);
 		if (!ProjectName.isEmpty())
 			gMainWindow->OpenProject(ProjectName);

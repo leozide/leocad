@@ -1623,6 +1623,19 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 
 			if (Primitive)
 			{
+				if (Primitive->mStud  &&
+				   (mMeshData.mHasLogoStud = Primitive->mHasLogoStud =
+				   (!strcmp(Primitive->mName,"stud2.dat") ||
+					!strcmp(Primitive->mName,"stud.dat"))))
+				{
+					if (Primitive->mState == lcPrimitiveState::LOADED &&
+						Primitive->mHasLogoStud && Library->mReloadStudLogo)
+					{
+						Primitive->mState = lcPrimitiveState::NOT_LOADED;
+						Primitive->mMeshData.RemoveAll();
+					}
+				}
+
 				if (Primitive->mState != lcPrimitiveState::LOADED && !Library->LoadPrimitive(Primitive))
 					break;
 

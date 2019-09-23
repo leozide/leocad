@@ -248,6 +248,8 @@ bool lcPiecesLibrary::Load(const QString& LibraryPath, bool ShowProgress)
 {
 	Unload();
 
+	mReloadStudLogo = false;
+
 	auto LoadCustomColors = []()
 	{
 		QString CustomColorsPath = lcGetProfileString(LC_PROFILE_COLOR_CONFIG);
@@ -1151,8 +1153,11 @@ void lcPiecesLibrary::LoadPieceInfo(PieceInfo* Info, bool Wait, bool Priority)
 	}
 	else
 	{
-		if (Info->AddRef() == 1)
+		bool ReloadStudLogo = mReloadStudLogo && Info->mHasLogoStud;
+		if (Info->AddRef() == 1 || ReloadStudLogo)
 		{
+			if (ReloadStudLogo)
+				 Info->mState = LC_PIECEINFO_UNLOADED;
 			if (Priority)
 				mLoadQueue.prepend(Info);
 			else
@@ -1250,8 +1255,11 @@ bool lcPiecesLibrary::LoadPieceData(PieceInfo* Info)
 	if (!Loaded || mCancelLoading)
 		return false;
 
-	if (Info)
+	if (Info) 
+	{
+		Info->mHasLogoStud = MeshData.mHasLogoStud;
 		Info->SetMesh(MeshData.CreateMesh());
+	}
 
 	if (SaveCache)
 		SaveCachePiece(Info);
@@ -1618,9 +1626,9 @@ bool lcPiecesLibrary::LoadPrimitive(lcLibraryPrimitive* Primitive)
 
 			if (StudLogo)
 			{
-				bool OpenStud = !strcmp(Primitive->mName,"stud2.dat");
-				if ((SetStudLogo = (OpenStud || !strcmp(Primitive->mName,"stud.dat"))))
+				if (Primitive->mHasLogoStud)
 				{
+					bool OpenStud = !strcmp(Primitive->mName,"stud2.dat");
 					SetStudLogo = GetStudLogo(PrimFile,StudLogo,OpenStud);
 				}
 			}
@@ -1652,10 +1660,10 @@ bool lcPiecesLibrary::LoadPrimitive(lcLibraryPrimitive* Primitive)
 		{
 			lcMemFile PrimFile;
 
-			bool OpenStud = !strcmp(Primitive->mName,"stud2.dat");
-			if ((SetStudLogo = (OpenStud || !strcmp(Primitive->mName,"stud.dat"))))
+			if (Primitive->mHasLogoStud)
 			{
-				if ((SetStudLogo = GetStudLogo(PrimFile,StudLogo,OpenStud)))
+				bool OpenStud = !strcmp(Primitive->mName,"stud2.dat");
+				if (GetStudLogo(PrimFile,StudLogo,OpenStud))
 					SetStudLogo = MeshLoader.LoadMesh(PrimFile, LC_MESHDATA_SHARED);
 			}
 		}

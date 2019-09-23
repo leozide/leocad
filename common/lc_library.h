@@ -45,6 +45,7 @@ public:
 		mState = lcPrimitiveState::NOT_LOADED;
 		mStud = Stud;
 		mSubFile = SubFile;
+		mHasLogoStud = false;
 	}
 
 	void SetZipFile(lcZipFileType ZipFileType, quint32 ZipFileIndex)
@@ -60,6 +61,7 @@ public:
 	lcPrimitiveState mState;
 	bool mStud;
 	bool mSubFile;
+	bool mHasLogoStud;
 	lcLibraryMeshData mMeshData;
 };
 
@@ -113,7 +115,7 @@ public:
 
 	bool LoadPrimitive(lcLibraryPrimitive* Primitive);
 
-    bool GetStudLogo(lcMemFile& PrimFile, int StudLogo, bool OpenStud = false);
+	bool GetStudLogo(lcMemFile& PrimFile, int StudLogo, bool OpenStud = false);
 
 	void SetOfficialPieces()
 	{
@@ -138,6 +140,7 @@ public:
 
 	QDir mLibraryDir;
 
+	bool mReloadStudLogo;
 	bool mBuffersDirty;
 	lcVertexBuffer mVertexBuffer;
 	lcIndexBuffer mIndexBuffer;

@@ -49,6 +49,7 @@ lcPiecesLibrary::lcPiecesLibrary()
 	mBuffersDirty = false;
 	mHasUnofficial = false;
 	mCancelLoading = false;
+	mStudLogo = lcGetProfileInt(LC_PROFILE_STUD_LOGO);
 }
 
 lcPiecesLibrary::~lcPiecesLibrary()
@@ -247,8 +248,6 @@ lcTexture* lcPiecesLibrary::FindTexture(const char* TextureName, Project* Curren
 bool lcPiecesLibrary::Load(const QString& LibraryPath, bool ShowProgress)
 {
 	Unload();
-
-	mReloadStudLogo = false;
 
 	auto LoadCustomColors = []()
 	{
@@ -1153,11 +1152,8 @@ void lcPiecesLibrary::LoadPieceInfo(PieceInfo* Info, bool Wait, bool Priority)
 	}
 	else
 	{
-		bool ReloadStudLogo = Info->mHasLogoStud && mReloadStudLogo;
-		if (Info->AddRef() == 1 || ReloadStudLogo)
+		if (Info->AddRef() == 1)
 		{
-			if (ReloadStudLogo)
-				 Info->mState = LC_PIECEINFO_UNLOADED;
 			if (Priority)
 				mLoadQueue.prepend(Info);
 			else
@@ -1557,18 +1553,42 @@ void lcPiecesLibrary::UploadTextures(lcContext* Context)
 	mTextureUploads.clear();
 }
 
-void lcPiecesLibrary::SetStudLogo(int StudLogo)
+void lcPiecesLibrary::SetStudLogo(int StudLogo, bool Reload)
 {
-	mReloadStudLogo = true;
-	lcSetProfileInt(LC_PROFILE_STUD_LOGO, StudLogo);
-	std::vector<std::string> Studs { "STUD.DAT", "STUD2.DAT" };
-	for (auto const& Stud: Studs)
+	mStudLogo = StudLogo;
+
+	const std::array<const char*, 2> Studs { "STUD.DAT", "STUD2.DAT" };
+
+	mLoadMutex.lock();
+
+	for (const char* Stud : Studs)
 	{
-		lcLibraryPrimitive* StudPrim = FindPrimitive(Stud.c_str());
-		if (StudPrim) {
-			StudPrim->mReloadStudLogo = mReloadStudLogo;
-			mPrimitives[Stud] = StudPrim;
+		lcLibraryPrimitive* StudPrim = FindPrimitive(Stud);
+		if (StudPrim)
+			StudPrim->Unload();
+	}
+
+	mLoadMutex.unlock();
+
+	if (Reload)
+	{
+		mLoadMutex.lock();
+
+		for (const auto& PieceIt : mPieces)
+		{
+			PieceInfo* Info = PieceIt.second;
+
+			if (Info->mState == LC_PIECEINFO_LOADED && Info->mHasLogoStud)
+			{
+				Info->Unload();
+				mLoadQueue.append(Info);
+				mLoadFutures.append(QtConcurrent::run([this]() { LoadQueuedPiece(); }));
+			}
 		}
+
+		mLoadMutex.unlock();
+
+		WaitForLoadQueue();
 	}
 }
 
@@ -1620,7 +1640,6 @@ bool lcPiecesLibrary::LoadPrimitive(lcLibraryPrimitive* Primitive)
 	lcMeshLoader MeshLoader(Primitive->mMeshData, true, nullptr, false);
 
 	bool SetStudLogo = false;
-	int StudLogo     = lcGetProfileInt(LC_PROFILE_STUD_LOGO);
 
 	if (mZipFiles[LC_ZIPFILE_OFFICIAL])
 	{
@@ -1639,13 +1658,12 @@ bool lcPiecesLibrary::LoadPrimitive(lcLibraryPrimitive* Primitive)
 				LowPrimitive = FindPrimitive(Name);
 			}
 
-			if (StudLogo)
+			if (mStudLogo)
 			{
 				bool OpenStud = !strcmp(Primitive->mName,"stud2.dat");
 				if (OpenStud || !strcmp(Primitive->mName,"stud.dat"))
 				{
-					Primitive->mReloadStudLogo = false;
-					SetStudLogo = GetStudLogo(PrimFile,StudLogo,OpenStud);
+					SetStudLogo = GetStudLogo(PrimFile, mStudLogo, OpenStud);
 				}
 			}
 		}
@@ -1672,15 +1690,14 @@ bool lcPiecesLibrary::LoadPrimitive(lcLibraryPrimitive* Primitive)
 	}
 	else
 	{
-		if (StudLogo && Primitive->mStud)
+		if (mStudLogo && Primitive->mStud)
 		{
 			lcMemFile PrimFile;
 
 			bool OpenStud = !strcmp(Primitive->mName,"stud2.dat");
 			if (OpenStud || !strcmp(Primitive->mName,"stud.dat"))
 			{
-				Primitive->mReloadStudLogo = false;
-				if (GetStudLogo(PrimFile,StudLogo,OpenStud))
+				if (GetStudLogo(PrimFile, mStudLogo, OpenStud))
 					SetStudLogo = MeshLoader.LoadMesh(PrimFile, LC_MESHDATA_SHARED);
 			}
 		}

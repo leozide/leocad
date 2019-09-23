@@ -45,13 +45,18 @@ public:
 		mState = lcPrimitiveState::NOT_LOADED;
 		mStud = Stud;
 		mSubFile = SubFile;
-		mReloadStudLogo = false;
 	}
 
 	void SetZipFile(lcZipFileType ZipFileType, quint32 ZipFileIndex)
 	{
 		mZipFileType = ZipFileType;
 		mZipFileIndex = ZipFileIndex;
+	}
+
+	void Unload()
+	{
+		mState = lcPrimitiveState::NOT_LOADED;
+		mMeshData.RemoveAll();
 	}
 
 	QString mFileName;
@@ -61,7 +66,6 @@ public:
 	lcPrimitiveState mState;
 	bool mStud;
 	bool mSubFile;
-	bool mReloadStudLogo;
 	lcLibraryMeshData mMeshData;
 };
 
@@ -115,9 +119,9 @@ public:
 
 	bool LoadPrimitive(lcLibraryPrimitive* Primitive);
 
-	bool GetStudLogo(lcMemFile& PrimFile, int StudLogo, bool OpenStud = false);
+	bool GetStudLogo(lcMemFile& PrimFile, int StudLogo, bool OpenStud);
 
-	void SetStudLogo(int StudLogo);
+	void SetStudLogo(int StudLogo, bool Reload);
 
 	void SetOfficialPieces()
 	{
@@ -142,7 +146,6 @@ public:
 
 	QDir mLibraryDir;
 
-	bool mReloadStudLogo;
 	bool mBuffersDirty;
 	lcVertexBuffer mVertexBuffer;
 	lcIndexBuffer mIndexBuffer;
@@ -172,6 +175,8 @@ protected:
 
 	QMutex mTextureMutex;
 	std::vector<lcTexture*> mTextureUploads;
+
+	int mStudLogo;
 
 	QString mCachePath;
 	qint64 mArchiveCheckSum[4];

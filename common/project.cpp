@@ -453,8 +453,6 @@ bool Project::Load(const QString& FileName)
 		Model->UpdatePieceInfo(UpdatedModels);
 	}
 
-	lcGetPiecesLibrary()->mReloadStudLogo = false;
-
 	mModified = false;
 
 	return true;

@@ -1088,10 +1088,6 @@ bool lcPiecesLibrary::LoadCachePiece(PieceInfo* Info)
 	if (!ReadArchiveCacheFile(FileName, MeshData))
 		return false;
 
-	quint32 Flags;
-	if (MeshData.ReadBuffer((char*)&Flags, sizeof(Flags)) == 0)
-		return false;
-
 	lcMesh* Mesh = new lcMesh;
 	if (Mesh->FileLoad(MeshData))
 	{

@@ -26,7 +26,7 @@
 #  define DEF_MEM_LEVEL  MAX_MEM_LEVEL
 #endif
 
-#define LC_LIBRARY_CACHE_VERSION   0x0107
+#define LC_LIBRARY_CACHE_VERSION   0x0108
 #define LC_LIBRARY_CACHE_ARCHIVE   0x0001
 #define LC_LIBRARY_CACHE_DIRECTORY 0x0002
 
@@ -1088,6 +1088,13 @@ bool lcPiecesLibrary::LoadCachePiece(PieceInfo* Info)
 	if (!ReadArchiveCacheFile(FileName, MeshData))
 		return false;
 
+	quint32 Flags;
+	if (MeshData.ReadBuffer((char*)&Flags, sizeof(Flags)) == 0)
+		return false;
+
+	if (Flags != mStudLogo)
+		return false;
+
 	lcMesh* Mesh = new lcMesh;
 	if (Mesh->FileLoad(MeshData))
 	{
@@ -1104,6 +1111,10 @@ bool lcPiecesLibrary::LoadCachePiece(PieceInfo* Info)
 bool lcPiecesLibrary::SaveCachePiece(PieceInfo* Info)
 {
 	lcMemFile MeshData;
+
+	quint32 Flags = mStudLogo;
+	if (MeshData.WriteBuffer((char*)&Flags, sizeof(Flags)) == 0)
+		return false;
 
 	if (!Info->GetMesh()->FileSave(MeshData))
 		return false;

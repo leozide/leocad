@@ -1627,10 +1627,7 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 					break;
 
 				if (Primitive->mStud)
-				{
-					mMeshData.mHasLogoStud = !strcmp(Primitive->mName,"stud2.dat") || !strcmp(Primitive->mName,"stud.dat");
 					mMeshData.AddMeshDataNoDuplicateCheck(Primitive->mMeshData, IncludeTransform, ColorCode, Mirror ^ InvertNext, InvertNext, TextureMap, MeshDataType);
-				}
 				else if (!Primitive->mSubFile)
 				{
 					if (mOptimize)
@@ -1639,14 +1636,12 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 						mMeshData.AddMeshDataNoDuplicateCheck(Primitive->mMeshData, IncludeTransform, ColorCode, Mirror ^ InvertNext, InvertNext, TextureMap, MeshDataType);
 				}
 				else
-				{
 					Library->GetPrimitiveFile(Primitive, FileCallback);
-				}
+
+				mMeshData.mHasLogoStud |= Primitive->mMeshData.mHasLogoStud;
 			}
 			else
-			{
 				Library->GetPieceFile(FileName, FileCallback);
-			}
 		} break;
 
 		case 2:

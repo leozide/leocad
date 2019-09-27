@@ -1088,7 +1088,7 @@ bool lcPiecesLibrary::LoadCachePiece(PieceInfo* Info)
 	if (!ReadArchiveCacheFile(FileName, MeshData))
 		return false;
 
-	quint32 Flags;
+	qint32 Flags;
 	if (MeshData.ReadBuffer((char*)&Flags, sizeof(Flags)) == 0)
 		return false;
 
@@ -1112,7 +1112,7 @@ bool lcPiecesLibrary::SaveCachePiece(PieceInfo* Info)
 {
 	lcMemFile MeshData;
 
-	quint32 Flags = mStudLogo;
+	qint32 Flags = mStudLogo;
 	if (MeshData.WriteBuffer((char*)&Flags, sizeof(Flags)) == 0)
 		return false;
 
@@ -1564,15 +1564,13 @@ void lcPiecesLibrary::SetStudLogo(int StudLogo, bool Reload)
 {
 	mStudLogo = StudLogo;
 
-	const std::array<const char*, 2> Studs { "STUD.DAT", "STUD2.DAT" };
-
 	mLoadMutex.lock();
 
-	for (const char* Stud : Studs)
+	for (const auto& PrimitiveIt : mPrimitives)
 	{
-		lcLibraryPrimitive* StudPrim = FindPrimitive(Stud);
-		if (StudPrim)
-			StudPrim->Unload();
+		lcLibraryPrimitive* Primitive = PrimitiveIt.second;
+		if (Primitive->mMeshData.mHasLogoStud)
+			Primitive->Unload();
 	}
 
 	mLoadMutex.unlock();
@@ -1665,13 +1663,13 @@ bool lcPiecesLibrary::LoadPrimitive(lcLibraryPrimitive* Primitive)
 				LowPrimitive = FindPrimitive(Name);
 			}
 
-			if (mStudLogo)
+			bool OpenStud = !strcmp(Primitive->mName,"stud2.dat");
+			if (OpenStud || !strcmp(Primitive->mName,"stud.dat"))
 			{
-				bool OpenStud = !strcmp(Primitive->mName,"stud2.dat");
-				if (OpenStud || !strcmp(Primitive->mName,"stud.dat"))
-				{
+				Primitive->mMeshData.mHasLogoStud = true;
+
+				if (mStudLogo)
 					SetStudLogo = GetStudLogo(PrimFile, mStudLogo, OpenStud);
-				}
 			}
 		}
 
@@ -1697,15 +1695,20 @@ bool lcPiecesLibrary::LoadPrimitive(lcLibraryPrimitive* Primitive)
 	}
 	else
 	{
-		if (mStudLogo && Primitive->mStud)
+		if (Primitive->mStud)
 		{
-			lcMemFile PrimFile;
-
 			bool OpenStud = !strcmp(Primitive->mName,"stud2.dat");
 			if (OpenStud || !strcmp(Primitive->mName,"stud.dat"))
 			{
-				if (GetStudLogo(PrimFile, mStudLogo, OpenStud))
-					SetStudLogo = MeshLoader.LoadMesh(PrimFile, LC_MESHDATA_SHARED);
+				Primitive->mMeshData.mHasLogoStud = true;
+
+				if (mStudLogo)
+				{
+					lcMemFile PrimFile;
+
+					if (GetStudLogo(PrimFile, mStudLogo, OpenStud))
+						SetStudLogo = MeshLoader.LoadMesh(PrimFile, LC_MESHDATA_SHARED);
+				}
 			}
 		}
 

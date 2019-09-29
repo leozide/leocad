@@ -119,9 +119,12 @@ public:
 
 	bool LoadPrimitive(lcLibraryPrimitive* Primitive);
 
-	bool GetStudLogo(lcMemFile& PrimFile, int StudLogo, bool OpenStud);
-
 	void SetStudLogo(int StudLogo, bool Reload);
+
+	int GetStudLogo() const
+	{
+		return mStudLogo;
+	}
 
 	void SetOfficialPieces()
 	{
@@ -168,6 +171,8 @@ protected:
 	bool SaveCachePiece(PieceInfo* Info);
 	bool ReadDirectoryCacheFile(const QString& FileName, lcMemFile& CacheFile);
 	bool WriteDirectoryCacheFile(const QString& FileName, lcMemFile& CacheFile);
+
+	bool GetStudLogoFile(lcMemFile& PrimFile, int StudLogo, bool OpenStud);
 
 	QMutex mLoadMutex;
 	QList<QFuture<void>> mLoadFutures;

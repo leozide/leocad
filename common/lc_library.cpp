@@ -1259,10 +1259,7 @@ bool lcPiecesLibrary::LoadPieceData(PieceInfo* Info)
 		return false;
 
 	if (Info) 
-	{
-		Info->mHasLogoStud = MeshData.mHasLogoStud;
 		Info->SetMesh(MeshData.CreateMesh());
-	}
 
 	if (SaveCache)
 		SaveCachePiece(Info);
@@ -1583,7 +1580,7 @@ void lcPiecesLibrary::SetStudLogo(int StudLogo, bool Reload)
 		{
 			PieceInfo* Info = PieceIt.second;
 
-			if (Info->mState == LC_PIECEINFO_LOADED && Info->mHasLogoStud)
+			if (Info->mState == LC_PIECEINFO_LOADED && Info->GetMesh() && Info->GetMesh()->mFlags & lcMeshFlag::HasLogoStud)
 			{
 				Info->Unload();
 				mLoadQueue.append(Info);
@@ -1597,7 +1594,7 @@ void lcPiecesLibrary::SetStudLogo(int StudLogo, bool Reload)
 	}
 }
 
-bool lcPiecesLibrary::GetStudLogo(lcMemFile& PrimFile, int StudLogo, bool OpenStud)
+bool lcPiecesLibrary::GetStudLogoFile(lcMemFile& PrimFile, int StudLogo, bool OpenStud)
 {
 	// validate logo choice and unofficial lib available
 	if (!StudLogo || (!mZipFiles[LC_ZIPFILE_UNOFFICIAL] && !mHasUnofficial))
@@ -1654,22 +1651,23 @@ bool lcPiecesLibrary::LoadPrimitive(lcLibraryPrimitive* Primitive)
 
 		if (Primitive->mStud)
 		{
-			if (strncmp(Primitive->mName, "8/", 2)) // todo: this is currently the only place that uses mName so use mFileName instead. this should also be done for the loose file libraries.
-			{
-				char Name[LC_PIECE_NAME_LEN];
-				strcpy(Name, "8/");
-				strcat(Name, Primitive->mName);
-
-				LowPrimitive = FindPrimitive(Name);
-			}
-
 			bool OpenStud = !strcmp(Primitive->mName,"stud2.dat");
 			if (OpenStud || !strcmp(Primitive->mName,"stud.dat"))
 			{
 				Primitive->mMeshData.mHasLogoStud = true;
 
 				if (mStudLogo)
-					SetStudLogo = GetStudLogo(PrimFile, mStudLogo, OpenStud);
+					SetStudLogo = GetStudLogoFile(PrimFile, mStudLogo, OpenStud);
+			}
+
+			if (!SetStudLogo && strncmp(Primitive->mName, "8/", 2)) // todo: this is currently the only place that uses mName so use mFileName instead. this should also be done for the loose file libraries.
+			{
+				char Name[LC_PIECE_NAME_LEN];
+				strcpy(Name, "8/");
+				strcat(Name, Primitive->mName);
+				strupr(Name);
+
+				LowPrimitive = FindPrimitive(Name);
 			}
 		}
 
@@ -1706,7 +1704,7 @@ bool lcPiecesLibrary::LoadPrimitive(lcLibraryPrimitive* Primitive)
 				{
 					lcMemFile PrimFile;
 
-					if (GetStudLogo(PrimFile, mStudLogo, OpenStud))
+					if (GetStudLogoFile(PrimFile, mStudLogo, OpenStud))
 						SetStudLogo = MeshLoader.LoadMesh(PrimFile, LC_MESHDATA_SHARED);
 				}
 			}

@@ -25,7 +25,6 @@ PieceInfo::PieceInfo()
 	mModel = nullptr;
 	mProject = nullptr;
 	mSynthInfo = nullptr;
-	mHasLogoStud = false;
 }
 
 PieceInfo::~PieceInfo()

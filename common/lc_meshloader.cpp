@@ -909,7 +909,6 @@ static int LibraryMeshSectionCompare(lcMergeSection const& First, lcMergeSection
 
 lcMesh* lcLibraryMeshData::CreateMesh()
 {
-	lcLibraryMeshData& MeshData = *this;
 	lcMesh* Mesh = new lcMesh();
 
 	int BaseVertices[LC_NUM_MESHDATA_TYPES];
@@ -919,11 +918,11 @@ lcMesh* lcLibraryMeshData::CreateMesh()
 	std::vector<quint32> IndexRemap[LC_NUM_MESHDATA_TYPES];
 	std::vector<quint32> TexturedIndexRemap[LC_NUM_MESHDATA_TYPES];
 
-	if (!MeshData.mHasTextures)
+	if (!mHasTextures)
 	{
 		for (int MeshDataIdx = 0; MeshDataIdx < LC_NUM_MESHDATA_TYPES; MeshDataIdx++)
 		{
-			lcArray<lcLibraryMeshSection*>& Sections = MeshData.mSections[MeshDataIdx];
+			lcArray<lcLibraryMeshSection*>& Sections = mSections[MeshDataIdx];
 
 			for (int SectionIdx = 0; SectionIdx < Sections.GetSize(); SectionIdx++)
 			{
@@ -932,14 +931,14 @@ lcMesh* lcLibraryMeshData::CreateMesh()
 			}
 
 			BaseVertices[MeshDataIdx] = NumVertices;
-			NumVertices += MeshData.mVertices[MeshDataIdx].GetSize();
+			NumVertices += mVertices[MeshDataIdx].GetSize();
 		}
 	}
 	else
 	{
 		for (int MeshDataIdx = 0; MeshDataIdx < LC_NUM_MESHDATA_TYPES; MeshDataIdx++)
 		{
-			lcArray<lcLibraryMeshSection*>& Sections = MeshData.mSections[MeshDataIdx];
+			lcArray<lcLibraryMeshSection*>& Sections = mSections[MeshDataIdx];
 
 			for (int SectionIdx = 0; SectionIdx < Sections.GetSize(); SectionIdx++)
 			{
@@ -950,7 +949,7 @@ lcMesh* lcLibraryMeshData::CreateMesh()
 			BaseVertices[MeshDataIdx] = NumVertices;
 			BaseTexturedVertices[MeshDataIdx] = NumTexturedVertices;
 
-			const lcArray<lcLibraryMeshVertex>& Vertices = MeshData.mVertices[MeshDataIdx];
+			const lcArray<lcLibraryMeshVertex>& Vertices = mVertices[MeshDataIdx];
 			IndexRemap[MeshDataIdx].resize(Vertices.GetSize());
 			TexturedIndexRemap[MeshDataIdx].resize(Vertices.GetSize());
 
@@ -980,8 +979,8 @@ lcMesh* lcLibraryMeshData::CreateMesh()
 
 	for (int LodIdx = 0; LodIdx < LC_NUM_MESH_LODS; LodIdx++)
 	{
-		const lcArray<lcLibraryMeshSection*>& SharedSections = MeshData.mSections[LC_MESHDATA_SHARED];
-		const lcArray<lcLibraryMeshSection*>& Sections = MeshData.mSections[LodIdx];
+		const lcArray<lcLibraryMeshSection*>& SharedSections = mSections[LC_MESHDATA_SHARED];
+		const lcArray<lcLibraryMeshSection*>& Sections = mSections[LodIdx];
 
 		for (int SharedSectionIdx = 0; SharedSectionIdx < SharedSections.GetSize(); SharedSectionIdx++)
 		{
@@ -1031,11 +1030,11 @@ lcMesh* lcLibraryMeshData::CreateMesh()
 	lcVector3 Min(FLT_MAX, FLT_MAX, FLT_MAX), Max(-FLT_MAX, -FLT_MAX, -FLT_MAX);
 	bool UpdatedBoundingBox = false;
 
-	if (!MeshData.mHasTextures)
+	if (!mHasTextures)
 	{
 		for (int MeshDataIdx = 0; MeshDataIdx < LC_NUM_MESHDATA_TYPES; MeshDataIdx++)
 		{
-			const lcArray<lcLibraryMeshVertex>& Vertices = MeshData.mVertices[MeshDataIdx];
+			const lcArray<lcLibraryMeshVertex>& Vertices = mVertices[MeshDataIdx];
 
 			for (const lcLibraryMeshVertex& SrcVertex : Vertices)
 			{
@@ -1045,7 +1044,7 @@ lcMesh* lcLibraryMeshData::CreateMesh()
 				DstVertex.Normal = lcPackNormal(lcVector3LDrawToLeoCAD(SrcVertex.Normal));
 			}
 
-			for (const lcLibraryMeshSection* Section : MeshData.mSections[MeshDataIdx])
+			for (const lcLibraryMeshSection* Section : mSections[MeshDataIdx])
 			{
 				if (Section->mPrimitiveType != LC_MESH_TRIANGLES)
 					continue;
@@ -1065,7 +1064,7 @@ lcMesh* lcLibraryMeshData::CreateMesh()
 	{
 		for (int MeshDataIdx = 0; MeshDataIdx < LC_NUM_MESHDATA_TYPES; MeshDataIdx++)
 		{
-			for (const lcLibraryMeshVertex& SrcVertex : MeshData.mVertices[MeshDataIdx])
+			for (const lcLibraryMeshVertex& SrcVertex : mVertices[MeshDataIdx])
 			{
 				if ((SrcVertex.Usage & LC_LIBRARY_VERTEX_UNTEXTURED) == 0)
 					continue;
@@ -1081,7 +1080,7 @@ lcMesh* lcLibraryMeshData::CreateMesh()
 
 		for (int MeshDataIdx = 0; MeshDataIdx < LC_NUM_MESHDATA_TYPES; MeshDataIdx++)
 		{
-			for (const lcLibraryMeshVertex& SrcVertex : MeshData.mVertices[MeshDataIdx])
+			for (const lcLibraryMeshVertex& SrcVertex : mVertices[MeshDataIdx])
 			{
 				if ((SrcVertex.Usage & LC_LIBRARY_VERTEX_TEXTURED) == 0)
 					continue;
@@ -1100,9 +1099,9 @@ lcMesh* lcLibraryMeshData::CreateMesh()
 
 		for (int MeshDataIdx = 0; MeshDataIdx < LC_NUM_MESHDATA_TYPES; MeshDataIdx++)
 		{
-			const lcArray<lcLibraryMeshVertex>& Vertices = MeshData.mVertices[MeshDataIdx];
+			const lcArray<lcLibraryMeshVertex>& Vertices = mVertices[MeshDataIdx];
 
-			for (lcLibraryMeshSection* Section : MeshData.mSections[MeshDataIdx])
+			for (lcLibraryMeshSection* Section : mSections[MeshDataIdx])
 			{
 				if (Section->mPrimitiveType == LC_MESH_TRIANGLES)
 				{
@@ -1238,11 +1237,15 @@ lcMesh* lcLibraryMeshData::CreateMesh()
 			NumIndices += DstSection.NumIndices;
 		}
 	}
+
+	if (mHasLogoStud)
+		Mesh->mFlags |= lcMeshFlag::HasLogoStud;
+
 	/*
-	for (int SectionIdx = 0; SectionIdx < MeshData.mSections.GetSize(); SectionIdx++)
+	for (int SectionIdx = 0; SectionIdx < mSections.GetSize(); SectionIdx++)
 	{
 		lcMeshSection& DstSection = Mesh->mSections[SectionIdx];
-		lcLibraryMeshSection* SrcSection = MeshData.mSections[SectionIdx];
+		lcLibraryMeshSection* SrcSection = mSections[SectionIdx];
 
 		DstSection.ColorIndex = SrcSection->mColor;
 		DstSection.PrimitiveType = SrcSection->mPrimitiveType;

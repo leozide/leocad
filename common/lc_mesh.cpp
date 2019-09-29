@@ -7,6 +7,9 @@
 #include "lc_application.h"
 #include "lc_library.h"
 
+#define LC_MESH_FILE_ID      LC_FOURCC('M', 'E', 'S', 'H')
+#define LC_MESH_FILE_VERSION 0x0116
+
 lcMesh* gPlaceholderMesh;
 
 lcMesh::lcMesh()
@@ -480,6 +483,9 @@ bool lcMesh::FileSave(lcMemFile& File)
 
 int lcMesh::GetLodIndex(float Distance) const
 {
+	if (lcGetPiecesLibrary()->GetStudLogo())
+		return LC_MESH_LOD_HIGH;
+
 	if (mLods[LC_MESH_LOD_LOW].NumSections && (Distance - mRadius) > 250.0f)
 		return LC_MESH_LOD_LOW;
 	else

@@ -169,7 +169,6 @@ public:
 	lcPieceInfoState mState;
 	int mFolderType;
 	int mFolderIndex;
-	bool mHasLogoStud;
 
 protected:
 	void ReleaseMesh();

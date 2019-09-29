@@ -2,9 +2,6 @@
 
 #include "lc_math.h"
 
-#define LC_MESH_FILE_ID      LC_FOURCC('M', 'E', 'S', 'H')
-#define LC_MESH_FILE_VERSION 0x0115
-
 enum lcMeshPrimitiveType
 {
 	LC_MESH_LINES = 0x01,
@@ -60,7 +57,8 @@ enum lcMeshFlag
 	HasSolid       = 0x02, // Mesh has triangles using a solid color
 	HasTranslucent = 0x04, // Mesh has triangles using a translucent color
 	HasLines       = 0x08, // Mesh has lines
-	HasTexture     = 0x10  // Mesh has sections using textures
+	HasTexture     = 0x10, // Mesh has sections using textures
+	HasLogoStud    = 0x20  // Mesh has a stud that can have a logo applied
 };
 
 Q_DECLARE_FLAGS(lcMeshFlags, lcMeshFlag)

@@ -76,9 +76,9 @@ int lcGetBrickLinkColor(int ColorIndex)
 		{  36,  17 }, // Trans-Red
 		{  37,  51 }, // Trans-Purple
 		{  40,  13 }, // Trans-Black
-		{  41,  15 }, // Trans-Light Blue
+		{  43,  15 }, // Trans-Light Blue
 		{  42,  16 }, // Trans-Neon Green
-		{  43, 113 }, // Trans-Very Lt Blue
+		{  39, 113 }, // Trans-Very Lt Blue
 		{  45,  50 }, // Trans-Dark Pink
 		{  46,  19 }, // Trans-Yellow
 		{  47,  12 }, // Trans-Clear

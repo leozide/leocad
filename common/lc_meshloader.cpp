@@ -1167,22 +1167,36 @@ lcMesh* lcLibraryMeshData::CreateMesh()
 
 				if (MergeSection.Shared)
 				{
-					quint16 BaseVertex = DstSection.Texture ? BaseTexturedVertices[LC_MESHDATA_SHARED] : BaseVertices[LC_MESHDATA_SHARED];
 					lcLibraryMeshSection* SrcSection = MergeSection.Shared;
 
-					for (int IndexIdx = 0; IndexIdx < SrcSection->mIndices.GetSize(); IndexIdx++)
-						*Index++ = BaseVertex + SrcSection->mIndices[IndexIdx];
+					if (!mHasTextures)
+					{
+						quint16 BaseVertex = DstSection.Texture ? BaseTexturedVertices[LC_MESHDATA_SHARED] : BaseVertices[LC_MESHDATA_SHARED];
+
+						for (int IndexIdx = 0; IndexIdx < SrcSection->mIndices.GetSize(); IndexIdx++)
+							*Index++ = BaseVertex + SrcSection->mIndices[IndexIdx];
+					}
+					else
+						for (int IndexIdx = 0; IndexIdx < SrcSection->mIndices.GetSize(); IndexIdx++)
+							*Index++ = SrcSection->mIndices[IndexIdx];
 
 					DstSection.NumIndices += SrcSection->mIndices.GetSize();
 				}
 
 				if (MergeSection.Lod)
 				{
-					quint16 BaseVertex = DstSection.Texture ? BaseTexturedVertices[LodIdx] : BaseVertices[LodIdx];
 					lcLibraryMeshSection* SrcSection = MergeSection.Lod;
 
-					for (int IndexIdx = 0; IndexIdx < SrcSection->mIndices.GetSize(); IndexIdx++)
-						*Index++ = BaseVertex + SrcSection->mIndices[IndexIdx];
+					if (!mHasTextures)
+					{
+						quint16 BaseVertex = DstSection.Texture ? BaseTexturedVertices[LodIdx] : BaseVertices[LodIdx];
+
+						for (int IndexIdx = 0; IndexIdx < SrcSection->mIndices.GetSize(); IndexIdx++)
+							*Index++ = BaseVertex + SrcSection->mIndices[IndexIdx];
+					}
+					else
+						for (int IndexIdx = 0; IndexIdx < SrcSection->mIndices.GetSize(); IndexIdx++)
+							*Index++ = SrcSection->mIndices[IndexIdx];
 
 					DstSection.NumIndices += SrcSection->mIndices.GetSize();
 				}

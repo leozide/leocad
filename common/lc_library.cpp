@@ -567,44 +567,49 @@ bool lcPiecesLibrary::OpenDirectory(const QDir& LibraryDir, bool ShowProgress)
 		}
 	}
 
-	QDir Dir(LibraryDir.absoluteFilePath(QLatin1String("parts/textures/")), QLatin1String("*.png"), QDir::SortFlags(QDir::Name | QDir::IgnoreCase), QDir::Files | QDir::Hidden | QDir::Readable);
-	QStringList FileList = Dir.entryList();
-
-	mTextures.reserve(FileList.size());
-
-	for (int FileIdx = 0; FileIdx < FileList.size(); FileIdx++)
+	for (unsigned int BaseFolderIdx = 0; BaseFolderIdx < sizeof(BaseFolders) / sizeof(BaseFolders[0]); BaseFolderIdx++)
 	{
-		char Name[LC_MAXPATH];
-		QByteArray FileString = FileList[FileIdx].toLatin1();
-		const char* Src = FileString;
-		char* Dst = Name;
+		QDir BaseDir(LibraryDir.absoluteFilePath(QLatin1String(BaseFolders[BaseFolderIdx])));
+		QDir Dir(BaseDir.absoluteFilePath(QLatin1String("parts/textures/")), QLatin1String("*.png"), QDir::SortFlags(QDir::Name | QDir::IgnoreCase), QDir::Files | QDir::Hidden | QDir::Readable);
+		QStringList FileList = Dir.entryList();
 
-		while (*Src && Dst - Name < (int)sizeof(Name))
+		mTextures.reserve(mTextures.size() + FileList.size());
+
+		for (int FileIdx = 0; FileIdx < FileList.size(); FileIdx++)
 		{
-			if (*Src >= 'a' && *Src <= 'z')
-				*Dst = *Src + 'A' - 'a';
-			else if (*Src == '\\')
-				*Dst = '/';
-			else
-				*Dst = *Src;
+			char Name[LC_MAXPATH];
+			QByteArray FileString = FileList[FileIdx].toLatin1();
+			const char* Src = FileString;
+			char* Dst = Name;
 
-			Src++;
-			Dst++;
+			while (*Src && Dst - Name < (int)sizeof(Name))
+			{
+				if (*Src >= 'a' && *Src <= 'z')
+					*Dst = *Src + 'A' - 'a';
+				else if (*Src == '\\')
+					*Dst = '/';
+				else
+					*Dst = *Src;
+
+				Src++;
+				Dst++;
+			}
+
+			if (Dst - Name <= 4)
+				continue;
+
+			Dst -= 4;
+			if (memcmp(Dst, ".PNG", 4))
+				continue;
+			*Dst = 0;
+
+			lcTexture* Texture = new lcTexture();
+			mTextures.push_back(Texture);
+
+			strncpy(Texture->mName, Name, sizeof(Texture->mName));
+			Texture->mName[sizeof(Texture->mName) - 1] = 0;
+			Texture->mFileName = Dir.absoluteFilePath(FileList[FileIdx]);
 		}
-
-		if (Dst - Name <= 4)
-			continue;
-
-		Dst -= 4;
-		if (memcmp(Dst, ".PNG", 4))
-			continue;
-		*Dst = 0;
-
-		lcTexture* Texture = new lcTexture();
-		mTextures.push_back(Texture);
-
-		strncpy(Texture->mName, Name, sizeof(Texture->mName));
-		Texture->mName[sizeof(Texture->mName) - 1] = 0;
 	}
 
 	return true;
@@ -1507,25 +1512,7 @@ bool lcPiecesLibrary::LoadTexture(lcTexture* Texture)
 		return Texture->Load(TextureFile);
 	}
 	else
-	{
-		sprintf(FileName, "parts/textures/%s.png", Texture->mName);
-
-		if (Texture->Load(mLibraryDir.absoluteFilePath(QLatin1String(FileName))))
-			return true;
-
-#if defined(Q_OS_MACOS) || defined(Q_OS_LINUX)
-		char Name[LC_MAXPATH];
-
-		strcpy(Name, Texture->mName);
-		strlwr(Name);
-
-		sprintf(FileName, "parts/textures/%s.png", Name);
-
-		return Texture->Load(mLibraryDir.absoluteFilePath(QLatin1String(FileName)));
-#else
-		return false;
-#endif
-	}
+		return Texture->Load(Texture->mFileName);
 }
 
 void lcPiecesLibrary::ReleaseTexture(lcTexture* Texture)

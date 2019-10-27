@@ -641,6 +641,7 @@ lcPartSelectionWidget::lcPartSelectionWidget(QWidget* Parent)
 {
 	mSplitter = new QSplitter(this);
 	mSplitter->setOrientation(Qt::Vertical);
+	mSplitter->setChildrenCollapsible(false);
 
 	mCategoriesWidget = new QTreeWidget(mSplitter);
 	mCategoriesWidget->setHeaderHidden(true);

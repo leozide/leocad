@@ -421,156 +421,143 @@ void lcLibraryMeshData::AddLine(lcMeshDataType MeshDataType, int LineType, quint
 
 void lcLibraryMeshData::AddTexturedLine(lcMeshDataType MeshDataType, int LineType, quint32 ColorCode, bool WindingCCW, const lcLibraryTextureMap& TextureMap, const lcVector3* Vertices, bool Optimize)
 {
-	lcMeshPrimitiveType PrimitiveType = (LineType == 2) ? LC_MESH_TEXTURED_LINES : LC_MESH_TEXTURED_TRIANGLES;
+	lcMeshPrimitiveType PrimitiveType = LC_MESH_TEXTURED_TRIANGLES;
 	lcLibraryMeshSection* Section = AddSection(MeshDataType, PrimitiveType, ColorCode, TextureMap.Texture);
 
 	int QuadIndices[4] = { 0, 1, 2, 3 };
 	int Indices[4] = { -1, -1, -1, -1 };
 
-	if (LineType == 3 || LineType == 4)
+	if (LineType == 4)
+		TestQuad(QuadIndices, Vertices);
+
+	lcVector3 Normal = lcNormalize(lcCross(Vertices[1] - Vertices[0], Vertices[2] - Vertices[0]));
+
+	if (!WindingCCW)
+		Normal = -Normal;
+
+	lcVector2 TexCoords[4];
+
+	for (int IndexIdx = 0; IndexIdx < lcMin(LineType, 4); IndexIdx++)
 	{
+		const lcVector3& Position = Vertices[QuadIndices[IndexIdx]];
+		TexCoords[QuadIndices[IndexIdx]] = lcCalculateTexCoord(Position, &TextureMap);
+	}
+
+	if (TextureMap.Type == lcLibraryTextureMapType::CYLINDRICAL || TextureMap.Type == lcLibraryTextureMapType::SPHERICAL)
+	{
+		auto CheckTexCoordsWrap = [&TexCoords, &Vertices, &TextureMap](int Index1, int Index2, int Index3)
+		{
+			float u12 = fabsf(TexCoords[Index1].x - TexCoords[Index2].x);
+			float u13 = fabsf(TexCoords[Index1].x - TexCoords[Index3].x);
+			float u23 = fabsf(TexCoords[Index2].x - TexCoords[Index3].x);
+
+			if (u12 < 0.5f && u13 < 0.5f && u23 < 0.5f)
+				return;
+
+			const lcVector4& Plane2 = (TextureMap.Type == lcLibraryTextureMapType::CYLINDRICAL) ? TextureMap.Params.Cylindrical.Plane2 : TextureMap.Params.Spherical.Plane2;
+			float Dot1 = fabsf(lcDot(Plane2, lcVector4(Vertices[Index1], 1.0f)));
+			float Dot2 = fabsf(lcDot(Plane2, lcVector4(Vertices[Index2], 1.0f)));
+			float Dot3 = fabsf(lcDot(Plane2, lcVector4(Vertices[Index3], 1.0f)));
+
+			if (Dot1 > Dot2)
+			{
+				if (Dot1 > Dot3)
+				{
+					if (u12 > 0.5f)
+						TexCoords[Index2].x += TexCoords[Index2].x < 0.5f ? 1.0f : -1.0f;
+
+					if (u13 > 0.5f)
+						TexCoords[Index3].x += TexCoords[Index3].x < 0.5f ? 1.0f : -1.0f;
+				}
+				else
+				{
+					if (u13 > 0.5f)
+						TexCoords[Index1].x += TexCoords[Index1].x < 0.5f ? 1.0f : -1.0f;
+
+					if (u23 > 0.5f)
+						TexCoords[Index2].x += TexCoords[Index2].x < 0.5f ? 1.0f : -1.0f;
+				}
+			}
+			else
+			{
+				if (Dot2 > Dot3)
+				{
+					if (u12 > 0.5f)
+						TexCoords[Index1].x += TexCoords[Index1].x < 0.5f ? 1.0f : -1.0f;
+
+					if (u23 > 0.5f)
+						TexCoords[Index3].x += TexCoords[Index3].x < 0.5f ? 1.0f : -1.0f;
+				}
+				else
+				{
+					if (u13 > 0.5f)
+						TexCoords[Index1].x += TexCoords[Index1].x < 0.5f ? 1.0f : -1.0f;
+
+					if (u23 > 0.5f)
+						TexCoords[Index2].x += TexCoords[Index2].x < 0.5f ? 1.0f : -1.0f;
+				}
+			}
+		};
+
+		CheckTexCoordsWrap(QuadIndices[0], QuadIndices[1], QuadIndices[2]);
+
 		if (LineType == 4)
-			TestQuad(QuadIndices, Vertices);
-
-		lcVector3 Normal = lcNormalize(lcCross(Vertices[1] - Vertices[0], Vertices[2] - Vertices[0]));
-
-		if (!WindingCCW)
-			Normal = -Normal;
-
-		lcVector2 TexCoords[4];
-
-		for (int IndexIdx = 0; IndexIdx < lcMin(LineType, 4); IndexIdx++)
-		{
-			const lcVector3& Position = Vertices[QuadIndices[IndexIdx]];
-			TexCoords[QuadIndices[IndexIdx]] = lcCalculateTexCoord(Position, &TextureMap);
-		}
-
-		if (TextureMap.Type == lcLibraryTextureMapType::CYLINDRICAL || TextureMap.Type == lcLibraryTextureMapType::SPHERICAL)
-		{
-			auto CheckTexCoordsWrap = [&TexCoords, &Vertices, &TextureMap](int Index1, int Index2, int Index3)
-			{
-				float u12 = fabsf(TexCoords[Index1].x - TexCoords[Index2].x);
-				float u13 = fabsf(TexCoords[Index1].x - TexCoords[Index3].x);
-				float u23 = fabsf(TexCoords[Index2].x - TexCoords[Index3].x);
-
-				if (u12 < 0.5f && u13 < 0.5f && u23 < 0.5f)
-					return;
-
-				const lcVector4& Plane2 = (TextureMap.Type == lcLibraryTextureMapType::CYLINDRICAL) ? TextureMap.Params.Cylindrical.Plane2 : TextureMap.Params.Spherical.Plane2;
-				float Dot1 = fabsf(lcDot(Plane2, lcVector4(Vertices[Index1], 1.0f)));
-				float Dot2 = fabsf(lcDot(Plane2, lcVector4(Vertices[Index2], 1.0f)));
-				float Dot3 = fabsf(lcDot(Plane2, lcVector4(Vertices[Index3], 1.0f)));
-
-				if (Dot1 > Dot2)
-				{
-					if (Dot1 > Dot3)
-					{
-						if (u12 > 0.5f)
-							TexCoords[Index2].x += TexCoords[Index2].x < 0.5f ? 1.0f : -1.0f;
-
-						if (u13 > 0.5f)
-							TexCoords[Index3].x += TexCoords[Index3].x < 0.5f ? 1.0f : -1.0f;
-					}
-					else
-					{
-						if (u13 > 0.5f)
-							TexCoords[Index1].x += TexCoords[Index1].x < 0.5f ? 1.0f : -1.0f;
-
-						if (u23 > 0.5f)
-							TexCoords[Index2].x += TexCoords[Index2].x < 0.5f ? 1.0f : -1.0f;
-					}
-				}
-				else
-				{
-					if (Dot2 > Dot3)
-					{
-						if (u12 > 0.5f)
-							TexCoords[Index1].x += TexCoords[Index1].x < 0.5f ? 1.0f : -1.0f;
-
-						if (u23 > 0.5f)
-							TexCoords[Index3].x += TexCoords[Index3].x < 0.5f ? 1.0f : -1.0f;
-					}
-					else
-					{
-						if (u13 > 0.5f)
-							TexCoords[Index1].x += TexCoords[Index1].x < 0.5f ? 1.0f : -1.0f;
-
-						if (u23 > 0.5f)
-							TexCoords[Index2].x += TexCoords[Index2].x < 0.5f ? 1.0f : -1.0f;
-					}
-				}
-			};
-
-			CheckTexCoordsWrap(QuadIndices[0], QuadIndices[1], QuadIndices[2]);
-
-			if (LineType == 4)
-				CheckTexCoordsWrap(QuadIndices[2], QuadIndices[3], QuadIndices[0]);
-		}
-
-		if (TextureMap.Type == lcLibraryTextureMapType::SPHERICAL)
-		{
-			auto CheckTexCoordsPole = [&TexCoords, &Vertices, &TextureMap](int Index1, int Index2, int Index3)
-			{
-				const lcVector4& FrontPlane = TextureMap.Params.Spherical.FrontPlane;
-				const lcVector4& Plane2 = TextureMap.Params.Spherical.Plane2;
-				int PoleIndex;
-				int EdgeIndex1, EdgeIndex2;
-
-				if (fabsf(lcDot(lcVector4(Vertices[Index1], 1.0f), FrontPlane)) < 0.01f && fabsf(lcDot(lcVector4(Vertices[Index1], 1.0f), Plane2)) < 0.01f)
-				{
-					PoleIndex = Index1;
-					EdgeIndex1 = Index2;
-					EdgeIndex2 = Index3;
-				}
-				else if (fabsf(lcDot(lcVector4(Vertices[Index2], 1.0f), FrontPlane)) < 0.01f && fabsf(lcDot(lcVector4(Vertices[Index2], 1.0f), Plane2)) < 0.01f)
-				{
-					PoleIndex = Index2;
-					EdgeIndex1 = Index1;
-					EdgeIndex2 = Index3;
-				}
-				else if (fabsf(lcDot(lcVector4(Vertices[Index3], 1.0f), FrontPlane)) < 0.01f && fabsf(lcDot(lcVector4(Vertices[Index3], 1.0f), Plane2)) < 0.01f)
-				{
-					PoleIndex = Index3;
-					EdgeIndex1 = Index1;
-					EdgeIndex2 = Index2;
-				}
-				else
-					return;
-
-				lcVector3 OppositeEdge = Vertices[EdgeIndex2] - Vertices[EdgeIndex1];
-				lcVector3 SideEdge = Vertices[PoleIndex] - Vertices[EdgeIndex1];
-
-				float OppositeLength = lcLength(OppositeEdge);
-				float Projection = lcDot(OppositeEdge, SideEdge) / (OppositeLength * OppositeLength);
-
-				TexCoords[PoleIndex].x = TexCoords[EdgeIndex1].x + (TexCoords[EdgeIndex2].x - TexCoords[EdgeIndex1].x) * Projection;
-			};
-
-			CheckTexCoordsPole(QuadIndices[0], QuadIndices[1], QuadIndices[2]);
-
-			if (LineType == 4)
-				CheckTexCoordsPole(QuadIndices[2], QuadIndices[3], QuadIndices[0]);
-		}
-
-		for (int IndexIdx = 0; IndexIdx < lcMin(LineType, 4); IndexIdx++)
-		{
-			const lcVector3& Position = Vertices[QuadIndices[IndexIdx]];
-			Indices[IndexIdx] = AddTexturedVertex(MeshDataType, Position, Normal, TexCoords[QuadIndices[IndexIdx]], Optimize);
-		}
-	}
-	else
-	{
-		for (int IndexIdx = 0; IndexIdx < lcMin(LineType, 4); IndexIdx++)
-		{
-			const lcVector3& Position = Vertices[QuadIndices[IndexIdx]];
-			lcVector2 TexCoord = lcCalculateTexCoord(Position, &TextureMap);
-			Indices[IndexIdx] = AddTexturedVertex(MeshDataType, Position, TexCoord, Optimize);
-		}
+			CheckTexCoordsWrap(QuadIndices[2], QuadIndices[3], QuadIndices[0]);
 	}
 
-	switch (LineType)
+	if (TextureMap.Type == lcLibraryTextureMapType::SPHERICAL)
 	{
-	case 4:
+		auto CheckTexCoordsPole = [&TexCoords, &Vertices, &TextureMap](int Index1, int Index2, int Index3)
+		{
+			const lcVector4& FrontPlane = TextureMap.Params.Spherical.FrontPlane;
+			const lcVector4& Plane2 = TextureMap.Params.Spherical.Plane2;
+			int PoleIndex;
+			int EdgeIndex1, EdgeIndex2;
+
+			if (fabsf(lcDot(lcVector4(Vertices[Index1], 1.0f), FrontPlane)) < 0.01f && fabsf(lcDot(lcVector4(Vertices[Index1], 1.0f), Plane2)) < 0.01f)
+			{
+				PoleIndex = Index1;
+				EdgeIndex1 = Index2;
+				EdgeIndex2 = Index3;
+			}
+			else if (fabsf(lcDot(lcVector4(Vertices[Index2], 1.0f), FrontPlane)) < 0.01f && fabsf(lcDot(lcVector4(Vertices[Index2], 1.0f), Plane2)) < 0.01f)
+			{
+				PoleIndex = Index2;
+				EdgeIndex1 = Index1;
+				EdgeIndex2 = Index3;
+			}
+			else if (fabsf(lcDot(lcVector4(Vertices[Index3], 1.0f), FrontPlane)) < 0.01f && fabsf(lcDot(lcVector4(Vertices[Index3], 1.0f), Plane2)) < 0.01f)
+			{
+				PoleIndex = Index3;
+				EdgeIndex1 = Index1;
+				EdgeIndex2 = Index2;
+			}
+			else
+				return;
+
+			lcVector3 OppositeEdge = Vertices[EdgeIndex2] - Vertices[EdgeIndex1];
+			lcVector3 SideEdge = Vertices[PoleIndex] - Vertices[EdgeIndex1];
+
+			float OppositeLength = lcLength(OppositeEdge);
+			float Projection = lcDot(OppositeEdge, SideEdge) / (OppositeLength * OppositeLength);
+
+			TexCoords[PoleIndex].x = TexCoords[EdgeIndex1].x + (TexCoords[EdgeIndex2].x - TexCoords[EdgeIndex1].x) * Projection;
+		};
+
+		CheckTexCoordsPole(QuadIndices[0], QuadIndices[1], QuadIndices[2]);
+
+		if (LineType == 4)
+			CheckTexCoordsPole(QuadIndices[2], QuadIndices[3], QuadIndices[0]);
+	}
+
+	for (int IndexIdx = 0; IndexIdx < lcMin(LineType, 4); IndexIdx++)
+	{
+		const lcVector3& Position = Vertices[QuadIndices[IndexIdx]];
+		Indices[IndexIdx] = AddTexturedVertex(MeshDataType, Position, Normal, TexCoords[QuadIndices[IndexIdx]], Optimize);
+	}
+
+	if (LineType == 4)
+	{
 		if (Indices[0] != Indices[2] && Indices[0] != Indices[3] && Indices[2] != Indices[3])
 		{
 			if (WindingCCW)
@@ -586,31 +573,22 @@ void lcLibraryMeshData::AddTexturedLine(lcMeshDataType MeshDataType, int LineTyp
 				Section->mIndices.Add(Indices[2]);
 			}
 		}
-		Q_FALLTHROUGH();
-	case 3:
-		if (Indices[0] != Indices[1] && Indices[0] != Indices[2] && Indices[1] != Indices[2])
-		{
-			if (WindingCCW)
-			{
-				Section->mIndices.Add(Indices[0]);
-				Section->mIndices.Add(Indices[1]);
-				Section->mIndices.Add(Indices[2]);
-			}
-			else
-			{
-				Section->mIndices.Add(Indices[2]);
-				Section->mIndices.Add(Indices[1]);
-				Section->mIndices.Add(Indices[0]);
-			}
-		}
-		break;
-	case 2:
-		if (Indices[0] != Indices[1])
+	}
+
+	if (Indices[0] != Indices[1] && Indices[0] != Indices[2] && Indices[1] != Indices[2])
+	{
+		if (WindingCCW)
 		{
 			Section->mIndices.Add(Indices[0]);
 			Section->mIndices.Add(Indices[1]);
+			Section->mIndices.Add(Indices[2]);
 		}
-		break;
+		else
+		{
+			Section->mIndices.Add(Indices[2]);
+			Section->mIndices.Add(Indices[1]);
+			Section->mIndices.Add(Indices[0]);
+		}
 	}
 }
 
@@ -704,14 +682,10 @@ void lcLibraryMeshData::AddMeshData(const lcLibraryMeshData& Data, const lcMatri
 
 			if (SrcSection->mTexture)
 				Texture = SrcSection->mTexture;
-			else if (TextureMap)
+			else if (TextureMap && SrcSection->mPrimitiveType == LC_MESH_TRIANGLES)
 			{
 				Texture = TextureMap->Texture;
-
-				if (SrcSection->mPrimitiveType == LC_MESH_TRIANGLES)
-					PrimitiveType = LC_MESH_TEXTURED_TRIANGLES;
-				else if (SrcSection->mPrimitiveType == LC_MESH_LINES)
-					PrimitiveType = LC_MESH_TEXTURED_LINES;
+				PrimitiveType = LC_MESH_TEXTURED_TRIANGLES;
 			}
 			else
 				Texture = nullptr;
@@ -882,7 +856,6 @@ static int LibraryMeshSectionCompare(lcMergeSection const& First, lcMergeSection
 			LC_MESH_TRIANGLES,
 			LC_MESH_TEXTURED_TRIANGLES,
 			LC_MESH_LINES,
-			LC_MESH_TEXTURED_LINES,
 			LC_MESH_CONDITIONAL_LINES
 		};
 
@@ -1245,7 +1218,7 @@ lcMesh* lcLibraryMeshData::CreateMesh()
 			else
 				Mesh->mFlags |= lcMeshFlag::HasLines;
 
-			if (DstSection.PrimitiveType == LC_MESH_TEXTURED_TRIANGLES || DstSection.PrimitiveType == LC_MESH_TEXTURED_LINES)
+			if (DstSection.PrimitiveType == LC_MESH_TEXTURED_TRIANGLES)
 				Mesh->mFlags |= lcMeshFlag::HasTexture;
 
 			NumIndices += DstSection.NumIndices;
@@ -1667,15 +1640,7 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 			Points[0] = lcMul31(Points[0], CurrentTransform);
 			Points[1] = lcMul31(Points[1], CurrentTransform);
 
-			if (TextureMap)
-			{
-				mMeshData.AddTexturedLine(MeshDataType, LineType, ColorCode, WindingCCW, *TextureMap, Points, mOptimize);
-
-				if (TextureMap->Next)
-					TextureStack.RemoveIndex(TextureStack.GetSize() - 1);
-			}
-			else
-				mMeshData.AddLine(MeshDataType, LineType, ColorCode, WindingCCW, Points, mOptimize);
+			mMeshData.AddLine(MeshDataType, LineType, ColorCode, WindingCCW, Points, mOptimize);
 			break;
 
 		case 3:

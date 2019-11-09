@@ -285,19 +285,29 @@ void lcScene::Draw(lcContext* Context) const
 
 		DrawRenderMeshes(Context, UntexturedPrimitives, false, false, false);
 
-		if (!mTranslucentMeshes.IsEmpty())
-			DrawRenderMeshes(Context, LC_MESH_TRIANGLES, false, true, false);
-
 		if (mHasTexture)
 		{
 			Context->SetMaterial(LC_MATERIAL_UNLIT_TEXTURE_DECAL);
 
 			DrawRenderMeshes(Context, LC_MESH_TEXTURED_TRIANGLES, false, false, true);
 
-			if (!mTranslucentMeshes.IsEmpty())
+			Context->BindTexture2D(0);
+		}
+
+		if (!mTranslucentMeshes.IsEmpty())
+		{
+			Context->SetMaterial(LC_MATERIAL_UNLIT_COLOR);
+
+			DrawRenderMeshes(Context, LC_MESH_TRIANGLES, false, true, false);
+
+			if (mHasTexture)
+			{
+				Context->SetMaterial(LC_MATERIAL_UNLIT_TEXTURE_DECAL);
+
 				DrawRenderMeshes(Context, LC_MESH_TEXTURED_TRIANGLES, false, true, true);
 
-			Context->BindTexture2D(0);
+				Context->BindTexture2D(0);
+			}
 		}
 	}
 	else
@@ -319,18 +329,29 @@ void lcScene::Draw(lcContext* Context) const
 		Context->SetMaterial(LC_MATERIAL_FAKELIT_COLOR);
 		DrawRenderMeshes(Context, LC_MESH_TRIANGLES, true, false, false);
 
-		if (!mTranslucentMeshes.IsEmpty())
-			DrawRenderMeshes(Context, LC_MESH_TRIANGLES, true, true, false);
-
 		if (mHasTexture)
 		{
 			Context->SetMaterial(LC_MATERIAL_FAKELIT_TEXTURE_DECAL);
+
 			DrawRenderMeshes(Context, LC_MESH_TEXTURED_TRIANGLES, true, false, true);
 
-			if (!mTranslucentMeshes.IsEmpty())
+			Context->BindTexture2D(0);
+		}
+
+		if (!mTranslucentMeshes.IsEmpty())
+		{
+			Context->SetMaterial(LC_MATERIAL_FAKELIT_COLOR);
+
+			DrawRenderMeshes(Context, LC_MESH_TRIANGLES, true, true, false);
+
+			if (mHasTexture)
+			{
+				Context->SetMaterial(LC_MATERIAL_FAKELIT_TEXTURE_DECAL);
+
 				DrawRenderMeshes(Context, LC_MESH_TEXTURED_TRIANGLES, true, true, true);
 
-			Context->BindTexture2D(0);
+				Context->BindTexture2D(0);
+			}
 		}
 	}
 }

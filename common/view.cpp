@@ -1821,7 +1821,7 @@ void View::DrawViewport()
 	mContext->SetViewMatrix(lcMatrix44Translation(lcVector3(0.375, 0.375, 0.0)));
 	mContext->SetProjectionMatrix(lcMatrix44Ortho(0.0f, mWidth, 0.0f, mHeight, -1.0f, 1.0f));
 
-	glDepthMask(GL_FALSE);
+	mContext->SetDepthWrite(false);
 	glDisable(GL_DEPTH_TEST);
 
 	if (gMainWindow->GetActiveView() == this)
@@ -1850,7 +1850,7 @@ void View::DrawViewport()
 		glDisable(GL_BLEND);
 	}
 
-	glDepthMask(GL_TRUE);
+	mContext->SetDepthWrite(true);
 	glEnable(GL_DEPTH_TEST);
 }
 

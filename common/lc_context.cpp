@@ -36,6 +36,7 @@ lcContext::lcContext()
 	mTexture2DMS = 0;
 	mTextureCubeMap = 0;
 	mPolygonOffset = LC_POLYGON_OFFSET_NONE;
+	mDepthWrite = true;
 	mLineWidth = 1.0f;
 #ifndef LC_OPENGLES
 	mMatrixMode = GL_MODELVIEW;
@@ -295,6 +296,9 @@ void lcContext::SetDefaultState()
 	glDisable(GL_POLYGON_OFFSET_FILL);
 	mPolygonOffset = LC_POLYGON_OFFSET_NONE;
 
+	mDepthWrite = true;
+	glDepthMask(GL_TRUE);
+
 	glLineWidth(1.0f);
 	mLineWidth = 1.0f;
 
@@ -413,6 +417,15 @@ void lcContext::SetPolygonOffset(lcPolygonOffset PolygonOffset)
 	mPolygonOffset = PolygonOffset;
 }
 
+void lcContext::SetDepthWrite(bool Enable)
+{
+	if (Enable == mDepthWrite)
+		return;
+
+	glDepthMask(Enable ? GL_TRUE : GL_FALSE);
+	mDepthWrite = Enable;
+}
+
 void lcContext::SetLineWidth(float LineWidth)
 {
 	if (LineWidth == mLineWidth)
@@ -428,20 +441,6 @@ void lcContext::SetSmoothShading(bool Smooth)
 	if (gSupportsShaderObjects)
 		glShadeModel(Smooth ? GL_SMOOTH : GL_FLAT);
 #endif
-}
-
-void lcContext::BeginTranslucent()
-{
-	glEnable(GL_BLEND);
-	glDepthMask(GL_FALSE);
-	SetPolygonOffset(LC_POLYGON_OFFSET_TRANSLUCENT);
-}
-
-void lcContext::EndTranslucent()
-{
-	glDepthMask(GL_TRUE);
-	glDisable(GL_BLEND);
-	SetPolygonOffset(LC_POLYGON_OFFSET_OPAQUE);
 }
 
 void lcContext::BindTexture2D(GLuint Texture)

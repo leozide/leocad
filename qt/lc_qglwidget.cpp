@@ -161,7 +161,6 @@ void lcQGLWidget::initializeGL()
 {
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
-	glDepthMask(GL_TRUE);
 }
 
 void lcQGLWidget::resizeGL(int width, int height)

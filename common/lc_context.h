@@ -147,10 +147,9 @@ public:
 	void SetMaterial(lcMaterialType MaterialType);
 	void SetViewport(int x, int y, int Width, int Height);
 	void SetPolygonOffset(lcPolygonOffset PolygonOffset);
+	void SetDepthWrite(bool Enable);
 	void SetLineWidth(float LineWidth);
 	void SetSmoothShading(bool Smooth);
-	void BeginTranslucent();
-	void EndTranslucent();
 	void BindTexture2D(GLuint Texture);
 	void BindTexture2DMS(GLuint Texture);
 	void BindTextureCubeMap(GLuint Texture);
@@ -231,6 +230,7 @@ protected:
 	GLuint mTexture2DMS;
 	GLuint mTextureCubeMap;
 	lcPolygonOffset mPolygonOffset;
+	bool mDepthWrite;
 	float mLineWidth;
 	int mMatrixMode;
 	bool mTextureEnabled;

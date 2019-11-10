@@ -1285,15 +1285,16 @@ void lcModel::DrawBackground(lcGLWidget* Widget)
 		return;
 	}
 
+	lcContext* Context = Widget->mContext;
+
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glDepthMask(GL_FALSE);
+	Context->SetDepthWrite(false);
 	glDisable(GL_DEPTH_TEST);
 
 	float ViewWidth = (float)Widget->mWidth;
 	float ViewHeight = (float)Widget->mHeight;
 
-	lcContext* Context = Widget->mContext;
 	Context->SetWorldMatrix(lcMatrix44Identity());
 	Context->SetViewMatrix(lcMatrix44Translation(lcVector3(0.375, 0.375, 0.0)));
 	Context->SetProjectionMatrix(lcMatrix44Ortho(0.0f, ViewWidth, 0.0f, ViewHeight, -1.0f, 1.0f));
@@ -1350,7 +1351,7 @@ void lcModel::DrawBackground(lcGLWidget* Widget)
 	}
 
 	glEnable(GL_DEPTH_TEST);
-	glDepthMask(GL_TRUE);
+	Context->SetDepthWrite(true);
 }
 
 void lcModel::SaveStepImages(const QString& BaseName, bool AddStepSuffix, bool Zoom, bool Highlight, int Width, int Height, lcStep Start, lcStep End)

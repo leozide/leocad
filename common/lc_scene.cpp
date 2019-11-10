@@ -71,11 +71,6 @@ void lcScene::DrawRenderMeshes(lcContext* Context, int PrimitiveTypes, bool Enab
 {
 	const lcArray<int>& Meshes = DrawTranslucent ? mTranslucentMeshes : mOpaqueMeshes;
 
-	if (DrawTranslucent)
-		Context->BeginTranslucent();
-	else
-		Context->SetPolygonOffset(LC_POLYGON_OFFSET_OPAQUE);
-
 	for (int MeshIndex : Meshes)
 	{
 		const lcRenderMesh& RenderMesh = mRenderMeshes[MeshIndex];
@@ -233,9 +228,6 @@ void lcScene::DrawRenderMeshes(lcContext* Context, int PrimitiveTypes, bool Enab
 		}
 #endif
 	}
-
-	if (DrawTranslucent)
-		Context->EndTranslucent();
 }
 
 void lcScene::Draw(lcContext* Context) const
@@ -252,6 +244,8 @@ void lcScene::Draw(lcContext* Context) const
 	lcShadingMode ShadingMode = Preferences.mShadingMode;
 	if (ShadingMode == LC_SHADING_WIREFRAME && !mAllowWireframe)
 		ShadingMode = LC_SHADING_FLAT;
+
+	Context->SetPolygonOffset(LC_POLYGON_OFFSET_OPAQUE);
 
 	if (ShadingMode == LC_SHADING_WIREFRAME)
 	{
@@ -296,6 +290,10 @@ void lcScene::Draw(lcContext* Context) const
 
 		if (!mTranslucentMeshes.IsEmpty())
 		{
+			glEnable(GL_BLEND);
+			Context->SetDepthWrite(false);
+			Context->SetPolygonOffset(LC_POLYGON_OFFSET_TRANSLUCENT);
+
 			Context->SetMaterial(LC_MATERIAL_UNLIT_COLOR);
 
 			DrawRenderMeshes(Context, LC_MESH_TRIANGLES, false, true, false);
@@ -308,6 +306,10 @@ void lcScene::Draw(lcContext* Context) const
 
 				Context->BindTexture2D(0);
 			}
+
+			Context->SetPolygonOffset(LC_POLYGON_OFFSET_OPAQUE);
+			Context->SetDepthWrite(true);
+			glDisable(GL_BLEND);
 		}
 	}
 	else
@@ -340,6 +342,10 @@ void lcScene::Draw(lcContext* Context) const
 
 		if (!mTranslucentMeshes.IsEmpty())
 		{
+			glEnable(GL_BLEND);
+			Context->SetDepthWrite(false);
+			Context->SetPolygonOffset(LC_POLYGON_OFFSET_TRANSLUCENT);
+
 			Context->SetMaterial(LC_MATERIAL_FAKELIT_COLOR);
 
 			DrawRenderMeshes(Context, LC_MESH_TRIANGLES, true, true, false);
@@ -352,6 +358,10 @@ void lcScene::Draw(lcContext* Context) const
 
 				Context->BindTexture2D(0);
 			}
+
+			Context->SetPolygonOffset(LC_POLYGON_OFFSET_OPAQUE);
+			Context->SetDepthWrite(true);
+			glDisable(GL_BLEND);
 		}
 	}
 }

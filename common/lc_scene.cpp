@@ -23,7 +23,6 @@ void lcScene::Begin(const lcMatrix44& ViewMatrix)
 	mOpaqueMeshes.RemoveAll();
 	mTranslucentMeshes.RemoveAll();
 	mInterfaceObjects.RemoveAll();
-	mHasTexture = false;
 }
 
 void lcScene::End()
@@ -71,9 +70,6 @@ void lcScene::AddMesh(lcMesh* Mesh, const lcMatrix44& WorldMatrix, int ColorInde
 
 	if ((Flags & lcMeshFlag::HasTranslucent) || ((Flags & lcMeshFlag::HasDefault) && Translucent))
 		mTranslucentMeshes.Add(mRenderMeshes.GetSize() - 1);
-
-	if (Flags & lcMeshFlag::HasTexture)
-		mHasTexture = true;
 }
 
 void lcScene::DrawPass(lcContext* Context, lcRenderPass RenderPass, int PrimitiveTypes) const

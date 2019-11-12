@@ -72,5 +72,4 @@ protected:
 	lcArray<int> mOpaqueMeshes;
 	lcArray<int> mTranslucentMeshes;
 	lcArray<const lcObject*> mInterfaceObjects;
-	bool mHasTexture;
 };

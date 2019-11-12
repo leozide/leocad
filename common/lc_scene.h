@@ -3,6 +3,14 @@
 #include "lc_mesh.h"
 #include "lc_array.h"
 
+enum class lcRenderPass
+{
+	UnlitOpaque,
+	UnlitTranslucent,
+	LitOpaque,
+	LitTranslucent
+};
+
 class lcScene
 {
 public:
@@ -52,7 +60,7 @@ public:
 	void DrawInterfaceObjects(lcContext* Context) const;
 
 protected:
-	void DrawRenderMeshes(lcContext* Context, int PrimitiveTypes, bool EnableNormals, bool DrawTranslucent, bool DrawTextured) const;
+	void DrawPass(lcContext* Context, lcRenderPass RenderPass, int PrimitiveTypes) const;
 
 	lcMatrix44 mViewMatrix;
 	lcMatrix44 mActiveSubmodelTransform;

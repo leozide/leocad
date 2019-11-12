@@ -30,7 +30,16 @@ void lcScene::End()
 {
 	auto OpaqueMeshCompare = [this](int Index1, int Index2)
 	{
-		return mRenderMeshes[Index1].Mesh <  mRenderMeshes[Index2].Mesh;
+		const lcMesh* Mesh1 = mRenderMeshes[Index1].Mesh;
+		const lcMesh* Mesh2 = mRenderMeshes[Index2].Mesh;
+
+		int Texture1 = Mesh1->mFlags & lcMeshFlag::HasTexture;
+		int Texture2 = Mesh2->mFlags & lcMeshFlag::HasTexture;
+
+		if (Texture1 == Texture2)
+			return Mesh1 < Mesh2;
+
+		return Texture1 ? false : true;
 	};
 
 	std::sort(mOpaqueMeshes.begin(), mOpaqueMeshes.end(), OpaqueMeshCompare);
@@ -67,9 +76,36 @@ void lcScene::AddMesh(lcMesh* Mesh, const lcMatrix44& WorldMatrix, int ColorInde
 		mHasTexture = true;
 }
 
-void lcScene::DrawRenderMeshes(lcContext* Context, int PrimitiveTypes, bool EnableNormals, bool DrawTranslucent, bool DrawTextured) const
+void lcScene::DrawPass(lcContext* Context, lcRenderPass RenderPass, int PrimitiveTypes) const
 {
-	const lcArray<int>& Meshes = DrawTranslucent ? mTranslucentMeshes : mOpaqueMeshes;
+	bool IsTranslucent = (RenderPass == lcRenderPass::UnlitTranslucent || RenderPass == lcRenderPass::LitTranslucent);
+	const lcArray<int>& Meshes = IsTranslucent ? mTranslucentMeshes : mOpaqueMeshes;
+
+	if (Meshes.IsEmpty())
+		return;
+
+	bool IsLit = (RenderPass == lcRenderPass::LitOpaque || RenderPass == lcRenderPass::LitTranslucent);
+	lcMaterialType FlatMaterial, TexturedMaterial;
+
+	if (IsLit)
+	{
+		FlatMaterial = LC_MATERIAL_FAKELIT_COLOR;
+		TexturedMaterial = LC_MATERIAL_FAKELIT_TEXTURE_DECAL;
+	}
+	else
+	{
+		FlatMaterial = LC_MATERIAL_UNLIT_COLOR;
+		TexturedMaterial = LC_MATERIAL_UNLIT_TEXTURE_DECAL;
+	}
+
+	if (IsTranslucent)
+	{
+		glEnable(GL_BLEND);
+		Context->SetDepthWrite(false);
+		Context->SetPolygonOffset(LC_POLYGON_OFFSET_TRANSLUCENT);
+	}
+	else
+		Context->SetPolygonOffset(LC_POLYGON_OFFSET_OPAQUE);
 
 	for (int MeshIndex : Meshes)
 	{
@@ -84,7 +120,7 @@ void lcScene::DrawRenderMeshes(lcContext* Context, int PrimitiveTypes, bool Enab
 		{
 			lcMeshSection* Section = &Mesh->mLods[LodIndex].Sections[SectionIdx];
 
-			if ((Section->PrimitiveType & PrimitiveTypes) == 0 || (Section->Texture != nullptr) != DrawTextured)
+			if ((Section->PrimitiveType & PrimitiveTypes) == 0)
 				continue;
 
 			int ColorIndex = Section->ColorIndex;
@@ -94,7 +130,7 @@ void lcScene::DrawRenderMeshes(lcContext* Context, int PrimitiveTypes, bool Enab
 				if (ColorIndex == gDefaultColor)
 					ColorIndex = RenderMesh.ColorIndex;
 
-				if (lcIsColorTranslucent(ColorIndex) != DrawTranslucent)
+				if (lcIsColorTranslucent(ColorIndex) != IsTranslucent)
 					continue;
 
 				switch (RenderMesh.State)
@@ -152,7 +188,7 @@ void lcScene::DrawRenderMeshes(lcContext* Context, int PrimitiveTypes, bool Enab
 				int IndexBufferOffset = Mesh->mIndexCacheOffset != -1 ? Mesh->mIndexCacheOffset : 0;
 
 				int VertexBufferOffset = Mesh->mVertexCacheOffset != -1 ? Mesh->mVertexCacheOffset : 0;
-				Context->SetVertexFormat(VertexBufferOffset, 3, 1, 0, 0, EnableNormals);
+				Context->SetVertexFormat(VertexBufferOffset, 3, 1, 0, 0, IsLit);
 
 				if (Mesh->mIndexType == GL_UNSIGNED_SHORT)
 				{
@@ -194,12 +230,14 @@ void lcScene::DrawRenderMeshes(lcContext* Context, int PrimitiveTypes, bool Enab
 
 			if (!Texture)
 			{
-				Context->SetVertexFormat(VertexBufferOffset, 3, 1, 0, 0, EnableNormals);
+				Context->SetMaterial(FlatMaterial);
+				Context->SetVertexFormat(VertexBufferOffset, 3, 1, 0, 0, IsLit);
 			}
 			else
 			{
+				Context->SetMaterial(TexturedMaterial);
 				VertexBufferOffset += Mesh->mNumVertices * sizeof(lcVertex);
-				Context->SetVertexFormat(VertexBufferOffset, 3, 1, 2, 0, EnableNormals);
+				Context->SetVertexFormat(VertexBufferOffset, 3, 1, 2, 0, IsLit);
 				Context->BindTexture2D(Texture->mTexture);
 			}
 
@@ -228,6 +266,13 @@ void lcScene::DrawRenderMeshes(lcContext* Context, int PrimitiveTypes, bool Enab
 		}
 #endif
 	}
+
+	if (IsTranslucent)
+	{
+		Context->SetPolygonOffset(LC_POLYGON_OFFSET_OPAQUE);
+		Context->SetDepthWrite(true);
+		glDisable(GL_BLEND);
+	}
 }
 
 void lcScene::Draw(lcContext* Context) const
@@ -245,125 +290,53 @@ void lcScene::Draw(lcContext* Context) const
 	if (ShadingMode == LC_SHADING_WIREFRAME && !mAllowWireframe)
 		ShadingMode = LC_SHADING_FLAT;
 
-	Context->SetPolygonOffset(LC_POLYGON_OFFSET_OPAQUE);
+	Context->BindTexture2D(0);
 
 	if (ShadingMode == LC_SHADING_WIREFRAME)
 	{
-		Context->BindTexture2D(0);
-
-		Context->SetMaterial(LC_MATERIAL_UNLIT_COLOR);
-
-		int UntexturedPrimitives = LC_MESH_LINES;
+		int PrimitiveTypes = LC_MESH_LINES;
 
 		if (DrawConditional)
-			UntexturedPrimitives |= LC_MESH_CONDITIONAL_LINES;
+			PrimitiveTypes |= LC_MESH_CONDITIONAL_LINES;
 
-		DrawRenderMeshes(Context, UntexturedPrimitives, false, false, false);
+		DrawPass(Context, lcRenderPass::UnlitOpaque, PrimitiveTypes);
 	}
 	else if (ShadingMode == LC_SHADING_FLAT)
 	{
 		bool DrawLines = Preferences.mDrawEdgeLines && Preferences.mLineWidth != 0.0f;
-		Context->BindTexture2D(0);
 
-		Context->SetMaterial(LC_MATERIAL_UNLIT_COLOR);
-
-		int UntexturedPrimitives = LC_MESH_TRIANGLES;
+		int PrimitiveTypes = LC_MESH_TRIANGLES | LC_MESH_TEXTURED_TRIANGLES;
 
 		if (DrawLines)
 		{
-			UntexturedPrimitives |= LC_MESH_LINES;
+			PrimitiveTypes |= LC_MESH_LINES;
 
 			if (DrawConditional)
-				UntexturedPrimitives |= LC_MESH_CONDITIONAL_LINES;
+				PrimitiveTypes |= LC_MESH_CONDITIONAL_LINES;
 		}
 
-		DrawRenderMeshes(Context, UntexturedPrimitives, false, false, false);
-
-		if (mHasTexture)
-		{
-			Context->SetMaterial(LC_MATERIAL_UNLIT_TEXTURE_DECAL);
-
-			DrawRenderMeshes(Context, LC_MESH_TEXTURED_TRIANGLES, false, false, true);
-
-			Context->BindTexture2D(0);
-		}
-
-		if (!mTranslucentMeshes.IsEmpty())
-		{
-			glEnable(GL_BLEND);
-			Context->SetDepthWrite(false);
-			Context->SetPolygonOffset(LC_POLYGON_OFFSET_TRANSLUCENT);
-
-			Context->SetMaterial(LC_MATERIAL_UNLIT_COLOR);
-
-			DrawRenderMeshes(Context, LC_MESH_TRIANGLES, false, true, false);
-
-			if (mHasTexture)
-			{
-				Context->SetMaterial(LC_MATERIAL_UNLIT_TEXTURE_DECAL);
-
-				DrawRenderMeshes(Context, LC_MESH_TEXTURED_TRIANGLES, false, true, true);
-
-				Context->BindTexture2D(0);
-			}
-
-			Context->SetPolygonOffset(LC_POLYGON_OFFSET_OPAQUE);
-			Context->SetDepthWrite(true);
-			glDisable(GL_BLEND);
-		}
+		DrawPass(Context, lcRenderPass::UnlitOpaque, PrimitiveTypes);
+		DrawPass(Context, lcRenderPass::UnlitTranslucent, LC_MESH_TRIANGLES | LC_MESH_TEXTURED_TRIANGLES);
 	}
 	else
 	{
 		bool DrawLines = Preferences.mDrawEdgeLines && Preferences.mLineWidth != 0.0f;
-		Context->BindTexture2D(0);
 
 		if (DrawLines)
 		{
-			int LinePrimitives = LC_MESH_LINES;
+			int PrimitiveTypes = LC_MESH_LINES;
 
 			if (DrawConditional)
-				LinePrimitives |= LC_MESH_CONDITIONAL_LINES;
+				PrimitiveTypes |= LC_MESH_CONDITIONAL_LINES;
 
-			Context->SetMaterial(LC_MATERIAL_UNLIT_COLOR);
-			DrawRenderMeshes(Context, LinePrimitives, false, false, false);
+			DrawPass(Context, lcRenderPass::UnlitOpaque, PrimitiveTypes);
 		}
 
-		Context->SetMaterial(LC_MATERIAL_FAKELIT_COLOR);
-		DrawRenderMeshes(Context, LC_MESH_TRIANGLES, true, false, false);
-
-		if (mHasTexture)
-		{
-			Context->SetMaterial(LC_MATERIAL_FAKELIT_TEXTURE_DECAL);
-
-			DrawRenderMeshes(Context, LC_MESH_TEXTURED_TRIANGLES, true, false, true);
-
-			Context->BindTexture2D(0);
-		}
-
-		if (!mTranslucentMeshes.IsEmpty())
-		{
-			glEnable(GL_BLEND);
-			Context->SetDepthWrite(false);
-			Context->SetPolygonOffset(LC_POLYGON_OFFSET_TRANSLUCENT);
-
-			Context->SetMaterial(LC_MATERIAL_FAKELIT_COLOR);
-
-			DrawRenderMeshes(Context, LC_MESH_TRIANGLES, true, true, false);
-
-			if (mHasTexture)
-			{
-				Context->SetMaterial(LC_MATERIAL_FAKELIT_TEXTURE_DECAL);
-
-				DrawRenderMeshes(Context, LC_MESH_TEXTURED_TRIANGLES, true, true, true);
-
-				Context->BindTexture2D(0);
-			}
-
-			Context->SetPolygonOffset(LC_POLYGON_OFFSET_OPAQUE);
-			Context->SetDepthWrite(true);
-			glDisable(GL_BLEND);
-		}
+		DrawPass(Context, lcRenderPass::LitOpaque, LC_MESH_TRIANGLES | LC_MESH_TEXTURED_TRIANGLES);
+		DrawPass(Context, lcRenderPass::LitTranslucent, LC_MESH_TRIANGLES | LC_MESH_TEXTURED_TRIANGLES);
 	}
+
+	Context->BindTexture2D(0);
 }
 
 void lcScene::DrawInterfaceObjects(lcContext* Context) const

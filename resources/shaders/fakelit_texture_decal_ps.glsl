@@ -12,6 +12,6 @@ void main()
 {
 	LC_PIXEL_FAKE_LIGHTING
 	LC_SHADER_PRECISION vec4 TexelColor = texture2D(Texture, PixelTexCoord);
-	LC_SHADER_PRECISION vec4 DiffuseColor = mix(MaterialColor, TexelColor, TexelColor.a);
-	gl_FragColor = vec4(vec3(DiffuseColor) * Diffuse + SpecularColor, DiffuseColor.a);
+	LC_SHADER_PRECISION vec3 DiffuseColor = mix(MaterialColor.rgb, TexelColor.rgb, TexelColor.a);
+	gl_FragColor = vec4(DiffuseColor * Diffuse + SpecularColor, max(TexelColor.a, MaterialColor.a));
 }

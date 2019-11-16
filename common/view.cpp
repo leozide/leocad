@@ -874,6 +874,12 @@ void View::OnDraw()
 				mContext->SetProjectionMatrix(GetProjectionMatrix());
 			}
 
+			if (DrawInterface)
+			{
+				mContext->SetViewMatrix(mScene.GetViewMatrix());
+				DrawGrid();
+			}
+
 			mContext->SetLineWidth(Preferences.mLineWidth);
 
 			mScene.Draw(mContext);
@@ -911,8 +917,6 @@ void View::OnDraw()
 		mScene.DrawInterfaceObjects(mContext);
 
 		mContext->SetLineWidth(1.0f);
-
-		DrawGrid();
 
 		if (Preferences.mDrawAxes)
 			DrawAxes();

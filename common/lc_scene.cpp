@@ -45,7 +45,7 @@ void lcScene::End()
 
 	auto TranslucentMeshCompare = [this](int Index1, int Index2)
 	{
-		return mRenderMeshes[Index1].Distance <  mRenderMeshes[Index2].Distance;
+		return mRenderMeshes[Index1].Distance >  mRenderMeshes[Index2].Distance;
 	};
 
 	std::sort(mTranslucentMeshes.begin(), mTranslucentMeshes.end(), TranslucentMeshCompare);

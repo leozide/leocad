@@ -27,6 +27,11 @@ public:
 		return mActiveSubmodelInstance;
 	}
 
+	const lcMatrix44& GetViewMatrix() const
+	{
+		return mViewMatrix;
+	}
+
 	void SetDrawInterface(bool DrawInterface)
 	{
 		mDrawInterface = DrawInterface;

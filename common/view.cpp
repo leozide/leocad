@@ -1726,6 +1726,8 @@ void View::DrawGrid()
 	{
 		mContext->BindTexture2D(gGridTexture->mTexture);
 		glEnable(GL_BLEND);
+		glEnable(GL_ALPHA_TEST);
+		glAlphaFunc(GL_GREATER, 0.25f);
 
 		mContext->SetMaterial(LC_MATERIAL_UNLIT_TEXTURE_MODULATE);
 		mContext->SetColor(lcVector4FromColor(Preferences.mGridStudColor));
@@ -1733,6 +1735,7 @@ void View::DrawGrid()
 		mContext->SetVertexFormat(0, 3, 0, 2, 0, false);
 		mContext->DrawPrimitives(GL_TRIANGLE_STRIP, 0, 4);
 
+		glDisable(GL_ALPHA_TEST);
 		glDisable(GL_BLEND);
 
 		BufferOffset = 4 * 5 * sizeof(float);

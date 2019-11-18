@@ -263,9 +263,11 @@ void lcScene::DrawPass(lcContext* Context, lcRenderPass RenderPass, int Primitiv
 #endif
 	}
 
+	Context->BindTexture2D(0);
+	Context->SetPolygonOffset(LC_POLYGON_OFFSET_NONE);
+
 	if (IsTranslucent)
 	{
-		Context->SetPolygonOffset(LC_POLYGON_OFFSET_OPAQUE);
 		Context->SetDepthWrite(true);
 		glDisable(GL_BLEND);
 	}
@@ -285,8 +287,6 @@ void lcScene::Draw(lcContext* Context) const
 	lcShadingMode ShadingMode = Preferences.mShadingMode;
 	if (ShadingMode == LC_SHADING_WIREFRAME && !mAllowWireframe)
 		ShadingMode = LC_SHADING_FLAT;
-
-	Context->BindTexture2D(0);
 
 	if (ShadingMode == LC_SHADING_WIREFRAME)
 	{
@@ -331,8 +331,6 @@ void lcScene::Draw(lcContext* Context) const
 		DrawPass(Context, lcRenderPass::LitOpaque, LC_MESH_TRIANGLES | LC_MESH_TEXTURED_TRIANGLES);
 		DrawPass(Context, lcRenderPass::LitTranslucent, LC_MESH_TRIANGLES | LC_MESH_TEXTURED_TRIANGLES);
 	}
-
-	Context->BindTexture2D(0);
 }
 
 void lcScene::DrawInterfaceObjects(lcContext* Context) const

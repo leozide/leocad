@@ -1000,8 +1000,6 @@ lcMesh* lcLibraryMeshData::CreateMesh()
 	Mesh->Create(NumSections, NumVertices, NumTexturedVertices, NumIndices);
 
 	lcVertex* DstVerts = (lcVertex*)Mesh->mVertexData;
-	lcVector3 Min(FLT_MAX, FLT_MAX, FLT_MAX), Max(-FLT_MAX, -FLT_MAX, -FLT_MAX);
-	bool UpdatedBoundingBox = false;
 
 	if (!mHasTextures)
 	{
@@ -1015,21 +1013,6 @@ lcMesh* lcLibraryMeshData::CreateMesh()
 
 				DstVertex.Position = lcVector3LDrawToLeoCAD(SrcVertex.Position);
 				DstVertex.Normal = lcPackNormal(lcVector3LDrawToLeoCAD(SrcVertex.Normal));
-			}
-
-			for (const lcLibraryMeshSection* Section : mSections[MeshDataIdx])
-			{
-				if (Section->mPrimitiveType != LC_MESH_TRIANGLES)
-					continue;
-
-				UpdatedBoundingBox = true;
-
-				for (quint32 Index : Section->mIndices)
-				{
-					lcVector3 Position = lcVector3LDrawToLeoCAD(Vertices[Index].Position);
-					Min = lcMin(Min, Position);
-					Max = lcMax(Max, Position);
-				}
 			}
 		}
 	}
@@ -1063,31 +1046,17 @@ lcMesh* lcLibraryMeshData::CreateMesh()
 				DstVertex.Position = lcVector3LDrawToLeoCAD(SrcVertex.Position);
 				DstVertex.Normal = lcPackNormal(lcVector3LDrawToLeoCAD(SrcVertex.Normal));
 				DstVertex.TexCoord = SrcVertex.TexCoord;
-
-				lcVector3& Position = DstVertex.Position;
-				Min = lcMin(Min, Position);
-				Max = lcMax(Max, Position);
 			}
 		}
 
 		for (int MeshDataIdx = 0; MeshDataIdx < LC_NUM_MESHDATA_TYPES; MeshDataIdx++)
 		{
-			const lcArray<lcLibraryMeshVertex>& Vertices = mVertices[MeshDataIdx];
-
 			for (lcLibraryMeshSection* Section : mSections[MeshDataIdx])
 			{
 				if (Section->mPrimitiveType == LC_MESH_TRIANGLES)
 				{
-					UpdatedBoundingBox = true;
-
 					for (quint32& Index : Section->mIndices)
-					{
-						lcVector3 Position = lcVector3LDrawToLeoCAD(Vertices[Index].Position);
-						Min = lcMin(Min, Position);
-						Max = lcMax(Max, Position);
-
 						Index = IndexRemap[MeshDataIdx][Index];
-					}
 				}
 				else
 				{
@@ -1105,13 +1074,6 @@ lcMesh* lcLibraryMeshData::CreateMesh()
 			}
 		}
 	}
-
-	if (!UpdatedBoundingBox)
-		Min = Max = lcVector3(0.0f, 0.0f, 0.0f);
-
-	Mesh->mBoundingBox.Max = Max;
-	Mesh->mBoundingBox.Min = Min;
-	Mesh->mRadius = lcLength((Max - Min) / 2.0f);
 
 	NumIndices = 0;
 
@@ -1228,57 +1190,92 @@ lcMesh* lcLibraryMeshData::CreateMesh()
 	if (mHasLogoStud)
 		Mesh->mFlags |= lcMeshFlag::HasLogoStud;
 
-	/*
-	for (int SectionIdx = 0; SectionIdx < mSections.GetSize(); SectionIdx++)
+	lcVector3 MeshMin(FLT_MAX, FLT_MAX, FLT_MAX), MeshMax(-FLT_MAX, -FLT_MAX, -FLT_MAX);
+	bool UpdatedBoundingBox = false;
+
+	for (int LodIdx = 0; LodIdx < LC_NUM_MESH_LODS; LodIdx++)
 	{
-		lcMeshSection& DstSection = Mesh->mSections[SectionIdx];
-		lcLibraryMeshSection* SrcSection = mSections[SectionIdx];
+		lcMeshLod& Lod = Mesh->mLods[LodIdx];
 
-		DstSection.ColorIndex = SrcSection->mColor;
-		DstSection.PrimitiveType = SrcSection->mPrimitiveType;
-		DstSection.NumIndices = SrcSection->mIndices.GetSize();
-		DstSection.Texture = SrcSection->mTexture;
-
-		if (DstSection.Texture)
-			DstSection.Texture->AddRef();
-
-		if (Mesh->mNumVertices < 0x10000)
+		for (int SectionIdx = 0; SectionIdx < Lod.NumSections; SectionIdx++)
 		{
-			DstSection.IndexOffset = NumIndices * 2;
+			lcMeshSection& Section = Lod.Sections[SectionIdx];
+			lcVector3 SectionMin(FLT_MAX, FLT_MAX, FLT_MAX), SectionMax(-FLT_MAX, -FLT_MAX, -FLT_MAX);
 
-			quint16* Index = (quint16*)Mesh->mIndexData + NumIndices;
+			if (Mesh->mNumVertices < 0x10000)
+			{
+				const quint16* IndexBuffer = static_cast<quint16*>(Mesh->mIndexData) + Section.IndexOffset / 2;
 
-			for (int IndexIdx = 0; IndexIdx < DstSection.NumIndices; IndexIdx++)
-				*Index++ = SrcSection->mIndices[IndexIdx];
-		}
-		else
-		{
-			DstSection.IndexOffset = NumIndices * 4;
+				if (!Section.Texture)
+				{
+					const lcVertex* VertexBuffer = static_cast<lcVertex*>(Mesh->mVertexData);
 
-			quint32* Index = (quint32*)Mesh->mIndexData + NumIndices;
+					for (int Index = 0; Index < Section.NumIndices; Index++)
+					{
+						const lcVector3& Position = VertexBuffer[IndexBuffer[Index]].Position;
+						SectionMin = lcMin(SectionMin, Position);
+						SectionMax = lcMax(SectionMax, Position);
+					}
+				}
+				else
+				{
+					const lcVertexTextured* VertexBuffer = reinterpret_cast<lcVertexTextured*>(static_cast<char*>(Mesh->mVertexData) + Mesh->mNumVertices * sizeof(lcVertex));
 
-			for (int IndexIdx = 0; IndexIdx < DstSection.NumIndices; IndexIdx++)
-				*Index++ = SrcSection->mIndices[IndexIdx];
-		}
-
-		if (DstSection.PrimitiveType == LC_MESH_TRIANGLES || DstSection.PrimitiveType == LC_MESH_TEXTURED_TRIANGLES)
-		{
-			if (DstSection.ColorIndex == gDefaultColor)
-				Info->mFlags |= LC_PIECE_HAS_DEFAULT;
+					for (int Index = 0; Index < Section.NumIndices; Index++)
+					{
+						const lcVector3& Position = VertexBuffer[IndexBuffer[Index]].Position;
+						SectionMin = lcMin(SectionMin, Position);
+						SectionMax = lcMax(SectionMax, Position);
+					}
+				}
+			}
 			else
 			{
-				if (lcIsColorTranslucent(DstSection.ColorIndex))
-					Info->mFlags |= LC_PIECE_HAS_TRANSLUCENT;
+				const quint32* IndexBuffer = static_cast<quint32*>(Mesh->mIndexData) + Section.IndexOffset / 4;
+
+				if (!Section.Texture)
+				{
+					const lcVertex* VertexBuffer = static_cast<lcVertex*>(Mesh->mVertexData);
+
+					for (int Index = 0; Index < Section.NumIndices; Index++)
+					{
+						const lcVector3& Position = VertexBuffer[IndexBuffer[Index]].Position;
+						SectionMin = lcMin(SectionMin, Position);
+						SectionMax = lcMax(SectionMax, Position);
+					}
+				}
 				else
-					Info->mFlags |= LC_PIECE_HAS_SOLID;
+				{
+					const lcVertexTextured* VertexBuffer = static_cast<lcVertexTextured*>(Mesh->mVertexData);
+
+					for (int Index = 0; Index < Section.NumIndices; Index++)
+					{
+						const lcVector3& Position = VertexBuffer[IndexBuffer[Index]].Position;
+						SectionMin = lcMin(SectionMin, Position);
+						SectionMax = lcMax(SectionMax, Position);
+					}
+				}
+			}
+
+			Section.BoundingBox.Max = SectionMax;
+			Section.BoundingBox.Min = SectionMin;
+			Section.Radius = lcLength((SectionMax - SectionMin) / 2.0f);
+
+			if (Section.PrimitiveType == LC_MESH_TRIANGLES || Section.PrimitiveType == LC_MESH_TEXTURED_TRIANGLES)
+			{
+				UpdatedBoundingBox = true;
+				MeshMin = lcMin(SectionMin, MeshMin);
+				MeshMax = lcMax(SectionMax, MeshMax);
 			}
 		}
-		else
-			Info->mFlags |= LC_PIECE_HAS_LINES;
-
-		NumIndices += DstSection.NumIndices;
 	}
-	*/
+
+	if (!UpdatedBoundingBox)
+		MeshMin = MeshMax = lcVector3(0.0f, 0.0f, 0.0f);
+
+	Mesh->mBoundingBox.Max = MeshMax;
+	Mesh->mBoundingBox.Min = MeshMin;
+	Mesh->mRadius = lcLength((MeshMax - MeshMin) / 2.0f);
 
 	return Mesh;
 }

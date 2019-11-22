@@ -8,7 +8,7 @@
 #include "lc_library.h"
 
 #define LC_MESH_FILE_ID      LC_FOURCC('M', 'E', 'S', 'H')
-#define LC_MESH_FILE_VERSION 0x0117
+#define LC_MESH_FILE_VERSION 0x0118
 
 lcMesh* gPlaceholderMesh;
 
@@ -143,6 +143,8 @@ void lcMesh::CreateBox()
 	Section->NumIndices = 36;
 	Section->PrimitiveType = LC_MESH_TRIANGLES;
 	Section->Texture = nullptr;
+	Section->BoundingBox = mBoundingBox;
+	Section->Radius = mRadius;
 
 	*Indices++ = 0; *Indices++ = 1; *Indices++ = 2;
 	*Indices++ = 0; *Indices++ = 2; *Indices++ = 3;
@@ -169,6 +171,8 @@ void lcMesh::CreateBox()
 	Section->NumIndices = 24;
 	Section->PrimitiveType = LC_MESH_LINES;
 	Section->Texture = nullptr;
+	Section->BoundingBox = mBoundingBox;
+	Section->Radius = mRadius;
 
 	*Indices++ = 0; *Indices++ = 1; *Indices++ = 1; *Indices++ = 2;
 	*Indices++ = 2; *Indices++ = 3; *Indices++ = 3; *Indices++ = 0;
@@ -402,6 +406,9 @@ bool lcMesh::FileLoad(lcMemFile& File)
 			Section.IndexOffset = IndexOffset;
 			Section.NumIndices = NumIndices;
 			Section.PrimitiveType = (lcMeshPrimitiveType)PrimtiveType;
+			Section.BoundingBox.Min = File.ReadVector3();
+			Section.BoundingBox.Max = File.ReadVector3();
+			Section.Radius = File.ReadFloat();
 
 			if (!File.ReadU16(&Length, 1))
 				return false;
@@ -460,6 +467,9 @@ bool lcMesh::FileSave(lcMemFile& File)
 			File.WriteU32(Section.IndexOffset);
 			File.WriteU32(Section.NumIndices);
 			File.WriteU16(Section.PrimitiveType);
+			File.WriteVector3(Section.BoundingBox.Min);
+			File.WriteVector3(Section.BoundingBox.Max);
+			File.WriteFloat(Section.Radius);
 
 			if (Section.Texture)
 			{

@@ -31,6 +31,8 @@ struct lcMeshSection
 	int NumIndices;
 	lcMeshPrimitiveType PrimitiveType;
 	lcTexture* Texture;
+	lcBoundingBox BoundingBox;
+	float Radius;
 };
 
 struct lcMeshLod

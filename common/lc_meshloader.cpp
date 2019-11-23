@@ -844,7 +844,7 @@ struct lcMergeSection
 	lcLibraryMeshSection* Lod;
 };
 
-static int LibraryMeshSectionCompare(lcMergeSection const& First, lcMergeSection const& Second)
+static bool lcLibraryMeshSectionCompare(const lcMergeSection& First, const lcMergeSection& Second)
 {
 	lcLibraryMeshSection* a = First.Lod ? First.Lod : First.Shared;
 	lcLibraryMeshSection* b = Second.Lod ? Second.Lod : Second.Shared;
@@ -864,10 +864,10 @@ static int LibraryMeshSectionCompare(lcMergeSection const& First, lcMergeSection
 			int Primitive = PrimitiveOrder[PrimitiveType];
 
 			if (a->mPrimitiveType == Primitive)
-				return -1;
+				return true;
 
 			if (b->mPrimitiveType == Primitive)
-				return 1;
+				return false;
 		}
 	}
 
@@ -875,9 +875,9 @@ static int LibraryMeshSectionCompare(lcMergeSection const& First, lcMergeSection
 	bool TranslucentB = lcIsColorTranslucent(b->mColor);
 
 	if (TranslucentA != TranslucentB)
-		return TranslucentA ? 1 : -1;
+		return !TranslucentA;
 
-	return a->mColor > b->mColor ? -1 : 1;
+	return a->mColor > b->mColor;
 }
 
 lcMesh* lcLibraryMeshData::CreateMesh()
@@ -994,7 +994,7 @@ lcMesh* lcLibraryMeshData::CreateMesh()
 		}
 
 		NumSections[LodIdx] = MergeSections[LodIdx].GetSize();
-		MergeSections[LodIdx].Sort(LibraryMeshSectionCompare);
+		std::sort(MergeSections[LodIdx].begin(), MergeSections[LodIdx].end(), lcLibraryMeshSectionCompare);
 	}
 
 	Mesh->Create(NumSections, NumVertices, NumTexturedVertices, NumIndices);

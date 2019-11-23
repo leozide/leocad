@@ -144,12 +144,13 @@ void lcPartSelectionListModel::SetCategory(int CategoryIndex)
 		}
 	}
 
-	auto lcPartSortFunc=[](PieceInfo* const& a, PieceInfo* const& b)
+	auto lcPartSortFunc=[](const PieceInfo* a, const PieceInfo* b)
 	{
-		return strcmp(a->m_strDescription, b->m_strDescription);
+		return strcmp(a->m_strDescription, b->m_strDescription) < 0;
 	};
 
-	SingleParts.Sort(lcPartSortFunc);
+	std::sort(SingleParts.begin(), SingleParts.end(), lcPartSortFunc);
+
 	mParts.resize(SingleParts.GetSize());
 
 	for (int PartIdx = 0; PartIdx < SingleParts.GetSize(); PartIdx++)

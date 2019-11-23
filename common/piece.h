@@ -1,7 +1,6 @@
 #pragma once
 
 class PieceInfo;
-enum class lcRenderMeshState : int;
 
 #include "object.h"
 #include "lc_colors.h"

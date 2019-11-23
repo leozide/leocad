@@ -112,24 +112,5 @@ public:
 	int mIndexType;
 };
 
-enum class lcRenderMeshState : int
-{
-	NORMAL,
-	SELECTED,
-	FOCUSED,
-	DISABLED,
-	HIGHLIGHT
-};
-
-struct lcRenderMesh
-{
-	lcMatrix44 WorldMatrix;
-	lcMesh* Mesh;
-	float Distance;
-	int ColorIndex;
-	int LodIndex;
-	lcRenderMeshState State;
-};
-
 extern lcMesh* gPlaceholderMesh;
 

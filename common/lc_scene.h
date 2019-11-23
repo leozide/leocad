@@ -3,12 +3,29 @@
 #include "lc_mesh.h"
 #include "lc_array.h"
 
-enum class lcRenderPass
+enum class lcRenderMeshState : int
 {
-	UnlitOpaque,
-	UnlitTranslucent,
-	LitOpaque,
-	LitTranslucent
+	NORMAL,
+	SELECTED,
+	FOCUSED,
+	DISABLED,
+	HIGHLIGHT
+};
+
+struct lcRenderMesh
+{
+	lcMatrix44 WorldMatrix;
+	lcMesh* Mesh;
+	int ColorIndex;
+	int LodIndex;
+	lcRenderMeshState State;
+};
+
+struct lcTranslucentMeshInstance
+{
+	const lcMeshSection* Section;
+	int RenderMeshIndex;
+	float Distance;
 };
 
 class lcScene
@@ -65,7 +82,9 @@ public:
 	void DrawInterfaceObjects(lcContext* Context) const;
 
 protected:
-	void DrawPass(lcContext* Context, lcRenderPass RenderPass, int PrimitiveTypes) const;
+	void DrawOpaqueMeshes(lcContext* Context, bool DrawLit, int PrimitiveTypes) const;
+	void DrawTranslucentMeshes(lcContext* Context, bool DrawLit) const;
+	void DrawDebugNormals(lcContext* Context, lcMesh* Mesh) const;
 
 	lcMatrix44 mViewMatrix;
 	lcMatrix44 mActiveSubmodelTransform;
@@ -75,6 +94,6 @@ protected:
 
 	lcArray<lcRenderMesh> mRenderMeshes;
 	lcArray<int> mOpaqueMeshes;
-	lcArray<int> mTranslucentMeshes;
+	lcArray<lcTranslucentMeshInstance> mTranslucentMeshes;
 	lcArray<const lcObject*> mInterfaceObjects;
 };

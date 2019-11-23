@@ -19,7 +19,6 @@
 #define LC_SEL_CAN_REMOVE_CONTROL_POINT 0x1000 // Can remove control points from focused piece
 
 class lcGLWidget;
-enum class lcRenderMeshState : int;
 
 enum class lcSelectionMode
 {

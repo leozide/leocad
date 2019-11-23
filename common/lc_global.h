@@ -74,6 +74,7 @@ struct lcMeshSection;
 struct lcRenderMesh;
 class lcTexture;
 class lcScene;
+enum class lcRenderMeshState : int;
 
 class lcFile;
 class lcMemFile;

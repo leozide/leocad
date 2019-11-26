@@ -469,8 +469,10 @@ void lcModel::SaveLDraw(QTextStream& Stream, bool SelectedOnly) const
 	Stream.flush();
 }
 
-void lcModel::SplitMPD(QIODevice& Device)
+int lcModel::SplitMPD(QIODevice& Device)
 {
+	qint64 ModelPos = Device.pos();
+
 	while (!Device.atEnd())
 	{
 		qint64 Pos = Device.pos();
@@ -494,6 +496,7 @@ void lcModel::SplitMPD(QIODevice& Device)
 				}
 
 				mProperties.mName = LineStream.readAll().trimmed();
+				ModelPos = Pos;
 			}
 			else if (Token == QLatin1String("NOFILE"))
 			{
@@ -501,6 +504,8 @@ void lcModel::SplitMPD(QIODevice& Device)
 			}
 		}
 	}
+
+	return ModelPos;
 }
 
 void lcModel::LoadLDraw(QIODevice& Device, Project* Project)

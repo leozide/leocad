@@ -209,7 +209,7 @@ public:
 	bool LoadBinary(lcFile* File);
 	bool LoadLDD(const QString& FileData);
 	bool LoadInventory(const QByteArray& Inventory);
-	void SplitMPD(QIODevice& Device);
+	int SplitMPD(QIODevice& Device);
 	void Merge(lcModel* Other);
 
 	void SetSaved()

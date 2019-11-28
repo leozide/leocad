@@ -20,7 +20,7 @@ void lcPreferences::LoadDefaults()
 	mDrawAxes = lcGetProfileInt(LC_PROFILE_DRAW_AXES);
 	mDrawEdgeLines = lcGetProfileInt(LC_PROFILE_DRAW_EDGE_LINES);
 	mLineWidth = lcGetProfileFloat(LC_PROFILE_LINE_WIDTH);
-	mAllowLOD = lcGetProfileFloat(LC_PROFILE_ALLOW_LOD);
+	mAllowLOD = lcGetProfileInt(LC_PROFILE_ALLOW_LOD);
 	mDrawGridStuds = lcGetProfileInt(LC_PROFILE_GRID_STUDS);
 	mGridStudColor = lcGetProfileInt(LC_PROFILE_GRID_STUD_COLOR);
 	mDrawGridLines = lcGetProfileInt(LC_PROFILE_GRID_LINES);
@@ -669,6 +669,7 @@ void lcApplication::ShowPreferencesDialog()
 	Options.POVRayPath = lcGetProfileString(LC_PROFILE_POVRAY_PATH);
 	Options.LGEOPath = lcGetProfileString(LC_PROFILE_POVRAY_LGEO_PATH);
 	Options.DefaultAuthor = lcGetProfileString(LC_PROFILE_DEFAULT_AUTHOR_NAME);
+	Options.Language = lcGetProfileString(LC_PROFILE_LANGUAGE);
 	Options.CheckForUpdates = lcGetProfileInt(LC_PROFILE_CHECK_UPDATES);
 
 	Options.AASamples = CurrentAASamples;
@@ -689,6 +690,7 @@ void lcApplication::ShowPreferencesDialog()
 	if (Dialog.exec() != QDialog::Accepted)
 		return;
 
+	bool LanguageChanged = Options.Language != lcGetProfileString(LC_PROFILE_LANGUAGE);
 	bool LibraryChanged = Options.LibraryPath != lcGetProfileString(LC_PROFILE_PARTS_LIBRARY);
 	bool ColorsChanged = Options.ColorConfigPath != lcGetProfileString(LC_PROFILE_COLOR_CONFIG);
 	bool AAChanged = CurrentAASamples != Options.AASamples;
@@ -704,11 +706,12 @@ void lcApplication::ShowPreferencesDialog()
 	lcSetProfileString(LC_PROFILE_MINIFIG_SETTINGS, Options.MinifigSettingsPath);
 	lcSetProfileString(LC_PROFILE_POVRAY_PATH, Options.POVRayPath);
 	lcSetProfileString(LC_PROFILE_POVRAY_LGEO_PATH, Options.LGEOPath);
+	lcSetProfileString(LC_PROFILE_LANGUAGE, Options.Language);
 	lcSetProfileInt(LC_PROFILE_CHECK_UPDATES, Options.CheckForUpdates);
 	lcSetProfileInt(LC_PROFILE_ANTIALIASING_SAMPLES, Options.AASamples);
 	lcSetProfileInt(LC_PROFILE_STUD_LOGO, Options.StudLogo);
 
-	if (LibraryChanged || ColorsChanged || AAChanged)
+	if (LanguageChanged || LibraryChanged || ColorsChanged || AAChanged)
 		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Some changes will only take effect the next time you start LeoCAD."));
 
 	if (Options.CategoriesModified)

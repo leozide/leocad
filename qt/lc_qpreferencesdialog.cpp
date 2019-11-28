@@ -10,6 +10,11 @@
 #include "lc_glextensions.h"
 #include "pieceinf.h"
 
+static const char* gLanguageLocales[] =
+{
+	"", "de_DE", "en_US", "fr_FR", "pt_PT"
+};
+
 lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogOptions* Options)
 	: QDialog(Parent), mOptions(Options), ui(new Ui::lcQPreferencesDialog)
 {
@@ -41,6 +46,14 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 	ui->lgeoPath->setText(mOptions->LGEOPath);
 	ui->authorName->setText(mOptions->DefaultAuthor);
 	ui->mouseSensitivity->setValue(mOptions->Preferences.mMouseSensitivity);
+	for (unsigned int LanguageIdx = 0; LanguageIdx < sizeof(gLanguageLocales) / sizeof(gLanguageLocales[0]); LanguageIdx++)
+	{
+		if (mOptions->Language == gLanguageLocales[LanguageIdx])
+		{
+			ui->Language->setCurrentIndex(LanguageIdx);
+			break;
+		}
+	}
 	ui->checkForUpdates->setCurrentIndex(mOptions->CheckForUpdates);
 	ui->fixedDirectionKeys->setChecked(mOptions->Preferences.mFixedAxes);
 	ui->autoLoadMostRecent->setChecked(mOptions->Preferences.mAutoLoadMostRecent);
@@ -153,6 +166,12 @@ void lcQPreferencesDialog::accept()
 	mOptions->LGEOPath = ui->lgeoPath->text();
 	mOptions->DefaultAuthor = ui->authorName->text();
 	mOptions->Preferences.mMouseSensitivity = ui->mouseSensitivity->value();
+
+	int Language = ui->Language->currentIndex();
+	if (Language < 0 || Language > sizeof(gLanguageLocales) / sizeof(gLanguageLocales[0]))
+		Language = 0;
+	mOptions->Language = gLanguageLocales[Language];
+
 	mOptions->CheckForUpdates = ui->checkForUpdates->currentIndex();
 	mOptions->Preferences.mFixedAxes = ui->fixedDirectionKeys->isChecked();
 	mOptions->Preferences.mAutoLoadMostRecent = ui->autoLoadMostRecent->isChecked();

@@ -73,6 +73,7 @@ static lcProfileEntry gProfileEntries[LC_NUM_PROFILE_KEYS] =
 	lcProfileEntry("Settings", "ViewSphereTextColor", LC_RGBA(0, 0, 0, 255)),               // LC_PROFILE_VIEW_SPHERE_TEXT_COLOR
 	lcProfileEntry("Settings", "ViewSphereHighlightColor", LC_RGBA(255, 0, 0, 255)),        // LC_PROFILE_VIEW_SPHERE_HIGHLIGHT_COLOR
 
+	lcProfileEntry("Settings", "Language", ""),                                             // LC_PROFILE_LANGUAGE
 	lcProfileEntry("Settings", "CheckUpdates", 1),                                          // LC_PROFILE_CHECK_UPDATES
 	lcProfileEntry("Settings", "ProjectsPath", ""),                                         // LC_PROFILE_PROJECTS_PATH
 	lcProfileEntry("Settings", "PartsLibrary", ""),                                         // LC_PROFILE_PARTS_LIBRARY

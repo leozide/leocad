@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>598</width>
-    <height>450</height>
+    <height>454</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -27,7 +27,97 @@
        <property name="fieldGrowthPolicy">
         <enum>QFormLayout::ExpandingFieldsGrow</enum>
        </property>
-       <item row="1" column="0">
+       <item row="1" column="0" colspan="2">
+        <widget class="QGroupBox" name="ApplicationGroup">
+         <property name="title">
+          <string>Application</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_4">
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_19">
+            <property name="text">
+             <string>Language:</string>
+            </property>
+            <property name="buddy">
+             <cstring>Language</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_10">
+            <property name="text">
+             <string>Check for updates:</string>
+            </property>
+            <property name="buddy">
+             <cstring>checkForUpdates</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QComboBox" name="Language">
+            <item>
+             <property name="text">
+              <string>Default</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Deutsch </string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>English</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Français</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Português</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QComboBox" name="checkForUpdates">
+            <item>
+             <property name="text">
+              <string>Never</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Once a day</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Once a week</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <spacer name="horizontalSpacer_8">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="2" column="0">
         <widget class="QLabel" name="label_4">
          <property name="text">
           <string>Default author name:</string>
@@ -37,46 +127,17 @@
          </property>
         </widget>
        </item>
-       <item row="1" column="1">
+       <item row="2" column="1">
         <widget class="QLineEdit" name="authorName"/>
        </item>
-       <item row="7" column="0">
-        <widget class="QLabel" name="label_10">
-         <property name="text">
-          <string>Check for updates:</string>
-         </property>
-         <property name="buddy">
-          <cstring>checkForUpdates</cstring>
-         </property>
-        </widget>
-       </item>
-       <item row="7" column="1">
-        <widget class="QComboBox" name="checkForUpdates">
-         <item>
-          <property name="text">
-           <string>Never</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Once a day</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Once a week</string>
-          </property>
-         </item>
-        </widget>
-       </item>
-       <item row="8" column="0" colspan="2">
+       <item row="9" column="0" colspan="2">
         <widget class="QCheckBox" name="fixedDirectionKeys">
          <property name="text">
           <string>Fixed direction keys</string>
          </property>
         </widget>
        </item>
-       <item row="9" column="0" colspan="2">
+       <item row="10" column="0" colspan="2">
         <widget class="QCheckBox" name="autoLoadMostRecent">
          <property name="text">
           <string>Open most recent file on startup</string>
@@ -84,7 +145,7 @@
         </widget>
        </item>
        <item row="0" column="0" colspan="2">
-        <widget class="QGroupBox" name="groupBox_6">
+        <widget class="QGroupBox" name="CustomPathsGroup">
          <property name="title">
           <string>Custom Paths</string>
          </property>
@@ -98,40 +159,6 @@
              <cstring>partsLibrary</cstring>
             </property>
            </widget>
-          </item>
-          <item row="3" column="0">
-           <widget class="QLabel" name="povrayLabel">
-            <property name="text">
-             <string>PO&amp;V-Ray Executable:</string>
-            </property>
-            <property name="buddy">
-             <cstring>povrayExecutable</cstring>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="0">
-           <widget class="QLabel" name="label_9">
-            <property name="text">
-             <string>&amp;LGEO Library:</string>
-            </property>
-            <property name="buddy">
-             <cstring>lgeoPath</cstring>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="1">
-           <layout class="QHBoxLayout" name="horizontalLayout_10">
-            <item>
-             <widget class="QLineEdit" name="lgeoPath"/>
-            </item>
-            <item>
-             <widget class="QToolButton" name="lgeoPathBrowse">
-              <property name="text">
-               <string>...</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
           </item>
           <item row="0" column="1">
            <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -156,31 +183,13 @@
             </item>
            </layout>
           </item>
-          <item row="3" column="1">
-           <layout class="QHBoxLayout" name="povrayLayout">
-            <item>
-             <widget class="QLineEdit" name="povrayExecutable"/>
-            </item>
-            <item>
-             <widget class="QToolButton" name="povrayExecutableBrowse">
-              <property name="text">
-               <string>...</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
           <item row="1" column="0">
            <widget class="QLabel" name="label_17">
             <property name="text">
              <string>Color Configuration:</string>
             </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_18">
-            <property name="text">
-             <string>Minifig Settings:</string>
+            <property name="buddy">
+             <cstring>ColorConfigEdit</cstring>
             </property>
            </widget>
           </item>
@@ -198,6 +207,16 @@
             </item>
            </layout>
           </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_18">
+            <property name="text">
+             <string>Minifig Settings:</string>
+            </property>
+            <property name="buddy">
+             <cstring>MinifigSettingsEdit</cstring>
+            </property>
+           </widget>
+          </item>
           <item row="2" column="1">
            <layout class="QHBoxLayout" name="MinifigSettingsLayout">
             <item>
@@ -205,6 +224,54 @@
             </item>
             <item>
              <widget class="QToolButton" name="MinifigSettingsBrowseButton">
+              <property name="text">
+               <string>...</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="povrayLabel">
+            <property name="text">
+             <string>PO&amp;V-Ray Executable:</string>
+            </property>
+            <property name="buddy">
+             <cstring>povrayExecutable</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <layout class="QHBoxLayout" name="povrayLayout">
+            <item>
+             <widget class="QLineEdit" name="povrayExecutable"/>
+            </item>
+            <item>
+             <widget class="QToolButton" name="povrayExecutableBrowse">
+              <property name="text">
+               <string>...</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="label_9">
+            <property name="text">
+             <string>&amp;LGEO Library:</string>
+            </property>
+            <property name="buddy">
+             <cstring>lgeoPath</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1">
+           <layout class="QHBoxLayout" name="horizontalLayout_10">
+            <item>
+             <widget class="QLineEdit" name="lgeoPath"/>
+            </item>
+            <item>
+             <widget class="QToolButton" name="lgeoPathBrowse">
               <property name="text">
                <string>...</string>
               </property>
@@ -1097,8 +1164,9 @@
   <tabstop>povrayExecutableBrowse</tabstop>
   <tabstop>lgeoPath</tabstop>
   <tabstop>lgeoPathBrowse</tabstop>
-  <tabstop>authorName</tabstop>
+  <tabstop>Language</tabstop>
   <tabstop>checkForUpdates</tabstop>
+  <tabstop>authorName</tabstop>
   <tabstop>fixedDirectionKeys</tabstop>
   <tabstop>autoLoadMostRecent</tabstop>
   <tabstop>antiAliasing</tabstop>

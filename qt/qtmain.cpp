@@ -2,6 +2,7 @@
 #include "lc_application.h"
 #include "lc_qupdatedialog.h"
 #include "lc_mainwindow.h"
+#include "lc_profile.h"
 #include <QApplication>
 #include <locale.h>
 
@@ -125,24 +126,30 @@ int main(int argc, char *argv[])
 {
 	lcApplication Application(argc, argv);
 
+	QString Language = lcGetProfileString(LC_PROFILE_LANGUAGE);
+	QLocale Locale;
+
+	if (!Language.isEmpty())
+		Locale = QLocale(Language);
+
 	QTranslator QtTranslator;
-	if (QtTranslator.load(QLocale::system(), "qt", "_", QLibraryInfo::location(QLibraryInfo::TranslationsPath)))
+	if (QtTranslator.load(Locale, "qt", "_", QLibraryInfo::location(QLibraryInfo::TranslationsPath)))
 		Application.installTranslator(&QtTranslator);
 #ifdef Q_OS_WIN
-	else if (QtTranslator.load(QLocale::system(), "qt", "_", qApp->applicationDirPath() + "/translations"))
+	else if (QtTranslator.load(Locale, "qt", "_", qApp->applicationDirPath() + "/translations"))
 		Application.installTranslator(&QtTranslator);
 #endif
 
 	QTranslator QtBaseTranslator;
-	if (QtBaseTranslator.load("qtbase_" + QLocale::system().name(), QLibraryInfo::location(QLibraryInfo::TranslationsPath)))
+	if (QtBaseTranslator.load("qtbase_" + Locale.name(), QLibraryInfo::location(QLibraryInfo::TranslationsPath)))
 		Application.installTranslator(&QtBaseTranslator);
 #ifdef Q_OS_WIN
-	else if (QtBaseTranslator.load("qtbase_" + QLocale::system().name(), qApp->applicationDirPath() + "/translations"))
+	else if (QtBaseTranslator.load("qtbase_" + Locale.name(), qApp->applicationDirPath() + "/translations"))
 		Application.installTranslator(&QtBaseTranslator);
 #endif
 
 	QTranslator Translator;
-	if (Translator.load("leocad_" + QLocale::system().name(), ":/resources"))
+	if (Translator.load("leocad_" + Locale.name(), ":/resources"))
 		Application.installTranslator(&Translator);
 
 	qRegisterMetaTypeStreamOperators<QList<int> >("QList<int>");

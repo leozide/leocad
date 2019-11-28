@@ -54,6 +54,7 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 		ui->antiAliasingSamples->setCurrentIndex(0);
 	ui->edgeLines->setChecked(mOptions->Preferences.mDrawEdgeLines);
 	ui->lineWidth->setText(lcFormatValueLocalized(mOptions->Preferences.mLineWidth));
+	ui->MeshLOD->setChecked(mOptions->Preferences.mAllowLOD);
 	ui->gridStuds->setChecked(mOptions->Preferences.mDrawGridStuds);
 	ui->gridLines->setChecked(mOptions->Preferences.mDrawGridLines);
 	ui->gridLineSpacing->setText(QString::number(mOptions->Preferences.mGridLineSpacing));
@@ -167,6 +168,7 @@ void lcQPreferencesDialog::accept()
 
 	mOptions->Preferences.mDrawEdgeLines = ui->edgeLines->isChecked();
 	mOptions->Preferences.mLineWidth = lcParseValueLocalized(ui->lineWidth->text());
+	mOptions->Preferences.mAllowLOD = ui->MeshLOD->isChecked();
 
 	mOptions->Preferences.mDrawGridStuds = ui->gridStuds->isChecked();
 	mOptions->Preferences.mDrawGridLines = ui->gridLines->isChecked();

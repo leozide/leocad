@@ -804,7 +804,10 @@ void View::OnDraw()
 	if (!mModel)
 		return;
 
+	const lcPreferences& Preferences = lcGetPreferences();
+
 	bool DrawInterface = mWidget != nullptr;
+	mScene.SetAllowLOD(Preferences.mAllowLOD && mWidget != nullptr);
 
 	mModel->GetScene(mScene, mCamera, DrawInterface, mHighlight, mActiveSubmodelInstance, mActiveSubmodelTransform);
 
@@ -837,8 +840,6 @@ void View::OnDraw()
 			TotalTileRows = (mHeight + ImageHeight - 1) / mHeight;
 		}
 	}
-
-	const lcPreferences& Preferences = lcGetPreferences();
 
 	for (int CurrentTileRow = 0; CurrentTileRow < TotalTileRows; CurrentTileRow++)
 	{

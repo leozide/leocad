@@ -20,6 +20,7 @@ void lcPreferences::LoadDefaults()
 	mDrawAxes = lcGetProfileInt(LC_PROFILE_DRAW_AXES);
 	mDrawEdgeLines = lcGetProfileInt(LC_PROFILE_DRAW_EDGE_LINES);
 	mLineWidth = lcGetProfileFloat(LC_PROFILE_LINE_WIDTH);
+	mAllowLOD = lcGetProfileFloat(LC_PROFILE_ALLOW_LOD);
 	mDrawGridStuds = lcGetProfileInt(LC_PROFILE_GRID_STUDS);
 	mGridStudColor = lcGetProfileInt(LC_PROFILE_GRID_STUD_COLOR);
 	mDrawGridLines = lcGetProfileInt(LC_PROFILE_GRID_LINES);
@@ -41,6 +42,7 @@ void lcPreferences::SaveDefaults()
 	lcSetProfileInt(LC_PROFILE_DRAW_AXES, mDrawAxes);
 	lcSetProfileInt(LC_PROFILE_DRAW_EDGE_LINES, mDrawEdgeLines);
 	lcSetProfileFloat(LC_PROFILE_LINE_WIDTH, mLineWidth);
+	lcSetProfileInt(LC_PROFILE_ALLOW_LOD, mAllowLOD);
 	lcSetProfileInt(LC_PROFILE_GRID_STUDS, mDrawGridStuds);
 	lcSetProfileInt(LC_PROFILE_GRID_STUD_COLOR, mGridStudColor);
 	lcSetProfileInt(LC_PROFILE_GRID_LINES, mDrawGridLines);

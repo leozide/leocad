@@ -385,6 +385,7 @@ void MinifigWizard::OnDraw()
 
 	lcScene Scene;
 	Scene.Begin(ViewMatrix);
+	Scene.SetAllowLOD(false);
 
 	for (int PieceIdx = 0; PieceIdx < LC_MFW_NUMITEMS; PieceIdx++)
 		if (mMinifig.Parts[PieceIdx])

@@ -805,11 +805,15 @@ void View::OnDraw()
 		return;
 
 	const lcPreferences& Preferences = lcGetPreferences();
+	const bool DrawInterface = mWidget != nullptr;
 
-	bool DrawInterface = mWidget != nullptr;
 	mScene.SetAllowLOD(Preferences.mAllowLOD && mWidget != nullptr);
+	mScene.SetActiveSubmodelInstance(mActiveSubmodelInstance, mActiveSubmodelTransform);
+	mScene.SetDrawInterface(DrawInterface);
 
-	mModel->GetScene(mScene, mCamera, DrawInterface, mHighlight, mActiveSubmodelInstance, mActiveSubmodelTransform);
+	mScene.Begin(mCamera->mWorldView);
+
+	mModel->GetScene(mScene, mCamera, mHighlight);
 
 	if (DrawInterface && mTrackTool == LC_TRACKTOOL_INSERT)
 	{
@@ -828,6 +832,8 @@ void View::OnDraw()
 
 	if (DrawInterface)
 		mScene.SetPreTranslucentCallback([this]() { DrawGrid(); });
+
+	mScene.End();
 
 	int TotalTileRows = 1;
 	int TotalTileColumns = 1;

@@ -13,6 +13,7 @@ lcScene::lcScene()
 	mActiveSubmodelInstance = nullptr;
 	mAllowWireframe = true;
 	mAllowLOD = true;
+	mPreTranslucentCallback = nullptr;
 }
 
 void lcScene::Begin(const lcMatrix44& ViewMatrix)
@@ -20,6 +21,7 @@ void lcScene::Begin(const lcMatrix44& ViewMatrix)
 	mViewMatrix = ViewMatrix;
 	mActiveSubmodelInstance = nullptr;
 	mDrawInterface = false;
+	mPreTranslucentCallback = nullptr;
 	mRenderMeshes.RemoveAll();
 	mOpaqueMeshes.RemoveAll();
 	mTranslucentMeshes.RemoveAll();
@@ -395,6 +397,9 @@ void lcScene::Draw(lcContext* Context) const
 			PrimitiveTypes |= LC_MESH_CONDITIONAL_LINES;
 
 		DrawOpaqueMeshes(Context, false, PrimitiveTypes);
+
+		if (mPreTranslucentCallback)
+			mPreTranslucentCallback();
 	}
 	else if (ShadingMode == LC_SHADING_FLAT)
 	{
@@ -411,6 +416,10 @@ void lcScene::Draw(lcContext* Context) const
 		}
 
 		DrawOpaqueMeshes(Context, false, PrimitiveTypes);
+
+		if (mPreTranslucentCallback)
+			mPreTranslucentCallback();
+
 		DrawTranslucentMeshes(Context, false);
 	}
 	else
@@ -428,6 +437,10 @@ void lcScene::Draw(lcContext* Context) const
 		}
 
 		DrawOpaqueMeshes(Context, true, LC_MESH_TRIANGLES | LC_MESH_TEXTURED_TRIANGLES);
+
+		if (mPreTranslucentCallback)
+			mPreTranslucentCallback();
+
 		DrawTranslucentMeshes(Context, true);
 	}
 }

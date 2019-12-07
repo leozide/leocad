@@ -81,6 +81,7 @@ public:
 	void ToggleListMode();
 	void SetCategory(int CategoryIndex);
 	void SetModelsCategory();
+	void SetFavoritesCategory();
 	void SetCurrentModelCategory();
 	void SetFilter(const QString& Filter);
 	void RequestPreview(int InfoIndex);
@@ -131,6 +132,9 @@ public:
 
 	void UpdateViewMode();
 
+signals:
+	void FavoriteRemoved();
+
 public slots:
 	void CustomContextMenuRequested(QPoint Pos);
 	void SetNoIcons();
@@ -176,6 +180,7 @@ protected slots:
 	void FilterTriggered();
 	void CategoryChanged(QTreeWidgetItem* Current, QTreeWidgetItem* Previous);
 	void PartChanged(const QModelIndex& Current, const QModelIndex& Previous);
+	void FavoriteRemoved();
 
 protected:
 	virtual void resizeEvent(QResizeEvent* Event);
@@ -183,6 +188,7 @@ protected:
 
 	QTreeWidget* mCategoriesWidget;
 	QTreeWidgetItem* mAllPartsCategoryItem;
+	QTreeWidgetItem* mFavoritesCategoryItem;
 	QTreeWidgetItem* mCurrentModelCategoryItem;
 	QTreeWidgetItem* mModelsCategoryItem;
 	QLineEdit* mFilterWidget;

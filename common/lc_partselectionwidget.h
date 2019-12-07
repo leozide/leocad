@@ -147,11 +147,14 @@ public slots:
 	void TogglePartAliases();
 	void ToggleListMode();
 	void ToggleFixedColor();
+	void AddToFavorites();
+	void RemoveFromFavorites();
 
 protected:
 	void SetIconSize(int Size);
 
 	lcPartSelectionListModel* mListModel;
+	PieceInfo* mContextInfo;
 };
 
 class lcPartSelectionWidget : public QWidget

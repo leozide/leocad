@@ -195,6 +195,13 @@ void lcPartSelectionListModel::SetFavoritesCategory()
 
 	std::vector<PieceInfo*> Favorites = lcGetPiecesLibrary()->GetFavorites();
 
+	auto lcPartSortFunc = [](const PieceInfo* a, const PieceInfo* b)
+	{
+		return strcmp(a->m_strDescription, b->m_strDescription) < 0;
+	};
+
+	std::sort(Favorites.begin(), Favorites.end(), lcPartSortFunc);
+
 	mParts.reserve(Favorites.size());
 
 	for (PieceInfo* Favorite : Favorites)
@@ -495,29 +502,22 @@ void lcPartSelectionListView::CustomContextMenuRequested(QPoint Pos)
 {
 	QMenu* Menu = new QMenu(this);
 
+	mContextInfo = nullptr;
 	QModelIndex Index = indexAt(Pos);
+
 	if (Index.isValid())
 	{
-		PieceInfo* Info = mListModel->GetPieceInfo(Index.row());
-		lcPiecesLibrary* Library = lcGetPiecesLibrary();
+		mContextInfo = mListModel->GetPieceInfo(Index.row());
 
-		if (!Library->IsFavorite(Info))
+		if (mContextInfo)
 		{
-			Menu->addAction(tr("Add to Favorites"), [Library, Info]()
-			{
-				Library->AddToFavorites(Info);
-			});
-		}
-		else
-		{
-			Menu->addAction(tr("Remove from Favorites"), [this, Library, Info]()
-			{
-				Library->RemoveFromFavorites(Info);
-				emit FavoriteRemoved();
-			});
-		}
+			if (!lcGetPiecesLibrary()->IsFavorite(mContextInfo))
+				Menu->addAction(tr("Add to Favorites"), this, SLOT(AddToFavorites()));
+			else
+				Menu->addAction(tr("Remove from Favorites"), this, SLOT(RemoveFromFavorites()));
 
-		Menu->addSeparator();
+			Menu->addSeparator();
+		}
 	}
 
 	if (gSupportsFramebufferObjectARB || gSupportsFramebufferObjectEXT)
@@ -636,6 +636,21 @@ void lcPartSelectionListView::ToggleListMode()
 void lcPartSelectionListView::ToggleFixedColor()
 {
 	mListModel->ToggleColorLocked();
+}
+
+void lcPartSelectionListView::AddToFavorites()
+{
+	if (mContextInfo)
+		lcGetPiecesLibrary()->AddToFavorites(mContextInfo);
+}
+
+void lcPartSelectionListView::RemoveFromFavorites()
+{
+	if (mContextInfo)
+	{
+		lcGetPiecesLibrary()->RemoveFromFavorites(mContextInfo);
+		emit FavoriteRemoved();
+	}
 }
 
 void lcPartSelectionListView::UpdateViewMode()

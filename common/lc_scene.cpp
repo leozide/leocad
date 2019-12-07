@@ -11,6 +11,7 @@ lcScene::lcScene()
 	: mRenderMeshes(0, 1024), mOpaqueMeshes(0, 1024), mTranslucentMeshes(0, 1024), mInterfaceObjects(0, 1024)
 {
 	mActiveSubmodelInstance = nullptr;
+	mDrawInterface = false;
 	mAllowWireframe = true;
 	mAllowLOD = true;
 	mPreTranslucentCallback = nullptr;
@@ -20,7 +21,6 @@ void lcScene::Begin(const lcMatrix44& ViewMatrix)
 {
 	mViewMatrix = ViewMatrix;
 	mActiveSubmodelInstance = nullptr;
-	mDrawInterface = false;
 	mPreTranslucentCallback = nullptr;
 	mRenderMeshes.RemoveAll();
 	mOpaqueMeshes.RemoveAll();

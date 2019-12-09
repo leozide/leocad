@@ -185,7 +185,7 @@ void lcPartSelectionListModel::SetModelsCategory()
 	SetFilter(mFilter);
 }
 
-void lcPartSelectionListModel::SetCustomSetCategory(int SetIndex)
+void lcPartSelectionListModel::SetPaletteCategory(int SetIndex)
 {
 	ClearRequests();
 
@@ -194,8 +194,8 @@ void lcPartSelectionListModel::SetCustomSetCategory(int SetIndex)
 	mParts.clear();
 
 	lcPartSelectionWidget* PartSelectionWidget = mListView->GetPartSelectionWidget();
-	const std::vector<lcPartCategoryCustomSet>& CustomSets = PartSelectionWidget->GetCustomSets();
-	std::vector<PieceInfo*> PartsList = lcGetPiecesLibrary()->GetPartsFromSet(CustomSets[SetIndex].Parts);
+	const std::vector<lcPartPalette>& Palettes = PartSelectionWidget->GetPartPalettes();
+	std::vector<PieceInfo*> PartsList = lcGetPiecesLibrary()->GetPartsFromSet(Palettes[SetIndex].Parts);
 
 	auto lcPartSortFunc = [](const PieceInfo* a, const PieceInfo* b)
 	{
@@ -513,14 +513,14 @@ void lcPartSelectionListView::CustomContextMenuRequested(QPoint Pos)
 	QModelIndex Index = indexAt(Pos);
 	mContextInfo = Index.isValid() ? mListModel->GetPieceInfo(Index.row()) : nullptr;
 
-	QMenu* SetMenu = Menu->addMenu(tr("Add to Set"));
+	QMenu* SetMenu = Menu->addMenu(tr("Add to Palette"));
 
-	const std::vector<lcPartCategoryCustomSet>& CustomSets = mPartSelectionWidget->GetCustomSets();
+	const std::vector<lcPartPalette>& Palettes = mPartSelectionWidget->GetPartPalettes();
 
-	if (!CustomSets.empty())
+	if (!Palettes.empty())
 	{
-		for (const lcPartCategoryCustomSet& Set : CustomSets)
-			SetMenu->addAction(Set.Name, mPartSelectionWidget, SLOT(AddToSet()));
+		for (const lcPartPalette& Palette : Palettes)
+			SetMenu->addAction(Palette.Name, mPartSelectionWidget, SLOT(AddToPalette()));
 	}
 	else
 	{
@@ -528,8 +528,8 @@ void lcPartSelectionListView::CustomContextMenuRequested(QPoint Pos)
 		Action->setEnabled(false);
 	}
 
-	QAction* RemoveAction = Menu->addAction(tr("Remove from Set"), mPartSelectionWidget, SLOT(RemoveFromSet()));
-	RemoveAction->setEnabled(mCategoryType == lcPartCategoryType::CustomSet);
+	QAction* RemoveAction = Menu->addAction(tr("Remove from Palette"), mPartSelectionWidget, SLOT(RemoveFromPalette()));
+	RemoveAction->setEnabled(mCategoryType == lcPartCategoryType::Palette);
 
 	Menu->exec(viewport()->mapToGlobal(Pos));
 	delete Menu;
@@ -551,8 +551,8 @@ void lcPartSelectionListView::SetCategory(lcPartCategoryType Type, int Index)
 	case lcPartCategoryType::Submodels:
 		mListModel->SetModelsCategory();
 		break;
-	case lcPartCategoryType::CustomSet:
-		mListModel->SetCustomSetCategory(Index);
+	case lcPartCategoryType::Palette:
+		mListModel->SetPaletteCategory(Index);
 		break;
 	case lcPartCategoryType::Category:
 		mListModel->SetCategory(Index);
@@ -714,7 +714,7 @@ lcPartSelectionWidget::lcPartSelectionWidget(QWidget* Parent)
 	connect(mFilterWidget, SIGNAL(textChanged(const QString&)), this, SLOT(FilterChanged(const QString&)));
 	connect(mCategoriesWidget, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), this, SLOT(CategoryChanged(QTreeWidgetItem*, QTreeWidgetItem*)));
 
-	LoadCustomSets();
+	LoadPartPalettes();
 	UpdateCategories();
 
 	mSplitter->setStretchFactor(0, 0);
@@ -843,6 +843,9 @@ void lcPartSelectionWidget::OptionsMenuAboutToShow()
 	QMenu* Menu = (QMenu*)sender();
 	Menu->clear();
 
+	Menu->addAction("Configure Palettes...", this, SLOT(ConfigurePartPalettes()));
+	Menu->addSeparator();
+
 	lcPartSelectionListModel* ListModel = mPartsWidget->GetListModel();
 
 	if (gSupportsFramebufferObjectARB || gSupportsFramebufferObjectEXT)
@@ -904,6 +907,11 @@ void lcPartSelectionWidget::OptionsMenuAboutToShow()
 	}
 }
 
+void lcPartSelectionWidget::ConfigurePartPalettes()
+{
+
+}
+
 void lcPartSelectionWidget::Redraw()
 {
 	mPartsWidget->GetListModel()->Redraw();
@@ -923,68 +931,68 @@ void lcPartSelectionWidget::SetDefaultPart()
 	}
 }
 
-void lcPartSelectionWidget::LoadCustomSets()
+void lcPartSelectionWidget::LoadPartPalettes()
 {
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
-	QByteArray Buffer = lcGetProfileBuffer(LC_PROFILE_PART_SETS);
+	QByteArray Buffer = lcGetProfileBuffer(LC_PROFILE_PART_PALETTES);
 	QJsonDocument Document = QJsonDocument::fromJson(Buffer);
 
 	if (Document.isNull())
-		Document = QJsonDocument::fromJson((QString("{ \"Version\":1, \"Sets\": { \"%1\": [] } }").arg(tr("Favorites"))).toUtf8());
+		Document = QJsonDocument::fromJson((QString("{ \"Version\":1, \"Palettes\": { \"%1\": [] } }").arg(tr("Favorites"))).toUtf8());
 
 	QJsonObject RootObject = Document.object();
-	mCustomSets.clear();
+	mPartPalettes.clear();
 
 	int Version = RootObject["Version"].toInt(0);
 	if (Version != 1)
 		return;
 
-	QJsonObject SetsObject = RootObject["Sets"].toObject();
+	QJsonObject PalettesObject = RootObject["Palettes"].toObject();
 
-	for (QJsonObject::const_iterator ElementIt = SetsObject.constBegin(); ElementIt != SetsObject.constEnd(); ElementIt++)
+	for (QJsonObject::const_iterator ElementIt = PalettesObject.constBegin(); ElementIt != PalettesObject.constEnd(); ElementIt++)
 	{
 		if (!ElementIt.value().isArray())
 			continue;
 
-		lcPartCategoryCustomSet Set;
-		Set.Name = ElementIt.key();
+		lcPartPalette Palette;
+		Palette.Name = ElementIt.key();
 
 		QJsonArray Parts = ElementIt.value().toArray();
 
 		for (const QJsonValue& Part : Parts)
-			Set.Parts.emplace_back(Part.toString().toStdString());
+			Palette.Parts.emplace_back(Part.toString().toStdString());
 
-		mCustomSets.emplace_back(std::move(Set));
+		mPartPalettes.emplace_back(std::move(Palette));
 	}
 #endif
 }
 
-void lcPartSelectionWidget::SaveCustomSets()
+void lcPartSelectionWidget::SavePartPalettes()
 {
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
 	QJsonObject RootObject;
 
 	RootObject["Version"] = 1;
-	QJsonObject SetsObject;
+	QJsonObject PalettesObject;
 
-	for (const lcPartCategoryCustomSet& Set: mCustomSets)
+	for (const lcPartPalette& Palette : mPartPalettes)
 	{
 		QJsonArray Parts;
 
-		for (const std::string& PartId : Set.Parts)
+		for (const std::string& PartId : Palette.Parts)
 			Parts.append(QString::fromStdString(PartId));
 
-		SetsObject[Set.Name] = Parts;
+		PalettesObject[Palette.Name] = Parts;
 	}
 
-	RootObject["Sets"] = SetsObject;
+	RootObject["Palettes"] = PalettesObject;
 
 	QByteArray Buffer = QJsonDocument(RootObject).toJson();
-	lcSetProfileBuffer(LC_PROFILE_PART_SETS, Buffer);
+	lcSetProfileBuffer(LC_PROFILE_PART_PALETTES, Buffer);
 #endif
 }
 
-void lcPartSelectionWidget::AddToSet()
+void lcPartSelectionWidget::AddToPalette()
 {
 	PieceInfo* Info = mPartsWidget->GetContextInfo();
 	if (!Info)
@@ -992,45 +1000,45 @@ void lcPartSelectionWidget::AddToSet()
 
 	QString SetName = ((QAction*)sender())->text();
 
-	std::vector<lcPartCategoryCustomSet>::iterator SetIt = std::find_if(mCustomSets.begin(), mCustomSets.end(), [&SetName](const lcPartCategoryCustomSet& Set)
+	std::vector<lcPartPalette>::iterator SetIt = std::find_if(mPartPalettes.begin(), mPartPalettes.end(), [&SetName](const lcPartPalette& Set)
 	{
 		return Set.Name == SetName;
 	});
 
-	if (SetIt == mCustomSets.end())
+	if (SetIt == mPartPalettes.end())
 		return;
 
 	std::string PartId = lcGetPiecesLibrary()->GetPartId(Info);
-	std::vector<std::string>& SetParts = SetIt->Parts;
+	std::vector<std::string>& Parts = SetIt->Parts;
 
-	if (std::find(SetParts.begin(), SetParts.end(), PartId) == SetParts.end())
+	if (std::find(Parts.begin(), Parts.end(), PartId) == Parts.end())
 	{
-		SetParts.emplace_back(PartId);
-		SaveCustomSets();
+		Parts.emplace_back(PartId);
+		SavePartPalettes();
 	}
 }
 
-void lcPartSelectionWidget::RemoveFromSet()
+void lcPartSelectionWidget::RemoveFromPalette()
 {
 	PieceInfo* Info = mPartsWidget->GetContextInfo();
 	if (!Info)
 		return;
 
 	QTreeWidgetItem* CurrentItem = mCategoriesWidget->currentItem();
-	if (!CurrentItem || CurrentItem->data(0, static_cast<int>(lcPartCategoryRole::Type)) != static_cast<int>(lcPartCategoryType::CustomSet))
+	if (!CurrentItem || CurrentItem->data(0, static_cast<int>(lcPartCategoryRole::Type)) != static_cast<int>(lcPartCategoryType::Palette))
 		return;
 
 	int SetIndex = CurrentItem->data(0, static_cast<int>(lcPartCategoryRole::Index)).toInt();
-	lcPartCategoryCustomSet& Set = mCustomSets[SetIndex];
+	lcPartPalette& Palette = mPartPalettes[SetIndex];
 
 	std::string PartId = lcGetPiecesLibrary()->GetPartId(Info);
-	std::vector<std::string>::iterator PartIt = std::find(Set.Parts.begin(), Set.Parts.end(), PartId);
+	std::vector<std::string>::iterator PartIt = std::find(Palette.Parts.begin(), Palette.Parts.end(), PartId);
 
-	if (PartIt != Set.Parts.end())
+	if (PartIt != Palette.Parts.end())
 	{
-		Set.Parts.erase(PartIt);
-		mPartsWidget->SetCategory(lcPartCategoryType::CustomSet, SetIndex);
-		SaveCustomSets();
+		Palette.Parts.erase(PartIt);
+		mPartsWidget->SetCategory(lcPartCategoryType::Palette, SetIndex);
+		SavePartPalettes();
 	}
 }
 
@@ -1049,11 +1057,11 @@ void lcPartSelectionWidget::UpdateCategories()
 	QTreeWidgetItem* SubmodelsCategoryItem = new QTreeWidgetItem(mCategoriesWidget, QStringList(tr("Submodels")));
 	SubmodelsCategoryItem->setData(0, static_cast<int>(lcPartCategoryRole::Type), static_cast<int>(lcPartCategoryType::Submodels));
 
-	for (int SetIdx = 0; SetIdx < static_cast<int>(mCustomSets.size()); SetIdx++)
+	for (int SetIdx = 0; SetIdx < static_cast<int>(mPartPalettes.size()); SetIdx++)
 	{
-		const lcPartCategoryCustomSet& Set = mCustomSets[SetIdx];
+		const lcPartPalette& Set = mPartPalettes[SetIdx];
 		QTreeWidgetItem* SetCategoryItem = new QTreeWidgetItem(mCategoriesWidget, QStringList(Set.Name));
-		SetCategoryItem->setData(0, static_cast<int>(lcPartCategoryRole::Type), static_cast<int>(lcPartCategoryType::CustomSet));
+		SetCategoryItem->setData(0, static_cast<int>(lcPartCategoryRole::Type), static_cast<int>(lcPartCategoryType::Palette));
 		SetCategoryItem->setData(0, static_cast<int>(lcPartCategoryRole::Index), SetIdx);
 	}
 

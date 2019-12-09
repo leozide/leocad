@@ -11,7 +11,7 @@ enum class lcPartCategoryType
 	AllParts,
 	PartsInUse,
 	Submodels,
-	CustomSet,
+	Palette,
 	Category
 };
 
@@ -21,7 +21,7 @@ enum class lcPartCategoryRole
 	Index
 };
 
-struct lcPartCategoryCustomSet
+struct lcPartPalette
 {
 	QString Name;
 	std::vector<std::string> Parts;
@@ -103,7 +103,7 @@ public:
 	void ToggleListMode();
 	void SetCategory(int CategoryIndex);
 	void SetModelsCategory();
-	void SetCustomSetCategory(int SetIndex);
+	void SetPaletteCategory(int SetIndex);
 	void SetCurrentModelCategory();
 	void SetFilter(const QString& Filter);
 	void RequestPreview(int InfoIndex);
@@ -209,14 +209,14 @@ public:
 		mPartsWidget->GetListModel()->SetColorIndex(ColorIndex);
 	}
 
-	const std::vector<lcPartCategoryCustomSet>& GetCustomSets() const
+	const std::vector<lcPartPalette>& GetPartPalettes() const
 	{
-		return mCustomSets;
+		return mPartPalettes;
 	}
 
 public slots:
-	void AddToSet();
-	void RemoveFromSet();
+	void AddToPalette();
+	void RemoveFromPalette();
 
 protected slots:
 	void DockLocationChanged(Qt::DockWidgetArea Area);
@@ -225,10 +225,11 @@ protected slots:
 	void CategoryChanged(QTreeWidgetItem* Current, QTreeWidgetItem* Previous);
 	void PartChanged(const QModelIndex& Current, const QModelIndex& Previous);
 	void OptionsMenuAboutToShow();
+	void ConfigurePartPalettes();
 
 protected:
-	void LoadCustomSets();
-	void SaveCustomSets();
+	void LoadPartPalettes();
+	void SavePartPalettes();
 
 	virtual void resizeEvent(QResizeEvent* Event);
 	virtual bool event(QEvent* Event);
@@ -238,5 +239,5 @@ protected:
 	QAction* mFilterAction;
 	lcPartSelectionListView* mPartsWidget;
 	QSplitter* mSplitter;
-	std::vector<lcPartCategoryCustomSet> mCustomSets;
+	std::vector<lcPartPalette> mPartPalettes;
 };

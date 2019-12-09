@@ -1049,7 +1049,7 @@ void lcPartSelectionWidget::UpdateCategories()
 	QTreeWidgetItem* SubmodelsCategoryItem = new QTreeWidgetItem(mCategoriesWidget, QStringList(tr("Submodels")));
 	SubmodelsCategoryItem->setData(0, static_cast<int>(lcPartCategoryRole::Type), static_cast<int>(lcPartCategoryType::Submodels));
 
-	for (size_t SetIdx = 0; SetIdx < mCustomSets.size(); SetIdx++)
+	for (int SetIdx = 0; SetIdx < static_cast<int>(mCustomSets.size()); SetIdx++)
 	{
 		const lcPartCategoryCustomSet& Set = mCustomSets[SetIdx];
 		QTreeWidgetItem* SetCategoryItem = new QTreeWidgetItem(mCategoriesWidget, QStringList(Set.Name));

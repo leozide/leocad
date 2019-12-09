@@ -57,7 +57,7 @@ static lcProfileEntry gProfileEntries[LC_NUM_PROFILE_KEYS] =
 {
 	lcProfileEntry("Settings", "FixedAxes", false),                                         // LC_PROFILE_FIXED_AXES
 	lcProfileEntry("Settings", "LineWidth", 1.0f),                                          // LC_PROFILE_LINE_WIDTH
-	lcProfileEntry("Settings", "AllowLOD", true),                                           // 	LC_PROFILE_ALLOW_LOD
+	lcProfileEntry("Settings", "AllowLOD", true),                                           // LC_PROFILE_ALLOW_LOD
 	lcProfileEntry("Settings", "ShadingMode", LC_SHADING_DEFAULT_LIGHTS),                   // LC_PROFILE_SHADING_MODE
 	lcProfileEntry("Settings", "DrawAxes", 0),                                              // LC_PROFILE_DRAW_AXES
 	lcProfileEntry("Settings", "DrawEdgeLines", 1),                                         // LC_PROFILE_DRAW_EDGE_LINES
@@ -77,7 +77,7 @@ static lcProfileEntry gProfileEntries[LC_NUM_PROFILE_KEYS] =
 	lcProfileEntry("Settings", "CheckUpdates", 1),                                          // LC_PROFILE_CHECK_UPDATES
 	lcProfileEntry("Settings", "ProjectsPath", ""),                                         // LC_PROFILE_PROJECTS_PATH
 	lcProfileEntry("Settings", "PartsLibrary", ""),                                         // LC_PROFILE_PARTS_LIBRARY
-	lcProfileEntry("Settings", "LibraryFavorites", QStringList()),                          // LC_PROFILE_LIBRARY_FAVORITES
+	lcProfileEntry("Settings", "PartSets"),                                                 // LC_PROFILE_PART_SETS
 	lcProfileEntry("Settings", "MinifigSettings", ""),                                      // LC_PROFILE_MINIFIG_SETTINGS
 	lcProfileEntry("Settings", "ColorConfig", ""),                                          // LC_PROFILE_COLOR_CONFIG
 	lcProfileEntry("Settings", "Shortcuts"),                                                // LC_PROFILE_KEYBOARD_SHORTCUTS

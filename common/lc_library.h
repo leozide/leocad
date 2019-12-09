@@ -103,10 +103,8 @@ public:
 	void GetPatternedPieces(PieceInfo* Parent, lcArray<PieceInfo*>& Pieces) const;
 	void GetParts(lcArray<PieceInfo*>& Parts) const;
 
-	std::vector<PieceInfo*> GetFavorites() const;
-	bool IsFavorite(const PieceInfo* Info) const;
-	void AddToFavorites(const PieceInfo* Info) const;
-	void RemoveFromFavorites(const PieceInfo* Info) const;
+	std::vector<PieceInfo*> GetPartsFromSet(const std::vector<std::string>& PartIds) const;
+	std::string GetPartId(const PieceInfo* Info) const;
 
 	void GetPrimitiveFile(lcLibraryPrimitive* Primitive, std::function<void(lcFile& File)> Callback);
 	void GetPieceFile(const char* FileName, std::function<void(lcFile& File)> Callback);

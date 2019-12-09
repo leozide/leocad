@@ -4,6 +4,28 @@
 
 class lcPartSelectionListModel;
 class lcPartSelectionListView;
+class lcPartSelectionWidget;
+
+enum class lcPartCategoryType
+{
+	AllParts,
+	PartsInUse,
+	Submodels,
+	CustomSet,
+	Category
+};
+
+enum class lcPartCategoryRole
+{
+	Type = Qt::UserRole,
+	Index
+};
+
+struct lcPartCategoryCustomSet
+{
+	QString Name;
+	std::vector<std::string> Parts;
+};
 
 class lcPartSelectionItemDelegate : public QStyledItemDelegate
 {
@@ -81,7 +103,7 @@ public:
 	void ToggleListMode();
 	void SetCategory(int CategoryIndex);
 	void SetModelsCategory();
-	void SetFavoritesCategory();
+	void SetCustomSetCategory(int SetIndex);
 	void SetCurrentModelCategory();
 	void SetFilter(const QString& Filter);
 	void RequestPreview(int InfoIndex);
@@ -116,9 +138,11 @@ class lcPartSelectionListView : public QListView
 	Q_OBJECT
 
 public:
-	lcPartSelectionListView(QWidget* Parent);
+	lcPartSelectionListView(QWidget* Parent, lcPartSelectionWidget* PartSelectionWidget);
 
 	virtual void startDrag(Qt::DropActions SupportedActions);
+
+	void SetCategory(lcPartCategoryType Type, int Index);
 
 	PieceInfo* GetCurrentPart() const
 	{
@@ -130,10 +154,17 @@ public:
 		return mListModel;
 	}
 
-	void UpdateViewMode();
+	lcPartSelectionWidget* GetPartSelectionWidget() const
+	{
+		return mPartSelectionWidget;
+	}
 
-signals:
-	void FavoriteRemoved();
+	PieceInfo* GetContextInfo() const
+	{
+		return mContextInfo;
+	}
+
+	void UpdateViewMode();
 
 public slots:
 	void CustomContextMenuRequested(QPoint Pos);
@@ -147,14 +178,15 @@ public slots:
 	void TogglePartAliases();
 	void ToggleListMode();
 	void ToggleFixedColor();
-	void AddToFavorites();
-	void RemoveFromFavorites();
 
 protected:
 	void SetIconSize(int Size);
 
 	lcPartSelectionListModel* mListModel;
+	lcPartSelectionWidget* mPartSelectionWidget;
 	PieceInfo* mContextInfo;
+	lcPartCategoryType mCategoryType;
+	int mCategoryIndex;
 };
 
 class lcPartSelectionWidget : public QWidget
@@ -177,25 +209,34 @@ public:
 		mPartsWidget->GetListModel()->SetColorIndex(ColorIndex);
 	}
 
+	const std::vector<lcPartCategoryCustomSet>& GetCustomSets() const
+	{
+		return mCustomSets;
+	}
+
+public slots:
+	void AddToSet();
+	void RemoveFromSet();
+
 protected slots:
 	void DockLocationChanged(Qt::DockWidgetArea Area);
 	void FilterChanged(const QString& Text);
 	void FilterTriggered();
 	void CategoryChanged(QTreeWidgetItem* Current, QTreeWidgetItem* Previous);
 	void PartChanged(const QModelIndex& Current, const QModelIndex& Previous);
-	void FavoriteRemoved();
+	void OptionsMenuAboutToShow();
 
 protected:
+	void LoadCustomSets();
+	void SaveCustomSets();
+
 	virtual void resizeEvent(QResizeEvent* Event);
 	virtual bool event(QEvent* Event);
 
 	QTreeWidget* mCategoriesWidget;
-	QTreeWidgetItem* mAllPartsCategoryItem;
-	QTreeWidgetItem* mFavoritesCategoryItem;
-	QTreeWidgetItem* mCurrentModelCategoryItem;
-	QTreeWidgetItem* mModelsCategoryItem;
 	QLineEdit* mFilterWidget;
 	QAction* mFilterAction;
 	lcPartSelectionListView* mPartsWidget;
 	QSplitter* mSplitter;
+	std::vector<lcPartCategoryCustomSet> mCustomSets;
 };

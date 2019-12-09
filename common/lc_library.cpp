@@ -1836,15 +1836,14 @@ void lcPiecesLibrary::GetParts(lcArray<PieceInfo*>& Parts) const
 		Parts.Add(PartIt.second);
 }
 
-std::vector<PieceInfo*> lcPiecesLibrary::GetFavorites() const
+std::vector<PieceInfo*> lcPiecesLibrary::GetPartsFromSet(const std::vector<std::string>& PartIds) const
 {
-	QStringList Favorites = lcGetProfileStringList(LC_PROFILE_LIBRARY_FAVORITES);
 	std::vector<PieceInfo*> Parts;
-	Parts.reserve(Favorites.size());
+	Parts.reserve(PartIds.size());
 
-	for (const QString& Favorite : Favorites)
+	for (const std::string& PartId : PartIds)
 	{
-		std::map<std::string, PieceInfo*>::const_iterator PartIt = mPieces.find(Favorite.toStdString());
+		std::map<std::string, PieceInfo*>::const_iterator PartIt = mPieces.find(PartId);
 
 		if (PartIt != mPieces.end())
 			Parts.push_back(PartIt->second);
@@ -1853,53 +1852,17 @@ std::vector<PieceInfo*> lcPiecesLibrary::GetFavorites() const
 	return Parts;
 }
 
-bool lcPiecesLibrary::IsFavorite(const PieceInfo* Info) const
+std::string lcPiecesLibrary::GetPartId(const PieceInfo* Info) const
 {
 	std::map<std::string, PieceInfo*>::const_iterator PartIt = std::find_if(mPieces.begin(), mPieces.end(), [Info](const std::pair<std::string, PieceInfo*>& PartIt)
 	{
 		return PartIt.second == Info;
 	});
 
-	if (PartIt == mPieces.end())
-		return false;
-
-	QStringList Favorites = lcGetProfileStringList(LC_PROFILE_LIBRARY_FAVORITES);
-
-	return Favorites.contains(QString::fromStdString(PartIt->first));
-}
-
-void lcPiecesLibrary::AddToFavorites(const PieceInfo* Info) const
-{
-	std::map<std::string, PieceInfo*>::const_iterator PartIt = std::find_if(mPieces.begin(), mPieces.end(), [Info](const std::pair<std::string, PieceInfo*>& PartIt)
-	{
-		return PartIt.second == Info;
-	});
-
-	if (PartIt == mPieces.end())
-		return;
-
-	QStringList Favorites = lcGetProfileStringList(LC_PROFILE_LIBRARY_FAVORITES);
-
-	Favorites.append(QString::fromStdString(PartIt->first));
-
-	lcSetProfileStringList(LC_PROFILE_LIBRARY_FAVORITES, Favorites);
-}
-
-void lcPiecesLibrary::RemoveFromFavorites(const PieceInfo* Info) const
-{
-	std::map<std::string, PieceInfo*>::const_iterator PartIt = std::find_if(mPieces.begin(), mPieces.end(), [Info](const std::pair<std::string, PieceInfo*>& PartIt)
-	{
-		return PartIt.second == Info;
-	});
-
-	if (PartIt == mPieces.end())
-		return;
-
-	QStringList Favorites = lcGetProfileStringList(LC_PROFILE_LIBRARY_FAVORITES);
-
-	Favorites.removeOne(QString::fromStdString(PartIt->first));
-
-	lcSetProfileStringList(LC_PROFILE_LIBRARY_FAVORITES, Favorites);
+	if (PartIt != mPieces.end())
+		return PartIt->first;
+	else
+		return std::string();
 }
 
 bool lcPiecesLibrary::LoadBuiltinPieces()

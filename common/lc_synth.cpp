@@ -93,7 +93,7 @@ void lcSynthInit()
 		{ "61927.dat",    lcSynthType::ACTUATOR,         170.00f,   1 }  // Technic Power Functions Linear Actuator (Contracted)
 	};
 
-	for (unsigned int InfoIdx = 0; InfoIdx < sizeof(HoseInfo) / sizeof(HoseInfo[0]); InfoIdx++)
+	for (unsigned int InfoIdx = 0; InfoIdx < LC_ARRAY_COUNT(HoseInfo); InfoIdx++)
 	{
 		PieceInfo* Info = Library->FindPiece(HoseInfo[InfoIdx].PartID, nullptr, false, false);
 
@@ -628,8 +628,8 @@ void lcSynthInfo::AddFlexHoseParts(lcMemFile& File, lcLibraryMeshData& MeshData,
 		}
 	};
 
-	AddSectionVertices(OutsideSectionVertices, sizeof(OutsideSectionVertices) / sizeof(OutsideSectionVertices[0]));
-	AddSectionVertices(InsideSectionVertices, sizeof(InsideSectionVertices) / sizeof(InsideSectionVertices[0]));
+	AddSectionVertices(OutsideSectionVertices, LC_ARRAY_COUNT(OutsideSectionVertices));
+	AddSectionVertices(InsideSectionVertices, LC_ARRAY_COUNT(InsideSectionVertices));
 }
 
 void lcSynthInfo::AddRibbedHoseParts(lcMemFile& File, const lcArray<lcMatrix44>& Sections) const
@@ -745,7 +745,7 @@ void lcSynthInfo::AddFlexibleAxleParts(lcMemFile& File, lcLibraryMeshData& MeshD
 		{ lcVector3(-5.602f, 0.0f, -2.000f), lcVector3(-0.942f, 0.0f, -0.336f), 4.0f, lcVector2(0.0f, 0.0f), 0 }
 	};
 
-	const int NumSectionVertices = sizeof(SectionVertices) / sizeof(SectionVertices[0]);
+	const int NumSectionVertices = LC_ARRAY_COUNT(SectionVertices);
 
 	int BaseVertex;
 	lcLibraryMeshVertex* VertexBuffer;

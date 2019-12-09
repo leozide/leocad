@@ -46,7 +46,7 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 	ui->lgeoPath->setText(mOptions->LGEOPath);
 	ui->authorName->setText(mOptions->DefaultAuthor);
 	ui->mouseSensitivity->setValue(mOptions->Preferences.mMouseSensitivity);
-	for (unsigned int LanguageIdx = 0; LanguageIdx < sizeof(gLanguageLocales) / sizeof(gLanguageLocales[0]); LanguageIdx++)
+	for (unsigned int LanguageIdx = 0; LanguageIdx < LC_ARRAY_COUNT(gLanguageLocales); LanguageIdx++)
 	{
 		if (mOptions->Language == gLanguageLocales[LanguageIdx])
 		{
@@ -168,7 +168,7 @@ void lcQPreferencesDialog::accept()
 	mOptions->Preferences.mMouseSensitivity = ui->mouseSensitivity->value();
 
 	int Language = ui->Language->currentIndex();
-	if (Language < 0 || Language > sizeof(gLanguageLocales) / sizeof(gLanguageLocales[0]))
+	if (Language < 0 || Language > LC_ARRAY_COUNT(gLanguageLocales))
 		Language = 0;
 	mOptions->Language = gLanguageLocales[Language];
 

@@ -66,7 +66,7 @@ void lcGLWidget::SetCursor(LC_CURSOR_TYPE CursorType)
 		{ 15, 15, ":/resources/cursor_rotate_view" },   // LC_CURSOR_ROTATE_VIEW
 	};
 
-	static_assert(sizeof(Cursors) / sizeof(Cursors[0]) == LC_CURSOR_COUNT, "Array size mismatch");
+	static_assert(LC_ARRAY_COUNT(Cursors) == LC_CURSOR_COUNT, "Array size mismatch");
 
 	QGLWidget* widget = (QGLWidget*)mWidget;
 

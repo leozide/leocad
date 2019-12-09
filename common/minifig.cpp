@@ -95,7 +95,7 @@ void MinifigWizard::OnInitialUpdate()
 	MakeCurrent();
 	mContext->SetDefaultState();
 
-	static_assert(sizeof(MinifigWizard::mSectionNames) / sizeof(MinifigWizard::mSectionNames[0]) == LC_MFW_NUMITEMS, "Array size mismatch.");
+	static_assert(LC_ARRAY_COUNT(MinifigWizard::mSectionNames) == LC_MFW_NUMITEMS, "Array size mismatch.");
 
 	const int ColorCodes[LC_MFW_NUMITEMS] = { 4, 7, 14, 7, 1, 0, 7, 4, 4, 14, 14, 7, 7, 0, 0, 7, 7 };
 	const char* Pieces[LC_MFW_NUMITEMS] = { "3624.dat", "", "3626bp01.dat", "", "973.dat", "3815.dat", "", "3819.dat", "3818.dat", "3820.dat", "3820.dat", "", "", "3817.dat", "3816.dat", "", "" };

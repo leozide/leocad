@@ -71,7 +71,7 @@ static LONG WINAPI lcSehHandler(PEXCEPTION_POINTERS exceptionPointers)
 
 static void lcSehInit()
 {
-	if (GetTempPath(sizeof(gMinidumpPath) / sizeof(gMinidumpPath[0]), gMinidumpPath))
+	if (GetTempPath(LC_ARRAY_SIZE(gMinidumpPath), gMinidumpPath))
 		lstrcat(gMinidumpPath, TEXT("leocad.dmp"));
 
 	SetUnhandledExceptionFilter(lcSehHandler);

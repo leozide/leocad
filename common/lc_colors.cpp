@@ -204,7 +204,7 @@ int lcGetBrickLinkColor(int ColorIndex)
 
 	int ColorCode = gColorList[ColorIndex].Code;
 
-	for (unsigned int Color = 0; Color < sizeof(BrickLinkColors) / sizeof(BrickLinkColors[0]); Color++)
+	for (unsigned int Color = 0; Color < LC_ARRAY_COUNT(BrickLinkColors); Color++)
 		if (BrickLinkColors[Color].LDraw == ColorCode)
 			return BrickLinkColors[Color].BrickLink;
 

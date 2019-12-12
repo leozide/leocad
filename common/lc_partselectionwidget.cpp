@@ -694,7 +694,8 @@ lcPartSelectionWidget::lcPartSelectionWidget(QWidget* Parent)
 	SearchLayout->addWidget(mFilterWidget);
 
 	QToolButton* OptionsButton = new QToolButton();
-	OptionsButton->setText("TEMP");
+	OptionsButton->setIcon(QIcon(":/resources/gear_in.png"));
+	OptionsButton->setToolTip(tr("Options"));
 	OptionsButton->setPopupMode(QToolButton::InstantPopup);
 	SearchLayout->addWidget(OptionsButton);
 

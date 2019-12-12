@@ -112,5 +112,6 @@
         <file>resources/shaders/unlit_vertex_color_vs.glsl</file>
         <file>resources/shaders/unlit_view_sphere_ps.glsl</file>
         <file>resources/shaders/unlit_view_sphere_vs.glsl</file>
+        <file>resources/gear_in.png</file>
     </qresource>
 </RCC>

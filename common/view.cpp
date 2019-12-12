@@ -808,10 +808,11 @@ void View::OnDraw()
 	const bool DrawInterface = mWidget != nullptr;
 
 	mScene.SetAllowLOD(Preferences.mAllowLOD && mWidget != nullptr);
-	mScene.SetActiveSubmodelInstance(mActiveSubmodelInstance, mActiveSubmodelTransform);
-	mScene.SetDrawInterface(DrawInterface);
 
 	mScene.Begin(mCamera->mWorldView);
+
+	mScene.SetActiveSubmodelInstance(mActiveSubmodelInstance, mActiveSubmodelTransform);
+	mScene.SetDrawInterface(DrawInterface);
 
 	mModel->GetScene(mScene, mCamera, mHighlight);
 

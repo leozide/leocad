@@ -1,5 +1,6 @@
 #include "lc_global.h"
 #include "lc_partselectionwidget.h"
+#include "lc_partpalettedialog.h"
 #include "lc_profile.h"
 #include "lc_application.h"
 #include "lc_mainwindow.h"
@@ -844,7 +845,7 @@ void lcPartSelectionWidget::OptionsMenuAboutToShow()
 	QMenu* Menu = (QMenu*)sender();
 	Menu->clear();
 
-	Menu->addAction("Configure Palettes...", this, SLOT(ConfigurePartPalettes()));
+	Menu->addAction("Edit Palettes...", this, SLOT(EditPartPalettes()));
 	Menu->addSeparator();
 
 	lcPartSelectionListModel* ListModel = mPartsWidget->GetListModel();
@@ -908,9 +909,15 @@ void lcPartSelectionWidget::OptionsMenuAboutToShow()
 	}
 }
 
-void lcPartSelectionWidget::ConfigurePartPalettes()
+void lcPartSelectionWidget::EditPartPalettes()
 {
+	lcPartPaletteDialog Dialog(this, mPartPalettes);
 
+	if (Dialog.exec() != QDialog::Accepted)
+		return;
+
+	SavePartPalettes();
+	UpdateCategories();
 }
 
 void lcPartSelectionWidget::Redraw()
@@ -1045,25 +1052,46 @@ void lcPartSelectionWidget::RemoveFromPalette()
 
 void lcPartSelectionWidget::UpdateCategories()
 {
-	int CurrentIndex = mCategoriesWidget->indexOfTopLevelItem(mCategoriesWidget->currentItem());
+	QTreeWidgetItem* CurrentItem = mCategoriesWidget->currentItem();
+	lcPartCategoryType CurrentType = lcPartCategoryType::Count;
+	int CurrentIndex = -1;
+
+	if (CurrentItem)
+	{
+		CurrentType = static_cast<lcPartCategoryType>(CurrentItem->data(0, static_cast<int>(lcPartCategoryRole::Type)).toInt());
+		CurrentIndex = CurrentItem->data(0, static_cast<int>(lcPartCategoryRole::Index)).toInt();
+		CurrentItem = nullptr;
+	}
 
 	mCategoriesWidget->clear();
 
 	QTreeWidgetItem* AllPartsCategoryItem = new QTreeWidgetItem(mCategoriesWidget, QStringList(tr("All Parts")));
 	AllPartsCategoryItem->setData(0, static_cast<int>(lcPartCategoryRole::Type), static_cast<int>(lcPartCategoryType::AllParts));
 
+	if (CurrentType == lcPartCategoryType::AllParts && CurrentIndex == 0)
+		CurrentItem = AllPartsCategoryItem;
+
 	QTreeWidgetItem* CurrentModelCategoryItem = new QTreeWidgetItem(mCategoriesWidget, QStringList(tr("Parts In Use")));
 	CurrentModelCategoryItem->setData(0, static_cast<int>(lcPartCategoryRole::Type), static_cast<int>(lcPartCategoryType::PartsInUse));
+
+	if (CurrentType == lcPartCategoryType::PartsInUse && CurrentIndex == 0)
+		CurrentItem = AllPartsCategoryItem;
 
 	QTreeWidgetItem* SubmodelsCategoryItem = new QTreeWidgetItem(mCategoriesWidget, QStringList(tr("Submodels")));
 	SubmodelsCategoryItem->setData(0, static_cast<int>(lcPartCategoryRole::Type), static_cast<int>(lcPartCategoryType::Submodels));
 
-	for (int SetIdx = 0; SetIdx < static_cast<int>(mPartPalettes.size()); SetIdx++)
+	if (CurrentType == lcPartCategoryType::Submodels && CurrentIndex == 0)
+		CurrentItem = AllPartsCategoryItem;
+
+	for (int PaletteIdx = 0; PaletteIdx < static_cast<int>(mPartPalettes.size()); PaletteIdx++)
 	{
-		const lcPartPalette& Set = mPartPalettes[SetIdx];
-		QTreeWidgetItem* SetCategoryItem = new QTreeWidgetItem(mCategoriesWidget, QStringList(Set.Name));
-		SetCategoryItem->setData(0, static_cast<int>(lcPartCategoryRole::Type), static_cast<int>(lcPartCategoryType::Palette));
-		SetCategoryItem->setData(0, static_cast<int>(lcPartCategoryRole::Index), SetIdx);
+		const lcPartPalette& Set = mPartPalettes[PaletteIdx];
+		QTreeWidgetItem* PaletteCategoryItem = new QTreeWidgetItem(mCategoriesWidget, QStringList(Set.Name));
+		PaletteCategoryItem->setData(0, static_cast<int>(lcPartCategoryRole::Type), static_cast<int>(lcPartCategoryType::Palette));
+		PaletteCategoryItem->setData(0, static_cast<int>(lcPartCategoryRole::Index), PaletteIdx);
+
+		if (CurrentType == lcPartCategoryType::Palette && CurrentIndex == PaletteIdx)
+			CurrentItem = PaletteCategoryItem;
 	}
 
 	for (int CategoryIdx = 0; CategoryIdx < gCategories.GetSize(); CategoryIdx++)
@@ -1071,10 +1099,13 @@ void lcPartSelectionWidget::UpdateCategories()
 		QTreeWidgetItem* CategoryItem = new QTreeWidgetItem(mCategoriesWidget, QStringList(gCategories[CategoryIdx].Name));
 		CategoryItem->setData(0, static_cast<int>(lcPartCategoryRole::Type), static_cast<int>(lcPartCategoryType::Category));
 		CategoryItem->setData(0, static_cast<int>(lcPartCategoryRole::Index), CategoryIdx);
+
+		if (CurrentType == lcPartCategoryType::Category && CurrentIndex == CategoryIdx)
+			CurrentItem = CategoryItem;
 	}
 
-	if (CurrentIndex != -1)
-		mCategoriesWidget->setCurrentItem(mCategoriesWidget->topLevelItem(CurrentIndex));
+	if (CurrentItem)
+		mCategoriesWidget->setCurrentItem(CurrentItem);
 }
 
 void lcPartSelectionWidget::UpdateModels()

@@ -213,7 +213,8 @@ SOURCES += common/view.cpp \
     common/lc_partselectionwidget.cpp \
     common/lc_timelinewidget.cpp \
     qt/lc_renderdialog.cpp \
-    qt/lc_setsdatabasedialog.cpp
+    qt/lc_setsdatabasedialog.cpp \
+    common/lc_partpalettedialog.cpp
 HEADERS += \
     common/view.h \
     common/texfont.h \
@@ -277,7 +278,8 @@ HEADERS += \
     common/lc_partselectionwidget.h \
     common/lc_timelinewidget.h \
     qt/lc_renderdialog.h \
-    qt/lc_setsdatabasedialog.h
+    qt/lc_setsdatabasedialog.h \
+    common/lc_partpalettedialog.h
 FORMS += \ 
     qt/lc_qarraydialog.ui \
     qt/lc_qgroupdialog.ui \
@@ -294,7 +296,8 @@ FORMS += \
     qt/lc_qfinddialog.ui \
     qt/lc_qmodellistdialog.ui \
     qt/lc_renderdialog.ui \
-    qt/lc_setsdatabasedialog.ui
+    qt/lc_setsdatabasedialog.ui \
+    common/lc_partpalettedialog.ui
 OTHER_FILES += 
 RESOURCES += leocad.qrc
 

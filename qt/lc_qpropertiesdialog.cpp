@@ -7,6 +7,29 @@
 #include "lc_application.h"
 #include "pieceinf.h"
 
+class lcPartsTableWidgetItem : public QTableWidgetItem
+{
+public:
+	explicit lcPartsTableWidgetItem(const QString& Text, int Type = Type)
+		: QTableWidgetItem(Text, Type)
+	{
+		mLast = false;
+	}
+
+	virtual bool operator<(const QTableWidgetItem& Other) const override
+	{
+		if (mLast)
+			return false;
+
+		if (((const lcPartsTableWidgetItem&)Other).mLast)
+			return true;
+
+		return QTableWidgetItem::operator<(Other);
+	}
+
+	bool mLast;
+};
+
 lcQPropertiesDialog::lcQPropertiesDialog(QWidget *parent, void *data) :
 	QDialog(parent),
 	ui(new Ui::lcQPropertiesDialog)
@@ -86,14 +109,14 @@ lcQPropertiesDialog::lcQPropertiesDialog(QWidget *parent, void *data) :
 
 	for (const auto& PartIt : PartsList)
 	{
-		table->setItem(Row, 0, new QTableWidgetItem(PartIt.first->m_strDescription));
+		table->setItem(Row, 0, new lcPartsTableWidgetItem(PartIt.first->m_strDescription));
 
 		for (const auto& ColorIt : PartIt.second)
 		{
 			int ColorIndex = ColorIt.first;
 			int Count = ColorIt.second;
 
-			QTableWidgetItem* Item = new QTableWidgetItem(QString::number(Count));
+			lcPartsTableWidgetItem* Item = new lcPartsTableWidgetItem(QString::number(Count));
 			Item->setTextAlignment(Qt::AlignCenter);
 			table->setItem(Row, ColorColumns[ColorIndex] + 1, Item);
 
@@ -102,26 +125,34 @@ lcQPropertiesDialog::lcQPropertiesDialog(QWidget *parent, void *data) :
 			Total += Count;
 		}
 
+		for (int Column = 0; Column <= NumColors; Column++)
+			if (!table->item(Row, Column))
+				table->setItem(Row, Column, new lcPartsTableWidgetItem(QString()));
+
 		Row++;
 	}
 
-	table->setItem((int)InfoTotals.size(), 0, new QTableWidgetItem(tr("Total")));
+	lcPartsTableWidgetItem* Item = new lcPartsTableWidgetItem(tr("Total"));
+	Item->mLast = true;
+	table->setItem((int)InfoTotals.size(), 0, Item);
 
 	for (Row = 0; Row < (int)InfoTotals.size(); Row++)
 	{
-		QTableWidgetItem *item = new QTableWidgetItem(QString::number(InfoTotals[Row]));
+		lcPartsTableWidgetItem *item = new lcPartsTableWidgetItem(QString::number(InfoTotals[Row]));
 		item->setTextAlignment(Qt::AlignCenter);
 		table->setItem(Row, NumColors + 1, item);
 	}
 
 	for (int colorIdx = 0; colorIdx < NumColors; colorIdx++)
 	{
-		QTableWidgetItem *item = new QTableWidgetItem(QString::number(ColorTotals[colorIdx]));
+		lcPartsTableWidgetItem *item = new lcPartsTableWidgetItem(QString::number(ColorTotals[colorIdx]));
+		item->mLast = true;
 		item->setTextAlignment(Qt::AlignCenter);
 		table->setItem((int)InfoTotals.size(), colorIdx + 1, item);
 	}
 
-	QTableWidgetItem *item = new QTableWidgetItem(QString::number(Total));
+	lcPartsTableWidgetItem *item = new lcPartsTableWidgetItem(QString::number(Total));
+	item->mLast = true;
 	item->setTextAlignment(Qt::AlignCenter);
 	table->setItem((int)InfoTotals.size(), NumColors + 1, item);
 }

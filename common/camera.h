@@ -281,7 +281,7 @@ public:
 	void Pan(const lcVector3& Distance, lcStep Step, bool AddKey);
 	void Orbit(float DistanceX, float DistanceY, const lcVector3& CenterPosition, lcStep Step, bool AddKey);
 	void Roll(float Distance, lcStep Step, bool AddKey);
-	void Center(lcVector3& point, lcStep Step, bool AddKey);
+	void Center(const lcVector3& NewCenter, lcStep Step, bool AddKey);
 	void MoveSelected(lcStep Step, bool AddKey, const lcVector3& Distance);
 	void MoveRelative(const lcVector3& Distance, lcStep Step, bool AddKey);
 	void SetViewpoint(lcViewpoint Viewpoint);

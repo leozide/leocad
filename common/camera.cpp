@@ -957,15 +957,46 @@ void lcCamera::Roll(float Distance, lcStep Step, bool AddKey)
 	UpdatePosition(Step);
 }
 
-void lcCamera::Center(lcVector3& point, lcStep Step, bool AddKey)
+void lcCamera::Center(const lcVector3& NewCenter, lcStep Step, bool AddKey)
 {
-	lcAlign(mTargetPosition, mPosition, point);
+	const lcMatrix44 Inverse = lcMatrix44AffineInverse(mWorldView);
+	const lcVector3 Direction = -lcVector3(Inverse[2]);
+
+	float Yaw, Pitch, Roll;
+
+	if (fabsf(Direction.z) < 0.9999f)
+	{
+		Yaw = atan2f(Direction.y, Direction.x);
+		Pitch = asinf(Direction.z);
+		Roll = atan2f(Inverse[0][2], Inverse[1][2]);
+	}
+	else
+	{
+		Yaw = 0.0f;
+		Pitch = asinf(Direction.z);
+		Roll = atan2f(Inverse[0][1], Inverse[1][1]);
+	}
+
+	mTargetPosition = NewCenter;
+
+	lcVector3 FrontVector(mPosition - mTargetPosition);
+	lcMatrix44 Rotation = lcMatrix44FromAxisAngle(FrontVector, Roll);
+
+	lcVector3 UpVector(0, 0, 1), SideVector;
+	FrontVector.Normalize();
+	if (fabsf(lcDot(UpVector, FrontVector)) > 0.99f)
+		SideVector = lcVector3(-1, 0, 0);
+	else
+		SideVector = lcCross(FrontVector, UpVector);
+	UpVector = lcCross(SideVector, FrontVector);
+	UpVector.Normalize();
+	mUpVector = lcMul30(UpVector, Rotation);
 
 	if (IsSimple())
 		AddKey = false;
 
-	ChangeKey(mPositionKeys, mPosition, Step, AddKey);
 	ChangeKey(mTargetPositionKeys, mTargetPosition, Step, AddKey);
+	ChangeKey(mUpVectorKeys, mUpVector, Step, AddKey);
 
 	UpdatePosition(Step);
 }

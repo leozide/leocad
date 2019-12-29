@@ -17,6 +17,7 @@ public:
 	void SetCurrentStep();
 
 public slots:
+	void CurrentItemChanged(QTreeWidgetItem* Current, QTreeWidgetItem* Previous);
 	void ItemSelectionChanged();
 	void CustomMenuRequested(QPoint Pos);
 

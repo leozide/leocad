@@ -85,7 +85,10 @@ void lcTimelineWidget::Update(bool Clear, bool UpdateItems)
 		clear();
 	}
 
-	lcStep LastStep = lcMax(Model->GetLastStep(), Model->GetCurrentStep());
+	lcStep LastStep = Model->GetLastStep();
+	if (Model->HasPieces())
+		LastStep++;
+	LastStep  = lcMax(LastStep, Model->GetCurrentStep());
 
 	for (int TopLevelItemIdx = LastStep; TopLevelItemIdx < topLevelItemCount(); )
 	{
@@ -105,6 +108,7 @@ void lcTimelineWidget::Update(bool Clear, bool UpdateItems)
 	for (unsigned int TopLevelItemIdx = topLevelItemCount(); TopLevelItemIdx < LastStep; TopLevelItemIdx++)
 	{
 		QTreeWidgetItem* StepItem = new QTreeWidgetItem(this, QStringList(tr("Step %1").arg(TopLevelItemIdx + 1)));
+		StepItem->setData(0, Qt::UserRole, qVariantFromValue<int>(TopLevelItemIdx + 1));
 		StepItem->setFlags(Qt::ItemIsEnabled | Qt::ItemIsDropEnabled);
 		addTopLevelItem(StepItem);
 		StepItem->setExpanded(true);
@@ -352,6 +356,15 @@ void lcTimelineWidget::ItemSelectionChanged()
 	lcStep LastStep = 1;
 	QList<QTreeWidgetItem*> SelectedItems = selectedItems();
 
+	QTreeWidgetItem* CurrentItem = currentItem();
+	lcModel* Model = gMainWindow->GetActiveModel();
+
+	if (SelectedItems.isEmpty() && CurrentItem)
+	{
+		Model->SetCurrentStep(CurrentItem->data(0, Qt::UserRole).value<int>());
+		return;
+	}
+
 	for (QTreeWidgetItem* PieceItem : SelectedItems)
 	{
 		lcPiece* Piece = (lcPiece*)PieceItem->data(0, Qt::UserRole).value<uintptr_t>();
@@ -363,13 +376,11 @@ void lcTimelineWidget::ItemSelectionChanged()
 	}
 
 	lcPiece* CurrentPiece = nullptr;
-	QTreeWidgetItem* CurrentItem = currentItem();
 	if (CurrentItem && CurrentItem->isSelected())
 		CurrentPiece = (lcPiece*)CurrentItem->data(0, Qt::UserRole).value<uintptr_t>();
 
 	bool Blocked = blockSignals(true);
 	mIgnoreUpdates = true;
-	lcModel* Model = gMainWindow->GetActiveModel();
 	if (LastStep > Model->GetCurrentStep())
 		Model->SetCurrentStep(LastStep);
 	Model->SetSelectionAndFocus(Selection, CurrentPiece, LC_PIECE_SECTION_POSITION, false);

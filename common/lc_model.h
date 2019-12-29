@@ -235,6 +235,11 @@ public:
 	bool SubModelMinIntersectDist(const lcVector3& WorldStart, const lcVector3& WorldEnd, float& MinDistance) const;
 	bool SubModelBoxTest(const lcVector4 Planes[6]) const;
 
+	bool HasPieces() const
+	{
+		return !mPieces.IsEmpty();
+	}
+
 	bool AnyPiecesSelected() const;
 	bool AnyObjectsSelected() const;
 	lcModel* GetFirstSelectedSubmodel() const;

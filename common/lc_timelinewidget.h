@@ -25,9 +25,11 @@ protected:
 	virtual void dropEvent(QDropEvent* Event);
 	virtual void mousePressEvent(QMouseEvent* Event);
 	void UpdateModel();
+	void UpdateCurrentStepItem();
 
 	QMap<int, QIcon> mIcons;
 	QMap<lcPiece*, QTreeWidgetItem*> mItems;
+	QTreeWidgetItem* mCurrentStepItem;
 	bool mIgnoreUpdates;
 };
 

@@ -8,6 +8,7 @@
 lcTimelineWidget::lcTimelineWidget(QWidget* Parent)
 	: QTreeWidget(Parent)
 {
+	mCurrentStepItem = nullptr;
 	mIgnoreUpdates = false;
 
 	setSelectionMode(QAbstractItemView::ExtendedSelection);
@@ -102,6 +103,9 @@ void lcTimelineWidget::Update(bool Clear, bool UpdateItems)
 			mItems.remove(Piece);
 			delete PieceItem;
 		}
+
+		if (mCurrentStepItem == StepItem)
+			mCurrentStepItem = nullptr;
 
 		delete StepItem;
 	}
@@ -230,8 +234,37 @@ void lcTimelineWidget::Update(bool Clear, bool UpdateItems)
 		StepItem = topLevelItem(Step - 1);
 		PieceItemIndex = 0;
 	}
+	
+	UpdateCurrentStepItem();
 
 	blockSignals(Blocked);
+}
+
+void lcTimelineWidget::UpdateCurrentStepItem()
+{
+	lcModel* Model = gMainWindow->GetActiveModel();
+	lcStep CurrentStep = Model->GetCurrentStep();
+	QTreeWidgetItem* CurrentStepItem = topLevelItem(CurrentStep - 1);
+
+	if (CurrentStepItem != mCurrentStepItem)
+	{
+		if (mCurrentStepItem)
+		{
+			QFont Font = mCurrentStepItem->font(0);
+			Font.setBold(false);
+			mCurrentStepItem->setFont(0, Font);
+		}
+
+		if (CurrentStepItem)
+		{
+			QFont Font = CurrentStepItem->font(0);
+			Font.setBold(true);
+			CurrentStepItem->setFont(0, Font);
+		}
+
+		mCurrentStepItem = CurrentStepItem;
+	}
+
 }
 
 void lcTimelineWidget::UpdateSelection()
@@ -315,6 +348,7 @@ void lcTimelineWidget::MoveSelection()
 
 	if (Step == -1)
 		return;
+	Step++;
 
 	QList<QTreeWidgetItem*> SelectedItems = selectedItems();
 
@@ -330,6 +364,11 @@ void lcTimelineWidget::MoveSelection()
 	}
 
 	UpdateModel();
+
+	lcModel* Model = gMainWindow->GetActiveModel();
+
+	if (Step > static_cast<int>(Model->GetCurrentStep()))
+		Model->SetCurrentStep(Step);
 }
 
 void lcTimelineWidget::SetCurrentStep()
@@ -352,10 +391,10 @@ void lcTimelineWidget::SetCurrentStep()
 
 void lcTimelineWidget::CurrentItemChanged(QTreeWidgetItem* Current, QTreeWidgetItem* Previous)
 {
-	Q_UNUSED(Current);
 	Q_UNUSED(Previous);
 
-	SetCurrentStep();
+	if (Current && !Current->parent())
+		SetCurrentStep();
 }
 
 void lcTimelineWidget::ItemSelectionChanged()
@@ -383,7 +422,10 @@ void lcTimelineWidget::ItemSelectionChanged()
 	mIgnoreUpdates = true;
 	lcModel* Model = gMainWindow->GetActiveModel();
 	if (LastStep > Model->GetCurrentStep())
+	{
 		Model->SetCurrentStep(LastStep);
+		UpdateCurrentStepItem();
+	}
 	Model->SetSelectionAndFocus(Selection, CurrentPiece, LC_PIECE_SECTION_POSITION, false);
 	mIgnoreUpdates = false;
 	blockSignals(Blocked);
@@ -391,8 +433,22 @@ void lcTimelineWidget::ItemSelectionChanged()
 
 void lcTimelineWidget::dropEvent(QDropEvent* Event)
 {
+	QTreeWidgetItem* DropItem = itemAt(Event->pos());
+	lcModel* Model = gMainWindow->GetActiveModel();
+
+	if (DropItem)
+	{
+		QTreeWidgetItem* ParentItem = DropItem->parent();
+		lcStep Step = indexOfTopLevelItem(ParentItem ? ParentItem : DropItem) + 1;
+
+		if (Step > Model->GetCurrentStep())
+			Model->SetCurrentStep(Step);
+	}
+
 	QTreeWidget::dropEvent(Event);
+
 	UpdateModel();
+	Update(false, false);
 }
 
 void lcTimelineWidget::mousePressEvent(QMouseEvent* Event)

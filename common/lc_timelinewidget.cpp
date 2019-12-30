@@ -75,6 +75,7 @@ void lcTimelineWidget::Update(bool Clear, bool UpdateItems)
 
 	if (!Model)
 	{
+		mCurrentStepItem = nullptr;
 		mItems.clear();
 		clear();
 		blockSignals(Blocked);
@@ -83,6 +84,7 @@ void lcTimelineWidget::Update(bool Clear, bool UpdateItems)
 
 	if (Clear)
 	{
+		mCurrentStepItem = nullptr;
 		mItems.clear();
 		clear();
 	}

@@ -653,6 +653,10 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 										lcVector4(IncludeMatrix[5], IncludeMatrix[8], IncludeMatrix[11], 0.0f), lcVector4(IncludeMatrix[0], IncludeMatrix[1], IncludeMatrix[2], 1.0f));
 
 			QString PartId = LineStream.readAll().trimmed();
+
+			if (PartId.isEmpty())
+				continue;
+
 			QByteArray CleanId = PartId.toLatin1().toUpper().replace('\\', '/');
 
 			if (Library->IsPrimitive(CleanId.constData()))

@@ -1055,7 +1055,8 @@ void lcMainWindow::Print(QPrinter* Printer)
 					QFontMetrics FontMetrics(Font);
 
 					int TextMargin = Printer->resolution() / 2;
-					QRect TextRect = Rect.marginsRemoved(QMargins(TextMargin, TextMargin, TextMargin, TextMargin));
+					QRect TextRect = QRect(Rect.left() + TextMargin, Rect.top() + TextMargin, Rect.width() - TextMargin * 2, Rect.height() - TextMargin * 2);
+
 					Painter.drawText(TextRect, Qt::AlignTop | Qt::AlignLeft, QString::number(Step));
 				}
 

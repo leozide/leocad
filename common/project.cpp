@@ -1491,6 +1491,16 @@ void Project::ExportCSV()
 	}
 }
 
+std::vector<std::pair<lcModel*, lcStep>> Project::GetPageLayouts() const
+{
+	std::vector<const lcModel*> AddedModels;
+
+	if (mActiveModel)
+		return mActiveModel->GetPageLayouts(AddedModels);
+
+	return std::vector<std::pair<lcModel*, lcStep>>();
+}
+
 QImage Project::CreatePartsListImage(lcModel* Model, lcStep Step)
 {
 	lcPartsList PartsList;

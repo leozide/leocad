@@ -86,6 +86,8 @@ public:
 
 	QString GetImageFileName(bool AllowCurrentFolder) const;
 
+	std::vector<std::pair<lcModel*, lcStep>> GetPageLayouts() const;
+
 	void SetActiveModel(int ModelIndex);
 	void SetActiveModel(const QString& ModelName);
 

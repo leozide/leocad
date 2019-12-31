@@ -1353,7 +1353,7 @@ void lcModel::DrawBackground(lcGLWidget* Widget)
 	Context->SetDepthWrite(true);
 }
 
-void lcModel::SaveStepImages(const QString& BaseName, bool AddStepSuffix, bool Zoom, bool Highlight, int Width, int Height, lcStep Start, lcStep End)
+QImage lcModel::GetStepImage(bool Zoom, bool Highlight, int Width, int Height, lcStep Step)
 {
 	View* ActiveView = gMainWindow->GetActiveView();
 	ActiveView->MakeCurrent();
@@ -1361,7 +1361,7 @@ void lcModel::SaveStepImages(const QString& BaseName, bool AddStepSuffix, bool Z
 
 	lcStep CurrentStep = mCurrentStep;
 
-	lcCamera* Camera = gMainWindow->GetActiveView()->mCamera;
+	lcCamera* Camera = ActiveView->mCamera;
 	if (Zoom)
 		ZoomExtents(Camera, (float)Width / (float)Height);
 
@@ -1373,14 +1373,29 @@ void lcModel::SaveStepImages(const QString& BaseName, bool AddStepSuffix, bool Z
 	if (!View.BeginRenderToImage(Width, Height))
 	{
 		QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Error creating images."));
-		return;
+		return QImage();
 	}
 
+	SetTemporaryStep(Step);
+	View.OnDraw();
+
+	QImage Image = View.GetRenderImage();
+
+	View.EndRenderToImage();
+	Context->ClearResources();
+
+	SetTemporaryStep(CurrentStep);
+
+	if (!mActive)
+		CalculateStep(LC_STEP_MAX);
+
+	return Image;
+}
+
+void lcModel::SaveStepImages(const QString& BaseName, bool AddStepSuffix, bool Zoom, bool Highlight, int Width, int Height, lcStep Start, lcStep End)
+{
 	for (lcStep Step = Start; Step <= End; Step++)
 	{
-		SetTemporaryStep(Step);
-		View.OnDraw();
-
 		QString FileName;
 
 		if (AddStepSuffix)
@@ -1393,20 +1408,55 @@ void lcModel::SaveStepImages(const QString& BaseName, bool AddStepSuffix, bool Z
 		if (Writer.format().isEmpty())
 			Writer.setFormat("png");
 
-		if (!Writer.write(View.GetRenderImage()))
+		QImage Image = GetStepImage(Zoom, Highlight, Width, Height, Step);
+		if (!Writer.write(Image))
 		{
 			QMessageBox::information(gMainWindow, tr("Error"), tr("Error writing to file '%1':\n%2").arg(FileName, Writer.errorString()));
 			break;
 		}
 	}
+}
 
-	View.EndRenderToImage();
-	Context->ClearResources();
+std::vector<std::pair<lcModel*, lcStep>> lcModel::GetPageLayouts(std::vector<const lcModel*>& AddedModels)
+{
+	std::vector<std::pair<lcModel*, lcStep>> PageLayouts;
 
-	SetTemporaryStep(CurrentStep);
+	if (std::find(AddedModels.begin(), AddedModels.end(), this) != AddedModels.end())
+		return PageLayouts;
 
-	if (!mActive)
-		CalculateStep(LC_STEP_MAX);
+	AddedModels.push_back(this);
+
+	std::map<lcStep, std::vector<lcPiece*>> StepPieces;
+
+	for (lcPiece* Piece : mPieces)
+		if (!Piece->IsHidden())
+			StepPieces[Piece->GetStepShow()].push_back(Piece);
+
+	lcStep CurrentStep = 1;
+
+	for (const std::pair<lcStep, std::vector<lcPiece*>>& StepIt : StepPieces)
+	{
+		while (StepIt.first > CurrentStep)
+		{
+			PageLayouts.emplace_back(std::make_pair(this, CurrentStep));
+			CurrentStep++;
+		}
+
+		for (lcPiece* Piece : StepIt.second)
+		{
+			if (Piece->mPieceInfo->IsModel())
+			{
+				lcModel* SubModel = Piece->mPieceInfo->GetModel();
+				std::vector<std::pair<lcModel*, lcStep>> SubModelLayouts = SubModel->GetPageLayouts(AddedModels);
+				PageLayouts.insert(PageLayouts.end(), std::make_move_iterator(SubModelLayouts.begin()), std::make_move_iterator(SubModelLayouts.end()));
+			}
+		}
+
+		PageLayouts.emplace_back(std::make_pair(this, CurrentStep));
+		CurrentStep++;
+	}
+
+	return PageLayouts;
 }
 
 void lcModel::UpdateBackgroundTexture()

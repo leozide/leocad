@@ -966,14 +966,11 @@ void lcMainWindow::ProjectFileChanged(const QString& Path)
 void lcMainWindow::Print(QPrinter* Printer)
 {
 #ifndef QT_NO_PRINTER
-	lcModel* Model = lcGetActiveModel();
 	int DocCopies;
 	int PageCopies;
 
-	int Rows = lcGetProfileInt(LC_PROFILE_PRINT_ROWS);
-	int Columns = lcGetProfileInt(LC_PROFILE_PRINT_COLUMNS);
-	int StepsPerPage = Rows * Columns;
-	int PageCount = (Model->GetLastStep() + StepsPerPage - 1) / StepsPerPage;
+	std::vector<std::pair<lcModel*, lcStep>> PageLayouts = lcGetActiveProject()->GetPageLayouts();
+	const int PageCount = PageLayouts.size();
 
 	if (Printer->collateCopies())
 	{
@@ -1014,22 +1011,10 @@ void lcMainWindow::Print(QPrinter* Printer)
 		Ascending = false;
 	}
 
-	GetActiveView()->MakeCurrent();
-	lcContext* Context = GetActiveView()->mContext;
-
 	QRect PageRect = Printer->pageRect();
 
-	int StepWidth = PageRect.width() / Columns;
-	int StepHeight = PageRect.height() / Rows;
-
-	View View(Model);
-	View.SetCamera(GetActiveView()->mCamera, false);
-	View.SetContext(Context);
-	View.BeginRenderToImage(StepWidth, StepHeight);
-
-	lcStep PreviousTime = Model->GetCurrentStep();
-
 	QPainter Painter(Printer);
+	bool FirstPage = true;
 	// TODO: option to print background
 
 	for (int DocCopy = 0; DocCopy < DocCopies; DocCopy++)
@@ -1041,75 +1026,52 @@ void lcMainWindow::Print(QPrinter* Printer)
 			for (int PageCopy = 0; PageCopy < PageCopies; PageCopy++)
 			{
 				if (Printer->printerState() == QPrinter::Aborted || Printer->printerState() == QPrinter::Error)
-				{
-					Model->SetTemporaryStep(PreviousTime);
-					View.EndRenderToImage();
-					Context->ClearResources();
 					return;
+
+				if (!FirstPage)
+					Printer->newPage();
+				else
+					FirstPage = false;
+
+				int StepWidth = PageRect.width();
+				int StepHeight = PageRect.height();
+
+				lcModel* Model = PageLayouts[Page - 1].first;
+				lcStep Step = PageLayouts[Page - 1].second;
+				QImage Image = Model->GetStepImage(false, false, StepWidth, StepHeight, Step);
+
+				QRect Rect = Painter.viewport();
+
+				Painter.drawImage(Rect.left(), Rect.top(), Image);
+
+				// TODO: add print options somewhere but Qt doesn't allow changes to the page setup dialog
+//				DWORD dwPrint = theApp.GetProfileInt("Settings","Print", PRINT_NUMBERS|PRINT_BORDER);
+
+//				if (print text)
+				{
+					QFont Font("Helvetica", Printer->resolution());
+					Painter.setFont(Font);
+
+					QFontMetrics FontMetrics(Font);
+
+					int TextTop = Rect.top() + Printer->resolution() / 2 + FontMetrics.ascent();
+					int TextLeft = Rect.left()  + Printer->resolution() / 2;
+
+					Painter.drawText(TextLeft, TextTop, QString::number(Step));
 				}
 
-				lcStep CurrentStep = 1 + ((Page - 1) * Rows * Columns);
-
-				for (int Row = 0; Row < Rows; Row++)
+//				if (print border)
 				{
-					for (int Column = 0; Column < Columns; Column++)
-					{
-						if (CurrentStep > Model->GetLastStep())
-							break;
+					QPen BlackPen(Qt::black, 2);
+					Painter.setPen(BlackPen);
 
-						Model->SetTemporaryStep(CurrentStep);
-
-						View.OnDraw();
-
-						QRect rect = Painter.viewport();
-						int left = rect.x() + (StepWidth * Column);
-						int bottom = rect.y() + (StepHeight * Row);
-
-						Painter.drawImage(left, bottom, View.GetRenderImage());
-
-						// TODO: add print options somewhere but Qt doesn't allow changes to the page setup dialog
-//						DWORD dwPrint = theApp.GetProfileInt("Settings","Print", PRINT_NUMBERS|PRINT_BORDER);
-
-						QRect Rect = Painter.viewport();
-						int Left = Rect.x() + (StepWidth * Column);
-						int Right = Rect.x() + (StepWidth * (Column + 1));
-						int Top = Rect.y() + (StepHeight * Row);
-						int Bottom = Rect.y() + (StepHeight * (Row + 1));
-
-//						if (print text)
-						{
-							QFont Font("Helvetica", Printer->resolution());
-							Painter.setFont(Font);
-
-							QFontMetrics FontMetrics(Font);
-
-							int TextTop = Top + Printer->resolution() / 2 + FontMetrics.ascent();
-							int TextLeft = Left + Printer->resolution() / 2;
-
-							Painter.drawText(TextLeft, TextTop, QString::number(CurrentStep));
-						}
-
-//						if (print border)
-						{
-							QPen BlackPen(Qt::black, 2);
-							Painter.setPen(BlackPen);
-
-							if (Row == 0)
-								Painter.drawLine(Left, Top, Right, Top);
-							if (Column == 0)
-								Painter.drawLine(Left, Top, Left, Bottom);
-							Painter.drawLine(Left, Bottom, Right, Bottom);
-							Painter.drawLine(Right, Top, Right, Bottom);
-						}
-
-						CurrentStep++;
-					}
+					Painter.drawLine(Rect.left(), Rect.top(), Rect.right(), Rect.top());
+					Painter.drawLine(Rect.left(), Rect.bottom(), Rect.right(), Rect.bottom());
+					Painter.drawLine(Rect.left(), Rect.top(), Rect.left(), Rect.bottom());
+					Painter.drawLine(Rect.right(), Rect.top(), Rect.right(), Rect.bottom());
 				}
 
 				// TODO: print header and footer
-
-				if (PageCopy < PageCopies - 1)
-					Printer->newPage();
 			}
 
 			if (Page == ToPage)
@@ -1119,18 +1081,8 @@ void lcMainWindow::Print(QPrinter* Printer)
 				Page++;
 			else
 				Page--;
-
-			Printer->newPage();
 		}
-
-		if (DocCopy < DocCopies - 1)
-			Printer->newPage();
 	}
-
-	Model->SetTemporaryStep(PreviousTime);
-
-	View.EndRenderToImage();
-	Context->ClearResources();
 #endif
 }
 
@@ -1183,11 +1135,7 @@ void lcMainWindow::ShowRenderDialog()
 void lcMainWindow::ShowPrintDialog()
 {
 #ifndef QT_NO_PRINTER
-	lcModel* Model = lcGetActiveModel();
-	int Rows = lcGetProfileInt(LC_PROFILE_PRINT_ROWS);
-	int Columns = lcGetProfileInt(LC_PROFILE_PRINT_COLUMNS);
-	int StepsPerPage = Rows * Columns;
-	int PageCount = (Model->GetLastStep() + StepsPerPage - 1) / StepsPerPage;
+	int PageCount = lcGetActiveProject()->GetPageLayouts().size();
 
 	QPrinter Printer(QPrinter::HighResolution);
 	Printer.setFromTo(1, PageCount + 1);
@@ -1784,11 +1732,7 @@ void lcMainWindow::TogglePrintPreview()
 #ifndef QT_NO_PRINTER
 	// todo: print preview inside main window
 
-	lcModel* Model = lcGetActiveModel();
-	int Rows = lcGetProfileInt(LC_PROFILE_PRINT_ROWS);
-	int Columns = lcGetProfileInt(LC_PROFILE_PRINT_COLUMNS);
-	int StepsPerPage = Rows * Columns;
-	int PageCount = (Model->GetLastStep() + StepsPerPage - 1) / StepsPerPage;
+	int PageCount = lcGetActiveProject()->GetPageLayouts().size();
 
 	QPrinter Printer(QPrinter::ScreenResolution);
 	Printer.setFromTo(1, PageCount + 1);

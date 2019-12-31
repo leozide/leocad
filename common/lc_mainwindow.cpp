@@ -1012,6 +1012,9 @@ void lcMainWindow::Print(QPrinter* Printer)
 	}
 
 	QRect PageRect = Printer->pageRect();
+	const int Resolution = Printer->resolution();
+	const int Margin = Resolution / 2; // todo: user setting
+	QRect MarginRect = QRect(PageRect.left() + Margin, PageRect.top() + Margin, PageRect.width() - Margin * 2, PageRect.height() - Margin * 2);
 
 	QPainter Painter(Printer);
 	bool FirstPage = true;
@@ -1033,16 +1036,14 @@ void lcMainWindow::Print(QPrinter* Printer)
 				else
 					FirstPage = false;
 
-				int StepWidth = PageRect.width();
-				int StepHeight = PageRect.height();
+				int StepWidth = MarginRect.width();
+				int StepHeight = MarginRect.height();
 
 				lcModel* Model = PageLayouts[Page - 1].first;
 				lcStep Step = PageLayouts[Page - 1].second;
 				QImage Image = Model->GetStepImage(false, false, StepWidth, StepHeight, Step);
 
-				QRect Rect = Painter.viewport();
-
-				Painter.drawImage(Rect.left(), Rect.top(), Image);
+				Painter.drawImage(MarginRect.left(), MarginRect.top(), Image);
 
 				// TODO: add print options somewhere but Qt doesn't allow changes to the page setup dialog
 //				DWORD dwPrint = theApp.GetProfileInt("Settings","Print", PRINT_NUMBERS|PRINT_BORDER);
@@ -1054,23 +1055,23 @@ void lcMainWindow::Print(QPrinter* Printer)
 
 					QFontMetrics FontMetrics(Font);
 
-					int TextMargin = Printer->resolution() / 2;
-					QRect TextRect = QRect(Rect.left() + TextMargin, Rect.top() + TextMargin, Rect.width() - TextMargin * 2, Rect.height() - TextMargin * 2);
+					int TextMargin = Resolution / 2;
+					QRect TextRect = QRect(MarginRect.left() + TextMargin, MarginRect.top() + TextMargin, MarginRect.width() - TextMargin * 2, MarginRect.height() - TextMargin * 2);
 
 					Painter.drawText(TextRect, Qt::AlignTop | Qt::AlignLeft, QString::number(Step));
 				}
-
+/*
 //				if (print border)
 				{
 					QPen BlackPen(Qt::black, 2);
 					Painter.setPen(BlackPen);
 
-					Painter.drawLine(Rect.left(), Rect.top(), Rect.right(), Rect.top());
-					Painter.drawLine(Rect.left(), Rect.bottom(), Rect.right(), Rect.bottom());
-					Painter.drawLine(Rect.left(), Rect.top(), Rect.left(), Rect.bottom());
-					Painter.drawLine(Rect.right(), Rect.top(), Rect.right(), Rect.bottom());
+					Painter.drawLine(MarginRect.left(), MarginRect.top(), MarginRect.right(), MarginRect.top());
+					Painter.drawLine(MarginRect.left(), MarginRect.bottom(), MarginRect.right(), MarginRect.bottom());
+					Painter.drawLine(MarginRect.left(), MarginRect.top(), MarginRect.left(), MarginRect.bottom());
+					Painter.drawLine(MarginRect.right(), MarginRect.top(), MarginRect.right(), MarginRect.bottom());
 				}
-
+*/
 				// TODO: print header and footer
 			}
 

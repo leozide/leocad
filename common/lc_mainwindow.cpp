@@ -1049,15 +1049,14 @@ void lcMainWindow::Print(QPrinter* Printer)
 
 //				if (print text)
 				{
-					QFont Font("Helvetica", Printer->resolution());
+					QFont Font("Helvetica", 96);
 					Painter.setFont(Font);
 
 					QFontMetrics FontMetrics(Font);
 
-					int TextTop = Rect.top() + Printer->resolution() / 2 + FontMetrics.ascent();
-					int TextLeft = Rect.left()  + Printer->resolution() / 2;
-
-					Painter.drawText(TextLeft, TextTop, QString::number(Step));
+					int TextMargin = Printer->resolution() / 2;
+					QRect TextRect = Rect.marginsRemoved(QMargins(TextMargin, TextMargin, TextMargin, TextMargin));
+					Painter.drawText(TextRect, Qt::AlignTop | Qt::AlignLeft, QString::number(Step));
 				}
 
 //				if (print border)

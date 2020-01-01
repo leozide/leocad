@@ -155,7 +155,7 @@ void lcPartSelectionListModel::SetCategory(int CategoryIndex)
 	mParts.resize(SingleParts.GetSize());
 
 	for (int PartIdx = 0; PartIdx < SingleParts.GetSize(); PartIdx++)
-		mParts[PartIdx] = QPair<PieceInfo*, QPixmap>(SingleParts[PartIdx], QPixmap());
+		mParts[PartIdx] = std::pair<PieceInfo*, QPixmap>(SingleParts[PartIdx], QPixmap());
 
 	endResetModel();
 
@@ -178,8 +178,15 @@ void lcPartSelectionListModel::SetModelsCategory()
 		lcModel* Model = Models[ModelIdx];
 
 		if (!Model->IncludesModel(ActiveModel))
-			mParts.emplace_back(QPair<PieceInfo*, QPixmap>(Model->GetPieceInfo(), QPixmap()));
+			mParts.emplace_back(std::pair<PieceInfo*, QPixmap>(Model->GetPieceInfo(), QPixmap()));
 	}
+
+	auto lcPartSortFunc = [](const std::pair<PieceInfo*, QPixmap>& a, const std::pair<PieceInfo*, QPixmap>& b)
+	{
+		return strcmp(a.first->m_strDescription, b.first->m_strDescription) < 0;
+	};
+
+	std::sort(mParts.begin(), mParts.end(), lcPartSortFunc);
 
 	endResetModel();
 
@@ -208,7 +215,7 @@ void lcPartSelectionListModel::SetPaletteCategory(int SetIndex)
 	mParts.reserve(PartsList.size());
 
 	for (PieceInfo* Favorite : PartsList)
-		mParts.emplace_back(QPair<PieceInfo*, QPixmap>(Favorite, QPixmap()));
+		mParts.emplace_back(std::pair<PieceInfo*, QPixmap>(Favorite, QPixmap()));
 
 	endResetModel();
 
@@ -228,7 +235,14 @@ void lcPartSelectionListModel::SetCurrentModelCategory()
 	ActiveModel->GetPartsList(gDefaultColor, true, PartsList);
 
 	for (const auto& PartIt : PartsList)
-		mParts.emplace_back(QPair<PieceInfo*, QPixmap>((PieceInfo*)PartIt.first, QPixmap()));
+		mParts.emplace_back(std::pair<PieceInfo*, QPixmap>((PieceInfo*)PartIt.first, QPixmap()));
+
+	auto lcPartSortFunc = [](const std::pair<PieceInfo*, QPixmap>& a, const std::pair<PieceInfo*, QPixmap>& b)
+	{
+		return strcmp(a.first->m_strDescription, b.first->m_strDescription) < 0;
+	};
+
+	std::sort(mParts.begin(), mParts.end(), lcPartSortFunc);
 
 	endResetModel();
 

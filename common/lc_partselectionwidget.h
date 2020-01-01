@@ -121,7 +121,7 @@ protected:
 	void DrawPreview(int InfoIndex);
 
 	lcPartSelectionListView* mListView;
-	std::vector<QPair<PieceInfo*, QPixmap>> mParts;
+	std::vector<std::pair<PieceInfo*, QPixmap>> mParts;
 	std::vector<int> mRequestedPreviews;
 	int mIconSize;
 	bool mColorLocked;

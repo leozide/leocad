@@ -1089,13 +1089,13 @@ void lcPartSelectionWidget::UpdateCategories()
 	CurrentModelCategoryItem->setData(0, static_cast<int>(lcPartCategoryRole::Type), static_cast<int>(lcPartCategoryType::PartsInUse));
 
 	if (CurrentType == lcPartCategoryType::PartsInUse && CurrentIndex == 0)
-		CurrentItem = AllPartsCategoryItem;
+		CurrentItem = CurrentModelCategoryItem;
 
 	QTreeWidgetItem* SubmodelsCategoryItem = new QTreeWidgetItem(mCategoriesWidget, QStringList(tr("Submodels")));
 	SubmodelsCategoryItem->setData(0, static_cast<int>(lcPartCategoryRole::Type), static_cast<int>(lcPartCategoryType::Submodels));
 
 	if (CurrentType == lcPartCategoryType::Submodels && CurrentIndex == 0)
-		CurrentItem = AllPartsCategoryItem;
+		CurrentItem = SubmodelsCategoryItem;
 
 	for (int PaletteIdx = 0; PaletteIdx < static_cast<int>(mPartPalettes.size()); PaletteIdx++)
 	{

@@ -125,7 +125,7 @@ void lcApplication::SetProject(Project* Project)
 	Project->SetActiveModel(0);
 	lcGetPiecesLibrary()->RemoveTemporaryPieces();
 
-	if (mProject && !mProject->GetFileName().isEmpty())
+	if (mProject && !mProject->GetFileName().isEmpty() && mPreferences.mRestoreTabLayout)
 	{
 		QSettings Settings;
 		QByteArray TabLayout = Settings.value(GetTabLayoutKey()).toByteArray();

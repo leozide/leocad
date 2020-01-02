@@ -166,20 +166,20 @@ void lcScene::DrawOpaqueMeshes(lcContext* Context, bool DrawLit, int PrimitiveTy
 
 				switch (RenderMesh.State)
 				{
-				case lcRenderMeshState::NORMAL:
-				case lcRenderMeshState::HIGHLIGHT:
+				case lcRenderMeshState::Default:
+				case lcRenderMeshState::Highlighted:
 					Context->SetColorIndex(ColorIndex);
 					break;
 
-				case lcRenderMeshState::SELECTED:
+				case lcRenderMeshState::Selected:
 					Context->SetColorIndexTinted(ColorIndex, LC_COLOR_SELECTED, 0.5f);
 					break;
 
-				case lcRenderMeshState::FOCUSED:
+				case lcRenderMeshState::Focused:
 					Context->SetColorIndexTinted(ColorIndex, LC_COLOR_FOCUSED, 0.5f);
 					break;
 
-				case lcRenderMeshState::DISABLED:
+				case lcRenderMeshState::Faded:
 					Context->SetColorIndexTinted(ColorIndex, LC_COLOR_DISABLED, 0.25f);
 					break;
 				}
@@ -188,26 +188,26 @@ void lcScene::DrawOpaqueMeshes(lcContext* Context, bool DrawLit, int PrimitiveTy
 			{
 				switch (RenderMesh.State)
 				{
-				case lcRenderMeshState::NORMAL:
+				case lcRenderMeshState::Default:
 					if (ColorIndex == gEdgeColor)
 						Context->SetEdgeColorIndex(RenderMesh.ColorIndex);
 					else
 						Context->SetColorIndex(ColorIndex);
 					break;
 
-				case lcRenderMeshState::SELECTED:
+				case lcRenderMeshState::Selected:
 					Context->SetInterfaceColor(LC_COLOR_SELECTED);
 					break;
 
-				case lcRenderMeshState::FOCUSED:
+				case lcRenderMeshState::Focused:
 					Context->SetInterfaceColor(LC_COLOR_FOCUSED);
 					break;
 
-				case lcRenderMeshState::HIGHLIGHT:
+				case lcRenderMeshState::Highlighted:
 					Context->SetInterfaceColor(LC_COLOR_HIGHLIGHT);
 					break;
 
-				case lcRenderMeshState::DISABLED:
+				case lcRenderMeshState::Faded:
 					Context->SetInterfaceColor(LC_COLOR_DISABLED);
 					break;
 				}
@@ -324,20 +324,20 @@ void lcScene::DrawTranslucentMeshes(lcContext* Context, bool DrawLit) const
 
 		switch (RenderMesh.State)
 		{
-		case lcRenderMeshState::NORMAL:
-		case lcRenderMeshState::HIGHLIGHT:
+		case lcRenderMeshState::Default:
+		case lcRenderMeshState::Highlighted:
 			Context->SetColorIndex(ColorIndex);
 			break;
 
-		case lcRenderMeshState::SELECTED:
+		case lcRenderMeshState::Selected:
 			Context->SetColorIndexTinted(ColorIndex, LC_COLOR_SELECTED, 0.5f);
 			break;
 
-		case lcRenderMeshState::FOCUSED:
+		case lcRenderMeshState::Focused:
 			Context->SetColorIndexTinted(ColorIndex, LC_COLOR_FOCUSED, 0.5f);
 			break;
 
-		case lcRenderMeshState::DISABLED:
+		case lcRenderMeshState::Faded:
 			Context->SetColorIndexTinted(ColorIndex, LC_COLOR_DISABLED, 0.25f);
 			break;
 		}

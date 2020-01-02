@@ -1583,7 +1583,7 @@ QImage Project::CreatePartsListImage(lcModel* Model, lcStep Step)
 		Scene.SetAllowLOD(false);
 		Scene.Begin(ViewMatrix);
 
-		Image.Info->AddRenderMeshes(Scene, lcMatrix44Identity(), Image.ColorIndex, lcRenderMeshState::NORMAL, true);
+		Image.Info->AddRenderMeshes(Scene, lcMatrix44Identity(), Image.ColorIndex, lcRenderMeshState::Default, true);
 
 		Scene.End();
 
@@ -1973,7 +1973,7 @@ void Project::ExportHTML(const lcHTMLExportOptions& Options)
 				Scene.SetAllowLOD(false);
 				Scene.Begin(ViewMatrix);
 
-				Info->AddRenderMeshes(Scene, lcMatrix44Identity(), Options.PartImagesColor, lcRenderMeshState::NORMAL, true);
+				Info->AddRenderMeshes(Scene, lcMatrix44Identity(), Options.PartImagesColor, lcRenderMeshState::Default, true);
 
 				Scene.End();
 

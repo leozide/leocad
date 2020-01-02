@@ -282,6 +282,13 @@
          </layout>
         </widget>
        </item>
+       <item row="11" column="0" colspan="2">
+        <widget class="QCheckBox" name="RestoreTabLayout">
+         <property name="text">
+          <string>Restore tab layout</string>
+         </property>
+        </widget>
+       </item>
       </layout>
      </widget>
      <widget class="QWidget" name="tabRendering">
@@ -292,17 +299,10 @@
        <item>
         <widget class="QWidget" name="widget" native="true">
          <layout class="QGridLayout" name="gridLayout">
-          <item row="4" column="0">
-           <widget class="QCheckBox" name="axisIcon">
+          <item row="2" column="2">
+           <widget class="QLabel" name="label_2">
             <property name="text">
-             <string>Axis icon</string>
-            </property>
-           </widget>
-          </item>
-          <item row="6" column="0">
-           <widget class="QLabel" name="label_3">
-            <property name="text">
-             <string>Shading Mode:</string>
+             <string>width</string>
             </property>
            </widget>
           </item>
@@ -335,11 +335,37 @@
             </item>
            </widget>
           </item>
-          <item row="2" column="2">
-           <widget class="QLabel" name="label_2">
+          <item row="6" column="0">
+           <widget class="QLabel" name="label_3">
             <property name="text">
-             <string>width</string>
+             <string>Shading Mode:</string>
             </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QCheckBox" name="axisIcon">
+            <property name="text">
+             <string>Axis icon</string>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="1" colspan="2">
+           <widget class="QComboBox" name="ShadingMode">
+            <item>
+             <property name="text">
+              <string>Wireframe</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Flat Shading</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Default Lights</string>
+             </property>
+            </item>
            </widget>
           </item>
           <item row="0" column="0">
@@ -385,13 +411,6 @@
             </item>
            </widget>
           </item>
-          <item row="2" column="0">
-           <widget class="QCheckBox" name="edgeLines">
-            <property name="text">
-             <string>Edge lines</string>
-            </property>
-           </widget>
-          </item>
           <item row="0" column="3">
            <spacer name="horizontalSpacer_2">
             <property name="orientation">
@@ -405,29 +424,24 @@
             </property>
            </spacer>
           </item>
-          <item row="6" column="1" colspan="2">
-           <widget class="QComboBox" name="ShadingMode">
-            <item>
-             <property name="text">
-              <string>Wireframe</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Flat Shading</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Default Lights</string>
-             </property>
-            </item>
+          <item row="2" column="0">
+           <widget class="QCheckBox" name="edgeLines">
+            <property name="text">
+             <string>Edge lines</string>
+            </property>
            </widget>
           </item>
           <item row="3" column="0">
            <widget class="QCheckBox" name="MeshLOD">
             <property name="text">
              <string>Mesh LOD</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0" colspan="2">
+           <widget class="QCheckBox" name="FadeSteps">
+            <property name="text">
+             <string>Fade Previous Steps</string>
             </property>
            </widget>
           </item>
@@ -1169,6 +1183,7 @@
   <tabstop>authorName</tabstop>
   <tabstop>fixedDirectionKeys</tabstop>
   <tabstop>autoLoadMostRecent</tabstop>
+  <tabstop>RestoreTabLayout</tabstop>
   <tabstop>antiAliasing</tabstop>
   <tabstop>antiAliasingSamples</tabstop>
   <tabstop>studLogo</tabstop>
@@ -1177,6 +1192,7 @@
   <tabstop>lineWidth</tabstop>
   <tabstop>MeshLOD</tabstop>
   <tabstop>axisIcon</tabstop>
+  <tabstop>FadeSteps</tabstop>
   <tabstop>ShadingMode</tabstop>
   <tabstop>gridStuds</tabstop>
   <tabstop>gridStudColor</tabstop>

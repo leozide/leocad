@@ -21,6 +21,7 @@ void lcPreferences::LoadDefaults()
 	mDrawEdgeLines = lcGetProfileInt(LC_PROFILE_DRAW_EDGE_LINES);
 	mLineWidth = lcGetProfileFloat(LC_PROFILE_LINE_WIDTH);
 	mAllowLOD = lcGetProfileInt(LC_PROFILE_ALLOW_LOD);
+	mFadeSteps = lcGetProfileInt(LC_PROFILE_FADE_STEPS);
 	mDrawGridStuds = lcGetProfileInt(LC_PROFILE_GRID_STUDS);
 	mGridStudColor = lcGetProfileInt(LC_PROFILE_GRID_STUD_COLOR);
 	mDrawGridLines = lcGetProfileInt(LC_PROFILE_GRID_LINES);
@@ -32,6 +33,7 @@ void lcPreferences::LoadDefaults()
 	mViewSphereTextColor = lcGetProfileInt(LC_PROFILE_VIEW_SPHERE_TEXT_COLOR);
 	mViewSphereHighlightColor = lcGetProfileInt(LC_PROFILE_VIEW_SPHERE_HIGHLIGHT_COLOR);
 	mAutoLoadMostRecent = lcGetProfileInt(LC_PROFILE_AUTOLOAD_MOSTRECENT);
+	mRestoreTabLayout = lcGetProfileInt(LC_PROFILE_RESTORE_TAB_LAYOUT);
 }
 
 void lcPreferences::SaveDefaults()
@@ -43,6 +45,7 @@ void lcPreferences::SaveDefaults()
 	lcSetProfileInt(LC_PROFILE_DRAW_EDGE_LINES, mDrawEdgeLines);
 	lcSetProfileFloat(LC_PROFILE_LINE_WIDTH, mLineWidth);
 	lcSetProfileInt(LC_PROFILE_ALLOW_LOD, mAllowLOD);
+	lcSetProfileInt(LC_PROFILE_FADE_STEPS, mFadeSteps);
 	lcSetProfileInt(LC_PROFILE_GRID_STUDS, mDrawGridStuds);
 	lcSetProfileInt(LC_PROFILE_GRID_STUD_COLOR, mGridStudColor);
 	lcSetProfileInt(LC_PROFILE_GRID_LINES, mDrawGridLines);
@@ -54,6 +57,7 @@ void lcPreferences::SaveDefaults()
 	lcSetProfileInt(LC_PROFILE_VIEW_SPHERE_TEXT_COLOR, mViewSphereTextColor);
 	lcSetProfileInt(LC_PROFILE_VIEW_SPHERE_HIGHLIGHT_COLOR, mViewSphereHighlightColor);
 	lcSetProfileInt(LC_PROFILE_AUTOLOAD_MOSTRECENT, mAutoLoadMostRecent);
+	lcSetProfileInt(LC_PROFILE_RESTORE_TAB_LAYOUT, mRestoreTabLayout);
 }
 
 lcApplication::lcApplication(int& Argc, char** Argv)

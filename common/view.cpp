@@ -814,7 +814,7 @@ void View::OnDraw()
 	mScene.SetActiveSubmodelInstance(mActiveSubmodelInstance, mActiveSubmodelTransform);
 	mScene.SetDrawInterface(DrawInterface);
 
-	mModel->GetScene(mScene, mCamera, mHighlight);
+	mModel->GetScene(mScene, mCamera, mHighlight, Preferences.mFadeSteps);
 
 	if (DrawInterface && mTrackTool == LC_TRACKTOOL_INSERT)
 	{
@@ -827,7 +827,7 @@ void View::OnDraw()
 			if (GetActiveModel() != mModel)
 				WorldMatrix = lcMul(WorldMatrix, mActiveSubmodelTransform);
 
-			Info->AddRenderMeshes(mScene, WorldMatrix, gMainWindow->mColorIndex, lcRenderMeshState::FOCUSED, true);
+			Info->AddRenderMeshes(mScene, WorldMatrix, gMainWindow->mColorIndex, lcRenderMeshState::Focused, true);
 		}
 	}
 

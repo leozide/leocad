@@ -34,6 +34,7 @@ public:
 	bool mDrawEdgeLines;
 	float mLineWidth;
 	bool mAllowLOD;
+	bool mFadeSteps;
 	bool mDrawGridStuds;
 	quint32 mGridStudColor;
 	bool mDrawGridLines;
@@ -46,6 +47,7 @@ public:
 	quint32 mViewSphereTextColor;
 	quint32 mViewSphereHighlightColor;
 	bool mAutoLoadMostRecent;
+	bool mRestoreTabLayout;
 };
 
 class lcApplication : public QApplication

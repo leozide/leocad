@@ -1252,13 +1252,18 @@ void lcModel::DuplicateSelectedPieces()
 	SaveCheckpoint(tr("Duplicating Pieces"));
 }
 
-void lcModel::GetScene(lcScene& Scene, lcCamera* ViewCamera, bool Highlight) const
+void lcModel::GetScene(lcScene& Scene, lcCamera* ViewCamera, bool AllowHighlight, bool AllowFade) const
 {
 	mPieceInfo->AddRenderMesh(Scene);
 
-	for (lcPiece* Piece : mPieces)
+	for (const lcPiece* Piece : mPieces)
+	{
 		if (Piece->IsVisible(mCurrentStep))
-			Piece->AddMainModelRenderMeshes(Scene, Highlight && Piece->GetStepShow() == mCurrentStep);
+		{
+			lcStep StepShow = Piece->GetStepShow();
+			Piece->AddMainModelRenderMeshes(Scene, AllowHighlight && StepShow == mCurrentStep, AllowFade && StepShow < mCurrentStep);
+		}
+	}
 
 	if (Scene.GetDrawInterface() && !Scene.GetActiveSubmodelInstance())
 	{

@@ -346,7 +346,7 @@ public:
 	virtual void DrawInterface(lcContext* Context, const lcScene& Scene) const override;
 	virtual void RemoveKeyFrames() override;
 
-	void AddMainModelRenderMeshes(lcScene& Scene, bool Highlight) const;
+	void AddMainModelRenderMeshes(lcScene& Scene, bool Highlight, bool Fade) const;
 	void AddSubModelRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, int DefaultColorIndex, lcRenderMeshState RenderMeshState, bool ParentActive) const;
 
 	void InsertTime(lcStep Start, lcStep Time);

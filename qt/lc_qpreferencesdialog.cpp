@@ -57,6 +57,7 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 	ui->checkForUpdates->setCurrentIndex(mOptions->CheckForUpdates);
 	ui->fixedDirectionKeys->setChecked(mOptions->Preferences.mFixedAxes);
 	ui->autoLoadMostRecent->setChecked(mOptions->Preferences.mAutoLoadMostRecent);
+	ui->RestoreTabLayout->setChecked(mOptions->Preferences.mRestoreTabLayout);
 
 	ui->antiAliasing->setChecked(mOptions->AASamples != 1);
 	if (mOptions->AASamples == 8)
@@ -68,6 +69,7 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 	ui->edgeLines->setChecked(mOptions->Preferences.mDrawEdgeLines);
 	ui->lineWidth->setText(lcFormatValueLocalized(mOptions->Preferences.mLineWidth));
 	ui->MeshLOD->setChecked(mOptions->Preferences.mAllowLOD);
+	ui->FadeSteps->setChecked(mOptions->Preferences.mFadeSteps);
 	ui->gridStuds->setChecked(mOptions->Preferences.mDrawGridStuds);
 	ui->gridLines->setChecked(mOptions->Preferences.mDrawGridLines);
 	ui->gridLineSpacing->setText(QString::number(mOptions->Preferences.mGridLineSpacing));
@@ -175,6 +177,7 @@ void lcQPreferencesDialog::accept()
 	mOptions->CheckForUpdates = ui->checkForUpdates->currentIndex();
 	mOptions->Preferences.mFixedAxes = ui->fixedDirectionKeys->isChecked();
 	mOptions->Preferences.mAutoLoadMostRecent = ui->autoLoadMostRecent->isChecked();
+	mOptions->Preferences.mRestoreTabLayout = ui->RestoreTabLayout->isChecked();
 
 	if (!ui->antiAliasing->isChecked())
 		mOptions->AASamples = 1;
@@ -188,6 +191,7 @@ void lcQPreferencesDialog::accept()
 	mOptions->Preferences.mDrawEdgeLines = ui->edgeLines->isChecked();
 	mOptions->Preferences.mLineWidth = lcParseValueLocalized(ui->lineWidth->text());
 	mOptions->Preferences.mAllowLOD = ui->MeshLOD->isChecked();
+	mOptions->Preferences.mFadeSteps = ui->FadeSteps->isChecked();
 
 	mOptions->Preferences.mDrawGridStuds = ui->gridStuds->isChecked();
 	mOptions->Preferences.mDrawGridLines = ui->gridLines->isChecked();

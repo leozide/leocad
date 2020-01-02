@@ -5,11 +5,11 @@
 
 enum class lcRenderMeshState : int
 {
-	NORMAL,
-	SELECTED,
-	FOCUSED,
-	DISABLED,
-	HIGHLIGHT
+	Default,
+	Selected,
+	Focused,
+	Faded,
+	Highlighted
 };
 
 struct lcRenderMesh

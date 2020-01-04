@@ -744,13 +744,75 @@ void lcMainWindow::CreateToolBars()
 	mPartsToolBar->raise();
 }
 
+class lcElidedLabel : public QFrame
+{
+public:
+	explicit lcElidedLabel(QWidget* Parent = nullptr)
+		: QFrame(Parent)
+	{
+		setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+	}
+
+	void setText(const QString& Text)
+	{
+		mText = Text;
+		update();
+	}
+
+protected:
+	void paintEvent(QPaintEvent* event) override;
+
+	QString mText;
+};
+
+void lcElidedLabel::paintEvent(QPaintEvent* event)
+{
+	QFrame::paintEvent(event);
+
+	QPainter Painter(this);
+	QFontMetrics FontMetrics = Painter.fontMetrics();
+
+	int LineSpacing = FontMetrics.lineSpacing();
+	int y = 0;
+
+	QTextLayout TextLayout(mText, Painter.font());
+	TextLayout.beginLayout();
+
+	for (;;)
+	{
+		QTextLine Line = TextLayout.createLine();
+
+		if (!Line.isValid())
+			break;
+
+		Line.setLineWidth(width());
+		int NextLineY = y + LineSpacing;
+
+		if (height() >= NextLineY + LineSpacing)
+		{
+			Line.draw(&Painter, QPoint(0, y));
+			y = NextLineY;
+		}
+		else
+		{
+			QString LastLine = mText.mid(Line.textStart());
+			QString ElidedLastLine = FontMetrics.elidedText(LastLine, Qt::ElideRight, width());
+			Painter.drawText(QPoint(0, y + FontMetrics.ascent()), ElidedLastLine);
+			Line = TextLayout.createLine();
+			break;
+		}
+	}
+
+	TextLayout.endLayout();
+}
+
 void lcMainWindow::CreateStatusBar()
 {
 	QStatusBar* StatusBar = new QStatusBar(this);
 	setStatusBar(StatusBar);
 
-	mStatusBarLabel = new QLabel();
-	StatusBar->addWidget(mStatusBarLabel);
+	mStatusBarLabel = new lcElidedLabel();
+	StatusBar->addWidget(mStatusBarLabel, 1);
 
 	mStatusPositionLabel = new QLabel();
 	StatusBar->addPermanentWidget(mStatusPositionLabel);

@@ -13,6 +13,7 @@ class lcQPartsTree;
 class lcQColorList;
 class lcQPropertiesTree;
 class lcTimelineWidget;
+class lcElidedLabel;
 #ifdef QT_NO_PRINTER
 class QPrinter;
 #endif
@@ -420,7 +421,7 @@ protected:
 	QLineEdit* mTransformYEdit;
 	QLineEdit* mTransformZEdit;
 
-	QLabel* mStatusBarLabel;
+	lcElidedLabel* mStatusBarLabel;
 	QLabel* mStatusPositionLabel;
 	QLabel* mStatusSnapLabel;
 	QLabel* mStatusTimeLabel;

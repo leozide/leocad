@@ -2210,19 +2210,32 @@ bool lcMainWindow::OpenProject(const QString& FileName)
 		lcSetProfileString(LC_PROFILE_PROJECTS_PATH, QFileInfo(LoadFileName).absolutePath());
 	}
 
+	return OpenProjectFile(LoadFileName);
+}
+
+void lcMainWindow::OpenRecentProject(int RecentFileIndex)
+{
+	if (!SaveProjectIfModified())
+		return;
+
+	if (!OpenProjectFile(mRecentFiles[RecentFileIndex]))
+		RemoveRecentFile(RecentFileIndex);
+}
+
+bool lcMainWindow::OpenProjectFile(const QString& FileName)
+{
 	Project* NewProject = new Project();
 
-	if (NewProject->Load(LoadFileName))
+	if (NewProject->Load(FileName))
 	{
 		gApplication->SetProject(NewProject);
-		AddRecentFile(LoadFileName);
+		AddRecentFile(FileName);
 		UpdateAllViews();
 
 		return true;
 	}
 
 	delete NewProject;
-
 	return false;
 }
 
@@ -2495,8 +2508,7 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 	case LC_FILE_RECENT2:
 	case LC_FILE_RECENT3:
 	case LC_FILE_RECENT4:
-		if (!OpenProject(mRecentFiles[CommandId - LC_FILE_RECENT1]))
-			RemoveRecentFile(CommandId - LC_FILE_RECENT1);
+		OpenRecentProject(CommandId - LC_FILE_RECENT1);
 		break;
 
 	case LC_FILE_EXIT:

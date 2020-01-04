@@ -292,6 +292,7 @@ public:
 
 	void NewProject();
 	bool OpenProject(const QString& FileName);
+	void OpenRecentProject(int RecentFileIndex);
 	void MergeProject();
 	void ImportLDD();
 	void ImportInventory();
@@ -372,6 +373,8 @@ protected:
 	void ShowHTMLDialog();
 	void ShowRenderDialog();
 	void ShowPrintDialog();
+
+	bool OpenProjectFile(const QString& FileName);
 
 	lcModelTabWidget* GetTabWidgetForModel(lcModel* Model) const
 	{

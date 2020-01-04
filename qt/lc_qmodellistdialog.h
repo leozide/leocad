@@ -28,7 +28,7 @@ public slots:
 	void on_MoveDown_clicked();
 	void on_SetActiveModel_clicked();
 	void on_ModelList_itemDoubleClicked(QListWidgetItem* Item);
-	void on_ModelList_currentRowChanged(int CurrentRow);
+	void on_ModelList_itemSelectionChanged();
 
 private:
 	QListWidgetItem* mActiveModelItem;

@@ -970,7 +970,7 @@ void lcMainWindow::Print(QPrinter* Printer)
 	int PageCopies;
 
 	std::vector<std::pair<lcModel*, lcStep>> PageLayouts = lcGetActiveProject()->GetPageLayouts();
-	const int PageCount = PageLayouts.size();
+	const int PageCount = static_cast<int>(PageLayouts.size());
 
 	if (Printer->collateCopies())
 	{
@@ -1136,7 +1136,7 @@ void lcMainWindow::ShowRenderDialog()
 void lcMainWindow::ShowPrintDialog()
 {
 #ifndef QT_NO_PRINTER
-	int PageCount = lcGetActiveProject()->GetPageLayouts().size();
+	int PageCount = static_cast<int>(lcGetActiveProject()->GetPageLayouts().size());
 
 	QPrinter Printer(QPrinter::HighResolution);
 	Printer.setFromTo(1, PageCount + 1);
@@ -1733,7 +1733,7 @@ void lcMainWindow::TogglePrintPreview()
 #ifndef QT_NO_PRINTER
 	// todo: print preview inside main window
 
-	int PageCount = lcGetActiveProject()->GetPageLayouts().size();
+	int PageCount = static_cast<int>(lcGetActiveProject()->GetPageLayouts().size());
 
 	QPrinter Printer(QPrinter::ScreenResolution);
 	Printer.setFromTo(1, PageCount + 1);

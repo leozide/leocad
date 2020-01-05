@@ -154,7 +154,7 @@ void lcViewSphere::Draw()
 	const lcPreferences& Preferences = lcGetPreferences();
 	int ViewportSize = Preferences.mViewSphereSize;
 
-	if (ViewportSize == 0)
+	if (ViewportSize == 0 || !Preferences.mViewSphereEnabled)
 		return;
 
 	lcContext* Context = mView->mContext;
@@ -221,7 +221,7 @@ void lcViewSphere::Draw()
 bool lcViewSphere::OnLeftButtonDown()
 {
 	const lcPreferences& Preferences = lcGetPreferences();
-	if (Preferences.mViewSphereSize == 0)
+	if (Preferences.mViewSphereSize == 0 || !Preferences.mViewSphereEnabled)
 		return false;
 
 	mIntersectionFlags = GetIntersectionFlags(mIntersection);
@@ -239,7 +239,7 @@ bool lcViewSphere::OnLeftButtonDown()
 bool lcViewSphere::OnLeftButtonUp()
 {
 	const lcPreferences& Preferences = lcGetPreferences();
-	if (Preferences.mViewSphereSize == 0)
+	if (Preferences.mViewSphereSize == 0 || !Preferences.mViewSphereEnabled)
 		return false;
 
 	if (!mMouseDown)
@@ -268,7 +268,7 @@ bool lcViewSphere::OnLeftButtonUp()
 bool lcViewSphere::OnMouseMove()
 {
 	const lcPreferences& Preferences = lcGetPreferences();
-	if (Preferences.mViewSphereSize == 0)
+	if (Preferences.mViewSphereSize == 0 || !Preferences.mViewSphereEnabled)
 		return false;
 
 	if (IsDragging())

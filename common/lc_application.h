@@ -41,6 +41,7 @@ public:
 	int mGridLineSpacing;
 	quint32 mGridLineColor;
 	bool mFixedAxes;
+	bool mViewSphereEnabled;
 	lcViewSphereLocation mViewSphereLocation;
 	int mViewSphereSize;
 	quint32 mViewSphereColor;

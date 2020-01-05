@@ -289,6 +289,7 @@ public:
 	void SetCurrentPieceInfo(PieceInfo* Info);
 	void SetShadingMode(lcShadingMode ShadingMode);
 	void SetSelectionMode(lcSelectionMode SelectionMode);
+	void ToggleViewSphere();
 
 	void NewProject();
 	bool OpenProject(const QString& FileName);
@@ -348,7 +349,6 @@ protected slots:
 	void UpdateGamepads();
 	void ModelTabContextMenuRequested(const QPoint& Point);
 	void ModelTabCloseOtherTabs();
-	void ModelTabResetViews();
 	void ModelTabClosed(int Index);
 	void ModelTabChanged(int Index);
 	void ClipboardChanged();

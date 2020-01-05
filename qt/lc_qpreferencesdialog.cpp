@@ -77,21 +77,26 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 
 	ui->ViewSphereLocationCombo->setCurrentIndex((int)mOptions->Preferences.mViewSphereLocation);
 
-	switch (mOptions->Preferences.mViewSphereSize)
+	if (mOptions->Preferences.mViewSphereEnabled)
 	{
-	case 200:
-		ui->ViewSphereSizeCombo->setCurrentIndex(3);
-		break;
-	case 100:
-		ui->ViewSphereSizeCombo->setCurrentIndex(2);
-		break;
-	case 50:
-		ui->ViewSphereSizeCombo->setCurrentIndex(1);
-		break;
-	default:
-		ui->ViewSphereSizeCombo->setCurrentIndex(0);
-		break;
+		switch (mOptions->Preferences.mViewSphereSize)
+		{
+		case 200:
+			ui->ViewSphereSizeCombo->setCurrentIndex(3);
+			break;
+		case 100:
+			ui->ViewSphereSizeCombo->setCurrentIndex(2);
+			break;
+		case 50:
+			ui->ViewSphereSizeCombo->setCurrentIndex(1);
+			break;
+		default:
+			ui->ViewSphereSizeCombo->setCurrentIndex(0);
+			break;
+		}
 	}
+	else
+		ui->ViewSphereSizeCombo->setCurrentIndex(0);
 
 	ui->studLogo->setChecked(mOptions->StudLogo);
 	if (ui->studLogo->isChecked())
@@ -212,7 +217,7 @@ void lcQPreferencesDialog::accept()
 		mOptions->Preferences.mViewSphereSize = 50;
 		break;
 	default:
-		mOptions->Preferences.mViewSphereSize = 0;
+		mOptions->Preferences.mViewSphereEnabled = 0;
 		break;
 	}
 

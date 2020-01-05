@@ -1039,6 +1039,13 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 		QT_TRANSLATE_NOOP("Status", "Set the current camera to use an orthographic projection"),
 		""
 	},
+	// LC_VIEW_TOGGLE_VIEW_SPHERE
+	{
+		QT_TRANSLATE_NOOP("Action", "View.ToggleViewSphere"),
+		QT_TRANSLATE_NOOP("Menu", "View Sphere"),
+		QT_TRANSLATE_NOOP("Status", "Toggle the view sphere"),
+		""
+	},
 	// LC_PIECE_INSERT
 	{
 		QT_TRANSLATE_NOOP("Action", "Piece.Insert"),

@@ -27,6 +27,7 @@ void lcPreferences::LoadDefaults()
 	mDrawGridLines = lcGetProfileInt(LC_PROFILE_GRID_LINES);
 	mGridLineSpacing = lcGetProfileInt(LC_PROFILE_GRID_LINE_SPACING);
 	mGridLineColor = lcGetProfileInt(LC_PROFILE_GRID_LINE_COLOR);
+	mViewSphereEnabled = lcGetProfileInt(LC_PROFILE_VIEW_SPHERE_ENABLED);
 	mViewSphereLocation = (lcViewSphereLocation)lcGetProfileInt(LC_PROFILE_VIEW_SPHERE_LOCATION);
 	mViewSphereSize = lcGetProfileInt(LC_PROFILE_VIEW_SPHERE_SIZE);
 	mViewSphereColor = lcGetProfileInt(LC_PROFILE_VIEW_SPHERE_COLOR);
@@ -51,6 +52,7 @@ void lcPreferences::SaveDefaults()
 	lcSetProfileInt(LC_PROFILE_GRID_LINES, mDrawGridLines);
 	lcSetProfileInt(LC_PROFILE_GRID_LINE_SPACING, mGridLineSpacing);
 	lcSetProfileInt(LC_PROFILE_GRID_LINE_COLOR, mGridLineColor);
+	lcSetProfileInt(LC_PROFILE_VIEW_SPHERE_ENABLED, mViewSphereSize ? 1 : 0);
 	lcSetProfileInt(LC_PROFILE_VIEW_SPHERE_LOCATION, (int)mViewSphereLocation);
 	lcSetProfileInt(LC_PROFILE_VIEW_SPHERE_SIZE, mViewSphereSize);
 	lcSetProfileInt(LC_PROFILE_VIEW_SPHERE_COLOR, mViewSphereColor);

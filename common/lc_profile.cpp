@@ -68,6 +68,7 @@ static lcProfileEntry gProfileEntries[LC_NUM_PROFILE_KEYS] =
 	lcProfileEntry("Settings", "GridLineSpacing", 5),                                       // LC_PROFILE_GRID_LINE_SPACING
 	lcProfileEntry("Settings", "GridLineColor", LC_RGBA(0, 0, 0, 255)),                     // LC_PROFILE_GRID_LINE_COLOR
 	lcProfileEntry("Settings", "AASamples", 1),                                             // LC_PROFILE_ANTIALIASING_SAMPLES
+	lcProfileEntry("Settings", "ViewSphereEnabled", 1),                                     // LC_PROFILE_VIEW_SPHERE_ENABLED
 	lcProfileEntry("Settings", "ViewSphereLocation", (int)lcViewSphereLocation::TOP_RIGHT), // LC_PROFILE_VIEW_SPHERE_LOCATION
 	lcProfileEntry("Settings", "ViewSphereSize", 100),                                      // LC_PROFILE_VIEW_SPHERE_SIZE
 	lcProfileEntry("Settings", "ViewSphereColor", LC_RGBA(255, 255, 255, 255)),             // LC_PROFILE_VIEW_SPHERE_COLOR

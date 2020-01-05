@@ -911,7 +911,7 @@ void lcMainWindow::ModelTabContextMenuRequested(const QPoint& Point)
 	if (mModelTabWidget->count() > 1)
 		Menu->addAction(tr("Close Other Tabs"), this, SLOT(ModelTabCloseOtherTabs()));
 	if (mModelTabWidgetContextMenuIndex == mModelTabWidget->currentIndex())
-		Menu->addAction(tr("Reset Views"), this, SLOT(ModelTabResetViews()));
+		Menu->addAction(mActions[LC_VIEW_RESET_VIEWS]);
 
 	Menu->exec(QCursor::pos());
 	delete Menu;
@@ -927,11 +927,6 @@ void lcMainWindow::ModelTabCloseOtherTabs()
 
 	while (mModelTabWidget->count() > 1)
 		delete mModelTabWidget->widget(0);
-}
-
-void lcMainWindow::ModelTabResetViews()
-{
-	ResetViews();
 }
 
 void lcMainWindow::ModelTabClosed(int Index)
@@ -1223,6 +1218,13 @@ void lcMainWindow::SetSelectionMode(lcSelectionMode SelectionMode)
 {
 	mSelectionMode = SelectionMode;
 	UpdateSelectionMode();
+}
+
+void lcMainWindow::ToggleViewSphere()
+{
+	lcGetPreferences().mViewSphereEnabled = !lcGetPreferences().mViewSphereEnabled;
+
+	UpdateAllViews();
 }
 
 QByteArray lcMainWindow::GetTabLayout()
@@ -2639,6 +2641,10 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 	case LC_VIEW_PROJECTION_ORTHO:
 		if (ActiveView)
 			ActiveView->SetProjection(true);
+		break;
+
+	case LC_VIEW_TOGGLE_VIEW_SPHERE:
+		ToggleViewSphere();
 		break;
 
 	case LC_PIECE_INSERT:

@@ -175,7 +175,7 @@ void lcQPreferencesDialog::accept()
 	mOptions->Preferences.mMouseSensitivity = ui->mouseSensitivity->value();
 
 	int Language = ui->Language->currentIndex();
-	if (Language < 0 || Language > LC_ARRAY_COUNT(gLanguageLocales))
+    if (Language < 0 || Language > static_cast<int>(LC_ARRAY_COUNT(gLanguageLocales)))
 		Language = 0;
 	mOptions->Language = gLanguageLocales[Language];
 

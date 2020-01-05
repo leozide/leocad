@@ -572,7 +572,9 @@ void lcPartSelectionListView::SetCategory(lcPartCategoryType Type, int Index)
 	case lcPartCategoryType::Category:
 		mListModel->SetCategory(Index);
 		break;
-	}
+    case lcPartCategoryType::Count:
+        break;
+    }
 
 	setCurrentIndex(mListModel->index(0, 0));
 }

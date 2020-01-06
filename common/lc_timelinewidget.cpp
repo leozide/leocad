@@ -447,6 +447,25 @@ void lcTimelineWidget::dropEvent(QDropEvent* Event)
 			Model->SetCurrentStep(Step);
 	}
 
+	QList<QTreeWidgetItem*> SelectedItems = selectedItems();
+	clearSelection();
+
+	auto SortItems = [this](QTreeWidgetItem* Item1, QTreeWidgetItem* Item2)
+	{
+		QTreeWidgetItem* StepItem1 = Item1->parent();
+		QTreeWidgetItem* StepItem2 = Item2->parent();
+
+		if (StepItem1 == StepItem2)
+			return StepItem1->indexOfChild(Item1) < StepItem1->indexOfChild(Item2);
+
+		return indexOfTopLevelItem(StepItem1) < indexOfTopLevelItem(StepItem2);
+	};
+
+	std::sort(SelectedItems.begin(), SelectedItems.end(), SortItems);
+
+	for (QTreeWidgetItem* SelectedItem : SelectedItems)
+		SelectedItem->setSelected(true);
+
 	QTreeWidget::dropEvent(Event);
 
 	UpdateModel();

@@ -19,6 +19,7 @@ protected slots:
 	void on_NewButton_clicked();
 	void on_DeleteButton_clicked();
 	void on_RenameButton_clicked();
+	void on_ImportButton_clicked();
 	void on_MoveUpButton_clicked();
 	void on_MoveDownButton_clicked();
 	void on_PaletteList_currentRowChanged(int CurrentRow);
@@ -28,4 +29,5 @@ private:
 
 	Ui::lcPartPaletteDialog* ui;
 	std::vector<lcPartPalette>& mPartPalettes;
+	std::vector<lcPartPalette*> mImportedPalettes;
 };

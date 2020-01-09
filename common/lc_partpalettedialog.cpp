@@ -2,11 +2,16 @@
 #include "lc_partpalettedialog.h"
 #include "ui_lc_partpalettedialog.h"
 #include "lc_partselectionwidget.h"
+#include "lc_setsdatabasedialog.h"
 
 lcPartPaletteDialog::lcPartPaletteDialog(QWidget* Parent, std::vector<lcPartPalette>& PartPalettes)
 	: QDialog(Parent), ui(new Ui::lcPartPaletteDialog), mPartPalettes(PartPalettes)
 {
     ui->setupUi(this);
+
+#if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
+	ui->ImportButton->hide();
+#endif
 
 	for (const lcPartPalette& Palette : PartPalettes)
 	{
@@ -14,13 +19,17 @@ lcPartPaletteDialog::lcPartPaletteDialog(QWidget* Parent, std::vector<lcPartPale
 		Item->setData(Qt::UserRole, qVariantFromValue<uintptr_t>(reinterpret_cast<uintptr_t>(&Palette)));
 		ui->PaletteList->addItem(Item);
 	}
+
 	ui->PaletteList->setCurrentRow(0);
 	UpdateButtons();
 }
 
 lcPartPaletteDialog::~lcPartPaletteDialog()
 {
-    delete ui;
+	for (lcPartPalette* Palette : mImportedPalettes)
+		delete Palette;
+
+	delete ui;
 }
 
 void lcPartPaletteDialog::UpdateButtons()
@@ -106,6 +115,42 @@ void lcPartPaletteDialog::on_RenameButton_clicked()
 
 	if (!Name.isEmpty())
 		SelectedItems[0]->setText(Name);
+}
+
+void lcPartPaletteDialog::on_ImportButton_clicked()
+{
+	lcSetsDatabaseDialog Dialog(this);
+
+	if (Dialog.exec() != QDialog::Accepted)
+		return;
+
+	lcPartPalette* Palette = new lcPartPalette;
+	Palette->Name = Dialog.GetSetDescription();
+	mImportedPalettes.push_back(Palette);
+
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+	QByteArray Inventory = Dialog.GetSetInventory();
+	QJsonDocument Document = QJsonDocument::fromJson(Inventory);
+	QJsonObject Root = Document.object();
+	QJsonArray Parts = Root["results"].toArray();
+
+	for (const QJsonValue& Part : Parts)
+	{
+		QJsonObject PartObject = Part.toObject();
+		QByteArray PartID = PartObject["part"].toObject()["part_num"].toString().toLatin1();
+		QJsonArray PartIDArray = PartObject["part"].toObject()["external_ids"].toObject()["LDraw"].toArray();
+		if (!PartIDArray.isEmpty())
+			PartID = PartIDArray.first().toString().toLatin1();
+
+		Palette->Parts.push_back(PartID.toUpper().toStdString() + ".DAT");
+	}
+#endif
+
+	QListWidgetItem* Item = new QListWidgetItem(Palette->Name);
+	Item->setData(Qt::UserRole, qVariantFromValue<uintptr_t>(reinterpret_cast<uintptr_t>(Palette)));
+	ui->PaletteList->addItem(Item);
+	ui->PaletteList->setCurrentRow(ui->PaletteList->count() - 1);
+	UpdateButtons();
 }
 
 void lcPartPaletteDialog::on_MoveUpButton_clicked()

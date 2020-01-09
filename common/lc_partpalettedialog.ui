@@ -43,6 +43,13 @@
         </widget>
        </item>
        <item>
+        <widget class="QPushButton" name="ImportButton">
+         <property name="text">
+          <string>Import...</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QPushButton" name="MoveUpButton">
          <property name="text">
           <string>Move Up</string>
@@ -90,6 +97,7 @@
   <tabstop>NewButton</tabstop>
   <tabstop>DeleteButton</tabstop>
   <tabstop>RenameButton</tabstop>
+  <tabstop>ImportButton</tabstop>
   <tabstop>MoveUpButton</tabstop>
   <tabstop>MoveDownButton</tabstop>
  </tabstops>

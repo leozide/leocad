@@ -32,7 +32,7 @@ struct lcPreferencesDialogOptions
 	int AASamples;
 	int StudLogo;
 
-	lcArray<lcLibraryCategory> Categories;
+	std::vector<lcLibraryCategory> Categories;
 	bool CategoriesModified;
 	bool CategoriesDefault;
 

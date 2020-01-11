@@ -1110,7 +1110,7 @@ void lcPartSelectionWidget::UpdateCategories()
 			CurrentItem = PaletteCategoryItem;
 	}
 
-	for (int CategoryIdx = 0; CategoryIdx < gCategories.GetSize(); CategoryIdx++)
+	for (int CategoryIdx = 0; CategoryIdx < static_cast<int>(gCategories.size()); CategoryIdx++)
 	{
 		QTreeWidgetItem* CategoryItem = new QTreeWidgetItem(mCategoriesWidget, QStringList(gCategories[CategoryIdx].Name));
 		CategoryItem->setData(0, static_cast<int>(lcPartCategoryRole::Type), static_cast<int>(lcPartCategoryType::Category));

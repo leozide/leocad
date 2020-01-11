@@ -1729,7 +1729,7 @@ bool lcPiecesLibrary::PieceInCategory(PieceInfo* Info, const char* CategoryKeywo
 
 void lcPiecesLibrary::GetCategoryEntries(int CategoryIndex, bool GroupPieces, lcArray<PieceInfo*>& SinglePieces, lcArray<PieceInfo*>& GroupedPieces)
 {
-	if (CategoryIndex >= 0 && CategoryIndex < gCategories.GetSize())
+	if (CategoryIndex >= 0 && CategoryIndex < static_cast<int>(gCategories.size()))
 		GetCategoryEntries(gCategories[CategoryIndex].Keywords.constData(), GroupPieces, SinglePieces, GroupedPieces);
 }
 

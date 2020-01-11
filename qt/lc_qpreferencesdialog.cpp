@@ -377,19 +377,19 @@ void lcQPreferencesDialog::on_ViewSphereSizeCombo_currentIndexChanged(int Index)
 
 void lcQPreferencesDialog::updateCategories()
 {
-	QTreeWidgetItem *categoryItem;
-	QTreeWidget *tree = ui->categoriesTree;
+	QTreeWidgetItem* CategoryItem;
+	QTreeWidget* CategoriesTree = ui->categoriesTree;
 
-	tree->clear();
+	CategoriesTree->clear();
 
-	for (int categoryIndex = 0; categoryIndex < mOptions->Categories.GetSize(); categoryIndex++)
+	for (int CategoryIndex = 0; CategoryIndex < static_cast<int>(mOptions->Categories.size()); CategoryIndex++)
 	{
-		categoryItem = new QTreeWidgetItem(tree, QStringList(mOptions->Categories[categoryIndex].Name));
-		categoryItem->setData(0, CategoryRole, QVariant(categoryIndex));
+		CategoryItem = new QTreeWidgetItem(CategoriesTree, QStringList(mOptions->Categories[CategoryIndex].Name));
+		CategoryItem->setData(0, CategoryRole, QVariant(CategoryIndex));
 	}
 
-	categoryItem = new QTreeWidgetItem(tree, QStringList(tr("Unassigned")));
-	categoryItem->setData(0, CategoryRole, QVariant(-1));
+	CategoryItem = new QTreeWidgetItem(CategoriesTree, QStringList(tr("Unassigned")));
+	CategoryItem->setData(0, CategoryRole, QVariant(-1));
 }
 
 void lcQPreferencesDialog::updateParts()
@@ -429,13 +429,13 @@ void lcQPreferencesDialog::updateParts()
 		{
 			PieceInfo* Info = PartIt.second;
 
-			for (categoryIndex = 0; categoryIndex < mOptions->Categories.GetSize(); categoryIndex++)
+			for (categoryIndex = 0; categoryIndex < static_cast<int>(mOptions->Categories.size()); categoryIndex++)
 			{
 				if (Library->PieceInCategory(Info, mOptions->Categories[categoryIndex].Keywords.constData()))
 					break;
 			}
 
-			if (categoryIndex == mOptions->Categories.GetSize())
+			if (categoryIndex == static_cast<int>(mOptions->Categories.size()))
 			{
 				QStringList rowList(Info->m_strDescription);
 				rowList.append(Info->mFileName);
@@ -459,10 +459,10 @@ void lcQPreferencesDialog::on_newCategory_clicked()
 
 	mOptions->CategoriesModified = true;
 	mOptions->CategoriesDefault = false;
-	mOptions->Categories.Add(category);
+	mOptions->Categories.emplace_back(std::move(category));
 
 	updateCategories();
-	ui->categoriesTree->setCurrentItem(ui->categoriesTree->topLevelItem(mOptions->Categories.GetSize() - 1));
+	ui->categoriesTree->setCurrentItem(ui->categoriesTree->topLevelItem(static_cast<int>(mOptions->Categories.size()) - 1));
 }
 
 void lcQPreferencesDialog::on_editCategory_clicked()
@@ -508,7 +508,7 @@ void lcQPreferencesDialog::on_deleteCategory_clicked()
 
 	mOptions->CategoriesModified = true;
 	mOptions->CategoriesDefault = false;
-	mOptions->Categories.RemoveIndex(categoryIndex);
+	mOptions->Categories.erase(mOptions->Categories.begin() + categoryIndex);
 
 	updateCategories();
 }
@@ -520,7 +520,7 @@ void lcQPreferencesDialog::on_importCategories_clicked()
 	if (FileName.isEmpty())
 		return;
 
-	lcArray<lcLibraryCategory> Categories;
+	std::vector<lcLibraryCategory> Categories;
 	if (!lcLoadCategories(FileName, Categories))
 	{
 		QMessageBox::warning(this, "LeoCAD", tr("Error loading categories file."));

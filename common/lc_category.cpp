@@ -3,7 +3,7 @@
 #include "lc_file.h"
 #include "lc_profile.h"
 
-lcArray<lcLibraryCategory> gCategories;
+std::vector<lcLibraryCategory> gCategories;
 
 void lcResetDefaultCategories()
 {
@@ -30,7 +30,7 @@ void lcSaveDefaultCategories()
 	lcSetProfileBuffer(LC_PROFILE_CATEGORIES, ByteArray);
 }
 
-void lcResetCategories(lcArray<lcLibraryCategory>& Categories, bool BuiltInLibrary)
+void lcResetCategories(std::vector<lcLibraryCategory>& Categories, bool BuiltInLibrary)
 {
 	const char DefaultCategories[] =
 	{
@@ -86,7 +86,7 @@ void lcResetCategories(lcArray<lcLibraryCategory>& Categories, bool BuiltInLibra
 	lcLoadCategories(Buffer, Categories);
 }
 
-bool lcLoadCategories(const QString& FileName, lcArray<lcLibraryCategory>& Categories)
+bool lcLoadCategories(const QString& FileName, std::vector<lcLibraryCategory>& Categories)
 {
 	QFile File(FileName);
 
@@ -98,9 +98,9 @@ bool lcLoadCategories(const QString& FileName, lcArray<lcLibraryCategory>& Categ
 	return lcLoadCategories(FileData, Categories);
 }
 
-bool lcLoadCategories(const QByteArray& Buffer, lcArray<lcLibraryCategory>& Categories)
+bool lcLoadCategories(const QByteArray& Buffer, std::vector<lcLibraryCategory>& Categories)
 {
-	Categories.RemoveAll();
+	Categories.clear();
 
 	QTextStream Stream(Buffer);
 
@@ -114,16 +114,18 @@ bool lcLoadCategories(const QByteArray& Buffer, lcArray<lcLibraryCategory>& Cate
 		QString Name = Line.left(Equals);
 		QString Keywords = Line.mid(Equals + 1);
 
-		lcLibraryCategory& Category = Categories.Add();
+		lcLibraryCategory Category;
 
-		Category.Name = Name.toLatin1().constData();
-		Category.Keywords = Keywords.toLatin1().constData();
+		Category.Name = Name;
+		Category.Keywords = Keywords.toLatin1();
+
+		Categories.emplace_back(std::move(Category));
 	}
 
 	return true;
 }
 
-bool lcSaveCategories(const QString& FileName, const lcArray<lcLibraryCategory>& Categories)
+bool lcSaveCategories(const QString& FileName, const std::vector<lcLibraryCategory>& Categories)
 {
 	QFile File(FileName);
 
@@ -135,7 +137,7 @@ bool lcSaveCategories(const QString& FileName, const lcArray<lcLibraryCategory>&
 	return lcSaveCategories(Stream, Categories);
 }
 
-bool lcSaveCategories(QTextStream& Stream, const lcArray<lcLibraryCategory>& Categories)
+bool lcSaveCategories(QTextStream& Stream, const std::vector<lcLibraryCategory>& Categories)
 {
 	QString Format("%1=%2\r\n");
 

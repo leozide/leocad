@@ -1121,7 +1121,7 @@ void Project::ExportBrickLink()
 	lcPartsList PartsList;
 
 	if (!mModels.IsEmpty())
-		mModels[0]->GetPartsList(gDefaultColor, true, PartsList);
+		mModels[0]->GetPartsList(gDefaultColor, true, false, PartsList);
 
 	if (PartsList.empty())
 	{
@@ -1455,7 +1455,7 @@ void Project::ExportCSV()
 	lcPartsList PartsList;
 
 	if (!mModels.IsEmpty())
-		mModels[0]->GetPartsList(gDefaultColor, true, PartsList);
+		mModels[0]->GetPartsList(gDefaultColor, true, false, PartsList);
 
 	if (PartsList.empty())
 	{
@@ -1505,7 +1505,7 @@ QImage Project::CreatePartsListImage(lcModel* Model, lcStep Step)
 {
 	lcPartsList PartsList;
 	if (Step == 0)
-		Model->GetPartsList(gDefaultColor, true, PartsList);
+		Model->GetPartsList(gDefaultColor, true, false, PartsList);
 	else
 		Model->GetPartsListForStep(Step, gDefaultColor, PartsList);
 
@@ -1705,7 +1705,7 @@ void Project::CreateHTMLPieceList(QTextStream& Stream, lcModel* Model, lcStep St
 	lcPartsList PartsList;
 
 	if (Step == 0)
-		Model->GetPartsList(gDefaultColor, true, PartsList);
+		Model->GetPartsList(gDefaultColor, true, false, PartsList);
 	else
 		Model->GetPartsListForStep(Step, gDefaultColor, PartsList);
 
@@ -1731,7 +1731,7 @@ void Project::CreateHTMLPieceList(QTextStream& Stream, lcModel* Model, lcStep St
 		const PieceInfo* Info = PartIt.first;
 
 		if (Images)
-			Stream << QString("<tr><td><IMG SRC=\"%1.png\" ALT=\"%2\"></td>\r\n").arg(Info->mFileName, Info->m_strDescription);
+			Stream << QString("<tr><td><IMG SRC=\"%1.png\" ALT=\"%2\"></td>\r\n").arg(QString::fromLatin1(Info->mFileName).replace('#', '_'), Info->m_strDescription);
 		else
 			Stream << QString("<tr><td>%1</td>\r\n").arg(Info->m_strDescription);
 
@@ -1951,7 +1951,7 @@ void Project::ExportHTML(const lcHTMLExportOptions& Options)
 			Context->SetViewport(0, 0, Width, Height);
 
 			lcPartsList PartsList;
-			Model->GetPartsList(gDefaultColor, true, PartsList);
+			Model->GetPartsList(gDefaultColor, true, true, PartsList);
 
 			lcMatrix44 ProjectionMatrix, ViewMatrix;
 
@@ -1979,7 +1979,7 @@ void Project::ExportHTML(const lcHTMLExportOptions& Options)
 
 				Scene.Draw(Context);
 
-				QString FileName = QFileInfo(Dir, QLatin1String(Info->mFileName) + QLatin1String(".png")).absoluteFilePath();
+				QString FileName = QFileInfo(Dir, QString::fromLatin1(Info->mFileName).replace('#', '_') + QLatin1String(".png")).absoluteFilePath();
 				QImage Image = Context->GetRenderFramebufferImage(RenderFramebuffer);
 
 				QImageWriter Writer(FileName);

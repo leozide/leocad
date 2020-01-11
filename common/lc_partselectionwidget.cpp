@@ -232,7 +232,7 @@ void lcPartSelectionListModel::SetCurrentModelCategory()
 
 	lcModel* ActiveModel = gMainWindow->GetActiveModel();
 	lcPartsList PartsList;
-	ActiveModel->GetPartsList(gDefaultColor, true, PartsList);
+	ActiveModel->GetPartsList(gDefaultColor, false, true, PartsList);
 
 	for (const auto& PartIt : PartsList)
 		mParts.emplace_back(std::pair<PieceInfo*, QPixmap>((PieceInfo*)PartIt.first, QPixmap()));

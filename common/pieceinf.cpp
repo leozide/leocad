@@ -320,15 +320,21 @@ void PieceInfo::AddRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, i
 	}
 }
 
-void PieceInfo::GetPartsList(int DefaultColorIndex, bool IncludeSubmodels, lcPartsList& PartsList) const
+void PieceInfo::GetPartsList(int DefaultColorIndex, bool ScanSubModels, bool AddSubModels, lcPartsList& PartsList) const
 {
-	if (IsModel() && IncludeSubmodels)
-		mModel->GetPartsList(DefaultColorIndex, IncludeSubmodels, PartsList);
+	if (IsModel())
+	{
+		if (ScanSubModels)
+			mModel->GetPartsList(DefaultColorIndex, ScanSubModels, AddSubModels, PartsList);
+
+		if (AddSubModels && DefaultColorIndex < gNumUserColors)
+			PartsList[this][DefaultColorIndex]++;
+	}
 	else if (IsProject())
 	{
 		lcModel* Model = mProject->GetMainModel();
 		if (Model)
-			Model->GetPartsList(DefaultColorIndex, IncludeSubmodels, PartsList);
+			Model->GetPartsList(DefaultColorIndex, ScanSubModels, AddSubModels, PartsList);
 	}
 	else if (DefaultColorIndex < gNumUserColors)
 		PartsList[this][DefaultColorIndex]++;

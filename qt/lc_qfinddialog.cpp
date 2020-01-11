@@ -16,7 +16,7 @@ lcQFindDialog::lcQFindDialog(QWidget* Parent, lcSearchOptions* SearchOptions, lc
 	parts->setMinimumContentsLength(1);
 
 	lcPartsList PartsList;
-	Model->GetPartsList(gDefaultColor, false, PartsList);
+	Model->GetPartsList(gDefaultColor, false, true, PartsList);
 
 	for (const auto& PartIt : PartsList)
 		parts->addItem(PartIt.first->m_strDescription, qVariantFromValue((void*)PartIt.first));

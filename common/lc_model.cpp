@@ -2934,14 +2934,14 @@ lcModel* lcModel::GetFirstSelectedSubmodel() const
 	return nullptr;
 }
 
-void lcModel::GetSubModels(lcArray<lcModel*> SubModels) const
+void lcModel::GetSubModels(lcArray<lcModel*>& SubModels) const
 {
 	for (lcPiece* Piece : mPieces)
 	{
 		if (Piece->mPieceInfo->IsModel())
 		{
 			lcModel* SubModel = Piece->mPieceInfo->GetModel();
-			if (SubModels.FindIndex(SubModel) != -1)
+			if (SubModels.FindIndex(SubModel) == -1)
 				SubModels.Add(SubModel);
 		}
 	}
@@ -3153,7 +3153,7 @@ bool lcModel::GetPiecesBoundingBox(lcVector3& Min, lcVector3& Max) const
 	return Valid;
 }
 
-void lcModel::GetPartsList(int DefaultColorIndex, bool IncludeSubmodels, lcPartsList& PartsList) const
+void lcModel::GetPartsList(int DefaultColorIndex, bool ScanSubModels, bool AddSubModels, lcPartsList& PartsList) const
 {
 	for (lcPiece* Piece : mPieces)
 	{
@@ -3165,7 +3165,7 @@ void lcModel::GetPartsList(int DefaultColorIndex, bool IncludeSubmodels, lcParts
 		if (ColorIndex == gDefaultColor)
 			ColorIndex = DefaultColorIndex;
 
-		Piece->mPieceInfo->GetPartsList(ColorIndex, IncludeSubmodels, PartsList);
+		Piece->mPieceInfo->GetPartsList(ColorIndex, ScanSubModels, AddSubModels, PartsList);
 	}
 }
 
@@ -3181,7 +3181,7 @@ void lcModel::GetPartsListForStep(lcStep Step, int DefaultColorIndex, lcPartsLis
 		if (ColorIndex == gDefaultColor)
 			ColorIndex = DefaultColorIndex;
 
-		Piece->mPieceInfo->GetPartsList(ColorIndex, true, PartsList);
+		Piece->mPieceInfo->GetPartsList(ColorIndex, false, true, PartsList);
 	}
 }
 
@@ -4091,7 +4091,7 @@ void lcModel::ShowPropertiesDialog()
 	Options.Properties = mProperties;
 	Options.SetDefault = false;
 
-	GetPartsList(gDefaultColor, true, Options.PartsList);
+	GetPartsList(gDefaultColor, true, false, Options.PartsList);
 
 	lcQPropertiesDialog Dialog(gMainWindow, &Options);
 	if (Dialog.exec() != QDialog::Accepted)

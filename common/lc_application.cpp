@@ -200,8 +200,6 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 	int StudLogo = lcGetProfileInt(LC_PROFILE_STUD_LOGO);
 	int ImageStart = 0;
 	int ImageEnd = 0;
-	int PartImagesWidth = -1;
-	int PartImagesHeight = -1;
 	float CameraLatitude = 0.0f, CameraLongitude = 0.0f;
 	QString ImageName;
 	QString ModelName;
@@ -380,10 +378,6 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 			SaveHTML = true;
 			ParseString(SaveHTMLName, false);
 		}
-		else if (Param == QLatin1String("--html-parts-width"))
-			ParseInteger(PartImagesWidth);
-		else if (Param == QLatin1String("--html-parts-height"))
-			ParseInteger(PartImagesHeight);
 		else if (Param == QLatin1String("-v") || Param == QLatin1String("--version"))
 		{
 #ifdef LC_CONTINUOUS_BUILD
@@ -420,8 +414,6 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 			printf("  -3ds, --export-3ds <outfile.3ds>: Export the model to 3D Studio 3DS format.\n");
 			printf("  -dae, --export-collada <outfile.dae>: Export the model to COLLADA DAE format.\n");
 			printf("  -html, --export-html <folder>: Create an HTML page for the model.\n");
-			printf("  --html-parts-width <width>: Set the HTML part pictures width.\n");
-			printf("  --html-parts-height <height>: Set the HTML part pictures height.\n");
 			printf("  -v, --version: Output version information and exit.\n");
 			printf("  -?, --help: Display this help message and exit.\n");
 			printf("  \n");
@@ -633,12 +625,6 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 
 			if (!SaveHTMLName.isEmpty())
 				Options.PathName = SaveHTMLName;
-
-			if (PartImagesWidth > 0)
-				Options.PartImagesWidth = PartImagesWidth;
-
-			if (PartImagesHeight > 0)
-				Options.PartImagesHeight = PartImagesHeight;
 
 			mProject->ExportHTML(Options);
 		}

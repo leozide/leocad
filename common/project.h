@@ -4,13 +4,8 @@
 #include "lc_array.h"
 #include "lc_application.h"
 
-#define LC_SCENE_BG				0x010	// Draw bg image
-#define LC_SCENE_BG_TILE		0x040	// Tile bg image
-#define LC_SCENE_GRADIENT		0x100	// Draw gradient
-
 #define LC_HTML_SINGLEPAGE    0x01
 #define LC_HTML_INDEX         0x02
-#define LC_HTML_IMAGES        0x04
 #define LC_HTML_LISTEND       0x08
 #define LC_HTML_LISTSTEP      0x10
 #define LC_HTML_HIGHLIGHT     0x20
@@ -34,10 +29,6 @@ public:
 	bool HighlightNewParts;
 	bool PartsListStep;
 	bool PartsListEnd;
-	bool PartsListImages;
-	int PartImagesColor;
-	int PartImagesWidth;
-	int PartImagesHeight;
 };
 
 enum LC_MOUSE_TRACK
@@ -118,7 +109,6 @@ protected:
 	QString GetExportFileName(const QString& FileName, const QString& DefaultExtension, const QString& DialogTitle, const QString& DialogFilter) const;
 	std::vector<lcModelPartsEntry> GetModelParts();
 	QImage CreatePartsListImage(lcModel* Model, lcStep Step);
-	void CreateHTMLPieceList(QTextStream& Stream, lcModel* Model, lcStep Step, bool Images);
 	void SetFileName(const QString& FileName);
 
 	bool mModified;

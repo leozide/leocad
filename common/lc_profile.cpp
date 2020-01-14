@@ -119,9 +119,6 @@ static lcProfileEntry gProfileEntries[LC_NUM_PROFILE_KEYS] =
 	lcProfileEntry("HTML", "ImageOptions", LC_IMAGE_TRANSPARENT),                           // LC_PROFILE_HTML_IMAGE_OPTIONS
 	lcProfileEntry("HTML", "ImageWidth", 640),                                              // LC_PROFILE_HTML_IMAGE_WIDTH
 	lcProfileEntry("HTML", "ImageHeight", 480),                                             // LC_PROFILE_HTML_IMAGE_HEIGHT
-	lcProfileEntry("HTML", "PartsColor", 16),                                               // LC_PROFILE_HTML_PARTS_COLOR
-	lcProfileEntry("HTML", "PartsWidth", 128),                                              // LC_PROFILE_HTML_PARTS_WIDTH
-	lcProfileEntry("HTML", "PartsHeight", 128),                                             // LC_PROFILE_HTML_PARTS_HEIGHT
 
 	lcProfileEntry("POVRay", "Path", "/usr/bin/povray"),                                    // LC_PROFILE_POVRAY_PATH
 	lcProfileEntry("POVRay", "LGEOPath", ""),                                               // LC_PROFILE_POVRAY_LGEO_PATH

@@ -178,99 +178,18 @@
      <property name="title">
       <string>Parts List</string>
      </property>
-     <layout class="QFormLayout" name="formLayout">
-      <item row="5" column="0">
-       <widget class="QLabel" name="label_5">
-        <property name="text">
-         <string>Color:</string>
-        </property>
-        <property name="buddy">
-         <cstring>partColor</cstring>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="1">
-       <layout class="QHBoxLayout" name="horizontalLayout_2">
-        <item>
-         <widget class="lcQColorPicker" name="partColor">
-          <property name="text">
-           <string/>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <spacer name="horizontalSpacer">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-       </layout>
-      </item>
-      <item row="6" column="0">
-       <widget class="QLabel" name="label_3">
-        <property name="text">
-         <string>Width:</string>
-        </property>
-        <property name="buddy">
-         <cstring>partImagesWidth</cstring>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="1">
-       <widget class="QLineEdit" name="partImagesWidth">
-        <property name="maximumSize">
-         <size>
-          <width>75</width>
-          <height>16777215</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item row="9" column="0">
-       <widget class="QLabel" name="label_4">
-        <property name="text">
-         <string>Height:</string>
-        </property>
-        <property name="buddy">
-         <cstring>partImagesHeight</cstring>
-        </property>
-       </widget>
-      </item>
-      <item row="9" column="1">
-       <widget class="QLineEdit" name="partImagesHeight">
-        <property name="maximumSize">
-         <size>
-          <width>75</width>
-          <height>16777215</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
-       <widget class="QCheckBox" name="partsAfterEachStep">
-        <property name="text">
-         <string>After each step</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="0">
-       <widget class="QCheckBox" name="partImages">
-        <property name="text">
-         <string>Create images</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
+     <layout class="QVBoxLayout" name="verticalLayout_4">
+      <item>
        <widget class="QCheckBox" name="partsAtTheEnd">
         <property name="text">
          <string>At the end</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="partsAfterEachStep">
+        <property name="text">
+         <string>After each step</string>
         </property>
        </widget>
       </item>
@@ -289,13 +208,6 @@
    </item>
   </layout>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>lcQColorPicker</class>
-   <extends>QToolButton</extends>
-   <header>lc_qcolorpicker.h</header>
-  </customwidget>
- </customwidgets>
  <tabstops>
   <tabstop>outputFolder</tabstop>
   <tabstop>outputFolderBrowse</tabstop>
@@ -311,10 +223,6 @@
   <tabstop>highlightNewParts</tabstop>
   <tabstop>partsAtTheEnd</tabstop>
   <tabstop>partsAfterEachStep</tabstop>
-  <tabstop>partImages</tabstop>
-  <tabstop>partColor</tabstop>
-  <tabstop>partImagesWidth</tabstop>
-  <tabstop>partImagesHeight</tabstop>
  </tabstops>
  <resources/>
  <connections>

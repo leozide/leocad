@@ -82,20 +82,20 @@ void lcScene::AddMesh(lcMesh* Mesh, const lcMatrix44& WorldMatrix, int ColorInde
 			if ((Section->PrimitiveType & (LC_MESH_TRIANGLES | LC_MESH_TEXTURED_TRIANGLES)) == 0)
 				continue;
 
-			int ColorIndex = Section->ColorIndex;
+			int SectionColorIndex = Section->ColorIndex;
 
-			if (ColorIndex == gDefaultColor)
-				ColorIndex = RenderMesh.ColorIndex;
+			if (SectionColorIndex == gDefaultColor)
+				SectionColorIndex = RenderMesh.ColorIndex;
 
-			if (!lcIsColorTranslucent(ColorIndex))
+			if (!lcIsColorTranslucent(SectionColorIndex))
 				continue;
 
 			lcVector3 Center = (Section->BoundingBox.Min + Section->BoundingBox.Max) / 2;
-			float Distance = fabsf(lcMul31(lcMul31(Center, WorldMatrix), mViewMatrix).z);
+			float InstanceDistance = fabsf(lcMul31(lcMul31(Center, WorldMatrix), mViewMatrix).z);
 
 			lcTranslucentMeshInstance& Instance = mTranslucentMeshes.Add();
 			Instance.Section = Section;
-			Instance.Distance = Distance;
+			Instance.Distance = InstanceDistance;
 			Instance.RenderMeshIndex = mRenderMeshes.GetSize() - 1;
 		}
 	}

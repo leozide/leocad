@@ -370,7 +370,7 @@ void lcPartSelectionListModel::PartLoaded(PieceInfo* Info)
 	{
 		if (mParts[PartIdx].first == Info)
 		{
-			auto PreviewIt = std::find(mRequestedPreviews.begin(), mRequestedPreviews.end(), PartIdx);
+			auto PreviewIt = std::find(mRequestedPreviews.begin(), mRequestedPreviews.end(), static_cast<int>(PartIdx));
 			if (PreviewIt != mRequestedPreviews.end())
 			{
 				mRequestedPreviews.erase(PreviewIt);

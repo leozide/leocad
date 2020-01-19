@@ -1540,10 +1540,9 @@ QImage Project::CreatePartsListImage(lcModel* Model, lcStep Step)
 	View* View = gMainWindow->GetActiveView();
 	View->MakeCurrent();
 	lcContext* Context = View->mContext;
-	const int ThumbnailWidth = 512;
-	const int ThumbnailHeight = 512;
+	const int ThumbnailSize = 512;
 
-	std::pair<lcFramebuffer, lcFramebuffer> RenderFramebuffer = Context->CreateRenderFramebuffer(ThumbnailWidth, ThumbnailHeight);
+	std::pair<lcFramebuffer, lcFramebuffer> RenderFramebuffer = Context->CreateRenderFramebuffer(ThumbnailSize, ThumbnailSize);
 
 	if (!RenderFramebuffer.first.IsValid())
 	{
@@ -1553,14 +1552,42 @@ QImage Project::CreatePartsListImage(lcModel* Model, lcStep Step)
 
 	Context->BindFramebuffer(RenderFramebuffer.first);
 
-	float Aspect = (float)ThumbnailWidth / (float)ThumbnailHeight;
-	float OrthoHeight = 200.0f;
-	float OrthoWidth = OrthoHeight * Aspect;
+	float OrthoSize = 200.0f;
 
-	lcMatrix44 ProjectionMatrix = lcMatrix44Ortho(-OrthoWidth, OrthoWidth, -OrthoHeight, OrthoHeight, 1.0f, 50000.0f);
+	lcMatrix44 ProjectionMatrix = lcMatrix44Ortho(-OrthoSize, OrthoSize, -OrthoSize, OrthoSize, -5000.0f, 5000.0f);
 	lcMatrix44 ViewMatrix = lcMatrix44LookAt(lcVector3(-100.0f, -100.0f, 75.0f), lcVector3(0.0f, 0.0f, 0.0f), lcVector3(0.0f, 0.0f, 1.0f));
+	const int Viewport[4] = { 0, 0, ThumbnailSize, ThumbnailSize };
 
-	Context->SetViewport(0, 0, ThumbnailWidth, ThumbnailHeight);
+	float ExtraPixels = 0.0f;
+
+	for (lcPartsListImage& Image : Images)
+	{
+		const PieceInfo* Info = Image.Info;
+		const lcBoundingBox& BoundingBox = Info->GetBoundingBox();
+
+		lcVector3 Center = (BoundingBox.Min + BoundingBox.Max) / 2.0f;
+
+		lcVector3 Points[8];
+		lcGetBoxCorners(BoundingBox.Min, BoundingBox.Max, Points);
+
+		for (lcVector3& Point : Points)
+		{
+			Point = lcProjectPoint(Point, ViewMatrix, ProjectionMatrix, Viewport);
+
+			ExtraPixels = qMax(ExtraPixels, -Point.x);
+			ExtraPixels = qMax(ExtraPixels, Point.x - ThumbnailSize);
+			ExtraPixels = qMax(ExtraPixels, -Point.y);
+			ExtraPixels = qMax(ExtraPixels, Point.y - ThumbnailSize);
+		}
+	}
+
+	if (ExtraPixels)
+	{
+		OrthoSize += ExtraPixels * (2.0f * OrthoSize / ThumbnailSize);
+		ProjectionMatrix = lcMatrix44Ortho(-OrthoSize, OrthoSize, -OrthoSize, OrthoSize, -5000.0f, 5000.0f);
+	}
+
+	Context->SetViewport(0, 0, ThumbnailSize, ThumbnailSize);
 	Context->SetDefaultState();
 	Context->SetProjectionMatrix(ProjectionMatrix);
 

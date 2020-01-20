@@ -229,6 +229,7 @@ public:
 	void AddSubModelRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, int DefaultColorIndex, lcRenderMeshState RenderMeshState, bool ParentActive) const;
 	void DrawBackground(lcGLWidget* Widget);
 	QImage GetStepImage(bool Zoom, bool Highlight, int Width, int Height, lcStep Step);
+	QImage GetPartsListImage(int MaxWidth, lcStep Step) const;
 	void SaveStepImages(const QString& BaseName, bool AddStepSuffix, bool Zoom, bool Highlight, int Width, int Height, lcStep Start, lcStep End);
 	std::vector<std::pair<lcModel*, lcStep>> GetPageLayouts(std::vector<const lcModel*>& AddedModels);
 

@@ -108,7 +108,6 @@ public:
 protected:
 	QString GetExportFileName(const QString& FileName, const QString& DefaultExtension, const QString& DialogTitle, const QString& DialogFilter) const;
 	std::vector<lcModelPartsEntry> GetModelParts();
-	QImage CreatePartsListImage(lcModel* Model, lcStep Step);
 	void SetFileName(const QString& FileName);
 
 	bool mModified;

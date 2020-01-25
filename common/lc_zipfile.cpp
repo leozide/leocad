@@ -732,7 +732,8 @@ bool lcZipFile::ExtractFile(int FileIndex, lcMemFile& File, quint32 MaxLength)
 		}
 	}
 
-	inflateEnd(&Stream);
+	if (FileInfo.compression_method == Z_DEFLATED)
+		inflateEnd(&Stream);
 
 	return true;
 }

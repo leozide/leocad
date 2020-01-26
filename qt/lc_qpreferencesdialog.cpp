@@ -658,7 +658,7 @@ void lcQPreferencesDialog::updateCommandList()
 
 		QTreeWidgetItem *item = new QTreeWidgetItem;
 		QKeySequence sequence(mOptions->KeyboardShortcuts.mShortcuts[actionIdx]);
-		item->setText(0, subId);
+		item->setText(0, qApp->translate("Menu", gCommands[actionIdx].MenuName).remove('&').remove(QLatin1String("...")));
 		item->setText(1, sequence.toString(QKeySequence::NativeText));
 		item->setData(0, Qt::UserRole, qVariantFromValue(actionIdx));
 

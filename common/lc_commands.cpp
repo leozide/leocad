@@ -139,28 +139,28 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 	// LC_FILE_RECENT1
 	{
 		QT_TRANSLATE_NOOP("Action", "File.Recent1"),
-		QT_TRANSLATE_NOOP("Menu", "&Recent1"),
+		QT_TRANSLATE_NOOP("Menu", "&Recent 1"),
 		QT_TRANSLATE_NOOP("Status", "Open this model"),
 		""
 	},
 	// LC_FILE_RECENT2
 	{
 		QT_TRANSLATE_NOOP("Action", "File.Recent2"),
-		QT_TRANSLATE_NOOP("Menu", "&Recent2"),
+		QT_TRANSLATE_NOOP("Menu", "&Recent 2"),
 		QT_TRANSLATE_NOOP("Status", "Open this model"),
 		""
 	},
 	// LC_FILE_RECENT3
 	{
 		QT_TRANSLATE_NOOP("Action", "File.Recent3"),
-		QT_TRANSLATE_NOOP("Menu", "&Recent3"),
+		QT_TRANSLATE_NOOP("Menu", "&Recent 3"),
 		QT_TRANSLATE_NOOP("Status", "Open this model"),
 		""
 	},
 	// LC_FILE_RECENT4
 	{
 		QT_TRANSLATE_NOOP("Action", "File.Recent4"),
-		QT_TRANSLATE_NOOP("Menu", "&Recent4"),
+		QT_TRANSLATE_NOOP("Menu", "&Recent 4"),
 		QT_TRANSLATE_NOOP("Status", "Open this model"),
 		""
 	},
@@ -797,112 +797,112 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 	// LC_VIEW_CAMERA1
 	{
 		QT_TRANSLATE_NOOP("Action", "View.Cameras.Camera01"),
-		QT_TRANSLATE_NOOP("Menu", "Camera"),
+		QT_TRANSLATE_NOOP("Menu", "Camera 1"),
 		QT_TRANSLATE_NOOP("Status", "Use this camera"),
 		""
 	},
 	// LC_VIEW_CAMERA2
 	{
 		QT_TRANSLATE_NOOP("Action", "View.Cameras.Camera02"),
-		QT_TRANSLATE_NOOP("Menu", "Camera"),
+		QT_TRANSLATE_NOOP("Menu", "Camera 2"),
 		QT_TRANSLATE_NOOP("Status", "Use this camera"),
 		""
 	},
 	// LC_VIEW_CAMERA3
 	{
 		QT_TRANSLATE_NOOP("Action", "View.Cameras.Camera03"),
-		QT_TRANSLATE_NOOP("Menu", "Camera"),
+		QT_TRANSLATE_NOOP("Menu", "Camera 3"),
 		QT_TRANSLATE_NOOP("Status", "Use this camera"),
 		""
 	},
 	// LC_VIEW_CAMERA4
 	{
 		QT_TRANSLATE_NOOP("Action", "View.Cameras.Camera04"),
-		QT_TRANSLATE_NOOP("Menu", "Camera"),
+		QT_TRANSLATE_NOOP("Menu", "Camera 4"),
 		QT_TRANSLATE_NOOP("Status", "Use this camera"),
 		""
 	},
 	// LC_VIEW_CAMERA5
 	{
 		QT_TRANSLATE_NOOP("Action", "View.Cameras.Camera05"),
-		QT_TRANSLATE_NOOP("Menu", "Camera"),
+		QT_TRANSLATE_NOOP("Menu", "Camera 5"),
 		QT_TRANSLATE_NOOP("Status", "Use this camera"),
 		""
 	},
 	// LC_VIEW_CAMERA6
 	{
 		QT_TRANSLATE_NOOP("Action", "View.Cameras.Camera06"),
-		QT_TRANSLATE_NOOP("Menu", "Camera"),
+		QT_TRANSLATE_NOOP("Menu", "Camera 6"),
 		QT_TRANSLATE_NOOP("Status", "Use this camera"),
 		""
 	},
 	// LC_VIEW_CAMERA7
 	{
 		QT_TRANSLATE_NOOP("Action", "View.Cameras.Camera07"),
-		QT_TRANSLATE_NOOP("Menu", "Camera"),
+		QT_TRANSLATE_NOOP("Menu", "Camera 7"),
 		QT_TRANSLATE_NOOP("Status", "Use this camera"),
 		""
 	},
 	// LC_VIEW_CAMERA8
 	{
 		QT_TRANSLATE_NOOP("Action", "View.Cameras.Camera08"),
-		QT_TRANSLATE_NOOP("Menu", "Camera"),
+		QT_TRANSLATE_NOOP("Menu", "Camera 8"),
 		QT_TRANSLATE_NOOP("Status", "Use this camera"),
 		""
 	},
 	// LC_VIEW_CAMERA9
 	{
 		QT_TRANSLATE_NOOP("Action", "View.Cameras.Camera09"),
-		QT_TRANSLATE_NOOP("Menu", "Camera"),
+		QT_TRANSLATE_NOOP("Menu", "Camera 9"),
 		QT_TRANSLATE_NOOP("Status", "Use this camera"),
 		""
 	},
 	// LC_VIEW_CAMERA10
 	{
 		QT_TRANSLATE_NOOP("Action", "View.Cameras.Camera10"),
-		QT_TRANSLATE_NOOP("Menu", "Camera"),
+		QT_TRANSLATE_NOOP("Menu", "Camera 10"),
 		QT_TRANSLATE_NOOP("Status", "Use this camera"),
 		""
 	},
 	// LC_VIEW_CAMERA11
 	{
 		QT_TRANSLATE_NOOP("Action", "View.Cameras.Camera11"),
-		QT_TRANSLATE_NOOP("Menu", "Camera"),
+		QT_TRANSLATE_NOOP("Menu", "Camera 11"),
 		QT_TRANSLATE_NOOP("Status", "Use this camera"),
 		""
 	},
 	// LC_VIEW_CAMERA12
 	{
 		QT_TRANSLATE_NOOP("Action", "View.Cameras.Camera12"),
-		QT_TRANSLATE_NOOP("Menu", "Camera"),
+		QT_TRANSLATE_NOOP("Menu", "Camera 12"),
 		QT_TRANSLATE_NOOP("Status", "Use this camera"),
 		""
 	},
 	// LC_VIEW_CAMERA13
 	{
 		QT_TRANSLATE_NOOP("Action", "View.Cameras.Camera13"),
-		QT_TRANSLATE_NOOP("Menu", "Camera"),
+		QT_TRANSLATE_NOOP("Menu", "Camera 13"),
 		QT_TRANSLATE_NOOP("Status", "Use this camera"),
 		""
 	},
 	// LC_VIEW_CAMERA14
 	{
 		QT_TRANSLATE_NOOP("Action", "View.Cameras.Camera14"),
-		QT_TRANSLATE_NOOP("Menu", "Camera"),
+		QT_TRANSLATE_NOOP("Menu", "Camera 14"),
 		QT_TRANSLATE_NOOP("Status", "Use this camera"),
 		""
 	},
 	// LC_VIEW_CAMERA15
 	{
 		QT_TRANSLATE_NOOP("Action", "View.Cameras.Camera15"),
-		QT_TRANSLATE_NOOP("Menu", "Camera"),
+		QT_TRANSLATE_NOOP("Menu", "Camera 15"),
 		QT_TRANSLATE_NOOP("Status", "Use this camera"),
 		""
 	},
 	// LC_VIEW_CAMERA16
 	{
 		QT_TRANSLATE_NOOP("Action", "View.Cameras.Camera16"),
-		QT_TRANSLATE_NOOP("Menu", "Camera"),
+		QT_TRANSLATE_NOOP("Menu", "Camera 16"),
 		QT_TRANSLATE_NOOP("Status", "Use this camera"),
 		""
 	},
@@ -1329,168 +1329,168 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 	// LC_MODEL_01
 	{
 		QT_TRANSLATE_NOOP("Action", "Model.Model01"),
-		QT_TRANSLATE_NOOP("Menu", ""),
+		QT_TRANSLATE_NOOP("Menu", "Model 1"),
 		QT_TRANSLATE_NOOP("Status", "Switch to this submodel"),
 		""
 	},
 	// LC_MODEL_02
 	{
 		QT_TRANSLATE_NOOP("Action", "Model.Model02"),
-		QT_TRANSLATE_NOOP("Menu", ""),
+		QT_TRANSLATE_NOOP("Menu", "Model 2"),
 		QT_TRANSLATE_NOOP("Status", "Switch to this submodel"),
 		""
 	},
 	// LC_MODEL_03
 	{
 		QT_TRANSLATE_NOOP("Action", "Model.Model03"),
-		QT_TRANSLATE_NOOP("Menu", ""),
+		QT_TRANSLATE_NOOP("Menu", "Model 3"),
 		QT_TRANSLATE_NOOP("Status", "Switch to this submodel"),
 		""
 	},
 	// LC_MODEL_04
 	{
 		QT_TRANSLATE_NOOP("Action", "Model.Model04"),
-		QT_TRANSLATE_NOOP("Menu", ""),
+		QT_TRANSLATE_NOOP("Menu", "Model 4"),
 		QT_TRANSLATE_NOOP("Status", "Switch to this submodel"),
 		""
 	},
 	// LC_MODEL_05
 	{
 		QT_TRANSLATE_NOOP("Action", "Model.Model05"),
-		QT_TRANSLATE_NOOP("Menu", ""),
+		QT_TRANSLATE_NOOP("Menu", "Model 5"),
 		QT_TRANSLATE_NOOP("Status", "Switch to this submodel"),
 		""
 	},
 	// LC_MODEL_06
 	{
 		QT_TRANSLATE_NOOP("Action", "Model.Model06"),
-		QT_TRANSLATE_NOOP("Menu", ""),
+		QT_TRANSLATE_NOOP("Menu", "Model 6"),
 		QT_TRANSLATE_NOOP("Status", "Switch to this submodel"),
 		""
 	},
 	// LC_MODEL_07
 	{
 		QT_TRANSLATE_NOOP("Action", "Model.Model07"),
-		QT_TRANSLATE_NOOP("Menu", ""),
+		QT_TRANSLATE_NOOP("Menu", "Model 7"),
 		QT_TRANSLATE_NOOP("Status", "Switch to this submodel"),
 		""
 	},
 	// LC_MODEL_08
 	{
 		QT_TRANSLATE_NOOP("Action", "Model.Model08"),
-		QT_TRANSLATE_NOOP("Menu", ""),
+		QT_TRANSLATE_NOOP("Menu", "Model 8"),
 		QT_TRANSLATE_NOOP("Status", "Switch to this submodel"),
 		""
 	},
 	// LC_MODEL_09
 	{
 		QT_TRANSLATE_NOOP("Action", "Model.Model09"),
-		QT_TRANSLATE_NOOP("Menu", ""),
+		QT_TRANSLATE_NOOP("Menu", "Model 9"),
 		QT_TRANSLATE_NOOP("Status", "Switch to this submodel"),
 		""
 	},
 	// LC_MODEL_10
 	{
 		QT_TRANSLATE_NOOP("Action", "Model.Model10"),
-		QT_TRANSLATE_NOOP("Menu", ""),
+		QT_TRANSLATE_NOOP("Menu", "Model 10"),
 		QT_TRANSLATE_NOOP("Status", "Switch to this submodel"),
 		""
 	},
 	// LC_MODEL_11
 	{
 		QT_TRANSLATE_NOOP("Action", "Model.Model11"),
-		QT_TRANSLATE_NOOP("Menu", ""),
+		QT_TRANSLATE_NOOP("Menu", "Model 11"),
 		QT_TRANSLATE_NOOP("Status", "Switch to this submodel"),
 		""
 	},
 	// LC_MODEL_12
 	{
 		QT_TRANSLATE_NOOP("Action", "Model.Model12"),
-		QT_TRANSLATE_NOOP("Menu", ""),
+		QT_TRANSLATE_NOOP("Menu", "Model 12"),
 		QT_TRANSLATE_NOOP("Status", "Switch to this submodel"),
 		""
 	},
 	// LC_MODEL_13
 	{
 		QT_TRANSLATE_NOOP("Action", "Model.Model13"),
-		QT_TRANSLATE_NOOP("Menu", ""),
+		QT_TRANSLATE_NOOP("Menu", "Model 13"),
 		QT_TRANSLATE_NOOP("Status", "Switch to this submodel"),
 		""
 	},
 	// LC_MODEL_14
 	{
 		QT_TRANSLATE_NOOP("Action", "Model.Model14"),
-		QT_TRANSLATE_NOOP("Menu", ""),
+		QT_TRANSLATE_NOOP("Menu", "Model 14"),
 		QT_TRANSLATE_NOOP("Status", "Switch to this submodel"),
 		""
 	},
 	// LC_MODEL_15
 	{
 		QT_TRANSLATE_NOOP("Action", "Model.Model15"),
-		QT_TRANSLATE_NOOP("Menu", ""),
+		QT_TRANSLATE_NOOP("Menu", "Model 15"),
 		QT_TRANSLATE_NOOP("Status", "Switch to this submodel"),
 		""
 	},
 	// LC_MODEL_16
 	{
 		QT_TRANSLATE_NOOP("Action", "Model.Model16"),
-		QT_TRANSLATE_NOOP("Menu", ""),
+		QT_TRANSLATE_NOOP("Menu", "Model 16"),
 		QT_TRANSLATE_NOOP("Status", "Switch to this submodel"),
 		""
 	},
 	// LC_MODEL_17
 	{
 		QT_TRANSLATE_NOOP("Action", "Model.Model17"),
-		QT_TRANSLATE_NOOP("Menu", ""),
+		QT_TRANSLATE_NOOP("Menu", "Model 17"),
 		QT_TRANSLATE_NOOP("Status", "Switch to this submodel"),
 		""
 	},
 	// LC_MODEL_18
 	{
 		QT_TRANSLATE_NOOP("Action", "Model.Model18"),
-		QT_TRANSLATE_NOOP("Menu", ""),
+		QT_TRANSLATE_NOOP("Menu", "Model 18"),
 		QT_TRANSLATE_NOOP("Status", "Switch to this submodel"),
 		""
 	},
 	// LC_MODEL_19
 	{
 		QT_TRANSLATE_NOOP("Action", "Model.Model19"),
-		QT_TRANSLATE_NOOP("Menu", ""),
+		QT_TRANSLATE_NOOP("Menu", "Model 19"),
 		QT_TRANSLATE_NOOP("Status", "Switch to this submodel"),
 		""
 	},
 	// LC_MODEL_20
 	{
 		QT_TRANSLATE_NOOP("Action", "Model.Model20"),
-		QT_TRANSLATE_NOOP("Menu", ""),
+		QT_TRANSLATE_NOOP("Menu", "Model 20"),
 		QT_TRANSLATE_NOOP("Status", "Switch to this submodel"),
 		""
 	},
 	// LC_MODEL_21
 	{
 		QT_TRANSLATE_NOOP("Action", "Model.Model21"),
-		QT_TRANSLATE_NOOP("Menu", ""),
+		QT_TRANSLATE_NOOP("Menu", "Model 21"),
 		QT_TRANSLATE_NOOP("Status", "Switch to this submodel"),
 		""
 	},
 	// LC_MODEL_22
 	{
 		QT_TRANSLATE_NOOP("Action", "Model.Model22"),
-		QT_TRANSLATE_NOOP("Menu", ""),
+		QT_TRANSLATE_NOOP("Menu", "Model 22"),
 		QT_TRANSLATE_NOOP("Status", "Switch to this submodel"),
 		""
 	},
 	// LC_MODEL_23
 	{
 		QT_TRANSLATE_NOOP("Action", "Model.Model23"),
-		QT_TRANSLATE_NOOP("Menu", ""),
+		QT_TRANSLATE_NOOP("Menu", "Model 23"),
 		QT_TRANSLATE_NOOP("Status", "Switch to this submodel"),
 		""
 	},
 	// LC_MODEL_24
 	{
 		QT_TRANSLATE_NOOP("Action", "Model.Model24"),
-		QT_TRANSLATE_NOOP("Menu", ""),
+		QT_TRANSLATE_NOOP("Menu", "Model 24"),
 		QT_TRANSLATE_NOOP("Status", "Switch to this submodel"),
 		""
 	},

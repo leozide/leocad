@@ -933,6 +933,8 @@ void lcMainWindow::ModelTabClosed(int Index)
 {
 	if (mModelTabWidget->count() != 1)
 		delete mModelTabWidget->widget(Index);
+	else
+		NewProject();
 }
 
 void lcMainWindow::ModelTabChanged(int Index)
@@ -1449,6 +1451,8 @@ void lcMainWindow::CloseCurrentModelTab()
 {
 	if (mModelTabWidget->count() > 1)
 		delete mModelTabWidget->currentWidget();
+	else
+		NewProject();
 }
 
 void lcMainWindow::SetCurrentModelTab(lcModel* Model)

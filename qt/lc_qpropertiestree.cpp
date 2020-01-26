@@ -398,6 +398,34 @@ void lcQPropertiesTree::Update(const lcArray<lcObject*>& Selection, lcObject* Fo
 	}
 }
 
+class lcStepValidator : public QIntValidator
+{
+public:
+	lcStepValidator(lcStep Min, lcStep Max, bool AllowEmpty)
+		: mMin(Min), mMax(Max), mAllowEmpty(AllowEmpty), QIntValidator(1, INT_MAX)
+	{
+	}
+
+	QValidator::State validate(QString& Input, int& Pos) const
+	{
+		if (mAllowEmpty && Input.isEmpty())
+			return Acceptable;
+
+		bool Ok;
+		lcStep Step = Input.toUInt(&Ok);
+
+		if (Ok)
+			return (Step >= mMin && Step <= mMax) ? Acceptable : Invalid;
+
+		return QIntValidator::validate(Input, Pos);
+	}
+
+protected:
+	lcStep mMin;
+	lcStep mMax;
+	bool mAllowEmpty;
+};
+
 QWidget *lcQPropertiesTree::createEditor(QWidget *parent, QTreeWidgetItem *item) const
 {
 	PropertyType propertyType = (PropertyType)item->data(0, lcQPropertiesTree::PropertyTypeRole).toInt();
@@ -432,17 +460,30 @@ QWidget *lcQPropertiesTree::createEditor(QWidget *parent, QTreeWidgetItem *item)
 			return editor;
 		}
 
-	case PropertyInt:
+	case PropertyStep:
 		{
-			QLineEdit *editor = new QLineEdit(parent);
-			quint32 value = item->data(0, PropertyValueRole).toUInt();
+			QLineEdit* Editor = new QLineEdit(parent);
 
-			editor->setValidator(new QIntValidator());
-			editor->setText(QString::number(value));
+			lcStep Value = item->data(0, PropertyValueRole).toUInt();
+			lcStep Show = partShow->data(0, PropertyValueRole).toUInt();
+			lcStep Hide = partHide->data(0, PropertyValueRole).toUInt();
 
-			connect(editor, SIGNAL(returnPressed()), this, SLOT(slotReturnPressed()));
+			if (Show && Hide)
+			{
+				if (item == partShow)
+					Editor->setValidator(new lcStepValidator(1, Hide - 1, false));
+				else
+					Editor->setValidator(new lcStepValidator(Show + 1, LC_STEP_MAX, true));
+			}
+			else
+				Editor->setValidator(new lcStepValidator(1, LC_STEP_MAX, item == partHide));
 
-			return editor;
+			if (item != partHide || Value != LC_STEP_MAX)
+				Editor->setText(QString::number(Value));
+
+			connect(Editor, SIGNAL(returnPressed()), this, SLOT(slotReturnPressed()));
+
+			return Editor;
 		}
 
 	case PropertyString:
@@ -595,15 +636,26 @@ void lcQPropertiesTree::slotReturnPressed()
 		}
 		else if (Item == partShow)
 		{
-			lcStep Step = Editor->text().toUInt();
+			bool Ok = false;
+			lcStep Step = Editor->text().toUInt(&Ok);
 
-			Model->SetSelectedPiecesStepShow(Step);
+			if (Ok)
+				Model->SetSelectedPiecesStepShow(Step);
 		}
 		else if (Item == partHide)
 		{
-			lcStep Step = Editor->text().toUInt();
+			QString Text = Editor->text();
 
-			Model->SetSelectedPiecesStepHide(Step);
+			if (Text.isEmpty())
+				Model->SetSelectedPiecesStepHide(LC_STEP_MAX);
+			else
+			{
+				bool Ok = false;
+				lcStep Step = Text.toUInt(&Ok);
+
+				if (Ok)
+					Model->SetSelectedPiecesStepHide(Step);
+			}
 		}
 	}
 	else if (mWidgetMode == LC_PROPERTY_WIDGET_CAMERA)
@@ -824,9 +876,9 @@ void lcQPropertiesTree::SetPiece(const lcArray<lcObject*>& Selection, lcObject* 
 		partRotationY = addProperty(partRotation, tr("Y"), PropertyFloat);
 		partRotationZ = addProperty(partRotation, tr("Z"), PropertyFloat);
 
-		partVisibility = addProperty(nullptr, tr("Visibility"), PropertyGroup);
-		partShow = addProperty(partVisibility, tr("Show"), PropertyInt);
-		partHide = addProperty(partVisibility, tr("Hide"), PropertyInt);
+		partVisibility = addProperty(nullptr, tr("Visible Steps"), PropertyGroup);
+		partShow = addProperty(partVisibility, tr("Show"), PropertyStep);
+		partHide = addProperty(partVisibility, tr("Hide"), PropertyStep);
 
 		partAppearance = addProperty(nullptr, tr("Appearance"), PropertyGroup);
 		partColor = addProperty(partAppearance, tr("Color"), PropertyColor);
@@ -914,7 +966,7 @@ void lcQPropertiesTree::SetPiece(const lcArray<lcObject*>& Selection, lcObject* 
 
 	partShow->setText(1, QString::number(Show));
 	partShow->setData(0, PropertyValueRole, Show);
-	partHide->setText(1, QString::number(Hide));
+	partHide->setText(1, Hide == LC_STEP_MAX ? QString() : QString::number(Hide));
 	partHide->setData(0, PropertyValueRole, Hide);
 
 	QImage img(16, 16, QImage::Format_ARGB32);

@@ -44,7 +44,7 @@ public:
 		PropertyGroup,
 		PropertyBool,
 		PropertyFloat,
-		PropertyInt,
+		PropertyStep,
 		PropertyString,
 		PropertyColor,
 		PropertyPart

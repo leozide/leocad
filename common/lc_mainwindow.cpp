@@ -521,7 +521,8 @@ void lcMainWindow::CreateMenus()
 	StepMenu->addAction(mActions[LC_VIEW_TIME_NEXT]);
 	StepMenu->addAction(mActions[LC_VIEW_TIME_LAST]);
 	StepMenu->addSeparator();
-	StepMenu->addAction(mActions[LC_VIEW_TIME_INSERT]);
+	StepMenu->addAction(mActions[LC_VIEW_TIME_INSERT_BEFORE]);
+	StepMenu->addAction(mActions[LC_VIEW_TIME_INSERT_AFTER]);
 	StepMenu->addAction(mActions[LC_VIEW_TIME_DELETE]);
 	ViewMenu->addSeparator();
 	ViewMenu->addAction(mActions[LC_VIEW_SPLIT_HORIZONTAL]);
@@ -2916,8 +2917,12 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 			ActiveModel->ShowLastStep();
 		break;
 
-	case LC_VIEW_TIME_INSERT:
+	case LC_VIEW_TIME_INSERT_BEFORE:
 		lcGetActiveModel()->InsertStep(lcGetActiveModel()->GetCurrentStep());
+		break;
+
+	case LC_VIEW_TIME_INSERT_AFTER:
+		lcGetActiveModel()->InsertStep(lcGetActiveModel()->GetCurrentStep() + 1);
 		break;
 
 	case LC_VIEW_TIME_DELETE:
@@ -3171,8 +3176,12 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 			ActiveView->CancelTrackingOrClearSelection();
 		break;
 
-	case LC_TIMELINE_INSERT:
-		mTimelineWidget->InsertStep();
+	case LC_TIMELINE_INSERT_BEFORE:
+		mTimelineWidget->InsertStepBefore();
+		break;
+
+	case LC_TIMELINE_INSERT_AFTER:
+		mTimelineWidget->InsertStepAfter();
 		break;
 
 	case LC_TIMELINE_DELETE:

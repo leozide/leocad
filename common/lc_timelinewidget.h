@@ -11,7 +11,8 @@ public:
 	void Update(bool Clear, bool UpdateItems);
 	void UpdateSelection();
 
-	void InsertStep();
+	void InsertStepBefore();
+	void InsertStepAfter();
 	void RemoveStep();
 	void MoveSelection();
 	void SetCurrentStep();

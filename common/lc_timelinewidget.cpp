@@ -49,7 +49,8 @@ void lcTimelineWidget::CustomMenuRequested(QPoint Pos)
 	}
 
 	Menu->addAction(gMainWindow->mActions[LC_TIMELINE_SET_CURRENT]);
-	Menu->addAction(gMainWindow->mActions[LC_TIMELINE_INSERT]);
+	Menu->addAction(gMainWindow->mActions[LC_TIMELINE_INSERT_BEFORE]);
+	Menu->addAction(gMainWindow->mActions[LC_TIMELINE_INSERT_AFTER]);
 	Menu->addAction(gMainWindow->mActions[LC_TIMELINE_DELETE]);
 	Menu->addAction(gMainWindow->mActions[LC_TIMELINE_MOVE_SELECTION]);
 
@@ -300,7 +301,7 @@ void lcTimelineWidget::UpdateSelection()
 	blockSignals(Blocked);
 }
 
-void lcTimelineWidget::InsertStep()
+void lcTimelineWidget::InsertStepBefore()
 {
 	QTreeWidgetItem* CurrentItem = currentItem();
 
@@ -316,6 +317,24 @@ void lcTimelineWidget::InsertStep()
 		return;
 
 	gMainWindow->GetActiveModel()->InsertStep(Step + 1);
+}
+
+void lcTimelineWidget::InsertStepAfter()
+{
+	QTreeWidgetItem* CurrentItem = currentItem();
+
+	if (!CurrentItem)
+		return;
+
+	if (CurrentItem->parent())
+		CurrentItem = CurrentItem->parent();
+
+	int Step = indexOfTopLevelItem(CurrentItem);
+
+	if (Step == -1)
+		return;
+
+	gMainWindow->GetActiveModel()->InsertStep(Step + 2);
 }
 
 void lcTimelineWidget::RemoveStep()

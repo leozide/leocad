@@ -941,11 +941,18 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 		QT_TRANSLATE_NOOP("Status", "Go to the last step of the model"),
 		"Alt+Down"
 	},
-	// LC_VIEW_TIME_INSERT
+	// LC_VIEW_TIME_INSERT_BEFORE
 	{
-		QT_TRANSLATE_NOOP("Action", "View.Time.Insert"),
-		QT_TRANSLATE_NOOP("Menu", "Insert Step"),
-		QT_TRANSLATE_NOOP("Status", "Insert new step"),
+		QT_TRANSLATE_NOOP("Action", "View.Time.InsertBefore"),
+		QT_TRANSLATE_NOOP("Menu", "Insert Before"),
+		QT_TRANSLATE_NOOP("Status", "Insert a new step before the current step"),
+		""
+	},
+	// LC_VIEW_TIME_INSERT_AFTER
+	{
+		QT_TRANSLATE_NOOP("Action", "View.Time.InsertAfter"),
+		QT_TRANSLATE_NOOP("Menu", "Insert After"),
+		QT_TRANSLATE_NOOP("Status", "Insert a new step after the current step"),
 		""
 	},
 	// LC_VIEW_TIME_DELETE
@@ -1522,11 +1529,18 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 		QT_TRANSLATE_NOOP("Status", "Display program version number and system information"),
 		""
 	},
-	// LC_TIMELINE_INSERT
+	// LC_TIMELINE_INSERT_BEFORE
 	{
 		"",
-		QT_TRANSLATE_NOOP("Menu", "Insert Step"),
-		QT_TRANSLATE_NOOP("Status", "Insert new step"),
+		QT_TRANSLATE_NOOP("Menu", "Insert Step Before"),
+		QT_TRANSLATE_NOOP("Status", "Insert a new step before the current step"),
+		""
+	},
+	// LC_TIMELINE_INSERT_AFTER
+	{
+		"",
+		QT_TRANSLATE_NOOP("Menu", "Insert Step After"),
+		QT_TRANSLATE_NOOP("Status", "Insert a new step after the current step"),
 		""
 	},
 	// LC_TIMELINE_DELETE

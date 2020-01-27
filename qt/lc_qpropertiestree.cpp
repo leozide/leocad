@@ -402,7 +402,7 @@ class lcStepValidator : public QIntValidator
 {
 public:
 	lcStepValidator(lcStep Min, lcStep Max, bool AllowEmpty)
-		: mMin(Min), mMax(Max), mAllowEmpty(AllowEmpty), QIntValidator(1, INT_MAX)
+		: QIntValidator(1, INT_MAX), mMin(Min), mMax(Max), mAllowEmpty(AllowEmpty)
 	{
 	}
 

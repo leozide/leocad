@@ -822,7 +822,7 @@ void View::OnDraw()
 
 		if (Info)
 		{
-			lcMatrix44 WorldMatrix = GetPieceInsertPosition(false, gMainWindow->GetCurrentPieceInfo());
+			lcMatrix44 WorldMatrix = GetPieceInsertPosition(false, Info);
 
 			if (GetActiveModel() != mModel)
 				WorldMatrix = lcMul(WorldMatrix, mActiveSubmodelTransform);

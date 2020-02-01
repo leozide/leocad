@@ -2141,7 +2141,8 @@ void lcMainWindow::UpdateModels()
 	mPartSelectionWidget->UpdateModels();
 
 	if (mCurrentPieceInfo && mCurrentPieceInfo->IsModel())
-		SetCurrentPieceInfo(nullptr);
+		if (Models.FindIndex(mCurrentPieceInfo->GetModel()) == -1)
+			SetCurrentPieceInfo(nullptr);
 }
 
 void lcMainWindow::UpdateCategories()

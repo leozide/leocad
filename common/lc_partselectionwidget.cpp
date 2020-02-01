@@ -1087,7 +1087,7 @@ void lcPartSelectionWidget::UpdateCategories()
 	if (CurrentType == lcPartCategoryType::AllParts && CurrentIndex == 0)
 		CurrentItem = AllPartsCategoryItem;
 
-	QTreeWidgetItem* CurrentModelCategoryItem = new QTreeWidgetItem(mCategoriesWidget, QStringList(tr("Parts In Use")));
+	QTreeWidgetItem* CurrentModelCategoryItem = new QTreeWidgetItem(mCategoriesWidget, QStringList(tr("In Use")));
 	CurrentModelCategoryItem->setData(0, static_cast<int>(lcPartCategoryRole::Type), static_cast<int>(lcPartCategoryType::PartsInUse));
 
 	if (CurrentType == lcPartCategoryType::PartsInUse && CurrentIndex == 0)

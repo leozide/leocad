@@ -1987,6 +1987,7 @@ void View::EndDrag(bool Accept)
 
 	mDragState = lcDragState::NONE;
 	UpdateTrackTool();
+	gMainWindow->UpdateAllViews();
 }
 
 void View::SetProjection(bool Ortho)

@@ -827,7 +827,7 @@ void View::OnDraw()
 			if (GetActiveModel() != mModel)
 				WorldMatrix = lcMul(WorldMatrix, mActiveSubmodelTransform);
 
-			Info->AddRenderMeshes(mScene, WorldMatrix, gMainWindow->mColorIndex, lcRenderMeshState::Focused, true);
+			Info->AddRenderMeshes(mScene, WorldMatrix, gMainWindow->mColorIndex, lcRenderMeshState::Focused, false);
 		}
 	}
 

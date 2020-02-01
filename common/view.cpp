@@ -1976,8 +1976,11 @@ void View::EndDrag(bool Accept)
 			break;
 
 		case lcDragState::PIECE:
-			ActiveModel->InsertPieceToolClicked(GetPieceInsertPosition(false, gMainWindow->GetCurrentPieceInfo()));
-			break;
+			{
+				PieceInfo* Info = gMainWindow->GetCurrentPieceInfo();
+				if (Info)
+					ActiveModel->InsertPieceToolClicked(GetPieceInsertPosition(false, Info));
+			} break;
 
 		case lcDragState::COLOR:
 			ActiveModel->PaintToolClicked(FindObjectUnderPointer(true, false).Object);

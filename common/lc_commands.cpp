@@ -619,13 +619,13 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 		QT_TRANSLATE_NOOP("Status", "Change piece color"),
 		""
 	},
-    // LC_EDIT_ACTION_PIPETTE
-    {
-        QT_TRANSLATE_NOOP("Action", "Edit.Tool.Pipette"),
-        QT_TRANSLATE_NOOP("Menu", "Pipette"),
-        QT_TRANSLATE_NOOP("Status", "Get piece color"),
-        ""
-    },
+	// LC_EDIT_ACTION_COLOR_PICKER
+	{
+		QT_TRANSLATE_NOOP("Action", "Edit.Tool.ColorPicker"),
+		QT_TRANSLATE_NOOP("Menu", "Color Picker"),
+		QT_TRANSLATE_NOOP("Status", "Get piece color"),
+		""
+	},
 	// LC_EDIT_ACTION_ZOOM
 	{
 		QT_TRANSLATE_NOOP("Action", "Edit.Tool.Zoom"),
@@ -1586,7 +1586,7 @@ const char* gToolNames[LC_NUM_TOOLS] =
 	QT_TRANSLATE_NOOP("Mouse", "Rotate"),        // LC_TOOL_ROTATE
 	QT_TRANSLATE_NOOP("Mouse", "Delete"),        // LC_TOOL_ERASER
 	QT_TRANSLATE_NOOP("Mouse", "Paint"),         // LC_TOOL_PAINT
-    QT_TRANSLATE_NOOP("Mouse", "Pipette"),       // LC_TOOL_PIPETTE
+    QT_TRANSLATE_NOOP("Mouse", "ColorPicker"),   // LC_TOOL_COLOR_PICKER
 	QT_TRANSLATE_NOOP("Mouse", "Zoom"),          // LC_TOOL_ZOOM
 	QT_TRANSLATE_NOOP("Mouse", "Pan"),           // LC_TOOL_PAN
 	QT_TRANSLATE_NOOP("Mouse", "Orbit"),         // LC_TOOL_ROTATE_VIEW

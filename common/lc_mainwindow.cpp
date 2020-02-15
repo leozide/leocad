@@ -286,10 +286,10 @@ void lcMainWindow::CreateActions()
 	EditActionPaintIcon.addFile(":/resources/action_paint_16.png");
 	mActions[LC_EDIT_ACTION_PAINT]->setIcon(EditActionPaintIcon);
 
-    QIcon EditActionPipetteIcon;
-    EditActionPipetteIcon.addFile(":/resources/action_pipette.png");
-    EditActionPipetteIcon.addFile(":/resources/action_pipette_16.png");
-    mActions[LC_EDIT_ACTION_PIPETTE]->setIcon(EditActionPipetteIcon);
+	QIcon EditActionColorPickerIcon;
+	EditActionColorPickerIcon.addFile(":/resources/action_color_picker.png");
+	EditActionColorPickerIcon.addFile(":/resources/action_color_picker_16.png");
+	mActions[LC_EDIT_ACTION_COLOR_PICKER]->setIcon(EditActionColorPickerIcon);
 
 	QIcon EditActionZoomIcon;
 	EditActionZoomIcon.addFile(":/resources/action_zoom.png");
@@ -448,7 +448,7 @@ void lcMainWindow::CreateMenus()
 	mToolsMenu->addAction(mActions[LC_EDIT_ACTION_ROTATE]);
 	mToolsMenu->addAction(mActions[LC_EDIT_ACTION_DELETE]);
 	mToolsMenu->addAction(mActions[LC_EDIT_ACTION_PAINT]);
-    mToolsMenu->addAction(mActions[LC_EDIT_ACTION_PIPETTE]);
+	mToolsMenu->addAction(mActions[LC_EDIT_ACTION_COLOR_PICKER]);
 	mToolsMenu->addSeparator();
 	mToolsMenu->addAction(mActions[LC_EDIT_ACTION_ZOOM]);
 	mToolsMenu->addAction(mActions[LC_EDIT_ACTION_PAN]);
@@ -671,7 +671,7 @@ void lcMainWindow::CreateToolBars()
 	mToolsToolBar->addAction(mActions[LC_EDIT_ACTION_ROTATE]);
 	mToolsToolBar->addAction(mActions[LC_EDIT_ACTION_DELETE]);
 	mToolsToolBar->addAction(mActions[LC_EDIT_ACTION_PAINT]);
-    mToolsToolBar->addAction(mActions[LC_EDIT_ACTION_PIPETTE]);
+	mToolsToolBar->addAction(mActions[LC_EDIT_ACTION_COLOR_PICKER]);
 	mToolsToolBar->addSeparator();
 	mToolsToolBar->addAction(mActions[LC_EDIT_ACTION_ZOOM]);
 	mToolsToolBar->addAction(mActions[LC_EDIT_ACTION_PAN]);
@@ -3159,9 +3159,9 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		SetTool(LC_TOOL_PAINT);
 		break;
 
-    case LC_EDIT_ACTION_PIPETTE:
-        SetTool(LC_TOOL_PIPETTE);
-        break;
+	case LC_EDIT_ACTION_COLOR_PICKER:
+		SetTool(LC_TOOL_COLOR_PICKER);
+		break;
 
 	case LC_EDIT_ACTION_ZOOM:
 		SetTool(LC_TOOL_ZOOM);

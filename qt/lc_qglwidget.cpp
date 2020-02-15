@@ -59,6 +59,7 @@ void lcGLWidget::SetCursor(LC_CURSOR_TYPE CursorType)
 		{ 15, 15, ":/resources/cursor_rotatey" },       // LC_CURSOR_ROTATEY
 		{  0, 10, ":/resources/cursor_delete" },        // LC_CURSOR_DELETE
 		{ 14, 14, ":/resources/cursor_paint" },         // LC_CURSOR_PAINT
+        { 14, 14, ":/resources/cursor_pipette" },       // LC_CURSOR_PIPETTE
 		{ 15, 15, ":/resources/cursor_zoom" },          // LC_CURSOR_ZOOM
 		{  9,  9, ":/resources/cursor_zoom_region" },   // LC_CURSOR_ZOOM_REGION
 		{ 15, 15, ":/resources/cursor_pan" },           // LC_CURSOR_PAN

@@ -479,6 +479,7 @@ LC_CURSOR_TYPE View::GetCursor() const
 		LC_CURSOR_MOVE,        // LC_TRACKTOOL_SCALE_MINUS
 		LC_CURSOR_DELETE,      // LC_TRACKTOOL_ERASER
 		LC_CURSOR_PAINT,       // LC_TRACKTOOL_PAINT
+        LC_CURSOR_PIPETTE,     // LC_TRACKTOOL_PIPETTE
 		LC_CURSOR_ZOOM,        // LC_TRACKTOOL_ZOOM
 		LC_CURSOR_PAN,         // LC_TRACKTOOL_PAN
 		LC_CURSOR_ROTATEX,     // LC_TRACKTOOL_ORBIT_X
@@ -1900,6 +1901,7 @@ lcTool View::GetCurrentTool() const
 		LC_TOOL_MOVE,        // LC_TRACKTOOL_SCALE_MINUS
 		LC_TOOL_ERASER,      // LC_TRACKTOOL_ERASER
 		LC_TOOL_PAINT,       // LC_TRACKTOOL_PAINT
+        LC_TOOL_PIPETTE,     // LC_TRACKTOOL_PIPETTE
 		LC_TOOL_ZOOM,        // LC_TRACKTOOL_ZOOM
 		LC_TOOL_PAN,         // LC_TRACKTOOL_PAN
 		LC_TOOL_ROTATE_VIEW, // LC_TRACKTOOL_ORBIT_X
@@ -1933,6 +1935,7 @@ lcTrackTool View::GetOverrideTrackTool(Qt::MouseButton Button) const
 		LC_TRACKTOOL_ROTATE_XYZ, // LC_TOOL_ROTATE
 		LC_TRACKTOOL_ERASER,     // LC_TOOL_ERASER
 		LC_TRACKTOOL_PAINT,      // LC_TOOL_PAINT
+        LC_TRACKTOOL_PIPETTE,    // LC_TOOL_PIPETTE
 		LC_TRACKTOOL_ZOOM,       // LC_TOOL_ZOOM
 		LC_TRACKTOOL_PAN,        // LC_TOOL_PAN
 		LC_TRACKTOOL_ORBIT_XY,   // LC_TOOL_ROTATE_VIEW
@@ -2404,6 +2407,10 @@ void View::UpdateTrackTool()
 		NewTrackTool = LC_TRACKTOOL_PAINT;
 		break;
 
+    case LC_TOOL_PIPETTE:
+        NewTrackTool = LC_TRACKTOOL_PIPETTE;
+        break;
+
 	case LC_TOOL_ZOOM:
 		NewTrackTool = LC_TRACKTOOL_ZOOM;
 		break;
@@ -2605,6 +2612,7 @@ void View::StartTracking(lcTrackButton TrackButton)
 
 	case LC_TOOL_ERASER:
 	case LC_TOOL_PAINT:
+    case LC_TOOL_PIPETTE:
 		break;
 
 	case LC_TOOL_ZOOM:
@@ -2664,6 +2672,7 @@ void View::StopTracking(bool Accept)
 
 	case LC_TOOL_ERASER:
 	case LC_TOOL_PAINT:
+    case LC_TOOL_PIPETTE:
 		break;
 
 	case LC_TOOL_ZOOM:
@@ -2814,6 +2823,10 @@ void View::OnButtonDown(lcTrackButton TrackButton)
 	case LC_TRACKTOOL_PAINT:
 		ActiveModel->PaintToolClicked(FindObjectUnderPointer(true, false).Object);
 		break;
+
+    case LC_TRACKTOOL_PIPETTE:
+        ActiveModel->PipetteToolClicked(FindObjectUnderPointer(true, false).Object);
+        break;
 
 	case LC_TRACKTOOL_ZOOM:
 	case LC_TRACKTOOL_PAN:
@@ -3213,6 +3226,7 @@ void View::OnMouseMove()
 
 	case LC_TRACKTOOL_ERASER:
 	case LC_TRACKTOOL_PAINT:
+    case LC_TRACKTOOL_PIPETTE:
 		break;
 
 	case LC_TRACKTOOL_ZOOM:

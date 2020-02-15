@@ -286,6 +286,11 @@ void lcMainWindow::CreateActions()
 	EditActionPaintIcon.addFile(":/resources/action_paint_16.png");
 	mActions[LC_EDIT_ACTION_PAINT]->setIcon(EditActionPaintIcon);
 
+    QIcon EditActionPipetteIcon;
+    EditActionPipetteIcon.addFile(":/resources/action_pipette.png");
+    EditActionPipetteIcon.addFile(":/resources/action_pipette_16.png");
+    mActions[LC_EDIT_ACTION_PIPETTE]->setIcon(EditActionPipetteIcon);
+
 	QIcon EditActionZoomIcon;
 	EditActionZoomIcon.addFile(":/resources/action_zoom.png");
 	EditActionZoomIcon.addFile(":/resources/action_zoom_16.png");
@@ -443,6 +448,7 @@ void lcMainWindow::CreateMenus()
 	mToolsMenu->addAction(mActions[LC_EDIT_ACTION_ROTATE]);
 	mToolsMenu->addAction(mActions[LC_EDIT_ACTION_DELETE]);
 	mToolsMenu->addAction(mActions[LC_EDIT_ACTION_PAINT]);
+    mToolsMenu->addAction(mActions[LC_EDIT_ACTION_PIPETTE]);
 	mToolsMenu->addSeparator();
 	mToolsMenu->addAction(mActions[LC_EDIT_ACTION_ZOOM]);
 	mToolsMenu->addAction(mActions[LC_EDIT_ACTION_PAN]);
@@ -665,6 +671,7 @@ void lcMainWindow::CreateToolBars()
 	mToolsToolBar->addAction(mActions[LC_EDIT_ACTION_ROTATE]);
 	mToolsToolBar->addAction(mActions[LC_EDIT_ACTION_DELETE]);
 	mToolsToolBar->addAction(mActions[LC_EDIT_ACTION_PAINT]);
+    mToolsToolBar->addAction(mActions[LC_EDIT_ACTION_PIPETTE]);
 	mToolsToolBar->addSeparator();
 	mToolsToolBar->addAction(mActions[LC_EDIT_ACTION_ZOOM]);
 	mToolsToolBar->addAction(mActions[LC_EDIT_ACTION_PAN]);
@@ -3151,6 +3158,10 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 	case LC_EDIT_ACTION_PAINT:
 		SetTool(LC_TOOL_PAINT);
 		break;
+
+    case LC_EDIT_ACTION_PIPETTE:
+        SetTool(LC_TOOL_PIPETTE);
+        break;
 
 	case LC_EDIT_ACTION_ZOOM:
 		SetTool(LC_TOOL_ZOOM);

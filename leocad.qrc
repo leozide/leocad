@@ -113,5 +113,8 @@
         <file>resources/shaders/unlit_view_sphere_ps.glsl</file>
         <file>resources/shaders/unlit_view_sphere_vs.glsl</file>
         <file>resources/gear_in.png</file>
+        <file>resources/action_pipette.png</file>
+        <file>resources/action_pipette_16.png</file>
+        <file>resources/cursor_pipette.png</file>
     </qresource>
 </RCC>

@@ -4202,6 +4202,16 @@ void lcModel::PaintToolClicked(lcObject* Object)
 	}
 }
 
+void lcModel::PipetteToolClicked(lcObject* Object)
+{
+    if(!Object || Object->GetType() != LC_OBJECT_PIECE)
+        return;
+
+    lcPiece* Piece = (lcPiece*)Object;
+
+    gMainWindow->SetColorIndex(Piece->mColorIndex);
+}
+
 void lcModel::UpdateZoomTool(lcCamera* Camera, float Mouse)
 {
 	Camera->Zoom(Mouse - mMouseToolDistance.x, mCurrentStep, gMainWindow->GetAddKeys());

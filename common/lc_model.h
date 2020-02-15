@@ -303,6 +303,7 @@ public:
 	void UpdateScaleTool(const float Scale);
 	void EraserToolClicked(lcObject* Object);
 	void PaintToolClicked(lcObject* Object);
+    void PipetteToolClicked(lcObject* Object);
 	void UpdateZoomTool(lcCamera* Camera, float Mouse);
 	void UpdatePanTool(lcCamera* Camera, const lcVector3& Distance);
 	void UpdateOrbitTool(lcCamera* Camera, float MouseX, float MouseY);

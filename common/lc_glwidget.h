@@ -2,29 +2,29 @@
 
 #include "lc_context.h"
 
-enum LC_CURSOR_TYPE
+enum class lcCursor
 {
-	LC_CURSOR_DEFAULT,
-	LC_CURSOR_BRICK,
-	LC_CURSOR_LIGHT,
-	LC_CURSOR_SPOTLIGHT,
-	LC_CURSOR_CAMERA,
-	LC_CURSOR_SELECT,
-	LC_CURSOR_SELECT_ADD,
-	LC_CURSOR_SELECT_REMOVE,
-	LC_CURSOR_MOVE,
-	LC_CURSOR_ROTATE,
-	LC_CURSOR_ROTATEX,
-	LC_CURSOR_ROTATEY,
-	LC_CURSOR_DELETE,
-	LC_CURSOR_PAINT,
-	LC_CURSOR_COLOR_PICKER,
-	LC_CURSOR_ZOOM,
-	LC_CURSOR_ZOOM_REGION,
-	LC_CURSOR_PAN,
-	LC_CURSOR_ROLL,
-	LC_CURSOR_ROTATE_VIEW,
-	LC_CURSOR_COUNT
+	Default,
+	Brick,
+	Light,
+	Spotlight,
+	Camera,
+	Select,
+	SelectAdd,
+	SelectRemove,
+	Move,
+	Rotate,
+	RotateX,
+	RotateY,
+	Delete,
+	Paint,
+	ColorPicker,
+	Zoom,
+	ZoomRegion,
+	Pan,
+	Roll,
+	RotateView,
+	Count
 };
 
 struct lcInputState
@@ -39,7 +39,7 @@ class lcGLWidget
 public:
 	lcGLWidget()
 	{
-		mCursorType = LC_CURSOR_DEFAULT;
+		mCursor = lcCursor::Default;
 		mWidget = nullptr;
 		mInputState.x = 0;
 		mInputState.y = 0;
@@ -67,7 +67,7 @@ public:
 
 	void MakeCurrent();
 	void Redraw();
-	void SetCursor(LC_CURSOR_TYPE Cursor);
+	void SetCursor(lcCursor Cursor);
 
 	virtual void OnDraw() { }
 	virtual void OnInitialUpdate() { }
@@ -89,9 +89,8 @@ public:
 	lcInputState mInputState;
 	int mWidth;
 	int mHeight;
-	int mCursorType;
+	lcCursor mCursor;
 	void* mWidget;
 	lcContext* mContext;
 	bool mDeleteContext;
 };
-

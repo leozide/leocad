@@ -32,9 +32,9 @@ void lcGLWidget::Redraw()
 	Widget->mUpdateTimer.start(0);
 }
 
-void lcGLWidget::SetCursor(LC_CURSOR_TYPE CursorType)
+void lcGLWidget::SetCursor(lcCursor CursorType)
 {
-	if (mCursorType == CursorType)
+	if (mCursor == CursorType)
 		return;
 
 	struct lcCursorInfo
@@ -43,44 +43,44 @@ void lcGLWidget::SetCursor(LC_CURSOR_TYPE CursorType)
 		const char* Name;
 	};
 
-	const lcCursorInfo Cursors[LC_CURSOR_COUNT] =
+	const lcCursorInfo Cursors[] =
 	{
-		{  0,  0, "" },                                 // LC_CURSOR_DEFAULT
-		{  8,  3, ":/resources/cursor_insert" },        // LC_CURSOR_BRICK
-		{ 15, 15, ":/resources/cursor_light" },         // LC_CURSOR_LIGHT
-		{  7, 10, ":/resources/cursor_spotlight" },     // LC_CURSOR_SPOTLIGHT
-		{ 15,  9, ":/resources/cursor_camera" },        // LC_CURSOR_CAMERA
-		{  0,  2, ":/resources/cursor_select" },        // LC_CURSOR_SELECT
-		{  0,  2, ":/resources/cursor_select_add" },    // LC_CURSOR_SELECT_ADD
-		{  0,  2, ":/resources/cursor_select_remove" }, // LC_CURSOR_SELECT_REMOVE
-		{ 15, 15, ":/resources/cursor_move" },          // LC_CURSOR_MOVE
-		{ 15, 15, ":/resources/cursor_rotate" },        // LC_CURSOR_ROTATE
-		{ 15, 15, ":/resources/cursor_rotatex" },       // LC_CURSOR_ROTATEX
-		{ 15, 15, ":/resources/cursor_rotatey" },       // LC_CURSOR_ROTATEY
-		{  0, 10, ":/resources/cursor_delete" },        // LC_CURSOR_DELETE
-		{ 14, 14, ":/resources/cursor_paint" },         // LC_CURSOR_PAINT
-		{  1, 13, ":/resources/cursor_color_picker" },  // LC_CURSOR_COLOR_PICKER
-		{ 15, 15, ":/resources/cursor_zoom" },          // LC_CURSOR_ZOOM
-		{  9,  9, ":/resources/cursor_zoom_region" },   // LC_CURSOR_ZOOM_REGION
-		{ 15, 15, ":/resources/cursor_pan" },           // LC_CURSOR_PAN
-		{ 15, 15, ":/resources/cursor_roll" },          // LC_CURSOR_ROLL
-		{ 15, 15, ":/resources/cursor_rotate_view" },   // LC_CURSOR_ROTATE_VIEW
+		{  0,  0, "" },                                 // lcCursor::Default
+		{  8,  3, ":/resources/cursor_insert" },        // lcCursor::Brick
+		{ 15, 15, ":/resources/cursor_light" },         // lcCursor::Light
+		{  7, 10, ":/resources/cursor_spotlight" },     // lcCursor::Spotlight
+		{ 15,  9, ":/resources/cursor_camera" },        // lcCursor::Camera
+		{  0,  2, ":/resources/cursor_select" },        // lcCursor::Select
+		{  0,  2, ":/resources/cursor_select_add" },    // lcCursor::SelectAdd
+		{  0,  2, ":/resources/cursor_select_remove" }, // lcCursor::SelectRemove
+		{ 15, 15, ":/resources/cursor_move" },          // lcCursor::Move
+		{ 15, 15, ":/resources/cursor_rotate" },        // lcCursor::Rotate
+		{ 15, 15, ":/resources/cursor_rotatex" },       // lcCursor::RotateX
+		{ 15, 15, ":/resources/cursor_rotatey" },       // lcCursor::RotateY
+		{  0, 10, ":/resources/cursor_delete" },        // lcCursor::Delete
+		{ 14, 14, ":/resources/cursor_paint" },         // lcCursor::Paint
+		{  1, 13, ":/resources/cursor_color_picker" },  // lcCursor::ColorPicker
+		{ 15, 15, ":/resources/cursor_zoom" },          // lcCursor::Zoom
+		{  9,  9, ":/resources/cursor_zoom_region" },   // lcCursor::ZoomRegion
+		{ 15, 15, ":/resources/cursor_pan" },           // lcCursor::Pan
+		{ 15, 15, ":/resources/cursor_roll" },          // lcCursor::Roll
+		{ 15, 15, ":/resources/cursor_rotate_view" },   // lcCursor::RotateView
 	};
 
-	static_assert(LC_ARRAY_COUNT(Cursors) == LC_CURSOR_COUNT, "Array size mismatch");
+	static_assert(LC_ARRAY_COUNT(Cursors) == static_cast<int>(lcCursor::Count), "Array size mismatch");
 
 	QGLWidget* widget = (QGLWidget*)mWidget;
 
-	if (CursorType != LC_CURSOR_DEFAULT && CursorType < LC_CURSOR_COUNT)
+	if (CursorType != lcCursor::Default && CursorType < lcCursor::Count)
 	{
-		const lcCursorInfo& Cursor = Cursors[CursorType];
+		const lcCursorInfo& Cursor = Cursors[static_cast<int>(CursorType)];
 		widget->setCursor(QCursor(QPixmap(Cursor.Name), Cursor.x, Cursor.y));
-		mCursorType = CursorType;
+		mCursor = CursorType;
 	}
 	else
 	{
 		widget->unsetCursor();
-		mCursorType = LC_CURSOR_DEFAULT;
+		mCursor = lcCursor::Default;
 	}
 }
 
@@ -339,12 +339,12 @@ void lcQGLWidget::dragEnterEvent(QDragEnterEvent* DragEnterEvent)
 		if (MimeData->hasFormat("application/vnd.leocad-part"))
 		{
 			DragEnterEvent->acceptProposedAction();
-			((View*)widget)->BeginDrag(lcDragState::PIECE);
+			((View*)widget)->BeginDrag(lcDragState::Piece);
 		}
 		else if (MimeData->hasFormat("application/vnd.leocad-color"))
 		{
 			DragEnterEvent->acceptProposedAction();
-			((View*)widget)->BeginDrag(lcDragState::COLOR);
+			((View*)widget)->BeginDrag(lcDragState::Color);
 		}
 	}
 	else

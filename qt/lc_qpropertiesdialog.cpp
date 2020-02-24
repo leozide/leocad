@@ -10,7 +10,7 @@
 class lcPartsTableWidgetItem : public QTableWidgetItem
 {
 public:
-	explicit lcPartsTableWidgetItem(const QString& Text, int Type = Type)
+	explicit lcPartsTableWidgetItem(const QString& Text, int Type = QTableWidgetItem::Type)
 		: QTableWidgetItem(Text, Type)
 	{
 		mLast = false;

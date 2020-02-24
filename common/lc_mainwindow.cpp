@@ -1508,8 +1508,9 @@ void lcMainWindow::SetCurrentModelTab(lcModel* Model)
 		ViewWidget = (lcQGLWidget*)TabWidget->layout()->itemAt(0)->widget();
 		ViewWidget->widget = NewView;
 		NewView->mWidget = ViewWidget;
-		NewView->mWidth = ViewWidget->width();
-		NewView->mHeight = ViewWidget->height();
+		float Scale = ViewWidget->deviceScale();
+		NewView->mWidth = ViewWidget->width() * Scale;
+		NewView->mHeight = ViewWidget->height() * Scale;
 		AddView(NewView);
 
 		mModelTabWidget->setCurrentWidget(TabWidget);

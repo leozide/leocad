@@ -1508,7 +1508,7 @@ void Project::ExportHTML(const lcHTMLExportOptions& Options)
 
 	QString ProjectTitle = GetTitle();
 
-	auto AddPartsListImage = [this, &Dir](QTextStream& Stream, lcModel* Model, lcStep Step, const QString& BaseName)
+	auto AddPartsListImage = [&Dir](QTextStream& Stream, lcModel* Model, lcStep Step, const QString& BaseName)
 	{
 		QImage Image = Model->GetPartsListImage(1024, Step);
 

@@ -532,10 +532,10 @@ QWidget *lcQPropertiesTree::createEditor(QWidget *parent, QTreeWidgetItem *item)
 			std::sort(SortedPieces.begin(), SortedPieces.end(), PieceCompare);
 
 			for (PieceInfo* Info : SortedPieces)
-				editor->addItem(Info->m_strDescription, qVariantFromValue((void*)Info));
+				editor->addItem(Info->m_strDescription, QVariant::fromValue((void*)Info));
 
 			PieceInfo *info = (PieceInfo*)item->data(0, PropertyValueRole).value<void*>();
-			editor->setCurrentIndex(editor->findData(qVariantFromValue((void*)info)));
+			editor->setCurrentIndex(editor->findData(QVariant::fromValue((void*)info)));
 
 			connect(editor, SIGNAL(currentIndexChanged(int)), this, SLOT(slotSetValue(int)));
 
@@ -807,7 +807,7 @@ QTreeWidgetItem *lcQPropertiesTree::addProperty(QTreeWidgetItem *parent, const Q
 
 	newItem->setData(0, PropertyTypeRole, QVariant(propertyType));
 	newItem->setFlags(newItem->flags() | Qt::ItemIsEditable);
-	setItemExpanded(newItem, true);
+	newItem->setExpanded(true);
 
 	if (propertyType == PropertyGroup)
 	{
@@ -987,7 +987,7 @@ void lcQPropertiesTree::SetPiece(const lcArray<lcObject*>& Selection, lcObject* 
 	QString text = Info ? Info->m_strDescription : QString();
 	partID->setText(1, text);
 	partID->setToolTip(1, text);
-	partID->setData(0, PropertyValueRole, qVariantFromValue((void*)Info));
+	partID->setData(0, PropertyValueRole, QVariant::fromValue((void*)Info));
 }
 
 void lcQPropertiesTree::SetCamera(lcObject* Focus)
@@ -1077,7 +1077,7 @@ void lcQPropertiesTree::SetCamera(lcObject* Focus)
 	cameraFar->setData(0, PropertyValueRole, ZFar);
 
 	cameraName->setText(1, Name);
-	cameraName->setData(0, PropertyValueRole, qVariantFromValue((void*)Name));
+	cameraName->setData(0, PropertyValueRole, QVariant::fromValue((void*)Name));
 }
 
 void lcQPropertiesTree::SetLight(lcObject* Focus)

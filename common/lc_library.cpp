@@ -278,7 +278,7 @@ bool lcPiecesLibrary::Load(const QString& LibraryPath, bool ShowProgress)
 	}
 	else
 	{
-		mLibraryDir = LibraryPath;
+		mLibraryDir.setPath(LibraryPath);
 
 		if (OpenDirectory(mLibraryDir, ShowProgress))
 		{

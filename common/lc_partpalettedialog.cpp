@@ -16,7 +16,7 @@ lcPartPaletteDialog::lcPartPaletteDialog(QWidget* Parent, std::vector<lcPartPale
 	for (const lcPartPalette& Palette : PartPalettes)
 	{
 		QListWidgetItem* Item = new QListWidgetItem(Palette.Name);
-		Item->setData(Qt::UserRole, qVariantFromValue<uintptr_t>(reinterpret_cast<uintptr_t>(&Palette)));
+		Item->setData(Qt::UserRole, QVariant::fromValue<uintptr_t>(reinterpret_cast<uintptr_t>(&Palette)));
 		ui->PaletteList->addItem(Item);
 	}
 
@@ -75,7 +75,7 @@ void lcPartPaletteDialog::on_NewButton_clicked()
 		return;
 
 	QListWidgetItem* Item = new QListWidgetItem(Name);
-	Item->setData(Qt::UserRole, qVariantFromValue<uintptr_t>(0));
+	Item->setData(Qt::UserRole, QVariant::fromValue<uintptr_t>(0));
 	ui->PaletteList->addItem(Item);
 	ui->PaletteList->setCurrentRow(ui->PaletteList->count() - 1);
 	UpdateButtons();
@@ -147,7 +147,7 @@ void lcPartPaletteDialog::on_ImportButton_clicked()
 #endif
 
 	QListWidgetItem* Item = new QListWidgetItem(Palette->Name);
-	Item->setData(Qt::UserRole, qVariantFromValue<uintptr_t>(reinterpret_cast<uintptr_t>(Palette)));
+	Item->setData(Qt::UserRole, QVariant::fromValue<uintptr_t>(reinterpret_cast<uintptr_t>(Palette)));
 	ui->PaletteList->addItem(Item);
 	ui->PaletteList->setCurrentRow(ui->PaletteList->count() - 1);
 	UpdateButtons();

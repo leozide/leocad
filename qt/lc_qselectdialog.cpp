@@ -192,7 +192,7 @@ void lcQSelectDialog::AddChildren(QTreeWidgetItem* ParentItem, lcGroup* ParentGr
 			continue;
 
 		QTreeWidgetItem* PieceItem = new QTreeWidgetItem(ParentItem, QStringList(Piece->GetName()));
-		PieceItem->setData(0, IndexRole, qVariantFromValue<uintptr_t>((uintptr_t)Piece));
+		PieceItem->setData(0, IndexRole, QVariant::fromValue<uintptr_t>((uintptr_t)Piece));
 		PieceItem->setCheckState(0, Piece->IsSelected() ? Qt::Checked : Qt::Unchecked);
 	}
 
@@ -206,7 +206,7 @@ void lcQSelectDialog::AddChildren(QTreeWidgetItem* ParentItem, lcGroup* ParentGr
 				continue;
 
 			QTreeWidgetItem *cameraItem = new QTreeWidgetItem(ParentItem, QStringList(Camera->GetName()));
-			cameraItem->setData(0, IndexRole, qVariantFromValue<uintptr_t>((uintptr_t)Camera));
+			cameraItem->setData(0, IndexRole, QVariant::fromValue<uintptr_t>((uintptr_t)Camera));
 			cameraItem->setCheckState(0, Camera->IsSelected() ? Qt::Checked : Qt::Unchecked);
 		}
 
@@ -218,7 +218,7 @@ void lcQSelectDialog::AddChildren(QTreeWidgetItem* ParentItem, lcGroup* ParentGr
 				continue;
 
 			QTreeWidgetItem *lightItem = new QTreeWidgetItem(ParentItem, QStringList(Light->GetName()));
-			lightItem->setData(0, IndexRole, qVariantFromValue<uintptr_t>((uintptr_t)Light));
+			lightItem->setData(0, IndexRole, QVariant::fromValue<uintptr_t>((uintptr_t)Light));
 			lightItem->setCheckState(0, Light->IsSelected() ? Qt::Checked : Qt::Unchecked);
 		}
 	}

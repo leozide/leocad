@@ -63,7 +63,7 @@ void lcQEditGroupsDialog::on_newGroup_clicked()
 
 	QTreeWidgetItem* GroupItem = new QTreeWidgetItem(CurrentItem, QStringList(NewGroup->mName));
 	GroupItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | Qt::ItemIsEnabled | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled | Qt::ItemIsEditable);
-	GroupItem->setData(0, GroupRole, qVariantFromValue<uintptr_t>((uintptr_t)NewGroup));
+	GroupItem->setData(0, GroupRole, QVariant::fromValue<uintptr_t>((uintptr_t)NewGroup));
 }
 
 void lcQEditGroupsDialog::onItemClicked(QTreeWidgetItem *item, int column)
@@ -148,7 +148,7 @@ void lcQEditGroupsDialog::AddChildren(QTreeWidgetItem* ParentItem, lcGroup* Pare
 
 		QTreeWidgetItem* GroupItem = new QTreeWidgetItem(ParentItem, QStringList(Group->mName));
 		GroupItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | Qt::ItemIsEnabled | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled | Qt::ItemIsEditable);
-		GroupItem->setData(0, GroupRole, qVariantFromValue<uintptr_t>((uintptr_t)Group));
+		GroupItem->setData(0, GroupRole, QVariant::fromValue<uintptr_t>((uintptr_t)Group));
 
 		AddChildren(GroupItem, Group);
 	}
@@ -163,6 +163,6 @@ void lcQEditGroupsDialog::AddChildren(QTreeWidgetItem* ParentItem, lcGroup* Pare
 
 		QTreeWidgetItem* PieceItem = new QTreeWidgetItem(ParentItem, QStringList(Piece->GetName()));
 		PieceItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | Qt::ItemIsEnabled | Qt::ItemIsDragEnabled);
-		PieceItem->setData(0, PieceRole, qVariantFromValue<uintptr_t>((uintptr_t)Piece));
+		PieceItem->setData(0, PieceRole, QVariant::fromValue<uintptr_t>((uintptr_t)Piece));
 	}
 }

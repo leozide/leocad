@@ -1478,8 +1478,6 @@ QImage lcModel::GetPartsListImage(int MaxWidth, lcStep Step) const
 		const PieceInfo* Info = Image.Info;
 		const lcBoundingBox& BoundingBox = Info->GetBoundingBox();
 
-		lcVector3 Center = (BoundingBox.Min + BoundingBox.Max) / 2.0f;
-
 		lcVector3 Points[8];
 		lcGetBoxCorners(BoundingBox.Min, BoundingBox.Max, Points);
 
@@ -4011,6 +4009,7 @@ void lcModel::EndMouseTool(lcTool Tool, bool Accept)
 
 	case LC_TOOL_ERASER:
 	case LC_TOOL_PAINT:
+	case LC_TOOL_COLOR_PICKER:
 		break;
 
 	case LC_TOOL_ZOOM:

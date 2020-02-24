@@ -164,7 +164,7 @@ void lcTimelineWidget::Update(bool Clear, bool UpdateItems)
 			{
 				PieceItem = new QTreeWidgetItem();
 				PieceItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsDragEnabled);
-				PieceItem->setData(0, Qt::UserRole, qVariantFromValue<uintptr_t>((uintptr_t)Piece));
+				PieceItem->setData(0, Qt::UserRole, QVariant::fromValue<uintptr_t>((uintptr_t)Piece));
 				StepItem->insertChild(PieceItemIndex, PieceItem);
 				mItems[Piece] = PieceItem;
 

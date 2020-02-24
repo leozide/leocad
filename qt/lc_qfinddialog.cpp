@@ -19,7 +19,7 @@ lcQFindDialog::lcQFindDialog(QWidget* Parent, lcSearchOptions* SearchOptions, lc
 	Model->GetPartsList(gDefaultColor, false, true, PartsList);
 
 	for (const auto& PartIt : PartsList)
-		parts->addItem(PartIt.first->m_strDescription, qVariantFromValue((void*)PartIt.first));
+		parts->addItem(PartIt.first->m_strDescription, QVariant::fromValue((void*)PartIt.first));
 	parts->model()->sort(0);
 
 	mSearchOptions = SearchOptions;
@@ -27,7 +27,7 @@ lcQFindDialog::lcQFindDialog(QWidget* Parent, lcSearchOptions* SearchOptions, lc
 	ui->findColor->setChecked(mSearchOptions->MatchColor);
 	ui->color->setCurrentColor(mSearchOptions->ColorIndex);
 	ui->findID->setChecked(mSearchOptions->MatchInfo);
-	parts->setCurrentIndex(parts->findData(qVariantFromValue((void*)mSearchOptions->Info)));
+	parts->setCurrentIndex(parts->findData(QVariant::fromValue((void*)mSearchOptions->Info)));
 	ui->findName->setChecked(mSearchOptions->MatchName);
 	ui->name->setText(mSearchOptions->Name);
 }

@@ -2556,6 +2556,7 @@ bool View::IsTrackToolAllowed(lcTrackTool TrackTool, quint32 AllowedTransforms) 
 
 	case LC_TRACKTOOL_ERASER:
 	case LC_TRACKTOOL_PAINT:
+	case LC_TRACKTOOL_COLOR_PICKER:
 	case LC_TRACKTOOL_ZOOM:
 	case LC_TRACKTOOL_PAN:
 	case LC_TRACKTOOL_ORBIT_X:
@@ -2564,6 +2565,9 @@ bool View::IsTrackToolAllowed(lcTrackTool TrackTool, quint32 AllowedTransforms) 
 	case LC_TRACKTOOL_ROLL:
 	case LC_TRACKTOOL_ZOOM_REGION:
 		return true;
+
+	case LC_TRACKTOOL_COUNT:
+		return false;
 	}
 
 	return false;
@@ -2841,6 +2845,9 @@ void View::OnButtonDown(lcTrackButton TrackButton)
 	case LC_TRACKTOOL_ROLL:
 	case LC_TRACKTOOL_ZOOM_REGION:
 		StartTracking(TrackButton);
+		break;
+
+	case LC_TRACKTOOL_COUNT:
 		break;
 	}
 }
@@ -3291,6 +3298,9 @@ void View::OnMouseMove()
 
 	case LC_TRACKTOOL_ZOOM_REGION:
 		Redraw();
+		break;
+
+	case LC_TRACKTOOL_COUNT:
 		break;
 	}
 }

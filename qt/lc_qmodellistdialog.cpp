@@ -14,7 +14,7 @@ lcQModelListDialog::lcQModelListDialog(QWidget* Parent, QList<QPair<QString, lcM
 	for (QList<QPair<QString, lcModel*>>::iterator it = Models.begin(); it != Models.end(); it++)
 	{
 		QListWidgetItem* Item = new QListWidgetItem(it->first);
-		Item->setData(Qt::UserRole, qVariantFromValue<uintptr_t>((uintptr_t)it->second));
+		Item->setData(Qt::UserRole, QVariant::fromValue<uintptr_t>((uintptr_t)it->second));
 		ui->ModelList->addItem(Item);
 	}
 	ui->ModelList->setCurrentRow(lcGetActiveProject()->GetActiveModelIndex());
@@ -85,7 +85,7 @@ void lcQModelListDialog::on_NewModel_clicked()
 		return;
 
 	QListWidgetItem* Item = new QListWidgetItem(Name);
-	Item->setData(Qt::UserRole, qVariantFromValue<uintptr_t>(0));
+	Item->setData(Qt::UserRole, QVariant::fromValue<uintptr_t>(0));
 	ui->ModelList->addItem(Item);
 	UpdateButtons();
 }

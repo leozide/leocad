@@ -120,6 +120,9 @@ public:
 
 	bool IsPatterned() const
 	{
+		if (mType != lcPieceInfoType::Part)
+			return false;
+
 		const char* Name = mFileName;
 
 		while (*Name)

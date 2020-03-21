@@ -122,7 +122,7 @@ protected:
 class lcSynthInfoUniversalJoint : public lcSynthInfo
 {
 public:
-	lcSynthInfoUniversalJoint(float Length, const char* EndPart, const char* CenterPart);
+	lcSynthInfoUniversalJoint(float Length, float EndOffset, const char* EndPart, const char* CenterPart);
 
 	void GetDefaultControlPoints(lcArray<lcPieceControlPoint>& ControlPoints) const override;
 	void VerifyControlPoints(lcArray<lcPieceControlPoint>& ControlPoints) const override;
@@ -131,6 +131,7 @@ protected:
 	void CalculateSections(const lcArray<lcPieceControlPoint>& ControlPoints, lcArray<lcMatrix44>& Sections, SectionCallbackFunc SectionCallback) const override;
 	void AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const lcArray<lcMatrix44>& Sections) const override;
 
+	float mEndOffset;
 	const char* mEndPart;
 	const char* mCenterPart;
 };
@@ -338,12 +339,15 @@ void lcSynthInit()
 	{
 		char PartID[16];
 		float Length;
+		float EndOffset;
 		char EndPart[16];
 		char CenterPart[16];
 	}
 	UniversalJoints[] =
 	{
-		{ "61903.dat",  60.00f, "62520.dat", "62519.dat" }  // Technic Universal Joint 3L
+		{ "61903.dat",   60.00f,  0.0f, "62520.dat", "62519.dat" }, // Technic Universal Joint 3L
+		{ "3712C01.dat", 60.00f, 30.0f, "3712.dat",  "3326.dat"  }, // Technic Universal Joint
+		{ "575C01.dat",  60.00f, 30.0f, "575.dat",   "3326a.dat" }  // Technic Universal Joint Type 1
 	};
 
 	for (const auto& JointInfo: UniversalJoints)
@@ -351,7 +355,7 @@ void lcSynthInit()
 		PieceInfo* Info = Library->FindPiece(JointInfo.PartID, nullptr, false, false);
 
 		if (Info)
-			Info->SetSynthInfo(new lcSynthInfoUniversalJoint(JointInfo.Length, JointInfo.EndPart, JointInfo.CenterPart));
+			Info->SetSynthInfo(new lcSynthInfoUniversalJoint(JointInfo.Length, JointInfo.EndOffset, JointInfo.EndPart, JointInfo.CenterPart));
 	}
 
 //	"758C01" // Hose Flexible  12L
@@ -433,8 +437,8 @@ lcSynthInfoActuator::lcSynthInfoActuator(float Length)
 {
 }
 
-lcSynthInfoUniversalJoint::lcSynthInfoUniversalJoint(float Length, const char* EndPart, const char* CenterPart)
-	: lcSynthInfo(Length), mEndPart(EndPart), mCenterPart(CenterPart)
+lcSynthInfoUniversalJoint::lcSynthInfoUniversalJoint(float Length, float EndOffset, const char* EndPart, const char* CenterPart)
+	: lcSynthInfo(Length), mEndOffset(EndOffset), mEndPart(EndPart), mCenterPart(CenterPart)
 {
 	mNondirectional = true;
 }
@@ -1348,13 +1352,21 @@ void lcSynthInfoUniversalJoint::AddParts(lcMemFile& File, lcLibraryMeshData&, co
 
 	Angle = atan2f(Offset.y, hypotf(Offset.x, Offset.z));
 	Rotation = lcMul(Rotation, lcMatrix44RotationX(Angle));
-	Transform = lcMatrix44LeoCADToLDraw(Rotation);
+	Transform = lcMul(
+			lcMatrix44Translation(lcVector3(0.0f, 0.0f, mEndOffset)),
+			lcMatrix44LeoCADToLDraw(Rotation)
+			);
 
-	sprintf(Line, "1 16 0 0 0 %f %f %f %f %f %f %f %f %f %s\n", Transform[0][0], Transform[1][0], Transform[2][0],
+	sprintf(Line, "1 16 %f %f %f %f %f %f %f %f %f %f %f %f %s\n", Transform[3][0], Transform[3][1], Transform[3][2],
+			Transform[0][0], Transform[1][0], Transform[2][0],
 			Transform[0][1], Transform[1][1], Transform[2][1], Transform[0][2], Transform[1][2], Transform[2][2], mEndPart);
 	File.WriteBuffer(Line, strlen(Line));
 
-	sprintf(Line, "1 16 0 0 0 0 -1 0 -1 0 0 0 0 -1 %s\n", mEndPart);
+	Rotation = lcMatrix44FromEulerAngles(lcVector3(0.0f, LC_PI/2, LC_PI));
+	Transform = lcMatrix44LeoCADToLDraw(lcMul(lcMatrix44Translation(lcVector3(0.0f, mEndOffset, 0.0f)), Rotation));
+	sprintf(Line, "1 16 %f %f %f %f %f %f %f %f %f %f %f %f %s\n", Transform[3][0], Transform[3][1], Transform[3][2],
+			Transform[0][0], Transform[1][0], Transform[2][0],
+			Transform[0][1], Transform[1][1], -Transform[2][1], Transform[0][2], Transform[1][2], Transform[2][2], mEndPart);
 	File.WriteBuffer(Line, strlen(Line));
 }
 

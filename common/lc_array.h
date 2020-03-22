@@ -51,10 +51,14 @@ public:
 	{
 		delete[] mData;
 
-		mData = std::exchange(Array.mData, nullptr);
-		mLength = std::exchange(Array.mLength, 0);
-		mAlloc = std::exchange(Array.mAlloc, 0);
+		mData = Array.mData;
+		Array.mData = nullptr;
+		mLength = Array.mLength;
+		Array.mLength = 0;
+		mAlloc = Array.mAlloc;
+		Array.mAlloc = 0;
 		mGrow = Array.mGrow;
+		Array.mGrow = 16;
 
 		return *this;
 	}

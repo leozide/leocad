@@ -173,7 +173,7 @@ void lcQModelListDialog::on_ExportModel_clicked()
 
 		QString SaveFileName = QFileInfo(QDir(lcGetProfileString(LC_PROFILE_PROJECTS_PATH)), CurrentItem->text()).absoluteFilePath();
 
-		SaveFileName = QFileDialog::getSaveFileName(this, tr("Save Model"), SaveFileName, tr("Supported Files (*.ldr *.dat);;All Files (*.*)"));
+		SaveFileName = QFileDialog::getSaveFileName(this, tr("Export Model"), SaveFileName, tr("Supported Files (*.ldr *.dat);;All Files (*.*)"));
 
 		if (SaveFileName.isEmpty())
 			return;

@@ -2898,9 +2898,9 @@ void lcModel::ScaleSelectedPieces(const float Scale, bool Update, bool Checkpoin
 	lcPiece* Piece = (lcPiece*)Focus;
 	quint32 Section = Piece->GetFocusSection();
 
-	if (Section >= LC_PIECE_SECTION_CONTROL_POINT_1 && Section <= LC_PIECE_SECTION_CONTROL_POINT_8)
+	if (Section >= LC_PIECE_SECTION_CONTROL_POINT_FIRST && Section <= LC_PIECE_SECTION_CONTROL_POINT_LAST)
 	{
-		int ControlPointIndex = Section - LC_PIECE_SECTION_CONTROL_POINT_1;
+		int ControlPointIndex = Section - LC_PIECE_SECTION_CONTROL_POINT_FIRST;
 		Piece->SetControlPointScale(ControlPointIndex, Scale);
 
 		if (Update)
@@ -3444,16 +3444,11 @@ void lcModel::GetSelectionInformation(int* Flags, lcArray<lcObject*>& Selection,
 
 				*Flags |= LC_SEL_PIECE | LC_SEL_SELECTED;
 
-				lcSynthInfo* SynthInfo = Piece->mPieceInfo->GetSynthInfo();
-				if (SynthInfo && SynthInfo->CanAddControlPoints())
-				{
+				if (Piece->CanAddControlPoint())
 					*Flags |= LC_SEL_CAN_ADD_CONTROL_POINT;
 
-					quint32 Section = Piece->GetFocusSection();
-
-					if (Section >= LC_PIECE_SECTION_CONTROL_POINT_1 && Section <= LC_PIECE_SECTION_CONTROL_POINT_8 && Piece->GetControlPoints().GetSize() > 2)
-						*Flags |= LC_SEL_CAN_REMOVE_CONTROL_POINT;
-				}
+				if (Piece->CanRemoveControlPoint())
+					*Flags |= LC_SEL_CAN_REMOVE_CONTROL_POINT;
 
 				if (Piece->GetGroup() != nullptr)
 				{

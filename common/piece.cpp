@@ -812,17 +812,33 @@ quint32 lcPiece::GetAllowedTransforms() const
 		return LC_OBJECT_TRANSFORM_MOVE_Z;
 }
 
+bool lcPiece::CanAddControlPoint() const
+{
+	if (mControlPoints.GetSize() >= LC_MAX_CONTROL_POINTS)
+		return false;
+
+	lcSynthInfo* SynthInfo = mPieceInfo->GetSynthInfo();
+	return SynthInfo && SynthInfo->CanAddControlPoints();
+}
+
+bool lcPiece::CanRemoveControlPoint() const
+{
+	quint32 Section = GetFocusSection();
+	return Section >= LC_PIECE_SECTION_CONTROL_POINT_FIRST && Section <= LC_PIECE_SECTION_CONTROL_POINT_LAST && mControlPoints.GetSize() > 2;
+}
+
 bool lcPiece::InsertControlPoint(const lcVector3& WorldStart, const lcVector3& WorldEnd)
 {
-	lcSynthInfo* SynthInfo = mPieceInfo->GetSynthInfo();
-	if (!SynthInfo || !SynthInfo->CanAddControlPoints())
+	if (!CanAddControlPoint())
 		return false;
 
 	lcMatrix44 InverseWorldMatrix = lcMatrix44AffineInverse(mModelWorld);
 	lcVector3 Start = lcMul31(WorldStart, InverseWorldMatrix);
 	lcVector3 End = lcMul31(WorldEnd, InverseWorldMatrix);
 
+	lcSynthInfo* SynthInfo = mPieceInfo->GetSynthInfo();
 	int ControlPointIndex = SynthInfo->InsertControlPoint(mControlPoints, Start, End);
+
 	if (ControlPointIndex)
 	{
 		SetFocused(GetFocusSection(), false);

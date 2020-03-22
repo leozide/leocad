@@ -1083,9 +1083,9 @@ void View::DrawSelectMoveOverlay()
 		lcPiece* Piece = (lcPiece*)Focus;
 		quint32 Section = Piece->GetFocusSection();
 
-		if (Section >= LC_PIECE_SECTION_CONTROL_POINT_1 && Section <= LC_PIECE_SECTION_CONTROL_POINT_8 && Piece->mPieceInfo->GetSynthInfo() && Piece->mPieceInfo->GetSynthInfo()->IsCurve())
+		if (Section >= LC_PIECE_SECTION_CONTROL_POINT_FIRST && Section <= LC_PIECE_SECTION_CONTROL_POINT_LAST && Piece->mPieceInfo->GetSynthInfo() && Piece->mPieceInfo->GetSynthInfo()->IsCurve())
 		{
-			int ControlPointIndex = Section - LC_PIECE_SECTION_CONTROL_POINT_1;
+			int ControlPointIndex = Section - LC_PIECE_SECTION_CONTROL_POINT_FIRST;
 			float Strength = Piece->GetControlPoints()[ControlPointIndex].Scale;
 			const float ScaleStart = 2.0f;
 			float Length = ScaleStart + Strength / OverlayScale;
@@ -2122,7 +2122,7 @@ void View::UpdateTrackTool()
 				lcPiece* Piece = (lcPiece*)Focus;
 				quint32 Section = Piece->GetFocusSection();
 
-				if (Section >= LC_PIECE_SECTION_CONTROL_POINT_1 && Section <= LC_PIECE_SECTION_CONTROL_POINT_8)
+				if (Section >= LC_PIECE_SECTION_CONTROL_POINT_FIRST && Section <= LC_PIECE_SECTION_CONTROL_POINT_LAST)
 					ControlPointIndex = Section - LC_PIECE_SECTION_CONTROL_POINT_1;
 			}
 
@@ -3122,7 +3122,7 @@ void View::OnMouseMove()
 					lcPiece* Piece = (lcPiece*)Focus;
 					quint32 Section = Piece->GetFocusSection();
 
-					if (Section >= LC_PIECE_SECTION_CONTROL_POINT_1 && Section <= LC_PIECE_SECTION_CONTROL_POINT_8)
+					if (Section >= LC_PIECE_SECTION_CONTROL_POINT_FIRST && Section <= LC_PIECE_SECTION_CONTROL_POINT_LAST)
 					{
 						const float ScaleMax = 200.0f;
 						const float OverlayScale = GetOverlayScale();

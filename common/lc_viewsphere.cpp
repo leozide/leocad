@@ -162,8 +162,8 @@ void lcViewSphere::Draw()
 	int Height = mView->mHeight;
 	lcViewSphereLocation Location = Preferences.mViewSphereLocation;
 
-	int Left = (Location == lcViewSphereLocation::BOTTOM_LEFT || Location == lcViewSphereLocation::TOP_LEFT) ? 0 : Width - ViewportSize;
-	int Bottom = (Location == lcViewSphereLocation::BOTTOM_LEFT || Location == lcViewSphereLocation::BOTTOM_RIGHT) ? 0 : Height - ViewportSize;
+	int Left = (Location == lcViewSphereLocation::BottomLeft || Location == lcViewSphereLocation::TopLeft) ? 0 : Width - ViewportSize;
+	int Bottom = (Location == lcViewSphereLocation::BottomLeft || Location == lcViewSphereLocation::BottomRight) ? 0 : Height - ViewportSize;
 	Context->SetViewport(Left, Bottom, ViewportSize, ViewportSize);
 
 	glDepthFunc(GL_ALWAYS);
@@ -173,7 +173,7 @@ void lcViewSphere::Draw()
 	Context->SetVertexFormatPosition(3);
 	Context->SetIndexBuffer(mIndexBuffer);
 
-	Context->SetMaterial(LC_MATERIAL_UNLIT_COLOR);
+	Context->SetMaterial(lcMaterialType::UnlitColor);
 	Context->SetColor(lcVector4(0.0f, 0.0f, 0.0f, 1.0f));
 
 	float Scale = 1.005f + 2.0f / (float)ViewportSize;
@@ -183,7 +183,7 @@ void lcViewSphere::Draw()
 
 	Context->DrawIndexedPrimitives(GL_TRIANGLES, mSubdivisions * mSubdivisions * 6 * 6, GL_UNSIGNED_SHORT, 0);
 
-	Context->SetMaterial(LC_MATERIAL_UNLIT_VIEW_SPHERE);
+	Context->SetMaterial(lcMaterialType::UnlitViewSphere);
 	Context->BindTextureCubeMap(mTexture->mTexture);
 
 	Context->SetWorldMatrix(lcMatrix44Identity());
@@ -305,8 +305,8 @@ std::bitset<6> lcViewSphere::GetIntersectionFlags(lcVector3& Intersection) const
 	int Width = mView->mWidth;
 	int Height = mView->mHeight;
 	int ViewportSize = Preferences.mViewSphereSize;
-	int Left = (Location == lcViewSphereLocation::BOTTOM_LEFT || Location == lcViewSphereLocation::TOP_LEFT) ? 0 : Width - ViewportSize;
-	int Bottom = (Location == lcViewSphereLocation::BOTTOM_LEFT || Location == lcViewSphereLocation::BOTTOM_RIGHT) ? 0 : Height - ViewportSize;
+	int Left = (Location == lcViewSphereLocation::BottomLeft || Location == lcViewSphereLocation::TopLeft) ? 0 : Width - ViewportSize;
+	int Bottom = (Location == lcViewSphereLocation::BottomLeft || Location == lcViewSphereLocation::BottomRight) ? 0 : Height - ViewportSize;
 	int x = mView->mInputState.x - Left;
 	int y = mView->mInputState.y - Bottom;
 	std::bitset<6> IntersectionFlags;

@@ -16,7 +16,7 @@ void lcPreferences::LoadDefaults()
 {
 	mFixedAxes = lcGetProfileInt(LC_PROFILE_FIXED_AXES);
 	mMouseSensitivity = lcGetProfileInt(LC_PROFILE_MOUSE_SENSITIVITY);
-	mShadingMode = (lcShadingMode)lcGetProfileInt(LC_PROFILE_SHADING_MODE);
+	mShadingMode = static_cast<lcShadingMode>(lcGetProfileInt(LC_PROFILE_SHADING_MODE));
 	mDrawAxes = lcGetProfileInt(LC_PROFILE_DRAW_AXES);
 	mDrawEdgeLines = lcGetProfileInt(LC_PROFILE_DRAW_EDGE_LINES);
 	mLineWidth = lcGetProfileFloat(LC_PROFILE_LINE_WIDTH);
@@ -28,7 +28,7 @@ void lcPreferences::LoadDefaults()
 	mGridLineSpacing = lcGetProfileInt(LC_PROFILE_GRID_LINE_SPACING);
 	mGridLineColor = lcGetProfileInt(LC_PROFILE_GRID_LINE_COLOR);
 	mViewSphereEnabled = lcGetProfileInt(LC_PROFILE_VIEW_SPHERE_ENABLED);
-	mViewSphereLocation = (lcViewSphereLocation)lcGetProfileInt(LC_PROFILE_VIEW_SPHERE_LOCATION);
+	mViewSphereLocation = static_cast<lcViewSphereLocation>(lcGetProfileInt(LC_PROFILE_VIEW_SPHERE_LOCATION));
 	mViewSphereSize = lcGetProfileInt(LC_PROFILE_VIEW_SPHERE_SIZE);
 	mViewSphereColor = lcGetProfileInt(LC_PROFILE_VIEW_SPHERE_COLOR);
 	mViewSphereTextColor = lcGetProfileInt(LC_PROFILE_VIEW_SPHERE_TEXT_COLOR);
@@ -41,7 +41,7 @@ void lcPreferences::SaveDefaults()
 {
 	lcSetProfileInt(LC_PROFILE_FIXED_AXES, mFixedAxes);
 	lcSetProfileInt(LC_PROFILE_MOUSE_SENSITIVITY, mMouseSensitivity);
-	lcSetProfileInt(LC_PROFILE_SHADING_MODE, mShadingMode);
+	lcSetProfileInt(LC_PROFILE_SHADING_MODE, static_cast<int>(mShadingMode));
 	lcSetProfileInt(LC_PROFILE_DRAW_AXES, mDrawAxes);
 	lcSetProfileInt(LC_PROFILE_DRAW_EDGE_LINES, mDrawEdgeLines);
 	lcSetProfileFloat(LC_PROFILE_LINE_WIDTH, mLineWidth);
@@ -340,13 +340,13 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 			ParseString(ShadingString, true);
 
 			if (ShadingString == QLatin1String("wireframe"))
-				mPreferences.mShadingMode = LC_SHADING_WIREFRAME;
+				mPreferences.mShadingMode = lcShadingMode::Wireframe;
 			else if (ShadingString == QLatin1String("flat"))
-				mPreferences.mShadingMode = LC_SHADING_FLAT;
+				mPreferences.mShadingMode = lcShadingMode::Flat;
 			else if (ShadingString == QLatin1String("default"))
-				mPreferences.mShadingMode = LC_SHADING_DEFAULT_LIGHTS;
+				mPreferences.mShadingMode = lcShadingMode::DefaultLights;
 			else if (ShadingString == QLatin1String("full"))
-				mPreferences.mShadingMode = LC_SHADING_FULL;
+				mPreferences.mShadingMode = lcShadingMode::Full;
 		}
 		else if (Param == QLatin1String("--line-width"))
 			ParseFloat(mPreferences.mLineWidth);

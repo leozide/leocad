@@ -8,7 +8,7 @@
 class lcVertexBuffer
 {
 public:
-	lcVertexBuffer()
+	constexpr lcVertexBuffer()
 		: Pointer(nullptr)
 	{
 	}
@@ -28,7 +28,7 @@ public:
 class lcIndexBuffer
 {
 public:
-	lcIndexBuffer()
+	constexpr lcIndexBuffer()
 		: Pointer(nullptr)
 	{
 	}
@@ -45,16 +45,16 @@ public:
 	};
 };
 
-enum lcMaterialType
+enum class lcMaterialType
 {
-	LC_MATERIAL_UNLIT_COLOR,
-	LC_MATERIAL_UNLIT_TEXTURE_MODULATE,
-	LC_MATERIAL_UNLIT_TEXTURE_DECAL,
-	LC_MATERIAL_UNLIT_VERTEX_COLOR,
-	LC_MATERIAL_UNLIT_VIEW_SPHERE,
-	LC_MATERIAL_FAKELIT_COLOR,
-	LC_MATERIAL_FAKELIT_TEXTURE_DECAL,
-	LC_NUM_MATERIALS
+	UnlitColor,
+	UnlitTextureModulate,
+	UnlitTextureDecal,
+	UnlitVertexColor,
+	UnlitViewSphere,
+	FakeLitColor,
+	FakeLitTextureDecal,
+	Count
 };
 
 enum lcProgramAttrib
@@ -100,11 +100,11 @@ public:
 	int mHeight = 0;
 };
 
-enum lcPolygonOffset
+enum class lcPolygonOffset
 {
-	LC_POLYGON_OFFSET_NONE,
-	LC_POLYGON_OFFSET_OPAQUE,
-	LC_POLYGON_OFFSET_TRANSLUCENT
+	None,
+	Opaque,
+	Translucent
 };
 
 class lcContext
@@ -250,7 +250,7 @@ protected:
 
 	GLuint mFramebufferObject;
 
-	static lcProgram mPrograms[LC_NUM_MATERIALS];
+	static lcProgram mPrograms[static_cast<int>(lcMaterialType::Count)];
 
 	Q_DECLARE_TR_FUNCTIONS(lcContext);
 };

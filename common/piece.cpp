@@ -557,7 +557,7 @@ void lcPiece::DrawInterface(lcContext* Context, const lcScene& Scene) const
 	};
 
 	lcMatrix44 WorldMatrix = Scene.ApplyActiveSubmodelTransform(mModelWorld);
-	Context->SetMaterial(LC_MATERIAL_UNLIT_COLOR);
+	Context->SetMaterial(lcMaterialType::UnlitColor);
 	Context->SetWorldMatrix(WorldMatrix);
 
 	if (IsFocused(LC_PIECE_SECTION_POSITION))

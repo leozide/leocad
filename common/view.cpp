@@ -955,7 +955,7 @@ void View::OnDraw()
 
 void View::DrawSelectMoveOverlay()
 {
-	mContext->SetMaterial(LC_MATERIAL_UNLIT_COLOR);
+	mContext->SetMaterial(lcMaterialType::UnlitColor);
 	mContext->SetViewMatrix(mCamera->mWorldView);
 	mContext->SetProjectionMatrix(GetProjectionMatrix());
 
@@ -1147,7 +1147,7 @@ void View::DrawRotateOverlay()
 	const float OverlayScale = GetOverlayScale();
 	const float OverlayRotateRadius = 2.0f;
 
-	mContext->SetMaterial(LC_MATERIAL_UNLIT_COLOR);
+	mContext->SetMaterial(lcMaterialType::UnlitColor);
 	mContext->SetViewMatrix(mCamera->mWorldView);
 	mContext->SetProjectionMatrix(GetProjectionMatrix());
 
@@ -1417,7 +1417,7 @@ void View::DrawRotateOverlay()
 		// Draw text.
 		lcVector3 ScreenPos = ProjectPoint(OverlayCenter);
 
-		mContext->SetMaterial(LC_MATERIAL_UNLIT_TEXTURE_MODULATE);
+		mContext->SetMaterial(lcMaterialType::UnlitTextureModulate);
 		mContext->SetWorldMatrix(lcMatrix44Identity());
 		mContext->SetViewMatrix(lcMatrix44Translation(lcVector3(0.375, 0.375, 0.0)));
 		mContext->SetProjectionMatrix(lcMatrix44Ortho(0.0f, mWidth, 0.0f, mHeight, -1.0f, 1.0f));
@@ -1441,7 +1441,7 @@ void View::DrawRotateOverlay()
 
 void View::DrawSelectZoomRegionOverlay()
 {
-	mContext->SetMaterial(LC_MATERIAL_UNLIT_COLOR);
+	mContext->SetMaterial(lcMaterialType::UnlitColor);
 	mContext->SetWorldMatrix(lcMatrix44Identity());
 	mContext->SetViewMatrix(lcMatrix44Translation(lcVector3(0.375, 0.375, 0.0)));
 	mContext->SetProjectionMatrix(lcMatrix44Ortho(0.0f, mWidth, 0.0f, mHeight, -1.0f, 1.0f));
@@ -1527,7 +1527,7 @@ void View::DrawRotateViewOverlay()
 	w = mWidth;
 	h = mHeight;
 
-	mContext->SetMaterial(LC_MATERIAL_UNLIT_COLOR);
+	mContext->SetMaterial(lcMaterialType::UnlitColor);
 	mContext->SetWorldMatrix(lcMatrix44Identity());
 	mContext->SetViewMatrix(lcMatrix44Translation(lcVector3(0.375, 0.375, 0.0)));
 	mContext->SetProjectionMatrix(lcMatrix44Ortho(0, w, 0, h, -1, 1));
@@ -1738,7 +1738,7 @@ void View::DrawGrid()
 		mContext->SetDepthWrite(false);
 		glEnable(GL_BLEND);
 
-		mContext->SetMaterial(LC_MATERIAL_UNLIT_TEXTURE_MODULATE);
+		mContext->SetMaterial(lcMaterialType::UnlitTextureModulate);
 		mContext->SetColor(lcVector4FromColor(Preferences.mGridStudColor));
 
 		mContext->SetVertexFormat(0, 3, 0, 2, 0, false);
@@ -1753,7 +1753,7 @@ void View::DrawGrid()
 	if (Preferences.mDrawGridLines)
 	{
 		mContext->SetLineWidth(1.0f);
-		mContext->SetMaterial(LC_MATERIAL_UNLIT_COLOR);
+		mContext->SetMaterial(lcMaterialType::UnlitColor);
 		mContext->SetColor(lcVector4FromColor(Preferences.mGridLineColor));
 
 		int NumVerts = 2 * (MaxX - MinX + MaxY - MinY + 2);
@@ -1790,7 +1790,7 @@ void View::DrawAxes()
 	lcMatrix44 WorldViewMatrix = mCamera->mWorldView;
 	WorldViewMatrix.SetTranslation(lcVector3(0, 0, 0));
 
-	mContext->SetMaterial(LC_MATERIAL_UNLIT_COLOR);
+	mContext->SetMaterial(lcMaterialType::UnlitColor);
 	mContext->SetWorldMatrix(lcMatrix44Identity());
 	mContext->SetViewMatrix(lcMul(WorldViewMatrix, TranslationMatrix));
 	mContext->SetProjectionMatrix(lcMatrix44Ortho(0, mWidth, 0, mHeight, -50, 50));
@@ -1809,7 +1809,7 @@ void View::DrawAxes()
 	mContext->SetColor(0.0f, 0.0f, 0.8f, 1.0f);
 	mContext->DrawIndexedPrimitives(GL_TRIANGLES, 24, GL_UNSIGNED_SHORT, (6 + 48) * 2);
 
-	mContext->SetMaterial(LC_MATERIAL_UNLIT_TEXTURE_MODULATE);
+	mContext->SetMaterial(lcMaterialType::UnlitTextureModulate);
 	mContext->SetViewMatrix(TranslationMatrix);
 	mContext->BindTexture2D(gTexFont.GetTexture());
 	glEnable(GL_BLEND);
@@ -1842,7 +1842,7 @@ void View::DrawViewport()
 
 	if (gMainWindow->GetActiveView() == this)
 	{
-		mContext->SetMaterial(LC_MATERIAL_UNLIT_COLOR);
+		mContext->SetMaterial(lcMaterialType::UnlitColor);
 		mContext->SetColor(1.0f, 0.0f, 0.0f, 1.0f);
 		float Verts[8] = { 0.0f, 0.0f, mWidth - 1.0f, 0.0f, mWidth - 1.0f, mHeight - 1.0f, 0.0f, mHeight - 1.0f };
 
@@ -1855,7 +1855,7 @@ void View::DrawViewport()
 
 	if (CameraName[0])
 	{
-		mContext->SetMaterial(LC_MATERIAL_UNLIT_TEXTURE_MODULATE);
+		mContext->SetMaterial(lcMaterialType::UnlitTextureModulate);
 		mContext->SetColor(0.0f, 0.0f, 0.0f, 1.0f);
 		mContext->BindTexture2D(gTexFont.GetTexture());
 

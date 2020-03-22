@@ -46,7 +46,7 @@ public:
 	{
 	}
 
-	lcVector2(const float _x, const float _y)
+	constexpr lcVector2(const float _x, const float _y)
 		: x(_x), y(_y)
 	{
 	}
@@ -86,7 +86,7 @@ public:
 	{
 	}
 
-	lcVector3(const float _x, const float _y, const float _z)
+	constexpr lcVector3(const float _x, const float _y, const float _z)
 		: x(_x), y(_y), z(_z)
 	{
 	}
@@ -132,12 +132,12 @@ public:
 	{
 	}
 
-	lcVector4(const float _x, const float _y, const float _z, const float _w)
+	constexpr lcVector4(const float _x, const float _y, const float _z, const float _w)
 		: x(_x), y(_y), z(_z), w(_w)
 	{
 	}
 
-	lcVector4(const lcVector3& _xyz, const float _w)
+	constexpr lcVector4(const lcVector3& _xyz, const float _w)
 		: x(_xyz.x), y(_xyz.y), z(_xyz.z), w(_w)
 	{
 	}

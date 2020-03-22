@@ -1325,7 +1325,7 @@ void lcModel::DrawBackground(lcGLWidget* Widget)
 			ViewWidth, 0.0f,       Color2[0], Color2[1], Color2[2], 1.0f
 		};
 
-		Context->SetMaterial(LC_MATERIAL_UNLIT_VERTEX_COLOR);
+		Context->SetMaterial(lcMaterialType::UnlitVertexColor);
 		Context->SetVertexBufferPointer(Verts);
 		Context->SetVertexFormat(0, 2, 0, 0, 4, false);
 
@@ -1354,7 +1354,7 @@ void lcModel::DrawBackground(lcGLWidget* Widget)
 		};
 
 		Context->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
-		Context->SetMaterial(LC_MATERIAL_UNLIT_TEXTURE_DECAL);
+		Context->SetMaterial(lcMaterialType::UnlitTextureDecal);
 		Context->SetVertexBufferPointer(Verts);
 		Context->SetVertexFormat(0, 2, 0, 2, 0, false);
 

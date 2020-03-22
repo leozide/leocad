@@ -5,21 +5,20 @@
 class Project;
 class lcPiecesLibrary;
 
-enum lcShadingMode
+enum class lcShadingMode
 {
-	LC_SHADING_WIREFRAME,
-	LC_SHADING_FLAT,
-	LC_SHADING_DEFAULT_LIGHTS,
-	LC_SHADING_FULL,
-	LC_NUM_SHADING_MODES
+	Wireframe,
+	Flat,
+	DefaultLights,
+	Full
 };
 
 enum class lcViewSphereLocation
 {
-	TOP_LEFT,
-	TOP_RIGHT,
-	BOTTOM_LEFT,
-	BOTTOM_RIGHT
+	TopLeft,
+	TopRight,
+	BottomLeft,
+	BottomRight
 };
 
 class lcPreferences

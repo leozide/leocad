@@ -127,16 +127,16 @@ void lcScene::DrawOpaqueMeshes(lcContext* Context, bool DrawLit, int PrimitiveTy
 
 	if (DrawLit)
 	{
-		FlatMaterial = LC_MATERIAL_FAKELIT_COLOR;
-		TexturedMaterial = LC_MATERIAL_FAKELIT_TEXTURE_DECAL;
+		FlatMaterial = lcMaterialType::FakeLitColor;
+		TexturedMaterial = lcMaterialType::FakeLitTextureDecal;
 	}
 	else
 	{
-		FlatMaterial = LC_MATERIAL_UNLIT_COLOR;
-		TexturedMaterial = LC_MATERIAL_UNLIT_TEXTURE_DECAL;
+		FlatMaterial = lcMaterialType::UnlitColor;
+		TexturedMaterial = lcMaterialType::UnlitTextureDecal;
 	}
 
-	Context->SetPolygonOffset(LC_POLYGON_OFFSET_OPAQUE);
+	Context->SetPolygonOffset(lcPolygonOffset::Opaque);
 
 	for (int MeshIndex : mOpaqueMeshes)
 	{
@@ -282,7 +282,7 @@ void lcScene::DrawOpaqueMeshes(lcContext* Context, bool DrawLit, int PrimitiveTy
 	}
 
 	Context->BindTexture2D(0);
-	Context->SetPolygonOffset(LC_POLYGON_OFFSET_NONE);
+	Context->SetPolygonOffset(lcPolygonOffset::None);
 }
 
 void lcScene::DrawTranslucentMeshes(lcContext* Context, bool DrawLit) const
@@ -294,18 +294,18 @@ void lcScene::DrawTranslucentMeshes(lcContext* Context, bool DrawLit) const
 
 	if (DrawLit)
 	{
-		FlatMaterial = LC_MATERIAL_FAKELIT_COLOR;
-		TexturedMaterial = LC_MATERIAL_FAKELIT_TEXTURE_DECAL;
+		FlatMaterial = lcMaterialType::FakeLitColor;
+		TexturedMaterial = lcMaterialType::FakeLitTextureDecal;
 	}
 	else
 	{
-		FlatMaterial = LC_MATERIAL_UNLIT_COLOR;
-		TexturedMaterial = LC_MATERIAL_UNLIT_TEXTURE_DECAL;
+		FlatMaterial = lcMaterialType::UnlitColor;
+		TexturedMaterial = lcMaterialType::UnlitTextureDecal;
 	}
 
 	glEnable(GL_BLEND);
 	Context->SetDepthWrite(false);
-	Context->SetPolygonOffset(LC_POLYGON_OFFSET_TRANSLUCENT);
+	Context->SetPolygonOffset(lcPolygonOffset::Translucent);
 
 	for (const lcTranslucentMeshInstance& MeshInstance : mTranslucentMeshes)
 	{
@@ -368,7 +368,7 @@ void lcScene::DrawTranslucentMeshes(lcContext* Context, bool DrawLit) const
 	}
 
 	Context->BindTexture2D(0);
-	Context->SetPolygonOffset(LC_POLYGON_OFFSET_NONE);
+	Context->SetPolygonOffset(lcPolygonOffset::None);
 
 	Context->SetDepthWrite(true);
 	glDisable(GL_BLEND);
@@ -386,10 +386,10 @@ void lcScene::Draw(lcContext* Context) const
 	const lcPreferences& Preferences = lcGetPreferences();
 
 	lcShadingMode ShadingMode = Preferences.mShadingMode;
-	if (ShadingMode == LC_SHADING_WIREFRAME && !mAllowWireframe)
-		ShadingMode = LC_SHADING_FLAT;
+	if (ShadingMode == lcShadingMode::Wireframe && !mAllowWireframe)
+		ShadingMode = lcShadingMode::Flat;
 
-	if (ShadingMode == LC_SHADING_WIREFRAME)
+	if (ShadingMode == lcShadingMode::Wireframe)
 	{
 		int PrimitiveTypes = LC_MESH_LINES;
 
@@ -401,7 +401,7 @@ void lcScene::Draw(lcContext* Context) const
 		if (mPreTranslucentCallback)
 			mPreTranslucentCallback();
 	}
-	else if (ShadingMode == LC_SHADING_FLAT)
+	else if (ShadingMode == lcShadingMode::Flat)
 	{
 		bool DrawLines = Preferences.mDrawEdgeLines && Preferences.mLineWidth != 0.0f;
 

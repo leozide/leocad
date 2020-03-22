@@ -284,7 +284,7 @@ void lcLight::UpdatePosition(lcStep Step)
 void lcLight::DrawInterface(lcContext* Context, const lcScene& Scene) const
 {
 	Q_UNUSED(Scene);
-	Context->SetMaterial(LC_MATERIAL_UNLIT_COLOR);
+	Context->SetMaterial(lcMaterialType::UnlitColor);
 
 	if (IsPointLight())
 		DrawPointLight(Context);

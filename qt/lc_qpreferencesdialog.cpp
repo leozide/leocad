@@ -105,8 +105,8 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 		ui->studLogoCombo->setCurrentIndex(mOptions->StudLogo);
 
 	if (!gSupportsShaderObjects)
-		ui->ShadingMode->removeItem(LC_SHADING_DEFAULT_LIGHTS);
-	ui->ShadingMode->setCurrentIndex(mOptions->Preferences.mShadingMode);
+		ui->ShadingMode->removeItem(static_cast<int>(lcShadingMode::DefaultLights));
+	ui->ShadingMode->setCurrentIndex(static_cast<int>(mOptions->Preferences.mShadingMode));
 
 	QPixmap pix(12, 12);
 

@@ -8,7 +8,7 @@ struct lcStringCacheEntry
 class lcStringCache
 {
 public:
-	lcStringCache();
+	constexpr lcStringCache();
 	~lcStringCache();
 
 	void AddRef(lcContext* Context);

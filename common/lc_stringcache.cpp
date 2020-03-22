@@ -5,10 +5,9 @@
 
 lcStringCache gStringCache;
 
-lcStringCache::lcStringCache()
+constexpr lcStringCache::lcStringCache()
+	: mTexture(nullptr), mRefCount(0)
 {
-	mTexture = nullptr;
-	mRefCount = 0;
 }
 
 lcStringCache::~lcStringCache()

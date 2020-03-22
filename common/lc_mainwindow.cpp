@@ -2085,7 +2085,7 @@ void lcMainWindow::UpdatePerspective()
 
 void lcMainWindow::UpdateShadingMode()
 {
-	mActions[LC_VIEW_SHADING_FIRST + lcGetPreferences().mShadingMode]->setChecked(true);
+	mActions[LC_VIEW_SHADING_FIRST + static_cast<int>(lcGetPreferences().mShadingMode)]->setChecked(true);
 }
 
 void lcMainWindow::UpdateSelectionMode()
@@ -2636,15 +2636,15 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		break;
 
 	case LC_VIEW_SHADING_WIREFRAME:
-		SetShadingMode(LC_SHADING_WIREFRAME);
+		SetShadingMode(lcShadingMode::Wireframe);
 		break;
 
 	case LC_VIEW_SHADING_FLAT:
-		SetShadingMode(LC_SHADING_FLAT);
+		SetShadingMode(lcShadingMode::Flat);
 		break;
 
 	case LC_VIEW_SHADING_DEFAULT_LIGHTS:
-		SetShadingMode(LC_SHADING_DEFAULT_LIGHTS);
+		SetShadingMode(lcShadingMode::DefaultLights);
 		break;
 
 	case LC_VIEW_PROJECTION_PERSPECTIVE:

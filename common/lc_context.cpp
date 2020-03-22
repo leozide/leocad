@@ -18,7 +18,7 @@
 #define GL_STATIC_DRAW_ARB GL_STATIC_DRAW
 #endif
 
-lcProgram lcContext::mPrograms[LC_NUM_MATERIALS];
+lcProgram lcContext::mPrograms[static_cast<int>(lcMaterialType::Count)];
 
 lcContext::lcContext()
 {
@@ -35,7 +35,7 @@ lcContext::lcContext()
 	mTexture2D = 0;
 	mTexture2DMS = 0;
 	mTextureCubeMap = 0;
-	mPolygonOffset = LC_POLYGON_OFFSET_NONE;
+	mPolygonOffset = lcPolygonOffset::None;
 	mDepthWrite = true;
 	mLineWidth = 1.0f;
 #ifndef LC_OPENGLES
@@ -61,7 +61,7 @@ lcContext::lcContext()
 	mViewProjectionMatrixDirty = false;
 	mHighlightParamsDirty = false;
 
-	mMaterialType = LC_NUM_MATERIALS;
+	mMaterialType = lcMaterialType::Count;
 }
 
 lcContext::~lcContext()
@@ -102,26 +102,26 @@ void lcContext::CreateShaderPrograms()
 "		LC_SHADER_PRECISION float Diffuse = min(abs(dot(Normal, LightDirection)) * 0.6 + 0.65, 1.0);\n"
 	};
 
-	const char* VertexShaders[LC_NUM_MATERIALS] =
+	const char* VertexShaders[lcMaterialType::Count] =
 	{
-		":/resources/shaders/unlit_color_vs.glsl",            // LC_MATERIAL_UNLIT_COLOR
-		":/resources/shaders/unlit_texture_modulate_vs.glsl", // LC_MATERIAL_UNLIT_TEXTURE_MODULATE
-		":/resources/shaders/unlit_texture_decal_vs.glsl",    // LC_MATERIAL_UNLIT_TEXTURE_DECAL
-		":/resources/shaders/unlit_vertex_color_vs.glsl",     // LC_MATERIAL_UNLIT_VERTEX_COLOR
-		":/resources/shaders/unlit_view_sphere_vs.glsl",      // LC_MATERIAL_UNLIT_VIEW_SPHERE
-		":/resources/shaders/fakelit_color_vs.glsl",          // LC_MATERIAL_FAKELIT_COLOR
-		":/resources/shaders/fakelit_texture_decal_vs.glsl"   // LC_MATERIAL_FAKELIT_TEXTURE_DECAL
+		":/resources/shaders/unlit_color_vs.glsl",            // UnlitColor
+		":/resources/shaders/unlit_texture_modulate_vs.glsl", // UnlitTextureModulate
+		":/resources/shaders/unlit_texture_decal_vs.glsl",    // UnlitTextureDecal
+		":/resources/shaders/unlit_vertex_color_vs.glsl",     // UnlitVertexColor
+		":/resources/shaders/unlit_view_sphere_vs.glsl",      // UnlitViewSphere
+		":/resources/shaders/fakelit_color_vs.glsl",          // FakeLitColor
+		":/resources/shaders/fakelit_texture_decal_vs.glsl"   // FakeLitTextureDecal
 	};
 
-	const char* FragmentShaders[LC_NUM_MATERIALS] =
+	const char* FragmentShaders[lcMaterialType::Count] =
 	{
-		":/resources/shaders/unlit_color_ps.glsl",            // LC_MATERIAL_UNLIT_COLOR
-		":/resources/shaders/unlit_texture_modulate_ps.glsl", // LC_MATERIAL_UNLIT_TEXTURE_MODULATE
-		":/resources/shaders/unlit_texture_decal_ps.glsl",    // LC_MATERIAL_UNLIT_TEXTURE_DECAL
-		":/resources/shaders/unlit_vertex_color_ps.glsl",     // LC_MATERIAL_UNLIT_VERTEX_COLOR
-		":/resources/shaders/unlit_view_sphere_ps.glsl",      // LC_MATERIAL_UNLIT_VIEW_SPHERE
-		":/resources/shaders/fakelit_color_ps.glsl",          // LC_MATERIAL_FAKELIT_COLOR
-		":/resources/shaders/fakelit_texture_decal_ps.glsl"   // LC_MATERIAL_FAKELIT_TEXTURE_DECAL
+		":/resources/shaders/unlit_color_ps.glsl",            // UnlitColor
+		":/resources/shaders/unlit_texture_modulate_ps.glsl", // UnlitTextureModulate
+		":/resources/shaders/unlit_texture_decal_ps.glsl",    // UnlitTextureDecal
+		":/resources/shaders/unlit_vertex_color_ps.glsl",     // UnlitVertexColor
+		":/resources/shaders/unlit_view_sphere_ps.glsl",      // UnlitViewSphere
+		":/resources/shaders/fakelit_color_ps.glsl",          // FakeLitColor
+		":/resources/shaders/fakelit_texture_decal_ps.glsl"   // FakeLitTextureDecal
 	};
 
 	auto LoadShader = [ShaderPrefix](const char* FileName, GLuint ShaderType) -> GLuint
@@ -165,7 +165,7 @@ void lcContext::CreateShaderPrograms()
 		return Shader;
 	};
 
-	for (int MaterialType = 0; MaterialType < LC_NUM_MATERIALS; MaterialType++)
+	for (int MaterialType = 0; MaterialType < static_cast<int>(lcMaterialType::Count); MaterialType++)
 	{
 		GLuint VertexShader = LoadShader(VertexShaders[MaterialType], GL_VERTEX_SHADER);
 		GLuint FragmentShader = LoadShader(FragmentShaders[MaterialType], GL_FRAGMENT_SHADER);
@@ -226,7 +226,7 @@ void lcContext::DestroyResources()
 	if (!gSupportsShaderObjects)
 		return;
 
-	for (int MaterialType = 0; MaterialType < LC_NUM_MATERIALS; MaterialType++)
+	for (int MaterialType = 0; MaterialType < static_cast<int>(lcMaterialType::Count); MaterialType++)
 	{
 		glDeleteProgram(mPrograms[MaterialType].Object);
 		mPrograms[MaterialType].Object = 0;
@@ -294,7 +294,7 @@ void lcContext::SetDefaultState()
 	mTextureCubeMap = 0;
 
 	glDisable(GL_POLYGON_OFFSET_FILL);
-	mPolygonOffset = LC_POLYGON_OFFSET_NONE;
+	mPolygonOffset = lcPolygonOffset::None;
 
 	mDepthWrite = true;
 	glDepthMask(GL_TRUE);
@@ -305,7 +305,7 @@ void lcContext::SetDefaultState()
 	if (gSupportsShaderObjects)
 	{
 		glUseProgram(0);
-		mMaterialType = LC_NUM_MATERIALS;
+		mMaterialType = lcMaterialType::Count;
 	}
 	else
 	{
@@ -337,7 +337,7 @@ void lcContext::SetMaterial(lcMaterialType MaterialType)
 
 	if (gSupportsShaderObjects)
 	{
-		glUseProgram(mPrograms[MaterialType].Object);
+		glUseProgram(mPrograms[static_cast<int>(MaterialType)].Object);
 		mColorDirty = true;
 		mWorldMatrixDirty = true; // todo: change dirty to a bitfield and set the lighting constants dirty here
 		mViewMatrixDirty = true;
@@ -348,7 +348,7 @@ void lcContext::SetMaterial(lcMaterialType MaterialType)
 #ifndef LC_OPENGLES
 		switch (MaterialType)
 		{
-		case LC_MATERIAL_UNLIT_TEXTURE_MODULATE:
+		case lcMaterialType::UnlitTextureModulate:
 			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
 			if (!mTextureEnabled)
@@ -358,8 +358,8 @@ void lcContext::SetMaterial(lcMaterialType MaterialType)
 			}
 			break;
 
-		case LC_MATERIAL_FAKELIT_TEXTURE_DECAL:
-		case LC_MATERIAL_UNLIT_TEXTURE_DECAL:
+		case lcMaterialType::FakeLitTextureDecal:
+		case lcMaterialType::UnlitTextureDecal:
 			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
 
 			if (!mTextureEnabled)
@@ -369,9 +369,9 @@ void lcContext::SetMaterial(lcMaterialType MaterialType)
 			}
 			break;
 
-		case LC_MATERIAL_UNLIT_COLOR:
-		case LC_MATERIAL_UNLIT_VERTEX_COLOR:
-		case LC_MATERIAL_FAKELIT_COLOR:
+		case lcMaterialType::UnlitColor:
+		case lcMaterialType::UnlitVertexColor:
+		case lcMaterialType::FakeLitColor:
 			if (mTextureEnabled)
 			{
 				glDisable(GL_TEXTURE_2D);
@@ -379,8 +379,8 @@ void lcContext::SetMaterial(lcMaterialType MaterialType)
 			}
 			break;
 
-		case LC_MATERIAL_UNLIT_VIEW_SPHERE:
-		case LC_NUM_MATERIALS:
+		case lcMaterialType::UnlitViewSphere:
+		case lcMaterialType::Count:
 			break;
 		}
 #endif
@@ -399,16 +399,16 @@ void lcContext::SetPolygonOffset(lcPolygonOffset PolygonOffset)
 
 	switch (PolygonOffset)
 	{
-	case LC_POLYGON_OFFSET_NONE:
+	case lcPolygonOffset::None:
 		glDisable(GL_POLYGON_OFFSET_FILL);
 		break;
 
-	case LC_POLYGON_OFFSET_OPAQUE:
+	case lcPolygonOffset::Opaque:
 		glPolygonOffset(0.5f, 0.1f);
 		glEnable(GL_POLYGON_OFFSET_FILL);
 		break;
 
-	case LC_POLYGON_OFFSET_TRANSLUCENT:
+	case lcPolygonOffset::Translucent:
 		glPolygonOffset(0.25f, 0.1f);
 		glEnable(GL_POLYGON_OFFSET_FILL);
 		break;
@@ -1174,7 +1174,7 @@ void lcContext::FlushState()
 {
 	if (gSupportsShaderObjects)
 	{
-		const lcProgram& Program = mPrograms[mMaterialType];
+		const lcProgram& Program = mPrograms[static_cast<int>(mMaterialType)];
 
 		if (mWorldMatrixDirty || mViewMatrixDirty || mProjectionMatrixDirty)
 		{

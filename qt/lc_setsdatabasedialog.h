@@ -25,7 +25,7 @@ public:
 		return mInventory;
 	}
 
-	virtual bool eventFilter(QObject* Object, QEvent* Event) override;
+	bool eventFilter(QObject* Object, QEvent* Event) override;
 
 public slots:
 	void DownloadFinished(lcHttpReply* Reply);

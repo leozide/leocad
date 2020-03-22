@@ -6,7 +6,7 @@ class lcTimelineWidget : public QTreeWidget
 
 public:
 	lcTimelineWidget(QWidget* Parent);
-	virtual ~lcTimelineWidget();
+	~lcTimelineWidget();
 
 	void Update(bool Clear, bool UpdateItems);
 	void UpdateSelection();
@@ -23,8 +23,8 @@ public slots:
 	void CustomMenuRequested(QPoint Pos);
 
 protected:
-	virtual void dropEvent(QDropEvent* Event);
-	virtual void mousePressEvent(QMouseEvent* Event);
+	void dropEvent(QDropEvent* DropEvent) override;
+	void mousePressEvent(QMouseEvent* MouseEvent) override;
 	void UpdateModel();
 	void UpdateCurrentStepItem();
 

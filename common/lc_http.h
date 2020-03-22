@@ -12,7 +12,7 @@ class lcHttpReply : public QThread
 public:
 	lcHttpReply(QObject* Parent, const QString& URL);
 
-	void run();
+	void run() override;
 
 	bool error() const
 	{

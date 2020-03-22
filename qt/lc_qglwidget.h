@@ -6,10 +6,10 @@ class lcGLWidget;
 class lcQGLWidget : public QGLWidget
 {
 public:
-	lcQGLWidget(QWidget *parent, lcGLWidget *owner, bool view);
+	lcQGLWidget(QWidget* Parent, lcGLWidget* Owner, bool IsView);
 	~lcQGLWidget();
 
-	QSize sizeHint() const;
+	QSize sizeHint() const override;
 
 	lcGLWidget *widget;
 	QSize preferredSize;
@@ -27,20 +27,20 @@ public:
 	QTimer mUpdateTimer;
 
 protected:
-	void initializeGL();
-	void resizeGL(int x, int h);
-	void paintGL();
-	void keyPressEvent(QKeyEvent *event);
-	void keyReleaseEvent(QKeyEvent *event);
-	void mousePressEvent(QMouseEvent *event);
-	void mouseReleaseEvent(QMouseEvent *event);
-	void mouseDoubleClickEvent(QMouseEvent *event);
-	void mouseMoveEvent(QMouseEvent *event);
-	void wheelEvent(QWheelEvent *event);
-	void dragEnterEvent(QDragEnterEvent *event);
-	void dragLeaveEvent(QDragLeaveEvent *event);
-	void dragMoveEvent(QDragMoveEvent *event);
-	void dropEvent(QDropEvent *event);
+	void initializeGL() override;
+	void resizeGL(int Width, int Height) override;
+	void paintGL() override;
+	void keyPressEvent(QKeyEvent* KeyEvent) override;
+	void keyReleaseEvent(QKeyEvent* KeyEvent) override;
+	void mousePressEvent(QMouseEvent* MouseEvent) override;
+	void mouseReleaseEvent(QMouseEvent* MouseEvent) override;
+	void mouseDoubleClickEvent(QMouseEvent* MouseEvent) override;
+	void mouseMoveEvent(QMouseEvent* MouseEvent) override;
+	void wheelEvent(QWheelEvent* WheelEvent) override;
+	void dragEnterEvent(QDragEnterEvent* DragEnterEvent) override;
+	void dragLeaveEvent(QDragLeaveEvent* DragLeaveEvent) override;
+	void dragMoveEvent(QDragMoveEvent* DragMoveEvent) override;
+	void dropEvent(QDropEvent* DropEvent) override;
 
 	int mWheelAccumulator;
 };

@@ -24,8 +24,8 @@ public:
 	}
 
 protected:
-	virtual void resizeEvent(QResizeEvent* Event) override;
-	virtual void paintEvent(QPaintEvent* PaintEvent) override;
+	void resizeEvent(QResizeEvent* Event) override;
+	void paintEvent(QPaintEvent* PaintEvent) override;
 
 	QImage mImage;
 	QImage mScaledImage;
@@ -40,7 +40,7 @@ public:
 	~lcRenderDialog();
 
 public slots:
-	void reject();
+	void reject() override;
 	void on_RenderButton_clicked();
 	void on_OutputBrowseButton_clicked();
 	void Update();

@@ -23,7 +23,7 @@ public:
 	};
 
 public slots:
-	void accept();
+	void accept() override;
 	void on_selectAll_clicked();
 	void on_selectNone_clicked();
 	void on_selectInvert_clicked();

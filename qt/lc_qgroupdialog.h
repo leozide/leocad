@@ -11,15 +11,14 @@ class lcQGroupDialog : public QDialog
 	Q_OBJECT
 
 public:
-	explicit lcQGroupDialog(QWidget *parent, const QString& Name);
+	explicit lcQGroupDialog(QWidget* Parent, const QString& Name);
 	~lcQGroupDialog();
 
 	QString mName;
 
 public slots:
-	void accept();
+	void accept() override;
 
 private:
 	Ui::lcQGroupDialog *ui;
 };
-

@@ -21,7 +21,7 @@ public:
 	int mEnd;
 
 public slots:
-	void accept();
+	void accept() override;
 	void on_fileNameBrowse_clicked();
 
 private:

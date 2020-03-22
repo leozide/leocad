@@ -16,7 +16,7 @@ public:
 		mLast = false;
 	}
 
-	virtual bool operator<(const QTableWidgetItem& Other) const override
+	bool operator<(const QTableWidgetItem& Other) const override
 	{
 		if (mLast)
 			return false;

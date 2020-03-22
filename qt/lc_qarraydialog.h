@@ -20,7 +20,7 @@ public:
 	lcVector3 mRotations[3];
 
 public slots:
-	void accept();
+	void accept() override;
 
 private:
 	Ui::lcQArrayDialog *ui;

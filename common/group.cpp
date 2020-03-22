@@ -8,10 +8,6 @@ lcGroup::lcGroup()
 	mGroup = nullptr;
 }
 
-lcGroup::~lcGroup()
-{
-}
-
 void lcGroup::FileLoad(lcFile* File)
 {
 	qint32 GroupIndex;

@@ -63,14 +63,14 @@ public:
 	void AddTemplatesJson(const QByteArray& TemplateData);
 	QByteArray GetTemplatesJson() const;
 
-	void OnDraw();
-	void OnLeftButtonDown();
-	void OnLeftButtonUp();
-	void OnLeftButtonDoubleClick();
-	void OnRightButtonDown();
-	void OnRightButtonUp();
-	void OnMouseMove();
-	void OnInitialUpdate();
+	void OnDraw() override;
+	void OnLeftButtonDown() override;
+	void OnLeftButtonUp() override;
+	void OnLeftButtonDoubleClick() override;
+	void OnRightButtonDown() override;
+	void OnRightButtonUp() override;
+	void OnMouseMove() override;
+	void OnInitialUpdate() override;
 
 	void Calculate();
 	int GetSelectionIndex(int Type) const;

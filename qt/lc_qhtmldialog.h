@@ -16,7 +16,7 @@ public:
 	~lcQHTMLDialog();
 
 public slots:
-	void accept();
+	void accept() override;
 	void on_outputFolderBrowse_clicked();
 
 private:

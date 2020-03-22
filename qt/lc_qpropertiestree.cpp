@@ -406,7 +406,7 @@ public:
 	{
 	}
 
-	QValidator::State validate(QString& Input, int& Pos) const
+	QValidator::State validate(QString& Input, int& Pos) const override
 	{
 		if (mAllowEmpty && Input.isEmpty())
 			return Acceptable;

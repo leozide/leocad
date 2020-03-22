@@ -8,7 +8,6 @@ class lcGroup
 {
 public:
 	lcGroup();
-	~lcGroup();
 
 	lcGroup* GetTopGroup()
 	{

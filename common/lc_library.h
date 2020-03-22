@@ -77,6 +77,11 @@ public:
 	lcPiecesLibrary();
 	~lcPiecesLibrary();
 
+	lcPiecesLibrary(const lcPiecesLibrary&) = delete;
+	lcPiecesLibrary(lcPiecesLibrary&&) = delete;
+	lcPiecesLibrary& operator=(const lcPiecesLibrary&) = delete;
+	lcPiecesLibrary& operator=(lcPiecesLibrary&&) = delete;
+
 	bool Load(const QString& LibraryPath, bool ShowProgress);
 	void Unload();
 	void RemoveTemporaryPieces();

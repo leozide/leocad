@@ -40,8 +40,8 @@ public:
 	}
 
 protected:
-	virtual void mousePressEvent(QMouseEvent* Event) override;
-	virtual void mouseReleaseEvent(QMouseEvent* Event) override;
+	void mousePressEvent(QMouseEvent* Event) override;
+	void mouseReleaseEvent(QMouseEvent* Event) override;
 
 	int mMousePressTab;
 };
@@ -357,10 +357,10 @@ protected slots:
 	void Print(QPrinter* Printer);
 
 protected:
-	void closeEvent(QCloseEvent *event);
-	void dragEnterEvent(QDragEnterEvent* Event);
-	void dropEvent(QDropEvent* Event);
-	QMenu* createPopupMenu();
+	void closeEvent(QCloseEvent *event) override;
+	void dragEnterEvent(QDragEnterEvent* Event) override;
+	void dropEvent(QDropEvent* Event) override;
+	QMenu* createPopupMenu() override;
 
 	void CreateActions();
 	void CreateMenus();

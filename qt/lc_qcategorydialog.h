@@ -18,7 +18,7 @@ public:
 	lcLibraryCategory *options;
 
 public slots:
-	void accept();
+	void accept() override;
 
 private:
 	Ui::lcQCategoryDialog *ui;

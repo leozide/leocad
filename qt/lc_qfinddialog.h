@@ -18,7 +18,7 @@ public:
 	lcSearchOptions* mSearchOptions;
 	
 public slots:
-	void accept();
+	void accept() override;
 
 private:
 	Ui::lcQFindDialog *ui;

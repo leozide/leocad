@@ -23,8 +23,8 @@ public:
 
 public slots:
 	void DownloadFinished(lcHttpReply* Reply);
-	void accept();
-	void reject();
+	void accept() override;
+	void reject() override;
 	void finished(int result);
 
 private:

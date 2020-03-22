@@ -41,6 +41,24 @@ public:
 		return *this;
 	}
 
+	lcArray(lcArray<T>&& Array)
+	{
+		mData = nullptr;
+		*this = std::move(Array);
+	}
+
+	lcArray<T>& operator=(lcArray<T>&& Array)
+	{
+		delete[] mData;
+
+		mData = std::exchange(Array.mData, nullptr);
+		mLength = std::exchange(Array.mLength, 0);
+		mAlloc = std::exchange(Array.mAlloc, 0);
+		mGrow = Array.mGrow;
+
+		return *this;
+	}
+
 	const T& operator[](int Index) const
 	{
 		return mData[Index];

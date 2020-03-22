@@ -8,7 +8,7 @@ class lcQColorPickerPopup : public QFrame
 	Q_OBJECT
 
 public:
-	lcQColorPickerPopup(QWidget *parent = 0, int colorIndex = 0);
+	lcQColorPickerPopup(QWidget *parent = nullptr, int colorIndex = 0);
 	~lcQColorPickerPopup();
 
 	void exec();
@@ -23,9 +23,9 @@ public slots:
 	void colorSelected(int colorIndex);
 
 protected:
-	void showEvent(QShowEvent *e);
-	void hideEvent(QHideEvent *e);
-	void mouseReleaseEvent(QMouseEvent *e);
+	void showEvent(QShowEvent* ShowEvent) override;
+	void hideEvent(QHideEvent* HideEvent) override;
+	void mouseReleaseEvent(QMouseEvent* MouseEvent) override;
 
 private:
 	QEventLoop *eventLoop;

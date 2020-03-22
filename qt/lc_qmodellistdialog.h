@@ -19,7 +19,7 @@ public:
 	QList<QPair<QString, lcModel*>>& mModels;
 
 public slots:
-	void accept();
+	void accept() override;
 	void on_NewModel_clicked();
 	void on_DeleteModel_clicked();
 	void on_RenameModel_clicked();

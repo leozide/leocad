@@ -102,7 +102,7 @@ void lcContext::CreateShaderPrograms()
 "		LC_SHADER_PRECISION float Diffuse = min(abs(dot(Normal, LightDirection)) * 0.6 + 0.65, 1.0);\n"
 	};
 
-	const char* VertexShaders[lcMaterialType::Count] =
+	const char* VertexShaders[static_cast<int>(lcMaterialType::Count)] =
 	{
 		":/resources/shaders/unlit_color_vs.glsl",            // UnlitColor
 		":/resources/shaders/unlit_texture_modulate_vs.glsl", // UnlitTextureModulate
@@ -113,7 +113,7 @@ void lcContext::CreateShaderPrograms()
 		":/resources/shaders/fakelit_texture_decal_vs.glsl"   // FakeLitTextureDecal
 	};
 
-	const char* FragmentShaders[lcMaterialType::Count] =
+	const char* FragmentShaders[static_cast<int>(lcMaterialType::Count)] =
 	{
 		":/resources/shaders/unlit_color_ps.glsl",            // UnlitColor
 		":/resources/shaders/unlit_texture_modulate_ps.glsl", // UnlitTextureModulate

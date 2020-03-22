@@ -40,7 +40,7 @@ class lcCamera : public lcObject
 public:
 	lcCamera(bool Simple);
 	lcCamera(float ex, float ey, float ez, float tx, float ty, float tz);
-	virtual ~lcCamera();
+	~lcCamera();
 
 	const char* GetName() const override
 	{
@@ -67,12 +67,12 @@ public:
 			mState &= ~LC_CAMERA_ORTHO;
 	}
 
-	virtual bool IsSelected() const override
+	bool IsSelected() const override
 	{
 		return (mState & LC_CAMERA_SELECTION_MASK) != 0;
 	}
 
-	virtual bool IsSelected(quint32 Section) const override
+	bool IsSelected(quint32 Section) const override
 	{
 		switch (Section)
 		{
@@ -91,7 +91,7 @@ public:
 		return false;
 	}
 
-	virtual void SetSelected(bool Selected) override
+	void SetSelected(bool Selected) override
 	{
 		if (Selected)
 			mState |= LC_CAMERA_SELECTION_MASK;
@@ -99,7 +99,7 @@ public:
 			mState &= ~(LC_CAMERA_SELECTION_MASK | LC_CAMERA_FOCUS_MASK);
 	}
 
-	virtual void SetSelected(quint32 Section, bool Selected) override
+	void SetSelected(quint32 Section, bool Selected) override
 	{
 		switch (Section)
 		{
@@ -126,12 +126,12 @@ public:
 		}
 	}
 
-	virtual bool IsFocused() const override
+	bool IsFocused() const override
 	{
 		return (mState & LC_CAMERA_FOCUS_MASK) != 0;
 	}
 
-	virtual bool IsFocused(quint32 Section) const override
+	bool IsFocused(quint32 Section) const override
 	{
 		switch (Section)
 		{
@@ -150,7 +150,7 @@ public:
 		return false;
 	}
 
-	virtual void SetFocused(quint32 Section, bool Focus) override
+	void SetFocused(quint32 Section, bool Focus) override
 	{
 		switch (Section)
 		{
@@ -177,7 +177,7 @@ public:
 		}
 	}
 
-	virtual quint32 GetFocusSection() const override
+	quint32 GetFocusSection() const override
 	{
 		if (mState & LC_CAMERA_POSITION_FOCUSED)
 			return LC_CAMERA_SECTION_POSITION;
@@ -191,12 +191,12 @@ public:
 		return ~0U;
 	}
 
-	virtual quint32 GetAllowedTransforms() const override
+	quint32 GetAllowedTransforms() const override
 	{
 		return LC_OBJECT_TRANSFORM_MOVE_X | LC_OBJECT_TRANSFORM_MOVE_Y | LC_OBJECT_TRANSFORM_MOVE_Z;
 	}
 
-	virtual lcVector3 GetSectionPosition(quint32 Section) const override
+	lcVector3 GetSectionPosition(quint32 Section) const override
 	{
 		switch (Section)
 		{
@@ -259,10 +259,10 @@ public:
 	}
 
 public:
-	virtual void RayTest(lcObjectRayTest& ObjectRayTest) const override;
-	virtual void BoxTest(lcObjectBoxTest& ObjectBoxTest) const override;
-	virtual void DrawInterface(lcContext* Context, const lcScene& Scene) const override;
-	virtual void RemoveKeyFrames() override;
+	void RayTest(lcObjectRayTest& ObjectRayTest) const override;
+	void BoxTest(lcObjectBoxTest& ObjectBoxTest) const override;
+	void DrawInterface(lcContext* Context, const lcScene& Scene) const override;
+	void RemoveKeyFrames() override;
 
 	void InsertTime(lcStep Start, lcStep Time);
 	void RemoveTime(lcStep Start, lcStep Time);

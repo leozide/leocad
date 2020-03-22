@@ -38,8 +38,8 @@ public:
 	{
 	}
 
-	virtual void paint(QPainter* Painter, const QStyleOptionViewItem& Option, const QModelIndex& Index) const;
-	virtual QSize sizeHint(const QStyleOptionViewItem& Option, const QModelIndex& Index) const;
+	void paint(QPainter* Painter, const QStyleOptionViewItem& Option, const QModelIndex& Index) const override;
+	QSize sizeHint(const QStyleOptionViewItem& Option, const QModelIndex& Index) const override;
 
 protected:
 	lcPartSelectionListModel* mListModel;
@@ -51,12 +51,12 @@ class lcPartSelectionListModel : public QAbstractListModel
 
 public:
 	lcPartSelectionListModel(QObject* Parent);
-	virtual ~lcPartSelectionListModel();
+	~lcPartSelectionListModel();
 
-	virtual int rowCount(const QModelIndex& Parent = QModelIndex()) const;
-	virtual QVariant data(const QModelIndex& Index, int Role = Qt::DisplayRole) const;
-	virtual QVariant headerData(int Section, Qt::Orientation Orientation, int Role = Qt::DisplayRole) const;
-	virtual Qt::ItemFlags flags(const QModelIndex& Index) const;
+	int rowCount(const QModelIndex& Parent = QModelIndex()) const override;
+	QVariant data(const QModelIndex& Index, int Role = Qt::DisplayRole) const override;
+	QVariant headerData(int Section, Qt::Orientation Orientation, int Role = Qt::DisplayRole) const override;
+	Qt::ItemFlags flags(const QModelIndex& Index) const override;
 
 	PieceInfo* GetPieceInfo(const QModelIndex& Index) const
 	{
@@ -141,7 +141,7 @@ class lcPartSelectionListView : public QListView
 public:
 	lcPartSelectionListView(QWidget* Parent, lcPartSelectionWidget* PartSelectionWidget);
 
-	virtual void startDrag(Qt::DropActions SupportedActions);
+	void startDrag(Qt::DropActions SupportedActions) override;
 
 	void SetCategory(lcPartCategoryType Type, int Index);
 
@@ -232,8 +232,8 @@ protected:
 	void LoadPartPalettes();
 	void SavePartPalettes();
 
-	virtual void resizeEvent(QResizeEvent* Event);
-	virtual bool event(QEvent* Event);
+	void resizeEvent(QResizeEvent* Event) override;
+	bool event(QEvent* Event) override;
 
 	QTreeWidget* mCategoriesWidget;
 	QLineEdit* mFilterWidget;

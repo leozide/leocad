@@ -26,7 +26,7 @@ class lcLight : public lcObject
 public:
 	lcLight(float px, float py, float pz);
 	lcLight(float px, float py, float pz, float tx, float ty, float tz);
-	virtual ~lcLight();
+	~lcLight();
 
 	bool IsPointLight() const
 	{
@@ -43,12 +43,12 @@ public:
 		return (mState & LC_LIGHT_DIRECTIONAL) != 0;
 	}
 
-	virtual bool IsSelected() const override
+	bool IsSelected() const override
 	{
 		return (mState & LC_LIGHT_SELECTION_MASK) != 0;
 	}
 
-	virtual bool IsSelected(quint32 Section) const override
+	bool IsSelected(quint32 Section) const override
 	{
 		switch (Section)
 		{
@@ -63,7 +63,7 @@ public:
 		return false;
 	}
 
-	virtual void SetSelected(bool Selected) override
+	void SetSelected(bool Selected) override
 	{
 		if (Selected)
 		{
@@ -76,7 +76,7 @@ public:
 			mState &= ~(LC_LIGHT_SELECTION_MASK | LC_LIGHT_FOCUS_MASK);
 	}
 
-	virtual void SetSelected(quint32 Section, bool Selected) override
+	void SetSelected(quint32 Section, bool Selected) override
 	{
 		switch (Section)
 		{
@@ -99,12 +99,12 @@ public:
 		}
 	}
 
-	virtual bool IsFocused() const override
+	bool IsFocused() const override
 	{
 		return (mState & LC_LIGHT_FOCUS_MASK) != 0;
 	}
 
-	virtual bool IsFocused(quint32 Section) const override
+	bool IsFocused(quint32 Section) const override
 	{
 		switch (Section)
 		{
@@ -119,7 +119,7 @@ public:
 		return false;
 	}
 
-	virtual void SetFocused(quint32 Section, bool Focused) override
+	void SetFocused(quint32 Section, bool Focused) override
 	{
 		switch (Section)
 		{
@@ -142,7 +142,7 @@ public:
 		}
 	}
 
-	virtual quint32 GetFocusSection() const override
+	quint32 GetFocusSection() const override
 	{
 		if (mState & LC_LIGHT_POSITION_FOCUSED)
 			return LC_LIGHT_SECTION_POSITION;
@@ -153,12 +153,12 @@ public:
 		return ~0U;
 	}
 
-	virtual quint32 GetAllowedTransforms() const override
+	quint32 GetAllowedTransforms() const override
 	{
 		return LC_OBJECT_TRANSFORM_MOVE_X | LC_OBJECT_TRANSFORM_MOVE_Y | LC_OBJECT_TRANSFORM_MOVE_Z;
 	}
 
-	virtual lcVector3 GetSectionPosition(quint32 Section) const override
+	lcVector3 GetSectionPosition(quint32 Section) const override
 	{
 		switch (Section)
 		{
@@ -175,10 +175,10 @@ public:
 	void SaveLDraw(QTextStream& Stream) const;
 
 public:
-	virtual void RayTest(lcObjectRayTest& ObjectRayTest) const override;
-	virtual void BoxTest(lcObjectBoxTest& ObjectBoxTest) const override;
-	virtual void DrawInterface(lcContext* Context, const lcScene& Scene) const override;
-	virtual void RemoveKeyFrames() override;
+	void RayTest(lcObjectRayTest& ObjectRayTest) const override;
+	void BoxTest(lcObjectBoxTest& ObjectBoxTest) const override;
+	void DrawInterface(lcContext* Context, const lcScene& Scene) const override;
+	void RemoveKeyFrames() override;
 
 	void InsertTime(lcStep Start, lcStep Time);
 	void RemoveTime(lcStep Start, lcStep Time);

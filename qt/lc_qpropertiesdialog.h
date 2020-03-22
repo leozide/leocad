@@ -18,7 +18,7 @@ public:
 	lcPropertiesDialogOptions *options;
 
 public slots:
-	void accept();
+	void accept() override;
 	void colorClicked();
 	void on_imageNameButton_clicked();
 

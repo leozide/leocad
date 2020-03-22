@@ -60,7 +60,7 @@ class View : public lcGLWidget
 {
 public:
 	View(lcModel* Model);
-	virtual ~View();
+	~View();
 
 	void Clear()
 	{
@@ -85,20 +85,20 @@ public:
 	static void CreateResources(lcContext* Context);
 	static void DestroyResources(lcContext* Context);
 
-	void OnDraw();
-	void OnInitialUpdate();
-	void OnUpdateCursor();
-	void OnLeftButtonDown();
-	void OnLeftButtonUp();
-	void OnLeftButtonDoubleClick();
-	void OnMiddleButtonDown();
-	void OnMiddleButtonUp();
-	void OnRightButtonDown();
-	void OnRightButtonUp();
-	void OnBackButtonUp();
-	void OnForwardButtonUp();
-	void OnMouseMove();
-	void OnMouseWheel(float Direction);
+	void OnDraw() override;
+	void OnInitialUpdate() override;
+	void OnUpdateCursor() override;
+	void OnLeftButtonDown() override;
+	void OnLeftButtonUp() override;
+	void OnLeftButtonDoubleClick() override;
+	void OnMiddleButtonDown() override;
+	void OnMiddleButtonUp() override;
+	void OnRightButtonDown() override;
+	void OnRightButtonUp() override;
+	void OnBackButtonUp() override;
+	void OnForwardButtonUp() override;
+	void OnMouseMove() override;
+	void OnMouseWheel(float Direction) override;
 
 	bool IsTracking() const
 	{

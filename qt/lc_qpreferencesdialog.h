@@ -22,10 +22,10 @@ public:
 		CategoryRole = Qt::UserRole
 	};
 
-	bool eventFilter(QObject *object, QEvent *event);
+	bool eventFilter(QObject* Object, QEvent* Event) override;
 
 public slots:
-	void accept();
+	void accept() override;
 	void on_partsLibraryBrowse_clicked();
 	void on_partsArchiveBrowse_clicked();
 	void on_ColorConfigBrowseButton_clicked();

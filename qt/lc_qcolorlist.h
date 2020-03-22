@@ -20,12 +20,12 @@ signals:
 	void colorSelected(int colorIndex);
 
 protected:
-	virtual bool event(QEvent* Event) override;
-	virtual void paintEvent(QPaintEvent* PaintEvent) override;
-	virtual void resizeEvent(QResizeEvent* ResizeEvent) override;
-	virtual void mousePressEvent(QMouseEvent* MouseEvent) override;
-	virtual void mouseMoveEvent(QMouseEvent* MouseEvent) override;
-	virtual void keyPressEvent(QKeyEvent* KeyEvent) override;
+	bool event(QEvent* Event) override;
+	void paintEvent(QPaintEvent* PaintEvent) override;
+	void resizeEvent(QResizeEvent* ResizeEvent) override;
+	void mousePressEvent(QMouseEvent* MouseEvent) override;
+	void mouseMoveEvent(QMouseEvent* MouseEvent) override;
+	void keyPressEvent(QKeyEvent* KeyEvent) override;
 
 	void SelectCell(int CellIdx);
 

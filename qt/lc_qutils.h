@@ -9,9 +9,9 @@ float lcParseValueLocalized(const QString& Value);
 class lcQTreeWidgetColumnStretcher : public QObject
 {
 public:
-	lcQTreeWidgetColumnStretcher(QTreeWidget *treeWidget, int columnToStretch);
+	lcQTreeWidgetColumnStretcher(QTreeWidget* TreeWidget, int ColumnToStretch);
 
-	virtual bool eventFilter(QObject *obj, QEvent *ev);
+	bool eventFilter(QObject* Object, QEvent* Event) override;
 
 	const int m_columnToStretch;
 };
@@ -24,7 +24,7 @@ public:
 	{
 	}
 
-	virtual QSize sizeHint() const override
+	QSize sizeHint() const override
 	{
 		QFontMetrics FontMetrics(font());
 
@@ -34,7 +34,7 @@ public:
 	}
 
 protected:
-	virtual bool event(QEvent* Event) override
+	bool event(QEvent* Event) override
 	{
 		if (Event->type() == QEvent::ShortcutOverride)
 		{

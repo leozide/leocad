@@ -26,8 +26,8 @@ public:
 	};
 
 public slots:
-	void accept();
-	void reject();
+	void accept() override;
+	void reject() override;
 	void on_newGroup_clicked();
 	void onItemClicked(QTreeWidgetItem* Item, int Column);
 	void onItemDoubleClicked(QTreeWidgetItem* Item, int Column);
@@ -38,7 +38,7 @@ private:
 	void UpdateParents(QTreeWidgetItem* ParentItem, lcGroup* ParentGroup);
 	void AddChildren(QTreeWidgetItem* ParentItem, lcGroup* ParentGroup);
 
-	void timerEvent(QTimerEvent* Event);
+	void timerEvent(QTimerEvent* Event) override;
 
 	lcModel* mModel;
 	QTreeWidgetItem* mLastItemClicked;

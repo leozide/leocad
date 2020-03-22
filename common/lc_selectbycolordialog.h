@@ -15,7 +15,7 @@ public:
 	int mColorIndex;
 
 public slots:
-	void accept();
+	void accept() override;
 
 protected:
 	lcQColorPicker* mColorPicker;

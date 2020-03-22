@@ -15,7 +15,7 @@ public:
     ~lcPartPaletteDialog();
 
 protected slots:
-	void accept();
+	void accept() override;
 	void on_NewButton_clicked();
 	void on_DeleteButton_clicked();
 	void on_RenameButton_clicked();

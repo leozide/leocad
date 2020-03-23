@@ -148,11 +148,9 @@ protected:
 	template<typename T>
 	void ChangeKey(lcArray<lcObjectKey<T>>& Keys, const T& Value, lcStep Step, bool AddKey)
 	{
-		lcObjectKey<T>* Key;
-
 		for (int KeyIdx = 0; KeyIdx < Keys.GetSize(); KeyIdx++)
 		{
-			Key = &Keys[KeyIdx];
+			lcObjectKey<T>* Key = &Keys[KeyIdx];
 
 			if (Key->Step == Step)
 			{
@@ -179,14 +177,14 @@ protected:
 
 		if (AddKey || Keys.GetSize() == 0)
 		{
-			Key = &Keys.Add();
+			lcObjectKey<T>* Key = &Keys.Add();
 
 			Key->Step = Step;
 			Key->Value = Value;
 		}
 		else
 		{
-			Key = &Keys[Keys.GetSize() - 1];
+			lcObjectKey<T>* Key = &Keys[Keys.GetSize() - 1];
 			Key->Value = Value;
 		}
 	}

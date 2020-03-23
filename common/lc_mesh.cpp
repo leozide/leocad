@@ -227,7 +227,7 @@ bool lcMesh::MinIntersectDist(const lcVector3& Start, const lcVector3& End, floa
 }
 
 template<typename IndexType>
-bool lcMesh::IntersectsPlanes(const lcVector4 Planes[6])
+bool lcMesh::IntersectsPlanes(const lcVector4 (&Planes)[6])
 {
 	lcVertex* Verts = (lcVertex*)mVertexData;
 
@@ -248,7 +248,7 @@ bool lcMesh::IntersectsPlanes(const lcVector4 Planes[6])
 	return false;
 }
 
-bool lcMesh::IntersectsPlanes(const lcVector4 Planes[6])
+bool lcMesh::IntersectsPlanes(const lcVector4 (&Planes)[6])
 {
 	if (mIndexType == GL_UNSIGNED_SHORT)
 		return IntersectsPlanes<GLushort>(Planes);

@@ -90,8 +90,8 @@ public:
 	bool MinIntersectDist(const lcVector3& Start, const lcVector3& End, float& MinDist);
 
 	template<typename IndexType>
-	bool IntersectsPlanes(const lcVector4 Planes[6]);
-	bool IntersectsPlanes(const lcVector4 Planes[6]);
+	bool IntersectsPlanes(const lcVector4 (&Planes)[6]);
+	bool IntersectsPlanes(const lcVector4 (&Planes)[6]);
 
 	int GetLodIndex(float Distance) const;
 

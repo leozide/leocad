@@ -55,13 +55,13 @@ bool lcLoadColorFile(lcFile& File);
 int lcGetColorIndex(quint32 ColorCode);
 int lcGetBrickLinkColor(int ColorIndex);
 
-inline constexpr quint32 lcGetColorCodeFromExtendedColor(int Color)
+inline quint32 lcGetColorCodeFromExtendedColor(int Color)
 {
 	const int ConverstionTable[] = { 4, 12, 2, 10, 1, 9, 14, 15, 8, 0, 6, 13, 13, 334, 36, 44, 34, 42, 33, 41, 46, 47, 7, 382, 6, 13, 11, 383 };
 	return ConverstionTable[Color];
 }
 
-inline constexpr quint32 lcGetColorCodeFromOriginalColor(int Color)
+inline quint32 lcGetColorCodeFromOriginalColor(int Color)
 {
 	const int ConverstionTable[] = { 0, 2, 4, 9, 7, 6, 22, 8, 10, 11, 14, 16, 18, 9, 21, 20, 22, 8, 10, 11 };
 	return lcGetColorCodeFromExtendedColor(ConverstionTable[Color]);

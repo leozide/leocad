@@ -133,7 +133,7 @@ public:
 	{
 		if ((mLength + Grow) > mAlloc)
 		{
-			size_t NewSize = ((mLength + Grow + mGrow - 1) / mGrow) * mGrow;
+			const size_t NewSize = ((mLength + Grow + mGrow - 1) / mGrow) * mGrow;
 			T* NewData = new T[NewSize];
 
 			for (int i = 0; i < mLength; i++)

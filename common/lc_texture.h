@@ -46,7 +46,7 @@ public:
 
 	bool Release()
 	{
-		bool InUse = mRefCount.deref();
+		const bool InUse = mRefCount.deref();
 
 		if (!InUse)
 			Unload();

@@ -45,7 +45,7 @@ lcTexture::~lcTexture()
 
 void lcTexture::CreateGridTexture()
 {
-	const int NumLevels = 9;
+	constexpr int NumLevels = 9;
 	mImages.resize(NumLevels);
 	quint8* Previous = nullptr;
 
@@ -57,30 +57,30 @@ void lcTexture::CreateGridTexture()
 
 		if (Previous)
 		{
-			int PreviousGridSize = 2 * GridSize;
+			const int PreviousGridSize = 2 * GridSize;
 
 			for (int y = 0; y < GridSize - 1; y++)
 			{
 				for (int x = 0; x < GridSize - 1; x++)
 				{
-					quint8 a = Previous[x * 2 + y * 2 * PreviousGridSize] > 64 ? 255 : 0;
-					quint8 b = Previous[x * 2 + 1 + y * 2 * PreviousGridSize] > 64 ? 255 : 0;
-					quint8 c = Previous[x * 2 + (y * 2 + 1) * PreviousGridSize] > 64 ? 255 : 0;
-					quint8 d = Previous[x * 2 + 1 + (y * 2 + 1) * PreviousGridSize] > 64 ? 255 : 0;
+					const quint8 a = Previous[x * 2 + y * 2 * PreviousGridSize] > 64 ? 255 : 0;
+					const quint8 b = Previous[x * 2 + 1 + y * 2 * PreviousGridSize] > 64 ? 255 : 0;
+					const quint8 c = Previous[x * 2 + (y * 2 + 1) * PreviousGridSize] > 64 ? 255 : 0;
+					const quint8 d = Previous[x * 2 + 1 + (y * 2 + 1) * PreviousGridSize] > 64 ? 255 : 0;
 					GridImage.mData[x + y * GridSize] = (a + b + c + d) / 4;
 				}
 
 				int x = GridSize - 1;
-				quint8 a = Previous[x * 2 + y * 2 * PreviousGridSize];
-				quint8 c = Previous[x * 2 + (y * 2 + 1) * PreviousGridSize];
+				const quint8 a = Previous[x * 2 + y * 2 * PreviousGridSize];
+				const quint8 c = Previous[x * 2 + (y * 2 + 1) * PreviousGridSize];
 				GridImage.mData[x + y * GridSize] = (a + c) / 2;
 			}
 
 			int y = GridSize - 1;
 			for (int x = 0; x < GridSize - 1; x++)
 			{
-				quint8 a = Previous[x * 2 + y * 2 * PreviousGridSize];
-				quint8 b = Previous[x * 2 + 1 + y * 2 * PreviousGridSize];
+				const quint8 a = Previous[x * 2 + y * 2 * PreviousGridSize];
+				const quint8 b = Previous[x * 2 + 1 + y * 2 * PreviousGridSize];
 				GridImage.mData[x + y * GridSize] = (a + b) / 2;
 			}
 
@@ -105,15 +105,15 @@ void lcTexture::CreateGridTexture()
 
 				if (Radius2 <= y2)
 				{
-					int x1 = sqrtf(Radius1 - y2);
+					const int x1 = sqrtf(Radius1 - y2);
 
 					for (int x = GridSize / 2 - x1; x < GridSize / 2 + x1; x++)
 						Pixel[x] = 255;
 				}
 				else
 				{
-					int x1 = sqrtf(Radius1 - y2);
-					int x2 = sqrtf(Radius2 - y2);
+					const int x1 = sqrtf(Radius1 - y2);
+					const int x2 = sqrtf(Radius2 - y2);
 
 					for (int x = GridSize / 2 - x1; x < GridSize / 2 - x2; x++)
 						Pixel[x] = 255;
@@ -127,24 +127,24 @@ void lcTexture::CreateGridTexture()
 			{
 				for (int x = 0; x < GridSize - 1; x++)
 				{
-					quint8 a = TempBuffer[x + y * GridSize];
-					quint8 b = TempBuffer[x + 1 + y * GridSize];
-					quint8 c = TempBuffer[x + (y + 1) * GridSize];
-					quint8 d = TempBuffer[x + 1 + (y + 1) * GridSize];
+					const quint8 a = TempBuffer[x + y * GridSize];
+					const quint8 b = TempBuffer[x + 1 + y * GridSize];
+					const quint8 c = TempBuffer[x + (y + 1) * GridSize];
+					const quint8 d = TempBuffer[x + 1 + (y + 1) * GridSize];
 					GridImage.mData[x + y * GridSize] = (a + b + c + d) / 4;
 				}
 
 				int x = GridSize - 1;
-				quint8 a = TempBuffer[x + y * GridSize];
-				quint8 c = TempBuffer[x + (y + 1) * GridSize];
+				const quint8 a = TempBuffer[x + y * GridSize];
+				const quint8 c = TempBuffer[x + (y + 1) * GridSize];
 				GridImage.mData[x + y * GridSize] = (a + c) / 2;
 			}
 
 			int y = GridSize - 1;
 			for (int x = 0; x < GridSize - 1; x++)
 			{
-				quint8 a = TempBuffer[x + y * GridSize];
-				quint8 b = TempBuffer[x + 1 + y * GridSize];
+				const quint8 a = TempBuffer[x + y * GridSize];
+				const quint8 b = TempBuffer[x + 1 + y * GridSize];
 				GridImage.mData[x + y * GridSize] = (a + b) / 2;
 			}
 
@@ -210,15 +210,15 @@ void lcTexture::Upload(lcContext* Context)
 	if (!mTexture)
 		glGenTextures(1, &mTexture);
 
-	int Filters[2][5] = 
+	constexpr int Filters[2][5] =
 	{
 		{ GL_NEAREST_MIPMAP_NEAREST, GL_NEAREST_MIPMAP_LINEAR, GL_LINEAR_MIPMAP_NEAREST, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR_MIPMAP_LINEAR },
 		{ GL_NEAREST, GL_LINEAR, GL_LINEAR, GL_LINEAR, GL_LINEAR  },
 	};
 
-	int FilterFlags = mFlags & LC_TEXTURE_FILTER_MASK;
-	int FilterIndex = FilterFlags >> LC_TEXTURE_FILTER_SHIFT;
-	int MipIndex = mFlags & LC_TEXTURE_MIPMAPS ? 0 : 1;
+	const int FilterFlags = mFlags & LC_TEXTURE_FILTER_MASK;
+	const int FilterIndex = FilterFlags >> LC_TEXTURE_FILTER_SHIFT;
+	const int MipIndex = mFlags & LC_TEXTURE_MIPMAPS ? 0 : 1;
 
     unsigned int Faces, Target;
 

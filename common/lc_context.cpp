@@ -102,7 +102,7 @@ void lcContext::CreateShaderPrograms()
 "		LC_SHADER_PRECISION float Diffuse = min(abs(dot(Normal, LightDirection)) * 0.6 + 0.65, 1.0);\n"
 	};
 
-	const char* VertexShaders[static_cast<int>(lcMaterialType::Count)] =
+	const char* const VertexShaders[static_cast<int>(lcMaterialType::Count)] =
 	{
 		":/resources/shaders/unlit_color_vs.glsl",            // UnlitColor
 		":/resources/shaders/unlit_texture_modulate_vs.glsl", // UnlitTextureModulate
@@ -113,7 +113,7 @@ void lcContext::CreateShaderPrograms()
 		":/resources/shaders/fakelit_texture_decal_vs.glsl"   // FakeLitTextureDecal
 	};
 
-	const char* FragmentShaders[static_cast<int>(lcMaterialType::Count)] =
+	const char* const FragmentShaders[static_cast<int>(lcMaterialType::Count)] =
 	{
 		":/resources/shaders/unlit_color_ps.glsl",            // UnlitColor
 		":/resources/shaders/unlit_texture_modulate_ps.glsl", // UnlitTextureModulate
@@ -124,7 +124,7 @@ void lcContext::CreateShaderPrograms()
 		":/resources/shaders/fakelit_texture_decal_ps.glsl"   // FakeLitTextureDecal
 	};
 
-	auto LoadShader = [ShaderPrefix](const char* FileName, GLuint ShaderType) -> GLuint
+	const auto LoadShader = [ShaderPrefix](const char* FileName, GLuint ShaderType) -> GLuint
 	{
 		QResource Resource(FileName);
 
@@ -141,7 +141,7 @@ void lcContext::CreateShaderPrograms()
 		Data = ShaderPrefix + Data;
 		const char* Source = Data.constData();
 
-		GLuint Shader = glCreateShader(ShaderType);
+		const GLuint Shader = glCreateShader(ShaderType);
 		glShaderSource(Shader, 1, &Source, nullptr);
 		glCompileShader(Shader);
 
@@ -167,8 +167,8 @@ void lcContext::CreateShaderPrograms()
 
 	for (int MaterialType = 0; MaterialType < static_cast<int>(lcMaterialType::Count); MaterialType++)
 	{
-		GLuint VertexShader = LoadShader(VertexShaders[MaterialType], GL_VERTEX_SHADER);
-		GLuint FragmentShader = LoadShader(FragmentShaders[MaterialType], GL_FRAGMENT_SHADER);
+		const GLuint VertexShader = LoadShader(VertexShaders[MaterialType], GL_VERTEX_SHADER);
+		const GLuint FragmentShader = LoadShader(FragmentShaders[MaterialType], GL_FRAGMENT_SHADER);
 
 		GLuint Program = glCreateProgram();
 
@@ -505,7 +505,7 @@ void lcContext::SetColorIndex(int ColorIndex)
 
 void lcContext::SetColorIndexTinted(int ColorIndex, lcInterfaceColor InterfaceColor, float Weight)
 {
-	lcVector3 Color(gColorList[ColorIndex].Value * Weight + gInterfaceColors[InterfaceColor] * (1.0f - Weight));
+	const lcVector3 Color(gColorList[ColorIndex].Value * Weight + gInterfaceColors[InterfaceColor] * (1.0f - Weight));
 	SetColor(lcVector4(Color, gColorList[ColorIndex].Value.w));
 }
 
@@ -686,7 +686,7 @@ void lcContext::GetRenderFramebufferImage(const std::pair<lcFramebuffer, lcFrame
 {
 	const int Width = RenderFramebuffer.first.mWidth;
 	const int Height = RenderFramebuffer.first.mHeight;
-	GLuint SavedFramebuffer = mFramebufferObject;
+	const GLuint SavedFramebuffer = mFramebufferObject;
 
 	if (RenderFramebuffer.second.IsValid())
 	{
@@ -866,7 +866,7 @@ void lcContext::SetVertexBuffer(lcVertexBuffer VertexBuffer)
 {
 	if (gSupportsVertexBufferObject)
 	{
-		GLuint VertexBufferObject = VertexBuffer.Object;
+		const GLuint VertexBufferObject = VertexBuffer.Object;
 		mVertexBufferPointer = nullptr;
 
 		if (VertexBufferObject != mVertexBufferObject)
@@ -897,7 +897,7 @@ void lcContext::SetVertexBufferPointer(const void* VertexBuffer)
 
 void lcContext::SetVertexFormatPosition(int PositionSize)
 {
-	int VertexSize = PositionSize * sizeof(float);
+	const int VertexSize = PositionSize * sizeof(float);
 	char* VertexBufferPointer = mVertexBufferPointer;
 
 	if (gSupportsShaderObjects)
@@ -956,7 +956,7 @@ void lcContext::SetVertexFormatPosition(int PositionSize)
 
 void lcContext::SetVertexFormat(int BufferOffset, int PositionSize, int NormalSize, int TexCoordSize, int ColorSize, bool EnableNormals)
 {
-	int VertexSize = (PositionSize + TexCoordSize + ColorSize) * sizeof(float) + NormalSize * sizeof(quint32);
+	const int VertexSize = (PositionSize + TexCoordSize + ColorSize) * sizeof(float) + NormalSize * sizeof(quint32);
 	char* VertexBufferPointer = mVertexBufferPointer + BufferOffset;
 
 	if (gSupportsShaderObjects)
@@ -1100,7 +1100,7 @@ void lcContext::SetIndexBuffer(lcIndexBuffer IndexBuffer)
 {
 	if (gSupportsVertexBufferObject)
 	{
-		GLuint IndexBufferObject = IndexBuffer.Object;
+		const GLuint IndexBufferObject = IndexBuffer.Object;
 		mIndexBufferPointer = nullptr;
 
 		if (IndexBufferObject != mIndexBufferObject)
@@ -1128,12 +1128,12 @@ void lcContext::SetIndexBufferPointer(const void* IndexBuffer)
 
 void lcContext::BindMesh(const lcMesh* Mesh)
 {
-	lcPiecesLibrary* Library = lcGetPiecesLibrary();
+	const lcPiecesLibrary* const Library = lcGetPiecesLibrary();
 
 	if (Mesh->mVertexCacheOffset != -1)
 	{
-		GLuint VertexBufferObject = Library->mVertexBuffer.Object;
-		GLuint IndexBufferObject = Library->mIndexBuffer.Object;
+		const GLuint VertexBufferObject = Library->mVertexBuffer.Object;
+		const GLuint IndexBufferObject = Library->mIndexBuffer.Object;
 
 		if (VertexBufferObject != mVertexBufferObject)
 		{
@@ -1192,7 +1192,7 @@ void lcContext::FlushState()
 
 			if (mViewMatrixDirty)
 			{
-				lcMatrix44 InverseViewMatrix = lcMatrix44AffineInverse(mViewMatrix);
+				const lcMatrix44 InverseViewMatrix = lcMatrix44AffineInverse(mViewMatrix);
 				lcVector3 ViewPosition = lcMul30(-mViewMatrix.GetTranslation(), InverseViewMatrix);
 
 				if (Program.LightPositionLocation != -1)

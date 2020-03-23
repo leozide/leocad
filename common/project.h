@@ -122,7 +122,7 @@ protected:
 
 inline lcModel* lcGetActiveModel()
 {
-	Project* Project = lcGetActiveProject();
+	const Project* const Project = lcGetActiveProject();
 	return Project ? Project->GetActiveModel() : nullptr;
 }
 

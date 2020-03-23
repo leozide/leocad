@@ -167,7 +167,7 @@ public:
 
 	QString ReadQString()
 	{
-		quint32 Size = ReadU32();
+		const quint32 Size = ReadU32();
 		char* Buffer = new char[Size];
 		ReadBuffer(Buffer, Size);
 		QString String = QString::fromUtf8(Buffer, Size);
@@ -545,7 +545,7 @@ public:
 
 	char* ReadLine(char* Buffer, size_t BufferSize) override
 	{
-		qint64 LineLength = mFile.readLine(Buffer, BufferSize);
+		const qint64 LineLength = mFile.readLine(Buffer, BufferSize);
 		return LineLength != -1 ? Buffer : nullptr;
 	}
 

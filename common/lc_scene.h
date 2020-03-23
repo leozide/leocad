@@ -94,7 +94,7 @@ public:
 protected:
 	void DrawOpaqueMeshes(lcContext* Context, bool DrawLit, int PrimitiveTypes) const;
 	void DrawTranslucentMeshes(lcContext* Context, bool DrawLit) const;
-	void DrawDebugNormals(lcContext* Context, lcMesh* Mesh) const;
+	void DrawDebugNormals(lcContext* Context, const lcMesh* Mesh) const;
 
 	lcMatrix44 mViewMatrix;
 	lcMatrix44 mActiveSubmodelTransform;

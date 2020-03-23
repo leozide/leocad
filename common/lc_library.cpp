@@ -498,7 +498,7 @@ void lcPiecesLibrary::ReadArchiveDescriptions(const QString& OfficialFileName, c
 bool lcPiecesLibrary::OpenDirectory(const QDir& LibraryDir, bool ShowProgress)
 {
 	const QLatin1String BaseFolders[LC_NUM_FOLDERTYPES] = { QLatin1String("unofficial/"), QLatin1String("") };
-	const int NumBaseFolders = LC_ARRAY_COUNT(BaseFolders);
+	constexpr int NumBaseFolders = LC_ARRAY_COUNT(BaseFolders);
 
 	QFileInfoList FileLists[NumBaseFolders];
 
@@ -561,7 +561,7 @@ bool lcPiecesLibrary::OpenDirectory(const QDir& LibraryDir, bool ShowProgress)
 				if (BaseFolderIdx == 0)
 					mHasUnofficial = true;
 
-				bool SubFile = SubFileDirectories[DirectoryIdx];
+				const bool SubFile = SubFileDirectories[DirectoryIdx];
 				mPrimitives[Name] = new lcLibraryPrimitive(std::move(FileName), strchr(FileString, '/') + 1, LC_NUM_ZIPFILES, 0, !SubFile && (memcmp(Name, "STU", 3) == 0), SubFile);
 			}
 		}
@@ -705,7 +705,7 @@ void lcPiecesLibrary::ReadDirectoryDescriptions(const QFileInfoList (&FileLists)
 			{
 				const char* FileName = *(const char**)CachedDescription;
 				const char* Description = FileName + strlen(FileName) + 1;
-				uint64_t CachedFileTime = *(uint64_t*)(Description + strlen(Description) + 1 + 4 + 1);
+				const uint64_t CachedFileTime = *(uint64_t*)(Description + strlen(Description) + 1 + 4 + 1);
 
 #if (QT_VERSION >= QT_VERSION_CHECK(4, 7, 0))
 				quint64 FileTime = FileLists[Info->mFolderType][Info->mFolderIndex].lastModified().toMSecsSinceEpoch();
@@ -851,7 +851,7 @@ bool lcPiecesLibrary::ReadArchiveCacheFile(const QString& FileName, lcMemFile& C
 	CacheFile.SetLength(UncompressedSize);
 	CacheFile.Seek(0, SEEK_SET);
 
-	const int CHUNK = 16384;
+	constexpr int CHUNK = 16384;
 	int ret;
 	unsigned have;
 	z_stream strm;
@@ -918,8 +918,8 @@ bool lcPiecesLibrary::WriteArchiveCacheFile(const QString& FileName, lcMemFile& 
 	if (!File.open(QIODevice::WriteOnly))
 		return false;
 
-	quint32 CacheVersion = LC_LIBRARY_CACHE_VERSION;
-	quint32 CacheFlags = LC_LIBRARY_CACHE_ARCHIVE;
+	constexpr quint32 CacheVersion = LC_LIBRARY_CACHE_VERSION;
+	constexpr quint32 CacheFlags = LC_LIBRARY_CACHE_ARCHIVE;
 
 	if (File.write((char*)&CacheVersion, sizeof(CacheVersion)) == -1)
 		return false;
@@ -930,12 +930,12 @@ bool lcPiecesLibrary::WriteArchiveCacheFile(const QString& FileName, lcMemFile& 
 	if (File.write((char*)&mArchiveCheckSum, sizeof(mArchiveCheckSum)) == -1)
 		return false;
 
-	quint32 UncompressedSize = (quint32)CacheFile.GetLength();
+	const quint32 UncompressedSize = (quint32)CacheFile.GetLength();
 
 	if (File.write((char*)&UncompressedSize, sizeof(UncompressedSize)) == -1)
 		return false;
 
-	const size_t BufferSize = 16384;
+	constexpr size_t BufferSize = 16384;
 	char WriteBuffer[BufferSize];
 	z_stream Stream;
 	quint32 Crc32 = 0;
@@ -1015,15 +1015,15 @@ bool lcPiecesLibrary::WriteDirectoryCacheFile(const QString& FileName, lcMemFile
 	if (!File.open(QIODevice::WriteOnly))
 		return false;
 
-	quint32 CacheVersion = LC_LIBRARY_CACHE_VERSION;
+	constexpr quint32 CacheVersion = LC_LIBRARY_CACHE_VERSION;
 	if (File.write((char*)&CacheVersion, sizeof(CacheVersion)) == -1)
 		return false;
 
-	quint32 CacheFlags = LC_LIBRARY_CACHE_DIRECTORY;
+	constexpr quint32 CacheFlags = LC_LIBRARY_CACHE_DIRECTORY;
 	if (File.write((char*)&CacheFlags, sizeof(CacheFlags)) == -1)
 		return false;
 
-	quint32 UncompressedSize = (quint32)CacheFile.GetLength();
+	const quint32 UncompressedSize = (quint32)CacheFile.GetLength();
 	if (File.write((char*)&UncompressedSize, sizeof(UncompressedSize)) == -1)
 		return false;
 
@@ -1065,15 +1065,15 @@ bool lcPiecesLibrary::SaveArchiveCacheIndex(const QString& FileName)
 {
 	lcMemFile IndexFile;
 
-	quint32 NumFiles = (quint32)mPieces.size();
+	const quint32 NumFiles = (quint32)mPieces.size();
 
 	if (IndexFile.WriteBuffer((char*)&NumFiles, sizeof(NumFiles)) == 0)
 		return false;
 
 	for (const auto& PieceIt : mPieces)
 	{
-		PieceInfo* Info = PieceIt.second;
-		quint8 Length = (quint8)strlen(Info->m_strDescription);
+		const PieceInfo* Info = PieceIt.second;
+		const quint8 Length = (quint8)strlen(Info->m_strDescription);
 
 		if (IndexFile.WriteBuffer((char*)&Length, sizeof(Length)) == 0)
 			return false;
@@ -1117,7 +1117,7 @@ bool lcPiecesLibrary::SaveCachePiece(PieceInfo* Info)
 {
 	lcMemFile MeshData;
 
-	qint32 Flags = mStudLogo;
+	const qint32 Flags = mStudLogo;
 	if (MeshData.WriteBuffer((char*)&Flags, sizeof(Flags)) == 0)
 		return false;
 
@@ -1425,7 +1425,7 @@ void lcPiecesLibrary::UpdateBuffers(lcContext* Context)
 
 	for (const auto& PieceIt : mPieces)
 	{
-		PieceInfo* Info = PieceIt.second;
+		const PieceInfo* const Info = PieceIt.second;
 		lcMesh* Mesh = Info->IsPlaceholder() ? gPlaceholderMesh : Info->GetMesh();
 
 		if (!Mesh)
@@ -1631,7 +1631,7 @@ bool lcPiecesLibrary::LoadPrimitive(lcLibraryPrimitive* Primitive)
 
 		if (Primitive->mStud)
 		{
-			bool OpenStud = !strcmp(Primitive->mName,"stud2.dat");
+			const bool OpenStud = !strcmp(Primitive->mName,"stud2.dat");
 			if (OpenStud || !strcmp(Primitive->mName,"stud.dat"))
 			{
 				Primitive->mMeshData.mHasLogoStud = true;
@@ -1675,7 +1675,7 @@ bool lcPiecesLibrary::LoadPrimitive(lcLibraryPrimitive* Primitive)
 	{
 		if (Primitive->mStud)
 		{
-			bool OpenStud = !strcmp(Primitive->mName,"stud2.dat");
+			const bool OpenStud = !strcmp(Primitive->mName,"stud2.dat");
 			if (OpenStud || !strcmp(Primitive->mName,"stud.dat"))
 			{
 				Primitive->mMeshData.mHasLogoStud = true;
@@ -1779,7 +1779,7 @@ void lcPiecesLibrary::GetCategoryEntries(const char* CategoryKeywords, bool Grou
 		else
 		{
 			// Check if this piece has already been added to this category by one of its children.
-			int Index = GroupedPieces.FindIndex(Info);
+			const int Index = GroupedPieces.FindIndex(Info);
 
 			if (Index == -1)
 				SinglePieces.Add(Info);

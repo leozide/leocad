@@ -545,7 +545,7 @@ public:
 
 	lcVector3 GetRotationCenter() const
 	{
-		quint32 Section = GetFocusSection();
+		const quint32 Section = GetFocusSection();
 
 		if (Section == LC_PIECE_SECTION_POSITION || Section == LC_PIECE_SECTION_INVALID)
 		{
@@ -556,7 +556,7 @@ public:
 		}
 		else
 		{
-			int ControlPointIndex = Section - LC_PIECE_SECTION_CONTROL_POINT_1;
+			const int ControlPointIndex = Section - LC_PIECE_SECTION_CONTROL_POINT_1;
 
 			if (ControlPointIndex >= 0 && ControlPointIndex < mControlPoints.GetSize())
 			{
@@ -570,7 +570,7 @@ public:
 
 	lcMatrix33 GetRelativeRotation() const
 	{
-		quint32 Section = GetFocusSection();
+		const quint32 Section = GetFocusSection();
 
 		if (Section == LC_PIECE_SECTION_POSITION || Section == LC_PIECE_SECTION_INVALID)
 		{
@@ -581,7 +581,7 @@ public:
 		}
 		else
 		{
-			int ControlPointIndex = Section - LC_PIECE_SECTION_CONTROL_POINT_1;
+			const int ControlPointIndex = Section - LC_PIECE_SECTION_CONTROL_POINT_1;
 
 			if (ControlPointIndex >= 0 && ControlPointIndex < mControlPoints.GetSize())
 			{

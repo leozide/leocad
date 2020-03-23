@@ -98,7 +98,7 @@ void MinifigWizard::OnInitialUpdate()
 	static_assert(LC_ARRAY_COUNT(MinifigWizard::mSectionNames) == LC_MFW_NUMITEMS, "Array size mismatch.");
 
 	const int ColorCodes[LC_MFW_NUMITEMS] = { 4, 7, 14, 7, 1, 0, 7, 4, 4, 14, 14, 7, 7, 0, 0, 7, 7 };
-	const char* Pieces[LC_MFW_NUMITEMS] = { "3624.dat", "", "3626bp01.dat", "", "973.dat", "3815.dat", "", "3819.dat", "3818.dat", "3820.dat", "3820.dat", "", "", "3817.dat", "3816.dat", "", "" };
+	const char* const Pieces[LC_MFW_NUMITEMS] = { "3624.dat", "", "3626bp01.dat", "", "973.dat", "3815.dat", "", "3819.dat", "3818.dat", "3820.dat", "3820.dat", "", "", "3817.dat", "3816.dat", "", "" };
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 
 	for (int i = 0; i < LC_MFW_NUMITEMS; i++)
@@ -129,7 +129,7 @@ void MinifigWizard::ParseSettings(lcFile& Settings)
 		char Line[1024];
 		bool FoundSection = false;
 		const char* SectionName = mSectionNames[SectionIndex];
-		size_t SectionNameLength = strlen(SectionName);
+		const size_t SectionNameLength = strlen(SectionName);
 
 		while (Settings.ReadLine(Line, sizeof(Line)))
 		{
@@ -323,7 +323,7 @@ void MinifigWizard::OnDraw()
 {
 	mContext->SetDefaultState();
 
-	float Aspect = (float)mWidth/(float)mHeight;
+	const float Aspect = (float)mWidth/(float)mHeight;
 	mContext->SetViewport(0, 0, mWidth, mHeight);
 
 	lcGetActiveModel()->DrawBackground(this);
@@ -332,7 +332,7 @@ void MinifigWizard::OnDraw()
 
 	for (int InfoIdx = 0; InfoIdx < LC_MFW_NUMITEMS; InfoIdx++)
 	{
-		PieceInfo* Info = mMinifig.Parts[InfoIdx];
+		const PieceInfo* const Info = mMinifig.Parts[InfoIdx];
 
 		if (!Info)
 			continue;
@@ -342,21 +342,21 @@ void MinifigWizard::OnDraw()
 
 		for (int PointIdx = 0; PointIdx < 8; PointIdx++)
 		{
-			lcVector3 Point = lcMul31(Points[PointIdx], mMinifig.Matrices[InfoIdx]);
+			const lcVector3 Point = lcMul31(Points[PointIdx], mMinifig.Matrices[InfoIdx]);
 
 			Min = lcMin(Point, Min);
 			Max = lcMax(Point, Max);
 		}
 	}
 
-	lcVector3 Center = (Min + Max) / 2.0f;
+	const lcVector3 Center = (Min + Max) / 2.0f;
 
 	lcVector3 Eye(0.0f, 0.0f, 1.0f);
 
 	Eye = lcMul30(Eye, lcMatrix44RotationX(-mRotateX * LC_DTOR));
 	Eye = lcMul30(Eye, lcMatrix44RotationZ(-mRotateZ * LC_DTOR));
 
-	lcMatrix44 Projection = lcMatrix44Perspective(30.0f, Aspect, 1.0f, 2500.0f);
+	const lcMatrix44 Projection = lcMatrix44Perspective(30.0f, Aspect, 1.0f, 2500.0f);
 	mContext->SetProjectionMatrix(Projection);
 
 	lcMatrix44 ViewMatrix;
@@ -368,12 +368,12 @@ void MinifigWizard::OnDraw()
 
 		Eye += Center;
 
-		lcMatrix44 ModelView = lcMatrix44LookAt(Eye, Center, lcVector3(0, 0, 1));
+		const lcMatrix44 ModelView = lcMatrix44LookAt(Eye, Center, lcVector3(0, 0, 1));
 		std::tie(Eye, std::ignore) = lcZoomExtents(Eye, ModelView, Projection, Points, 8);
 
 		ViewMatrix = lcMatrix44LookAt(Eye, Center, lcVector3(0, 0, 1));
 
-		lcVector3 d = Eye - Center;
+		const lcVector3 d = Eye - Center;
 		mDistance = d.Length();
 	}
 	else
@@ -476,11 +476,11 @@ void MinifigWizard::Calculate()
 	lcMatrix44 Root, Mat, Mat2;
 
 	PieceInfo** Parts = mMinifig.Parts;
-	float* Angles = mMinifig.Angles;
+	const float* Angles = mMinifig.Angles;
 	lcMatrix44* Matrices = mMinifig.Matrices;
 
-	bool DroidTorso = Parts[LC_MFW_BODY] && !qstricmp(Parts[LC_MFW_BODY]->mFileName, "30375.dat");
-	bool SkeletonTorso = Parts[LC_MFW_BODY] && !qstricmp(Parts[LC_MFW_BODY]->mFileName, "6260.dat");
+	const bool DroidTorso = Parts[LC_MFW_BODY] && !qstricmp(Parts[LC_MFW_BODY]->mFileName, "30375.dat");
+	const bool SkeletonTorso = Parts[LC_MFW_BODY] && !qstricmp(Parts[LC_MFW_BODY]->mFileName, "6260.dat");
 
 	if (Parts[LC_MFW_BODY3])
 		Root = lcMatrix44Translation(lcVector3(0, 0, 74.0f));
@@ -610,7 +610,7 @@ void MinifigWizard::Calculate()
 
 	if (Parts[LC_MFW_RLEGA])
 	{
-		lcVector3 Center(-10.0f, -1.0f, -28.0f);
+		const lcVector3 Center(-10.0f, -1.0f, -28.0f);
 		Mat = lcMatrix44RotationZ(LC_DTOR * Angles[LC_MFW_RLEGA]);
 		Mat2 = mSettings[LC_MFW_RLEGA][GetSelectionIndex(LC_MFW_RLEGA)].Offset;
 		Mat2.SetTranslation(lcMul31(-Center, Mat2));
@@ -629,7 +629,7 @@ void MinifigWizard::Calculate()
 
 	if (Parts[LC_MFW_LLEGA])
 	{
-		lcVector3 Center(10.0f, -1.0f, -28.0f);
+		const lcVector3 Center(10.0f, -1.0f, -28.0f);
 		Mat = lcMatrix44RotationZ(LC_DTOR * Angles[LC_MFW_LLEGA]);
 		Mat2 = mSettings[LC_MFW_LLEGA][GetSelectionIndex(LC_MFW_LLEGA)].Offset;
 		Mat2.SetTranslation(lcMul31(-Center, Mat2));

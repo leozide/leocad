@@ -84,7 +84,7 @@ void PieceInfo::SetModel(lcModel* Model, bool UpdateMesh, Project* CurrentProjec
 		PieceFile.Seek(0, SEEK_SET);
 
 		lcMeshLoader MeshLoader(MeshData, true, CurrentProject, SearchProjectFolder);
-		bool Ret = MeshLoader.LoadMesh(PieceFile, LC_MESHDATA_SHARED);
+		const bool Ret = MeshLoader.LoadMesh(PieceFile, LC_MESHDATA_SHARED);
 
 		if (Ret && !MeshData.IsEmpty())
 			SetMesh(MeshData.CreateMesh());
@@ -210,7 +210,7 @@ bool PieceInfo::MinIntersectDist(const lcVector3& Start, const lcVector3& End, f
 			Intersect |= mModel->SubModelMinIntersectDist(Start, End, MinDistance);
 		else if (IsProject())
 		{
-			lcModel* Model = mProject->GetMainModel();
+			const lcModel* const Model = mProject->GetMainModel();
 			if (Model)
 				Intersect |= Model->SubModelMinIntersectDist(Start, End, MinDistance);
 		}
@@ -226,13 +226,13 @@ bool PieceInfo::BoxTest(const lcMatrix44& WorldMatrix, const lcVector4 WorldPlan
 {
 	lcMatrix44 InverseWorldMatrix = lcMatrix44AffineInverse(WorldMatrix);
 
-	const int NumCorners = 8;
-	const int NumPlanes = 6;
+	constexpr int NumCorners = 8;
+	constexpr int NumPlanes = 6;
 	lcVector4 LocalPlanes[NumPlanes];
 
 	for (int PlaneIdx = 0; PlaneIdx < NumPlanes; PlaneIdx++)
 	{
-		lcVector3 PlaneNormal = lcMul30(WorldPlanes[PlaneIdx], InverseWorldMatrix);
+		const lcVector3 PlaneNormal = lcMul30(WorldPlanes[PlaneIdx], InverseWorldMatrix);
 		LocalPlanes[PlaneIdx] = lcVector4(PlaneNormal, WorldPlanes[PlaneIdx][3] - lcDot3(InverseWorldMatrix[3], PlaneNormal));
 	}
 
@@ -276,7 +276,7 @@ bool PieceInfo::BoxTest(const lcMatrix44& WorldMatrix, const lcVector4 WorldPlan
 		return mModel->SubModelBoxTest(LocalPlanes);
 	else if (IsProject())
 	{
-		lcModel* Model = mProject->GetMainModel();
+		const lcModel* const Model = mProject->GetMainModel();
 		return Model ? Model->SubModelBoxTest(LocalPlanes) : false;
 	}
 
@@ -288,11 +288,11 @@ void PieceInfo::ZoomExtents(float FoV, float AspectRatio, lcMatrix44& Projection
 	lcVector3 Points[8];
 	lcGetBoxCorners(mBoundingBox, Points);
 
-	lcVector3 Center = (mBoundingBox.Min + mBoundingBox.Max) / 2.0f;
+	const lcVector3 Center = (mBoundingBox.Min + mBoundingBox.Max) / 2.0f;
 	lcVector3 Position = Center + lcVector3(100.0f, -100.0f, 75.0f);
 
 	ProjectionMatrix = lcMatrix44Perspective(FoV, AspectRatio, 1.0f, 12500.0f);
-	lcMatrix44 ModelView = lcMatrix44LookAt(Position, Center, lcVector3(0, 0, 1));
+	const lcMatrix44 ModelView = lcMatrix44LookAt(Position, Center, lcVector3(0, 0, 1));
 	float FarDistance;
 	std::tie(Position, FarDistance) = lcZoomExtents(Position, ModelView, ProjectionMatrix, Points, 8);
 	ViewMatrix = lcMatrix44LookAt(Position, Center, lcVector3(0, 0, 1));
@@ -314,7 +314,7 @@ void PieceInfo::AddRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, i
 		mModel->AddSubModelRenderMeshes(Scene, WorldMatrix, ColorIndex, RenderMeshState, ParentActive);
 	else if (IsProject())
 	{
-		lcModel* Model = mProject->GetMainModel();
+		const lcModel* const Model = mProject->GetMainModel();
 		if (Model)
 			Model->AddSubModelRenderMeshes(Scene, WorldMatrix, ColorIndex, RenderMeshState, ParentActive);
 	}
@@ -332,7 +332,7 @@ void PieceInfo::GetPartsList(int DefaultColorIndex, bool ScanSubModels, bool Add
 	}
 	else if (IsProject())
 	{
-		lcModel* Model = mProject->GetMainModel();
+		const lcModel* const Model = mProject->GetMainModel();
 		if (Model)
 			Model->GetPartsList(DefaultColorIndex, ScanSubModels, AddSubModels, PartsList);
 	}
@@ -349,7 +349,7 @@ void PieceInfo::GetModelParts(const lcMatrix44& WorldMatrix, int DefaultColorInd
 	}
 	else if (IsProject())
 	{
-		lcModel* Model = mProject->GetMainModel();
+		const lcModel* const Model = mProject->GetMainModel();
 		if (Model)
 			Model->GetModelParts(WorldMatrix, DefaultColorIndex, ModelParts);
 		return;

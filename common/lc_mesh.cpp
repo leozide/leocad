@@ -191,7 +191,7 @@ bool lcMesh::MinIntersectDist(const lcVector3& Start, const lcVector3& End, floa
 	if (!lcBoundingBoxRayIntersectDistance(mBoundingBox.Min, mBoundingBox.Max, Start, End, &Distance, nullptr) || (Distance >= MinDistance))
 		return false;
 
-	lcVertex* Verts = (lcVertex*)mVertexData;
+	lcVertex* const Verts = (lcVertex*)mVertexData;
 	bool Hit = false;
 	lcVector3 Intersection;
 
@@ -265,7 +265,7 @@ void lcMesh::ExportPOVRay(lcFile& File, const char* MeshName, const char** Color
 
 	for (int SectionIdx = 0; SectionIdx < mLods[LC_MESH_LOD_HIGH].NumSections; SectionIdx++)
 	{
-		lcMeshSection* Section = &mLods[LC_MESH_LOD_HIGH].Sections[SectionIdx];
+		const lcMeshSection* const Section = &mLods[LC_MESH_LOD_HIGH].Sections[SectionIdx];
 
 		if (Section->PrimitiveType == LC_MESH_TRIANGLES || Section->PrimitiveType == LC_MESH_TEXTURED_TRIANGLES)
 			NumSections++;
@@ -277,7 +277,7 @@ void lcMesh::ExportPOVRay(lcFile& File, const char* MeshName, const char** Color
 		sprintf(Line, "#declare lc_%s = mesh {\n", MeshName);
 	File.WriteLine(Line);
 
-	lcVertex* Verts = (lcVertex*)mVertexData;
+	const lcVertex* const Verts = (lcVertex*)mVertexData;
 
 	for (int SectionIdx = 0; SectionIdx < mLods[LC_MESH_LOD_HIGH].NumSections; SectionIdx++)
 	{
@@ -348,9 +348,9 @@ void lcMesh::ExportWavefrontIndices(lcFile& File, int DefaultColorIndex, int Ver
 
 		for (int Idx = 0; Idx < Section->NumIndices; Idx += 3)
 		{
-			long int idx1 = Indices[Idx + 0] + VertexOffset;
-			long int idx2 = Indices[Idx + 1] + VertexOffset;
-			long int idx3 = Indices[Idx + 2] + VertexOffset;
+			const long int idx1 = Indices[Idx + 0] + VertexOffset;
+			const long int idx2 = Indices[Idx + 1] + VertexOffset;
+			const long int idx3 = Indices[Idx + 2] + VertexOffset;
 
 			if (idx1 != idx2 && idx1 != idx3 && idx2 != idx3)
 				sprintf(Line, "f %ld//%ld %ld//%ld %ld//%ld\n", idx1, idx1, idx2, idx2, idx3, idx3);
@@ -461,7 +461,7 @@ bool lcMesh::FileSave(lcMemFile& File)
 	{
 		for (int SectionIdx = 0; SectionIdx < mLods[LodIdx].NumSections; SectionIdx++)
 		{
-			lcMeshSection& Section = mLods[LodIdx].Sections[SectionIdx];
+			const lcMeshSection& Section = mLods[LodIdx].Sections[SectionIdx];
 
 			File.WriteU32(lcGetColorCode(Section.ColorIndex));
 			File.WriteU32(Section.IndexOffset);
@@ -473,7 +473,7 @@ bool lcMesh::FileSave(lcMemFile& File)
 
 			if (Section.Texture)
 			{
-				quint16 Length = (quint16)strlen(Section.Texture->mName);
+				const quint16 Length = (quint16)strlen(Section.Texture->mName);
 				File.WriteU16(Length);
 				File.WriteBuffer(Section.Texture->mName, Length);
 			}

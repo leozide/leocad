@@ -448,7 +448,7 @@ inline QDataStream& operator >> (QDataStream& Stream, lcVector4& v)
 
 inline void lcVector3::Normalize()
 {
-	float InvLength = 1.0f / Length();
+	const float InvLength = 1.0f / Length();
 
 	x *= InvLength;
 	y *= InvLength;
@@ -680,13 +680,13 @@ inline lcVector4 lcMul4(const lcVector4& a, const lcMatrix44& b)
 
 inline lcMatrix33 lcMul(const lcMatrix33& a, const lcMatrix33& b)
 {
-	lcVector3 Col0(b.r[0][0], b.r[1][0], b.r[2][0]);
-	lcVector3 Col1(b.r[0][1], b.r[1][1], b.r[2][1]);
-	lcVector3 Col2(b.r[0][2], b.r[1][2], b.r[2][2]);
+	const lcVector3 Col0(b.r[0][0], b.r[1][0], b.r[2][0]);
+	const lcVector3 Col1(b.r[0][1], b.r[1][1], b.r[2][1]);
+	const lcVector3 Col2(b.r[0][2], b.r[1][2], b.r[2][2]);
 
-	lcVector3 Ret0(lcDot(a.r[0], Col0), lcDot(a.r[0], Col1), lcDot(a.r[0], Col2));
-	lcVector3 Ret1(lcDot(a.r[1], Col0), lcDot(a.r[1], Col1), lcDot(a.r[1], Col2));
-	lcVector3 Ret2(lcDot(a.r[2], Col0), lcDot(a.r[2], Col1), lcDot(a.r[2], Col2));
+	const lcVector3 Ret0(lcDot(a.r[0], Col0), lcDot(a.r[0], Col1), lcDot(a.r[0], Col2));
+	const lcVector3 Ret1(lcDot(a.r[1], Col0), lcDot(a.r[1], Col1), lcDot(a.r[1], Col2));
+	const lcVector3 Ret2(lcDot(a.r[2], Col0), lcDot(a.r[2], Col1), lcDot(a.r[2], Col2));
 
 	return lcMatrix33(Ret0, Ret1, Ret2);
 }
@@ -1101,8 +1101,8 @@ inline lcVector4 lcMatrix44ToAxisAngle(const lcMatrix44& m)
 	if (m.Determinant() < 0.0f)
 		Rows[0] *= -1.0f;
 
-	float Trace = Rows[0][0] + Rows[1][1] + Rows[2][2];
-	float Cos = 0.5f * (Trace - 1.0f);
+	const float Trace = Rows[0][0] + Rows[1][1] + Rows[2][2];
+	const float Cos = 0.5f * (Trace - 1.0f);
 	lcVector4 rot;
 
 	rot[3] = acosf(lcClamp(Cos, -1.0f, 1.0f));  // in [0,PI]
@@ -1358,10 +1358,10 @@ inline lcMatrix44 lcMatrix44Inverse(const lcMatrix44& m)
 	r0[4] = s * (r0[4] - r1[4] * m0), r0[5] = s * (r0[5] - r1[5] * m0),
 	r0[6] = s * (r0[6] - r1[6] * m0), r0[7] = s * (r0[7] - r1[7] * m0);
 
-	lcVector4 Row0(r0[4], r1[4], r2[4], r3[4]);
-	lcVector4 Row1(r0[5], r1[5], r2[5], r3[5]);
-	lcVector4 Row2(r0[6], r1[6], r2[6], r3[6]);
-	lcVector4 Row3(r0[7], r1[7], r2[7], r3[7]);
+	const lcVector4 Row0(r0[4], r1[4], r2[4], r3[4]);
+	const lcVector4 Row1(r0[5], r1[5], r2[5], r3[5]);
+	const lcVector4 Row2(r0[6], r1[6], r2[6], r3[6]);
+	const lcVector4 Row3(r0[7], r1[7], r2[7], r3[7]);
 	
 	lcMatrix44 out(Row0, Row1, Row2, Row3);
 	
@@ -1412,17 +1412,17 @@ inline lcVector4 lcQuaternionRotationZ(float Radians)
 
 inline lcVector4 lcQuaternionFromAxisAngle(const lcVector4& a)
 {
-	float s = sinf(a[3] / 2.0f);
+	const float s = sinf(a[3] / 2.0f);
 	return lcVector4(a[0] * s, a[1] * s, a[2] * s, cosf(a[3] / 2.0f));
 }
 
 inline lcVector4 lcQuaternionToAxisAngle(const lcVector4& a)
 {
-	float Len = lcDot3(a, a);
+	const float Len = lcDot3(a, a);
 
 	if (Len > 0.00001f)
 	{
-		float f = 1.0f / sqrtf(Len);
+		const float f = 1.0f / sqrtf(Len);
 		return lcVector4(a[0] * f, a[1] * f, a[2] * f, acosf(a[3]) * 2.0f);
 	}
 	else
@@ -1433,10 +1433,10 @@ inline lcVector4 lcQuaternionToAxisAngle(const lcVector4& a)
 
 inline lcVector4 lcQuaternionMultiply(const lcVector4& a, const lcVector4& b)
 {
-	float x =  a[0] * b[3] + a[1] * b[2] - a[2] * b[1] + a[3] * b[0];
-	float y = -a[0] * b[2] + a[1] * b[3] + a[2] * b[0] + a[3] * b[1];
-	float z =  a[0] * b[1] - a[1] * b[0] + a[2] * b[3] + a[3] * b[2];
-	float w = -a[0] * b[0] - a[1] * b[1] - a[2] * b[2] + a[3] * b[3];
+	const float x =  a[0] * b[3] + a[1] * b[2] - a[2] * b[1] + a[3] * b[0];
+	const float y = -a[0] * b[2] + a[1] * b[3] + a[2] * b[0] + a[3] * b[1];
+	const float z =  a[0] * b[1] - a[1] * b[0] + a[2] * b[3] + a[3] * b[2];
+	const float w = -a[0] * b[0] - a[1] * b[1] - a[2] * b[2] + a[3] * b[3];
 
 	return lcVector4(x, y, z, w);
 }
@@ -1444,18 +1444,18 @@ inline lcVector4 lcQuaternionMultiply(const lcVector4& a, const lcVector4& b)
 inline lcVector3 lcQuaternionMul(const lcVector3& a, const lcVector4& b)
 {
 	// Faster to transform to a matrix and multiply.
-	float Tx  = 2.0f*b[0];
-	float Ty  = 2.0f*b[1];
-	float Tz  = 2.0f*b[2];
-	float Twx = Tx*b[3];
-	float Twy = Ty*b[3];
-	float Twz = Tz*b[3];
-	float Txx = Tx*b[0];
-	float Txy = Ty*b[0];
-	float Txz = Tz*b[0];
-	float Tyy = Ty*b[1];
-	float Tyz = Tz*b[1];
-	float Tzz = Tz*b[2];
+	const float Tx  = 2.0f*b[0];
+	const float Ty  = 2.0f*b[1];
+	const float Tz  = 2.0f*b[2];
+	const float Twx = Tx*b[3];
+	const float Twy = Ty*b[3];
+	const float Twz = Tz*b[3];
+	const float Txx = Tx*b[0];
+	const float Txy = Ty*b[0];
+	const float Txz = Tz*b[0];
+	const float Tyy = Ty*b[1];
+	const float Tyz = Tz*b[1];
+	const float Tzz = Tz*b[2];
 
 	lcVector3 Rows[3];
 	Rows[0] = lcVector3(1.0f-(Tyy+Tzz), Txy+Twz, Txz-Twy);
@@ -1483,7 +1483,7 @@ inline lcVector3 lcProjectPoint(const lcVector3& Point, const lcMatrix44& ModelV
 inline lcVector3 lcUnprojectPoint(const lcVector3& Point, const lcMatrix44& ModelView, const lcMatrix44& Projection, const int Viewport[4])
 {
 	// Calculate the screen to model transform.
-	lcMatrix44 Transform = lcMatrix44Inverse(lcMul(ModelView, Projection));
+	const lcMatrix44 Transform = lcMatrix44Inverse(lcMul(ModelView, Projection));
 
 	lcVector4 Tmp;
 
@@ -1504,7 +1504,7 @@ inline lcVector3 lcUnprojectPoint(const lcVector3& Point, const lcMatrix44& Mode
 inline void lcUnprojectPoints(lcVector3* Points, int NumPoints, const lcMatrix44& ModelView, const lcMatrix44& Projection, const int Viewport[4])
 {
 	// Calculate the screen to model transform.
-	lcMatrix44 Transform = lcMatrix44Inverse(lcMul(ModelView, Projection));
+	const lcMatrix44 Transform = lcMatrix44Inverse(lcMul(ModelView, Projection));
 
 	for (int i = 0; i < NumPoints; i++)
 	{
@@ -1556,8 +1556,8 @@ inline void lcGetFrustumPlanes(const lcMatrix44& WorldView, const lcMatrix44& Pr
 
 	for (int i = 0; i < 6; i++)
 	{
-		lcVector3 Normal(Planes[i][0], Planes[i][1], Planes[i][2]);
-		float Length = Normal.Length();
+		const lcVector3 Normal(Planes[i][0], Planes[i][1], Planes[i][2]);
+		const float Length = Normal.Length();
 		Planes[i] /= -Length;
 	}
 }
@@ -1570,19 +1570,19 @@ inline std::tuple<lcVector3, float> lcZoomExtents(const lcVector3& Position, con
 	lcVector4 Planes[6];
 	lcGetFrustumPlanes(WorldView, Projection, Planes);
 
-	lcVector3 Front(WorldView[0][2], WorldView[1][2], WorldView[2][2]);
+	const lcVector3 Front(WorldView[0][2], WorldView[1][2], WorldView[2][2]);
 
 	float SmallestDistance = FLT_MAX;
 
 	for (int PlaneIdx = 0; PlaneIdx < 4; PlaneIdx++)
 	{
-		lcVector3 Plane(Planes[PlaneIdx][0], Planes[PlaneIdx][1], Planes[PlaneIdx][2]);
-		float ep = lcDot(Position, Plane);
-		float fp = lcDot(Front, Plane);
+		const lcVector3 Plane(Planes[PlaneIdx][0], Planes[PlaneIdx][1], Planes[PlaneIdx][2]);
+		const float ep = lcDot(Position, Plane);
+		const float fp = lcDot(Front, Plane);
 
 		for (int PointIdx = 0; PointIdx < NumPoints; PointIdx++)
 		{
-			float u = (ep - lcDot(Points[PointIdx], Plane)) / fp;
+			const float u = (ep - lcDot(Points[PointIdx], Plane)) / fp;
 
 			if (u < SmallestDistance)
 				SmallestDistance = u;
@@ -1595,7 +1595,7 @@ inline std::tuple<lcVector3, float> lcZoomExtents(const lcVector3& Position, con
 
 	for (int PointIdx = 0; PointIdx < NumPoints; PointIdx++)
 	{
-		float Distance = lcDot(Points[PointIdx], Front);
+		const float Distance = lcDot(Points[PointIdx], Front);
 
 		if (Distance > FarDistance)
 			FarDistance = Distance;
@@ -1606,11 +1606,11 @@ inline std::tuple<lcVector3, float> lcZoomExtents(const lcVector3& Position, con
 
 inline void lcClosestPointsBetweenLines(const lcVector3& Line1a, const lcVector3& Line1b, const lcVector3& Line2a, const lcVector3& Line2b, lcVector3* Intersection1, lcVector3* Intersection2)
 {
-	lcVector3 u1 = Line1b - Line1a;
-	lcVector3 u2 = Line2b - Line2a;
-	lcVector3 p21 = Line2a - Line1a;
-	lcVector3 m = lcCross(u2, u1);
-	float m2 = lcDot(m, m);
+	const lcVector3 u1 = Line1b - Line1a;
+	const lcVector3 u2 = Line2b - Line2a;
+	const lcVector3 p21 = Line2a - Line1a;
+	const lcVector3 m = lcCross(u2, u1);
+	const float m2 = lcDot(m, m);
 
 	if (m2 < 0.00001f)
 	{
@@ -1621,33 +1621,33 @@ inline void lcClosestPointsBetweenLines(const lcVector3& Line1a, const lcVector3
 		return;
 	}
 
-	lcVector3 r = lcCross(p21, m / m2);
+	const lcVector3 r = lcCross(p21, m / m2);
 
 	if (Intersection1)
 	{
-		float t1 = lcDot(r, u2);
+		const float t1 = lcDot(r, u2);
 		*Intersection1 = Line1a + t1 * u1;
 	}
 
 	if (Intersection2)
 	{
-		float t2 = lcDot(r, u1);
+		const float t2 = lcDot(r, u1);
 		*Intersection2 = Line2a + t2 * u2;
 	}
 }
 
 inline bool lcLineSegmentPlaneIntersection(lcVector3* Intersection, const lcVector3& Start, const lcVector3& End, const lcVector4& Plane)
 {
-	lcVector3 Dir = End - Start;
-	lcVector3 PlaneNormal(Plane[0], Plane[1], Plane[2]);
+	const lcVector3 Dir = End - Start;
+	const lcVector3 PlaneNormal(Plane[0], Plane[1], Plane[2]);
 
-	float t1 = lcDot(PlaneNormal, Start) + Plane[3];
-	float t2 = lcDot(PlaneNormal, Dir);
+	const float t1 = lcDot(PlaneNormal, Start) + Plane[3];
+	const float t2 = lcDot(PlaneNormal, Dir);
 
 	if (t2 == 0.0f)
 		return false;
 
-	float t = -t1 / t2;
+	const float t = -t1 / t2;
 
 	*Intersection = Start + t * Dir;
 
@@ -1660,19 +1660,19 @@ inline bool lcLineSegmentPlaneIntersection(lcVector3* Intersection, const lcVect
 inline bool lcLineTriangleMinIntersection(const lcVector3& p1, const lcVector3& p2, const lcVector3& p3, const lcVector3& Start, const lcVector3& End, float* MinDist, lcVector3* Intersection)
 {
 	// Calculate the polygon plane.
-	lcVector3 PlaneNormal = lcCross(p1 - p2, p3 - p2);
-	float PlaneD = -lcDot(PlaneNormal, p1);
+	const lcVector3 PlaneNormal = lcCross(p1 - p2, p3 - p2);
+	const float PlaneD = -lcDot(PlaneNormal, p1);
 
 	// Check if the line is parallel to the plane.
-	lcVector3 Dir = End - Start;
+	const lcVector3 Dir = End - Start;
 
-	float t1 = lcDot(PlaneNormal, Start) + PlaneD;
-	float t2 = lcDot(PlaneNormal, Dir);
+	const float t1 = lcDot(PlaneNormal, Start) + PlaneD;
+	const float t2 = lcDot(PlaneNormal, Dir);
 
 	if (t2 == 0)
 		return false;
 
-	float t = -(t1 / t2);
+	const float t = -(t1 / t2);
 
 	if (t < 0)
 		return false;
@@ -1696,7 +1696,7 @@ inline bool lcLineTriangleMinIntersection(const lcVector3& p1, const lcVector3& 
 	a2 = lcDot(pa2, pa3);
 	a3 = lcDot(pa3, pa1);
 
-	float total = (acosf(a1) + acosf(a2) + acosf(a3)) * LC_RTOD;
+	const float total = (acosf(a1) + acosf(a2) + acosf(a3)) * LC_RTOD;
 
 	if (fabs(total - 360) <= 0.001f)
 	{
@@ -1757,15 +1757,15 @@ inline void lcPolygonPlaneClip(lcVector3* InPoints, int NumInPoints, lcVector3* 
 // Return true if a polygon intersects a set of planes.
 inline bool lcTriangleIntersectsPlanes(const float* p1, const float* p2, const float* p3, const lcVector4 Planes[6])
 {
-	const int NumPlanes = 6;
-	const float* Points[3] = { p1, p2, p3 };
+	constexpr int NumPlanes = 6;
+	const float* const Points[3] = { p1, p2, p3 };
 	int Outcodes[3] = { 0, 0, 0 }, i;
-	int NumPoints = 3;
+	constexpr int NumPoints = 3;
 
 	// First do the Cohen-Sutherland out code test for trivial rejects/accepts.
 	for (i = 0; i < NumPoints; i++)
 	{
-		lcVector3 Pt(Points[i][0], Points[i][1], Points[i][2]);
+		const lcVector3 Pt(Points[i][0], Points[i][1], Points[i][2]);
 
 		for (int j = 0; j < NumPlanes; j++)
 		{
@@ -1892,9 +1892,9 @@ inline bool lcBoundingBoxRayIntersectDistance(const lcVector3& Min, const lcVect
 
 inline bool lcSphereRayMinIntersectDistance(const lcVector3& Center, float Radius, const lcVector3& Start, const lcVector3& End, float* Dist)
 {
-	lcVector3 Dir = Center - Start;
-	float LengthSquaredDir = lcLengthSquared(Dir);
-	float RadiusSquared = Radius * Radius;
+	const lcVector3 Dir = Center - Start;
+	const float LengthSquaredDir = lcLengthSquared(Dir);
+	const float RadiusSquared = Radius * Radius;
 
 	if (LengthSquaredDir < RadiusSquared)
 	{
@@ -1904,14 +1904,14 @@ inline bool lcSphereRayMinIntersectDistance(const lcVector3& Center, float Radiu
 	}
 	else
 	{
-		lcVector3 RayDir = End - Start;
+		const lcVector3 RayDir = End - Start;
 		float t = lcDot(Dir, RayDir) / lcLengthSquared(RayDir);
 
 		// Ray points away from sphere.
 		if (t < 0)
 			return false;
 
-		float c = (RadiusSquared - LengthSquaredDir) / lcLengthSquared(RayDir) + (t * t);
+		const float c = (RadiusSquared - LengthSquaredDir) / lcLengthSquared(RayDir) + (t * t);
 		if (c > 0)
 		{
 			*Dist = t - sqrtf(c);
@@ -1924,8 +1924,8 @@ inline bool lcSphereRayMinIntersectDistance(const lcVector3& Center, float Radiu
 
 inline lcVector3 lcRayPointClosestPoint(const lcVector3& Point, const lcVector3& Start, const lcVector3& End)
 {
-	lcVector3 Dir = Point - Start;
-	lcVector3 RayDir = End - Start;
+	const lcVector3 Dir = Point - Start;
+	const lcVector3 RayDir = End - Start;
 
 	float t = lcDot(Dir, RayDir) / lcLengthSquared(RayDir);
 	t = lcClamp(t, 0.0f, 1.0f);
@@ -1935,7 +1935,7 @@ inline lcVector3 lcRayPointClosestPoint(const lcVector3& Point, const lcVector3&
 
 inline float lcRayPointDistance(const lcVector3& Point, const lcVector3& Start, const lcVector3& End)
 {
-	lcVector3 Closest = lcRayPointClosestPoint(Point, Start, End);
+	const lcVector3 Closest = lcRayPointClosestPoint(Point, Start, End);
 
 	return lcLength(Closest - Point);
 }
@@ -1943,7 +1943,7 @@ inline float lcRayPointDistance(const lcVector3& Point, const lcVector3& Start, 
 // Returns true if the axis aligned box intersects the volume defined by planes.
 inline bool lcBoundingBoxIntersectsVolume(const lcVector3& Min, const lcVector3& Max, const lcVector4 Planes[6])
 {
-	const int NumPlanes = 6;
+	constexpr int NumPlanes = 6;
 	lcVector3 Points[8] =
 	{
 		Points[0] = lcVector3(Min[0], Min[1], Min[2]),

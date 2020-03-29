@@ -866,6 +866,22 @@ bool lcPiece::RemoveFocusedControlPoint()
 	return true;
 }
 
+void lcPiece::VerifyControlPoints(lcArray<lcPieceControlPoint>& ControlPoints) const
+{
+	lcSynthInfo* SynthInfo = mPieceInfo->GetSynthInfo();
+	if (!SynthInfo)
+	{
+		ControlPoints.RemoveAll();
+	}
+	else
+	{
+		if (ControlPoints.GetSize() > LC_MAX_CONTROL_POINTS)
+			ControlPoints.SetSize(LC_MAX_CONTROL_POINTS);
+
+		SynthInfo->VerifyControlPoints(ControlPoints);
+	}
+}
+
 const char* lcPiece::GetName() const
 {
 	return mPieceInfo->m_strDescription;

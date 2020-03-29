@@ -13,6 +13,7 @@ public:
 	lcSynthInfoCurved(float Length, float DefaultScale, int NumSections, bool RigidEdges);
 
 	void GetDefaultControlPoints(lcArray<lcPieceControlPoint>& ControlPoints) const override;
+	void VerifyControlPoints(lcArray<lcPieceControlPoint>& ControlPoints) const override;
 
 protected:
 	float GetSectionTwist(const lcMatrix44& StartTransform, const lcMatrix44& EndTransform) const;
@@ -87,6 +88,8 @@ class lcSynthInfoStraight : public lcSynthInfo
 {
 public:
 	explicit lcSynthInfoStraight(float Length);
+
+	void VerifyControlPoints(lcArray<lcPieceControlPoint>& ControlPoints) const override;
 
 protected:
 	void CalculateSections(const lcArray<lcPieceControlPoint>& ControlPoints, lcArray<lcMatrix44>& Sections, SectionCallbackFunc SectionCallback) const override;
@@ -407,12 +410,26 @@ void lcSynthInfoCurved::GetDefaultControlPoints(lcArray<lcPieceControlPoint>& Co
 	ControlPoints[1].Scale = Scale;
 }
 
+void lcSynthInfoCurved::VerifyControlPoints(lcArray<lcPieceControlPoint>& ControlPoints) const
+{
+	if (ControlPoints.GetSize() < 2)
+		GetDefaultControlPoints(ControlPoints);
+}
+
 void lcSynthInfoFlexSystemHose::GetDefaultControlPoints(lcArray<lcPieceControlPoint>& ControlPoints) const
 {
 	lcSynthInfoCurved::GetDefaultControlPoints(ControlPoints);
 
 	ControlPoints[0].Transform = lcMatrix44Translation(lcVector3(0.0f, 0.0f, -mLength));
 	ControlPoints[1].Transform = lcMatrix44Translation(lcVector3(0.0f, 0.0f, 0.0f));
+}
+
+void lcSynthInfoStraight::VerifyControlPoints(lcArray<lcPieceControlPoint>& ControlPoints) const
+{
+	if (ControlPoints.GetSize() < 2)
+		GetDefaultControlPoints(ControlPoints);
+	else
+		ControlPoints.SetSize(2);
 }
 
 void lcSynthInfoShockAbsorber::GetDefaultControlPoints(lcArray<lcPieceControlPoint>& ControlPoints) const

@@ -431,11 +431,8 @@ public:
 
 	void SetControlPoints(const lcArray<lcPieceControlPoint>& ControlPoints)
 	{
-		if (ControlPoints.GetSize() > 1)
-		{
-			mControlPoints = ControlPoints;
-			UpdateMesh();
-		}
+		mControlPoints = ControlPoints;
+		UpdateMesh();
 	}
 
 	void SetControlPointScale(int ControlPointIndex, float Scale)
@@ -472,6 +469,7 @@ public:
 
 	bool InsertControlPoint(const lcVector3& WorldStart, const lcVector3& WorldEnd);
 	bool RemoveFocusedControlPoint();
+	void VerifyControlPoints(lcArray<lcPieceControlPoint>& ControlPoints) const;
 
 	lcGroup* GetTopGroup();
 

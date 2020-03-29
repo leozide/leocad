@@ -684,6 +684,7 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 				Piece->SetPieceInfo(Info, PartId, false);
 				Piece->Initialize(Transform, CurrentStep);
 				Piece->SetColorCode(ColorCode);
+				Piece->VerifyControlPoints(ControlPoints);
 				Piece->SetControlPoints(ControlPoints);
 				AddPiece(Piece);
 				Piece = nullptr;

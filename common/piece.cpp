@@ -703,6 +703,11 @@ void lcPiece::AddSubModelRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMat
 		Scene.AddInterfaceObject(this);
 }
 
+void lcPiece::SubmodelCompareBoundingBox(const lcMatrix44& WorldMatrix, lcVector3& Min, lcVector3& Max) const
+{
+	mPieceInfo->CompareBoundingBox(lcMul(mModelWorld, WorldMatrix), Min, Max);
+}
+
 void lcPiece::MoveSelected(lcStep Step, bool AddKey, const lcVector3& Distance)
 {
 	quint32 Section = GetFocusSection();
@@ -934,19 +939,21 @@ const lcBoundingBox& lcPiece::GetBoundingBox() const
 
 void lcPiece::CompareBoundingBox(lcVector3& Min, lcVector3& Max) const
 {
-	lcVector3 Points[8];
-
 	if (!mMesh)
-		lcGetBoxCorners(GetBoundingBox(), Points);
+		mPieceInfo->CompareBoundingBox(mModelWorld, Min, Max);
 	else
+	{
+		lcVector3 Points[8];
+
 		lcGetBoxCorners(mMesh->mBoundingBox, Points);
 
-	for (int i = 0; i < 8; i++)
-	{
-		lcVector3 Point = lcMul31(Points[i], mModelWorld);
+		for (int i = 0; i < 8; i++)
+		{
+			lcVector3 Point = lcMul31(Points[i], mModelWorld);
 
-		Min = lcMin(Point, Min);
-		Max = lcMax(Point, Max);
+			Min = lcMin(Point, Min);
+			Max = lcMax(Point, Max);
+		}
 	}
 }
 

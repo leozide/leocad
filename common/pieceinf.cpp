@@ -358,6 +358,31 @@ void PieceInfo::GetModelParts(const lcMatrix44& WorldMatrix, int DefaultColorInd
 	ModelParts.emplace_back(lcModelPartsEntry{ WorldMatrix, this, nullptr, DefaultColorIndex });
 }
 
+void PieceInfo::CompareBoundingBox(const lcMatrix44& WorldMatrix, lcVector3& Min, lcVector3& Max) const
+{
+	if (!IsModel())
+	{
+		lcVector3 Points[8];
+
+		if (!mMesh)
+			lcGetBoxCorners(GetBoundingBox(), Points);
+		else
+			lcGetBoxCorners(mMesh->mBoundingBox, Points);
+
+		for (int i = 0; i < 8; i++)
+		{
+			lcVector3 Point = lcMul31(Points[i], WorldMatrix);
+
+			Min = lcMin(Point, Min);
+			Max = lcMax(Point, Max);
+		}
+	}
+	else
+	{
+		mModel->SubModelCompareBoundingBox(WorldMatrix, Min, Max);
+	}
+}
+
 void PieceInfo::UpdateBoundingBox(std::vector<lcModel*>& UpdatedModels)
 {
 	if (IsModel())

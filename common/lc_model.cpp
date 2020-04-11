@@ -1764,6 +1764,13 @@ bool lcModel::SubModelBoxTest(const lcVector4 Planes[6]) const
 	return false;
 }
 
+void lcModel::SubModelCompareBoundingBox(const lcMatrix44& WorldMatrix, lcVector3& Min, lcVector3& Max) const
+{
+	for (lcPiece* Piece : mPieces)
+		if (Piece->IsVisibleInSubModel())
+			Piece->SubmodelCompareBoundingBox(WorldMatrix, Min, Max);
+}
+
 void lcModel::SaveCheckpoint(const QString& Description)
 {
 	lcModelHistoryEntry* ModelHistoryEntry = new lcModelHistoryEntry();

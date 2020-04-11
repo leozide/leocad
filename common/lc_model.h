@@ -237,6 +237,7 @@ public:
 	void BoxTest(lcObjectBoxTest& ObjectBoxTest) const;
 	bool SubModelMinIntersectDist(const lcVector3& WorldStart, const lcVector3& WorldEnd, float& MinDistance) const;
 	bool SubModelBoxTest(const lcVector4 Planes[6]) const;
+	void SubModelCompareBoundingBox(const lcMatrix44& WorldMatrix, lcVector3& Min, lcVector3& Max) const;
 
 	bool HasPieces() const
 	{

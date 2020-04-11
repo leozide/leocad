@@ -1237,6 +1237,13 @@ void lcMainWindow::ToggleViewSphere()
 	UpdateAllViews();
 }
 
+void lcMainWindow::ToggleFadePreviousSteps()
+{
+	lcGetPreferences().mFadeSteps = !lcGetPreferences().mFadeSteps;
+
+	UpdateAllViews();
+}
+
 QByteArray lcMainWindow::GetTabLayout()
 {
 	QByteArray TabLayoutData;
@@ -2659,6 +2666,10 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 
 	case LC_VIEW_TOGGLE_VIEW_SPHERE:
 		ToggleViewSphere();
+		break;
+
+	case LC_VIEW_FADE_PREVIOUS_STEPS:
+		ToggleFadePreviousSteps();
 		break;
 
 	case LC_PIECE_INSERT:

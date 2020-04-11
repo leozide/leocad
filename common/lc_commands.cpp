@@ -1060,6 +1060,13 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 		QT_TRANSLATE_NOOP("Status", "Toggle the view sphere"),
 		""
 	},
+	// LC_VIEW_FADE_PREVIOUS_STEPS
+	{
+		QT_TRANSLATE_NOOP("Action", "View.FadePreviousSteps"),
+		QT_TRANSLATE_NOOP("Menu", "Fade Previous Steps"),
+		QT_TRANSLATE_NOOP("Status", "Toggle fading previous model steps"),
+		""
+	},
 	// LC_PIECE_INSERT
 	{
 		QT_TRANSLATE_NOOP("Action", "Piece.Insert"),

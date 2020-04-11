@@ -290,6 +290,7 @@ public:
 	void SetShadingMode(lcShadingMode ShadingMode);
 	void SetSelectionMode(lcSelectionMode SelectionMode);
 	void ToggleViewSphere();
+	void ToggleFadePreviousSteps();
 
 	void NewProject();
 	bool OpenProject(const QString& FileName);

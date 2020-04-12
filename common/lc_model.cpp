@@ -1167,14 +1167,10 @@ void lcModel::Paste()
 	lcArray<lcObject*> SelectedObjects;
 	SelectedObjects.AllocGrow(PastedPieces.GetSize());
 
-	for (int PieceIdx = 0; PieceIdx < PastedPieces.GetSize(); PieceIdx++)
+	for (lcPiece* Piece : PastedPieces)
 	{
-		lcPiece* Piece = PastedPieces[PieceIdx];
-		lcStep Step = Piece->GetStepShow();
-
 		Piece->SetFileLine(-1);
-		if (Step > mCurrentStep)
-			Piece->SetStepShow(mCurrentStep);
+		Piece->SetStepShow(mCurrentStep);
 
 		SelectedObjects.Add(Piece);
 	}

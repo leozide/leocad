@@ -2,8 +2,8 @@ QT += core gui opengl network xml
 TEMPLATE = app
 
 greaterThan(QT_MAJOR_VERSION, 4) {
-    QT *= printsupport
-    QT += concurrent
+	QT *= printsupport
+	QT += concurrent
 }
 
 equals(QT_MAJOR_VERSION, 5) {
@@ -17,7 +17,15 @@ INCLUDEPATH += qt common
 CONFIG += precompile_header incremental c++11 force_debug_info
 
 win32 {
-	RC_FILE = qt/leocad.rc
+	RC_ICONS = resources/leocad.ico
+	VERSION = 19.7.1.0
+	QMAKE_TARGET_COMPANY = LeoCAD Software
+	QMAKE_TARGET_DESCRIPTION = LeoCAD
+	QMAKE_TARGET_COPYRIGHT = "Copyright (C) LeoCAD.org"
+	QMAKE_TARGET_PRODUCT = LeoCAD
+	RC_CODEPAGE = 1252
+	RC_LANG = 0x0409
+
 	LIBS += -lwininet
 }
 win32-msvc* {
@@ -73,6 +81,8 @@ APPVEYOR_REPO_COMMIT = $$(APPVEYOR_REPO_COMMIT)
 !isEmpty(APPVEYOR_REPO_COMMIT) {
 	isEmpty(APPVEYOR_REPO_TAG) {
 		DEFINES += "LC_CONTINUOUS_BUILD=$$system(git rev-parse --short HEAD)"
+		VERSION = 0.0.0.1
+		QMAKE_TARGET_DESCRIPTION = "LeoCAD Continuous Build $$system(git rev-parse --short HEAD)"
 	}
 }
 
@@ -111,7 +121,7 @@ unix:!macx {
 	isEmpty(DESKTOP_DIR):DESKTOP_DIR = $$INSTALL_PREFIX/share/applications
 	isEmpty(MIME_DIR):MIME_DIR = $$INSTALL_PREFIX/share/mime/packages
 	isEmpty(MIME_ICON_DIR):MIME_ICON_DIR = $$INSTALL_PREFIX/share/icons/hicolor/scalable/mimetypes
-    isEmpty(APPDATA_DIR):APPDATA_DIR = $$INSTALL_PREFIX/share/metainfo
+	isEmpty(APPDATA_DIR):APPDATA_DIR = $$INSTALL_PREFIX/share/metainfo
 
 	target.path = $$BIN_DIR
 	docs.path = $$DOCS_DIR
@@ -148,11 +158,11 @@ macx {
 	document_icon.path = Contents/Resources
 	library.files += $$_PRO_FILE_PWD_/library.bin
 	library.path = Contents/Resources
-    povray.files += $$_PRO_FILE_PWD_/tools/povray/povray
-    povray.path = Contents/MacOS
+	povray.files += $$_PRO_FILE_PWD_/tools/povray/povray
+	povray.path = Contents/MacOS
 
-    QMAKE_BUNDLE_DATA += document_icon library povray
-    DEFINES += LC_DISABLE_UPDATE_CHECK=1
+	QMAKE_BUNDLE_DATA += document_icon library povray
+	DEFINES += LC_DISABLE_UPDATE_CHECK=1
 }
 
 SOURCES += common/view.cpp \

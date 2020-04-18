@@ -26,7 +26,6 @@ public slots:
 	void on_ExportModel_clicked();
 	void on_MoveUp_clicked();
 	void on_MoveDown_clicked();
-	void on_SetActiveModel_clicked();
 	void on_ModelList_itemDoubleClicked(QListWidgetItem* Item);
 	void on_ModelList_itemSelectionChanged();
 

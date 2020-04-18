@@ -17,7 +17,12 @@ lcQModelListDialog::lcQModelListDialog(QWidget* Parent, QList<QPair<QString, lcM
 		Item->setData(Qt::UserRole, QVariant::fromValue<uintptr_t>((uintptr_t)it->second));
 		ui->ModelList->addItem(Item);
 	}
+
 	ui->ModelList->setCurrentRow(lcGetActiveProject()->GetActiveModelIndex());
+
+	QSettings Settings;
+	ui->SetActiveModel->setChecked(Settings.value("Settings/ModelListSetActive", true).toBool());
+
 	UpdateButtons();
 }
 
@@ -68,6 +73,12 @@ void lcQModelListDialog::accept()
 		QListWidgetItem* Item = ui->ModelList->item(ItemIdx);
 		mModels.append(QPair<QString, lcModel*>(Item->text(), (lcModel*)Item->data(Qt::UserRole).value<uintptr_t>()));
 	}
+
+	if (ui->SetActiveModel->isChecked())
+		mActiveModelItem = ui->ModelList->currentItem();
+
+	QSettings Settings;
+	Settings.setValue("Settings/ModelListSetActive", ui->SetActiveModel->isChecked());
 
 	QDialog::accept();
 }
@@ -245,11 +256,6 @@ void lcQModelListDialog::on_MoveDown_clicked()
 
 	ui->ModelList->blockSignals(Blocked);
 	UpdateButtons();
-}
-
-void lcQModelListDialog::on_SetActiveModel_clicked()
-{
-	mActiveModelItem = ui->ModelList->currentItem();
 }
 
 void lcQModelListDialog::on_ModelList_itemDoubleClicked(QListWidgetItem* Item)

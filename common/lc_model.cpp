@@ -980,8 +980,8 @@ bool lcModel::LoadBinary(lcFile* file)
 
 bool lcModel::LoadLDD(const QString& FileData)
 {
-	lcArray<lcPiece*> Pieces;
-	lcArray<lcArray<lcPiece*>> Groups;
+	std::vector<lcPiece*> Pieces;
+	std::vector<std::vector<lcPiece*>> Groups;
 	
 	if (!lcImportLXFMLFile(FileData, Pieces, Groups))
 		return false;
@@ -989,7 +989,7 @@ bool lcModel::LoadLDD(const QString& FileData)
 	for (lcPiece* Piece : Pieces)
 		AddPiece(Piece);
 
-	for (const lcArray<lcPiece*>& Group : Groups)
+	for (const std::vector<lcPiece*>& Group : Groups)
 	{
 		lcGroup* NewGroup = AddGroup(tr("Group #"), nullptr);
 		for (lcPiece* Piece : Group)

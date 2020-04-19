@@ -78,7 +78,7 @@ static bool lcLoadLDrawXML(std::map<int, int>& MaterialTable, std::map<int, std:
 	return true;
 }
 
-bool lcImportLXFMLFile(const QString& FileData, lcArray<lcPiece*>& Pieces, lcArray<lcArray<lcPiece*>>& Groups)
+bool lcImportLXFMLFile(const QString& FileData, std::vector<lcPiece*>& Pieces, std::vector<std::vector<lcPiece*>>& Groups)
 {
 	std::map<int, int> MaterialTable;
 	std::map<int, std::string> BrickTable;
@@ -187,16 +187,16 @@ bool lcImportLXFMLFile(const QString& FileData, lcArray<lcPiece*>& Pieces, lcArr
 				Piece->SetPieceInfo(Info, QString(), false);
 				Piece->Initialize(lcMatrix44LDrawToLeoCAD(WorldMatrix), 1);
 				Piece->SetColorCode(ColorCode);
-				Pieces.Add(Piece);
+				Pieces.push_back(Piece);
 				NumBrickPieces++;
 			}
 		
 			if (NumBrickPieces > 1)
 			{
-				lcArray<lcPiece*> Group;
-				for (int PieceIdx = Pieces.GetSize() - NumBrickPieces; PieceIdx < Pieces.GetSize(); PieceIdx++)
-					Group.Add(Pieces[PieceIdx]);
-				Groups.Add(Group);
+				std::vector<lcPiece*> Group;
+				for (size_t PieceIdx = Pieces.size() - NumBrickPieces; PieceIdx < Pieces.size(); PieceIdx++)
+					Group.push_back(Pieces[PieceIdx]);
+				Groups.push_back(Group);
 			}
 		}
 	}

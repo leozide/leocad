@@ -316,15 +316,15 @@ void lcQPropertiesTree::Update(const lcArray<lcObject*>& Selection, lcObject* Fo
 	{
 		switch (Focus->GetType())
 		{
-		case LC_OBJECT_PIECE:
+		case lcObjectType::Piece:
 			Mode = LC_PROPERTY_WIDGET_PIECE;
 			break;
 
-		case LC_OBJECT_CAMERA:
+		case lcObjectType::Camera:
 			Mode = LC_PROPERTY_WIDGET_CAMERA;
 			break;
 
-		case LC_OBJECT_LIGHT:
+		case lcObjectType::Light:
 			Mode = LC_PROPERTY_WIDGET_LIGHT;
 			break;
 		}
@@ -335,7 +335,7 @@ void lcQPropertiesTree::Update(const lcArray<lcObject*>& Selection, lcObject* Fo
 		{
 			switch (Selection[ObjectIdx]->GetType())
 			{
-			case LC_OBJECT_PIECE:
+			case lcObjectType::Piece:
 				if (Mode == LC_PROPERTY_WIDGET_EMPTY)
 					Mode = LC_PROPERTY_WIDGET_PIECE;
 				else if (Mode != LC_PROPERTY_WIDGET_PIECE)
@@ -345,7 +345,7 @@ void lcQPropertiesTree::Update(const lcArray<lcObject*>& Selection, lcObject* Fo
 				}
 				break;
 
-			case LC_OBJECT_CAMERA:
+			case lcObjectType::Camera:
 				if (Mode != LC_PROPERTY_WIDGET_EMPTY)
 				{
 					Mode = LC_PROPERTY_WIDGET_MULTIPLE;
@@ -358,7 +358,7 @@ void lcQPropertiesTree::Update(const lcArray<lcObject*>& Selection, lcObject* Fo
 				}
 				break;
 
-			case LC_OBJECT_LIGHT:
+			case lcObjectType::Light:
 				if (Mode != LC_PROPERTY_WIDGET_EMPTY)
 				{
 					Mode = LC_PROPERTY_WIDGET_MULTIPLE;
@@ -933,7 +933,7 @@ void lcQPropertiesTree::SetPiece(const lcArray<lcObject*>& Selection, lcObject* 
 		{
 			lcObject* Object = Selection[ObjectIdx];
 
-			if (Object->GetType() != LC_OBJECT_PIECE)
+			if (!Object->IsPiece())
 				continue;
 
 			lcPiece* SelectedPiece = (lcPiece*)Object;

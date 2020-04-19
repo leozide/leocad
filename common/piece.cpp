@@ -18,7 +18,7 @@
 #define LC_PIECE_CONTROL_POINT_SIZE 10.0f
 
 lcPiece::lcPiece(PieceInfo* Info)
-	: lcObject(LC_OBJECT_PIECE)
+	: lcObject(lcObjectType::Piece)
 {
 	mMesh = nullptr;
 	SetPieceInfo(Info, QString(), true);
@@ -33,7 +33,7 @@ lcPiece::lcPiece(PieceInfo* Info)
 }
 
 lcPiece::lcPiece(const lcPiece& Other)
-	: lcObject(LC_OBJECT_PIECE)
+	: lcObject(lcObjectType::Piece)
 {
 	mMesh = nullptr;
 	SetPieceInfo(Other.mPieceInfo, Other.mID, true);

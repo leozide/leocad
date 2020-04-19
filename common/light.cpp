@@ -14,7 +14,7 @@
 
 // New omni light.
 lcLight::lcLight(float px, float py, float pz)
-	: lcObject(LC_OBJECT_LIGHT)
+	: lcObject(lcObjectType::Light)
 {
 	Initialize(lcVector3(px, py, pz), lcVector3(0.0f, 0.0f, 0.0f));
 	UpdatePosition(1);
@@ -22,7 +22,7 @@ lcLight::lcLight(float px, float py, float pz)
 
 // New directional or spot light.
 lcLight::lcLight(float px, float py, float pz, float tx, float ty, float tz)
-	: lcObject(LC_OBJECT_LIGHT)
+	: lcObject(lcObjectType::Light)
 {
 	Initialize(lcVector3(px, py, pz), lcVector3(tx, ty, tz));
 	mState |= LC_LIGHT_SPOT;

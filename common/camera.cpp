@@ -16,7 +16,7 @@
 #define LC_CAMERA_SAVE_VERSION 7 // LeoCAD 0.80
 
 lcCamera::lcCamera(bool Simple)
-	: lcObject(LC_OBJECT_CAMERA)
+	: lcObject(lcObjectType::Camera)
 {
 	Initialize();
 
@@ -37,7 +37,7 @@ lcCamera::lcCamera(bool Simple)
 }
 
 lcCamera::lcCamera(float ex, float ey, float ez, float tx, float ty, float tz)
-	: lcObject(LC_OBJECT_CAMERA)
+	: lcObject(lcObjectType::Camera)
 {
 	// Fix the up vector
 	lcVector3 UpVector(0, 0, 1), FrontVector(ex - tx, ey - ty, ez - tz), SideVector;

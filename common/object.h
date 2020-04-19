@@ -6,11 +6,11 @@
 typedef quint32 lcStep;
 #define LC_STEP_MAX 0xffffffff
 
-enum lcObjectType
+enum class lcObjectType
 {
-	LC_OBJECT_PIECE,
-	LC_OBJECT_CAMERA,
-	LC_OBJECT_LIGHT
+	Piece,
+	Camera,
+	Light
 };
 
 template<typename T>
@@ -63,17 +63,17 @@ public:
 public:
 	bool IsPiece() const
 	{
-		return mObjectType == LC_OBJECT_PIECE;
+		return mObjectType == lcObjectType::Piece;
 	}
 
 	bool IsCamera() const
 	{
-		return mObjectType == LC_OBJECT_CAMERA;
+		return mObjectType == lcObjectType::Camera;
 	}
 
 	bool IsLight() const
 	{
-		return mObjectType == LC_OBJECT_LIGHT;
+		return mObjectType == lcObjectType::Light;
 	}
 
 	lcObjectType GetType() const

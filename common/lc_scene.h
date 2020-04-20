@@ -92,8 +92,8 @@ public:
 	void DrawInterfaceObjects(lcContext* Context) const;
 
 protected:
-	void DrawOpaqueMeshes(lcContext* Context, bool DrawLit, int PrimitiveTypes) const;
-	void DrawTranslucentMeshes(lcContext* Context, bool DrawLit) const;
+	void DrawOpaqueMeshes(lcContext* Context, bool DrawLit, int PrimitiveTypes, bool DrawFaded, bool DrawNonFaded) const;
+	void DrawTranslucentMeshes(lcContext* Context, bool DrawLit, bool DrawFadePrepass, bool DrawFaded, bool DrawNonFaded) const;
 	void DrawDebugNormals(lcContext* Context, const lcMesh* Mesh) const;
 
 	lcMatrix44 mViewMatrix;

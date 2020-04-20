@@ -7,6 +7,8 @@
 #include "lc_application.h"
 #include "object.h"
 
+bool gTranslucentFade = true; // todo: move to preferences
+
 lcScene::lcScene()
 	: mRenderMeshes(0, 1024), mOpaqueMeshes(0, 1024), mTranslucentMeshes(0, 1024), mInterfaceObjects(0, 1024)
 {
@@ -65,7 +67,8 @@ void lcScene::AddMesh(lcMesh* Mesh, const lcMatrix44& WorldMatrix, int ColorInde
 	const float Distance = fabsf(lcMul31(WorldMatrix[3], mViewMatrix).z);
 	RenderMesh.LodIndex = mAllowLOD ? RenderMesh.Mesh->GetLodIndex(Distance) : LC_MESH_LOD_HIGH;
 
-	const bool Translucent = lcIsColorTranslucent(ColorIndex);
+	const bool ForceTranslucent = (gTranslucentFade && State == lcRenderMeshState::Faded);
+	const bool Translucent = lcIsColorTranslucent(ColorIndex) || ForceTranslucent;
 	const lcMeshFlags Flags = Mesh->mFlags;
 
 	if ((Flags & (lcMeshFlag::HasSolid | lcMeshFlag::HasLines)) || ((Flags & lcMeshFlag::HasDefault) && !Translucent))
@@ -87,7 +90,7 @@ void lcScene::AddMesh(lcMesh* Mesh, const lcMatrix44& WorldMatrix, int ColorInde
 			if (SectionColorIndex == gDefaultColor)
 				SectionColorIndex = RenderMesh.ColorIndex;
 
-			if (!lcIsColorTranslucent(SectionColorIndex))
+			if (!lcIsColorTranslucent(SectionColorIndex) && !ForceTranslucent)
 				continue;
 
 			const lcVector3 Center = (Section->BoundingBox.Min + Section->BoundingBox.Max) / 2;
@@ -118,7 +121,7 @@ void lcScene::DrawDebugNormals(lcContext* Context, const lcMesh* Mesh) const
 	free(Vertices);
 }
 
-void lcScene::DrawOpaqueMeshes(lcContext* Context, bool DrawLit, int PrimitiveTypes) const
+void lcScene::DrawOpaqueMeshes(lcContext* Context, bool DrawLit, int PrimitiveTypes, bool DrawFaded, bool DrawNonFaded) const
 {
 	if (mOpaqueMeshes.IsEmpty())
 		return;
@@ -143,6 +146,12 @@ void lcScene::DrawOpaqueMeshes(lcContext* Context, bool DrawLit, int PrimitiveTy
 		const lcRenderMesh& RenderMesh = mRenderMeshes[MeshIndex];
 		const lcMesh* Mesh = RenderMesh.Mesh;
 		const int LodIndex = RenderMesh.LodIndex;
+
+		if (!DrawFaded && RenderMesh.State == lcRenderMeshState::Faded)
+			continue;
+
+		if (!DrawNonFaded && RenderMesh.State != lcRenderMeshState::Faded)
+			continue;
 
 		Context->BindMesh(Mesh);
 		Context->SetWorldMatrix(RenderMesh.WorldMatrix);
@@ -180,6 +189,8 @@ void lcScene::DrawOpaqueMeshes(lcContext* Context, bool DrawLit, int PrimitiveTy
 					break;
 
 				case lcRenderMeshState::Faded:
+					if (gTranslucentFade)
+						continue;
 					Context->SetColorIndexTinted(ColorIndex, LC_COLOR_DISABLED, 0.25f);
 					break;
 				}
@@ -208,7 +219,10 @@ void lcScene::DrawOpaqueMeshes(lcContext* Context, bool DrawLit, int PrimitiveTy
 					break;
 
 				case lcRenderMeshState::Faded:
-					Context->SetInterfaceColor(LC_COLOR_DISABLED);
+					if (gTranslucentFade)
+						Context->SetEdgeColorIndexTintedAlpha(ColorIndex, LC_COLOR_DISABLED_TRANSLUCENT, 0.25f);
+					else
+						Context->SetEdgeColorIndexTinted(ColorIndex, LC_COLOR_DISABLED, 0.25f);
 					break;
 				}
 			}
@@ -285,7 +299,7 @@ void lcScene::DrawOpaqueMeshes(lcContext* Context, bool DrawLit, int PrimitiveTy
 	Context->SetPolygonOffset(lcPolygonOffset::None);
 }
 
-void lcScene::DrawTranslucentMeshes(lcContext* Context, bool DrawLit) const
+void lcScene::DrawTranslucentMeshes(lcContext* Context, bool DrawLit, bool DrawFadePrepass, bool DrawFaded, bool DrawNonFaded) const
 {
 	if (mTranslucentMeshes.IsEmpty())
 		return;
@@ -303,14 +317,26 @@ void lcScene::DrawTranslucentMeshes(lcContext* Context, bool DrawLit) const
 		TexturedMaterial = lcMaterialType::UnlitTextureDecal;
 	}
 
-	glEnable(GL_BLEND);
-	Context->SetDepthWrite(false);
+	if (!DrawFadePrepass)
+	{
+		glEnable(GL_BLEND);
+		Context->SetDepthWrite(false);
+	}
+	else
+		glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+
 	Context->SetPolygonOffset(lcPolygonOffset::Translucent);
 
 	for (const lcTranslucentMeshInstance& MeshInstance : mTranslucentMeshes)
 	{
 		const lcRenderMesh& RenderMesh = mRenderMeshes[MeshInstance.RenderMeshIndex];
 		const lcMesh* Mesh = RenderMesh.Mesh;
+
+		if (!DrawFaded && RenderMesh.State == lcRenderMeshState::Faded)
+			continue;
+
+		if (!DrawNonFaded && RenderMesh.State != lcRenderMeshState::Faded)
+			continue;
 
 		Context->BindMesh(Mesh);
 		Context->SetWorldMatrix(RenderMesh.WorldMatrix);
@@ -338,7 +364,10 @@ void lcScene::DrawTranslucentMeshes(lcContext* Context, bool DrawLit) const
 			break;
 
 		case lcRenderMeshState::Faded:
-			Context->SetColorIndexTinted(ColorIndex, LC_COLOR_DISABLED, 0.25f);
+			if (gTranslucentFade)
+				Context->SetColorIndexTintedAlpha(ColorIndex, LC_COLOR_DISABLED_TRANSLUCENT, 0.25f);
+			else
+				Context->SetColorIndexTinted(ColorIndex, LC_COLOR_DISABLED, 0.25f);
 			break;
 		}
 
@@ -370,8 +399,13 @@ void lcScene::DrawTranslucentMeshes(lcContext* Context, bool DrawLit) const
 	Context->BindTexture2D(0);
 	Context->SetPolygonOffset(lcPolygonOffset::None);
 
-	Context->SetDepthWrite(true);
-	glDisable(GL_BLEND);
+	if (!DrawFadePrepass)
+	{
+		Context->SetDepthWrite(true);
+		glDisable(GL_BLEND);
+	}
+	else
+		glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 }
 
 void lcScene::Draw(lcContext* Context) const
@@ -396,7 +430,7 @@ void lcScene::Draw(lcContext* Context) const
 		if (DrawConditional)
 			PrimitiveTypes |= LC_MESH_CONDITIONAL_LINES;
 
-		DrawOpaqueMeshes(Context, false, PrimitiveTypes);
+		DrawOpaqueMeshes(Context, false, PrimitiveTypes, true, true);
 
 		if (mPreTranslucentCallback)
 			mPreTranslucentCallback();
@@ -405,43 +439,75 @@ void lcScene::Draw(lcContext* Context) const
 	{
 		const bool DrawLines = Preferences.mDrawEdgeLines && Preferences.mLineWidth != 0.0f;
 
-		int PrimitiveTypes = LC_MESH_TRIANGLES | LC_MESH_TEXTURED_TRIANGLES;
+		int LinePrimitiveTypes = LC_MESH_LINES;
 
-		if (DrawLines)
+		if (DrawConditional)
+			LinePrimitiveTypes |= LC_MESH_CONDITIONAL_LINES;
+
+		const int SolidPrimitiveTypes = LC_MESH_TRIANGLES | LC_MESH_TEXTURED_TRIANGLES;
+
+		if (gTranslucentFade)
 		{
-			PrimitiveTypes |= LC_MESH_LINES;
+			DrawOpaqueMeshes(Context, false, SolidPrimitiveTypes | LinePrimitiveTypes, false, true);
 
-			if (DrawConditional)
-				PrimitiveTypes |= LC_MESH_CONDITIONAL_LINES;
+			if (mPreTranslucentCallback)
+				mPreTranslucentCallback();
+
+			DrawTranslucentMeshes(Context, false, true, true, false);
+
+			if (DrawLines)
+				DrawOpaqueMeshes(Context, false, LinePrimitiveTypes, true, false);
+
+			DrawTranslucentMeshes(Context, true, false, true, true);
 		}
+		else
+		{
+			DrawOpaqueMeshes(Context, false, SolidPrimitiveTypes | LinePrimitiveTypes, true, true);
 
-		DrawOpaqueMeshes(Context, false, PrimitiveTypes);
+			if (mPreTranslucentCallback)
+				mPreTranslucentCallback();
 
-		if (mPreTranslucentCallback)
-			mPreTranslucentCallback();
-
-		DrawTranslucentMeshes(Context, false);
+			DrawTranslucentMeshes(Context, true, false, true, true);
+		}
 	}
 	else
 	{
 		const bool DrawLines = Preferences.mDrawEdgeLines && Preferences.mLineWidth != 0.0f;
 
-		if (DrawLines)
+		int LinePrimitiveTypes = LC_MESH_LINES;
+
+		if (DrawConditional)
+			LinePrimitiveTypes |= LC_MESH_CONDITIONAL_LINES;
+
+		if (gTranslucentFade)
 		{
-			int PrimitiveTypes = LC_MESH_LINES;
+			DrawOpaqueMeshes(Context, true, LC_MESH_TRIANGLES | LC_MESH_TEXTURED_TRIANGLES, false, true);
 
-			if (DrawConditional)
-				PrimitiveTypes |= LC_MESH_CONDITIONAL_LINES;
+			if (DrawLines)
+				DrawOpaqueMeshes(Context, false, LinePrimitiveTypes, false, true);
 
-			DrawOpaqueMeshes(Context, false, PrimitiveTypes);
+			if (mPreTranslucentCallback)
+				mPreTranslucentCallback();
+
+			DrawTranslucentMeshes(Context, false, true, true, false);
+
+			if (DrawLines)
+				DrawOpaqueMeshes(Context, false, LinePrimitiveTypes, true, false);
+
+			DrawTranslucentMeshes(Context, true, false, true, true);
 		}
+		else
+		{
+			if (DrawLines)
+				DrawOpaqueMeshes(Context, false, LinePrimitiveTypes, true, true);
 
-		DrawOpaqueMeshes(Context, true, LC_MESH_TRIANGLES | LC_MESH_TEXTURED_TRIANGLES);
+			DrawOpaqueMeshes(Context, true, LC_MESH_TRIANGLES | LC_MESH_TEXTURED_TRIANGLES, true, true);
 
-		if (mPreTranslucentCallback)
-			mPreTranslucentCallback();
+			if (mPreTranslucentCallback)
+				mPreTranslucentCallback();
 
-		DrawTranslucentMeshes(Context, true);
+			DrawTranslucentMeshes(Context, true, false, true, true);
+		}
 	}
 }
 

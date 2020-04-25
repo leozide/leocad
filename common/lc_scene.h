@@ -102,6 +102,7 @@ protected:
 	bool mDrawInterface;
 	bool mAllowWireframe;
 	bool mAllowLOD;
+	bool mHasFadedParts;
 
 	std::function<void()> mPreTranslucentCallback;
 	lcArray<lcRenderMesh> mRenderMeshes;

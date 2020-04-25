@@ -16,6 +16,7 @@ lcScene::lcScene()
 	mDrawInterface = false;
 	mAllowWireframe = true;
 	mAllowLOD = true;
+	mHasFadedParts = false;
 	mPreTranslucentCallback = nullptr;
 }
 
@@ -23,6 +24,7 @@ void lcScene::Begin(const lcMatrix44& ViewMatrix)
 {
 	mViewMatrix = ViewMatrix;
 	mActiveSubmodelInstance = nullptr;
+	mHasFadedParts = false;
 	mPreTranslucentCallback = nullptr;
 	mRenderMeshes.RemoveAll();
 	mOpaqueMeshes.RemoveAll();
@@ -70,6 +72,7 @@ void lcScene::AddMesh(lcMesh* Mesh, const lcMatrix44& WorldMatrix, int ColorInde
 	const bool ForceTranslucent = (gTranslucentFade && State == lcRenderMeshState::Faded);
 	const bool Translucent = lcIsColorTranslucent(ColorIndex) || ForceTranslucent;
 	const lcMeshFlags Flags = Mesh->mFlags;
+	mHasFadedParts |= State == lcRenderMeshState::Faded;
 
 	if ((Flags & (lcMeshFlag::HasSolid | lcMeshFlag::HasLines)) || ((Flags & lcMeshFlag::HasDefault) && !Translucent))
 		mOpaqueMeshes.Add(mRenderMeshes.GetSize() - 1);
@@ -348,7 +351,7 @@ void lcScene::DrawTranslucentMeshes(lcContext* Context, bool DrawLit, bool DrawF
 		if (ColorIndex == gDefaultColor)
 			ColorIndex = RenderMesh.ColorIndex;
 
-		if (DrawFadePrepass && !lcIsColorTranslucent(ColorIndex))
+		if (DrawFadePrepass && lcIsColorTranslucent(ColorIndex))
 			continue;
 
 		switch (RenderMesh.State)
@@ -449,7 +452,7 @@ void lcScene::Draw(lcContext* Context) const
 
 		const int SolidPrimitiveTypes = LC_MESH_TRIANGLES | LC_MESH_TEXTURED_TRIANGLES;
 
-		if (gTranslucentFade)
+		if (gTranslucentFade && mHasFadedParts)
 		{
 			DrawOpaqueMeshes(Context, false, SolidPrimitiveTypes | LinePrimitiveTypes, false, true);
 
@@ -482,7 +485,7 @@ void lcScene::Draw(lcContext* Context) const
 		if (DrawConditional)
 			LinePrimitiveTypes |= LC_MESH_CONDITIONAL_LINES;
 
-		if (gTranslucentFade)
+		if (gTranslucentFade && mHasFadedParts)
 		{
 			DrawOpaqueMeshes(Context, true, LC_MESH_TRIANGLES | LC_MESH_TEXTURED_TRIANGLES, false, true);
 

@@ -348,6 +348,9 @@ void lcScene::DrawTranslucentMeshes(lcContext* Context, bool DrawLit, bool DrawF
 		if (ColorIndex == gDefaultColor)
 			ColorIndex = RenderMesh.ColorIndex;
 
+		if (DrawFadePrepass && !lcIsColorTranslucent(ColorIndex))
+			continue;
+
 		switch (RenderMesh.State)
 		{
 		case lcRenderMeshState::Default:

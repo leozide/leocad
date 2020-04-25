@@ -86,7 +86,7 @@ APPVEYOR_REPO_COMMIT = $$(APPVEYOR_REPO_COMMIT)
 	}
 }
 
-TSFILES = resources/leocad_fr.ts resources/leocad_pt.ts resources/leocad_de.ts resources/leocad_uk.ts
+TSFILES = resources/leocad_fr.ts resources/leocad_pt.ts resources/leocad_de.ts resources/leocad_uk.ts resources/leocad_cs.ts
 lrelease.input = TSFILES
 lrelease.output = ${QMAKE_FILE_PATH}/${QMAKE_FILE_BASE}.qm
 lrelease.commands = $$QMAKE_LRELEASE -silent ${QMAKE_FILE_IN} -qm ${QMAKE_FILE_PATH}/${QMAKE_FILE_BASE}.qm

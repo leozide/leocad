@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>598</width>
-    <height>454</height>
+    <height>477</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -58,6 +58,11 @@
             <item>
              <property name="text">
               <string>Default</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Czech</string>
              </property>
             </item>
             <item>

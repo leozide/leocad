@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>598</width>
-    <height>489</height>
+    <height>492</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -304,6 +304,13 @@
        <item>
         <widget class="QWidget" name="widget" native="true">
          <layout class="QGridLayout" name="gridLayout">
+          <item row="6" column="0">
+           <widget class="QCheckBox" name="HighlightNewParts">
+            <property name="text">
+             <string>Highlight new parts</string>
+            </property>
+           </widget>
+          </item>
           <item row="0" column="1">
            <widget class="QComboBox" name="antiAliasingSamples">
             <item>
@@ -323,53 +330,23 @@
             </item>
            </widget>
           </item>
-          <item row="8" column="0">
-           <widget class="QLabel" name="label_3">
-            <property name="text">
-             <string>Shading Mode:</string>
+          <item row="0" column="3">
+           <spacer name="horizontalSpacer_2">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
             </property>
-           </widget>
-          </item>
-          <item row="2" column="2">
-           <widget class="QLabel" name="label_2">
-            <property name="text">
-             <string>width</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="QLineEdit" name="lineWidth">
-            <property name="maximumSize">
+            <property name="sizeHint" stdset="0">
              <size>
-              <width>75</width>
-              <height>16777215</height>
+              <width>40</width>
+              <height>20</height>
              </size>
             </property>
-           </widget>
+           </spacer>
           </item>
-          <item row="8" column="1" colspan="2">
-           <widget class="QComboBox" name="ShadingMode">
-            <item>
-             <property name="text">
-              <string>Wireframe</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Flat Shading</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Default Lights</string>
-             </property>
-            </item>
-           </widget>
-          </item>
-          <item row="0" column="0">
-           <widget class="QCheckBox" name="antiAliasing">
+          <item row="1" column="0">
+           <widget class="QCheckBox" name="studLogo">
             <property name="text">
-             <string>Anti-aliasing</string>
+             <string>Stud Logo</string>
             </property>
            </widget>
           </item>
@@ -402,33 +379,6 @@
             </item>
            </widget>
           </item>
-          <item row="1" column="0">
-           <widget class="QCheckBox" name="studLogo">
-            <property name="text">
-             <string>Stud Logo</string>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="0">
-           <widget class="QCheckBox" name="axisIcon">
-            <property name="text">
-             <string>Axis icon</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="3">
-           <spacer name="horizontalSpacer_2">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
           <item row="2" column="0">
            <widget class="QCheckBox" name="edgeLines">
             <property name="text">
@@ -436,10 +386,20 @@
             </property>
            </widget>
           </item>
-          <item row="5" column="0" colspan="2">
-           <widget class="QCheckBox" name="FadeSteps">
+          <item row="2" column="1">
+           <widget class="QLineEdit" name="lineWidth">
+            <property name="maximumSize">
+             <size>
+              <width>75</width>
+              <height>16777215</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QCheckBox" name="antiAliasing">
             <property name="text">
-             <string>Fade Previous Steps</string>
+             <string>Anti-aliasing</string>
             </property>
            </widget>
           </item>
@@ -450,36 +410,66 @@
             </property>
            </widget>
           </item>
-          <item row="7" column="0" colspan="4">
-           <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <item row="8" column="0">
+           <widget class="QLabel" name="label_3">
+            <property name="text">
+             <string>Shading Mode:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="8" column="1" colspan="2">
+           <widget class="QComboBox" name="ShadingMode">
             <item>
-             <widget class="QCheckBox" name="HighlightNewParts">
-              <property name="text">
-               <string>Highlight new parts</string>
-              </property>
-             </widget>
+             <property name="text">
+              <string>Wireframe</string>
+             </property>
             </item>
             <item>
-             <widget class="QToolButton" name="HighlightNewPartsColor">
-              <property name="text">
-               <string/>
-              </property>
-             </widget>
+             <property name="text">
+              <string>Flat Shading</string>
+             </property>
             </item>
             <item>
-             <spacer name="horizontalSpacer_9">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
+             <property name="text">
+              <string>Default Lights</string>
+             </property>
             </item>
-           </layout>
+           </widget>
+          </item>
+          <item row="2" column="2">
+           <widget class="QLabel" name="label_2">
+            <property name="text">
+             <string>width</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QCheckBox" name="axisIcon">
+            <property name="text">
+             <string>Axis icon</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0">
+           <widget class="QCheckBox" name="FadeSteps">
+            <property name="text">
+             <string>Fade previous steps</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="1">
+           <widget class="QToolButton" name="FadeStepsColor">
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="1">
+           <widget class="QToolButton" name="HighlightNewPartsColor">
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
           </item>
          </layout>
         </widget>
@@ -1229,6 +1219,7 @@
   <tabstop>MeshLOD</tabstop>
   <tabstop>axisIcon</tabstop>
   <tabstop>FadeSteps</tabstop>
+  <tabstop>FadeStepsColor</tabstop>
   <tabstop>HighlightNewParts</tabstop>
   <tabstop>HighlightNewPartsColor</tabstop>
   <tabstop>ShadingMode</tabstop>

@@ -509,10 +509,11 @@ void lcContext::SetColorIndexTinted(int ColorIndex, lcInterfaceColor InterfaceCo
 	SetColor(lcVector4(Color, gColorList[ColorIndex].Value.w));
 }
 
-void lcContext::SetColorIndexTintedAlpha(int ColorIndex, lcInterfaceColor InterfaceColor, float Weight)
+void lcContext::SetColorIndexTinted(int ColorIndex, const lcVector4& Tint)
 {
-	const lcVector3 Color(gColorList[ColorIndex].Value * Weight + gInterfaceColors[InterfaceColor] * (1.0f - Weight));
-	SetColor(lcVector4(Color, gColorList[ColorIndex].Value.w * gInterfaceColors[InterfaceColor].w));
+	const float Weight = Tint.w;
+	const lcVector3 Color(gColorList[ColorIndex].Value * Weight + Tint * (1.0f - Weight));
+	SetColor(lcVector4(Color, gColorList[ColorIndex].Value.w * Tint.w));
 }
 
 void lcContext::SetEdgeColorIndex(int ColorIndex)
@@ -520,16 +521,11 @@ void lcContext::SetEdgeColorIndex(int ColorIndex)
 	SetColor(gColorList[ColorIndex].Edge);
 }
 
-void lcContext::SetEdgeColorIndexTinted(int ColorIndex, lcInterfaceColor InterfaceColor, float Weight)
+void lcContext::SetEdgeColorIndexTinted(int ColorIndex, const lcVector4& Tint)
 {
-	const lcVector3 Color(gColorList[ColorIndex].Edge * Weight + gInterfaceColors[InterfaceColor] * (1.0f - Weight));
-	SetColor(lcVector4(Color, gColorList[ColorIndex].Edge.w));
-}
-
-void lcContext::SetEdgeColorIndexTintedAlpha(int ColorIndex, lcInterfaceColor InterfaceColor, float Weight)
-{
-	const lcVector3 Color(gColorList[ColorIndex].Edge * Weight + gInterfaceColors[InterfaceColor] * (1.0f - Weight));
-	SetColor(lcVector4(Color, gColorList[ColorIndex].Edge.w * gInterfaceColors[InterfaceColor].w));
+	const float Weight = Tint.w;
+	const lcVector3 Color(gColorList[ColorIndex].Edge * Weight + Tint * (1.0f - Weight));
+	SetColor(lcVector4(Color, gColorList[ColorIndex].Edge.w * Tint.w));
 }
 
 void lcContext::SetInterfaceColor(lcInterfaceColor InterfaceColor)

@@ -7,8 +7,6 @@
 #include "lc_application.h"
 #include "object.h"
 
-bool gTranslucentFade = true; // todo: move to preferences
-
 lcScene::lcScene()
 	: mRenderMeshes(0, 1024), mOpaqueMeshes(0, 1024), mTranslucentMeshes(0, 1024), mInterfaceObjects(0, 1024)
 {
@@ -24,12 +22,17 @@ void lcScene::Begin(const lcMatrix44& ViewMatrix)
 {
 	mViewMatrix = ViewMatrix;
 	mActiveSubmodelInstance = nullptr;
-	mHasFadedParts = false;
 	mPreTranslucentCallback = nullptr;
 	mRenderMeshes.RemoveAll();
 	mOpaqueMeshes.RemoveAll();
 	mTranslucentMeshes.RemoveAll();
 	mInterfaceObjects.RemoveAll();
+
+	const lcPreferences& Preferences = lcGetPreferences();
+	mHighlightColor = lcVector4FromColor(Preferences.mHighlightNewPartsColor);
+	mFadeColor = lcVector4FromColor(Preferences.mFadeStepsColor);
+	mHasFadedParts = false;
+	mTranslucentFade = mFadeColor.w != 1.0f;
 }
 
 void lcScene::End()
@@ -69,7 +72,7 @@ void lcScene::AddMesh(lcMesh* Mesh, const lcMatrix44& WorldMatrix, int ColorInde
 	const float Distance = fabsf(lcMul31(WorldMatrix[3], mViewMatrix).z);
 	RenderMesh.LodIndex = mAllowLOD ? RenderMesh.Mesh->GetLodIndex(Distance) : LC_MESH_LOD_HIGH;
 
-	const bool ForceTranslucent = (gTranslucentFade && State == lcRenderMeshState::Faded);
+	const bool ForceTranslucent = (mTranslucentFade && State == lcRenderMeshState::Faded);
 	const bool Translucent = lcIsColorTranslucent(ColorIndex) || ForceTranslucent;
 	const lcMeshFlags Flags = Mesh->mFlags;
 	mHasFadedParts |= State == lcRenderMeshState::Faded;
@@ -192,9 +195,9 @@ void lcScene::DrawOpaqueMeshes(lcContext* Context, bool DrawLit, int PrimitiveTy
 					break;
 
 				case lcRenderMeshState::Faded:
-					if (gTranslucentFade)
+					if (mTranslucentFade)
 						continue;
-					Context->SetColorIndexTinted(ColorIndex, LC_COLOR_DISABLED, 0.25f);
+					Context->SetColorIndexTinted(ColorIndex, mFadeColor);
 					break;
 				}
 			}
@@ -218,14 +221,11 @@ void lcScene::DrawOpaqueMeshes(lcContext* Context, bool DrawLit, int PrimitiveTy
 					break;
 
 				case lcRenderMeshState::Highlighted:
-					Context->SetColor(lcVector4FromColor(lcGetPreferences().mHighlightNewPartsColor));
+					Context->SetColor(mHighlightColor);
 					break;
 
 				case lcRenderMeshState::Faded:
-					if (gTranslucentFade)
-						Context->SetEdgeColorIndexTintedAlpha(ColorIndex, LC_COLOR_DISABLED_TRANSLUCENT, 0.25f);
-					else
-						Context->SetEdgeColorIndexTinted(ColorIndex, LC_COLOR_DISABLED, 0.25f);
+					Context->SetEdgeColorIndexTinted(ColorIndex, mFadeColor);
 					break;
 				}
 			}
@@ -370,10 +370,7 @@ void lcScene::DrawTranslucentMeshes(lcContext* Context, bool DrawLit, bool DrawF
 			break;
 
 		case lcRenderMeshState::Faded:
-			if (gTranslucentFade)
-				Context->SetColorIndexTintedAlpha(ColorIndex, LC_COLOR_DISABLED_TRANSLUCENT, 0.25f);
-			else
-				Context->SetColorIndexTinted(ColorIndex, LC_COLOR_DISABLED, 0.25f);
+			Context->SetColorIndexTinted(ColorIndex, mFadeColor);
 			break;
 		}
 
@@ -452,7 +449,7 @@ void lcScene::Draw(lcContext* Context) const
 
 		const int SolidPrimitiveTypes = LC_MESH_TRIANGLES | LC_MESH_TEXTURED_TRIANGLES;
 
-		if (gTranslucentFade && mHasFadedParts)
+		if (mTranslucentFade && mHasFadedParts)
 		{
 			DrawOpaqueMeshes(Context, false, SolidPrimitiveTypes | LinePrimitiveTypes, false, true);
 
@@ -485,7 +482,7 @@ void lcScene::Draw(lcContext* Context) const
 		if (DrawConditional)
 			LinePrimitiveTypes |= LC_MESH_CONDITIONAL_LINES;
 
-		if (gTranslucentFade && mHasFadedParts)
+		if (mTranslucentFade && mHasFadedParts)
 		{
 			DrawOpaqueMeshes(Context, true, LC_MESH_TRIANGLES | LC_MESH_TEXTURED_TRIANGLES, false, true);
 

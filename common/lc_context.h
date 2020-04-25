@@ -174,10 +174,9 @@ public:
 	void SetColor(float Red, float Green, float Blue, float Alpha);
 	void SetColorIndex(int ColorIndex);
 	void SetColorIndexTinted(int ColorIndex, lcInterfaceColor InterfaceColor, float Weight);
-	void SetColorIndexTintedAlpha(int ColorIndex, lcInterfaceColor InterfaceColor, float Weight);
+	void SetColorIndexTinted(int ColorIndex, const lcVector4& Tint);
 	void SetEdgeColorIndex(int ColorIndex);
-	void SetEdgeColorIndexTinted(int ColorIndex, lcInterfaceColor InterfaceColor, float Weight);
-	void SetEdgeColorIndexTintedAlpha(int ColorIndex, lcInterfaceColor InterfaceColor, float Weight);
+	void SetEdgeColorIndexTinted(int ColorIndex, const lcVector4& Tint);
 	void SetInterfaceColor(lcInterfaceColor InterfaceColor);
 
 	void ClearFramebuffer();

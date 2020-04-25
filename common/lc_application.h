@@ -34,6 +34,7 @@ public:
 	float mLineWidth;
 	bool mAllowLOD;
 	bool mFadeSteps;
+	quint32 mFadeStepsColor;
 	bool mHighlightNewParts;
 	quint32 mHighlightNewPartsColor;
 	bool mDrawGridStuds;

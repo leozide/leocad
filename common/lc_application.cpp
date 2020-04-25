@@ -22,6 +22,7 @@ void lcPreferences::LoadDefaults()
 	mLineWidth = lcGetProfileFloat(LC_PROFILE_LINE_WIDTH);
 	mAllowLOD = lcGetProfileInt(LC_PROFILE_ALLOW_LOD);
 	mFadeSteps = lcGetProfileInt(LC_PROFILE_FADE_STEPS);
+	mFadeStepsColor = lcGetProfileInt(LC_PROFILE_FADE_STEPS_COLOR);
 	mHighlightNewParts = lcGetProfileInt(LC_PROFILE_HIGHLIGHT_NEW_PARTS);
 	mHighlightNewPartsColor = lcGetProfileInt(LC_PROFILE_HIGHLIGHT_NEW_PARTS_COLOR);
 	mDrawGridStuds = lcGetProfileInt(LC_PROFILE_GRID_STUDS);
@@ -49,6 +50,7 @@ void lcPreferences::SaveDefaults()
 	lcSetProfileFloat(LC_PROFILE_LINE_WIDTH, mLineWidth);
 	lcSetProfileInt(LC_PROFILE_ALLOW_LOD, mAllowLOD);
 	lcSetProfileInt(LC_PROFILE_FADE_STEPS, mFadeSteps);
+	lcSetProfileInt(LC_PROFILE_FADE_STEPS_COLOR, mFadeStepsColor);
 	lcSetProfileInt(LC_PROFILE_HIGHLIGHT_NEW_PARTS, mHighlightNewParts);
 	lcSetProfileInt(LC_PROFILE_HIGHLIGHT_NEW_PARTS_COLOR, mHighlightNewPartsColor);
 	lcSetProfileInt(LC_PROFILE_GRID_STUDS, mDrawGridStuds);

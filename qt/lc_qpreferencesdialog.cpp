@@ -29,6 +29,7 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 #endif
 
 	ui->lineWidth->setValidator(new QDoubleValidator(ui->lineWidth));
+	connect(ui->FadeStepsColor, SIGNAL(clicked()), this, SLOT(ColorButtonClicked()));
 	connect(ui->HighlightNewPartsColor, SIGNAL(clicked()), this, SLOT(ColorButtonClicked()));
 	connect(ui->gridStudColor, SIGNAL(clicked()), this, SLOT(ColorButtonClicked()));
 	connect(ui->gridLineColor, SIGNAL(clicked()), this, SLOT(ColorButtonClicked()));
@@ -112,6 +113,9 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 
 	QPixmap pix(12, 12);
 
+	pix.fill(QColor(LC_RGBA_RED(mOptions->Preferences.mFadeStepsColor), LC_RGBA_GREEN(mOptions->Preferences.mFadeStepsColor), LC_RGBA_BLUE(mOptions->Preferences.mFadeStepsColor)));
+	ui->FadeStepsColor->setIcon(pix);
+
 	pix.fill(QColor(LC_RGBA_RED(mOptions->Preferences.mHighlightNewPartsColor), LC_RGBA_GREEN(mOptions->Preferences.mHighlightNewPartsColor), LC_RGBA_BLUE(mOptions->Preferences.mHighlightNewPartsColor)));
 	ui->HighlightNewPartsColor->setIcon(pix);
 
@@ -133,6 +137,7 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 	on_studLogo_toggled();
 	on_antiAliasing_toggled();
 	on_edgeLines_toggled();
+	on_FadeSteps_toggled();
 	on_HighlightNewParts_toggled();
 	on_gridStuds_toggled();
 	on_gridLines_toggled();
@@ -299,7 +304,13 @@ void lcQPreferencesDialog::ColorButtonClicked()
 	quint32* Color = nullptr;
 	QColorDialog::ColorDialogOptions DialogOptions;
 
-	if (Button == ui->HighlightNewPartsColor)
+	if (Button == ui->FadeStepsColor)
+	{
+		Color = &mOptions->Preferences.mFadeStepsColor;
+		Title = tr("Select Fade Color");
+		DialogOptions = QColorDialog::ShowAlphaChannel;
+	}
+	else if (Button == ui->HighlightNewPartsColor)
 	{
 		Color = &mOptions->Preferences.mHighlightNewPartsColor;
 		Title = tr("Select Highlight Color");
@@ -365,6 +376,11 @@ void lcQPreferencesDialog::on_antiAliasing_toggled()
 void lcQPreferencesDialog::on_edgeLines_toggled()
 {
 	ui->lineWidth->setEnabled(ui->edgeLines->isChecked());
+}
+
+void lcQPreferencesDialog::on_FadeSteps_toggled()
+{
+	ui->FadeStepsColor->setEnabled(ui->FadeSteps->isChecked());
 }
 
 void lcQPreferencesDialog::on_HighlightNewParts_toggled()

@@ -29,6 +29,7 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 #endif
 
 	ui->lineWidth->setValidator(new QDoubleValidator(ui->lineWidth));
+	connect(ui->HighlightNewPartsColor, SIGNAL(clicked()), this, SLOT(ColorButtonClicked()));
 	connect(ui->gridStudColor, SIGNAL(clicked()), this, SLOT(ColorButtonClicked()));
 	connect(ui->gridLineColor, SIGNAL(clicked()), this, SLOT(ColorButtonClicked()));
 	connect(ui->ViewSphereColorButton, SIGNAL(clicked()), this, SLOT(ColorButtonClicked()));
@@ -70,6 +71,7 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 	ui->lineWidth->setText(lcFormatValueLocalized(mOptions->Preferences.mLineWidth));
 	ui->MeshLOD->setChecked(mOptions->Preferences.mAllowLOD);
 	ui->FadeSteps->setChecked(mOptions->Preferences.mFadeSteps);
+	ui->HighlightNewParts->setChecked(mOptions->Preferences.mHighlightNewParts);
 	ui->gridStuds->setChecked(mOptions->Preferences.mDrawGridStuds);
 	ui->gridLines->setChecked(mOptions->Preferences.mDrawGridLines);
 	ui->gridLineSpacing->setText(QString::number(mOptions->Preferences.mGridLineSpacing));
@@ -110,6 +112,9 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 
 	QPixmap pix(12, 12);
 
+	pix.fill(QColor(LC_RGBA_RED(mOptions->Preferences.mHighlightNewPartsColor), LC_RGBA_GREEN(mOptions->Preferences.mHighlightNewPartsColor), LC_RGBA_BLUE(mOptions->Preferences.mHighlightNewPartsColor)));
+	ui->HighlightNewPartsColor->setIcon(pix);
+
 	pix.fill(QColor(LC_RGBA_RED(mOptions->Preferences.mGridStudColor), LC_RGBA_GREEN(mOptions->Preferences.mGridStudColor), LC_RGBA_BLUE(mOptions->Preferences.mGridStudColor)));
 	ui->gridStudColor->setIcon(pix);
 
@@ -128,6 +133,7 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 	on_studLogo_toggled();
 	on_antiAliasing_toggled();
 	on_edgeLines_toggled();
+	on_HighlightNewParts_toggled();
 	on_gridStuds_toggled();
 	on_gridLines_toggled();
 	on_ViewSphereSizeCombo_currentIndexChanged(ui->ViewSphereSizeCombo->currentIndex());
@@ -197,6 +203,7 @@ void lcQPreferencesDialog::accept()
 	mOptions->Preferences.mLineWidth = lcParseValueLocalized(ui->lineWidth->text());
 	mOptions->Preferences.mAllowLOD = ui->MeshLOD->isChecked();
 	mOptions->Preferences.mFadeSteps = ui->FadeSteps->isChecked();
+	mOptions->Preferences.mHighlightNewParts = ui->HighlightNewParts->isChecked();
 
 	mOptions->Preferences.mDrawGridStuds = ui->gridStuds->isChecked();
 	mOptions->Preferences.mDrawGridLines = ui->gridLines->isChecked();
@@ -287,56 +294,62 @@ void lcQPreferencesDialog::on_lgeoPathBrowse_clicked()
 
 void lcQPreferencesDialog::ColorButtonClicked()
 {
-	QObject *button = sender();
-	QString title;
-	quint32 *color = nullptr;
-	QColorDialog::ColorDialogOptions dialogOptions;
+	QObject* Button = sender();
+	QString Title;
+	quint32* Color = nullptr;
+	QColorDialog::ColorDialogOptions DialogOptions;
 
-	if (button == ui->gridStudColor)
+	if (Button == ui->HighlightNewPartsColor)
 	{
-		color = &mOptions->Preferences.mGridStudColor;
-		title = tr("Select Grid Stud Color");
-		dialogOptions = QColorDialog::ShowAlphaChannel;
+		Color = &mOptions->Preferences.mHighlightNewPartsColor;
+		Title = tr("Select Highlight Color");
+		DialogOptions = QColorDialog::ShowAlphaChannel;
 	}
-	else if (button == ui->gridLineColor)
+	else if (Button == ui->gridStudColor)
 	{
-		color = &mOptions->Preferences.mGridLineColor;
-		title = tr("Select Grid Line Color");
-		dialogOptions = 0;
+		Color = &mOptions->Preferences.mGridStudColor;
+		Title = tr("Select Grid Stud Color");
+		DialogOptions = QColorDialog::ShowAlphaChannel;
 	}
-	else if (button == ui->ViewSphereColorButton)
+	else if (Button == ui->gridLineColor)
 	{
-		color = &mOptions->Preferences.mViewSphereColor;
-		title = tr("Select View Sphere Color");
-		dialogOptions = 0;
+		Color = &mOptions->Preferences.mGridLineColor;
+		Title = tr("Select Grid Line Color");
+		DialogOptions = 0;
 	}
-	else if (button == ui->ViewSphereTextColorButton)
+	else if (Button == ui->ViewSphereColorButton)
 	{
-		color = &mOptions->Preferences.mViewSphereTextColor;
-		title = tr("Select View Sphere Text Color");
-		dialogOptions = 0;
+		Color = &mOptions->Preferences.mViewSphereColor;
+		Title = tr("Select View Sphere Color");
+		DialogOptions = 0;
 	}
-	else if (button == ui->ViewSphereHighlightColorButton)
+	else if (Button == ui->ViewSphereTextColorButton)
 	{
-		color = &mOptions->Preferences.mViewSphereHighlightColor;
-		title = tr("Select View Sphere Highlight Color");
-		dialogOptions = 0;
+		Color = &mOptions->Preferences.mViewSphereTextColor;
+		Title = tr("Select View Sphere Text Color");
+		DialogOptions = 0;
+	}
+	else if (Button == ui->ViewSphereHighlightColorButton)
+	{
+		Color = &mOptions->Preferences.mViewSphereHighlightColor;
+		Title = tr("Select View Sphere Highlight Color");
+		DialogOptions = 0;
 	}
 	else
 		return;
 
-	QColor oldColor = QColor(LC_RGBA_RED(*color), LC_RGBA_GREEN(*color), LC_RGBA_BLUE(*color), LC_RGBA_ALPHA(*color));
-	QColor newColor = QColorDialog::getColor(oldColor, this, title, dialogOptions);
+	QColor oldColor = QColor(LC_RGBA_RED(*Color), LC_RGBA_GREEN(*Color), LC_RGBA_BLUE(*Color), LC_RGBA_ALPHA(*Color));
+	QColor newColor = QColorDialog::getColor(oldColor, this, Title, DialogOptions);
 
 	if (newColor == oldColor || !newColor.isValid())
 		return;
 
-	*color = LC_RGBA(newColor.red(), newColor.green(), newColor.blue(), newColor.alpha());
+	*Color = LC_RGBA(newColor.red(), newColor.green(), newColor.blue(), newColor.alpha());
 
 	QPixmap pix(12, 12);
 
 	pix.fill(newColor);
-	((QToolButton*)button)->setIcon(pix);
+	((QToolButton*)Button)->setIcon(pix);
 }
 
 void lcQPreferencesDialog::on_studLogo_toggled()
@@ -352,6 +365,11 @@ void lcQPreferencesDialog::on_antiAliasing_toggled()
 void lcQPreferencesDialog::on_edgeLines_toggled()
 {
 	ui->lineWidth->setEnabled(ui->edgeLines->isChecked());
+}
+
+void lcQPreferencesDialog::on_HighlightNewParts_toggled()
+{
+	ui->HighlightNewPartsColor->setEnabled(ui->HighlightNewParts->isChecked());
 }
 
 void lcQPreferencesDialog::on_gridStuds_toggled()

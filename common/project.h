@@ -8,7 +8,6 @@
 #define LC_HTML_INDEX         0x02
 #define LC_HTML_LISTEND       0x08
 #define LC_HTML_LISTSTEP      0x10
-#define LC_HTML_HIGHLIGHT     0x20
 #define LC_HTML_SUBMODELS     0x40
 #define LC_HTML_CURRENT_ONLY  0x80
 
@@ -26,7 +25,6 @@ public:
 	bool IndexPage;
 	int StepImagesWidth;
 	int StepImagesHeight;
-	bool HighlightNewParts;
 	bool PartsListStep;
 	bool PartsListEnd;
 };

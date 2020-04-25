@@ -22,6 +22,8 @@ void lcPreferences::LoadDefaults()
 	mLineWidth = lcGetProfileFloat(LC_PROFILE_LINE_WIDTH);
 	mAllowLOD = lcGetProfileInt(LC_PROFILE_ALLOW_LOD);
 	mFadeSteps = lcGetProfileInt(LC_PROFILE_FADE_STEPS);
+	mHighlightNewParts = lcGetProfileInt(LC_PROFILE_HIGHLIGHT_NEW_PARTS);
+	mHighlightNewPartsColor = lcGetProfileInt(LC_PROFILE_HIGHLIGHT_NEW_PARTS_COLOR);
 	mDrawGridStuds = lcGetProfileInt(LC_PROFILE_GRID_STUDS);
 	mGridStudColor = lcGetProfileInt(LC_PROFILE_GRID_STUD_COLOR);
 	mDrawGridLines = lcGetProfileInt(LC_PROFILE_GRID_LINES);
@@ -47,6 +49,8 @@ void lcPreferences::SaveDefaults()
 	lcSetProfileFloat(LC_PROFILE_LINE_WIDTH, mLineWidth);
 	lcSetProfileInt(LC_PROFILE_ALLOW_LOD, mAllowLOD);
 	lcSetProfileInt(LC_PROFILE_FADE_STEPS, mFadeSteps);
+	lcSetProfileInt(LC_PROFILE_HIGHLIGHT_NEW_PARTS, mHighlightNewParts);
+	lcSetProfileInt(LC_PROFILE_HIGHLIGHT_NEW_PARTS_COLOR, mHighlightNewPartsColor);
 	lcSetProfileInt(LC_PROFILE_GRID_STUDS, mDrawGridStuds);
 	lcSetProfileInt(LC_PROFILE_GRID_STUD_COLOR, mGridStudColor);
 	lcSetProfileInt(LC_PROFILE_GRID_LINES, mDrawGridLines);
@@ -194,7 +198,7 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 	bool SaveHTML = false;
 	bool SetCameraAngles = false;
 	bool Orthographic = false;
-	bool ImageHighlight = false;
+	bool ImageHighlight = mPreferences.mHighlightNewParts;
 	int ImageWidth = lcGetProfileInt(LC_PROFILE_IMAGE_WIDTH);
 	int ImageHeight = lcGetProfileInt(LC_PROFILE_IMAGE_HEIGHT);
 	int StudLogo = lcGetProfileInt(LC_PROFILE_STUD_LOGO);
@@ -544,7 +548,9 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 			else
 				Frame = ImageName;
 
-			ActiveModel->SaveStepImages(Frame, ImageStart != ImageEnd, CameraName == nullptr, ImageHighlight, ImageWidth, ImageHeight, ImageStart, ImageEnd);
+			mPreferences.mHighlightNewParts = ImageHighlight;
+
+			ActiveModel->SaveStepImages(Frame, ImageStart != ImageEnd, CameraName == nullptr, ImageWidth, ImageHeight, ImageStart, ImageEnd);
 		}
 
 		if (SaveWavefront)

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>612</height>
+    <height>460</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -163,13 +163,6 @@
         </property>
        </widget>
       </item>
-      <item row="5" column="0" colspan="2">
-       <widget class="QCheckBox" name="highlightNewParts">
-        <property name="text">
-         <string>Highlight new parts</string>
-        </property>
-       </widget>
-      </item>
      </layout>
     </widget>
    </item>
@@ -220,7 +213,6 @@
   <tabstop>indexPage</tabstop>
   <tabstop>stepWidth</tabstop>
   <tabstop>stepHeight</tabstop>
-  <tabstop>highlightNewParts</tabstop>
   <tabstop>partsAtTheEnd</tabstop>
   <tabstop>partsAfterEachStep</tabstop>
  </tabstops>

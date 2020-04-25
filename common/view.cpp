@@ -18,7 +18,6 @@ View::View(lcModel* Model)
 	mModel = Model;
 	mActiveSubmodelInstance = nullptr;
 	mCamera = nullptr;
-	mHighlight = false;
 	memset(mGridSettings, 0, sizeof(mGridSettings));
 
 	mDragState = lcDragState::None;
@@ -820,7 +819,7 @@ void View::OnDraw()
 	mScene.SetActiveSubmodelInstance(mActiveSubmodelInstance, mActiveSubmodelTransform);
 	mScene.SetDrawInterface(DrawInterface);
 
-	mModel->GetScene(mScene, mCamera, mHighlight, Preferences.mFadeSteps);
+	mModel->GetScene(mScene, mCamera, Preferences.mHighlightNewParts, Preferences.mFadeSteps);
 
 	if (DrawInterface && mTrackTool == LC_TRACKTOOL_INSERT)
 	{

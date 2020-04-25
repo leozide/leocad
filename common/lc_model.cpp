@@ -1362,7 +1362,7 @@ void lcModel::DrawBackground(lcGLWidget* Widget)
 	Context->SetDepthWrite(true);
 }
 
-QImage lcModel::GetStepImage(bool Zoom, bool Highlight, int Width, int Height, lcStep Step)
+QImage lcModel::GetStepImage(bool Zoom, int Width, int Height, lcStep Step)
 {
 	View* ActiveView = gMainWindow->GetActiveView();
 	ActiveView->MakeCurrent();
@@ -1375,7 +1375,6 @@ QImage lcModel::GetStepImage(bool Zoom, bool Highlight, int Width, int Height, l
 		ZoomExtents(Camera, (float)Width / (float)Height);
 
 	View View(this);
-	View.SetHighlight(Highlight);
 	View.SetCamera(Camera, false);
 	View.SetContext(Context);
 
@@ -1620,7 +1619,7 @@ QImage lcModel::GetPartsListImage(int MaxWidth, lcStep Step) const
 	return PainterImage;
 }
 
-void lcModel::SaveStepImages(const QString& BaseName, bool AddStepSuffix, bool Zoom, bool Highlight, int Width, int Height, lcStep Start, lcStep End)
+void lcModel::SaveStepImages(const QString& BaseName, bool AddStepSuffix, bool Zoom, int Width, int Height, lcStep Start, lcStep End)
 {
 	for (lcStep Step = Start; Step <= End; Step++)
 	{
@@ -1636,7 +1635,7 @@ void lcModel::SaveStepImages(const QString& BaseName, bool AddStepSuffix, bool Z
 		if (Writer.format().isEmpty())
 			Writer.setFormat("png");
 
-		QImage Image = GetStepImage(Zoom, Highlight, Width, Height, Step);
+		QImage Image = GetStepImage(Zoom, Width, Height, Step);
 		if (!Writer.write(Image))
 		{
 			QMessageBox::information(gMainWindow, tr("Error"), tr("Error writing to file '%1':\n%2").arg(FileName, Writer.errorString()));

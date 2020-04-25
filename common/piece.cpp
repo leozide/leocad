@@ -654,6 +654,9 @@ void lcPiece::AddMainModelRenderMeshes(lcScene& Scene, bool Highlight, bool Fade
 	lcRenderMeshState RenderMeshState = lcRenderMeshState::Default;
 	bool ParentActive = false;
 
+	if (Highlight)
+		RenderMeshState = lcRenderMeshState::Highlighted;
+
 	if (Fade)
 		RenderMeshState = lcRenderMeshState::Faded;
 
@@ -668,8 +671,6 @@ void lcPiece::AddMainModelRenderMeshes(lcScene& Scene, bool Highlight, bool Fade
 		else
 			RenderMeshState = lcRenderMeshState::Faded;
 	}
-	else if (Highlight)
-		RenderMeshState = lcRenderMeshState::Highlighted;
 
 	if (!mMesh)
 		mPieceInfo->AddRenderMeshes(Scene, mModelWorld, mColorIndex, RenderMeshState, ParentActive);

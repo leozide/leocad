@@ -28,7 +28,6 @@ lcQHTMLDialog::lcQHTMLDialog(QWidget* Parent, lcHTMLExportOptions* Options)
 	ui->indexPage->setChecked(mOptions->SinglePage);
 	ui->stepWidth->setText(QString::number(mOptions->StepImagesWidth));
 	ui->stepHeight->setText(QString::number(mOptions->StepImagesHeight));
-	ui->highlightNewParts->setChecked(mOptions->HighlightNewParts);
 	ui->partsAfterEachStep->setChecked(mOptions->PartsListStep);
 	ui->partsAtTheEnd->setChecked(mOptions->PartsListEnd);
 }
@@ -56,7 +55,6 @@ void lcQHTMLDialog::accept()
 	mOptions->IndexPage = ui->indexPage->isChecked();
 	mOptions->StepImagesWidth = ui->stepWidth->text().toInt();
 	mOptions->StepImagesHeight = ui->stepHeight->text().toInt();
-	mOptions->HighlightNewParts = ui->highlightNewParts->isChecked();
 	mOptions->PartsListStep = ui->partsAfterEachStep->isChecked();
 	mOptions->PartsListEnd = ui->partsAtTheEnd->isChecked();
 

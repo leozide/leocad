@@ -218,7 +218,7 @@ void lcScene::DrawOpaqueMeshes(lcContext* Context, bool DrawLit, int PrimitiveTy
 					break;
 
 				case lcRenderMeshState::Highlighted:
-					Context->SetInterfaceColor(LC_COLOR_HIGHLIGHT);
+					Context->SetColor(lcVector4FromColor(lcGetPreferences().mHighlightNewPartsColor));
 					break;
 
 				case lcRenderMeshState::Faded:

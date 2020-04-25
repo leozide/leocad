@@ -1108,7 +1108,7 @@ void lcMainWindow::Print(QPrinter* Printer)
 
 				lcModel* Model = PageLayouts[Page - 1].first;
 				lcStep Step = PageLayouts[Page - 1].second;
-				QImage Image = Model->GetStepImage(false, false, StepWidth, StepHeight, Step);
+				QImage Image = Model->GetStepImage(false, StepWidth, StepHeight, Step);
 
 				Painter.drawImage(MarginRect.left(), MarginRect.top(), Image);
 

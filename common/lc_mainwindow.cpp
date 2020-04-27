@@ -100,6 +100,7 @@ lcMainWindow::lcMainWindow()
 	mMoveZSnapIndex = 3;
 	mAngleSnapIndex = 5;
 	mRelativeTransform = true;
+	mLocalTransform = false;
 	mCurrentPieceInfo = nullptr;
 	mSelectionMode = lcSelectionMode::SINGLE;
 	mModelTabWidget = nullptr;
@@ -1659,6 +1660,11 @@ void lcMainWindow::SetRelativeTransform(bool RelativeTransform)
 	UpdateAllViews();
 }
 
+void lcMainWindow::SetLocalTransform(bool SelectionTransform)
+{
+	mLocalTransform = SelectionTransform;
+}
+
 void lcMainWindow::SetTransformType(lcTransformType TransformType)
 {
 	mTransformType = TransformType;
@@ -3074,6 +3080,10 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 
 	case LC_EDIT_TRANSFORM_RELATIVE:
 		SetRelativeTransform(!GetRelativeTransform());
+		break;
+
+	case LC_EDIT_TRANSFORM_LOCAL:
+		SetLocalTransform(!GetLocalTransform());
 		break;
 
 	case LC_EDIT_SNAP_MOVE_TOGGLE:

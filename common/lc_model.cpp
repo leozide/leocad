@@ -2825,7 +2825,7 @@ void lcModel::MoveSelectedObjects(const lcVector3& PieceDistance, const lcVector
 	}
 }
 
-void lcModel::RotateSelectedPieces(const lcVector3& Angles, bool Relative, bool AlternateButtonDrag, bool Update, bool Checkpoint)
+void lcModel::RotateSelectedPieces(const lcVector3& Angles, bool Relative, bool RotatePivotPoint, bool Update, bool Checkpoint)
 {
 	if (Angles.LengthSquared() < 0.001f)
 		return;
@@ -2842,7 +2842,7 @@ void lcModel::RotateSelectedPieces(const lcVector3& Angles, bool Relative, bool 
 	if (Angles[2] != 0.0f)
 		RotationMatrix = lcMul(lcMatrix33RotationZ(Angles[2] * LC_DTOR), RotationMatrix);
 
-	if (AlternateButtonDrag)
+	if (RotatePivotPoint)
 	{
 		lcObject* Focus = GetFocusObject();
 
@@ -2854,29 +2854,60 @@ void lcModel::RotateSelectedPieces(const lcVector3& Angles, bool Relative, bool 
 	}
 	else
 	{
-		lcVector3 Center;
-		lcMatrix33 RelativeRotation;
-
-		GetMoveRotateTransform(Center, RelativeRotation);
-
-		lcMatrix33 WorldToFocusMatrix;
-
-		if (Relative)
+		if (!gMainWindow->GetLocalTransform())
 		{
-			WorldToFocusMatrix = lcMatrix33AffineInverse(RelativeRotation);
-			RotationMatrix = lcMul(RotationMatrix, RelativeRotation);
+			lcVector3 Center;
+			lcMatrix33 RelativeRotation;
+
+			GetMoveRotateTransform(Center, RelativeRotation);
+
+			lcMatrix33 WorldToFocusMatrix;
+
+			if (Relative)
+			{
+				WorldToFocusMatrix = lcMatrix33AffineInverse(RelativeRotation);
+				RotationMatrix = lcMul(RotationMatrix, RelativeRotation);
+			}
+			else
+				WorldToFocusMatrix = lcMatrix33Identity();
+
+			for (lcPiece* Piece : mPieces)
+			{
+				if (!Piece->IsSelected())
+					continue;
+
+				Piece->Rotate(mCurrentStep, gMainWindow->GetAddKeys(), RotationMatrix, Center, WorldToFocusMatrix);
+				Piece->UpdatePosition(mCurrentStep);
+				Rotated = true;
+			}
 		}
 		else
-			WorldToFocusMatrix = lcMatrix33Identity();
-
-		for (lcPiece* Piece : mPieces)
 		{
-			if (!Piece->IsSelected())
-				continue;
+			for (lcPiece* Piece : mPieces)
+			{
+				if (!Piece->IsSelected())
+					continue;
 
-			Piece->Rotate(mCurrentStep, gMainWindow->GetAddKeys(), RotationMatrix, Center, WorldToFocusMatrix);
-			Piece->UpdatePosition(mCurrentStep);
-			Rotated = true;
+				const lcVector3 Center = Piece->GetRotationCenter();
+				lcMatrix33 WorldToFocusMatrix;
+				lcMatrix33 RelativeRotationMatrix;
+
+				if (Relative)
+				{
+					lcMatrix33 RelativeRotation = Piece->GetRelativeRotation();
+					WorldToFocusMatrix = lcMatrix33AffineInverse(RelativeRotation);
+					RelativeRotationMatrix = lcMul(RotationMatrix, RelativeRotation);
+				}
+				else
+				{
+					WorldToFocusMatrix = lcMatrix33Identity();
+					RelativeRotationMatrix = RotationMatrix;
+				}
+
+				Piece->Rotate(mCurrentStep, gMainWindow->GetAddKeys(), RelativeRotationMatrix, Center, WorldToFocusMatrix);
+				Piece->UpdatePosition(mCurrentStep);
+				Rotated = true;
+			}
 		}
 	}
 

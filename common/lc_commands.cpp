@@ -297,6 +297,13 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 		QT_TRANSLATE_NOOP("Status", "Move and rotate objects relative to the one that has focus"),
 		""
 	},
+	// LC_EDIT_TRANSFORM_LOCAL
+	{
+		QT_TRANSLATE_NOOP("Action", "Edit.TransformLocal"),
+		QT_TRANSLATE_NOOP("Menu", "Local Transforms"),
+		QT_TRANSLATE_NOOP("Status", "Rotate pieces around their individual pivot point"),
+		""
+	},
 	// LC_EDIT_SNAP_MOVE_TOGGLE
 	{
 		QT_TRANSLATE_NOOP("Action", "Edit.Snap.Toggle"),

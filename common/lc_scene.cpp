@@ -442,10 +442,15 @@ void lcScene::Draw(lcContext* Context) const
 	{
 		const bool DrawLines = Preferences.mDrawEdgeLines && Preferences.mLineWidth != 0.0f;
 
-		int LinePrimitiveTypes = LC_MESH_LINES;
+		int LinePrimitiveTypes = 0;
 
-		if (DrawConditional)
-			LinePrimitiveTypes |= LC_MESH_CONDITIONAL_LINES;
+		if (DrawLines)
+		{
+			LinePrimitiveTypes |= LC_MESH_LINES;
+
+			if (DrawConditional)
+				LinePrimitiveTypes |= LC_MESH_CONDITIONAL_LINES;
+		}
 
 		const int SolidPrimitiveTypes = LC_MESH_TRIANGLES | LC_MESH_TEXTURED_TRIANGLES;
 

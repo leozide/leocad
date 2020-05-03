@@ -51,7 +51,7 @@ public:
 
 	bool operator==(const lcModelProperties& Properties)
 	{
-		if (mName != Properties.mName || mAuthor != Properties.mAuthor ||
+		if (mFileName != Properties.mFileName || mModelName != Properties.mModelName || mAuthor != Properties.mAuthor ||
 			mDescription != Properties.mDescription || mComments != Properties.mComments)
 			return false;
 
@@ -67,11 +67,13 @@ public:
 	}
 
 	void SaveLDraw(QTextStream& Stream) const;
+	bool ParseLDrawHeader(QString Line, bool FirstLine);
 	void ParseLDrawLine(QTextStream& Stream);
 
-	QString mName;
-	QString mAuthor;
+	QString mFileName;
 	QString mDescription;
+	QString mModelName;
+	QString mAuthor;
 	QString mComments;
 
 	lcBackgroundType mBackgroundType;
@@ -93,7 +95,7 @@ struct lcModelHistoryEntry
 class lcModel
 {
 public:
-	lcModel(const QString& Name);
+	lcModel(const QString& FileName);
 	~lcModel();
 
 	bool IsModified() const
@@ -137,14 +139,16 @@ public:
 		return mProperties;
 	}
 
-	void SetName(const QString& Name)
+	void SetFileName(const QString& FileName)
 	{
-		mProperties.mName = Name;
+		if (mProperties.mModelName == mProperties.mFileName)
+			mProperties.mModelName = FileName;
+		mProperties.mFileName = FileName;
 	}
 
-	const QString& GetName()
+	const QString& GetFileName() const
 	{
-		return mProperties.mName;
+		return mProperties.mFileName;
 	}
 
 	void SetDescription(const QString& Description)

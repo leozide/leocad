@@ -57,11 +57,9 @@ void lcModelProperties::SaveLDraw(QTextStream& Stream) const
 {
 	QLatin1String LineEnding("\r\n");
 
-	if (!mAuthor.isEmpty())
-		Stream << QLatin1String("0 !LEOCAD MODEL AUTHOR ") << mAuthor << LineEnding;
-
-	if (!mDescription.isEmpty())
-		Stream << QLatin1String("0 !LEOCAD MODEL DESCRIPTION ") << mDescription << LineEnding;
+	Stream << QLatin1String("0 ") << mDescription << LineEnding;
+	Stream << QLatin1String("0 Name: ") << mModelName << LineEnding;
+	Stream << QLatin1String("0 Author: ") << mAuthor << LineEnding;
 
 	if (!mComments.isEmpty())
 	{
@@ -97,6 +95,40 @@ void lcModelProperties::SaveLDraw(QTextStream& Stream) const
 	}
 
 //	lcVector3 mAmbientColor;
+}
+
+bool lcModelProperties::ParseLDrawHeader(QString Line, bool FirstLine)
+{
+	QTextStream LineStream(&Line, QIODevice::ReadOnly);
+
+	QString Token;
+	LineStream >> Token;
+	int StartPos = LineStream.pos();
+	LineStream >> Token;
+
+	if (Token == QLatin1String("!LEOCAD"))
+		return false;
+
+	if (FirstLine)
+	{
+		LineStream.seek(StartPos);
+		mDescription = LineStream.readLine().mid(1);
+		return true;
+	}
+
+	if (Token == QLatin1String("Name:"))
+	{
+		mModelName = LineStream.readLine().mid(1);
+		return true;
+	}
+
+	if (Token == QLatin1String("Author:"))
+	{
+		mAuthor = LineStream.readLine().mid(1);
+		return true;
+	}
+
+	return false;
 }
 
 void lcModelProperties::ParseLDrawLine(QTextStream& Stream)
@@ -148,9 +180,10 @@ void lcModelProperties::ParseLDrawLine(QTextStream& Stream)
 	}
 }
 
-lcModel::lcModel(const QString& Name)
+lcModel::lcModel(const QString& FileName)
 {
-	mProperties.mName = Name;
+	mProperties.mModelName = FileName;
+	mProperties.mFileName = FileName;
 	mProperties.LoadDefaults();
 
 	mActive = false;
@@ -259,7 +292,7 @@ void lcModel::DeleteModel()
 void lcModel::CreatePieceInfo(Project* Project)
 {
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
-	mPieceInfo = Library->FindPiece(mProperties.mName.toLatin1().constData(), Project, true, false);
+	mPieceInfo = Library->FindPiece(mProperties.mFileName.toLatin1().constData(), Project, true, false);
 	mPieceInfo->SetModel(this, true, Project, true);
 	Library->LoadPieceInfo(mPieceInfo, true, true);
 }
@@ -492,13 +525,13 @@ int lcModel::SplitMPD(QIODevice& Device)
 
 			if (Token == QLatin1String("FILE"))
 			{
-				if (!mProperties.mName.isEmpty())
+				if (!mProperties.mFileName.isEmpty())
 				{
 					Device.seek(Pos);
 					break;
 				}
 
-				mProperties.mName = LineStream.readAll().trimmed();
+				SetFileName(LineStream.readAll().trimmed());
 				ModelPos = Pos;
 			}
 			else if (Token == QLatin1String("NOFILE"))
@@ -524,6 +557,8 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 	mProperties.mAuthor.clear();
 	mProperties.mDescription.clear();
 	mProperties.mComments.clear();
+	bool ReadingHeader = true;
+	bool FirstLine = true;
 
 	while (!Device.atEnd())
 	{
@@ -543,7 +578,7 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 			{
 				QString Name = LineStream.readAll().trimmed();
 
-				if (mProperties.mName != Name)
+				if (mProperties.mFileName != Name)
 				{
 					Device.seek(Pos);
 					break;
@@ -555,7 +590,17 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 			{
 				break;
 			}
-			else if (Token == QLatin1String("STEP"))
+
+			if (ReadingHeader)
+			{
+				ReadingHeader = mProperties.ParseLDrawHeader(Line, FirstLine);
+				FirstLine = false;
+
+				if (ReadingHeader)
+					continue;
+			}
+
+			if (Token == QLatin1String("STEP"))
 			{
 				CurrentStep++;
 				mFileLines.append(OriginalLine);
@@ -645,6 +690,7 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 		}
 		else if (Token == QLatin1String("1"))
 		{
+			ReadingHeader = false;
 			int ColorCode;
 			LineStream >> ColorCode;
 
@@ -691,7 +737,12 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 			}
 		}
 		else
-			mFileLines.append(OriginalLine); 
+		{
+			ReadingHeader = false;
+			mFileLines.append(OriginalLine);
+		}
+
+		FirstLine = false;
 	}
 
 	mCurrentStep = CurrentStep;

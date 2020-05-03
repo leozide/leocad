@@ -61,9 +61,9 @@ void PieceInfo::SetModel(lcModel* Model, bool UpdateMesh, Project* CurrentProjec
 		mModel = Model;
 	}
 
-	strncpy(mFileName, Model->GetProperties().mName.toLatin1().data(), sizeof(mFileName));
+	strncpy(mFileName, Model->GetProperties().mFileName.toLatin1().data(), sizeof(mFileName));
 	mFileName[sizeof(mFileName)-1] = 0;
-	strncpy(m_strDescription, Model->GetProperties().mName.toLatin1().data(), sizeof(m_strDescription));
+	strncpy(m_strDescription, Model->GetProperties().mFileName.toLatin1().data(), sizeof(m_strDescription));
 	m_strDescription[sizeof(m_strDescription)-1] = 0;
 
 	const QStringList& MeshLines = Model->GetFileLines();

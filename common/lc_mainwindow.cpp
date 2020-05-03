@@ -1253,13 +1253,13 @@ QByteArray lcMainWindow::GetTabLayout()
 	DataStream << (quint32)LC_TAB_LAYOUT_VERSION;
 	qint32 NumTabs = mModelTabWidget->count();
 	DataStream << NumTabs;
-	DataStream << ((lcModelTabWidget*)mModelTabWidget->currentWidget())->GetModel()->GetProperties().mName;
+	DataStream << ((lcModelTabWidget*)mModelTabWidget->currentWidget())->GetModel()->GetProperties().mFileName;
 
 	for (int TabIdx = 0; TabIdx < NumTabs; TabIdx++)
 	{
 		lcModelTabWidget* TabWidget = (lcModelTabWidget*)mModelTabWidget->widget(TabIdx);
 
-		DataStream << TabWidget->GetModel()->GetProperties().mName;
+		DataStream << TabWidget->GetModel()->GetProperties().mFileName;
 
 		std::function<void (QWidget*)> SaveWidget = [&DataStream, &SaveWidget, &TabWidget](QWidget* Widget)
 		{
@@ -1496,7 +1496,7 @@ void lcMainWindow::SetCurrentModelTab(lcModel* Model)
 	if (!EmptyWidget)
 	{
 		TabWidget = new lcModelTabWidget(Model);
-		mModelTabWidget->addTab(TabWidget, Model->GetProperties().mName);
+		mModelTabWidget->addTab(TabWidget, Model->GetProperties().mFileName);
 
 		QGridLayout* CentralLayout = new QGridLayout(TabWidget);
 		CentralLayout->setContentsMargins(0, 0, 0, 0);
@@ -2136,7 +2136,7 @@ void lcMainWindow::UpdateModels()
 		if (ModelIdx < Models.GetSize())
 		{
 			Action->setChecked(CurrentModel == Models[ModelIdx]);
-			Action->setText(QString::fromLatin1("&%1 %2").arg(QString::number(ModelIdx + 1), Models[ModelIdx]->GetProperties().mName));
+			Action->setText(QString::fromLatin1("&%1 %2").arg(QString::number(ModelIdx + 1), Models[ModelIdx]->GetProperties().mFileName));
 			Action->setVisible(true);
 		}
 		else
@@ -2152,7 +2152,7 @@ void lcMainWindow::UpdateModels()
 			TabIdx++;
 		else if (Models.FindIndex(Model) != -1)
 		{
-			mModelTabWidget->setTabText(TabIdx, Model->GetProperties().mName);
+			mModelTabWidget->setTabText(TabIdx, Model->GetProperties().mFileName);
 			TabIdx++;
 		}
 		else

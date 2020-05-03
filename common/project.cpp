@@ -76,10 +76,10 @@ Project::~Project()
 	mModels.DeleteAll();
 }
 
-lcModel* Project::GetModel(const QString& Name) const
+lcModel* Project::GetModel(const QString& FileName) const
 {
 	for (lcModel* Model : mModels)
-		if (Model->GetProperties().mName == Name)
+		if (Model->GetProperties().mFileName == FileName)
 			return Model;
 
 	return nullptr;
@@ -153,11 +153,11 @@ void Project::SetActiveModel(int ModelIndex)
 	mActiveModel->UpdateInterface();
 }
 
-void Project::SetActiveModel(const QString& ModelName)
+void Project::SetActiveModel(const QString& FileName)
 {
 	for (int ModelIdx = 0; ModelIdx < mModels.GetSize(); ModelIdx++)
 	{
-		if (ModelName.compare(mModels[ModelIdx]->GetName(), Qt::CaseInsensitive) == 0)
+		if (FileName.compare(mModels[ModelIdx]->GetFileName(), Qt::CaseInsensitive) == 0)
 		{
 			SetActiveModel(ModelIdx);
 			return;
@@ -237,7 +237,7 @@ lcModel* Project::CreateNewModel(bool ShowModel)
 	QStringList ModelNames;
 
 	for (int ModelIdx = 0; ModelIdx < mModels.GetSize(); ModelIdx++)
-		ModelNames.append(mModels[ModelIdx]->GetProperties().mName);
+		ModelNames.append(mModels[ModelIdx]->GetProperties().mFileName);
 
 	QString Name = GetNewModelName(gMainWindow, tr("New Submodel"), QString(), ModelNames);
 
@@ -271,7 +271,7 @@ void Project::ShowModelListDialog()
 	for (int ModelIdx = 0; ModelIdx < mModels.GetSize(); ModelIdx++)
 	{
 		lcModel* Model = mModels[ModelIdx];
-		Models.append(QPair<QString, lcModel*>(Model->GetProperties().mName, Model));
+		Models.append(QPair<QString, lcModel*>(Model->GetProperties().mFileName, Model));
 	}
 
 	lcQModelListDialog Dialog(gMainWindow, Models);
@@ -292,9 +292,9 @@ void Project::ShowModelListDialog()
 			Model->SetSaved();
 			mModified = true;
 		}
-		else if (Model->GetProperties().mName != it->first)
+		else if (Model->GetProperties().mFileName != it->first)
 		{
-			Model->SetName(it->first);
+			Model->SetFileName(it->first);
 			lcGetPiecesLibrary()->RenamePiece(Model->GetPieceInfo(), it->first.toLatin1().constData());
 
 			for (lcModel* CheckModel : mModels)
@@ -377,7 +377,7 @@ bool Project::Load(const QString& FileName)
 			lcModel* Model = new lcModel(QString());
 			int Pos = Model->SplitMPD(Buffer);
 
-			if (Models.empty() || !Model->GetProperties().mName.isEmpty())
+			if (Models.empty() || !Model->GetFileName().isEmpty())
 			{
 				mModels.Add(Model);
 				Models.emplace_back(std::make_pair(Pos, Model));
@@ -423,9 +423,9 @@ bool Project::Load(const QString& FileName)
 	{
 		lcModel* Model = mModels[0];
 
-		if (Model->GetProperties().mName.isEmpty())
+		if (Model->GetProperties().mFileName.isEmpty())
 		{
-			Model->SetName(FileInfo.fileName());
+			Model->SetFileName(FileInfo.fileName());
 			lcGetPiecesLibrary()->RenamePiece(Model->GetPieceInfo(), FileInfo.fileName().toLatin1());
 		}
 	}
@@ -476,7 +476,7 @@ bool Project::Save(QTextStream& Stream)
 	for (lcModel* Model : mModels)
 	{
 		if (MPD)
-			Stream << QLatin1String("0 FILE ") << Model->GetProperties().mName << QLatin1String("\r\n");
+			Stream << QLatin1String("0 FILE ") << Model->GetProperties().mFileName << QLatin1String("\r\n");
 
 		Model->SaveLDraw(Stream, false);
 		Model->SetSaved();
@@ -492,7 +492,7 @@ void Project::Merge(Project* Other)
 {
 	for (lcModel* Model : Other->mModels)
 	{
-		QString Name = Model->GetProperties().mName;
+		QString FileName = Model->GetProperties().mFileName;
 
 		for (;;)
 		{
@@ -500,7 +500,7 @@ void Project::Merge(Project* Other)
 
 			for (int SearchIdx = 0; SearchIdx < mModels.GetSize(); SearchIdx++)
 			{
-				if (mModels[SearchIdx]->GetProperties().mName == Name)
+				if (mModels[SearchIdx]->GetProperties().mFileName == FileName)
 				{
 					Duplicate = true;
 					break;
@@ -510,8 +510,8 @@ void Project::Merge(Project* Other)
 			if (!Duplicate)
 				break;
 
-			Name = tr("Merged ") + Name;
-			Model->SetName(Name);
+			FileName = tr("Merged ") + FileName;
+			Model->SetFileName(FileName);
 		}
 
 		mModels.Add(Model);
@@ -533,7 +533,8 @@ bool Project::ImportLDD(const QString& FileName)
 		return false;
 
 	mModels.DeleteAll();
-	lcModel* Model = new lcModel(QString());
+	QString ModelName = QFileInfo(FileName).completeBaseName();
+	lcModel* Model = new lcModel(ModelName);
 
 	if (Model->LoadLDD(QString::fromUtf8((const char*)XMLFile.mBuffer)))
 	{
@@ -545,9 +546,6 @@ bool Project::ImportLDD(const QString& FileName)
 		delete Model;
 		return false;
 	}
-
-	if (Model->GetProperties().mName.isEmpty())
-		Model->SetName(QFileInfo(FileName).completeBaseName());
 
 	for (int ModelIdx = 0; ModelIdx < mModels.GetSize(); ModelIdx++)
 		mModels[ModelIdx]->CreatePieceInfo(this);
@@ -569,7 +567,7 @@ bool Project::ImportInventory(const QByteArray& Inventory, const QString& Name, 
 		return false;
 
 	mModels.DeleteAll();
-	lcModel* Model = new lcModel(QString());
+	lcModel* Model = new lcModel(Name);
 
 	if (Model->LoadInventory(Inventory))
 	{
@@ -582,7 +580,6 @@ bool Project::ImportInventory(const QByteArray& Inventory, const QString& Name, 
 		return false;
 	}
 
-	Model->SetName(Name);
 	Model->SetDescription(Description);
 
 	for (int ModelIdx = 0; ModelIdx < mModels.GetSize(); ModelIdx++)
@@ -1528,8 +1525,8 @@ void Project::ExportHTML(const lcHTMLExportOptions& Options)
 
 		if (Models.GetSize() > 1)
 		{
-			BaseName += '-' + Model->GetProperties().mName;
-			PageTitle = Model->GetProperties().mName;
+			BaseName += '-' + Model->GetProperties().mFileName;
+			PageTitle = Model->GetProperties().mFileName;
 		}
 		else
 			PageTitle = ProjectTitle;
@@ -1675,24 +1672,24 @@ void Project::ExportHTML(const lcHTMLExportOptions& Options)
 		for (int ModelIdx = 0; ModelIdx < Models.GetSize(); ModelIdx++)
 		{
 			lcModel* Model = Models[ModelIdx];
-			BaseName = ProjectTitle.left(ProjectTitle.length() - QFileInfo(ProjectTitle).suffix().length() - 1) + '-' + Model->GetProperties().mName;
+			BaseName = ProjectTitle.left(ProjectTitle.length() - QFileInfo(ProjectTitle).suffix().length() - 1) + '-' + Model->GetProperties().mFileName;
 			BaseName.replace('#', '_');
 
 			if (Options.SinglePage)
 			{
 				FileName = BaseName + QLatin1String(".html");
-				Stream << QString::fromLatin1("<p><a href=\"%1\">%2</a>").arg(FileName, Model->GetProperties().mName);
+				Stream << QString::fromLatin1("<p><a href=\"%1\">%2</a>").arg(FileName, Model->GetProperties().mFileName);
 			}
 			else if (Options.IndexPage)
 			{
 				FileName = BaseName + QLatin1String("-index.html");
-				Stream << QString::fromLatin1("<p><a href=\"%1\">%2</a>").arg(FileName, Model->GetProperties().mName);
+				Stream << QString::fromLatin1("<p><a href=\"%1\">%2</a>").arg(FileName, Model->GetProperties().mFileName);
 			}
 			else
 			{
 				lcStep LastStep = Model->GetLastStep();
 
-				Stream << QString::fromLatin1("<p>%1</p>").arg(Model->GetProperties().mName);
+				Stream << QString::fromLatin1("<p>%1</p>").arg(Model->GetProperties().mFileName);
 
 				for (lcStep Step = 1; Step <= LastStep; Step++)
 					Stream << QString::fromLatin1("<A HREF=\"%1-%2.html\">Step %3<BR>\r\n</A>").arg(BaseName, QString("%1").arg(Step, 2, 10, QLatin1Char('0')), QString::number(Step));

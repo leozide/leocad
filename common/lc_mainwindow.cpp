@@ -89,7 +89,7 @@ lcMainWindow::lcMainWindow()
 {
 	memset(mActions, 0, sizeof(mActions));
 
-	mTransformType = LC_TRANSFORM_RELATIVE_TRANSLATION;
+	mTransformType = lcTransformType::RelativeTranslation;
 
 	mColorIndex = lcGetColorIndex(4);
 	mTool = LC_TOOL_SELECT;
@@ -102,7 +102,7 @@ lcMainWindow::lcMainWindow()
 	mRelativeTransform = true;
 	mLocalTransform = false;
 	mCurrentPieceInfo = nullptr;
-	mSelectionMode = lcSelectionMode::SINGLE;
+	mSelectionMode = lcSelectionMode::Single;
 	mModelTabWidget = nullptr;
 
 	memset(&mSearchOptions, 0, sizeof(mSearchOptions));
@@ -1667,9 +1667,12 @@ void lcMainWindow::SetLocalTransform(bool SelectionTransform)
 
 void lcMainWindow::SetTransformType(lcTransformType TransformType)
 {
+	if (TransformType < lcTransformType::First || TransformType >= lcTransformType::Count)
+		return;
+	
 	mTransformType = TransformType;
 
-	const char* IconNames[] =
+	const char* IconNames[static_cast<int>(lcTransformType::Count)] =
 	{
 		":/resources/edit_transform_absolute_translation.png",
 		":/resources/edit_transform_relative_translation.png",
@@ -1677,11 +1680,9 @@ void lcMainWindow::SetTransformType(lcTransformType TransformType)
 		":/resources/edit_transform_relative_rotation.png"
 	};
 
-	if (TransformType >= 0 && TransformType <= 3)
-	{
-		mActions[LC_EDIT_TRANSFORM_ABSOLUTE_TRANSLATION + TransformType]->setChecked(true);
-		mActions[LC_EDIT_TRANSFORM]->setIcon(QIcon(IconNames[TransformType]));
-	}
+	int TransformIndex = static_cast<int>(TransformType);
+	mActions[LC_EDIT_TRANSFORM_ABSOLUTE_TRANSLATION + TransformIndex]->setChecked(true);
+	mActions[LC_EDIT_TRANSFORM]->setIcon(QIcon(IconNames[TransformIndex]));
 }
 
 void lcMainWindow::SetCurrentPieceInfo(PieceInfo* Info)
@@ -2105,19 +2106,19 @@ void lcMainWindow::UpdateSelectionMode()
 {
 	switch (mSelectionMode)
 	{
-	case lcSelectionMode::SINGLE:
+	case lcSelectionMode::Single:
 		mActions[LC_EDIT_SELECTION_SINGLE]->setChecked(true);
 		break;
 
-	case lcSelectionMode::PIECE:
+	case lcSelectionMode::Piece:
 		mActions[LC_EDIT_SELECTION_PIECE]->setChecked(true);
 		break;
 
-	case lcSelectionMode::COLOR:
+	case lcSelectionMode::Color:
 		mActions[LC_EDIT_SELECTION_COLOR]->setChecked(true);
 		break;
 
-	case lcSelectionMode::PIECE_COLOR:
+	case lcSelectionMode::PieceColor:
 		mActions[LC_EDIT_SELECTION_PIECE_COLOR]->setChecked(true);
 		break;
 	}
@@ -2609,19 +2610,19 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		break;
 
 	case LC_EDIT_SELECTION_SINGLE:
-		SetSelectionMode(lcSelectionMode::SINGLE);
+		SetSelectionMode(lcSelectionMode::Single);
 		break;
 
 	case LC_EDIT_SELECTION_PIECE:
-		SetSelectionMode(lcSelectionMode::PIECE);
+		SetSelectionMode(lcSelectionMode::Piece);
 		break;
 
 	case LC_EDIT_SELECTION_COLOR:
-		SetSelectionMode(lcSelectionMode::COLOR);
+		SetSelectionMode(lcSelectionMode::Color);
 		break;
 
 	case LC_EDIT_SELECTION_PIECE_COLOR:
-		SetSelectionMode(lcSelectionMode::PIECE_COLOR);
+		SetSelectionMode(lcSelectionMode::PieceColor);
 		break;
 
 	case LC_VIEW_SPLIT_HORIZONTAL:
@@ -3139,10 +3140,19 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		break;
 
 	case LC_EDIT_TRANSFORM_ABSOLUTE_TRANSLATION:
+		SetTransformType(lcTransformType::AbsoluteTranslation);
+		break;
+
 	case LC_EDIT_TRANSFORM_RELATIVE_TRANSLATION:
+		SetTransformType(lcTransformType::RelativeTranslation);
+		break;
+
 	case LC_EDIT_TRANSFORM_ABSOLUTE_ROTATION:
+		SetTransformType(lcTransformType::AbsoluteRotation);
+		break;
+
 	case LC_EDIT_TRANSFORM_RELATIVE_ROTATION:
-		SetTransformType((lcTransformType)(CommandId - LC_EDIT_TRANSFORM_ABSOLUTE_TRANSLATION));
+		SetTransformType(lcTransformType::RelativeRotation);
 		break;
 
 	case LC_EDIT_ACTION_SELECT:

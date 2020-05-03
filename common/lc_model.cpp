@@ -3002,19 +3002,19 @@ void lcModel::TransformSelectedObjects(lcTransformType TransformType, const lcVe
 {
 	switch (TransformType)
 	{
-	case LC_TRANSFORM_ABSOLUTE_TRANSLATION:
+	case lcTransformType::AbsoluteTranslation:
 		MoveSelectedObjects(Transform, false, false, true, true);
 		break;
 
-	case LC_TRANSFORM_RELATIVE_TRANSLATION:
+	case lcTransformType::RelativeTranslation:
 		MoveSelectedObjects(Transform, true, false, true, true);
 		break;
 
-	case LC_TRANSFORM_ABSOLUTE_ROTATION:
+	case lcTransformType::AbsoluteRotation:
 		RotateSelectedPieces(Transform, false, false, true, true);
 		break;
 
-	case LC_TRANSFORM_RELATIVE_ROTATION:
+	case lcTransformType::RelativeRotation:
 		RotateSelectedPieces(Transform, true, false, true, true);
 		break;
 	}
@@ -3599,22 +3599,22 @@ lcArray<lcObject*> lcModel::GetSelectionModePieces(lcPiece* SelectedPiece) const
 
 	switch (gMainWindow->GetSelectionMode())
 	{
-	case lcSelectionMode::SINGLE:
+	case lcSelectionMode::Single:
 		break;
 
-	case lcSelectionMode::PIECE:
+	case lcSelectionMode::Piece:
 		for (lcPiece* Piece : mPieces)
 			if (Piece->IsVisible(mCurrentStep) && Piece->mPieceInfo == Info && Piece != SelectedPiece)
 				Pieces.Add(Piece);
 		break;
 
-	case lcSelectionMode::COLOR:
+	case lcSelectionMode::Color:
 		for (lcPiece* Piece : mPieces)
 			if (Piece->IsVisible(mCurrentStep) && Piece->mColorIndex == ColorIndex && Piece != SelectedPiece)
 				Pieces.Add(Piece);
 		break;
 
-	case lcSelectionMode::PIECE_COLOR:
+	case lcSelectionMode::PieceColor:
 		for (lcPiece* Piece : mPieces)
 			if (Piece->IsVisible(mCurrentStep) && Piece->mPieceInfo == Info && Piece->mColorIndex == ColorIndex && Piece != SelectedPiece)
 				Pieces.Add(Piece);
@@ -3678,7 +3678,7 @@ void lcModel::FocusOrDeselectObject(const lcObjectSection& ObjectSection)
 		{
 			lcPiece* Piece = (lcPiece*)Object;
 
-			if (gMainWindow->GetSelectionMode() == lcSelectionMode::SINGLE)
+			if (gMainWindow->GetSelectionMode() == lcSelectionMode::Single)
 				SelectGroup(Piece->GetTopGroup(), IsSelected);
 			else
 			{
@@ -3787,7 +3787,7 @@ void lcModel::RemoveFromSelection(const lcArray<lcObject*>& Objects)
 		{
 			lcPiece* Piece = (lcPiece*)SelectedObject;
 
-			if (gMainWindow->GetSelectionMode() == lcSelectionMode::SINGLE)
+			if (gMainWindow->GetSelectionMode() == lcSelectionMode::Single)
 				SelectGroup(Piece->GetTopGroup(), false);
 			else
 			{
@@ -3828,7 +3828,7 @@ void lcModel::RemoveFromSelection(const lcObjectSection& ObjectSection)
 	{
 		lcPiece* Piece = (lcPiece*)SelectedObject;
 
-		if (gMainWindow->GetSelectionMode() == lcSelectionMode::SINGLE)
+		if (gMainWindow->GetSelectionMode() == lcSelectionMode::Single)
 			SelectGroup(Piece->GetTopGroup(), false);
 		else
 		{

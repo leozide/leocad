@@ -22,18 +22,20 @@ class lcGLWidget;
 
 enum class lcSelectionMode
 {
-	SINGLE,
-	PIECE,
-	COLOR,
-	PIECE_COLOR
+	Single,
+	Piece,
+	Color,
+	PieceColor
 };
 
-enum lcTransformType
+enum class lcTransformType
 {
-	LC_TRANSFORM_ABSOLUTE_TRANSLATION,
-	LC_TRANSFORM_RELATIVE_TRANSLATION,
-	LC_TRANSFORM_ABSOLUTE_ROTATION,
-	LC_TRANSFORM_RELATIVE_ROTATION
+	First,
+	AbsoluteTranslation = First,
+	RelativeTranslation,
+	AbsoluteRotation,
+	RelativeRotation,
+	Count
 };
 
 enum lcBackgroundType

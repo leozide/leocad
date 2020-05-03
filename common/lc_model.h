@@ -100,6 +100,11 @@ public:
 	lcModel(const QString& FileName);
 	~lcModel();
 
+	lcModel(const lcModel&) = delete;
+	lcModel(lcModel&&) = delete;
+	lcModel& operator=(const lcModel&) = delete;
+	lcModel& operator=(lcModel&&) = delete;
+
 	bool IsModified() const
 	{
 		return mSavedHistory != mUndoHistory[0];

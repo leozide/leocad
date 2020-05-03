@@ -98,10 +98,6 @@ TexFont::TexFont()
 	memset(&mGlyphs, 0, sizeof(mGlyphs));
 }
 
-TexFont::~TexFont()
-{
-}
-
 bool TexFont::Load(lcContext* Context)
 {
 	mRefCount++;

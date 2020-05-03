@@ -113,6 +113,11 @@ public:
 	lcContext();
 	~lcContext();
 
+	lcContext(const lcContext&) = delete;
+	lcContext(lcContext&&) = delete;
+	lcContext& operator=(const lcContext&) = delete;
+	lcContext& operator=(lcContext&&) = delete;
+
 	static void CreateResources();
 	static void DestroyResources();
 

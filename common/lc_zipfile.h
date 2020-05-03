@@ -52,6 +52,11 @@ public:
 	lcZipFile();
 	~lcZipFile();
 
+	lcZipFile(const lcZipFile&) = delete;
+	lcZipFile(lcZipFile&&) = delete;
+	lcZipFile& operator=(const lcZipFile&) = delete;
+	lcZipFile& operator=(lcZipFile&&) = delete;
+
 	bool OpenRead(const QString& FileName);
 	bool OpenRead(lcFile* File);
 	bool OpenWrite(const QString& FileName);

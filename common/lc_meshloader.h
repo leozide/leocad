@@ -35,10 +35,6 @@ public:
 		mTexture = Texture;
 	}
 
-	~lcLibraryMeshSection()
-	{
-	}
-
 	lcMeshPrimitiveType mPrimitiveType;
 	quint32 mColor;
 	lcTexture* mTexture;
@@ -108,6 +104,11 @@ public:
 		for (int MeshDataIdx = 0; MeshDataIdx < LC_NUM_MESHDATA_TYPES; MeshDataIdx++)
 			mSections[MeshDataIdx].DeleteAll();
 	}
+
+	lcLibraryMeshData(const lcLibraryMeshData&) = delete;
+	lcLibraryMeshData(lcLibraryMeshData&&) = delete;
+	lcLibraryMeshData& operator=(const lcLibraryMeshData&) = delete;
+	lcLibraryMeshData& operator=(lcLibraryMeshData&&) = delete;
 
 	bool IsEmpty() const
 	{

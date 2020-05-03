@@ -23,6 +23,11 @@ public:
 	lcTexture();
 	~lcTexture();
 
+	lcTexture(const lcTexture&) = delete;
+	lcTexture(lcTexture&&) = delete;
+	lcTexture& operator=(const lcTexture&) = delete;
+	lcTexture& operator=(lcTexture&&) = delete;
+
 	void CreateGridTexture();
 
 	bool Load(const QString& FileName, int Flags = 0);

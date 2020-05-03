@@ -28,6 +28,11 @@ public:
 	lcLight(float px, float py, float pz, float tx, float ty, float tz);
 	~lcLight();
 
+	lcLight(const lcLight&) = delete;
+	lcLight(lcLight&&) = delete;
+	lcLight& operator=(const lcLight&) = delete;
+	lcLight& operator=(lcLight&&) = delete;
+
 	bool IsPointLight() const
 	{
 		return (mState & (LC_LIGHT_SPOT | LC_LIGHT_DIRECTIONAL)) == 0;

@@ -42,6 +42,11 @@ public:
 	lcCamera(float ex, float ey, float ez, float tx, float ty, float tz);
 	~lcCamera();
 
+	lcCamera(const lcCamera&) = delete;
+	lcCamera(lcCamera&&) = delete;
+	lcCamera& operator=(const lcCamera&) = delete;
+	lcCamera& operator=(lcCamera&&) = delete;
+
 	const char* GetName() const override
 	{
 		return m_strName;

@@ -4,7 +4,6 @@ class TexFont
 {
 public:
 	TexFont();
-	~TexFont();
 
 	bool IsLoaded() const
 	{

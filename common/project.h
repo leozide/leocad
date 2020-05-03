@@ -42,6 +42,11 @@ public:
 	Project();
 	~Project();
 
+	Project(const Project&) = delete;
+	Project(Project&&) = delete;
+	Project& operator=(const Project&) = delete;
+	Project& operator=(Project&&) = delete;
+
 	const lcArray<lcModel*>& GetModels() const
 	{
 		return mModels;

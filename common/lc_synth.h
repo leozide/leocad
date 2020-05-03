@@ -11,6 +11,11 @@ public:
 	explicit lcSynthInfo(float Length);
 	virtual ~lcSynthInfo() = default;
 
+	lcSynthInfo(const lcSynthInfo&) = delete;
+	lcSynthInfo(lcSynthInfo&&) = delete;
+	lcSynthInfo& operator=(const lcSynthInfo&) = delete;
+	lcSynthInfo& operator=(lcSynthInfo&&) = delete;
+
 	bool CanAddControlPoints() const
 	{
 		return mCurve;

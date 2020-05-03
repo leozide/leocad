@@ -20,6 +20,10 @@ public:
 	Image(Image&& Other);
 	virtual ~Image();
 
+	Image(const Image&) = delete;
+	Image& operator=(const Image&) = delete;
+	Image& operator=(Image&&) = delete;
+
 	int GetBPP() const;
 	bool HasAlpha() const;
 

@@ -37,6 +37,11 @@ public:
 	PieceInfo();
 	~PieceInfo();
 
+	PieceInfo(const PieceInfo&) = delete;
+	PieceInfo(PieceInfo&&) = delete;
+	PieceInfo& operator=(const PieceInfo&) = delete;
+	PieceInfo& operator=(PieceInfo&&) = delete;
+
 	const lcBoundingBox& GetBoundingBox() const
 	{
 		return mBoundingBox;

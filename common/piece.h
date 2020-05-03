@@ -71,6 +71,10 @@ public:
 	lcPiece(const lcPiece& Other);
 	~lcPiece();
 
+	lcPiece(lcPiece&&) = delete;
+	lcPiece& operator=(const lcPiece&) = delete;
+	lcPiece& operator=(lcPiece&&) = delete;
+
 	bool IsSelected() const override
 	{
 		return (mState & LC_PIECE_SELECTION_MASK) != 0;

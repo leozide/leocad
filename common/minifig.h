@@ -53,6 +53,11 @@ public:
 	MinifigWizard();
 	~MinifigWizard();
 
+	MinifigWizard(const MinifigWizard&) = delete;
+	MinifigWizard(MinifigWizard&&) = delete;
+	MinifigWizard& operator=(const MinifigWizard&) = delete;
+	MinifigWizard& operator=(MinifigWizard&&) = delete;
+
 	const std::map<QString, lcMinifigTemplate>& GetTemplates() const
 	{
 		return mTemplates;

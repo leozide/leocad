@@ -511,9 +511,7 @@ void lcContext::SetColorIndexTinted(int ColorIndex, lcInterfaceColor InterfaceCo
 
 void lcContext::SetColorIndexTinted(int ColorIndex, const lcVector4& Tint)
 {
-	const float Weight = Tint.w;
-	const lcVector3 Color(gColorList[ColorIndex].Value * Weight + Tint * (1.0f - Weight));
-	SetColor(lcVector4(Color, gColorList[ColorIndex].Value.w * Tint.w));
+	SetColor(gColorList[ColorIndex].Value * Tint);
 }
 
 void lcContext::SetEdgeColorIndex(int ColorIndex)
@@ -523,9 +521,7 @@ void lcContext::SetEdgeColorIndex(int ColorIndex)
 
 void lcContext::SetEdgeColorIndexTinted(int ColorIndex, const lcVector4& Tint)
 {
-	const float Weight = Tint.w;
-	const lcVector3 Color(gColorList[ColorIndex].Edge * Weight + Tint * (1.0f - Weight));
-	SetColor(lcVector4(Color, gColorList[ColorIndex].Edge.w * Tint.w));
+	SetColor(gColorList[ColorIndex].Edge * Tint);
 }
 
 void lcContext::SetInterfaceColor(lcInterfaceColor InterfaceColor)

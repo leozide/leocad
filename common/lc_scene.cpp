@@ -466,7 +466,7 @@ void lcScene::Draw(lcContext* Context) const
 			if (DrawLines)
 				DrawOpaqueMeshes(Context, false, LinePrimitiveTypes, true, false);
 
-			DrawTranslucentMeshes(Context, true, false, true, true);
+			DrawTranslucentMeshes(Context, false, false, true, true);
 		}
 		else
 		{
@@ -475,7 +475,7 @@ void lcScene::Draw(lcContext* Context) const
 			if (mPreTranslucentCallback)
 				mPreTranslucentCallback();
 
-			DrawTranslucentMeshes(Context, true, false, true, true);
+			DrawTranslucentMeshes(Context, false, false, true, true);
 		}
 	}
 	else

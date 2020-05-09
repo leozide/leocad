@@ -2834,6 +2834,9 @@ void lcModel::MoveSelectedObjects(const lcVector3& PieceDistance, const lcVector
 			{
 				if (Piece->IsSelected())
 				{
+					if (gMainWindow->GetLocalTransform())
+						TransformedPieceDistance = lcMul(PieceDistance, Piece->GetRelativeRotation());
+
 					Piece->MoveSelected(mCurrentStep, gMainWindow->GetAddKeys(), TransformedPieceDistance);
 					Piece->UpdatePosition(mCurrentStep);
 					Moved = true;

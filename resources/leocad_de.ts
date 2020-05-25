@@ -1219,7 +1219,7 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="58"/>
         <source>Set &amp;Inventory...</source>
-        <translation>Setze &amp;Inventar...</translation>
+        <translation>Bausatz-&amp;Inventar...</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="72"/>
@@ -2487,7 +2487,7 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="59"/>
         <source>Import all parts from an official set</source>
-        <translation>Import aller Teile eines offiziellen Sets</translation>
+        <translation>Import aller Teile eines offiziellen Bausatzes</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="66"/>
@@ -5617,17 +5617,17 @@ GL_EXT_texture_filter_anisotropic extension: %5
     <message>
         <location filename="../qt/lc_setsdatabasedialog.ui" line="14"/>
         <source>Sets Database</source>
-        <translation>Datenbank festlegen</translation>
+        <translation>Bausatz-Datenbank</translation>
     </message>
     <message>
         <location filename="../qt/lc_setsdatabasedialog.ui" line="22"/>
         <source>Set Name or Number</source>
-        <translation>Name oder Nummer festlegen</translation>
+        <translation>Bausatz-Name oder -Nummer</translation>
     </message>
     <message>
         <location filename="../qt/lc_setsdatabasedialog.ui" line="29"/>
         <source>Search</source>
-        <translation>Suche</translation>
+        <translation>Suchen</translation>
     </message>
     <message>
         <location filename="../qt/lc_setsdatabasedialog.ui" line="51"/>
@@ -5652,12 +5652,12 @@ GL_EXT_texture_filter_anisotropic extension: %5
     <message>
         <location filename="../qt/lc_setsdatabasedialog.ui" line="74"/>
         <source>Sets Database provided by &lt;a href=&quot;https://www.rebrickable.com&quot;&gt;Rebrickable&lt;/a&gt;</source>
-        <translation>Sets Datenbank bereitgestellt von &lt;a href=&quot;https://www.rebrickable.com&quot;&gt;Rebrickable&lt;/a&gt;</translation>
+        <translation>Bausatz-Datenbank bereitgestellt von &lt;a href=&quot;https://www.rebrickable.com&quot;&gt;Rebrickable&lt;/a&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_setsdatabasedialog.cpp" line="62"/>
         <source>Please select a set from the list.</source>
-        <translation>Bitte wählen sie ein Set aus der Liste.</translation>
+        <translation>Bitte wählen Sie einen Bausatz aus der Liste.</translation>
     </message>
     <message>
         <location filename="../qt/lc_setsdatabasedialog.cpp" line="69"/>
@@ -5667,7 +5667,7 @@ GL_EXT_texture_filter_anisotropic extension: %5
     <message>
         <location filename="../qt/lc_setsdatabasedialog.cpp" line="70"/>
         <source>Downloading set inventory</source>
-        <translation>Downloaden des Inventars</translation>
+        <translation>Downloaden des Bausatz-Inventars</translation>
     </message>
     <message>
         <location filename="../qt/lc_setsdatabasedialog.cpp" line="114"/>
@@ -5677,7 +5677,7 @@ GL_EXT_texture_filter_anisotropic extension: %5
     <message>
         <location filename="../qt/lc_setsdatabasedialog.cpp" line="119"/>
         <source>Searching</source>
-        <translation>Suchen</translation>
+        <translation>Suche</translation>
     </message>
     <message>
         <location filename="../qt/lc_setsdatabasedialog.cpp" line="120"/>
@@ -5692,7 +5692,7 @@ GL_EXT_texture_filter_anisotropic extension: %5
     <message>
         <location filename="../qt/lc_setsdatabasedialog.cpp" line="226"/>
         <source>Error downloading set inventory.</source>
-        <translation>Fehler beim downloaden des Inventars.</translation>
+        <translation>Fehler beim Downloaden des Bausatz-Inventars.</translation>
     </message>
 </context>
 <context>

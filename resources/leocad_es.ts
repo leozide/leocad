@@ -3336,7 +3336,7 @@ Por favor Visite https://www.leocad.org para aprender como descargar e instalar 
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="531"/>
         <source>T&amp;oolbars</source>
-        <translation>Barras de&amp;Herramientas</translation>
+        <translation type="unfinished">Barras de &amp;Herramientas</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="542"/>

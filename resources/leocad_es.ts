@@ -461,7 +461,7 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="645"/>
         <source>Edit.Tool.Pan</source>
-        <translation>Editar.Herramienta.Deslizar</translation>
+        <translation>Editar.Herramienta.Desplazar</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="652"/>
@@ -1578,7 +1578,7 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="632"/>
         <source>Pan</source>
-        <translation>Deslizar</translation>
+        <translation>Desplazar</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="639"/>
@@ -2740,7 +2740,7 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="633"/>
         <source>Pan the current view</source>
-        <translation>Deslizar la vista actual</translation>
+        <translation>Desplazar la vista actual</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="640"/>
@@ -3336,7 +3336,7 @@ Por favor Visite https://www.leocad.org para aprender como descargar e instalar 
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="531"/>
         <source>T&amp;oolbars</source>
-        <translation>Barras de&amp;Herramientas</translation>
+        <translation>Barras de &amp;Herramientas</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="542"/>

@@ -1,6 +1,7 @@
 #pragma once
 
-struct lcInstructionsPageLayout;
+//struct lcInstructionsPageLayout;
+#include "lc_model.h"
 
 class lcInstructionsPageWidget : public QGraphicsView
 {

@@ -3020,6 +3020,9 @@ void lcModel::TransformSelectedObjects(lcTransformType TransformType, const lcVe
 	case lcTransformType::RelativeRotation:
 		RotateSelectedPieces(Transform, true, false, true, true);
 		break;
+
+	case lcTransformType::Count:
+		break;
 	}
 }
 

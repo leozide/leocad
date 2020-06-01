@@ -361,9 +361,10 @@ void lcSynthInit()
 	}
 	UniversalJoints[] =
 	{
-		{ "61903.dat",   60.00f,  0.0f, "62520.dat", "62519.dat" }, // Technic Universal Joint 3L
-		{ "3712C01.dat", 60.00f, 30.0f, "3712.dat",  "3326.dat"  }, // Technic Universal Joint
-		{ "575C01.dat",  60.00f, 30.0f, "575.dat",   "3326a.dat" }  // Technic Universal Joint Type 1
+		{ "61903.dat",   60.00f,  0.0f, "62520.dat", "62519.dat" }, // Technic Universal Joint 3L (Complete)
+		{ "3712C01.dat", 60.00f, 30.0f, "3712.dat",  "3326.dat"  }, // Technic Universal Joint 4L with Bush Ends with Centre Type 2 (Complete)
+		{ "3712C03.dat", 60.00f, 30.0f, "3712.dat",  "3326a.dat" }, // Technic Universal Joint 4L with Bush Ends with Centre Type 1 (Complete)
+		{ "575C01.dat",  60.00f, 30.0f, "575.dat",   "3326a.dat" }  // Technic Universal Joint Type 1 (Complete)
 	};
 
 	for (const auto& JointInfo: UniversalJoints)

@@ -323,8 +323,10 @@ void lcSynthInit()
 	}
 	Actuators[] =
 	{
-		{ "61927C01.dat", 270.00f }, // Technic Power Functions Linear Actuator (Extended)
-		{ "61927.dat",    170.00f }  // Technic Power Functions Linear Actuator (Contracted)
+		{ "61927-F1.dat",    170.00f }, // Technic Linear Actuator 8 x 2 x 2 (Contracted)
+		{ "61927-F2.dat",    270.00f }, // Technic Linear Actuator 8 x 2 x 2 (Extended)
+		{ "61927C01.dat",    270.00f }, // Moved to 61927-f2 (was Technic Power Functions Linear Actuator (Extended))
+		{ "61927.dat",       170.00f }, // Moved to 61927-f1 (was Technic Power Functions Linear Actuator (Contracted))
 	};
 
 	for (const auto& ActuatorInfo: Actuators)

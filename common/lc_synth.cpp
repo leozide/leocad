@@ -111,12 +111,17 @@ protected:
 class lcSynthInfoActuator : public lcSynthInfoStraight
 {
 public:
-	explicit lcSynthInfoActuator(float Length);
+	explicit lcSynthInfoActuator(const char* BodyPart, const char* PistonPart, const char* AxlePart, float Length, float AxleOffset);
 
 	void GetDefaultControlPoints(lcArray<lcPieceControlPoint>& ControlPoints) const override;
 
 protected:
 	void AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const lcArray<lcMatrix44>& Sections) const override;
+
+	const char* mBodyPart;
+	const char* mPistonPart;
+	const char* mAxlePart;
+	float mAxleOffset;
 };
 
 class lcSynthInfoUniversalJoint : public lcSynthInfo
@@ -319,14 +324,22 @@ void lcSynthInit()
 	static const struct
 	{
 		char PartID[16];
+		char BodyPart[16];
+		char PistonPart[16];
+		char AxlePart[16];
 		float Length;
+		float AxleOffset;
 	}
 	Actuators[] =
 	{
-		{ "61927-F1.dat",    170.00f }, // Technic Linear Actuator 8 x 2 x 2 (Contracted)
-		{ "61927-F2.dat",    270.00f }, // Technic Linear Actuator 8 x 2 x 2 (Extended)
-		{ "61927C01.dat",    270.00f }, // Moved to 61927-f2 (was Technic Power Functions Linear Actuator (Extended))
-		{ "61927.dat",       170.00f }, // Moved to 61927-f1 (was Technic Power Functions Linear Actuator (Contracted))
+		{ "61927-F1.dat",    "62271c01.dat", "62274c01.dat", "47157.dat", 170.00f,  0.0f }, // Technic Linear Actuator 8 x 2 x 2 (Contracted)
+		{ "61927-F2.dat",    "62271c01.dat", "62274c01.dat", "47157.dat", 270.00f,  0.0f }, // Technic Linear Actuator 8 x 2 x 2 (Extended)
+		{ "61927C01.dat",    "62271c01.dat", "62274c01.dat", "47157.dat", 270.00f,  0.0f }, // Moved to 61927-f2 (was Technic Power Functions Linear Actuator (Extended))
+		{ "61927.dat",       "62271c01.dat", "62274c01.dat", "47157.dat", 170.00f,  0.0f }, // Moved to 61927-f1 (was Technic Power Functions Linear Actuator (Contracted))
+		{ "92693C01-F1.dat", "92693c01.dat", "92696.dat",    "92695.dat", 120.00f, 30.0f }, // Technic Linear Actuator 4 x 1 x 1 (Contracted)
+		{ "92693C01-F2.dat", "92693c01.dat", "92696.dat",    "92695.dat", 180.00f, 30.0f }, // Technic Linear Actuator 4 x 1 x 1 (Extended)
+		{ "92693C02.dat",    "92693c01.dat", "92696.dat",    "92695.dat", 120.00f, 30.0f }, // Moved to 92693c01-f1 (was Technic Linear Actuator Small (Contracted))
+		{ "92693C03.dat",    "92693c01.dat", "92696.dat",    "92695.dat", 180.00f, 30.0f }, // Moved to 92693c01-f2 (was Technic Linear Actuator Small (Extended))
 	};
 
 	for (const auto& ActuatorInfo: Actuators)
@@ -334,7 +347,8 @@ void lcSynthInit()
 		PieceInfo* Info = Library->FindPiece(ActuatorInfo.PartID, nullptr, false, false);
 
 		if (Info)
-			Info->SetSynthInfo(new lcSynthInfoActuator(ActuatorInfo.Length));
+			Info->SetSynthInfo(new lcSynthInfoActuator(ActuatorInfo.BodyPart, ActuatorInfo.PistonPart,
+					ActuatorInfo.AxlePart, ActuatorInfo.Length, ActuatorInfo.AxleOffset));
 	}
 
 	static const struct
@@ -434,8 +448,8 @@ lcSynthInfoShockAbsorber::lcSynthInfoShockAbsorber(const char* SpringPart)
 {
 }
 
-lcSynthInfoActuator::lcSynthInfoActuator(float Length)
-	: lcSynthInfoStraight(Length)
+lcSynthInfoActuator::lcSynthInfoActuator(const char* BodyPart, const char* PistonPart, const char* AxlePart, float Length, float AxleOffset)
+	: lcSynthInfoStraight(Length), mBodyPart(BodyPart), mPistonPart(PistonPart), mAxlePart(AxlePart), mAxleOffset(AxleOffset)
 {
 }
 
@@ -1329,13 +1343,15 @@ void lcSynthInfoActuator::AddParts(lcMemFile& File, lcLibraryMeshData&, const lc
 	lcVector3 Offset;
 
 	Offset = Sections[0].GetTranslation();
-	sprintf(Line, "1 25 %f %f %f 0 1 0 -1 0 0 0 0 1 47157.dat\n", Offset[0], Offset[1], Offset[2]);
+	sprintf(Line, "1 16 %f %f %f 1 0 0 0 1 0 0 0 1 %s\n", Offset[0], Offset[1], Offset[2], mBodyPart);
 	File.WriteBuffer(Line, strlen(Line));
-	sprintf(Line, "1 16 %f %f %f 1 0 0 0 1 0 0 0 1 62271c01.dat\n", Offset[0], Offset[1], Offset[2]);
+
+	Offset = lcMul(Sections[0], lcMatrix44Translation(lcVector3(0.0f, 0.0f, mAxleOffset))).GetTranslation();
+	sprintf(Line, "1 25 %f %f %f 0 1 0 -1 0 0 0 0 1 %s\n", Offset[0], Offset[1], Offset[2], mAxlePart);
 	File.WriteBuffer(Line, strlen(Line));
 
 	Offset = Sections[1].GetTranslation();
-	sprintf(Line, "1 72 %f %f %f 1 0 0 0 1 0 0 0 1 62274c01.dat\n", Offset[0], Offset[1], Offset[2]);
+	sprintf(Line, "1 72 %f %f %f 1 0 0 0 1 0 0 0 1 %s\n", Offset[0], Offset[1], Offset[2], mPistonPart);
 	File.WriteBuffer(Line, strlen(Line));
 }
 

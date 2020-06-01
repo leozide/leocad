@@ -166,6 +166,7 @@ macx {
 }
 
 SOURCES += common/view.cpp \
+    common/lc_instructionsdialog.cpp \
     common/texfont.cpp \
     common/project.cpp \
     common/pieceinf.cpp \
@@ -226,6 +227,7 @@ SOURCES += common/view.cpp \
     qt/lc_setsdatabasedialog.cpp \
     common/lc_partpalettedialog.cpp
 HEADERS += \
+    common/lc_instructionsdialog.h \
     common/view.h \
     common/texfont.h \
     common/project.h \
@@ -290,7 +292,7 @@ HEADERS += \
     qt/lc_renderdialog.h \
     qt/lc_setsdatabasedialog.h \
     common/lc_partpalettedialog.h
-FORMS += \ 
+FORMS += \
     qt/lc_qarraydialog.ui \
     qt/lc_qgroupdialog.ui \
     qt/lc_qaboutdialog.ui \

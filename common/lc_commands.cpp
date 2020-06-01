@@ -115,6 +115,13 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 		QT_TRANSLATE_NOOP("Status", "Render the current model using POV-Ray"),
 		""
 	},
+	// LC_FILE_INSTRUCTIONS
+	{
+		QT_TRANSLATE_NOOP("Action", "File.Instructions"),
+		QT_TRANSLATE_NOOP("Menu", "&Instructions..."),
+		QT_TRANSLATE_NOOP("Status", "Configure instructions layout"),
+		""
+	},
 	// LC_FILE_PRINT
 	{
 		QT_TRANSLATE_NOOP("Action", "File.Print"),

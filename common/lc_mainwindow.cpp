@@ -14,6 +14,7 @@
 #include "lc_setsdatabasedialog.h"
 #include "lc_qhtmldialog.h"
 #include "lc_renderdialog.h"
+#include "lc_instructionsdialog.h"
 #include "lc_profile.h"
 #include "view.h"
 #include "project.h"
@@ -480,6 +481,7 @@ void lcMainWindow::CreateMenus()
 	ExportMenu->addAction(mActions[LC_FILE_EXPORT_WAVEFRONT]);
 	FileMenu->addSeparator();
 	FileMenu->addAction(mActions[LC_FILE_RENDER]);
+	FileMenu->addAction(mActions[LC_FILE_INSTRUCTIONS]);
 	FileMenu->addAction(mActions[LC_FILE_PRINT]);
 	FileMenu->addAction(mActions[LC_FILE_PRINT_PREVIEW]);
 //	FileMenu->addAction(mActions[LC_FILE_PRINT_BOM]);
@@ -1037,7 +1039,7 @@ void lcMainWindow::Print(QPrinter* Printer)
 	int DocCopies;
 	int PageCopies;
 
-	std::vector<std::pair<lcModel*, lcStep>> PageLayouts = lcGetActiveProject()->GetPageLayouts();
+	std::vector<lcInstructionsPageLayout> PageLayouts = lcGetActiveProject()->GetPageLayouts();
 	const int PageCount = static_cast<int>(PageLayouts.size());
 
 	if (Printer->collateCopies())
@@ -1107,8 +1109,8 @@ void lcMainWindow::Print(QPrinter* Printer)
 				int StepWidth = MarginRect.width();
 				int StepHeight = MarginRect.height();
 
-				lcModel* Model = PageLayouts[Page - 1].first;
-				lcStep Step = PageLayouts[Page - 1].second;
+				lcModel* Model = PageLayouts[Page - 1].Model;
+				lcStep Step = PageLayouts[Page - 1].Step;
 				QImage Image = Model->GetStepImage(false, StepWidth, StepHeight, Step);
 
 				Painter.drawImage(MarginRect.left(), MarginRect.top(), Image);
@@ -1199,6 +1201,14 @@ void lcMainWindow::ShowRenderDialog()
 {
 	lcRenderDialog Dialog(this);
 	Dialog.exec();
+}
+
+void lcMainWindow::ShowInstructionsDialog()
+{
+	lcInstructionsDialog* Dialog = new lcInstructionsDialog(this, lcGetActiveProject());
+	Dialog->setWindowModality(Qt::ApplicationModal);
+	Dialog->setAttribute(Qt::WA_DeleteOnClose);
+	Dialog->show();
 }
 
 void lcMainWindow::ShowPrintDialog()
@@ -2520,6 +2530,10 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 
 	case LC_FILE_RENDER:
 		ShowRenderDialog();
+		break;
+
+	case LC_FILE_INSTRUCTIONS:
+		ShowInstructionsDialog();
 		break;
 
 	case LC_FILE_PRINT_PREVIEW:

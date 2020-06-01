@@ -1473,14 +1473,14 @@ void Project::ExportCSV()
 	}
 }
 
-std::vector<std::pair<lcModel*, lcStep>> Project::GetPageLayouts() const
+std::vector<lcInstructionsPageLayout> Project::GetPageLayouts() const
 {
 	std::vector<const lcModel*> AddedModels;
 
-	if (mActiveModel)
-		return mActiveModel->GetPageLayouts(AddedModels);
+	if (!mModels.IsEmpty())
+		return mModels[0]->GetPageLayouts(AddedModels);
 
-	return std::vector<std::pair<lcModel*, lcStep>>();
+	return std::vector<lcInstructionsPageLayout>();
 }
 
 void Project::ExportHTML(const lcHTMLExportOptions& Options)

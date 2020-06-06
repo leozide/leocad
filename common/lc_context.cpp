@@ -235,6 +235,9 @@ void lcContext::DestroyResources()
 
 void lcContext::SetDefaultState()
 {
+	if (QGLFormat::defaultFormat().sampleBuffers() && QGLFormat::defaultFormat().samples() > 1)
+		glEnable(GL_LINE_SMOOTH);
+
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
 

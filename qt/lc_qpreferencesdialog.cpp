@@ -28,7 +28,6 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 	delete ui->povrayLayout;
 #endif
 
-	ui->lineWidth->setValidator(new QDoubleValidator(ui->lineWidth));
 	connect(ui->FadeStepsColor, SIGNAL(clicked()), this, SLOT(ColorButtonClicked()));
 	connect(ui->HighlightNewPartsColor, SIGNAL(clicked()), this, SLOT(ColorButtonClicked()));
 	connect(ui->gridStudColor, SIGNAL(clicked()), this, SLOT(ColorButtonClicked()));
@@ -69,7 +68,21 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 	else
 		ui->antiAliasingSamples->setCurrentIndex(0);
 	ui->edgeLines->setChecked(mOptions->Preferences.mDrawEdgeLines);
-	ui->lineWidth->setText(lcFormatValueLocalized(mOptions->Preferences.mLineWidth));
+
+	if (QGLFormat::defaultFormat().sampleBuffers() && QGLFormat::defaultFormat().samples() > 1)
+	{
+		glGetFloatv(GL_SMOOTH_LINE_WIDTH_RANGE, mLineWidthRange);
+		glGetFloatv(GL_SMOOTH_LINE_WIDTH_GRANULARITY, &mLineWidthGranularity);
+	}
+	else
+	{
+		glGetFloatv(GL_ALIASED_LINE_WIDTH_RANGE, mLineWidthRange);
+		mLineWidthGranularity = 1.0f;
+	}
+
+	ui->LineWidthSlider->setRange(0, (mLineWidthRange[1] - mLineWidthRange[0]) / mLineWidthGranularity);
+	ui->LineWidthSlider->setValue((mOptions->Preferences.mLineWidth - mLineWidthRange[0]) / mLineWidthGranularity);
+
 	ui->MeshLOD->setChecked(mOptions->Preferences.mAllowLOD);
 	ui->FadeSteps->setChecked(mOptions->Preferences.mFadeSteps);
 	ui->HighlightNewParts->setChecked(mOptions->Preferences.mHighlightNewParts);
@@ -137,6 +150,7 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 	on_studLogo_toggled();
 	on_antiAliasing_toggled();
 	on_edgeLines_toggled();
+	on_LineWidthSlider_valueChanged();
 	on_FadeSteps_toggled();
 	on_HighlightNewParts_toggled();
 	on_gridStuds_toggled();
@@ -205,7 +219,7 @@ void lcQPreferencesDialog::accept()
 		mOptions->AASamples = 2;
 
 	mOptions->Preferences.mDrawEdgeLines = ui->edgeLines->isChecked();
-	mOptions->Preferences.mLineWidth = lcParseValueLocalized(ui->lineWidth->text());
+	mOptions->Preferences.mLineWidth = mLineWidthRange[0] + static_cast<float>(ui->LineWidthSlider->value()) * mLineWidthGranularity;
 	mOptions->Preferences.mAllowLOD = ui->MeshLOD->isChecked();
 	mOptions->Preferences.mFadeSteps = ui->FadeSteps->isChecked();
 	mOptions->Preferences.mHighlightNewParts = ui->HighlightNewParts->isChecked();
@@ -375,7 +389,14 @@ void lcQPreferencesDialog::on_antiAliasing_toggled()
 
 void lcQPreferencesDialog::on_edgeLines_toggled()
 {
-	ui->lineWidth->setEnabled(ui->edgeLines->isChecked());
+	ui->LineWidthSlider->setEnabled(ui->edgeLines->isChecked());
+	ui->LineWidthLabel->setEnabled(ui->edgeLines->isChecked());
+}
+
+void lcQPreferencesDialog::on_LineWidthSlider_valueChanged()
+{
+	float Value = mLineWidthRange[0] + static_cast<float>(ui->LineWidthSlider->value()) * mLineWidthGranularity;
+	ui->LineWidthLabel->setText(QString::number(Value));
 }
 
 void lcQPreferencesDialog::on_FadeSteps_toggled()

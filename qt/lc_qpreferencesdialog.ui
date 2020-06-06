@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>598</width>
-    <height>492</height>
+    <height>494</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -391,16 +391,6 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="1">
-           <widget class="QLineEdit" name="lineWidth">
-            <property name="maximumSize">
-             <size>
-              <width>75</width>
-              <height>16777215</height>
-             </size>
-            </property>
-           </widget>
-          </item>
           <item row="0" column="0">
            <widget class="QCheckBox" name="antiAliasing">
             <property name="text">
@@ -441,13 +431,6 @@
             </item>
            </widget>
           </item>
-          <item row="2" column="2">
-           <widget class="QLabel" name="label_2">
-            <property name="text">
-             <string>width</string>
-            </property>
-           </widget>
-          </item>
           <item row="4" column="0">
            <widget class="QCheckBox" name="axisIcon">
             <property name="text">
@@ -471,6 +454,29 @@
           </item>
           <item row="6" column="1">
            <widget class="QToolButton" name="HighlightNewPartsColor">
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QSlider" name="LineWidthSlider">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="tickPosition">
+             <enum>QSlider::NoTicks</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="3">
+           <widget class="QLabel" name="LineWidthLabel">
             <property name="text">
              <string/>
             </property>
@@ -1220,7 +1226,8 @@
   <tabstop>studLogo</tabstop>
   <tabstop>studLogoCombo</tabstop>
   <tabstop>edgeLines</tabstop>
-  <tabstop>lineWidth</tabstop>
+  <tabstop>LineWidthSlider</tabstop>
+  <tabstop>LineWidthLabel</tabstop>
   <tabstop>MeshLOD</tabstop>
   <tabstop>axisIcon</tabstop>
   <tabstop>FadeSteps</tabstop>

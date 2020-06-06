@@ -35,6 +35,7 @@ public slots:
 	void ColorButtonClicked();
 	void on_antiAliasing_toggled();
 	void on_edgeLines_toggled();
+	void on_LineWidthSlider_valueChanged();
 	void on_FadeSteps_toggled();
 	void on_HighlightNewParts_toggled();
 	void on_gridStuds_toggled();
@@ -68,5 +69,7 @@ private:
 	void UpdateMouseTree();
 	void UpdateMouseTreeItem(int ItemIndex);
 	void setShortcutModified(QTreeWidgetItem *treeItem, bool modified);
-};
 
+	float mLineWidthRange[2];
+	float mLineWidthGranularity;
+};

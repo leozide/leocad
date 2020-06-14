@@ -138,18 +138,25 @@ void lcQMinifigDialog::on_TemplateComboBox_currentIndexChanged(const QString& Te
 
 	for (int PartIdx = 0; PartIdx < LC_MFW_NUMITEMS; PartIdx++)
 	{
-		PieceInfo* Info = lcGetPiecesLibrary()->FindPiece(Template.Parts[PartIdx].toLatin1(), nullptr, false, false);
-
-		if (Info)
+		if (!Template.Parts[PartIdx].isEmpty())
 		{
-			for (const lcMinifigPieceInfo& MinifigPieceInfo : mMinifigWidget->mSettings[PartIdx])
+			PieceInfo* Info = lcGetPiecesLibrary()->FindPiece(Template.Parts[PartIdx].toLatin1(), nullptr, false, false);
+
+			if (Info)
 			{
-				if (Info == MinifigPieceInfo.Info)
+				for (const lcMinifigPieceInfo& MinifigPieceInfo : mMinifigWidget->mSettings[PartIdx])
 				{
-					getTypeComboBox(PartIdx)->setCurrentText(MinifigPieceInfo.Description);
-					break;
+					if (Info == MinifigPieceInfo.Info)
+					{
+						getTypeComboBox(PartIdx)->setCurrentText(MinifigPieceInfo.Description);
+						break;
+					}
 				}
 			}
+		}
+		else
+		{
+			getTypeComboBox(PartIdx)->setCurrentText("None");
 		}
 
 		getColorPicker(PartIdx)->setCurrentColorCode(Template.Colors[PartIdx]);

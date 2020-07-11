@@ -28,6 +28,8 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 	delete ui->povrayLayout;
 #endif
 
+	connect(ui->AxesColorButton, SIGNAL(clicked()), this, SLOT(ColorButtonClicked()));
+	connect(ui->OverlayColorButton, SIGNAL(clicked()), this, SLOT(ColorButtonClicked()));
 	connect(ui->FadeStepsColor, SIGNAL(clicked()), this, SLOT(ColorButtonClicked()));
 	connect(ui->HighlightNewPartsColor, SIGNAL(clicked()), this, SLOT(ColorButtonClicked()));
 	connect(ui->gridStudColor, SIGNAL(clicked()), this, SLOT(ColorButtonClicked()));
@@ -89,7 +91,7 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 	ui->gridStuds->setChecked(mOptions->Preferences.mDrawGridStuds);
 	ui->gridLines->setChecked(mOptions->Preferences.mDrawGridLines);
 	ui->gridLineSpacing->setText(QString::number(mOptions->Preferences.mGridLineSpacing));
-	ui->axisIcon->setChecked(mOptions->Preferences.mDrawAxes);
+	ui->AxisIconCheckBox->setChecked(mOptions->Preferences.mDrawAxes);
 
 	ui->ViewSphereLocationCombo->setCurrentIndex((int)mOptions->Preferences.mViewSphereLocation);
 
@@ -125,6 +127,12 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 	ui->ShadingMode->setCurrentIndex(static_cast<int>(mOptions->Preferences.mShadingMode));
 
 	QPixmap pix(12, 12);
+
+	pix.fill(QColor(LC_RGBA_RED(mOptions->Preferences.mAxesColor), LC_RGBA_GREEN(mOptions->Preferences.mAxesColor), LC_RGBA_BLUE(mOptions->Preferences.mAxesColor)));
+	ui->AxesColorButton->setIcon(pix);
+
+	pix.fill(QColor(LC_RGBA_RED(mOptions->Preferences.mOverlayColor), LC_RGBA_GREEN(mOptions->Preferences.mOverlayColor), LC_RGBA_BLUE(mOptions->Preferences.mOverlayColor)));
+	ui->OverlayColorButton->setIcon(pix);
 
 	pix.fill(QColor(LC_RGBA_RED(mOptions->Preferences.mFadeStepsColor), LC_RGBA_GREEN(mOptions->Preferences.mFadeStepsColor), LC_RGBA_BLUE(mOptions->Preferences.mFadeStepsColor)));
 	ui->FadeStepsColor->setIcon(pix);
@@ -228,7 +236,7 @@ void lcQPreferencesDialog::accept()
 	mOptions->Preferences.mDrawGridLines = ui->gridLines->isChecked();
 	mOptions->Preferences.mGridLineSpacing = gridLineSpacing;
 
-	mOptions->Preferences.mDrawAxes = ui->axisIcon->isChecked();
+	mOptions->Preferences.mDrawAxes = ui->AxisIconCheckBox->isChecked();
 	mOptions->Preferences.mViewSphereLocation = (lcViewSphereLocation)ui->ViewSphereLocationCombo->currentIndex();
 
 	switch (ui->ViewSphereSizeCombo->currentIndex())
@@ -318,7 +326,19 @@ void lcQPreferencesDialog::ColorButtonClicked()
 	quint32* Color = nullptr;
 	QColorDialog::ColorDialogOptions DialogOptions;
 
-	if (Button == ui->FadeStepsColor)
+	if (Button == ui->AxesColorButton)
+	{
+		Color = &mOptions->Preferences.mAxesColor;
+		Title = tr("Select Axes Color");
+		DialogOptions = 0;
+	}
+	else if (Button == ui->OverlayColorButton)
+	{
+		Color = &mOptions->Preferences.mOverlayColor;
+		Title = tr("Select Overlay Color");
+		DialogOptions = 0;
+	}
+	else if (Button == ui->FadeStepsColor)
 	{
 		Color = &mOptions->Preferences.mFadeStepsColor;
 		Title = tr("Select Fade Color");

@@ -18,6 +18,8 @@ void lcPreferences::LoadDefaults()
 	mMouseSensitivity = lcGetProfileInt(LC_PROFILE_MOUSE_SENSITIVITY);
 	mShadingMode = static_cast<lcShadingMode>(lcGetProfileInt(LC_PROFILE_SHADING_MODE));
 	mDrawAxes = lcGetProfileInt(LC_PROFILE_DRAW_AXES);
+	mAxesColor = lcGetProfileInt(LC_PROFILE_AXES_COLOR);
+	mOverlayColor = lcGetProfileInt(LC_PROFILE_OVERLAY_COLOR);
 	mDrawEdgeLines = lcGetProfileInt(LC_PROFILE_DRAW_EDGE_LINES);
 	mLineWidth = lcGetProfileFloat(LC_PROFILE_LINE_WIDTH);
 	mAllowLOD = lcGetProfileInt(LC_PROFILE_ALLOW_LOD);
@@ -46,6 +48,8 @@ void lcPreferences::SaveDefaults()
 	lcSetProfileInt(LC_PROFILE_MOUSE_SENSITIVITY, mMouseSensitivity);
 	lcSetProfileInt(LC_PROFILE_SHADING_MODE, static_cast<int>(mShadingMode));
 	lcSetProfileInt(LC_PROFILE_DRAW_AXES, mDrawAxes);
+	lcSetProfileInt(LC_PROFILE_AXES_COLOR, mAxesColor);
+	lcSetProfileInt(LC_PROFILE_OVERLAY_COLOR, mOverlayColor);
 	lcSetProfileInt(LC_PROFILE_DRAW_EDGE_LINES, mDrawEdgeLines);
 	lcSetProfileFloat(LC_PROFILE_LINE_WIDTH, mLineWidth);
 	lcSetProfileInt(LC_PROFILE_ALLOW_LOD, mAllowLOD);

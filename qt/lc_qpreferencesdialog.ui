@@ -309,7 +309,20 @@
        <item>
         <widget class="QWidget" name="widget" native="true">
          <layout class="QGridLayout" name="gridLayout">
-          <item row="6" column="0">
+          <item row="0" column="3">
+           <spacer name="horizontalSpacer_2">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item row="5" column="0">
            <widget class="QCheckBox" name="HighlightNewParts">
             <property name="text">
              <string>Highlight new parts</string>
@@ -335,23 +348,17 @@
             </item>
            </widget>
           </item>
-          <item row="0" column="3">
-           <spacer name="horizontalSpacer_2">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item row="1" column="0">
-           <widget class="QCheckBox" name="studLogo">
+          <item row="3" column="0">
+           <widget class="QCheckBox" name="MeshLOD">
             <property name="text">
-             <string>Stud Logo</string>
+             <string>Mesh LOD</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QCheckBox" name="edgeLines">
+            <property name="text">
+             <string>Edge lines</string>
             </property>
            </widget>
           </item>
@@ -384,10 +391,10 @@
             </item>
            </widget>
           </item>
-          <item row="2" column="0">
-           <widget class="QCheckBox" name="edgeLines">
+          <item row="1" column="0">
+           <widget class="QCheckBox" name="studLogo">
             <property name="text">
-             <string>Edge lines</string>
+             <string>Stud Logo</string>
             </property>
            </widget>
           </item>
@@ -398,21 +405,21 @@
             </property>
            </widget>
           </item>
-          <item row="3" column="0">
-           <widget class="QCheckBox" name="MeshLOD">
+          <item row="4" column="0">
+           <widget class="QCheckBox" name="FadeSteps">
             <property name="text">
-             <string>Mesh LOD</string>
+             <string>Fade previous steps</string>
             </property>
            </widget>
           </item>
-          <item row="8" column="0">
+          <item row="7" column="0">
            <widget class="QLabel" name="label_3">
             <property name="text">
              <string>Shading Mode:</string>
             </property>
            </widget>
           </item>
-          <item row="8" column="1" colspan="2">
+          <item row="7" column="1" colspan="2">
            <widget class="QComboBox" name="ShadingMode">
             <item>
              <property name="text">
@@ -431,28 +438,14 @@
             </item>
            </widget>
           </item>
-          <item row="4" column="0">
-           <widget class="QCheckBox" name="axisIcon">
-            <property name="text">
-             <string>Axis icon</string>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="0">
-           <widget class="QCheckBox" name="FadeSteps">
-            <property name="text">
-             <string>Fade previous steps</string>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="1">
+          <item row="4" column="1">
            <widget class="QToolButton" name="FadeStepsColor">
             <property name="text">
              <string/>
             </property>
            </widget>
           </item>
-          <item row="6" column="1">
+          <item row="5" column="1">
            <widget class="QToolButton" name="HighlightNewPartsColor">
             <property name="text">
              <string/>
@@ -477,6 +470,76 @@
           </item>
           <item row="2" column="3">
            <widget class="QLabel" name="LineWidthLabel">
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab">
+      <attribute name="title">
+       <string>Interface</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_13">
+       <item>
+        <widget class="QGroupBox" name="groupBox_6">
+         <property name="title">
+          <string>Overlays</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_3">
+          <item row="0" column="1">
+           <widget class="QToolButton" name="AxesColorButton">
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QCheckBox" name="AxisIconCheckBox">
+            <property name="text">
+             <string>Axis icon</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <spacer name="horizontalSpacer_7">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_2">
+            <property name="text">
+             <string>Overlay Color:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QToolButton" name="OverlayColorButton">
             <property name="text">
              <string/>
             </property>
@@ -553,13 +616,13 @@
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="ViewSphereGroup">
+        <widget class="QGroupBox" name="ViewSphereGroup_2">
          <property name="title">
           <string>View Sphere</string>
          </property>
-         <layout class="QGridLayout" name="gridLayout_3">
+         <layout class="QGridLayout" name="gridLayout_5">
           <item row="0" column="7">
-           <spacer name="horizontalSpacer_7">
+           <spacer name="horizontalSpacer_9">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
             </property>
@@ -596,14 +659,14 @@
            </widget>
           </item>
           <item row="2" column="5">
-           <widget class="QLabel" name="label_16">
+           <widget class="QLabel" name="label_20">
             <property name="text">
              <string>Highlight Color:</string>
             </property>
            </widget>
           </item>
           <item row="0" column="0">
-           <widget class="QLabel" name="label_8">
+           <widget class="QLabel" name="label_21">
             <property name="text">
              <string>Size:</string>
             </property>
@@ -617,7 +680,7 @@
            </widget>
           </item>
           <item row="2" column="0">
-           <widget class="QLabel" name="label_14">
+           <widget class="QLabel" name="label_22">
             <property name="text">
              <string>Color:</string>
             </property>
@@ -631,14 +694,14 @@
            </widget>
           </item>
           <item row="2" column="2">
-           <widget class="QLabel" name="label_15">
+           <widget class="QLabel" name="label_23">
             <property name="text">
              <string>Text Color:</string>
             </property>
            </widget>
           </item>
           <item row="0" column="2">
-           <widget class="QLabel" name="label_6">
+           <widget class="QLabel" name="label_24">
             <property name="text">
              <string>Location:</string>
             </property>
@@ -679,7 +742,7 @@
         </widget>
        </item>
        <item>
-        <spacer name="verticalSpacer">
+        <spacer name="verticalSpacer_2">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>
@@ -1227,14 +1290,15 @@
   <tabstop>studLogoCombo</tabstop>
   <tabstop>edgeLines</tabstop>
   <tabstop>LineWidthSlider</tabstop>
-  <tabstop>LineWidthLabel</tabstop>
   <tabstop>MeshLOD</tabstop>
-  <tabstop>axisIcon</tabstop>
   <tabstop>FadeSteps</tabstop>
   <tabstop>FadeStepsColor</tabstop>
   <tabstop>HighlightNewParts</tabstop>
   <tabstop>HighlightNewPartsColor</tabstop>
   <tabstop>ShadingMode</tabstop>
+  <tabstop>AxisIconCheckBox</tabstop>
+  <tabstop>AxesColorButton</tabstop>
+  <tabstop>OverlayColorButton</tabstop>
   <tabstop>gridStuds</tabstop>
   <tabstop>gridStudColor</tabstop>
   <tabstop>gridLines</tabstop>

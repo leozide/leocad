@@ -1532,7 +1532,7 @@ void View::DrawRotateViewOverlay()
 	mContext->SetProjectionMatrix(lcMatrix44Ortho(0, w, 0, h, -1, 1));
 
 	glDisable(GL_DEPTH_TEST);
-	mContext->SetColor(0.0f, 0.0f, 0.0f, 1.0f);
+	mContext->SetColor(lcVector4FromColor(lcGetPreferences().mOverlayColor));
 
 	float Verts[32 * 16 * 2];
 	float* CurVert = Verts;
@@ -1824,7 +1824,7 @@ void View::DrawAxes()
 	mContext->SetVertexBufferPointer(TextBuffer);
 	mContext->SetVertexFormat(0, 3, 0, 2, 0, false);
 
-	mContext->SetColor(0.0f, 0.0f, 0.0f, 1.0f);
+	mContext->SetColor(lcVector4FromColor(lcGetPreferences().mAxesColor));
 	mContext->DrawPrimitives(GL_TRIANGLES, 0, 6 * 3);
 
 	glDisable(GL_BLEND);

@@ -353,6 +353,7 @@ public slots:
 	void ProjectFileChanged(const QString& Path);
 
 protected slots:
+	void UpdateDockWidgetActions();
 	void UpdateGamepads();
 	void ModelTabContextMenuRequested(const QPoint& Point);
 	void ModelTabCloseOtherTabs();
@@ -373,6 +374,7 @@ protected:
 	void CreateMenus();
 	void CreateToolBars();
 	void CreateStatusBar();
+	void ToggleDockWidget(QWidget* DockWidget);
 	void SplitView(Qt::Orientation Orientation);
 	void ShowSearchDialog();
 	void ShowUpdatesDialog();

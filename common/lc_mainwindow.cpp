@@ -329,6 +329,9 @@ void lcMainWindow::CreateActions()
 	mActions[LC_VIEW_CAMERA_NONE]->setCheckable(true);
 	mActions[LC_VIEW_TIME_ADD_KEYS]->setCheckable(true);
 
+	for (int ActionIndex = LC_VIEW_TOOLBAR_FIRST; ActionIndex <= LC_VIEW_TOOLBAR_LAST; ActionIndex++)
+		mActions[ActionIndex]->setCheckable(true);
+
 	QActionGroup* ActionSnapXYGroup = new QActionGroup(this);
 	for (int ActionIdx = LC_EDIT_SNAP_MOVE_XY0; ActionIdx <= LC_EDIT_SNAP_MOVE_XY9; ActionIdx++)
 	{
@@ -540,14 +543,15 @@ void lcMainWindow::CreateMenus()
 	ViewMenu->addAction(mActions[LC_VIEW_RESET_VIEWS]);
 	ViewMenu->addSeparator();
 	QMenu* ToolBarsMenu = ViewMenu->addMenu(tr("T&oolbars"));
-	ToolBarsMenu->addAction(mPartsToolBar->toggleViewAction());
-	ToolBarsMenu->addAction(mColorsToolBar->toggleViewAction());
-	ToolBarsMenu->addAction(mPropertiesToolBar->toggleViewAction());
-	ToolBarsMenu->addAction(mTimelineToolBar->toggleViewAction());
+	connect(ToolBarsMenu, SIGNAL(aboutToShow()), this, SLOT(UpdateDockWidgetActions()));
+	ToolBarsMenu->addAction(mActions[LC_VIEW_TOOLBAR_PARTS]);
+	ToolBarsMenu->addAction(mActions[LC_VIEW_TOOLBAR_COLORS]);
+	ToolBarsMenu->addAction(mActions[LC_VIEW_TOOLBAR_PROPERTIES]);
+	ToolBarsMenu->addAction(mActions[LC_VIEW_TOOLBAR_TIMELINE]);
 	ToolBarsMenu->addSeparator();
-	ToolBarsMenu->addAction(mStandardToolBar->toggleViewAction());
-	ToolBarsMenu->addAction(mToolsToolBar->toggleViewAction());
-	ToolBarsMenu->addAction(mTimeToolBar->toggleViewAction());
+	ToolBarsMenu->addAction(mActions[LC_VIEW_TOOLBAR_STANDARD]);
+	ToolBarsMenu->addAction(mActions[LC_VIEW_TOOLBAR_TOOLS]);
+	ToolBarsMenu->addAction(mActions[LC_VIEW_TOOLBAR_TIME]);
 	ViewMenu->addAction(mActions[LC_VIEW_FULLSCREEN]);
 
 	QMenu* PieceMenu = menuBar()->addMenu(tr("&Piece"));
@@ -873,16 +877,29 @@ QMenu* lcMainWindow::createPopupMenu()
 {
 	QMenu* Menu = new QMenu(this);
 
-	Menu->addAction(mPartsToolBar->toggleViewAction());
-	Menu->addAction(mColorsToolBar->toggleViewAction());
-	Menu->addAction(mPropertiesToolBar->toggleViewAction());
-	Menu->addAction(mTimelineToolBar->toggleViewAction());
+	UpdateDockWidgetActions();
+
+	Menu->addAction(mActions[LC_VIEW_TOOLBAR_PARTS]);
+	Menu->addAction(mActions[LC_VIEW_TOOLBAR_COLORS]);
+	Menu->addAction(mActions[LC_VIEW_TOOLBAR_PROPERTIES]);
+	Menu->addAction(mActions[LC_VIEW_TOOLBAR_TIMELINE]);
 	Menu->addSeparator();
-	Menu->addAction(mStandardToolBar->toggleViewAction());
-	Menu->addAction(mToolsToolBar->toggleViewAction());
-	Menu->addAction(mTimeToolBar->toggleViewAction());
+	Menu->addAction(mActions[LC_VIEW_TOOLBAR_STANDARD]);
+	Menu->addAction(mActions[LC_VIEW_TOOLBAR_TOOLS]);
+	Menu->addAction(mActions[LC_VIEW_TOOLBAR_TIME]);
 
 	return Menu;
+}
+
+void lcMainWindow::UpdateDockWidgetActions()
+{
+	mActions[LC_VIEW_TOOLBAR_PARTS]->setChecked(mPartsToolBar->isVisible());
+	mActions[LC_VIEW_TOOLBAR_COLORS]->setChecked(mColorsToolBar->isVisible());
+	mActions[LC_VIEW_TOOLBAR_PROPERTIES]->setChecked(mPropertiesToolBar->isVisible());
+	mActions[LC_VIEW_TOOLBAR_TIMELINE]->setChecked(mTimelineToolBar->isVisible());
+	mActions[LC_VIEW_TOOLBAR_STANDARD]->setChecked(mStandardToolBar->isVisible());
+	mActions[LC_VIEW_TOOLBAR_TOOLS]->setChecked(mToolsToolBar->isVisible());
+	mActions[LC_VIEW_TOOLBAR_TIME]->setChecked(mTimeToolBar->isVisible());
 }
 
 void lcMainWindow::UpdateGamepads()
@@ -1829,6 +1846,14 @@ void lcMainWindow::ResetViews()
 	TabWidget->GetActiveView()->SetViewpoint(LC_VIEWPOINT_HOME);
 }
 
+void lcMainWindow::ToggleDockWidget(QWidget* DockWidget)
+{
+	if (DockWidget->isHidden())
+		DockWidget->show();
+	else
+		DockWidget->hide();
+}
+
 void lcMainWindow::TogglePrintPreview()
 {
 #ifndef QT_NO_PRINTER
@@ -2653,6 +2678,34 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 
 	case LC_VIEW_RESET_VIEWS:
 		ResetViews();
+		break;
+
+	case LC_VIEW_TOOLBAR_STANDARD:
+		ToggleDockWidget(mStandardToolBar);
+		break;
+
+	case LC_VIEW_TOOLBAR_TOOLS:
+		ToggleDockWidget(mToolsToolBar);
+		break;
+
+	case LC_VIEW_TOOLBAR_TIME:
+		ToggleDockWidget(mTimeToolBar);
+		break;
+
+	case LC_VIEW_TOOLBAR_PARTS:
+		ToggleDockWidget(mPartsToolBar);
+		break;
+
+	case LC_VIEW_TOOLBAR_COLORS:
+		ToggleDockWidget(mColorsToolBar);
+		break;
+
+	case LC_VIEW_TOOLBAR_PROPERTIES:
+		ToggleDockWidget(mPropertiesToolBar);
+		break;
+
+	case LC_VIEW_TOOLBAR_TIMELINE:
+		ToggleDockWidget(mTimelineToolBar);
 		break;
 
 	case LC_VIEW_FULLSCREEN:

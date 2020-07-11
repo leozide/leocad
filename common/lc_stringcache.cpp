@@ -6,7 +6,7 @@
 lcStringCache gStringCache;
 
 lcStringCache::lcStringCache()
-	: mTexture(nullptr), mRefCount(0)
+	: mTexture(nullptr)
 {
 }
 
@@ -15,27 +15,17 @@ lcStringCache::~lcStringCache()
 	delete mTexture;
 }
 
-void lcStringCache::AddRef(lcContext* Context)
+void lcStringCache::Initialize(lcContext* Context)
 {
 	Q_UNUSED(Context);
 
-	mRefCount++;
-
-	if (mRefCount == 1)
-		mTexture = new lcTexture();
+	mTexture = new lcTexture();
 }
 
-void lcStringCache::Release(lcContext* Context)
+void lcStringCache::Reset()
 {
-	mRefCount--;
-
-	if (mRefCount == 0)
-	{
-		Context->UnbindTexture2D(mTexture->mTexture); // todo: unbind from all contexts
-
-		delete mTexture;
-		mTexture = nullptr;
-	}
+	delete mTexture;
+	mTexture = nullptr;
 }
 
 void lcStringCache::CacheStrings(const QStringList& Strings)

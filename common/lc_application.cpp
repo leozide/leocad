@@ -147,7 +147,9 @@ void lcApplication::UpdateStyle()
 		Palette.setColor(QPalette::AlternateBase, QColor(44, 47, 50));
 		Palette.setColor(QPalette::ToolTipBase, QColor(224, 224, 244));
 		Palette.setColor(QPalette::ToolTipText, QColor(58, 58, 58));
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 12, 0))
 		Palette.setColor(QPalette::PlaceholderText, QColor(100, 100, 100));
+#endif
 		Palette.setColor(QPalette::Text, QColor(224, 224, 224));
 		Palette.setColor(QPalette::Button, QColor(45, 48, 51));
 		Palette.setColor(QPalette::ButtonText, QColor(224, 224, 244));

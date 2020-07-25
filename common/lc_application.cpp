@@ -20,6 +20,7 @@ void lcPreferences::LoadDefaults()
 	mDrawAxes = lcGetProfileInt(LC_PROFILE_DRAW_AXES);
 	mAxesColor = lcGetProfileInt(LC_PROFILE_AXES_COLOR);
 	mOverlayColor = lcGetProfileInt(LC_PROFILE_OVERLAY_COLOR);
+	mActiveViewColor = lcGetProfileInt(LC_PROFILE_ACTIVE_VIEW_COLOR);
 	mDrawEdgeLines = lcGetProfileInt(LC_PROFILE_DRAW_EDGE_LINES);
 	mLineWidth = lcGetProfileFloat(LC_PROFILE_LINE_WIDTH);
 	mAllowLOD = lcGetProfileInt(LC_PROFILE_ALLOW_LOD);
@@ -40,6 +41,7 @@ void lcPreferences::LoadDefaults()
 	mViewSphereHighlightColor = lcGetProfileInt(LC_PROFILE_VIEW_SPHERE_HIGHLIGHT_COLOR);
 	mAutoLoadMostRecent = lcGetProfileInt(LC_PROFILE_AUTOLOAD_MOSTRECENT);
 	mRestoreTabLayout = lcGetProfileInt(LC_PROFILE_RESTORE_TAB_LAYOUT);
+	mColorTheme = static_cast<lcColorTheme>(lcGetProfileInt(LC_PROFILE_COLOR_THEME));
 }
 
 void lcPreferences::SaveDefaults()
@@ -50,6 +52,7 @@ void lcPreferences::SaveDefaults()
 	lcSetProfileInt(LC_PROFILE_DRAW_AXES, mDrawAxes);
 	lcSetProfileInt(LC_PROFILE_AXES_COLOR, mAxesColor);
 	lcSetProfileInt(LC_PROFILE_OVERLAY_COLOR, mOverlayColor);
+	lcSetProfileInt(LC_PROFILE_ACTIVE_VIEW_COLOR, mActiveViewColor);
 	lcSetProfileInt(LC_PROFILE_DRAW_EDGE_LINES, mDrawEdgeLines);
 	lcSetProfileFloat(LC_PROFILE_LINE_WIDTH, mLineWidth);
 	lcSetProfileInt(LC_PROFILE_ALLOW_LOD, mAllowLOD);
@@ -63,13 +66,41 @@ void lcPreferences::SaveDefaults()
 	lcSetProfileInt(LC_PROFILE_GRID_LINE_SPACING, mGridLineSpacing);
 	lcSetProfileInt(LC_PROFILE_GRID_LINE_COLOR, mGridLineColor);
 	lcSetProfileInt(LC_PROFILE_VIEW_SPHERE_ENABLED, mViewSphereSize ? 1 : 0);
-	lcSetProfileInt(LC_PROFILE_VIEW_SPHERE_LOCATION, (int)mViewSphereLocation);
+	lcSetProfileInt(LC_PROFILE_VIEW_SPHERE_LOCATION, static_cast<int>(mViewSphereLocation));
 	lcSetProfileInt(LC_PROFILE_VIEW_SPHERE_SIZE, mViewSphereSize);
 	lcSetProfileInt(LC_PROFILE_VIEW_SPHERE_COLOR, mViewSphereColor);
 	lcSetProfileInt(LC_PROFILE_VIEW_SPHERE_TEXT_COLOR, mViewSphereTextColor);
 	lcSetProfileInt(LC_PROFILE_VIEW_SPHERE_HIGHLIGHT_COLOR, mViewSphereHighlightColor);
 	lcSetProfileInt(LC_PROFILE_AUTOLOAD_MOSTRECENT, mAutoLoadMostRecent);
 	lcSetProfileInt(LC_PROFILE_RESTORE_TAB_LAYOUT, mRestoreTabLayout);
+	lcSetProfileInt(LC_PROFILE_COLOR_THEME, static_cast<int>(mColorTheme));
+}
+
+void lcPreferences::SetInterfaceColors(lcColorTheme ColorTheme)
+{
+	if (ColorTheme == lcColorTheme::Dark)
+	{
+		mAxesColor = LC_RGBA(0, 0, 0, 255);
+		mOverlayColor = lcGetProfileInt(LC_PROFILE_OVERLAY_COLOR);
+		mActiveViewColor = LC_RGBA(41, 128, 185, 255);
+		mGridStudColor = LC_RGBA(24, 24, 24, 192);
+		mGridLineColor = LC_RGBA(24, 24, 24, 255);
+		mViewSphereColor = LC_RGBA(35, 38, 41, 255);
+		mViewSphereTextColor = LC_RGBA(224, 224, 224, 255);
+		mViewSphereHighlightColor = LC_RGBA(41, 128, 185, 255);
+		// todo: background color
+	}
+	else
+	{
+		mAxesColor = LC_RGBA(0, 0, 0, 255);
+		mOverlayColor = LC_RGBA(0, 0, 0, 255);
+		mActiveViewColor = LC_RGBA(255, 0, 0, 255);
+		mGridStudColor = LC_RGBA(64, 64, 64, 192);
+		mGridLineColor = LC_RGBA(0, 0, 0, 255);
+		mViewSphereColor = LC_RGBA(255, 255, 255, 255);
+		mViewSphereTextColor = LC_RGBA(0, 0, 0, 255);
+		mViewSphereHighlightColor = LC_RGBA(255, 0, 0, 255);
+	}
 }
 
 lcApplication::lcApplication(int& Argc, char** Argv)
@@ -87,8 +118,11 @@ lcApplication::lcApplication(int& Argc, char** Argv)
 	gApplication = this;
 	mProject = nullptr;
 	mLibrary = nullptr;
+	mDefaultStyle = style()->objectName();
 
 	mPreferences.LoadDefaults();
+
+	UpdateStyle();
 }
 
 lcApplication::~lcApplication()
@@ -96,6 +130,57 @@ lcApplication::~lcApplication()
 	delete mProject;
 	delete mLibrary;
 	gApplication = nullptr;
+}
+
+void lcApplication::UpdateStyle()
+{
+	if (mPreferences.mColorTheme == lcColorTheme::Dark)
+	{
+		if (!QApplication::setStyle("fusion"))
+			return;
+
+		QPalette Palette = QApplication::palette();
+
+		Palette.setColor(QPalette::Window, QColor(49, 52, 55));
+		Palette.setColor(QPalette::WindowText, QColor(240, 240, 240));
+		Palette.setColor(QPalette::Base, QColor(35, 38, 41));
+		Palette.setColor(QPalette::AlternateBase, QColor(44, 47, 50));
+		Palette.setColor(QPalette::ToolTipBase, QColor(224, 224, 244));
+		Palette.setColor(QPalette::ToolTipText, QColor(58, 58, 58));
+		Palette.setColor(QPalette::PlaceholderText, QColor(100, 100, 100));
+		Palette.setColor(QPalette::Text, QColor(224, 224, 224));
+		Palette.setColor(QPalette::Button, QColor(45, 48, 51));
+		Palette.setColor(QPalette::ButtonText, QColor(224, 224, 244));
+		Palette.setColor(QPalette::Light, QColor(65, 65, 65));
+		Palette.setColor(QPalette::Midlight, QColor(62, 62, 62));
+		Palette.setColor(QPalette::Dark, QColor(35, 35, 35));
+		Palette.setColor(QPalette::Mid, QColor(50, 50, 50));
+		Palette.setColor(QPalette::Shadow, QColor(20, 20, 20));
+//		Palette.setColor(QPalette::Highlight, QColor(46, 108, 219));
+		Palette.setColor(QPalette::Highlight, QColor(41, 128, 185));
+		Palette.setColor(QPalette::HighlightedText, QColor(232, 232, 232));
+		Palette.setColor(QPalette::Link, QColor(41, 128, 185));
+
+		Palette.setColor(QPalette::Disabled, QPalette::Text, QColor(128, 128, 128));
+		Palette.setColor(QPalette::Disabled, QPalette::WindowText, QColor(128, 128, 128));
+		Palette.setColor(QPalette::Disabled, QPalette::ButtonText, QColor(128, 128, 128));
+
+		QApplication::setPalette(Palette);
+
+		QFile StylesheetFile(QStringLiteral(":/stylesheet/stylesheet.qss"));
+
+		if (StylesheetFile.open(QIODevice::ReadOnly))
+		{
+			QString Stylesheet = QString::fromLatin1(StylesheetFile.readAll());
+			qApp->setStyleSheet(Stylesheet);
+		}
+	}
+	else
+	{
+		QApplication::setStyle(mDefaultStyle);
+		QApplication::setPalette(qApp->style()->standardPalette());
+		qApp->setStyleSheet(QString());
+	}
 }
 
 void lcApplication::SaveTabLayout() const
@@ -644,7 +729,7 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 
 	if (ShowWindow)
 	{
-		gMainWindow->SetColorIndex(lcGetColorIndex(4));
+		gMainWindow->SetColorIndex(lcGetColorIndex(7));
 		gMainWindow->GetPartSelectionWidget()->SetDefaultPart();
 		gMainWindow->UpdateRecentFiles();
 		gMainWindow->show();
@@ -703,6 +788,7 @@ void lcApplication::ShowPreferencesDialog()
 	mPreferences = Options.Preferences;
 
 	mPreferences.SaveDefaults();
+	UpdateStyle();
 
 	lcSetProfileString(LC_PROFILE_DEFAULT_AUTHOR_NAME, Options.DefaultAuthor);
 	lcSetProfileString(LC_PROFILE_PARTS_LIBRARY, Options.LibraryPath);

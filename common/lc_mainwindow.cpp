@@ -92,7 +92,7 @@ lcMainWindow::lcMainWindow()
 
 	mTransformType = lcTransformType::RelativeTranslation;
 
-	mColorIndex = lcGetColorIndex(4);
+	mColorIndex = lcGetColorIndex(7);
 	mTool = LC_TOOL_SELECT;
 	mAddKeys = false;
 	mMoveSnapEnabled = true;
@@ -697,18 +697,10 @@ void lcMainWindow::CreateToolBars()
 	mColorsToolBar->setObjectName("ColorsToolbar");
 	mColorsToolBar->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
 
-	QFrame* ColorFrame = new QFrame(mColorsToolBar);
-	ColorFrame->setFrameShape(QFrame::StyledPanel);
-	ColorFrame->setFrameShadow(QFrame::Sunken);
-
-	QGridLayout* ColorLayout = new QGridLayout(ColorFrame);
-	ColorLayout->setContentsMargins(0, 0, 0, 0);
-
-	mColorList = new lcQColorList(ColorFrame);
-	ColorLayout->addWidget(mColorList);
+	mColorList = new lcQColorList();
 	connect(mColorList, SIGNAL(colorChanged(int)), this, SLOT(ColorChanged(int)));
 
-	mColorsToolBar->setWidget(ColorFrame);
+	mColorsToolBar->setWidget(mColorList);
 	addDockWidget(Qt::RightDockWidgetArea, mColorsToolBar);
 
 	mPropertiesToolBar = new QDockWidget(tr("Properties"), this);

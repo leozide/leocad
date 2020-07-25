@@ -220,9 +220,9 @@ bool lcLoadColorFile(lcFile& File)
 	for (int GroupIdx = 0; GroupIdx < LC_NUM_COLORGROUPS; GroupIdx++)
 		gColorGroups[GroupIdx].Colors.clear();
 
-	gColorGroups[0].Name = QApplication::tr("Solid Colors", "Colors");
-	gColorGroups[1].Name = QApplication::tr("Translucent Colors", "Colors");
-	gColorGroups[2].Name = QApplication::tr("Special Colors", "Colors");
+	gColorGroups[0].Name = QApplication::tr("Solid", "Colors");
+	gColorGroups[1].Name = QApplication::tr("Translucent", "Colors");
+	gColorGroups[2].Name = QApplication::tr("Special", "Colors");
 
 	MainColor.Code = 16;
 	MainColor.Translucent = false;

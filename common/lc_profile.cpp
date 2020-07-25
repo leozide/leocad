@@ -66,21 +66,23 @@ static lcProfileEntry gProfileEntries[LC_NUM_PROFILE_KEYS] =
 	lcProfileEntry("Settings", "DrawAxes", 0),                                                 // LC_PROFILE_DRAW_AXES
 	lcProfileEntry("Settings", "AxesColor", LC_RGBA(0, 0, 0, 255)),                            // LC_PROFILE_AXES_COLOR
 	lcProfileEntry("Settings", "OverlayColor", LC_RGBA(0, 0, 0, 255)),                         // LC_PROFILE_OVERLAY_COLOR
+	lcProfileEntry("Settings", "ActiveViewColor", LC_RGBA(41, 128, 185, 255)),                 // LC_PROFILE_ACTIVE_VIEW_COLOR
 	lcProfileEntry("Settings", "DrawEdgeLines", 1),                                            // LC_PROFILE_DRAW_EDGE_LINES
 	lcProfileEntry("Settings", "GridStuds", 1),                                                // LC_PROFILE_GRID_STUDS
-	lcProfileEntry("Settings", "GridStudColor", LC_RGBA(64, 64, 64, 192)),                     // LC_PROFILE_GRID_STUD_COLOR
+	lcProfileEntry("Settings", "GridStudColor", LC_RGBA(24, 24, 24, 192)),                     // LC_PROFILE_GRID_STUD_COLOR
 	lcProfileEntry("Settings", "GridLines", 1),                                                // LC_PROFILE_GRID_LINES
 	lcProfileEntry("Settings", "GridLineSpacing", 5),                                          // LC_PROFILE_GRID_LINE_SPACING
-	lcProfileEntry("Settings", "GridLineColor", LC_RGBA(0, 0, 0, 255)),                        // LC_PROFILE_GRID_LINE_COLOR
+	lcProfileEntry("Settings", "GridLineColor", LC_RGBA(24, 24, 24, 255)),                     // LC_PROFILE_GRID_LINE_COLOR
 	lcProfileEntry("Settings", "AASamples", 1),                                                // LC_PROFILE_ANTIALIASING_SAMPLES
 	lcProfileEntry("Settings", "ViewSphereEnabled", 1),                                        // LC_PROFILE_VIEW_SPHERE_ENABLED
 	lcProfileEntry("Settings", "ViewSphereLocation", (int)lcViewSphereLocation::TopRight),     // LC_PROFILE_VIEW_SPHERE_LOCATION
 	lcProfileEntry("Settings", "ViewSphereSize", 100),                                         // LC_PROFILE_VIEW_SPHERE_SIZE
-	lcProfileEntry("Settings", "ViewSphereColor", LC_RGBA(255, 255, 255, 255)),                // LC_PROFILE_VIEW_SPHERE_COLOR
-	lcProfileEntry("Settings", "ViewSphereTextColor", LC_RGBA(0, 0, 0, 255)),                  // LC_PROFILE_VIEW_SPHERE_TEXT_COLOR
-	lcProfileEntry("Settings", "ViewSphereHighlightColor", LC_RGBA(255, 0, 0, 255)),           // LC_PROFILE_VIEW_SPHERE_HIGHLIGHT_COLOR
+	lcProfileEntry("Settings", "ViewSphereColor", LC_RGBA(35, 38, 41, 255)),                   // LC_PROFILE_VIEW_SPHERE_COLOR
+	lcProfileEntry("Settings", "ViewSphereTextColor", LC_RGBA(224, 224, 224, 255)),            // LC_PROFILE_VIEW_SPHERE_TEXT_COLOR
+	lcProfileEntry("Settings", "ViewSphereHighlightColor", LC_RGBA(41, 128, 185, 255)),        // LC_PROFILE_VIEW_SPHERE_HIGHLIGHT_COLOR
 
 	lcProfileEntry("Settings", "Language", ""),                                                // LC_PROFILE_LANGUAGE
+	lcProfileEntry("Settings", "ColorTheme", static_cast<int>(lcColorTheme::Dark)),            // LC_PROFILE_COLOR_THEME
 	lcProfileEntry("Settings", "CheckUpdates", 1),                                             // LC_PROFILE_CHECK_UPDATES
 	lcProfileEntry("Settings", "ProjectsPath", ""),                                            // LC_PROFILE_PROJECTS_PATH
 	lcProfileEntry("Settings", "PartsLibrary", ""),                                            // LC_PROFILE_PARTS_LIBRARY
@@ -110,8 +112,6 @@ static lcProfileEntry gProfileEntries[LC_NUM_PROFILE_KEYS] =
 	lcProfileEntry("Settings", "StudLogo", 0),                                                 // LC_PROFILE_STUD_LOGO
 
 	lcProfileEntry("Defaults", "Author", ""),                                                  // LC_PROFILE_DEFAULT_AUTHOR_NAME
-	lcProfileEntry("Defaults", "FloorColor", LC_RGB(0, 191, 0)),                               // LC_PROFILE_DEFAULT_FLOOR_COLOR
-	lcProfileEntry("Defaults", "FloorTexture", ""),                                            // LC_PROFILE_DEFAULT_FLOOR_TEXTURE
 	lcProfileEntry("Defaults", "AmbientColor", LC_RGB(75, 75, 75)),                            // LC_PROFILE_DEFAULT_AMBIENT_COLOR
 	lcProfileEntry("Defaults", "BackgroundType", LC_BACKGROUND_SOLID),                         // LC_PROFILE_DEFAULT_BACKGROUND_TYPE
 	lcProfileEntry("Defaults", "BackgroundColor", LC_RGB(255, 255, 255)),                      // LC_PROFILE_DEFAULT_BACKGROUND_COLOR

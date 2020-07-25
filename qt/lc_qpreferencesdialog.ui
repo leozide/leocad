@@ -33,7 +33,7 @@
           <string>Application</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_4">
-          <item row="0" column="0">
+          <item row="1" column="0">
            <widget class="QLabel" name="label_19">
             <property name="text">
              <string>Language:</string>
@@ -43,17 +43,7 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_10">
-            <property name="text">
-             <string>Check for updates:</string>
-            </property>
-            <property name="buddy">
-             <cstring>checkForUpdates</cstring>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
+          <item row="1" column="1">
            <widget class="QComboBox" name="Language">
             <item>
              <property name="text">
@@ -92,7 +82,7 @@
             </item>
            </widget>
           </item>
-          <item row="1" column="1">
+          <item row="2" column="1">
            <widget class="QComboBox" name="checkForUpdates">
             <item>
              <property name="text">
@@ -111,7 +101,17 @@
             </item>
            </widget>
           </item>
-          <item row="0" column="2">
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_10">
+            <property name="text">
+             <string>Check for updates:</string>
+            </property>
+            <property name="buddy">
+             <cstring>checkForUpdates</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2">
            <spacer name="horizontalSpacer_8">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
@@ -123,6 +123,30 @@
              </size>
             </property>
            </spacer>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_25">
+            <property name="text">
+             <string>Color Theme:</string>
+            </property>
+            <property name="buddy">
+             <cstring>Language</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QComboBox" name="ColorTheme">
+            <item>
+             <property name="text">
+              <string>Dark</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>System</string>
+             </property>
+            </item>
+           </widget>
           </item>
          </layout>
         </widget>
@@ -504,20 +528,6 @@
           <string>Overlays</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_3">
-          <item row="0" column="1">
-           <widget class="QToolButton" name="AxesColorButton">
-            <property name="text">
-             <string/>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0">
-           <widget class="QCheckBox" name="AxisIconCheckBox">
-            <property name="text">
-             <string>Axis icon</string>
-            </property>
-           </widget>
-          </item>
           <item row="0" column="2">
            <spacer name="horizontalSpacer_7">
             <property name="orientation">
@@ -531,15 +541,43 @@
             </property>
            </spacer>
           </item>
-          <item row="1" column="0">
+          <item row="0" column="0">
+           <widget class="QCheckBox" name="AxisIconCheckBox">
+            <property name="text">
+             <string>Axis icon</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
            <widget class="QLabel" name="label_2">
             <property name="text">
              <string>Overlay Color:</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="1">
+          <item row="0" column="1">
+           <widget class="QToolButton" name="AxesColorButton">
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
            <widget class="QToolButton" name="OverlayColorButton">
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_6">
+            <property name="text">
+             <string>Active View:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QToolButton" name="ActiveViewColorButton">
             <property name="text">
              <string/>
             </property>
@@ -1278,12 +1316,12 @@
   <tabstop>povrayExecutableBrowse</tabstop>
   <tabstop>lgeoPath</tabstop>
   <tabstop>lgeoPathBrowse</tabstop>
+  <tabstop>ColorTheme</tabstop>
   <tabstop>Language</tabstop>
   <tabstop>checkForUpdates</tabstop>
   <tabstop>authorName</tabstop>
   <tabstop>fixedDirectionKeys</tabstop>
   <tabstop>autoLoadMostRecent</tabstop>
-  <tabstop>RestoreTabLayout</tabstop>
   <tabstop>antiAliasing</tabstop>
   <tabstop>antiAliasingSamples</tabstop>
   <tabstop>studLogo</tabstop>
@@ -1298,6 +1336,7 @@
   <tabstop>ShadingMode</tabstop>
   <tabstop>AxisIconCheckBox</tabstop>
   <tabstop>AxesColorButton</tabstop>
+  <tabstop>ActiveViewColorButton</tabstop>
   <tabstop>OverlayColorButton</tabstop>
   <tabstop>gridStuds</tabstop>
   <tabstop>gridStudColor</tabstop>
@@ -1334,6 +1373,7 @@
   <tabstop>mouseAssign</tabstop>
   <tabstop>mouseRemove</tabstop>
   <tabstop>mouseSensitivity</tabstop>
+  <tabstop>RestoreTabLayout</tabstop>
  </tabstops>
  <resources/>
  <connections>

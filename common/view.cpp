@@ -1842,7 +1842,7 @@ void View::DrawViewport()
 	if (gMainWindow->GetActiveView() == this)
 	{
 		mContext->SetMaterial(lcMaterialType::UnlitColor);
-		mContext->SetColor(1.0f, 0.0f, 0.0f, 1.0f);
+		mContext->SetColor(lcVector4FromColor(lcGetPreferences().mActiveViewColor));
 		float Verts[8] = { 0.0f, 0.0f, mWidth - 1.0f, 0.0f, mWidth - 1.0f, mHeight - 1.0f, 0.0f, mHeight - 1.0f };
 
 		mContext->SetVertexBufferPointer(Verts);

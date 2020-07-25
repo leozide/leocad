@@ -21,17 +21,25 @@ enum class lcViewSphereLocation
 	BottomRight
 };
 
+enum class lcColorTheme
+{
+	Dark,
+	System
+};
+
 class lcPreferences
 {
 public:
 	void LoadDefaults();
 	void SaveDefaults();
+	void SetInterfaceColors(lcColorTheme ColorTheme);
 
 	int mMouseSensitivity;
 	lcShadingMode mShadingMode;
 	bool mDrawAxes;
 	quint32 mAxesColor;
 	quint32 mOverlayColor;
+	quint32 mActiveViewColor;
 	bool mDrawEdgeLines;
 	float mLineWidth;
 	bool mAllowLOD;
@@ -53,6 +61,7 @@ public:
 	quint32 mViewSphereHighlightColor;
 	bool mAutoLoadMostRecent;
 	bool mRestoreTabLayout;
+	lcColorTheme mColorTheme;
 };
 
 class lcApplication : public QApplication
@@ -80,7 +89,10 @@ public:
 	QByteArray mClipboard;
 
 protected:
+	void UpdateStyle();
 	QString GetTabLayoutKey() const;
+
+	QString mDefaultStyle;
 };
 
 extern lcApplication* gApplication;

@@ -1,0 +1,86 @@
+QToolBar {
+    border: none;
+}
+
+QTreeView::branch {
+    background: transparent;
+}
+
+QTreeView::branch:has-siblings:!adjoins-item {
+    border-image: url(:/stylesheet/branch_vline.png);
+}
+
+QTreeView::branch:has-siblings:adjoins-item {
+    border-image: url(:/stylesheet/branch_more.png);
+}
+
+QTreeView::branch:!has-children:!has-siblings:adjoins-item {
+    border-image: url(:/stylesheet/branch_end.png);
+}
+
+QTreeView::branch:closed:has-children:has-siblings {
+    border-image: url(:/stylesheet/branch_closed.png);
+}
+
+QTreeView::branch:has-children:!has-siblings:closed {
+    border-image: url(:/stylesheet/branch_closed.png);
+}
+
+QTreeView::branch:open:has-children:has-siblings {
+    border-image: url(:/stylesheet/branch_open.png);
+}
+
+QTreeView::branch:open:has-children:!has-siblings {
+    border-image: url(:/stylesheet/branch_open.png);
+}
+
+QDockWidget {
+    titlebar-close-icon: url(:/stylesheet/close.png);
+    titlebar-normal-icon: url(:/stylesheet/undock.png);
+}
+
+QDockWidget::close-button,
+QDockWidget::float-button {
+    border: none;
+    border-radius: 3px;
+    subcontrol-origin: padding;
+    subcontrol-position: right center;
+}
+
+QDockWidget::close-button {
+    right: 4px;
+}
+    
+QDockWidget::float-button {
+    right: 22px;
+}
+
+QDockWidget::close-button:hover,
+QDockWidget::float-button:hover {
+    background-color: rgba(255, 255, 255, 30);
+}
+
+QDockWidget::title {
+    text-align: center;
+    border: 4px solid transparent;
+    padding: 4px 0px;
+}
+
+QDockWidget::close-button:pressed,
+QDockWidget::float-button:pressed {
+    background-color: rgba(255, 255, 255, 40);
+}
+
+QTabBar::close-button {
+    background-image: url(:/stylesheet/close.png);
+    background-position: center center;
+    background-repeat: none;
+}
+
+QTabBar::close-button:hover {
+    background-color: rgba(255, 255, 255, 30);
+}
+
+QTabBar::close-button:pressed {
+    background-color: rgba(255, 255, 255, 40);
+}

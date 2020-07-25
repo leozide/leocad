@@ -311,7 +311,7 @@ FORMS += \
     qt/lc_setsdatabasedialog.ui \
     common/lc_partpalettedialog.ui
 OTHER_FILES += 
-RESOURCES += leocad.qrc
+RESOURCES += leocad.qrc resources/stylesheet/stylesheet.qrc
 
 !win32 {
     TRANSLATIONS = resources/leocad_pt.ts resources/leocad_fr.ts resources/leocad_de.ts resources/leocad_uk.ts resources/leocad_cs.ts resources/leocad_es.ts

@@ -356,7 +356,7 @@ void lcQColorList::paintEvent(QPaintEvent *event)
 
 	QPainter painter(this);
 
-	painter.fillRect(rect(), palette().brush(QPalette::Base));
+	painter.fillRect(rect(), palette().brush(QPalette::Window));
 
 	painter.setFont(font());
 	painter.setPen(palette().color(QPalette::Text));
@@ -365,7 +365,7 @@ void lcQColorList::paintEvent(QPaintEvent *event)
 	{
 		lcColorGroup* Group = &gColorGroups[GroupIdx];
 
-		painter.drawText(mGroupRects[GroupIdx], Qt::TextSingleLine | Qt::AlignCenter, Group->Name);
+		painter.drawText(mGroupRects[GroupIdx], Qt::TextSingleLine | Qt::AlignLeft, Group->Name);
 	}
 
 	painter.setPen(palette().color(QPalette::Shadow));

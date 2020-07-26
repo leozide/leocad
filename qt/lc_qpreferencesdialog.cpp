@@ -49,8 +49,9 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 	ui->lgeoPath->setText(mOptions->LGEOPath);
 	ui->authorName->setText(mOptions->DefaultAuthor);
 	ui->mouseSensitivity->setValue(mOptions->Preferences.mMouseSensitivity);
-	QSignalBlocker ColorThemeBlocker(ui->ColorTheme);
+	const bool ColorThemeBlocked = ui->ColorTheme->blockSignals(true);
 	ui->ColorTheme->setCurrentIndex(static_cast<int>(mOptions->Preferences.mColorTheme));
+	ui->ColorTheme->blockSignals(ColorThemeBlocked);
 	for (unsigned int LanguageIdx = 0; LanguageIdx < LC_ARRAY_COUNT(gLanguageLocales); LanguageIdx++)
 	{
 		if (mOptions->Language == gLanguageLocales[LanguageIdx])

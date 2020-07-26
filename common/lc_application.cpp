@@ -169,7 +169,7 @@ void lcApplication::UpdateStyle()
 
 		QApplication::setPalette(Palette);
 
-		QFile StylesheetFile(QStringLiteral(":/stylesheet/stylesheet.qss"));
+		QFile StylesheetFile(QLatin1String(":/stylesheet/stylesheet.qss"));
 
 		if (StylesheetFile.open(QIODevice::ReadOnly))
 		{

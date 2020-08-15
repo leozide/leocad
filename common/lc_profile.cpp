@@ -58,6 +58,7 @@ static lcProfileEntry gProfileEntries[LC_NUM_PROFILE_KEYS] =
 	lcProfileEntry("Settings", "FixedAxes", false),                                            // LC_PROFILE_FIXED_AXES
 	lcProfileEntry("Settings", "LineWidth", 1.0f),                                             // LC_PROFILE_LINE_WIDTH
 	lcProfileEntry("Settings", "AllowLOD", true),                                              // LC_PROFILE_ALLOW_LOD
+	lcProfileEntry("Settings", "LODDistance", 750.0f),                                         // LC_PROFILE_LOD_DISTANCE
 	lcProfileEntry("Settings", "FadeSteps", false),                                            // LC_PROFILE_FADE_STEPS
 	lcProfileEntry("Settings", "FadeStepsColor", LC_RGBA(128, 128, 128, 128)),                 // LC_PROFILE_FADE_STEPS_COLOR
 	lcProfileEntry("Settings", "HighlightNewParts", 0),                                        // LC_PROFILE_HIGHLIGHT_NEW_PARTS

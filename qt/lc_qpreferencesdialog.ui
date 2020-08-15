@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>598</width>
-    <height>494</height>
+    <height>503</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -494,6 +494,29 @@
           </item>
           <item row="2" column="3">
            <widget class="QLabel" name="LineWidthLabel">
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QSlider" name="MeshLODSlider">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="tickPosition">
+             <enum>QSlider::NoTicks</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="3">
+           <widget class="QLabel" name="MeshLODLabel">
             <property name="text">
              <string/>
             </property>
@@ -1322,6 +1345,7 @@
   <tabstop>authorName</tabstop>
   <tabstop>fixedDirectionKeys</tabstop>
   <tabstop>autoLoadMostRecent</tabstop>
+  <tabstop>RestoreTabLayout</tabstop>
   <tabstop>antiAliasing</tabstop>
   <tabstop>antiAliasingSamples</tabstop>
   <tabstop>studLogo</tabstop>
@@ -1329,6 +1353,7 @@
   <tabstop>edgeLines</tabstop>
   <tabstop>LineWidthSlider</tabstop>
   <tabstop>MeshLOD</tabstop>
+  <tabstop>MeshLODSlider</tabstop>
   <tabstop>FadeSteps</tabstop>
   <tabstop>FadeStepsColor</tabstop>
   <tabstop>HighlightNewParts</tabstop>
@@ -1373,7 +1398,6 @@
   <tabstop>mouseAssign</tabstop>
   <tabstop>mouseRemove</tabstop>
   <tabstop>mouseSensitivity</tabstop>
-  <tabstop>RestoreTabLayout</tabstop>
  </tabstops>
  <resources/>
  <connections>

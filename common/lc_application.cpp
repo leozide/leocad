@@ -24,6 +24,7 @@ void lcPreferences::LoadDefaults()
 	mDrawEdgeLines = lcGetProfileInt(LC_PROFILE_DRAW_EDGE_LINES);
 	mLineWidth = lcGetProfileFloat(LC_PROFILE_LINE_WIDTH);
 	mAllowLOD = lcGetProfileInt(LC_PROFILE_ALLOW_LOD);
+	mMeshLODDistance = lcGetProfileFloat(LC_PROFILE_LOD_DISTANCE);
 	mFadeSteps = lcGetProfileInt(LC_PROFILE_FADE_STEPS);
 	mFadeStepsColor = lcGetProfileInt(LC_PROFILE_FADE_STEPS_COLOR);
 	mHighlightNewParts = lcGetProfileInt(LC_PROFILE_HIGHLIGHT_NEW_PARTS);
@@ -56,6 +57,7 @@ void lcPreferences::SaveDefaults()
 	lcSetProfileInt(LC_PROFILE_DRAW_EDGE_LINES, mDrawEdgeLines);
 	lcSetProfileFloat(LC_PROFILE_LINE_WIDTH, mLineWidth);
 	lcSetProfileInt(LC_PROFILE_ALLOW_LOD, mAllowLOD);
+	lcSetProfileFloat(LC_PROFILE_LOD_DISTANCE, mMeshLODDistance);
 	lcSetProfileInt(LC_PROFILE_FADE_STEPS, mFadeSteps);
 	lcSetProfileInt(LC_PROFILE_FADE_STEPS_COLOR, mFadeStepsColor);
 	lcSetProfileInt(LC_PROFILE_HIGHLIGHT_NEW_PARTS, mHighlightNewParts);

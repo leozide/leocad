@@ -43,6 +43,7 @@ public:
 	bool mDrawEdgeLines;
 	float mLineWidth;
 	bool mAllowLOD;
+	float mMeshLODDistance;
 	bool mFadeSteps;
 	quint32 mFadeStepsColor;
 	bool mHighlightNewParts;

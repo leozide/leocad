@@ -37,6 +37,7 @@ public slots:
 	void on_antiAliasing_toggled();
 	void on_edgeLines_toggled();
 	void on_LineWidthSlider_valueChanged();
+	void on_MeshLODSlider_valueChanged();
 	void on_FadeSteps_toggled();
 	void on_HighlightNewParts_toggled();
 	void on_gridStuds_toggled();
@@ -73,4 +74,5 @@ private:
 
 	float mLineWidthRange[2];
 	float mLineWidthGranularity;
+	static constexpr float mMeshLODMultiplier = 25.0f;
 };

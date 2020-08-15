@@ -813,6 +813,7 @@ void View::OnDraw()
 	const bool DrawInterface = mWidget != nullptr;
 
 	mScene.SetAllowLOD(Preferences.mAllowLOD && mWidget != nullptr);
+	mScene.SetLODDistance(Preferences.mMeshLODDistance);
 
 	mScene.Begin(mCamera->mWorldView);
 

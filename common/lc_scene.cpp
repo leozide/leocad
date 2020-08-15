@@ -14,6 +14,7 @@ lcScene::lcScene()
 	mDrawInterface = false;
 	mAllowWireframe = true;
 	mAllowLOD = true;
+	mMeshLODDistance = 250.0f;
 	mHasFadedParts = false;
 	mPreTranslucentCallback = nullptr;
 }
@@ -69,7 +70,7 @@ void lcScene::AddMesh(lcMesh* Mesh, const lcMatrix44& WorldMatrix, int ColorInde
 	RenderMesh.Mesh = Mesh;
 	RenderMesh.ColorIndex = ColorIndex;
 	RenderMesh.State = State;
-	const float Distance = fabsf(lcMul31(WorldMatrix[3], mViewMatrix).z);
+	const float Distance = fabsf(lcMul31(WorldMatrix[3], mViewMatrix).z) - mMeshLODDistance;
 	RenderMesh.LodIndex = mAllowLOD ? RenderMesh.Mesh->GetLodIndex(Distance) : LC_MESH_LOD_HIGH;
 
 	const bool ForceTranslucent = (mTranslucentFade && State == lcRenderMeshState::Faded);

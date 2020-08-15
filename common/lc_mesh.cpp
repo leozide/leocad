@@ -496,7 +496,7 @@ int lcMesh::GetLodIndex(float Distance) const
 	if (lcGetPiecesLibrary()->GetStudLogo())
 		return LC_MESH_LOD_HIGH;
 
-	if (mLods[LC_MESH_LOD_LOW].NumSections && (Distance - mRadius) > 250.0f)
+	if (mLods[LC_MESH_LOD_LOW].NumSections && (Distance > mRadius))
 		return LC_MESH_LOD_LOW;
 	else
 		return LC_MESH_LOD_HIGH;

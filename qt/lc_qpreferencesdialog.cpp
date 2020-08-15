@@ -89,6 +89,10 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 	ui->LineWidthSlider->setValue((mOptions->Preferences.mLineWidth - mLineWidthRange[0]) / mLineWidthGranularity);
 
 	ui->MeshLOD->setChecked(mOptions->Preferences.mAllowLOD);
+
+	ui->MeshLODSlider->setRange(0, 1500.0f / mMeshLODMultiplier);
+	ui->MeshLODSlider->setValue(mOptions->Preferences.mMeshLODDistance / mMeshLODMultiplier);
+
 	ui->FadeSteps->setChecked(mOptions->Preferences.mFadeSteps);
 	ui->HighlightNewParts->setChecked(mOptions->Preferences.mHighlightNewParts);
 	ui->gridStuds->setChecked(mOptions->Preferences.mDrawGridStuds);
@@ -165,6 +169,7 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 	on_antiAliasing_toggled();
 	on_edgeLines_toggled();
 	on_LineWidthSlider_valueChanged();
+	on_MeshLODSlider_valueChanged();
 	on_FadeSteps_toggled();
 	on_HighlightNewParts_toggled();
 	on_gridStuds_toggled();
@@ -236,6 +241,7 @@ void lcQPreferencesDialog::accept()
 	mOptions->Preferences.mDrawEdgeLines = ui->edgeLines->isChecked();
 	mOptions->Preferences.mLineWidth = mLineWidthRange[0] + static_cast<float>(ui->LineWidthSlider->value()) * mLineWidthGranularity;
 	mOptions->Preferences.mAllowLOD = ui->MeshLOD->isChecked();
+	mOptions->Preferences.mMeshLODDistance = ui->MeshLODSlider->value() * mMeshLODMultiplier;
 	mOptions->Preferences.mFadeSteps = ui->FadeSteps->isChecked();
 	mOptions->Preferences.mHighlightNewParts = ui->HighlightNewParts->isChecked();
 
@@ -438,6 +444,12 @@ void lcQPreferencesDialog::on_LineWidthSlider_valueChanged()
 {
 	float Value = mLineWidthRange[0] + static_cast<float>(ui->LineWidthSlider->value()) * mLineWidthGranularity;
 	ui->LineWidthLabel->setText(QString::number(Value));
+}
+
+void lcQPreferencesDialog::on_MeshLODSlider_valueChanged()
+{
+	float Value = ui->MeshLODSlider->value() * mMeshLODMultiplier;
+	ui->MeshLODLabel->setText(QString::number(static_cast<int>(Value)));
 }
 
 void lcQPreferencesDialog::on_FadeSteps_toggled()

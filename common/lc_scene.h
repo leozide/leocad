@@ -69,6 +69,11 @@ public:
 		mAllowLOD = AllowLOD;
 	}
 
+	void SetLODDistance(float Distance)
+	{
+		mMeshLODDistance = Distance;
+	}
+
 	void SetPreTranslucentCallback(std::function<void()> Callback)
 	{
 		mPreTranslucentCallback = Callback;
@@ -102,6 +107,7 @@ protected:
 	bool mDrawInterface;
 	bool mAllowWireframe;
 	bool mAllowLOD;
+	float mMeshLODDistance;
 
 	lcVector4 mFadeColor;
 	lcVector4 mHighlightColor;

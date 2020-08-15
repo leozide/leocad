@@ -32,7 +32,7 @@ public slots:
 	void on_MinifigSettingsBrowseButton_clicked();
 	void on_povrayExecutableBrowse_clicked();
 	void on_lgeoPathBrowse_clicked();
-	void on_ColorTheme_currentIndexChanged();
+	void on_ColorTheme_currentIndexChanged(int Index);
 	void ColorButtonClicked();
 	void on_antiAliasing_toggled();
 	void on_edgeLines_toggled();

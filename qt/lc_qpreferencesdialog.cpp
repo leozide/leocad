@@ -326,8 +326,10 @@ void lcQPreferencesDialog::on_lgeoPathBrowse_clicked()
 		ui->lgeoPath->setText(QDir::toNativeSeparators(result));
 }
 
-void lcQPreferencesDialog::on_ColorTheme_currentIndexChanged()
+void lcQPreferencesDialog::on_ColorTheme_currentIndexChanged(int Index)
 {
+	Q_UNUSED(Index);
+
 	if (QMessageBox::question(this, tr("Reset Colors"), tr("Would you like to also reset the interface colors to match the color theme?")) == QMessageBox::Yes)
 		mOptions->Preferences.SetInterfaceColors(static_cast<lcColorTheme>(ui->ColorTheme->currentIndex()));
 }

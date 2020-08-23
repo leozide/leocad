@@ -941,7 +941,7 @@ void View::OnDraw()
 			DrawSelectMoveOverlay();
 		else if ((Tool == LC_TOOL_ROTATE || (Tool == LC_TOOL_SELECT && mTrackButton != lcTrackButton::None && mTrackTool >= LC_TRACKTOOL_ROTATE_X && mTrackTool <= LC_TRACKTOOL_ROTATE_XYZ)) && ActiveModel->AnyPiecesSelected())
 			DrawRotateOverlay();
-		else if ((mTrackTool == LC_TRACKTOOL_SELECT || mTrackTool == LC_TRACKTOOL_ZOOM_REGION) && mTrackButton == lcTrackButton::Left)
+		else if ((mTrackTool == LC_TRACKTOOL_SELECT || mTrackTool == LC_TRACKTOOL_ZOOM_REGION) && mTrackButton != lcTrackButton::None)
 			DrawSelectZoomRegionOverlay();
 		else if (Tool == LC_TOOL_ROTATE_VIEW && mTrackButton == lcTrackButton::None)
 			DrawRotateViewOverlay();

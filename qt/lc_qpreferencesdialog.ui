@@ -1169,6 +1169,20 @@
               <item>
                <layout class="QHBoxLayout" name="horizontalLayout_13">
                 <item>
+                 <widget class="QPushButton" name="MouseImportButton">
+                  <property name="text">
+                   <string>Import...</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="MouseExportButton">
+                  <property name="text">
+                   <string>Export...</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
                  <widget class="QPushButton" name="mouseReset">
                   <property name="text">
                    <string>Reset...</string>
@@ -1390,6 +1404,8 @@
   <tabstop>shortcutAssign</tabstop>
   <tabstop>shortcutRemove</tabstop>
   <tabstop>mouseTree</tabstop>
+  <tabstop>MouseImportButton</tabstop>
+  <tabstop>MouseExportButton</tabstop>
   <tabstop>mouseReset</tabstop>
   <tabstop>mouseButton</tabstop>
   <tabstop>mouseControl</tabstop>

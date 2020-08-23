@@ -151,6 +151,27 @@ void lcMouseShortcuts::Reset()
 	mShortcuts[LC_TOOL_ZOOM].Button1 = Qt::RightButton;
 }
 
+bool lcMouseShortcuts::Save(const QString& FileName)
+{
+	QStringList Shortcuts;
+
+	if (!Save(Shortcuts))
+		return false;
+
+	QFile File(FileName);
+
+	if (!File.open(QIODevice::WriteOnly))
+		return false;
+
+	QTextStream Stream(&File);
+
+	for (const QString& Shortcut : Shortcuts)
+		Stream << Shortcut << QLatin1String("\n");
+
+	Stream.flush();
+
+	return true;
+}
 bool lcMouseShortcuts::Save(QStringList& Shortcuts)
 {
 	Shortcuts.clear();
@@ -177,6 +198,22 @@ bool lcMouseShortcuts::Save(QStringList& Shortcuts)
 	}
 
 	return true;
+}
+
+bool lcMouseShortcuts::Load(const QString& FileName)
+{
+	QFile File(FileName);
+
+	if (!File.open(QIODevice::ReadOnly))
+		return false;
+
+	QTextStream Stream(&File);
+	QStringList Lines;
+
+	while (!Stream.atEnd())
+		Lines += Stream.readLine();
+
+	return Load(Lines);
 }
 
 bool lcMouseShortcuts::Load(const QStringList& FullShortcuts)

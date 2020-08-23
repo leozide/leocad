@@ -59,6 +59,8 @@ public slots:
 	void on_KeyboardFilterEdit_textEdited(const QString& Text);
 	void on_mouseAssign_clicked();
 	void on_mouseRemove_clicked();
+	void on_MouseImportButton_clicked();
+	void on_MouseExportButton_clicked();
 	void on_mouseReset_clicked();
 	void on_studLogo_toggled();
 	void MouseTreeItemChanged(QTreeWidgetItem* Current);

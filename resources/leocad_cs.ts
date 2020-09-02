@@ -739,388 +739,423 @@
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1023"/>
+        <source>View.Toolbars.Standard</source>
+        <translation>Zobrazit.Panely nástrojů.Standard</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1030"/>
+        <source>View.Toolbars.Tools</source>
+        <translation>Zobrazit.Panely nástrojů.Nástroje</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1037"/>
+        <source>View.Toolbars.Time</source>
+        <translation>Zobrazit.Panely nástrojů.Čas</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1044"/>
+        <source>View.Toolbars.Parts</source>
+        <translation>Zobrazit.Panely nástrojů.Části</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1051"/>
+        <source>View.Toolbars.Colors</source>
+        <translation>Zobrazit.Panely nástrojů.Barvy</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1058"/>
+        <source>View.Toolbars.Properties</source>
+        <translation>Zobrazit.Panely nástrojů.Vlastnosti</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1065"/>
+        <source>View.Toolbars.Timeline</source>
+        <translation>Zobrazit.Panely nástrojů.Časová osa</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1072"/>
         <source>View.FullScreen</source>
         <translation>Zobrazit.Celá obrazovka</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1030"/>
+        <location filename="../common/lc_commands.cpp" line="1079"/>
         <source>View.CloseCurrentTab</source>
         <translation>Zobrazit.Zavřít aktuální kartu</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1037"/>
+        <location filename="../common/lc_commands.cpp" line="1086"/>
         <source>View.Shade.Wireframe</source>
         <translation>Zobrazit.Stín.Schéma</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1044"/>
+        <location filename="../common/lc_commands.cpp" line="1093"/>
         <source>View.Shade.Flat</source>
         <translation>Zobrazit.Stín.Plochý</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1051"/>
+        <location filename="../common/lc_commands.cpp" line="1100"/>
         <source>View.Shade.DefaultLights</source>
         <translation>Zobrazit.Stín.Výchozí osvětlení</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1058"/>
+        <location filename="../common/lc_commands.cpp" line="1107"/>
         <source>View.Projection.Perspective</source>
         <translation>Zobrazit.Projekce.Perspektivní</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1065"/>
+        <location filename="../common/lc_commands.cpp" line="1114"/>
         <source>View.Projection.Orthographic</source>
         <translation>Zobrazit.Projekce.Pravoúhlá</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1072"/>
+        <location filename="../common/lc_commands.cpp" line="1121"/>
         <source>View.ToggleViewSphere</source>
         <translatorcomment>TODO - space betwen words?</translatorcomment>
         <translation>Zobrazit.Přepnout sférické zobrazení</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1079"/>
+        <location filename="../common/lc_commands.cpp" line="1128"/>
         <source>View.FadePreviousSteps</source>
         <translation>Zobrazit.Zeslabit předchozí kroky</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1086"/>
+        <location filename="../common/lc_commands.cpp" line="1135"/>
         <source>Piece.Insert</source>
         <translatorcomment>TODO - kousek, kus, část</translatorcomment>
         <translation>Dílek.Vložit</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1093"/>
+        <location filename="../common/lc_commands.cpp" line="1142"/>
         <source>Piece.Delete</source>
         <translation>Dílek.Odstranit</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1100"/>
+        <location filename="../common/lc_commands.cpp" line="1149"/>
         <source>Piece.Duplicate</source>
         <translation>Dílek.Duplikovat</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1107"/>
+        <location filename="../common/lc_commands.cpp" line="1156"/>
         <source>Piece.ResetPivotPoint</source>
         <translation>Dílek.Vynulovat bod otáčení</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1114"/>
+        <location filename="../common/lc_commands.cpp" line="1163"/>
         <source>Piece.RemoveKeyFrames</source>
         <translation>Dílek.Odstranit klíčový snímek</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1121"/>
+        <location filename="../common/lc_commands.cpp" line="1170"/>
         <source>Piece.ControlPoint.Insert</source>
         <translation>Dílek.Kontrolní bod.Vložit</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1128"/>
+        <location filename="../common/lc_commands.cpp" line="1177"/>
         <source>Piece.ControlPoint.Remove</source>
         <translation>Dílek.Kontrolní bod.Odstranit</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1135"/>
+        <location filename="../common/lc_commands.cpp" line="1184"/>
         <source>Piece.Move.PlusX</source>
         <translation>Dílek.Posuny.PlusX</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1142"/>
+        <location filename="../common/lc_commands.cpp" line="1191"/>
         <source>Piece.Move.MinusX</source>
         <translation>Dílek.Posuny.MinusX</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1149"/>
+        <location filename="../common/lc_commands.cpp" line="1198"/>
         <source>Piece.Move.PlusY</source>
         <translation>Dílek.Posuny.PlusY</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1156"/>
+        <location filename="../common/lc_commands.cpp" line="1205"/>
         <source>Piece.Move.MinusY</source>
         <translation>Dílek.Posuny.MinusY</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1163"/>
+        <location filename="../common/lc_commands.cpp" line="1212"/>
         <source>Piece.Move.PlusZ</source>
         <translation>Dílek.Posuny.PlusZ</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1170"/>
+        <location filename="../common/lc_commands.cpp" line="1219"/>
         <source>Piece.Move.MinusZ</source>
         <translation>Dílek.Posuny.MinusZ</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1177"/>
+        <location filename="../common/lc_commands.cpp" line="1226"/>
         <source>Piece.Rotate.PlusX</source>
         <translation>Dílek.Otočení.PlusX</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1184"/>
+        <location filename="../common/lc_commands.cpp" line="1233"/>
         <source>Piece.Rotate.MinusX</source>
         <translation>Dílek.Otočení.MinusX</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1191"/>
+        <location filename="../common/lc_commands.cpp" line="1240"/>
         <source>Piece.Rotate.PlusY</source>
         <translation>Dílek.Otočení.PlusY</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1198"/>
+        <location filename="../common/lc_commands.cpp" line="1247"/>
         <source>Piece.Rotate.MinusY</source>
         <translation>Dílek.Otočení.MinusY</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1205"/>
+        <location filename="../common/lc_commands.cpp" line="1254"/>
         <source>Piece.Rotate.PlusZ</source>
         <translation>Dílek.Otočení.PlusZ</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1212"/>
+        <location filename="../common/lc_commands.cpp" line="1261"/>
         <source>Piece.Rotate.MinusZ</source>
         <translation>Dílek.Otočení.MinusZ</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1219"/>
+        <location filename="../common/lc_commands.cpp" line="1268"/>
         <source>Piece.MinifigWizard</source>
         <translation>Dílek.Průvodce Minifig</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1226"/>
+        <location filename="../common/lc_commands.cpp" line="1275"/>
         <source>Piece.Array</source>
         <translation>Dílek.Pole</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1233"/>
+        <location filename="../common/lc_commands.cpp" line="1282"/>
         <source>Piece.ViewSelectedModel</source>
         <translation>Dílek.Zobrazit vybraný model</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1240"/>
+        <location filename="../common/lc_commands.cpp" line="1289"/>
         <source>Piece.MoveSelectionToModel</source>
         <translation>Dílek.Přesunout výběr do modelu</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1247"/>
+        <location filename="../common/lc_commands.cpp" line="1296"/>
         <source>Piece.InlineSelectedModels</source>
         <translation>Dílek.Vložené vybrané modely</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1254"/>
+        <location filename="../common/lc_commands.cpp" line="1303"/>
         <source>Piece.EditSelectedSubmodel</source>
         <translation>Dílek.Upravit vybraný podmodel</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1261"/>
+        <location filename="../common/lc_commands.cpp" line="1310"/>
         <source>Piece.EditEndSubmodel</source>
         <translation>Dílek.Upravit koncový podmodel</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1268"/>
+        <location filename="../common/lc_commands.cpp" line="1317"/>
         <source>Piece.Group</source>
         <translation>Dílek.Seskupit</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1275"/>
+        <location filename="../common/lc_commands.cpp" line="1324"/>
         <source>Piece.Ungroup</source>
         <translation>Dílek.Rozdělit</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1282"/>
+        <location filename="../common/lc_commands.cpp" line="1331"/>
         <source>Piece.GroupAdd</source>
         <translation>Dílek.Přidat skupinu</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1289"/>
+        <location filename="../common/lc_commands.cpp" line="1338"/>
         <source>Piece.GroupRemove</source>
         <translation>Dílek.Odstranit skupinu</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1296"/>
+        <location filename="../common/lc_commands.cpp" line="1345"/>
         <source>Piece.GroupEdit</source>
         <translation>Dílek.Upravit skupinu</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1303"/>
+        <location filename="../common/lc_commands.cpp" line="1352"/>
         <source>Piece.HideSelected</source>
         <translation>Dílek.Skrýt vybrané</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1310"/>
+        <location filename="../common/lc_commands.cpp" line="1359"/>
         <source>Piece.HideUnselected</source>
         <translation>Dílek.Skrýt nevybrané</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1317"/>
+        <location filename="../common/lc_commands.cpp" line="1366"/>
         <source>Piece.UnhideSelected</source>
         <translation>Dílek.Zobrazit vybrané</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1324"/>
+        <location filename="../common/lc_commands.cpp" line="1373"/>
         <source>Piece.UnhideAll</source>
         <translation>Dílek.Zobrazit vše</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1331"/>
+        <location filename="../common/lc_commands.cpp" line="1380"/>
         <source>Piece.ShowEarlier</source>
         <translation>Dílek.Zobrazit dříve</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1338"/>
+        <location filename="../common/lc_commands.cpp" line="1387"/>
         <source>Piece.ShowLater</source>
         <translation>Dílek.Zobrazit později</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1345"/>
+        <location filename="../common/lc_commands.cpp" line="1394"/>
         <source>Model.New</source>
         <translation>Model.Nový</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1352"/>
+        <location filename="../common/lc_commands.cpp" line="1401"/>
         <source>Model.Properties</source>
         <translation>Model.Vlastnosti</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1359"/>
+        <location filename="../common/lc_commands.cpp" line="1408"/>
         <source>Model.List</source>
         <translation>Model.Seznam</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1366"/>
+        <location filename="../common/lc_commands.cpp" line="1415"/>
         <source>Model.Model01</source>
         <translation>Model.Model01</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1373"/>
+        <location filename="../common/lc_commands.cpp" line="1422"/>
         <source>Model.Model02</source>
         <translation>Model.Model02</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1380"/>
+        <location filename="../common/lc_commands.cpp" line="1429"/>
         <source>Model.Model03</source>
         <translation>Model.Model03</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1387"/>
+        <location filename="../common/lc_commands.cpp" line="1436"/>
         <source>Model.Model04</source>
         <translation>Model.Model04</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1394"/>
+        <location filename="../common/lc_commands.cpp" line="1443"/>
         <source>Model.Model05</source>
         <translation>Model.Model05</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1401"/>
+        <location filename="../common/lc_commands.cpp" line="1450"/>
         <source>Model.Model06</source>
         <translation>Model.Model06</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1408"/>
+        <location filename="../common/lc_commands.cpp" line="1457"/>
         <source>Model.Model07</source>
         <translation>Model.Model07</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1415"/>
+        <location filename="../common/lc_commands.cpp" line="1464"/>
         <source>Model.Model08</source>
         <translation>Model.Model08</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1422"/>
+        <location filename="../common/lc_commands.cpp" line="1471"/>
         <source>Model.Model09</source>
         <translation>Model.Model09</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1429"/>
+        <location filename="../common/lc_commands.cpp" line="1478"/>
         <source>Model.Model10</source>
         <translation>Model.Model10</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1436"/>
+        <location filename="../common/lc_commands.cpp" line="1485"/>
         <source>Model.Model11</source>
         <translation>Model.Model11</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1443"/>
+        <location filename="../common/lc_commands.cpp" line="1492"/>
         <source>Model.Model12</source>
         <translation>Model.Model12</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1450"/>
+        <location filename="../common/lc_commands.cpp" line="1499"/>
         <source>Model.Model13</source>
         <translation>Model.Model13</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1457"/>
+        <location filename="../common/lc_commands.cpp" line="1506"/>
         <source>Model.Model14</source>
         <translation>Model.Model14</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1464"/>
+        <location filename="../common/lc_commands.cpp" line="1513"/>
         <source>Model.Model15</source>
         <translation>Model.Model15</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1471"/>
+        <location filename="../common/lc_commands.cpp" line="1520"/>
         <source>Model.Model16</source>
         <translation>Model.Model16</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1478"/>
+        <location filename="../common/lc_commands.cpp" line="1527"/>
         <source>Model.Model17</source>
         <translation>Model.Model17</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1485"/>
+        <location filename="../common/lc_commands.cpp" line="1534"/>
         <source>Model.Model18</source>
         <translation>Model.Model18</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1492"/>
+        <location filename="../common/lc_commands.cpp" line="1541"/>
         <source>Model.Model19</source>
         <translation>Model.Model19</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1499"/>
+        <location filename="../common/lc_commands.cpp" line="1548"/>
         <source>Model.Model20</source>
         <translation>Model.Model20</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1506"/>
+        <location filename="../common/lc_commands.cpp" line="1555"/>
         <source>Model.Model21</source>
         <translation>Model.Model21</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1513"/>
+        <location filename="../common/lc_commands.cpp" line="1562"/>
         <source>Model.Model22</source>
         <translation>Model.Model22</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1520"/>
+        <location filename="../common/lc_commands.cpp" line="1569"/>
         <source>Model.Model23</source>
         <translation>Model.Model23</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1527"/>
+        <location filename="../common/lc_commands.cpp" line="1576"/>
         <source>Model.Model24</source>
         <translation>Model.Model24</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1534"/>
+        <location filename="../common/lc_commands.cpp" line="1583"/>
         <source>Help.HomePage</source>
         <translation>Nápověda.Domovská stránka</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1541"/>
+        <location filename="../common/lc_commands.cpp" line="1590"/>
         <source>Help.BugReport</source>
         <translation>Nápověda.Náhlásit chyby</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1548"/>
+        <location filename="../common/lc_commands.cpp" line="1597"/>
         <source>Help.Updates</source>
         <translation>Nápověda.Aktualizace</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1555"/>
+        <location filename="../common/lc_commands.cpp" line="1604"/>
         <source>Help.About</source>
         <translation>Nápověda.O</translation>
     </message>
@@ -1824,7 +1859,7 @@
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="982"/>
-        <location filename="../common/lc_commands.cpp" line="1577"/>
+        <location filename="../common/lc_commands.cpp" line="1626"/>
         <source>Remove Step</source>
         <translation>Odebrat krok</translation>
     </message>
@@ -1855,411 +1890,446 @@
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1024"/>
+        <source>Standard</source>
+        <translation>Standard</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1031"/>
+        <source>Tools</source>
+        <translation>Nástroje</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1038"/>
+        <source>Time</source>
+        <translation>Čas</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1045"/>
+        <source>Parts</source>
+        <translation>Části</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1052"/>
+        <source>Colors</source>
+        <translation>Barvy</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1059"/>
+        <source>Properties</source>
+        <translation>Vlastnosti</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1066"/>
+        <source>Timeline</source>
+        <translation>Časová osa</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1073"/>
         <source>&amp;Full Screen</source>
         <translation>&amp;Celá obrazovka</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1031"/>
+        <location filename="../common/lc_commands.cpp" line="1080"/>
         <source>Close &amp;Tab</source>
         <translation>Zavří&amp;t záložku</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1038"/>
+        <location filename="../common/lc_commands.cpp" line="1087"/>
         <source>&amp;Wireframe</source>
         <translation>&amp;Drátový model</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1045"/>
+        <location filename="../common/lc_commands.cpp" line="1094"/>
         <source>&amp;Flat Shading</source>
         <translation>&amp;Ploché stínování</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1052"/>
+        <location filename="../common/lc_commands.cpp" line="1101"/>
         <source>&amp;Default Lights</source>
         <translation>&amp;Výchozí osvětlení</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1059"/>
+        <location filename="../common/lc_commands.cpp" line="1108"/>
         <source>&amp;Perspective</source>
         <translatorcomment>TODO - Perspektiva, Perspektivně</translatorcomment>
         <translation>&amp;Perspektivně</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1066"/>
+        <location filename="../common/lc_commands.cpp" line="1115"/>
         <source>&amp;Orthographic</source>
         <translatorcomment>TODO - Pravoúhle, Ortograficky</translatorcomment>
         <translation>Prav&amp;oúhle</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1073"/>
+        <location filename="../common/lc_commands.cpp" line="1122"/>
         <source>View Sphere</source>
         <translatorcomment>TODO - sphere?</translatorcomment>
         <translation>Zobrazit sféru</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1080"/>
+        <location filename="../common/lc_commands.cpp" line="1129"/>
         <source>Fade Previous Steps</source>
         <translation>Zeslabit předchozí kroky</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1087"/>
+        <location filename="../common/lc_commands.cpp" line="1136"/>
         <source>&amp;Insert</source>
         <translation>Vlož&amp;it</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1094"/>
+        <location filename="../common/lc_commands.cpp" line="1143"/>
         <source>&amp;Delete</source>
         <translation>&amp;Odstranit</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1101"/>
+        <location filename="../common/lc_commands.cpp" line="1150"/>
         <source>&amp;Duplicate</source>
         <translation>&amp;Duplikovat</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1108"/>
+        <location filename="../common/lc_commands.cpp" line="1157"/>
         <source>Reset &amp;Pivot Point</source>
         <translation>Vynulovat &amp;bod otáčení</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1115"/>
+        <location filename="../common/lc_commands.cpp" line="1164"/>
         <source>Remove &amp;Key Frames</source>
         <translation>Odstranit &amp;klíčové snímky</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1122"/>
+        <location filename="../common/lc_commands.cpp" line="1171"/>
         <source>Insert Control Point</source>
         <translation>Vložit kontrolní bod</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1129"/>
+        <location filename="../common/lc_commands.cpp" line="1178"/>
         <source>Remove Control Point</source>
         <translation>Odstranit kontrolní bod</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1136"/>
+        <location filename="../common/lc_commands.cpp" line="1185"/>
         <source>Move +X</source>
         <translation>Přesunout +X</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1143"/>
+        <location filename="../common/lc_commands.cpp" line="1192"/>
         <source>Move -X</source>
         <translation>Přesunout -X</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1150"/>
+        <location filename="../common/lc_commands.cpp" line="1199"/>
         <source>Move +Y</source>
         <translation>Přesunout +Y</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1157"/>
+        <location filename="../common/lc_commands.cpp" line="1206"/>
         <source>Move -Y</source>
         <translation>Přesunout -Y</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1164"/>
+        <location filename="../common/lc_commands.cpp" line="1213"/>
         <source>Move +Z</source>
         <translation>Přesunout +Z</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1171"/>
+        <location filename="../common/lc_commands.cpp" line="1220"/>
         <source>Move -Z</source>
         <translation>Přesunout -Z</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1178"/>
+        <location filename="../common/lc_commands.cpp" line="1227"/>
         <source>Rotate +X</source>
         <translation>Otočit +X</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1185"/>
+        <location filename="../common/lc_commands.cpp" line="1234"/>
         <source>Rotate -X</source>
         <translation>Otočit -X</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1192"/>
+        <location filename="../common/lc_commands.cpp" line="1241"/>
         <source>Rotate +Y</source>
         <translation>Otočit +Y</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1199"/>
+        <location filename="../common/lc_commands.cpp" line="1248"/>
         <source>Rotate -Y</source>
         <translation>Otočit -Y</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1206"/>
+        <location filename="../common/lc_commands.cpp" line="1255"/>
         <source>Rotate +Z</source>
         <translation>Otočit +Z</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1213"/>
+        <location filename="../common/lc_commands.cpp" line="1262"/>
         <source>Rotate -Z</source>
         <translation>Otočit -Z</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1220"/>
+        <location filename="../common/lc_commands.cpp" line="1269"/>
         <source>Minifig &amp;Wizard...</source>
         <translation>Průvodce &amp;Minifig...</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1227"/>
+        <location filename="../common/lc_commands.cpp" line="1276"/>
         <source>A&amp;rray...</source>
         <translation>Po&amp;le...</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1234"/>
+        <location filename="../common/lc_commands.cpp" line="1283"/>
         <source>Open Selected Model</source>
         <translation>Otevřít vybraný model</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1241"/>
+        <location filename="../common/lc_commands.cpp" line="1290"/>
         <source>Move to New Model...</source>
         <translation>Přesunout na nový model...</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1248"/>
+        <location filename="../common/lc_commands.cpp" line="1297"/>
         <source>Inline Selected Models</source>
         <translation>Vložit vybrané modely</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1255"/>
+        <location filename="../common/lc_commands.cpp" line="1304"/>
         <source>Edit Selected Submodel</source>
         <translation>Upravit vybrané podmodely</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1262"/>
+        <location filename="../common/lc_commands.cpp" line="1311"/>
         <source>End Submodel Editing</source>
         <translation>Ukončit úpravy podmodelu</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1269"/>
+        <location filename="../common/lc_commands.cpp" line="1318"/>
         <source>&amp;Group...</source>
         <translatorcomment>TODO - možná seskupit</translatorcomment>
         <translation>&amp;Skupina...</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1276"/>
+        <location filename="../common/lc_commands.cpp" line="1325"/>
         <source>&amp;Ungroup</source>
         <translation>&amp;Rozdělit</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1283"/>
+        <location filename="../common/lc_commands.cpp" line="1332"/>
         <source>&amp;Add to Group</source>
         <translation>&amp;Přidat do skupiny</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1290"/>
+        <location filename="../common/lc_commands.cpp" line="1339"/>
         <source>Re&amp;move from Group</source>
         <translation>&amp;Odebrat ze skupiny</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1297"/>
+        <location filename="../common/lc_commands.cpp" line="1346"/>
         <source>&amp;Edit Groups...</source>
         <translation>&amp;Upravit skupiny...</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1304"/>
+        <location filename="../common/lc_commands.cpp" line="1353"/>
         <source>&amp;Hide Selected</source>
         <translation>&amp;Skrýt vybrané</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1311"/>
+        <location filename="../common/lc_commands.cpp" line="1360"/>
         <source>Hide &amp;Unselected</source>
         <translation>Skrýt &amp;nevybrané</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1318"/>
+        <location filename="../common/lc_commands.cpp" line="1367"/>
         <source>&amp;Unhide Selected</source>
         <translation>&amp;Zobrazit vybrané</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1325"/>
+        <location filename="../common/lc_commands.cpp" line="1374"/>
         <source>U&amp;nhide All</source>
         <translation>Zobrazit &amp;vše</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1332"/>
+        <location filename="../common/lc_commands.cpp" line="1381"/>
         <source>Show Earlier</source>
         <translation>Zobrazit starší</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1339"/>
+        <location filename="../common/lc_commands.cpp" line="1388"/>
         <source>Show Later</source>
         <translation>Zobrazit později</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1346"/>
+        <location filename="../common/lc_commands.cpp" line="1395"/>
         <source>New Submodel...</source>
         <translation>Nový podmodel...</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1353"/>
+        <location filename="../common/lc_commands.cpp" line="1402"/>
         <source>Prope&amp;rties...</source>
         <translation>Vlastno&amp;sti...</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1360"/>
+        <location filename="../common/lc_commands.cpp" line="1409"/>
         <source>Submodels...</source>
         <translation>Podmodely...</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1367"/>
+        <location filename="../common/lc_commands.cpp" line="1416"/>
         <source>Model 1</source>
         <translation>Model 1</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1374"/>
+        <location filename="../common/lc_commands.cpp" line="1423"/>
         <source>Model 2</source>
         <translation>Model 2</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1381"/>
+        <location filename="../common/lc_commands.cpp" line="1430"/>
         <source>Model 3</source>
         <translation>Model 3</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1388"/>
+        <location filename="../common/lc_commands.cpp" line="1437"/>
         <source>Model 4</source>
         <translation>Model 4</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1395"/>
+        <location filename="../common/lc_commands.cpp" line="1444"/>
         <source>Model 5</source>
         <translation>Model 5</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1402"/>
+        <location filename="../common/lc_commands.cpp" line="1451"/>
         <source>Model 6</source>
         <translation>Model 6</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1409"/>
+        <location filename="../common/lc_commands.cpp" line="1458"/>
         <source>Model 7</source>
         <translation>Model 7</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1416"/>
+        <location filename="../common/lc_commands.cpp" line="1465"/>
         <source>Model 8</source>
         <translation>Model 8</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1423"/>
+        <location filename="../common/lc_commands.cpp" line="1472"/>
         <source>Model 9</source>
         <translation>Model 9</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1430"/>
+        <location filename="../common/lc_commands.cpp" line="1479"/>
         <source>Model 10</source>
         <translation>Model 10</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1437"/>
+        <location filename="../common/lc_commands.cpp" line="1486"/>
         <source>Model 11</source>
         <translation>Model 11</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1444"/>
+        <location filename="../common/lc_commands.cpp" line="1493"/>
         <source>Model 12</source>
         <translation>Model 12</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1451"/>
+        <location filename="../common/lc_commands.cpp" line="1500"/>
         <source>Model 13</source>
         <translation>Model 13</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1458"/>
+        <location filename="../common/lc_commands.cpp" line="1507"/>
         <source>Model 14</source>
         <translation>Model 14</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1465"/>
+        <location filename="../common/lc_commands.cpp" line="1514"/>
         <source>Model 15</source>
         <translation>Model 15</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1472"/>
+        <location filename="../common/lc_commands.cpp" line="1521"/>
         <source>Model 16</source>
         <translation>Model 16</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1479"/>
+        <location filename="../common/lc_commands.cpp" line="1528"/>
         <source>Model 17</source>
         <translation>Model 17</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1486"/>
+        <location filename="../common/lc_commands.cpp" line="1535"/>
         <source>Model 18</source>
         <translation>Model 18</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1493"/>
+        <location filename="../common/lc_commands.cpp" line="1542"/>
         <source>Model 19</source>
         <translation>Model 19</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1500"/>
+        <location filename="../common/lc_commands.cpp" line="1549"/>
         <source>Model 20</source>
         <translation>Model 20</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1507"/>
+        <location filename="../common/lc_commands.cpp" line="1556"/>
         <source>Model 21</source>
         <translation>Model 21</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1514"/>
+        <location filename="../common/lc_commands.cpp" line="1563"/>
         <source>Model 22</source>
         <translation>Model 22</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1521"/>
+        <location filename="../common/lc_commands.cpp" line="1570"/>
         <source>Model 23</source>
         <translation>Model 23</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1528"/>
+        <location filename="../common/lc_commands.cpp" line="1577"/>
         <source>Model 24</source>
         <translation>Model 24</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1535"/>
+        <location filename="../common/lc_commands.cpp" line="1584"/>
         <source>LeoCAD &amp;Home Page</source>
         <translation>LeoCAD &amp;domovská stránka</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1542"/>
+        <location filename="../common/lc_commands.cpp" line="1591"/>
         <source>Report a Bug</source>
         <translatorcomment>TODO - Oznámit chybu</translatorcomment>
         <translation>Nahlásit chybu</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1549"/>
+        <location filename="../common/lc_commands.cpp" line="1598"/>
         <source>Check for &amp;Updates...</source>
         <translation>Zkontrolovat akt&amp;ualizace...</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1556"/>
+        <location filename="../common/lc_commands.cpp" line="1605"/>
         <source>&amp;About...</source>
         <translation>&amp;O...</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1563"/>
+        <location filename="../common/lc_commands.cpp" line="1612"/>
         <source>Insert Step Before</source>
         <translation>Vložit krok před</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1570"/>
+        <location filename="../common/lc_commands.cpp" line="1619"/>
         <source>Insert Step After</source>
         <translation>Vložit krok za</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1584"/>
+        <location filename="../common/lc_commands.cpp" line="1633"/>
         <source>Move Selection Here</source>
         <translation>Přesunout výběr sem</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1591"/>
+        <location filename="../common/lc_commands.cpp" line="1640"/>
         <source>Set Current Step</source>
         <translation>Nastavit aktuální krok</translation>
     </message>
@@ -2267,82 +2337,82 @@
 <context>
     <name>Mouse</name>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1601"/>
+        <location filename="../common/lc_commands.cpp" line="1650"/>
         <source>NewPiece</source>
         <translatorcomment>TODO</translatorcomment>
         <translation>Nový díl</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1602"/>
+        <location filename="../common/lc_commands.cpp" line="1651"/>
         <source>NewPointLight</source>
         <translatorcomment>TODO</translatorcomment>
         <translation>Nové bodové světlo</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1603"/>
+        <location filename="../common/lc_commands.cpp" line="1652"/>
         <source>NewSpotLight</source>
         <translatorcomment>TODO</translatorcomment>
         <translation>Nový zdroj osvětlení</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1604"/>
+        <location filename="../common/lc_commands.cpp" line="1653"/>
         <source>NewCamera</source>
         <translatorcomment>TODO</translatorcomment>
         <translation>Nová kamera</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1605"/>
+        <location filename="../common/lc_commands.cpp" line="1654"/>
         <source>Select</source>
         <translation>Vybrat</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1606"/>
+        <location filename="../common/lc_commands.cpp" line="1655"/>
         <source>Move</source>
         <translation>Přesunout</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1607"/>
+        <location filename="../common/lc_commands.cpp" line="1656"/>
         <source>Rotate</source>
         <translation>Otočit</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1608"/>
+        <location filename="../common/lc_commands.cpp" line="1657"/>
         <source>Delete</source>
         <translation>Odstranit</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1609"/>
+        <location filename="../common/lc_commands.cpp" line="1658"/>
         <source>Paint</source>
         <translation>Malování</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1610"/>
+        <location filename="../common/lc_commands.cpp" line="1659"/>
         <source>ColorPicker</source>
         <translation>Výběr barvy</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1611"/>
+        <location filename="../common/lc_commands.cpp" line="1660"/>
         <source>Zoom</source>
         <translatorcomment>Lupa</translatorcomment>
         <translation>Zvětšit</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1612"/>
+        <location filename="../common/lc_commands.cpp" line="1661"/>
         <source>Pan</source>
         <translation>Posouvat</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1613"/>
+        <location filename="../common/lc_commands.cpp" line="1662"/>
         <source>Orbit</source>
         <translation>Otáčení</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1614"/>
+        <location filename="../common/lc_commands.cpp" line="1663"/>
         <source>Roll</source>
         <translation>Přetočení</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1615"/>
+        <location filename="../common/lc_commands.cpp" line="1664"/>
         <source>ZoomRegion</source>
         <translatorcomment>TODO</translatorcomment>
         <translation>Oblast zvětšení</translation>
@@ -2560,25 +2630,40 @@ Formát souboru není rozpoznán.</translation>
         <translation>Skupina #</translation>
     </message>
     <message>
-        <location filename="../common/lc_colors.cpp" line="223"/>
         <source>Solid Colors</source>
         <comment>Colors</comment>
         <translatorcomment>Barvy</translatorcomment>
-        <translation>Plné barvy</translation>
+        <translation type="vanished">Plné barvy</translation>
     </message>
     <message>
-        <location filename="../common/lc_colors.cpp" line="224"/>
         <source>Translucent Colors</source>
         <comment>Colors</comment>
         <translatorcomment>Barvy</translatorcomment>
-        <translation>Průsvitné barvy</translation>
+        <translation type="vanished">Průsvitné barvy</translation>
     </message>
     <message>
-        <location filename="../common/lc_colors.cpp" line="225"/>
         <source>Special Colors</source>
         <comment>Colors</comment>
         <translatorcomment>Barvy</translatorcomment>
-        <translation>Zvláštní barvy</translation>
+        <translation type="vanished">Zvláštní barvy</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_colors.cpp" line="223"/>
+        <source>Solid</source>
+        <comment>Colors</comment>
+        <translation>Plné</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_colors.cpp" line="224"/>
+        <source>Translucent</source>
+        <comment>Colors</comment>
+        <translation>Průsvitné</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_colors.cpp" line="225"/>
+        <source>Special</source>
+        <comment>Colors</comment>
+        <translation>Zvláštní</translation>
     </message>
 </context>
 <context>
@@ -3194,13 +3279,13 @@ Formát souboru není rozpoznán.</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="969"/>
-        <location filename="../common/lc_commands.cpp" line="1564"/>
+        <location filename="../common/lc_commands.cpp" line="1613"/>
         <source>Insert a new step before the current step</source>
         <translation>Vložit nový krok před aktuální krok</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="976"/>
-        <location filename="../common/lc_commands.cpp" line="1571"/>
+        <location filename="../common/lc_commands.cpp" line="1620"/>
         <source>Insert a new step after the current step</source>
         <translation>Vložit nový krok za aktuální krok</translation>
     </message>
@@ -3210,7 +3295,7 @@ Formát souboru není rozpoznán.</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="983"/>
-        <location filename="../common/lc_commands.cpp" line="1578"/>
+        <location filename="../common/lc_commands.cpp" line="1627"/>
         <source>Remove current step</source>
         <translation>Odebrat aktuální krok</translation>
     </message>
@@ -3241,237 +3326,265 @@ Formát souboru není rozpoznán.</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1025"/>
+        <source>Toggle the Standard Toolbar</source>
+        <translation>Přepnout panel standardních nástrojů</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1032"/>
+        <source>Toggle the Tools Toolbar</source>
+        <translation>Přepnout panel nástrojů</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1039"/>
+        <source>Toggle the Time Toolbar</source>
+        <translation>Přepnout panel nástrojů času</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1046"/>
+        <source>Toggle the Parts Toolbar</source>
+        <translation>Přepnout panel částí</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1053"/>
+        <source>Toggle the Colors Toolbar</source>
+        <translation>Přepnout panel nástrojů barev</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1060"/>
+        <source>Toggle the Properties Toolbar</source>
+        <translation>Přepnout panel vlastností</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1067"/>
+        <source>Toggle the Timeline Toolbar</source>
+        <translation>Přepnout panel časové osy</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1074"/>
         <source>Toggle fullscreen mode</source>
         <translation>Přepnout režim celé obrazovky</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1032"/>
+        <location filename="../common/lc_commands.cpp" line="1081"/>
         <source>Close current tab</source>
         <translation>Zavřít aktuální záložku</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1039"/>
+        <location filename="../common/lc_commands.cpp" line="1088"/>
         <source>Display the scene as wireframe</source>
         <translatorcomment>TODO</translatorcomment>
         <translation>Zobrazit scénu jako drátový model</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1046"/>
+        <location filename="../common/lc_commands.cpp" line="1095"/>
         <source>Display the scene without any shading or lights</source>
         <translation>Zobrazit scénu bez stínování nebo osvětlení</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1053"/>
+        <location filename="../common/lc_commands.cpp" line="1102"/>
         <source>Display the scene with the default lights</source>
         <translation>Zobrazit scénu s výchozími světly</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1060"/>
+        <location filename="../common/lc_commands.cpp" line="1109"/>
         <source>Set the current camera to use a perspective projection</source>
         <translation>Nastavte aktuální kameru tak, aby použila perspektivní projekci</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1067"/>
+        <location filename="../common/lc_commands.cpp" line="1116"/>
         <source>Set the current camera to use an orthographic projection</source>
         <translation>Nastavte aktuální kameru tak, aby použila pravoúhlou projekci</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1074"/>
+        <location filename="../common/lc_commands.cpp" line="1123"/>
         <source>Toggle the view sphere</source>
         <translation>Přepnout sférické zobrazení</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1081"/>
+        <location filename="../common/lc_commands.cpp" line="1130"/>
         <source>Toggle fading previous model steps</source>
         <translation>Přepnout zeslabování předchozích kroků modelu</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1088"/>
+        <location filename="../common/lc_commands.cpp" line="1137"/>
         <source>Add a new piece to the model</source>
         <translation>Přidat nový dílek do modelu</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1095"/>
+        <location filename="../common/lc_commands.cpp" line="1144"/>
         <source>Delete selected objects</source>
         <translation>Odstranit vybrané objekty</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1102"/>
+        <location filename="../common/lc_commands.cpp" line="1151"/>
         <source>Create a copy of the selected pieces</source>
         <translation>Vytvořte kopii vybraných dílků</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1109"/>
+        <location filename="../common/lc_commands.cpp" line="1158"/>
         <source>Reset the pivot point of the selected pieces to their origin</source>
         <translatorcomment>TODO - původ, zdroj, počátek, vznik</translatorcomment>
         <translation>Obnovte bod otáčení vybraných dílků dle jejich původu</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1116"/>
+        <location filename="../common/lc_commands.cpp" line="1165"/>
         <source>Remove all key frames from the selected pieces</source>
         <translation>Odstraňte všechny klíčové snímky z vybraných dílků</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1123"/>
+        <location filename="../common/lc_commands.cpp" line="1172"/>
         <source>Insert a new control point</source>
         <translation>Vložit nový kontrolní bod</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1130"/>
+        <location filename="../common/lc_commands.cpp" line="1179"/>
         <source>Remove the selected control point</source>
         <translation>Odstranit vybraný kontrolní bod</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1137"/>
-        <location filename="../common/lc_commands.cpp" line="1144"/>
+        <location filename="../common/lc_commands.cpp" line="1186"/>
+        <location filename="../common/lc_commands.cpp" line="1193"/>
         <source>Move selected objects along the X axis</source>
         <translation>Přesunout vybrané objekty podél osy X</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1151"/>
-        <location filename="../common/lc_commands.cpp" line="1158"/>
+        <location filename="../common/lc_commands.cpp" line="1200"/>
+        <location filename="../common/lc_commands.cpp" line="1207"/>
         <source>Move selected objects along the Y axis</source>
         <translation>Přesunout vybrané objekty podél osy Y</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1165"/>
-        <location filename="../common/lc_commands.cpp" line="1172"/>
+        <location filename="../common/lc_commands.cpp" line="1214"/>
+        <location filename="../common/lc_commands.cpp" line="1221"/>
         <source>Move selected objects along the Z axis</source>
         <translation>Přesunout vybrané objekty podél osy Z</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1179"/>
-        <location filename="../common/lc_commands.cpp" line="1186"/>
+        <location filename="../common/lc_commands.cpp" line="1228"/>
+        <location filename="../common/lc_commands.cpp" line="1235"/>
         <source>Rotate selected objects along the X axis</source>
         <translation>Otočit vybrané objekty podél osy X</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1193"/>
-        <location filename="../common/lc_commands.cpp" line="1200"/>
+        <location filename="../common/lc_commands.cpp" line="1242"/>
+        <location filename="../common/lc_commands.cpp" line="1249"/>
         <source>Rotate selected objects along the Y axis</source>
         <translation>Otočit vybrané objekty podél osy Y</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1207"/>
-        <location filename="../common/lc_commands.cpp" line="1214"/>
+        <location filename="../common/lc_commands.cpp" line="1256"/>
+        <location filename="../common/lc_commands.cpp" line="1263"/>
         <source>Rotate selected objects along the Z axis</source>
         <translation>Otočit vybrané objekty podél osy Z</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1221"/>
+        <location filename="../common/lc_commands.cpp" line="1270"/>
         <source>Add a new minifig to the model</source>
         <translation>Přidat k modelu nový minifig</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1228"/>
+        <location filename="../common/lc_commands.cpp" line="1277"/>
         <source>Make copies of the selected pieces</source>
         <translation>Vytvořit kopie vybraných dílků</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1235"/>
+        <location filename="../common/lc_commands.cpp" line="1284"/>
         <source>Open the model referenced by the selected piece in a new tab</source>
         <translatorcomment>TODO</translatorcomment>
         <translation>Otevřete model, na který odkazuje vybraný dílek, na nové kartě</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1242"/>
+        <location filename="../common/lc_commands.cpp" line="1291"/>
         <source>Move the selected pieces to a new model and replace them with a reference to the model</source>
         <translation>Přesuňte vybrané dílky do nového modelu a nahraďte je odkazem na model</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1249"/>
+        <location filename="../common/lc_commands.cpp" line="1298"/>
         <source>Insert the contents of the selected model references into the current model</source>
         <translation>Vložte obsah vybraných referencí modelu do aktuálního modelu</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1256"/>
+        <location filename="../common/lc_commands.cpp" line="1305"/>
         <source>Edit the currently selected submodel in-place</source>
         <translatorcomment>TODO - in-place -&gt; vložený, na místě, v místě</translatorcomment>
         <translation>Upravte aktuálně vybraný vložený podmodel</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1263"/>
+        <location filename="../common/lc_commands.cpp" line="1312"/>
         <source>End in-place submodel editing</source>
         <translation>Ukončit místní úpravy podmodelu</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1270"/>
+        <location filename="../common/lc_commands.cpp" line="1319"/>
         <source>Group selected pieces together</source>
         <translation>Seskupit vybrané dílky dohromady</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1277"/>
+        <location filename="../common/lc_commands.cpp" line="1326"/>
         <source>Ungroup selected group</source>
         <translation>Oddělit vybranou skupinu</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1284"/>
+        <location filename="../common/lc_commands.cpp" line="1333"/>
         <source>Add focused piece to selected group</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1291"/>
+        <location filename="../common/lc_commands.cpp" line="1340"/>
         <source>Remove focused piece from group</source>
         <translation>Odstranit vybraný kousek ze skupiny</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1298"/>
+        <location filename="../common/lc_commands.cpp" line="1347"/>
         <source>Edit groups</source>
         <translation>Upravit skupiny</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1305"/>
+        <location filename="../common/lc_commands.cpp" line="1354"/>
         <source>Hide selected objects</source>
         <translation>Skrýt vybrané objekty</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1312"/>
+        <location filename="../common/lc_commands.cpp" line="1361"/>
         <source>Hide objects that are not selected</source>
         <translation>Skrýt objekty, které nejsou vybrány</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1319"/>
+        <location filename="../common/lc_commands.cpp" line="1368"/>
         <source>Show hidden objects that are selected</source>
         <translation>Zobrazit skryté vybrané objekty</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1326"/>
+        <location filename="../common/lc_commands.cpp" line="1375"/>
         <source>Show all hidden objects</source>
         <translation>Zobrazit všechny skryté objekty</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1333"/>
+        <location filename="../common/lc_commands.cpp" line="1382"/>
         <source>Show selected pieces one step earlier</source>
         <translation>Zobrazit vybrané dílky o krok dříve</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1340"/>
+        <location filename="../common/lc_commands.cpp" line="1389"/>
         <source>Show selected pieces one step later</source>
         <translation>Zobrazit vybrané dílky o krok později</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1347"/>
+        <location filename="../common/lc_commands.cpp" line="1396"/>
         <source>Create a new submodel</source>
         <translation>Vytvořit nový podmodel</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1354"/>
+        <location filename="../common/lc_commands.cpp" line="1403"/>
         <source>Display the properties of the current submodel</source>
         <translation>Zobrazit vlastnosti aktuálního podmodelu</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1361"/>
+        <location filename="../common/lc_commands.cpp" line="1410"/>
         <source>Show a list of all submodels</source>
         <translation>Zobrazit seznam všech podmodelů</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1368"/>
-        <location filename="../common/lc_commands.cpp" line="1375"/>
-        <location filename="../common/lc_commands.cpp" line="1382"/>
-        <location filename="../common/lc_commands.cpp" line="1389"/>
-        <location filename="../common/lc_commands.cpp" line="1396"/>
-        <location filename="../common/lc_commands.cpp" line="1403"/>
-        <location filename="../common/lc_commands.cpp" line="1410"/>
         <location filename="../common/lc_commands.cpp" line="1417"/>
         <location filename="../common/lc_commands.cpp" line="1424"/>
         <location filename="../common/lc_commands.cpp" line="1431"/>
@@ -3489,36 +3602,43 @@ Formát souboru není rozpoznán.</translation>
         <location filename="../common/lc_commands.cpp" line="1515"/>
         <location filename="../common/lc_commands.cpp" line="1522"/>
         <location filename="../common/lc_commands.cpp" line="1529"/>
+        <location filename="../common/lc_commands.cpp" line="1536"/>
+        <location filename="../common/lc_commands.cpp" line="1543"/>
+        <location filename="../common/lc_commands.cpp" line="1550"/>
+        <location filename="../common/lc_commands.cpp" line="1557"/>
+        <location filename="../common/lc_commands.cpp" line="1564"/>
+        <location filename="../common/lc_commands.cpp" line="1571"/>
+        <location filename="../common/lc_commands.cpp" line="1578"/>
         <source>Switch to this submodel</source>
         <translation>Přepnout na tento podmodel</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1536"/>
+        <location filename="../common/lc_commands.cpp" line="1585"/>
         <source>Open LeoCAD&apos;s home page on the internet using your default web browser</source>
         <translation>Otevřít domovskou stránku LeoCADu na internetu výchozím webovím prohlížečem</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1543"/>
+        <location filename="../common/lc_commands.cpp" line="1592"/>
         <source>Open LeoCAD&apos;s bug report form on your default web browser</source>
         <translation>Otevřít formulář hlášení chyb LeoCADu ve výchozím webovém prohlížeči</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1550"/>
+        <location filename="../common/lc_commands.cpp" line="1599"/>
         <source>Check if a newer LeoCAD version or parts library has been released</source>
         <translation>Zkontrolovat, zda nebyla vydána novější verze LeoCADu nebo knihovny součástí</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1557"/>
+        <location filename="../common/lc_commands.cpp" line="1606"/>
         <source>Display program version number and system information</source>
         <translation>Zobrazit verzi programu a systémové informace</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1585"/>
+        <location filename="../common/lc_commands.cpp" line="1634"/>
         <source>Move the selected parts into this step</source>
         <translation>Přesunout vybrané části do tohoto kroku</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1592"/>
+        <location filename="../common/lc_commands.cpp" line="1641"/>
         <source>View the model at this point in the timeline</source>
         <translation>Zobrazit model v tomto okamžiku na časové ose</translation>
     </message>
@@ -3559,7 +3679,7 @@ Formát souboru není rozpoznán.</translation>
 <context>
     <name>lcApplication</name>
     <message>
-        <location filename="../common/lc_application.cpp" line="445"/>
+        <location filename="../common/lc_application.cpp" line="538"/>
         <source>LeoCAD could not find a compatible Parts Library so only a small number of parts will be available.
 
 Please visit https://www.leocad.org for information on how to download and install a library.</source>
@@ -3568,7 +3688,7 @@ Please visit https://www.leocad.org for information on how to download and insta
 Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese https://www.leocad.org.</translation>
     </message>
     <message>
-        <location filename="../common/lc_application.cpp" line="447"/>
+        <location filename="../common/lc_application.cpp" line="540"/>
         <source>LeoCAD could not load Parts Library.
 
 Please visit https://www.leocad.org for information on how to download and install a library.</source>
@@ -3577,13 +3697,13 @@ Please visit https://www.leocad.org for information on how to download and insta
 Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese https://www.leocad.org.</translation>
     </message>
     <message>
-        <location filename="../common/lc_application.cpp" line="450"/>
-        <location filename="../common/lc_application.cpp" line="715"/>
+        <location filename="../common/lc_application.cpp" line="543"/>
+        <location filename="../common/lc_application.cpp" line="809"/>
         <source>LeoCAD</source>
         <translation>LeoCAD</translation>
     </message>
     <message>
-        <location filename="../common/lc_application.cpp" line="715"/>
+        <location filename="../common/lc_application.cpp" line="809"/>
         <source>Some changes will only take effect the next time you start LeoCAD.</source>
         <translation>Některé změny se projeví až při příštím spuštění LeoCADu.</translation>
     </message>
@@ -3605,186 +3725,186 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="198"/>
-        <location filename="../common/lc_mainwindow.cpp" line="2245"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2262"/>
         <source>Open Model</source>
         <translation>Otevřít model</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="199"/>
-        <location filename="../common/lc_mainwindow.cpp" line="2378"/>
-        <location filename="../common/lc_mainwindow.cpp" line="2407"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2395"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2424"/>
         <source>Save Model</source>
         <translation>Uložit model</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="408"/>
+        <location filename="../common/lc_mainwindow.cpp" line="411"/>
         <source>Transform</source>
         <translation>Transformace</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="415"/>
+        <location filename="../common/lc_mainwindow.cpp" line="418"/>
         <source>C&amp;ameras</source>
         <translation>K&amp;amery</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="424"/>
+        <location filename="../common/lc_mainwindow.cpp" line="427"/>
         <source>&amp;Viewpoints</source>
         <translatorcomment>TODO - pohled, hledisko, vyhlídka, zorný úhel,</translatorcomment>
         <translation>&amp;Pohledy</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="433"/>
+        <location filename="../common/lc_mainwindow.cpp" line="436"/>
         <source>Projection</source>
         <translation>Projekce</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="437"/>
+        <location filename="../common/lc_mainwindow.cpp" line="440"/>
         <source>Sh&amp;ading</source>
         <translation>Stínov&amp;ání</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="442"/>
-        <location filename="../common/lc_mainwindow.cpp" line="664"/>
+        <location filename="../common/lc_mainwindow.cpp" line="445"/>
+        <location filename="../common/lc_mainwindow.cpp" line="668"/>
         <source>Tools</source>
         <translation>Nástroje</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="461"/>
+        <location filename="../common/lc_mainwindow.cpp" line="464"/>
         <source>&amp;File</source>
         <translation>&amp;Soubor</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="469"/>
+        <location filename="../common/lc_mainwindow.cpp" line="472"/>
         <source>&amp;Import</source>
         <translation>&amp;Importovat</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="474"/>
+        <location filename="../common/lc_mainwindow.cpp" line="477"/>
         <source>&amp;Export</source>
         <translation>&amp;Exportovat</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="496"/>
+        <location filename="../common/lc_mainwindow.cpp" line="499"/>
         <source>&amp;Edit</source>
         <translation>&amp;Upravit</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="518"/>
+        <location filename="../common/lc_mainwindow.cpp" line="521"/>
         <source>&amp;View</source>
         <translatorcomment>TODO - Zobrazit, pohled,</translatorcomment>
         <translation>&amp;Zobrazit</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="527"/>
+        <location filename="../common/lc_mainwindow.cpp" line="530"/>
         <source>Ste&amp;p</source>
         <translation>Kro&amp;k</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="542"/>
+        <location filename="../common/lc_mainwindow.cpp" line="545"/>
         <source>T&amp;oolbars</source>
         <translation>Panely nástr&amp;ojů</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="553"/>
+        <location filename="../common/lc_mainwindow.cpp" line="557"/>
         <source>&amp;Piece</source>
         <translatorcomment>TODO - dílek, kus</translatorcomment>
         <translation>&amp;Dílek</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="578"/>
+        <location filename="../common/lc_mainwindow.cpp" line="582"/>
         <source>Sub&amp;model</source>
         <translation>Pod&amp;model</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="586"/>
+        <location filename="../common/lc_mainwindow.cpp" line="590"/>
         <source>&amp;Help</source>
         <translation>&amp;Nápověda</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="600"/>
         <location filename="../common/lc_mainwindow.cpp" line="604"/>
+        <location filename="../common/lc_mainwindow.cpp" line="608"/>
         <source>Selection Mode</source>
         <translation>Režim výběru</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="605"/>
+        <location filename="../common/lc_mainwindow.cpp" line="609"/>
         <source>Change selection mode</source>
         <translation>Změna režimu výběru</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="609"/>
+        <location filename="../common/lc_mainwindow.cpp" line="613"/>
         <source>Snap XY</source>
         <translatorcomment>TODO - Přichytit, Lusknutí, Přichycení</translatorcomment>
         <translation>Přichycení XY</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="613"/>
+        <location filename="../common/lc_mainwindow.cpp" line="617"/>
         <source>Snap Z</source>
         <translation>Přichycení Z</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="617"/>
+        <location filename="../common/lc_mainwindow.cpp" line="621"/>
         <source>Snap Menu</source>
         <translation>Nabídka přichycení</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="623"/>
+        <location filename="../common/lc_mainwindow.cpp" line="627"/>
         <source>Movement Snap</source>
         <translatorcomment>TODO - pohyb, přesun</translatorcomment>
         <translation>Přesun přichycení</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="624"/>
+        <location filename="../common/lc_mainwindow.cpp" line="628"/>
         <source>Snap translations to fixed intervals</source>
         <translation>Přichycení posunů k pevným bodům</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="628"/>
+        <location filename="../common/lc_mainwindow.cpp" line="632"/>
         <source>Snap Angle Menu</source>
         <translation>Nabídka úhlů přichycení</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="634"/>
+        <location filename="../common/lc_mainwindow.cpp" line="638"/>
         <source>Rotation Snap</source>
         <translation>Otočení přichycení</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="635"/>
+        <location filename="../common/lc_mainwindow.cpp" line="639"/>
         <source>Snap rotations to fixed intervals</source>
         <translation>Přychycení otáčení k pevným bodům</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="639"/>
+        <location filename="../common/lc_mainwindow.cpp" line="643"/>
         <source>Standard</source>
         <translation>Standard</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="656"/>
+        <location filename="../common/lc_mainwindow.cpp" line="660"/>
         <source>Time</source>
         <translation>Čas</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="686"/>
+        <location filename="../common/lc_mainwindow.cpp" line="690"/>
         <source>Parts</source>
         <translation>Části</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="692"/>
+        <location filename="../common/lc_mainwindow.cpp" line="696"/>
         <source>Colors</source>
         <translation>Barvy</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="710"/>
+        <location filename="../common/lc_mainwindow.cpp" line="706"/>
         <source>Properties</source>
         <translation>Vlastnosti</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="744"/>
+        <location filename="../common/lc_mainwindow.cpp" line="740"/>
         <source>Timeline</source>
         <translation>Časová osa</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="923"/>
+        <location filename="../common/lc_mainwindow.cpp" line="932"/>
         <source>Close Other Tabs</source>
         <translation>Zavřít ostatní záložky</translation>
     </message>
@@ -3793,22 +3913,22 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
         <translation type="vanished">Obnovit zobrazení</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="997"/>
+        <location filename="../common/lc_mainwindow.cpp" line="1006"/>
         <source>The file &apos;%1&apos; has been modified by another application, do you want to reload it?</source>
         <translation>Soubor &apos;%1&apos; byl upraven jinou aplikací, chcete jej znovu načíst?</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="1003"/>
+        <location filename="../common/lc_mainwindow.cpp" line="1012"/>
         <source>File Changed</source>
         <translation>Soubor byl změněn</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="1946"/>
+        <location filename="../common/lc_mainwindow.cpp" line="1963"/>
         <source>%1 (ID: %2)</source>
         <translation>%1 (ID: %2)</translation>
     </message>
     <message numerus="yes">
-        <location filename="../common/lc_mainwindow.cpp" line="1952"/>
+        <location filename="../common/lc_mainwindow.cpp" line="1969"/>
         <source>%n Object(s) selected</source>
         <translation>
             <numerusform>%n vybraný objekt</numerusform>
@@ -3817,104 +3937,104 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
         </translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="1956"/>
+        <location filename="../common/lc_mainwindow.cpp" line="1973"/>
         <source> - %1 (ID: %2)</source>
         <translation> - %1 (ID: %2)</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="1960"/>
+        <location filename="../common/lc_mainwindow.cpp" line="1977"/>
         <source> in group &apos;%1&apos;</source>
         <translation> ve skupině &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="1997"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2014"/>
         <source>Step %1</source>
         <translation>Krok %1</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="2023"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2040"/>
         <source> M: %1 %2 R: %3 </source>
         <translation> M: %1 %2 R: %3 </translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="2039"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2056"/>
         <source>&amp;Undo %1</source>
         <translation>&amp;Zpět %1</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="2044"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2061"/>
         <source>&amp;Undo</source>
         <translation>&amp;Zpět</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="2050"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2067"/>
         <source>&amp;Redo %1</source>
         <translation>&amp;Znovu %1</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="2055"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2072"/>
         <source>&amp;Redo</source>
         <translation>&amp;Znovu</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="2245"/>
-        <location filename="../common/lc_mainwindow.cpp" line="2289"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2262"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2306"/>
         <source>Supported Files (*.lcd *.ldr *.dat *.mpd);;All Files (*.*)</source>
         <translation>Podporované soubory (*.lcd *.ldr *.dat *.mpd);;všechny soubory (*.*)</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="2289"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2306"/>
         <source>Merge Model</source>
         <translation>Sloučit model</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="2305"/>
-        <location filename="../common/lc_mainwindow.cpp" line="2307"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2322"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2324"/>
         <source>LeoCAD</source>
         <translation>LeoCAD</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="2305"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2322"/>
         <source>Merged 1 submodel.</source>
         <translation>Sloučit 1 podmodel.</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="2307"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2324"/>
         <source>Merged %1 submodels.</source>
         <translation>Sloučit %1 podmodelů.</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="2320"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2337"/>
         <source>Import</source>
         <translation>Importovat</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="2320"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2337"/>
         <source>LEGO Diginal Designer Files (*.lxf);;All Files (*.*)</source>
         <translation>LEGO Diginal Designer soubory (*.lxf);;všechny soubory (*.*)</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="2376"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2393"/>
         <source>Supported Files (*.mpd);;All Files (*.*)</source>
         <translation>Podporované soubory (*.mpd);;všechny soubory (*.*)</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="2376"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2393"/>
         <source>Supported Files (*.ldr *.dat *.mpd);;All Files (*.*)</source>
         <translation>Podporované soubory (*.ldr *.dat *.mpd);;všechny soubory (*.*)</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="2388"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2405"/>
         <source>Error</source>
         <translation>Chyba</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="2388"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2405"/>
         <source>Saving files in LCD format is no longer supported, please use the LDR or MPD formats instead.</source>
         <translation>Ukládání souborů ve formátu LCD již není podporováno, místo toho použijte formáty LDR nebo MPD.</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="2407"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2424"/>
         <source>Save changes to &apos;%1&apos;?</source>
         <translation>Chcete uložit změny v &apos;%1&apos;?</translation>
     </message>
@@ -4979,72 +5099,72 @@ GL_EXT_texture_filter_anisotropic rozšíření: %5
         <translation>Exportovat...</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qminifigdialog.cpp" line="169"/>
         <location filename="../qt/lc_qminifigdialog.cpp" line="176"/>
+        <location filename="../qt/lc_qminifigdialog.cpp" line="183"/>
         <source>Save Template</source>
         <translation>Uložit šablonu</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qminifigdialog.cpp" line="169"/>
+        <location filename="../qt/lc_qminifigdialog.cpp" line="176"/>
         <source>Template Name:</source>
         <translation>Název šablony:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qminifigdialog.cpp" line="176"/>
+        <location filename="../qt/lc_qminifigdialog.cpp" line="183"/>
         <source>Template name cannot be empty.</source>
         <translation>Název šablony nesmí být prázdný.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qminifigdialog.cpp" line="182"/>
+        <location filename="../qt/lc_qminifigdialog.cpp" line="189"/>
         <source>Are you sure you want to overwrite the template &apos;%1&apos;?</source>
         <translation>Opravdu chcete přepsat tuto šablonu &apos;%1&apos;?</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qminifigdialog.cpp" line="183"/>
+        <location filename="../qt/lc_qminifigdialog.cpp" line="190"/>
         <source>Overwrite Template</source>
         <translation>Přepsat šablonu</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qminifigdialog.cpp" line="209"/>
+        <location filename="../qt/lc_qminifigdialog.cpp" line="216"/>
         <source>Are you sure you want to delete the template &apos;%1&apos;?</source>
         <translation>Opravdu chcete odstranit tuto šablonu &apos;%1&apos;?</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qminifigdialog.cpp" line="211"/>
+        <location filename="../qt/lc_qminifigdialog.cpp" line="218"/>
         <source>Delete Template</source>
         <translation>Odstranit šablonu</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qminifigdialog.cpp" line="221"/>
+        <location filename="../qt/lc_qminifigdialog.cpp" line="228"/>
         <source>Import Templates</source>
         <translation>Importovat šablony</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qminifigdialog.cpp" line="221"/>
-        <location filename="../qt/lc_qminifigdialog.cpp" line="242"/>
+        <location filename="../qt/lc_qminifigdialog.cpp" line="228"/>
+        <location filename="../qt/lc_qminifigdialog.cpp" line="249"/>
         <source>Minifig Template Files (*.minifig);;All Files (*.*)</source>
         <translation>Šablona Minifig souborů (*.minifig);;všechny soubory (*.*)</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qminifigdialog.cpp" line="230"/>
-        <location filename="../qt/lc_qminifigdialog.cpp" line="251"/>
+        <location filename="../qt/lc_qminifigdialog.cpp" line="237"/>
+        <location filename="../qt/lc_qminifigdialog.cpp" line="258"/>
         <source>Error</source>
         <translation>Chyba</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qminifigdialog.cpp" line="230"/>
+        <location filename="../qt/lc_qminifigdialog.cpp" line="237"/>
         <source>Error reading file &apos;%1&apos;:
 %2</source>
         <translation>Chyba při čtení souboru &apos;%1&apos;:
 %2</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qminifigdialog.cpp" line="242"/>
+        <location filename="../qt/lc_qminifigdialog.cpp" line="249"/>
         <source>Export Templates</source>
         <translation>Exportovat šablony</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qminifigdialog.cpp" line="251"/>
+        <location filename="../qt/lc_qminifigdialog.cpp" line="258"/>
         <source>Error writing to file &apos;%1&apos;:
 %2</source>
         <translation>Chyba zápisu do souboru &apos;%1&apos;:
@@ -5196,133 +5316,133 @@ GL_EXT_texture_filter_anisotropic rozšíření: %5
         <translation>Jazyk:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="49"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="107"/>
         <source>Check for updates:</source>
         <translation>Zkontrolovat aktualizace:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="60"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="50"/>
         <source>Default</source>
         <translation>Výchozí</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="70"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="60"/>
         <source>Deutsch </source>
         <translation>Deutsch </translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="75"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="65"/>
         <source>English</source>
         <translation>English</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="80"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="70"/>
         <source>Français</source>
         <translation>Français</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="85"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="75"/>
         <source>Português</source>
         <translation>Português</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="99"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="89"/>
         <source>Never</source>
         <translation>Nikdy</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="104"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="94"/>
         <source>Once a day</source>
         <translation>Jednou denně</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="109"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="99"/>
         <source>Once a week</source>
         <translation>Jednou týdně</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="133"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="157"/>
         <source>Default author name:</source>
         <translation>Výchozí jméno autora:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="146"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="170"/>
         <source>Fixed direction keys</source>
         <translatorcomment>TODO</translatorcomment>
         <translation>Klávesy fixního směru</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="153"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="177"/>
         <source>Open most recent file on startup</source>
         <translation>Otevírat nejnovější soubor při spuštění</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="160"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="184"/>
         <source>Custom Paths</source>
         <translation>Vlastní cesty</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="166"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="190"/>
         <source>Parts Library:</source>
         <translation>Knihovna součástí:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="199"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="223"/>
         <source>Color Configuration:</source>
         <translation>Barevná konfigurace:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="214"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="238"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="262"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="286"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="310"/>
         <source>...</source>
         <translation>...</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="223"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="247"/>
         <source>Minifig Settings:</source>
         <translation>Nastavení Minifig:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="247"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="271"/>
         <source>PO&amp;V-Ray Executable:</source>
         <translation>Spustitelný soubor PO&amp;V-Ray:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="271"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="295"/>
         <source>&amp;LGEO Library:</source>
         <translation>Knihovna &amp;LGEO:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="306"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="330"/>
         <source>Rendering</source>
         <translation>Vykreslování</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="437"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="570"/>
         <source>Axis icon</source>
         <translatorcomment>TODO</translatorcomment>
         <translation>Ikona osy</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="411"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="442"/>
         <source>Shading Mode:</source>
         <translatorcomment>TODO</translatorcomment>
         <translation>Režim stínování:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="323"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="360"/>
         <source>2x</source>
         <translation>2x</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="328"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="365"/>
         <source>4x</source>
         <translation>4x</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="333"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="370"/>
         <source>8x</source>
         <translation>8x</translation>
     </message>
@@ -5331,566 +5451,650 @@ GL_EXT_texture_filter_anisotropic rozšíření: %5
         <translation type="vanished">šířka</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="397"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="428"/>
         <source>Anti-aliasing</source>
         <translation>Antialiasing</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="354"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="421"/>
         <source>Stud Logo</source>
         <translatorcomment>TODO</translatorcomment>
         <translation>Stud Logo</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="362"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="393"/>
         <source>Logo1</source>
         <translation>Logo1</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="367"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="398"/>
         <source>Logo2</source>
         <translation>Logo2</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="372"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="403"/>
         <source>Logo3</source>
         <translation>Logo3</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="377"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="408"/>
         <source>Logo4</source>
         <translation>Logo4</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="382"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="413"/>
         <source>Logo5</source>
         <translation>Logo5</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="390"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="385"/>
         <source>Edge lines</source>
         <translatorcomment>TODO</translatorcomment>
         <translation>Okrajové čáry</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="419"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="450"/>
         <source>Wireframe</source>
         <translation>Drátový model</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="424"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="455"/>
         <source>Flat Shading</source>
         <translation>Ploché stínování</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="429"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="460"/>
         <source>Default Lights</source>
         <translation>Výchozí osvětlení</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="404"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="378"/>
         <source>Mesh LOD</source>
         <translation>Síť LOD</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="65"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="55"/>
         <source>Czech</source>
         <translation>Česky</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="90"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="80"/>
         <source>Español</source>
         <translation>Španělsky</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="298"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="130"/>
+        <source>Color Theme:</source>
+        <translation>Barevný motiv:</translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="141"/>
+        <source>Dark</source>
+        <translation>Tmavé</translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="146"/>
+        <source>System</source>
+        <translation>Systém</translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="322"/>
         <source>Restore tab layout</source>
         <translation>Obnovit rozvržení karty</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="315"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="352"/>
         <source>Highlight new parts</source>
         <translation>Zvýrazněte nové části</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="444"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="435"/>
         <source>Fade previous steps</source>
         <translation>Zeslabit předchozí kroky</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="491"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="545"/>
+        <source>Interface</source>
+        <translation>Rozhraní</translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="551"/>
+        <source>Overlays</source>
+        <translation>Překrývání</translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="577"/>
+        <source>Overlay Color:</source>
+        <translation>Barva překrytí:</translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="598"/>
+        <source>Active View:</source>
+        <translation>Aktivní zobrazení:</translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="615"/>
         <source>Base Grid</source>
         <translation>Základní mřížka</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="527"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="651"/>
         <source>Draw studs</source>
         <translatorcomment>TODO</translatorcomment>
         <translation>Nakreslete cvočky</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="534"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="658"/>
         <source>studs</source>
         <translatorcomment>TODO</translatorcomment>
         <translation>cvočky</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="541"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="665"/>
         <source>Draw lines every</source>
         <translatorcomment>TODO</translatorcomment>
         <translation>Nakreslí včechny čáry</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="558"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="682"/>
         <source>View Sphere</source>
         <translatorcomment>TODO</translatorcomment>
         <translation>Zobrazit sféru</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="578"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="702"/>
         <source>Disabled</source>
         <translation>Zakázáno</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="583"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="707"/>
         <source>Small</source>
         <translation>Malé</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="588"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="712"/>
         <source>Medium</source>
         <translation>Střední</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="593"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="717"/>
         <source>Large</source>
         <translation>Velké</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="601"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="725"/>
         <source>Highlight Color:</source>
         <translation>Barva zvýraznění:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="608"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="732"/>
         <source>Size:</source>
         <translation>Velikost:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="622"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="746"/>
         <source>Color:</source>
         <translation>Barva:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="636"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="760"/>
         <source>Text Color:</source>
         <translation>Barva textu:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="643"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="767"/>
         <source>Location:</source>
         <translatorcomment>TODO - poloha, umístění , místo</translatorcomment>
         <translation>Umístění:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="651"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="775"/>
         <source>Top Left</source>
         <translation>Vlevo nahoře</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="656"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="780"/>
         <source>Top Right</source>
         <translation>Vpravo nahoře</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="661"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="785"/>
         <source>Bottom Left</source>
         <translation>Vlevo dole</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="666"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="790"/>
         <source>Bottom Right</source>
         <translation>Vpravo dole</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="698"/>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="739"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="822"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="863"/>
         <source>Categories</source>
         <translation>Kategorie</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="704"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="828"/>
         <source>Parts Library Categories</source>
         <translatorcomment>TODO</translatorcomment>
         <translation>Kategorie knihoven součástí</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="773"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="897"/>
         <source>Name</source>
         <translation>Název</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="778"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="902"/>
         <source>Number</source>
         <translation>Číslo</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="789"/>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="917"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="913"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1041"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1174"/>
         <source>Import...</source>
         <translation>Importovat...</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="796"/>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="924"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="920"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1048"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1181"/>
         <source>Export...</source>
         <translation>Exportovat...</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="803"/>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="931"/>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1050"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="927"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1055"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1188"/>
         <source>Reset...</source>
         <translatorcomment>TODO - Vynulovat, obnovit, zrušit, přenastavit, resetovat</translatorcomment>
         <translation>Obnovit...</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="828"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="952"/>
         <source>Category</source>
         <translation>Kategorie</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="834"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="958"/>
         <source>New...</source>
         <translation>Nová...</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="841"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="965"/>
         <source>Edit...</source>
         <translation>Upravit...</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="848"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="972"/>
         <source>Delete...</source>
         <translation>Odstranit...</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="872"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="996"/>
         <source>Keyboard</source>
         <translatorcomment>TODO</translatorcomment>
         <translation>Klávesnice</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="882"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1006"/>
         <source>Keyboard Shortcuts</source>
         <translation>Klávesové zkratky</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="895"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1019"/>
         <source>Command</source>
         <translation>Příkaz</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="900"/>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="959"/>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1079"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1024"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1083"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1217"/>
         <source>Shortcut</source>
         <translation>Zkratka</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="908"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1032"/>
         <source>Search shortcuts</source>
         <translation>Hledání zkratky</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="965"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1089"/>
         <source>Key se&amp;quence:</source>
         <translation>Kom&amp;binace kláves:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="978"/>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1146"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1102"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1284"/>
         <source>Assign</source>
         <translation>Přiřadit</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="985"/>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1153"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1109"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1291"/>
         <source>Remove</source>
         <translation>Odebrat</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1007"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1131"/>
         <source>Mouse</source>
         <translation>Myš</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1015"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1139"/>
         <source>Mouse Shortcuts</source>
         <translation>Zkratky myší</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1030"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1154"/>
         <source>Action</source>
         <translation>Akce</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1035"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1159"/>
         <source>Shortcut 1</source>
         <translation>Zkratka 1</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1040"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1164"/>
         <source>Shortcut 2</source>
         <translation>Zkratka 2</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1087"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1225"/>
         <source>Button:</source>
         <translation>Tlačítko:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1095"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1233"/>
         <source>None</source>
         <translation>Žádné</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1100"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1238"/>
         <source>Left</source>
         <translation>Levé</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1105"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1243"/>
         <source>Middle</source>
         <translation>Střední</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1110"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1248"/>
         <source>Right</source>
         <translation>Pravé</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1118"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1256"/>
         <source>Modifiers:</source>
         <translation>Modifikátory:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1125"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1263"/>
         <source>Control</source>
         <translation>Control</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1132"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1270"/>
         <source>Alt</source>
         <translation>Alt</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1139"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1277"/>
         <source>Shift</source>
         <translation>Shift</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1167"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1305"/>
         <source>Mouse sensitivity:</source>
         <translation>Citlivost myši:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="190"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="209"/>
         <source>Grid spacing must be greater than 0.</source>
         <translation>Rozteč mřížky musí být větší než 0.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="262"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="283"/>
         <source>Select Parts Library Folder</source>
         <translation>Vyberte složku knihovny částí</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="270"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="291"/>
         <source>Select Parts Library Archive</source>
         <translation>Vyberte archiv knihovny částí</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="270"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="291"/>
         <source>Supported Archives (*.zip *.bin);;All Files (*.*)</source>
         <translation>Podporované archivy (*.zip *.bin);;všechny soubory (*.*)</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="278"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="299"/>
         <source>Select Color Configuration File</source>
         <translation>Vyberte konfigurační soubor barev</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="278"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="299"/>
         <source>Settings Files (*.ldr);;All Files (*.*)</source>
         <translation>Soubory nastavení (*.ldr);;všechny soubory (*.*)</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="286"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="307"/>
         <source>Select Minifig Settings File</source>
         <translation>Vyberte soubor nastavení Minifig</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="286"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="307"/>
         <source>Settings Files (*.ini);;All Files (*.*)</source>
         <translation>Soubory nastavení (*.ini);;všechny soubory (*.*)</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="295"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="316"/>
         <source>Executable Files (*.exe);;All Files (*.*)</source>
         <translation>Spustitelné soubory (*.exe);;všechny soubory (*.*)</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="297"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="318"/>
         <source>All Files (*.*)</source>
         <translation>Všechny soubory (*.*)</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="300"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="321"/>
         <source>Select POV-Ray Executable</source>
         <translation>Vyberte spustitelný soubor POV-Ray</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="308"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="329"/>
         <source>Open LGEO Folder</source>
         <translation>Otevřete složku LGEO</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="324"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="339"/>
+        <source>Reset Colors</source>
+        <translation>Obnovit barvy</translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="339"/>
+        <source>Would you like to also reset the interface colors to match the color theme?</source>
+        <translation>Chcete také resetovat barvy rozhraní tak, aby odpovídaly barevnému motivu?</translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="353"/>
+        <source>Select Axes Color</source>
+        <translation>Vybrat barvu os</translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="359"/>
+        <source>Select Overlay Color</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="365"/>
+        <source>Select Active View Color</source>
+        <translation>Vybrat barvu aktivního pohledu</translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="371"/>
         <source>Select Fade Color</source>
         <translation>Výbrat barvu slábnutí</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="330"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="377"/>
         <source>Select Highlight Color</source>
         <translation>Vybrat barvu zvýraznění</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="336"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="383"/>
         <source>Select Grid Stud Color</source>
         <translatorcomment>TODO</translatorcomment>
         <translation>Vyberte barevnou mřížku Stud</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="342"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="389"/>
         <source>Select Grid Line Color</source>
         <translatorcomment>TODO</translatorcomment>
         <translation>Vyberte barevnou mřížku Line</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="348"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="395"/>
         <source>Select View Sphere Color</source>
         <translatorcomment>TODO</translatorcomment>
         <translation>Vyberte pohled dle barvy Sphere</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="354"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="401"/>
         <source>Select View Sphere Text Color</source>
         <translatorcomment>TODO</translatorcomment>
         <translation>Vyberte pohled dle barvy textu Sphere</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="360"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="407"/>
         <source>Select View Sphere Highlight Color</source>
         <translatorcomment>TODO</translatorcomment>
         <translation>Vyberte pohled dle barvy zvíraznění Sphere</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="446"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="499"/>
         <source>Unassigned</source>
         <translation>Nepřiřazeno</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="560"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="613"/>
         <source>Are you sure you want to delete the category &apos;%1&apos;?</source>
         <translation>Opravdu chcete smazat kategorii &apos;%1&apos;?</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="573"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="626"/>
         <source>Import Categories</source>
         <translation>Importovat kategorie</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="573"/>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="592"/>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="812"/>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="832"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="626"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="645"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="865"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="885"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1059"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1080"/>
         <source>Text Files (*.txt);;All Files (*.*)</source>
         <translation>Textové soubory (*.txt);;všechny soubory (*.*)</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="581"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="634"/>
         <source>Error loading categories file.</source>
         <translation>Při načítání souboru kategorií došlo k chybě.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="592"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="645"/>
         <source>Export Categories</source>
         <translation>Exportovat kategorie</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="599"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="652"/>
         <source>Error saving categories file.</source>
-        <translation>Při ukládání souboru kategorií došlo k chybě.</translation>
+        <translation>Chyba při ukládání souboru kategorií.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="606"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="659"/>
         <source>Are you sure you want to load the default categories?</source>
         <translation>Opravdu chcete načíst výchozí kategorie?</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="812"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="865"/>
         <source>Import shortcuts</source>
         <translation>Importovat zkratky</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="820"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="873"/>
         <source>Error loading keyboard shortcuts file.</source>
         <translation>Chyba při čtení souboru klávesových zkratek.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="832"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="885"/>
         <source>Export shortcuts</source>
         <translation>Exportovat zkratky</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="839"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="892"/>
         <source>Error saving keyboard shortcuts file.</source>
-        <translation>Při ukládání souboru klávesových zkratek.</translation>
+        <translation>Chyba při ukládání souboru klávesových zkratek.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="846"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="899"/>
         <source>Are you sure you want to load the default keyboard shortcuts?</source>
         <translation>Opravdu chcete načíst výchozí klávesové zkratky?</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="873"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="926"/>
         <source>Left Button</source>
         <translation>Levé tlačítko</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="878"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="931"/>
         <source>Middle Button</source>
         <translation>Střední tlačítko</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="883"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="936"/>
         <source>Right Button</source>
         <translation>Pravé tlačítko</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="952"/>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="961"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1005"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1014"/>
         <source>Override Shortcut</source>
         <translation>Přepsat zkratky</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="952"/>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="961"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1005"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1014"/>
         <source>This shortcut is already assigned to &apos;%1&apos;, do you want to replace it?</source>
         <translation>Tato zkratka je již přiřazena k &apos;%1&apos;, chcete ji nahradit?</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1006"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1059"/>
+        <source>Import Shortcuts</source>
+        <translation>Importovat zkratky</translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1067"/>
+        <source>Error loading mouse shortcuts file.</source>
+        <translation>Chyba při čtení souboru zkratek myši.</translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1080"/>
+        <source>Export Shortcuts</source>
+        <translation>Exportovat zkratky</translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1086"/>
+        <source>Error saving mouse shortcuts file.</source>
+        <translation>Při ukládání souboru klávesových zkratek došlo k chybě.</translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1091"/>
         <source>Are you sure you want to load the default mouse shortcuts?</source>
         <translation>Opravdu chcete načíst výchozí zkratky pro myš?</translation>
     </message>

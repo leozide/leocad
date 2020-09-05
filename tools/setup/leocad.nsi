@@ -4,7 +4,7 @@
 Name "LeoCAD"
 
 ; The file to write
-OutFile "leocad-setup.exe"
+;OutFile "leocad-setup.exe"
 
 ; Request application privileges for Windows Vista
 ;RequestExecutionLevel admin

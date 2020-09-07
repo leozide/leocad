@@ -263,39 +263,53 @@ lcModel* Project::CreateNewModel(bool ShowModel)
 
 void Project::ShowModelListDialog()
 {
-	QList<QPair<QString, lcModel*>> Models;
-#if (QT_VERSION >= QT_VERSION_CHECK(4, 7, 0))
-	Models.reserve(mModels.GetSize());
-#endif
+	lcQModelListDialog Dialog(gMainWindow, mModels);
 
-	for (int ModelIdx = 0; ModelIdx < mModels.GetSize(); ModelIdx++)
-	{
-		lcModel* Model = mModels[ModelIdx];
-		Models.append(QPair<QString, lcModel*>(Model->GetProperties().mFileName, Model));
-	}
-
-	lcQModelListDialog Dialog(gMainWindow, Models);
-
-	if (Dialog.exec() != QDialog::Accepted || Models.isEmpty())
+	if (Dialog.exec() != QDialog::Accepted)
 		return;
 
 	lcArray<lcModel*> NewModels;
+	std::vector<lcModelListDialogEntry> Results = Dialog.GetResults();
 
-	for (QList<QPair<QString, lcModel*>>::iterator it = Models.begin(); it != Models.end(); it++)
+	for (const lcModelListDialogEntry& Entry : Results)
 	{
-		lcModel* Model = it->second;
+		lcModel* Model = Entry.ExistingModel;
 
 		if (!Model)
 		{
-			Model = new lcModel(it->first);
+			const lcModel* Source = Entry.DuplicateSource;
+
+			if (!Source)
+			{
+				Model = new lcModel(Entry.Name);
+			}
+			else
+			{
+				Model = new lcModel(Source->GetProperties().mFileName);
+
+				QByteArray File;
+
+				QTextStream SaveStream(&File);
+				Source->SaveLDraw(SaveStream, false);
+				SaveStream.flush();
+
+				QBuffer Buffer(&File);
+				Buffer.open(QIODevice::ReadOnly);
+
+				Model->LoadLDraw(Buffer, this);
+				Model->SetFileName(Entry.Name);
+				Model->CreatePieceInfo(this);
+			}
+
 			Model->CreatePieceInfo(this);
 			Model->SetSaved();
+
 			mModified = true;
 		}
-		else if (Model->GetProperties().mFileName != it->first)
+		else if (Model->GetProperties().mFileName != Entry.Name)
 		{
-			Model->SetFileName(it->first);
-			lcGetPiecesLibrary()->RenamePiece(Model->GetPieceInfo(), it->first.toLatin1().constData());
+			Model->SetFileName(Entry.Name);
+			lcGetPiecesLibrary()->RenamePiece(Model->GetPieceInfo(), Entry.Name.toLatin1().constData());
 
 			for (lcModel* CheckModel : mModels)
 				CheckModel->RenamePiece(Model->GetPieceInfo());

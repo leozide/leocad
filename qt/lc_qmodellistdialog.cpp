@@ -3,18 +3,25 @@
 #include "ui_lc_qmodellistdialog.h"
 #include "project.h"
 #include "lc_profile.h"
+#include "lc_model.h"
 
-lcQModelListDialog::lcQModelListDialog(QWidget* Parent, QList<QPair<QString, lcModel*>>& Models)
-	: QDialog(Parent), mModels(Models), ui(new Ui::lcQModelListDialog)
+enum class lcModelListRole
+{
+	ExistingModel = Qt::UserRole,
+	DuplicateModel
+};
+
+lcQModelListDialog::lcQModelListDialog(QWidget* Parent, const lcArray<lcModel*> Models)
+	: QDialog(Parent), ui(new Ui::lcQModelListDialog)
 {
 	mActiveModelItem = nullptr;
 
 	ui->setupUi(this);
 
-	for (QList<QPair<QString, lcModel*>>::iterator it = Models.begin(); it != Models.end(); it++)
+	for (const lcModel* Model : Models)
 	{
-		QListWidgetItem* Item = new QListWidgetItem(it->first);
-		Item->setData(Qt::UserRole, QVariant::fromValue<uintptr_t>((uintptr_t)it->second));
+		QListWidgetItem* Item = new QListWidgetItem(Model->GetProperties().mFileName);
+		Item->setData(static_cast<int>(lcModelListRole::ExistingModel), QVariant::fromValue<uintptr_t>((uintptr_t)Model));
 		ui->ModelList->addItem(Item);
 	}
 
@@ -34,6 +41,27 @@ lcQModelListDialog::~lcQModelListDialog()
 int lcQModelListDialog::GetActiveModelIndex() const
 {
 	return ui->ModelList->row(mActiveModelItem);
+}
+
+std::vector<lcModelListDialogEntry> lcQModelListDialog::GetResults() const
+{
+	std::vector<lcModelListDialogEntry> Models;
+	Models.reserve(ui->ModelList->count());
+
+	for (int ItemIdx = 0; ItemIdx < ui->ModelList->count(); ItemIdx++)
+	{
+		QListWidgetItem* Item = ui->ModelList->item(ItemIdx);
+
+		lcModelListDialogEntry Entry;
+
+		Entry.Name = Item->text();
+		Entry.ExistingModel = reinterpret_cast<lcModel*>(Item->data(static_cast<int>(lcModelListRole::ExistingModel)).value<uintptr_t>());
+		Entry.DuplicateSource = reinterpret_cast<lcModel*>(Item->data(static_cast<int>(lcModelListRole::DuplicateModel)).value<uintptr_t>());
+
+		Models.emplace_back(Entry);
+	}
+
+	return Models;
 }
 
 void lcQModelListDialog::UpdateButtons()
@@ -66,14 +94,6 @@ void lcQModelListDialog::UpdateButtons()
 
 void lcQModelListDialog::accept()
 {
-	mModels.clear();
-
-	for (int ItemIdx = 0; ItemIdx < ui->ModelList->count(); ItemIdx++)
-	{
-		QListWidgetItem* Item = ui->ModelList->item(ItemIdx);
-		mModels.append(QPair<QString, lcModel*>(Item->text(), (lcModel*)Item->data(Qt::UserRole).value<uintptr_t>()));
-	}
-
 	if (ui->SetActiveModel->isChecked())
 		mActiveModelItem = ui->ModelList->currentItem();
 
@@ -96,7 +116,6 @@ void lcQModelListDialog::on_NewModel_clicked()
 		return;
 
 	QListWidgetItem* Item = new QListWidgetItem(Name);
-	Item->setData(Qt::UserRole, QVariant::fromValue<uintptr_t>(0));
 	ui->ModelList->addItem(Item);
 	UpdateButtons();
 }
@@ -174,12 +193,17 @@ void lcQModelListDialog::on_ExportModel_clicked()
 	if (SelectedItems.size() == 1)
 	{
 		QListWidgetItem* CurrentItem = SelectedItems[0];
-		lcModel* Model = (lcModel*)CurrentItem->data(Qt::UserRole).value<uintptr_t>();
+		lcModel* Model = (lcModel*)CurrentItem->data(static_cast<int>(lcModelListRole::ExistingModel)).value<uintptr_t>();
 
 		if (!Model)
 		{
-			QMessageBox::information(this, tr("LeoCAD"), tr("Nothing to export."));
-			return;
+			Model = (lcModel*)CurrentItem->data(static_cast<int>(lcModelListRole::DuplicateModel)).value<uintptr_t>();
+
+			if (!Model)
+			{
+				QMessageBox::information(this, tr("LeoCAD"), tr("Nothing to export."));
+				return;
+			}
 		}
 
 		QString SaveFileName = QFileInfo(QDir(lcGetProfileString(LC_PROFILE_PROJECTS_PATH)), CurrentItem->text()).absoluteFilePath();
@@ -195,11 +219,14 @@ void lcQModelListDialog::on_ExportModel_clicked()
 	}
 	else
 	{
-		QString Folder = QFileDialog::getExistingDirectory(this, tr("Select Parts Library Folder"), lcGetProfileString(LC_PROFILE_PROJECTS_PATH));
+		QString Folder = QFileDialog::getExistingDirectory(this, tr("Select Export Folder"), lcGetProfileString(LC_PROFILE_PROJECTS_PATH));
 
 		for (QListWidgetItem* CurrentItem : SelectedItems)
 		{
-			lcModel* Model = (lcModel*)CurrentItem->data(Qt::UserRole).value<uintptr_t>();
+			lcModel* Model = (lcModel*)CurrentItem->data(static_cast<int>(lcModelListRole::ExistingModel)).value<uintptr_t>();
+
+			if (!Model)
+				Model = (lcModel*)CurrentItem->data(static_cast<int>(lcModelListRole::DuplicateModel)).value<uintptr_t>();
 
 			if (Model)
 			{
@@ -210,6 +237,46 @@ void lcQModelListDialog::on_ExportModel_clicked()
 
 		lcSetProfileString(LC_PROFILE_PROJECTS_PATH, Folder);
 	}
+}
+
+void lcQModelListDialog::on_DuplicateModel_clicked()
+{
+	QList<QListWidgetItem*>	SelectedItems = ui->ModelList->selectedItems();
+
+	if (SelectedItems.isEmpty())
+	{
+		QMessageBox::information(this, tr("Duplicate Submodel"), tr("No submodel selected."));
+		return;
+	}
+
+	for (QListWidgetItem* CurrentItem : SelectedItems)
+	{
+		QStringList ModelNames;
+
+		for (int ItemIdx = 0; ItemIdx < ui->ModelList->count(); ItemIdx++)
+			ModelNames.append(ui->ModelList->item(ItemIdx)->text());
+
+		QString Name = CurrentItem->text();
+
+		do
+		{
+			Name = tr("Copy of ") + Name;
+		} while (ModelNames.contains(Name, Qt::CaseInsensitive));
+
+		Name = lcGetActiveProject()->GetNewModelName(this, tr("Duplicate Submodel"), Name, ModelNames);
+
+		if (Name.isEmpty())
+			continue;
+
+		QListWidgetItem* Item = new QListWidgetItem(Name);
+		uintptr_t ExistingModel = CurrentItem->data(static_cast<int>(lcModelListRole::ExistingModel)).value<uintptr_t>();
+		if (!ExistingModel)
+			ExistingModel = CurrentItem->data(static_cast<int>(lcModelListRole::DuplicateModel)).value<uintptr_t>();
+		Item->setData(static_cast<int>(lcModelListRole::DuplicateModel), QVariant::fromValue<uintptr_t>(ExistingModel));
+		ui->ModelList->addItem(Item);
+	}
+
+	UpdateButtons();
 }
 
 void lcQModelListDialog::on_MoveUp_clicked()

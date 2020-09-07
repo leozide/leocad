@@ -54,6 +54,13 @@
         </widget>
        </item>
        <item>
+        <widget class="QPushButton" name="DuplicateModel">
+         <property name="text">
+          <string>Duplicate...</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QPushButton" name="MoveUp">
          <property name="text">
           <string>Move &amp;Up</string>
@@ -109,8 +116,10 @@
   <tabstop>DeleteModel</tabstop>
   <tabstop>RenameModel</tabstop>
   <tabstop>ExportModel</tabstop>
+  <tabstop>DuplicateModel</tabstop>
   <tabstop>MoveUp</tabstop>
   <tabstop>MoveDown</tabstop>
+  <tabstop>SetActiveModel</tabstop>
  </tabstops>
  <resources/>
  <connections>

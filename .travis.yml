@@ -40,7 +40,7 @@ install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then 
       brew install qt5 grep;
       brew link --force qt5;
-      wget https://github.com/leozide/leocad/releases/download/v18.02/Library-Linux-11494.zip -O library.zip;
+      wget https://github.com/leozide/leocad/releases/download/v19.07.1/Library-Linux-14384.zip -O library.zip;
       unzip library.zip;
     fi
 

@@ -1,0 +1,52 @@
+version: '{branch}.{build}'
+skip_tags: true
+image:
+- Visual Studio 2019
+- Ubuntu2004
+- macos
+configuration: Release
+platform: x64
+before_build:
+- cmd: >-
+    call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
+    set PATH=C:\Qt\5.15.0\msvc2019_64\bin;%PATH%
+    git rev-parse --short HEAD > version.txt
+    set /p VERSION= < version.txt
+    qmake -v
+    qmake -tp vc
+- sh: >-
+    qmake -v
+    qmake PREFIX=/usr -r
+    make -j$(nproc)
+build:
+  project: leocad.vcxproj
+  verbosity: minimal
+after_build:
+- cmd: "7z a symbols.zip build\\release\\leocad.exe build\\release\\leocad.pdb\nappveyor PushArtifact symbols.zip\nif defined APPVEYOR_PULL_REQUEST_NUMBER appveyor exit\nmkdir appdir\ncopy build\\release\\leocad.exe appdir\ncopy docs\\readme.txt appdir\nset DOWNLOAD_LIBRARY=yes\nif defined DOWNLOAD_LIBRARY ( appveyor DownloadFile https://github.com/leozide/leocad/releases/download/v19.07.1/Library-Linux-14384.zip -FileName Library.zip & 7z e Library.zip & copy library.bin appdir\\library.bin ) ELSE ( copy resources\\library.zip appdir\\library.bin )\nappveyor DownloadFile https://github.com/leozide/povray/releases/download/continuous/povconsole32-sse2.exe -FileName appdir\\povconsole32-sse2.exe \nwindeployqt appdir\\leocad.exe\ncopy tools\\setup\\leocad.nsi .\ncopy tools\\setup\\setup.ico .\ncopy \"%VCToolsRedistDir%\\vcredist_x64.exe\" appdir\n\"C:\\Program Files (x86)\\NSIS\\makensis.exe\" /V4 /DX64 \"/XOutFile LeoCAD-Windows-%VERSION%.exe\" leocad.nsi"
+- sh: >-
+    if defined APPVEYOR_PULL_REQUEST_NUMBER appveyor exit
+    appveyor DownloadFile https://github.com/leozide/leocad/releases/download/v19.07.1/Library-Linux-14384.zip -FileName library.zip
+    unzip library.zip
+    mkdir -p AppDir/usr/share/leocad
+    mv library.bin AppDir/usr/share/leocad/library.bin
+    appveyor DownloadFile https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage
+    chmod a+x linuxdeployqt*.AppImage 
+    unset QTDIR; unset QT_PLUGIN_PATH ; unset LD_LIBRARY_PATH
+    export VERSION=$(git rev-parse --short HEAD)
+    ./linuxdeployqt*.AppImage ./AppDir/usr/share/applications/*.desktop -bundle-non-qt-libs
+    ./linuxdeployqt*.AppImage --appimage-extract
+    export PATH=$(readlink -f ./squashfs-root/usr/bin/):$PATH
+    ./squashfs-root/usr/bin/appimagetool AppDir/
+    mv ./LeoCAD-$VERSION-x86_64.AppImage ./LeoCAD-Linux-$VERSION-x86_64.AppImage 
+
+artifacts:
+- path: LeoCAD-Windows-$(VERSION).exe
+  name: leocad
+deploy:
+- provider: GitHub
+  tag: continuous
+  description: Continuous build for commit $(appveyor_repo_commit)
+  auth_token:
+    secure: +EZPzYX4wUEc6MYg4kBLx9TogAqeeeWUPgtEW3VtAJATrBtxwpuOQIHrrR4hbc7a
+  artifact: LeoCAD-Windows-$(version).exe
+  force_update: true

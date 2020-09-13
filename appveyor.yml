@@ -35,7 +35,7 @@ for:
   - copy tools\setup\leocad.nsi .
   - copy tools\setup\setup.ico .
   - copy "%VCToolsRedistDir%\vcredist_x64.exe" appdir
-  - "C:\Program Files (x86)\NSIS\makensis.exe" /V4 /DX64 "/XOutFile LeoCAD-Windows-%VERSION%.exe" leocad.nsi
+  - "C:\\Program Files (x86)\\NSIS\\makensis.exe" /V4 /DX64 "/XOutFile LeoCAD-Windows-%VERSION%.exe" leocad.nsi
   artifacts:
   - path: symbols.zip
     name: symbols

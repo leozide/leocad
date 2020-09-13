@@ -4,13 +4,13 @@ image:
 - Ubuntu2004
 - macos
 - Visual Studio 2019
+configuration: Release
+platform: x64
 
 for:
 - matrix:
     only:
       - image: Visual Studio 2019
-  configuration: Release
-  platform: x64
   before_build:
   - call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
   - set PATH=C:\Qt\5.15.0\msvc2019_64\bin;%PATH%
@@ -47,7 +47,10 @@ for:
       - image: Ubuntu2004
   before_build:
   - $HOME/Qt/latest/gcc_64/bin/qmake -v
+  build: off
+  build_script:
   - $HOME/Qt/latest/gcc_64/bin/qmake PREFIX=/usr -r
+  - make
   after_build:
   - if defined APPVEYOR_PULL_REQUEST_NUMBER appveyor exit
   - appveyor DownloadFile https://github.com/leozide/leocad/releases/download/v19.07.1/Library-Linux-14384.zip -FileName library.zip
@@ -73,8 +76,11 @@ for:
   - wget https://github.com/leozide/leocad/releases/download/v19.07.1/Library-Linux-14384.zip -O library.zip;
   - unzip library.zip;
   before_build:
-  - $HOME/Qt/latest/gcc_64/bin/qmake -v
-  - $HOME/Qt/latest/gcc_64/bin/qmake PREFIX=/usr -r
+  - qmake -v
+  build: off
+  build_script:
+  - qmake -r
+  - make
 
 deploy:
 - provider: GitHub

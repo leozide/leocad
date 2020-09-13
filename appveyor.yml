@@ -6,6 +6,18 @@ image:
 - Visual Studio 2019
 configuration: Release
 platform: x64
+
+for:
+-
+  matrix:
+    only:
+      - image: macos
+  before_build:
+  - sh: brew install qt5 grep;
+  - sh: brew link --force qt5;
+  - sh: wget https://github.com/leozide/leocad/releases/download/v19.07.1/Library-Linux-14384.zip -O library.zip;
+  - sh: unzip library.zip;
+
 before_build:
 - cmd: call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
 - cmd: set PATH=C:\Qt\5.15.0\msvc2019_64\bin;%PATH%
@@ -15,9 +27,16 @@ before_build:
 - cmd: qmake -tp vc
 - sh: $HOME/Qt/latest/gcc_64/bin/qmake -v
 - sh: $HOME/Qt/latest/gcc_64/bin/qmake PREFIX=/usr -r
-build:
-  project: leocad.vcxproj
-  verbosity: minimal
+
+for:
+-
+  matrix:
+    only:
+      - image: Visual Studio 2019
+  build:
+    project: leocad.vcxproj
+    verbosity: minimal
+
 after_build:
 - cmd: 7z a symbols.zip build\\release\\leocad.exe build\\release\\leocad.pdb
 - cmd: appveyor PushArtifact symbols.zip

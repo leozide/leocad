@@ -1,7 +1,7 @@
 version: '{branch}.{build}'
 skip_tags: true
 image:
-- Ubuntu
+- Ubuntu1604
 - macos
 - Visual Studio 2019
 configuration: Release
@@ -43,7 +43,7 @@ for:
   
 - matrix:
     only:
-      - image: Ubuntu
+      - image: Ubuntu1604
   install:
   - sudo apt-get update
   - sudo apt-get -y install libgl-dev
@@ -79,7 +79,7 @@ for:
   - brew link --force qt5
   - curl -L -o library.zip https://github.com/leozide/leocad/releases/download/v19.07.1/Library-Linux-14384.zip
   - unzip library.zip
-  - curl -L https://github.com/leozide/povray/releases/download/continuous/povray
+  - curl -L -o povray https://github.com/leozide/povray/releases/download/continuous/povray
   - mv povray
   before_build:
   - qmake -v

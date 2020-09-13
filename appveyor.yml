@@ -45,6 +45,7 @@ for:
     only:
       - image: Ubuntu
   install:
+  - sudo apt-get update
   - sudo apt-get -y install libgl-dev
   before_build:
   - $HOME/Qt/latest/gcc_64/bin/qmake -v
@@ -78,6 +79,8 @@ for:
   - brew link --force qt5
   - curl -L -o library.zip https://github.com/leozide/leocad/releases/download/v19.07.1/Library-Linux-14384.zip
   - unzip library.zip
+  - curl -L https://github.com/leozide/povray/releases/download/continuous/povray
+  - mv povray
   before_build:
   - qmake -v
   build: off

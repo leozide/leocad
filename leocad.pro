@@ -158,7 +158,7 @@ macx {
 	document_icon.path = Contents/Resources
 	library.files += $$_PRO_FILE_PWD_/library.bin
 	library.path = Contents/Resources
-	povray.files += $$_PRO_FILE_PWD_/tools/povray/povray
+	povray.files += $$_PRO_FILE_PWD_/povray
 	povray.path = Contents/MacOS
 
 	QMAKE_BUNDLE_DATA += document_icon library povray

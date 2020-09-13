@@ -22,20 +22,20 @@ for:
     project: leocad.vcxproj
     verbosity: minimal
   after_build:
-  - 7z a symbols.zip build\\release\\leocad.exe build\\release\\leocad.pdb
+  - 7z a symbols.zip build\release\leocad.exe build\release\leocad.pdb
   - if defined APPVEYOR_PULL_REQUEST_NUMBER appveyor exit
   - mkdir appdir
-  - copy build\\release\\leocad.exe appdir
-  - copy docs\\readme.txt appdir
+  - copy build\release\leocad.exe appdir
+  - copy docs\readme.txt appdir
   - appveyor DownloadFile https://github.com/leozide/leocad/releases/download/v19.07.1/Library-Linux-14384.zip -FileName library.zip
   - 7z e library.zip
-  - copy library.bin appdir\\library.bin
-  - appveyor DownloadFile https://github.com/leozide/povray/releases/download/continuous/povconsole32-sse2.exe -FileName appdir\\povconsole32-sse2.exe 
-  - windeployqt appdir\\leocad.exe
-  - copy tools\\setup\\leocad.nsi .
-  - copy tools\\setup\\setup.ico .
-  - copy \"%VCToolsRedistDir%\\vcredist_x64.exe\" appdir
-  - \"C:\\Program Files (x86)\\NSIS\\makensis.exe\" /V4 /DX64 \"/XOutFile LeoCAD-Windows-%VERSION%.exe\" leocad.nsi"
+  - copy library.bin appdir\library.bin
+  - appveyor DownloadFile https://github.com/leozide/povray/releases/download/continuous/povconsole32-sse2.exe -FileName appdir\povconsole32-sse2.exe 
+  - windeployqt appdir\leocad.exe
+  - copy tools\setup\leocad.nsi .
+  - copy tools\setup\setup.ico .
+  - copy "%VCToolsRedistDir%\vcredist_x64.exe" appdir
+  - "C:\Program Files (x86)\NSIS\makensis.exe" /V4 /DX64 "/XOutFile LeoCAD-Windows-%VERSION%.exe" leocad.nsi
   artifacts:
   - path: symbols.zip
     name: symbols
@@ -73,7 +73,7 @@ for:
   install:
   - brew install qt5 grep;
   - brew link --force qt5;
-  - wget https://github.com/leozide/leocad/releases/download/v19.07.1/Library-Linux-14384.zip -O library.zip;
+  - curl -o library.zip https://github.com/leozide/leocad/releases/download/v19.07.1/Library-Linux-14384.zip;
   - unzip library.zip;
   before_build:
   - qmake -v
@@ -81,6 +81,10 @@ for:
   build_script:
   - qmake -r
   - make
+  after_build:
+  - cd build/release
+  - macdeployqt LeoCAD.app -dmg
+  - mv LeoCAD.dmg LeoCAD-macOS-$(git rev-parse --short HEAD).dmg
 
 deploy:
 - provider: GitHub

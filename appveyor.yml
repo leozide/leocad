@@ -23,7 +23,6 @@ for:
     verbosity: minimal
   after_build:
   - 7z a symbols.zip build/release/leocad.exe build/release/leocad.pdb
-  - if defined APPVEYOR_PULL_REQUEST_NUMBER appveyor exit
   - mkdir appdir
   - copy build\release\leocad.exe appdir
   - copy docs\readme.txt appdir
@@ -34,8 +33,8 @@ for:
   - windeployqt appdir\leocad.exe
   - copy tools\setup\leocad.nsi .
   - copy tools\setup\setup.ico .
-  - "copy \"%VCToolsRedistDir%\\vcredist_x64.exe\" appdir"
-  - '\"C:\Program Files (x86)\NSIS\makensis.exe\" /V4 /DX64 \"/XOutFile LeoCAD-Windows-%VERSION%.exe\" leocad.nsi'
+  - 'copy "%VCToolsRedistDir%\vcredist_x64.exe" appdir'
+  - '"C:\Program Files (x86)\NSIS\makensis.exe" /V4 /DX64 "/XOutFile LeoCAD-Windows-%VERSION%.exe" leocad.nsi'
   artifacts:
   - path: symbols.zip
     name: symbols
@@ -52,9 +51,8 @@ for:
   build: off
   build_script:
   - $HOME/Qt/latest/gcc_64/bin/qmake PREFIX=/usr -r
-  - make
+  - make -j$(nproc)
   after_build:
-  - if defined APPVEYOR_PULL_REQUEST_NUMBER appveyor exit
   - appveyor DownloadFile https://github.com/leozide/leocad/releases/download/v19.07.1/Library-Linux-14384.zip -FileName library.zip
   - unzip library.zip
   - mkdir -p AppDir/usr/share/leocad
@@ -75,7 +73,7 @@ for:
   install:
   - brew install qt5 grep
   - brew link --force qt5
-  - curl -o library.zip https://github.com/leozide/leocad/releases/download/v19.07.1/Library-Linux-14384.zip
+  - curl -L -o library.zip https://github.com/leozide/leocad/releases/download/v19.07.1/Library-Linux-14384.zip
   - cat library.zip
   - unzip library.zip
   before_build:
@@ -83,7 +81,7 @@ for:
   build: off
   build_script:
   - qmake -r
-  - make
+  - make -j$(nproc)
   after_build:
   - cd build/release
   - macdeployqt LeoCAD.app -dmg

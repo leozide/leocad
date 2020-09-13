@@ -34,8 +34,8 @@ for:
   - windeployqt appdir\leocad.exe
   - copy tools\setup\leocad.nsi .
   - copy tools\setup\setup.ico .
-  - copy \"%VCToolsRedistDir%\\vcredist_x64.exe\" appdir
-  - \"C:\\Program Files (x86)\\NSIS\\makensis.exe\" /V4 /DX64 /XOutFile LeoCAD-Windows-%VERSION%.exe leocad.nsi
+  - "copy \"%VCToolsRedistDir%\\vcredist_x64.exe\" appdir"
+  - "\"C:\\Program Files (x86)\\NSIS\\makensis.exe\" /V4 /DX64 \"/XOutFile LeoCAD-Windows-%VERSION%.exe\" leocad.nsi
   artifacts:
   - path: symbols.zip
     name: symbols
@@ -46,7 +46,7 @@ for:
     only:
       - image: Ubuntu2004
   install:
-  - sudo apt-get install libgl-dev
+  - sudo apt-get -y install libgl-dev
   before_build:
   - $HOME/Qt/latest/gcc_64/bin/qmake -v
   build: off
@@ -76,7 +76,7 @@ for:
   - brew install qt5 grep
   - brew link --force qt5
   - curl -o library.zip https://github.com/leozide/leocad/releases/download/v19.07.1/Library-Linux-14384.zip
-  - echo library.zip
+  - cat library.zip
   - unzip library.zip
   before_build:
   - qmake -v

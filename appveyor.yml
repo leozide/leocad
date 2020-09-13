@@ -7,17 +7,15 @@ image:
 configuration: Release
 platform: x64
 before_build:
-- cmd: >-
-    call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
-    set PATH=C:\Qt\5.15.0\msvc2019_64\bin;%PATH%
-    git rev-parse --short HEAD > version.txt
-    set /p VERSION= < version.txt
-    qmake -v
-    qmake -tp vc
-- sh: >-
-    qmake -v
-    qmake PREFIX=/usr -r
-    make -j$(nproc)
+- cmd: call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
+- cmd: set PATH=C:\Qt\5.15.0\msvc2019_64\bin;%PATH%
+- cmd: git rev-parse --short HEAD > version.txt
+- cmd: set /p VERSION= < version.txt
+- cmd: qmake -v
+- cmd: qmake -tp vc
+- sh: $HOME/Qt/latest/bin/qmake -v
+- sh: $HOME/Qt/latest/bin/qmake PREFIX=/usr -r
+- sh: make -j$(nproc)
 build:
   project: leocad.vcxproj
   verbosity: minimal

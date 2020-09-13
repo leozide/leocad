@@ -54,6 +54,7 @@ for:
   - $HOME/Qt/latest/gcc_64/bin/qmake PREFIX=/usr -r
   - make -j$(nproc)
   after_build:
+  - make install INSTALL_ROOT=AppDir
   - appveyor DownloadFile https://github.com/leozide/leocad/releases/download/v19.07.1/Library-Linux-14384.zip -FileName library.zip
   - unzip library.zip
   - mkdir -p AppDir/usr/share/leocad

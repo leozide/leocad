@@ -1,7 +1,7 @@
 version: '{branch}.{build}'
 skip_tags: true
 image:
-- Ubuntu2004
+- Ubuntu
 - macos
 - Visual Studio 2019
 configuration: Release
@@ -39,11 +39,11 @@ for:
   - path: symbols.zip
     name: symbols
   - path: LeoCAD-Windows-$(VERSION).exe
-    name: leocad
+    name: leocad-Windows
   
 - matrix:
     only:
-      - image: Ubuntu2004
+      - image: Ubuntu
   install:
   - sudo apt-get -y install libgl-dev
   before_build:
@@ -66,6 +66,9 @@ for:
   - export PATH=$(readlink -f ./squashfs-root/usr/bin/):$PATH
   - ./squashfs-root/usr/bin/appimagetool AppDir/
   - mv ./LeoCAD-$VERSION-x86_64.AppImage ./LeoCAD-Linux-$VERSION-x86_64.AppImage 
+  artifacts:
+  - path: LeoCAD-Linux-$VERSION-x86_64.AppImage
+    name: leocad-Linux
 
 - matrix:
     only:
@@ -74,7 +77,6 @@ for:
   - brew install qt5 grep
   - brew link --force qt5
   - curl -L -o library.zip https://github.com/leozide/leocad/releases/download/v19.07.1/Library-Linux-14384.zip
-  - cat library.zip
   - unzip library.zip
   before_build:
   - qmake -v
@@ -86,6 +88,9 @@ for:
   - cd build/release
   - macdeployqt LeoCAD.app -dmg
   - mv LeoCAD.dmg LeoCAD-macOS-$(git rev-parse --short HEAD).dmg
+  artifacts:
+  - path: LeoCAD-macOS-$(git rev-parse --short HEAD).dmg
+    name: leocad-macOS
 
 deploy:
 - provider: GitHub
@@ -93,5 +98,5 @@ deploy:
   description: Continuous build for commit $(appveyor_repo_commit)
   auth_token:
     secure: +EZPzYX4wUEc6MYg4kBLx9TogAqeeeWUPgtEW3VtAJATrBtxwpuOQIHrrR4hbc7a
-  artifact: LeoCAD-Windows-$(version).exe
+  artifact: 'LeoCAD-Windows-*.exe,LeoCAD-Linux-*.AppImage,LeoCAD-macOS-*.dmg'
   force_update: true

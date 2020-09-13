@@ -296,6 +296,7 @@ public:
 	void SetShadingMode(lcShadingMode ShadingMode);
 	void SetSelectionMode(lcSelectionMode SelectionMode);
 	void ToggleViewSphere();
+	void ToggleAxisIcon();
 	void ToggleFadePreviousSteps();
 
 	void NewProject();

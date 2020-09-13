@@ -1257,6 +1257,13 @@ void lcMainWindow::ToggleViewSphere()
 	UpdateAllViews();
 }
 
+void lcMainWindow::ToggleAxisIcon()
+{
+	lcGetPreferences().mDrawAxes = !lcGetPreferences().mDrawAxes;
+
+	UpdateAllViews();
+}
+
 void lcMainWindow::ToggleFadePreviousSteps()
 {
 	lcGetPreferences().mFadeSteps = !lcGetPreferences().mFadeSteps;
@@ -2732,6 +2739,10 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 
 	case LC_VIEW_TOGGLE_VIEW_SPHERE:
 		ToggleViewSphere();
+		break;
+
+	case LC_VIEW_TOGGLE_AXIS_ICON:
+		ToggleAxisIcon();
 		break;
 
 	case LC_VIEW_FADE_PREVIOUS_STEPS:

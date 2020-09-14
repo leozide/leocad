@@ -39,7 +39,7 @@ for:
   - path: symbols.zip
     name: symbols
   - path: LeoCAD-Windows-$(VERSION).exe
-    name: leocad-Windows
+    name: leocad
   
 - matrix:
     only:
@@ -70,8 +70,8 @@ for:
   - ./squashfs-root/usr/bin/appimagetool AppDir/
   - mv ./LeoCAD-$VERSION-x86_64.AppImage ./LeoCAD-Linux-$VERSION-x86_64.AppImage 
   artifacts:
-  - path: LeoCAD-Linux-$VERSION-x86_64.AppImage
-    name: leocad-Linux
+  - path: LeoCAD-Linux-$(VERSION)-x86_64.AppImage
+    name: leocad
 
 - matrix:
     only:
@@ -94,8 +94,8 @@ for:
   - export VERSION=$(git rev-parse --short HEAD)
   - mv LeoCAD.dmg LeoCAD-macOS-$VERSION.dmg
   artifacts:
-  - path: LeoCAD-macOS-$VERSION.dmg
-    name: leocad-macOS
+  - path: LeoCAD-macOS-$(VERSION).dmg
+    name: leocad
 
 deploy:
 - provider: GitHub
@@ -103,5 +103,7 @@ deploy:
   description: Continuous build for commit $(appveyor_repo_commit)
   auth_token:
     secure: +EZPzYX4wUEc6MYg4kBLx9TogAqeeeWUPgtEW3VtAJATrBtxwpuOQIHrrR4hbc7a
-  artifact: 'LeoCAD-Windows-*.exe,LeoCAD-Linux-*.AppImage,LeoCAD-macOS-*.dmg'
+  artifact: leocad
   force_update: true
+  on:
+    branch: master

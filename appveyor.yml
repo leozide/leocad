@@ -46,7 +46,7 @@ for:
       - image: Ubuntu1604
   install:
   - sudo apt-get update
-  - sudo apt-get -y install libgl-dev
+  - sudo apt-get -y install libgl-dev libxkbcommon-dev
   before_build:
   - $HOME/Qt/latest/gcc_64/bin/qmake -v
   build: off

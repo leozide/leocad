@@ -92,7 +92,7 @@ for:
   - cd build/release
   - macdeployqt LeoCAD.app -dmg
   - export VERSION=$(git rev-parse --short HEAD)
-  - mv LeoCAD.dmg LeoCAD-macOS-$VERSION.dmg
+  - mv LeoCAD.dmg ../../LeoCAD-macOS-$VERSION.dmg
   artifacts:
   - path: LeoCAD-macOS-$(VERSION).dmg
     name: leocad
@@ -100,7 +100,7 @@ for:
 deploy:
 - provider: GitHub
   tag: continuous
-  description: Continuous build for commit $(appveyor_repo_commit)
+  description: Continuous build for commit $(VERSION)
   auth_token:
     secure: +EZPzYX4wUEc6MYg4kBLx9TogAqeeeWUPgtEW3VtAJATrBtxwpuOQIHrrR4hbc7a
   artifact: leocad

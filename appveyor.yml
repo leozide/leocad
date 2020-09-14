@@ -46,7 +46,7 @@ for:
       - image: Ubuntu1604
   install:
   - sudo apt-get update
-  - sudo apt-get -y install libgl-dev libxkbcommon-dev
+  - sudo apt-get -y install libgl-dev libxkbcommon-dev libxkbcommon-x11-0
   before_build:
   - $HOME/Qt/latest/gcc_64/bin/qmake -v
   build: off
@@ -91,9 +91,10 @@ for:
   after_build:
   - cd build/release
   - macdeployqt LeoCAD.app -dmg
-  - mv LeoCAD.dmg LeoCAD-macOS-$(git rev-parse --short HEAD).dmg
+  - export VERSION=$(git rev-parse --short HEAD)
+  - mv LeoCAD.dmg LeoCAD-macOS-$VERSION.dmg
   artifacts:
-  - path: LeoCAD-macOS-$(git rev-parse --short HEAD).dmg
+  - path: LeoCAD-macOS-$VERSION.dmg
     name: leocad-macOS
 
 deploy:

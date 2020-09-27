@@ -48,7 +48,7 @@ public:
 	void LoadDefaults();
 	void SaveDefaults();
 
-	bool operator==(const lcModelProperties& Properties)
+	bool operator==(const lcModelProperties& Properties) const
 	{
 		if (mFileName != Properties.mFileName || mModelName != Properties.mModelName || mAuthor != Properties.mAuthor ||
 			mDescription != Properties.mDescription || mComments != Properties.mComments)

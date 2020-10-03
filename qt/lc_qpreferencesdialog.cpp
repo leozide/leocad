@@ -123,6 +123,55 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 	else
 		ui->ViewSphereSizeCombo->setCurrentIndex(0);
 
+	ui->PreviewAxisIconCheckBox->setChecked(mOptions->Preferences.mDrawPreviewAxis);
+
+	ui->PreviewViewSphereCheckBox->setChecked(mOptions->Preferences.mDrawPreviewViewSphere);
+
+	ui->PreviewLocationCombo->setCurrentIndex((int)mOptions->Preferences.mPreviewLocation);
+
+	ui->PreviewPositionCombo->setCurrentIndex((int)mOptions->Preferences.mPreviewPosition);
+
+	if (mOptions->Preferences.mPreviewEnabled)
+	{
+		switch (mOptions->Preferences.mPreviewSize)
+		{
+		case 400:
+			ui->PreviewSizeCombo->setCurrentIndex(2);
+			break;
+		case 300:
+			ui->PreviewSizeCombo->setCurrentIndex(1);
+			break;
+		default: /*Disabled*/
+			ui->PreviewSizeCombo->setCurrentIndex(0);
+			break;
+		}
+	}
+	else
+		ui->PreviewSizeCombo->setCurrentIndex(0);
+
+	ui->PreviewViewSphereLocationCombo->setCurrentIndex((int)mOptions->Preferences.mPreviewViewSphereLocation);
+
+	if (mOptions->Preferences.mPreviewViewSphereEnabled)
+	{
+		switch (mOptions->Preferences.mPreviewViewSphereSize)
+		{
+		case 100:
+			ui->PreviewViewSphereSizeCombo->setCurrentIndex(3);
+			break;
+		case 75:
+			ui->PreviewViewSphereSizeCombo->setCurrentIndex(2);
+			break;
+		case 50:
+			ui->PreviewViewSphereSizeCombo->setCurrentIndex(1);
+			break;
+		default:
+			ui->PreviewViewSphereSizeCombo->setCurrentIndex(0);
+			break;
+		}
+	}
+	else
+		ui->PreviewViewSphereSizeCombo->setCurrentIndex(0);
+
 	ui->studLogo->setChecked(mOptions->StudLogo);
 	if (ui->studLogo->isChecked())
 		ui->studLogoCombo->setCurrentIndex(mOptions->StudLogo - 1);
@@ -176,6 +225,13 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 	on_gridLines_toggled();
 	on_ViewSphereSizeCombo_currentIndexChanged(ui->ViewSphereSizeCombo->currentIndex());
 
+	on_PreviewViewSphereSizeCombo_currentIndexChanged(ui->PreviewViewSphereSizeCombo->currentIndex());
+	on_PreviewSizeCombo_currentIndexChanged(ui->PreviewSizeCombo->currentIndex());
+	on_PreviewPositionCombo_currentIndexChanged(ui->PreviewPositionCombo->currentIndex());
+	ui->PreviewLocationCombo->setEnabled(
+				ui->PreviewSizeCombo->currentIndex() != 0 &&
+				ui->PreviewPositionCombo->currentIndex() != 0);
+
 	updateCategories();
 	ui->categoriesTree->setCurrentItem(ui->categoriesTree->topLevelItem(0));
 
@@ -220,7 +276,7 @@ void lcQPreferencesDialog::accept()
 	mOptions->Preferences.mColorTheme = static_cast<lcColorTheme>(ui->ColorTheme->currentIndex());
 
 	int Language = ui->Language->currentIndex();
-    if (Language < 0 || Language > static_cast<int>(LC_ARRAY_COUNT(gLanguageLocales)))
+	if (Language < 0 || Language > static_cast<int>(LC_ARRAY_COUNT(gLanguageLocales)))
 		Language = 0;
 	mOptions->Language = gLanguageLocales[Language];
 
@@ -274,6 +330,44 @@ void lcQPreferencesDialog::accept()
 		mOptions->StudLogo = ui->studLogoCombo->currentIndex() + 1;
 	else
 		mOptions->StudLogo = 0;
+
+	mOptions->Preferences.mDrawPreviewAxis = ui->PreviewAxisIconCheckBox->isChecked();
+
+	mOptions->Preferences.mDrawPreviewViewSphere = ui->PreviewViewSphereCheckBox->isChecked();
+
+	mOptions->Preferences.mPreviewLocation = (lcPreviewLocation)ui->PreviewLocationCombo->currentIndex();
+
+	mOptions->Preferences.mPreviewPosition = (lcPreviewPosition)ui->PreviewPositionCombo->currentIndex();
+
+	switch (ui->PreviewSizeCombo->currentIndex())
+	{
+	case 2:
+		mOptions->Preferences.mPreviewSize = 400;
+		break;
+	case 1:
+		mOptions->Preferences.mPreviewSize = 300;
+		break;
+	default:
+		mOptions->Preferences.mPreviewEnabled = 0;
+		break;
+	}
+
+	mOptions->Preferences.mPreviewViewSphereLocation = (lcViewSphereLocation)ui->PreviewViewSphereLocationCombo->currentIndex();
+
+	switch (ui->PreviewViewSphereSizeCombo->currentIndex())
+	{
+	case 3:
+		mOptions->Preferences.mPreviewViewSphereSize = 100;
+		break;
+	case 2:
+		mOptions->Preferences.mPreviewViewSphereSize = 75;
+		break;
+	case 1:
+		mOptions->Preferences.mPreviewViewSphereSize = 50;
+		break;
+	default:
+		break;
+	}
 
 	QDialog::accept();
 }
@@ -471,6 +565,26 @@ void lcQPreferencesDialog::on_gridLines_toggled()
 {
 	ui->gridLineColor->setEnabled(ui->gridLines->isChecked());
 	ui->gridLineSpacing->setEnabled(ui->gridLines->isChecked());
+}
+
+void lcQPreferencesDialog::on_PreviewViewSphereSizeCombo_currentIndexChanged(int Index)
+{
+	ui->PreviewViewSphereLocationCombo->setEnabled(Index != 0);
+}
+
+void lcQPreferencesDialog::on_PreviewSizeCombo_currentIndexChanged(int Index)
+{
+	ui->PreviewLocationCombo->setEnabled(Index != 0);
+	if (ui->PreviewPositionCombo->currentIndex() != 0)
+		ui->PreviewPositionCombo->setEnabled(Index != 0);
+	ui->PreviewAxisIconCheckBox->setEnabled(Index != 0);
+	ui->PreviewViewSphereCheckBox->setEnabled(Index != 0);
+}
+
+void lcQPreferencesDialog::on_PreviewPositionCombo_currentIndexChanged(int Index)
+{
+	ui->PreviewSizeCombo->setEnabled(Index != 0);
+	ui->PreviewLocationCombo->setEnabled(Index != 0);
 }
 
 void lcQPreferencesDialog::on_ViewSphereSizeCombo_currentIndexChanged(int Index)

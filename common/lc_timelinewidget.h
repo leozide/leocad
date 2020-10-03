@@ -21,10 +21,12 @@ public slots:
 	void CurrentItemChanged(QTreeWidgetItem* Current, QTreeWidgetItem* Previous);
 	void ItemSelectionChanged();
 	void CustomMenuRequested(QPoint Pos);
+	void PreviewSelection(QTreeWidgetItem* Current);
 
 protected:
 	void dropEvent(QDropEvent* DropEvent) override;
 	void mousePressEvent(QMouseEvent* MouseEvent) override;
+	void mouseDoubleClickEvent(QMouseEvent *event) override;
 	void UpdateModel();
 	void UpdateCurrentStepItem();
 
@@ -33,4 +35,3 @@ protected:
 	QTreeWidgetItem* mCurrentStepItem;
 	bool mIgnoreUpdates;
 };
-

@@ -23,6 +23,7 @@
 #include "lc_qpropertiesdialog.h"
 #include "lc_qutils.h"
 #include "lc_lxf.h"
+#include "lc_previewwidget.h"
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
 #include <QtConcurrent>
 #endif
@@ -180,7 +181,8 @@ void lcModelProperties::ParseLDrawLine(QTextStream& Stream)
 	}
 }
 
-lcModel::lcModel(const QString& FileName)
+lcModel::lcModel(const QString& FileName, bool Preview)
+	: mIsPreview(Preview)
 {
 	mProperties.mModelName = FileName;
 	mProperties.mFileName = FileName;
@@ -196,7 +198,7 @@ lcModel::~lcModel()
 {
 	if (mPieceInfo)
 	{
-		if (gMainWindow && gMainWindow->GetCurrentPieceInfo() == mPieceInfo)
+		if (!mIsPreview && gMainWindow && gMainWindow->GetCurrentPieceInfo() == mPieceInfo)
 			gMainWindow->SetCurrentPieceInfo(nullptr);
 
 		if (mPieceInfo->GetModel() == this)
@@ -264,7 +266,13 @@ void lcModel::DeleteModel()
 	lcReleaseTexture(mBackgroundTexture);
 	mBackgroundTexture = nullptr;
 
-	if (gMainWindow)
+	if (mIsPreview && gPreviewWidget) {
+		lcCamera* Camera = gPreviewWidget->GetCamera();
+
+		if (Camera && !Camera->IsSimple() && mCameras.FindIndex(Camera) != -1)
+			gPreviewWidget->SetCamera(Camera);
+	}
+	else if (gMainWindow)
 	{
 		const lcArray<View*>* Views = gMainWindow->GetViewsForModel(this);
 
@@ -1819,6 +1827,10 @@ void lcModel::SubModelCompareBoundingBox(const lcMatrix44& WorldMatrix, lcVector
 
 void lcModel::SaveCheckpoint(const QString& Description)
 {
+	if (mIsPreview) {
+		return;
+	}
+
 	lcModelHistoryEntry* ModelHistoryEntry = new lcModelHistoryEntry();
 
 	ModelHistoryEntry->Description = Description;
@@ -1840,6 +1852,10 @@ void lcModel::SaveCheckpoint(const QString& Description)
 
 void lcModel::LoadCheckPoint(lcModelHistoryEntry* CheckPoint)
 {
+	if (mIsPreview) {
+		return;
+	}
+
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 	std::vector<PieceInfo*> LoadedInfos;
 
@@ -2424,10 +2440,12 @@ void lcModel::DeleteSelectedObjects()
 {
 	if (RemoveSelectedObjects())
 	{
-		gMainWindow->UpdateTimeline(false, false);
-		gMainWindow->UpdateSelectedObjects(true);
-		gMainWindow->UpdateAllViews();
-		SaveCheckpoint(tr("Deleting"));
+		if (!mIsPreview) {
+			gMainWindow->UpdateTimeline(false, false);
+			gMainWindow->UpdateSelectedObjects(true);
+			gMainWindow->UpdateAllViews();
+			SaveCheckpoint(tr("Deleting"));
+		}
 	}
 }
 
@@ -3861,8 +3879,10 @@ void lcModel::SelectAllPieces()
 		if (Piece->IsVisible(mCurrentStep))
 			Piece->SetSelected(true);
 
-	gMainWindow->UpdateSelectedObjects(true);
-	gMainWindow->UpdateAllViews();
+	if (!mIsPreview) {
+		gMainWindow->UpdateSelectedObjects(true);
+		gMainWindow->UpdateAllViews();
+	}
 }
 
 void lcModel::InvertSelection()
@@ -4026,7 +4046,8 @@ void lcModel::FindPiece(bool FindFirst, bool SearchForward)
 
 void lcModel::UndoAction()
 {
-	if (mUndoHistory.size() < 2)
+
+	if (mIsPreview || mUndoHistory.size() < 2)
 		return;
 
 	lcModelHistoryEntry* Undo = mUndoHistory.front();
@@ -4041,7 +4062,7 @@ void lcModel::UndoAction()
 
 void lcModel::RedoAction()
 {
-	if (mRedoHistory.empty())
+	if (mIsPreview || mRedoHistory.empty())
 		return;
 
 	lcModelHistoryEntry* Redo = mRedoHistory.front();
@@ -4061,7 +4082,7 @@ void lcModel::BeginMouseTool()
 
 void lcModel::EndMouseTool(lcTool Tool, bool Accept)
 {
-	if (!Accept)
+	if (!Accept && !mIsPreview)
 	{
 		LoadCheckPoint(mUndoHistory[0]);
 		return;
@@ -4078,7 +4099,8 @@ void lcModel::EndMouseTool(lcTool Tool, bool Accept)
 		break;
 
 	case LC_TOOL_CAMERA:
-		gMainWindow->UpdateCameraMenu();
+		if (!mIsPreview)
+			gMainWindow->UpdateCameraMenu();
 		SaveCheckpoint(tr("New Camera"));
 		break;
 
@@ -4099,22 +4121,22 @@ void lcModel::EndMouseTool(lcTool Tool, bool Accept)
 		break;
 
 	case LC_TOOL_ZOOM:
-		if (!gMainWindow->GetActiveView()->mCamera->IsSimple())
+		if (!mIsPreview && !gMainWindow->GetActiveView()->mCamera->IsSimple())
 			SaveCheckpoint(tr("Zoom"));
 		break;
 
 	case LC_TOOL_PAN:
-		if (!gMainWindow->GetActiveView()->mCamera->IsSimple())
+		if (!mIsPreview && !gMainWindow->GetActiveView()->mCamera->IsSimple())
 			SaveCheckpoint(tr("Pan"));
 		break;
 
 	case LC_TOOL_ROTATE_VIEW:
-		if (!gMainWindow->GetActiveView()->mCamera->IsSimple())
+		if (!mIsPreview && !gMainWindow->GetActiveView()->mCamera->IsSimple())
 			SaveCheckpoint(tr("Orbit"));
 		break;
 
 	case LC_TOOL_ROLL:
-		if (!gMainWindow->GetActiveView()->mCamera->IsSimple())
+		if (!mIsPreview && !gMainWindow->GetActiveView()->mCamera->IsSimple())
 			SaveCheckpoint(tr("Roll"));
 		break;
 
@@ -4308,7 +4330,8 @@ void lcModel::UpdatePanTool(lcCamera* Camera, const lcVector3& Distance)
 {
 	Camera->Pan(Distance - mMouseToolDistance, mCurrentStep, gMainWindow->GetAddKeys());
 	mMouseToolDistance = Distance;
-	gMainWindow->UpdateAllViews();
+	if (!mIsPreview)
+		gMainWindow->UpdateAllViews();
 }
 
 void lcModel::UpdateOrbitTool(lcCamera* Camera, float MouseX, float MouseY)
@@ -4318,7 +4341,8 @@ void lcModel::UpdateOrbitTool(lcCamera* Camera, float MouseX, float MouseY)
 	Camera->Orbit(MouseX - mMouseToolDistance.x, MouseY - mMouseToolDistance.y, Center, mCurrentStep, gMainWindow->GetAddKeys());
 	mMouseToolDistance.x = MouseX;
 	mMouseToolDistance.y = MouseY;
-	gMainWindow->UpdateAllViews();
+	if (!mIsPreview)
+		gMainWindow->UpdateAllViews();
 }
 
 void lcModel::UpdateRollTool(lcCamera* Camera, float Mouse)
@@ -4384,10 +4408,12 @@ void lcModel::ZoomExtents(lcCamera* Camera, float Aspect)
 	lcVector3 Points[8];
 	lcGetBoxCorners(Min, Max, Points);
 
-	Camera->ZoomExtents(Aspect, Center, Points, 8, mCurrentStep, gMainWindow->GetAddKeys());
+	Camera->ZoomExtents(Aspect, Center, Points, 8, mCurrentStep, mIsPreview ? false : gMainWindow->GetAddKeys());
 
-	gMainWindow->UpdateSelectedObjects(false);
-	gMainWindow->UpdateAllViews();
+	if (!mIsPreview) {
+		gMainWindow->UpdateSelectedObjects(false);
+		gMainWindow->UpdateAllViews();
+	}
 
 	if (!Camera->IsSimple())
 		SaveCheckpoint(tr("Zoom"));
@@ -4395,10 +4421,11 @@ void lcModel::ZoomExtents(lcCamera* Camera, float Aspect)
 
 void lcModel::Zoom(lcCamera* Camera, float Amount)
 {
-	Camera->Zoom(Amount, mCurrentStep, gMainWindow->GetAddKeys());
-	gMainWindow->UpdateSelectedObjects(false);
-	gMainWindow->UpdateAllViews();
-
+	Camera->Zoom(Amount, mCurrentStep, mIsPreview ? false : gMainWindow->GetAddKeys());
+	if (!mIsPreview) {
+		gMainWindow->UpdateSelectedObjects(false);
+		gMainWindow->UpdateAllViews();
+	}
 	if (!Camera->IsSimple())
 		SaveCheckpoint(tr("Zoom"));
 }

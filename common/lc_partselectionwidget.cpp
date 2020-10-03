@@ -11,6 +11,9 @@
 #include "view.h"
 #include "lc_glextensions.h"
 
+#include "lc_qglwidget.h"
+#include "lc_previewwidget.h"
+
  Q_DECLARE_METATYPE(QList<int>)
 
 void lcPartSelectionItemDelegate::paint(QPainter* Painter, const QStyleOptionViewItem& Option, const QModelIndex& Index) const
@@ -412,7 +415,7 @@ void lcPartSelectionListModel::DrawPreview(int InfoIndex)
 
 	glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		
+
 	lcMatrix44 ProjectionMatrix, ViewMatrix;
 
 	Info->ZoomExtents(20.0f, Aspect, ProjectionMatrix, ViewMatrix);
@@ -572,9 +575,9 @@ void lcPartSelectionListView::SetCategory(lcPartCategoryType Type, int Index)
 	case lcPartCategoryType::Category:
 		mListModel->SetCategory(Index);
 		break;
-    case lcPartCategoryType::Count:
-        break;
-    }
+	case lcPartCategoryType::Count:
+		break;
+	}
 
 	setCurrentIndex(mListModel->index(0, 0));
 }
@@ -678,6 +681,91 @@ void lcPartSelectionListView::startDrag(Qt::DropActions SupportedActions)
 	Drag->setMimeData(MimeData);
 
 	Drag->exec(Qt::CopyAction);
+}
+
+void lcPartSelectionListView::mouseDoubleClickEvent(QMouseEvent *event)
+{
+	QAbstractItemView::mouseDoubleClickEvent(event);
+	if ( event->button() == Qt::LeftButton ) {
+		PreviewSelection(currentIndex().row());
+	 }
+}
+
+void lcPartSelectionListView::PreviewSelection(int InfoIndex)
+{
+	PieceInfo* Info = mListModel->GetPieceInfo(InfoIndex);
+	if (!Info)
+		return;
+
+	bool IsSubfile    = Info->IsModel();
+	QString PartType  = Info->mFileName;
+	quint32 ColorCode = IsSubfile ? 16 : lcGetColorCode(mListModel->GetColorIndex());
+	const lcPreferences& Preferences = lcGetPreferences();
+
+	if (Preferences.mPreviewPosition != lcPreviewPosition::Floating) {
+		emit gMainWindow->PreviewPiece(PartType, ColorCode);
+		return;
+	}
+
+	if (!Preferences.mPreviewEnabled)
+		return;
+
+	QString TypeLabel    = IsSubfile ? "Submodel" : "Part";
+	QString WindowTitle  = QString("%1 Preview").arg(TypeLabel);
+
+	lcPreviewWidget *Preview = new lcPreviewWidget();
+
+	lcQGLWidget   *ViewWidget = new lcQGLWidget(nullptr, Preview, true/*isView*/, true/*isPreview*/);
+
+	if (Preview && ViewWidget) {
+		if (!Preview->SetCurrentPiece(PartType, ColorCode))
+			QMessageBox::critical(gMainWindow, tr("Error"), tr("Preview %1 failed.").arg(Info->mFileName));
+
+		ViewWidget->setWindowTitle(WindowTitle);
+		int Size[2] = { 300,200 };
+		if (Preferences.mPreviewSize == 400) {
+			Size[0] = 400; Size[1] = 300;
+		}
+		ViewWidget->preferredSize = QSize(Size[0], Size[1]);
+		float Scale               = ViewWidget->deviceScale();
+		Preview->mWidth           = ViewWidget->width()  * Scale;
+		Preview->mHeight          = ViewWidget->height() * Scale;
+
+		const QRect desktop = QApplication::desktop()->geometry();
+
+		QPoint pos;
+		switch (Preferences.mPreviewLocation)
+		{
+		case lcPreviewLocation::TopRight:
+			pos = mapToGlobal(rect().topRight());
+			break;
+		case lcPreviewLocation::TopLeft:
+			pos = mapToGlobal(rect().topLeft());
+			break;
+		case lcPreviewLocation::BottomRight:
+			pos = mapToGlobal(rect().bottomRight());
+			break;
+		default:
+			pos = mapToGlobal(rect().bottomLeft());
+			break;
+		}
+		if (pos.x() < desktop.left())
+			pos.setX(desktop.left());
+		if (pos.y() < desktop.top())
+			pos.setY(desktop.top());
+
+		if ((pos.x() + ViewWidget->width()) > desktop.width())
+			pos.setX(desktop.width() - ViewWidget->width());
+		if ((pos.y() + ViewWidget->height()) > desktop.bottom())
+			pos.setY(desktop.bottom() - ViewWidget->height());
+		ViewWidget->move(pos);
+
+		ViewWidget->setMinimumSize(100,100);
+		ViewWidget->show();
+		ViewWidget->setFocus();
+	} else {
+		QMessageBox::critical(gMainWindow, tr("Error"), tr("Preview %1 failed.").arg(Info->mFileName));
+	}
 }
 
 lcPartSelectionWidget::lcPartSelectionWidget(QWidget* Parent)

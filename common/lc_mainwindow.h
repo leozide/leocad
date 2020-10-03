@@ -7,6 +7,7 @@
 
 class View;
 class lcPartSelectionWidget;
+class lcPreviewDockWidget;
 class PiecePreview;
 class lcQGLWidget;
 class lcQPartsTree;
@@ -246,6 +247,11 @@ public:
 		return mPartSelectionWidget;
 	}
 
+	lcPreviewDockWidget* GetPreviewWidget() const
+	{
+		return mPreviewWidget;
+	}
+
 	QMenu* GetToolsMenu() const
 	{
 		return mToolsMenu;
@@ -352,6 +358,8 @@ public:
 
 public slots:
 	void ProjectFileChanged(const QString& Path);
+	void PreviewPiece(const QString &, int);
+	void TogglePreviewWidget(bool);
 
 protected slots:
 	void UpdateDockWidgetActions();
@@ -364,6 +372,7 @@ protected slots:
 	void ActionTriggered();
 	void ColorChanged(int ColorIndex);
 	void Print(QPrinter* Printer);
+	void EnableWindowFlags(bool);
 
 protected:
 	void closeEvent(QCloseEvent *event) override;
@@ -384,6 +393,7 @@ protected:
 	void ShowRenderDialog();
 	void ShowInstructionsDialog();
 	void ShowPrintDialog();
+	void CreatePreviewWidget();
 
 	bool OpenProjectFile(const QString& FileName);
 
@@ -423,6 +433,7 @@ protected:
 	QToolBar* mStandardToolBar;
 	QToolBar* mToolsToolBar;
 	QToolBar* mTimeToolBar;
+	QDockWidget* mPreviewToolBar;
 	QDockWidget* mPartsToolBar;
 	QDockWidget* mColorsToolBar;
 	QDockWidget* mPropertiesToolBar;
@@ -435,6 +446,7 @@ protected:
 	QLineEdit* mTransformXEdit;
 	QLineEdit* mTransformYEdit;
 	QLineEdit* mTransformZEdit;
+	lcPreviewDockWidget* mPreviewWidget;
 
 	lcElidedLabel* mStatusBarLabel;
 	QLabel* mStatusPositionLabel;

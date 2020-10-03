@@ -24,6 +24,8 @@
 #include "lc_library.h"
 #include "lc_colors.h"
 
+#include "lc_previewwidget.h"
+
 #if LC_ENABLE_GAMEPAD
 #include <QtGamepad/QGamepad>
 #endif
@@ -105,6 +107,7 @@ lcMainWindow::lcMainWindow()
 	mCurrentPieceInfo = nullptr;
 	mSelectionMode = lcSelectionMode::Single;
 	mModelTabWidget = nullptr;
+	mPreviewToolBar = nullptr;
 
 	memset(&mSearchOptions, 0, sizeof(mSearchOptions));
 
@@ -163,8 +166,8 @@ void lcMainWindow::CreateWidgets()
 	connect(mModelTabWidget->tabBar(), SIGNAL(tabCloseRequested(int)), this, SLOT(ModelTabClosed(int)));
 	connect(mModelTabWidget->tabBar(), SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(ModelTabContextMenuRequested(const QPoint&)));
 #else
-    mModelTabWidget->setMovable(true);
-    mModelTabWidget->setTabsClosable(true);
+	mModelTabWidget->setMovable(true);
+	mModelTabWidget->setTabsClosable(true);
 	connect(mModelTabWidget, SIGNAL(tabCloseRequested(int)), this, SLOT(ModelTabClosed(int)));
 #endif
 	setCentralWidget(mModelTabWidget);
@@ -746,9 +749,69 @@ void lcMainWindow::CreateToolBars()
 	mTimelineToolBar->setWidget(mTimelineWidget);
 	addDockWidget(Qt::RightDockWidgetArea, mTimelineToolBar);
 
+	// Preview
+	const lcPreferences& Preferences = lcGetPreferences();
+	if (Preferences.mPreviewPosition == lcPreviewPosition::Dockable)
+		CreatePreviewWidget();
+
 	tabifyDockWidget(mPartsToolBar, mPropertiesToolBar);
 	tabifyDockWidget(mPropertiesToolBar, mTimelineToolBar);
+
+	connect(mPropertiesToolBar, SIGNAL (topLevelChanged(bool)), this, SLOT (EnableWindowFlags(bool)));
+	connect(mTimelineToolBar,   SIGNAL (topLevelChanged(bool)), this, SLOT (EnableWindowFlags(bool)));
+	connect(mPartsToolBar,      SIGNAL (topLevelChanged(bool)), this, SLOT (EnableWindowFlags(bool)));
+	connect(mColorsToolBar,     SIGNAL (topLevelChanged(bool)), this, SLOT (EnableWindowFlags(bool)));
+
 	mPartsToolBar->raise();
+}
+
+void lcMainWindow::PreviewPiece(const QString &PartType, int ColorCode)
+{
+	if (mPreviewWidget) {
+		if (!mPreviewWidget->SetCurrentPiece(PartType, ColorCode))
+			QMessageBox::critical(gMainWindow, tr("Error"), tr("Part preview for % failed.").arg(PartType));
+	}
+}
+
+void lcMainWindow::CreatePreviewWidget()
+{
+	mPreviewWidget  = new lcPreviewDockWidget();
+
+	mPreviewToolBar = new QDockWidget(tr("Preview"), this);
+	mPreviewToolBar->setWindowTitle(trUtf8("Preview"));
+	mPreviewToolBar->setObjectName("PreviewToolBarw");
+	mPreviewToolBar->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+	mPreviewToolBar->setWidget(mPreviewWidget);
+	addDockWidget(Qt::RightDockWidgetArea, mPreviewToolBar);
+
+	tabifyDockWidget(mTimelineToolBar, mPreviewToolBar);
+
+	connect(mPreviewToolBar, SIGNAL (topLevelChanged(bool)), this, SLOT (EnableWindowFlags(bool)));
+}
+
+void lcMainWindow::TogglePreviewWidget(bool visible)
+{
+	if (mPreviewToolBar) {
+		if (visible)
+			mPreviewToolBar->show();
+		else
+			mPreviewToolBar->hide();
+	} else if (visible) {
+		CreatePreviewWidget();
+	}
+}
+
+void lcMainWindow::EnableWindowFlags(bool Detached)
+{
+	if (Detached) {
+		QDockWidget *DockWidget = qobject_cast<QDockWidget *>(sender());
+		DockWidget->setWindowFlags(Qt::CustomizeWindowHint |
+										  Qt::Window |
+										  Qt::WindowMinimizeButtonHint |
+										  Qt::WindowMaximizeButtonHint |
+										  Qt::WindowCloseButtonHint);
+		DockWidget->show();
+	}
 }
 
 class lcElidedLabel : public QFrame

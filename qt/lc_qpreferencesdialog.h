@@ -65,6 +65,10 @@ public slots:
 	void on_studLogo_toggled();
 	void MouseTreeItemChanged(QTreeWidgetItem* Current);
 
+	void on_PreviewSizeCombo_currentIndexChanged(int Index);
+	void on_PreviewViewSphereSizeCombo_currentIndexChanged(int Index);
+	void on_PreviewPositionCombo_currentIndexChanged(int Index);
+
 private:
 	Ui::lcQPreferencesDialog *ui;
 

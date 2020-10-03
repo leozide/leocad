@@ -60,15 +60,17 @@ void lcHTMLExportOptions::SaveDefaults()
 	lcSetProfileInt(LC_PROFILE_HTML_IMAGE_HEIGHT, StepImagesHeight);
 }
 
-Project::Project()
+Project::Project(bool IsPreview)
+	: mIsPreview(IsPreview)
 {
 	mModified = false;
-	mActiveModel = new lcModel(tr("New Model.ldr"));
+	mActiveModel = new lcModel(tr(mIsPreview ? "Preview.ldr" : "New Model.ldr"), mIsPreview);
 	mActiveModel->CreatePieceInfo(this);
 	mActiveModel->SetSaved();
 	mModels.Add(mActiveModel);
 
-	QObject::connect(&mFileWatcher, SIGNAL(fileChanged(const QString&)), gMainWindow, SLOT(ProjectFileChanged(const QString&)));
+	if (!mIsPreview)
+		QObject::connect(&mFileWatcher, SIGNAL(fileChanged(const QString&)), gMainWindow, SLOT(ProjectFileChanged(const QString&)));
 }
 
 Project::~Project()
@@ -149,8 +151,10 @@ void Project::SetActiveModel(int ModelIndex)
 		mModels[ModelIdx]->UpdatePieceInfo(UpdatedModels);
 
 	mActiveModel = mModels[ModelIndex];
-	gMainWindow->SetCurrentModelTab(mActiveModel);
-	mActiveModel->UpdateInterface();
+	if (!mIsPreview) {
+		gMainWindow->SetCurrentModelTab(mActiveModel);
+		mActiveModel->UpdateInterface();
+	}
 }
 
 void Project::SetActiveModel(const QString& FileName)
@@ -346,10 +350,10 @@ void Project::SetFileName(const QString& FileName)
 	if (mFileName == FileName)
 		return;
 
-	if (!mFileName.isEmpty())
+	if (!mIsPreview && !mFileName.isEmpty())
 		mFileWatcher.removePath(mFileName);
 
-	if (!FileName.isEmpty())
+	if (!mIsPreview && !FileName.isEmpty())
 		mFileWatcher.addPath(FileName);
 
 	mFileName = FileName;
@@ -357,11 +361,15 @@ void Project::SetFileName(const QString& FileName)
 
 bool Project::Load(const QString& FileName)
 {
+	QWidget *parent = nullptr;
+	if (!mIsPreview)
+		parent = gMainWindow;
+
 	QFile File(FileName);
 
 	if (!File.open(QIODevice::ReadOnly))
 	{
-		QMessageBox::warning(gMainWindow, tr("Error"), tr("Error reading file '%1':\n%2").arg(FileName, File.errorString()));
+		QMessageBox::warning(parent, tr("Error"), tr("Error reading file '%1':\n%2").arg(FileName, File.errorString()));
 		return false;
 	}
 
@@ -388,7 +396,7 @@ bool Project::Load(const QString& FileName)
 
 		while (!Buffer.atEnd())
 		{
-			lcModel* Model = new lcModel(QString());
+			lcModel* Model = new lcModel(QString(), mIsPreview);
 			int Pos = Model->SplitMPD(Buffer);
 
 			if (Models.empty() || !Model->GetFileName().isEmpty())
@@ -415,7 +423,7 @@ bool Project::Load(const QString& FileName)
 		MemFile.WriteBuffer(FileData.constData(), FileData.size());
 		MemFile.Seek(0, SEEK_SET);
 
-		lcModel* Model = new lcModel(QString());
+		lcModel* Model = new lcModel(QString(), mIsPreview);
 
 		if (Model->LoadBinary(&MemFile))
 		{
@@ -429,7 +437,7 @@ bool Project::Load(const QString& FileName)
 
 	if (mModels.IsEmpty())
 	{
-		QMessageBox::warning(gMainWindow, tr("Error"), tr("Error loading file '%1':\nFile format is not recognized.").arg(FileName));
+		QMessageBox::warning(parent, tr("Error"), tr("Error loading file '%1':\nFile format is not recognized.").arg(FileName));
 		return false;
 	}
 

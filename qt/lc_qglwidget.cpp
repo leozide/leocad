@@ -84,8 +84,8 @@ void lcGLWidget::SetCursor(lcCursor CursorType)
 	}
 }
 
-lcQGLWidget::lcQGLWidget(QWidget *parent, lcGLWidget *owner, bool view)
-	: QGLWidget(parent, gWidgetList.isEmpty() ? nullptr : gWidgetList.first())
+lcQGLWidget::lcQGLWidget(QWidget *parent, lcGLWidget *owner, bool IsView, bool IsPreview)
+	: QGLWidget(parent, gWidgetList.isEmpty() ? nullptr : gWidgetList.first()), mIsPreview(IsPreview)
 {
 	mWheelAccumulator = 0;
 	widget = owner;
@@ -110,8 +110,11 @@ lcQGLWidget::lcQGLWidget(QWidget *parent, lcGLWidget *owner, bool view)
 		if (!gSupportsShaderObjects && lcGetPreferences().mShadingMode == lcShadingMode::DefaultLights)
 			lcGetPreferences().mShadingMode = lcShadingMode::Flat;
 
-		if (!gSupportsFramebufferObjectARB && !gSupportsFramebufferObjectEXT)
-			gMainWindow->GetPartSelectionWidget()->DisableIconMode();
+		if (!mIsPreview) {
+			if (!gSupportsFramebufferObjectARB && !gSupportsFramebufferObjectEXT)  {
+				gMainWindow->GetPartSelectionWidget()->DisableIconMode();
+			}
+		}
 
 		gPlaceholderMesh = new lcMesh;
 		gPlaceholderMesh->CreateBox();
@@ -124,11 +127,12 @@ lcQGLWidget::lcQGLWidget(QWidget *parent, lcGLWidget *owner, bool view)
 	preferredSize = QSize(0, 0);
 	setMouseTracking(true);
 
-	mIsView = view;
+	mIsView = IsView;
 	if (mIsView)
 	{
 		setFocusPolicy(Qt::StrongFocus);
-		setAcceptDrops(true);
+		if (!mIsPreview)
+			setAcceptDrops(true);
 	}
 }
 
@@ -142,7 +146,8 @@ lcQGLWidget::~lcQGLWidget()
 		gTexFont.Reset();
 
 		lcGetPiecesLibrary()->ReleaseBuffers(widget->mContext);
-		View::DestroyResources(widget->mContext);
+		if (!mIsPreview)
+			View::DestroyResources(widget->mContext);
 		lcContext::DestroyResources();
 		lcViewSphere::DestroyResources(widget->mContext);
 
@@ -180,7 +185,7 @@ void lcQGLWidget::paintGL()
 
 void lcQGLWidget::keyPressEvent(QKeyEvent *event)
 {
-	if (mIsView && (event->key() == Qt::Key_Control || event->key() == Qt::Key_Shift))
+	if (!mIsPreview && mIsView && (event->key() == Qt::Key_Control || event->key() == Qt::Key_Shift))
 	{
 		widget->mInputState.Modifiers = event->modifiers();
 		widget->OnUpdateCursor();
@@ -191,7 +196,7 @@ void lcQGLWidget::keyPressEvent(QKeyEvent *event)
 
 void lcQGLWidget::keyReleaseEvent(QKeyEvent *event)
 {
-	if (mIsView && (event->key() == Qt::Key_Control || event->key() == Qt::Key_Shift))
+	if (!mIsPreview && mIsView && (event->key() == Qt::Key_Control || event->key() == Qt::Key_Shift))
 	{
 		widget->mInputState.Modifiers = event->modifiers();
 		widget->OnUpdateCursor();
@@ -335,7 +340,7 @@ void lcQGLWidget::wheelEvent(QWheelEvent *event)
 
 void lcQGLWidget::dragEnterEvent(QDragEnterEvent* DragEnterEvent)
 {
-	if (mIsView)
+	if (!mIsPreview && mIsView)
 	{
 		const QMimeData* MimeData = DragEnterEvent->mimeData();
 
@@ -356,8 +361,9 @@ void lcQGLWidget::dragEnterEvent(QDragEnterEvent* DragEnterEvent)
 
 void lcQGLWidget::dragLeaveEvent(QDragLeaveEvent *event)
 {
-	if (!mIsView)
+	if (!mIsView || mIsPreview) {
 		return;
+	}
 
 	((View*)widget)->EndDrag(false);
 
@@ -366,7 +372,7 @@ void lcQGLWidget::dragLeaveEvent(QDragLeaveEvent *event)
 
 void lcQGLWidget::dragMoveEvent(QDragMoveEvent* DragMoveEvent)
 {
-	if (mIsView)
+	if (!mIsPreview && mIsView)
 	{
 		const QMimeData* MimeData = DragMoveEvent->mimeData();
 
@@ -390,7 +396,7 @@ void lcQGLWidget::dragMoveEvent(QDragMoveEvent* DragMoveEvent)
 
 void lcQGLWidget::dropEvent(QDropEvent* DropEvent)
 {
-	if (mIsView)
+	if (!mIsPreview && mIsView)
 	{
 		const QMimeData* MimeData = DropEvent->mimeData();
 

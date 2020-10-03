@@ -41,7 +41,7 @@ struct lcInstructionsPageLayout;
 class Project
 {
 public:
-	Project();
+	Project(bool IsPreview = false);
 	~Project();
 
 	Project(const Project&) = delete;
@@ -115,6 +115,7 @@ protected:
 	std::vector<lcModelPartsEntry> GetModelParts();
 	void SetFileName(const QString& FileName);
 
+	bool mIsPreview;
 	bool mModified;
 	QString mFileName;
 	QFileSystemWatcher mFileWatcher;

@@ -718,7 +718,7 @@ void lcPartSelectionListView::PreviewSelection(int InfoIndex)
 	{
 		if (!Preview->SetCurrentPiece(Info->mFileName, ColorCode))
 			QMessageBox::critical(gMainWindow, tr("Error"), tr("Preview %1 failed.").arg(Info->mFileName));
-
+		ViewWidget->SetPreviewPosition(rect());
 	}
 	else
 	{

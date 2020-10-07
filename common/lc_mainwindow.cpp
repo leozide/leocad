@@ -108,6 +108,7 @@ lcMainWindow::lcMainWindow()
 	mSelectionMode = lcSelectionMode::Single;
 	mModelTabWidget = nullptr;
 	mPreviewToolBar = nullptr;
+	mPreviewWidget = nullptr;
 
 	memset(&mSearchOptions, 0, sizeof(mSearchOptions));
 

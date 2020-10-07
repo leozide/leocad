@@ -940,7 +940,7 @@ void lcQPropertiesTree::SetPiece(const lcArray<lcObject*>& Selection, lcObject* 
 		ColorIndex = Piece->mColorIndex;
 		Info = Piece->mPieceInfo;
 		lcPreferences& Preferences = lcGetPreferences();
-		if (Preferences.mPreviewEnabled)
+		if (Preferences.mPreviewEnabled && Preferences.mPreviewPosition != lcPreviewPosition::Floating)
 		{
 			quint32 ColorCode = lcGetColorCode(ColorIndex);
 			PreviewSelection(Info->mFileName, ColorCode);

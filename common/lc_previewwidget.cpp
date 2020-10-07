@@ -54,7 +54,8 @@ bool lcPreviewDockWidget::SetCurrentPiece(const QString& PartType, int ColorCode
 
 void lcPreviewDockWidget::ClearPreview()
 {
-	mPreview->ClearPreview();
+	if (mPreview->GetActiveModel()->GetPieces().GetSize())
+		mPreview->ClearPreview();
 	mLabel->setText(QString());
 }
 
@@ -95,6 +96,8 @@ lcPreviewWidget::~lcPreviewWidget()
 		delete mCamera;
 
 	delete mLoader;
+
+	gPreviewWidget = nullptr;
 }
 
 bool lcPreviewWidget::SetCurrentPiece(const QString& PartType, int ColorCode)

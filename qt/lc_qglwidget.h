@@ -25,6 +25,8 @@ public:
 #endif
 	}
 
+	void SetPreviewPosition(const QRect& ParentRect);
+
 	QTimer mUpdateTimer;
 
 protected:

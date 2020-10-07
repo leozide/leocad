@@ -16,23 +16,24 @@ lcPreviewWidget* gPreviewWidget;
 lcPreviewDockWidget::lcPreviewDockWidget(QMainWindow* Parent)
 	: QMainWindow(Parent)
 {
-	Preview = new lcPreviewWidget();
-	ViewWidget = new lcQGLWidget(nullptr, Preview, true/*IsView*/, true/*IsPreview*/);
-	setCentralWidget(ViewWidget);
+	mPreview = new lcPreviewWidget();
+	mViewWidget = new lcQGLWidget(nullptr, mPreview, true/*IsView*/, true/*IsPreview*/);
+	setCentralWidget(mViewWidget);
 	setMinimumSize(200, 200);
-	ToolBar = addToolBar(tr("PreviewDescription"));
-	ToolBar->setObjectName("PreviewDescription");
-	ToolBar->setMovable(false);
-	Label = new QLabel(QString());
-	ToolBar->addWidget(Label);
+
+	mToolBar = addToolBar(tr("PreviewDescription"));
+	mToolBar->setObjectName("PreviewDescription");
+	mToolBar->setMovable(false);
+	mLabel = new QLabel(QString());
+	mToolBar->addWidget(mLabel);
 }
 
 bool lcPreviewDockWidget::SetCurrentPiece(const QString& PartType, int ColorCode)
 {
-	Label->setText("Loading...");
-	if (Preview->SetCurrentPiece(PartType, ColorCode))
+	mLabel->setText(tr("Loading..."));
+	if (mPreview->SetCurrentPiece(PartType, ColorCode))
 	{
-		Label->setText(Preview->GetDescription());
+		mLabel->setText(mPreview->GetDescription());
 		return true;
 	}
 	return false;
@@ -40,8 +41,8 @@ bool lcPreviewDockWidget::SetCurrentPiece(const QString& PartType, int ColorCode
 
 void lcPreviewDockWidget::ClearPreview()
 {
-	Preview->ClearPreview();
-	Label->setText(QString());
+	mPreview->ClearPreview();
+	mLabel->setText(QString());
 }
 
 lcPreviewWidget::lcPreviewWidget()
@@ -74,6 +75,7 @@ bool lcPreviewWidget::SetCurrentPiece(const QString& PartType, int ColorCode)
 
 	if (Info)
 	{
+		mIsModel = Info->IsModel();
 		mDescription = Info->m_strDescription;
 		lcModel* ActiveModel = GetActiveModel();
 
@@ -109,6 +111,7 @@ bool lcPreviewWidget::SetCurrentPiece(const QString& PartType, int ColorCode)
 			mDescription = mModel->GetProperties().mDescription;
 		else
 			mDescription = PartType;
+		mIsModel = true;
 	}
 
 	ZoomExtents();
@@ -272,14 +275,12 @@ void lcPreviewWidget::DrawAxes()
 	glEnable(GL_BLEND);
 
 	float TextBuffer[6 * 5 * 3];
-	/*** Native viewer camera globe mod, switch Y and Z axis with -Y(LC -Z) in the up direction ***/
 	lcVector3 PosX = lcMul30(lcVector3(25.0f, 0.0f, 0.0f), WorldViewMatrix);
 	gTexFont.GetGlyphTriangles(PosX.x, PosX.y, PosX.z, 'X', TextBuffer);
 	lcVector3 PosY = lcMul30(lcVector3(0.0f, 25.0f, 0.0f), WorldViewMatrix);
-	gTexFont.GetGlyphTriangles(PosY.x, PosY.y, PosY.z, 'Z', TextBuffer + 5 * 6);
+	gTexFont.GetGlyphTriangles(PosY.x, PosY.y, PosY.z, 'Y', TextBuffer + 5 * 6);
 	lcVector3 PosZ = lcMul30(lcVector3(0.0f, 0.0f, 25.0f), WorldViewMatrix);
-	gTexFont.GetGlyphTriangles(PosZ.x, PosZ.y, PosZ.z, 'Y', TextBuffer + 5 * 6 * 2);
-	/*** Camera globe mod end ***/
+	gTexFont.GetGlyphTriangles(PosZ.x, PosZ.y, PosZ.z, 'Z', TextBuffer + 5 * 6 * 2);
 
 	mContext->SetVertexBufferPointer(TextBuffer);
 	mContext->SetVertexFormat(0, 3, 0, 2, 0, false);

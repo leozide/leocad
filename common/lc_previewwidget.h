@@ -21,15 +21,15 @@ class lcPreviewDockWidget : public QMainWindow
 	Q_OBJECT
 
 public:
-	explicit lcPreviewDockWidget(QMainWindow *parent = nullptr);
-	bool SetCurrentPiece(const QString &PartType, int ColorCode);
+	explicit lcPreviewDockWidget(QMainWindow* parent = nullptr);
+	bool SetCurrentPiece(const QString& PartType, int ColorCode);
 	void ClearPreview();
 
 protected:
-	QToolBar        *ToolBar;
-	QLabel          *Label;
-	lcPreviewWidget *Preview;
-	lcQGLWidget     *ViewWidget;
+	QToolBar* mToolBar;
+	QLabel* mLabel;
+	lcPreviewWidget* mPreview;
+	lcQGLWidget* mViewWidget;
 };
 
 class lcPreviewWidget : public lcGLWidget
@@ -98,6 +98,11 @@ public:
 		return mTrackButton != lcTrackButton::None;
 	}
 
+	bool IsModel() const
+	{
+		return mIsModel;
+	}
+	
 	void OnInitialUpdate() override;
 	void OnDraw() override;
 	void OnUpdateCursor() override;
@@ -132,7 +137,8 @@ protected:
 	lcTrackTool mTrackTool;
 
 	QString mDescription;
-
+	bool mIsModel;
+	
 	bool mTrackUpdated;
 	int mMouseDownX;
 	int mMouseDownY;

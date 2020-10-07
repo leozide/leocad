@@ -12,6 +12,9 @@
 #include "lc_library.h"
 #include "lc_qutils.h"
 
+#include "lc_qglwidget.h"
+#include "lc_previewwidget.h"
+
 // Draw an icon indicating opened/closing branches
 static QIcon drawIndicatorIcon(const QPalette &palette, QStyle *style)
 {
@@ -761,7 +764,19 @@ void lcQPropertiesTree::slotSetValue(int Value)
 		{
 			QComboBox *editor = (QComboBox*)sender();
 
-			Model->SetSelectedPiecesPieceInfo((PieceInfo*)editor->itemData(Value).value<void*>());
+			PieceInfo* Info = (PieceInfo*)editor->itemData(Value).value<void*>();
+			Model->SetSelectedPiecesPieceInfo(Info);
+
+			lcPreferences& Preferences = lcGetPreferences();
+			if (Preferences.mPreviewEnabled && Preferences.mPreviewPosition != lcPreviewPosition::Floating)
+			{
+				int ColorIndex = gDefaultColor;
+				lcObject* Focus = gMainWindow->GetActiveModel()->GetFocusObject();
+				if (Focus && Focus->IsPiece())
+					ColorIndex = ((lcPiece*)Focus)->mColorIndex;
+				quint32 ColorCode = lcGetColorCode(ColorIndex);
+				PreviewSelection(Info->mFileName, ColorCode);
+			}
 		}
 	}
 }
@@ -924,6 +939,12 @@ void lcQPropertiesTree::SetPiece(const lcArray<lcObject*>& Selection, lcObject* 
 		Hide = Piece->GetStepHide();
 		ColorIndex = Piece->mColorIndex;
 		Info = Piece->mPieceInfo;
+		lcPreferences& Preferences = lcGetPreferences();
+		if (Preferences.mPreviewEnabled)
+		{
+			quint32 ColorCode = lcGetColorCode(ColorIndex);
+			PreviewSelection(Info->mFileName, ColorCode);
+		}
 	}
 	else
 	{
@@ -1107,4 +1128,29 @@ void lcQPropertiesTree::SetMultiple()
 bool lcQPropertiesTree::lastColumn(int column) const
 {
 	return header()->visualIndex(column) == columnCount() - 1;
+}
+
+void lcQPropertiesTree::PreviewSelection(const QString &PartType, int ColorCode)
+{
+	lcPreferences& Preferences = lcGetPreferences();
+	if (Preferences.mPreviewPosition != lcPreviewPosition::Floating)
+	{
+		gMainWindow->PreviewPiece(PartType, ColorCode);
+		return;
+	}
+
+	lcPreviewWidget *Preview = new lcPreviewWidget();
+
+	lcQGLWidget *ViewWidget = new lcQGLWidget(nullptr, Preview, true/*isView*/, true/*isPreview*/);
+
+	if (Preview && ViewWidget)
+	{
+		if (!Preview->SetCurrentPiece(PartType, ColorCode))
+			QMessageBox::critical(gMainWindow, tr("Error"), tr("Part preview for %1 failed.").arg(PartType));
+		ViewWidget->SetPreviewPosition(rect());
+	}
+	else
+	{
+		QMessageBox::critical(gMainWindow, tr("Error"), tr("Preview %1 failed.").arg(PartType));
+	}
 }

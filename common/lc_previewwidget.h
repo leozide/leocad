@@ -25,7 +25,11 @@ public:
 	bool SetCurrentPiece(const QString& PartType, int ColorCode);
 	void ClearPreview();
 
+protected slots:
+	void SetPreviewLock();
+
 protected:
+	QAction* mLockAction;
 	QToolBar* mToolBar;
 	QLabel* mLabel;
 	lcPreviewWidget* mPreview;

@@ -21,15 +21,28 @@ lcPreviewDockWidget::lcPreviewDockWidget(QMainWindow* Parent)
 	setCentralWidget(mViewWidget);
 	setMinimumSize(200, 200);
 
+	mLockAction = new QAction(QIcon(":/resources/action_preview_unlocked.png"),tr("Lock Preview"), this);
+	mLockAction->setCheckable(true);
+	mLockAction->setChecked(false);
+	mLockAction->setShortcut(tr("Ctrl+L"));
+	connect(mLockAction, SIGNAL(triggered()), this, SLOT(SetPreviewLock()));
+	SetPreviewLock();
+
+	mLabel = new QLabel(QString());
+
 	mToolBar = addToolBar(tr("PreviewDescription"));
 	mToolBar->setObjectName("PreviewDescription");
 	mToolBar->setMovable(false);
-	mLabel = new QLabel(QString());
+	mToolBar->addAction(mLockAction);
+	mToolBar->addSeparator();
 	mToolBar->addWidget(mLabel);
 }
 
 bool lcPreviewDockWidget::SetCurrentPiece(const QString& PartType, int ColorCode)
 {
+	if (mLockAction->isChecked())
+		return true;
+
 	mLabel->setText(tr("Loading..."));
 	if (mPreview->SetCurrentPiece(PartType, ColorCode))
 	{
@@ -43,6 +56,22 @@ void lcPreviewDockWidget::ClearPreview()
 {
 	mPreview->ClearPreview();
 	mLabel->setText(QString());
+}
+
+void lcPreviewDockWidget::SetPreviewLock()
+{
+	bool Locked = mLockAction->isChecked();
+	if (Locked && mPreview->GetActiveModel()->GetPieces().IsEmpty())
+	{
+		mLockAction->setChecked(false);
+		return;
+	}
+	QIcon LockIcon(Locked ? ":/resources/action_preview_locked.png" : ":/resources/action_preview_unlocked.png");
+	QString State(Locked ? tr("Unlock") : tr("Lock"));
+	QString StatusTip(tr("%1 the preview display to %2 updates").arg(State).arg(Locked ? "enable" : "disable"));
+	mLockAction->setToolTip(tr("%1 Preview").arg(State));
+	mLockAction->setIcon(LockIcon);
+	mLockAction->setStatusTip(StatusTip);
 }
 
 lcPreviewWidget::lcPreviewWidget()

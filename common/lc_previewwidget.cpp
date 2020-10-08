@@ -107,9 +107,19 @@ bool lcPreviewWidget::SetCurrentPiece(const QString& PartType, int ColorCode)
 
 	if (Info)
 	{
+		lcModel* ActiveModel = GetActiveModel();
+		for (lcPiece* ModelPiece : ActiveModel->GetPieces())
+		{
+			if (Info == ModelPiece->mPieceInfo)
+			{
+				int ModelColorCode = ModelPiece->mColorCode;
+				if (ModelColorCode == ColorCode)
+					return true;
+			}
+		}
+
 		mIsModel = Info->IsModel();
 		mDescription = Info->m_strDescription;
-		lcModel* ActiveModel = GetActiveModel();
 
 		ActiveModel->SelectAllPieces();
 		ActiveModel->DeleteSelectedObjects();

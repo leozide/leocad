@@ -515,17 +515,17 @@ void lcTimelineWidget::mouseDoubleClickEvent(QMouseEvent *event)
 	QTreeWidget::mouseDoubleClickEvent(event);
 	if ( event->button() == Qt::LeftButton )
 	{
-		QTreeWidgetItem* CurrentItem = currentItem();
-		PreviewSelection(CurrentItem);
+		lcPreferences& Preferences = lcGetPreferences();
+		if (Preferences.mPreviewEnabled && Preferences.mPreviewPosition == lcPreviewPosition::Floating)
+		{
+			QTreeWidgetItem* CurrentItem = currentItem();
+			PreviewSelection(CurrentItem);
+		}
 	}
 }
 
 void lcTimelineWidget::PreviewSelection(QTreeWidgetItem* Current)
 {
-	lcPreferences& Preferences = lcGetPreferences();
-	if (!Preferences.mPreviewEnabled)
-		return;
-
 	lcPiece* Piece = (lcPiece*)Current->data(0, Qt::UserRole).value<uintptr_t>();
 	if (!Piece)
 		return;
@@ -533,12 +533,6 @@ void lcTimelineWidget::PreviewSelection(QTreeWidgetItem* Current)
 	PieceInfo* Info = Piece->mPieceInfo;
 	if (!Info)
 		return;
-
-	if (Preferences.mPreviewPosition != lcPreviewPosition::Floating)
-	{
-		gMainWindow->PreviewPiece(Info->mFileName, Piece->mColorCode);
-		return;
-	}
 
 	lcPreviewWidget *Preview = new lcPreviewWidget();
 

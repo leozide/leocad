@@ -11,6 +11,9 @@
 #include "view.h"
 #include "lc_glextensions.h"
 
+#include "lc_qglwidget.h"
+#include "lc_previewwidget.h"
+
  Q_DECLARE_METATYPE(QList<int>)
 
 void lcPartSelectionItemDelegate::paint(QPainter* Painter, const QStyleOptionViewItem& Option, const QModelIndex& Index) const
@@ -412,7 +415,7 @@ void lcPartSelectionListModel::DrawPreview(int InfoIndex)
 
 	glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		
+
 	lcMatrix44 ProjectionMatrix, ViewMatrix;
 
 	Info->ZoomExtents(20.0f, Aspect, ProjectionMatrix, ViewMatrix);
@@ -572,9 +575,9 @@ void lcPartSelectionListView::SetCategory(lcPartCategoryType Type, int Index)
 	case lcPartCategoryType::Category:
 		mListModel->SetCategory(Index);
 		break;
-    case lcPartCategoryType::Count:
-        break;
-    }
+	case lcPartCategoryType::Count:
+		break;
+	}
 
 	setCurrentIndex(mListModel->index(0, 0));
 }
@@ -678,6 +681,49 @@ void lcPartSelectionListView::startDrag(Qt::DropActions SupportedActions)
 	Drag->setMimeData(MimeData);
 
 	Drag->exec(Qt::CopyAction);
+}
+
+void lcPartSelectionListView::mouseDoubleClickEvent(QMouseEvent *event)
+{
+	QAbstractItemView::mouseDoubleClickEvent(event);
+	if ( event->button() == Qt::LeftButton )
+	{
+		PreviewSelection(currentIndex().row());
+	}
+}
+
+void lcPartSelectionListView::PreviewSelection(int InfoIndex)
+{
+	lcPreferences& Preferences = lcGetPreferences();
+	if (!Preferences.mPreviewEnabled)
+		return;
+
+	PieceInfo* Info = mListModel->GetPieceInfo(InfoIndex);
+	if (!Info)
+		return;
+
+	quint32 ColorCode = lcGetColorCode(mListModel->GetColorIndex());
+
+	if (Preferences.mPreviewPosition != lcPreviewPosition::Floating)
+	{
+		gMainWindow->PreviewPiece(Info->mFileName, ColorCode);
+		return;
+	}
+
+	lcPreviewWidget* Preview = new lcPreviewWidget();
+
+	lcQGLWidget* ViewWidget = new lcQGLWidget(nullptr, Preview, true/*isView*/, true/*isPreview*/);
+
+	if (Preview && ViewWidget)
+	{
+		if (!Preview->SetCurrentPiece(Info->mFileName, ColorCode))
+			QMessageBox::critical(gMainWindow, tr("Error"), tr("Preview %1 failed.").arg(Info->mFileName));
+		ViewWidget->SetPreviewPosition(rect());
+	}
+	else
+	{
+		QMessageBox::critical(gMainWindow, tr("Error"), tr("Preview %1 failed.").arg(Info->mFileName));
+	}
 }
 
 lcPartSelectionWidget::lcPartSelectionWidget(QWidget* Parent)

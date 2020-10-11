@@ -129,7 +129,18 @@ static lcProfileEntry gProfileEntries[LC_NUM_PROFILE_KEYS] =
 	lcProfileEntry("POVRay", "Path", "/usr/bin/povray"),                                       // LC_PROFILE_POVRAY_PATH
 	lcProfileEntry("POVRay", "LGEOPath", ""),                                                  // LC_PROFILE_POVRAY_LGEO_PATH
 	lcProfileEntry("POVRay", "Width", 1280),                                                   // LC_PROFILE_POVRAY_WIDTH
-	lcProfileEntry("POVRay", "Height", 720)                                                    // LC_PROFILE_POVRAY_HEIGHT
+	lcProfileEntry("POVRay", "Height", 720),                                                    // LC_PROFILE_POVRAY_HEIGHT
+
+	lcProfileEntry("Settings", "PreviewActiveColor", LC_RGBA(69, 69, 69, 255)),                // LC_PROFILE_PREVIEW_ACTIVE_COLOR
+	lcProfileEntry("Settgins", "PreviewViewSphereEnabled", 1),                                 // LC_PROFILE_PREVIEW_VIEW_SPHERE_ENABLED
+	lcProfileEntry("Settings", "PreviewViewSphereSize", 75),                                   // LC_PROFILE_PREVIEW_VIEW_SPHERE_SIZE
+	lcProfileEntry("Settings", "PreviewViewSphereLocation", (int)lcViewSphereLocation::TopRight), // LC_PROFILE_PREVIEW_VIEW_SPHERE_LOCATION
+	lcProfileEntry("Settings", "PreviewEnabled", 1),                                           // LC_PROFILE_PREVIEW_ENABLED
+	lcProfileEntry("Settings", "PreviewSize", 300),                                            // LC_PROFILE_PREVIEW_SIZE
+	lcProfileEntry("Settings", "PreviewLocation", (int)lcPreviewLocation::BottomRight),        // LC_PROFILE_PREVIEW_LOCATION
+	lcProfileEntry("Settings", "PreviewPosition", (int)lcPreviewPosition::Dockable),           // LC_PROFILE_PREVIEW_POSITION
+	lcProfileEntry("Settings", "DrawPreviewAxis", 0),                                          // LC_PROFILE_PREVIEW_DRAW_AXES
+	lcProfileEntry("Settings", "DrawPreviewViewSphere",1)                                      // LC_PROFILE_PREVIEW_DRAW_VIEW_SPHERE
 };
 
 void lcRemoveProfileKey(LC_PROFILE_KEY Key)

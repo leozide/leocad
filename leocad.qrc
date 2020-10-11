@@ -30,6 +30,8 @@
         <file>resources/action_next.png</file>
         <file>resources/action_paint.png</file>
         <file>resources/action_pan.png</file>
+        <file>resources/action_preview_locked.png</file>
+        <file>resources/action_preview_unlocked.png</file>
         <file>resources/action_previous.png</file>
         <file>resources/action_roll.png</file>
         <file>resources/action_rotate.png</file>

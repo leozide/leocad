@@ -88,6 +88,11 @@ public:
 		return mShowPartNames;
 	}
 
+	int GetColorIndex() const
+	{
+		return mColorIndex;
+	}
+
 	bool IsColorLocked() const
 	{
 		return mColorLocked;
@@ -182,6 +187,8 @@ public slots:
 
 protected:
 	void SetIconSize(int Size);
+	void PreviewSelection(int InfoIndex);
+	void mouseDoubleClickEvent(QMouseEvent *event) override;
 
 	lcPartSelectionListModel* mListModel;
 	lcPartSelectionWidget* mPartSelectionWidget;

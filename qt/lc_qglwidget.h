@@ -6,7 +6,7 @@ class lcGLWidget;
 class lcQGLWidget : public QGLWidget
 {
 public:
-	lcQGLWidget(QWidget* Parent, lcGLWidget* Owner, bool IsView);
+	lcQGLWidget(QWidget* Parent, lcGLWidget* Owner, bool IsView, bool IsPreview = false);
 	~lcQGLWidget();
 
 	QSize sizeHint() const override;
@@ -14,6 +14,7 @@ public:
 	lcGLWidget *widget;
 	QSize preferredSize;
 	bool mIsView;
+	bool mIsPreview;
 
 	float deviceScale()
 	{
@@ -23,6 +24,8 @@ public:
 		return 1.0f;
 #endif
 	}
+
+	void SetPreviewPosition(const QRect& ParentRect);
 
 	QTimer mUpdateTimer;
 

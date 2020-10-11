@@ -1,6 +1,8 @@
 #include "lc_global.h"
 #include "lc_viewsphere.h"
 #include "view.h"
+#include "lc_previewwidget.h"
+
 #include "lc_context.h"
 #include "lc_stringcache.h"
 #include "lc_application.h"
@@ -15,14 +17,25 @@ const float lcViewSphere::mHighlightRadius = 0.35f;
 const int lcViewSphere::mSubdivisions = 7;
 
 lcViewSphere::lcViewSphere(View* View)
-	: mView(View)
+	: mPreview(nullptr),
+	  mView(View),
+	  mIsPreview(false)
 {
 	mMouseDown = false;
 }
 
+lcViewSphere::lcViewSphere(lcPreviewWidget* Preview)
+	: mPreview(Preview),
+	  mView(nullptr),
+	  mIsPreview(true)
+{
+	mMouseDown = false;
+	mViewSphereSize = lcGetPreferences().mPreviewViewSphereSize;
+}
+
 lcMatrix44 lcViewSphere::GetViewMatrix() const
 {
-	lcMatrix44 ViewMatrix = mView->mCamera->mWorldView;
+	lcMatrix44 ViewMatrix = mIsPreview ? mPreview->GetCamera()->mWorldView : mView->mCamera->mWorldView;
 	ViewMatrix.SetTranslation(lcVector3(0, 0, 0));
 	return ViewMatrix;
 }
@@ -152,15 +165,15 @@ void lcViewSphere::DestroyResources(lcContext* Context)
 void lcViewSphere::Draw()
 {
 	const lcPreferences& Preferences = lcGetPreferences();
-	int ViewportSize = Preferences.mViewSphereSize;
+	int ViewportSize = mIsPreview ? mViewSphereSize : Preferences.mViewSphereSize;
 
 	if (ViewportSize == 0 || !Preferences.mViewSphereEnabled)
 		return;
 
-	lcContext* Context = mView->mContext;
-	int Width = mView->mWidth;
-	int Height = mView->mHeight;
-	lcViewSphereLocation Location = Preferences.mViewSphereLocation;
+	lcContext* Context = mIsPreview ? mPreview->mContext : mView->mContext;
+	int Width = mIsPreview ? mPreview->mWidth : mView->mWidth;
+	int Height = mIsPreview ? mPreview->mHeight : mView->mHeight;
+	lcViewSphereLocation Location = mIsPreview ? Preferences.mPreviewViewSphereLocation : Preferences.mViewSphereLocation;
 
 	int Left = (Location == lcViewSphereLocation::BottomLeft || Location == lcViewSphereLocation::TopLeft) ? 0 : Width - ViewportSize;
 	int Bottom = (Location == lcViewSphereLocation::BottomLeft || Location == lcViewSphereLocation::BottomRight) ? 0 : Height - ViewportSize;
@@ -221,7 +234,7 @@ void lcViewSphere::Draw()
 bool lcViewSphere::OnLeftButtonDown()
 {
 	const lcPreferences& Preferences = lcGetPreferences();
-	if (Preferences.mViewSphereSize == 0 || !Preferences.mViewSphereEnabled)
+	if ((mIsPreview ? !mViewSphereSize : !Preferences.mViewSphereSize) || !Preferences.mViewSphereEnabled)
 		return false;
 
 	mIntersectionFlags = GetIntersectionFlags(mIntersection);
@@ -229,8 +242,8 @@ bool lcViewSphere::OnLeftButtonDown()
 	if (!mIntersectionFlags.any())
 		return false;
 
-	mMouseDownX = mView->mInputState.x;
-	mMouseDownY = mView->mInputState.y;
+	mMouseDownX = mIsPreview ? mPreview->mInputState.x : mView->mInputState.x;
+	mMouseDownY = mIsPreview ? mPreview->mInputState.y : mView->mInputState.y;
 	mMouseDown = true;
 
 	return true;
@@ -239,7 +252,7 @@ bool lcViewSphere::OnLeftButtonDown()
 bool lcViewSphere::OnLeftButtonUp()
 {
 	const lcPreferences& Preferences = lcGetPreferences();
-	if (Preferences.mViewSphereSize == 0 || !Preferences.mViewSphereEnabled)
+	if ((mIsPreview ? !mViewSphereSize : !Preferences.mViewSphereSize) || !Preferences.mViewSphereEnabled)
 		return false;
 
 	if (!mMouseDown)
@@ -260,7 +273,7 @@ bool lcViewSphere::OnLeftButtonUp()
 			Position[AxisIdx] = -1250.0f;
 	}
 
-	mView->SetViewpoint(Position);
+	mIsPreview ? mPreview->SetViewpoint(Position) : mView->SetViewpoint(Position);
 
 	return true;
 }
@@ -268,17 +281,17 @@ bool lcViewSphere::OnLeftButtonUp()
 bool lcViewSphere::OnMouseMove()
 {
 	const lcPreferences& Preferences = lcGetPreferences();
-	if (Preferences.mViewSphereSize == 0 || !Preferences.mViewSphereEnabled)
+	if ((mIsPreview ? !mViewSphereSize : !Preferences.mViewSphereSize) || !Preferences.mViewSphereEnabled)
 		return false;
 
 	if (IsDragging())
 	{
 		mIntersectionFlags.reset();
-		mView->StartOrbitTracking();
+		mIsPreview ? mPreview->StartOrbitTracking() : mView->StartOrbitTracking();
 		return true;
 	}
 
-	if (mView->IsTracking())
+	if (mIsPreview ? mPreview->IsTracking() : mView->IsTracking())
 		return false;
 
 	std::bitset<6> IntersectionFlags = GetIntersectionFlags(mIntersection);
@@ -286,7 +299,7 @@ bool lcViewSphere::OnMouseMove()
 	if (IntersectionFlags != mIntersectionFlags)
 	{
 		mIntersectionFlags = IntersectionFlags;
-		mView->Redraw();
+		mIsPreview ? mPreview->Redraw() : mView->Redraw();
 	}
 
 	return mIntersectionFlags.any();
@@ -294,21 +307,23 @@ bool lcViewSphere::OnMouseMove()
 
 bool lcViewSphere::IsDragging() const
 {
-	return mMouseDown && (qAbs(mMouseDownX - mView->mInputState.x) > 3 || qAbs(mMouseDownY - mView->mInputState.y) > 3);
+	int InputStateX = mIsPreview ? mPreview->mInputState.x : mView->mInputState.x;
+	int InputStateY = mIsPreview ? mPreview->mInputState.y : mView->mInputState.y;
+	return mMouseDown && (qAbs(mMouseDownX - InputStateX) > 3 || qAbs(mMouseDownY - InputStateY) > 3);
 }
 
 std::bitset<6> lcViewSphere::GetIntersectionFlags(lcVector3& Intersection) const
 {
 	const lcPreferences& Preferences = lcGetPreferences();
-	lcViewSphereLocation Location = Preferences.mViewSphereLocation;
+	lcViewSphereLocation Location = mIsPreview ? Preferences.mPreviewViewSphereLocation : Preferences.mViewSphereLocation;
 
-	int Width = mView->mWidth;
-	int Height = mView->mHeight;
-	int ViewportSize = Preferences.mViewSphereSize;
+	int Width = mIsPreview ? mPreview->mWidth : mView->mWidth;
+	int Height = mIsPreview ? mPreview->mHeight : mView->mHeight;
+	int ViewportSize = mIsPreview ? mViewSphereSize : Preferences.mViewSphereSize;
 	int Left = (Location == lcViewSphereLocation::BottomLeft || Location == lcViewSphereLocation::TopLeft) ? 0 : Width - ViewportSize;
 	int Bottom = (Location == lcViewSphereLocation::BottomLeft || Location == lcViewSphereLocation::BottomRight) ? 0 : Height - ViewportSize;
-	int x = mView->mInputState.x - Left;
-	int y = mView->mInputState.y - Bottom;
+	int x = (mIsPreview ? mPreview->mInputState.x : mView->mInputState.x) - Left;
+	int y = (mIsPreview ? mPreview->mInputState.y : mView->mInputState.y) - Bottom;
 	std::bitset<6> IntersectionFlags;
 
 	if (x < 0 || x > Width || y < 0 || y > Height)

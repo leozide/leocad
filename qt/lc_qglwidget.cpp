@@ -16,6 +16,8 @@
 #include "lc_mesh.h"
 #include "lc_profile.h"
 
+#include "lc_previewwidget.h"
+
 static QList<QGLWidget*> gWidgetList;
 
 void lcGLWidget::MakeCurrent()
@@ -84,8 +86,8 @@ void lcGLWidget::SetCursor(lcCursor CursorType)
 	}
 }
 
-lcQGLWidget::lcQGLWidget(QWidget *parent, lcGLWidget *owner, bool view)
-	: QGLWidget(parent, gWidgetList.isEmpty() ? nullptr : gWidgetList.first())
+lcQGLWidget::lcQGLWidget(QWidget *parent, lcGLWidget *owner, bool IsView, bool IsPreview)
+	: QGLWidget(parent, gWidgetList.isEmpty() ? nullptr : gWidgetList.first()), mIsPreview(IsPreview)
 {
 	mWheelAccumulator = 0;
 	widget = owner;
@@ -110,8 +112,11 @@ lcQGLWidget::lcQGLWidget(QWidget *parent, lcGLWidget *owner, bool view)
 		if (!gSupportsShaderObjects && lcGetPreferences().mShadingMode == lcShadingMode::DefaultLights)
 			lcGetPreferences().mShadingMode = lcShadingMode::Flat;
 
-		if (!gSupportsFramebufferObjectARB && !gSupportsFramebufferObjectEXT)
-			gMainWindow->GetPartSelectionWidget()->DisableIconMode();
+		if (!mIsPreview) {
+			if (!gSupportsFramebufferObjectARB && !gSupportsFramebufferObjectEXT)  {
+				gMainWindow->GetPartSelectionWidget()->DisableIconMode();
+			}
+		}
 
 		gPlaceholderMesh = new lcMesh;
 		gPlaceholderMesh->CreateBox();
@@ -124,11 +129,12 @@ lcQGLWidget::lcQGLWidget(QWidget *parent, lcGLWidget *owner, bool view)
 	preferredSize = QSize(0, 0);
 	setMouseTracking(true);
 
-	mIsView = view;
+	mIsView = IsView;
 	if (mIsView)
 	{
 		setFocusPolicy(Qt::StrongFocus);
-		setAcceptDrops(true);
+		if (!mIsPreview)
+			setAcceptDrops(true);
 	}
 }
 
@@ -142,7 +148,8 @@ lcQGLWidget::~lcQGLWidget()
 		gTexFont.Reset();
 
 		lcGetPiecesLibrary()->ReleaseBuffers(widget->mContext);
-		View::DestroyResources(widget->mContext);
+		if (!mIsPreview)
+			View::DestroyResources(widget->mContext);
 		lcContext::DestroyResources();
 		lcViewSphere::DestroyResources(widget->mContext);
 
@@ -159,6 +166,58 @@ QSize lcQGLWidget::sizeHint() const
 		return QGLWidget::sizeHint();
 	else
 		return preferredSize;
+}
+
+void lcQGLWidget::SetPreviewPosition(const QRect& ParentRect)
+{
+	lcPreferences& Preferences = lcGetPreferences();
+	lcPreviewWidget* Preview = reinterpret_cast<lcPreviewWidget*>(widget);
+
+	setWindowTitle(tr("%1 Preview").arg(Preview->IsModel() ? "Submodel" : "Part"));
+
+	int Size[2] = { 300,200 };
+	if (Preferences.mPreviewSize == 400)
+	{
+		Size[0] = 400; Size[1] = 300;
+	}
+	preferredSize = QSize(Size[0], Size[1]);
+
+	float Scale = deviceScale();
+	Preview->mWidth = width()  * Scale;
+	Preview->mHeight = height() * Scale;
+
+	const QRect desktop = QApplication::desktop()->geometry();
+
+	QPoint pos;
+	switch (Preferences.mPreviewLocation)
+	{
+	case lcPreviewLocation::TopRight:
+		pos = mapToGlobal(ParentRect.topRight());
+		break;
+	case lcPreviewLocation::TopLeft:
+		pos = mapToGlobal(ParentRect.topLeft());
+		break;
+	case lcPreviewLocation::BottomRight:
+		pos = mapToGlobal(ParentRect.bottomRight());
+		break;
+	default:
+		pos = mapToGlobal(ParentRect.bottomLeft());
+		break;
+	}
+	if (pos.x() < desktop.left())
+		pos.setX(desktop.left());
+	if (pos.y() < desktop.top())
+		pos.setY(desktop.top());
+
+	if ((pos.x() + width()) > desktop.width())
+		pos.setX(desktop.width() - width());
+	if ((pos.y() + height()) > desktop.bottom())
+		pos.setY(desktop.bottom() - height());
+	move(pos);
+
+	setMinimumSize(100,100);
+	show();
+	setFocus();
 }
 
 void lcQGLWidget::initializeGL()
@@ -180,7 +239,7 @@ void lcQGLWidget::paintGL()
 
 void lcQGLWidget::keyPressEvent(QKeyEvent *event)
 {
-	if (mIsView && (event->key() == Qt::Key_Control || event->key() == Qt::Key_Shift))
+	if (!mIsPreview && mIsView && (event->key() == Qt::Key_Control || event->key() == Qt::Key_Shift))
 	{
 		widget->mInputState.Modifiers = event->modifiers();
 		widget->OnUpdateCursor();
@@ -191,7 +250,7 @@ void lcQGLWidget::keyPressEvent(QKeyEvent *event)
 
 void lcQGLWidget::keyReleaseEvent(QKeyEvent *event)
 {
-	if (mIsView && (event->key() == Qt::Key_Control || event->key() == Qt::Key_Shift))
+	if (!mIsPreview && mIsView && (event->key() == Qt::Key_Control || event->key() == Qt::Key_Shift))
 	{
 		widget->mInputState.Modifiers = event->modifiers();
 		widget->OnUpdateCursor();
@@ -335,7 +394,7 @@ void lcQGLWidget::wheelEvent(QWheelEvent *event)
 
 void lcQGLWidget::dragEnterEvent(QDragEnterEvent* DragEnterEvent)
 {
-	if (mIsView)
+	if (!mIsPreview && mIsView)
 	{
 		const QMimeData* MimeData = DragEnterEvent->mimeData();
 
@@ -356,8 +415,9 @@ void lcQGLWidget::dragEnterEvent(QDragEnterEvent* DragEnterEvent)
 
 void lcQGLWidget::dragLeaveEvent(QDragLeaveEvent *event)
 {
-	if (!mIsView)
+	if (!mIsView || mIsPreview) {
 		return;
+	}
 
 	((View*)widget)->EndDrag(false);
 
@@ -366,7 +426,7 @@ void lcQGLWidget::dragLeaveEvent(QDragLeaveEvent *event)
 
 void lcQGLWidget::dragMoveEvent(QDragMoveEvent* DragMoveEvent)
 {
-	if (mIsView)
+	if (!mIsPreview && mIsView)
 	{
 		const QMimeData* MimeData = DragMoveEvent->mimeData();
 
@@ -390,7 +450,7 @@ void lcQGLWidget::dragMoveEvent(QDragMoveEvent* DragMoveEvent)
 
 void lcQGLWidget::dropEvent(QDropEvent* DropEvent)
 {
-	if (mIsView)
+	if (!mIsPreview && mIsView)
 	{
 		const QMimeData* MimeData = DropEvent->mimeData();
 

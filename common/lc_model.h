@@ -103,7 +103,7 @@ struct lcModelHistoryEntry
 class lcModel
 {
 public:
-	lcModel(const QString& FileName);
+	lcModel(const QString& FileName, bool Preview = false);
 	~lcModel();
 
 	lcModel(const lcModel&) = delete;
@@ -114,6 +114,11 @@ public:
 	bool IsModified() const
 	{
 		return mSavedHistory != mUndoHistory[0];
+	}
+
+	bool IsPreview()
+	{
+		return mIsPreview;
 	}
 
 	bool GetPieceWorldMatrix(lcPiece* Piece, lcMatrix44& ParentWorldMatrix) const;
@@ -234,7 +239,13 @@ public:
 		if (mUndoHistory.empty())
 			SaveCheckpoint(QString());
 
-		mSavedHistory = mUndoHistory[0];
+		if (!mIsPreview)
+			mSavedHistory = mUndoHistory[0];
+	}
+
+	void SetPreviewPiece(lcPiece* Piece)
+	{
+		AddPiece(Piece);
 	}
 
 	void Cut();
@@ -379,6 +390,7 @@ protected:
 	lcModelProperties mProperties;
 	PieceInfo* mPieceInfo;
 
+	bool mIsPreview;
 	bool mActive;
 	lcStep mCurrentStep;
 	lcVector3 mMouseToolDistance;

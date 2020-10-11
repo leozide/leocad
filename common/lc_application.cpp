@@ -9,6 +9,7 @@
 #include "lc_partselectionwidget.h"
 #include "lc_shortcuts.h"
 #include "view.h"
+#include "lc_previewwidget.h"
 
 lcApplication* gApplication;
 
@@ -43,6 +44,17 @@ void lcPreferences::LoadDefaults()
 	mAutoLoadMostRecent = lcGetProfileInt(LC_PROFILE_AUTOLOAD_MOSTRECENT);
 	mRestoreTabLayout = lcGetProfileInt(LC_PROFILE_RESTORE_TAB_LAYOUT);
 	mColorTheme = static_cast<lcColorTheme>(lcGetProfileInt(LC_PROFILE_COLOR_THEME));
+
+	mPreviewActiveColor = lcGetProfileInt(LC_PROFILE_PREVIEW_ACTIVE_COLOR);
+	mPreviewViewSphereEnabled = lcGetProfileInt(LC_PROFILE_PREVIEW_VIEW_SPHERE_ENABLED);
+	mPreviewViewSphereSize = lcGetProfileInt(LC_PROFILE_PREVIEW_VIEW_SPHERE_SIZE);
+	mPreviewViewSphereLocation = static_cast<lcViewSphereLocation>(lcGetProfileInt(LC_PROFILE_PREVIEW_VIEW_SPHERE_LOCATION));
+	mPreviewEnabled  = lcGetProfileInt(LC_PROFILE_PREVIEW_ENABLED);
+	mPreviewSize     = lcGetProfileInt(LC_PROFILE_PREVIEW_SIZE);
+	mPreviewLocation = static_cast<lcPreviewLocation>(lcGetProfileInt(LC_PROFILE_PREVIEW_LOCATION));
+	mPreviewPosition = static_cast<lcPreviewPosition>(lcGetProfileInt(LC_PROFILE_PREVIEW_POSITION));
+	mDrawPreviewAxis = lcGetProfileInt(LC_PROFILE_PREVIEW_DRAW_AXES);
+	mDrawPreviewViewSphere = lcGetProfileInt(LC_PROFILE_PREVIEW_DRAW_VIEW_SPHERE);
 }
 
 void lcPreferences::SaveDefaults()
@@ -76,6 +88,17 @@ void lcPreferences::SaveDefaults()
 	lcSetProfileInt(LC_PROFILE_AUTOLOAD_MOSTRECENT, mAutoLoadMostRecent);
 	lcSetProfileInt(LC_PROFILE_RESTORE_TAB_LAYOUT, mRestoreTabLayout);
 	lcSetProfileInt(LC_PROFILE_COLOR_THEME, static_cast<int>(mColorTheme));
+
+	lcSetProfileInt(LC_PROFILE_PREVIEW_ACTIVE_COLOR, mPreviewActiveColor);
+	lcSetProfileInt(LC_PROFILE_PREVIEW_ENABLED, mPreviewViewSphereEnabled);
+	lcSetProfileInt(LC_PROFILE_PREVIEW_VIEW_SPHERE_SIZE, mPreviewViewSphereSize);
+	lcSetProfileInt(LC_PROFILE_PREVIEW_VIEW_SPHERE_LOCATION, static_cast<int>(mPreviewViewSphereLocation));
+	lcSetProfileInt(LC_PROFILE_PREVIEW_ENABLED, mPreviewEnabled);
+	lcSetProfileInt(LC_PROFILE_PREVIEW_SIZE, mPreviewSize);
+	lcSetProfileInt(LC_PROFILE_PREVIEW_LOCATION, static_cast<int>(mPreviewLocation));
+	lcSetProfileInt(LC_PROFILE_PREVIEW_POSITION, static_cast<int>(mPreviewPosition));
+	lcSetProfileInt(LC_PROFILE_PREVIEW_DRAW_AXES, mDrawPreviewAxis);
+	lcSetProfileInt(LC_PROFILE_PREVIEW_DRAW_VIEW_SPHERE, mDrawPreviewViewSphere);
 }
 
 void lcPreferences::SetInterfaceColors(lcColorTheme ColorTheme)
@@ -219,6 +242,9 @@ void lcApplication::SetProject(Project* Project)
 	SaveTabLayout();
 
 	gMainWindow->RemoveAllModelTabs();
+
+	if (gMainWindow->GetPreviewWidget())
+		 gMainWindow->GetPreviewWidget()->ClearPreview();
 
 	delete mProject;
 	mProject = Project;
@@ -779,6 +805,8 @@ void lcApplication::ShowPreferencesDialog()
 	Options.MouseShortcutsModified = false;
 	Options.MouseShortcutsDefault = false;
 
+	lcPreviewPosition PreviewDockable = Options.Preferences.mPreviewPosition;
+
 	lcQPreferencesDialog Dialog(gMainWindow, &Options);
 	if (Dialog.exec() != QDialog::Accepted)
 		return;
@@ -804,6 +832,11 @@ void lcApplication::ShowPreferencesDialog()
 	lcSetProfileInt(LC_PROFILE_CHECK_UPDATES, Options.CheckForUpdates);
 	lcSetProfileInt(LC_PROFILE_ANTIALIASING_SAMPLES, Options.AASamples);
 	lcSetProfileInt(LC_PROFILE_STUD_LOGO, Options.StudLogo);
+
+	lcPreviewPosition Dockable = Options.Preferences.mPreviewPosition;
+	if (PreviewDockable != Dockable)
+		gMainWindow->TogglePreviewWidget(
+			Dockable == lcPreviewPosition::Dockable);
 
 	if (LanguageChanged || LibraryChanged || ColorsChanged || AAChanged)
 		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Some changes will only take effect the next time you start LeoCAD."));

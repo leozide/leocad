@@ -21,6 +21,21 @@ enum class lcViewSphereLocation
 	BottomRight
 };
 
+enum class lcPreviewLocation
+{
+	TopLeft,
+	TopRight,
+	BottomLeft,
+	BottomRight
+};
+
+enum class lcPreviewPosition
+{
+	Dockable,
+	Floating,
+	Viewport     // not implemented
+};
+
 enum class lcColorTheme
 {
 	Dark,
@@ -63,6 +78,17 @@ public:
 	bool mAutoLoadMostRecent;
 	bool mRestoreTabLayout;
 	lcColorTheme mColorTheme;
+
+	int mPreviewEnabled;
+	quint32 mPreviewActiveColor;
+	int mPreviewViewSphereEnabled;
+	int mPreviewViewSphereSize;
+	lcViewSphereLocation mPreviewViewSphereLocation;
+	lcPreviewLocation mPreviewLocation;
+	lcPreviewPosition mPreviewPosition;
+	int mPreviewSize;
+	int mDrawPreviewAxis;
+	int mDrawPreviewViewSphere;
 };
 
 class lcApplication : public QApplication
@@ -112,4 +138,3 @@ inline lcPreferences& lcGetPreferences()
 {
 	return gApplication->mPreferences;
 }
-

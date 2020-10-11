@@ -5,11 +5,13 @@
 #include <bitset>
 
 class View;
+class lcPreviewWidget;
 
 class lcViewSphere
 {
 public:
-	lcViewSphere(View* View);
+	lcViewSphere(View *View);
+	lcViewSphere(lcPreviewWidget *Preview);
 
 	void Draw();
 	bool OnMouseMove();
@@ -25,12 +27,15 @@ protected:
 	lcMatrix44 GetProjectionMatrix() const;
 	std::bitset<6> GetIntersectionFlags(lcVector3& Intersection) const;
 
+	lcPreviewWidget* mPreview;
 	View* mView;
 	lcVector3 mIntersection;
 	std::bitset<6> mIntersectionFlags;
+	int mViewSphereSize;
 	int mMouseDownX;
 	int mMouseDownY;
 	bool mMouseDown;
+	bool mIsPreview;
 
 	static lcTexture* mTexture;
 	static lcVertexBuffer mVertexBuffer;

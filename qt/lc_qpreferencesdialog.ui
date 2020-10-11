@@ -202,7 +202,7 @@
             <item>
              <widget class="QToolButton" name="partsLibraryBrowse">
               <property name="icon">
-               <iconset>
+               <iconset resource="../leocad.qrc">
                 <normaloff>:/resources/file_open.png</normaloff>:/resources/file_open.png</iconset>
               </property>
              </widget>
@@ -210,7 +210,7 @@
             <item>
              <widget class="QToolButton" name="partsArchiveBrowse">
               <property name="icon">
-               <iconset>
+               <iconset resource="../leocad.qrc">
                 <normaloff>:/resources/archive.png</normaloff>:/resources/archive.png</iconset>
               </property>
              </widget>
@@ -551,7 +551,14 @@
           <string>Overlays</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_3">
-          <item row="0" column="2">
+          <item row="0" column="0">
+           <widget class="QCheckBox" name="AxisIconCheckBox">
+            <property name="text">
+             <string>Axis icon</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="6">
            <spacer name="horizontalSpacer_7">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
@@ -564,17 +571,24 @@
             </property>
            </spacer>
           </item>
-          <item row="0" column="0">
-           <widget class="QCheckBox" name="AxisIconCheckBox">
+          <item row="0" column="5">
+           <widget class="QToolButton" name="OverlayColorButton">
             <property name="text">
-             <string>Axis icon</string>
+             <string/>
             </property>
            </widget>
           </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_2">
+          <item row="0" column="3">
+           <widget class="QToolButton" name="ActiveViewColorButton">
             <property name="text">
-             <string>Overlay Color:</string>
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QLabel" name="label_6">
+            <property name="text">
+             <string>Active View:</string>
             </property>
            </widget>
           </item>
@@ -585,24 +599,10 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="1">
-           <widget class="QToolButton" name="OverlayColorButton">
+          <item row="0" column="4">
+           <widget class="QLabel" name="label_2">
             <property name="text">
-             <string/>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_6">
-            <property name="text">
-             <string>Active View:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QToolButton" name="ActiveViewColorButton">
-            <property name="text">
-             <string/>
+             <string>Overlay Color:</string>
             </property>
            </widget>
           </item>
@@ -719,52 +719,10 @@
             </item>
            </widget>
           </item>
-          <item row="2" column="5">
-           <widget class="QLabel" name="label_20">
-            <property name="text">
-             <string>Highlight Color:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_21">
-            <property name="text">
-             <string>Size:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="QToolButton" name="ViewSphereColorButton">
+          <item row="2" column="6">
+           <widget class="QToolButton" name="ViewSphereHighlightColorButton">
             <property name="text">
              <string/>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_22">
-            <property name="text">
-             <string>Color:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="3">
-           <widget class="QToolButton" name="ViewSphereTextColorButton">
-            <property name="text">
-             <string/>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="2">
-           <widget class="QLabel" name="label_23">
-            <property name="text">
-             <string>Text Color:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="2">
-           <widget class="QLabel" name="label_24">
-            <property name="text">
-             <string>Location:</string>
             </property>
            </widget>
           </item>
@@ -792,12 +750,230 @@
             </item>
            </widget>
           </item>
-          <item row="2" column="6">
-           <widget class="QToolButton" name="ViewSphereHighlightColorButton">
+          <item row="2" column="1">
+           <widget class="QToolButton" name="ViewSphereColorButton">
             <property name="text">
              <string/>
             </property>
            </widget>
+          </item>
+          <item row="1" column="2">
+           <widget class="QLabel" name="label_14">
+            <property name="text">
+             <string>Preview Location</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_22">
+            <property name="text">
+             <string>Color:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="2">
+           <widget class="QLabel" name="label_23">
+            <property name="text">
+             <string>Text Color:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QLabel" name="label_24">
+            <property name="text">
+             <string>Location:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QComboBox" name="PreviewViewSphereSizeCombo">
+            <item>
+             <property name="text">
+              <string>Disabled</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Small</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Medium</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Large</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_8">
+            <property name="text">
+             <string>Preview Size:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_21">
+            <property name="text">
+             <string>Size:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="5">
+           <widget class="QLabel" name="label_20">
+            <property name="text">
+             <string>Highlight Color:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="3">
+           <widget class="QToolButton" name="ViewSphereTextColorButton">
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="3">
+           <widget class="QComboBox" name="PreviewViewSphereLocationCombo">
+            <item>
+             <property name="text">
+              <string>Top Left</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Top Right</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Bottom Left</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Bottom Right</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="PreviewGroup">
+         <property name="title">
+          <string>Preview</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_6">
+          <item row="0" column="2">
+           <widget class="QLabel" name="label_16">
+            <property name="text">
+             <string>Location:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0" colspan="2">
+           <widget class="QCheckBox" name="PreviewViewSphereCheckBox">
+            <property name="text">
+             <string>View Sphere</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="5">
+           <widget class="QComboBox" name="PreviewPositionCombo">
+            <item>
+             <property name="text">
+              <string>Dockable</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Floating</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="0" column="4">
+           <widget class="QLabel" name="label_26">
+            <property name="text">
+             <string>Position:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_15">
+            <property name="text">
+             <string>Size:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="3">
+           <widget class="QComboBox" name="PreviewLocationCombo">
+            <item>
+             <property name="text">
+              <string>Top Left</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Top Right</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Bottom Left</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Bottom Right</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="1" column="2" colspan="2">
+           <widget class="QCheckBox" name="PreviewAxisIconCheckBox">
+            <property name="text">
+             <string>Axis Icon</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QComboBox" name="PreviewSizeCombo">
+            <item>
+             <property name="text">
+              <string>Disabled</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Small</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Large</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="0" column="6">
+           <spacer name="horizontalSpacer_11">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
           </item>
          </layout>
         </widget>
@@ -1384,9 +1560,16 @@
   <tabstop>gridLineColor</tabstop>
   <tabstop>ViewSphereSizeCombo</tabstop>
   <tabstop>ViewSphereLocationCombo</tabstop>
+  <tabstop>PreviewViewSphereSizeCombo</tabstop>
+  <tabstop>PreviewViewSphereLocationCombo</tabstop>
   <tabstop>ViewSphereColorButton</tabstop>
   <tabstop>ViewSphereTextColorButton</tabstop>
   <tabstop>ViewSphereHighlightColorButton</tabstop>
+  <tabstop>PreviewSizeCombo</tabstop>
+  <tabstop>PreviewLocationCombo</tabstop>
+  <tabstop>PreviewPositionCombo</tabstop>
+  <tabstop>PreviewViewSphereCheckBox</tabstop>
+  <tabstop>PreviewAxisIconCheckBox</tabstop>
   <tabstop>categoriesTree</tabstop>
   <tabstop>partsTree</tabstop>
   <tabstop>importCategories</tabstop>
@@ -1415,7 +1598,9 @@
   <tabstop>mouseRemove</tabstop>
   <tabstop>mouseSensitivity</tabstop>
  </tabstops>
- <resources/>
+ <resources>
+  <include location="../leocad.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>buttonBox</sender>

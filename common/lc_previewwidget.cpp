@@ -30,12 +30,15 @@ lcPreviewDockWidget::lcPreviewDockWidget(QMainWindow* Parent)
 
 	mLabel = new QLabel(QString());
 
-	mToolBar = addToolBar(tr("PreviewDescription"));
-	mToolBar->setObjectName("PreviewDescription");
+	mToolBar = addToolBar(tr("Toolbar"));
+	mToolBar->setObjectName("Toolbar");
+	mToolBar->setStatusTip(tr("Preview Toolbar"));
 	mToolBar->setMovable(false);
 	mToolBar->addAction(mLockAction);
 	mToolBar->addSeparator();
 	mToolBar->addWidget(mLabel);
+	if (mToolBar->isHidden())
+		mToolBar->show();
 }
 
 bool lcPreviewDockWidget::SetCurrentPiece(const QString& PartType, int ColorCode)

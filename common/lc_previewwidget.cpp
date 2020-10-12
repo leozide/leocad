@@ -163,6 +163,7 @@ bool lcPreviewWidget::SetCurrentPiece(const QString& PartType, int ColorCode)
 
 void lcPreviewWidget::ClearPreview()
 {
+	delete mLoader;
 	mLoader = new Project(true/*IsPreview*/);
 	mLoader->SetActiveModel(0);
 	mModel = mLoader->GetActiveModel();

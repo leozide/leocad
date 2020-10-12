@@ -145,11 +145,6 @@ void lcMainWindow::CreateWidgets()
 	setWindowIcon(QIcon(":/resources/leocad.png"));
 	setWindowFilePath(QString());
 
-	CreateActions();
-	CreateToolBars();
-	CreateMenus();
-	CreateStatusBar();
-
 	int AASamples = lcGetProfileInt(LC_PROFILE_ANTIALIASING_SAMPLES);
 	if (AASamples > 1)
 	{
@@ -158,6 +153,11 @@ void lcMainWindow::CreateWidgets()
 		format.setSamples(AASamples);
 		QGLFormat::setDefaultFormat(format);
 	}
+
+	CreateActions();
+	CreateToolBars();
+	CreateMenus();
+	CreateStatusBar();
 
 	mModelTabWidget = new lcTabWidget();
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))

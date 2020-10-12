@@ -52,6 +52,11 @@ bool lcPreviewDockWidget::SetCurrentPiece(const QString& PartType, int ColorCode
 	return false;
 }
 
+void lcPreviewDockWidget::UpdatePreview()
+{
+	mPreview->UpdatePreview();
+}
+
 void lcPreviewDockWidget::ClearPreview()
 {
 	if (mPreview->GetActiveModel()->GetPieces().GetSize())
@@ -169,6 +174,27 @@ void lcPreviewWidget::ClearPreview()
 	mModel = mLoader->GetActiveModel();
 	lcGetPiecesLibrary()->UnloadUnusedParts();
 	Redraw();
+}
+
+void lcPreviewWidget::UpdatePreview()
+{
+	QString PartType;
+	int ColorCode = -1;
+	lcModel* ActiveModel = GetActiveModel();
+	for (lcPiece* ModelPiece : ActiveModel->GetPieces())
+	{
+		if (ModelPiece->mPieceInfo)
+		{
+			PartType = ModelPiece->mPieceInfo->mFileName;
+			ColorCode = ModelPiece->mColorCode;
+			break;
+		}
+	}
+
+	ClearPreview();
+
+	if (!PartType.isEmpty() && ColorCode > -1)
+		SetCurrentPiece(PartType, ColorCode);
 }
 
 void lcPreviewWidget::SetDefaultCamera()

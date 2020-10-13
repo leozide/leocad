@@ -24,6 +24,7 @@ public:
 	explicit lcPreviewDockWidget(QMainWindow* parent = nullptr);
 	bool SetCurrentPiece(const QString& PartType, int ColorCode);
 	void ClearPreview();
+	void UpdatePreview();
 
 protected slots:
 	void SetPreviewLock();
@@ -86,6 +87,7 @@ public:
 	}
 
 	void ClearPreview();
+	void UpdatePreview();
 	bool SetCurrentPiece(const QString& PartType, int ColorCode);
 	lcMatrix44 GetProjectionMatrix() const;
 	lcModel* GetActiveModel() const;

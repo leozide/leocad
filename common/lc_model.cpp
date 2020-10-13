@@ -4453,6 +4453,10 @@ void lcModel::ShowPropertiesDialog()
 
 	UpdateBackgroundTexture();
 
+	lcPreferences& Preferences = lcGetPreferences();
+	if (Preferences.mPreviewEnabled && Preferences.mPreviewPosition != lcPreviewPosition::Floating)
+		gMainWindow->GetPreviewWidget()->UpdatePreview();
+
 	SaveCheckpoint(tr("Changing Properties"));
 }
 

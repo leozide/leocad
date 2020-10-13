@@ -1067,6 +1067,13 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 		QT_TRANSLATE_NOOP("Status", "Toggle the Timeline Toolbar"),
 		""
 	},
+	// LC_VIEW_TOOLBAR_PREVIEW
+	{
+		QT_TRANSLATE_NOOP("Action", "View.Toolbars.Preview"),
+		QT_TRANSLATE_NOOP("Menu", "Preview"),
+		QT_TRANSLATE_NOOP("Status", "Toggle the Preview Toolbar"),
+		""
+	},
 	// LC_VIEW_FULLSCREEN
 	{
 		QT_TRANSLATE_NOOP("Action", "View.FullScreen"),
@@ -1663,7 +1670,7 @@ const char* gToolNames[LC_NUM_TOOLS] =
 	QT_TRANSLATE_NOOP("Mouse", "Rotate"),        // LC_TOOL_ROTATE
 	QT_TRANSLATE_NOOP("Mouse", "Delete"),        // LC_TOOL_ERASER
 	QT_TRANSLATE_NOOP("Mouse", "Paint"),         // LC_TOOL_PAINT
-    QT_TRANSLATE_NOOP("Mouse", "ColorPicker"),   // LC_TOOL_COLOR_PICKER
+	QT_TRANSLATE_NOOP("Mouse", "ColorPicker"),   // LC_TOOL_COLOR_PICKER
 	QT_TRANSLATE_NOOP("Mouse", "Zoom"),          // LC_TOOL_ZOOM
 	QT_TRANSLATE_NOOP("Mouse", "Pan"),           // LC_TOOL_PAN
 	QT_TRANSLATE_NOOP("Mouse", "Orbit"),         // LC_TOOL_ROTATE_VIEW

@@ -552,6 +552,9 @@ void lcMainWindow::CreateMenus()
 	ToolBarsMenu->addAction(mActions[LC_VIEW_TOOLBAR_COLORS]);
 	ToolBarsMenu->addAction(mActions[LC_VIEW_TOOLBAR_PROPERTIES]);
 	ToolBarsMenu->addAction(mActions[LC_VIEW_TOOLBAR_TIMELINE]);
+	lcPreferences& Preferences = lcGetPreferences();
+	if (Preferences.mPreviewEnabled && Preferences.mPreviewPosition == lcPreviewPosition::Dockable)
+		ToolBarsMenu->addAction(mActions[LC_VIEW_TOOLBAR_PREVIEW]);
 	ToolBarsMenu->addSeparator();
 	ToolBarsMenu->addAction(mActions[LC_VIEW_TOOLBAR_STANDARD]);
 	ToolBarsMenu->addAction(mActions[LC_VIEW_TOOLBAR_TOOLS]);
@@ -807,10 +810,10 @@ void lcMainWindow::EnableWindowFlags(bool Detached)
 	if (Detached) {
 		QDockWidget *DockWidget = qobject_cast<QDockWidget *>(sender());
 		DockWidget->setWindowFlags(Qt::CustomizeWindowHint |
-										  Qt::Window |
-										  Qt::WindowMinimizeButtonHint |
-										  Qt::WindowMaximizeButtonHint |
-										  Qt::WindowCloseButtonHint);
+								   Qt::Window |
+								   Qt::WindowMinimizeButtonHint |
+								   Qt::WindowMaximizeButtonHint |
+								   Qt::WindowCloseButtonHint);
 		DockWidget->show();
 	}
 }
@@ -939,6 +942,9 @@ QMenu* lcMainWindow::createPopupMenu()
 	Menu->addAction(mActions[LC_VIEW_TOOLBAR_COLORS]);
 	Menu->addAction(mActions[LC_VIEW_TOOLBAR_PROPERTIES]);
 	Menu->addAction(mActions[LC_VIEW_TOOLBAR_TIMELINE]);
+	lcPreferences& Preferences = lcGetPreferences();
+	if (Preferences.mPreviewEnabled && Preferences.mPreviewPosition == lcPreviewPosition::Dockable)
+		Menu->addAction(mActions[LC_VIEW_TOOLBAR_PREVIEW]);
 	Menu->addSeparator();
 	Menu->addAction(mActions[LC_VIEW_TOOLBAR_STANDARD]);
 	Menu->addAction(mActions[LC_VIEW_TOOLBAR_TOOLS]);
@@ -956,6 +962,9 @@ void lcMainWindow::UpdateDockWidgetActions()
 	mActions[LC_VIEW_TOOLBAR_STANDARD]->setChecked(mStandardToolBar->isVisible());
 	mActions[LC_VIEW_TOOLBAR_TOOLS]->setChecked(mToolsToolBar->isVisible());
 	mActions[LC_VIEW_TOOLBAR_TIME]->setChecked(mTimeToolBar->isVisible());
+	lcPreferences& Preferences = lcGetPreferences();
+	if (Preferences.mPreviewEnabled && Preferences.mPreviewPosition == lcPreviewPosition::Dockable)
+		mActions[LC_VIEW_TOOLBAR_PREVIEW]->setChecked(mPreviewToolBar->isVisible());
 }
 
 void lcMainWindow::UpdateGamepads()
@@ -1452,7 +1461,7 @@ void lcMainWindow::RestoreTabLayout(const QByteArray& TabLayout)
 				DataStream >> CameraType;
 
 				View* CurrentView = nullptr;
-				
+
 				if (ParentWidget)
 					CurrentView = (View*)((lcQGLWidget*)ParentWidget)->widget;
 
@@ -1759,7 +1768,7 @@ void lcMainWindow::SetTransformType(lcTransformType TransformType)
 {
 	if (TransformType < lcTransformType::First || TransformType >= lcTransformType::Count)
 		return;
-	
+
 	mTransformType = TransformType;
 
 	const char* IconNames[static_cast<int>(lcTransformType::Count)] =
@@ -1819,7 +1828,7 @@ void lcMainWindow::SplitView(Qt::Orientation Orientation)
 	}
 	else
 	{
-		QSplitter* ParentSplitter = (QSplitter*)Parent;	
+		QSplitter* ParentSplitter = (QSplitter*)Parent;
 		Sizes = ParentSplitter->sizes();
 		int FocusIndex = ParentSplitter->indexOf(Focus);
 
@@ -2769,6 +2778,10 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 
 	case LC_VIEW_TOOLBAR_TIMELINE:
 		ToggleDockWidget(mTimelineToolBar);
+		break;
+
+	case LC_VIEW_TOOLBAR_PREVIEW:
+		ToggleDockWidget(mPreviewToolBar);
 		break;
 
 	case LC_VIEW_FULLSCREEN:

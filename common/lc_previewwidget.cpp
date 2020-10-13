@@ -30,12 +30,15 @@ lcPreviewDockWidget::lcPreviewDockWidget(QMainWindow* Parent)
 
 	mLabel = new QLabel(QString());
 
-	mToolBar = addToolBar(tr("PreviewDescription"));
-	mToolBar->setObjectName("PreviewDescription");
+	mToolBar = addToolBar(tr("Toolbar"));
+	mToolBar->setObjectName("Toolbar");
+	mToolBar->setStatusTip(tr("Preview Toolbar"));
 	mToolBar->setMovable(false);
 	mToolBar->addAction(mLockAction);
 	mToolBar->addSeparator();
 	mToolBar->addWidget(mLabel);
+	if (mToolBar->isHidden())
+		mToolBar->show();
 }
 
 bool lcPreviewDockWidget::SetCurrentPiece(const QString& PartType, int ColorCode)
@@ -50,6 +53,11 @@ bool lcPreviewDockWidget::SetCurrentPiece(const QString& PartType, int ColorCode
 		return true;
 	}
 	return false;
+}
+
+void lcPreviewDockWidget::UpdatePreview()
+{
+	mPreview->UpdatePreview();
 }
 
 void lcPreviewDockWidget::ClearPreview()
@@ -169,6 +177,27 @@ void lcPreviewWidget::ClearPreview()
 	mModel = mLoader->GetActiveModel();
 	lcGetPiecesLibrary()->UnloadUnusedParts();
 	Redraw();
+}
+
+void lcPreviewWidget::UpdatePreview()
+{
+	QString PartType;
+	int ColorCode = -1;
+	lcModel* ActiveModel = GetActiveModel();
+	for (lcPiece* ModelPiece : ActiveModel->GetPieces())
+	{
+		if (ModelPiece->mPieceInfo)
+		{
+			PartType = ModelPiece->mPieceInfo->mFileName;
+			ColorCode = ModelPiece->mColorCode;
+			break;
+		}
+	}
+
+	ClearPreview();
+
+	if (!PartType.isEmpty() && ColorCode > -1)
+		SetCurrentPiece(PartType, ColorCode);
 }
 
 void lcPreviewWidget::SetDefaultCamera()

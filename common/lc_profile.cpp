@@ -140,7 +140,8 @@ static lcProfileEntry gProfileEntries[LC_NUM_PROFILE_KEYS] =
 	lcProfileEntry("Settings", "PreviewLocation", (int)lcPreviewLocation::BottomRight),        // LC_PROFILE_PREVIEW_LOCATION
 	lcProfileEntry("Settings", "PreviewPosition", (int)lcPreviewPosition::Dockable),           // LC_PROFILE_PREVIEW_POSITION
 	lcProfileEntry("Settings", "DrawPreviewAxis", 0),                                          // LC_PROFILE_PREVIEW_DRAW_AXES
-	lcProfileEntry("Settings", "DrawPreviewViewSphere",1)                                      // LC_PROFILE_PREVIEW_DRAW_VIEW_SPHERE
+	lcProfileEntry("Settings", "DrawPreviewViewSphere",1),                                     // LC_PROFILE_PREVIEW_DRAW_VIEW_SPHERE
+	lcProfileEntry("Settings", "PreviewLoadPath", "")                                             // LC_PROFILE_PREVIEW_LOAD_PATH
 };
 
 void lcRemoveProfileKey(LC_PROFILE_KEY Key)

@@ -2,6 +2,7 @@
 #include "lc_global.h"
 #include "lc_previewwidget.h"
 #include "lc_shortcuts.h"
+#include "lc_profile.h"
 #include "pieceinf.h"
 #include "piece.h"
 #include "project.h"
@@ -147,7 +148,10 @@ bool lcPreviewWidget::SetCurrentPiece(const QString& PartType, int ColorCode)
 	}
 	else
 	{
-		QString ModelPath = QString("%1/%2").arg(QDir::currentPath()).arg(PartType);
+		QString Path = lcGetProfileString(LC_PROFILE_PREVIEW_LOAD_PATH);
+		if (Path.isEmpty())
+			Path = QDir::currentPath();
+		QString ModelPath = QString("%1/%2").arg(Path).arg(PartType);
 
 		if (!mLoader->Load(ModelPath))
 		{

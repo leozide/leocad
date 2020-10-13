@@ -127,6 +127,7 @@ protected:
 	void DrawViewport();
 
 	lcTool GetCurrentTool() const;
+	lcTrackTool GetOverrideTrackTool(Qt::MouseButton Button) const;
 	void StartTracking(lcTrackButton TrackButton);
 	void StopTracking(bool Accept);
 	void OnButtonDown(lcTrackButton TrackButton);

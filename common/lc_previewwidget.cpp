@@ -1,6 +1,7 @@
 #include "QMessageBox"
 #include "lc_global.h"
 #include "lc_previewwidget.h"
+#include "lc_shortcuts.h"
 #include "pieceinf.h"
 #include "piece.h"
 #include "project.h"
@@ -432,6 +433,33 @@ void lcPreviewWidget::StopTracking(bool Accept)
 	OnUpdateCursor();
 }
 
+lcPreviewWidget::lcTrackTool lcPreviewWidget::GetOverrideTrackTool(Qt::MouseButton Button) const
+{
+	lcTool OverrideTool = gMouseShortcuts.GetTool(Button, mInputState.Modifiers);
+
+	switch (OverrideTool)
+	{
+		case LC_NUM_TOOLS:         // Button == Qt::MouseButton::LeftButton
+			OverrideTool = lcTool(LC_TRACKTOOL_ORBIT_XY);
+			break;
+		case LC_TOOL_ROTATE_VIEW:  // Button == Qt::MouseButton::RightButton
+			OverrideTool = lcTool(LC_TRACKTOOL_PAN);
+			break;
+		default:
+			OverrideTool = lcTool(LC_TRACKTOOL_NONE);
+			break;
+	}
+
+	lcPreviewWidget::lcTrackTool TrackToolFromTool[LC_NUM_TOOLS] =
+	{
+		LC_TRACKTOOL_NONE,         // LC_TOOL_SELECT
+		LC_TRACKTOOL_PAN,          // LC_TOOL_PAN
+		LC_TRACKTOOL_ORBIT_XY      // LC_TOOL_ROTATE_VIEW
+	};
+
+	return TrackToolFromTool[OverrideTool];
+}
+
 void lcPreviewWidget::OnButtonDown(lcTrackButton TrackButton)
 {
 	switch (mTrackTool)
@@ -538,7 +566,7 @@ void lcPreviewWidget::OnLeftButtonDown()
 	if (mViewSphere.OnLeftButtonDown())
 		return;
 
-	lcTrackTool OverrideTool = LC_TRACKTOOL_ORBIT_XY;
+	lcTrackTool OverrideTool = GetOverrideTrackTool(Qt::LeftButton); // LC_TRACKTOOL_ORBIT_XY;
 
 	if (OverrideTool != LC_TRACKTOOL_NONE)
 	{
@@ -568,7 +596,7 @@ void lcPreviewWidget::OnMiddleButtonDown()
 	}
 
 #if (QT_VERSION >= QT_VERSION_CHECK(4, 7, 0))
-	lcTrackTool OverrideTool = LC_TRACKTOOL_NONE;
+	lcTrackTool OverrideTool = GetOverrideTrackTool(Qt::MiddleButton); //LC_TRACKTOOL_NONE;
 
 	if (OverrideTool != LC_TRACKTOOL_NONE)
 	{
@@ -598,7 +626,7 @@ void lcPreviewWidget::OnRightButtonDown()
 		return;
 	}
 
-	lcTrackTool OverrideTool = LC_TRACKTOOL_PAN;
+	lcTrackTool OverrideTool = GetOverrideTrackTool(Qt::RightButton); //LC_TRACKTOOL_PAN;
 
 	if (OverrideTool != LC_TRACKTOOL_NONE)
 	{
@@ -606,7 +634,7 @@ void lcPreviewWidget::OnRightButtonDown()
 		OnUpdateCursor();
 	}
 
-	OnButtonDown(lcTrackButton::Middle);
+	OnButtonDown(lcTrackButton::Right);
 }
 
 void lcPreviewWidget::OnRightButtonUp()

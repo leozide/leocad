@@ -1,3 +1,16 @@
+QToolTip {
+    color: rgb(58, 58, 58);
+    background-color: rgb(224, 224, 224);
+    border: 0px;
+}
+
+QMenu::separator {
+    height: 1px;
+    background: rgb(80, 80, 80);
+    margin-left: 10px;
+    margin-right: 5px;
+}
+
 QToolBar {
     border: none;
 }

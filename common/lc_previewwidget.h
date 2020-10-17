@@ -149,5 +149,3 @@ protected:
 	int mMouseDownX;
 	int mMouseDownY;
 };
-
-extern lcPreviewWidget* gPreviewWidget;

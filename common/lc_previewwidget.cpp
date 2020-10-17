@@ -11,8 +11,6 @@
 
 #include "lc_qglwidget.h"
 
-lcPreviewWidget* gPreviewWidget;
-
 lcPreviewDockWidget::lcPreviewDockWidget(QMainWindow* Parent)
 	: QMainWindow(Parent)
 {
@@ -104,8 +102,6 @@ lcPreviewWidget::~lcPreviewWidget()
 		delete mCamera;
 
 	delete mLoader;
-
-	gPreviewWidget = nullptr;
 }
 
 bool lcPreviewWidget::SetCurrentPiece(const QString& PartType, int ColorCode)

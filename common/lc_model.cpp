@@ -266,13 +266,7 @@ void lcModel::DeleteModel()
 	lcReleaseTexture(mBackgroundTexture);
 	mBackgroundTexture = nullptr;
 
-	if (mIsPreview && gPreviewWidget) {
-		lcCamera* Camera = gPreviewWidget->GetCamera();
-
-		if (Camera && !Camera->IsSimple() && mCameras.FindIndex(Camera) != -1)
-			gPreviewWidget->SetCamera(Camera);
-	}
-	else if (gMainWindow)
+	if (gMainWindow)
 	{
 		const lcArray<View*>* Views = gMainWindow->GetViewsForModel(this);
 

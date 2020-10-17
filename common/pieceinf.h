@@ -130,6 +130,11 @@ public:
 
 		const char* Name = mFileName;
 
+		// Heuristic: Names matching '^[Uu]?[0-9]*[A-Za-z][^.][^.]' are patterned.
+
+		if (*Name == 'U' || *Name == 'u')
+			Name++;
+
 		while (*Name)
 		{
 			if (*Name < '0' || *Name > '9')
@@ -138,7 +143,10 @@ public:
 			Name++;
 		}
 
-		if (*Name == 'P' || *Name == 'p')
+		if (!*Name || !((*Name >= 'A' && *Name <= 'Z') || (*Name >= 'a' && *Name <= 'z')))
+			return false;
+
+		if (Name[1] && Name[1] != '.' && Name[2] && Name[2] != '.')
 			return true;
 
 		return false;

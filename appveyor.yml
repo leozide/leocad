@@ -1,8 +1,6 @@
 version: '{branch}.{build}'
 skip_tags: true
 image:
-- Ubuntu1604
-- macos
 - Visual Studio 2019
 configuration: Release
 platform: x64
@@ -96,14 +94,3 @@ for:
   artifacts:
   - path: LeoCAD-macOS-$(VERSION).dmg
     name: leocad
-
-deploy:
-- provider: GitHub
-  tag: continuous
-  description: Continuous build for commit $(VERSION)
-  auth_token:
-    secure: +EZPzYX4wUEc6MYg4kBLx9TogAqeeeWUPgtEW3VtAJATrBtxwpuOQIHrrR4hbc7a
-  artifact: leocad
-  force_update: true
-  on:
-    branch: master

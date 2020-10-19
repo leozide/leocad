@@ -1,0 +1,99 @@
+language: cpp
+
+matrix:
+ include:
+  - os: linux
+    dist: trusty
+    addons:
+      apt:
+        sources:
+          - sourceline: "ppa:beineri/opt-qt487-trusty"
+        packages:
+          - opt-qt4-qmake opt-qt4-dev-tools opt-libqt4-dev opt-libqt4-dev-bin opt-libqt4-opengl-dev
+    sudo: required
+    compiler: gcc
+    env:
+     - QT_BASE=48
+  - os: linux
+    dist: trusty
+    addons:
+      apt:
+        sources:
+          - sourceline: "ppa:beineri/opt-qt-5.10.1-trusty"
+        packages:
+          - qt510base
+    sudo: required
+    compiler: gcc
+    env:
+     - QT_BASE=510
+  - os: osx
+    compiler: clang
+    env:
+     - QT_BASE=57
+
+before_install:
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then 
+      brew update;
+    fi
+
+install:
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then 
+      brew install qt5 grep;
+      brew link --force qt5;
+      wget https://github.com/leozide/leocad/releases/download/v19.07.1/Library-Linux-14384.zip -O library.zip;
+      unzip library.zip;
+    fi
+
+script:
+  - |
+    if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+      source /opt/qt*/bin/qt*-env.sh
+      qmake PREFIX=/usr -v
+      qmake PREFIX=/usr -r
+      make -j$(nproc); export COMPILE_RESULT=$?
+      if [[ "$QT_BASE" != "510" ]]; then exit $COMPILE_RESULT; fi
+      make install INSTALL_ROOT=AppDir
+      if [[ "$TRAVIS_TAG" != "" ]]; then
+        wget https://github.com/leozide/leocad/releases/download/v19.07.1/Library-Linux-14384.zip -O library.zip;
+        unzip library.zip;
+        mkdir -p AppDir/usr/share/leocad;
+        mv library.bin AppDir/usr/share/leocad/library.bin;
+      fi
+      wget -c "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
+      chmod a+x linuxdeployqt*.AppImage 
+      unset QTDIR; unset QT_PLUGIN_PATH ; unset LD_LIBRARY_PATH
+      export VERSION=$(git rev-parse --short HEAD)
+      ./linuxdeployqt*.AppImage ./AppDir/usr/share/applications/*.desktop -bundle-non-qt-libs
+      ./linuxdeployqt*.AppImage --appimage-extract
+      export PATH=$(readlink -f ./squashfs-root/usr/bin/):$PATH
+      ./squashfs-root/usr/bin/appimagetool AppDir/
+      mv ./LeoCAD-$VERSION-x86_64.AppImage ./LeoCAD-Linux-$VERSION-x86_64.AppImage 
+    elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+      qmake PREFIX=/usr -v
+      qmake PREFIX=/usr -r
+      make -j$(sysctl -n hw.ncpu)
+      cd build/release
+      macdeployqt LeoCAD.app -dmg
+      mv LeoCAD.dmg LeoCAD-macOS-$(git rev-parse --short HEAD).dmg
+    fi
+
+after_success:
+  - |
+    export GREP_PATH=grep;
+    if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then export GREP_PATH=ggrep; fi
+    curl -s -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/repos/leozide/leocad/commits/master -o repo.txt;
+    export REMOTE=$($GREP_PATH -Po '(?<=: \")(([a-z0-9])\w+)(?=\")' -m 1 repo.txt);
+    export LOCAL=$(git rev-parse HEAD);
+    if [[ "$REMOTE" != "$LOCAL" ]]; then echo "Build no longer current. $REMOTE vs $LOCAL - aborting upload."; exit 0; fi;
+    if [[ "$QT_BASE" = "510" && "$TRAVIS_OS_NAME" = "linux" ]]; then
+      wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh
+      bash upload.sh LeoCAD*.AppImage*
+    elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+      wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh
+      bash upload.sh LeoCAD*.dmg*
+    fi
+
+branches:
+  except:
+    - # Do not build tags that we create when we upload to GitHub Releases
+    - /^(?i:continuous)/

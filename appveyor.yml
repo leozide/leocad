@@ -5,92 +5,32 @@ image:
 configuration: Release
 platform: x64
 
-for:
-- matrix:
-    only:
-      - image: Visual Studio 2019
-  before_build:
-  - call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
-  - set PATH=C:\Qt\5.15.0\msvc2019_64\bin;%PATH%
-  - git rev-parse --short HEAD > version.txt
-  - set /p VERSION= < version.txt
-  - qmake -v
-  - qmake -tp vc
-  build:
-    project: leocad.vcxproj
-    verbosity: minimal
-  after_build:
-  - 7z a symbols.zip build/release/leocad.exe build/release/leocad.pdb
-  - mkdir appdir
-  - copy build\release\leocad.exe appdir
-  - copy docs\readme.txt appdir
-  - appveyor DownloadFile https://github.com/leozide/leocad/releases/download/v19.07.1/Library-Linux-14384.zip -FileName library.zip
-  - 7z e library.zip
-  - copy library.bin appdir\\library.bin
-  - appveyor DownloadFile https://github.com/leozide/povray/releases/download/continuous/povconsole32-sse2.exe -FileName appdir\povconsole32-sse2.exe 
-  - windeployqt appdir\leocad.exe
-  - copy tools\setup\leocad.nsi .
-  - copy tools\setup\setup.ico .
-  - 'copy "%VCToolsRedistDir%\vcredist_x64.exe" appdir'
-  - '"C:\Program Files (x86)\NSIS\makensis.exe" /V4 /DX64 "/XOutFile LeoCAD-Windows-%VERSION%.exe" leocad.nsi'
-  artifacts:
-  - path: symbols.zip
-    name: symbols
-  - path: LeoCAD-Windows-$(VERSION).exe
-    name: leocad
-  
-- matrix:
-    only:
-      - image: Ubuntu1604
-  install:
-  - sudo apt-get update
-  - sudo apt-get -y install libgl-dev libxkbcommon-dev libxkbcommon-x11-0
-  before_build:
-  - $HOME/Qt/latest/gcc_64/bin/qmake -v
-  build: off
-  build_script:
-  - $HOME/Qt/latest/gcc_64/bin/qmake PREFIX=/usr -r
-  - make -j$(nproc)
-  after_build:
-  - make install INSTALL_ROOT=AppDir
-  - appveyor DownloadFile https://github.com/leozide/leocad/releases/download/v19.07.1/Library-Linux-14384.zip -FileName library.zip
-  - unzip library.zip
-  - mkdir -p AppDir/usr/share/leocad
-  - mv library.bin AppDir/usr/share/leocad/library.bin
-  - appveyor DownloadFile https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage
-  - chmod a+x linuxdeployqt*.AppImage 
-  - unset QTDIR; unset QT_PLUGIN_PATH; unset LD_LIBRARY_PATH
-  - export VERSION=$(git rev-parse --short HEAD)
-  - export PATH=$HOME/Qt/latest/gcc_64/bin:$PATH
-  - ./linuxdeployqt*.AppImage ./AppDir/usr/share/applications/*.desktop -bundle-non-qt-libs
-  - ./linuxdeployqt*.AppImage --appimage-extract
-  - export PATH=$(readlink -f ./squashfs-root/usr/bin/):$PATH
-  - ./squashfs-root/usr/bin/appimagetool AppDir/
-  - mv ./LeoCAD-$VERSION-x86_64.AppImage ./LeoCAD-Linux-$VERSION-x86_64.AppImage 
-  artifacts:
-  - path: LeoCAD-Linux-$(VERSION)-x86_64.AppImage
-    name: leocad
-
-- matrix:
-    only:
-      - image: macos
-  install:
-  - brew install qt5 grep
-  - brew link --force qt5
-  - curl -L -o library.zip https://github.com/leozide/leocad/releases/download/v19.07.1/Library-Linux-14384.zip
-  - unzip library.zip
-  - curl -L -o povray https://github.com/leozide/povray/releases/download/continuous/povray
-  before_build:
-  - qmake -v
-  build: off
-  build_script:
-  - qmake -r
-  - make -j$(nproc)
-  after_build:
-  - cd build/release
-  - macdeployqt LeoCAD.app -dmg
-  - export VERSION=$(git rev-parse --short HEAD)
-  - mv LeoCAD.dmg ../../LeoCAD-macOS-$VERSION.dmg
-  artifacts:
-  - path: LeoCAD-macOS-$(VERSION).dmg
-    name: leocad
+before_build:
+- call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
+- set PATH=C:\Qt\5.15.0\msvc2019_64\bin;%PATH%
+- git rev-parse --short HEAD > version.txt
+- set /p VERSION= < version.txt
+- qmake -v
+- qmake -tp vc
+build:
+  project: leocad.vcxproj
+  verbosity: minimal
+after_build:
+- 7z a symbols.zip build/release/leocad.exe build/release/leocad.pdb
+- mkdir appdir
+- copy build\release\leocad.exe appdir
+- copy docs\readme.txt appdir
+- appveyor DownloadFile https://github.com/leozide/leocad/releases/download/v19.07.1/Library-Linux-14384.zip -FileName library.zip
+- 7z e library.zip
+- copy library.bin appdir\\library.bin
+- appveyor DownloadFile https://github.com/leozide/povray/releases/download/continuous/povconsole32-sse2.exe -FileName appdir\povconsole32-sse2.exe 
+- windeployqt appdir\leocad.exe
+- copy tools\setup\leocad.nsi .
+- copy tools\setup\setup.ico .
+- 'copy "%VCToolsRedistDir%\vcredist_x64.exe" appdir'
+- '"C:\Program Files (x86)\NSIS\makensis.exe" /V4 /DX64 "/XOutFile LeoCAD-Windows-%VERSION%.exe" leocad.nsi'
+artifacts:
+- path: symbols.zip
+  name: symbols
+- path: LeoCAD-Windows-$(VERSION).exe
+  name: leocad

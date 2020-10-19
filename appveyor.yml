@@ -34,8 +34,6 @@ after_build:
 - set TRAVIS_TAG=%APPVEYOR_REPO_TAG_NAME%
 - set TRAVIS_REPO_SLUG=%APPVEYOR_REPO_NAME%
 - set TRAVIS_COMMIT=%APPVEYOR_REPO_COMMIT%
-- echo tag: %TRAVIS_TAG%
-- echo commit: %TRAVIS_COMMIT%
 - appveyor DownloadFile https://github.com/probonopd/uploadtool/raw/master/upload.sh
 - bash upload.sh LeoCAD*.exe
 

@@ -37,6 +37,7 @@ matrix:
           - qt5-default
           - qtbase5-dev
           - qttools5-dev-tools
+          - libqt5opengl5-dev
     sudo: required
     compiler: gcc
     env:

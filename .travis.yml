@@ -66,6 +66,7 @@ jobs:
           - qtbase5-dev
           - qttools5-dev-tools
           - libqt5opengl5-dev
+          - zip
     compiler: gcc
     script:
      - qmake -v

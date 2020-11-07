@@ -3,7 +3,6 @@ language: cpp
 matrix:
  include:
   - os: linux
-    arch: amd64
     dist: trusty
     addons:
       apt:
@@ -16,7 +15,6 @@ matrix:
     env:
      - QT_BASE=48
   - os: linux
-    arch: amd64
     dist: trusty
     addons:
       apt:
@@ -43,7 +41,6 @@ matrix:
     env:
      - QT_BASE=510
   - os: osx
-    arch: amd64
     compiler: clang
     env:
      - QT_BASE=57

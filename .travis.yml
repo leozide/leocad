@@ -35,6 +35,7 @@ matrix:
       apt:
         packages:
           - qt5-default
+          - qtbase5-dev
     sudo: required
     compiler: gcc
     env:

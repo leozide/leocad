@@ -72,7 +72,7 @@ jobs:
      - qmake PREFIX=/usr
      - make -j$(nproc)
 
-- os: osx
+  - os: osx
     name: macOS
     osx_image: xcode11
     compiler: clang

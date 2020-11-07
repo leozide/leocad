@@ -68,9 +68,18 @@ jobs:
           - libqt5opengl5-dev
     compiler: gcc
     script:
-     - qmake PREFIX=/usr -v
+     - qmake -v
      - qmake PREFIX=/usr
      - make -j$(nproc)
+     - cp build/release/leocad .
+     - export VERSION=$(git rev-parse --short HEAD)
+     - zip LeoCAD-Linux-$VERSION-arm64.zip leocad
+     - 'curl -s -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/repos/leozide/leocad/commits/master -o repo.txt'
+     - 'export REMOTE=$(grep -Po ''(?<=: \")(([a-z0-9])\w+)(?=\")'' -m 1 repo.txt)'
+     - export LOCAL=$(git rev-parse HEAD)
+     - if [[ "$REMOTE" != "$LOCAL" ]]; then echo "Build no longer current. $REMOTE vs $LOCAL - aborting upload."; exit 0; fi;
+     - wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh
+     - bash upload.sh LeoCAD*.zip
 
   - os: osx
     name: macOS

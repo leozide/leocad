@@ -38,6 +38,8 @@ jobs:
     env:
      - QT_BASE=510
   - os: osx
+    name: macOS
+    osx_image: xcode11
     compiler: clang
     addons:
       homebrew:
@@ -47,7 +49,6 @@ jobs:
     env:
      - QT_BASE=57
     install:
-     - brew install grep
      - brew link --force qt5
      - wget https://github.com/leozide/povray/releases/download/continuous/povray
      - wget https://github.com/leozide/leocad/releases/download/v19.07.1/Library-Linux-14384.zip -O library.zip

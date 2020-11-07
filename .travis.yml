@@ -12,6 +12,11 @@ jobs:
         packages:
           - opt-qt4-qmake opt-qt4-dev-tools opt-libqt4-dev opt-libqt4-dev-bin opt-libqt4-opengl-dev
     compiler: gcc
+    script:
+     - source /opt/qt*/bin/qt*-env.sh
+     - qmake PREFIX=/usr -v
+     - qmake PREFIX=/usr
+     - make -j$(nproc)
     
   - os: linux
     name: Linux amd64
@@ -23,6 +28,11 @@ jobs:
         packages:
           - qt510base
     compiler: gcc
+    script:
+     - source /opt/qt*/bin/qt*-env.sh
+     - qmake PREFIX=/usr -v
+     - qmake PREFIX=/usr
+     - make -j$(nproc)
     after_success:
      - make install INSTALL_ROOT=AppDir
      - wget https://github.com/leozide/leocad/releases/download/v19.07.1/Library-Linux-14384.zip -O library.zip;
@@ -38,10 +48,10 @@ jobs:
      - export PATH=$(readlink -f ./squashfs-root/usr/bin/):$PATH
      - ./squashfs-root/usr/bin/appimagetool AppDir/
      - mv ./LeoCAD-$VERSION-x86_64.AppImage ./LeoCAD-Linux-$VERSION-x86_64.AppImage 
-     - curl -s -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/repos/leozide/leocad/commits/master -o repo.txt;
-     - export REMOTE=$(grep -Po '(?<=: \")(([a-z0-9])\w+)(?=\")' -m 1 repo.txt);
-     - export LOCAL=$(git rev-parse HEAD);
-     - if [[ "$REMOTE" != "$LOCAL" ]]; then echo "Build no longer current. $REMOTE vs $LOCAL - aborting upload."; exit 0; fi;
+     - curl -s -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/repos/leozide/leocad/commits/master -o repo.txt
+     - export REMOTE=$(grep -Po '(?<=: \")(([a-z0-9])\w+)(?=\")' -m 1 repo.txt)
+     - export LOCAL=$(git rev-parse HEAD)
+     - if [[ "$REMOTE" != "$LOCAL" ]]; then echo "Build no longer current. $REMOTE vs $LOCAL - aborting upload."; exit 0; fi
      - wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh
      - bash upload.sh LeoCAD*.AppImage*
      
@@ -57,9 +67,12 @@ jobs:
           - qttools5-dev-tools
           - libqt5opengl5-dev
     compiler: gcc
-    env:
-     - QT_BASE=510
-  - os: osx
+    script:
+     - qmake PREFIX=/usr -v
+     - qmake PREFIX=/usr
+     - make -j$(nproc)
+
+- os: osx
     name: macOS
     osx_image: xcode11
     compiler: clang
@@ -68,8 +81,6 @@ jobs:
         packages:
           - grep
           - qt5
-    env:
-     - QT_BASE=57
     install:
      - brew link --force qt5
      - wget https://github.com/leozide/povray/releases/download/continuous/povray
@@ -83,18 +94,12 @@ jobs:
      - macdeployqt LeoCAD.app -dmg
      - mv LeoCAD.dmg LeoCAD-macOS-$(git rev-parse --short HEAD).dmg
     after_success:
-     - curl -s -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/repos/leozide/leocad/commits/master -o repo.txt;
-     - export REMOTE=$(ggrep -Po '(?<=: \")(([a-z0-9])\w+)(?=\")' -m 1 repo.txt);
-     - export LOCAL=$(git rev-parse HEAD);
-     - if [[ "$REMOTE" != "$LOCAL" ]]; then echo "Build no longer current. $REMOTE vs $LOCAL - aborting upload."; exit 0; fi;
+     - curl -s -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/repos/leozide/leocad/commits/master -o repo.txt
+     - export REMOTE=$(ggrep -Po '(?<=: \")(([a-z0-9])\w+)(?=\")' -m 1 repo.txt)
+     - export LOCAL=$(git rev-parse HEAD)
+     - if [[ "$REMOTE" != "$LOCAL" ]]; then echo "Build no longer current. $REMOTE vs $LOCAL - aborting upload."; exit 0; fi
      - wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh
      - bash upload.sh LeoCAD*.dmg*
-
-script:
- - source /opt/qt*/bin/qt*-env.sh
- - qmake PREFIX=/usr -v
- - qmake PREFIX=/usr
- - make -j$(nproc)
 
 branches:
   except:

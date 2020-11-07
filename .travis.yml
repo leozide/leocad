@@ -10,7 +10,6 @@ matrix:
           - sourceline: "ppa:beineri/opt-qt487-trusty"
         packages:
           - opt-qt4-qmake opt-qt4-dev-tools opt-libqt4-dev opt-libqt4-dev-bin opt-libqt4-opengl-dev
-    sudo: required
     compiler: gcc
     env:
      - QT_BASE=48
@@ -22,7 +21,6 @@ matrix:
           - sourceline: "ppa:beineri/opt-qt-5.10.1-trusty"
         packages:
           - qt510base
-    sudo: required
     compiler: gcc
     env:
      - QT_BASE=510
@@ -36,7 +34,6 @@ matrix:
           - qtbase5-dev
           - qttools5-dev-tools
           - libqt5opengl5-dev
-    sudo: required
     compiler: gcc
     env:
      - QT_BASE=510
@@ -50,15 +47,8 @@ matrix:
     env:
      - QT_BASE=57
 
-before_install:
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then 
-      #brew update;
-    fi
-
 install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then 
-      #brew install qt5 grep;
-      #brew link --force qt5;
       wget https://github.com/leozide/povray/releases/download/continuous/povray
       wget https://github.com/leozide/leocad/releases/download/v19.07.1/Library-Linux-14384.zip -O library.zip;
       unzip library.zip;

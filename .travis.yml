@@ -49,7 +49,7 @@ jobs:
      - ./squashfs-root/usr/bin/appimagetool AppDir/
      - mv ./LeoCAD-$VERSION-x86_64.AppImage ./LeoCAD-Linux-$VERSION-x86_64.AppImage 
      - "curl -s -H 'Authorization: token $GITHUB_TOKEN' https://api.github.com/repos/leozide/leocad/commits/master -o repo.txt"
-     - "export REMOTE=$(grep -Po '(?<=: \")(([a-z0-9])\w+)(?=\")' -m 1 repo.txt)"
+     - 'export REMOTE=$(grep -Po ''(?<=: \")(([a-z0-9])\w+)(?=\")'' -m 1 repo.txt)'
      - export LOCAL=$(git rev-parse HEAD)
      - if [[ "$REMOTE" != "$LOCAL" ]]; then echo "Build no longer current. $REMOTE vs $LOCAL - aborting upload."; exit 0; fi
      - wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh
@@ -95,7 +95,7 @@ jobs:
      - mv LeoCAD.dmg LeoCAD-macOS-$(git rev-parse --short HEAD).dmg
     after_success:
      - "curl -s -H 'Authorization: token $GITHUB_TOKEN' https://api.github.com/repos/leozide/leocad/commits/master -o repo.txt"
-     - "export REMOTE=$(ggrep -Po '(?<=: \")(([a-z0-9])\w+)(?=\")' -m 1 repo.txt)"
+     - 'export REMOTE=$(ggrep -Po ''(?<=: \")(([a-z0-9])\w+)(?=\")'' -m 1 repo.txt)'
      - export LOCAL=$(git rev-parse HEAD)
      - if [[ "$REMOTE" != "$LOCAL" ]]; then echo "Build no longer current. $REMOTE vs $LOCAL - aborting upload."; exit 0; fi
      - wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh

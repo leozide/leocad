@@ -42,18 +42,24 @@ matrix:
      - QT_BASE=510
   - os: osx
     compiler: clang
+    addons:
+      homebrew:
+        packages:
+          - grep
+          - qt5
     env:
      - QT_BASE=57
 
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then 
-      brew update;
+      #brew update;
     fi
 
 install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then 
-      brew install qt5 grep;
-      brew link --force qt5;
+      #brew install qt5 grep;
+      #brew link --force qt5;
+      wget https://github.com/leozide/povray/releases/download/continuous/povray
       wget https://github.com/leozide/leocad/releases/download/v19.07.1/Library-Linux-14384.zip -O library.zip;
       unzip library.zip;
     fi

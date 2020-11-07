@@ -49,7 +49,7 @@ matrix:
 
 install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then 
-      wget https://github.com/leozide/povray/releases/download/continuous/povray
+      wget https://github.com/leozide/povray/releases/download/continuous/povray;
       wget https://github.com/leozide/leocad/releases/download/v19.07.1/Library-Linux-14384.zip -O library.zip;
       unzip library.zip;
     fi

@@ -20,9 +20,20 @@ matrix:
     env:
      - QT_BASE=48
   - os: linux
-    arch:
-      - amd64
-      - arm64
+    arch: amd64
+    dist: trusty
+    addons:
+      apt:
+        sources:
+          - sourceline: "ppa:beineri/opt-qt-5.10.1-trusty"
+        packages:
+          - qt510base
+    sudo: required
+    compiler: gcc
+    env:
+     - QT_BASE=510
+  - os: linux
+    arch: arm64
     dist: trusty
     addons:
       apt:

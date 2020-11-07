@@ -1,8 +1,13 @@
 language: cpp
 
+arch:
+  - amd64
+  - arm64
+
 matrix:
  include:
   - os: linux
+    arch: amd64
     dist: trusty
     addons:
       apt:
@@ -15,6 +20,9 @@ matrix:
     env:
      - QT_BASE=48
   - os: linux
+    arch:
+      - amd64
+      - arm64
     dist: trusty
     addons:
       apt:
@@ -27,6 +35,7 @@ matrix:
     env:
      - QT_BASE=510
   - os: osx
+    arch: amd64
     compiler: clang
     env:
      - QT_BASE=57
@@ -52,6 +61,7 @@ script:
       qmake PREFIX=/usr -r
       make -j$(nproc); export COMPILE_RESULT=$?
       if [[ "$QT_BASE" != "510" ]]; then exit $COMPILE_RESULT; fi
+      if [[ "$TRAVIS_CPU_ARCH" != "amd64" ]]; then exit $COMPILE_RESULT; fi
       make install INSTALL_ROOT=AppDir
       if [[ "$TRAVIS_TAG" != "" ]]; then
         wget https://github.com/leozide/leocad/releases/download/v19.07.1/Library-Linux-14384.zip -O library.zip;

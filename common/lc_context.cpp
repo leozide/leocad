@@ -235,8 +235,10 @@ void lcContext::DestroyResources()
 
 void lcContext::SetDefaultState()
 {
+#ifndef LC_OPENGLES
 	if (QGLFormat::defaultFormat().sampleBuffers() && QGLFormat::defaultFormat().samples() > 1)
 		glEnable(GL_LINE_SMOOTH);
+#endif
 
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);

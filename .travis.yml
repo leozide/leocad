@@ -1,6 +1,6 @@
 language: cpp
 
-matrix:
+jobs:
  include:
   - os: linux
     dist: trusty
@@ -47,10 +47,11 @@ matrix:
     env:
      - QT_BASE=57
     install:
-     - brew link --force qt5;
-     - wget https://github.com/leozide/povray/releases/download/continuous/povray;
-     - wget https://github.com/leozide/leocad/releases/download/v19.07.1/Library-Linux-14384.zip -O library.zip;
-     - unzip library.zip;
+     - brew install grep
+     - brew link --force qt5
+     - wget https://github.com/leozide/povray/releases/download/continuous/povray
+     - wget https://github.com/leozide/leocad/releases/download/v19.07.1/Library-Linux-14384.zip -O library.zip
+     - unzip library.zip
      
 script:
   - |

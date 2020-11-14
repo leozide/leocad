@@ -31,7 +31,7 @@ void lcGLWidget::Redraw()
 {
 	lcQGLWidget* Widget = (lcQGLWidget*)mWidget;
 
-	Widget->mUpdateTimer.start(0);
+	Widget->update();
 }
 
 void lcGLWidget::SetCursor(lcCursor CursorType)
@@ -93,10 +93,7 @@ lcQGLWidget::lcQGLWidget(QWidget *parent, lcGLWidget *owner, bool IsView, bool I
 	widget = owner;
 	widget->mWidget = this;
 
-	mUpdateTimer.setSingleShot(true);
-	connect(&mUpdateTimer, SIGNAL(timeout()), this, SLOT(updateGL()));
-
-	widget->MakeCurrent();
+	makeCurrent();
 
 	if (gWidgetList.isEmpty())
 	{

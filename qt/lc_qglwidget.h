@@ -27,8 +27,6 @@ public:
 
 	void SetPreviewPosition(const QRect& ParentRect);
 
-	QTimer mUpdateTimer;
-
 protected:
 	void initializeGL() override;
 	void resizeGL(int Width, int Height) override;

@@ -712,7 +712,7 @@ void lcPartSelectionListView::PreviewSelection(int InfoIndex)
 
 	lcPreviewWidget* Preview = new lcPreviewWidget();
 
-	lcQGLWidget* ViewWidget = new lcQGLWidget(nullptr, Preview, true/*isView*/, true/*isPreview*/);
+	lcQGLWidget* ViewWidget = new lcQGLWidget(nullptr, Preview);
 
 	if (Preview && ViewWidget)
 	{

@@ -1601,7 +1601,7 @@ void lcMainWindow::SetCurrentModelTab(lcModel* Model)
 		CentralLayout->setContentsMargins(0, 0, 0, 0);
 
 		NewView = new View(Model);
-		ViewWidget = new lcQGLWidget(TabWidget, NewView, true);
+		ViewWidget = new lcQGLWidget(TabWidget, NewView);
 		CentralLayout->addWidget(ViewWidget, 0, 0, 1, 1);
 
 		mModelTabWidget->setCurrentWidget(TabWidget);
@@ -1824,7 +1824,7 @@ void lcMainWindow::SplitView(Qt::Orientation Orientation)
 		Splitter = new QSplitter(Orientation, Parent);
 		Parent->layout()->addWidget(Splitter);
 		Splitter->addWidget(Focus);
-		Splitter->addWidget(new lcQGLWidget(mModelTabWidget->currentWidget(), new View(GetCurrentTabModel()), true));
+		Splitter->addWidget(new lcQGLWidget(mModelTabWidget->currentWidget(), new View(GetCurrentTabModel())));
 	}
 	else
 	{
@@ -1835,7 +1835,7 @@ void lcMainWindow::SplitView(Qt::Orientation Orientation)
 		Splitter = new QSplitter(Orientation, Parent);
 		ParentSplitter->insertWidget(FocusIndex, Splitter);
 		Splitter->addWidget(Focus);
-		Splitter->addWidget(new lcQGLWidget(mModelTabWidget->currentWidget(), new View(GetCurrentTabModel()), true));
+		Splitter->addWidget(new lcQGLWidget(mModelTabWidget->currentWidget(), new View(GetCurrentTabModel())));
 
 		ParentSplitter->setSizes(Sizes);
 	}

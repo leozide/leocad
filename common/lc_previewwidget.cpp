@@ -15,7 +15,7 @@ lcPreviewDockWidget::lcPreviewDockWidget(QMainWindow* Parent)
 	: QMainWindow(Parent)
 {
 	mPreview = new lcPreviewWidget();
-	mViewWidget = new lcQGLWidget(nullptr, mPreview, true/*IsView*/, true/*IsPreview*/);
+	mViewWidget = new lcQGLWidget(nullptr, mPreview);
 	setCentralWidget(mViewWidget);
 	setMinimumSize(200, 200);
 

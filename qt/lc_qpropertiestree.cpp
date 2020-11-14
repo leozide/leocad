@@ -1141,7 +1141,7 @@ void lcQPropertiesTree::PreviewSelection(const QString &PartType, int ColorCode)
 
 	lcPreviewWidget *Preview = new lcPreviewWidget();
 
-	lcQGLWidget *ViewWidget = new lcQGLWidget(nullptr, Preview, true/*isView*/, true/*isPreview*/);
+	lcQGLWidget *ViewWidget = new lcQGLWidget(nullptr, Preview);
 
 	if (Preview && ViewWidget)
 	{

@@ -2,6 +2,13 @@
 
 #include "lc_context.h"
 
+enum class lcDragState
+{
+	None,
+	Piece,
+	Color
+};
+
 enum class lcCursor
 {
 	Default,
@@ -85,6 +92,9 @@ public:
 	virtual void OnForwardButtonUp() { }
 	virtual void OnMouseMove() { }
 	virtual void OnMouseWheel(float Direction) { Q_UNUSED(Direction); }
+	virtual void BeginDrag(lcDragState DragState) { Q_UNUSED(DragState); };
+	virtual void EndDrag(bool Accept) { Q_UNUSED(Accept); };
+
 
 	lcInputState mInputState;
 	int mWidth;

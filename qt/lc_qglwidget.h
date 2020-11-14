@@ -6,15 +6,12 @@ class lcGLWidget;
 class lcQGLWidget : public QGLWidget
 {
 public:
-	lcQGLWidget(QWidget* Parent, lcGLWidget* Owner, bool IsView, bool IsPreview = false);
+	lcQGLWidget(QWidget* Parent, lcGLWidget* Owner);
 	~lcQGLWidget();
 
 	QSize sizeHint() const override;
 
-	lcGLWidget *widget;
-	QSize preferredSize;
-	bool mIsView;
-	bool mIsPreview;
+	lcGLWidget* widget;
 
 	float deviceScale()
 	{
@@ -28,7 +25,6 @@ public:
 	void SetPreviewPosition(const QRect& ParentRect);
 
 protected:
-	void initializeGL() override;
 	void resizeGL(int Width, int Height) override;
 	void paintGL() override;
 	void keyPressEvent(QKeyEvent* KeyEvent) override;
@@ -43,6 +39,7 @@ protected:
 	void dragMoveEvent(QDragMoveEvent* DragMoveEvent) override;
 	void dropEvent(QDropEvent* DropEvent) override;
 
+	QSize mPreferredSize;
 	int mWheelAccumulator;
 };
 

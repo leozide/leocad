@@ -19,7 +19,7 @@ lcQMinifigDialog::lcQMinifigDialog(QWidget *parent) :
 
 	mMinifigWidget = new MinifigWizard();
 
-	lcQGLWidget *minifigWidget = new lcQGLWidget(nullptr, mMinifigWidget, false);
+	lcQGLWidget *minifigWidget = new lcQGLWidget(nullptr, mMinifigWidget);
 	minifigWidget->setMinimumWidth(100);
 	previewLayout->addWidget(minifigWidget);
 

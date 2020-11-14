@@ -15,7 +15,6 @@
 #include "lc_texture.h"
 #include "lc_mesh.h"
 #include "lc_profile.h"
-
 #include "lc_previewwidget.h"
 
 static QList<QGLWidget*> gWidgetList;
@@ -360,7 +359,7 @@ void lcQGLWidget::wheelEvent(QWheelEvent* WheelEvent)
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 2, 0))
 	mWheelAccumulator += WheelEvent->angleDelta().y() / 8;
 #else
-	mWheelAccumulator += event->delta() / 8;
+	mWheelAccumulator += WheelEvent->delta() / 8;
 #endif
 	int numSteps = mWheelAccumulator / 15;
 

@@ -135,7 +135,7 @@ unix:!macx {
 	mime.path = $$MIME_DIR
 	mime.files = qt/leocad.xml
 	mime_icon.path = $$MIME_ICON_DIR
-	mime_icon.files = resources/application-vnd.leocad.svg
+	mime_icon.files = tools/icon/scalable/mimetypes/application-vnd.leocad.svg
 	appdata.path = $$APPDATA_DIR
 	appdata.files = tools/setup/leocad.appdata.xml
 	

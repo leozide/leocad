@@ -131,7 +131,7 @@ unix:!macx {
 	desktop.path = $$DESKTOP_DIR
 	desktop.files = qt/leocad.desktop
 	icon.path = $$ICON_DIR
-	icon.files = resources/leocad.png
+	icon.files = tools/icon/64x64/apps/leocad.png
 	mime.path = $$MIME_DIR
 	mime.files = qt/leocad.xml
 	mime_icon.path = $$MIME_ICON_DIR

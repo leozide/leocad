@@ -116,11 +116,10 @@ unix:!macx {
 	isEmpty(INSTALL_PREFIX):INSTALL_PREFIX = /usr
 	isEmpty(BIN_DIR):BIN_DIR = $$INSTALL_PREFIX/bin
 	isEmpty(DOCS_DIR):DOCS_DIR = $$INSTALL_PREFIX/share/doc/leocad
-	isEmpty(ICON_DIR):ICON_DIR = $$INSTALL_PREFIX/share/pixmaps
+	isEmpty(ICON_DIR):ICON_DIR = $$INSTALL_PREFIX/share/icons
 	isEmpty(MAN_DIR):MAN_DIR = $$INSTALL_PREFIX/share/man/man1
 	isEmpty(DESKTOP_DIR):DESKTOP_DIR = $$INSTALL_PREFIX/share/applications
 	isEmpty(MIME_DIR):MIME_DIR = $$INSTALL_PREFIX/share/mime/packages
-	isEmpty(MIME_ICON_DIR):MIME_ICON_DIR = $$INSTALL_PREFIX/share/icons/hicolor/scalable/mimetypes
 	isEmpty(APPDATA_DIR):APPDATA_DIR = $$INSTALL_PREFIX/share/metainfo
 
 	target.path = $$BIN_DIR
@@ -130,16 +129,22 @@ unix:!macx {
 	man.files = docs/leocad.1
 	desktop.path = $$DESKTOP_DIR
 	desktop.files = qt/leocad.desktop
-	icon.path = $$ICON_DIR
-	icon.files = tools/icon/64x64/apps/leocad.png
+	icons.path = $$ICON_DIR/hicolor
+	icons.files += tools/icon/128x128
+	icons.files += tools/icon/16x16
+	icons.files += tools/icon/24x24
+	icons.files += tools/icon/256x256
+	icons.files += tools/icon/32x32
+	icons.files += tools/icon/48x48
+	icons.files += tools/icon/512x512
+	icons.files += tools/icon/64x64
+	icons.files += tools/icon/scalable
 	mime.path = $$MIME_DIR
 	mime.files = qt/leocad.xml
-	mime_icon.path = $$MIME_ICON_DIR
-	mime_icon.files = tools/icon/scalable/mimetypes/application-vnd.leocad.svg
 	appdata.path = $$APPDATA_DIR
 	appdata.files = tools/setup/leocad.appdata.xml
 	
-	INSTALLS += target docs man desktop icon mime mime_icon appdata
+	INSTALLS += target docs man desktop icons mime appdata
 
 	!isEmpty(DISABLE_UPDATE_CHECK) {
 		DEFINES += LC_DISABLE_UPDATE_CHECK=$$DISABLE_UPDATE_CHECK

@@ -39,7 +39,7 @@ after_build:
 - set TRAVIS_REPO_SLUG=%APPVEYOR_REPO_NAME%
 - set TRAVIS_COMMIT=%APPVEYOR_REPO_COMMIT%
 - appveyor DownloadFile https://github.com/probonopd/uploadtool/raw/master/upload.sh
-- if (-not (Test-Path env:APPVEYOR_PULL_REQUEST_NUMBER)) { bash upload.sh LeoCAD*.exe }
+- if not defined APPVEYOR_PULL_REQUEST_NUMBER (bash upload.sh LeoCAD*.exe)
 
 artifacts:
 - path: symbols.zip

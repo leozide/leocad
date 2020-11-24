@@ -78,7 +78,7 @@
         <file>resources/time_next.png</file>
         <file>resources/time_previous.png</file>
         <file>resources/time_stop.png</file>
-        <file>resources/leocad.png</file>
+        <file alias="resources/leocad.png">tools/icon/64x64/apps/leocad.png</file>
         <file>resources/help_homepage.png</file>
         <file>resources/view_zoomextents.png</file>
         <file>resources/view_split_horizontal.png</file>

@@ -1257,57 +1257,6 @@ void lcModel::AddSubModelRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMat
 			Piece->AddSubModelRenderMeshes(Scene, WorldMatrix, DefaultColorIndex, RenderMeshState, ParentActive);
 }
 
-void lcModel::DrawBackground(lcGLWidget* Widget)
-{
-	const lcPreferences& Preferences = lcGetPreferences();
-
-	if (!Preferences.mBackgroundGradient)
-	{
-		lcVector3 BackgroundColor = lcVector3FromColor(Preferences.mBackgroundSolidColor);
-		glClearColor(BackgroundColor[0], BackgroundColor[1], BackgroundColor[2], 0.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		return;
-	}
-
-	lcContext* Context = Widget->mContext;
-
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	Context->SetDepthWrite(false);
-	glDisable(GL_DEPTH_TEST);
-
-	float ViewWidth = (float)Widget->mWidth;
-	float ViewHeight = (float)Widget->mHeight;
-
-	Context->SetWorldMatrix(lcMatrix44Identity());
-	Context->SetViewMatrix(lcMatrix44Translation(lcVector3(0.375, 0.375, 0.0)));
-	Context->SetProjectionMatrix(lcMatrix44Ortho(0.0f, ViewWidth, 0.0f, ViewHeight, -1.0f, 1.0f));
-
-	Context->SetSmoothShading(true);
-
-	const lcVector3 Color1 = lcVector3FromColor(Preferences.mBackgroundGradientColorTop);
-	const lcVector3 Color2 = lcVector3FromColor(Preferences.mBackgroundGradientColorBottom);
-
-	float Verts[] =
-	{
-		ViewWidth, ViewHeight, Color1[0], Color1[1], Color1[2], 1.0f,
-		0.0f,      ViewHeight, Color1[0], Color1[1], Color1[2], 1.0f,
-		0.0f,      0.0f,       Color2[0], Color2[1], Color2[2], 1.0f,
-		ViewWidth, 0.0f,       Color2[0], Color2[1], Color2[2], 1.0f
-	};
-
-	Context->SetMaterial(lcMaterialType::UnlitVertexColor);
-	Context->SetVertexBufferPointer(Verts);
-	Context->SetVertexFormat(0, 2, 0, 0, 4, false);
-
-	Context->DrawPrimitives(GL_TRIANGLE_FAN, 0, 4);
-
-	Context->SetSmoothShading(false);
-
-	glEnable(GL_DEPTH_TEST);
-	Context->SetDepthWrite(true);
-}
-
 QImage lcModel::GetStepImage(bool Zoom, int Width, int Height, lcStep Step)
 {
 	View* ActiveView = gMainWindow->GetActiveView();

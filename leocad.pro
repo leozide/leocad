@@ -187,6 +187,7 @@ SOURCES += common/view.cpp \
 	common/lc_context.cpp \
 	common/lc_file.cpp \
 	common/lc_glextensions.cpp \
+	common/lc_glwidget.cpp \
 	common/lc_http.cpp \
 	common/lc_library.cpp \
 	common/lc_lxf.cpp \

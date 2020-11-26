@@ -864,7 +864,7 @@ void View::OnDraw()
 			mContext->SetDefaultState();
 			mContext->SetViewport(0, 0, mWidth, mHeight);
 
-			mModel->DrawBackground(this);
+			DrawBackground();
 
 			int CurrentTileWidth, CurrentTileHeight;
 

@@ -75,6 +75,7 @@ public:
 	void MakeCurrent();
 	void Redraw();
 	void SetCursor(lcCursor Cursor);
+	void DrawBackground() const;
 
 	virtual void OnDraw() { }
 	virtual void OnInitialUpdate() { }
@@ -100,7 +101,7 @@ public:
 	int mWidth;
 	int mHeight;
 	lcCursor mCursor;
-	void* mWidget;
+	QGLWidget* mWidget;
 	lcContext* mContext;
 	bool mDeleteContext;
 };

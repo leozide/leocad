@@ -495,7 +495,7 @@ void lcPreviewWidget::OnDraw()
 
 	mContext->SetViewport(0, 0, mWidth, mHeight);
 
-	mModel->DrawBackground(this);
+	DrawBackground();
 
 	mContext->SetProjectionMatrix(GetProjectionMatrix());
 

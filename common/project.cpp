@@ -401,9 +401,19 @@ bool Project::Load(const QString& FileName)
 
 			if (Models.empty() || !Model->GetFileName().isEmpty())
 			{
-				mModels.Add(Model);
-				Models.emplace_back(std::make_pair(Pos, Model));
-				Model->CreatePieceInfo(this);
+				auto ModelCompare = [Model](const std::pair<int, lcModel*>& ModelIt)
+				{
+					return ModelIt.second->GetFileName() == Model->GetFileName();
+				};
+
+				if (std::find_if(Models.begin(), Models.end(), ModelCompare) == Models.end())
+				{
+					mModels.Add(Model);
+					Models.emplace_back(std::make_pair(Pos, Model));
+					Model->CreatePieceInfo(this);
+				}
+				else
+					delete Model;
 			}
 			else
 				delete Model;

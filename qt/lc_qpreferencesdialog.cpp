@@ -28,6 +28,9 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 	delete ui->povrayLayout;
 #endif
 
+	connect(ui->BackgroundSolidColorButton, SIGNAL(clicked()), this, SLOT(ColorButtonClicked()));
+	connect(ui->BackgroundGradient1ColorButton, SIGNAL(clicked()), this, SLOT(ColorButtonClicked()));
+	connect(ui->BackgroundGradient2ColorButton, SIGNAL(clicked()), this, SLOT(ColorButtonClicked()));
 	connect(ui->AxesColorButton, SIGNAL(clicked()), this, SLOT(ColorButtonClicked()));
 	connect(ui->OverlayColorButton, SIGNAL(clicked()), this, SLOT(ColorButtonClicked()));
 	connect(ui->FadeStepsColor, SIGNAL(clicked()), this, SLOT(ColorButtonClicked()));
@@ -101,6 +104,11 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 	ui->gridLines->setChecked(mOptions->Preferences.mDrawGridLines);
 	ui->gridLineSpacing->setText(QString::number(mOptions->Preferences.mGridLineSpacing));
 	ui->AxisIconCheckBox->setChecked(mOptions->Preferences.mDrawAxes);
+
+	if (!mOptions->Preferences.mBackgroundGradient)
+		ui->BackgroundSolidRadio->setChecked(true);
+	else
+		ui->BackgroundGradientRadio->setChecked(true);
 
 	ui->ViewSphereLocationCombo->setCurrentIndex((int)mOptions->Preferences.mViewSphereLocation);
 
@@ -185,6 +193,15 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 	ui->ShadingMode->setCurrentIndex(static_cast<int>(mOptions->Preferences.mShadingMode));
 
 	QPixmap pix(12, 12);
+
+	pix.fill(QColor(LC_RGBA_RED(mOptions->Preferences.mBackgroundSolidColor), LC_RGBA_GREEN(mOptions->Preferences.mBackgroundSolidColor), LC_RGBA_BLUE(mOptions->Preferences.mBackgroundSolidColor)));
+	ui->BackgroundSolidColorButton->setIcon(pix);
+
+	pix.fill(QColor(LC_RGBA_RED(mOptions->Preferences.mBackgroundGradientColorTop), LC_RGBA_GREEN(mOptions->Preferences.mBackgroundGradientColorTop), LC_RGBA_BLUE(mOptions->Preferences.mBackgroundGradientColorTop)));
+	ui->BackgroundGradient1ColorButton->setIcon(pix);
+
+	pix.fill(QColor(LC_RGBA_RED(mOptions->Preferences.mBackgroundGradientColorBottom), LC_RGBA_GREEN(mOptions->Preferences.mBackgroundGradientColorBottom), LC_RGBA_BLUE(mOptions->Preferences.mBackgroundGradientColorBottom)));
+	ui->BackgroundGradient2ColorButton->setIcon(pix);
 
 	pix.fill(QColor(LC_RGBA_RED(mOptions->Preferences.mAxesColor), LC_RGBA_GREEN(mOptions->Preferences.mAxesColor), LC_RGBA_BLUE(mOptions->Preferences.mAxesColor)));
 	ui->AxesColorButton->setIcon(pix);
@@ -307,6 +324,7 @@ void lcQPreferencesDialog::accept()
 	mOptions->Preferences.mDrawGridLines = ui->gridLines->isChecked();
 	mOptions->Preferences.mGridLineSpacing = gridLineSpacing;
 
+	mOptions->Preferences.mBackgroundGradient = ui->BackgroundGradientRadio->isChecked();
 	mOptions->Preferences.mDrawAxes = ui->AxisIconCheckBox->isChecked();
 	mOptions->Preferences.mViewSphereLocation = (lcViewSphereLocation)ui->ViewSphereLocationCombo->currentIndex();
 
@@ -443,7 +461,25 @@ void lcQPreferencesDialog::ColorButtonClicked()
 	quint32* Color = nullptr;
 	QColorDialog::ColorDialogOptions DialogOptions;
 
-	if (Button == ui->AxesColorButton)
+	if (Button == ui->BackgroundSolidColorButton)
+	{
+		Color = &mOptions->Preferences.mBackgroundSolidColor;
+		Title = tr("Select Background Color");
+		DialogOptions = 0;
+	}
+	else if (Button == ui->BackgroundGradient1ColorButton)
+	{
+		Color = &mOptions->Preferences.mBackgroundGradientColorTop;
+		Title = tr("Select Gradient Top Color");
+		DialogOptions = 0;
+	}
+	else if (Button == ui->BackgroundGradient2ColorButton)
+	{
+		Color = &mOptions->Preferences.mBackgroundGradientColorBottom;
+		Title = tr("Select Gradient Bottom Color");
+		DialogOptions = 0;
+	}
+	else if (Button == ui->AxesColorButton)
 	{
 		Color = &mOptions->Preferences.mAxesColor;
 		Title = tr("Select Axes Color");

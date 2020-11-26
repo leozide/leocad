@@ -31,26 +31,11 @@
 void lcModelProperties::LoadDefaults()
 {
 	mAuthor = lcGetProfileString(LC_PROFILE_DEFAULT_AUTHOR_NAME);
-
-	mBackgroundType = (lcBackgroundType)lcGetProfileInt(LC_PROFILE_DEFAULT_BACKGROUND_TYPE);
-	mBackgroundSolidColor = lcVector3FromColor(lcGetProfileInt(LC_PROFILE_DEFAULT_BACKGROUND_COLOR));
-	mBackgroundGradientColor1 = lcVector3FromColor(lcGetProfileInt(LC_PROFILE_DEFAULT_GRADIENT_COLOR1));
-	mBackgroundGradientColor2 = lcVector3FromColor(lcGetProfileInt(LC_PROFILE_DEFAULT_GRADIENT_COLOR2));
-	mBackgroundImage = lcGetProfileString(LC_PROFILE_DEFAULT_BACKGROUND_TEXTURE);
-	mBackgroundImageTile = lcGetProfileInt(LC_PROFILE_DEFAULT_BACKGROUND_TILE);
-
 	mAmbientColor = lcVector3FromColor(lcGetProfileInt(LC_PROFILE_DEFAULT_AMBIENT_COLOR));
 }
 
 void lcModelProperties::SaveDefaults()
 {
-	lcSetProfileInt(LC_PROFILE_DEFAULT_BACKGROUND_TYPE, mBackgroundType);
-	lcSetProfileInt(LC_PROFILE_DEFAULT_BACKGROUND_COLOR, lcColorFromVector3(mBackgroundSolidColor));
-	lcSetProfileInt(LC_PROFILE_DEFAULT_GRADIENT_COLOR1, lcColorFromVector3(mBackgroundGradientColor1));
-	lcSetProfileInt(LC_PROFILE_DEFAULT_GRADIENT_COLOR2, lcColorFromVector3(mBackgroundGradientColor2));
-	lcSetProfileString(LC_PROFILE_DEFAULT_BACKGROUND_TEXTURE, mBackgroundImage);
-	lcSetProfileInt(LC_PROFILE_DEFAULT_BACKGROUND_TILE, mBackgroundImageTile);
-
 	lcSetProfileInt(LC_PROFILE_DEFAULT_AMBIENT_COLOR, lcColorFromVector3(mAmbientColor));
 }
 
@@ -67,32 +52,6 @@ void lcModelProperties::SaveLDraw(QTextStream& Stream) const
 		QStringList Comments = mComments.split('\n');
 		for (const QString& Comment : Comments)
 			Stream << QLatin1String("0 !LEOCAD MODEL COMMENT ") << Comment << LineEnding;
-	}
-
-	bool TypeChanged = (mBackgroundType != lcGetDefaultProfileInt(LC_PROFILE_DEFAULT_BACKGROUND_TYPE));
-
-	switch (mBackgroundType)
-	{
-	case LC_BACKGROUND_SOLID:
-		if (mBackgroundSolidColor != lcVector3FromColor(lcGetDefaultProfileInt(LC_PROFILE_DEFAULT_BACKGROUND_COLOR)) || TypeChanged)
-			Stream << QLatin1String("0 !LEOCAD MODEL BACKGROUND COLOR ") << mBackgroundSolidColor[0] << ' ' << mBackgroundSolidColor[1] << ' ' << mBackgroundSolidColor[2] << LineEnding;
-		break;
-
-	case LC_BACKGROUND_GRADIENT:
-		if (mBackgroundGradientColor1 != lcVector3FromColor(lcGetProfileInt(LC_PROFILE_DEFAULT_GRADIENT_COLOR1)) ||
-			mBackgroundGradientColor2 != lcVector3FromColor(lcGetProfileInt(LC_PROFILE_DEFAULT_GRADIENT_COLOR2)) || TypeChanged)
-			Stream << QLatin1String("0 !LEOCAD MODEL BACKGROUND GRADIENT ") << mBackgroundGradientColor1[0] << ' ' << mBackgroundGradientColor1[1] << ' ' << mBackgroundGradientColor1[2] << ' ' << mBackgroundGradientColor2[0] << ' ' << mBackgroundGradientColor2[1] << ' ' << mBackgroundGradientColor2[2] << LineEnding;
-		break;
-
-	case LC_BACKGROUND_IMAGE:
-		if (!mBackgroundImage.isEmpty())
-		{
-			Stream << QLatin1String("0 !LEOCAD MODEL BACKGROUND IMAGE ");
-			if (mBackgroundImageTile)
-				Stream << QLatin1String("TILE ");
-			Stream << QLatin1String("NAME ") << mBackgroundImage << LineEnding;
-		}
-		break;
 	}
 
 //	lcVector3 mAmbientColor;
@@ -148,37 +107,6 @@ void lcModelProperties::ParseLDrawLine(QTextStream& Stream)
 			mComments += '\n';
 		mComments += Comment;
 	}
-	else if (Token == QLatin1String("BACKGROUND"))
-	{
-		Stream >> Token;
-
-		if (Token == QLatin1String("COLOR"))
-		{
-			mBackgroundType = LC_BACKGROUND_SOLID;
-			Stream >> mBackgroundSolidColor[0] >> mBackgroundSolidColor[1] >> mBackgroundSolidColor[2];
-		}
-		else if (Token == QLatin1String("GRADIENT"))
-		{
-			mBackgroundType = LC_BACKGROUND_GRADIENT;
-			Stream >> mBackgroundGradientColor1[0] >> mBackgroundGradientColor1[1] >> mBackgroundGradientColor1[2] >> mBackgroundGradientColor2[0] >> mBackgroundGradientColor2[1] >> mBackgroundGradientColor2[2];
-		}
-		else if (Token == QLatin1String("IMAGE"))
-		{
-			Stream >> Token;
-
-			if (Token == QLatin1String("TILE"))
-			{
-				mBackgroundImageTile = true;
-				Stream >> Token;
-			}
-
-			if (Token == QLatin1String("NAME"))
-			{
-				mBackgroundImage = Stream.readLine().trimmed();
-				mBackgroundType = LC_BACKGROUND_IMAGE;
-			}
-		}
-	}
 }
 
 lcModel::lcModel(const QString& FileName, bool Preview)
@@ -190,7 +118,6 @@ lcModel::lcModel(const QString& FileName, bool Preview)
 
 	mActive = false;
 	mCurrentStep = 1;
-	mBackgroundTexture = nullptr;
 	mPieceInfo = nullptr;
 }
 
@@ -263,9 +190,6 @@ void lcModel::DeleteHistory()
 
 void lcModel::DeleteModel()
 {
-	lcReleaseTexture(mBackgroundTexture);
-	mBackgroundTexture = nullptr;
-
 	if (gMainWindow)
 	{
 		const lcArray<View*>* Views = gMainWindow->GetViewsForModel(this);
@@ -757,7 +681,6 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 
 	mCurrentStep = CurrentStep;
 	CalculateStep(mCurrentStep);
-	UpdateBackgroundTexture();
 	Library->WaitForLoadQueue();
 	Library->mBuffersDirty = true;
 	Library->UnloadUnusedParts();
@@ -794,9 +717,6 @@ bool lcModel::LoadBinary(lcFile* file)
 		file->ReadFloats(&fv, 1);
 
 	file->ReadU32(&rgb, 1);
-	mProperties.mBackgroundSolidColor[0] = (float)((unsigned char) (rgb))/255;
-	mProperties.mBackgroundSolidColor[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
-	mProperties.mBackgroundSolidColor[2] = (float)((unsigned char) ((rgb) >> 16))/255;
 
 	if (fv < 0.6f) // old view
 	{
@@ -993,7 +913,6 @@ bool lcModel::LoadBinary(lcFile* file)
 		{
 			char Background[LC_MAXPATH];
 			file->ReadBuffer(Background, sh);
-			mProperties.mBackgroundImage = Background;
 		}
 		else
 			file->Seek(sh, SEEK_CUR);
@@ -1023,16 +942,9 @@ bool lcModel::LoadBinary(lcFile* file)
 	if (fv > 1.0f)
 	{
 		file->ReadU32(&rgb, 1);
-		mProperties.mBackgroundGradientColor1[0] = (float)((unsigned char) (rgb))/255;
-		mProperties.mBackgroundGradientColor1[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
-		mProperties.mBackgroundGradientColor1[2] = (float)((unsigned char) ((rgb) >> 16))/255;
 		file->ReadU32(&rgb, 1);
-		mProperties.mBackgroundGradientColor2[0] = (float)((unsigned char) (rgb))/255;
-		mProperties.mBackgroundGradientColor2[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
-		mProperties.mBackgroundGradientColor2[2] = (float)((unsigned char) ((rgb) >> 16))/255;
 	}
 
-	UpdateBackgroundTexture();
 	CalculateStep(mCurrentStep);
 	lcGetPiecesLibrary()->UnloadUnusedParts();
 
@@ -1347,9 +1259,12 @@ void lcModel::AddSubModelRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMat
 
 void lcModel::DrawBackground(lcGLWidget* Widget)
 {
-	if (mProperties.mBackgroundType == LC_BACKGROUND_SOLID)
+	const lcPreferences& Preferences = lcGetPreferences();
+
+	if (!Preferences.mBackgroundGradient)
 	{
-		glClearColor(mProperties.mBackgroundSolidColor[0], mProperties.mBackgroundSolidColor[1], mProperties.mBackgroundSolidColor[2], 0.0f);
+		lcVector3 BackgroundColor = lcVector3FromColor(Preferences.mBackgroundSolidColor);
+		glClearColor(BackgroundColor[0], BackgroundColor[1], BackgroundColor[2], 0.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		return;
 	}
@@ -1368,56 +1283,26 @@ void lcModel::DrawBackground(lcGLWidget* Widget)
 	Context->SetViewMatrix(lcMatrix44Translation(lcVector3(0.375, 0.375, 0.0)));
 	Context->SetProjectionMatrix(lcMatrix44Ortho(0.0f, ViewWidth, 0.0f, ViewHeight, -1.0f, 1.0f));
 
-	if (mProperties.mBackgroundType == LC_BACKGROUND_GRADIENT)
+	Context->SetSmoothShading(true);
+
+	const lcVector3 Color1 = lcVector3FromColor(Preferences.mBackgroundGradientColorTop);
+	const lcVector3 Color2 = lcVector3FromColor(Preferences.mBackgroundGradientColorBottom);
+
+	float Verts[] =
 	{
-		Context->SetSmoothShading(true);
+		ViewWidth, ViewHeight, Color1[0], Color1[1], Color1[2], 1.0f,
+		0.0f,      ViewHeight, Color1[0], Color1[1], Color1[2], 1.0f,
+		0.0f,      0.0f,       Color2[0], Color2[1], Color2[2], 1.0f,
+		ViewWidth, 0.0f,       Color2[0], Color2[1], Color2[2], 1.0f
+	};
 
-		const lcVector3& Color1 = mProperties.mBackgroundGradientColor1;
-		const lcVector3& Color2 = mProperties.mBackgroundGradientColor2;
+	Context->SetMaterial(lcMaterialType::UnlitVertexColor);
+	Context->SetVertexBufferPointer(Verts);
+	Context->SetVertexFormat(0, 2, 0, 0, 4, false);
 
-		float Verts[] =
-		{
-			ViewWidth, ViewHeight, Color1[0], Color1[1], Color1[2], 1.0f,
-			0.0f,      ViewHeight, Color1[0], Color1[1], Color1[2], 1.0f,
-			0.0f,      0.0f,       Color2[0], Color2[1], Color2[2], 1.0f,
-			ViewWidth, 0.0f,       Color2[0], Color2[1], Color2[2], 1.0f
-		};
+	Context->DrawPrimitives(GL_TRIANGLE_FAN, 0, 4);
 
-		Context->SetMaterial(lcMaterialType::UnlitVertexColor);
-		Context->SetVertexBufferPointer(Verts);
-		Context->SetVertexFormat(0, 2, 0, 0, 4, false);
-
-		Context->DrawPrimitives(GL_TRIANGLE_FAN, 0, 4);
-
-		Context->SetSmoothShading(false);
-	}
-	else if (mProperties.mBackgroundType == LC_BACKGROUND_IMAGE)
-	{
-		Context->BindTexture2D(mBackgroundTexture->mTexture);
-
-		float TileWidth = 1.0f, TileHeight = 1.0f;
-
-		if (mProperties.mBackgroundImageTile)
-		{
-			TileWidth = ViewWidth / mBackgroundTexture->mWidth;
-			TileHeight = ViewHeight / mBackgroundTexture->mHeight;
-		}
-
-		float Verts[] =
-		{
-			0.0f,      ViewHeight, 0.0f,      0.0f,
-			ViewWidth, ViewHeight, TileWidth, 0.0f,
-			ViewWidth, 0.0f,       TileWidth, TileHeight,
-			0.0f,      0.0f,       0.0f,      TileHeight
-		};
-
-		Context->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
-		Context->SetMaterial(lcMaterialType::UnlitTextureDecal);
-		Context->SetVertexBufferPointer(Verts);
-		Context->SetVertexFormat(0, 2, 0, 2, 0, false);
-
-		Context->DrawPrimitives(GL_TRIANGLE_FAN, 0, 4);
-	}
+	Context->SetSmoothShading(false);
 
 	glEnable(GL_DEPTH_TEST);
 	Context->SetDepthWrite(true);
@@ -1745,20 +1630,6 @@ std::vector<lcInstructionsPageLayout> lcModel::GetPageLayouts(std::vector<const 
 	}
 
 	return PageLayouts;
-}
-
-void lcModel::UpdateBackgroundTexture()
-{
-	lcReleaseTexture(mBackgroundTexture);
-	mBackgroundTexture = nullptr;
-
-	if (mProperties.mBackgroundType == LC_BACKGROUND_IMAGE)
-	{
-		mBackgroundTexture = lcLoadTexture(mProperties.mBackgroundImage, LC_TEXTURE_WRAPU | LC_TEXTURE_WRAPV);
-
-		if (!mBackgroundTexture)
-			mProperties.mBackgroundType = LC_BACKGROUND_SOLID;
-	}
 }
 
 void lcModel::RayTest(lcObjectRayTest& ObjectRayTest) const
@@ -4452,8 +4323,6 @@ void lcModel::ShowPropertiesDialog()
 		return;
 
 	mProperties = Options.Properties;
-
-	UpdateBackgroundTexture();
 
 	lcPreferences& Preferences = lcGetPreferences();
 	if (Preferences.mPreviewEnabled && Preferences.mPreviewPosition != lcPreviewPosition::Floating)

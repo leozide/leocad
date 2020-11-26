@@ -51,6 +51,10 @@ public:
 
 	int mMouseSensitivity;
 	lcShadingMode mShadingMode;
+	bool mBackgroundGradient;
+	quint32 mBackgroundSolidColor;
+	quint32 mBackgroundGradientColorTop;
+	quint32 mBackgroundGradientColorBottom;
 	bool mDrawAxes;
 	quint32 mAxesColor;
 	quint32 mOverlayColor;

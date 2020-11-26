@@ -44,13 +44,6 @@ enum class lcTransformType
 	Count
 };
 
-enum lcBackgroundType
-{
-	LC_BACKGROUND_SOLID,
-	LC_BACKGROUND_GRADIENT,
-	LC_BACKGROUND_IMAGE
-};
-
 class lcModelProperties
 {
 public:
@@ -61,11 +54,6 @@ public:
 	{
 		if (mFileName != Properties.mFileName || mModelName != Properties.mModelName || mAuthor != Properties.mAuthor ||
 			mDescription != Properties.mDescription || mComments != Properties.mComments)
-			return false;
-
-		if (mBackgroundType != Properties.mBackgroundType || mBackgroundSolidColor != Properties.mBackgroundSolidColor ||
-			mBackgroundGradientColor1 != Properties.mBackgroundGradientColor1 || mBackgroundGradientColor2 != Properties.mBackgroundGradientColor2 ||
-			mBackgroundImage != Properties.mBackgroundImage || mBackgroundImageTile != Properties.mBackgroundImageTile)
 			return false;
 
 		if (mAmbientColor != Properties.mAmbientColor)
@@ -83,13 +71,6 @@ public:
 	QString mModelName;
 	QString mAuthor;
 	QString mComments;
-
-	lcBackgroundType mBackgroundType;
-	lcVector3 mBackgroundSolidColor;
-	lcVector3 mBackgroundGradientColor1;
-	lcVector3 mBackgroundGradientColor2;
-	QString mBackgroundImage;
-	bool mBackgroundImageTile;
 
 	lcVector3 mAmbientColor;
 };
@@ -380,8 +361,6 @@ protected:
 	void RemoveEmptyGroups();
 	bool RemoveSelectedObjects();
 
-	void UpdateBackgroundTexture();
-
 	void SelectGroup(lcGroup* TopGroup, bool Select);
 
 	void AddPiece(lcPiece* Piece);
@@ -394,7 +373,6 @@ protected:
 	bool mActive;
 	lcStep mCurrentStep;
 	lcVector3 mMouseToolDistance;
-	lcTexture* mBackgroundTexture;
 
 	lcArray<lcPiece*> mPieces;
 	lcArray<lcCamera*> mCameras;
@@ -408,4 +386,3 @@ protected:
 
 	Q_DECLARE_TR_FUNCTIONS(lcModel);
 };
-

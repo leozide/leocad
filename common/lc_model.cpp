@@ -3912,60 +3912,60 @@ void lcModel::EndMouseTool(lcTool Tool, bool Accept)
 
 	switch (Tool)
 	{
-	case LC_TOOL_INSERT:
-	case LC_TOOL_LIGHT:
+	case lcTool::Insert:
+	case lcTool::Light:
 		break;
 
-	case LC_TOOL_SPOTLIGHT:
+	case lcTool::SpotLight:
 		SaveCheckpoint(tr("New SpotLight"));
 		break;
 
-	case LC_TOOL_CAMERA:
+	case lcTool::Camera:
 		if (!mIsPreview)
 			gMainWindow->UpdateCameraMenu();
 		SaveCheckpoint(tr("New Camera"));
 		break;
 
-	case LC_TOOL_SELECT:
+	case lcTool::Select:
 		break;
 
-	case LC_TOOL_MOVE:
+	case lcTool::Move:
 		SaveCheckpoint(tr("Move"));
 		break;
 
-	case LC_TOOL_ROTATE:
+	case lcTool::Rotate:
 		SaveCheckpoint(tr("Rotate"));
 		break;
 
-	case LC_TOOL_ERASER:
-	case LC_TOOL_PAINT:
-	case LC_TOOL_COLOR_PICKER:
+	case lcTool::Eraser:
+	case lcTool::Paint:
+	case lcTool::ColorPicker:
 		break;
 
-	case LC_TOOL_ZOOM:
+	case lcTool::Zoom:
 		if (!mIsPreview && !gMainWindow->GetActiveView()->GetCamera()->IsSimple())
 			SaveCheckpoint(tr("Zoom"));
 		break;
 
-	case LC_TOOL_PAN:
+	case lcTool::Pan:
 		if (!mIsPreview && !gMainWindow->GetActiveView()->GetCamera()->IsSimple())
 			SaveCheckpoint(tr("Pan"));
 		break;
 
-	case LC_TOOL_ROTATE_VIEW:
+	case lcTool::RotateView:
 		if (!mIsPreview && !gMainWindow->GetActiveView()->GetCamera()->IsSimple())
 			SaveCheckpoint(tr("Orbit"));
 		break;
 
-	case LC_TOOL_ROLL:
+	case lcTool::Roll:
 		if (!mIsPreview && !gMainWindow->GetActiveView()->GetCamera()->IsSimple())
 			SaveCheckpoint(tr("Roll"));
 		break;
 
-	case LC_TOOL_ZOOM_REGION:
+	case lcTool::ZoomRegion:
 		break;
 
-	case LC_NUM_TOOLS:
+	case lcTool::Count:
 		break;
 	}
 }

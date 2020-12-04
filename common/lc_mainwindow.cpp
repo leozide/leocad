@@ -95,7 +95,7 @@ lcMainWindow::lcMainWindow()
 	mTransformType = lcTransformType::RelativeTranslation;
 
 	mColorIndex = lcGetColorIndex(7);
-	mTool = LC_TOOL_SELECT;
+	mTool = lcTool::Select;
 	mAddKeys = false;
 	mMoveSnapEnabled = true;
 	mAngleSnapEnabled = true;
@@ -1704,7 +1704,7 @@ void lcMainWindow::SetTool(lcTool Tool)
 {
 	mTool = Tool;
 
-	QAction* Action = mActions[LC_EDIT_ACTION_FIRST + mTool];
+	QAction* Action = mActions[LC_EDIT_ACTION_FIRST + static_cast<int>(mTool)];
 
 	if (Action)
 		Action->setChecked(true);
@@ -3303,63 +3303,63 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		break;
 
 	case LC_EDIT_ACTION_SELECT:
-		SetTool(LC_TOOL_SELECT);
+		SetTool(lcTool::Select);
 		break;
 
 	case LC_EDIT_ACTION_INSERT:
-		SetTool(LC_TOOL_INSERT);
+		SetTool(lcTool::Insert);
 		break;
 
 	case LC_EDIT_ACTION_LIGHT:
-		SetTool(LC_TOOL_LIGHT);
+		SetTool(lcTool::Light);
 		break;
 
 	case LC_EDIT_ACTION_SPOTLIGHT:
-		SetTool(LC_TOOL_SPOTLIGHT);
+		SetTool(lcTool::SpotLight);
 		break;
 
 	case LC_EDIT_ACTION_CAMERA:
-		SetTool(LC_TOOL_CAMERA);
+		SetTool(lcTool::Camera);
 		break;
 
 	case LC_EDIT_ACTION_MOVE:
-		SetTool(LC_TOOL_MOVE);
+		SetTool(lcTool::Move);
 		break;
 
 	case LC_EDIT_ACTION_ROTATE:
-		SetTool(LC_TOOL_ROTATE);
+		SetTool(lcTool::Rotate);
 		break;
 
 	case LC_EDIT_ACTION_DELETE:
-		SetTool(LC_TOOL_ERASER);
+		SetTool(lcTool::Eraser);
 		break;
 
 	case LC_EDIT_ACTION_PAINT:
-		SetTool(LC_TOOL_PAINT);
+		SetTool(lcTool::Paint);
 		break;
 
 	case LC_EDIT_ACTION_COLOR_PICKER:
-		SetTool(LC_TOOL_COLOR_PICKER);
+		SetTool(lcTool::ColorPicker);
 		break;
 
 	case LC_EDIT_ACTION_ZOOM:
-		SetTool(LC_TOOL_ZOOM);
+		SetTool(lcTool::Zoom);
 		break;
 
 	case LC_EDIT_ACTION_ZOOM_REGION:
-		SetTool(LC_TOOL_ZOOM_REGION);
+		SetTool(lcTool::ZoomRegion);
 		break;
 
 	case LC_EDIT_ACTION_PAN:
-		SetTool(LC_TOOL_PAN);
+		SetTool(lcTool::Pan);
 		break;
 
 	case LC_EDIT_ACTION_ROTATE_VIEW:
-		SetTool(LC_TOOL_ROTATE_VIEW);
+		SetTool(lcTool::RotateView);
 		break;
 
 	case LC_EDIT_ACTION_ROLL:
-		SetTool(LC_TOOL_ROLL);
+		SetTool(lcTool::Roll);
 		break;
 
 	case LC_EDIT_CANCEL:

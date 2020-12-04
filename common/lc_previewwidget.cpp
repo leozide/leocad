@@ -83,7 +83,7 @@ lcPreviewWidget::lcPreviewWidget()
 	: mLoader(new Project(true/*IsPreview*/)),
 	mViewSphere(this/*Preview*/)
 {
-	mTool = LC_TOOL_SELECT;
+	mTool = lcTool::Select;
 	mTrackTool = LC_TRACKTOOL_NONE;
 	mTrackButton = lcTrackButton::None;
 
@@ -278,9 +278,9 @@ lcTool lcPreviewWidget::GetCurrentTool() const
 {
 	const lcTool ToolFromTrackTool[] =
 	{
-		LC_TOOL_SELECT,             // LC_TRACKTOOL_NONE
-		LC_TOOL_PAN,                // LC_TRACKTOOL_PAN
-		LC_TOOL_ROTATE_VIEW,        // LC_TRACKTOOL_ORBIT_XY
+	    lcTool::Select,             // LC_TRACKTOOL_NONE
+	    lcTool::Pan,                // LC_TRACKTOOL_PAN
+	    lcTool::RotateView,        // LC_TRACKTOOL_ORBIT_XY
 	};
 
 	return ToolFromTrackTool[mTrackTool];
@@ -297,15 +297,15 @@ void lcPreviewWidget::StartTracking(lcTrackButton TrackButton)
 
 	switch (Tool)
 	{
-		case LC_TOOL_SELECT:
+		case lcTool::Select:
 			break;
 
-		case LC_TOOL_PAN:
-		case LC_TOOL_ROTATE_VIEW:
+		case lcTool::Pan:
+		case lcTool::RotateView:
 			ActiveModel->BeginMouseTool();
 			break;
 
-		case LC_NUM_TOOLS:
+		case lcTool::Count:
 		default:
 			break;
 	}
@@ -323,15 +323,15 @@ void lcPreviewWidget::StopTracking(bool Accept)
 
 	switch (Tool)
 	{
-		case LC_TOOL_SELECT:
+		case lcTool::Select:
 			break;
 
-		case LC_TOOL_PAN:
-		case LC_TOOL_ROTATE_VIEW:
+		case lcTool::Pan:
+		case lcTool::RotateView:
 			ActiveModel->EndMouseTool(Tool, Accept);
 			break;
 
-		case LC_NUM_TOOLS:
+		case lcTool::Count:
 		default:
 			break;
 	}

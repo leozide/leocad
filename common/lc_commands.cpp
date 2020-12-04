@@ -1659,23 +1659,23 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 
 static_assert(sizeof(gCommands)/sizeof(gCommands[0]) == LC_NUM_COMMANDS, "Array size mismatch.");
 
-const char* gToolNames[LC_NUM_TOOLS] =
+const char* gToolNames[static_cast<int>(lcTool::Count)] =
 {
-	QT_TRANSLATE_NOOP("Mouse", "NewPiece"),      // LC_TOOL_INSERT
-	QT_TRANSLATE_NOOP("Mouse", "NewPointLight"), // LC_TOOL_LIGHT
-	QT_TRANSLATE_NOOP("Mouse", "NewSpotLight"),  // LC_TOOL_SPOTLIGHT
-	QT_TRANSLATE_NOOP("Mouse", "NewCamera"),     // LC_TOOL_CAMERA
-	QT_TRANSLATE_NOOP("Mouse", "Select"),        // LC_TOOL_SELECT
-	QT_TRANSLATE_NOOP("Mouse", "Move"),          // LC_TOOL_MOVE
-	QT_TRANSLATE_NOOP("Mouse", "Rotate"),        // LC_TOOL_ROTATE
-	QT_TRANSLATE_NOOP("Mouse", "Delete"),        // LC_TOOL_ERASER
-	QT_TRANSLATE_NOOP("Mouse", "Paint"),         // LC_TOOL_PAINT
-	QT_TRANSLATE_NOOP("Mouse", "ColorPicker"),   // LC_TOOL_COLOR_PICKER
-	QT_TRANSLATE_NOOP("Mouse", "Zoom"),          // LC_TOOL_ZOOM
-	QT_TRANSLATE_NOOP("Mouse", "Pan"),           // LC_TOOL_PAN
-	QT_TRANSLATE_NOOP("Mouse", "Orbit"),         // LC_TOOL_ROTATE_VIEW
-	QT_TRANSLATE_NOOP("Mouse", "Roll"),          // LC_TOOL_ROLL
-	QT_TRANSLATE_NOOP("Mouse", "ZoomRegion")     // LC_TOOL_ZOOM_REGION
+    QT_TRANSLATE_NOOP("Mouse", "NewPiece"),      // lcTool::Insert
+    QT_TRANSLATE_NOOP("Mouse", "NewPointLight"), // lcTool::Light
+    QT_TRANSLATE_NOOP("Mouse", "NewSpotLight"),  // lcTool::SpotLight
+    QT_TRANSLATE_NOOP("Mouse", "NewCamera"),     // lcTool::Camera
+    QT_TRANSLATE_NOOP("Mouse", "Select"),        // lcTool::Select
+    QT_TRANSLATE_NOOP("Mouse", "Move"),          // lcTool::Move
+    QT_TRANSLATE_NOOP("Mouse", "Rotate"),        // lcTool::Rotate
+    QT_TRANSLATE_NOOP("Mouse", "Delete"),        // lcTool::Eraser
+    QT_TRANSLATE_NOOP("Mouse", "Paint"),         // lcTool::Paint
+    QT_TRANSLATE_NOOP("Mouse", "ColorPicker"),   // lcTool::ColorPicker
+    QT_TRANSLATE_NOOP("Mouse", "Zoom"),          // lcTool::Zoom
+    QT_TRANSLATE_NOOP("Mouse", "Pan"),           // lcTool::Pan
+    QT_TRANSLATE_NOOP("Mouse", "Orbit"),         // lcTool::RotateView
+    QT_TRANSLATE_NOOP("Mouse", "Roll"),          // lcTool::Roll
+    QT_TRANSLATE_NOOP("Mouse", "ZoomRegion")     // lcTool::ZoomRegion
 };
 
-static_assert(LC_ARRAY_COUNT(gToolNames) == LC_NUM_TOOLS, "Array size mismatch.");
+static_assert(LC_ARRAY_COUNT(gToolNames) == static_cast<int>(lcTool::Count), "Array size mismatch.");

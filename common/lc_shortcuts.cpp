@@ -132,23 +132,26 @@ void lcMouseShortcuts::Reset()
 {
 	memset(mShortcuts, 0, sizeof(mShortcuts));
 
-	mShortcuts[LC_TOOL_ROTATE_VIEW].Modifiers1 = Qt::AltModifier;
-	mShortcuts[LC_TOOL_ROTATE_VIEW].Button1 = Qt::LeftButton;
-	mShortcuts[LC_TOOL_ROTATE_VIEW].Modifiers2 = Qt::NoModifier;
-	mShortcuts[LC_TOOL_ROTATE_VIEW].Button2 = Qt::RightButton;
+	lcToolShortcut& RotateViewShortcut = mShortcuts[static_cast<int>(lcTool::RotateView)];
+	RotateViewShortcut.Modifiers1 = Qt::AltModifier;
+	RotateViewShortcut.Button1 = Qt::LeftButton;
+	RotateViewShortcut.Modifiers2 = Qt::NoModifier;
+	RotateViewShortcut.Button2 = Qt::RightButton;
 
+	lcToolShortcut& PanShortcut = mShortcuts[static_cast<int>(lcTool::Pan)];
 #if (QT_VERSION >= QT_VERSION_CHECK(4, 7, 0))
-	mShortcuts[LC_TOOL_PAN].Modifiers1 = Qt::AltModifier;
-	mShortcuts[LC_TOOL_PAN].Button1 = Qt::MiddleButton;
-	mShortcuts[LC_TOOL_PAN].Modifiers2 = Qt::ShiftModifier;
-	mShortcuts[LC_TOOL_PAN].Button2 = Qt::RightButton;
+	PanShortcut.Modifiers1 = Qt::AltModifier;
+	PanShortcut.Button1 = Qt::MiddleButton;
+	PanShortcut.Modifiers2 = Qt::ShiftModifier;
+	PanShortcut.Button2 = Qt::RightButton;
 #else
-	mShortcuts[LC_TOOL_PAN].Modifiers1 = Qt::ShiftModifier;
-	mShortcuts[LC_TOOL_PAN].Button1 = Qt::RightButton;
+	PanShortcut.Modifiers1 = Qt::ShiftModifier;
+	PanShortcut.Button1 = Qt::RightButton;
 #endif
 
-	mShortcuts[LC_TOOL_ZOOM].Modifiers1 = Qt::AltModifier;
-	mShortcuts[LC_TOOL_ZOOM].Button1 = Qt::RightButton;
+	lcToolShortcut& ZoomShortcut = mShortcuts[static_cast<int>(lcTool::Zoom)];
+	ZoomShortcut.Modifiers1 = Qt::AltModifier;
+	ZoomShortcut.Button1 = Qt::RightButton;
 }
 
 bool lcMouseShortcuts::Save(const QString& FileName)
@@ -176,7 +179,7 @@ bool lcMouseShortcuts::Save(QStringList& Shortcuts)
 {
 	Shortcuts.clear();
 
-	for (int ToolIdx = 0; ToolIdx < LC_NUM_TOOLS; ToolIdx++)
+	for (int ToolIdx = 0; ToolIdx < static_cast<int>(lcTool::Count); ToolIdx++)
 	{
 		int ButtonIndex1 = 0;
 		for (int Button1 = mShortcuts[ToolIdx].Button1; Button1; Button1 >>= 1)
@@ -230,11 +233,11 @@ bool lcMouseShortcuts::Load(const QStringList& FullShortcuts)
 		QString Key = FullShortcut.left(Equals);
 
 		int ToolIdx;
-		for (ToolIdx = 0; ToolIdx < LC_NUM_TOOLS; ToolIdx++)
+		for (ToolIdx = 0; ToolIdx < static_cast<int>(lcTool::Count); ToolIdx++)
 			if (Key == gToolNames[ToolIdx])
 				break;
 
-		if (ToolIdx == LC_NUM_TOOLS)
+		if (ToolIdx == static_cast<int>(lcTool::Count))
 			continue;
 
 		QStringList Shortcuts = FullShortcut.mid(Equals + 1).split(',');
@@ -270,9 +273,9 @@ bool lcMouseShortcuts::Load(const QStringList& FullShortcuts)
 
 lcTool lcMouseShortcuts::GetTool(Qt::MouseButton Button, Qt::KeyboardModifiers Modifiers) const
 {
-	for (int ToolIdx = 0; ToolIdx < LC_NUM_TOOLS; ToolIdx++)
+	for (int ToolIdx = 0; ToolIdx < static_cast<int>(lcTool::Count); ToolIdx++)
 		if ((mShortcuts[ToolIdx].Button1 == Button && mShortcuts[ToolIdx].Modifiers1 == Modifiers) || (mShortcuts[ToolIdx].Button2 == Button && mShortcuts[ToolIdx].Modifiers2 == Modifiers))
 			return (lcTool)ToolIdx;
 
-	return LC_NUM_TOOLS;
+	return lcTool::Count;
 }

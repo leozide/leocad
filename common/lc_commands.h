@@ -267,25 +267,25 @@ struct lcCommand
 
 extern lcCommand gCommands[LC_NUM_COMMANDS];
 
-enum lcTool
+enum class lcTool
 {
-	LC_TOOL_INSERT,
-	LC_TOOL_LIGHT,
-	LC_TOOL_SPOTLIGHT,
-	LC_TOOL_CAMERA,
-	LC_TOOL_SELECT,
-	LC_TOOL_MOVE,
-	LC_TOOL_ROTATE,
-	LC_TOOL_ERASER,
-	LC_TOOL_PAINT,
-	LC_TOOL_COLOR_PICKER,
-	LC_TOOL_ZOOM,
-	LC_TOOL_PAN,
-	LC_TOOL_ROTATE_VIEW,
-	LC_TOOL_ROLL,
-	LC_TOOL_ZOOM_REGION,
-	LC_NUM_TOOLS
+	Insert,
+	Light,
+	SpotLight,
+	Camera,
+	Select,
+	Move,
+	Rotate,
+	Eraser,
+	Paint,
+	ColorPicker,
+	Zoom,
+	Pan,
+	RotateView,
+	Roll,
+	ZoomRegion,
+	Count
 };
 
-extern const char* gToolNames[LC_NUM_TOOLS];
+extern const char* gToolNames[static_cast<int>(lcTool::Count)];
 

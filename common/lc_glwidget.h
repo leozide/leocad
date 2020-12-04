@@ -1,7 +1,5 @@
 #pragma once
 
-#include "lc_context.h"
-
 enum class lcDragState
 {
 	None,
@@ -36,42 +34,21 @@ enum class lcCursor
 
 struct lcInputState
 {
-	int x;
-	int y;
-	Qt::KeyboardModifiers Modifiers;
+	int x = 0;
+	int y = 0;
+	Qt::KeyboardModifiers Modifiers = Qt::NoModifier;
 };
 
 class lcGLWidget
 {
 public:
-	lcGLWidget()
-	{
-		mCursor = lcCursor::Default;
-		mWidget = nullptr;
-		mInputState.x = 0;
-		mInputState.y = 0;
-		mInputState.Modifiers = Qt::NoModifier;
-		mWidth = 1;
-		mHeight = 1;
-		mContext = new lcContext();
-		mDeleteContext = true;
-	}
+	lcGLWidget();
+	virtual ~lcGLWidget();
 
-	virtual ~lcGLWidget()
-	{
-		if (mDeleteContext)
-			delete mContext;
-	}
+	lcGLWidget(const lcGLWidget&) = delete;
+	lcGLWidget& operator=(const lcGLWidget&) = delete;
 
-	void SetContext(lcContext* Context)
-	{
-		if (mDeleteContext)
-			delete mContext;
-
-		mContext = Context;
-		mDeleteContext = false;
-	}
-
+	void SetContext(lcContext* Context);
 	void MakeCurrent();
 	void Redraw();
 	void SetCursor(lcCursor Cursor);
@@ -93,15 +70,14 @@ public:
 	virtual void OnForwardButtonUp() { }
 	virtual void OnMouseMove() { }
 	virtual void OnMouseWheel(float Direction) { Q_UNUSED(Direction); }
-	virtual void BeginDrag(lcDragState DragState) { Q_UNUSED(DragState); };
-	virtual void EndDrag(bool Accept) { Q_UNUSED(Accept); };
-
+	virtual void BeginDrag(lcDragState DragState) { Q_UNUSED(DragState); }
+	virtual void EndDrag(bool Accept) { Q_UNUSED(Accept); }
 
 	lcInputState mInputState;
-	int mWidth;
-	int mHeight;
-	lcCursor mCursor;
-	QGLWidget* mWidget;
-	lcContext* mContext;
-	bool mDeleteContext;
+	int mWidth = 1;
+	int mHeight = 1;
+	lcCursor mCursor = lcCursor::Default;
+	QGLWidget* mWidget = nullptr;
+	lcContext* mContext = nullptr;
+	bool mDeleteContext = true;
 };

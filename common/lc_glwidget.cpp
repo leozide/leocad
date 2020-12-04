@@ -1,6 +1,27 @@
 #include "lc_global.h"
 #include "lc_glwidget.h"
 #include "lc_application.h"
+#include "lc_context.h"
+
+lcGLWidget::lcGLWidget()
+{
+	mContext = new lcContext();
+}
+
+lcGLWidget::~lcGLWidget()
+{
+	if (mDeleteContext)
+		delete mContext;
+}
+
+void lcGLWidget::SetContext(lcContext* Context)
+{
+	if (mDeleteContext)
+		delete mContext;
+
+	mContext = Context;
+	mDeleteContext = false;
+}
 
 void lcGLWidget::MakeCurrent()
 {

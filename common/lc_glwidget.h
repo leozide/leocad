@@ -48,11 +48,23 @@ public:
 	lcGLWidget(const lcGLWidget&) = delete;
 	lcGLWidget& operator=(const lcGLWidget&) = delete;
 
+	lcCamera* GetCamera() const
+	{
+		return mCamera;
+	}
+
 	void SetContext(lcContext* Context);
 	void MakeCurrent();
 	void Redraw();
 	void SetCursor(lcCursor Cursor);
+
+	lcVector3 ProjectPoint(const lcVector3& Point) const;
+	lcVector3 UnprojectPoint(const lcVector3& Point) const;
+	void UnprojectPoints(lcVector3* Points, int NumPoints) const;
+	lcMatrix44 GetProjectionMatrix() const;
+
 	void DrawBackground() const;
+	void DrawAxes() const;
 
 	virtual void OnDraw() { }
 	virtual void OnInitialUpdate() { }
@@ -79,5 +91,8 @@ public:
 	lcCursor mCursor = lcCursor::Default;
 	QGLWidget* mWidget = nullptr;
 	lcContext* mContext = nullptr;
+
+protected:
+	lcCamera* mCamera = nullptr;
 	bool mDeleteContext = true;
 };

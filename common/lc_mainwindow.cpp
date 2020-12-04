@@ -1369,7 +1369,7 @@ QByteArray lcMainWindow::GetTabLayout()
 				DataStream << (qint32)0;
 				DataStream << (qint32)(TabWidget->GetActiveView() == CurrentView ? 1 : 0);
 
-				lcCamera* Camera = CurrentView->mCamera;
+				const lcCamera* Camera = CurrentView->GetCamera();
 
 				if (Camera->IsSimple())
 				{
@@ -1479,7 +1479,7 @@ void lcMainWindow::RestoreTabLayout(const QByteArray& TabLayout)
 
 					if (CurrentView)
 					{
-						lcCamera* Camera = CurrentView->mCamera;
+						lcCamera* Camera = CurrentView->GetCamera();
 						if (!std::isnan(FoV))
 							Camera->m_fovy = FoV;
 						if (!std::isnan(ZNear))
@@ -2157,7 +2157,7 @@ void lcMainWindow::UpdateCameraMenu()
 {
 	const lcArray<lcCamera*>& Cameras = lcGetActiveModel()->GetCameras();
 	View* ActiveView = GetActiveView();
-	lcCamera* CurrentCamera = ActiveView ? ActiveView->mCamera : nullptr;
+	const lcCamera* CurrentCamera = ActiveView ? ActiveView->GetCamera() : nullptr;
 	int CurrentIndex = -1;
 
 	for (int ActionIdx = LC_VIEW_CAMERA_FIRST; ActionIdx <= LC_VIEW_CAMERA_LAST; ActionIdx++)
@@ -2197,7 +2197,7 @@ void lcMainWindow::UpdatePerspective()
 
 	if (ActiveView)
 	{
-		if (ActiveView->mCamera->IsOrtho())
+		if (ActiveView->GetCamera()->IsOrtho())
 			mActions[LC_VIEW_PROJECTION_ORTHO]->setChecked(true);
 		else
 			mActions[LC_VIEW_PROJECTION_PERSPECTIVE]->setChecked(true);

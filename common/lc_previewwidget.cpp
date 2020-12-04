@@ -1,4 +1,3 @@
-#include "QMessageBox"
 #include "lc_global.h"
 #include "lc_previewwidget.h"
 #include "pieceinf.h"
@@ -6,7 +5,6 @@
 #include "project.h"
 #include "lc_model.h"
 #include "camera.h"
-#include "texfont.h"
 #include "lc_library.h"
 
 #include "lc_qglwidget.h"
@@ -226,21 +224,6 @@ void lcPreviewWidget::ZoomExtents()
 	}
 }
 
-lcMatrix44 lcPreviewWidget::GetProjectionMatrix() const
-{
-	float AspectRatio = (float)mWidth / (float)mHeight;
-
-	if (mCamera->IsOrtho())
-	{
-		float OrthoHeight = mCamera->GetOrthoHeight() / 2.0f;
-		float OrthoWidth = OrthoHeight * AspectRatio;
-
-		return lcMatrix44Ortho(-OrthoWidth, OrthoWidth, -OrthoHeight, OrthoHeight, mCamera->m_zNear, mCamera->m_zFar * 4);
-	}
-	else
-		return lcMatrix44Perspective(mCamera->m_fovy, AspectRatio, mCamera->m_zNear, mCamera->m_zFar);
-}
-
 void lcPreviewWidget::StartOrbitTracking() // called by viewSphere
 {
 	mTrackTool = LC_TRACKTOOL_ORBIT_XY;
@@ -289,74 +272,6 @@ void lcPreviewWidget::DrawViewport()
 
 	mContext->SetDepthWrite(true);
 	glEnable(GL_DEPTH_TEST);
-}
-
-void lcPreviewWidget::DrawAxes()
-{
-	//	glClear(GL_DEPTH_BUFFER_BIT);
-
-	const float Verts[28 * 3] =
-	{
-		 0.00f,  0.00f,  0.00f, 20.00f,  0.00f,  0.00f, 12.00f,  3.00f,  0.00f, 12.00f,  2.12f,  2.12f,
-		12.00f,  0.00f,  3.00f, 12.00f, -2.12f,  2.12f, 12.00f, -3.00f,  0.00f, 12.00f, -2.12f, -2.12f,
-		12.00f,  0.00f, -3.00f, 12.00f,  2.12f, -2.12f,  0.00f, 20.00f,  0.00f,  3.00f, 12.00f,  0.00f,
-		 2.12f, 12.00f,  2.12f,  0.00f, 12.00f,  3.00f, -2.12f, 12.00f,  2.12f, -3.00f, 12.00f,  0.00f,
-		-2.12f, 12.00f, -2.12f,  0.00f, 12.00f, -3.00f,  2.12f, 12.00f, -2.12f,  0.00f,  0.00f, 20.00f,
-		 0.00f,  3.00f, 12.00f,  2.12f,  2.12f, 12.00f,  3.00f,  0.00f, 12.00f,  2.12f, -2.12f, 12.00f,
-		 0.00f, -3.00f, 12.00f, -2.12f, -2.12f, 12.00f, -3.00f,  0.00f, 12.00f, -2.12f,  2.12f, 12.00f,
-	};
-
-	const GLushort Indices[78] =
-	{
-		 0,  1,  0, 10,  0, 19,
-		 1,  2,  3,  1,  3,  4,  1,  4,  5,  1,  5,  6,  1,  6,  7,  1,  7,  8,  1,  8,  9,  1,  9,  2,
-		10, 11, 12, 10, 12, 13, 10, 13, 14, 10, 14, 15, 10, 15, 16, 10, 16, 17, 10, 17, 18, 10, 18, 11,
-		19, 20, 21, 19, 21, 22, 19, 22, 23, 19, 23, 24, 19, 24, 25, 19, 25, 26, 19, 26, 27, 19, 27, 20
-	};
-
-	lcMatrix44 TranslationMatrix = lcMatrix44Translation(lcVector3(30.375f, 30.375f, 0.0f));
-	lcMatrix44 WorldViewMatrix = mCamera->mWorldView;
-	WorldViewMatrix.SetTranslation(lcVector3(0, 0, 0));
-
-	mContext->SetMaterial(lcMaterialType::UnlitColor);
-	mContext->SetWorldMatrix(lcMatrix44Identity());
-	mContext->SetViewMatrix(lcMul(WorldViewMatrix, TranslationMatrix));
-	mContext->SetProjectionMatrix(lcMatrix44Ortho(0, mWidth, 0, mHeight, -50, 50));
-
-	mContext->SetVertexBufferPointer(Verts);
-	mContext->SetVertexFormatPosition(3);
-	mContext->SetIndexBufferPointer(Indices);
-
-	mContext->SetColor(0.0f, 0.0f, 0.0f, 1.0f);
-	mContext->DrawIndexedPrimitives(GL_LINES, 6, GL_UNSIGNED_SHORT, 0);
-
-	mContext->SetColor(0.8f, 0.0f, 0.0f, 1.0f);
-	mContext->DrawIndexedPrimitives(GL_TRIANGLES, 24, GL_UNSIGNED_SHORT, 6 * 2);
-	mContext->SetColor(0.0f, 0.8f, 0.0f, 1.0f);
-	mContext->DrawIndexedPrimitives(GL_TRIANGLES, 24, GL_UNSIGNED_SHORT, (6 + 24) * 2);
-	mContext->SetColor(0.0f, 0.0f, 0.8f, 1.0f);
-	mContext->DrawIndexedPrimitives(GL_TRIANGLES, 24, GL_UNSIGNED_SHORT, (6 + 48) * 2);
-
-	mContext->SetMaterial(lcMaterialType::UnlitTextureModulate);
-	mContext->SetViewMatrix(TranslationMatrix);
-	mContext->BindTexture2D(gTexFont.GetTexture());
-	glEnable(GL_BLEND);
-
-	float TextBuffer[6 * 5 * 3];
-	lcVector3 PosX = lcMul30(lcVector3(25.0f, 0.0f, 0.0f), WorldViewMatrix);
-	gTexFont.GetGlyphTriangles(PosX.x, PosX.y, PosX.z, 'X', TextBuffer);
-	lcVector3 PosY = lcMul30(lcVector3(0.0f, 25.0f, 0.0f), WorldViewMatrix);
-	gTexFont.GetGlyphTriangles(PosY.x, PosY.y, PosY.z, 'Y', TextBuffer + 5 * 6);
-	lcVector3 PosZ = lcMul30(lcVector3(0.0f, 0.0f, 25.0f), WorldViewMatrix);
-	gTexFont.GetGlyphTriangles(PosZ.x, PosZ.y, PosZ.z, 'Z', TextBuffer + 5 * 6 * 2);
-
-	mContext->SetVertexBufferPointer(TextBuffer);
-	mContext->SetVertexFormat(0, 3, 0, 2, 0, false);
-
-	mContext->SetColor(lcVector4FromColor(lcGetPreferences().mAxesColor));
-	mContext->DrawPrimitives(GL_TRIANGLES, 0, 6 * 3);
-
-	glDisable(GL_BLEND);
 }
 
 lcTool lcPreviewWidget::GetCurrentTool() const

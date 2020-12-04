@@ -1,27 +1,19 @@
 #pragma once
 
-#include <QMainWindow>
-#include <QString>
-#include "lc_global.h"
 #include "lc_glwidget.h"
 #include "lc_scene.h"
 #include "lc_viewsphere.h"
 #include "lc_commands.h"
-#include "lc_application.h"
-#include "camera.h"
 
-class QLabel;
-class Project;
-class lcModel;
-class lcPiece;
 class lcQGLWidget;
+class lcPreviewWidget;
 
 class lcPreviewDockWidget : public QMainWindow
 {
 	Q_OBJECT
 
 public:
-	explicit lcPreviewDockWidget(QMainWindow* parent = nullptr);
+	explicit lcPreviewDockWidget(QMainWindow* Parent = nullptr);
 	bool SetCurrentPiece(const QString& PartType, int ColorCode);
 	void ClearPreview();
 	void UpdatePreview();
@@ -64,32 +56,14 @@ public:
 		return mTool;
 	}
 
-	lcCamera* GetCamera() const
-	{
-		return mCamera;
-	}
-
 	QString GetDescription() const
 	{
 		return mDescription;
 	}
 
-	lcVector3 UnprojectPoint(const lcVector3& Point) const
-	{
-		int Viewport[4] = { 0, 0, mWidth, mHeight };
-		return lcUnprojectPoint(Point, mCamera->mWorldView, GetProjectionMatrix(), Viewport);
-	}
-
-	void UnprojectPoints(lcVector3* Points, int NumPoints) const
-	{
-		int Viewport[4] = { 0, 0, mWidth, mHeight };
-		lcUnprojectPoints(Points, NumPoints, mCamera->mWorldView, GetProjectionMatrix(), Viewport);
-	}
-
 	void ClearPreview();
 	void UpdatePreview();
 	bool SetCurrentPiece(const QString& PartType, int ColorCode);
-	lcMatrix44 GetProjectionMatrix() const;
 	lcModel* GetActiveModel() const;
 	lcCursor GetCursor() const;
 	void SetCamera(lcCamera* Camera);
@@ -123,7 +97,6 @@ public:
 	void OnMouseWheel(float Direction) override;
 
 protected:
-	void DrawAxes();
 	void DrawViewport();
 
 	lcTool GetCurrentTool() const;
@@ -133,7 +106,6 @@ protected:
 
 	Project* mLoader;
 	lcModel* mModel;
-	lcCamera* mCamera;
 	lcViewSphere mViewSphere;
 
 	lcScene mScene;

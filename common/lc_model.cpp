@@ -200,7 +200,7 @@ void lcModel::DeleteModel()
 			for (int ViewIdx = 0; ViewIdx < Views->GetSize(); ViewIdx++)
 			{
 				View* View = (*Views)[ViewIdx];
-				lcCamera* Camera = View->mCamera;
+				lcCamera* Camera = View->GetCamera();
 
 				if (!Camera->IsSimple() && mCameras.FindIndex(Camera) != -1)
 					View->SetCamera(Camera, true);
@@ -1265,7 +1265,7 @@ QImage lcModel::GetStepImage(bool Zoom, int Width, int Height, lcStep Step)
 
 	lcStep CurrentStep = mCurrentStep;
 
-	lcCamera* Camera = ActiveView->mCamera;
+	lcCamera* Camera = ActiveView->GetCamera();
 	if (Zoom)
 		ZoomExtents(Camera, (float)Width / (float)Height);
 
@@ -2608,7 +2608,7 @@ bool lcModel::RemoveSelectedObjects()
 			{
 				View* View = (*Views)[ViewIdx];
 
-				if (Camera == View->mCamera)
+				if (Camera == View->GetCamera())
 					View->SetCamera(Camera, true);
 			}
 
@@ -3943,22 +3943,22 @@ void lcModel::EndMouseTool(lcTool Tool, bool Accept)
 		break;
 
 	case LC_TOOL_ZOOM:
-		if (!mIsPreview && !gMainWindow->GetActiveView()->mCamera->IsSimple())
+		if (!mIsPreview && !gMainWindow->GetActiveView()->GetCamera()->IsSimple())
 			SaveCheckpoint(tr("Zoom"));
 		break;
 
 	case LC_TOOL_PAN:
-		if (!mIsPreview && !gMainWindow->GetActiveView()->mCamera->IsSimple())
+		if (!mIsPreview && !gMainWindow->GetActiveView()->GetCamera()->IsSimple())
 			SaveCheckpoint(tr("Pan"));
 		break;
 
 	case LC_TOOL_ROTATE_VIEW:
-		if (!mIsPreview && !gMainWindow->GetActiveView()->mCamera->IsSimple())
+		if (!mIsPreview && !gMainWindow->GetActiveView()->GetCamera()->IsSimple())
 			SaveCheckpoint(tr("Orbit"));
 		break;
 
 	case LC_TOOL_ROLL:
-		if (!mIsPreview && !gMainWindow->GetActiveView()->mCamera->IsSimple())
+		if (!mIsPreview && !gMainWindow->GetActiveView()->GetCamera()->IsSimple())
 			SaveCheckpoint(tr("Roll"));
 		break;
 
@@ -4089,7 +4089,7 @@ void lcModel::EraserToolClicked(lcObject* Object)
 			for (int ViewIdx = 0; ViewIdx < Views->GetSize(); ViewIdx++)
 			{
 				View* View = (*Views)[ViewIdx];
-				lcCamera* Camera = View->mCamera;
+				lcCamera* Camera = View->GetCamera();
 
 				if (Camera == Object)
 					View->SetCamera(Camera, true);

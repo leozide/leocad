@@ -117,7 +117,6 @@ public:
 	void SetViewpoint(const lcVector3& Position);
 	void SetCameraAngles(float Latitude, float Longitude);
 	void SetDefaultCamera();
-	lcMatrix44 GetProjectionMatrix() const;
 	lcCursor GetCursor() const;
 	void ShowContextMenu() const;
 
@@ -127,26 +126,6 @@ public:
 	void GetRayUnderPointer(lcVector3& Start, lcVector3& End) const;
 	lcObjectSection FindObjectUnderPointer(bool PiecesOnly, bool IgnoreSelected) const;
 	lcArray<lcObject*> FindObjectsInBox(float x1, float y1, float x2, float y2) const;
-
-	lcCamera* mCamera;
-
-	lcVector3 ProjectPoint(const lcVector3& Point) const
-	{
-		int Viewport[4] = { 0, 0, mWidth, mHeight };
-		return lcProjectPoint(Point, mCamera->mWorldView, GetProjectionMatrix(), Viewport);
-	}
-
-	lcVector3 UnprojectPoint(const lcVector3& Point) const
-	{
-		int Viewport[4] = { 0, 0, mWidth, mHeight };
-		return lcUnprojectPoint(Point, mCamera->mWorldView, GetProjectionMatrix(), Viewport);
-	}
-
-	void UnprojectPoints(lcVector3* Points, int NumPoints) const
-	{
-		int Viewport[4] = { 0, 0, mWidth, mHeight };
-		lcUnprojectPoints(Points, NumPoints, mCamera->mWorldView, GetProjectionMatrix(), Viewport);
-	}
 
 	bool BeginRenderToImage(int Width, int Height);
 	void EndRenderToImage();
@@ -164,7 +143,6 @@ protected:
 	void DrawSelectZoomRegionOverlay();
 	void DrawRotateViewOverlay();
 	void DrawGrid();
-	void DrawAxes();
 	void DrawViewport();
 
 	void UpdateTrackTool();

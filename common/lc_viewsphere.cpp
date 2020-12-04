@@ -35,7 +35,7 @@ lcViewSphere::lcViewSphere(lcPreviewWidget* Preview)
 
 lcMatrix44 lcViewSphere::GetViewMatrix() const
 {
-	lcMatrix44 ViewMatrix = mIsPreview ? mPreview->GetCamera()->mWorldView : mView->mCamera->mWorldView;
+	lcMatrix44 ViewMatrix = mIsPreview ? mPreview->GetCamera()->mWorldView : mView->GetCamera()->mWorldView;
 	ViewMatrix.SetTranslation(lcVector3(0, 0, 0));
 	return ViewMatrix;
 }

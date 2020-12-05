@@ -4,6 +4,7 @@
 
 class Project;
 class lcPiecesLibrary;
+enum class lcViewSphereLocation;
 
 enum class lcShadingMode
 {
@@ -11,14 +12,6 @@ enum class lcShadingMode
 	Flat,
 	DefaultLights,
 	Full
-};
-
-enum class lcViewSphereLocation
-{
-	TopLeft,
-	TopRight,
-	BottomLeft,
-	BottomRight
 };
 
 enum class lcPreviewLocation

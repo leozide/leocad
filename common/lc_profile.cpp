@@ -4,6 +4,7 @@
 #include "image.h"
 #include "lc_model.h"
 #include "project.h"
+#include "lc_viewsphere.h"
 
 lcProfileEntry::lcProfileEntry(const char* Section, const char* Key, int DefaultValue)
 {

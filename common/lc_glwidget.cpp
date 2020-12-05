@@ -16,6 +16,17 @@ lcGLWidget::~lcGLWidget()
 		delete mContext;
 }
 
+void lcGLWidget::SetMousePosition(int MouseX, int MouseY)
+{
+	mMouseX = MouseX;
+	mMouseY = MouseY;
+}
+
+void lcGLWidget::SetMouseModifiers(Qt::KeyboardModifiers MouseModifiers)
+{
+	mMouseModifiers = MouseModifiers;
+}
+
 void lcGLWidget::SetContext(lcContext* Context)
 {
 	if (mDeleteContext)
@@ -72,17 +83,17 @@ void lcGLWidget::SetCursor(lcCursor CursorType)
 
 	static_assert(LC_ARRAY_COUNT(Cursors) == static_cast<int>(lcCursor::Count), "Array size mismatch");
 
-	QGLWidget* widget = (QGLWidget*)mWidget;
+	QGLWidget* mWidget = (QGLWidget*)mWidget;
 
 	if (CursorType > lcCursor::Default && CursorType < lcCursor::Count)
 	{
 		const lcCursorInfo& Cursor = Cursors[static_cast<int>(CursorType)];
-		widget->setCursor(QCursor(QPixmap(Cursor.Name), Cursor.x, Cursor.y));
+		mWidget->setCursor(QCursor(QPixmap(Cursor.Name), Cursor.x, Cursor.y));
 		mCursor = CursorType;
 	}
 	else
 	{
-		widget->unsetCursor();
+		mWidget->unsetCursor();
 		mCursor = lcCursor::Default;
 	}
 }

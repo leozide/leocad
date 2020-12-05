@@ -40,13 +40,6 @@ enum class lcTrackButton
 	Right
 };
 
-struct lcInputState
-{
-	int x = 0;
-	int y = 0;
-	Qt::KeyboardModifiers Modifiers = Qt::NoModifier;
-};
-
 class lcGLWidget
 {
 public:
@@ -66,6 +59,18 @@ public:
 		return mTrackButton != lcTrackButton::None;
 	}
 
+	int GetMouseX() const
+	{
+		return mMouseX;
+	}
+
+	int GetMouseY() const
+	{
+		return mMouseY;
+	}
+
+	void SetMousePosition(int MouseX, int MouseY);
+	void SetMouseModifiers(Qt::KeyboardModifiers MouseModifiers);
 	void SetContext(lcContext* Context);
 	void MakeCurrent();
 	void Redraw();
@@ -98,15 +103,19 @@ public:
 	virtual void BeginDrag(lcDragState DragState) { Q_UNUSED(DragState); }
 	virtual void EndDrag(bool Accept) { Q_UNUSED(Accept); }
 
-	lcInputState mInputState;
 	int mWidth = 1;
 	int mHeight = 1;
 	QGLWidget* mWidget = nullptr;
 	lcContext* mContext = nullptr;
 
 protected:
+	int mMouseX = 0;
+	int mMouseY = 0;
+	Qt::KeyboardModifiers mMouseModifiers = Qt::NoModifier;
+
+	lcTrackButton mTrackButton = lcTrackButton::None;
+	lcCursor mCursor = lcCursor::Default;
+
 	lcCamera* mCamera = nullptr;
 	bool mDeleteContext = true;
-	lcCursor mCursor = lcCursor::Default;
-	lcTrackButton mTrackButton = lcTrackButton::None;
 };

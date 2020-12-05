@@ -402,8 +402,8 @@ void MinifigWizard::OnLeftButtonDown()
 {
 	if (mTracking == LC_TRACK_NONE)
 	{
-		mDownX = mInputState.x;
-		mDownY = mInputState.y;
+		mDownX = mMouseX;
+		mDownY = mMouseY;
 		mTracking = LC_TRACK_LEFT;
 	}
 }
@@ -424,8 +424,8 @@ void MinifigWizard::OnRightButtonDown()
 {
 	if (mTracking == LC_TRACK_NONE)
 	{
-		mDownX = mInputState.x;
-		mDownY = mInputState.y;
+		mDownX = mMouseX;
+		mDownY = mMouseY;
 		mTracking = LC_TRACK_RIGHT;
 	}
 }
@@ -441,30 +441,30 @@ void MinifigWizard::OnMouseMove()
 	if (mTracking == LC_TRACK_LEFT)
 	{
 		// Rotate.
-		mRotateZ += mInputState.x - mDownX;
-		mRotateX += mInputState.y - mDownY;
+		mRotateZ += mMouseX - mDownX;
+		mRotateX += mMouseY - mDownY;
 
 		if (mRotateX > 179.5f)
 			mRotateX = 179.5f;
 		else if (mRotateX < 0.5f)
 			mRotateX = 0.5f;
 
-		mDownX = mInputState.x;
-		mDownY = mInputState.y;
+		mDownX = mMouseX;
+		mDownY = mMouseY;
 
 		Redraw();
 	}
 	else if (mTracking == LC_TRACK_RIGHT)
 	{
 		// Zoom.
-		mDistance += (float)(mDownY - mInputState.y) * 0.2f;
+		mDistance += (float)(mDownY - mMouseY) * 0.2f;
 		mAutoZoom = false;
 
 		if (mDistance < 0.5f)
 			mDistance = 0.5f;
 
-		mDownX = mInputState.x;
-		mDownY = mInputState.y;
+		mDownX = mMouseX;
+		mDownY = mMouseY;
 
 		Redraw();
 	}

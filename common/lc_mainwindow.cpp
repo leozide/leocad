@@ -72,7 +72,7 @@ void lcModelTabWidget::ResetLayout()
 	TopWidget->deleteLater();
 
 	Widget->setFocus();
-	SetActiveView((View*)((lcQGLWidget*)Widget)->widget);
+	SetActiveView((View*)((lcQGLWidget*)Widget)->mWidget);
 }
 
 void lcModelTabWidget::Clear()
@@ -84,8 +84,8 @@ void lcModelTabWidget::Clear()
 	mViews.RemoveAll();
 	mActiveView = nullptr;
 	lcQGLWidget* Widget = (lcQGLWidget*)layout()->itemAt(0)->widget();
-	delete Widget->widget;
-	Widget->widget = nullptr;
+	delete Widget->mWidget;
+	Widget->mWidget = nullptr;
 }
 
 lcMainWindow::lcMainWindow()
@@ -1364,7 +1364,7 @@ QByteArray lcMainWindow::GetTabLayout()
 		{
 			if (Widget->metaObject() == &lcQGLWidget::staticMetaObject)
 			{
-				View* CurrentView = (View*)((lcQGLWidget*)Widget)->widget;
+				View* CurrentView = (View*)((lcQGLWidget*)Widget)->mWidget;
 
 				DataStream << (qint32)0;
 				DataStream << (qint32)(TabWidget->GetActiveView() == CurrentView ? 1 : 0);
@@ -1463,7 +1463,7 @@ void lcMainWindow::RestoreTabLayout(const QByteArray& TabLayout)
 				View* CurrentView = nullptr;
 
 				if (ParentWidget)
-					CurrentView = (View*)((lcQGLWidget*)ParentWidget)->widget;
+					CurrentView = (View*)((lcQGLWidget*)ParentWidget)->mWidget;
 
 				if (CameraType == 0)
 				{
@@ -1536,7 +1536,7 @@ void lcMainWindow::RestoreTabLayout(const QByteArray& TabLayout)
 
 		if (ActiveWidget && TabWidget)
 		{
-			View* ActiveView = (View*)((lcQGLWidget*)ActiveWidget)->widget;
+			View* ActiveView = (View*)((lcQGLWidget*)ActiveWidget)->mWidget;
 			TabWidget->SetActiveView(ActiveView);
 		}
 	}
@@ -1613,9 +1613,9 @@ void lcMainWindow::SetCurrentModelTab(lcModel* Model)
 
 		NewView = new View(Model);
 		ViewWidget = (lcQGLWidget*)TabWidget->layout()->itemAt(0)->widget();
-		ViewWidget->widget = NewView;
+		ViewWidget->mWidget = NewView;
 		NewView->mWidget = ViewWidget;
-		float Scale = ViewWidget->deviceScale();
+		float Scale = ViewWidget->GetDeviceScale();
 		NewView->mWidth = ViewWidget->width() * Scale;
 		NewView->mHeight = ViewWidget->height() * Scale;
 		AddView(NewView);
@@ -1904,7 +1904,7 @@ void lcMainWindow::RemoveActiveView()
 	}
 
 	OtherWidget->setFocus();
-	SetActiveView((View*)((lcQGLWidget*)OtherWidget)->widget);
+	SetActiveView((View*)((lcQGLWidget*)OtherWidget)->mWidget);
 }
 
 void lcMainWindow::ResetViews()

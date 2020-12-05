@@ -290,8 +290,8 @@ void lcPreviewWidget::StartTracking(lcTrackButton TrackButton)
 {
 	mTrackButton = TrackButton;
 	mTrackUpdated = false;
-	mMouseDownX = mInputState.x;
-	mMouseDownY = mInputState.y;
+	mMouseDownX = mMouseX;
+	mMouseDownY = mMouseY;
 	lcTool Tool = GetCurrentTool();  // Either lcTrackTool::None (LC_TOOL_SELECT) or lcTrackTool::OrbitXY (LC_TOOL_ROTATE_VIEW)
 	lcModel* ActiveModel = GetActiveModel();
 
@@ -563,8 +563,8 @@ void lcPreviewWidget::OnMouseMove()
 		{
 			lcVector3 Points[4] =
 			{
-				lcVector3((float)mInputState.x, (float)mInputState.y, 0.0f),
-				lcVector3((float)mInputState.x, (float)mInputState.y, 1.0f),
+				lcVector3((float)mMouseX, (float)mMouseY, 0.0f),
+				lcVector3((float)mMouseX, (float)mMouseY, 1.0f),
 				lcVector3(mMouseDownX, mMouseDownY, 0.0f),
 				lcVector3(mMouseDownX, mMouseDownY, 1.0f)
 			};
@@ -596,7 +596,7 @@ void lcPreviewWidget::OnMouseMove()
 		break;
 
 		case lcTrackTool::OrbitXY:
-			ActiveModel->UpdateOrbitTool(mCamera, 0.1f * MouseSensitivity * (mInputState.x - mMouseDownX), 0.1f * MouseSensitivity * (mInputState.y - mMouseDownY));
+			ActiveModel->UpdateOrbitTool(mCamera, 0.1f * MouseSensitivity * (mMouseX - mMouseDownX), 0.1f * MouseSensitivity * (mMouseY - mMouseDownY));
 			Redraw();
 			break;
 
@@ -607,6 +607,6 @@ void lcPreviewWidget::OnMouseMove()
 
 void lcPreviewWidget::OnMouseWheel(float Direction)
 {
-	mModel->Zoom(mCamera, (int)(((mInputState.Modifiers & Qt::ControlModifier) ? 100 : 10) * Direction));
+	mModel->Zoom(mCamera, (int)(((mMouseModifiers & Qt::ControlModifier) ? 100 : 10) * Direction));
 	Redraw();
 }

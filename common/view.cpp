@@ -432,10 +432,10 @@ lcCursor View::GetCursor() const
 {
 	if (mTrackTool == lcTrackTool::Select)
 	{
-		if (mInputState.Modifiers & Qt::ControlModifier)
+		if (mMouseModifiers & Qt::ControlModifier)
 			return lcCursor::SelectAdd;
 
-		if (mInputState.Modifiers & Qt::ShiftModifier)
+		if (mMouseModifiers & Qt::ShiftModifier)
 			return lcCursor::SelectRemove;
 	}
 
@@ -593,7 +593,7 @@ lcMatrix44 View::GetPieceInsertPosition(bool IgnoreSelected, PieceInfo* Info) co
 		return WorldMatrix;
 	}
 
-	std::array<lcVector3, 2> ClickPoints = {{ lcVector3((float)mInputState.x, (float)mInputState.y, 0.0f), lcVector3((float)mInputState.x, (float)mInputState.y, 1.0f) }};
+	std::array<lcVector3, 2> ClickPoints = {{ lcVector3((float)mMouseX, (float)mMouseY, 0.0f), lcVector3((float)mMouseX, (float)mMouseY, 1.0f) }};
 	UnprojectPoints(ClickPoints.data(), 2);
 
 	if (ActiveModel != mModel)
@@ -613,14 +613,14 @@ lcMatrix44 View::GetPieceInsertPosition(bool IgnoreSelected, PieceInfo* Info) co
 		return lcMatrix44Translation(Intersection);
 	}
 
-	return lcMatrix44Translation(UnprojectPoint(lcVector3((float)mInputState.x, (float)mInputState.y, 0.9f)));
+	return lcMatrix44Translation(UnprojectPoint(lcVector3((float)mMouseX, (float)mMouseY, 0.9f)));
 }
 
 lcVector3 View::GetCameraLightInsertPosition() const
 {
 	lcModel* ActiveModel = GetActiveModel();
 
-	std::array<lcVector3, 2> ClickPoints = { { lcVector3((float)mInputState.x, (float)mInputState.y, 0.0f), lcVector3((float)mInputState.x, (float)mInputState.y, 1.0f) } };
+	std::array<lcVector3, 2> ClickPoints = { { lcVector3((float)mMouseX, (float)mMouseY, 0.0f), lcVector3((float)mMouseX, (float)mMouseY, 1.0f) } };
 	UnprojectPoints(ClickPoints.data(), 2);
 
 	if (ActiveModel != mModel)
@@ -646,8 +646,8 @@ void View::GetRayUnderPointer(lcVector3& Start, lcVector3& End) const
 {
 	lcVector3 StartEnd[2] =
 	{
-		lcVector3((float)mInputState.x, (float)mInputState.y, 0.0f),
-		lcVector3((float)mInputState.x, (float)mInputState.y, 1.0f)
+		lcVector3((float)mMouseX, (float)mMouseY, 0.0f),
+		lcVector3((float)mMouseX, (float)mMouseY, 1.0f)
 	};
 
 	UnprojectPoints(StartEnd, 2);
@@ -660,8 +660,8 @@ lcObjectSection View::FindObjectUnderPointer(bool PiecesOnly, bool IgnoreSelecte
 {
 	lcVector3 StartEnd[2] =
 	{
-		lcVector3((float)mInputState.x, (float)mInputState.y, 0.0f),
-		lcVector3((float)mInputState.x, (float)mInputState.y, 1.0f)
+		lcVector3((float)mMouseX, (float)mMouseY, 0.0f),
+		lcVector3((float)mMouseX, (float)mMouseY, 1.0f)
 	};
 
 	UnprojectPoints(StartEnd, 2);
@@ -1435,8 +1435,8 @@ void View::DrawSelectZoomRegionOverlay()
 
 	float pt1x = (float)mMouseDownX;
 	float pt1y = (float)mMouseDownY;
-	float pt2x = (float)mInputState.x;
-	float pt2y = (float)mInputState.y;
+	float pt2x = (float)mMouseX;
+	float pt2y = (float)mMouseY;
 
 	float Left, Right, Bottom, Top;
 
@@ -1846,7 +1846,7 @@ lcTrackTool View::GetOverrideTrackTool(Qt::MouseButton Button) const
 	if (mTrackToolFromOverlay)
 		return lcTrackTool::None;
 
-	lcTool OverrideTool = gMouseShortcuts.GetTool(Button, mInputState.Modifiers);
+	lcTool OverrideTool = gMouseShortcuts.GetTool(Button, mMouseModifiers);
 
 	if (OverrideTool == lcTool::Count)
 		return lcTrackTool::None;
@@ -1972,8 +1972,8 @@ void View::UpdateTrackTool()
 {
 	lcTool CurrentTool = gMainWindow->GetTool();
 	lcTrackTool NewTrackTool = mTrackTool;
-	int x = mInputState.x;
-	int y = mInputState.y;
+	int x = mMouseX;
+	int y = mMouseY;
 	bool Redraw = false;
 	mTrackToolFromOverlay = false;
 	lcModel* ActiveModel = GetActiveModel();
@@ -2161,7 +2161,7 @@ void View::UpdateTrackTool()
 				}
 			}
 
-			if (CurrentTool == lcTool::Select && NewTrackTool == lcTrackTool::Select && mInputState.Modifiers == Qt::NoModifier)
+			if (CurrentTool == lcTool::Select && NewTrackTool == lcTrackTool::Select && mMouseModifiers == Qt::NoModifier)
 			{
 				lcObjectSection ObjectSection = FindObjectUnderPointer(false, false);
 				lcObject* Object = ObjectSection.Object;
@@ -2506,8 +2506,8 @@ void View::StartTracking(lcTrackButton TrackButton)
 {
 	mTrackButton = TrackButton;
 	mTrackUpdated = false;
-	mMouseDownX = mInputState.x;
-	mMouseDownY = mInputState.y;
+	mMouseDownX = mMouseX;
+	mMouseDownY = mMouseY;
 	lcTool Tool = GetCurrentTool();
 	lcModel* ActiveModel = GetActiveModel();
 
@@ -2583,13 +2583,13 @@ void View::StopTracking(bool Accept)
 		break;
 
 	case lcTool::Select:
-		if (Accept && mMouseDownX != mInputState.x && mMouseDownY != mInputState.y)
+		if (Accept && mMouseDownX != mMouseX && mMouseDownY != mMouseY)
 		{
-			lcArray<lcObject*> Objects = FindObjectsInBox(mMouseDownX, mMouseDownY, mInputState.x, mInputState.y);
+			lcArray<lcObject*> Objects = FindObjectsInBox(mMouseDownX, mMouseDownY, mMouseX, mMouseY);
 
-			if (mInputState.Modifiers & Qt::ControlModifier)
+			if (mMouseModifiers & Qt::ControlModifier)
 				ActiveModel->AddToSelection(Objects, true, true);
-			else if (mInputState.Modifiers & Qt::ShiftModifier)
+			else if (mMouseModifiers & Qt::ShiftModifier)
 				ActiveModel->RemoveFromSelection(Objects);
 			else
 				ActiveModel->SetSelectionAndFocus(Objects, nullptr, 0, true);
@@ -2615,15 +2615,15 @@ void View::StopTracking(bool Accept)
 
 	case lcTool::ZoomRegion:
 		{
-			if (mInputState.x == mMouseDownX || mInputState.y == mMouseDownY)
+			if (mMouseX == mMouseDownX || mMouseY == mMouseDownY)
 				break;
 
 			lcVector3 Points[6] =
 			{
-				lcVector3((mMouseDownX + lcMin(mInputState.x, mWidth - 1)) / 2, (mMouseDownY + lcMin(mInputState.y, mHeight - 1)) / 2, 0.0f),
-				lcVector3((mMouseDownX + lcMin(mInputState.x, mWidth - 1)) / 2, (mMouseDownY + lcMin(mInputState.y, mHeight - 1)) / 2, 1.0f),
-				lcVector3((float)mInputState.x, (float)mInputState.y, 0.0f),
-				lcVector3((float)mInputState.x, (float)mInputState.y, 1.0f),
+				lcVector3((mMouseDownX + lcMin(mMouseX, mWidth - 1)) / 2, (mMouseDownY + lcMin(mMouseY, mHeight - 1)) / 2, 0.0f),
+				lcVector3((mMouseDownX + lcMin(mMouseX, mWidth - 1)) / 2, (mMouseDownY + lcMin(mMouseY, mHeight - 1)) / 2, 1.0f),
+				lcVector3((float)mMouseX, (float)mMouseY, 0.0f),
+				lcVector3((float)mMouseX, (float)mMouseY, 1.0f),
 				lcVector3(mMouseDownX, mMouseDownY, 0.0f),
 				lcVector3(mMouseDownX, mMouseDownY, 1.0f)
 			};
@@ -2683,7 +2683,7 @@ void View::OnButtonDown(lcTrackButton TrackButton)
 
 			ActiveModel->InsertPieceToolClicked(GetPieceInsertPosition(false, gMainWindow->GetCurrentPieceInfo()));
 
-			if ((mInputState.Modifiers & Qt::ControlModifier) == 0)
+			if ((mMouseModifiers & Qt::ControlModifier) == 0)
 				gMainWindow->SetTool(lcTool::Select);
 
 			UpdateTrackTool();
@@ -2694,7 +2694,7 @@ void View::OnButtonDown(lcTrackButton TrackButton)
 		{
 			ActiveModel->PointLightToolClicked(GetCameraLightInsertPosition());
 
-			if ((mInputState.Modifiers & Qt::ControlModifier) == 0)
+			if ((mMouseModifiers & Qt::ControlModifier) == 0)
 				gMainWindow->SetTool(lcTool::Select);
 
 			UpdateTrackTool();
@@ -2710,9 +2710,9 @@ void View::OnButtonDown(lcTrackButton TrackButton)
 		{
 			lcObjectSection ObjectSection = FindObjectUnderPointer(false, false);
 
-			if (mInputState.Modifiers & Qt::ControlModifier)
+			if (mMouseModifiers & Qt::ControlModifier)
 				ActiveModel->FocusOrDeselectObject(ObjectSection);
-			else if (mInputState.Modifiers & Qt::ShiftModifier)
+			else if (mMouseModifiers & Qt::ShiftModifier)
 				ActiveModel->RemoveFromSelection(ObjectSection);
 			else
 				ActiveModel->ClearSelectionAndSetFocus(ObjectSection, true);
@@ -2813,9 +2813,9 @@ void View::OnLeftButtonDoubleClick()
 	lcObjectSection ObjectSection = FindObjectUnderPointer(false, false);
 	lcModel* ActiveModel = GetActiveModel();
 
-	if (mInputState.Modifiers & Qt::ControlModifier)
+	if (mMouseModifiers & Qt::ControlModifier)
 		ActiveModel->FocusOrDeselectObject(ObjectSection);
-	else if (mInputState.Modifiers & Qt::ShiftModifier)
+	else if (mMouseModifiers & Qt::ShiftModifier)
 		ActiveModel->RemoveFromSelection(ObjectSection);
 	else
 		ActiveModel->ClearSelectionAndSetFocus(ObjectSection, true);
@@ -2953,8 +2953,8 @@ void View::OnMouseMove()
 	{
 			lcVector3 Points[4] =
 			{
-				lcVector3((float)mInputState.x, (float)mInputState.y, 0.0f),
-				lcVector3((float)mInputState.x, (float)mInputState.y, 1.0f),
+				lcVector3((float)mMouseX, (float)mMouseY, 0.0f),
+				lcVector3((float)mMouseX, (float)mMouseY, 1.0f),
 				lcVector3(mMouseDownX, mMouseDownY, 0.0f),
 				lcVector3(mMouseDownX, mMouseDownY, 1.0f)
 			};
@@ -3131,8 +3131,8 @@ void View::OnMouseMove()
 					MoveY = -Dir1;
 			}
 
-			MoveX *= 36.0f * (float)(mInputState.x - mMouseDownX) * MouseSensitivity;
-			MoveY *= 36.0f * (float)(mInputState.y - mMouseDownY) * MouseSensitivity;
+			MoveX *= 36.0f * (float)(mMouseX - mMouseDownX) * MouseSensitivity;
+			MoveY *= 36.0f * (float)(mMouseY - mMouseDownY) * MouseSensitivity;
 
 			ActiveModel->UpdateRotateTool(MoveX + MoveY, mTrackButton != lcTrackButton::Left);
 		}
@@ -3144,8 +3144,8 @@ void View::OnMouseMove()
 			lcVector3 ScreenX = lcCross(ScreenZ, mCamera->mUpVector);
 			lcVector3 ScreenY = mCamera->mUpVector;
 
-			lcVector3 MoveX = 36.0f * (float)(mInputState.x - mMouseDownX) * MouseSensitivity * ScreenX;
-			lcVector3 MoveY = 36.0f * (float)(mInputState.y - mMouseDownY) * MouseSensitivity * ScreenY;
+			lcVector3 MoveX = 36.0f * (float)(mMouseX - mMouseDownX) * MouseSensitivity * ScreenX;
+			lcVector3 MoveY = 36.0f * (float)(mMouseY - mMouseDownY) * MouseSensitivity * ScreenY;
 			ActiveModel->UpdateRotateTool(MoveX + MoveY, mTrackButton != lcTrackButton::Left);
 		}
 		break;
@@ -3154,7 +3154,7 @@ void View::OnMouseMove()
 		{
 			lcVector3 ScreenZ = lcNormalize(mCamera->mTargetPosition - mCamera->mPosition);
 
-			ActiveModel->UpdateRotateTool(36.0f * (float)(mInputState.y - mMouseDownY) * MouseSensitivity * ScreenZ, mTrackButton != lcTrackButton::Left);
+			ActiveModel->UpdateRotateTool(36.0f * (float)(mMouseY - mMouseDownY) * MouseSensitivity * ScreenZ, mTrackButton != lcTrackButton::Left);
 		}
 		break;
 
@@ -3164,15 +3164,15 @@ void View::OnMouseMove()
 		break;
 
 	case lcTrackTool::Zoom:
-		ActiveModel->UpdateZoomTool(mCamera, 2.0f * MouseSensitivity * (mInputState.y - mMouseDownY));
+		ActiveModel->UpdateZoomTool(mCamera, 2.0f * MouseSensitivity * (mMouseY - mMouseDownY));
 		break;
 
 	case lcTrackTool::Pan:
 		{
 			lcVector3 Points[4] =
 			{
-				lcVector3((float)mInputState.x, (float)mInputState.y, 0.0f),
-				lcVector3((float)mInputState.x, (float)mInputState.y, 1.0f),
+				lcVector3((float)mMouseX, (float)mMouseY, 0.0f),
+				lcVector3((float)mMouseX, (float)mMouseY, 1.0f),
 				lcVector3(mMouseDownX, mMouseDownY, 0.0f),
 				lcVector3(mMouseDownX, mMouseDownY, 1.0f)
 			};
@@ -3203,19 +3203,19 @@ void View::OnMouseMove()
 		break;
 
 	case lcTrackTool::OrbitX:
-		ActiveModel->UpdateOrbitTool(mCamera, 0.1f * MouseSensitivity * (mInputState.x - mMouseDownX), 0.0f);
+		ActiveModel->UpdateOrbitTool(mCamera, 0.1f * MouseSensitivity * (mMouseX - mMouseDownX), 0.0f);
 		break;
 
 	case lcTrackTool::OrbitY:
-		ActiveModel->UpdateOrbitTool(mCamera, 0.0f, 0.1f * MouseSensitivity * (mInputState.y - mMouseDownY));
+		ActiveModel->UpdateOrbitTool(mCamera, 0.0f, 0.1f * MouseSensitivity * (mMouseY - mMouseDownY));
 		break;
 
 	case lcTrackTool::OrbitXY:
-		ActiveModel->UpdateOrbitTool(mCamera, 0.1f * MouseSensitivity * (mInputState.x - mMouseDownX), 0.1f * MouseSensitivity * (mInputState.y - mMouseDownY));
+		ActiveModel->UpdateOrbitTool(mCamera, 0.1f * MouseSensitivity * (mMouseX - mMouseDownX), 0.1f * MouseSensitivity * (mMouseY - mMouseDownY));
 		break;
 
 	case lcTrackTool::Roll:
-		ActiveModel->UpdateRollTool(mCamera, 2.0f * MouseSensitivity * (mInputState.x - mMouseDownX) * LC_DTOR);
+		ActiveModel->UpdateRollTool(mCamera, 2.0f * MouseSensitivity * (mMouseX - mMouseDownX) * LC_DTOR);
 		break;
 
 	case lcTrackTool::ZoomRegion:
@@ -3229,5 +3229,5 @@ void View::OnMouseMove()
 
 void View::OnMouseWheel(float Direction)
 {
-	mModel->Zoom(mCamera, (int)(((mInputState.Modifiers & Qt::ControlModifier) ? 100 : 10) * Direction));
+	mModel->Zoom(mCamera, (int)(((mMouseModifiers & Qt::ControlModifier) ? 100 : 10) * Direction));
 }

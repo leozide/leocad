@@ -11,9 +11,9 @@ public:
 
 	QSize sizeHint() const override;
 
-	lcGLWidget* widget;
+	lcGLWidget* mWidget;
 
-	float deviceScale()
+	float GetDeviceScale() const
 	{
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
 		return windowHandle()->devicePixelRatio();

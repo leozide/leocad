@@ -22,7 +22,7 @@ View::View(lcModel* Model)
 
 	mDragState = lcDragState::None;
 	mTrackButton = lcTrackButton::None;
-	mTrackTool = LC_TRACKTOOL_NONE;
+	mTrackTool = lcTrackTool::None;
 	mTrackToolFromOverlay = false;
 
 	View* ActiveView = gMainWindow->GetActiveView();
@@ -430,7 +430,7 @@ lcMatrix44 View::GetTileProjectionMatrix(int CurrentRow, int CurrentColumn, int 
 
 lcCursor View::GetCursor() const
 {
-	if (mTrackTool == LC_TRACKTOOL_SELECT)
+	if (mTrackTool == lcTrackTool::Select)
 	{
 		if (mInputState.Modifiers & Qt::ControlModifier)
 			return lcCursor::SelectAdd;
@@ -439,44 +439,44 @@ lcCursor View::GetCursor() const
 			return lcCursor::SelectRemove;
 	}
 
-	const lcCursor CursorFromTrackTool[] =
+	const lcCursor CursorFromTrackTool[static_cast<int>(lcTrackTool::Count)] =
 	{
-		lcCursor::Select,      // LC_TRACKTOOL_NONE
-		lcCursor::Brick,       // LC_TRACKTOOL_INSERT
-		lcCursor::Light,       // LC_TRACKTOOL_POINTLIGHT
-		lcCursor::Spotlight,   // LC_TRACKTOOL_SPOTLIGHT
-		lcCursor::Camera,      // LC_TRACKTOOL_CAMERA
-		lcCursor::Select,      // LC_TRACKTOOL_SELECT
-		lcCursor::Move,        // LC_TRACKTOOL_MOVE_X
-		lcCursor::Move,        // LC_TRACKTOOL_MOVE_Y
-		lcCursor::Move,        // LC_TRACKTOOL_MOVE_Z
-		lcCursor::Move,        // LC_TRACKTOOL_MOVE_XY
-		lcCursor::Move,        // LC_TRACKTOOL_MOVE_XZ
-		lcCursor::Move,        // LC_TRACKTOOL_MOVE_YZ
-		lcCursor::Move,        // LC_TRACKTOOL_MOVE_XYZ
-		lcCursor::Rotate,      // LC_TRACKTOOL_ROTATE_X
-		lcCursor::Rotate,      // LC_TRACKTOOL_ROTATE_Y
-		lcCursor::Rotate,      // LC_TRACKTOOL_ROTATE_Z
-		lcCursor::Rotate,      // LC_TRACKTOOL_ROTATE_XY
-		lcCursor::Rotate,      // LC_TRACKTOOL_ROTATE_XYZ
-		lcCursor::Move,        // LC_TRACKTOOL_SCALE_PLUS
-		lcCursor::Move,        // LC_TRACKTOOL_SCALE_MINUS
-		lcCursor::Delete,      // LC_TRACKTOOL_ERASER
-		lcCursor::Paint,       // LC_TRACKTOOL_PAINT
-		lcCursor::ColorPicker, // LC_TRACKTOOL_COLOR_PICKER
-		lcCursor::Zoom,        // LC_TRACKTOOL_ZOOM
-		lcCursor::Pan,         // LC_TRACKTOOL_PAN
-		lcCursor::RotateX,     // LC_TRACKTOOL_ORBIT_X
-		lcCursor::RotateY,     // LC_TRACKTOOL_ORBIT_Y
-		lcCursor::RotateView,  // LC_TRACKTOOL_ORBIT_XY
-		lcCursor::Roll,        // LC_TRACKTOOL_ROLL
-		lcCursor::ZoomRegion   // LC_TRACKTOOL_ZOOM_REGION
+	    lcCursor::Select,      // lcTrackTool::None
+	    lcCursor::Brick,       // lcTrackTool::Insert
+	    lcCursor::Light,       // lcTrackTool::PointLight
+	    lcCursor::Spotlight,   // lcTrackTool::SpotLight
+	    lcCursor::Camera,      // lcTrackTool::Camera
+	    lcCursor::Select,      // lcTrackTool::Select
+	    lcCursor::Move,        // lcTrackTool::MoveX
+	    lcCursor::Move,        // lcTrackTool::MoveY
+	    lcCursor::Move,        // lcTrackTool::MoveZ
+	    lcCursor::Move,        // lcTrackTool::MoveXY
+	    lcCursor::Move,        // lcTrackTool::MoveXZ
+	    lcCursor::Move,        // lcTrackTool::MoveYZ
+	    lcCursor::Move,        // lcTrackTool::MoveXYZ
+	    lcCursor::Rotate,      // lcTrackTool::RotateX
+	    lcCursor::Rotate,      // lcTrackTool::RotateY
+	    lcCursor::Rotate,      // lcTrackTool::RotateZ
+	    lcCursor::Rotate,      // lcTrackTool::RotateXY
+	    lcCursor::Rotate,      // lcTrackTool::RotateXYZ
+	    lcCursor::Move,        // lcTrackTool::ScalePlus
+	    lcCursor::Move,        // lcTrackTool::ScaleMinus
+	    lcCursor::Delete,      // lcTrackTool::Eraser
+	    lcCursor::Paint,       // lcTrackTool::Paint
+	    lcCursor::ColorPicker, // lcTrackTool::ColorPicker
+	    lcCursor::Zoom,        // lcTrackTool::Zoom
+	    lcCursor::Pan,         // lcTrackTool::Pan
+	    lcCursor::RotateX,     // lcTrackTool::OrbitX
+	    lcCursor::RotateY,     // lcTrackTool::OrbitY
+	    lcCursor::RotateView,  // lcTrackTool::OrbitXY
+	    lcCursor::Roll,        // lcTrackTool::Roll
+	    lcCursor::ZoomRegion   // lcTrackTool::ZoomRegion
 	};
 
-	static_assert(LC_ARRAY_COUNT(CursorFromTrackTool) == LC_TRACKTOOL_COUNT, "Array size mismatch.");
+	static_assert(LC_ARRAY_COUNT(CursorFromTrackTool) == static_cast<int>(lcTrackTool::Count), "Array size mismatch.");
 
-	if (mTrackTool >= 0 && mTrackTool < LC_ARRAY_COUNT(CursorFromTrackTool))
-		return CursorFromTrackTool[mTrackTool];
+	if (mTrackTool >= lcTrackTool::None && mTrackTool < lcTrackTool::Count)
+		return CursorFromTrackTool[static_cast<int>(mTrackTool)];
 
 	return lcCursor::Select;
 }
@@ -807,7 +807,7 @@ void View::OnDraw()
 
 	mModel->GetScene(mScene, mCamera, Preferences.mHighlightNewParts, Preferences.mFadeSteps);
 
-	if (DrawInterface && mTrackTool == LC_TRACKTOOL_INSERT)
+	if (DrawInterface && mTrackTool == lcTrackTool::Insert)
 	{
 		PieceInfo* Info = gMainWindow->GetCurrentPieceInfo();
 
@@ -924,9 +924,9 @@ void View::OnDraw()
 			DrawSelectMoveOverlay();
 		else if (GetCurrentTool() == lcTool::Move && mTrackButton != lcTrackButton::None)
 			DrawSelectMoveOverlay();
-		else if ((Tool == lcTool::Rotate || (Tool == lcTool::Select && mTrackButton != lcTrackButton::None && mTrackTool >= LC_TRACKTOOL_ROTATE_X && mTrackTool <= LC_TRACKTOOL_ROTATE_XYZ)) && ActiveModel->AnyPiecesSelected())
+		else if ((Tool == lcTool::Rotate || (Tool == lcTool::Select && mTrackButton != lcTrackButton::None && mTrackTool >= lcTrackTool::RotateX && mTrackTool <= lcTrackTool::RotateXYZ)) && ActiveModel->AnyPiecesSelected())
 			DrawRotateOverlay();
-		else if ((mTrackTool == LC_TRACKTOOL_SELECT || mTrackTool == LC_TRACKTOOL_ZOOM_REGION) && mTrackButton != lcTrackButton::None)
+		else if ((mTrackTool == lcTrackTool::Select || mTrackTool == lcTrackTool::ZoomRegion) && mTrackButton != lcTrackButton::None)
 			DrawSelectZoomRegionOverlay();
 		else if (Tool == lcTool::RotateView && mTrackButton == lcTrackButton::None)
 			DrawRotateViewOverlay();
@@ -969,11 +969,11 @@ void View::DrawSelectMoveOverlay()
 	lcObject* Focus = ActiveModel->GetFocusObject();
 	quint32 AllowedTransforms = Focus ? Focus->GetAllowedTransforms() : LC_OBJECT_TRANSFORM_MOVE_X | LC_OBJECT_TRANSFORM_MOVE_Y | LC_OBJECT_TRANSFORM_MOVE_Z | LC_OBJECT_TRANSFORM_ROTATE_X | LC_OBJECT_TRANSFORM_ROTATE_Y | LC_OBJECT_TRANSFORM_ROTATE_Z;
 
-	if (mTrackButton == lcTrackButton::None || (mTrackTool >= LC_TRACKTOOL_MOVE_X && mTrackTool <= LC_TRACKTOOL_MOVE_XYZ))
+	if (mTrackButton == lcTrackButton::None || (mTrackTool >= lcTrackTool::MoveX && mTrackTool <= lcTrackTool::MoveXYZ))
 	{
 		if (AllowedTransforms & LC_OBJECT_TRANSFORM_MOVE_X)
 		{
-			if ((mTrackTool == LC_TRACKTOOL_MOVE_X) || (mTrackTool == LC_TRACKTOOL_MOVE_XY) || (mTrackTool == LC_TRACKTOOL_MOVE_XZ))
+			if ((mTrackTool == lcTrackTool::MoveX) || (mTrackTool == lcTrackTool::MoveXY) || (mTrackTool == lcTrackTool::MoveXZ))
 			{
 				mContext->SetColor(0.8f, 0.8f, 0.0f, 1.0f);
 				mContext->DrawIndexedPrimitives(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 0);
@@ -987,7 +987,7 @@ void View::DrawSelectMoveOverlay()
 
 		if (AllowedTransforms & LC_OBJECT_TRANSFORM_MOVE_Y)
 		{
-			if (((mTrackTool == LC_TRACKTOOL_MOVE_Y) || (mTrackTool == LC_TRACKTOOL_MOVE_XY) || (mTrackTool == LC_TRACKTOOL_MOVE_YZ)) && (AllowedTransforms & LC_OBJECT_TRANSFORM_MOVE_Y))
+			if (((mTrackTool == lcTrackTool::MoveY) || (mTrackTool == lcTrackTool::MoveXY) || (mTrackTool == lcTrackTool::MoveYZ)) && (AllowedTransforms & LC_OBJECT_TRANSFORM_MOVE_Y))
 			{
 				mContext->SetColor(0.8f, 0.8f, 0.0f, 1.0f);
 				mContext->DrawIndexedPrimitives(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 36 * 2);
@@ -1001,7 +1001,7 @@ void View::DrawSelectMoveOverlay()
 
 		if (AllowedTransforms & LC_OBJECT_TRANSFORM_MOVE_Z)
 		{
-			if (((mTrackTool == LC_TRACKTOOL_MOVE_Z) || (mTrackTool == LC_TRACKTOOL_MOVE_XZ) || (mTrackTool == LC_TRACKTOOL_MOVE_YZ)) && (AllowedTransforms & LC_OBJECT_TRANSFORM_MOVE_Z))
+			if (((mTrackTool == lcTrackTool::MoveZ) || (mTrackTool == lcTrackTool::MoveXZ) || (mTrackTool == lcTrackTool::MoveYZ)) && (AllowedTransforms & LC_OBJECT_TRANSFORM_MOVE_Z))
 			{
 				mContext->SetColor(0.8f, 0.8f, 0.0f, 1.0f);
 				mContext->DrawIndexedPrimitives(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 72 * 2);
@@ -1018,7 +1018,7 @@ void View::DrawSelectMoveOverlay()
 	{
 		if (AllowedTransforms & LC_OBJECT_TRANSFORM_ROTATE_X)
 		{
-			if (mTrackTool == LC_TRACKTOOL_ROTATE_X)
+			if (mTrackTool == lcTrackTool::RotateX)
 				mContext->SetColor(0.8f, 0.8f, 0.0f, 1.0f);
 			else
 				mContext->SetColor(0.8f, 0.0f, 0.0f, 1.0f);
@@ -1028,7 +1028,7 @@ void View::DrawSelectMoveOverlay()
 
 		if (AllowedTransforms & LC_OBJECT_TRANSFORM_ROTATE_Y)
 		{
-			if (mTrackTool == LC_TRACKTOOL_ROTATE_Y)
+			if (mTrackTool == lcTrackTool::RotateY)
 				mContext->SetColor(0.8f, 0.8f, 0.0f, 1.0f);
 			else
 				mContext->SetColor(0.0f, 0.8f, 0.0f, 1.0f);
@@ -1038,7 +1038,7 @@ void View::DrawSelectMoveOverlay()
 
 		if (AllowedTransforms & LC_OBJECT_TRANSFORM_ROTATE_Z)
 		{
-			if (mTrackTool == LC_TRACKTOOL_ROTATE_Z)
+			if (mTrackTool == lcTrackTool::RotateZ)
 				mContext->SetColor(0.8f, 0.8f, 0.0f, 1.0f);
 			else
 				mContext->SetColor(0.0f, 0.0f, 0.8f, 1.0f);
@@ -1047,17 +1047,17 @@ void View::DrawSelectMoveOverlay()
 		}
 	}
 
-	if ((mTrackTool == LC_TRACKTOOL_MOVE_XY) || (mTrackTool == LC_TRACKTOOL_MOVE_XZ) || (mTrackTool == LC_TRACKTOOL_MOVE_YZ))
+	if ((mTrackTool == lcTrackTool::MoveXY) || (mTrackTool == lcTrackTool::MoveXZ) || (mTrackTool == lcTrackTool::MoveYZ))
 	{
 		glEnable(GL_BLEND);
 
 		mContext->SetColor(0.8f, 0.8f, 0.0f, 0.3f);
 
-		if (mTrackTool == LC_TRACKTOOL_MOVE_XY)
+		if (mTrackTool == lcTrackTool::MoveXY)
 			mContext->DrawIndexedPrimitives(GL_TRIANGLE_FAN, 4, GL_UNSIGNED_SHORT, (108 + 360 + 8) * 2);
-		else if (mTrackTool == LC_TRACKTOOL_MOVE_XZ)
+		else if (mTrackTool == lcTrackTool::MoveXZ)
 			mContext->DrawIndexedPrimitives(GL_TRIANGLE_FAN, 4, GL_UNSIGNED_SHORT, (108 + 360 + 4) * 2);
-		else if (mTrackTool == LC_TRACKTOOL_MOVE_YZ)
+		else if (mTrackTool == lcTrackTool::MoveYZ)
 			mContext->DrawIndexedPrimitives(GL_TRIANGLE_FAN, 4, GL_UNSIGNED_SHORT, (108 + 360) * 2);
 
 		glDisable(GL_BLEND);
@@ -1109,7 +1109,7 @@ void View::DrawSelectMoveOverlay()
 				Verts[NumVerts++] = lcVector3(-Length + x * OverlayScaleRadius, 0.0f, y * OverlayScaleRadius);
 			}
 
-			if (mTrackTool == LC_TRACKTOOL_SCALE_PLUS || mTrackTool == LC_TRACKTOOL_SCALE_MINUS)
+			if (mTrackTool == lcTrackTool::ScalePlus || mTrackTool == lcTrackTool::ScaleMinus)
 				mContext->SetColor(0.8f, 0.8f, 0.0f, 0.3f);
 			else
 				mContext->SetColor(0.0f, 0.0f, 0.8f, 1.0f);
@@ -1157,17 +1157,17 @@ void View::DrawRotateOverlay()
 
 		switch (mTrackTool)
 		{
-		case LC_TRACKTOOL_ROTATE_X:
+		case lcTrackTool::RotateX:
 			mContext->SetColor(0.8f, 0.0f, 0.0f, 0.3f);
 			Angle = MouseToolDistance[0];
 			Rotation = lcVector4(0.0f, 0.0f, 0.0f, 1.0f);
 			break;
-		case LC_TRACKTOOL_ROTATE_Y:
+		case lcTrackTool::RotateY:
 			mContext->SetColor(0.0f, 0.8f, 0.0f, 0.3f);
 			Angle = MouseToolDistance[1];
 			Rotation = lcVector4(90.0f, 0.0f, 0.0f, 1.0f);
 			break;
-		case LC_TRACKTOOL_ROTATE_Z:
+		case lcTrackTool::RotateZ:
 			mContext->SetColor(0.0f, 0.0f, 0.8f, 0.3f);
 			Angle = MouseToolDistance[2];
 			Rotation = lcVector4(90.0f, 0.0f, -1.0f, 0.0f);
@@ -1280,7 +1280,7 @@ void View::DrawRotateOverlay()
 	// Draw each axis circle.
 	for (int i = 0; i < 3; i++)
 	{
-		if (mTrackTool == LC_TRACKTOOL_ROTATE_X + i)
+		if (static_cast<int>(mTrackTool) == static_cast<int>(lcTrackTool::RotateX) + i)
 		{
 			mContext->SetColor(0.8f, 0.8f, 0.0f, 1.0f);
 		}
@@ -1342,7 +1342,7 @@ void View::DrawRotateOverlay()
 	}
 
 	// Draw tangent vector.
-	if (mTrackButton != lcTrackButton::None && ((mTrackTool == LC_TRACKTOOL_ROTATE_X) || (mTrackTool == LC_TRACKTOOL_ROTATE_Y) || (mTrackTool == LC_TRACKTOOL_ROTATE_Z)))
+	if (mTrackButton != lcTrackButton::None && ((mTrackTool == lcTrackTool::RotateX) || (mTrackTool == lcTrackTool::RotateY) || (mTrackTool == lcTrackTool::RotateZ)))
 	{
 		const float OverlayRotateArrowSize = 1.5f;
 		const float OverlayRotateArrowCapSize = 0.25f;
@@ -1352,15 +1352,15 @@ void View::DrawRotateOverlay()
 
 		switch (mTrackTool)
 		{
-		case LC_TRACKTOOL_ROTATE_X:
+		case lcTrackTool::RotateX:
 			Angle = MouseToolDistance[0];
 			Rotation = lcVector4(0.0f, 0.0f, 0.0f, 1.0f);
 			break;
-		case LC_TRACKTOOL_ROTATE_Y:
+		case lcTrackTool::RotateY:
 			Angle = MouseToolDistance[1];
 			Rotation = lcVector4(90.0f, 0.0f, 0.0f, 1.0f);
 			break;
-		case LC_TRACKTOOL_ROTATE_Z:
+		case lcTrackTool::RotateZ:
 			Angle = MouseToolDistance[2];
 			Rotation = lcVector4(90.0f, 0.0f, -1.0f, 0.0f);
 			break;
@@ -1581,7 +1581,7 @@ void View::DrawGrid()
 
 	bool GridSizeValid = mModel->GetPiecesBoundingBox(Min, Max);
 
-	if (mTrackTool == LC_TRACKTOOL_INSERT)
+	if (mTrackTool == lcTrackTool::Insert)
 	{
 		PieceInfo* CurPiece = gMainWindow->GetCurrentPieceInfo();
 
@@ -1799,70 +1799,75 @@ void View::OnUpdateCursor()
 
 lcTool View::GetCurrentTool() const
 {
-	const lcTool ToolFromTrackTool[] =
+	const lcTool ToolFromTrackTool[static_cast<int>(lcTrackTool::Count)] =
 	{
-		lcTool::Select,       // LC_TRACKTOOL_NONE
-		lcTool::Insert,       // LC_TRACKTOOL_INSERT
-		lcTool::Light,        // LC_TRACKTOOL_POINTLIGHT
-		lcTool::SpotLight,    // LC_TRACKTOOL_SPOTLIGHT
-		lcTool::Camera,       // LC_TRACKTOOL_CAMERA
-		lcTool::Select,       // LC_TRACKTOOL_SELECT
-		lcTool::Move,         // LC_TRACKTOOL_MOVE_X
-		lcTool::Move,         // LC_TRACKTOOL_MOVE_Y
-		lcTool::Move,         // LC_TRACKTOOL_MOVE_Z
-		lcTool::Move,         // LC_TRACKTOOL_MOVE_XY
-		lcTool::Move,         // LC_TRACKTOOL_MOVE_XZ
-		lcTool::Move,         // LC_TRACKTOOL_MOVE_YZ
-		lcTool::Move,         // LC_TRACKTOOL_MOVE_XYZ
-		lcTool::Rotate,       // LC_TRACKTOOL_ROTATE_X
-		lcTool::Rotate,       // LC_TRACKTOOL_ROTATE_Y
-		lcTool::Rotate,       // LC_TRACKTOOL_ROTATE_Z
-		lcTool::Rotate,       // LC_TRACKTOOL_ROTATE_XY
-		lcTool::Rotate,       // LC_TRACKTOOL_ROTATE_XYZ
-		lcTool::Move,         // LC_TRACKTOOL_SCALE_PLUS
-		lcTool::Move,         // LC_TRACKTOOL_SCALE_MINUS
-		lcTool::Eraser,       // LC_TRACKTOOL_ERASER
-		lcTool::Paint,        // LC_TRACKTOOL_PAINT
-		lcTool::ColorPicker, // LC_TRACKTOOL_COLOR_PICKER
-		lcTool::Zoom,         // LC_TRACKTOOL_ZOOM
-		lcTool::Pan,          // LC_TRACKTOOL_PAN
-		lcTool::RotateView,  // LC_TRACKTOOL_ORBIT_X
-		lcTool::RotateView,  // LC_TRACKTOOL_ORBIT_Y
-		lcTool::RotateView,  // LC_TRACKTOOL_ORBIT_XY
-		lcTool::Roll,         // LC_TRACKTOOL_ROLL
-		lcTool::ZoomRegion   // LC_TRACKTOOL_ZOOM_REGION
+	    lcTool::Select,      // lcTrackTool::None
+	    lcTool::Insert,      // lcTrackTool::Insert
+	    lcTool::Light,       // lcTrackTool::PointLight
+	    lcTool::SpotLight,   // lcTrackTool::SpotLight
+	    lcTool::Camera,      // lcTrackTool::Camera
+	    lcTool::Select,      // lcTrackTool::Select
+	    lcTool::Move,        // lcTrackTool::MoveX
+	    lcTool::Move,        // lcTrackTool::MoveY
+	    lcTool::Move,        // lcTrackTool::MoveZ
+	    lcTool::Move,        // lcTrackTool::MoveXY
+	    lcTool::Move,        // lcTrackTool::MoveXZ
+	    lcTool::Move,        // lcTrackTool::MoveYZ
+	    lcTool::Move,        // lcTrackTool::MoveXYZ
+	    lcTool::Rotate,      // lcTrackTool::RotateX
+	    lcTool::Rotate,      // lcTrackTool::RotateY
+	    lcTool::Rotate,      // lcTrackTool::RotateZ
+	    lcTool::Rotate,      // lcTrackTool::RotateXY
+	    lcTool::Rotate,      // lcTrackTool::RotateXYZ
+	    lcTool::Move,        // lcTrackTool::ScalePlus
+	    lcTool::Move,        // lcTrackTool::ScaleMinus
+	    lcTool::Eraser,      // lcTrackTool::Eraser
+	    lcTool::Paint,       // lcTrackTool::Paint
+	    lcTool::ColorPicker, // lcTrackTool::ColorPicker
+	    lcTool::Zoom,        // lcTrackTool::Zoom
+	    lcTool::Pan,         // lcTrackTool::Pan
+	    lcTool::RotateView,  // lcTrackTool::OrbitX
+	    lcTool::RotateView,  // lcTrackTool::OrbitY
+	    lcTool::RotateView,  // lcTrackTool::OrbitXY
+	    lcTool::Roll,        // lcTrackTool::Roll
+	    lcTool::ZoomRegion   // lcTrackTool::ZoomRegion
 	};
 
-	return ToolFromTrackTool[mTrackTool];
+	static_assert(LC_ARRAY_COUNT(ToolFromTrackTool) == static_cast<int>(lcTrackTool::Count), "Array size mismatch.");
+
+	if (mTrackTool >= lcTrackTool::None && mTrackTool < lcTrackTool::Count)
+		return ToolFromTrackTool[static_cast<int>(mTrackTool)];
+
+	return lcTool::Select;
 }
 
 lcTrackTool View::GetOverrideTrackTool(Qt::MouseButton Button) const
 {
 	if (mTrackToolFromOverlay)
-		return LC_TRACKTOOL_NONE;
+		return lcTrackTool::None;
 
 	lcTool OverrideTool = gMouseShortcuts.GetTool(Button, mInputState.Modifiers);
 
 	if (OverrideTool == lcTool::Count)
-		return LC_TRACKTOOL_NONE;
+		return lcTrackTool::None;
 
 	lcTrackTool TrackToolFromTool[static_cast<int>(lcTool::Count)] =
 	{
-	    LC_TRACKTOOL_INSERT,       // lcTool::Insert
-	    LC_TRACKTOOL_POINTLIGHT,   // lcTool::Light
-	    LC_TRACKTOOL_SPOTLIGHT,    // lcTool::SpotLight
-	    LC_TRACKTOOL_CAMERA,       // lcTool::Camera
-	    LC_TRACKTOOL_SELECT,       // lcTool::Select
-	    LC_TRACKTOOL_MOVE_XYZ,     // lcTool::Move
-	    LC_TRACKTOOL_ROTATE_XYZ,   // lcTool::Rotate
-	    LC_TRACKTOOL_ERASER,       // lcTool::Eraser
-	    LC_TRACKTOOL_PAINT,        // lcTool::Paint
-	    LC_TRACKTOOL_COLOR_PICKER, // lcTool::ColorPicker
-	    LC_TRACKTOOL_ZOOM,         // lcTool::Zoom
-	    LC_TRACKTOOL_PAN,          // lcTool::Pan
-	    LC_TRACKTOOL_ORBIT_XY,     // lcTool::RotateView
-	    LC_TRACKTOOL_ROLL,         // lcTool::Roll
-	    LC_TRACKTOOL_ZOOM_REGION   // lcTool::ZoomRegion
+	    lcTrackTool::Insert,      // lcTool::Insert
+	    lcTrackTool::PointLight,  // lcTool::Light
+	    lcTrackTool::SpotLight,   // lcTool::SpotLight
+	    lcTrackTool::Camera,      // lcTool::Camera
+	    lcTrackTool::Select,      // lcTool::Select
+	    lcTrackTool::MoveXYZ,     // lcTool::Move
+	    lcTrackTool::RotateXYZ,   // lcTool::Rotate
+	    lcTrackTool::Eraser,      // lcTool::Eraser
+	    lcTrackTool::Paint,       // lcTool::Paint
+	    lcTrackTool::ColorPicker, // lcTool::ColorPicker
+	    lcTrackTool::Zoom,        // lcTool::Zoom
+	    lcTrackTool::Pan,         // lcTool::Pan
+	    lcTrackTool::OrbitXY,     // lcTool::RotateView
+	    lcTrackTool::Roll,        // lcTool::Roll
+	    lcTrackTool::ZoomRegion   // lcTool::ZoomRegion
 	};
 
 	return TrackToolFromTool[static_cast<int>(OverrideTool)];
@@ -1976,19 +1981,19 @@ void View::UpdateTrackTool()
 	switch (CurrentTool)
 	{
 	case lcTool::Insert:
-		NewTrackTool = LC_TRACKTOOL_INSERT;
+		NewTrackTool = lcTrackTool::Insert;
 		break;
 
 	case lcTool::Light:
-		NewTrackTool = LC_TRACKTOOL_POINTLIGHT;
+		NewTrackTool = lcTrackTool::PointLight;
 		break;
 
 	case lcTool::SpotLight:
-		NewTrackTool = LC_TRACKTOOL_SPOTLIGHT;
+		NewTrackTool = lcTrackTool::SpotLight;
 		break;
 
 	case lcTool::Camera:
-		NewTrackTool = LC_TRACKTOOL_CAMERA;
+		NewTrackTool = lcTrackTool::Camera;
 		break;
 
 	case lcTool::Select:
@@ -2002,7 +2007,7 @@ void View::UpdateTrackTool()
 			const float OverlayRotateArrowEnd = 1.5f * OverlayScale;
 			const float OverlayScaleRadius = 0.125f;
 
-			NewTrackTool = (CurrentTool == lcTool::Move) ? LC_TRACKTOOL_MOVE_XYZ : LC_TRACKTOOL_SELECT;
+			NewTrackTool = (CurrentTool == lcTool::Move) ? lcTrackTool::MoveXYZ : lcTrackTool::Select;
 			mMouseDownPiece = nullptr;
 
 			lcVector3 OverlayCenter;
@@ -2065,7 +2070,7 @@ void View::UpdateTrackTool()
 
 				if (Proj1 > 0.0f && Proj1 < OverlayMovePlaneSize && Proj2 > 0.0f && Proj2 < OverlayMovePlaneSize)
 				{
-					lcTrackTool PlaneModes[] = { LC_TRACKTOOL_MOVE_YZ, LC_TRACKTOOL_MOVE_XZ, LC_TRACKTOOL_MOVE_XY };
+					lcTrackTool PlaneModes[] = { lcTrackTool::MoveYZ, lcTrackTool::MoveXZ, lcTrackTool::MoveXY };
 
 					if (IsTrackToolAllowed(PlaneModes[AxisIndex], AllowedTransforms))
 					{
@@ -2076,7 +2081,7 @@ void View::UpdateTrackTool()
 
 				if (CurrentTool == lcTool::Select && Proj1 > OverlayRotateArrowStart && Proj1 < OverlayRotateArrowEnd && Proj2 > OverlayRotateArrowStart && Proj2 < OverlayRotateArrowEnd && ActiveModel->AnyPiecesSelected())
 				{
-					lcTrackTool PlaneModes[] = { LC_TRACKTOOL_ROTATE_X, LC_TRACKTOOL_ROTATE_Y, LC_TRACKTOOL_ROTATE_Z };
+					lcTrackTool PlaneModes[] = { lcTrackTool::RotateX, lcTrackTool::RotateY, lcTrackTool::RotateZ };
 
 					if (IsTrackToolAllowed(PlaneModes[AxisIndex], AllowedTransforms))
 					{
@@ -2087,7 +2092,7 @@ void View::UpdateTrackTool()
 
 				if (fabs(Proj1) < OverlayMoveArrowCapRadius && Proj2 > 0.0f && Proj2 < OverlayMoveArrowSize)
 				{
-					lcTrackTool DirModes[] = { LC_TRACKTOOL_MOVE_Z, LC_TRACKTOOL_MOVE_X, LC_TRACKTOOL_MOVE_Y };
+					lcTrackTool DirModes[] = { lcTrackTool::MoveZ, lcTrackTool::MoveX, lcTrackTool::MoveY };
 
 					if (IsTrackToolAllowed(DirModes[AxisIndex], AllowedTransforms))
 					{
@@ -2098,7 +2103,7 @@ void View::UpdateTrackTool()
 
 				if (fabs(Proj2) < OverlayMoveArrowCapRadius && Proj1 > 0.0f && Proj1 < OverlayMoveArrowSize)
 				{
-					lcTrackTool DirModes[] = { LC_TRACKTOOL_MOVE_Y, LC_TRACKTOOL_MOVE_Z, LC_TRACKTOOL_MOVE_X };
+					lcTrackTool DirModes[] = { lcTrackTool::MoveY, lcTrackTool::MoveZ, lcTrackTool::MoveX };
 
 					if (IsTrackToolAllowed(DirModes[AxisIndex], AllowedTransforms))
 					{
@@ -2119,17 +2124,17 @@ void View::UpdateTrackTool()
 					{
 						if (Proj2 > ScaleStart && Proj2 < ScaleEnd)
 						{
-							if (IsTrackToolAllowed(LC_TRACKTOOL_SCALE_PLUS, AllowedTransforms))
+							if (IsTrackToolAllowed(lcTrackTool::ScalePlus, AllowedTransforms))
 							{
-								NewTrackTool = LC_TRACKTOOL_SCALE_PLUS;
+								NewTrackTool = lcTrackTool::ScalePlus;
 								ClosestIntersectionDistance = IntersectionDistance;
 							}
 						}
 						else if (Proj2 < -ScaleStart && Proj2 > -ScaleEnd)
 						{
-							if (IsTrackToolAllowed(LC_TRACKTOOL_SCALE_MINUS, AllowedTransforms))
+							if (IsTrackToolAllowed(lcTrackTool::ScaleMinus, AllowedTransforms))
 							{
-								NewTrackTool = LC_TRACKTOOL_SCALE_MINUS;
+								NewTrackTool = lcTrackTool::ScaleMinus;
 								ClosestIntersectionDistance = IntersectionDistance;
 							}
 						}
@@ -2138,17 +2143,17 @@ void View::UpdateTrackTool()
 					{
 						if (Proj1 > ScaleStart && Proj1 < ScaleEnd)
 						{
-							if (IsTrackToolAllowed(LC_TRACKTOOL_SCALE_PLUS, AllowedTransforms))
+							if (IsTrackToolAllowed(lcTrackTool::ScalePlus, AllowedTransforms))
 							{
-								NewTrackTool = LC_TRACKTOOL_SCALE_PLUS;
+								NewTrackTool = lcTrackTool::ScalePlus;
 								ClosestIntersectionDistance = IntersectionDistance;
 							}
 						}
 						else if (Proj1 < -ScaleStart && Proj1 > -ScaleEnd)
 						{
-							if (IsTrackToolAllowed(LC_TRACKTOOL_SCALE_MINUS, AllowedTransforms))
+							if (IsTrackToolAllowed(lcTrackTool::ScaleMinus, AllowedTransforms))
 							{
-								NewTrackTool = LC_TRACKTOOL_SCALE_MINUS;
+								NewTrackTool = lcTrackTool::ScaleMinus;
 								ClosestIntersectionDistance = IntersectionDistance;
 							}
 						}
@@ -2156,7 +2161,7 @@ void View::UpdateTrackTool()
 				}
 			}
 
-			if (CurrentTool == lcTool::Select && NewTrackTool == LC_TRACKTOOL_SELECT && mInputState.Modifiers == Qt::NoModifier)
+			if (CurrentTool == lcTool::Select && NewTrackTool == lcTrackTool::Select && mInputState.Modifiers == Qt::NoModifier)
 			{
 				lcObjectSection ObjectSection = FindObjectUnderPointer(false, false);
 				lcObject* Object = ObjectSection.Object;
@@ -2166,11 +2171,11 @@ void View::UpdateTrackTool()
 					lcPiece* Piece = (lcPiece*)Object;
 					mMouseDownPosition = Piece->mModelWorld.GetTranslation();
 					mMouseDownPiece = Piece->mPieceInfo;
-					NewTrackTool = LC_TRACKTOOL_MOVE_XYZ;
+					NewTrackTool = lcTrackTool::MoveXYZ;
 				}
 			}
 
-			mTrackToolFromOverlay = NewTrackTool != LC_TRACKTOOL_MOVE_XYZ && NewTrackTool != LC_TRACKTOOL_SELECT;
+			mTrackToolFromOverlay = NewTrackTool != lcTrackTool::MoveXYZ && NewTrackTool != lcTrackTool::Select;
 			Redraw = true;
 		}
 		break;
@@ -2180,7 +2185,7 @@ void View::UpdateTrackTool()
 			const float OverlayScale = GetOverlayScale();
 			const float OverlayRotateRadius = 2.0f;
 
-			NewTrackTool = LC_TRACKTOOL_ROTATE_XYZ;
+			NewTrackTool = lcTrackTool::RotateXYZ;
 
 			lcVector3 OverlayCenter;
 			lcMatrix33 RelativeRotation;
@@ -2206,12 +2211,12 @@ void View::UpdateTrackTool()
 
 			if (Distance > (OverlayRotateRadius * OverlayScale + Epsilon))
 			{
-				NewTrackTool = LC_TRACKTOOL_ROTATE_XYZ;
+				NewTrackTool = lcTrackTool::RotateXYZ;
 			}
 			else if (Distance < (OverlayRotateRadius * OverlayScale + Epsilon))
 			{
 				// 3D rotation unless we're over one of the axis circles.
-				NewTrackTool = LC_TRACKTOOL_ROTATE_XYZ;
+				NewTrackTool = lcTrackTool::RotateXYZ;
 
 				// Point P on a line defined by two points P1 and P2 is described by P = P1 + u (P2 - P1)
 				// A sphere centered at P3 with radius r is described by (x - x3)^2 + (y - y3)^2 + (z - z3)^2 = r^2
@@ -2270,12 +2275,12 @@ void View::UpdateTrackTool()
 							if (dx < dz)
 							{
 								if (dx < Epsilon)
-									NewTrackTool = LC_TRACKTOOL_ROTATE_X;
+									NewTrackTool = lcTrackTool::RotateX;
 							}
 							else
 							{
 								if (dz < Epsilon)
-									NewTrackTool = LC_TRACKTOOL_ROTATE_Z;
+									NewTrackTool = lcTrackTool::RotateZ;
 							}
 						}
 						else
@@ -2283,26 +2288,26 @@ void View::UpdateTrackTool()
 							if (dy < dz)
 							{
 								if (dy < Epsilon)
-									NewTrackTool = LC_TRACKTOOL_ROTATE_Y;
+									NewTrackTool = lcTrackTool::RotateY;
 							}
 							else
 							{
 								if (dz < Epsilon)
-									NewTrackTool = LC_TRACKTOOL_ROTATE_Z;
+									NewTrackTool = lcTrackTool::RotateZ;
 							}
 						}
 
-						if (NewTrackTool != LC_TRACKTOOL_ROTATE_XYZ)
+						if (NewTrackTool != lcTrackTool::RotateXYZ)
 						{
 							switch (NewTrackTool)
 							{
-							case LC_TRACKTOOL_ROTATE_X:
+							case lcTrackTool::RotateX:
 								Dist[0] = 0.0f;
 								break;
-							case LC_TRACKTOOL_ROTATE_Y:
+							case lcTrackTool::RotateY:
 								Dist[1] = 0.0f;
 								break;
-							case LC_TRACKTOOL_ROTATE_Z:
+							case lcTrackTool::RotateZ:
 								Dist[2] = 0.0f;
 								break;
 							default:
@@ -2322,23 +2327,23 @@ void View::UpdateTrackTool()
 		break;
 
 	case lcTool::Eraser:
-		NewTrackTool = LC_TRACKTOOL_ERASER;
+		NewTrackTool = lcTrackTool::Eraser;
 		break;
 
 	case lcTool::Paint:
-		NewTrackTool = LC_TRACKTOOL_PAINT;
+		NewTrackTool = lcTrackTool::Paint;
 		break;
 
 	case lcTool::ColorPicker:
-		NewTrackTool = LC_TRACKTOOL_COLOR_PICKER;
+		NewTrackTool = lcTrackTool::ColorPicker;
 		break;
 
 	case lcTool::Zoom:
-		NewTrackTool = LC_TRACKTOOL_ZOOM;
+		NewTrackTool = lcTrackTool::Zoom;
 		break;
 
 	case lcTool::Pan:
-		NewTrackTool = LC_TRACKTOOL_PAN;
+		NewTrackTool = lcTrackTool::Pan;
 		break;
 
 	case lcTool::RotateView:
@@ -2362,32 +2367,32 @@ void View::UpdateTrackTool()
 			{
 				if ((cx - x < SquareSize) && (cx - x > -SquareSize))
 				{
-					NewTrackTool = LC_TRACKTOOL_ORBIT_Y;
+					NewTrackTool = lcTrackTool::OrbitY;
 					mTrackToolFromOverlay = true;
 				}
 
 				if ((cy - y < SquareSize) && (cy - y > -SquareSize))
 				{
-					NewTrackTool = LC_TRACKTOOL_ORBIT_X;
+					NewTrackTool = lcTrackTool::OrbitX;
 					mTrackToolFromOverlay = true;
 				}
 			}
 			else
 			{
 				if (d < r)
-					NewTrackTool = LC_TRACKTOOL_ORBIT_XY;
+					NewTrackTool = lcTrackTool::OrbitXY;
 				else
-					NewTrackTool = LC_TRACKTOOL_ROLL;
+					NewTrackTool = lcTrackTool::Roll;
 			}
 		}
 		break;
 
 	case lcTool::Roll:
-		NewTrackTool = LC_TRACKTOOL_ROLL;
+		NewTrackTool = lcTrackTool::Roll;
 		break;
 
 	case lcTool::ZoomRegion:
-		NewTrackTool = LC_TRACKTOOL_ZOOM_REGION;
+		NewTrackTool = lcTrackTool::ZoomRegion;
 		break;
 
 	case lcTool::Count:
@@ -2400,12 +2405,12 @@ void View::UpdateTrackTool()
 		break;
 
 	case lcDragState::Piece:
-		NewTrackTool = LC_TRACKTOOL_INSERT;
+		NewTrackTool = lcTrackTool::Insert;
 		Redraw = true;
 		break;
 
 	case lcDragState::Color:
-		NewTrackTool = LC_TRACKTOOL_PAINT;
+		NewTrackTool = lcTrackTool::Paint;
 		break;
 	}
 
@@ -2423,67 +2428,67 @@ bool View::IsTrackToolAllowed(lcTrackTool TrackTool, quint32 AllowedTransforms) 
 {
 	switch (TrackTool)
 	{
-	case LC_TRACKTOOL_NONE:
-	case LC_TRACKTOOL_INSERT:
-	case LC_TRACKTOOL_POINTLIGHT:
-	case LC_TRACKTOOL_SPOTLIGHT:
-	case LC_TRACKTOOL_CAMERA:
-	case LC_TRACKTOOL_SELECT:
+	case lcTrackTool::None:
+	case lcTrackTool::Insert:
+	case lcTrackTool::PointLight:
+	case lcTrackTool::SpotLight:
+	case lcTrackTool::Camera:
+	case lcTrackTool::Select:
 		return true;
 
-	case LC_TRACKTOOL_MOVE_X:
+	case lcTrackTool::MoveX:
 		return AllowedTransforms & LC_OBJECT_TRANSFORM_MOVE_X;
 
-	case LC_TRACKTOOL_MOVE_Y:
+	case lcTrackTool::MoveY:
 		return AllowedTransforms & LC_OBJECT_TRANSFORM_MOVE_Y;
 
-	case LC_TRACKTOOL_MOVE_Z:
+	case lcTrackTool::MoveZ:
 		return AllowedTransforms & LC_OBJECT_TRANSFORM_MOVE_Z;
 
-	case LC_TRACKTOOL_MOVE_XY:
+	case lcTrackTool::MoveXY:
 		return (AllowedTransforms & (LC_OBJECT_TRANSFORM_MOVE_X | LC_OBJECT_TRANSFORM_MOVE_Y)) == (LC_OBJECT_TRANSFORM_MOVE_X | LC_OBJECT_TRANSFORM_MOVE_Y);
 
-	case LC_TRACKTOOL_MOVE_XZ:
+	case lcTrackTool::MoveXZ:
 		return (AllowedTransforms & (LC_OBJECT_TRANSFORM_MOVE_X | LC_OBJECT_TRANSFORM_MOVE_Z)) == (LC_OBJECT_TRANSFORM_MOVE_X | LC_OBJECT_TRANSFORM_MOVE_Z);
 
-	case LC_TRACKTOOL_MOVE_YZ:
+	case lcTrackTool::MoveYZ:
 		return (AllowedTransforms & (LC_OBJECT_TRANSFORM_MOVE_Y | LC_OBJECT_TRANSFORM_MOVE_Z)) == (LC_OBJECT_TRANSFORM_MOVE_Y | LC_OBJECT_TRANSFORM_MOVE_Z);
 
-	case LC_TRACKTOOL_MOVE_XYZ:
+	case lcTrackTool::MoveXYZ:
 		return (AllowedTransforms & (LC_OBJECT_TRANSFORM_MOVE_X | LC_OBJECT_TRANSFORM_MOVE_Y | LC_OBJECT_TRANSFORM_MOVE_Z)) == (LC_OBJECT_TRANSFORM_MOVE_X | LC_OBJECT_TRANSFORM_MOVE_Y | LC_OBJECT_TRANSFORM_MOVE_Z);
 
-	case LC_TRACKTOOL_ROTATE_X:
+	case lcTrackTool::RotateX:
 		return AllowedTransforms & LC_OBJECT_TRANSFORM_ROTATE_X;
 
-	case LC_TRACKTOOL_ROTATE_Y:
+	case lcTrackTool::RotateY:
 		return AllowedTransforms & LC_OBJECT_TRANSFORM_ROTATE_Y;
 
-	case LC_TRACKTOOL_ROTATE_Z:
+	case lcTrackTool::RotateZ:
 		return AllowedTransforms & LC_OBJECT_TRANSFORM_ROTATE_Z;
 
-	case LC_TRACKTOOL_ROTATE_XY:
+	case lcTrackTool::RotateXY:
 		return (AllowedTransforms & (LC_OBJECT_TRANSFORM_ROTATE_X | LC_OBJECT_TRANSFORM_ROTATE_Y)) == (LC_OBJECT_TRANSFORM_ROTATE_X | LC_OBJECT_TRANSFORM_ROTATE_Y);
 
-	case LC_TRACKTOOL_ROTATE_XYZ:
+	case lcTrackTool::RotateXYZ:
 		return (AllowedTransforms & (LC_OBJECT_TRANSFORM_ROTATE_X | LC_OBJECT_TRANSFORM_ROTATE_Y | LC_OBJECT_TRANSFORM_ROTATE_Z)) == (LC_OBJECT_TRANSFORM_ROTATE_X | LC_OBJECT_TRANSFORM_ROTATE_Y | LC_OBJECT_TRANSFORM_ROTATE_Z);
 
-	case LC_TRACKTOOL_SCALE_PLUS:
-	case LC_TRACKTOOL_SCALE_MINUS:
+	case lcTrackTool::ScalePlus:
+	case lcTrackTool::ScaleMinus:
 		return AllowedTransforms & (LC_OBJECT_TRANSFORM_SCALE_X | LC_OBJECT_TRANSFORM_SCALE_Y | LC_OBJECT_TRANSFORM_SCALE_Z);
 
-	case LC_TRACKTOOL_ERASER:
-	case LC_TRACKTOOL_PAINT:
-	case LC_TRACKTOOL_COLOR_PICKER:
-	case LC_TRACKTOOL_ZOOM:
-	case LC_TRACKTOOL_PAN:
-	case LC_TRACKTOOL_ORBIT_X:
-	case LC_TRACKTOOL_ORBIT_Y:
-	case LC_TRACKTOOL_ORBIT_XY:
-	case LC_TRACKTOOL_ROLL:
-	case LC_TRACKTOOL_ZOOM_REGION:
+	case lcTrackTool::Eraser:
+	case lcTrackTool::Paint:
+	case lcTrackTool::ColorPicker:
+	case lcTrackTool::Zoom:
+	case lcTrackTool::Pan:
+	case lcTrackTool::OrbitX:
+	case lcTrackTool::OrbitY:
+	case lcTrackTool::OrbitXY:
+	case lcTrackTool::Roll:
+	case lcTrackTool::ZoomRegion:
 		return true;
 
-	case LC_TRACKTOOL_COUNT:
+	case lcTrackTool::Count:
 		return false;
 	}
 
@@ -2492,7 +2497,7 @@ bool View::IsTrackToolAllowed(lcTrackTool TrackTool, quint32 AllowedTransforms) 
 
 void View::StartOrbitTracking()
 {
-	mTrackTool = LC_TRACKTOOL_ORBIT_XY;
+	mTrackTool = lcTrackTool::OrbitXY;
 	OnUpdateCursor();
 	OnButtonDown(lcTrackButton::Left);
 }
@@ -2666,10 +2671,10 @@ void View::OnButtonDown(lcTrackButton TrackButton)
 
 	switch (mTrackTool)
 	{
-	case LC_TRACKTOOL_NONE:
+	case lcTrackTool::None:
 		break;
 
-	case LC_TRACKTOOL_INSERT:
+	case lcTrackTool::Insert:
 		{
 			PieceInfo* CurPiece = gMainWindow->GetCurrentPieceInfo();
 
@@ -2685,7 +2690,7 @@ void View::OnButtonDown(lcTrackButton TrackButton)
 		}
 		break;
 
-	case LC_TRACKTOOL_POINTLIGHT:
+	case lcTrackTool::PointLight:
 		{
 			ActiveModel->PointLightToolClicked(GetCameraLightInsertPosition());
 
@@ -2696,12 +2701,12 @@ void View::OnButtonDown(lcTrackButton TrackButton)
 		}
 		break;
 
-	case LC_TRACKTOOL_SPOTLIGHT:
-	case LC_TRACKTOOL_CAMERA:
+	case lcTrackTool::SpotLight:
+	case lcTrackTool::Camera:
 		StartTracking(TrackButton);
 		break;
 		
-	case LC_TRACKTOOL_SELECT:
+	case lcTrackTool::Select:
 		{
 			lcObjectSection ObjectSection = FindObjectUnderPointer(false, false);
 
@@ -2716,55 +2721,55 @@ void View::OnButtonDown(lcTrackButton TrackButton)
 		}
 		break;
 
-	case LC_TRACKTOOL_MOVE_X:
-	case LC_TRACKTOOL_MOVE_Y:
-	case LC_TRACKTOOL_MOVE_Z:
-	case LC_TRACKTOOL_MOVE_XY:
-	case LC_TRACKTOOL_MOVE_XZ:
-	case LC_TRACKTOOL_MOVE_YZ:
-	case LC_TRACKTOOL_MOVE_XYZ:
+	case lcTrackTool::MoveX:
+	case lcTrackTool::MoveY:
+	case lcTrackTool::MoveZ:
+	case lcTrackTool::MoveXY:
+	case lcTrackTool::MoveXZ:
+	case lcTrackTool::MoveYZ:
+	case lcTrackTool::MoveXYZ:
 		if (ActiveModel->AnyObjectsSelected())
 			StartTracking(TrackButton);
 		break;
 
-	case LC_TRACKTOOL_ROTATE_X:
-	case LC_TRACKTOOL_ROTATE_Y:
-	case LC_TRACKTOOL_ROTATE_Z:
-	case LC_TRACKTOOL_ROTATE_XY:
-	case LC_TRACKTOOL_ROTATE_XYZ:
+	case lcTrackTool::RotateX:
+	case lcTrackTool::RotateY:
+	case lcTrackTool::RotateZ:
+	case lcTrackTool::RotateXY:
+	case lcTrackTool::RotateXYZ:
 		if (ActiveModel->AnyPiecesSelected())
 			StartTracking(TrackButton);
 		break;
 
-	case LC_TRACKTOOL_SCALE_PLUS:
-	case LC_TRACKTOOL_SCALE_MINUS:
+	case lcTrackTool::ScalePlus:
+	case lcTrackTool::ScaleMinus:
 		if (ActiveModel->AnyPiecesSelected())
 			StartTracking(TrackButton);
 		break;
 
-	case LC_TRACKTOOL_ERASER:
+	case lcTrackTool::Eraser:
 		ActiveModel->EraserToolClicked(FindObjectUnderPointer(false, false).Object);
 		break;
 
-	case LC_TRACKTOOL_PAINT:
+	case lcTrackTool::Paint:
 		ActiveModel->PaintToolClicked(FindObjectUnderPointer(true, false).Object);
 		break;
 
-	case LC_TRACKTOOL_COLOR_PICKER:
+	case lcTrackTool::ColorPicker:
 		ActiveModel->ColorPickerToolClicked(FindObjectUnderPointer(true, false).Object);
 		break;
 
-	case LC_TRACKTOOL_ZOOM:
-	case LC_TRACKTOOL_PAN:
-	case LC_TRACKTOOL_ORBIT_X:
-	case LC_TRACKTOOL_ORBIT_Y:
-	case LC_TRACKTOOL_ORBIT_XY:
-	case LC_TRACKTOOL_ROLL:
-	case LC_TRACKTOOL_ZOOM_REGION:
+	case lcTrackTool::Zoom:
+	case lcTrackTool::Pan:
+	case lcTrackTool::OrbitX:
+	case lcTrackTool::OrbitY:
+	case lcTrackTool::OrbitXY:
+	case lcTrackTool::Roll:
+	case lcTrackTool::ZoomRegion:
 		StartTracking(TrackButton);
 		break;
 
-	case LC_TRACKTOOL_COUNT:
+	case lcTrackTool::Count:
 		break;
 	}
 }
@@ -2784,7 +2789,7 @@ void View::OnLeftButtonDown()
 
 	lcTrackTool OverrideTool = GetOverrideTrackTool(Qt::LeftButton);
 
-	if (OverrideTool != LC_TRACKTOOL_NONE)
+	if (OverrideTool != lcTrackTool::None)
 	{
 		mTrackTool = OverrideTool;
 		OnUpdateCursor();
@@ -2828,7 +2833,7 @@ void View::OnMiddleButtonDown()
 #if (QT_VERSION >= QT_VERSION_CHECK(4, 7, 0))
 	lcTrackTool OverrideTool = GetOverrideTrackTool(Qt::MiddleButton);
 
-	if (OverrideTool != LC_TRACKTOOL_NONE)
+	if (OverrideTool != lcTrackTool::None)
 	{
 		mTrackTool = OverrideTool;
 		OnUpdateCursor();
@@ -2854,7 +2859,7 @@ void View::OnRightButtonDown()
 
 	lcTrackTool OverrideTool = GetOverrideTrackTool(Qt::RightButton);
 
-	if (OverrideTool != LC_TRACKTOOL_NONE)
+	if (OverrideTool != lcTrackTool::None)
 	{
 		mTrackTool = OverrideTool;
 		OnUpdateCursor();
@@ -2895,7 +2900,7 @@ void View::OnMouseMove()
 	{
 		if (mViewSphere.OnMouseMove())
 		{
-			lcTrackTool NewTrackTool = mViewSphere.IsDragging() ? LC_TRACKTOOL_ORBIT_XY : LC_TRACKTOOL_NONE;
+			lcTrackTool NewTrackTool = mViewSphere.IsDragging() ? lcTrackTool::OrbitXY : lcTrackTool::None;
 
 			if (NewTrackTool != mTrackTool)
 			{
@@ -2908,7 +2913,7 @@ void View::OnMouseMove()
 
 		UpdateTrackTool();
 
-		if (mTrackTool == LC_TRACKTOOL_INSERT)
+		if (mTrackTool == lcTrackTool::Insert)
 			gMainWindow->UpdateAllViews();
 
 		return;
@@ -2919,32 +2924,32 @@ void View::OnMouseMove()
 
 	switch (mTrackTool)
 	{
-	case LC_TRACKTOOL_NONE:
-	case LC_TRACKTOOL_INSERT:
-	case LC_TRACKTOOL_POINTLIGHT:
+	case lcTrackTool::None:
+	case lcTrackTool::Insert:
+	case lcTrackTool::PointLight:
 		break;
 
-	case LC_TRACKTOOL_SPOTLIGHT:
+	case lcTrackTool::SpotLight:
 		ActiveModel->UpdateSpotLightTool(GetCameraLightInsertPosition());
 		break;
 
-	case LC_TRACKTOOL_CAMERA:
+	case lcTrackTool::Camera:
 		ActiveModel->UpdateCameraTool(GetCameraLightInsertPosition());
 		break;
 
-	case LC_TRACKTOOL_SELECT:
+	case lcTrackTool::Select:
 		Redraw();
 		break;
 
-	case LC_TRACKTOOL_MOVE_X:
-	case LC_TRACKTOOL_MOVE_Y:
-	case LC_TRACKTOOL_MOVE_Z:
-	case LC_TRACKTOOL_MOVE_XY:
-	case LC_TRACKTOOL_MOVE_XZ:
-	case LC_TRACKTOOL_MOVE_YZ:
-	case LC_TRACKTOOL_MOVE_XYZ:
-	case LC_TRACKTOOL_SCALE_PLUS:
-	case LC_TRACKTOOL_SCALE_MINUS:
+	case lcTrackTool::MoveX:
+	case lcTrackTool::MoveY:
+	case lcTrackTool::MoveZ:
+	case lcTrackTool::MoveXY:
+	case lcTrackTool::MoveXZ:
+	case lcTrackTool::MoveYZ:
+	case lcTrackTool::MoveXYZ:
+	case lcTrackTool::ScalePlus:
+	case lcTrackTool::ScaleMinus:
 	{
 			lcVector3 Points[4] =
 			{
@@ -2965,12 +2970,12 @@ void View::OnMouseMove()
 			lcMatrix33 RelativeRotation;
 			ActiveModel->GetMoveRotateTransform(Center, RelativeRotation);
 
-			if (mTrackTool == LC_TRACKTOOL_MOVE_X || mTrackTool == LC_TRACKTOOL_MOVE_Y || mTrackTool == LC_TRACKTOOL_MOVE_Z)
+			if (mTrackTool == lcTrackTool::MoveX || mTrackTool == lcTrackTool::MoveY || mTrackTool == lcTrackTool::MoveZ)
 			{
 				lcVector3 Direction;
-				if (mTrackTool == LC_TRACKTOOL_MOVE_X)
+				if (mTrackTool == lcTrackTool::MoveX)
 					Direction = lcVector3(1.0f, 0.0f, 0.0f);
-				else if (mTrackTool == LC_TRACKTOOL_MOVE_Y)
+				else if (mTrackTool == lcTrackTool::MoveY)
 					Direction = lcVector3(0.0f, 1.0f, 0.0f);
 				else
 					Direction = lcVector3(0.0f, 0.0f, 1.0f);
@@ -2987,13 +2992,13 @@ void View::OnMouseMove()
 				Distance = lcMul(Distance, lcMatrix33AffineInverse(RelativeRotation));
 				ActiveModel->UpdateMoveTool(Distance, mTrackButton != lcTrackButton::Left);
 			}
-			else if (mTrackTool == LC_TRACKTOOL_MOVE_XY || mTrackTool == LC_TRACKTOOL_MOVE_XZ || mTrackTool == LC_TRACKTOOL_MOVE_YZ)
+			else if (mTrackTool == lcTrackTool::MoveXY || mTrackTool == lcTrackTool::MoveXZ || mTrackTool == lcTrackTool::MoveYZ)
 			{
 				lcVector3 PlaneNormal;
 
-				if (mTrackTool == LC_TRACKTOOL_MOVE_XY)
+				if (mTrackTool == lcTrackTool::MoveXY)
 					PlaneNormal = lcVector3(0.0f, 0.0f, 1.0f);
-				else if (mTrackTool == LC_TRACKTOOL_MOVE_XZ)
+				else if (mTrackTool == lcTrackTool::MoveXZ)
 					PlaneNormal = lcVector3(0.0f, 1.0f, 0.0f);
 				else
 					PlaneNormal = lcVector3(1.0f, 0.0f, 0.0f);
@@ -3014,16 +3019,16 @@ void View::OnMouseMove()
 					}
 				}
 			}
-			else if (mTrackTool == LC_TRACKTOOL_MOVE_XYZ && mMouseDownPiece)
+			else if (mTrackTool == lcTrackTool::MoveXYZ && mMouseDownPiece)
 			{
 				lcMatrix44 NewPosition = GetPieceInsertPosition(true, mMouseDownPiece);
 				lcVector3 Distance = NewPosition.GetTranslation() - mMouseDownPosition;
 				ActiveModel->UpdateMoveTool(Distance, mTrackButton != lcTrackButton::Left);
 			}
-			else if (mTrackTool == LC_TRACKTOOL_SCALE_PLUS || mTrackTool == LC_TRACKTOOL_SCALE_MINUS)
+			else if (mTrackTool == lcTrackTool::ScalePlus || mTrackTool == lcTrackTool::ScaleMinus)
 			{
 				lcVector3 Direction;
-				if (mTrackTool == LC_TRACKTOOL_SCALE_PLUS)
+				if (mTrackTool == lcTrackTool::ScalePlus)
 					Direction = lcVector3(1.0f, 0.0f, 0.0f);
 				else
 					Direction = lcVector3(-1.0f, 0.0f, 0.0f);
@@ -3078,9 +3083,9 @@ void View::OnMouseMove()
 		}
 		break;
 
-	case LC_TRACKTOOL_ROTATE_X:
-	case LC_TRACKTOOL_ROTATE_Y:
-	case LC_TRACKTOOL_ROTATE_Z:
+	case lcTrackTool::RotateX:
+	case lcTrackTool::RotateY:
+	case lcTrackTool::RotateZ:
 		{
 			lcVector3 ScreenX = lcNormalize(lcCross(mCamera->mTargetPosition - mCamera->mPosition, mCamera->mUpVector));
 			lcVector3 ScreenY = mCamera->mUpVector;
@@ -3088,13 +3093,13 @@ void View::OnMouseMove()
 
 			switch (mTrackTool)
 			{
-			case LC_TRACKTOOL_ROTATE_X:
+			case lcTrackTool::RotateX:
 				Dir1 = lcVector3(1.0f, 0.0f, 0.0f);
 				break;
-			case LC_TRACKTOOL_ROTATE_Y:
+			case lcTrackTool::RotateY:
 				Dir1 = lcVector3(0.0f, 1.0f, 0.0f);
 				break;
-			case LC_TRACKTOOL_ROTATE_Z:
+			case lcTrackTool::RotateZ:
 				Dir1 = lcVector3(0.0f, 0.0f, 1.0f);
 				break;
 			default:
@@ -3133,7 +3138,7 @@ void View::OnMouseMove()
 		}
 		break;
 
-	case LC_TRACKTOOL_ROTATE_XY:
+	case lcTrackTool::RotateXY:
 		{
 			lcVector3 ScreenZ = lcNormalize(mCamera->mTargetPosition - mCamera->mPosition);
 			lcVector3 ScreenX = lcCross(ScreenZ, mCamera->mUpVector);
@@ -3145,7 +3150,7 @@ void View::OnMouseMove()
 		}
 		break;
 
-	case LC_TRACKTOOL_ROTATE_XYZ:
+	case lcTrackTool::RotateXYZ:
 		{
 			lcVector3 ScreenZ = lcNormalize(mCamera->mTargetPosition - mCamera->mPosition);
 
@@ -3153,16 +3158,16 @@ void View::OnMouseMove()
 		}
 		break;
 
-	case LC_TRACKTOOL_ERASER:
-	case LC_TRACKTOOL_PAINT:
-	case LC_TRACKTOOL_COLOR_PICKER:
+	case lcTrackTool::Eraser:
+	case lcTrackTool::Paint:
+	case lcTrackTool::ColorPicker:
 		break;
 
-	case LC_TRACKTOOL_ZOOM:
+	case lcTrackTool::Zoom:
 		ActiveModel->UpdateZoomTool(mCamera, 2.0f * MouseSensitivity * (mInputState.y - mMouseDownY));
 		break;
 
-	case LC_TRACKTOOL_PAN:
+	case lcTrackTool::Pan:
 		{
 			lcVector3 Points[4] =
 			{
@@ -3197,27 +3202,27 @@ void View::OnMouseMove()
 		}
 		break;
 
-	case LC_TRACKTOOL_ORBIT_X:
+	case lcTrackTool::OrbitX:
 		ActiveModel->UpdateOrbitTool(mCamera, 0.1f * MouseSensitivity * (mInputState.x - mMouseDownX), 0.0f);
 		break;
 
-	case LC_TRACKTOOL_ORBIT_Y:
+	case lcTrackTool::OrbitY:
 		ActiveModel->UpdateOrbitTool(mCamera, 0.0f, 0.1f * MouseSensitivity * (mInputState.y - mMouseDownY));
 		break;
 
-	case LC_TRACKTOOL_ORBIT_XY:
+	case lcTrackTool::OrbitXY:
 		ActiveModel->UpdateOrbitTool(mCamera, 0.1f * MouseSensitivity * (mInputState.x - mMouseDownX), 0.1f * MouseSensitivity * (mInputState.y - mMouseDownY));
 		break;
 
-	case LC_TRACKTOOL_ROLL:
+	case lcTrackTool::Roll:
 		ActiveModel->UpdateRollTool(mCamera, 2.0f * MouseSensitivity * (mInputState.x - mMouseDownX) * LC_DTOR);
 		break;
 
-	case LC_TRACKTOOL_ZOOM_REGION:
+	case lcTrackTool::ZoomRegion:
 		Redraw();
 		break;
 
-	case LC_TRACKTOOL_COUNT:
+	case lcTrackTool::Count:
 		break;
 	}
 }

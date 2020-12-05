@@ -40,12 +40,12 @@ public:
 		Right
 	};
 
-	enum lcTrackTool
+	enum class lcTrackTool
 	{
-		LC_TRACKTOOL_NONE,
-		LC_TRACKTOOL_PAN,
-		LC_TRACKTOOL_ORBIT_XY,
-		LC_TRACKTOOL_COUNT
+		None,
+		Pan,
+		OrbitXY,
+		Count
 	};
 
 	lcPreviewWidget();

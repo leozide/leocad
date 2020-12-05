@@ -32,14 +32,6 @@ protected:
 class lcPreviewWidget : public lcGLWidget
 {
 public:
-	enum class lcTrackButton
-	{
-		None,
-		Left,
-		Middle,
-		Right
-	};
-
 	enum class lcTrackTool
 	{
 		None,
@@ -73,10 +65,6 @@ public:
 	// exclusively called from viewSphere
 	void SetViewpoint(const lcVector3& Position);
 	void StartOrbitTracking();
-	bool IsTracking() const
-	{
-		return mTrackButton != lcTrackButton::None;
-	}
 
 	bool IsModel() const
 	{
@@ -111,7 +99,6 @@ protected:
 	lcScene mScene;
 
 	lcTool mTool;
-	lcTrackButton mTrackButton;
 	lcTrackTool mTrackTool;
 
 	QString mDescription;

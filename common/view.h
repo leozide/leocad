@@ -6,14 +6,6 @@
 #include "lc_viewsphere.h"
 #include "lc_commands.h"
 
-enum class lcTrackButton
-{
-	None,
-	Left,
-	Middle,
-	Right
-};
-
 enum class lcTrackTool
 {
 	None,
@@ -95,11 +87,6 @@ public:
 	void BeginDrag(lcDragState DragState) override;
 	void EndDrag(bool Accept) override;
 
-	bool IsTracking() const
-	{
-		return mTrackButton != lcTrackButton::None;
-	}
-
 	void StartOrbitTracking();
 	void CancelTrackingOrClearSelection();
 
@@ -161,7 +148,6 @@ protected:
 
 	lcScene mScene;
 	lcDragState mDragState;
-	lcTrackButton mTrackButton;
 	lcTrackTool mTrackTool;
 	bool mTrackToolFromOverlay;
 	bool mTrackUpdated;

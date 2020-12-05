@@ -32,6 +32,14 @@ enum class lcCursor
 	Count
 };
 
+enum class lcTrackButton
+{
+	None,
+	Left,
+	Middle,
+	Right
+};
+
 struct lcInputState
 {
 	int x = 0;
@@ -51,6 +59,11 @@ public:
 	lcCamera* GetCamera() const
 	{
 		return mCamera;
+	}
+
+	bool IsTracking() const
+	{
+		return mTrackButton != lcTrackButton::None;
 	}
 
 	void SetContext(lcContext* Context);
@@ -88,11 +101,12 @@ public:
 	lcInputState mInputState;
 	int mWidth = 1;
 	int mHeight = 1;
-	lcCursor mCursor = lcCursor::Default;
 	QGLWidget* mWidget = nullptr;
 	lcContext* mContext = nullptr;
 
 protected:
 	lcCamera* mCamera = nullptr;
 	bool mDeleteContext = true;
+	lcCursor mCursor = lcCursor::Default;
+	lcTrackButton mTrackButton = lcTrackButton::None;
 };

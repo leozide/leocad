@@ -18,12 +18,9 @@ View::View(lcModel* Model)
 {
 	mModel = Model;
 	mActiveSubmodelInstance = nullptr;
-	mCamera = nullptr;
 	memset(mGridSettings, 0, sizeof(mGridSettings));
 
 	mDragState = lcDragState::None;
-	mTrackButton = lcTrackButton::None;
-	mTrackTool = lcTrackTool::None;
 	mTrackToolFromOverlay = false;
 
 	View* ActiveView = gMainWindow->GetActiveView();
@@ -427,59 +424,6 @@ lcMatrix44 View::GetTileProjectionMatrix(int CurrentRow, int CurrentColumn, int 
 		return lcMatrix44Ortho(Left, Right, Bottom, Top, Near, Far);
 	else
 		return lcMatrix44Frustum(Left, Right, Bottom, Top, Near, Far);
-}
-
-lcCursor View::GetCursor() const
-{
-	if (mTrackTool == lcTrackTool::Select)
-	{
-		if (mMouseModifiers & Qt::ControlModifier)
-			return lcCursor::SelectAdd;
-
-		if (mMouseModifiers & Qt::ShiftModifier)
-			return lcCursor::SelectRemove;
-	}
-
-	const lcCursor CursorFromTrackTool[static_cast<int>(lcTrackTool::Count)] =
-	{
-	    lcCursor::Select,      // lcTrackTool::None
-	    lcCursor::Brick,       // lcTrackTool::Insert
-	    lcCursor::Light,       // lcTrackTool::PointLight
-	    lcCursor::Spotlight,   // lcTrackTool::SpotLight
-	    lcCursor::Camera,      // lcTrackTool::Camera
-	    lcCursor::Select,      // lcTrackTool::Select
-	    lcCursor::Move,        // lcTrackTool::MoveX
-	    lcCursor::Move,        // lcTrackTool::MoveY
-	    lcCursor::Move,        // lcTrackTool::MoveZ
-	    lcCursor::Move,        // lcTrackTool::MoveXY
-	    lcCursor::Move,        // lcTrackTool::MoveXZ
-	    lcCursor::Move,        // lcTrackTool::MoveYZ
-	    lcCursor::Move,        // lcTrackTool::MoveXYZ
-	    lcCursor::Rotate,      // lcTrackTool::RotateX
-	    lcCursor::Rotate,      // lcTrackTool::RotateY
-	    lcCursor::Rotate,      // lcTrackTool::RotateZ
-	    lcCursor::Rotate,      // lcTrackTool::RotateXY
-	    lcCursor::Rotate,      // lcTrackTool::RotateXYZ
-	    lcCursor::Move,        // lcTrackTool::ScalePlus
-	    lcCursor::Move,        // lcTrackTool::ScaleMinus
-	    lcCursor::Delete,      // lcTrackTool::Eraser
-	    lcCursor::Paint,       // lcTrackTool::Paint
-	    lcCursor::ColorPicker, // lcTrackTool::ColorPicker
-	    lcCursor::Zoom,        // lcTrackTool::Zoom
-	    lcCursor::Pan,         // lcTrackTool::Pan
-	    lcCursor::RotateX,     // lcTrackTool::OrbitX
-	    lcCursor::RotateY,     // lcTrackTool::OrbitY
-	    lcCursor::RotateView,  // lcTrackTool::OrbitXY
-	    lcCursor::Roll,        // lcTrackTool::Roll
-	    lcCursor::ZoomRegion   // lcTrackTool::ZoomRegion
-	};
-
-	static_assert(LC_ARRAY_COUNT(CursorFromTrackTool) == static_cast<int>(lcTrackTool::Count), "Array size mismatch.");
-
-	if (mTrackTool >= lcTrackTool::None && mTrackTool < lcTrackTool::Count)
-		return CursorFromTrackTool[static_cast<int>(mTrackTool)];
-
-	return lcCursor::Select;
 }
 
 void View::ShowContextMenu() const
@@ -1793,55 +1737,6 @@ void View::OnInitialUpdate()
 	gMainWindow->AddView(this);
 }
 
-void View::OnUpdateCursor()
-{
-	SetCursor(GetCursor());
-}
-
-lcTool View::GetCurrentTool() const
-{
-	const lcTool ToolFromTrackTool[static_cast<int>(lcTrackTool::Count)] =
-	{
-	    lcTool::Select,      // lcTrackTool::None
-	    lcTool::Insert,      // lcTrackTool::Insert
-	    lcTool::Light,       // lcTrackTool::PointLight
-	    lcTool::SpotLight,   // lcTrackTool::SpotLight
-	    lcTool::Camera,      // lcTrackTool::Camera
-	    lcTool::Select,      // lcTrackTool::Select
-	    lcTool::Move,        // lcTrackTool::MoveX
-	    lcTool::Move,        // lcTrackTool::MoveY
-	    lcTool::Move,        // lcTrackTool::MoveZ
-	    lcTool::Move,        // lcTrackTool::MoveXY
-	    lcTool::Move,        // lcTrackTool::MoveXZ
-	    lcTool::Move,        // lcTrackTool::MoveYZ
-	    lcTool::Move,        // lcTrackTool::MoveXYZ
-	    lcTool::Rotate,      // lcTrackTool::RotateX
-	    lcTool::Rotate,      // lcTrackTool::RotateY
-	    lcTool::Rotate,      // lcTrackTool::RotateZ
-	    lcTool::Rotate,      // lcTrackTool::RotateXY
-	    lcTool::Rotate,      // lcTrackTool::RotateXYZ
-	    lcTool::Move,        // lcTrackTool::ScalePlus
-	    lcTool::Move,        // lcTrackTool::ScaleMinus
-	    lcTool::Eraser,      // lcTrackTool::Eraser
-	    lcTool::Paint,       // lcTrackTool::Paint
-	    lcTool::ColorPicker, // lcTrackTool::ColorPicker
-	    lcTool::Zoom,        // lcTrackTool::Zoom
-	    lcTool::Pan,         // lcTrackTool::Pan
-	    lcTool::RotateView,  // lcTrackTool::OrbitX
-	    lcTool::RotateView,  // lcTrackTool::OrbitY
-	    lcTool::RotateView,  // lcTrackTool::OrbitXY
-	    lcTool::Roll,        // lcTrackTool::Roll
-	    lcTool::ZoomRegion   // lcTrackTool::ZoomRegion
-	};
-
-	static_assert(LC_ARRAY_COUNT(ToolFromTrackTool) == static_cast<int>(lcTrackTool::Count), "Array size mismatch.");
-
-	if (mTrackTool >= lcTrackTool::None && mTrackTool < lcTrackTool::Count)
-		return ToolFromTrackTool[static_cast<int>(mTrackTool)];
-
-	return lcTool::Select;
-}
-
 lcTrackTool View::GetOverrideTrackTool(Qt::MouseButton Button) const
 {
 	if (mTrackToolFromOverlay)
@@ -2418,7 +2313,7 @@ void View::UpdateTrackTool()
 	if (NewTrackTool != mTrackTool)
 	{
 		mTrackTool = NewTrackTool;
-		OnUpdateCursor();
+		UpdateCursor();
 
 		if (Redraw)
 			gMainWindow->UpdateAllViews();
@@ -2499,7 +2394,7 @@ bool View::IsTrackToolAllowed(lcTrackTool TrackTool, quint32 AllowedTransforms) 
 void View::StartOrbitTracking()
 {
 	mTrackTool = lcTrackTool::OrbitXY;
-	OnUpdateCursor();
+	UpdateCursor();
 	OnButtonDown(lcTrackButton::Left);
 }
 
@@ -2561,7 +2456,7 @@ void View::StartTracking(lcTrackButton TrackButton)
 		break;
 	}
 
-	OnUpdateCursor();
+	UpdateCursor();
 }
 
 void View::StopTracking(bool Accept)
@@ -2793,7 +2688,7 @@ void View::OnLeftButtonDown()
 	if (OverrideTool != lcTrackTool::None)
 	{
 		mTrackTool = OverrideTool;
-		OnUpdateCursor();
+		UpdateCursor();
 	}
 
 	OnButtonDown(lcTrackButton::Left);
@@ -2837,7 +2732,7 @@ void View::OnMiddleButtonDown()
 	if (OverrideTool != lcTrackTool::None)
 	{
 		mTrackTool = OverrideTool;
-		OnUpdateCursor();
+		UpdateCursor();
 	}
 #endif
 	OnButtonDown(lcTrackButton::Middle);
@@ -2863,7 +2758,7 @@ void View::OnRightButtonDown()
 	if (OverrideTool != lcTrackTool::None)
 	{
 		mTrackTool = OverrideTool;
-		OnUpdateCursor();
+		UpdateCursor();
 	}
 
 	OnButtonDown(lcTrackButton::Right);
@@ -2906,7 +2801,7 @@ void View::OnMouseMove()
 			if (NewTrackTool != mTrackTool)
 			{
 				mTrackTool = NewTrackTool;
-				OnUpdateCursor();
+				UpdateCursor();
 			}
 
 			return;

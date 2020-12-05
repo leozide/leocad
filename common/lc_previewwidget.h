@@ -32,14 +32,6 @@ protected:
 class lcPreviewWidget : public lcGLWidget
 {
 public:
-	enum class lcTrackTool
-	{
-		None,
-		Pan,
-		OrbitXY,
-		Count
-	};
-
 	lcPreviewWidget();
 	~lcPreviewWidget();
 
@@ -52,7 +44,6 @@ public:
 	void UpdatePreview();
 	bool SetCurrentPiece(const QString& PartType, int ColorCode);
 	lcModel* GetActiveModel() const;
-	lcCursor GetCursor() const;
 	void SetCamera(lcCamera* Camera);
 	void SetDefaultCamera();
 	void ZoomExtents();
@@ -67,7 +58,6 @@ public:
 	}
 	
 	void OnDraw() override;
-	void OnUpdateCursor() override;
 	void OnLeftButtonDown() override;
 	void OnLeftButtonUp() override;
 	void OnLeftButtonDoubleClick() override;
@@ -81,7 +71,6 @@ public:
 protected:
 	void DrawViewport();
 
-	lcTool GetCurrentTool() const;
 	void StartTracking(lcTrackButton TrackButton);
 	void StopTracking(bool Accept);
 	void OnButtonDown(lcTrackButton TrackButton);
@@ -89,8 +78,6 @@ protected:
 	Project* mLoader;
 	lcModel* mModel;
 	lcViewSphere mViewSphere;
-
-	lcTrackTool mTrackTool;
 
 	QString mDescription;
 	bool mIsModel;

@@ -156,7 +156,7 @@ void lcQGLWidget::keyPressEvent(QKeyEvent* KeyEvent)
 	if (KeyEvent->key() == Qt::Key_Control || KeyEvent->key() == Qt::Key_Shift)
 	{
 		mWidget->SetMouseModifiers(KeyEvent->modifiers());
-		mWidget->OnUpdateCursor();
+		mWidget->UpdateCursor();
 	}
 
 	QGLWidget::keyPressEvent(KeyEvent);
@@ -167,7 +167,7 @@ void lcQGLWidget::keyReleaseEvent(QKeyEvent* KeyEvent)
 	if (KeyEvent->key() == Qt::Key_Control || KeyEvent->key() == Qt::Key_Shift)
 	{
 		mWidget->SetMouseModifiers(KeyEvent->modifiers());
-		mWidget->OnUpdateCursor();
+		mWidget->UpdateCursor();
 	}
 
 	QGLWidget::keyReleaseEvent(KeyEvent);

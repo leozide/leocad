@@ -1,5 +1,7 @@
 #pragma once
 
+#include "lc_commands.h"
+
 enum class lcDragState
 {
 	None,
@@ -40,6 +42,41 @@ enum class lcTrackButton
 	Right
 };
 
+enum class lcTrackTool
+{
+	None,
+	Insert,
+	PointLight,
+	SpotLight,
+	Camera,
+	Select,
+	MoveX,
+	MoveY,
+	MoveZ,
+	MoveXY,
+	MoveXZ,
+	MoveYZ,
+	MoveXYZ,
+	RotateX,
+	RotateY,
+	RotateZ,
+	RotateXY,
+	RotateXYZ,
+	ScalePlus,
+	ScaleMinus,
+	Eraser,
+	Paint,
+	ColorPicker,
+	Zoom,
+	Pan,
+	OrbitX,
+	OrbitY,
+	OrbitXY,
+	Roll,
+	ZoomRegion,
+	Count
+};
+
 class lcGLWidget
 {
 public:
@@ -74,7 +111,7 @@ public:
 	void SetContext(lcContext* Context);
 	void MakeCurrent();
 	void Redraw();
-	void SetCursor(lcCursor Cursor);
+	void UpdateCursor();
 
 	lcVector3 ProjectPoint(const lcVector3& Point) const;
 	lcVector3 UnprojectPoint(const lcVector3& Point) const;
@@ -86,7 +123,6 @@ public:
 
 	virtual void OnDraw() { }
 	virtual void OnInitialUpdate() { }
-	virtual void OnUpdateCursor() { }
 	virtual void OnLeftButtonDown() { }
 	virtual void OnLeftButtonUp() { }
 	virtual void OnLeftButtonDoubleClick() { }
@@ -109,12 +145,17 @@ public:
 	lcContext* mContext = nullptr;
 
 protected:
+	lcCursor GetCursor() const;
+	void SetCursor(lcCursor Cursor);
+	lcTool GetCurrentTool() const;
+
 	int mMouseX = 0;
 	int mMouseY = 0;
 	int mMouseDownX = 0;
 	int mMouseDownY = 0;
 	Qt::KeyboardModifiers mMouseModifiers = Qt::NoModifier;
 
+	lcTrackTool mTrackTool = lcTrackTool::None;
 	lcTrackButton mTrackButton = lcTrackButton::None;
 	lcCursor mCursor = lcCursor::Default;
 

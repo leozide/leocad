@@ -3,42 +3,6 @@
 #include "lc_glwidget.h"
 #include "camera.h"
 #include "lc_viewsphere.h"
-#include "lc_commands.h"
-
-enum class lcTrackTool
-{
-	None,
-	Insert,
-	PointLight,
-	SpotLight,
-	Camera,
-	Select,
-	MoveX,
-	MoveY,
-	MoveZ,
-	MoveXY,
-	MoveXZ,
-	MoveYZ,
-	MoveXYZ,
-	RotateX,
-	RotateY,
-	RotateZ,
-	RotateXY,
-	RotateXYZ,
-	ScalePlus,
-	ScaleMinus,
-	Eraser,
-	Paint,
-	ColorPicker,
-	Zoom,
-	Pan,
-	OrbitX,
-	OrbitY,
-	OrbitXY,
-	Roll,
-	ZoomRegion,
-	Count
-};
 
 class View : public lcGLWidget
 {
@@ -71,7 +35,6 @@ public:
 
 	void OnDraw() override;
 	void OnInitialUpdate() override;
-	void OnUpdateCursor() override;
 	void OnLeftButtonDown() override;
 	void OnLeftButtonUp() override;
 	void OnLeftButtonDoubleClick() override;
@@ -103,7 +66,6 @@ public:
 	void SetViewpoint(const lcVector3& Position);
 	void SetCameraAngles(float Latitude, float Longitude);
 	void SetDefaultCamera();
-	lcCursor GetCursor() const;
 	void ShowContextMenu() const;
 
 	lcVector3 GetMoveDirection(const lcVector3& Direction) const;
@@ -133,7 +95,6 @@ protected:
 
 	void UpdateTrackTool();
 	bool IsTrackToolAllowed(lcTrackTool TrackTool, quint32 AllowedTransforms) const;
-	lcTool GetCurrentTool() const;
 	lcTrackTool GetOverrideTrackTool(Qt::MouseButton Button) const;
 	float GetOverlayScale() const;
 	void StartTracking(lcTrackButton TrackButton);
@@ -146,7 +107,6 @@ protected:
 	lcMatrix44 mActiveSubmodelTransform;
 
 	lcDragState mDragState;
-	lcTrackTool mTrackTool;
 	bool mTrackToolFromOverlay;
 	bool mTrackUpdated;
 	lcVector3 mMouseDownPosition;

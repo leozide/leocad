@@ -14,6 +14,7 @@
 #include <array>
 #include <set>
 #include <functional>
+#include <memory>
 
 #ifndef Q_FALLTHROUGH
 #define Q_FALLTHROUGH();
@@ -71,6 +72,7 @@ class lcVector4;
 class lcMatrix33;
 class lcMatrix44;
 
+class lcGLWidget;
 class lcContext;
 class lcMesh;
 struct lcMeshSection;

@@ -18,8 +18,6 @@
 #define LC_SEL_CAN_ADD_CONTROL_POINT    0x0800 // Can add control points to focused piece
 #define LC_SEL_CAN_REMOVE_CONTROL_POINT 0x1000 // Can remove control points from focused piece
 
-class lcGLWidget;
-
 struct lcInstructionsPageLayout
 {
 	lcModel* Model;

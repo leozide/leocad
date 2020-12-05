@@ -286,7 +286,6 @@ lcTool lcPreviewWidget::GetCurrentTool() const
 void lcPreviewWidget::StartTracking(lcTrackButton TrackButton)
 {
 	mTrackButton = TrackButton;
-	mTrackUpdated = false;
 	mMouseDownX = mMouseX;
 	mMouseDownY = mMouseY;
 	lcTool Tool = GetCurrentTool();  // Either lcTrackTool::None (LC_TOOL_SELECT) or lcTrackTool::OrbitXY (LC_TOOL_ROTATE_VIEW)
@@ -541,7 +540,6 @@ void lcPreviewWidget::OnMouseMove()
 		return;
 	}
 
-	mTrackUpdated = true;
 	const float MouseSensitivity = 0.5f / (21.0f - lcGetPreferences().mMouseSensitivity);
 
 	switch (mTrackTool)

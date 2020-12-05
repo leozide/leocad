@@ -94,6 +94,4 @@ protected:
 
 	QString mDescription;
 	bool mIsModel;
-	
-	bool mTrackUpdated;
 };

@@ -1,7 +1,6 @@
 #pragma once
 
 #include <QGLWidget>
-class lcGLWidget;
 
 class lcQGLWidget : public QGLWidget
 {

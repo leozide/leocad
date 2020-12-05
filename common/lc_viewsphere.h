@@ -4,7 +4,6 @@
 #include "lc_context.h"
 #include <bitset>
 
-class lcGLWidget;
 class View;
 class lcPreviewWidget;
 

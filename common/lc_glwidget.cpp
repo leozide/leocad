@@ -4,8 +4,10 @@
 #include "lc_context.h"
 #include "camera.h"
 #include "texfont.h"
+#include "lc_scene.h"
 
 lcGLWidget::lcGLWidget()
+	: mScene(new lcScene())
 {
 	mContext = new lcContext();
 }

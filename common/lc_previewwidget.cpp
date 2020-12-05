@@ -80,16 +80,13 @@ void lcPreviewDockWidget::SetPreviewLock()
 }
 
 lcPreviewWidget::lcPreviewWidget()
-	: mLoader(new Project(true/*IsPreview*/)),
-	mViewSphere(this/*Preview*/)
+	: mLoader(new Project(true)), mViewSphere(this)
 {
-	mTool = lcTool::Select;
 	mTrackTool = lcTrackTool::None;
 	mTrackButton = lcTrackButton::None;
 
 	mLoader->SetActiveModel(0);
 	mModel = mLoader->GetActiveModel();
-	mCamera = nullptr;
 
 	SetDefaultCamera();
 }
@@ -380,13 +377,6 @@ lcCursor lcPreviewWidget::GetCursor() const
 	return lcCursor::Select;
 }
 
-void lcPreviewWidget::OnInitialUpdate()
-{
-	MakeCurrent();
-
-	mContext->SetDefaultState();
-}
-
 void lcPreviewWidget::OnDraw()
 {
 	if (!mModel)
@@ -395,16 +385,16 @@ void lcPreviewWidget::OnDraw()
 	lcPreferences& Preferences = lcGetPreferences();
 	const bool DrawInterface = mWidget != nullptr;
 
-	mScene.SetAllowLOD(Preferences.mAllowLOD && mWidget != nullptr);
-	mScene.SetLODDistance(Preferences.mMeshLODDistance);
+	mScene->SetAllowLOD(Preferences.mAllowLOD && mWidget != nullptr);
+	mScene->SetLODDistance(Preferences.mMeshLODDistance);
 
-	mScene.Begin(mCamera->mWorldView);
+	mScene->Begin(mCamera->mWorldView);
 
-	mScene.SetDrawInterface(DrawInterface);
+	mScene->SetDrawInterface(DrawInterface);
 
-	mModel->GetScene(mScene, mCamera, false /*HighlightNewParts*/, false/*mFadeSteps*/);
+	mModel->GetScene(mScene.get(), mCamera, false /*HighlightNewParts*/, false/*mFadeSteps*/);
 
-	mScene.End();
+	mScene->End();
 
 	mContext->SetDefaultState();
 
@@ -416,7 +406,7 @@ void lcPreviewWidget::OnDraw()
 
 	mContext->SetLineWidth(Preferences.mLineWidth);
 
-	mScene.Draw(mContext);
+	mScene->Draw(mContext);
 
 	if (DrawInterface)
 	{

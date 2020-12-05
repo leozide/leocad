@@ -1225,9 +1225,9 @@ void lcModel::DuplicateSelectedPieces()
 	SaveCheckpoint(tr("Duplicating Pieces"));
 }
 
-void lcModel::GetScene(lcScene& Scene, lcCamera* ViewCamera, bool AllowHighlight, bool AllowFade) const
+void lcModel::GetScene(lcScene* Scene, lcCamera* ViewCamera, bool AllowHighlight, bool AllowFade) const
 {
-	mPieceInfo->AddRenderMesh(Scene);
+	mPieceInfo->AddRenderMesh(*Scene);
 
 	for (const lcPiece* Piece : mPieces)
 	{
@@ -1238,19 +1238,19 @@ void lcModel::GetScene(lcScene& Scene, lcCamera* ViewCamera, bool AllowHighlight
 		}
 	}
 
-	if (Scene.GetDrawInterface() && !Scene.GetActiveSubmodelInstance())
+	if (Scene->GetDrawInterface() && !Scene->GetActiveSubmodelInstance())
 	{
 		for (lcCamera* Camera : mCameras)
 			if (Camera != ViewCamera && Camera->IsVisible())
-				Scene.AddInterfaceObject(Camera);
+				Scene->AddInterfaceObject(Camera);
 
 		for (lcLight* Light : mLights)
 			if (Light->IsVisible())
-				Scene.AddInterfaceObject(Light);
+				Scene->AddInterfaceObject(Light);
 	}
 }
 
-void lcModel::AddSubModelRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, int DefaultColorIndex, lcRenderMeshState RenderMeshState, bool ParentActive) const
+void lcModel::AddSubModelRenderMeshes(lcScene* Scene, const lcMatrix44& WorldMatrix, int DefaultColorIndex, lcRenderMeshState RenderMeshState, bool ParentActive) const
 {
 	for (lcPiece* Piece : mPieces)
 		if (Piece->IsVisibleInSubModel())
@@ -1403,7 +1403,7 @@ QImage lcModel::GetPartsListImage(int MaxWidth, lcStep Step) const
 		Scene.SetAllowLOD(false);
 		Scene.Begin(ViewMatrix);
 
-		Image.Info->AddRenderMeshes(Scene, lcMatrix44Identity(), Image.ColorIndex, lcRenderMeshState::Default, true);
+		Image.Info->AddRenderMeshes(&Scene, lcMatrix44Identity(), Image.ColorIndex, lcRenderMeshState::Default, true);
 
 		Scene.End();
 

@@ -2,7 +2,6 @@
 
 #include "lc_glwidget.h"
 #include "camera.h"
-#include "lc_scene.h"
 #include "lc_viewsphere.h"
 #include "lc_commands.h"
 
@@ -146,13 +145,10 @@ protected:
 	lcPiece* mActiveSubmodelInstance;
 	lcMatrix44 mActiveSubmodelTransform;
 
-	lcScene mScene;
 	lcDragState mDragState;
 	lcTrackTool mTrackTool;
 	bool mTrackToolFromOverlay;
 	bool mTrackUpdated;
-	int mMouseDownX;
-	int mMouseDownY;
 	lcVector3 mMouseDownPosition;
 	PieceInfo* mMouseDownPiece;
 	QImage mRenderImage;

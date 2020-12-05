@@ -43,11 +43,6 @@ public:
 	lcPreviewWidget();
 	~lcPreviewWidget();
 
-	lcTool GetTool() const
-	{
-		return mTool;
-	}
-
 	QString GetDescription() const
 	{
 		return mDescription;
@@ -71,7 +66,6 @@ public:
 		return mIsModel;
 	}
 	
-	void OnInitialUpdate() override;
 	void OnDraw() override;
 	void OnUpdateCursor() override;
 	void OnLeftButtonDown() override;
@@ -96,15 +90,10 @@ protected:
 	lcModel* mModel;
 	lcViewSphere mViewSphere;
 
-	lcScene mScene;
-
-	lcTool mTool;
 	lcTrackTool mTrackTool;
 
 	QString mDescription;
 	bool mIsModel;
 	
 	bool mTrackUpdated;
-	int mMouseDownX;
-	int mMouseDownY;
 };

@@ -19,8 +19,8 @@ enum class lcViewSphereLocation
 class lcViewSphere
 {
 public:
-	lcViewSphere(View *View);
-	lcViewSphere(lcPreviewWidget *Preview);
+	lcViewSphere(View* View);
+	lcViewSphere(lcPreviewWidget* Preview);
 
 	void Draw();
 	bool OnMouseMove();

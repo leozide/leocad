@@ -111,10 +111,14 @@ public:
 protected:
 	int mMouseX = 0;
 	int mMouseY = 0;
+	int mMouseDownX = 0;
+	int mMouseDownY = 0;
 	Qt::KeyboardModifiers mMouseModifiers = Qt::NoModifier;
 
 	lcTrackButton mTrackButton = lcTrackButton::None;
 	lcCursor mCursor = lcCursor::Default;
+
+	std::unique_ptr<lcScene> mScene;
 
 	lcCamera* mCamera = nullptr;
 	bool mDeleteContext = true;

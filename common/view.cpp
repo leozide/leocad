@@ -8,6 +8,7 @@
 #include "piece.h"
 #include "pieceinf.h"
 #include "lc_synth.h"
+#include "lc_scene.h"
 
 lcVertexBuffer View::mRotateMoveVertexBuffer;
 lcIndexBuffer View::mRotateMoveIndexBuffer;
@@ -797,15 +798,15 @@ void View::OnDraw()
 	const lcPreferences& Preferences = lcGetPreferences();
 	const bool DrawInterface = mWidget != nullptr;
 
-	mScene.SetAllowLOD(Preferences.mAllowLOD && mWidget != nullptr);
-	mScene.SetLODDistance(Preferences.mMeshLODDistance);
+	mScene->SetAllowLOD(Preferences.mAllowLOD && mWidget != nullptr);
+	mScene->SetLODDistance(Preferences.mMeshLODDistance);
 
-	mScene.Begin(mCamera->mWorldView);
+	mScene->Begin(mCamera->mWorldView);
 
-	mScene.SetActiveSubmodelInstance(mActiveSubmodelInstance, mActiveSubmodelTransform);
-	mScene.SetDrawInterface(DrawInterface);
+	mScene->SetActiveSubmodelInstance(mActiveSubmodelInstance, mActiveSubmodelTransform);
+	mScene->SetDrawInterface(DrawInterface);
 
-	mModel->GetScene(mScene, mCamera, Preferences.mHighlightNewParts, Preferences.mFadeSteps);
+	mModel->GetScene(mScene.get(), mCamera, Preferences.mHighlightNewParts, Preferences.mFadeSteps);
 
 	if (DrawInterface && mTrackTool == lcTrackTool::Insert)
 	{
@@ -818,14 +819,14 @@ void View::OnDraw()
 			if (GetActiveModel() != mModel)
 				WorldMatrix = lcMul(WorldMatrix, mActiveSubmodelTransform);
 
-			Info->AddRenderMeshes(mScene, WorldMatrix, gMainWindow->mColorIndex, lcRenderMeshState::Focused, false);
+			Info->AddRenderMeshes(mScene.get(), WorldMatrix, gMainWindow->mColorIndex, lcRenderMeshState::Focused, false);
 		}
 	}
 
 	if (DrawInterface)
-		mScene.SetPreTranslucentCallback([this]() { DrawGrid(); });
+		mScene->SetPreTranslucentCallback([this]() { DrawGrid(); });
 
-	mScene.End();
+	mScene->End();
 
 	int TotalTileRows = 1;
 	int TotalTileColumns = 1;
@@ -878,7 +879,7 @@ void View::OnDraw()
 
 			mContext->SetLineWidth(Preferences.mLineWidth);
 
-			mScene.Draw(mContext);
+			mScene->Draw(mContext);
 
 			if (!mRenderImage.isNull())
 			{
@@ -910,7 +911,7 @@ void View::OnDraw()
 
 	if (DrawInterface)
 	{
-		mScene.DrawInterfaceObjects(mContext);
+		mScene->DrawInterfaceObjects(mContext);
 
 		mContext->SetLineWidth(1.0f);
 

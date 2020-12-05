@@ -57,7 +57,7 @@ void lcGLWidget::SetCursor(lcCursor CursorType)
 		const char* Name;
 	};
 
-	const lcCursorInfo Cursors[] =
+	const lcCursorInfo Cursors[static_cast<int>(lcCursor::Count)] =
 	{
 		{  0,  0, "" },                                 // lcCursor::Default
 		{  8,  3, ":/resources/cursor_insert" },        // lcCursor::Brick
@@ -82,8 +82,6 @@ void lcGLWidget::SetCursor(lcCursor CursorType)
 	};
 
 	static_assert(LC_ARRAY_COUNT(Cursors) == static_cast<int>(lcCursor::Count), "Array size mismatch");
-
-	QGLWidget* mWidget = (QGLWidget*)mWidget;
 
 	if (CursorType > lcCursor::Default && CursorType < lcCursor::Count)
 	{

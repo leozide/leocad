@@ -14,10 +14,8 @@ lcVertexBuffer View::mRotateMoveVertexBuffer;
 lcIndexBuffer View::mRotateMoveIndexBuffer;
 
 View::View(lcModel* Model)
-	: mViewSphere(this)
+	: lcGLWidget(Model), mViewSphere(this)
 {
-	mModel = Model;
-	mActiveSubmodelInstance = nullptr;
 	memset(mGridSettings, 0, sizeof(mGridSettings));
 
 	mDragState = lcDragState::None;
@@ -39,11 +37,6 @@ View::~View()
 
 	if (mCamera && mCamera->IsSimple())
 		delete mCamera;
-}
-
-lcModel* View::GetActiveModel() const
-{
-	return !mActiveSubmodelInstance ? mModel : mActiveSubmodelInstance->mPieceInfo->GetModel();
 }
 
 void View::SetTopSubmodelActive()
@@ -559,32 +552,6 @@ lcMatrix44 View::GetPieceInsertPosition(bool IgnoreSelected, PieceInfo* Info) co
 	}
 
 	return lcMatrix44Translation(UnprojectPoint(lcVector3((float)mMouseX, (float)mMouseY, 0.9f)));
-}
-
-lcVector3 View::GetCameraLightInsertPosition() const
-{
-	lcModel* ActiveModel = GetActiveModel();
-
-	std::array<lcVector3, 2> ClickPoints = { { lcVector3((float)mMouseX, (float)mMouseY, 0.0f), lcVector3((float)mMouseX, (float)mMouseY, 1.0f) } };
-	UnprojectPoints(ClickPoints.data(), 2);
-
-	if (ActiveModel != mModel)
-	{
-		lcMatrix44 InverseMatrix = lcMatrix44AffineInverse(mActiveSubmodelTransform);
-
-		for (lcVector3& Point : ClickPoints)
-			Point = lcMul31(Point, InverseMatrix);
-	}
-
-	lcVector3 Min, Max;
-	lcVector3 Center;
-
-	if (ActiveModel->GetPiecesBoundingBox(Min, Max))
-		Center = (Min + Max) / 2.0f;
-	else
-		Center = lcVector3(0.0f, 0.0f, 0.0f);
-
-	return lcRayPointClosestPoint(Center, ClickPoints[0], ClickPoints[1]);
 }
 
 void View::GetRayUnderPointer(lcVector3& Start, lcVector3& End) const
@@ -2396,67 +2363,6 @@ void View::StartOrbitTracking()
 	mTrackTool = lcTrackTool::OrbitXY;
 	UpdateCursor();
 	OnButtonDown(lcTrackButton::Left);
-}
-
-void View::StartTracking(lcTrackButton TrackButton)
-{
-	mTrackButton = TrackButton;
-	mTrackUpdated = false;
-	mMouseDownX = mMouseX;
-	mMouseDownY = mMouseY;
-	lcTool Tool = GetCurrentTool();
-	lcModel* ActiveModel = GetActiveModel();
-
-	switch (Tool)
-	{
-	case lcTool::Insert:
-	case lcTool::Light:
-		break;
-
-	case lcTool::SpotLight:
-		{
-			lcVector3 Position = GetCameraLightInsertPosition();
-			lcVector3 Target = Position + lcVector3(0.1f, 0.1f, 0.1f);
-			ActiveModel->BeginSpotLightTool(Position, Target);
-		}
-		break;
-
-	case lcTool::Camera:
-		{
-			lcVector3 Position = GetCameraLightInsertPosition();
-			lcVector3 Target = Position + lcVector3(0.1f, 0.1f, 0.1f);
-			ActiveModel->BeginCameraTool(Position, Target);
-		}
-		break;
-
-	case lcTool::Select:
-		break;
-
-	case lcTool::Move:
-	case lcTool::Rotate:
-		ActiveModel->BeginMouseTool();
-		break;
-
-	case lcTool::Eraser:
-	case lcTool::Paint:
-	case lcTool::ColorPicker:
-		break;
-
-	case lcTool::Zoom:
-	case lcTool::Pan:
-	case lcTool::RotateView:
-	case lcTool::Roll:
-		ActiveModel->BeginMouseTool();
-		break;
-
-	case lcTool::ZoomRegion:
-		break;
-
-	case lcTool::Count:
-		break;
-	}
-
-	UpdateCursor();
 }
 
 void View::StopTracking(bool Accept)

@@ -36,6 +36,7 @@ const char* MinifigWizard::mSectionNames[LC_MFW_NUMITEMS] =
 };
 
 MinifigWizard::MinifigWizard()
+	: lcGLWidget(nullptr)
 {
 	LoadSettings();
 	LoadTemplates();

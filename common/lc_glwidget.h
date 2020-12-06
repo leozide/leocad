@@ -1,6 +1,7 @@
 #pragma once
 
 #include "lc_commands.h"
+#include "lc_math.h"
 
 enum class lcDragState
 {
@@ -80,11 +81,13 @@ enum class lcTrackTool
 class lcGLWidget
 {
 public:
-	lcGLWidget();
+	lcGLWidget(lcModel* Model);
 	virtual ~lcGLWidget();
 
 	lcGLWidget(const lcGLWidget&) = delete;
 	lcGLWidget& operator=(const lcGLWidget&) = delete;
+
+	lcModel* GetActiveModel() const;
 
 	lcCamera* GetCamera() const
 	{
@@ -148,6 +151,8 @@ protected:
 	lcCursor GetCursor() const;
 	void SetCursor(lcCursor Cursor);
 	lcTool GetCurrentTool() const;
+	void StartTracking(lcTrackButton TrackButton);
+	lcVector3 GetCameraLightInsertPosition() const;
 
 	int mMouseX = 0;
 	int mMouseY = 0;
@@ -155,11 +160,16 @@ protected:
 	int mMouseDownY = 0;
 	Qt::KeyboardModifiers mMouseModifiers = Qt::NoModifier;
 
+	bool mTrackUpdated;
 	lcTrackTool mTrackTool = lcTrackTool::None;
 	lcTrackButton mTrackButton = lcTrackButton::None;
 	lcCursor mCursor = lcCursor::Default;
 
 	std::unique_ptr<lcScene> mScene;
+
+	lcModel* mModel = nullptr;
+	lcPiece* mActiveSubmodelInstance = nullptr;
+	lcMatrix44 mActiveSubmodelTransform;
 
 	lcCamera* mCamera = nullptr;
 	bool mDeleteContext = true;

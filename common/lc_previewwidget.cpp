@@ -80,7 +80,7 @@ void lcPreviewDockWidget::SetPreviewLock()
 }
 
 lcPreviewWidget::lcPreviewWidget()
-	: mLoader(new Project(true)), mViewSphere(this)
+	: lcGLWidget(nullptr), mLoader(new Project(true)), mViewSphere(this)
 {
 	mLoader->SetActiveModel(0);
 	mModel = mLoader->GetActiveModel();
@@ -203,11 +203,6 @@ void lcPreviewWidget::SetCamera(lcCamera* Camera) // called by lcModel::DeleteMo
 	mCamera->CopyPosition(Camera);
 }
 
-lcModel* lcPreviewWidget::GetActiveModel() const
-{
-	return mModel;
-}
-
 void lcPreviewWidget::ZoomExtents()
 {
 	lcModel* ActiveModel = GetActiveModel();
@@ -266,32 +261,6 @@ void lcPreviewWidget::DrawViewport()
 
 	mContext->SetDepthWrite(true);
 	glEnable(GL_DEPTH_TEST);
-}
-
-void lcPreviewWidget::StartTracking(lcTrackButton TrackButton)
-{
-	mTrackButton = TrackButton;
-	mMouseDownX = mMouseX;
-	mMouseDownY = mMouseY;
-	lcTool Tool = GetCurrentTool();
-	lcModel* ActiveModel = GetActiveModel();
-
-	switch (Tool)
-	{
-		case lcTool::Select:
-			break;
-
-		case lcTool::Pan:
-		case lcTool::RotateView:
-			ActiveModel->BeginMouseTool();
-			break;
-
-		case lcTool::Count:
-		default:
-			break;
-	}
-
-	UpdateCursor();
 }
 
 void lcPreviewWidget::StopTracking(bool Accept)

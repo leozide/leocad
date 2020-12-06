@@ -2,12 +2,15 @@
 #include "lc_glwidget.h"
 #include "lc_application.h"
 #include "lc_context.h"
+#include "piece.h"
 #include "camera.h"
+#include "pieceinf.h"
 #include "texfont.h"
+#include "lc_model.h"
 #include "lc_scene.h"
 
-lcGLWidget::lcGLWidget()
-	: mScene(new lcScene())
+lcGLWidget::lcGLWidget(lcModel* Model)
+	: mModel(Model), mScene(new lcScene())
 {
 	mContext = new lcContext();
 }
@@ -16,6 +19,11 @@ lcGLWidget::~lcGLWidget()
 {
 	if (mDeleteContext)
 		delete mContext;
+}
+
+lcModel* lcGLWidget::GetActiveModel() const
+{
+	return !mActiveSubmodelInstance ? mModel : mActiveSubmodelInstance->mPieceInfo->GetModel();
 }
 
 void lcGLWidget::SetMousePosition(int MouseX, int MouseY)
@@ -231,6 +239,93 @@ void lcGLWidget::UnprojectPoints(lcVector3* Points, int NumPoints) const
 {
 	int Viewport[4] = { 0, 0, mWidth, mHeight };
 	lcUnprojectPoints(Points, NumPoints, mCamera->mWorldView, GetProjectionMatrix(), Viewport);
+}
+
+void lcGLWidget::StartTracking(lcTrackButton TrackButton)
+{
+	mTrackButton = TrackButton;
+	mTrackUpdated = false;
+	mMouseDownX = mMouseX;
+	mMouseDownY = mMouseY;
+	lcTool Tool = GetCurrentTool();
+	lcModel* ActiveModel = GetActiveModel();
+
+	switch (Tool)
+	{
+		case lcTool::Insert:
+		case lcTool::Light:
+			break;
+
+		case lcTool::SpotLight:
+		{
+			lcVector3 Position = GetCameraLightInsertPosition();
+			lcVector3 Target = Position + lcVector3(0.1f, 0.1f, 0.1f);
+			ActiveModel->BeginSpotLightTool(Position, Target);
+		}
+		break;
+
+		case lcTool::Camera:
+		{
+			lcVector3 Position = GetCameraLightInsertPosition();
+			lcVector3 Target = Position + lcVector3(0.1f, 0.1f, 0.1f);
+			ActiveModel->BeginCameraTool(Position, Target);
+		}
+		break;
+
+		case lcTool::Select:
+			break;
+
+		case lcTool::Move:
+		case lcTool::Rotate:
+			ActiveModel->BeginMouseTool();
+			break;
+
+		case lcTool::Eraser:
+		case lcTool::Paint:
+		case lcTool::ColorPicker:
+			break;
+
+		case lcTool::Zoom:
+		case lcTool::Pan:
+		case lcTool::RotateView:
+		case lcTool::Roll:
+			ActiveModel->BeginMouseTool();
+			break;
+
+		case lcTool::ZoomRegion:
+			break;
+
+		case lcTool::Count:
+			break;
+	}
+
+	UpdateCursor();
+}
+
+lcVector3 lcGLWidget::GetCameraLightInsertPosition() const
+{
+	lcModel* ActiveModel = GetActiveModel();
+
+	std::array<lcVector3, 2> ClickPoints = { { lcVector3((float)mMouseX, (float)mMouseY, 0.0f), lcVector3((float)mMouseX, (float)mMouseY, 1.0f) } };
+	UnprojectPoints(ClickPoints.data(), 2);
+
+	if (ActiveModel != mModel)
+	{
+		lcMatrix44 InverseMatrix = lcMatrix44AffineInverse(mActiveSubmodelTransform);
+
+		for (lcVector3& Point : ClickPoints)
+			Point = lcMul31(Point, InverseMatrix);
+	}
+
+	lcVector3 Min, Max;
+	lcVector3 Center;
+
+	if (ActiveModel->GetPiecesBoundingBox(Min, Max))
+		Center = (Min + Max) / 2.0f;
+	else
+		Center = lcVector3(0.0f, 0.0f, 0.0f);
+
+	return lcRayPointClosestPoint(Center, ClickPoints[0], ClickPoints[1]);
 }
 
 void lcGLWidget::DrawBackground() const

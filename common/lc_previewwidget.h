@@ -43,7 +43,6 @@ public:
 	void ClearPreview();
 	void UpdatePreview();
 	bool SetCurrentPiece(const QString& PartType, int ColorCode);
-	lcModel* GetActiveModel() const;
 	void SetCamera(lcCamera* Camera);
 	void SetDefaultCamera();
 	void ZoomExtents();
@@ -71,12 +70,10 @@ public:
 protected:
 	void DrawViewport();
 
-	void StartTracking(lcTrackButton TrackButton);
 	void StopTracking(bool Accept);
 	void OnButtonDown(lcTrackButton TrackButton);
 
 	Project* mLoader;
-	lcModel* mModel;
 	lcViewSphere mViewSphere;
 
 	QString mDescription;

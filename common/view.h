@@ -26,7 +26,6 @@ public:
 		return mModel;
 	}
 
-	lcModel* GetActiveModel() const;
 	void SetTopSubmodelActive();
 	void SetSelectedSubmodelActive();
 
@@ -70,7 +69,6 @@ public:
 
 	lcVector3 GetMoveDirection(const lcVector3& Direction) const;
 	lcMatrix44 GetPieceInsertPosition(bool IgnoreSelected, PieceInfo* Info) const;
-	lcVector3 GetCameraLightInsertPosition() const;
 	void GetRayUnderPointer(lcVector3& Start, lcVector3& End) const;
 	lcObjectSection FindObjectUnderPointer(bool PiecesOnly, bool IgnoreSelected) const;
 	lcArray<lcObject*> FindObjectsInBox(float x1, float y1, float x2, float y2) const;
@@ -97,18 +95,12 @@ protected:
 	bool IsTrackToolAllowed(lcTrackTool TrackTool, quint32 AllowedTransforms) const;
 	lcTrackTool GetOverrideTrackTool(Qt::MouseButton Button) const;
 	float GetOverlayScale() const;
-	void StartTracking(lcTrackButton TrackButton);
 	void StopTracking(bool Accept);
 	void OnButtonDown(lcTrackButton TrackButton);
 	lcMatrix44 GetTileProjectionMatrix(int CurrentRow, int CurrentColumn, int CurrentTileWidth, int CurrentTileHeight) const;
 
-	lcModel* mModel;
-	lcPiece* mActiveSubmodelInstance;
-	lcMatrix44 mActiveSubmodelTransform;
-
 	lcDragState mDragState;
 	bool mTrackToolFromOverlay;
-	bool mTrackUpdated;
 	lcVector3 mMouseDownPosition;
 	PieceInfo* mMouseDownPiece;
 	QImage mRenderImage;

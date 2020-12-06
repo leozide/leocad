@@ -2277,14 +2277,11 @@ void View::UpdateTrackTool()
 		break;
 	}
 
-	if (NewTrackTool != mTrackTool)
-	{
-		mTrackTool = NewTrackTool;
-		UpdateCursor();
+	mTrackTool = NewTrackTool;
+	UpdateCursor();
 
-		if (Redraw)
-			gMainWindow->UpdateAllViews();
-	}
+	if (Redraw)
+		gMainWindow->UpdateAllViews();
 }
 
 bool View::IsTrackToolAllowed(lcTrackTool TrackTool, quint32 AllowedTransforms) const

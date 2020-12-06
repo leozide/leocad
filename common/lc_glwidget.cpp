@@ -58,6 +58,9 @@ void lcGLWidget::Redraw()
 
 lcCursor lcGLWidget::GetCursor() const
 {
+	if (mTrackButton != lcTrackButton::None)
+		return lcCursor::Hidden;
+
 	if (mTrackTool == lcTrackTool::Select)
 	{
 		if (mMouseModifiers & Qt::ControlModifier)
@@ -122,6 +125,7 @@ void lcGLWidget::SetCursor(lcCursor CursorType)
 
 	const lcCursorInfo Cursors[static_cast<int>(lcCursor::Count)] =
 	{
+		{  0,  0, "" },                                 // lcCursor::Hidden
 		{  0,  0, "" },                                 // lcCursor::Default
 		{  8,  3, ":/resources/cursor_insert" },        // lcCursor::Brick
 		{ 15, 15, ":/resources/cursor_light" },         // lcCursor::Light
@@ -146,7 +150,12 @@ void lcGLWidget::SetCursor(lcCursor CursorType)
 
 	static_assert(LC_ARRAY_COUNT(Cursors) == static_cast<int>(lcCursor::Count), "Array size mismatch");
 
-	if (CursorType > lcCursor::Default && CursorType < lcCursor::Count)
+	if (CursorType == lcCursor::Hidden)
+	{
+		mWidget->setCursor(Qt::BlankCursor);
+		mCursor = CursorType;
+	}
+	else if (CursorType >= lcCursor::First && CursorType < lcCursor::Count)
 	{
 		const lcCursorInfo& Cursor = Cursors[static_cast<int>(CursorType)];
 		mWidget->setCursor(QCursor(QPixmap(Cursor.Name), Cursor.x, Cursor.y));

@@ -12,6 +12,8 @@ enum class lcDragState
 
 enum class lcCursor
 {
+	First,
+	Hidden = First,
 	Default,
 	Brick,
 	Light,

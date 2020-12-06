@@ -287,5 +287,5 @@ enum class lcTool
 	Count
 };
 
-extern const char* gToolNames[static_cast<int>(lcTool::Count)];
+extern const char* gToolNames[];
 

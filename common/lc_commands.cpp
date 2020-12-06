@@ -1657,9 +1657,9 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 	}
 };
 
-static_assert(sizeof(gCommands)/sizeof(gCommands[0]) == LC_NUM_COMMANDS, "Array size mismatch.");
+LC_ARRAY_SIZE_CHECK(gCommands, LC_NUM_COMMANDS);
 
-const char* gToolNames[static_cast<int>(lcTool::Count)] =
+const char* gToolNames[] =
 {
     QT_TRANSLATE_NOOP("Mouse", "NewPiece"),      // lcTool::Insert
     QT_TRANSLATE_NOOP("Mouse", "NewPointLight"), // lcTool::Light
@@ -1678,4 +1678,4 @@ const char* gToolNames[static_cast<int>(lcTool::Count)] =
     QT_TRANSLATE_NOOP("Mouse", "ZoomRegion")     // lcTool::ZoomRegion
 };
 
-static_assert(LC_ARRAY_COUNT(gToolNames) == static_cast<int>(lcTool::Count), "Array size mismatch.");
+LC_ARRAY_SIZE_CHECK(gToolNames, lcTool::Count);

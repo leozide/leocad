@@ -102,7 +102,7 @@ void lcContext::CreateShaderPrograms()
 "		LC_SHADER_PRECISION float Diffuse = min(abs(dot(Normal, LightDirection)) * 0.6 + 0.65, 1.0);\n"
 	};
 
-	const char* const VertexShaders[static_cast<int>(lcMaterialType::Count)] =
+	const char* const VertexShaders[] =
 	{
 		":/resources/shaders/unlit_color_vs.glsl",            // UnlitColor
 		":/resources/shaders/unlit_texture_modulate_vs.glsl", // UnlitTextureModulate
@@ -113,7 +113,9 @@ void lcContext::CreateShaderPrograms()
 		":/resources/shaders/fakelit_texture_decal_vs.glsl"   // FakeLitTextureDecal
 	};
 
-	const char* const FragmentShaders[static_cast<int>(lcMaterialType::Count)] =
+	LC_ARRAY_SIZE_CHECK(VertexShaders, lcMaterialType::Count);
+
+	const char* const FragmentShaders[] =
 	{
 		":/resources/shaders/unlit_color_ps.glsl",            // UnlitColor
 		":/resources/shaders/unlit_texture_modulate_ps.glsl", // UnlitTextureModulate
@@ -123,6 +125,8 @@ void lcContext::CreateShaderPrograms()
 		":/resources/shaders/fakelit_color_ps.glsl",          // FakeLitColor
 		":/resources/shaders/fakelit_texture_decal_ps.glsl"   // FakeLitTextureDecal
 	};
+
+	LC_ARRAY_SIZE_CHECK(FragmentShaders, lcMaterialType::Count);
 
 	const auto LoadShader = [ShaderPrefix](const char* FileName, GLuint ShaderType) -> GLuint
 	{

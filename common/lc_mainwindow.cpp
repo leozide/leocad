@@ -1771,13 +1771,15 @@ void lcMainWindow::SetTransformType(lcTransformType TransformType)
 
 	mTransformType = TransformType;
 
-	const char* IconNames[static_cast<int>(lcTransformType::Count)] =
+	constexpr const char* IconNames[] =
 	{
 		":/resources/edit_transform_absolute_translation.png",
 		":/resources/edit_transform_relative_translation.png",
 		":/resources/edit_transform_absolute_rotation.png",
 		":/resources/edit_transform_relative_rotation.png"
 	};
+
+	LC_ARRAY_SIZE_CHECK(IconNames, lcTransformType::Count);
 
 	int TransformIndex = static_cast<int>(TransformType);
 	mActions[LC_EDIT_TRANSFORM_ABSOLUTE_TRANSLATION + TransformIndex]->setChecked(true);

@@ -70,7 +70,7 @@ lcCursor lcGLWidget::GetCursor() const
 			return lcCursor::SelectRemove;
 	}
 
-	const lcCursor CursorFromTrackTool[static_cast<int>(lcTrackTool::Count)] =
+	constexpr lcCursor CursorFromTrackTool[] =
 	{
 		lcCursor::Select,      // lcTrackTool::None
 		lcCursor::Brick,       // lcTrackTool::Insert
@@ -104,7 +104,7 @@ lcCursor lcGLWidget::GetCursor() const
 		lcCursor::ZoomRegion   // lcTrackTool::ZoomRegion
 	};
 
-	static_assert(LC_ARRAY_COUNT(CursorFromTrackTool) == static_cast<int>(lcTrackTool::Count), "Array size mismatch.");
+	LC_ARRAY_SIZE_CHECK(CursorFromTrackTool, lcTrackTool::Count);
 
 	if (mTrackTool >= lcTrackTool::None && mTrackTool < lcTrackTool::Count)
 		return CursorFromTrackTool[static_cast<int>(mTrackTool)];
@@ -123,7 +123,7 @@ void lcGLWidget::SetCursor(lcCursor CursorType)
 		const char* Name;
 	};
 
-	const lcCursorInfo Cursors[static_cast<int>(lcCursor::Count)] =
+	constexpr lcCursorInfo Cursors[] =
 	{
 		{  0,  0, "" },                                 // lcCursor::Hidden
 		{  0,  0, "" },                                 // lcCursor::Default
@@ -148,7 +148,7 @@ void lcGLWidget::SetCursor(lcCursor CursorType)
 		{ 15, 15, ":/resources/cursor_rotate_view" },   // lcCursor::RotateView
 	};
 
-	static_assert(LC_ARRAY_COUNT(Cursors) == static_cast<int>(lcCursor::Count), "Array size mismatch");
+	LC_ARRAY_SIZE_CHECK(Cursors, lcCursor::Count);
 
 	if (CursorType == lcCursor::Hidden)
 	{
@@ -175,7 +175,7 @@ void lcGLWidget::UpdateCursor()
 
 lcTool lcGLWidget::GetCurrentTool() const
 {
-	const lcTool ToolFromTrackTool[static_cast<int>(lcTrackTool::Count)] =
+	constexpr lcTool ToolFromTrackTool[] =
 	{
 		lcTool::Select,      // lcTrackTool::None
 		lcTool::Insert,      // lcTrackTool::Insert
@@ -209,7 +209,7 @@ lcTool lcGLWidget::GetCurrentTool() const
 		lcTool::ZoomRegion   // lcTrackTool::ZoomRegion
 	};
 
-	static_assert(LC_ARRAY_COUNT(ToolFromTrackTool) == static_cast<int>(lcTrackTool::Count), "Array size mismatch.");
+	LC_ARRAY_SIZE_CHECK(ToolFromTrackTool, lcTrackTool::Count);
 
 	if (mTrackTool >= lcTrackTool::None && mTrackTool < lcTrackTool::Count)
 		return ToolFromTrackTool[static_cast<int>(mTrackTool)];

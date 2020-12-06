@@ -1714,7 +1714,7 @@ lcTrackTool View::GetOverrideTrackTool(Qt::MouseButton Button) const
 	if (OverrideTool == lcTool::Count)
 		return lcTrackTool::None;
 
-	lcTrackTool TrackToolFromTool[static_cast<int>(lcTool::Count)] =
+	constexpr lcTrackTool TrackToolFromTool[] =
 	{
 	    lcTrackTool::Insert,      // lcTool::Insert
 	    lcTrackTool::PointLight,  // lcTool::Light
@@ -1732,6 +1732,8 @@ lcTrackTool View::GetOverrideTrackTool(Qt::MouseButton Button) const
 	    lcTrackTool::Roll,        // lcTool::Roll
 	    lcTrackTool::ZoomRegion   // lcTool::ZoomRegion
 	};
+
+	LC_ARRAY_SIZE_CHECK(TrackToolFromTool, lcTool::Count);
 
 	return TrackToolFromTool[static_cast<int>(OverrideTool)];
 }

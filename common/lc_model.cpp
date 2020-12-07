@@ -1227,7 +1227,8 @@ void lcModel::DuplicateSelectedPieces()
 
 void lcModel::GetScene(lcScene* Scene, lcCamera* ViewCamera, bool AllowHighlight, bool AllowFade) const
 {
-	mPieceInfo->AddRenderMesh(*Scene);
+	if (mPieceInfo)
+		mPieceInfo->AddRenderMesh(*Scene);
 
 	for (const lcPiece* Piece : mPieces)
 	{
@@ -4432,6 +4433,24 @@ void lcModel::ShowMinifigDialog()
 	SetSelectionAndFocus(Pieces, nullptr, 0, false);
 	gMainWindow->UpdateTimeline(false, false);
 	SaveCheckpoint(tr("Minifig"));
+}
+
+void lcModel::SetMinifig(const lcMinifig& Minifig)
+{
+	DeleteModel();
+
+	for (int PartIdx = 0; PartIdx < LC_MFW_NUMITEMS; PartIdx++)
+	{
+		if (!Minifig.Parts[PartIdx])
+			continue;
+
+		lcPiece* Piece = new lcPiece(Minifig.Parts[PartIdx]);
+
+		Piece->Initialize(Minifig.Matrices[PartIdx], 1);
+		Piece->SetColorIndex(Minifig.Colors[PartIdx]);
+		AddPiece(Piece);
+		Piece->UpdatePosition(1);
+	}
 }
 
 void lcModel::UpdateInterface()

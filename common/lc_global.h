@@ -66,6 +66,7 @@ class lcGroup;
 class PieceInfo;
 typedef std::map<const PieceInfo*, std::map<int, int>> lcPartsList;
 struct lcModelPartsEntry;
+struct lcMinifig;
 
 class lcVector2;
 class lcVector3;

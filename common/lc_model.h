@@ -222,6 +222,7 @@ public:
 			mSavedHistory = mUndoHistory[0];
 	}
 
+	void SetMinifig(const lcMinifig& Minifig);
 	void SetPreviewPiece(lcPiece* Piece)
 	{
 		AddPiece(Piece);

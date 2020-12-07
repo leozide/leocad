@@ -1,9 +1,9 @@
 #include "lc_global.h"
+#include "minifig.h"
 #include "lc_colors.h"
-#include "lc_math.h"
 #include <string.h>
 #include <stdio.h>
-#include "minifig.h"
+#include "camera.h"
 #include "pieceinf.h"
 #include "project.h"
 #include "lc_model.h"
@@ -41,6 +41,9 @@ MinifigWizard::MinifigWizard()
 	LoadSettings();
 	LoadTemplates();
 
+	mModel = new lcModel(QString(), false);
+	mCamera = new lcCamera(true);
+
 	mRotateX = 75.0f;
 	mRotateZ = 180.0f;
 	mDistance = 10.0f;
@@ -54,7 +57,10 @@ MinifigWizard::~MinifigWizard()
 
 	for (int i = 0; i < LC_MFW_NUMITEMS; i++)
 		if (mMinifig.Parts[i])
-			Library->ReleasePieceInfo(mMinifig.Parts[i]);
+			Library->ReleasePieceInfo(mMinifig.Parts[i]); // todo: don't call ReleasePieceInfo here because it may release textures and they need a GL context current
+
+	delete mModel;
+	delete mCamera;
 
 	SaveTemplates();
 }
@@ -324,10 +330,33 @@ void MinifigWizard::OnDraw()
 {
 	mContext->SetDefaultState();
 
-	const float Aspect = (float)mWidth/(float)mHeight;
 	mContext->SetViewport(0, 0, mWidth, mHeight);
 
 	DrawBackground();
+
+	// todo: temp viewport drawing code until this is merged with View
+	{
+		mContext->SetWorldMatrix(lcMatrix44Identity());
+		mContext->SetViewMatrix(lcMatrix44Translation(lcVector3(0.375, 0.375, 0.0)));
+		mContext->SetProjectionMatrix(lcMatrix44Ortho(0.0f, mWidth, 0.0f, mHeight, -1.0f, 1.0f));
+
+		mContext->SetDepthWrite(false);
+		glDisable(GL_DEPTH_TEST);
+
+//		if (gMainWindow->GetActiveView() == this)
+		{
+			mContext->SetMaterial(lcMaterialType::UnlitColor);
+			mContext->SetColor(lcVector4FromColor(lcGetPreferences().mActiveViewColor));
+			float Verts[8] = { 0.0f, 0.0f, mWidth - 1.0f, 0.0f, mWidth - 1.0f, mHeight - 1.0f, 0.0f, mHeight - 1.0f };
+
+			mContext->SetVertexBufferPointer(Verts);
+			mContext->SetVertexFormatPosition(2);
+			mContext->DrawPrimitives(GL_LINE_LOOP, 0, 4);
+		}
+
+		mContext->SetDepthWrite(true);
+		glEnable(GL_DEPTH_TEST);
+	}
 
 	lcVector3 Min(FLT_MAX, FLT_MAX, FLT_MAX), Max(-FLT_MAX, -FLT_MAX, -FLT_MAX);
 
@@ -357,10 +386,11 @@ void MinifigWizard::OnDraw()
 	Eye = lcMul30(Eye, lcMatrix44RotationX(-mRotateX * LC_DTOR));
 	Eye = lcMul30(Eye, lcMatrix44RotationZ(-mRotateZ * LC_DTOR));
 
+	const float Aspect = (float)mWidth / (float)mHeight;
 	const lcMatrix44 Projection = lcMatrix44Perspective(30.0f, Aspect, 1.0f, 2500.0f);
 	mContext->SetProjectionMatrix(Projection);
 
-	lcMatrix44 ViewMatrix;
+	lcMatrix44& ViewMatrix = mCamera->mWorldView;
 
 	if (mAutoZoom)
 	{
@@ -384,17 +414,14 @@ void MinifigWizard::OnDraw()
 
 	Calculate();
 
-	lcScene Scene;
-	Scene.Begin(ViewMatrix);
-	Scene.SetAllowLOD(false);
+	mScene->Begin(ViewMatrix);
+	mScene->SetAllowLOD(false);
 
-	for (int PieceIdx = 0; PieceIdx < LC_MFW_NUMITEMS; PieceIdx++)
-		if (mMinifig.Parts[PieceIdx])
-			mMinifig.Parts[PieceIdx]->AddRenderMeshes(&Scene, mMinifig.Matrices[PieceIdx], mMinifig.Colors[PieceIdx], lcRenderMeshState::Default, true);
+	mModel->GetScene(mScene.get(), mCamera, false, false);
 
-	Scene.End();
+	mScene->End();
 
-	Scene.Draw(mContext);
+	mScene->Draw(mContext);
 
 	mContext->ClearResources();
 }
@@ -638,6 +665,8 @@ void MinifigWizard::Calculate()
 		Mat.SetTranslation(lcMul31(Center, Mat2));
 		Matrices[LC_MFW_LLEGA] = lcMul(Mat, Matrices[LC_MFW_LLEG]);
 	}
+
+	mModel->SetMinifig(mMinifig);
 }
 
 int MinifigWizard::GetSelectionIndex(int Type) const

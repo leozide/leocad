@@ -266,11 +266,11 @@ void lcTimelineWidget::UpdateCurrentStepItem()
 			QFont Font = CurrentStepItem->font(0);
 			Font.setBold(true);
 			CurrentStepItem->setFont(0, Font);
+			setCurrentItem(CurrentStepItem);
 		}
 
 		mCurrentStepItem = CurrentStepItem;
 	}
-
 }
 
 void lcTimelineWidget::UpdateSelection()

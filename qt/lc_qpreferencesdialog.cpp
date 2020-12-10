@@ -863,7 +863,7 @@ void lcQPreferencesDialog::updateCommandList()
 	ui->commandList->clear();
 	QMap<QString, QTreeWidgetItem*> sections;
 
-	for (int actionIdx = 0; actionIdx < LC_NUM_COMMANDS; actionIdx++)
+	for (unsigned int actionIdx = 0; actionIdx < LC_NUM_COMMANDS; actionIdx++)
 	{
 		if (!gCommands[actionIdx].ID[0])
 			continue;
@@ -989,17 +989,66 @@ void lcQPreferencesDialog::on_KeyboardFilterEdit_textEdited(const QString& Text)
 
 void lcQPreferencesDialog::on_shortcutAssign_clicked()
 {
-	QTreeWidgetItem *current = ui->commandList->currentItem();
+	QTreeWidgetItem* CurrentItem = ui->commandList->currentItem();
 
-	if (!current || !current->data(0, Qt::UserRole).isValid())
+	if (!CurrentItem || !CurrentItem->data(0, Qt::UserRole).isValid())
 		return;
 
-	int shortcutIndex = qvariant_cast<int>(current->data(0, Qt::UserRole));
-	mOptions->KeyboardShortcuts.mShortcuts[shortcutIndex] = ui->shortcutEdit->text();
+	uint ShortcutIndex = CurrentItem->data(0, Qt::UserRole).toUInt();
+	QString (&Shortcuts)[LC_NUM_COMMANDS] = mOptions->KeyboardShortcuts.mShortcuts;
 
-	current->setText(1, ui->shortcutEdit->text());
+	if (ShortcutIndex >= LC_ARRAY_COUNT(Shortcuts))
+		return;
 
-	setShortcutModified(current, mOptions->KeyboardShortcuts.mShortcuts[shortcutIndex] != gCommands[shortcutIndex].DefaultShortcut);
+	QString NewShortcut = ui->shortcutEdit->text();
+
+	if (!NewShortcut.isEmpty())
+	{
+		for (uint ExistingIndex = 0; ExistingIndex < LC_ARRAY_COUNT(Shortcuts); ExistingIndex++)
+		{
+			if (NewShortcut == Shortcuts[ExistingIndex])
+			{
+				QString QuestionText = tr("The shortcut '%1' is already assigned to '%2'. Do you want to replace it?").arg(NewShortcut, gCommands[ExistingIndex].ID);
+
+				if (QMessageBox::question(this, tr("Duplicate Shortcut"), QuestionText, QMessageBox::Yes | QMessageBox::No) != QMessageBox::Yes)
+					return;
+
+				mOptions->KeyboardShortcuts.mShortcuts[ExistingIndex].clear();
+
+				std::function<QTreeWidgetItem* (QTreeWidgetItem*)> FindItem = [&FindItem, ExistingIndex](QTreeWidgetItem* ParentItem) -> QTreeWidgetItem*
+				{
+					for (int ChildIdx = 0; ChildIdx < ParentItem->childCount(); ChildIdx++)
+					{
+						QTreeWidgetItem* ChildItem = ParentItem->child(ChildIdx);
+						uint ChildIndex = ChildItem->data(0, Qt::UserRole).toUInt();
+
+						if (ChildIndex == ExistingIndex)
+							return ChildItem;
+
+						QTreeWidgetItem* ExistingItem = FindItem(ChildItem);
+
+						if (ExistingItem)
+							return ExistingItem;
+					}
+
+					return nullptr;
+				};
+
+				QTreeWidgetItem* ExistingItem = FindItem(ui->commandList->invisibleRootItem());
+
+				if (ExistingItem)
+				{
+					ExistingItem->setText(1, QString());
+					setShortcutModified(ExistingItem, gCommands[ShortcutIndex].DefaultShortcut[0] != 0);
+				}
+			}
+		}
+	}
+
+	mOptions->KeyboardShortcuts.mShortcuts[ShortcutIndex] = NewShortcut;
+	CurrentItem->setText(1, NewShortcut);
+
+	setShortcutModified(CurrentItem, mOptions->KeyboardShortcuts.mShortcuts[ShortcutIndex] != gCommands[ShortcutIndex].DefaultShortcut);
 
 	mOptions->KeyboardShortcutsModified = true;
 	mOptions->KeyboardShortcutsDefault = false;

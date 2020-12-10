@@ -308,7 +308,7 @@ void lcPreviewWidget::OnButtonDown(lcTrackButton TrackButton)
 			StartTracking(TrackButton);
 			break;
 
-		case lcTrackTool::Count:
+		default:
 			break;
 	}
 }
@@ -520,7 +520,7 @@ void lcPreviewWidget::OnMouseMove()
 			Redraw();
 			break;
 
-		case lcTrackTool::Count:
+		default:
 			break;
 	}
 }

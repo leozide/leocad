@@ -130,19 +130,12 @@ void lcContext::CreateShaderPrograms()
 
 	const auto LoadShader = [ShaderPrefix](const char* FileName, GLuint ShaderType) -> GLuint
 	{
-		QResource Resource(FileName);
+		QFile ShaderFile(FileName);
 
-		if (!Resource.isValid())
+		if (!ShaderFile.open(QIODevice::ReadOnly))
 			return 0;
 
-		QByteArray Data;
-
-		if (Resource.isCompressed())
-			Data = qUncompress(Resource.data(), Resource.size());
-		else
-			Data = QByteArray::fromRawData((const char*)Resource.data(), Resource.size());
-
-		Data = ShaderPrefix + Data;
+		QByteArray Data = ShaderPrefix + ShaderFile.readAll();
 		const char* Source = Data.constData();
 
 		const GLuint Shader = glCreateShader(ShaderType);

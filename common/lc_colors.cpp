@@ -412,23 +412,10 @@ bool lcLoadColorFile(lcFile& File)
 
 void lcLoadDefaultColors()
 {
-	QResource Resource(":/resources/ldconfig.ldr");
+	lcDiskFile ConfigFile(":/resources/ldconfig.ldr");
 
-	if (!Resource.isValid())
-		return;
-
-	QByteArray Data;
-
-	if (Resource.isCompressed())
-		Data = qUncompress(Resource.data(), Resource.size());
-	else
-		Data = QByteArray::fromRawData((const char*)Resource.data(), Resource.size());
-
-	lcMemFile MemSettings;
-
-	MemSettings.WriteBuffer(Data.constData(), Data.size());
-	MemSettings.Seek(0, SEEK_SET);
-	lcLoadColorFile(MemSettings);
+	if (ConfigFile.Open(QIODevice::ReadOnly))
+		lcLoadColorFile(ConfigFile);
 }
 
 int lcGetColorIndex(quint32 ColorCode)

@@ -80,21 +80,10 @@ void MinifigWizard::LoadSettings()
 		}
 	}
 
-	QResource Resource(":/resources/minifig.ini");
+	lcDiskFile MinifigFile(":/resources/minifig.ini");
 
-	if (Resource.isValid())
-	{
-		QByteArray Data;
-
-		if (Resource.isCompressed())
-			Data = qUncompress(Resource.data(), Resource.size());
-		else
-			Data = QByteArray::fromRawData((const char*)Resource.data(), Resource.size());
-
-		lcMemFile MemSettings;
-		MemSettings.WriteBuffer(Data.constData(), Data.size());
-		ParseSettings(MemSettings);
-	}
+	if (MinifigFile.Open(QIODevice::ReadOnly))
+		ParseSettings(MinifigFile);
 }
 
 void MinifigWizard::OnInitialUpdate()

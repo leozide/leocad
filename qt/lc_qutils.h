@@ -28,7 +28,11 @@ public:
 	{
 		QFontMetrics FontMetrics(font());
 
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 11, 0))
+		int Width = FontMetrics.horizontalAdvance(QLatin1Char('x')) * 10;
+#else
 		int Width = FontMetrics.width(QLatin1Char('x')) * 10;
+#endif
 
 		return QLineEdit::sizeHint() - QSize(Width, 0);
 	}

@@ -212,7 +212,7 @@ void lcTimelineWidget::Update(bool Clear, bool UpdateItems)
 			QColor Color = palette().text().color();
 			if (Piece->IsHidden())
 				Color.setAlpha(128);
-			PieceItem->setTextColor(0, Color);
+			PieceItem->setForeground(0, Color);
 		}
 
 		PieceItem->setSelected(Piece->IsSelected());

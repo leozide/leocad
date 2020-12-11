@@ -465,37 +465,31 @@ void lcQPreferencesDialog::ColorButtonClicked()
 	{
 		Color = &mOptions->Preferences.mBackgroundSolidColor;
 		Title = tr("Select Background Color");
-		DialogOptions = 0;
 	}
 	else if (Button == ui->BackgroundGradient1ColorButton)
 	{
 		Color = &mOptions->Preferences.mBackgroundGradientColorTop;
 		Title = tr("Select Gradient Top Color");
-		DialogOptions = 0;
 	}
 	else if (Button == ui->BackgroundGradient2ColorButton)
 	{
 		Color = &mOptions->Preferences.mBackgroundGradientColorBottom;
 		Title = tr("Select Gradient Bottom Color");
-		DialogOptions = 0;
 	}
 	else if (Button == ui->AxesColorButton)
 	{
 		Color = &mOptions->Preferences.mAxesColor;
 		Title = tr("Select Axes Color");
-		DialogOptions = 0;
 	}
 	else if (Button == ui->OverlayColorButton)
 	{
 		Color = &mOptions->Preferences.mOverlayColor;
 		Title = tr("Select Overlay Color");
-		DialogOptions = 0;
 	}
 	else if (Button == ui->ActiveViewColorButton)
 	{
 		Color = &mOptions->Preferences.mActiveViewColor;
 		Title = tr("Select Active View Color");
-		DialogOptions = 0;
 	}
 	else if (Button == ui->FadeStepsColor)
 	{
@@ -519,25 +513,21 @@ void lcQPreferencesDialog::ColorButtonClicked()
 	{
 		Color = &mOptions->Preferences.mGridLineColor;
 		Title = tr("Select Grid Line Color");
-		DialogOptions = 0;
 	}
 	else if (Button == ui->ViewSphereColorButton)
 	{
 		Color = &mOptions->Preferences.mViewSphereColor;
 		Title = tr("Select View Sphere Color");
-		DialogOptions = 0;
 	}
 	else if (Button == ui->ViewSphereTextColorButton)
 	{
 		Color = &mOptions->Preferences.mViewSphereTextColor;
 		Title = tr("Select View Sphere Text Color");
-		DialogOptions = 0;
 	}
 	else if (Button == ui->ViewSphereHighlightColorButton)
 	{
 		Color = &mOptions->Preferences.mViewSphereHighlightColor;
 		Title = tr("Select View Sphere Highlight Color");
-		DialogOptions = 0;
 	}
 	else
 		return;

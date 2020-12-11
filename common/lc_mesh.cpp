@@ -29,7 +29,6 @@ lcMesh::lcMesh()
 	mIndexDataSize = 0;
 	mVertexCacheOffset = -1;
 	mIndexCacheOffset = -1;
-	mFlags = 0;
 }
 
 lcMesh::~lcMesh()

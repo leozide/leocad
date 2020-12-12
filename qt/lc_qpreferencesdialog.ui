@@ -17,7 +17,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>3</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="tabGeneral">
       <attribute name="title">
@@ -1000,48 +1000,34 @@
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="groupBox_8">
+        <widget class="QGroupBox" name="groupBox_11">
          <property name="title">
-          <string>View</string>
+          <string>Overlays</string>
          </property>
-         <layout class="QHBoxLayout" name="horizontalLayout_8">
-          <item>
-           <widget class="QToolButton" name="AxesColorButton">
-            <property name="text">
-             <string/>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="label_6">
-            <property name="text">
-             <string>Active View:</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QToolButton" name="ActiveViewColorButton">
-            <property name="text">
-             <string/>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="label_2">
-            <property name="text">
-             <string>Overlay Color:</string>
-            </property>
-           </widget>
-          </item>
-          <item>
+         <layout class="QGridLayout" name="gridLayout_8">
+          <item row="1" column="3">
            <widget class="QToolButton" name="OverlayColorButton">
             <property name="text">
              <string/>
             </property>
            </widget>
           </item>
-          <item>
-           <spacer name="horizontalSpacer_15">
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_31">
+            <property name="text">
+             <string>Axis Icon:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QToolButton" name="AxesColorButton">
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="4">
+           <spacer name="horizontalSpacer_16">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
             </property>
@@ -1052,6 +1038,41 @@
              </size>
             </property>
            </spacer>
+          </item>
+          <item row="1" column="2">
+           <widget class="QLabel" name="label_2">
+            <property name="text">
+             <string>Overlay Color:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_6">
+            <property name="text">
+             <string>Active View:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QToolButton" name="ActiveViewColorButton">
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QLabel" name="label_32">
+            <property name="text">
+             <string>Inactive View:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="3">
+           <widget class="QToolButton" name="InactiveViewColorButton">
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
           </item>
          </layout>
         </widget>
@@ -1754,6 +1775,20 @@
   <tabstop>PreviewPositionCombo</tabstop>
   <tabstop>PreviewViewSphereCheckBox</tabstop>
   <tabstop>PreviewAxisIconCheckBox</tabstop>
+  <tabstop>BackgroundSolidRadio</tabstop>
+  <tabstop>BackgroundSolidColorButton</tabstop>
+  <tabstop>BackgroundGradientRadio</tabstop>
+  <tabstop>BackgroundGradient1ColorButton</tabstop>
+  <tabstop>BackgroundGradient2ColorButton</tabstop>
+  <tabstop>ActiveViewColorButton</tabstop>
+  <tabstop>InactiveViewColorButton</tabstop>
+  <tabstop>AxesColorButton</tabstop>
+  <tabstop>OverlayColorButton</tabstop>
+  <tabstop>gridLineColor</tabstop>
+  <tabstop>gridStudColor</tabstop>
+  <tabstop>ViewSphereColorButton</tabstop>
+  <tabstop>ViewSphereTextColorButton</tabstop>
+  <tabstop>ViewSphereHighlightColorButton</tabstop>
   <tabstop>categoriesTree</tabstop>
   <tabstop>partsTree</tabstop>
   <tabstop>importCategories</tabstop>

@@ -212,6 +212,9 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 	pix.fill(QColor(LC_RGBA_RED(mOptions->Preferences.mActiveViewColor), LC_RGBA_GREEN(mOptions->Preferences.mActiveViewColor), LC_RGBA_BLUE(mOptions->Preferences.mActiveViewColor)));
 	ui->ActiveViewColorButton->setIcon(pix);
 	
+	pix.fill(QColor(LC_RGBA_RED(mOptions->Preferences.mInactiveViewColor), LC_RGBA_GREEN(mOptions->Preferences.mInactiveViewColor), LC_RGBA_BLUE(mOptions->Preferences.mInactiveViewColor)));
+	ui->InactiveViewColorButton->setIcon(pix);
+
 	pix.fill(QColor(LC_RGBA_RED(mOptions->Preferences.mFadeStepsColor), LC_RGBA_GREEN(mOptions->Preferences.mFadeStepsColor), LC_RGBA_BLUE(mOptions->Preferences.mFadeStepsColor)));
 	ui->FadeStepsColor->setIcon(pix);
 
@@ -490,6 +493,11 @@ void lcQPreferencesDialog::ColorButtonClicked()
 	{
 		Color = &mOptions->Preferences.mActiveViewColor;
 		Title = tr("Select Active View Color");
+	}
+	else if (Button == ui->InactiveViewColorButton)
+	{
+		Color = &mOptions->Preferences.mInactiveViewColor;
+		Title = tr("Select Inactive View Color");
 	}
 	else if (Button == ui->FadeStepsColor)
 	{

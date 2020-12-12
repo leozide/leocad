@@ -1537,6 +1537,11 @@ void lcPiecesLibrary::UploadTextures(lcContext* Context)
 	mTextureUploads.clear();
 }
 
+bool lcPiecesLibrary::SupportsStudLogo() const
+{
+	return mZipFiles[LC_ZIPFILE_UNOFFICIAL] || mHasUnofficial;
+}
+
 void lcPiecesLibrary::SetStudLogo(int StudLogo, bool Reload)
 {
 	mStudLogo = StudLogo;

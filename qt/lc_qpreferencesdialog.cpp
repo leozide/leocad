@@ -182,6 +182,12 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 	else
 		ui->PreviewViewSphereSizeCombo->setCurrentIndex(0);
 
+	if (!lcGetPiecesLibrary()->SupportsStudLogo())
+	{
+		ui->studLogo->setEnabled(false);
+		ui->studLogoCombo->setEnabled(false);
+	}
+
 	ui->studLogo->setChecked(mOptions->StudLogo);
 	if (ui->studLogo->isChecked())
 		ui->studLogoCombo->setCurrentIndex(mOptions->StudLogo - 1);
@@ -556,7 +562,8 @@ void lcQPreferencesDialog::ColorButtonClicked()
 
 void lcQPreferencesDialog::on_studLogo_toggled()
 {
-   ui->studLogoCombo->setEnabled(ui->studLogo->isChecked());
+	if (lcGetPiecesLibrary()->SupportsStudLogo())
+	   ui->studLogoCombo->setEnabled(ui->studLogo->isChecked());
 }
 
 void lcQPreferencesDialog::on_antiAliasing_toggled()

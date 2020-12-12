@@ -9,6 +9,8 @@
 #include "lc_model.h"
 #include "lc_scene.h"
 
+lcGLWidget* lcGLWidget::mLastFocusView;
+
 lcGLWidget::lcGLWidget(lcModel* Model)
 	: mModel(Model), mScene(new lcScene())
 {
@@ -17,6 +19,9 @@ lcGLWidget::lcGLWidget(lcModel* Model)
 
 lcGLWidget::~lcGLWidget()
 {
+	if (mLastFocusView == this)
+		mLastFocusView = nullptr;
+
 	if (mDeleteContext)
 		delete mContext;
 }
@@ -24,6 +29,12 @@ lcGLWidget::~lcGLWidget()
 lcModel* lcGLWidget::GetActiveModel() const
 {
 	return !mActiveSubmodelInstance ? mModel : mActiveSubmodelInstance->mPieceInfo->GetModel();
+}
+
+void lcGLWidget::SetFocus(bool Focus)
+{
+	if (Focus)
+		mLastFocusView = this;
 }
 
 void lcGLWidget::SetMousePosition(int MouseX, int MouseY)
@@ -386,6 +397,47 @@ void lcGLWidget::DrawBackground() const
 
 	glEnable(GL_DEPTH_TEST);
 	Context->SetDepthWrite(true);
+}
+
+void lcGLWidget::DrawViewport() const
+{
+	mContext->SetWorldMatrix(lcMatrix44Identity());
+	mContext->SetViewMatrix(lcMatrix44Translation(lcVector3(0.375, 0.375, 0.0)));
+	mContext->SetProjectionMatrix(lcMatrix44Ortho(0.0f, mWidth, 0.0f, mHeight, -1.0f, 1.0f));
+
+	mContext->SetDepthWrite(false);
+	glDisable(GL_DEPTH_TEST);
+
+	mContext->SetMaterial(lcMaterialType::UnlitColor);
+
+	if (mLastFocusView == this)
+		mContext->SetColor(lcVector4FromColor(lcGetPreferences().mActiveViewColor));
+	else
+		mContext->SetColor(lcVector4FromColor(lcGetPreferences().mInactiveViewColor));
+
+	float Verts[8] = { 0.0f, 0.0f, mWidth - 1.0f, 0.0f, mWidth - 1.0f, mHeight - 1.0f, 0.0f, mHeight - 1.0f };
+
+	mContext->SetVertexBufferPointer(Verts);
+	mContext->SetVertexFormatPosition(2);
+	mContext->DrawPrimitives(GL_LINE_LOOP, 0, 4);
+
+	const char* CameraName = mCamera->GetName();
+
+	if (CameraName[0])
+	{
+		mContext->SetMaterial(lcMaterialType::UnlitTextureModulate);
+		mContext->SetColor(0.0f, 0.0f, 0.0f, 1.0f);
+		mContext->BindTexture2D(gTexFont.GetTexture());
+
+		glEnable(GL_BLEND);
+
+		gTexFont.PrintText(mContext, 3.0f, (float)mHeight - 1.0f - 6.0f, 0.0f, CameraName);
+
+		glDisable(GL_BLEND);
+	}
+
+	mContext->SetDepthWrite(true);
+	glEnable(GL_DEPTH_TEST);
 }
 
 void lcGLWidget::DrawAxes() const

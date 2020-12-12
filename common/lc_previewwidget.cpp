@@ -239,30 +239,6 @@ void lcPreviewWidget::SetViewpoint(const lcVector3& Position)
 	Redraw();
 }
 
-void lcPreviewWidget::DrawViewport()
-{
-	mContext->SetWorldMatrix(lcMatrix44Identity());
-	mContext->SetViewMatrix(lcMatrix44Translation(lcVector3(0.375, 0.375, 0.0)));
-	mContext->SetProjectionMatrix(lcMatrix44Ortho(0.0f, mWidth, 0.0f, mHeight, -1.0f, 1.0f));
-
-	mContext->SetDepthWrite(false);
-	glDisable(GL_DEPTH_TEST);
-
-	if (true/*we have an active view*/)
-	{
-		mContext->SetMaterial(lcMaterialType::UnlitColor);
-		mContext->SetColor(lcVector4FromColor(lcGetPreferences().mPreviewActiveColor));
-		float Verts[8] = { 0.0f, 0.0f, mWidth - 1.0f, 0.0f, mWidth - 1.0f, mHeight - 1.0f, 0.0f, mHeight - 1.0f };
-
-		mContext->SetVertexBufferPointer(Verts);
-		mContext->SetVertexFormatPosition(2);
-		mContext->DrawPrimitives(GL_LINE_LOOP, 0, 4);
-	}
-
-	mContext->SetDepthWrite(true);
-	glEnable(GL_DEPTH_TEST);
-}
-
 void lcPreviewWidget::StopTracking(bool Accept)
 {
 	if (mTrackButton == lcTrackButton::None)

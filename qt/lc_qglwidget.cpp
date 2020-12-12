@@ -137,7 +137,6 @@ void lcQGLWidget::SetPreviewPosition(const QRect& ParentRect)
 
 	setMinimumSize(100,100);
 	show();
-	setFocus();
 }
 
 void lcQGLWidget::resizeGL(int Width, int Height)
@@ -149,6 +148,22 @@ void lcQGLWidget::resizeGL(int Width, int Height)
 void lcQGLWidget::paintGL()
 {
 	mWidget->OnDraw();
+}
+
+void lcQGLWidget::focusInEvent(QFocusEvent* FocusEvent)
+{
+	if (mWidget)
+		mWidget->SetFocus(true);
+
+	QGLWidget::focusInEvent(FocusEvent);
+}
+
+void lcQGLWidget::focusOutEvent(QFocusEvent* FocusEvent)
+{
+	if (mWidget)
+		mWidget->SetFocus(false);
+
+	QGLWidget::focusOutEvent(FocusEvent);
 }
 
 void lcQGLWidget::keyPressEvent(QKeyEvent* KeyEvent)

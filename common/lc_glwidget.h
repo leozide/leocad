@@ -111,6 +111,7 @@ public:
 		return mMouseY;
 	}
 
+	void SetFocus(bool Focus);
 	void SetMousePosition(int MouseX, int MouseY);
 	void SetMouseModifiers(Qt::KeyboardModifiers MouseModifiers);
 	void SetContext(lcContext* Context);
@@ -124,6 +125,7 @@ public:
 	lcMatrix44 GetProjectionMatrix() const;
 
 	void DrawBackground() const;
+	void DrawViewport() const;
 	void DrawAxes() const;
 
 	virtual void OnDraw() { }
@@ -162,7 +164,7 @@ protected:
 	int mMouseDownY = 0;
 	Qt::KeyboardModifiers mMouseModifiers = Qt::NoModifier;
 
-	bool mTrackUpdated;
+	bool mTrackUpdated = false;
 	lcTrackTool mTrackTool = lcTrackTool::None;
 	lcTrackButton mTrackButton = lcTrackButton::None;
 	lcCursor mCursor = lcCursor::Default;
@@ -175,4 +177,6 @@ protected:
 
 	lcCamera* mCamera = nullptr;
 	bool mDeleteContext = true;
+
+	static lcGLWidget* mLastFocusView;
 };

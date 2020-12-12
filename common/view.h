@@ -89,7 +89,6 @@ protected:
 	void DrawSelectZoomRegionOverlay();
 	void DrawRotateViewOverlay();
 	void DrawGrid();
-	void DrawViewport();
 
 	void UpdateTrackTool();
 	bool IsTrackToolAllowed(lcTrackTool TrackTool, quint32 AllowedTransforms) const;

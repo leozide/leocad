@@ -52,6 +52,7 @@ public:
 	quint32 mAxesColor;
 	quint32 mOverlayColor;
 	quint32 mActiveViewColor;
+	quint32 mInactiveViewColor;
 	bool mDrawEdgeLines;
 	float mLineWidth;
 	bool mAllowLOD;
@@ -77,7 +78,6 @@ public:
 	lcColorTheme mColorTheme;
 
 	int mPreviewEnabled;
-	quint32 mPreviewActiveColor;
 	int mPreviewViewSphereEnabled;
 	int mPreviewViewSphereSize;
 	lcViewSphereLocation mPreviewViewSphereLocation;

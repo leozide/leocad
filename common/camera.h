@@ -273,7 +273,6 @@ public:
 	void RemoveTime(lcStep Start, lcStep Time);
 
 	bool FileLoad(lcFile& file);
-	void Select(bool bSelecting, bool bFocus, bool bMultiple);
 
 	void CompareBoundingBox(lcVector3& Min, lcVector3& Max);
 	void UpdatePosition(lcStep Step);
@@ -291,6 +290,7 @@ public:
 	void MoveRelative(const lcVector3& Distance, lcStep Step, bool AddKey);
 	void SetViewpoint(lcViewpoint Viewpoint);
 	void SetViewpoint(const lcVector3& Position);
+	void SetViewpoint(const lcVector3& Position, const lcVector3& Target, const lcVector3& Up);
 	void GetAngles(float& Latitude, float& Longitude, float& Distance) const;
 	void SetAngles(float Latitude, float Longitude, float Distance);
 

@@ -63,6 +63,7 @@ public:
 	void SetCameraIndex(int Index);
 	void SetViewpoint(lcViewpoint Viewpoint);
 	void SetViewpoint(const lcVector3& Position);
+	void SetViewpoint(const lcVector3& Position, const lcVector3& Target, const lcVector3& Up);
 	void SetCameraAngles(float Latitude, float Longitude);
 	void SetDefaultCamera();
 	void ShowContextMenu() const;

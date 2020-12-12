@@ -1058,6 +1058,25 @@ void lcCamera::SetViewpoint(const lcVector3& Position)
 	UpdatePosition(1);
 }
 
+void lcCamera::SetViewpoint(const lcVector3& Position, const lcVector3& Target, const lcVector3& Up)
+{
+	mPosition = Position;
+	mTargetPosition = Target;
+
+	lcVector3 Direction = Target - Position;
+	lcVector3 UpVector, SideVector;
+	SideVector = lcCross(Direction, Up);
+	UpVector = lcCross(SideVector, Direction);
+	UpVector.Normalize();
+	mUpVector = Up;
+
+	ChangeKey(mPositionKeys, mPosition, 1, false);
+	ChangeKey(mTargetPositionKeys, mTargetPosition, 1, false);
+	ChangeKey(mUpVectorKeys, mUpVector, 1, false);
+
+	UpdatePosition(1);
+}
+
 void lcCamera::SetAngles(float Latitude, float Longitude, float Distance)
 {
 	mPosition = lcVector3(0, -1, 0);

@@ -345,6 +345,24 @@ void View::SetViewpoint(const lcVector3& Position)
 	gMainWindow->UpdateCurrentCamera(-1);
 }
 
+void View::SetViewpoint(const lcVector3& Position, const lcVector3& Target, const lcVector3& Up)
+{
+	if (!mCamera || !mCamera->IsSimple())
+	{
+		lcCamera* OldCamera = mCamera;
+
+		mCamera = new lcCamera(true);
+
+		if (OldCamera)
+			mCamera->CopySettings(OldCamera);
+	}
+
+	mCamera->SetViewpoint(Position, Target, Up);
+	Redraw();
+
+	gMainWindow->UpdateCurrentCamera(-1);
+}
+
 void View::SetCameraAngles(float Latitude, float Longitude)
 {
 	if (!mCamera || !mCamera->IsSimple())

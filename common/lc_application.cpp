@@ -332,13 +332,19 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 	bool SaveHTML = false;
 	bool SetCameraAngles = false;
 	bool Orthographic = false;
+	bool SetFadeStepsColor = false;
+	bool SetHighlightColor = false;
+	bool FadeSteps = mPreferences.mFadeSteps;
 	bool ImageHighlight = mPreferences.mHighlightNewParts;
 	int ImageWidth = lcGetProfileInt(LC_PROFILE_IMAGE_WIDTH);
 	int ImageHeight = lcGetProfileInt(LC_PROFILE_IMAGE_HEIGHT);
+	int AASamples = lcGetProfileInt(LC_PROFILE_ANTIALIASING_SAMPLES);
 	int StudLogo = lcGetProfileInt(LC_PROFILE_STUD_LOGO);
 	int ImageStart = 0;
 	int ImageEnd = 0;
 	float CameraLatitude = 0.0f, CameraLongitude = 0.0f;
+	quint32 FadeStepsColor = mPreferences.mFadeStepsColor;
+	quint32	HighlightColor = mPreferences.mHighlightNewPartsColor;
 	QString ImageName;
 	QString ModelName;
 	QString CameraName;
@@ -436,6 +442,25 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 			return false;
 		};
 
+		auto ParseColor = [&ArgIdx, &Arguments, NumArguments](quint32& Color)
+		{
+			if (ArgIdx + 1 >= NumArguments)
+			{
+				printf("Not enough parameters for the '%s' argument.\n", Arguments[ArgIdx].toLatin1().constData());
+				return false;
+			}
+
+			QColor ParsedColor = QColor(Arguments[ArgIdx+1]);
+			if (!ParsedColor.isValid())
+			{
+				printf("Invalid value specified for the '%s' argument: '%s'.\n", Arguments[ArgIdx].toLatin1().constData(), Arguments[ArgIdx+1].toLatin1().constData());
+				return false;
+			}
+
+			Color = LC_RGBA(ParsedColor.red(), ParsedColor.green(), ParsedColor.blue(), ParsedColor.alpha());
+			return true;
+		};
+
 		if (Param == QLatin1String("-l") || Param == QLatin1String("--libpath"))
 		{
 			QString LibPath;
@@ -470,8 +495,30 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 			SetCameraAngles = ParseVector2(CameraLatitude, CameraLongitude);
 		else if (Param == QLatin1String("--orthographic"))
 			Orthographic = true;
+		else if (Param == QLatin1String("--fade-steps"))
+			FadeSteps = true;
+		else if (Param == QLatin1String("--no-fade-steps"))
+			FadeSteps = false;
+		else if (Param == QLatin1String("--fade-steps-color"))
+		{
+			if (ParseColor(FadeStepsColor))
+			{
+				SetFadeStepsColor = true;
+				FadeSteps = true;
+			}
+		}
 		else if (Param == QLatin1String("--highlight"))
 			ImageHighlight = true;
+		else if (Param == QLatin1String("--no-highlight"))
+			ImageHighlight = false;
+		else if (Param == QLatin1String("--highlight-color"))
+		{
+			if (ParseColor(HighlightColor))
+			{
+				SetHighlightColor = true;
+				ImageHighlight = true;
+			}
+		}
 		else if (Param == QLatin1String("--shading"))
 		{
 			QString ShadingString;
@@ -488,6 +535,8 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 		}
 		else if (Param == QLatin1String("--line-width"))
 			ParseFloat(mPreferences.mLineWidth);
+		else if (Param == QLatin1String("--aa-samples"))
+			ParseInteger(AASamples);
 		else if (Param == QLatin1String("-sl") || Param == QLatin1String("--stud-logo"))
 		{
 			ParseInteger(StudLogo);
@@ -534,20 +583,26 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 			printf("Usage: leocad [options] [file]\n");
 			printf("  [options] can be:\n");
 			printf("  -l, --libpath <path>: Set the Parts Library location to path.\n");
-			printf("  -i, --image <outfile.ext>: Save a picture in the format specified by ext.\n");
+			printf("  -i, --image <outfile.ext>: Save a picture in the format specified by ext and exit.\n");
 			printf("  -w, --width <width>: Set the picture width.\n");
 			printf("  -h, --height <height>: Set the picture height.\n");
-			printf("  -f, --from <time>: Set the first step to save pictures.\n");
-			printf("  -t, --to <time>: Set the last step to save pictures.\n");
+			printf("  -f, --from <step>: Set the first step to save pictures.\n");
+			printf("  -t, --to <step>: Set the last step to save pictures.\n");
 			printf("  -s, --submodel <submodel>: Set the active submodel.\n");
 			printf("  -c, --camera <camera>: Set the active camera.\n");
-			printf("  -sl --stud-logo <type>: Set the stud logo type 0 - 5, 0 is no logo.\n");
+			printf("  -sl, --stud-logo <type>: Set the stud logo type 0 - 5, 0 is no logo.\n");
 			printf("  --viewpoint <front|back|left|right|top|bottom|home>: Set the viewpoint.\n");
 			printf("  --camera-angles <latitude> <longitude>: Set the camera angles in degrees around the model.\n");
 			printf("  --orthographic: Make the view orthographic.\n");
-			printf("  --highlight: Highlight pieces in the steps they appear.\n");
+			printf("  --fade-steps: Render parts from prior steps faded.\n");
+			printf("  --no-fade-steps: Do not render parts from prior steps faded.\n");
+			printf("  --fade-steps-color <rgba>: Renderinng color for prior step parts (#AARRGGBB).\n");
+			printf("  --highlight: Highlight parts in the steps they appear.\n");
+			printf("  --no-highlight: Do not highlight parts in the steps they appear.\n");
+			printf("  --highlight-color: Renderinng color for highlighted parts (#AARRGGBB).\n");
 			printf("  --shading <wireframe|flat|default|full>: Select shading mode for rendering.\n");
 			printf("  --line-width <width>: Set the with of the edge lines.\n");
+			printf("  --aa-samples <count>: AntiAliasing sample size (1, 2, 4, or 8).\n");
 			printf("  -obj, --export-wavefront <outfile.obj>: Export the model to Wavefront OBJ format.\n");
 			printf("  -3ds, --export-3ds <outfile.3ds>: Export the model to 3D Studio 3DS format.\n");
 			printf("  -dae, --export-collada <outfile.dae>: Export the model to COLLADA DAE format.\n");
@@ -584,7 +639,7 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 			fprintf(stderr, "%s", Message.toLatin1().constData());
 	}
 
-	gMainWindow->CreateWidgets();
+	gMainWindow->CreateWidgets(AASamples);
 
 	Project* NewProject = new Project();
 	SetProject(NewProject);
@@ -682,7 +737,10 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 			else
 				Frame = ImageName;
 
+			mPreferences.mFadeSteps = FadeSteps;
+			mPreferences.mFadeStepsColor = FadeStepsColor;
 			mPreferences.mHighlightNewParts = ImageHighlight;
+			mPreferences.mHighlightNewPartsColor = HighlightColor;
 
 			ActiveModel->SaveStepImages(Frame, ImageStart != ImageEnd, CameraName == nullptr, ImageWidth, ImageHeight, ImageStart, ImageEnd);
 		}

@@ -139,13 +139,12 @@ lcMainWindow::~lcMainWindow()
 	gMainWindow = nullptr;
 }
 
-void lcMainWindow::CreateWidgets()
+void lcMainWindow::CreateWidgets(int AASamples)
 {
 	setAcceptDrops(true);
 	setWindowIcon(QIcon(":/resources/leocad.png"));
 	setWindowFilePath(QString());
 
-	int AASamples = lcGetProfileInt(LC_PROFILE_ANTIALIASING_SAMPLES);
 	if (AASamples > 1)
 	{
 		QGLFormat format;

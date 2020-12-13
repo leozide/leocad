@@ -6,6 +6,8 @@
 
 class View : public lcGLWidget
 {
+	Q_OBJECT
+
 public:
 	View(lcModel* Model);
 	~View();
@@ -53,19 +55,10 @@ public:
 
 	void SetProjection(bool Ortho);
 	void LookAt();
-	void ZoomExtents();
 	void MoveCamera(const lcVector3& Direction);
 	void Zoom(float Amount);
 
 	void RemoveCamera();
-	void SetCamera(lcCamera* Camera, bool ForceCopy);
-	void SetCamera(const char* CameraName);
-	void SetCameraIndex(int Index);
-	void SetViewpoint(lcViewpoint Viewpoint);
-	void SetViewpoint(const lcVector3& Position);
-	void SetViewpoint(const lcVector3& Position, const lcVector3& Target, const lcVector3& Up);
-	void SetCameraAngles(float Latitude, float Longitude);
-	void SetDefaultCamera();
 	void ShowContextMenu() const;
 
 	lcVector3 GetMoveDirection(const lcVector3& Direction) const;

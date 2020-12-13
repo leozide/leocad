@@ -80,8 +80,10 @@ enum class lcTrackTool
 	Count
 };
 
-class lcGLWidget
+class lcGLWidget : public QObject
 {
+	Q_OBJECT
+
 public:
 	lcGLWidget(lcModel* Model);
 	virtual ~lcGLWidget();
@@ -94,6 +96,11 @@ public:
 	lcCamera* GetCamera() const
 	{
 		return mCamera;
+	}
+
+	bool IsLastFocused() const
+	{
+		return mLastFocusedView == this;
 	}
 
 	bool IsTracking() const
@@ -124,6 +131,17 @@ public:
 	void UnprojectPoints(lcVector3* Points, int NumPoints) const;
 	lcMatrix44 GetProjectionMatrix() const;
 
+	void ZoomExtents();
+
+	void SetViewpoint(lcViewpoint Viewpoint);
+	void SetViewpoint(const lcVector3& Position);
+	void SetViewpoint(const lcVector3& Position, const lcVector3& Target, const lcVector3& Up);
+	void SetCameraAngles(float Latitude, float Longitude);
+	void SetDefaultCamera();
+	void SetCamera(lcCamera* Camera, bool ForceCopy);
+	void SetCamera(const char* CameraName);
+	void SetCameraIndex(int Index);
+
 	void DrawBackground() const;
 	void DrawViewport() const;
 	void DrawAxes() const;
@@ -150,6 +168,9 @@ public:
 	int mHeight = 1;
 	QGLWidget* mWidget = nullptr;
 	lcContext* mContext = nullptr;
+
+signals:
+	void CameraChanged();
 
 protected:
 	lcCursor GetCursor() const;
@@ -178,5 +199,5 @@ protected:
 	lcCamera* mCamera = nullptr;
 	bool mDeleteContext = true;
 
-	static lcGLWidget* mLastFocusView;
+	static lcGLWidget* mLastFocusedView;
 };

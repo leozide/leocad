@@ -283,7 +283,7 @@ bool lcViewSphere::OnLeftButtonUp()
 			Position[AxisIdx] = -1250.0f;
 	}
 
-	mIsPreview ? mPreview->SetViewpoint(Position) : mView->SetViewpoint(Position);
+	mWidget->SetViewpoint(Position);
 
 	return true;
 }

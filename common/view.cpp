@@ -257,137 +257,8 @@ void View::RemoveCamera()
 	else
 		mCamera->SetViewpoint(lcViewpoint::Home);
 
-	gMainWindow->UpdateCurrentCamera(-1);
+	emit CameraChanged();
 	Redraw();
-}
-
-void View::SetCamera(lcCamera* Camera, bool ForceCopy)
-{
-	if (Camera->IsSimple() || ForceCopy)
-	{
-		if (!mCamera || !mCamera->IsSimple())
-			mCamera = new lcCamera(true);
-
-		mCamera->CopyPosition(Camera);
-	}
-	else
-	{
-		if (mCamera && mCamera->IsSimple())
-			delete mCamera;
-
-		mCamera = Camera;
-	}
-}
-
-void View::SetCamera(const char* CameraName)
-{
-	const lcArray<lcCamera*>& Cameras = mModel->GetCameras();
-
-	for (int CameraIdx = 0; CameraIdx < Cameras.GetSize(); CameraIdx++)
-	{
-		if (qstricmp(CameraName, Cameras[CameraIdx]->m_strName) == 0)
-		{
-			SetCameraIndex(CameraIdx);
-			return;
-		}
-	}
-}
-
-void View::SetCameraIndex(int Index)
-{
-	const lcArray<lcCamera*>& Cameras = mModel->GetCameras();
-
-	if (Index >= Cameras.GetSize())
-		return;
-
-	lcCamera* Camera = Cameras[Index];
-	SetCamera(Camera, false);
-
-	gMainWindow->UpdateCurrentCamera(Index);
-	Redraw();
-}
-
-void View::SetViewpoint(lcViewpoint Viewpoint)
-{
-	if (!mCamera || !mCamera->IsSimple())
-	{
-		lcCamera* OldCamera = mCamera;
-
-		mCamera = new lcCamera(true);
-
-		if (OldCamera)
-			mCamera->CopySettings(OldCamera);
-	}
-
-	mCamera->SetViewpoint(Viewpoint);
-	ZoomExtents();
-	Redraw();
-
-	gMainWindow->UpdateCurrentCamera(-1);
-}
-
-void View::SetViewpoint(const lcVector3& Position)
-{
-	if (!mCamera || !mCamera->IsSimple())
-	{
-		lcCamera* OldCamera = mCamera;
-
-		mCamera = new lcCamera(true);
-
-		if (OldCamera)
-			mCamera->CopySettings(OldCamera);
-	}
-
-	mCamera->SetViewpoint(Position);
-	ZoomExtents();
-	Redraw();
-
-	gMainWindow->UpdateCurrentCamera(-1);
-}
-
-void View::SetViewpoint(const lcVector3& Position, const lcVector3& Target, const lcVector3& Up)
-{
-	if (!mCamera || !mCamera->IsSimple())
-	{
-		lcCamera* OldCamera = mCamera;
-
-		mCamera = new lcCamera(true);
-
-		if (OldCamera)
-			mCamera->CopySettings(OldCamera);
-	}
-
-	mCamera->SetViewpoint(Position, Target, Up);
-	Redraw();
-
-	gMainWindow->UpdateCurrentCamera(-1);
-}
-
-void View::SetCameraAngles(float Latitude, float Longitude)
-{
-	if (!mCamera || !mCamera->IsSimple())
-	{
-		lcCamera* OldCamera = mCamera;
-
-		mCamera = new lcCamera(true);
-
-		if (OldCamera)
-			mCamera->CopySettings(OldCamera);
-	}
-
-	mCamera->SetAngles(Latitude, Longitude, 1.0f);
-	ZoomExtents();
-	Redraw();
-}
-
-void View::SetDefaultCamera()
-{
-	if (!mCamera || !mCamera->IsSimple())
-		mCamera = new lcCamera(true);
-
-	mCamera->SetViewpoint(lcViewpoint::Home);
-
-	gMainWindow->UpdateCurrentCamera(-1);
 }
 
 lcMatrix44 View::GetTileProjectionMatrix(int CurrentRow, int CurrentColumn, int CurrentTileWidth, int CurrentTileHeight) const
@@ -1789,13 +1660,6 @@ void View::LookAt()
 	lcModel* ActiveModel = GetActiveModel();
 	if (ActiveModel)
 		ActiveModel->LookAt(mCamera);
-}
-
-void View::ZoomExtents()
-{
-	lcModel* ActiveModel = GetActiveModel();
-	if (ActiveModel)
-		ActiveModel->ZoomExtents(mCamera, (float)mWidth / (float)mHeight);
 }
 
 void View::MoveCamera(const lcVector3& Direction)

@@ -760,12 +760,21 @@ void lcMainWindow::CreateToolBars()
 	tabifyDockWidget(mPartsToolBar, mPropertiesToolBar);
 	tabifyDockWidget(mPropertiesToolBar, mTimelineToolBar);
 
-	connect(mPropertiesToolBar, SIGNAL (topLevelChanged(bool)), this, SLOT (EnableWindowFlags(bool)));
-	connect(mTimelineToolBar,   SIGNAL (topLevelChanged(bool)), this, SLOT (EnableWindowFlags(bool)));
-	connect(mPartsToolBar,      SIGNAL (topLevelChanged(bool)), this, SLOT (EnableWindowFlags(bool)));
-	connect(mColorsToolBar,     SIGNAL (topLevelChanged(bool)), this, SLOT (EnableWindowFlags(bool)));
+	connect(mPropertiesToolBar, SIGNAL(topLevelChanged(bool)), this, SLOT(EnableWindowFlags(bool)));
+	connect(mTimelineToolBar,   SIGNAL(topLevelChanged(bool)), this, SLOT(EnableWindowFlags(bool)));
+	connect(mPartsToolBar,      SIGNAL(topLevelChanged(bool)), this, SLOT(EnableWindowFlags(bool)));
+	connect(mColorsToolBar,     SIGNAL(topLevelChanged(bool)), this, SLOT(EnableWindowFlags(bool)));
 
 	mPartsToolBar->raise();
+}
+
+View* lcMainWindow::CreateView(lcModel* Model)
+{
+	View* NewView = new View(Model);
+
+	connect(NewView, SIGNAL(CameraChanged()), this, SLOT(ViewCameraChanged()));
+
+	return NewView;
 }
 
 void lcMainWindow::PreviewPiece(const QString &PartType, int ColorCode)
@@ -789,7 +798,7 @@ void lcMainWindow::CreatePreviewWidget()
 
 	tabifyDockWidget(mTimelineToolBar, mPreviewToolBar);
 
-	connect(mPreviewToolBar, SIGNAL (topLevelChanged(bool)), this, SLOT (EnableWindowFlags(bool)));
+	connect(mPreviewToolBar, SIGNAL(topLevelChanged(bool)), this, SLOT(EnableWindowFlags(bool)));
 }
 
 void lcMainWindow::TogglePreviewWidget(bool visible)
@@ -1599,7 +1608,7 @@ void lcMainWindow::SetCurrentModelTab(lcModel* Model)
 		QGridLayout* CentralLayout = new QGridLayout(TabWidget);
 		CentralLayout->setContentsMargins(0, 0, 0, 0);
 
-		NewView = new View(Model);
+		NewView = CreateView(Model);
 		ViewWidget = new lcQGLWidget(TabWidget, NewView);
 		CentralLayout->addWidget(ViewWidget, 0, 0, 1, 1);
 
@@ -1610,7 +1619,7 @@ void lcMainWindow::SetCurrentModelTab(lcModel* Model)
 		TabWidget = EmptyWidget;
 		TabWidget->SetModel(Model);
 
-		NewView = new View(Model);
+		NewView = CreateView(Model);
 		ViewWidget = (lcQGLWidget*)TabWidget->layout()->itemAt(0)->widget();
 		ViewWidget->mWidget = NewView;
 		NewView->mWidget = ViewWidget;
@@ -1825,7 +1834,7 @@ void lcMainWindow::SplitView(Qt::Orientation Orientation)
 		Splitter = new QSplitter(Orientation, Parent);
 		Parent->layout()->addWidget(Splitter);
 		Splitter->addWidget(Focus);
-		Splitter->addWidget(new lcQGLWidget(mModelTabWidget->currentWidget(), new View(GetCurrentTabModel())));
+		Splitter->addWidget(new lcQGLWidget(mModelTabWidget->currentWidget(), CreateView(GetCurrentTabModel())));
 	}
 	else
 	{
@@ -1836,7 +1845,7 @@ void lcMainWindow::SplitView(Qt::Orientation Orientation)
 		Splitter = new QSplitter(Orientation, Parent);
 		ParentSplitter->insertWidget(FocusIndex, Splitter);
 		Splitter->addWidget(Focus);
-		Splitter->addWidget(new lcQGLWidget(mModelTabWidget->currentWidget(), new View(GetCurrentTabModel())));
+		Splitter->addWidget(new lcQGLWidget(mModelTabWidget->currentWidget(), CreateView(GetCurrentTabModel())));
 
 		ParentSplitter->setSizes(Sizes);
 	}
@@ -2152,6 +2161,16 @@ void lcMainWindow::UpdateUndoRedo(const QString& UndoText, const QString& RedoTe
 		RedoAction->setEnabled(false);
 		RedoAction->setText(tr("&Redo"));
 	}
+}
+
+void lcMainWindow::ViewCameraChanged()
+{
+	lcGLWidget* View = dynamic_cast<lcGLWidget*>(sender());
+
+	if (!View || !View->IsLastFocused())
+		return;
+
+	UpdateCameraMenu();
 }
 
 void lcMainWindow::UpdateCameraMenu()

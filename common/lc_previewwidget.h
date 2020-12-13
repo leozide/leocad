@@ -40,22 +40,17 @@ public:
 		return mDescription;
 	}
 
-	void ClearPreview();
-	void UpdatePreview();
-	bool SetCurrentPiece(const QString& PartType, int ColorCode);
-	void SetCamera(lcCamera* Camera);
-	void SetDefaultCamera();
-	void ZoomExtents();
-
-	// exclusively called from viewSphere
-	void SetViewpoint(const lcVector3& Position);
-	void StartOrbitTracking();
-
 	bool IsModel() const
 	{
 		return mIsModel;
 	}
-	
+
+	void ClearPreview();
+	void UpdatePreview();
+	bool SetCurrentPiece(const QString& PartType, int ColorCode);
+
+	void StartOrbitTracking();
+
 	void OnDraw() override;
 	void OnLeftButtonDown() override;
 	void OnLeftButtonUp() override;

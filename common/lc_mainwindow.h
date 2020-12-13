@@ -362,6 +362,7 @@ public slots:
 	void TogglePreviewWidget(bool);
 
 protected slots:
+	void ViewCameraChanged();
 	void UpdateDockWidgetActions();
 	void UpdateGamepads();
 	void ModelTabContextMenuRequested(const QPoint& Point);
@@ -384,6 +385,7 @@ protected:
 	void CreateMenus();
 	void CreateToolBars();
 	void CreateStatusBar();
+	View* CreateView(lcModel* Model);
 	void ToggleDockWidget(QWidget* DockWidget);
 	void SplitView(Qt::Orientation Orientation);
 	void ShowSearchDialog();

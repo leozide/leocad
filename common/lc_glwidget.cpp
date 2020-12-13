@@ -9,7 +9,7 @@
 #include "lc_model.h"
 #include "lc_scene.h"
 
-lcGLWidget* lcGLWidget::mLastFocusView;
+lcGLWidget* lcGLWidget::mLastFocusedView;
 
 lcGLWidget::lcGLWidget(lcModel* Model)
 	: mModel(Model), mScene(new lcScene())
@@ -19,8 +19,8 @@ lcGLWidget::lcGLWidget(lcModel* Model)
 
 lcGLWidget::~lcGLWidget()
 {
-	if (mLastFocusView == this)
-		mLastFocusView = nullptr;
+	if (mLastFocusedView == this)
+		mLastFocusedView = nullptr;
 
 	if (mDeleteContext)
 		delete mContext;
@@ -34,7 +34,7 @@ lcModel* lcGLWidget::GetActiveModel() const
 void lcGLWidget::SetFocus(bool Focus)
 {
 	if (Focus)
-		mLastFocusView = this;
+		mLastFocusedView = this;
 }
 
 void lcGLWidget::SetMousePosition(int MouseX, int MouseY)
@@ -261,6 +261,142 @@ void lcGLWidget::UnprojectPoints(lcVector3* Points, int NumPoints) const
 	lcUnprojectPoints(Points, NumPoints, mCamera->mWorldView, GetProjectionMatrix(), Viewport);
 }
 
+void lcGLWidget::ZoomExtents()
+{
+	lcModel* ActiveModel = GetActiveModel();
+	if (ActiveModel)
+		ActiveModel->ZoomExtents(mCamera, (float)mWidth / (float)mHeight);
+}
+
+void lcGLWidget::SetViewpoint(lcViewpoint Viewpoint)
+{
+	if (!mCamera || !mCamera->IsSimple())
+	{
+		lcCamera* OldCamera = mCamera;
+
+		mCamera = new lcCamera(true);
+
+		if (OldCamera)
+			mCamera->CopySettings(OldCamera);
+	}
+
+	mCamera->SetViewpoint(Viewpoint);
+	ZoomExtents();
+	Redraw();
+
+	emit CameraChanged();
+}
+
+void lcGLWidget::SetViewpoint(const lcVector3& Position)
+{
+	if (!mCamera || !mCamera->IsSimple())
+	{
+		lcCamera* OldCamera = mCamera;
+
+		mCamera = new lcCamera(true);
+
+		if (OldCamera)
+			mCamera->CopySettings(OldCamera);
+	}
+
+	mCamera->SetViewpoint(Position);
+	ZoomExtents();
+	Redraw();
+
+	emit CameraChanged();
+}
+
+void lcGLWidget::SetViewpoint(const lcVector3& Position, const lcVector3& Target, const lcVector3& Up)
+{
+	if (!mCamera || !mCamera->IsSimple())
+	{
+		lcCamera* OldCamera = mCamera;
+
+		mCamera = new lcCamera(true);
+
+		if (OldCamera)
+			mCamera->CopySettings(OldCamera);
+	}
+
+	mCamera->SetViewpoint(Position, Target, Up);
+	Redraw();
+
+	emit CameraChanged();
+}
+
+void lcGLWidget::SetCameraAngles(float Latitude, float Longitude)
+{
+	if (!mCamera || !mCamera->IsSimple())
+	{
+		lcCamera* OldCamera = mCamera;
+
+		mCamera = new lcCamera(true);
+
+		if (OldCamera)
+			mCamera->CopySettings(OldCamera);
+	}
+
+	mCamera->SetAngles(Latitude, Longitude, 1.0f);
+	ZoomExtents();
+	Redraw();
+}
+
+void lcGLWidget::SetDefaultCamera()
+{
+	if (!mCamera || !mCamera->IsSimple())
+		mCamera = new lcCamera(true);
+
+	mCamera->SetViewpoint(lcViewpoint::Home);
+
+	emit CameraChanged();
+}
+
+void lcGLWidget::SetCamera(lcCamera* Camera, bool ForceCopy)
+{
+	if (Camera->IsSimple() || ForceCopy)
+	{
+		if (!mCamera || !mCamera->IsSimple())
+			mCamera = new lcCamera(true);
+
+		mCamera->CopyPosition(Camera);
+	}
+	else
+	{
+		if (mCamera && mCamera->IsSimple())
+			delete mCamera;
+
+		mCamera = Camera;
+	}
+}
+
+void lcGLWidget::SetCamera(const char* CameraName)
+{
+	const lcArray<lcCamera*>& Cameras = mModel->GetCameras();
+
+	for (int CameraIdx = 0; CameraIdx < Cameras.GetSize(); CameraIdx++)
+	{
+		if (qstricmp(CameraName, Cameras[CameraIdx]->m_strName) == 0)
+		{
+			SetCameraIndex(CameraIdx);
+			return;
+		}
+	}
+}
+
+void lcGLWidget::SetCameraIndex(int Index)
+{
+	const lcArray<lcCamera*>& Cameras = mModel->GetCameras();
+
+	if (Index >= Cameras.GetSize())
+		return;
+
+	lcCamera* Camera = Cameras[Index];
+	SetCamera(Camera, false);
+
+	emit CameraChanged();
+	Redraw();
+}
+
 void lcGLWidget::StartTracking(lcTrackButton TrackButton)
 {
 	mTrackButton = TrackButton;
@@ -410,7 +546,7 @@ void lcGLWidget::DrawViewport() const
 
 	mContext->SetMaterial(lcMaterialType::UnlitColor);
 
-	if (mLastFocusView == this)
+	if (mLastFocusedView == this)
 		mContext->SetColor(lcVector4FromColor(lcGetPreferences().mActiveViewColor));
 	else
 		mContext->SetColor(lcVector4FromColor(lcGetPreferences().mInactiveViewColor));

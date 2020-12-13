@@ -188,31 +188,6 @@ void lcPreviewWidget::UpdatePreview()
 		SetCurrentPiece(PartType, ColorCode);
 }
 
-void lcPreviewWidget::SetDefaultCamera()
-{
-	if (!mCamera || !mCamera->IsSimple())
-		mCamera = new lcCamera(true);
-	mCamera->SetViewpoint(lcViewpoint::Home);
-}
-
-void lcPreviewWidget::SetCamera(lcCamera* Camera) // called by lcModel::DeleteModel()
-{
-	if (!mCamera || !mCamera->IsSimple())
-		mCamera = new lcCamera(true);
-
-	mCamera->CopyPosition(Camera);
-}
-
-void lcPreviewWidget::ZoomExtents()
-{
-	lcModel* ActiveModel = GetActiveModel();
-	if (ActiveModel)
-	{
-		ActiveModel->ZoomExtents(mCamera, float(mWidth) / float(mHeight));
-		Redraw();
-	}
-}
-
 void lcPreviewWidget::StartOrbitTracking() // called by viewSphere
 {
 	mTrackTool = lcTrackTool::OrbitXY;
@@ -220,23 +195,6 @@ void lcPreviewWidget::StartOrbitTracking() // called by viewSphere
 	UpdateCursor();
 
 	OnButtonDown(lcTrackButton::Left);
-}
-
-void lcPreviewWidget::SetViewpoint(const lcVector3& Position)
-{
-	if (!mCamera || !mCamera->IsSimple())
-	{
-		lcCamera* OldCamera = mCamera;
-
-		mCamera = new lcCamera(true);
-
-		if (OldCamera)
-			mCamera->CopySettings(OldCamera);
-	}
-
-	mCamera->SetViewpoint(Position);
-
-	Redraw();
 }
 
 void lcPreviewWidget::StopTracking(bool Accept)

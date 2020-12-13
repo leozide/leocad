@@ -44,8 +44,6 @@ lcPiecesLibrary::lcPiecesLibrary()
 	Dir.mkpath(mCachePath);
 
 	mNumOfficialPieces = 0;
-	mZipFiles[LC_ZIPFILE_OFFICIAL] = nullptr;
-	mZipFiles[LC_ZIPFILE_UNOFFICIAL] = nullptr;
 	mBuffersDirty = false;
 	mHasUnofficial = false;
 	mCancelLoading = false;
@@ -77,9 +75,7 @@ void lcPiecesLibrary::Unload()
 	mTextures.clear();
 
 	mNumOfficialPieces = 0;
-	delete mZipFiles[LC_ZIPFILE_OFFICIAL];
 	mZipFiles[LC_ZIPFILE_OFFICIAL] = nullptr;
-	delete mZipFiles[LC_ZIPFILE_UNOFFICIAL];
 	mZipFiles[LC_ZIPFILE_UNOFFICIAL] = nullptr;
 }
 
@@ -317,15 +313,10 @@ bool lcPiecesLibrary::OpenArchive(const QString& FileName, lcZipFileType ZipFile
 
 bool lcPiecesLibrary::OpenArchive(std::unique_ptr<lcFile> File, const QString& FileName, lcZipFileType ZipFileType)
 {
-	lcZipFile* ZipFile = new lcZipFile();
+	std::unique_ptr<lcZipFile> ZipFile(new lcZipFile());
 
 	if (!ZipFile->OpenRead(std::move(File)))
-	{
-		delete ZipFile;
 		return false;
-	}
-
-	mZipFiles[ZipFileType] = ZipFile;
 
 	for (int FileIdx = 0; FileIdx < ZipFile->mFiles.GetSize(); FileIdx++)
 	{
@@ -423,6 +414,8 @@ bool lcPiecesLibrary::OpenArchive(std::unique_ptr<lcFile> File, const QString& F
 				Primitive->SetZipFile(ZipFileType, FileIdx);
 		}
 	}
+
+	mZipFiles[ZipFileType] = std::move(ZipFile);
 
 	return true;
 }

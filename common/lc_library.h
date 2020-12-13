@@ -194,7 +194,7 @@ protected:
 
 	QString mCachePath;
 	qint64 mArchiveCheckSum[4];
-	lcZipFile* mZipFiles[LC_NUM_ZIPFILES];
+	std::unique_ptr<lcZipFile> mZipFiles[LC_NUM_ZIPFILES];
 	bool mHasUnofficial;
 	bool mCancelLoading;
 };

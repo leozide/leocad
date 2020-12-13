@@ -183,8 +183,8 @@ void lcViewSphere::Draw()
 		return;
 
 	lcContext* Context = mWidget->mContext;
-	const int Width = mWidget->mWidth;
-	const int Height = mWidget->mHeight;
+	const int Width = mWidget->GetWidth();
+	const int Height = mWidget->GetHeight();
 	const int ViewportSize = mSize;
 	const int Left = (mLocation == lcViewSphereLocation::BottomLeft || mLocation == lcViewSphereLocation::TopLeft) ? 0 : Width - ViewportSize;
 	const int Bottom = (mLocation == lcViewSphereLocation::BottomLeft || mLocation == lcViewSphereLocation::BottomRight) ? 0 : Height - ViewportSize;
@@ -323,8 +323,8 @@ bool lcViewSphere::IsDragging() const
 
 std::bitset<6> lcViewSphere::GetIntersectionFlags(lcVector3& Intersection) const
 {
-	const int Width = mWidget->mWidth;
-	const int Height = mWidget->mHeight;
+	const int Width = mWidget->GetWidth();
+	const int Height = mWidget->GetHeight();
 	const int ViewportSize = mSize;
 	const int Left = (mLocation == lcViewSphereLocation::BottomLeft || mLocation == lcViewSphereLocation::TopLeft) ? 0 : Width - ViewportSize;
 	const int Bottom = (mLocation == lcViewSphereLocation::BottomLeft || mLocation == lcViewSphereLocation::BottomRight) ? 0 : Height - ViewportSize;

@@ -5,13 +5,20 @@
 class lcQGLWidget : public QGLWidget
 {
 public:
-	lcQGLWidget(QWidget* Parent, lcGLWidget* Owner);
+	lcQGLWidget(QWidget* Parent, lcGLWidget* View);
 	~lcQGLWidget();
+
+	lcGLWidget* GetView() const
+	{
+		return mView;
+	}
+
+	void SetView(lcGLWidget* View);
+	void SetPreviewPosition(const QRect& ParentRect);
 
 	QSize sizeHint() const override;
 
-	lcGLWidget* mWidget;
-
+protected:
 	float GetDeviceScale() const
 	{
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
@@ -19,11 +26,8 @@ public:
 #else
 		return 1.0f;
 #endif
-	}
+}
 
-	void SetPreviewPosition(const QRect& ParentRect);
-
-protected:
 	void resizeGL(int Width, int Height) override;
 	void paintGL() override;
 	void focusInEvent(QFocusEvent* FocusEvent) override;
@@ -40,6 +44,7 @@ protected:
 	void dragMoveEvent(QDragMoveEvent* DragMoveEvent) override;
 	void dropEvent(QDropEvent* DropEvent) override;
 
+	lcGLWidget* mView;
 	QSize mPreferredSize;
 	int mWheelAccumulator;
 };

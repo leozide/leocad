@@ -23,21 +23,21 @@ lcQGLWidget::lcQGLWidget(QWidget* Parent, lcGLWidget* Owner)
 	: QGLWidget(Parent, gWidgetList.isEmpty() ? nullptr : gWidgetList.first())
 {
 	mWheelAccumulator = 0;
-	mWidget = Owner;
-	mWidget->mWidget = this;
+	mView = Owner;
+	mView->SetWidget(this);
 
 	makeCurrent();
 
 	if (gWidgetList.isEmpty())
 	{
 		// TODO: Find a better place for the grid texture and font
-		gStringCache.Initialize(mWidget->mContext);
-		gTexFont.Initialize(mWidget->mContext);
+		gStringCache.Initialize(mView->mContext);
+		gTexFont.Initialize(mView->mContext);
 
 		lcInitializeGLExtensions(context());
 		lcContext::CreateResources();
-		View::CreateResources(mWidget->mContext);
-		lcViewSphere::CreateResources(mWidget->mContext);
+		View::CreateResources(mView->mContext);
+		lcViewSphere::CreateResources(mView->mContext);
 
 		if (!gSupportsShaderObjects && lcGetPreferences().mShadingMode == lcShadingMode::DefaultLights)
 			lcGetPreferences().mShadingMode = lcShadingMode::Flat;
@@ -51,7 +51,7 @@ lcQGLWidget::lcQGLWidget(QWidget* Parent, lcGLWidget* Owner)
 
 	gWidgetList.append(this);
 
-	mWidget->OnInitialUpdate();
+	mView->OnInitialUpdate();
 
 	setMouseTracking(true);
 
@@ -71,16 +71,16 @@ lcQGLWidget::~lcQGLWidget()
 		gStringCache.Reset();
 		gTexFont.Reset();
 
-		lcGetPiecesLibrary()->ReleaseBuffers(mWidget->mContext);
-		View::DestroyResources(mWidget->mContext);
+		lcGetPiecesLibrary()->ReleaseBuffers(mView->mContext);
+		View::DestroyResources(mView->mContext);
 		lcContext::DestroyResources();
-		lcViewSphere::DestroyResources(mWidget->mContext);
+		lcViewSphere::DestroyResources(mView->mContext);
 
 		delete gPlaceholderMesh;
 		gPlaceholderMesh = nullptr;
 	}
 
-	delete mWidget;
+	delete mView;
 }
 
 QSize lcQGLWidget::sizeHint() const
@@ -88,10 +88,25 @@ QSize lcQGLWidget::sizeHint() const
 	return mPreferredSize.isNull() ? QGLWidget::sizeHint() : mPreferredSize;
 }
 
+void lcQGLWidget::SetView(lcGLWidget* View)
+{
+	mView = View;
+
+	if (View)
+	{
+		View->SetWidget(this);
+		const float Scale = GetDeviceScale();
+		View->SetSize(width() * Scale, height() * Scale);
+
+		if (hasFocus())
+			View->SetFocus(true);
+	}
+}
+
 void lcQGLWidget::SetPreviewPosition(const QRect& ParentRect)
 {
 	lcPreferences& Preferences = lcGetPreferences();
-	lcPreviewWidget* Preview = reinterpret_cast<lcPreviewWidget*>(mWidget);
+	lcPreviewWidget* Preview = reinterpret_cast<lcPreviewWidget*>(mView);
 
 	setWindowTitle(tr("%1 Preview").arg(Preview->IsModel() ? "Submodel" : "Part"));
 
@@ -101,10 +116,6 @@ void lcQGLWidget::SetPreviewPosition(const QRect& ParentRect)
 		Size[0] = 400; Size[1] = 300;
 	}
 	mPreferredSize = QSize(Size[0], Size[1]);
-
-	float Scale = GetDeviceScale();
-	Preview->mWidth = width()  * Scale;
-	Preview->mHeight = height() * Scale;
 
 	const QRect desktop = QApplication::desktop()->geometry();
 
@@ -141,27 +152,26 @@ void lcQGLWidget::SetPreviewPosition(const QRect& ParentRect)
 
 void lcQGLWidget::resizeGL(int Width, int Height)
 {
-	mWidget->mWidth = Width;
-	mWidget->mHeight = Height;
+	mView->SetSize(Width, Height);
 }
 
 void lcQGLWidget::paintGL()
 {
-	mWidget->OnDraw();
+	mView->OnDraw();
 }
 
 void lcQGLWidget::focusInEvent(QFocusEvent* FocusEvent)
 {
-	if (mWidget)
-		mWidget->SetFocus(true);
+	if (mView)
+		mView->SetFocus(true);
 
 	QGLWidget::focusInEvent(FocusEvent);
 }
 
 void lcQGLWidget::focusOutEvent(QFocusEvent* FocusEvent)
 {
-	if (mWidget)
-		mWidget->SetFocus(false);
+	if (mView)
+		mView->SetFocus(false);
 
 	QGLWidget::focusOutEvent(FocusEvent);
 }
@@ -170,8 +180,8 @@ void lcQGLWidget::keyPressEvent(QKeyEvent* KeyEvent)
 {
 	if (KeyEvent->key() == Qt::Key_Control || KeyEvent->key() == Qt::Key_Shift)
 	{
-		mWidget->SetMouseModifiers(KeyEvent->modifiers());
-		mWidget->UpdateCursor();
+		mView->SetMouseModifiers(KeyEvent->modifiers());
+		mView->UpdateCursor();
 	}
 
 	QGLWidget::keyPressEvent(KeyEvent);
@@ -181,8 +191,8 @@ void lcQGLWidget::keyReleaseEvent(QKeyEvent* KeyEvent)
 {
 	if (KeyEvent->key() == Qt::Key_Control || KeyEvent->key() == Qt::Key_Shift)
 	{
-		mWidget->SetMouseModifiers(KeyEvent->modifiers());
-		mWidget->UpdateCursor();
+		mView->SetMouseModifiers(KeyEvent->modifiers());
+		mView->UpdateCursor();
 	}
 
 	QGLWidget::keyReleaseEvent(KeyEvent);
@@ -192,30 +202,30 @@ void lcQGLWidget::mousePressEvent(QMouseEvent* MouseEvent)
 {
 	float DeviceScale = GetDeviceScale();
 
-	mWidget->SetMousePosition(MouseEvent->x() * DeviceScale, mWidget->mHeight - MouseEvent->y() * DeviceScale - 1);
-	mWidget->SetMouseModifiers(MouseEvent->modifiers());
+	mView->SetMousePosition(MouseEvent->x() * DeviceScale, mView->GetHeight() - MouseEvent->y() * DeviceScale - 1);
+	mView->SetMouseModifiers(MouseEvent->modifiers());
 
 	switch (MouseEvent->button())
 	{
 	case Qt::LeftButton:
-		mWidget->OnLeftButtonDown();
+		mView->OnLeftButtonDown();
 		break;
 
 	case Qt::MidButton:
-		mWidget->OnMiddleButtonDown();
+		mView->OnMiddleButtonDown();
 		break;
 
 	case Qt::RightButton:
-		mWidget->OnRightButtonDown();
+		mView->OnRightButtonDown();
 		break;
 
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
 	case Qt::BackButton:
-		mWidget->OnBackButtonDown();
+		mView->OnBackButtonDown();
 		break;
 
 	case Qt::ForwardButton:
-		mWidget->OnForwardButtonDown();
+		mView->OnForwardButtonDown();
 		break;
 #endif
 
@@ -228,30 +238,30 @@ void lcQGLWidget::mouseReleaseEvent(QMouseEvent* MouseEvent)
 {
 	float DeviceScale = GetDeviceScale();
 
-	mWidget->SetMousePosition(MouseEvent->x() * DeviceScale, mWidget->mHeight - MouseEvent->y() * DeviceScale - 1);
-	mWidget->SetMouseModifiers(MouseEvent->modifiers());
+	mView->SetMousePosition(MouseEvent->x() * DeviceScale, mView->GetHeight() - MouseEvent->y() * DeviceScale - 1);
+	mView->SetMouseModifiers(MouseEvent->modifiers());
 
 	switch (MouseEvent->button())
 	{
 	case Qt::LeftButton:
-		mWidget->OnLeftButtonUp();
+		mView->OnLeftButtonUp();
 		break;
 
 	case Qt::MidButton:
-		mWidget->OnMiddleButtonUp();
+		mView->OnMiddleButtonUp();
 		break;
 
 	case Qt::RightButton:
-		mWidget->OnRightButtonUp();
+		mView->OnRightButtonUp();
 		break;
 
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
 	case Qt::BackButton:
-		mWidget->OnBackButtonUp();
+		mView->OnBackButtonUp();
 		break;
 
 	case Qt::ForwardButton:
-		mWidget->OnForwardButtonUp();
+		mView->OnForwardButtonUp();
 		break;
 #endif
 
@@ -264,13 +274,13 @@ void lcQGLWidget::mouseDoubleClickEvent(QMouseEvent* MouseEvent)
 {
 	float DeviceScale = GetDeviceScale();
 
-	mWidget->SetMousePosition(MouseEvent->x() * DeviceScale, mWidget->mHeight - MouseEvent->y() * DeviceScale - 1);
-	mWidget->SetMouseModifiers(MouseEvent->modifiers());
+	mView->SetMousePosition(MouseEvent->x() * DeviceScale, mView->GetHeight() - MouseEvent->y() * DeviceScale - 1);
+	mView->SetMouseModifiers(MouseEvent->modifiers());
 
 	switch (MouseEvent->button())
 	{
 	case Qt::LeftButton:
-		mWidget->OnLeftButtonDoubleClick();
+		mView->OnLeftButtonDoubleClick();
 		break;
 	default:
 		break;
@@ -281,10 +291,10 @@ void lcQGLWidget::mouseMoveEvent(QMouseEvent* MouseEvent)
 {
 	float DeviceScale = GetDeviceScale();
 
-	mWidget->SetMousePosition(MouseEvent->x() * DeviceScale, mWidget->mHeight - MouseEvent->y() * DeviceScale - 1);
-	mWidget->SetMouseModifiers(MouseEvent->modifiers());
+	mView->SetMousePosition(MouseEvent->x() * DeviceScale, mView->GetHeight() - MouseEvent->y() * DeviceScale - 1);
+	mView->SetMouseModifiers(MouseEvent->modifiers());
 
-	mWidget->OnMouseMove();
+	mView->OnMouseMove();
 }
 
 void lcQGLWidget::wheelEvent(QWheelEvent* WheelEvent)
@@ -302,11 +312,11 @@ void lcQGLWidget::wheelEvent(QWheelEvent* WheelEvent)
 	float DeviceScale = GetDeviceScale();
 
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 14, 0))
-	mWidget->SetMousePosition(WheelEvent->position().x() * DeviceScale, mWidget->mHeight - WheelEvent->position().y() * DeviceScale - 1);
+	mView->SetMousePosition(WheelEvent->position().x() * DeviceScale, mView->GetHeight() - WheelEvent->position().y() * DeviceScale - 1);
 #else
-	mWidget->SetMousePosition(WheelEvent->x() * DeviceScale, mWidget->mHeight - WheelEvent->y() * DeviceScale - 1);
+	mView->SetMousePosition(WheelEvent->x() * DeviceScale, mView->mHeight - WheelEvent->y() * DeviceScale - 1);
 #endif
-	mWidget->SetMouseModifiers(WheelEvent->modifiers());
+	mView->SetMouseModifiers(WheelEvent->modifiers());
 
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 2, 0))
 	mWheelAccumulator += WheelEvent->angleDelta().y() / 8;
@@ -317,7 +327,7 @@ void lcQGLWidget::wheelEvent(QWheelEvent* WheelEvent)
 
 	if (numSteps)
 	{
-		mWidget->OnMouseWheel(numSteps);
+		mView->OnMouseWheel(numSteps);
 		mWheelAccumulator -= numSteps * 15;
 	}
 
@@ -331,13 +341,13 @@ void lcQGLWidget::dragEnterEvent(QDragEnterEvent* DragEnterEvent)
 	if (MimeData->hasFormat("application/vnd.leocad-part"))
 	{
 		DragEnterEvent->acceptProposedAction();
-		mWidget->BeginDrag(lcDragState::Piece);
+		mView->BeginDrag(lcDragState::Piece);
 		return;
 	}
 	else if (MimeData->hasFormat("application/vnd.leocad-color"))
 	{
 		DragEnterEvent->acceptProposedAction();
-		mWidget->BeginDrag(lcDragState::Color);
+		mView->BeginDrag(lcDragState::Color);
 		return;
 	}
 
@@ -346,7 +356,7 @@ void lcQGLWidget::dragEnterEvent(QDragEnterEvent* DragEnterEvent)
 
 void lcQGLWidget::dragLeaveEvent(QDragLeaveEvent* DragLeaveEvent)
 {
-	mWidget->EndDrag(false);
+	mView->EndDrag(false);
 	DragLeaveEvent->accept();
 }
 
@@ -358,10 +368,10 @@ void lcQGLWidget::dragMoveEvent(QDragMoveEvent* DragMoveEvent)
 	{
 		float DeviceScale = GetDeviceScale();
 
-		mWidget->SetMousePosition(DragMoveEvent->pos().x() * DeviceScale, mWidget->mHeight - DragMoveEvent->pos().y() * DeviceScale - 1);
-		mWidget->SetMouseModifiers(DragMoveEvent->keyboardModifiers());
+		mView->SetMousePosition(DragMoveEvent->pos().x() * DeviceScale, mView->GetHeight() - DragMoveEvent->pos().y() * DeviceScale - 1);
+		mView->SetMouseModifiers(DragMoveEvent->keyboardModifiers());
 
-		mWidget->OnMouseMove();
+		mView->OnMouseMove();
 
 		DragMoveEvent->accept();
 		return;
@@ -376,7 +386,7 @@ void lcQGLWidget::dropEvent(QDropEvent* DropEvent)
 
 	if (MimeData->hasFormat("application/vnd.leocad-part") || MimeData->hasFormat("application/vnd.leocad-color"))
 	{
-		mWidget->EndDrag(true);
+		mView->EndDrag(true);
 		setFocus(Qt::MouseFocusReason);
 
 		DropEvent->accept();

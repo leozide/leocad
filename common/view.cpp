@@ -310,10 +310,9 @@ lcMatrix44 View::GetTileProjectionMatrix(int CurrentRow, int CurrentColumn, int 
 
 void View::ShowContextMenu() const
 {
-	QGLWidget* Widget = (QGLWidget*)mWidget;
 	QAction** Actions = gMainWindow->mActions;
 
-	QMenu* Popup = new QMenu(Widget);
+	QMenu* Popup = new QMenu(mWidget);
 
 	Popup->addAction(Actions[LC_EDIT_CUT]);
 	Popup->addAction(Actions[LC_EDIT_COPY]);

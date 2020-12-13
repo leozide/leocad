@@ -108,6 +108,32 @@ public:
 		return mTrackButton != lcTrackButton::None;
 	}
 
+	int GetWidth() const
+	{
+		return mWidth;
+	}
+
+	int GetHeight() const
+	{
+		return mHeight;
+	}
+
+	void SetSize(int Width, int Height)
+	{
+		mWidth = Width;
+		mHeight = Height;
+	}
+
+	QGLWidget* GetWidget() const
+	{
+		return mWidget;
+	}
+
+	void SetWidget(QGLWidget* Widget)
+	{
+		mWidget = Widget;
+	}
+
 	int GetMouseX() const
 	{
 		return mMouseX;
@@ -164,9 +190,6 @@ public:
 	virtual void BeginDrag(lcDragState DragState) { Q_UNUSED(DragState); }
 	virtual void EndDrag(bool Accept) { Q_UNUSED(Accept); }
 
-	int mWidth = 1;
-	int mHeight = 1;
-	QGLWidget* mWidget = nullptr;
 	lcContext* mContext = nullptr;
 
 signals:
@@ -197,6 +220,10 @@ protected:
 	lcMatrix44 mActiveSubmodelTransform;
 
 	lcCamera* mCamera = nullptr;
+
+	QGLWidget* mWidget = nullptr;
+	int mWidth = 1;
+	int mHeight = 1;
 	bool mDeleteContext = true;
 
 	static lcGLWidget* mLastFocusedView;

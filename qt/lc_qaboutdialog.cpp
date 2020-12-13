@@ -17,7 +17,7 @@ lcQAboutDialog::lcQAboutDialog(QWidget *parent) :
 	ui->version->setText(tr("LeoCAD Version %1").arg(QString::fromLatin1(LC_VERSION_TEXT)));
 #endif
 
-	QGLWidget* Widget = (QGLWidget*)gMainWindow->GetActiveView()->mWidget;
+	QGLWidget* Widget = gMainWindow->GetActiveView()->GetWidget();
 	QGLFormat Format = Widget->context()->format();
 
 	int ColorDepth = Format.redBufferSize() + Format.greenBufferSize() + Format.blueBufferSize() + Format.alphaBufferSize();

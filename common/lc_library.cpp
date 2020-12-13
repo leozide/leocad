@@ -330,11 +330,6 @@ bool lcPiecesLibrary::OpenArchive(lcFile* File, const QString& FileName, lcZipFi
 
 	mZipFiles[ZipFileType] = ZipFile;
 
-	if (ZipFileType == LC_ZIPFILE_OFFICIAL)
-		mLibraryFileName = FileName;
-	else
-		mUnofficialFileName = FileName;
-
 	for (int FileIdx = 0; FileIdx < ZipFile->mFiles.GetSize(); FileIdx++)
 	{
 		lcZipFileInfo& FileInfo = ZipFile->mFiles[FileIdx];

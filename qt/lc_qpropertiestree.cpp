@@ -798,8 +798,12 @@ void lcQPropertiesTree::slotColorButtonClicked()
 	connect(Popup, SIGNAL(selected(int)), SLOT(slotSetValue(int)));
 	Popup->setMinimumSize(300, 200);
 
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 10, 0))
 	QScreen* Screen = QGuiApplication::screenAt(Button->mapToGlobal(Button->rect().bottomLeft()));
 	const QRect ScreenRect = Screen ? Screen->geometry() : QApplication::desktop()->geometry();
+#else
+	const QRect ScreenRect = QApplication::desktop()->geometry();
+#endif
 
 	QPoint pos = Button->mapToGlobal(Button->rect().bottomLeft());
 	if (pos.x() < ScreenRect.left())

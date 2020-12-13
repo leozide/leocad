@@ -255,7 +255,7 @@ void View::RemoveCamera()
 	if (Camera)
 		mCamera->CopyPosition(Camera);
 	else
-		mCamera->SetViewpoint(LC_VIEWPOINT_HOME);
+		mCamera->SetViewpoint(lcViewpoint::Home);
 
 	gMainWindow->UpdateCurrentCamera(-1);
 	Redraw();
@@ -385,7 +385,7 @@ void View::SetDefaultCamera()
 	if (!mCamera || !mCamera->IsSimple())
 		mCamera = new lcCamera(true);
 
-	mCamera->SetViewpoint(LC_VIEWPOINT_HOME);
+	mCamera->SetViewpoint(lcViewpoint::Home);
 
 	gMainWindow->UpdateCurrentCamera(-1);
 }

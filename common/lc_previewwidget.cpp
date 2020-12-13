@@ -192,7 +192,7 @@ void lcPreviewWidget::SetDefaultCamera()
 {
 	if (!mCamera || !mCamera->IsSimple())
 		mCamera = new lcCamera(true);
-	mCamera->SetViewpoint(LC_VIEWPOINT_HOME);
+	mCamera->SetViewpoint(lcViewpoint::Home);
 }
 
 void lcPreviewWidget::SetCamera(lcCamera* Camera) // called by lcModel::DeleteModel()

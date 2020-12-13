@@ -1005,13 +1005,13 @@ void lcCamera::SetViewpoint(lcViewpoint Viewpoint)
 {
 	lcVector3 Positions[] =
 	{
-		lcVector3(    0.0f, -1250.0f,     0.0f), // LC_VIEWPOINT_FRONT
-		lcVector3(    0.0f,  1250.0f,     0.0f), // LC_VIEWPOINT_BACK
-		lcVector3(    0.0f,     0.0f,  1250.0f), // LC_VIEWPOINT_TOP
-		lcVector3(    0.0f,     0.0f, -1250.0f), // LC_VIEWPOINT_BOTTOM
-		lcVector3( 1250.0f,     0.0f,     0.0f), // LC_VIEWPOINT_LEFT
-		lcVector3(-1250.0f,     0.0f,     0.0f), // LC_VIEWPOINT_RIGHT
-		lcVector3(  375.0f,  -375.0f,   187.5f)  // LC_VIEWPOINT_HOME
+		lcVector3(    0.0f, -1250.0f,     0.0f), // lcViewpoint::Front
+		lcVector3(    0.0f,  1250.0f,     0.0f), // lcViewpoint::Back
+		lcVector3(    0.0f,     0.0f,  1250.0f), // lcViewpoint::Top
+		lcVector3(    0.0f,     0.0f, -1250.0f), // lcViewpoint::Bottom
+		lcVector3( 1250.0f,     0.0f,     0.0f), // lcViewpoint::Left
+		lcVector3(-1250.0f,     0.0f,     0.0f), // lcViewpoint::Right
+		lcVector3(  375.0f,  -375.0f,   187.5f)  // lcViewpoint::Home
 	};
 
 	lcVector3 Ups[] =
@@ -1025,9 +1025,9 @@ void lcCamera::SetViewpoint(lcViewpoint Viewpoint)
 		lcVector3(0.2357f, -0.2357f, 0.94281f)
 	};
 
-	mPosition = Positions[Viewpoint];
+	mPosition = Positions[static_cast<int>(Viewpoint)];
 	mTargetPosition = lcVector3(0, 0, 0);
-	mUpVector = Ups[Viewpoint];
+	mUpVector = Ups[static_cast<int>(Viewpoint)];
 
 	ChangeKey(mPositionKeys, mPosition, 1, false);
 	ChangeKey(mTargetPositionKeys, mTargetPosition, 1, false);

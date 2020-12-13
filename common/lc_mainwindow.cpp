@@ -1916,7 +1916,7 @@ void lcMainWindow::ResetViews()
 		return;
 
 	TabWidget->ResetLayout();
-	TabWidget->GetActiveView()->SetViewpoint(LC_VIEWPOINT_HOME);
+	TabWidget->GetActiveView()->SetViewpoint(lcViewpoint::Home);
 }
 
 void lcMainWindow::ToggleDockWidget(QWidget* DockWidget)
@@ -3106,37 +3106,37 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 
 	case LC_VIEW_VIEWPOINT_FRONT:
 		if (ActiveView)
-			ActiveView->SetViewpoint(LC_VIEWPOINT_FRONT);
+			ActiveView->SetViewpoint(lcViewpoint::Front);
 		break;
 
 	case LC_VIEW_VIEWPOINT_BACK:
 		if (ActiveView)
-			ActiveView->SetViewpoint(LC_VIEWPOINT_BACK);
+			ActiveView->SetViewpoint(lcViewpoint::Back);
 		break;
 
 	case LC_VIEW_VIEWPOINT_TOP:
 		if (ActiveView)
-			ActiveView->SetViewpoint(LC_VIEWPOINT_TOP);
+			ActiveView->SetViewpoint(lcViewpoint::Top);
 		break;
 
 	case LC_VIEW_VIEWPOINT_BOTTOM:
 		if (ActiveView)
-			ActiveView->SetViewpoint(LC_VIEWPOINT_BOTTOM);
+			ActiveView->SetViewpoint(lcViewpoint::Bottom);
 		break;
 
 	case LC_VIEW_VIEWPOINT_LEFT:
 		if (ActiveView)
-			ActiveView->SetViewpoint(LC_VIEWPOINT_LEFT);
+			ActiveView->SetViewpoint(lcViewpoint::Left);
 		break;
 
 	case LC_VIEW_VIEWPOINT_RIGHT:
 		if (ActiveView)
-			ActiveView->SetViewpoint(LC_VIEWPOINT_RIGHT);
+			ActiveView->SetViewpoint(lcViewpoint::Right);
 		break;
 
 	case LC_VIEW_VIEWPOINT_HOME:
 		if (ActiveView)
-			ActiveView->SetViewpoint(LC_VIEWPOINT_HOME);
+			ActiveView->SetViewpoint(lcViewpoint::Home);
 		break;
 
 	case LC_VIEW_CAMERA_NONE:

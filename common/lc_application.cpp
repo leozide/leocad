@@ -721,19 +721,19 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 			if (!ViewpointName.isEmpty())
 			{
 				if (ViewpointName == QLatin1String("front"))
-					ActiveView->SetViewpoint(LC_VIEWPOINT_FRONT);
+					ActiveView->SetViewpoint(lcViewpoint::Front);
 				else if (ViewpointName == QLatin1String("back"))
-					ActiveView->SetViewpoint(LC_VIEWPOINT_BACK);
+					ActiveView->SetViewpoint(lcViewpoint::Back);
 				else if (ViewpointName == QLatin1String("top"))
-					ActiveView->SetViewpoint(LC_VIEWPOINT_TOP);
+					ActiveView->SetViewpoint(lcViewpoint::Top);
 				else if (ViewpointName == QLatin1String("bottom"))
-					ActiveView->SetViewpoint(LC_VIEWPOINT_BOTTOM);
+					ActiveView->SetViewpoint(lcViewpoint::Bottom);
 				else if (ViewpointName == QLatin1String("left"))
-					ActiveView->SetViewpoint(LC_VIEWPOINT_LEFT);
+					ActiveView->SetViewpoint(lcViewpoint::Left);
 				else if (ViewpointName == QLatin1String("right"))
-					ActiveView->SetViewpoint(LC_VIEWPOINT_RIGHT);
+					ActiveView->SetViewpoint(lcViewpoint::Right);
 				else if (ViewpointName == QLatin1String("home"))
-					ActiveView->SetViewpoint(LC_VIEWPOINT_HOME);
+					ActiveView->SetViewpoint(lcViewpoint::Home);
 				else
 					printf("Unknown viewpoint: '%s'\n", ViewpointName.toLatin1().constData());
 

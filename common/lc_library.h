@@ -167,7 +167,7 @@ signals:
 
 protected:
 	bool OpenArchive(const QString& FileName, lcZipFileType ZipFileType);
-	bool OpenArchive(lcFile* File, const QString& FileName, lcZipFileType ZipFileType);
+	bool OpenArchive(std::unique_ptr<lcFile> File, const QString& FileName, lcZipFileType ZipFileType);
 	bool OpenDirectory(const QDir& LibraryDir, bool ShowProgress);
 	void ReadArchiveDescriptions(const QString& OfficialFileName, const QString& UnofficialFileName);
 	void ReadDirectoryDescriptions(const QFileInfoList (&FileLists)[LC_NUM_FOLDERTYPES], bool ShowProgress);

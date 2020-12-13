@@ -14,32 +14,25 @@
 lcZipFile::lcZipFile()
 {
 	mModified = false;
-	mFile = nullptr;
 }
 
 lcZipFile::~lcZipFile()
 {
-	delete mFile;
 }
 
 bool lcZipFile::OpenRead(const QString& FileName)
 {
-	lcDiskFile* File = new lcDiskFile(FileName);
-	mFile = File;
+	std::unique_ptr<lcDiskFile> File(new lcDiskFile(FileName));
 
-	if (!File->Open(QIODevice::ReadOnly) || !Open())
-	{
-		delete File;
-		mFile = nullptr;
+	if (!File->Open(QIODevice::ReadOnly))
 		return false;
-	}
 
-	return true;
+	return OpenRead(std::move(File));
 }
 
-bool lcZipFile::OpenRead(lcFile* File)
+bool lcZipFile::OpenRead(std::unique_ptr<lcFile> File)
 {
-	mFile = File;
+	mFile = std::move(File);
 
 	if (!Open())
 	{
@@ -52,21 +45,18 @@ bool lcZipFile::OpenRead(lcFile* File)
 
 bool lcZipFile::OpenWrite(const QString& FileName)
 {
-	lcDiskFile* File = new lcDiskFile(FileName);
-	mFile = File;
+	std::unique_ptr<lcDiskFile> File(new lcDiskFile(FileName));
+
+	if (!File->Open(QIODevice::WriteOnly))
+		return false;
+
+	mFile = std::move(File);
 
 	mNumEntries = 0;
 	mCentralDirSize = 0;
 	mCentralDirOffset = 0;
 	mBytesBeforeZipFile = 0;
 	mCentralPos = 0;
-
-	if (!File->Open(QIODevice::WriteOnly))
-	{
-		delete File;
-		mFile = nullptr;
-		return false;
-	}
 
 	return true;
 }

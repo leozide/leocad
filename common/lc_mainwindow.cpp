@@ -790,7 +790,7 @@ void lcMainWindow::CreatePreviewWidget()
 	mPreviewWidget  = new lcPreviewDockWidget();
 
 	mPreviewToolBar = new QDockWidget(tr("Preview"), this);
-	mPreviewToolBar->setWindowTitle(trUtf8("Preview"));
+	mPreviewToolBar->setWindowTitle(tr("Preview"));
 	mPreviewToolBar->setObjectName("PreviewToolBarw");
 	mPreviewToolBar->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 	mPreviewToolBar->setWidget(mPreviewWidget);

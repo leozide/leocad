@@ -1581,28 +1581,28 @@ void lcPiecesLibrary::SetStudLogo(int StudLogo, bool Reload)
 
 bool lcPiecesLibrary::GetStudLogoFile(lcMemFile& PrimFile, int StudLogo, bool OpenStud)
 {
-	// validate logo choice and unofficial lib available
 	if (!StudLogo || (!mZipFiles[LC_ZIPFILE_UNOFFICIAL] && !mHasUnofficial))
 		return false;
 
-	// construct logo reference line
 	QString Logo        = QString("%1").arg(StudLogo);
 	QString LogoRefLine = QString("1 16 0 0 0 1 0 0 0 1 0 0 0 1 ");
 	LogoRefLine        += (OpenStud ? QString("stud2-logo%1.dat").arg(StudLogo > 1 ? Logo : ""):
 									  QString("stud-logo%1.dat").arg(StudLogo > 1 ? Logo : ""));
 
-	// construct primitive file
+	const QLatin1String LineEnding("\r\n");
 	QByteArray FileData;
-	QTextStream out(&FileData);
-	out << (OpenStud ? "0 Stud Open" : "0 Stud") << endl;
-	out << (OpenStud ? "0 Name: stud2.dat" : "0 Name: stud.dat") << endl;
-	out << "0 Author: James Jessiman" << endl;
-	out << "0 !LDRAW_ORG Primitive" << endl;
-	out << "0 BFC CERTIFY CCW" << endl;
-	out << LogoRefLine << endl;
+	QTextStream TextStream(&FileData);
+
+	TextStream << (OpenStud ? "0 Stud Open" : "0 Stud") << LineEnding;
+	TextStream << (OpenStud ? "0 Name: stud2.dat" : "0 Name: stud.dat") << LineEnding;
+	TextStream << "0 Author: James Jessiman" << LineEnding;
+	TextStream << "0 !LDRAW_ORG Primitive" << LineEnding;
+	TextStream << "0 BFC CERTIFY CCW" << LineEnding;
+	TextStream << LogoRefLine << LineEnding;
 
 	PrimFile.WriteBuffer(FileData.constData(), size_t(FileData.size()));
 	PrimFile.Seek(0, SEEK_SET);
+
 	return true;
 }
 

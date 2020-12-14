@@ -26,7 +26,7 @@
          </sizepolicy>
         </property>
         <property name="sizeAdjustPolicy">
-         <enum>QComboBox::AdjustToMinimumContentsLength</enum>
+         <enum>QComboBox::AdjustToContents</enum>
         </property>
         <property name="minimumContentsLength">
          <number>24</number>
@@ -110,7 +110,7 @@
          </sizepolicy>
         </property>
         <property name="sizeAdjustPolicy">
-         <enum>QComboBox::AdjustToMinimumContentsLength</enum>
+         <enum>QComboBox::AdjustToContents</enum>
         </property>
         <property name="minimumContentsLength">
          <number>24</number>
@@ -126,7 +126,7 @@
          </sizepolicy>
         </property>
         <property name="sizeAdjustPolicy">
-         <enum>QComboBox::AdjustToMinimumContentsLength</enum>
+         <enum>QComboBox::AdjustToContents</enum>
         </property>
         <property name="minimumContentsLength">
          <number>24</number>
@@ -168,7 +168,7 @@
          </sizepolicy>
         </property>
         <property name="sizeAdjustPolicy">
-         <enum>QComboBox::AdjustToMinimumContentsLength</enum>
+         <enum>QComboBox::AdjustToContents</enum>
         </property>
         <property name="minimumContentsLength">
          <number>24</number>
@@ -198,7 +198,7 @@
          </sizepolicy>
         </property>
         <property name="sizeAdjustPolicy">
-         <enum>QComboBox::AdjustToMinimumContentsLength</enum>
+         <enum>QComboBox::AdjustToContents</enum>
         </property>
         <property name="minimumContentsLength">
          <number>24</number>
@@ -214,7 +214,7 @@
          </sizepolicy>
         </property>
         <property name="sizeAdjustPolicy">
-         <enum>QComboBox::AdjustToMinimumContentsLength</enum>
+         <enum>QComboBox::AdjustToContents</enum>
         </property>
         <property name="minimumContentsLength">
          <number>24</number>
@@ -282,7 +282,7 @@
          </sizepolicy>
         </property>
         <property name="sizeAdjustPolicy">
-         <enum>QComboBox::AdjustToMinimumContentsLength</enum>
+         <enum>QComboBox::AdjustToContents</enum>
         </property>
         <property name="minimumContentsLength">
          <number>24</number>
@@ -298,7 +298,7 @@
          </sizepolicy>
         </property>
         <property name="sizeAdjustPolicy">
-         <enum>QComboBox::AdjustToMinimumContentsLength</enum>
+         <enum>QComboBox::AdjustToContents</enum>
         </property>
         <property name="minimumContentsLength">
          <number>24</number>
@@ -366,7 +366,7 @@
          </sizepolicy>
         </property>
         <property name="sizeAdjustPolicy">
-         <enum>QComboBox::AdjustToMinimumContentsLength</enum>
+         <enum>QComboBox::AdjustToContents</enum>
         </property>
         <property name="minimumContentsLength">
          <number>24</number>
@@ -382,7 +382,7 @@
          </sizepolicy>
         </property>
         <property name="sizeAdjustPolicy">
-         <enum>QComboBox::AdjustToMinimumContentsLength</enum>
+         <enum>QComboBox::AdjustToContents</enum>
         </property>
         <property name="minimumContentsLength">
          <number>24</number>
@@ -450,7 +450,7 @@
          </sizepolicy>
         </property>
         <property name="sizeAdjustPolicy">
-         <enum>QComboBox::AdjustToMinimumContentsLength</enum>
+         <enum>QComboBox::AdjustToContents</enum>
         </property>
         <property name="minimumContentsLength">
          <number>24</number>
@@ -466,7 +466,7 @@
          </sizepolicy>
         </property>
         <property name="sizeAdjustPolicy">
-         <enum>QComboBox::AdjustToMinimumContentsLength</enum>
+         <enum>QComboBox::AdjustToContents</enum>
         </property>
         <property name="minimumContentsLength">
          <number>24</number>
@@ -496,7 +496,7 @@
          </sizepolicy>
         </property>
         <property name="sizeAdjustPolicy">
-         <enum>QComboBox::AdjustToMinimumContentsLength</enum>
+         <enum>QComboBox::AdjustToContents</enum>
         </property>
         <property name="minimumContentsLength">
          <number>24</number>
@@ -512,7 +512,7 @@
          </sizepolicy>
         </property>
         <property name="sizeAdjustPolicy">
-         <enum>QComboBox::AdjustToMinimumContentsLength</enum>
+         <enum>QComboBox::AdjustToContents</enum>
         </property>
         <property name="minimumContentsLength">
          <number>24</number>
@@ -580,7 +580,7 @@
          </sizepolicy>
         </property>
         <property name="sizeAdjustPolicy">
-         <enum>QComboBox::AdjustToMinimumContentsLength</enum>
+         <enum>QComboBox::AdjustToContents</enum>
         </property>
         <property name="minimumContentsLength">
          <number>24</number>
@@ -596,7 +596,7 @@
          </sizepolicy>
         </property>
         <property name="sizeAdjustPolicy">
-         <enum>QComboBox::AdjustToMinimumContentsLength</enum>
+         <enum>QComboBox::AdjustToContents</enum>
         </property>
         <property name="minimumContentsLength">
          <number>24</number>
@@ -664,7 +664,7 @@
          </sizepolicy>
         </property>
         <property name="sizeAdjustPolicy">
-         <enum>QComboBox::AdjustToMinimumContentsLength</enum>
+         <enum>QComboBox::AdjustToContents</enum>
         </property>
         <property name="minimumContentsLength">
          <number>24</number>

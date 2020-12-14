@@ -345,7 +345,7 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 	int StudLogo = lcGetProfileInt(LC_PROFILE_STUD_LOGO);
 	int ImageStart = 0;
 	int ImageEnd = 0;
-	float CameraPosition[9] = {};
+	lcVector3 CameraPosition[3] = {};
 	float CameraLatitude = 0.0f, CameraLongitude = 0.0f;
 	float FoV = 0.0f;
 	float ZNear = 0.0f, ZFar = 0.0f;
@@ -532,7 +532,18 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 		else if (Param == QLatin1String("--camera-angles"))
 			SetCameraAngles = ParseVector2(CameraLatitude, CameraLongitude);
 		else if (Param == QLatin1String("--camera-position"))
-			SetCameraPosition = ParseFloatArray(9, CameraPosition);
+			SetCameraPosition = ParseFloatArray(9, CameraPosition[0]);
+		else if (Param == QLatin1String("--camera-position-ldraw"))
+		{
+			SetCameraPosition = ParseFloatArray(9, CameraPosition[0]);
+
+			if (SetCameraPosition)
+			{
+				CameraPosition[0] = lcVector3LDrawToLeoCAD(CameraPosition[0]);
+				CameraPosition[1] = lcVector3LDrawToLeoCAD(CameraPosition[1]);
+				CameraPosition[2] = lcVector3LDrawToLeoCAD(CameraPosition[2]);
+			}
+		}
 		else if (Param == QLatin1String("--orthographic"))
 			Orthographic = true;
 		else if (Param == QLatin1String("--fov"))
@@ -637,6 +648,7 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 			printf("  --viewpoint <front|back|left|right|top|bottom|home>: Set the viewpoint.\n");
 			printf("  --camera-angles <latitude> <longitude>: Set the camera angles in degrees around the model.\n");
 			printf("  --camera-position <x> <y> <z> <tx> <ty> <tz> <ux> <uy> <uz>: Set the camera position, target and up vector.\n");
+			printf("  --camera-position-ldraw <x> <y> <z> <tx> <ty> <tz> <ux> <uy> <uz>: Set the camera position, target and up vector using LDraw coordinates.\n");
 			printf("  --orthographic: Render images using an orthographic projection.\n");
 			printf("  --fov <degrees>: Set the vertical field of view used to render images.\n");
 			printf("  --zplanes <near> <far>: Set the near and far clipping planes used to render images.\n");
@@ -765,9 +777,7 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 			}
 			else if (SetCameraPosition)
 			{
-				ActiveView->SetViewpoint(lcVector3(CameraPosition[0], CameraPosition[1], CameraPosition[2]),
-				                         lcVector3(CameraPosition[3], CameraPosition[4], CameraPosition[5]),
-				                         lcVector3(CameraPosition[6], CameraPosition[7], CameraPosition[8]));
+				ActiveView->SetViewpoint(CameraPosition[0], CameraPosition[1], CameraPosition[2]);
 			}
 		}
 

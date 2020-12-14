@@ -68,17 +68,22 @@ void lcCamera::Initialize()
 	m_zNear = 25.0f;
 	m_zFar = 50000.0f;
 	mState = 0;
-	memset(m_strName, 0, sizeof(m_strName));
+}
+
+void lcCamera::SetName(const QString& Name)
+{
+	mName = Name;
 }
 
 void lcCamera::CreateName(const lcArray<lcCamera*>& Cameras)
 {
-	if (m_strName[0])
+	if (!mName.isEmpty())
 	{
 		bool Found = false;
-		for (int CameraIdx = 0; CameraIdx < Cameras.GetSize(); CameraIdx++)
+
+		for (const lcCamera* Camera : Cameras)
 		{
-			if (!strcmp(Cameras[CameraIdx]->m_strName, m_strName))
+			if (Camera->GetName() == mName)
 			{
 				Found = true;
 				break;
@@ -89,16 +94,24 @@ void lcCamera::CreateName(const lcArray<lcCamera*>& Cameras)
 			return;
 	}
 
-	int i, max = 0;
-	const char* Prefix = "Camera ";
+	int MaxCameraNumber = 0;
+	const QLatin1String Prefix("Camera ");
 
-	for (int CameraIdx = 0; CameraIdx < Cameras.GetSize(); CameraIdx++)
-		if (strncmp(Cameras[CameraIdx]->m_strName, Prefix, strlen(Prefix)) == 0)
-			if (sscanf(Cameras[CameraIdx]->m_strName + strlen(Prefix), " %d", &i) == 1)
-				if (i > max)
-					max = i;
+	for (const lcCamera* Camera : Cameras)
+	{
+		QString CameraName = Camera->GetName();
 
-	sprintf(m_strName, "%s %d", Prefix, max+1);
+		if (CameraName.startsWith(Prefix))
+		{
+			bool Ok = false;
+			int CameraNumber = CameraName.midRef(Prefix.size()).toInt(&Ok);
+
+			if (Ok && CameraNumber > MaxCameraNumber)
+				MaxCameraNumber = CameraNumber;
+		}
+	}
+
+	mName = Prefix + QString::number(MaxCameraNumber + 1);
 }
 
 void lcCamera::SaveLDraw(QTextStream& Stream) const
@@ -130,7 +143,7 @@ void lcCamera::SaveLDraw(QTextStream& Stream) const
 	if (IsOrtho())
 		Stream << QLatin1String("ORTHOGRAPHIC ");
 
-	Stream << QLatin1String("NAME ") << m_strName << LineEnding;
+	Stream << QLatin1String("NAME ") << mName << LineEnding;
 }
 
 bool lcCamera::ParseLDrawLine(QTextStream& Stream)
@@ -173,10 +186,7 @@ bool lcCamera::ParseLDrawLine(QTextStream& Stream)
 			LoadKeysLDraw(Stream, mUpVectorKeys);
 		else if (Token == QLatin1String("NAME"))
 		{
-			QString Name = Stream.readAll().trimmed();
-			QByteArray NameUtf = Name.toUtf8(); // todo: replace with qstring
-			strncpy(m_strName, NameUtf.constData(), sizeof(m_strName));
-			m_strName[sizeof(m_strName) - 1] = 0;
+			mName = Stream.readAll().trimmed();
 			return true;
 		}
 	}
@@ -232,16 +242,20 @@ bool lcCamera::FileLoad(lcFile& file)
 
 	if (version == 4)
 	{
-		file.ReadBuffer(m_strName, 80);
-		m_strName[80] = 0;
+		char Name[81];
+		file.ReadBuffer(Name, 80);
+		Name[80] = 0;
+		mName = Name;
 	}
 	else
 	{
 		ch = file.ReadU8();
 		if (ch == 0xFF)
 			return false; // don't read CString
-		file.ReadBuffer(m_strName, ch);
-		m_strName[ch] = 0;
+		char Name[81];
+		file.ReadBuffer(Name, ch);
+		Name[ch] = 0;
+		mName = Name;
 	}
 
 	if (version < 3)

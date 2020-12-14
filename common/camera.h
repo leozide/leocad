@@ -47,11 +47,12 @@ public:
 	lcCamera& operator=(const lcCamera&) = delete;
 	lcCamera& operator=(lcCamera&&) = delete;
 
-	const char* GetName() const override
+	QString GetName() const override
 	{
-		return m_strName;
+		return mName;
 	}
 
+	void SetName(const QString& Name);
 	void CreateName(const lcArray<lcCamera*>& Cameras);
 
 	bool IsSimple() const
@@ -294,8 +295,6 @@ public:
 	void GetAngles(float& Latitude, float& Longitude, float& Distance) const;
 	void SetAngles(float Latitude, float Longitude, float Distance);
 
-	char m_strName[81];
-
 	float m_fovy;
 	float m_zNear;
 	float m_zFar;
@@ -312,6 +311,6 @@ protected:
 
 	void Initialize();
 
+	QString mName;
 	quint32 mState;
 };
-

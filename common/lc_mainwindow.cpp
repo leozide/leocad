@@ -1392,7 +1392,7 @@ QByteArray lcMainWindow::GetTabLayout()
 				else
 				{
 					DataStream << (qint32)1;
-					DataStream << QByteArray::fromRawData(Camera->m_strName, sizeof(Camera->m_strName));
+					DataStream << Camera->GetName();
 				}
 			}
 			else

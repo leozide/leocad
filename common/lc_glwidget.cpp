@@ -369,13 +369,13 @@ void lcGLWidget::SetCamera(lcCamera* Camera, bool ForceCopy)
 	}
 }
 
-void lcGLWidget::SetCamera(const char* CameraName)
+void lcGLWidget::SetCamera(const QString& CameraName)
 {
 	const lcArray<lcCamera*>& Cameras = mModel->GetCameras();
 
 	for (int CameraIdx = 0; CameraIdx < Cameras.GetSize(); CameraIdx++)
 	{
-		if (qstricmp(CameraName, Cameras[CameraIdx]->m_strName) == 0)
+		if (CameraName.compare(Cameras[CameraIdx]->GetName(), Qt::CaseInsensitive) == 0)
 		{
 			SetCameraIndex(CameraIdx);
 			return;
@@ -557,9 +557,9 @@ void lcGLWidget::DrawViewport() const
 	mContext->SetVertexFormatPosition(2);
 	mContext->DrawPrimitives(GL_LINE_LOOP, 0, 4);
 
-	const char* CameraName = mCamera->GetName();
+	QString CameraName = mCamera->GetName();
 
-	if (CameraName[0])
+	if (!CameraName.isEmpty())
 	{
 		mContext->SetMaterial(lcMaterialType::UnlitTextureModulate);
 		mContext->SetColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -567,7 +567,7 @@ void lcGLWidget::DrawViewport() const
 
 		glEnable(GL_BLEND);
 
-		gTexFont.PrintText(mContext, 3.0f, (float)mHeight - 1.0f - 6.0f, 0.0f, CameraName);
+		gTexFont.PrintText(mContext, 3.0f, (float)mHeight - 1.0f - 6.0f, 0.0f, CameraName.toLatin1().constData());
 
 		glDisable(GL_BLEND);
 	}

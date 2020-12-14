@@ -896,9 +896,9 @@ void lcPiece::VerifyControlPoints(lcArray<lcPieceControlPoint>& ControlPoints) c
 	}
 }
 
-const char* lcPiece::GetName() const
+QString lcPiece::GetName() const
 {
-	return mPieceInfo->m_strDescription;
+	return QString::fromLatin1(mPieceInfo->m_strDescription);
 }
 
 bool lcPiece::IsVisible(lcStep Step) const

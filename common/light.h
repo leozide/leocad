@@ -191,8 +191,10 @@ public:
 	bool IsVisible() const
 	{ return (mState & LC_LIGHT_HIDDEN) == 0; }
 
-	const char* GetName() const override
-	{ return m_strName; }
+	QString GetName() const override
+	{
+		return mName;
+	}
 
 	void CompareBoundingBox(lcVector3& Min, lcVector3& Max);
 	void UpdatePosition(lcStep Step);
@@ -226,7 +228,6 @@ protected:
 	void DrawPointLight(lcContext* Context) const;
 	void DrawSpotLight(lcContext* Context) const;
 
+	QString mName;
 	quint32 mState;
-	char m_strName[81];
 };
-

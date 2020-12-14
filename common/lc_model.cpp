@@ -3022,13 +3022,12 @@ void lcModel::SetCameraZFar(lcCamera* Camera, float ZFar)
 	gMainWindow->UpdateAllViews();
 }
 
-void lcModel::SetCameraName(lcCamera* Camera, const char* Name)
+void lcModel::SetCameraName(lcCamera* Camera, const QString& Name)
 {
-	if (!strcmp(Camera->m_strName, Name))
+	if (Camera->GetName() == Name)
 		return;
 
-	strncpy(Camera->m_strName, Name, sizeof(Camera->m_strName));
-	Camera->m_strName[sizeof(Camera->m_strName) - 1] = 0;
+	Camera->SetName(Name);
 
 	SaveCheckpoint(tr("Renaming Camera"));
 	gMainWindow->UpdateSelectedObjects(false);
@@ -3857,7 +3856,7 @@ void lcModel::FindPiece(bool FindFirst, bool SearchForward)
 
 		if ((!SearchOptions.MatchInfo || Current->mPieceInfo == SearchOptions.Info) &&
 			(!SearchOptions.MatchColor || Current->mColorIndex == SearchOptions.ColorIndex) &&
-			(!SearchOptions.MatchName || strcasestr(Current->GetName(), SearchOptions.Name)))
+			(!SearchOptions.MatchName || (Current->GetName().indexOf(SearchOptions.Name, 0, Qt::CaseInsensitive) != -1)))
 		{
 			Focus = Current;
 			break;

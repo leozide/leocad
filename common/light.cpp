@@ -32,7 +32,6 @@ lcLight::lcLight(float px, float py, float pz, float tx, float ty, float tz)
 void lcLight::Initialize(const lcVector3& Position, const lcVector3& TargetPosition)
 {
 	mState = 0;
-	memset(m_strName, 0, sizeof(m_strName));
 
 	ChangeKey(mPositionKeys, Position, 1, true);
 	ChangeKey(mTargetPositionKeys, TargetPosition, 1, true);
@@ -55,13 +54,13 @@ void lcLight::SaveLDraw(QTextStream& Stream) const
 
 void lcLight::CreateName(const lcArray<lcLight*>& Lights)
 {
-	if (m_strName[0])
+	if (!mName.isEmpty())
 	{
 		bool Found = false;
 
 		for (lcLight* Light : Lights)
 		{
-			if (!strcmp(Light->m_strName, m_strName))
+			if (Light->GetName() == mName)
 			{
 				Found = true;
 				break;
@@ -72,21 +71,24 @@ void lcLight::CreateName(const lcArray<lcLight*>& Lights)
 			return;
 	}
 
-	int i, max = 0;
+	int MaxLightNumber = 0;
+	const QLatin1String Prefix("Light ");
 
 	for (lcLight* Light : Lights)
 	{
-		if (strncmp(Light->m_strName, "Light ", 6) == 0)
+		QString LightName = Light->GetName();
+
+		if (LightName.startsWith(Prefix))
 		{
-			if (sscanf(Light->m_strName + 6, " #%d", &i) == 1)
-			{
-				if (i > max)
-					max = i;
-			}
+			bool Ok = false;
+			int LightNumber = LightName.midRef(Prefix.size()).toInt(&Ok);
+
+			if (Ok && LightNumber > MaxLightNumber)
+				MaxLightNumber = LightNumber;
 		}
 	}
 
-	sprintf(m_strName, "Light #%.2d", max+1);
+	mName = Prefix + QString::number(MaxLightNumber + 1);
 }
 
 void lcLight::CompareBoundingBox(lcVector3& Min, lcVector3& Max)

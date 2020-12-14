@@ -101,7 +101,7 @@ public:
 	virtual void BoxTest(lcObjectBoxTest& ObjectBoxTest) const = 0;
 	virtual void DrawInterface(lcContext* Context, const lcScene& Scene) const = 0;
 	virtual void RemoveKeyFrames() = 0;
-	virtual const char* GetName() const = 0;
+	virtual QString GetName() const = 0;
 
 protected:
 	template<typename T>

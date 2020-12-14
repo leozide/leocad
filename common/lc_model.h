@@ -340,7 +340,7 @@ public:
 	void SetCameraFOV(lcCamera* Camera, float FOV);
 	void SetCameraZNear(lcCamera* Camera, float ZNear);
 	void SetCameraZFar(lcCamera* Camera, float ZFar);
-	void SetCameraName(lcCamera* Camera, const char* Name);
+	void SetCameraName(lcCamera* Camera, const QString& Name);
 
 	void ShowPropertiesDialog();
 	void ShowSelectByNameDialog();

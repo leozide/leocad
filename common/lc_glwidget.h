@@ -165,7 +165,7 @@ public:
 	void SetCameraAngles(float Latitude, float Longitude);
 	void SetDefaultCamera();
 	void SetCamera(lcCamera* Camera, bool ForceCopy);
-	void SetCamera(const char* CameraName);
+	void SetCamera(const QString& CameraName);
 	void SetCameraIndex(int Index);
 
 	void DrawBackground() const;

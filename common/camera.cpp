@@ -980,18 +980,19 @@ void lcCamera::Center(const lcVector3& NewCenter, lcStep Step, bool AddKey)
 	const lcMatrix44 Inverse = lcMatrix44AffineInverse(mWorldView);
 	const lcVector3 Direction = -lcVector3(Inverse[2]);
 
-	float Yaw, Pitch, Roll;
+//	float Yaw, Pitch, Roll;
+	float Roll;
 
 	if (fabsf(Direction.z) < 0.9999f)
 	{
-		Yaw = atan2f(Direction.y, Direction.x);
-		Pitch = asinf(Direction.z);
+//		Yaw = atan2f(Direction.y, Direction.x);
+//		Pitch = asinf(Direction.z);
 		Roll = atan2f(Inverse[0][2], Inverse[1][2]);
 	}
 	else
 	{
-		Yaw = 0.0f;
-		Pitch = asinf(Direction.z);
+//		Yaw = 0.0f;
+//		Pitch = asinf(Direction.z);
 		Roll = atan2f(Inverse[0][1], Inverse[1][1]);
 	}
 

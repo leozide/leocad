@@ -104,7 +104,11 @@ void lcCamera::CreateName(const lcArray<lcCamera*>& Cameras)
 		if (CameraName.startsWith(Prefix))
 		{
 			bool Ok = false;
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
 			int CameraNumber = CameraName.midRef(Prefix.size()).toInt(&Ok);
+#else
+			int CameraNumber = CameraName.midRef((int)strlen(Prefix.latin1())).toInt(&Ok);
+#endif
 
 			if (Ok && CameraNumber > MaxCameraNumber)
 				MaxCameraNumber = CameraNumber;

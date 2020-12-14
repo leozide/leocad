@@ -812,9 +812,11 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 				Frame = ImageName;
 
 			mPreferences.mFadeSteps = FadeSteps;
-			mPreferences.mFadeStepsColor = FadeStepsColor;
+			if (SetFadeStepsColor)
+				mPreferences.mFadeStepsColor = FadeStepsColor;
 			mPreferences.mHighlightNewParts = ImageHighlight;
-			mPreferences.mHighlightNewPartsColor = HighlightColor;
+			if (SetHighlightColor)
+				mPreferences.mHighlightNewPartsColor = HighlightColor;
 
 			ActiveModel->SaveStepImages(Frame, ImageStart != ImageEnd, CameraName.isEmpty() && !SetCameraPosition, ImageWidth, ImageHeight, ImageStart, ImageEnd);
 		}

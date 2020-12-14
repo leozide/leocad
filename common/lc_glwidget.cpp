@@ -12,7 +12,7 @@
 lcGLWidget* lcGLWidget::mLastFocusedView;
 
 lcGLWidget::lcGLWidget(lcModel* Model)
-	: mModel(Model), mScene(new lcScene())
+	: mScene(new lcScene()), mModel(Model)
 {
 	mContext = new lcContext();
 }

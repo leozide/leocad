@@ -314,7 +314,7 @@ void lcQGLWidget::wheelEvent(QWheelEvent* WheelEvent)
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 14, 0))
 	mView->SetMousePosition(WheelEvent->position().x() * DeviceScale, mView->GetHeight() - WheelEvent->position().y() * DeviceScale - 1);
 #else
-	mView->SetMousePosition(WheelEvent->x() * DeviceScale, mView->mHeight - WheelEvent->y() * DeviceScale - 1);
+	mView->SetMousePosition(WheelEvent->x() * DeviceScale, mView->GetHeight() - WheelEvent->y() * DeviceScale - 1);
 #endif
 	mView->SetMouseModifiers(WheelEvent->modifiers());
 

@@ -702,7 +702,7 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 
 		if (!CameraName.isEmpty())
 		{
-			ActiveView->SetCamera(CameraName.toLatin1()); // todo: qstring
+			ActiveView->SetCamera(CameraName);
 
 			if (!ViewpointName.isEmpty())
 				printf("Warning: --viewpoint is ignored when --camera is set.\n");

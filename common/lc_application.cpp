@@ -718,6 +718,19 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 		}
 		else
 		{
+			ActiveView->SetProjection(Orthographic);
+
+			if (SetFoV)
+				ActiveView->GetCamera()->m_fovy = FoV;
+
+			if (SetZPlanes)
+			{
+				lcCamera* Camera = ActiveView->GetCamera();
+
+				Camera->m_zNear = ZNear;
+				Camera->m_zFar = ZFar;
+			}
+
 			if (!ViewpointName.isEmpty())
 			{
 				if (ViewpointName == QLatin1String("front"))
@@ -755,19 +768,6 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 				ActiveView->SetViewpoint(lcVector3(CameraPosition[0], CameraPosition[1], CameraPosition[2]),
 				                         lcVector3(CameraPosition[3], CameraPosition[4], CameraPosition[5]),
 				                         lcVector3(CameraPosition[6], CameraPosition[7], CameraPosition[8]));
-			}
-
-			ActiveView->SetProjection(Orthographic);
-
-			if (SetFoV)
-				ActiveView->GetCamera()->m_fovy = FoV;
-
-			if (SetZPlanes)
-			{
-				lcCamera* Camera = ActiveView->GetCamera();
-
-				Camera->m_zNear = ZNear;
-				Camera->m_zFar = ZFar;
 			}
 		}
 

@@ -346,9 +346,9 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 	int ImageStart = 0;
 	int ImageEnd = 0;
 	lcVector3 CameraPosition[3] = {};
-	float CameraLatitude = 0.0f, CameraLongitude = 0.0f;
+	float CameraLatLon[2] = {0.0f, 0.0f};
 	float FoV = 0.0f;
-	float ZNear = 0.0f, ZFar = 0.0f;
+	float ZPlanes[2] = {0.0f, 0.0f};
 	quint32 FadeStepsColor = mPreferences.mFadeStepsColor;
 	quint32	HighlightColor = mPreferences.mHighlightNewPartsColor;
 	QString ImageName;
@@ -363,6 +363,7 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 
 	QStringList Arguments = arguments();
 	const int NumArguments = Arguments.size();
+	bool ParseOK = true;
 
 	for (int ArgIdx = 1; ArgIdx < NumArguments; ArgIdx++)
 	{
@@ -377,7 +378,7 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 			continue;
 		}
 
-		auto ParseString = [&ArgIdx, &Arguments, NumArguments](QString& Value, bool Required)
+		auto ParseString = [&ArgIdx, &Arguments, NumArguments, &ParseOK](QString& Value, bool Required)
 		{
 			if (ArgIdx < NumArguments - 1 && Arguments[ArgIdx + 1][0] != '-')
 			{
@@ -385,10 +386,16 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 				Value = Arguments[ArgIdx];
 			}
 			else if (Required)
+			{
 				printf("Not enough parameters for the '%s' argument.\n", Arguments[ArgIdx].toLatin1().constData());
+				ParseOK = false;
+				return false;
+			}
+
+			return true;
 		};
 
-		auto ParseInteger = [&ArgIdx, &Arguments, NumArguments](int& Value)
+		auto ParseInteger = [&ArgIdx, &Arguments, NumArguments, &ParseOK](int& Value)
 		{
 			if (ArgIdx < NumArguments - 1 && Arguments[ArgIdx + 1][0] != '-')
 			{
@@ -397,15 +404,21 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 				int NewValue = Arguments[ArgIdx].toInt(&Ok);
 
 				if (Ok)
+				{
 					Value = NewValue;
+					return true;
+				}
 				else
-					printf("Invalid value specified for the '%s' argument.\n", Arguments[ArgIdx - 1].toLatin1().constData());
+					printf("Invalid value specified for the '%s' argument: '%s'.\n", Arguments[ArgIdx - 1].toLatin1().constData(), Arguments[ArgIdx].toLatin1().constData());
 			}
 			else
 				printf("Not enough parameters for the '%s' argument.\n", Arguments[ArgIdx].toLatin1().constData());
+
+			ParseOK = false;
+			return false;
 		};
 
-		auto ParseFloat = [&ArgIdx, &Arguments, NumArguments](float& Value)
+		auto ParseFloat = [&ArgIdx, &Arguments, NumArguments, &ParseOK](float& Value)
 		{
 			if (ArgIdx < NumArguments - 1 && Arguments[ArgIdx + 1][0] != '-')
 			{
@@ -419,84 +432,71 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 					return true;
 				}
 				else
-					printf("Invalid value specified for the '%s' argument.\n", Arguments[ArgIdx - 1].toLatin1().constData());
+					printf("Invalid value specified for the '%s' argument: '%s'.\n", Arguments[ArgIdx - 1].toLatin1().constData(), Arguments[ArgIdx].toLatin1().constData());
 			}
 			else
 				printf("Not enough parameters for the '%s' argument.\n", Arguments[ArgIdx].toLatin1().constData());
 
+			ParseOK = false;
 			return false;
 		};
 
-		auto ParseVector2 = [&ArgIdx, &Arguments, NumArguments](float& Value1, float& Value2)
-		{
-			if (ArgIdx < NumArguments - 2 && Arguments[ArgIdx + 1][0] != '-' && Arguments[ArgIdx + 2][0] != '-')
-			{
-				bool Ok1 = false, Ok2 = false;
-
-				ArgIdx++;
-				float NewValue1 = Arguments[ArgIdx].toFloat(&Ok1);
-				ArgIdx++;
-				float NewValue2 = Arguments[ArgIdx].toFloat(&Ok2);
-
-				if (Ok1 && Ok2)
-				{
-					Value1 = NewValue1;
-					Value2 = NewValue2;
-					return true;
-				}
-				else
-					printf("Invalid value specified for the '%s' argument.\n", Arguments[ArgIdx - 2].toLatin1().constData());
-			}
-			else
-				printf("Not enough parameters for the '%s' argument.\n", Arguments[ArgIdx].toLatin1().constData());
-
-			return false;
-		};
-
-		auto ParseFloatArray = [&ArgIdx, &Arguments, NumArguments](int Count, float* ValueArray)
+		auto ParseFloatArray = [&ArgIdx, &Arguments, NumArguments, &ParseOK](int Count, float* ValueArray, bool NegativesValid)
 		{
 			if (ArgIdx + Count >= NumArguments)
 			{
 				printf("Not enough parameters for the '%s' argument.\n", Arguments[ArgIdx].toLatin1().constData());
+				ArgIdx += Count;
+				ParseOK = false;
 				return false;
 			}
 
 			for (int ParseIndex = 0; ParseIndex < Count; ParseIndex++)
 			{
-				bool Ok = false;
-				float NewValue = Arguments[ArgIdx+ParseIndex+1].toFloat(&Ok);
-
-				if (Ok)
-					*(ValueArray++) = NewValue;
-				else
+				if (NegativesValid || Arguments[ArgIdx+ParseIndex+1][0] != '-')
 				{
+					bool Ok = false;
+					float NewValue = Arguments[ArgIdx+ParseIndex+1].toFloat(&Ok);
+
+					if (Ok)
+					{
+						*(ValueArray++) = NewValue;
+						continue;
+					}
+
 					printf("Invalid value specified for the '%s' argument: '%s'.\n", Arguments[ArgIdx].toLatin1().constData(), Arguments[ArgIdx+ParseIndex+1].toLatin1().constData());
-					ArgIdx += 1 + Count;
-					return false;
 				}
+				else
+					printf("Not enough parameters for the '%s' argument.\n", Arguments[ArgIdx].toLatin1().constData());
+
+				ArgIdx += ParseIndex;
+				ParseOK = false;
+				return false;
 			}
 
 			ArgIdx += Count;
 			return true;
 		};
 
-		auto ParseColor = [&ArgIdx, &Arguments, NumArguments](quint32& Color)
+		auto ParseColor = [&ArgIdx, &Arguments, NumArguments, &ParseOK](quint32& Color)
 		{
-			if (ArgIdx + 1 >= NumArguments)
+			if (ArgIdx < NumArguments - 1 && Arguments[ArgIdx + 1][0] != '-')
 			{
+				ArgIdx++;
+				QColor ParsedColor = QColor(Arguments[ArgIdx]);
+				if (ParsedColor.isValid())
+				{
+					Color = LC_RGBA(ParsedColor.red(), ParsedColor.green(), ParsedColor.blue(), ParsedColor.alpha());
+					return true;
+				}
+				else
+					printf("Invalid value specified for the '%s' argument: '%s'.\n", Arguments[ArgIdx - 1].toLatin1().constData(), Arguments[ArgIdx].toLatin1().constData());
+			}
+			else
 				printf("Not enough parameters for the '%s' argument.\n", Arguments[ArgIdx].toLatin1().constData());
-				return false;
-			}
 
-			QColor ParsedColor = QColor(Arguments[ArgIdx+1]);
-			if (!ParsedColor.isValid())
-			{
-				printf("Invalid value specified for the '%s' argument: '%s'.\n", Arguments[ArgIdx].toLatin1().constData(), Arguments[ArgIdx+1].toLatin1().constData());
-				return false;
-			}
-
-			Color = LC_RGBA(ParsedColor.red(), ParsedColor.green(), ParsedColor.blue(), ParsedColor.alpha());
-			return true;
+			ParseOK = false;
+			return false;
 		};
 
 		if (Param == QLatin1String("-l") || Param == QLatin1String("--libpath"))
@@ -530,12 +530,12 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 		else if (Param == QLatin1String("--viewpoint"))
 			ParseString(ViewpointName, true);
 		else if (Param == QLatin1String("--camera-angles"))
-			SetCameraAngles = ParseVector2(CameraLatitude, CameraLongitude);
+			SetCameraAngles = ParseFloatArray(2, CameraLatLon, false);
 		else if (Param == QLatin1String("--camera-position"))
-			SetCameraPosition = ParseFloatArray(9, CameraPosition[0]);
+			SetCameraPosition = ParseFloatArray(9, CameraPosition[0], true);
 		else if (Param == QLatin1String("--camera-position-ldraw"))
 		{
-			SetCameraPosition = ParseFloatArray(9, CameraPosition[0]);
+			SetCameraPosition = ParseFloatArray(9, CameraPosition[0], true);
 
 			if (SetCameraPosition)
 			{
@@ -549,7 +549,7 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 		else if (Param == QLatin1String("--fov"))
 			SetFoV = ParseFloat(FoV);
 		else if (Param == QLatin1String("--zplanes"))
-			SetZPlanes = ParseVector2(ZNear, ZFar);
+			SetZPlanes = ParseFloatArray(2, ZPlanes, false);
 		else if (Param == QLatin1String("--fade-steps"))
 			FadeSteps = true;
 		else if (Param == QLatin1String("--no-fade-steps"))
@@ -673,7 +673,16 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 			return true;
 		}
 		else
+		{
 			printf("Unknown parameter: '%s'\n", Param.toLatin1().constData());
+			ParseOK = false;
+		}
+	}
+
+	if (!ParseOK)
+	{
+		ShowWindow = false;
+		return false;
 	}
 
 	gMainWindow = new lcMainWindow();
@@ -739,8 +748,8 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 			{
 				lcCamera* Camera = ActiveView->GetCamera();
 
-				Camera->m_zNear = ZNear;
-				Camera->m_zFar = ZFar;
+				Camera->m_zNear = ZPlanes[0];
+				Camera->m_zFar = ZPlanes[1];
 			}
 
 			if (!ViewpointName.isEmpty())
@@ -770,7 +779,7 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 			}
 			else if (SetCameraAngles)
 			{
-				ActiveView->SetCameraAngles(CameraLatitude, CameraLongitude);
+				ActiveView->SetCameraAngles(CameraLatLon[0], CameraLatLon[1]);
 
 				if (SetCameraPosition)
 					printf("Warning: --camera-position is ignored when --camera-angles is set.\n");

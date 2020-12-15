@@ -337,7 +337,6 @@ public:
 	void UpdateSnap();
 	void UpdateColor();
 	void UpdateUndoRedo(const QString& UndoText, const QString& RedoText);
-	void UpdateCurrentCamera(int CameraIndex);
 	void UpdatePerspective();
 	void UpdateCameraMenu();
 	void UpdateShadingMode();

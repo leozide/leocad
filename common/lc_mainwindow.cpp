@@ -2174,7 +2174,7 @@ void lcMainWindow::UpdateCameraMenu()
 	const lcArray<lcCamera*>& Cameras = lcGetActiveModel()->GetCameras();
 	View* ActiveView = GetActiveView();
 	const lcCamera* CurrentCamera = ActiveView ? ActiveView->GetCamera() : nullptr;
-	int CurrentIndex = -1;
+	bool CurrentSet = false;
 
 	for (int ActionIdx = LC_VIEW_CAMERA_FIRST; ActionIdx <= LC_VIEW_CAMERA_LAST; ActionIdx++)
 	{
@@ -2184,7 +2184,10 @@ void lcMainWindow::UpdateCameraMenu()
 		if (CameraIdx < Cameras.GetSize())
 		{
 			if (CurrentCamera == Cameras[CameraIdx])
-				CurrentIndex = CameraIdx;
+			{
+				Action->setChecked(true);
+				CurrentSet = true;
+			}
 
 			Action->setText(Cameras[CameraIdx]->GetName());
 			Action->setVisible(true);
@@ -2193,17 +2196,9 @@ void lcMainWindow::UpdateCameraMenu()
 			Action->setVisible(false);
 	}
 
-	UpdateCurrentCamera(CurrentIndex);
-}
+	if (!CurrentSet)
+		mActions[LC_VIEW_CAMERA_NONE]->setChecked(true);
 
-void lcMainWindow::UpdateCurrentCamera(int CameraIndex)
-{
-	int ActionIndex = LC_VIEW_CAMERA_FIRST + CameraIndex;
-
-	if (ActionIndex < LC_VIEW_CAMERA_FIRST || ActionIndex > LC_VIEW_CAMERA_LAST)
-		ActionIndex = LC_VIEW_CAMERA_NONE;
-
-	mActions[ActionIndex]->setChecked(true);
 	UpdatePerspective();
 }
 

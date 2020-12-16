@@ -376,6 +376,7 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 		if (Param[0] != '-')
 		{
 			ProjectName = Param;
+			// TODO: check file is readable
 			continue;
 		}
 
@@ -388,7 +389,7 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 			}
 			else if (Required)
 			{
-				printf("Not enough parameters for the '%s' argument.\n", Arguments[ArgIdx].toLatin1().constData());
+				printf("Not enough parameters for the '%s' option.\n", Arguments[ArgIdx].toLatin1().constData());
 				ParseOK = false;
 				return false;
 			}
@@ -410,10 +411,10 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 					return true;
 				}
 				else
-					printf("Invalid value specified for the '%s' argument: '%s'.\n", Arguments[ArgIdx - 1].toLatin1().constData(), Arguments[ArgIdx].toLatin1().constData());
+					printf("Invalid parameter value specified for the '%s' option: '%s'.\n", Arguments[ArgIdx - 1].toLatin1().constData(), Arguments[ArgIdx].toLatin1().constData());
 			}
 			else
-				printf("Not enough parameters for the '%s' argument.\n", Arguments[ArgIdx].toLatin1().constData());
+				printf("Not enough parameters for the '%s' option.\n", Arguments[ArgIdx].toLatin1().constData());
 
 			ParseOK = false;
 			return false;
@@ -433,10 +434,10 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 					return true;
 				}
 				else
-					printf("Invalid value specified for the '%s' argument: '%s'.\n", Arguments[ArgIdx - 1].toLatin1().constData(), Arguments[ArgIdx].toLatin1().constData());
+					printf("Invalid parameter value specified for the '%s' option: '%s'.\n", Arguments[ArgIdx - 1].toLatin1().constData(), Arguments[ArgIdx].toLatin1().constData());
 			}
 			else
-				printf("Not enough parameters for the '%s' argument.\n", Arguments[ArgIdx].toLatin1().constData());
+				printf("Not enough parameters for the '%s' option.\n", Arguments[ArgIdx].toLatin1().constData());
 
 			ParseOK = false;
 			return false;
@@ -446,7 +447,7 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 		{
 			if (ArgIdx + Count >= NumArguments)
 			{
-				printf("Not enough parameters for the '%s' argument.\n", Arguments[ArgIdx].toLatin1().constData());
+				printf("Not enough parameters for the '%s' option.\n", Arguments[ArgIdx].toLatin1().constData());
 				ArgIdx += Count;
 				ParseOK = false;
 				return false;
@@ -465,10 +466,10 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 						continue;
 					}
 
-					printf("Invalid value specified for the '%s' argument: '%s'.\n", Arguments[ArgIdx].toLatin1().constData(), Arguments[ArgIdx+ParseIndex+1].toLatin1().constData());
+					printf("Invalid parameter value specified for the '%s' option: '%s'.\n", Arguments[ArgIdx].toLatin1().constData(), Arguments[ArgIdx+ParseIndex+1].toLatin1().constData());
 				}
 				else
-					printf("Not enough parameters for the '%s' argument.\n", Arguments[ArgIdx].toLatin1().constData());
+					printf("Not enough parameters for the '%s' option.\n", Arguments[ArgIdx].toLatin1().constData());
 
 				ArgIdx += ParseIndex;
 				ParseOK = false;
@@ -491,10 +492,10 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 					return true;
 				}
 				else
-					printf("Invalid value specified for the '%s' argument: '%s'.\n", Arguments[ArgIdx - 1].toLatin1().constData(), Arguments[ArgIdx].toLatin1().constData());
+					printf("Invalid parameter value specified for the '%s' option: '%s'.\n", Arguments[ArgIdx - 1].toLatin1().constData(), Arguments[ArgIdx].toLatin1().constData());
 			}
 			else
-				printf("Not enough parameters for the '%s' argument.\n", Arguments[ArgIdx].toLatin1().constData());
+				printf("Not enough parameters for the '%s' option.\n", Arguments[ArgIdx].toLatin1().constData());
 
 			ParseOK = false;
 			return false;
@@ -517,40 +518,102 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 			ParseString(ImageName, false);
 		}
 		else if (Param == QLatin1String("-w") || Param == QLatin1String("--width"))
-			ParseInteger(ImageWidth);
+		{
+			if (ParseInteger(ImageWidth) && ImageWidth <= 0)
+			{
+				printf("Invalid parameter value specified for the '%s' option: '%s'.\n", Param.toLatin1().constData(), Arguments[ArgIdx].toLatin1().constData());
+				ParseOK = false;
+			}
+		}
 		else if (Param == QLatin1String("-h") || Param == QLatin1String("--height"))
-			ParseInteger(ImageHeight);
+		{
+			if (ParseInteger(ImageHeight) && ImageWidth <= 0)
+			{
+				printf("Invalid parameter value specified for the '%s' option: '%s'.\n", Param.toLatin1().constData(), Arguments[ArgIdx].toLatin1().constData());
+				ParseOK = false;
+			}
+		}
 		else if (Param == QLatin1String("-f") || Param == QLatin1String("--from"))
-			ParseInteger(ImageStart);
+		{
+			if (ParseInteger(ImageStart) && ImageStart <= 0)
+			{
+				printf("Invalid parameter value specified for the '%s' option: '%s'.\n", Param.toLatin1().constData(), Arguments[ArgIdx].toLatin1().constData());
+				ParseOK = false;
+			}
+		}
 		else if (Param == QLatin1String("-t") || Param == QLatin1String("--to"))
-			ParseInteger(ImageEnd);
+		{
+			if (ParseInteger(ImageEnd) && (ImageEnd <= 0 || (ImageStart && ImageStart > ImageEnd)))
+			{
+				printf("Invalid parameter value specified for the '%s' option: '%s'.\n", Param.toLatin1().constData(), Arguments[ArgIdx].toLatin1().constData());
+				ParseOK = false;
+			}
+		}
 		else if (Param == QLatin1String("-s") || Param == QLatin1String("--submodel"))
 			ParseString(ModelName, true);
 		else if (Param == QLatin1String("-c") || Param == QLatin1String("--camera"))
 			ParseString(CameraName, true);
 		else if (Param == QLatin1String("--viewpoint"))
-			ParseString(ViewpointName, true);
-		else if (Param == QLatin1String("--camera-angles"))
-			SetCameraAngles = ParseFloatArray(2, CameraLatLon, false);
-		else if (Param == QLatin1String("--camera-position"))
-			SetCameraPosition = ParseFloatArray(9, CameraPosition[0], true);
-		else if (Param == QLatin1String("--camera-position-ldraw"))
 		{
-			SetCameraPosition = ParseFloatArray(9, CameraPosition[0], true);
-
-			if (SetCameraPosition)
+			if (ParseString(ViewpointName, true)
+				// TODO: move the string checks into view or camera
+				&& ViewpointName != QLatin1String("front")
+				&& ViewpointName != QLatin1String("back")
+				&& ViewpointName != QLatin1String("top")
+				&& ViewpointName != QLatin1String("bottom")
+				&& ViewpointName != QLatin1String("left")
+				&& ViewpointName != QLatin1String("right")
+				&& ViewpointName != QLatin1String("home"))
 			{
-				CameraPosition[0] = lcVector3LDrawToLeoCAD(CameraPosition[0]);
-				CameraPosition[1] = lcVector3LDrawToLeoCAD(CameraPosition[1]);
-				CameraPosition[2] = lcVector3LDrawToLeoCAD(CameraPosition[2]);
+				printf("Invalid parameter value specified for the '%s' option: '%s'.\n", Param.toLatin1().constData(), Arguments[ArgIdx].toLatin1().constData());
+				ParseOK = false;
+			}
+		}
+		else if (Param == QLatin1String("--camera-angles"))
+		{
+			if ((SetCameraAngles = ParseFloatArray(2, CameraLatLon, true)) && (fabsf(CameraLatLon[0]) > 360.0f || fabsf(CameraLatLon[1]) > 360.0f))
+			{
+				printf("Invalid parameter value(s) specified for the '%s' option: limits are +/- 360\n",  Param.toLatin1().constData());
+				ParseOK = false;
+			}
+		}
+		else if (Param == QLatin1String("--camera-position") || Param == QLatin1String("--camera-position-ldraw"))
+		{
+			if((SetCameraPosition = ParseFloatArray(9, CameraPosition[0], true)))
+			{
+				lcVector3 Front = CameraPosition[1] - CameraPosition[0];
+
+				if (Front.LengthSquared() < 1.0f || CameraPosition[2].LengthSquared() < 1.0f || fabsf(lcDot(lcNormalize(Front), lcNormalize(CameraPosition[2]))) > 0.99f)
+				{
+					printf("Invalid parameter value(s) specified for the '%s' option.\n", Param.toLatin1().constData());
+					ParseOK = false;
+				}
+				else if (Param == QLatin1String("--camera-position-ldraw"))
+				{
+					CameraPosition[0] = lcVector3LDrawToLeoCAD(CameraPosition[0]);
+					CameraPosition[1] = lcVector3LDrawToLeoCAD(CameraPosition[1]);
+					CameraPosition[2] = lcVector3LDrawToLeoCAD(CameraPosition[2]);
+				}
 			}
 		}
 		else if (Param == QLatin1String("--orthographic"))
 			Orthographic = true;
 		else if (Param == QLatin1String("--fov"))
-			SetFoV = ParseFloat(FoV);
+		{
+			if ((SetFoV = ParseFloat(FoV)) && fabsf(FoV) >= 180)
+			{
+				printf("Invalid parameter value specified for the '%s' option: '%s'.\n", Param.toLatin1().constData(), Arguments[ArgIdx].toLatin1().constData());
+				ParseOK = false;
+			}
+		}
 		else if (Param == QLatin1String("--zplanes"))
-			SetZPlanes = ParseFloatArray(2, ZPlanes, false);
+		{
+			if ((SetZPlanes = ParseFloatArray(2, ZPlanes, false)) && (ZPlanes[0] < 1.0 || ZPlanes[0] >= ZPlanes[1]))
+			{
+				printf("Invalid parameter value(s) specified for the '%s' option: requirements are: 1 <= <near> < <far>\n", Param.toLatin1().constData());
+				ParseOK = false;
+			}
+		}
 		else if (Param == QLatin1String("--fade-steps"))
 			FadeSteps = true;
 		else if (Param == QLatin1String("--no-fade-steps"))
@@ -578,21 +641,33 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 		else if (Param == QLatin1String("--shading"))
 		{
 			QString ShadingString;
-			ParseString(ShadingString, true);
-
-			if (ShadingString == QLatin1String("wireframe"))
-				mPreferences.mShadingMode = lcShadingMode::Wireframe;
-			else if (ShadingString == QLatin1String("flat"))
-				mPreferences.mShadingMode = lcShadingMode::Flat;
-			else if (ShadingString == QLatin1String("default"))
-				mPreferences.mShadingMode = lcShadingMode::DefaultLights;
-			else if (ShadingString == QLatin1String("full"))
-				mPreferences.mShadingMode = lcShadingMode::Full;
+			if (ParseString(ShadingString, true))
+			{
+				if (ShadingString == QLatin1String("wireframe"))
+					mPreferences.mShadingMode = lcShadingMode::Wireframe;
+				else if (ShadingString == QLatin1String("flat"))
+					mPreferences.mShadingMode = lcShadingMode::Flat;
+				else if (ShadingString == QLatin1String("default"))
+					mPreferences.mShadingMode = lcShadingMode::DefaultLights;
+				else if (ShadingString == QLatin1String("full"))
+					mPreferences.mShadingMode = lcShadingMode::Full;
+				else
+				{
+					printf("Invalid parameter value specified for the '%s' option: '%s'\n", Param.toLatin1().constData(), Arguments[ArgIdx].toLatin1().constData());
+					ParseOK = false;
+				}
+			}
 		}
 		else if (Param == QLatin1String("--line-width"))
 			ParseFloat(mPreferences.mLineWidth);
 		else if (Param == QLatin1String("--aa-samples"))
-			ParseInteger(AASamples);
+		{
+			if (ParseInteger(AASamples) && AASamples != 1 && AASamples != 2 && AASamples != 4 && AASamples != 8)
+			{
+				printf("Invalid parameter value specified for the '%s' option: '%s'.\n", Param.toLatin1().constData(), Arguments[ArgIdx].toLatin1().constData());
+				ParseOK = false;
+			}
+		}
 		else if (Param == QLatin1String("-sl") || Param == QLatin1String("--stud-logo"))
 		{
 			ParseInteger(StudLogo);
@@ -651,8 +726,8 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 			printf("  --camera-position <x> <y> <z> <tx> <ty> <tz> <ux> <uy> <uz>: Set the camera position, target and up vector.\n");
 			printf("  --camera-position-ldraw <x> <y> <z> <tx> <ty> <tz> <ux> <uy> <uz>: Set the camera position, target and up vector using LDraw coordinates.\n");
 			printf("  --orthographic: Render images using an orthographic projection.\n");
-			printf("  --fov <degrees>: Set the vertical field of view used to render images.\n");
-			printf("  --zplanes <near> <far>: Set the near and far clipping planes used to render images.\n");
+			printf("  --fov <degrees>: Set the vertical field of view used to render images (< 180).\n");
+			printf("  --zplanes <near> <far>: Set the near and far clipping planes used to render images (1 <= <near> < <far>).\n");
 			printf("  --fade-steps: Render parts from prior steps faded.\n");
 			printf("  --no-fade-steps: Do not render parts from prior steps faded.\n");
 			printf("  --fade-steps-color <rgba>: Renderinng color for prior step parts (#AARRGGBB).\n");
@@ -675,7 +750,7 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 		}
 		else
 		{
-			printf("Unknown parameter: '%s'\n", Param.toLatin1().constData());
+			printf("Unknown option: '%s'\n", Param.toLatin1().constData());
 			ParseOK = false;
 		}
 	}
@@ -770,7 +845,8 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 				else if (ViewpointName == QLatin1String("home"))
 					ActiveView->SetViewpoint(lcViewpoint::Home);
 				else
-					printf("Unknown viewpoint: '%s'\n", ViewpointName.toLatin1().constData());
+					printf("Warning: unknown viewpoint: '%s'\n", ViewpointName.toLatin1().constData());
+				// TODO: move the above into view or camera
 
 				if (SetCameraAngles)
 					printf("Warning: --camera-angles is ignored when --viewpoint is set.\n");

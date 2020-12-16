@@ -1759,7 +1759,7 @@ bool Project::ExportPOVRay(const QString& FileName)
 	char Line[1024];
 
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
-	std::map<const PieceInfo*, std::pair<char[LC_PIECE_NAME_LEN], int>> PieceTable;
+	std::map<const PieceInfo*, std::pair<char[LC_PIECE_NAME_LEN + 1], int>> PieceTable;
 	size_t NumColors = gColorList.size();
 	std::vector<std::array<char, LC_MAX_COLOR_NAME>> ColorTable(NumColors);
 
@@ -1795,12 +1795,12 @@ bool Project::ExportPOVRay(const QString& FileName)
 
 		while (TableFile.ReadLine(Line, sizeof(Line)))
 		{
-			char Src[1024], Dst[1024], Flags[1024];
+			char Src[129], Dst[129], Flags[11];
 
 			if (*Line == ';')
 				continue;
 
-			if (sscanf(Line,"%s%s%s", Src, Dst, Flags) != 3)
+			if (sscanf(Line,"%128s%128s%10s", Src, Dst, Flags) != 3)
 				continue;
 
 			strcat(Src, ".dat");
@@ -1811,21 +1811,21 @@ bool Project::ExportPOVRay(const QString& FileName)
 
 			if (strchr(Flags, 'L'))
 			{
-				std::pair<char[LC_PIECE_NAME_LEN], int>& Entry = PieceTable[Info];
+				std::pair<char[LC_PIECE_NAME_LEN + 1], int>& Entry = PieceTable[Info];
 				Entry.second |= LGEO_PIECE_LGEO;
 				sprintf(Entry.first, "lg_%s", Dst);
 			}
 
 			if (strchr(Flags, 'A'))
 			{
-				std::pair<char[LC_PIECE_NAME_LEN], int>& Entry = PieceTable[Info];
+				std::pair<char[LC_PIECE_NAME_LEN + 1], int>& Entry = PieceTable[Info];
 				Entry.second |= LGEO_PIECE_AR;
 				sprintf(Entry.first, "ar_%s", Dst);
 			}
 
 			if (strchr(Flags, 'S'))
 			{
-				std::pair<char[LC_PIECE_NAME_LEN], int>& Entry = PieceTable[Info];
+				std::pair<char[LC_PIECE_NAME_LEN + 1], int>& Entry = PieceTable[Info];
 				Entry.second |= LGEO_PIECE_SLOPE;
 				Entry.first[0] = 0;
 			}
@@ -1881,7 +1881,7 @@ bool Project::ExportPOVRay(const QString& FileName)
 			if (!AddedMeshes.insert(Mesh).second)
 				continue;
 
-			const std::pair<char[LC_PIECE_NAME_LEN], int>& Entry = Search->second;
+			const std::pair<char[LC_PIECE_NAME_LEN + 1], int>& Entry = Search->second;
 			if (Entry.first[0])
 			{
 				sprintf(Line, "#include \"%s.inc\"\n", Entry.first);
@@ -1920,7 +1920,7 @@ bool Project::ExportPOVRay(const QString& FileName)
 	for (size_t ColorIdx = 0; ColorIdx < NumColors; ColorIdx++)
 		ColorTablePointer[ColorIdx] = ColorTable[ColorIdx].data();
 
-	auto GetMeshName = [](const lcModelPartsEntry& ModelPart, char* Name)
+	auto GetMeshName = [](const lcModelPartsEntry& ModelPart, char (&Name)[LC_PIECE_NAME_LEN])
 	{
 		strcpy(Name, ModelPart.Info->mFileName);
 
@@ -1932,7 +1932,8 @@ bool Project::ExportPOVRay(const QString& FileName)
 		{
 			char Suffix[32];
 			sprintf(Suffix, "_%p", ModelPart.Mesh);
-			strcat(Name, Suffix);
+			strncat(Name, Suffix, sizeof(Name) - 1);
+			Name[sizeof(Name) - 1] = 0;
 		}
 	};
 
@@ -1951,8 +1952,10 @@ bool Project::ExportPOVRay(const QString& FileName)
 
 		if (!ModelPart.Mesh)
 		{
-			std::pair<char[LC_PIECE_NAME_LEN], int>& Entry = PieceTable[ModelPart.Info];
-			sprintf(Entry.first, "lc_%s", Name);
+			std::pair<char[LC_PIECE_NAME_LEN + 1], int>& Entry = PieceTable[ModelPart.Info];
+			strcpy(Entry.first, "lc_");
+			strncat(Entry.first, Name, sizeof(Entry.first) - 1);
+			Entry.first[sizeof(Entry.first) - 1] = 0;
 		}
 
 		Mesh->ExportPOVRay(POVFile, Name, &ColorTablePointer[0]);
@@ -2012,7 +2015,7 @@ bool Project::ExportPOVRay(const QString& FileName)
 
 		if (!ModelPart.Mesh)
 		{
-			std::pair<char[LC_PIECE_NAME_LEN], int>& Entry = PieceTable[ModelPart.Info];
+			std::pair<char[LC_PIECE_NAME_LEN + 1], int>& Entry = PieceTable[ModelPart.Info];
 
 			if (Entry.second & LGEO_PIECE_SLOPE)
 			{

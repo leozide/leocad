@@ -773,6 +773,7 @@ View* lcMainWindow::CreateView(lcModel* Model)
 	View* NewView = new View(Model);
 
 	connect(NewView, SIGNAL(CameraChanged()), this, SLOT(ViewCameraChanged()));
+	connect(NewView, SIGNAL(FocusReceived()), this, SLOT(ViewFocusReceived()));
 
 	return NewView;
 }
@@ -2144,6 +2145,11 @@ void lcMainWindow::UpdateUndoRedo(const QString& UndoText, const QString& RedoTe
 		RedoAction->setEnabled(false);
 		RedoAction->setText(tr("&Redo"));
 	}
+}
+
+void lcMainWindow::ViewFocusReceived()
+{
+	SetActiveView(dynamic_cast<View*>(sender()));
 }
 
 void lcMainWindow::ViewCameraChanged()

@@ -13,9 +13,7 @@ public:
 	~View();
 
 	View(const View&) = delete;
-	View(View&&) = delete;
 	View& operator=(const View&) = delete;
-	View& operator=(View&&) = delete;
 
 	void Clear()
 	{

@@ -196,6 +196,7 @@ public:
 	lcContext* mContext = nullptr;
 
 signals:
+	void FocusReceived();
 	void CameraChanged();
 
 protected:

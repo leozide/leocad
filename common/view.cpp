@@ -2425,8 +2425,6 @@ void View::OnLeftButtonDown()
 		return;
 	}
 
-	gMainWindow->SetActiveView(this);
-
 	if (mViewSphere.OnLeftButtonDown())
 		return;
 
@@ -2451,8 +2449,6 @@ void View::OnLeftButtonUp()
 
 void View::OnLeftButtonDoubleClick()
 {
-	gMainWindow->SetActiveView(this);
-
 	lcObjectSection ObjectSection = FindObjectUnderPointer(false, false);
 	lcModel* ActiveModel = GetActiveModel();
 
@@ -2472,7 +2468,6 @@ void View::OnMiddleButtonDown()
 		return;
 	}
 
-	gMainWindow->SetActiveView(this);
 #if (QT_VERSION >= QT_VERSION_CHECK(4, 7, 0))
 	lcTrackTool OverrideTool = GetOverrideTrackTool(Qt::MiddleButton);
 
@@ -2497,8 +2492,6 @@ void View::OnRightButtonDown()
 		StopTracking(false);
 		return;
 	}
-
-	gMainWindow->SetActiveView(this);
 
 	lcTrackTool OverrideTool = GetOverrideTrackTool(Qt::RightButton);
 

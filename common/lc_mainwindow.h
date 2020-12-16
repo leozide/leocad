@@ -285,7 +285,6 @@ public:
 	void ResetCameras();
 	void AddView(View* View);
 	void RemoveView(View* View);
-	void SetActiveView(View* ActiveView);
 
 	void SetTool(lcTool Tool);
 	void SetTransformType(lcTransformType TransformType);
@@ -360,6 +359,7 @@ public slots:
 	void TogglePreviewWidget(bool);
 
 protected slots:
+	void ViewFocusReceived();
 	void ViewCameraChanged();
 	void UpdateDockWidgetActions();
 	void UpdateGamepads();
@@ -384,6 +384,7 @@ protected:
 	void CreateToolBars();
 	void CreateStatusBar();
 	View* CreateView(lcModel* Model);
+	void SetActiveView(View* ActiveView);
 	void ToggleDockWidget(QWidget* DockWidget);
 	void SplitView(Qt::Orientation Orientation);
 	void ShowSearchDialog();

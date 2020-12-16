@@ -55,7 +55,11 @@ lcModel* lcGLWidget::GetActiveModel() const
 void lcGLWidget::SetFocus(bool Focus)
 {
 	if (Focus)
+	{
 		mLastFocusedView = this;
+
+		emit FocusReceived();
+	}
 }
 
 void lcGLWidget::SetMousePosition(int MouseX, int MouseY)

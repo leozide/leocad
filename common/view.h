@@ -1,8 +1,7 @@
 #pragma once
 
 #include "lc_glwidget.h"
-#include "camera.h"
-#include "lc_viewsphere.h"
+#include "lc_context.h"
 
 class View : public lcGLWidget
 {
@@ -95,7 +94,6 @@ protected:
 	PieceInfo* mMouseDownPiece;
 	QImage mRenderImage;
 	std::pair<lcFramebuffer, lcFramebuffer> mRenderFramebuffer;
-	lcViewSphere mViewSphere;
 
 	lcVertexBuffer mGridBuffer;
 	int mGridSettings[7];

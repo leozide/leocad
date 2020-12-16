@@ -9,6 +9,7 @@
 #include "lc_partselectionwidget.h"
 #include "lc_shortcuts.h"
 #include "view.h"
+#include "camera.h"
 #include "lc_previewwidget.h"
 
 lcApplication* gApplication;

@@ -8,6 +8,7 @@
 #include "texfont.h"
 #include "lc_model.h"
 #include "lc_scene.h"
+#include "lc_viewsphere.h"
 
 lcGLWidget* lcGLWidget::mLastFocusedView;
 std::vector<lcGLWidget*> lcGLWidget::mViews;

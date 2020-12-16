@@ -2,7 +2,6 @@
 
 #include "lc_glwidget.h"
 #include "lc_scene.h"
-#include "lc_viewsphere.h"
 #include "lc_commands.h"
 
 class lcQGLWidget;
@@ -66,7 +65,6 @@ protected:
 	void OnButtonDown(lcTrackButton TrackButton);
 
 	Project* mLoader;
-	lcViewSphere mViewSphere;
 
 	QString mDescription;
 	bool mIsModel;

@@ -2,7 +2,7 @@
 #include "lc_viewsphere.h"
 #include "view.h"
 #include "lc_previewwidget.h"
-
+#include "camera.h"
 #include "lc_context.h"
 #include "lc_stringcache.h"
 #include "lc_application.h"

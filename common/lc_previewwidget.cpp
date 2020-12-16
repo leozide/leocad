@@ -6,6 +6,7 @@
 #include "lc_model.h"
 #include "camera.h"
 #include "lc_library.h"
+#include "lc_viewsphere.h"
 
 #include "lc_qglwidget.h"
 
@@ -80,8 +81,9 @@ void lcPreviewDockWidget::SetPreviewLock()
 }
 
 lcPreviewWidget::lcPreviewWidget()
-	: lcGLWidget(nullptr), mLoader(new Project(true)), mViewSphere(this)
+	: lcGLWidget(nullptr), mLoader(new Project(true))
 {
+	mViewSphere = std::unique_ptr<lcViewSphere>(new lcViewSphere(this));
 	mLoader->SetActiveModel(0);
 	mModel = mLoader->GetActiveModel();
 
@@ -286,7 +288,7 @@ void lcPreviewWidget::OnDraw()
 			DrawAxes();
 
 		if (Preferences.mDrawPreviewViewSphere)
-			mViewSphere.Draw();
+			mViewSphere->Draw();
 		DrawViewport();
 	}
 
@@ -301,7 +303,7 @@ void lcPreviewWidget::OnLeftButtonDown()
 		return;
 	}
 
-	if (mViewSphere.OnLeftButtonDown())
+	if (mViewSphere->OnLeftButtonDown())
 		return;
 
 	lcTrackTool OverrideTool = lcTrackTool::OrbitXY;
@@ -319,7 +321,8 @@ void lcPreviewWidget::OnLeftButtonUp()
 {
 	StopTracking(mTrackButton == lcTrackButton::Left);
 
-	if (mViewSphere.OnLeftButtonUp()) {
+	if (mViewSphere->OnLeftButtonUp())
+	{
 		ZoomExtents();
 		return;
 	}
@@ -390,9 +393,9 @@ void lcPreviewWidget::OnMouseMove()
 
 	if (mTrackButton == lcTrackButton::None)
 	{
-		if (mViewSphere.OnMouseMove())
+		if (mViewSphere->OnMouseMove())
 		{
-			lcTrackTool NewTrackTool = mViewSphere.IsDragging() ? lcTrackTool::OrbitXY : lcTrackTool::None;
+			lcTrackTool NewTrackTool = mViewSphere->IsDragging() ? lcTrackTool::OrbitXY : lcTrackTool::None;
 
 			if (NewTrackTool != mTrackTool)
 			{

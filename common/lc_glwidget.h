@@ -218,6 +218,7 @@ protected:
 	lcCursor mCursor = lcCursor::Default;
 
 	std::unique_ptr<lcScene> mScene;
+	std::unique_ptr<lcViewSphere> mViewSphere;
 
 	lcModel* mModel = nullptr;
 	lcPiece* mActiveSubmodelInstance = nullptr;

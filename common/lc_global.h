@@ -80,8 +80,10 @@ class lcContext;
 class lcMesh;
 struct lcMeshSection;
 struct lcRenderMesh;
+struct lcObjectSection;
 class lcTexture;
 class lcScene;
+class lcViewSphere;
 enum class lcRenderMeshState : int;
 
 class lcFile;

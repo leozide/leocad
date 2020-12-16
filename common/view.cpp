@@ -9,13 +9,16 @@
 #include "pieceinf.h"
 #include "lc_synth.h"
 #include "lc_scene.h"
+#include "lc_context.h"
+#include "lc_viewsphere.h"
 
 lcVertexBuffer View::mRotateMoveVertexBuffer;
 lcIndexBuffer View::mRotateMoveIndexBuffer;
 
 View::View(lcModel* Model)
-	: lcGLWidget(Model), mViewSphere(this)
+	: lcGLWidget(Model)
 {
+	mViewSphere = std::unique_ptr<lcViewSphere>(new lcViewSphere(this));
 	memset(mGridSettings, 0, sizeof(mGridSettings));
 
 	mDragState = lcDragState::None;
@@ -731,7 +734,7 @@ void View::OnDraw()
 		else if (Tool == lcTool::RotateView && mTrackButton == lcTrackButton::None)
 			DrawRotateViewOverlay();
 
-		mViewSphere.Draw();
+		mViewSphere->Draw();
 		DrawViewport();
 	}
 
@@ -2425,7 +2428,7 @@ void View::OnLeftButtonDown()
 		return;
 	}
 
-	if (mViewSphere.OnLeftButtonDown())
+	if (mViewSphere->OnLeftButtonDown())
 		return;
 
 	lcTrackTool OverrideTool = GetOverrideTrackTool(Qt::LeftButton);
@@ -2443,7 +2446,7 @@ void View::OnLeftButtonUp()
 {
 	StopTracking(mTrackButton == lcTrackButton::Left);
 
-	if (mViewSphere.OnLeftButtonUp())
+	if (mViewSphere->OnLeftButtonUp())
 		return;
 }
 
@@ -2534,9 +2537,9 @@ void View::OnMouseMove()
 
 	if (mTrackButton == lcTrackButton::None)
 	{
-		if (mViewSphere.OnMouseMove())
+		if (mViewSphere->OnMouseMove())
 		{
-			lcTrackTool NewTrackTool = mViewSphere.IsDragging() ? lcTrackTool::OrbitXY : lcTrackTool::None;
+			lcTrackTool NewTrackTool = mViewSphere->IsDragging() ? lcTrackTool::OrbitXY : lcTrackTool::None;
 
 			if (NewTrackTool != mTrackTool)
 			{

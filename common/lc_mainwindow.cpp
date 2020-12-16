@@ -19,6 +19,7 @@
 #include "view.h"
 #include "project.h"
 #include "piece.h"
+#include "camera.h"
 #include "group.h"
 #include "pieceinf.h"
 #include "lc_library.h"

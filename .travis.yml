@@ -20,7 +20,7 @@ jobs:
     
   - os: linux
     name: Linux amd64
-    dist: trusty
+    dist: focal
     addons:
       apt:
         sources:

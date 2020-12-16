@@ -41,7 +41,7 @@ MinifigWizard::MinifigWizard()
 	LoadSettings();
 	LoadTemplates();
 
-	mModel = new lcModel(QString(), false);
+	mModel = new lcModel(QString(), nullptr, false);
 	mCamera = new lcCamera(true);
 
 	mRotateX = 75.0f;

@@ -1111,7 +1111,7 @@ void lcMainWindow::ProjectFileChanged(const QString& Path)
 			QByteArray TabLayout = GetTabLayout();
 			gApplication->SetProject(NewProject);
 			RestoreTabLayout(TabLayout);
-			UpdateAllViews();
+			lcGLWidget::UpdateAllViews();
 		}
 	}
 	else
@@ -1320,7 +1320,7 @@ void lcMainWindow::SetShadingMode(lcShadingMode ShadingMode)
 {
 	lcGetPreferences().mShadingMode = ShadingMode;
 	UpdateShadingMode();
-	UpdateAllViews();
+	lcGLWidget::UpdateAllViews();
 	if (mPartSelectionWidget)
 		mPartSelectionWidget->Redraw();
 }
@@ -1335,21 +1335,21 @@ void lcMainWindow::ToggleViewSphere()
 {
 	lcGetPreferences().mViewSphereEnabled = !lcGetPreferences().mViewSphereEnabled;
 
-	UpdateAllViews();
+	lcGLWidget::UpdateAllViews();
 }
 
 void lcMainWindow::ToggleAxisIcon()
 {
 	lcGetPreferences().mDrawAxes = !lcGetPreferences().mDrawAxes;
 
-	UpdateAllViews();
+	lcGLWidget::UpdateAllViews();
 }
 
 void lcMainWindow::ToggleFadePreviousSteps()
 {
 	lcGetPreferences().mFadeSteps = !lcGetPreferences().mFadeSteps;
 
-	UpdateAllViews();
+	lcGLWidget::UpdateAllViews();
 }
 
 QByteArray lcMainWindow::GetTabLayout()
@@ -1691,19 +1691,6 @@ void lcMainWindow::SetActiveView(View* ActiveView)
 	UpdatePerspective();
 }
 
-void lcMainWindow::UpdateAllViews()
-{
-	lcModelTabWidget* CurrentTab = (lcModelTabWidget*)mModelTabWidget->currentWidget();
-
-	if (CurrentTab)
-	{
-		const lcArray<View*>* Views = CurrentTab->GetViews();
-
-		for (int ViewIdx = 0; ViewIdx < Views->GetSize(); ViewIdx++)
-			(*Views)[ViewIdx]->Redraw();
-	}
-}
-
 void lcMainWindow::SetTool(lcTool Tool)
 {
 	mTool = Tool;
@@ -1713,7 +1700,7 @@ void lcMainWindow::SetTool(lcTool Tool)
 	if (Action)
 		Action->setChecked(true);
 
-	UpdateAllViews();
+	lcGLWidget::UpdateAllViews();
 }
 
 void lcMainWindow::SetColorIndex(int ColorIndex)
@@ -1760,7 +1747,7 @@ void lcMainWindow::SetRelativeTransform(bool RelativeTransform)
 {
 	mRelativeTransform = RelativeTransform;
 	UpdateLockSnap();
-	UpdateAllViews();
+	lcGLWidget::UpdateAllViews();
 }
 
 void lcMainWindow::SetLocalTransform(bool SelectionTransform)
@@ -2378,7 +2365,7 @@ bool lcMainWindow::OpenProjectFile(const QString& FileName)
 	{
 		gApplication->SetProject(NewProject);
 		AddRecentFile(FileName);
-		UpdateAllViews();
+		lcGLWidget::UpdateProjectViews(NewProject);
 
 		return true;
 	}
@@ -2434,7 +2421,7 @@ void lcMainWindow::ImportLDD()
 	if (NewProject->ImportLDD(LoadFileName))
 	{
 		gApplication->SetProject(NewProject);
-		UpdateAllViews();
+		lcGLWidget::UpdateProjectViews(NewProject);
 	}
 	else
 		delete NewProject;
@@ -2454,7 +2441,7 @@ void lcMainWindow::ImportInventory()
 	if (NewProject->ImportInventory(Dialog.GetSetInventory(), Dialog.GetSetName(), Dialog.GetSetDescription()))
 	{
 		gApplication->SetProject(NewProject);
-		UpdateAllViews();
+		lcGLWidget::UpdateProjectViews(NewProject);
 	}
 	else
 		delete NewProject;

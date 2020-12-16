@@ -10,20 +10,41 @@
 #include "lc_scene.h"
 
 lcGLWidget* lcGLWidget::mLastFocusedView;
+std::vector<lcGLWidget*> lcGLWidget::mViews;
 
 lcGLWidget::lcGLWidget(lcModel* Model)
 	: mScene(new lcScene()), mModel(Model)
 {
 	mContext = new lcContext();
+	mViews.push_back(this);
 }
 
 lcGLWidget::~lcGLWidget()
 {
+	mViews.erase(std::find(mViews.begin(), mViews.end(), this));
+
 	if (mLastFocusedView == this)
 		mLastFocusedView = nullptr;
 
 	if (mDeleteContext)
 		delete mContext;
+}
+
+void lcGLWidget::UpdateProjectViews(const Project* Project)
+{
+	for (lcGLWidget* View : mViews)
+	{
+		const lcModel* ViewModel = View->GetActiveModel();
+
+		if (ViewModel->GetProject() == Project)
+			View->Redraw();
+	}
+}
+
+void lcGLWidget::UpdateAllViews()
+{
+	for (lcGLWidget* View : mViews)
+		View->Redraw();
 }
 
 lcModel* lcGLWidget::GetActiveModel() const
@@ -482,6 +503,11 @@ lcVector3 lcGLWidget::GetCameraLightInsertPosition() const
 		Center = lcVector3(0.0f, 0.0f, 0.0f);
 
 	return lcRayPointClosestPoint(Center, ClickPoints[0], ClickPoints[1]);
+}
+
+void lcGLWidget::OnMouseWheel(float Direction)
+{
+	mModel->Zoom(mCamera, (int)(((mMouseModifiers & Qt::ControlModifier) ? 100 : 10) * Direction));
 }
 
 void lcGLWidget::DrawBackground() const

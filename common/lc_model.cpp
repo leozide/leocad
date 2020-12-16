@@ -109,8 +109,8 @@ void lcModelProperties::ParseLDrawLine(QTextStream& Stream)
 	}
 }
 
-lcModel::lcModel(const QString& FileName, bool Preview)
-	: mIsPreview(Preview)
+lcModel::lcModel(const QString& FileName, Project* Project, bool Preview)
+	: mProject(Project), mIsPreview(Preview)
 {
 	mProperties.mModelName = FileName;
 	mProperties.mFileName = FileName;
@@ -226,6 +226,11 @@ void lcModel::CreatePieceInfo(Project* Project)
 void lcModel::UpdateMesh()
 {
 	mPieceInfo->SetModel(this, true, nullptr, false);
+}
+
+void lcModel::UpdateAllViews() const
+{
+	View::UpdateProjectViews(mProject);
 }
 
 void lcModel::UpdatePieceInfo(std::vector<lcModel*>& UpdatedModels)
@@ -1110,7 +1115,7 @@ void lcModel::Cut()
 	{
 		gMainWindow->UpdateTimeline(false, false);
 		gMainWindow->UpdateSelectedObjects(true);
-		gMainWindow->UpdateAllViews();
+		UpdateAllViews();
 		SaveCheckpoint(tr("Cutting"));
 	}
 }
@@ -1130,7 +1135,7 @@ void lcModel::Paste()
 	if (gApplication->mClipboard.isEmpty())
 		return;
 
-	lcModel* Model = new lcModel(QString());
+	lcModel* Model = new lcModel(QString(), nullptr, false);
 
 	QBuffer Buffer(&gApplication->mClipboard);
 	Buffer.open(QIODevice::ReadOnly);
@@ -1158,7 +1163,7 @@ void lcModel::Paste()
 
 	CalculateStep(mCurrentStep);
 	gMainWindow->UpdateTimeline(false, false);
-	gMainWindow->UpdateAllViews();
+	UpdateAllViews();
 }
 
 void lcModel::DuplicateSelectedPieces()
@@ -1699,7 +1704,7 @@ void lcModel::LoadCheckPoint(lcModelHistoryEntry* CheckPoint)
 	gMainWindow->UpdateCameraMenu();
 	gMainWindow->UpdateCurrentStep();
 	gMainWindow->UpdateSelectedObjects(true);
-	gMainWindow->UpdateAllViews();
+	UpdateAllViews();
 
 	for (PieceInfo* Info : LoadedInfos)
 		Library->ReleasePieceInfo(Info);
@@ -1740,7 +1745,7 @@ void lcModel::SetCurrentStep(lcStep Step)
 
 	gMainWindow->UpdateTimeline(false, false);
 	gMainWindow->UpdateSelectedObjects(true);
-	gMainWindow->UpdateAllViews();
+	UpdateAllViews();
 	gMainWindow->UpdateCurrentStep();
 }
 
@@ -2255,7 +2260,7 @@ void lcModel::DeleteAllCameras()
 
 	gMainWindow->UpdateCameraMenu();
 	gMainWindow->UpdateSelectedObjects(true);
-	gMainWindow->UpdateAllViews();
+	UpdateAllViews();
 	SaveCheckpoint(tr("Resetting Cameras"));
 }
 
@@ -2266,7 +2271,7 @@ void lcModel::DeleteSelectedObjects()
 		if (!mIsPreview) {
 			gMainWindow->UpdateTimeline(false, false);
 			gMainWindow->UpdateSelectedObjects(true);
-			gMainWindow->UpdateAllViews();
+			UpdateAllViews();
 			SaveCheckpoint(tr("Deleting"));
 		}
 	}
@@ -2278,7 +2283,7 @@ void lcModel::ResetSelectedPiecesPivotPoint()
 		if (Piece->IsSelected())
 			Piece->ResetPivotPoint();
 
-	gMainWindow->UpdateAllViews();
+	UpdateAllViews();
 }
 
 void lcModel::RemoveSelectedPiecesKeyFrames()
@@ -2295,7 +2300,7 @@ void lcModel::RemoveSelectedPiecesKeyFrames()
 		if (Light->IsSelected())
 			Light->RemoveKeyFrames();
 
-	gMainWindow->UpdateAllViews();
+	UpdateAllViews();
 	SaveCheckpoint(tr("Removing Key Frames"));
 }
 
@@ -2315,7 +2320,7 @@ void lcModel::InsertControlPoint()
 	{
 		SaveCheckpoint(tr("Modifying"));
 		gMainWindow->UpdateSelectedObjects(true);
-		gMainWindow->UpdateAllViews();
+		UpdateAllViews();
 	}
 }
 
@@ -2332,7 +2337,7 @@ void lcModel::RemoveFocusedControlPoint()
 	{
 		SaveCheckpoint(tr("Modifying"));
 		gMainWindow->UpdateSelectedObjects(true);
-		gMainWindow->UpdateAllViews();
+		UpdateAllViews();
 	}
 }
 
@@ -2375,7 +2380,7 @@ void lcModel::ShowSelectedPiecesEarlier()
 	SaveCheckpoint(tr("Modifying"));
 	gMainWindow->UpdateTimeline(false, false);
 	gMainWindow->UpdateSelectedObjects(true);
-	gMainWindow->UpdateAllViews();
+	UpdateAllViews();
 }
 
 void lcModel::ShowSelectedPiecesLater()
@@ -2420,7 +2425,7 @@ void lcModel::ShowSelectedPiecesLater()
 	SaveCheckpoint(tr("Modifying"));
 	gMainWindow->UpdateTimeline(false, false);
 	gMainWindow->UpdateSelectedObjects(true);
-	gMainWindow->UpdateAllViews();
+	UpdateAllViews();
 }
 
 void lcModel::SetPieceSteps(const QList<QPair<lcPiece*, lcStep>>& PieceSteps)
@@ -2453,7 +2458,7 @@ void lcModel::SetPieceSteps(const QList<QPair<lcPiece*, lcStep>>& PieceSteps)
 	if (Modified)
 	{
 		SaveCheckpoint(tr("Modifying"));
-		gMainWindow->UpdateAllViews();
+		UpdateAllViews();
 		gMainWindow->UpdateTimeline(false, false);
 		gMainWindow->UpdateSelectedObjects(true);
 	}
@@ -2713,7 +2718,7 @@ void lcModel::MoveSelectedObjects(const lcVector3& PieceDistance, const lcVector
 
 	if (Moved && Update)
 	{
-		gMainWindow->UpdateAllViews();
+		UpdateAllViews();
 		if (Checkpoint)
 			SaveCheckpoint(tr("Moving"));
 		gMainWindow->UpdateSelectedObjects(false);
@@ -2808,7 +2813,7 @@ void lcModel::RotateSelectedPieces(const lcVector3& Angles, bool Relative, bool 
 
 	if (Rotated && Update)
 	{
-		gMainWindow->UpdateAllViews();
+		UpdateAllViews();
 		if (Checkpoint)
 			SaveCheckpoint(tr("Rotating"));
 		gMainWindow->UpdateSelectedObjects(false);
@@ -2834,7 +2839,7 @@ void lcModel::ScaleSelectedPieces(const float Scale, bool Update, bool Checkpoin
 
 		if (Update)
 		{
-			gMainWindow->UpdateAllViews();
+			UpdateAllViews();
 			if (Checkpoint)
 				SaveCheckpoint(tr("Scaling"));
 			gMainWindow->UpdateSelectedObjects(false);
@@ -2884,7 +2889,7 @@ void lcModel::SetSelectedPiecesColorIndex(int ColorIndex)
 	{
 		SaveCheckpoint(tr("Painting"));
 		gMainWindow->UpdateSelectedObjects(false);
-		gMainWindow->UpdateAllViews();
+		UpdateAllViews();
 		gMainWindow->UpdateTimeline(false, true);
 	}
 }
@@ -2908,7 +2913,7 @@ void lcModel::SetSelectedPiecesPieceInfo(PieceInfo* Info)
 	{
 		SaveCheckpoint(tr("Setting Part"));
 		gMainWindow->UpdateSelectedObjects(false);
-		gMainWindow->UpdateAllViews();
+		UpdateAllViews();
 		gMainWindow->UpdateTimeline(false, true);
 	}
 }
@@ -2937,7 +2942,7 @@ void lcModel::SetSelectedPiecesStepShow(lcStep Step)
 	if (Modified)
 	{
 		SaveCheckpoint(tr("Showing Pieces"));
-		gMainWindow->UpdateAllViews();
+		UpdateAllViews();
 		gMainWindow->UpdateTimeline(false, false);
 		gMainWindow->UpdateSelectedObjects(SelectionChanged);
 	}
@@ -2967,7 +2972,7 @@ void lcModel::SetSelectedPiecesStepHide(lcStep Step)
 	if (Modified)
 	{
 		SaveCheckpoint(tr("Hiding Pieces"));
-		gMainWindow->UpdateAllViews();
+		UpdateAllViews();
 		gMainWindow->UpdateTimeline(false, false);
 		gMainWindow->UpdateSelectedObjects(SelectionChanged);
 	}
@@ -2982,7 +2987,7 @@ void lcModel::SetCameraOrthographic(lcCamera* Camera, bool Ortho)
 	Camera->UpdatePosition(mCurrentStep);
 
 	SaveCheckpoint(tr("Editing Camera"));
-	gMainWindow->UpdateAllViews();
+	UpdateAllViews();
 	gMainWindow->UpdatePerspective();
 }
 
@@ -2995,7 +3000,7 @@ void lcModel::SetCameraFOV(lcCamera* Camera, float FOV)
 	Camera->UpdatePosition(mCurrentStep);
 
 	SaveCheckpoint(tr("Changing FOV"));
-	gMainWindow->UpdateAllViews();
+	UpdateAllViews();
 }
 
 void lcModel::SetCameraZNear(lcCamera* Camera, float ZNear)
@@ -3007,7 +3012,7 @@ void lcModel::SetCameraZNear(lcCamera* Camera, float ZNear)
 	Camera->UpdatePosition(mCurrentStep);
 
 	SaveCheckpoint(tr("Editing Camera"));
-	gMainWindow->UpdateAllViews();
+	UpdateAllViews();
 }
 
 void lcModel::SetCameraZFar(lcCamera* Camera, float ZFar)
@@ -3019,7 +3024,7 @@ void lcModel::SetCameraZFar(lcCamera* Camera, float ZFar)
 	Camera->UpdatePosition(mCurrentStep);
 
 	SaveCheckpoint(tr("Editing Camera"));
-	gMainWindow->UpdateAllViews();
+	UpdateAllViews();
 }
 
 void lcModel::SetCameraName(lcCamera* Camera, const QString& Name)
@@ -3031,7 +3036,7 @@ void lcModel::SetCameraName(lcCamera* Camera, const QString& Name)
 
 	SaveCheckpoint(tr("Renaming Camera"));
 	gMainWindow->UpdateSelectedObjects(false);
-	gMainWindow->UpdateAllViews();
+	UpdateAllViews();
 	gMainWindow->UpdateCameraMenu();
 }
 
@@ -3484,7 +3489,7 @@ void lcModel::ClearSelection(bool UpdateInterface)
 	if (UpdateInterface)
 	{
 		gMainWindow->UpdateSelectedObjects(true);
-		gMainWindow->UpdateAllViews();
+		UpdateAllViews();
 	}
 }
 
@@ -3540,7 +3545,7 @@ void lcModel::FocusOrDeselectObject(const lcObjectSection& ObjectSection)
 	}
 
 	gMainWindow->UpdateSelectedObjects(true);
-	gMainWindow->UpdateAllViews();
+	UpdateAllViews();
 }
 
 void lcModel::ClearSelectionAndSetFocus(lcObject* Object, quint32 Section, bool EnableSelectionMode)
@@ -3564,7 +3569,7 @@ void lcModel::ClearSelectionAndSetFocus(lcObject* Object, quint32 Section, bool 
 	}
 
 	gMainWindow->UpdateSelectedObjects(true);
-	gMainWindow->UpdateAllViews();
+	UpdateAllViews();
 }
 
 void lcModel::ClearSelectionAndSetFocus(const lcObjectSection& ObjectSection, bool EnableSelectionMode)
@@ -3618,7 +3623,7 @@ void lcModel::AddToSelection(const lcArray<lcObject*>& Objects, bool EnableSelec
 	if (UpdateInterface)
 	{
 		gMainWindow->UpdateSelectedObjects(true);
-		gMainWindow->UpdateAllViews();
+		UpdateAllViews();
 	}
 }
 
@@ -3652,7 +3657,7 @@ void lcModel::RemoveFromSelection(const lcArray<lcObject*>& Objects)
 	}
 
 	gMainWindow->UpdateSelectedObjects(true);
-	gMainWindow->UpdateAllViews();
+	UpdateAllViews();
 }
 
 void lcModel::RemoveFromSelection(const lcObjectSection& ObjectSection)
@@ -3692,7 +3697,7 @@ void lcModel::RemoveFromSelection(const lcObjectSection& ObjectSection)
 	}
 
 	gMainWindow->UpdateSelectedObjects(true);
-	gMainWindow->UpdateAllViews();
+	UpdateAllViews();
 }
 
 void lcModel::SelectAllPieces()
@@ -3701,10 +3706,9 @@ void lcModel::SelectAllPieces()
 		if (Piece->IsVisible(mCurrentStep))
 			Piece->SetSelected(true);
 
-	if (!mIsPreview) {
+	if (!mIsPreview)
 		gMainWindow->UpdateSelectedObjects(true);
-		gMainWindow->UpdateAllViews();
-	}
+	UpdateAllViews();
 }
 
 void lcModel::InvertSelection()
@@ -3714,7 +3718,7 @@ void lcModel::InvertSelection()
 			Piece->SetSelected(!Piece->IsSelected());
 
 	gMainWindow->UpdateSelectedObjects(true);
-	gMainWindow->UpdateAllViews();
+	UpdateAllViews();
 }
 
 void lcModel::HideSelectedPieces()
@@ -3736,7 +3740,7 @@ void lcModel::HideSelectedPieces()
 
 	gMainWindow->UpdateTimeline(false, true);
 	gMainWindow->UpdateSelectedObjects(true);
-	gMainWindow->UpdateAllViews();
+	UpdateAllViews();
 
 	SaveCheckpoint(tr("Hide"));
 }
@@ -3759,7 +3763,7 @@ void lcModel::HideUnselectedPieces()
 
 	gMainWindow->UpdateTimeline(false, true);
 	gMainWindow->UpdateSelectedObjects(true);
-	gMainWindow->UpdateAllViews();
+	UpdateAllViews();
 
 	SaveCheckpoint(tr("Hide"));
 }
@@ -3782,7 +3786,7 @@ void lcModel::UnhideSelectedPieces()
 
 	gMainWindow->UpdateTimeline(false, true);
 	gMainWindow->UpdateSelectedObjects(true);
-	gMainWindow->UpdateAllViews();
+	UpdateAllViews();
 
 	SaveCheckpoint(tr("Unhide"));
 }
@@ -3805,7 +3809,7 @@ void lcModel::UnhideAllPieces()
 
 	gMainWindow->UpdateTimeline(false, true);
 	gMainWindow->UpdateSelectedObjects(true);
-	gMainWindow->UpdateAllViews();
+	UpdateAllViews();
 
 	SaveCheckpoint(tr("Unhide"));
 }
@@ -4014,7 +4018,7 @@ void lcModel::UpdateSpotLightTool(const lcVector3& Position)
 	mMouseToolDistance = Position;
 
 	gMainWindow->UpdateSelectedObjects(false);
-	gMainWindow->UpdateAllViews();
+	UpdateAllViews();
 }
 
 void lcModel::BeginCameraTool(const lcVector3& Position, const lcVector3& Target)
@@ -4038,7 +4042,7 @@ void lcModel::UpdateCameraTool(const lcVector3& Position)
 	mMouseToolDistance = Position;
 
 	gMainWindow->UpdateSelectedObjects(false);
-	gMainWindow->UpdateAllViews();
+	UpdateAllViews();
 }
 
 void lcModel::UpdateMoveTool(const lcVector3& Distance, bool AlternateButtonDrag)
@@ -4050,7 +4054,7 @@ void lcModel::UpdateMoveTool(const lcVector3& Distance, bool AlternateButtonDrag
 	mMouseToolDistance = Distance;
 
 	gMainWindow->UpdateSelectedObjects(false);
-	gMainWindow->UpdateAllViews();
+	UpdateAllViews();
 }
 
 void lcModel::UpdateRotateTool(const lcVector3& Angles, bool AlternateButtonDrag)
@@ -4060,7 +4064,7 @@ void lcModel::UpdateRotateTool(const lcVector3& Angles, bool AlternateButtonDrag
 	mMouseToolDistance = Angles;
 
 	gMainWindow->UpdateSelectedObjects(false);
-	gMainWindow->UpdateAllViews();
+	UpdateAllViews();
 }
 
 void lcModel::UpdateScaleTool(const float Scale)
@@ -4068,7 +4072,7 @@ void lcModel::UpdateScaleTool(const float Scale)
 	ScaleSelectedPieces(Scale, true, false);
 
 	gMainWindow->UpdateSelectedObjects(false);
-	gMainWindow->UpdateAllViews();
+	UpdateAllViews();
 }
 
 void lcModel::EraserToolClicked(lcObject* Object)
@@ -4109,7 +4113,7 @@ void lcModel::EraserToolClicked(lcObject* Object)
 	delete Object;
 	gMainWindow->UpdateTimeline(false, false);
 	gMainWindow->UpdateSelectedObjects(true);
-	gMainWindow->UpdateAllViews();
+	UpdateAllViews();
 	SaveCheckpoint(tr("Deleting"));
 }
 
@@ -4126,7 +4130,7 @@ void lcModel::PaintToolClicked(lcObject* Object)
 
 		SaveCheckpoint(tr("Painting"));
 		gMainWindow->UpdateSelectedObjects(false);
-		gMainWindow->UpdateAllViews();
+		UpdateAllViews();
 		gMainWindow->UpdateTimeline(false, true);
 	}
 }
@@ -4145,33 +4149,36 @@ void lcModel::UpdateZoomTool(lcCamera* Camera, float Mouse)
 {
 	Camera->Zoom(Mouse - mMouseToolDistance.x, mCurrentStep, gMainWindow->GetAddKeys());
 	mMouseToolDistance.x = Mouse;
-	gMainWindow->UpdateAllViews();
+
+	UpdateAllViews();
 }
 
 void lcModel::UpdatePanTool(lcCamera* Camera, const lcVector3& Distance)
 {
 	Camera->Pan(Distance - mMouseToolDistance, mCurrentStep, gMainWindow->GetAddKeys());
 	mMouseToolDistance = Distance;
-	if (!mIsPreview)
-		gMainWindow->UpdateAllViews();
+
+	UpdateAllViews();
 }
 
 void lcModel::UpdateOrbitTool(lcCamera* Camera, float MouseX, float MouseY)
 {
 	lcVector3 Center;
 	GetSelectionCenter(Center);
+
 	Camera->Orbit(MouseX - mMouseToolDistance.x, MouseY - mMouseToolDistance.y, Center, mCurrentStep, gMainWindow->GetAddKeys());
 	mMouseToolDistance.x = MouseX;
 	mMouseToolDistance.y = MouseY;
-	if (!mIsPreview)
-		gMainWindow->UpdateAllViews();
+
+	UpdateAllViews();
 }
 
 void lcModel::UpdateRollTool(lcCamera* Camera, float Mouse)
 {
 	Camera->Roll(Mouse - mMouseToolDistance.x, mCurrentStep, gMainWindow->GetAddKeys());
 	mMouseToolDistance.x = Mouse;
-	gMainWindow->UpdateAllViews();
+
+	UpdateAllViews();
 }
 
 void lcModel::ZoomRegionToolClicked(lcCamera* Camera, float AspectRatio, const lcVector3& Position, const lcVector3& TargetPosition, const lcVector3* Corners)
@@ -4179,7 +4186,7 @@ void lcModel::ZoomRegionToolClicked(lcCamera* Camera, float AspectRatio, const l
 	Camera->ZoomRegion(AspectRatio, Position, TargetPosition, Corners, mCurrentStep, gMainWindow->GetAddKeys());
 
 	gMainWindow->UpdateSelectedObjects(false);
-	gMainWindow->UpdateAllViews();
+	UpdateAllViews();
 
 	if (!Camera->IsSimple())
 		SaveCheckpoint(tr("Zoom"));
@@ -4202,7 +4209,7 @@ void lcModel::LookAt(lcCamera* Camera)
 	Camera->Center(Center, mCurrentStep, gMainWindow->GetAddKeys());
 
 	gMainWindow->UpdateSelectedObjects(false);
-	gMainWindow->UpdateAllViews();
+	UpdateAllViews();
 
 	if (!Camera->IsSimple())
 		SaveCheckpoint(tr("Look At"));
@@ -4212,7 +4219,7 @@ void lcModel::MoveCamera(lcCamera* Camera, const lcVector3& Direction)
 {
 	Camera->MoveRelative(Direction, mCurrentStep, gMainWindow->GetAddKeys());
 	gMainWindow->UpdateSelectedObjects(false);
-	gMainWindow->UpdateAllViews();
+	UpdateAllViews();
 
 	if (!Camera->IsSimple())
 		SaveCheckpoint(tr("Moving Camera"));
@@ -4232,10 +4239,9 @@ void lcModel::ZoomExtents(lcCamera* Camera, float Aspect)
 
 	Camera->ZoomExtents(Aspect, Center, Points, 8, mCurrentStep, mIsPreview ? false : gMainWindow->GetAddKeys());
 
-	if (!mIsPreview) {
+	if (!mIsPreview)
 		gMainWindow->UpdateSelectedObjects(false);
-		gMainWindow->UpdateAllViews();
-	}
+	UpdateAllViews();
 
 	if (!Camera->IsSimple())
 		SaveCheckpoint(tr("Zoom"));
@@ -4244,10 +4250,11 @@ void lcModel::ZoomExtents(lcCamera* Camera, float Aspect)
 void lcModel::Zoom(lcCamera* Camera, float Amount)
 {
 	Camera->Zoom(Amount, mCurrentStep, mIsPreview ? false : gMainWindow->GetAddKeys());
-	if (!mIsPreview) {
+
+	if (!mIsPreview)
 		gMainWindow->UpdateSelectedObjects(false);
-		gMainWindow->UpdateAllViews();
-	}
+	UpdateAllViews();
+
 	if (!Camera->IsSimple())
 		SaveCheckpoint(tr("Zoom"));
 }

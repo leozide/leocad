@@ -82,13 +82,16 @@ struct lcModelHistoryEntry
 class lcModel
 {
 public:
-	lcModel(const QString& FileName, bool Preview = false);
+	lcModel(const QString& FileName, Project* Project, bool Preview);
 	~lcModel();
 
 	lcModel(const lcModel&) = delete;
-	lcModel(lcModel&&) = delete;
 	lcModel& operator=(const lcModel&) = delete;
-	lcModel& operator=(lcModel&&) = delete;
+
+	Project* GetProject() const
+	{
+		return mProject;
+	}
 
 	bool IsModified() const
 	{
@@ -105,6 +108,7 @@ public:
 	void CreatePieceInfo(Project* Project);
 	void UpdatePieceInfo(std::vector<lcModel*>& UpdatedModels);
 	void UpdateMesh();
+	void UpdateAllViews() const;
 
 	PieceInfo* GetPieceInfo() const
 	{
@@ -365,6 +369,7 @@ protected:
 	void InsertPiece(lcPiece* Piece, int Index);
 
 	lcModelProperties mProperties;
+	Project* const mProject;
 	PieceInfo* mPieceInfo;
 
 	bool mIsPreview;

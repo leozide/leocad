@@ -286,7 +286,6 @@ public:
 	void AddView(View* View);
 	void RemoveView(View* View);
 	void SetActiveView(View* ActiveView);
-	void UpdateAllViews();
 
 	void SetTool(lcTool Tool);
 	void SetTransformType(lcTransformType TransformType);

@@ -46,7 +46,6 @@ public:
 	void OnBackButtonUp() override;
 	void OnForwardButtonUp() override;
 	void OnMouseMove() override;
-	void OnMouseWheel(float Direction) override;
 	void BeginDrag(lcDragState DragState) override;
 	void EndDrag(bool Accept) override;
 

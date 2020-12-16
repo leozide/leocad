@@ -60,7 +60,6 @@ public:
 	void OnRightButtonDown() override;
 	void OnRightButtonUp() override;
 	void OnMouseMove() override;
-	void OnMouseWheel(float Direction) override;
 
 protected:
 	void StopTracking(bool Accept);

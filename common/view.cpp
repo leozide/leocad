@@ -1610,10 +1610,10 @@ void View::BeginDrag(lcDragState DragState)
 
 void View::EndDrag(bool Accept)
 {
+	lcModel* ActiveModel = GetActiveModel();
+
 	if (Accept)
 	{
-		lcModel* ActiveModel = GetActiveModel();
-
 		switch (mDragState)
 		{
 		case lcDragState::None:
@@ -1634,7 +1634,7 @@ void View::EndDrag(bool Accept)
 
 	mDragState = lcDragState::None;
 	UpdateTrackTool();
-	gMainWindow->UpdateAllViews();
+	ActiveModel->UpdateAllViews();
 }
 
 void View::SetProjection(bool Ortho)
@@ -2125,7 +2125,7 @@ void View::UpdateTrackTool()
 	UpdateCursor();
 
 	if (Redraw)
-		gMainWindow->UpdateAllViews();
+		ActiveModel->UpdateAllViews();
 }
 
 bool View::IsTrackToolAllowed(lcTrackTool TrackTool, quint32 AllowedTransforms) const
@@ -2293,7 +2293,7 @@ void View::StopTracking(bool Accept)
 
 	mTrackButton = lcTrackButton::None;
 	UpdateTrackTool();
-	gMainWindow->UpdateAllViews();
+	ActiveModel->UpdateAllViews();
 }
 
 void View::CancelTrackingOrClearSelection()
@@ -2557,7 +2557,7 @@ void View::OnMouseMove()
 		UpdateTrackTool();
 
 		if (mTrackTool == lcTrackTool::Insert)
-			gMainWindow->UpdateAllViews();
+			ActiveModel->UpdateAllViews();
 
 		return;
 	}
@@ -2868,9 +2868,4 @@ void View::OnMouseMove()
 	case lcTrackTool::Count:
 		break;
 	}
-}
-
-void View::OnMouseWheel(float Direction)
-{
-	mModel->Zoom(mCamera, (int)(((mMouseModifiers & Qt::ControlModifier) ? 100 : 10) * Direction));
 }

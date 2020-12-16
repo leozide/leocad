@@ -458,9 +458,3 @@ void lcPreviewWidget::OnMouseMove()
 			break;
 	}
 }
-
-void lcPreviewWidget::OnMouseWheel(float Direction)
-{
-	mModel->Zoom(mCamera, (int)(((mMouseModifiers & Qt::ControlModifier) ? 100 : 10) * Direction));
-	Redraw();
-}

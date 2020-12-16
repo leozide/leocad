@@ -1057,5 +1057,5 @@ void lcApplication::ShowPreferencesDialog()
 	*/
 
 	gMainWindow->SetShadingMode(Options.Preferences.mShadingMode);
-	gMainWindow->UpdateAllViews();
+	lcGLWidget::UpdateAllViews();
 }

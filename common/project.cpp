@@ -64,7 +64,7 @@ Project::Project(bool IsPreview)
 	: mIsPreview(IsPreview)
 {
 	mModified = false;
-	mActiveModel = new lcModel(tr(mIsPreview ? "Preview.ldr" : "New Model.ldr"), mIsPreview);
+	mActiveModel = new lcModel(tr(mIsPreview ? "Preview.ldr" : "New Model.ldr"), this, mIsPreview);
 	mActiveModel->CreatePieceInfo(this);
 	mActiveModel->SetSaved();
 	mModels.Add(mActiveModel);
@@ -249,7 +249,7 @@ lcModel* Project::CreateNewModel(bool ShowModel)
 		return nullptr;
 
 	mModified = true;
-	lcModel* Model = new lcModel(Name);
+	lcModel* Model = new lcModel(Name, this, false);
 	Model->CreatePieceInfo(this);
 	Model->SetSaved();
 	mModels.Add(Model);
@@ -285,11 +285,11 @@ void Project::ShowModelListDialog()
 
 			if (!Source)
 			{
-				Model = new lcModel(Entry.Name);
+				Model = new lcModel(Entry.Name, this, false);
 			}
 			else
 			{
-				Model = new lcModel(Source->GetProperties().mFileName);
+				Model = new lcModel(Source->GetProperties().mFileName, this, false);
 
 				QByteArray File;
 
@@ -396,7 +396,7 @@ bool Project::Load(const QString& FileName)
 
 		while (!Buffer.atEnd())
 		{
-			lcModel* Model = new lcModel(QString(), mIsPreview);
+			lcModel* Model = new lcModel(QString(), this, mIsPreview);
 			int Pos = Model->SplitMPD(Buffer);
 
 			if (Models.empty() || !Model->GetFileName().isEmpty())
@@ -433,7 +433,7 @@ bool Project::Load(const QString& FileName)
 		MemFile.WriteBuffer(FileData.constData(), FileData.size());
 		MemFile.Seek(0, SEEK_SET);
 
-		lcModel* Model = new lcModel(QString(), mIsPreview);
+		lcModel* Model = new lcModel(QString(), this, mIsPreview);
 
 		if (Model->LoadBinary(&MemFile))
 		{
@@ -566,7 +566,7 @@ bool Project::ImportLDD(const QString& FileName)
 
 	mModels.DeleteAll();
 	QString ModelName = QFileInfo(FileName).completeBaseName();
-	lcModel* Model = new lcModel(ModelName);
+	lcModel* Model = new lcModel(ModelName, this, false);
 
 	if (Model->LoadLDD(QString::fromUtf8((const char*)XMLFile.mBuffer)))
 	{
@@ -599,7 +599,7 @@ bool Project::ImportInventory(const QByteArray& Inventory, const QString& Name, 
 		return false;
 
 	mModels.DeleteAll();
-	lcModel* Model = new lcModel(Name);
+	lcModel* Model = new lcModel(Name, this, false);
 
 	if (Model->LoadInventory(Inventory))
 	{

@@ -91,6 +91,9 @@ public:
 	lcGLWidget(const lcGLWidget&) = delete;
 	lcGLWidget& operator=(const lcGLWidget&) = delete;
 
+	static void UpdateProjectViews(const Project* Project);
+	static void UpdateAllViews();
+
 	lcModel* GetActiveModel() const;
 
 	lcCamera* GetCamera() const
@@ -186,7 +189,7 @@ public:
 	virtual void OnForwardButtonDown() { }
 	virtual void OnForwardButtonUp() { }
 	virtual void OnMouseMove() { }
-	virtual void OnMouseWheel(float Direction) { Q_UNUSED(Direction); }
+	void OnMouseWheel(float Direction);
 	virtual void BeginDrag(lcDragState DragState) { Q_UNUSED(DragState); }
 	virtual void EndDrag(bool Accept) { Q_UNUSED(Accept); }
 
@@ -227,4 +230,5 @@ protected:
 	bool mDeleteContext = true;
 
 	static lcGLWidget* mLastFocusedView;
+	static std::vector<lcGLWidget*> mViews;
 };

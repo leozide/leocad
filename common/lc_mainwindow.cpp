@@ -72,7 +72,6 @@ void lcModelTabWidget::ResetLayout()
 	TopWidget->deleteLater();
 
 	Widget->setFocus();
-	SetActiveView((View*)((lcQGLWidget*)Widget)->GetView());
 }
 
 void lcModelTabWidget::Clear()
@@ -1543,10 +1542,7 @@ void lcMainWindow::RestoreTabLayout(const QByteArray& TabLayout)
 		LoadWidget(TabWidget ? TabWidget->layout()->itemAt(0)->widget() : nullptr);
 
 		if (ActiveWidget && TabWidget)
-		{
-			View* ActiveView = (View*)((lcQGLWidget*)ActiveWidget)->GetView();
-			TabWidget->SetActiveView(ActiveView);
-		}
+			ActiveWidget->setFocus();
 	}
 
 	if (!ModelAdded)
@@ -1630,7 +1626,6 @@ void lcMainWindow::SetCurrentModelTab(lcModel* Model)
 	ViewWidget->show();
 	ViewWidget->setFocus();
 	NewView->ZoomExtents();
-	SetActiveView(NewView);
 }
 
 void lcMainWindow::ResetCameras()
@@ -1897,7 +1892,6 @@ void lcMainWindow::RemoveActiveView()
 	}
 
 	OtherWidget->setFocus();
-	SetActiveView((View*)((lcQGLWidget*)OtherWidget)->GetView());
 }
 
 void lcMainWindow::ResetViews()

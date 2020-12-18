@@ -1618,9 +1618,9 @@ void lcMainWindow::SetCurrentModelTab(lcModel* Model)
 		TabWidget->SetModel(Model);
 
 		NewView = CreateView(Model);
+		AddView(NewView);
 		ViewWidget = (lcViewWidget*)TabWidget->layout()->itemAt(0)->widget();
 		ViewWidget->SetView(NewView);
-		AddView(NewView);
 
 		mModelTabWidget->setCurrentWidget(TabWidget);
 	}
@@ -1653,8 +1653,6 @@ void lcMainWindow::AddView(View* View)
 		return;
 
 	TabWidget->AddView(View);
-
-	View->MakeCurrent();
 
 	if (!TabWidget->GetActiveView())
 	{

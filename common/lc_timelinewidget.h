@@ -26,7 +26,7 @@ public slots:
 protected:
 	void dropEvent(QDropEvent* DropEvent) override;
 	void mousePressEvent(QMouseEvent* MouseEvent) override;
-	void mouseDoubleClickEvent(QMouseEvent *event) override;
+	void mouseDoubleClickEvent(QMouseEvent* MouseEvent) override;
 	void UpdateModel();
 	void UpdateCurrentStepItem();
 

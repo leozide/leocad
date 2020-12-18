@@ -774,7 +774,7 @@ void lcQPropertiesTree::slotSetValue(int Value)
 				if (Focus && Focus->IsPiece())
 					ColorIndex = ((lcPiece*)Focus)->mColorIndex;
 				quint32 ColorCode = lcGetColorCode(ColorIndex);
-				PreviewSelection(Info->mFileName, ColorCode);
+				gMainWindow->PreviewPiece(Info->mFileName, ColorCode);
 			}
 		}
 	}
@@ -952,7 +952,7 @@ void lcQPropertiesTree::SetPiece(const lcArray<lcObject*>& Selection, lcObject* 
 		if (Preferences.mPreviewEnabled && Preferences.mPreviewPosition != lcPreviewPosition::Floating)
 		{
 			quint32 ColorCode = lcGetColorCode(ColorIndex);
-			PreviewSelection(Info->mFileName, ColorCode);
+			gMainWindow->PreviewPiece(Info->mFileName, ColorCode);
 		}
 	}
 	else
@@ -1137,29 +1137,4 @@ void lcQPropertiesTree::SetMultiple()
 bool lcQPropertiesTree::lastColumn(int column) const
 {
 	return header()->visualIndex(column) == columnCount() - 1;
-}
-
-void lcQPropertiesTree::PreviewSelection(const QString& PartType, int ColorCode)
-{
-	lcPreferences& Preferences = lcGetPreferences();
-	if (Preferences.mPreviewPosition != lcPreviewPosition::Floating)
-	{
-		gMainWindow->PreviewPiece(PartType, ColorCode);
-		return;
-	}
-
-	lcPreviewWidget* Preview = new lcPreviewWidget();
-
-	lcViewWidget* ViewWidget = new lcViewWidget(nullptr, Preview);
-
-	if (Preview && ViewWidget)
-	{
-		if (!Preview->SetCurrentPiece(PartType, ColorCode))
-			QMessageBox::critical(gMainWindow, tr("Error"), tr("Part preview for %1 failed.").arg(PartType));
-		ViewWidget->SetPreviewPosition(rect());
-	}
-	else
-	{
-		QMessageBox::critical(gMainWindow, tr("Error"), tr("Preview %1 failed.").arg(PartType));
-	}
 }

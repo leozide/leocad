@@ -509,44 +509,33 @@ void lcTimelineWidget::mousePressEvent(QMouseEvent* Event)
 		QTreeWidget::mousePressEvent(Event);
 }
 
-void lcTimelineWidget::mouseDoubleClickEvent(QMouseEvent *event)
+void lcTimelineWidget::mouseDoubleClickEvent(QMouseEvent* MouseEvent)
 {
-	QTreeWidget::mouseDoubleClickEvent(event);
-	if ( event->button() == Qt::LeftButton )
+	if (MouseEvent->button() == Qt::LeftButton)
 	{
-		lcPreferences& Preferences = lcGetPreferences();
-		if (Preferences.mPreviewEnabled && Preferences.mPreviewPosition == lcPreviewPosition::Floating)
-		{
-			QTreeWidgetItem* CurrentItem = currentItem();
-			PreviewSelection(CurrentItem);
-		}
+		QTreeWidgetItem* CurrentItem = currentItem();
+		PreviewSelection(CurrentItem);
 	}
+
+	QTreeWidget::mouseDoubleClickEvent(MouseEvent);
 }
 
-void lcTimelineWidget::PreviewSelection(QTreeWidgetItem* Current)
+void lcTimelineWidget::PreviewSelection(QTreeWidgetItem* CurrentItem)
 {
-	lcPiece* Piece = (lcPiece*)Current->data(0, Qt::UserRole).value<uintptr_t>();
+	if (!CurrentItem)
+		return;
+
+	lcPiece* Piece = (lcPiece*)CurrentItem->data(0, Qt::UserRole).value<uintptr_t>();
+
 	if (!Piece)
 		return;
 
 	PieceInfo* Info = Piece->mPieceInfo;
+
 	if (!Info)
 		return;
 
-	lcPreviewWidget* Preview = new lcPreviewWidget();
-
-	lcViewWidget* ViewWidget = new lcViewWidget(nullptr, Preview);
-
-	if (Preview && ViewWidget)
-	{
-		if (!Preview->SetCurrentPiece(Info->mFileName, Piece->mColorCode))
-			QMessageBox::critical(gMainWindow, tr("Error"), tr("Part preview for %1 failed.").arg(Info->mFileName));
-		ViewWidget->SetPreviewPosition(rect());
-	}
-	else
-	{
-		QMessageBox::critical(gMainWindow, tr("Error"), tr("Preview %1 failed.").arg(Info->mFileName));
-	}
+	gMainWindow->PreviewPiece(Info->mFileName, Piece->mColorCode);
 }
 
 void lcTimelineWidget::UpdateModel()

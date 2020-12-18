@@ -778,12 +778,36 @@ View* lcMainWindow::CreateView(lcModel* Model)
 	return NewView;
 }
 
-void lcMainWindow::PreviewPiece(const QString &PartType, int ColorCode)
+void lcMainWindow::PreviewPiece(const QString& PartId, int ColorCode)
 {
-	if (mPreviewWidget) {
-		if (!mPreviewWidget->SetCurrentPiece(PartType, ColorCode))
-			QMessageBox::critical(gMainWindow, tr("Error"), tr("Part preview for % failed.").arg(PartType));
+	lcPreferences& Preferences = lcGetPreferences();
+
+	if (!Preferences.mPreviewEnabled)
+		return;
+
+	if (Preferences.mPreviewPosition != lcPreviewPosition::Floating)
+	{
+		if (mPreviewWidget && mPreviewWidget->SetCurrentPiece(PartId, ColorCode))
+			return;
 	}
+	else
+	{
+		lcPreviewWidget* Preview = new lcPreviewWidget();
+		lcViewWidget* ViewWidget = new lcViewWidget(nullptr, Preview);
+
+		if (Preview && ViewWidget)
+		{
+			ViewWidget->setAttribute(Qt::WA_DeleteOnClose, true);
+
+			if (Preview->SetCurrentPiece(PartId, ColorCode))
+			{
+				ViewWidget->SetPreviewPosition(rect());
+				return;
+			}
+		}
+	}
+
+	QMessageBox::information(this, tr("Error"), tr("Part preview for '%1' failed.").arg(PartId));
 }
 
 void lcMainWindow::CreatePreviewWidget()
@@ -802,14 +826,14 @@ void lcMainWindow::CreatePreviewWidget()
 	connect(mPreviewToolBar, SIGNAL(topLevelChanged(bool)), this, SLOT(EnableWindowFlags(bool)));
 }
 
-void lcMainWindow::TogglePreviewWidget(bool visible)
+void lcMainWindow::TogglePreviewWidget(bool Visible)
 {
 	if (mPreviewToolBar) {
-		if (visible)
+		if (Visible)
 			mPreviewToolBar->show();
 		else
 			mPreviewToolBar->hide();
-	} else if (visible) {
+	} else if (Visible) {
 		CreatePreviewWidget();
 	}
 }

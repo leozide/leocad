@@ -72,8 +72,6 @@ protected:
 
 	void getPartProperties(lcPartProperties *properties);
 
-	void PreviewSelection(const QString& PartType, int ColorCode);
-
 	lcPropertyWidgetMode mWidgetMode;
 	lcObject* mFocus;
 

@@ -188,7 +188,7 @@ public slots:
 protected:
 	void SetIconSize(int Size);
 	void PreviewSelection(int InfoIndex);
-	void mouseDoubleClickEvent(QMouseEvent *event) override;
+	void mouseDoubleClickEvent(QMouseEvent* MouseEvent) override;
 
 	lcPartSelectionListModel* mListModel;
 	lcPartSelectionWidget* mPartSelectionWidget;

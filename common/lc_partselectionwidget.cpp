@@ -682,48 +682,24 @@ void lcPartSelectionListView::startDrag(Qt::DropActions SupportedActions)
 	Drag->exec(Qt::CopyAction);
 }
 
-void lcPartSelectionListView::mouseDoubleClickEvent(QMouseEvent *event)
+void lcPartSelectionListView::mouseDoubleClickEvent(QMouseEvent* MouseEvent)
 {
-	QAbstractItemView::mouseDoubleClickEvent(event);
-	if ( event->button() == Qt::LeftButton )
-	{
+	if (MouseEvent->button() == Qt::LeftButton )
 		PreviewSelection(currentIndex().row());
-	}
+
+	QListView::mouseDoubleClickEvent(MouseEvent);
 }
 
 void lcPartSelectionListView::PreviewSelection(int InfoIndex)
 {
-	lcPreferences& Preferences = lcGetPreferences();
-	if (!Preferences.mPreviewEnabled)
-		return;
-
 	PieceInfo* Info = mListModel->GetPieceInfo(InfoIndex);
+
 	if (!Info)
 		return;
 
 	quint32 ColorCode = lcGetColorCode(mListModel->GetColorIndex());
 
-	if (Preferences.mPreviewPosition != lcPreviewPosition::Floating)
-	{
-		gMainWindow->PreviewPiece(Info->mFileName, ColorCode);
-		return;
-	}
-
-	lcPreviewWidget* Preview = new lcPreviewWidget();
-
-	lcViewWidget* ViewWidget = new lcViewWidget(nullptr, Preview);
-
-	if (Preview && ViewWidget)
-	{
-		ViewWidget->setAttribute(Qt::WA_DeleteOnClose, true);
-		if (!Preview->SetCurrentPiece(Info->mFileName, ColorCode))
-			QMessageBox::critical(gMainWindow, tr("Error"), tr("Preview %1 failed.").arg(Info->mFileName));
-		ViewWidget->SetPreviewPosition(rect());
-	}
-	else
-	{
-		QMessageBox::critical(gMainWindow, tr("Error"), tr("Preview %1 failed.").arg(Info->mFileName));
-	}
+	gMainWindow->PreviewPiece(Info->mFileName, ColorCode);
 }
 
 lcPartSelectionWidget::lcPartSelectionWidget(QWidget* Parent)

@@ -354,8 +354,8 @@ public:
 
 public slots:
 	void ProjectFileChanged(const QString& Path);
-	void PreviewPiece(const QString &, int);
-	void TogglePreviewWidget(bool);
+	void PreviewPiece(const QString& PartId, int ColorCode);
+	void TogglePreviewWidget(bool Visible);
 
 protected slots:
 	void ViewFocusReceived();

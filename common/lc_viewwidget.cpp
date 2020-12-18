@@ -135,13 +135,14 @@ void lcViewWidget::SetPreviewPosition(const QRect& ParentRect)
 		pos = mapToGlobal(ParentRect.bottomLeft());
 		break;
 	}
+
 	if (pos.x() < desktop.left())
 		pos.setX(desktop.left());
 	if (pos.y() < desktop.top())
 		pos.setY(desktop.top());
 
-	if ((pos.x() + width()) > desktop.width())
-		pos.setX(desktop.width() - width());
+	if ((pos.x() + width()) > desktop.right())
+		pos.setX(desktop.right() - width());
 	if ((pos.y() + height()) > desktop.bottom())
 		pos.setY(desktop.bottom() - height());
 	move(pos);

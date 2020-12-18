@@ -75,6 +75,7 @@ class lcVector4;
 class lcMatrix33;
 class lcMatrix44;
 
+class lcViewWidget;
 class lcGLWidget;
 class lcContext;
 class lcMesh;

@@ -4,8 +4,7 @@
 #include "piece.h"
 #include "pieceinf.h"
 #include "lc_mainwindow.h"
-
-#include "lc_qglwidget.h"
+#include "lc_viewwidget.h"
 #include "lc_previewwidget.h"
 
 lcTimelineWidget::lcTimelineWidget(QWidget* Parent)
@@ -534,9 +533,9 @@ void lcTimelineWidget::PreviewSelection(QTreeWidgetItem* Current)
 	if (!Info)
 		return;
 
-	lcPreviewWidget *Preview = new lcPreviewWidget();
+	lcPreviewWidget* Preview = new lcPreviewWidget();
 
-	lcQGLWidget *ViewWidget = new lcQGLWidget(nullptr, Preview);
+	lcViewWidget* ViewWidget = new lcViewWidget(nullptr, Preview);
 
 	if (Preview && ViewWidget)
 	{

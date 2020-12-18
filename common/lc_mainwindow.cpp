@@ -4,7 +4,7 @@
 #include <QPrintPreviewDialog>
 #include "lc_partselectionwidget.h"
 #include "lc_timelinewidget.h"
-#include "lc_qglwidget.h"
+#include "lc_viewwidget.h"
 #include "lc_qcolorlist.h"
 #include "lc_qpropertiestree.h"
 #include "lc_qutils.h"
@@ -63,7 +63,7 @@ void lcModelTabWidget::ResetLayout()
 	QLayout* TabLayout = layout();
 	QWidget* TopWidget = TabLayout->itemAt(0)->widget();
 
-	if (TopWidget->metaObject() == &lcQGLWidget::staticMetaObject)
+	if (TopWidget->metaObject() == &lcViewWidget::staticMetaObject)
 		return;
 
 	QWidget* Widget = GetAnyViewWidget();
@@ -83,7 +83,7 @@ void lcModelTabWidget::Clear()
 		View->Clear();
 	mViews.RemoveAll();
 	mActiveView = nullptr;
-	lcQGLWidget* Widget = (lcQGLWidget*)layout()->itemAt(0)->widget();
+	lcViewWidget* Widget = (lcViewWidget*)layout()->itemAt(0)->widget();
 	delete Widget->GetView();
 	Widget->SetView(nullptr);
 }
@@ -1371,9 +1371,9 @@ QByteArray lcMainWindow::GetTabLayout()
 
 		std::function<void (QWidget*)> SaveWidget = [&DataStream, &SaveWidget, &TabWidget](QWidget* Widget)
 		{
-			if (Widget->metaObject() == &lcQGLWidget::staticMetaObject)
+			if (Widget->metaObject() == &lcViewWidget::staticMetaObject)
 			{
-				View* CurrentView = (View*)((lcQGLWidget*)Widget)->GetView();
+				View* CurrentView = (View*)((lcViewWidget*)Widget)->GetView();
 
 				DataStream << (qint32)0;
 				DataStream << (qint32)(TabWidget->GetActiveView() == CurrentView ? 1 : 0);
@@ -1472,7 +1472,7 @@ void lcMainWindow::RestoreTabLayout(const QByteArray& TabLayout)
 				View* CurrentView = nullptr;
 
 				if (ParentWidget)
-					CurrentView = (View*)((lcQGLWidget*)ParentWidget)->GetView();
+					CurrentView = (View*)((lcViewWidget*)ParentWidget)->GetView();
 
 				if (CameraType == 0)
 				{
@@ -1595,7 +1595,7 @@ void lcMainWindow::SetCurrentModelTab(lcModel* Model)
 	}
 
 	lcModelTabWidget* TabWidget;
-	lcQGLWidget* ViewWidget;
+	lcViewWidget* ViewWidget;
 	View* NewView;
 
 	if (!EmptyWidget)
@@ -1607,7 +1607,7 @@ void lcMainWindow::SetCurrentModelTab(lcModel* Model)
 		CentralLayout->setContentsMargins(0, 0, 0, 0);
 
 		NewView = CreateView(Model);
-		ViewWidget = new lcQGLWidget(TabWidget, NewView);
+		ViewWidget = new lcViewWidget(TabWidget, NewView);
 		CentralLayout->addWidget(ViewWidget, 0, 0, 1, 1);
 
 		mModelTabWidget->setCurrentWidget(TabWidget);
@@ -1618,7 +1618,7 @@ void lcMainWindow::SetCurrentModelTab(lcModel* Model)
 		TabWidget->SetModel(Model);
 
 		NewView = CreateView(Model);
-		ViewWidget = (lcQGLWidget*)TabWidget->layout()->itemAt(0)->widget();
+		ViewWidget = (lcViewWidget*)TabWidget->layout()->itemAt(0)->widget();
 		ViewWidget->SetView(NewView);
 		AddView(NewView);
 
@@ -1802,7 +1802,7 @@ void lcMainWindow::SplitView(Qt::Orientation Orientation)
 {
 	QWidget* Focus = focusWidget();
 
-	if (Focus->metaObject() != &lcQGLWidget::staticMetaObject)
+	if (Focus->metaObject() != &lcViewWidget::staticMetaObject)
 		return;
 
 	QWidget* Parent = Focus->parentWidget();
@@ -1814,7 +1814,7 @@ void lcMainWindow::SplitView(Qt::Orientation Orientation)
 		Splitter = new QSplitter(Orientation, Parent);
 		Parent->layout()->addWidget(Splitter);
 		Splitter->addWidget(Focus);
-		Splitter->addWidget(new lcQGLWidget(mModelTabWidget->currentWidget(), CreateView(GetCurrentTabModel())));
+		Splitter->addWidget(new lcViewWidget(mModelTabWidget->currentWidget(), CreateView(GetCurrentTabModel())));
 	}
 	else
 	{
@@ -1825,7 +1825,7 @@ void lcMainWindow::SplitView(Qt::Orientation Orientation)
 		Splitter = new QSplitter(Orientation, Parent);
 		ParentSplitter->insertWidget(FocusIndex, Splitter);
 		Splitter->addWidget(Focus);
-		Splitter->addWidget(new lcQGLWidget(mModelTabWidget->currentWidget(), CreateView(GetCurrentTabModel())));
+		Splitter->addWidget(new lcViewWidget(mModelTabWidget->currentWidget(), CreateView(GetCurrentTabModel())));
 
 		ParentSplitter->setSizes(Sizes);
 	}
@@ -1851,7 +1851,7 @@ void lcMainWindow::RemoveActiveView()
 {
 	QWidget* Focus = focusWidget();
 
-	if (Focus->metaObject() != &lcQGLWidget::staticMetaObject)
+	if (Focus->metaObject() != &lcViewWidget::staticMetaObject)
 		return;
 
 	QWidget* Parent = Focus->parentWidget();
@@ -1885,7 +1885,7 @@ void lcMainWindow::RemoveActiveView()
 
 	Parent->deleteLater();
 
-	if (OtherWidget->metaObject() != &lcQGLWidget::staticMetaObject)
+	if (OtherWidget->metaObject() != &lcViewWidget::staticMetaObject)
 	{
 		lcModelTabWidget* TabWidget = (lcModelTabWidget*)mModelTabWidget->currentWidget();
 

@@ -9,7 +9,6 @@ class View;
 class lcPartSelectionWidget;
 class lcPreviewDockWidget;
 class PiecePreview;
-class lcQGLWidget;
 class lcQPartsTree;
 class lcQColorList;
 class lcQPropertiesTree;

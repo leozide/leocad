@@ -2,11 +2,11 @@
 
 #include <QGLWidget>
 
-class lcQGLWidget : public QGLWidget
+class lcViewWidget : public QGLWidget
 {
 public:
-	lcQGLWidget(QWidget* Parent, lcGLWidget* View);
-	~lcQGLWidget();
+	lcViewWidget(QWidget* Parent, lcGLWidget* View);
+	~lcViewWidget();
 
 	lcGLWidget* GetView() const
 	{
@@ -26,7 +26,7 @@ protected:
 #else
 		return 1.0f;
 #endif
-}
+	}
 
 	void resizeGL(int Width, int Height) override;
 	void paintGL() override;
@@ -48,4 +48,3 @@ protected:
 	QSize mPreferredSize;
 	int mWheelAccumulator;
 };
-

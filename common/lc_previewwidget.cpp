@@ -7,14 +7,13 @@
 #include "camera.h"
 #include "lc_library.h"
 #include "lc_viewsphere.h"
-
-#include "lc_qglwidget.h"
+#include "lc_viewwidget.h"
 
 lcPreviewDockWidget::lcPreviewDockWidget(QMainWindow* Parent)
 	: QMainWindow(Parent)
 {
 	mPreview = new lcPreviewWidget();
-	mViewWidget = new lcQGLWidget(nullptr, mPreview);
+	mViewWidget = new lcViewWidget(nullptr, mPreview);
 	setCentralWidget(mViewWidget);
 	setMinimumSize(200, 200);
 

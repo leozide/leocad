@@ -1,5 +1,5 @@
 #include "lc_global.h"
-#include "lc_qglwidget.h"
+#include "lc_viewwidget.h"
 #include "lc_glwidget.h"
 #include "lc_glextensions.h"
 #include "project.h"
@@ -17,9 +17,9 @@
 #include "lc_profile.h"
 #include "lc_previewwidget.h"
 
-static QList<QGLWidget*> gWidgetList;
+static QList<lcViewWidget*> gWidgetList;
 
-lcQGLWidget::lcQGLWidget(QWidget* Parent, lcGLWidget* Owner)
+lcViewWidget::lcViewWidget(QWidget* Parent, lcGLWidget* Owner)
 	: QGLWidget(Parent, gWidgetList.isEmpty() ? nullptr : gWidgetList.first())
 {
 	mWheelAccumulator = 0;
@@ -62,7 +62,7 @@ lcQGLWidget::lcQGLWidget(QWidget* Parent, lcGLWidget* Owner)
 	}
 }
 
-lcQGLWidget::~lcQGLWidget()
+lcViewWidget::~lcViewWidget()
 {
 	gWidgetList.removeOne(this);
 
@@ -83,12 +83,12 @@ lcQGLWidget::~lcQGLWidget()
 	delete mView;
 }
 
-QSize lcQGLWidget::sizeHint() const
+QSize lcViewWidget::sizeHint() const
 {
 	return mPreferredSize.isNull() ? QGLWidget::sizeHint() : mPreferredSize;
 }
 
-void lcQGLWidget::SetView(lcGLWidget* View)
+void lcViewWidget::SetView(lcGLWidget* View)
 {
 	mView = View;
 
@@ -103,7 +103,7 @@ void lcQGLWidget::SetView(lcGLWidget* View)
 	}
 }
 
-void lcQGLWidget::SetPreviewPosition(const QRect& ParentRect)
+void lcViewWidget::SetPreviewPosition(const QRect& ParentRect)
 {
 	lcPreferences& Preferences = lcGetPreferences();
 	lcPreviewWidget* Preview = reinterpret_cast<lcPreviewWidget*>(mView);
@@ -150,17 +150,17 @@ void lcQGLWidget::SetPreviewPosition(const QRect& ParentRect)
 	show();
 }
 
-void lcQGLWidget::resizeGL(int Width, int Height)
+void lcViewWidget::resizeGL(int Width, int Height)
 {
 	mView->SetSize(Width, Height);
 }
 
-void lcQGLWidget::paintGL()
+void lcViewWidget::paintGL()
 {
 	mView->OnDraw();
 }
 
-void lcQGLWidget::focusInEvent(QFocusEvent* FocusEvent)
+void lcViewWidget::focusInEvent(QFocusEvent* FocusEvent)
 {
 	if (mView)
 		mView->SetFocus(true);
@@ -168,7 +168,7 @@ void lcQGLWidget::focusInEvent(QFocusEvent* FocusEvent)
 	QGLWidget::focusInEvent(FocusEvent);
 }
 
-void lcQGLWidget::focusOutEvent(QFocusEvent* FocusEvent)
+void lcViewWidget::focusOutEvent(QFocusEvent* FocusEvent)
 {
 	if (mView)
 		mView->SetFocus(false);
@@ -176,7 +176,7 @@ void lcQGLWidget::focusOutEvent(QFocusEvent* FocusEvent)
 	QGLWidget::focusOutEvent(FocusEvent);
 }
 
-void lcQGLWidget::keyPressEvent(QKeyEvent* KeyEvent)
+void lcViewWidget::keyPressEvent(QKeyEvent* KeyEvent)
 {
 	if (KeyEvent->key() == Qt::Key_Control || KeyEvent->key() == Qt::Key_Shift)
 	{
@@ -187,7 +187,7 @@ void lcQGLWidget::keyPressEvent(QKeyEvent* KeyEvent)
 	QGLWidget::keyPressEvent(KeyEvent);
 }
 
-void lcQGLWidget::keyReleaseEvent(QKeyEvent* KeyEvent)
+void lcViewWidget::keyReleaseEvent(QKeyEvent* KeyEvent)
 {
 	if (KeyEvent->key() == Qt::Key_Control || KeyEvent->key() == Qt::Key_Shift)
 	{
@@ -198,7 +198,7 @@ void lcQGLWidget::keyReleaseEvent(QKeyEvent* KeyEvent)
 	QGLWidget::keyReleaseEvent(KeyEvent);
 }
 
-void lcQGLWidget::mousePressEvent(QMouseEvent* MouseEvent)
+void lcViewWidget::mousePressEvent(QMouseEvent* MouseEvent)
 {
 	float DeviceScale = GetDeviceScale();
 
@@ -234,7 +234,7 @@ void lcQGLWidget::mousePressEvent(QMouseEvent* MouseEvent)
 	}
 }
 
-void lcQGLWidget::mouseReleaseEvent(QMouseEvent* MouseEvent)
+void lcViewWidget::mouseReleaseEvent(QMouseEvent* MouseEvent)
 {
 	float DeviceScale = GetDeviceScale();
 
@@ -270,7 +270,7 @@ void lcQGLWidget::mouseReleaseEvent(QMouseEvent* MouseEvent)
 	}
 }
 
-void lcQGLWidget::mouseDoubleClickEvent(QMouseEvent* MouseEvent)
+void lcViewWidget::mouseDoubleClickEvent(QMouseEvent* MouseEvent)
 {
 	float DeviceScale = GetDeviceScale();
 
@@ -287,7 +287,7 @@ void lcQGLWidget::mouseDoubleClickEvent(QMouseEvent* MouseEvent)
 	}
 }
 
-void lcQGLWidget::mouseMoveEvent(QMouseEvent* MouseEvent)
+void lcViewWidget::mouseMoveEvent(QMouseEvent* MouseEvent)
 {
 	float DeviceScale = GetDeviceScale();
 
@@ -297,7 +297,7 @@ void lcQGLWidget::mouseMoveEvent(QMouseEvent* MouseEvent)
 	mView->OnMouseMove();
 }
 
-void lcQGLWidget::wheelEvent(QWheelEvent* WheelEvent)
+void lcViewWidget::wheelEvent(QWheelEvent* WheelEvent)
 {
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 2, 0))
 	if (WheelEvent->angleDelta().y() == 0)
@@ -334,7 +334,7 @@ void lcQGLWidget::wheelEvent(QWheelEvent* WheelEvent)
 	WheelEvent->accept();
 }
 
-void lcQGLWidget::dragEnterEvent(QDragEnterEvent* DragEnterEvent)
+void lcViewWidget::dragEnterEvent(QDragEnterEvent* DragEnterEvent)
 {
 	const QMimeData* MimeData = DragEnterEvent->mimeData();
 
@@ -354,13 +354,13 @@ void lcQGLWidget::dragEnterEvent(QDragEnterEvent* DragEnterEvent)
 	DragEnterEvent->ignore();
 }
 
-void lcQGLWidget::dragLeaveEvent(QDragLeaveEvent* DragLeaveEvent)
+void lcViewWidget::dragLeaveEvent(QDragLeaveEvent* DragLeaveEvent)
 {
 	mView->EndDrag(false);
 	DragLeaveEvent->accept();
 }
 
-void lcQGLWidget::dragMoveEvent(QDragMoveEvent* DragMoveEvent)
+void lcViewWidget::dragMoveEvent(QDragMoveEvent* DragMoveEvent)
 {
 	const QMimeData* MimeData = DragMoveEvent->mimeData();
 
@@ -380,7 +380,7 @@ void lcQGLWidget::dragMoveEvent(QDragMoveEvent* DragMoveEvent)
 	QGLWidget::dragMoveEvent(DragMoveEvent);
 }
 
-void lcQGLWidget::dropEvent(QDropEvent* DropEvent)
+void lcViewWidget::dropEvent(QDropEvent* DropEvent)
 {
 	const QMimeData* MimeData = DropEvent->mimeData();
 

@@ -4,7 +4,6 @@
 #include "lc_scene.h"
 #include "lc_commands.h"
 
-class lcQGLWidget;
 class lcPreviewWidget;
 
 class lcPreviewDockWidget : public QMainWindow
@@ -25,7 +24,7 @@ protected:
 	QToolBar* mToolBar;
 	QLabel* mLabel;
 	lcPreviewWidget* mPreview;
-	lcQGLWidget* mViewWidget;
+	lcViewWidget* mViewWidget;
 };
 
 class lcPreviewWidget : public lcGLWidget

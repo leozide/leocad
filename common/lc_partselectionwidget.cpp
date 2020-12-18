@@ -10,8 +10,7 @@
 #include "pieceinf.h"
 #include "view.h"
 #include "lc_glextensions.h"
-
-#include "lc_qglwidget.h"
+#include "lc_viewwidget.h"
 #include "lc_previewwidget.h"
 
  Q_DECLARE_METATYPE(QList<int>)
@@ -712,7 +711,7 @@ void lcPartSelectionListView::PreviewSelection(int InfoIndex)
 
 	lcPreviewWidget* Preview = new lcPreviewWidget();
 
-	lcQGLWidget* ViewWidget = new lcQGLWidget(nullptr, Preview);
+	lcViewWidget* ViewWidget = new lcViewWidget(nullptr, Preview);
 
 	if (Preview && ViewWidget)
 	{

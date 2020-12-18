@@ -11,8 +11,7 @@
 #include "pieceinf.h"
 #include "lc_library.h"
 #include "lc_qutils.h"
-
-#include "lc_qglwidget.h"
+#include "lc_viewwidget.h"
 #include "lc_previewwidget.h"
 
 // Draw an icon indicating opened/closing branches
@@ -1140,7 +1139,7 @@ bool lcQPropertiesTree::lastColumn(int column) const
 	return header()->visualIndex(column) == columnCount() - 1;
 }
 
-void lcQPropertiesTree::PreviewSelection(const QString &PartType, int ColorCode)
+void lcQPropertiesTree::PreviewSelection(const QString& PartType, int ColorCode)
 {
 	lcPreferences& Preferences = lcGetPreferences();
 	if (Preferences.mPreviewPosition != lcPreviewPosition::Floating)
@@ -1149,9 +1148,9 @@ void lcQPropertiesTree::PreviewSelection(const QString &PartType, int ColorCode)
 		return;
 	}
 
-	lcPreviewWidget *Preview = new lcPreviewWidget();
+	lcPreviewWidget* Preview = new lcPreviewWidget();
 
-	lcQGLWidget *ViewWidget = new lcQGLWidget(nullptr, Preview);
+	lcViewWidget* ViewWidget = new lcViewWidget(nullptr, Preview);
 
 	if (Preview && ViewWidget)
 	{

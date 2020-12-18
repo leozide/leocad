@@ -195,19 +195,22 @@ SOURCES += common/view.cpp \
 	common/lc_mesh.cpp \
 	common/lc_meshloader.cpp \
 	common/lc_model.cpp \
-	common/lc_profile.cpp \
+        common/lc_partselectionwidget.cpp \
+        common/lc_profile.cpp \
 	common/lc_scene.cpp \
 	common/lc_selectbycolordialog.cpp \
 	common/lc_shortcuts.cpp \
 	common/lc_stringcache.cpp \
 	common/lc_synth.cpp \
 	common/lc_texture.cpp \
-	common/lc_viewsphere.cpp \
-	common/lc_zipfile.cpp \
+        common/lc_timelinewidget.cpp \
+        common/lc_viewsphere.cpp \
+        common/lc_viewwidget.cpp \
+        common/lc_zipfile.cpp \
 	common/image.cpp \
 	common/group.cpp \
 	common/camera.cpp \
-	qt/system.cpp \
+        qt/system.cpp \
 	qt/qtmain.cpp \
 	qt/lc_qarraydialog.cpp \
 	qt/lc_qgroupdialog.cpp \
@@ -224,12 +227,9 @@ SOURCES += common/view.cpp \
 	qt/lc_qutils.cpp \
 	qt/lc_qpropertiestree.cpp \
 	qt/lc_qcolorpicker.cpp \
-	qt/lc_qglwidget.cpp \
 	qt/lc_qcolorlist.cpp \
 	qt/lc_qfinddialog.cpp \
 	qt/lc_qmodellistdialog.cpp \
-	common/lc_partselectionwidget.cpp \
-	common/lc_timelinewidget.cpp \
 	qt/lc_renderdialog.cpp \
 	qt/lc_setsdatabasedialog.cpp \
 	common/lc_partpalettedialog.cpp
@@ -272,8 +272,11 @@ HEADERS += \
 	common/lc_synth.h \
 	common/lc_texture.h \
 	common/lc_viewsphere.h \
+        common/lc_viewwidget.h \
 	common/lc_zipfile.h \
-	common/image.h \
+        common/lc_partselectionwidget.h \
+        common/lc_timelinewidget.h \
+        common/image.h \
 	common/group.h \
 	common/camera.h \
 	qt/lc_qarraydialog.h \
@@ -291,12 +294,9 @@ HEADERS += \
 	qt/lc_qutils.h \
 	qt/lc_qpropertiestree.h \
 	qt/lc_qcolorpicker.h \
-	qt/lc_qglwidget.h \
 	qt/lc_qcolorlist.h \
 	qt/lc_qfinddialog.h \
 	qt/lc_qmodellistdialog.h \
-	common/lc_partselectionwidget.h \
-	common/lc_timelinewidget.h \
 	qt/lc_renderdialog.h \
 	qt/lc_setsdatabasedialog.h \
 	common/lc_partpalettedialog.h

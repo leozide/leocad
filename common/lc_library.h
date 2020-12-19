@@ -37,7 +37,7 @@ public:
 	explicit lcLibraryPrimitive(QString&& FileName, const char* Name, lcZipFileType ZipFileType, quint32 ZipFileIndex, bool Stud, bool SubFile)
 		: mFileName(std::move(FileName))
 	{
-		strncpy(mName, Name, sizeof(mName));
+		strncpy(mName, Name, sizeof(mName)-1);
 		mName[sizeof(mName) - 1] = 0;
 
 		mZipFileType = ZipFileType;

@@ -356,7 +356,7 @@ bool lcPiecesLibrary::OpenArchive(std::unique_ptr<lcFile> File, lcZipFileType Zi
 					mTextures.push_back(Texture);
 
 					*Dst = 0;
-					strncpy(Texture->mName, Name + (ZipFileType == LC_ZIPFILE_OFFICIAL ? 21 : 15), sizeof(Texture->mName));
+					strncpy(Texture->mName, Name + (ZipFileType == LC_ZIPFILE_OFFICIAL ? 21 : 15), sizeof(Texture->mName)-1);
 					Texture->mName[sizeof(Texture->mName) - 1] = 0;
 				}
 			}
@@ -384,7 +384,7 @@ bool lcPiecesLibrary::OpenArchive(std::unique_ptr<lcFile> File, lcZipFileType Zi
 				{
 					Info = new PieceInfo();
 
-					strncpy(Info->mFileName, FileInfo.file_name + (Name - NameBuffer), sizeof(Info->mFileName));
+					strncpy(Info->mFileName, FileInfo.file_name + (Name - NameBuffer), sizeof(Info->mFileName)-1);
 					Info->mFileName[sizeof(Info->mFileName) - 1] = 0;
 
 					mPieces[Name] = Info;

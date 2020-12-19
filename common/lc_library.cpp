@@ -44,8 +44,6 @@ lcPiecesLibrary::lcPiecesLibrary()
 	Dir.mkpath(mCachePath);
 
 	mNumOfficialPieces = 0;
-	mZipFiles[LC_ZIPFILE_OFFICIAL] = nullptr;
-	mZipFiles[LC_ZIPFILE_UNOFFICIAL] = nullptr;
 	mBuffersDirty = false;
 	mHasUnofficial = false;
 	mCancelLoading = false;
@@ -77,9 +75,7 @@ void lcPiecesLibrary::Unload()
 	mTextures.clear();
 
 	mNumOfficialPieces = 0;
-	delete mZipFiles[LC_ZIPFILE_OFFICIAL];
 	mZipFiles[LC_ZIPFILE_OFFICIAL] = nullptr;
-	delete mZipFiles[LC_ZIPFILE_UNOFFICIAL];
 	mZipFiles[LC_ZIPFILE_UNOFFICIAL] = nullptr;
 }
 
@@ -307,33 +303,20 @@ bool lcPiecesLibrary::Load(const QString& LibraryPath, bool ShowProgress)
 
 bool lcPiecesLibrary::OpenArchive(const QString& FileName, lcZipFileType ZipFileType)
 {
-	lcDiskFile* File = new lcDiskFile(FileName);
+	std::unique_ptr<lcDiskFile> File(new lcDiskFile(FileName));
 
-	if (!File->Open(QIODevice::ReadOnly) || !OpenArchive(File, FileName, ZipFileType))
-	{
-		delete File;
+	if (!File->Open(QIODevice::ReadOnly))
 		return false;
-	}
 
-	return true;
+	return OpenArchive(std::move(File), FileName, ZipFileType);
 }
 
-bool lcPiecesLibrary::OpenArchive(lcFile* File, const QString& FileName, lcZipFileType ZipFileType)
+bool lcPiecesLibrary::OpenArchive(std::unique_ptr<lcFile> File, const QString& FileName, lcZipFileType ZipFileType)
 {
-	lcZipFile* ZipFile = new lcZipFile();
+	std::unique_ptr<lcZipFile> ZipFile(new lcZipFile());
 
-	if (!ZipFile->OpenRead(File))
-	{
-		delete ZipFile;
+	if (!ZipFile->OpenRead(std::move(File)))
 		return false;
-	}
-
-	mZipFiles[ZipFileType] = ZipFile;
-
-	if (ZipFileType == LC_ZIPFILE_OFFICIAL)
-		mLibraryFileName = FileName;
-	else
-		mUnofficialFileName = FileName;
 
 	for (int FileIdx = 0; FileIdx < ZipFile->mFiles.GetSize(); FileIdx++)
 	{
@@ -431,6 +414,8 @@ bool lcPiecesLibrary::OpenArchive(lcFile* File, const QString& FileName, lcZipFi
 				Primitive->SetZipFile(ZipFileType, FileIdx);
 		}
 	}
+
+	mZipFiles[ZipFileType] = std::move(ZipFile);
 
 	return true;
 }
@@ -1870,14 +1855,11 @@ bool lcPiecesLibrary::LoadBuiltinPieces()
 	if (!Resource.isValid())
 		return false;
 
-	lcMemFile* File = new lcMemFile();
+	std::unique_ptr<lcMemFile> File(new lcMemFile());
 	File->WriteBuffer(Resource.data(), Resource.size());
 
-	if (!OpenArchive(File, "builtin", LC_ZIPFILE_OFFICIAL))
-	{
-		delete File;
+	if (!OpenArchive(std::move(File), "builtin", LC_ZIPFILE_OFFICIAL))
 		return false;
-	}
 
 	lcMemFile PieceFile;
 

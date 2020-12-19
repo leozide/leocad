@@ -1,8 +1,6 @@
 #pragma once
 
-#include <QDialog>
-struct lcMinifig;
-class MinifigWizard;
+#include "minifig.h"
 class lcQColorPicker;
 
 namespace Ui {
@@ -19,25 +17,22 @@ public:
 
 	MinifigWizard* mMinifigWidget;
 
-public slots:
+protected slots:
 	void on_TemplateComboBox_currentIndexChanged(const QString& TemplateName);
 	void on_TemplateSaveButton_clicked();
 	void on_TemplateDeleteButton_clicked();
 	void on_TemplateImportButton_clicked();
 	void on_TemplateExportButton_clicked();
-	void typeChanged(int index);
-	void colorChanged(int index);
-	void angleChanged(double value);
+	void TypeChanged(int Index);
+	void ColorChanged(int Index);
+	void AngleChanged(double Value);
 
 protected:
-	Ui::lcQMinifigDialog *ui;
-
 	void UpdateTemplateCombo();
-	QComboBox *getTypeComboBox(int type);
-	int getTypeIndex(QObject *widget);
-	lcQColorPicker* getColorPicker(int index);
-	int getColorIndex(QObject *widget);
-	QDoubleSpinBox* getAngleEdit(int index);
-	int getAngleIndex(QObject *widget);
-};
 
+	Ui::lcQMinifigDialog* ui;
+
+	std::array<QComboBox*, LC_MFW_NUMITEMS> mComboBoxes;
+	std::array<lcQColorPicker*, LC_MFW_NUMITEMS> mColorPickers;
+	std::array<QDoubleSpinBox*, LC_MFW_NUMITEMS> mSpinBoxes;
+};

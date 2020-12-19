@@ -244,7 +244,23 @@ enum lcCommandId
 	LC_MODEL_22,
 	LC_MODEL_23,
 	LC_MODEL_24,
-	LC_MODEL_LAST = LC_MODEL_24,
+	LC_MODEL_25,
+	LC_MODEL_26,
+	LC_MODEL_27,
+	LC_MODEL_28,
+	LC_MODEL_29,
+	LC_MODEL_30,
+	LC_MODEL_31,
+	LC_MODEL_32,
+	LC_MODEL_33,
+	LC_MODEL_34,
+	LC_MODEL_35,
+	LC_MODEL_36,
+	LC_MODEL_37,
+	LC_MODEL_38,
+	LC_MODEL_39,
+	LC_MODEL_40,
+	LC_MODEL_LAST = LC_MODEL_40,
 	LC_HELP_HOMEPAGE,
 	LC_HELP_BUG_REPORT,
 	LC_HELP_UPDATES,
@@ -265,7 +281,7 @@ struct lcCommand
 	const char* DefaultShortcut;
 };
 
-extern lcCommand gCommands[LC_NUM_COMMANDS];
+extern const lcCommand gCommands[];
 
 enum class lcTool
 {

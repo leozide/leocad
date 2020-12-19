@@ -2265,7 +2265,7 @@ void lcMainWindow::UpdateModels()
 		if (ModelIdx < Models.GetSize())
 		{
 			Action->setChecked(CurrentModel == Models[ModelIdx]);
-			Action->setText(QString::fromLatin1("&%1 %2").arg(QString::number(ModelIdx + 1), Models[ModelIdx]->GetProperties().mFileName));
+			Action->setText(QString::fromLatin1("%1%2 %3").arg(ModelIdx < 9 ? QString("&") : QString(), QString::number(ModelIdx + 1), Models[ModelIdx]->GetProperties().mFileName));
 			Action->setVisible(true);
 		}
 		else
@@ -3224,6 +3224,22 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 	case LC_MODEL_22:
 	case LC_MODEL_23:
 	case LC_MODEL_24:
+	case LC_MODEL_25:
+	case LC_MODEL_26:
+	case LC_MODEL_27:
+	case LC_MODEL_28:
+	case LC_MODEL_29:
+	case LC_MODEL_30:
+	case LC_MODEL_31:
+	case LC_MODEL_32:
+	case LC_MODEL_33:
+	case LC_MODEL_34:
+	case LC_MODEL_35:
+	case LC_MODEL_36:
+	case LC_MODEL_37:
+	case LC_MODEL_38:
+	case LC_MODEL_39:
+	case LC_MODEL_40:
 		lcGetActiveProject()->SetActiveModel(CommandId - LC_MODEL_01);
 		break;
 

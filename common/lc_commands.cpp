@@ -1,7 +1,7 @@
 #include "lc_global.h"
 #include "lc_commands.h"
 
-lcCommand gCommands[LC_NUM_COMMANDS] =
+const lcCommand gCommands[] =
 {
 	// LC_FILE_NEW
 	{
@@ -1589,6 +1589,118 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 	{
 		QT_TRANSLATE_NOOP("Action", "Model.Model24"),
 		QT_TRANSLATE_NOOP("Menu", "Model 24"),
+		QT_TRANSLATE_NOOP("Status", "Switch to this submodel"),
+		""
+	},
+	// LC_MODEL_25
+	{
+		QT_TRANSLATE_NOOP("Action", "Model.Model25"),
+		QT_TRANSLATE_NOOP("Menu", "Model 25"),
+		QT_TRANSLATE_NOOP("Status", "Switch to this submodel"),
+		""
+	},
+	// LC_MODEL_26
+	{
+		QT_TRANSLATE_NOOP("Action", "Model.Model26"),
+		QT_TRANSLATE_NOOP("Menu", "Model 26"),
+		QT_TRANSLATE_NOOP("Status", "Switch to this submodel"),
+		""
+	},
+	// LC_MODEL_27
+	{
+		QT_TRANSLATE_NOOP("Action", "Model.Model27"),
+		QT_TRANSLATE_NOOP("Menu", "Model 27"),
+		QT_TRANSLATE_NOOP("Status", "Switch to this submodel"),
+		""
+	},
+	// LC_MODEL_28
+	{
+		QT_TRANSLATE_NOOP("Action", "Model.Model28"),
+		QT_TRANSLATE_NOOP("Menu", "Model 28"),
+		QT_TRANSLATE_NOOP("Status", "Switch to this submodel"),
+		""
+	},
+	// LC_MODEL_29
+	{
+		QT_TRANSLATE_NOOP("Action", "Model.Model29"),
+		QT_TRANSLATE_NOOP("Menu", "Model 29"),
+		QT_TRANSLATE_NOOP("Status", "Switch to this submodel"),
+		""
+	},
+	// LC_MODEL_30
+	{
+		QT_TRANSLATE_NOOP("Action", "Model.Model30"),
+		QT_TRANSLATE_NOOP("Menu", "Model 30"),
+		QT_TRANSLATE_NOOP("Status", "Switch to this submodel"),
+		""
+	},
+	// LC_MODEL_31
+	{
+		QT_TRANSLATE_NOOP("Action", "Model.Model31"),
+		QT_TRANSLATE_NOOP("Menu", "Model 31"),
+		QT_TRANSLATE_NOOP("Status", "Switch to this submodel"),
+		""
+	},
+	// LC_MODEL_32
+	{
+		QT_TRANSLATE_NOOP("Action", "Model.Model32"),
+		QT_TRANSLATE_NOOP("Menu", "Model 32"),
+		QT_TRANSLATE_NOOP("Status", "Switch to this submodel"),
+		""
+	},
+	// LC_MODEL_33
+	{
+		QT_TRANSLATE_NOOP("Action", "Model.Model33"),
+		QT_TRANSLATE_NOOP("Menu", "Model 33"),
+		QT_TRANSLATE_NOOP("Status", "Switch to this submodel"),
+		""
+	},
+	// LC_MODEL_34
+	{
+		QT_TRANSLATE_NOOP("Action", "Model.Model34"),
+		QT_TRANSLATE_NOOP("Menu", "Model 34"),
+		QT_TRANSLATE_NOOP("Status", "Switch to this submodel"),
+		""
+	},
+	// LC_MODEL_35
+	{
+		QT_TRANSLATE_NOOP("Action", "Model.Model35"),
+		QT_TRANSLATE_NOOP("Menu", "Model 35"),
+		QT_TRANSLATE_NOOP("Status", "Switch to this submodel"),
+		""
+	},
+	// LC_MODEL_36
+	{
+		QT_TRANSLATE_NOOP("Action", "Model.Model36"),
+		QT_TRANSLATE_NOOP("Menu", "Model 36"),
+		QT_TRANSLATE_NOOP("Status", "Switch to this submodel"),
+		""
+	},
+	// LC_MODEL_37
+	{
+		QT_TRANSLATE_NOOP("Action", "Model.Model37"),
+		QT_TRANSLATE_NOOP("Menu", "Model 37"),
+		QT_TRANSLATE_NOOP("Status", "Switch to this submodel"),
+		""
+	},
+	// LC_MODEL_38
+	{
+		QT_TRANSLATE_NOOP("Action", "Model.Model38"),
+		QT_TRANSLATE_NOOP("Menu", "Model 38"),
+		QT_TRANSLATE_NOOP("Status", "Switch to this submodel"),
+		""
+	},
+	// LC_MODEL_39
+	{
+		QT_TRANSLATE_NOOP("Action", "Model.Model39"),
+		QT_TRANSLATE_NOOP("Menu", "Model 39"),
+		QT_TRANSLATE_NOOP("Status", "Switch to this submodel"),
+		""
+	},
+	// LC_MODEL_40
+	{
+		QT_TRANSLATE_NOOP("Action", "Model.Model40"),
+		QT_TRANSLATE_NOOP("Menu", "Model 40"),
 		QT_TRANSLATE_NOOP("Status", "Switch to this submodel"),
 		""
 	},

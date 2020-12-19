@@ -308,10 +308,10 @@ bool lcPiecesLibrary::OpenArchive(const QString& FileName, lcZipFileType ZipFile
 	if (!File->Open(QIODevice::ReadOnly))
 		return false;
 
-	return OpenArchive(std::move(File), FileName, ZipFileType);
+	return OpenArchive(std::move(File), ZipFileType);
 }
 
-bool lcPiecesLibrary::OpenArchive(std::unique_ptr<lcFile> File, const QString& FileName, lcZipFileType ZipFileType)
+bool lcPiecesLibrary::OpenArchive(std::unique_ptr<lcFile> File, lcZipFileType ZipFileType)
 {
 	std::unique_ptr<lcZipFile> ZipFile(new lcZipFile());
 
@@ -1858,7 +1858,7 @@ bool lcPiecesLibrary::LoadBuiltinPieces()
 	std::unique_ptr<lcMemFile> File(new lcMemFile());
 	File->WriteBuffer(Resource.data(), Resource.size());
 
-	if (!OpenArchive(std::move(File), "builtin", LC_ZIPFILE_OFFICIAL))
+	if (!OpenArchive(std::move(File), LC_ZIPFILE_OFFICIAL))
 		return false;
 
 	lcMemFile PieceFile;

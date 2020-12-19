@@ -433,10 +433,23 @@ lcMatrix44 View::GetPieceInsertPosition(bool IgnoreSelected, PieceInfo* Info) co
 			Point = lcMul31(Point, InverseMatrix);
 	}
 
+	const lcBoundingBox& BoundingBox = Info->GetBoundingBox();
 	lcVector3 Intersection;
 
-	const lcBoundingBox& BoundingBox = Info->GetBoundingBox();
 	if (lcLineSegmentPlaneIntersection(&Intersection, ClickPoints[0], ClickPoints[1], lcVector4(0, 0, 1, BoundingBox.Min.z)))
+	{
+		Intersection = ActiveModel->SnapPosition(Intersection);
+		return lcMatrix44Translation(Intersection);
+	}
+
+	lcVector3 Position;
+
+	if (!ActiveModel->GetFocusPosition(Position))
+		Position = ActiveModel->GetSelectionOrModelCenter();
+
+	lcVector3 FrontVector(mCamera->mTargetPosition - mCamera->mPosition);
+
+	if (lcLineSegmentPlaneIntersection(&Intersection, ClickPoints[0], ClickPoints[1], lcVector4(FrontVector, -lcDot(FrontVector, Position))))
 	{
 		Intersection = ActiveModel->SnapPosition(Intersection);
 		return lcMatrix44Translation(Intersection);

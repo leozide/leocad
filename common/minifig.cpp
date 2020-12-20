@@ -494,9 +494,13 @@ void MinifigWizard::SetSelectionIndex(int Type, int Index)
 void MinifigWizard::SetColor(int Type, int Color)
 {
 	mMinifig.Colors[Type] = Color;
+
+	Calculate();
 }
 
 void MinifigWizard::SetAngle(int Type, float Angle)
 {
 	mMinifig.Angles[Type] = Angle;
+
+	Calculate();
 }

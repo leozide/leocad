@@ -1352,18 +1352,16 @@ void lcPiecesLibrary::GetPieceFile(const char* PieceName, std::function<void(lcF
 		{
 			lcDiskFile IncludeFile;
 
-			auto LoadIncludeFile = [&IncludeFile, PieceName, this](const char* Folder)
+			auto LoadIncludeFile = [&IncludeFile, PieceName, this](const QLatin1String& Folder)
 			{
-				char IncludeFileName[LC_MAXPATH];
-				sprintf(IncludeFileName, Folder, PieceName);
-				IncludeFile.SetFileName(mLibraryDir.absoluteFilePath(QLatin1String(IncludeFileName)));
+				const QString IncludeFileName = Folder + PieceName;
+				IncludeFile.SetFileName(mLibraryDir.absoluteFilePath(IncludeFileName));
 				if (IncludeFile.Open(QIODevice::ReadOnly))
 					return true;
 
 #if defined(Q_OS_MACOS) || defined(Q_OS_LINUX)
-				// todo: instead of using strlwr, search the parts/primitive lists and get the file name from there
-				strlwr(IncludeFileName);
-				IncludeFile.SetFileName(mLibraryDir.absoluteFilePath(QLatin1String(IncludeFileName)));
+				// todo: search the parts/primitive lists and get the file name from there instead of using toLower
+				IncludeFile.SetFileName(mLibraryDir.absoluteFilePath(IncludeFileName.toLower()));
 				return IncludeFile.Open(QIODevice::ReadOnly);
 #else
 				return false;
@@ -1372,18 +1370,18 @@ void lcPiecesLibrary::GetPieceFile(const char* PieceName, std::function<void(lcF
 
 			if (mHasUnofficial)
 			{
-				Found = LoadIncludeFile("unofficial/parts/%s");
+				Found = LoadIncludeFile(QLatin1String("unofficial/parts/"));
 
 				if (!Found)
-					Found = LoadIncludeFile("unofficial/p/%s");
+					Found = LoadIncludeFile(QLatin1String("unofficial/p/"));
 			}
 
 			if (!Found)
 			{
-				Found = LoadIncludeFile("parts/%s");
+				Found = LoadIncludeFile(QLatin1String("parts/"));
 
 				if (!Found)
-					Found = LoadIncludeFile("p/%s");
+					Found = LoadIncludeFile(QLatin1String("p/"));
 			}
 
 			if (Found)

@@ -46,7 +46,6 @@
 char* strcasestr(const char *s, const char *find);
 #else
 char* strupr(char* string);
-char* strlwr(char* string);
 #endif
 
 // Version number.

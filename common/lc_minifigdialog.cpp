@@ -1,6 +1,6 @@
 #include "lc_global.h"
-#include "lc_qminifigdialog.h"
-#include "ui_lc_qminifigdialog.h"
+#include "lc_minifigdialog.h"
+#include "ui_lc_minifigdialog.h"
 #include "lc_viewwidget.h"
 #include "lc_qcolorpicker.h"
 #include "minifig.h"
@@ -10,8 +10,8 @@
 #include "view.h"
 #include "camera.h"
 
-lcQMinifigDialog::lcQMinifigDialog(QWidget* Parent)
-	: QDialog(Parent), ui(new Ui::lcQMinifigDialog)
+lcMinifigDialog::lcMinifigDialog(QWidget* Parent)
+	: QDialog(Parent), ui(new Ui::lcMinifigDialog)
 {
 	ui->setupUi(this);
 
@@ -99,13 +99,13 @@ lcQMinifigDialog::lcQMinifigDialog(QWidget* Parent)
 	mView->ZoomExtents();
 }
 
-lcQMinifigDialog::~lcQMinifigDialog()
+lcMinifigDialog::~lcMinifigDialog()
 {
 	delete mMinifigWizard;
 	delete ui;
 }
 
-void lcQMinifigDialog::UpdateTemplateCombo()
+void lcMinifigDialog::UpdateTemplateCombo()
 {
 	ui->TemplateComboBox->clear();
 
@@ -114,7 +114,7 @@ void lcQMinifigDialog::UpdateTemplateCombo()
 		ui->TemplateComboBox->addItem(Template.first);
 }
 
-void lcQMinifigDialog::on_TemplateComboBox_currentIndexChanged(const QString& TemplateName)
+void lcMinifigDialog::on_TemplateComboBox_currentIndexChanged(const QString& TemplateName)
 {
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
 	const auto& Templates = mMinifigWizard->GetTemplates();
@@ -158,7 +158,7 @@ void lcQMinifigDialog::on_TemplateComboBox_currentIndexChanged(const QString& Te
 #endif
 }
 
-void lcQMinifigDialog::on_TemplateSaveButton_clicked()
+void lcMinifigDialog::on_TemplateSaveButton_clicked()
 {
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
 	QString CurrentName = ui->TemplateComboBox->currentText();
@@ -200,7 +200,7 @@ void lcQMinifigDialog::on_TemplateSaveButton_clicked()
 #endif
 }
 
-void lcQMinifigDialog::on_TemplateDeleteButton_clicked()
+void lcMinifigDialog::on_TemplateDeleteButton_clicked()
 {
 	QString Template = ui->TemplateComboBox->currentText();
 	QString Question = tr("Are you sure you want to delete the template '%1'?").arg(Template);
@@ -213,7 +213,7 @@ void lcQMinifigDialog::on_TemplateDeleteButton_clicked()
 	UpdateTemplateCombo();
 }
 
-void lcQMinifigDialog::on_TemplateImportButton_clicked()
+void lcMinifigDialog::on_TemplateImportButton_clicked()
 {
 	QString FileName = QFileDialog::getOpenFileName(this, tr("Import Templates"), "", tr("Minifig Template Files (*.minifig);;All Files (*.*)"));
 
@@ -234,7 +234,7 @@ void lcQMinifigDialog::on_TemplateImportButton_clicked()
 	UpdateTemplateCombo();
 }
 
-void lcQMinifigDialog::on_TemplateExportButton_clicked()
+void lcMinifigDialog::on_TemplateExportButton_clicked()
 {
 	QString FileName = QFileDialog::getSaveFileName(this, tr("Export Templates"), "", tr("Minifig Template Files (*.minifig);;All Files (*.*)"));
 
@@ -253,7 +253,7 @@ void lcQMinifigDialog::on_TemplateExportButton_clicked()
 	File.write(Templates);
 }
 
-void lcQMinifigDialog::TypeChanged(int Index)
+void lcMinifigDialog::TypeChanged(int Index)
 {
 	std::array<QComboBox*, LC_MFW_NUMITEMS>::iterator Search = std::find(mComboBoxes.begin(), mComboBoxes.end(), sender());
 
@@ -265,7 +265,7 @@ void lcQMinifigDialog::TypeChanged(int Index)
 	mView->Redraw();
 }
 
-void lcQMinifigDialog::ColorChanged(int Index)
+void lcMinifigDialog::ColorChanged(int Index)
 {
 	std::array<lcQColorPicker*, LC_MFW_NUMITEMS>::iterator Search = std::find(mColorPickers.begin(), mColorPickers.end(), sender());
 
@@ -276,7 +276,7 @@ void lcQMinifigDialog::ColorChanged(int Index)
 	mView->Redraw();
 }
 
-void lcQMinifigDialog::AngleChanged(double Value)
+void lcMinifigDialog::AngleChanged(double Value)
 {
 	std::array<QDoubleSpinBox*, LC_MFW_NUMITEMS>::iterator Search = std::find(mSpinBoxes.begin(), mSpinBoxes.end(), sender());
 

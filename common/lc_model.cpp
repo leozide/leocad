@@ -16,7 +16,7 @@
 #include "minifig.h"
 #include "lc_qarraydialog.h"
 #include "lc_qselectdialog.h"
-#include "lc_qminifigdialog.h"
+#include "lc_minifigdialog.h"
 #include "lc_qgroupdialog.h"
 #include "lc_qeditgroupsdialog.h"
 #include "lc_selectbycolordialog.h"
@@ -4409,7 +4409,7 @@ void lcModel::ShowArrayDialog()
 
 void lcModel::ShowMinifigDialog()
 {
-	lcQMinifigDialog Dialog(gMainWindow);
+	lcMinifigDialog Dialog(gMainWindow);
 
 	if (Dialog.exec() != QDialog::Accepted)
 		return;

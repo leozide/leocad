@@ -171,8 +171,6 @@ macx {
 }
 
 SOURCES += common/view.cpp \
-	common/lc_instructionsdialog.cpp \
-	common/lc_previewwidget.cpp \
 	common/texfont.cpp \
 	common/project.cpp \
 	common/pieceinf.cpp \
@@ -189,28 +187,31 @@ SOURCES += common/view.cpp \
 	common/lc_glextensions.cpp \
 	common/lc_glwidget.cpp \
 	common/lc_http.cpp \
+	common/lc_instructionsdialog.cpp \
 	common/lc_library.cpp \
 	common/lc_lxf.cpp \
 	common/lc_mainwindow.cpp \
 	common/lc_mesh.cpp \
 	common/lc_meshloader.cpp \
+	common/lc_minifigdialog.cpp \
 	common/lc_model.cpp \
-        common/lc_partselectionwidget.cpp \
-        common/lc_profile.cpp \
+	common/lc_partselectionwidget.cpp \
+	common/lc_previewwidget.cpp \
+	common/lc_profile.cpp \
 	common/lc_scene.cpp \
 	common/lc_selectbycolordialog.cpp \
 	common/lc_shortcuts.cpp \
 	common/lc_stringcache.cpp \
 	common/lc_synth.cpp \
 	common/lc_texture.cpp \
-        common/lc_timelinewidget.cpp \
-        common/lc_viewsphere.cpp \
-        common/lc_viewwidget.cpp \
-        common/lc_zipfile.cpp \
+	common/lc_timelinewidget.cpp \
+	common/lc_viewsphere.cpp \
+	common/lc_viewwidget.cpp \
+	common/lc_zipfile.cpp \
 	common/image.cpp \
 	common/group.cpp \
 	common/camera.cpp \
-        qt/system.cpp \
+	qt/system.cpp \
 	qt/qtmain.cpp \
 	qt/lc_qarraydialog.cpp \
 	qt/lc_qgroupdialog.cpp \
@@ -219,7 +220,6 @@ SOURCES += common/view.cpp \
 	qt/lc_qselectdialog.cpp \
 	qt/lc_qpropertiesdialog.cpp \
 	qt/lc_qhtmldialog.cpp \
-	qt/lc_qminifigdialog.cpp \
 	qt/lc_qpreferencesdialog.cpp \
 	qt/lc_qcategorydialog.cpp \
 	qt/lc_qimagedialog.cpp \
@@ -234,8 +234,6 @@ SOURCES += common/view.cpp \
 	qt/lc_setsdatabasedialog.cpp \
 	common/lc_partpalettedialog.cpp
 HEADERS += \
-	common/lc_instructionsdialog.h \
-	common/lc_previewwidget.h \
 	common/view.h \
 	common/texfont.h \
 	common/project.h \
@@ -257,13 +255,16 @@ HEADERS += \
 	common/lc_global.h \
 	common/lc_glwidget.h \
 	common/lc_http.h \
+	common/lc_instructionsdialog.h \
 	common/lc_library.h \
 	common/lc_lxf.h \
 	common/lc_mainwindow.h \
 	common/lc_math.h \
 	common/lc_mesh.h \
 	common/lc_meshloader.h \
+	common/lc_minifigdialog.h \
 	common/lc_model.h \
+	common/lc_previewwidget.h \
 	common/lc_profile.h \
 	common/lc_scene.h \
 	common/lc_selectbycolordialog.h \
@@ -272,11 +273,11 @@ HEADERS += \
 	common/lc_synth.h \
 	common/lc_texture.h \
 	common/lc_viewsphere.h \
-        common/lc_viewwidget.h \
+	common/lc_viewwidget.h \
 	common/lc_zipfile.h \
-        common/lc_partselectionwidget.h \
-        common/lc_timelinewidget.h \
-        common/image.h \
+	common/lc_partselectionwidget.h \
+	common/lc_timelinewidget.h \
+	common/image.h \
 	common/group.h \
 	common/camera.h \
 	qt/lc_qarraydialog.h \
@@ -286,7 +287,6 @@ HEADERS += \
 	qt/lc_qselectdialog.h \
 	qt/lc_qpropertiesdialog.h \
 	qt/lc_qhtmldialog.h \
-	qt/lc_qminifigdialog.h \
 	qt/lc_qpreferencesdialog.h \
 	qt/lc_qcategorydialog.h \
 	qt/lc_qimagedialog.h \
@@ -308,7 +308,6 @@ FORMS += \
 	qt/lc_qselectdialog.ui \
 	qt/lc_qpropertiesdialog.ui \
 	qt/lc_qhtmldialog.ui \
-	qt/lc_qminifigdialog.ui \
 	qt/lc_qpreferencesdialog.ui \
 	qt/lc_qcategorydialog.ui \
 	qt/lc_qimagedialog.ui \
@@ -317,6 +316,7 @@ FORMS += \
 	qt/lc_qmodellistdialog.ui \
 	qt/lc_renderdialog.ui \
 	qt/lc_setsdatabasedialog.ui \
+	common/lc_minifigdialog.ui \
 	common/lc_partpalettedialog.ui
 OTHER_FILES += 
 RESOURCES += leocad.qrc resources/stylesheet/stylesheet.qrc

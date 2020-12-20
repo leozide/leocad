@@ -5,16 +5,16 @@ class lcQColorPicker;
 class View;
 
 namespace Ui {
-class lcQMinifigDialog;
+class lcMinifigDialog;
 }
 
-class lcQMinifigDialog : public QDialog
+class lcMinifigDialog : public QDialog
 {
 	Q_OBJECT
 
 public:
-	explicit lcQMinifigDialog(QWidget* Parent);
-	~lcQMinifigDialog();
+	explicit lcMinifigDialog(QWidget* Parent);
+	~lcMinifigDialog();
 
 	MinifigWizard* mMinifigWizard;
 
@@ -31,7 +31,7 @@ protected slots:
 protected:
 	void UpdateTemplateCombo();
 
-	Ui::lcQMinifigDialog* ui;
+	Ui::lcMinifigDialog* ui;
 
 	View* mView;
 	std::array<QComboBox*, LC_MFW_NUMITEMS> mComboBoxes;

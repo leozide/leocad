@@ -42,7 +42,7 @@ protected:
 	bool mIsPreview = false;
 
 	int mSize = 1;
-	bool mEnabled = true;
+	bool mEnabled = false;
 	lcViewSphereLocation mLocation = lcViewSphereLocation::TopRight;
 
 	int mMouseDownX = 0;

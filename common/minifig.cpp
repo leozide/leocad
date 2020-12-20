@@ -36,19 +36,10 @@ const char* MinifigWizard::mSectionNames[LC_MFW_NUMITEMS] =
 };
 
 MinifigWizard::MinifigWizard()
-	: lcGLWidget(nullptr)
+	: mModel(new lcModel(QString(), nullptr, false))
 {
 	LoadSettings();
 	LoadTemplates();
-
-	mModel = new lcModel(QString(), nullptr, false);
-	mCamera = new lcCamera(true);
-
-	mRotateX = 75.0f;
-	mRotateZ = 180.0f;
-	mDistance = 10.0f;
-	mAutoZoom = true;
-	mTracking = LC_TRACK_NONE;
 }
 
 MinifigWizard::~MinifigWizard()
@@ -58,9 +49,6 @@ MinifigWizard::~MinifigWizard()
 	for (int i = 0; i < LC_MFW_NUMITEMS; i++)
 		if (mMinifig.Parts[i])
 			Library->ReleasePieceInfo(mMinifig.Parts[i]); // todo: don't call ReleasePieceInfo here because it may release textures and they need a GL context current
-
-	delete mModel;
-	delete mCamera;
 
 	SaveTemplates();
 }
@@ -86,11 +74,8 @@ void MinifigWizard::LoadSettings()
 		ParseSettings(MinifigFile);
 }
 
-void MinifigWizard::OnInitialUpdate()
+void MinifigWizard::LoadDefault()
 {
-	MakeCurrent();
-	mContext->SetDefaultState();
-
 	LC_ARRAY_SIZE_CHECK(MinifigWizard::mSectionNames, LC_MFW_NUMITEMS);
 
 	const int ColorCodes[LC_MFW_NUMITEMS] = { 4, 7, 14, 7, 1, 0, 7, 4, 4, 14, 14, 7, 7, 0, 0, 7, 7 };
@@ -315,156 +300,6 @@ void MinifigWizard::SaveTemplates()
 #endif
 }
 
-void MinifigWizard::OnDraw()
-{
-	mContext->SetDefaultState();
-
-	mContext->SetViewport(0, 0, mWidth, mHeight);
-
-	DrawBackground();
-
-	DrawViewport();
-
-	lcVector3 Min(FLT_MAX, FLT_MAX, FLT_MAX), Max(-FLT_MAX, -FLT_MAX, -FLT_MAX);
-
-	for (int InfoIdx = 0; InfoIdx < LC_MFW_NUMITEMS; InfoIdx++)
-	{
-		const PieceInfo* const Info = mMinifig.Parts[InfoIdx];
-
-		if (!Info)
-			continue;
-
-		lcVector3 Points[8];
-		lcGetBoxCorners(Info->GetBoundingBox(), Points);
-
-		for (int PointIdx = 0; PointIdx < 8; PointIdx++)
-		{
-			const lcVector3 Point = lcMul31(Points[PointIdx], mMinifig.Matrices[InfoIdx]);
-
-			Min = lcMin(Point, Min);
-			Max = lcMax(Point, Max);
-		}
-	}
-
-	const lcVector3 Center = (Min + Max) / 2.0f;
-
-	lcVector3 Eye(0.0f, 0.0f, 1.0f);
-
-	Eye = lcMul30(Eye, lcMatrix44RotationX(-mRotateX * LC_DTOR));
-	Eye = lcMul30(Eye, lcMatrix44RotationZ(-mRotateZ * LC_DTOR));
-
-	const float Aspect = (float)mWidth / (float)mHeight;
-	const lcMatrix44 Projection = lcMatrix44Perspective(30.0f, Aspect, 1.0f, 2500.0f);
-	mContext->SetProjectionMatrix(Projection);
-
-	lcMatrix44& ViewMatrix = mCamera->mWorldView;
-
-	if (mAutoZoom)
-	{
-		lcVector3 Points[8];
-		lcGetBoxCorners(Min, Max, Points);
-
-		Eye += Center;
-
-		const lcMatrix44 ModelView = lcMatrix44LookAt(Eye, Center, lcVector3(0, 0, 1));
-		std::tie(Eye, std::ignore) = lcZoomExtents(Eye, ModelView, Projection, Points, 8);
-
-		ViewMatrix = lcMatrix44LookAt(Eye, Center, lcVector3(0, 0, 1));
-
-		const lcVector3 d = Eye - Center;
-		mDistance = d.Length();
-	}
-	else
-	{
-		ViewMatrix = lcMatrix44LookAt(Eye * mDistance, Center, lcVector3(0, 0, 1));
-	}
-
-	Calculate();
-
-	mScene->Begin(ViewMatrix);
-	mScene->SetAllowLOD(false);
-
-	mModel->GetScene(mScene.get(), mCamera, false, false);
-
-	mScene->End();
-
-	mScene->Draw(mContext);
-
-	mContext->ClearResources();
-}
-
-void MinifigWizard::OnLeftButtonDown()
-{
-	if (mTracking == LC_TRACK_NONE)
-	{
-		mDownX = mMouseX;
-		mDownY = mMouseY;
-		mTracking = LC_TRACK_LEFT;
-	}
-}
-
-void MinifigWizard::OnLeftButtonUp()
-{
-	if (mTracking == LC_TRACK_LEFT)
-		mTracking = LC_TRACK_NONE;
-}
-
-void MinifigWizard::OnLeftButtonDoubleClick()
-{
-	mAutoZoom = true;
-	Redraw();
-}
-
-void MinifigWizard::OnRightButtonDown()
-{
-	if (mTracking == LC_TRACK_NONE)
-	{
-		mDownX = mMouseX;
-		mDownY = mMouseY;
-		mTracking = LC_TRACK_RIGHT;
-	}
-}
-
-void MinifigWizard::OnRightButtonUp()
-{
-	if (mTracking == LC_TRACK_RIGHT)
-		mTracking = LC_TRACK_NONE;
-}
-
-void MinifigWizard::OnMouseMove()
-{
-	if (mTracking == LC_TRACK_LEFT)
-	{
-		// Rotate.
-		mRotateZ += mMouseX - mDownX;
-		mRotateX += mMouseY - mDownY;
-
-		if (mRotateX > 179.5f)
-			mRotateX = 179.5f;
-		else if (mRotateX < 0.5f)
-			mRotateX = 0.5f;
-
-		mDownX = mMouseX;
-		mDownY = mMouseY;
-
-		Redraw();
-	}
-	else if (mTracking == LC_TRACK_RIGHT)
-	{
-		// Zoom.
-		mDistance += (float)(mDownY - mMouseY) * 0.2f;
-		mAutoZoom = false;
-
-		if (mDistance < 0.5f)
-			mDistance = 0.5f;
-
-		mDownX = mMouseX;
-		mDownY = mMouseY;
-
-		Redraw();
-	}
-}
-
 void MinifigWizard::Calculate()
 {
 	float HeadOffset = 0.0f;
@@ -650,7 +485,6 @@ int MinifigWizard::GetSelectionIndex(int Type) const
 void MinifigWizard::SetSelectionIndex(int Type, int Index)
 {
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
-	MakeCurrent();
 
 	if (mMinifig.Parts[Type])
 		Library->ReleasePieceInfo(mMinifig.Parts[Type]);

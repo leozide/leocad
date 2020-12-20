@@ -1275,7 +1275,7 @@ QImage lcModel::GetStepImage(bool Zoom, int Width, int Height, lcStep Step)
 	if (Zoom)
 		ZoomExtents(Camera, (float)Width / (float)Height);
 
-	View View(this);
+	View View(lcViewType::View, this);
 	View.SetCamera(Camera, false);
 	View.SetContext(Context);
 
@@ -4418,7 +4418,7 @@ void lcModel::ShowMinifigDialog()
 
 	lcGroup* Group = AddGroup(tr("Minifig #"), nullptr);
 	lcArray<lcObject*> Pieces(LC_MFW_NUMITEMS);
-	lcMinifig& Minifig = Dialog.mMinifigWidget->mMinifig;
+	lcMinifig& Minifig = Dialog.mMinifigWizard->mMinifig;
 
 	for (int PartIdx = 0; PartIdx < LC_MFW_NUMITEMS; PartIdx++)
 	{

@@ -19,11 +19,11 @@
 
 static QList<lcViewWidget*> gWidgetList;
 
-lcViewWidget::lcViewWidget(QWidget* Parent, lcGLWidget* Owner)
+lcViewWidget::lcViewWidget(QWidget* Parent, lcGLWidget* View)
 	: QGLWidget(Parent, gWidgetList.isEmpty() ? nullptr : gWidgetList.first())
 {
 	mWheelAccumulator = 0;
-	mView = Owner;
+	mView = View;
 	mView->SetWidget(this);
 
 	makeCurrent();
@@ -55,7 +55,7 @@ lcViewWidget::lcViewWidget(QWidget* Parent, lcGLWidget* Owner)
 
 	setMouseTracking(true);
 
-	if (dynamic_cast<View*>(Owner))
+	if (View->GetViewType() == lcViewType::View)
 	{
 		setFocusPolicy(Qt::StrongFocus);
 		setAcceptDrops(true);

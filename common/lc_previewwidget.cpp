@@ -80,7 +80,7 @@ void lcPreviewDockWidget::SetPreviewLock()
 }
 
 lcPreviewWidget::lcPreviewWidget()
-	: lcGLWidget(nullptr), mLoader(new Project(true))
+	: lcGLWidget(lcViewType::Preview, nullptr), mLoader(new Project(true))
 {
 	mViewSphere = std::unique_ptr<lcViewSphere>(new lcViewSphere(this));
 	mLoader->SetActiveModel(0);

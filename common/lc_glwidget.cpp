@@ -13,8 +13,8 @@
 lcGLWidget* lcGLWidget::mLastFocusedView;
 std::vector<lcGLWidget*> lcGLWidget::mViews;
 
-lcGLWidget::lcGLWidget(lcModel* Model)
-	: mScene(new lcScene()), mModel(Model)
+lcGLWidget::lcGLWidget(lcViewType ViewType, lcModel* Model)
+	: mScene(new lcScene()), mModel(Model), mViewType(ViewType)
 {
 	mContext = new lcContext();
 	mViews.push_back(this);

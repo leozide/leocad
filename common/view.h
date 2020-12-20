@@ -8,7 +8,7 @@ class View : public lcGLWidget
 	Q_OBJECT
 
 public:
-	View(lcModel* Model);
+	View(lcViewType ViewType, lcModel* Model);
 	~View();
 
 	View(const View&) = delete;

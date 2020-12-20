@@ -80,12 +80,20 @@ enum class lcTrackTool
 	Count
 };
 
+enum class lcViewType
+{
+	View,
+	Preview,
+	Minifig,
+	Count
+};
+
 class lcGLWidget : public QObject
 {
 	Q_OBJECT
 
 public:
-	lcGLWidget(lcModel* Model);
+	lcGLWidget(lcViewType ViewType, lcModel* Model);
 	virtual ~lcGLWidget();
 
 	lcGLWidget(const lcGLWidget&) = delete;
@@ -95,6 +103,11 @@ public:
 	static void UpdateAllViews();
 
 	lcModel* GetActiveModel() const;
+
+	lcViewType GetViewType() const
+	{
+		return mViewType;
+	}
 
 	lcCamera* GetCamera() const
 	{
@@ -230,6 +243,7 @@ protected:
 	int mWidth = 1;
 	int mHeight = 1;
 	bool mDeleteContext = true;
+	lcViewType mViewType;
 
 	static lcGLWidget* mLastFocusedView;
 	static std::vector<lcGLWidget*> mViews;

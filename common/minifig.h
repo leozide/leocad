@@ -1,6 +1,5 @@
 #pragma once
 
-#include "lc_glwidget.h"
 #include "lc_math.h"
 
 enum LC_MFW_TYPES
@@ -47,16 +46,19 @@ struct lcMinifigTemplate
 	float Angles[LC_MFW_NUMITEMS];
 };
 
-class MinifigWizard : public lcGLWidget
+class MinifigWizard
 {
 public:
 	MinifigWizard();
 	~MinifigWizard();
 
 	MinifigWizard(const MinifigWizard&) = delete;
-	MinifigWizard(MinifigWizard&&) = delete;
 	MinifigWizard& operator=(const MinifigWizard&) = delete;
-	MinifigWizard& operator=(MinifigWizard&&) = delete;
+
+	lcModel* GetModel() const
+	{
+		return mModel.get();
+	}
 
 	const std::map<QString, lcMinifigTemplate>& GetTemplates() const
 	{
@@ -68,14 +70,7 @@ public:
 	void AddTemplatesJson(const QByteArray& TemplateData);
 	QByteArray GetTemplatesJson() const;
 
-	void OnDraw() override;
-	void OnLeftButtonDown() override;
-	void OnLeftButtonUp() override;
-	void OnLeftButtonDoubleClick() override;
-	void OnRightButtonDown() override;
-	void OnRightButtonUp() override;
-	void OnMouseMove() override;
-	void OnInitialUpdate() override;
+	void LoadDefault();
 
 	void Calculate();
 	int GetSelectionIndex(int Type) const;
@@ -83,26 +78,18 @@ public:
 	void SetColor(int Type, int Color);
 	void SetAngle(int Type, float Angle);
 
-	void ParseSettings(lcFile& Settings);
-
 	std::vector<lcMinifigPieceInfo> mSettings[LC_MFW_NUMITEMS];
 
 	lcMinifig mMinifig;
 
-	int mTracking;
-	int mDownX;
-	int mDownY;
-
-	float mDistance;
-	float mRotateX;
-	float mRotateZ;
-	bool mAutoZoom;
-
 protected:
 	void LoadSettings();
+	void ParseSettings(lcFile& Settings);
+
 	void LoadTemplates();
 	void SaveTemplates();
 
+	std::unique_ptr<lcModel> mModel;
 	std::map<QString, lcMinifigTemplate> mTemplates;
 	static const char* mSectionNames[LC_MFW_NUMITEMS];
 };

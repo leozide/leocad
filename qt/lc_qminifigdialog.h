@@ -2,6 +2,7 @@
 
 #include "minifig.h"
 class lcQColorPicker;
+class View;
 
 namespace Ui {
 class lcQMinifigDialog;
@@ -15,7 +16,7 @@ public:
 	explicit lcQMinifigDialog(QWidget* Parent);
 	~lcQMinifigDialog();
 
-	MinifigWizard* mMinifigWidget;
+	MinifigWizard* mMinifigWizard;
 
 protected slots:
 	void on_TemplateComboBox_currentIndexChanged(const QString& TemplateName);
@@ -32,6 +33,7 @@ protected:
 
 	Ui::lcQMinifigDialog* ui;
 
+	View* mView;
 	std::array<QComboBox*, LC_MFW_NUMITEMS> mComboBoxes;
 	std::array<lcQColorPicker*, LC_MFW_NUMITEMS> mColorPickers;
 	std::array<QDoubleSpinBox*, LC_MFW_NUMITEMS> mSpinBoxes;

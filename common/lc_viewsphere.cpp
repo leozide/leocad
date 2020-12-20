@@ -32,17 +32,23 @@ void lcViewSphere::UpdateSettings()
 {
 	const lcPreferences& Preferences = lcGetPreferences();
 
-	if (!mIsPreview)
+	switch (mWidget->GetViewType())
 	{
+	case lcViewType::View:
 		mSize = Preferences.mViewSphereSize;
 		mEnabled = Preferences.mViewSphereEnabled;
 		mLocation = Preferences.mViewSphereLocation;
-	}
-	else
-	{
+		break;
+
+	case lcViewType::Preview:
 		mSize = Preferences.mPreviewViewSphereSize;
 		mEnabled = Preferences.mPreviewViewSphereEnabled;
 		mLocation = Preferences.mPreviewViewSphereLocation;
+		break;
+
+	case lcViewType::Minifig:
+	case lcViewType::Count:
+		break;
 	}
 }
 

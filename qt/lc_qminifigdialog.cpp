@@ -7,6 +7,8 @@
 #include "lc_application.h"
 #include "pieceinf.h"
 #include "lc_library.h"
+#include "view.h"
+#include "camera.h"
 
 lcQMinifigDialog::lcQMinifigDialog(QWidget* Parent)
 	: QDialog(Parent), ui(new Ui::lcQMinifigDialog)
@@ -44,15 +46,19 @@ lcQMinifigDialog::lcQMinifigDialog(QWidget* Parent)
 	QGridLayout* PreviewLayout = new QGridLayout(ui->minifigFrame);
 	PreviewLayout->setContentsMargins(0, 0, 0, 0);
 
-	mMinifigWidget = new MinifigWizard();
+	mMinifigWizard = new MinifigWizard();
+	mView = new View(lcViewType::Minifig, mMinifigWizard->GetModel());
 
-	lcViewWidget* ViewWidget = new lcViewWidget(nullptr, mMinifigWidget);
+	lcViewWidget* ViewWidget = new lcViewWidget(nullptr, mView);
 	ViewWidget->setMinimumWidth(100);
 	PreviewLayout->addWidget(ViewWidget);
 
+	mView->MakeCurrent();
+	mMinifigWizard->LoadDefault();
+
 	for (int ItemIndex = 0; ItemIndex < LC_MFW_NUMITEMS; ItemIndex++)
 	{
-		std::vector<lcMinifigPieceInfo>& PartList = mMinifigWidget->mSettings[ItemIndex];
+		std::vector<lcMinifigPieceInfo>& PartList = mMinifigWizard->mSettings[ItemIndex];
 		QStringList ItemStrings;
 		QVector<int> Separators;
 
@@ -72,12 +78,12 @@ lcQMinifigDialog::lcQMinifigDialog(QWidget* Parent)
 		ItemCombo->addItems(ItemStrings);
 		for (int SeparatorIndex = Separators.size() - 1; SeparatorIndex >= 0; SeparatorIndex--)
 			ItemCombo->insertSeparator(Separators[SeparatorIndex]);
-		ItemCombo->setCurrentIndex(mMinifigWidget->GetSelectionIndex(ItemIndex));
+		ItemCombo->setCurrentIndex(mMinifigWizard->GetSelectionIndex(ItemIndex));
 		ItemCombo->blockSignals(false);
 
 		lcQColorPicker *colorPicker = mColorPickers[ItemIndex];
 		colorPicker->blockSignals(true);
-		colorPicker->setCurrentColor(mMinifigWidget->mMinifig.Colors[ItemIndex]);
+		colorPicker->setCurrentColor(mMinifigWizard->mMinifig.Colors[ItemIndex]);
 		colorPicker->blockSignals(false);
 	}
 
@@ -85,12 +91,16 @@ lcQMinifigDialog::lcQMinifigDialog(QWidget* Parent)
 	ui->TemplateGroup->hide();
 #endif
 
-	mMinifigWidget->OnInitialUpdate();
 	UpdateTemplateCombo();
+
+	mMinifigWizard->Calculate();
+	mView->GetCamera()->SetViewpoint(lcVector3(0.0f, -270.0f, 90.0f));
+	mView->ZoomExtents();
 }
 
 lcQMinifigDialog::~lcQMinifigDialog()
 {
+	delete mMinifigWizard;
 	delete ui;
 }
 
@@ -98,7 +108,7 @@ void lcQMinifigDialog::UpdateTemplateCombo()
 {
 	ui->TemplateComboBox->clear();
 
-	const auto& Templates = mMinifigWidget->GetTemplates();
+	const auto& Templates = mMinifigWizard->GetTemplates();
 	for (const auto& Template : Templates)
 		ui->TemplateComboBox->addItem(Template.first);
 }
@@ -106,7 +116,7 @@ void lcQMinifigDialog::UpdateTemplateCombo()
 void lcQMinifigDialog::on_TemplateComboBox_currentIndexChanged(const QString& TemplateName)
 {
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
-	const auto& Templates = mMinifigWidget->GetTemplates();
+	const auto& Templates = mMinifigWizard->GetTemplates();
 	const auto& Position = Templates.find(TemplateName);
 	if (Position == Templates.end())
 		return;
@@ -121,7 +131,7 @@ void lcQMinifigDialog::on_TemplateComboBox_currentIndexChanged(const QString& Te
 
 			if (Info)
 			{
-				for (const lcMinifigPieceInfo& MinifigPieceInfo : mMinifigWidget->mSettings[PartIdx])
+				for (const lcMinifigPieceInfo& MinifigPieceInfo : mMinifigWizard->mSettings[PartIdx])
 				{
 					if (Info == MinifigPieceInfo.Info)
 					{
@@ -142,6 +152,8 @@ void lcQMinifigDialog::on_TemplateComboBox_currentIndexChanged(const QString& Te
 		if (AngleSpinBox)
 			AngleSpinBox->setValue(Template.Angles[PartIdx]);
 	}
+
+	mMinifigWizard->Calculate();
 #endif
 }
 
@@ -172,13 +184,13 @@ void lcQMinifigDialog::on_TemplateSaveButton_clicked()
 
 	for (int PartIdx = 0; PartIdx < LC_MFW_NUMITEMS; PartIdx++)
 	{
-		Template.Parts[PartIdx] = mMinifigWidget->mSettings[PartIdx][mComboBoxes[PartIdx]->currentIndex()].Info->mFileName;
+		Template.Parts[PartIdx] = mMinifigWizard->mSettings[PartIdx][mComboBoxes[PartIdx]->currentIndex()].Info->mFileName;
 		Template.Colors[PartIdx] = mColorPickers[PartIdx]->currentColorCode();
 		QDoubleSpinBox* AngleSpinBox = mSpinBoxes[PartIdx];
 		Template.Angles[PartIdx] = AngleSpinBox ? AngleSpinBox->value() : 0.0f;
 	}
 
-	mMinifigWidget->SaveTemplate(TemplateName, Template);
+	mMinifigWizard->SaveTemplate(TemplateName, Template);
 
 	ui->TemplateComboBox->blockSignals(true);
 	UpdateTemplateCombo();
@@ -195,7 +207,7 @@ void lcQMinifigDialog::on_TemplateDeleteButton_clicked()
 	if (QMessageBox::question(this, tr("Delete Template"), Question, QMessageBox::Yes | QMessageBox::No) != QMessageBox::Yes)
 		return;
 
-	mMinifigWidget->DeleteTemplate(Template);
+	mMinifigWizard->DeleteTemplate(Template);
 
 	UpdateTemplateCombo();
 }
@@ -216,7 +228,7 @@ void lcQMinifigDialog::on_TemplateImportButton_clicked()
 	}
 
 	QByteArray FileData = File.readAll();
-	mMinifigWidget->AddTemplatesJson(FileData);
+	mMinifigWizard->AddTemplatesJson(FileData);
 
 	UpdateTemplateCombo();
 }
@@ -236,7 +248,7 @@ void lcQMinifigDialog::on_TemplateExportButton_clicked()
 		return;
 	}
 
-	QByteArray Templates = mMinifigWidget->GetTemplatesJson();
+	QByteArray Templates = mMinifigWizard->GetTemplatesJson();
 	File.write(Templates);
 }
 
@@ -247,8 +259,9 @@ void lcQMinifigDialog::TypeChanged(int Index)
 	if (Search == mComboBoxes.end())
 		return;
 
-	mMinifigWidget->SetSelectionIndex(std::distance(mComboBoxes.begin(), Search), Index);
-	mMinifigWidget->Redraw();
+	mView->MakeCurrent();
+	mMinifigWizard->SetSelectionIndex(std::distance(mComboBoxes.begin(), Search), Index);
+	mView->Redraw();
 }
 
 void lcQMinifigDialog::ColorChanged(int Index)
@@ -258,8 +271,8 @@ void lcQMinifigDialog::ColorChanged(int Index)
 	if (Search == mColorPickers.end())
 		return;
 
-	mMinifigWidget->SetColor(std::distance(mColorPickers.begin(), Search), Index);
-	mMinifigWidget->Redraw();
+	mMinifigWizard->SetColor(std::distance(mColorPickers.begin(), Search), Index);
+	mView->Redraw();
 }
 
 void lcQMinifigDialog::AngleChanged(double Value)
@@ -269,6 +282,6 @@ void lcQMinifigDialog::AngleChanged(double Value)
 	if (Search == mSpinBoxes.end())
 		return;
 
-	mMinifigWidget->SetAngle(std::distance(mSpinBoxes.begin(), Search), Value);
-	mMinifigWidget->Redraw();
+	mMinifigWizard->SetAngle(std::distance(mSpinBoxes.begin(), Search), Value);
+	mView->Redraw();
 }

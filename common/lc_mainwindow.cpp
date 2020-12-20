@@ -770,7 +770,7 @@ void lcMainWindow::CreateToolBars()
 
 View* lcMainWindow::CreateView(lcModel* Model)
 {
-	View* NewView = new View(Model);
+	View* NewView = new View(lcViewType::View, Model);
 
 	connect(NewView, SIGNAL(CameraChanged()), this, SLOT(ViewCameraChanged()));
 	connect(NewView, SIGNAL(FocusReceived()), this, SLOT(ViewFocusReceived()));

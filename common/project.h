@@ -29,13 +29,6 @@ public:
 	bool PartsListEnd;
 };
 
-enum LC_MOUSE_TRACK
-{
-	LC_TRACK_NONE,
-	LC_TRACK_LEFT,
-	LC_TRACK_RIGHT
-};
-
 struct lcInstructionsPageLayout;
 
 class Project

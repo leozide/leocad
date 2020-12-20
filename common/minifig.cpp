@@ -1,16 +1,10 @@
 #include "lc_global.h"
 #include "minifig.h"
 #include "lc_colors.h"
-#include <string.h>
-#include <stdio.h>
-#include "camera.h"
 #include "pieceinf.h"
-#include "project.h"
 #include "lc_model.h"
 #include "lc_library.h"
 #include "lc_application.h"
-#include "lc_context.h"
-#include "lc_scene.h"
 #include "lc_file.h"
 #include "lc_profile.h"
 

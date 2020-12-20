@@ -58,7 +58,7 @@ lcQMinifigDialog::lcQMinifigDialog(QWidget* Parent)
 
 	for (int ItemIndex = 0; ItemIndex < LC_MFW_NUMITEMS; ItemIndex++)
 	{
-		std::vector<lcMinifigPieceInfo>& PartList = mMinifigWizard->mSettings[ItemIndex];
+		const std::vector<lcMinifigPieceInfo>& PartList = mMinifigWizard->mSettings[ItemIndex];
 		QStringList ItemStrings;
 		QVector<int> Separators;
 
@@ -81,10 +81,11 @@ lcQMinifigDialog::lcQMinifigDialog(QWidget* Parent)
 		ItemCombo->setCurrentIndex(mMinifigWizard->GetSelectionIndex(ItemIndex));
 		ItemCombo->blockSignals(false);
 
-		lcQColorPicker *colorPicker = mColorPickers[ItemIndex];
-		colorPicker->blockSignals(true);
-		colorPicker->setCurrentColor(mMinifigWizard->mMinifig.Colors[ItemIndex]);
-		colorPicker->blockSignals(false);
+		lcQColorPicker* ColorPicker = mColorPickers[ItemIndex];
+
+		ColorPicker->blockSignals(true);
+		ColorPicker->setCurrentColor(mMinifigWizard->mMinifig.Colors[ItemIndex]);
+		ColorPicker->blockSignals(false);
 	}
 
 #if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))

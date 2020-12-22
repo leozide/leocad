@@ -85,7 +85,7 @@ lcViewWidget::~lcViewWidget()
 
 QSize lcViewWidget::sizeHint() const
 {
-	return mPreferredSize.isNull() ? QGLWidget::sizeHint() : mPreferredSize;
+	return mPreferredSize.isEmpty() ? QGLWidget::sizeHint() : mPreferredSize;
 }
 
 void lcViewWidget::SetView(lcGLWidget* View)

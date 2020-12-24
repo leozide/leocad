@@ -3910,7 +3910,8 @@ void lcModel::EndMouseTool(lcTool Tool, bool Accept)
 {
 	if (!Accept && !mIsPreview)
 	{
-		LoadCheckPoint(mUndoHistory[0]);
+		if (!mUndoHistory.empty())
+			LoadCheckPoint(mUndoHistory.front());
 		return;
 	}
 

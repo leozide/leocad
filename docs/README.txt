@@ -18,13 +18,13 @@ rendering.
 
 - LeoCAD for Windows:
 
-  Download LeoCAD-Windows-19.07.exe to your computer, double click on the
-  icon to launch the installer and follow the intructions.
+  Download LeoCAD-Windows.exe to your computer, double click on the icon 
+  to launch the installer and follow the intructions.
 
 - LeoCAD for Linux:
 
-  Download LeoCAD-Linux-19.07-x86_64.AppImage, make the file executable
-  (chmod +x) and run it.
+  Download LeoCAD-Linux.AppImage, make the file executable (chmod +x) and
+  run it.
 
   If you prefer to compile LeoCAD yourself, go to the GitHub releases page
   at https://github.com/leozide/leocad/releases/latest and download the 
@@ -33,10 +33,11 @@ rendering.
   instructions. More information on how to compile your own executable is
   available in the Documentation section of https://www.leocad.org
 
-- LeoCAD for Mac OSX:
+- LeoCAD for macOS:
 
-  Download LeoCAD-macOS-19.07.dmg to your computer, double click on the
-  icon to open the archive and copy LeoCAD.app to your Applications folder.
+  Download LeoCAD-macOS.dmg to your computer, double click on the icon 
+  to open the archive, copy LeoCAD.app to your Applications folder and
+  then launch it from there.
 
 New users should read the online tutorial located at
 https://www.leocad.org/docs/tutorial1.html to learn how to use LeoCAD.
@@ -50,6 +51,9 @@ Online Resources
 
 - GitHub page:
   https://github.com/leozide/leocad
+
+- Unstable builds:
+  https://github.com/leozide/leocad/releases/tag/continuous
 
 
 Legal Disclaimer

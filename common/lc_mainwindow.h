@@ -1,6 +1,7 @@
 #pragma once
 
-#include "lc_basewindow.h"
+#include "lc_application.h"
+#include "lc_shortcuts.h"
 #include "lc_array.h"
 #include "lc_commands.h"
 #include "lc_model.h"

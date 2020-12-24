@@ -12,8 +12,9 @@
 #include "lc_glextensions.h"
 #include "lc_viewwidget.h"
 #include "lc_previewwidget.h"
+#include "lc_category.h"
 
- Q_DECLARE_METATYPE(QList<int>)
+Q_DECLARE_METATYPE(QList<int>)
 
 void lcPartSelectionItemDelegate::paint(QPainter* Painter, const QStyleOptionViewItem& Option, const QModelIndex& Index) const
 {

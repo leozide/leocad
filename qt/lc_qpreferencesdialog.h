@@ -1,9 +1,40 @@
 #pragma once
 
-#include <QDialog>
-struct lcPreferencesDialogOptions;
+#include "lc_application.h"
+#include "lc_shortcuts.h"
+#include "lc_category.h"
 
-namespace Ui {
+struct lcPreferencesDialogOptions
+{
+	lcPreferences Preferences;
+
+	QString LibraryPath;
+	QString ColorConfigPath;
+	QString MinifigSettingsPath;
+	QString POVRayPath;
+	QString LGEOPath;
+	QString DefaultAuthor;
+	QString Language;
+	int CheckForUpdates;
+
+	int AASamples;
+	int StudLogo;
+
+	std::vector<lcLibraryCategory> Categories;
+	bool CategoriesModified;
+	bool CategoriesDefault;
+
+	lcKeyboardShortcuts KeyboardShortcuts;
+	bool KeyboardShortcutsModified;
+	bool KeyboardShortcutsDefault;
+
+	lcMouseShortcuts MouseShortcuts;
+	bool MouseShortcutsModified;
+	bool MouseShortcutsDefault;
+};
+
+namespace Ui
+{
 class lcQPreferencesDialog;
 }
 

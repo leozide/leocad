@@ -244,7 +244,6 @@ HEADERS += \
 	common/light.h \
 	common/lc_application.h \
 	common/lc_array.h \
-	common/lc_basewindow.h \
 	common/lc_category.h \
 	common/lc_colors.h \
 	common/lc_commands.h \

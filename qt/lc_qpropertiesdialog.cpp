@@ -2,7 +2,6 @@
 #include "lc_qpropertiesdialog.h"
 #include "ui_lc_qpropertiesdialog.h"
 #include "lc_qutils.h"
-#include "lc_basewindow.h"
 #include "lc_colors.h"
 #include "lc_application.h"
 #include "pieceinf.h"

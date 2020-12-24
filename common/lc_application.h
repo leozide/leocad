@@ -61,6 +61,7 @@ public:
 	quint32 mFadeStepsColor;
 	bool mHighlightNewParts;
 	quint32 mHighlightNewPartsColor;
+	bool mGridEnabled = true;
 	bool mDrawGridStuds;
 	quint32 mGridStudColor;
 	bool mDrawGridLines;

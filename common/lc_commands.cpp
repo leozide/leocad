@@ -1137,6 +1137,13 @@ const lcCommand gCommands[] =
 		QT_TRANSLATE_NOOP("Status", "Toggle axis icon"),
 		""
 	},
+	// LC_VIEW_TOGGLE_GRID
+	{
+		QT_TRANSLATE_NOOP("Action", "View.ToggleGrid"),
+		QT_TRANSLATE_NOOP("Menu", "Grid"),
+		QT_TRANSLATE_NOOP("Status", "Toggle grid"),
+		""
+	},
 	// LC_VIEW_FADE_PREVIOUS_STEPS
 	{
 		QT_TRANSLATE_NOOP("Action", "View.FadePreviousSteps"),

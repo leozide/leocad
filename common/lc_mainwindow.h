@@ -301,6 +301,7 @@ public:
 	void SetSelectionMode(lcSelectionMode SelectionMode);
 	void ToggleViewSphere();
 	void ToggleAxisIcon();
+	void ToggleGrid();
 	void ToggleFadePreviousSteps();
 
 	void NewProject();

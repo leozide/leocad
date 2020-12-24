@@ -1370,6 +1370,13 @@ void lcMainWindow::ToggleAxisIcon()
 	lcGLWidget::UpdateAllViews();
 }
 
+void lcMainWindow::ToggleGrid()
+{
+	lcGetPreferences().mGridEnabled = !lcGetPreferences().mGridEnabled;
+
+	lcGLWidget::UpdateAllViews();
+}
+
 void lcMainWindow::ToggleFadePreviousSteps()
 {
 	lcGetPreferences().mFadeSteps = !lcGetPreferences().mFadeSteps;
@@ -2841,6 +2848,10 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 
 	case LC_VIEW_TOGGLE_AXIS_ICON:
 		ToggleAxisIcon();
+		break;
+
+	case LC_VIEW_TOGGLE_GRID:
+		ToggleGrid();
 		break;
 
 	case LC_VIEW_FADE_PREVIOUS_STEPS:

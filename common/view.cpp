@@ -1390,7 +1390,11 @@ void View::DrawRotateViewOverlay()
 void View::DrawGrid()
 {
 	const lcPreferences& Preferences = lcGetPreferences();
+
 	if (!Preferences.mDrawGridStuds && !Preferences.mDrawGridLines)
+		return;
+
+	if (!Preferences.mGridEnabled)
 		return;
 
 	const int Spacing = lcMax(Preferences.mGridLineSpacing, 1);

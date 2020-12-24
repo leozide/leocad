@@ -1,9 +1,16 @@
 #pragma once
 
-#include <QDialog>
-struct lcPropertiesDialogOptions;
+#include "lc_model.h"
 
-namespace Ui {
+struct lcPropertiesDialogOptions
+{
+	lcModelProperties Properties;
+
+	lcPartsList PartsList;
+};
+
+namespace Ui
+{
 class lcQPropertiesDialog;
 }
 
@@ -12,15 +19,15 @@ class lcQPropertiesDialog : public QDialog
 	Q_OBJECT
 
 public:
-	lcQPropertiesDialog(QWidget* Parent, void* Data);
+	lcQPropertiesDialog(QWidget* Parent, lcPropertiesDialogOptions* Options);
 	~lcQPropertiesDialog();
 
-	lcPropertiesDialogOptions *options;
+	lcPropertiesDialogOptions* mOptions;
 
 public slots:
 	void accept() override;
 
 private:
-	Ui::lcQPropertiesDialog *ui;
+	Ui::lcQPropertiesDialog* ui;
 };
 

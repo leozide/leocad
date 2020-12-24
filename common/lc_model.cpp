@@ -4264,16 +4264,12 @@ void lcModel::ShowPropertiesDialog()
 	lcPropertiesDialogOptions Options;
 
 	Options.Properties = mProperties;
-	Options.SetDefault = false;
 
 	GetPartsList(gDefaultColor, true, false, Options.PartsList);
 
 	lcQPropertiesDialog Dialog(gMainWindow, &Options);
 	if (Dialog.exec() != QDialog::Accepted)
 		return;
-
-	if (Options.SetDefault)
-		Options.Properties.SaveDefaults();
 
 	if (mProperties == Options.Properties)
 		return;

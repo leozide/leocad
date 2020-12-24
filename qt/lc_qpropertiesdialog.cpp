@@ -24,27 +24,31 @@ public:
 		if (((const lcPartsTableWidgetItem&)Other).mLast)
 			return true;
 
+		if (column() > 0)
+		{
+			int Count = text().toInt();
+			int OtherCount = Other.text().toInt();
+			return Count < OtherCount;
+		}
+
 		return QTableWidgetItem::operator<(Other);
 	}
 
 	bool mLast;
 };
 
-lcQPropertiesDialog::lcQPropertiesDialog(QWidget* Parent, void* Data)
-	: QDialog(Parent),
-	ui(new Ui::lcQPropertiesDialog)
+lcQPropertiesDialog::lcQPropertiesDialog(QWidget* Parent, lcPropertiesDialogOptions* Options)
+	: QDialog(Parent), mOptions(Options), ui(new Ui::lcQPropertiesDialog)
 {
 	ui->setupUi(this);
 
-	options = (lcPropertiesDialogOptions*)Data;
+	setWindowTitle(tr("%1 Properties").arg(mOptions->Properties.mFileName));
 
-	setWindowTitle(tr("%1 Properties").arg(options->Properties.mFileName));
+	ui->descriptionEdit->setText(mOptions->Properties.mDescription);
+	ui->authorEdit->setText(mOptions->Properties.mAuthor);
+	ui->commentsEdit->setText(mOptions->Properties.mComments);
 
-	ui->descriptionEdit->setText(options->Properties.mDescription);
-	ui->authorEdit->setText(options->Properties.mAuthor);
-	ui->commentsEdit->setText(options->Properties.mComments);
-
-	const lcPartsList& PartsList = options->PartsList;
+	const lcPartsList& PartsList = mOptions->PartsList;
 	QStringList horizontalLabels;
 
 	QVector<bool> ColorsUsed(gNumUserColors);
@@ -141,9 +145,9 @@ lcQPropertiesDialog::~lcQPropertiesDialog()
 
 void lcQPropertiesDialog::accept()
 {
-	options->Properties.mDescription = ui->descriptionEdit->text();
-	options->Properties.mAuthor = ui->authorEdit->text();
-	options->Properties.mComments = ui->commentsEdit->toPlainText();
+	mOptions->Properties.mDescription = ui->descriptionEdit->text();
+	mOptions->Properties.mAuthor = ui->authorEdit->text();
+	mOptions->Properties.mComments = ui->commentsEdit->toPlainText();
 
 	QDialog::accept();
 }

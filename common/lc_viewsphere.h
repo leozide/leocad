@@ -5,7 +5,6 @@
 #include <bitset>
 
 class View;
-class lcPreviewWidget;
 
 enum class lcViewSphereLocation
 {
@@ -19,7 +18,6 @@ class lcViewSphere
 {
 public:
 	lcViewSphere(View* View);
-	lcViewSphere(lcPreviewWidget* Preview);
 
 	void Draw();
 	bool OnMouseMove();
@@ -36,10 +34,7 @@ protected:
 	lcMatrix44 GetProjectionMatrix() const;
 	std::bitset<6> GetIntersectionFlags(lcVector3& Intersection) const;
 
-	lcGLWidget* const mWidget = nullptr;
-	lcPreviewWidget* const mPreview = nullptr;
 	View* const mView = nullptr;
-	bool mIsPreview = false;
 
 	int mSize = 1;
 	bool mEnabled = false;

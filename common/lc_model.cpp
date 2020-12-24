@@ -8,6 +8,7 @@
 #include "lc_mainwindow.h"
 #include "lc_profile.h"
 #include "lc_library.h"
+#include "lc_scene.h"
 #include "lc_texture.h"
 #include "lc_synth.h"
 #include "lc_file.h"

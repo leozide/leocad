@@ -792,7 +792,7 @@ void lcMainWindow::PreviewPiece(const QString& PartId, int ColorCode)
 	}
 	else
 	{
-		lcPreviewWidget* Preview = new lcPreviewWidget();
+		lcPreview* Preview = new lcPreview();
 		lcViewWidget* ViewWidget = new lcViewWidget(nullptr, Preview);
 
 		if (Preview && ViewWidget)

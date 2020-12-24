@@ -106,7 +106,7 @@ void lcViewWidget::SetView(lcGLWidget* View)
 void lcViewWidget::SetPreviewPosition(const QRect& ParentRect)
 {
 	lcPreferences& Preferences = lcGetPreferences();
-	lcPreviewWidget* Preview = reinterpret_cast<lcPreviewWidget*>(mView);
+	lcPreview* Preview = reinterpret_cast<lcPreview*>(mView);
 
 	setWindowTitle(tr("%1 Preview").arg(Preview->IsModel() ? "Submodel" : "Part"));
 

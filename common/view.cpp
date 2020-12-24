@@ -35,7 +35,7 @@ View::~View()
 {
 	mContext->DestroyVertexBuffer(mGridBuffer);
 
-	if (gMainWindow)
+	if (gMainWindow && mViewType == lcViewType::View)
 		gMainWindow->RemoveView(this);
 
 	if (mCamera && mCamera->IsSimple())
@@ -1572,7 +1572,8 @@ void View::DrawGrid()
 
 void View::OnInitialUpdate()
 {
-	gMainWindow->AddView(this);
+	if (mViewType == lcViewType::View)
+		gMainWindow->AddView(this);
 }
 
 lcTrackTool View::GetOverrideTrackTool(Qt::MouseButton Button) const

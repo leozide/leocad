@@ -611,7 +611,7 @@ void View::OnDraw()
 		return;
 
 	const lcPreferences& Preferences = lcGetPreferences();
-	const bool DrawInterface = mWidget != nullptr;
+	const bool DrawInterface = mWidget != nullptr && mViewType == lcViewType::View;
 
 	mScene->SetAllowLOD(Preferences.mAllowLOD && mWidget != nullptr);
 	mScene->SetLODDistance(Preferences.mMeshLODDistance);
@@ -638,7 +638,7 @@ void View::OnDraw()
 		}
 	}
 
-	if (DrawInterface && mViewType == lcViewType::View)
+	if (DrawInterface)
 		mScene->SetPreTranslucentCallback([this]() { DrawGrid(); });
 
 	mScene->End();
@@ -730,30 +730,28 @@ void View::OnDraw()
 
 		mContext->SetLineWidth(1.0f);
 
-		if (mViewType == lcViewType::View)
-		{
-			if (Preferences.mDrawAxes)
-				DrawAxes();
+		if (Preferences.mDrawAxes)
+			DrawAxes();
 
-			lcTool Tool = gMainWindow->GetTool();
-			lcModel* ActiveModel = GetActiveModel();
+		lcTool Tool = gMainWindow->GetTool();
+		lcModel* ActiveModel = GetActiveModel();
 
-			if ((Tool == lcTool::Select || Tool == lcTool::Move) && mTrackButton == lcTrackButton::None && ActiveModel->AnyObjectsSelected())
-				DrawSelectMoveOverlay();
-			else if (GetCurrentTool() == lcTool::Move && mTrackButton != lcTrackButton::None)
-				DrawSelectMoveOverlay();
-			else if ((Tool == lcTool::Rotate || (Tool == lcTool::Select && mTrackButton != lcTrackButton::None && mTrackTool >= lcTrackTool::RotateX && mTrackTool <= lcTrackTool::RotateXYZ)) && ActiveModel->AnyPiecesSelected())
-				DrawRotateOverlay();
-			else if ((mTrackTool == lcTrackTool::Select || mTrackTool == lcTrackTool::ZoomRegion) && mTrackButton != lcTrackButton::None)
-				DrawSelectZoomRegionOverlay();
-			else if (Tool == lcTool::RotateView && mTrackButton == lcTrackButton::None)
-				DrawRotateViewOverlay();
+		if ((Tool == lcTool::Select || Tool == lcTool::Move) && mTrackButton == lcTrackButton::None && ActiveModel->AnyObjectsSelected())
+			DrawSelectMoveOverlay();
+		else if (GetCurrentTool() == lcTool::Move && mTrackButton != lcTrackButton::None)
+			DrawSelectMoveOverlay();
+		else if ((Tool == lcTool::Rotate || (Tool == lcTool::Select && mTrackButton != lcTrackButton::None && mTrackTool >= lcTrackTool::RotateX && mTrackTool <= lcTrackTool::RotateXYZ)) && ActiveModel->AnyPiecesSelected())
+			DrawRotateOverlay();
+		else if ((mTrackTool == lcTrackTool::Select || mTrackTool == lcTrackTool::ZoomRegion) && mTrackButton != lcTrackButton::None)
+			DrawSelectZoomRegionOverlay();
+		else if (Tool == lcTool::RotateView && mTrackButton == lcTrackButton::None)
+			DrawRotateViewOverlay();
 
-			mViewSphere->Draw();
-		}
-
-		DrawViewport();
+		mViewSphere->Draw();
 	}
+
+	if (mWidget != nullptr)
+		DrawViewport();
 
 	mContext->ClearResources();
 }

@@ -4442,6 +4442,8 @@ void lcModel::SetMinifig(const lcMinifig& Minifig)
 {
 	DeleteModel();
 
+	lcArray<lcObject*> Pieces(LC_MFW_NUMITEMS);
+
 	for (int PartIdx = 0; PartIdx < LC_MFW_NUMITEMS; PartIdx++)
 	{
 		if (!Minifig.Parts[PartIdx])
@@ -4453,7 +4455,11 @@ void lcModel::SetMinifig(const lcMinifig& Minifig)
 		Piece->SetColorIndex(Minifig.Colors[PartIdx]);
 		AddPiece(Piece);
 		Piece->UpdatePosition(1);
+
+		Pieces.Add(Piece);
 	}
+
+	SetSelectionAndFocus(Pieces, nullptr, 0, false);
 }
 
 void lcModel::UpdateInterface()

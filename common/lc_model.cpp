@@ -70,13 +70,6 @@ bool lcModelProperties::ParseLDrawHeader(QString Line, bool FirstLine)
 	if (Token == QLatin1String("!LEOCAD"))
 		return false;
 
-	if (FirstLine)
-	{
-		LineStream.seek(StartPos);
-		mDescription = LineStream.readLine().mid(1);
-		return true;
-	}
-
 	if (Token == QLatin1String("Name:"))
 	{
 		mModelName = LineStream.readLine().mid(1);
@@ -86,6 +79,13 @@ bool lcModelProperties::ParseLDrawHeader(QString Line, bool FirstLine)
 	if (Token == QLatin1String("Author:"))
 	{
 		mAuthor = LineStream.readLine().mid(1);
+		return true;
+	}
+
+	if (FirstLine)
+	{
+		LineStream.seek(StartPos);
+		mDescription = LineStream.readLine().mid(1);
 		return true;
 	}
 

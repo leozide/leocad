@@ -51,8 +51,6 @@ lcViewWidget::lcViewWidget(QWidget* Parent, lcGLWidget* View)
 
 	gWidgetList.append(this);
 
-	mView->OnInitialUpdate();
-
 	setMouseTracking(true);
 
 	if (View->GetViewType() == lcViewType::View)

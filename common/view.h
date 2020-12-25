@@ -32,7 +32,6 @@ public:
 	static void DestroyResources(lcContext* Context);
 
 	void OnDraw() override;
-	void OnInitialUpdate() override;
 	void OnLeftButtonDown() override;
 	void OnLeftButtonUp() override;
 	void OnLeftButtonDoubleClick() override;

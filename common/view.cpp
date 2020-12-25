@@ -1570,12 +1570,6 @@ void View::DrawGrid()
 	}
 }
 
-void View::OnInitialUpdate()
-{
-	if (mViewType == lcViewType::View)
-		gMainWindow->AddView(this);
-}
-
 lcTrackTool View::GetOverrideTrackTool(Qt::MouseButton Button) const
 {
 	if (mTrackToolFromOverlay)

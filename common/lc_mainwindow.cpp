@@ -775,6 +775,8 @@ View* lcMainWindow::CreateView(lcModel* Model)
 	connect(NewView, SIGNAL(CameraChanged()), this, SLOT(ViewCameraChanged()));
 	connect(NewView, SIGNAL(FocusReceived()), this, SLOT(ViewFocusReceived()));
 
+	AddView(NewView);
+
 	return NewView;
 }
 

@@ -189,7 +189,6 @@ public:
 	void DrawAxes() const;
 
 	virtual void OnDraw() { }
-	virtual void OnInitialUpdate() { }
 	virtual void OnLeftButtonDown() { }
 	virtual void OnLeftButtonUp() { }
 	virtual void OnLeftButtonDoubleClick() { }

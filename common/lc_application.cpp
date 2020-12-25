@@ -795,7 +795,7 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 		if (!ModelName.isEmpty())
 			mProject->SetActiveModel(ModelName);
 
-		View* ActiveView = gMainWindow->GetActiveView();
+		lcView* ActiveView = gMainWindow->GetActiveView();
 
 		if (!CameraName.isEmpty())
 		{
@@ -1134,5 +1134,5 @@ void lcApplication::ShowPreferencesDialog()
 	*/
 
 	gMainWindow->SetShadingMode(Options.Preferences.mShadingMode);
-	View::UpdateAllViews();
+	lcView::UpdateAllViews();
 }

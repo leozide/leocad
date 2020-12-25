@@ -26,7 +26,7 @@ protected:
 	lcViewWidget* mViewWidget;
 };
 
-class lcPreview : public View
+class lcPreview : public lcView
 {
 public:
 	lcPreview();

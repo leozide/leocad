@@ -83,7 +83,7 @@ void lcPreviewDockWidget::SetPreviewLock()
 }
 
 lcPreview::lcPreview()
-	: View(lcViewType::Preview, nullptr), mLoader(new Project(true))
+	: lcView(lcViewType::Preview, nullptr), mLoader(new Project(true))
 {
 	mLoader->SetActiveModel(0);
 	mModel = mLoader->GetActiveModel();

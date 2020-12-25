@@ -387,7 +387,7 @@ void lcPartSelectionListModel::PartLoaded(PieceInfo* Info)
 
 void lcPartSelectionListModel::DrawPreview(int InfoIndex)
 {
-	View* ActiveView = gMainWindow->GetActiveView();
+	lcView* ActiveView = gMainWindow->GetActiveView();
 	if (!ActiveView)
 		return;
 

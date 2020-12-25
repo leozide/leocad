@@ -15,7 +15,7 @@ const float lcViewSphere::mRadius = 1.0f;
 const float lcViewSphere::mHighlightRadius = 0.35f;
 const int lcViewSphere::mSubdivisions = 7;
 
-lcViewSphere::lcViewSphere(View* View)
+lcViewSphere::lcViewSphere(lcView* View)
 	: mView(View)
 {
 	UpdateSettings();

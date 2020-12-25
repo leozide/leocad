@@ -89,16 +89,16 @@ enum class lcViewType
 	Count
 };
 
-class View : public QObject
+class lcView : public QObject
 {
 	Q_OBJECT
 
 public:
-	View(lcViewType ViewType, lcModel* Model);
-	~View();
+	lcView(lcViewType ViewType, lcModel* Model);
+	~lcView();
 
-	View(const View&) = delete;
-	View& operator=(const View&) = delete;
+	lcView(const lcView&) = delete;
+	lcView& operator=(const lcView&) = delete;
 
 	void Clear()
 	{
@@ -311,8 +311,8 @@ protected:
 	lcVertexBuffer mGridBuffer;
 	int mGridSettings[7];
 
-	static View* mLastFocusedView;
-	static std::vector<View*> mViews;
+	static lcView* mLastFocusedView;
+	static std::vector<lcView*> mViews;
 
 	static lcVertexBuffer mRotateMoveVertexBuffer;
 	static lcIndexBuffer mRotateMoveIndexBuffer;

@@ -47,7 +47,7 @@ lcMinifigDialog::lcMinifigDialog(QWidget* Parent)
 	PreviewLayout->setContentsMargins(0, 0, 0, 0);
 
 	mMinifigWizard = new MinifigWizard();
-	mView = new View(lcViewType::Minifig, mMinifigWizard->GetModel());
+	mView = new lcView(lcViewType::Minifig, mMinifigWizard->GetModel());
 
 	lcViewWidget* ViewWidget = new lcViewWidget(nullptr, mView);
 	ViewWidget->setMinimumWidth(100);

@@ -2,9 +2,9 @@
 
 #include "minifig.h"
 class lcQColorPicker;
-class View;
 
-namespace Ui {
+namespace Ui
+{
 class lcMinifigDialog;
 }
 
@@ -33,7 +33,7 @@ protected:
 
 	Ui::lcMinifigDialog* ui;
 
-	View* mView;
+	lcView* mView;
 	std::array<QComboBox*, LC_MFW_NUMITEMS> mComboBoxes;
 	std::array<lcQColorPicker*, LC_MFW_NUMITEMS> mColorPickers;
 	std::array<QDoubleSpinBox*, LC_MFW_NUMITEMS> mSpinBoxes;

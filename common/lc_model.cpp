@@ -193,14 +193,14 @@ void lcModel::DeleteModel()
 {
 	if (gMainWindow)
 	{
-		const lcArray<View*>* Views = gMainWindow->GetViewsForModel(this);
+		const lcArray<lcView*>* Views = gMainWindow->GetViewsForModel(this);
 
 		// TODO: this is only needed to avoid a dangling pointer during undo/redo if a camera is set to a view but we should find a better solution instead
 		if (Views)
 		{
 			for (int ViewIdx = 0; ViewIdx < Views->GetSize(); ViewIdx++)
 			{
-				View* View = (*Views)[ViewIdx];
+				lcView* View = (*Views)[ViewIdx];
 				lcCamera* Camera = View->GetCamera();
 
 				if (!Camera->IsSimple() && mCameras.FindIndex(Camera) != -1)
@@ -231,7 +231,7 @@ void lcModel::UpdateMesh()
 
 void lcModel::UpdateAllViews() const
 {
-	View::UpdateProjectViews(mProject);
+	lcView::UpdateProjectViews(mProject);
 }
 
 void lcModel::UpdatePieceInfo(std::vector<lcModel*>& UpdatedModels)
@@ -1266,7 +1266,7 @@ void lcModel::AddSubModelRenderMeshes(lcScene* Scene, const lcMatrix44& WorldMat
 
 QImage lcModel::GetStepImage(bool Zoom, int Width, int Height, lcStep Step)
 {
-	View* ActiveView = gMainWindow->GetActiveView();
+	lcView* ActiveView = gMainWindow->GetActiveView();
 	ActiveView->MakeCurrent();
 	lcContext* Context = ActiveView->mContext;
 
@@ -1276,7 +1276,7 @@ QImage lcModel::GetStepImage(bool Zoom, int Width, int Height, lcStep Step)
 	if (Zoom)
 		ZoomExtents(Camera, (float)Width / (float)Height);
 
-	View View(lcViewType::View, this);
+	lcView View(lcViewType::View, this);
 	View.SetCamera(Camera, false);
 	View.SetContext(Context);
 
@@ -1348,7 +1348,7 @@ QImage lcModel::GetPartsListImage(int MaxWidth, lcStep Step) const
 
 	std::sort(Images.begin(), Images.end(), ImageCompare);
 
-	View* View = gMainWindow->GetActiveView();
+	lcView* View = gMainWindow->GetActiveView();
 	View->MakeCurrent();
 	lcContext* Context = View->mContext;
 	const int ThumbnailSize = qMin(MaxWidth, 512);
@@ -2610,10 +2610,10 @@ bool lcModel::RemoveSelectedObjects()
 
 		if (Camera->IsSelected())
 		{
-			const lcArray<View*>* Views = gMainWindow->GetViewsForModel(this);
+			const lcArray<lcView*>* Views = gMainWindow->GetViewsForModel(this);
 			for (int ViewIdx = 0; ViewIdx < Views->GetSize(); ViewIdx++)
 			{
-				View* View = (*Views)[ViewIdx];
+				lcView* View = (*Views)[ViewIdx];
 
 				if (Camera == View->GetCamera())
 					View->SetCamera(Camera, true);
@@ -4091,10 +4091,10 @@ void lcModel::EraserToolClicked(lcObject* Object)
 
 	case lcObjectType::Camera:
 		{
-			const lcArray<View*>* Views = gMainWindow->GetViewsForModel(this);
+			const lcArray<lcView*>* Views = gMainWindow->GetViewsForModel(this);
 			for (int ViewIdx = 0; ViewIdx < Views->GetSize(); ViewIdx++)
 			{
-				View* View = (*Views)[ViewIdx];
+				lcView* View = (*Views)[ViewIdx];
 				lcCamera* Camera = View->GetCamera();
 
 				if (Camera == Object)

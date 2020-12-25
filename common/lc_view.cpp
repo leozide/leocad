@@ -12,13 +12,13 @@
 #include "lc_context.h"
 #include "lc_viewsphere.h"
 
-View* View::mLastFocusedView;
-std::vector<View*> View::mViews;
+lcView* lcView::mLastFocusedView;
+std::vector<lcView*> lcView::mViews;
 
-lcVertexBuffer View::mRotateMoveVertexBuffer;
-lcIndexBuffer View::mRotateMoveIndexBuffer;
+lcVertexBuffer lcView::mRotateMoveVertexBuffer;
+lcIndexBuffer lcView::mRotateMoveIndexBuffer;
 
-View::View(lcViewType ViewType, lcModel* Model)
+lcView::lcView(lcViewType ViewType, lcModel* Model)
 	: mScene(new lcScene()), mModel(Model), mViewType(ViewType)
 {
 	mContext = new lcContext();
@@ -30,14 +30,14 @@ View::View(lcViewType ViewType, lcModel* Model)
 	mDragState = lcDragState::None;
 	mTrackToolFromOverlay = false;
 
-	View* ActiveView = gMainWindow->GetActiveView();
+	lcView* ActiveView = gMainWindow->GetActiveView();
 	if (ActiveView)
 		SetCamera(ActiveView->mCamera, false);
 	else
 		SetDefaultCamera();
 }
 
-View::~View()
+lcView::~lcView()
 {
 	mContext->DestroyVertexBuffer(mGridBuffer);
 
@@ -56,9 +56,9 @@ View::~View()
 		delete mContext;
 }
 
-void View::UpdateProjectViews(const Project* Project)
+void lcView::UpdateProjectViews(const Project* Project)
 {
-	for (View* View : mViews)
+	for (lcView* View : mViews)
 	{
 		const lcModel* ViewModel = View->GetActiveModel();
 
@@ -67,23 +67,23 @@ void View::UpdateProjectViews(const Project* Project)
 	}
 }
 
-void View::UpdateAllViews()
+void lcView::UpdateAllViews()
 {
-	for (View* View : mViews)
+	for (lcView* View : mViews)
 		View->Redraw();
 }
 
-void View::MakeCurrent()
+void lcView::MakeCurrent()
 {
 	mWidget->makeCurrent();
 }
 
-void View::Redraw()
+void lcView::Redraw()
 {
 	mWidget->update();
 }
 
-void View::SetContext(lcContext* Context)
+void lcView::SetContext(lcContext* Context)
 {
 	if (mDeleteContext)
 		delete mContext;
@@ -92,7 +92,7 @@ void View::SetContext(lcContext* Context)
 	mDeleteContext = false;
 }
 
-void View::SetFocus(bool Focus)
+void lcView::SetFocus(bool Focus)
 {
 	if (Focus)
 	{
@@ -102,23 +102,23 @@ void View::SetFocus(bool Focus)
 	}
 }
 
-void View::SetMousePosition(int MouseX, int MouseY)
+void lcView::SetMousePosition(int MouseX, int MouseY)
 {
 	mMouseX = MouseX;
 	mMouseY = MouseY;
 }
 
-void View::SetMouseModifiers(Qt::KeyboardModifiers MouseModifiers)
+void lcView::SetMouseModifiers(Qt::KeyboardModifiers MouseModifiers)
 {
 	mMouseModifiers = MouseModifiers;
 }
 
-lcModel* View::GetActiveModel() const
+lcModel* lcView::GetActiveModel() const
 {
 	return !mActiveSubmodelInstance ? mModel : mActiveSubmodelInstance->mPieceInfo->GetModel();
 }
 
-void View::SetTopSubmodelActive()
+void lcView::SetTopSubmodelActive()
 {
 	lcModel* ActiveModel = GetActiveModel();
 
@@ -131,7 +131,7 @@ void View::SetTopSubmodelActive()
 	GetActiveModel()->UpdateInterface();
 }
 
-void View::SetSelectedSubmodelActive()
+void lcView::SetSelectedSubmodelActive()
 {
 	lcModel* ActiveModel = GetActiveModel();
 	lcObject* Object = ActiveModel->GetFocusObject();
@@ -160,7 +160,7 @@ void View::SetSelectedSubmodelActive()
 	GetActiveModel()->UpdateInterface();
 }
 
-void View::CreateResources(lcContext* Context)
+void lcView::CreateResources(lcContext* Context)
 {
 	gGridTexture = new lcTexture;
 	gGridTexture->CreateGridTexture();
@@ -168,7 +168,7 @@ void View::CreateResources(lcContext* Context)
 	CreateSelectMoveOverlayMesh(Context);
 }
 
-void View::CreateSelectMoveOverlayMesh(lcContext* Context)
+void lcView::CreateSelectMoveOverlayMesh(lcContext* Context)
 {
 	float Verts[(51 + 138 + 10) * 3];
 	float* CurVert = Verts;
@@ -314,7 +314,7 @@ void View::CreateSelectMoveOverlayMesh(lcContext* Context)
 	mRotateMoveIndexBuffer = Context->CreateIndexBuffer(sizeof(Indices), Indices);
 }
 
-void View::DestroyResources(lcContext* Context)
+void lcView::DestroyResources(lcContext* Context)
 {
 	delete gGridTexture;
 	gGridTexture = nullptr;
@@ -323,7 +323,7 @@ void View::DestroyResources(lcContext* Context)
 	Context->DestroyIndexBuffer(mRotateMoveIndexBuffer);
 }
 
-void View::RemoveCamera()
+void lcView::RemoveCamera()
 {
 	if (mCamera && mCamera->IsSimple())
 		return;
@@ -340,25 +340,25 @@ void View::RemoveCamera()
 	Redraw();
 }
 
-lcVector3 View::ProjectPoint(const lcVector3& Point) const
+lcVector3 lcView::ProjectPoint(const lcVector3& Point) const
 {
 	int Viewport[4] = { 0, 0, mWidth, mHeight };
 	return lcProjectPoint(Point, mCamera->mWorldView, GetProjectionMatrix(), Viewport);
 }
 
-lcVector3 View::UnprojectPoint(const lcVector3& Point) const
+lcVector3 lcView::UnprojectPoint(const lcVector3& Point) const
 {
 	int Viewport[4] = { 0, 0, mWidth, mHeight };
 	return lcUnprojectPoint(Point, mCamera->mWorldView, GetProjectionMatrix(), Viewport);
 }
 
-void View::UnprojectPoints(lcVector3* Points, int NumPoints) const
+void lcView::UnprojectPoints(lcVector3* Points, int NumPoints) const
 {
 	int Viewport[4] = { 0, 0, mWidth, mHeight };
 	lcUnprojectPoints(Points, NumPoints, mCamera->mWorldView, GetProjectionMatrix(), Viewport);
 }
 
-lcMatrix44 View::GetProjectionMatrix() const
+lcMatrix44 lcView::GetProjectionMatrix() const
 {
 	float AspectRatio = (float)mWidth / (float)mHeight;
 
@@ -373,7 +373,7 @@ lcMatrix44 View::GetProjectionMatrix() const
 		return lcMatrix44Perspective(mCamera->m_fovy, AspectRatio, mCamera->m_zNear, mCamera->m_zFar);
 }
 
-lcMatrix44 View::GetTileProjectionMatrix(int CurrentRow, int CurrentColumn, int CurrentTileWidth, int CurrentTileHeight) const
+lcMatrix44 lcView::GetTileProjectionMatrix(int CurrentRow, int CurrentColumn, int CurrentTileWidth, int CurrentTileHeight) const
 {
 	int ImageWidth = mRenderImage.width();
 	int ImageHeight = mRenderImage.height();
@@ -420,7 +420,7 @@ lcMatrix44 View::GetTileProjectionMatrix(int CurrentRow, int CurrentColumn, int 
 		return lcMatrix44Frustum(Left, Right, Bottom, Top, Near, Far);
 }
 
-void View::ShowContextMenu() const
+void lcView::ShowContextMenu() const
 {
 	QAction** Actions = gMainWindow->mActions;
 
@@ -463,7 +463,7 @@ void View::ShowContextMenu() const
 	delete Popup;
 }
 
-lcVector3 View::GetMoveDirection(const lcVector3& Direction) const
+lcVector3 lcView::GetMoveDirection(const lcVector3& Direction) const
 {
 	if (lcGetPreferences().mFixedAxes)
 		return Direction;
@@ -511,7 +511,7 @@ lcVector3 View::GetMoveDirection(const lcVector3& Direction) const
 	return axis;
 }
 
-lcMatrix44 View::GetPieceInsertPosition(bool IgnoreSelected, PieceInfo* Info) const
+lcMatrix44 lcView::GetPieceInsertPosition(bool IgnoreSelected, PieceInfo* Info) const
 {
 	lcPiece* HitPiece = (lcPiece*)FindObjectUnderPointer(true, IgnoreSelected).Object;
 	lcModel* ActiveModel = GetActiveModel();
@@ -567,7 +567,7 @@ lcMatrix44 View::GetPieceInsertPosition(bool IgnoreSelected, PieceInfo* Info) co
 	return lcMatrix44Translation(UnprojectPoint(lcVector3((float)mMouseX, (float)mMouseY, 0.9f)));
 }
 
-lcVector3 View::GetCameraLightInsertPosition() const
+lcVector3 lcView::GetCameraLightInsertPosition() const
 {
 	lcModel* ActiveModel = GetActiveModel();
 
@@ -593,7 +593,7 @@ lcVector3 View::GetCameraLightInsertPosition() const
 	return lcRayPointClosestPoint(Center, ClickPoints[0], ClickPoints[1]);
 }
 
-void View::GetRayUnderPointer(lcVector3& Start, lcVector3& End) const
+void lcView::GetRayUnderPointer(lcVector3& Start, lcVector3& End) const
 {
 	lcVector3 StartEnd[2] =
 	{
@@ -607,7 +607,7 @@ void View::GetRayUnderPointer(lcVector3& Start, lcVector3& End) const
 	End = StartEnd[1];
 }
 
-lcObjectSection View::FindObjectUnderPointer(bool PiecesOnly, bool IgnoreSelected) const
+lcObjectSection lcView::FindObjectUnderPointer(bool PiecesOnly, bool IgnoreSelected) const
 {
 	lcVector3 StartEnd[2] =
 	{
@@ -643,7 +643,7 @@ lcObjectSection View::FindObjectUnderPointer(bool PiecesOnly, bool IgnoreSelecte
 	return ObjectRayTest.ObjectSection;
 }
 
-lcArray<lcObject*> View::FindObjectsInBox(float x1, float y1, float x2, float y2) const
+lcArray<lcObject*> lcView::FindObjectsInBox(float x1, float y1, float x2, float y2) const
 {
 	float Left, Top, Bottom, Right;
 
@@ -713,7 +713,7 @@ lcArray<lcObject*> View::FindObjectsInBox(float x1, float y1, float x2, float y2
 	return ObjectBoxTest.Objects;
 }
 
-bool View::BeginRenderToImage(int Width, int Height)
+bool lcView::BeginRenderToImage(int Width, int Height)
 {
 	GLint MaxTexture;
 	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &MaxTexture);
@@ -733,14 +733,14 @@ bool View::BeginRenderToImage(int Width, int Height)
 	return mRenderFramebuffer.first.IsValid();
 }
 
-void View::EndRenderToImage()
+void lcView::EndRenderToImage()
 {
 	mRenderImage = QImage();
 	mContext->DestroyRenderFramebuffer(mRenderFramebuffer);
 	mContext->ClearFramebuffer();
 }
 
-void View::OnDraw()
+void lcView::OnDraw()
 {
 	if (!mModel)
 		return;
@@ -891,7 +891,7 @@ void View::OnDraw()
 	mContext->ClearResources();
 }
 
-void View::DrawBackground() const
+void lcView::DrawBackground() const
 {
 	const lcPreferences& Preferences = lcGetPreferences();
 
@@ -942,7 +942,7 @@ void View::DrawBackground() const
 	Context->SetDepthWrite(true);
 }
 
-void View::DrawViewport() const
+void lcView::DrawViewport() const
 {
 	mContext->SetWorldMatrix(lcMatrix44Identity());
 	mContext->SetViewMatrix(lcMatrix44Translation(lcVector3(0.375, 0.375, 0.0)));
@@ -983,7 +983,7 @@ void View::DrawViewport() const
 	glEnable(GL_DEPTH_TEST);
 }
 
-void View::DrawAxes() const
+void lcView::DrawAxes() const
 {
 //	glClear(GL_DEPTH_BUFFER_BIT);
 
@@ -1051,7 +1051,7 @@ void View::DrawAxes() const
 	glDisable(GL_BLEND);
 }
 
-void View::DrawSelectMoveOverlay()
+void lcView::DrawSelectMoveOverlay()
 {
 	mContext->SetMaterial(lcMaterialType::UnlitColor);
 	mContext->SetViewMatrix(mCamera->mWorldView);
@@ -1240,7 +1240,7 @@ void View::DrawSelectMoveOverlay()
 	glEnable(GL_DEPTH_TEST);
 }
 
-void View::DrawRotateOverlay()
+void lcView::DrawRotateOverlay()
 {
 	const float OverlayScale = GetOverlayScale();
 	const float OverlayRotateRadius = 2.0f;
@@ -1537,7 +1537,7 @@ void View::DrawRotateOverlay()
 	glEnable(GL_DEPTH_TEST);
 }
 
-void View::DrawSelectZoomRegionOverlay()
+void lcView::DrawSelectZoomRegionOverlay()
 {
 	mContext->SetMaterial(lcMaterialType::UnlitColor);
 	mContext->SetWorldMatrix(lcMatrix44Identity());
@@ -1616,7 +1616,7 @@ void View::DrawSelectZoomRegionOverlay()
 	glEnable(GL_DEPTH_TEST);
 }
 
-void View::DrawRotateViewOverlay()
+void lcView::DrawRotateViewOverlay()
 {
 	int x, y, w, h;
 
@@ -1682,7 +1682,7 @@ void View::DrawRotateViewOverlay()
 	glEnable(GL_DEPTH_TEST);
 }
 
-void View::DrawGrid()
+void lcView::DrawGrid()
 {
 	const lcPreferences& Preferences = lcGetPreferences();
 
@@ -1865,7 +1865,7 @@ void View::DrawGrid()
 	}
 }
 
-lcTrackTool View::GetOverrideTrackTool(Qt::MouseButton Button) const
+lcTrackTool lcView::GetOverrideTrackTool(Qt::MouseButton Button) const
 {
 	if (mTrackToolFromOverlay)
 		return lcTrackTool::None;
@@ -1899,7 +1899,7 @@ lcTrackTool View::GetOverrideTrackTool(Qt::MouseButton Button) const
 	return TrackToolFromTool[static_cast<int>(OverrideTool)];
 }
 
-float View::GetOverlayScale() const
+float lcView::GetOverlayScale() const
 {
 	lcVector3 OverlayCenter;
 	lcMatrix33 RelativeRotation;
@@ -1914,13 +1914,13 @@ float View::GetOverlayScale() const
 	return Dist.Length() * 5.0f;
 }
 
-void View::BeginDrag(lcDragState DragState)
+void lcView::BeginDrag(lcDragState DragState)
 {
 	mDragState = DragState;
 	UpdateTrackTool();
 }
 
-void View::EndDrag(bool Accept)
+void lcView::EndDrag(bool Accept)
 {
 	lcModel* ActiveModel = GetActiveModel();
 
@@ -1949,7 +1949,7 @@ void View::EndDrag(bool Accept)
 	ActiveModel->UpdateAllViews();
 }
 
-void View::SetViewpoint(lcViewpoint Viewpoint)
+void lcView::SetViewpoint(lcViewpoint Viewpoint)
 {
 	if (!mCamera || !mCamera->IsSimple())
 	{
@@ -1968,7 +1968,7 @@ void View::SetViewpoint(lcViewpoint Viewpoint)
 	emit CameraChanged();
 }
 
-void View::SetViewpoint(const lcVector3& Position)
+void lcView::SetViewpoint(const lcVector3& Position)
 {
 	if (!mCamera || !mCamera->IsSimple())
 	{
@@ -1987,7 +1987,7 @@ void View::SetViewpoint(const lcVector3& Position)
 	emit CameraChanged();
 }
 
-void View::SetViewpoint(const lcVector3& Position, const lcVector3& Target, const lcVector3& Up)
+void lcView::SetViewpoint(const lcVector3& Position, const lcVector3& Target, const lcVector3& Up)
 {
 	if (!mCamera || !mCamera->IsSimple())
 	{
@@ -2005,7 +2005,7 @@ void View::SetViewpoint(const lcVector3& Position, const lcVector3& Target, cons
 	emit CameraChanged();
 }
 
-void View::SetCameraAngles(float Latitude, float Longitude)
+void lcView::SetCameraAngles(float Latitude, float Longitude)
 {
 	if (!mCamera || !mCamera->IsSimple())
 	{
@@ -2022,7 +2022,7 @@ void View::SetCameraAngles(float Latitude, float Longitude)
 	Redraw();
 }
 
-void View::SetDefaultCamera()
+void lcView::SetDefaultCamera()
 {
 	if (!mCamera || !mCamera->IsSimple())
 		mCamera = new lcCamera(true);
@@ -2032,7 +2032,7 @@ void View::SetDefaultCamera()
 	emit CameraChanged();
 }
 
-void View::SetCamera(lcCamera* Camera, bool ForceCopy)
+void lcView::SetCamera(lcCamera* Camera, bool ForceCopy)
 {
 	if (Camera->IsSimple() || ForceCopy)
 	{
@@ -2050,7 +2050,7 @@ void View::SetCamera(lcCamera* Camera, bool ForceCopy)
 	}
 }
 
-void View::SetCamera(const QString& CameraName)
+void lcView::SetCamera(const QString& CameraName)
 {
 	const lcArray<lcCamera*>& Cameras = mModel->GetCameras();
 
@@ -2064,7 +2064,7 @@ void View::SetCamera(const QString& CameraName)
 	}
 }
 
-void View::SetCameraIndex(int Index)
+void lcView::SetCameraIndex(int Index)
 {
 	const lcArray<lcCamera*>& Cameras = mModel->GetCameras();
 
@@ -2078,7 +2078,7 @@ void View::SetCameraIndex(int Index)
 	Redraw();
 }
 
-void View::SetProjection(bool Ortho)
+void lcView::SetProjection(bool Ortho)
 {
 	if (mCamera->IsSimple())
 	{
@@ -2095,35 +2095,35 @@ void View::SetProjection(bool Ortho)
 	}
 }
 
-void View::LookAt()
+void lcView::LookAt()
 {
 	lcModel* ActiveModel = GetActiveModel();
 	if (ActiveModel)
 		ActiveModel->LookAt(mCamera);
 }
 
-void View::MoveCamera(const lcVector3& Direction)
+void lcView::MoveCamera(const lcVector3& Direction)
 {
 	lcModel* ActiveModel = GetActiveModel();
 	if (ActiveModel)
 		ActiveModel->MoveCamera(mCamera, Direction);
 }
 
-void View::Zoom(float Amount)
+void lcView::Zoom(float Amount)
 {
 	lcModel* ActiveModel = GetActiveModel();
 	if (ActiveModel)
 		ActiveModel->Zoom(mCamera, Amount);
 }
 
-void View::ZoomExtents()
+void lcView::ZoomExtents()
 {
 	lcModel* ActiveModel = GetActiveModel();
 	if (ActiveModel)
 		ActiveModel->ZoomExtents(mCamera, (float)mWidth / (float)mHeight);
 }
 
-lcCursor View::GetCursor() const
+lcCursor lcView::GetCursor() const
 {
 	if (mTrackButton != lcTrackButton::None)
 		return lcCursor::Hidden;
@@ -2179,7 +2179,7 @@ lcCursor View::GetCursor() const
 	return lcCursor::Select;
 }
 
-void View::SetCursor(lcCursor CursorType)
+void lcView::SetCursor(lcCursor CursorType)
 {
 	if (mCursor == CursorType)
 		return;
@@ -2235,12 +2235,12 @@ void View::SetCursor(lcCursor CursorType)
 	}
 }
 
-void View::UpdateCursor()
+void lcView::UpdateCursor()
 {
 	SetCursor(GetCursor());
 }
 
-lcTool View::GetCurrentTool() const
+lcTool lcView::GetCurrentTool() const
 {
 	constexpr lcTool ToolFromTrackTool[] =
 	{
@@ -2284,7 +2284,7 @@ lcTool View::GetCurrentTool() const
 	return lcTool::Select;
 }
 
-void View::UpdateTrackTool()
+void lcView::UpdateTrackTool()
 {
 	if (mViewType != lcViewType::View)
 	{
@@ -2744,7 +2744,7 @@ void View::UpdateTrackTool()
 		ActiveModel->UpdateAllViews();
 }
 
-bool View::IsTrackToolAllowed(lcTrackTool TrackTool, quint32 AllowedTransforms) const
+bool lcView::IsTrackToolAllowed(lcTrackTool TrackTool, quint32 AllowedTransforms) const
 {
 	switch (TrackTool)
 	{
@@ -2815,7 +2815,7 @@ bool View::IsTrackToolAllowed(lcTrackTool TrackTool, quint32 AllowedTransforms) 
 	return false;
 }
 
-void View::StartOrbitTracking()
+void lcView::StartOrbitTracking()
 {
 	mTrackTool = lcTrackTool::OrbitXY;
 	UpdateCursor();
@@ -2823,7 +2823,7 @@ void View::StartOrbitTracking()
 }
 
 
-void View::StartTracking(lcTrackButton TrackButton)
+void lcView::StartTracking(lcTrackButton TrackButton)
 {
 	mTrackButton = TrackButton;
 	mTrackUpdated = false;
@@ -2884,7 +2884,7 @@ void View::StartTracking(lcTrackButton TrackButton)
 	UpdateCursor();
 }
 
-void View::StopTracking(bool Accept)
+void lcView::StopTracking(bool Accept)
 {
 	if (mTrackButton == lcTrackButton::None)
 		return;
@@ -2974,7 +2974,7 @@ void View::StopTracking(bool Accept)
 	ActiveModel->UpdateAllViews();
 }
 
-void View::CancelTrackingOrClearSelection()
+void lcView::CancelTrackingOrClearSelection()
 {
 	if (mTrackButton != lcTrackButton::None)
 		StopTracking(false);
@@ -2986,7 +2986,7 @@ void View::CancelTrackingOrClearSelection()
 	}
 }
 
-void View::OnButtonDown(lcTrackButton TrackButton)
+void lcView::OnButtonDown(lcTrackButton TrackButton)
 {
 	lcModel* ActiveModel = GetActiveModel();
 
@@ -3095,7 +3095,7 @@ void View::OnButtonDown(lcTrackButton TrackButton)
 	}
 }
 
-void View::OnLeftButtonDown()
+void lcView::OnLeftButtonDown()
 {
 	if (mTrackButton != lcTrackButton::None)
 	{
@@ -3117,7 +3117,7 @@ void View::OnLeftButtonDown()
 	OnButtonDown(lcTrackButton::Left);
 }
 
-void View::OnLeftButtonUp()
+void lcView::OnLeftButtonUp()
 {
 	StopTracking(mTrackButton == lcTrackButton::Left);
 
@@ -3125,7 +3125,7 @@ void View::OnLeftButtonUp()
 		return;
 }
 
-void View::OnLeftButtonDoubleClick()
+void lcView::OnLeftButtonDoubleClick()
 {
 	lcObjectSection ObjectSection = FindObjectUnderPointer(false, false);
 	lcModel* ActiveModel = GetActiveModel();
@@ -3138,7 +3138,7 @@ void View::OnLeftButtonDoubleClick()
 		ActiveModel->ClearSelectionAndSetFocus(ObjectSection, true);
 }
 
-void View::OnMiddleButtonDown()
+void lcView::OnMiddleButtonDown()
 {
 	if (mTrackButton != lcTrackButton::None)
 	{
@@ -3158,12 +3158,12 @@ void View::OnMiddleButtonDown()
 	OnButtonDown(lcTrackButton::Middle);
 }
 
-void View::OnMiddleButtonUp()
+void lcView::OnMiddleButtonUp()
 {
 	StopTracking(mTrackButton == lcTrackButton::Middle);
 }
 
-void View::OnRightButtonDown()
+void lcView::OnRightButtonDown()
 {
 	if (mTrackButton != lcTrackButton::None)
 	{
@@ -3182,7 +3182,7 @@ void View::OnRightButtonDown()
 	OnButtonDown(lcTrackButton::Right);
 }
 
-void View::OnRightButtonUp()
+void lcView::OnRightButtonUp()
 {
 	bool ShowMenu = mTrackButton == lcTrackButton::None || !mTrackUpdated;
 
@@ -3193,25 +3193,25 @@ void View::OnRightButtonUp()
 		ShowContextMenu();
 }
 
-void View::OnBackButtonDown()
+void lcView::OnBackButtonDown()
 {
 }
 
-void View::OnBackButtonUp()
+void lcView::OnBackButtonUp()
 {
 	gMainWindow->HandleCommand(LC_VIEW_TIME_PREVIOUS);
 }
 
-void View::OnForwardButtonDown()
+void lcView::OnForwardButtonDown()
 {
 }
 
-void View::OnForwardButtonUp()
+void lcView::OnForwardButtonUp()
 {
 	gMainWindow->HandleCommand(LC_VIEW_TIME_NEXT);
 }
 
-void View::OnMouseMove()
+void lcView::OnMouseMove()
 {
 	lcModel* ActiveModel = GetActiveModel();
 
@@ -3549,7 +3549,7 @@ void View::OnMouseMove()
 	}
 }
 
-void View::OnMouseWheel(float Direction)
+void lcView::OnMouseWheel(float Direction)
 {
 	mModel->Zoom(mCamera, (int)(((mMouseModifiers & Qt::ControlModifier) ? 100 : 10) * Direction));
 }

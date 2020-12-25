@@ -18,7 +18,7 @@
 
 static QList<lcViewWidget*> gWidgetList;
 
-lcViewWidget::lcViewWidget(QWidget* Parent, View* View)
+lcViewWidget::lcViewWidget(QWidget* Parent, lcView* View)
 	: QGLWidget(Parent, gWidgetList.isEmpty() ? nullptr : gWidgetList.first())
 {
 	mWheelAccumulator = 0;
@@ -35,7 +35,7 @@ lcViewWidget::lcViewWidget(QWidget* Parent, View* View)
 
 		lcInitializeGLExtensions(context());
 		lcContext::CreateResources();
-		View::CreateResources(mView->mContext);
+		lcView::CreateResources(mView->mContext);
 		lcViewSphere::CreateResources(mView->mContext);
 
 		if (!gSupportsShaderObjects && lcGetPreferences().mShadingMode == lcShadingMode::DefaultLights)
@@ -69,7 +69,7 @@ lcViewWidget::~lcViewWidget()
 		gTexFont.Reset();
 
 		lcGetPiecesLibrary()->ReleaseBuffers(mView->mContext);
-		View::DestroyResources(mView->mContext);
+		lcView::DestroyResources(mView->mContext);
 		lcContext::DestroyResources();
 		lcViewSphere::DestroyResources(mView->mContext);
 
@@ -85,7 +85,7 @@ QSize lcViewWidget::sizeHint() const
 	return mPreferredSize.isEmpty() ? QGLWidget::sizeHint() : mPreferredSize;
 }
 
-void lcViewWidget::SetView(View* View)
+void lcViewWidget::SetView(lcView* View)
 {
 	mView = View;
 

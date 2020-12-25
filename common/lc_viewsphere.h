@@ -4,8 +4,6 @@
 #include "lc_context.h"
 #include <bitset>
 
-class View;
-
 enum class lcViewSphereLocation
 {
 	TopLeft,
@@ -17,7 +15,7 @@ enum class lcViewSphereLocation
 class lcViewSphere
 {
 public:
-	lcViewSphere(View* View);
+	lcViewSphere(lcView* View);
 
 	void Draw();
 	bool OnMouseMove();
@@ -34,7 +32,7 @@ protected:
 	lcMatrix44 GetProjectionMatrix() const;
 	std::bitset<6> GetIntersectionFlags(lcVector3& Intersection) const;
 
-	View* const mView = nullptr;
+	lcView* const mView = nullptr;
 
 	int mSize = 1;
 	bool mEnabled = false;

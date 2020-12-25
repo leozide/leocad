@@ -1,6 +1,6 @@
 #include "lc_global.h"
 #include "lc_viewsphere.h"
-#include "view.h"
+#include "lc_view.h"
 #include "camera.h"
 #include "lc_context.h"
 #include "lc_stringcache.h"

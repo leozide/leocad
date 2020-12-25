@@ -170,7 +170,7 @@ macx {
 	DEFINES += LC_DISABLE_UPDATE_CHECK=1
 }
 
-SOURCES += common/view.cpp \
+SOURCES += \
 	common/texfont.cpp \
 	common/project.cpp \
 	common/pieceinf.cpp \
@@ -204,6 +204,7 @@ SOURCES += common/view.cpp \
 	common/lc_synth.cpp \
 	common/lc_texture.cpp \
 	common/lc_timelinewidget.cpp \
+	common/lc_view.cpp \
 	common/lc_viewsphere.cpp \
 	common/lc_viewwidget.cpp \
 	common/lc_zipfile.cpp \
@@ -233,7 +234,6 @@ SOURCES += common/view.cpp \
 	qt/lc_setsdatabasedialog.cpp \
 	common/lc_partpalettedialog.cpp
 HEADERS += \
-	common/view.h \
 	common/texfont.h \
 	common/project.h \
 	common/pieceinf.h \
@@ -269,6 +269,7 @@ HEADERS += \
 	common/lc_stringcache.h \
 	common/lc_synth.h \
 	common/lc_texture.h \
+	common/lc_view.h \
 	common/lc_viewsphere.h \
 	common/lc_viewwidget.h \
 	common/lc_zipfile.h \

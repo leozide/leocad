@@ -6,7 +6,7 @@
 #include "lc_model.h"
 #include "lc_library.h"
 #include "lc_viewwidget.h"
-#include "view.h"
+#include "lc_view.h"
 
 lcPreviewDockWidget::lcPreviewDockWidget(QMainWindow* Parent)
 	: QMainWindow(Parent)

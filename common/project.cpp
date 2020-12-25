@@ -7,7 +7,7 @@
 #include "project.h"
 #include "image.h"
 #include "lc_mainwindow.h"
-#include "view.h"
+#include "lc_view.h"
 #include "lc_library.h"
 #include "lc_application.h"
 #include "lc_profile.h"

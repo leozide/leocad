@@ -13,7 +13,7 @@
 #include "lc_synth.h"
 #include "lc_file.h"
 #include "pieceinf.h"
-#include "view.h"
+#include "lc_view.h"
 #include "minifig.h"
 #include "lc_qarraydialog.h"
 #include "lc_qselectdialog.h"

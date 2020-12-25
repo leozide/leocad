@@ -9,7 +9,7 @@
 #include "project.h"
 #include "pieceinf.h"
 #include "lc_scene.h"
-#include "view.h"
+#include "lc_view.h"
 #include "lc_glextensions.h"
 #include "lc_viewwidget.h"
 #include "lc_previewwidget.h"

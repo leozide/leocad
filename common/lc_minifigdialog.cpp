@@ -7,7 +7,7 @@
 #include "lc_application.h"
 #include "pieceinf.h"
 #include "lc_library.h"
-#include "view.h"
+#include "lc_view.h"
 #include "camera.h"
 
 lcMinifigDialog::lcMinifigDialog(QWidget* Parent)

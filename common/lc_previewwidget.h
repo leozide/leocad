@@ -1,6 +1,6 @@
 #pragma once
 
-#include "view.h"
+#include "lc_view.h"
 
 class lcPreview;
 

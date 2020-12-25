@@ -16,7 +16,7 @@
 #include "lc_renderdialog.h"
 #include "lc_instructionsdialog.h"
 #include "lc_profile.h"
-#include "view.h"
+#include "lc_view.h"
 #include "project.h"
 #include "piece.h"
 #include "camera.h"

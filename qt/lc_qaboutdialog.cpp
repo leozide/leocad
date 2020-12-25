@@ -2,7 +2,7 @@
 #include "lc_qaboutdialog.h"
 #include "ui_lc_qaboutdialog.h"
 #include "lc_mainwindow.h"
-#include "view.h"
+#include "lc_view.h"
 #include "lc_glextensions.h"
 
 lcQAboutDialog::lcQAboutDialog(QWidget *parent) :

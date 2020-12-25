@@ -7,7 +7,7 @@
 #include "lc_mainwindow.h"
 #include "lc_partselectionwidget.h"
 #include "lc_context.h"
-#include "view.h"
+#include "lc_view.h"
 #include "texfont.h"
 #include "lc_viewsphere.h"
 #include "lc_stringcache.h"

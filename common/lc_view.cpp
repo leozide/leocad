@@ -1,8 +1,8 @@
 #include "lc_global.h"
+#include "lc_view.h"
 #include <stdlib.h>
 #include "lc_mainwindow.h"
 #include "camera.h"
-#include "view.h"
 #include "texfont.h"
 #include "lc_texture.h"
 #include "piece.h"

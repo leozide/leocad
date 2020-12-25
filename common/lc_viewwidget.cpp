@@ -1,6 +1,5 @@
 #include "lc_global.h"
 #include "lc_viewwidget.h"
-#include "lc_glwidget.h"
 #include "lc_glextensions.h"
 #include "project.h"
 #include "lc_library.h"
@@ -19,7 +18,7 @@
 
 static QList<lcViewWidget*> gWidgetList;
 
-lcViewWidget::lcViewWidget(QWidget* Parent, lcGLWidget* View)
+lcViewWidget::lcViewWidget(QWidget* Parent, View* View)
 	: QGLWidget(Parent, gWidgetList.isEmpty() ? nullptr : gWidgetList.first())
 {
 	mWheelAccumulator = 0;
@@ -86,7 +85,7 @@ QSize lcViewWidget::sizeHint() const
 	return mPreferredSize.isEmpty() ? QGLWidget::sizeHint() : mPreferredSize;
 }
 
-void lcViewWidget::SetView(lcGLWidget* View)
+void lcViewWidget::SetView(View* View)
 {
 	mView = View;
 

@@ -1,19 +1,19 @@
 #pragma once
 
-#include <QGLWidget>
+class View;
 
 class lcViewWidget : public QGLWidget
 {
 public:
-	lcViewWidget(QWidget* Parent, lcGLWidget* View);
+	lcViewWidget(QWidget* Parent, View* View);
 	~lcViewWidget();
 
-	lcGLWidget* GetView() const
+	View* GetView() const
 	{
 		return mView;
 	}
 
-	void SetView(lcGLWidget* View);
+	void SetView(View* View);
 	void SetPreviewPosition(const QRect& ParentRect);
 
 	QSize sizeHint() const override;
@@ -44,7 +44,7 @@ protected:
 	void dragMoveEvent(QDragMoveEvent* DragMoveEvent) override;
 	void dropEvent(QDropEvent* DropEvent) override;
 
-	lcGLWidget* mView;
+	View* mView;
 	QSize mPreferredSize;
 	int mWheelAccumulator;
 };

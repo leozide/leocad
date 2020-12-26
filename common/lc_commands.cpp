@@ -1140,7 +1140,7 @@ const lcCommand gCommands[] =
 	// LC_VIEW_TOGGLE_GRID
 	{
 		QT_TRANSLATE_NOOP("Action", "View.ToggleGrid"),
-		QT_TRANSLATE_NOOP("Menu", "Grid"),
+		QT_TRANSLATE_NOOP("Menu", "Base Grid"),
 		QT_TRANSLATE_NOOP("Status", "Toggle grid"),
 		""
 	},

@@ -1041,8 +1041,12 @@ void lcView::DrawAxes() const
 	mContext->SetVertexFormatPosition(3);
 	mContext->SetIndexBufferPointer(Indices);
 
-	mContext->SetColor(0.0f, 0.0f, 0.0f, 1.0f);
-	mContext->DrawIndexedPrimitives(GL_LINES, 6, GL_UNSIGNED_SHORT, 0);
+	mContext->SetColor(0.8f, 0.0f, 0.0f, 1.0f);
+	mContext->DrawIndexedPrimitives(GL_LINES, 2, GL_UNSIGNED_SHORT, 0);
+	mContext->SetColor(0.0f, 0.8f, 0.0f, 1.0f);
+	mContext->DrawIndexedPrimitives(GL_LINES, 2, GL_UNSIGNED_SHORT, 2 * 2);
+	mContext->SetColor(0.0f, 0.0f, 0.8f, 1.0f);
+	mContext->DrawIndexedPrimitives(GL_LINES, 2, GL_UNSIGNED_SHORT, 4 * 2);
 
 	mContext->SetColor(0.8f, 0.0f, 0.0f, 1.0f);
 	mContext->DrawIndexedPrimitives(GL_TRIANGLES, 24, GL_UNSIGNED_SHORT, 6 * 2);

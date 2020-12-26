@@ -818,8 +818,7 @@ void lcMainWindow::CreatePreviewWidget()
 
 	mPreviewToolBar = new QDockWidget(tr("Preview"), this);
 	mPreviewToolBar->setWindowTitle(tr("Preview"));
-	mPreviewToolBar->setObjectName("PreviewToolBarw");
-	mPreviewToolBar->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+	mPreviewToolBar->setObjectName("PreviewToolBar");
 	mPreviewToolBar->setWidget(mPreviewWidget);
 	addDockWidget(Qt::RightDockWidgetArea, mPreviewToolBar);
 
@@ -830,12 +829,15 @@ void lcMainWindow::CreatePreviewWidget()
 
 void lcMainWindow::TogglePreviewWidget(bool Visible)
 {
-	if (mPreviewToolBar) {
+	if (mPreviewToolBar)
+	{
 		if (Visible)
 			mPreviewToolBar->show();
 		else
 			mPreviewToolBar->hide();
-	} else if (Visible) {
+	}
+	else if (Visible) 
+	{
 		CreatePreviewWidget();
 	}
 }

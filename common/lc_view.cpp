@@ -422,6 +422,9 @@ lcMatrix44 lcView::GetTileProjectionMatrix(int CurrentRow, int CurrentColumn, in
 
 void lcView::ShowContextMenu() const
 {
+	if (mViewType != lcViewType::View)
+		return;
+
 	QAction** Actions = gMainWindow->mActions;
 
 	QMenu* Popup = new QMenu(mWidget);
@@ -746,6 +749,7 @@ void lcView::OnDraw()
 		return;
 
 	const lcPreferences& Preferences = lcGetPreferences();
+	const bool DrawOverlays = mWidget != nullptr;
 	const bool DrawInterface = mWidget != nullptr && mViewType == lcViewType::View;
 
 	mScene->SetAllowLOD(Preferences.mAllowLOD && mWidget != nullptr);
@@ -860,13 +864,13 @@ void lcView::OnDraw()
 	}
 
 	if (DrawInterface)
-	{
 		mScene->DrawInterfaceObjects(mContext);
 
+	if (DrawOverlays)
+	{
 		mContext->SetLineWidth(1.0f);
 
-		if (Preferences.mDrawAxes)
-			DrawAxes();
+		DrawAxes();
 
 		lcTool Tool = gMainWindow->GetTool();
 		lcModel* ActiveModel = GetActiveModel();
@@ -883,10 +887,9 @@ void lcView::OnDraw()
 			DrawRotateViewOverlay();
 
 		mViewSphere->Draw();
-	}
 
-	if (mWidget != nullptr)
 		DrawViewport();
+	}
 
 	mContext->ClearResources();
 }
@@ -985,6 +988,25 @@ void lcView::DrawViewport() const
 
 void lcView::DrawAxes() const
 {
+	const lcPreferences& Preferences = lcGetPreferences();
+
+	switch (mViewType)
+	{
+		case lcViewType::View:
+			if (!Preferences.mDrawAxes)
+				return;
+			break;
+
+		case lcViewType::Preview:
+			if (!Preferences.mDrawPreviewAxis)
+				return;
+			break;
+
+		case lcViewType::Minifig:
+		case lcViewType::Count:
+			return;
+	}
+
 //	glClear(GL_DEPTH_BUFFER_BIT);
 
 	const float Verts[28 * 3] =

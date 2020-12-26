@@ -867,11 +867,10 @@ void lcView::OnDraw()
 		mScene->DrawInterfaceObjects(mContext);
 
 	if (DrawOverlays)
-	{
-		mContext->SetLineWidth(1.0f);
-
 		DrawAxes();
 
+	if (DrawInterface)
+	{
 		lcTool Tool = gMainWindow->GetTool();
 		lcModel* ActiveModel = GetActiveModel();
 
@@ -885,7 +884,10 @@ void lcView::OnDraw()
 			DrawSelectZoomRegionOverlay();
 		else if (Tool == lcTool::RotateView && mTrackButton == lcTrackButton::None)
 			DrawRotateViewOverlay();
+	}
 
+	if (DrawOverlays)
+	{
 		mViewSphere->Draw();
 
 		DrawViewport();
@@ -950,6 +952,7 @@ void lcView::DrawViewport() const
 	mContext->SetWorldMatrix(lcMatrix44Identity());
 	mContext->SetViewMatrix(lcMatrix44Translation(lcVector3(0.375, 0.375, 0.0)));
 	mContext->SetProjectionMatrix(lcMatrix44Ortho(0.0f, mWidth, 0.0f, mHeight, -1.0f, 1.0f));
+	mContext->SetLineWidth(1.0f);
 
 	mContext->SetDepthWrite(false);
 	glDisable(GL_DEPTH_TEST);
@@ -1032,6 +1035,7 @@ void lcView::DrawAxes() const
 	lcMatrix44 WorldViewMatrix = mCamera->mWorldView;
 	WorldViewMatrix.SetTranslation(lcVector3(0, 0, 0));
 
+	mContext->SetLineWidth(1.0f);
 	mContext->SetMaterial(lcMaterialType::UnlitColor);
 	mContext->SetWorldMatrix(lcMatrix44Identity());
 	mContext->SetViewMatrix(lcMul(WorldViewMatrix, TranslationMatrix));
@@ -1100,6 +1104,7 @@ void lcView::DrawSelectMoveOverlay()
 	WorldMatrix = lcMul(lcMatrix44Scale(lcVector3(OverlayScale, OverlayScale, OverlayScale)), WorldMatrix);
 
 	mContext->SetWorldMatrix(WorldMatrix);
+	mContext->SetLineWidth(1.0f);
 
 	mContext->SetIndexBuffer(mRotateMoveIndexBuffer);
 	mContext->SetVertexBuffer(mRotateMoveVertexBuffer);
@@ -1274,6 +1279,7 @@ void lcView::DrawRotateOverlay()
 	mContext->SetMaterial(lcMaterialType::UnlitColor);
 	mContext->SetViewMatrix(mCamera->mWorldView);
 	mContext->SetProjectionMatrix(GetProjectionMatrix());
+	mContext->SetLineWidth(1.0f);
 
 	glDisable(GL_DEPTH_TEST);
 
@@ -1569,6 +1575,7 @@ void lcView::DrawSelectZoomRegionOverlay()
 	mContext->SetWorldMatrix(lcMatrix44Identity());
 	mContext->SetViewMatrix(lcMatrix44Translation(lcVector3(0.375, 0.375, 0.0)));
 	mContext->SetProjectionMatrix(lcMatrix44Ortho(0.0f, mWidth, 0.0f, mHeight, -1.0f, 1.0f));
+	mContext->SetLineWidth(1.0f);
 
 	glDisable(GL_DEPTH_TEST);
 
@@ -1655,6 +1662,7 @@ void lcView::DrawRotateViewOverlay()
 	mContext->SetWorldMatrix(lcMatrix44Identity());
 	mContext->SetViewMatrix(lcMatrix44Translation(lcVector3(0.375, 0.375, 0.0)));
 	mContext->SetProjectionMatrix(lcMatrix44Ortho(0, w, 0, h, -1, 1));
+	mContext->SetLineWidth(1.0f);
 
 	glDisable(GL_DEPTH_TEST);
 	mContext->SetColor(lcVector4FromColor(lcGetPreferences().mOverlayColor));
@@ -3153,6 +3161,12 @@ void lcView::OnLeftButtonUp()
 
 void lcView::OnLeftButtonDoubleClick()
 {
+	if (mViewType != lcViewType::View)
+	{
+		ZoomExtents();
+		return;
+	}
+
 	lcObjectSection ObjectSection = FindObjectUnderPointer(false, false);
 	lcModel* ActiveModel = GetActiveModel();
 

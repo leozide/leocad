@@ -19,7 +19,7 @@ lcVertexBuffer lcView::mRotateMoveVertexBuffer;
 lcIndexBuffer lcView::mRotateMoveIndexBuffer;
 
 lcView::lcView(lcViewType ViewType, lcModel* Model)
-	: mScene(new lcScene()), mModel(Model), mViewType(ViewType)
+	: mViewType(ViewType), mScene(new lcScene()), mModel(Model)
 {
 	mContext = new lcContext();
 	mViews.push_back(this);

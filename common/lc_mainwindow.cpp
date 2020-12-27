@@ -950,6 +950,9 @@ void lcMainWindow::closeEvent(QCloseEvent* Event)
 		Settings.endGroup();
 
 		gApplication->SaveTabLayout();
+
+		delete mPreviewWidget;
+		mPreviewWidget = nullptr;
 	}
 	else
 		Event->ignore();

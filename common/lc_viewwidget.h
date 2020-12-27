@@ -2,6 +2,8 @@
 
 class lcViewWidget : public QGLWidget
 {
+	Q_OBJECT
+
 public:
 	lcViewWidget(QWidget* Parent, lcView* View);
 	~lcViewWidget();

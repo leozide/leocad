@@ -134,7 +134,7 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 
 	ui->PreviewAxisIconCheckBox->setChecked(mOptions->Preferences.mDrawPreviewAxis);
 
-	ui->PreviewViewSphereCheckBox->setChecked(mOptions->Preferences.mDrawPreviewViewSphere);
+	ui->PreviewViewSphereCheckBox->setChecked(mOptions->Preferences.mPreviewViewSphereEnabled);
 
 	ui->PreviewLocationCombo->setCurrentIndex((int)mOptions->Preferences.mPreviewLocation);
 
@@ -361,8 +361,6 @@ void lcQPreferencesDialog::accept()
 
 	mOptions->Preferences.mDrawPreviewAxis = ui->PreviewAxisIconCheckBox->isChecked();
 
-	mOptions->Preferences.mDrawPreviewViewSphere = ui->PreviewViewSphereCheckBox->isChecked();
-
 	mOptions->Preferences.mPreviewLocation = (lcPreviewLocation)ui->PreviewLocationCombo->currentIndex();
 
 	mOptions->Preferences.mPreviewPosition = (lcPreviewPosition)ui->PreviewPositionCombo->currentIndex();
@@ -396,6 +394,8 @@ void lcQPreferencesDialog::accept()
 	default:
 		break;
 	}
+
+	mOptions->Preferences.mPreviewViewSphereEnabled = ui->PreviewViewSphereCheckBox->isChecked();
 
 	QDialog::accept();
 }

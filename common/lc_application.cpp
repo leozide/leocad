@@ -59,7 +59,6 @@ void lcPreferences::LoadDefaults()
 	mPreviewLocation = static_cast<lcPreviewLocation>(lcGetProfileInt(LC_PROFILE_PREVIEW_LOCATION));
 	mPreviewPosition = static_cast<lcPreviewPosition>(lcGetProfileInt(LC_PROFILE_PREVIEW_POSITION));
 	mDrawPreviewAxis = lcGetProfileInt(LC_PROFILE_PREVIEW_DRAW_AXES);
-	mDrawPreviewViewSphere = lcGetProfileInt(LC_PROFILE_PREVIEW_DRAW_VIEW_SPHERE);
 }
 
 void lcPreferences::SaveDefaults()
@@ -107,7 +106,6 @@ void lcPreferences::SaveDefaults()
 	lcSetProfileInt(LC_PROFILE_PREVIEW_LOCATION, static_cast<int>(mPreviewLocation));
 	lcSetProfileInt(LC_PROFILE_PREVIEW_POSITION, static_cast<int>(mPreviewPosition));
 	lcSetProfileInt(LC_PROFILE_PREVIEW_DRAW_AXES, mDrawPreviewAxis);
-	lcSetProfileInt(LC_PROFILE_PREVIEW_DRAW_VIEW_SPHERE, mDrawPreviewViewSphere);
 }
 
 void lcPreferences::SetInterfaceColors(lcColorTheme ColorTheme)

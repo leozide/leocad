@@ -844,8 +844,9 @@ void lcMainWindow::TogglePreviewWidget(bool Visible)
 
 void lcMainWindow::EnableWindowFlags(bool Detached)
 {
-	if (Detached) {
-		QDockWidget *DockWidget = qobject_cast<QDockWidget *>(sender());
+	if (Detached)
+	{
+		QDockWidget* DockWidget = qobject_cast<QDockWidget*>(sender());
 		DockWidget->setWindowFlags(Qt::CustomizeWindowHint |
 								   Qt::Window |
 								   Qt::WindowMinimizeButtonHint |
@@ -2181,12 +2182,12 @@ void lcMainWindow::UpdateUndoRedo(const QString& UndoText, const QString& RedoTe
 
 void lcMainWindow::ViewFocusReceived()
 {
-	SetActiveView(dynamic_cast<lcView*>(sender()));
+	SetActiveView(qobject_cast<lcView*>(sender()));
 }
 
 void lcMainWindow::ViewCameraChanged()
 {
-	lcView* View = dynamic_cast<lcView*>(sender());
+	lcView* View = qobject_cast<lcView*>(sender());
 
 	if (!View || !View->IsLastFocused())
 		return;

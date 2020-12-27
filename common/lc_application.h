@@ -86,7 +86,6 @@ public:
 	lcPreviewPosition mPreviewPosition;
 	int mPreviewSize;
 	int mDrawPreviewAxis;
-	int mDrawPreviewViewSphere;
 };
 
 class lcApplication : public QApplication

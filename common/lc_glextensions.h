@@ -1,17 +1,24 @@
 #pragma once
 
+#ifdef LC_USE_QOPENGLWIDGET
+void lcInitializeGLExtensions(const QOpenGLContext* Context);
+#else
 void lcInitializeGLExtensions(const QGLContext* Context);
+#endif
 
 extern bool gSupportsShaderObjects;
 extern bool gSupportsVertexBufferObject;
+extern bool gSupportsFramebufferObject;
+#ifndef LC_USE_QOPENGLWIDGET
 extern bool gSupportsFramebufferObjectARB;
 extern bool gSupportsFramebufferObjectEXT;
+#endif
 extern bool gSupportsTexImage2DMultisample;
 extern bool gSupportsBlendFuncSeparate;
 extern bool gSupportsAnisotropic;
 extern GLfloat gMaxAnisotropy;
 
-#if !defined(Q_OS_MAC) && !defined(QT_OPENGL_ES)
+#if !defined(Q_OS_MAC) && !defined(QT_OPENGL_ES) && !defined(LC_USE_QOPENGLWIDGET)
 #define LC_LOAD_GLEXTENSIONS
 #endif
 

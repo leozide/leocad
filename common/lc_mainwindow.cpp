@@ -147,10 +147,16 @@ void lcMainWindow::CreateWidgets(int AASamples)
 
 	if (AASamples > 1)
 	{
-		QGLFormat format;
-		format.setSampleBuffers(true);
-		format.setSamples(AASamples);
-		QGLFormat::setDefaultFormat(format);
+#ifdef LC_USE_QOPENGLWIDGET
+		QSurfaceFormat Format = QSurfaceFormat::defaultFormat();
+		Format.setSamples(AASamples);
+		QSurfaceFormat::setDefaultFormat(Format);
+#else
+		QGLFormat Format;
+		Format.setSampleBuffers(true);
+		Format.setSamples(AASamples);
+		QGLFormat::setDefaultFormat(Format);
+#endif
 	}
 
 	CreateActions();
@@ -950,9 +956,6 @@ void lcMainWindow::closeEvent(QCloseEvent* Event)
 		Settings.endGroup();
 
 		gApplication->SaveTabLayout();
-
-		delete mPreviewWidget;
-		mPreviewWidget = nullptr;
 	}
 	else
 		Event->ignore();

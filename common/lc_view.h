@@ -147,12 +147,12 @@ public:
 		mHeight = Height;
 	}
 
-	QGLWidget* GetWidget() const
+	lcViewWidget* GetWidget() const
 	{
 		return mWidget;
 	}
 
-	void SetWidget(QGLWidget* Widget)
+	void SetWidget(lcViewWidget* Widget)
 	{
 		mWidget = Widget;
 	}
@@ -275,7 +275,7 @@ protected:
 	void StopTracking(bool Accept);
 	void OnButtonDown(lcTrackButton TrackButton);
 
-	QGLWidget* mWidget = nullptr;
+	lcViewWidget* mWidget = nullptr;
 	int mWidth = 1;
 	int mHeight = 1;
 	bool mDeleteContext = true;

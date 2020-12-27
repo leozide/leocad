@@ -3,8 +3,11 @@
 
 bool gSupportsShaderObjects;
 bool gSupportsVertexBufferObject;
+bool gSupportsFramebufferObject;
+#ifndef LC_USE_QOPENGLWIDGET
 bool gSupportsFramebufferObjectARB;
 bool gSupportsFramebufferObjectEXT;
+#endif
 bool gSupportsTexImage2DMultisample;
 bool gSupportsBlendFuncSeparate;
 bool gSupportsAnisotropic;
@@ -168,6 +171,52 @@ static void APIENTRY lcGLDebugCallback(GLenum Source, GLenum Type, GLuint Id, GL
 
 #endif
 
+#ifdef LC_USE_QOPENGLWIDGET
+
+#include <QOpenGLFunctions_3_2_Core>
+
+void lcInitializeGLExtensions(const QOpenGLContext* Context)
+{
+	const QOpenGLFunctions* Functions = Context->functions();
+
+#if !defined(QT_NO_DEBUG) && defined(GL_ARB_debug_output)
+	if (Context->hasExtension("GL_KHR_debug"))
+	{
+		PFNGLDEBUGMESSAGECALLBACKARBPROC DebugMessageCallback = (PFNGLDEBUGMESSAGECALLBACKARBPROC)Context->getProcAddress("glDebugMessageCallback");
+
+#ifndef GL_DEBUG_OUTPUT
+#define GL_DEBUG_OUTPUT 0x92E0
+#endif
+
+		if (DebugMessageCallback)
+		{
+			DebugMessageCallback((GLDEBUGPROCARB)&lcGLDebugCallback, nullptr);
+			glEnable(GL_DEBUG_OUTPUT);
+			glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
+		}
+	}
+#endif
+
+	if (Context->hasExtension("GL_EXT_texture_filter_anisotropic"))
+	{
+		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &gMaxAnisotropy);
+
+		gSupportsAnisotropic = true;
+	}
+
+	gSupportsVertexBufferObject = Functions->hasOpenGLFeature(QOpenGLFunctions::Buffers);
+	gSupportsFramebufferObject = Functions->hasOpenGLFeature(QOpenGLFunctions::Framebuffers);
+	gSupportsBlendFuncSeparate = Functions->hasOpenGLFeature(QOpenGLFunctions::BlendFuncSeparate);
+	gSupportsShaderObjects = Functions->hasOpenGLFeature(QOpenGLFunctions::Shaders);
+
+	QOpenGLFunctions_3_2_Core* Funcs = Context->versionFunctions<QOpenGLFunctions_3_2_Core>();
+
+	if (Funcs)
+		gSupportsTexImage2DMultisample = true;
+}
+
+#else
+
 void lcInitializeGLExtensions(const QGLContext* Context)
 {
 	const GLubyte* Extensions = glGetString(GL_EXTENSIONS);
@@ -246,6 +295,7 @@ void lcInitializeGLExtensions(const QGLContext* Context)
 		lcRenderbufferStorageMultisample = (PFNGLRENDERBUFFERSTORAGEMULTISAMPLEPROC)Context->getProcAddress("glRenderbufferStorageMultisample");
 		lcFramebufferTextureLayer = (PFNGLFRAMEBUFFERTEXTURELAYERARBPROC)Context->getProcAddress("glFramebufferTextureLayer");
 #endif
+		gSupportsFramebufferObject = true;
 		gSupportsFramebufferObjectARB = true;
 	}
 
@@ -270,6 +320,7 @@ void lcInitializeGLExtensions(const QGLContext* Context)
 		lcGetFramebufferAttachmentParameterivEXT = (PFNGLGETFRAMEBUFFERATTACHMENTPARAMETERIVEXTPROC)Context->getProcAddress("glGetFramebufferAttachmentParameterivEXT");
 		lcGenerateMipmapEXT = (PFNGLGENERATEMIPMAPEXTPROC)Context->getProcAddress("glGenerateMipmapEXT");
 #endif
+		gSupportsFramebufferObject = true;
 		gSupportsFramebufferObjectEXT = true;
 	}
 
@@ -373,3 +424,5 @@ void lcInitializeGLExtensions(const QGLContext* Context)
 	gSupportsShaderObjects = true;
 #endif
 }
+
+#endif

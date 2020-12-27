@@ -890,7 +890,7 @@ void lcPartSelectionWidget::OptionsMenuAboutToShow()
 
 	lcPartSelectionListModel* ListModel = mPartsWidget->GetListModel();
 
-	if (gSupportsFramebufferObjectARB || gSupportsFramebufferObjectEXT)
+	if (gSupportsFramebufferObject)
 	{
 		QActionGroup* IconGroup = new QActionGroup(Menu);
 

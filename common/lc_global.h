@@ -28,12 +28,18 @@
 #define LC_ARRAY_COUNT(x) ((sizeof(x)/sizeof(0[x])) / ((size_t)(!(sizeof(x) % sizeof(0[x])))))
 #define LC_ARRAY_SIZE_CHECK(a,s) static_assert(LC_ARRAY_COUNT(a) == static_cast<int>(s), QT_STRINGIFY(a) " size mismatch.")
 
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 4, 0))
+#define LC_USE_QOPENGLWIDGET 1
+#endif
+
 #if !defined(EGL_VERSION_1_0) && !defined(GL_ES_VERSION_2_0) && !defined(GL_ES_VERSION_3_0) && !defined(QT_OPENGL_ES)
+#ifndef LC_USE_QOPENGLWIDGET
 #undef GL_LINES_ADJACENCY_EXT
 #undef GL_LINE_STRIP_ADJACENCY_EXT
 #undef GL_TRIANGLES_ADJACENCY_EXT
 #undef GL_TRIANGLE_STRIP_ADJACENCY_EXT
 #include "lc_glext.h"
+#endif
 #else
 #define LC_OPENGLES 1
 #endif

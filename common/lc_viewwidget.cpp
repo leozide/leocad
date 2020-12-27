@@ -17,36 +17,19 @@
 #include "lc_previewwidget.h"
 
 static QList<lcViewWidget*> gWidgetList;
+bool lcViewWidget::mResourcesLoaded;
 
+#ifdef LC_USE_QOPENGLWIDGET
 lcViewWidget::lcViewWidget(QWidget* Parent, lcView* View)
-	: QGLWidget(Parent, gWidgetList.isEmpty() ? nullptr : gWidgetList.first())
+	: lcViewWidgetParent(Parent)
+#else
+lcViewWidget::lcViewWidget(QWidget* Parent, lcView* View)
+	: lcViewWidgetParent(Parent, gWidgetList.isEmpty() ? nullptr : gWidgetList.first())
+#endif
 {
 	mWheelAccumulator = 0;
 	mView = View;
 	mView->SetWidget(this);
-
-	makeCurrent();
-
-	if (gWidgetList.isEmpty())
-	{
-		// TODO: Find a better place for the grid texture and font
-		gStringCache.Initialize(mView->mContext);
-		gTexFont.Initialize(mView->mContext);
-
-		lcInitializeGLExtensions(context());
-		lcContext::CreateResources();
-		lcView::CreateResources(mView->mContext);
-		lcViewSphere::CreateResources(mView->mContext);
-
-		if (!gSupportsShaderObjects && lcGetPreferences().mShadingMode == lcShadingMode::DefaultLights)
-			lcGetPreferences().mShadingMode = lcShadingMode::Flat;
-
-		if (!gSupportsFramebufferObjectARB && !gSupportsFramebufferObjectEXT)
-			gMainWindow->GetPartSelectionWidget()->DisableIconMode();
-
-		gPlaceholderMesh = new lcMesh;
-		gPlaceholderMesh->CreateBox();
-	}
 
 	gWidgetList.append(this);
 
@@ -70,11 +53,13 @@ lcViewWidget::~lcViewWidget()
 
 		lcGetPiecesLibrary()->ReleaseBuffers(mView->mContext);
 		lcView::DestroyResources(mView->mContext);
-		lcContext::DestroyResources();
+		mView->mContext->DestroyResources();
 		lcViewSphere::DestroyResources(mView->mContext);
 
 		delete gPlaceholderMesh;
 		gPlaceholderMesh = nullptr;
+
+		mResourcesLoaded = false;
 	}
 
 	delete mView;
@@ -82,7 +67,7 @@ lcViewWidget::~lcViewWidget()
 
 QSize lcViewWidget::sizeHint() const
 {
-	return mPreferredSize.isEmpty() ? QGLWidget::sizeHint() : mPreferredSize;
+	return mPreferredSize.isEmpty() ? lcViewWidgetParent::sizeHint() : mPreferredSize;
 }
 
 void lcViewWidget::SetView(lcView* View)
@@ -91,6 +76,9 @@ void lcViewWidget::SetView(lcView* View)
 
 	if (View)
 	{
+#ifdef LC_USE_QOPENGLWIDGET
+		View->mContext->SetGLContext(context());
+#endif
 		View->SetWidget(this);
 		const float Scale = GetDeviceScale();
 		View->SetSize(width() * Scale, height() * Scale);
@@ -148,6 +136,37 @@ void lcViewWidget::SetPreviewPosition(const QRect& ParentRect)
 	show();
 }
 
+void lcViewWidget::initializeGL()
+{
+#ifdef LC_USE_QOPENGLWIDGET
+	mView->mContext->SetGLContext(context());
+#endif
+
+	if (!mResourcesLoaded)
+	{
+		lcInitializeGLExtensions(context());
+
+		// TODO: Find a better place for the grid texture and font
+		gStringCache.Initialize(mView->mContext);
+		gTexFont.Initialize(mView->mContext);
+
+		mView->mContext->CreateResources();
+		lcView::CreateResources(mView->mContext);
+		lcViewSphere::CreateResources(mView->mContext);
+
+		if (!gSupportsShaderObjects && lcGetPreferences().mShadingMode == lcShadingMode::DefaultLights)
+			lcGetPreferences().mShadingMode = lcShadingMode::Flat;
+
+		if (!gSupportsFramebufferObject)
+			gMainWindow->GetPartSelectionWidget()->DisableIconMode();
+
+		gPlaceholderMesh = new lcMesh;
+		gPlaceholderMesh->CreateBox();
+
+		mResourcesLoaded = true;
+	}
+}
+
 void lcViewWidget::resizeGL(int Width, int Height)
 {
 	mView->SetSize(Width, Height);
@@ -163,7 +182,7 @@ void lcViewWidget::focusInEvent(QFocusEvent* FocusEvent)
 	if (mView)
 		mView->SetFocus(true);
 
-	QGLWidget::focusInEvent(FocusEvent);
+	lcViewWidgetParent::focusInEvent(FocusEvent);
 }
 
 void lcViewWidget::focusOutEvent(QFocusEvent* FocusEvent)
@@ -171,7 +190,7 @@ void lcViewWidget::focusOutEvent(QFocusEvent* FocusEvent)
 	if (mView)
 		mView->SetFocus(false);
 
-	QGLWidget::focusOutEvent(FocusEvent);
+	lcViewWidgetParent::focusOutEvent(FocusEvent);
 }
 
 void lcViewWidget::keyPressEvent(QKeyEvent* KeyEvent)
@@ -182,7 +201,7 @@ void lcViewWidget::keyPressEvent(QKeyEvent* KeyEvent)
 		mView->UpdateCursor();
 	}
 
-	QGLWidget::keyPressEvent(KeyEvent);
+	lcViewWidgetParent::keyPressEvent(KeyEvent);
 }
 
 void lcViewWidget::keyReleaseEvent(QKeyEvent* KeyEvent)
@@ -193,7 +212,7 @@ void lcViewWidget::keyReleaseEvent(QKeyEvent* KeyEvent)
 		mView->UpdateCursor();
 	}
 
-	QGLWidget::keyReleaseEvent(KeyEvent);
+	lcViewWidgetParent::keyReleaseEvent(KeyEvent);
 }
 
 void lcViewWidget::mousePressEvent(QMouseEvent* MouseEvent)
@@ -375,7 +394,7 @@ void lcViewWidget::dragMoveEvent(QDragMoveEvent* DragMoveEvent)
 		return;
 	}
 
-	QGLWidget::dragMoveEvent(DragMoveEvent);
+	lcViewWidgetParent::dragMoveEvent(DragMoveEvent);
 }
 
 void lcViewWidget::dropEvent(QDropEvent* DropEvent)
@@ -391,5 +410,5 @@ void lcViewWidget::dropEvent(QDropEvent* DropEvent)
 		return;
 	}
 
-	QGLWidget::dropEvent(DropEvent);
+	lcViewWidgetParent::dropEvent(DropEvent);
 }

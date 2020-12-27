@@ -7,6 +7,10 @@
 #include "lc_mainwindow.h"
 #include "lc_library.h"
 
+#ifdef LC_USE_QOPENGLWIDGET
+#include <QOpenGLFunctions_3_2_Core>
+#endif
+
 #ifdef LC_OPENGLES
 #define glEnableClientState(...)
 #define glDisableClientState(...)
@@ -128,7 +132,7 @@ void lcContext::CreateShaderPrograms()
 
 	LC_ARRAY_SIZE_CHECK(FragmentShaders, lcMaterialType::Count);
 
-	const auto LoadShader = [ShaderPrefix](const char* FileName, GLuint ShaderType) -> GLuint
+	const auto LoadShader = [this, ShaderPrefix](const char* FileName, GLuint ShaderType) -> GLuint
 	{
 		QFile ShaderFile(FileName);
 
@@ -232,7 +236,10 @@ void lcContext::DestroyResources()
 
 void lcContext::SetDefaultState()
 {
-#ifndef LC_OPENGLES
+#ifdef LC_USE_QOPENGLWIDGET
+	if (QSurfaceFormat::defaultFormat().samples() > 1)
+		glEnable(GL_LINE_SMOOTH);
+#elif !defined(LC_OPENGLES)
 	if (QGLFormat::defaultFormat().sampleBuffers() && QGLFormat::defaultFormat().samples() > 1)
 		glEnable(GL_LINE_SMOOTH);
 #endif
@@ -536,11 +543,15 @@ void lcContext::ClearFramebuffer()
 	if (!mFramebufferObject)
 		return;
 
+#ifdef LC_USE_QOPENGLWIDGET
+	glBindFramebuffer(GL_FRAMEBUFFER, mGLContext->defaultFramebufferObject());
+#else
 	if (gSupportsFramebufferObjectARB)
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-#ifndef LC_OPENGLES
+#if !defined(LC_OPENGLES) && !defined(LC_USE_QOPENGLWIDGET)
 	else if (gSupportsFramebufferObjectEXT)
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+#endif
 #endif
 
 	mFramebufferObject = 0;
@@ -550,9 +561,17 @@ lcFramebuffer lcContext::CreateFramebuffer(int Width, int Height, bool Depth, bo
 {
 	lcFramebuffer Framebuffer(Width, Height);
 
+#ifdef LC_USE_QOPENGLWIDGET
+	if (gSupportsFramebufferObject)
+#else
 	if (gSupportsFramebufferObjectARB)
+#endif
 	{
+#ifdef LC_USE_QOPENGLWIDGET
+		int Samples = (Multisample && gSupportsTexImage2DMultisample) ? QSurfaceFormat::defaultFormat().samples() : 1;
+#else
 		int Samples = (Multisample && gSupportsTexImage2DMultisample && QGLFormat::defaultFormat().sampleBuffers()) ? QGLFormat::defaultFormat().samples() : 1;
+#endif
 
 		glGenFramebuffers(1, &Framebuffer.mObject);
 		glBindFramebuffer(GL_FRAMEBUFFER, Framebuffer.mObject);
@@ -576,7 +595,24 @@ lcFramebuffer lcContext::CreateFramebuffer(int Width, int Height, bool Depth, bo
 				glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, Framebuffer.mDepthRenderbuffer);
 			}
 		}
-#ifndef LC_OPENGLES
+#ifdef LC_USE_QOPENGLWIDGET
+		else
+		{
+			QOpenGLFunctions_3_2_Core* Funcs = mGLContext->versionFunctions<QOpenGLFunctions_3_2_Core>();
+
+			BindTexture2DMS(Framebuffer.mColorTexture);
+			Funcs->glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, Samples, GL_RGBA, Width, Height, GL_TRUE);
+			BindTexture2DMS(0);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, Framebuffer.mColorTexture, 0);
+
+			if (Depth)
+			{
+				glBindRenderbuffer(GL_RENDERBUFFER, Framebuffer.mDepthRenderbuffer);
+				Funcs->glRenderbufferStorageMultisample(GL_RENDERBUFFER, Samples, GL_DEPTH_COMPONENT24, Width, Height);
+				glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, Framebuffer.mDepthRenderbuffer);
+			}
+		}
+#elif !defined(LC_OPENGLES)
 		else
 		{
 			BindTexture2DMS(Framebuffer.mColorTexture);
@@ -598,7 +634,7 @@ lcFramebuffer lcContext::CreateFramebuffer(int Width, int Height, bool Depth, bo
 
 		glBindFramebuffer(GL_FRAMEBUFFER, mFramebufferObject);
 	}
-#ifndef LC_OPENGLES
+#if !defined(LC_OPENGLES) && !defined(LC_USE_QOPENGLWIDGET)
 	else if (gSupportsFramebufferObjectEXT)
 	{
 		glGenFramebuffersEXT(1, &Framebuffer.mObject);
@@ -634,13 +670,17 @@ lcFramebuffer lcContext::CreateFramebuffer(int Width, int Height, bool Depth, bo
 
 void lcContext::DestroyFramebuffer(lcFramebuffer& Framebuffer)
 {
+#ifdef LC_USE_QOPENGLWIDGET
+	if (gSupportsFramebufferObject)
+#else
 	if (gSupportsFramebufferObjectARB)
+#endif
 	{
 		glDeleteFramebuffers(1, &Framebuffer.mObject);
 		glDeleteTextures(1, &Framebuffer.mColorTexture);
 		glDeleteRenderbuffers(1, &Framebuffer.mDepthRenderbuffer);
 	}
-#ifndef LC_OPENGLES
+#if !defined(LC_OPENGLES) && !defined(LC_USE_QOPENGLWIDGET)
 	else if (gSupportsFramebufferObjectEXT)
 	{
 		glDeleteFramebuffersEXT(1, &Framebuffer.mObject);
@@ -661,11 +701,15 @@ void lcContext::BindFramebuffer(GLuint FramebufferObject)
 	if (FramebufferObject == mFramebufferObject)
 		return;
 
+#ifdef LC_USE_QOPENGLWIDGET
+	glBindFramebuffer(GL_FRAMEBUFFER, FramebufferObject);
+#else
 	if (gSupportsFramebufferObjectARB)
 		glBindFramebuffer(GL_FRAMEBUFFER, FramebufferObject);
 #ifndef LC_OPENGLES
 	else if (gSupportsFramebufferObjectEXT)
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, FramebufferObject);
+#endif
 #endif
 
 	mFramebufferObject = FramebufferObject;
@@ -673,10 +717,17 @@ void lcContext::BindFramebuffer(GLuint FramebufferObject)
 
 std::pair<lcFramebuffer, lcFramebuffer> lcContext::CreateRenderFramebuffer(int Width, int Height)
 {
+#ifdef LC_USE_QOPENGLWIDGET
+	if (gSupportsFramebufferObject && QSurfaceFormat::defaultFormat().samples() > 1)
+		return std::make_pair(CreateFramebuffer(Width, Height, true, true), CreateFramebuffer(Width, Height, false, false));
+	else
+		return std::make_pair(CreateFramebuffer(Width, Height, true, false), lcFramebuffer());
+#else
 	if (gSupportsFramebufferObjectARB && QGLFormat::defaultFormat().sampleBuffers() && QGLFormat::defaultFormat().samples() > 1)
 		return std::make_pair(CreateFramebuffer(Width, Height, true, true), CreateFramebuffer(Width, Height, false, false));
 	else
 		return std::make_pair(CreateFramebuffer(Width, Height, true, false), lcFramebuffer());
+#endif
 }
 
 void lcContext::DestroyRenderFramebuffer(std::pair<lcFramebuffer, lcFramebuffer>& RenderFramebuffer)
@@ -705,7 +756,14 @@ void lcContext::GetRenderFramebufferImage(const std::pair<lcFramebuffer, lcFrame
 #ifndef LC_OPENGLES
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, RenderFramebuffer.second.mObject);
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, RenderFramebuffer.first.mObject);
+
+#ifdef LC_USE_QOPENGLWIDGET
+		QOpenGLFunctions_3_2_Core* Funcs = mGLContext->versionFunctions<QOpenGLFunctions_3_2_Core>();
+		Funcs->glBlitFramebuffer(0, 0, Width, Height, 0, 0, Width, Height, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+#else
 		glBlitFramebuffer(0, 0, Width, Height, 0, 0, Width, Height, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+#endif
+
 		BindFramebuffer(RenderFramebuffer.second);
 #endif
 	}

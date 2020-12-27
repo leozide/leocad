@@ -1,5 +1,6 @@
 #include "lc_global.h"
 #include "lc_view.h"
+#include "lc_viewwidget.h"
 #include <stdlib.h>
 #include "lc_mainwindow.h"
 #include "camera.h"
@@ -722,7 +723,11 @@ bool lcView::BeginRenderToImage(int Width, int Height)
 	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &MaxTexture);
 
 	MaxTexture = qMin(MaxTexture, 2048);
+#ifdef LC_USE_QOPENGLWIDGET
+	MaxTexture /= QSurfaceFormat::defaultFormat().samples();
+#else
 	MaxTexture /= QGLFormat::defaultFormat().sampleBuffers() ? QGLFormat::defaultFormat().samples() : 1;
+#endif
 
 	int TileWidth = qMin(Width, MaxTexture);
 	int TileHeight = qMin(Height, MaxTexture);

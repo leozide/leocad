@@ -76,7 +76,14 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 		ui->antiAliasingSamples->setCurrentIndex(0);
 	ui->edgeLines->setChecked(mOptions->Preferences.mDrawEdgeLines);
 
-#ifndef LC_OPENGLES
+#ifdef LC_USE_QOPENGLWIDGET
+	if (QSurfaceFormat::defaultFormat().samples() > 1)
+	{
+		glGetFloatv(GL_SMOOTH_LINE_WIDTH_RANGE, mLineWidthRange);
+		glGetFloatv(GL_SMOOTH_LINE_WIDTH_GRANULARITY, &mLineWidthGranularity);
+	}
+	else
+#elif !defined(LC_OPENGLES)
 	if (QGLFormat::defaultFormat().sampleBuffers() && QGLFormat::defaultFormat().samples() > 1)
 	{
 		glGetFloatv(GL_SMOOTH_LINE_WIDTH_RANGE, mLineWidthRange);

@@ -1,6 +1,12 @@
 #pragma once
 
-class lcViewWidget : public QGLWidget
+#ifdef LC_USE_QOPENGLWIDGET
+typedef QOpenGLWidget lcViewWidgetParent;
+#else
+typedef QGLWidget lcViewWidgetParent;
+#endif
+
+class lcViewWidget : public lcViewWidgetParent
 {
 	Q_OBJECT
 
@@ -21,13 +27,16 @@ public:
 protected:
 	float GetDeviceScale() const
 	{
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+#ifdef LC_USE_QOPENGLWIDGET
+		return devicePixelRatio();
+#elif (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
 		return windowHandle()->devicePixelRatio();
 #else
 		return 1.0f;
 #endif
 	}
 
+	void initializeGL() override;
 	void resizeGL(int Width, int Height) override;
 	void paintGL() override;
 	void focusInEvent(QFocusEvent* FocusEvent) override;
@@ -47,4 +56,6 @@ protected:
 	lcView* mView;
 	QSize mPreferredSize;
 	int mWheelAccumulator;
+
+	static bool mResourcesLoaded;
 };

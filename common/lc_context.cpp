@@ -968,7 +968,7 @@ void lcContext::SetVertexFormatPosition(int PositionSize)
 
 void lcContext::SetVertexFormat(int BufferOffset, int PositionSize, int NormalSize, int TexCoordSize, int ColorSize, bool EnableNormals)
 {
-	const int VertexSize = (PositionSize + TexCoordSize + ColorSize) * sizeof(float) + NormalSize * sizeof(quint32);
+	const int VertexSize = (PositionSize + TexCoordSize) * sizeof(float) + NormalSize * sizeof(quint32) + ColorSize;
 	char* VertexBufferPointer = mVertexBufferPointer + BufferOffset;
 
 	if (gSupportsShaderObjects)
@@ -1019,7 +1019,7 @@ void lcContext::SetVertexFormat(int BufferOffset, int PositionSize, int NormalSi
 
 		if (ColorSize)
 		{
-			glVertexAttribPointer(LC_ATTRIB_COLOR, ColorSize, GL_FLOAT, false, VertexSize, VertexBufferPointer + Offset);
+			glVertexAttribPointer(LC_ATTRIB_COLOR, ColorSize, GL_UNSIGNED_BYTE, true, VertexSize, VertexBufferPointer + Offset);
 
 			if (!mColorEnabled)
 			{

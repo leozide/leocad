@@ -908,43 +908,44 @@ void lcView::DrawBackground() const
 		return;
 	}
 
-	lcContext* Context = mContext;
-
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	Context->SetDepthWrite(false);
+	mContext->SetDepthWrite(false);
 	glDisable(GL_DEPTH_TEST);
 
 	float ViewWidth = (float)mWidth;
 	float ViewHeight = (float)mHeight;
 
-	Context->SetWorldMatrix(lcMatrix44Identity());
-	Context->SetViewMatrix(lcMatrix44Translation(lcVector3(0.375, 0.375, 0.0)));
-	Context->SetProjectionMatrix(lcMatrix44Ortho(0.0f, ViewWidth, 0.0f, ViewHeight, -1.0f, 1.0f));
+	mContext->SetWorldMatrix(lcMatrix44Identity());
+	mContext->SetViewMatrix(lcMatrix44Translation(lcVector3(0.375, 0.375, 0.0)));
+	mContext->SetProjectionMatrix(lcMatrix44Ortho(0.0f, ViewWidth, 0.0f, ViewHeight, -1.0f, 1.0f));
 
-	Context->SetSmoothShading(true);
+	mContext->SetSmoothShading(true);
 
-	const lcVector3 Color1 = lcVector3FromColor(Preferences.mBackgroundGradientColorTop);
-	const lcVector3 Color2 = lcVector3FromColor(Preferences.mBackgroundGradientColorBottom);
+	const quint32 Color1 = Preferences.mBackgroundGradientColorTop;
+	const quint32 Color2 = Preferences.mBackgroundGradientColorBottom;
 
-	float Verts[] =
+	struct lcBackgroundVertex
 	{
-		ViewWidth, ViewHeight, Color1[0], Color1[1], Color1[2], 1.0f,
-		0.0f,      ViewHeight, Color1[0], Color1[1], Color1[2], 1.0f,
-		0.0f,      0.0f,       Color2[0], Color2[1], Color2[2], 1.0f,
-		ViewWidth, 0.0f,       Color2[0], Color2[1], Color2[2], 1.0f
+		float x, y;
+		quint32 Color;
 	};
 
-	Context->SetMaterial(lcMaterialType::UnlitVertexColor);
-	Context->SetVertexBufferPointer(Verts);
-	Context->SetVertexFormat(0, 2, 0, 0, 4, false);
+	const lcBackgroundVertex Verts[4] =
+	{
+		{ ViewWidth, ViewHeight, Color1 }, { 0.0f, ViewHeight, Color1 }, { 0.0f, 0.0f, Color2 }, { ViewWidth, 0.0f, Color2 }
+	};
 
-	Context->DrawPrimitives(GL_TRIANGLE_FAN, 0, 4);
+	mContext->SetMaterial(lcMaterialType::UnlitVertexColor);
+	mContext->SetVertexBufferPointer(Verts);
+	mContext->SetVertexFormat(0, 2, 0, 0, 4, false);
 
-	Context->SetSmoothShading(false);
+	mContext->DrawPrimitives(GL_TRIANGLE_FAN, 0, 4);
+
+	mContext->SetSmoothShading(false);
 
 	glEnable(GL_DEPTH_TEST);
-	Context->SetDepthWrite(true);
+	mContext->SetDepthWrite(true);
 }
 
 void lcView::DrawViewport() const
@@ -1012,23 +1013,32 @@ void lcView::DrawAxes() const
 
 //	glClear(GL_DEPTH_BUFFER_BIT);
 
-	const float Verts[28 * 3] =
+	struct lcAxisVertex
 	{
-		 0.00f,  0.00f,  0.00f, 20.00f,  0.00f,  0.00f, 12.00f,  3.00f,  0.00f, 12.00f,  2.12f,  2.12f,
-		12.00f,  0.00f,  3.00f, 12.00f, -2.12f,  2.12f, 12.00f, -3.00f,  0.00f, 12.00f, -2.12f, -2.12f,
-		12.00f,  0.00f, -3.00f, 12.00f,  2.12f, -2.12f,  0.00f, 20.00f,  0.00f,  3.00f, 12.00f,  0.00f,
-		 2.12f, 12.00f,  2.12f,  0.00f, 12.00f,  3.00f, -2.12f, 12.00f,  2.12f, -3.00f, 12.00f,  0.00f,
-		-2.12f, 12.00f, -2.12f,  0.00f, 12.00f, -3.00f,  2.12f, 12.00f, -2.12f,  0.00f,  0.00f, 20.00f,
-		 0.00f,  3.00f, 12.00f,  2.12f,  2.12f, 12.00f,  3.00f,  0.00f, 12.00f,  2.12f, -2.12f, 12.00f,
-		 0.00f, -3.00f, 12.00f, -2.12f, -2.12f, 12.00f, -3.00f,  0.00f, 12.00f, -2.12f,  2.12f, 12.00f,
+		float x, y, z;
+		quint32 Color;
+	};
+
+	const quint32 Red = LC_RGBA(204, 0, 0, 255);
+	const quint32 Green = LC_RGBA(0, 204, 0, 255);
+	const quint32 Blue = LC_RGBA(0, 0, 204, 255);
+
+	const lcAxisVertex Verts[30] =
+	{
+		{  0.00f,  0.00f,  0.00f, Red }, { 20.00f,  0.00f,  0.00f, Red }, { 12.00f,  3.00f,  0.00f, Red }, { 12.00f,  2.12f,  2.12f, Red }, { 12.00f,  0.00f,  3.00f, Red },
+		{ 12.00f, -2.12f,  2.12f, Red }, { 12.00f, -3.00f,  0.00f, Red }, { 12.00f, -2.12f, -2.12f, Red }, { 12.00f,  0.00f, -3.00f, Red }, { 12.00f,  2.12f, -2.12f, Red },
+		{  0.00f,  0.00f,  0.00f, Green }, {  0.00f, 20.00f,  0.00f, Green }, {  3.00f, 12.00f,  0.00f, Green }, {  2.12f, 12.00f,  2.12f, Green }, {  0.00f, 12.00f,  3.00f, Green },
+		{ -2.12f, 12.00f,  2.12f, Green }, { -3.00f, 12.00f,  0.00f, Green }, { -2.12f, 12.00f, -2.12f, Green }, {  0.00f, 12.00f, -3.00f, Green }, {  2.12f, 12.00f, -2.12f, Green },
+		{  0.00f,  0.00f,  0.00f, Blue }, {  0.00f,  0.00f, 20.00f, Blue }, {  0.00f,  3.00f, 12.00f, Blue }, {  2.12f,  2.12f, 12.00f, Blue }, {  3.00f,  0.00f, 12.00f, Blue },
+		{  2.12f, -2.12f, 12.00f, Blue }, {  0.00f, -3.00f, 12.00f, Blue }, { -2.12f, -2.12f, 12.00f, Blue }, { -3.00f,  0.00f, 12.00f, Blue }, { -2.12f,  2.12f, 12.00f, Blue }
 	};
 
 	const GLushort Indices[78] =
 	{
-		 0,  1,  0, 10,  0, 19,
+		 0,  1, 10, 11, 20, 21,
 		 1,  2,  3,  1,  3,  4,  1,  4,  5,  1,  5,  6,  1,  6,  7,  1,  7,  8,  1,  8,  9,  1,  9,  2,
-		10, 11, 12, 10, 12, 13, 10, 13, 14, 10, 14, 15, 10, 15, 16, 10, 16, 17, 10, 17, 18, 10, 18, 11,
-		19, 20, 21, 19, 21, 22, 19, 22, 23, 19, 23, 24, 19, 24, 25, 19, 25, 26, 19, 26, 27, 19, 27, 20
+		11, 12, 13, 11, 13, 14, 11, 14, 15, 11, 15, 16, 11, 16, 17, 11, 17, 18, 11, 18, 19, 11, 19, 12,
+		21, 22, 23, 21, 23, 24, 21, 24, 25, 21, 25, 26, 21, 26, 27, 21, 27, 28, 21, 28, 29, 21, 29, 22
 	};
 
 	lcMatrix44 TranslationMatrix = lcMatrix44Translation(lcVector3(30.375f, 30.375f, 0.0f));
@@ -1036,28 +1046,17 @@ void lcView::DrawAxes() const
 	WorldViewMatrix.SetTranslation(lcVector3(0, 0, 0));
 
 	mContext->SetLineWidth(1.0f);
-	mContext->SetMaterial(lcMaterialType::UnlitColor);
+	mContext->SetMaterial(lcMaterialType::UnlitVertexColor);
 	mContext->SetWorldMatrix(lcMatrix44Identity());
 	mContext->SetViewMatrix(lcMul(WorldViewMatrix, TranslationMatrix));
 	mContext->SetProjectionMatrix(lcMatrix44Ortho(0, mWidth, 0, mHeight, -50, 50));
 
 	mContext->SetVertexBufferPointer(Verts);
-	mContext->SetVertexFormatPosition(3);
+	mContext->SetVertexFormat(0, 3, 0, 0, 4, false);
 	mContext->SetIndexBufferPointer(Indices);
 
-	mContext->SetColor(0.8f, 0.0f, 0.0f, 1.0f);
-	mContext->DrawIndexedPrimitives(GL_LINES, 2, GL_UNSIGNED_SHORT, 0);
-	mContext->SetColor(0.0f, 0.8f, 0.0f, 1.0f);
-	mContext->DrawIndexedPrimitives(GL_LINES, 2, GL_UNSIGNED_SHORT, 2 * 2);
-	mContext->SetColor(0.0f, 0.0f, 0.8f, 1.0f);
-	mContext->DrawIndexedPrimitives(GL_LINES, 2, GL_UNSIGNED_SHORT, 4 * 2);
-
-	mContext->SetColor(0.8f, 0.0f, 0.0f, 1.0f);
-	mContext->DrawIndexedPrimitives(GL_TRIANGLES, 24, GL_UNSIGNED_SHORT, 6 * 2);
-	mContext->SetColor(0.0f, 0.8f, 0.0f, 1.0f);
-	mContext->DrawIndexedPrimitives(GL_TRIANGLES, 24, GL_UNSIGNED_SHORT, (6 + 24) * 2);
-	mContext->SetColor(0.0f, 0.0f, 0.8f, 1.0f);
-	mContext->DrawIndexedPrimitives(GL_TRIANGLES, 24, GL_UNSIGNED_SHORT, (6 + 48) * 2);
+	mContext->DrawIndexedPrimitives(GL_LINES, 6, GL_UNSIGNED_SHORT, 0);
+	mContext->DrawIndexedPrimitives(GL_TRIANGLES, 72, GL_UNSIGNED_SHORT, 6 * 2);
 
 	mContext->SetMaterial(lcMaterialType::UnlitTextureModulate);
 	mContext->SetViewMatrix(TranslationMatrix);

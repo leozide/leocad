@@ -288,6 +288,7 @@ protected:
 	Qt::KeyboardModifiers mMouseModifiers = Qt::NoModifier;
 
 	bool mTrackUpdated = false;
+	bool mToolClicked = false;
 	lcTrackTool mTrackTool = lcTrackTool::None;
 	lcTrackButton mTrackButton = lcTrackButton::None;
 	lcCursor mCursor = lcCursor::Default;

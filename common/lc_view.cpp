@@ -3027,6 +3027,7 @@ void lcView::CancelTrackingOrClearSelection()
 void lcView::OnButtonDown(lcTrackButton TrackButton)
 {
 	lcModel* ActiveModel = GetActiveModel();
+	mToolClicked = false;
 
 	switch (mTrackTool)
 	{
@@ -3045,6 +3046,7 @@ void lcView::OnButtonDown(lcTrackButton TrackButton)
 			if ((mMouseModifiers & Qt::ControlModifier) == 0)
 				gMainWindow->SetTool(lcTool::Select);
 
+			mToolClicked = true;
 			UpdateTrackTool();
 		}
 		break;
@@ -3056,6 +3058,7 @@ void lcView::OnButtonDown(lcTrackButton TrackButton)
 			if ((mMouseModifiers & Qt::ControlModifier) == 0)
 				gMainWindow->SetTool(lcTool::Select);
 
+			mToolClicked = true;
 			UpdateTrackTool();
 		}
 		break;
@@ -3108,14 +3111,17 @@ void lcView::OnButtonDown(lcTrackButton TrackButton)
 
 	case lcTrackTool::Eraser:
 		ActiveModel->EraserToolClicked(FindObjectUnderPointer(false, false).Object);
+		mToolClicked = true;
 		break;
 
 	case lcTrackTool::Paint:
 		ActiveModel->PaintToolClicked(FindObjectUnderPointer(true, false).Object);
+		mToolClicked = true;
 		break;
 
 	case lcTrackTool::ColorPicker:
 		ActiveModel->ColorPickerToolClicked(FindObjectUnderPointer(true, false).Object);
+		mToolClicked = true;
 		break;
 
 	case lcTrackTool::Zoom:
@@ -3228,7 +3234,7 @@ void lcView::OnRightButtonDown()
 
 void lcView::OnRightButtonUp()
 {
-	bool ShowMenu = mTrackButton == lcTrackButton::None || !mTrackUpdated;
+	bool ShowMenu = !mToolClicked && (mTrackButton == lcTrackButton::None || !mTrackUpdated);
 
 	if (mTrackButton != lcTrackButton::None)
 		StopTracking(mTrackButton == lcTrackButton::Right);

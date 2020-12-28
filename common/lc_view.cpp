@@ -724,7 +724,9 @@ bool lcView::BeginRenderToImage(int Width, int Height)
 
 	MaxTexture = qMin(MaxTexture, 2048);
 #ifdef LC_USE_QOPENGLWIDGET
-	MaxTexture /= QSurfaceFormat::defaultFormat().samples();
+	const int Samples = QSurfaceFormat::defaultFormat().samples();
+	if (Samples > 1)
+		MaxTexture /= Samples;
 #else
 	MaxTexture /= QGLFormat::defaultFormat().sampleBuffers() ? QGLFormat::defaultFormat().samples() : 1;
 #endif

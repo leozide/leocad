@@ -568,7 +568,7 @@ lcFramebuffer lcContext::CreateFramebuffer(int Width, int Height, bool Depth, bo
 #endif
 	{
 #ifdef LC_USE_QOPENGLWIDGET
-		int Samples = (Multisample && gSupportsTexImage2DMultisample) ? QSurfaceFormat::defaultFormat().samples() : 1;
+		int Samples = (Multisample && gSupportsTexImage2DMultisample && QSurfaceFormat::defaultFormat().samples() > 1) ? QSurfaceFormat::defaultFormat().samples() : 1;
 #else
 		int Samples = (Multisample && gSupportsTexImage2DMultisample && QGLFormat::defaultFormat().sampleBuffers()) ? QGLFormat::defaultFormat().samples() : 1;
 #endif

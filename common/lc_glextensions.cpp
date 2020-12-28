@@ -125,36 +125,6 @@ PFNGLBLENDFUNCSEPARATEPROC lcBlendFuncSeparate;
 
 #endif
 
-static bool lcIsGLExtensionSupported(const GLubyte* Extensions, const char* Name)
-{
-	const GLubyte* Start;
-	GLubyte* Where;
-	GLubyte* Terminator;
-
-	Where = (GLubyte*)strchr(Name, ' ');
-	if (Where || *Name == '\0')
-		return false;
-
-	if (!Extensions)
-		return false;
-
-	for (Start = Extensions; ;)
-	{
-		Where = (GLubyte*)strstr((const char*)Start, Name);
-		if (!Where)
-			break;
-
-		Terminator = Where + strlen(Name);
-		if (Where == Start || *(Where - 1) == ' ')
-			if (*Terminator == ' ' || *Terminator == '\0')
-				return true;
-
-		Start = Terminator;
-	}
-
-	return false;
-}
-
 #if !defined(QT_NO_DEBUG) && defined(GL_ARB_debug_output)
 
 static void APIENTRY lcGLDebugCallback(GLenum Source, GLenum Type, GLuint Id, GLenum Severity, GLsizei Length, const GLchar* Message, GLvoid* UserParam)
@@ -216,6 +186,36 @@ void lcInitializeGLExtensions(const QOpenGLContext* Context)
 }
 
 #else
+
+static bool lcIsGLExtensionSupported(const GLubyte* Extensions, const char* Name)
+{
+	const GLubyte* Start;
+	GLubyte* Where;
+	GLubyte* Terminator;
+
+	Where = (GLubyte*)strchr(Name, ' ');
+	if (Where || *Name == '\0')
+		return false;
+
+	if (!Extensions)
+		return false;
+
+	for (Start = Extensions; ;)
+	{
+		Where = (GLubyte*)strstr((const char*)Start, Name);
+		if (!Where)
+			break;
+
+		Terminator = Where + strlen(Name);
+		if (Where == Start || *(Where - 1) == ' ')
+			if (*Terminator == ' ' || *Terminator == '\0')
+				return true;
+
+		Start = Terminator;
+	}
+
+	return false;
+}
 
 void lcInitializeGLExtensions(const QGLContext* Context)
 {

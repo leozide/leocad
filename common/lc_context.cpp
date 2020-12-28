@@ -718,7 +718,7 @@ void lcContext::BindFramebuffer(GLuint FramebufferObject)
 std::pair<lcFramebuffer, lcFramebuffer> lcContext::CreateRenderFramebuffer(int Width, int Height)
 {
 #ifdef LC_USE_QOPENGLWIDGET
-	if (gSupportsFramebufferObject && QSurfaceFormat::defaultFormat().samples() > 1)
+	if (gSupportsFramebufferObject && gSupportsTexImage2DMultisample && QSurfaceFormat::defaultFormat().samples() > 1)
 		return std::make_pair(CreateFramebuffer(Width, Height, true, true), CreateFramebuffer(Width, Height, false, false));
 	else
 		return std::make_pair(CreateFramebuffer(Width, Height, true, false), lcFramebuffer());

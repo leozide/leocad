@@ -1230,6 +1230,8 @@ void lcQPreferencesDialog::on_mouseAssign_clicked()
 				mOptions->MouseShortcuts.mShortcuts[ToolIdx].Modifiers1 = mOptions->MouseShortcuts.mShortcuts[ToolIdx].Modifiers2;
 				mOptions->MouseShortcuts.mShortcuts[ToolIdx].Button2 = Qt::NoButton;
 				mOptions->MouseShortcuts.mShortcuts[ToolIdx].Modifiers2 = Qt::NoModifier;
+
+				UpdateMouseTreeItem(ToolIdx);
 			}
 		}
 	}

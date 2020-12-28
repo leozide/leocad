@@ -77,7 +77,8 @@ void lcViewWidget::SetView(lcView* View)
 	if (View)
 	{
 #ifdef LC_USE_QOPENGLWIDGET
-		View->mContext->SetGLContext(context());
+		if (context())
+			View->mContext->SetGLContext(context());
 #endif
 		View->SetWidget(this);
 		const float Scale = GetDeviceScale();

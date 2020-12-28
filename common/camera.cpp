@@ -1087,7 +1087,7 @@ void lcCamera::SetViewpoint(const lcVector3& Position, const lcVector3& Target, 
 	SideVector = lcCross(Direction, Up);
 	UpVector = lcCross(SideVector, Direction);
 	UpVector.Normalize();
-	mUpVector = Up;
+	mUpVector = UpVector;
 
 	ChangeKey(mPositionKeys, mPosition, 1, false);
 	ChangeKey(mTargetPositionKeys, mTargetPosition, 1, false);

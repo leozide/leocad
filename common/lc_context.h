@@ -129,7 +129,7 @@ public:
 #ifdef LC_USE_QOPENGLWIDGET
 	void SetGLContext(QOpenGLContext* GLContext);
 #else
-	void SetGLContext(QGLContext* GLContext);
+	void SetGLContext(const QGLContext* GLContext);
 #endif
 
 	void SetWorldMatrix(const lcMatrix44& WorldMatrix)
@@ -232,8 +232,6 @@ protected:
 
 #ifdef LC_USE_QOPENGLWIDGET
 	QOpenGLContext* mGLContext = nullptr;
-#else
-	QGLContext* mGLContext = nullptr;
 #endif
 	bool mValid = false;
 

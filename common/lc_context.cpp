@@ -261,13 +261,13 @@ void lcContext::DestroyResources()
 #ifdef LC_USE_QOPENGLWIDGET
 void lcContext::SetGLContext(QOpenGLContext* GLContext)
 #else
-void lcContext::SetGLContext(QGLContext* GLContext);
+void lcContext::SetGLContext(const QGLContext* GLContext)
 #endif
 {
 #ifdef LC_USE_QOPENGLWIDGET
 	initializeOpenGLFunctions();
-#endif
 	mGLContext = GLContext;
+#endif
 
 	if (!mValidContexts)
 	{

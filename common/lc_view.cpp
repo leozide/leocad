@@ -781,7 +781,7 @@ bool lcView::BeginRenderToImage(int Width, int Height)
 	if (QSurfaceFormat::defaultFormat().samples() > 1)
 		Format.setSamples(QSurfaceFormat::defaultFormat().samples());
 
-	mRenderFramebuffer = std::make_unique<QOpenGLFramebufferObject>(QSize(TileWidth, TileHeight), Format);
+	mRenderFramebuffer = std::unique_ptr<QOpenGLFramebufferObject>(new QOpenGLFramebufferObject(QSize(TileWidth, TileHeight), Format));
 
 	return mRenderFramebuffer->bind();
 #else

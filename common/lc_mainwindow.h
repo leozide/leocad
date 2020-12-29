@@ -428,8 +428,6 @@ protected:
 	lcSelectionMode mSelectionMode;
 	int mModelTabWidgetContextMenuIndex;
 
-	QAction* mActionFileRecentSeparator;
-
 	lcTabWidget* mModelTabWidget;
 	QToolBar* mStandardToolBar;
 	QToolBar* mToolsToolBar;

@@ -784,7 +784,7 @@ std::pair<lcFramebuffer, lcFramebuffer> lcContext::CreateRenderFramebuffer(int W
 	else
 		return std::make_pair(CreateFramebuffer(Width, Height, true, false), lcFramebuffer());
 #else
-	if (gSupportsFramebufferObjectARB && QGLFormat::defaultFormat().sampleBuffers() && QGLFormat::defaultFormat().samples() > 1)
+	if (gSupportsFramebufferObjectARB && gSupportsTexImage2DMultisample && QGLFormat::defaultFormat().sampleBuffers() && QGLFormat::defaultFormat().samples() > 1)
 		return std::make_pair(CreateFramebuffer(Width, Height, true, true), CreateFramebuffer(Width, Height, false, false));
 	else
 		return std::make_pair(CreateFramebuffer(Width, Height, true, false), lcFramebuffer());

@@ -795,7 +795,7 @@ void lcQPropertiesTree::slotColorButtonClicked()
 
 	lcQColorPickerPopup* Popup = new lcQColorPickerPopup(Button, ColorIndex);
 	connect(Popup, SIGNAL(selected(int)), SLOT(slotSetValue(int)));
-	Popup->setMinimumSize(300, 200);
+	Popup->setMinimumSize(qMax(300, width()), 200);
 
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 10, 0))
 	QScreen* Screen = QGuiApplication::screenAt(Button->mapToGlobal(Button->rect().bottomLeft()));
@@ -804,18 +804,20 @@ void lcQPropertiesTree::slotColorButtonClicked()
 	const QRect ScreenRect = QApplication::desktop()->geometry();
 #endif
 
-	QPoint pos = Button->mapToGlobal(Button->rect().bottomLeft());
-	if (pos.x() < ScreenRect.left())
-		pos.setX(ScreenRect.left());
-	if (pos.y() < ScreenRect.top())
-		pos.setY(ScreenRect.top());
+	int x = mapToGlobal(QPoint(0, 0)).x();
+	int y = Button->mapToGlobal(Button->rect().bottomLeft()).y();
 
-	if ((pos.x() + Popup->width()) > ScreenRect.right())
-		pos.setX(ScreenRect.right() - Popup->width());
-	if ((pos.y() + Popup->height()) > ScreenRect.bottom())
-		pos.setY(ScreenRect.bottom() - Popup->height());
-	Popup->move(pos);
+	if (x < ScreenRect.left())
+		x = ScreenRect.left();
+	if (y < ScreenRect.top())
+		y = ScreenRect.top();
 
+	if (x + Popup->width() > ScreenRect.right())
+		x = ScreenRect.right() - Popup->width();
+	if (y + Popup->height() > ScreenRect.bottom())
+		y = ScreenRect.bottom() - Popup->height();
+
+	Popup->move(QPoint(x, y));
 	Popup->setFocus();
 	Popup->show();
 }

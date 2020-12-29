@@ -83,9 +83,6 @@ void lcModelTabWidget::Clear()
 		View->Clear();
 	mViews.RemoveAll();
 	mActiveView = nullptr;
-	lcViewWidget* Widget = (lcViewWidget*)layout()->itemAt(0)->widget();
-	delete Widget->GetView();
-	Widget->SetView(nullptr);
 }
 
 lcMainWindow::lcMainWindow()

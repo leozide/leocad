@@ -51,12 +51,14 @@ QSize lcViewWidget::sizeHint() const
 
 void lcViewWidget::SetView(lcView* View)
 {
-	mView = View;
-
 	if (View)
 	{
 		if (context())
+		{
+			makeCurrent();
 			View->mContext->SetGLContext(context());
+		}
+
 		View->SetWidget(this);
 		const float Scale = GetDeviceScale();
 		View->SetSize(width() * Scale, height() * Scale);
@@ -64,6 +66,9 @@ void lcViewWidget::SetView(lcView* View)
 		if (hasFocus())
 			View->SetFocus(true);
 	}
+
+	delete mView;
+	mView = View;
 }
 
 void lcViewWidget::SetPreviewPosition(const QRect& ParentRect)

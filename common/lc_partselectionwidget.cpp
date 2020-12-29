@@ -387,14 +387,34 @@ void lcPartSelectionListModel::PartLoaded(PieceInfo* Info)
 
 void lcPartSelectionListModel::DrawPreview(int InfoIndex)
 {
+	const int Width = mIconSize * 2;
+	const int Height = mIconSize * 2;
+
+#ifdef LC_USE_QOPENGLWIDGET
+	if (mView && (mView->GetWidth() != Width || mView->GetHeight() != Height))
+		mView.reset();
+
+	if (!mView)
+	{
+		mView = std::unique_ptr<lcView>(new lcView(lcViewType::PartsList, nullptr));
+
+		if (!mView->BeginRenderToImage(Width, Height))
+		{
+			mView.reset();
+			return;
+		}
+	}
+
+	mView->MakeCurrent();
+
+	lcContext* Context = mView->mContext;
+#else
 	lcView* ActiveView = gMainWindow->GetActiveView();
 	if (!ActiveView)
 		return;
 
 	ActiveView->MakeCurrent();
 	lcContext* Context = ActiveView->mContext;
-	int Width = mIconSize * 2;
-	int Height = mIconSize * 2;
 
 	if (mRenderFramebuffer.first.mWidth != Width || mRenderFramebuffer.first.mHeight != Height)
 	{
@@ -405,11 +425,13 @@ void lcPartSelectionListModel::DrawPreview(int InfoIndex)
 	if (!mRenderFramebuffer.first.IsValid())
 		return;
 
-	float Aspect = (float)Width / (float)Height;
+	Context->BindFramebuffer(mRenderFramebuffer.first);
+#endif
+
+	const float Aspect = (float)Width / (float)Height;
 	Context->SetViewport(0, 0, Width, Height);
 
 	Context->SetDefaultState();
-	Context->BindFramebuffer(mRenderFramebuffer.first);
 
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 	PieceInfo* Info = mParts[InfoIndex].first;
@@ -434,11 +456,17 @@ void lcPartSelectionListModel::DrawPreview(int InfoIndex)
 
 	Scene.Draw(Context);
 
-	mParts[InfoIndex].second = QPixmap::fromImage(Context->GetRenderFramebufferImage(mRenderFramebuffer)).scaled(mIconSize, mIconSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+#ifdef LC_USE_QOPENGLWIDGET
+	QImage Image = mView->GetRenderFramebufferImage().convertToFormat(QImage::Format_ARGB32);
+#else
+	QImage Image = Context->GetRenderFramebufferImage(mRenderFramebuffer);
+	Context->ClearFramebuffer();
+#endif
+
+	mParts[InfoIndex].second = QPixmap::fromImage(Image).scaled(mIconSize, mIconSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 
 	Library->ReleasePieceInfo(Info);
 
-	Context->ClearFramebuffer();
 	Context->ClearResources();
 
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 2, 0))

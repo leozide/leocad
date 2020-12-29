@@ -1093,6 +1093,7 @@ void lcView::DrawAxes() const
 			break;
 
 		case lcViewType::Minifig:
+		case lcViewType::PartsList:
 		case lcViewType::Count:
 			return;
 	}

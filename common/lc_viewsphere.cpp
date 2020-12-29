@@ -40,6 +40,7 @@ void lcViewSphere::UpdateSettings()
 		break;
 
 	case lcViewType::Minifig:
+	case lcViewType::PartsList:
 	case lcViewType::Count:
 		break;
 	}

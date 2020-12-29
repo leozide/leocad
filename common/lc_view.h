@@ -86,6 +86,7 @@ enum class lcViewType
 	View,
 	Preview,
 	Minifig,
+	PartsList,
 	Count
 };
 

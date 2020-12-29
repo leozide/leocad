@@ -988,13 +988,12 @@ void lcView::DrawBackground() const
 
 	if (!Preferences.mBackgroundGradient)
 	{
-		lcVector3 BackgroundColor = lcVector3FromColor(Preferences.mBackgroundSolidColor);
-		glClearColor(BackgroundColor[0], BackgroundColor[1], BackgroundColor[2], 0.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		lcVector4 BackgroundColor(lcVector3FromColor(Preferences.mBackgroundSolidColor), 0.0f);
+		mContext->ClearColorAndDepth(BackgroundColor);
 		return;
 	}
 
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	mContext->ClearDepth();
 
 	mContext->SetDepthWrite(false);
 	glDisable(GL_DEPTH_TEST);
@@ -1098,7 +1097,7 @@ void lcView::DrawAxes() const
 			return;
 	}
 
-//	glClear(GL_DEPTH_BUFFER_BIT);
+//	mContext->ClearDepth();
 
 	struct lcAxisVertex
 	{

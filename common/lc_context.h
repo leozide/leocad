@@ -132,6 +132,9 @@ public:
 	void SetGLContext(const QGLContext* GLContext);
 #endif
 
+	void ClearColorAndDepth(const lcVector4& ClearColor);
+	void ClearDepth();
+
 	void SetWorldMatrix(const lcMatrix44& WorldMatrix)
 	{
 		mWorldMatrix = WorldMatrix;

@@ -390,6 +390,17 @@ void lcContext::SetDefaultState()
 	}
 }
 
+void lcContext::ClearColorAndDepth(const lcVector4& ClearColor)
+{
+	glClearColor(ClearColor[0], ClearColor[1], ClearColor[2], ClearColor[3]);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+void lcContext::ClearDepth()
+{
+	glClear(GL_DEPTH_BUFFER_BIT);
+}
+
 void lcContext::ClearResources()
 {
 	ClearVertexBuffer();

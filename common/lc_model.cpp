@@ -1408,8 +1408,7 @@ QImage lcModel::GetPartsListImage(int MaxWidth, lcStep Step) const
 
 	for (lcPartsListImage& Image : Images)
 	{
-		glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		Context->ClearColorAndDepth(lcVector4(1.0f, 1.0f, 1.0f, 0.0f));
 
 		lcScene Scene;
 		Scene.SetAllowWireframe(false);

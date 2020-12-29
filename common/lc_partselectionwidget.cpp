@@ -436,8 +436,7 @@ void lcPartSelectionListModel::DrawPreview(int InfoIndex)
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 	PieceInfo* Info = mParts[InfoIndex].first;
 
-	glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	Context->ClearColorAndDepth(lcVector4(1.0f, 1.0f, 1.0f, 0.0f));
 
 	lcMatrix44 ProjectionMatrix, ViewMatrix;
 

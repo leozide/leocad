@@ -127,11 +127,9 @@ public:
 	void ClearResources();
 
 #ifdef LC_USE_QOPENGLWIDGET
-	void SetGLContext(QOpenGLContext* GLContext)
-	{
-		initializeOpenGLFunctions();
-		mGLContext = GLContext;
-	}
+	void SetGLContext(QOpenGLContext* GLContext);
+#else
+	void SetGLContext(QGLContext* GLContext);
 #endif
 
 	void SetWorldMatrix(const lcMatrix44& WorldMatrix)
@@ -234,7 +232,10 @@ protected:
 
 #ifdef LC_USE_QOPENGLWIDGET
 	QOpenGLContext* mGLContext = nullptr;
+#else
+	QGLContext* mGLContext = nullptr;
 #endif
+	bool mValid = false;
 
 	GLuint mVertexBufferObject;
 	GLuint mIndexBufferObject;
@@ -272,6 +273,7 @@ protected:
 	GLuint mFramebufferObject;
 
 	static lcProgram mPrograms[static_cast<int>(lcMaterialType::Count)];
+	static int mValidContexts;
 
 	Q_DECLARE_TR_FUNCTIONS(lcContext);
 };

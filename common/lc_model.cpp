@@ -1267,18 +1267,17 @@ void lcModel::AddSubModelRenderMeshes(lcScene* Scene, const lcMatrix44& WorldMat
 QImage lcModel::GetStepImage(bool Zoom, int Width, int Height, lcStep Step)
 {
 	lcView* ActiveView = gMainWindow->GetActiveView();
-	ActiveView->MakeCurrent();
-	lcContext* Context = ActiveView->mContext;
-
-	lcStep CurrentStep = mCurrentStep;
-
+	const lcStep CurrentStep = mCurrentStep;
 	lcCamera* Camera = ActiveView->GetCamera();
-	if (Zoom)
-		ZoomExtents(Camera, (float)Width / (float)Height);
 
 	lcView View(lcViewType::View, this);
 	View.SetCamera(Camera, false);
+
+#ifndef LC_USE_QOPENGLWIDGET
+	ActiveView->MakeCurrent();
+	lcContext* Context = ActiveView->mContext;
 	View.SetContext(Context);
+#endif
 
 	if (!View.BeginRenderToImage(Width, Height))
 	{
@@ -1287,12 +1286,19 @@ QImage lcModel::GetStepImage(bool Zoom, int Width, int Height, lcStep Step)
 	}
 
 	SetTemporaryStep(Step);
+
+	if (Zoom)
+		ZoomExtents(Camera, (float)Width / (float)Height);
+
 	View.OnDraw();
 
 	QImage Image = View.GetRenderImage();
 
-	View.EndRenderToImage();
+#ifndef LC_USE_QOPENGLWIDGET
 	Context->ClearResources();
+#endif
+
+	View.EndRenderToImage();
 
 	SetTemporaryStep(CurrentStep);
 

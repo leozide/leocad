@@ -63,7 +63,7 @@ void lcView::UpdateProjectViews(const Project* Project)
 	{
 		const lcModel* ViewModel = View->GetActiveModel();
 
-		if (ViewModel->GetProject() == Project)
+		if (ViewModel && ViewModel->GetProject() == Project)
 			View->Redraw();
 	}
 }
@@ -76,12 +76,18 @@ void lcView::UpdateAllViews()
 
 void lcView::MakeCurrent()
 {
-	mWidget->makeCurrent();
+	if (mWidget)
+		mWidget->makeCurrent();
+#ifdef LC_USE_QOPENGLWIDGET
+	else if (mOffscreenContext)
+		mOffscreenContext->makeCurrent(mOffscreenSurface.get());
+#endif
 }
 
 void lcView::Redraw()
 {
-	mWidget->update();
+	if (mWidget)
+		mWidget->update();
 }
 
 void lcView::SetContext(lcContext* Context)
@@ -719,6 +725,36 @@ lcArray<lcObject*> lcView::FindObjectsInBox(float x1, float y1, float x2, float 
 
 bool lcView::BeginRenderToImage(int Width, int Height)
 {
+#ifdef LC_USE_QOPENGLWIDGET
+	std::unique_ptr<QOpenGLContext> OffscreenContext(new QOpenGLContext());
+
+	if (!OffscreenContext)
+		return false;
+
+	OffscreenContext->setShareContext(QOpenGLContext::globalShareContext());
+
+	if (!OffscreenContext->create() || !OffscreenContext->isValid())
+		return false;
+
+	std::unique_ptr<QOffscreenSurface> OffscreenSurface(new QOffscreenSurface());
+
+	if (!OffscreenSurface)
+		return false;
+
+	OffscreenSurface->create();
+
+	if (!OffscreenSurface->isValid())
+		return false;
+
+	if (!OffscreenContext->makeCurrent(OffscreenSurface.get()))
+		return false;
+
+	mContext->SetGLContext(OffscreenContext.get());
+
+	mOffscreenContext = std::move(OffscreenContext);
+	mOffscreenSurface = std::move(OffscreenSurface);
+#endif
+
 	GLint MaxTexture;
 	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &MaxTexture);
 
@@ -738,17 +774,54 @@ bool lcView::BeginRenderToImage(int Width, int Height)
 	mHeight = TileHeight;
 	mRenderImage = QImage(Width, Height, QImage::Format_ARGB32);
 
+#ifdef LC_USE_QOPENGLWIDGET
+	QOpenGLFramebufferObjectFormat Format;
+	Format.setAttachment(QOpenGLFramebufferObject::Depth);
+
+	if (QSurfaceFormat::defaultFormat().samples() > 1)
+		Format.setSamples(QSurfaceFormat::defaultFormat().samples());
+
+	mRenderFramebuffer = std::make_unique<QOpenGLFramebufferObject>(QSize(TileWidth, TileHeight), Format);
+
+	return mRenderFramebuffer->bind();
+#else
 	mRenderFramebuffer = mContext->CreateRenderFramebuffer(TileWidth, TileHeight);
 	mContext->BindFramebuffer(mRenderFramebuffer.first);
+
 	return mRenderFramebuffer.first.IsValid();
+#endif
 }
 
 void lcView::EndRenderToImage()
 {
+#ifdef LC_USE_QOPENGLWIDGET
+	mOffscreenContext.reset();
+	mOffscreenSurface.reset();
+	mRenderFramebuffer.reset();
+#else
 	mRenderImage = QImage();
 	mContext->DestroyRenderFramebuffer(mRenderFramebuffer);
 	mContext->ClearFramebuffer();
+#endif
 }
+
+QImage lcView::GetRenderImage() const
+{
+	return mRenderImage;
+}
+
+#ifdef LC_USE_QOPENGLWIDGET
+
+QImage lcView::GetRenderFramebufferImage() const
+{
+	mRenderFramebuffer->release();
+	QImage Image = mRenderFramebuffer->toImage();
+	mRenderFramebuffer->bind();
+
+	return Image;
+}
+
+#endif
 
 void lcView::OnDraw()
 {
@@ -844,10 +917,14 @@ void lcView::OnDraw()
 
 			if (!mRenderImage.isNull())
 			{
+#ifdef LC_USE_QOPENGLWIDGET
+				QImage TileImage = GetRenderFramebufferImage();
+				quint8* Buffer = TileImage.bits();
+#else
 				quint8* Buffer = (quint8*)malloc(mWidth * mHeight * 4);
-				uchar* ImageBuffer = mRenderImage.bits();
-
 				mContext->GetRenderFramebufferImage(mRenderFramebuffer, Buffer);
+#endif
+				uchar* ImageBuffer = mRenderImage.bits();
 
 				quint32 TileY = 0, SrcY = 0;
 				if (CurrentTileRow != TotalTileRows - 1)
@@ -865,7 +942,9 @@ void lcView::OnDraw()
 					memcpy(dst, src, CurrentTileWidth * 4);
 				}
 
+#ifndef LC_USE_QOPENGLWIDGET
 				free(Buffer);
+#endif
 			}
 		}
 	}

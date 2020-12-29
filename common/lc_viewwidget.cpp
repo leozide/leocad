@@ -5,19 +5,14 @@
 #include "lc_library.h"
 #include "lc_application.h"
 #include "lc_mainwindow.h"
-#include "lc_partselectionwidget.h"
 #include "lc_context.h"
 #include "lc_view.h"
-#include "texfont.h"
-#include "lc_viewsphere.h"
-#include "lc_stringcache.h"
 #include "lc_texture.h"
 #include "lc_mesh.h"
 #include "lc_profile.h"
 #include "lc_previewwidget.h"
 
 static QList<lcViewWidget*> gWidgetList;
-bool lcViewWidget::mResourcesLoaded;
 
 #ifdef LC_USE_QOPENGLWIDGET
 lcViewWidget::lcViewWidget(QWidget* Parent, lcView* View)
@@ -46,22 +41,6 @@ lcViewWidget::~lcViewWidget()
 {
 	gWidgetList.removeOne(this);
 
-	if (gWidgetList.isEmpty())
-	{
-		gStringCache.Reset();
-		gTexFont.Reset();
-
-		lcGetPiecesLibrary()->ReleaseBuffers(mView->mContext);
-		lcView::DestroyResources(mView->mContext);
-		mView->mContext->DestroyResources();
-		lcViewSphere::DestroyResources(mView->mContext);
-
-		delete gPlaceholderMesh;
-		gPlaceholderMesh = nullptr;
-
-		mResourcesLoaded = false;
-	}
-
 	delete mView;
 }
 
@@ -76,10 +55,8 @@ void lcViewWidget::SetView(lcView* View)
 
 	if (View)
 	{
-#ifdef LC_USE_QOPENGLWIDGET
 		if (context())
 			View->mContext->SetGLContext(context());
-#endif
 		View->SetWidget(this);
 		const float Scale = GetDeviceScale();
 		View->SetSize(width() * Scale, height() * Scale);
@@ -139,33 +116,7 @@ void lcViewWidget::SetPreviewPosition(const QRect& ParentRect)
 
 void lcViewWidget::initializeGL()
 {
-#ifdef LC_USE_QOPENGLWIDGET
 	mView->mContext->SetGLContext(context());
-#endif
-
-	if (!mResourcesLoaded)
-	{
-		lcInitializeGLExtensions(context());
-
-		// TODO: Find a better place for the grid texture and font
-		gStringCache.Initialize(mView->mContext);
-		gTexFont.Initialize(mView->mContext);
-
-		mView->mContext->CreateResources();
-		lcView::CreateResources(mView->mContext);
-		lcViewSphere::CreateResources(mView->mContext);
-
-		if (!gSupportsShaderObjects && lcGetPreferences().mShadingMode == lcShadingMode::DefaultLights)
-			lcGetPreferences().mShadingMode = lcShadingMode::Flat;
-
-		if (!gSupportsFramebufferObject)
-			gMainWindow->GetPartSelectionWidget()->DisableIconMode();
-
-		gPlaceholderMesh = new lcMesh;
-		gPlaceholderMesh->CreateBox();
-
-		mResourcesLoaded = true;
-	}
 }
 
 void lcViewWidget::resizeGL(int Width, int Height)

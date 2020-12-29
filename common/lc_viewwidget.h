@@ -56,6 +56,4 @@ protected:
 	lcView* mView;
 	QSize mPreferredSize;
 	int mWheelAccumulator;
-
-	static bool mResourcesLoaded;
 };

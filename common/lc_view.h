@@ -233,11 +233,10 @@ public:
 
 	bool BeginRenderToImage(int Width, int Height);
 	void EndRenderToImage();
-
-	QImage GetRenderImage() const
-	{
-		return mRenderImage;
-	}
+	QImage GetRenderImage() const;
+#ifdef LC_USE_QOPENGLWIDGET
+	QImage GetRenderFramebufferImage() const;
+#endif
 
 	lcContext* mContext = nullptr;
 
@@ -297,8 +296,15 @@ protected:
 	bool mTrackToolFromOverlay;
 	lcVector3 mMouseDownPosition;
 	PieceInfo* mMouseDownPiece;
+
 	QImage mRenderImage;
+#ifdef LC_USE_QOPENGLWIDGET
+	std::unique_ptr<QOpenGLContext> mOffscreenContext;
+	std::unique_ptr<QOffscreenSurface> mOffscreenSurface;
+	std::unique_ptr<QOpenGLFramebufferObject> mRenderFramebuffer;
+#else
 	std::pair<lcFramebuffer, lcFramebuffer> mRenderFramebuffer;
+#endif
 
 	std::unique_ptr<lcScene> mScene;
 	std::unique_ptr<lcViewSphere> mViewSphere;

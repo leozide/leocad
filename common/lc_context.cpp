@@ -6,6 +6,11 @@
 #include "lc_colors.h"
 #include "lc_mainwindow.h"
 #include "lc_library.h"
+#include "texfont.h"
+#include "lc_view.h"
+#include "lc_viewsphere.h"
+#include "lc_stringcache.h"
+#include "lc_partselectionwidget.h"
 
 #ifdef LC_USE_QOPENGLWIDGET
 #include <QOpenGLFunctions_3_2_Core>
@@ -23,6 +28,7 @@
 #endif
 
 lcProgram lcContext::mPrograms[static_cast<int>(lcMaterialType::Count)];
+int lcContext::mValidContexts;
 
 lcContext::lcContext()
 {
@@ -70,6 +76,24 @@ lcContext::lcContext()
 
 lcContext::~lcContext()
 {
+	if (mValid)
+	{
+		mValidContexts--;
+
+		if (!mValidContexts)
+		{
+			gStringCache.Reset();
+			gTexFont.Reset();
+
+			lcGetPiecesLibrary()->ReleaseBuffers(this);
+			lcView::DestroyResources(this);
+			DestroyResources();
+			lcViewSphere::DestroyResources(this);
+
+			delete gPlaceholderMesh;
+			gPlaceholderMesh = nullptr;
+		}
+	}
 }
 
 void lcContext::CreateShaderPrograms()
@@ -232,6 +256,43 @@ void lcContext::DestroyResources()
 		glDeleteProgram(mPrograms[MaterialType].Object);
 		mPrograms[MaterialType].Object = 0;
 	}
+}
+
+#ifdef LC_USE_QOPENGLWIDGET
+void lcContext::SetGLContext(QOpenGLContext* GLContext)
+#else
+void lcContext::SetGLContext(QGLContext* GLContext);
+#endif
+{
+#ifdef LC_USE_QOPENGLWIDGET
+	initializeOpenGLFunctions();
+#endif
+	mGLContext = GLContext;
+
+	if (!mValidContexts)
+	{
+		lcInitializeGLExtensions(GLContext);
+
+		// TODO: Find a better place for the grid texture and font
+		gStringCache.Initialize(this);
+		gTexFont.Initialize(this);
+
+		CreateResources();
+		lcView::CreateResources(this);
+		lcViewSphere::CreateResources(this);
+
+		if (!gSupportsShaderObjects && lcGetPreferences().mShadingMode == lcShadingMode::DefaultLights)
+			lcGetPreferences().mShadingMode = lcShadingMode::Flat;
+
+		if (!gSupportsFramebufferObject)
+			gMainWindow->GetPartSelectionWidget()->DisableIconMode();
+
+		gPlaceholderMesh = new lcMesh;
+		gPlaceholderMesh->CreateBox();
+	}
+
+	mValid = true;
+	mValidContexts++;
 }
 
 void lcContext::SetDefaultState()

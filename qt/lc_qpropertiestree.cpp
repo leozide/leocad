@@ -791,7 +791,7 @@ void lcQPropertiesTree::slotColorButtonClicked()
 
 	lcQColorPickerPopup* Popup = new lcQColorPickerPopup(Button, ColorIndex);
 	connect(Popup, SIGNAL(selected(int)), SLOT(slotSetValue(int)));
-	Popup->setMinimumSize(qMax(300, width()), 200);
+	Popup->setMinimumSize(qMax(300, width()), qMax(200, static_cast<int>(width() * 2 / 3)));
 
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 10, 0))
 	QScreen* Screen = QGuiApplication::screenAt(Button->mapToGlobal(Button->rect().bottomLeft()));

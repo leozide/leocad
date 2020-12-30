@@ -1172,6 +1172,13 @@ const lcCommand gCommands[] =
 		QT_TRANSLATE_NOOP("Status", "Create a copy of the selected pieces"),
 		"Ctrl+D"
 	},
+	// LC_PIECE_PAINT_SELECTED
+	{
+		QT_TRANSLATE_NOOP("Action", "Piece.PaintSelected"),
+		QT_TRANSLATE_NOOP("Menu", "&Paint Selected"),
+		QT_TRANSLATE_NOOP("Status", "Change the color of the selected pieces"),
+		""
+	},
 	// LC_PIECE_RESET_PIVOT_POINT
 	{
 		QT_TRANSLATE_NOOP("Action", "Piece.ResetPivotPoint"),

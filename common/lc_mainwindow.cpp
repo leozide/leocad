@@ -567,6 +567,7 @@ void lcMainWindow::CreateMenus()
 	PieceMenu->addAction(mActions[LC_PIECE_INSERT]);
 	PieceMenu->addAction(mActions[LC_PIECE_DELETE]);
 	PieceMenu->addAction(mActions[LC_PIECE_DUPLICATE]);
+	PieceMenu->addAction(mActions[LC_PIECE_PAINT_SELECTED]);
 	PieceMenu->addAction(mActions[LC_PIECE_ARRAY]);
 	PieceMenu->addAction(mActions[LC_PIECE_MINIFIG_WIZARD]);
 	PieceMenu->addAction(mActions[LC_PIECE_RESET_PIVOT_POINT]);
@@ -709,7 +710,25 @@ void lcMainWindow::CreateToolBars()
 	mColorList = new lcQColorList();
 	connect(mColorList, SIGNAL(colorChanged(int)), this, SLOT(ColorChanged(int)));
 
-	mColorsToolBar->setWidget(mColorList);
+	QWidget* ColorWidget = new QWidget(mColorsToolBar);
+
+	QVBoxLayout* ColorLayout = new QVBoxLayout(ColorWidget);
+
+	QHBoxLayout* ColorButtonLayout = new QHBoxLayout();
+	ColorButtonLayout->setContentsMargins(0, 0, 0, 0);
+	ColorLayout->addLayout(ColorButtonLayout);
+
+	mColorButton = new QToolButton(ColorWidget);
+	mColorButton->setAutoRaise(true);
+	mColorButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+	mColorButton->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Maximum);
+	ColorButtonLayout->addWidget(mColorButton);
+
+	connect(mColorButton, SIGNAL(clicked()), this, SLOT(ColorButtonClicked()));
+
+	ColorLayout->addWidget(mColorList);
+
+	mColorsToolBar->setWidget(ColorWidget);
 	addDockWidget(Qt::RightDockWidgetArea, mColorsToolBar);
 
 	mPropertiesToolBar = new QDockWidget(tr("Properties"), this);
@@ -1108,6 +1127,14 @@ void lcMainWindow::ActionTriggered()
 void lcMainWindow::ColorChanged(int ColorIndex)
 {
 	SetColorIndex(ColorIndex);
+}
+
+void lcMainWindow::ColorButtonClicked()
+{
+	lcModel* ActiveModel = GetActiveModel();
+
+	if (ActiveModel)
+		ActiveModel->PaintSelectedPieces();
 }
 
 void lcMainWindow::ProjectFileChanged(const QString& Path)
@@ -2038,6 +2065,7 @@ void lcMainWindow::UpdateSelectedObjects(bool SelectionChanged)
 
 		mActions[LC_PIECE_DELETE]->setEnabled(Flags & LC_SEL_SELECTED);
 		mActions[LC_PIECE_DUPLICATE]->setEnabled(Flags & LC_SEL_SELECTED);
+		mActions[LC_PIECE_PAINT_SELECTED]->setEnabled(Flags & LC_SEL_PIECE);
 		mActions[LC_PIECE_RESET_PIVOT_POINT]->setEnabled(Flags & LC_SEL_SELECTED);
 		mActions[LC_PIECE_REMOVE_KEY_FRAMES]->setEnabled(Flags & LC_SEL_SELECTED);
 		mActions[LC_PIECE_ARRAY]->setEnabled(Flags & LC_SEL_PIECE);
@@ -2152,6 +2180,11 @@ void lcMainWindow::UpdateSnap()
 
 void lcMainWindow::UpdateColor()
 {
+	QPixmap Pixmap(16, 16);
+	Pixmap.fill(QColor::fromRgbF(gColorList[mColorIndex].Value[0], gColorList[mColorIndex].Value[1], gColorList[mColorIndex].Value[2]));
+
+	mColorButton->setIcon(Pixmap);
+	mColorButton->setText(QString("  ") + gColorList[mColorIndex].Name);
 	mColorList->setCurrentColor(mColorIndex);
 }
 
@@ -2883,6 +2916,11 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 	case LC_PIECE_DUPLICATE:
 		if (ActiveModel)
 			ActiveModel->DuplicateSelectedPieces();
+		break;
+
+	case LC_PIECE_PAINT_SELECTED:
+		if (ActiveModel)
+			ActiveModel->PaintSelectedPieces();
 		break;
 
 	case LC_PIECE_RESET_PIVOT_POINT:

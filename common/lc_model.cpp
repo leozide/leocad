@@ -1231,6 +1231,11 @@ void lcModel::DuplicateSelectedPieces()
 	SaveCheckpoint(tr("Duplicating Pieces"));
 }
 
+void lcModel::PaintSelectedPieces()
+{
+	SetSelectedPiecesColorIndex(gMainWindow->mColorIndex);
+}
+
 void lcModel::GetScene(lcScene* Scene, lcCamera* ViewCamera, bool AllowHighlight, bool AllowFade) const
 {
 	if (mPieceInfo)

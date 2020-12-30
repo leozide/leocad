@@ -236,6 +236,7 @@ public:
 	void Copy();
 	void Paste();
 	void DuplicateSelectedPieces();
+	void PaintSelectedPieces();
 
 	void GetScene(lcScene* Scene, lcCamera* ViewCamera, bool AllowHighlight, bool AllowFade) const;
 	void AddSubModelRenderMeshes(lcScene* Scene, const lcMatrix44& WorldMatrix, int DefaultColorIndex, lcRenderMeshState RenderMeshState, bool ParentActive) const;

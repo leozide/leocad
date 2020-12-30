@@ -752,7 +752,18 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 	lcLoadDefaultKeyboardShortcuts();
 	lcLoadDefaultMouseShortcuts();
 
-	ShowWindow = !SaveImage && !SaveWavefront && !Save3DS && !SaveCOLLADA && !SaveHTML;
+	if (SaveImage || SaveWavefront || Save3DS || SaveCOLLADA || SaveHTML)
+	{
+		ShowWindow = false;
+
+		if (ProjectName.isEmpty())
+		{
+			printf("No file name specified.\n");
+			return false;
+		}
+	}
+	else
+		ShowWindow = true;
 
 	if (!LoadPartsLibrary(LibraryPaths, OnlyUseLibraryPaths, ShowWindow))
 	{

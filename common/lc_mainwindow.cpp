@@ -735,6 +735,7 @@ void lcMainWindow::CreateToolBars()
 
 	QWidget* PropertiesWidget = new QWidget(mPropertiesToolBar);
 	QVBoxLayout* PropertiesLayout = new QVBoxLayout(PropertiesWidget);
+	PropertiesLayout->setContentsMargins(0, 0, 0, 0);
 
 	mPropertiesWidget = new lcQPropertiesTree(PropertiesWidget);
 	PropertiesLayout->addWidget(mPropertiesWidget);
@@ -2146,7 +2147,7 @@ void lcMainWindow::UpdateSnap()
 
 void lcMainWindow::UpdateColor()
 {
-	QPixmap Pixmap(16, 16);
+	QPixmap Pixmap(14, 14);
 	Pixmap.fill(QColor::fromRgbF(gColorList[mColorIndex].Value[0], gColorList[mColorIndex].Value[1], gColorList[mColorIndex].Value[2]));
 
 	mColorButton->setIcon(Pixmap);

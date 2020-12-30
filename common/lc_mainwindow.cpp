@@ -713,6 +713,7 @@ void lcMainWindow::CreateToolBars()
 	QWidget* ColorWidget = new QWidget(mColorsToolBar);
 
 	QVBoxLayout* ColorLayout = new QVBoxLayout(ColorWidget);
+	ColorLayout->setContentsMargins(0, 0, 0, 0);
 
 	QHBoxLayout* ColorButtonLayout = new QHBoxLayout();
 	ColorButtonLayout->setContentsMargins(0, 0, 0, 0);

@@ -71,54 +71,6 @@ void lcViewWidget::SetView(lcView* View)
 	mView = View;
 }
 
-void lcViewWidget::SetPreviewPosition(const QRect& ParentRect)
-{
-	lcPreferences& Preferences = lcGetPreferences();
-	lcPreview* Preview = reinterpret_cast<lcPreview*>(mView);
-
-	setWindowTitle(tr("%1 Preview").arg(Preview->IsModel() ? "Submodel" : "Part"));
-
-	int Size[2] = { 300,200 };
-	if (Preferences.mPreviewSize == 400)
-	{
-		Size[0] = 400; Size[1] = 300;
-	}
-	mPreferredSize = QSize(Size[0], Size[1]);
-
-	const QRect desktop = QApplication::desktop()->geometry();
-
-	QPoint pos;
-	switch (Preferences.mPreviewLocation)
-	{
-	case lcPreviewLocation::TopRight:
-		pos = mapToGlobal(ParentRect.topRight());
-		break;
-	case lcPreviewLocation::TopLeft:
-		pos = mapToGlobal(ParentRect.topLeft());
-		break;
-	case lcPreviewLocation::BottomRight:
-		pos = mapToGlobal(ParentRect.bottomRight());
-		break;
-	default:
-		pos = mapToGlobal(ParentRect.bottomLeft());
-		break;
-	}
-
-	if (pos.x() < desktop.left())
-		pos.setX(desktop.left());
-	if (pos.y() < desktop.top())
-		pos.setY(desktop.top());
-
-	if ((pos.x() + width()) > desktop.right())
-		pos.setX(desktop.right() - width());
-	if ((pos.y() + height()) > desktop.bottom())
-		pos.setY(desktop.bottom() - height());
-	move(pos);
-
-	setMinimumSize(100,100);
-	show();
-}
-
 void lcViewWidget::initializeGL()
 {
 	mView->mContext->SetGLContext(context());

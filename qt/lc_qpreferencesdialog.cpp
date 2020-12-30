@@ -141,30 +141,6 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 
 	ui->PreviewAxisIconCheckBox->setChecked(mOptions->Preferences.mDrawPreviewAxis);
 
-	ui->PreviewViewSphereCheckBox->setChecked(mOptions->Preferences.mPreviewViewSphereEnabled);
-
-	ui->PreviewLocationCombo->setCurrentIndex((int)mOptions->Preferences.mPreviewLocation);
-
-	ui->PreviewPositionCombo->setCurrentIndex((int)mOptions->Preferences.mPreviewPosition);
-
-	if (mOptions->Preferences.mPreviewEnabled)
-	{
-		switch (mOptions->Preferences.mPreviewSize)
-		{
-		case 400:
-			ui->PreviewSizeCombo->setCurrentIndex(2);
-			break;
-		case 300:
-			ui->PreviewSizeCombo->setCurrentIndex(1);
-			break;
-		default: /*Disabled*/
-			ui->PreviewSizeCombo->setCurrentIndex(0);
-			break;
-		}
-	}
-	else
-		ui->PreviewSizeCombo->setCurrentIndex(0);
-
 	ui->PreviewViewSphereLocationCombo->setCurrentIndex((int)mOptions->Preferences.mPreviewViewSphereLocation);
 
 	if (mOptions->Preferences.mPreviewViewSphereEnabled)
@@ -258,13 +234,7 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 	on_gridStuds_toggled();
 	on_gridLines_toggled();
 	on_ViewSphereSizeCombo_currentIndexChanged(ui->ViewSphereSizeCombo->currentIndex());
-
 	on_PreviewViewSphereSizeCombo_currentIndexChanged(ui->PreviewViewSphereSizeCombo->currentIndex());
-	on_PreviewSizeCombo_currentIndexChanged(ui->PreviewSizeCombo->currentIndex());
-	on_PreviewPositionCombo_currentIndexChanged(ui->PreviewPositionCombo->currentIndex());
-	ui->PreviewLocationCombo->setEnabled(
-				ui->PreviewSizeCombo->currentIndex() != 0 &&
-				ui->PreviewPositionCombo->currentIndex() != 0);
 
 	updateCategories();
 	ui->categoriesTree->setCurrentItem(ui->categoriesTree->topLevelItem(0));
@@ -347,12 +317,15 @@ void lcQPreferencesDialog::accept()
 	{
 	case 3:
 		mOptions->Preferences.mViewSphereSize = 200;
+		mOptions->Preferences.mViewSphereEnabled = 1;
 		break;
 	case 2:
 		mOptions->Preferences.mViewSphereSize = 100;
+		mOptions->Preferences.mViewSphereEnabled = 1;
 		break;
 	case 1:
 		mOptions->Preferences.mViewSphereSize = 50;
+		mOptions->Preferences.mViewSphereEnabled = 1;
 		break;
 	default:
 		mOptions->Preferences.mViewSphereEnabled = 0;
@@ -368,41 +341,26 @@ void lcQPreferencesDialog::accept()
 
 	mOptions->Preferences.mDrawPreviewAxis = ui->PreviewAxisIconCheckBox->isChecked();
 
-	mOptions->Preferences.mPreviewLocation = (lcPreviewLocation)ui->PreviewLocationCombo->currentIndex();
-
-	mOptions->Preferences.mPreviewPosition = (lcPreviewPosition)ui->PreviewPositionCombo->currentIndex();
-
-	switch (ui->PreviewSizeCombo->currentIndex())
-	{
-	case 2:
-		mOptions->Preferences.mPreviewSize = 400;
-		break;
-	case 1:
-		mOptions->Preferences.mPreviewSize = 300;
-		break;
-	default:
-		mOptions->Preferences.mPreviewEnabled = 0;
-		break;
-	}
-
 	mOptions->Preferences.mPreviewViewSphereLocation = (lcViewSphereLocation)ui->PreviewViewSphereLocationCombo->currentIndex();
 
 	switch (ui->PreviewViewSphereSizeCombo->currentIndex())
 	{
 	case 3:
 		mOptions->Preferences.mPreviewViewSphereSize = 100;
+		mOptions->Preferences.mPreviewViewSphereEnabled = 1;
 		break;
 	case 2:
 		mOptions->Preferences.mPreviewViewSphereSize = 75;
+		mOptions->Preferences.mPreviewViewSphereEnabled = 1;
 		break;
 	case 1:
 		mOptions->Preferences.mPreviewViewSphereSize = 50;
+		mOptions->Preferences.mPreviewViewSphereEnabled = 1;
 		break;
 	default:
+		mOptions->Preferences.mPreviewViewSphereEnabled = 0;
 		break;
 	}
-
-	mOptions->Preferences.mPreviewViewSphereEnabled = ui->PreviewViewSphereCheckBox->isChecked();
 
 	QDialog::accept();
 }
@@ -621,29 +579,9 @@ void lcQPreferencesDialog::on_PreviewViewSphereSizeCombo_currentIndexChanged(int
 	ui->PreviewViewSphereLocationCombo->setEnabled(Index != 0);
 }
 
-void lcQPreferencesDialog::on_PreviewSizeCombo_currentIndexChanged(int Index)
-{
-	ui->PreviewLocationCombo->setEnabled(Index != 0);
-	if (ui->PreviewPositionCombo->currentIndex() != 0)
-		ui->PreviewPositionCombo->setEnabled(Index != 0);
-	ui->PreviewAxisIconCheckBox->setEnabled(Index != 0);
-	ui->PreviewViewSphereCheckBox->setEnabled(Index != 0);
-}
-
-void lcQPreferencesDialog::on_PreviewPositionCombo_currentIndexChanged(int Index)
-{
-	ui->PreviewSizeCombo->setEnabled(Index != 0);
-	ui->PreviewLocationCombo->setEnabled(Index != 0);
-}
-
 void lcQPreferencesDialog::on_ViewSphereSizeCombo_currentIndexChanged(int Index)
 {
-	bool Enabled = Index != 0;
-
-	ui->ViewSphereLocationCombo->setEnabled(Enabled);
-	ui->ViewSphereColorButton->setEnabled(Enabled);
-	ui->ViewSphereTextColorButton->setEnabled(Enabled);
-	ui->ViewSphereHighlightColorButton->setEnabled(Enabled);
+	ui->ViewSphereLocationCombo->setEnabled(Index != 0);
 }
 
 void lcQPreferencesDialog::updateCategories()

@@ -14,21 +14,6 @@ enum class lcShadingMode
 	Full
 };
 
-enum class lcPreviewLocation
-{
-	TopLeft,
-	TopRight,
-	BottomLeft,
-	BottomRight
-};
-
-enum class lcPreviewPosition
-{
-	Dockable,
-	Floating,
-	Viewport     // not implemented
-};
-
 enum class lcColorTheme
 {
 	Dark,
@@ -78,13 +63,9 @@ public:
 	bool mRestoreTabLayout;
 	lcColorTheme mColorTheme;
 
-	int mPreviewEnabled;
 	int mPreviewViewSphereEnabled;
 	int mPreviewViewSphereSize;
 	lcViewSphereLocation mPreviewViewSphereLocation;
-	lcPreviewLocation mPreviewLocation;
-	lcPreviewPosition mPreviewPosition;
-	int mPreviewSize;
 	int mDrawPreviewAxis;
 };
 

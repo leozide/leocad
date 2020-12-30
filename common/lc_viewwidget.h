@@ -20,7 +20,6 @@ public:
 	}
 
 	void SetView(lcView* View);
-	void SetPreviewPosition(const QRect& ParentRect);
 
 	QSize sizeHint() const override;
 

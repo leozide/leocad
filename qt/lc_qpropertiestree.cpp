@@ -766,16 +766,12 @@ void lcQPropertiesTree::slotSetValue(int Value)
 			PieceInfo* Info = (PieceInfo*)editor->itemData(Value).value<void*>();
 			Model->SetSelectedPiecesPieceInfo(Info);
 
-			lcPreferences& Preferences = lcGetPreferences();
-			if (Preferences.mPreviewEnabled && Preferences.mPreviewPosition != lcPreviewPosition::Floating)
-			{
-				int ColorIndex = gDefaultColor;
-				lcObject* Focus = gMainWindow->GetActiveModel()->GetFocusObject();
-				if (Focus && Focus->IsPiece())
-					ColorIndex = ((lcPiece*)Focus)->mColorIndex;
-				quint32 ColorCode = lcGetColorCode(ColorIndex);
-				gMainWindow->PreviewPiece(Info->mFileName, ColorCode);
-			}
+			int ColorIndex = gDefaultColor;
+			lcObject* Focus = gMainWindow->GetActiveModel()->GetFocusObject();
+			if (Focus && Focus->IsPiece())
+				ColorIndex = ((lcPiece*)Focus)->mColorIndex;
+			quint32 ColorCode = lcGetColorCode(ColorIndex);
+			gMainWindow->PreviewPiece(Info->mFileName, ColorCode);
 		}
 	}
 }
@@ -950,12 +946,8 @@ void lcQPropertiesTree::SetPiece(const lcArray<lcObject*>& Selection, lcObject* 
 		Hide = Piece->GetStepHide();
 		ColorIndex = Piece->mColorIndex;
 		Info = Piece->mPieceInfo;
-		lcPreferences& Preferences = lcGetPreferences();
-		if (Preferences.mPreviewEnabled && Preferences.mPreviewPosition != lcPreviewPosition::Floating)
-		{
-			quint32 ColorCode = lcGetColorCode(ColorIndex);
-			gMainWindow->PreviewPiece(Info->mFileName, ColorCode);
-		}
+		quint32 ColorCode = lcGetColorCode(ColorIndex);
+		gMainWindow->PreviewPiece(Info->mFileName, ColorCode);
 	}
 	else
 	{

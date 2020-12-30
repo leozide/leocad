@@ -4288,9 +4288,7 @@ void lcModel::ShowPropertiesDialog()
 
 	mProperties = Options.Properties;
 
-	lcPreferences& Preferences = lcGetPreferences();
-	if (Preferences.mPreviewEnabled && Preferences.mPreviewPosition != lcPreviewPosition::Floating)
-		gMainWindow->GetPreviewWidget()->UpdatePreview();
+	gMainWindow->GetPreviewWidget()->UpdatePreview();
 
 	SaveCheckpoint(tr("Changing Properties"));
 }

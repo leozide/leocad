@@ -74,6 +74,7 @@ public slots:
 	void on_gridStuds_toggled();
 	void on_gridLines_toggled();
 	void on_ViewSphereSizeCombo_currentIndexChanged(int Index);
+	void on_PreviewViewSphereSizeCombo_currentIndexChanged(int Index);
 	void updateParts();
 	void on_newCategory_clicked();
 	void on_editCategory_clicked();
@@ -95,10 +96,6 @@ public slots:
 	void on_mouseReset_clicked();
 	void on_studLogo_toggled();
 	void MouseTreeItemChanged(QTreeWidgetItem* Current);
-
-	void on_PreviewSizeCombo_currentIndexChanged(int Index);
-	void on_PreviewViewSphereSizeCombo_currentIndexChanged(int Index);
-	void on_PreviewPositionCombo_currentIndexChanged(int Index);
 
 private:
 	Ui::lcQPreferencesDialog *ui;

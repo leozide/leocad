@@ -554,9 +554,7 @@ void lcMainWindow::CreateMenus()
 	ToolBarsMenu->addAction(mActions[LC_VIEW_TOOLBAR_COLORS]);
 	ToolBarsMenu->addAction(mActions[LC_VIEW_TOOLBAR_PROPERTIES]);
 	ToolBarsMenu->addAction(mActions[LC_VIEW_TOOLBAR_TIMELINE]);
-	lcPreferences& Preferences = lcGetPreferences();
-	if (Preferences.mPreviewEnabled && Preferences.mPreviewPosition == lcPreviewPosition::Dockable)
-		ToolBarsMenu->addAction(mActions[LC_VIEW_TOOLBAR_PREVIEW]);
+	ToolBarsMenu->addAction(mActions[LC_VIEW_TOOLBAR_PREVIEW]);
 	ToolBarsMenu->addSeparator();
 	ToolBarsMenu->addAction(mActions[LC_VIEW_TOOLBAR_STANDARD]);
 	ToolBarsMenu->addAction(mActions[LC_VIEW_TOOLBAR_TOOLS]);
@@ -775,10 +773,7 @@ void lcMainWindow::CreateToolBars()
 	mTimelineToolBar->setWidget(mTimelineWidget);
 	addDockWidget(Qt::RightDockWidgetArea, mTimelineToolBar);
 
-	// Preview
-	const lcPreferences& Preferences = lcGetPreferences();
-	if (Preferences.mPreviewPosition == lcPreviewPosition::Dockable)
-		CreatePreviewWidget();
+	CreatePreviewWidget();
 
 	tabifyDockWidget(mPartsToolBar, mPropertiesToolBar);
 	tabifyDockWidget(mPropertiesToolBar, mTimelineToolBar);
@@ -805,34 +800,8 @@ lcView* lcMainWindow::CreateView(lcModel* Model)
 
 void lcMainWindow::PreviewPiece(const QString& PartId, int ColorCode)
 {
-	lcPreferences& Preferences = lcGetPreferences();
-
-	if (!Preferences.mPreviewEnabled)
-		return;
-
-	if (Preferences.mPreviewPosition != lcPreviewPosition::Floating)
-	{
-		if (mPreviewWidget && mPreviewWidget->SetCurrentPiece(PartId, ColorCode))
-			return;
-	}
-	else
-	{
-		lcPreview* Preview = new lcPreview();
-		lcViewWidget* ViewWidget = new lcViewWidget(nullptr, Preview);
-
-		if (Preview && ViewWidget)
-		{
-			ViewWidget->setAttribute(Qt::WA_DeleteOnClose, true);
-
-			if (Preview->SetCurrentPiece(PartId, ColorCode))
-			{
-				ViewWidget->SetPreviewPosition(rect());
-				return;
-			}
-		}
-	}
-
-	QMessageBox::information(this, tr("Error"), tr("Part preview for '%1' failed.").arg(PartId));
+	if (!mPreviewWidget->SetCurrentPiece(PartId, ColorCode))
+		QMessageBox::information(this, tr("Error"), tr("Part preview for '%1' failed.").arg(PartId));
 }
 
 void lcMainWindow::CreatePreviewWidget()
@@ -1003,9 +972,7 @@ QMenu* lcMainWindow::createPopupMenu()
 	Menu->addAction(mActions[LC_VIEW_TOOLBAR_COLORS]);
 	Menu->addAction(mActions[LC_VIEW_TOOLBAR_PROPERTIES]);
 	Menu->addAction(mActions[LC_VIEW_TOOLBAR_TIMELINE]);
-	lcPreferences& Preferences = lcGetPreferences();
-	if (Preferences.mPreviewEnabled && Preferences.mPreviewPosition == lcPreviewPosition::Dockable)
-		Menu->addAction(mActions[LC_VIEW_TOOLBAR_PREVIEW]);
+	Menu->addAction(mActions[LC_VIEW_TOOLBAR_PREVIEW]);
 	Menu->addSeparator();
 	Menu->addAction(mActions[LC_VIEW_TOOLBAR_STANDARD]);
 	Menu->addAction(mActions[LC_VIEW_TOOLBAR_TOOLS]);
@@ -1023,9 +990,7 @@ void lcMainWindow::UpdateDockWidgetActions()
 	mActions[LC_VIEW_TOOLBAR_STANDARD]->setChecked(mStandardToolBar->isVisible());
 	mActions[LC_VIEW_TOOLBAR_TOOLS]->setChecked(mToolsToolBar->isVisible());
 	mActions[LC_VIEW_TOOLBAR_TIME]->setChecked(mTimeToolBar->isVisible());
-	lcPreferences& Preferences = lcGetPreferences();
-	if (Preferences.mPreviewEnabled && Preferences.mPreviewPosition == lcPreviewPosition::Dockable)
-		mActions[LC_VIEW_TOOLBAR_PREVIEW]->setChecked(mPreviewToolBar->isVisible());
+	mActions[LC_VIEW_TOOLBAR_PREVIEW]->setChecked(mPreviewToolBar->isVisible());
 }
 
 void lcMainWindow::UpdateGamepads()

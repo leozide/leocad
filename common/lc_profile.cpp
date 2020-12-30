@@ -131,13 +131,9 @@ static lcProfileEntry gProfileEntries[LC_NUM_PROFILE_KEYS] =
 	lcProfileEntry("POVRay", "Width", 1280),                                                   // LC_PROFILE_POVRAY_WIDTH
 	lcProfileEntry("POVRay", "Height", 720),                                                   // LC_PROFILE_POVRAY_HEIGHT
 
-	lcProfileEntry("Settgins", "PreviewViewSphereEnabled", 1),                                    // LC_PROFILE_PREVIEW_VIEW_SPHERE_ENABLED
+	lcProfileEntry("Settgins", "PreviewViewSphereEnabled", 0),                                    // LC_PROFILE_PREVIEW_VIEW_SPHERE_ENABLED
 	lcProfileEntry("Settings", "PreviewViewSphereSize", 75),                                      // LC_PROFILE_PREVIEW_VIEW_SPHERE_SIZE
 	lcProfileEntry("Settings", "PreviewViewSphereLocation", (int)lcViewSphereLocation::TopRight), // LC_PROFILE_PREVIEW_VIEW_SPHERE_LOCATION
-	lcProfileEntry("Settings", "PreviewEnabled", 1),                                              // LC_PROFILE_PREVIEW_ENABLED
-	lcProfileEntry("Settings", "PreviewSize", 300),                                               // LC_PROFILE_PREVIEW_SIZE
-	lcProfileEntry("Settings", "PreviewLocation", (int)lcPreviewLocation::BottomRight),           // LC_PROFILE_PREVIEW_LOCATION
-	lcProfileEntry("Settings", "PreviewPosition", (int)lcPreviewPosition::Dockable),              // LC_PROFILE_PREVIEW_POSITION
 	lcProfileEntry("Settings", "DrawPreviewAxis", 0),                                             // LC_PROFILE_PREVIEW_DRAW_AXES
 };
 

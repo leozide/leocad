@@ -1061,7 +1061,7 @@ void lcView::DrawViewport() const
 	if (!CameraName.isEmpty())
 	{
 		mContext->SetMaterial(lcMaterialType::UnlitTextureModulate);
-		mContext->SetColor(0.0f, 0.0f, 0.0f, 1.0f);
+		mContext->SetColor(lcVector4FromColor(lcGetPreferences().mTextColor));
 		mContext->BindTexture2D(gTexFont.GetTexture());
 
 		glEnable(GL_BLEND);

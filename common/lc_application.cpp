@@ -25,6 +25,7 @@ void lcPreferences::LoadDefaults()
 	mBackgroundGradientColorBottom = lcGetProfileInt(LC_PROFILE_GRADIENT_COLOR_BOTTOM);
 	mDrawAxes = lcGetProfileInt(LC_PROFILE_DRAW_AXES);
 	mAxesColor = lcGetProfileInt(LC_PROFILE_AXES_COLOR);
+	mTextColor = lcGetProfileInt(LC_PROFILE_TEXT_COLOR);
 	mOverlayColor = lcGetProfileInt(LC_PROFILE_OVERLAY_COLOR);
 	mActiveViewColor = lcGetProfileInt(LC_PROFILE_ACTIVE_VIEW_COLOR);
 	mInactiveViewColor = lcGetProfileInt(LC_PROFILE_INACTIVE_VIEW_COLOR);
@@ -63,6 +64,7 @@ void lcPreferences::SaveDefaults()
 	lcSetProfileInt(LC_PROFILE_SHADING_MODE, static_cast<int>(mShadingMode));
 	lcSetProfileInt(LC_PROFILE_DRAW_AXES, mDrawAxes);
 	lcSetProfileInt(LC_PROFILE_AXES_COLOR, mAxesColor);
+	lcSetProfileInt(LC_PROFILE_TEXT_COLOR, mTextColor);
 	lcSetProfileInt(LC_PROFILE_BACKGROUND_GRADIENT, mBackgroundGradient);
 	lcSetProfileInt(LC_PROFILE_BACKGROUND_COLOR, mBackgroundSolidColor);
 	lcSetProfileInt(LC_PROFILE_GRADIENT_COLOR_TOP, mBackgroundGradientColorTop);
@@ -101,7 +103,8 @@ void lcPreferences::SetInterfaceColors(lcColorTheme ColorTheme)
 {
 	if (ColorTheme == lcColorTheme::Dark)
 	{
-		mAxesColor = LC_RGBA(0, 0, 0, 255);
+		mAxesColor = LC_RGBA(160, 160, 160, 255);
+		mTextColor = LC_RGBA(160, 160, 160, 255);
 		mBackgroundSolidColor = LC_RGB(49, 52, 55);
 		mBackgroundGradientColorTop = LC_RGB(0, 0, 191);
 		mBackgroundGradientColorBottom = LC_RGB(255, 255, 255);
@@ -116,6 +119,7 @@ void lcPreferences::SetInterfaceColors(lcColorTheme ColorTheme)
 	else
 	{
 		mAxesColor = LC_RGBA(0, 0, 0, 255);
+		mTextColor = LC_RGBA(0, 0, 0, 255);
 		mBackgroundSolidColor = LC_RGB(255, 255, 255);
 		mBackgroundGradientColorTop = LC_RGB(54, 72, 95);
 		mBackgroundGradientColorBottom = LC_RGB(49, 52, 55);

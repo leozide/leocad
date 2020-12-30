@@ -35,6 +35,7 @@ public:
 	quint32 mBackgroundGradientColorBottom;
 	bool mDrawAxes;
 	quint32 mAxesColor;
+	quint32 mTextColor;
 	quint32 mOverlayColor;
 	quint32 mActiveViewColor;
 	quint32 mInactiveViewColor;

@@ -31,6 +31,7 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 	connect(ui->BackgroundGradient1ColorButton, SIGNAL(clicked()), this, SLOT(ColorButtonClicked()));
 	connect(ui->BackgroundGradient2ColorButton, SIGNAL(clicked()), this, SLOT(ColorButtonClicked()));
 	connect(ui->AxesColorButton, SIGNAL(clicked()), this, SLOT(ColorButtonClicked()));
+	connect(ui->TextColorButton, SIGNAL(clicked()), this, SLOT(ColorButtonClicked()));
 	connect(ui->OverlayColorButton, SIGNAL(clicked()), this, SLOT(ColorButtonClicked()));
 	connect(ui->FadeStepsColor, SIGNAL(clicked()), this, SLOT(ColorButtonClicked()));
 	connect(ui->HighlightNewPartsColor, SIGNAL(clicked()), this, SLOT(ColorButtonClicked()));
@@ -194,6 +195,9 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 	pix.fill(QColor(LC_RGBA_RED(mOptions->Preferences.mAxesColor), LC_RGBA_GREEN(mOptions->Preferences.mAxesColor), LC_RGBA_BLUE(mOptions->Preferences.mAxesColor)));
 	ui->AxesColorButton->setIcon(pix);
 
+	pix.fill(QColor(LC_RGBA_RED(mOptions->Preferences.mTextColor), LC_RGBA_GREEN(mOptions->Preferences.mTextColor), LC_RGBA_BLUE(mOptions->Preferences.mTextColor)));
+	ui->TextColorButton->setIcon(pix);
+
 	pix.fill(QColor(LC_RGBA_RED(mOptions->Preferences.mOverlayColor), LC_RGBA_GREEN(mOptions->Preferences.mOverlayColor), LC_RGBA_BLUE(mOptions->Preferences.mOverlayColor)));
 	ui->OverlayColorButton->setIcon(pix);
 
@@ -311,24 +315,19 @@ void lcQPreferencesDialog::accept()
 
 	mOptions->Preferences.mBackgroundGradient = ui->BackgroundGradientRadio->isChecked();
 	mOptions->Preferences.mDrawAxes = ui->AxisIconCheckBox->isChecked();
+	mOptions->Preferences.mViewSphereEnabled = ui->ViewSphereSizeCombo->currentIndex() > 0;
 	mOptions->Preferences.mViewSphereLocation = (lcViewSphereLocation)ui->ViewSphereLocationCombo->currentIndex();
 
 	switch (ui->ViewSphereSizeCombo->currentIndex())
 	{
 	case 3:
 		mOptions->Preferences.mViewSphereSize = 200;
-		mOptions->Preferences.mViewSphereEnabled = 1;
 		break;
 	case 2:
 		mOptions->Preferences.mViewSphereSize = 100;
-		mOptions->Preferences.mViewSphereEnabled = 1;
 		break;
 	case 1:
 		mOptions->Preferences.mViewSphereSize = 50;
-		mOptions->Preferences.mViewSphereEnabled = 1;
-		break;
-	default:
-		mOptions->Preferences.mViewSphereEnabled = 0;
 		break;
 	}
 
@@ -340,25 +339,19 @@ void lcQPreferencesDialog::accept()
 		mOptions->StudLogo = 0;
 
 	mOptions->Preferences.mDrawPreviewAxis = ui->PreviewAxisIconCheckBox->isChecked();
-
+	mOptions->Preferences.mPreviewViewSphereEnabled = ui->PreviewViewSphereSizeCombo->currentIndex() > 0;
 	mOptions->Preferences.mPreviewViewSphereLocation = (lcViewSphereLocation)ui->PreviewViewSphereLocationCombo->currentIndex();
 
 	switch (ui->PreviewViewSphereSizeCombo->currentIndex())
 	{
 	case 3:
 		mOptions->Preferences.mPreviewViewSphereSize = 100;
-		mOptions->Preferences.mPreviewViewSphereEnabled = 1;
 		break;
 	case 2:
 		mOptions->Preferences.mPreviewViewSphereSize = 75;
-		mOptions->Preferences.mPreviewViewSphereEnabled = 1;
 		break;
 	case 1:
 		mOptions->Preferences.mPreviewViewSphereSize = 50;
-		mOptions->Preferences.mPreviewViewSphereEnabled = 1;
-		break;
-	default:
-		mOptions->Preferences.mPreviewViewSphereEnabled = 0;
 		break;
 	}
 
@@ -453,6 +446,11 @@ void lcQPreferencesDialog::ColorButtonClicked()
 	{
 		Color = &mOptions->Preferences.mAxesColor;
 		Title = tr("Select Axes Color");
+	}
+	else if (Button == ui->TextColorButton)
+	{
+		Color = &mOptions->Preferences.mTextColor;
+		Title = tr("Select Text Color");
 	}
 	else if (Button == ui->OverlayColorButton)
 	{

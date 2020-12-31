@@ -314,7 +314,7 @@ bool lcApplication::LoadPartsLibrary(const QList<QPair<QString, bool>>& LibraryP
 	return false;
 }
 
-bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& ShowWindow)
+lcStartupMode lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths)
 {
 	bool OnlyUseLibraryPaths = false;
 	bool SaveImage = false;
@@ -696,8 +696,7 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 #endif
 			printf("Compiled " __DATE__ "\n");
 
-			ShowWindow = false;
-			return true;
+			return lcStartupMode::Success;
 		}
 		else if (Param == QLatin1String("-?") || Param == QLatin1String("--help"))
 		{
@@ -736,8 +735,7 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 			printf("  -?, --help: Display this help message and exit.\n");
 			printf("  \n");
 
-			ShowWindow = false;
-			return true;
+			return lcStartupMode::Success;
 		}
 		else
 		{
@@ -747,9 +745,14 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 	}
 
 	if (!ParseOK)
+		return lcStartupMode::Error;
+
+	const bool SaveAndExit = (SaveImage || SaveWavefront || Save3DS || SaveCOLLADA || SaveHTML);
+
+	if (SaveAndExit && ProjectName.isEmpty())
 	{
-		ShowWindow = false;
-		return false;
+		printf("No file name specified.\n");
+		return lcStartupMode::Error;
 	}
 
 	if (AASamples > 1)
@@ -770,20 +773,7 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 	lcLoadDefaultKeyboardShortcuts();
 	lcLoadDefaultMouseShortcuts();
 
-	if (SaveImage || SaveWavefront || Save3DS || SaveCOLLADA || SaveHTML)
-	{
-		ShowWindow = false;
-
-		if (ProjectName.isEmpty())
-		{
-			printf("No file name specified.\n");
-			return false;
-		}
-	}
-	else
-		ShowWindow = true;
-
-	if (!LoadPartsLibrary(LibraryPaths, OnlyUseLibraryPaths, ShowWindow))
+	if (!LoadPartsLibrary(LibraryPaths, OnlyUseLibraryPaths, !SaveAndExit))
 	{
 		QString Message;
 
@@ -792,7 +782,7 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 		else
 			Message = tr("LeoCAD could not load Parts Library.\n\nPlease visit https://www.leocad.org for information on how to download and install a library.");
 
-		if (ShowWindow)
+		if (!SaveAndExit)
 			QMessageBox::information(gMainWindow, tr("LeoCAD"), Message);
 		else
 			fprintf(stderr, "%s", Message.toLatin1().constData());
@@ -803,7 +793,7 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 	Project* NewProject = new Project();
 	SetProject(NewProject);
 
-	if (ShowWindow && ProjectName.isEmpty() && lcGetProfileInt(LC_PROFILE_AUTOLOAD_MOSTRECENT))
+	if (!SaveAndExit && ProjectName.isEmpty() && lcGetProfileInt(LC_PROFILE_AUTOLOAD_MOSTRECENT))
 		ProjectName = lcGetProfileString(LC_PROFILE_RECENT_FILE1);
 
 	if (!ProjectName.isEmpty() && gMainWindow->OpenProject(ProjectName))
@@ -1016,7 +1006,7 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 		}
 	}
 
-	if (ShowWindow)
+	if (!SaveAndExit)
 	{
 		gMainWindow->SetColorIndex(lcGetColorIndex(7));
 		gMainWindow->GetPartSelectionWidget()->SetDefaultPart();
@@ -1024,7 +1014,7 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 		gMainWindow->show();
 	}
 
-	return true;
+	return SaveAndExit ? lcStartupMode::Success : lcStartupMode::ShowWindow;
 }
 
 void lcApplication::Shutdown()

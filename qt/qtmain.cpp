@@ -181,13 +181,14 @@ int main(int argc, char *argv[])
 	
 	setlocale(LC_NUMERIC, "C");
 
-	bool ShowWindow;
-	if (!Application.Initialize(LibraryPaths, ShowWindow))
+	lcStartupMode StartupMode = Application.Initialize(LibraryPaths);
+
+	if (StartupMode == lcStartupMode::Error)
 		return 1;
 
 	int ExecReturn = 0;
 
-	if (ShowWindow)
+	if (StartupMode == lcStartupMode::ShowWindow)
 	{
 #if !LC_DISABLE_UPDATE_CHECK
 		lcDoInitialUpdateCheck();

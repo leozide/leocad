@@ -70,6 +70,13 @@ public:
 	int mDrawPreviewAxis;
 };
 
+enum class lcStartupMode
+{
+	ShowWindow,
+	Success,
+	Error
+};
+
 class lcApplication : public QApplication
 {
 	Q_OBJECT
@@ -79,7 +86,7 @@ public:
 	~lcApplication();
 
 	void SetProject(Project* Project);
-	bool Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& ShowWindow);
+	lcStartupMode Initialize(QList<QPair<QString, bool>>& LibraryPaths);
 	void Shutdown();
 	void ShowPreferencesDialog();
 	void SaveTabLayout() const;

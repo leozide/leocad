@@ -953,11 +953,12 @@ void lcQPreferencesDialog::on_shortcutAssign_clicked()
 	{
 		for (uint ExistingIndex = 0; ExistingIndex < LC_ARRAY_COUNT(Shortcuts); ExistingIndex++)
 		{
-			if (NewShortcut == Shortcuts[ExistingIndex])
+			if (NewShortcut == Shortcuts[ExistingIndex] && ExistingIndex != ShortcutIndex)
 			{
-				QString QuestionText = tr("The shortcut '%1' is already assigned to '%2'. Do you want to replace it?").arg(NewShortcut, gCommands[ExistingIndex].ID);
+				QString ActionText = qApp->translate("Menu", gCommands[ExistingIndex].MenuName).remove('&').remove(QLatin1String("..."));
+				QString QuestionText = tr("The shortcut '%1' is already assigned to '%2'. Do you want to replace it?").arg(NewShortcut, ActionText);
 
-				if (QMessageBox::question(this, tr("Duplicate Shortcut"), QuestionText, QMessageBox::Yes | QMessageBox::No) != QMessageBox::Yes)
+				if (QMessageBox::question(this, tr("Override Shortcut"), QuestionText, QMessageBox::Yes | QMessageBox::No) != QMessageBox::Yes)
 					return;
 
 				mOptions->KeyboardShortcuts.mShortcuts[ExistingIndex].clear();

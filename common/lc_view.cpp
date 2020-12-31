@@ -1719,18 +1719,22 @@ void lcView::DrawSelectZoomRegionOverlay()
 		{ Right - BorderX, Top - BorderY },
 	};
 
-	glEnable(GL_BLEND);
-
 	mContext->SetVertexBufferPointer(Verts);
 	mContext->SetVertexFormatPosition(2);
 
-	mContext->SetColor(0.25f, 0.25f, 1.0f, 1.0f);
+	const lcPreferences& Preferences = lcGetPreferences();
+
+	mContext->SetColor(lcVector4FromColor(Preferences.mMarqueeBorderColor));
 	mContext->DrawPrimitives(GL_TRIANGLE_STRIP, 0, 10);
 
-	mContext->SetColor(0.25f, 0.25f, 1.0f, 0.25f);
-	mContext->DrawPrimitives(GL_TRIANGLE_STRIP, 10, 4);
+	if (LC_RGBA_ALPHA(Preferences.mMarqueeFillColor))
+	{
+		glEnable(GL_BLEND);
+		mContext->SetColor(lcVector4FromColor(Preferences.mMarqueeFillColor));
+		mContext->DrawPrimitives(GL_TRIANGLE_STRIP, 10, 4);
+		glDisable(GL_BLEND);
+	}
 
-	glDisable(GL_BLEND);
 	glEnable(GL_DEPTH_TEST);
 }
 

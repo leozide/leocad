@@ -36,6 +36,8 @@ public:
 	bool mDrawAxes;
 	quint32 mAxesColor;
 	quint32 mTextColor;
+	quint32 mMarqueeBorderColor;
+	quint32 mMarqueeFillColor;
 	quint32 mOverlayColor;
 	quint32 mActiveViewColor;
 	quint32 mInactiveViewColor;

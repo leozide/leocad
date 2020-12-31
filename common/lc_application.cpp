@@ -26,6 +26,8 @@ void lcPreferences::LoadDefaults()
 	mDrawAxes = lcGetProfileInt(LC_PROFILE_DRAW_AXES);
 	mAxesColor = lcGetProfileInt(LC_PROFILE_AXES_COLOR);
 	mTextColor = lcGetProfileInt(LC_PROFILE_TEXT_COLOR);
+	mMarqueeBorderColor = lcGetProfileInt(LC_PROFILE_MARQUEE_BORDER_COLOR);
+	mMarqueeFillColor = lcGetProfileInt(LC_PROFILE_MARQUEE_FILL_COLOR);
 	mOverlayColor = lcGetProfileInt(LC_PROFILE_OVERLAY_COLOR);
 	mActiveViewColor = lcGetProfileInt(LC_PROFILE_ACTIVE_VIEW_COLOR);
 	mInactiveViewColor = lcGetProfileInt(LC_PROFILE_INACTIVE_VIEW_COLOR);
@@ -69,6 +71,8 @@ void lcPreferences::SaveDefaults()
 	lcSetProfileInt(LC_PROFILE_BACKGROUND_COLOR, mBackgroundSolidColor);
 	lcSetProfileInt(LC_PROFILE_GRADIENT_COLOR_TOP, mBackgroundGradientColorTop);
 	lcSetProfileInt(LC_PROFILE_GRADIENT_COLOR_BOTTOM, mBackgroundGradientColorBottom);
+	lcSetProfileInt(LC_PROFILE_MARQUEE_BORDER_COLOR, mMarqueeBorderColor);
+	lcSetProfileInt(LC_PROFILE_MARQUEE_FILL_COLOR, mMarqueeFillColor);
 	lcSetProfileInt(LC_PROFILE_OVERLAY_COLOR, mOverlayColor);
 	lcSetProfileInt(LC_PROFILE_ACTIVE_VIEW_COLOR, mActiveViewColor);
 	lcSetProfileInt(LC_PROFILE_INACTIVE_VIEW_COLOR, mInactiveViewColor);

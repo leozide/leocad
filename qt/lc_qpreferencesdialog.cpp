@@ -32,6 +32,8 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 	connect(ui->BackgroundGradient2ColorButton, SIGNAL(clicked()), this, SLOT(ColorButtonClicked()));
 	connect(ui->AxesColorButton, SIGNAL(clicked()), this, SLOT(ColorButtonClicked()));
 	connect(ui->TextColorButton, SIGNAL(clicked()), this, SLOT(ColorButtonClicked()));
+	connect(ui->MarqueeBorderColorButton, SIGNAL(clicked()), this, SLOT(ColorButtonClicked()));
+	connect(ui->MarqueeFillColorButton, SIGNAL(clicked()), this, SLOT(ColorButtonClicked()));
 	connect(ui->OverlayColorButton, SIGNAL(clicked()), this, SLOT(ColorButtonClicked()));
 	connect(ui->FadeStepsColor, SIGNAL(clicked()), this, SLOT(ColorButtonClicked()));
 	connect(ui->HighlightNewPartsColor, SIGNAL(clicked()), this, SLOT(ColorButtonClicked()));
@@ -181,52 +183,31 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 		ui->ShadingMode->removeItem(static_cast<int>(lcShadingMode::DefaultLights));
 	ui->ShadingMode->setCurrentIndex(static_cast<int>(mOptions->Preferences.mShadingMode));
 
-	QPixmap pix(12, 12);
+	auto SetButtonPixmap = [](quint32 Color, QToolButton* Button)
+	{
+		QPixmap Pixmap(12, 12);
 
-	pix.fill(QColor(LC_RGBA_RED(mOptions->Preferences.mBackgroundSolidColor), LC_RGBA_GREEN(mOptions->Preferences.mBackgroundSolidColor), LC_RGBA_BLUE(mOptions->Preferences.mBackgroundSolidColor)));
-	ui->BackgroundSolidColorButton->setIcon(pix);
+		Pixmap.fill(QColor(LC_RGBA_RED(Color), LC_RGBA_GREEN(Color), LC_RGBA_BLUE(Color)));
+		Button->setIcon(Pixmap);
+	};
 
-	pix.fill(QColor(LC_RGBA_RED(mOptions->Preferences.mBackgroundGradientColorTop), LC_RGBA_GREEN(mOptions->Preferences.mBackgroundGradientColorTop), LC_RGBA_BLUE(mOptions->Preferences.mBackgroundGradientColorTop)));
-	ui->BackgroundGradient1ColorButton->setIcon(pix);
-
-	pix.fill(QColor(LC_RGBA_RED(mOptions->Preferences.mBackgroundGradientColorBottom), LC_RGBA_GREEN(mOptions->Preferences.mBackgroundGradientColorBottom), LC_RGBA_BLUE(mOptions->Preferences.mBackgroundGradientColorBottom)));
-	ui->BackgroundGradient2ColorButton->setIcon(pix);
-
-	pix.fill(QColor(LC_RGBA_RED(mOptions->Preferences.mAxesColor), LC_RGBA_GREEN(mOptions->Preferences.mAxesColor), LC_RGBA_BLUE(mOptions->Preferences.mAxesColor)));
-	ui->AxesColorButton->setIcon(pix);
-
-	pix.fill(QColor(LC_RGBA_RED(mOptions->Preferences.mTextColor), LC_RGBA_GREEN(mOptions->Preferences.mTextColor), LC_RGBA_BLUE(mOptions->Preferences.mTextColor)));
-	ui->TextColorButton->setIcon(pix);
-
-	pix.fill(QColor(LC_RGBA_RED(mOptions->Preferences.mOverlayColor), LC_RGBA_GREEN(mOptions->Preferences.mOverlayColor), LC_RGBA_BLUE(mOptions->Preferences.mOverlayColor)));
-	ui->OverlayColorButton->setIcon(pix);
-
-	pix.fill(QColor(LC_RGBA_RED(mOptions->Preferences.mActiveViewColor), LC_RGBA_GREEN(mOptions->Preferences.mActiveViewColor), LC_RGBA_BLUE(mOptions->Preferences.mActiveViewColor)));
-	ui->ActiveViewColorButton->setIcon(pix);
-	
-	pix.fill(QColor(LC_RGBA_RED(mOptions->Preferences.mInactiveViewColor), LC_RGBA_GREEN(mOptions->Preferences.mInactiveViewColor), LC_RGBA_BLUE(mOptions->Preferences.mInactiveViewColor)));
-	ui->InactiveViewColorButton->setIcon(pix);
-
-	pix.fill(QColor(LC_RGBA_RED(mOptions->Preferences.mFadeStepsColor), LC_RGBA_GREEN(mOptions->Preferences.mFadeStepsColor), LC_RGBA_BLUE(mOptions->Preferences.mFadeStepsColor)));
-	ui->FadeStepsColor->setIcon(pix);
-
-	pix.fill(QColor(LC_RGBA_RED(mOptions->Preferences.mHighlightNewPartsColor), LC_RGBA_GREEN(mOptions->Preferences.mHighlightNewPartsColor), LC_RGBA_BLUE(mOptions->Preferences.mHighlightNewPartsColor)));
-	ui->HighlightNewPartsColor->setIcon(pix);
-
-	pix.fill(QColor(LC_RGBA_RED(mOptions->Preferences.mGridStudColor), LC_RGBA_GREEN(mOptions->Preferences.mGridStudColor), LC_RGBA_BLUE(mOptions->Preferences.mGridStudColor)));
-	ui->gridStudColor->setIcon(pix);
-
-	pix.fill(QColor(LC_RGBA_RED(mOptions->Preferences.mGridLineColor), LC_RGBA_GREEN(mOptions->Preferences.mGridLineColor), LC_RGBA_BLUE(mOptions->Preferences.mGridLineColor)));
-	ui->gridLineColor->setIcon(pix);
-
-	pix.fill(QColor(LC_RGBA_RED(mOptions->Preferences.mViewSphereColor), LC_RGBA_GREEN(mOptions->Preferences.mViewSphereColor), LC_RGBA_BLUE(mOptions->Preferences.mViewSphereColor)));
-	ui->ViewSphereColorButton->setIcon(pix);
-
-	pix.fill(QColor(LC_RGBA_RED(mOptions->Preferences.mViewSphereTextColor), LC_RGBA_GREEN(mOptions->Preferences.mViewSphereTextColor), LC_RGBA_BLUE(mOptions->Preferences.mViewSphereTextColor)));
-	ui->ViewSphereTextColorButton->setIcon(pix);
-
-	pix.fill(QColor(LC_RGBA_RED(mOptions->Preferences.mViewSphereHighlightColor), LC_RGBA_GREEN(mOptions->Preferences.mViewSphereHighlightColor), LC_RGBA_BLUE(mOptions->Preferences.mViewSphereHighlightColor)));
-	ui->ViewSphereHighlightColorButton->setIcon(pix);
+	SetButtonPixmap(mOptions->Preferences.mBackgroundSolidColor, ui->BackgroundSolidColorButton);
+	SetButtonPixmap(mOptions->Preferences.mBackgroundGradientColorTop, ui->BackgroundGradient1ColorButton);
+	SetButtonPixmap(mOptions->Preferences.mBackgroundGradientColorBottom, ui->BackgroundGradient2ColorButton);
+	SetButtonPixmap(mOptions->Preferences.mAxesColor, ui->AxesColorButton);
+	SetButtonPixmap(mOptions->Preferences.mTextColor, ui->TextColorButton);
+	SetButtonPixmap(mOptions->Preferences.mMarqueeBorderColor, ui->MarqueeBorderColorButton);
+	SetButtonPixmap(mOptions->Preferences.mMarqueeFillColor, ui->MarqueeFillColorButton);
+	SetButtonPixmap(mOptions->Preferences.mOverlayColor, ui->OverlayColorButton);
+	SetButtonPixmap(mOptions->Preferences.mActiveViewColor, ui->ActiveViewColorButton);
+	SetButtonPixmap(mOptions->Preferences.mInactiveViewColor, ui->InactiveViewColorButton);
+	SetButtonPixmap(mOptions->Preferences.mFadeStepsColor, ui->FadeStepsColor);
+	SetButtonPixmap(mOptions->Preferences.mHighlightNewPartsColor, ui->HighlightNewPartsColor);
+	SetButtonPixmap(mOptions->Preferences.mGridStudColor, ui->gridStudColor);
+	SetButtonPixmap(mOptions->Preferences.mGridLineColor, ui->gridLineColor);
+	SetButtonPixmap(mOptions->Preferences.mViewSphereColor, ui->ViewSphereColorButton);
+	SetButtonPixmap(mOptions->Preferences.mViewSphereTextColor, ui->ViewSphereTextColorButton);
+	SetButtonPixmap(mOptions->Preferences.mViewSphereHighlightColor, ui->ViewSphereHighlightColorButton);
 
 	on_studLogo_toggled();
 	on_antiAliasing_toggled();
@@ -452,6 +433,17 @@ void lcQPreferencesDialog::ColorButtonClicked()
 		Color = &mOptions->Preferences.mTextColor;
 		Title = tr("Select Text Color");
 	}
+	else if (Button == ui->MarqueeBorderColorButton)
+	{
+		Color = &mOptions->Preferences.mMarqueeBorderColor;
+		Title = tr("Select Marquee Border Color");
+	}
+	else if (Button == ui->MarqueeFillColorButton)
+	{
+		Color = &mOptions->Preferences.mMarqueeFillColor;
+		Title = tr("Select Marquee Fill Color");
+		DialogOptions = QColorDialog::ShowAlphaChannel;
+	}
 	else if (Button == ui->OverlayColorButton)
 	{
 		Color = &mOptions->Preferences.mOverlayColor;
@@ -518,6 +510,7 @@ void lcQPreferencesDialog::ColorButtonClicked()
 
 	QPixmap pix(12, 12);
 
+	newColor.setAlpha(255);
 	pix.fill(newColor);
 	((QToolButton*)Button)->setIcon(pix);
 }

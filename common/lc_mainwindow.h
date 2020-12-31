@@ -135,7 +135,7 @@ public:
 	lcMainWindow();
 	~lcMainWindow();
 
-	void CreateWidgets(int AASamples);
+	void CreateWidgets();
 
 	lcTool GetTool() const
 	{

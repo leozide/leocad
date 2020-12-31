@@ -752,6 +752,20 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 		return false;
 	}
 
+	if (AASamples > 1)
+	{
+#ifdef LC_USE_QOPENGLWIDGET
+		QSurfaceFormat Format = QSurfaceFormat::defaultFormat();
+		Format.setSamples(AASamples);
+		QSurfaceFormat::setDefaultFormat(Format);
+#else
+		QGLFormat Format;
+		Format.setSampleBuffers(true);
+		Format.setSamples(AASamples);
+		QGLFormat::setDefaultFormat(Format);
+#endif
+	}
+
 	gMainWindow = new lcMainWindow();
 	lcLoadDefaultKeyboardShortcuts();
 	lcLoadDefaultMouseShortcuts();
@@ -784,7 +798,7 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 			fprintf(stderr, "%s", Message.toLatin1().constData());
 	}
 
-	gMainWindow->CreateWidgets(AASamples);
+	gMainWindow->CreateWidgets();
 
 	Project* NewProject = new Project();
 	SetProject(NewProject);

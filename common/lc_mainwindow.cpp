@@ -136,25 +136,11 @@ lcMainWindow::~lcMainWindow()
 	gMainWindow = nullptr;
 }
 
-void lcMainWindow::CreateWidgets(int AASamples)
+void lcMainWindow::CreateWidgets()
 {
 	setAcceptDrops(true);
 	setWindowIcon(QIcon(":/resources/leocad.png"));
 	setWindowFilePath(QString());
-
-	if (AASamples > 1)
-	{
-#ifdef LC_USE_QOPENGLWIDGET
-		QSurfaceFormat Format = QSurfaceFormat::defaultFormat();
-		Format.setSamples(AASamples);
-		QSurfaceFormat::setDefaultFormat(Format);
-#else
-		QGLFormat Format;
-		Format.setSampleBuffers(true);
-		Format.setSamples(AASamples);
-		QGLFormat::setDefaultFormat(Format);
-#endif
-	}
 
 	CreateActions();
 	CreateToolBars();

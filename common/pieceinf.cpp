@@ -383,6 +383,26 @@ void PieceInfo::CompareBoundingBox(const lcMatrix44& WorldMatrix, lcVector3& Min
 	}
 }
 
+void PieceInfo::AddSubModelBoundingBoxPoints(const lcMatrix44& WorldMatrix, std::vector<lcVector3>& Points) const
+{
+	if (!IsModel())
+	{
+		lcVector3 BoxPoints[8];
+
+		if (!mMesh)
+			lcGetBoxCorners(GetBoundingBox(), BoxPoints);
+		else
+			lcGetBoxCorners(mMesh->mBoundingBox, BoxPoints);
+
+		for (int i = 0; i < 8; i++)
+			Points.emplace_back(lcMul31(BoxPoints[i], WorldMatrix));
+	}
+	else
+	{
+		mModel->SubModelAddBoundingBoxPoints(WorldMatrix, Points);
+	}
+}
+
 void PieceInfo::UpdateBoundingBox(std::vector<lcModel*>& UpdatedModels)
 {
 	if (IsModel())

@@ -793,15 +793,15 @@ void lcCamera::RemoveTime(lcStep Start, lcStep Time)
 	lcObject::RemoveTime(mUpVectorKeys, Start, Time);
 }
 
-void lcCamera::ZoomExtents(float AspectRatio, const lcVector3& Center, const lcVector3* Points, int NumPoints, lcStep Step, bool AddKey)
+void lcCamera::ZoomExtents(float AspectRatio, const lcVector3& Center, const std::vector<lcVector3>& Points, lcStep Step, bool AddKey)
 {
 	if (IsOrtho())
 	{
 		float MinX = FLT_MAX, MaxX = -FLT_MAX, MinY = FLT_MAX, MaxY = -FLT_MAX;
 
-		for (int PointIdx = 0; PointIdx < NumPoints; PointIdx++)
+		for (lcVector3 Point : Points)
 		{
-			lcVector3 Point = lcMul30(Points[PointIdx], mWorldView);
+			Point = lcMul30(Point, mWorldView);
 
 			MinX = lcMin(MinX, Point.x);
 			MinY = lcMin(MinY, Point.y);
@@ -826,7 +826,7 @@ void lcCamera::ZoomExtents(float AspectRatio, const lcVector3& Center, const lcV
 		lcVector3 Position(mPosition + Center - mTargetPosition);
 		lcMatrix44 ProjectionMatrix = lcMatrix44Perspective(m_fovy, AspectRatio, m_zNear, m_zFar);
 
-		std::tie(mPosition, std::ignore) = lcZoomExtents(Position, mWorldView, ProjectionMatrix, Points, NumPoints);
+		std::tie(mPosition, std::ignore) = lcZoomExtents(Position, mWorldView, ProjectionMatrix, Points.data(), Points.size());
 		mTargetPosition = Center;
 	}
 

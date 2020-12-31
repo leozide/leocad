@@ -704,9 +704,24 @@ void lcPiece::AddSubModelRenderMeshes(lcScene* Scene, const lcMatrix44& WorldMat
 		Scene->AddInterfaceObject(this);
 }
 
-void lcPiece::SubmodelCompareBoundingBox(const lcMatrix44& WorldMatrix, lcVector3& Min, lcVector3& Max) const
+void lcPiece::SubModelCompareBoundingBox(const lcMatrix44& WorldMatrix, lcVector3& Min, lcVector3& Max) const
 {
 	mPieceInfo->CompareBoundingBox(lcMul(mModelWorld, WorldMatrix), Min, Max);
+}
+
+void lcPiece::SubModelAddBoundingBoxPoints(const lcMatrix44& WorldMatrix, std::vector<lcVector3>& Points) const
+{
+	if (!mMesh)
+		mPieceInfo->AddSubModelBoundingBoxPoints(lcMul(mModelWorld, WorldMatrix), Points);
+	else
+	{
+		lcVector3 BoxPoints[8];
+
+		lcGetBoxCorners(mMesh->mBoundingBox, BoxPoints);
+
+		for (int i = 0; i < 8; i++)
+			Points.emplace_back(lcMul31(BoxPoints[i], mModelWorld));
+	}
 }
 
 void lcPiece::MoveSelected(lcStep Step, bool AddKey, const lcVector3& Distance)

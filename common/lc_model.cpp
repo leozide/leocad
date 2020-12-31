@@ -1661,7 +1661,14 @@ void lcModel::SubModelCompareBoundingBox(const lcMatrix44& WorldMatrix, lcVector
 {
 	for (lcPiece* Piece : mPieces)
 		if (Piece->IsVisibleInSubModel())
-			Piece->SubmodelCompareBoundingBox(WorldMatrix, Min, Max);
+			Piece->SubModelCompareBoundingBox(WorldMatrix, Min, Max);
+}
+
+void lcModel::SubModelAddBoundingBoxPoints(const lcMatrix44& WorldMatrix, std::vector<lcVector3>& Points) const
+{
+	for (lcPiece* Piece : mPieces)
+		if (Piece->IsVisibleInSubModel())
+			Piece->SubModelAddBoundingBoxPoints(WorldMatrix, Points);
 }
 
 void lcModel::SaveCheckpoint(const QString& Description)
@@ -3322,6 +3329,17 @@ bool lcModel::GetPiecesBoundingBox(lcVector3& Min, lcVector3& Max) const
 	return Valid;
 }
 
+std::vector<lcVector3> lcModel::GetPiecesBoundingBoxPoints() const
+{
+	std::vector<lcVector3> Points;
+
+	for (lcPiece* Piece : mPieces)
+		if (Piece->IsVisible(mCurrentStep))
+			Piece->SubModelAddBoundingBoxPoints(lcMatrix44Identity(), Points);
+
+	return Points;
+}
+
 void lcModel::GetPartsList(int DefaultColorIndex, bool ScanSubModels, bool AddSubModels, lcPartsList& PartsList) const
 {
 	for (lcPiece* Piece : mPieces)
@@ -4239,17 +4257,22 @@ void lcModel::MoveCamera(lcCamera* Camera, const lcVector3& Direction)
 
 void lcModel::ZoomExtents(lcCamera* Camera, float Aspect)
 {
+	std::vector<lcVector3> Points = GetPiecesBoundingBoxPoints();
+
+	if (Points.empty())
+		return;
+
 	lcVector3 Min(FLT_MAX, FLT_MAX, FLT_MAX), Max(-FLT_MAX, -FLT_MAX, -FLT_MAX);
 
-	if (!GetPiecesBoundingBox(Min, Max))
-		return;
+	for (const lcVector3& Point : Points)
+	{
+		Min = lcMin(Point, Min);
+		Max = lcMax(Point, Max);
+	}
 
 	lcVector3 Center = (Min + Max) / 2.0f;
 
-	lcVector3 Points[8];
-	lcGetBoxCorners(Min, Max, Points);
-
-	Camera->ZoomExtents(Aspect, Center, Points, 8, mCurrentStep, mIsPreview ? false : gMainWindow->GetAddKeys());
+	Camera->ZoomExtents(Aspect, Center, Points, mCurrentStep, mIsPreview ? false : gMainWindow->GetAddKeys());
 
 	if (!mIsPreview)
 		gMainWindow->UpdateSelectedObjects(false);

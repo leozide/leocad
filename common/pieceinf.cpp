@@ -44,9 +44,9 @@ void PieceInfo::SetMesh(lcMesh* Mesh)
 
 void PieceInfo::SetPlaceholder()
 {
-	mBoundingBox.Min = lcVector3(-10.0f, -10.0f, -24.0f);
-	mBoundingBox.Max = lcVector3(10.0f, 10.0f, 4.0f);
-	ReleaseMesh();
+	lcMesh* Mesh = new lcMesh;
+	Mesh->CreateBox();
+	SetMesh(Mesh);
 
 	mType = lcPieceInfoType::Placeholder;
 	mModel = nullptr;
@@ -147,8 +147,6 @@ void PieceInfo::Load()
 		{
 			if (lcGetPiecesLibrary()->LoadPieceData(this))
 				mType = lcPieceInfoType::Part;
-			else
-				mBoundingBox = gPlaceholderMesh->mBoundingBox;
 		}
 		else
 			lcGetPiecesLibrary()->LoadPieceData(this);
@@ -266,9 +264,6 @@ bool PieceInfo::BoxTest(const lcMatrix44& WorldMatrix, const lcVector4 WorldPlan
 	if (OutcodesOR == 0)
 		return true;
 
-	if (IsPlaceholder())
-		return gPlaceholderMesh->IntersectsPlanes(LocalPlanes);
-
 	if (mMesh && mMesh->IntersectsPlanes(LocalPlanes))
 		return true;
 
@@ -308,7 +303,7 @@ void PieceInfo::AddRenderMesh(lcScene& Scene)
 void PieceInfo::AddRenderMeshes(lcScene* Scene, const lcMatrix44& WorldMatrix, int ColorIndex, lcRenderMeshState RenderMeshState, bool ParentActive) const
 {
 	if (mMesh || IsPlaceholder())
-		Scene->AddMesh(IsPlaceholder() ? gPlaceholderMesh : mMesh, WorldMatrix, ColorIndex, RenderMeshState);
+		Scene->AddMesh(mMesh, WorldMatrix, ColorIndex, RenderMeshState);
 
 	if (IsModel())
 		mModel->AddSubModelRenderMeshes(Scene, WorldMatrix, ColorIndex, RenderMeshState, ParentActive);

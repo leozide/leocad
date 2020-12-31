@@ -2260,7 +2260,7 @@ void lcModel::InsertPiece(lcPiece* Piece, int Index)
 
 	if (!Info->IsModel())
 	{
-		lcMesh* Mesh = Info->IsTemporary() ? gPlaceholderMesh : Info->GetMesh();
+		lcMesh* Mesh = Info->GetMesh();
 
 		if (Mesh && Mesh->mVertexCacheOffset == -1)
 			lcGetPiecesLibrary()->mBuffersDirty = true;

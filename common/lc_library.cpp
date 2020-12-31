@@ -1245,16 +1245,25 @@ bool lcPiecesLibrary::LoadPieceData(PieceInfo* Info)
 		}
 	}
 
-	if (!Loaded || mCancelLoading)
+	if (mCancelLoading)
 		return false;
 
-	if (Info) 
-		Info->SetMesh(MeshData.CreateMesh());
+	if (Info)
+	{
+		if (Loaded)
+			Info->SetMesh(MeshData.CreateMesh());
+		else
+		{
+			lcMesh* Mesh = new lcMesh;
+			Mesh->CreateBox();
+			Info->SetMesh(Mesh);
+		}
+	}
 
 	if (SaveCache)
 		SaveCachePiece(Info);
 
-	return true;
+	return Loaded;
 }
 
 void lcPiecesLibrary::GetPrimitiveFile(lcLibraryPrimitive* Primitive, std::function<void(lcFile& File)> Callback)
@@ -1409,7 +1418,7 @@ void lcPiecesLibrary::UpdateBuffers(lcContext* Context)
 	for (const auto& PieceIt : mPieces)
 	{
 		const PieceInfo* const Info = PieceIt.second;
-		lcMesh* Mesh = Info->IsPlaceholder() ? gPlaceholderMesh : Info->GetMesh();
+		lcMesh* Mesh = Info->GetMesh();
 
 		if (!Mesh)
 			continue;

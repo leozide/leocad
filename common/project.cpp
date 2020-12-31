@@ -1298,7 +1298,7 @@ void Project::ExportCOLLADA(const QString& FileName)
 		QString ID = GetMeshID(ModelPart);
 
 		if (!Mesh)
-			Mesh = gPlaceholderMesh;
+			continue;
 
 		Stream << QString("\t<geometry id=\"%1\">\r\n").arg(ID);
 		Stream << "\t\t<mesh>\r\n";
@@ -1407,6 +1407,11 @@ void Project::ExportCOLLADA(const QString& FileName)
 
 	for (const lcModelPartsEntry& ModelPart : ModelParts)
 	{
+		lcMesh* Mesh = !ModelPart.Mesh ? ModelPart.Info->GetMesh() : ModelPart.Mesh;
+
+		if (!Mesh)
+			continue;
+
 		QString ID = GetMeshID(ModelPart);
 
 		Stream << "\t\t<node>\r\n";
@@ -1422,11 +1427,6 @@ void Project::ExportCOLLADA(const QString& FileName)
 		Stream << QString("\t\t\t<instance_geometry url=\"#%1\">\r\n").arg(ID);
 		Stream << "\t\t\t\t<bind_material>\r\n";
 		Stream << "\t\t\t\t\t<technique_common>\r\n";
-
-		lcMesh* Mesh = !ModelPart.Mesh ? ModelPart.Info->GetMesh() : ModelPart.Mesh;
-
-		if (!Mesh)
-			Mesh = gPlaceholderMesh;
 
 		for (int SectionIdx = 0; SectionIdx < Mesh->mLods[LC_MESH_LOD_HIGH].NumSections; SectionIdx++)
 		{

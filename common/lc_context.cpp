@@ -89,9 +89,6 @@ lcContext::~lcContext()
 			lcView::DestroyResources(this);
 			DestroyResources();
 			lcViewSphere::DestroyResources(this);
-
-			delete gPlaceholderMesh;
-			gPlaceholderMesh = nullptr;
 		}
 	}
 }
@@ -286,9 +283,6 @@ void lcContext::SetGLContext(const QGLContext* GLContext)
 
 		if (!gSupportsFramebufferObject)
 			gMainWindow->GetPartSelectionWidget()->DisableIconMode();
-
-		gPlaceholderMesh = new lcMesh;
-		gPlaceholderMesh->CreateBox();
 	}
 
 	mValid = true;

@@ -117,5 +117,4 @@ public:
 	int mIndexType;
 };
 
-extern lcMesh* gPlaceholderMesh;
 

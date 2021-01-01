@@ -59,6 +59,8 @@ void PieceInfo::SetModel(lcModel* Model, bool UpdateMesh, Project* CurrentProjec
 	{
 		mType = lcPieceInfoType::Model;
 		mModel = Model;
+		delete mMesh;
+		mMesh = nullptr;
 	}
 
 	strncpy(mFileName, Model->GetProperties().mFileName.toLatin1().data(), sizeof(mFileName) - 1);

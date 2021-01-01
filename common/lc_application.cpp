@@ -807,6 +807,9 @@ lcStartupMode lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPath
 
 		lcView* ActiveView = gMainWindow->GetActiveView();
 
+		if (SaveImage)
+			ActiveView->SetSize(ImageWidth, ImageHeight);
+
 		if (!CameraName.isEmpty())
 		{
 			ActiveView->SetCamera(CameraName);

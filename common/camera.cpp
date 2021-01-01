@@ -62,6 +62,28 @@ lcCamera::~lcCamera()
 {
 }
 
+lcViewpoint lcCamera::GetViewpoint(const QString& ViewpointName)
+{
+	const QLatin1String ViewpointNames[] =
+	{
+		QLatin1String("front"),
+		QLatin1String("back"),
+		QLatin1String("top"),
+		QLatin1String("bottom"),
+		QLatin1String("left"),
+		QLatin1String("right"),
+		QLatin1String("home")
+	};
+
+	LC_ARRAY_SIZE_CHECK(ViewpointNames, lcViewpoint::Count);
+
+	for (int ViewpointIndex = 0; ViewpointIndex < static_cast<int>(lcViewpoint::Count); ViewpointIndex++)
+		if (ViewpointNames[ViewpointIndex] == ViewpointName)
+			return static_cast<lcViewpoint>(ViewpointIndex);
+
+	return lcViewpoint::Count;
+}
+
 void lcCamera::Initialize()
 {
 	m_fovy = 30.0f;

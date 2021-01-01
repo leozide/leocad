@@ -25,7 +25,8 @@ enum class lcViewpoint
 	Bottom,
 	Left,
 	Right,
-	Home
+	Home,
+	Count
 };
 
 enum lcCameraSection
@@ -43,9 +44,9 @@ public:
 	~lcCamera();
 
 	lcCamera(const lcCamera&) = delete;
-	lcCamera(lcCamera&&) = delete;
 	lcCamera& operator=(const lcCamera&) = delete;
-	lcCamera& operator=(lcCamera&&) = delete;
+
+	static lcViewpoint GetViewpoint(const QString& ViewpointName);
 
 	QString GetName() const override
 	{

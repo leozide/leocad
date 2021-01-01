@@ -345,12 +345,12 @@ lcStartupMode lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPath
 	float CameraLatLon[2] = {0.0f, 0.0f};
 	float FoV = 0.0f;
 	float ZPlanes[2] = {0.0f, 0.0f};
+	lcViewpoint Viewpoint = lcViewpoint::Count;
 	quint32 FadeStepsColor = mPreferences.mFadeStepsColor;
 	quint32	HighlightColor = mPreferences.mHighlightNewPartsColor;
 	QString ImageName;
 	QString ModelName;
 	QString CameraName;
-	QString ViewpointName;
 	QString ProjectName;
 	QString SaveWavefrontName;
 	QString Save3DSName;
@@ -550,18 +550,17 @@ lcStartupMode lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPath
 			ParseString(CameraName, true);
 		else if (Param == QLatin1String("--viewpoint"))
 		{
-			if (ParseString(ViewpointName, true)
-				// TODO: move the string checks into view or camera
-				&& ViewpointName != QLatin1String("front")
-				&& ViewpointName != QLatin1String("back")
-				&& ViewpointName != QLatin1String("top")
-				&& ViewpointName != QLatin1String("bottom")
-				&& ViewpointName != QLatin1String("left")
-				&& ViewpointName != QLatin1String("right")
-				&& ViewpointName != QLatin1String("home"))
+			QString ViewpointName;
+
+			if (ParseString(ViewpointName, true))
 			{
-				printf("Invalid parameter value specified for the '%s' option: '%s'.\n", Param.toLatin1().constData(), Arguments[ArgIdx].toLatin1().constData());
-				ParseOK = false;
+				Viewpoint = lcCamera::GetViewpoint(ViewpointName);
+
+				if (Viewpoint == lcViewpoint::Count)
+				{
+					printf("Invalid parameter value specified for the '%s' option: '%s'.\n", Param.toLatin1().constData(), Arguments[ArgIdx].toLatin1().constData());
+					ParseOK = false;
+				}
 			}
 		}
 		else if (Param == QLatin1String("--camera-angles"))
@@ -814,7 +813,7 @@ lcStartupMode lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPath
 		{
 			ActiveView->SetCamera(CameraName);
 
-			if (!ViewpointName.isEmpty())
+			if (Viewpoint != lcViewpoint::Count)
 				printf("Warning: --viewpoint is ignored when --camera is set.\n");
 
 			if (Orthographic)
@@ -841,25 +840,9 @@ lcStartupMode lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPath
 				Camera->m_zFar = ZPlanes[1];
 			}
 
-			if (!ViewpointName.isEmpty())
+			if (Viewpoint != lcViewpoint::Count)
 			{
-				if (ViewpointName == QLatin1String("front"))
-					ActiveView->SetViewpoint(lcViewpoint::Front);
-				else if (ViewpointName == QLatin1String("back"))
-					ActiveView->SetViewpoint(lcViewpoint::Back);
-				else if (ViewpointName == QLatin1String("top"))
-					ActiveView->SetViewpoint(lcViewpoint::Top);
-				else if (ViewpointName == QLatin1String("bottom"))
-					ActiveView->SetViewpoint(lcViewpoint::Bottom);
-				else if (ViewpointName == QLatin1String("left"))
-					ActiveView->SetViewpoint(lcViewpoint::Left);
-				else if (ViewpointName == QLatin1String("right"))
-					ActiveView->SetViewpoint(lcViewpoint::Right);
-				else if (ViewpointName == QLatin1String("home"))
-					ActiveView->SetViewpoint(lcViewpoint::Home);
-				else
-					printf("Warning: unknown viewpoint: '%s'\n", ViewpointName.toLatin1().constData());
-				// TODO: move the above into view or camera
+				ActiveView->SetViewpoint(Viewpoint);
 
 				if (SetCameraAngles)
 					printf("Warning: --camera-angles is ignored when --viewpoint is set.\n");

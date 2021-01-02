@@ -758,22 +758,8 @@ lcStartupMode lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPath
 		return lcStartupMode::Error;
 	}
 
-	if (AASamples > 1)
-	{
 #ifdef LC_USE_QOPENGLWIDGET
-		QSurfaceFormat Format = QSurfaceFormat::defaultFormat();
-		Format.setSamples(AASamples);
-		QSurfaceFormat::setDefaultFormat(Format);
-#else
-		QGLFormat Format;
-		Format.setSampleBuffers(true);
-		Format.setSamples(AASamples);
-		QGLFormat::setDefaultFormat(Format);
-#endif
-	}
-
-#ifdef LC_USE_QOPENGLWIDGET
-	if (!lcContext::CreateOffscreenContext())
+	if (!InitializeRenderer(AASamples))
 		return lcStartupMode::Error;
 #endif
 
@@ -1014,8 +1000,47 @@ lcStartupMode lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPath
 
 void lcApplication::Shutdown()
 {
+	delete gMainWindow;
+	gMainWindow = nullptr;
+
+	delete mProject;
+	mProject = nullptr;
+
 	delete mLibrary;
 	mLibrary = nullptr;
+
+	ShutdownRenderer();
+}
+
+bool lcApplication::InitializeRenderer(int AASamples)
+{
+	if (AASamples > 1)
+	{
+#ifdef LC_USE_QOPENGLWIDGET
+		QSurfaceFormat Format = QSurfaceFormat::defaultFormat();
+		Format.setSamples(AASamples);
+		QSurfaceFormat::setDefaultFormat(Format);
+#else
+		QGLFormat Format;
+		Format.setSampleBuffers(true);
+		Format.setSamples(AASamples);
+		QGLFormat::setDefaultFormat(Format);
+#endif
+	}
+
+#ifdef LC_USE_QOPENGLWIDGET
+	if (!lcContext::CreateOffscreenContext())
+		return false;
+#endif
+
+	return true;
+}
+
+void lcApplication::ShutdownRenderer()
+{
+#ifdef LC_USE_QOPENGLWIDGET
+	lcContext::DestroyOffscreenContext();
+#endif
 }
 
 void lcApplication::ShowPreferencesDialog()

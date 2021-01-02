@@ -1,9 +1,7 @@
 #include "lc_global.h"
 #include "lc_application.h"
 #include "lc_qupdatedialog.h"
-#include "lc_mainwindow.h"
 #include "lc_profile.h"
-#include "lc_context.h"
 #include <QApplication>
 #include <locale.h>
 
@@ -198,12 +196,7 @@ int main(int argc, char *argv[])
 		ExecReturn = Application.exec();
 	}
 
-#ifdef LC_USE_QOPENGLWIDGET
-	lcContext::DestroyOffscreenContext();
-#endif
-
-	delete gMainWindow;
-	gMainWindow = nullptr;
+	Application.Shutdown();
 
 	return ExecReturn;
 }

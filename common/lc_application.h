@@ -104,6 +104,8 @@ public:
 	QByteArray mClipboard;
 
 protected:
+	bool InitializeRenderer(int AASamples);
+	void ShutdownRenderer();
 	void UpdateStyle();
 	QString GetTabLayoutKey() const;
 

@@ -120,16 +120,23 @@ public:
 	lcContext(const lcContext&) = delete;
 	lcContext& operator=(const lcContext&) = delete;
 
+#ifdef LC_USE_QOPENGLWIDGET
+	static bool CreateOffscreenContext();
+	static void DestroyOffscreenContext();
+#endif
+
 	void CreateResources();
 	void DestroyResources();
 
 	void SetDefaultState();
 	void ClearResources();
 
+	void MakeCurrent();
 #ifdef LC_USE_QOPENGLWIDGET
-	void SetGLContext(QOpenGLContext* GLContext);
+	void SetGLContext(QOpenGLContext* GLContext, QOpenGLWidget* Widget);
+	void SetOffscreenContext();
 #else
-	void SetGLContext(const QGLContext* GLContext);
+	void SetGLContext(const QGLContext* GLContext, QGLWidget* Widget);
 #endif
 
 	void ClearColorAndDepth(const lcVector4& ClearColor);
@@ -234,7 +241,8 @@ protected:
 	void FlushState();
 
 #ifdef LC_USE_QOPENGLWIDGET
-	QOpenGLContext* mGLContext = nullptr;
+	QOpenGLWidget* mWidget = nullptr;
+	QOpenGLContext* mContext = nullptr;
 #endif
 	bool mValid = false;
 
@@ -272,6 +280,11 @@ protected:
 	bool mHighlightParamsDirty;
 
 	GLuint mFramebufferObject;
+
+#ifdef LC_USE_QOPENGLWIDGET
+	static std::unique_ptr<QOpenGLContext> mOffscreenContext;
+	static std::unique_ptr<QOffscreenSurface> mOffscreenSurface;
+#endif
 
 	static lcProgram mPrograms[static_cast<int>(lcMaterialType::Count)];
 	static int mValidContexts;

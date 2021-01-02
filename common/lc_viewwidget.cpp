@@ -56,7 +56,7 @@ void lcViewWidget::SetView(lcView* View)
 		if (context())
 		{
 			makeCurrent();
-			View->mContext->SetGLContext(context());
+			View->mContext->SetGLContext(context(), this);
 		}
 
 		View->SetWidget(this);
@@ -73,7 +73,7 @@ void lcViewWidget::SetView(lcView* View)
 
 void lcViewWidget::initializeGL()
 {
-	mView->mContext->SetGLContext(context());
+	mView->mContext->SetGLContext(context(), this);
 }
 
 void lcViewWidget::resizeGL(int Width, int Height)

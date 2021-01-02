@@ -398,6 +398,9 @@ void lcPartSelectionListModel::DrawPreview(int InfoIndex)
 	{
 		mView = std::unique_ptr<lcView>(new lcView(lcViewType::PartsList, nullptr));
 
+		mView->SetOffscreenContext();
+		mView->MakeCurrent();
+
 		if (!mView->BeginRenderToImage(Width, Height))
 		{
 			mView.reset();
@@ -406,6 +409,7 @@ void lcPartSelectionListModel::DrawPreview(int InfoIndex)
 	}
 
 	mView->MakeCurrent();
+	mView->BindRenderFramebuffer();
 
 	lcContext* Context = mView->mContext;
 #else
@@ -456,6 +460,7 @@ void lcPartSelectionListModel::DrawPreview(int InfoIndex)
 	Scene.Draw(Context);
 
 #ifdef LC_USE_QOPENGLWIDGET
+	mView->UnbindRenderFramebuffer();
 	QImage Image = mView->GetRenderFramebufferImage().convertToFormat(QImage::Format_ARGB32);
 #else
 	QImage Image = Context->GetRenderFramebufferImage(mRenderFramebuffer);

@@ -176,7 +176,12 @@ public:
 
 	void MakeCurrent();
 	void Redraw();
+
+#ifdef LC_USE_QOPENGLWIDGET
+	void SetOffscreenContext();
+#else
 	void SetContext(lcContext* Context);
+#endif
 
 	void SetFocus(bool Focus);
 	void SetMousePosition(int MouseX, int MouseY);
@@ -236,6 +241,8 @@ public:
 	void EndRenderToImage();
 	QImage GetRenderImage() const;
 #ifdef LC_USE_QOPENGLWIDGET
+	void BindRenderFramebuffer();
+	void UnbindRenderFramebuffer();
 	QImage GetRenderFramebufferImage() const;
 #endif
 
@@ -300,8 +307,6 @@ protected:
 
 	QImage mRenderImage;
 #ifdef LC_USE_QOPENGLWIDGET
-	std::unique_ptr<QOpenGLContext> mOffscreenContext;
-	std::unique_ptr<QOffscreenSurface> mOffscreenSurface;
 	std::unique_ptr<QOpenGLFramebufferObject> mRenderFramebuffer;
 #else
 	std::pair<lcFramebuffer, lcFramebuffer> mRenderFramebuffer;

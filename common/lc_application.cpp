@@ -772,6 +772,11 @@ lcStartupMode lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPath
 #endif
 	}
 
+#ifdef LC_USE_QOPENGLWIDGET
+	if (!lcContext::CreateOffscreenContext())
+		return lcStartupMode::Error;
+#endif
+
 	gMainWindow = new lcMainWindow();
 	lcLoadDefaultKeyboardShortcuts();
 	lcLoadDefaultMouseShortcuts();

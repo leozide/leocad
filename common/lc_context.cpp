@@ -27,6 +27,10 @@
 #define GL_STATIC_DRAW_ARB GL_STATIC_DRAW
 #endif
 
+#ifdef LC_USE_QOPENGLWIDGET
+std::unique_ptr<QOpenGLContext> lcContext::mOffscreenContext;
+std::unique_ptr<QOffscreenSurface> lcContext::mOffscreenSurface;
+#endif
 lcProgram lcContext::mPrograms[static_cast<int>(lcMaterialType::Count)];
 int lcContext::mValidContexts;
 
@@ -92,6 +96,47 @@ lcContext::~lcContext()
 		}
 	}
 }
+
+#ifdef LC_USE_QOPENGLWIDGET
+
+bool lcContext::CreateOffscreenContext()
+{
+	std::unique_ptr<QOpenGLContext> OffscreenContext(new QOpenGLContext());
+
+	if (!OffscreenContext)
+		return false;
+
+	OffscreenContext->setShareContext(QOpenGLContext::globalShareContext());
+
+	if (!OffscreenContext->create() || !OffscreenContext->isValid())
+		return false;
+
+	std::unique_ptr<QOffscreenSurface> OffscreenSurface(new QOffscreenSurface());
+
+	if (!OffscreenSurface)
+		return false;
+
+	OffscreenSurface->create();
+
+	if (!OffscreenSurface->isValid())
+		return false;
+
+	if (!OffscreenContext->makeCurrent(OffscreenSurface.get()))
+		return false;
+
+	mOffscreenContext = std::move(OffscreenContext);
+	mOffscreenSurface = std::move(OffscreenSurface);
+
+	return true;
+}
+
+void lcContext::DestroyOffscreenContext()
+{
+	mOffscreenSurface.reset();
+	mOffscreenContext.reset();
+}
+
+#endif
 
 void lcContext::CreateShaderPrograms()
 {
@@ -255,20 +300,33 @@ void lcContext::DestroyResources()
 	}
 }
 
+void lcContext::MakeCurrent()
+{
+	if (mWidget)
+		mWidget->makeCurrent();
 #ifdef LC_USE_QOPENGLWIDGET
-void lcContext::SetGLContext(QOpenGLContext* GLContext)
+	else
+		mOffscreenContext->makeCurrent(mOffscreenSurface.get());
+#endif
+}
+
+#ifdef LC_USE_QOPENGLWIDGET
+void lcContext::SetGLContext(QOpenGLContext* Context, QOpenGLWidget* Widget)
 #else
-void lcContext::SetGLContext(const QGLContext* GLContext)
+void lcContext::SetGLContext(const QGLContext* Context, QGLWidget* Widget)
 #endif
 {
+	mContext = Context;
+	mWidget = Widget;
+
 #ifdef LC_USE_QOPENGLWIDGET
+	MakeCurrent();
 	initializeOpenGLFunctions();
-	mGLContext = GLContext;
 #endif
 
 	if (!mValidContexts)
 	{
-		lcInitializeGLExtensions(GLContext);
+		lcInitializeGLExtensions(Context);
 
 		// TODO: Find a better place for the grid texture and font
 		gStringCache.Initialize(this);
@@ -288,6 +346,15 @@ void lcContext::SetGLContext(const QGLContext* GLContext)
 	mValid = true;
 	mValidContexts++;
 }
+
+#ifdef LC_USE_QOPENGLWIDGET
+
+void lcContext::SetOffscreenContext()
+{
+	SetGLContext(mOffscreenContext.get(), nullptr);
+}
+
+#endif
 
 void lcContext::SetDefaultState()
 {
@@ -610,7 +677,7 @@ void lcContext::ClearFramebuffer()
 		return;
 
 #ifdef LC_USE_QOPENGLWIDGET
-	glBindFramebuffer(GL_FRAMEBUFFER, mGLContext->defaultFramebufferObject());
+	glBindFramebuffer(GL_FRAMEBUFFER, mContext->defaultFramebufferObject());
 #else
 	if (gSupportsFramebufferObjectARB)
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -664,7 +731,7 @@ lcFramebuffer lcContext::CreateFramebuffer(int Width, int Height, bool Depth, bo
 #ifdef LC_USE_QOPENGLWIDGET
 		else
 		{
-			QOpenGLFunctions_3_2_Core* Funcs = mGLContext->versionFunctions<QOpenGLFunctions_3_2_Core>();
+			QOpenGLFunctions_3_2_Core* Funcs = mContext->versionFunctions<QOpenGLFunctions_3_2_Core>();
 
 			BindTexture2DMS(Framebuffer.mColorTexture);
 			Funcs->glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, Samples, GL_RGBA, Width, Height, GL_TRUE);
@@ -824,7 +891,7 @@ void lcContext::GetRenderFramebufferImage(const std::pair<lcFramebuffer, lcFrame
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, RenderFramebuffer.first.mObject);
 
 #ifdef LC_USE_QOPENGLWIDGET
-		QOpenGLFunctions_3_2_Core* Funcs = mGLContext->versionFunctions<QOpenGLFunctions_3_2_Core>();
+		QOpenGLFunctions_3_2_Core* Funcs = mContext->versionFunctions<QOpenGLFunctions_3_2_Core>();
 		Funcs->glBlitFramebuffer(0, 0, Width, Height, 0, 0, Width, Height, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 #else
 		glBlitFramebuffer(0, 0, Width, Height, 0, 0, Width, Height, GL_COLOR_BUFFER_BIT, GL_LINEAR);

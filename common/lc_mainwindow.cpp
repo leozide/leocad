@@ -826,12 +826,11 @@ void lcMainWindow::EnableWindowFlags(bool Detached)
 	if (Detached)
 	{
 		QDockWidget* DockWidget = qobject_cast<QDockWidget*>(sender());
-		DockWidget->setWindowFlags(Qt::CustomizeWindowHint |
-								   Qt::Window |
-								   Qt::WindowMinimizeButtonHint |
-								   Qt::WindowMaximizeButtonHint |
-								   Qt::WindowCloseButtonHint);
-		DockWidget->show();
+
+		DockWidget->setWindowFlags(Qt::CustomizeWindowHint | Qt::Window | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
+
+		if (isVisible())
+			DockWidget->show();
 	}
 }
 

@@ -839,7 +839,7 @@ void lcCamera::ZoomExtents(float AspectRatio, const lcVector3& Center, const std
 
 		float f = Height / (m_fovy * (LC_PI / 180.0f));
 
-		lcVector3 FrontVector(Center - mPosition);
+		lcVector3 FrontVector(mTargetPosition - mPosition);
 		mPosition = Center - lcNormalize(FrontVector) * f;
 		mTargetPosition = Center;
 	}

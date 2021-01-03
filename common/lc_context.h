@@ -243,6 +243,9 @@ protected:
 #ifdef LC_USE_QOPENGLWIDGET
 	QOpenGLWidget* mWidget = nullptr;
 	QOpenGLContext* mContext = nullptr;
+#else
+	QGLWidget* mWidget = nullptr;
+	const QGLContext* mContext = nullptr;
 #endif
 	bool mValid = false;
 

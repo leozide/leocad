@@ -832,8 +832,8 @@ void lcCamera::ZoomExtents(float AspectRatio, const lcVector3& Center, const std
 		}
 
 		lcVector3 ViewCenter = lcMul30(Center, mWorldView);
-		float Width = qMax(fabsf(MaxX - Center.x), fabsf(Center.x - MinX)) * 2;
-		float Height = qMax(fabsf(MaxY - Center.y), fabsf(Center.y - MinY)) * 2;
+		float Width = qMax(fabsf(MaxX - ViewCenter.x), fabsf(ViewCenter.x - MinX)) * 2;
+		float Height = qMax(fabsf(MaxY - ViewCenter.y), fabsf(ViewCenter.y - MinY)) * 2;
 
 		if (Width > Height * AspectRatio)
 			Height = Width / AspectRatio;

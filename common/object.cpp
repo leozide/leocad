@@ -10,10 +10,33 @@ lcObject::~lcObject()
 {
 }
 
-template class lcObjectKeyArray<float>;
-template class lcObjectKeyArray<lcVector3>;
-template class lcObjectKeyArray<lcVector4>;
-template class lcObjectKeyArray<lcMatrix33>;
+template void lcObjectKeyArray<float>::SaveKeysLDraw(QTextStream& Stream, const char* KeyName) const;
+template void lcObjectKeyArray<float>::LoadKeysLDraw(QTextStream& Stream);
+template const float& lcObjectKeyArray<float>::CalculateKey(lcStep Step) const;
+template void lcObjectKeyArray<float>::ChangeKey(const float& Value, lcStep Step, bool AddKey);
+template void lcObjectKeyArray<float>::InsertTime(lcStep Start, lcStep Time);
+template void lcObjectKeyArray<float>::RemoveTime(lcStep Start, lcStep Time);
+
+template void lcObjectKeyArray<lcVector3>::SaveKeysLDraw(QTextStream& Stream, const char* KeyName) const;
+template void lcObjectKeyArray<lcVector3>::LoadKeysLDraw(QTextStream& Stream);
+template const lcVector3& lcObjectKeyArray<lcVector3>::CalculateKey(lcStep Step) const;
+template void lcObjectKeyArray<lcVector3>::ChangeKey(const lcVector3& Value, lcStep Step, bool AddKey);
+template void lcObjectKeyArray<lcVector3>::InsertTime(lcStep Start, lcStep Time);
+template void lcObjectKeyArray<lcVector3>::RemoveTime(lcStep Start, lcStep Time);
+
+template void lcObjectKeyArray<lcVector4>::SaveKeysLDraw(QTextStream& Stream, const char* KeyName) const;
+template void lcObjectKeyArray<lcVector4>::LoadKeysLDraw(QTextStream& Stream);
+template const lcVector4& lcObjectKeyArray<lcVector4>::CalculateKey(lcStep Step) const;
+template void lcObjectKeyArray<lcVector4>::ChangeKey(const lcVector4& Value, lcStep Step, bool AddKey);
+template void lcObjectKeyArray<lcVector4>::InsertTime(lcStep Start, lcStep Time);
+template void lcObjectKeyArray<lcVector4>::RemoveTime(lcStep Start, lcStep Time);
+
+template void lcObjectKeyArray<lcMatrix33>::SaveKeysLDraw(QTextStream& Stream, const char* KeyName) const;
+template void lcObjectKeyArray<lcMatrix33>::LoadKeysLDraw(QTextStream& Stream);
+template const lcMatrix33& lcObjectKeyArray<lcMatrix33>::CalculateKey(lcStep Step) const;
+template void lcObjectKeyArray<lcMatrix33>::ChangeKey(const lcMatrix33& Value, lcStep Step, bool AddKey);
+template void lcObjectKeyArray<lcMatrix33>::InsertTime(lcStep Start, lcStep Time);
+template void lcObjectKeyArray<lcMatrix33>::RemoveTime(lcStep Start, lcStep Time);
 
 template<typename T>
 void lcObjectKeyArray<T>::SaveKeysLDraw(QTextStream& Stream, const char* KeyName) const

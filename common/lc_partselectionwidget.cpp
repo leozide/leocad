@@ -733,7 +733,7 @@ void lcPartSelectionListView::PreviewSelection(int InfoIndex)
 
 	quint32 ColorCode = lcGetColorCode(mListModel->GetColorIndex());
 
-	gMainWindow->PreviewPiece(Info->mFileName, ColorCode);
+	gMainWindow->PreviewPiece(Info->mFileName, ColorCode, true);
 }
 
 lcPartSelectionWidget::lcPartSelectionWidget(QWidget* Parent)

@@ -771,7 +771,7 @@ void lcQPropertiesTree::slotSetValue(int Value)
 			if (Focus && Focus->IsPiece())
 				ColorIndex = ((lcPiece*)Focus)->mColorIndex;
 			quint32 ColorCode = lcGetColorCode(ColorIndex);
-			gMainWindow->PreviewPiece(Info->mFileName, ColorCode);
+			gMainWindow->PreviewPiece(Info->mFileName, ColorCode, false);
 		}
 	}
 }
@@ -947,7 +947,7 @@ void lcQPropertiesTree::SetPiece(const lcArray<lcObject*>& Selection, lcObject* 
 		ColorIndex = Piece->mColorIndex;
 		Info = Piece->mPieceInfo;
 		quint32 ColorCode = lcGetColorCode(ColorIndex);
-		gMainWindow->PreviewPiece(Info->mFileName, ColorCode);
+		gMainWindow->PreviewPiece(Info->mFileName, ColorCode, false);
 	}
 	else
 	{

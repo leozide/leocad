@@ -355,7 +355,7 @@ public:
 
 public slots:
 	void ProjectFileChanged(const QString& Path);
-	void PreviewPiece(const QString& PartId, int ColorCode);
+	void PreviewPiece(const QString& PartId, int ColorCode, bool ShowPreview);
 	void TogglePreviewWidget(bool Visible);
 
 protected slots:

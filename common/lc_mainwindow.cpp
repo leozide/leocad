@@ -785,8 +785,11 @@ lcView* lcMainWindow::CreateView(lcModel* Model)
 	return NewView;
 }
 
-void lcMainWindow::PreviewPiece(const QString& PartId, int ColorCode)
+void lcMainWindow::PreviewPiece(const QString& PartId, int ColorCode, bool ShowPreview)
 {
+	if (ShowPreview)
+		mPreviewToolBar->show();
+
 	if (!mPreviewWidget->SetCurrentPiece(PartId, ColorCode))
 		QMessageBox::information(this, tr("Error"), tr("Part preview for '%1' failed.").arg(PartId));
 }

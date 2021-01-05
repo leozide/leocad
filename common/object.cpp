@@ -67,7 +67,7 @@ const T& lcObjectKeyArray<T>::CalculateKey(lcStep Step) const
 template<typename T>
 void lcObjectKeyArray<T>::ChangeKey(const T& Value, lcStep Step, bool AddKey)
 {
-	for (std::vector<lcObjectKey<T>>::iterator KeyIt = mKeys.begin(); KeyIt != mKeys.end(); KeyIt++)
+	for (typename std::vector<lcObjectKey<T>>::iterator KeyIt = mKeys.begin(); KeyIt != mKeys.end(); KeyIt++)
 	{
 		if (KeyIt->Step < Step)
 			continue;
@@ -98,7 +98,7 @@ void lcObjectKeyArray<T>::InsertTime(lcStep Start, lcStep Time)
 {
 	bool EndKey = false;
 
-	for (std::vector<lcObjectKey<T>>::iterator KeyIt = mKeys.begin(); KeyIt != mKeys.end();)
+	for (typename std::vector<lcObjectKey<T>>::iterator KeyIt = mKeys.begin(); KeyIt != mKeys.end();)
 	{
 		if ((KeyIt->Step < Start) || (KeyIt->Step == 1))
 		{
@@ -127,7 +127,7 @@ void lcObjectKeyArray<T>::InsertTime(lcStep Start, lcStep Time)
 template<typename T>
 void lcObjectKeyArray<T>::RemoveTime(lcStep Start, lcStep Time)
 {
-	for (std::vector<lcObjectKey<T>>::iterator KeyIt = mKeys.begin(); KeyIt != mKeys.end();)
+	for (typename std::vector<lcObjectKey<T>>::iterator KeyIt = mKeys.begin(); KeyIt != mKeys.end();)
 	{
 		if ((KeyIt->Step < Start) || (KeyIt->Step == 1))
 		{

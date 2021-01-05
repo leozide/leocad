@@ -20,6 +20,36 @@ struct lcObjectKey
 	T Value;
 };
 
+template<typename T>
+class lcObjectKeyArray
+{
+public:
+	int GetSize() const
+	{
+		return mKeys.GetSize();
+	}
+
+	bool IsEmpty() const
+	{
+		return mKeys.IsEmpty();
+	}
+
+	void RemoveAll()
+	{
+		mKeys.RemoveAll();
+	}
+
+	void SaveKeysLDraw(QTextStream& Stream, const char* KeyName) const;
+	void LoadKeysLDraw(QTextStream& Stream);
+	const T& CalculateKey(lcStep Step) const;
+	void ChangeKey(const T& Value, lcStep Step, bool AddKey);
+	void InsertTime(lcStep Start, lcStep Time);
+	void RemoveTime(lcStep Start, lcStep Time);
+
+protected:
+	lcArray<lcObjectKey<T>> mKeys;
+};
+
 struct lcObjectSection
 {
 	lcObject* Object;
@@ -61,9 +91,7 @@ public:
 	virtual ~lcObject();
 
 	lcObject(const lcObject&) = delete;
-	lcObject(lcObject&&) = delete;
 	lcObject& operator=(const lcObject&) = delete;
-	lcObject& operator=(lcObject&&) = delete;
 
 public:
 	bool IsPiece() const
@@ -102,147 +130,6 @@ public:
 	virtual void DrawInterface(lcContext* Context, const lcScene& Scene) const = 0;
 	virtual void RemoveKeyFrames() = 0;
 	virtual QString GetName() const = 0;
-
-protected:
-	template<typename T>
-	void SaveKeysLDraw(QTextStream& Stream, const lcArray<lcObjectKey<T>>& Keys, const char* KeyName) const
-	{
-		const int Count = sizeof(T) / sizeof(float);
-		for (int KeyIdx = 0; KeyIdx < Keys.GetSize(); KeyIdx++)
-		{
-			const lcObjectKey<T>& Key = Keys[KeyIdx];
-			Stream << QLatin1String("0 !LEOCAD ") << KeyName << Key.Step << ' ';
-			for (int ValueIdx = 0; ValueIdx < Count; ValueIdx++)
-				Stream << ((float*)&Key.Value)[ValueIdx] << ' ';
-			Stream << QLatin1String("\r\n");
-		}
-	}
-
-	template<typename T>
-	void LoadKeysLDraw(QTextStream& Stream, lcArray<lcObjectKey<T>>& Keys)
-	{
-		QString Token;
-		Stream >> Token;
-
-		int Step = Token.toInt();
-		T Value;
-
-		const int Count = sizeof(T) / sizeof(float);
-		for (int ValueIdx = 0; ValueIdx < Count; ValueIdx++)
-			Stream >> ((float*)&Value)[ValueIdx];
-
-		ChangeKey(Keys, Value, Step, true);
-	}
-
-	template<typename T>
-	const T& CalculateKey(const lcArray<lcObjectKey<T>>& Keys, lcStep Step)
-	{
-		const lcObjectKey<T>* PreviousKey = &Keys[0];
-
-		for (int KeyIdx = 0; KeyIdx < Keys.GetSize(); KeyIdx++)
-		{
-			if (Keys[KeyIdx].Step > Step)
-				break;
-
-			PreviousKey = &Keys[KeyIdx];
-		}
-
-		return PreviousKey->Value;
-	}
-
-	template<typename T>
-	void ChangeKey(lcArray<lcObjectKey<T>>& Keys, const T& Value, lcStep Step, bool AddKey)
-	{
-		for (int KeyIdx = 0; KeyIdx < Keys.GetSize(); KeyIdx++)
-		{
-			lcObjectKey<T>* Key = &Keys[KeyIdx];
-
-			if (Key->Step == Step)
-			{
-				Key->Value = Value;
-
-				return;
-			}
-
-			if (Key->Step > Step)
-			{
-				if (AddKey)
-				{
-					Key = &Keys.InsertAt(KeyIdx);
-					Key->Step = Step;
-				}
-				else if (KeyIdx)
-					Key = &Keys[KeyIdx - 1];
-
-				Key->Value = Value;
-
-				return;
-			}
-		}
-
-		if (AddKey || Keys.GetSize() == 0)
-		{
-			lcObjectKey<T>* Key = &Keys.Add();
-
-			Key->Step = Step;
-			Key->Value = Value;
-		}
-		else
-		{
-			lcObjectKey<T>* Key = &Keys[Keys.GetSize() - 1];
-			Key->Value = Value;
-		}
-	}
-
-	template<typename T>
-	void InsertTime(lcArray<lcObjectKey<T>>& Keys, lcStep Start, lcStep Time)
-	{
-		bool EndKey = false;
-
-		for (int KeyIdx = 0; KeyIdx < Keys.GetSize(); KeyIdx++)
-		{
-			lcObjectKey<T>& Key = Keys[KeyIdx];
-
-			if ((Key.Step < Start) || (Key.Step == 1))
-				continue;
-
-			if (EndKey)
-			{
-				Keys.RemoveIndex(KeyIdx);
-				KeyIdx--;
-				continue;
-			}
-
-			if (Key.Step >= LC_STEP_MAX - Time)
-			{
-				Key.Step = LC_STEP_MAX;
-				EndKey = true;
-			}
-			else
-				Key.Step += Time;
-		}
-	}
-
-	template<typename T>
-	void RemoveTime(lcArray<lcObjectKey<T>>& Keys, lcStep Start, lcStep Time)
-	{
-		for (int KeyIdx = 0; KeyIdx < Keys.GetSize(); KeyIdx++)
-		{
-			lcObjectKey<T>& Key = Keys[KeyIdx];
-
-			if ((Key.Step < Start) || (Key.Step == 1))
-				continue;
-
-			if (Key.Step < Start + Time)
-			{
-				Keys.RemoveIndex(KeyIdx);
-				KeyIdx--;
-				continue;
-			}
-
-			Key.Step -= Time;
-		}
-	}
 
 private:
 	lcObjectType mObjectType;

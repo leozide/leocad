@@ -539,12 +539,12 @@ public:
 
 	void SetPosition(const lcVector3& Position, lcStep Step, bool AddKey)
 	{
-		ChangeKey(mPositionKeys, Position, Step, AddKey);
+		mPositionKeys.ChangeKey(Position, Step, AddKey);
 	}
 
 	void SetRotation(const lcMatrix33& Rotation, lcStep Step, bool AddKey)
 	{
-		ChangeKey(mRotationKeys, Rotation, Step, AddKey);
+		mRotationKeys.ChangeKey(Rotation, Step, AddKey);
 	}
 
 	lcVector3 GetRotationCenter() const
@@ -625,8 +625,8 @@ protected:
 		return IsSelected();
 	}
 
-	lcArray<lcObjectKey<lcVector3>> mPositionKeys;
-	lcArray<lcObjectKey<lcMatrix33>> mRotationKeys;
+	lcObjectKeyArray<lcVector3> mPositionKeys;
+	lcObjectKeyArray<lcMatrix33> mRotationKeys;
 
 	int mFileLine;
 	QString mID;

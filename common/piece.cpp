@@ -123,10 +123,10 @@ void lcPiece::SaveLDraw(QTextStream& Stream) const
 	}
 
 	if (mPositionKeys.GetSize() > 1)
-		SaveKeysLDraw(Stream, mPositionKeys, "PIECE POSITION_KEY ");
+		mPositionKeys.SaveKeysLDraw(Stream, "PIECE POSITION_KEY ");
 
 	if (mRotationKeys.GetSize() > 1)
-		SaveKeysLDraw(Stream, mRotationKeys, "PIECE ROTATION_KEY ");
+		mRotationKeys.SaveKeysLDraw(Stream, "PIECE ROTATION_KEY ");
 
 	Stream << "1 " << mColorCode << ' ';
 
@@ -163,9 +163,9 @@ bool lcPiece::ParseLDrawLine(QTextStream& Stream)
 			mState |= LC_PIECE_PIVOT_POINT_VALID;
 		}
 		else if (Token == QLatin1String("POSITION_KEY"))
-			LoadKeysLDraw(Stream, mPositionKeys);
+			mPositionKeys.LoadKeysLDraw(Stream);
 		else if (Token == QLatin1String("ROTATION_KEY"))
-			LoadKeysLDraw(Stream, mRotationKeys);
+			mRotationKeys.LoadKeysLDraw(Stream);
 	}
 
 	return false;
@@ -179,6 +179,8 @@ bool lcPiece::FileLoad(lcFile& file)
 
 	if (version > 12) // LeoCAD 0.80
 		return false;
+
+	const float PositionScale = (version < 12) ? 25.0f : 1.0f;
 
 	if (version > 8)
 	{
@@ -198,9 +200,9 @@ bool lcPiece::FileLoad(lcFile& file)
 			file.ReadU8(&type, 1);
 
 			if (type == 0)
-				ChangeKey(mPositionKeys, lcVector3(param[0], param[1], param[2]), time, true);
+				mPositionKeys.ChangeKey(lcVector3(param[0], param[1], param[2]) * PositionScale, time, true);
 			else if (type == 1)
-				ChangeKey(mRotationKeys, lcMatrix33FromAxisAngle(lcVector3(param[0], param[1], param[2]), param[3] * LC_DTOR), time, true);
+				mRotationKeys.ChangeKey(lcMatrix33FromAxisAngle(lcVector3(param[0], param[1], param[2]), param[3] * LC_DTOR), time, true);
 		}
 
 		file.ReadU32(&n, 1);
@@ -212,50 +214,71 @@ bool lcPiece::FileLoad(lcFile& file)
 		}
 	}
 
-  if (version < 9)
-  {
-    quint16 time;
-    quint8 type;
+	if (version < 9)
+	{
+		quint16 time;
+		quint8 type;
 
-    if (version > 5)
-    {
-      quint32 keys;
-      float param[4];
+		if (version > 5)
+		{
+			quint32 keys;
+			float param[4];
 
-      file.ReadU32(&keys, 1);
-      while (keys--)
-      {
-        file.ReadFloats(param, 4);
-        file.ReadU16(&time, 1);
-        file.ReadU8(&type, 1);
-
-		if (type == 0)
-			ChangeKey(mPositionKeys, lcVector3(param[0], param[1], param[2]), time, true);
-		else if (type == 1)
-			ChangeKey(mRotationKeys, lcMatrix33FromAxisAngle(lcVector3(param[0], param[1], param[2]), param[3] * LC_DTOR), time, true);
-      }
-
-      file.ReadU32(&keys, 1);
-      while (keys--)
-      {
-        file.ReadFloats(param, 4);
-        file.ReadU16(&time, 1);
-        file.ReadU8(&type, 1);
-      }
-    }
-    else
-    {
-      if (version > 2)
-      {
-        file.ReadU8(&ch, 1);
-
-        while (ch--)
-        {
-			lcMatrix44 ModelWorld;
-
-			if (version > 3)
+			file.ReadU32(&keys, 1);
+			while (keys--)
 			{
-				file.ReadFloats(ModelWorld, 16);
+				file.ReadFloats(param, 4);
+				file.ReadU16(&time, 1);
+				file.ReadU8(&type, 1);
+
+				if (type == 0)
+					mPositionKeys.ChangeKey(lcVector3(param[0], param[1], param[2]) * PositionScale, time, true);
+				else if (type == 1)
+					mRotationKeys.ChangeKey(lcMatrix33FromAxisAngle(lcVector3(param[0], param[1], param[2]), param[3] * LC_DTOR), time, true);
+			}
+
+			file.ReadU32(&keys, 1);
+			while (keys--)
+			{
+				file.ReadFloats(param, 4);
+				file.ReadU16(&time, 1);
+				file.ReadU8(&type, 1);
+			}
+		}
+		else
+		{
+			if (version > 2)
+			{
+				file.ReadU8(&ch, 1);
+
+				while (ch--)
+				{
+					lcMatrix44 ModelWorld;
+
+					if (version > 3)
+					{
+						file.ReadFloats(ModelWorld, 16);
+					}
+					else
+					{
+						lcVector3 Translation;
+						float Rotation[3];
+						file.ReadFloats(Translation, 3);
+						file.ReadFloats(Rotation, 3);
+						ModelWorld = lcMatrix44Translation(Translation);
+						ModelWorld = lcMul(lcMatrix44RotationZ(Rotation[2] * LC_DTOR), lcMul(lcMatrix44RotationY(Rotation[1] * LC_DTOR), lcMul(lcMatrix44RotationX(Rotation[0] * LC_DTOR), ModelWorld)));
+					}
+
+					quint8 b;
+					file.ReadU8(&b, 1);
+					time = b;
+
+					mPositionKeys.ChangeKey(ModelWorld.GetTranslation() * PositionScale, 1, true);
+					mRotationKeys.ChangeKey(lcMatrix33(ModelWorld), time, true);
+
+					qint32 bl;
+					file.ReadS32(&bl, 1);
+				}
 			}
 			else
 			{
@@ -263,46 +286,25 @@ bool lcPiece::FileLoad(lcFile& file)
 				float Rotation[3];
 				file.ReadFloats(Translation, 3);
 				file.ReadFloats(Rotation, 3);
-				ModelWorld = lcMatrix44Translation(Translation);
+				lcMatrix44 ModelWorld = lcMatrix44Translation(Translation);
 				ModelWorld = lcMul(lcMatrix44RotationZ(Rotation[2] * LC_DTOR), lcMul(lcMatrix44RotationY(Rotation[1] * LC_DTOR), lcMul(lcMatrix44RotationX(Rotation[0] * LC_DTOR), ModelWorld)));
+
+				mPositionKeys.ChangeKey(lcVector3(ModelWorld.r[3][0], ModelWorld.r[3][1], ModelWorld.r[3][2]) * PositionScale, 1, true);
+				mRotationKeys.ChangeKey(lcMatrix33(ModelWorld), 1, true);
 			}
+		}
+	}
 
-			quint8 b;
-			file.ReadU8(&b, 1);
-			time = b;
-
-			ChangeKey(mPositionKeys, ModelWorld.GetTranslation(), 1, true);
-			ChangeKey(mRotationKeys, lcMatrix33(ModelWorld), time, true);
-
-			qint32 bl;
-			file.ReadS32(&bl, 1);
-        }
-      }
-      else
-      {
-			lcVector3 Translation;
-			float Rotation[3];
-			file.ReadFloats(Translation, 3);
-			file.ReadFloats(Rotation, 3);
-			lcMatrix44 ModelWorld = lcMatrix44Translation(Translation);
-			ModelWorld = lcMul(lcMatrix44RotationZ(Rotation[2] * LC_DTOR), lcMul(lcMatrix44RotationY(Rotation[1] * LC_DTOR), lcMul(lcMatrix44RotationX(Rotation[0] * LC_DTOR), ModelWorld)));
-
-			ChangeKey(mPositionKeys, lcVector3(ModelWorld.r[3][0], ModelWorld.r[3][1], ModelWorld.r[3][2]), 1, true);
-			ChangeKey(mRotationKeys, lcMatrix33(ModelWorld), 1, true);
-	  }
-    }
-  }
-
-  // Common to all versions.
+	// Common to all versions.
 	char name[LC_PIECE_NAME_LEN];
-  if (version < 10)
-  {
-	  memset(name, 0, LC_PIECE_NAME_LEN);
-	  file.ReadBuffer(name, 9);
-  }
-  else
-	  file.ReadBuffer(name, LC_PIECE_NAME_LEN);
-  strcat(name, ".dat");
+	if (version < 10)
+	{
+		memset(name, 0, LC_PIECE_NAME_LEN);
+		file.ReadBuffer(name, 9);
+	}
+	else
+		file.ReadBuffer(name, LC_PIECE_NAME_LEN);
+	strcat(name, ".dat");
 
 	PieceInfo* pInfo = lcGetPiecesLibrary()->FindPiece(name, nullptr, true, false);
 	SetPieceInfo(pInfo, QString(), true);
@@ -323,63 +325,57 @@ bool lcPiece::FileLoad(lcFile& file)
 		file.ReadU32(&mColorCode, 1);
 	mColorIndex = lcGetColorIndex(mColorCode);
 
-  quint8 Step;
-  file.ReadU8(&Step, 1);
-  mStepShow = Step;
-  if (version > 1)
-  {
-    file.ReadU8(&Step, 1);
-	mStepHide = Step == 255 ? LC_STEP_MAX : Step;
-  }
-  else
-    mStepHide = LC_STEP_MAX;
-
-  if (version > 5)
-  {
-	file.ReadU16(); // m_nFrameShow
-	file.ReadU16(); // m_nFrameHide
-
-    if (version > 7)
-    {
-      quint8 Hidden;
-      file.ReadU8(&Hidden, 1);
-	  if (Hidden & 1)
-		  mState |= LC_PIECE_HIDDEN;
-      file.ReadU8(&ch, 1);
-	  file.Seek(ch, SEEK_CUR);
-    }
-    else
-    {
-      qint32 hide;
-      file.ReadS32(&hide, 1);
-      if (hide != 0)
-        mState |= LC_PIECE_HIDDEN;
-	  file.Seek(81, SEEK_CUR);
-    }
-
-    // 7 (0.64)
-    qint32 i = -1;
-    if (version > 6)
-      file.ReadS32(&i, 1);
-    mGroup = (lcGroup*)(quintptr)i;
-  }
-  else
-  {
-    file.ReadU8(&ch, 1);
-    if (ch == 0)
-      mGroup = (lcGroup*)-1;
-    else
-      mGroup = (lcGroup*)(quintptr)ch;
-
-    file.ReadU8(&ch, 1);
-    if (ch & 0x01)
-      mState |= LC_PIECE_HIDDEN;
-  }
-
-	if (version < 12)
+	quint8 Step;
+	file.ReadU8(&Step, 1);
+	mStepShow = Step;
+	if (version > 1)
 	{
-		for (int KeyIdx = 0; KeyIdx < mPositionKeys.GetSize(); KeyIdx++)
-			mPositionKeys[KeyIdx].Value *= 25.0f;
+		file.ReadU8(&Step, 1);
+		mStepHide = Step == 255 ? LC_STEP_MAX : Step;
+	}
+	else
+		mStepHide = LC_STEP_MAX;
+
+	if (version > 5)
+	{
+		file.ReadU16(); // m_nFrameShow
+		file.ReadU16(); // m_nFrameHide
+
+		if (version > 7)
+		{
+			quint8 Hidden;
+			file.ReadU8(&Hidden, 1);
+			if (Hidden & 1)
+				mState |= LC_PIECE_HIDDEN;
+			file.ReadU8(&ch, 1);
+			file.Seek(ch, SEEK_CUR);
+		}
+		else
+		{
+			qint32 hide;
+			file.ReadS32(&hide, 1);
+			if (hide != 0)
+				mState |= LC_PIECE_HIDDEN;
+			file.Seek(81, SEEK_CUR);
+		}
+
+		// 7 (0.64)
+		qint32 i = -1;
+		if (version > 6)
+			file.ReadS32(&i, 1);
+		mGroup = (lcGroup*)(quintptr)i;
+	}
+	else
+	{
+		file.ReadU8(&ch, 1);
+		if (ch == 0)
+			mGroup = (lcGroup*)-1;
+		else
+			mGroup = (lcGroup*)(quintptr)ch;
+
+		file.ReadU8(&ch, 1);
+		if (ch & 0x01)
+			mState |= LC_PIECE_HIDDEN;
 	}
 
 	return true;
@@ -390,9 +386,9 @@ void lcPiece::Initialize(const lcMatrix44& WorldMatrix, lcStep Step)
 	mStepShow = Step;
 
 	if (mPositionKeys.IsEmpty())
-		ChangeKey(mPositionKeys, WorldMatrix.GetTranslation(), 1, true);
+		mPositionKeys.ChangeKey(WorldMatrix.GetTranslation(), 1, true);
 	if (mRotationKeys.IsEmpty())
-		ChangeKey(mRotationKeys, lcMatrix33(WorldMatrix), 1, true);
+		mRotationKeys.ChangeKey(lcMatrix33(WorldMatrix), 1, true);
 
 	UpdatePosition(Step);
 }
@@ -426,8 +422,8 @@ void lcPiece::InsertTime(lcStep Start, lcStep Time)
 		}
 	}
 
-	lcObject::InsertTime(mPositionKeys, Start, Time);
-	lcObject::InsertTime(mRotationKeys, Start, Time);
+	mPositionKeys.InsertTime(Start, Time);
+	mRotationKeys.InsertTime(Start, Time);
 }
 
 void lcPiece::RemoveTime(lcStep Start, lcStep Time)
@@ -459,8 +455,8 @@ void lcPiece::RemoveTime(lcStep Start, lcStep Time)
 		}
 	}
 
-	lcObject::RemoveTime(mPositionKeys, Start, Time);
-	lcObject::RemoveTime(mRotationKeys, Start, Time);
+	mPositionKeys.RemoveTime(Start, Time);
+	mRotationKeys.RemoveTime(Start, Time);
 }
 
 void lcPiece::RayTest(lcObjectRayTest& ObjectRayTest) const
@@ -643,10 +639,10 @@ void lcPiece::DrawInterface(lcContext* Context, const lcScene& Scene) const
 void lcPiece::RemoveKeyFrames()
 {
 	mPositionKeys.RemoveAll();
-	ChangeKey(mPositionKeys, mModelWorld.GetTranslation(), 1, true);
+	mPositionKeys.ChangeKey(mModelWorld.GetTranslation(), 1, true);
 
 	mRotationKeys.RemoveAll();
-	ChangeKey(mRotationKeys, lcMatrix33(mModelWorld), 1, true);
+	mRotationKeys.ChangeKey(lcMatrix33(mModelWorld), 1, true);
 }
 
 void lcPiece::AddMainModelRenderMeshes(lcScene* Scene, bool Highlight, bool Fade) const
@@ -980,8 +976,8 @@ lcGroup* lcPiece::GetTopGroup()
 
 void lcPiece::UpdatePosition(lcStep Step)
 {
-	lcVector3 Position = CalculateKey(mPositionKeys, Step);
-	lcMatrix33 Rotation = CalculateKey(mRotationKeys, Step);
+	lcVector3 Position = mPositionKeys.CalculateKey(Step);
+	lcMatrix33 Rotation = mRotationKeys.CalculateKey(Step);
 
 	mModelWorld = lcMatrix44(Rotation, Position);
 }

@@ -214,14 +214,14 @@ public:
 	float mSpotExponent;
 
 protected:
-	lcArray<lcObjectKey<lcVector3>> mPositionKeys;
-	lcArray<lcObjectKey<lcVector3>> mTargetPositionKeys;
-	lcArray<lcObjectKey<lcVector4>> mAmbientColorKeys;
-	lcArray<lcObjectKey<lcVector4>> mDiffuseColorKeys;
-	lcArray<lcObjectKey<lcVector4>> mSpecularColorKeys;
-	lcArray<lcObjectKey<lcVector3>> mAttenuationKeys;
-	lcArray<lcObjectKey<float>> mSpotCutoffKeys;
-	lcArray<lcObjectKey<float>> mSpotExponentKeys;
+	lcObjectKeyArray<lcVector3> mPositionKeys;
+	lcObjectKeyArray<lcVector3> mTargetPositionKeys;
+	lcObjectKeyArray<lcVector4> mAmbientColorKeys;
+	lcObjectKeyArray<lcVector4> mDiffuseColorKeys;
+	lcObjectKeyArray<lcVector4> mSpecularColorKeys;
+	lcObjectKeyArray<lcVector3> mAttenuationKeys;
+	lcObjectKeyArray<float> mSpotCutoffKeys;
+	lcObjectKeyArray<float> mSpotExponentKeys;
 
 	void Initialize(const lcVector3& Position, const lcVector3& TargetPosition);
 

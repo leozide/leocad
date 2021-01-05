@@ -242,17 +242,17 @@ public:
 
 	void SetPosition(const lcVector3& Position, lcStep Step, bool AddKey)
 	{
-		ChangeKey(mPositionKeys, Position, Step, AddKey);
+		mPositionKeys.ChangeKey(Position, Step, AddKey);
 	}
 
 	void SetTargetPosition(const lcVector3& TargetPosition, lcStep Step, bool AddKey)
 	{
-		ChangeKey(mTargetPositionKeys, TargetPosition, Step, AddKey);
+		mTargetPositionKeys.ChangeKey(TargetPosition, Step, AddKey);
 	}
 
 	void SetUpVector(const lcVector3& UpVector, lcStep Step, bool AddKey)
 	{
-		ChangeKey(mPositionKeys, UpVector, Step, AddKey);
+		mPositionKeys.ChangeKey(UpVector, Step, AddKey);
 	}
 
 	float GetOrthoHeight() const
@@ -274,7 +274,7 @@ public:
 	void InsertTime(lcStep Start, lcStep Time);
 	void RemoveTime(lcStep Start, lcStep Time);
 
-	bool FileLoad(lcFile& file);
+	static bool FileLoad(lcFile& file);
 
 	void CompareBoundingBox(lcVector3& Min, lcVector3& Max);
 	void UpdatePosition(lcStep Step);
@@ -306,9 +306,9 @@ public:
 	lcVector3 mUpVector;
 
 protected:
-	lcArray<lcObjectKey<lcVector3>> mPositionKeys;
-	lcArray<lcObjectKey<lcVector3>> mTargetPositionKeys;
-	lcArray<lcObjectKey<lcVector3>> mUpVectorKeys;
+	lcObjectKeyArray<lcVector3> mPositionKeys;
+	lcObjectKeyArray<lcVector3> mTargetPositionKeys;
+	lcObjectKeyArray<lcVector3> mUpVectorKeys;
 
 	void Initialize();
 

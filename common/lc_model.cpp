@@ -884,21 +884,9 @@ bool lcModel::LoadBinary(lcFile* file)
 			file->Seek(2, SEEK_CUR);
 
 		file->ReadS32(&count, 1);
-		for (i = 0; i < count; i++)
-			mCameras.Add(new lcCamera(false));
 
-		if (count < 7)
-		{
-			lcCamera* pCam = new lcCamera(false);
-			for (i = 0; i < count; i++)
-				pCam->FileLoad(*file);
-			delete pCam;
-		}
-		else
-		{
-			for (lcCamera* Camera : mCameras)
-				Camera->FileLoad(*file);
-		}
+		for (i = 0; i < count; i++)
+			lcCamera::FileLoad(*file);
 	}
 
 	if (fv >= 0.7f)

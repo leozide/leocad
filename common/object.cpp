@@ -1,6 +1,5 @@
 #include "lc_global.h"
 #include "object.h"
-#include "lc_file.h"
 
 lcObject::lcObject(lcObjectType ObjectType)
 	: mObjectType(ObjectType)
@@ -68,45 +67,30 @@ const T& lcObjectKeyArray<T>::CalculateKey(lcStep Step) const
 template<typename T>
 void lcObjectKeyArray<T>::ChangeKey(const T& Value, lcStep Step, bool AddKey)
 {
-	for (int KeyIdx = 0; KeyIdx < mKeys.GetSize(); KeyIdx++)
+	for (std::vector<lcObjectKey<T>>::iterator KeyIt = mKeys.begin(); KeyIt != mKeys.end(); KeyIt++)
 	{
-		lcObjectKey<T>* Key = &mKeys[KeyIdx];
+		if (KeyIt->Step < Step)
+			continue;
 
-		if (Key->Step == Step)
+		if (KeyIt->Step == Step)
+			KeyIt->Value = Value;
+		else if (AddKey)
+			mKeys.insert(KeyIt, lcObjectKey<T>{ Step, Value });
+		else if (KeyIt == mKeys.begin())
+			KeyIt->Value = Value;
+		else
 		{
-			Key->Value = Value;
-
-			return;
+			KeyIt = KeyIt - 1;
+			KeyIt->Value = Value;
 		}
 
-		if (Key->Step > Step)
-		{
-			if (AddKey)
-			{
-				Key = &mKeys.InsertAt(KeyIdx);
-				Key->Step = Step;
-			}
-			else if (KeyIdx)
-				Key = &mKeys[KeyIdx - 1];
-
-			Key->Value = Value;
-
-			return;
-		}
+		return;
 	}
 
-	if (AddKey || mKeys.GetSize() == 0)
-	{
-		lcObjectKey<T>* Key = &mKeys.Add();
-
-		Key->Step = Step;
-		Key->Value = Value;
-	}
+	if (AddKey || mKeys.empty())
+		mKeys.emplace_back(lcObjectKey<T>{ Step, Value });
 	else
-	{
-		lcObjectKey<T>* Key = &mKeys[mKeys.GetSize() - 1];
-		Key->Value = Value;
-	}
+		mKeys.back().Value = Value;
 }
 
 template<typename T>
@@ -114,47 +98,50 @@ void lcObjectKeyArray<T>::InsertTime(lcStep Start, lcStep Time)
 {
 	bool EndKey = false;
 
-	for (int KeyIdx = 0; KeyIdx < mKeys.GetSize(); KeyIdx++)
+	for (std::vector<lcObjectKey<T>>::iterator KeyIt = mKeys.begin(); KeyIt != mKeys.end();)
 	{
-		lcObjectKey<T>& Key = mKeys[KeyIdx];
-
-		if ((Key.Step < Start) || (Key.Step == 1))
+		if ((KeyIt->Step < Start) || (KeyIt->Step == 1))
+		{
+			KeyIt++;
 			continue;
+		}
 
 		if (EndKey)
 		{
-			mKeys.RemoveIndex(KeyIdx);
-			KeyIdx--;
+			KeyIt = mKeys.erase(KeyIt);
 			continue;
 		}
 
-		if (Key.Step >= LC_STEP_MAX - Time)
+		if (KeyIt->Step >= LC_STEP_MAX - Time)
 		{
-			Key.Step = LC_STEP_MAX;
+			KeyIt->Step = LC_STEP_MAX;
 			EndKey = true;
 		}
 		else
-			Key.Step += Time;
+			KeyIt->Step += Time;
+
+		KeyIt++;
 	}
 }
 
 template<typename T>
 void lcObjectKeyArray<T>::RemoveTime(lcStep Start, lcStep Time)
 {
-	for (int KeyIdx = 0; KeyIdx < mKeys.GetSize(); KeyIdx++)
+	for (std::vector<lcObjectKey<T>>::iterator KeyIt = mKeys.begin(); KeyIt != mKeys.end();)
 	{
-		lcObjectKey<T>& Key = mKeys[KeyIdx];
-
-		if ((Key.Step < Start) || (Key.Step == 1))
-			continue;
-
-		if (Key.Step < Start + Time)
+		if ((KeyIt->Step < Start) || (KeyIt->Step == 1))
 		{
-			mKeys.RemoveIndex(KeyIdx);
-			KeyIdx--;
+			KeyIt++;
 			continue;
 		}
 
-		Key.Step -= Time;
+		if (KeyIt->Step < Start + Time)
+		{
+			KeyIt = mKeys.erase(KeyIt);
+			continue;
+		}
+
+		KeyIt->Step -= Time;
+		KeyIt++;
 	}
 }

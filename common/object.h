@@ -26,17 +26,17 @@ class lcObjectKeyArray
 public:
 	int GetSize() const
 	{
-		return mKeys.GetSize();
+		return static_cast<int>(mKeys.size());
 	}
 
 	bool IsEmpty() const
 	{
-		return mKeys.IsEmpty();
+		return mKeys.empty();
 	}
 
 	void RemoveAll()
 	{
-		mKeys.RemoveAll();
+		mKeys.clear();
 	}
 
 	void SaveKeysLDraw(QTextStream& Stream, const char* KeyName) const;
@@ -47,7 +47,7 @@ public:
 	void RemoveTime(lcStep Start, lcStep Time);
 
 protected:
-	lcArray<lcObjectKey<T>> mKeys;
+	std::vector<lcObjectKey<T>> mKeys;
 };
 
 struct lcObjectSection

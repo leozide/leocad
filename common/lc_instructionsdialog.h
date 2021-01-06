@@ -12,6 +12,17 @@ public:
 	void SetCurrentPage(const lcInstructionsPage* Page);
 };
 
+class lcInstructionsPageListWidget : public QDockWidget
+{
+	Q_OBJECT
+
+public:
+	lcInstructionsPageListWidget(QWidget* Parent);
+
+//protected:
+	QListWidget* mThumbnailsWidget = nullptr;
+};
+
 class lcInstructionsDialog : public QMainWindow
 {
 	Q_OBJECT
@@ -29,8 +40,8 @@ protected:
 	int mCurrentPageNumber;
 	lcInstructions mInstructions;
 
-	QListWidget* mThumbnailsWidget = nullptr;
-	lcInstructionsPageWidget* mPageWidget = nullptr ;
+	lcInstructionsPageWidget* mPageWidget = nullptr;
+	lcInstructionsPageListWidget* mPageListWidget = nullptr;
 
 	QToolBar* mPageSettingsToolBar = nullptr;
 	QAction* mVerticalPageAction = nullptr;

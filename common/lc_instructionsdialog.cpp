@@ -36,25 +36,31 @@ void lcInstructionsPageWidget::SetCurrentPage(const lcInstructionsPage* Page)
 	}
 }
 
+lcInstructionsPageListWidget::lcInstructionsPageListWidget(QWidget* Parent)
+	: QDockWidget(Parent)
+{
+	QWidget* CentralWidget = new QWidget(this);
+	setWidget(CentralWidget);
+	setWindowTitle(tr("Pages"));
+
+	QHBoxLayout* Layout = new QHBoxLayout(CentralWidget);
+	Layout->setContentsMargins(0, 0, 0, 0);
+
+	mThumbnailsWidget = new QListWidget(CentralWidget);
+	Layout->addWidget(mThumbnailsWidget);
+}
+
 lcInstructionsDialog::lcInstructionsDialog(QWidget* Parent, Project* Project)
 	: QMainWindow(Parent), mProject(Project)
 {
-	QWidget* CentralWidget = new QWidget(this);
-	setCentralWidget(CentralWidget);
 	setWindowTitle(tr("Instructions"));
 
-	QVBoxLayout* Layout = new QVBoxLayout(CentralWidget);
-	Layout->setContentsMargins(0, 0, 0, 0);
+	mPageWidget = new lcInstructionsPageWidget(this);
+	setCentralWidget(mPageWidget);
 
-	QSplitter* Splitter = new QSplitter(CentralWidget);
-	Splitter->setOrientation(Qt::Horizontal);
-	Layout->addWidget(Splitter);
-
-	mThumbnailsWidget = new QListWidget(Splitter);
-	Splitter->addWidget(mThumbnailsWidget);
-
-	mPageWidget = new lcInstructionsPageWidget(Splitter);
-	Splitter->addWidget(mPageWidget);
+	mPageListWidget = new lcInstructionsPageListWidget(this);
+	mPageListWidget->setObjectName("PageList");
+	addDockWidget(Qt::LeftDockWidgetArea, mPageListWidget);
 
 	mInstructions = mProject->GetInstructions();
 
@@ -79,10 +85,10 @@ lcInstructionsDialog::lcInstructionsDialog(QWidget* Parent, Project* Project)
 	PageDirectionGroup->addAction(mHorizontalPageAction);
 
 	for (size_t PageNumber = 0; PageNumber < mInstructions.mPages.size(); PageNumber++)
-		mThumbnailsWidget->addItem(QString("Page %1").arg(PageNumber + 1));
+		mPageListWidget->mThumbnailsWidget->addItem(QString("Page %1").arg(PageNumber + 1));
 
-	connect(mThumbnailsWidget, SIGNAL(currentRowChanged(int)), this, SLOT(CurrentThumbnailChanged(int)));
-	mThumbnailsWidget->setCurrentRow(0);
+	connect(mPageListWidget->mThumbnailsWidget, SIGNAL(currentRowChanged(int)), this, SLOT(CurrentThumbnailChanged(int)));
+	mPageListWidget->mThumbnailsWidget->setCurrentRow(0);
 
 	connect(mVerticalPageAction, SIGNAL(toggled()), this, SLOT(UpdatePageSettings()));
 	connect(mHorizontalPageAction, SIGNAL(toggled()), this, SLOT(UpdatePageSettings()));
@@ -105,9 +111,9 @@ void lcInstructionsDialog::UpdatePageSettings()
 	mInstructions.SetDefaultPageSettings(PageSettings);
 //	lcInstructionsPage* Page = &mInstructions.mPages[mThumbnailsWidget->currentIndex().row()];
 
-	mThumbnailsWidget->clear();
+	mPageListWidget->mThumbnailsWidget->clear();
 	for (size_t PageNumber = 0; PageNumber < mInstructions.mPages.size(); PageNumber++)
-		mThumbnailsWidget->addItem(QString("Page %1").arg(PageNumber + 1));
+		mPageListWidget->mThumbnailsWidget->addItem(QString("Page %1").arg(PageNumber + 1));
 
 //	mThumbnailsWidget->setCurrentRow(0);
 

@@ -84,8 +84,8 @@ lcInstructionsDialog::lcInstructionsDialog(QWidget* Parent, Project* Project)
 	connect(mThumbnailsWidget, SIGNAL(currentRowChanged(int)), this, SLOT(CurrentThumbnailChanged(int)));
 	mThumbnailsWidget->setCurrentRow(0);
 
-	connect(mVerticalPageAction, SIGNAL(checked()), this, SLOT(UpdatePageSettings()));
-	connect(mHorizontalPageAction, SIGNAL(checked()), this, SLOT(UpdatePageSettings()));
+	connect(mVerticalPageAction, SIGNAL(toggled()), this, SLOT(UpdatePageSettings()));
+	connect(mHorizontalPageAction, SIGNAL(toggled()), this, SLOT(UpdatePageSettings()));
 	connect(mRowsSpinBox, SIGNAL(valueChanged(int)), this, SLOT(UpdatePageSettings()));
 	connect(mColumnsSpinBox, SIGNAL(valueChanged(int)), this, SLOT(UpdatePageSettings()));
 }

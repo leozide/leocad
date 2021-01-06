@@ -152,7 +152,9 @@ void Project::SetActiveModel(int ModelIndex)
 		mModels[ModelIdx]->UpdatePieceInfo(UpdatedModels);
 
 	mActiveModel = mModels[ModelIndex];
-	if (!mIsPreview) {
+
+	if (!mIsPreview && gMainWindow)
+	{
 		gMainWindow->SetCurrentModelTab(mActiveModel);
 		mActiveModel->UpdateInterface();
 	}

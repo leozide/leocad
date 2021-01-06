@@ -250,10 +250,13 @@ void lcApplication::SetProject(Project* Project)
 {
 	SaveTabLayout();
 
-	gMainWindow->RemoveAllModelTabs();
+	if (gMainWindow)
+	{
+		gMainWindow->RemoveAllModelTabs();
 
-	if (gMainWindow->GetPreviewWidget())
-		 gMainWindow->GetPreviewWidget()->ClearPreview();
+		if (gMainWindow->GetPreviewWidget())
+			gMainWindow->GetPreviewWidget()->ClearPreview();
+	}
 
 	delete mProject;
 	mProject = Project;
@@ -266,7 +269,8 @@ void lcApplication::SetProject(Project* Project)
 		QSettings Settings;
 		QByteArray TabLayout = Settings.value(GetTabLayoutKey()).toByteArray();
 
-		gMainWindow->RestoreTabLayout(TabLayout);
+		if (gMainWindow)
+			gMainWindow->RestoreTabLayout(TabLayout);
 	}
 }
 
@@ -763,9 +767,14 @@ lcStartupMode lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPath
 		return lcStartupMode::Error;
 #endif
 
-	gMainWindow = new lcMainWindow();
-	lcLoadDefaultKeyboardShortcuts();
-	lcLoadDefaultMouseShortcuts();
+#ifdef LC_USE_QOPENGLWIDGET
+	if (!SaveAndExit)
+#endif
+	{
+		gMainWindow = new lcMainWindow();
+		lcLoadDefaultKeyboardShortcuts();
+		lcLoadDefaultMouseShortcuts();
+	}
 
 	if (!LoadPartsLibrary(LibraryPaths, OnlyUseLibraryPaths, !SaveAndExit))
 	{
@@ -782,7 +791,12 @@ lcStartupMode lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPath
 			fprintf(stderr, "%s", Message.toLatin1().constData());
 	}
 
-	gMainWindow->CreateWidgets();
+#ifdef LC_USE_QOPENGLWIDGET
+	if (!SaveAndExit)
+#endif
+	{
+		gMainWindow->CreateWidgets();
+	}
 
 	Project* NewProject = new Project();
 	SetProject(NewProject);
@@ -790,67 +804,119 @@ lcStartupMode lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPath
 	if (!SaveAndExit && ProjectName.isEmpty() && lcGetProfileInt(LC_PROFILE_AUTOLOAD_MOSTRECENT))
 		ProjectName = lcGetProfileString(LC_PROFILE_RECENT_FILE1);
 
-	if (!ProjectName.isEmpty() && gMainWindow->OpenProject(ProjectName))
+	bool ProjectLoaded = false;
+
+	if (!ProjectName.isEmpty())
+	{
+		if (gMainWindow)
+			gMainWindow->OpenProject(ProjectName);
+		else
+		{
+			Project* LoadedProject = new Project();
+
+			if (LoadedProject->Load(ProjectName))
+			{
+				SetProject(LoadedProject);
+				ProjectLoaded = true;
+			}
+			else
+			{
+				delete LoadedProject;
+			}
+		}
+	}
+
+	if (ProjectLoaded)
 	{
 		if (!ModelName.isEmpty())
 			mProject->SetActiveModel(ModelName);
 
+#ifdef LC_USE_QOPENGLWIDGET
+		std::unique_ptr<lcView> ActiveView;
+
+		if (SaveImage)
+		{
+			lcModel* Model;
+
+			if (!ModelName.isEmpty())
+			{
+				Model = mProject->GetModel(ModelName);
+
+				if (!Model)
+				{
+					printf("Error: model '%s' does not exist.\n", ModelName.toLatin1().constData());
+					return lcStartupMode::Error;
+				}
+			}
+			else
+				Model = mProject->GetMainModel();
+
+			ActiveView = std::unique_ptr<lcView>(new lcView(lcViewType::View, Model));
+
+			ActiveView->SetOffscreenContext();
+			ActiveView->MakeCurrent();
+		}
+#else
 		lcView* ActiveView = gMainWindow->GetActiveView();
+#endif
 
 		if (SaveImage)
 			ActiveView->SetSize(ImageWidth, ImageHeight);
 
-		if (!CameraName.isEmpty())
+		if (ActiveView)
 		{
-			ActiveView->SetCamera(CameraName);
-
-			if (Viewpoint != lcViewpoint::Count)
-				printf("Warning: --viewpoint is ignored when --camera is set.\n");
-
-			if (Orthographic)
-				printf("Warning: --orthographic is ignored when --camera is set.\n");
-
-			if (SetCameraAngles)
-				printf("Warning: --camera-angles is ignored when --camera is set.\n");
-
-			if (SetCameraPosition)
-				printf("Warning: --camera-position is ignored when --camera is set.\n");
-		}
-		else
-		{
-			ActiveView->SetProjection(Orthographic);
-
-			if (SetFoV)
-				ActiveView->GetCamera()->m_fovy = FoV;
-
-			if (SetZPlanes)
+			if (!CameraName.isEmpty())
 			{
-				lcCamera* Camera = ActiveView->GetCamera();
+				ActiveView->SetCamera(CameraName);
 
-				Camera->m_zNear = ZPlanes[0];
-				Camera->m_zFar = ZPlanes[1];
-			}
+				if (Viewpoint != lcViewpoint::Count)
+					printf("Warning: --viewpoint is ignored when --camera is set.\n");
 
-			if (Viewpoint != lcViewpoint::Count)
-			{
-				ActiveView->SetViewpoint(Viewpoint);
+				if (Orthographic)
+					printf("Warning: --orthographic is ignored when --camera is set.\n");
 
 				if (SetCameraAngles)
-					printf("Warning: --camera-angles is ignored when --viewpoint is set.\n");
+					printf("Warning: --camera-angles is ignored when --camera is set.\n");
 
 				if (SetCameraPosition)
-					printf("Warning: --camera-position is ignored when --viewpoint is set.\n");
+					printf("Warning: --camera-position is ignored when --camera is set.\n");
 			}
-			else if (SetCameraAngles)
+			else
 			{
-				ActiveView->SetCameraAngles(CameraLatLon[0], CameraLatLon[1]);
+				ActiveView->SetProjection(Orthographic);
 
-				if (SetCameraPosition)
-					printf("Warning: --camera-position is ignored when --camera-angles is set.\n");
-			}
-			else if (SetCameraPosition)
-			{
-				ActiveView->SetViewpoint(CameraPosition[0], CameraPosition[1], CameraPosition[2]);
+				if (SetFoV)
+					ActiveView->GetCamera()->m_fovy = FoV;
+
+				if (SetZPlanes)
+				{
+					lcCamera* Camera = ActiveView->GetCamera();
+
+					Camera->m_zNear = ZPlanes[0];
+					Camera->m_zFar = ZPlanes[1];
+				}
+
+				if (Viewpoint != lcViewpoint::Count)
+				{
+					ActiveView->SetViewpoint(Viewpoint);
+
+					if (SetCameraAngles)
+						printf("Warning: --camera-angles is ignored when --viewpoint is set.\n");
+
+					if (SetCameraPosition)
+						printf("Warning: --camera-position is ignored when --viewpoint is set.\n");
+				}
+				else if (SetCameraAngles)
+				{
+					ActiveView->SetCameraAngles(CameraLatLon[0], CameraLatLon[1]);
+
+					if (SetCameraPosition)
+						printf("Warning: --camera-position is ignored when --camera-angles is set.\n");
+				}
+				else if (SetCameraPosition)
+				{
+					ActiveView->SetViewpoint(CameraPosition[0], CameraPosition[1], CameraPosition[2]);
+				}
 			}
 		}
 
@@ -858,10 +924,14 @@ lcStartupMode lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPath
 		{
 			lcModel* ActiveModel;
 
+#ifdef LC_USE_QOPENGLWIDGET
+			ActiveModel = ActiveView->GetModel();
+#else
 			if (ModelName.isEmpty())
 				ActiveModel = mProject->GetMainModel();
 			else
 				ActiveModel = mProject->GetActiveModel();
+#endif
 
 			if (ImageName.isEmpty())
 				ImageName = mProject->GetImageFileName(true);
@@ -901,7 +971,14 @@ lcStartupMode lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPath
 			if (SetHighlightColor)
 				mPreferences.mHighlightNewPartsColor = HighlightColor;
 
+#ifdef LC_USE_QOPENGLWIDGET
+			if (CameraName.isEmpty() && !SetCameraPosition)
+				ActiveView->ZoomExtents();
+
+			ActiveView->SaveStepImages(Frame, ImageStart != ImageEnd, ImageStart, ImageEnd);
+#else
 			ActiveModel->SaveStepImages(Frame, ImageStart != ImageEnd, CameraName.isEmpty() && !SetCameraPosition, ImageWidth, ImageHeight, ImageStart, ImageEnd);
+#endif
 		}
 
 		if (SaveWavefront)

@@ -244,6 +244,8 @@ public:
 	void BindRenderFramebuffer();
 	void UnbindRenderFramebuffer();
 	QImage GetRenderFramebufferImage() const;
+	std::vector<QImage> GetStepImages(lcStep Start, lcStep End);
+	void SaveStepImages(const QString& BaseName, bool AddStepSuffix, lcStep Start, lcStep End);
 #endif
 
 	lcContext* mContext = nullptr;

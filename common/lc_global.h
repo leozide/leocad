@@ -48,6 +48,9 @@
 #define LC_MAXPATH 1024
 #define LC_MAXNAME 1000
 
+typedef quint32 lcStep;
+#define LC_STEP_MAX 0xffffffff
+
 #ifdef Q_OS_WIN
 char* strcasestr(const char *s, const char *find);
 #else
@@ -74,6 +77,8 @@ struct lcModelPartsEntry;
 struct lcMinifig;
 enum class lcViewpoint;
 class lcInstructions;
+struct lcObjectRayTest;
+struct lcObjectBoxTest;
 
 class lcVector2;
 class lcVector3;

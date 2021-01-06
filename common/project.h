@@ -1,6 +1,5 @@
 #pragma once
 
-#include "object.h"
 #include "lc_array.h"
 #include "lc_application.h"
 

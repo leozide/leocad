@@ -3,9 +3,6 @@
 #include "lc_math.h"
 #include "lc_array.h"
 
-typedef quint32 lcStep;
-#define LC_STEP_MAX 0xffffffff
-
 enum class lcObjectType
 {
 	Piece,

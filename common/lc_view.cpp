@@ -31,7 +31,8 @@ lcView::lcView(lcViewType ViewType, lcModel* Model)
 	mDragState = lcDragState::None;
 	mTrackToolFromOverlay = false;
 
-	lcView* ActiveView = gMainWindow->GetActiveView();
+	lcView* ActiveView = gMainWindow ? gMainWindow->GetActiveView() : nullptr;
+
 	if (ActiveView)
 		SetCamera(ActiveView->mCamera, false);
 	else
@@ -728,6 +729,67 @@ lcArray<lcObject*> lcView::FindObjectsInBox(float x1, float y1, float x2, float 
 
 	return ObjectBoxTest.Objects;
 }
+
+#ifdef LC_USE_QOPENGLWIDGET
+
+std::vector<QImage> lcView::GetStepImages(lcStep Start, lcStep End)
+{
+	std::vector<QImage> Images;
+
+	if (!BeginRenderToImage(mWidth, mHeight))
+	{
+		QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Error creating images."));
+		return Images;
+	}
+
+	const lcStep CurrentStep = mModel->GetCurrentStep();
+
+	for (lcStep Step = Start; Step <= End; Step++)
+	{
+		mModel->SetTemporaryStep(Step);
+
+		OnDraw();
+
+		Images.emplace_back(GetRenderImage());
+	}
+
+	EndRenderToImage();
+
+	mModel->SetTemporaryStep(CurrentStep);
+
+	if (!mModel->IsActive())
+		mModel->CalculateStep(LC_STEP_MAX);
+
+	return Images;
+}
+
+void lcView::SaveStepImages(const QString& BaseName, bool AddStepSuffix, lcStep Start, lcStep End)
+{
+	std::vector<QImage> Images = GetStepImages(Start, End);
+
+	for (lcStep Step = Start; Step <= End; Step++)
+	{
+		QString FileName;
+
+		if (AddStepSuffix)
+			FileName = BaseName.arg(Step, 2, 10, QLatin1Char('0'));
+		else
+			FileName = BaseName;
+
+		QImageWriter Writer(FileName);
+
+		if (Writer.format().isEmpty())
+			Writer.setFormat("png");
+
+		if (!Writer.write(Images[Step - Start]))
+		{
+			QMessageBox::information(gMainWindow, tr("Error"), tr("Error writing to file '%1':\n%2").arg(FileName, Writer.errorString()));
+			break;
+		}
+	}
+}
+
+#endif
 
 bool lcView::BeginRenderToImage(int Width, int Height)
 {
@@ -2190,7 +2252,8 @@ void lcView::SetProjection(bool Ortho)
 		mCamera->SetOrtho(Ortho);
 		Redraw();
 
-		gMainWindow->UpdatePerspective();
+		if (gMainWindow)
+			gMainWindow->UpdatePerspective();
 	}
 	else
 	{

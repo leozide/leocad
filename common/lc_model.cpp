@@ -4221,9 +4221,9 @@ void lcModel::ZoomExtents(lcCamera* Camera, float Aspect)
 
 	lcVector3 Center = (Min + Max) / 2.0f;
 
-	Camera->ZoomExtents(Aspect, Center, Points, mCurrentStep, mIsPreview ? false : gMainWindow->GetAddKeys());
+	Camera->ZoomExtents(Aspect, Center, Points, mCurrentStep, gMainWindow ? gMainWindow->GetAddKeys() : false);
 
-	if (!mIsPreview)
+	if (!mIsPreview && gMainWindow)
 		gMainWindow->UpdateSelectedObjects(false);
 	UpdateAllViews();
 
@@ -4445,6 +4445,9 @@ void lcModel::SetMinifig(const lcMinifig& Minifig)
 
 void lcModel::UpdateInterface()
 {
+	if (!gMainWindow)
+		return;
+
 	gMainWindow->UpdateTimeline(true, false);
 	gMainWindow->UpdateUndoRedo(mUndoHistory.size() > 1 ? mUndoHistory[0]->Description : nullptr, !mRedoHistory.empty() ? mRedoHistory[0]->Description : nullptr);
 	gMainWindow->UpdatePaste(!gApplication->mClipboard.isEmpty());

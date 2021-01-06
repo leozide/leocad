@@ -1,8 +1,8 @@
 #pragma once
 
 #include "lc_math.h"
-#include "object.h"
 #include "lc_commands.h"
+#include "lc_array.h"
 
 #define LC_SEL_NO_PIECES                0x0001 // No pieces in model
 #define LC_SEL_PIECE                    0x0002 // At last 1 piece selected
@@ -92,7 +92,12 @@ public:
 		return mSavedHistory != mUndoHistory[0];
 	}
 
-	bool IsPreview()
+	bool IsActive() const
+	{
+		return mActive;
+	}
+
+	bool IsPreview() const
 	{
 		return mIsPreview;
 	}

@@ -1,7 +1,5 @@
 #pragma once
 
-#include "object.h"
-
 enum class lcInstructionsDirection
 {
 	Horizontal,

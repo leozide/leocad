@@ -29,8 +29,6 @@ public:
 	bool PartsListEnd;
 };
 
-struct lcInstructionsPageLayout;
-
 class Project
 {
 public:
@@ -38,9 +36,7 @@ public:
 	~Project();
 
 	Project(const Project&) = delete;
-	Project(Project&&) = delete;
 	Project& operator=(const Project&) = delete;
-	Project& operator=(Project&&) = delete;
 
 	const lcArray<lcModel*>& GetModels() const
 	{
@@ -75,7 +71,7 @@ public:
 
 	QString GetImageFileName(bool AllowCurrentFolder) const;
 
-	std::vector<lcInstructionsPageLayout> GetPageLayouts() const;
+	lcInstructions GetInstructions();
 
 	void SetActiveModel(int ModelIndex);
 	void SetActiveModel(const QString& FileName);

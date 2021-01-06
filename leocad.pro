@@ -186,6 +186,7 @@ SOURCES += \
 	common/lc_file.cpp \
 	common/lc_glextensions.cpp \
 	common/lc_http.cpp \
+	common/lc_instructions.cpp \
 	common/lc_instructionsdialog.cpp \
 	common/lc_library.cpp \
 	common/lc_lxf.cpp \
@@ -252,6 +253,7 @@ HEADERS += \
 	common/lc_glextensions.h \
 	common/lc_global.h \
 	common/lc_http.h \
+	common/lc_instructions.h \
 	common/lc_instructionsdialog.h \
 	common/lc_library.h \
 	common/lc_lxf.h \

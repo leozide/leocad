@@ -1547,48 +1547,6 @@ void lcModel::SaveStepImages(const QString& BaseName, bool AddStepSuffix, bool Z
 	}
 }
 
-std::vector<lcInstructionsPageLayout> lcModel::GetPageLayouts(std::vector<const lcModel*>& AddedModels)
-{
-	std::vector<lcInstructionsPageLayout> PageLayouts;
-
-	if (std::find(AddedModels.begin(), AddedModels.end(), this) != AddedModels.end())
-		return PageLayouts;
-
-	AddedModels.push_back(this);
-
-	std::map<lcStep, std::vector<lcPiece*>> StepPieces;
-
-	for (lcPiece* Piece : mPieces)
-		if (!Piece->IsHidden())
-			StepPieces[Piece->GetStepShow()].push_back(Piece);
-
-	lcStep CurrentStep = 1;
-
-	for (const std::pair<lcStep, std::vector<lcPiece*>>& StepIt : StepPieces)
-	{
-		while (StepIt.first > CurrentStep)
-		{
-			PageLayouts.emplace_back(lcInstructionsPageLayout{ this, CurrentStep });
-			CurrentStep++;
-		}
-
-		for (lcPiece* Piece : StepIt.second)
-		{
-			if (Piece->mPieceInfo->IsModel())
-			{
-				lcModel* SubModel = Piece->mPieceInfo->GetModel();
-				std::vector<lcInstructionsPageLayout> SubModelLayouts = SubModel->GetPageLayouts(AddedModels);
-				PageLayouts.insert(PageLayouts.end(), std::make_move_iterator(SubModelLayouts.begin()), std::make_move_iterator(SubModelLayouts.end()));
-			}
-		}
-
-		PageLayouts.emplace_back(lcInstructionsPageLayout{ this, CurrentStep });
-		CurrentStep++;
-	}
-
-	return PageLayouts;
-}
-
 void lcModel::RayTest(lcObjectRayTest& ObjectRayTest) const
 {
 	for (lcPiece* Piece : mPieces)

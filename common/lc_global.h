@@ -73,6 +73,7 @@ typedef std::map<const PieceInfo*, std::map<int, int>> lcPartsList;
 struct lcModelPartsEntry;
 struct lcMinifig;
 enum class lcViewpoint;
+class lcInstructions;
 
 class lcVector2;
 class lcVector3;

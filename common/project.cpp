@@ -5,6 +5,7 @@
 #include "pieceinf.h"
 #include "camera.h"
 #include "project.h"
+#include "lc_instructions.h"
 #include "image.h"
 #include "lc_mainwindow.h"
 #include "lc_view.h"
@@ -1501,14 +1502,9 @@ void Project::ExportCSV()
 	}
 }
 
-std::vector<lcInstructionsPageLayout> Project::GetPageLayouts() const
+lcInstructions Project::GetInstructions()
 {
-	std::vector<const lcModel*> AddedModels;
-
-	if (!mModels.IsEmpty())
-		return mModels[0]->GetPageLayouts(AddedModels);
-
-	return std::vector<lcInstructionsPageLayout>();
+	return lcInstructions(this);
 }
 
 void Project::ExportHTML(const lcHTMLExportOptions& Options)

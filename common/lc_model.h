@@ -18,12 +18,6 @@
 #define LC_SEL_CAN_ADD_CONTROL_POINT    0x0800 // Can add control points to focused piece
 #define LC_SEL_CAN_REMOVE_CONTROL_POINT 0x1000 // Can remove control points from focused piece
 
-struct lcInstructionsPageLayout
-{
-	lcModel* Model;
-	lcStep Step;
-};
-
 enum class lcSelectionMode
 {
 	Single,
@@ -243,7 +237,6 @@ public:
 	QImage GetStepImage(bool Zoom, int Width, int Height, lcStep Step);
 	QImage GetPartsListImage(int MaxWidth, lcStep Step) const;
 	void SaveStepImages(const QString& BaseName, bool AddStepSuffix, bool Zoom, int Width, int Height, lcStep Start, lcStep End);
-	std::vector<lcInstructionsPageLayout> GetPageLayouts(std::vector<const lcModel*>& AddedModels);
 
 	void RayTest(lcObjectRayTest& ObjectRayTest) const;
 	void BoxTest(lcObjectBoxTest& ObjectBoxTest) const;

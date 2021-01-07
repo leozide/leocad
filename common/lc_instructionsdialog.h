@@ -17,24 +17,31 @@ class lcInstructionsPageListWidget : public QDockWidget
 	Q_OBJECT
 
 public:
-	lcInstructionsPageListWidget(QWidget* Parent);
+	lcInstructionsPageListWidget(QWidget* Parent, lcInstructions* Instructions);
 
+protected slots:
+	void ShowPageSetupDialog();
+
+public:
 //protected:
-	QComboBox* mSizeComboBox = nullptr;
-	QLineEdit* mWidthEdit = nullptr;
-	QLineEdit* mHeightEdit = nullptr;
-
-	QRadioButton* mPortraitButton = nullptr;
-	QRadioButton* mLandscapeButton = nullptr;
-
-	QLineEdit* mLeftMarginEdit = nullptr;
-	QLineEdit* mRightMarginEdit = nullptr;
-	QLineEdit* mTopMarginEdit = nullptr;
-	QLineEdit* mBottomMarginEdit = nullptr;
-
-	QComboBox* mUnitsComboBox = nullptr;
+//	QComboBox* mSizeComboBox = nullptr;
+//	QLineEdit* mWidthEdit = nullptr;
+//	QLineEdit* mHeightEdit = nullptr;
+//
+//	QRadioButton* mPortraitButton = nullptr;
+//	QRadioButton* mLandscapeButton = nullptr;
+//
+//	QLineEdit* mLeftMarginEdit = nullptr;
+//	QLineEdit* mRightMarginEdit = nullptr;
+//	QLineEdit* mTopMarginEdit = nullptr;
+//	QLineEdit* mBottomMarginEdit = nullptr;
+//
+//	QComboBox* mUnitsComboBox = nullptr;
 
 	QListWidget* mThumbnailsWidget = nullptr;
+
+protected:
+	lcInstructions* mInstructions;
 };
 
 class lcInstructionsDialog : public QMainWindow

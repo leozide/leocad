@@ -196,6 +196,7 @@ SOURCES += \
 	common/lc_meshloader.cpp \
 	common/lc_minifigdialog.cpp \
 	common/lc_model.cpp \
+	common/lc_pagesetupdialog.cpp \
 	common/lc_partselectionwidget.cpp \
 	common/lc_previewwidget.cpp \
 	common/lc_profile.cpp \
@@ -265,6 +266,7 @@ HEADERS += \
 	common/lc_meshloader.h \
 	common/lc_minifigdialog.h \
 	common/lc_model.h \
+	common/lc_pagesetupdialog.h \
 	common/lc_previewwidget.h \
 	common/lc_profile.h \
 	common/lc_scene.h \
@@ -319,6 +321,7 @@ FORMS += \
 	qt/lc_renderdialog.ui \
 	qt/lc_setsdatabasedialog.ui \
 	common/lc_minifigdialog.ui \
+	common/lc_pagesetupdialog.ui \
 	common/lc_partpalettedialog.ui
 OTHER_FILES += 
 RESOURCES += leocad.qrc resources/stylesheet/stylesheet.qrc

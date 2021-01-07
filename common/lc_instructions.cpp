@@ -5,9 +5,18 @@
 #include "piece.h"
 #include "pieceinf.h"
 
+const float lcInstructions::mDisplayDPI = 72.0f;
+
 lcInstructions::lcInstructions(Project* Project)
 	: mProject(Project)
 {
+	mPageSetup.Width = 8.5f * mDisplayDPI;
+	mPageSetup.Height = 11.0f * mDisplayDPI;
+	mPageSetup.MarginLeft = 0.5 * mDisplayDPI;
+	mPageSetup.MarginRight = 0.5 * mDisplayDPI;
+	mPageSetup.MarginTop = 0.5 * mDisplayDPI;
+	mPageSetup.MarginBottom = 0.5 * mDisplayDPI;
+
 	mPageSettings.Rows = 1;
 	mPageSettings.Columns = 1;
 	mPageSettings.Direction = lcInstructionsDirection::Horizontal;

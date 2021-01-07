@@ -1,5 +1,15 @@
 #pragma once
 
+struct lcInstructionsPageSetup
+{
+	float Width;
+	float Height;
+	float MarginLeft;
+	float MarginRight;
+	float MarginTop;
+	float MarginBottom;
+};
+
 enum class lcInstructionsDirection
 {
 	Horizontal,
@@ -35,10 +45,13 @@ public:
 
 	std::vector<lcInstructionsPage> mPages;
 	lcInstructionsPageSettings mPageSettings;
+	lcInstructionsPageSetup mPageSetup;
 
 protected:
 	void CreatePages();
 	void AddDefaultPages(lcModel* Model, std::vector<const lcModel*>& AddedModels);
 
 	Project* mProject = nullptr;
+
+	static const float mDisplayDPI;
 };

@@ -77,6 +77,7 @@ struct lcModelPartsEntry;
 struct lcMinifig;
 enum class lcViewpoint;
 class lcInstructions;
+struct lcInstructionsPageSetup;
 struct lcObjectRayTest;
 struct lcObjectBoxTest;
 

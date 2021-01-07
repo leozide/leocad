@@ -1,7 +1,9 @@
 #include "lc_global.h"
 #include "lc_instructionsdialog.h"
+#include "lc_collapsiblewidget.h"
 #include "project.h"
 #include "lc_model.h"
+#include "lc_qutils.h"
 
 lcInstructionsPageWidget::lcInstructionsPageWidget(QWidget* Parent)
 	: QGraphicsView(Parent)
@@ -43,8 +45,76 @@ lcInstructionsPageListWidget::lcInstructionsPageListWidget(QWidget* Parent)
 	setWidget(CentralWidget);
 	setWindowTitle(tr("Pages"));
 
-	QHBoxLayout* Layout = new QHBoxLayout(CentralWidget);
+	QVBoxLayout* Layout = new QVBoxLayout(CentralWidget);
 	Layout->setContentsMargins(0, 0, 0, 0);
+
+	lcCollapsibleWidget* SetupWidget = new lcCollapsibleWidget(tr("Page Setup"), CentralWidget);
+	Layout->addWidget(SetupWidget);
+
+	QVBoxLayout* SetupLayout = new QVBoxLayout();
+	SetupWidget->SetChildLayout(SetupLayout);
+
+	lcCollapsibleWidget* SizeWidget = new lcCollapsibleWidget(tr("Size"));
+	SetupLayout->addWidget(SizeWidget);
+
+	QGridLayout* SizeLayout = new QGridLayout();
+	SizeWidget->SetChildLayout(SizeLayout);
+
+	mSizeComboBox = new QComboBox();
+	SizeLayout->addWidget(mSizeComboBox, 0, 0, 1, -1);
+
+	mWidthEdit = new lcSmallLineEdit();
+	SizeLayout->addWidget(new QLabel(tr("Width:")), 1, 0);
+	SizeLayout->addWidget(mWidthEdit, 1, 1);
+
+	mHeightEdit = new lcSmallLineEdit();
+	SizeLayout->addWidget(new QLabel(tr("Height:")), 1, 2);
+	SizeLayout->addWidget(mHeightEdit, 1, 3);
+
+	lcCollapsibleWidget* OrientationWidget = new lcCollapsibleWidget(tr("Orientation"));
+	SetupLayout->addWidget(OrientationWidget);
+
+	QVBoxLayout* OrientationLayout = new QVBoxLayout();
+	OrientationWidget->SetChildLayout(OrientationLayout);
+
+	mPortraitButton = new QRadioButton(tr("Portrait"));
+	OrientationLayout->addWidget(mPortraitButton);
+	mLandscapeButton = new QRadioButton(tr("Landscape"));
+	OrientationLayout->addWidget(mLandscapeButton);
+
+	lcCollapsibleWidget* MarginsWidget = new lcCollapsibleWidget(tr("Margins"));
+	SetupLayout->addWidget(MarginsWidget);
+
+	QGridLayout* MarginsLayout = new QGridLayout();
+	MarginsWidget->SetChildLayout(MarginsLayout);
+
+	mLeftMarginEdit = new lcSmallLineEdit();
+	MarginsLayout->addWidget(new QLabel(tr("Left:")), 0, 0);
+	MarginsLayout->addWidget(mLeftMarginEdit, 0, 1);
+
+	mRightMarginEdit = new lcSmallLineEdit();
+	MarginsLayout->addWidget(new QLabel(tr("Right:")), 0, 2);
+	MarginsLayout->addWidget(mRightMarginEdit, 0, 3);
+
+	mTopMarginEdit = new lcSmallLineEdit();
+	MarginsLayout->addWidget(new QLabel(tr("Top:")), 1, 0);
+	MarginsLayout->addWidget(mTopMarginEdit, 1, 1);
+
+	mBottomMarginEdit = new lcSmallLineEdit();
+	MarginsLayout->addWidget(new QLabel(tr("Bottom:")), 1, 2);
+	MarginsLayout->addWidget(mBottomMarginEdit, 1, 3);
+
+	lcCollapsibleWidget* UnitsWidget = new lcCollapsibleWidget(tr("Units"));
+	SetupLayout->addWidget(UnitsWidget);
+
+	QVBoxLayout* UnitsLayout = new QVBoxLayout();
+	UnitsWidget->SetChildLayout(UnitsLayout);
+
+	mUnitsComboBox = new QComboBox();
+	mUnitsComboBox->addItems(QStringList() << tr("Pixels") << tr("Centimeters") << tr("Inches"));
+	UnitsLayout->addWidget(mUnitsComboBox);
+
+	SetupWidget->Collapse();
 
 	mThumbnailsWidget = new QListWidget(CentralWidget);
 	Layout->addWidget(mThumbnailsWidget);
@@ -90,8 +160,8 @@ lcInstructionsDialog::lcInstructionsDialog(QWidget* Parent, Project* Project)
 	connect(mPageListWidget->mThumbnailsWidget, SIGNAL(currentRowChanged(int)), this, SLOT(CurrentThumbnailChanged(int)));
 	mPageListWidget->mThumbnailsWidget->setCurrentRow(0);
 
-	connect(mVerticalPageAction, SIGNAL(toggled()), this, SLOT(UpdatePageSettings()));
-	connect(mHorizontalPageAction, SIGNAL(toggled()), this, SLOT(UpdatePageSettings()));
+	connect(mVerticalPageAction, SIGNAL(toggled(bool)), this, SLOT(UpdatePageSettings()));
+	connect(mHorizontalPageAction, SIGNAL(toggled(bool)), this, SLOT(UpdatePageSettings()));
 	connect(mRowsSpinBox, SIGNAL(valueChanged(int)), this, SLOT(UpdatePageSettings()));
 	connect(mColumnsSpinBox, SIGNAL(valueChanged(int)), this, SLOT(UpdatePageSettings()));
 }
@@ -122,7 +192,7 @@ void lcInstructionsDialog::UpdatePageSettings()
 
 void lcInstructionsDialog::CurrentThumbnailChanged(int Index)
 {
-	if (Index < 0 || Index >= mInstructions.mPages.size())
+	if (Index < 0 || Index >= static_cast<int>(mInstructions.mPages.size()))
 	{
 		mPageWidget->SetCurrentPage(nullptr);
 		return;

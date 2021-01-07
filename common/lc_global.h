@@ -86,6 +86,7 @@ class lcVector4;
 class lcMatrix33;
 class lcMatrix44;
 
+class lcCollapsibleWidget;
 class lcViewWidget;
 class lcView;
 class lcContext;

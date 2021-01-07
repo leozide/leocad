@@ -8,6 +8,8 @@ float lcParseValueLocalized(const QString& Value);
 
 class lcQTreeWidgetColumnStretcher : public QObject
 {
+	Q_OBJECT
+
 public:
 	lcQTreeWidgetColumnStretcher(QTreeWidget* TreeWidget, int ColumnToStretch);
 
@@ -16,14 +18,11 @@ public:
 	const int m_columnToStretch;
 };
 
-class lcTransformLineEdit : public QLineEdit
+class lcSmallLineEdit : public QLineEdit
 {
-public:
-	lcTransformLineEdit()
-		: QLineEdit()
-	{
-	}
+	Q_OBJECT
 
+public:
 	QSize sizeHint() const override
 	{
 		QFontMetrics FontMetrics(font());
@@ -36,6 +35,11 @@ public:
 
 		return QLineEdit::sizeHint() - QSize(Width, 0);
 	}
+};
+
+class lcTransformLineEdit : public lcSmallLineEdit
+{
+	Q_OBJECT
 
 protected:
 	bool event(QEvent* Event) override

@@ -180,6 +180,7 @@ SOURCES += \
 	common/light.cpp \
 	common/lc_application.cpp \
 	common/lc_category.cpp \
+	common/lc_collapsiblewidget.cpp \
 	common/lc_colors.cpp \
 	common/lc_commands.cpp \
 	common/lc_context.cpp \
@@ -245,6 +246,7 @@ HEADERS += \
 	common/lc_application.h \
 	common/lc_array.h \
 	common/lc_category.h \
+	common/lc_collapsiblewidget.h \
 	common/lc_colors.h \
 	common/lc_commands.h \
 	common/lc_context.h \

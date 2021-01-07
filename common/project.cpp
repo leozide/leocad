@@ -70,7 +70,7 @@ Project::Project(bool IsPreview)
 	mActiveModel->SetSaved();
 	mModels.Add(mActiveModel);
 
-	if (!mIsPreview)
+	if (!mIsPreview && gMainWindow)
 		QObject::connect(&mFileWatcher, SIGNAL(fileChanged(const QString&)), gMainWindow, SLOT(ProjectFileChanged(const QString&)));
 }
 

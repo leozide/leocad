@@ -6,36 +6,47 @@
 #include "lc_qutils.h"
 #include "lc_pagesetupdialog.h"
 
-lcInstructionsPageWidget::lcInstructionsPageWidget(QWidget* Parent)
-	: QGraphicsView(Parent)
+lcInstructionsPageWidget::lcInstructionsPageWidget(QWidget* Parent, lcInstructions* Instructions)
+	: QGraphicsView(Parent), mInstructions(Instructions)
 {
 }
 
 void lcInstructionsPageWidget::SetCurrentPage(const lcInstructionsPage* Page)
 {
-	QGraphicsScene* Scene = new QGraphicsScene(this);
+	QGraphicsScene* Scene = new QGraphicsScene();
 	setScene(Scene);
-	Scene->setSceneRect(0, 0, 1000, 1000);
-//	Scene->setBackgroundBrush(Qt::black);
 
-	if (Page)
+	if (!Page)
+		return;
+
+	const lcInstructionsPageSetup& PageSetup = mInstructions->mPageSetup;
+//	Scene->setSceneRect(0, 0, mInstructions->mPageSetup.Width, mInstructions->mPageSetup.Height);
+
+	QGraphicsRectItem* PageItem = Scene->addRect(QRectF(0.0f, 0.0f, PageSetup.Width, PageSetup.Height), QPen(Qt::black), QBrush(Qt::white));
+	PageItem->setFlag(QGraphicsItem::ItemClipsChildrenToShape, true);
+
+	QRectF MarginsRect(PageSetup.MarginLeft, PageSetup.MarginTop, PageSetup.Width - PageSetup.MarginLeft - PageSetup.MarginRight, PageSetup.Height - PageSetup.MarginTop - PageSetup.MarginBottom);
+
+	for (const lcInstructionsStep& Step : Page->Steps)
 	{
-		for (const lcInstructionsStep& Step : Page->Steps)
-		{
-			QImage StepImage = Step.Model->GetStepImage(false, 500, 500, Step.Step);
-			QGraphicsPixmapItem* StepImageItem = Scene->addPixmap(QPixmap::fromImage(StepImage));
-			StepImageItem->setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsFocusable);
-			StepImageItem->setPos(1000.0 * Step.Rect.x(), 1000.0 * Step.Rect.y());
+		const float StepWidth = MarginsRect.width() * Step.Rect.width();
+		const float StepHeight = MarginsRect.height() * Step.Rect.height();
 
-			QGraphicsSimpleTextItem* StepNumberItem = Scene->addSimpleText(QString::number(Step.Step), QFont("Helvetica", 96));
-			StepNumberItem->setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsFocusable);
-			StepNumberItem->setPos(1000.0 * Step.Rect.x(), 1000.0 * Step.Rect.y());
+		QImage StepImage = Step.Model->GetStepImage(false, StepWidth, StepHeight, Step.Step); // todo: override background color and opacity
 
-			QImage PartsImage = Step.Model->GetPartsListImage(300, Step.Step);
-			QGraphicsPixmapItem* PartsImageItem = Scene->addPixmap(QPixmap::fromImage(PartsImage));
-			PartsImageItem->setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsFocusable);
-			PartsImageItem->setPos(StepNumberItem->pos() + QPointF(StepNumberItem->sceneBoundingRect().width(), 0));
-		}
+		QGraphicsPixmapItem* StepImageItem = new QGraphicsPixmapItem(QPixmap::fromImage(StepImage), PageItem);
+		StepImageItem->setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsFocusable);
+		StepImageItem->setPos(MarginsRect.left() + MarginsRect.width() * Step.Rect.x(), MarginsRect.top() + MarginsRect.height() * Step.Rect.y());
+
+		QGraphicsSimpleTextItem* StepNumberItem = new QGraphicsSimpleTextItem(QString::number(Step.Step), StepImageItem);
+		StepNumberItem->setFont(QFont("Helvetica", 96));
+		StepNumberItem->setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsFocusable);
+
+		QImage PartsImage = Step.Model->GetPartsListImage(300, Step.Step);
+
+		QGraphicsPixmapItem* PartsImageItem = new QGraphicsPixmapItem(QPixmap::fromImage(PartsImage), StepImageItem);
+		PartsImageItem->setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsFocusable);
+		PartsImageItem->setPos(StepNumberItem->boundingRect().topRight());
 	}
 }
 
@@ -160,7 +171,7 @@ lcInstructionsDialog::lcInstructionsDialog(QWidget* Parent, Project* Project)
 
 	mInstructions = mProject->GetInstructions();
 
-	mPageWidget = new lcInstructionsPageWidget(this);
+	mPageWidget = new lcInstructionsPageWidget(this, &mInstructions);
 	setCentralWidget(mPageWidget);
 
 	mPageListWidget = new lcInstructionsPageListWidget(this, &mInstructions);

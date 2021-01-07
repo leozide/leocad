@@ -7,9 +7,12 @@ class lcInstructionsPageWidget : public QGraphicsView
 	Q_OBJECT
 
 public:
-	lcInstructionsPageWidget(QWidget* Parent);
+	lcInstructionsPageWidget(QWidget* Parent, lcInstructions* Instructions);
 
 	void SetCurrentPage(const lcInstructionsPage* Page);
+
+protected:
+	lcInstructions* mInstructions;
 };
 
 class lcInstructionsPageListWidget : public QDockWidget

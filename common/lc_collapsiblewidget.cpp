@@ -57,11 +57,11 @@ void lcCollapsibleWidget::UpdateIcon()
 		{
 			QImage Image(16, 16, QImage::Format::Format_ARGB32);
 			Image.fill(QColor(0, 0, 0, 0));
-			QColor Color(palette().color(QPalette::Text));
+			uint Color = palette().color(QPalette::Text).rgba();
 
 			for (int y = 0; y < 8; y++)
 				for (int x = y; x < 8 - y; x++)
-					Image.setPixelColor(x + 4, y + 6, Color);
+					Image.setPixel(x + 4, y + 6, Color);
 
 			mExpandedIcon = Image;
 		}
@@ -74,11 +74,11 @@ void lcCollapsibleWidget::UpdateIcon()
 		{
 			QImage Image(16, 16, QImage::Format::Format_ARGB32);
 			Image.fill(QColor(0, 0, 0, 0));
-			QColor Color(palette().color(QPalette::Text));
+			uint Color = palette().color(QPalette::Text).rgba();
 
 			for (int y = 0; y < 8; y++)
 				for (int x = y; x < 8 - y; x++)
-					Image.setPixelColor(y + 6, x + 4, Color);
+					Image.setPixel(y + 6, x + 4, Color);
 
 			mCollapsedIcon = Image;
 		}

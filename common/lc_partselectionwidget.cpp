@@ -8,11 +8,10 @@
 #include "lc_model.h"
 #include "project.h"
 #include "pieceinf.h"
+#include "camera.h"
 #include "lc_scene.h"
 #include "lc_view.h"
 #include "lc_glextensions.h"
-#include "lc_viewwidget.h"
-#include "lc_previewwidget.h"
 #include "lc_category.h"
 
 Q_DECLARE_METATYPE(QList<int>)
@@ -67,6 +66,9 @@ lcPartSelectionListModel::lcPartSelectionListModel(QObject* Parent)
 lcPartSelectionListModel::~lcPartSelectionListModel()
 {
 	ClearRequests();
+
+	mView.reset();
+	mModel.reset();
 }
 
 void lcPartSelectionListModel::ClearRequests()
@@ -395,10 +397,13 @@ void lcPartSelectionListModel::DrawPreview(int InfoIndex)
 
 	if (!mView)
 	{
-		mView = std::unique_ptr<lcView>(new lcView(lcViewType::PartsList, nullptr));
+		if (!mModel)
+			mModel = std::unique_ptr<lcModel>(new lcModel(QString(), nullptr, true));
+		mView = std::unique_ptr<lcView>(new lcView(lcViewType::PartsList, mModel.get()));
 
 		mView->SetOffscreenContext();
 		mView->MakeCurrent();
+		mView->SetSize(Width, Height);
 
 		if (!mView->BeginRenderToImage(Width, Height))
 		{
@@ -410,34 +415,20 @@ void lcPartSelectionListModel::DrawPreview(int InfoIndex)
 	mView->MakeCurrent();
 	mView->BindRenderFramebuffer();
 
-	lcContext* Context = mView->mContext;
+	const uint BackgroundColor = mListView->palette().color(QPalette::Base).rgba();
+	mView->SetBackgroundColorOverride(LC_RGBA(qRed(BackgroundColor), qGreen(BackgroundColor), qBlue(BackgroundColor), 0));
 
-	const float Aspect = (float)Width / (float)Height;
-	Context->SetViewport(0, 0, Width, Height);
-
-	Context->SetDefaultState();
-
-	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 	PieceInfo* Info = mParts[InfoIndex].first;
+	mModel->SetPreviewPieceInfo(Info, mColorIndex);
 
-	Context->ClearColorAndDepth(lcVector4(1.0f, 1.0f, 1.0f, 0.0f));
+	const lcVector3 Center = (Info->GetBoundingBox().Min + Info->GetBoundingBox().Max) / 2.0f;
+	const lcVector3 Position = Center + lcVector3(100.0f, -100.0f, 75.0f);
 
-	lcMatrix44 ProjectionMatrix, ViewMatrix;
+	mView->GetCamera()->SetViewpoint(Position, Center, lcVector3(0, 0, 1));
+	mView->GetCamera()->m_fovy = 20.0f;
+	mView->ZoomExtents();
 
-	Info->ZoomExtents(20.0f, Aspect, ProjectionMatrix, ViewMatrix);
-
-	Context->SetProjectionMatrix(ProjectionMatrix);
-
-	lcScene Scene;
-	Scene.SetAllowWireframe(false);
-	Scene.SetAllowLOD(false);
-	Scene.Begin(ViewMatrix);
-
-	Info->AddRenderMeshes(&Scene, lcMatrix44Identity(), mColorIndex, lcRenderMeshState::Default, false);
-
-	Scene.End();
-
-	Scene.Draw(Context);
+	mView->OnDraw();
 
 	mView->UnbindRenderFramebuffer();
 
@@ -445,9 +436,7 @@ void lcPartSelectionListModel::DrawPreview(int InfoIndex)
 
 	mParts[InfoIndex].second = QPixmap::fromImage(Image).scaled(mIconSize, mIconSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 
-	Library->ReleasePieceInfo(Info);
-
-	Context->ClearResources();
+	lcGetPiecesLibrary()->ReleasePieceInfo(Info);
 
 	emit dataChanged(index(InfoIndex, 0), index(InfoIndex, 0), QVector<int>() << Qt::DecorationRole);
 }

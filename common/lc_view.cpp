@@ -835,6 +835,7 @@ void lcView::OnDraw()
 	const bool DrawOverlays = mWidget != nullptr;
 	const bool DrawInterface = mWidget != nullptr && mViewType == lcViewType::View;
 
+	mScene->SetAllowWireframe(mWidget != nullptr);
 	mScene->SetAllowLOD(Preferences.mAllowLOD && mWidget != nullptr);
 	mScene->SetLODDistance(Preferences.mMeshLODDistance);
 

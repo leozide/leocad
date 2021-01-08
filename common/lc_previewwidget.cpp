@@ -115,14 +115,9 @@ bool lcPreview::SetCurrentPiece(const QString& PartType, int ColorCode)
 		Library->LoadPieceInfo(Info, false, true);
 		Library->WaitForLoadQueue();
 
-		lcStep CurrentStep = 1;
-		lcPiece* Piece = new lcPiece(nullptr);
+		mModel->SetPreviewPieceInfo(Info, lcGetColorIndex(ColorCode));
 
-		Piece->SetPieceInfo(Info, PartType, false);
-		Piece->Initialize(lcMatrix44Identity(), CurrentStep);
-		Piece->SetColorCode(ColorCode);
-
-		mModel->SetPreviewPiece(Piece);
+		Library->ReleasePieceInfo(Info);
 	}
 	else
 	{

@@ -4425,6 +4425,18 @@ void lcModel::SetMinifig(const lcMinifig& Minifig)
 	SetSelectionAndFocus(Pieces, nullptr, 0, false);
 }
 
+void lcModel::SetPreviewPieceInfo(PieceInfo* Info, int ColorIndex)
+{
+	DeleteModel();
+
+	lcPiece* Piece = new lcPiece(Info);
+
+	Piece->Initialize(lcMatrix44Identity(), 1);
+	Piece->SetColorIndex(ColorIndex);
+	AddPiece(Piece);
+	Piece->UpdatePosition(1);
+}
+
 void lcModel::UpdateInterface()
 {
 	if (!gMainWindow)

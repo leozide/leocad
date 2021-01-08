@@ -137,6 +137,7 @@ protected:
 	bool mShowPartAliases;
 	QByteArray mFilter;
 	std::unique_ptr<lcView> mView;
+	std::unique_ptr<lcModel> mModel;
 };
 
 class lcPartSelectionListView : public QListView

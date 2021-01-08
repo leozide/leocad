@@ -1028,6 +1028,13 @@ void lcView::OnDraw()
 
 void lcView::DrawBackground() const
 {
+	if (mOverrideBackgroundColor)
+	{
+		lcVector4 BackgroundColor(lcVector4FromColor(mBackgroundColor));
+		mContext->ClearColorAndDepth(BackgroundColor);
+		return;
+	}
+
 	const lcPreferences& Preferences = lcGetPreferences();
 
 	if (!Preferences.mBackgroundGradient)

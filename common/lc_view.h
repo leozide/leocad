@@ -168,6 +168,12 @@ public:
 		return mMouseY;
 	}
 
+	void SetBackgroundColorOverride(quint32 BackgroundColor)
+	{
+		mOverrideBackgroundColor = true;
+		mBackgroundColor = BackgroundColor;
+	}
+
 	static void UpdateProjectViews(const Project* Project);
 	static void UpdateAllViews();
 
@@ -313,6 +319,8 @@ protected:
 #else
 	std::pair<lcFramebuffer, lcFramebuffer> mRenderFramebuffer;
 #endif
+	bool mOverrideBackgroundColor = false;
+	quint32 mBackgroundColor = 0;
 
 	std::unique_ptr<lcScene> mScene;
 	std::unique_ptr<lcViewSphere> mViewSphere;

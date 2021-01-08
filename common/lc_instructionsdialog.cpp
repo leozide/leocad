@@ -1,10 +1,9 @@
 #include "lc_global.h"
 #include "lc_instructionsdialog.h"
-#include "lc_collapsiblewidget.h"
+#include "lc_pagesetupdialog.h"
 #include "project.h"
 #include "lc_model.h"
-#include "lc_qutils.h"
-#include "lc_pagesetupdialog.h"
+#include "lc_view.h"
 
 lcInstructionsPageWidget::lcInstructionsPageWidget(QWidget* Parent, lcInstructions* Instructions)
 	: QGraphicsView(Parent), mInstructions(Instructions)
@@ -32,7 +31,19 @@ void lcInstructionsPageWidget::SetCurrentPage(const lcInstructionsPage* Page)
 		const float StepWidth = MarginsRect.width() * Step.Rect.width();
 		const float StepHeight = MarginsRect.height() * Step.Rect.height();
 
-		QImage StepImage = Step.Model->GetStepImage(false, StepWidth, StepHeight, Step.Step); // todo: override background color and opacity
+		lcView View(lcViewType::View, Step.Model);
+
+		View.SetOffscreenContext();
+		View.MakeCurrent();
+//		View.SetBackgroundColorOverride(LC_RGBA(255, 255, 0, 255));
+		View.SetSize(StepWidth, StepHeight);
+
+		std::vector<QImage> Images = View.GetStepImages(Step.Step, Step.Step);
+
+		if (Images.empty())
+			continue;
+
+		QImage& StepImage = Images.front();
 
 		QGraphicsPixmapItem* StepImageItem = new QGraphicsPixmapItem(QPixmap::fromImage(StepImage), PageItem);
 		StepImageItem->setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsFocusable);

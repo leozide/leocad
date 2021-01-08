@@ -473,13 +473,7 @@ void lcPartSelectionListModel::DrawPreview(int InfoIndex)
 
 	Context->ClearResources();
 
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 2, 0))
-	QVector<int> Roles;
-	Roles.append(Qt::DecorationRole);
-	emit dataChanged(index(InfoIndex, 0), index(InfoIndex, 0), Roles);
-#else
-	emit dataChanged(index(InfoIndex, 0), index(InfoIndex, 0));
-#endif
+	emit dataChanged(index(InfoIndex, 0), index(InfoIndex, 0), QVector<int>() << Qt::DecorationRole);
 }
 
 void lcPartSelectionListModel::SetShowDecoratedParts(bool Show)
@@ -758,10 +752,8 @@ lcPartSelectionWidget::lcPartSelectionWidget(QWidget* Parent)
 
 	mFilterWidget = new QLineEdit(PartsGroupWidget);
 	mFilterWidget->setPlaceholderText(tr("Search Parts"));
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 2, 0))
 	mFilterAction = mFilterWidget->addAction(QIcon(":/resources/parts_search.png"), QLineEdit::TrailingPosition);
 	connect(mFilterAction, SIGNAL(triggered()), this, SLOT(FilterTriggered()));
-#endif
 	SearchLayout->addWidget(mFilterWidget);
 
 	QToolButton* OptionsButton = new QToolButton();

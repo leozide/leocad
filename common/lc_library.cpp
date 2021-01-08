@@ -729,19 +729,11 @@ void lcPiecesLibrary::ReadDirectoryDescriptions(const QFileInfoList (&FileLists)
 
 	while (!LoadFuture.isFinished())
 	{
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 3, 0))
 		ProgressDialog->setValue(FilesLoaded);
-#else
-		ProgressDialog->setValue(FilesLoaded.load());
-#endif
 		QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
 	}
 
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 3, 0))
 	ProgressDialog->setValue(FilesLoaded);
-#else
-	ProgressDialog->setValue(FilesLoaded.load());
-#endif
 	QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
 
 	ProgressDialog->deleteLater();

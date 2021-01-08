@@ -221,11 +221,7 @@ void lcViewWidget::mouseMoveEvent(QMouseEvent* MouseEvent)
 
 void lcViewWidget::wheelEvent(QWheelEvent* WheelEvent)
 {
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 2, 0))
 	if (WheelEvent->angleDelta().y() == 0)
-#else
-	if ((WheelEvent->orientation() & Qt::Vertical) == 0)
-#endif
 	{
 		WheelEvent->ignore();
 		return;
@@ -240,11 +236,7 @@ void lcViewWidget::wheelEvent(QWheelEvent* WheelEvent)
 #endif
 	mView->SetMouseModifiers(WheelEvent->modifiers());
 
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 2, 0))
 	mWheelAccumulator += WheelEvent->angleDelta().y() / 8;
-#else
-	mWheelAccumulator += WheelEvent->delta() / 8;
-#endif
 	int numSteps = mWheelAccumulator / 15;
 
 	if (numSteps)

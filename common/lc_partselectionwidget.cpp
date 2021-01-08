@@ -390,7 +390,6 @@ void lcPartSelectionListModel::DrawPreview(int InfoIndex)
 	const int Width = mIconSize * 2;
 	const int Height = mIconSize * 2;
 
-#ifdef LC_USE_QOPENGLWIDGET
 	if (mView && (mView->GetWidth() != Width || mView->GetHeight() != Height))
 		mView.reset();
 
@@ -412,25 +411,6 @@ void lcPartSelectionListModel::DrawPreview(int InfoIndex)
 	mView->BindRenderFramebuffer();
 
 	lcContext* Context = mView->mContext;
-#else
-	lcView* ActiveView = gMainWindow->GetActiveView();
-	if (!ActiveView)
-		return;
-
-	ActiveView->MakeCurrent();
-	lcContext* Context = ActiveView->mContext;
-
-	if (mRenderFramebuffer.first.mWidth != Width || mRenderFramebuffer.first.mHeight != Height)
-	{
-		Context->DestroyRenderFramebuffer(mRenderFramebuffer);
-		mRenderFramebuffer = Context->CreateRenderFramebuffer(Width, Height);
-	}
-
-	if (!mRenderFramebuffer.first.IsValid())
-		return;
-
-	Context->BindFramebuffer(mRenderFramebuffer.first);
-#endif
 
 	const float Aspect = (float)Width / (float)Height;
 	Context->SetViewport(0, 0, Width, Height);
@@ -459,13 +439,9 @@ void lcPartSelectionListModel::DrawPreview(int InfoIndex)
 
 	Scene.Draw(Context);
 
-#ifdef LC_USE_QOPENGLWIDGET
 	mView->UnbindRenderFramebuffer();
+
 	QImage Image = mView->GetRenderFramebufferImage().convertToFormat(QImage::Format_ARGB32);
-#else
-	QImage Image = Context->GetRenderFramebufferImage(mRenderFramebuffer);
-	Context->ClearFramebuffer();
-#endif
 
 	mParts[InfoIndex].second = QPixmap::fromImage(Image).scaled(mIconSize, mIconSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 

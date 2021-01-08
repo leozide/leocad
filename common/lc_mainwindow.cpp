@@ -464,7 +464,6 @@ void lcMainWindow::CreateMenus()
 	FileMenu->addAction(mActions[LC_FILE_INSTRUCTIONS]);
 	FileMenu->addAction(mActions[LC_FILE_PRINT]);
 	FileMenu->addAction(mActions[LC_FILE_PRINT_PREVIEW]);
-//	FileMenu->addAction(mActions[LC_FILE_PRINT_BOM]);
 	FileMenu->addSeparator();
 	FileMenu->addAction(mActions[LC_FILE_RECENT1]);
 	FileMenu->addAction(mActions[LC_FILE_RECENT2]);
@@ -2649,10 +2648,6 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 
 	case LC_FILE_PRINT:
 		ShowPrintDialog();
-		break;
-
-	// TODO: printing
-	case LC_FILE_PRINT_BOM:
 		break;
 
 	case LC_FILE_RECENT1:

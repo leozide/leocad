@@ -136,13 +136,6 @@ const lcCommand gCommands[] =
 		QT_TRANSLATE_NOOP("Status", "Display how the model would look if printed"),
 		""
 	},
-	// LC_FILE_PRINT_BOM
-	{
-		QT_TRANSLATE_NOOP("Action", "File.PrintBOM"),
-		QT_TRANSLATE_NOOP("Menu", "Print &Bill of Materials..."),
-		QT_TRANSLATE_NOOP("Status", "Print a list of parts used"),
-		""
-	},
 	// LC_FILE_RECENT1
 	{
 		QT_TRANSLATE_NOOP("Action", "File.Recent1"),

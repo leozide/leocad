@@ -107,11 +107,7 @@ enum class lcPolygonOffset
 	Translucent
 };
 
-#ifdef LC_USE_QOPENGLWIDGET
 class lcContext : protected QOpenGLFunctions
-#else
-class lcContext
-#endif
 {
 public:
 	lcContext();
@@ -120,10 +116,8 @@ public:
 	lcContext(const lcContext&) = delete;
 	lcContext& operator=(const lcContext&) = delete;
 
-#ifdef LC_USE_QOPENGLWIDGET
 	static bool CreateOffscreenContext();
 	static void DestroyOffscreenContext();
-#endif
 
 	void CreateResources();
 	void DestroyResources();
@@ -132,12 +126,9 @@ public:
 	void ClearResources();
 
 	void MakeCurrent();
-#ifdef LC_USE_QOPENGLWIDGET
+
 	void SetGLContext(QOpenGLContext* GLContext, QOpenGLWidget* Widget);
 	void SetOffscreenContext();
-#else
-	void SetGLContext(const QGLContext* GLContext, QGLWidget* Widget);
-#endif
 
 	void ClearColorAndDepth(const lcVector4& ClearColor);
 	void ClearDepth();
@@ -240,13 +231,8 @@ protected:
 	void CreateShaderPrograms();
 	void FlushState();
 
-#ifdef LC_USE_QOPENGLWIDGET
 	QOpenGLWidget* mWidget = nullptr;
 	QOpenGLContext* mContext = nullptr;
-#else
-	QGLWidget* mWidget = nullptr;
-	const QGLContext* mContext = nullptr;
-#endif
 	bool mValid = false;
 
 	GLuint mVertexBufferObject;
@@ -284,10 +270,8 @@ protected:
 
 	GLuint mFramebufferObject;
 
-#ifdef LC_USE_QOPENGLWIDGET
 	static std::unique_ptr<QOpenGLContext> mOffscreenContext;
 	static std::unique_ptr<QOffscreenSurface> mOffscreenSurface;
-#endif
 
 	static lcProgram mPrograms[static_cast<int>(lcMaterialType::Count)];
 	static int mValidContexts;

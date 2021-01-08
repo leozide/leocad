@@ -1258,15 +1258,8 @@ QImage lcModel::GetStepImage(bool Zoom, int Width, int Height, lcStep Step)
 
 	lcView View(lcViewType::View, this);
 	View.SetCamera(Camera, true);
-
-#ifdef LC_USE_QOPENGLWIDGET
 	View.SetOffscreenContext();
 	View.MakeCurrent();
-#else
-	ActiveView->MakeCurrent();
-	lcContext* Context = ActiveView->mContext;
-	View.SetContext(Context);
-#endif
 
 	if (!View.BeginRenderToImage(Width, Height))
 	{
@@ -1282,10 +1275,6 @@ QImage lcModel::GetStepImage(bool Zoom, int Width, int Height, lcStep Step)
 	View.OnDraw();
 
 	QImage Image = View.GetRenderImage();
-
-#ifndef LC_USE_QOPENGLWIDGET
-	Context->ClearResources();
-#endif
 
 	View.EndRenderToImage();
 

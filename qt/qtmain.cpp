@@ -123,9 +123,7 @@ static void lcRegisterShellFileTypes()
 
 int main(int argc, char *argv[])
 {
-#ifdef LC_USE_QOPENGLWIDGET
 	QCoreApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
-#endif
 
 	lcApplication Application(argc, argv);
 

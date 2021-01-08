@@ -14,13 +14,8 @@
 
 static QList<lcViewWidget*> gWidgetList;
 
-#ifdef LC_USE_QOPENGLWIDGET
 lcViewWidget::lcViewWidget(QWidget* Parent, lcView* View)
-	: lcViewWidgetParent(Parent)
-#else
-lcViewWidget::lcViewWidget(QWidget* Parent, lcView* View)
-	: lcViewWidgetParent(Parent, gWidgetList.isEmpty() ? nullptr : gWidgetList.first())
-#endif
+	: QOpenGLWidget(Parent)
 {
 	mWheelAccumulator = 0;
 	mView = View;
@@ -46,7 +41,7 @@ lcViewWidget::~lcViewWidget()
 
 QSize lcViewWidget::sizeHint() const
 {
-	return mPreferredSize.isEmpty() ? lcViewWidgetParent::sizeHint() : mPreferredSize;
+	return mPreferredSize.isEmpty() ? QOpenGLWidget::sizeHint() : mPreferredSize;
 }
 
 void lcViewWidget::SetView(lcView* View)
@@ -91,7 +86,7 @@ void lcViewWidget::focusInEvent(QFocusEvent* FocusEvent)
 	if (mView)
 		mView->SetFocus(true);
 
-	lcViewWidgetParent::focusInEvent(FocusEvent);
+	QOpenGLWidget::focusInEvent(FocusEvent);
 }
 
 void lcViewWidget::focusOutEvent(QFocusEvent* FocusEvent)
@@ -99,7 +94,7 @@ void lcViewWidget::focusOutEvent(QFocusEvent* FocusEvent)
 	if (mView)
 		mView->SetFocus(false);
 
-	lcViewWidgetParent::focusOutEvent(FocusEvent);
+	QOpenGLWidget::focusOutEvent(FocusEvent);
 }
 
 void lcViewWidget::keyPressEvent(QKeyEvent* KeyEvent)
@@ -110,7 +105,7 @@ void lcViewWidget::keyPressEvent(QKeyEvent* KeyEvent)
 		mView->UpdateCursor();
 	}
 
-	lcViewWidgetParent::keyPressEvent(KeyEvent);
+	QOpenGLWidget::keyPressEvent(KeyEvent);
 }
 
 void lcViewWidget::keyReleaseEvent(QKeyEvent* KeyEvent)
@@ -121,7 +116,7 @@ void lcViewWidget::keyReleaseEvent(QKeyEvent* KeyEvent)
 		mView->UpdateCursor();
 	}
 
-	lcViewWidgetParent::keyReleaseEvent(KeyEvent);
+	QOpenGLWidget::keyReleaseEvent(KeyEvent);
 }
 
 void lcViewWidget::mousePressEvent(QMouseEvent* MouseEvent)
@@ -204,6 +199,7 @@ void lcViewWidget::mouseDoubleClickEvent(QMouseEvent* MouseEvent)
 	case Qt::LeftButton:
 		mView->OnLeftButtonDoubleClick();
 		break;
+
 	default:
 		break;
 	}
@@ -291,7 +287,7 @@ void lcViewWidget::dragMoveEvent(QDragMoveEvent* DragMoveEvent)
 		return;
 	}
 
-	lcViewWidgetParent::dragMoveEvent(DragMoveEvent);
+	QOpenGLWidget::dragMoveEvent(DragMoveEvent);
 }
 
 void lcViewWidget::dropEvent(QDropEvent* DropEvent)
@@ -307,5 +303,5 @@ void lcViewWidget::dropEvent(QDropEvent* DropEvent)
 		return;
 	}
 
-	lcViewWidgetParent::dropEvent(DropEvent);
+	QOpenGLWidget::dropEvent(DropEvent);
 }

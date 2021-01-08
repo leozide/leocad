@@ -11,10 +11,7 @@
 #include "lc_viewsphere.h"
 #include "lc_stringcache.h"
 #include "lc_partselectionwidget.h"
-
-#ifdef LC_USE_QOPENGLWIDGET
 #include <QOpenGLFunctions_3_2_Core>
-#endif
 
 #ifdef LC_OPENGLES
 #define glEnableClientState(...)
@@ -27,10 +24,8 @@
 #define GL_STATIC_DRAW_ARB GL_STATIC_DRAW
 #endif
 
-#ifdef LC_USE_QOPENGLWIDGET
 std::unique_ptr<QOpenGLContext> lcContext::mOffscreenContext;
 std::unique_ptr<QOffscreenSurface> lcContext::mOffscreenSurface;
-#endif
 lcProgram lcContext::mPrograms[static_cast<int>(lcMaterialType::Count)];
 int lcContext::mValidContexts;
 
@@ -97,8 +92,6 @@ lcContext::~lcContext()
 	}
 }
 
-#ifdef LC_USE_QOPENGLWIDGET
-
 bool lcContext::CreateOffscreenContext()
 {
 	std::unique_ptr<QOpenGLContext> OffscreenContext(new QOpenGLContext());
@@ -135,8 +128,6 @@ void lcContext::DestroyOffscreenContext()
 	mOffscreenSurface.reset();
 	mOffscreenContext.reset();
 }
-
-#endif
 
 void lcContext::CreateShaderPrograms()
 {
@@ -304,25 +295,17 @@ void lcContext::MakeCurrent()
 {
 	if (mWidget)
 		mWidget->makeCurrent();
-#ifdef LC_USE_QOPENGLWIDGET
 	else
 		mOffscreenContext->makeCurrent(mOffscreenSurface.get());
-#endif
 }
 
-#ifdef LC_USE_QOPENGLWIDGET
 void lcContext::SetGLContext(QOpenGLContext* Context, QOpenGLWidget* Widget)
-#else
-void lcContext::SetGLContext(const QGLContext* Context, QGLWidget* Widget)
-#endif
 {
 	mContext = Context;
 	mWidget = Widget;
 
-#ifdef LC_USE_QOPENGLWIDGET
 	MakeCurrent();
 	initializeOpenGLFunctions();
-#endif
 
 	if (!mValidContexts)
 	{
@@ -347,24 +330,15 @@ void lcContext::SetGLContext(const QGLContext* Context, QGLWidget* Widget)
 	mValidContexts++;
 }
 
-#ifdef LC_USE_QOPENGLWIDGET
-
 void lcContext::SetOffscreenContext()
 {
 	SetGLContext(mOffscreenContext.get(), nullptr);
 }
 
-#endif
-
 void lcContext::SetDefaultState()
 {
-#ifdef LC_USE_QOPENGLWIDGET
 	if (QSurfaceFormat::defaultFormat().samples() > 1)
 		glEnable(GL_LINE_SMOOTH);
-#elif !defined(LC_OPENGLES)
-	if (QGLFormat::defaultFormat().sampleBuffers() && QGLFormat::defaultFormat().samples() > 1)
-		glEnable(GL_LINE_SMOOTH);
-#endif
 
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
@@ -676,16 +650,7 @@ void lcContext::ClearFramebuffer()
 	if (!mFramebufferObject)
 		return;
 
-#ifdef LC_USE_QOPENGLWIDGET
 	glBindFramebuffer(GL_FRAMEBUFFER, mContext->defaultFramebufferObject());
-#else
-	if (gSupportsFramebufferObjectARB)
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-#if !defined(LC_OPENGLES) && !defined(LC_USE_QOPENGLWIDGET)
-	else if (gSupportsFramebufferObjectEXT)
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-#endif
-#endif
 
 	mFramebufferObject = 0;
 }
@@ -694,17 +659,9 @@ lcFramebuffer lcContext::CreateFramebuffer(int Width, int Height, bool Depth, bo
 {
 	lcFramebuffer Framebuffer(Width, Height);
 
-#ifdef LC_USE_QOPENGLWIDGET
 	if (gSupportsFramebufferObject)
-#else
-	if (gSupportsFramebufferObjectARB)
-#endif
 	{
-#ifdef LC_USE_QOPENGLWIDGET
 		int Samples = (Multisample && gSupportsTexImage2DMultisample && QSurfaceFormat::defaultFormat().samples() > 1) ? QSurfaceFormat::defaultFormat().samples() : 1;
-#else
-		int Samples = (Multisample && gSupportsTexImage2DMultisample && QGLFormat::defaultFormat().sampleBuffers()) ? QGLFormat::defaultFormat().samples() : 1;
-#endif
 
 		glGenFramebuffers(1, &Framebuffer.mObject);
 		glBindFramebuffer(GL_FRAMEBUFFER, Framebuffer.mObject);
@@ -728,7 +685,6 @@ lcFramebuffer lcContext::CreateFramebuffer(int Width, int Height, bool Depth, bo
 				glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, Framebuffer.mDepthRenderbuffer);
 			}
 		}
-#ifdef LC_USE_QOPENGLWIDGET
 		else
 		{
 			QOpenGLFunctions_3_2_Core* Funcs = mContext->versionFunctions<QOpenGLFunctions_3_2_Core>();
@@ -745,82 +701,24 @@ lcFramebuffer lcContext::CreateFramebuffer(int Width, int Height, bool Depth, bo
 				glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, Framebuffer.mDepthRenderbuffer);
 			}
 		}
-#elif !defined(LC_OPENGLES)
-		else
-		{
-			BindTexture2DMS(Framebuffer.mColorTexture);
-			glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, Samples, GL_RGBA, Width, Height, GL_TRUE);
-			BindTexture2DMS(0);
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, Framebuffer.mColorTexture, 0);
-
-			if (Depth)
-			{
-				glBindRenderbuffer(GL_RENDERBUFFER, Framebuffer.mDepthRenderbuffer);
-				glRenderbufferStorageMultisample(GL_RENDERBUFFER, Samples, GL_DEPTH_COMPONENT24, Width, Height);
-				glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, Framebuffer.mDepthRenderbuffer);
-			}
-		}
-#endif
 		
 		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 			DestroyFramebuffer(Framebuffer);
 
 		glBindFramebuffer(GL_FRAMEBUFFER, mFramebufferObject);
 	}
-#if !defined(LC_OPENGLES) && !defined(LC_USE_QOPENGLWIDGET)
-	else if (gSupportsFramebufferObjectEXT)
-	{
-		glGenFramebuffersEXT(1, &Framebuffer.mObject);
-		glGenTextures(1, &Framebuffer.mColorTexture);
-
-		BindTexture2D(Framebuffer.mColorTexture);
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, Width, Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, Framebuffer.mObject);
-		glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, Framebuffer.mColorTexture, 0);
-
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, Framebuffer.mObject);
-
-		glGenRenderbuffersEXT(1, &Framebuffer.mDepthRenderbuffer);
-		glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, Framebuffer.mDepthRenderbuffer);
-		glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT24, Width, Height);
-
-		glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, Framebuffer.mDepthRenderbuffer);
-
-		BindTexture2D(0);
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, Framebuffer.mObject);
-
-		if (glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT) != GL_FRAMEBUFFER_COMPLETE_EXT)
-			DestroyFramebuffer(Framebuffer);
-
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, mFramebufferObject);
-	}
-#endif
 
 	return Framebuffer;
 }
 
 void lcContext::DestroyFramebuffer(lcFramebuffer& Framebuffer)
 {
-#ifdef LC_USE_QOPENGLWIDGET
 	if (gSupportsFramebufferObject)
-#else
-	if (gSupportsFramebufferObjectARB)
-#endif
 	{
 		glDeleteFramebuffers(1, &Framebuffer.mObject);
 		glDeleteTextures(1, &Framebuffer.mColorTexture);
 		glDeleteRenderbuffers(1, &Framebuffer.mDepthRenderbuffer);
 	}
-#if !defined(LC_OPENGLES) && !defined(LC_USE_QOPENGLWIDGET)
-	else if (gSupportsFramebufferObjectEXT)
-	{
-		glDeleteFramebuffersEXT(1, &Framebuffer.mObject);
-		glDeleteTextures(1, &Framebuffer.mColorTexture);
-		glDeleteRenderbuffersEXT(1, &Framebuffer.mDepthRenderbuffer);
-	}
-#endif
 
 	Framebuffer.mObject = 0;
 	Framebuffer.mColorTexture = 0;
@@ -834,33 +732,17 @@ void lcContext::BindFramebuffer(GLuint FramebufferObject)
 	if (FramebufferObject == mFramebufferObject)
 		return;
 
-#ifdef LC_USE_QOPENGLWIDGET
 	glBindFramebuffer(GL_FRAMEBUFFER, FramebufferObject);
-#else
-	if (gSupportsFramebufferObjectARB)
-		glBindFramebuffer(GL_FRAMEBUFFER, FramebufferObject);
-#ifndef LC_OPENGLES
-	else if (gSupportsFramebufferObjectEXT)
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, FramebufferObject);
-#endif
-#endif
 
 	mFramebufferObject = FramebufferObject;
 }
 
 std::pair<lcFramebuffer, lcFramebuffer> lcContext::CreateRenderFramebuffer(int Width, int Height)
 {
-#ifdef LC_USE_QOPENGLWIDGET
 	if (gSupportsFramebufferObject && gSupportsTexImage2DMultisample && QSurfaceFormat::defaultFormat().samples() > 1)
 		return std::make_pair(CreateFramebuffer(Width, Height, true, true), CreateFramebuffer(Width, Height, false, false));
 	else
 		return std::make_pair(CreateFramebuffer(Width, Height, true, false), lcFramebuffer());
-#else
-	if (gSupportsFramebufferObjectARB && gSupportsTexImage2DMultisample && QGLFormat::defaultFormat().sampleBuffers() && QGLFormat::defaultFormat().samples() > 1)
-		return std::make_pair(CreateFramebuffer(Width, Height, true, true), CreateFramebuffer(Width, Height, false, false));
-	else
-		return std::make_pair(CreateFramebuffer(Width, Height, true, false), lcFramebuffer());
-#endif
 }
 
 void lcContext::DestroyRenderFramebuffer(std::pair<lcFramebuffer, lcFramebuffer>& RenderFramebuffer)
@@ -890,12 +772,8 @@ void lcContext::GetRenderFramebufferImage(const std::pair<lcFramebuffer, lcFrame
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, RenderFramebuffer.second.mObject);
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, RenderFramebuffer.first.mObject);
 
-#ifdef LC_USE_QOPENGLWIDGET
 		QOpenGLFunctions_3_2_Core* Funcs = mContext->versionFunctions<QOpenGLFunctions_3_2_Core>();
 		Funcs->glBlitFramebuffer(0, 0, Width, Height, 0, 0, Width, Height, GL_COLOR_BUFFER_BIT, GL_LINEAR);
-#else
-		glBlitFramebuffer(0, 0, Width, Height, 0, 0, Width, Height, GL_COLOR_BUFFER_BIT, GL_LINEAR);
-#endif
 
 		BindFramebuffer(RenderFramebuffer.second);
 #endif

@@ -239,7 +239,6 @@ HEADERS += \
 	common/lc_commands.h \
 	common/lc_context.h \
 	common/lc_file.h \
-	common/lc_glext.h \
 	common/lc_glextensions.h \
 	common/lc_global.h \
 	common/lc_http.h \

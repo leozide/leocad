@@ -759,14 +759,10 @@ lcStartupMode lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPath
 		return lcStartupMode::Error;
 	}
 
-#ifdef LC_USE_QOPENGLWIDGET
 	if (!InitializeRenderer(AASamples))
 		return lcStartupMode::Error;
-#endif
 
-#ifdef LC_USE_QOPENGLWIDGET
 	if (!SaveAndExit)
-#endif
 	{
 		gMainWindow = new lcMainWindow();
 		lcLoadDefaultKeyboardShortcuts();
@@ -788,12 +784,8 @@ lcStartupMode lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPath
 			fprintf(stderr, "%s", Message.toLatin1().constData());
 	}
 
-#ifdef LC_USE_QOPENGLWIDGET
 	if (!SaveAndExit)
-#endif
-	{
 		gMainWindow->CreateWidgets();
-	}
 
 	Project* NewProject = new Project();
 	SetProject(NewProject);
@@ -828,7 +820,6 @@ lcStartupMode lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPath
 		if (!ModelName.isEmpty())
 			mProject->SetActiveModel(ModelName);
 
-#ifdef LC_USE_QOPENGLWIDGET
 		std::unique_ptr<lcView> ActiveView;
 
 		if (SaveImage)
@@ -853,9 +844,6 @@ lcStartupMode lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPath
 			ActiveView->SetOffscreenContext();
 			ActiveView->MakeCurrent();
 		}
-#else
-		lcView* ActiveView = gMainWindow->GetActiveView();
-#endif
 
 		if (SaveImage)
 			ActiveView->SetSize(ImageWidth, ImageHeight);
@@ -919,16 +907,7 @@ lcStartupMode lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPath
 
 		if (SaveImage)
 		{
-			lcModel* ActiveModel;
-
-#ifdef LC_USE_QOPENGLWIDGET
-			ActiveModel = ActiveView->GetModel();
-#else
-			if (ModelName.isEmpty())
-				ActiveModel = mProject->GetMainModel();
-			else
-				ActiveModel = mProject->GetActiveModel();
-#endif
+			lcModel* ActiveModel = ActiveView->GetModel();
 
 			if (ImageName.isEmpty())
 				ImageName = mProject->GetImageFileName(true);
@@ -968,14 +947,10 @@ lcStartupMode lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPath
 			if (SetHighlightColor)
 				mPreferences.mHighlightNewPartsColor = HighlightColor;
 
-#ifdef LC_USE_QOPENGLWIDGET
 			if (CameraName.isEmpty() && !SetCameraPosition)
 				ActiveView->ZoomExtents();
 
 			ActiveView->SaveStepImages(Frame, ImageStart != ImageEnd, ImageStart, ImageEnd);
-#else
-			ActiveModel->SaveStepImages(Frame, ImageStart != ImageEnd, CameraName.isEmpty() && !SetCameraPosition, ImageWidth, ImageHeight, ImageStart, ImageEnd);
-#endif
 		}
 
 		if (SaveWavefront)
@@ -1090,31 +1065,20 @@ bool lcApplication::InitializeRenderer(int AASamples)
 {
 	if (AASamples > 1)
 	{
-#ifdef LC_USE_QOPENGLWIDGET
 		QSurfaceFormat Format = QSurfaceFormat::defaultFormat();
 		Format.setSamples(AASamples);
 		QSurfaceFormat::setDefaultFormat(Format);
-#else
-		QGLFormat Format;
-		Format.setSampleBuffers(true);
-		Format.setSamples(AASamples);
-		QGLFormat::setDefaultFormat(Format);
-#endif
 	}
 
-#ifdef LC_USE_QOPENGLWIDGET
 	if (!lcContext::CreateOffscreenContext())
 		return false;
-#endif
 
 	return true;
 }
 
 void lcApplication::ShutdownRenderer()
 {
-#ifdef LC_USE_QOPENGLWIDGET
 	lcContext::DestroyOffscreenContext();
-#endif
 }
 
 void lcApplication::ShowPreferencesDialog()

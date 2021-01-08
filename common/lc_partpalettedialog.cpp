@@ -9,10 +9,6 @@ lcPartPaletteDialog::lcPartPaletteDialog(QWidget* Parent, std::vector<lcPartPale
 {
     ui->setupUi(this);
 
-#if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
-	ui->ImportButton->hide();
-#endif
-
 	for (const lcPartPalette& Palette : PartPalettes)
 	{
 		QListWidgetItem* Item = new QListWidgetItem(Palette.Name);
@@ -128,7 +124,6 @@ void lcPartPaletteDialog::on_ImportButton_clicked()
 	Palette->Name = Dialog.GetSetDescription();
 	mImportedPalettes.push_back(Palette);
 
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
 	QByteArray Inventory = Dialog.GetSetInventory();
 	QJsonDocument Document = QJsonDocument::fromJson(Inventory);
 	QJsonObject Root = Document.object();
@@ -144,7 +139,6 @@ void lcPartPaletteDialog::on_ImportButton_clicked()
 
 		Palette->Parts.push_back(PartID.toUpper().toStdString() + ".DAT");
 	}
-#endif
 
 	QListWidgetItem* Item = new QListWidgetItem(Palette->Name);
 	Item->setData(Qt::UserRole, QVariant::fromValue<uintptr_t>(reinterpret_cast<uintptr_t>(Palette)));

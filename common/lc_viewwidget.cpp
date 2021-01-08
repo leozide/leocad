@@ -145,7 +145,6 @@ void lcViewWidget::mousePressEvent(QMouseEvent* MouseEvent)
 		mView->OnRightButtonDown();
 		break;
 
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
 	case Qt::BackButton:
 		mView->OnBackButtonDown();
 		break;
@@ -153,7 +152,6 @@ void lcViewWidget::mousePressEvent(QMouseEvent* MouseEvent)
 	case Qt::ForwardButton:
 		mView->OnForwardButtonDown();
 		break;
-#endif
 
 	default:
 		break;
@@ -181,7 +179,6 @@ void lcViewWidget::mouseReleaseEvent(QMouseEvent* MouseEvent)
 		mView->OnRightButtonUp();
 		break;
 
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
 	case Qt::BackButton:
 		mView->OnBackButtonUp();
 		break;
@@ -189,7 +186,6 @@ void lcViewWidget::mouseReleaseEvent(QMouseEvent* MouseEvent)
 	case Qt::ForwardButton:
 		mView->OnForwardButtonUp();
 		break;
-#endif
 
 	default:
 		break;

@@ -1,16 +1,14 @@
-QT += core gui opengl network xml
+QT += core gui opengl network xml concurrent
+QT *= printsupport
 TEMPLATE = app
 
-greaterThan(QT_MAJOR_VERSION, 4) {
-	QT *= printsupport
-	QT += concurrent
+lessThan(QT_MAJOR_VERSION, 5) {
+	error("LeoCAD requires Qt5 or later.")
 }
 
-equals(QT_MAJOR_VERSION, 5) {
-	qtHaveModule(gamepad) {
-		QT += gamepad
-		DEFINES += LC_ENABLE_GAMEPAD
-	}
+qtHaveModule(gamepad) {
+	QT += gamepad
+	DEFINES += LC_ENABLE_GAMEPAD
 }
 
 INCLUDEPATH += qt common
@@ -32,30 +30,15 @@ win32-msvc* {
 	QMAKE_CXXFLAGS_WARN_ON += -wd4100
 	QMAKE_CXXFLAGS *= /MP /W4
 	PRECOMPILED_HEADER = common/lc_global.h
-	DEFINES += _CRT_SECURE_NO_WARNINGS _CRT_SECURE_NO_DEPRECATE=1 _CRT_NONSTDC_NO_WARNINGS=1
-	greaterThan(QT_MAJOR_VERSION, 4) {
-		INCLUDEPATH += $$[QT_INSTALL_HEADERS]/QtZlib
-	} else {
-		INCLUDEPATH += $$[QT_INSTALL_PREFIX]/src/3rdparty/zlib
-	}
-	QMAKE_LFLAGS += /INCREMENTAL
 	PRECOMPILED_SOURCE = common/lc_global.cpp
+	DEFINES += _CRT_SECURE_NO_WARNINGS _CRT_SECURE_NO_DEPRECATE=1 _CRT_NONSTDC_NO_WARNINGS=1
+	INCLUDEPATH += $$[QT_INSTALL_HEADERS]/QtZlib
+	QMAKE_LFLAGS += /INCREMENTAL
 	LIBS += -ladvapi32 -lshell32 -lopengl32 -luser32
 } else {
 	PRECOMPILED_HEADER = common/lc_global.h
 	LIBS += -lz
 	QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-parameter
-}
-
-lessThan(QT_MAJOR_VERSION, 5) {
-	unix {
-		GCC_VERSION = $$system(g++ -dumpversion)
-		greaterThan(GCC_VERSION, 4.6) {
-			QMAKE_CXXFLAGS += -std=c++11
-		} else {
-			QMAKE_CXXFLAGS += -std=c++0x
-		}
-	}
 }
 
 isEmpty(QMAKE_LRELEASE) {

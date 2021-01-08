@@ -9,6 +9,7 @@
 #include <QGLWidget>
 #include <QtGui>
 #include <QPrinter>
+#include <QtConcurrent>
 #include <map>
 #include <vector>
 #include <array>

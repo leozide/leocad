@@ -88,10 +88,6 @@ lcMinifigDialog::lcMinifigDialog(QWidget* Parent)
 		ColorPicker->blockSignals(false);
 	}
 
-#if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
-	ui->TemplateGroup->hide();
-#endif
-
 	UpdateTemplateCombo();
 
 	mMinifigWizard->Calculate();
@@ -116,7 +112,6 @@ void lcMinifigDialog::UpdateTemplateCombo()
 
 void lcMinifigDialog::on_TemplateComboBox_currentIndexChanged(const QString& TemplateName)
 {
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
 	const auto& Templates = mMinifigWizard->GetTemplates();
 	const auto& Position = Templates.find(TemplateName);
 	if (Position == Templates.end())
@@ -155,12 +150,10 @@ void lcMinifigDialog::on_TemplateComboBox_currentIndexChanged(const QString& Tem
 	}
 
 	mMinifigWizard->Calculate();
-#endif
 }
 
 void lcMinifigDialog::on_TemplateSaveButton_clicked()
 {
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
 	QString CurrentName = ui->TemplateComboBox->currentText();
 	bool Ok;
 	QString TemplateName = QInputDialog::getText(this, tr("Save Template"), tr("Template Name:"), QLineEdit::Normal, CurrentName, &Ok);
@@ -197,7 +190,6 @@ void lcMinifigDialog::on_TemplateSaveButton_clicked()
 	UpdateTemplateCombo();
 	ui->TemplateComboBox->setCurrentText(TemplateName);
 	ui->TemplateComboBox->blockSignals(false);
-#endif
 }
 
 void lcMinifigDialog::on_TemplateDeleteButton_clicked()

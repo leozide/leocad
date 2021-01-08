@@ -76,12 +76,7 @@ lcQPropertiesDialog::lcQPropertiesDialog(QWidget* Parent, lcPropertiesDialogOpti
 	table->setColumnCount(NumColors + 2);
 	table->setRowCount((int)PartsList.size() + 1);
 	table->setHorizontalHeaderLabels(horizontalLabels);
-
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
 	table->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
-#else
-	table->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
-#endif
 
 	std::vector<int> InfoTotals(PartsList.size());
 	std::vector<int> ColorTotals(NumColors);

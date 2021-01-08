@@ -25,9 +25,6 @@
 #include "lc_qutils.h"
 #include "lc_lxf.h"
 #include "lc_previewwidget.h"
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
-#include <QtConcurrent>
-#endif
 
 void lcModelProperties::LoadDefaults()
 {
@@ -974,7 +971,6 @@ bool lcModel::LoadLDD(const QString& FileData)
 
 bool lcModel::LoadInventory(const QByteArray& Inventory)
 {
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
 	QJsonDocument Document = QJsonDocument::fromJson(Inventory);
 	QJsonObject Root = Document.object();
 	QJsonArray Parts = Root["results"].toArray();
@@ -1048,9 +1044,6 @@ bool lcModel::LoadInventory(const QByteArray& Inventory)
 	CalculateStep(mCurrentStep);
 
 	return true;
-#else
-	return false;
-#endif
 }
 
 void lcModel::Merge(lcModel* Other)

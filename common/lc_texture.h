@@ -41,7 +41,7 @@ public:
 	{
 		mRefCount.ref();
 
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 3, 0) || QT_VERSION < QT_VERSION_CHECK(5, 0, 0) )
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 3, 0))
 		if (mRefCount == 1)
 #else
 		if (mRefCount.load() == 1)

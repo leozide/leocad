@@ -46,19 +46,6 @@ protected:
 	int mMousePressTab;
 };
 
-class lcTabWidget : public QTabWidget
-{
-public:
-	lcTabWidget();
-
-#if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
-	QTabBar* tabBar()
-	{
-		return QTabWidget::tabBar();
-	}
-#endif
-};
-
 class lcModelTabWidget : public QWidget
 {
 	Q_OBJECT
@@ -431,7 +418,7 @@ protected:
 
 	QAction* mActionFileRecentSeparator;
 
-	lcTabWidget* mModelTabWidget;
+	QTabWidget* mModelTabWidget;
 	QToolBar* mStandardToolBar;
 	QToolBar* mToolsToolBar;
 	QToolBar* mTimeToolBar;

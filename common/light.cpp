@@ -81,11 +81,7 @@ void lcLight::CreateName(const lcArray<lcLight*>& Lights)
 		if (LightName.startsWith(Prefix))
 		{
 			bool Ok = false;
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
 			int LightNumber = LightName.midRef(Prefix.size()).toInt(&Ok);
-#else
-			int LightNumber = LightName.mid((int)strlen(Prefix.latin1())).toInt(&Ok);
-#endif
 
 			if (Ok && LightNumber > MaxLightNumber)
 				MaxLightNumber = LightNumber;

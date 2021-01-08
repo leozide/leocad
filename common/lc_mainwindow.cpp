@@ -50,14 +50,6 @@ void lcTabBar::mouseReleaseEvent(QMouseEvent* Event)
 		QTabBar::mouseReleaseEvent(Event);
 }
 
-lcTabWidget::lcTabWidget()
-	: QTabWidget()
-{
-	lcTabBar* TabBar = new lcTabBar(this);
-	setTabBar(TabBar);
-	TabBar->setDrawBase(false);
-}
-
 void lcModelTabWidget::ResetLayout()
 {
 	QLayout* TabLayout = layout();
@@ -147,19 +139,14 @@ void lcMainWindow::CreateWidgets()
 	CreateMenus();
 	CreateStatusBar();
 
-	mModelTabWidget = new lcTabWidget();
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+	mModelTabWidget = new QTabWidget();
 	mModelTabWidget->tabBar()->setMovable(true);
 	mModelTabWidget->tabBar()->setTabsClosable(true);
 	mModelTabWidget->tabBar()->setContextMenuPolicy(Qt::CustomContextMenu);
+	setCentralWidget(mModelTabWidget);
+
 	connect(mModelTabWidget->tabBar(), SIGNAL(tabCloseRequested(int)), this, SLOT(ModelTabClosed(int)));
 	connect(mModelTabWidget->tabBar(), SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(ModelTabContextMenuRequested(const QPoint&)));
-#else
-	mModelTabWidget->setMovable(true);
-	mModelTabWidget->setTabsClosable(true);
-	connect(mModelTabWidget, SIGNAL(tabCloseRequested(int)), this, SLOT(ModelTabClosed(int)));
-#endif
-	setCentralWidget(mModelTabWidget);
 	connect(mModelTabWidget, SIGNAL(currentChanged(int)), this, SLOT(ModelTabChanged(int)));
 
 	connect(QApplication::clipboard(), SIGNAL(dataChanged()), this, SLOT(ClipboardChanged()));
@@ -463,9 +450,7 @@ void lcMainWindow::CreateMenus()
 	FileMenu->addAction(mActions[LC_FILE_SAVE_IMAGE]);
 	QMenu* ImportMenu = FileMenu->addMenu(tr("&Import"));
 	ImportMenu->addAction(mActions[LC_FILE_IMPORT_LDD]);
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
 	ImportMenu->addAction(mActions[LC_FILE_IMPORT_INVENTORY]);
-#endif
 	QMenu* ExportMenu = FileMenu->addMenu(tr("&Export"));
 	ExportMenu->addAction(mActions[LC_FILE_EXPORT_3DS]);
 	ExportMenu->addAction(mActions[LC_FILE_EXPORT_BRICKLINK]);
@@ -1150,15 +1135,11 @@ void lcMainWindow::Print(QPrinter* Printer)
 	if (Printer->collateCopies())
 	{
 		DocCopies = 1;
-#if (QT_VERSION >= QT_VERSION_CHECK(4, 7, 0))
 		PageCopies = Printer->supportsMultipleCopies() ? 1 : Printer->copyCount();
-#endif
 	}
 	else
 	{
-#if (QT_VERSION >= QT_VERSION_CHECK(4, 7, 0))
 		DocCopies = Printer->supportsMultipleCopies() ? 1 : Printer->copyCount();
-#endif
 		PageCopies = 1;
 	}
 

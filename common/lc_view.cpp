@@ -3333,7 +3333,6 @@ void lcView::OnMiddleButtonDown()
 		return;
 	}
 
-#if (QT_VERSION >= QT_VERSION_CHECK(4, 7, 0))
 	lcTrackTool OverrideTool = GetOverrideTrackTool(Qt::MiddleButton);
 
 	if (OverrideTool != lcTrackTool::None)
@@ -3341,7 +3340,7 @@ void lcView::OnMiddleButtonDown()
 		mTrackTool = OverrideTool;
 		UpdateCursor();
 	}
-#endif
+
 	OnButtonDown(lcTrackButton::Middle);
 }
 

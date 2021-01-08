@@ -550,9 +550,7 @@ lcPartSelectionListView::lcPartSelectionListView(QWidget* Parent, lcPartSelectio
 	lcPartSelectionItemDelegate* ItemDelegate = new lcPartSelectionItemDelegate(this, mListModel);
 	setItemDelegate(ItemDelegate);
 
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
 	connect(this, SIGNAL(customContextMenuRequested(QPoint)), SLOT(CustomContextMenuRequested(QPoint)));
-#endif
 
 	SetIconSize(lcGetProfileInt(LC_PROFILE_PARTS_LIST_ICONS));
 }
@@ -1013,7 +1011,6 @@ void lcPartSelectionWidget::SetDefaultPart()
 
 void lcPartSelectionWidget::LoadPartPalettes()
 {
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
 	QByteArray Buffer = lcGetProfileBuffer(LC_PROFILE_PART_PALETTES);
 	QJsonDocument Document = QJsonDocument::fromJson(Buffer);
 
@@ -1044,12 +1041,10 @@ void lcPartSelectionWidget::LoadPartPalettes()
 
 		mPartPalettes.emplace_back(std::move(Palette));
 	}
-#endif
 }
 
 void lcPartSelectionWidget::SavePartPalettes()
 {
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
 	QJsonObject RootObject;
 
 	RootObject["Version"] = 1;
@@ -1069,7 +1064,6 @@ void lcPartSelectionWidget::SavePartPalettes()
 
 	QByteArray Buffer = QJsonDocument(RootObject).toJson();
 	lcSetProfileBuffer(LC_PROFILE_PART_PALETTES, Buffer);
-#endif
 }
 
 void lcPartSelectionWidget::AddToPalette()

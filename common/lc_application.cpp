@@ -140,10 +140,7 @@ void lcPreferences::SetInterfaceColors(lcColorTheme ColorTheme)
 lcApplication::lcApplication(int& Argc, char** Argv)
 	: QApplication(Argc, Argv)
 {
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
 	setApplicationDisplayName("LeoCAD");
-#endif
-
 	setOrganizationDomain("leocad.org");
 	setOrganizationName("LeoCAD Software");
 	setApplicationName("LeoCAD");

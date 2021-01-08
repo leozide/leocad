@@ -28,10 +28,8 @@ protected:
 	{
 #ifdef LC_USE_QOPENGLWIDGET
 		return devicePixelRatio();
-#elif (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
-		return windowHandle()->devicePixelRatio();
 #else
-		return 1.0f;
+		return windowHandle()->devicePixelRatio();
 #endif
 	}
 

@@ -3,22 +3,6 @@ language: cpp
 jobs:
  include:
   - os: linux
-    name: Qt 4.8
-    dist: trusty
-    addons:
-      apt:
-        sources:
-          - sourceline: "ppa:beineri/opt-qt487-trusty"
-        packages:
-          - opt-qt4-qmake opt-qt4-dev-tools opt-libqt4-dev opt-libqt4-dev-bin opt-libqt4-opengl-dev
-    compiler: gcc
-    script:
-     - source /opt/qt*/bin/qt*-env.sh
-     - qmake PREFIX=/usr -v
-     - qmake PREFIX=/usr
-     - make -j$(nproc)
-    
-  - os: linux
     name: Linux amd64
     dist: trusty
     addons:

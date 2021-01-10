@@ -140,26 +140,20 @@ void lcPreferences::SetInterfaceColors(lcColorTheme ColorTheme)
 lcApplication::lcApplication(int& Argc, char** Argv)
 	: QApplication(Argc, Argv)
 {
-	setApplicationDisplayName("LeoCAD");
-	setOrganizationDomain("leocad.org");
-	setOrganizationName("LeoCAD Software");
-	setApplicationName("LeoCAD");
-	setApplicationVersion(LC_VERSION_TEXT);
+	setApplicationDisplayName(QLatin1String("LeoCAD"));
+	setOrganizationDomain(QLatin1String("leocad.org"));
+	setOrganizationName(QLatin1String("LeoCAD Software"));
+	setApplicationName(QLatin1String("LeoCAD"));
+	setApplicationVersion(QLatin1String(LC_VERSION_TEXT));
 
 	gApplication = this;
-	mProject = nullptr;
-	mLibrary = nullptr;
 	mDefaultStyle = style()->objectName();
 
 	mPreferences.LoadDefaults();
-
-	UpdateStyle();
 }
 
 lcApplication::~lcApplication()
 {
-	delete mProject;
-	delete mLibrary;
 	gApplication = nullptr;
 }
 
@@ -764,7 +758,10 @@ lcStartupMode lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPath
 
 	if (!SaveAndExit)
 	{
+		UpdateStyle();
+
 		gMainWindow = new lcMainWindow();
+
 		lcLoadDefaultKeyboardShortcuts();
 		lcLoadDefaultMouseShortcuts();
 	}
@@ -1063,9 +1060,11 @@ void lcApplication::Shutdown()
 
 bool lcApplication::InitializeRenderer(int AASamples)
 {
-	if (AASamples > 1)
+	QSurfaceFormat Format = QSurfaceFormat::defaultFormat();
+	const int FormatSamples = Format.samples() > 1 ? Format.samples() : 1;
+
+	if (AASamples != FormatSamples)
 	{
-		QSurfaceFormat Format = QSurfaceFormat::defaultFormat();
 		Format.setSamples(AASamples);
 		QSurfaceFormat::setDefaultFormat(Format);
 	}

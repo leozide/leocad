@@ -121,8 +121,23 @@ static void lcRegisterShellFileTypes()
 
 #endif
 
+static void lcInitializeSurfaceFormat(int argc, char* argv[])
+{
+	lcApplication Application(argc, argv);
+	const int AASamples = lcGetProfileInt(LC_PROFILE_ANTIALIASING_SAMPLES);
+
+	if (AASamples > 1)
+	{
+		QSurfaceFormat Format = QSurfaceFormat::defaultFormat();
+		Format.setSamples(AASamples);
+		QSurfaceFormat::setDefaultFormat(Format);
+	}
+}
+
 int main(int argc, char *argv[])
 {
+	lcInitializeSurfaceFormat(argc, argv);
+
 	QCoreApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
 
 	lcApplication Application(argc, argv);
@@ -181,7 +196,10 @@ int main(int argc, char *argv[])
 	lcStartupMode StartupMode = Application.Initialize(LibraryPaths);
 
 	if (StartupMode == lcStartupMode::Error)
+	{
+		Application.Shutdown();
 		return 1;
+	}
 
 	int ExecReturn = 0;
 

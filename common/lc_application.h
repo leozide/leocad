@@ -98,8 +98,8 @@ public:
 	void SetClipboard(const QByteArray& Clipboard);
 	void ExportClipboard(const QByteArray& Clipboard);
 
-	Project* mProject;
-	lcPiecesLibrary* mLibrary;
+	Project* mProject = nullptr;
+	lcPiecesLibrary* mLibrary = nullptr;
 	lcPreferences mPreferences;
 	QByteArray mClipboard;
 

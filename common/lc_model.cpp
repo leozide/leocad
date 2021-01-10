@@ -1389,7 +1389,13 @@ QImage lcModel::GetPartsListImage(int MaxWidth, lcStep Step) const
 		Context->ClearColorAndDepth(lcVector4(1.0f, 1.0f, 1.0f, 0.0f));
 
 		lcScene Scene;
-		Scene.SetAllowWireframe(false);
+
+		const lcPreferences& Preferences = lcGetPreferences();
+		lcShadingMode ShadingMode = Preferences.mShadingMode;
+		if (ShadingMode == lcShadingMode::Wireframe)
+			ShadingMode = lcShadingMode::Flat;
+
+		Scene.SetShadingMode(ShadingMode);
 		Scene.SetAllowLOD(false);
 		Scene.Begin(ViewMatrix);
 

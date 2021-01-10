@@ -66,6 +66,7 @@ typedef std::map<const PieceInfo*, std::map<int, int>> lcPartsList;
 struct lcModelPartsEntry;
 struct lcMinifig;
 enum class lcViewpoint;
+enum class lcShadingMode;
 class lcInstructions;
 struct lcInstructionsPageSetup;
 struct lcObjectRayTest;

@@ -835,7 +835,11 @@ void lcView::OnDraw()
 	const bool DrawOverlays = mWidget != nullptr;
 	const bool DrawInterface = mWidget != nullptr && mViewType == lcViewType::View;
 
-	mScene->SetAllowWireframe(mWidget != nullptr);
+	lcShadingMode ShadingMode = Preferences.mShadingMode;
+	if (ShadingMode == lcShadingMode::Wireframe && !mWidget)
+		ShadingMode = lcShadingMode::Flat;
+
+	mScene->SetShadingMode(ShadingMode);
 	mScene->SetAllowLOD(Preferences.mAllowLOD && mWidget != nullptr);
 	mScene->SetLODDistance(Preferences.mMeshLODDistance);
 

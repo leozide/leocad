@@ -59,9 +59,9 @@ public:
 		return mDrawInterface;
 	}
 
-	void SetAllowWireframe(bool AllowWireframe)
+	void SetShadingMode(lcShadingMode ShadingMode)
 	{
-		mAllowWireframe = AllowWireframe;
+		mShadingMode = ShadingMode;
 	}
 
 	void SetAllowLOD(bool AllowLOD)
@@ -104,8 +104,8 @@ protected:
 	lcMatrix44 mViewMatrix;
 	lcMatrix44 mActiveSubmodelTransform;
 	lcPiece* mActiveSubmodelInstance;
+	lcShadingMode mShadingMode;
 	bool mDrawInterface;
-	bool mAllowWireframe;
 	bool mAllowLOD;
 	float mMeshLODDistance;
 

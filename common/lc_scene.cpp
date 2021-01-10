@@ -12,7 +12,7 @@ lcScene::lcScene()
 {
 	mActiveSubmodelInstance = nullptr;
 	mDrawInterface = false;
-	mAllowWireframe = true;
+	mShadingMode = lcShadingMode::DefaultLights;
 	mAllowLOD = true;
 	mMeshLODDistance = 250.0f;
 	mHasFadedParts = false;
@@ -207,10 +207,20 @@ void lcScene::DrawOpaqueMeshes(lcContext* Context, bool DrawLit, int PrimitiveTy
 				switch (RenderMesh.State)
 				{
 				case lcRenderMeshState::Default:
-					if (ColorIndex == gEdgeColor)
-						Context->SetEdgeColorIndex(RenderMesh.ColorIndex);
+					if (mShadingMode != lcShadingMode::Wireframe)
+					{
+						if (ColorIndex != gEdgeColor)
+							Context->SetColorIndex(ColorIndex);
+						else
+							Context->SetEdgeColorIndex(RenderMesh.ColorIndex);
+					}
 					else
+					{
+						if (ColorIndex == gEdgeColor)
+							ColorIndex = RenderMesh.ColorIndex;
+
 						Context->SetColorIndex(ColorIndex);
+					}
 					break;
 
 				case lcRenderMeshState::Selected:
@@ -423,11 +433,11 @@ void lcScene::Draw(lcContext* Context) const
 	constexpr bool DrawConditional = false;
 	const lcPreferences& Preferences = lcGetPreferences();
 
-	lcShadingMode ShadingMode = Preferences.mShadingMode;
-	if (ShadingMode == lcShadingMode::Wireframe && !mAllowWireframe)
-		ShadingMode = lcShadingMode::Flat;
+//	lcShadingMode ShadingMode = Preferences.mShadingMode;
+//	if (ShadingMode == lcShadingMode::Wireframe && !mAllowWireframe)
+//		ShadingMode = lcShadingMode::Flat;
 
-	if (ShadingMode == lcShadingMode::Wireframe)
+	if (mShadingMode == lcShadingMode::Wireframe)
 	{
 		int PrimitiveTypes = LC_MESH_LINES;
 
@@ -439,7 +449,7 @@ void lcScene::Draw(lcContext* Context) const
 		if (mPreTranslucentCallback)
 			mPreTranslucentCallback();
 	}
-	else if (ShadingMode == lcShadingMode::Flat)
+	else if (mShadingMode == lcShadingMode::Flat)
 	{
 		const bool DrawLines = Preferences.mDrawEdgeLines && Preferences.mLineWidth != 0.0f;
 

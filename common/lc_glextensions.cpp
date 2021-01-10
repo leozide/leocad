@@ -5,7 +5,6 @@
 bool gSupportsShaderObjects;
 bool gSupportsVertexBufferObject;
 bool gSupportsFramebufferObject;
-bool gSupportsTexImage2DMultisample;
 bool gSupportsBlendFuncSeparate;
 bool gSupportsAnisotropic;
 GLfloat gMaxAnisotropy;
@@ -59,9 +58,4 @@ void lcInitializeGLExtensions(const QOpenGLContext* Context)
 	gSupportsFramebufferObject = Functions->hasOpenGLFeature(QOpenGLFunctions::Framebuffers);
 	gSupportsBlendFuncSeparate = Functions->hasOpenGLFeature(QOpenGLFunctions::BlendFuncSeparate);
 	gSupportsShaderObjects = Functions->hasOpenGLFeature(QOpenGLFunctions::Shaders);
-
-	QOpenGLFunctions_3_2_Core* Funcs = Context->versionFunctions<QOpenGLFunctions_3_2_Core>();
-
-	if (Funcs)
-		gSupportsTexImage2DMultisample = true;
 }

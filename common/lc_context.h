@@ -141,7 +141,6 @@ public:
 	void SetLineWidth(float LineWidth);
 	void SetSmoothShading(bool Smooth);
 	void BindTexture2D(GLuint Texture);
-	void BindTexture2DMS(GLuint Texture);
 	void BindTextureCubeMap(GLuint Texture);
 	void UnbindTexture2D(GLuint Texture);
 	void UnbindTextureCubeMap(GLuint Texture);
@@ -209,7 +208,6 @@ protected:
 	bool mColorEnabled;
 
 	GLuint mTexture2D;
-	GLuint mTexture2DMS;
 	GLuint mTextureCubeMap;
 	lcPolygonOffset mPolygonOffset;
 	bool mDepthWrite;

@@ -42,7 +42,6 @@ lcContext::lcContext()
 	mColorEnabled = false;
 
 	mTexture2D = 0;
-	mTexture2DMS = 0;
 	mTextureCubeMap = 0;
 	mPolygonOffset = lcPolygonOffset::None;
 	mDepthWrite = true;
@@ -386,13 +385,6 @@ void lcContext::SetDefaultState()
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 	mTexture2D = 0;
-#ifndef LC_OPENGLES
-	if (gSupportsTexImage2DMultisample)
-	{
-		glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
-		mTexture2DMS = 0;
-	}
-#endif
 	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 	mTextureCubeMap = 0;
 
@@ -439,7 +431,6 @@ void lcContext::ClearResources()
 	ClearVertexBuffer();
 	ClearIndexBuffer();
 	BindTexture2D(0);
-	BindTexture2DMS(0);
 }
 
 void lcContext::SetMaterial(lcMaterialType MaterialType)
@@ -564,20 +555,6 @@ void lcContext::BindTexture2D(GLuint Texture)
 
 	glBindTexture(GL_TEXTURE_2D, Texture);
 	mTexture2D = Texture;
-}
-
-void lcContext::BindTexture2DMS(GLuint Texture)
-{
-	if (mTexture2DMS == Texture)
-		return;
-
-#ifndef LC_OPENGLES
-	if (gSupportsTexImage2DMultisample)
-	{
-		glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, Texture);
-		mTexture2DMS = Texture;
-	}
-#endif
 }
 
 void lcContext::BindTextureCubeMap(GLuint Texture)

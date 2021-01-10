@@ -30,15 +30,14 @@ lcQAboutDialog::lcQAboutDialog(QWidget *parent) :
 	const QString BuffersFormat = tr("Color Buffer: %1 bits\nDepth Buffer: %2 bits\nStencil Buffer: %3 bits\n\n");
 	const QString Buffers = BuffersFormat.arg(QString::number(ColorDepth), QString::number(Format.depthBufferSize()), QString::number(Format.stencilBufferSize()));
 
-	const QString ExtensionsFormat = tr("Buffers: %1\nShaders: %2\nFramebuffers: %3\nTexImage2DMultisample: %4\nBlendFuncSeparate: %5\nAnisotropic: %6\n");
+	const QString ExtensionsFormat = tr("Buffers: %1\nShaders: %2\nFramebuffers: %3\nBlendFuncSeparate: %4\nAnisotropic: %5\n");
 	const QString VertexBuffers = gSupportsVertexBufferObject ? tr("Supported") : tr("Not supported");
 	const QString Shaders = gSupportsShaderObjects ? tr("Supported") : tr("Not supported");
 	const QString Framebuffers = gSupportsFramebufferObject ? tr("Supported") : tr("Not supported");
-	const QString TexImage2DMultisample = gSupportsTexImage2DMultisample ? tr("Supported") : tr("Not supported");
 	const QString BlendFuncSeparate = gSupportsBlendFuncSeparate ? tr("Supported") : tr("Not supported");
 	const QString Anisotropic = gSupportsAnisotropic ? tr("Supported (max %1)").arg(gMaxAnisotropy) : tr("Not supported");
 
-	const QString Extensions = ExtensionsFormat.arg(VertexBuffers, Shaders, Framebuffers, TexImage2DMultisample, BlendFuncSeparate, Anisotropic);
+	const QString Extensions = ExtensionsFormat.arg(VertexBuffers, Shaders, Framebuffers, BlendFuncSeparate, Anisotropic);
 
 	ui->info->setText(QtVersion + Version + Buffers + Extensions);
 }

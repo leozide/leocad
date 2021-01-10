@@ -1332,20 +1332,19 @@ QImage lcModel::GetPartsListImage(int MaxWidth, lcStep Step) const
 
 	std::sort(Images.begin(), Images.end(), ImageCompare);
 
-	lcView* View = gMainWindow->GetActiveView();
-	View->MakeCurrent();
-	lcContext* Context = View->mContext;
+	lcView View(lcViewType::PartsList, nullptr);
+	View.SetOffscreenContext();
+	View.MakeCurrent();
+	lcContext* Context = View.mContext;
 	const int ThumbnailSize = qMin(MaxWidth, 512);
 
-	std::pair<lcFramebuffer, lcFramebuffer> RenderFramebuffer = Context->CreateRenderFramebuffer(ThumbnailSize, ThumbnailSize);
+	View.SetSize(ThumbnailSize, ThumbnailSize);
 
-	if (!RenderFramebuffer.first.IsValid())
+	if (!View.BeginRenderToImage(ThumbnailSize, ThumbnailSize))
 	{
 		QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Error creating images."));
 		return QImage();
 	}
-
-	Context->BindFramebuffer(RenderFramebuffer.first);
 
 	float OrthoSize = 200.0f;
 
@@ -1405,11 +1404,10 @@ QImage lcModel::GetPartsListImage(int MaxWidth, lcStep Step) const
 
 		Scene.Draw(Context);
 
-		Image.Thumbnail = Context->GetRenderFramebufferImage(RenderFramebuffer);
+		Image.Thumbnail = View.GetRenderFramebufferImage().convertToFormat(QImage::Format_ARGB32);
 	}
 
-	Context->ClearFramebuffer();
-	Context->DestroyRenderFramebuffer(RenderFramebuffer);
+	View.EndRenderToImage();
 	Context->ClearResources();
 
 	auto CalculateImageBounds = [](lcPartsListImage& Image)

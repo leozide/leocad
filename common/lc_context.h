@@ -76,30 +76,6 @@ struct lcProgram
 	GLint HighlightParamsLocation;
 };
 
-class lcFramebuffer
-{
-public:
-	lcFramebuffer()
-	{
-	}
-
-	lcFramebuffer(int Width, int Height)
-		: mWidth(Width), mHeight(Height)
-	{
-	}
-
-	bool IsValid() const
-	{
-		return mObject != 0;
-	}
-
-	GLuint mObject = 0;
-	GLuint mColorTexture = 0;
-	GLuint mDepthRenderbuffer = 0;
-	int mWidth = 0;
-	int mHeight = 0;
-};
-
 enum class lcPolygonOffset
 {
 	None,
@@ -193,20 +169,6 @@ public:
 	void SetEdgeColorIndexTinted(int ColorIndex, const lcVector4& Tint);
 	void SetInterfaceColor(lcInterfaceColor InterfaceColor);
 
-	void ClearFramebuffer();
-	lcFramebuffer CreateFramebuffer(int Width, int Height, bool Depth, bool Multisample);
-	void DestroyFramebuffer(lcFramebuffer& Framebuffer);
-	void BindFramebuffer(GLuint FramebufferObject);
-	void BindFramebuffer(const lcFramebuffer& Framebuffer)
-	{
-		BindFramebuffer(Framebuffer.mObject);
-	}
-
-	std::pair<lcFramebuffer, lcFramebuffer> CreateRenderFramebuffer(int Width, int Height);
-	void DestroyRenderFramebuffer(std::pair<lcFramebuffer, lcFramebuffer>& RenderFramebuffer);
-	QImage GetRenderFramebufferImage(const std::pair<lcFramebuffer, lcFramebuffer>& RenderFramebuffer);
-	void GetRenderFramebufferImage(const std::pair<lcFramebuffer, lcFramebuffer>& RenderFramebuffer, quint8* Buffer);
-
 	lcVertexBuffer CreateVertexBuffer(int Size, const void* Data);
 	void DestroyVertexBuffer(lcVertexBuffer& VertexBuffer);
 	lcIndexBuffer CreateIndexBuffer(int Size, const void* Data);
@@ -267,8 +229,6 @@ protected:
 	bool mProjectionMatrixDirty;
 	bool mViewProjectionMatrixDirty;
 	bool mHighlightParamsDirty;
-
-	GLuint mFramebufferObject;
 
 	static std::unique_ptr<QOpenGLContext> mOffscreenContext;
 	static std::unique_ptr<QOffscreenSurface> mOffscreenSurface;

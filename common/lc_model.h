@@ -97,11 +97,6 @@ public:
 		return mActive;
 	}
 
-	bool IsPreview() const
-	{
-		return mIsPreview;
-	}
-
 	bool GetPieceWorldMatrix(lcPiece* Piece, lcMatrix44& ParentWorldMatrix) const;
 	bool IncludesModel(const lcModel* Model) const;
 	void CreatePieceInfo(Project* Project);

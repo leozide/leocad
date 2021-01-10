@@ -1610,10 +1610,6 @@ void lcModel::SubModelAddBoundingBoxPoints(const lcMatrix44& WorldMatrix, std::v
 
 void lcModel::SaveCheckpoint(const QString& Description)
 {
-	if (mIsPreview) {
-		return;
-	}
-
 	lcModelHistoryEntry* ModelHistoryEntry = new lcModelHistoryEntry();
 
 	ModelHistoryEntry->Description = Description;
@@ -1635,10 +1631,6 @@ void lcModel::SaveCheckpoint(const QString& Description)
 
 void lcModel::LoadCheckPoint(lcModelHistoryEntry* CheckPoint)
 {
-	if (mIsPreview) {
-		return;
-	}
-
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 	std::vector<PieceInfo*> LoadedInfos;
 
@@ -3838,8 +3830,7 @@ void lcModel::FindPiece(bool FindFirst, bool SearchForward)
 
 void lcModel::UndoAction()
 {
-
-	if (mIsPreview || mUndoHistory.size() < 2)
+	if (mUndoHistory.size() < 2)
 		return;
 
 	lcModelHistoryEntry* Undo = mUndoHistory.front();
@@ -3854,7 +3845,7 @@ void lcModel::UndoAction()
 
 void lcModel::RedoAction()
 {
-	if (mIsPreview || mRedoHistory.empty())
+	if (mRedoHistory.empty())
 		return;
 
 	lcModelHistoryEntry* Redo = mRedoHistory.front();
@@ -3874,7 +3865,7 @@ void lcModel::BeginMouseTool()
 
 void lcModel::EndMouseTool(lcTool Tool, bool Accept)
 {
-	if (!Accept && !mIsPreview)
+	if (!Accept)
 	{
 		if (!mUndoHistory.empty())
 			LoadCheckPoint(mUndoHistory.front());
@@ -3892,8 +3883,7 @@ void lcModel::EndMouseTool(lcTool Tool, bool Accept)
 		break;
 
 	case lcTool::Camera:
-		if (!mIsPreview)
-			gMainWindow->UpdateCameraMenu();
+		gMainWindow->UpdateCameraMenu();
 		SaveCheckpoint(tr("New Camera"));
 		break;
 
@@ -3914,22 +3904,22 @@ void lcModel::EndMouseTool(lcTool Tool, bool Accept)
 		break;
 
 	case lcTool::Zoom:
-		if (!mIsPreview && !gMainWindow->GetActiveView()->GetCamera()->IsSimple())
+		if (!gMainWindow->GetActiveView()->GetCamera()->IsSimple())
 			SaveCheckpoint(tr("Zoom"));
 		break;
 
 	case lcTool::Pan:
-		if (!mIsPreview && !gMainWindow->GetActiveView()->GetCamera()->IsSimple())
+		if (!gMainWindow->GetActiveView()->GetCamera()->IsSimple())
 			SaveCheckpoint(tr("Pan"));
 		break;
 
 	case lcTool::RotateView:
-		if (!mIsPreview && !gMainWindow->GetActiveView()->GetCamera()->IsSimple())
+		if (!gMainWindow->GetActiveView()->GetCamera()->IsSimple())
 			SaveCheckpoint(tr("Orbit"));
 		break;
 
 	case lcTool::Roll:
-		if (!mIsPreview && !gMainWindow->GetActiveView()->GetCamera()->IsSimple())
+		if (!gMainWindow->GetActiveView()->GetCamera()->IsSimple())
 			SaveCheckpoint(tr("Roll"));
 		break;
 
@@ -4221,7 +4211,7 @@ void lcModel::ZoomExtents(lcCamera* Camera, float Aspect)
 
 void lcModel::Zoom(lcCamera* Camera, float Amount)
 {
-	Camera->Zoom(Amount, mCurrentStep, mIsPreview ? false : gMainWindow->GetAddKeys());
+	Camera->Zoom(Amount, mCurrentStep, gMainWindow->GetAddKeys());
 
 	if (!mIsPreview)
 		gMainWindow->UpdateSelectedObjects(false);
@@ -4441,6 +4431,8 @@ void lcModel::SetPreviewPieceInfo(PieceInfo* Info, int ColorIndex)
 	Piece->SetColorIndex(ColorIndex);
 	AddPiece(Piece);
 	Piece->UpdatePosition(1);
+
+	SaveCheckpoint(QString());
 }
 
 void lcModel::UpdateInterface()

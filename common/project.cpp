@@ -686,27 +686,27 @@ QString Project::GetExportFileName(const QString& FileName, const QString& Defau
 	return QFileDialog::getSaveFileName(gMainWindow, DialogTitle, SaveFileName, DialogFilter);
 }
 
-void Project::Export3DStudio(const QString& FileName)
+bool Project::Export3DStudio(const QString& FileName)
 {
 	std::vector<lcModelPartsEntry> ModelParts = GetModelParts();
 
 	if (ModelParts.empty())
 	{
 		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Nothing to export."));
-		return;
+		return false;
 	}
 
 	QString SaveFileName = GetExportFileName(FileName, "3ds", tr("Export 3D Studio"), tr("3DS Files (*.3ds);;All Files (*.*)"));
 
 	if (SaveFileName.isEmpty())
-		return;
+		return false;
 
 	lcDiskFile File(SaveFileName);
 
 	if (!File.Open(QIODevice::WriteOnly))
 	{
 		QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Could not open file '%1' for writing.").arg(SaveFileName));
-		return;
+		return false;
 	}
 
 	long M3DStart = File.GetPosition();
@@ -1123,6 +1123,8 @@ void Project::Export3DStudio(const QString& FileName)
 	File.Seek(M3DStart + 2, SEEK_SET);
 	File.WriteU32(M3DEnd - M3DStart);
 	File.Seek(M3DEnd, SEEK_SET);
+
+	return true;
 }
 
 void Project::ExportBrickLink()
@@ -1189,27 +1191,27 @@ void Project::ExportBrickLink()
 	BrickLinkFile.WriteLine("</INVENTORY>\n");
 }
 
-void Project::ExportCOLLADA(const QString& FileName)
+bool Project::ExportCOLLADA(const QString& FileName)
 {
 	std::vector<lcModelPartsEntry> ModelParts = GetModelParts();
 
 	if (ModelParts.empty())
 	{
 		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Nothing to export."));
-		return;
+		return false;
 	}
 
 	QString SaveFileName = GetExportFileName(FileName, "dae", tr("Export COLLADA"), tr("COLLADA Files (*.dae);;All Files (*.*)"));
 
 	if (SaveFileName.isEmpty())
-		return;
+		return false;
 
 	QFile File(SaveFileName);
 
 	if (!File.open(QIODevice::WriteOnly))
 	{
 		QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Could not open file '%1' for writing.").arg(SaveFileName));
-		return;
+		return false;
 	}
 
 	QTextStream Stream(&File);
@@ -1457,6 +1459,8 @@ void Project::ExportCOLLADA(const QString& FileName)
 	Stream << "</scene>\r\n";
 
 	Stream << "</COLLADA>\r\n";
+
+	return true;
 }
 
 void Project::ExportCSV()
@@ -2044,20 +2048,20 @@ bool Project::ExportPOVRay(const QString& FileName)
 	return true;
 }
 
-void Project::ExportWavefront(const QString& FileName)
+bool Project::ExportWavefront(const QString& FileName)
 {
 	std::vector<lcModelPartsEntry> ModelParts = GetModelParts();
 
 	if (ModelParts.empty())
 	{
 		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Nothing to export."));
-		return;
+		return false;
 	}
 
 	QString SaveFileName = GetExportFileName(FileName, QLatin1String("obj"), tr("Export Wavefront"), tr("Wavefront Files (*.obj);;All Files (*.*)"));
 
 	if (SaveFileName.isEmpty())
-		return;
+		return false;
 
 	lcDiskFile OBJFile(SaveFileName);
 	char Line[1024];
@@ -2065,7 +2069,7 @@ void Project::ExportWavefront(const QString& FileName)
 	if (!OBJFile.Open(QIODevice::WriteOnly))
 	{
 		QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Could not open file '%1' for writing.").arg(SaveFileName));
-		return;
+		return false;
 	}
 
 	quint32 vert = 1;
@@ -2082,7 +2086,7 @@ void Project::ExportWavefront(const QString& FileName)
 	if (!MaterialFile.Open(QIODevice::WriteOnly))
 	{
 		QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Could not open file '%1' for writing.").arg(MaterialFileName));
-		return;
+		return false;
 	}
 
 	MaterialFile.WriteLine("# Colors used by LeoCAD\n\n");
@@ -2149,6 +2153,8 @@ void Project::ExportWavefront(const QString& FileName)
 			vert += Mesh->mNumVertices;
 		}
 	}
+
+	return true;
 }
 
 void Project::SaveImage()

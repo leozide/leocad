@@ -537,7 +537,7 @@ lcCommandLineOptions lcApplication::ParseCommandLineOptions()
 		{
 			if ((Options.SetCameraAngles = ParseFloatArray(2, Options.CameraLatLon, true)) && (fabsf(Options.CameraLatLon[0]) > 360.0f || fabsf(Options.CameraLatLon[1]) > 360.0f))
 			{
-				Options.Output += QString("Invalid parameter value(s) specified for the '%1' option: limits are +/- 360\n").arg(Option);
+				Options.Output += QString("Invalid parameter value(s) specified for the '%1' option: limits are +/- 360.\n").arg(Option);
 				Options.ParseOK = false;
 			}
 		}
@@ -568,7 +568,7 @@ lcCommandLineOptions lcApplication::ParseCommandLineOptions()
 		{
 			if ((Options.SetZPlanes = ParseFloatArray(2, Options.ZPlanes, false)) && (Options.ZPlanes[0] < 1.0 || Options.ZPlanes[0] >= Options.ZPlanes[1]))
 			{
-				Options.Output += QString("Invalid parameter value(s) specified for the '%1' option: requirements are: 1 <= <near> < <far>\n").arg(Option);
+				Options.Output += QString("Invalid parameter value(s) specified for the '%1' option: requirements are: 1 <= <near> < <far>.\n").arg(Option);
 				Options.ParseOK = false;
 			}
 		}
@@ -612,7 +612,7 @@ lcCommandLineOptions lcApplication::ParseCommandLineOptions()
 					mPreferences.mShadingMode = lcShadingMode::Full;
 				else
 				{
-					Options.Output += QString("Invalid parameter value specified for the '%1' option: '%2'\n").arg(Option, ShadingString);
+					Options.Output += QString("Invalid parameter value specified for the '%1' option: '%2'.\n").arg(Option, ShadingString);
 					Options.ParseOK = false;
 				}
 			}
@@ -926,7 +926,12 @@ lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& Libra
 			if (Options.CameraName.isEmpty() && !Options.SetCameraPosition)
 				ActiveView->ZoomExtents();
 
-			ActiveView->SaveStepImages(Frame, Options.ImageStart != Options.ImageEnd, Options.ImageStart, Options.ImageEnd);
+			auto ProgressCallback = [](const QString& FileName)
+			{
+				printf("Saved '%s'.\n", FileName.toLatin1().constData());
+			};
+
+			ActiveView->SaveStepImages(Frame, Options.ImageStart != Options.ImageEnd, Options.ImageStart, Options.ImageEnd, ProgressCallback);
 		}
 
 		if (Options.SaveWavefront)
@@ -950,7 +955,8 @@ lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& Libra
 				FileName += ".obj";
 			}
 
-			mProject->ExportWavefront(FileName);
+			if (mProject->ExportWavefront(FileName))
+				printf("Saved '%s'.\n", FileName.toLatin1().constData());
 		}
 
 		if (Options.Save3DS)
@@ -974,7 +980,8 @@ lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& Libra
 				FileName += ".3ds";
 			}
 
-			mProject->Export3DStudio(FileName);
+			if (mProject->Export3DStudio(FileName))
+				printf("Saved '%s'.\n", FileName.toLatin1().constData());
 		}
 
 		if (Options.SaveCOLLADA)
@@ -998,7 +1005,8 @@ lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& Libra
 				FileName += ".dae";
 			}
 
-			mProject->ExportCOLLADA(FileName);
+			if (mProject->ExportCOLLADA(FileName))
+				printf("Saved '%s'.\n", FileName.toLatin1().constData());
 		}
 
 		if (Options.SaveHTML)

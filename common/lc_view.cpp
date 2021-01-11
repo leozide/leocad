@@ -746,7 +746,7 @@ std::vector<QImage> lcView::GetStepImages(lcStep Start, lcStep End)
 	return Images;
 }
 
-void lcView::SaveStepImages(const QString& BaseName, bool AddStepSuffix, lcStep Start, lcStep End)
+void lcView::SaveStepImages(const QString& BaseName, bool AddStepSuffix, lcStep Start, lcStep End, std::function<void(const QString&)> ProgressCallback)
 {
 	std::vector<QImage> Images = GetStepImages(Start, End);
 
@@ -769,6 +769,9 @@ void lcView::SaveStepImages(const QString& BaseName, bool AddStepSuffix, lcStep 
 			QMessageBox::information(gMainWindow, tr("Error"), tr("Error writing to file '%1':\n%2").arg(FileName, Writer.errorString()));
 			break;
 		}
+
+		if (ProgressCallback)
+			ProgressCallback(FileName);
 	}
 }
 

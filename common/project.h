@@ -88,13 +88,13 @@ public:
 
 	void SaveImage();
 	bool ExportModel(const QString& FileName, lcModel* Model) const;
-	void Export3DStudio(const QString& FileName);
+	bool Export3DStudio(const QString& FileName);
 	void ExportBrickLink();
-	void ExportCOLLADA(const QString& FileName);
+	bool ExportCOLLADA(const QString& FileName);
 	void ExportCSV();
 	void ExportHTML(const lcHTMLExportOptions& Options);
 	bool ExportPOVRay(const QString& FileName);
-	void ExportWavefront(const QString& FileName);
+	bool ExportWavefront(const QString& FileName);
 
 	void UpdatePieceInfo(PieceInfo* Info) const;
 

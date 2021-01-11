@@ -113,7 +113,8 @@ struct lcCommandLineOptions
 	QString SaveCOLLADAName;
 	QString SaveHTMLName;
 	QList<QPair<QString, bool>> LibraryPaths;
-	QString Output;
+	QString StdOut;
+	QString StdErr;
 };
 
 enum class lcStartupMode
@@ -138,7 +139,7 @@ public:
 	void ShowPreferencesDialog();
 	void SaveTabLayout() const;
 
-	bool LoadPartsLibrary(const QList<QPair<QString, bool>>& LibraryPaths, bool OnlyUsePaths, bool ShowProgress);
+	bool LoadPartsLibrary(const QList<QPair<QString, bool>>& LibraryPaths, bool OnlyUsePaths);
 
 	void SetClipboard(const QByteArray& Clipboard);
 	void ExportClipboard(const QByteArray& Clipboard);

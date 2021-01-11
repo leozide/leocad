@@ -1,6 +1,7 @@
 #pragma once
 
 #include "lc_array.h"
+#include "lc_math.h"
 
 class Project;
 class lcPiecesLibrary;
@@ -72,6 +73,49 @@ public:
 	int mDrawPreviewAxis;
 };
 
+struct lcCommandLineOptions
+{
+	bool ParseOK;
+	bool Exit;
+	bool SaveImage;
+	bool SaveWavefront;
+	bool Save3DS;
+	bool SaveCOLLADA;
+	bool SaveHTML;
+	bool SetCameraAngles;
+	bool SetCameraPosition;
+	bool Orthographic;
+	bool SetFoV;
+	bool SetZPlanes;
+	bool SetFadeStepsColor;
+	bool SetHighlightColor;
+	bool FadeSteps;
+	bool ImageHighlight;
+	int ImageWidth;
+	int ImageHeight;
+	int AASamples;
+	int StudLogo;
+	int ImageStart;
+	int ImageEnd;
+	lcVector3 CameraPosition[3];
+	lcVector2 CameraLatLon;
+	float FoV;
+	lcVector2 ZPlanes;
+	lcViewpoint Viewpoint;
+	quint32 FadeStepsColor;
+	quint32	HighlightColor;
+	QString ImageName;
+	QString ModelName;
+	QString CameraName;
+	QString ProjectName;
+	QString SaveWavefrontName;
+	QString Save3DSName;
+	QString SaveCOLLADAName;
+	QString SaveHTMLName;
+	QList<QPair<QString, bool>> LibraryPaths;
+	QString Output;
+};
+
 enum class lcStartupMode
 {
 	ShowWindow,
@@ -88,7 +132,8 @@ public:
 	~lcApplication();
 
 	void SetProject(Project* Project);
-	lcStartupMode Initialize(QList<QPair<QString, bool>>& LibraryPaths);
+	lcCommandLineOptions ParseCommandLineOptions();
+	lcStartupMode Initialize(const QList<QPair<QString, bool>>& LibraryPaths);
 	void Shutdown();
 	void ShowPreferencesDialog();
 	void SaveTabLayout() const;
@@ -104,7 +149,7 @@ public:
 	QByteArray mClipboard;
 
 protected:
-	bool InitializeRenderer(int AASamples);
+	bool InitializeRenderer();
 	void ShutdownRenderer();
 	void UpdateStyle();
 	QString GetTabLayoutKey() const;

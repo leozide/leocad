@@ -124,12 +124,12 @@ static void lcRegisterShellFileTypes()
 static void lcInitializeSurfaceFormat(int argc, char* argv[])
 {
 	lcApplication Application(argc, argv);
-	const int AASamples = lcGetProfileInt(LC_PROFILE_ANTIALIASING_SAMPLES);
+	const lcCommandLineOptions Options = Application.ParseCommandLineOptions();
 
-	if (AASamples > 1)
+	if (Options.ParseOK && Options.AASamples > 1)
 	{
 		QSurfaceFormat Format = QSurfaceFormat::defaultFormat();
-		Format.setSamples(AASamples);
+		Format.setSamples(Options.AASamples);
 		QSurfaceFormat::setDefaultFormat(Format);
 	}
 }

@@ -313,142 +313,136 @@ bool lcApplication::LoadPartsLibrary(const QList<QPair<QString, bool>>& LibraryP
 	return false;
 }
 
-lcStartupMode lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths)
+lcCommandLineOptions lcApplication::ParseCommandLineOptions()
 {
-	bool OnlyUseLibraryPaths = false;
-	bool SaveImage = false;
-	bool SaveWavefront = false;
-	bool Save3DS = false;
-	bool SaveCOLLADA = false;
-	bool SaveHTML = false;
-	bool SetCameraAngles = false;
-	bool SetCameraPosition = false;
-	bool Orthographic = false;
-	bool SetFoV = false;
-	bool SetZPlanes = false;
-	bool SetFadeStepsColor = false;
-	bool SetHighlightColor = false;
-	bool FadeSteps = mPreferences.mFadeSteps;
-	bool ImageHighlight = mPreferences.mHighlightNewParts;
-	int ImageWidth = lcGetProfileInt(LC_PROFILE_IMAGE_WIDTH);
-	int ImageHeight = lcGetProfileInt(LC_PROFILE_IMAGE_HEIGHT);
-	int AASamples = lcGetProfileInt(LC_PROFILE_ANTIALIASING_SAMPLES);
-	int StudLogo = lcGetProfileInt(LC_PROFILE_STUD_LOGO);
-	int ImageStart = 0;
-	int ImageEnd = 0;
-	lcVector3 CameraPosition[3] = {};
-	float CameraLatLon[2] = {0.0f, 0.0f};
-	float FoV = 0.0f;
-	float ZPlanes[2] = {0.0f, 0.0f};
-	lcViewpoint Viewpoint = lcViewpoint::Count;
-	quint32 FadeStepsColor = mPreferences.mFadeStepsColor;
-	quint32	HighlightColor = mPreferences.mHighlightNewPartsColor;
-	QString ImageName;
-	QString ModelName;
-	QString CameraName;
-	QString ProjectName;
-	QString SaveWavefrontName;
-	QString Save3DSName;
-	QString SaveCOLLADAName;
-	QString SaveHTMLName;
+	lcCommandLineOptions Options;
+
+	Options.ParseOK = true;
+	Options.Exit = false;
+	Options.SaveImage = false;
+	Options.SaveWavefront = false;
+	Options.Save3DS = false;
+	Options.SaveCOLLADA = false;
+	Options.SaveHTML = false;
+	Options.SetCameraAngles = false;
+	Options.SetCameraPosition = false;
+	Options.Orthographic = false;
+	Options.SetFoV = false;
+	Options.SetZPlanes = false;
+	Options.SetFadeStepsColor = false;
+	Options.SetHighlightColor = false;
+	Options.FadeSteps = mPreferences.mFadeSteps;
+	Options.ImageHighlight = mPreferences.mHighlightNewParts;
+	Options.ImageWidth = lcGetProfileInt(LC_PROFILE_IMAGE_WIDTH);
+	Options.ImageHeight = lcGetProfileInt(LC_PROFILE_IMAGE_HEIGHT);
+	Options.AASamples = lcGetProfileInt(LC_PROFILE_ANTIALIASING_SAMPLES);
+	Options.StudLogo = lcGetProfileInt(LC_PROFILE_STUD_LOGO);
+	Options.ImageStart = 0;
+	Options.ImageEnd = 0;
+	Options.CameraPosition[0] = lcVector3(0.0f, 0.0f, 0.0f);
+	Options.CameraPosition[1] = lcVector3(0.0f, 0.0f, 0.0f);
+	Options.CameraPosition[2] = lcVector3(0.0f, 0.0f, 0.0f);
+	Options.CameraLatLon = lcVector2(0.0f, 0.0f);
+	Options.FoV = 0.0f;
+	Options.ZPlanes = lcVector2(0.0f, 0.0f);
+	Options.Viewpoint = lcViewpoint::Count;
+	Options.FadeStepsColor = mPreferences.mFadeStepsColor;
+	Options.HighlightColor = mPreferences.mHighlightNewPartsColor;
 
 	QStringList Arguments = arguments();
-	const int NumArguments = Arguments.size();
-	bool ParseOK = true;
 
-	for (int ArgIdx = 1; ArgIdx < NumArguments; ArgIdx++)
+	if (Arguments.isEmpty())
+		return Options;
+
+	Arguments.removeFirst();
+
+	while (!Arguments.isEmpty())
 	{
-		const QString& Param = Arguments[ArgIdx];
+		QString Option = Arguments.takeFirst();
 
-		if (Param.isEmpty())
+		if (Option.isEmpty())
 			continue;
 
-		if (Param[0] != '-')
+		auto ParseString = [&Option, &Arguments, &Options](QString& Value, bool Required)
 		{
-			ProjectName = Param;
-			// TODO: check file is readable
-			continue;
-		}
-
-		auto ParseString = [&ArgIdx, &Arguments, NumArguments, &ParseOK](QString& Value, bool Required)
-		{
-			if (ArgIdx < NumArguments - 1 && Arguments[ArgIdx + 1][0] != '-')
+			if (!Arguments.isEmpty() && Arguments.front()[0] != '-')
 			{
-				ArgIdx++;
-				Value = Arguments[ArgIdx];
+				QString Parameter = Arguments.takeFirst();
+				Value = Parameter;
 			}
 			else if (Required)
 			{
-				printf("Not enough parameters for the '%s' option.\n", Arguments[ArgIdx].toLatin1().constData());
-				ParseOK = false;
+				Options.Output += QString("Not enough parameters for the '%1' option.\n").arg(Option);
+				Options.ParseOK = false;
 				return false;
 			}
 
 			return true;
 		};
 
-		auto ParseInteger = [&ArgIdx, &Arguments, NumArguments, &ParseOK](int& Value)
+		auto ParseInteger = [&Option, &Arguments, &Options](int& Value, int Min, int Max)
 		{
-			if (ArgIdx < NumArguments - 1 && Arguments[ArgIdx + 1][0] != '-')
+			if (!Arguments.isEmpty() && Arguments.front()[0] != '-')
 			{
 				bool Ok = false;
-				ArgIdx++;
-				int NewValue = Arguments[ArgIdx].toInt(&Ok);
+				QString Parameter = Arguments.takeFirst();
+				int NewValue = Parameter.toInt(&Ok);
 
-				if (Ok)
+				if (Ok && NewValue >= Min && NewValue <= Max)
 				{
 					Value = NewValue;
 					return true;
 				}
 				else
-					printf("Invalid parameter value specified for the '%s' option: '%s'.\n", Arguments[ArgIdx - 1].toLatin1().constData(), Arguments[ArgIdx].toLatin1().constData());
+					Options.Output += QString("Invalid parameter value specified for the '%1' option: '%2'.\n").arg(Option, Parameter);
 			}
 			else
-				printf("Not enough parameters for the '%s' option.\n", Arguments[ArgIdx].toLatin1().constData());
+				Options.Output += QString("Not enough parameters for the '%1' option.\n").arg(Option);
 
-			ParseOK = false;
+			Options.ParseOK = false;
 			return false;
 		};
 
-		auto ParseFloat = [&ArgIdx, &Arguments, NumArguments, &ParseOK](float& Value)
+		auto ParseFloat = [&Option, &Arguments, &Options](float& Value, float Min, float Max)
 		{
-			if (ArgIdx < NumArguments - 1 && Arguments[ArgIdx + 1][0] != '-')
+			if (!Arguments.isEmpty() && Arguments.front()[0] != '-')
 			{
 				bool Ok = false;
-				ArgIdx++;
-				float NewValue = Arguments[ArgIdx].toFloat(&Ok);
+				QString Parameter = Arguments.takeFirst();
+				float NewValue = Parameter.toFloat(&Ok);
 
-				if (Ok)
+				if (Ok && NewValue >= Min && NewValue <= Max)
 				{
 					Value = NewValue;
 					return true;
 				}
 				else
-					printf("Invalid parameter value specified for the '%s' option: '%s'.\n", Arguments[ArgIdx - 1].toLatin1().constData(), Arguments[ArgIdx].toLatin1().constData());
+					Options.Output += QString("Invalid parameter value specified for the '%1' option: '%2'.\n").arg(Option, Parameter);
 			}
 			else
-				printf("Not enough parameters for the '%s' option.\n", Arguments[ArgIdx].toLatin1().constData());
+				Options.Output += QString("Not enough parameters for the '%1' option.\n").arg(Option);
 
-			ParseOK = false;
+			Options.ParseOK = false;
 			return false;
 		};
 
-		auto ParseFloatArray = [&ArgIdx, &Arguments, NumArguments, &ParseOK](int Count, float* ValueArray, bool NegativesValid)
+		auto ParseFloatArray = [&Option, &Arguments, &Options](int Count, float* ValueArray, bool NegativesValid)
 		{
-			if (ArgIdx + Count >= NumArguments)
+			if (Arguments.size() < Count)
 			{
-				printf("Not enough parameters for the '%s' option.\n", Arguments[ArgIdx].toLatin1().constData());
-				ArgIdx += Count;
-				ParseOK = false;
+				Options.Output += QString("Not enough parameters for the '%1' option.\n").arg(Option);
+				Arguments.clear();
+				Options.ParseOK = false;
 				return false;
 			}
 
 			for (int ParseIndex = 0; ParseIndex < Count; ParseIndex++)
 			{
-				if (NegativesValid || Arguments[ArgIdx+ParseIndex+1][0] != '-')
+				if (NegativesValid || Arguments.front()[0] != '-')
 				{
 					bool Ok = false;
-					float NewValue = Arguments[ArgIdx+ParseIndex+1].toFloat(&Ok);
+					QString Parameter = Arguments.takeFirst();
+					float NewValue = Parameter.toFloat(&Ok);
 
 					if (Ok)
 					{
@@ -456,180 +450,156 @@ lcStartupMode lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPath
 						continue;
 					}
 
-					printf("Invalid parameter value specified for the '%s' option: '%s'.\n", Arguments[ArgIdx].toLatin1().constData(), Arguments[ArgIdx+ParseIndex+1].toLatin1().constData());
+					Options.Output += QString("Invalid parameter value specified for the '%1' option: '%2'.\n").arg(Option, Parameter);
 				}
 				else
-					printf("Not enough parameters for the '%s' option.\n", Arguments[ArgIdx].toLatin1().constData());
+					Options.Output += QString("Not enough parameters for the '%1' option.\n").arg(Option);
 
-				ArgIdx += ParseIndex;
-				ParseOK = false;
+				Options.ParseOK = false;
 				return false;
 			}
 
-			ArgIdx += Count;
 			return true;
 		};
 
-		auto ParseColor = [&ArgIdx, &Arguments, NumArguments, &ParseOK](quint32& Color)
+		auto ParseColor = [&Option, &Arguments, &Options](quint32& Color)
 		{
-			if (ArgIdx < NumArguments - 1 && Arguments[ArgIdx + 1][0] != '-')
+			if (!Arguments.isEmpty() && Arguments.front()[0] != '-')
 			{
-				ArgIdx++;
-				QColor ParsedColor = QColor(Arguments[ArgIdx]);
+				QString Parameter = Arguments.takeFirst();
+				QColor ParsedColor = QColor(Parameter);
+
 				if (ParsedColor.isValid())
 				{
 					Color = LC_RGBA(ParsedColor.red(), ParsedColor.green(), ParsedColor.blue(), ParsedColor.alpha());
 					return true;
 				}
 				else
-					printf("Invalid parameter value specified for the '%s' option: '%s'.\n", Arguments[ArgIdx - 1].toLatin1().constData(), Arguments[ArgIdx].toLatin1().constData());
+					Options.Output += QString("Invalid parameter value specified for the '%1' option: '%2'.\n").arg(Option, Parameter);
 			}
 			else
-				printf("Not enough parameters for the '%s' option.\n", Arguments[ArgIdx].toLatin1().constData());
+				Options.Output += QString("Not enough parameters for the '%1' option.\n").arg(Option);
 
-			ParseOK = false;
+			Options.ParseOK = false;
 			return false;
 		};
 
-		if (Param == QLatin1String("-l") || Param == QLatin1String("--libpath"))
+		if (Option[0] != '-')
+		{
+			if (QFileInfo(Option).isReadable())
+				Options.ProjectName = Option;
+			else
+				Options.Output += QString("The file '%1' is not readable.\n").arg(Option);
+
+			continue;
+		}
+
+		if (Option == QLatin1String("-l") || Option == QLatin1String("--libpath"))
 		{
 			QString LibPath;
-			ParseString(LibPath, true);
-			if (!LibPath.isEmpty())
-			{
-				LibraryPaths.clear();
-				LibraryPaths += qMakePair<QString, bool>(LibPath, false);
-				OnlyUseLibraryPaths = true;
-			}
+
+			if (ParseString(LibPath, true))
+				Options.LibraryPaths += qMakePair<QString, bool>(LibPath, false);
 		}
-		else if (Param == QLatin1String("-i") || Param == QLatin1String("--image"))
+		else if (Option == QLatin1String("-i") || Option == QLatin1String("--image"))
 		{
-			SaveImage = true;
-			ParseString(ImageName, false);
+			Options.SaveImage = true;
+			ParseString(Options.ImageName, false);
 		}
-		else if (Param == QLatin1String("-w") || Param == QLatin1String("--width"))
-		{
-			if (ParseInteger(ImageWidth) && ImageWidth <= 0)
-			{
-				printf("Invalid parameter value specified for the '%s' option: '%s'.\n", Param.toLatin1().constData(), Arguments[ArgIdx].toLatin1().constData());
-				ParseOK = false;
-			}
-		}
-		else if (Param == QLatin1String("-h") || Param == QLatin1String("--height"))
-		{
-			if (ParseInteger(ImageHeight) && ImageWidth <= 0)
-			{
-				printf("Invalid parameter value specified for the '%s' option: '%s'.\n", Param.toLatin1().constData(), Arguments[ArgIdx].toLatin1().constData());
-				ParseOK = false;
-			}
-		}
-		else if (Param == QLatin1String("-f") || Param == QLatin1String("--from"))
-		{
-			if (ParseInteger(ImageStart) && ImageStart <= 0)
-			{
-				printf("Invalid parameter value specified for the '%s' option: '%s'.\n", Param.toLatin1().constData(), Arguments[ArgIdx].toLatin1().constData());
-				ParseOK = false;
-			}
-		}
-		else if (Param == QLatin1String("-t") || Param == QLatin1String("--to"))
-		{
-			if (ParseInteger(ImageEnd) && (ImageEnd <= 0 || (ImageStart && ImageStart > ImageEnd)))
-			{
-				printf("Invalid parameter value specified for the '%s' option: '%s'.\n", Param.toLatin1().constData(), Arguments[ArgIdx].toLatin1().constData());
-				ParseOK = false;
-			}
-		}
-		else if (Param == QLatin1String("-s") || Param == QLatin1String("--submodel"))
-			ParseString(ModelName, true);
-		else if (Param == QLatin1String("-c") || Param == QLatin1String("--camera"))
-			ParseString(CameraName, true);
-		else if (Param == QLatin1String("--viewpoint"))
+		else if (Option == QLatin1String("-w") || Option == QLatin1String("--width"))
+			ParseInteger(Options.ImageWidth, 1, INT_MAX);
+		else if (Option == QLatin1String("-h") || Option == QLatin1String("--height"))
+			ParseInteger(Options.ImageHeight, 1, INT_MAX);
+		else if (Option == QLatin1String("-f") || Option == QLatin1String("--from"))
+			ParseInteger(Options.ImageStart, 1, LC_STEP_MAX);
+		else if (Option == QLatin1String("-t") || Option == QLatin1String("--to"))
+			ParseInteger(Options.ImageEnd, 1, LC_STEP_MAX);
+		else if (Option == QLatin1String("-s") || Option == QLatin1String("--submodel"))
+			ParseString(Options.ModelName, true);
+		else if (Option == QLatin1String("-c") || Option == QLatin1String("--camera"))
+			ParseString(Options.CameraName, true);
+		else if (Option == QLatin1String("--viewpoint"))
 		{
 			QString ViewpointName;
 
 			if (ParseString(ViewpointName, true))
 			{
-				Viewpoint = lcCamera::GetViewpoint(ViewpointName);
+				Options.Viewpoint = lcCamera::GetViewpoint(ViewpointName);
 
-				if (Viewpoint == lcViewpoint::Count)
+				if (Options.Viewpoint == lcViewpoint::Count)
 				{
-					printf("Invalid parameter value specified for the '%s' option: '%s'.\n", Param.toLatin1().constData(), Arguments[ArgIdx].toLatin1().constData());
-					ParseOK = false;
+					Options.Output += QString("Invalid parameter value specified for the '%1' option: '%2'.\n").arg(Option, ViewpointName);
+					Options.ParseOK = false;
 				}
 			}
 		}
-		else if (Param == QLatin1String("--camera-angles"))
+		else if (Option == QLatin1String("--camera-angles"))
 		{
-			if ((SetCameraAngles = ParseFloatArray(2, CameraLatLon, true)) && (fabsf(CameraLatLon[0]) > 360.0f || fabsf(CameraLatLon[1]) > 360.0f))
+			if ((Options.SetCameraAngles = ParseFloatArray(2, Options.CameraLatLon, true)) && (fabsf(Options.CameraLatLon[0]) > 360.0f || fabsf(Options.CameraLatLon[1]) > 360.0f))
 			{
-				printf("Invalid parameter value(s) specified for the '%s' option: limits are +/- 360\n",  Param.toLatin1().constData());
-				ParseOK = false;
+				Options.Output += QString("Invalid parameter value(s) specified for the '%1' option: limits are +/- 360\n").arg(Option);
+				Options.ParseOK = false;
 			}
 		}
-		else if (Param == QLatin1String("--camera-position") || Param == QLatin1String("--camera-position-ldraw"))
+		else if (Option == QLatin1String("--camera-position") || Option == QLatin1String("--camera-position-ldraw"))
 		{
-			if((SetCameraPosition = ParseFloatArray(9, CameraPosition[0], true)))
+			if ((Options.SetCameraPosition = ParseFloatArray(9, Options.CameraPosition[0], true)))
 			{
-				lcVector3 Front = CameraPosition[1] - CameraPosition[0];
+				lcVector3 Front = Options.CameraPosition[1] - Options.CameraPosition[0];
 
-				if (Front.LengthSquared() < 1.0f || CameraPosition[2].LengthSquared() < 1.0f || fabsf(lcDot(lcNormalize(Front), lcNormalize(CameraPosition[2]))) > 0.99f)
+				if (Front.LengthSquared() < 1.0f || Options.CameraPosition[2].LengthSquared() < 1.0f || fabsf(lcDot(lcNormalize(Front), lcNormalize(Options.CameraPosition[2]))) > 0.99f)
 				{
-					printf("Invalid parameter value(s) specified for the '%s' option.\n", Param.toLatin1().constData());
-					ParseOK = false;
+					Options.Output += QString("Invalid parameter value(s) specified for the '%1' option.\n").arg(Option);
+					Options.ParseOK = false;
 				}
-				else if (Param == QLatin1String("--camera-position-ldraw"))
+				else if (Option == QLatin1String("--camera-position-ldraw"))
 				{
-					CameraPosition[0] = lcVector3LDrawToLeoCAD(CameraPosition[0]);
-					CameraPosition[1] = lcVector3LDrawToLeoCAD(CameraPosition[1]);
-					CameraPosition[2] = lcVector3LDrawToLeoCAD(CameraPosition[2]);
+					Options.CameraPosition[0] = lcVector3LDrawToLeoCAD(Options.CameraPosition[0]);
+					Options.CameraPosition[1] = lcVector3LDrawToLeoCAD(Options.CameraPosition[1]);
+					Options.CameraPosition[2] = lcVector3LDrawToLeoCAD(Options.CameraPosition[2]);
 				}
 			}
 		}
-		else if (Param == QLatin1String("--orthographic"))
-			Orthographic = true;
-		else if (Param == QLatin1String("--fov"))
+		else if (Option == QLatin1String("--orthographic"))
+			Options.Orthographic = true;
+		else if (Option == QLatin1String("--fov"))
+			Options.SetFoV = ParseFloat(Options.FoV, 1.0f, 180.0f);
+		else if (Option == QLatin1String("--zplanes"))
 		{
-			if ((SetFoV = ParseFloat(FoV)) && fabsf(FoV) >= 180)
+			if ((Options.SetZPlanes = ParseFloatArray(2, Options.ZPlanes, false)) && (Options.ZPlanes[0] < 1.0 || Options.ZPlanes[0] >= Options.ZPlanes[1]))
 			{
-				printf("Invalid parameter value specified for the '%s' option: '%s'.\n", Param.toLatin1().constData(), Arguments[ArgIdx].toLatin1().constData());
-				ParseOK = false;
+				Options.Output += QString("Invalid parameter value(s) specified for the '%1' option: requirements are: 1 <= <near> < <far>\n").arg(Option);
+				Options.ParseOK = false;
 			}
 		}
-		else if (Param == QLatin1String("--zplanes"))
+		else if (Option == QLatin1String("--fade-steps"))
+			Options.FadeSteps = true;
+		else if (Option == QLatin1String("--no-fade-steps"))
+			Options.FadeSteps = false;
+		else if (Option == QLatin1String("--fade-steps-color"))
 		{
-			if ((SetZPlanes = ParseFloatArray(2, ZPlanes, false)) && (ZPlanes[0] < 1.0 || ZPlanes[0] >= ZPlanes[1]))
+			if (ParseColor(Options.FadeStepsColor))
 			{
-				printf("Invalid parameter value(s) specified for the '%s' option: requirements are: 1 <= <near> < <far>\n", Param.toLatin1().constData());
-				ParseOK = false;
+				Options.SetFadeStepsColor = true;
+				Options.FadeSteps = true;
 			}
 		}
-		else if (Param == QLatin1String("--fade-steps"))
-			FadeSteps = true;
-		else if (Param == QLatin1String("--no-fade-steps"))
-			FadeSteps = false;
-		else if (Param == QLatin1String("--fade-steps-color"))
+		else if (Option == QLatin1String("--highlight"))
+			Options.ImageHighlight = true;
+		else if (Option == QLatin1String("--no-highlight"))
+			Options.ImageHighlight = false;
+		else if (Option == QLatin1String("--highlight-color"))
 		{
-			if (ParseColor(FadeStepsColor))
+			if (ParseColor(Options.HighlightColor))
 			{
-				SetFadeStepsColor = true;
-				FadeSteps = true;
+				Options.SetHighlightColor = true;
+				Options.ImageHighlight = true;
 			}
 		}
-		else if (Param == QLatin1String("--highlight"))
-			ImageHighlight = true;
-		else if (Param == QLatin1String("--no-highlight"))
-			ImageHighlight = false;
-		else if (Param == QLatin1String("--highlight-color"))
-		{
-			if (ParseColor(HighlightColor))
-			{
-				SetHighlightColor = true;
-				ImageHighlight = true;
-			}
-		}
-		else if (Param == QLatin1String("--shading"))
+		else if (Option == QLatin1String("--shading"))
 		{
 			QString ShadingString;
+
 			if (ParseString(ShadingString, true))
 			{
 				if (ShadingString == QLatin1String("wireframe"))
@@ -642,118 +612,127 @@ lcStartupMode lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPath
 					mPreferences.mShadingMode = lcShadingMode::Full;
 				else
 				{
-					printf("Invalid parameter value specified for the '%s' option: '%s'\n", Param.toLatin1().constData(), Arguments[ArgIdx].toLatin1().constData());
-					ParseOK = false;
+					Options.Output += QString("Invalid parameter value specified for the '%1' option: '%2'\n").arg(Option, ShadingString);
+					Options.ParseOK = false;
 				}
 			}
 		}
-		else if (Param == QLatin1String("--line-width"))
-			ParseFloat(mPreferences.mLineWidth);
-		else if (Param == QLatin1String("--aa-samples"))
+		else if (Option == QLatin1String("--line-width"))
+			ParseFloat(mPreferences.mLineWidth, 0.0f, 10.0f);
+		else if (Option == QLatin1String("--aa-samples"))
 		{
-			if (ParseInteger(AASamples) && AASamples != 1 && AASamples != 2 && AASamples != 4 && AASamples != 8)
+			if (ParseInteger(Options.AASamples, 1, 8) && Options.AASamples != 1 && Options.AASamples != 2 && Options.AASamples != 4 && Options.AASamples != 8)
 			{
-				printf("Invalid parameter value specified for the '%s' option: '%s'.\n", Param.toLatin1().constData(), Arguments[ArgIdx].toLatin1().constData());
-				ParseOK = false;
+				Options.Output += QString("Invalid parameter value specified for the '%1' option: '%2'.\n").arg(Option, QString::number(Options.AASamples));
+				Options.ParseOK = false;
 			}
 		}
-		else if (Param == QLatin1String("-sl") || Param == QLatin1String("--stud-logo"))
+		else if (Option == QLatin1String("-sl") || Option == QLatin1String("--stud-logo"))
 		{
-			ParseInteger(StudLogo);
-			if (StudLogo != lcGetProfileInt(LC_PROFILE_STUD_LOGO))
-			{
-				lcGetPiecesLibrary()->SetStudLogo(StudLogo, false);
-			}
+			ParseInteger(Options.StudLogo, 0, 5);
+
+			if (Options.StudLogo != lcGetProfileInt(LC_PROFILE_STUD_LOGO))
+				lcGetPiecesLibrary()->SetStudLogo(Options.StudLogo, false);
 		}
-		else if (Param == QLatin1String("-obj") || Param == QLatin1String("--export-wavefront"))
+		else if (Option == QLatin1String("-obj") || Option == QLatin1String("--export-wavefront"))
 		{
-			SaveWavefront = true;
-			ParseString(SaveWavefrontName, false);
+			Options.SaveWavefront = true;
+			ParseString(Options.SaveWavefrontName, false);
 		}
-		else if (Param == QLatin1String("-3ds") || Param == QLatin1String("--export-3ds"))
+		else if (Option == QLatin1String("-3ds") || Option == QLatin1String("--export-3ds"))
 		{
-			Save3DS = true;
-			ParseString(Save3DSName, false);
+			Options.Save3DS = true;
+			ParseString(Options.Save3DSName, false);
 		}
-		else if (Param == QLatin1String("-dae") || Param == QLatin1String("--export-collada"))
+		else if (Option == QLatin1String("-dae") || Option == QLatin1String("--export-collada"))
 		{
-			SaveCOLLADA = true;
-			ParseString(SaveCOLLADAName, false);
+			Options.SaveCOLLADA = true;
+			ParseString(Options.SaveCOLLADAName, false);
 		}
-		else if (Param == QLatin1String("-html") || Param == QLatin1String("--export-html"))
+		else if (Option == QLatin1String("-html") || Option == QLatin1String("--export-html"))
 		{
-			SaveHTML = true;
-			ParseString(SaveHTMLName, false);
+			Options.SaveHTML = true;
+			ParseString(Options.SaveHTMLName, false);
 		}
-		else if (Param == QLatin1String("-v") || Param == QLatin1String("--version"))
+		else if (Option == QLatin1String("-v") || Option == QLatin1String("--version"))
 		{
 #ifdef LC_CONTINUOUS_BUILD
-			printf("LeoCAD Continuous Build " QT_STRINGIFY(LC_CONTINUOUS_BUILD) "\n");
+			Options.Output += QLatin1String("LeoCAD Continuous Build " QT_STRINGIFY(LC_CONTINUOUS_BUILD) "\n");
 #else
-			printf("LeoCAD Version " LC_VERSION_TEXT "\n");
+			Options.Output += QLatin1String("LeoCAD Version " LC_VERSION_TEXT "\n");
 #endif
-			printf("Compiled " __DATE__ "\n");
-
-			return lcStartupMode::Success;
+			Options.Output += QLatin1String("Compiled " __DATE__ "\n");
+			Options.Exit = true;
 		}
-		else if (Param == QLatin1String("-?") || Param == QLatin1String("--help"))
+		else if (Option == QLatin1String("-?") || Option == QLatin1String("--help"))
 		{
-			printf("Usage: leocad [options] [file]\n");
-			printf("  [options] can be:\n");
-			printf("  -l, --libpath <path>: Set the Parts Library location to path.\n");
-			printf("  -i, --image <outfile.ext>: Save a picture in the format specified by ext and exit.\n");
-			printf("  -w, --width <width>: Set the picture width.\n");
-			printf("  -h, --height <height>: Set the picture height.\n");
-			printf("  -f, --from <step>: Set the first step to save pictures.\n");
-			printf("  -t, --to <step>: Set the last step to save pictures.\n");
-			printf("  -s, --submodel <submodel>: Set the active submodel.\n");
-			printf("  -c, --camera <camera>: Set the active camera.\n");
-			printf("  -sl, --stud-logo <type>: Set the stud logo type 0 - 5, 0 is no logo.\n");
-			printf("  --viewpoint <front|back|left|right|top|bottom|home>: Set the viewpoint.\n");
-			printf("  --camera-angles <latitude> <longitude>: Set the camera angles in degrees around the model.\n");
-			printf("  --camera-position <x> <y> <z> <tx> <ty> <tz> <ux> <uy> <uz>: Set the camera position, target and up vector.\n");
-			printf("  --camera-position-ldraw <x> <y> <z> <tx> <ty> <tz> <ux> <uy> <uz>: Set the camera position, target and up vector using LDraw coordinates.\n");
-			printf("  --orthographic: Render images using an orthographic projection.\n");
-			printf("  --fov <degrees>: Set the vertical field of view used to render images (< 180).\n");
-			printf("  --zplanes <near> <far>: Set the near and far clipping planes used to render images (1 <= <near> < <far>).\n");
-			printf("  --fade-steps: Render parts from prior steps faded.\n");
-			printf("  --no-fade-steps: Do not render parts from prior steps faded.\n");
-			printf("  --fade-steps-color <rgba>: Renderinng color for prior step parts (#AARRGGBB).\n");
-			printf("  --highlight: Highlight parts in the steps they appear.\n");
-			printf("  --no-highlight: Do not highlight parts in the steps they appear.\n");
-			printf("  --highlight-color: Renderinng color for highlighted parts (#AARRGGBB).\n");
-			printf("  --shading <wireframe|flat|default|full>: Select shading mode for rendering.\n");
-			printf("  --line-width <width>: Set the with of the edge lines.\n");
-			printf("  --aa-samples <count>: AntiAliasing sample size (1, 2, 4, or 8).\n");
-			printf("  -obj, --export-wavefront <outfile.obj>: Export the model to Wavefront OBJ format.\n");
-			printf("  -3ds, --export-3ds <outfile.3ds>: Export the model to 3D Studio 3DS format.\n");
-			printf("  -dae, --export-collada <outfile.dae>: Export the model to COLLADA DAE format.\n");
-			printf("  -html, --export-html <folder>: Create an HTML page for the model.\n");
-			printf("  -v, --version: Output version information and exit.\n");
-			printf("  -?, --help: Display this help message and exit.\n");
-			printf("  \n");
-
-			return lcStartupMode::Success;
+			Options.Output += QLatin1String("Usage: leocad [options] [file]\n");
+			Options.Output += QLatin1String("  [options] can be:\n");
+			Options.Output += QLatin1String("  -l, --libpath <path>: Set the Parts Library location to path.\n");
+			Options.Output += QLatin1String("  -i, --image <outfile.ext>: Save a picture in the format specified by ext and exit.\n");
+			Options.Output += QLatin1String("  -w, --width <width>: Set the picture width.\n");
+			Options.Output += QLatin1String("  -h, --height <height>: Set the picture height.\n");
+			Options.Output += QLatin1String("  -f, --from <step>: Set the first step to save pictures.\n");
+			Options.Output += QLatin1String("  -t, --to <step>: Set the last step to save pictures.\n");
+			Options.Output += QLatin1String("  -s, --submodel <submodel>: Set the active submodel.\n");
+			Options.Output += QLatin1String("  -c, --camera <camera>: Set the active camera.\n");
+			Options.Output += QLatin1String("  -sl, --stud-logo <type>: Set the stud logo type 0 - 5, 0 is no logo.\n");
+			Options.Output += QLatin1String("  --viewpoint <front|back|left|right|top|bottom|home>: Set the viewpoint.\n");
+			Options.Output += QLatin1String("  --camera-angles <latitude> <longitude>: Set the camera angles in degrees around the model.\n");
+			Options.Output += QLatin1String("  --camera-position <x> <y> <z> <tx> <ty> <tz> <ux> <uy> <uz>: Set the camera position, target and up vector.\n");
+			Options.Output += QLatin1String("  --camera-position-ldraw <x> <y> <z> <tx> <ty> <tz> <ux> <uy> <uz>: Set the camera position, target and up vector using LDraw coordinates.\n");
+			Options.Output += QLatin1String("  --orthographic: Render images using an orthographic projection.\n");
+			Options.Output += QLatin1String("  --fov <degrees>: Set the vertical field of view used to render images (< 180).\n");
+			Options.Output += QLatin1String("  --zplanes <near> <far>: Set the near and far clipping planes used to render images (1 <= <near> < <far>).\n");
+			Options.Output += QLatin1String("  --fade-steps: Render parts from prior steps faded.\n");
+			Options.Output += QLatin1String("  --no-fade-steps: Do not render parts from prior steps faded.\n");
+			Options.Output += QLatin1String("  --fade-steps-color <rgba>: Renderinng color for prior step parts (#AARRGGBB).\n");
+			Options.Output += QLatin1String("  --highlight: Highlight parts in the steps they appear.\n");
+			Options.Output += QLatin1String("  --no-highlight: Do not highlight parts in the steps they appear.\n");
+			Options.Output += QLatin1String("  --highlight-color: Renderinng color for highlighted parts (#AARRGGBB).\n");
+			Options.Output += QLatin1String("  --shading <wireframe|flat|default|full>: Select shading mode for rendering.\n");
+			Options.Output += QLatin1String("  --line-width <width>: Set the with of the edge lines.\n");
+			Options.Output += QLatin1String("  --aa-samples <count>: AntiAliasing sample size (1, 2, 4, or 8).\n");
+			Options.Output += QLatin1String("  -obj, --export-wavefront <outfile.obj>: Export the model to Wavefront OBJ format.\n");
+			Options.Output += QLatin1String("  -3ds, --export-3ds <outfile.3ds>: Export the model to 3D Studio 3DS format.\n");
+			Options.Output += QLatin1String("  -dae, --export-collada <outfile.dae>: Export the model to COLLADA DAE format.\n");
+			Options.Output += QLatin1String("  -html, --export-html <folder>: Create an HTML page for the model.\n");
+			Options.Output += QLatin1String("  -v, --version: Output version information and exit.\n");
+			Options.Output += QLatin1String("  -?, --help: Display this help message and exit.\n");
+			Options.Output += QLatin1String("\n");
+			Options.Exit = true;
 		}
 		else
 		{
-			printf("Unknown option: '%s'\n", Param.toLatin1().constData());
-			ParseOK = false;
+			Options.Output += QString("Unknown option: '%1'\n").arg(Option);
+			Options.ParseOK = false;
 		}
 	}
 
-	if (!ParseOK)
+	return Options;
+}
+
+lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& LibraryPaths)
+{
+	lcCommandLineOptions Options = ParseCommandLineOptions();
+
+	QTextStream(stdout, QIODevice::WriteOnly) << Options.Output;
+
+	if (Options.Exit)
+		return lcStartupMode::Success;
+
+	if (!Options.ParseOK)
 		return lcStartupMode::Error;
 
-	const bool SaveAndExit = (SaveImage || SaveWavefront || Save3DS || SaveCOLLADA || SaveHTML);
+	const bool SaveAndExit = (Options.SaveImage || Options.SaveWavefront || Options.Save3DS || Options.SaveCOLLADA || Options.SaveHTML);
 
-	if (SaveAndExit && ProjectName.isEmpty())
+	if (SaveAndExit && Options.ProjectName.isEmpty())
 	{
 		printf("No file name specified.\n");
 		return lcStartupMode::Error;
 	}
 
-	if (!InitializeRenderer(AASamples))
+	if (!InitializeRenderer())
 		return lcStartupMode::Error;
 
 	if (!SaveAndExit)
@@ -766,7 +745,7 @@ lcStartupMode lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPath
 		lcLoadDefaultMouseShortcuts();
 	}
 
-	if (!LoadPartsLibrary(LibraryPaths, OnlyUseLibraryPaths, !SaveAndExit))
+	if (!LoadPartsLibrary(Options.LibraryPaths.isEmpty() ? LibraryPaths : Options.LibraryPaths, !Options.LibraryPaths.isEmpty(), !SaveAndExit))
 	{
 		QString Message;
 
@@ -787,20 +766,20 @@ lcStartupMode lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPath
 	Project* NewProject = new Project();
 	SetProject(NewProject);
 
-	if (!SaveAndExit && ProjectName.isEmpty() && lcGetProfileInt(LC_PROFILE_AUTOLOAD_MOSTRECENT))
-		ProjectName = lcGetProfileString(LC_PROFILE_RECENT_FILE1);
+	if (!SaveAndExit && Options.ProjectName.isEmpty() && lcGetProfileInt(LC_PROFILE_AUTOLOAD_MOSTRECENT))
+		Options.ProjectName = lcGetProfileString(LC_PROFILE_RECENT_FILE1);
 
 	bool ProjectLoaded = false;
 
-	if (!ProjectName.isEmpty())
+	if (!Options.ProjectName.isEmpty())
 	{
 		if (gMainWindow)
-			gMainWindow->OpenProject(ProjectName);
+			gMainWindow->OpenProject(Options.ProjectName);
 		else
 		{
 			Project* LoadedProject = new Project();
 
-			if (LoadedProject->Load(ProjectName))
+			if (LoadedProject->Load(Options.ProjectName))
 			{
 				SetProject(LoadedProject);
 				ProjectLoaded = true;
@@ -814,22 +793,22 @@ lcStartupMode lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPath
 
 	if (ProjectLoaded)
 	{
-		if (!ModelName.isEmpty())
-			mProject->SetActiveModel(ModelName);
+		if (!Options.ModelName.isEmpty())
+			mProject->SetActiveModel(Options.ModelName);
 
 		std::unique_ptr<lcView> ActiveView;
 
-		if (SaveImage)
+		if (Options.SaveImage)
 		{
 			lcModel* Model;
 
-			if (!ModelName.isEmpty())
+			if (!Options.ModelName.isEmpty())
 			{
-				Model = mProject->GetModel(ModelName);
+				Model = mProject->GetModel(Options.ModelName);
 
 				if (!Model)
 				{
-					printf("Error: model '%s' does not exist.\n", ModelName.toLatin1().constData());
+					printf("Error: model '%s' does not exist.\n", Options.ModelName.toLatin1().constData());
 					return lcStartupMode::Error;
 				}
 			}
@@ -842,122 +821,122 @@ lcStartupMode lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPath
 			ActiveView->MakeCurrent();
 		}
 
-		if (SaveImage)
-			ActiveView->SetSize(ImageWidth, ImageHeight);
+		if (Options.SaveImage)
+			ActiveView->SetSize(Options.ImageWidth, Options.ImageHeight);
 
 		if (ActiveView)
 		{
-			if (!CameraName.isEmpty())
+			if (!Options.CameraName.isEmpty())
 			{
-				ActiveView->SetCamera(CameraName);
+				ActiveView->SetCamera(Options.CameraName);
 
-				if (Viewpoint != lcViewpoint::Count)
+				if (Options.Viewpoint != lcViewpoint::Count)
 					printf("Warning: --viewpoint is ignored when --camera is set.\n");
 
-				if (Orthographic)
+				if (Options.Orthographic)
 					printf("Warning: --orthographic is ignored when --camera is set.\n");
 
-				if (SetCameraAngles)
+				if (Options.SetCameraAngles)
 					printf("Warning: --camera-angles is ignored when --camera is set.\n");
 
-				if (SetCameraPosition)
+				if (Options.SetCameraPosition)
 					printf("Warning: --camera-position is ignored when --camera is set.\n");
 			}
 			else
 			{
-				ActiveView->SetProjection(Orthographic);
+				ActiveView->SetProjection(Options.Orthographic);
 
-				if (SetFoV)
-					ActiveView->GetCamera()->m_fovy = FoV;
+				if (Options.SetFoV)
+					ActiveView->GetCamera()->m_fovy = Options.FoV;
 
-				if (SetZPlanes)
+				if (Options.SetZPlanes)
 				{
 					lcCamera* Camera = ActiveView->GetCamera();
 
-					Camera->m_zNear = ZPlanes[0];
-					Camera->m_zFar = ZPlanes[1];
+					Camera->m_zNear = Options.ZPlanes[0];
+					Camera->m_zFar = Options.ZPlanes[1];
 				}
 
-				if (Viewpoint != lcViewpoint::Count)
+				if (Options.Viewpoint != lcViewpoint::Count)
 				{
-					ActiveView->SetViewpoint(Viewpoint);
+					ActiveView->SetViewpoint(Options.Viewpoint);
 
-					if (SetCameraAngles)
+					if (Options.SetCameraAngles)
 						printf("Warning: --camera-angles is ignored when --viewpoint is set.\n");
 
-					if (SetCameraPosition)
+					if (Options.SetCameraPosition)
 						printf("Warning: --camera-position is ignored when --viewpoint is set.\n");
 				}
-				else if (SetCameraAngles)
+				else if (Options.SetCameraAngles)
 				{
-					ActiveView->SetCameraAngles(CameraLatLon[0], CameraLatLon[1]);
+					ActiveView->SetCameraAngles(Options.CameraLatLon[0], Options.CameraLatLon[1]);
 
-					if (SetCameraPosition)
+					if (Options.SetCameraPosition)
 						printf("Warning: --camera-position is ignored when --camera-angles is set.\n");
 				}
-				else if (SetCameraPosition)
+				else if (Options.SetCameraPosition)
 				{
-					ActiveView->SetViewpoint(CameraPosition[0], CameraPosition[1], CameraPosition[2]);
+					ActiveView->SetViewpoint(Options.CameraPosition[0], Options.CameraPosition[1], Options.CameraPosition[2]);
 				}
 			}
 		}
 
-		if (SaveImage)
+		if (Options.SaveImage)
 		{
 			lcModel* ActiveModel = ActiveView->GetModel();
 
-			if (ImageName.isEmpty())
-				ImageName = mProject->GetImageFileName(true);
+			if (Options.ImageName.isEmpty())
+				Options.ImageName = mProject->GetImageFileName(true);
 
-			if (ImageEnd < ImageStart)
-				ImageEnd = ImageStart;
-			else if (ImageStart > ImageEnd)
-				ImageStart = ImageEnd;
+			if (Options.ImageEnd < Options.ImageStart)
+				Options.ImageEnd = Options.ImageStart;
+			else if (Options.ImageStart > Options.ImageEnd)
+				Options.ImageStart = Options.ImageEnd;
 
-			if ((ImageStart == 0) && (ImageEnd == 0))
-				ImageStart = ImageEnd = ActiveModel->GetCurrentStep();
-			else if ((ImageStart == 0) && (ImageEnd != 0))
-				ImageStart = ImageEnd;
-			else if ((ImageStart != 0) && (ImageEnd == 0))
-				ImageEnd = ImageStart;
+			if ((Options.ImageStart == 0) && (Options.ImageEnd == 0))
+				Options.ImageStart = Options.ImageEnd = ActiveModel->GetCurrentStep();
+			else if ((Options.ImageStart == 0) && (Options.ImageEnd != 0))
+				Options.ImageStart = Options.ImageEnd;
+			else if ((Options.ImageStart != 0) && (Options.ImageEnd == 0))
+				Options.ImageEnd = Options.ImageStart;
 
-			if (ImageStart > 255)
-				ImageStart = 255;
+			if (Options.ImageStart > 255)
+				Options.ImageStart = 255;
 
-			if (ImageEnd > 255)
-				ImageEnd = 255;
+			if (Options.ImageEnd > 255)
+				Options.ImageEnd = 255;
 
 			QString Frame;
 
-			if (ImageStart != ImageEnd)
+			if (Options.ImageStart != Options.ImageEnd)
 			{
-				QString Extension = QFileInfo(ImageName).suffix();
-				Frame = ImageName.left(ImageName.length() - Extension.length() - 1) + QLatin1String("%1.") + Extension;
+				QString Extension = QFileInfo(Options.ImageName).suffix();
+				Frame = Options.ImageName.left(Options.ImageName.length() - Extension.length() - 1) + QLatin1String("%1.") + Extension;
 			}
 			else
-				Frame = ImageName;
+				Frame = Options.ImageName;
 
-			mPreferences.mFadeSteps = FadeSteps;
-			if (SetFadeStepsColor)
-				mPreferences.mFadeStepsColor = FadeStepsColor;
-			mPreferences.mHighlightNewParts = ImageHighlight;
-			if (SetHighlightColor)
-				mPreferences.mHighlightNewPartsColor = HighlightColor;
+			mPreferences.mFadeSteps = Options.FadeSteps;
+			if (Options.SetFadeStepsColor)
+				mPreferences.mFadeStepsColor = Options.FadeStepsColor;
+			mPreferences.mHighlightNewParts = Options.ImageHighlight;
+			if (Options.SetHighlightColor)
+				mPreferences.mHighlightNewPartsColor = Options.HighlightColor;
 
-			if (CameraName.isEmpty() && !SetCameraPosition)
+			if (Options.CameraName.isEmpty() && !Options.SetCameraPosition)
 				ActiveView->ZoomExtents();
 
-			ActiveView->SaveStepImages(Frame, ImageStart != ImageEnd, ImageStart, ImageEnd);
+			ActiveView->SaveStepImages(Frame, Options.ImageStart != Options.ImageEnd, Options.ImageStart, Options.ImageEnd);
 		}
 
-		if (SaveWavefront)
+		if (Options.SaveWavefront)
 		{
 			QString FileName;
 
-			if (!SaveWavefrontName.isEmpty())
-				FileName = SaveWavefrontName;
+			if (!Options.SaveWavefrontName.isEmpty())
+				FileName = Options.SaveWavefrontName;
 			else
-				FileName = ProjectName;
+				FileName = Options.ProjectName;
 
 			QString Extension = QFileInfo(FileName).suffix().toLower();
 
@@ -974,14 +953,14 @@ lcStartupMode lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPath
 			mProject->ExportWavefront(FileName);
 		}
 
-		if (Save3DS)
+		if (Options.Save3DS)
 		{
 			QString FileName;
 
-			if (!Save3DSName.isEmpty())
-				FileName = Save3DSName;
+			if (!Options.Save3DSName.isEmpty())
+				FileName = Options.Save3DSName;
 			else
-				FileName = ProjectName;
+				FileName = Options.ProjectName;
 
 			QString Extension = QFileInfo(FileName).suffix().toLower();
 
@@ -998,14 +977,14 @@ lcStartupMode lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPath
 			mProject->Export3DStudio(FileName);
 		}
 
-		if (SaveCOLLADA)
+		if (Options.SaveCOLLADA)
 		{
 			QString FileName;
 
-			if (!SaveCOLLADAName.isEmpty())
-				FileName = SaveCOLLADAName;
+			if (!Options.SaveCOLLADAName.isEmpty())
+				FileName = Options.SaveCOLLADAName;
 			else
-				FileName = ProjectName;
+				FileName = Options.ProjectName;
 
 			QString Extension = QFileInfo(FileName).suffix().toLower();
 
@@ -1022,14 +1001,14 @@ lcStartupMode lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPath
 			mProject->ExportCOLLADA(FileName);
 		}
 
-		if (SaveHTML)
+		if (Options.SaveHTML)
 		{
-			lcHTMLExportOptions Options(mProject);
+			lcHTMLExportOptions HTMLOptions(mProject);
 
-			if (!SaveHTMLName.isEmpty())
-				Options.PathName = SaveHTMLName;
+			if (!Options.SaveHTMLName.isEmpty())
+				HTMLOptions.PathName = Options.SaveHTMLName;
 
-			mProject->ExportHTML(Options);
+			mProject->ExportHTML(HTMLOptions);
 		}
 	}
 
@@ -1058,17 +1037,8 @@ void lcApplication::Shutdown()
 	ShutdownRenderer();
 }
 
-bool lcApplication::InitializeRenderer(int AASamples)
+bool lcApplication::InitializeRenderer()
 {
-	QSurfaceFormat Format = QSurfaceFormat::defaultFormat();
-	const int FormatSamples = Format.samples() > 1 ? Format.samples() : 1;
-
-	if (AASamples != FormatSamples)
-	{
-		Format.setSamples(AASamples);
-		QSurfaceFormat::setDefaultFormat(Format);
-	}
-
 	if (!lcContext::CreateOffscreenContext())
 		return false;
 

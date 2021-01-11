@@ -748,6 +748,7 @@ void lcMainWindow::CreateToolBars()
 
 	tabifyDockWidget(mPartsToolBar, mPropertiesToolBar);
 	tabifyDockWidget(mPropertiesToolBar, mTimelineToolBar);
+	tabifyDockWidget(mTimelineToolBar, mPreviewToolBar);
 
 	connect(mPropertiesToolBar, SIGNAL(topLevelChanged(bool)), this, SLOT(EnableWindowFlags(bool)));
 	connect(mTimelineToolBar,   SIGNAL(topLevelChanged(bool)), this, SLOT(EnableWindowFlags(bool)));
@@ -787,8 +788,6 @@ void lcMainWindow::CreatePreviewWidget()
 	mPreviewToolBar->setObjectName("PreviewToolBar");
 	mPreviewToolBar->setWidget(mPreviewWidget);
 	addDockWidget(Qt::RightDockWidgetArea, mPreviewToolBar);
-
-	tabifyDockWidget(mTimelineToolBar, mPreviewToolBar);
 
 	connect(mPreviewToolBar, SIGNAL(topLevelChanged(bool)), this, SLOT(EnableWindowFlags(bool)));
 }

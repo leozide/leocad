@@ -1820,7 +1820,7 @@ void lcView::DrawGrid()
 {
 	const lcPreferences& Preferences = lcGetPreferences();
 
-	if (!Preferences.mDrawGridStuds && !Preferences.mDrawGridLines)
+	if (!Preferences.mDrawGridStuds && !Preferences.mDrawGridLines && !Preferences.mDrawGridOrigin)
 		return;
 
 	if (!Preferences.mGridEnabled)
@@ -1996,6 +1996,30 @@ void lcView::DrawGrid()
 
 		mContext->SetVertexFormat(BufferOffset, 3, 0, 0, 0, false);
 		mContext->DrawPrimitives(GL_LINES, 0, NumVerts);
+	}
+
+	if (Preferences.mDrawGridOrigin)
+	{
+		struct lcGridVertex
+		{
+			float x, y;
+			quint32 Color;
+		};
+
+		const quint32 Red = LC_RGBA(204, 0, 0, 255);
+		const quint32 Green = LC_RGBA(0, 204, 0, 255);
+		const float Scale = 20.0f * Spacing;
+
+		const lcGridVertex Verts[4] =
+		{
+			{ 0.0f, MinY * Scale, Green }, { 0.0f, MaxY * Scale, Green }, { MinX * Scale, 0.0f, Red }, { MaxX * Scale, 0.0f, Red }
+		};
+
+		mContext->SetMaterial(lcMaterialType::UnlitVertexColor);
+		mContext->SetVertexBufferPointer(Verts);
+		mContext->SetVertexFormat(0, 2, 0, 0, 4, false);
+
+		mContext->DrawPrimitives(GL_LINES, 0, 4);
 	}
 }
 

@@ -103,6 +103,7 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 	ui->gridStuds->setChecked(mOptions->Preferences.mDrawGridStuds);
 	ui->gridLines->setChecked(mOptions->Preferences.mDrawGridLines);
 	ui->gridLineSpacing->setText(QString::number(mOptions->Preferences.mGridLineSpacing));
+	ui->GridOriginCheckBox->setChecked(mOptions->Preferences.mDrawGridOrigin);
 	ui->AxisIconCheckBox->setChecked(mOptions->Preferences.mDrawAxes);
 
 	if (!mOptions->Preferences.mBackgroundGradient)
@@ -278,6 +279,7 @@ void lcQPreferencesDialog::accept()
 	mOptions->Preferences.mDrawGridStuds = ui->gridStuds->isChecked();
 	mOptions->Preferences.mDrawGridLines = ui->gridLines->isChecked();
 	mOptions->Preferences.mGridLineSpacing = gridLineSpacing;
+	mOptions->Preferences.mDrawGridOrigin = ui->GridOriginCheckBox->isChecked();
 
 	mOptions->Preferences.mBackgroundGradient = ui->BackgroundGradientRadio->isChecked();
 	mOptions->Preferences.mDrawAxes = ui->AxisIconCheckBox->isChecked();

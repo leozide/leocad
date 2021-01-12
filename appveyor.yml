@@ -26,7 +26,7 @@ after_build:
 - mkdir appdir
 - copy build\release\leocad.exe appdir
 - copy docs\readme.txt appdir
-- appveyor DownloadFile https://github.com/leozide/leocad/releases/download/v19.07.1/Library-Linux-14384.zip -FileName library.zip
+- appveyor DownloadFile https://github.com/leozide/leocad/releases/download/v19.07.1/Library-20.03.zip -FileName library.zip
 - 7z e library.zip
 - copy library.bin appdir\\library.bin
 - appveyor DownloadFile https://github.com/leozide/povray/releases/download/continuous/povconsole32-sse2.exe -FileName appdir\povconsole32-sse2.exe 

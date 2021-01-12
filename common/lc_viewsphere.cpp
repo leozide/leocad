@@ -190,8 +190,8 @@ void lcViewSphere::Draw()
 	const int Bottom = (mLocation == lcViewSphereLocation::BottomLeft || mLocation == lcViewSphereLocation::BottomRight) ? 0 : Height - ViewportSize;
 	Context->SetViewport(Left, Bottom, ViewportSize, ViewportSize);
 
-	glDepthFunc(GL_ALWAYS);
-	glEnable(GL_CULL_FACE);
+	Context->SetDepthFunction(lcDepthFunction::Always);
+	Context->EnableCullFace(true);
 
 	Context->SetVertexBuffer(mVertexBuffer);
 	Context->SetVertexFormatPosition(3);
@@ -237,8 +237,8 @@ void lcViewSphere::Draw()
 	Context->SetHighlightParams(HighlightPosition, TextColor, BackgroundColor, HighlightColor);
 	Context->DrawIndexedPrimitives(GL_TRIANGLES, mSubdivisions * mSubdivisions * 6 * 6, GL_UNSIGNED_SHORT, 0);
 
-	glDisable(GL_CULL_FACE);
-	glDepthFunc(GL_LEQUAL);
+	Context->EnableCullFace(false);
+	Context->SetDepthFunction(lcDepthFunction::LessEqual);
 
 	Context->SetViewport(0, 0, Width, Height);
 }

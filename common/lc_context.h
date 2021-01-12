@@ -83,6 +83,12 @@ enum class lcPolygonOffset
 	Translucent
 };
 
+enum class lcDepthFunction
+{
+	LessEqual,
+	Always
+};
+
 class lcContext : protected QOpenGLFunctions
 {
 public:
@@ -138,6 +144,8 @@ public:
 	void SetViewport(int x, int y, int Width, int Height);
 	void SetPolygonOffset(lcPolygonOffset PolygonOffset);
 	void SetDepthWrite(bool Enable);
+	void SetDepthFunction(lcDepthFunction DepthFunction);
+	void EnableCullFace(bool Enable);
 	void SetLineWidth(float LineWidth);
 	void SetSmoothShading(bool Smooth);
 	void BindTexture2D(GLuint Texture);
@@ -211,6 +219,8 @@ protected:
 	GLuint mTextureCubeMap;
 	lcPolygonOffset mPolygonOffset;
 	bool mDepthWrite;
+	lcDepthFunction mDepthFunction;
+	bool mCullFace;
 	float mLineWidth;
 	int mMatrixMode;
 	bool mTextureEnabled;

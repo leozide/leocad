@@ -613,7 +613,7 @@ void lcPiece::DrawInterface(lcContext* Context, const lcScene& Scene) const
 		};
 
 		glEnable(GL_BLEND);
-		glEnable(GL_CULL_FACE);
+		Context->EnableCullFace(true);
 
 		for (int ControlPointIdx = 0; ControlPointIdx < mControlPoints.GetSize(); ControlPointIdx++)
 		{
@@ -631,7 +631,7 @@ void lcPiece::DrawInterface(lcContext* Context, const lcScene& Scene) const
 			Context->DrawIndexedPrimitives(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 0);
 		}
 
-		glDisable(GL_CULL_FACE);
+		Context->EnableCullFace(false);
 		glDisable(GL_BLEND);
 	}
 }

@@ -1,10 +1,13 @@
 version: '{branch}.{build}'
-skip_tags: true
 image:
 - Visual Studio 2019
 configuration: Release
 platform: x64
 
+branches:
+  except:
+    - continuous
+    
 environment:
   GITHUB_TOKEN:
     secure: +EZPzYX4wUEc6MYg4kBLx9TogAqeeeWUPgtEW3VtAJATrBtxwpuOQIHrrR4hbc7a

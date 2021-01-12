@@ -1,7 +1,7 @@
 LC_PIXEL_INPUT vec3 PixelNormal;
 LC_PIXEL_OUTPUT
 
-uniform mediump vec4 HighlightParams[5];
+uniform mediump vec4 HighlightParams[4];
 uniform samplerCube Texture;
 
 void main()

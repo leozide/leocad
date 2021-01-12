@@ -461,7 +461,7 @@ void lcMainWindow::CreateMenus()
 	ExportMenu->addAction(mActions[LC_FILE_EXPORT_WAVEFRONT]);
 	FileMenu->addSeparator();
 	FileMenu->addAction(mActions[LC_FILE_RENDER]);
-	FileMenu->addAction(mActions[LC_FILE_INSTRUCTIONS]);
+//	FileMenu->addAction(mActions[LC_FILE_INSTRUCTIONS]);
 	FileMenu->addAction(mActions[LC_FILE_PRINT]);
 	FileMenu->addAction(mActions[LC_FILE_PRINT_PREVIEW]);
 	FileMenu->addSeparator();

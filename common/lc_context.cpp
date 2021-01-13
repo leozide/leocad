@@ -336,8 +336,10 @@ void lcContext::SetOffscreenContext()
 
 void lcContext::SetDefaultState()
 {
+#ifndef LC_OPENGLES
 	if (QSurfaceFormat::defaultFormat().samples() > 1)
 		glEnable(GL_LINE_SMOOTH);
+#endif
 
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);

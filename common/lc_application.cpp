@@ -806,7 +806,10 @@ lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& Libra
 		if (gMainWindow)
 			QMessageBox::information(gMainWindow, tr("LeoCAD"), Message);
 		else
-			StdErr << Message << endl;
+		{
+			StdErr << Message << "\n";
+			StdErr.flush();
+		}
 	}
 
 	if (!SaveAndExit)

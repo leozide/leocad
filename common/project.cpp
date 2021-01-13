@@ -402,7 +402,7 @@ bool Project::Load(const QString& FileName)
 			{
 				auto ModelCompare = [Model](const std::pair<int, lcModel*>& ModelIt)
 				{
-					return ModelIt.second->GetFileName() == Model->GetFileName();
+					return ModelIt.second->GetFileName().compare(Model->GetFileName(), Qt::CaseInsensitive) == 0;
 				};
 
 				if (std::find_if(Models.begin(), Models.end(), ModelCompare) == Models.end())

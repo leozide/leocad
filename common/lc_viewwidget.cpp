@@ -132,7 +132,7 @@ void lcViewWidget::mousePressEvent(QMouseEvent* MouseEvent)
 		mView->OnLeftButtonDown();
 		break;
 
-	case Qt::MidButton:
+	case Qt::MiddleButton:
 		mView->OnMiddleButtonDown();
 		break;
 
@@ -166,7 +166,7 @@ void lcViewWidget::mouseReleaseEvent(QMouseEvent* MouseEvent)
 		mView->OnLeftButtonUp();
 		break;
 
-	case Qt::MidButton:
+	case Qt::MiddleButton:
 		mView->OnMiddleButtonUp();
 		break;
 

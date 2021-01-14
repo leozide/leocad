@@ -900,13 +900,7 @@ bool lcModel::LoadBinary(lcFile* file)
 		else
 			file->ReadU16(&sh, 1);
 
-		if (sh < LC_MAXPATH)
-		{
-			char Background[LC_MAXPATH];
-			file->ReadBuffer(Background, sh);
-		}
-		else
-			file->Seek(sh, SEEK_CUR);
+		file->Seek(sh, SEEK_CUR); // Background
 	}
 
 	if (fv >= 0.8f)

@@ -36,7 +36,7 @@ lcMainWindow* gMainWindow;
 
 void lcTabBar::mousePressEvent(QMouseEvent* Event)
 {
-	if (Event->button() == Qt::MidButton)
+	if (Event->button() == Qt::MiddleButton)
 		mMousePressTab = tabAt(Event->pos());
 	else
 		QTabBar::mousePressEvent(Event);
@@ -44,7 +44,7 @@ void lcTabBar::mousePressEvent(QMouseEvent* Event)
 
 void lcTabBar::mouseReleaseEvent(QMouseEvent* Event)
 {
-	if (Event->button() == Qt::MidButton && tabAt(Event->pos()) == mMousePressTab)
+	if (Event->button() == Qt::MiddleButton && tabAt(Event->pos()) == mMousePressTab)
 		tabCloseRequested(mMousePressTab);
 	else
 		QTabBar::mouseReleaseEvent(Event);
@@ -461,7 +461,7 @@ void lcMainWindow::CreateMenus()
 	ExportMenu->addAction(mActions[LC_FILE_EXPORT_WAVEFRONT]);
 	FileMenu->addSeparator();
 	FileMenu->addAction(mActions[LC_FILE_RENDER]);
-//	FileMenu->addAction(mActions[LC_FILE_INSTRUCTIONS]);
+	FileMenu->addAction(mActions[LC_FILE_INSTRUCTIONS]);
 	FileMenu->addAction(mActions[LC_FILE_PRINT]);
 	FileMenu->addAction(mActions[LC_FILE_PRINT_PREVIEW]);
 	FileMenu->addSeparator();
@@ -1165,7 +1165,7 @@ void lcMainWindow::Print(QPrinter* Printer)
 		Ascending = false;
 	}
 
-	QRect PageRect = Printer->pageRect();
+	QRect PageRect = Printer->pageLayout().paintRectPixels(Printer->resolution());
 	const int Resolution = Printer->resolution();
 	const int Margin = Resolution / 2; // todo: user setting
 	QRect MarginRect = QRect(PageRect.left() + Margin, PageRect.top() + Margin, PageRect.width() - Margin * 2, PageRect.height() - Margin * 2);

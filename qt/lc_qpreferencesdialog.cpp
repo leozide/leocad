@@ -1,3 +1,5 @@
+#include <GL/gl.h>
+
 #include "lc_global.h"
 #include "lc_qpreferencesdialog.h"
 #include "ui_lc_qpreferencesdialog.h"

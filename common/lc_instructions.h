@@ -28,12 +28,20 @@ struct lcInstructionsPageSettings
 enum class lcInstructionsPropertyMode
 {
 	NotSet,
-	Set,
+	Default,
+	Model,
+	StepForward,
 	StepOnly
 };
 
 struct lcInstructionsStepProperties
 {
+	lcInstructionsPropertyMode StepNumberFontMode = lcInstructionsPropertyMode::NotSet;
+	QString StepNumberFont = QFont("Helvetica", 72).toString();
+
+	lcInstructionsPropertyMode StepNumberColorMode = lcInstructionsPropertyMode::NotSet;
+	quint32 StepNumberColor = LC_RGBA(0, 0, 0, 255);
+
 	lcInstructionsPropertyMode BackgroundColorMode = lcInstructionsPropertyMode::NotSet;
 	quint32 BackgroundColor = LC_RGBA(255, 255, 255, 0);
 };

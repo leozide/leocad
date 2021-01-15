@@ -39,8 +39,42 @@ lcInstructionsStepProperties lcInstructions::GetStepProperties(lcModel* Model, l
 	{
 		const lcInstructionsStepProperties& Properties = InstructionModel.StepProperties[StepIndex];
 
-		if (Properties.BackgroundColorMode == lcInstructionsPropertyMode::Set || (Properties.BackgroundColorMode == lcInstructionsPropertyMode::StepOnly && Step == StepIndex))
+		auto ShouldSetProperty = [StepIndex, Step](lcInstructionsPropertyMode Mode)
+		{
+			switch (Mode)
+			{
+			case lcInstructionsPropertyMode::NotSet:
+				return false;
+			case lcInstructionsPropertyMode::Default:
+				return true;
+			case lcInstructionsPropertyMode::Model:
+				return true;
+			case lcInstructionsPropertyMode::StepForward:
+				return true;
+			case lcInstructionsPropertyMode::StepOnly:
+				return StepIndex == Step;
+			}
+
+			return false;
+		};
+
+		if (ShouldSetProperty(Properties.BackgroundColorMode))
+		{
+			StepProperties.BackgroundColorMode = Properties.BackgroundColorMode;
 			StepProperties.BackgroundColor = Properties.BackgroundColor;
+		}
+
+		if (ShouldSetProperty(Properties.StepNumberFontMode))
+		{
+			StepProperties.StepNumberFontMode = Properties.StepNumberFontMode;
+			StepProperties.StepNumberFont = Properties.StepNumberFont;
+		}
+
+		if (ShouldSetProperty(Properties.StepNumberColorMode))
+		{
+			StepProperties.StepNumberColorMode = Properties.StepNumberColorMode;
+			StepProperties.StepNumberColor = Properties.StepNumberColor;
+		}
 	}
 
 	return StepProperties;

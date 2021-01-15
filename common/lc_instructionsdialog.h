@@ -4,15 +4,51 @@
 
 class lcInstructionsPropertiesWidget;
 
-class lcInstructionsStepItem : public QGraphicsPixmapItem
+class lcInstructionsStepImageItem : public QGraphicsPixmapItem
 {
 public:
-	lcInstructionsStepItem(const QPixmap& Pixmap, QGraphicsItem* Parent, lcInstructionsPropertiesWidget* PropertiesWidget);
+	lcInstructionsStepImageItem(const QPixmap& Pixmap, QGraphicsItem* Parent, lcModel* Model, lcStep Step, lcInstructionsPropertiesWidget* PropertiesWidget);
+
+	lcModel* GetModel() const
+	{
+		return mModel;
+	}
+
+	lcStep GetStep() const
+	{
+		return mStep;
+	}
 
 protected:
 	void focusInEvent(QFocusEvent* FocusEvent) override;
 	void focusOutEvent(QFocusEvent* FocusEvent) override;
 
+	lcModel* mModel = nullptr;
+	lcStep mStep = 1;
+	lcInstructionsPropertiesWidget* mPropertiesWidget = nullptr;
+};
+
+class lcInstructionsStepNumberItem : public QGraphicsSimpleTextItem
+{
+public:
+	lcInstructionsStepNumberItem(const QString& Text, QGraphicsItem* Parent, lcModel* Model, lcStep Step, lcInstructionsPropertiesWidget* PropertiesWidget);
+
+	lcModel* GetModel() const
+	{
+		return mModel;
+	}
+
+	lcStep GetStep() const
+	{
+		return mStep;
+	}
+
+protected:
+	void focusInEvent(QFocusEvent* FocusEvent) override;
+	void focusOutEvent(QFocusEvent* FocusEvent) override;
+
+	lcModel* mModel = nullptr;
+	lcStep mStep = 1;
 	lcInstructionsPropertiesWidget* mPropertiesWidget = nullptr;
 };
 
@@ -68,7 +104,8 @@ class lcInstructionsPropertiesWidget : public QDockWidget
 public:
 	lcInstructionsPropertiesWidget(QWidget* Parent, lcInstructions* Instructions);
 
-	void StepItemFocusIn(lcInstructionsStepItem* StepItem);
+	void StepImageItemFocusIn(lcInstructionsStepImageItem* ImageItem);
+	void StepNumberItemFocusIn(lcInstructionsStepNumberItem* NumberItem);
 	void ItemFocusOut(QGraphicsItem* Item);
 
 protected slots:

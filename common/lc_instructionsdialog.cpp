@@ -6,23 +6,42 @@
 #include "lc_view.h"
 #include "lc_collapsiblewidget.h"
 
-lcInstructionsStepItem::lcInstructionsStepItem(const QPixmap& Pixmap, QGraphicsItem* Parent, lcInstructionsPropertiesWidget* PropertiesWidget)
-	: QGraphicsPixmapItem(Pixmap, Parent), mPropertiesWidget(PropertiesWidget)
+lcInstructionsStepImageItem::lcInstructionsStepImageItem(const QPixmap& Pixmap, QGraphicsItem* Parent, lcModel* Model, lcStep Step, lcInstructionsPropertiesWidget* PropertiesWidget)
+	: QGraphicsPixmapItem(Pixmap, Parent), mModel(Model), mStep(Step), mPropertiesWidget(PropertiesWidget)
 {
 }
 
-void lcInstructionsStepItem::focusInEvent(QFocusEvent* FocusEvent)
+void lcInstructionsStepImageItem::focusInEvent(QFocusEvent* FocusEvent)
 {
-	mPropertiesWidget->StepItemFocusIn(this);
+	mPropertiesWidget->StepImageItemFocusIn(this);
 
 	QGraphicsPixmapItem::focusInEvent(FocusEvent);
 }
 
-void lcInstructionsStepItem::focusOutEvent(QFocusEvent* FocusEvent)
+void lcInstructionsStepImageItem::focusOutEvent(QFocusEvent* FocusEvent)
 {
 	mPropertiesWidget->ItemFocusOut(this);
 
 	QGraphicsPixmapItem::focusOutEvent(FocusEvent);
+}
+
+lcInstructionsStepNumberItem::lcInstructionsStepNumberItem(const QString& Text, QGraphicsItem* Parent, lcModel* Model, lcStep Step, lcInstructionsPropertiesWidget* PropertiesWidget)
+	: QGraphicsSimpleTextItem(Text, Parent), mModel(Model), mStep(Step), mPropertiesWidget(PropertiesWidget)
+{
+}
+
+void lcInstructionsStepNumberItem::focusInEvent(QFocusEvent* FocusEvent)
+{
+	mPropertiesWidget->StepNumberItemFocusIn(this);
+
+	QGraphicsSimpleTextItem::focusInEvent(FocusEvent);
+}
+
+void lcInstructionsStepNumberItem::focusOutEvent(QFocusEvent* FocusEvent)
+{
+	mPropertiesWidget->ItemFocusOut(this);
+
+	QGraphicsSimpleTextItem::focusOutEvent(FocusEvent);
 }
 
 lcInstructionsPageWidget::lcInstructionsPageWidget(QWidget* Parent, lcInstructions* Instructions)
@@ -66,12 +85,16 @@ void lcInstructionsPageWidget::SetCurrentPage(const lcInstructionsPage* Page, lc
 
 		QImage& StepImage = Images.front();
 
-		lcInstructionsStepItem* StepImageItem = new lcInstructionsStepItem(QPixmap::fromImage(StepImage), PageItem, PropertiesWidget);
+		lcInstructionsStepImageItem* StepImageItem = new lcInstructionsStepImageItem(QPixmap::fromImage(StepImage), PageItem, Step.Model, Step.Step, PropertiesWidget);
 		StepImageItem->setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsFocusable);
 		StepImageItem->setPos(MarginsRect.left() + MarginsRect.width() * Step.Rect.x(), MarginsRect.top() + MarginsRect.height() * Step.Rect.y());
 
-		QGraphicsSimpleTextItem* StepNumberItem = new QGraphicsSimpleTextItem(QString::number(Step.Step), StepImageItem);
-		StepNumberItem->setFont(QFont("Helvetica", 96));
+		lcInstructionsStepNumberItem* StepNumberItem = new lcInstructionsStepNumberItem(QString::number(Step.Step), StepImageItem, Step.Model, Step.Step, PropertiesWidget);
+		QFont StepNumberFont;
+		if (!StepNumberFont.fromString(StepProperties.StepNumberFont))
+			StepNumberFont = QFont("Helvetica", 72);
+		StepNumberItem->setFont(StepNumberFont);
+		StepNumberItem->setBrush(QBrush(QColor::fromRgb(LC_RGBA_RED(StepProperties.StepNumberColor), LC_RGBA_GREEN(StepProperties.StepNumberColor), LC_RGBA_BLUE(StepProperties.StepNumberColor))));
 		StepNumberItem->setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsFocusable);
 
 		QImage PartsImage = Step.Model->GetPartsListImage(300, Step.Step);
@@ -234,12 +257,12 @@ void lcInstructionsPropertiesWidget::ColorButtonClicked()
 //	mPageListWidget->mThumbnailsWidget->setCurrentRow(0);
 }
 
-void lcInstructionsPropertiesWidget::StepItemFocusIn(lcInstructionsStepItem* StepItem)
+void lcInstructionsPropertiesWidget::StepImageItemFocusIn(lcInstructionsStepImageItem* ImageItem)
 {
-	if (mFocusItem == StepItem)
+	if (mFocusItem == ImageItem)
 		return;
 
-	mFocusItem = StepItem;
+	mFocusItem = ImageItem;
 
 	delete mWidget;
 	mWidget = new lcCollapsibleWidget(tr("Step Properties")); // todo: disable collapse
@@ -256,6 +279,51 @@ void lcInstructionsPropertiesWidget::StepItemFocusIn(lcInstructionsStepItem* Ste
 	Layout->addWidget(ColorButton);
 
 	connect(ColorButton, &QToolButton::clicked, this, &lcInstructionsPropertiesWidget::ColorButtonClicked);
+}
+
+void lcInstructionsPropertiesWidget::StepNumberItemFocusIn(lcInstructionsStepNumberItem* NumberItem)
+{
+	if (mFocusItem == NumberItem)
+		return;
+
+	mFocusItem = NumberItem;
+
+	delete mWidget;
+	mWidget = new lcCollapsibleWidget(tr("Step Number Properties")); // todo: disable collapse
+
+	QGridLayout* WidgetLayout = qobject_cast<QGridLayout*>(widget()->layout());
+	WidgetLayout->addWidget(mWidget, 2, 0, 1, -1);
+
+	QGridLayout* Layout = new QGridLayout();
+	mWidget->SetChildLayout(Layout);
+
+	lcInstructionsStepProperties StepProperties = mInstructions->GetStepProperties(NumberItem->GetModel(), NumberItem->GetStep());
+
+	QFont Font;
+	Font.fromString(StepProperties.StepNumberFont);
+
+	QLabel* FontLabel = new QLabel(tr("Font:"));
+	Layout->addWidget(FontLabel, 0, 0);
+
+	QToolButton* FontButton = new QToolButton();
+	FontButton->setText(Font.family());
+	Layout->addWidget(FontButton, 0, 1);
+
+	connect(FontButton, &QToolButton::clicked, []()
+	{
+		bool Ok;
+		QFontDialog::getFont(&Ok);
+	});// this, & lcInstructionsPropertiesWidget::ColorButtonClicked);
+
+	QLabel* ColorLabel = new QLabel(tr("Color:"));
+	Layout->addWidget(ColorLabel, 1, 0);
+
+//	QToolButton* ColorButton = new QToolButton();
+//	ColorButton->setText("Font");
+//
+//	Layout->addWidget(ColorButton);
+//
+//	connect(ColorButton, &QToolButton::clicked, this, &lcInstructionsPropertiesWidget::ColorButtonClicked);
 }
 
 void lcInstructionsPropertiesWidget::ItemFocusOut(QGraphicsItem* Item)

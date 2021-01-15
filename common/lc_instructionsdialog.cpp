@@ -6,52 +6,41 @@
 #include "lc_view.h"
 #include "lc_collapsiblewidget.h"
 
-lcInstructionsStepImageItem::lcInstructionsStepImageItem(const QPixmap& Pixmap, QGraphicsItem* Parent, lcModel* Model, lcStep Step, lcInstructionsPropertiesWidget* PropertiesWidget)
-	: QGraphicsPixmapItem(Pixmap, Parent), mModel(Model), mStep(Step), mPropertiesWidget(PropertiesWidget)
+lcInstructionsStepImageItem::lcInstructionsStepImageItem(const QPixmap& Pixmap, QGraphicsItem* Parent, lcModel* Model, lcStep Step)
+	: QGraphicsPixmapItem(Pixmap, Parent), mModel(Model), mStep(Step)
 {
 }
 
-void lcInstructionsStepImageItem::focusInEvent(QFocusEvent* FocusEvent)
-{
-	mPropertiesWidget->StepImageItemFocusIn(this);
-
-	QGraphicsPixmapItem::focusInEvent(FocusEvent);
-}
-
-void lcInstructionsStepImageItem::focusOutEvent(QFocusEvent* FocusEvent)
-{
-	mPropertiesWidget->ItemFocusOut(this);
-
-	QGraphicsPixmapItem::focusOutEvent(FocusEvent);
-}
-
-lcInstructionsStepNumberItem::lcInstructionsStepNumberItem(const QString& Text, QGraphicsItem* Parent, lcModel* Model, lcStep Step, lcInstructionsPropertiesWidget* PropertiesWidget)
-	: QGraphicsSimpleTextItem(Text, Parent), mModel(Model), mStep(Step), mPropertiesWidget(PropertiesWidget)
+lcInstructionsStepNumberItem::lcInstructionsStepNumberItem(const QString& Text, QGraphicsItem* Parent, lcModel* Model, lcStep Step)
+	: QGraphicsSimpleTextItem(Text, Parent), mModel(Model), mStep(Step)
 {
 }
 
-void lcInstructionsStepNumberItem::focusInEvent(QFocusEvent* FocusEvent)
-{
-	mPropertiesWidget->StepNumberItemFocusIn(this);
-
-	QGraphicsSimpleTextItem::focusInEvent(FocusEvent);
-}
-
-void lcInstructionsStepNumberItem::focusOutEvent(QFocusEvent* FocusEvent)
-{
-	mPropertiesWidget->ItemFocusOut(this);
-
-	QGraphicsSimpleTextItem::focusOutEvent(FocusEvent);
-}
-
-lcInstructionsPageWidget::lcInstructionsPageWidget(QWidget* Parent, lcInstructions* Instructions)
-	: QGraphicsView(Parent), mInstructions(Instructions)
+lcInstructionsPageWidget::lcInstructionsPageWidget(QWidget* Parent, lcInstructions* Instructions, lcInstructionsPropertiesWidget* PropertiesWidget)
+	: QGraphicsView(Parent), mInstructions(Instructions), mPropertiesWidget(PropertiesWidget)
 {
 }
 
-void lcInstructionsPageWidget::SetCurrentPage(const lcInstructionsPage* Page, lcInstructionsPropertiesWidget* PropertiesWidget)
+void lcInstructionsPageWidget::SelectionChanged()
+{
+	QGraphicsScene* Scene = qobject_cast<QGraphicsScene*>(sender());
+	QGraphicsItem* Focus = nullptr;
+
+	if (Scene)
+	{
+		QList<QGraphicsItem*> SelectedItems = Scene->selectedItems();
+
+		if (!SelectedItems.isEmpty())
+			Focus = SelectedItems.first();
+	}
+
+	mPropertiesWidget->FocusChanged(Focus);
+}
+
+void lcInstructionsPageWidget::SetCurrentPage(const lcInstructionsPage* Page)
 {
 	QGraphicsScene* Scene = new QGraphicsScene();
+	connect(Scene, &QGraphicsScene::selectionChanged, this, &lcInstructionsPageWidget::SelectionChanged);
 	setScene(Scene);
 
 	if (!Page)
@@ -85,11 +74,11 @@ void lcInstructionsPageWidget::SetCurrentPage(const lcInstructionsPage* Page, lc
 
 		QImage& StepImage = Images.front();
 
-		lcInstructionsStepImageItem* StepImageItem = new lcInstructionsStepImageItem(QPixmap::fromImage(StepImage), PageItem, Step.Model, Step.Step, PropertiesWidget);
+		lcInstructionsStepImageItem* StepImageItem = new lcInstructionsStepImageItem(QPixmap::fromImage(StepImage), PageItem, Step.Model, Step.Step);
 		StepImageItem->setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsFocusable);
 		StepImageItem->setPos(MarginsRect.left() + MarginsRect.width() * Step.Rect.x(), MarginsRect.top() + MarginsRect.height() * Step.Rect.y());
 
-		lcInstructionsStepNumberItem* StepNumberItem = new lcInstructionsStepNumberItem(QString::number(Step.Step), StepImageItem, Step.Model, Step.Step, PropertiesWidget);
+		lcInstructionsStepNumberItem* StepNumberItem = new lcInstructionsStepNumberItem(QString::number(Step.Step), StepImageItem, Step.Model, Step.Step);
 		QFont StepNumberFont;
 		if (!StepNumberFont.fromString(StepProperties.StepNumberFont))
 			StepNumberFont = QFont("Helvetica", 72);
@@ -259,12 +248,6 @@ void lcInstructionsPropertiesWidget::ColorButtonClicked()
 
 void lcInstructionsPropertiesWidget::StepImageItemFocusIn(lcInstructionsStepImageItem* ImageItem)
 {
-	if (mFocusItem == ImageItem)
-		return;
-
-	mFocusItem = ImageItem;
-
-	delete mWidget;
 	mWidget = new lcCollapsibleWidget(tr("Step Properties")); // todo: disable collapse
 
 	QGridLayout* WidgetLayout = qobject_cast<QGridLayout*>(widget()->layout());
@@ -283,12 +266,6 @@ void lcInstructionsPropertiesWidget::StepImageItemFocusIn(lcInstructionsStepImag
 
 void lcInstructionsPropertiesWidget::StepNumberItemFocusIn(lcInstructionsStepNumberItem* NumberItem)
 {
-	if (mFocusItem == NumberItem)
-		return;
-
-	mFocusItem = NumberItem;
-
-	delete mWidget;
 	mWidget = new lcCollapsibleWidget(tr("Step Number Properties")); // todo: disable collapse
 
 	QGridLayout* WidgetLayout = qobject_cast<QGridLayout*>(widget()->layout());
@@ -326,15 +303,33 @@ void lcInstructionsPropertiesWidget::StepNumberItemFocusIn(lcInstructionsStepNum
 //	connect(ColorButton, &QToolButton::clicked, this, &lcInstructionsPropertiesWidget::ColorButtonClicked);
 }
 
-void lcInstructionsPropertiesWidget::ItemFocusOut(QGraphicsItem* Item)
+void lcInstructionsPropertiesWidget::FocusChanged(QGraphicsItem* FocusItem)
 {
-	if (mFocusItem != Item)
+	if (mFocusItem == FocusItem)
 		return;
-
-	mFocusItem = nullptr;
 
 	delete mWidget;
 	mWidget = nullptr;
+	mFocusItem = FocusItem;
+
+	if (!FocusItem)
+		return;
+
+	lcInstructionsStepImageItem* ImageItem = dynamic_cast<lcInstructionsStepImageItem*>(FocusItem);
+
+	if (ImageItem)
+	{
+		StepImageItemFocusIn(ImageItem);
+		return;
+	}
+
+	lcInstructionsStepNumberItem* NumberItem = dynamic_cast<lcInstructionsStepNumberItem*>(FocusItem);
+
+	if (NumberItem)
+	{
+		StepNumberItemFocusIn(NumberItem);
+		return;
+	}
 }
 
 lcInstructionsDialog::lcInstructionsDialog(QWidget* Parent, Project* Project)
@@ -344,16 +339,16 @@ lcInstructionsDialog::lcInstructionsDialog(QWidget* Parent, Project* Project)
 
 	mInstructions = mProject->GetInstructions();
 
-	mPageWidget = new lcInstructionsPageWidget(this, mInstructions);
+	mPropertiesWidget = new lcInstructionsPropertiesWidget(this, mInstructions);
+	mPropertiesWidget->setObjectName("InstructionsProperties");
+	addDockWidget(Qt::RightDockWidgetArea, mPropertiesWidget);
+
+	mPageWidget = new lcInstructionsPageWidget(this, mInstructions, mPropertiesWidget);
 	setCentralWidget(mPageWidget);
 
 	mPageListWidget = new lcInstructionsPageListWidget(this, mInstructions);
 	mPageListWidget->setObjectName("InstructionsPageList");
 	addDockWidget(Qt::LeftDockWidgetArea, mPageListWidget);
-
-	mPropertiesWidget = new lcInstructionsPropertiesWidget(this, mInstructions);
-	mPropertiesWidget->setObjectName("InstructionsProperties");
-	addDockWidget(Qt::RightDockWidgetArea, mPropertiesWidget);
 
 	mPageSettingsToolBar = addToolBar(tr("Page Settings"));
 	mPageSettingsToolBar->setObjectName("PageSettings");
@@ -416,7 +411,7 @@ void lcInstructionsDialog::CurrentThumbnailChanged(int Index)
 {
 	if (Index < 0 || Index >= static_cast<int>(mInstructions->mPages.size()))
 	{
-		mPageWidget->SetCurrentPage(nullptr, mPropertiesWidget);
+		mPageWidget->SetCurrentPage(nullptr);
 		return;
 	}
 
@@ -424,7 +419,7 @@ void lcInstructionsDialog::CurrentThumbnailChanged(int Index)
 //	const lcInstructionsPageSettings& PageSettings = Page->Settings;
 	const lcInstructionsPageSettings& PageSettings = mInstructions->mPageSettings;
 
-	mPageWidget->SetCurrentPage(Page, mPropertiesWidget);
+	mPageWidget->SetCurrentPage(Page);
 
 	if (PageSettings.Direction == lcInstructionsDirection::Horizontal)
 	{
@@ -453,6 +448,6 @@ void lcInstructionsDialog::PageInvalid(int PageIndex)
 	if (mPageListWidget->mThumbnailsWidget->currentRow() == PageIndex)
 	{
 		const lcInstructionsPage* Page = &mInstructions->mPages[PageIndex];
-		mPageWidget->SetCurrentPage(Page, mPropertiesWidget);
+		mPageWidget->SetCurrentPage(Page);
 	}
 }

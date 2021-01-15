@@ -7,7 +7,7 @@ class lcInstructionsPropertiesWidget;
 class lcInstructionsStepImageItem : public QGraphicsPixmapItem
 {
 public:
-	lcInstructionsStepImageItem(const QPixmap& Pixmap, QGraphicsItem* Parent, lcModel* Model, lcStep Step, lcInstructionsPropertiesWidget* PropertiesWidget);
+	lcInstructionsStepImageItem(const QPixmap& Pixmap, QGraphicsItem* Parent, lcModel* Model, lcStep Step);
 
 	lcModel* GetModel() const
 	{
@@ -20,18 +20,14 @@ public:
 	}
 
 protected:
-	void focusInEvent(QFocusEvent* FocusEvent) override;
-	void focusOutEvent(QFocusEvent* FocusEvent) override;
-
 	lcModel* mModel = nullptr;
 	lcStep mStep = 1;
-	lcInstructionsPropertiesWidget* mPropertiesWidget = nullptr;
 };
 
 class lcInstructionsStepNumberItem : public QGraphicsSimpleTextItem
 {
 public:
-	lcInstructionsStepNumberItem(const QString& Text, QGraphicsItem* Parent, lcModel* Model, lcStep Step, lcInstructionsPropertiesWidget* PropertiesWidget);
+	lcInstructionsStepNumberItem(const QString& Text, QGraphicsItem* Parent, lcModel* Model, lcStep Step);
 
 	lcModel* GetModel() const
 	{
@@ -44,12 +40,8 @@ public:
 	}
 
 protected:
-	void focusInEvent(QFocusEvent* FocusEvent) override;
-	void focusOutEvent(QFocusEvent* FocusEvent) override;
-
 	lcModel* mModel = nullptr;
 	lcStep mStep = 1;
-	lcInstructionsPropertiesWidget* mPropertiesWidget = nullptr;
 };
 
 class lcInstructionsPageWidget : public QGraphicsView
@@ -57,12 +49,16 @@ class lcInstructionsPageWidget : public QGraphicsView
 	Q_OBJECT
 
 public:
-	lcInstructionsPageWidget(QWidget* Parent, lcInstructions* Instructions);
+	lcInstructionsPageWidget(QWidget* Parent, lcInstructions* Instructions, lcInstructionsPropertiesWidget* PropertiesWidget);
 
-	void SetCurrentPage(const lcInstructionsPage* Page, lcInstructionsPropertiesWidget* PropertiesWidget);
+	void SetCurrentPage(const lcInstructionsPage* Page);
+
+protected slots:
+	void SelectionChanged();
 
 protected:
 	lcInstructions* mInstructions;
+	lcInstructionsPropertiesWidget* mPropertiesWidget;
 };
 
 class lcInstructionsPageListWidget : public QDockWidget
@@ -104,14 +100,15 @@ class lcInstructionsPropertiesWidget : public QDockWidget
 public:
 	lcInstructionsPropertiesWidget(QWidget* Parent, lcInstructions* Instructions);
 
-	void StepImageItemFocusIn(lcInstructionsStepImageItem* ImageItem);
-	void StepNumberItemFocusIn(lcInstructionsStepNumberItem* NumberItem);
-	void ItemFocusOut(QGraphicsItem* Item);
+	void FocusChanged(QGraphicsItem* FocusItem);
 
 protected slots:
 	void ColorButtonClicked();
 
 protected:
+	void StepImageItemFocusIn(lcInstructionsStepImageItem* ImageItem);
+	void StepNumberItemFocusIn(lcInstructionsStepNumberItem* NumberItem);
+
 	lcCollapsibleWidget* mWidget = nullptr;
 	lcInstructions* mInstructions = nullptr;
 	QGraphicsItem* mFocusItem = nullptr;

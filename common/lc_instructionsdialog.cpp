@@ -260,12 +260,25 @@ void lcInstructionsPropertiesWidget::StepImageItemFocusIn(lcInstructionsStepImag
 	QGridLayout* Layout = new QGridLayout();
 	mWidget->SetChildLayout(Layout);
 
+	lcInstructionsStepProperties StepProperties = mInstructions->GetStepProperties(ImageItem->GetModel(), ImageItem->GetStep());
+
+	QLabel* ColorLabel = new QLabel(tr("Color:"));
+	Layout->addWidget(ColorLabel, 1, 0);
+
 	QToolButton* ColorButton = new QToolButton();
-	ColorButton->setText("background");
+	QPixmap Pixmap(12, 12);
+	QColor Color(LC_RGBA_RED(StepProperties.BackgroundColor), LC_RGBA_GREEN(StepProperties.BackgroundColor), LC_RGBA_BLUE(StepProperties.BackgroundColor));
+	Pixmap.fill(Color);
+	ColorButton->setIcon(Pixmap);
+	Layout->addWidget(ColorButton, 1, 1);
 
-	Layout->addWidget(ColorButton);
+	connect(ColorButton, &QToolButton::clicked, [this, Color]()
+	{
+		QColor NewColor = QColorDialog::getColor(Color, this, tr("Select Step Number Color"));
 
-	connect(ColorButton, &QToolButton::clicked, this, &lcInstructionsPropertiesWidget::ColorButtonClicked);
+		if (NewColor.isValid())
+			mInstructions->SetDefaultStepBackgroundColor(LC_RGBA(NewColor.red(), NewColor.green(), NewColor.blue(), NewColor.alpha()));
+	});
 }
 
 void lcInstructionsPropertiesWidget::StepNumberItemFocusIn(lcInstructionsStepNumberItem* NumberItem)

@@ -1127,8 +1127,8 @@ void lcMainWindow::Print(QPrinter* Printer)
 	int DocCopies;
 	int PageCopies;
 
-	lcInstructions Instructions = lcGetActiveProject()->GetInstructions();
-	const int PageCount = static_cast<int>(Instructions.mPages.size());
+	lcInstructions* Instructions = lcGetActiveProject()->GetInstructions();
+	const int PageCount = static_cast<int>(Instructions->mPages.size());
 
 	if (Printer->collateCopies())
 	{
@@ -1193,7 +1193,7 @@ void lcMainWindow::Print(QPrinter* Printer)
 				int StepWidth = MarginRect.width();
 				int StepHeight = MarginRect.height();
 
-				const lcInstructionsPage& PageLayout = Instructions.mPages[Page - 1];
+				const lcInstructionsPage& PageLayout = Instructions->mPages[Page - 1];
 				lcModel* Model = PageLayout.Steps[0].Model;
 				lcStep Step = PageLayout.Steps[0].Step;
 				QImage Image = Model->GetStepImage(false, StepWidth, StepHeight, Step);
@@ -1299,7 +1299,7 @@ void lcMainWindow::ShowInstructionsDialog()
 void lcMainWindow::ShowPrintDialog()
 {
 #ifndef QT_NO_PRINTER
-	int PageCount = static_cast<int>(lcGetActiveProject()->GetInstructions().mPages.size());
+	int PageCount = static_cast<int>(lcGetActiveProject()->GetInstructions()->mPages.size());
 
 	QPrinter Printer(QPrinter::HighResolution);
 	Printer.setFromTo(1, PageCount + 1);
@@ -1923,7 +1923,7 @@ void lcMainWindow::TogglePrintPreview()
 #ifndef QT_NO_PRINTER
 	// todo: print preview inside main window
 
-	int PageCount = static_cast<int>(lcGetActiveProject()->GetInstructions().mPages.size());
+	int PageCount = static_cast<int>(lcGetActiveProject()->GetInstructions()->mPages.size());
 
 	QPrinter Printer(QPrinter::ScreenResolution);
 	Printer.setFromTo(1, PageCount + 1);

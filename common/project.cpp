@@ -1504,9 +1504,12 @@ void Project::ExportCSV()
 	}
 }
 
-lcInstructions Project::GetInstructions()
+lcInstructions* Project::GetInstructions()
 {
-	return lcInstructions(this);
+	mInstructions.reset();
+	mInstructions = std::unique_ptr<lcInstructions>(new lcInstructions(this));
+
+	return mInstructions.get();
 }
 
 void Project::ExportHTML(const lcHTMLExportOptions& Options)

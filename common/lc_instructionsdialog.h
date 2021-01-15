@@ -2,6 +2,20 @@
 
 #include "lc_instructions.h"
 
+class lcInstructionsPropertiesWidget;
+
+class lcInstructionsStepItem : public QGraphicsPixmapItem
+{
+public:
+	lcInstructionsStepItem(const QPixmap& Pixmap, QGraphicsItem* Parent, lcInstructionsPropertiesWidget* PropertiesWidget);
+
+protected:
+	void focusInEvent(QFocusEvent* FocusEvent) override;
+	void focusOutEvent(QFocusEvent* FocusEvent) override;
+
+	lcInstructionsPropertiesWidget* mPropertiesWidget = nullptr;
+};
+
 class lcInstructionsPageWidget : public QGraphicsView
 {
 	Q_OBJECT
@@ -9,7 +23,7 @@ class lcInstructionsPageWidget : public QGraphicsView
 public:
 	lcInstructionsPageWidget(QWidget* Parent, lcInstructions* Instructions);
 
-	void SetCurrentPage(const lcInstructionsPage* Page);
+	void SetCurrentPage(const lcInstructionsPage* Page, lcInstructionsPropertiesWidget* PropertiesWidget);
 
 protected:
 	lcInstructions* mInstructions;
@@ -47,6 +61,25 @@ protected:
 	lcInstructions* mInstructions;
 };
 
+class lcInstructionsPropertiesWidget : public QDockWidget
+{
+	Q_OBJECT
+
+public:
+	lcInstructionsPropertiesWidget(QWidget* Parent, lcInstructions* Instructions);
+
+	void StepItemFocusIn(lcInstructionsStepItem* StepItem);
+	void ItemFocusOut(QGraphicsItem* Item);
+
+protected slots:
+	void ColorButtonClicked();
+
+protected:
+	lcCollapsibleWidget* mWidget = nullptr;
+	lcInstructions* mInstructions = nullptr;
+	QGraphicsItem* mFocusItem = nullptr;
+};
+
 class lcInstructionsDialog : public QMainWindow
 {
 	Q_OBJECT
@@ -57,15 +90,17 @@ public:
 protected slots:
 	void UpdatePageSettings();
 	void CurrentThumbnailChanged(int Index);
+	void PageInvalid(int PageIndex);
 
 protected:
 	Project* mProject = nullptr;
 
 	int mCurrentPageNumber;
-	lcInstructions mInstructions;
+	lcInstructions* mInstructions;
 
 	lcInstructionsPageWidget* mPageWidget = nullptr;
 	lcInstructionsPageListWidget* mPageListWidget = nullptr;
+	lcInstructionsPropertiesWidget* mPropertiesWidget = nullptr;
 
 	QToolBar* mPageSettingsToolBar = nullptr;
 	QAction* mVerticalPageAction = nullptr;

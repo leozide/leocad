@@ -4,13 +4,33 @@
 #include "project.h"
 #include "lc_model.h"
 #include "lc_view.h"
+#include "lc_collapsiblewidget.h"
+
+lcInstructionsStepItem::lcInstructionsStepItem(const QPixmap& Pixmap, QGraphicsItem* Parent, lcInstructionsPropertiesWidget* PropertiesWidget)
+	: QGraphicsPixmapItem(Pixmap, Parent), mPropertiesWidget(PropertiesWidget)
+{
+}
+
+void lcInstructionsStepItem::focusInEvent(QFocusEvent* FocusEvent)
+{
+	mPropertiesWidget->StepItemFocusIn(this);
+
+	QGraphicsPixmapItem::focusInEvent(FocusEvent);
+}
+
+void lcInstructionsStepItem::focusOutEvent(QFocusEvent* FocusEvent)
+{
+	mPropertiesWidget->ItemFocusOut(this);
+
+	QGraphicsPixmapItem::focusOutEvent(FocusEvent);
+}
 
 lcInstructionsPageWidget::lcInstructionsPageWidget(QWidget* Parent, lcInstructions* Instructions)
 	: QGraphicsView(Parent), mInstructions(Instructions)
 {
 }
 
-void lcInstructionsPageWidget::SetCurrentPage(const lcInstructionsPage* Page)
+void lcInstructionsPageWidget::SetCurrentPage(const lcInstructionsPage* Page, lcInstructionsPropertiesWidget* PropertiesWidget)
 {
 	QGraphicsScene* Scene = new QGraphicsScene();
 	setScene(Scene);
@@ -30,12 +50,13 @@ void lcInstructionsPageWidget::SetCurrentPage(const lcInstructionsPage* Page)
 	{
 		const float StepWidth = MarginsRect.width() * Step.Rect.width();
 		const float StepHeight = MarginsRect.height() * Step.Rect.height();
+		const lcInstructionsStepProperties StepProperties = mInstructions->GetStepProperties(Step.Model, Step.Step);
 
 		lcView View(lcViewType::View, Step.Model);
 
 		View.SetOffscreenContext();
 		View.MakeCurrent();
-//		View.SetBackgroundColorOverride(LC_RGBA(255, 255, 0, 255));
+		View.SetBackgroundColorOverride(StepProperties.BackgroundColor);
 		View.SetSize(StepWidth, StepHeight);
 
 		std::vector<QImage> Images = View.GetStepImages(Step.Step, Step.Step);
@@ -45,7 +66,7 @@ void lcInstructionsPageWidget::SetCurrentPage(const lcInstructionsPage* Page)
 
 		QImage& StepImage = Images.front();
 
-		QGraphicsPixmapItem* StepImageItem = new QGraphicsPixmapItem(QPixmap::fromImage(StepImage), PageItem);
+		lcInstructionsStepItem* StepImageItem = new lcInstructionsStepItem(QPixmap::fromImage(StepImage), PageItem, PropertiesWidget);
 		StepImageItem->setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsFocusable);
 		StepImageItem->setPos(MarginsRect.left() + MarginsRect.width() * Step.Rect.x(), MarginsRect.top() + MarginsRect.height() * Step.Rect.y());
 
@@ -175,6 +196,79 @@ void lcInstructionsPageListWidget::ShowPageSetupDialog()
 		return;
 }
 
+lcInstructionsPropertiesWidget::lcInstructionsPropertiesWidget(QWidget* Parent, lcInstructions* Instructions)
+	: QDockWidget(Parent), mInstructions(Instructions)
+{
+	QWidget* CentralWidget = new QWidget(this);
+	setWidget(CentralWidget);
+	setWindowTitle(tr("Properties"));
+	
+	QGridLayout* Layout = new QGridLayout(CentralWidget);
+	Layout->setContentsMargins(0, 0, 0, 0);
+
+	QComboBox* ScopeComboBox = new QComboBox(CentralWidget);
+	ScopeComboBox->addItems(QStringList() << tr("Default") << tr("Current Model") << tr("Current Step Only") << tr("Current Step Forward"));
+
+	Layout->addWidget(new QLabel(tr("Scope:")), 0, 0);
+	Layout->addWidget(ScopeComboBox, 0, 1);
+
+	QComboBox* PresetComboBox = new QComboBox(CentralWidget);
+
+	Layout->addWidget(new QLabel(tr("Preset:")), 1, 0);
+	Layout->addWidget(PresetComboBox, 1, 1);
+
+	Layout->setRowStretch(3, 1);
+}
+
+void lcInstructionsPropertiesWidget::ColorButtonClicked()
+{
+//	const lcInstructionsStepProperties StepProperties = mInstructions->GetStepProperties(Step.Model, Step.Step);
+
+	QColor Color = QColorDialog::getColor();
+
+	if (!Color.isValid())
+		return;
+
+	mInstructions->SetDefaultStepBackgroundColor(LC_RGBA(Color.red(), Color.green(), Color.blue(), Color.alpha()));
+
+//	mPageListWidget->mThumbnailsWidget->setCurrentRow(0);
+}
+
+void lcInstructionsPropertiesWidget::StepItemFocusIn(lcInstructionsStepItem* StepItem)
+{
+	if (mFocusItem == StepItem)
+		return;
+
+	mFocusItem = StepItem;
+
+	delete mWidget;
+	mWidget = new lcCollapsibleWidget(tr("Step Properties")); // todo: disable collapse
+
+	QGridLayout* WidgetLayout = qobject_cast<QGridLayout*>(widget()->layout());
+	WidgetLayout->addWidget(mWidget, 2, 0, 1, -1);
+
+	QGridLayout* Layout = new QGridLayout();
+	mWidget->SetChildLayout(Layout);
+
+	QToolButton* ColorButton = new QToolButton();
+	ColorButton->setText("background");
+
+	Layout->addWidget(ColorButton);
+
+	connect(ColorButton, &QToolButton::clicked, this, &lcInstructionsPropertiesWidget::ColorButtonClicked);
+}
+
+void lcInstructionsPropertiesWidget::ItemFocusOut(QGraphicsItem* Item)
+{
+	if (mFocusItem != Item)
+		return;
+
+	mFocusItem = nullptr;
+
+	delete mWidget;
+	mWidget = nullptr;
+}
+
 lcInstructionsDialog::lcInstructionsDialog(QWidget* Parent, Project* Project)
 	: QMainWindow(Parent), mProject(Project)
 {
@@ -182,12 +276,16 @@ lcInstructionsDialog::lcInstructionsDialog(QWidget* Parent, Project* Project)
 
 	mInstructions = mProject->GetInstructions();
 
-	mPageWidget = new lcInstructionsPageWidget(this, &mInstructions);
+	mPageWidget = new lcInstructionsPageWidget(this, mInstructions);
 	setCentralWidget(mPageWidget);
 
-	mPageListWidget = new lcInstructionsPageListWidget(this, &mInstructions);
-	mPageListWidget->setObjectName("PageList");
+	mPageListWidget = new lcInstructionsPageListWidget(this, mInstructions);
+	mPageListWidget->setObjectName("InstructionsPageList");
 	addDockWidget(Qt::LeftDockWidgetArea, mPageListWidget);
+
+	mPropertiesWidget = new lcInstructionsPropertiesWidget(this, mInstructions);
+	mPropertiesWidget->setObjectName("InstructionsProperties");
+	addDockWidget(Qt::RightDockWidgetArea, mPropertiesWidget);
 
 	mPageSettingsToolBar = addToolBar(tr("Page Settings"));
 	mPageSettingsToolBar->setObjectName("PageSettings");
@@ -209,12 +307,13 @@ lcInstructionsDialog::lcInstructionsDialog(QWidget* Parent, Project* Project)
 	PageDirectionGroup->addAction(mVerticalPageAction);
 	PageDirectionGroup->addAction(mHorizontalPageAction);
 
-	for (size_t PageNumber = 0; PageNumber < mInstructions.mPages.size(); PageNumber++)
+	for (size_t PageNumber = 0; PageNumber < mInstructions->mPages.size(); PageNumber++)
 		mPageListWidget->mThumbnailsWidget->addItem(QString("Page %1").arg(PageNumber + 1));
 
 	connect(mPageListWidget->mThumbnailsWidget, SIGNAL(currentRowChanged(int)), this, SLOT(CurrentThumbnailChanged(int)));
 	mPageListWidget->mThumbnailsWidget->setCurrentRow(0);
 
+	connect(mInstructions, &lcInstructions::PageInvalid, this, &lcInstructionsDialog::PageInvalid);
 	connect(mVerticalPageAction, SIGNAL(toggled(bool)), this, SLOT(UpdatePageSettings()));
 	connect(mHorizontalPageAction, SIGNAL(toggled(bool)), this, SLOT(UpdatePageSettings()));
 	connect(mRowsSpinBox, SIGNAL(valueChanged(int)), this, SLOT(UpdatePageSettings()));
@@ -233,11 +332,11 @@ void lcInstructionsDialog::UpdatePageSettings()
 	else
 		PageSettings.Direction = lcInstructionsDirection::Vertical;
 
-	mInstructions.SetDefaultPageSettings(PageSettings);
+	mInstructions->SetDefaultPageSettings(PageSettings);
 //	lcInstructionsPage* Page = &mInstructions.mPages[mThumbnailsWidget->currentIndex().row()];
 
 	mPageListWidget->mThumbnailsWidget->clear();
-	for (size_t PageNumber = 0; PageNumber < mInstructions.mPages.size(); PageNumber++)
+	for (size_t PageNumber = 0; PageNumber < mInstructions->mPages.size(); PageNumber++)
 		mPageListWidget->mThumbnailsWidget->addItem(QString("Page %1").arg(PageNumber + 1));
 
 //	mThumbnailsWidget->setCurrentRow(0);
@@ -247,17 +346,17 @@ void lcInstructionsDialog::UpdatePageSettings()
 
 void lcInstructionsDialog::CurrentThumbnailChanged(int Index)
 {
-	if (Index < 0 || Index >= static_cast<int>(mInstructions.mPages.size()))
+	if (Index < 0 || Index >= static_cast<int>(mInstructions->mPages.size()))
 	{
-		mPageWidget->SetCurrentPage(nullptr);
+		mPageWidget->SetCurrentPage(nullptr, mPropertiesWidget);
 		return;
 	}
 
-	const lcInstructionsPage* Page = &mInstructions.mPages[Index];
+	const lcInstructionsPage* Page = &mInstructions->mPages[Index];
 //	const lcInstructionsPageSettings& PageSettings = Page->Settings;
-	const lcInstructionsPageSettings& PageSettings = mInstructions.mPageSettings;
+	const lcInstructionsPageSettings& PageSettings = mInstructions->mPageSettings;
 
-	mPageWidget->SetCurrentPage(Page);
+	mPageWidget->SetCurrentPage(Page, mPropertiesWidget);
 
 	if (PageSettings.Direction == lcInstructionsDirection::Horizontal)
 	{
@@ -279,4 +378,13 @@ void lcInstructionsDialog::CurrentThumbnailChanged(int Index)
 	mColumnsSpinBox->blockSignals(true);
 	mColumnsSpinBox->setValue(PageSettings.Columns);
 	mColumnsSpinBox->blockSignals(false);
+}
+
+void lcInstructionsDialog::PageInvalid(int PageIndex)
+{
+	if (mPageListWidget->mThumbnailsWidget->currentRow() == PageIndex)
+	{
+		const lcInstructionsPage* Page = &mInstructions->mPages[PageIndex];
+		mPageWidget->SetCurrentPage(Page, mPropertiesWidget);
+	}
 }

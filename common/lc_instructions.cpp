@@ -24,11 +24,44 @@ lcInstructions::lcInstructions(Project* Project)
 	CreatePages();
 }
 
+lcInstructionsStepProperties lcInstructions::GetStepProperties(lcModel* Model, lcStep Step) const
+{
+	lcInstructionsStepProperties StepProperties = mStepProperties;
+
+	std::map<lcModel*, lcInstructionsModel>::const_iterator ModelIt = mModels.find(Model);
+
+	if (ModelIt == mModels.end())
+		return StepProperties;
+
+	const lcInstructionsModel& InstructionModel = ModelIt->second;
+
+	for (lcStep StepIndex = 0; StepIndex <= Step; StepIndex++)
+	{
+		const lcInstructionsStepProperties& Properties = InstructionModel.StepProperties[StepIndex];
+
+		if (Properties.BackgroundColorMode == lcInstructionsPropertyMode::Set || (Properties.BackgroundColorMode == lcInstructionsPropertyMode::StepOnly && Step == StepIndex))
+			StepProperties.BackgroundColor = Properties.BackgroundColor;
+	}
+
+	return StepProperties;
+}
+
 void lcInstructions::SetDefaultPageSettings(const lcInstructionsPageSettings& PageSettings)
 {
 	mPageSettings = PageSettings;
 
 	CreatePages();
+}
+
+void lcInstructions::SetDefaultStepBackgroundColor(quint32 Color)
+{
+	if (mStepProperties.BackgroundColor == Color)
+		return;
+
+	mStepProperties.BackgroundColor = Color;
+
+	for (size_t PageIndex = 0; PageIndex < mPages.size(); PageIndex++)
+		emit PageInvalid(static_cast<int>(PageIndex)); // todo: invalidate steps, not pages
 }
 
 void lcInstructions::CreatePages()
@@ -56,6 +89,10 @@ void lcInstructions::AddDefaultPages(lcModel* Model, std::vector<const lcModel*>
 	const lcStep LastStep = Model->GetLastStep();
 	lcInstructionsPage Page;
 	int Row = 0, Column = 0;
+
+	lcInstructionsModel InstructionModel;
+	InstructionModel.StepProperties.resize(LastStep + 1);
+	mModels.emplace(Model, std::move(InstructionModel));
 
 	for (lcStep Step = 1; Step <= LastStep; Step++)
 	{

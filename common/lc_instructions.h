@@ -37,7 +37,7 @@ enum class lcInstructionsPropertyMode
 struct lcInstructionsStepProperties
 {
 	lcInstructionsPropertyMode StepNumberFontMode = lcInstructionsPropertyMode::NotSet;
-	QString StepNumberFont = QFont("Helvetica", 72).toString();
+	QString StepNumberFont = QFont("Arial", 72).toString();
 
 	lcInstructionsPropertyMode StepNumberColorMode = lcInstructionsPropertyMode::NotSet;
 	quint32 StepNumberColor = LC_RGBA(0, 0, 0, 255);
@@ -75,7 +75,10 @@ public:
 
 	lcInstructionsStepProperties GetStepProperties(lcModel* Model, lcStep Step) const;
 	void SetDefaultPageSettings(const lcInstructionsPageSettings& PageSettings);
+
 	void SetDefaultStepBackgroundColor(quint32 Color);
+	void SetDefaultStepNumberFont(const QString& Font);
+	void SetDefaultStepNumberColor(quint32 Color);
 
 	std::vector<lcInstructionsPage> mPages;
 	lcInstructionsPageSettings mPageSettings;

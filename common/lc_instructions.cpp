@@ -98,6 +98,28 @@ void lcInstructions::SetDefaultStepBackgroundColor(quint32 Color)
 		emit PageInvalid(static_cast<int>(PageIndex)); // todo: invalidate steps, not pages
 }
 
+void lcInstructions::SetDefaultStepNumberFont(const QString& Font)
+{
+	if (mStepProperties.StepNumberFont == Font)
+		return;
+
+	mStepProperties.StepNumberFont = Font;
+
+	for (size_t PageIndex = 0; PageIndex < mPages.size(); PageIndex++)
+		emit PageInvalid(static_cast<int>(PageIndex)); // todo: invalidate steps, not pages
+}
+
+void lcInstructions::SetDefaultStepNumberColor(quint32 Color)
+{
+	if (mStepProperties.StepNumberColor == Color)
+		return;
+
+	mStepProperties.StepNumberColor = Color;
+
+	for (size_t PageIndex = 0; PageIndex < mPages.size(); PageIndex++)
+		emit PageInvalid(static_cast<int>(PageIndex)); // todo: invalidate steps, not pages
+}
+
 void lcInstructions::CreatePages()
 {
 	mPages.clear();

@@ -19,6 +19,10 @@ lcInstructionsStepNumberItem::lcInstructionsStepNumberItem(const QString& Text, 
 lcInstructionsPageWidget::lcInstructionsPageWidget(QWidget* Parent, lcInstructions* Instructions, lcInstructionsPropertiesWidget* PropertiesWidget)
 	: QGraphicsView(Parent), mInstructions(Instructions), mPropertiesWidget(PropertiesWidget)
 {
+	QGraphicsScene* Scene = new QGraphicsScene();
+	setScene(Scene);
+
+	connect(Scene, &QGraphicsScene::selectionChanged, this, &lcInstructionsPageWidget::SelectionChanged);
 }
 
 void lcInstructionsPageWidget::SelectionChanged()
@@ -34,14 +38,14 @@ void lcInstructionsPageWidget::SelectionChanged()
 			Focus = SelectedItems.first();
 	}
 
-	mPropertiesWidget->FocusChanged(Focus);
+	mPropertiesWidget->SelectionChanged(Focus);
 }
 
 void lcInstructionsPageWidget::SetCurrentPage(const lcInstructionsPage* Page)
 {
-	QGraphicsScene* Scene = new QGraphicsScene();
-	connect(Scene, &QGraphicsScene::selectionChanged, this, &lcInstructionsPageWidget::SelectionChanged);
-	setScene(Scene);
+	QGraphicsScene* Scene = scene();
+
+	Scene->clear();
 
 	if (!Page)
 		return;
@@ -283,27 +287,44 @@ void lcInstructionsPropertiesWidget::StepNumberItemFocusIn(lcInstructionsStepNum
 	Layout->addWidget(FontLabel, 0, 0);
 
 	QToolButton* FontButton = new QToolButton();
-	FontButton->setText(Font.family());
+	QString FontName = Font.family();
+	QString FontStyle = Font.styleName();
+	if (!FontStyle.isEmpty())
+		FontName += " " + FontStyle;
+	FontName += " " + QString::number(Font.pointSize());
+	FontButton->setText(FontName);
 	Layout->addWidget(FontButton, 0, 1);
 
-	connect(FontButton, &QToolButton::clicked, []()
+	connect(FontButton, &QToolButton::clicked, [this, Font]()
 	{
-		bool Ok;
-		QFontDialog::getFont(&Ok);
-	});// this, & lcInstructionsPropertiesWidget::ColorButtonClicked);
+		bool Ok = false;
+
+		QFont NewFont = QFontDialog::getFont(&Ok, Font, this, tr("Select Step Number Font"));
+
+		if (Ok)
+			mInstructions->SetDefaultStepNumberFont(NewFont.toString()); // todo: this is clearing the scene selection and hiding the properties widget
+	});
 
 	QLabel* ColorLabel = new QLabel(tr("Color:"));
 	Layout->addWidget(ColorLabel, 1, 0);
 
-//	QToolButton* ColorButton = new QToolButton();
-//	ColorButton->setText("Font");
-//
-//	Layout->addWidget(ColorButton);
-//
-//	connect(ColorButton, &QToolButton::clicked, this, &lcInstructionsPropertiesWidget::ColorButtonClicked);
+	QToolButton* ColorButton = new QToolButton();
+	QPixmap Pixmap(12, 12);
+	QColor Color(LC_RGBA_RED(StepProperties.StepNumberColor), LC_RGBA_GREEN(StepProperties.StepNumberColor), LC_RGBA_BLUE(StepProperties.StepNumberColor));
+	Pixmap.fill(Color);
+	ColorButton->setIcon(Pixmap);
+	Layout->addWidget(ColorButton, 1, 1);
+
+	connect(ColorButton, &QToolButton::clicked, [this, Color]()
+	{
+		QColor NewColor = QColorDialog::getColor(Color, this, tr("Select Step Number Color"));
+
+		if (NewColor.isValid())
+			mInstructions->SetDefaultStepNumberColor(LC_RGBA(NewColor.red(), NewColor.green(), NewColor.blue(), NewColor.alpha()));
+	});
 }
 
-void lcInstructionsPropertiesWidget::FocusChanged(QGraphicsItem* FocusItem)
+void lcInstructionsPropertiesWidget::SelectionChanged(QGraphicsItem* FocusItem)
 {
 	if (mFocusItem == FocusItem)
 		return;

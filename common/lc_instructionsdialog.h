@@ -100,7 +100,7 @@ class lcInstructionsPropertiesWidget : public QDockWidget
 public:
 	lcInstructionsPropertiesWidget(QWidget* Parent, lcInstructions* Instructions);
 
-	void FocusChanged(QGraphicsItem* FocusItem);
+	void SelectionChanged(QGraphicsItem* FocusItem);
 
 protected slots:
 	void ColorButtonClicked();

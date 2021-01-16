@@ -1533,7 +1533,7 @@ void Project::ExportHTML(const lcHTMLExportOptions& Options)
 
 	auto AddPartsListImage = [&Dir](QTextStream& Stream, lcModel* Model, lcStep Step, const QString& BaseName)
 	{
-		QImage Image = Model->GetPartsListImage(1024, Step);
+		QImage Image = Model->GetPartsListImage(1024, Step, LC_RGBA(255, 255, 255, 0), QFont("Arial", 20, QFont::Bold), Qt::black);
 
 		if (!Image.isNull())
 		{

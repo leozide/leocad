@@ -58,6 +58,29 @@ protected:
 	lcStep mStep = 1;
 };
 
+class lcInstructionsPartsListItem : public QGraphicsPixmapItem
+{
+public:
+	lcInstructionsPartsListItem(QGraphicsItem* Parent, lcInstructions* Instructions, lcModel* Model, lcStep Step);
+
+	lcModel* GetModel() const
+	{
+		return mModel;
+	}
+
+	lcStep GetStep() const
+	{
+		return mStep;
+	}
+
+	void Update();
+
+protected:
+	lcInstructions* mInstructions = nullptr;
+	lcModel* mModel = nullptr;
+	lcStep mStep = 1;
+};
+
 class lcInstructionsPageWidget : public QGraphicsView
 {
 	Q_OBJECT

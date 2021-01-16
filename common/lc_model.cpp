@@ -1280,7 +1280,7 @@ QImage lcModel::GetStepImage(bool Zoom, int Width, int Height, lcStep Step)
 	return Image;
 }
 
-QImage lcModel::GetPartsListImage(int MaxWidth, lcStep Step) const
+QImage lcModel::GetPartsListImage(int MaxWidth, lcStep Step, quint32 BackgroundColor, QFont Font, QColor TextColor) const
 {
 	lcPartsList PartsList;
 
@@ -1379,7 +1379,7 @@ QImage lcModel::GetPartsListImage(int MaxWidth, lcStep Step) const
 
 	for (lcPartsListImage& Image : Images)
 	{
-		Context->ClearColorAndDepth(lcVector4(1.0f, 1.0f, 1.0f, 0.0f));
+		Context->ClearColorAndDepth(lcVector4(lcVector3FromColor(BackgroundColor), 0.0f));
 
 		lcScene Scene;
 
@@ -1437,7 +1437,6 @@ QImage lcModel::GetPartsListImage(int MaxWidth, lcStep Step) const
 	QImage DummyImage(16, 16, QImage::Format_ARGB32);
 	QPainter DummyPainter(&DummyImage);
 
-	QFont Font("helvetica", 20, QFont::Bold);
 	DummyPainter.setFont(Font);
 	QFontMetrics FontMetrics = DummyPainter.fontMetrics();
 	int Ascent = FontMetrics.ascent();
@@ -1485,10 +1484,11 @@ QImage lcModel::GetPartsListImage(int MaxWidth, lcStep Step) const
 	}
 
 	QImage PainterImage(ImageWidth + 40, CurrentHeight + 40, QImage::Format_ARGB32);
-	PainterImage.fill(QColor(255, 255, 255, 0));
+	PainterImage.fill(lcQColorFromRGBA(BackgroundColor));
 
 	QPainter Painter(&PainterImage);
 	Painter.setFont(Font);
+	Painter.setPen(TextColor);
 
 	for (lcPartsListImage& Image : Images)
 	{

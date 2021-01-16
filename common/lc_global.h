@@ -17,6 +17,10 @@
 #include <functional>
 #include <memory>
 
+#if _MSC_VER
+#pragma warning(default : 4062) // enumerator 'identifier' in switch of enum 'enumeration' is not handled
+#endif
+
 #ifndef Q_FALLTHROUGH
 #define Q_FALLTHROUGH();
 #endif

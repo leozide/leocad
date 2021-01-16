@@ -39,6 +39,13 @@ enum class lcInstructionsPropertyType
 	StepNumberFont,
 	StepNumberColor,
 	StepBackgroundColor,
+	PLIBackgroundColor,
+	PLIFont,
+	PLITextColor,
+	PLIBorderColor,
+//	PLIBorderWidth,
+//	PLIBorderRound,
+	// pli: spacing and margins, text alignment
 	Count
 };
 

@@ -24,8 +24,14 @@ lcInstructions::lcInstructions(Project* Project)
 	mStepProperties[static_cast<int>(lcInstructionsPropertyType::StepNumberFont)].Value = QFont("Arial", 72).toString();
 	mStepProperties[static_cast<int>(lcInstructionsPropertyType::StepNumberColor)].Value = LC_RGBA(0, 0, 0, 255);
 	mStepProperties[static_cast<int>(lcInstructionsPropertyType::StepBackgroundColor)].Value = LC_RGBA(255, 255, 255, 0);
+	mStepProperties[static_cast<int>(lcInstructionsPropertyType::PLIBackgroundColor)].Value = LC_RGBA(255, 255, 255, 255);
+	mStepProperties[static_cast<int>(lcInstructionsPropertyType::PLIFont)].Value = QFont("Arial", 20, QFont::Bold).toString();
+	mStepProperties[static_cast<int>(lcInstructionsPropertyType::PLITextColor)].Value = LC_RGBA(0, 0, 0, 255);
+	mStepProperties[static_cast<int>(lcInstructionsPropertyType::PLIBorderColor)].Value = LC_RGBA(0, 0, 0, 255);
+//	mStepProperties[static_cast<int>(lcInstructionsPropertyType::PLIBorderWidth)].Value = 2.0f;
+//	mStepProperties[static_cast<int>(lcInstructionsPropertyType::PLIBorderRound)].Value = true;
 
-	static_assert(static_cast<int>(lcInstructionsPropertyType::Count) == 3, "Missing default property");
+	static_assert(static_cast<int>(lcInstructionsPropertyType::Count) == 7, "Missing default property");
 
 	CreatePages();
 }

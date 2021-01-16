@@ -42,6 +42,22 @@ void lcInstructionsStepNumberItem::Update()
 	setText(QString::number(mStep));
 }
 
+lcInstructionsPartsListItem::lcInstructionsPartsListItem(QGraphicsItem* Parent, lcInstructions* Instructions, lcModel* Model, lcStep Step)
+	: QGraphicsPixmapItem(Parent), mInstructions(Instructions), mModel(Model), mStep(Step)
+{
+	setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsFocusable);
+}
+
+void lcInstructionsPartsListItem::Update()
+{
+	QColor BackgroundColor = mInstructions->GetColorProperty(lcInstructionsPropertyType::PLIBackgroundColor, mModel, mStep);
+	QFont Font = mInstructions->GetFontProperty(lcInstructionsPropertyType::PLIFont, mModel, mStep);
+	QColor TextColor = mInstructions->GetColorProperty(lcInstructionsPropertyType::PLITextColor, mModel, mStep);
+
+	QImage PartsImage = mModel->GetPartsListImage(300, mStep, lcRGBAFromQColor(BackgroundColor), Font, TextColor);
+	setPixmap(QPixmap::fromImage(PartsImage));
+}
+
 lcInstructionsPageWidget::lcInstructionsPageWidget(QWidget* Parent, lcInstructions* Instructions, lcInstructionsPropertiesWidget* PropertiesWidget)
 	: QGraphicsView(Parent), mInstructions(Instructions), mPropertiesWidget(PropertiesWidget)
 {
@@ -76,6 +92,16 @@ void lcInstructionsPageWidget::StepSettingsChanged(lcModel* Model, lcStep Step)
 		{
 			if (!Model || (NumberItem->GetModel() == Model && NumberItem->GetStep() == Step))
 				NumberItem->Update();
+
+			continue;
+		}
+
+		lcInstructionsPartsListItem* PartsItem = dynamic_cast<lcInstructionsPartsListItem*>(Item);
+
+		if (PartsItem)
+		{
+			if (!Model || (PartsItem->GetModel() == Model && PartsItem->GetStep() == Step))
+				PartsItem->Update();
 
 			continue;
 		}
@@ -125,11 +151,9 @@ void lcInstructionsPageWidget::SetCurrentPage(const lcInstructionsPage* Page)
 		lcInstructionsStepNumberItem* StepNumberItem = new lcInstructionsStepNumberItem(StepImageItem, mInstructions, Step.Model, Step.Step);
 		StepNumberItem->Update();
 
-		QImage PartsImage = Step.Model->GetPartsListImage(300, Step.Step);
-
-		QGraphicsPixmapItem* PartsImageItem = new QGraphicsPixmapItem(QPixmap::fromImage(PartsImage), StepImageItem);
-		PartsImageItem->setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsFocusable);
+		lcInstructionsPartsListItem* PartsImageItem = new lcInstructionsPartsListItem(StepImageItem, mInstructions, Step.Model, Step.Step);
 		PartsImageItem->setPos(StepNumberItem->boundingRect().topRight());
+		PartsImageItem->Update();
 	}
 }
 
@@ -277,17 +301,24 @@ void lcInstructionsPropertiesWidget::AddColorProperty(lcInstructionsPropertyType
 
 	switch (Type)
 	{
-	case lcInstructionsPropertyType::StepNumberFont:
-		break;
-
 	case lcInstructionsPropertyType::StepNumberColor:
-		Label = tr("Color:");
+	case lcInstructionsPropertyType::PLITextColor:
+		Label = tr("Text Color:");
 		break;
 
 	case lcInstructionsPropertyType::StepBackgroundColor:
+	case lcInstructionsPropertyType::PLIBackgroundColor:
 		Label = tr("Background Color:");
 		break;
 
+	case lcInstructionsPropertyType::PLIBorderColor:
+		Label = tr("Border Color:");
+		break;
+
+	case lcInstructionsPropertyType::StepNumberFont:
+	case lcInstructionsPropertyType::PLIFont:
+//	case lcInstructionsPropertyType::PLIBorderWidth:
+//	case lcInstructionsPropertyType::PLIBorderRound:
 	case lcInstructionsPropertyType::Count:
 		break;
 	}
@@ -315,9 +346,6 @@ void lcInstructionsPropertiesWidget::AddColorProperty(lcInstructionsPropertyType
 
 		switch (Type)
 		{
-			case lcInstructionsPropertyType::StepNumberFont:
-				break;
-
 			case lcInstructionsPropertyType::StepNumberColor:
 				Title = tr("Select Step Number Color");
 				break;
@@ -326,6 +354,22 @@ void lcInstructionsPropertiesWidget::AddColorProperty(lcInstructionsPropertyType
 				Title = tr("Select Step Background Color");
 				break;
 
+			case lcInstructionsPropertyType::PLIBackgroundColor:
+				Title = tr("Select Parts List Background Color");
+				break;
+
+			case lcInstructionsPropertyType::PLIBorderColor:
+				Title = tr("Select Parts List Border Color");
+				break;
+
+			case lcInstructionsPropertyType::PLITextColor:
+				Title = tr("Select Parts List Text Color");
+				break;
+
+			case lcInstructionsPropertyType::StepNumberFont:
+			case lcInstructionsPropertyType::PLIFont:
+//			case lcInstructionsPropertyType::StepPLIBorderWidth:
+//			case lcInstructionsPropertyType::StepPLIBorderRound:
 			case lcInstructionsPropertyType::Count:
 				break;
 		}
@@ -343,20 +387,7 @@ void lcInstructionsPropertiesWidget::AddColorProperty(lcInstructionsPropertyType
 
 void lcInstructionsPropertiesWidget::AddFontProperty(lcInstructionsPropertyType Type)
 {
-	QString Label;
-
-	switch (Type)
-	{
-		case lcInstructionsPropertyType::StepNumberFont:
-			Label = tr("Font:");
-			break;
-
-		case lcInstructionsPropertyType::StepNumberColor:
-		case lcInstructionsPropertyType::StepBackgroundColor:
-		case lcInstructionsPropertyType::Count:
-			break;
-	}
-
+	const QString Label = tr("Font:");
 	const int Row = mPropertiesLayout->rowCount();
 
 	mPropertiesLayout->addWidget(new QLabel(Label), Row, 0);
@@ -383,21 +414,28 @@ void lcInstructionsPropertiesWidget::AddFontProperty(lcInstructionsPropertyType 
 				Title = tr("Select Step Number Font");
 				break;
 
+			case lcInstructionsPropertyType::PLIFont:
+				Title = tr("Select Parts List Font");
+				break;
+
 			case lcInstructionsPropertyType::StepNumberColor:
 			case lcInstructionsPropertyType::StepBackgroundColor:
+			case lcInstructionsPropertyType::PLIBackgroundColor:
+			case lcInstructionsPropertyType::PLITextColor:
+			case lcInstructionsPropertyType::PLIBorderColor:
 			case lcInstructionsPropertyType::Count:
 				break;
 		}
 
 		bool Ok = false;
 
-		QFont Font = mInstructions->GetFontProperty(lcInstructionsPropertyType::StepNumberFont, mModel, mStep);
+		QFont Font = mInstructions->GetFontProperty(Type, mModel, mStep);
 		Font = QFontDialog::getFont(&Ok, Font, this, tr("Select Step Number Font"));
 
 		if (Ok)
 		{
 			UpdateButton();
-			mInstructions->SetDefaultFont(lcInstructionsPropertyType::StepNumberFont, Font);
+			mInstructions->SetDefaultFont(Type, Font);
 		}
 	});
 }
@@ -452,6 +490,25 @@ void lcInstructionsPropertiesWidget::SelectionChanged(QGraphicsItem* FocusItem)
 
 		AddFontProperty(lcInstructionsPropertyType::StepNumberFont);
 		AddColorProperty(lcInstructionsPropertyType::StepNumberColor);
+
+		return;
+	}
+
+	lcInstructionsPartsListItem* PartsItem = dynamic_cast<lcInstructionsPartsListItem*>(FocusItem);
+
+	if (PartsItem)
+	{
+		CreatePropertyWidget(tr("Parts List Properties"));
+
+		mModel = PartsItem->GetModel();
+		mStep = PartsItem->GetStep();
+
+		AddColorProperty(lcInstructionsPropertyType::PLIBackgroundColor);
+		AddFontProperty(lcInstructionsPropertyType::PLIFont);
+		AddColorProperty(lcInstructionsPropertyType::PLITextColor);
+		AddColorProperty(lcInstructionsPropertyType::PLIBorderColor);
+//		PLIBorderWidth,
+//		PLIBorderRound,
 
 		return;
 	}

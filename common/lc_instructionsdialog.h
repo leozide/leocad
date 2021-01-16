@@ -102,9 +102,6 @@ public:
 
 	void SelectionChanged(QGraphicsItem* FocusItem);
 
-protected slots:
-	void ColorButtonClicked();
-
 protected:
 	void StepImageItemFocusIn(lcInstructionsStepImageItem* ImageItem);
 	void StepNumberItemFocusIn(lcInstructionsStepNumberItem* NumberItem);

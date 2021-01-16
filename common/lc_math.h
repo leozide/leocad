@@ -14,7 +14,16 @@
 #define LC_RGBA_GREEN(rgba) ((quint8)(((rgba) >>  8) & 0xff))
 #define LC_RGBA_BLUE(rgba)  ((quint8)(((rgba) >> 16) & 0xff))
 #define LC_RGBA_ALPHA(rgba) ((quint8)(((rgba) >> 24) & 0xff))
-#define LC_FLOATRGB(f) LC_RGB(f[0]*255, f[1]*255, f[2]*255)
+
+inline quint32 lcRGBAFromQColor(const QColor& Color)
+{
+	return LC_RGBA(Color.red(), Color.green(), Color.blue(), Color.alpha());
+}
+
+inline QColor lcQColorFromRGBA(quint32 RGBA)
+{
+	return QColor::fromRgb(LC_RGBA_RED(RGBA), LC_RGBA_GREEN(RGBA), LC_RGBA_BLUE(RGBA), LC_RGBA_ALPHA(RGBA));
+}
 
 template<typename T>
 inline T lcMin(const T& a, const T& b)

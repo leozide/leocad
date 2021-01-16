@@ -21,63 +21,12 @@ lcInstructions::lcInstructions(Project* Project)
 	mPageSettings.Columns = 1;
 	mPageSettings.Direction = lcInstructionsDirection::Horizontal;
 
+	mStepProperties[static_cast<int>(lcInstructionsPropertyType::StepNumberFont)].Value = QFont("Arial", 72).toString();
+	mStepProperties[static_cast<int>(lcInstructionsPropertyType::StepNumberColor)].Value = LC_RGBA(0, 0, 0, 255);
+	mStepProperties[static_cast<int>(lcInstructionsPropertyType::StepBackgroundColor)].Value = LC_RGBA(255, 255, 255, 0);
+	static_assert(static_cast<int>(lcInstructionsPropertyType::Count) == 3, "size mismatch");
+
 	CreatePages();
-}
-
-lcInstructionsStepProperties lcInstructions::GetStepProperties(lcModel* Model, lcStep Step) const
-{
-	lcInstructionsStepProperties StepProperties = mStepProperties;
-
-	std::map<lcModel*, lcInstructionsModel>::const_iterator ModelIt = mModels.find(Model);
-
-	if (ModelIt == mModels.end())
-		return StepProperties;
-
-	const lcInstructionsModel& InstructionModel = ModelIt->second;
-
-	for (lcStep StepIndex = 0; StepIndex <= Step; StepIndex++)
-	{
-		const lcInstructionsStepProperties& Properties = InstructionModel.StepProperties[StepIndex];
-
-		auto ShouldSetProperty = [StepIndex, Step](lcInstructionsPropertyMode Mode)
-		{
-			switch (Mode)
-			{
-			case lcInstructionsPropertyMode::NotSet:
-				return false;
-			case lcInstructionsPropertyMode::Default:
-				return true;
-			case lcInstructionsPropertyMode::Model:
-				return true;
-			case lcInstructionsPropertyMode::StepForward:
-				return true;
-			case lcInstructionsPropertyMode::StepOnly:
-				return StepIndex == Step;
-			}
-
-			return false;
-		};
-
-		if (ShouldSetProperty(Properties.BackgroundColorMode))
-		{
-			StepProperties.BackgroundColorMode = Properties.BackgroundColorMode;
-			StepProperties.BackgroundColor = Properties.BackgroundColor;
-		}
-
-		if (ShouldSetProperty(Properties.StepNumberFontMode))
-		{
-			StepProperties.StepNumberFontMode = Properties.StepNumberFontMode;
-			StepProperties.StepNumberFont = Properties.StepNumberFont;
-		}
-
-		if (ShouldSetProperty(Properties.StepNumberColorMode))
-		{
-			StepProperties.StepNumberColorMode = Properties.StepNumberColorMode;
-			StepProperties.StepNumberColor = Properties.StepNumberColor;
-		}
-	}
-
-	return StepProperties;
 }
 
 void lcInstructions::SetDefaultPageSettings(const lcInstructionsPageSettings& PageSettings)
@@ -87,34 +36,63 @@ void lcInstructions::SetDefaultPageSettings(const lcInstructionsPageSettings& Pa
 	CreatePages();
 }
 
-void lcInstructions::SetDefaultStepBackgroundColor(quint32 Color)
+QColor lcInstructions::GetColorProperty(lcInstructionsPropertyType Type, lcModel* Model, lcStep Step) const
 {
-	if (mStepProperties.BackgroundColor == Color)
-		return;
-
-	mStepProperties.BackgroundColor = Color;
-
-	for (size_t PageIndex = 0; PageIndex < mPages.size(); PageIndex++)
-		emit PageInvalid(static_cast<int>(PageIndex)); // todo: invalidate steps, not pages
+	QVariant Value = GetProperty(Type, Model, Step);
+	return lcRGBAFromQColor(Value.toUInt());
 }
 
-void lcInstructions::SetDefaultStepNumberFont(const QString& Font)
+QFont lcInstructions::GetFontProperty(lcInstructionsPropertyType Type, lcModel* Model, lcStep Step) const
 {
-	if (mStepProperties.StepNumberFont == Font)
-		return;
-
-	mStepProperties.StepNumberFont = Font;
-
-	for (size_t PageIndex = 0; PageIndex < mPages.size(); PageIndex++)
-		emit PageInvalid(static_cast<int>(PageIndex)); // todo: invalidate steps, not pages
+	QVariant Value = GetProperty(Type, Model, Step);
+	QFont Font;
+	Font.fromString(Value.toString());
+	return Font;
 }
 
-void lcInstructions::SetDefaultStepNumberColor(quint32 Color)
+QVariant lcInstructions::GetProperty(lcInstructionsPropertyType Type, lcModel* Model, lcStep Step) const
 {
-	if (mStepProperties.StepNumberColor == Color)
+	QVariant Value = mStepProperties[static_cast<int>(Type)].Value;
+
+	std::map<lcModel*, lcInstructionsModel>::const_iterator ModelIt = mModels.find(Model);
+
+	if (ModelIt == mModels.end())
+		return Value;
+
+	const lcInstructionsModel& InstructionModel = ModelIt->second;
+
+	for (lcStep StepIndex = 0; StepIndex <= Step; StepIndex++)
+	{
+		const lcInstructionsProperties& Properties = InstructionModel.StepProperties[StepIndex];
+		const lcInstructionsProperty& Property = Properties[static_cast<int>(Type)];
+
+		if (Property.Mode == lcInstructionsPropertyMode::NotSet || (Property.Mode == lcInstructionsPropertyMode::StepOnly && StepIndex != Step))
+			continue;
+
+		Value = Property.Value;
+	}
+
+	return Value;
+}
+
+void lcInstructions::SetDefaultColor(lcInstructionsPropertyType Type, const QColor& Color)
+{
+	SetDefaultProperty(Type, lcRGBAFromQColor(Color));
+}
+
+void lcInstructions::SetDefaultFont(lcInstructionsPropertyType Type, const QFont& Font)
+{
+	SetDefaultProperty(Type, Font.toString());
+}
+
+void lcInstructions::SetDefaultProperty(lcInstructionsPropertyType Type, const QVariant& Value)
+{
+	lcInstructionsProperty& Property = mStepProperties[static_cast<int>(Type)];
+
+	if (Property.Value == Value)
 		return;
 
-	mStepProperties.StepNumberColor = Color;
+	Property.Value = Value;
 
 	for (size_t PageIndex = 0; PageIndex < mPages.size(); PageIndex++)
 		emit PageInvalid(static_cast<int>(PageIndex)); // todo: invalidate steps, not pages

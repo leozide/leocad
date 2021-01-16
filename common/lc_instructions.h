@@ -34,17 +34,21 @@ enum class lcInstructionsPropertyMode
 	StepOnly
 };
 
-struct lcInstructionsStepProperties
+enum class lcInstructionsPropertyType
 {
-	lcInstructionsPropertyMode StepNumberFontMode = lcInstructionsPropertyMode::NotSet;
-	QString StepNumberFont = QFont("Arial", 72).toString();
-
-	lcInstructionsPropertyMode StepNumberColorMode = lcInstructionsPropertyMode::NotSet;
-	quint32 StepNumberColor = LC_RGBA(0, 0, 0, 255);
-
-	lcInstructionsPropertyMode BackgroundColorMode = lcInstructionsPropertyMode::NotSet;
-	quint32 BackgroundColor = LC_RGBA(255, 255, 255, 0);
+	StepNumberFont,
+	StepNumberColor,
+	StepBackgroundColor,
+	Count
 };
+
+struct lcInstructionsProperty
+{
+	lcInstructionsPropertyMode Mode = lcInstructionsPropertyMode::NotSet;
+	QVariant Value;
+};
+
+using lcInstructionsProperties = std::array<lcInstructionsProperty, static_cast<int>(lcInstructionsPropertyType::Count)>;
 
 struct lcInstructionsStep
 {
@@ -52,7 +56,7 @@ struct lcInstructionsStep
 	lcModel* Model;
 	lcStep Step;
 
-	lcInstructionsStepProperties Properties;
+	lcInstructionsProperties Properties;
 };
 
 struct lcInstructionsPage
@@ -63,7 +67,7 @@ struct lcInstructionsPage
 
 struct lcInstructionsModel
 {
-	std::vector<lcInstructionsStepProperties> StepProperties;
+	std::vector<lcInstructionsProperties> StepProperties;
 };
 
 class lcInstructions : public QObject
@@ -73,17 +77,18 @@ class lcInstructions : public QObject
 public:
 	lcInstructions(Project* Project = nullptr);
 
-	lcInstructionsStepProperties GetStepProperties(lcModel* Model, lcStep Step) const;
 	void SetDefaultPageSettings(const lcInstructionsPageSettings& PageSettings);
 
-	void SetDefaultStepBackgroundColor(quint32 Color);
-	void SetDefaultStepNumberFont(const QString& Font);
-	void SetDefaultStepNumberColor(quint32 Color);
+	QColor GetColorProperty(lcInstructionsPropertyType Type, lcModel* Model, lcStep Step) const;
+	QFont GetFontProperty(lcInstructionsPropertyType Type, lcModel* Model, lcStep Step) const;
+
+	void SetDefaultColor(lcInstructionsPropertyType Type, const QColor& Color);
+	void SetDefaultFont(lcInstructionsPropertyType Type, const QFont& Font);
 
 	std::vector<lcInstructionsPage> mPages;
 	lcInstructionsPageSettings mPageSettings;
 	lcInstructionsPageSetup mPageSetup;
-	lcInstructionsStepProperties mStepProperties;
+	lcInstructionsProperties mStepProperties;
 
 	std::map<lcModel*, lcInstructionsModel> mModels;
 
@@ -93,6 +98,9 @@ signals:
 protected:
 	void CreatePages();
 	void AddDefaultPages(lcModel* Model, std::vector<const lcModel*>& AddedModels);
+
+	QVariant GetProperty(lcInstructionsPropertyType Type, lcModel* Model, lcStep Step) const;
+	void SetDefaultProperty(lcInstructionsPropertyType Type, const QVariant& Value);
 
 	Project* mProject = nullptr;
 

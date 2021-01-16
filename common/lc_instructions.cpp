@@ -24,7 +24,8 @@ lcInstructions::lcInstructions(Project* Project)
 	mStepProperties[static_cast<int>(lcInstructionsPropertyType::StepNumberFont)].Value = QFont("Arial", 72).toString();
 	mStepProperties[static_cast<int>(lcInstructionsPropertyType::StepNumberColor)].Value = LC_RGBA(0, 0, 0, 255);
 	mStepProperties[static_cast<int>(lcInstructionsPropertyType::StepBackgroundColor)].Value = LC_RGBA(255, 255, 255, 0);
-	static_assert(static_cast<int>(lcInstructionsPropertyType::Count) == 3, "size mismatch");
+
+	static_assert(static_cast<int>(lcInstructionsPropertyType::Count) == 3, "Missing default property");
 
 	CreatePages();
 }

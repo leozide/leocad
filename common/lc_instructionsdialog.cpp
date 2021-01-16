@@ -233,81 +233,114 @@ lcInstructionsPropertiesWidget::lcInstructionsPropertiesWidget(QWidget* Parent, 
 	Layout->setRowStretch(3, 1);
 }
 
-void lcInstructionsPropertiesWidget::StepImageItemFocusIn(lcInstructionsStepImageItem* ImageItem)
+void lcInstructionsPropertiesWidget::AddColorProperty(lcInstructionsPropertyType Type)
 {
-	mWidget = new lcCollapsibleWidget(tr("Step Properties")); // todo: disable collapse
+	QString Label;
 
-	QGridLayout* WidgetLayout = qobject_cast<QGridLayout*>(widget()->layout());
-	WidgetLayout->addWidget(mWidget, 2, 0, 1, -1);
+	switch (Type)
+	{
+	case lcInstructionsPropertyType::StepNumberFont:
+		break;
 
-	QGridLayout* Layout = new QGridLayout();
-	mWidget->SetChildLayout(Layout);
+	case lcInstructionsPropertyType::StepNumberColor:
+		Label = tr("Color:");
+		break;
 
-	QLabel* ColorLabel = new QLabel(tr("Background Color:"));
-	Layout->addWidget(ColorLabel, 1, 0);
+	case lcInstructionsPropertyType::StepBackgroundColor:
+		Label = tr("Background Color:");
+		break;
+
+	case lcInstructionsPropertyType::Count:
+		break;
+	}
+
+	const int Row = mPropertiesLayout->rowCount();
+
+	mPropertiesLayout->addWidget(new QLabel(Label), Row, 0);
 
 	QToolButton* ColorButton = new QToolButton();
 	QPixmap Pixmap(12, 12);
-	QColor Color = mInstructions->GetColorProperty(lcInstructionsPropertyType::StepBackgroundColor, ImageItem->GetModel(), ImageItem->GetStep());
+	QColor Color = mInstructions->GetColorProperty(Type, mModel, mStep);
 	Pixmap.fill(Color);
 	ColorButton->setIcon(Pixmap);
-	Layout->addWidget(ColorButton, 1, 1);
+	mPropertiesLayout->addWidget(ColorButton, Row, 1);
 
-	connect(ColorButton, &QToolButton::clicked, [this, Color]()
+	connect(ColorButton, &QToolButton::clicked, [this, Type, Color]()
 	{
-		QColor NewColor = QColorDialog::getColor(Color, this, tr("Select Step Number Color"));
+		QString Title;
+
+		switch (Type)
+		{
+			case lcInstructionsPropertyType::StepNumberFont:
+				break;
+
+			case lcInstructionsPropertyType::StepNumberColor:
+				Title = tr("Select Step Number Color");
+				break;
+
+			case lcInstructionsPropertyType::StepBackgroundColor:
+				Title = tr("Select Step Background Color");
+				break;
+
+			case lcInstructionsPropertyType::Count:
+				break;
+		}
+
+		QColor NewColor = QColorDialog::getColor(Color, this, Title);
 
 		if (NewColor.isValid())
-			mInstructions->SetDefaultColor(lcInstructionsPropertyType::StepBackgroundColor, NewColor);
+			mInstructions->SetDefaultColor(Type, NewColor);
 	});
 }
 
-void lcInstructionsPropertiesWidget::StepNumberItemFocusIn(lcInstructionsStepNumberItem* NumberItem)
+void lcInstructionsPropertiesWidget::AddFontProperty(lcInstructionsPropertyType Type)
 {
-	mWidget = new lcCollapsibleWidget(tr("Step Number Properties")); // todo: disable collapse
+	QString Label;
 
-	QGridLayout* WidgetLayout = qobject_cast<QGridLayout*>(widget()->layout());
-	WidgetLayout->addWidget(mWidget, 2, 0, 1, -1);
+	switch (Type)
+	{
+		case lcInstructionsPropertyType::StepNumberFont:
+			Label = tr("Font:");
+			break;
 
-	QGridLayout* Layout = new QGridLayout();
-	mWidget->SetChildLayout(Layout);
+		case lcInstructionsPropertyType::StepNumberColor:
+		case lcInstructionsPropertyType::StepBackgroundColor:
+		case lcInstructionsPropertyType::Count:
+			break;
+	}
 
-	QFont Font = mInstructions->GetFontProperty(lcInstructionsPropertyType::StepNumberFont, NumberItem->GetModel(), NumberItem->GetStep());
+	const int Row = mPropertiesLayout->rowCount();
 
-	QLabel* FontLabel = new QLabel(tr("Font:"));
-	Layout->addWidget(FontLabel, 0, 0);
+	mPropertiesLayout->addWidget(new QLabel(Label), Row, 0);
 
 	QToolButton* FontButton = new QToolButton();
+	QFont Font = mInstructions->GetFontProperty(lcInstructionsPropertyType::StepNumberFont, mModel, mStep);
 	QString FontName = QString("%1 %2").arg(Font.family(), QString::number(Font.pointSize()));
 	FontButton->setText(FontName);
-	Layout->addWidget(FontButton, 0, 1);
+	mPropertiesLayout->addWidget(FontButton, Row, 1);
 
-	connect(FontButton, &QToolButton::clicked, [this, Font]()
+	connect(FontButton, &QToolButton::clicked, [this, Type, Font]()
 	{
+		QString Title;
+
+		switch (Type)
+		{
+			case lcInstructionsPropertyType::StepNumberFont:
+				Title = tr("Select Step Number Font");
+				break;
+
+			case lcInstructionsPropertyType::StepNumberColor:
+			case lcInstructionsPropertyType::StepBackgroundColor:
+			case lcInstructionsPropertyType::Count:
+				break;
+		}
+
 		bool Ok = false;
 
 		QFont NewFont = QFontDialog::getFont(&Ok, Font, this, tr("Select Step Number Font"));
 
 		if (Ok)
 			mInstructions->SetDefaultFont(lcInstructionsPropertyType::StepNumberFont, NewFont); // todo: this is clearing the scene selection and hiding the properties widget
-	});
-
-	QLabel* ColorLabel = new QLabel(tr("Color:"));
-	Layout->addWidget(ColorLabel, 1, 0);
-
-	QToolButton* ColorButton = new QToolButton();
-	QPixmap Pixmap(12, 12);
-	QColor Color = mInstructions->GetColorProperty(lcInstructionsPropertyType::StepNumberColor, NumberItem->GetModel(), NumberItem->GetStep());
-	Pixmap.fill(Color);
-	ColorButton->setIcon(Pixmap);
-	Layout->addWidget(ColorButton, 1, 1);
-
-	connect(ColorButton, &QToolButton::clicked, [this, Color]()
-	{
-		QColor NewColor = QColorDialog::getColor(Color, this, tr("Select Step Number Color"));
-
-		if (NewColor.isValid())
-			mInstructions->SetDefaultColor(lcInstructionsPropertyType::StepNumberColor, NewColor);
 	});
 }
 
@@ -319,15 +352,34 @@ void lcInstructionsPropertiesWidget::SelectionChanged(QGraphicsItem* FocusItem)
 	delete mWidget;
 	mWidget = nullptr;
 	mFocusItem = FocusItem;
+	mModel = nullptr;
+	mStep = 1;
 
 	if (!FocusItem)
 		return;
+
+	auto CreatePropertyWidget = [this](const QString& Title)
+	{
+		mWidget = new lcCollapsibleWidget(Title); // todo: disable collapse
+
+		QGridLayout* WidgetLayout = qobject_cast<QGridLayout*>(widget()->layout());
+		WidgetLayout->addWidget(mWidget, 2, 0, 1, -1);
+
+		mPropertiesLayout = new QGridLayout();
+		mWidget->SetChildLayout(mPropertiesLayout);
+	};
 
 	lcInstructionsStepImageItem* ImageItem = dynamic_cast<lcInstructionsStepImageItem*>(FocusItem);
 
 	if (ImageItem)
 	{
-		StepImageItemFocusIn(ImageItem);
+		CreatePropertyWidget(tr("Step Properties"));
+
+		mModel = ImageItem->GetModel();
+		mStep = ImageItem->GetStep();
+
+		AddColorProperty(lcInstructionsPropertyType::StepBackgroundColor);
+
 		return;
 	}
 
@@ -335,7 +387,14 @@ void lcInstructionsPropertiesWidget::SelectionChanged(QGraphicsItem* FocusItem)
 
 	if (NumberItem)
 	{
-		StepNumberItemFocusIn(NumberItem);
+		CreatePropertyWidget(tr("Step Number Properties"));
+
+		mModel = NumberItem->GetModel();
+		mStep = NumberItem->GetStep();
+
+		AddFontProperty(lcInstructionsPropertyType::StepNumberFont);
+		AddColorProperty(lcInstructionsPropertyType::StepNumberColor);
+
 		return;
 	}
 }

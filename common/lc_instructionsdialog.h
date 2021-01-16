@@ -103,12 +103,15 @@ public:
 	void SelectionChanged(QGraphicsItem* FocusItem);
 
 protected:
-	void StepImageItemFocusIn(lcInstructionsStepImageItem* ImageItem);
-	void StepNumberItemFocusIn(lcInstructionsStepNumberItem* NumberItem);
+	void AddColorProperty(lcInstructionsPropertyType Type);
+	void AddFontProperty(lcInstructionsPropertyType Type);
 
 	lcCollapsibleWidget* mWidget = nullptr;
+	QGridLayout* mPropertiesLayout = nullptr;
 	lcInstructions* mInstructions = nullptr;
 	QGraphicsItem* mFocusItem = nullptr;
+	lcModel* mModel = nullptr;
+	lcStep mStep = 1;
 };
 
 class lcInstructionsDialog : public QMainWindow

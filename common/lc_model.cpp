@@ -1379,6 +1379,7 @@ QImage lcModel::GetPartsListImage(int MaxWidth, lcStep Step, quint32 BackgroundC
 
 	for (lcPartsListImage& Image : Images)
 	{
+		View.BindRenderFramebuffer();
 		Context->ClearColorAndDepth(lcVector4(lcVector3FromColor(BackgroundColor), 0.0f));
 
 		lcScene Scene;
@@ -1398,6 +1399,7 @@ QImage lcModel::GetPartsListImage(int MaxWidth, lcStep Step, quint32 BackgroundC
 
 		Scene.Draw(Context);
 
+		View.UnbindRenderFramebuffer();
 		Image.Thumbnail = View.GetRenderFramebufferImage().convertToFormat(QImage::Format_ARGB32);
 	}
 

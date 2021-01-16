@@ -95,8 +95,7 @@ void lcInstructions::SetDefaultProperty(lcInstructionsPropertyType Type, const Q
 
 	Property.Value = Value;
 
-	for (size_t PageIndex = 0; PageIndex < mPages.size(); PageIndex++)
-		emit PageInvalid(static_cast<int>(PageIndex)); // todo: invalidate steps, not pages
+	emit StepSettingsChanged(nullptr, 0);
 }
 
 void lcInstructions::CreatePages()

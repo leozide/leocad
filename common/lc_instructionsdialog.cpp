@@ -6,14 +6,40 @@
 #include "lc_view.h"
 #include "lc_collapsiblewidget.h"
 
-lcInstructionsStepImageItem::lcInstructionsStepImageItem(const QPixmap& Pixmap, QGraphicsItem* Parent, lcModel* Model, lcStep Step)
-	: QGraphicsPixmapItem(Pixmap, Parent), mModel(Model), mStep(Step)
+lcInstructionsStepImageItem::lcInstructionsStepImageItem(QGraphicsItem* Parent, lcInstructions* Instructions, lcModel* Model, lcStep Step)
+	: QGraphicsPixmapItem(Parent), mInstructions(Instructions), mModel(Model), mStep(Step)
 {
+	setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsFocusable);
 }
 
-lcInstructionsStepNumberItem::lcInstructionsStepNumberItem(const QString& Text, QGraphicsItem* Parent, lcModel* Model, lcStep Step)
-	: QGraphicsSimpleTextItem(Text, Parent), mModel(Model), mStep(Step)
+void lcInstructionsStepImageItem::Update()
 {
+	lcView View(lcViewType::View, mModel);
+
+	View.SetOffscreenContext();
+	View.MakeCurrent();
+	View.SetBackgroundColorOverride(lcRGBAFromQColor(mInstructions->GetColorProperty(lcInstructionsPropertyType::StepBackgroundColor, mModel, mStep)));
+	View.SetSize(mWidth, mHeight);
+
+	std::vector<QImage> Images = View.GetStepImages(mStep, mStep);
+
+	if (!Images.empty())
+		setPixmap(QPixmap::fromImage(Images.front()));
+}
+
+lcInstructionsStepNumberItem::lcInstructionsStepNumberItem(QGraphicsItem* Parent, lcInstructions* Instructions, lcModel* Model, lcStep Step)
+	: QGraphicsSimpleTextItem(Parent), mInstructions(Instructions), mModel(Model), mStep(Step)
+{
+	setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsFocusable);
+}
+
+void lcInstructionsStepNumberItem::Update()
+{
+	QFont StepNumberFont = mInstructions->GetFontProperty(lcInstructionsPropertyType::StepNumberFont, mModel, mStep);
+
+	setFont(StepNumberFont);
+	setBrush(QBrush(mInstructions->GetColorProperty(lcInstructionsPropertyType::StepNumberColor, mModel, mStep)));
+	setText(QString::number(mStep));
 }
 
 lcInstructionsPageWidget::lcInstructionsPageWidget(QWidget* Parent, lcInstructions* Instructions, lcInstructionsPropertiesWidget* PropertiesWidget)
@@ -22,7 +48,38 @@ lcInstructionsPageWidget::lcInstructionsPageWidget(QWidget* Parent, lcInstructio
 	QGraphicsScene* Scene = new QGraphicsScene();
 	setScene(Scene);
 
+	connect(mInstructions, &lcInstructions::StepSettingsChanged, this, &lcInstructionsPageWidget::StepSettingsChanged);
 	connect(Scene, &QGraphicsScene::selectionChanged, this, &lcInstructionsPageWidget::SelectionChanged);
+}
+
+void lcInstructionsPageWidget::StepSettingsChanged(lcModel* Model, lcStep Step)
+{
+	QGraphicsScene* Scene = scene();
+
+	QList<QGraphicsItem*> Items = Scene->items();
+
+	for (QGraphicsItem* Item : Items)
+	{
+		lcInstructionsStepImageItem* ImageItem = dynamic_cast<lcInstructionsStepImageItem*>(Item);
+
+		if (ImageItem)
+		{
+			if (!Model || (ImageItem->GetModel() == Model && ImageItem->GetStep() == Step))
+				ImageItem->Update();
+
+			continue;
+		}
+
+		lcInstructionsStepNumberItem* NumberItem = dynamic_cast<lcInstructionsStepNumberItem*>(Item);
+
+		if (NumberItem)
+		{
+			if (!Model || (NumberItem->GetModel() == Model && NumberItem->GetStep() == Step))
+				NumberItem->Update();
+
+			continue;
+		}
+	}
 }
 
 void lcInstructionsPageWidget::SelectionChanged()
@@ -60,32 +117,13 @@ void lcInstructionsPageWidget::SetCurrentPage(const lcInstructionsPage* Page)
 
 	for (const lcInstructionsStep& Step : Page->Steps)
 	{
-		const float StepWidth = MarginsRect.width() * Step.Rect.width();
-		const float StepHeight = MarginsRect.height() * Step.Rect.height();
-
-		lcView View(lcViewType::View, Step.Model);
-
-		View.SetOffscreenContext();
-		View.MakeCurrent();
-		View.SetBackgroundColorOverride(lcRGBAFromQColor(mInstructions->GetColorProperty(lcInstructionsPropertyType::StepBackgroundColor, Step.Model, Step.Step)));
-		View.SetSize(StepWidth, StepHeight);
-
-		std::vector<QImage> Images = View.GetStepImages(Step.Step, Step.Step);
-
-		if (Images.empty())
-			continue;
-
-		QImage& StepImage = Images.front();
-
-		lcInstructionsStepImageItem* StepImageItem = new lcInstructionsStepImageItem(QPixmap::fromImage(StepImage), PageItem, Step.Model, Step.Step);
-		StepImageItem->setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsFocusable);
+		lcInstructionsStepImageItem* StepImageItem = new lcInstructionsStepImageItem(PageItem, mInstructions, Step.Model, Step.Step);
 		StepImageItem->setPos(MarginsRect.left() + MarginsRect.width() * Step.Rect.x(), MarginsRect.top() + MarginsRect.height() * Step.Rect.y());
+		StepImageItem->SetImageSize(MarginsRect.width() * Step.Rect.width(), MarginsRect.height() * Step.Rect.height());
+		StepImageItem->Update();
 
-		lcInstructionsStepNumberItem* StepNumberItem = new lcInstructionsStepNumberItem(QString::number(Step.Step), StepImageItem, Step.Model, Step.Step);
-		QFont StepNumberFont = mInstructions->GetFontProperty(lcInstructionsPropertyType::StepNumberFont, Step.Model, Step.Step);
-		StepNumberItem->setFont(StepNumberFont);
-		StepNumberItem->setBrush(QBrush(mInstructions->GetColorProperty(lcInstructionsPropertyType::StepNumberColor, Step.Model, Step.Step)));
-		StepNumberItem->setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsFocusable);
+		lcInstructionsStepNumberItem* StepNumberItem = new lcInstructionsStepNumberItem(StepImageItem, mInstructions, Step.Model, Step.Step);
+		StepNumberItem->Update();
 
 		QImage PartsImage = Step.Model->GetPartsListImage(300, Step.Step);
 
@@ -259,13 +297,19 @@ void lcInstructionsPropertiesWidget::AddColorProperty(lcInstructionsPropertyType
 	mPropertiesLayout->addWidget(new QLabel(Label), Row, 0);
 
 	QToolButton* ColorButton = new QToolButton();
-	QPixmap Pixmap(12, 12);
-	QColor Color = mInstructions->GetColorProperty(Type, mModel, mStep);
-	Pixmap.fill(Color);
-	ColorButton->setIcon(Pixmap);
 	mPropertiesLayout->addWidget(ColorButton, Row, 1);
 
-	connect(ColorButton, &QToolButton::clicked, [this, Type, Color]()
+	auto UpdateButton = [this, Type, ColorButton]()
+	{
+		QPixmap Pixmap(12, 12);
+		QColor Color = mInstructions->GetColorProperty(Type, mModel, mStep);
+		Pixmap.fill(Color);
+		ColorButton->setIcon(Pixmap);
+	};
+	
+	UpdateButton();
+
+	connect(ColorButton, &QToolButton::clicked, [this, Type, UpdateButton]()
 	{
 		QString Title;
 
@@ -286,10 +330,14 @@ void lcInstructionsPropertiesWidget::AddColorProperty(lcInstructionsPropertyType
 				break;
 		}
 
-		QColor NewColor = QColorDialog::getColor(Color, this, Title);
+		QColor Color = mInstructions->GetColorProperty(Type, mModel, mStep);
+		Color = QColorDialog::getColor(Color, this, Title);
 
-		if (NewColor.isValid())
-			mInstructions->SetDefaultColor(Type, NewColor);
+		if (Color.isValid())
+		{
+			mInstructions->SetDefaultColor(Type, Color);
+			UpdateButton();
+		}
 	});
 }
 
@@ -314,12 +362,18 @@ void lcInstructionsPropertiesWidget::AddFontProperty(lcInstructionsPropertyType 
 	mPropertiesLayout->addWidget(new QLabel(Label), Row, 0);
 
 	QToolButton* FontButton = new QToolButton();
-	QFont Font = mInstructions->GetFontProperty(lcInstructionsPropertyType::StepNumberFont, mModel, mStep);
-	QString FontName = QString("%1 %2").arg(Font.family(), QString::number(Font.pointSize()));
-	FontButton->setText(FontName);
 	mPropertiesLayout->addWidget(FontButton, Row, 1);
 
-	connect(FontButton, &QToolButton::clicked, [this, Type, Font]()
+	auto UpdateButton = [this, Type, FontButton]()
+	{
+		QFont Font = mInstructions->GetFontProperty(Type, mModel, mStep);
+		QString FontName = QString("%1 %2").arg(Font.family(), QString::number(Font.pointSize()));
+		FontButton->setText(FontName);
+	};
+
+	UpdateButton();
+
+	connect(FontButton, &QToolButton::clicked, [this, Type, UpdateButton]()
 	{
 		QString Title;
 
@@ -337,10 +391,14 @@ void lcInstructionsPropertiesWidget::AddFontProperty(lcInstructionsPropertyType 
 
 		bool Ok = false;
 
-		QFont NewFont = QFontDialog::getFont(&Ok, Font, this, tr("Select Step Number Font"));
+		QFont Font = mInstructions->GetFontProperty(lcInstructionsPropertyType::StepNumberFont, mModel, mStep);
+		Font = QFontDialog::getFont(&Ok, Font, this, tr("Select Step Number Font"));
 
 		if (Ok)
-			mInstructions->SetDefaultFont(lcInstructionsPropertyType::StepNumberFont, NewFont); // todo: this is clearing the scene selection and hiding the properties widget
+		{
+			UpdateButton();
+			mInstructions->SetDefaultFont(lcInstructionsPropertyType::StepNumberFont, Font);
+		}
 	});
 }
 
@@ -443,7 +501,6 @@ lcInstructionsDialog::lcInstructionsDialog(QWidget* Parent, Project* Project)
 	connect(mPageListWidget->mThumbnailsWidget, SIGNAL(currentRowChanged(int)), this, SLOT(CurrentThumbnailChanged(int)));
 	mPageListWidget->mThumbnailsWidget->setCurrentRow(0);
 
-	connect(mInstructions, &lcInstructions::PageInvalid, this, &lcInstructionsDialog::PageInvalid);
 	connect(mVerticalPageAction, SIGNAL(toggled(bool)), this, SLOT(UpdatePageSettings()));
 	connect(mHorizontalPageAction, SIGNAL(toggled(bool)), this, SLOT(UpdatePageSettings()));
 	connect(mRowsSpinBox, SIGNAL(valueChanged(int)), this, SLOT(UpdatePageSettings()));
@@ -508,13 +565,4 @@ void lcInstructionsDialog::CurrentThumbnailChanged(int Index)
 	mColumnsSpinBox->blockSignals(true);
 	mColumnsSpinBox->setValue(PageSettings.Columns);
 	mColumnsSpinBox->blockSignals(false);
-}
-
-void lcInstructionsDialog::PageInvalid(int PageIndex)
-{
-	if (mPageListWidget->mThumbnailsWidget->currentRow() == PageIndex)
-	{
-		const lcInstructionsPage* Page = &mInstructions->mPages[PageIndex];
-		mPageWidget->SetCurrentPage(Page);
-	}
 }

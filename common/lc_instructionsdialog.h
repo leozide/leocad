@@ -7,7 +7,7 @@ class lcInstructionsPropertiesWidget;
 class lcInstructionsStepImageItem : public QGraphicsPixmapItem
 {
 public:
-	lcInstructionsStepImageItem(const QPixmap& Pixmap, QGraphicsItem* Parent, lcModel* Model, lcStep Step);
+	lcInstructionsStepImageItem(QGraphicsItem* Parent, lcInstructions* Instructions, lcModel* Model, lcStep Step);
 
 	lcModel* GetModel() const
 	{
@@ -19,15 +19,26 @@ public:
 		return mStep;
 	}
 
+	void SetImageSize(int Width, int Height)
+	{
+		mWidth = Width;
+		mHeight = Height;
+	}
+
+	void Update();
+
 protected:
+	lcInstructions* mInstructions = nullptr;
 	lcModel* mModel = nullptr;
 	lcStep mStep = 1;
+	int mWidth = 1;
+	int mHeight = 1;
 };
 
 class lcInstructionsStepNumberItem : public QGraphicsSimpleTextItem
 {
 public:
-	lcInstructionsStepNumberItem(const QString& Text, QGraphicsItem* Parent, lcModel* Model, lcStep Step);
+	lcInstructionsStepNumberItem(QGraphicsItem* Parent, lcInstructions* Instructions, lcModel* Model, lcStep Step);
 
 	lcModel* GetModel() const
 	{
@@ -39,7 +50,10 @@ public:
 		return mStep;
 	}
 
+	void Update();
+
 protected:
+	lcInstructions* mInstructions = nullptr;
 	lcModel* mModel = nullptr;
 	lcStep mStep = 1;
 };
@@ -54,6 +68,7 @@ public:
 	void SetCurrentPage(const lcInstructionsPage* Page);
 
 protected slots:
+	void StepSettingsChanged(lcModel* Model, lcStep Step);
 	void SelectionChanged();
 
 protected:
@@ -124,7 +139,6 @@ public:
 protected slots:
 	void UpdatePageSettings();
 	void CurrentThumbnailChanged(int Index);
-	void PageInvalid(int PageIndex);
 
 protected:
 	Project* mProject = nullptr;

@@ -93,7 +93,7 @@ public:
 	std::map<lcModel*, lcInstructionsModel> mModels;
 
 signals:
-	void PageInvalid(int PageIndex);
+	void StepSettingsChanged(lcModel* Model, lcStep Step);
 
 protected:
 	void CreatePages();

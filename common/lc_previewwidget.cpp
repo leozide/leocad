@@ -100,7 +100,7 @@ bool lcPreview::SetCurrentPiece(const QString& PartType, int ColorCode)
 		{
 			if (Info == ModelPiece->mPieceInfo)
 			{
-				int ModelColorCode = ModelPiece->mColorCode;
+				int ModelColorCode = ModelPiece->GetColorCode();
 				if (ModelColorCode == ColorCode)
 					return true;
 			}
@@ -163,7 +163,7 @@ void lcPreview::UpdatePreview()
 		if (ModelPiece->mPieceInfo)
 		{
 			PartType = ModelPiece->mPieceInfo->mFileName;
-			ColorCode = ModelPiece->mColorCode;
+			ColorCode = ModelPiece->GetColorCode();
 			break;
 		}
 	}

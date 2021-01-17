@@ -764,7 +764,7 @@ void lcQPropertiesTree::slotSetValue(int Value)
 			int ColorIndex = gDefaultColor;
 			lcObject* Focus = gMainWindow->GetActiveModel()->GetFocusObject();
 			if (Focus && Focus->IsPiece())
-				ColorIndex = ((lcPiece*)Focus)->mColorIndex;
+				ColorIndex = ((lcPiece*)Focus)->GetColorIndex();
 			quint32 ColorCode = lcGetColorCode(ColorIndex);
 			gMainWindow->PreviewPiece(Info->mFileName, ColorCode, false);
 		}
@@ -777,7 +777,7 @@ void lcQPropertiesTree::slotColorButtonClicked()
 	lcObject* Focus = gMainWindow->GetActiveModel()->GetFocusObject();
 
 	if (Focus && Focus->IsPiece())
-		ColorIndex = ((lcPiece*)Focus)->mColorIndex;
+		ColorIndex = ((lcPiece*)Focus)->GetColorIndex();
 
 	QWidget* Button = (QWidget*)sender();
 
@@ -939,7 +939,7 @@ void lcQPropertiesTree::SetPiece(const lcArray<lcObject*>& Selection, lcObject* 
 	{
 		Show = Piece->GetStepShow();
 		Hide = Piece->GetStepHide();
-		ColorIndex = Piece->mColorIndex;
+		ColorIndex = Piece->GetColorIndex();
 		Info = Piece->mPieceInfo;
 		quint32 ColorCode = lcGetColorCode(ColorIndex);
 		gMainWindow->PreviewPiece(Info->mFileName, ColorCode, false);
@@ -961,7 +961,7 @@ void lcQPropertiesTree::SetPiece(const lcArray<lcObject*>& Selection, lcObject* 
 			{
 				Show = SelectedPiece->GetStepShow();
 				Hide = SelectedPiece->GetStepHide();
-				ColorIndex = SelectedPiece->mColorIndex;
+				ColorIndex = SelectedPiece->GetColorIndex();
 				Info = SelectedPiece->mPieceInfo;
 
 				FirstPiece = false;
@@ -974,7 +974,7 @@ void lcQPropertiesTree::SetPiece(const lcArray<lcObject*>& Selection, lcObject* 
 				if (SelectedPiece->GetStepHide() != Hide)
 					Hide = 0;
 
-				if (SelectedPiece->mColorIndex != ColorIndex)
+				if (SelectedPiece->GetColorIndex() != ColorIndex)
 					ColorIndex = gDefaultColor;
 
 				if (SelectedPiece->mPieceInfo != Info)

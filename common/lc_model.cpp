@@ -2495,10 +2495,10 @@ void lcModel::InlineSelectedModels()
 
 			// todo: recreate in groups in the current model
 
-			int ColorIndex = ModelPiece->mColorIndex;
+			int ColorIndex = ModelPiece->GetColorIndex();
 
 			if (ColorIndex == gDefaultColor)
-				ColorIndex = Piece->mColorIndex;
+				ColorIndex = Piece->GetColorIndex();
 
 			NewPiece->SetPieceInfo(ModelPiece->mPieceInfo, ModelPiece->GetID(), true);
 			NewPiece->Initialize(lcMul(ModelPiece->mModelWorld, Piece->mModelWorld), Piece->GetStepShow());
@@ -2819,7 +2819,7 @@ void lcModel::SetSelectedPiecesColorIndex(int ColorIndex)
 
 	for (lcPiece* Piece : mPieces)
 	{
-		if (Piece->IsSelected() && Piece->mColorIndex != ColorIndex)
+		if (Piece->IsSelected() && Piece->GetColorIndex() != ColorIndex)
 		{
 			Piece->SetColorIndex(ColorIndex);
 			Modified = true;
@@ -3270,7 +3270,7 @@ void lcModel::GetPartsList(int DefaultColorIndex, bool ScanSubModels, bool AddSu
 		if (!Piece->IsVisibleInSubModel())
 			continue;
 
-		int ColorIndex = Piece->mColorIndex;
+		int ColorIndex = Piece->GetColorIndex();
 
 		if (ColorIndex == gDefaultColor)
 			ColorIndex = DefaultColorIndex;
@@ -3286,7 +3286,7 @@ void lcModel::GetPartsListForStep(lcStep Step, int DefaultColorIndex, lcPartsLis
 		if (Piece->GetStepShow() != Step || Piece->IsHidden())
 			continue;
 
-		int ColorIndex = Piece->mColorIndex;
+		int ColorIndex = Piece->GetColorIndex();
 
 		if (ColorIndex == gDefaultColor)
 			ColorIndex = DefaultColorIndex;
@@ -3397,7 +3397,7 @@ void lcModel::GetSelectionInformation(int* Flags, lcArray<lcObject*>& Selection,
 lcArray<lcObject*> lcModel::GetSelectionModePieces(lcPiece* SelectedPiece) const
 {
 	PieceInfo* Info = SelectedPiece->mPieceInfo;
-	int ColorIndex = SelectedPiece->mColorIndex;
+	int ColorIndex = SelectedPiece->GetColorIndex();
 	lcArray<lcObject*> Pieces;
 
 	switch (gMainWindow->GetSelectionMode())
@@ -3413,13 +3413,13 @@ lcArray<lcObject*> lcModel::GetSelectionModePieces(lcPiece* SelectedPiece) const
 
 	case lcSelectionMode::Color:
 		for (lcPiece* Piece : mPieces)
-			if (Piece->IsVisible(mCurrentStep) && Piece->mColorIndex == ColorIndex && Piece != SelectedPiece)
+			if (Piece->IsVisible(mCurrentStep) && Piece->GetColorIndex() == ColorIndex && Piece != SelectedPiece)
 				Pieces.Add(Piece);
 		break;
 
 	case lcSelectionMode::PieceColor:
 		for (lcPiece* Piece : mPieces)
-			if (Piece->IsVisible(mCurrentStep) && Piece->mPieceInfo == Info && Piece->mColorIndex == ColorIndex && Piece != SelectedPiece)
+			if (Piece->IsVisible(mCurrentStep) && Piece->mPieceInfo == Info && Piece->GetColorIndex() == ColorIndex && Piece != SelectedPiece)
 				Pieces.Add(Piece);
 		break;
 	}
@@ -3811,7 +3811,7 @@ void lcModel::FindPiece(bool FindFirst, bool SearchForward)
 			continue;
 
 		if ((!SearchOptions.MatchInfo || Current->mPieceInfo == SearchOptions.Info) &&
-			(!SearchOptions.MatchColor || Current->mColorIndex == SearchOptions.ColorIndex) &&
+			(!SearchOptions.MatchColor || Current->GetColorIndex() == SearchOptions.ColorIndex) &&
 			(!SearchOptions.MatchName || (Current->GetName().indexOf(SearchOptions.Name, 0, Qt::CaseInsensitive) != -1)))
 		{
 			Focus = Current;
@@ -4075,7 +4075,7 @@ void lcModel::PaintToolClicked(lcObject* Object)
 
 	lcPiece* Piece = (lcPiece*)Object;
 
-	if (Piece->mColorIndex != gMainWindow->mColorIndex)
+	if (Piece->GetColorIndex() != gMainWindow->mColorIndex)
 	{
 		Piece->SetColorIndex(gMainWindow->mColorIndex);
 
@@ -4093,7 +4093,7 @@ void lcModel::ColorPickerToolClicked(lcObject* Object)
 
 	lcPiece* Piece = (lcPiece*)Object;
 
-	gMainWindow->SetColorIndex(Piece->mColorIndex);
+	gMainWindow->SetColorIndex(Piece->GetColorIndex());
 }
 
 void lcModel::UpdateZoomTool(lcCamera* Camera, float Mouse)
@@ -4266,7 +4266,7 @@ void lcModel::ShowSelectByColorDialog()
 	lcObject* Focus = GetFocusObject();
 
 	if (Focus && Focus->IsPiece())
-		ColorIndex = ((lcPiece*)Focus)->mColorIndex;
+		ColorIndex = ((lcPiece*)Focus)->GetColorIndex();
 
 	lcSelectByColorDialog Dialog(gMainWindow, ColorIndex);
 
@@ -4277,7 +4277,7 @@ void lcModel::ShowSelectByColorDialog()
 	lcArray<lcObject*> Selection;
 
 	for (lcPiece* Piece : mPieces)
-		if (Piece->IsVisible(mCurrentStep) && Piece->mColorIndex == ColorIndex)
+		if (Piece->IsVisible(mCurrentStep) && Piece->GetColorIndex() == ColorIndex)
 			Selection.Add(Piece);
 
 	SetSelectionAndFocus(Selection, nullptr, 0, false);
@@ -4337,7 +4337,7 @@ void lcModel::ShowArrayDialog()
 					lcPiece* NewPiece = new lcPiece(nullptr);
 					NewPiece->SetPieceInfo(Piece->mPieceInfo, Piece->GetID(), true);
 					NewPiece->Initialize(ModelWorld, mCurrentStep);
-					NewPiece->SetColorIndex(Piece->mColorIndex);
+					NewPiece->SetColorIndex(Piece->GetColorIndex());
 
 					NewPieces.Add(NewPiece);
 				}

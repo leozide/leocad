@@ -190,7 +190,7 @@ void lcTimelineWidget::Update(bool Clear, bool UpdateItems)
 		{
 			PieceItem->setText(0, Piece->mPieceInfo->m_strDescription);
 
-			int ColorIndex = Piece->mColorIndex;
+			int ColorIndex = Piece->GetColorIndex();
 			if (!mIcons.contains(ColorIndex))
 			{
 				int Size = rowHeight(indexFromItem(PieceItem));
@@ -535,7 +535,7 @@ void lcTimelineWidget::PreviewSelection(QTreeWidgetItem* CurrentItem)
 	if (!Info)
 		return;
 
-	gMainWindow->PreviewPiece(Info->mFileName, Piece->mColorCode, false);
+	gMainWindow->PreviewPiece(Info->mFileName, Piece->GetColorCode(), false);
 }
 
 void lcTimelineWidget::UpdateModel()

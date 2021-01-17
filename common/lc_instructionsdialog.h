@@ -141,6 +141,7 @@ public:
 	void SelectionChanged(QGraphicsItem* FocusItem);
 
 protected:
+	void AddBoolProperty(lcInstructionsPropertyType Type);
 	void AddColorProperty(lcInstructionsPropertyType Type);
 	void AddFontProperty(lcInstructionsPropertyType Type);
 

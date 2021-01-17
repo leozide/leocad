@@ -35,6 +35,9 @@ lcInstructionsStepNumberItem::lcInstructionsStepNumberItem(QGraphicsItem* Parent
 
 void lcInstructionsStepNumberItem::Update()
 {
+	bool Visible = mInstructions->GetBoolProperty(lcInstructionsPropertyType::ShowStepNumber, mModel, mStep);
+	setVisible(Visible);
+
 	QFont StepNumberFont = mInstructions->GetFontProperty(lcInstructionsPropertyType::StepNumberFont, mModel, mStep);
 
 	setFont(StepNumberFont);
@@ -50,6 +53,12 @@ lcInstructionsPartsListItem::lcInstructionsPartsListItem(QGraphicsItem* Parent, 
 
 void lcInstructionsPartsListItem::Update()
 {
+	bool Visible = mInstructions->GetBoolProperty(lcInstructionsPropertyType::ShowStepPLI, mModel, mStep);
+	setVisible(Visible);
+
+	if (!Visible)
+		return;
+
 	QColor BackgroundColor = mInstructions->GetColorProperty(lcInstructionsPropertyType::PLIBackgroundColor, mModel, mStep);
 	QFont Font = mInstructions->GetFontProperty(lcInstructionsPropertyType::PLIFont, mModel, mStep);
 	QColor TextColor = mInstructions->GetColorProperty(lcInstructionsPropertyType::PLITextColor, mModel, mStep);
@@ -295,34 +304,26 @@ lcInstructionsPropertiesWidget::lcInstructionsPropertiesWidget(QWidget* Parent, 
 	Layout->setRowStretch(3, 1);
 }
 
+void lcInstructionsPropertiesWidget::AddBoolProperty(lcInstructionsPropertyType Type)
+{
+	const QString Label = mInstructions->GetPropertyLabel(Type);
+	const int Row = mPropertiesLayout->rowCount();
+
+	QCheckBox* CheckBox = new QCheckBox(Label);
+	mPropertiesLayout->addWidget(CheckBox, Row, 0, 1, -1);
+
+	bool Enabled = mInstructions->GetBoolProperty(Type, mModel, mStep);
+	CheckBox->setChecked(Enabled);
+
+	connect(CheckBox, &QToolButton::toggled, [this, Type](bool Checked)
+	{
+		mInstructions->SetDefaultBool(Type, Checked);
+	} );
+}
+
 void lcInstructionsPropertiesWidget::AddColorProperty(lcInstructionsPropertyType Type)
 {
-	QString Label;
-
-	switch (Type)
-	{
-	case lcInstructionsPropertyType::StepNumberColor:
-	case lcInstructionsPropertyType::PLITextColor:
-		Label = tr("Text Color:");
-		break;
-
-	case lcInstructionsPropertyType::StepBackgroundColor:
-	case lcInstructionsPropertyType::PLIBackgroundColor:
-		Label = tr("Background Color:");
-		break;
-
-	case lcInstructionsPropertyType::PLIBorderColor:
-		Label = tr("Border Color:");
-		break;
-
-	case lcInstructionsPropertyType::StepNumberFont:
-	case lcInstructionsPropertyType::PLIFont:
-//	case lcInstructionsPropertyType::PLIBorderWidth:
-//	case lcInstructionsPropertyType::PLIBorderRound:
-	case lcInstructionsPropertyType::Count:
-		break;
-	}
-
+	const QString Label = mInstructions->GetPropertyLabel(Type);
 	const int Row = mPropertiesLayout->rowCount();
 
 	mPropertiesLayout->addWidget(new QLabel(Label), Row, 0);
@@ -366,6 +367,8 @@ void lcInstructionsPropertiesWidget::AddColorProperty(lcInstructionsPropertyType
 				Title = tr("Select Parts List Text Color");
 				break;
 
+			case lcInstructionsPropertyType::ShowStepNumber:
+			case lcInstructionsPropertyType::ShowStepPLI:
 			case lcInstructionsPropertyType::StepNumberFont:
 			case lcInstructionsPropertyType::PLIFont:
 //			case lcInstructionsPropertyType::StepPLIBorderWidth:
@@ -387,7 +390,7 @@ void lcInstructionsPropertiesWidget::AddColorProperty(lcInstructionsPropertyType
 
 void lcInstructionsPropertiesWidget::AddFontProperty(lcInstructionsPropertyType Type)
 {
-	const QString Label = tr("Font:");
+	const QString Label = mInstructions->GetPropertyLabel(Type);
 	const int Row = mPropertiesLayout->rowCount();
 
 	mPropertiesLayout->addWidget(new QLabel(Label), Row, 0);
@@ -418,6 +421,8 @@ void lcInstructionsPropertiesWidget::AddFontProperty(lcInstructionsPropertyType 
 				Title = tr("Select Parts List Font");
 				break;
 
+			case lcInstructionsPropertyType::ShowStepNumber:
+			case lcInstructionsPropertyType::ShowStepPLI:
 			case lcInstructionsPropertyType::StepNumberColor:
 			case lcInstructionsPropertyType::StepBackgroundColor:
 			case lcInstructionsPropertyType::PLIBackgroundColor:
@@ -474,6 +479,8 @@ void lcInstructionsPropertiesWidget::SelectionChanged(QGraphicsItem* FocusItem)
 		mModel = ImageItem->GetModel();
 		mStep = ImageItem->GetStep();
 
+		AddBoolProperty(lcInstructionsPropertyType::ShowStepNumber);
+		AddBoolProperty(lcInstructionsPropertyType::ShowStepPLI);
 		AddColorProperty(lcInstructionsPropertyType::StepBackgroundColor);
 
 		return;

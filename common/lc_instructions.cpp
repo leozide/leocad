@@ -21,6 +21,8 @@ lcInstructions::lcInstructions(Project* Project)
 	mPageSettings.Columns = 1;
 	mPageSettings.Direction = lcInstructionsDirection::Horizontal;
 
+	mStepProperties[static_cast<int>(lcInstructionsPropertyType::ShowStepNumber)].Value = true;
+	mStepProperties[static_cast<int>(lcInstructionsPropertyType::ShowStepPLI)].Value = true;
 	mStepProperties[static_cast<int>(lcInstructionsPropertyType::StepNumberFont)].Value = QFont("Arial", 72).toString();
 	mStepProperties[static_cast<int>(lcInstructionsPropertyType::StepNumberColor)].Value = LC_RGBA(0, 0, 0, 255);
 	mStepProperties[static_cast<int>(lcInstructionsPropertyType::StepBackgroundColor)].Value = LC_RGBA(255, 255, 255, 0);
@@ -31,9 +33,38 @@ lcInstructions::lcInstructions(Project* Project)
 //	mStepProperties[static_cast<int>(lcInstructionsPropertyType::PLIBorderWidth)].Value = 2.0f;
 //	mStepProperties[static_cast<int>(lcInstructionsPropertyType::PLIBorderRound)].Value = true;
 
-	static_assert(static_cast<int>(lcInstructionsPropertyType::Count) == 7, "Missing default property");
+	static_assert(static_cast<int>(lcInstructionsPropertyType::Count) == 9, "Missing default property");
 
 	CreatePages();
+}
+
+QString lcInstructions::GetPropertyLabel(lcInstructionsPropertyType Type)
+{
+	switch (Type)
+	{
+		case lcInstructionsPropertyType::ShowStepNumber:
+			return tr("Show Step Number");
+		case lcInstructionsPropertyType::ShowStepPLI:
+			return tr("Show Parts List");
+		case lcInstructionsPropertyType::StepNumberFont:
+			return tr("Font:");
+		case lcInstructionsPropertyType::StepNumberColor:
+			return tr("Text Color:");
+		case lcInstructionsPropertyType::StepBackgroundColor:
+			return tr("Background Color:");
+		case lcInstructionsPropertyType::PLIBackgroundColor:
+			return tr("Background Color:");
+		case lcInstructionsPropertyType::PLIFont:
+			return tr("Font:");
+		case lcInstructionsPropertyType::PLITextColor:
+			return tr("Text Color:");
+		case lcInstructionsPropertyType::PLIBorderColor:
+			return tr("Border Color:");
+		case lcInstructionsPropertyType::Count:
+			break;
+	}
+
+	return QString();
 }
 
 void lcInstructions::SetDefaultPageSettings(const lcInstructionsPageSettings& PageSettings)
@@ -41,6 +72,12 @@ void lcInstructions::SetDefaultPageSettings(const lcInstructionsPageSettings& Pa
 	mPageSettings = PageSettings;
 
 	CreatePages();
+}
+
+bool lcInstructions::GetBoolProperty(lcInstructionsPropertyType Type, lcModel* Model, lcStep Step) const
+{
+	QVariant Value = GetProperty(Type, Model, Step);
+	return Value.toBool();
 }
 
 QColor lcInstructions::GetColorProperty(lcInstructionsPropertyType Type, lcModel* Model, lcStep Step) const
@@ -80,6 +117,11 @@ QVariant lcInstructions::GetProperty(lcInstructionsPropertyType Type, lcModel* M
 	}
 
 	return Value;
+}
+
+void lcInstructions::SetDefaultBool(lcInstructionsPropertyType Type, bool Enabled)
+{
+	SetDefaultProperty(Type, Enabled);
 }
 
 void lcInstructions::SetDefaultColor(lcInstructionsPropertyType Type, const QColor& Color)

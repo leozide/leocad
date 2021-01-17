@@ -36,6 +36,8 @@ enum class lcInstructionsPropertyMode
 
 enum class lcInstructionsPropertyType
 {
+	ShowStepNumber,
+	ShowStepPLI,
 	StepNumberFont,
 	StepNumberColor,
 	StepBackgroundColor,
@@ -84,14 +86,19 @@ class lcInstructions : public QObject
 public:
 	lcInstructions(Project* Project = nullptr);
 
+	static QString GetPropertyLabel(lcInstructionsPropertyType Type);
+
 	void SetDefaultPageSettings(const lcInstructionsPageSettings& PageSettings);
 
+	bool GetBoolProperty(lcInstructionsPropertyType Type, lcModel* Model, lcStep Step) const;
 	QColor GetColorProperty(lcInstructionsPropertyType Type, lcModel* Model, lcStep Step) const;
 	QFont GetFontProperty(lcInstructionsPropertyType Type, lcModel* Model, lcStep Step) const;
 
+	void SetDefaultBool(lcInstructionsPropertyType Type, bool Enabled);
 	void SetDefaultColor(lcInstructionsPropertyType Type, const QColor& Color);
 	void SetDefaultFont(lcInstructionsPropertyType Type, const QFont& Font);
 
+//protected:
 	std::vector<lcInstructionsPage> mPages;
 	lcInstructionsPageSettings mPageSettings;
 	lcInstructionsPageSetup mPageSetup;

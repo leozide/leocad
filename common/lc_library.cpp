@@ -1580,16 +1580,16 @@ bool lcPiecesLibrary::LoadPrimitive(lcLibraryPrimitive* Primitive)
 {
 	mLoadMutex.lock();
 
-	if (Primitive->mState == lcPrimitiveState::NOT_LOADED)
-		Primitive->mState = lcPrimitiveState::LOADING;
+	if (Primitive->mState == lcPrimitiveState::NotLoaded)
+		Primitive->mState = lcPrimitiveState::Loading;
 	else
 	{
 		mLoadMutex.unlock();
 
-		while (Primitive->mState == lcPrimitiveState::LOADING)
+		while (Primitive->mState == lcPrimitiveState::Loading)
 			lcSleeper::msleep(5);
 
-		return Primitive->mState == lcPrimitiveState::LOADED;
+		return Primitive->mState == lcPrimitiveState::Loaded;
 	}
 
 	mLoadMutex.unlock();
@@ -1688,7 +1688,7 @@ bool lcPiecesLibrary::LoadPrimitive(lcLibraryPrimitive* Primitive)
 	}
 
 	mLoadMutex.lock();
-	Primitive->mState = lcPrimitiveState::LOADED;
+	Primitive->mState = lcPrimitiveState::Loaded;
 	mLoadMutex.unlock();
 
 	return true;

@@ -27,9 +27,9 @@ enum lcLibraryFolderType
 
 enum class lcPrimitiveState
 {
-	NOT_LOADED,
-	LOADING,
-	LOADED
+	NotLoaded,
+	Loading,
+	Loaded
 };
 
 class lcLibraryPrimitive
@@ -43,7 +43,7 @@ public:
 
 		mZipFileType = ZipFileType;
 		mZipFileIndex = ZipFileIndex;
-		mState = lcPrimitiveState::NOT_LOADED;
+		mState = lcPrimitiveState::NotLoaded;
 		mStud = Stud;
 		mSubFile = SubFile;
 	}
@@ -56,7 +56,7 @@ public:
 
 	void Unload()
 	{
-		mState = lcPrimitiveState::NOT_LOADED;
+		mState = lcPrimitiveState::NotLoaded;
 		mMeshData.RemoveAll();
 	}
 

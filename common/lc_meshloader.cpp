@@ -1610,7 +1610,7 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 
 			if (Primitive)
 			{
-				if (Primitive->mState != lcPrimitiveState::LOADED && !Library->LoadPrimitive(Primitive))
+				if (Primitive->mState != lcPrimitiveState::Loaded && !Library->LoadPrimitive(Primitive))
 					break;
 
 				if (Primitive->mStud)

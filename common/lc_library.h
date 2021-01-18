@@ -14,7 +14,7 @@ enum class lcZipFileType
 {
 	Official,
 	Unofficial,
-	Primitives,
+	StudLogo,
 	Count
 };
 
@@ -70,6 +70,24 @@ public:
 	lcLibraryMeshData mMeshData;
 };
 
+enum class lcLibrarySourceType
+{
+	Library,
+	StudLogo
+};
+
+struct lcLibrarySource
+{
+	~lcLibrarySource()
+	{
+		for (const auto& PrimitiveIt : Primitives)
+			delete PrimitiveIt.second;
+	}
+
+	lcLibrarySourceType Type;
+	std::map<std::string, lcLibraryPrimitive*> Primitives;
+};
+
 class lcPiecesLibrary : public QObject
 {
 	Q_OBJECT
@@ -115,17 +133,8 @@ public:
 	void GetPrimitiveFile(lcLibraryPrimitive* Primitive, std::function<void(lcFile& File)> Callback);
 	void GetPieceFile(const char* FileName, std::function<void(lcFile& File)> Callback);
 
-	bool IsPrimitive(const char* Name) const
-	{
-		return mPrimitives.find(Name) != mPrimitives.end();
-	}
-
-	lcLibraryPrimitive* FindPrimitive(const char* Name) const
-	{
-		const auto PrimitiveIt = mPrimitives.find(Name);
-		return PrimitiveIt != mPrimitives.end() ? PrimitiveIt->second : nullptr;
-	}
-
+	bool IsPrimitive(const char* Name) const;
+	lcLibraryPrimitive* FindPrimitive(const char* Name) const;
 	bool LoadPrimitive(lcLibraryPrimitive* Primitive);
 
 	bool SupportsStudLogo() const;
@@ -152,7 +161,6 @@ public:
 	void UnloadUnusedParts();
 
 	std::map<std::string, PieceInfo*> mPieces;
-	std::map<std::string, lcLibraryPrimitive*> mPrimitives;
 	int mNumOfficialPieces;
 
 	std::vector<lcTexture*> mTextures;
@@ -182,7 +190,9 @@ protected:
 	bool ReadDirectoryCacheFile(const QString& FileName, lcMemFile& CacheFile);
 	bool WriteDirectoryCacheFile(const QString& FileName, lcMemFile& CacheFile);
 
-	bool GetStudLogoFile(lcMemFile& PrimFile, int StudLogo, bool OpenStud);
+	void UpdateStudLogoSource();
+
+	std::vector<std::unique_ptr<lcLibrarySource>> mSources;
 
 	QMutex mLoadMutex;
 	QList<QFuture<void>> mLoadFutures;

@@ -60,9 +60,7 @@ void lcPiecesLibrary::Unload()
 		delete PieceIt.second;
 	mPieces.clear();
 
-	for (const auto& PrimitiveIt : mPrimitives)
-		delete PrimitiveIt.second;
-	mPrimitives.clear();
+	mSources.clear();
 
 	for (lcTexture* Texture : mTextures)
 		delete Texture;
@@ -259,11 +257,6 @@ bool lcPiecesLibrary::Load(const QString& LibraryPath, bool ShowProgress)
 			if (!mZipFiles[static_cast<int>(lcZipFileType::Official)]->ExtractFile("ldraw/ldconfig.ldr", ColorFile) || !lcLoadColorFile(ColorFile))
 				lcLoadDefaultColors();
 
-		std::unique_ptr<lcDiskFile> PrimitivesFile(new lcDiskFile(":/resources/primitives.zip"));
-
-		if (PrimitivesFile->Open(QIODevice::ReadOnly))
-			OpenArchive(std::move(PrimitivesFile), lcZipFileType::Primitives);
-
 		mLibraryDir = QFileInfo(LibraryPath).absoluteDir();
 		QString UnofficialFileName = mLibraryDir.absoluteFilePath(QLatin1String("ldrawunf.zip"));
 
@@ -290,20 +283,32 @@ bool lcPiecesLibrary::Load(const QString& LibraryPath, bool ShowProgress)
 						lcLoadDefaultColors();
 				}
 			}
-
-			std::unique_ptr<lcDiskFile> PrimitivesFile(new lcDiskFile(":/resources/primitives.zip"));
-
-			if (PrimitivesFile->Open(QIODevice::ReadOnly))
-				OpenArchive(std::move(PrimitivesFile), lcZipFileType::Primitives);
 		}
 		else
 			return false;
 	}
 
+	UpdateStudLogoSource();
 	lcLoadDefaultCategories();
 	lcSynthInit();
 
 	return true;
+}
+
+void lcPiecesLibrary::UpdateStudLogoSource()
+{
+	if (!mSources.empty() && mSources.front()->Type == lcLibrarySourceType::StudLogo)
+		mSources.erase(mSources.begin());
+
+	mZipFiles[static_cast<int>(lcZipFileType::StudLogo)].reset();
+
+	if (!mStudLogo)
+		return;
+
+	std::unique_ptr<lcDiskFile> StudLogoFile(new lcDiskFile(QString(":/resources/studlogo%1.zip").arg(QString::number(mStudLogo))));
+
+	if (StudLogoFile->Open(QIODevice::ReadOnly))
+		OpenArchive(std::move(StudLogoFile), lcZipFileType::StudLogo);
 }
 
 bool lcPiecesLibrary::OpenArchive(const QString& FileName, lcZipFileType ZipFileType)
@@ -322,6 +327,9 @@ bool lcPiecesLibrary::OpenArchive(std::unique_ptr<lcFile> File, lcZipFileType Zi
 
 	if (!ZipFile->OpenRead(std::move(File)))
 		return false;
+
+	std::unique_ptr<lcLibrarySource> Source(new lcLibrarySource);
+	Source->Type = ZipFileType != lcZipFileType::StudLogo ? lcLibrarySourceType::Library : lcLibrarySourceType::StudLogo;
 
 	for (int FileIdx = 0; FileIdx < ZipFile->mFiles.GetSize(); FileIdx++)
 	{
@@ -398,29 +406,18 @@ bool lcPiecesLibrary::OpenArchive(std::unique_ptr<lcFile> File, lcZipFileType Zi
 				Info->SetZipFile(ZipFileType, FileIdx);
 			}
 			else
-			{
-				lcLibraryPrimitive* Primitive = FindPrimitive(Name);
-
-				if (!Primitive)
-					mPrimitives[Name] = new lcLibraryPrimitive(QString(), FileInfo.file_name + (Name - NameBuffer), ZipFileType, FileIdx, false, true);
-				else
-					Primitive->SetZipFile(ZipFileType, FileIdx);
-			}
+				Source->Primitives[Name] = new lcLibraryPrimitive(QString(), FileInfo.file_name + (Name - NameBuffer), ZipFileType, FileIdx, false, true);
 		}
 		else if (!memcmp(Name, "P/", 2))
 		{
 			Name += 2;
 
-			lcLibraryPrimitive* Primitive = FindPrimitive(Name);
-
-			if (!Primitive)
-				mPrimitives[Name] = new lcLibraryPrimitive(QString(), FileInfo.file_name + (Name - NameBuffer), ZipFileType, FileIdx, (memcmp(Name, "STU", 3) == 0), false);
-			else
-				Primitive->SetZipFile(ZipFileType, FileIdx);
+			Source->Primitives[Name] = new lcLibraryPrimitive(QString(), FileInfo.file_name + (Name - NameBuffer), ZipFileType, FileIdx, (memcmp(Name, "STU", 3) == 0), false);
 		}
 	}
 
 	mZipFiles[static_cast<int>(ZipFileType)] = std::move(ZipFile);
+	mSources.insert(mSources.begin(), std::move(Source));
 
 	return true;
 }
@@ -500,6 +497,9 @@ bool lcPiecesLibrary::OpenDirectory(const QDir& LibraryDir, bool ShowProgress)
 
 	for (unsigned int BaseFolderIdx = 0; BaseFolderIdx < LC_ARRAY_COUNT(BaseFolders); BaseFolderIdx++)
 	{
+		std::unique_ptr<lcLibrarySource> Source(new lcLibrarySource);
+		Source->Type = lcLibrarySourceType::Library;
+
 		const char* PrimitiveDirectories[] = { "p/", "parts/s/" };
 		bool SubFileDirectories[] = { false, false, true };
 		QDir BaseDir(LibraryDir.absoluteFilePath(QLatin1String(BaseFolders[BaseFolderIdx])));
@@ -545,9 +545,11 @@ bool lcPiecesLibrary::OpenDirectory(const QDir& LibraryDir, bool ShowProgress)
 					mHasUnofficial = true;
 
 				const bool SubFile = SubFileDirectories[DirectoryIdx];
-				mPrimitives[Name] = new lcLibraryPrimitive(std::move(FileName), strchr(FileString, '/') + 1, lcZipFileType::Count, 0, !SubFile && (memcmp(Name, "STU", 3) == 0), SubFile);
+				Source->Primitives[Name] = new lcLibraryPrimitive(std::move(FileName), strchr(FileString, '/') + 1, lcZipFileType::Count, 0, !SubFile && (memcmp(Name, "STU", 3) == 0), SubFile);
 			}
 		}
+
+		mSources.push_back(std::move(Source));
 	}
 
 	for (unsigned int BaseFolderIdx = 0; BaseFolderIdx < LC_ARRAY_COUNT(BaseFolders); BaseFolderIdx++)
@@ -1513,20 +1515,25 @@ void lcPiecesLibrary::UploadTextures(lcContext* Context)
 
 bool lcPiecesLibrary::SupportsStudLogo() const
 {
-	return mZipFiles[static_cast<int>(lcZipFileType::Primitives)] != nullptr || mHasUnofficial;
+	return true;
 }
 
 void lcPiecesLibrary::SetStudLogo(int StudLogo, bool Reload)
 {
 	mStudLogo = StudLogo;
 
+	UpdateStudLogoSource();
+
 	mLoadMutex.lock();
 
-	for (const auto& PrimitiveIt : mPrimitives)
+	for (const std::unique_ptr<lcLibrarySource>& Source : mSources)
 	{
-		lcLibraryPrimitive* Primitive = PrimitiveIt.second;
-		if (Primitive->mMeshData.mHasLogoStud)
-			Primitive->Unload();
+		for (const auto& PrimitiveIt : Source->Primitives)
+		{
+			lcLibraryPrimitive* Primitive = PrimitiveIt.second;
+			if (Primitive->mMeshData.mHasLogoStud)
+				Primitive->Unload();
+		}
 	}
 
 	mLoadMutex.unlock();
@@ -1553,27 +1560,26 @@ void lcPiecesLibrary::SetStudLogo(int StudLogo, bool Reload)
 	}
 }
 
-bool lcPiecesLibrary::GetStudLogoFile(lcMemFile& PrimFile, int StudLogo, bool OpenStud)
+bool lcPiecesLibrary::IsPrimitive(const char* Name) const
 {
-	if (!StudLogo || !SupportsStudLogo())
-		return false;
+	for (const std::unique_ptr<lcLibrarySource>& Source : mSources)
+		if (Source->Primitives.find(Name) != Source->Primitives.end())
+			return true;
 
-	const QLatin1String LineEnding("\r\n");
-	QByteArray FileData;
-	QTextStream TextStream(&FileData);
+	return false;
+}
 
-	TextStream << (OpenStud ? QLatin1String("0 Stud Open") : QLatin1String("0 Stud")) << LineEnding;
-	TextStream << (OpenStud ? QLatin1String("0 Name: stud2.dat") : QLatin1String("0 Name: stud.dat")) << LineEnding;
-	TextStream << QLatin1String("0 Author: James Jessiman") << LineEnding;
-	TextStream << QLatin1String("0 !LDRAW_ORG Primitive") << LineEnding;
-	TextStream << QLatin1String("0 BFC CERTIFY CCW") << LineEnding;
-	TextStream << QString("1 16 0 0 0 1 0 0 0 1 0 0 0 1 stud%1-logo%2.dat").arg(OpenStud ? "2" : QString(), StudLogo > 1 ? QString::number(StudLogo) : QString()) << LineEnding;
-	TextStream.flush();
+lcLibraryPrimitive* lcPiecesLibrary::FindPrimitive(const char* Name) const
+{
+	for (const std::unique_ptr<lcLibrarySource>& Source : mSources)
+	{
+		const auto PrimitiveIt = Source->Primitives.find(Name);
 
-	PrimFile.WriteBuffer(FileData.constData(), size_t(FileData.size()));
-	PrimFile.Seek(0, SEEK_SET);
+		if (PrimitiveIt != Source->Primitives.end())
+			return PrimitiveIt->second;
+	}
 
-	return true;
+	return  nullptr;
 }
 
 bool lcPiecesLibrary::LoadPrimitive(lcLibraryPrimitive* Primitive)
@@ -1596,8 +1602,6 @@ bool lcPiecesLibrary::LoadPrimitive(lcLibraryPrimitive* Primitive)
 
 	lcMeshLoader MeshLoader(Primitive->mMeshData, true, nullptr, false);
 
-	bool SetStudLogo = false;
-
 	if (mZipFiles[static_cast<int>(lcZipFileType::Official)])
 	{
 		lcLibraryPrimitive* LowPrimitive = nullptr;
@@ -1606,27 +1610,20 @@ bool lcPiecesLibrary::LoadPrimitive(lcLibraryPrimitive* Primitive)
 
 		if (Primitive->mStud)
 		{
-			const bool OpenStud = !strcmp(Primitive->mName,"stud2.dat");
-			if (OpenStud || !strcmp(Primitive->mName,"stud.dat"))
-			{
+			if (!strcmp(Primitive->mName, "stud.dat") || !strcmp(Primitive->mName, "stud2.dat"))
 				Primitive->mMeshData.mHasLogoStud = true;
-
-				if (mStudLogo)
-					SetStudLogo = GetStudLogoFile(PrimFile, mStudLogo, OpenStud);
-			}
-
-			if (!SetStudLogo && strncmp(Primitive->mName, "8/", 2)) // todo: this is currently the only place that uses mName so use mFileName instead. this should also be done for the loose file libraries.
+			else if (strncmp(Primitive->mName, "8/", 2)) // todo: this is currently the only place that uses mName so use mFileName instead. this should also be done for the loose file libraries.
 			{
 				char Name[LC_PIECE_NAME_LEN];
 				strcpy(Name, "8/");
 				strcat(Name, Primitive->mName);
 				strupr(Name);
 
-				LowPrimitive = FindPrimitive(Name);
+				LowPrimitive = FindPrimitive(Name); // todo: low primitives don't work with studlogo, because the low stud gets added as shared
 			}
 		}
 
-		if (!SetStudLogo && !mZipFiles[static_cast<int>(Primitive->mZipFileType)]->ExtractFile(Primitive->mZipFileIndex, PrimFile))
+		if (!mZipFiles[static_cast<int>(Primitive->mZipFileType)]->ExtractFile(Primitive->mZipFileIndex, PrimFile))
 			return false;
 
 		if (!LowPrimitive)
@@ -1650,40 +1647,26 @@ bool lcPiecesLibrary::LoadPrimitive(lcLibraryPrimitive* Primitive)
 	{
 		if (Primitive->mStud)
 		{
-			const bool OpenStud = !strcmp(Primitive->mName,"stud2.dat");
-			if (OpenStud || !strcmp(Primitive->mName,"stud.dat"))
-			{
+			if (!strcmp(Primitive->mName,"stud.dat") || !strcmp(Primitive->mName, "stud2.dat"))
 				Primitive->mMeshData.mHasLogoStud = true;
-
-				if (mStudLogo)
-				{
-					lcMemFile PrimFile;
-
-					if (GetStudLogoFile(PrimFile, mStudLogo, OpenStud))
-						SetStudLogo = MeshLoader.LoadMesh(PrimFile, LC_MESHDATA_SHARED);
-				}
-			}
 		}
 
-		if (!SetStudLogo)
+		if (Primitive->mZipFileType == lcZipFileType::Count)
 		{
-			if (Primitive->mZipFileType == lcZipFileType::Count)
-			{
-				lcDiskFile PrimFile(Primitive->mFileName);
+			lcDiskFile PrimFile(Primitive->mFileName);
 
-				if (!PrimFile.Open(QIODevice::ReadOnly) || !MeshLoader.LoadMesh(PrimFile, LC_MESHDATA_SHARED)) // todo: LOD like the zip files
-					return false;
-			}
-			else
-			{
-				lcMemFile PrimFile;
+			if (!PrimFile.Open(QIODevice::ReadOnly) || !MeshLoader.LoadMesh(PrimFile, LC_MESHDATA_SHARED)) // todo: LOD like the zip files
+				return false;
+		}
+		else
+		{
+			lcMemFile PrimFile;
 
-				if (!mZipFiles[static_cast<int>(Primitive->mZipFileType)]->ExtractFile(Primitive->mZipFileIndex, PrimFile))
-					return false;
+			if (!mZipFiles[static_cast<int>(Primitive->mZipFileType)]->ExtractFile(Primitive->mZipFileIndex, PrimFile))
+				return false;
 
-				if (!MeshLoader.LoadMesh(PrimFile, LC_MESHDATA_SHARED))
-					return false;
-			}
+			if (!MeshLoader.LoadMesh(PrimFile, LC_MESHDATA_SHARED))
+				return false;
 		}
 	}
 

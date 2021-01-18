@@ -10,11 +10,12 @@ class PieceInfo;
 class lcZipFile;
 class lcLibraryMeshData;
 
-enum lcZipFileType
+enum class lcZipFileType
 {
-	LC_ZIPFILE_OFFICIAL,
-	LC_ZIPFILE_UNOFFICIAL,
-	LC_NUM_ZIPFILES
+	Official,
+	Unofficial,
+	Primitives,
+	Count
 };
 
 enum lcLibraryFolderType
@@ -137,7 +138,7 @@ public:
 
 	void SetOfficialPieces()
 	{
-		if (mZipFiles[LC_ZIPFILE_OFFICIAL])
+		if (mZipFiles[static_cast<int>(lcZipFileType::Official)])
 			mNumOfficialPieces = (int)mPieces.size();
 	}
 
@@ -194,7 +195,7 @@ protected:
 
 	QString mCachePath;
 	qint64 mArchiveCheckSum[4];
-	std::unique_ptr<lcZipFile> mZipFiles[LC_NUM_ZIPFILES];
+	std::unique_ptr<lcZipFile> mZipFiles[static_cast<int>(lcZipFileType::Count)];
 	bool mHasUnofficial;
 	bool mCancelLoading;
 };

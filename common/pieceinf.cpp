@@ -16,7 +16,7 @@
 
 PieceInfo::PieceInfo()
 {
-	mZipFileType = LC_NUM_ZIPFILES;
+	mZipFileType = lcZipFileType::Count;
 	mZipFileIndex = -1;
 	mState = LC_PIECEINFO_UNLOADED;
 	mRefCount = 0;

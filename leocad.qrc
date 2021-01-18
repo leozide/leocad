@@ -96,6 +96,7 @@
         <file>resources/parts_cancel.png</file>
         <file>resources/archive.png</file>
         <file>resources/library.zip</file>
+        <file>resources/primitives.zip</file>
         <file>resources/ldconfig.ldr</file>
         <file>resources/minifig.ini</file>
         <file>resources/ldraw.xml</file>

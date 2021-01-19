@@ -78,6 +78,7 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 	else
 		ui->antiAliasingSamples->setCurrentIndex(0);
 	ui->edgeLines->setChecked(mOptions->Preferences.mDrawEdgeLines);
+	ui->LegoStyleDisplay->setChecked(mOptions->LegoStyleDisplay);
 
 #ifndef LC_OPENGLES
 	if (QSurfaceFormat::defaultFormat().samples() > 1)
@@ -204,6 +205,7 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 	SetButtonPixmap(mOptions->Preferences.mViewSphereHighlightColor, ui->ViewSphereHighlightColorButton);
 
 	on_studLogo_toggled();
+	on_LegoStyleDisplay_toggled();
 	on_antiAliasing_toggled();
 	on_edgeLines_toggled();
 	on_LineWidthSlider_valueChanged();
@@ -257,6 +259,7 @@ void lcQPreferencesDialog::accept()
 		Language = 0;
 	mOptions->Language = gLanguageLocales[Language];
 
+	mOptions->LegoStyleDisplay = ui->LegoStyleDisplay->isChecked();
 	mOptions->CheckForUpdates = ui->checkForUpdates->currentIndex();
 	mOptions->Preferences.mFixedAxes = ui->fixedDirectionKeys->isChecked();
 	mOptions->Preferences.mAutoLoadMostRecent = ui->autoLoadMostRecent->isChecked();
@@ -507,7 +510,20 @@ void lcQPreferencesDialog::ColorButtonClicked()
 void lcQPreferencesDialog::on_studLogo_toggled()
 {
 	if (lcGetPiecesLibrary()->SupportsStudLogo())
+	{
+		if (ui->studLogo->isChecked())
+			if (ui->LegoStyleDisplay->isChecked())
+				ui->LegoStyleDisplay->setChecked(false);
+
 	   ui->studLogoCombo->setEnabled(ui->studLogo->isChecked());
+	}
+}
+
+void lcQPreferencesDialog::on_LegoStyleDisplay_toggled()
+{
+	if (ui->LegoStyleDisplay->isChecked())
+		if (ui->studLogo->isChecked())
+			ui->studLogo->setChecked(false);
 }
 
 void lcQPreferencesDialog::on_antiAliasing_toggled()

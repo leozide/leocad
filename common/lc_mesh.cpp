@@ -8,7 +8,7 @@
 #include "lc_library.h"
 
 #define LC_MESH_FILE_ID      LC_FOURCC('M', 'E', 'S', 'H')
-#define LC_MESH_FILE_VERSION 0x0118
+#define LC_MESH_FILE_VERSION 0x0119
 
 lcMesh* gPlaceholderMesh;
 

@@ -111,6 +111,7 @@ static lcProfileEntry gProfileEntries[LC_NUM_PROFILE_KEYS] =
 	lcProfileEntry("Settings", "RestoreTabLayout", true),                                      // LC_PROFILE_RESTORE_TAB_LAYOUT
 	lcProfileEntry("Settings", "AutosaveInterval", 10),                                        // LC_PROFILE_AUTOSAVE_INTERVAL
 	lcProfileEntry("Settings", "MouseSensitivity", 11),                                        // LC_PROFILE_MOUSE_SENSITIVITY
+	lcProfileEntry("Settings", "LegoStyleDisplay", 0),                                         // LC_PROFILE_LEGO_STYLE_DISPLAY
 	lcProfileEntry("Settings", "ImageWidth", 1280),                                            // LC_PROFILE_IMAGE_WIDTH
 	lcProfileEntry("Settings", "ImageHeight", 720),                                            // LC_PROFILE_IMAGE_HEIGHT
 	lcProfileEntry("Settings", "ImageExtension", ".png"),                                      // LC_PROFILE_IMAGE_EXTENSION

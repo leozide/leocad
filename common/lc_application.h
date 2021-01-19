@@ -92,6 +92,7 @@ struct lcCommandLineOptions
 	bool SetHighlightColor;
 	bool FadeSteps;
 	bool ImageHighlight;
+	bool LegoStyleDisplay;
 	int ImageWidth;
 	int ImageHeight;
 	int AASamples;

@@ -15,6 +15,7 @@ enum class lcZipFileType
 	Official,
 	Unofficial,
 	StudLogo,
+	StudsLegoStyle,
 	Count
 };
 
@@ -73,7 +74,8 @@ public:
 enum class lcLibrarySourceType
 {
 	Library,
-	StudLogo
+	StudLogo,
+	StudsLegoStyle
 };
 
 struct lcLibrarySource
@@ -102,6 +104,7 @@ public:
 	lcPiecesLibrary& operator=(lcPiecesLibrary&&) = delete;
 
 	bool Load(const QString& LibraryPath, bool ShowProgress);
+	void LoadColors(bool Update = false);
 	void Unload();
 	void RemoveTemporaryPieces();
 	void RemovePiece(PieceInfo* Info);
@@ -139,6 +142,7 @@ public:
 
 	bool SupportsStudLogo() const;
 	void SetStudLogo(int StudLogo, bool Reload);
+	void SetLegoStyleDisplay(bool Enable, bool Reload);
 
 	int GetStudLogo() const
 	{
@@ -191,6 +195,7 @@ protected:
 	bool WriteDirectoryCacheFile(const QString& FileName, lcMemFile& CacheFile);
 
 	void UpdateStudLogoSource();
+	void UpdateStudsLegoStyleSource();
 
 	std::vector<std::unique_ptr<lcLibrarySource>> mSources;
 
@@ -202,6 +207,7 @@ protected:
 	std::vector<lcTexture*> mTextureUploads;
 
 	int mStudLogo;
+	int mLegoStyleDisplay;
 
 	QString mCachePath;
 	qint64 mArchiveCheckSum[4];

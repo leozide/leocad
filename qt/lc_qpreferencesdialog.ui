@@ -522,6 +522,13 @@
             </property>
            </widget>
           </item>
+          <item row="6" column="0">
+           <widget class="QCheckBox" name="LegoStyleDisplay">
+            <property name="text">
+             <string>LEGO-Style Display</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
@@ -1703,6 +1710,7 @@
   <tabstop>FadeStepsColor</tabstop>
   <tabstop>HighlightNewParts</tabstop>
   <tabstop>HighlightNewPartsColor</tabstop>
+  <tabstop>LegoStyleDisplay</tabstop>
   <tabstop>ShadingMode</tabstop>
   <tabstop>ViewSphereSizeCombo</tabstop>
   <tabstop>ViewSphereLocationCombo</tabstop>

@@ -56,7 +56,7 @@ enum class lcMeshFlag
 	HasLines       = 0x08, // Mesh has lines
 	HasTexture     = 0x10, // Mesh has sections using textures
 	HasLogoStud    = 0x20, // Mesh has a stud that can have a logo applied
-    HasLegoStyleStud = 0x40// Mesh has a stud whose cylinder can be colored
+	HasLegoStyleStud = 0x40// Mesh has a stud whose cylinder can be colored
 };
 
 Q_DECLARE_FLAGS(lcMeshFlags, lcMeshFlag)

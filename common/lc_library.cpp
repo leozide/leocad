@@ -299,7 +299,7 @@ void lcPiecesLibrary::LoadColors(bool Update)
 		lcMemFile ColorFile;
 
 		if (!LoadCustomColors())
-			if (!mZipFiles[static_cast<int>(lcZipFileType::Official)]->ExtractFile("ldraw/ldconfig.ldr", ColorFile) || !lcLoadColorFile(ColorFile))
+			if (!mZipFiles[static_cast<int>(lcZipFileType::Official)]->ExtractFile("ldraw/ldconfig.ldr", ColorFile) || !lcLoadColorFile(ColorFile, Update))
 				lcLoadDefaultColors();
 	}
 	else
@@ -308,11 +308,11 @@ void lcPiecesLibrary::LoadColors(bool Update)
 		{
 			lcDiskFile ColorFile(mLibraryDir.absoluteFilePath(QLatin1String("ldconfig.ldr")));
 
-			if (!ColorFile.Open(QIODevice::ReadOnly) || !lcLoadColorFile(ColorFile))
+			if (!ColorFile.Open(QIODevice::ReadOnly) || !lcLoadColorFile(ColorFile, Update))
 			{
 				ColorFile.SetFileName(mLibraryDir.absoluteFilePath(QLatin1String("LDConfig.ldr")));
 
-				if (!ColorFile.Open(QIODevice::ReadOnly) || !lcLoadColorFile(ColorFile))
+				if (!ColorFile.Open(QIODevice::ReadOnly) || !lcLoadColorFile(ColorFile, Update))
 					lcLoadDefaultColors();
 			}
 		}

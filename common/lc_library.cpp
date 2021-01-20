@@ -238,24 +238,9 @@ bool lcPiecesLibrary::Load(const QString& LibraryPath, bool ShowProgress)
 {
 	Unload();
 
-	auto LoadCustomColors = []()
-	{
-		QString CustomColorsPath = lcGetProfileString(LC_PROFILE_COLOR_CONFIG);
-
-		if (CustomColorsPath.isEmpty())
-			return false;
-
-		lcDiskFile ColorFile(CustomColorsPath);
-		return ColorFile.Open(QIODevice::ReadOnly) && lcLoadColorFile(ColorFile);
-	};
-
 	if (OpenArchive(LibraryPath, lcZipFileType::Official))
 	{
-		lcMemFile ColorFile;
-
-		if (!LoadCustomColors())
-			if (!mZipFiles[static_cast<int>(lcZipFileType::Official)]->ExtractFile("ldraw/ldconfig.ldr", ColorFile) || !lcLoadColorFile(ColorFile))
-				lcLoadDefaultColors();
+		LoadColors(false);
 
 		mLibraryDir = QFileInfo(LibraryPath).absoluteDir();
 		QString UnofficialFileName = mLibraryDir.absoluteFilePath(QLatin1String("ldrawunf.zip"));
@@ -270,20 +255,7 @@ bool lcPiecesLibrary::Load(const QString& LibraryPath, bool ShowProgress)
 		mLibraryDir.setPath(LibraryPath);
 
 		if (OpenDirectory(mLibraryDir, ShowProgress))
-		{
-			if (!LoadCustomColors())
-			{
-				lcDiskFile ColorFile(mLibraryDir.absoluteFilePath(QLatin1String("ldconfig.ldr")));
-
-				if (!ColorFile.Open(QIODevice::ReadOnly) || !lcLoadColorFile(ColorFile))
-				{
-					ColorFile.SetFileName(mLibraryDir.absoluteFilePath(QLatin1String("LDConfig.ldr")));
-
-					if (!ColorFile.Open(QIODevice::ReadOnly) || !lcLoadColorFile(ColorFile))
-						lcLoadDefaultColors();
-				}
-			}
-		}
+			LoadColors(false);
 		else
 			return false;
 	}
@@ -293,6 +265,44 @@ bool lcPiecesLibrary::Load(const QString& LibraryPath, bool ShowProgress)
 	lcSynthInit();
 
 	return true;
+}
+
+void lcPiecesLibrary::LoadColors(bool Update)
+{
+	auto LoadCustomColors = [&Update]()
+	{
+		QString CustomColorsPath = lcGetProfileString(LC_PROFILE_COLOR_CONFIG);
+
+		if (CustomColorsPath.isEmpty())
+			return false;
+
+		lcDiskFile ColorFile(CustomColorsPath);
+		return ColorFile.Open(QIODevice::ReadOnly) && lcLoadColorFile(ColorFile, Update);
+	};
+
+	if (mZipFiles[static_cast<int>(lcZipFileType::Official)])
+	{
+		lcMemFile ColorFile;
+
+		if (!LoadCustomColors())
+			if (!mZipFiles[static_cast<int>(lcZipFileType::Official)]->ExtractFile("ldraw/ldconfig.ldr", ColorFile) || !lcLoadColorFile(ColorFile, Update))
+				lcLoadDefaultColors();
+	}
+	else
+	{
+		if (!LoadCustomColors())
+		{
+			lcDiskFile ColorFile(mLibraryDir.absoluteFilePath(QLatin1String("ldconfig.ldr")));
+
+			if (!ColorFile.Open(QIODevice::ReadOnly) || !lcLoadColorFile(ColorFile, Update))
+			{
+				ColorFile.SetFileName(mLibraryDir.absoluteFilePath(QLatin1String("LDConfig.ldr")));
+
+				if (!ColorFile.Open(QIODevice::ReadOnly) || !lcLoadColorFile(ColorFile, Update))
+					lcLoadDefaultColors();
+			}
+		}
+	}
 }
 
 void lcPiecesLibrary::UpdateStudLogoSource()
@@ -305,7 +315,16 @@ void lcPiecesLibrary::UpdateStudLogoSource()
 	if (!mStudLogo)
 		return;
 
-	std::unique_ptr<lcDiskFile> StudLogoFile(new lcDiskFile(QString(":/resources/studlogo%1.zip").arg(QString::number(mStudLogo))));
+	if (mStudLogo > 5)
+		lcLoadLegoStyleDisplayColors();
+
+	std::unique_ptr<lcDiskFile> StudLogoFile;
+	if (mStudLogo < 6)
+		StudLogoFile = std::unique_ptr<lcDiskFile>(new lcDiskFile(QString(":/resources/studlogo%1.zip").arg(QString::number(mStudLogo))));
+	else if (mStudLogo == 6)
+		StudLogoFile = std::unique_ptr<lcDiskFile>(new lcDiskFile(QString(":/resources/studslegostyle1.zip")));
+	else
+		StudLogoFile = std::unique_ptr<lcDiskFile>(new lcDiskFile(QString(":/resources/studslegostyle2.zip")));
 
 	if (StudLogoFile->Open(QIODevice::ReadOnly))
 		OpenArchive(std::move(StudLogoFile), lcZipFileType::StudLogo);
@@ -1520,6 +1539,9 @@ bool lcPiecesLibrary::SupportsStudLogo() const
 
 void lcPiecesLibrary::SetStudLogo(int StudLogo, bool Reload)
 {
+	if (mStudLogo > 5 && StudLogo < 6 && Reload)
+		LoadColors(Reload);
+
 	mStudLogo = StudLogo;
 
 	UpdateStudLogoSource();
@@ -1602,6 +1624,21 @@ bool lcPiecesLibrary::LoadPrimitive(lcLibraryPrimitive* Primitive)
 
 	lcMeshLoader MeshLoader(Primitive->mMeshData, true, nullptr, false);
 
+	auto StudLogoPrimitive = [this, &Primitive] ()
+	{
+		if (!mSources.empty() && mSources.front()->Type == lcLibrarySourceType::StudLogo)
+		{
+			char Name[LC_PIECE_NAME_LEN];
+			strcpy(Name, Primitive->mName);
+			strupr(Name);
+			const std::unique_ptr<lcLibrarySource>& Source = mSources.front();
+			const auto& PrimitiveIt = Source->Primitives.find(Name);
+			if (PrimitiveIt != Source->Primitives.end())
+				return true;
+		}
+		return false;
+	};
+
 	if (mZipFiles[static_cast<int>(lcZipFileType::Official)])
 	{
 		lcLibraryPrimitive* LowPrimitive = nullptr;
@@ -1610,7 +1647,7 @@ bool lcPiecesLibrary::LoadPrimitive(lcLibraryPrimitive* Primitive)
 
 		if (Primitive->mStud)
 		{
-			if (!strcmp(Primitive->mName, "stud.dat") || !strcmp(Primitive->mName, "stud2.dat"))
+			if (StudLogoPrimitive())
 				Primitive->mMeshData.mHasLogoStud = true;
 			else if (strncmp(Primitive->mName, "8/", 2)) // todo: this is currently the only place that uses mName so use mFileName instead. this should also be done for the loose file libraries.
 			{
@@ -1647,7 +1684,7 @@ bool lcPiecesLibrary::LoadPrimitive(lcLibraryPrimitive* Primitive)
 	{
 		if (Primitive->mStud)
 		{
-			if (!strcmp(Primitive->mName,"stud.dat") || !strcmp(Primitive->mName, "stud2.dat"))
+			 if (StudLogoPrimitive())
 				Primitive->mMeshData.mHasLogoStud = true;
 		}
 

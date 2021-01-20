@@ -390,27 +390,37 @@
            <widget class="QComboBox" name="studLogoCombo">
             <item>
              <property name="text">
-              <string>Logo1</string>
+              <string>1 LDraw Single Wire</string>
              </property>
             </item>
             <item>
              <property name="text">
-              <string>Logo2</string>
+              <string>2 LDraw Double Wire</string>
              </property>
             </item>
             <item>
              <property name="text">
-              <string>Logo3</string>
+              <string>3 LDraw Raised Floating</string>
              </property>
             </item>
             <item>
              <property name="text">
-              <string>Logo4</string>
+              <string>4 LDraw Raised Rounded </string>
              </property>
             </item>
             <item>
              <property name="text">
-              <string>Logo5</string>
+              <string>5 LDraw Subtle Rounded</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>6 LEGO Without Logo</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>7 LEGO Single Wire</string>
              </property>
             </item>
            </widget>

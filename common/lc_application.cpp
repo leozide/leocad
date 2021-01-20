@@ -656,7 +656,7 @@ lcCommandLineOptions lcApplication::ParseCommandLineOptions()
 		}
 		else if (Option == QLatin1String("-sl") || Option == QLatin1String("--stud-logo"))
 		{
-			ParseInteger(Options.StudLogo, 0, 5);
+			ParseInteger(Options.StudLogo, 0, 7);
 
 			if (Options.StudLogo != lcGetProfileInt(LC_PROFILE_STUD_LOGO))
 				lcGetPiecesLibrary()->SetStudLogo(Options.StudLogo, false);

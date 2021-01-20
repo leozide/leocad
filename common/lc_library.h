@@ -102,6 +102,7 @@ public:
 	lcPiecesLibrary& operator=(lcPiecesLibrary&&) = delete;
 
 	bool Load(const QString& LibraryPath, bool ShowProgress);
+	void LoadColors(bool Update);
 	void Unload();
 	void RemoveTemporaryPieces();
 	void RemovePiece(PieceInfo* Info);

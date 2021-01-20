@@ -41,7 +41,7 @@ class lcQPreferencesDialog;
 class lcQPreferencesDialog : public QDialog
 {
 	Q_OBJECT
-	
+
 public:
 	lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogOptions* Options);
 	~lcQPreferencesDialog();

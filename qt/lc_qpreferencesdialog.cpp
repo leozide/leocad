@@ -161,17 +161,17 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 	else
 		ui->PreviewViewSphereSizeCombo->setCurrentIndex(0);
 
-	if (!lcGetPiecesLibrary()->SupportsStudLogo())
+	if (!lcGetPiecesLibrary()->SupportsStudStyle())
 	{
-		ui->studLogo->setEnabled(false);
-		ui->studLogoCombo->setEnabled(false);
+		ui->studStyle->setEnabled(false);
+		ui->studStyleCombo->setEnabled(false);
 	}
 
-	ui->studLogo->setChecked(mOptions->StudLogo);
-	if (ui->studLogo->isChecked())
-		ui->studLogoCombo->setCurrentIndex(mOptions->StudLogo - 1);
+	ui->studStyle->setChecked(mOptions->StudStyle);
+	if (ui->studStyle->isChecked())
+		ui->studStyleCombo->setCurrentIndex(mOptions->StudStyle - 1);
 	else
-		ui->studLogoCombo->setCurrentIndex(mOptions->StudLogo);
+		ui->studStyleCombo->setCurrentIndex(mOptions->StudStyle);
 
 	if (!gSupportsShaderObjects)
 		ui->ShadingMode->removeItem(static_cast<int>(lcShadingMode::DefaultLights));
@@ -203,7 +203,7 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 	SetButtonPixmap(mOptions->Preferences.mViewSphereTextColor, ui->ViewSphereTextColorButton);
 	SetButtonPixmap(mOptions->Preferences.mViewSphereHighlightColor, ui->ViewSphereHighlightColorButton);
 
-	on_studLogo_toggled();
+	on_studStyle_toggled();
 	on_antiAliasing_toggled();
 	on_edgeLines_toggled();
 	on_LineWidthSlider_valueChanged();
@@ -303,10 +303,10 @@ void lcQPreferencesDialog::accept()
 
 	mOptions->Preferences.mShadingMode = (lcShadingMode)ui->ShadingMode->currentIndex();
 
-	if (ui->studLogoCombo->isEnabled())
-		mOptions->StudLogo = ui->studLogoCombo->currentIndex() + 1;
+	if (ui->studStyleCombo->isEnabled())
+		mOptions->StudStyle = ui->studStyleCombo->currentIndex() + 1;
 	else
-		mOptions->StudLogo = 0;
+		mOptions->StudStyle = 0;
 
 	mOptions->Preferences.mDrawPreviewAxis = ui->PreviewAxisIconCheckBox->isChecked();
 	mOptions->Preferences.mPreviewViewSphereEnabled = ui->PreviewViewSphereSizeCombo->currentIndex() > 0;
@@ -504,10 +504,10 @@ void lcQPreferencesDialog::ColorButtonClicked()
 	((QToolButton*)Button)->setIcon(pix);
 }
 
-void lcQPreferencesDialog::on_studLogo_toggled()
+void lcQPreferencesDialog::on_studStyle_toggled()
 {
-	if (lcGetPiecesLibrary()->SupportsStudLogo())
-	   ui->studLogoCombo->setEnabled(ui->studLogo->isChecked());
+	if (lcGetPiecesLibrary()->SupportsStudStyle())
+	   ui->studStyleCombo->setEnabled(ui->studStyle->isChecked());
 }
 
 void lcQPreferencesDialog::on_antiAliasing_toggled()

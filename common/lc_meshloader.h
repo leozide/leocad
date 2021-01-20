@@ -93,7 +93,7 @@ public:
 	lcLibraryMeshData()
 	{
 		mHasTextures = false;
-		mHasLogoStud = false;
+		mHasStyleStud = false;
 
 		for (int MeshDataIdx = 0; MeshDataIdx < LC_NUM_MESHDATA_TYPES; MeshDataIdx++)
 			mVertices[MeshDataIdx].SetGrow(1024);
@@ -148,7 +148,7 @@ public:
 	lcArray<lcLibraryMeshSection*> mSections[LC_NUM_MESHDATA_TYPES];
 	lcArray<lcLibraryMeshVertex> mVertices[LC_NUM_MESHDATA_TYPES];
 	bool mHasTextures;
-	bool mHasLogoStud;
+	bool mHasStyleStud;
 };
 
 class lcMeshLoader

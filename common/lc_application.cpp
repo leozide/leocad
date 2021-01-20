@@ -340,7 +340,7 @@ lcCommandLineOptions lcApplication::ParseCommandLineOptions()
 	Options.ImageWidth = lcGetProfileInt(LC_PROFILE_IMAGE_WIDTH);
 	Options.ImageHeight = lcGetProfileInt(LC_PROFILE_IMAGE_HEIGHT);
 	Options.AASamples = lcGetProfileInt(LC_PROFILE_ANTIALIASING_SAMPLES);
-	Options.StudLogo = lcGetProfileInt(LC_PROFILE_STUD_LOGO);
+	Options.StudStyle = lcGetProfileInt(LC_PROFILE_STUD_STYLE);
 	Options.ImageStart = 0;
 	Options.ImageEnd = 0;
 	Options.CameraPosition[0] = lcVector3(0.0f, 0.0f, 0.0f);
@@ -654,12 +654,12 @@ lcCommandLineOptions lcApplication::ParseCommandLineOptions()
 				Options.ParseOK = false;
 			}
 		}
-		else if (Option == QLatin1String("-sl") || Option == QLatin1String("--stud-logo"))
+		else if (Option == QLatin1String("-ss") || Option == QLatin1String("--stud-style"))
 		{
-			ParseInteger(Options.StudLogo, 0, 5);
+			ParseInteger(Options.StudStyle, 0, 7);
 
-			if (Options.StudLogo != lcGetProfileInt(LC_PROFILE_STUD_LOGO))
-				lcGetPiecesLibrary()->SetStudLogo(Options.StudLogo, false);
+			if (Options.StudStyle != lcGetProfileInt(LC_PROFILE_STUD_STYLE))
+				lcGetPiecesLibrary()->SetStudStyle(Options.StudStyle, false);
 		}
 		else if (Option == QLatin1String("-obj") || Option == QLatin1String("--export-wavefront"))
 		{
@@ -703,7 +703,7 @@ lcCommandLineOptions lcApplication::ParseCommandLineOptions()
 			Options.StdOut += tr("  -t, --to <step>: Set the last step to save pictures.\n");
 			Options.StdOut += tr("  -s, --submodel <submodel>: Set the active submodel.\n");
 			Options.StdOut += tr("  -c, --camera <camera>: Set the active camera.\n");
-			Options.StdOut += tr("  -sl, --stud-logo <type>: Set the stud logo type 0 - 5, 0 is no logo.\n");
+			Options.StdOut += tr("  -ss, --stud-style <id>: Set the stud style 0=No style, 1=LDraw single wire, 2=LDraw double wire, 3=LDraw raised floating, 4=LDraw raised rounded, 5=LDraw subtle rounded, 6=LEGO no logo, 7=LEGO single wire.\n");
 			Options.StdOut += tr("  --viewpoint <front|back|left|right|top|bottom|home>: Set the viewpoint.\n");
 			Options.StdOut += tr("  --camera-angles <latitude> <longitude>: Set the camera angles in degrees around the model.\n");
 			Options.StdOut += tr("  --camera-position <x> <y> <z> <tx> <ty> <tz> <ux> <uy> <uz>: Set the camera position, target and up vector.\n");
@@ -1108,7 +1108,7 @@ void lcApplication::ShowPreferencesDialog()
 {
 	lcPreferencesDialogOptions Options;
 	int CurrentAASamples = lcGetProfileInt(LC_PROFILE_ANTIALIASING_SAMPLES);
-	int CurrentStudLogo = lcGetProfileInt(LC_PROFILE_STUD_LOGO);
+	int CurrentStudStyle = lcGetProfileInt(LC_PROFILE_STUD_STYLE);
 
 	Options.Preferences = mPreferences;
 
@@ -1122,7 +1122,7 @@ void lcApplication::ShowPreferencesDialog()
 	Options.CheckForUpdates = lcGetProfileInt(LC_PROFILE_CHECK_UPDATES);
 
 	Options.AASamples = CurrentAASamples;
-	Options.StudLogo = CurrentStudLogo;
+	Options.StudStyle = CurrentStudStyle;
 
 	Options.Categories = gCategories;
 	Options.CategoriesModified = false;
@@ -1143,7 +1143,7 @@ void lcApplication::ShowPreferencesDialog()
 	bool LibraryChanged = Options.LibraryPath != lcGetProfileString(LC_PROFILE_PARTS_LIBRARY);
 	bool ColorsChanged = Options.ColorConfigPath != lcGetProfileString(LC_PROFILE_COLOR_CONFIG);
 	bool AAChanged = CurrentAASamples != Options.AASamples;
-	bool StudLogoChanged = CurrentStudLogo != Options.StudLogo;
+	bool StudStyleChanged = CurrentStudStyle != Options.StudStyle;
 
 	mPreferences = Options.Preferences;
 
@@ -1159,7 +1159,7 @@ void lcApplication::ShowPreferencesDialog()
 	lcSetProfileString(LC_PROFILE_LANGUAGE, Options.Language);
 	lcSetProfileInt(LC_PROFILE_CHECK_UPDATES, Options.CheckForUpdates);
 	lcSetProfileInt(LC_PROFILE_ANTIALIASING_SAMPLES, Options.AASamples);
-	lcSetProfileInt(LC_PROFILE_STUD_LOGO, Options.StudLogo);
+	lcSetProfileInt(LC_PROFILE_STUD_STYLE, Options.StudStyle);
 
 	if (LanguageChanged || LibraryChanged || ColorsChanged || AAChanged)
 		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Some changes will only take effect the next time you start LeoCAD."));
@@ -1201,10 +1201,10 @@ void lcApplication::ShowPreferencesDialog()
 		}
 	}
 
-	if (StudLogoChanged)
+	if (StudStyleChanged)
 	{
-		lcSetProfileInt(LC_PROFILE_STUD_LOGO, Options.StudLogo);
-		lcGetPiecesLibrary()->SetStudLogo(Options.StudLogo, true);
+		lcSetProfileInt(LC_PROFILE_STUD_STYLE, Options.StudStyle);
+		lcGetPiecesLibrary()->SetStudStyle(Options.StudStyle, true);
 	}
 
 	// TODO: printing preferences

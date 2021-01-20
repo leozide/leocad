@@ -18,7 +18,7 @@ struct lcPreferencesDialogOptions
 	int CheckForUpdates;
 
 	int AASamples;
-	int StudLogo;
+	int StudStyle;
 
 	std::vector<lcLibraryCategory> Categories;
 	bool CategoriesModified;
@@ -41,7 +41,7 @@ class lcQPreferencesDialog;
 class lcQPreferencesDialog : public QDialog
 {
 	Q_OBJECT
-	
+
 public:
 	lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogOptions* Options);
 	~lcQPreferencesDialog();
@@ -94,7 +94,7 @@ public slots:
 	void on_MouseImportButton_clicked();
 	void on_MouseExportButton_clicked();
 	void on_mouseReset_clicked();
-	void on_studLogo_toggled();
+	void on_studStyle_toggled();
 	void MouseTreeItemChanged(QTreeWidgetItem* Current);
 
 private:

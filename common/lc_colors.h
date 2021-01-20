@@ -49,8 +49,10 @@ extern int gEdgeColor;
 extern int gDefaultColor;
 
 void lcLoadDefaultColors();
-bool lcLoadColorFile(lcFile& File);
+void lcLoadLegoStudStyleColors();
+bool lcLoadColorFile(lcFile& File, bool Update);
 int lcGetColorIndex(quint32 ColorCode);
+int lcGetColorIndexByName(const char * ColorName);
 int lcGetBrickLinkColor(int ColorIndex);
 
 inline quint32 lcGetColorCodeFromExtendedColor(int Color)

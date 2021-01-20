@@ -14,7 +14,7 @@ enum class lcZipFileType
 {
 	Official,
 	Unofficial,
-	StudLogo,
+	StudStyle,
 	Count
 };
 
@@ -73,7 +73,7 @@ public:
 enum class lcLibrarySourceType
 {
 	Library,
-	StudLogo
+	StudStyle
 };
 
 struct lcLibrarySource
@@ -102,6 +102,7 @@ public:
 	lcPiecesLibrary& operator=(lcPiecesLibrary&&) = delete;
 
 	bool Load(const QString& LibraryPath, bool ShowProgress);
+	void LoadColors(bool Update);
 	void Unload();
 	void RemoveTemporaryPieces();
 	void RemovePiece(PieceInfo* Info);
@@ -137,12 +138,12 @@ public:
 	lcLibraryPrimitive* FindPrimitive(const char* Name) const;
 	bool LoadPrimitive(lcLibraryPrimitive* Primitive);
 
-	bool SupportsStudLogo() const;
-	void SetStudLogo(int StudLogo, bool Reload);
+	bool SupportsStudStyle() const;
+	void SetStudStyle(int StudStyle, bool Reload);
 
-	int GetStudLogo() const
+	int GetStudStyle() const
 	{
-		return mStudLogo;
+		return mStudStyle;
 	}
 
 	void SetOfficialPieces()
@@ -190,7 +191,7 @@ protected:
 	bool ReadDirectoryCacheFile(const QString& FileName, lcMemFile& CacheFile);
 	bool WriteDirectoryCacheFile(const QString& FileName, lcMemFile& CacheFile);
 
-	void UpdateStudLogoSource();
+	void UpdateStudStyleSource();
 
 	std::vector<std::unique_ptr<lcLibrarySource>> mSources;
 
@@ -201,7 +202,7 @@ protected:
 	QMutex mTextureMutex;
 	std::vector<lcTexture*> mTextureUploads;
 
-	int mStudLogo;
+	int mStudStyle;
 
 	QString mCachePath;
 	qint64 mArchiveCheckSum[4];

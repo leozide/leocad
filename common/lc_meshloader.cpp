@@ -1187,8 +1187,8 @@ lcMesh* lcLibraryMeshData::CreateMesh()
 		}
 	}
 
-	if (mHasLogoStud)
-		Mesh->mFlags |= lcMeshFlag::HasLogoStud;
+	if (mHasStyleStud)
+		Mesh->mFlags |= lcMeshFlag::HasStyleStud;
 
 	lcVector3 MeshMin(FLT_MAX, FLT_MAX, FLT_MAX), MeshMax(-FLT_MAX, -FLT_MAX, -FLT_MAX);
 	bool UpdatedBoundingBox = false;
@@ -1625,7 +1625,7 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 				else
 					Library->GetPrimitiveFile(Primitive, FileCallback);
 
-				mMeshData.mHasLogoStud |= Primitive->mMeshData.mHasLogoStud;
+				mMeshData.mHasStyleStud |= Primitive->mMeshData.mHasStyleStud;
 			}
 			else
 				Library->GetPieceFile(FileName, FileCallback);

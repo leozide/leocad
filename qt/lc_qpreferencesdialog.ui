@@ -387,38 +387,48 @@
            </widget>
           </item>
           <item row="1" column="1">
-           <widget class="QComboBox" name="studLogoCombo">
+           <widget class="QComboBox" name="studStyleCombo">
             <item>
              <property name="text">
-              <string>Logo1</string>
+              <string>1 LDraw Single Wire</string>
              </property>
             </item>
             <item>
              <property name="text">
-              <string>Logo2</string>
+              <string>2 LDraw Double Wire</string>
              </property>
             </item>
             <item>
              <property name="text">
-              <string>Logo3</string>
+              <string>3 LDraw Raised Floating</string>
              </property>
             </item>
             <item>
              <property name="text">
-              <string>Logo4</string>
+              <string>4 LDraw Raised Rounded </string>
              </property>
             </item>
             <item>
              <property name="text">
-              <string>Logo5</string>
+              <string>5 LDraw Subtle Rounded</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>6 LEGO Without Logo</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>7 LEGO Single Wire</string>
              </property>
             </item>
            </widget>
           </item>
           <item row="1" column="0">
-           <widget class="QCheckBox" name="studLogo">
+           <widget class="QCheckBox" name="studStyle">
             <property name="text">
-             <string>Stud Logo</string>
+             <string>Stud Style</string>
             </property>
            </widget>
           </item>
@@ -1693,8 +1703,8 @@
   <tabstop>RestoreTabLayout</tabstop>
   <tabstop>antiAliasing</tabstop>
   <tabstop>antiAliasingSamples</tabstop>
-  <tabstop>studLogo</tabstop>
-  <tabstop>studLogoCombo</tabstop>
+  <tabstop>studStyle</tabstop>
+  <tabstop>studStyleCombo</tabstop>
   <tabstop>edgeLines</tabstop>
   <tabstop>LineWidthSlider</tabstop>
   <tabstop>MeshLOD</tabstop>

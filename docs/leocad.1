@@ -1,4 +1,4 @@
-.TH LEOCAD 1 "12 January 2021"
+.TH LEOCAD 1 "20 January 2021"
 .\" NAME should be all caps, SECTION should be 1-8, maybe w/ subsection
 .\" other params are allowed: see man(7), man(1)
 .SH NAME
@@ -66,9 +66,9 @@ Sets the active submodel to \fIsubmodel\fR.
 Sets the active camera to \fIcamera\fR.
 
 .TP
-\fB\-sl \fItype\fR,\ \fB\-\-stud\-logo\ \fItype
+\fB\-ss \fIid\fR,\ \fB\-\-stud\-style\ \fIid
 .br
-Set the stud logo type. Valid values or 0 - 5, inclusive, with 0 meaning no stud logo. Stud logos may be found as part of the unofficial parts library from \fILDraw.org\fR.
+Set the stud style. Valid values 0=No style, 1=LDraw single wire, 2=LDraw double wire, 3=LDraw raised floating, 4=LDraw raised rounded, 5=LDraw subtle rounded, 6=LEGO no logo, 7=LEGO single wire. Stud style 1 - 5 require stud logo primitives which are in the unofficial parts library from \fILDraw.org\fR.
 
 .TP
 \fB\-\-viewpoint \fRfront\ |\ back\ |\ left\ |\ right\ |\ top\ |\ bottom\ |\ home

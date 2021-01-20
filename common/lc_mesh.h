@@ -55,7 +55,7 @@ enum class lcMeshFlag
 	HasTranslucent = 0x04, // Mesh has triangles using a translucent color
 	HasLines       = 0x08, // Mesh has lines
 	HasTexture     = 0x10, // Mesh has sections using textures
-	HasLogoStud    = 0x20  // Mesh has a stud that can have a logo applied
+	HasStyleStud   = 0x20  // Mesh has a stud that can have a logo applied
 };
 
 Q_DECLARE_FLAGS(lcMeshFlags, lcMeshFlag)

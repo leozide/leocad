@@ -387,7 +387,7 @@
            </widget>
           </item>
           <item row="1" column="1">
-           <widget class="QComboBox" name="studLogoCombo">
+           <widget class="QComboBox" name="studStyleCombo">
             <item>
              <property name="text">
               <string>1 LDraw Single Wire</string>
@@ -426,9 +426,9 @@
            </widget>
           </item>
           <item row="1" column="0">
-           <widget class="QCheckBox" name="studLogo">
+           <widget class="QCheckBox" name="studStyle">
             <property name="text">
-             <string>Stud Logo</string>
+             <string>Stud Style</string>
             </property>
            </widget>
           </item>
@@ -1703,8 +1703,8 @@
   <tabstop>RestoreTabLayout</tabstop>
   <tabstop>antiAliasing</tabstop>
   <tabstop>antiAliasingSamples</tabstop>
-  <tabstop>studLogo</tabstop>
-  <tabstop>studLogoCombo</tabstop>
+  <tabstop>studStyle</tabstop>
+  <tabstop>studStyleCombo</tabstop>
   <tabstop>edgeLines</tabstop>
   <tabstop>LineWidthSlider</tabstop>
   <tabstop>MeshLOD</tabstop>

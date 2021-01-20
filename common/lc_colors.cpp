@@ -487,7 +487,7 @@ int lcGetColorIndex(quint32 ColorCode)
 	return (int)gColorList.size() - 1;
 }
 
-void lcLoadLegoStyleDisplayColors()
+void lcLoadLegoStudStyleColors()
 {
 	QByteArray ColorData;
 	const char *ColorEntry = "0 !COLOUR   Stud_Style_Black    CODE 4242    VALUE #1B2A34    EDGE #000000\r\n";

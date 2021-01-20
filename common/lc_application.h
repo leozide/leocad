@@ -95,7 +95,7 @@ struct lcCommandLineOptions
 	int ImageWidth;
 	int ImageHeight;
 	int AASamples;
-	int StudLogo;
+	int StudStyle;
 	lcStep ImageStart;
 	lcStep ImageEnd;
 	lcVector3 CameraPosition[3];

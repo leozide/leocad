@@ -94,7 +94,6 @@ public slots:
 	void on_MouseImportButton_clicked();
 	void on_MouseExportButton_clicked();
 	void on_mouseReset_clicked();
-	void on_studStyle_toggled();
 	void MouseTreeItemChanged(QTreeWidgetItem* Current);
 
 private:

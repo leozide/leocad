@@ -162,16 +162,9 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 		ui->PreviewViewSphereSizeCombo->setCurrentIndex(0);
 
 	if (!lcGetPiecesLibrary()->SupportsStudStyle())
-	{
-		ui->studStyle->setEnabled(false);
 		ui->studStyleCombo->setEnabled(false);
-	}
 
-	ui->studStyle->setChecked(mOptions->StudStyle);
-	if (ui->studStyle->isChecked())
-		ui->studStyleCombo->setCurrentIndex(mOptions->StudStyle - 1);
-	else
-		ui->studStyleCombo->setCurrentIndex(mOptions->StudStyle);
+	ui->studStyleCombo->setCurrentIndex(mOptions->StudStyle);
 
 	if (!gSupportsShaderObjects)
 		ui->ShadingMode->removeItem(static_cast<int>(lcShadingMode::DefaultLights));
@@ -203,7 +196,6 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 	SetButtonPixmap(mOptions->Preferences.mViewSphereTextColor, ui->ViewSphereTextColorButton);
 	SetButtonPixmap(mOptions->Preferences.mViewSphereHighlightColor, ui->ViewSphereHighlightColorButton);
 
-	on_studStyle_toggled();
 	on_antiAliasing_toggled();
 	on_edgeLines_toggled();
 	on_LineWidthSlider_valueChanged();
@@ -303,10 +295,7 @@ void lcQPreferencesDialog::accept()
 
 	mOptions->Preferences.mShadingMode = (lcShadingMode)ui->ShadingMode->currentIndex();
 
-	if (ui->studStyleCombo->isEnabled())
-		mOptions->StudStyle = ui->studStyleCombo->currentIndex() + 1;
-	else
-		mOptions->StudStyle = 0;
+	mOptions->StudStyle = ui->studStyleCombo->currentIndex();
 
 	mOptions->Preferences.mDrawPreviewAxis = ui->PreviewAxisIconCheckBox->isChecked();
 	mOptions->Preferences.mPreviewViewSphereEnabled = ui->PreviewViewSphereSizeCombo->currentIndex() > 0;
@@ -502,12 +491,6 @@ void lcQPreferencesDialog::ColorButtonClicked()
 	newColor.setAlpha(255);
 	pix.fill(newColor);
 	((QToolButton*)Button)->setIcon(pix);
-}
-
-void lcQPreferencesDialog::on_studStyle_toggled()
-{
-	if (lcGetPiecesLibrary()->SupportsStudStyle())
-	   ui->studStyleCombo->setEnabled(ui->studStyle->isChecked());
 }
 
 void lcQPreferencesDialog::on_antiAliasing_toggled()

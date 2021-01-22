@@ -18,7 +18,7 @@ struct lcPreferencesDialogOptions
 	int CheckForUpdates;
 
 	int AASamples;
-	int StudStyle;
+	lcStudStyle StudStyle;
 
 	std::vector<lcLibraryCategory> Categories;
 	bool CategoriesModified;

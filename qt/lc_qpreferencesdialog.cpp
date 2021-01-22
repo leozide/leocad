@@ -164,7 +164,7 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 	if (!lcGetPiecesLibrary()->SupportsStudStyle())
 		ui->studStyleCombo->setEnabled(false);
 
-	ui->studStyleCombo->setCurrentIndex(mOptions->StudStyle);
+	ui->studStyleCombo->setCurrentIndex(static_cast<int>(mOptions->StudStyle));
 
 	if (!gSupportsShaderObjects)
 		ui->ShadingMode->removeItem(static_cast<int>(lcShadingMode::DefaultLights));
@@ -295,7 +295,7 @@ void lcQPreferencesDialog::accept()
 
 	mOptions->Preferences.mShadingMode = (lcShadingMode)ui->ShadingMode->currentIndex();
 
-	mOptions->StudStyle = ui->studStyleCombo->currentIndex();
+	mOptions->StudStyle = static_cast<lcStudStyle>(ui->studStyleCombo->currentIndex());
 
 	mOptions->Preferences.mDrawPreviewAxis = ui->PreviewAxisIconCheckBox->isChecked();
 	mOptions->Preferences.mPreviewViewSphereEnabled = ui->PreviewViewSphereSizeCombo->currentIndex() > 0;

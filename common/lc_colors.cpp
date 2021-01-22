@@ -1,6 +1,7 @@
 #include "lc_global.h"
 #include "lc_colors.h"
 #include "lc_file.h"
+#include "lc_library.h"
 #include <float.h>
 
 std::vector<lcColor> gColorList;
@@ -209,9 +210,9 @@ int lcGetBrickLinkColor(int ColorIndex)
 	return 0;
 }
 
-static void lcAdjustStudStyleColors(int StudStyle)
+static void lcAdjustStudStyleColors(lcStudStyle StudStyle)
 {
-	if (StudStyle < 6)
+	if (StudStyle != lcStudStyle::HighContrast && StudStyle != lcStudStyle::HighContrastLogo)
 		return;
 
 	for (lcColor& Color : gColorList)
@@ -228,7 +229,7 @@ static void lcAdjustStudStyleColors(int StudStyle)
 	}
 }
 
-bool lcLoadColorFile(lcFile& File, int StudStyle)
+bool lcLoadColorFile(lcFile& File, lcStudStyle StudStyle)
 {
 	char Line[1024], Token[1024];
 	std::vector<lcColor>& Colors = gColorList;
@@ -452,7 +453,7 @@ bool lcLoadColorFile(lcFile& File, int StudStyle)
 	return Colors.size() > 3;
 }
 
-void lcLoadDefaultColors(int StudStyle)
+void lcLoadDefaultColors(lcStudStyle StudStyle)
 {
 	lcDiskFile ConfigFile(":/resources/ldconfig.ldr");
 

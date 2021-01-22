@@ -48,8 +48,8 @@ extern int gNumUserColors;
 extern int gEdgeColor;
 extern int gDefaultColor;
 
-void lcLoadDefaultColors(int StudStyle);
-bool lcLoadColorFile(lcFile& File, int StudStyle);
+void lcLoadDefaultColors(lcStudStyle StudStyle);
+bool lcLoadColorFile(lcFile& File, lcStudStyle StudStyle);
 int lcGetColorIndex(quint32 ColorCode);
 int lcGetBrickLinkColor(int ColorIndex);
 

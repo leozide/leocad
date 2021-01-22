@@ -492,7 +492,7 @@ bool lcMesh::FileSave(lcMemFile& File)
 
 int lcMesh::GetLodIndex(float Distance) const
 {
-	if (lcGetPiecesLibrary()->GetStudStyle())
+	if (lcGetPiecesLibrary()->GetStudStyle() != lcStudStyle::Plain) // todo: support low lod studs
 		return LC_MESH_LOD_HIGH;
 
 	if (mLods[LC_MESH_LOD_LOW].NumSections && (Distance > mRadius))

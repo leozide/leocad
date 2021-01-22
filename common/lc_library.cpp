@@ -41,7 +41,7 @@ lcPiecesLibrary::lcPiecesLibrary()
 	mBuffersDirty = false;
 	mHasUnofficial = false;
 	mCancelLoading = false;
-	mStudStyle = lcGetProfileInt(LC_PROFILE_STUD_STYLE);
+	mStudStyle = static_cast<lcStudStyle>(lcGetProfileInt(LC_PROFILE_STUD_STYLE));
 }
 
 lcPiecesLibrary::~lcPiecesLibrary()
@@ -312,16 +312,24 @@ void lcPiecesLibrary::UpdateStudStyleSource()
 
 	mZipFiles[static_cast<int>(lcZipFileType::StudStyle)].reset();
 
-	if (!mStudStyle)
+	if (mStudStyle == lcStudStyle::Plain)
 		return;
 
-	std::unique_ptr<lcDiskFile> StudStyleFile;
-	if (mStudStyle < 6)
-		StudStyleFile = std::unique_ptr<lcDiskFile>(new lcDiskFile(QString(":/resources/studlogo%1.zip").arg(QString::number(mStudStyle))));
-	else if (mStudStyle == 6)
-		StudStyleFile = std::unique_ptr<lcDiskFile>(new lcDiskFile(QString(":/resources/studslegostyle1.zip")));
-	else
-		StudStyleFile = std::unique_ptr<lcDiskFile>(new lcDiskFile(QString(":/resources/studslegostyle2.zip")));
+	const QLatin1String FileNames[] =
+	{
+		QLatin1String(),                                  // Plain
+		QLatin1String(":/resources/studlogo1.zip"),       // ThinLinesLogo
+		QLatin1String(":/resources/studlogo2.zip"),       // OutlineLogo
+		QLatin1String(":/resources/studlogo3.zip"),       // SharpTopLogo
+		QLatin1String(":/resources/studlogo4.zip"),       // RoundedTopLogo
+		QLatin1String(":/resources/studlogo5.zip"),       // FlattenedLogo
+		QLatin1String(":/resources/studslegostyle1.zip"), // HighContrast
+		QLatin1String(":/resources/studslegostyle2.zip")  // HighContrastLogo
+	};
+
+	LC_ARRAY_SIZE_CHECK(FileNames, lcStudStyle::Count);
+
+	std::unique_ptr<lcDiskFile> StudStyleFile(new lcDiskFile(FileNames[static_cast<int>(mStudStyle)]));
 
 	if (StudStyleFile->Open(QIODevice::ReadOnly))
 		OpenArchive(std::move(StudStyleFile), lcZipFileType::StudStyle);
@@ -1082,7 +1090,7 @@ bool lcPiecesLibrary::LoadCachePiece(PieceInfo* Info)
 	if (MeshData.ReadBuffer((char*)&Flags, sizeof(Flags)) == 0)
 		return false;
 
-	if (Flags != mStudStyle)
+	if (Flags != static_cast<qint32>(mStudStyle))
 		return false;
 
 	lcMesh* Mesh = new lcMesh;
@@ -1102,7 +1110,7 @@ bool lcPiecesLibrary::SaveCachePiece(PieceInfo* Info)
 {
 	lcMemFile MeshData;
 
-	const qint32 Flags = mStudStyle;
+	const qint32 Flags = static_cast<qint32>(mStudStyle);
 	if (MeshData.WriteBuffer((char*)&Flags, sizeof(Flags)) == 0)
 		return false;
 
@@ -1534,7 +1542,7 @@ bool lcPiecesLibrary::SupportsStudStyle() const
 	return true;
 }
 
-void lcPiecesLibrary::SetStudStyle(int StudStyle, bool Reload)
+void lcPiecesLibrary::SetStudStyle(lcStudStyle StudStyle, bool Reload)
 {
 	if (mStudStyle == StudStyle)
 		return;
@@ -1897,7 +1905,7 @@ bool lcPiecesLibrary::LoadBuiltinPieces()
 		}
 	}
 
-	lcLoadDefaultColors(0);
+	lcLoadDefaultColors(lcStudStyle::Plain);
 	lcLoadDefaultCategories(true);
 	lcSynthInit();
 

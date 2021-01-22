@@ -340,7 +340,7 @@ lcCommandLineOptions lcApplication::ParseCommandLineOptions()
 	Options.ImageWidth = lcGetProfileInt(LC_PROFILE_IMAGE_WIDTH);
 	Options.ImageHeight = lcGetProfileInt(LC_PROFILE_IMAGE_HEIGHT);
 	Options.AASamples = lcGetProfileInt(LC_PROFILE_ANTIALIASING_SAMPLES);
-	Options.StudStyle = lcGetProfileInt(LC_PROFILE_STUD_STYLE);
+	Options.StudStyle = static_cast<lcStudStyle>(lcGetProfileInt(LC_PROFILE_STUD_STYLE));
 	Options.ImageStart = 0;
 	Options.ImageEnd = 0;
 	Options.CameraPosition[0] = lcVector3(0.0f, 0.0f, 0.0f);
@@ -655,7 +655,12 @@ lcCommandLineOptions lcApplication::ParseCommandLineOptions()
 			}
 		}
 		else if (Option == QLatin1String("-ss") || Option == QLatin1String("--stud-style"))
-			ParseInteger(Options.StudStyle, 0, 7);
+		{
+			int StudStyle;
+
+			if (ParseInteger(StudStyle, 0, static_cast<int>(lcStudStyle::Count) - 1))
+				Options.StudStyle = static_cast<lcStudStyle>(StudStyle);
+		}
 		else if (Option == QLatin1String("-obj") || Option == QLatin1String("--export-wavefront"))
 		{
 			Options.SaveWavefront = true;
@@ -1105,7 +1110,7 @@ void lcApplication::ShowPreferencesDialog()
 {
 	lcPreferencesDialogOptions Options;
 	int CurrentAASamples = lcGetProfileInt(LC_PROFILE_ANTIALIASING_SAMPLES);
-	int CurrentStudStyle = lcGetProfileInt(LC_PROFILE_STUD_STYLE);
+	lcStudStyle CurrentStudStyle = lcGetPiecesLibrary()->GetStudStyle();
 
 	Options.Preferences = mPreferences;
 
@@ -1156,7 +1161,7 @@ void lcApplication::ShowPreferencesDialog()
 	lcSetProfileString(LC_PROFILE_LANGUAGE, Options.Language);
 	lcSetProfileInt(LC_PROFILE_CHECK_UPDATES, Options.CheckForUpdates);
 	lcSetProfileInt(LC_PROFILE_ANTIALIASING_SAMPLES, Options.AASamples);
-	lcSetProfileInt(LC_PROFILE_STUD_STYLE, Options.StudStyle);
+	lcSetProfileInt(LC_PROFILE_STUD_STYLE, static_cast<int>(Options.StudStyle));
 
 	if (LanguageChanged || LibraryChanged || ColorsChanged || AAChanged)
 		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Some changes will only take effect the next time you start LeoCAD."));
@@ -1200,15 +1205,9 @@ void lcApplication::ShowPreferencesDialog()
 
 	if (StudStyleChanged)
 	{
-		lcSetProfileInt(LC_PROFILE_STUD_STYLE, Options.StudStyle);
+		lcSetProfileInt(LC_PROFILE_STUD_STYLE, static_cast<int>(Options.StudStyle));
 		lcGetPiecesLibrary()->SetStudStyle(Options.StudStyle, true);
 	}
-
-	// TODO: printing preferences
-	/*
-	strcpy(opts.strFooter, m_strFooter);
-	strcpy(opts.strHeader, m_strHeader);
-	*/
 
 	gMainWindow->SetShadingMode(Options.Preferences.mShadingMode);
 	lcView::UpdateAllViews();

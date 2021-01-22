@@ -10,6 +10,19 @@ class PieceInfo;
 class lcZipFile;
 class lcLibraryMeshData;
 
+enum class lcStudStyle
+{
+	Plain,
+	ThinLinesLogo,
+	OutlineLogo,
+	SharpTopLogo,
+	RoundedTopLogo,
+	FlattenedLogo,
+	HighContrast,
+	HighContrastLogo,
+	Count
+};
+
 enum class lcZipFileType
 {
 	Official,
@@ -139,9 +152,9 @@ public:
 	bool LoadPrimitive(lcLibraryPrimitive* Primitive);
 
 	bool SupportsStudStyle() const;
-	void SetStudStyle(int StudStyle, bool Reload);
+	void SetStudStyle(lcStudStyle StudStyle, bool Reload);
 
-	int GetStudStyle() const
+	lcStudStyle GetStudStyle() const
 	{
 		return mStudStyle;
 	}
@@ -203,7 +216,7 @@ protected:
 	QMutex mTextureMutex;
 	std::vector<lcTexture*> mTextureUploads;
 
-	int mStudStyle;
+	lcStudStyle mStudStyle;
 
 	QString mCachePath;
 	qint64 mArchiveCheckSum[4];

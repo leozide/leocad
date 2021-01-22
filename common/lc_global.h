@@ -71,6 +71,7 @@ struct lcModelPartsEntry;
 struct lcMinifig;
 enum class lcViewpoint;
 enum class lcShadingMode;
+enum class lcStudStyle;
 class lcInstructions;
 struct lcInstructionsPageSetup;
 struct lcObjectRayTest;

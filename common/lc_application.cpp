@@ -655,12 +655,7 @@ lcCommandLineOptions lcApplication::ParseCommandLineOptions()
 			}
 		}
 		else if (Option == QLatin1String("-ss") || Option == QLatin1String("--stud-style"))
-		{
 			ParseInteger(Options.StudStyle, 0, 7);
-
-			if (Options.StudStyle != lcGetProfileInt(LC_PROFILE_STUD_STYLE))
-				lcGetPiecesLibrary()->SetStudStyle(Options.StudStyle, false);
-		}
 		else if (Option == QLatin1String("-obj") || Option == QLatin1String("--export-wavefront"))
 		{
 			Options.SaveWavefront = true;
@@ -834,6 +829,8 @@ lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& Libra
 			StdErr.flush();
 		}
 	}
+
+	lcGetPiecesLibrary()->SetStudStyle(Options.StudStyle, false);
 
 	if (!SaveAndExit)
 		gMainWindow->CreateWidgets();

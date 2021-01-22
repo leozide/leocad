@@ -1536,6 +1536,9 @@ bool lcPiecesLibrary::SupportsStudStyle() const
 
 void lcPiecesLibrary::SetStudStyle(int StudStyle, bool Reload)
 {
+	if (mStudStyle == StudStyle)
+		return;
+
 	mStudStyle = StudStyle;
 
 	LoadColors();

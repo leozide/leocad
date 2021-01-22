@@ -209,76 +209,78 @@ int lcGetBrickLinkColor(int ColorIndex)
 	return 0;
 }
 
-bool lcLoadColorFile(lcFile& File, bool Update)
+static void lcAdjustStudStyleColors(int StudStyle)
+{
+	if (StudStyle < 6)
+		return;
+
+	for (lcColor& Color : gColorList)
+	{
+		const lcVector4 FillColor = Color.Value * 255.0f;
+		lcVector4 EdgeColor(0.0f, 0.0f, 0.0f, 255.0f);
+
+		if (30.0f * FillColor[0] + 59.0f * FillColor[1] + 11.0f * FillColor[2] <= 3600.0f)
+			EdgeColor = lcVector4(27.0f, 42.0f, 52.0f, 255.0f);
+		else if (Color.Code == 0)
+			EdgeColor = lcVector4(255.0f, 255.0f, 255.0f, 255.0f);
+
+		Color.Edge = EdgeColor / 255.0f;
+	}
+}
+
+bool lcLoadColorFile(lcFile& File, int StudStyle)
 {
 	char Line[1024], Token[1024];
 	std::vector<lcColor>& Colors = gColorList;
-	lcColor Color, MainColor, EdgeColor;
+	lcColor Color, MainColor, EdgeColor, StudColor;
 
-	if (Update)
-	{
-		EdgeColor = Colors[lcGetColorIndex(24)];
-		for (auto EdgeColorIt = Colors.begin(); EdgeColorIt != Colors.end() ; EdgeColorIt++)
-		{
-			if (EdgeColorIt->Code == 24)
-			{
-				Colors.erase(EdgeColorIt);
-				break;
-			}
-		}
+	Colors.clear();
 
-		MainColor = Colors[lcGetColorIndex(16)];
-		for (auto MainColorIt = Colors.begin(); MainColorIt != Colors.end() ; MainColorIt++)
-		{
-			if (MainColorIt->Code == 16)
-			{
-				Colors.erase(MainColorIt);
-				break;
-			}
-		}
+	for (int GroupIdx = 0; GroupIdx < LC_NUM_COLORGROUPS; GroupIdx++)
+		gColorGroups[GroupIdx].Colors.clear();
 
-		std::vector<int>& SolidColors = gColorGroups[LC_COLORGROUP_SOLID].Colors;
-		const auto& DefaultColorIt = std::find(SolidColors.begin(), SolidColors.end(), gDefaultColor);
-		if (DefaultColorIt != SolidColors.end())
-			SolidColors.erase(DefaultColorIt);
-	}
-	else
-	{
-		Colors.clear();
+	gColorGroups[0].Name = QApplication::tr("Solid", "Colors");
+	gColorGroups[1].Name = QApplication::tr("Translucent", "Colors");
+	gColorGroups[2].Name = QApplication::tr("Special", "Colors");
 
-		for (int GroupIdx = 0; GroupIdx < LC_NUM_COLORGROUPS; GroupIdx++)
-			gColorGroups[GroupIdx].Colors.clear();
+	MainColor.Code = 16;
+	MainColor.Translucent = false;
+	MainColor.Value[0] = 1.0f;
+	MainColor.Value[1] = 1.0f;
+	MainColor.Value[2] = 0.5f;
+	MainColor.Value[3] = 1.0f;
+	MainColor.Edge[0] = 0.2f;
+	MainColor.Edge[1] = 0.2f;
+	MainColor.Edge[2] = 0.2f;
+	MainColor.Edge[3] = 1.0f;
+	strcpy(MainColor.Name, "Main Color");
+	strcpy(MainColor.SafeName, "Main_Color");
 
-		gColorGroups[0].Name = QApplication::tr("Solid", "Colors");
-		gColorGroups[1].Name = QApplication::tr("Translucent", "Colors");
-		gColorGroups[2].Name = QApplication::tr("Special", "Colors");
+	EdgeColor.Code = 24;
+	EdgeColor.Translucent = false;
+	EdgeColor.Value[0] = 0.5f;
+	EdgeColor.Value[1] = 0.5f;
+	EdgeColor.Value[2] = 0.5f;
+	EdgeColor.Value[3] = 1.0f;
+	EdgeColor.Edge[0] = 0.2f;
+	EdgeColor.Edge[1] = 0.2f;
+	EdgeColor.Edge[2] = 0.2f;
+	EdgeColor.Edge[3] = 1.0f;
+	strcpy(EdgeColor.Name, "Edge Color");
+	strcpy(EdgeColor.SafeName, "Edge_Color");
 
-		MainColor.Code = 16;
-		MainColor.Translucent = false;
-		MainColor.Value[0] = 1.0f;
-		MainColor.Value[1] = 1.0f;
-		MainColor.Value[2] = 0.5f;
-		MainColor.Value[3] = 1.0f;
-		MainColor.Edge[0] = 0.2f;
-		MainColor.Edge[1] = 0.2f;
-		MainColor.Edge[2] = 0.2f;
-		MainColor.Edge[3] = 1.0f;
-		strcpy(MainColor.Name, "Main Color");
-		strcpy(MainColor.SafeName, "Main_Color");
-
-		EdgeColor.Code = 24;
-		EdgeColor.Translucent = false;
-		EdgeColor.Value[0] = 0.5f;
-		EdgeColor.Value[1] = 0.5f;
-		EdgeColor.Value[2] = 0.5f;
-		EdgeColor.Value[3] = 1.0f;
-		EdgeColor.Edge[0] = 0.2f;
-		EdgeColor.Edge[1] = 0.2f;
-		EdgeColor.Edge[2] = 0.2f;
-		EdgeColor.Edge[3] = 1.0f;
-		strcpy(EdgeColor.Name, "Edge Color");
-		strcpy(EdgeColor.SafeName, "Edge_Color");
-	}
+	StudColor.Code = 4242;
+	StudColor.Translucent = false;
+	StudColor.Value[0] = 27.0f / 255.0f;
+	StudColor.Value[1] = 42.0f / 255.0f;
+	StudColor.Value[2] = 52.0f / 255.0f;
+	StudColor.Value[3] = 1.0f;
+	StudColor.Edge[0] = 0.0f;
+	StudColor.Edge[1] = 0.0f;
+	StudColor.Edge[2] = 0.0f;
+	StudColor.Edge[3] = 1.0f;
+	strcpy(StudColor.Name, "Stud Style Black");
+	strcpy(StudColor.SafeName, "Stud_Style_Black");
 
 	while (File.ReadLine(Line, sizeof(Line)))
 	{
@@ -370,7 +372,7 @@ bool lcLoadColorFile(lcFile& File, bool Update)
 					GroupSpecial = true;
 			}
 			else if (!strcmp(Token, "CHROME") || !strcmp(Token, "PEARLESCENT") || !strcmp(Token, "RUBBER") ||
-					 !strcmp(Token, "MATTE_METALIC") || !strcmp(Token, "METAL") || !strcmp(Token, "LUMINANCE"))
+			         !strcmp(Token, "MATTE_METALIC") || !strcmp(Token, "METAL") || !strcmp(Token, "LUMINANCE"))
 			{
 				GroupSpecial = true;
 			}
@@ -391,19 +393,19 @@ bool lcLoadColorFile(lcFile& File, bool Update)
 			Color.Edge[2] = 33.0f / 255.0f;
 		}
 
-		bool ExistingColorUpdate = false;
+		bool Duplicate = false;
 
 		for (lcColor& ExistingColor : Colors)
 		{
 			if (ExistingColor.Code == Color.Code)
 			{
 				ExistingColor = Color;
-				ExistingColorUpdate = true;
+				Duplicate = true;
 				break;
 			}
 		}
 
-		if (ExistingColorUpdate)
+		if (Duplicate)
 			continue;
 
 		if (Color.Code == 16)
@@ -418,6 +420,12 @@ bool lcLoadColorFile(lcFile& File, bool Update)
 			continue;
 		}
 
+		if (Color.Code == 4242)
+		{
+			StudColor = Color;
+			continue;
+		}
+
 		Colors.push_back(Color);
 
 		if (GroupSpecial)
@@ -429,7 +437,6 @@ bool lcLoadColorFile(lcFile& File, bool Update)
 	}
 
 	gDefaultColor = (int)Colors.size();
-
 	Colors.push_back(MainColor);
 	gColorGroups[LC_COLORGROUP_SOLID].Colors.push_back(gDefaultColor);
 
@@ -438,15 +445,19 @@ bool lcLoadColorFile(lcFile& File, bool Update)
 	gEdgeColor = (int)Colors.size();
 	Colors.push_back(EdgeColor);
 
-	return Colors.size() > 2;
+	lcAdjustStudStyleColors(StudStyle);
+
+	Colors.push_back(StudColor);
+
+	return Colors.size() > 3;
 }
 
-void lcLoadDefaultColors()
+void lcLoadDefaultColors(int StudStyle)
 {
 	lcDiskFile ConfigFile(":/resources/ldconfig.ldr");
 
 	if (ConfigFile.Open(QIODevice::ReadOnly))
-		lcLoadColorFile(ConfigFile, false);
+		lcLoadColorFile(ConfigFile, StudStyle);
 }
 
 int lcGetColorIndex(quint32 ColorCode)
@@ -467,8 +478,8 @@ int lcGetColorIndex(quint32 ColorCode)
 	if (ColorCode & LC_COLOR_DIRECT)
 	{
 		Color.Value[0] = (float)((ColorCode & 0xff0000) >> 16) / 255.0f;
-		Color.Value[1] = (float)((ColorCode & 0x00ff00) >>  8) / 255.0f;
-		Color.Value[2] = (float)((ColorCode & 0x0000ff) >>  0) / 255.0f;
+		Color.Value[1] = (float)((ColorCode & 0x00ff00) >> 8) / 255.0f;
+		Color.Value[2] = (float)((ColorCode & 0x0000ff) >> 0) / 255.0f;
 		Color.Value[3] = 1.0f;
 		sprintf(Color.Name, "Color %06X", ColorCode & 0xffffff);
 		sprintf(Color.SafeName, "Color_%06X", ColorCode & 0xffffff);
@@ -485,73 +496,4 @@ int lcGetColorIndex(quint32 ColorCode)
 
 	gColorList.push_back(Color);
 	return (int)gColorList.size() - 1;
-}
-
-void lcLoadLegoStudStyleColors()
-{
-	QByteArray ColorData;
-	const char *ColorEntry = "0 !COLOUR   Stud_Style_Black    CODE 4242    VALUE #1B2A34    EDGE #000000\r\n";
-	ColorData.append(ColorEntry);
-	lcMemFile ColorMemFile;
-	ColorMemFile.WriteBuffer(ColorData.constData(), ColorData.size());
-	ColorMemFile.Seek(0, SEEK_SET);
-
-	lcLoadColorFile(ColorMemFile, true);
-
-	lcColor* DarkGrey = &gColorList[lcGetColorIndexByName("Stud Style Dark Gray Edge")];
-	lcColor* Black = &gColorList[lcGetColorIndexByName("Stud Style Black Edge")];
-
-	for (size_t ColorIdx = 0; ColorIdx < gColorList.size(); ColorIdx++)
-	{
-		lcColor* Color = &gColorList[ColorIdx];
-		if (Color->Code == 4242)
-			continue;
-
-		float r = 0.0f, g = 0.0f, b = 0.0f;
-		float rr = Color->Value[0] * 255.0f,
-			  gg = Color->Value[1] * 255.0f,
-			  bb = Color->Value[2] * 255.0f;
-		if (30 * rr + 59 * gg + 11 * bb <= 3600)
-		{
-			if (DarkGrey)
-			{
-				r = DarkGrey->Edge[0];
-				g = DarkGrey->Edge[1];
-				b = DarkGrey->Edge[2];
-			}
-			else
-			{
-				r = 27.0f;
-				g = 42.0f;
-				b = 52.0f;
-			}
-		}
-		else
-		{
-			if (Color->Code == 0)
-			{
-				r = 255.0f;
-				g = 255.0f;
-				b = 255.0f;
-			}
-			else if (Black)
-			{
-				r = Black->Edge[0];
-				g = Black->Edge[1];
-				b = Black->Edge[2];
-			}
-		}
-
-		Color->Edge[0] = r / 255.0f;
-		Color->Edge[1] = g / 255.0f;
-		Color->Edge[2] = b / 255.0f;
-	}
-}
-
-int lcGetColorIndexByName(const char * ColorName)
-{
-	for (size_t ColorIdx = 0; ColorIdx < gColorList.size(); ColorIdx++)
-		if (gColorList[ColorIdx].Name == ColorName)
-			return (int)ColorIdx;
-	return 0x0;
 }

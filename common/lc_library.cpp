@@ -240,7 +240,7 @@ bool lcPiecesLibrary::Load(const QString& LibraryPath, bool ShowProgress)
 
 	if (OpenArchive(LibraryPath, lcZipFileType::Official))
 	{
-		LoadColors(false);
+		LoadColors();
 
 		mLibraryDir = QFileInfo(LibraryPath).absoluteDir();
 		QString UnofficialFileName = mLibraryDir.absoluteFilePath(QLatin1String("ldrawunf.zip"));
@@ -255,7 +255,7 @@ bool lcPiecesLibrary::Load(const QString& LibraryPath, bool ShowProgress)
 		mLibraryDir.setPath(LibraryPath);
 
 		if (OpenDirectory(mLibraryDir, ShowProgress))
-			LoadColors(false);
+			LoadColors();
 		else
 			return false;
 	}
@@ -267,42 +267,42 @@ bool lcPiecesLibrary::Load(const QString& LibraryPath, bool ShowProgress)
 	return true;
 }
 
-void lcPiecesLibrary::LoadColors(bool Update)
+void lcPiecesLibrary::LoadColors()
 {
-	auto LoadCustomColors = [&Update]()
+	QString CustomColorsPath = lcGetProfileString(LC_PROFILE_COLOR_CONFIG);
+
+	if (!CustomColorsPath.isEmpty())
 	{
-		QString CustomColorsPath = lcGetProfileString(LC_PROFILE_COLOR_CONFIG);
-
-		if (CustomColorsPath.isEmpty())
-			return false;
-
 		lcDiskFile ColorFile(CustomColorsPath);
-		return ColorFile.Open(QIODevice::ReadOnly) && lcLoadColorFile(ColorFile, Update);
-	};
+
+		if (ColorFile.Open(QIODevice::ReadOnly) && lcLoadColorFile(ColorFile, mStudStyle))
+		{
+			emit ColorsLoaded();
+			return;
+		}
+	}
 
 	if (mZipFiles[static_cast<int>(lcZipFileType::Official)])
 	{
 		lcMemFile ColorFile;
 
-		if (!LoadCustomColors())
-			if (!mZipFiles[static_cast<int>(lcZipFileType::Official)]->ExtractFile("ldraw/ldconfig.ldr", ColorFile) || !lcLoadColorFile(ColorFile, Update))
-				lcLoadDefaultColors();
+		if (!mZipFiles[static_cast<int>(lcZipFileType::Official)]->ExtractFile("ldraw/ldconfig.ldr", ColorFile) || !lcLoadColorFile(ColorFile, mStudStyle))
+			lcLoadDefaultColors(mStudStyle);
 	}
 	else
 	{
-		if (!LoadCustomColors())
+		lcDiskFile ColorFile(mLibraryDir.absoluteFilePath(QLatin1String("ldconfig.ldr")));
+
+		if (!ColorFile.Open(QIODevice::ReadOnly) || !lcLoadColorFile(ColorFile, mStudStyle))
 		{
-			lcDiskFile ColorFile(mLibraryDir.absoluteFilePath(QLatin1String("ldconfig.ldr")));
+			ColorFile.SetFileName(mLibraryDir.absoluteFilePath(QLatin1String("LDConfig.ldr")));
 
-			if (!ColorFile.Open(QIODevice::ReadOnly) || !lcLoadColorFile(ColorFile, Update))
-			{
-				ColorFile.SetFileName(mLibraryDir.absoluteFilePath(QLatin1String("LDConfig.ldr")));
-
-				if (!ColorFile.Open(QIODevice::ReadOnly) || !lcLoadColorFile(ColorFile, Update))
-					lcLoadDefaultColors();
-			}
+			if (!ColorFile.Open(QIODevice::ReadOnly) || !lcLoadColorFile(ColorFile, mStudStyle))
+				lcLoadDefaultColors(mStudStyle);
 		}
 	}
+
+	emit ColorsLoaded();
 }
 
 void lcPiecesLibrary::UpdateStudStyleSource()
@@ -314,9 +314,6 @@ void lcPiecesLibrary::UpdateStudStyleSource()
 
 	if (!mStudStyle)
 		return;
-
-	if (mStudStyle > 5)
-		lcLoadLegoStudStyleColors();
 
 	std::unique_ptr<lcDiskFile> StudStyleFile;
 	if (mStudStyle < 6)
@@ -1539,11 +1536,9 @@ bool lcPiecesLibrary::SupportsStudStyle() const
 
 void lcPiecesLibrary::SetStudStyle(int StudStyle, bool Reload)
 {
-	if (mStudStyle > 5 && StudStyle < 6 && Reload)
-		LoadColors(Reload);
-
 	mStudStyle = StudStyle;
 
+	LoadColors();
 	UpdateStudStyleSource();
 
 	mLoadMutex.lock();
@@ -1899,7 +1894,7 @@ bool lcPiecesLibrary::LoadBuiltinPieces()
 		}
 	}
 
-	lcLoadDefaultColors();
+	lcLoadDefaultColors(0);
 	lcLoadDefaultCategories(true);
 	lcSynthInit();
 

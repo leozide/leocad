@@ -48,11 +48,9 @@ extern int gNumUserColors;
 extern int gEdgeColor;
 extern int gDefaultColor;
 
-void lcLoadDefaultColors();
-void lcLoadLegoStudStyleColors();
-bool lcLoadColorFile(lcFile& File, bool Update);
+void lcLoadDefaultColors(int StudStyle);
+bool lcLoadColorFile(lcFile& File, int StudStyle);
 int lcGetColorIndex(quint32 ColorCode);
-int lcGetColorIndexByName(const char * ColorName);
 int lcGetBrickLinkColor(int ColorIndex);
 
 inline quint32 lcGetColorCodeFromExtendedColor(int Color)
@@ -76,4 +74,3 @@ inline bool lcIsColorTranslucent(size_t ColorIndex)
 {
 	return gColorList[ColorIndex].Translucent;
 }
-

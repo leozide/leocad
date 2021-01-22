@@ -102,7 +102,7 @@ public:
 	lcPiecesLibrary& operator=(lcPiecesLibrary&&) = delete;
 
 	bool Load(const QString& LibraryPath, bool ShowProgress);
-	void LoadColors(bool Update);
+	void LoadColors();
 	void Unload();
 	void RemoveTemporaryPieces();
 	void RemovePiece(PieceInfo* Info);
@@ -174,6 +174,7 @@ public:
 
 signals:
 	void PartLoaded(PieceInfo* Info);
+	void ColorsLoaded();
 
 protected:
 	bool OpenArchive(const QString& FileName, lcZipFileType ZipFileType);

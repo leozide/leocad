@@ -19,6 +19,8 @@
 
 #if _MSC_VER
 #pragma warning(default : 4062) // enumerator 'identifier' in switch of enum 'enumeration' is not handled
+#pragma warning(default : 4388) // 'token' : signed/unsigned mismatch
+#pragma warning(default : 4389) // 'equality-operator' : signed/unsigned mismatch
 #endif
 
 #ifndef Q_FALLTHROUGH

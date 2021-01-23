@@ -471,7 +471,7 @@ bool lcLoadColorFile(lcFile& File, lcStudStyle StudStyle)
 			if (gColorList[ColorIndex].Code == Color.Code)
 				break;
 
-		if (ColorIndex == gColorList.size())
+		if (ColorIndex == static_cast<int>(gColorList.size()))
 			gColorList.push_back(Color);
 		else
 			gColorList[ColorIndex] = Color;

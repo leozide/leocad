@@ -311,7 +311,7 @@ void lcQColorList::keyPressEvent(QKeyEvent *event)
 			else if (CurGroup > 0)
 			{
 				size_t NumColors = gColorGroups[CurGroup - 1].Colors.size();
-				int NumColumns = NumColors % mColumns;
+				size_t NumColumns = NumColors % mColumns;
 
 				if (NumColumns < Column + 1)
 					NewCell = mCurrentCell - NumColumns - mColumns;
@@ -327,7 +327,7 @@ void lcQColorList::keyPressEvent(QKeyEvent *event)
 				NewCell = mCurrentCell + mColumns;
 			else
 			{
-				int NumColumns = NumColors % mColumns;
+				size_t NumColumns = NumColors % mColumns;
 
 				if (NumColumns > Column)
 				{

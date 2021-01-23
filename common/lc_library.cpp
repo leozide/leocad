@@ -1580,7 +1580,7 @@ void lcPiecesLibrary::SetStudStyle(lcStudStyle StudStyle, bool Reload)
 		{
 			lcLibraryPrimitive* Primitive = PrimitiveIt.second;
 
-			if (Primitive->mStudStyle)
+			if (Primitive->mStudStyle || Primitive->mMeshData.mHasStyleStud)
 				Primitive->Unload();
 		}
 	}

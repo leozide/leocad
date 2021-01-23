@@ -1213,7 +1213,6 @@ void lcApplication::ShowPreferencesDialog()
 		lcGetPiecesLibrary()->LoadColors();
 	}
 
-
 	gMainWindow->SetShadingMode(Options.Preferences.mShadingMode);
 	lcView::UpdateAllViews();
 }

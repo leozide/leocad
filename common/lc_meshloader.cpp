@@ -1625,7 +1625,7 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 				else
 					Library->GetPrimitiveFile(Primitive, FileCallback);
 
-				mMeshData.mHasStyleStud |= Primitive->mStudStyle;
+				mMeshData.mHasStyleStud |= Primitive->mStudStyle | Primitive->mMeshData.mHasStyleStud;
 			}
 			else
 				Library->GetPieceFile(FileName, FileCallback);

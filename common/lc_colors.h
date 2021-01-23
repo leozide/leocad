@@ -9,6 +9,7 @@
 struct lcColor
 {
 	quint32 Code;
+	int Group;
 	bool Translucent;
 	lcVector4 Value;
 	lcVector4 Edge;

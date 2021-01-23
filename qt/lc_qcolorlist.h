@@ -1,15 +1,18 @@
 #pragma once
 
-#include <QWidget>
-#include "lc_colors.h"
+struct lcColorListCell
+{
+	QRect Rect;
+	int ColorIndex;
+};
 
 class lcQColorList : public QWidget
 {
 	Q_OBJECT
 
 public:
-	lcQColorList(QWidget *parent = 0);
-	~lcQColorList();
+	lcQColorList(QWidget* Parent = nullptr);
+	~lcQColorList() = default;
 
 	QSize sizeHint() const override;
 
@@ -19,7 +22,14 @@ signals:
 	void colorChanged(int colorIndex);
 	void colorSelected(int colorIndex);
 
+protected slots:
+	void ColorsLoaded();
+
 protected:
+	void UpdateCells();
+	void UpdateRects();
+	void SelectCell(size_t CellIndex);
+
 	bool event(QEvent* Event) override;
 	void paintEvent(QPaintEvent* PaintEvent) override;
 	void resizeEvent(QResizeEvent* ResizeEvent) override;
@@ -27,20 +37,18 @@ protected:
 	void mouseMoveEvent(QMouseEvent* MouseEvent) override;
 	void keyPressEvent(QKeyEvent* KeyEvent) override;
 
-	void SelectCell(int CellIdx);
+	std::vector<lcColorListCell> mCells;
+	std::vector<QRect> mGroupRects;
 
-	QRect mGroupRects[LC_NUM_COLORGROUPS];
-	QRect* mCellRects;
-	int* mCellColors;
-	int mNumCells;
+	size_t mCurrentCell = 0;
+	quint32 mColorCode = 0;
 
-	int mColumns;
-	int mRows;
-	int mWidth;
-	int mHeight;
-	int mPreferredHeight;
+	int mColumns = 0;
+	int mRows = 0;
+	int mWidth = 0;
+	int mHeight = 0;
+	int mPreferredHeight = 0;
 
-	int mCurCell;
 	QPoint mDragStartPosition;
 };
 

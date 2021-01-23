@@ -1154,7 +1154,6 @@ void lcApplication::ShowPreferencesDialog()
 
 	lcSetProfileString(LC_PROFILE_DEFAULT_AUTHOR_NAME, Options.DefaultAuthor);
 	lcSetProfileString(LC_PROFILE_PARTS_LIBRARY, Options.LibraryPath);
-	lcSetProfileString(LC_PROFILE_COLOR_CONFIG, Options.ColorConfigPath);
 	lcSetProfileString(LC_PROFILE_MINIFIG_SETTINGS, Options.MinifigSettingsPath);
 	lcSetProfileString(LC_PROFILE_POVRAY_PATH, Options.POVRayPath);
 	lcSetProfileString(LC_PROFILE_POVRAY_LGEO_PATH, Options.LGEOPath);
@@ -1163,7 +1162,7 @@ void lcApplication::ShowPreferencesDialog()
 	lcSetProfileInt(LC_PROFILE_ANTIALIASING_SAMPLES, Options.AASamples);
 	lcSetProfileInt(LC_PROFILE_STUD_STYLE, static_cast<int>(Options.StudStyle));
 
-	if (LanguageChanged || LibraryChanged || ColorsChanged || AAChanged)
+	if (LanguageChanged || LibraryChanged || AAChanged)
 		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Some changes will only take effect the next time you start LeoCAD."));
 
 	if (Options.CategoriesModified)
@@ -1208,6 +1207,12 @@ void lcApplication::ShowPreferencesDialog()
 		lcSetProfileInt(LC_PROFILE_STUD_STYLE, static_cast<int>(Options.StudStyle));
 		lcGetPiecesLibrary()->SetStudStyle(Options.StudStyle, true);
 	}
+	else if (ColorsChanged)
+	{
+		lcSetProfileString(LC_PROFILE_COLOR_CONFIG, Options.ColorConfigPath);
+		lcGetPiecesLibrary()->LoadColors();
+	}
+
 
 	gMainWindow->SetShadingMode(Options.Preferences.mShadingMode);
 	lcView::UpdateAllViews();

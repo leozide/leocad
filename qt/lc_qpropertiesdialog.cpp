@@ -50,23 +50,23 @@ lcQPropertiesDialog::lcQPropertiesDialog(QWidget* Parent, lcPropertiesDialogOpti
 	const lcPartsList& PartsList = mOptions->PartsList;
 	QStringList horizontalLabels;
 
-	QVector<bool> ColorsUsed(gNumUserColors);
+	std::vector<bool> ColorsUsed(gColorList.size());
 
 	for (const auto& PartIt : PartsList)
 		for (const auto& ColorIt : PartIt.second)
 			ColorsUsed[ColorIt.first] = true;
 
-	QVector<int> ColorColumns(gNumUserColors);
+	std::vector<int> ColorColumns(gColorList.size());
 	int NumColors = 0;
 
 	horizontalLabels.append(tr("Part"));
 
-	for (int colorIdx = 0; colorIdx < gNumUserColors; colorIdx++)
+	for (size_t ColorIndex = 0; ColorIndex < gColorList.size(); ColorIndex++)
 	{
-		if (ColorsUsed[colorIdx])
+		if (ColorsUsed[ColorIndex])
 		{
-			ColorColumns[colorIdx] = NumColors++;
-			horizontalLabels.append(gColorList[colorIdx].Name);
+			ColorColumns[ColorIndex] = NumColors++;
+			horizontalLabels.append(gColorList[ColorIndex].Name);
 		}
 	}
 

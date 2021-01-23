@@ -6,7 +6,6 @@
 
 std::vector<lcColor> gColorList;
 lcColorGroup gColorGroups[LC_NUM_COLORGROUPS];
-int gNumUserColors;
 int gEdgeColor;
 int gDefaultColor;
 
@@ -485,8 +484,6 @@ bool lcLoadColorFile(lcFile& File, lcStudStyle StudStyle)
 		else if (Color.Code == 24)
 			gEdgeColor = ColorIndex;
 	}
-
-	gNumUserColors = (int)Colors.size() - 2;
 
 	return Valid;
 }

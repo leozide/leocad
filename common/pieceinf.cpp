@@ -324,7 +324,7 @@ void PieceInfo::GetPartsList(int DefaultColorIndex, bool ScanSubModels, bool Add
 		if (ScanSubModels)
 			mModel->GetPartsList(DefaultColorIndex, ScanSubModels, AddSubModels, PartsList);
 
-		if (AddSubModels && DefaultColorIndex < gNumUserColors)
+		if (AddSubModels)
 			PartsList[this][DefaultColorIndex]++;
 	}
 	else if (IsProject())
@@ -333,7 +333,7 @@ void PieceInfo::GetPartsList(int DefaultColorIndex, bool ScanSubModels, bool Add
 		if (Model)
 			Model->GetPartsList(DefaultColorIndex, ScanSubModels, AddSubModels, PartsList);
 	}
-	else if (DefaultColorIndex < gNumUserColors)
+	else
 		PartsList[this][DefaultColorIndex]++;
 }
 

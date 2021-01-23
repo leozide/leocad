@@ -305,6 +305,26 @@ void lcPiecesLibrary::LoadColors()
 	emit ColorsLoaded();
 }
 
+bool lcPiecesLibrary::IsStudPrimitive(const char* FileName)
+{
+	return memcmp(FileName, "STU", 3) == 0;
+}
+
+bool lcPiecesLibrary::IsStudStylePrimitive(const char* FileName)
+{
+	constexpr std::array<const char*, 15> StudStylePrimitives =
+	{
+		"2-4STUD4.DAT", "STUD.DAT", "STUD2.DAT", "STUD2A.DAT", "STUD3.DAT", "STUD4.DAT", "STUD4A.DAT", "STUD4H.DAT",
+		"8/STUD.DAT", "8/STUD2.DAT", "8/STUD2A.DAT", "8/STUD3.DAT", "8/STUD4.DAT", "8/STUD4A.DAT", "8/STUD4H.DAT"
+	};
+
+	for (const char* StudStylePrimitive : StudStylePrimitives)
+		if (!strcmp(StudStylePrimitive, FileName))
+			return true;
+
+	return false;
+}
+
 void lcPiecesLibrary::UpdateStudStyleSource()
 {
 	if (!mSources.empty() && mSources.front()->Type == lcLibrarySourceType::StudStyle)
@@ -430,13 +450,13 @@ bool lcPiecesLibrary::OpenArchive(std::unique_ptr<lcFile> File, lcZipFileType Zi
 				Info->SetZipFile(ZipFileType, FileIdx);
 			}
 			else
-				Source->Primitives[Name] = new lcLibraryPrimitive(QString(), FileInfo.file_name + (Name - NameBuffer), ZipFileType, FileIdx, false, true);
+				Source->Primitives[Name] = new lcLibraryPrimitive(QString(), FileInfo.file_name + (Name - NameBuffer), ZipFileType, FileIdx, false, false, true);
 		}
 		else if (!memcmp(Name, "P/", 2))
 		{
 			Name += 2;
 
-			Source->Primitives[Name] = new lcLibraryPrimitive(QString(), FileInfo.file_name + (Name - NameBuffer), ZipFileType, FileIdx, (memcmp(Name, "STU", 3) == 0), false);
+			Source->Primitives[Name] = new lcLibraryPrimitive(QString(), FileInfo.file_name + (Name - NameBuffer), ZipFileType, FileIdx, IsStudPrimitive(Name), IsStudStylePrimitive(Name), false);
 		}
 	}
 
@@ -569,10 +589,10 @@ bool lcPiecesLibrary::OpenDirectory(const QDir& LibraryDir, bool ShowProgress)
 					mHasUnofficial = true;
 
 				const bool SubFile = SubFileDirectories[DirectoryIdx];
-				Source->Primitives[Name] = new lcLibraryPrimitive(std::move(FileName), strchr(FileString, '/') + 1, lcZipFileType::Count, 0, !SubFile && (memcmp(Name, "STU", 3) == 0), SubFile);
+				Source->Primitives[Name] = new lcLibraryPrimitive(std::move(FileName), strchr(FileString, '/') + 1, lcZipFileType::Count, 0, !SubFile && IsStudPrimitive(Name), IsStudStylePrimitive(Name), SubFile);
 			}
 		}
-
+		
 		mSources.push_back(std::move(Source));
 	}
 
@@ -1559,7 +1579,8 @@ void lcPiecesLibrary::SetStudStyle(lcStudStyle StudStyle, bool Reload)
 		for (const auto& PrimitiveIt : Source->Primitives)
 		{
 			lcLibraryPrimitive* Primitive = PrimitiveIt.second;
-			if (Primitive->mMeshData.mHasStyleStud)
+
+			if (Primitive->mStudStyle)
 				Primitive->Unload();
 		}
 	}
@@ -1630,32 +1651,15 @@ bool lcPiecesLibrary::LoadPrimitive(lcLibraryPrimitive* Primitive)
 
 	lcMeshLoader MeshLoader(Primitive->mMeshData, true, nullptr, false);
 
-	auto StudStylePrimitive = [this, &Primitive] ()
-	{
-		if (!mSources.empty() && mSources.front()->Type == lcLibrarySourceType::StudStyle)
-		{
-			char Name[LC_PIECE_NAME_LEN];
-			strcpy(Name, Primitive->mName);
-			strupr(Name);
-			const std::unique_ptr<lcLibrarySource>& Source = mSources.front();
-			const auto& PrimitiveIt = Source->Primitives.find(Name);
-			if (PrimitiveIt != Source->Primitives.end())
-				return true;
-		}
-		return false;
-	};
-
 	if (mZipFiles[static_cast<int>(lcZipFileType::Official)])
 	{
 		lcLibraryPrimitive* LowPrimitive = nullptr;
 
 		lcMemFile PrimFile;
 
-		if (Primitive->mStud)
+		if (Primitive->mStud && !Primitive->mStudStyle)
 		{
-			if (StudStylePrimitive())
-				Primitive->mMeshData.mHasStyleStud = true;
-			else if (strncmp(Primitive->mName, "8/", 2)) // todo: this is currently the only place that uses mName so use mFileName instead. this should also be done for the loose file libraries.
+			if (strncmp(Primitive->mName, "8/", 2)) // todo: this is currently the only place that uses mName so use mFileName instead. this should also be done for the loose file libraries.
 			{
 				char Name[LC_PIECE_NAME_LEN];
 				strcpy(Name, "8/");
@@ -1688,12 +1692,6 @@ bool lcPiecesLibrary::LoadPrimitive(lcLibraryPrimitive* Primitive)
 	}
 	else
 	{
-		if (Primitive->mStud)
-		{
-			 if (StudStylePrimitive())
-				Primitive->mMeshData.mHasStyleStud = true;
-		}
-
 		if (Primitive->mZipFileType == lcZipFileType::Count)
 		{
 			lcDiskFile PrimFile(Primitive->mFileName);

@@ -48,7 +48,7 @@ enum class lcPrimitiveState
 class lcLibraryPrimitive
 {
 public:
-	explicit lcLibraryPrimitive(QString&& FileName, const char* Name, lcZipFileType ZipFileType, quint32 ZipFileIndex, bool Stud, bool SubFile)
+	explicit lcLibraryPrimitive(QString&& FileName, const char* Name, lcZipFileType ZipFileType, quint32 ZipFileIndex, bool Stud, bool StudStyle, bool SubFile)
 		: mFileName(std::move(FileName))
 	{
 		strncpy(mName, Name, sizeof(mName)-1);
@@ -58,6 +58,7 @@ public:
 		mZipFileIndex = ZipFileIndex;
 		mState = lcPrimitiveState::NotLoaded;
 		mStud = Stud;
+		mStudStyle = StudStyle;
 		mSubFile = SubFile;
 	}
 
@@ -79,6 +80,7 @@ public:
 	quint32 mZipFileIndex;
 	lcPrimitiveState mState;
 	bool mStud;
+	bool mStudStyle;
 	bool mSubFile;
 	lcLibraryMeshData mMeshData;
 };
@@ -205,6 +207,8 @@ protected:
 	bool ReadDirectoryCacheFile(const QString& FileName, lcMemFile& CacheFile);
 	bool WriteDirectoryCacheFile(const QString& FileName, lcMemFile& CacheFile);
 
+	static bool IsStudPrimitive(const char* FileName);
+	static bool IsStudStylePrimitive(const char* FileName);
 	void UpdateStudStyleSource();
 
 	std::vector<std::unique_ptr<lcLibrarySource>> mSources;
@@ -224,4 +228,3 @@ protected:
 	bool mHasUnofficial;
 	bool mCancelLoading;
 };
-

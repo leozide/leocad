@@ -8,6 +8,7 @@
 #include "lc_qutils.h"
 #include "lc_glextensions.h"
 #include "pieceinf.h"
+#include "lc_edgecolordialog.h"
 
 static const char* gLanguageLocales[] =
 {
@@ -46,6 +47,7 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 	ui->shortcutEdit->installEventFilter(this);
 	connect(ui->commandList, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), this, SLOT(commandChanged(QTreeWidgetItem*)));
 	connect(ui->mouseTree, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), this, SLOT(MouseTreeItemChanged(QTreeWidgetItem*)));
+	connect(ui->AutomateEdgeColorButton, SIGNAL(clicked()), this, SLOT(AutomateEdgeColor()));
 
 	ui->partsLibrary->setText(mOptions->LibraryPath);
 	ui->ColorConfigEdit->setText(mOptions->ColorConfigPath);
@@ -69,6 +71,7 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 	ui->fixedDirectionKeys->setChecked(mOptions->Preferences.mFixedAxes);
 	ui->autoLoadMostRecent->setChecked(mOptions->Preferences.mAutoLoadMostRecent);
 	ui->RestoreTabLayout->setChecked(mOptions->Preferences.mRestoreTabLayout);
+	ui->AutomateEdgeColor->setChecked(mOptions->Preferences.mAutomateEdgeColor);
 
 	ui->antiAliasing->setChecked(mOptions->AASamples != 1);
 	if (mOptions->AASamples == 8)
@@ -197,6 +200,7 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 	SetButtonPixmap(mOptions->Preferences.mViewSphereHighlightColor, ui->ViewSphereHighlightColorButton);
 
 	on_antiAliasing_toggled();
+	on_AutomateEdgeColor_toggled();
 	on_edgeLines_toggled();
 	on_LineWidthSlider_valueChanged();
 	on_MeshLODSlider_valueChanged();
@@ -243,6 +247,7 @@ void lcQPreferencesDialog::accept()
 	mOptions->DefaultAuthor = ui->authorName->text();
 	mOptions->Preferences.mMouseSensitivity = ui->mouseSensitivity->value();
 	mOptions->Preferences.mColorTheme = static_cast<lcColorTheme>(ui->ColorTheme->currentIndex());
+	mOptions->Preferences.mAutomateEdgeColor = ui->AutomateEdgeColor->isChecked();
 
 	int Language = ui->Language->currentIndex();
 	if (Language < 0 || Language > static_cast<int>(LC_ARRAY_COUNT(gLanguageLocales)))
@@ -545,6 +550,24 @@ void lcQPreferencesDialog::on_PreviewViewSphereSizeCombo_currentIndexChanged(int
 void lcQPreferencesDialog::on_ViewSphereSizeCombo_currentIndexChanged(int Index)
 {
 	ui->ViewSphereLocationCombo->setEnabled(Index != 0);
+}
+
+void lcQPreferencesDialog::on_AutomateEdgeColor_toggled()
+{
+	ui->AutomateEdgeColorButton->setEnabled(ui->AutomateEdgeColor->isChecked());
+}
+
+void lcQPreferencesDialog::AutomateEdgeColor()
+{
+	lcAutomateEdgeColorDialog Dialog(this);
+	if (Dialog.exec() == QDialog::Accepted)
+	{
+		mOptions->Preferences.mStudColor = Dialog.mStudColor;
+		mOptions->Preferences.mStudEdgeColor = Dialog.mStudEdgeColor;
+		mOptions->Preferences.mPartEdgeContrast = Dialog.mPartEdgeContrast;
+		mOptions->Preferences.mPartEdgeGamma = Dialog.mPartEdgeGamma;
+		mOptions->Preferences.mPartColorToneIndex = Dialog.mPartColorToneIndex;
+	}
 }
 
 void lcQPreferencesDialog::updateCategories()

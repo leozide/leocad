@@ -2,6 +2,7 @@
 #include "lc_colors.h"
 #include "lc_file.h"
 #include "lc_library.h"
+#include "lc_application.h"
 #include <float.h>
 
 std::vector<lcColor> gColorList;
@@ -211,7 +212,32 @@ int lcGetBrickLinkColor(int ColorIndex)
 
 static void lcAdjustStudStyleColors(std::vector<lcColor>& Colors, lcStudStyle StudStyle)
 {
-	if (StudStyle != lcStudStyle::HighContrast && StudStyle != lcStudStyle::HighContrastLogo)
+	if (lcGetPreferences().mAutomateEdgeColor)
+	{
+		for (lcColor& Color : Colors)
+		{
+			if (Color.Code == 4242)
+				continue;
+
+			float EdgeLuminescence = 0.0f;
+			float r = LC_GAMMA_ADJUST(Color.Value[0], lcGetPreferences().mPartEdgeGamma);
+			float g = LC_GAMMA_ADJUST(Color.Value[1], lcGetPreferences().mPartEdgeGamma);
+			float b = LC_GAMMA_ADJUST(Color.Value[2], lcGetPreferences().mPartEdgeGamma);
+
+			float ValueLuminescence = 0.2126f * r + 0.7152f * g + 0.0722f * b;
+
+			if (LC_GAMMA_APPLY(ValueLuminescence, lcGetPreferences().mPartEdgeGamma) > (lcGetPreferences().mPartColorToneIndex))
+				EdgeLuminescence = ValueLuminescence - (ValueLuminescence * lcGetPreferences().mPartEdgeContrast);
+			else
+				EdgeLuminescence = (1.0f - ValueLuminescence) * lcGetPreferences().mPartEdgeContrast + ValueLuminescence;
+
+			EdgeLuminescence = LC_GAMMA_APPLY(EdgeLuminescence, lcGetPreferences().mPartEdgeGamma);
+
+			Color.Edge = lcVector4(EdgeLuminescence, EdgeLuminescence, EdgeLuminescence, 1.0f);
+		}
+		return;
+	}
+	else if (StudStyle != lcStudStyle::HighContrast && StudStyle != lcStudStyle::HighContrastLogo)
 		return;
 
 	for (lcColor& Color : Colors)

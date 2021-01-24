@@ -9,11 +9,13 @@
 #define LC_2PI (static_cast<float>(2 * M_PI))
 
 #define LC_RGB(r,g,b) LC_RGBA(r,g,b,255)
-#define LC_RGBA(r,g,b,a) ((quint32)(((quint8) (r) | ((quint16) (g) << 8)) | (((quint32) (quint8) (b)) << 16) | (((quint32) (quint8) (a)) << 24))) 
+#define LC_RGBA(r,g,b,a) ((quint32)(((quint8) (r) | ((quint16) (g) << 8)) | (((quint32) (quint8) (b)) << 16) | (((quint32) (quint8) (a)) << 24)))
 #define LC_RGBA_RED(rgba)   ((quint8)(((rgba) >>  0) & 0xff))
 #define LC_RGBA_GREEN(rgba) ((quint8)(((rgba) >>  8) & 0xff))
 #define LC_RGBA_BLUE(rgba)  ((quint8)(((rgba) >> 16) & 0xff))
 #define LC_RGBA_ALPHA(rgba) ((quint8)(((rgba) >> 24) & 0xff))
+#define LC_GAMMA_ADJUST(v,g) (powf(v, g))
+#define LC_GAMMA_APPLY(v,g)  (powf(v, 1.0f/g))
 
 inline quint32 lcRGBAFromQColor(const QColor& Color)
 {
@@ -64,12 +66,12 @@ public:
 	{
 		return (const float*)this;
 	}
-	
+
 	operator float*()
 	{
 		return (float*)this;
 	}
-	
+
 	const float& operator[](int i) const
 	{
 		return ((float*)this)[i];
@@ -106,12 +108,12 @@ public:
 	{
 		return (const float*)this;
 	}
-	
+
 	operator float*()
 	{
 		return (float*)this;
 	}
-	
+
 	const float& operator[](int i) const
 	{
 		return ((float*)this)[i];
@@ -155,12 +157,12 @@ public:
 	{
 		return (const float*)this;
 	}
-	
+
 	operator float*()
 	{
 		return (float*)this;
 	}
-	
+
 	const float& operator[](int i) const
 	{
 		return ((float*)this)[i];
@@ -199,12 +201,12 @@ public:
 	{
 		return (const float*)this;
 	}
-	
+
 	operator float*()
 	{
 		return (float*)this;
 	}
-	
+
 	const lcVector3& operator[](int i) const
 	{
 		return r[i];
@@ -257,12 +259,12 @@ public:
 	{
 		return (const float*)this;
 	}
-	
+
 	operator float*()
 	{
 		return (float*)this;
 	}
-	
+
 	const lcVector4& operator[](int i) const
 	{
 		return r[i];
@@ -1221,7 +1223,7 @@ inline lcVector3 lcMatrix44ToEulerAngles(const lcMatrix44& RotMat)
 		CosRoll = RotMat.r[2][2] / CosPitch;
 		SinYaw = RotMat.r[0][1] / CosPitch;
 		CosYaw = RotMat.r[0][0] / CosPitch;
-	} 
+	}
 	else
 	{
 		SinRoll = -RotMat.r[2][1];
@@ -1371,9 +1373,9 @@ inline lcMatrix44 lcMatrix44Inverse(const lcMatrix44& m)
 	const lcVector4 Row1(r0[5], r1[5], r2[5], r3[5]);
 	const lcVector4 Row2(r0[6], r1[6], r2[6], r3[6]);
 	const lcVector4 Row3(r0[7], r1[7], r2[7], r3[7]);
-	
+
 	lcMatrix44 out(Row0, Row1, Row2, Row3);
-	
+
 	return out;
 
 #undef MAT
@@ -1996,7 +1998,7 @@ inline bool lcBoundingBoxIntersectsVolume(const lcVector3& Min, const lcVector3&
 	if (OutcodesOR == 0)
 		return true;
 
-	int Indices[36] = 
+	int Indices[36] =
 	{
 		0, 1, 2,
 		0, 2, 3,

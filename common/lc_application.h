@@ -72,6 +72,13 @@ public:
 	int mPreviewViewSphereSize;
 	lcViewSphereLocation mPreviewViewSphereLocation;
 	int mDrawPreviewAxis;
+
+	quint32 mStudColor;
+	quint32 mStudEdgeColor;
+	float mPartEdgeContrast;
+	float mPartEdgeGamma;
+	float mPartColorToneIndex;
+	bool  mAutomateEdgeColor;
 };
 
 struct lcCommandLineOptions

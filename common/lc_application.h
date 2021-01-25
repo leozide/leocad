@@ -77,7 +77,7 @@ public:
 	quint32 mStudEdgeColor;
 	float mPartEdgeContrast;
 	float mPartEdgeGamma;
-	float mPartColorToneIndex;
+	float mPartColorValueLDIndex;
 	bool  mAutomateEdgeColor;
 };
 

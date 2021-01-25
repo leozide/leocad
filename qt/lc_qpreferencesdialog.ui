@@ -547,7 +547,7 @@
           <item row="7" column="0">
            <widget class="QCheckBox" name="AutomateEdgeColor">
             <property name="text">
-             <string>Automate Edge Color:</string>
+             <string>Automate edge color:</string>
             </property>
            </widget>
           </item>

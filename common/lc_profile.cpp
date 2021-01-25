@@ -140,11 +140,11 @@ static lcProfileEntry gProfileEntries[LC_NUM_PROFILE_KEYS] =
 	lcProfileEntry("Settings", "PreviewViewSphereLocation", (int)lcViewSphereLocation::TopRight), // LC_PROFILE_PREVIEW_VIEW_SPHERE_LOCATION
 	lcProfileEntry("Settings", "DrawPreviewAxis", 0),                                             // LC_PROFILE_PREVIEW_DRAW_AXES
 
-	lcProfileEntry("Settings", "StudColor", LC_RGBA(5, 19, 29, 255)),                          // LC_PROFILE_STUD_COLOR
+	lcProfileEntry("Settings", "StudColor", LC_RGBA(27, 42, 52, 255)),                         // LC_PROFILE_STUD_COLOR
 	lcProfileEntry("Settings", "StudEdgeColor", LC_RGBA(0, 0, 0, 255)),                        // LC_PROFILE_STUD_EDGE_COLOR
-	lcProfileEntry("Settings", "PartEdgeContrast", 0.5f),                                      // LC_PROFILE_PART_EDGE_CONTRAST
-	lcProfileEntry("Settings", "PartEdgeGamma", 1.8f),                                         // LC_PROFILE_PART_EDGE_GAMMA
-	lcProfileEntry("Settings", "PartColorToneIndex", 0.5f),                                    // LC_PROFILE_PART_COLOR_TONE_INDEX
+	lcProfileEntry("Settings", "PartEdgeContrast", 0.50f),                                      // LC_PROFILE_PART_EDGE_CONTRAST
+	lcProfileEntry("Settings", "PartEdgeGamma", 2.20f),                                         // LC_PROFILE_PART_EDGE_GAMMA
+	lcProfileEntry("Settings", "PartColorValueLDIndex", 0.50f),                                 // LC_PROFILE_PART_COLOR_VALUE_LD_INDEX
 	lcProfileEntry("Settings", "AutomateEdgeColor", 0)                                         // LC_PROFILE_AUTOMATE_EDGE_COLOR
 };
 

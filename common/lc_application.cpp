@@ -62,7 +62,7 @@ void lcPreferences::LoadDefaults()
 	mStudEdgeColor = lcGetProfileInt(LC_PROFILE_STUD_EDGE_COLOR);
 	mPartEdgeContrast = lcGetProfileFloat(LC_PROFILE_PART_EDGE_CONTRAST);
 	mPartEdgeGamma = lcGetProfileFloat(LC_PROFILE_PART_EDGE_GAMMA);
-	mPartColorToneIndex = lcGetProfileFloat(LC_PROFILE_PART_COLOR_TONE_INDEX);
+	mPartColorValueLDIndex = lcGetProfileFloat(LC_PROFILE_PART_COLOR_VALUE_LD_INDEX);
 	mAutomateEdgeColor = lcGetProfileInt(LC_PROFILE_AUTOMATE_EDGE_COLOR);
 }
 
@@ -113,7 +113,7 @@ void lcPreferences::SaveDefaults()
 	lcSetProfileInt(LC_PROFILE_STUD_EDGE_COLOR, mStudEdgeColor);
 	lcSetProfileFloat(LC_PROFILE_PART_EDGE_CONTRAST, mPartEdgeContrast);
 	lcSetProfileFloat(LC_PROFILE_PART_EDGE_GAMMA, mPartEdgeGamma);
-	lcSetProfileFloat(LC_PROFILE_PART_COLOR_TONE_INDEX, mPartColorToneIndex);
+	lcSetProfileFloat(LC_PROFILE_PART_COLOR_VALUE_LD_INDEX, mPartColorValueLDIndex);
 	lcSetProfileInt(LC_PROFILE_AUTOMATE_EDGE_COLOR, mAutomateEdgeColor);
 }
 
@@ -1158,15 +1158,15 @@ void lcApplication::ShowPreferencesDialog()
 	bool ColorsChanged = Options.ColorConfigPath != lcGetProfileString(LC_PROFILE_COLOR_CONFIG);
 	bool AAChanged = CurrentAASamples != Options.AASamples;
 	bool StudStyleChanged = CurrentStudStyle != Options.StudStyle;
-	bool AutomateEdgeColorChanged = Options.Preferences.mAutomateEdgeColor != lcGetProfileInt(LC_PROFILE_AUTOMATE_EDGE_COLOR);
+	bool AutomateEdgeColorChanged = Options.Preferences.mAutomateEdgeColor != bool(lcGetProfileInt(LC_PROFILE_AUTOMATE_EDGE_COLOR));
 	bool StudColorChanged = Options.Preferences.mStudColor != quint32(lcGetProfileInt(LC_PROFILE_STUD_COLOR));
 	bool StudEdgeColorChanged = Options.Preferences.mStudEdgeColor != quint32(lcGetProfileInt(LC_PROFILE_STUD_EDGE_COLOR));
 	bool PartEdgeContrastChanged = Options.Preferences.mPartEdgeContrast != lcGetProfileFloat(LC_PROFILE_PART_EDGE_CONTRAST);
 	bool PartEdgeGammaChanged = Options.Preferences.mPartEdgeGamma != lcGetProfileFloat(LC_PROFILE_PART_EDGE_GAMMA);
-	bool PartColorToneIndexChanged = Options.Preferences.mPartColorToneIndex != lcGetProfileFloat(LC_PROFILE_PART_COLOR_TONE_INDEX);
-	if (!StudStyleChanged)
-		StudStyleChanged = (StudColorChanged || StudEdgeColorChanged || PartEdgeContrastChanged || PartEdgeGammaChanged || PartColorToneIndexChanged);
-/*** LPub3D Mod - ***/
+	bool PartColorValueLDIndexChanged = Options.Preferences.mPartColorValueLDIndex != lcGetProfileFloat(LC_PROFILE_PART_COLOR_VALUE_LD_INDEX);
+	if (!AutomateEdgeColorChanged)
+		AutomateEdgeColorChanged = (StudColorChanged || StudEdgeColorChanged || PartEdgeContrastChanged || PartEdgeGammaChanged || PartColorValueLDIndexChanged);
+
 	mPreferences = Options.Preferences;
 
 	mPreferences.SaveDefaults();

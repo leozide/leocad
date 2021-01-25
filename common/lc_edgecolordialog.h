@@ -11,7 +11,7 @@ public:
 	quint32 mStudEdgeColor;
 	float mPartEdgeContrast;
 	float mPartEdgeGamma;
-	float mPartColorToneIndex;
+	float mPartColorValueLDIndex;
 
 protected slots:
 	void SliderValueChanged(int);
@@ -20,7 +20,7 @@ protected slots:
 
 protected:
 	QSlider* PartEdgeGammaSlider;
-	QSlider* PartColorToneIndexSlider;
+	QSlider* PartColorValueLDIndexSlider;
 	QSlider* PartEdgeContrastSlider;
 
 	QToolButton* StudColorButton;
@@ -30,6 +30,6 @@ protected:
 
 	QLabel* PartEdgeContrast;
 	QLabel* PartEdgeGamma;
-	QLabel* PartColorToneIndex;
+	QLabel* PartColorValueLDIndex;
 };
 

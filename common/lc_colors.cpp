@@ -226,7 +226,7 @@ static void lcAdjustStudStyleColors(std::vector<lcColor>& Colors, lcStudStyle St
 
 			float ValueLuminescence = 0.2126f * r + 0.7152f * g + 0.0722f * b;
 
-			if (LC_GAMMA_APPLY(ValueLuminescence, lcGetPreferences().mPartEdgeGamma) > (lcGetPreferences().mPartColorToneIndex))
+			if (LC_GAMMA_APPLY(ValueLuminescence, lcGetPreferences().mPartEdgeGamma) > (lcGetPreferences().mPartColorValueLDIndex))
 				EdgeLuminescence = ValueLuminescence - (ValueLuminescence * lcGetPreferences().mPartEdgeContrast);
 			else
 				EdgeLuminescence = (1.0f - ValueLuminescence) * lcGetPreferences().mPartEdgeContrast + ValueLuminescence;
@@ -461,18 +461,25 @@ bool lcLoadColorFile(lcFile& File, lcStudStyle StudStyle)
 	if (!FoundStud)
 	{
 		lcColor StudColor;
-
+		lcVector4 Value = lcVector4(LC_RGBA_RED(lcGetPreferences().mStudColor),
+									LC_RGBA_GREEN(lcGetPreferences().mStudColor),
+									LC_RGBA_BLUE(lcGetPreferences().mStudColor),
+									LC_RGBA_ALPHA(lcGetPreferences().mStudColor)) / 255.0f;
+		lcVector4 Edge  = lcVector4(LC_RGBA_RED(lcGetPreferences().mStudEdgeColor),
+									LC_RGBA_GREEN(lcGetPreferences().mStudEdgeColor),
+									LC_RGBA_BLUE(lcGetPreferences().mStudEdgeColor),
+									LC_RGBA_ALPHA(lcGetPreferences().mStudEdgeColor)) / 255.0f;
 		StudColor.Code = 4242;
 		StudColor.Translucent = false;
 		StudColor.Group = LC_NUM_COLORGROUPS;
-		StudColor.Value[0] = 27.0f / 255.0f;
-		StudColor.Value[1] = 42.0f / 255.0f;
-		StudColor.Value[2] = 52.0f / 255.0f;
-		StudColor.Value[3] = 1.0f;
-		StudColor.Edge[0] = 0.0f;
-		StudColor.Edge[1] = 0.0f;
-		StudColor.Edge[2] = 0.0f;
-		StudColor.Edge[3] = 1.0f;
+		StudColor.Value[0] = Value[0];
+		StudColor.Value[1] = Value[1];
+		StudColor.Value[2] = Value[2];
+		StudColor.Value[3] = Value[3];
+		StudColor.Edge[0] = Edge[0];
+		StudColor.Edge[1] = Edge[1];
+		StudColor.Edge[2] = Edge[2];
+		StudColor.Edge[3] = Edge[3];
 		strcpy(StudColor.Name, "Stud Style Black");
 		strcpy(StudColor.SafeName, "Stud_Style_Black");
 

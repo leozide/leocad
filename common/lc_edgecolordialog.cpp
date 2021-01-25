@@ -171,11 +171,27 @@ void lcAutomateEdgeColorDialog::ColorButtonClicked()
 	}
 	else if (Button == BlackEdgeColorButton)
 	{
+		if (lcGetPreferences().mAutomateEdgeColor)
+		{
+			QMessageBox msgBox;
+			msgBox.setText("Automate edge colour appears to be enabled.<br>"
+						   "Black parts edge color setting will not be accessible.");
+			if (msgBox.exec() != QMessageBox::Accepted)
+				return;
+		}
 		Title = tr("Select Black Edge Color");
 		Color = &mBlackEdgeColor;
 	}
 	else if (Button == DarkEdgeColorButton)
 	{
+		if (lcGetPreferences().mAutomateEdgeColor)
+		{
+			QMessageBox msgBox;
+			msgBox.setText("Automate edge colour appears to be enabled.<br>"
+						   "Dark parts edge color setting will not be accessible.");
+			if (msgBox.exec() != QMessageBox::Accepted)
+				return;
+		}
 		Title = tr("Select Dark Edge Color");
 		Color = &mDarkEdgeColor;
 	}

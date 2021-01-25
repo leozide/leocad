@@ -78,7 +78,6 @@ public:
 	quint32 mBlackEdgeColor;
 	quint32 mDarkEdgeColor;
 	float mPartEdgeContrast;
-	float mPartEdgeGamma;
 	float mPartColorValueLDIndex;
 	bool  mAutomateEdgeColor;
 };

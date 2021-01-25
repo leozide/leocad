@@ -14,8 +14,9 @@
 #define LC_RGBA_GREEN(rgba) ((quint8)(((rgba) >>  8) & 0xff))
 #define LC_RGBA_BLUE(rgba)  ((quint8)(((rgba) >> 16) & 0xff))
 #define LC_RGBA_ALPHA(rgba) ((quint8)(((rgba) >> 24) & 0xff))
-#define LC_GAMMA_ADJUST(v,g) (powf(v, g))
-#define LC_GAMMA_APPLY(v,g)  (powf(v, 1.0f/g))
+#define LC_GAMMA (2.20f)
+#define LC_GAMMA_ADJUST(v) (powf(v, LC_GAMMA))
+#define LC_GAMMA_APPLY(v)  (powf(v, 1.0f/LC_GAMMA))
 
 inline quint32 lcRGBAFromQColor(const QColor& Color)
 {

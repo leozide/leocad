@@ -220,18 +220,18 @@ static void lcAdjustStudStyleColors(std::vector<lcColor>& Colors, lcStudStyle St
 				continue;
 
 			float EdgeLuminescence = 0.0f;
-			float r = LC_GAMMA_ADJUST(Color.Value[0], lcGetPreferences().mPartEdgeGamma);
-			float g = LC_GAMMA_ADJUST(Color.Value[1], lcGetPreferences().mPartEdgeGamma);
-			float b = LC_GAMMA_ADJUST(Color.Value[2], lcGetPreferences().mPartEdgeGamma);
+			float r = LC_GAMMA_ADJUST(Color.Value[0]);
+			float g = LC_GAMMA_ADJUST(Color.Value[1]);
+			float b = LC_GAMMA_ADJUST(Color.Value[2]);
 
 			float ValueLuminescence = 0.2126f * r + 0.7152f * g + 0.0722f * b;
 
-			if (LC_GAMMA_APPLY(ValueLuminescence, lcGetPreferences().mPartEdgeGamma) > (lcGetPreferences().mPartColorValueLDIndex))
+			if (LC_GAMMA_APPLY(ValueLuminescence) > (lcGetPreferences().mPartColorValueLDIndex))
 				EdgeLuminescence = ValueLuminescence - (ValueLuminescence * lcGetPreferences().mPartEdgeContrast);
 			else
 				EdgeLuminescence = (1.0f - ValueLuminescence) * lcGetPreferences().mPartEdgeContrast + ValueLuminescence;
 
-			EdgeLuminescence = LC_GAMMA_APPLY(EdgeLuminescence, lcGetPreferences().mPartEdgeGamma);
+			EdgeLuminescence = LC_GAMMA_APPLY(EdgeLuminescence);
 
 			Color.Edge = lcVector4(EdgeLuminescence, EdgeLuminescence, EdgeLuminescence, 1.0f);
 		}

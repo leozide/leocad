@@ -1,8 +1,6 @@
 #include "lc_edgecolordialog.h"
 #include "lc_application.h"
 
-#define MIN_GAMMA 1.0f
-
 lcAutomateEdgeColorDialog::lcAutomateEdgeColorDialog(QWidget* Parent, bool ShowHighContrastDialog)
 	:QDialog(Parent)
 {
@@ -12,7 +10,6 @@ lcAutomateEdgeColorDialog::lcAutomateEdgeColorDialog(QWidget* Parent, bool ShowH
 	mDarkEdgeColor = lcGetPreferences().mDarkEdgeColor;
 
 	mPartEdgeContrast = lcGetPreferences().mPartEdgeContrast;
-	mPartEdgeGamma = lcGetPreferences().mPartEdgeGamma;
 	mPartColorValueLDIndex = lcGetPreferences().mPartColorValueLDIndex;
 
 	setWindowTitle(tr("Color Preferences"));
@@ -37,20 +34,7 @@ lcAutomateEdgeColorDialog::lcAutomateEdgeColorDialog(QWidget* Parent, bool ShowH
 	EdgeSettingsLayout->addWidget(PartEdgeContrastSlider,0,1);
 	EdgeSettingsLayout->addWidget(PartEdgeContrast,0,2);
 
-	QLabel* PartEdgeGammaLabel = new QLabel(tr("Gamma:"), this);
-	PartEdgeGamma = new QLabel(this);
-	PartEdgeGammaSlider = new QSlider(Qt::Horizontal, this);
-	PartEdgeGammaSlider->setRange(0, 200);
-	PartEdgeGammaSlider->setValue(qRound((mPartEdgeGamma - MIN_GAMMA) * 100));
-	PartEdgeGammaSlider->setToolTip(tr("Set the gamma (brightness) - normal range is 1.80 to 2.80."));
-	connect(PartEdgeGammaSlider, SIGNAL(valueChanged(int)), this, SLOT(SliderValueChanged(int)));
-	emit PartEdgeGammaSlider->valueChanged(PartEdgeGammaSlider->value());
-
-	EdgeSettingsLayout->addWidget(PartEdgeGammaLabel,1,0);
-	EdgeSettingsLayout->addWidget(PartEdgeGammaSlider,1,1);
-	EdgeSettingsLayout->addWidget(PartEdgeGamma,1,2);
-
-	QLabel* PartColorValueLDIndexLabel = new QLabel(tr("Value L/D Index:"), this);
+	QLabel* PartColorValueLDIndexLabel = new QLabel(tr("Light/Dark Value:"), this);
 	PartColorValueLDIndex = new QLabel(this);
 	PartColorValueLDIndexSlider = new QSlider(Qt::Horizontal, this);
 	PartColorValueLDIndexSlider->setRange(0, 100);
@@ -59,9 +43,9 @@ lcAutomateEdgeColorDialog::lcAutomateEdgeColorDialog(QWidget* Parent, bool ShowH
 	connect(PartColorValueLDIndexSlider, SIGNAL(valueChanged(int)), this, SLOT(SliderValueChanged(int)));
 	emit PartColorValueLDIndexSlider->valueChanged(PartColorValueLDIndexSlider->value());
 
-	EdgeSettingsLayout->addWidget(PartColorValueLDIndexLabel,2,0);
-	EdgeSettingsLayout->addWidget(PartColorValueLDIndexSlider,2,1);
-	EdgeSettingsLayout->addWidget(PartColorValueLDIndex,2,2);
+	EdgeSettingsLayout->addWidget(PartColorValueLDIndexLabel,1,0);
+	EdgeSettingsLayout->addWidget(PartColorValueLDIndexSlider,1,1);
+	EdgeSettingsLayout->addWidget(PartColorValueLDIndex,1,2);
 
 	QGroupBox* StudColorBox = new QGroupBox(tr("High Contrast Studs"), this);
 	StudColorBox->setVisible(ShowHighContrastDialog);
@@ -149,11 +133,6 @@ void lcAutomateEdgeColorDialog::SliderValueChanged(int Value)
 		mPartEdgeContrast = Value * 0.01f;
 		PartEdgeContrast->setText(QString::number(mPartEdgeContrast, 'f', 2));
 	}
-	else if (sender() == PartEdgeGammaSlider)
-	{
-		mPartEdgeGamma = (Value * 0.01f) + MIN_GAMMA;
-		PartEdgeGamma->setText(QString::number(mPartEdgeGamma, 'f', 2));
-	}
 	else if (sender() == PartColorValueLDIndexSlider)
 	{
 		mPartColorValueLDIndex = Value * 0.01f;
@@ -212,7 +191,7 @@ void lcAutomateEdgeColorDialog::ResetColorButtonClicked()
 	QPixmap Pix(12, 12);
 	QColor ResetColor;
 
-	if (sender() == StudColorButton)
+	if (sender() == ResetStudColorButton)
 	{
 		Color = &mStudColor;
 		*Color = LC_RGBA(27, 42, 52, 255);
@@ -221,7 +200,7 @@ void lcAutomateEdgeColorDialog::ResetColorButtonClicked()
 		StudColorButton->setIcon(Pix);
 		StudColorButton->setToolTip(ResetColor.name().toUpper());
 	}
-	else if (sender() == StudEdgeColorButton)
+	else if (sender() == ResetStudEdgeColorButton)
 	{
 		Color = &mStudEdgeColor;
 		*Color = LC_RGBA(0, 0, 0, 255);
@@ -230,16 +209,16 @@ void lcAutomateEdgeColorDialog::ResetColorButtonClicked()
 		StudEdgeColorButton->setIcon(Pix);
 		StudEdgeColorButton->setToolTip(ResetColor.name().toUpper());
 	}
-	else if (sender() == BlackEdgeColorButton)
+	else if (sender() == ResetBlackEdgeColorButton)
 	{
 		Color = &mBlackEdgeColor;
-		*Color = LC_RGBA(0, 0, 0, 255);
+		*Color = LC_RGBA(255, 255, 255, 255);
 		ResetColor = QColor(LC_RGBA_RED(*Color), LC_RGBA_GREEN(*Color), LC_RGBA_BLUE(*Color), LC_RGBA_ALPHA(*Color));
 		Pix.fill(ResetColor);
 		BlackEdgeColorButton->setIcon(Pix);
 		BlackEdgeColorButton->setToolTip(ResetColor.name().toUpper());
 	}
-	else if (sender() == DarkEdgeColorButton)
+	else if (sender() == ResetDarkEdgeColorButton)
 	{
 		Color = &mDarkEdgeColor;
 		*Color = LC_RGBA(27, 42, 52, 255);

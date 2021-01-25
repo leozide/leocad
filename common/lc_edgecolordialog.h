@@ -12,7 +12,6 @@ public:
 	quint32 mDarkEdgeColor;
 	quint32 mBlackEdgeColor;
 	float mPartEdgeContrast;
-	float mPartEdgeGamma;
 	float mPartColorValueLDIndex;
 
 protected slots:
@@ -21,12 +20,10 @@ protected slots:
 	void ResetColorButtonClicked();
 
 protected:
-	QSlider* PartEdgeGammaSlider;
 	QSlider* PartColorValueLDIndexSlider;
 	QSlider* PartEdgeContrastSlider;
 
 	QLabel* PartEdgeContrast;
-	QLabel* PartEdgeGamma;
 	QLabel* PartColorValueLDIndex;
 
 	QToolButton* StudColorButton;

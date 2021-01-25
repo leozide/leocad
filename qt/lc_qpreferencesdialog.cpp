@@ -573,7 +573,6 @@ void lcQPreferencesDialog::AutomateEdgeColor()
 		mOptions->Preferences.mBlackEdgeColor = Dialog.mBlackEdgeColor;
 		mOptions->Preferences.mDarkEdgeColor = Dialog.mDarkEdgeColor;
 		mOptions->Preferences.mPartEdgeContrast = Dialog.mPartEdgeContrast;
-		mOptions->Preferences.mPartEdgeGamma = Dialog.mPartEdgeGamma;
 		mOptions->Preferences.mPartColorValueLDIndex = Dialog.mPartColorValueLDIndex;
 	}
 }

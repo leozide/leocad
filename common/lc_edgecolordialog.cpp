@@ -30,9 +30,15 @@ lcAutomateEdgeColorDialog::lcAutomateEdgeColorDialog(QWidget* Parent, bool ShowH
 	connect(PartEdgeContrastSlider, SIGNAL(valueChanged(int)), this, SLOT(SliderValueChanged(int)));
 	emit PartEdgeContrastSlider->valueChanged(PartEdgeContrastSlider->value());
 
+	ResetPartEdgeContrastButton = new QToolButton(this);
+	ResetPartEdgeContrastButton->setText(tr("..."));
+	ResetPartEdgeContrastButton->setToolTip(tr("Reset"));
+	connect(ResetPartEdgeContrastButton, SIGNAL(clicked()), this, SLOT(ResetSliderButtonClicked()));
+
 	EdgeSettingsLayout->addWidget(PartEdgeContrastLabel,0,0);
 	EdgeSettingsLayout->addWidget(PartEdgeContrastSlider,0,1);
 	EdgeSettingsLayout->addWidget(PartEdgeContrast,0,2);
+	EdgeSettingsLayout->addWidget(ResetPartEdgeContrastButton,0,3);
 
 	QLabel* PartColorValueLDIndexLabel = new QLabel(tr("Light/Dark Value:"), this);
 	PartColorValueLDIndex = new QLabel(this);
@@ -43,9 +49,15 @@ lcAutomateEdgeColorDialog::lcAutomateEdgeColorDialog(QWidget* Parent, bool ShowH
 	connect(PartColorValueLDIndexSlider, SIGNAL(valueChanged(int)), this, SLOT(SliderValueChanged(int)));
 	emit PartColorValueLDIndexSlider->valueChanged(PartColorValueLDIndexSlider->value());
 
+	ResetPartColorValueLDIndexButton = new QToolButton(this);
+	ResetPartColorValueLDIndexButton->setText(tr("..."));
+	ResetPartColorValueLDIndexButton->setToolTip(tr("Reset"));
+	connect(ResetPartColorValueLDIndexButton, SIGNAL(clicked()), this, SLOT(ResetSliderButtonClicked()));
+
 	EdgeSettingsLayout->addWidget(PartColorValueLDIndexLabel,1,0);
 	EdgeSettingsLayout->addWidget(PartColorValueLDIndexSlider,1,1);
 	EdgeSettingsLayout->addWidget(PartColorValueLDIndex,1,2);
+	EdgeSettingsLayout->addWidget(ResetPartColorValueLDIndexButton,1,3);
 
 	QGroupBox* StudColorBox = new QGroupBox(tr("High Contrast Studs"), this);
 	StudColorBox->setVisible(ShowHighContrastDialog);
@@ -183,6 +195,20 @@ void lcAutomateEdgeColorDialog::ColorButtonClicked()
 	Pix.fill(NewColor);
 	((QToolButton*)Button)->setIcon(Pix);
 	((QToolButton*)Button)->setToolTip(NewColor.name().toUpper());
+}
+
+void lcAutomateEdgeColorDialog::ResetSliderButtonClicked()
+{
+	if (sender() == ResetPartEdgeContrastButton)
+	{
+		PartEdgeContrastSlider->setValue(0.5f * 100);
+		emit PartEdgeContrastSlider->valueChanged(PartEdgeContrastSlider->value());
+	}
+	else if (sender() == ResetPartColorValueLDIndexButton)
+	{
+		PartColorValueLDIndexSlider->setValue(0.5f * 100);
+		emit PartColorValueLDIndexSlider->valueChanged(PartColorValueLDIndexSlider->value());
+	}
 }
 
 void lcAutomateEdgeColorDialog::ResetColorButtonClicked()

@@ -16,6 +16,7 @@ public:
 
 protected slots:
 	void SliderValueChanged(int);
+	void ResetSliderButtonClicked();
 	void ColorButtonClicked();
 	void ResetColorButtonClicked();
 
@@ -25,6 +26,9 @@ protected:
 
 	QLabel* PartEdgeContrast;
 	QLabel* PartColorValueLDIndex;
+
+	QToolButton* ResetPartEdgeContrastButton;
+	QToolButton* ResetPartColorValueLDIndexButton;
 
 	QToolButton* StudColorButton;
 	QToolButton* StudEdgeColorButton;

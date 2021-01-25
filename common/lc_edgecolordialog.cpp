@@ -3,11 +3,14 @@
 
 #define MIN_GAMMA 1.0f
 
-lcAutomateEdgeColorDialog::lcAutomateEdgeColorDialog(QWidget* Parent)
+lcAutomateEdgeColorDialog::lcAutomateEdgeColorDialog(QWidget* Parent, bool ShowHighContrastDialog)
 	:QDialog(Parent)
 {
 	mStudColor = lcGetPreferences().mStudColor;
 	mStudEdgeColor = lcGetPreferences().mStudEdgeColor;
+	mBlackEdgeColor = lcGetPreferences().mBlackEdgeColor;
+	mDarkEdgeColor = lcGetPreferences().mDarkEdgeColor;
+
 	mPartEdgeContrast = lcGetPreferences().mPartEdgeContrast;
 	mPartEdgeGamma = lcGetPreferences().mPartEdgeGamma;
 	mPartColorValueLDIndex = lcGetPreferences().mPartColorValueLDIndex;
@@ -16,6 +19,7 @@ lcAutomateEdgeColorDialog::lcAutomateEdgeColorDialog(QWidget* Parent)
 	QVBoxLayout* MainLayout = new  QVBoxLayout(this);
 
 	QGroupBox* EdgeSettingsBox = new QGroupBox(tr("Edge Colors"), this);
+	EdgeSettingsBox->setVisible(!ShowHighContrastDialog);
 	MainLayout->addWidget(EdgeSettingsBox);
 	QGridLayout* EdgeSettingsLayout = new QGridLayout(EdgeSettingsBox);
 	EdgeSettingsBox->setLayout(EdgeSettingsLayout);
@@ -60,6 +64,7 @@ lcAutomateEdgeColorDialog::lcAutomateEdgeColorDialog(QWidget* Parent)
 	EdgeSettingsLayout->addWidget(PartColorValueLDIndex,2,2);
 
 	QGroupBox* StudColorBox = new QGroupBox(tr("High Contrast Studs"), this);
+	StudColorBox->setVisible(ShowHighContrastDialog);
 	MainLayout->addWidget(StudColorBox);
 	QGridLayout* StudColorLayout = new QGridLayout(StudColorBox);
 	StudColorBox->setLayout(StudColorLayout);
@@ -100,6 +105,34 @@ lcAutomateEdgeColorDialog::lcAutomateEdgeColorDialog(QWidget* Parent)
 	StudColorLayout->addWidget(StudEdgeColorLabel,1,0);
 	StudColorLayout->addWidget(StudEdgeColorButton,1,1);
 	StudColorLayout->addWidget(ResetStudEdgeColorButton,1,2);
+
+	QLabel* BlackEdgeColorLabel = new QLabel(tr("Black Parts Edge Color:"), this);
+	BlackEdgeColorButton = new QToolButton(this);
+	SetButtonPixmap(mBlackEdgeColor, BlackEdgeColorButton);
+	connect(BlackEdgeColorButton, SIGNAL(clicked()), this, SLOT(ColorButtonClicked()));
+
+	ResetBlackEdgeColorButton = new QToolButton(this);
+	ResetBlackEdgeColorButton->setText(tr("..."));
+	ResetBlackEdgeColorButton->setToolTip(tr("Reset"));
+	connect(ResetBlackEdgeColorButton, SIGNAL(clicked()), this, SLOT(ResetColorButtonClicked()));
+
+	StudColorLayout->addWidget(BlackEdgeColorLabel,2,0);
+	StudColorLayout->addWidget(BlackEdgeColorButton,2,1);
+	StudColorLayout->addWidget(ResetBlackEdgeColorButton,2,2);
+
+	QLabel* DarkEdgeColorLabel = new QLabel(tr("Dark Parts Edge Color:"), this);
+	DarkEdgeColorButton = new QToolButton(this);
+	SetButtonPixmap(mDarkEdgeColor, DarkEdgeColorButton);
+	connect(DarkEdgeColorButton, SIGNAL(clicked()), this, SLOT(ColorButtonClicked()));
+
+	ResetDarkEdgeColorButton = new QToolButton(this);
+	ResetDarkEdgeColorButton->setText(tr("..."));
+	ResetDarkEdgeColorButton->setToolTip(tr("Reset"));
+	connect(ResetDarkEdgeColorButton, SIGNAL(clicked()), this, SLOT(ResetColorButtonClicked()));
+
+	StudColorLayout->addWidget(DarkEdgeColorLabel,3,0);
+	StudColorLayout->addWidget(DarkEdgeColorButton,3,1);
+	StudColorLayout->addWidget(ResetDarkEdgeColorButton,3,2);
 
 	QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, this);
 	MainLayout->addWidget(buttonBox);
@@ -145,6 +178,16 @@ void lcAutomateEdgeColorDialog::ColorButtonClicked()
 		Title = tr("Select Stud Edge Color");
 		Color = &mStudEdgeColor;
 	}
+	else if (Button == BlackEdgeColorButton)
+	{
+		Title = tr("Select Black Edge Color");
+		Color = &mBlackEdgeColor;
+	}
+	else if (Button == DarkEdgeColorButton)
+	{
+		Title = tr("Select Dark Edge Color");
+		Color = &mDarkEdgeColor;
+	}
 	else
 		return;
 
@@ -172,7 +215,7 @@ void lcAutomateEdgeColorDialog::ResetColorButtonClicked()
 	if (sender() == StudColorButton)
 	{
 		Color = &mStudColor;
-	   *Color = LC_RGBA(27, 42, 52, 255);
+		*Color = LC_RGBA(27, 42, 52, 255);
 		ResetColor = QColor(LC_RGBA_RED(*Color), LC_RGBA_GREEN(*Color), LC_RGBA_BLUE(*Color), LC_RGBA_ALPHA(*Color));
 		Pix.fill(ResetColor);
 		StudColorButton->setIcon(Pix);
@@ -181,10 +224,28 @@ void lcAutomateEdgeColorDialog::ResetColorButtonClicked()
 	else if (sender() == StudEdgeColorButton)
 	{
 		Color = &mStudEdgeColor;
-	   *Color = LC_RGBA(0, 0, 0, 255);
+		*Color = LC_RGBA(0, 0, 0, 255);
 		ResetColor = QColor(LC_RGBA_RED(*Color), LC_RGBA_GREEN(*Color), LC_RGBA_BLUE(*Color), LC_RGBA_ALPHA(*Color));
 		Pix.fill(ResetColor);
 		StudEdgeColorButton->setIcon(Pix);
 		StudEdgeColorButton->setToolTip(ResetColor.name().toUpper());
+	}
+	else if (sender() == BlackEdgeColorButton)
+	{
+		Color = &mBlackEdgeColor;
+		*Color = LC_RGBA(0, 0, 0, 255);
+		ResetColor = QColor(LC_RGBA_RED(*Color), LC_RGBA_GREEN(*Color), LC_RGBA_BLUE(*Color), LC_RGBA_ALPHA(*Color));
+		Pix.fill(ResetColor);
+		BlackEdgeColorButton->setIcon(Pix);
+		BlackEdgeColorButton->setToolTip(ResetColor.name().toUpper());
+	}
+	else if (sender() == DarkEdgeColorButton)
+	{
+		Color = &mDarkEdgeColor;
+		*Color = LC_RGBA(27, 42, 52, 255);
+		ResetColor = QColor(LC_RGBA_RED(*Color), LC_RGBA_GREEN(*Color), LC_RGBA_BLUE(*Color), LC_RGBA_ALPHA(*Color));
+		Pix.fill(ResetColor);
+		DarkEdgeColorButton->setIcon(Pix);
+		DarkEdgeColorButton->setToolTip(ResetColor.name().toUpper());
 	}
 }

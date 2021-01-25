@@ -47,6 +47,7 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 	ui->shortcutEdit->installEventFilter(this);
 	connect(ui->commandList, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), this, SLOT(commandChanged(QTreeWidgetItem*)));
 	connect(ui->mouseTree, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), this, SLOT(MouseTreeItemChanged(QTreeWidgetItem*)));
+	connect(ui->HighContrastButton, SIGNAL(clicked()), this, SLOT(AutomateEdgeColor()));
 	connect(ui->AutomateEdgeColorButton, SIGNAL(clicked()), this, SLOT(AutomateEdgeColor()));
 
 	ui->partsLibrary->setText(mOptions->LibraryPath);
@@ -557,13 +558,20 @@ void lcQPreferencesDialog::on_AutomateEdgeColor_toggled()
 	ui->AutomateEdgeColorButton->setEnabled(ui->AutomateEdgeColor->isChecked());
 }
 
+void lcQPreferencesDialog::on_studStyleCombo_currentIndexChanged(int index)
+{
+	ui->HighContrastButton->setEnabled(index > static_cast<int>(lcStudStyle::FlattenedLogo));
+}
+
 void lcQPreferencesDialog::AutomateEdgeColor()
 {
-	lcAutomateEdgeColorDialog Dialog(this);
+	lcAutomateEdgeColorDialog Dialog(this, sender() == ui->HighContrastButton);
 	if (Dialog.exec() == QDialog::Accepted)
 	{
 		mOptions->Preferences.mStudColor = Dialog.mStudColor;
 		mOptions->Preferences.mStudEdgeColor = Dialog.mStudEdgeColor;
+		mOptions->Preferences.mBlackEdgeColor = Dialog.mBlackEdgeColor;
+		mOptions->Preferences.mDarkEdgeColor = Dialog.mDarkEdgeColor;
 		mOptions->Preferences.mPartEdgeContrast = Dialog.mPartEdgeContrast;
 		mOptions->Preferences.mPartEdgeGamma = Dialog.mPartEdgeGamma;
 		mOptions->Preferences.mPartColorValueLDIndex = Dialog.mPartColorValueLDIndex;

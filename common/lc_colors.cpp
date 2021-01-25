@@ -240,17 +240,28 @@ static void lcAdjustStudStyleColors(std::vector<lcColor>& Colors, lcStudStyle St
 	else if (StudStyle != lcStudStyle::HighContrast && StudStyle != lcStudStyle::HighContrastLogo)
 		return;
 
+	const lcVector4 Edge(LC_RGBA_RED(lcGetPreferences().mStudEdgeColor),
+						 LC_RGBA_GREEN(lcGetPreferences().mStudEdgeColor),
+						 LC_RGBA_BLUE(lcGetPreferences().mStudEdgeColor),
+						 LC_RGBA_ALPHA(lcGetPreferences().mStudEdgeColor));
+	const lcVector4 DarkEdge(LC_RGBA_RED(lcGetPreferences().mDarkEdgeColor),
+							 LC_RGBA_GREEN(lcGetPreferences().mDarkEdgeColor),
+							 LC_RGBA_BLUE(lcGetPreferences().mDarkEdgeColor),
+							 LC_RGBA_ALPHA(lcGetPreferences().mDarkEdgeColor));
+	const lcVector4 BlackEdge(LC_RGBA_RED(lcGetPreferences().mBlackEdgeColor),
+							  LC_RGBA_GREEN(lcGetPreferences().mBlackEdgeColor),
+							  LC_RGBA_BLUE(lcGetPreferences().mBlackEdgeColor),
+							  LC_RGBA_ALPHA(lcGetPreferences().mBlackEdgeColor));
+
 	for (lcColor& Color : Colors)
 	{
 		const lcVector4 FillColor = Color.Value * 255.0f;
-		lcVector4 EdgeColor(0.0f, 0.0f, 0.0f, 255.0f);
-
 		if (30.0f * FillColor[0] + 59.0f * FillColor[1] + 11.0f * FillColor[2] <= 3600.0f)
-			EdgeColor = lcVector4(27.0f, 42.0f, 52.0f, 255.0f);
+			Color.Edge = DarkEdge / 255.0f;
 		else if (Color.Code == 0)
-			EdgeColor = lcVector4(255.0f, 255.0f, 255.0f, 255.0f);
-
-		Color.Edge = EdgeColor / 255.0f;
+			Color.Edge = BlackEdge / 255.0f;
+		else
+			Color.Edge = Edge / 255.0f;
 	}
 }
 

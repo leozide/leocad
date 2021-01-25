@@ -75,6 +75,8 @@ public:
 
 	quint32 mStudColor;
 	quint32 mStudEdgeColor;
+	quint32 mBlackEdgeColor;
+	quint32 mDarkEdgeColor;
 	float mPartEdgeContrast;
 	float mPartEdgeGamma;
 	float mPartColorValueLDIndex;

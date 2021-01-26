@@ -366,6 +366,13 @@ lcCommandLineOptions lcApplication::ParseCommandLineOptions()
 	Options.Viewpoint = lcViewpoint::Count;
 	Options.FadeStepsColor = mPreferences.mFadeStepsColor;
 	Options.HighlightColor = mPreferences.mHighlightNewPartsColor;
+	Options.StudCylinderColor = mPreferences.mStudCylinderColor;
+	Options.PartEdgeColor = mPreferences.mPartEdgeColor;
+	Options.BlackEdgeColor = mPreferences.mBlackEdgeColor;
+	Options.DarkEdgeColor = mPreferences.mDarkEdgeColor;
+	Options.PartEdgeContrast = mPreferences.mPartEdgeContrast;
+	Options.PartColorValueLDIndex = mPreferences.mPartColorValueLDIndex;
+	Options.AutomateEdgeColor = mPreferences.mAutomateEdgeColor;
 
 	QStringList Arguments = arguments();
 
@@ -613,6 +620,76 @@ lcCommandLineOptions lcApplication::ParseCommandLineOptions()
 				Options.ParseOK = false;
 			}
 		}
+		else if (Option == QLatin1String("-scc") || Option == QLatin1String("--stud-cylinder-color"))
+		{
+			if (ParseColor(Options.StudCylinderColor))
+			{
+				if (Options.StudStyle < lcStudStyle::HighContrast)
+				{
+					Options.StdErr += tr("High contrast stud style is required for the '%1' option but is not enabled.\n").arg(Option);
+					Options.ParseOK = false;
+				}
+			}
+		}
+		else if (Option == QLatin1String("-ec") || Option == QLatin1String("--edge-color"))
+		{
+			if (ParseColor(Options.PartEdgeColor))
+			{
+				if (Options.StudStyle < lcStudStyle::HighContrast)
+				{
+					Options.StdErr += tr("High contrast stud style is required for the '%1' option but is not enabled.\n").arg(Option);
+					Options.ParseOK = false;
+				}
+			}
+		}
+		else if (Option == QLatin1String("-bec") || Option == QLatin1String("--black-edge-color"))
+		{
+			if (ParseColor(Options.BlackEdgeColor))
+			{
+				if (Options.StudStyle < lcStudStyle::HighContrast)
+				{
+					Options.StdErr += tr("High contrast stud style is required for the '%1' option but is not enabled.\n").arg(Option);
+					Options.ParseOK = false;
+				}
+			}
+		}
+		else if (Option == QLatin1String("-dec") || Option == QLatin1String("--dark-edge-color"))
+		{
+			if (ParseColor(Options.DarkEdgeColor))
+			{
+				if (Options.StudStyle < lcStudStyle::HighContrast)
+				{
+					Options.StdErr += tr("High contrast stud style is required for the '%1' option but is not enabled.\n").arg(Option);
+					Options.ParseOK = false;
+				}
+			}
+		}
+		else if (Option == QLatin1String("-aec") || Option == QLatin1String("--automate-edge-color"))
+		{
+			Options.AutomateEdgeColor = true;
+		}
+		else if (Option == QLatin1String("-cc") || Option == QLatin1String("--color-contrast"))
+		{
+			if (ParseFloat(Options.PartEdgeContrast, 0.0f, 1.0f))
+			{
+				if (!Options.AutomateEdgeColor)
+				{
+					Options.StdErr += tr("Automate edge color is required for the '%1' option but is not enabled.\n").arg(Option);
+					Options.ParseOK = false;
+				}
+			}
+		}
+		else if (Option == QLatin1String("-ldv") || Option == QLatin1String("--light-dark-value"))
+		{
+			if (ParseFloat(Options.PartColorValueLDIndex, 0.0f, 1.0f))
+			{
+				if (!Options.AutomateEdgeColor)
+				{
+					Options.StdErr += tr("Automate edge color is required for the '%1' option but is not enabled.\n").arg(Option);
+					Options.ParseOK = false;
+				}
+			}
+		}
 		else if (Option == QLatin1String("--fade-steps"))
 			Options.FadeSteps = true;
 		else if (Option == QLatin1String("--no-fade-steps"))
@@ -734,6 +811,13 @@ lcCommandLineOptions lcApplication::ParseCommandLineOptions()
 			Options.StdOut += tr("  --shading <wireframe|flat|default|full>: Select shading mode for rendering.\n");
 			Options.StdOut += tr("  --line-width <width>: Set the with of the edge lines.\n");
 			Options.StdOut += tr("  --aa-samples <count>: AntiAliasing sample size (1, 2, 4, or 8).\n");
+			Options.StdOut += tr("  -scc, --stud-cylinder-color <#AARRGGBB>: High contrast stud cylinder color.\n");
+			Options.StdOut += tr("  -ec, --edge-color <#AARRGGBB>: High contrast edge color.\n");
+			Options.StdOut += tr("  -bec, --black-edge-color <#AARRGGBB>: High contrast edge color for black parts.\n");
+			Options.StdOut += tr("  -dec, --dark-edge-color <#AARRGGBB>: High contrast edge color for dark color parts.\n");
+			Options.StdOut += tr("  -aec, --automate-edge-color: Enable automatically adjusted edge colors.\n");
+			Options.StdOut += tr("  -cc, --color-contrast <float>: Color contrast value between 0.0 and 1.0.\n");
+			Options.StdOut += tr("  -ldv, --light-dark-value <float>: Light/Dark color value between 0.0 and 1.0.\n");
 			Options.StdOut += tr("  -obj, --export-wavefront <outfile.obj>: Export the model to Wavefront OBJ format.\n");
 			Options.StdOut += tr("  -3ds, --export-3ds <outfile.3ds>: Export the model to 3D Studio 3DS format.\n");
 			Options.StdOut += tr("  -dae, --export-collada <outfile.dae>: Export the model to COLLADA DAE format.\n");
@@ -748,6 +832,12 @@ lcCommandLineOptions lcApplication::ParseCommandLineOptions()
 			Options.StdErr += tr("Unknown option: '%1'.\n").arg(Option);
 			Options.ParseOK = false;
 		}
+	}
+
+	if (Options.AutomateEdgeColor && Options.StudStyle > lcStudStyle::FlattenedLogo)
+	{
+		Options.StdErr += tr("Automate edge color and high contrast stud style cannot be enabled at the same time.\n");
+		Options.ParseOK = false;
 	}
 
 	if (!Options.CameraName.isEmpty())
@@ -848,6 +938,14 @@ lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& Libra
 			StdErr.flush();
 		}
 	}
+
+	mPreferences.mStudCylinderColor = Options.StudCylinderColor;
+	mPreferences.mPartEdgeColor = Options.PartEdgeColor;
+	mPreferences.mBlackEdgeColor = Options.BlackEdgeColor;
+	mPreferences.mDarkEdgeColor = Options.DarkEdgeColor;
+	mPreferences.mPartEdgeContrast = Options.PartEdgeContrast;
+	mPreferences.mPartColorValueLDIndex = Options.PartColorValueLDIndex;
+	mPreferences.mAutomateEdgeColor = Options.AutomateEdgeColor;
 
 	lcGetPiecesLibrary()->SetStudStyle(Options.StudStyle, false);
 

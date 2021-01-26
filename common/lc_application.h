@@ -73,8 +73,8 @@ public:
 	lcViewSphereLocation mPreviewViewSphereLocation;
 	int mDrawPreviewAxis;
 
-	quint32 mStudColor;
-	quint32 mStudEdgeColor;
+	quint32 mStudCylinderColor;
+	quint32 mPartEdgeColor;
 	quint32 mBlackEdgeColor;
 	quint32 mDarkEdgeColor;
 	float mPartEdgeContrast;

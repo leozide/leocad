@@ -245,7 +245,7 @@ static void lcAdjustStudStyleColors(std::vector<lcColor>& Colors, lcStudStyle St
 	if (StudStyle != lcStudStyle::HighContrast && StudStyle != lcStudStyle::HighContrastLogo)
 		return;
 
-	const lcVector4 Edge = lcVector4FromColor(Preferences.mStudEdgeColor);
+	const lcVector4 Edge = lcVector4FromColor(Preferences.mPartEdgeColor);
 	const lcVector4 DarkEdge = lcVector4FromColor(Preferences.mDarkEdgeColor);
 	const lcVector4 BlackEdge = lcVector4FromColor(Preferences.mBlackEdgeColor);
 
@@ -468,17 +468,17 @@ bool lcLoadColorFile(lcFile& File, lcStudStyle StudStyle)
 	if (!FoundStud)
 	{
 		const lcPreferences& Preferences = lcGetPreferences();
-		lcColor StudColor;
+		lcColor StudCylinderColor;
 
-		StudColor.Code = 4242;
-		StudColor.Translucent = false;
-		StudColor.Group = LC_NUM_COLORGROUPS;
-		StudColor.Value = lcVector4FromColor(Preferences.mStudColor);
-		StudColor.Edge = lcVector4FromColor(Preferences.mStudEdgeColor);
-		strcpy(StudColor.Name, "Stud Style Black");
-		strcpy(StudColor.SafeName, "Stud_Style_Black");
+		StudCylinderColor.Code = 4242;
+		StudCylinderColor.Translucent = false;
+		StudCylinderColor.Group = LC_NUM_COLORGROUPS;
+		StudCylinderColor.Value = lcVector4FromColor(Preferences.mStudCylinderColor);
+		StudCylinderColor.Edge = lcVector4FromColor(Preferences.mPartEdgeColor);
+		strcpy(StudCylinderColor.Name, "Stud Cylinder Color");
+		strcpy(StudCylinderColor.SafeName, "Stud_Cylinder_Color");
 
-		Colors.push_back(StudColor);
+		Colors.push_back(StudCylinderColor);
 	}
 
 	for (lcColor& Color : gColorList)

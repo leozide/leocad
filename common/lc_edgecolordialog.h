@@ -7,8 +7,8 @@ class lcAutomateEdgeColorDialog : public QDialog
 	Q_OBJECT
 public:
 	lcAutomateEdgeColorDialog(QWidget *Parent, bool ShowHighContrastDialog);
-	quint32 mStudColor;
-	quint32 mStudEdgeColor;
+	quint32 mStudCylinderColor;
+	quint32 mPartEdgeColor;
 	quint32 mDarkEdgeColor;
 	quint32 mBlackEdgeColor;
 	float mPartEdgeContrast;
@@ -30,13 +30,13 @@ protected:
 	QToolButton* ResetPartEdgeContrastButton;
 	QToolButton* ResetPartColorValueLDIndexButton;
 
-	QToolButton* StudColorButton;
-	QToolButton* StudEdgeColorButton;
+	QToolButton* StudCylinderColorButton;
+	QToolButton* PartEdgeColorButton;
 	QToolButton* BlackEdgeColorButton;
 	QToolButton* DarkEdgeColorButton;
 
-	QToolButton* ResetStudColorButton;
-	QToolButton* ResetStudEdgeColorButton;
+	QToolButton* ResetStudCylinderColorButton;
+	QToolButton* ResetPartEdgeColorButton;
 	QToolButton* ResetBlackEdgeColorButton;
 	QToolButton* ResetDarkEdgeColorButton;
 };

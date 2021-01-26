@@ -58,8 +58,8 @@ void lcPreferences::LoadDefaults()
 	mPreviewViewSphereSize = lcGetProfileInt(LC_PROFILE_PREVIEW_VIEW_SPHERE_SIZE);
 	mPreviewViewSphereLocation = static_cast<lcViewSphereLocation>(lcGetProfileInt(LC_PROFILE_PREVIEW_VIEW_SPHERE_LOCATION));
 	mDrawPreviewAxis = lcGetProfileInt(LC_PROFILE_PREVIEW_DRAW_AXES);
-	mStudColor = lcGetProfileInt(LC_PROFILE_STUD_COLOR);
-	mStudEdgeColor = lcGetProfileInt(LC_PROFILE_STUD_EDGE_COLOR);
+	mStudCylinderColor = lcGetProfileInt(LC_PROFILE_STUD_CYLINDER_COLOR);
+	mPartEdgeColor = lcGetProfileInt(LC_PROFILE_PART_EDGE_COLOR);
 	mBlackEdgeColor = lcGetProfileInt(LC_PROFILE_BLACK_EDGE_COLOR);
 	mDarkEdgeColor = lcGetProfileInt(LC_PROFILE_DARK_EDGE_COLOR);
 	mPartEdgeContrast = lcGetProfileFloat(LC_PROFILE_PART_EDGE_CONTRAST);
@@ -110,8 +110,8 @@ void lcPreferences::SaveDefaults()
 	lcSetProfileInt(LC_PROFILE_PREVIEW_VIEW_SPHERE_SIZE, mPreviewViewSphereSize);
 	lcSetProfileInt(LC_PROFILE_PREVIEW_VIEW_SPHERE_LOCATION, static_cast<int>(mPreviewViewSphereLocation));
 	lcSetProfileInt(LC_PROFILE_PREVIEW_DRAW_AXES, mDrawPreviewAxis);
-	lcSetProfileInt(LC_PROFILE_STUD_COLOR, mStudColor);
-	lcSetProfileInt(LC_PROFILE_STUD_EDGE_COLOR, mStudEdgeColor);
+	lcSetProfileInt(LC_PROFILE_STUD_CYLINDER_COLOR, mStudCylinderColor);
+	lcSetProfileInt(LC_PROFILE_PART_EDGE_COLOR, mPartEdgeColor);
 	lcSetProfileInt(LC_PROFILE_BLACK_EDGE_COLOR, mBlackEdgeColor);
 	lcSetProfileInt(LC_PROFILE_DARK_EDGE_COLOR, mDarkEdgeColor);
 	lcSetProfileFloat(LC_PROFILE_PART_EDGE_CONTRAST, mPartEdgeContrast);
@@ -1161,8 +1161,8 @@ void lcApplication::ShowPreferencesDialog()
 	bool AAChanged = CurrentAASamples != Options.AASamples;
 	bool StudStyleChanged = CurrentStudStyle != Options.StudStyle;
 	bool AutomateEdgeColorChanged = Options.Preferences.mAutomateEdgeColor != mPreferences.mAutomateEdgeColor;
-	AutomateEdgeColorChanged |= Options.Preferences.mStudColor != mPreferences.mStudColor;
-	AutomateEdgeColorChanged |= Options.Preferences.mStudEdgeColor != mPreferences.mStudEdgeColor;
+	AutomateEdgeColorChanged |= Options.Preferences.mStudCylinderColor != mPreferences.mStudCylinderColor;
+	AutomateEdgeColorChanged |= Options.Preferences.mPartEdgeColor != mPreferences.mPartEdgeColor;
 	AutomateEdgeColorChanged |= Options.Preferences.mBlackEdgeColor != mPreferences.mBlackEdgeColor;
 	AutomateEdgeColorChanged |= Options.Preferences.mDarkEdgeColor != mPreferences.mDarkEdgeColor;
 	AutomateEdgeColorChanged |= Options.Preferences.mPartEdgeContrast != mPreferences.mPartEdgeContrast;

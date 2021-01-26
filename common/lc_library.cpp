@@ -1874,7 +1874,7 @@ bool lcPiecesLibrary::LoadBuiltinPieces()
 {
 	std::unique_ptr<lcDiskFile> File(new lcDiskFile(":/resources/library.zip"));
 
-	if (!OpenArchive(std::move(File), lcZipFileType::Official))
+	if (!File->Open(QIODevice::ReadOnly) || !OpenArchive(std::move(File), lcZipFileType::Official))
 		return false;
 
 	lcMemFile PieceFile;

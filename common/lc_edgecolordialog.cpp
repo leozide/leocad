@@ -4,40 +4,46 @@
 lcAutomateEdgeColorDialog::lcAutomateEdgeColorDialog(QWidget* Parent, bool ShowHighContrastDialog)
 	:QDialog(Parent)
 {
-	mStudCylinderColor = lcGetPreferences().mStudCylinderColor;
-	mPartEdgeColor = lcGetPreferences().mPartEdgeColor;
-	mBlackEdgeColor = lcGetPreferences().mBlackEdgeColor;
-	mDarkEdgeColor = lcGetPreferences().mDarkEdgeColor;
-
-	mPartEdgeContrast = lcGetPreferences().mPartEdgeContrast;
-	mPartColorValueLDIndex = lcGetPreferences().mPartColorValueLDIndex;
+	const lcPreferences& Preferences = lcGetPreferences();
+	mStudCylinderColor = Preferences.mStudCylinderColor;
+	mPartEdgeColor = Preferences.mPartEdgeColor;
+	mBlackEdgeColor = Preferences.mBlackEdgeColor;
+	mDarkEdgeColor = Preferences.mDarkEdgeColor;
+	mPartEdgeContrast = Preferences.mPartEdgeContrast;
+	mPartColorValueLDIndex = Preferences.mPartColorValueLDIndex;
 
 	setWindowTitle(tr("Color Preferences"));
 	QVBoxLayout* MainLayout = new  QVBoxLayout(this);
 
 	QGroupBox* EdgeSettingsBox = new QGroupBox(tr("Edge Colors"), this);
-	EdgeSettingsBox->setVisible(!ShowHighContrastDialog);
 	MainLayout->addWidget(EdgeSettingsBox);
 	QGridLayout* EdgeSettingsLayout = new QGridLayout(EdgeSettingsBox);
 	EdgeSettingsBox->setLayout(EdgeSettingsLayout);
 
-	QLabel* PartEdgeContrastLabel = new QLabel(tr("Contrast:"), this);
-	PartEdgeContrast = new QLabel(this);
-	PartEdgeContrastSlider = new QSlider(Qt::Horizontal, this);
-	PartEdgeContrastSlider->setRange(0, 100);
-	PartEdgeContrastSlider->setValue(mPartEdgeContrast * 100);
-	PartEdgeContrastSlider->setToolTip(tr("Set the amount of contrast - 0.50 is midway."));
-	connect(PartEdgeContrastSlider, SIGNAL(valueChanged(int)), this, SLOT(SliderValueChanged(int)));
-	emit PartEdgeContrastSlider->valueChanged(PartEdgeContrastSlider->value());
+	int LDIndexRow = 0;
+	PartEdgeContrast = nullptr;
+	PartEdgeContrastSlider = nullptr;
+	if (!ShowHighContrastDialog)
+	{
+		LDIndexRow = 1;
+		QLabel* PartEdgeContrastLabel = new QLabel(tr("Contrast:"), this);
+		PartEdgeContrast = new QLabel(this);
+		PartEdgeContrastSlider = new QSlider(Qt::Horizontal, this);
+		PartEdgeContrastSlider->setRange(0, 100);
+		PartEdgeContrastSlider->setValue(mPartEdgeContrast * 100);
+		PartEdgeContrastSlider->setToolTip(tr("Set the amount of contrast - 0.50 is midway."));
+		connect(PartEdgeContrastSlider, SIGNAL(valueChanged(int)), this, SLOT(SliderValueChanged(int)));
+		emit PartEdgeContrastSlider->valueChanged(PartEdgeContrastSlider->value());
 
-	ResetPartEdgeContrastButton = new QToolButton(this);
-	ResetPartEdgeContrastButton->setText(tr("Reset"));
-	connect(ResetPartEdgeContrastButton, SIGNAL(clicked()), this, SLOT(ResetSliderButtonClicked()));
+		ResetPartEdgeContrastButton = new QToolButton(this);
+		ResetPartEdgeContrastButton->setText(tr("Reset"));
+		connect(ResetPartEdgeContrastButton, SIGNAL(clicked()), this, SLOT(ResetSliderButtonClicked()));
 
-	EdgeSettingsLayout->addWidget(PartEdgeContrastLabel,0,0);
-	EdgeSettingsLayout->addWidget(PartEdgeContrastSlider,0,1);
-	EdgeSettingsLayout->addWidget(PartEdgeContrast,0,2);
-	EdgeSettingsLayout->addWidget(ResetPartEdgeContrastButton,0,3);
+		EdgeSettingsLayout->addWidget(PartEdgeContrastLabel,0,0);
+		EdgeSettingsLayout->addWidget(PartEdgeContrastSlider,0,1);
+		EdgeSettingsLayout->addWidget(PartEdgeContrast,0,2);
+		EdgeSettingsLayout->addWidget(ResetPartEdgeContrastButton,0,3);
+	}
 
 	QLabel* PartColorValueLDIndexLabel = new QLabel(tr("Light/Dark Value:"), this);
 	PartColorValueLDIndex = new QLabel(this);
@@ -52,10 +58,10 @@ lcAutomateEdgeColorDialog::lcAutomateEdgeColorDialog(QWidget* Parent, bool ShowH
 	ResetPartColorValueLDIndexButton->setText(tr("Reset"));
 	connect(ResetPartColorValueLDIndexButton, SIGNAL(clicked()), this, SLOT(ResetSliderButtonClicked()));
 
-	EdgeSettingsLayout->addWidget(PartColorValueLDIndexLabel,1,0);
-	EdgeSettingsLayout->addWidget(PartColorValueLDIndexSlider,1,1);
-	EdgeSettingsLayout->addWidget(PartColorValueLDIndex,1,2);
-	EdgeSettingsLayout->addWidget(ResetPartColorValueLDIndexButton,1,3);
+	EdgeSettingsLayout->addWidget(PartColorValueLDIndexLabel,LDIndexRow,0);
+	EdgeSettingsLayout->addWidget(PartColorValueLDIndexSlider,LDIndexRow,1);
+	EdgeSettingsLayout->addWidget(PartColorValueLDIndex,LDIndexRow,2);
+	EdgeSettingsLayout->addWidget(ResetPartColorValueLDIndexButton,LDIndexRow,3);
 
 	QGroupBox* HighContrastColorBox = new QGroupBox(tr("High Contrast"), this);
 	HighContrastColorBox->setVisible(ShowHighContrastDialog);

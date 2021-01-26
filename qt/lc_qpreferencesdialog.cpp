@@ -200,6 +200,7 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 	SetButtonPixmap(mOptions->Preferences.mViewSphereTextColor, ui->ViewSphereTextColorButton);
 	SetButtonPixmap(mOptions->Preferences.mViewSphereHighlightColor, ui->ViewSphereHighlightColorButton);
 
+	on_studStyleCombo_currentIndexChanged(ui->studStyleCombo->currentIndex());
 	on_antiAliasing_toggled();
 	on_AutomateEdgeColor_toggled();
 	on_edgeLines_toggled();

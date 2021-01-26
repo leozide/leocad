@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>598</width>
-    <height>503</height>
+    <width>621</width>
+    <height>658</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -521,7 +521,7 @@
           <item row="7" column="1">
            <widget class="QToolButton" name="AutomateEdgeColorButton">
             <property name="text">
-             <string>...</string>
+             <string>Settings...</string>
             </property>
            </widget>
           </item>
@@ -535,7 +535,7 @@
           <item row="10" column="2">
            <widget class="QToolButton" name="HighContrastButton">
             <property name="text">
-             <string>...</string>
+             <string>Contrast Settings...</string>
             </property>
            </widget>
           </item>

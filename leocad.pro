@@ -130,7 +130,7 @@ unix:!macx {
 	mime.files = qt/leocad.xml
 	appdata.path = $$APPDATA_DIR
 	appdata.files = tools/setup/leocad.appdata.xml
-	
+
 	INSTALLS += target docs man desktop icons mime appdata
 
 	!isEmpty(DISABLE_UPDATE_CHECK) {
@@ -171,6 +171,7 @@ SOURCES += \
 	common/lc_colors.cpp \
 	common/lc_commands.cpp \
 	common/lc_context.cpp \
+	common/lc_edgecolordialog.cpp \
 	common/lc_file.cpp \
 	common/lc_glextensions.cpp \
 	common/lc_http.cpp \
@@ -238,6 +239,7 @@ HEADERS += \
 	common/lc_colors.h \
 	common/lc_commands.h \
 	common/lc_context.h \
+	common/lc_edgecolordialog.h \
 	common/lc_file.h \
 	common/lc_glextensions.h \
 	common/lc_global.h \
@@ -309,7 +311,7 @@ FORMS += \
 	common/lc_minifigdialog.ui \
 	common/lc_pagesetupdialog.ui \
 	common/lc_partpalettedialog.ui
-OTHER_FILES += 
+OTHER_FILES +=
 RESOURCES += leocad.qrc resources/stylesheet/stylesheet.qrc
 
 !win32 {

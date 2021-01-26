@@ -139,6 +139,14 @@ static lcProfileEntry gProfileEntries[LC_NUM_PROFILE_KEYS] =
 	lcProfileEntry("Settings", "PreviewViewSphereSize", 75),                                      // LC_PROFILE_PREVIEW_VIEW_SPHERE_SIZE
 	lcProfileEntry("Settings", "PreviewViewSphereLocation", (int)lcViewSphereLocation::TopRight), // LC_PROFILE_PREVIEW_VIEW_SPHERE_LOCATION
 	lcProfileEntry("Settings", "DrawPreviewAxis", 0),                                             // LC_PROFILE_PREVIEW_DRAW_AXES
+
+	lcProfileEntry("Settings", "StudColor", LC_RGBA(27, 42, 52, 255)),                         // LC_PROFILE_STUD_COLOR
+	lcProfileEntry("Settings", "StudEdgeColor", LC_RGBA(0, 0, 0, 255)),                        // LC_PROFILE_STUD_EDGE_COLOR
+	lcProfileEntry("Settings", "BlackEdgeColor", LC_RGBA(255, 255, 255, 255)),                 // LC_PROFILE_BLACK_EDGE_COLOR
+	lcProfileEntry("Settings", "DarkEdgeColor", LC_RGBA(27, 42, 52, 255)),                     // LC_PROFILE_DARK_EDGE_COLOR
+	lcProfileEntry("Settings", "PartEdgeContrast", 0.5f),                                      // LC_PROFILE_PART_EDGE_CONTRAST
+	lcProfileEntry("Settings", "mPartColorValueLDIndex", 0.5f),                                // LC_PROFILE_PART_COLOR_VALUE_LD_INDEX
+	lcProfileEntry("Settings", "AutomateEdgeColor", 0)                                         // LC_PROFILE_AUTOMATE_EDGE_COLOR
 };
 
 void lcRemoveProfileKey(LC_PROFILE_KEY Key)

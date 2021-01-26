@@ -65,6 +65,9 @@ public slots:
 	void on_lgeoPathBrowse_clicked();
 	void on_ColorTheme_currentIndexChanged(int Index);
 	void ColorButtonClicked();
+	void AutomateEdgeColor();
+	void on_AutomateEdgeColor_toggled();
+	void on_studStyleCombo_currentIndexChanged(int index);
 	void on_antiAliasing_toggled();
 	void on_edgeLines_toggled();
 	void on_LineWidthSlider_valueChanged();

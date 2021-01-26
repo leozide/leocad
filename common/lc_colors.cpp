@@ -2,6 +2,7 @@
 #include "lc_colors.h"
 #include "lc_file.h"
 #include "lc_library.h"
+#include "lc_application.h"
 #include <float.h>
 
 std::vector<lcColor> gColorList;
@@ -211,20 +212,56 @@ int lcGetBrickLinkColor(int ColorIndex)
 
 static void lcAdjustStudStyleColors(std::vector<lcColor>& Colors, lcStudStyle StudStyle)
 {
-	if (StudStyle != lcStudStyle::HighContrast && StudStyle != lcStudStyle::HighContrastLogo)
+	if (lcGetPreferences().mAutomateEdgeColor)
+	{
+		for (lcColor& Color : Colors)
+		{
+			if (Color.Code == 4242)
+				continue;
+
+			float EdgeLuminescence = 0.0f;
+			float r = LC_GAMMA_ADJUST(Color.Value[0]);
+			float g = LC_GAMMA_ADJUST(Color.Value[1]);
+			float b = LC_GAMMA_ADJUST(Color.Value[2]);
+
+			float ValueLuminescence = 0.2126f * r + 0.7152f * g + 0.0722f * b;
+
+			if (LC_GAMMA_APPLY(ValueLuminescence) > (lcGetPreferences().mPartColorValueLDIndex))
+				EdgeLuminescence = ValueLuminescence - (ValueLuminescence * lcGetPreferences().mPartEdgeContrast);
+			else
+				EdgeLuminescence = (1.0f - ValueLuminescence) * lcGetPreferences().mPartEdgeContrast + ValueLuminescence;
+
+			EdgeLuminescence = LC_GAMMA_APPLY(EdgeLuminescence);
+
+			Color.Edge = lcVector4(EdgeLuminescence, EdgeLuminescence, EdgeLuminescence, 1.0f);
+		}
 		return;
+	}
+	else if (StudStyle != lcStudStyle::HighContrast && StudStyle != lcStudStyle::HighContrastLogo)
+		return;
+
+	const lcVector4 Edge(LC_RGBA_RED(lcGetPreferences().mStudEdgeColor),
+						 LC_RGBA_GREEN(lcGetPreferences().mStudEdgeColor),
+						 LC_RGBA_BLUE(lcGetPreferences().mStudEdgeColor),
+						 LC_RGBA_ALPHA(lcGetPreferences().mStudEdgeColor));
+	const lcVector4 DarkEdge(LC_RGBA_RED(lcGetPreferences().mDarkEdgeColor),
+							 LC_RGBA_GREEN(lcGetPreferences().mDarkEdgeColor),
+							 LC_RGBA_BLUE(lcGetPreferences().mDarkEdgeColor),
+							 LC_RGBA_ALPHA(lcGetPreferences().mDarkEdgeColor));
+	const lcVector4 BlackEdge(LC_RGBA_RED(lcGetPreferences().mBlackEdgeColor),
+							  LC_RGBA_GREEN(lcGetPreferences().mBlackEdgeColor),
+							  LC_RGBA_BLUE(lcGetPreferences().mBlackEdgeColor),
+							  LC_RGBA_ALPHA(lcGetPreferences().mBlackEdgeColor));
 
 	for (lcColor& Color : Colors)
 	{
 		const lcVector4 FillColor = Color.Value * 255.0f;
-		lcVector4 EdgeColor(0.0f, 0.0f, 0.0f, 255.0f);
-
 		if (30.0f * FillColor[0] + 59.0f * FillColor[1] + 11.0f * FillColor[2] <= 3600.0f)
-			EdgeColor = lcVector4(27.0f, 42.0f, 52.0f, 255.0f);
+			Color.Edge = DarkEdge / 255.0f;
 		else if (Color.Code == 0)
-			EdgeColor = lcVector4(255.0f, 255.0f, 255.0f, 255.0f);
-
-		Color.Edge = EdgeColor / 255.0f;
+			Color.Edge = BlackEdge / 255.0f;
+		else
+			Color.Edge = Edge / 255.0f;
 	}
 }
 
@@ -435,18 +472,25 @@ bool lcLoadColorFile(lcFile& File, lcStudStyle StudStyle)
 	if (!FoundStud)
 	{
 		lcColor StudColor;
-
+		lcVector4 Value = lcVector4(LC_RGBA_RED(lcGetPreferences().mStudColor),
+									LC_RGBA_GREEN(lcGetPreferences().mStudColor),
+									LC_RGBA_BLUE(lcGetPreferences().mStudColor),
+									LC_RGBA_ALPHA(lcGetPreferences().mStudColor)) / 255.0f;
+		lcVector4 Edge  = lcVector4(LC_RGBA_RED(lcGetPreferences().mStudEdgeColor),
+									LC_RGBA_GREEN(lcGetPreferences().mStudEdgeColor),
+									LC_RGBA_BLUE(lcGetPreferences().mStudEdgeColor),
+									LC_RGBA_ALPHA(lcGetPreferences().mStudEdgeColor)) / 255.0f;
 		StudColor.Code = 4242;
 		StudColor.Translucent = false;
 		StudColor.Group = LC_NUM_COLORGROUPS;
-		StudColor.Value[0] = 27.0f / 255.0f;
-		StudColor.Value[1] = 42.0f / 255.0f;
-		StudColor.Value[2] = 52.0f / 255.0f;
-		StudColor.Value[3] = 1.0f;
-		StudColor.Edge[0] = 0.0f;
-		StudColor.Edge[1] = 0.0f;
-		StudColor.Edge[2] = 0.0f;
-		StudColor.Edge[3] = 1.0f;
+		StudColor.Value[0] = Value[0];
+		StudColor.Value[1] = Value[1];
+		StudColor.Value[2] = Value[2];
+		StudColor.Value[3] = Value[3];
+		StudColor.Edge[0] = Edge[0];
+		StudColor.Edge[1] = Edge[1];
+		StudColor.Edge[2] = Edge[2];
+		StudColor.Edge[3] = Edge[3];
 		strcpy(StudColor.Name, "Stud Style Black");
 		strcpy(StudColor.SafeName, "Stud_Style_Black");
 

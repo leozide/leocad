@@ -213,21 +213,21 @@ int lcGetBrickLinkColor(int ColorIndex)
 static void lcAdjustStudStyleColors(std::vector<lcColor>& Colors, lcStudStyle StudStyle)
 {
 	const lcPreferences& Preferences = lcGetPreferences();
+	if (!Preferences.mAutomateEdgeColor && StudStyle != lcStudStyle::HighContrast && StudStyle != lcStudStyle::HighContrastLogo)
+		return;
+
 	const float LDIndex = LC_SRGB_TO_LINEAR(Preferences.mPartColorValueLDIndex);
+	const lcVector4 Edge = lcVector4FromColor(Preferences.mPartEdgeColor);
+	const lcVector4 DarkEdge = lcVector4FromColor(Preferences.mDarkEdgeColor);
+	const lcVector4 BlackEdge = lcVector4FromColor(Preferences.mBlackEdgeColor);
 
-	if (Preferences.mAutomateEdgeColor)
+	for (lcColor& Color : Colors)
 	{
-		for (lcColor& Color : Colors)
+		float ValueLuminescence = lcLuminescenceFromRGBA(Color.Value);
+
+		if (Preferences.mAutomateEdgeColor)
 		{
-			if (Color.Code == 4242)
-				continue;
-
 			float EdgeLuminescence = 0.0f;
-			float r = LC_SRGB_TO_LINEAR(Color.Value[0]);
-			float g = LC_SRGB_TO_LINEAR(Color.Value[1]);
-			float b = LC_SRGB_TO_LINEAR(Color.Value[2]);
-
-			float ValueLuminescence = 0.2126f * r + 0.7152f * g + 0.0722f * b;
 
 			if (ValueLuminescence > LDIndex)
 				EdgeLuminescence = ValueLuminescence - (ValueLuminescence * Preferences.mPartEdgeContrast);
@@ -238,26 +238,17 @@ static void lcAdjustStudStyleColors(std::vector<lcColor>& Colors, lcStudStyle St
 
 			Color.Edge = lcVector4(EdgeLuminescence, EdgeLuminescence, EdgeLuminescence, 1.0f);
 		}
-
-		return;
-	}
-
-	if (StudStyle != lcStudStyle::HighContrast && StudStyle != lcStudStyle::HighContrastLogo)
-		return;
-
-	const lcVector4 Edge = lcVector4FromColor(Preferences.mStudEdgeColor);
-	const lcVector4 DarkEdge = lcVector4FromColor(Preferences.mDarkEdgeColor);
-	const lcVector4 BlackEdge = lcVector4FromColor(Preferences.mBlackEdgeColor);
-
-	for (lcColor& Color : Colors)
-	{
-		const lcVector4 FillColor = Color.Value * 255.0f;
-		if (30.0f * FillColor[0] + 59.0f * FillColor[1] + 11.0f * FillColor[2] <= 3600.0f)
-			Color.Edge = DarkEdge;
-		else if (Color.Code == 0)
-			Color.Edge = BlackEdge;
 		else
-			Color.Edge = Edge;
+		{
+			if (Color.Code == 4242)
+				continue;
+			else if (Color.Code == 0)
+				Color.Edge = BlackEdge;
+			else if (ValueLuminescence < LDIndex)
+				Color.Edge = DarkEdge;
+			else
+				Color.Edge = Edge;
+		}
 	}
 }
 
@@ -355,7 +346,7 @@ static std::vector<lcColor> lcParseColorFile(lcFile& File)
 					Color.Group = LC_COLORGROUP_SPECIAL;
 			}
 			else if (!strcmp(Token, "CHROME") || !strcmp(Token, "PEARLESCENT") || !strcmp(Token, "RUBBER") ||
-			         !strcmp(Token, "MATTE_METALIC") || !strcmp(Token, "METAL") || !strcmp(Token, "LUMINANCE"))
+					 !strcmp(Token, "MATTE_METALIC") || !strcmp(Token, "METAL") || !strcmp(Token, "LUMINANCE"))
 			{
 				Color.Group = LC_COLORGROUP_SPECIAL;
 			}
@@ -468,17 +459,17 @@ bool lcLoadColorFile(lcFile& File, lcStudStyle StudStyle)
 	if (!FoundStud)
 	{
 		const lcPreferences& Preferences = lcGetPreferences();
-		lcColor StudColor;
+		lcColor StudCylinderColor;
 
-		StudColor.Code = 4242;
-		StudColor.Translucent = false;
-		StudColor.Group = LC_NUM_COLORGROUPS;
-		StudColor.Value = lcVector4FromColor(Preferences.mStudColor);
-		StudColor.Edge = lcVector4FromColor(Preferences.mStudEdgeColor);
-		strcpy(StudColor.Name, "Stud Style Black");
-		strcpy(StudColor.SafeName, "Stud_Style_Black");
+		StudCylinderColor.Code = 4242;
+		StudCylinderColor.Translucent = false;
+		StudCylinderColor.Group = LC_NUM_COLORGROUPS;
+		StudCylinderColor.Value = lcVector4FromColor(Preferences.mStudCylinderColor);
+		StudCylinderColor.Edge = lcVector4FromColor(Preferences.mPartEdgeColor);
+		strcpy(StudCylinderColor.Name, "Stud Cylinder Color");
+		strcpy(StudCylinderColor.SafeName, "Stud_Cylinder_Color");
 
-		Colors.push_back(StudColor);
+		Colors.push_back(StudCylinderColor);
 	}
 
 	for (lcColor& Color : gColorList)

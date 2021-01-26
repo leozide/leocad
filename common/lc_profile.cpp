@@ -140,8 +140,8 @@ static lcProfileEntry gProfileEntries[LC_NUM_PROFILE_KEYS] =
 	lcProfileEntry("Settings", "PreviewViewSphereLocation", (int)lcViewSphereLocation::TopRight), // LC_PROFILE_PREVIEW_VIEW_SPHERE_LOCATION
 	lcProfileEntry("Settings", "DrawPreviewAxis", 0),                                             // LC_PROFILE_PREVIEW_DRAW_AXES
 
-	lcProfileEntry("Settings", "StudColor", LC_RGBA(27, 42, 52, 255)),                         // LC_PROFILE_STUD_COLOR
-	lcProfileEntry("Settings", "StudEdgeColor", LC_RGBA(0, 0, 0, 255)),                        // LC_PROFILE_STUD_EDGE_COLOR
+	lcProfileEntry("Settings", "StudCylinderColor", LC_RGBA(27, 42, 52, 255)),                 // LC_PROFILE_STUD_CYLINDER_COLOR
+	lcProfileEntry("Settings", "PartEdgeColor", LC_RGBA(0, 0, 0, 255)),                        // LC_PROFILE_PART_EDGE_COLOR
 	lcProfileEntry("Settings", "BlackEdgeColor", LC_RGBA(255, 255, 255, 255)),                 // LC_PROFILE_BLACK_EDGE_COLOR
 	lcProfileEntry("Settings", "DarkEdgeColor", LC_RGBA(27, 42, 52, 255)),                     // LC_PROFILE_DARK_EDGE_COLOR
 	lcProfileEntry("Settings", "PartEdgeContrast", 0.5f),                                      // LC_PROFILE_PART_EDGE_CONTRAST

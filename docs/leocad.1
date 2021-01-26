@@ -1,4 +1,4 @@
-.TH LEOCAD 1 "20 January 2021"
+.TH LEOCAD 1 "26 January 2021"
 .\" NAME should be all caps, SECTION should be 1-8, maybe w/ subsection
 .\" other params are allowed: see man(7), man(1)
 .SH NAME
@@ -68,7 +68,7 @@ Sets the active camera to \fIcamera\fR.
 .TP
 \fB\-ss \fIid\fR,\ \fB\-\-stud\-style\ \fIid
 .br
-Set the stud style. Valid values 0=No style, 1=LDraw single wire, 2=LDraw double wire, 3=LDraw raised floating, 4=LDraw raised rounded, 5=LDraw subtle rounded, 6=LEGO no logo, 7=LEGO single wire. Stud style 1 - 5 require stud logo primitives which are in the unofficial parts library from \fILDraw.org\fR.
+Set the stud style. Valid values 0=Plain, 1=Thin Lines Logo, 2=Outline Logo, 3=Sharp Top Logo, 4=Rounded Top Logo, 5=Flattened Logo, 6=High Contrast, 7=High Contrast with Logo.
 
 .TP
 \fB\-\-viewpoint \fRfront\ |\ back\ |\ left\ |\ right\ |\ top\ |\ bottom\ |\ home
@@ -135,6 +135,41 @@ Set the with of the edge lines.
 .TP
 .BI "\-\-aa\-samples " count
 AntiAliasing sample size (1, 2, 4, or 8).
+
+.TP
+\fB\-scc \fI#AARRGGBB\fR,\ \fB\-\-stud\-cylinder\-color\ \fI#AARRGGBB
+.br
+High contrast stud cylinder color.
+
+.TP
+\fB\-ec \fI#AARRGGBB\fR,\ \fB\-\-edge\-color\ \fI#AARRGGBB
+.br
+High contrast edge color.
+
+.TP
+\fB\-bec \fI#AARRGGBB\fR,\ \fB\-\-black\-edge\-color\ \fI#AARRGGBB
+.br
+High contrast edge color for black parts.
+
+.TP
+\fB\-dec \fI#AARRGGBB\fR,\ \fB\-\-dark\-edge\-color\ \fI#AARRGGBB
+.br
+High contrast edge color for dark color parts.
+
+.TP
+\fB\-aec,\ \fB\-\-automate\-edge\-color
+.br
+Enable automatically adjusted edge colors.\
+
+.TP
+\fB\-cc \fIfloat\fR,\ \fB\-\-color\-contrast\ \ffloat
+.br
+Set the near and far clipping planes used to render images (1 <= \fInear\fR < \fIfar\fR).
+
+.TP
+\fB\-ldv \fIfloat\fR,\ \fB\-\-light\-dark\-value\ \ffloat
+.br
+Set the value to indicate a light or dark color.
 
 .TP
 \fB\-obj \fR[\fIoutfile.obj\fR]

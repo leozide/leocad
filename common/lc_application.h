@@ -73,8 +73,8 @@ public:
 	lcViewSphereLocation mPreviewViewSphereLocation;
 	int mDrawPreviewAxis;
 
-	quint32 mStudColor;
-	quint32 mStudEdgeColor;
+	quint32 mStudCylinderColor;
+	quint32 mPartEdgeColor;
 	quint32 mBlackEdgeColor;
 	quint32 mDarkEdgeColor;
 	float mPartEdgeContrast;
@@ -100,6 +100,7 @@ struct lcCommandLineOptions
 	bool SetHighlightColor;
 	bool FadeSteps;
 	bool ImageHighlight;
+	bool AutomateEdgeColor;
 	int ImageWidth;
 	int ImageHeight;
 	int AASamples;
@@ -109,8 +110,14 @@ struct lcCommandLineOptions
 	lcVector3 CameraPosition[3];
 	lcVector2 CameraLatLon;
 	float FoV;
+	float PartEdgeContrast;
+	float PartColorValueLDIndex;
 	lcVector2 ZPlanes;
 	lcViewpoint Viewpoint;
+	quint32 StudCylinderColor;
+	quint32 PartEdgeColor;
+	quint32 BlackEdgeColor;
+	quint32 DarkEdgeColor;
 	quint32 FadeStepsColor;
 	quint32	HighlightColor;
 	QString ImageName;

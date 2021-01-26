@@ -569,8 +569,8 @@ void lcQPreferencesDialog::AutomateEdgeColor()
 	lcAutomateEdgeColorDialog Dialog(this, sender() == ui->HighContrastButton);
 	if (Dialog.exec() == QDialog::Accepted)
 	{
-		mOptions->Preferences.mStudColor = Dialog.mStudColor;
-		mOptions->Preferences.mStudEdgeColor = Dialog.mStudEdgeColor;
+		mOptions->Preferences.mStudCylinderColor = Dialog.mStudCylinderColor;
+		mOptions->Preferences.mPartEdgeColor = Dialog.mPartEdgeColor;
 		mOptions->Preferences.mBlackEdgeColor = Dialog.mBlackEdgeColor;
 		mOptions->Preferences.mDarkEdgeColor = Dialog.mDarkEdgeColor;
 		mOptions->Preferences.mPartEdgeContrast = Dialog.mPartEdgeContrast;

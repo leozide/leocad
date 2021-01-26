@@ -651,6 +651,15 @@ inline quint32 lcColorFromVector3(const lcVector3& Color)
 	return LC_RGB(Color[0] * 255, Color[1] * 255, Color[2] * 255);
 }
 
+inline float lcLuminescenceFromRGBA(lcVector4& Value)
+{
+	float r = LC_SRGB_TO_LINEAR(Value[0]);
+	float g = LC_SRGB_TO_LINEAR(Value[1]);
+	float b = LC_SRGB_TO_LINEAR(Value[2]);
+
+	return 0.2126f * r + 0.7152f * g + 0.0722f * b;
+}
+
 inline lcVector3 lcMul(const lcVector3& a, const lcMatrix33& b)
 {
 	return b.r[0] * a[0] + b.r[1] * a[1] + b.r[2] * a[2];

@@ -1160,16 +1160,13 @@ void lcApplication::ShowPreferencesDialog()
 	bool ColorsChanged = Options.ColorConfigPath != lcGetProfileString(LC_PROFILE_COLOR_CONFIG);
 	bool AAChanged = CurrentAASamples != Options.AASamples;
 	bool StudStyleChanged = CurrentStudStyle != Options.StudStyle;
-	bool AutomateEdgeColorChanged = Options.Preferences.mAutomateEdgeColor != bool(lcGetProfileInt(LC_PROFILE_AUTOMATE_EDGE_COLOR));
-	bool StudColorChanged = Options.Preferences.mStudColor != quint32(lcGetProfileInt(LC_PROFILE_STUD_COLOR));
-	bool StudEdgeColorChanged = Options.Preferences.mStudEdgeColor != quint32(lcGetProfileInt(LC_PROFILE_STUD_EDGE_COLOR));
-	bool BlackEdgeColorChanged = Options.Preferences.mBlackEdgeColor != quint32(lcGetProfileInt(LC_PROFILE_BLACK_EDGE_COLOR));
-	bool DarkEdgeColorChanged = Options.Preferences.mDarkEdgeColor != quint32(lcGetProfileInt(LC_PROFILE_DARK_EDGE_COLOR));
-	bool PartEdgeContrastChanged = Options.Preferences.mPartEdgeContrast != lcGetProfileFloat(LC_PROFILE_PART_EDGE_CONTRAST);
-	bool PartColorValueLDIndexChanged = Options.Preferences.mPartColorValueLDIndex != lcGetProfileFloat(LC_PROFILE_PART_COLOR_VALUE_LD_INDEX);
-
-	if (!AutomateEdgeColorChanged)
-		AutomateEdgeColorChanged = (StudColorChanged || StudEdgeColorChanged || BlackEdgeColorChanged || DarkEdgeColorChanged || PartEdgeContrastChanged || PartColorValueLDIndexChanged);
+	bool AutomateEdgeColorChanged = Options.Preferences.mAutomateEdgeColor != mPreferences.mAutomateEdgeColor;
+	AutomateEdgeColorChanged |= Options.Preferences.mStudColor != mPreferences.mStudColor;
+	AutomateEdgeColorChanged |= Options.Preferences.mStudEdgeColor != mPreferences.mStudEdgeColor;
+	AutomateEdgeColorChanged |= Options.Preferences.mBlackEdgeColor != mPreferences.mBlackEdgeColor;
+	AutomateEdgeColorChanged |= Options.Preferences.mDarkEdgeColor != mPreferences.mDarkEdgeColor;
+	AutomateEdgeColorChanged |= Options.Preferences.mPartEdgeContrast != mPreferences.mPartEdgeContrast;
+	AutomateEdgeColorChanged |= Options.Preferences.mPartColorValueLDIndex != mPreferences.mPartColorValueLDIndex;
 
 	mPreferences = Options.Preferences;
 

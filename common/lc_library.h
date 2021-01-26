@@ -23,6 +23,11 @@ enum class lcStudStyle
 	Count
 };
 
+inline bool lcIsHighContrast(lcStudStyle StudStyle)
+{
+	return StudStyle == lcStudStyle::HighContrast || StudStyle == lcStudStyle::HighContrastLogo;
+}
+
 enum class lcZipFileType
 {
 	Official,

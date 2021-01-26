@@ -561,7 +561,7 @@ void lcQPreferencesDialog::on_AutomateEdgeColor_toggled()
 
 void lcQPreferencesDialog::on_studStyleCombo_currentIndexChanged(int index)
 {
-	ui->HighContrastButton->setEnabled(index > static_cast<int>(lcStudStyle::FlattenedLogo));
+	ui->HighContrastButton->setEnabled(lcIsHighContrast(static_cast<lcStudStyle>(index)));
 }
 
 void lcQPreferencesDialog::AutomateEdgeColor()

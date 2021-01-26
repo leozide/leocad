@@ -624,7 +624,7 @@ lcCommandLineOptions lcApplication::ParseCommandLineOptions()
 		{
 			if (ParseColor(Options.StudCylinderColor))
 			{
-				if (Options.StudStyle < lcStudStyle::HighContrast)
+				if (!lcIsHighContrast(Options.StudStyle))
 				{
 					Options.StdErr += tr("High contrast stud style is required for the '%1' option but is not enabled.\n").arg(Option);
 					Options.ParseOK = false;
@@ -635,7 +635,7 @@ lcCommandLineOptions lcApplication::ParseCommandLineOptions()
 		{
 			if (ParseColor(Options.PartEdgeColor))
 			{
-				if (Options.StudStyle < lcStudStyle::HighContrast)
+				if (!lcIsHighContrast(Options.StudStyle))
 				{
 					Options.StdErr += tr("High contrast stud style is required for the '%1' option but is not enabled.\n").arg(Option);
 					Options.ParseOK = false;
@@ -646,7 +646,7 @@ lcCommandLineOptions lcApplication::ParseCommandLineOptions()
 		{
 			if (ParseColor(Options.BlackEdgeColor))
 			{
-				if (Options.StudStyle < lcStudStyle::HighContrast)
+				if (!lcIsHighContrast(Options.StudStyle))
 				{
 					Options.StdErr += tr("High contrast stud style is required for the '%1' option but is not enabled.\n").arg(Option);
 					Options.ParseOK = false;
@@ -657,7 +657,7 @@ lcCommandLineOptions lcApplication::ParseCommandLineOptions()
 		{
 			if (ParseColor(Options.DarkEdgeColor))
 			{
-				if (Options.StudStyle < lcStudStyle::HighContrast)
+				if (!lcIsHighContrast(Options.StudStyle))
 				{
 					Options.StdErr += tr("High contrast stud style is required for the '%1' option but is not enabled.\n").arg(Option);
 					Options.ParseOK = false;
@@ -834,7 +834,7 @@ lcCommandLineOptions lcApplication::ParseCommandLineOptions()
 		}
 	}
 
-	if (Options.AutomateEdgeColor && Options.StudStyle > lcStudStyle::FlattenedLogo)
+	if (Options.AutomateEdgeColor && lcIsHighContrast(Options.StudStyle))
 	{
 		Options.StdErr += tr("Automate edge color and high contrast stud style cannot be enabled at the same time.\n");
 		Options.ParseOK = false;

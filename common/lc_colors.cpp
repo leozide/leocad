@@ -213,7 +213,8 @@ int lcGetBrickLinkColor(int ColorIndex)
 static void lcAdjustStudStyleColors(std::vector<lcColor>& Colors, lcStudStyle StudStyle)
 {
 	const lcPreferences& Preferences = lcGetPreferences();
-	if (!Preferences.mAutomateEdgeColor && StudStyle != lcStudStyle::HighContrast && StudStyle != lcStudStyle::HighContrastLogo)
+
+	if (!Preferences.mAutomateEdgeColor && !lcIsHighContrast(StudStyle))
 		return;
 
 	const float LDIndex = LC_SRGB_TO_LINEAR(Preferences.mPartColorValueLDIndex);
@@ -223,7 +224,7 @@ static void lcAdjustStudStyleColors(std::vector<lcColor>& Colors, lcStudStyle St
 
 	for (lcColor& Color : Colors)
 	{
-		float ValueLuminescence = lcLuminescenceFromRGBA(Color.Value);
+		float ValueLuminescence = lcLuminescenceFromSRGB(Color.Value);
 
 		if (Preferences.mAutomateEdgeColor)
 		{

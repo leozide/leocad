@@ -73,7 +73,12 @@ void lcViewWidget::initializeGL()
 
 void lcViewWidget::resizeGL(int Width, int Height)
 {
-	mView->SetSize(Width, Height);
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 6, 0))
+	const float Scale = devicePixelRatioF();
+#else
+	const int Scale = devicePixelRatio();
+#endif
+	mView->SetSize(Width * Scale, Height * Scale);
 }
 
 void lcViewWidget::paintGL()

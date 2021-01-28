@@ -123,8 +123,8 @@ static void lcRegisterShellFileTypes()
 
 static void lcInitializeSurfaceFormat(int argc, char* argv[])
 {
-	lcApplication Application(argc, argv);
-	const lcCommandLineOptions Options = Application.ParseCommandLineOptions();
+	QCoreApplication Application(argc, argv);
+	const lcCommandLineOptions Options = lcApplication::ParseCommandLineOptions();
 
 	if (Options.ParseOK && Options.AASamples > 1)
 	{
@@ -136,6 +136,11 @@ static void lcInitializeSurfaceFormat(int argc, char* argv[])
 
 int main(int argc, char *argv[])
 {
+	QCoreApplication::setOrganizationDomain(QLatin1String("leocad.org"));
+	QCoreApplication::setOrganizationName(QLatin1String("LeoCAD Software"));
+	QCoreApplication::setApplicationName(QLatin1String("LeoCAD"));
+	QCoreApplication::setApplicationVersion(QLatin1String(LC_VERSION_TEXT));
+
 	lcInitializeSurfaceFormat(argc, argv);
 
 	QCoreApplication::setAttribute(Qt::AA_ShareOpenGLContexts);

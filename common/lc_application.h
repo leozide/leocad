@@ -104,6 +104,8 @@ struct lcCommandLineOptions
 	int ImageWidth;
 	int ImageHeight;
 	int AASamples;
+	lcShadingMode ShadingMode;
+	float LineWidth;
 	lcStudStyle StudStyle;
 	lcStep ImageStart;
 	lcStep ImageEnd;
@@ -149,7 +151,7 @@ public:
 	~lcApplication();
 
 	void SetProject(Project* Project);
-	lcCommandLineOptions ParseCommandLineOptions();
+	static lcCommandLineOptions ParseCommandLineOptions();
 	lcStartupMode Initialize(const QList<QPair<QString, bool>>& LibraryPaths);
 	void Shutdown();
 	void ShowPreferencesDialog();

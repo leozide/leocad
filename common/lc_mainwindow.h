@@ -179,7 +179,7 @@ public:
 		return mRelativeTransform;
 	}
 
-	bool GetLocalTransform() const
+	bool GetSeparateTransform() const
 	{
 		return mLocalTransform;
 	}
@@ -281,7 +281,7 @@ public:
 	void SetMoveZSnapIndex(int Index);
 	void SetAngleSnapIndex(int Index);
 	void SetRelativeTransform(bool RelativeTransform);
-	void SetLocalTransform(bool SelectionTransform);
+	void SetSeparateTransform(bool SelectionTransform);
 	void SetCurrentPieceInfo(PieceInfo* Info);
 	void SetShadingMode(lcShadingMode ShadingMode);
 	void SetSelectionMode(lcSelectionMode SelectionMode);
@@ -443,6 +443,7 @@ protected:
 	QLabel* mStatusSnapLabel;
 	QLabel* mStatusTimeLabel;
 
+	QMenu* mTransformMenu;
 	QMenu* mToolsMenu;
 	QMenu* mViewpointMenu;
 	QMenu* mCameraMenu;

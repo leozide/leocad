@@ -290,18 +290,46 @@ const lcCommand gCommands[] =
 		QT_TRANSLATE_NOOP("Status", "Select all pieces of the same type and color"),
 		""
 	},
-	// LC_EDIT_TRANSFORM_RELATIVE
-	{
-		QT_TRANSLATE_NOOP("Action", "Edit.TransformRelative"),
-		QT_TRANSLATE_NOOP("Menu", "Relative Transforms"),
-		QT_TRANSLATE_NOOP("Status", "Move and rotate objects relative to the one that has focus"),
+    // LC_EDIT_TRANSFORM_RELATIVE
+    {
+        QT_TRANSLATE_NOOP("Action", "Edit.TransformRelative"),
+        QT_TRANSLATE_NOOP("Menu", "Relative Transforms"),
+        QT_TRANSLATE_NOOP("Status", "Move and rotate objects relative to the one that has focus"),
+        ""
+    },
+    // LC_EDIT_TRANSFORM_ABSOLUTE
+    {
+        QT_TRANSLATE_NOOP("Action", "Edit.TransformAbsolute"),
+        QT_TRANSLATE_NOOP("Menu", "Absolute Transforms"),
+        QT_TRANSLATE_NOOP("Status", "Move and rotate objects in absolute coordinates"),
+        ""
+    },
+    // LC_EDIT_TRANSFORM_TOGGLE_RELATIVE
+    {
+        QT_TRANSLATE_NOOP("Action", "Edit.TransformToggleRelative"),
+        QT_TRANSLATE_NOOP("Menu", "Toggle Relative Transforms"),
+        QT_TRANSLATE_NOOP("Status", "Toggle moving and rotating objects relative to the one that has focus"),
 		""
 	},
-	// LC_EDIT_TRANSFORM_LOCAL
+    // LC_EDIT_TRANSFORM_SEPARATELY
+    {
+        QT_TRANSLATE_NOOP("Action", "Edit.TransformSeparately"),
+        QT_TRANSLATE_NOOP("Menu", "Rotate Separately"),
+        QT_TRANSLATE_NOOP("Status", "Rotate selected pieces separately"),
+        ""
+    },
+    // LC_EDIT_TRANSFORM_TOGETHER
+    {
+        QT_TRANSLATE_NOOP("Action", "Edit.TransformTogether"),
+        QT_TRANSLATE_NOOP("Menu", "Rotate Together"),
+        QT_TRANSLATE_NOOP("Status", "Rotate selected pieces together"),
+        ""
+    },
+    // LC_EDIT_TRANSFORM_TOGGLE_SEPARATE
 	{
-		QT_TRANSLATE_NOOP("Action", "Edit.TransformLocal"),
-		QT_TRANSLATE_NOOP("Menu", "Local Transforms"),
-		QT_TRANSLATE_NOOP("Status", "Rotate pieces around their individual pivot point"),
+        QT_TRANSLATE_NOOP("Action", "Edit.TransformToggleSeparate"),
+        QT_TRANSLATE_NOOP("Menu", "Toggle Separate Transforms"),
+        QT_TRANSLATE_NOOP("Status", "Toggle rotating selected pieces separately"),
 		""
 	},
 	// LC_EDIT_SNAP_MOVE_TOGGLE

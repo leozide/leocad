@@ -287,7 +287,6 @@ void lcMainWindow::CreateActions()
 	mActions[LC_EDIT_ACTION_ROLL]->setIcon(QIcon(":/resources/action_roll.png"));
 	mActions[LC_EDIT_ACTION_ZOOM_REGION]->setIcon(QIcon(":/resources/action_zoom_region.png"));
 	mActions[LC_EDIT_FIND]->setIcon(QIcon(":/resources/edit_find.png"));
-	mActions[LC_EDIT_TRANSFORM_RELATIVE]->setIcon(QIcon(":/resources/edit_transform_relative.png"));
 	mActions[LC_PIECE_SHOW_EARLIER]->setIcon(QIcon(":/resources/piece_show_earlier.png"));
 	mActions[LC_PIECE_SHOW_LATER]->setIcon(QIcon(":/resources/piece_show_later.png"));
 	mActions[LC_VIEW_SPLIT_HORIZONTAL]->setIcon(QIcon(":/resources/view_split_horizontal.png"));
@@ -302,7 +301,6 @@ void lcMainWindow::CreateActions()
 	mActions[LC_VIEW_TIME_ADD_KEYS]->setIcon(QIcon(":/resources/time_add_keys.png"));
 	mActions[LC_HELP_HOMEPAGE]->setIcon(QIcon(":/resources/help_homepage.png"));
 
-	mActions[LC_EDIT_TRANSFORM_RELATIVE]->setCheckable(true);
 	mActions[LC_EDIT_SNAP_MOVE_TOGGLE]->setCheckable(true);
 	mActions[LC_EDIT_SNAP_ANGLE_TOGGLE]->setCheckable(true);
 	mActions[LC_VIEW_CAMERA_NONE]->setCheckable(true);
@@ -310,6 +308,20 @@ void lcMainWindow::CreateActions()
 
 	for (int ActionIndex = LC_VIEW_TOOLBAR_FIRST; ActionIndex <= LC_VIEW_TOOLBAR_LAST; ActionIndex++)
 		mActions[ActionIndex]->setCheckable(true);
+
+	QActionGroup* ActionRelativeGroup = new QActionGroup(this);
+	for (int ActionIdx = LC_EDIT_TRANSFORM_RELATIVE; ActionIdx <= LC_EDIT_TRANSFORM_ABSOLUTE; ActionIdx++)
+	{
+		mActions[ActionIdx]->setCheckable(true);
+		ActionRelativeGroup->addAction(mActions[ActionIdx]);
+	}
+
+	QActionGroup* ActionSeparateGroup = new QActionGroup(this);
+	for (int ActionIdx = LC_EDIT_TRANSFORM_SEPARATELY; ActionIdx <= LC_EDIT_TRANSFORM_TOGETHER; ActionIdx++)
+	{
+		mActions[ActionIdx]->setCheckable(true);
+		ActionSeparateGroup->addAction(mActions[ActionIdx]);
+	}
 
 	QActionGroup* ActionSnapXYGroup = new QActionGroup(this);
 	for (int ActionIdx = LC_EDIT_SNAP_MOVE_XY0; ActionIdx <= LC_EDIT_SNAP_MOVE_XY9; ActionIdx++)
@@ -492,6 +504,7 @@ void lcMainWindow::CreateMenus()
 	EditMenu->addAction(mActions[LC_EDIT_SELECT_BY_COLOR]);
 	EditMenu->addMenu(mSelectionModeMenu);
 	EditMenu->addSeparator();
+	EditMenu->addMenu(mTransformMenu);
 	EditMenu->addMenu(mToolsMenu);
 
 	QMenu* ViewMenu = menuBar()->addMenu(tr("&View"));
@@ -588,6 +601,18 @@ void lcMainWindow::CreateToolBars()
 	SelectionModeAction->setIcon(QIcon(":/resources/action_select.png"));
 	SelectionModeAction->setMenu(mSelectionModeMenu);
 
+	mTransformMenu = new QMenu(tr("Transform"), this);
+	mTransformMenu->addAction(mActions[LC_EDIT_TRANSFORM_RELATIVE]);
+	mTransformMenu->addAction(mActions[LC_EDIT_TRANSFORM_ABSOLUTE]);
+	mTransformMenu->addSeparator();
+	mTransformMenu->addAction(mActions[LC_EDIT_TRANSFORM_TOGETHER]);
+	mTransformMenu->addAction(mActions[LC_EDIT_TRANSFORM_SEPARATELY]);
+
+	QAction* TransformAction = new QAction(tr("Transform"), this);
+	TransformAction->setStatusTip(tr("Transform Options"));
+	TransformAction->setIcon(QIcon(":/resources/edit_transform_relative.png"));
+	TransformAction->setMenu(mTransformMenu);
+
 	QMenu* SnapXYMenu = new QMenu(tr("Snap XY"), this);
 	for (int actionIdx = LC_EDIT_SNAP_MOVE_XY0; actionIdx <= LC_EDIT_SNAP_MOVE_XY9; actionIdx++)
 		SnapXYMenu->addAction(mActions[actionIdx]);
@@ -628,10 +653,11 @@ void lcMainWindow::CreateToolBars()
 	mStandardToolBar->addAction(mActions[LC_EDIT_REDO]);
 	mStandardToolBar->addSeparator();
 	mStandardToolBar->addAction(SelectionModeAction);
-	mStandardToolBar->addAction(mActions[LC_EDIT_TRANSFORM_RELATIVE]);
+	mStandardToolBar->addAction(TransformAction);
 	mStandardToolBar->addAction(MoveAction);
 	mStandardToolBar->addAction(AngleAction);
 	((QToolButton*)mStandardToolBar->widgetForAction(SelectionModeAction))->setPopupMode(QToolButton::InstantPopup);
+	((QToolButton*)mStandardToolBar->widgetForAction(TransformAction))->setPopupMode(QToolButton::InstantPopup);
 	((QToolButton*)mStandardToolBar->widgetForAction(MoveAction))->setPopupMode(QToolButton::InstantPopup);
 	((QToolButton*)mStandardToolBar->widgetForAction(AngleAction))->setPopupMode(QToolButton::InstantPopup);
 
@@ -1746,13 +1772,16 @@ void lcMainWindow::SetAngleSnapIndex(int Index)
 void lcMainWindow::SetRelativeTransform(bool RelativeTransform)
 {
 	mRelativeTransform = RelativeTransform;
+
 	UpdateLockSnap();
 	lcView::UpdateAllViews();
 }
 
-void lcMainWindow::SetLocalTransform(bool SelectionTransform)
+void lcMainWindow::SetSeparateTransform(bool SelectionTransform)
 {
 	mLocalTransform = SelectionTransform;
+
+	UpdateLockSnap();
 }
 
 void lcMainWindow::SetTransformType(lcTransformType TransformType)
@@ -2099,7 +2128,17 @@ void lcMainWindow::SetAddKeys(bool AddKeys)
 
 void lcMainWindow::UpdateLockSnap()
 {
-	mActions[LC_EDIT_TRANSFORM_RELATIVE]->setChecked(GetRelativeTransform());
+	if (GetRelativeTransform())
+		mActions[LC_EDIT_TRANSFORM_RELATIVE]->setChecked(true);
+	else
+		mActions[LC_EDIT_TRANSFORM_ABSOLUTE]->setChecked(true);
+
+	if (GetSeparateTransform())
+		mActions[LC_EDIT_TRANSFORM_SEPARATELY]->setChecked(true);
+	else
+		mActions[LC_EDIT_TRANSFORM_TOGETHER]->setChecked(true);
+
+	UpdateSnap();
 }
 
 void lcMainWindow::UpdateSnap()
@@ -2110,7 +2149,8 @@ void lcMainWindow::UpdateSnap()
 	mActions[LC_EDIT_SNAP_MOVE_Z0 + mMoveZSnapIndex]->setChecked(true);
 	mActions[LC_EDIT_SNAP_ANGLE0 + mAngleSnapIndex]->setChecked(true);
 
-	mStatusSnapLabel->setText(QString(tr(" M: %1 %2 R: %3 ")).arg(GetMoveXYSnapText(), GetMoveZSnapText(), GetAngleSnapText()));
+	QString Relative = mRelativeTransform ? tr("L") : tr("G");
+	mStatusSnapLabel->setText(QString(tr(" M: %1 %2 R: %3 %4 ")).arg(GetMoveXYSnapText(), GetMoveZSnapText(), GetAngleSnapText(), Relative));
 }
 
 void lcMainWindow::UpdateColor()
@@ -3256,11 +3296,27 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		break;
 
 	case LC_EDIT_TRANSFORM_RELATIVE:
+		SetRelativeTransform(true);
+		break;
+
+	case LC_EDIT_TRANSFORM_ABSOLUTE:
+		SetRelativeTransform(false);
+		break;
+
+	case LC_EDIT_TRANSFORM_TOGGLE_RELATIVE:
 		SetRelativeTransform(!GetRelativeTransform());
 		break;
 
-	case LC_EDIT_TRANSFORM_LOCAL:
-		SetLocalTransform(!GetLocalTransform());
+	case LC_EDIT_TRANSFORM_SEPARATELY:
+		SetSeparateTransform(true);
+		break;
+
+	case LC_EDIT_TRANSFORM_TOGETHER:
+		SetSeparateTransform(false);
+		break;
+
+	case LC_EDIT_TRANSFORM_TOGGLE_SEPARATE:
+		SetSeparateTransform(!GetSeparateTransform());
 		break;
 
 	case LC_EDIT_SNAP_MOVE_TOGGLE:

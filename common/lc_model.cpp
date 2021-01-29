@@ -2621,7 +2621,7 @@ void lcModel::MoveSelectedObjects(const lcVector3& PieceDistance, const lcVector
 			{
 				if (Piece->IsSelected())
 				{
-					if (gMainWindow->GetLocalTransform())
+					if (gMainWindow->GetSeparateTransform())
 						TransformedPieceDistance = lcMul(PieceDistance, Piece->GetRelativeRotation());
 
 					Piece->MoveSelected(mCurrentStep, gMainWindow->GetAddKeys(), TransformedPieceDistance);
@@ -2695,7 +2695,7 @@ void lcModel::RotateSelectedPieces(const lcVector3& Angles, bool Relative, bool 
 	}
 	else
 	{
-		if (!gMainWindow->GetLocalTransform())
+		if (!gMainWindow->GetSeparateTransform())
 		{
 			lcVector3 Center;
 			lcMatrix33 RelativeRotation;

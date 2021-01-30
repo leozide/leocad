@@ -8,7 +8,6 @@
 #include "lc_qcolorlist.h"
 #include "lc_qpropertiestree.h"
 #include "lc_qutils.h"
-#include "lc_qfinddialog.h"
 #include "lc_qupdatedialog.h"
 #include "lc_qaboutdialog.h"
 #include "lc_setsdatabasedialog.h"
@@ -24,7 +23,6 @@
 #include "pieceinf.h"
 #include "lc_library.h"
 #include "lc_colors.h"
-
 #include "lc_previewwidget.h"
 
 #if LC_ENABLE_GAMEPAD
@@ -493,9 +491,10 @@ void lcMainWindow::CreateMenus()
 	EditMenu->addAction(mActions[LC_EDIT_PASTE]);
 	EditMenu->addSeparator();
 	EditMenu->addAction(mActions[LC_EDIT_FIND]);
-
 	EditMenu->addAction(mActions[LC_EDIT_FIND_NEXT]);
 	EditMenu->addAction(mActions[LC_EDIT_FIND_PREVIOUS]);
+	EditMenu->addAction(mActions[LC_EDIT_REPLACE]);
+	EditMenu->addAction(mActions[LC_EDIT_REPLACE_NEXT]);
 	EditMenu->addSeparator();
 	EditMenu->addAction(mActions[LC_EDIT_SELECT_ALL]);
 	EditMenu->addAction(mActions[LC_EDIT_SELECT_NONE]);
@@ -1268,22 +1267,6 @@ void lcMainWindow::Print(QPrinter* Printer)
 #endif
 }
 
-void lcMainWindow::ShowSearchDialog()
-{
-	lcModel* Model = GetActiveModel();
-
-	if (!mSearchOptions.SearchValid)
-	{
-		lcObject* Focus = Model->GetFocusObject();
-		if (Focus && Focus->IsPiece())
-			mSearchOptions.Info = ((lcPiece*)Focus)->mPieceInfo;
-	}
-
-	lcQFindDialog Dialog(this, &mSearchOptions, Model);
-	if (Dialog.exec() == QDialog::Accepted)
-		Model->FindPiece(true, true);
-}
-
 void lcMainWindow::ShowUpdatesDialog()
 {
 	lcQUpdateDialog Dialog(this, false);
@@ -1634,12 +1617,12 @@ void lcMainWindow::SetCurrentModelTab(lcModel* Model)
 		TabWidget = new lcModelTabWidget(Model);
 		mModelTabWidget->addTab(TabWidget, Model->GetProperties().mFileName);
 
-		QGridLayout* CentralLayout = new QGridLayout(TabWidget);
+		QVBoxLayout* CentralLayout = new QVBoxLayout(TabWidget);
 		CentralLayout->setContentsMargins(0, 0, 0, 0);
 
 		NewView = CreateView(Model);
 		ViewWidget = new lcViewWidget(TabWidget, NewView);
-		CentralLayout->addWidget(ViewWidget, 0, 0, 1, 1);
+		CentralLayout->addWidget(ViewWidget);
 
 		mModelTabWidget->setCurrentWidget(TabWidget);
 	}
@@ -1703,9 +1686,13 @@ void lcMainWindow::RemoveView(lcView* View)
 void lcMainWindow::SetActiveView(lcView* ActiveView)
 {
 	lcModelTabWidget* TabWidget = GetTabForView(ActiveView);
+
+	if (!TabWidget)
+		return;
+
 	lcView* CurrentActiveView = TabWidget->GetActiveView();
 
-	if (!TabWidget || CurrentActiveView == ActiveView)
+	if (CurrentActiveView == ActiveView)
 		return;
 
 	if (CurrentActiveView)
@@ -2726,17 +2713,28 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		break;
 
 	case LC_EDIT_FIND:
-		ShowSearchDialog();
+		if (ActiveView)
+			ActiveView->ShowFindReplaceWidget(false);
 		break;
 
 	case LC_EDIT_FIND_NEXT:
 		if (ActiveModel)
-			ActiveModel->FindPiece(false, true);
+			ActiveModel->FindReplacePiece(true);
 		break;
 
 	case LC_EDIT_FIND_PREVIOUS:
 		if (ActiveModel)
-			ActiveModel->FindPiece(false, false);
+			ActiveModel->FindReplacePiece(false);
+		break;
+
+	case LC_EDIT_REPLACE:
+		if (ActiveView)
+			ActiveView->ShowFindReplaceWidget(true);
+		break;
+
+	case LC_EDIT_REPLACE_NEXT:
+		if (ActiveModel)
+			ActiveModel->FindReplacePiece(true);
 		break;
 
 	case LC_EDIT_SELECT_ALL:
@@ -3448,7 +3446,7 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		break;
 
 	case LC_EDIT_CANCEL:
-		if (ActiveView)
+		if (ActiveView && !ActiveView->CloseFindReplaceDialog())
 			ActiveView->CancelTrackingOrClearSelection();
 		break;
 

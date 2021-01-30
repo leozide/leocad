@@ -25,10 +25,13 @@ struct lcSearchOptions
 	bool SearchValid;
 	bool MatchInfo;
 	bool MatchColor;
-	bool MatchName;
+	bool ReplaceInfo;
+	bool ReplaceColor;
+
 	PieceInfo* Info;
 	int ColorIndex;
-	char Name[256];
+	PieceInfo* ReplacePieceInfo;
+	int ReplaceColorIndex;
 };
 
 class lcTabBar : public QTabBar
@@ -375,7 +378,6 @@ protected:
 	void SetActiveView(lcView* ActiveView);
 	void ToggleDockWidget(QWidget* DockWidget);
 	void SplitView(Qt::Orientation Orientation);
-	void ShowSearchDialog();
 	void ShowUpdatesDialog();
 	void ShowAboutDialog();
 	void ShowHTMLDialog();

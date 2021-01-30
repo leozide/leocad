@@ -281,7 +281,7 @@ public:
 	void UnhideSelectedPieces();
 	void UnhideAllPieces();
 
-	void FindPiece(bool FindFirst, bool SearchForward);
+	void FindReplacePiece(bool SearchForward);
 
 	void UndoAction();
 	void RedoAction();

@@ -209,23 +209,37 @@ const lcCommand gCommands[] =
 	// LC_EDIT_FIND
 	{
 		QT_TRANSLATE_NOOP("Action", "Edit.Find"),
-		QT_TRANSLATE_NOOP("Menu", "&Find..."),
-		QT_TRANSLATE_NOOP("Status", "Find object"),
+		QT_TRANSLATE_NOOP("Menu", "&Find"),
+		QT_TRANSLATE_NOOP("Status", "Find piece"),
 		"Ctrl+F"
 	},
 	// LC_EDIT_FIND_NEXT
 	{
 		QT_TRANSLATE_NOOP("Action", "Edit.FindNext"),
 		QT_TRANSLATE_NOOP("Menu", "Find Ne&xt"),
-		QT_TRANSLATE_NOOP("Status", "Find next object"),
+		QT_TRANSLATE_NOOP("Status", "Find next piece"),
 		"F3"
 	},
 	// LC_EDIT_FIND_PREVIOUS
 	{
 		QT_TRANSLATE_NOOP("Action", "Edit.FindPrevious"),
 		QT_TRANSLATE_NOOP("Menu", "Find Pre&vious"),
-		QT_TRANSLATE_NOOP("Status", "Find object"),
+		QT_TRANSLATE_NOOP("Status", "Find previous piece"),
 		"Shift+F3"
+	},
+	// LC_EDIT_REPLACE
+	{
+		QT_TRANSLATE_NOOP("Action", "Edit.Replace"),
+		QT_TRANSLATE_NOOP("Menu", "&Replace"),
+		QT_TRANSLATE_NOOP("Status", "Replace piece"),
+		""
+	},
+	// LC_EDIT_REPLACE_NEXT
+	{
+		QT_TRANSLATE_NOOP("Action", "Edit.ReplaceNext"),
+		QT_TRANSLATE_NOOP("Menu", "Replace Next"),
+		QT_TRANSLATE_NOOP("Status", "Replace next piece"),
+		""
 	},
 	// LC_EDIT_SELECT_ALL
 	{

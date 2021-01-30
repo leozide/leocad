@@ -231,6 +231,8 @@ public:
 
 	void RemoveCamera();
 	void ShowContextMenu() const;
+	bool CloseFindReplaceDialog();
+	void ShowFindReplaceWidget(bool Replace);
 
 	lcVector3 GetMoveDirection(const lcVector3& Direction) const;
 	lcMatrix44 GetPieceInsertPosition(bool IgnoreSelected, PieceInfo* Info) const;
@@ -324,10 +326,10 @@ protected:
 	lcVertexBuffer mGridBuffer;
 	int mGridSettings[7];
 
+	static QWidget* mFindWidget;
 	static lcView* mLastFocusedView;
 	static std::vector<lcView*> mViews;
 
 	static lcVertexBuffer mRotateMoveVertexBuffer;
 	static lcIndexBuffer mRotateMoveIndexBuffer;
 };
-

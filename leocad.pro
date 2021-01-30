@@ -173,6 +173,7 @@ SOURCES += \
 	common/lc_context.cpp \
 	common/lc_edgecolordialog.cpp \
 	common/lc_file.cpp \
+	common/lc_findreplacewidget.cpp \
 	common/lc_glextensions.cpp \
 	common/lc_http.cpp \
 	common/lc_instructions.cpp \
@@ -219,7 +220,6 @@ SOURCES += \
 	qt/lc_qpropertiestree.cpp \
 	qt/lc_qcolorpicker.cpp \
 	qt/lc_qcolorlist.cpp \
-	qt/lc_qfinddialog.cpp \
 	qt/lc_qmodellistdialog.cpp \
 	qt/lc_renderdialog.cpp \
 	qt/lc_setsdatabasedialog.cpp \
@@ -241,6 +241,7 @@ HEADERS += \
 	common/lc_context.h \
 	common/lc_edgecolordialog.h \
 	common/lc_file.h \
+	common/lc_findreplacewidget.h \
 	common/lc_glextensions.h \
 	common/lc_global.h \
 	common/lc_http.h \
@@ -287,7 +288,6 @@ HEADERS += \
 	qt/lc_qpropertiestree.h \
 	qt/lc_qcolorpicker.h \
 	qt/lc_qcolorlist.h \
-	qt/lc_qfinddialog.h \
 	qt/lc_qmodellistdialog.h \
 	qt/lc_renderdialog.h \
 	qt/lc_setsdatabasedialog.h \
@@ -304,7 +304,6 @@ FORMS += \
 	qt/lc_qcategorydialog.ui \
 	qt/lc_qimagedialog.ui \
 	qt/lc_qupdatedialog.ui \
-	qt/lc_qfinddialog.ui \
 	qt/lc_qmodellistdialog.ui \
 	qt/lc_renderdialog.ui \
 	qt/lc_setsdatabasedialog.ui \

@@ -3779,29 +3779,51 @@ void lcModel::UnhideAllPieces()
 	SaveCheckpoint(tr("Unhide"));
 }
 
-void lcModel::FindPiece(bool FindFirst, bool SearchForward)
+void lcModel::FindReplacePiece(bool SearchForward)
 {
 	if (mPieces.IsEmpty())
 		return;
 
-	int StartIdx = mPieces.GetSize() - 1;
-	if (!FindFirst)
-	{
-		for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-		{
-			lcPiece* Piece = mPieces[PieceIdx];
+	const lcSearchOptions& SearchOptions = gMainWindow->mSearchOptions;
 
-			if (Piece->IsFocused() && Piece->IsVisible(mCurrentStep))
+	if (!SearchOptions.SearchValid)
+		return;
+
+	auto PieceMatches = [](const lcPiece* Piece)
+	{
+		const lcSearchOptions& SearchOptions = gMainWindow->mSearchOptions;
+		return (!SearchOptions.MatchInfo || Piece->mPieceInfo == SearchOptions.Info) && (!SearchOptions.MatchColor || Piece->GetColorIndex() == SearchOptions.ColorIndex);
+	};
+
+	int StartIdx = mPieces.GetSize() - 1;
+
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+	{
+		lcPiece* Piece = mPieces[PieceIdx];
+
+		if (Piece->IsFocused() && Piece->IsVisible(mCurrentStep))
+		{
+			if (PieceMatches(Piece))
 			{
-				StartIdx = PieceIdx;
-				break;
+				if (SearchOptions.ReplaceColor)
+					Piece->SetColorIndex(SearchOptions.ReplaceColorIndex);
+
+				if (SearchOptions.ReplaceInfo)
+					Piece->SetPieceInfo(SearchOptions.ReplacePieceInfo, QString(), true);
+
+				SaveCheckpoint(tr("Replacing Part"));
+				gMainWindow->UpdateSelectedObjects(false);
+				UpdateAllViews();
+				gMainWindow->UpdateTimeline(false, true);
 			}
+
+			StartIdx = PieceIdx;
+			break;
 		}
 	}
 
 	int CurrentIdx = StartIdx;
-	lcObject* Focus = nullptr;
-	const lcSearchOptions& SearchOptions = gMainWindow->mSearchOptions;
+	lcPiece* Focus = nullptr;
 
 	for (;;)
 	{
@@ -3815,21 +3837,19 @@ void lcModel::FindPiece(bool FindFirst, bool SearchForward)
 		else if (CurrentIdx >= mPieces.GetSize())
 			CurrentIdx = 0;
 
-		if (CurrentIdx == StartIdx)
-			break;
-
 		lcPiece* Current = mPieces[CurrentIdx];
 
 		if (!Current->IsVisible(mCurrentStep))
 			continue;
 
-		if ((!SearchOptions.MatchInfo || Current->mPieceInfo == SearchOptions.Info) &&
-			(!SearchOptions.MatchColor || Current->GetColorIndex() == SearchOptions.ColorIndex) &&
-			(!SearchOptions.MatchName || (Current->GetName().indexOf(SearchOptions.Name, 0, Qt::CaseInsensitive) != -1)))
+		if (PieceMatches(Current))
 		{
 			Focus = Current;
 			break;
 		}
+
+		if (CurrentIdx == StartIdx)
+			break;
 	}
 
 	ClearSelectionAndSetFocus(Focus, LC_PIECE_SECTION_POSITION, false);

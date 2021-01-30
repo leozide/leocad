@@ -23,11 +23,25 @@ rendering.
 
 - LeoCAD for Linux:
 
+  There are few options to install LeoCAD on Linux.
+
+  * AppImage:
+
   Download the latest LeoCAD-Linux.AppImage, make the file executable
   (chmod +x) and run it.
 
+  * Flatpak:
+
+  You can also install LeoCAD releases as a Flatpak from Flathub:
+    https://flathub.org/apps/details/org.leocad.LeoCAD
+
+  Note: there might be a delay for new releases to appear there. If
+  you have it already installed, it will be updated.
+
+  * From source:
+
   If you prefer to compile LeoCAD yourself, go to the GitHub releases page
-  at https://github.com/leozide/leocad/releases/latest and download the 
+  at https://github.com/leozide/leocad/releases/latest and download the
   source archive from there. If you do not already have a Parts Library
   installed, you will need to download one and follow the installation
   instructions. More information on how to compile your own executable is

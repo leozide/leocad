@@ -23,7 +23,7 @@ rendering.
 
 - LeoCAD for Linux:
 
-  There are few options to install LeoCAD on Linux.
+  There are multiple ways to install LeoCAD on Linux.
 
   * AppImage:
 

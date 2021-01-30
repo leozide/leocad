@@ -2861,11 +2861,13 @@ void lcModel::SetSelectedPiecesPieceInfo(PieceInfo* Info)
 
 void lcModel::SetSelectedPiecesStepShow(lcStep Step)
 {
-	bool Modified = false;
+	lcArray<lcPiece*> MovedPieces;
 	bool SelectionChanged = false;
 
-	for (lcPiece* Piece : mPieces)
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); )
 	{
+		lcPiece* Piece = mPieces[PieceIdx];
+
 		if (Piece->IsSelected() && Piece->GetStepShow() != Step)
 		{
 			Piece->SetStepShow(Step);
@@ -2876,17 +2878,28 @@ void lcModel::SetSelectedPiecesStepShow(lcStep Step)
 				SelectionChanged = true;
 			}
 
-			Modified = true;
+			MovedPieces.Add(Piece);
+			mPieces.RemoveIndex(PieceIdx);
+			continue;
 		}
+
+		PieceIdx++;
 	}
 
-	if (Modified)
+	if (MovedPieces.IsEmpty())
+		return;
+
+	for (int PieceIdx = 0; PieceIdx < MovedPieces.GetSize(); PieceIdx++)
 	{
-		SaveCheckpoint(tr("Showing Pieces"));
-		UpdateAllViews();
-		gMainWindow->UpdateTimeline(false, false);
-		gMainWindow->UpdateSelectedObjects(SelectionChanged);
+		lcPiece* Piece = MovedPieces[PieceIdx];
+		Piece->SetFileLine(-1);
+		AddPiece(Piece);
 	}
+
+	SaveCheckpoint(tr("Showing Pieces"));
+	UpdateAllViews();
+	gMainWindow->UpdateTimeline(false, false);
+	gMainWindow->UpdateSelectedObjects(SelectionChanged);
 }
 
 void lcModel::SetSelectedPiecesStepHide(lcStep Step)

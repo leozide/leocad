@@ -190,7 +190,6 @@ SOURCES += \
 	common/lc_previewwidget.cpp \
 	common/lc_profile.cpp \
 	common/lc_scene.cpp \
-	common/lc_selectbycolordialog.cpp \
 	common/lc_shortcuts.cpp \
 	common/lc_stringcache.cpp \
 	common/lc_synth.cpp \
@@ -259,7 +258,6 @@ HEADERS += \
 	common/lc_previewwidget.h \
 	common/lc_profile.h \
 	common/lc_scene.h \
-	common/lc_selectbycolordialog.h \
 	common/lc_shortcuts.h \
 	common/lc_stringcache.h \
 	common/lc_synth.h \

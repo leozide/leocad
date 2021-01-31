@@ -501,7 +501,6 @@ void lcMainWindow::CreateMenus()
 	EditMenu->addAction(mActions[LC_EDIT_SELECT_NONE]);
 	EditMenu->addAction(mActions[LC_EDIT_SELECT_INVERT]);
 	EditMenu->addAction(mActions[LC_EDIT_SELECT_BY_NAME]);
-	EditMenu->addAction(mActions[LC_EDIT_SELECT_BY_COLOR]);
 	EditMenu->addMenu(mSelectionModeMenu);
 	EditMenu->addSeparator();
 	EditMenu->addMenu(mTransformMenu);
@@ -2009,11 +2008,12 @@ void lcMainWindow::UpdateSelectedObjects(bool SelectionChanged)
 		mActions[LC_EDIT_FIND]->setEnabled((Flags & LC_SEL_NO_PIECES) == 0);
 		mActions[LC_EDIT_FIND_NEXT]->setEnabled((Flags & LC_SEL_NO_PIECES) == 0);
 		mActions[LC_EDIT_FIND_PREVIOUS]->setEnabled((Flags & LC_SEL_NO_PIECES) == 0);
+		mActions[LC_EDIT_FIND_ALL]->setEnabled((Flags & LC_SEL_NO_PIECES) == 0);
 		mActions[LC_EDIT_REPLACE]->setEnabled((Flags & LC_SEL_NO_PIECES) == 0);
 		mActions[LC_EDIT_REPLACE_NEXT]->setEnabled((Flags & LC_SEL_NO_PIECES) == 0);
+		mActions[LC_EDIT_REPLACE_ALL]->setEnabled((Flags & LC_SEL_NO_PIECES) == 0);
 		mActions[LC_EDIT_SELECT_INVERT]->setEnabled((Flags & LC_SEL_NO_PIECES) == 0);
 		mActions[LC_EDIT_SELECT_BY_NAME]->setEnabled((Flags & LC_SEL_NO_PIECES) == 0);
-		mActions[LC_EDIT_SELECT_BY_COLOR]->setEnabled((Flags & LC_SEL_NO_PIECES) == 0);
 		mActions[LC_EDIT_SELECT_NONE]->setEnabled(Flags & LC_SEL_SELECTED);
 		mActions[LC_EDIT_SELECT_ALL]->setEnabled(Flags & LC_SEL_UNSELECTED);
 
@@ -2768,11 +2768,6 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 	case LC_EDIT_SELECT_BY_NAME:
 		if (ActiveModel)
 			ActiveModel->ShowSelectByNameDialog();
-		break;
-
-	case LC_EDIT_SELECT_BY_COLOR:
-		if (ActiveModel)
-			ActiveModel->ShowSelectByColorDialog();
 		break;
 
 	case LC_EDIT_SELECTION_SINGLE:

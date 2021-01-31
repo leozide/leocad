@@ -283,13 +283,6 @@ const lcCommand gCommands[] =
 		QT_TRANSLATE_NOOP("Status", "Select objects by name"),
 		""
 	},
-	// LC_EDIT_SELECT_BY_COLOR
-	{
-		QT_TRANSLATE_NOOP("Action", "Edit.SelectByColor"),
-		QT_TRANSLATE_NOOP("Menu", "Select by Col&or..."),
-		QT_TRANSLATE_NOOP("Status", "Select pieces by color"),
-		""
-	},
 	// LC_EDIT_SELECT_SINGLE
 	{
 		QT_TRANSLATE_NOOP("Action", "Edit.SelectSingle"),

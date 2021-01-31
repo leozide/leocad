@@ -20,7 +20,6 @@
 #include "lc_minifigdialog.h"
 #include "lc_qgroupdialog.h"
 #include "lc_qeditgroupsdialog.h"
-#include "lc_selectbycolordialog.h"
 #include "lc_qpropertiesdialog.h"
 #include "lc_qutils.h"
 #include "lc_lxf.h"
@@ -4299,36 +4298,6 @@ void lcModel::ShowSelectByNameDialog()
 		return;
 
 	SetSelectionAndFocus(Dialog.mObjects, nullptr, 0, false);
-}
-
-void lcModel::ShowSelectByColorDialog()
-{
-	if (mPieces.IsEmpty())
-	{
-		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Nothing to select."));
-		return;
-	}
-
-	int ColorIndex = gMainWindow->mColorIndex;
-
-	lcObject* Focus = GetFocusObject();
-
-	if (Focus && Focus->IsPiece())
-		ColorIndex = ((lcPiece*)Focus)->GetColorIndex();
-
-	lcSelectByColorDialog Dialog(gMainWindow, ColorIndex);
-
-	if (Dialog.exec() != QDialog::Accepted)
-		return;
-
-	ColorIndex = Dialog.mColorIndex;
-	lcArray<lcObject*> Selection;
-
-	for (lcPiece* Piece : mPieces)
-		if (Piece->IsVisible(mCurrentStep) && Piece->GetColorIndex() == ColorIndex)
-			Selection.Add(Piece);
-
-	SetSelectionAndFocus(Selection, nullptr, 0, false);
 }
 
 void lcModel::ShowArrayDialog()

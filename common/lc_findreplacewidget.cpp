@@ -62,13 +62,15 @@ lcFindReplaceWidget::lcFindReplaceWidget(QWidget* Parent, lcModel* Model, bool R
 
 	if (Replace)
 	{
-		ReplaceColorCheckBox = new QCheckBox(tr("Replace Color"), this);
+		Layout->addWidget(new QLabel(tr("Replace:")), 1, 0);
+
+		ReplaceColorCheckBox = new QCheckBox(this);
 		Layout->addWidget(ReplaceColorCheckBox, 1, 1);
 
 		ReplaceColorPicker = new lcQColorPicker(this);
 		Layout->addWidget(ReplaceColorPicker, 1, 2);
 
-		ReplacePartCheckBox = new QCheckBox(tr("Replace Part"), this);
+		ReplacePartCheckBox = new QCheckBox(this);
 		Layout->addWidget(ReplacePartCheckBox, 1, 3);
 
 		ReplacePartComboBox = new QComboBox(this);

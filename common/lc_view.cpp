@@ -14,7 +14,7 @@
 #include "lc_viewsphere.h"
 #include "lc_findreplacewidget.h"
 
-QWidget* lcView::mFindWidget;
+lcFindReplaceWidget* lcView::mFindWidget;
 lcView* lcView::mLastFocusedView;
 std::vector<lcView*> lcView::mViews;
 
@@ -58,6 +58,11 @@ lcView::~lcView()
 
 	if (mDeleteContext)
 		delete mContext;
+}
+
+lcFindReplaceParams* lcView::GetFindReplaceParams()
+{
+	return mFindWidget ? mFindWidget->GetFindReplaceParams() : nullptr;
 }
 
 void lcView::UpdateProjectViews(const Project* Project)

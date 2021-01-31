@@ -85,6 +85,8 @@ class lcVector4;
 class lcMatrix33;
 class lcMatrix44;
 
+class lcFindReplaceWidget;
+struct lcFindReplaceParams;
 class lcCollapsibleWidget;
 class lcViewWidget;
 class lcView;

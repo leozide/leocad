@@ -101,6 +101,8 @@ public:
 	lcView(const lcView&) = delete;
 	lcView& operator=(const lcView&) = delete;
 
+	static lcFindReplaceParams* GetFindReplaceParams();
+
 	void Clear()
 	{
 		mModel = nullptr;
@@ -326,7 +328,7 @@ protected:
 	lcVertexBuffer mGridBuffer;
 	int mGridSettings[7];
 
-	static QWidget* mFindWidget;
+	static lcFindReplaceWidget* mFindWidget;
 	static lcView* mLastFocusedView;
 	static std::vector<lcView*> mViews;
 

@@ -25,6 +25,7 @@
 #include "lc_qutils.h"
 #include "lc_lxf.h"
 #include "lc_previewwidget.h"
+#include "lc_findreplacewidget.h"
 
 void lcModelProperties::LoadDefaults()
 {
@@ -3784,15 +3785,20 @@ void lcModel::FindReplacePiece(bool SearchForward, bool FindAll)
 	if (mPieces.IsEmpty())
 		return;
 
-	const lcSearchOptions& SearchOptions = gMainWindow->mSearchOptions;
+	const lcFindReplaceParams* Params = lcView::GetFindReplaceParams();
 
-	if (!SearchOptions.SearchValid)
+	if (!Params)
 		return;
 
-	auto PieceMatches = [](const lcPiece* Piece)
+	auto PieceMatches = [Params](const lcPiece* Piece)
 	{
-		const lcSearchOptions& SearchOptions = gMainWindow->mSearchOptions;
-		return (!SearchOptions.MatchInfo || Piece->mPieceInfo == SearchOptions.Info) && (!SearchOptions.MatchColor || Piece->GetColorIndex() == SearchOptions.ColorIndex);
+		if (Params->FindInfo && Params->FindInfo != Piece->mPieceInfo)
+			return false;
+
+		if (!Params->FindString.isEmpty() && !strcasestr(Piece->mPieceInfo->m_strDescription, Params->FindString.toLatin1()))
+			return false;
+
+		return !Params->MatchColor || Piece->GetColorIndex() == Params->ColorIndex;
 	};
 
 	int StartIdx = mPieces.GetSize() - 1;
@@ -3805,11 +3811,11 @@ void lcModel::FindReplacePiece(bool SearchForward, bool FindAll)
 		{
 			if (PieceMatches(Piece))
 			{
-				if (SearchOptions.ReplaceColor)
-					Piece->SetColorIndex(SearchOptions.ReplaceColorIndex);
+				if (Params->ReplaceColor)
+					Piece->SetColorIndex(Params->ReplaceColorIndex);
 
-				if (SearchOptions.ReplaceInfo)
-					Piece->SetPieceInfo(SearchOptions.ReplacePieceInfo, QString(), true);
+				if (Params->ReplaceInfo)
+					Piece->SetPieceInfo(Params->ReplacePieceInfo, QString(), true);
 
 				SaveCheckpoint(tr("Replacing Part"));
 				gMainWindow->UpdateSelectedObjects(false);

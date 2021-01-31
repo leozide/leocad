@@ -20,20 +20,6 @@ class QPrinter;
 
 #define LC_MAX_RECENT_FILES 4
 
-struct lcSearchOptions
-{
-	bool SearchValid;
-	bool MatchInfo;
-	bool MatchColor;
-	bool ReplaceInfo;
-	bool ReplaceColor;
-
-	PieceInfo* Info;
-	int ColorIndex;
-	PieceInfo* ReplacePieceInfo;
-	int ReplaceColorIndex;
-};
-
 class lcTabBar : public QTabBar
 {
 public:
@@ -340,7 +326,6 @@ public:
 
 	QString mRecentFiles[LC_MAX_RECENT_FILES];
 	int mColorIndex;
-	lcSearchOptions mSearchOptions;
 	QAction* mActions[LC_NUM_COMMANDS];
 
 public slots:

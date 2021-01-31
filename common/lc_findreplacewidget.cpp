@@ -126,6 +126,8 @@ lcFindReplaceWidget::lcFindReplaceWidget(QWidget* Parent, lcModel* Model, bool R
 
 	lcSearchOptions& SearchOptions = gMainWindow->mSearchOptions;
 
+	SearchOptions.SearchValid = true;
+
 	if (!Replace)
 	{
 		SearchOptions.ReplaceColor = false;
@@ -134,7 +136,6 @@ lcFindReplaceWidget::lcFindReplaceWidget(QWidget* Parent, lcModel* Model, bool R
 
 	if (Focus)
 	{
-		SearchOptions.SearchValid = true;
 		SearchOptions.Info = Focus->mPieceInfo;
 		SearchOptions.ColorIndex = Focus->GetColorIndex();
 

@@ -227,6 +227,13 @@ const lcCommand gCommands[] =
 		QT_TRANSLATE_NOOP("Status", "Find previous piece"),
 		"Shift+F3"
 	},
+	// LC_EDIT_FIND_ALL
+	{
+		QT_TRANSLATE_NOOP("Action", "Edit.FindAll"),
+		QT_TRANSLATE_NOOP("Menu", "Find All"),
+		QT_TRANSLATE_NOOP("Status", "Find all pieces that match the search criteria"),
+		""
+	},
 	// LC_EDIT_REPLACE
 	{
 		QT_TRANSLATE_NOOP("Action", "Edit.Replace"),
@@ -239,6 +246,13 @@ const lcCommand gCommands[] =
 		QT_TRANSLATE_NOOP("Action", "Edit.ReplaceNext"),
 		QT_TRANSLATE_NOOP("Menu", "Replace Next"),
 		QT_TRANSLATE_NOOP("Status", "Replace next piece"),
+		""
+	},
+	// LC_EDIT_REPLACE_ALL
+	{
+		QT_TRANSLATE_NOOP("Action", "Edit.ReplaceAll"),
+		QT_TRANSLATE_NOOP("Menu", "Replace All"),
+		QT_TRANSLATE_NOOP("Status", "Replace pieces that match the search criteria"),
 		""
 	},
 	// LC_EDIT_SELECT_ALL

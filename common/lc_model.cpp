@@ -3779,7 +3779,7 @@ void lcModel::UnhideAllPieces()
 	SaveCheckpoint(tr("Unhide"));
 }
 
-void lcModel::FindReplacePiece(bool SearchForward)
+void lcModel::FindReplacePiece(bool SearchForward, bool FindAll)
 {
 	if (mPieces.IsEmpty())
 		return;
@@ -3824,6 +3824,7 @@ void lcModel::FindReplacePiece(bool SearchForward)
 
 	int CurrentIdx = StartIdx;
 	lcPiece* Focus = nullptr;
+	lcArray<lcObject*> Selection;
 
 	for (;;)
 	{
@@ -3844,15 +3845,23 @@ void lcModel::FindReplacePiece(bool SearchForward)
 
 		if (PieceMatches(Current))
 		{
-			Focus = Current;
-			break;
+			if (FindAll)
+				Selection.Add(Current);
+			else
+			{
+				Focus = Current;
+				break;
+			}
 		}
 
 		if (CurrentIdx == StartIdx)
 			break;
 	}
 
-	ClearSelectionAndSetFocus(Focus, LC_PIECE_SECTION_POSITION, false);
+	if (FindAll)
+		SetSelectionAndFocus(Selection, nullptr, 0, false);
+	else
+		ClearSelectionAndSetFocus(Focus, LC_PIECE_SECTION_POSITION, false);
 }
 
 void lcModel::UndoAction()

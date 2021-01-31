@@ -11,6 +11,9 @@ lcFindReplaceWidget::lcFindReplaceWidget(QWidget* Parent, lcModel* Model, bool R
 	: QWidget(Parent)
 {
 	setAutoFillBackground(true);
+	QPalette Palette = palette();
+	Palette.setColor(QPalette::Window, QApplication::palette().color(QPalette::Button));
+	setPalette(Palette);
 
 	QGridLayout* Layout = new QGridLayout(this);
 	Layout->setContentsMargins(5, 5, 5, 5);
@@ -28,8 +31,14 @@ lcFindReplaceWidget::lcFindReplaceWidget(QWidget* Parent, lcModel* Model, bool R
 	Layout->addWidget(FindPartComboBox, 0, 4);
 
 	QToolButton* FindNextButton = new QToolButton(this);
+	FindNextButton->setAutoRaise(true);
 	FindNextButton->setDefaultAction(gMainWindow->mActions[LC_EDIT_FIND_NEXT]);
 	Layout->addWidget(FindNextButton, 0, 5);
+
+	QToolButton* FindAllButton = new QToolButton(this);
+	FindAllButton ->setAutoRaise(true);
+	FindAllButton ->setDefaultAction(gMainWindow->mActions[LC_EDIT_FIND_ALL]);
+	Layout->addWidget(FindAllButton, 0, 6);
 
 	connect(FindColorCheckBox, &QCheckBox::toggled, [](bool Checked)
 	{
@@ -71,8 +80,14 @@ lcFindReplaceWidget::lcFindReplaceWidget(QWidget* Parent, lcModel* Model, bool R
 		Layout->addWidget(ReplacePartComboBox, 1, 4);
 
 		QToolButton* ReplaceNextButton = new QToolButton(this);
+		ReplaceNextButton->setAutoRaise(true);
 		ReplaceNextButton->setDefaultAction(gMainWindow->mActions[LC_EDIT_REPLACE_NEXT]);
 		Layout->addWidget(ReplaceNextButton, 1, 5);
+
+		QToolButton* ReplaceAllButton = new QToolButton(this);
+		ReplaceAllButton->setAutoRaise(true);
+		ReplaceAllButton->setDefaultAction(gMainWindow->mActions[LC_EDIT_REPLACE_ALL]);
+		Layout->addWidget(ReplaceAllButton, 1, 6);
 
 		connect(ReplaceColorCheckBox, &QCheckBox::toggled, [](bool Checked)
 		{

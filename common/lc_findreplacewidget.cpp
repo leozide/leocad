@@ -46,7 +46,7 @@ lcFindReplaceWidget::lcFindReplaceWidget(QWidget* Parent, lcModel* Model, bool R
 		gMainWindow->mSearchOptions.MatchInfo = Checked;
 	});
 
-	connect(FindPartComboBox, qOverload<int>(&QComboBox::currentIndexChanged), [FindPartComboBox](int Index)
+	connect(FindPartComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), [FindPartComboBox](int Index)
 	{
 		gMainWindow->mSearchOptions.Info = (PieceInfo*)FindPartComboBox->itemData(Index).value<void*>();
 	});
@@ -89,7 +89,7 @@ lcFindReplaceWidget::lcFindReplaceWidget(QWidget* Parent, lcModel* Model, bool R
 			gMainWindow->mSearchOptions.ReplaceInfo = Checked;
 		});
 
-		connect(ReplacePartComboBox, qOverload<int>(&QComboBox::currentIndexChanged), [ReplacePartComboBox](int Index)
+		connect(ReplacePartComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), [ReplacePartComboBox](int Index)
 		{
 			gMainWindow->mSearchOptions.ReplacePieceInfo = (PieceInfo*)ReplacePartComboBox->itemData(Index).value<void*>();
 		});

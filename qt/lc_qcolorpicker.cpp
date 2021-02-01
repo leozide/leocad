@@ -146,7 +146,7 @@ void lcQColorPicker::buttonPressed(bool toggled)
 
 void lcQColorPicker::UpdateIcon()
 {
-	const int IconSize = style()->pixelMetric(QStyle::PM_SmallIconSize);
+	const int IconSize = 14;//style()->pixelMetric(QStyle::PM_SmallIconSize);
 	QPixmap Pixmap(IconSize, IconSize);
 
 	QPainter Painter(&Pixmap);
@@ -161,14 +161,7 @@ void lcQColorPicker::UpdateIcon()
 		Painter.drawRect(0, 0, Pixmap.width() - 1, Pixmap.height() - 1);
 	}
 	else
-	{
-		Painter.setBrush(Qt::black);
-		Painter.drawRect(0, 0, Pixmap.width() - 1, Pixmap.height() - 1);
-
-		const int SquareSize = IconSize / 2 - 1;
-		Painter.fillRect(1, 1, SquareSize, SquareSize, Qt::white);
-		Painter.fillRect(1 + SquareSize, 1 + SquareSize, SquareSize, SquareSize, Qt::white);
-	}
+		lcDrawNoColorRect(Painter, QRect(0, 0, Pixmap.width() - 1, Pixmap.height() - 1));
 
 	Painter.end();
 

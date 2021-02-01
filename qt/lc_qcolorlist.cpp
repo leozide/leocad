@@ -4,6 +4,47 @@
 #include "lc_library.h"
 #include "lc_colors.h"
 
+void lcDrawNoColorRect(QPainter& Painter, const QRect& Rect)
+{
+	Painter.setBrush(Qt::black);
+	Painter.drawRect(Rect);
+
+	const int SquareSize = 3;
+	int Column = 0;
+
+	for (;;)
+	{
+		int x = Rect.left() + 1 + Column * SquareSize;
+
+		if (x >= Rect.right())
+			break;
+
+		int Row = Column & 1;
+
+		for (;;)
+		{
+			int y = Rect.top() + 1 + Row * SquareSize;
+
+			if (y >= Rect.bottom())
+				break;
+
+			QRect GridRect(x, y, SquareSize, SquareSize);
+
+			if (GridRect.right() > Rect.right())
+				GridRect.setRight(Rect.right());
+
+			if (GridRect.bottom() > Rect.bottom())
+				GridRect.setBottom(Rect.bottom());
+
+			Painter.fillRect(GridRect, Qt::white);
+
+			Row += 2;
+		}
+
+		Column++;
+	}
+}
+
 lcQColorList::lcQColorList(QWidget* Parent, bool AllowNoColor)
 	: QWidget(Parent), mAllowNoColor(AllowNoColor)
 {
@@ -125,7 +166,7 @@ void lcQColorList::UpdateRects()
 			const int Left = CellWidth * CurColumn - 1;
 			const int Right = (CurColumn + 1) * CellWidth - 1;
 			const int Top = GroupY + CellHeight * NumRows;
-			const int Bottom = (TotalRows != mRows) ? GroupY + CellHeight * (NumRows + 1) : height();
+			const int Bottom = (TotalRows != mRows) ? GroupY + CellHeight * (NumRows + 1) : height() - 1;
 
 			mCells[CurCell].Rect = QRect(Left, Top, Right - Left, Bottom - Top);
 
@@ -198,14 +239,7 @@ bool lcQColorList::event(QEvent *event)
 			if (color->Code != LC_COLOR_NOCOLOR)
 				painter.drawRect(0, 0, image.width() - 1, image.height() - 1);
 			else
-			{
-				painter.setBrush(Qt::black);
-				painter.drawRect(0, 0, image.width() - 1, image.height() - 1);
-
-				const int SquareSize = image.width() / 2 - 1;
-				painter.fillRect(1, 1, SquareSize, SquareSize, Qt::white);
-				painter.fillRect(1 + SquareSize, 1 + SquareSize, SquareSize, SquareSize, Qt::white);
-			}
+				lcDrawNoColorRect(painter, QRect(0, 0, image.width() - 1, image.height() - 1));
 			painter.end();
 
 			QByteArray ba;
@@ -403,37 +437,28 @@ void lcQColorList::paintEvent(QPaintEvent* Event)
 
 	for (size_t CellIndex = 0; CellIndex < mCells.size(); CellIndex++)
 	{
-		lcColor* Color = &gColorList[mCells[CellIndex].ColorIndex];
-		QColor CellColor(Color->Value[0] * 255, Color->Value[1] * 255, Color->Value[2] * 255);
+		const lcColor* Color = &gColorList[mCells[CellIndex].ColorIndex];
 
-		Painter.setBrush(CellColor);
 		const QRect& Rect = mCells[CellIndex].Rect;
 
 		if (Color->Code != LC_COLOR_NOCOLOR)
-			Painter.drawRect(Rect);
-		else
 		{
-			Painter.setBrush(Qt::black);
-			Painter.drawRect(Rect);
+			QColor CellColor(Color->Value[0] * 255, Color->Value[1] * 255, Color->Value[2] * 255);
 
-			const int SquareWidth = Rect.width() / 2 - 1;
-			const int SquareHeight = Rect.height() / 2 - 1;
-			Painter.fillRect(Rect.x() + 1, Rect.y() + 1, SquareWidth, SquareHeight, Qt::white);
-			Painter.fillRect(Rect.x() + 1 + SquareWidth, Rect.y() + 1 + SquareHeight, Rect.width() - SquareWidth - 1, SquareHeight, Qt::white);
+			Painter.setBrush(CellColor);
+			Painter.drawRect(Rect);
 		}
+		else
+			lcDrawNoColorRect(Painter, Rect);
 	}
 
 	if (mCurrentCell < mCells.size())
 	{
-		lcColor* Color = &gColorList[mCells[mCurrentCell].ColorIndex];
+		const lcColor* Color = &gColorList[mCells[mCurrentCell].ColorIndex];
 		QColor EdgeColor(255 - Color->Value[0] * 255, 255 - Color->Value[1] * 255, 255 - Color->Value[2] * 255);
-		QColor CellColor(Color->Value[0] * 255, Color->Value[1] * 255, Color->Value[2] * 255);
 
 		Painter.setPen(EdgeColor);
-		if (Color->Code != LC_COLOR_NOCOLOR)
-			Painter.setBrush(CellColor);
-		else
-			Painter.setBrush(Qt::NoBrush);
+		Painter.setBrush(Qt::NoBrush);
 
 		QRect CellRect = mCells[mCurrentCell].Rect;
 		CellRect.adjust(1, 1, -1, -1);

@@ -3784,24 +3784,20 @@ void lcModel::FindReplacePiece(bool SearchForward, bool FindAll)
 	if (mPieces.IsEmpty())
 		return;
 
-	const lcFindReplaceParams* Params = lcView::GetFindReplaceParams();
-
-	if (!Params)
-		return;
-
 	auto PieceMatches = [](const lcPiece* Piece)
 	{
-		const lcFindReplaceParams* Params = lcView::GetFindReplaceParams();
+		const lcFindReplaceParams& Params = lcView::GetFindReplaceParams();
 
-		if (Params->FindInfo && Params->FindInfo != Piece->mPieceInfo)
+		if (Params.FindInfo && Params.FindInfo != Piece->mPieceInfo)
 			return false;
 
-		if (!Params->FindString.isEmpty() && !strcasestr(Piece->mPieceInfo->m_strDescription, Params->FindString.toLatin1()))
+		if (!Params.FindString.isEmpty() && !strcasestr(Piece->mPieceInfo->m_strDescription, Params.FindString.toLatin1()))
 			return false;
 
-		return (lcGetColorCode(Params->FindColorIndex) == LC_COLOR_NOCOLOR) || (Piece->GetColorIndex() == Params->FindColorIndex);
+		return (lcGetColorCode(Params.FindColorIndex) == LC_COLOR_NOCOLOR) || (Piece->GetColorIndex() == Params.FindColorIndex);
 	};
 
+	const lcFindReplaceParams& Params = lcView::GetFindReplaceParams();
 	int StartIdx = mPieces.GetSize() - 1;
 
 	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
@@ -3812,15 +3808,15 @@ void lcModel::FindReplacePiece(bool SearchForward, bool FindAll)
 		{
 			if (PieceMatches(Piece))
 			{
-				const bool ReplaceColor = lcGetColorCode(Params->FindColorIndex) != LC_COLOR_NOCOLOR;
+				const bool ReplaceColor = lcGetColorCode(Params.FindColorIndex) != LC_COLOR_NOCOLOR;
 
 				if (ReplaceColor)
-					Piece->SetColorIndex(Params->ReplaceColorIndex);
+					Piece->SetColorIndex(Params.ReplaceColorIndex);
 
-				if (Params->ReplacePieceInfo)
-					Piece->SetPieceInfo(Params->ReplacePieceInfo, QString(), true);
+				if (Params.ReplacePieceInfo)
+					Piece->SetPieceInfo(Params.ReplacePieceInfo, QString(), true);
 
-				if (ReplaceColor || Params->ReplacePieceInfo)
+				if (ReplaceColor || Params.ReplacePieceInfo)
 				{
 					SaveCheckpoint(tr("Replacing Part"));
 					gMainWindow->UpdateSelectedObjects(false);

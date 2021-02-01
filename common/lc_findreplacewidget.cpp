@@ -6,6 +6,7 @@
 #include "pieceinf.h"
 #include "piece.h"
 #include "lc_model.h"
+#include "lc_view.h"
 
 lcFindReplaceWidget::lcFindReplaceWidget(QWidget* Parent, lcModel* Model, bool Replace)
 	: QWidget(Parent)
@@ -104,11 +105,13 @@ lcFindReplaceWidget::lcFindReplaceWidget(QWidget* Parent, lcModel* Model, bool R
 
 	if (Focus)
 	{
-		mFindReplaceParams.FindInfo = Focus->mPieceInfo;
-		mFindReplaceParams.FindColorIndex = Focus->GetColorIndex();
+		lcFindReplaceParams& Params = lcView::GetFindReplaceParams();
 
-		FindColorPicker->setCurrentColor(mFindReplaceParams.FindColorIndex);
-		mFindPartComboBox->setCurrentIndex(mFindPartComboBox->findData(QVariant::fromValue((void*)mFindReplaceParams.FindInfo)));
+		Params.FindInfo = Focus->mPieceInfo;
+		Params.FindColorIndex = Focus->GetColorIndex();
+
+		FindColorPicker->setCurrentColor(Params.FindColorIndex);
+		mFindPartComboBox->setCurrentIndex(mFindPartComboBox->findData(QVariant::fromValue((void*)Params.FindInfo)));
 
 	}
 	else
@@ -125,27 +128,37 @@ lcFindReplaceWidget::lcFindReplaceWidget(QWidget* Parent, lcModel* Model, bool R
 
 void lcFindReplaceWidget::FindColorIndexChanged(int ColorIndex)
 {
-	mFindReplaceParams.FindColorIndex = ColorIndex;
+	lcFindReplaceParams& Params = lcView::GetFindReplaceParams();
+
+	Params.FindColorIndex = ColorIndex;
 }
 
 void lcFindReplaceWidget::FindTextEdited(const QString& Text)
 {
-	mFindReplaceParams.FindString = Text;
-	mFindReplaceParams.FindInfo = nullptr;
+	lcFindReplaceParams& Params = lcView::GetFindReplaceParams();
+
+	Params.FindString = Text;
+	Params.FindInfo = nullptr;
 }
 
 void lcFindReplaceWidget::FindActivated(int Index)
 {
-	mFindReplaceParams.FindString.clear();
-	mFindReplaceParams.FindInfo = (PieceInfo*)mFindPartComboBox->itemData(Index).value<void*>();
+	lcFindReplaceParams& Params = lcView::GetFindReplaceParams();
+
+	Params.FindString.clear();
+	Params.FindInfo = (PieceInfo*)mFindPartComboBox->itemData(Index).value<void*>();
 }
 
 void lcFindReplaceWidget::ReplaceColorIndexChanged(int ColorIndex)
 {
-	mFindReplaceParams.ReplaceColorIndex = ColorIndex;
+	lcFindReplaceParams& Params = lcView::GetFindReplaceParams();
+
+	Params.ReplaceColorIndex = ColorIndex;
 }
 
 void lcFindReplaceWidget::ReplaceActivated(int Index)
 {
-	mFindReplaceParams.ReplacePieceInfo = (PieceInfo*)mReplacePartComboBox->itemData(Index).value<void*>();
+	lcFindReplaceParams& Params = lcView::GetFindReplaceParams();
+
+	Params.ReplacePieceInfo = (PieceInfo*)mReplacePartComboBox->itemData(Index).value<void*>();
 }

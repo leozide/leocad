@@ -3789,15 +3789,17 @@ void lcModel::FindReplacePiece(bool SearchForward, bool FindAll)
 	if (!Params)
 		return;
 
-	auto PieceMatches = [Params](const lcPiece* Piece)
+	auto PieceMatches = [](const lcPiece* Piece)
 	{
+		const lcFindReplaceParams* Params = lcView::GetFindReplaceParams();
+
 		if (Params->FindInfo && Params->FindInfo != Piece->mPieceInfo)
 			return false;
 
 		if (!Params->FindString.isEmpty() && !strcasestr(Piece->mPieceInfo->m_strDescription, Params->FindString.toLatin1()))
 			return false;
 
-		return !Params->MatchColor || Piece->GetColorIndex() == Params->ColorIndex;
+		return (lcGetColorCode(Params->FindColorIndex) == LC_COLOR_NOCOLOR) || (Piece->GetColorIndex() == Params->FindColorIndex);
 	};
 
 	int StartIdx = mPieces.GetSize() - 1;

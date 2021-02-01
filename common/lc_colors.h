@@ -5,6 +5,7 @@
 
 #define LC_MAX_COLOR_NAME 64
 #define LC_COLOR_DIRECT 0x80000000
+#define LC_COLOR_NOCOLOR 0xffffffff
 
 struct lcColor
 {

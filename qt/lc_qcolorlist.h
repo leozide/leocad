@@ -6,12 +6,19 @@ struct lcColorListCell
 	int ColorIndex;
 };
 
+struct lcColorListGroup
+{
+	QRect Rect;
+	QString Name;
+	std::vector<size_t> Cells;
+};
+
 class lcQColorList : public QWidget
 {
 	Q_OBJECT
 
 public:
-	lcQColorList(QWidget* Parent = nullptr);
+	lcQColorList(QWidget* Parent = nullptr, bool AllowNoColor = false);
 	~lcQColorList() = default;
 
 	QSize sizeHint() const override;
@@ -38,7 +45,7 @@ protected:
 	void keyPressEvent(QKeyEvent* KeyEvent) override;
 
 	std::vector<lcColorListCell> mCells;
-	std::vector<QRect> mGroupRects;
+	std::vector<lcColorListGroup> mGroups;
 
 	size_t mCurrentCell = 0;
 	quint32 mColorCode = 0;
@@ -48,6 +55,7 @@ protected:
 	int mWidth = 0;
 	int mHeight = 0;
 	int mPreferredHeight = 0;
+	bool mAllowNoColor;
 
 	QPoint mDragStartPosition;
 };

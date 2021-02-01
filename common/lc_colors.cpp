@@ -395,7 +395,7 @@ bool lcLoadColorFile(lcFile& File, lcStudStyle StudStyle)
 	if (Valid)
 		lcAdjustStudStyleColors(Colors, StudStyle);
 
-	bool FoundMain = false, FoundEdge = false, FoundStud = false;
+	bool FoundMain = false, FoundEdge = false, FoundStud = false, FoundNoColor = false;
 
 	for (const lcColor& Color : Colors)
 	{
@@ -411,6 +411,10 @@ bool lcLoadColorFile(lcFile& File, lcStudStyle StudStyle)
 
 			case 4242:
 				FoundStud = true;
+				break;
+
+			case LC_COLOR_NOCOLOR:
+				FoundNoColor = true;
 				break;
 		}
 	}
@@ -471,6 +475,27 @@ bool lcLoadColorFile(lcFile& File, lcStudStyle StudStyle)
 		strcpy(StudCylinderColor.SafeName, "Stud_Cylinder_Color");
 
 		Colors.push_back(StudCylinderColor);
+	}
+
+	if (!FoundNoColor)
+	{
+		lcColor NoColor;
+
+		NoColor.Code = LC_COLOR_NOCOLOR;
+		NoColor.Translucent = false;
+		NoColor.Group = LC_NUM_COLORGROUPS;
+		NoColor.Value[0] = 0.5f;
+		NoColor.Value[1] = 0.5f;
+		NoColor.Value[2] = 0.5f;
+		NoColor.Value[3] = 1.0f;
+		NoColor.Edge[0] = 0.2f;
+		NoColor.Edge[1] = 0.2f;
+		NoColor.Edge[2] = 0.2f;
+		NoColor.Edge[3] = 1.0f;
+		strcpy(NoColor.Name, "No Color");
+		strcpy(NoColor.SafeName, "No_Color");
+
+		Colors.push_back(NoColor);
 	}
 
 	for (lcColor& Color : gColorList)

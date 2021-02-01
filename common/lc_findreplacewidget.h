@@ -4,11 +4,10 @@ struct lcFindReplaceParams
 {
 	PieceInfo* FindInfo = nullptr;
 	QString FindString;
+	int FindColorIndex = 0;
 
-	bool MatchColor = false;
 	bool ReplaceInfo = false;
 	bool ReplaceColor = false;
-	int ColorIndex = 0;
 	PieceInfo* ReplacePieceInfo = nullptr;
 	int ReplaceColorIndex = 0;
 };
@@ -26,8 +25,9 @@ public:
 	}
 
 protected slots:
+	void FindColorIndexChanged(int ColorIndex);
 	void FindTextEdited(const QString& Text);
-	void FindIndexChanged(int Index);
+	void FindActivated(int Index);
 
 protected:
 	QComboBox* mFindPartComboBox = nullptr;

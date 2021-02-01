@@ -3,8 +3,8 @@
 #include "lc_qcolorlist.h"
 #include "lc_colors.h"
 
-lcQColorPickerPopup::lcQColorPickerPopup(QWidget *parent, int colorIndex)
-	: QFrame(parent, Qt::Popup)
+lcQColorPickerPopup::lcQColorPickerPopup(QWidget* Parent, int ColorIndex, bool AllowNoColor)
+	: QFrame(Parent, Qt::Popup)
 {
 	setFrameStyle(QFrame::StyledPanel);
 	setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
@@ -16,13 +16,13 @@ lcQColorPickerPopup::lcQColorPickerPopup(QWidget *parent, int colorIndex)
 	layout->setContentsMargins(0, 0, 0, 0);
 	setLayout(layout);
 
-	colorList = new lcQColorList(this);
+	colorList = new lcQColorList(this, AllowNoColor);
 	connect(colorList, SIGNAL(colorChanged(int)), this, SLOT(colorChanged(int)));
 	connect(colorList, SIGNAL(colorSelected(int)), this, SLOT(colorSelected(int)));
 	layout->addWidget(colorList);
 
 	colorList->blockSignals(true);
-	colorList->setCurrentColor(colorIndex);
+	colorList->setCurrentColor(ColorIndex);
 	colorList->blockSignals(false);
 
 	eventLoop = nullptr;
@@ -75,17 +75,15 @@ void lcQColorPickerPopup::showEvent(QShowEvent *)
 	colorList->setFocus();
 }
 
-lcQColorPicker::lcQColorPicker(QWidget *parent)
-	: QPushButton(parent)
+lcQColorPicker::lcQColorPicker(QWidget* Parent, bool AllowNoColor)
+	: QPushButton(Parent), mAllowNoColor(AllowNoColor)
 {
 	setFocusPolicy(Qt::StrongFocus);
 	setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 	setAutoDefault(false);
 	setCheckable(true);
 
-	initialColorIndex = 0;
-	currentColorIndex = 0;
-	updateIcon();
+	UpdateIcon();
 
 	connect(this, SIGNAL(toggled(bool)), SLOT(buttonPressed(bool)));
 }
@@ -106,12 +104,12 @@ void lcQColorPicker::setCurrentColorCode(int colorCode)
 
 int lcQColorPicker::currentColor() const
 {
-	return currentColorIndex;
+	return mCurrentColorIndex;
 }
 
 int lcQColorPicker::currentColorCode() const
 {
-	return gColorList[currentColorIndex].Code;
+	return gColorList[mCurrentColorIndex].Code;
 }
 
 void lcQColorPicker::buttonPressed(bool toggled)
@@ -119,7 +117,7 @@ void lcQColorPicker::buttonPressed(bool toggled)
 	if (!toggled)
 		return;
 
-	lcQColorPickerPopup *popup = new lcQColorPickerPopup(this, currentColorIndex);
+	lcQColorPickerPopup *popup = new lcQColorPickerPopup(this, mCurrentColorIndex, mAllowNoColor);
 	connect(popup, SIGNAL(changed(int)), SLOT(changed(int)));
 	connect(popup, SIGNAL(selected(int)), SLOT(selected(int)));
 	connect(popup, SIGNAL(hid()), SLOT(popupClosed()));
@@ -146,26 +144,41 @@ void lcQColorPicker::buttonPressed(bool toggled)
 	popup->show();
 }
 
-void lcQColorPicker::updateIcon()
+void lcQColorPicker::UpdateIcon()
 {
-	int iconSize = style()->pixelMetric(QStyle::PM_SmallIconSize);
-	QPixmap pix(iconSize, iconSize);
+	const int IconSize = style()->pixelMetric(QStyle::PM_SmallIconSize);
+	QPixmap Pixmap(IconSize, IconSize);
 
-	QPainter p(&pix);
+	QPainter Painter(&Pixmap);
 
-	lcColor* color = &gColorList[currentColorIndex];
-	p.setPen(Qt::darkGray);
-	p.setBrush(QColor::fromRgbF(color->Value[0], color->Value[1], color->Value[2]));
-	p.drawRect(0, 0, pix.width() - 1, pix.height() - 1);
-	p.end();
+	Painter.setPen(Qt::darkGray);
 
-	setIcon(QIcon(pix));
+	const lcColor* Color = &gColorList[mCurrentColorIndex];
+
+	if (Color->Code != LC_COLOR_NOCOLOR)
+	{
+		Painter.setBrush(QColor::fromRgbF(Color->Value[0], Color->Value[1], Color->Value[2]));
+		Painter.drawRect(0, 0, Pixmap.width() - 1, Pixmap.height() - 1);
+	}
+	else
+	{
+		Painter.setBrush(Qt::black);
+		Painter.drawRect(0, 0, Pixmap.width() - 1, Pixmap.height() - 1);
+
+		const int SquareSize = IconSize / 2 - 1;
+		Painter.fillRect(1, 1, SquareSize, SquareSize, Qt::white);
+		Painter.fillRect(1 + SquareSize, 1 + SquareSize, SquareSize, SquareSize, Qt::white);
+	}
+
+	Painter.end();
+
+	setIcon(QIcon(Pixmap));
 }
 
 void lcQColorPicker::popupClosed()
 {
-	if (initialColorIndex != currentColorIndex)
-		changed(initialColorIndex);
+	if (mInitialColorIndex != mCurrentColorIndex)
+		changed(mInitialColorIndex);
 
 	setChecked(false);
 	setFocus();
@@ -173,19 +186,19 @@ void lcQColorPicker::popupClosed()
 
 void lcQColorPicker::changed(int colorIndex)
 {
-	if (colorIndex == currentColorIndex)
+	if (colorIndex == mCurrentColorIndex)
 		return;
 
-	currentColorIndex = colorIndex;
-	updateIcon();
+	mCurrentColorIndex = colorIndex;
+	UpdateIcon();
 
 	repaint();
 
-	emit colorChanged(currentColorIndex);
+	emit colorChanged(mCurrentColorIndex);
 }
 
 void lcQColorPicker::selected(int colorIndex)
 {
-	initialColorIndex = colorIndex;
+	mInitialColorIndex = colorIndex;
 	changed(colorIndex);
 }

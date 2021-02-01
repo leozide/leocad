@@ -252,7 +252,7 @@ const lcCommand gCommands[] =
 	{
 		QT_TRANSLATE_NOOP("Action", "Edit.ReplaceAll"),
 		QT_TRANSLATE_NOOP("Menu", "Replace All"),
-		QT_TRANSLATE_NOOP("Status", "Replace pieces that match the search criteria"),
+		QT_TRANSLATE_NOOP("Status", "Replace all pieces that match the search criteria"),
 		""
 	},
 	// LC_EDIT_SELECT_ALL

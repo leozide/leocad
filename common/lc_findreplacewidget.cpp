@@ -21,81 +21,55 @@ lcFindReplaceWidget::lcFindReplaceWidget(QWidget* Parent, lcModel* Model, bool R
 	Layout->addWidget(new QLabel(tr("Find:")), 0, 0);
 
 	lcQColorPicker* FindColorPicker = new lcQColorPicker(this, true);
-	Layout->addWidget(FindColorPicker, 0, 2);
+	Layout->addWidget(FindColorPicker, 0, 1);
 
 	mFindPartComboBox = new QComboBox(this);
 	mFindPartComboBox->setEditable(true);
 	mFindPartComboBox->setInsertPolicy(QComboBox::NoInsert);
-	Layout->addWidget(mFindPartComboBox, 0, 4);
+	Layout->addWidget(mFindPartComboBox, 0, 2);
 
 	QToolButton* FindNextButton = new QToolButton(this);
 	FindNextButton->setAutoRaise(true);
 	FindNextButton->setDefaultAction(gMainWindow->mActions[LC_EDIT_FIND_NEXT]);
-	Layout->addWidget(FindNextButton, 0, 5);
+	Layout->addWidget(FindNextButton, 0, 3);
 
 	QToolButton* FindAllButton = new QToolButton(this);
 	FindAllButton ->setAutoRaise(true);
 	FindAllButton ->setDefaultAction(gMainWindow->mActions[LC_EDIT_FIND_ALL]);
-	Layout->addWidget(FindAllButton, 0, 6);
+	Layout->addWidget(FindAllButton, 0, 4);
 
 	connect(FindColorPicker, &lcQColorPicker::colorChanged, this, &lcFindReplaceWidget::FindColorIndexChanged);
 	connect(mFindPartComboBox->lineEdit(), &QLineEdit::returnPressed, gMainWindow->mActions[LC_EDIT_FIND_NEXT], &QAction::trigger);
 	connect(mFindPartComboBox->lineEdit(), &QLineEdit::textEdited, this, &lcFindReplaceWidget::FindTextEdited);
 	connect(mFindPartComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::activated), this, &lcFindReplaceWidget::FindActivated);
 
-	QCheckBox* ReplaceColorCheckBox = nullptr;
 	lcQColorPicker* ReplaceColorPicker = nullptr;
-	QCheckBox* ReplacePartCheckBox = nullptr;
-	QComboBox* ReplacePartComboBox = nullptr;
 
 	if (Replace)
 	{
 		Layout->addWidget(new QLabel(tr("Replace:")), 1, 0);
 
-		ReplaceColorCheckBox = new QCheckBox(this);
-		Layout->addWidget(ReplaceColorCheckBox, 1, 1);
+		ReplaceColorPicker = new lcQColorPicker(this, true);
+		Layout->addWidget(ReplaceColorPicker, 1, 1);
 
-		ReplaceColorPicker = new lcQColorPicker(this);
-		Layout->addWidget(ReplaceColorPicker, 1, 2);
-
-		ReplacePartCheckBox = new QCheckBox(this);
-		Layout->addWidget(ReplacePartCheckBox, 1, 3);
-
-		ReplacePartComboBox = new QComboBox(this);
-		Layout->addWidget(ReplacePartComboBox, 1, 4);
+		mReplacePartComboBox = new QComboBox(this);
+		Layout->addWidget(mReplacePartComboBox, 1, 2);
 
 		QToolButton* ReplaceNextButton = new QToolButton(this);
 		ReplaceNextButton->setAutoRaise(true);
 		ReplaceNextButton->setDefaultAction(gMainWindow->mActions[LC_EDIT_REPLACE_NEXT]);
-		Layout->addWidget(ReplaceNextButton, 1, 5);
+		Layout->addWidget(ReplaceNextButton, 1, 3);
 
 		QToolButton* ReplaceAllButton = new QToolButton(this);
 		ReplaceAllButton->setAutoRaise(true);
 		ReplaceAllButton->setDefaultAction(gMainWindow->mActions[LC_EDIT_REPLACE_ALL]);
-		Layout->addWidget(ReplaceAllButton, 1, 6);
+		Layout->addWidget(ReplaceAllButton, 1, 4);
 
-		connect(ReplaceColorCheckBox, &QCheckBox::toggled, [this](bool Checked)
-		{
-			mFindReplaceParams.ReplaceColor = Checked;
-		});
+		connect(ReplaceColorPicker, &lcQColorPicker::colorChanged, this, &lcFindReplaceWidget::ReplaceColorIndexChanged);
+		connect(mReplacePartComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::activated), this, &lcFindReplaceWidget::ReplaceActivated);
 
-		connect(ReplaceColorPicker, &lcQColorPicker::colorChanged, [this](int ColorIndex)
-		{
-			mFindReplaceParams.ReplaceColorIndex = ColorIndex;
-		});
-
-		connect(ReplacePartCheckBox, &QCheckBox::toggled, [this](bool Checked)
-		{
-			mFindReplaceParams.ReplaceInfo = Checked;
-		});
-
-		connect(ReplacePartComboBox, qOverload<int>(&QComboBox::currentIndexChanged), [this, ReplacePartComboBox](int Index)
-		{
-			mFindReplaceParams.ReplacePieceInfo = (PieceInfo*)ReplacePartComboBox->itemData(Index).value<void*>();
-		});
-
-		ReplacePartComboBox->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
-		ReplacePartComboBox->setMinimumContentsLength(1);
+		mReplacePartComboBox->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
+		mReplacePartComboBox->setMinimumContentsLength(1);
 
 		lcPiecesLibrary* Library = lcGetPiecesLibrary();
 		std::vector<PieceInfo*> SortedPieces;
@@ -111,8 +85,12 @@ lcFindReplaceWidget::lcFindReplaceWidget(QWidget* Parent, lcModel* Model, bool R
 
 		std::sort(SortedPieces.begin(), SortedPieces.end(), PieceCompare);
 
+		mReplacePartComboBox->addItem(QString(), QVariant::fromValue((void*)nullptr));
 		for (PieceInfo* Info : SortedPieces)
-			ReplacePartComboBox->addItem(Info->m_strDescription, QVariant::fromValue((void*)Info));
+			mReplacePartComboBox->addItem(QString::fromLatin1(Info->m_strDescription), QVariant::fromValue((void*)Info));
+
+		ReplaceColorPicker->setCurrentColor(lcGetColorIndex(LC_COLOR_NOCOLOR));
+		mReplacePartComboBox->setCurrentIndex(0);
 	}
 
 	lcPartsList PartsList;
@@ -132,13 +110,6 @@ lcFindReplaceWidget::lcFindReplaceWidget(QWidget* Parent, lcModel* Model, bool R
 		FindColorPicker->setCurrentColor(mFindReplaceParams.FindColorIndex);
 		mFindPartComboBox->setCurrentIndex(mFindPartComboBox->findData(QVariant::fromValue((void*)mFindReplaceParams.FindInfo)));
 
-		if (Replace)
-		{
-			ReplaceColorCheckBox->setChecked(true);
-			ReplaceColorPicker->setCurrentColor(mFindReplaceParams.FindColorIndex);
-			ReplacePartCheckBox->setChecked(true);
-			ReplacePartComboBox->setCurrentIndex(ReplacePartComboBox->findData(QVariant::fromValue((void*)mFindReplaceParams.FindInfo)));
-		}
 	}
 	else
 	{
@@ -167,4 +138,14 @@ void lcFindReplaceWidget::FindActivated(int Index)
 {
 	mFindReplaceParams.FindString.clear();
 	mFindReplaceParams.FindInfo = (PieceInfo*)mFindPartComboBox->itemData(Index).value<void*>();
+}
+
+void lcFindReplaceWidget::ReplaceColorIndexChanged(int ColorIndex)
+{
+	mFindReplaceParams.ReplaceColorIndex = ColorIndex;
+}
+
+void lcFindReplaceWidget::ReplaceActivated(int Index)
+{
+	mFindReplaceParams.ReplacePieceInfo = (PieceInfo*)mReplacePartComboBox->itemData(Index).value<void*>();
 }

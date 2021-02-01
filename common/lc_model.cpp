@@ -3812,16 +3812,21 @@ void lcModel::FindReplacePiece(bool SearchForward, bool FindAll)
 		{
 			if (PieceMatches(Piece))
 			{
-				if (Params->ReplaceColor)
+				const bool ReplaceColor = lcGetColorCode(Params->FindColorIndex) != LC_COLOR_NOCOLOR;
+
+				if (ReplaceColor)
 					Piece->SetColorIndex(Params->ReplaceColorIndex);
 
-				if (Params->ReplaceInfo)
+				if (Params->ReplacePieceInfo)
 					Piece->SetPieceInfo(Params->ReplacePieceInfo, QString(), true);
 
-				SaveCheckpoint(tr("Replacing Part"));
-				gMainWindow->UpdateSelectedObjects(false);
-				UpdateAllViews();
-				gMainWindow->UpdateTimeline(false, true);
+				if (ReplaceColor || Params->ReplacePieceInfo)
+				{
+					SaveCheckpoint(tr("Replacing Part"));
+					gMainWindow->UpdateSelectedObjects(false);
+					UpdateAllViews();
+					gMainWindow->UpdateTimeline(false, true);
+				}
 			}
 
 			StartIdx = PieceIdx;

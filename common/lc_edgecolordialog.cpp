@@ -45,12 +45,14 @@ lcAutomateEdgeColorDialog::lcAutomateEdgeColorDialog(QWidget* Parent, bool ShowH
 		EdgeSettingsLayout->addWidget(ResetPartEdgeContrastButton,0,3);
 	}
 
-	QLabel* PartColorValueLDIndexLabel = new QLabel(tr("Light/Dark Value:"), this);
+	QLabel* PartColorValueLDIndexLabel = new QLabel(tr(ShowHighContrastDialog ? "Light/Dark Value:" : "Saturation:"), this);
 	PartColorValueLDIndex = new QLabel(this);
 	PartColorValueLDIndexSlider = new QSlider(Qt::Horizontal, this);
 	PartColorValueLDIndexSlider->setRange(0, 100);
 	PartColorValueLDIndexSlider->setValue(mPartColorValueLDIndex * 100);
-	PartColorValueLDIndexSlider->setToolTip(tr("Set to classify where color values are light or dark - e.g. Dark Bluish Gray (72) is light at 0.39."));
+	PartColorValueLDIndexSlider->setToolTip(tr(ShowHighContrastDialog ?
+		"Set to classify where color values are light or dark - e.g. Dark Bluish Gray (72) is light at 0.39." :
+		"Set to specify amount of edge color tint or shade from the saturation adjusted part color"));
 	connect(PartColorValueLDIndexSlider, SIGNAL(valueChanged(int)), this, SLOT(SliderValueChanged(int)));
 	emit PartColorValueLDIndexSlider->valueChanged(PartColorValueLDIndexSlider->value());
 

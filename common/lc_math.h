@@ -2187,24 +2187,24 @@ inline lcVector4 lcAlgorithmicEdgeColor(const lcVector4& Value, const float Valu
 	hSL = lc_RGB2hSL(lcVector3(Value[0], Value[1], Value[2]));
 
 	// Adjust saturation
-	sat = 4.0f * sat - 2.0f;
-	if (sat < 0.0f)
-	{
-		sat = -sat;
-		hSL[0] = (hSL[0] < 3.0f) ? hSL[0] + 3.0f : hSL[0] - 3.0f;
-	}
-	sat = (sat > 2.0f) ? 2.0f : sat;
-	if (sat > 1.0f)
-	{
-		// Supersaturate
-		sat -= 1.0f;
-		hSL[1] += sat * (1.0f - hSL[1]);
-	}
-	else
-	{
+//	sat = 4.0f * sat - 2.0f;
+//	if (sat < 0.0f)
+//	{
+//		sat = -sat;
+//		hSL[0] = (hSL[0] < 3.0f) ? hSL[0] + 3.0f : hSL[0] - 3.0f;
+//	}
+//	sat = (sat > 2.0f) ? 2.0f : sat;
+//	if (sat > 1.0f)
+//	{
+//		// Supersaturate
+//		sat -= 1.0f;
+//		hSL[1] += sat * (1.0f - hSL[1]);
+//	}
+//	else
+//	{
 		// Desaturate
 		hSL[1] *= sat;
-	}
+//	}
 
 	// Adjusted color to RGB
 	rgb1 = lc_hSL2RGB(lcVector3(hSL[0], hSL[1], 0.5f));

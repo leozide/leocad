@@ -7,7 +7,7 @@
 #define LC_RTOD (static_cast<float>(180 / M_PI))
 #define LC_PI (static_cast<float>(M_PI))
 #define LC_2PI (static_cast<float>(2 * M_PI))
-#define LC_EPSILON (static_cast<float>(0.5f / 255.0f))
+#define LC_RGB_EPSILON (static_cast<float>(0.5f / 255.0f))
 
 #define LC_RGB(r,g,b) LC_RGBA(r,g,b,255)
 #define LC_RGBA(r,g,b,a) ((quint32)(((quint8) (r) | ((quint16) (g) << 8)) | (((quint32) (quint8) (b)) << 16) | (((quint32) (quint8) (a)) << 24)))
@@ -367,6 +367,15 @@ inline lcVector3& operator/=(lcVector3& a, const lcVector3& b)
 	return a;
 }
 
+inline lcVector3& operator+=(lcVector3& a, float b)
+{
+	a.x += b;
+	a.y += b;
+	a.z += b;
+
+	return a;
+}
+
 inline lcVector3& operator*=(lcVector3& a, float b)
 {
 	a.x *= b;
@@ -606,24 +615,6 @@ inline lcVector4& operator/=(lcVector4& a, float b)
 	return a;
 }
 
-inline lcVector3& operator+=(lcVector3& a, float b)
-{
-	a.x += b;
-	a.y += b;
-	a.z += b;
-
-	return a;
-}
-
-inline lcVector3& operator-=(lcVector3& a, float b)
-{
-	a.x -= b;
-	a.y -= b;
-	a.z -= b;
-
-	return a;
-}
-
 inline quint32 lcPackNormal(const lcVector3& Normal)
 {
 	quint32 Packed = 0;
@@ -679,7 +670,7 @@ inline float lcLuminescenceFromSRGB(lcVector4& Value)
 	return 0.2126f * r + 0.7152f * g + 0.0722f * b;
 }
 
-inline float lcLuminescenceFromlRGB(lcVector3& Value)
+inline float lcLuminescenceFromLRGB(lcVector3& Value)
 {
 	return 0.2126f * Value[0] + 0.7152f * Value[1] + 0.0722f * Value[2];
 }
@@ -2102,7 +2093,7 @@ inline lcVector3 lc_RGB2hSL(lcVector3 rgb)
 	C = M - m;
 	L = (M + m) / 2.0f;
 
-	if (C < LC_EPSILON)    // C == 0.0
+	if (C < LC_RGB_EPSILON)    // C == 0.0
 	{
 		h = 0.0f;
 	}
@@ -2122,7 +2113,7 @@ inline lcVector3 lc_RGB2hSL(lcVector3 rgb)
 	h = (h <  0.0) ? h + 6.0f : h;
 	h = (h >= 6.0) ? h - 6.0f : h;
 
-	S = ((L < (LC_EPSILON / 2.0f)) || (L > (1.0f -(LC_EPSILON / 2.0f))))
+	S = ((L < (LC_RGB_EPSILON / 2.0f)) || (L > (1.0f -(LC_RGB_EPSILON / 2.0f))))
 		? 0.0f : (2.0f * (M - L)) / (1.0f - fabs((2.0f * L) - 1.0f)) ;
 
 	return lcVector3(h, S, L);
@@ -2178,7 +2169,7 @@ inline lcVector4 lcAlgorithmicEdgeColor(const lcVector4& Value, const float Valu
 	float ye = EdgeLum;
 	float cont = Contrast;
 	float sat = Saturation;
-	lcVector3 rgb, hSL, rgb1, rgbf;
+	lcVector3 hSL, rgb1, rgbf;
 
 	// Determine luma target
 	if (ye < y0)
@@ -2193,7 +2184,6 @@ inline lcVector4 lcAlgorithmicEdgeColor(const lcVector4& Value, const float Valu
 	}
 
 	// Get base color in hSL
-	rgb = lcVector3(LC_SRGB_TO_LINEAR(Value[0]), LC_SRGB_TO_LINEAR(Value[1]), LC_SRGB_TO_LINEAR(Value[2]));
 	hSL = lc_RGB2hSL(lcVector3(Value[0], Value[1], Value[2]));
 
 	// Adjust saturation
@@ -2220,7 +2210,7 @@ inline lcVector4 lcAlgorithmicEdgeColor(const lcVector4& Value, const float Valu
 	rgb1 = lc_hSL2RGB(lcVector3(hSL[0], hSL[1], 0.5f));
 
 	// Fix adjusted color luma to target value
-	y1 = lcLuminescenceFromlRGB(rgb1);
+	y1 = lcLuminescenceFromLRGB(rgb1);
 	if (yt < y1)
 	{
 		// Make darker via scaling

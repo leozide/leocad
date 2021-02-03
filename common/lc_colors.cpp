@@ -228,14 +228,14 @@ static void lcAdjustStudStyleColors(std::vector<lcColor>& Colors, lcStudStyle St
 
 	for (lcColor& Color : Colors)
 	{
-		float ValueLuminescence = lcLuminescenceFromSRGB(Color.Value);
+		const float ValueLuminescence = lcLuminescenceFromSRGB(Color.Value);
 
 		if (Preferences.mAutomateEdgeColor)
 		{
 			if (Color.Adjusted)
 				continue;
 
-			float EdgeLuminescence = lcLuminescenceFromSRGB(Color.Edge);
+			const float EdgeLuminescence = lcLuminescenceFromSRGB(Color.Edge);
 
 			Color.Edge = lcAlgorithmicEdgeColor(Color.Value, ValueLuminescence, EdgeLuminescence, ContrastControl, LightDarkControl);
 			Color.Adjusted = true;
@@ -244,7 +244,6 @@ static void lcAdjustStudStyleColors(std::vector<lcColor>& Colors, lcStudStyle St
 		{
 			if (Color.Code == 4242)
 				continue;
-
 			else if (Color.Code == 0)
 				Color.Edge = BlackEdge;
 			else if (ValueLuminescence < LightDarkControl)

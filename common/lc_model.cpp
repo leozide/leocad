@@ -531,6 +531,8 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 
 			if (Token == QLatin1String("STEP"))
 			{
+				delete Piece;
+				Piece = nullptr;
 				CurrentStep++;
 				mFileLines.append(OriginalLine);
 				continue;

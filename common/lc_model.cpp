@@ -706,6 +706,9 @@ bool lcModel::LoadBinary(lcFile* file)
 	file->ReadBuffer(id, 32);
 	sscanf(&id[7], "%f", &fv);
 
+	if (memcmp(id, "LeoCAD ", 7))
+		return false;
+
 	if (fv == 0.0f)
 	{
 		lconv *loc = localeconv();

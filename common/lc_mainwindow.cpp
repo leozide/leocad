@@ -286,6 +286,8 @@ void lcMainWindow::CreateActions()
 	mActions[LC_EDIT_FIND_NEXT]->setIcon(QIcon(":/resources/edit_find_next.png"));
 	mActions[LC_EDIT_FIND_PREVIOUS]->setIcon(QIcon(":/resources/edit_find_previous.png"));
 	mActions[LC_EDIT_FIND_ALL]->setIcon(QIcon(":/resources/edit_find_all.png"));
+	mActions[LC_EDIT_REPLACE_NEXT]->setIcon(QIcon(":/resources/edit_replace_next.png"));
+	mActions[LC_EDIT_REPLACE_ALL]->setIcon(QIcon(":/resources/edit_replace_all.png"));
 	mActions[LC_PIECE_SHOW_EARLIER]->setIcon(QIcon(":/resources/piece_show_earlier.png"));
 	mActions[LC_PIECE_SHOW_LATER]->setIcon(QIcon(":/resources/piece_show_later.png"));
 	mActions[LC_VIEW_SPLIT_HORIZONTAL]->setIcon(QIcon(":/resources/view_split_horizontal.png"));

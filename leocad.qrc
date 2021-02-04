@@ -66,6 +66,8 @@
         <file>resources/edit_find_next.png</file>
         <file>resources/edit_find_previous.png</file>
         <file>resources/edit_find_all.png</file>
+        <file>resources/edit_replace_next.png</file>
+        <file>resources/edit_replace_all.png</file>
         <file>resources/edit_paste.png</file>
         <file>resources/edit_redo.png</file>
         <file>resources/edit_snap_angle.png</file>

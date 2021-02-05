@@ -11,7 +11,7 @@ Exec=leocad %f
 Terminal=false
 Type=Application
 Icon=leocad
-MimeType=application/vnd.leocad;application/x-ldraw;application/x-multi-part-ldraw;application/x-ldlite;
+MimeType=application/vnd.leocad;application/x-ldraw;application/x-multi-part-ldraw;application/x-multipart-ldraw;application/x-ldlite;
 Categories=Graphics;3DGraphics;Education;
 Keywords=CAD;LEGO;LDraw;
 

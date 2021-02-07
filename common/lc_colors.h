@@ -11,7 +11,8 @@ struct lcColor
 {
 	quint32 Code;
 	int Group;
-	bool Translucent;
+	bool Translucent = false;
+	bool Adjusted = false;
 	lcVector4 Value;
 	lcVector4 Edge;
 	char Name[LC_MAX_COLOR_NAME];

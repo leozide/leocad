@@ -7,6 +7,7 @@
 #define LC_RTOD (static_cast<float>(180 / M_PI))
 #define LC_PI (static_cast<float>(M_PI))
 #define LC_2PI (static_cast<float>(2 * M_PI))
+#define LC_RGB_EPSILON (static_cast<float>(0.5f / 255.0f))
 
 #define LC_RGB(r,g,b) LC_RGBA(r,g,b,255)
 #define LC_RGBA(r,g,b,a) ((quint32)(((quint8) (r) | ((quint16) (g) << 8)) | (((quint32) (quint8) (b)) << 16) | (((quint32) (quint8) (a)) << 24)))
@@ -15,7 +16,7 @@
 #define LC_RGBA_BLUE(rgba)  ((quint8)(((rgba) >> 16) & 0xff))
 #define LC_RGBA_ALPHA(rgba) ((quint8)(((rgba) >> 24) & 0xff))
 #define LC_SRGB_TO_LINEAR(v) (powf(v, 2.2f))
-#define LC_LINEAR_TO_SRGB(v)  (powf(v, 1.0f / 2.2f))
+#define LC_LINEAR_TO_SRGB(v) (powf(v, 1.0f / 2.2f))
 
 inline quint32 lcRGBAFromQColor(const QColor& Color)
 {
@@ -366,6 +367,15 @@ inline lcVector3& operator/=(lcVector3& a, const lcVector3& b)
 	return a;
 }
 
+inline lcVector3& operator+=(lcVector3& a, float b)
+{
+	a.x += b;
+	a.y += b;
+	a.z += b;
+
+	return a;
+}
+
 inline lcVector3& operator*=(lcVector3& a, float b)
 {
 	a.x *= b;
@@ -648,16 +658,30 @@ inline lcVector4 lcVector4FromColor(quint32 Color)
 
 inline quint32 lcColorFromVector3(const lcVector3& Color)
 {
-	return LC_RGB(Color[0] * 255, Color[1] * 255, Color[2] * 255);
+	return LC_RGB(roundf(Color[0] * 255), roundf(Color[1] * 255), roundf(Color[2] * 255));
 }
 
-inline float lcLuminescenceFromSRGB(lcVector4& Value)
+inline float lcLuminescence(const lcVector3& Color)
 {
-	float r = LC_SRGB_TO_LINEAR(Value[0]);
-	float g = LC_SRGB_TO_LINEAR(Value[1]);
-	float b = LC_SRGB_TO_LINEAR(Value[2]);
+	return 0.2126f * Color[0] + 0.7152f * Color[1] + 0.0722f * Color[2];
+}
 
-	return 0.2126f * r + 0.7152f * g + 0.0722f * b;
+inline lcVector3 lcSRGBToLinear(const lcVector3& Color)
+{
+	const float r = LC_SRGB_TO_LINEAR(Color[0]);
+	const float g = LC_SRGB_TO_LINEAR(Color[1]);
+	const float b = LC_SRGB_TO_LINEAR(Color[2]);
+
+	return lcVector3(r, g, b);
+}
+
+inline lcVector3 lcLinearToSRGB(const lcVector3& Color)
+{
+	const float r = LC_LINEAR_TO_SRGB(Color[0]);
+	const float g = LC_LINEAR_TO_SRGB(Color[1]);
+	const float b = LC_LINEAR_TO_SRGB(Color[2]);
+
+	return lcVector3(r, g, b);
 }
 
 inline lcVector3 lcMul(const lcVector3& a, const lcMatrix33& b)
@@ -2063,3 +2087,128 @@ bool SphereIntersectsVolume(const Vector3& Center, float Radius, const Vector4* 
 	return true;
 }*/
 
+inline lcVector3 lcRGBToHSL(const lcVector3& rgb)
+{
+	int Mi;
+	float M, m, C, h, S, L; // h is H/60
+
+	Mi = (rgb[0] >= rgb[1]) ? 0 : 1;
+	Mi = (rgb[Mi] >= rgb[2]) ? Mi : 2;
+	M = rgb[Mi];
+
+	m = (rgb[0] < rgb[1]) ? rgb[0] : rgb[1];
+	m = (m < rgb[2]) ? m : rgb[2];
+
+	C = M - m;
+	L = (M + m) / 2.0f;
+
+	if (C < LC_RGB_EPSILON) // C == 0.0
+		h = 0.0f;
+	else if (Mi == 0)       // M == R
+		h = 0.0f + (rgb[1] - rgb[2]) / C;
+	else if (Mi == 1)       // M == G
+		h = 2.0f + (rgb[2] - rgb[0]) / C;
+	else                    // M = B
+		h = 4.0f + (rgb[0] - rgb[1]) / C;
+
+	h = (h <  0.0) ? h + 6.0f : h;
+	h = (h >= 6.0) ? h - 6.0f : h;
+
+	S = ((L < (LC_RGB_EPSILON / 2.0f)) || (L > (1.0f -(LC_RGB_EPSILON / 2.0f))))
+		? 0.0f : (2.0f * (M - L)) / (1.0f - fabs((2.0f * L) - 1.0f)) ;
+
+	return lcVector3(h, S, L);
+}
+
+inline lcVector3 lcHSLToRGB(const lcVector3& hSL)
+{
+	lcVector3 rgb;
+	float h, S, L, C, X, m;
+
+	h = hSL[0];
+	S = hSL[1];
+	L = hSL[2];
+
+	C = (1.0f - fabs(2.0f * L - 1.0f)) * S;
+	X = C * (1.0f - fabs(fmodf(h, 2.0f) - 1.0f));
+
+	if (h < 1.0f)
+		rgb = lcVector3(C, X, 0.0f);
+	else if (h < 2.0f)
+		rgb = lcVector3(X, C, 0.0f);
+	else if (h < 3.0f)
+		rgb = lcVector3(0.0f, C, X);
+	else if (h < 4.0f)
+		rgb = lcVector3(0.0f, X, C);
+	else if (h < 5.0f)
+		rgb = lcVector3(X, 0.0f, C);
+	else
+		rgb = lcVector3(C, 0.0f, X);
+
+	m = L - C / 2.0f;
+	rgb += m;
+
+	return rgb;
+}
+
+inline lcVector4 lcAlgorithmicEdgeColor(const lcVector3& Value, const float ValueLum, const float EdgeLum, const float Contrast, const float Saturation)
+{
+	float y1, yt;
+	lcVector3 hSL, rgb1, rgbf;
+
+	// Determine luma target
+	if (EdgeLum < ValueLum)
+	{
+		// Light base color
+		yt = ValueLum - Contrast * ValueLum;
+	}
+	else
+	{
+		// Dark base color
+		yt = ValueLum + Contrast * (1.0f - ValueLum);
+	}
+
+	// Get base color in hSL
+	hSL = lcRGBToHSL(Value);
+
+	// Adjust saturation
+//	sat = 4.0f * sat - 2.0f;
+//	if (sat < 0.0f)
+//	{
+//		sat = -sat;
+//		hSL[0] = (hSL[0] < 3.0f) ? hSL[0] + 3.0f : hSL[0] - 3.0f;
+//	}
+//	sat = (sat > 2.0f) ? 2.0f : sat;
+//	if (sat > 1.0f)
+//	{
+//		// Supersaturate
+//		sat -= 1.0f;
+//		hSL[1] += sat * (1.0f - hSL[1]);
+//	}
+//	else
+//	{
+		// Desaturate
+		hSL[1] *= Saturation;
+//	}
+
+	// Adjusted color to RGB
+	rgb1 = lcHSLToRGB(lcVector3(hSL[0], hSL[1], 0.5f));
+
+	// Fix adjusted color luma to target value
+	y1 = lcLuminescence(rgb1);
+
+	if (yt < y1)
+	{
+		// Make darker via scaling
+		rgbf = (yt/y1) * rgb1;
+	}
+	else
+	{
+		// Make lighter via scaling anti-color
+		rgbf = lcVector3(1.0f, 1.0f, 1.0f) - rgb1;
+		rgbf *= (1.0f - yt) / (1.0f - y1);
+		rgbf = lcVector3(1.0f, 1.0f, 1.0f) - rgbf;
+	}
+
+	return  lcVector4(lcLinearToSRGB(rgbf), 1.0f);
+}

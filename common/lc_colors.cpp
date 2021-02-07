@@ -217,27 +217,27 @@ static void lcAdjustStudStyleColors(std::vector<lcColor>& Colors, lcStudStyle St
 	if (!Preferences.mAutomateEdgeColor && !lcIsHighContrast(StudStyle))
 		return;
 
-	const float LDIndex = LC_SRGB_TO_LINEAR(Preferences.mPartColorValueLDIndex);
 	const lcVector4 Edge = lcVector4FromColor(Preferences.mPartEdgeColor);
 	const lcVector4 DarkEdge = lcVector4FromColor(Preferences.mDarkEdgeColor);
 	const lcVector4 BlackEdge = lcVector4FromColor(Preferences.mBlackEdgeColor);
 
+	const float ContrastControl = Preferences.mPartEdgeContrast;
+	const float LightDarkControl = LC_SRGB_TO_LINEAR(Preferences.mAutomateEdgeColor ? Preferences.mPartColorValueLDIndex : Preferences.mPartColorValueLDIndex);
+
 	for (lcColor& Color : Colors)
 	{
-		float ValueLuminescence = lcLuminescenceFromSRGB(Color.Value);
+		lcVector3 LinearColor = lcSRGBToLinear(lcVector3(Color.Value));
+		const float ValueLuminescence = lcLuminescence(LinearColor);
 
 		if (Preferences.mAutomateEdgeColor)
 		{
-			float EdgeLuminescence = 0.0f;
+			if (Color.Adjusted)
+				continue;
 
-			if (ValueLuminescence > LDIndex)
-				EdgeLuminescence = ValueLuminescence - (ValueLuminescence * Preferences.mPartEdgeContrast);
-			else
-				EdgeLuminescence = (1.0f - ValueLuminescence) * Preferences.mPartEdgeContrast + ValueLuminescence;
+			const float EdgeLuminescence = lcLuminescence(lcSRGBToLinear(lcVector3(Color.Edge)));
 
-			EdgeLuminescence = LC_LINEAR_TO_SRGB(EdgeLuminescence);
-
-			Color.Edge = lcVector4(EdgeLuminescence, EdgeLuminescence, EdgeLuminescence, 1.0f);
+			Color.Edge = lcAlgorithmicEdgeColor(LinearColor, ValueLuminescence, EdgeLuminescence, ContrastControl, LightDarkControl);
+			Color.Adjusted = true;
 		}
 		else
 		{
@@ -245,7 +245,7 @@ static void lcAdjustStudStyleColors(std::vector<lcColor>& Colors, lcStudStyle St
 				continue;
 			else if (Color.Code == 0)
 				Color.Edge = BlackEdge;
-			else if (ValueLuminescence < LDIndex)
+			else if (ValueLuminescence < LightDarkControl)
 				Color.Edge = DarkEdge;
 			else
 				Color.Edge = Edge;

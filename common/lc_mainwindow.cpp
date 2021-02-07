@@ -2495,19 +2495,9 @@ bool lcMainWindow::SaveProject(const QString& FileName)
 	QString SaveFileName = FileName;
 	Project* Project = lcGetActiveProject();
 
-	if (!SaveFileName.isEmpty() && Project->GetModels().GetSize() > 1 && QFileInfo(SaveFileName).suffix().toLower() != QLatin1String("mpd"))
-		SaveFileName.clear();
-
 	if (SaveFileName.isEmpty())
 	{
 		SaveFileName = Project->GetFileName();
-
-		if (Project->GetModels().GetSize() > 1 && QFileInfo(SaveFileName).suffix().toLower() != QLatin1String("mpd"))
-		{
-			int SuffixLength = QFileInfo(SaveFileName).suffix().length();
-			if (SuffixLength)
-				SaveFileName = SaveFileName.left(SaveFileName.length() - SuffixLength - 1);
-		}
 
 		if (SaveFileName.isEmpty())
 			SaveFileName = QFileInfo(QDir(lcGetProfileString(LC_PROFILE_PROJECTS_PATH)), Project->GetTitle()).absoluteFilePath();

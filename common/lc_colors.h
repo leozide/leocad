@@ -11,17 +11,12 @@ struct lcColor
 {
 	quint32 Code;
 	int Group;
-	bool Translucent;
-	bool Adjusted;
+	bool Translucent = false;
+	bool Adjusted = false;
 	lcVector4 Value;
 	lcVector4 Edge;
 	char Name[LC_MAX_COLOR_NAME];
 	char SafeName[LC_MAX_COLOR_NAME];
-	lcColor()
-	{
-		Translucent = false;
-		Adjusted = false;
-	}
 };
 
 enum

@@ -661,18 +661,27 @@ inline quint32 lcColorFromVector3(const lcVector3& Color)
 	return LC_RGB(roundf(Color[0] * 255), roundf(Color[1] * 255), roundf(Color[2] * 255));
 }
 
-inline float lcLuminescenceFromSRGB(lcVector4& Value)
+inline float lcLuminescence(const lcVector3& Color)
 {
-	float r = LC_SRGB_TO_LINEAR(Value[0]);
-	float g = LC_SRGB_TO_LINEAR(Value[1]);
-	float b = LC_SRGB_TO_LINEAR(Value[2]);
-
-	return 0.2126f * r + 0.7152f * g + 0.0722f * b;
+	return 0.2126f * Color[0] + 0.7152f * Color[1] + 0.0722f * Color[2];
 }
 
-inline float lcLuminescenceFromLRGB(lcVector3& Value)
+inline lcVector3 lcSRGBToLinear(const lcVector3& Color)
 {
-	return 0.2126f * Value[0] + 0.7152f * Value[1] + 0.0722f * Value[2];
+	const float r = LC_SRGB_TO_LINEAR(Color[0]);
+	const float g = LC_SRGB_TO_LINEAR(Color[1]);
+	const float b = LC_SRGB_TO_LINEAR(Color[2]);
+
+	return lcVector3(r, g, b);
+}
+
+inline lcVector3 lcLinearToSRGB(const lcVector3& Color)
+{
+	const float r = LC_LINEAR_TO_SRGB(Color[0]);
+	const float g = LC_LINEAR_TO_SRGB(Color[1]);
+	const float b = LC_LINEAR_TO_SRGB(Color[2]);
+
+	return lcVector3(r, g, b);
 }
 
 inline lcVector3 lcMul(const lcVector3& a, const lcMatrix33& b)
@@ -2078,7 +2087,7 @@ bool SphereIntersectsVolume(const Vector3& Center, float Radius, const Vector4* 
 	return true;
 }*/
 
-inline lcVector3 lc_RGB2hSL(lcVector3 rgb)
+inline lcVector3 lcRGBToHSL(const lcVector3& rgb)
 {
 	int Mi;
 	float M, m, C, h, S, L; // h is H/60
@@ -2093,22 +2102,14 @@ inline lcVector3 lc_RGB2hSL(lcVector3 rgb)
 	C = M - m;
 	L = (M + m) / 2.0f;
 
-	if (C < LC_RGB_EPSILON)    // C == 0.0
-	{
+	if (C < LC_RGB_EPSILON) // C == 0.0
 		h = 0.0f;
-	}
-	else if (Mi == 0)      // M == R
-	{
+	else if (Mi == 0)       // M == R
 		h = 0.0f + (rgb[1] - rgb[2]) / C;
-	}
-	else if (Mi == 1)      // M == G
-	{
+	else if (Mi == 1)       // M == G
 		h = 2.0f + (rgb[2] - rgb[0]) / C;
-	}
-	else                   // M = B
-	{
+	else                    // M = B
 		h = 4.0f + (rgb[0] - rgb[1]) / C;
-	}
 
 	h = (h <  0.0) ? h + 6.0f : h;
 	h = (h >= 6.0) ? h - 6.0f : h;
@@ -2119,7 +2120,7 @@ inline lcVector3 lc_RGB2hSL(lcVector3 rgb)
 	return lcVector3(h, S, L);
 }
 
-inline lcVector3 lc_hSL2RGB(lcVector3 hSL)
+inline lcVector3 lcHSLToRGB(const lcVector3& hSL)
 {
 	lcVector3 rgb;
 	float h, S, L, C, X, m;
@@ -2132,29 +2133,17 @@ inline lcVector3 lc_hSL2RGB(lcVector3 hSL)
 	X = C * (1.0f - fabs(fmodf(h, 2.0f) - 1.0f));
 
 	if (h < 1.0f)
-	{
 		rgb = lcVector3(C, X, 0.0f);
-	}
 	else if (h < 2.0f)
-	{
 		rgb = lcVector3(X, C, 0.0f);
-	}
 	else if (h < 3.0f)
-	{
 		rgb = lcVector3(0.0f, C, X);
-	}
 	else if (h < 4.0f)
-	{
 		rgb = lcVector3(0.0f, X, C);
-	}
 	else if (h < 5.0f)
-	{
 		rgb = lcVector3(X, 0.0f, C);
-	}
 	else
-	{
 		rgb = lcVector3(C, 0.0f, X);
-	}
 
 	m = L - C / 2.0f;
 	rgb += m;
@@ -2162,29 +2151,25 @@ inline lcVector3 lc_hSL2RGB(lcVector3 hSL)
 	return rgb;
 }
 
-inline lcVector4 lcAlgorithmicEdgeColor(const lcVector4& Value, const float ValueLum, const float EdgeLum, const float Contrast, const float Saturation)
+inline lcVector4 lcAlgorithmicEdgeColor(const lcVector3& Value, const float ValueLum, const float EdgeLum, const float Contrast, const float Saturation)
 {
 	float y1, yt;
-	float y0 = ValueLum;
-	float ye = EdgeLum;
-	float cont = Contrast;
-	float sat = Saturation;
 	lcVector3 hSL, rgb1, rgbf;
 
 	// Determine luma target
-	if (ye < y0)
+	if (EdgeLum < ValueLum)
 	{
 		// Light base color
-		yt = y0 - cont * y0;
+		yt = ValueLum - Contrast * ValueLum;
 	}
 	else
 	{
 		// Dark base color
-		yt = y0 + cont * (1.0f - y0);
+		yt = ValueLum + Contrast * (1.0f - ValueLum);
 	}
 
 	// Get base color in hSL
-	hSL = lc_RGB2hSL(lcVector3(Value[0], Value[1], Value[2]));
+	hSL = lcRGBToHSL(Value);
 
 	// Adjust saturation
 //	sat = 4.0f * sat - 2.0f;
@@ -2203,14 +2188,15 @@ inline lcVector4 lcAlgorithmicEdgeColor(const lcVector4& Value, const float Valu
 //	else
 //	{
 		// Desaturate
-		hSL[1] *= sat;
+		hSL[1] *= Saturation;
 //	}
 
 	// Adjusted color to RGB
-	rgb1 = lc_hSL2RGB(lcVector3(hSL[0], hSL[1], 0.5f));
+	rgb1 = lcHSLToRGB(lcVector3(hSL[0], hSL[1], 0.5f));
 
 	// Fix adjusted color luma to target value
-	y1 = lcLuminescenceFromLRGB(rgb1);
+	y1 = lcLuminescence(rgb1);
+
 	if (yt < y1)
 	{
 		// Make darker via scaling
@@ -2224,6 +2210,5 @@ inline lcVector4 lcAlgorithmicEdgeColor(const lcVector4& Value, const float Valu
 		rgbf = lcVector3(1.0f, 1.0f, 1.0f) - rgbf;
 	}
 
-	return  lcVector4(LC_LINEAR_TO_SRGB(rgbf[0]), LC_LINEAR_TO_SRGB(rgbf[1]), LC_LINEAR_TO_SRGB(rgbf[2]), 1.0f);
+	return  lcVector4(lcLinearToSRGB(rgbf), 1.0f);
 }
-

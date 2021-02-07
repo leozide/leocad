@@ -492,6 +492,7 @@ void lcMainWindow::CreateMenus()
 	EditMenu->addAction(mActions[LC_EDIT_CUT]);
 	EditMenu->addAction(mActions[LC_EDIT_COPY]);
 	EditMenu->addAction(mActions[LC_EDIT_PASTE]);
+	EditMenu->addAction(mActions[LC_EDIT_PASTE_STEPS]);
 	EditMenu->addSeparator();
 	EditMenu->addAction(mActions[LC_EDIT_FIND]);
 	EditMenu->addAction(mActions[LC_EDIT_FIND_NEXT]);
@@ -2088,10 +2089,11 @@ void lcMainWindow::UpdateTimeline(bool Clear, bool UpdateItems)
 
 void lcMainWindow::UpdatePaste(bool Enabled)
 {
-	QAction* Action = mActions[LC_EDIT_PASTE];
+	if (mActions[LC_EDIT_PASTE])
+		mActions[LC_EDIT_PASTE]->setEnabled(Enabled);
 
-	if (Action)
-		Action->setEnabled(Enabled);
+	if (mActions[LC_EDIT_PASTE_STEPS])
+		mActions[LC_EDIT_PASTE_STEPS]->setEnabled(Enabled);
 }
 
 void lcMainWindow::UpdateCurrentStep()
@@ -2714,7 +2716,12 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 
 	case LC_EDIT_PASTE:
 		if (ActiveModel)
-			ActiveModel->Paste();
+			ActiveModel->Paste(true);
+		break;
+
+	case LC_EDIT_PASTE_STEPS:
+		if (ActiveModel)
+			ActiveModel->Paste(false);
 		break;
 
 	case LC_EDIT_FIND:

@@ -203,8 +203,15 @@ const lcCommand gCommands[] =
 	{
 		QT_TRANSLATE_NOOP("Action", "Edit.Paste"),
 		QT_TRANSLATE_NOOP("Menu", "&Paste"),
-		QT_TRANSLATE_NOOP("Status", "Insert Clipboard contents"),
+		QT_TRANSLATE_NOOP("Status", "Insert Clipboard contents in the current step"),
 		"Ctrl+V"
+	},
+	// LC_EDIT_PASTE_STEPS
+	{
+		QT_TRANSLATE_NOOP("Action", "Edit.PasteSteps"),
+		QT_TRANSLATE_NOOP("Menu", "Paste with Steps"),
+		QT_TRANSLATE_NOOP("Status", "Insert Clipboard contents in their original steps"),
+		""
 	},
 	// LC_EDIT_FIND
 	{

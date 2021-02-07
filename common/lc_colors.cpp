@@ -222,7 +222,7 @@ static void lcAdjustStudStyleColors(std::vector<lcColor>& Colors, lcStudStyle St
 	const lcVector4 BlackEdge = lcVector4FromColor(Preferences.mBlackEdgeColor);
 
 	const float ContrastControl = Preferences.mPartEdgeContrast;
-	const float LightDarkControl = LC_SRGB_TO_LINEAR(Preferences.mAutomateEdgeColor ? Preferences.mPartColorValueLDIndex : Preferences.mPartColorValueLDIndex);
+	const float LightDarkControl = Preferences.mPartColorValueLDIndex;
 
 	for (lcColor& Color : Colors)
 	{

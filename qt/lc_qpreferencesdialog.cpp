@@ -28,21 +28,23 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 	delete ui->povrayLayout;
 #endif
 
-	connect(ui->BackgroundSolidColorButton, SIGNAL(clicked()), this, SLOT(ColorButtonClicked()));
-	connect(ui->BackgroundGradient1ColorButton, SIGNAL(clicked()), this, SLOT(ColorButtonClicked()));
-	connect(ui->BackgroundGradient2ColorButton, SIGNAL(clicked()), this, SLOT(ColorButtonClicked()));
-	connect(ui->AxesColorButton, SIGNAL(clicked()), this, SLOT(ColorButtonClicked()));
-	connect(ui->TextColorButton, SIGNAL(clicked()), this, SLOT(ColorButtonClicked()));
-	connect(ui->MarqueeBorderColorButton, SIGNAL(clicked()), this, SLOT(ColorButtonClicked()));
-	connect(ui->MarqueeFillColorButton, SIGNAL(clicked()), this, SLOT(ColorButtonClicked()));
-	connect(ui->OverlayColorButton, SIGNAL(clicked()), this, SLOT(ColorButtonClicked()));
-	connect(ui->FadeStepsColor, SIGNAL(clicked()), this, SLOT(ColorButtonClicked()));
-	connect(ui->HighlightNewPartsColor, SIGNAL(clicked()), this, SLOT(ColorButtonClicked()));
-	connect(ui->gridStudColor, SIGNAL(clicked()), this, SLOT(ColorButtonClicked()));
-	connect(ui->gridLineColor, SIGNAL(clicked()), this, SLOT(ColorButtonClicked()));
-	connect(ui->ViewSphereColorButton, SIGNAL(clicked()), this, SLOT(ColorButtonClicked()));
-	connect(ui->ViewSphereTextColorButton, SIGNAL(clicked()), this, SLOT(ColorButtonClicked()));
-	connect(ui->ViewSphereHighlightColorButton, SIGNAL(clicked()), this, SLOT(ColorButtonClicked()));
+	connect(ui->BackgroundSolidColorButton, &QToolButton::clicked, this, &lcQPreferencesDialog::ColorButtonClicked);
+	connect(ui->BackgroundGradient1ColorButton, &QToolButton::clicked, this, &lcQPreferencesDialog::ColorButtonClicked);
+	connect(ui->BackgroundGradient2ColorButton, &QToolButton::clicked, this, &lcQPreferencesDialog::ColorButtonClicked);
+	connect(ui->ActiveViewColorButton, &QToolButton::clicked, this, &lcQPreferencesDialog::ColorButtonClicked);
+	connect(ui->InactiveViewColorButton, &QToolButton::clicked, this, &lcQPreferencesDialog::ColorButtonClicked);
+	connect(ui->AxesColorButton, &QToolButton::clicked, this, &lcQPreferencesDialog::ColorButtonClicked);
+	connect(ui->TextColorButton, &QToolButton::clicked, this, &lcQPreferencesDialog::ColorButtonClicked);
+	connect(ui->MarqueeBorderColorButton, &QToolButton::clicked, this, &lcQPreferencesDialog::ColorButtonClicked);
+	connect(ui->MarqueeFillColorButton, &QToolButton::clicked, this, &lcQPreferencesDialog::ColorButtonClicked);
+	connect(ui->OverlayColorButton, &QToolButton::clicked, this, &lcQPreferencesDialog::ColorButtonClicked);
+	connect(ui->FadeStepsColor, &QToolButton::clicked, this, &lcQPreferencesDialog::ColorButtonClicked);
+	connect(ui->HighlightNewPartsColor, &QToolButton::clicked, this, &lcQPreferencesDialog::ColorButtonClicked);
+	connect(ui->gridStudColor, &QToolButton::clicked, this, &lcQPreferencesDialog::ColorButtonClicked);
+	connect(ui->gridLineColor, &QToolButton::clicked, this, &lcQPreferencesDialog::ColorButtonClicked);
+	connect(ui->ViewSphereColorButton, &QToolButton::clicked, this, &lcQPreferencesDialog::ColorButtonClicked);
+	connect(ui->ViewSphereTextColorButton, &QToolButton::clicked, this, &lcQPreferencesDialog::ColorButtonClicked);
+	connect(ui->ViewSphereHighlightColorButton, &QToolButton::clicked, this, &lcQPreferencesDialog::ColorButtonClicked);
 	connect(ui->categoriesTree, SIGNAL(itemSelectionChanged()), this, SLOT(updateParts()));
 	ui->shortcutEdit->installEventFilter(this);
 	connect(ui->commandList, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), this, SLOT(commandChanged(QTreeWidgetItem*)));

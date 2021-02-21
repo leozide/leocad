@@ -143,6 +143,22 @@ namespace {
 	}
 }
 
+class Item
+{
+public:
+	Item(const std::string& id, int color, int count)
+		: mId(id), mColor(color), mCount(count)
+		{
+		}
+	void AddToCount(int count)
+		{
+			mCount += count;
+		}
+	std::string mId;
+	int mColor;
+	int mCount;
+};
+
 void ExportBrickLink(const Project& project)
 {
 	lcPartsList PartsList;
@@ -171,6 +187,8 @@ void ExportBrickLink(const Project& project)
 		return;
 	}
 
+	std::map<std::string, Item> Inventory;
+
 	BrickLinkFile.WriteLine("<INVENTORY>\n");
 
 	for (const auto& PartIt : PartsList)
@@ -179,8 +197,6 @@ void ExportBrickLink(const Project& project)
 
 		for (const auto& ColorIt : PartIt.second)
 		{
-			BrickLinkFile.WriteLine("  <ITEM>\n");
-			BrickLinkFile.WriteLine("    <ITEMTYPE>P</ITEMTYPE>\n");
 
 			char FileName[LC_PIECE_NAME_LEN];
 			strcpy(FileName, Info->mFileName);
@@ -189,22 +205,38 @@ void ExportBrickLink(const Project& project)
 				*Ext = 0;
 
 			const char* Remapped = BrickLinkRemap(FileName);
-
-			sprintf(Line, "    <ITEMID>%s</ITEMID>\n", Remapped);
-			BrickLinkFile.WriteLine(Line);
-
-			sprintf(Line, "    <MINQTY>%d</MINQTY>\n", ColorIt.second);
-			BrickLinkFile.WriteLine(Line);
-
 			int Color = lcGetBrickLinkColor(ColorIt.first);
-			if (Color)
+			std::string key(Remapped);
+			key += "-" + std::to_string(Color);
+			auto iter = Inventory.find(key);
+			if (iter == Inventory.end())
 			{
-				sprintf(Line, "    <COLOR>%d</COLOR>\n", Color);
-				BrickLinkFile.WriteLine(Line);
+				Inventory.emplace(std::make_pair(key, Item(Remapped, Color, ColorIt.second)));
 			}
-
-			BrickLinkFile.WriteLine("  </ITEM>\n");
+			else
+			{
+				iter->second.AddToCount(ColorIt.second);
+			}
 		}
+	}
+
+	for (const auto& Item : Inventory)
+	{
+		BrickLinkFile.WriteLine("  <ITEM>\n");
+		BrickLinkFile.WriteLine("    <ITEMTYPE>P</ITEMTYPE>\n");
+		sprintf(Line, "    <ITEMID>%s</ITEMID>\n", Item.second.mId.c_str());
+		BrickLinkFile.WriteLine(Line);
+
+		sprintf(Line, "    <MINQTY>%d</MINQTY>\n", Item.second.mCount);
+		BrickLinkFile.WriteLine(Line);
+
+		if (Item.second.mColor)
+		{
+			sprintf(Line, "    <COLOR>%d</COLOR>\n", Item.second.mColor);
+			BrickLinkFile.WriteLine(Line);
+		}
+
+		BrickLinkFile.WriteLine("  </ITEM>\n");
 	}
 
 	BrickLinkFile.WriteLine("</INVENTORY>\n");

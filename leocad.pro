@@ -166,6 +166,7 @@ SOURCES += \
 	common/minifig.cpp \
 	common/light.cpp \
 	common/lc_application.cpp \
+	common/lc_bricklink.cpp \
 	common/lc_category.cpp \
 	common/lc_collapsiblewidget.cpp \
 	common/lc_colors.cpp \
@@ -233,6 +234,7 @@ HEADERS += \
 	common/light.h \
 	common/lc_application.h \
 	common/lc_array.h \
+	common/lc_bricklink.h \
 	common/lc_category.h \
 	common/lc_collapsiblewidget.h \
 	common/lc_colors.h \

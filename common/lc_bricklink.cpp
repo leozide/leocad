@@ -64,8 +64,10 @@ namespace {
 					qDebug() << "BL remappings: Invalid line" << Line;
 					continue;
 				}
-				Remapping.insert(std::make_pair(parts.value(0).toStdString(),
+				auto result = Remapping.insert(std::make_pair(parts.value(0).toStdString(),
 												parts.value(1).toUtf8().data()));
+				if (!result.second)
+					qDebug() << "Duplicate" << parts.value(0);
 			}
 		}
 

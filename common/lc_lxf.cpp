@@ -16,15 +16,10 @@ static bool lcLoadLDrawXML(std::map<int, int>& MaterialTable, std::map<int, std:
 		Data = File.readAll();
 	else
 	{
-		QResource Resource(":/resources/ldraw.xml");
+		QFile DefaultFile(":/resources/ldraw.xml");
 
-		if (Resource.isValid())
-		{
-			if (Resource.isCompressed())
-				Data = qUncompress(Resource.data(), Resource.size());
-			else
-				Data = QByteArray::fromRawData((const char*)Resource.data(), Resource.size());
-		}
+		if (DefaultFile.open(QIODevice::ReadOnly))
+			Data = DefaultFile.readAll();
 	}
 
 	if (Data.isEmpty())

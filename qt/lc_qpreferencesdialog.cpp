@@ -3,12 +3,12 @@
 #include "ui_lc_qpreferencesdialog.h"
 #include "lc_qutils.h"
 #include "lc_qcategorydialog.h"
-#include "lc_basewindow.h"
 #include "lc_library.h"
 #include "lc_application.h"
 #include "lc_qutils.h"
 #include "lc_glextensions.h"
 #include "pieceinf.h"
+#include "lc_edgecolordialog.h"
 
 static const char* gLanguageLocales[] =
 {
@@ -28,18 +28,29 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 	delete ui->povrayLayout;
 #endif
 
-	ui->lineWidth->setValidator(new QDoubleValidator(ui->lineWidth));
-	connect(ui->FadeStepsColor, SIGNAL(clicked()), this, SLOT(ColorButtonClicked()));
-	connect(ui->HighlightNewPartsColor, SIGNAL(clicked()), this, SLOT(ColorButtonClicked()));
-	connect(ui->gridStudColor, SIGNAL(clicked()), this, SLOT(ColorButtonClicked()));
-	connect(ui->gridLineColor, SIGNAL(clicked()), this, SLOT(ColorButtonClicked()));
-	connect(ui->ViewSphereColorButton, SIGNAL(clicked()), this, SLOT(ColorButtonClicked()));
-	connect(ui->ViewSphereTextColorButton, SIGNAL(clicked()), this, SLOT(ColorButtonClicked()));
-	connect(ui->ViewSphereHighlightColorButton, SIGNAL(clicked()), this, SLOT(ColorButtonClicked()));
+	connect(ui->BackgroundSolidColorButton, &QToolButton::clicked, this, &lcQPreferencesDialog::ColorButtonClicked);
+	connect(ui->BackgroundGradient1ColorButton, &QToolButton::clicked, this, &lcQPreferencesDialog::ColorButtonClicked);
+	connect(ui->BackgroundGradient2ColorButton, &QToolButton::clicked, this, &lcQPreferencesDialog::ColorButtonClicked);
+	connect(ui->ActiveViewColorButton, &QToolButton::clicked, this, &lcQPreferencesDialog::ColorButtonClicked);
+	connect(ui->InactiveViewColorButton, &QToolButton::clicked, this, &lcQPreferencesDialog::ColorButtonClicked);
+	connect(ui->AxesColorButton, &QToolButton::clicked, this, &lcQPreferencesDialog::ColorButtonClicked);
+	connect(ui->TextColorButton, &QToolButton::clicked, this, &lcQPreferencesDialog::ColorButtonClicked);
+	connect(ui->MarqueeBorderColorButton, &QToolButton::clicked, this, &lcQPreferencesDialog::ColorButtonClicked);
+	connect(ui->MarqueeFillColorButton, &QToolButton::clicked, this, &lcQPreferencesDialog::ColorButtonClicked);
+	connect(ui->OverlayColorButton, &QToolButton::clicked, this, &lcQPreferencesDialog::ColorButtonClicked);
+	connect(ui->FadeStepsColor, &QToolButton::clicked, this, &lcQPreferencesDialog::ColorButtonClicked);
+	connect(ui->HighlightNewPartsColor, &QToolButton::clicked, this, &lcQPreferencesDialog::ColorButtonClicked);
+	connect(ui->gridStudColor, &QToolButton::clicked, this, &lcQPreferencesDialog::ColorButtonClicked);
+	connect(ui->gridLineColor, &QToolButton::clicked, this, &lcQPreferencesDialog::ColorButtonClicked);
+	connect(ui->ViewSphereColorButton, &QToolButton::clicked, this, &lcQPreferencesDialog::ColorButtonClicked);
+	connect(ui->ViewSphereTextColorButton, &QToolButton::clicked, this, &lcQPreferencesDialog::ColorButtonClicked);
+	connect(ui->ViewSphereHighlightColorButton, &QToolButton::clicked, this, &lcQPreferencesDialog::ColorButtonClicked);
 	connect(ui->categoriesTree, SIGNAL(itemSelectionChanged()), this, SLOT(updateParts()));
 	ui->shortcutEdit->installEventFilter(this);
 	connect(ui->commandList, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), this, SLOT(commandChanged(QTreeWidgetItem*)));
 	connect(ui->mouseTree, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), this, SLOT(MouseTreeItemChanged(QTreeWidgetItem*)));
+	connect(ui->HighContrastButton, SIGNAL(clicked()), this, SLOT(AutomateEdgeColor()));
+	connect(ui->AutomateEdgeColorButton, SIGNAL(clicked()), this, SLOT(AutomateEdgeColor()));
 
 	ui->partsLibrary->setText(mOptions->LibraryPath);
 	ui->ColorConfigEdit->setText(mOptions->ColorConfigPath);
@@ -48,6 +59,9 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 	ui->lgeoPath->setText(mOptions->LGEOPath);
 	ui->authorName->setText(mOptions->DefaultAuthor);
 	ui->mouseSensitivity->setValue(mOptions->Preferences.mMouseSensitivity);
+	const bool ColorThemeBlocked = ui->ColorTheme->blockSignals(true);
+	ui->ColorTheme->setCurrentIndex(static_cast<int>(mOptions->Preferences.mColorTheme));
+	ui->ColorTheme->blockSignals(ColorThemeBlocked);
 	for (unsigned int LanguageIdx = 0; LanguageIdx < LC_ARRAY_COUNT(gLanguageLocales); LanguageIdx++)
 	{
 		if (mOptions->Language == gLanguageLocales[LanguageIdx])
@@ -60,6 +74,7 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 	ui->fixedDirectionKeys->setChecked(mOptions->Preferences.mFixedAxes);
 	ui->autoLoadMostRecent->setChecked(mOptions->Preferences.mAutoLoadMostRecent);
 	ui->RestoreTabLayout->setChecked(mOptions->Preferences.mRestoreTabLayout);
+	ui->AutomateEdgeColor->setChecked(mOptions->Preferences.mAutomateEdgeColor);
 
 	ui->antiAliasing->setChecked(mOptions->AASamples != 1);
 	if (mOptions->AASamples == 8)
@@ -69,14 +84,40 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 	else
 		ui->antiAliasingSamples->setCurrentIndex(0);
 	ui->edgeLines->setChecked(mOptions->Preferences.mDrawEdgeLines);
-	ui->lineWidth->setText(lcFormatValueLocalized(mOptions->Preferences.mLineWidth));
+
+#ifndef LC_OPENGLES
+	if (QSurfaceFormat::defaultFormat().samples() > 1)
+	{
+		glGetFloatv(GL_SMOOTH_LINE_WIDTH_RANGE, mLineWidthRange);
+		glGetFloatv(GL_SMOOTH_LINE_WIDTH_GRANULARITY, &mLineWidthGranularity);
+	}
+	else
+#endif
+	{
+		glGetFloatv(GL_ALIASED_LINE_WIDTH_RANGE, mLineWidthRange);
+		mLineWidthGranularity = 1.0f;
+	}
+
+	ui->LineWidthSlider->setRange(0, (mLineWidthRange[1] - mLineWidthRange[0]) / mLineWidthGranularity);
+	ui->LineWidthSlider->setValue((mOptions->Preferences.mLineWidth - mLineWidthRange[0]) / mLineWidthGranularity);
+
 	ui->MeshLOD->setChecked(mOptions->Preferences.mAllowLOD);
+
+	ui->MeshLODSlider->setRange(0, 1500.0f / mMeshLODMultiplier);
+	ui->MeshLODSlider->setValue(mOptions->Preferences.mMeshLODDistance / mMeshLODMultiplier);
+
 	ui->FadeSteps->setChecked(mOptions->Preferences.mFadeSteps);
 	ui->HighlightNewParts->setChecked(mOptions->Preferences.mHighlightNewParts);
 	ui->gridStuds->setChecked(mOptions->Preferences.mDrawGridStuds);
 	ui->gridLines->setChecked(mOptions->Preferences.mDrawGridLines);
 	ui->gridLineSpacing->setText(QString::number(mOptions->Preferences.mGridLineSpacing));
-	ui->axisIcon->setChecked(mOptions->Preferences.mDrawAxes);
+	ui->GridOriginCheckBox->setChecked(mOptions->Preferences.mDrawGridOrigin);
+	ui->AxisIconCheckBox->setChecked(mOptions->Preferences.mDrawAxes);
+
+	if (!mOptions->Preferences.mBackgroundGradient)
+		ui->BackgroundSolidRadio->setChecked(true);
+	else
+		ui->BackgroundGradientRadio->setChecked(true);
 
 	ui->ViewSphereLocationCombo->setCurrentIndex((int)mOptions->Preferences.mViewSphereLocation);
 
@@ -101,47 +142,78 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 	else
 		ui->ViewSphereSizeCombo->setCurrentIndex(0);
 
-	ui->studLogo->setChecked(mOptions->StudLogo);
-	if (ui->studLogo->isChecked())
-		ui->studLogoCombo->setCurrentIndex(mOptions->StudLogo - 1);
+	ui->PreviewAxisIconCheckBox->setChecked(mOptions->Preferences.mDrawPreviewAxis);
+
+	ui->PreviewViewSphereLocationCombo->setCurrentIndex((int)mOptions->Preferences.mPreviewViewSphereLocation);
+
+	if (mOptions->Preferences.mPreviewViewSphereEnabled)
+	{
+		switch (mOptions->Preferences.mPreviewViewSphereSize)
+		{
+		case 100:
+			ui->PreviewViewSphereSizeCombo->setCurrentIndex(3);
+			break;
+		case 75:
+			ui->PreviewViewSphereSizeCombo->setCurrentIndex(2);
+			break;
+		case 50:
+			ui->PreviewViewSphereSizeCombo->setCurrentIndex(1);
+			break;
+		default:
+			ui->PreviewViewSphereSizeCombo->setCurrentIndex(0);
+			break;
+		}
+	}
 	else
-		ui->studLogoCombo->setCurrentIndex(mOptions->StudLogo);
+		ui->PreviewViewSphereSizeCombo->setCurrentIndex(0);
+
+	if (!lcGetPiecesLibrary()->SupportsStudStyle())
+		ui->studStyleCombo->setEnabled(false);
+
+	ui->studStyleCombo->setCurrentIndex(static_cast<int>(mOptions->StudStyle));
 
 	if (!gSupportsShaderObjects)
 		ui->ShadingMode->removeItem(static_cast<int>(lcShadingMode::DefaultLights));
 	ui->ShadingMode->setCurrentIndex(static_cast<int>(mOptions->Preferences.mShadingMode));
 
-	QPixmap pix(12, 12);
+	auto SetButtonPixmap = [](quint32 Color, QToolButton* Button)
+	{
+		QPixmap Pixmap(12, 12);
 
-	pix.fill(QColor(LC_RGBA_RED(mOptions->Preferences.mFadeStepsColor), LC_RGBA_GREEN(mOptions->Preferences.mFadeStepsColor), LC_RGBA_BLUE(mOptions->Preferences.mFadeStepsColor)));
-	ui->FadeStepsColor->setIcon(pix);
+		Pixmap.fill(QColor(LC_RGBA_RED(Color), LC_RGBA_GREEN(Color), LC_RGBA_BLUE(Color)));
+		Button->setIcon(Pixmap);
+	};
 
-	pix.fill(QColor(LC_RGBA_RED(mOptions->Preferences.mHighlightNewPartsColor), LC_RGBA_GREEN(mOptions->Preferences.mHighlightNewPartsColor), LC_RGBA_BLUE(mOptions->Preferences.mHighlightNewPartsColor)));
-	ui->HighlightNewPartsColor->setIcon(pix);
+	SetButtonPixmap(mOptions->Preferences.mBackgroundSolidColor, ui->BackgroundSolidColorButton);
+	SetButtonPixmap(mOptions->Preferences.mBackgroundGradientColorTop, ui->BackgroundGradient1ColorButton);
+	SetButtonPixmap(mOptions->Preferences.mBackgroundGradientColorBottom, ui->BackgroundGradient2ColorButton);
+	SetButtonPixmap(mOptions->Preferences.mAxesColor, ui->AxesColorButton);
+	SetButtonPixmap(mOptions->Preferences.mTextColor, ui->TextColorButton);
+	SetButtonPixmap(mOptions->Preferences.mMarqueeBorderColor, ui->MarqueeBorderColorButton);
+	SetButtonPixmap(mOptions->Preferences.mMarqueeFillColor, ui->MarqueeFillColorButton);
+	SetButtonPixmap(mOptions->Preferences.mOverlayColor, ui->OverlayColorButton);
+	SetButtonPixmap(mOptions->Preferences.mActiveViewColor, ui->ActiveViewColorButton);
+	SetButtonPixmap(mOptions->Preferences.mInactiveViewColor, ui->InactiveViewColorButton);
+	SetButtonPixmap(mOptions->Preferences.mFadeStepsColor, ui->FadeStepsColor);
+	SetButtonPixmap(mOptions->Preferences.mHighlightNewPartsColor, ui->HighlightNewPartsColor);
+	SetButtonPixmap(mOptions->Preferences.mGridStudColor, ui->gridStudColor);
+	SetButtonPixmap(mOptions->Preferences.mGridLineColor, ui->gridLineColor);
+	SetButtonPixmap(mOptions->Preferences.mViewSphereColor, ui->ViewSphereColorButton);
+	SetButtonPixmap(mOptions->Preferences.mViewSphereTextColor, ui->ViewSphereTextColorButton);
+	SetButtonPixmap(mOptions->Preferences.mViewSphereHighlightColor, ui->ViewSphereHighlightColorButton);
 
-	pix.fill(QColor(LC_RGBA_RED(mOptions->Preferences.mGridStudColor), LC_RGBA_GREEN(mOptions->Preferences.mGridStudColor), LC_RGBA_BLUE(mOptions->Preferences.mGridStudColor)));
-	ui->gridStudColor->setIcon(pix);
-
-	pix.fill(QColor(LC_RGBA_RED(mOptions->Preferences.mGridLineColor), LC_RGBA_GREEN(mOptions->Preferences.mGridLineColor), LC_RGBA_BLUE(mOptions->Preferences.mGridLineColor)));
-	ui->gridLineColor->setIcon(pix);
-
-	pix.fill(QColor(LC_RGBA_RED(mOptions->Preferences.mViewSphereColor), LC_RGBA_GREEN(mOptions->Preferences.mViewSphereColor), LC_RGBA_BLUE(mOptions->Preferences.mViewSphereColor)));
-	ui->ViewSphereColorButton->setIcon(pix);
-
-	pix.fill(QColor(LC_RGBA_RED(mOptions->Preferences.mViewSphereTextColor), LC_RGBA_GREEN(mOptions->Preferences.mViewSphereTextColor), LC_RGBA_BLUE(mOptions->Preferences.mViewSphereTextColor)));
-	ui->ViewSphereTextColorButton->setIcon(pix);
-
-	pix.fill(QColor(LC_RGBA_RED(mOptions->Preferences.mViewSphereHighlightColor), LC_RGBA_GREEN(mOptions->Preferences.mViewSphereHighlightColor), LC_RGBA_BLUE(mOptions->Preferences.mViewSphereHighlightColor)));
-	ui->ViewSphereHighlightColorButton->setIcon(pix);
-
-	on_studLogo_toggled();
+	on_studStyleCombo_currentIndexChanged(ui->studStyleCombo->currentIndex());
 	on_antiAliasing_toggled();
+	on_AutomateEdgeColor_toggled();
 	on_edgeLines_toggled();
+	on_LineWidthSlider_valueChanged();
+	on_MeshLODSlider_valueChanged();
 	on_FadeSteps_toggled();
 	on_HighlightNewParts_toggled();
 	on_gridStuds_toggled();
 	on_gridLines_toggled();
 	on_ViewSphereSizeCombo_currentIndexChanged(ui->ViewSphereSizeCombo->currentIndex());
+	on_PreviewViewSphereSizeCombo_currentIndexChanged(ui->PreviewViewSphereSizeCombo->currentIndex());
 
 	updateCategories();
 	ui->categoriesTree->setCurrentItem(ui->categoriesTree->topLevelItem(0));
@@ -151,15 +223,9 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 	commandChanged(nullptr);
 
 	UpdateMouseTree();
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
 	ui->mouseTree->header()->setSectionResizeMode(0, QHeaderView::Stretch);
 	ui->mouseTree->header()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
 	ui->mouseTree->header()->setSectionResizeMode(2, QHeaderView::ResizeToContents);
-#else
-	ui->mouseTree->header()->setResizeMode(0, QHeaderView::Stretch);
-	ui->mouseTree->header()->setResizeMode(1, QHeaderView::ResizeToContents);
-	ui->mouseTree->header()->setResizeMode(2, QHeaderView::ResizeToContents);
-#endif
 	MouseTreeItemChanged(nullptr);
 }
 
@@ -184,9 +250,11 @@ void lcQPreferencesDialog::accept()
 	mOptions->LGEOPath = ui->lgeoPath->text();
 	mOptions->DefaultAuthor = ui->authorName->text();
 	mOptions->Preferences.mMouseSensitivity = ui->mouseSensitivity->value();
+	mOptions->Preferences.mColorTheme = static_cast<lcColorTheme>(ui->ColorTheme->currentIndex());
+	mOptions->Preferences.mAutomateEdgeColor = ui->AutomateEdgeColor->isChecked();
 
 	int Language = ui->Language->currentIndex();
-    if (Language < 0 || Language > static_cast<int>(LC_ARRAY_COUNT(gLanguageLocales)))
+	if (Language < 0 || Language > static_cast<int>(LC_ARRAY_COUNT(gLanguageLocales)))
 		Language = 0;
 	mOptions->Language = gLanguageLocales[Language];
 
@@ -205,16 +273,20 @@ void lcQPreferencesDialog::accept()
 		mOptions->AASamples = 2;
 
 	mOptions->Preferences.mDrawEdgeLines = ui->edgeLines->isChecked();
-	mOptions->Preferences.mLineWidth = lcParseValueLocalized(ui->lineWidth->text());
+	mOptions->Preferences.mLineWidth = mLineWidthRange[0] + static_cast<float>(ui->LineWidthSlider->value()) * mLineWidthGranularity;
 	mOptions->Preferences.mAllowLOD = ui->MeshLOD->isChecked();
+	mOptions->Preferences.mMeshLODDistance = ui->MeshLODSlider->value() * mMeshLODMultiplier;
 	mOptions->Preferences.mFadeSteps = ui->FadeSteps->isChecked();
 	mOptions->Preferences.mHighlightNewParts = ui->HighlightNewParts->isChecked();
 
 	mOptions->Preferences.mDrawGridStuds = ui->gridStuds->isChecked();
 	mOptions->Preferences.mDrawGridLines = ui->gridLines->isChecked();
 	mOptions->Preferences.mGridLineSpacing = gridLineSpacing;
+	mOptions->Preferences.mDrawGridOrigin = ui->GridOriginCheckBox->isChecked();
 
-	mOptions->Preferences.mDrawAxes = ui->axisIcon->isChecked();
+	mOptions->Preferences.mBackgroundGradient = ui->BackgroundGradientRadio->isChecked();
+	mOptions->Preferences.mDrawAxes = ui->AxisIconCheckBox->isChecked();
+	mOptions->Preferences.mViewSphereEnabled = ui->ViewSphereSizeCombo->currentIndex() > 0;
 	mOptions->Preferences.mViewSphereLocation = (lcViewSphereLocation)ui->ViewSphereLocationCombo->currentIndex();
 
 	switch (ui->ViewSphereSizeCombo->currentIndex())
@@ -228,17 +300,28 @@ void lcQPreferencesDialog::accept()
 	case 1:
 		mOptions->Preferences.mViewSphereSize = 50;
 		break;
-	default:
-		mOptions->Preferences.mViewSphereEnabled = 0;
-		break;
 	}
 
 	mOptions->Preferences.mShadingMode = (lcShadingMode)ui->ShadingMode->currentIndex();
 
-	if (ui->studLogoCombo->isEnabled())
-		mOptions->StudLogo = ui->studLogoCombo->currentIndex() + 1;
-	else
-		mOptions->StudLogo = 0;
+	mOptions->StudStyle = static_cast<lcStudStyle>(ui->studStyleCombo->currentIndex());
+
+	mOptions->Preferences.mDrawPreviewAxis = ui->PreviewAxisIconCheckBox->isChecked();
+	mOptions->Preferences.mPreviewViewSphereEnabled = ui->PreviewViewSphereSizeCombo->currentIndex() > 0;
+	mOptions->Preferences.mPreviewViewSphereLocation = (lcViewSphereLocation)ui->PreviewViewSphereLocationCombo->currentIndex();
+
+	switch (ui->PreviewViewSphereSizeCombo->currentIndex())
+	{
+	case 3:
+		mOptions->Preferences.mPreviewViewSphereSize = 100;
+		break;
+	case 2:
+		mOptions->Preferences.mPreviewViewSphereSize = 75;
+		break;
+	case 1:
+		mOptions->Preferences.mPreviewViewSphereSize = 50;
+		break;
+	}
 
 	QDialog::accept();
 }
@@ -297,6 +380,14 @@ void lcQPreferencesDialog::on_lgeoPathBrowse_clicked()
 		ui->lgeoPath->setText(QDir::toNativeSeparators(result));
 }
 
+void lcQPreferencesDialog::on_ColorTheme_currentIndexChanged(int Index)
+{
+	Q_UNUSED(Index);
+
+	if (QMessageBox::question(this, tr("Reset Colors"), tr("Would you like to also reset the interface colors to match the color theme?")) == QMessageBox::Yes)
+		mOptions->Preferences.SetInterfaceColors(static_cast<lcColorTheme>(ui->ColorTheme->currentIndex()));
+}
+
 void lcQPreferencesDialog::ColorButtonClicked()
 {
 	QObject* Button = sender();
@@ -304,7 +395,58 @@ void lcQPreferencesDialog::ColorButtonClicked()
 	quint32* Color = nullptr;
 	QColorDialog::ColorDialogOptions DialogOptions;
 
-	if (Button == ui->FadeStepsColor)
+	if (Button == ui->BackgroundSolidColorButton)
+	{
+		Color = &mOptions->Preferences.mBackgroundSolidColor;
+		Title = tr("Select Background Color");
+	}
+	else if (Button == ui->BackgroundGradient1ColorButton)
+	{
+		Color = &mOptions->Preferences.mBackgroundGradientColorTop;
+		Title = tr("Select Gradient Top Color");
+	}
+	else if (Button == ui->BackgroundGradient2ColorButton)
+	{
+		Color = &mOptions->Preferences.mBackgroundGradientColorBottom;
+		Title = tr("Select Gradient Bottom Color");
+	}
+	else if (Button == ui->AxesColorButton)
+	{
+		Color = &mOptions->Preferences.mAxesColor;
+		Title = tr("Select Axes Color");
+	}
+	else if (Button == ui->TextColorButton)
+	{
+		Color = &mOptions->Preferences.mTextColor;
+		Title = tr("Select Text Color");
+	}
+	else if (Button == ui->MarqueeBorderColorButton)
+	{
+		Color = &mOptions->Preferences.mMarqueeBorderColor;
+		Title = tr("Select Marquee Border Color");
+	}
+	else if (Button == ui->MarqueeFillColorButton)
+	{
+		Color = &mOptions->Preferences.mMarqueeFillColor;
+		Title = tr("Select Marquee Fill Color");
+		DialogOptions = QColorDialog::ShowAlphaChannel;
+	}
+	else if (Button == ui->OverlayColorButton)
+	{
+		Color = &mOptions->Preferences.mOverlayColor;
+		Title = tr("Select Overlay Color");
+	}
+	else if (Button == ui->ActiveViewColorButton)
+	{
+		Color = &mOptions->Preferences.mActiveViewColor;
+		Title = tr("Select Active View Color");
+	}
+	else if (Button == ui->InactiveViewColorButton)
+	{
+		Color = &mOptions->Preferences.mInactiveViewColor;
+		Title = tr("Select Inactive View Color");
+	}
+	else if (Button == ui->FadeStepsColor)
 	{
 		Color = &mOptions->Preferences.mFadeStepsColor;
 		Title = tr("Select Fade Color");
@@ -326,25 +468,21 @@ void lcQPreferencesDialog::ColorButtonClicked()
 	{
 		Color = &mOptions->Preferences.mGridLineColor;
 		Title = tr("Select Grid Line Color");
-		DialogOptions = 0;
 	}
 	else if (Button == ui->ViewSphereColorButton)
 	{
 		Color = &mOptions->Preferences.mViewSphereColor;
 		Title = tr("Select View Sphere Color");
-		DialogOptions = 0;
 	}
 	else if (Button == ui->ViewSphereTextColorButton)
 	{
 		Color = &mOptions->Preferences.mViewSphereTextColor;
 		Title = tr("Select View Sphere Text Color");
-		DialogOptions = 0;
 	}
 	else if (Button == ui->ViewSphereHighlightColorButton)
 	{
 		Color = &mOptions->Preferences.mViewSphereHighlightColor;
 		Title = tr("Select View Sphere Highlight Color");
-		DialogOptions = 0;
 	}
 	else
 		return;
@@ -359,13 +497,9 @@ void lcQPreferencesDialog::ColorButtonClicked()
 
 	QPixmap pix(12, 12);
 
+	newColor.setAlpha(255);
 	pix.fill(newColor);
 	((QToolButton*)Button)->setIcon(pix);
-}
-
-void lcQPreferencesDialog::on_studLogo_toggled()
-{
-   ui->studLogoCombo->setEnabled(ui->studLogo->isChecked());
 }
 
 void lcQPreferencesDialog::on_antiAliasing_toggled()
@@ -375,7 +509,20 @@ void lcQPreferencesDialog::on_antiAliasing_toggled()
 
 void lcQPreferencesDialog::on_edgeLines_toggled()
 {
-	ui->lineWidth->setEnabled(ui->edgeLines->isChecked());
+	ui->LineWidthSlider->setEnabled(ui->edgeLines->isChecked());
+	ui->LineWidthLabel->setEnabled(ui->edgeLines->isChecked());
+}
+
+void lcQPreferencesDialog::on_LineWidthSlider_valueChanged()
+{
+	float Value = mLineWidthRange[0] + static_cast<float>(ui->LineWidthSlider->value()) * mLineWidthGranularity;
+	ui->LineWidthLabel->setText(QString::number(Value));
+}
+
+void lcQPreferencesDialog::on_MeshLODSlider_valueChanged()
+{
+	float Value = ui->MeshLODSlider->value() * mMeshLODMultiplier;
+	ui->MeshLODLabel->setText(QString::number(static_cast<int>(Value)));
 }
 
 void lcQPreferencesDialog::on_FadeSteps_toggled()
@@ -399,14 +546,38 @@ void lcQPreferencesDialog::on_gridLines_toggled()
 	ui->gridLineSpacing->setEnabled(ui->gridLines->isChecked());
 }
 
+void lcQPreferencesDialog::on_PreviewViewSphereSizeCombo_currentIndexChanged(int Index)
+{
+	ui->PreviewViewSphereLocationCombo->setEnabled(Index != 0);
+}
+
 void lcQPreferencesDialog::on_ViewSphereSizeCombo_currentIndexChanged(int Index)
 {
-	bool Enabled = Index != 0;
+	ui->ViewSphereLocationCombo->setEnabled(Index != 0);
+}
 
-	ui->ViewSphereLocationCombo->setEnabled(Enabled);
-	ui->ViewSphereColorButton->setEnabled(Enabled);
-	ui->ViewSphereTextColorButton->setEnabled(Enabled);
-	ui->ViewSphereHighlightColorButton->setEnabled(Enabled);
+void lcQPreferencesDialog::on_AutomateEdgeColor_toggled()
+{
+	ui->AutomateEdgeColorButton->setEnabled(ui->AutomateEdgeColor->isChecked());
+}
+
+void lcQPreferencesDialog::on_studStyleCombo_currentIndexChanged(int index)
+{
+	ui->HighContrastButton->setEnabled(lcIsHighContrast(static_cast<lcStudStyle>(index)));
+}
+
+void lcQPreferencesDialog::AutomateEdgeColor()
+{
+	lcAutomateEdgeColorDialog Dialog(this, sender() == ui->HighContrastButton);
+	if (Dialog.exec() == QDialog::Accepted)
+	{
+		mOptions->Preferences.mStudCylinderColor = Dialog.mStudCylinderColor;
+		mOptions->Preferences.mPartEdgeColor = Dialog.mPartEdgeColor;
+		mOptions->Preferences.mBlackEdgeColor = Dialog.mBlackEdgeColor;
+		mOptions->Preferences.mDarkEdgeColor = Dialog.mDarkEdgeColor;
+		mOptions->Preferences.mPartEdgeContrast = Dialog.mPartEdgeContrast;
+		mOptions->Preferences.mPartColorValueLDIndex = Dialog.mPartColorValueLDIndex;
+	}
 }
 
 void lcQPreferencesDialog::updateCategories()
@@ -637,7 +808,7 @@ void lcQPreferencesDialog::updateCommandList()
 	ui->commandList->clear();
 	QMap<QString, QTreeWidgetItem*> sections;
 
-	for (int actionIdx = 0; actionIdx < LC_NUM_COMMANDS; actionIdx++)
+	for (unsigned int actionIdx = 0; actionIdx < LC_NUM_COMMANDS; actionIdx++)
 	{
 		if (!gCommands[actionIdx].ID[0])
 			continue;
@@ -763,17 +934,67 @@ void lcQPreferencesDialog::on_KeyboardFilterEdit_textEdited(const QString& Text)
 
 void lcQPreferencesDialog::on_shortcutAssign_clicked()
 {
-	QTreeWidgetItem *current = ui->commandList->currentItem();
+	QTreeWidgetItem* CurrentItem = ui->commandList->currentItem();
 
-	if (!current || !current->data(0, Qt::UserRole).isValid())
+	if (!CurrentItem || !CurrentItem->data(0, Qt::UserRole).isValid())
 		return;
 
-	int shortcutIndex = qvariant_cast<int>(current->data(0, Qt::UserRole));
-	mOptions->KeyboardShortcuts.mShortcuts[shortcutIndex] = ui->shortcutEdit->text();
+	uint ShortcutIndex = CurrentItem->data(0, Qt::UserRole).toUInt();
+	QString (&Shortcuts)[LC_NUM_COMMANDS] = mOptions->KeyboardShortcuts.mShortcuts;
 
-	current->setText(1, ui->shortcutEdit->text());
+	if (ShortcutIndex >= LC_ARRAY_COUNT(Shortcuts))
+		return;
 
-	setShortcutModified(current, mOptions->KeyboardShortcuts.mShortcuts[shortcutIndex] != gCommands[shortcutIndex].DefaultShortcut);
+	QString NewShortcut = ui->shortcutEdit->text();
+
+	if (!NewShortcut.isEmpty())
+	{
+		for (uint ExistingIndex = 0; ExistingIndex < LC_ARRAY_COUNT(Shortcuts); ExistingIndex++)
+		{
+			if (NewShortcut == Shortcuts[ExistingIndex] && ExistingIndex != ShortcutIndex)
+			{
+				QString ActionText = qApp->translate("Menu", gCommands[ExistingIndex].MenuName).remove('&').remove(QLatin1String("..."));
+				QString QuestionText = tr("The shortcut '%1' is already assigned to '%2'. Do you want to replace it?").arg(NewShortcut, ActionText);
+
+				if (QMessageBox::question(this, tr("Override Shortcut"), QuestionText, QMessageBox::Yes | QMessageBox::No) != QMessageBox::Yes)
+					return;
+
+				mOptions->KeyboardShortcuts.mShortcuts[ExistingIndex].clear();
+
+				std::function<QTreeWidgetItem* (QTreeWidgetItem*)> FindItem = [&FindItem, ExistingIndex](QTreeWidgetItem* ParentItem) -> QTreeWidgetItem*
+				{
+					for (int ChildIdx = 0; ChildIdx < ParentItem->childCount(); ChildIdx++)
+					{
+						QTreeWidgetItem* ChildItem = ParentItem->child(ChildIdx);
+						uint ChildIndex = ChildItem->data(0, Qt::UserRole).toUInt();
+
+						if (ChildIndex == ExistingIndex)
+							return ChildItem;
+
+						QTreeWidgetItem* ExistingItem = FindItem(ChildItem);
+
+						if (ExistingItem)
+							return ExistingItem;
+					}
+
+					return nullptr;
+				};
+
+				QTreeWidgetItem* ExistingItem = FindItem(ui->commandList->invisibleRootItem());
+
+				if (ExistingItem)
+				{
+					ExistingItem->setText(1, QString());
+					setShortcutModified(ExistingItem, gCommands[ShortcutIndex].DefaultShortcut[0] != 0);
+				}
+			}
+		}
+	}
+
+	mOptions->KeyboardShortcuts.mShortcuts[ShortcutIndex] = NewShortcut;
+	CurrentItem->setText(1, NewShortcut);
+
+	setShortcutModified(CurrentItem, mOptions->KeyboardShortcuts.mShortcuts[ShortcutIndex] != gCommands[ShortcutIndex].DefaultShortcut);
 
 	mOptions->KeyboardShortcutsModified = true;
 	mOptions->KeyboardShortcutsDefault = false;
@@ -836,7 +1057,7 @@ void lcQPreferencesDialog::UpdateMouseTree()
 {
 	ui->mouseTree->clear();
 
-	for (int ToolIdx = 0; ToolIdx < LC_NUM_TOOLS; ToolIdx++)
+	for (int ToolIdx = 0; ToolIdx < static_cast<int>(lcTool::Count); ToolIdx++)
 		UpdateMouseTreeItem(ToolIdx);
 }
 
@@ -852,11 +1073,9 @@ void lcQPreferencesDialog::UpdateMouseTreeItem(int ItemIndex)
 			Shortcut += tr("Left Button");
 			break;
 
-#if (QT_VERSION >= QT_VERSION_CHECK(4, 7, 0))
 		case Qt::MiddleButton:
 			Shortcut += tr("Middle Button");
 			break;
-#endif
 
 		case Qt::RightButton:
 			Shortcut += tr("Right Button");
@@ -901,11 +1120,9 @@ void lcQPreferencesDialog::on_mouseAssign_clicked()
 			Button = Qt::LeftButton;
 			break;
 
-#if (QT_VERSION >= QT_VERSION_CHECK(4, 7, 0))
 		case 2:
 			Button = Qt::MiddleButton;
 			break;
-#endif
 
 		case 3:
 			Button = Qt::RightButton;
@@ -921,7 +1138,7 @@ void lcQPreferencesDialog::on_mouseAssign_clicked()
 		if (ui->mouseAlt->isChecked())
 			Modifiers |= Qt::AltModifier;
 
-		for (int ToolIdx = 0; ToolIdx < LC_NUM_TOOLS; ToolIdx++)
+		for (int ToolIdx = 0; ToolIdx < static_cast<int>(lcTool::Count); ToolIdx++)
 		{
 			if (ToolIdx == ButtonIndex)
 				continue;
@@ -944,6 +1161,8 @@ void lcQPreferencesDialog::on_mouseAssign_clicked()
 				mOptions->MouseShortcuts.mShortcuts[ToolIdx].Modifiers1 = mOptions->MouseShortcuts.mShortcuts[ToolIdx].Modifiers2;
 				mOptions->MouseShortcuts.mShortcuts[ToolIdx].Button2 = Qt::NoButton;
 				mOptions->MouseShortcuts.mShortcuts[ToolIdx].Modifiers2 = Qt::NoModifier;
+
+				UpdateMouseTreeItem(ToolIdx);
 			}
 		}
 	}
@@ -980,6 +1199,38 @@ void lcQPreferencesDialog::on_mouseRemove_clicked()
 	MouseTreeItemChanged(Current);
 }
 
+void lcQPreferencesDialog::on_MouseImportButton_clicked()
+{
+	QString FileName = QFileDialog::getOpenFileName(this, tr("Import Shortcuts"), "", tr("Text Files (*.txt);;All Files (*.*)"));
+
+	if (FileName.isEmpty())
+		return;
+
+	lcMouseShortcuts Shortcuts;
+	if (!Shortcuts.Load(FileName))
+	{
+		QMessageBox::warning(this, "LeoCAD", tr("Error loading mouse shortcuts file."));
+		return;
+	}
+
+	mOptions->MouseShortcuts = Shortcuts;
+	UpdateMouseTree();
+
+	mOptions->MouseShortcutsModified = true;
+	mOptions->MouseShortcutsDefault = false;
+}
+
+void lcQPreferencesDialog::on_MouseExportButton_clicked()
+{
+	QString FileName = QFileDialog::getSaveFileName(this, tr("Export Shortcuts"), "", tr("Text Files (*.txt);;All Files (*.*)"));
+
+	if (FileName.isEmpty())
+		return;
+
+	if (!mOptions->MouseShortcuts.Save(FileName))
+		QMessageBox::warning(this, "LeoCAD", tr("Error saving mouse shortcuts file."));
+}
+
 void lcQPreferencesDialog::on_mouseReset_clicked()
 {
 	if (QMessageBox::question(this, "LeoCAD", tr("Are you sure you want to load the default mouse shortcuts?"), QMessageBox::Yes | QMessageBox::No) != QMessageBox::Yes)
@@ -1012,11 +1263,9 @@ void lcQPreferencesDialog::MouseTreeItemChanged(QTreeWidgetItem* Current)
 		ui->mouseButton->setCurrentIndex(1);
 		break;
 
-#if (QT_VERSION >= QT_VERSION_CHECK(4, 7, 0))
 	case Qt::MiddleButton:
 		ui->mouseButton->setCurrentIndex(2);
 		break;
-#endif
 
 	case Qt::RightButton:
 		ui->mouseButton->setCurrentIndex(3);

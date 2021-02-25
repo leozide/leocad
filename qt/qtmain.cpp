@@ -1,7 +1,6 @@
 #include "lc_global.h"
 #include "lc_application.h"
 #include "lc_qupdatedialog.h"
-#include "lc_mainwindow.h"
 #include "lc_profile.h"
 #include <QApplication>
 #include <locale.h>
@@ -122,8 +121,30 @@ static void lcRegisterShellFileTypes()
 
 #endif
 
+static void lcInitializeSurfaceFormat(int argc, char* argv[])
+{
+	QCoreApplication Application(argc, argv);
+	const lcCommandLineOptions Options = lcApplication::ParseCommandLineOptions();
+
+	if (Options.ParseOK && Options.AASamples > 1)
+	{
+		QSurfaceFormat Format = QSurfaceFormat::defaultFormat();
+		Format.setSamples(Options.AASamples);
+		QSurfaceFormat::setDefaultFormat(Format);
+	}
+}
+
 int main(int argc, char *argv[])
 {
+	QCoreApplication::setOrganizationDomain(QLatin1String("leocad.org"));
+	QCoreApplication::setOrganizationName(QLatin1String("LeoCAD Software"));
+	QCoreApplication::setApplicationName(QLatin1String("LeoCAD"));
+	QCoreApplication::setApplicationVersion(QLatin1String(LC_VERSION_TEXT));
+
+	lcInitializeSurfaceFormat(argc, argv);
+
+	QCoreApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
+
 	lcApplication Application(argc, argv);
 
 	QString Language = lcGetProfileString(LC_PROFILE_LANGUAGE);
@@ -177,13 +198,17 @@ int main(int argc, char *argv[])
 	
 	setlocale(LC_NUMERIC, "C");
 
-	bool ShowWindow;
-	if (!Application.Initialize(LibraryPaths, ShowWindow))
+	lcStartupMode StartupMode = Application.Initialize(LibraryPaths);
+
+	if (StartupMode == lcStartupMode::Error)
+	{
+		Application.Shutdown();
 		return 1;
+	}
 
 	int ExecReturn = 0;
 
-	if (ShowWindow)
+	if (StartupMode == lcStartupMode::ShowWindow)
 	{
 #if !LC_DISABLE_UPDATE_CHECK
 		lcDoInitialUpdateCheck();
@@ -192,8 +217,7 @@ int main(int argc, char *argv[])
 		ExecReturn = Application.exec();
 	}
 
-	delete gMainWindow;
-	gMainWindow = nullptr;
+	Application.Shutdown();
 
 	return ExecReturn;
 }

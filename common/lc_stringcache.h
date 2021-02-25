@@ -11,8 +11,8 @@ public:
     lcStringCache();
 	~lcStringCache();
 
-	void AddRef(lcContext* Context);
-	void Release(lcContext* Context);
+	void Initialize(lcContext* Context);
+	void Reset();
 
 	void CacheStrings(const QStringList& Strings);
 	void GetStringDimensions(int* cx, int* cy, const QString& String) const;
@@ -20,7 +20,6 @@ public:
 
 protected:
 	lcTexture* mTexture;
-	int mRefCount;
 
 	std::map<QString, lcStringCacheEntry> mStrings;
 };

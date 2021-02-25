@@ -24,18 +24,22 @@ class lcMouseShortcuts
 {
 public:
 	void Reset();
+	bool Save(const QString& FileName);
 	bool Save(QStringList& Shortcuts);
+	bool Load(const QString& FileName);
 	bool Load(const QStringList& Shortcuts);
+
 	lcTool GetTool(Qt::MouseButton Button, Qt::KeyboardModifiers Modifiers) const;
 
-	struct
+	struct lcToolShortcut
 	{
 		Qt::KeyboardModifiers Modifiers1;
 		Qt::MouseButton Button1;
 		Qt::KeyboardModifiers Modifiers2;
 		Qt::MouseButton Button2;
-	}
-	mShortcuts[LC_NUM_TOOLS];
+	};
+
+	lcToolShortcut mShortcuts[static_cast<int>(lcTool::Count)];
 };
 
 extern lcMouseShortcuts gMouseShortcuts;

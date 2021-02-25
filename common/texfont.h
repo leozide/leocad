@@ -15,8 +15,8 @@ public:
 		return mTexture;
 	}
 
-	bool Load(lcContext* Context);
-	void Release();
+	bool Initialize(lcContext* Context);
+	void Reset();
 
 	void PrintText(lcContext* Context, float Left, float Top, float Z, const char* Text) const;
 	void GetTriangles(const lcMatrix44& Transform, const char* Text, float* Buffer) const;
@@ -34,7 +34,6 @@ protected:
 	int mTextureWidth;
 	int mTextureHeight;
 	int mFontHeight;
-	int mRefCount;
 };
 
 extern TexFont gTexFont;

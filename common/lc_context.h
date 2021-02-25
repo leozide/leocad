@@ -76,30 +76,6 @@ struct lcProgram
 	GLint HighlightParamsLocation;
 };
 
-class lcFramebuffer
-{
-public:
-	lcFramebuffer()
-	{
-	}
-
-	lcFramebuffer(int Width, int Height)
-		: mWidth(Width), mHeight(Height)
-	{
-	}
-
-	bool IsValid() const
-	{
-		return mObject != 0;
-	}
-
-	GLuint mObject = 0;
-	GLuint mColorTexture = 0;
-	GLuint mDepthRenderbuffer = 0;
-	int mWidth = 0;
-	int mHeight = 0;
-};
-
 enum class lcPolygonOffset
 {
 	None,
@@ -107,22 +83,37 @@ enum class lcPolygonOffset
 	Translucent
 };
 
-class lcContext
+enum class lcDepthFunction
+{
+	LessEqual,
+	Always
+};
+
+class lcContext : protected QOpenGLFunctions
 {
 public:
 	lcContext();
 	~lcContext();
 
 	lcContext(const lcContext&) = delete;
-	lcContext(lcContext&&) = delete;
 	lcContext& operator=(const lcContext&) = delete;
-	lcContext& operator=(lcContext&&) = delete;
 
-	static void CreateResources();
-	static void DestroyResources();
+	static bool CreateOffscreenContext();
+	static void DestroyOffscreenContext();
+
+	void CreateResources();
+	void DestroyResources();
 
 	void SetDefaultState();
 	void ClearResources();
+
+	void MakeCurrent();
+
+	void SetGLContext(QOpenGLContext* GLContext, QOpenGLWidget* Widget);
+	void SetOffscreenContext();
+
+	void ClearColorAndDepth(const lcVector4& ClearColor);
+	void ClearDepth();
 
 	void SetWorldMatrix(const lcMatrix44& WorldMatrix)
 	{
@@ -153,10 +144,11 @@ public:
 	void SetViewport(int x, int y, int Width, int Height);
 	void SetPolygonOffset(lcPolygonOffset PolygonOffset);
 	void SetDepthWrite(bool Enable);
+	void SetDepthFunction(lcDepthFunction DepthFunction);
+	void EnableCullFace(bool Enable);
 	void SetLineWidth(float LineWidth);
 	void SetSmoothShading(bool Smooth);
 	void BindTexture2D(GLuint Texture);
-	void BindTexture2DMS(GLuint Texture);
 	void BindTextureCubeMap(GLuint Texture);
 	void UnbindTexture2D(GLuint Texture);
 	void UnbindTextureCubeMap(GLuint Texture);
@@ -184,20 +176,6 @@ public:
 	void SetEdgeColorIndexTinted(int ColorIndex, const lcVector4& Tint);
 	void SetInterfaceColor(lcInterfaceColor InterfaceColor);
 
-	void ClearFramebuffer();
-	lcFramebuffer CreateFramebuffer(int Width, int Height, bool Depth, bool Multisample);
-	void DestroyFramebuffer(lcFramebuffer& Framebuffer);
-	void BindFramebuffer(GLuint FramebufferObject);
-	void BindFramebuffer(const lcFramebuffer& Framebuffer)
-	{
-		BindFramebuffer(Framebuffer.mObject);
-	}
-
-	std::pair<lcFramebuffer, lcFramebuffer> CreateRenderFramebuffer(int Width, int Height);
-	void DestroyRenderFramebuffer(std::pair<lcFramebuffer, lcFramebuffer>& RenderFramebuffer);
-	QImage GetRenderFramebufferImage(const std::pair<lcFramebuffer, lcFramebuffer>& RenderFramebuffer);
-	void GetRenderFramebufferImage(const std::pair<lcFramebuffer, lcFramebuffer>& RenderFramebuffer, quint8* Buffer);
-
 	lcVertexBuffer CreateVertexBuffer(int Size, const void* Data);
 	void DestroyVertexBuffer(lcVertexBuffer& VertexBuffer);
 	lcIndexBuffer CreateIndexBuffer(int Size, const void* Data);
@@ -219,8 +197,12 @@ public:
 	void BindMesh(const lcMesh* Mesh);
 
 protected:
-	static void CreateShaderPrograms();
+	void CreateShaderPrograms();
 	void FlushState();
+
+	QOpenGLWidget* mWidget = nullptr;
+	QOpenGLContext* mContext = nullptr;
+	bool mValid = false;
 
 	GLuint mVertexBufferObject;
 	GLuint mIndexBufferObject;
@@ -234,10 +216,11 @@ protected:
 	bool mColorEnabled;
 
 	GLuint mTexture2D;
-	GLuint mTexture2DMS;
 	GLuint mTextureCubeMap;
 	lcPolygonOffset mPolygonOffset;
 	bool mDepthWrite;
+	lcDepthFunction mDepthFunction;
+	bool mCullFace;
 	float mLineWidth;
 	int mMatrixMode;
 	bool mTextureEnabled;
@@ -247,7 +230,7 @@ protected:
 	lcMatrix44 mViewMatrix;
 	lcMatrix44 mProjectionMatrix;
 	lcMatrix44 mViewProjectionMatrix;
-	lcVector4 mHighlightParams[5];
+	lcVector4 mHighlightParams[4];
 	bool mColorDirty;
 	bool mWorldMatrixDirty;
 	bool mViewMatrixDirty;
@@ -255,9 +238,11 @@ protected:
 	bool mViewProjectionMatrixDirty;
 	bool mHighlightParamsDirty;
 
-	GLuint mFramebufferObject;
+	static std::unique_ptr<QOpenGLContext> mOffscreenContext;
+	static std::unique_ptr<QOffscreenSurface> mOffscreenSurface;
 
 	static lcProgram mPrograms[static_cast<int>(lcMaterialType::Count)];
+	static int mValidContexts;
 
 	Q_DECLARE_TR_FUNCTIONS(lcContext);
 };

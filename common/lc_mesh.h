@@ -48,18 +48,14 @@ enum
 	LC_NUM_MESH_LODS
 };
 
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
 enum class lcMeshFlag
-#else
-enum lcMeshFlag
-#endif
 {
 	HasDefault     = 0x01, // Mesh has triangles using the default color
 	HasSolid       = 0x02, // Mesh has triangles using a solid color
 	HasTranslucent = 0x04, // Mesh has triangles using a translucent color
 	HasLines       = 0x08, // Mesh has lines
 	HasTexture     = 0x10, // Mesh has sections using textures
-	HasLogoStud    = 0x20  // Mesh has a stud that can have a logo applied
+	HasStyleStud   = 0x20  // Mesh has a stud that can have a logo applied
 };
 
 Q_DECLARE_FLAGS(lcMeshFlags, lcMeshFlag)
@@ -117,5 +113,4 @@ public:
 	int mIndexType;
 };
 
-extern lcMesh* gPlaceholderMesh;
 

@@ -1,54 +1,204 @@
-#include <QtGui>
 #include "lc_global.h"
 #include "lc_qcolorlist.h"
+#include "lc_application.h"
+#include "lc_library.h"
+#include "lc_colors.h"
 
-lcQColorList::lcQColorList(QWidget *parent)
-	: QWidget(parent)
+void lcDrawNoColorRect(QPainter& Painter, const QRect& Rect)
 {
-	mCellRects = new QRect[gNumUserColors];
-	mCellColors = new int[gNumUserColors];
-	mNumCells = 0;
+	Painter.setBrush(Qt::black);
+	Painter.drawRect(Rect);
 
-	mCurCell = 0;
+	const int SquareSize = 3;
+	int Column = 0;
+
+	for (;;)
+	{
+		int x = Rect.left() + 1 + Column * SquareSize;
+
+		if (x >= Rect.right())
+			break;
+
+		int Row = Column & 1;
+
+		for (;;)
+		{
+			int y = Rect.top() + 1 + Row * SquareSize;
+
+			if (y >= Rect.bottom())
+				break;
+
+			QRect GridRect(x, y, SquareSize, SquareSize);
+
+			if (GridRect.right() > Rect.right())
+				GridRect.setRight(Rect.right());
+
+			if (GridRect.bottom() > Rect.bottom())
+				GridRect.setBottom(Rect.bottom());
+
+			Painter.fillRect(GridRect, Qt::white);
+
+			Row += 2;
+		}
+
+		Column++;
+	}
+}
+
+lcQColorList::lcQColorList(QWidget* Parent, bool AllowNoColor)
+	: QWidget(Parent), mAllowNoColor(AllowNoColor)
+{
+	setFocusPolicy(Qt::StrongFocus);
+
+	UpdateCells();
+
+	connect(lcGetPiecesLibrary(), &lcPiecesLibrary::ColorsLoaded, this, &lcQColorList::ColorsLoaded);
+}
+
+void lcQColorList::UpdateCells()
+{
+	mCells.clear();
+	mGroups.clear();
+
+	for (int GroupIdx = 0; GroupIdx < LC_NUM_COLORGROUPS; GroupIdx++)
+	{
+		lcColorGroup* Group = &gColorGroups[GroupIdx];
+		lcColorListGroup ListGroup;
+
+		for (int ColorIndex : Group->Colors)
+		{
+			mCells.emplace_back(lcColorListCell{ QRect(), ColorIndex });
+			ListGroup.Name = Group->Name;
+			ListGroup.Cells.emplace_back(mCells.size());
+		}
+
+		mGroups.emplace_back(std::move(ListGroup));
+	}
+
+	if (mAllowNoColor)
+	{
+		mCells.emplace_back(lcColorListCell{ QRect(), lcGetColorIndex(LC_COLOR_NOCOLOR) });
+		mGroups[LC_COLORGROUP_SPECIAL].Cells.emplace_back(mCells.size());
+	}
 
 	mColumns = 14;
 	mRows = 0;
 
-	for (int GroupIdx = 0; GroupIdx < LC_NUM_COLORGROUPS; GroupIdx++)
-	{
-		lcColorGroup* Group = &gColorGroups[GroupIdx];
-
-		for (int Color: Group->Colors)
-			mCellColors[mNumCells++] = Color;
-
-		mRows += ((int)Group->Colors.size() + mColumns - 1) / mColumns;
-	}
-
-	mWidth = 0;
-	mHeight = 0;
+	for (const lcColorListGroup& Group : mGroups)
+		mRows += ((int)Group.Cells.size() + mColumns - 1) / mColumns;
 
 	QFontMetrics Metrics(font());
 	int TextHeight = 0;
 
-	for (int GroupIdx = 0; GroupIdx < LC_NUM_COLORGROUPS; GroupIdx++)
+	for (lcColorListGroup& Group : mGroups)
 	{
-		lcColorGroup* Group = &gColorGroups[GroupIdx];
+		Group.Rect = Metrics.boundingRect(rect(), Qt::TextSingleLine | Qt::AlignCenter, Group.Name);
 
-		mGroupRects[GroupIdx] = Metrics.boundingRect(rect(), Qt::TextSingleLine | Qt::AlignCenter, Group->Name);
-
-		TextHeight += mGroupRects[GroupIdx].height();
+		TextHeight += Group.Rect.height();
 	}
 
 	mPreferredHeight = TextHeight + 10 * mRows;
 
-	setFocusPolicy(Qt::StrongFocus);
 	setMinimumHeight(TextHeight + 5 * mRows);
 }
 
-lcQColorList::~lcQColorList()
+void lcQColorList::UpdateRects()
 {
-	delete[] mCellRects;
-	delete[] mCellColors;
+	QFontMetrics Metrics(font());
+	int TextHeight = 0;
+
+	for (lcColorListGroup& Group : mGroups)
+	{
+		Group.Rect = Metrics.boundingRect(rect(), Qt::TextSingleLine | Qt::AlignCenter, Group.Name);
+
+		TextHeight += Group.Rect.height();
+	}
+
+	mPreferredHeight = TextHeight + 10 * mRows;
+
+	float CellWidth = (float)(width() + 1) / (float)mColumns;
+	float CellHeight = (float)(height() - TextHeight) / (float)mRows;
+
+	while (CellWidth / CellHeight > 1.5f)
+	{
+		mColumns++;
+		mRows = 0;
+
+		for (const lcColorListGroup& Group : mGroups)
+			mRows += ((int)Group.Cells.size() + mColumns - 1) / mColumns;
+
+		CellWidth = (float)(width() + 1) / (float)mColumns;
+		CellHeight = (float)(height() - TextHeight) / (float)mRows;
+
+		if (mRows <= LC_NUM_COLORGROUPS)
+			break;
+	}
+
+	while (CellHeight / CellWidth > 1.5f)
+	{
+		mColumns--;
+		mRows = 0;
+
+		for (const lcColorListGroup& Group : mGroups)
+			mRows += ((int)Group.Cells.size() + mColumns - 1) / mColumns;
+
+		CellWidth = (float)(width() + 1) / (float)mColumns;
+		CellHeight = (float)(height() - TextHeight) / (float)mRows;
+
+		if (mColumns <= 5)
+			break;
+	}
+
+	int CurCell = 0;
+	float GroupY = 0.0f;
+	int TotalRows = 1;
+
+	for (lcColorListGroup& Group : mGroups)
+	{
+		int CurColumn = 0;
+		int NumRows = 0;
+
+		Group.Rect = QRect(0, (int)GroupY, width(), Group.Rect.height());
+		GroupY += Group.Rect.height();
+
+		for (size_t ColorIdx = 0; ColorIdx < Group.Cells.size(); ColorIdx++)
+		{
+			const int Left = CellWidth * CurColumn - 1;
+			const int Right = (CurColumn + 1) * CellWidth - 1;
+			const int Top = GroupY + CellHeight * NumRows;
+			const int Bottom = (TotalRows != mRows) ? GroupY + CellHeight * (NumRows + 1) : height() - 1;
+
+			mCells[CurCell].Rect = QRect(Left, Top, Right - Left, Bottom - Top);
+
+			CurColumn++;
+			if (CurColumn == mColumns)
+			{
+				CurColumn = 0;
+				NumRows++;
+				TotalRows++;
+			}
+
+			CurCell++;
+		}
+
+		if (CurColumn != 0)
+		{
+			NumRows++;
+			TotalRows++;
+		}
+
+		GroupY += NumRows * CellHeight;
+	}
+}
+
+void lcQColorList::ColorsLoaded()
+{
+	UpdateCells();
+	UpdateRects();
+
+	setCurrentColor(lcGetColorIndex(mColorCode));
+
+	update();
 }
 
 QSize lcQColorList::sizeHint() const
@@ -56,15 +206,15 @@ QSize lcQColorList::sizeHint() const
 	return QSize(200, mPreferredHeight);
 }
 
-void lcQColorList::setCurrentColor(int colorIndex)
+void lcQColorList::setCurrentColor(int ColorIndex)
 {
-	for (int CellIdx = 0; CellIdx < mNumCells; CellIdx++)
+	for (size_t CellIndex = 0; CellIndex < mCells.size(); CellIndex++)
 	{
-		if (mCellColors[CellIdx] != colorIndex)
-			continue;
-
-		SelectCell(CellIdx);
-		break;
+		if (mCells[CellIndex].ColorIndex == ColorIndex)
+		{
+			SelectCell(CellIndex);
+			break;
+		}
 	}
 }
 
@@ -74,19 +224,22 @@ bool lcQColorList::event(QEvent *event)
 	{
 		QHelpEvent *helpEvent = static_cast<QHelpEvent *>(event);
 
-		for (int CellIdx = 0; CellIdx < mNumCells; CellIdx++)
+		for (size_t CellIndex = 0; CellIndex < mCells.size(); CellIndex++)
 		{
-			if (!mCellRects[CellIdx].contains(helpEvent->pos()))
+			if (!mCells[CellIndex].Rect.contains(helpEvent->pos()))
 				continue;
 
-			lcColor* color = &gColorList[mCellColors[CellIdx]];
+			lcColor* color = &gColorList[mCells[CellIndex].ColorIndex];
 			QColor rgb(color->Value[0] * 255, color->Value[1] * 255, color->Value[2] * 255);
 
 			QImage image(16, 16, QImage::Format_RGB888);
 			image.fill(rgb);
 			QPainter painter(&image);
 			painter.setPen(Qt::darkGray);
-			painter.drawRect(0, 0, image.width() - 1, image.height() - 1);
+			if (color->Code != LC_COLOR_NOCOLOR)
+				painter.drawRect(0, 0, image.width() - 1, image.height() - 1);
+			else
+				lcDrawNoColorRect(painter, QRect(0, 0, image.width() - 1, image.height() - 1));
 			painter.end();
 
 			QByteArray ba;
@@ -95,9 +248,18 @@ bool lcQColorList::event(QEvent *event)
 			image.save(&buffer, "PNG");
 			buffer.close();
 
-			int colorIndex = mCellColors[CellIdx];
-			const char* format = "<table><tr><td style=\"vertical-align:middle\"><img src=\"data:image/png;base64,%1\"/></td><td>%2 (%3)</td></tr></table>";
-			QString text = QString(format).arg(QString(buffer.data().toBase64()), gColorList[colorIndex].Name, QString::number(gColorList[colorIndex].Code));
+			int colorIndex = mCells[CellIndex].ColorIndex;
+			QString text;
+			if (color->Code != LC_COLOR_NOCOLOR)
+			{
+				const char* format = "<table><tr><td style=\"vertical-align:middle\"><img src=\"data:image/png;base64,%1\"/></td><td>%2 (%3)</td></tr></table>";
+				text = QString(format).arg(QString(buffer.data().toBase64()), gColorList[colorIndex].Name, QString::number(gColorList[colorIndex].Code));
+			}
+			else
+			{
+				const char* format = "<table><tr><td style=\"vertical-align:middle\"><img src=\"data:image/png;base64,%1\"/></td><td>%2</td></tr></table>";
+				text = QString(format).arg(QString(buffer.data().toBase64()), gColorList[colorIndex].Name);
+			}
 
 			QToolTip::showText(helpEvent->globalPos(), text);
 			return true;
@@ -132,13 +294,13 @@ bool lcQColorList::event(QEvent *event)
 
 void lcQColorList::mousePressEvent(QMouseEvent* MouseEvent)
 {
-	for (int CellIdx = 0; CellIdx < mNumCells; CellIdx++)
+	for (size_t CellIndex = 0; CellIndex < mCells.size(); CellIndex++)
 	{
-		if (!mCellRects[CellIdx].contains(MouseEvent->pos()))
+		if (!mCells[CellIndex].Rect.contains(MouseEvent->pos()))
 			continue;
 
-		SelectCell(CellIdx);
-		emit colorSelected(mCellColors[CellIdx]);
+		SelectCell(CellIndex);
+		emit colorSelected(mCells[CellIndex].ColorIndex);
 
 		break;
 	}
@@ -155,7 +317,7 @@ void lcQColorList::mouseMoveEvent(QMouseEvent* MouseEvent)
 		return;
 
 	QMimeData* MimeData = new QMimeData;
-	MimeData->setData("application/vnd.leocad-color", QString::number(mCellColors[mCurCell]).toLatin1());
+	MimeData->setData("application/vnd.leocad-color", QString::number(mCells[mCurrentCell].ColorIndex).toLatin1());
 
 	QDrag* Drag = new QDrag(this);
 	Drag->setMimeData(MimeData);
@@ -165,232 +327,142 @@ void lcQColorList::mouseMoveEvent(QMouseEvent* MouseEvent)
 
 void lcQColorList::keyPressEvent(QKeyEvent *event)
 {
-	int NewCell = mCurCell;
+	size_t NewCell = mCurrentCell;
 
 	if (event->key() == Qt::Key_Left)
 	{
-		if (mCurCell > 0)
-			NewCell = mCurCell - 1;
+		if (mCurrentCell > 0)
+			NewCell = mCurrentCell - 1;
 	}
 	else if (event->key() == Qt::Key_Right)
 	{
-		if (mCurCell < mNumCells - 1)
-			NewCell = mCurCell + 1;
+		if (mCurrentCell < mCells.size() - 1)
+			NewCell = mCurrentCell + 1;
 	}
 	else if (event->key() == Qt::Key_Up || event->key() == Qt::Key_Down)
 	{
-		if (mCurCell < 0 || mCurCell >= mNumCells)
-			mCurCell = 0;
+		if (mCurrentCell >= mCells.size())
+			mCurrentCell = 0;
 
-		int CurGroup = 0;
-		int NumCells = 0;
+		size_t CurGroup = 0;
+		size_t NumCells = 0;
 
-		for (CurGroup = 0; CurGroup < LC_NUM_COLORGROUPS; CurGroup++)
+		for (CurGroup = 0; CurGroup < mGroups.size(); CurGroup++)
 		{
-			int NumColors = (int)gColorGroups[CurGroup].Colors.size();
+			int NumColors = (int)mGroups[CurGroup].Cells.size();
 
-			if (mCurCell < NumCells + NumColors)
+			if (mCurrentCell < NumCells + NumColors)
 				break;
 
 			NumCells += NumColors;
 		}
 
-		int Row = (mCurCell - NumCells) / mColumns;
-		int Column = (mCurCell - NumCells) % mColumns;
+		size_t Row = (mCurrentCell - NumCells) / mColumns;
+		size_t Column = (mCurrentCell - NumCells) % mColumns;
 
 		if (event->key() == Qt::Key_Up)
 		{
 			if (Row > 0)
-				NewCell = mCurCell - mColumns;
+				NewCell = mCurrentCell - mColumns;
 			else if (CurGroup > 0)
 			{
-				size_t NumColors = gColorGroups[CurGroup - 1].Colors.size();
-				int NumColumns = NumColors % mColumns;
+				size_t NumColors = mGroups[CurGroup - 1].Cells.size();
+				size_t NumColumns = NumColors % mColumns;
 
-				if (NumColumns <= Column + 1)
-					NewCell = mCurCell - NumColumns - mColumns;
+				if (NumColumns < Column + 1)
+					NewCell = mCurrentCell - NumColumns - mColumns;
 				else
-					NewCell = mCurCell - NumColumns;
+					NewCell = mCurrentCell - NumColumns;
 			}
 		}
 		else if (event->key() == Qt::Key_Down)
 		{
-			int NumColors = (int)gColorGroups[CurGroup].Colors.size();
+			int NumColors = (int)mGroups[CurGroup].Cells.size();
 
-			if (mCurCell + mColumns < NumCells + NumColors)
-				NewCell = mCurCell + mColumns;
+			if (mCurrentCell + mColumns < NumCells + NumColors)
+				NewCell = mCurrentCell + mColumns;
 			else
 			{
-				int NumColumns = NumColors % mColumns;
+				size_t NumColumns = NumColors % mColumns;
 
 				if (NumColumns > Column)
 				{
-					if (mCurCell + NumColumns < mNumCells)
-						NewCell = mCurCell + NumColumns;
+					if (mCurrentCell + NumColumns < mCells.size())
+						NewCell = mCurrentCell + NumColumns;
 				}
 				else
-					NewCell = mCurCell + mColumns + NumColumns;
+					NewCell = mCurrentCell + mColumns + NumColumns;
 			}
 		}
 	}
 	else if (event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter)
 	{
-		emit colorSelected(mCellColors[mCurCell]);
+		emit colorSelected(mCells[mCurrentCell].ColorIndex);
 	}
 
-	if (NewCell != mCurCell)
+	if (NewCell != mCurrentCell)
 		SelectCell(NewCell);
 	else
 		QWidget::keyPressEvent(event);
 }
 
-void lcQColorList::resizeEvent(QResizeEvent *event)
+void lcQColorList::resizeEvent(QResizeEvent* Event)
 {
 	if (mWidth == width() && mHeight == height())
 		return;
 
-	QFontMetrics Metrics(font());
-	int TextHeight = 0;
-
-	for (int GroupIdx = 0; GroupIdx < LC_NUM_COLORGROUPS; GroupIdx++)
-	{
-		lcColorGroup* Group = &gColorGroups[GroupIdx];
-
-		mGroupRects[GroupIdx] = Metrics.boundingRect(rect(), Qt::TextSingleLine | Qt::AlignCenter, Group->Name);
-
-		TextHeight += mGroupRects[GroupIdx].height();
-	}
-
-	mPreferredHeight = TextHeight + 10 * mRows;
-
-	float CellWidth = (float)(width() + 1) / (float)mColumns;
-	float CellHeight = (float)(height() - TextHeight) / (float)mRows;
-
-	while (CellWidth / CellHeight > 1.5f)
-	{
-		mColumns++;
-		mRows = 0;
-
-		for (int GroupIdx = 0; GroupIdx < LC_NUM_COLORGROUPS; GroupIdx++)
-		{
-			lcColorGroup* Group = &gColorGroups[GroupIdx];
-			mRows += ((int)Group->Colors.size() + mColumns - 1) / mColumns;
-		}
-
-		CellWidth = (float)(width() + 1) / (float)mColumns;
-		CellHeight = (float)(height() - TextHeight) / (float)mRows;
-
-		if (mRows <= LC_NUM_COLORGROUPS)
-			break;
-	}
-
-	while (CellHeight / CellWidth > 1.5f)
-	{
-		mColumns--;
-		mRows = 0;
-
-		for (int GroupIdx = 0; GroupIdx < LC_NUM_COLORGROUPS; GroupIdx++)
-		{
-			lcColorGroup* Group = &gColorGroups[GroupIdx];
-			mRows += ((int)Group->Colors.size() + mColumns - 1) / mColumns;
-		}
-
-		CellWidth = (float)(width() + 1) / (float)mColumns;
-		CellHeight = (float)(height() - TextHeight) / (float)mRows;
-
-		if (mColumns <= 5)
-			break;
-	}
-
-	int CurCell = 0;
-	float GroupY = 0.0f;
-	int TotalRows = 1;
-
-	for (int GroupIdx = 0; GroupIdx < LC_NUM_COLORGROUPS; GroupIdx++)
-	{
-		lcColorGroup* Group = &gColorGroups[GroupIdx];
-		int CurColumn = 0;
-		int NumRows = 0;
-
-		mGroupRects[GroupIdx] = QRect(0, (int)GroupY, width(), mGroupRects[GroupIdx].height());
-		GroupY += mGroupRects[GroupIdx].height();
-
-		for (size_t ColorIdx = 0; ColorIdx < Group->Colors.size(); ColorIdx++)
-		{
-			const int Left = CellWidth * CurColumn - 1;
-			const int Right = (CurColumn + 1) * CellWidth - 1;
-			const int Top = GroupY + CellHeight * NumRows;
-			const int Bottom = (TotalRows != mRows) ? GroupY + CellHeight * (NumRows + 1) : height();
-
-			mCellRects[CurCell] = QRect(Left, Top, Right - Left, Bottom - Top);
-
-			CurColumn++;
-			if (CurColumn == mColumns)
-			{
-				CurColumn = 0;
-				NumRows++;
-				TotalRows++;
-			}
-
-			CurCell++;
-		}
-
-		if (CurColumn != 0)
-		{
-			NumRows++;
-			TotalRows++;
-		}
-
-		GroupY += NumRows * CellHeight;
-	}
+	UpdateRects();
 
 	mWidth = width();
 	mHeight = height();
 
-	QWidget::resizeEvent(event);
+	QWidget::resizeEvent(Event);
 }
 
-void lcQColorList::paintEvent(QPaintEvent *event)
+void lcQColorList::paintEvent(QPaintEvent* Event)
 {
-	Q_UNUSED(event);
+	Q_UNUSED(Event);
 
-	QPainter painter(this);
+	QPainter Painter(this);
 
-	painter.fillRect(rect(), palette().brush(QPalette::Base));
+	Painter.fillRect(rect(), palette().brush(QPalette::Window));
 
-	painter.setFont(font());
-	painter.setPen(palette().color(QPalette::Text));
+	Painter.setFont(font());
+	Painter.setPen(palette().color(QPalette::Text));
 
-	for (int GroupIdx = 0; GroupIdx < LC_NUM_COLORGROUPS; GroupIdx++)
+	for (const lcColorListGroup& Group : mGroups)
+		Painter.drawText(Group.Rect, Qt::TextSingleLine | Qt::AlignLeft, Group.Name);
+
+	Painter.setPen(palette().color(QPalette::Shadow));
+
+	for (size_t CellIndex = 0; CellIndex < mCells.size(); CellIndex++)
 	{
-		lcColorGroup* Group = &gColorGroups[GroupIdx];
+		const lcColor* Color = &gColorList[mCells[CellIndex].ColorIndex];
 
-		painter.drawText(mGroupRects[GroupIdx], Qt::TextSingleLine | Qt::AlignCenter, Group->Name);
+		const QRect& Rect = mCells[CellIndex].Rect;
+
+		if (Color->Code != LC_COLOR_NOCOLOR)
+		{
+			QColor CellColor(Color->Value[0] * 255, Color->Value[1] * 255, Color->Value[2] * 255);
+
+			Painter.setBrush(CellColor);
+			Painter.drawRect(Rect);
+		}
+		else
+			lcDrawNoColorRect(Painter, Rect);
 	}
 
-	painter.setPen(palette().color(QPalette::Shadow));
-
-	for (int CellIdx = 0; CellIdx < mNumCells; CellIdx++)
+	if (mCurrentCell < mCells.size())
 	{
-		lcColor* Color = &gColorList[mCellColors[CellIdx]];
-		QColor CellColor(Color->Value[0] * 255, Color->Value[1] * 255, Color->Value[2] * 255);
-
-		painter.setBrush(CellColor);
-		painter.drawRect(mCellRects[CellIdx]);
-	}
-
-	if (mCurCell < mNumCells)
-	{
-		lcColor* Color = &gColorList[mCellColors[mCurCell]];
+		const lcColor* Color = &gColorList[mCells[mCurrentCell].ColorIndex];
 		QColor EdgeColor(255 - Color->Value[0] * 255, 255 - Color->Value[1] * 255, 255 - Color->Value[2] * 255);
-		QColor CellColor(Color->Value[0] * 255, Color->Value[1] * 255, Color->Value[2] * 255);
 
-		painter.setPen(EdgeColor);
-		painter.setBrush(CellColor);
+		Painter.setPen(EdgeColor);
+		Painter.setBrush(Qt::NoBrush);
 
-		QRect CellRect = mCellRects[mCurCell];
+		QRect CellRect = mCells[mCurrentCell].Rect;
 		CellRect.adjust(1, 1, -1, -1);
-		painter.drawRect(CellRect);
+		Painter.drawRect(CellRect);
 
 		/*
 		if (GetFocus() == this)
@@ -402,36 +474,17 @@ void lcQColorList::paintEvent(QPaintEvent *event)
 	}
 }
 
-void lcQColorList::SelectCell(int CellIdx)
+void lcQColorList::SelectCell(size_t CellIndex)
 {
-	if (CellIdx < 0 || CellIdx >= mNumCells)
+	if (CellIndex >= mCells.size())
 		return;
 
-	if (CellIdx == mCurCell)
+	if (CellIndex == mCurrentCell)
 		return;
 
-	update(mCellRects[mCurCell]);
-	update(mCellRects[CellIdx]);
-	mCurCell = CellIdx;
+	mCurrentCell = CellIndex;
+	mColorCode = lcGetColorCode(mCells[CellIndex].ColorIndex);
 
-	emit colorChanged(mCellColors[mCurCell]);
+	emit colorChanged(mCells[mCurrentCell].ColorIndex);
+	update();
 }
-
-#if 0
-
-*/
-void ColorPickerButton::focusInEvent(QFocusEvent *e)
-{
-    setFrameShadow(Raised);
-    update();
-    QFrame::focusOutEvent(e);
-}
-
-void ColorPickerButton::focusOutEvent(QFocusEvent *e)
-{
-    setFrameShadow(Raised);
-    update();
-    QFrame::focusOutEvent(e);
-}
-
-#endif

@@ -93,16 +93,13 @@ TexFont gTexFont;
 
 TexFont::TexFont()
 {
-	mRefCount = 0;
 	mTexture = 0;
 	memset(&mGlyphs, 0, sizeof(mGlyphs));
 }
 
-bool TexFont::Load(lcContext* Context)
+bool TexFont::Initialize(lcContext* Context)
 {
-	mRefCount++;
-
-	if (mRefCount != 1)
+	if (mTexture)
 		return true;
 
 	mFontHeight = 16;
@@ -151,14 +148,9 @@ bool TexFont::Load(lcContext* Context)
 	return true;
 }
 
-void TexFont::Release()
+void TexFont::Reset()
 {
-	mRefCount--;
-	if (mRefCount == 0)
-	{
-		glDeleteTextures(1, &mTexture);
-		mTexture = 0;
-	}
+	mTexture = 0;
 }
 
 void TexFont::GetStringDimensions(int* cx, int* cy, const char* Text) const

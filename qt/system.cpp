@@ -1,6 +1,6 @@
 #include "lc_global.h"
 
-#ifdef WIN32
+#ifdef Q_OS_WIN
 
 char* strcasestr(const char *s, const char *find)
 {
@@ -29,14 +29,6 @@ char* strupr(char *string)
 {
 	for (char *c = string; *c; c++)
 		*c = toupper(*c);
-
-	return string;
-}
-
-char* strlwr(char *string)
-{
-	for (char *c = string; *c; c++)
-		*c = tolower(*c);
 
 	return string;
 }

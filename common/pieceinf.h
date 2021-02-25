@@ -30,6 +30,7 @@ struct lcModelPartsEntry
 };
 
 class lcSynthInfo;
+enum class lcZipFileType;
 
 class PieceInfo
 {
@@ -117,7 +118,7 @@ public:
 		return mType != lcPieceInfoType::Part;
 	}
 
-	void SetZipFile(int ZipFileType, int ZipFileIndex)
+	void SetZipFile(lcZipFileType ZipFileType, int ZipFileIndex)
 	{
 		mZipFileType = ZipFileType;
 		mZipFileIndex = ZipFileIndex;
@@ -130,6 +131,11 @@ public:
 
 		const char* Name = mFileName;
 
+		// Heuristic: Names matching '^[Uu]?[0-9]*[A-Za-z][^.][^.]' are patterned.
+
+		if (*Name == 'U' || *Name == 'u')
+			Name++;
+
 		while (*Name)
 		{
 			if (*Name < '0' || *Name > '9')
@@ -138,7 +144,10 @@ public:
 			Name++;
 		}
 
-		if (*Name == 'P' || *Name == 'p')
+		if (!*Name || !((*Name >= 'A' && *Name <= 'Z') || (*Name >= 'a' && *Name <= 'z')))
+			return false;
+
+		if (Name[1] && Name[1] != '.' && Name[2] && Name[2] != '.')
 			return true;
 
 		return false;
@@ -151,7 +160,7 @@ public:
 
 	void ZoomExtents(float FoV, float AspectRatio, lcMatrix44& ProjectionMatrix, lcMatrix44& ViewMatrix) const;
 	void AddRenderMesh(lcScene& Scene);
-	void AddRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, int ColorIndex, lcRenderMeshState RenderMeshState, bool ParentActive) const;
+	void AddRenderMeshes(lcScene* Scene, const lcMatrix44& WorldMatrix, int ColorIndex, lcRenderMeshState RenderMeshState, bool ParentActive) const;
 
 	void CreatePlaceholder(const char* Name);
 
@@ -165,6 +174,7 @@ public:
 	void GetPartsList(int DefaultColorIndex, bool ScanSubModels, bool AddSubModels, lcPartsList& PartsList) const;
 	void GetModelParts(const lcMatrix44& WorldMatrix, int DefaultColorIndex, std::vector<lcModelPartsEntry>& ModelParts) const;
 	void CompareBoundingBox(const lcMatrix44& WorldMatrix, lcVector3& Min, lcVector3& Max) const;
+	void AddSubModelBoundingBoxPoints(const lcMatrix44& WorldMatrix, std::vector<lcVector3>& Points) const;
 	void UpdateBoundingBox(std::vector<lcModel*>& UpdatedModels);
 
 	void Load();
@@ -173,7 +183,7 @@ public:
 public:
 	char mFileName[LC_PIECE_NAME_LEN];
 	char m_strDescription[128];
-	int mZipFileType;
+	lcZipFileType mZipFileType;
 	int mZipFileIndex;
 	lcPieceInfoState mState;
 	int mFolderType;

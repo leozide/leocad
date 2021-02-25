@@ -1,0 +1,48 @@
+version: '{branch}.{build}'
+skip_tags: true
+image:
+- Visual Studio 2019
+configuration: Release
+platform: x64
+
+environment:
+  GITHUB_TOKEN:
+    secure: +EZPzYX4wUEc6MYg4kBLx9TogAqeeeWUPgtEW3VtAJATrBtxwpuOQIHrrR4hbc7a
+
+before_build:
+- call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
+- set PATH=C:\Qt\5.15\msvc2019_64\bin;%PATH%
+- git rev-parse --short HEAD > version.txt
+- set /p VERSION= < version.txt
+- qmake -v
+- qmake -tp vc
+
+build:
+  project: leocad.vcxproj
+  verbosity: minimal
+
+after_build:
+- 7z a symbols.zip build/release/leocad.exe build/release/leocad.pdb
+- mkdir appdir
+- copy build\release\leocad.exe appdir
+- copy docs\readme.txt appdir
+- appveyor DownloadFile https://github.com/leozide/leocad/releases/download/v19.07.1/Library-20.03.zip -FileName library.zip
+- 7z e library.zip
+- copy library.bin appdir\\library.bin
+- appveyor DownloadFile https://github.com/leozide/povray/releases/download/continuous/povconsole32-sse2.exe -FileName appdir\povconsole32-sse2.exe 
+- windeployqt appdir\leocad.exe
+- copy tools\setup\leocad.nsi .
+- copy tools\setup\setup.ico .
+- 'copy "%VCToolsRedistDir%\vcredist_x64.exe" appdir'
+- '"C:\Program Files (x86)\NSIS\makensis.exe" /V4 /DX64 "/XOutFile LeoCAD-Windows-%VERSION%.exe" leocad.nsi'
+- set TRAVIS_TAG=%APPVEYOR_REPO_TAG_NAME%
+- set TRAVIS_REPO_SLUG=%APPVEYOR_REPO_NAME%
+- set TRAVIS_COMMIT=%APPVEYOR_REPO_COMMIT%
+- appveyor DownloadFile https://github.com/probonopd/uploadtool/raw/master/upload.sh
+- if not defined APPVEYOR_PULL_REQUEST_NUMBER (bash upload.sh LeoCAD*.exe)
+
+artifacts:
+- path: symbols.zip
+  name: symbols
+- path: LeoCAD-Windows-$(VERSION).exe
+  name: leocad

@@ -11,6 +11,8 @@
 #include "pieceinf.h"
 #include "lc_library.h"
 #include "lc_qutils.h"
+#include "lc_viewwidget.h"
+#include "lc_previewwidget.h"
 
 // Draw an icon indicating opened/closing branches
 static QIcon drawIndicatorIcon(const QPalette &palette, QStyle *style)
@@ -209,13 +211,8 @@ lcQPropertiesTree::lcQPropertiesTree(QWidget *parent) :
 	labels.append(tr("Property"));
 	labels.append(tr("Value"));
 	setHeaderLabels(labels);
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
 	header()->setSectionsMovable(false);
 	header()->setSectionResizeMode(QHeaderView::ResizeToContents);
-#else
-	header()->setMovable(false);
-	header()->setResizeMode(QHeaderView::ResizeToContents);
-#endif
 	header()->setVisible(false);
 	setAlternatingRowColors(true);
 	setRootIsDecorated(false);
@@ -489,7 +486,7 @@ QWidget *lcQPropertiesTree::createEditor(QWidget *parent, QTreeWidgetItem *item)
 	case PropertyString:
 		{
 			QLineEdit *editor = new QLineEdit(parent);
-			const char *value = (const char*)item->data(0, PropertyValueRole).value<void*>();
+			QString value = item->data(0, PropertyValueRole).toString();
 
 			editor->setText(value);
 
@@ -737,7 +734,7 @@ void lcQPropertiesTree::slotReturnPressed()
 			{
 				QString Value = Editor->text();
 
-				Model->SetCameraName(Camera, Value.toLocal8Bit().data());
+				Model->SetCameraName(Camera, Value);
 			}
 		}
 	}
@@ -761,7 +758,15 @@ void lcQPropertiesTree::slotSetValue(int Value)
 		{
 			QComboBox *editor = (QComboBox*)sender();
 
-			Model->SetSelectedPiecesPieceInfo((PieceInfo*)editor->itemData(Value).value<void*>());
+			PieceInfo* Info = (PieceInfo*)editor->itemData(Value).value<void*>();
+			Model->SetSelectedPiecesPieceInfo(Info);
+
+			int ColorIndex = gDefaultColor;
+			lcObject* Focus = gMainWindow->GetActiveModel()->GetFocusObject();
+			if (Focus && Focus->IsPiece())
+				ColorIndex = ((lcPiece*)Focus)->GetColorIndex();
+			quint32 ColorCode = lcGetColorCode(ColorIndex);
+			gMainWindow->PreviewPiece(Info->mFileName, ColorCode, false);
 		}
 	}
 }
@@ -770,30 +775,42 @@ void lcQPropertiesTree::slotColorButtonClicked()
 {
 	int ColorIndex = gDefaultColor;
 	lcObject* Focus = gMainWindow->GetActiveModel()->GetFocusObject();
+
 	if (Focus && Focus->IsPiece())
-		ColorIndex = ((lcPiece*)Focus)->mColorIndex;
+		ColorIndex = ((lcPiece*)Focus)->GetColorIndex();
 
-	QWidget *parent = (QWidget*)sender();
-	lcQColorPickerPopup *popup = new lcQColorPickerPopup(parent, ColorIndex);
-	connect(popup, SIGNAL(selected(int)), SLOT(slotSetValue(int)));
-	popup->setMinimumSize(300, 200);
+	QWidget* Button = (QWidget*)sender();
 
-	const QRect desktop = QApplication::desktop()->geometry();
+	if (!Button)
+		return;
 
-	QPoint pos = parent->mapToGlobal(parent->rect().bottomLeft());
-	if (pos.x() < desktop.left())
-		pos.setX(desktop.left());
-	if (pos.y() < desktop.top())
-		pos.setY(desktop.top());
+	lcQColorPickerPopup* Popup = new lcQColorPickerPopup(Button, ColorIndex);
+	connect(Popup, SIGNAL(selected(int)), SLOT(slotSetValue(int)));
+	Popup->setMinimumSize(qMax(300, width()), qMax(200, static_cast<int>(width() * 2 / 3)));
 
-	if ((pos.x() + popup->width()) > desktop.width())
-		pos.setX(desktop.width() - popup->width());
-	if ((pos.y() + popup->height()) > desktop.bottom())
-		pos.setY(desktop.bottom() - popup->height());
-	popup->move(pos);
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 10, 0))
+	QScreen* Screen = QGuiApplication::screenAt(Button->mapToGlobal(Button->rect().bottomLeft()));
+	const QRect ScreenRect = Screen ? Screen->geometry() : QApplication::desktop()->geometry();
+#else
+	const QRect ScreenRect = QApplication::desktop()->geometry();
+#endif
 
-	popup->setFocus();
-	popup->show();
+	int x = mapToGlobal(QPoint(0, 0)).x();
+	int y = Button->mapToGlobal(Button->rect().bottomLeft()).y();
+
+	if (x < ScreenRect.left())
+		x = ScreenRect.left();
+	if (y < ScreenRect.top())
+		y = ScreenRect.top();
+
+	if (x + Popup->width() > ScreenRect.right())
+		x = ScreenRect.right() - Popup->width();
+	if (y + Popup->height() > ScreenRect.bottom())
+		y = ScreenRect.bottom() - Popup->height();
+
+	Popup->move(QPoint(x, y));
+	Popup->setFocus();
+	Popup->show();
 }
 
 QTreeWidgetItem *lcQPropertiesTree::addProperty(QTreeWidgetItem *parent, const QString& label, PropertyType propertyType)
@@ -922,8 +939,10 @@ void lcQPropertiesTree::SetPiece(const lcArray<lcObject*>& Selection, lcObject* 
 	{
 		Show = Piece->GetStepShow();
 		Hide = Piece->GetStepHide();
-		ColorIndex = Piece->mColorIndex;
+		ColorIndex = Piece->GetColorIndex();
 		Info = Piece->mPieceInfo;
+		quint32 ColorCode = lcGetColorCode(ColorIndex);
+		gMainWindow->PreviewPiece(Info->mFileName, ColorCode, false);
 	}
 	else
 	{
@@ -942,7 +961,7 @@ void lcQPropertiesTree::SetPiece(const lcArray<lcObject*>& Selection, lcObject* 
 			{
 				Show = SelectedPiece->GetStepShow();
 				Hide = SelectedPiece->GetStepHide();
-				ColorIndex = SelectedPiece->mColorIndex;
+				ColorIndex = SelectedPiece->GetColorIndex();
 				Info = SelectedPiece->mPieceInfo;
 
 				FirstPiece = false;
@@ -955,7 +974,7 @@ void lcQPropertiesTree::SetPiece(const lcArray<lcObject*>& Selection, lcObject* 
 				if (SelectedPiece->GetStepHide() != Hide)
 					Hide = 0;
 
-				if (SelectedPiece->mColorIndex != ColorIndex)
+				if (SelectedPiece->GetColorIndex() != ColorIndex)
 					ColorIndex = gDefaultColor;
 
 				if (SelectedPiece->mPieceInfo != Info)
@@ -1031,7 +1050,7 @@ void lcQPropertiesTree::SetCamera(lcObject* Focus)
 	float FoV = 60.0f;
 	float ZNear = 1.0f;
 	float ZFar = 100.0f;
-	const char* Name = "";
+	QString Name;
 
 	if (Camera)
 	{
@@ -1077,7 +1096,7 @@ void lcQPropertiesTree::SetCamera(lcObject* Focus)
 	cameraFar->setData(0, PropertyValueRole, ZFar);
 
 	cameraName->setText(1, Name);
-	cameraName->setData(0, PropertyValueRole, QVariant::fromValue((void*)Name));
+	cameraName->setData(0, PropertyValueRole, Name);
 }
 
 void lcQPropertiesTree::SetLight(lcObject* Focus)

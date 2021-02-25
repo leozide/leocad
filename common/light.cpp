@@ -32,16 +32,15 @@ lcLight::lcLight(float px, float py, float pz, float tx, float ty, float tz)
 void lcLight::Initialize(const lcVector3& Position, const lcVector3& TargetPosition)
 {
 	mState = 0;
-	memset(m_strName, 0, sizeof(m_strName));
 
-	ChangeKey(mPositionKeys, Position, 1, true);
-	ChangeKey(mTargetPositionKeys, TargetPosition, 1, true);
-	ChangeKey(mAmbientColorKeys, lcVector4(0.0f, 0.0f, 0.0f, 1.0f), 1, true);
-	ChangeKey(mDiffuseColorKeys, lcVector4(0.8f, 0.8f, 0.8f, 1.0f), 1, true);
-	ChangeKey(mSpecularColorKeys, lcVector4(1.0f, 1.0f, 1.0f, 1.0f), 1, true);
-	ChangeKey(mAttenuationKeys, lcVector3(1.0f, 0.0f, 0.0f), 1, true);
-	ChangeKey(mSpotCutoffKeys, 30.0f, 1, true);
-	ChangeKey(mSpotExponentKeys, 0.0f, 1, true);
+	mPositionKeys.ChangeKey(Position, 1, true);
+	mTargetPositionKeys.ChangeKey(TargetPosition, 1, true);
+	mAmbientColorKeys.ChangeKey(lcVector4(0.0f, 0.0f, 0.0f, 1.0f), 1, true);
+	mDiffuseColorKeys.ChangeKey(lcVector4(0.8f, 0.8f, 0.8f, 1.0f), 1, true);
+	mSpecularColorKeys.ChangeKey(lcVector4(1.0f, 1.0f, 1.0f, 1.0f), 1, true);
+	mAttenuationKeys.ChangeKey(lcVector3(1.0f, 0.0f, 0.0f), 1, true);
+	mSpotCutoffKeys.ChangeKey(30.0f, 1, true);
+	mSpotExponentKeys.ChangeKey(0.0f, 1, true);
 }
 
 lcLight::~lcLight()
@@ -55,13 +54,13 @@ void lcLight::SaveLDraw(QTextStream& Stream) const
 
 void lcLight::CreateName(const lcArray<lcLight*>& Lights)
 {
-	if (m_strName[0])
+	if (!mName.isEmpty())
 	{
 		bool Found = false;
 
 		for (lcLight* Light : Lights)
 		{
-			if (!strcmp(Light->m_strName, m_strName))
+			if (Light->GetName() == mName)
 			{
 				Found = true;
 				break;
@@ -72,21 +71,24 @@ void lcLight::CreateName(const lcArray<lcLight*>& Lights)
 			return;
 	}
 
-	int i, max = 0;
+	int MaxLightNumber = 0;
+	const QLatin1String Prefix("Light ");
 
 	for (lcLight* Light : Lights)
 	{
-		if (strncmp(Light->m_strName, "Light ", 6) == 0)
+		QString LightName = Light->GetName();
+
+		if (LightName.startsWith(Prefix))
 		{
-			if (sscanf(Light->m_strName + 6, " #%d", &i) == 1)
-			{
-				if (i > max)
-					max = i;
-			}
+			bool Ok = false;
+			int LightNumber = LightName.midRef(Prefix.size()).toInt(&Ok);
+
+			if (Ok && LightNumber > MaxLightNumber)
+				MaxLightNumber = LightNumber;
 		}
 	}
 
-	sprintf(m_strName, "Light #%.2d", max+1);
+	mName = Prefix + QString::number(MaxLightNumber + 1);
 }
 
 void lcLight::CompareBoundingBox(lcVector3& Min, lcVector3& Max)
@@ -207,50 +209,50 @@ void lcLight::MoveSelected(lcStep Step, bool AddKey, const lcVector3& Distance)
 	if (IsSelected(LC_LIGHT_SECTION_POSITION))
 	{
 		mPosition += Distance;
-		ChangeKey(mPositionKeys, mPosition, Step, AddKey);
+		mPositionKeys.ChangeKey(mPosition, Step, AddKey);
 	}
 
 	if (IsSelected(LC_LIGHT_SECTION_TARGET))
 	{
 		mTargetPosition += Distance;
-		ChangeKey(mTargetPositionKeys, mTargetPosition, Step, AddKey);
+		mTargetPositionKeys.ChangeKey(mTargetPosition, Step, AddKey);
 	}
 }
 
 void lcLight::InsertTime(lcStep Start, lcStep Time)
 {
-	lcObject::InsertTime(mPositionKeys, Start, Time);
-	lcObject::InsertTime(mTargetPositionKeys, Start, Time);
-	lcObject::InsertTime(mAmbientColorKeys, Start, Time);
-	lcObject::InsertTime(mDiffuseColorKeys, Start, Time);
-	lcObject::InsertTime(mSpecularColorKeys, Start, Time);
-	lcObject::InsertTime(mAttenuationKeys, Start, Time);
-	lcObject::InsertTime(mSpotCutoffKeys, Start, Time);
-	lcObject::InsertTime(mSpotExponentKeys, Start, Time);
+	mPositionKeys.InsertTime(Start, Time);
+	mTargetPositionKeys.InsertTime(Start, Time);
+	mAmbientColorKeys.InsertTime(Start, Time);
+	mDiffuseColorKeys.InsertTime(Start, Time);
+	mSpecularColorKeys.InsertTime(Start, Time);
+	mAttenuationKeys.InsertTime(Start, Time);
+	mSpotCutoffKeys.InsertTime(Start, Time);
+	mSpotExponentKeys.InsertTime(Start, Time);
 }
 
 void lcLight::RemoveTime(lcStep Start, lcStep Time)
 {
-	lcObject::RemoveTime(mPositionKeys, Start, Time);
-	lcObject::RemoveTime(mTargetPositionKeys, Start, Time);
-	lcObject::RemoveTime(mAmbientColorKeys, Start, Time);
-	lcObject::RemoveTime(mDiffuseColorKeys, Start, Time);
-	lcObject::RemoveTime(mSpecularColorKeys, Start, Time);
-	lcObject::RemoveTime(mAttenuationKeys, Start, Time);
-	lcObject::RemoveTime(mSpotCutoffKeys, Start, Time);
-	lcObject::RemoveTime(mSpotExponentKeys, Start, Time);
+	mPositionKeys.RemoveTime(Start, Time);
+	mTargetPositionKeys.RemoveTime(Start, Time);
+	mAmbientColorKeys.RemoveTime(Start, Time);
+	mDiffuseColorKeys.RemoveTime(Start, Time);
+	mSpecularColorKeys.RemoveTime(Start, Time);
+	mAttenuationKeys.RemoveTime(Start, Time);
+	mSpotCutoffKeys.RemoveTime(Start, Time);
+	mSpotExponentKeys.RemoveTime(Start, Time);
 }
 
 void lcLight::UpdatePosition(lcStep Step)
 {
-	mPosition = CalculateKey(mPositionKeys, Step);
-	mTargetPosition = CalculateKey(mTargetPositionKeys, Step);
-	mAmbientColor = CalculateKey(mAmbientColorKeys, Step);
-	mDiffuseColor = CalculateKey(mDiffuseColorKeys, Step);
-	mSpecularColor = CalculateKey(mSpecularColorKeys, Step);
-	mAttenuation = CalculateKey(mAttenuationKeys, Step);
-	mSpotCutoff = CalculateKey(mSpotCutoffKeys, Step);
-	mSpotExponent = CalculateKey(mSpotExponentKeys, Step);
+	mPosition = mPositionKeys.CalculateKey(Step);
+	mTargetPosition = mTargetPositionKeys.CalculateKey(Step);
+	mAmbientColor = mAmbientColorKeys.CalculateKey(Step);
+	mDiffuseColor = mDiffuseColorKeys.CalculateKey(Step);
+	mSpecularColor = mSpecularColorKeys.CalculateKey(Step);
+	mAttenuation = mAttenuationKeys.CalculateKey(Step);
+	mSpotCutoff = mSpotCutoffKeys.CalculateKey(Step);
+	mSpotExponent = mSpotExponentKeys.CalculateKey(Step);
 
 	if (IsPointLight())
 	{
@@ -527,28 +529,28 @@ void lcLight::DrawPointLight(lcContext* Context) const
 void lcLight::RemoveKeyFrames()
 {
 	mPositionKeys.RemoveAll();
-	ChangeKey(mPositionKeys, mPosition, 1, true);
+	mPositionKeys.ChangeKey(mPosition, 1, true);
 
 	mTargetPositionKeys.RemoveAll();
-	ChangeKey(mTargetPositionKeys, mTargetPosition, 1, true);
+	mTargetPositionKeys.ChangeKey(mTargetPosition, 1, true);
 
 	mAmbientColorKeys.RemoveAll();
-	ChangeKey(mAmbientColorKeys, mAmbientColor, 1, true);
+	mAmbientColorKeys.ChangeKey(mAmbientColor, 1, true);
 
 	mDiffuseColorKeys.RemoveAll();
-	ChangeKey(mDiffuseColorKeys, mDiffuseColor, 1, true);
+	mDiffuseColorKeys.ChangeKey(mDiffuseColor, 1, true);
 
 	mSpecularColorKeys.RemoveAll();
-	ChangeKey(mSpecularColorKeys, mSpecularColor, 1, true);
+	mSpecularColorKeys.ChangeKey(mSpecularColor, 1, true);
 
 	mAttenuationKeys.RemoveAll();
-	ChangeKey(mAttenuationKeys, mAttenuation, 1, true);
+	mAttenuationKeys.ChangeKey(mAttenuation, 1, true);
 
 	mSpotCutoffKeys.RemoveAll();
-	ChangeKey(mSpotCutoffKeys, mSpotCutoff, 1, true);
+	mSpotCutoffKeys.ChangeKey(mSpotCutoff, 1, true);
 
 	mSpotExponentKeys.RemoveAll();
-	ChangeKey(mSpotExponentKeys, mSpotExponent, 1, true);
+	mSpotExponentKeys.ChangeKey(mSpotExponent, 1, true);
 }
 
 bool lcLight::Setup(int LightIndex)

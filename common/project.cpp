@@ -5,9 +5,10 @@
 #include "pieceinf.h"
 #include "camera.h"
 #include "project.h"
+#include "lc_instructions.h"
 #include "image.h"
 #include "lc_mainwindow.h"
-#include "view.h"
+#include "lc_view.h"
 #include "lc_library.h"
 #include "lc_application.h"
 #include "lc_profile.h"
@@ -60,15 +61,17 @@ void lcHTMLExportOptions::SaveDefaults()
 	lcSetProfileInt(LC_PROFILE_HTML_IMAGE_HEIGHT, StepImagesHeight);
 }
 
-Project::Project()
+Project::Project(bool IsPreview)
+	: mIsPreview(IsPreview)
 {
 	mModified = false;
-	mActiveModel = new lcModel(tr("New Model.ldr"));
+	mActiveModel = new lcModel(tr(mIsPreview ? "Preview.ldr" : "New Model.ldr"), this, mIsPreview);
 	mActiveModel->CreatePieceInfo(this);
 	mActiveModel->SetSaved();
 	mModels.Add(mActiveModel);
 
-	QObject::connect(&mFileWatcher, SIGNAL(fileChanged(const QString&)), gMainWindow, SLOT(ProjectFileChanged(const QString&)));
+	if (!mIsPreview && gMainWindow)
+		QObject::connect(&mFileWatcher, SIGNAL(fileChanged(const QString&)), gMainWindow, SLOT(ProjectFileChanged(const QString&)));
 }
 
 Project::~Project()
@@ -121,12 +124,8 @@ QString Project::GetImageFileName(bool AllowCurrentFolder) const
 			FileName = QLatin1String("image");
 		else
 		{
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
-			QStringList cachePathList = QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation);
-			FileName = cachePathList.first();
-#else
-			FileName = QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation);
-#endif
+			QStringList CachePathList = QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation);
+			FileName = CachePathList.first();
 			FileName = QDir(FileName).absoluteFilePath(QLatin1String("image"));
 		}
 	}
@@ -149,8 +148,12 @@ void Project::SetActiveModel(int ModelIndex)
 		mModels[ModelIdx]->UpdatePieceInfo(UpdatedModels);
 
 	mActiveModel = mModels[ModelIndex];
-	gMainWindow->SetCurrentModelTab(mActiveModel);
-	mActiveModel->UpdateInterface();
+
+	if (!mIsPreview && gMainWindow)
+	{
+		gMainWindow->SetCurrentModelTab(mActiveModel);
+		mActiveModel->UpdateInterface();
+	}
 }
 
 void Project::SetActiveModel(const QString& FileName)
@@ -245,7 +248,7 @@ lcModel* Project::CreateNewModel(bool ShowModel)
 		return nullptr;
 
 	mModified = true;
-	lcModel* Model = new lcModel(Name);
+	lcModel* Model = new lcModel(Name, this, false);
 	Model->CreatePieceInfo(this);
 	Model->SetSaved();
 	mModels.Add(Model);
@@ -263,39 +266,53 @@ lcModel* Project::CreateNewModel(bool ShowModel)
 
 void Project::ShowModelListDialog()
 {
-	QList<QPair<QString, lcModel*>> Models;
-#if (QT_VERSION >= QT_VERSION_CHECK(4, 7, 0))
-	Models.reserve(mModels.GetSize());
-#endif
+	lcQModelListDialog Dialog(gMainWindow, mModels);
 
-	for (int ModelIdx = 0; ModelIdx < mModels.GetSize(); ModelIdx++)
-	{
-		lcModel* Model = mModels[ModelIdx];
-		Models.append(QPair<QString, lcModel*>(Model->GetProperties().mFileName, Model));
-	}
-
-	lcQModelListDialog Dialog(gMainWindow, Models);
-
-	if (Dialog.exec() != QDialog::Accepted || Models.isEmpty())
+	if (Dialog.exec() != QDialog::Accepted)
 		return;
 
 	lcArray<lcModel*> NewModels;
+	std::vector<lcModelListDialogEntry> Results = Dialog.GetResults();
 
-	for (QList<QPair<QString, lcModel*>>::iterator it = Models.begin(); it != Models.end(); it++)
+	for (const lcModelListDialogEntry& Entry : Results)
 	{
-		lcModel* Model = it->second;
+		lcModel* Model = Entry.ExistingModel;
 
 		if (!Model)
 		{
-			Model = new lcModel(it->first);
+			const lcModel* Source = Entry.DuplicateSource;
+
+			if (!Source)
+			{
+				Model = new lcModel(Entry.Name, this, false);
+			}
+			else
+			{
+				Model = new lcModel(Source->GetProperties().mFileName, this, false);
+
+				QByteArray File;
+
+				QTextStream SaveStream(&File);
+				Source->SaveLDraw(SaveStream, false);
+				SaveStream.flush();
+
+				QBuffer Buffer(&File);
+				Buffer.open(QIODevice::ReadOnly);
+
+				Model->LoadLDraw(Buffer, this);
+				Model->SetFileName(Entry.Name);
+				Model->CreatePieceInfo(this);
+			}
+
 			Model->CreatePieceInfo(this);
 			Model->SetSaved();
+
 			mModified = true;
 		}
-		else if (Model->GetProperties().mFileName != it->first)
+		else if (Model->GetProperties().mFileName != Entry.Name)
 		{
-			Model->SetFileName(it->first);
-			lcGetPiecesLibrary()->RenamePiece(Model->GetPieceInfo(), it->first.toLatin1().constData());
+			Model->SetFileName(Entry.Name);
+			lcGetPiecesLibrary()->RenamePiece(Model->GetPieceInfo(), Entry.Name.toLatin1().constData());
 
 			for (lcModel* CheckModel : mModels)
 				CheckModel->RenamePiece(Model->GetPieceInfo());
@@ -332,10 +349,10 @@ void Project::SetFileName(const QString& FileName)
 	if (mFileName == FileName)
 		return;
 
-	if (!mFileName.isEmpty())
+	if (!mIsPreview && !mFileName.isEmpty())
 		mFileWatcher.removePath(mFileName);
 
-	if (!FileName.isEmpty())
+	if (!mIsPreview && !FileName.isEmpty())
 		mFileWatcher.addPath(FileName);
 
 	mFileName = FileName;
@@ -343,11 +360,15 @@ void Project::SetFileName(const QString& FileName)
 
 bool Project::Load(const QString& FileName)
 {
+	QWidget *parent = nullptr;
+	if (!mIsPreview)
+		parent = gMainWindow;
+
 	QFile File(FileName);
 
 	if (!File.open(QIODevice::ReadOnly))
 	{
-		QMessageBox::warning(gMainWindow, tr("Error"), tr("Error reading file '%1':\n%2").arg(FileName, File.errorString()));
+		QMessageBox::warning(parent, tr("Error"), tr("Error reading file '%1':\n%2").arg(FileName, File.errorString()));
 		return false;
 	}
 
@@ -374,14 +395,24 @@ bool Project::Load(const QString& FileName)
 
 		while (!Buffer.atEnd())
 		{
-			lcModel* Model = new lcModel(QString());
+			lcModel* Model = new lcModel(QString(), this, mIsPreview);
 			int Pos = Model->SplitMPD(Buffer);
 
 			if (Models.empty() || !Model->GetFileName().isEmpty())
 			{
-				mModels.Add(Model);
-				Models.emplace_back(std::make_pair(Pos, Model));
-				Model->CreatePieceInfo(this);
+				auto ModelCompare = [Model](const std::pair<int, lcModel*>& ModelIt)
+				{
+					return ModelIt.second->GetFileName().compare(Model->GetFileName(), Qt::CaseInsensitive) == 0;
+				};
+
+				if (std::find_if(Models.begin(), Models.end(), ModelCompare) == Models.end())
+				{
+					mModels.Add(Model);
+					Models.emplace_back(std::make_pair(Pos, Model));
+					Model->CreatePieceInfo(this);
+				}
+				else
+					delete Model;
 			}
 			else
 				delete Model;
@@ -401,7 +432,7 @@ bool Project::Load(const QString& FileName)
 		MemFile.WriteBuffer(FileData.constData(), FileData.size());
 		MemFile.Seek(0, SEEK_SET);
 
-		lcModel* Model = new lcModel(QString());
+		lcModel* Model = new lcModel(QString(), this, mIsPreview);
 
 		if (Model->LoadBinary(&MemFile))
 		{
@@ -415,7 +446,7 @@ bool Project::Load(const QString& FileName)
 
 	if (mModels.IsEmpty())
 	{
-		QMessageBox::warning(gMainWindow, tr("Error"), tr("Error loading file '%1':\nFile format is not recognized.").arg(FileName));
+		QMessageBox::warning(parent, tr("Error"), tr("Error loading file '%1':\nFile format is not recognized.").arg(FileName));
 		return false;
 	}
 
@@ -534,7 +565,7 @@ bool Project::ImportLDD(const QString& FileName)
 
 	mModels.DeleteAll();
 	QString ModelName = QFileInfo(FileName).completeBaseName();
-	lcModel* Model = new lcModel(ModelName);
+	lcModel* Model = new lcModel(ModelName, this, false);
 
 	if (Model->LoadLDD(QString::fromUtf8((const char*)XMLFile.mBuffer)))
 	{
@@ -567,7 +598,7 @@ bool Project::ImportInventory(const QByteArray& Inventory, const QString& Name, 
 		return false;
 
 	mModels.DeleteAll();
-	lcModel* Model = new lcModel(Name);
+	lcModel* Model = new lcModel(Name, this, false);
 
 	if (Model->LoadInventory(Inventory))
 	{
@@ -655,27 +686,27 @@ QString Project::GetExportFileName(const QString& FileName, const QString& Defau
 	return QFileDialog::getSaveFileName(gMainWindow, DialogTitle, SaveFileName, DialogFilter);
 }
 
-void Project::Export3DStudio(const QString& FileName)
+bool Project::Export3DStudio(const QString& FileName)
 {
 	std::vector<lcModelPartsEntry> ModelParts = GetModelParts();
 
 	if (ModelParts.empty())
 	{
 		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Nothing to export."));
-		return;
+		return false;
 	}
 
 	QString SaveFileName = GetExportFileName(FileName, "3ds", tr("Export 3D Studio"), tr("3DS Files (*.3ds);;All Files (*.*)"));
 
 	if (SaveFileName.isEmpty())
-		return;
+		return false;
 
 	lcDiskFile File(SaveFileName);
 
 	if (!File.Open(QIODevice::WriteOnly))
 	{
 		QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Could not open file '%1' for writing.").arg(SaveFileName));
-		return;
+		return false;
 	}
 
 	long M3DStart = File.GetPosition();
@@ -882,17 +913,15 @@ void Project::Export3DStudio(const QString& FileName)
 	File.WriteU16(0x0010); // CHK_COLOR_F
 	File.WriteU32(18);
 
-	File.WriteFloats(Properties.mBackgroundSolidColor, 3);
+	const lcPreferences& Preferences = lcGetPreferences();
+	lcVector3 BackgroundSolidColor = lcVector3FromColor(Preferences.mBackgroundSolidColor);
+
+	File.WriteFloats(BackgroundSolidColor, 3);
 
 	File.WriteU16(0x0013); // CHK_LIN_COLOR_F
 	File.WriteU32(18);
 
-	File.WriteFloats(Properties.mBackgroundSolidColor, 3);
-
-	File.WriteU16(0x1100); // CHK_BIT_MAP
-	QByteArray BackgroundImage = Properties.mBackgroundImage.toLatin1();
-	File.WriteU32(6 + 1 + (quint32)strlen(BackgroundImage.constData()));
-	File.WriteBuffer(BackgroundImage.constData(), strlen(BackgroundImage.constData()) + 1);
+	File.WriteFloats(BackgroundSolidColor, 3);
 
 	File.WriteU16(0x1300); // CHK_V_GRADIENT
 	File.WriteU32(118);
@@ -902,41 +931,39 @@ void Project::Export3DStudio(const QString& FileName)
 	File.WriteU16(0x0010); // CHK_COLOR_F
 	File.WriteU32(18);
 
-	File.WriteFloats(Properties.mBackgroundGradientColor1, 3);
+	const lcVector3 BackgroundGradientColor1 = lcVector3FromColor(Preferences.mBackgroundGradientColorTop);
+	const lcVector3 BackgroundGradientColor2 = lcVector3FromColor(Preferences.mBackgroundGradientColorBottom);
+
+	File.WriteFloats(BackgroundGradientColor1, 3);
 
 	File.WriteU16(0x0013); // CHK_LIN_COLOR_F
 	File.WriteU32(18);
 
-	File.WriteFloats(Properties.mBackgroundGradientColor1, 3);
+	File.WriteFloats(BackgroundGradientColor1, 3);
 
 	File.WriteU16(0x0010); // CHK_COLOR_F
 	File.WriteU32(18);
 
-	File.WriteFloats((Properties.mBackgroundGradientColor1 + Properties.mBackgroundGradientColor2) / 2.0f, 3);
+	File.WriteFloats((BackgroundGradientColor1 + BackgroundGradientColor2) / 2.0f, 3);
 
 	File.WriteU16(0x0013); // CHK_LIN_COLOR_F
 	File.WriteU32(18);
 
-	File.WriteFloats((Properties.mBackgroundGradientColor1 + Properties.mBackgroundGradientColor2) / 2.0f, 3);
+	File.WriteFloats((BackgroundGradientColor1 + BackgroundGradientColor2) / 2.0f, 3);
 
 	File.WriteU16(0x0010); // CHK_COLOR_F
 	File.WriteU32(18);
 
-	File.WriteFloats(Properties.mBackgroundGradientColor2, 3);
+	File.WriteFloats(BackgroundGradientColor2, 3);
 
 	File.WriteU16(0x0013); // CHK_LIN_COLOR_F
 	File.WriteU32(18);
 
-	File.WriteFloats(Properties.mBackgroundGradientColor2, 3);
+	File.WriteFloats(BackgroundGradientColor2, 3);
 
-	if (Properties.mBackgroundType == LC_BACKGROUND_GRADIENT)
+	if (Preferences.mBackgroundGradient)
 	{
 		File.WriteU16(0x1301); // LIB3DS_USE_V_GRADIENT
-		File.WriteU32(6);
-	}
-	else if (Properties.mBackgroundType == LC_BACKGROUND_IMAGE)
-	{
-		File.WriteU16(0x1101); // LIB3DS_USE_BIT_MAP
 		File.WriteU32(6);
 	}
 	else
@@ -1096,6 +1123,8 @@ void Project::Export3DStudio(const QString& FileName)
 	File.Seek(M3DStart + 2, SEEK_SET);
 	File.WriteU32(M3DEnd - M3DStart);
 	File.Seek(M3DEnd, SEEK_SET);
+
+	return true;
 }
 
 void Project::ExportBrickLink()
@@ -1162,27 +1191,27 @@ void Project::ExportBrickLink()
 	BrickLinkFile.WriteLine("</INVENTORY>\n");
 }
 
-void Project::ExportCOLLADA(const QString& FileName)
+bool Project::ExportCOLLADA(const QString& FileName)
 {
 	std::vector<lcModelPartsEntry> ModelParts = GetModelParts();
 
 	if (ModelParts.empty())
 	{
 		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Nothing to export."));
-		return;
+		return false;
 	}
 
 	QString SaveFileName = GetExportFileName(FileName, "dae", tr("Export COLLADA"), tr("COLLADA Files (*.dae);;All Files (*.*)"));
 
 	if (SaveFileName.isEmpty())
-		return;
+		return false;
 
 	QFile File(SaveFileName);
 
 	if (!File.open(QIODevice::WriteOnly))
 	{
 		QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Could not open file '%1' for writing.").arg(SaveFileName));
-		return;
+		return false;
 	}
 
 	QTextStream Stream(&File);
@@ -1270,7 +1299,7 @@ void Project::ExportCOLLADA(const QString& FileName)
 		QString ID = GetMeshID(ModelPart);
 
 		if (!Mesh)
-			Mesh = gPlaceholderMesh;
+			continue;
 
 		Stream << QString("\t<geometry id=\"%1\">\r\n").arg(ID);
 		Stream << "\t\t<mesh>\r\n";
@@ -1379,6 +1408,11 @@ void Project::ExportCOLLADA(const QString& FileName)
 
 	for (const lcModelPartsEntry& ModelPart : ModelParts)
 	{
+		lcMesh* Mesh = !ModelPart.Mesh ? ModelPart.Info->GetMesh() : ModelPart.Mesh;
+
+		if (!Mesh)
+			continue;
+
 		QString ID = GetMeshID(ModelPart);
 
 		Stream << "\t\t<node>\r\n";
@@ -1394,11 +1428,6 @@ void Project::ExportCOLLADA(const QString& FileName)
 		Stream << QString("\t\t\t<instance_geometry url=\"#%1\">\r\n").arg(ID);
 		Stream << "\t\t\t\t<bind_material>\r\n";
 		Stream << "\t\t\t\t\t<technique_common>\r\n";
-
-		lcMesh* Mesh = !ModelPart.Mesh ? ModelPart.Info->GetMesh() : ModelPart.Mesh;
-
-		if (!Mesh)
-			Mesh = gPlaceholderMesh;
 
 		for (int SectionIdx = 0; SectionIdx < Mesh->mLods[LC_MESH_LOD_HIGH].NumSections; SectionIdx++)
 		{
@@ -1430,6 +1459,8 @@ void Project::ExportCOLLADA(const QString& FileName)
 	Stream << "</scene>\r\n";
 
 	Stream << "</COLLADA>\r\n";
+
+	return true;
 }
 
 void Project::ExportCSV()
@@ -1473,14 +1504,12 @@ void Project::ExportCSV()
 	}
 }
 
-std::vector<std::pair<lcModel*, lcStep>> Project::GetPageLayouts() const
+lcInstructions* Project::GetInstructions()
 {
-	std::vector<const lcModel*> AddedModels;
+	mInstructions.reset();
+	mInstructions = std::unique_ptr<lcInstructions>(new lcInstructions(this));
 
-	if (mActiveModel)
-		return mActiveModel->GetPageLayouts(AddedModels);
-
-	return std::vector<std::pair<lcModel*, lcStep>>();
+	return mInstructions.get();
 }
 
 void Project::ExportHTML(const lcHTMLExportOptions& Options)
@@ -1504,7 +1533,7 @@ void Project::ExportHTML(const lcHTMLExportOptions& Options)
 
 	auto AddPartsListImage = [&Dir](QTextStream& Stream, lcModel* Model, lcStep Step, const QString& BaseName)
 	{
-		QImage Image = Model->GetPartsListImage(1024, Step);
+		QImage Image = Model->GetPartsListImage(1024, Step, LC_RGBA(255, 255, 255, 0), QFont("Arial", 16, QFont::Bold), Qt::black);
 
 		if (!Image.isNull())
 		{
@@ -1731,7 +1760,7 @@ bool Project::ExportPOVRay(const QString& FileName)
 	char Line[1024];
 
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
-	std::map<const PieceInfo*, std::pair<char[LC_PIECE_NAME_LEN], int>> PieceTable;
+	std::map<const PieceInfo*, std::pair<char[LC_PIECE_NAME_LEN + 1], int>> PieceTable;
 	size_t NumColors = gColorList.size();
 	std::vector<std::array<char, LC_MAX_COLOR_NAME>> ColorTable(NumColors);
 
@@ -1767,12 +1796,12 @@ bool Project::ExportPOVRay(const QString& FileName)
 
 		while (TableFile.ReadLine(Line, sizeof(Line)))
 		{
-			char Src[1024], Dst[1024], Flags[1024];
+			char Src[129], Dst[129], Flags[11];
 
 			if (*Line == ';')
 				continue;
 
-			if (sscanf(Line,"%s%s%s", Src, Dst, Flags) != 3)
+			if (sscanf(Line,"%128s%128s%10s", Src, Dst, Flags) != 3)
 				continue;
 
 			strcat(Src, ".dat");
@@ -1783,21 +1812,21 @@ bool Project::ExportPOVRay(const QString& FileName)
 
 			if (strchr(Flags, 'L'))
 			{
-				std::pair<char[LC_PIECE_NAME_LEN], int>& Entry = PieceTable[Info];
+				std::pair<char[LC_PIECE_NAME_LEN + 1], int>& Entry = PieceTable[Info];
 				Entry.second |= LGEO_PIECE_LGEO;
 				sprintf(Entry.first, "lg_%s", Dst);
 			}
 
 			if (strchr(Flags, 'A'))
 			{
-				std::pair<char[LC_PIECE_NAME_LEN], int>& Entry = PieceTable[Info];
+				std::pair<char[LC_PIECE_NAME_LEN + 1], int>& Entry = PieceTable[Info];
 				Entry.second |= LGEO_PIECE_AR;
 				sprintf(Entry.first, "ar_%s", Dst);
 			}
 
 			if (strchr(Flags, 'S'))
 			{
-				std::pair<char[LC_PIECE_NAME_LEN], int>& Entry = PieceTable[Info];
+				std::pair<char[LC_PIECE_NAME_LEN + 1], int>& Entry = PieceTable[Info];
 				Entry.second |= LGEO_PIECE_SLOPE;
 				Entry.first[0] = 0;
 			}
@@ -1853,7 +1882,7 @@ bool Project::ExportPOVRay(const QString& FileName)
 			if (!AddedMeshes.insert(Mesh).second)
 				continue;
 
-			const std::pair<char[LC_PIECE_NAME_LEN], int>& Entry = Search->second;
+			const std::pair<char[LC_PIECE_NAME_LEN + 1], int>& Entry = Search->second;
 			if (Entry.first[0])
 			{
 				sprintf(Line, "#include \"%s.inc\"\n", Entry.first);
@@ -1892,7 +1921,7 @@ bool Project::ExportPOVRay(const QString& FileName)
 	for (size_t ColorIdx = 0; ColorIdx < NumColors; ColorIdx++)
 		ColorTablePointer[ColorIdx] = ColorTable[ColorIdx].data();
 
-	auto GetMeshName = [](const lcModelPartsEntry& ModelPart, char* Name)
+	auto GetMeshName = [](const lcModelPartsEntry& ModelPart, char (&Name)[LC_PIECE_NAME_LEN])
 	{
 		strcpy(Name, ModelPart.Info->mFileName);
 
@@ -1904,7 +1933,8 @@ bool Project::ExportPOVRay(const QString& FileName)
 		{
 			char Suffix[32];
 			sprintf(Suffix, "_%p", ModelPart.Mesh);
-			strcat(Name, Suffix);
+			strncat(Name, Suffix, sizeof(Name) - 1);
+			Name[sizeof(Name) - 1] = 0;
 		}
 	};
 
@@ -1923,8 +1953,10 @@ bool Project::ExportPOVRay(const QString& FileName)
 
 		if (!ModelPart.Mesh)
 		{
-			std::pair<char[LC_PIECE_NAME_LEN], int>& Entry = PieceTable[ModelPart.Info];
-			sprintf(Entry.first, "lc_%s", Name);
+			std::pair<char[LC_PIECE_NAME_LEN + 1], int>& Entry = PieceTable[ModelPart.Info];
+			strcpy(Entry.first, "lc_");
+			strncat(Entry.first, Name, sizeof(Entry.first) - 1);
+			Entry.first[sizeof(Entry.first) - 1] = 0;
 		}
 
 		Mesh->ExportPOVRay(POVFile, Name, &ColorTablePointer[0]);
@@ -1933,16 +1965,16 @@ bool Project::ExportPOVRay(const QString& FileName)
 		POVFile.WriteLine(Line);
 	}
 
-	lcCamera* Camera = gMainWindow->GetActiveView()->mCamera;
+	const lcCamera* Camera = gMainWindow->GetActiveView()->GetCamera();
 	const lcVector3& Position = Camera->mPosition;
 	const lcVector3& Target = Camera->mTargetPosition;
 	const lcVector3& Up = Camera->mUpVector;
-	const lcModelProperties& Properties = mModels[0]->GetProperties();
 
 	sprintf(Line, "camera {\n  perspective\n  right x * image_width / image_height\n  sky<%1g,%1g,%1g>\n  location <%1g, %1g, %1g>\n  look_at <%1g, %1g, %1g>\n  angle %.0f * image_width / image_height\n}\n\n",
 			Up[1], Up[0], Up[2], Position[1] / 25.0f, Position[0] / 25.0f, Position[2] / 25.0f, Target[1] / 25.0f, Target[0] / 25.0f, Target[2] / 25.0f, Camera->m_fovy);
 	POVFile.WriteLine(Line);
-	sprintf(Line, "background { color rgb <%1g, %1g, %1g> }\n\n", Properties.mBackgroundSolidColor[0], Properties.mBackgroundSolidColor[1], Properties.mBackgroundSolidColor[2]);
+	lcVector3 BackgroundColor = lcVector3FromColor(lcGetPreferences().mBackgroundSolidColor);
+	sprintf(Line, "background { color rgb <%1g, %1g, %1g> }\n\n", BackgroundColor[0], BackgroundColor[1], BackgroundColor[2]);
 	POVFile.WriteLine(Line);
 
 	lcVector3 Min(FLT_MAX, FLT_MAX, FLT_MAX);
@@ -1984,7 +2016,7 @@ bool Project::ExportPOVRay(const QString& FileName)
 
 		if (!ModelPart.Mesh)
 		{
-			std::pair<char[LC_PIECE_NAME_LEN], int>& Entry = PieceTable[ModelPart.Info];
+			std::pair<char[LC_PIECE_NAME_LEN + 1], int>& Entry = PieceTable[ModelPart.Info];
 
 			if (Entry.second & LGEO_PIECE_SLOPE)
 			{
@@ -2019,20 +2051,20 @@ bool Project::ExportPOVRay(const QString& FileName)
 	return true;
 }
 
-void Project::ExportWavefront(const QString& FileName)
+bool Project::ExportWavefront(const QString& FileName)
 {
 	std::vector<lcModelPartsEntry> ModelParts = GetModelParts();
 
 	if (ModelParts.empty())
 	{
 		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Nothing to export."));
-		return;
+		return false;
 	}
 
 	QString SaveFileName = GetExportFileName(FileName, QLatin1String("obj"), tr("Export Wavefront"), tr("Wavefront Files (*.obj);;All Files (*.*)"));
 
 	if (SaveFileName.isEmpty())
-		return;
+		return false;
 
 	lcDiskFile OBJFile(SaveFileName);
 	char Line[1024];
@@ -2040,7 +2072,7 @@ void Project::ExportWavefront(const QString& FileName)
 	if (!OBJFile.Open(QIODevice::WriteOnly))
 	{
 		QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Could not open file '%1' for writing.").arg(SaveFileName));
-		return;
+		return false;
 	}
 
 	quint32 vert = 1;
@@ -2057,7 +2089,7 @@ void Project::ExportWavefront(const QString& FileName)
 	if (!MaterialFile.Open(QIODevice::WriteOnly))
 	{
 		QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Could not open file '%1' for writing.").arg(MaterialFileName));
-		return;
+		return false;
 	}
 
 	MaterialFile.WriteLine("# Colors used by LeoCAD\n\n");
@@ -2124,6 +2156,8 @@ void Project::ExportWavefront(const QString& FileName)
 			vert += Mesh->mNumVertices;
 		}
 	}
+
+	return true;
 }
 
 void Project::SaveImage()

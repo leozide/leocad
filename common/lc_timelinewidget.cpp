@@ -4,6 +4,8 @@
 #include "piece.h"
 #include "pieceinf.h"
 #include "lc_mainwindow.h"
+#include "lc_viewwidget.h"
+#include "lc_previewwidget.h"
 
 lcTimelineWidget::lcTimelineWidget(QWidget* Parent)
 	: QTreeWidget(Parent)
@@ -188,7 +190,7 @@ void lcTimelineWidget::Update(bool Clear, bool UpdateItems)
 		{
 			PieceItem->setText(0, Piece->mPieceInfo->m_strDescription);
 
-			int ColorIndex = Piece->mColorIndex;
+			int ColorIndex = Piece->GetColorIndex();
 			if (!mIcons.contains(ColorIndex))
 			{
 				int Size = rowHeight(indexFromItem(PieceItem));
@@ -209,7 +211,7 @@ void lcTimelineWidget::Update(bool Clear, bool UpdateItems)
 			QColor Color = palette().text().color();
 			if (Piece->IsHidden())
 				Color.setAlpha(128);
-			PieceItem->setTextColor(0, Color);
+			PieceItem->setForeground(0, Color);
 		}
 
 		PieceItem->setSelected(Piece->IsSelected());
@@ -263,11 +265,11 @@ void lcTimelineWidget::UpdateCurrentStepItem()
 			QFont Font = CurrentStepItem->font(0);
 			Font.setBold(true);
 			CurrentStepItem->setFont(0, Font);
+			setCurrentItem(CurrentStepItem);
 		}
 
 		mCurrentStepItem = CurrentStepItem;
 	}
-
 }
 
 void lcTimelineWidget::UpdateSelection()
@@ -505,6 +507,35 @@ void lcTimelineWidget::mousePressEvent(QMouseEvent* Event)
 	}
 	else
 		QTreeWidget::mousePressEvent(Event);
+}
+
+void lcTimelineWidget::mouseDoubleClickEvent(QMouseEvent* MouseEvent)
+{
+	if (MouseEvent->button() == Qt::LeftButton)
+	{
+		QTreeWidgetItem* CurrentItem = currentItem();
+		PreviewSelection(CurrentItem);
+	}
+
+	QTreeWidget::mouseDoubleClickEvent(MouseEvent);
+}
+
+void lcTimelineWidget::PreviewSelection(QTreeWidgetItem* CurrentItem)
+{
+	if (!CurrentItem)
+		return;
+
+	lcPiece* Piece = (lcPiece*)CurrentItem->data(0, Qt::UserRole).value<uintptr_t>();
+
+	if (!Piece)
+		return;
+
+	PieceInfo* Info = Piece->mPieceInfo;
+
+	if (!Info)
+		return;
+
+	gMainWindow->PreviewPiece(Info->mFileName, Piece->GetColorCode(), false);
 }
 
 void lcTimelineWidget::UpdateModel()

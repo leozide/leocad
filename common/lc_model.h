@@ -1,8 +1,8 @@
 #pragma once
 
 #include "lc_math.h"
-#include "object.h"
 #include "lc_commands.h"
+#include "lc_array.h"
 
 #define LC_SEL_NO_PIECES                0x0001 // No pieces in model
 #define LC_SEL_PIECE                    0x0002 // At last 1 piece selected
@@ -17,8 +17,6 @@
 #define LC_SEL_MODEL_SELECTED           0x0400 // At least one model reference is selected
 #define LC_SEL_CAN_ADD_CONTROL_POINT    0x0800 // Can add control points to focused piece
 #define LC_SEL_CAN_REMOVE_CONTROL_POINT 0x1000 // Can remove control points from focused piece
-
-class lcGLWidget;
 
 enum class lcSelectionMode
 {
@@ -38,28 +36,16 @@ enum class lcTransformType
 	Count
 };
 
-enum lcBackgroundType
-{
-	LC_BACKGROUND_SOLID,
-	LC_BACKGROUND_GRADIENT,
-	LC_BACKGROUND_IMAGE
-};
-
 class lcModelProperties
 {
 public:
 	void LoadDefaults();
 	void SaveDefaults();
 
-	bool operator==(const lcModelProperties& Properties)
+	bool operator==(const lcModelProperties& Properties) const
 	{
 		if (mFileName != Properties.mFileName || mModelName != Properties.mModelName || mAuthor != Properties.mAuthor ||
 			mDescription != Properties.mDescription || mComments != Properties.mComments)
-			return false;
-
-		if (mBackgroundType != Properties.mBackgroundType || mBackgroundSolidColor != Properties.mBackgroundSolidColor ||
-			mBackgroundGradientColor1 != Properties.mBackgroundGradientColor1 || mBackgroundGradientColor2 != Properties.mBackgroundGradientColor2 ||
-			mBackgroundImage != Properties.mBackgroundImage || mBackgroundImageTile != Properties.mBackgroundImageTile)
 			return false;
 
 		if (mAmbientColor != Properties.mAmbientColor)
@@ -78,13 +64,6 @@ public:
 	QString mAuthor;
 	QString mComments;
 
-	lcBackgroundType mBackgroundType;
-	lcVector3 mBackgroundSolidColor;
-	lcVector3 mBackgroundGradientColor1;
-	lcVector3 mBackgroundGradientColor2;
-	QString mBackgroundImage;
-	bool mBackgroundImageTile;
-
 	lcVector3 mAmbientColor;
 };
 
@@ -97,17 +76,25 @@ struct lcModelHistoryEntry
 class lcModel
 {
 public:
-	lcModel(const QString& FileName);
+	lcModel(const QString& FileName, Project* Project, bool Preview);
 	~lcModel();
 
 	lcModel(const lcModel&) = delete;
-	lcModel(lcModel&&) = delete;
 	lcModel& operator=(const lcModel&) = delete;
-	lcModel& operator=(lcModel&&) = delete;
+
+	Project* GetProject() const
+	{
+		return mProject;
+	}
 
 	bool IsModified() const
 	{
 		return mSavedHistory != mUndoHistory[0];
+	}
+
+	bool IsActive() const
+	{
+		return mActive;
 	}
 
 	bool GetPieceWorldMatrix(lcPiece* Piece, lcMatrix44& ParentWorldMatrix) const;
@@ -115,6 +102,7 @@ public:
 	void CreatePieceInfo(Project* Project);
 	void UpdatePieceInfo(std::vector<lcModel*>& UpdatedModels);
 	void UpdateMesh();
+	void UpdateAllViews() const;
 
 	PieceInfo* GetPieceInfo() const
 	{
@@ -228,27 +216,31 @@ public:
 		if (mUndoHistory.empty())
 			SaveCheckpoint(QString());
 
-		mSavedHistory = mUndoHistory[0];
+		if (!mIsPreview)
+			mSavedHistory = mUndoHistory[0];
 	}
+
+	void SetMinifig(const lcMinifig& Minifig);
+	void SetPreviewPieceInfo(PieceInfo* Info, int ColorIndex);
 
 	void Cut();
 	void Copy();
-	void Paste();
+	void Paste(bool PasteToCurrentStep);
 	void DuplicateSelectedPieces();
+	void PaintSelectedPieces();
 
-	void GetScene(lcScene& Scene, lcCamera* ViewCamera, bool AllowHighlight, bool AllowFade) const;
-	void AddSubModelRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, int DefaultColorIndex, lcRenderMeshState RenderMeshState, bool ParentActive) const;
-	void DrawBackground(lcGLWidget* Widget);
+	void GetScene(lcScene* Scene, lcCamera* ViewCamera, bool AllowHighlight, bool AllowFade) const;
+	void AddSubModelRenderMeshes(lcScene* Scene, const lcMatrix44& WorldMatrix, int DefaultColorIndex, lcRenderMeshState RenderMeshState, bool ParentActive) const;
 	QImage GetStepImage(bool Zoom, int Width, int Height, lcStep Step);
-	QImage GetPartsListImage(int MaxWidth, lcStep Step) const;
+	QImage GetPartsListImage(int MaxWidth, lcStep Step, quint32 BackgroundColor, QFont Font, QColor TextColor) const;
 	void SaveStepImages(const QString& BaseName, bool AddStepSuffix, bool Zoom, int Width, int Height, lcStep Start, lcStep End);
-	std::vector<std::pair<lcModel*, lcStep>> GetPageLayouts(std::vector<const lcModel*>& AddedModels);
 
 	void RayTest(lcObjectRayTest& ObjectRayTest) const;
 	void BoxTest(lcObjectBoxTest& ObjectBoxTest) const;
 	bool SubModelMinIntersectDist(const lcVector3& WorldStart, const lcVector3& WorldEnd, float& MinDistance) const;
 	bool SubModelBoxTest(const lcVector4 Planes[6]) const;
 	void SubModelCompareBoundingBox(const lcMatrix44& WorldMatrix, lcVector3& Min, lcVector3& Max) const;
+	void SubModelAddBoundingBoxPoints(const lcMatrix44& WorldMatrix, std::vector<lcVector3>& Points) const;
 
 	bool HasPieces() const
 	{
@@ -266,6 +258,7 @@ public:
 	lcObject* GetFocusObject() const;
 	bool GetSelectionCenter(lcVector3& Center) const;
 	bool GetPiecesBoundingBox(lcVector3& Min, lcVector3& Max) const;
+	std::vector<lcVector3> GetPiecesBoundingBoxPoints() const;
 	void GetPartsList(int DefaultColorIndex, bool ScanSubModels, bool AddSubModels, lcPartsList& PartsList) const;
 	void GetPartsListForStep(lcStep Step, int DefaultColorIndex, lcPartsList& PartsList) const;
 	void GetModelParts(const lcMatrix44& WorldMatrix, int DefaultColorIndex, std::vector<lcModelPartsEntry>& ModelParts) const;
@@ -288,7 +281,7 @@ public:
 	void UnhideSelectedPieces();
 	void UnhideAllPieces();
 
-	void FindPiece(bool FindFirst, bool SearchForward);
+	void FindReplacePiece(bool SearchForward, bool FindAll);
 
 	void UndoAction();
 	void RedoAction();
@@ -344,11 +337,10 @@ public:
 	void SetCameraFOV(lcCamera* Camera, float FOV);
 	void SetCameraZNear(lcCamera* Camera, float ZNear);
 	void SetCameraZFar(lcCamera* Camera, float ZFar);
-	void SetCameraName(lcCamera* Camera, const char* Name);
+	void SetCameraName(lcCamera* Camera, const QString& Name);
 
 	void ShowPropertiesDialog();
 	void ShowSelectByNameDialog();
-	void ShowSelectByColorDialog();
 	void ShowArrayDialog();
 	void ShowMinifigDialog();
 	void UpdateInterface();
@@ -363,20 +355,19 @@ protected:
 	void RemoveEmptyGroups();
 	bool RemoveSelectedObjects();
 
-	void UpdateBackgroundTexture();
-
 	void SelectGroup(lcGroup* TopGroup, bool Select);
 
 	void AddPiece(lcPiece* Piece);
 	void InsertPiece(lcPiece* Piece, int Index);
 
 	lcModelProperties mProperties;
+	Project* const mProject;
 	PieceInfo* mPieceInfo;
 
+	bool mIsPreview;
 	bool mActive;
 	lcStep mCurrentStep;
 	lcVector3 mMouseToolDistance;
-	lcTexture* mBackgroundTexture;
 
 	lcArray<lcPiece*> mPieces;
 	lcArray<lcCamera*> mCameras;
@@ -390,4 +381,3 @@ protected:
 
 	Q_DECLARE_TR_FUNCTIONS(lcModel);
 };
-

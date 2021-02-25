@@ -8,7 +8,7 @@ class lcQColorPickerPopup : public QFrame
 	Q_OBJECT
 
 public:
-	lcQColorPickerPopup(QWidget *parent = nullptr, int colorIndex = 0);
+	lcQColorPickerPopup(QWidget* Parent = nullptr, int ColorIndex = 0, bool AllowNoColor = false);
 	~lcQColorPickerPopup();
 
 	void exec();
@@ -28,8 +28,8 @@ protected:
 	void mouseReleaseEvent(QMouseEvent* MouseEvent) override;
 
 private:
-	QEventLoop *eventLoop;
-	lcQColorList *colorList;
+	QEventLoop* eventLoop;
+	lcQColorList* colorList;
 };
 
 class lcQColorPicker : public QPushButton
@@ -37,7 +37,7 @@ class lcQColorPicker : public QPushButton
 	Q_OBJECT
 
 public:
-	lcQColorPicker(QWidget *parent = 0);
+	lcQColorPicker(QWidget* Parent = nullptr, bool AllowNoColor = false);
 	~lcQColorPicker();
 
 	int currentColor() const;
@@ -52,15 +52,14 @@ public slots:
 signals:
 	void colorChanged(int colorIndex);
 
-protected:
-	void updateIcon();
-
 private slots:
 	void buttonPressed(bool toggled);
 	void popupClosed();
 
-private:
-	int currentColorIndex;
-	int initialColorIndex;
-};
+protected:
+	void UpdateIcon();
 
+	int mCurrentColorIndex = 0;
+	int mInitialColorIndex = 0;
+	bool mAllowNoColor = false;
+};

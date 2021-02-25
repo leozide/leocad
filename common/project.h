@@ -1,6 +1,5 @@
 #pragma once
 
-#include "object.h"
 #include "lc_array.h"
 #include "lc_application.h"
 
@@ -29,23 +28,14 @@ public:
 	bool PartsListEnd;
 };
 
-enum LC_MOUSE_TRACK
-{
-	LC_TRACK_NONE,
-	LC_TRACK_LEFT,
-	LC_TRACK_RIGHT
-};
-
 class Project
 {
 public:
-	Project();
+	Project(bool IsPreview = false);
 	~Project();
 
 	Project(const Project&) = delete;
-	Project(Project&&) = delete;
 	Project& operator=(const Project&) = delete;
-	Project& operator=(Project&&) = delete;
 
 	const lcArray<lcModel*>& GetModels() const
 	{
@@ -80,7 +70,7 @@ public:
 
 	QString GetImageFileName(bool AllowCurrentFolder) const;
 
-	std::vector<std::pair<lcModel*, lcStep>> GetPageLayouts() const;
+	lcInstructions* GetInstructions();
 
 	void SetActiveModel(int ModelIndex);
 	void SetActiveModel(const QString& FileName);
@@ -98,13 +88,13 @@ public:
 
 	void SaveImage();
 	bool ExportModel(const QString& FileName, lcModel* Model) const;
-	void Export3DStudio(const QString& FileName);
+	bool Export3DStudio(const QString& FileName);
 	void ExportBrickLink();
-	void ExportCOLLADA(const QString& FileName);
+	bool ExportCOLLADA(const QString& FileName);
 	void ExportCSV();
 	void ExportHTML(const lcHTMLExportOptions& Options);
 	bool ExportPOVRay(const QString& FileName);
-	void ExportWavefront(const QString& FileName);
+	bool ExportWavefront(const QString& FileName);
 
 	void UpdatePieceInfo(PieceInfo* Info) const;
 
@@ -113,12 +103,14 @@ protected:
 	std::vector<lcModelPartsEntry> GetModelParts();
 	void SetFileName(const QString& FileName);
 
+	bool mIsPreview;
 	bool mModified;
 	QString mFileName;
 	QFileSystemWatcher mFileWatcher;
 
 	lcArray<lcModel*> mModels;
 	lcModel* mActiveModel;
+	std::unique_ptr<lcInstructions> mInstructions;
 
 	Q_DECLARE_TR_FUNCTIONS(Project);
 };

@@ -8,7 +8,9 @@
 #include "lc_qpreferencesdialog.h"
 #include "lc_partselectionwidget.h"
 #include "lc_shortcuts.h"
-#include "view.h"
+#include "lc_view.h"
+#include "camera.h"
+#include "lc_previewwidget.h"
 
 lcApplication* gApplication;
 
@@ -17,10 +19,22 @@ void lcPreferences::LoadDefaults()
 	mFixedAxes = lcGetProfileInt(LC_PROFILE_FIXED_AXES);
 	mMouseSensitivity = lcGetProfileInt(LC_PROFILE_MOUSE_SENSITIVITY);
 	mShadingMode = static_cast<lcShadingMode>(lcGetProfileInt(LC_PROFILE_SHADING_MODE));
+	mBackgroundGradient = lcGetProfileInt(LC_PROFILE_BACKGROUND_GRADIENT);
+	mBackgroundSolidColor = lcGetProfileInt(LC_PROFILE_BACKGROUND_COLOR);
+	mBackgroundGradientColorTop = lcGetProfileInt(LC_PROFILE_GRADIENT_COLOR_TOP);
+	mBackgroundGradientColorBottom = lcGetProfileInt(LC_PROFILE_GRADIENT_COLOR_BOTTOM);
 	mDrawAxes = lcGetProfileInt(LC_PROFILE_DRAW_AXES);
+	mAxesColor = lcGetProfileInt(LC_PROFILE_AXES_COLOR);
+	mTextColor = lcGetProfileInt(LC_PROFILE_TEXT_COLOR);
+	mMarqueeBorderColor = lcGetProfileInt(LC_PROFILE_MARQUEE_BORDER_COLOR);
+	mMarqueeFillColor = lcGetProfileInt(LC_PROFILE_MARQUEE_FILL_COLOR);
+	mOverlayColor = lcGetProfileInt(LC_PROFILE_OVERLAY_COLOR);
+	mActiveViewColor = lcGetProfileInt(LC_PROFILE_ACTIVE_VIEW_COLOR);
+	mInactiveViewColor = lcGetProfileInt(LC_PROFILE_INACTIVE_VIEW_COLOR);
 	mDrawEdgeLines = lcGetProfileInt(LC_PROFILE_DRAW_EDGE_LINES);
 	mLineWidth = lcGetProfileFloat(LC_PROFILE_LINE_WIDTH);
 	mAllowLOD = lcGetProfileInt(LC_PROFILE_ALLOW_LOD);
+	mMeshLODDistance = lcGetProfileFloat(LC_PROFILE_LOD_DISTANCE);
 	mFadeSteps = lcGetProfileInt(LC_PROFILE_FADE_STEPS);
 	mFadeStepsColor = lcGetProfileInt(LC_PROFILE_FADE_STEPS_COLOR);
 	mHighlightNewParts = lcGetProfileInt(LC_PROFILE_HIGHLIGHT_NEW_PARTS);
@@ -30,6 +44,7 @@ void lcPreferences::LoadDefaults()
 	mDrawGridLines = lcGetProfileInt(LC_PROFILE_GRID_LINES);
 	mGridLineSpacing = lcGetProfileInt(LC_PROFILE_GRID_LINE_SPACING);
 	mGridLineColor = lcGetProfileInt(LC_PROFILE_GRID_LINE_COLOR);
+	mDrawGridOrigin = lcGetProfileInt(LC_PROFILE_GRID_ORIGIN);
 	mViewSphereEnabled = lcGetProfileInt(LC_PROFILE_VIEW_SPHERE_ENABLED);
 	mViewSphereLocation = static_cast<lcViewSphereLocation>(lcGetProfileInt(LC_PROFILE_VIEW_SPHERE_LOCATION));
 	mViewSphereSize = lcGetProfileInt(LC_PROFILE_VIEW_SPHERE_SIZE);
@@ -38,6 +53,18 @@ void lcPreferences::LoadDefaults()
 	mViewSphereHighlightColor = lcGetProfileInt(LC_PROFILE_VIEW_SPHERE_HIGHLIGHT_COLOR);
 	mAutoLoadMostRecent = lcGetProfileInt(LC_PROFILE_AUTOLOAD_MOSTRECENT);
 	mRestoreTabLayout = lcGetProfileInt(LC_PROFILE_RESTORE_TAB_LAYOUT);
+	mColorTheme = static_cast<lcColorTheme>(lcGetProfileInt(LC_PROFILE_COLOR_THEME));
+	mPreviewViewSphereEnabled = lcGetProfileInt(LC_PROFILE_PREVIEW_VIEW_SPHERE_ENABLED);
+	mPreviewViewSphereSize = lcGetProfileInt(LC_PROFILE_PREVIEW_VIEW_SPHERE_SIZE);
+	mPreviewViewSphereLocation = static_cast<lcViewSphereLocation>(lcGetProfileInt(LC_PROFILE_PREVIEW_VIEW_SPHERE_LOCATION));
+	mDrawPreviewAxis = lcGetProfileInt(LC_PROFILE_PREVIEW_DRAW_AXES);
+	mStudCylinderColor = lcGetProfileInt(LC_PROFILE_STUD_CYLINDER_COLOR);
+	mPartEdgeColor = lcGetProfileInt(LC_PROFILE_PART_EDGE_COLOR);
+	mBlackEdgeColor = lcGetProfileInt(LC_PROFILE_BLACK_EDGE_COLOR);
+	mDarkEdgeColor = lcGetProfileInt(LC_PROFILE_DARK_EDGE_COLOR);
+	mPartEdgeContrast = lcGetProfileFloat(LC_PROFILE_PART_EDGE_CONTRAST);
+	mPartColorValueLDIndex = lcGetProfileFloat(LC_PROFILE_PART_COLOR_VALUE_LD_INDEX);
+	mAutomateEdgeColor = lcGetProfileInt(LC_PROFILE_AUTOMATE_EDGE_COLOR);
 }
 
 void lcPreferences::SaveDefaults()
@@ -46,9 +73,21 @@ void lcPreferences::SaveDefaults()
 	lcSetProfileInt(LC_PROFILE_MOUSE_SENSITIVITY, mMouseSensitivity);
 	lcSetProfileInt(LC_PROFILE_SHADING_MODE, static_cast<int>(mShadingMode));
 	lcSetProfileInt(LC_PROFILE_DRAW_AXES, mDrawAxes);
+	lcSetProfileInt(LC_PROFILE_AXES_COLOR, mAxesColor);
+	lcSetProfileInt(LC_PROFILE_TEXT_COLOR, mTextColor);
+	lcSetProfileInt(LC_PROFILE_BACKGROUND_GRADIENT, mBackgroundGradient);
+	lcSetProfileInt(LC_PROFILE_BACKGROUND_COLOR, mBackgroundSolidColor);
+	lcSetProfileInt(LC_PROFILE_GRADIENT_COLOR_TOP, mBackgroundGradientColorTop);
+	lcSetProfileInt(LC_PROFILE_GRADIENT_COLOR_BOTTOM, mBackgroundGradientColorBottom);
+	lcSetProfileInt(LC_PROFILE_MARQUEE_BORDER_COLOR, mMarqueeBorderColor);
+	lcSetProfileInt(LC_PROFILE_MARQUEE_FILL_COLOR, mMarqueeFillColor);
+	lcSetProfileInt(LC_PROFILE_OVERLAY_COLOR, mOverlayColor);
+	lcSetProfileInt(LC_PROFILE_ACTIVE_VIEW_COLOR, mActiveViewColor);
+	lcSetProfileInt(LC_PROFILE_INACTIVE_VIEW_COLOR, mInactiveViewColor);
 	lcSetProfileInt(LC_PROFILE_DRAW_EDGE_LINES, mDrawEdgeLines);
 	lcSetProfileFloat(LC_PROFILE_LINE_WIDTH, mLineWidth);
 	lcSetProfileInt(LC_PROFILE_ALLOW_LOD, mAllowLOD);
+	lcSetProfileFloat(LC_PROFILE_LOD_DISTANCE, mMeshLODDistance);
 	lcSetProfileInt(LC_PROFILE_FADE_STEPS, mFadeSteps);
 	lcSetProfileInt(LC_PROFILE_FADE_STEPS_COLOR, mFadeStepsColor);
 	lcSetProfileInt(LC_PROFILE_HIGHLIGHT_NEW_PARTS, mHighlightNewParts);
@@ -58,40 +97,129 @@ void lcPreferences::SaveDefaults()
 	lcSetProfileInt(LC_PROFILE_GRID_LINES, mDrawGridLines);
 	lcSetProfileInt(LC_PROFILE_GRID_LINE_SPACING, mGridLineSpacing);
 	lcSetProfileInt(LC_PROFILE_GRID_LINE_COLOR, mGridLineColor);
+	lcSetProfileInt(LC_PROFILE_GRID_ORIGIN, mDrawGridOrigin);
 	lcSetProfileInt(LC_PROFILE_VIEW_SPHERE_ENABLED, mViewSphereSize ? 1 : 0);
-	lcSetProfileInt(LC_PROFILE_VIEW_SPHERE_LOCATION, (int)mViewSphereLocation);
+	lcSetProfileInt(LC_PROFILE_VIEW_SPHERE_LOCATION, static_cast<int>(mViewSphereLocation));
 	lcSetProfileInt(LC_PROFILE_VIEW_SPHERE_SIZE, mViewSphereSize);
 	lcSetProfileInt(LC_PROFILE_VIEW_SPHERE_COLOR, mViewSphereColor);
 	lcSetProfileInt(LC_PROFILE_VIEW_SPHERE_TEXT_COLOR, mViewSphereTextColor);
 	lcSetProfileInt(LC_PROFILE_VIEW_SPHERE_HIGHLIGHT_COLOR, mViewSphereHighlightColor);
 	lcSetProfileInt(LC_PROFILE_AUTOLOAD_MOSTRECENT, mAutoLoadMostRecent);
 	lcSetProfileInt(LC_PROFILE_RESTORE_TAB_LAYOUT, mRestoreTabLayout);
+	lcSetProfileInt(LC_PROFILE_COLOR_THEME, static_cast<int>(mColorTheme));
+	lcSetProfileInt(LC_PROFILE_PREVIEW_VIEW_SPHERE_SIZE, mPreviewViewSphereSize);
+	lcSetProfileInt(LC_PROFILE_PREVIEW_VIEW_SPHERE_LOCATION, static_cast<int>(mPreviewViewSphereLocation));
+	lcSetProfileInt(LC_PROFILE_PREVIEW_DRAW_AXES, mDrawPreviewAxis);
+	lcSetProfileInt(LC_PROFILE_STUD_CYLINDER_COLOR, mStudCylinderColor);
+	lcSetProfileInt(LC_PROFILE_PART_EDGE_COLOR, mPartEdgeColor);
+	lcSetProfileInt(LC_PROFILE_BLACK_EDGE_COLOR, mBlackEdgeColor);
+	lcSetProfileInt(LC_PROFILE_DARK_EDGE_COLOR, mDarkEdgeColor);
+	lcSetProfileFloat(LC_PROFILE_PART_EDGE_CONTRAST, mPartEdgeContrast);
+	lcSetProfileFloat(LC_PROFILE_PART_COLOR_VALUE_LD_INDEX, mPartColorValueLDIndex);
+	lcSetProfileInt(LC_PROFILE_AUTOMATE_EDGE_COLOR, mAutomateEdgeColor);
+}
+
+void lcPreferences::SetInterfaceColors(lcColorTheme ColorTheme)
+{
+	if (ColorTheme == lcColorTheme::Dark)
+	{
+		mAxesColor = LC_RGBA(160, 160, 160, 255);
+		mTextColor = LC_RGBA(160, 160, 160, 255);
+		mBackgroundSolidColor = LC_RGB(49, 52, 55);
+		mBackgroundGradientColorTop = LC_RGB(0, 0, 191);
+		mBackgroundGradientColorBottom = LC_RGB(255, 255, 255);
+		mOverlayColor = lcGetProfileInt(LC_PROFILE_OVERLAY_COLOR);
+		mActiveViewColor = LC_RGBA(41, 128, 185, 255);
+		mGridStudColor = LC_RGBA(24, 24, 24, 192);
+		mGridLineColor = LC_RGBA(24, 24, 24, 255);
+		mViewSphereColor = LC_RGBA(35, 38, 41, 255);
+		mViewSphereTextColor = LC_RGBA(224, 224, 224, 255);
+		mViewSphereHighlightColor = LC_RGBA(41, 128, 185, 255);
+	}
+	else
+	{
+		mAxesColor = LC_RGBA(0, 0, 0, 255);
+		mTextColor = LC_RGBA(0, 0, 0, 255);
+		mBackgroundSolidColor = LC_RGB(255, 255, 255);
+		mBackgroundGradientColorTop = LC_RGB(54, 72, 95);
+		mBackgroundGradientColorBottom = LC_RGB(49, 52, 55);
+		mOverlayColor = LC_RGBA(0, 0, 0, 255);
+		mActiveViewColor = LC_RGBA(255, 0, 0, 255);
+		mGridStudColor = LC_RGBA(64, 64, 64, 192);
+		mGridLineColor = LC_RGBA(0, 0, 0, 255);
+		mViewSphereColor = LC_RGBA(255, 255, 255, 255);
+		mViewSphereTextColor = LC_RGBA(0, 0, 0, 255);
+		mViewSphereHighlightColor = LC_RGBA(255, 0, 0, 255);
+	}
 }
 
 lcApplication::lcApplication(int& Argc, char** Argv)
 	: QApplication(Argc, Argv)
 {
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
-	setApplicationDisplayName("LeoCAD");
-#endif
-
-	setOrganizationDomain("leocad.org");
-	setOrganizationName("LeoCAD Software");
-	setApplicationName("LeoCAD");
-	setApplicationVersion(LC_VERSION_TEXT);
+	setApplicationDisplayName(QLatin1String("LeoCAD"));
 
 	gApplication = this;
-	mProject = nullptr;
-	mLibrary = nullptr;
+	mDefaultStyle = style()->objectName();
 
 	mPreferences.LoadDefaults();
 }
 
 lcApplication::~lcApplication()
 {
-	delete mProject;
-	delete mLibrary;
 	gApplication = nullptr;
+}
+
+void lcApplication::UpdateStyle()
+{
+	if (mPreferences.mColorTheme == lcColorTheme::Dark)
+	{
+		if (!QApplication::setStyle("fusion"))
+			return;
+
+		QPalette Palette = QApplication::palette();
+
+		Palette.setColor(QPalette::Window, QColor(49, 52, 55));
+		Palette.setColor(QPalette::WindowText, QColor(240, 240, 240));
+		Palette.setColor(QPalette::Base, QColor(35, 38, 41));
+		Palette.setColor(QPalette::AlternateBase, QColor(44, 47, 50));
+		Palette.setColor(QPalette::ToolTipBase, QColor(224, 224, 244));
+		Palette.setColor(QPalette::ToolTipText, QColor(58, 58, 58));
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 12, 0))
+		Palette.setColor(QPalette::PlaceholderText, QColor(100, 100, 100));
+#endif
+		Palette.setColor(QPalette::Text, QColor(224, 224, 224));
+		Palette.setColor(QPalette::Button, QColor(45, 48, 51));
+		Palette.setColor(QPalette::ButtonText, QColor(224, 224, 244));
+		Palette.setColor(QPalette::Light, QColor(65, 65, 65));
+		Palette.setColor(QPalette::Midlight, QColor(62, 62, 62));
+		Palette.setColor(QPalette::Dark, QColor(35, 35, 35));
+		Palette.setColor(QPalette::Mid, QColor(50, 50, 50));
+		Palette.setColor(QPalette::Shadow, QColor(20, 20, 20));
+//		Palette.setColor(QPalette::Highlight, QColor(46, 108, 219));
+		Palette.setColor(QPalette::Highlight, QColor(41, 128, 185));
+		Palette.setColor(QPalette::HighlightedText, QColor(232, 232, 232));
+		Palette.setColor(QPalette::Link, QColor(41, 128, 185));
+
+		Palette.setColor(QPalette::Disabled, QPalette::Text, QColor(128, 128, 128));
+		Palette.setColor(QPalette::Disabled, QPalette::WindowText, QColor(128, 128, 128));
+		Palette.setColor(QPalette::Disabled, QPalette::ButtonText, QColor(128, 128, 128));
+
+		QApplication::setPalette(Palette);
+
+		QFile StylesheetFile(QLatin1String(":/stylesheet/stylesheet.qss"));
+
+		if (StylesheetFile.open(QIODevice::ReadOnly))
+		{
+			QString Stylesheet = QString::fromLatin1(StylesheetFile.readAll());
+			qApp->setStyleSheet(Stylesheet);
+		}
+	}
+	else
+	{
+		QApplication::setStyle(mDefaultStyle);
+		QApplication::setPalette(qApp->style()->standardPalette());
+		qApp->setStyleSheet(QString());
+	}
 }
 
 void lcApplication::SaveTabLayout() const
@@ -125,7 +253,13 @@ void lcApplication::SetProject(Project* Project)
 {
 	SaveTabLayout();
 
-	gMainWindow->RemoveAllModelTabs();
+	if (gMainWindow)
+	{
+		gMainWindow->RemoveAllModelTabs();
+
+		if (gMainWindow->GetPreviewWidget())
+			gMainWindow->GetPreviewWidget()->ClearPreview();
+	}
 
 	delete mProject;
 	mProject = Project;
@@ -138,7 +272,8 @@ void lcApplication::SetProject(Project* Project)
 		QSettings Settings;
 		QByteArray TabLayout = Settings.value(GetTabLayoutKey()).toByteArray();
 
-		gMainWindow->RestoreTabLayout(TabLayout);
+		if (gMainWindow)
+			gMainWindow->RestoreTabLayout(TabLayout);
 	}
 }
 
@@ -158,10 +293,12 @@ void lcApplication::ExportClipboard(const QByteArray& Clipboard)
 	SetClipboard(Clipboard);
 }
 
-bool lcApplication::LoadPartsLibrary(const QList<QPair<QString, bool>>& LibraryPaths, bool OnlyUsePaths, bool ShowProgress)
+bool lcApplication::LoadPartsLibrary(const QList<QPair<QString, bool>>& LibraryPaths, bool OnlyUsePaths)
 {
 	if (mLibrary == nullptr)
 		mLibrary = new lcPiecesLibrary();
+
+	const bool ShowProgress = gMainWindow != nullptr;
 
 	if (!OnlyUsePaths)
 	{
@@ -190,254 +327,601 @@ bool lcApplication::LoadPartsLibrary(const QList<QPair<QString, bool>>& LibraryP
 	return false;
 }
 
-bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& ShowWindow)
+lcCommandLineOptions lcApplication::ParseCommandLineOptions()
 {
-	bool OnlyUseLibraryPaths = false;
-	bool SaveImage = false;
-	bool SaveWavefront = false;
-	bool Save3DS = false;
-	bool SaveCOLLADA = false;
-	bool SaveHTML = false;
-	bool SetCameraAngles = false;
-	bool Orthographic = false;
-	bool ImageHighlight = mPreferences.mHighlightNewParts;
-	int ImageWidth = lcGetProfileInt(LC_PROFILE_IMAGE_WIDTH);
-	int ImageHeight = lcGetProfileInt(LC_PROFILE_IMAGE_HEIGHT);
-	int StudLogo = lcGetProfileInt(LC_PROFILE_STUD_LOGO);
-	int ImageStart = 0;
-	int ImageEnd = 0;
-	float CameraLatitude = 0.0f, CameraLongitude = 0.0f;
-	QString ImageName;
-	QString ModelName;
-	QString CameraName;
-	QString ViewpointName;
-	QString ProjectName;
-	QString SaveWavefrontName;
-	QString Save3DSName;
-	QString SaveCOLLADAName;
-	QString SaveHTMLName;
+	lcPreferences Preferences;
+	Preferences.LoadDefaults();
+
+	lcCommandLineOptions Options;
+
+	Options.ParseOK = true;
+	Options.Exit = false;
+	Options.SaveImage = false;
+	Options.SaveWavefront = false;
+	Options.Save3DS = false;
+	Options.SaveCOLLADA = false;
+	Options.SaveHTML = false;
+	Options.SetCameraAngles = false;
+	Options.SetCameraPosition = false;
+	Options.Orthographic = false;
+	Options.SetFoV = false;
+	Options.SetZPlanes = false;
+	Options.SetFadeStepsColor = false;
+	Options.SetHighlightColor = false;
+	Options.FadeSteps = Preferences.mFadeSteps;
+	Options.ImageHighlight = Preferences.mHighlightNewParts;
+	Options.ImageWidth = lcGetProfileInt(LC_PROFILE_IMAGE_WIDTH);
+	Options.ImageHeight = lcGetProfileInt(LC_PROFILE_IMAGE_HEIGHT);
+	Options.ShadingMode = Preferences.mShadingMode;
+	Options.LineWidth = Preferences.mLineWidth;
+	Options.AASamples = lcGetProfileInt(LC_PROFILE_ANTIALIASING_SAMPLES);
+	Options.StudStyle = static_cast<lcStudStyle>(lcGetProfileInt(LC_PROFILE_STUD_STYLE));
+	Options.ImageStart = 0;
+	Options.ImageEnd = 0;
+	Options.CameraPosition[0] = lcVector3(0.0f, 0.0f, 0.0f);
+	Options.CameraPosition[1] = lcVector3(0.0f, 0.0f, 0.0f);
+	Options.CameraPosition[2] = lcVector3(0.0f, 0.0f, 0.0f);
+	Options.CameraLatLon = lcVector2(0.0f, 0.0f);
+	Options.FoV = 0.0f;
+	Options.ZPlanes = lcVector2(0.0f, 0.0f);
+	Options.Viewpoint = lcViewpoint::Count;
+	Options.FadeStepsColor = Preferences.mFadeStepsColor;
+	Options.HighlightColor = Preferences.mHighlightNewPartsColor;
+	Options.StudCylinderColor = Preferences.mStudCylinderColor;
+	Options.PartEdgeColor = Preferences.mPartEdgeColor;
+	Options.BlackEdgeColor = Preferences.mBlackEdgeColor;
+	Options.DarkEdgeColor = Preferences.mDarkEdgeColor;
+	Options.PartEdgeContrast = Preferences.mPartEdgeContrast;
+	Options.PartColorValueLDIndex = Preferences.mPartColorValueLDIndex;
+	Options.AutomateEdgeColor = Preferences.mAutomateEdgeColor;
 
 	QStringList Arguments = arguments();
-	const int NumArguments = Arguments.size();
 
-	for (int ArgIdx = 1; ArgIdx < NumArguments; ArgIdx++)
+	if (Arguments.isEmpty())
+		return Options;
+
+	Arguments.removeFirst();
+
+	while (!Arguments.isEmpty())
 	{
-		const QString& Param = Arguments[ArgIdx];
+		QString Option = Arguments.takeFirst();
 
-		if (Param.isEmpty())
+		if (Option.isEmpty())
 			continue;
 
-		if (Param[0] != '-')
+		auto ParseString = [&Option, &Arguments, &Options](QString& Value, bool Required)
 		{
-			ProjectName = Param;
-			continue;
-		}
-
-		auto ParseString = [&ArgIdx, &Arguments, NumArguments](QString& Value, bool Required)
-		{
-			if (ArgIdx < NumArguments - 1 && Arguments[ArgIdx + 1][0] != '-')
+			if (!Arguments.isEmpty() && Arguments.front()[0] != '-')
 			{
-				ArgIdx++;
-				Value = Arguments[ArgIdx];
+				QString Parameter = Arguments.takeFirst();
+				Value = Parameter;
 			}
 			else if (Required)
-				printf("Not enough parameters for the '%s' argument.\n", Arguments[ArgIdx].toLatin1().constData());
+			{
+				Options.StdErr += tr("Not enough parameters for the '%1' option.\n").arg(Option);
+				Options.ParseOK = false;
+				return false;
+			}
+
+			return true;
 		};
 
-		auto ParseInteger = [&ArgIdx, &Arguments, NumArguments](int& Value)
+		auto ParseInteger = [&Option, &Arguments, &Options](int& Value, int Min, int Max)
 		{
-			if (ArgIdx < NumArguments - 1 && Arguments[ArgIdx + 1][0] != '-')
+			if (!Arguments.isEmpty() && Arguments.front()[0] != '-')
 			{
 				bool Ok = false;
-				ArgIdx++;
-				int NewValue = Arguments[ArgIdx].toInt(&Ok);
+				QString Parameter = Arguments.takeFirst();
+				int NewValue = Parameter.toInt(&Ok);
 
-				if (Ok)
-					Value = NewValue;
-				else
-					printf("Invalid value specified for the '%s' argument.\n", Arguments[ArgIdx - 1].toLatin1().constData());
-			}
-			else
-				printf("Not enough parameters for the '%s' argument.\n", Arguments[ArgIdx].toLatin1().constData());
-		};
-
-		auto ParseFloat = [&ArgIdx, &Arguments, NumArguments](float& Value)
-		{
-			if (ArgIdx < NumArguments - 1 && Arguments[ArgIdx + 1][0] != '-')
-			{
-				bool Ok = false;
-				ArgIdx++;
-				int NewValue = Arguments[ArgIdx].toFloat(&Ok);
-
-				if (Ok)
-					Value = NewValue;
-				else
-					printf("Invalid value specified for the '%s' argument.\n", Arguments[ArgIdx - 1].toLatin1().constData());
-			}
-			else
-				printf("Not enough parameters for the '%s' argument.\n", Arguments[ArgIdx].toLatin1().constData());
-		};
-
-		auto ParseVector2 = [&ArgIdx, &Arguments, NumArguments](float& Value1, float& Value2)
-		{
-			if (ArgIdx < NumArguments - 2 && Arguments[ArgIdx + 1][0] != '-' && Arguments[ArgIdx + 2][0] != '-')
-			{
-				bool Ok1 = false, Ok2 = false;
-
-				ArgIdx++;
-				float NewValue1 = Arguments[ArgIdx].toFloat(&Ok1);
-				ArgIdx++;
-				float NewValue2 = Arguments[ArgIdx].toFloat(&Ok2);
-
-				if (Ok1 && Ok2)
+				if (Ok && NewValue >= Min && NewValue <= Max)
 				{
-					Value1 = NewValue1;
-					Value2 = NewValue2;
+					Value = NewValue;
 					return true;
 				}
 				else
-					printf("Invalid value specified for the '%s' argument.\n", Arguments[ArgIdx - 2].toLatin1().constData());
+					Options.StdErr += tr("Invalid parameter value specified for the '%1' option: '%2'.\n").arg(Option, Parameter);
 			}
 			else
-				printf("Not enough parameters for the '%s' argument.\n", Arguments[ArgIdx].toLatin1().constData());
+				Options.StdErr += tr("Not enough parameters for the '%1' option.\n").arg(Option);
 
+			Options.ParseOK = false;
 			return false;
 		};
 
-		if (Param == QLatin1String("-l") || Param == QLatin1String("--libpath"))
+		auto ParseUnsigned = [&Option, &Arguments, &Options](uint& Value, uint Min, uint Max)
+		{
+			if (!Arguments.isEmpty() && Arguments.front()[0] != '-')
+			{
+				bool Ok = false;
+				QString Parameter = Arguments.takeFirst();
+				uint NewValue = Parameter.toUInt(&Ok);
+
+				if (Ok && NewValue >= Min && NewValue <= Max)
+				{
+					Value = NewValue;
+					return true;
+				}
+				else
+					Options.StdErr += tr("Invalid parameter value specified for the '%1' option: '%2'.\n").arg(Option, Parameter);
+			}
+			else
+				Options.StdErr += tr("Not enough parameters for the '%1' option.\n").arg(Option);
+
+			Options.ParseOK = false;
+			return false;
+		};
+
+		auto ParseFloat = [&Option, &Arguments, &Options](float& Value, float Min, float Max)
+		{
+			if (!Arguments.isEmpty() && Arguments.front()[0] != '-')
+			{
+				bool Ok = false;
+				QString Parameter = Arguments.takeFirst();
+				float NewValue = Parameter.toFloat(&Ok);
+
+				if (Ok && NewValue >= Min && NewValue <= Max)
+				{
+					Value = NewValue;
+					return true;
+				}
+				else
+					Options.StdErr += tr("Invalid parameter value specified for the '%1' option: '%2'.\n").arg(Option, Parameter);
+			}
+			else
+				Options.StdErr += tr("Not enough parameters for the '%1' option.\n").arg(Option);
+
+			Options.ParseOK = false;
+			return false;
+		};
+
+		auto ParseFloatArray = [&Option, &Arguments, &Options](int Count, float* ValueArray, bool NegativesValid)
+		{
+			if (Arguments.size() < Count)
+			{
+				Options.StdErr += tr("Not enough parameters for the '%1' option.\n").arg(Option);
+				Arguments.clear();
+				Options.ParseOK = false;
+				return false;
+			}
+
+			for (int ParseIndex = 0; ParseIndex < Count; ParseIndex++)
+			{
+				if (NegativesValid || Arguments.front()[0] != '-')
+				{
+					bool Ok = false;
+					QString Parameter = Arguments.takeFirst();
+					float NewValue = Parameter.toFloat(&Ok);
+
+					if (Ok)
+					{
+						*(ValueArray++) = NewValue;
+						continue;
+					}
+
+					Options.StdErr += tr("Invalid parameter value specified for the '%1' option: '%2'.\n").arg(Option, Parameter);
+				}
+				else
+					Options.StdErr += tr("Not enough parameters for the '%1' option.\n").arg(Option);
+
+				Options.ParseOK = false;
+				return false;
+			}
+
+			return true;
+		};
+
+		auto ParseColor = [&Option, &Arguments, &Options](quint32& Color)
+		{
+			if (!Arguments.isEmpty() && Arguments.front()[0] != '-')
+			{
+				QString Parameter = Arguments.takeFirst();
+				QColor ParsedColor = QColor(Parameter);
+
+				if (ParsedColor.isValid())
+				{
+					Color = LC_RGBA(ParsedColor.red(), ParsedColor.green(), ParsedColor.blue(), ParsedColor.alpha());
+					return true;
+				}
+				else
+					Options.StdErr += tr("Invalid parameter value specified for the '%1' option: '%2'.\n").arg(Option, Parameter);
+			}
+			else
+				Options.StdErr += tr("Not enough parameters for the '%1' option.\n").arg(Option);
+
+			Options.ParseOK = false;
+			return false;
+		};
+
+		if (Option[0] != '-')
+		{
+			if (QFileInfo(Option).isReadable())
+				Options.ProjectName = Option;
+			else
+				Options.StdErr += tr("The file '%1' is not readable.\n").arg(Option);
+
+			continue;
+		}
+
+		if (Option == QLatin1String("-l") || Option == QLatin1String("--libpath"))
 		{
 			QString LibPath;
-			ParseString(LibPath, true);
-			if (!LibPath.isEmpty())
+
+			if (ParseString(LibPath, true))
+				Options.LibraryPaths += qMakePair<QString, bool>(LibPath, false);
+		}
+		else if (Option == QLatin1String("-i") || Option == QLatin1String("--image"))
+		{
+			Options.SaveImage = true;
+			ParseString(Options.ImageName, false);
+		}
+		else if (Option == QLatin1String("-w") || Option == QLatin1String("--width"))
+			ParseInteger(Options.ImageWidth, 1, INT_MAX);
+		else if (Option == QLatin1String("-h") || Option == QLatin1String("--height"))
+			ParseInteger(Options.ImageHeight, 1, INT_MAX);
+		else if (Option == QLatin1String("-f") || Option == QLatin1String("--from"))
+			ParseUnsigned(Options.ImageStart, 1, LC_STEP_MAX);
+		else if (Option == QLatin1String("-t") || Option == QLatin1String("--to"))
+			ParseUnsigned(Options.ImageEnd, 1, LC_STEP_MAX);
+		else if (Option == QLatin1String("-s") || Option == QLatin1String("--submodel"))
+			ParseString(Options.ModelName, true);
+		else if (Option == QLatin1String("-c") || Option == QLatin1String("--camera"))
+			ParseString(Options.CameraName, true);
+		else if (Option == QLatin1String("--viewpoint"))
+		{
+			QString ViewpointName;
+
+			if (ParseString(ViewpointName, true))
 			{
-				LibraryPaths.clear();
-				LibraryPaths += qMakePair<QString, bool>(LibPath, false);
-				OnlyUseLibraryPaths = true;
+				Options.Viewpoint = lcCamera::GetViewpoint(ViewpointName);
+
+				if (Options.Viewpoint == lcViewpoint::Count)
+				{
+					Options.StdErr += tr("Invalid parameter value specified for the '%1' option: '%2'.\n").arg(Option, ViewpointName);
+					Options.ParseOK = false;
+				}
 			}
 		}
-		else if (Param == QLatin1String("-i") || Param == QLatin1String("--image"))
+		else if (Option == QLatin1String("--camera-angles"))
 		{
-			SaveImage = true;
-			ParseString(ImageName, false);
+			if ((Options.SetCameraAngles = ParseFloatArray(2, Options.CameraLatLon, true)) && (fabsf(Options.CameraLatLon[0]) > 360.0f || fabsf(Options.CameraLatLon[1]) > 360.0f))
+			{
+				Options.StdErr += tr("Invalid parameter value(s) specified for the '%1' option: limits are +/- 360.\n").arg(Option);
+				Options.ParseOK = false;
+			}
 		}
-		else if (Param == QLatin1String("-w") || Param == QLatin1String("--width"))
-			ParseInteger(ImageWidth);
-		else if (Param == QLatin1String("-h") || Param == QLatin1String("--height"))
-			ParseInteger(ImageHeight);
-		else if (Param == QLatin1String("-f") || Param == QLatin1String("--from"))
-			ParseInteger(ImageStart);
-		else if (Param == QLatin1String("-t") || Param == QLatin1String("--to"))
-			ParseInteger(ImageEnd);
-		else if (Param == QLatin1String("-s") || Param == QLatin1String("--submodel"))
-			ParseString(ModelName, true);
-		else if (Param == QLatin1String("-c") || Param == QLatin1String("--camera"))
-			ParseString(CameraName, true);
-		else if (Param == QLatin1String("--viewpoint"))
-			ParseString(ViewpointName, true);
-		else if (Param == QLatin1String("--camera-angles"))
-			SetCameraAngles = ParseVector2(CameraLatitude, CameraLongitude);
-		else if (Param == QLatin1String("--orthographic"))
-			Orthographic = true;
-		else if (Param == QLatin1String("--highlight"))
-			ImageHighlight = true;
-		else if (Param == QLatin1String("--shading"))
+		else if (Option == QLatin1String("--camera-position") || Option == QLatin1String("--camera-position-ldraw"))
+		{
+			if ((Options.SetCameraPosition = ParseFloatArray(9, Options.CameraPosition[0], true)))
+			{
+				lcVector3 Front = Options.CameraPosition[1] - Options.CameraPosition[0];
+
+				if (Front.LengthSquared() < 1.0f || Options.CameraPosition[2].LengthSquared() < 1.0f || fabsf(lcDot(lcNormalize(Front), lcNormalize(Options.CameraPosition[2]))) > 0.99f)
+				{
+					Options.StdErr += tr("Invalid parameter value(s) specified for the '%1' option.\n").arg(Option);
+					Options.ParseOK = false;
+				}
+				else if (Option == QLatin1String("--camera-position-ldraw"))
+				{
+					Options.CameraPosition[0] = lcVector3LDrawToLeoCAD(Options.CameraPosition[0]);
+					Options.CameraPosition[1] = lcVector3LDrawToLeoCAD(Options.CameraPosition[1]);
+					Options.CameraPosition[2] = lcVector3LDrawToLeoCAD(Options.CameraPosition[2]);
+				}
+			}
+		}
+		else if (Option == QLatin1String("--orthographic"))
+			Options.Orthographic = true;
+		else if (Option == QLatin1String("--fov"))
+			Options.SetFoV = ParseFloat(Options.FoV, 1.0f, 180.0f);
+		else if (Option == QLatin1String("--zplanes"))
+		{
+			if ((Options.SetZPlanes = ParseFloatArray(2, Options.ZPlanes, false)) && (Options.ZPlanes[0] < 1.0 || Options.ZPlanes[0] >= Options.ZPlanes[1]))
+			{
+				Options.StdErr += tr("Invalid parameter value(s) specified for the '%1' option: requirements are: 1 <= <near> < <far>.\n").arg(Option);
+				Options.ParseOK = false;
+			}
+		}
+		else if (Option == QLatin1String("-scc") || Option == QLatin1String("--stud-cylinder-color"))
+		{
+			if (ParseColor(Options.StudCylinderColor))
+			{
+				if (!lcIsHighContrast(Options.StudStyle))
+				{
+					Options.StdErr += tr("High contrast stud style is required for the '%1' option but is not enabled.\n").arg(Option);
+					Options.ParseOK = false;
+				}
+			}
+		}
+		else if (Option == QLatin1String("-ec") || Option == QLatin1String("--edge-color"))
+		{
+			if (ParseColor(Options.PartEdgeColor))
+			{
+				if (!lcIsHighContrast(Options.StudStyle))
+				{
+					Options.StdErr += tr("High contrast stud style is required for the '%1' option but is not enabled.\n").arg(Option);
+					Options.ParseOK = false;
+				}
+			}
+		}
+		else if (Option == QLatin1String("-bec") || Option == QLatin1String("--black-edge-color"))
+		{
+			if (ParseColor(Options.BlackEdgeColor))
+			{
+				if (!lcIsHighContrast(Options.StudStyle))
+				{
+					Options.StdErr += tr("High contrast stud style is required for the '%1' option but is not enabled.\n").arg(Option);
+					Options.ParseOK = false;
+				}
+			}
+		}
+		else if (Option == QLatin1String("-dec") || Option == QLatin1String("--dark-edge-color"))
+		{
+			if (ParseColor(Options.DarkEdgeColor))
+			{
+				if (!lcIsHighContrast(Options.StudStyle))
+				{
+					Options.StdErr += tr("High contrast stud style is required for the '%1' option but is not enabled.\n").arg(Option);
+					Options.ParseOK = false;
+				}
+			}
+		}
+		else if (Option == QLatin1String("-aec") || Option == QLatin1String("--automate-edge-color"))
+		{
+			Options.AutomateEdgeColor = true;
+		}
+		else if (Option == QLatin1String("-cc") || Option == QLatin1String("--color-contrast"))
+		{
+			if (ParseFloat(Options.PartEdgeContrast, 0.0f, 1.0f))
+			{
+				if (!Options.AutomateEdgeColor)
+				{
+					Options.StdErr += tr("Automate edge color is required for the '%1' option but is not enabled.\n").arg(Option);
+					Options.ParseOK = false;
+				}
+			}
+		}
+		else if (Option == QLatin1String("-ldv") || Option == QLatin1String("--light-dark-value"))
+		{
+			if (ParseFloat(Options.PartColorValueLDIndex, 0.0f, 1.0f))
+			{
+				if (!Options.AutomateEdgeColor)
+				{
+					Options.StdErr += tr("Automate edge color is required for the '%1' option but is not enabled.\n").arg(Option);
+					Options.ParseOK = false;
+				}
+			}
+		}
+		else if (Option == QLatin1String("--fade-steps"))
+			Options.FadeSteps = true;
+		else if (Option == QLatin1String("--no-fade-steps"))
+			Options.FadeSteps = false;
+		else if (Option == QLatin1String("--fade-steps-color"))
+		{
+			if (ParseColor(Options.FadeStepsColor))
+			{
+				Options.SetFadeStepsColor = true;
+				Options.FadeSteps = true;
+			}
+		}
+		else if (Option == QLatin1String("--highlight"))
+			Options.ImageHighlight = true;
+		else if (Option == QLatin1String("--no-highlight"))
+			Options.ImageHighlight = false;
+		else if (Option == QLatin1String("--highlight-color"))
+		{
+			if (ParseColor(Options.HighlightColor))
+			{
+				Options.SetHighlightColor = true;
+				Options.ImageHighlight = true;
+			}
+		}
+		else if (Option == QLatin1String("--shading"))
 		{
 			QString ShadingString;
-			ParseString(ShadingString, true);
 
-			if (ShadingString == QLatin1String("wireframe"))
-				mPreferences.mShadingMode = lcShadingMode::Wireframe;
-			else if (ShadingString == QLatin1String("flat"))
-				mPreferences.mShadingMode = lcShadingMode::Flat;
-			else if (ShadingString == QLatin1String("default"))
-				mPreferences.mShadingMode = lcShadingMode::DefaultLights;
-			else if (ShadingString == QLatin1String("full"))
-				mPreferences.mShadingMode = lcShadingMode::Full;
-		}
-		else if (Param == QLatin1String("--line-width"))
-			ParseFloat(mPreferences.mLineWidth);
-		else if (Param == QLatin1String("-sl") || Param == QLatin1String("--stud-logo"))
-		{
-			ParseInteger(StudLogo);
-			if (StudLogo != lcGetProfileInt(LC_PROFILE_STUD_LOGO))
+			if (ParseString(ShadingString, true))
 			{
-				lcGetPiecesLibrary()->SetStudLogo(StudLogo, false);
+				if (ShadingString == QLatin1String("wireframe"))
+					Options.ShadingMode = lcShadingMode::Wireframe;
+				else if (ShadingString == QLatin1String("flat"))
+					Options.ShadingMode = lcShadingMode::Flat;
+				else if (ShadingString == QLatin1String("default"))
+					Options.ShadingMode = lcShadingMode::DefaultLights;
+				else if (ShadingString == QLatin1String("full"))
+					Options.ShadingMode = lcShadingMode::Full;
+				else
+				{
+					Options.StdErr += tr("Invalid parameter value specified for the '%1' option: '%2'.\n").arg(Option, ShadingString);
+					Options.ParseOK = false;
+				}
 			}
 		}
-		else if (Param == QLatin1String("-obj") || Param == QLatin1String("--export-wavefront"))
+		else if (Option == QLatin1String("--line-width"))
+			ParseFloat(Options.LineWidth, 0.0f, 10.0f);
+		else if (Option == QLatin1String("--aa-samples"))
 		{
-			SaveWavefront = true;
-			ParseString(SaveWavefrontName, false);
+			if (ParseInteger(Options.AASamples, 1, 8) && Options.AASamples != 1 && Options.AASamples != 2 && Options.AASamples != 4 && Options.AASamples != 8)
+			{
+				Options.StdErr += tr("Invalid parameter value specified for the '%1' option: '%2'.\n").arg(Option, QString::number(Options.AASamples));
+				Options.ParseOK = false;
+			}
 		}
-		else if (Param == QLatin1String("-3ds") || Param == QLatin1String("--export-3ds"))
+		else if (Option == QLatin1String("-ss") || Option == QLatin1String("--stud-style"))
 		{
-			Save3DS = true;
-			ParseString(Save3DSName, false);
+			int StudStyle;
+
+			if (ParseInteger(StudStyle, 0, static_cast<int>(lcStudStyle::Count) - 1))
+				Options.StudStyle = static_cast<lcStudStyle>(StudStyle);
 		}
-		else if (Param == QLatin1String("-dae") || Param == QLatin1String("--export-collada"))
+		else if (Option == QLatin1String("-obj") || Option == QLatin1String("--export-wavefront"))
 		{
-			SaveCOLLADA = true;
-			ParseString(SaveCOLLADAName, false);
+			Options.SaveWavefront = true;
+			ParseString(Options.SaveWavefrontName, false);
 		}
-		else if (Param == QLatin1String("-html") || Param == QLatin1String("--export-html"))
+		else if (Option == QLatin1String("-3ds") || Option == QLatin1String("--export-3ds"))
 		{
-			SaveHTML = true;
-			ParseString(SaveHTMLName, false);
+			Options.Save3DS = true;
+			ParseString(Options.Save3DSName, false);
 		}
-		else if (Param == QLatin1String("-v") || Param == QLatin1String("--version"))
+		else if (Option == QLatin1String("-dae") || Option == QLatin1String("--export-collada"))
+		{
+			Options.SaveCOLLADA = true;
+			ParseString(Options.SaveCOLLADAName, false);
+		}
+		else if (Option == QLatin1String("-html") || Option == QLatin1String("--export-html"))
+		{
+			Options.SaveHTML = true;
+			ParseString(Options.SaveHTMLName, false);
+		}
+		else if (Option == QLatin1String("-v") || Option == QLatin1String("--version"))
 		{
 #ifdef LC_CONTINUOUS_BUILD
-			printf("LeoCAD Continuous Build " QT_STRINGIFY(LC_CONTINUOUS_BUILD) "\n");
+			Options.StdOut += tr("LeoCAD Continuous Build %1\n").arg(QT_STRINGIFY(LC_CONTINUOUS_BUILD));
 #else
-			printf("LeoCAD Version " LC_VERSION_TEXT "\n");
+			Options.StdOut += tr("LeoCAD Version %1\n").arg(LC_VERSION_TEXT);
 #endif
-			printf("LeoCAD Version " LC_VERSION_TEXT "\n");
-			printf("Compiled " __DATE__ "\n");
-
-			ShowWindow = false;
-			return true;
+			Options.StdOut += tr("Compiled %1\n").arg(__DATE__);
+			Options.Exit = true;
 		}
-		else if (Param == QLatin1String("-?") || Param == QLatin1String("--help"))
+		else if (Option == QLatin1String("-?") || Option == QLatin1String("--help"))
 		{
-			printf("Usage: leocad [options] [file]\n");
-			printf("  [options] can be:\n");
-			printf("  -l, --libpath <path>: Set the Parts Library location to path.\n");
-			printf("  -i, --image <outfile.ext>: Save a picture in the format specified by ext.\n");
-			printf("  -w, --width <width>: Set the picture width.\n");
-			printf("  -h, --height <height>: Set the picture height.\n");
-			printf("  -f, --from <time>: Set the first step to save pictures.\n");
-			printf("  -t, --to <time>: Set the last step to save pictures.\n");
-			printf("  -s, --submodel <submodel>: Set the active submodel.\n");
-			printf("  -c, --camera <camera>: Set the active camera.\n");
-			printf("  -sl --stud-logo <type>: Set the stud logo type 0 - 5, 0 is no logo.\n");
-			printf("  --viewpoint <front|back|left|right|top|bottom|home>: Set the viewpoint.\n");
-			printf("  --camera-angles <latitude> <longitude>: Set the camera angles in degrees around the model.\n");
-			printf("  --orthographic: Make the view orthographic.\n");
-			printf("  --highlight: Highlight pieces in the steps they appear.\n");
-			printf("  --shading <wireframe|flat|default|full>: Select shading mode for rendering.\n");
-			printf("  --line-width <width>: Set the with of the edge lines.\n");
-			printf("  -obj, --export-wavefront <outfile.obj>: Export the model to Wavefront OBJ format.\n");
-			printf("  -3ds, --export-3ds <outfile.3ds>: Export the model to 3D Studio 3DS format.\n");
-			printf("  -dae, --export-collada <outfile.dae>: Export the model to COLLADA DAE format.\n");
-			printf("  -html, --export-html <folder>: Create an HTML page for the model.\n");
-			printf("  -v, --version: Output version information and exit.\n");
-			printf("  -?, --help: Display this help message and exit.\n");
-			printf("  \n");
-
-			ShowWindow = false;
-			return true;
+			Options.StdOut += tr("Usage: leocad [options] [file]\n");
+			Options.StdOut += tr("  [options] can be:\n");
+			Options.StdOut += tr("  -l, --libpath <path>: Set the Parts Library location to path.\n");
+			Options.StdOut += tr("  -i, --image <outfile.ext>: Save a picture in the format specified by ext and exit.\n");
+			Options.StdOut += tr("  -w, --width <width>: Set the picture width.\n");
+			Options.StdOut += tr("  -h, --height <height>: Set the picture height.\n");
+			Options.StdOut += tr("  -f, --from <step>: Set the first step to save pictures.\n");
+			Options.StdOut += tr("  -t, --to <step>: Set the last step to save pictures.\n");
+			Options.StdOut += tr("  -s, --submodel <submodel>: Set the active submodel.\n");
+			Options.StdOut += tr("  -c, --camera <camera>: Set the active camera.\n");
+			Options.StdOut += tr("  -ss, --stud-style <id>: Set the stud style 0=No style, 1=LDraw single wire, 2=LDraw double wire, 3=LDraw raised floating, 4=LDraw raised rounded, 5=LDraw subtle rounded, 6=LEGO no logo, 7=LEGO single wire.\n");
+			Options.StdOut += tr("  --viewpoint <front|back|left|right|top|bottom|home>: Set the viewpoint.\n");
+			Options.StdOut += tr("  --camera-angles <latitude> <longitude>: Set the camera angles in degrees around the model.\n");
+			Options.StdOut += tr("  --camera-position <x> <y> <z> <tx> <ty> <tz> <ux> <uy> <uz>: Set the camera position, target and up vector.\n");
+			Options.StdOut += tr("  --camera-position-ldraw <x> <y> <z> <tx> <ty> <tz> <ux> <uy> <uz>: Set the camera position, target and up vector using LDraw coordinates.\n");
+			Options.StdOut += tr("  --orthographic: Render images using an orthographic projection.\n");
+			Options.StdOut += tr("  --fov <degrees>: Set the vertical field of view used to render images (< 180).\n");
+			Options.StdOut += tr("  --zplanes <near> <far>: Set the near and far clipping planes used to render images (1 <= <near> < <far>).\n");
+			Options.StdOut += tr("  --fade-steps: Render parts from prior steps faded.\n");
+			Options.StdOut += tr("  --no-fade-steps: Do not render parts from prior steps faded.\n");
+			Options.StdOut += tr("  --fade-steps-color <rgba>: Renderinng color for prior step parts (#AARRGGBB).\n");
+			Options.StdOut += tr("  --highlight: Highlight parts in the steps they appear.\n");
+			Options.StdOut += tr("  --no-highlight: Do not highlight parts in the steps they appear.\n");
+			Options.StdOut += tr("  --highlight-color: Renderinng color for highlighted parts (#AARRGGBB).\n");
+			Options.StdOut += tr("  --shading <wireframe|flat|default|full>: Select shading mode for rendering.\n");
+			Options.StdOut += tr("  --line-width <width>: Set the with of the edge lines.\n");
+			Options.StdOut += tr("  --aa-samples <count>: AntiAliasing sample size (1, 2, 4, or 8).\n");
+			Options.StdOut += tr("  -scc, --stud-cylinder-color <#AARRGGBB>: High contrast stud cylinder color.\n");
+			Options.StdOut += tr("  -ec, --edge-color <#AARRGGBB>: High contrast edge color.\n");
+			Options.StdOut += tr("  -bec, --black-edge-color <#AARRGGBB>: High contrast edge color for black parts.\n");
+			Options.StdOut += tr("  -dec, --dark-edge-color <#AARRGGBB>: High contrast edge color for dark color parts.\n");
+			Options.StdOut += tr("  -aec, --automate-edge-color: Enable automatically adjusted edge colors.\n");
+			Options.StdOut += tr("  -cc, --color-contrast <float>: Color contrast value between 0.0 and 1.0.\n");
+			Options.StdOut += tr("  -ldv, --light-dark-value <float>: Light/Dark color value between 0.0 and 1.0.\n");
+			Options.StdOut += tr("  -obj, --export-wavefront <outfile.obj>: Export the model to Wavefront OBJ format.\n");
+			Options.StdOut += tr("  -3ds, --export-3ds <outfile.3ds>: Export the model to 3D Studio 3DS format.\n");
+			Options.StdOut += tr("  -dae, --export-collada <outfile.dae>: Export the model to COLLADA DAE format.\n");
+			Options.StdOut += tr("  -html, --export-html <folder>: Create an HTML page for the model.\n");
+			Options.StdOut += tr("  -v, --version: Output version information and exit.\n");
+			Options.StdOut += tr("  -?, --help: Display this help message and exit.\n");
+			Options.StdOut += QLatin1String("\n");
+			Options.Exit = true;
 		}
 		else
-			printf("Unknown parameter: '%s'\n", Param.toLatin1().constData());
+		{
+			Options.StdErr += tr("Unknown option: '%1'.\n").arg(Option);
+			Options.ParseOK = false;
+		}
 	}
 
-	gMainWindow = new lcMainWindow();
-	lcLoadDefaultKeyboardShortcuts();
-	lcLoadDefaultMouseShortcuts();
+	if (Options.AutomateEdgeColor && lcIsHighContrast(Options.StudStyle))
+	{
+		Options.StdErr += tr("High contrast stud and edge color settings are ignored when -aec or --automate-edge-color is set.\n");
+	}
 
-	ShowWindow = !SaveImage && !SaveWavefront && !Save3DS && !SaveCOLLADA && !SaveHTML;
+	if (!Options.CameraName.isEmpty())
+	{
+		if (Options.Viewpoint != lcViewpoint::Count)
+			Options.StdErr += tr("--viewpoint is ignored when --camera is set.\n");
 
-	if (!LoadPartsLibrary(LibraryPaths, OnlyUseLibraryPaths, ShowWindow))
+		if (Options.Orthographic)
+			Options.StdErr += tr("--orthographic is ignored when --camera is set.\n");
+
+		if (Options.SetCameraAngles)
+			Options.StdErr += tr("--camera-angles is ignored when --camera is set.\n");
+
+		if (Options.SetCameraPosition)
+			Options.StdErr += tr("--camera-position is ignored when --camera is set.\n");
+	}
+	else if (Options.Viewpoint != lcViewpoint::Count)
+	{
+		if (Options.SetCameraAngles)
+			Options.StdErr += tr("--camera-angles is ignored when --viewpoint is set.\n");
+
+		if (Options.SetCameraPosition)
+			Options.StdErr += tr("--camera-position is ignored when --viewpoint is set.\n");
+	}
+	else if (Options.SetCameraAngles)
+	{
+		if (Options.SetCameraPosition)
+			Options.StdErr += tr("--camera-position is ignored when --camera-angles is set.\n");
+	}
+
+	const bool SaveAndExit = (Options.SaveImage || Options.SaveWavefront || Options.Save3DS || Options.SaveCOLLADA || Options.SaveHTML);
+
+	if (SaveAndExit && Options.ProjectName.isEmpty())
+	{
+		Options.StdErr += tr("No file name specified.\n");
+		Options.ParseOK = false;
+	}
+
+	return Options;
+}
+
+lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& LibraryPaths)
+{
+	lcCommandLineOptions Options = ParseCommandLineOptions();
+	QTextStream StdErr(stderr, QIODevice::WriteOnly);
+	QTextStream StdOut(stdout, QIODevice::WriteOnly);
+
+	if (!Options.StdErr.isEmpty())
+	{
+		StdErr << Options.StdErr;
+		StdErr.flush();
+	}
+
+	if (!Options.StdOut.isEmpty())
+	{
+		StdOut << Options.StdOut;
+		StdOut.flush();
+	}
+
+	if (!Options.ParseOK)
+		return lcStartupMode::Error;
+
+	if (Options.Exit)
+		return lcStartupMode::Success;
+
+	if (!InitializeRenderer())
+	{
+		StdErr << tr("Error creating OpenGL context.\n");
+		return lcStartupMode::Error;
+	}
+
+	const bool SaveAndExit = (Options.SaveImage || Options.SaveWavefront || Options.Save3DS || Options.SaveCOLLADA || Options.SaveHTML);
+
+	if (!SaveAndExit)
+	{
+		UpdateStyle();
+
+		gMainWindow = new lcMainWindow();
+
+		lcLoadDefaultKeyboardShortcuts();
+		lcLoadDefaultMouseShortcuts();
+	}
+
+	if (!LoadPartsLibrary(Options.LibraryPaths.isEmpty() ? LibraryPaths : Options.LibraryPaths, !Options.LibraryPaths.isEmpty()))
 	{
 		QString Message;
 
@@ -446,123 +930,180 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 		else
 			Message = tr("LeoCAD could not load Parts Library.\n\nPlease visit https://www.leocad.org for information on how to download and install a library.");
 
-		if (ShowWindow)
+		if (gMainWindow)
 			QMessageBox::information(gMainWindow, tr("LeoCAD"), Message);
 		else
-			fprintf(stderr, "%s", Message.toLatin1().constData());
+		{
+			StdErr << Message << "\n";
+			StdErr.flush();
+		}
 	}
 
-	gMainWindow->CreateWidgets();
+	mPreferences.mShadingMode = Options.ShadingMode;
+	mPreferences.mLineWidth = Options.LineWidth;
+	mPreferences.mStudCylinderColor = Options.StudCylinderColor;
+	mPreferences.mPartEdgeColor = Options.PartEdgeColor;
+	mPreferences.mBlackEdgeColor = Options.BlackEdgeColor;
+	mPreferences.mDarkEdgeColor = Options.DarkEdgeColor;
+	mPreferences.mPartEdgeContrast = Options.PartEdgeContrast;
+	mPreferences.mPartColorValueLDIndex = Options.PartColorValueLDIndex;
+	mPreferences.mAutomateEdgeColor = Options.AutomateEdgeColor;
+
+	lcGetPiecesLibrary()->SetStudStyle(Options.StudStyle, false);
+
+	if (!SaveAndExit)
+		gMainWindow->CreateWidgets();
 
 	Project* NewProject = new Project();
 	SetProject(NewProject);
 
-	if (ShowWindow && ProjectName.isEmpty() && lcGetProfileInt(LC_PROFILE_AUTOLOAD_MOSTRECENT))
-		ProjectName = lcGetProfileString(LC_PROFILE_RECENT_FILE1);
+	if (!SaveAndExit && Options.ProjectName.isEmpty() && lcGetProfileInt(LC_PROFILE_AUTOLOAD_MOSTRECENT))
+		Options.ProjectName = lcGetProfileString(LC_PROFILE_RECENT_FILE1);
 
-	if (!ProjectName.isEmpty() && gMainWindow->OpenProject(ProjectName))
+	bool ProjectLoaded = false;
+
+	if (!Options.ProjectName.isEmpty())
 	{
-		if (!ModelName.isEmpty())
-			mProject->SetActiveModel(ModelName);
-
-		View* ActiveView = gMainWindow->GetActiveView();
-
-		if (!CameraName.isEmpty())
-		{
-			ActiveView->SetCamera(CameraName.toLatin1()); // todo: qstring
-
-			if (!ViewpointName.isEmpty())
-				printf("Warning: --viewpoint is ignored when --camera is set.\n");
-
-			if (Orthographic)
-				printf("Warning: --orthographic is ignored when --camera is set.\n");
-
-			if (SetCameraAngles)
-				printf("Warning: --camera-angles is ignored when --camera is set.\n");
-		}
+		if (gMainWindow)
+			gMainWindow->OpenProject(Options.ProjectName);
 		else
 		{
-			if (!ViewpointName.isEmpty())
+			Project* LoadedProject = new Project();
+
+			if (LoadedProject->Load(Options.ProjectName))
 			{
-				if (ViewpointName == QLatin1String("front"))
-					ActiveView->SetViewpoint(LC_VIEWPOINT_FRONT);
-				else if (ViewpointName == QLatin1String("back"))
-					ActiveView->SetViewpoint(LC_VIEWPOINT_BACK);
-				else if (ViewpointName == QLatin1String("top"))
-					ActiveView->SetViewpoint(LC_VIEWPOINT_TOP);
-				else if (ViewpointName == QLatin1String("bottom"))
-					ActiveView->SetViewpoint(LC_VIEWPOINT_BOTTOM);
-				else if (ViewpointName == QLatin1String("left"))
-					ActiveView->SetViewpoint(LC_VIEWPOINT_LEFT);
-				else if (ViewpointName == QLatin1String("right"))
-					ActiveView->SetViewpoint(LC_VIEWPOINT_RIGHT);
-				else if (ViewpointName == QLatin1String("home"))
-					ActiveView->SetViewpoint(LC_VIEWPOINT_HOME);
-				else
-					printf("Unknown viewpoint: '%s'\n", ViewpointName.toLatin1().constData());
-
-				if (SetCameraAngles)
-					printf("Warning: --camera-angles is ignored when --viewpoint is set.\n");
+				SetProject(LoadedProject);
+				ProjectLoaded = true;
 			}
-			else if (SetCameraAngles)
-				ActiveView->SetCameraAngles(CameraLatitude, CameraLongitude);
+			else
+			{
+				delete LoadedProject;
+			}
+		}
+	}
 
-			ActiveView->SetProjection(Orthographic);
+	if (ProjectLoaded)
+	{
+		if (!Options.ModelName.isEmpty())
+			mProject->SetActiveModel(Options.ModelName);
+
+		std::unique_ptr<lcView> ActiveView;
+
+		if (Options.SaveImage)
+		{
+			lcModel* Model;
+
+			if (!Options.ModelName.isEmpty())
+			{
+				Model = mProject->GetModel(Options.ModelName);
+
+				if (!Model)
+				{
+					StdErr << tr("Error: model '%1' does not exist.\n").arg(Options.ModelName);
+					return lcStartupMode::Error;
+				}
+			}
+			else
+				Model = mProject->GetMainModel();
+
+			ActiveView = std::unique_ptr<lcView>(new lcView(lcViewType::View, Model));
+
+			ActiveView->SetOffscreenContext();
+			ActiveView->MakeCurrent();
 		}
 
-		if (SaveImage)
+		if (Options.SaveImage)
+			ActiveView->SetSize(Options.ImageWidth, Options.ImageHeight);
+
+		if (ActiveView)
 		{
-			lcModel* ActiveModel;
-
-			if (ModelName.isEmpty())
-				ActiveModel = mProject->GetMainModel();
+			if (!Options.CameraName.isEmpty())
+				ActiveView->SetCamera(Options.CameraName);
 			else
-				ActiveModel = mProject->GetActiveModel();
+			{
+				ActiveView->SetProjection(Options.Orthographic);
 
-			if (ImageName.isEmpty())
-				ImageName = mProject->GetImageFileName(true);
+				if (Options.SetFoV)
+					ActiveView->GetCamera()->m_fovy = Options.FoV;
 
-			if (ImageEnd < ImageStart)
-				ImageEnd = ImageStart;
-			else if (ImageStart > ImageEnd)
-				ImageStart = ImageEnd;
+				if (Options.SetZPlanes)
+				{
+					lcCamera* Camera = ActiveView->GetCamera();
 
-			if ((ImageStart == 0) && (ImageEnd == 0))
-				ImageStart = ImageEnd = ActiveModel->GetCurrentStep();
-			else if ((ImageStart == 0) && (ImageEnd != 0))
-				ImageStart = ImageEnd;
-			else if ((ImageStart != 0) && (ImageEnd == 0))
-				ImageEnd = ImageStart;
+					Camera->m_zNear = Options.ZPlanes[0];
+					Camera->m_zFar = Options.ZPlanes[1];
+				}
 
-			if (ImageStart > 255)
-				ImageStart = 255;
+				if (Options.Viewpoint != lcViewpoint::Count)
+					ActiveView->SetViewpoint(Options.Viewpoint);
+				else if (Options.SetCameraAngles)
+					ActiveView->SetCameraAngles(Options.CameraLatLon[0], Options.CameraLatLon[1]);
+				else if (Options.SetCameraPosition)
+					ActiveView->SetViewpoint(Options.CameraPosition[0], Options.CameraPosition[1], Options.CameraPosition[2]);
+			}
+		}
 
-			if (ImageEnd > 255)
-				ImageEnd = 255;
+		if (Options.SaveImage)
+		{
+			lcModel* ActiveModel = ActiveView->GetModel();
+
+			if (Options.ImageName.isEmpty())
+				Options.ImageName = mProject->GetImageFileName(true);
+
+			if (Options.ImageEnd < Options.ImageStart)
+				Options.ImageEnd = Options.ImageStart;
+			else if (Options.ImageStart > Options.ImageEnd)
+				Options.ImageStart = Options.ImageEnd;
+
+			if ((Options.ImageStart == 0) && (Options.ImageEnd == 0))
+				Options.ImageStart = Options.ImageEnd = ActiveModel->GetCurrentStep();
+			else if ((Options.ImageStart == 0) && (Options.ImageEnd != 0))
+				Options.ImageStart = Options.ImageEnd;
+			else if ((Options.ImageStart != 0) && (Options.ImageEnd == 0))
+				Options.ImageEnd = Options.ImageStart;
+
+			if (Options.ImageStart > 255)
+				Options.ImageStart = 255;
+
+			if (Options.ImageEnd > 255)
+				Options.ImageEnd = 255;
 
 			QString Frame;
 
-			if (ImageStart != ImageEnd)
+			if (Options.ImageStart != Options.ImageEnd)
 			{
-				QString Extension = QFileInfo(ImageName).suffix();
-				Frame = ImageName.left(ImageName.length() - Extension.length() - 1) + QLatin1String("%1.") + Extension;
+				QString Extension = QFileInfo(Options.ImageName).suffix();
+				Frame = Options.ImageName.left(Options.ImageName.length() - Extension.length() - 1) + QLatin1String("%1.") + Extension;
 			}
 			else
-				Frame = ImageName;
+				Frame = Options.ImageName;
 
-			mPreferences.mHighlightNewParts = ImageHighlight;
+			mPreferences.mFadeSteps = Options.FadeSteps;
+			if (Options.SetFadeStepsColor)
+				mPreferences.mFadeStepsColor = Options.FadeStepsColor;
+			mPreferences.mHighlightNewParts = Options.ImageHighlight;
+			if (Options.SetHighlightColor)
+				mPreferences.mHighlightNewPartsColor = Options.HighlightColor;
 
-			ActiveModel->SaveStepImages(Frame, ImageStart != ImageEnd, CameraName == nullptr, ImageWidth, ImageHeight, ImageStart, ImageEnd);
+			if (Options.CameraName.isEmpty() && !Options.SetCameraPosition)
+				ActiveView->ZoomExtents();
+
+			auto ProgressCallback = [&StdOut](const QString& FileName)
+			{
+				StdOut << tr("Saved '%1'.\n").arg(FileName);
+			};
+
+			ActiveView->SaveStepImages(Frame, Options.ImageStart != Options.ImageEnd, Options.ImageStart, Options.ImageEnd, ProgressCallback);
 		}
 
-		if (SaveWavefront)
+		if (Options.SaveWavefront)
 		{
 			QString FileName;
 
-			if (!SaveWavefrontName.isEmpty())
-				FileName = SaveWavefrontName;
+			if (!Options.SaveWavefrontName.isEmpty())
+				FileName = Options.SaveWavefrontName;
 			else
-				FileName = ProjectName;
+				FileName = Options.ProjectName;
 
 			QString Extension = QFileInfo(FileName).suffix().toLower();
 
@@ -576,17 +1117,18 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 				FileName += ".obj";
 			}
 
-			mProject->ExportWavefront(FileName);
+			if (mProject->ExportWavefront(FileName))
+				StdOut << tr("Saved '%1'.\n").arg(FileName);
 		}
 
-		if (Save3DS)
+		if (Options.Save3DS)
 		{
 			QString FileName;
 
-			if (!Save3DSName.isEmpty())
-				FileName = Save3DSName;
+			if (!Options.Save3DSName.isEmpty())
+				FileName = Options.Save3DSName;
 			else
-				FileName = ProjectName;
+				FileName = Options.ProjectName;
 
 			QString Extension = QFileInfo(FileName).suffix().toLower();
 
@@ -600,17 +1142,18 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 				FileName += ".3ds";
 			}
 
-			mProject->Export3DStudio(FileName);
+			if (mProject->Export3DStudio(FileName))
+				StdOut << tr("Saved '%1'.\n").arg(FileName);
 		}
 
-		if (SaveCOLLADA)
+		if (Options.SaveCOLLADA)
 		{
 			QString FileName;
 
-			if (!SaveCOLLADAName.isEmpty())
-				FileName = SaveCOLLADAName;
+			if (!Options.SaveCOLLADAName.isEmpty())
+				FileName = Options.SaveCOLLADAName;
 			else
-				FileName = ProjectName;
+				FileName = Options.ProjectName;
 
 			QString Extension = QFileInfo(FileName).suffix().toLower();
 
@@ -624,42 +1167,64 @@ bool lcApplication::Initialize(QList<QPair<QString, bool>>& LibraryPaths, bool& 
 				FileName += ".dae";
 			}
 
-			mProject->ExportCOLLADA(FileName);
+			if (mProject->ExportCOLLADA(FileName))
+				StdOut << tr("Saved '%1'.\n").arg(FileName);
 		}
 
-		if (SaveHTML)
+		if (Options.SaveHTML)
 		{
-			lcHTMLExportOptions Options(mProject);
+			lcHTMLExportOptions HTMLOptions(mProject);
 
-			if (!SaveHTMLName.isEmpty())
-				Options.PathName = SaveHTMLName;
+			if (!Options.SaveHTMLName.isEmpty())
+				HTMLOptions.PathName = Options.SaveHTMLName;
 
-			mProject->ExportHTML(Options);
+			mProject->ExportHTML(HTMLOptions);
 		}
 	}
 
-	if (ShowWindow)
+	if (!SaveAndExit)
 	{
-		gMainWindow->SetColorIndex(lcGetColorIndex(4));
+		gMainWindow->SetColorIndex(lcGetColorIndex(7));
 		gMainWindow->GetPartSelectionWidget()->SetDefaultPart();
 		gMainWindow->UpdateRecentFiles();
 		gMainWindow->show();
 	}
 
-	return true;
+	return SaveAndExit ? lcStartupMode::Success : lcStartupMode::ShowWindow;
 }
 
 void lcApplication::Shutdown()
 {
+	delete gMainWindow;
+	gMainWindow = nullptr;
+
+	delete mProject;
+	mProject = nullptr;
+
 	delete mLibrary;
 	mLibrary = nullptr;
+
+	ShutdownRenderer();
+}
+
+bool lcApplication::InitializeRenderer()
+{
+	if (!lcContext::CreateOffscreenContext())
+		return false;
+
+	return true;
+}
+
+void lcApplication::ShutdownRenderer()
+{
+	lcContext::DestroyOffscreenContext();
 }
 
 void lcApplication::ShowPreferencesDialog()
 {
 	lcPreferencesDialogOptions Options;
 	int CurrentAASamples = lcGetProfileInt(LC_PROFILE_ANTIALIASING_SAMPLES);
-	int CurrentStudLogo = lcGetProfileInt(LC_PROFILE_STUD_LOGO);
+	lcStudStyle CurrentStudStyle = lcGetPiecesLibrary()->GetStudStyle();
 
 	Options.Preferences = mPreferences;
 
@@ -673,7 +1238,7 @@ void lcApplication::ShowPreferencesDialog()
 	Options.CheckForUpdates = lcGetProfileInt(LC_PROFILE_CHECK_UPDATES);
 
 	Options.AASamples = CurrentAASamples;
-	Options.StudLogo = CurrentStudLogo;
+	Options.StudStyle = CurrentStudStyle;
 
 	Options.Categories = gCategories;
 	Options.CategoriesModified = false;
@@ -694,24 +1259,31 @@ void lcApplication::ShowPreferencesDialog()
 	bool LibraryChanged = Options.LibraryPath != lcGetProfileString(LC_PROFILE_PARTS_LIBRARY);
 	bool ColorsChanged = Options.ColorConfigPath != lcGetProfileString(LC_PROFILE_COLOR_CONFIG);
 	bool AAChanged = CurrentAASamples != Options.AASamples;
-	bool StudLogoChanged = CurrentStudLogo != Options.StudLogo;
+	bool StudStyleChanged = CurrentStudStyle != Options.StudStyle;
+	bool AutomateEdgeColorChanged = Options.Preferences.mAutomateEdgeColor != mPreferences.mAutomateEdgeColor;
+	AutomateEdgeColorChanged |= Options.Preferences.mStudCylinderColor != mPreferences.mStudCylinderColor;
+	AutomateEdgeColorChanged |= Options.Preferences.mPartEdgeColor != mPreferences.mPartEdgeColor;
+	AutomateEdgeColorChanged |= Options.Preferences.mBlackEdgeColor != mPreferences.mBlackEdgeColor;
+	AutomateEdgeColorChanged |= Options.Preferences.mDarkEdgeColor != mPreferences.mDarkEdgeColor;
+	AutomateEdgeColorChanged |= Options.Preferences.mPartEdgeContrast != mPreferences.mPartEdgeContrast;
+	AutomateEdgeColorChanged |= Options.Preferences.mPartColorValueLDIndex != mPreferences.mPartColorValueLDIndex;
 
 	mPreferences = Options.Preferences;
 
 	mPreferences.SaveDefaults();
+	UpdateStyle();
 
 	lcSetProfileString(LC_PROFILE_DEFAULT_AUTHOR_NAME, Options.DefaultAuthor);
 	lcSetProfileString(LC_PROFILE_PARTS_LIBRARY, Options.LibraryPath);
-	lcSetProfileString(LC_PROFILE_COLOR_CONFIG, Options.ColorConfigPath);
 	lcSetProfileString(LC_PROFILE_MINIFIG_SETTINGS, Options.MinifigSettingsPath);
 	lcSetProfileString(LC_PROFILE_POVRAY_PATH, Options.POVRayPath);
 	lcSetProfileString(LC_PROFILE_POVRAY_LGEO_PATH, Options.LGEOPath);
 	lcSetProfileString(LC_PROFILE_LANGUAGE, Options.Language);
 	lcSetProfileInt(LC_PROFILE_CHECK_UPDATES, Options.CheckForUpdates);
 	lcSetProfileInt(LC_PROFILE_ANTIALIASING_SAMPLES, Options.AASamples);
-	lcSetProfileInt(LC_PROFILE_STUD_LOGO, Options.StudLogo);
+	lcSetProfileInt(LC_PROFILE_STUD_STYLE, static_cast<int>(Options.StudStyle));
 
-	if (LanguageChanged || LibraryChanged || ColorsChanged || AAChanged)
+	if (LanguageChanged || LibraryChanged || AAChanged)
 		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Some changes will only take effect the next time you start LeoCAD."));
 
 	if (Options.CategoriesModified)
@@ -751,18 +1323,18 @@ void lcApplication::ShowPreferencesDialog()
 		}
 	}
 
-	if (StudLogoChanged)
+	if (StudStyleChanged)
 	{
-		lcSetProfileInt(LC_PROFILE_STUD_LOGO, Options.StudLogo);
-		lcGetPiecesLibrary()->SetStudLogo(Options.StudLogo, true);
+		lcSetProfileInt(LC_PROFILE_STUD_STYLE, static_cast<int>(Options.StudStyle));
+		lcGetPiecesLibrary()->SetStudStyle(Options.StudStyle, true);
+	}
+	else if (ColorsChanged || AutomateEdgeColorChanged)
+	{
+		if (ColorsChanged)
+			lcSetProfileString(LC_PROFILE_COLOR_CONFIG, Options.ColorConfigPath);
+		lcGetPiecesLibrary()->LoadColors();
 	}
 
-	// TODO: printing preferences
-	/*
-	strcpy(opts.strFooter, m_strFooter);
-	strcpy(opts.strHeader, m_strHeader);
-	*/
-
 	gMainWindow->SetShadingMode(Options.Preferences.mShadingMode);
-	gMainWindow->UpdateAllViews();
+	lcView::UpdateAllViews();
 }

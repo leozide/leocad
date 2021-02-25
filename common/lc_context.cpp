@@ -6,6 +6,12 @@
 #include "lc_colors.h"
 #include "lc_mainwindow.h"
 #include "lc_library.h"
+#include "texfont.h"
+#include "lc_view.h"
+#include "lc_viewsphere.h"
+#include "lc_stringcache.h"
+#include "lc_partselectionwidget.h"
+#include <QOpenGLFunctions_3_2_Core>
 
 #ifdef LC_OPENGLES
 #define glEnableClientState(...)
@@ -18,7 +24,10 @@
 #define GL_STATIC_DRAW_ARB GL_STATIC_DRAW
 #endif
 
+std::unique_ptr<QOpenGLContext> lcContext::mOffscreenContext;
+std::unique_ptr<QOffscreenSurface> lcContext::mOffscreenSurface;
 lcProgram lcContext::mPrograms[static_cast<int>(lcMaterialType::Count)];
+int lcContext::mValidContexts;
 
 lcContext::lcContext()
 {
@@ -33,17 +42,16 @@ lcContext::lcContext()
 	mColorEnabled = false;
 
 	mTexture2D = 0;
-	mTexture2DMS = 0;
 	mTextureCubeMap = 0;
 	mPolygonOffset = lcPolygonOffset::None;
 	mDepthWrite = true;
+	mDepthFunction = lcDepthFunction::LessEqual;
+	mCullFace = false;
 	mLineWidth = 1.0f;
 #ifndef LC_OPENGLES
 	mMatrixMode = GL_MODELVIEW;
 	mTextureEnabled = false;
 #endif
-
-	mFramebufferObject = 0;
 
 	mColor = lcVector4(0.0f, 0.0f, 0.0f, 0.0f);
 	mWorldMatrix = lcMatrix44Identity();
@@ -66,6 +74,58 @@ lcContext::lcContext()
 
 lcContext::~lcContext()
 {
+	if (mValid)
+	{
+		mValidContexts--;
+
+		if (!mValidContexts)
+		{
+			gStringCache.Reset();
+			gTexFont.Reset();
+
+			lcGetPiecesLibrary()->ReleaseBuffers(this);
+			lcView::DestroyResources(this);
+			DestroyResources();
+			lcViewSphere::DestroyResources(this);
+		}
+	}
+}
+
+bool lcContext::CreateOffscreenContext()
+{
+	std::unique_ptr<QOpenGLContext> OffscreenContext(new QOpenGLContext());
+
+	if (!OffscreenContext)
+		return false;
+
+	OffscreenContext->setShareContext(QOpenGLContext::globalShareContext());
+
+	if (!OffscreenContext->create() || !OffscreenContext->isValid())
+		return false;
+
+	std::unique_ptr<QOffscreenSurface> OffscreenSurface(new QOffscreenSurface());
+
+	if (!OffscreenSurface)
+		return false;
+
+	OffscreenSurface->create();
+
+	if (!OffscreenSurface->isValid())
+		return false;
+
+	if (!OffscreenContext->makeCurrent(OffscreenSurface.get()))
+		return false;
+
+	mOffscreenContext = std::move(OffscreenContext);
+	mOffscreenSurface = std::move(OffscreenSurface);
+
+	return true;
+}
+
+void lcContext::DestroyOffscreenContext()
+{
+	mOffscreenSurface.reset();
+	mOffscreenContext.reset();
 }
 
 void lcContext::CreateShaderPrograms()
@@ -102,7 +162,7 @@ void lcContext::CreateShaderPrograms()
 "		LC_SHADER_PRECISION float Diffuse = min(abs(dot(Normal, LightDirection)) * 0.6 + 0.65, 1.0);\n"
 	};
 
-	const char* const VertexShaders[static_cast<int>(lcMaterialType::Count)] =
+	const char* const VertexShaders[] =
 	{
 		":/resources/shaders/unlit_color_vs.glsl",            // UnlitColor
 		":/resources/shaders/unlit_texture_modulate_vs.glsl", // UnlitTextureModulate
@@ -113,7 +173,9 @@ void lcContext::CreateShaderPrograms()
 		":/resources/shaders/fakelit_texture_decal_vs.glsl"   // FakeLitTextureDecal
 	};
 
-	const char* const FragmentShaders[static_cast<int>(lcMaterialType::Count)] =
+	LC_ARRAY_SIZE_CHECK(VertexShaders, lcMaterialType::Count);
+
+	const char* const FragmentShaders[] =
 	{
 		":/resources/shaders/unlit_color_ps.glsl",            // UnlitColor
 		":/resources/shaders/unlit_texture_modulate_ps.glsl", // UnlitTextureModulate
@@ -124,21 +186,16 @@ void lcContext::CreateShaderPrograms()
 		":/resources/shaders/fakelit_texture_decal_ps.glsl"   // FakeLitTextureDecal
 	};
 
-	const auto LoadShader = [ShaderPrefix](const char* FileName, GLuint ShaderType) -> GLuint
-	{
-		QResource Resource(FileName);
+	LC_ARRAY_SIZE_CHECK(FragmentShaders, lcMaterialType::Count);
 
-		if (!Resource.isValid())
+	const auto LoadShader = [this, ShaderPrefix](const char* FileName, GLuint ShaderType) -> GLuint
+	{
+		QFile ShaderFile(FileName);
+
+		if (!ShaderFile.open(QIODevice::ReadOnly))
 			return 0;
 
-		QByteArray Data;
-
-		if (Resource.isCompressed())
-			Data = qUncompress(Resource.data(), Resource.size());
-		else
-			Data = QByteArray::fromRawData((const char*)Resource.data(), Resource.size());
-
-		Data = ShaderPrefix + Data;
+		QByteArray Data = ShaderPrefix + ShaderFile.readAll();
 		const char* Source = Data.constData();
 
 		const GLuint Shader = glCreateShader(ShaderType);
@@ -233,10 +290,60 @@ void lcContext::DestroyResources()
 	}
 }
 
+void lcContext::MakeCurrent()
+{
+	if (mWidget)
+		mWidget->makeCurrent();
+	else
+		mOffscreenContext->makeCurrent(mOffscreenSurface.get());
+}
+
+void lcContext::SetGLContext(QOpenGLContext* Context, QOpenGLWidget* Widget)
+{
+	mContext = Context;
+	mWidget = Widget;
+
+	MakeCurrent();
+	initializeOpenGLFunctions();
+
+	if (!mValidContexts)
+	{
+		lcInitializeGLExtensions(Context);
+
+		// TODO: Find a better place for the grid texture and font
+		gStringCache.Initialize(this);
+		gTexFont.Initialize(this);
+
+		CreateResources();
+		lcView::CreateResources(this);
+		lcViewSphere::CreateResources(this);
+
+		if (!gSupportsShaderObjects && lcGetPreferences().mShadingMode == lcShadingMode::DefaultLights)
+			lcGetPreferences().mShadingMode = lcShadingMode::Flat;
+
+		if (!gSupportsFramebufferObject)
+			gMainWindow->GetPartSelectionWidget()->DisableIconMode();
+	}
+
+	mValid = true;
+	mValidContexts++;
+}
+
+void lcContext::SetOffscreenContext()
+{
+	SetGLContext(mOffscreenContext.get(), nullptr);
+}
+
 void lcContext::SetDefaultState()
 {
+#ifndef LC_OPENGLES
+	if (QSurfaceFormat::defaultFormat().samples() > 1)
+		glEnable(GL_LINE_SMOOTH);
+#endif
+
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
+	mDepthFunction = lcDepthFunction::LessEqual;
 
 	if (gSupportsBlendFuncSeparate)
 		glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE_MINUS_DST_ALPHA, GL_ONE);
@@ -283,13 +390,6 @@ void lcContext::SetDefaultState()
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 	mTexture2D = 0;
-#ifndef LC_OPENGLES
-	if (gSupportsTexImage2DMultisample)
-	{
-		glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
-		mTexture2DMS = 0;
-	}
-#endif
 	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 	mTextureCubeMap = 0;
 
@@ -298,6 +398,9 @@ void lcContext::SetDefaultState()
 
 	mDepthWrite = true;
 	glDepthMask(GL_TRUE);
+
+	glDisable(GL_CULL_FACE);
+	mCullFace = false;
 
 	glLineWidth(1.0f);
 	mLineWidth = 1.0f;
@@ -320,12 +423,22 @@ void lcContext::SetDefaultState()
 	}
 }
 
+void lcContext::ClearColorAndDepth(const lcVector4& ClearColor)
+{
+	glClearColor(ClearColor[0], ClearColor[1], ClearColor[2], ClearColor[3]);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+void lcContext::ClearDepth()
+{
+	glClear(GL_DEPTH_BUFFER_BIT);
+}
+
 void lcContext::ClearResources()
 {
 	ClearVertexBuffer();
 	ClearIndexBuffer();
 	BindTexture2D(0);
-	BindTexture2DMS(0);
 }
 
 void lcContext::SetMaterial(lcMaterialType MaterialType)
@@ -426,6 +539,38 @@ void lcContext::SetDepthWrite(bool Enable)
 	mDepthWrite = Enable;
 }
 
+void lcContext::SetDepthFunction(lcDepthFunction DepthFunction)
+{
+	if (DepthFunction == mDepthFunction)
+		return;
+
+	switch (DepthFunction)
+	{
+	case lcDepthFunction::Always:
+		glDepthFunc(GL_ALWAYS);
+		break;
+
+	case lcDepthFunction::LessEqual:
+		glDepthFunc(GL_LEQUAL);
+		break;
+	}
+
+	mDepthFunction = DepthFunction;
+}
+
+void lcContext::EnableCullFace(bool Enable)
+{
+	if (Enable == mCullFace)
+		return;
+
+	if (Enable)
+		glEnable(GL_CULL_FACE);
+	else
+		glDisable(GL_CULL_FACE);
+
+	mCullFace = Enable;
+}
+
 void lcContext::SetLineWidth(float LineWidth)
 {
 	if (LineWidth == mLineWidth)
@@ -450,20 +595,6 @@ void lcContext::BindTexture2D(GLuint Texture)
 
 	glBindTexture(GL_TEXTURE_2D, Texture);
 	mTexture2D = Texture;
-}
-
-void lcContext::BindTexture2DMS(GLuint Texture)
-{
-	if (mTexture2DMS == Texture)
-		return;
-
-#ifndef LC_OPENGLES
-	if (gSupportsTexImage2DMultisample)
-	{
-		glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, Texture);
-		mTexture2DMS = Texture;
-	}
-#endif
 }
 
 void lcContext::BindTextureCubeMap(GLuint Texture)
@@ -527,210 +658,6 @@ void lcContext::SetEdgeColorIndexTinted(int ColorIndex, const lcVector4& Tint)
 void lcContext::SetInterfaceColor(lcInterfaceColor InterfaceColor)
 {
 	SetColor(gInterfaceColors[InterfaceColor]);
-}
-
-void lcContext::ClearFramebuffer()
-{
-	if (!mFramebufferObject)
-		return;
-
-	if (gSupportsFramebufferObjectARB)
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-#ifndef LC_OPENGLES
-	else if (gSupportsFramebufferObjectEXT)
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-#endif
-
-	mFramebufferObject = 0;
-}
-
-lcFramebuffer lcContext::CreateFramebuffer(int Width, int Height, bool Depth, bool Multisample)
-{
-	lcFramebuffer Framebuffer(Width, Height);
-
-	if (gSupportsFramebufferObjectARB)
-	{
-		int Samples = (Multisample && gSupportsTexImage2DMultisample && QGLFormat::defaultFormat().sampleBuffers()) ? QGLFormat::defaultFormat().samples() : 1;
-
-		glGenFramebuffers(1, &Framebuffer.mObject);
-		glBindFramebuffer(GL_FRAMEBUFFER, Framebuffer.mObject);
-
-		glGenTextures(1, &Framebuffer.mColorTexture);
-		if (Depth)
-			glGenRenderbuffers(1, &Framebuffer.mDepthRenderbuffer);
-
-		if (Samples == 1)
-		{
-			BindTexture2D(Framebuffer.mColorTexture);
-			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Width, Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-			BindTexture2D(0);
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, Framebuffer.mColorTexture, 0);
-
-			if (Depth)
-			{
-				glBindRenderbuffer(GL_RENDERBUFFER, Framebuffer.mDepthRenderbuffer);
-				glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, Width, Height);
-				glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, Framebuffer.mDepthRenderbuffer);
-			}
-		}
-#ifndef LC_OPENGLES
-		else
-		{
-			BindTexture2DMS(Framebuffer.mColorTexture);
-			glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, Samples, GL_RGBA, Width, Height, GL_TRUE);
-			BindTexture2DMS(0);
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, Framebuffer.mColorTexture, 0);
-
-			if (Depth)
-			{
-				glBindRenderbuffer(GL_RENDERBUFFER, Framebuffer.mDepthRenderbuffer);
-				glRenderbufferStorageMultisample(GL_RENDERBUFFER, Samples, GL_DEPTH_COMPONENT24, Width, Height);
-				glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, Framebuffer.mDepthRenderbuffer);
-			}
-		}
-#endif
-		
-		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-			DestroyFramebuffer(Framebuffer);
-
-		glBindFramebuffer(GL_FRAMEBUFFER, mFramebufferObject);
-	}
-#ifndef LC_OPENGLES
-	else if (gSupportsFramebufferObjectEXT)
-	{
-		glGenFramebuffersEXT(1, &Framebuffer.mObject);
-		glGenTextures(1, &Framebuffer.mColorTexture);
-
-		BindTexture2D(Framebuffer.mColorTexture);
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, Width, Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, Framebuffer.mObject);
-		glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, Framebuffer.mColorTexture, 0);
-
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, Framebuffer.mObject);
-
-		glGenRenderbuffersEXT(1, &Framebuffer.mDepthRenderbuffer);
-		glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, Framebuffer.mDepthRenderbuffer);
-		glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT24, Width, Height);
-
-		glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, Framebuffer.mDepthRenderbuffer);
-
-		BindTexture2D(0);
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, Framebuffer.mObject);
-
-		if (glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT) != GL_FRAMEBUFFER_COMPLETE_EXT)
-			DestroyFramebuffer(Framebuffer);
-
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, mFramebufferObject);
-	}
-#endif
-
-	return Framebuffer;
-}
-
-void lcContext::DestroyFramebuffer(lcFramebuffer& Framebuffer)
-{
-	if (gSupportsFramebufferObjectARB)
-	{
-		glDeleteFramebuffers(1, &Framebuffer.mObject);
-		glDeleteTextures(1, &Framebuffer.mColorTexture);
-		glDeleteRenderbuffers(1, &Framebuffer.mDepthRenderbuffer);
-	}
-#ifndef LC_OPENGLES
-	else if (gSupportsFramebufferObjectEXT)
-	{
-		glDeleteFramebuffersEXT(1, &Framebuffer.mObject);
-		glDeleteTextures(1, &Framebuffer.mColorTexture);
-		glDeleteRenderbuffersEXT(1, &Framebuffer.mDepthRenderbuffer);
-	}
-#endif
-
-	Framebuffer.mObject = 0;
-	Framebuffer.mColorTexture = 0;
-	Framebuffer.mDepthRenderbuffer = 0;
-	Framebuffer.mWidth = 0;
-	Framebuffer.mHeight = 0;
-}
-
-void lcContext::BindFramebuffer(GLuint FramebufferObject)
-{
-	if (FramebufferObject == mFramebufferObject)
-		return;
-
-	if (gSupportsFramebufferObjectARB)
-		glBindFramebuffer(GL_FRAMEBUFFER, FramebufferObject);
-#ifndef LC_OPENGLES
-	else if (gSupportsFramebufferObjectEXT)
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, FramebufferObject);
-#endif
-
-	mFramebufferObject = FramebufferObject;
-}
-
-std::pair<lcFramebuffer, lcFramebuffer> lcContext::CreateRenderFramebuffer(int Width, int Height)
-{
-	if (gSupportsFramebufferObjectARB && QGLFormat::defaultFormat().sampleBuffers() && QGLFormat::defaultFormat().samples() > 1)
-		return std::make_pair(CreateFramebuffer(Width, Height, true, true), CreateFramebuffer(Width, Height, false, false));
-	else
-		return std::make_pair(CreateFramebuffer(Width, Height, true, false), lcFramebuffer());
-}
-
-void lcContext::DestroyRenderFramebuffer(std::pair<lcFramebuffer, lcFramebuffer>& RenderFramebuffer)
-{
-	DestroyFramebuffer(RenderFramebuffer.first);
-	DestroyFramebuffer(RenderFramebuffer.second);
-}
-
-QImage lcContext::GetRenderFramebufferImage(const std::pair<lcFramebuffer, lcFramebuffer>& RenderFramebuffer)
-{
-	QImage Image(RenderFramebuffer.first.mWidth, RenderFramebuffer.first.mHeight, QImage::Format_ARGB32);
-
-	GetRenderFramebufferImage(RenderFramebuffer, Image.bits());
-
-	return Image;
-}
-
-void lcContext::GetRenderFramebufferImage(const std::pair<lcFramebuffer, lcFramebuffer>& RenderFramebuffer, quint8* Buffer)
-{
-	const int Width = RenderFramebuffer.first.mWidth;
-	const int Height = RenderFramebuffer.first.mHeight;
-	const GLuint SavedFramebuffer = mFramebufferObject;
-
-	if (RenderFramebuffer.second.IsValid())
-	{
-#ifndef LC_OPENGLES
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, RenderFramebuffer.second.mObject);
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, RenderFramebuffer.first.mObject);
-		glBlitFramebuffer(0, 0, Width, Height, 0, 0, Width, Height, GL_COLOR_BUFFER_BIT, GL_LINEAR);
-		BindFramebuffer(RenderFramebuffer.second);
-#endif
-	}
-	else
-		BindFramebuffer(RenderFramebuffer.first);
-
-	glFinish();
-	glReadPixels(0, 0, Width, Height, GL_RGBA, GL_UNSIGNED_BYTE, Buffer);
-	BindFramebuffer(SavedFramebuffer);
-
-	for (int y = 0; y < (Height + 1) / 2; y++)
-	{
-		quint8* Top = Buffer + ((Height - y - 1) * Width * 4);
-		quint8* Bottom = Buffer + y * Width * 4;
-
-		for (int x = 0; x < Width; x++)
-		{
-			QRgb TopColor = qRgba(Top[0], Top[1], Top[2], Top[3]);
-			QRgb BottomColor = qRgba(Bottom[0], Bottom[1], Bottom[2], Bottom[3]);
-
-			*(QRgb*)Top = BottomColor;
-			*(QRgb*)Bottom = TopColor;
-
-			Top += 4;
-			Bottom += 4;
-		}
-	}
 }
 
 lcVertexBuffer lcContext::CreateVertexBuffer(int Size, const void* Data)
@@ -966,7 +893,7 @@ void lcContext::SetVertexFormatPosition(int PositionSize)
 
 void lcContext::SetVertexFormat(int BufferOffset, int PositionSize, int NormalSize, int TexCoordSize, int ColorSize, bool EnableNormals)
 {
-	const int VertexSize = (PositionSize + TexCoordSize + ColorSize) * sizeof(float) + NormalSize * sizeof(quint32);
+	const int VertexSize = (PositionSize + TexCoordSize) * sizeof(float) + NormalSize * sizeof(quint32) + ColorSize;
 	char* VertexBufferPointer = mVertexBufferPointer + BufferOffset;
 
 	if (gSupportsShaderObjects)
@@ -1017,7 +944,7 @@ void lcContext::SetVertexFormat(int BufferOffset, int PositionSize, int NormalSi
 
 		if (ColorSize)
 		{
-			glVertexAttribPointer(LC_ATTRIB_COLOR, ColorSize, GL_FLOAT, false, VertexSize, VertexBufferPointer + Offset);
+			glVertexAttribPointer(LC_ATTRIB_COLOR, ColorSize, GL_UNSIGNED_BYTE, true, VertexSize, VertexBufferPointer + Offset);
 
 			if (!mColorEnabled)
 			{
@@ -1229,10 +1156,7 @@ void lcContext::FlushState()
 
 		if (mHighlightParamsDirty && Program.HighlightParamsLocation != -1)
 		{
-			lcMatrix44 InverseViewMatrix = lcMatrix44AffineInverse(mViewMatrix);
-			mHighlightParams[4] = InverseViewMatrix[2];
-
-			glUniform4fv(Program.HighlightParamsLocation, 5, mHighlightParams[0]);
+			glUniform4fv(Program.HighlightParamsLocation, 4, mHighlightParams[0]);
 			mHighlightParamsDirty = false;
 		}
 	}

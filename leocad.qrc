@@ -30,6 +30,8 @@
         <file>resources/action_next.png</file>
         <file>resources/action_paint.png</file>
         <file>resources/action_pan.png</file>
+        <file>resources/action_preview_locked.png</file>
+        <file>resources/action_preview_unlocked.png</file>
         <file>resources/action_previous.png</file>
         <file>resources/action_roll.png</file>
         <file>resources/action_rotate.png</file>
@@ -61,6 +63,11 @@
         <file>resources/edit_copy.png</file>
         <file>resources/edit_cut.png</file>
         <file>resources/edit_find.png</file>
+        <file>resources/edit_find_next.png</file>
+        <file>resources/edit_find_previous.png</file>
+        <file>resources/edit_find_all.png</file>
+        <file>resources/edit_replace_next.png</file>
+        <file>resources/edit_replace_all.png</file>
         <file>resources/edit_paste.png</file>
         <file>resources/edit_redo.png</file>
         <file>resources/edit_snap_angle.png</file>
@@ -76,7 +83,7 @@
         <file>resources/time_next.png</file>
         <file>resources/time_previous.png</file>
         <file>resources/time_stop.png</file>
-        <file>resources/leocad.png</file>
+        <file alias="resources/leocad.png">tools/icon/64x64/apps/leocad.png</file>
         <file>resources/help_homepage.png</file>
         <file>resources/view_zoomextents.png</file>
         <file>resources/view_split_horizontal.png</file>
@@ -94,6 +101,13 @@
         <file>resources/parts_cancel.png</file>
         <file>resources/archive.png</file>
         <file>resources/library.zip</file>
+        <file>resources/studlogo1.zip</file>
+        <file>resources/studlogo2.zip</file>
+        <file>resources/studlogo3.zip</file>
+        <file>resources/studlogo4.zip</file>
+        <file>resources/studlogo5.zip</file>
+        <file>resources/studslegostyle1.zip</file>
+        <file>resources/studslegostyle2.zip</file>
         <file>resources/ldconfig.ldr</file>
         <file>resources/minifig.ini</file>
         <file>resources/ldraw.xml</file>

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>312</height>
+    <width>421</width>
+    <height>348</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -50,6 +50,13 @@
         <widget class="QPushButton" name="ExportModel">
          <property name="text">
           <string>Export...</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="DuplicateModel">
+         <property name="text">
+          <string>Duplicate...</string>
          </property>
         </widget>
        </item>
@@ -109,8 +116,10 @@
   <tabstop>DeleteModel</tabstop>
   <tabstop>RenameModel</tabstop>
   <tabstop>ExportModel</tabstop>
+  <tabstop>DuplicateModel</tabstop>
   <tabstop>MoveUp</tabstop>
   <tabstop>MoveDown</tabstop>
+  <tabstop>SetActiveModel</tabstop>
  </tabstops>
  <resources/>
  <connections>

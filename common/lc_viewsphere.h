@@ -4,12 +4,18 @@
 #include "lc_context.h"
 #include <bitset>
 
-class View;
+enum class lcViewSphereLocation
+{
+	TopLeft,
+	TopRight,
+	BottomLeft,
+	BottomRight
+};
 
 class lcViewSphere
 {
 public:
-	lcViewSphere(View* View);
+	lcViewSphere(lcView* View);
 
 	void Draw();
 	bool OnMouseMove();
@@ -21,16 +27,23 @@ public:
 	static void DestroyResources(lcContext* Context);
 
 protected:
+	void UpdateSettings();
 	lcMatrix44 GetViewMatrix() const;
 	lcMatrix44 GetProjectionMatrix() const;
 	std::bitset<6> GetIntersectionFlags(lcVector3& Intersection) const;
 
-	View* mView;
+	lcView* const mView = nullptr;
+
+	int mSize = 1;
+	bool mEnabled = false;
+	lcViewSphereLocation mLocation = lcViewSphereLocation::TopRight;
+
+	int mMouseDownX = 0;
+	int mMouseDownY = 0;
+	bool mMouseDown = false;
+
 	lcVector3 mIntersection;
 	std::bitset<6> mIntersectionFlags;
-	int mMouseDownX;
-	int mMouseDownY;
-	bool mMouseDown;
 
 	static lcTexture* mTexture;
 	static lcVertexBuffer mVertexBuffer;

@@ -191,8 +191,10 @@ public:
 	bool IsVisible() const
 	{ return (mState & LC_LIGHT_HIDDEN) == 0; }
 
-	const char* GetName() const override
-	{ return m_strName; }
+	QString GetName() const override
+	{
+		return mName;
+	}
 
 	void CompareBoundingBox(lcVector3& Min, lcVector3& Max);
 	void UpdatePosition(lcStep Step);
@@ -212,21 +214,20 @@ public:
 	float mSpotExponent;
 
 protected:
-	lcArray<lcObjectKey<lcVector3>> mPositionKeys;
-	lcArray<lcObjectKey<lcVector3>> mTargetPositionKeys;
-	lcArray<lcObjectKey<lcVector4>> mAmbientColorKeys;
-	lcArray<lcObjectKey<lcVector4>> mDiffuseColorKeys;
-	lcArray<lcObjectKey<lcVector4>> mSpecularColorKeys;
-	lcArray<lcObjectKey<lcVector3>> mAttenuationKeys;
-	lcArray<lcObjectKey<float>> mSpotCutoffKeys;
-	lcArray<lcObjectKey<float>> mSpotExponentKeys;
+	lcObjectKeyArray<lcVector3> mPositionKeys;
+	lcObjectKeyArray<lcVector3> mTargetPositionKeys;
+	lcObjectKeyArray<lcVector4> mAmbientColorKeys;
+	lcObjectKeyArray<lcVector4> mDiffuseColorKeys;
+	lcObjectKeyArray<lcVector4> mSpecularColorKeys;
+	lcObjectKeyArray<lcVector3> mAttenuationKeys;
+	lcObjectKeyArray<float> mSpotCutoffKeys;
+	lcObjectKeyArray<float> mSpotExponentKeys;
 
 	void Initialize(const lcVector3& Position, const lcVector3& TargetPosition);
 
 	void DrawPointLight(lcContext* Context) const;
 	void DrawSpotLight(lcContext* Context) const;
 
+	QString mName;
 	quint32 mState;
-	char m_strName[81];
 };
-

@@ -88,6 +88,11 @@ public:
 		return mShowPartNames;
 	}
 
+	int GetColorIndex() const
+	{
+		return mColorIndex;
+	}
+
 	bool IsColorLocked() const
 	{
 		return mColorLocked;
@@ -131,7 +136,8 @@ protected:
 	bool mShowDecoratedParts;
 	bool mShowPartAliases;
 	QByteArray mFilter;
-	std::pair<lcFramebuffer, lcFramebuffer> mRenderFramebuffer;
+	std::unique_ptr<lcView> mView;
+	std::unique_ptr<lcModel> mModel;
 };
 
 class lcPartSelectionListView : public QListView
@@ -182,6 +188,8 @@ public slots:
 
 protected:
 	void SetIconSize(int Size);
+	void PreviewSelection(int InfoIndex);
+	void mouseDoubleClickEvent(QMouseEvent* MouseEvent) override;
 
 	lcPartSelectionListModel* mListModel;
 	lcPartSelectionWidget* mPartSelectionWidget;

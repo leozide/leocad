@@ -59,14 +59,19 @@ public:
 		return mDrawInterface;
 	}
 
-	void SetAllowWireframe(bool AllowWireframe)
+	void SetShadingMode(lcShadingMode ShadingMode)
 	{
-		mAllowWireframe = AllowWireframe;
+		mShadingMode = ShadingMode;
 	}
 
 	void SetAllowLOD(bool AllowLOD)
 	{
 		mAllowLOD = AllowLOD;
+	}
+
+	void SetLODDistance(float Distance)
+	{
+		mMeshLODDistance = Distance;
 	}
 
 	void SetPreTranslucentCallback(std::function<void()> Callback)
@@ -99,9 +104,10 @@ protected:
 	lcMatrix44 mViewMatrix;
 	lcMatrix44 mActiveSubmodelTransform;
 	lcPiece* mActiveSubmodelInstance;
+	lcShadingMode mShadingMode;
 	bool mDrawInterface;
-	bool mAllowWireframe;
 	bool mAllowLOD;
+	float mMeshLODDistance;
 
 	lcVector4 mFadeColor;
 	lcVector4 mHighlightColor;

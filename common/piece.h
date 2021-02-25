@@ -409,9 +409,10 @@ public:
 	void DrawInterface(lcContext* Context, const lcScene& Scene) const override;
 	void RemoveKeyFrames() override;
 
-	void AddMainModelRenderMeshes(lcScene& Scene, bool Highlight, bool Fade) const;
-	void AddSubModelRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, int DefaultColorIndex, lcRenderMeshState RenderMeshState, bool ParentActive) const;
-	void SubmodelCompareBoundingBox(const lcMatrix44& WorldMatrix, lcVector3& Min, lcVector3& Max) const;
+	void AddMainModelRenderMeshes(lcScene* Scene, bool Highlight, bool Fade) const;
+	void AddSubModelRenderMeshes(lcScene* Scene, const lcMatrix44& WorldMatrix, int DefaultColorIndex, lcRenderMeshState RenderMeshState, bool ParentActive) const;
+	void SubModelCompareBoundingBox(const lcMatrix44& WorldMatrix, lcVector3& Min, lcVector3& Max) const;
+	void SubModelAddBoundingBoxPoints(const lcMatrix44& WorldMatrix, std::vector<lcVector3>& Points) const;
 
 	void InsertTime(lcStep Start, lcStep Time);
 	void RemoveTime(lcStep Start, lcStep Time);
@@ -453,7 +454,7 @@ public:
 
 	void UpdateID();
 
-	const char* GetName() const override;
+	QString GetName() const override;
 	bool IsVisible(lcStep Step) const;
 	bool IsVisibleInSubModel() const;
 	void GetModelParts(const lcMatrix44& WorldMatrix, int DefaultColorIndex, std::vector<lcModelPartsEntry>& ModelParts) const;
@@ -524,10 +525,20 @@ public:
 			mStepHide = mStepShow + 1;
 	}
 
+	quint32 GetColorCode() const
+	{
+		return mColorCode;
+	}
+
 	void SetColorCode(quint32 ColorCode)
 	{
 		mColorCode = ColorCode;
 		mColorIndex = lcGetColorIndex(ColorCode);
+	}
+
+	int GetColorIndex() const
+	{
+		return mColorIndex;
 	}
 
 	void SetColorIndex(int ColorIndex)
@@ -538,12 +549,12 @@ public:
 
 	void SetPosition(const lcVector3& Position, lcStep Step, bool AddKey)
 	{
-		ChangeKey(mPositionKeys, Position, Step, AddKey);
+		mPositionKeys.ChangeKey(Position, Step, AddKey);
 	}
 
 	void SetRotation(const lcMatrix33& Rotation, lcStep Step, bool AddKey)
 	{
-		ChangeKey(mRotationKeys, Rotation, Step, AddKey);
+		mRotationKeys.ChangeKey(Rotation, Step, AddKey);
 	}
 
 	lcVector3 GetRotationCenter() const
@@ -605,9 +616,6 @@ public:
 public:
 	PieceInfo* mPieceInfo;
 
-	int mColorIndex;
-	quint32 mColorCode;
-
 	lcMatrix44 mModelWorld;
 	lcMatrix44 mPivotMatrix;
 
@@ -624,13 +632,16 @@ protected:
 		return IsSelected();
 	}
 
-	lcArray<lcObjectKey<lcVector3>> mPositionKeys;
-	lcArray<lcObjectKey<lcMatrix33>> mRotationKeys;
+	lcObjectKeyArray<lcVector3> mPositionKeys;
+	lcObjectKeyArray<lcMatrix33> mRotationKeys;
 
 	int mFileLine;
 	QString mID;
 
 	lcGroup* mGroup;
+
+	int mColorIndex;
+	quint32 mColorCode;
 
 	lcStep mStepShow;
 	lcStep mStepHide;

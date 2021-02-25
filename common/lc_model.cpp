@@ -8,48 +8,32 @@
 #include "lc_mainwindow.h"
 #include "lc_profile.h"
 #include "lc_library.h"
+#include "lc_scene.h"
 #include "lc_texture.h"
 #include "lc_synth.h"
 #include "lc_file.h"
 #include "pieceinf.h"
-#include "view.h"
+#include "lc_view.h"
 #include "minifig.h"
 #include "lc_qarraydialog.h"
 #include "lc_qselectdialog.h"
-#include "lc_qminifigdialog.h"
+#include "lc_minifigdialog.h"
 #include "lc_qgroupdialog.h"
 #include "lc_qeditgroupsdialog.h"
-#include "lc_selectbycolordialog.h"
 #include "lc_qpropertiesdialog.h"
 #include "lc_qutils.h"
 #include "lc_lxf.h"
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
-#include <QtConcurrent>
-#endif
+#include "lc_previewwidget.h"
+#include "lc_findreplacewidget.h"
 
 void lcModelProperties::LoadDefaults()
 {
 	mAuthor = lcGetProfileString(LC_PROFILE_DEFAULT_AUTHOR_NAME);
-
-	mBackgroundType = (lcBackgroundType)lcGetProfileInt(LC_PROFILE_DEFAULT_BACKGROUND_TYPE);
-	mBackgroundSolidColor = lcVector3FromColor(lcGetProfileInt(LC_PROFILE_DEFAULT_BACKGROUND_COLOR));
-	mBackgroundGradientColor1 = lcVector3FromColor(lcGetProfileInt(LC_PROFILE_DEFAULT_GRADIENT_COLOR1));
-	mBackgroundGradientColor2 = lcVector3FromColor(lcGetProfileInt(LC_PROFILE_DEFAULT_GRADIENT_COLOR2));
-	mBackgroundImage = lcGetProfileString(LC_PROFILE_DEFAULT_BACKGROUND_TEXTURE);
-	mBackgroundImageTile = lcGetProfileInt(LC_PROFILE_DEFAULT_BACKGROUND_TILE);
-
 	mAmbientColor = lcVector3FromColor(lcGetProfileInt(LC_PROFILE_DEFAULT_AMBIENT_COLOR));
 }
 
 void lcModelProperties::SaveDefaults()
 {
-	lcSetProfileInt(LC_PROFILE_DEFAULT_BACKGROUND_TYPE, mBackgroundType);
-	lcSetProfileInt(LC_PROFILE_DEFAULT_BACKGROUND_COLOR, lcColorFromVector3(mBackgroundSolidColor));
-	lcSetProfileInt(LC_PROFILE_DEFAULT_GRADIENT_COLOR1, lcColorFromVector3(mBackgroundGradientColor1));
-	lcSetProfileInt(LC_PROFILE_DEFAULT_GRADIENT_COLOR2, lcColorFromVector3(mBackgroundGradientColor2));
-	lcSetProfileString(LC_PROFILE_DEFAULT_BACKGROUND_TEXTURE, mBackgroundImage);
-	lcSetProfileInt(LC_PROFILE_DEFAULT_BACKGROUND_TILE, mBackgroundImageTile);
-
 	lcSetProfileInt(LC_PROFILE_DEFAULT_AMBIENT_COLOR, lcColorFromVector3(mAmbientColor));
 }
 
@@ -68,32 +52,6 @@ void lcModelProperties::SaveLDraw(QTextStream& Stream) const
 			Stream << QLatin1String("0 !LEOCAD MODEL COMMENT ") << Comment << LineEnding;
 	}
 
-	bool TypeChanged = (mBackgroundType != lcGetDefaultProfileInt(LC_PROFILE_DEFAULT_BACKGROUND_TYPE));
-
-	switch (mBackgroundType)
-	{
-	case LC_BACKGROUND_SOLID:
-		if (mBackgroundSolidColor != lcVector3FromColor(lcGetDefaultProfileInt(LC_PROFILE_DEFAULT_BACKGROUND_COLOR)) || TypeChanged)
-			Stream << QLatin1String("0 !LEOCAD MODEL BACKGROUND COLOR ") << mBackgroundSolidColor[0] << ' ' << mBackgroundSolidColor[1] << ' ' << mBackgroundSolidColor[2] << LineEnding;
-		break;
-
-	case LC_BACKGROUND_GRADIENT:
-		if (mBackgroundGradientColor1 != lcVector3FromColor(lcGetProfileInt(LC_PROFILE_DEFAULT_GRADIENT_COLOR1)) ||
-			mBackgroundGradientColor2 != lcVector3FromColor(lcGetProfileInt(LC_PROFILE_DEFAULT_GRADIENT_COLOR2)) || TypeChanged)
-			Stream << QLatin1String("0 !LEOCAD MODEL BACKGROUND GRADIENT ") << mBackgroundGradientColor1[0] << ' ' << mBackgroundGradientColor1[1] << ' ' << mBackgroundGradientColor1[2] << ' ' << mBackgroundGradientColor2[0] << ' ' << mBackgroundGradientColor2[1] << ' ' << mBackgroundGradientColor2[2] << LineEnding;
-		break;
-
-	case LC_BACKGROUND_IMAGE:
-		if (!mBackgroundImage.isEmpty())
-		{
-			Stream << QLatin1String("0 !LEOCAD MODEL BACKGROUND IMAGE ");
-			if (mBackgroundImageTile)
-				Stream << QLatin1String("TILE ");
-			Stream << QLatin1String("NAME ") << mBackgroundImage << LineEnding;
-		}
-		break;
-	}
-
 //	lcVector3 mAmbientColor;
 }
 
@@ -109,13 +67,6 @@ bool lcModelProperties::ParseLDrawHeader(QString Line, bool FirstLine)
 	if (Token == QLatin1String("!LEOCAD"))
 		return false;
 
-	if (FirstLine)
-	{
-		LineStream.seek(StartPos);
-		mDescription = LineStream.readLine().mid(1);
-		return true;
-	}
-
 	if (Token == QLatin1String("Name:"))
 	{
 		mModelName = LineStream.readLine().mid(1);
@@ -125,6 +76,13 @@ bool lcModelProperties::ParseLDrawHeader(QString Line, bool FirstLine)
 	if (Token == QLatin1String("Author:"))
 	{
 		mAuthor = LineStream.readLine().mid(1);
+		return true;
+	}
+
+	if (FirstLine)
+	{
+		LineStream.seek(StartPos);
+		mDescription = LineStream.readLine().mid(1);
 		return true;
 	}
 
@@ -147,40 +105,10 @@ void lcModelProperties::ParseLDrawLine(QTextStream& Stream)
 			mComments += '\n';
 		mComments += Comment;
 	}
-	else if (Token == QLatin1String("BACKGROUND"))
-	{
-		Stream >> Token;
-
-		if (Token == QLatin1String("COLOR"))
-		{
-			mBackgroundType = LC_BACKGROUND_SOLID;
-			Stream >> mBackgroundSolidColor[0] >> mBackgroundSolidColor[1] >> mBackgroundSolidColor[2];
-		}
-		else if (Token == QLatin1String("GRADIENT"))
-		{
-			mBackgroundType = LC_BACKGROUND_GRADIENT;
-			Stream >> mBackgroundGradientColor1[0] >> mBackgroundGradientColor1[1] >> mBackgroundGradientColor1[2] >> mBackgroundGradientColor2[0] >> mBackgroundGradientColor2[1] >> mBackgroundGradientColor2[2];
-		}
-		else if (Token == QLatin1String("IMAGE"))
-		{
-			Stream >> Token;
-
-			if (Token == QLatin1String("TILE"))
-			{
-				mBackgroundImageTile = true;
-				Stream >> Token;
-			}
-
-			if (Token == QLatin1String("NAME"))
-			{
-				mBackgroundImage = Stream.readLine().trimmed();
-				mBackgroundType = LC_BACKGROUND_IMAGE;
-			}
-		}
-	}
 }
 
-lcModel::lcModel(const QString& FileName)
+lcModel::lcModel(const QString& FileName, Project* Project, bool Preview)
+	: mProject(Project), mIsPreview(Preview)
 {
 	mProperties.mModelName = FileName;
 	mProperties.mFileName = FileName;
@@ -188,7 +116,6 @@ lcModel::lcModel(const QString& FileName)
 
 	mActive = false;
 	mCurrentStep = 1;
-	mBackgroundTexture = nullptr;
 	mPieceInfo = nullptr;
 }
 
@@ -196,7 +123,7 @@ lcModel::~lcModel()
 {
 	if (mPieceInfo)
 	{
-		if (gMainWindow && gMainWindow->GetCurrentPieceInfo() == mPieceInfo)
+		if (!mIsPreview && gMainWindow && gMainWindow->GetCurrentPieceInfo() == mPieceInfo)
 			gMainWindow->SetCurrentPieceInfo(nullptr);
 
 		if (mPieceInfo->GetModel() == this)
@@ -261,20 +188,17 @@ void lcModel::DeleteHistory()
 
 void lcModel::DeleteModel()
 {
-	lcReleaseTexture(mBackgroundTexture);
-	mBackgroundTexture = nullptr;
-
 	if (gMainWindow)
 	{
-		const lcArray<View*>* Views = gMainWindow->GetViewsForModel(this);
+		const lcArray<lcView*>* Views = gMainWindow->GetViewsForModel(this);
 
 		// TODO: this is only needed to avoid a dangling pointer during undo/redo if a camera is set to a view but we should find a better solution instead
 		if (Views)
 		{
 			for (int ViewIdx = 0; ViewIdx < Views->GetSize(); ViewIdx++)
 			{
-				View* View = (*Views)[ViewIdx];
-				lcCamera* Camera = View->mCamera;
+				lcView* View = (*Views)[ViewIdx];
+				lcCamera* Camera = View->GetCamera();
 
 				if (!Camera->IsSimple() && mCameras.FindIndex(Camera) != -1)
 					View->SetCamera(Camera, true);
@@ -300,6 +224,11 @@ void lcModel::CreatePieceInfo(Project* Project)
 void lcModel::UpdateMesh()
 {
 	mPieceInfo->SetModel(this, true, nullptr, false);
+}
+
+void lcModel::UpdateAllViews() const
+{
+	lcView::UpdateProjectViews(mProject);
 }
 
 void lcModel::UpdatePieceInfo(std::vector<lcModel*>& UpdatedModels)
@@ -602,6 +531,8 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 
 			if (Token == QLatin1String("STEP"))
 			{
+				delete Piece;
+				Piece = nullptr;
 				CurrentStep++;
 				mFileLines.append(OriginalLine);
 				continue;
@@ -732,6 +663,14 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 				Piece->SetColorCode(ColorCode);
 				Piece->VerifyControlPoints(ControlPoints);
 				Piece->SetControlPoints(ControlPoints);
+
+				if (Piece->mPieceInfo->IsModel() && Piece->mPieceInfo->GetModel()->IncludesModel(this))
+				{
+					delete Piece;
+					Piece = nullptr;
+					continue;
+				}
+
 				AddPiece(Piece);
 				Piece = nullptr;
 			}
@@ -747,7 +686,6 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 
 	mCurrentStep = CurrentStep;
 	CalculateStep(mCurrentStep);
-	UpdateBackgroundTexture();
 	Library->WaitForLoadQueue();
 	Library->mBuffersDirty = true;
 	Library->UnloadUnusedParts();
@@ -770,6 +708,9 @@ bool lcModel::LoadBinary(lcFile* file)
 	file->ReadBuffer(id, 32);
 	sscanf(&id[7], "%f", &fv);
 
+	if (memcmp(id, "LeoCAD ", 7))
+		return false;
+
 	if (fv == 0.0f)
 	{
 		lconv *loc = localeconv();
@@ -784,9 +725,6 @@ bool lcModel::LoadBinary(lcFile* file)
 		file->ReadFloats(&fv, 1);
 
 	file->ReadU32(&rgb, 1);
-	mProperties.mBackgroundSolidColor[0] = (float)((unsigned char) (rgb))/255;
-	mProperties.mBackgroundSolidColor[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
-	mProperties.mBackgroundSolidColor[2] = (float)((unsigned char) ((rgb) >> 16))/255;
 
 	if (fv < 0.6f) // old view
 	{
@@ -948,21 +886,9 @@ bool lcModel::LoadBinary(lcFile* file)
 			file->Seek(2, SEEK_CUR);
 
 		file->ReadS32(&count, 1);
-		for (i = 0; i < count; i++)
-			mCameras.Add(new lcCamera(false));
 
-		if (count < 7)
-		{
-			lcCamera* pCam = new lcCamera(false);
-			for (i = 0; i < count; i++)
-				pCam->FileLoad(*file);
-			delete pCam;
-		}
-		else
-		{
-			for (lcCamera* Camera : mCameras)
-				Camera->FileLoad(*file);
-		}
+		for (i = 0; i < count; i++)
+			lcCamera::FileLoad(*file);
 	}
 
 	if (fv >= 0.7f)
@@ -979,14 +905,7 @@ bool lcModel::LoadBinary(lcFile* file)
 		else
 			file->ReadU16(&sh, 1);
 
-		if (sh < LC_MAXPATH)
-		{
-			char Background[LC_MAXPATH];
-			file->ReadBuffer(Background, sh);
-			mProperties.mBackgroundImage = Background;
-		}
-		else
-			file->Seek(sh, SEEK_CUR);
+		file->Seek(sh, SEEK_CUR); // Background
 	}
 
 	if (fv >= 0.8f)
@@ -1013,16 +932,9 @@ bool lcModel::LoadBinary(lcFile* file)
 	if (fv > 1.0f)
 	{
 		file->ReadU32(&rgb, 1);
-		mProperties.mBackgroundGradientColor1[0] = (float)((unsigned char) (rgb))/255;
-		mProperties.mBackgroundGradientColor1[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
-		mProperties.mBackgroundGradientColor1[2] = (float)((unsigned char) ((rgb) >> 16))/255;
 		file->ReadU32(&rgb, 1);
-		mProperties.mBackgroundGradientColor2[0] = (float)((unsigned char) (rgb))/255;
-		mProperties.mBackgroundGradientColor2[1] = (float)((unsigned char) (((unsigned short) (rgb)) >> 8))/255;
-		mProperties.mBackgroundGradientColor2[2] = (float)((unsigned char) ((rgb) >> 16))/255;
 	}
 
-	UpdateBackgroundTexture();
 	CalculateStep(mCurrentStep);
 	lcGetPiecesLibrary()->UnloadUnusedParts();
 
@@ -1058,7 +970,6 @@ bool lcModel::LoadLDD(const QString& FileData)
 
 bool lcModel::LoadInventory(const QByteArray& Inventory)
 {
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
 	QJsonDocument Document = QJsonDocument::fromJson(Inventory);
 	QJsonObject Root = Document.object();
 	QJsonArray Parts = Root["results"].toArray();
@@ -1132,9 +1043,6 @@ bool lcModel::LoadInventory(const QByteArray& Inventory)
 	CalculateStep(mCurrentStep);
 
 	return true;
-#else
-	return false;
-#endif
 }
 
 void lcModel::Merge(lcModel* Other)
@@ -1188,7 +1096,7 @@ void lcModel::Cut()
 	{
 		gMainWindow->UpdateTimeline(false, false);
 		gMainWindow->UpdateSelectedObjects(true);
-		gMainWindow->UpdateAllViews();
+		UpdateAllViews();
 		SaveCheckpoint(tr("Cutting"));
 	}
 }
@@ -1203,12 +1111,12 @@ void lcModel::Copy()
 	gApplication->ExportClipboard(File);
 }
 
-void lcModel::Paste()
+void lcModel::Paste(bool PasteToCurrentStep)
 {
 	if (gApplication->mClipboard.isEmpty())
 		return;
 
-	lcModel* Model = new lcModel(QString());
+	lcModel* Model = new lcModel(QString(), nullptr, false);
 
 	QBuffer Buffer(&gApplication->mClipboard);
 	Buffer.open(QIODevice::ReadOnly);
@@ -1221,9 +1129,17 @@ void lcModel::Paste()
 	for (lcPiece* Piece : PastedPieces)
 	{
 		Piece->SetFileLine(-1);
-		Piece->SetStepShow(mCurrentStep);
 
-		SelectedObjects.Add(Piece);
+		if (PasteToCurrentStep)
+		{
+			Piece->SetStepShow(mCurrentStep);
+			SelectedObjects.Add(Piece);
+		}
+		else
+		{
+			if (Piece->GetStepShow() <= mCurrentStep)
+				SelectedObjects.Add(Piece);
+		}
 	}
 
 	Merge(Model);
@@ -1236,7 +1152,7 @@ void lcModel::Paste()
 
 	CalculateStep(mCurrentStep);
 	gMainWindow->UpdateTimeline(false, false);
-	gMainWindow->UpdateAllViews();
+	UpdateAllViews();
 }
 
 void lcModel::DuplicateSelectedPieces()
@@ -1303,9 +1219,15 @@ void lcModel::DuplicateSelectedPieces()
 	SaveCheckpoint(tr("Duplicating Pieces"));
 }
 
-void lcModel::GetScene(lcScene& Scene, lcCamera* ViewCamera, bool AllowHighlight, bool AllowFade) const
+void lcModel::PaintSelectedPieces()
 {
-	mPieceInfo->AddRenderMesh(Scene);
+	SetSelectedPiecesColorIndex(gMainWindow->mColorIndex);
+}
+
+void lcModel::GetScene(lcScene* Scene, lcCamera* ViewCamera, bool AllowHighlight, bool AllowFade) const
+{
+	if (mPieceInfo)
+		mPieceInfo->AddRenderMesh(*Scene);
 
 	for (const lcPiece* Piece : mPieces)
 	{
@@ -1316,118 +1238,35 @@ void lcModel::GetScene(lcScene& Scene, lcCamera* ViewCamera, bool AllowHighlight
 		}
 	}
 
-	if (Scene.GetDrawInterface() && !Scene.GetActiveSubmodelInstance())
+	if (Scene->GetDrawInterface() && !Scene->GetActiveSubmodelInstance())
 	{
 		for (lcCamera* Camera : mCameras)
 			if (Camera != ViewCamera && Camera->IsVisible())
-				Scene.AddInterfaceObject(Camera);
+				Scene->AddInterfaceObject(Camera);
 
 		for (lcLight* Light : mLights)
 			if (Light->IsVisible())
-				Scene.AddInterfaceObject(Light);
+				Scene->AddInterfaceObject(Light);
 	}
 }
 
-void lcModel::AddSubModelRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, int DefaultColorIndex, lcRenderMeshState RenderMeshState, bool ParentActive) const
+void lcModel::AddSubModelRenderMeshes(lcScene* Scene, const lcMatrix44& WorldMatrix, int DefaultColorIndex, lcRenderMeshState RenderMeshState, bool ParentActive) const
 {
 	for (lcPiece* Piece : mPieces)
 		if (Piece->IsVisibleInSubModel())
 			Piece->AddSubModelRenderMeshes(Scene, WorldMatrix, DefaultColorIndex, RenderMeshState, ParentActive);
 }
 
-void lcModel::DrawBackground(lcGLWidget* Widget)
-{
-	if (mProperties.mBackgroundType == LC_BACKGROUND_SOLID)
-	{
-		glClearColor(mProperties.mBackgroundSolidColor[0], mProperties.mBackgroundSolidColor[1], mProperties.mBackgroundSolidColor[2], 0.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		return;
-	}
-
-	lcContext* Context = Widget->mContext;
-
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	Context->SetDepthWrite(false);
-	glDisable(GL_DEPTH_TEST);
-
-	float ViewWidth = (float)Widget->mWidth;
-	float ViewHeight = (float)Widget->mHeight;
-
-	Context->SetWorldMatrix(lcMatrix44Identity());
-	Context->SetViewMatrix(lcMatrix44Translation(lcVector3(0.375, 0.375, 0.0)));
-	Context->SetProjectionMatrix(lcMatrix44Ortho(0.0f, ViewWidth, 0.0f, ViewHeight, -1.0f, 1.0f));
-
-	if (mProperties.mBackgroundType == LC_BACKGROUND_GRADIENT)
-	{
-		Context->SetSmoothShading(true);
-
-		const lcVector3& Color1 = mProperties.mBackgroundGradientColor1;
-		const lcVector3& Color2 = mProperties.mBackgroundGradientColor2;
-
-		float Verts[] =
-		{
-			ViewWidth, ViewHeight, Color1[0], Color1[1], Color1[2], 1.0f,
-			0.0f,      ViewHeight, Color1[0], Color1[1], Color1[2], 1.0f,
-			0.0f,      0.0f,       Color2[0], Color2[1], Color2[2], 1.0f,
-			ViewWidth, 0.0f,       Color2[0], Color2[1], Color2[2], 1.0f
-		};
-
-		Context->SetMaterial(lcMaterialType::UnlitVertexColor);
-		Context->SetVertexBufferPointer(Verts);
-		Context->SetVertexFormat(0, 2, 0, 0, 4, false);
-
-		Context->DrawPrimitives(GL_TRIANGLE_FAN, 0, 4);
-
-		Context->SetSmoothShading(false);
-	}
-	else if (mProperties.mBackgroundType == LC_BACKGROUND_IMAGE)
-	{
-		Context->BindTexture2D(mBackgroundTexture->mTexture);
-
-		float TileWidth = 1.0f, TileHeight = 1.0f;
-
-		if (mProperties.mBackgroundImageTile)
-		{
-			TileWidth = ViewWidth / mBackgroundTexture->mWidth;
-			TileHeight = ViewHeight / mBackgroundTexture->mHeight;
-		}
-
-		float Verts[] =
-		{
-			0.0f,      ViewHeight, 0.0f,      0.0f,
-			ViewWidth, ViewHeight, TileWidth, 0.0f,
-			ViewWidth, 0.0f,       TileWidth, TileHeight,
-			0.0f,      0.0f,       0.0f,      TileHeight
-		};
-
-		Context->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
-		Context->SetMaterial(lcMaterialType::UnlitTextureDecal);
-		Context->SetVertexBufferPointer(Verts);
-		Context->SetVertexFormat(0, 2, 0, 2, 0, false);
-
-		Context->DrawPrimitives(GL_TRIANGLE_FAN, 0, 4);
-	}
-
-	glEnable(GL_DEPTH_TEST);
-	Context->SetDepthWrite(true);
-}
-
 QImage lcModel::GetStepImage(bool Zoom, int Width, int Height, lcStep Step)
 {
-	View* ActiveView = gMainWindow->GetActiveView();
-	ActiveView->MakeCurrent();
-	lcContext* Context = ActiveView->mContext;
+	lcView* ActiveView = gMainWindow->GetActiveView();
+	const lcStep CurrentStep = mCurrentStep;
+	lcCamera* Camera = ActiveView->GetCamera();
 
-	lcStep CurrentStep = mCurrentStep;
-
-	lcCamera* Camera = ActiveView->mCamera;
-	if (Zoom)
-		ZoomExtents(Camera, (float)Width / (float)Height);
-
-	View View(this);
-	View.SetCamera(Camera, false);
-	View.SetContext(Context);
+	lcView View(lcViewType::View, this);
+	View.SetCamera(Camera, true);
+	View.SetOffscreenContext();
+	View.MakeCurrent();
 
 	if (!View.BeginRenderToImage(Width, Height))
 	{
@@ -1436,12 +1275,15 @@ QImage lcModel::GetStepImage(bool Zoom, int Width, int Height, lcStep Step)
 	}
 
 	SetTemporaryStep(Step);
+
+	if (Zoom)
+		ZoomExtents(Camera, (float)Width / (float)Height);
+
 	View.OnDraw();
 
 	QImage Image = View.GetRenderImage();
 
 	View.EndRenderToImage();
-	Context->ClearResources();
 
 	SetTemporaryStep(CurrentStep);
 
@@ -1451,7 +1293,7 @@ QImage lcModel::GetStepImage(bool Zoom, int Width, int Height, lcStep Step)
 	return Image;
 }
 
-QImage lcModel::GetPartsListImage(int MaxWidth, lcStep Step) const
+QImage lcModel::GetPartsListImage(int MaxWidth, lcStep Step, quint32 BackgroundColor, QFont Font, QColor TextColor) const
 {
 	lcPartsList PartsList;
 
@@ -1497,20 +1339,19 @@ QImage lcModel::GetPartsListImage(int MaxWidth, lcStep Step) const
 
 	std::sort(Images.begin(), Images.end(), ImageCompare);
 
-	View* View = gMainWindow->GetActiveView();
-	View->MakeCurrent();
-	lcContext* Context = View->mContext;
+	lcView View(lcViewType::PartsList, nullptr);
+	View.SetOffscreenContext();
+	View.MakeCurrent();
+	lcContext* Context = View.mContext;
 	const int ThumbnailSize = qMin(MaxWidth, 512);
 
-	std::pair<lcFramebuffer, lcFramebuffer> RenderFramebuffer = Context->CreateRenderFramebuffer(ThumbnailSize, ThumbnailSize);
+	View.SetSize(ThumbnailSize, ThumbnailSize);
 
-	if (!RenderFramebuffer.first.IsValid())
+	if (!View.BeginRenderToImage(ThumbnailSize, ThumbnailSize))
 	{
 		QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Error creating images."));
 		return QImage();
 	}
-
-	Context->BindFramebuffer(RenderFramebuffer.first);
 
 	float OrthoSize = 200.0f;
 
@@ -1551,25 +1392,31 @@ QImage lcModel::GetPartsListImage(int MaxWidth, lcStep Step) const
 
 	for (lcPartsListImage& Image : Images)
 	{
-		glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		View.BindRenderFramebuffer();
+		Context->ClearColorAndDepth(lcVector4(lcVector3FromColor(BackgroundColor), 0.0f));
 
 		lcScene Scene;
-		Scene.SetAllowWireframe(false);
+
+		const lcPreferences& Preferences = lcGetPreferences();
+		lcShadingMode ShadingMode = Preferences.mShadingMode;
+		if (ShadingMode == lcShadingMode::Wireframe)
+			ShadingMode = lcShadingMode::Flat;
+
+		Scene.SetShadingMode(ShadingMode);
 		Scene.SetAllowLOD(false);
 		Scene.Begin(ViewMatrix);
 
-		Image.Info->AddRenderMeshes(Scene, lcMatrix44Identity(), Image.ColorIndex, lcRenderMeshState::Default, true);
+		Image.Info->AddRenderMeshes(&Scene, lcMatrix44Identity(), Image.ColorIndex, lcRenderMeshState::Default, true);
 
 		Scene.End();
 
 		Scene.Draw(Context);
 
-		Image.Thumbnail = Context->GetRenderFramebufferImage(RenderFramebuffer);
+		View.UnbindRenderFramebuffer();
+		Image.Thumbnail = View.GetRenderFramebufferImage().convertToFormat(QImage::Format_ARGB32);
 	}
 
-	Context->ClearFramebuffer();
-	Context->DestroyRenderFramebuffer(RenderFramebuffer);
+	View.EndRenderToImage();
 	Context->ClearResources();
 
 	auto CalculateImageBounds = [](lcPartsListImage& Image)
@@ -1605,7 +1452,6 @@ QImage lcModel::GetPartsListImage(int MaxWidth, lcStep Step) const
 	QImage DummyImage(16, 16, QImage::Format_ARGB32);
 	QPainter DummyPainter(&DummyImage);
 
-	QFont Font("helvetica", 20, QFont::Bold);
 	DummyPainter.setFont(Font);
 	QFontMetrics FontMetrics = DummyPainter.fontMetrics();
 	int Ascent = FontMetrics.ascent();
@@ -1653,10 +1499,11 @@ QImage lcModel::GetPartsListImage(int MaxWidth, lcStep Step) const
 	}
 
 	QImage PainterImage(ImageWidth + 40, CurrentHeight + 40, QImage::Format_ARGB32);
-	PainterImage.fill(QColor(255, 255, 255, 0));
+	PainterImage.fill(lcQColorFromRGBA(BackgroundColor));
 
 	QPainter Painter(&PainterImage);
 	Painter.setFont(Font);
+	Painter.setPen(TextColor);
 
 	for (lcPartsListImage& Image : Images)
 	{
@@ -1692,62 +1539,6 @@ void lcModel::SaveStepImages(const QString& BaseName, bool AddStepSuffix, bool Z
 			QMessageBox::information(gMainWindow, tr("Error"), tr("Error writing to file '%1':\n%2").arg(FileName, Writer.errorString()));
 			break;
 		}
-	}
-}
-
-std::vector<std::pair<lcModel*, lcStep>> lcModel::GetPageLayouts(std::vector<const lcModel*>& AddedModels)
-{
-	std::vector<std::pair<lcModel*, lcStep>> PageLayouts;
-
-	if (std::find(AddedModels.begin(), AddedModels.end(), this) != AddedModels.end())
-		return PageLayouts;
-
-	AddedModels.push_back(this);
-
-	std::map<lcStep, std::vector<lcPiece*>> StepPieces;
-
-	for (lcPiece* Piece : mPieces)
-		if (!Piece->IsHidden())
-			StepPieces[Piece->GetStepShow()].push_back(Piece);
-
-	lcStep CurrentStep = 1;
-
-	for (const std::pair<lcStep, std::vector<lcPiece*>>& StepIt : StepPieces)
-	{
-		while (StepIt.first > CurrentStep)
-		{
-			PageLayouts.emplace_back(std::make_pair(this, CurrentStep));
-			CurrentStep++;
-		}
-
-		for (lcPiece* Piece : StepIt.second)
-		{
-			if (Piece->mPieceInfo->IsModel())
-			{
-				lcModel* SubModel = Piece->mPieceInfo->GetModel();
-				std::vector<std::pair<lcModel*, lcStep>> SubModelLayouts = SubModel->GetPageLayouts(AddedModels);
-				PageLayouts.insert(PageLayouts.end(), std::make_move_iterator(SubModelLayouts.begin()), std::make_move_iterator(SubModelLayouts.end()));
-			}
-		}
-
-		PageLayouts.emplace_back(std::make_pair(this, CurrentStep));
-		CurrentStep++;
-	}
-
-	return PageLayouts;
-}
-
-void lcModel::UpdateBackgroundTexture()
-{
-	lcReleaseTexture(mBackgroundTexture);
-	mBackgroundTexture = nullptr;
-
-	if (mProperties.mBackgroundType == LC_BACKGROUND_IMAGE)
-	{
-		mBackgroundTexture = lcLoadTexture(mProperties.mBackgroundImage, LC_TEXTURE_WRAPU | LC_TEXTURE_WRAPV);
-
-		if (!mBackgroundTexture)
-			mProperties.mBackgroundType = LC_BACKGROUND_SOLID;
 	}
 }
 
@@ -1814,7 +1605,14 @@ void lcModel::SubModelCompareBoundingBox(const lcMatrix44& WorldMatrix, lcVector
 {
 	for (lcPiece* Piece : mPieces)
 		if (Piece->IsVisibleInSubModel())
-			Piece->SubmodelCompareBoundingBox(WorldMatrix, Min, Max);
+			Piece->SubModelCompareBoundingBox(WorldMatrix, Min, Max);
+}
+
+void lcModel::SubModelAddBoundingBoxPoints(const lcMatrix44& WorldMatrix, std::vector<lcVector3>& Points) const
+{
+	for (lcPiece* Piece : mPieces)
+		if (Piece->IsVisibleInSubModel())
+			Piece->SubModelAddBoundingBoxPoints(WorldMatrix, Points);
 }
 
 void lcModel::SaveCheckpoint(const QString& Description)
@@ -1860,7 +1658,7 @@ void lcModel::LoadCheckPoint(lcModelHistoryEntry* CheckPoint)
 	gMainWindow->UpdateCameraMenu();
 	gMainWindow->UpdateCurrentStep();
 	gMainWindow->UpdateSelectedObjects(true);
-	gMainWindow->UpdateAllViews();
+	UpdateAllViews();
 
 	for (PieceInfo* Info : LoadedInfos)
 		Library->ReleasePieceInfo(Info);
@@ -1901,7 +1699,7 @@ void lcModel::SetCurrentStep(lcStep Step)
 
 	gMainWindow->UpdateTimeline(false, false);
 	gMainWindow->UpdateSelectedObjects(true);
-	gMainWindow->UpdateAllViews();
+	UpdateAllViews();
 	gMainWindow->UpdateCurrentStep();
 }
 
@@ -2398,7 +2196,7 @@ void lcModel::InsertPiece(lcPiece* Piece, int Index)
 
 	if (!Info->IsModel())
 	{
-		lcMesh* Mesh = Info->IsTemporary() ? gPlaceholderMesh : Info->GetMesh();
+		lcMesh* Mesh = Info->GetMesh();
 
 		if (Mesh && Mesh->mVertexCacheOffset == -1)
 			lcGetPiecesLibrary()->mBuffersDirty = true;
@@ -2416,7 +2214,7 @@ void lcModel::DeleteAllCameras()
 
 	gMainWindow->UpdateCameraMenu();
 	gMainWindow->UpdateSelectedObjects(true);
-	gMainWindow->UpdateAllViews();
+	UpdateAllViews();
 	SaveCheckpoint(tr("Resetting Cameras"));
 }
 
@@ -2424,10 +2222,12 @@ void lcModel::DeleteSelectedObjects()
 {
 	if (RemoveSelectedObjects())
 	{
-		gMainWindow->UpdateTimeline(false, false);
-		gMainWindow->UpdateSelectedObjects(true);
-		gMainWindow->UpdateAllViews();
-		SaveCheckpoint(tr("Deleting"));
+		if (!mIsPreview) {
+			gMainWindow->UpdateTimeline(false, false);
+			gMainWindow->UpdateSelectedObjects(true);
+			UpdateAllViews();
+			SaveCheckpoint(tr("Deleting"));
+		}
 	}
 }
 
@@ -2437,7 +2237,7 @@ void lcModel::ResetSelectedPiecesPivotPoint()
 		if (Piece->IsSelected())
 			Piece->ResetPivotPoint();
 
-	gMainWindow->UpdateAllViews();
+	UpdateAllViews();
 }
 
 void lcModel::RemoveSelectedPiecesKeyFrames()
@@ -2454,7 +2254,7 @@ void lcModel::RemoveSelectedPiecesKeyFrames()
 		if (Light->IsSelected())
 			Light->RemoveKeyFrames();
 
-	gMainWindow->UpdateAllViews();
+	UpdateAllViews();
 	SaveCheckpoint(tr("Removing Key Frames"));
 }
 
@@ -2474,7 +2274,7 @@ void lcModel::InsertControlPoint()
 	{
 		SaveCheckpoint(tr("Modifying"));
 		gMainWindow->UpdateSelectedObjects(true);
-		gMainWindow->UpdateAllViews();
+		UpdateAllViews();
 	}
 }
 
@@ -2491,7 +2291,7 @@ void lcModel::RemoveFocusedControlPoint()
 	{
 		SaveCheckpoint(tr("Modifying"));
 		gMainWindow->UpdateSelectedObjects(true);
-		gMainWindow->UpdateAllViews();
+		UpdateAllViews();
 	}
 }
 
@@ -2534,7 +2334,7 @@ void lcModel::ShowSelectedPiecesEarlier()
 	SaveCheckpoint(tr("Modifying"));
 	gMainWindow->UpdateTimeline(false, false);
 	gMainWindow->UpdateSelectedObjects(true);
-	gMainWindow->UpdateAllViews();
+	UpdateAllViews();
 }
 
 void lcModel::ShowSelectedPiecesLater()
@@ -2579,7 +2379,7 @@ void lcModel::ShowSelectedPiecesLater()
 	SaveCheckpoint(tr("Modifying"));
 	gMainWindow->UpdateTimeline(false, false);
 	gMainWindow->UpdateSelectedObjects(true);
-	gMainWindow->UpdateAllViews();
+	UpdateAllViews();
 }
 
 void lcModel::SetPieceSteps(const QList<QPair<lcPiece*, lcStep>>& PieceSteps)
@@ -2612,7 +2412,7 @@ void lcModel::SetPieceSteps(const QList<QPair<lcPiece*, lcStep>>& PieceSteps)
 	if (Modified)
 	{
 		SaveCheckpoint(tr("Modifying"));
-		gMainWindow->UpdateAllViews();
+		UpdateAllViews();
 		gMainWindow->UpdateTimeline(false, false);
 		gMainWindow->UpdateSelectedObjects(true);
 	}
@@ -2708,10 +2508,10 @@ void lcModel::InlineSelectedModels()
 
 			// todo: recreate in groups in the current model
 
-			int ColorIndex = ModelPiece->mColorIndex;
+			int ColorIndex = ModelPiece->GetColorIndex();
 
 			if (ColorIndex == gDefaultColor)
-				ColorIndex = Piece->mColorIndex;
+				ColorIndex = Piece->GetColorIndex();
 
 			NewPiece->SetPieceInfo(ModelPiece->mPieceInfo, ModelPiece->GetID(), true);
 			NewPiece->Initialize(lcMul(ModelPiece->mModelWorld, Piece->mModelWorld), Piece->GetStepShow());
@@ -2763,12 +2563,12 @@ bool lcModel::RemoveSelectedObjects()
 
 		if (Camera->IsSelected())
 		{
-			const lcArray<View*>* Views = gMainWindow->GetViewsForModel(this);
+			const lcArray<lcView*>* Views = gMainWindow->GetViewsForModel(this);
 			for (int ViewIdx = 0; ViewIdx < Views->GetSize(); ViewIdx++)
 			{
-				View* View = (*Views)[ViewIdx];
+				lcView* View = (*Views)[ViewIdx];
 
-				if (Camera == View->mCamera)
+				if (Camera == View->GetCamera())
 					View->SetCamera(Camera, true);
 			}
 
@@ -2834,7 +2634,7 @@ void lcModel::MoveSelectedObjects(const lcVector3& PieceDistance, const lcVector
 			{
 				if (Piece->IsSelected())
 				{
-					if (gMainWindow->GetLocalTransform())
+					if (gMainWindow->GetSeparateTransform())
 						TransformedPieceDistance = lcMul(PieceDistance, Piece->GetRelativeRotation());
 
 					Piece->MoveSelected(mCurrentStep, gMainWindow->GetAddKeys(), TransformedPieceDistance);
@@ -2872,7 +2672,7 @@ void lcModel::MoveSelectedObjects(const lcVector3& PieceDistance, const lcVector
 
 	if (Moved && Update)
 	{
-		gMainWindow->UpdateAllViews();
+		UpdateAllViews();
 		if (Checkpoint)
 			SaveCheckpoint(tr("Moving"));
 		gMainWindow->UpdateSelectedObjects(false);
@@ -2908,7 +2708,7 @@ void lcModel::RotateSelectedPieces(const lcVector3& Angles, bool Relative, bool 
 	}
 	else
 	{
-		if (!gMainWindow->GetLocalTransform())
+		if (!gMainWindow->GetSeparateTransform())
 		{
 			lcVector3 Center;
 			lcMatrix33 RelativeRotation;
@@ -2967,7 +2767,7 @@ void lcModel::RotateSelectedPieces(const lcVector3& Angles, bool Relative, bool 
 
 	if (Rotated && Update)
 	{
-		gMainWindow->UpdateAllViews();
+		UpdateAllViews();
 		if (Checkpoint)
 			SaveCheckpoint(tr("Rotating"));
 		gMainWindow->UpdateSelectedObjects(false);
@@ -2993,7 +2793,7 @@ void lcModel::ScaleSelectedPieces(const float Scale, bool Update, bool Checkpoin
 
 		if (Update)
 		{
-			gMainWindow->UpdateAllViews();
+			UpdateAllViews();
 			if (Checkpoint)
 				SaveCheckpoint(tr("Scaling"));
 			gMainWindow->UpdateSelectedObjects(false);
@@ -3020,6 +2820,9 @@ void lcModel::TransformSelectedObjects(lcTransformType TransformType, const lcVe
 	case lcTransformType::RelativeRotation:
 		RotateSelectedPieces(Transform, true, false, true, true);
 		break;
+
+	case lcTransformType::Count:
+		break;
 	}
 }
 
@@ -3029,7 +2832,7 @@ void lcModel::SetSelectedPiecesColorIndex(int ColorIndex)
 
 	for (lcPiece* Piece : mPieces)
 	{
-		if (Piece->IsSelected() && Piece->mColorIndex != ColorIndex)
+		if (Piece->IsSelected() && Piece->GetColorIndex() != ColorIndex)
 		{
 			Piece->SetColorIndex(ColorIndex);
 			Modified = true;
@@ -3040,7 +2843,7 @@ void lcModel::SetSelectedPiecesColorIndex(int ColorIndex)
 	{
 		SaveCheckpoint(tr("Painting"));
 		gMainWindow->UpdateSelectedObjects(false);
-		gMainWindow->UpdateAllViews();
+		UpdateAllViews();
 		gMainWindow->UpdateTimeline(false, true);
 	}
 }
@@ -3064,18 +2867,20 @@ void lcModel::SetSelectedPiecesPieceInfo(PieceInfo* Info)
 	{
 		SaveCheckpoint(tr("Setting Part"));
 		gMainWindow->UpdateSelectedObjects(false);
-		gMainWindow->UpdateAllViews();
+		UpdateAllViews();
 		gMainWindow->UpdateTimeline(false, true);
 	}
 }
 
 void lcModel::SetSelectedPiecesStepShow(lcStep Step)
 {
-	bool Modified = false;
+	lcArray<lcPiece*> MovedPieces;
 	bool SelectionChanged = false;
 
-	for (lcPiece* Piece : mPieces)
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); )
 	{
+		lcPiece* Piece = mPieces[PieceIdx];
+
 		if (Piece->IsSelected() && Piece->GetStepShow() != Step)
 		{
 			Piece->SetStepShow(Step);
@@ -3086,17 +2891,28 @@ void lcModel::SetSelectedPiecesStepShow(lcStep Step)
 				SelectionChanged = true;
 			}
 
-			Modified = true;
+			MovedPieces.Add(Piece);
+			mPieces.RemoveIndex(PieceIdx);
+			continue;
 		}
+
+		PieceIdx++;
 	}
 
-	if (Modified)
+	if (MovedPieces.IsEmpty())
+		return;
+
+	for (int PieceIdx = 0; PieceIdx < MovedPieces.GetSize(); PieceIdx++)
 	{
-		SaveCheckpoint(tr("Showing Pieces"));
-		gMainWindow->UpdateAllViews();
-		gMainWindow->UpdateTimeline(false, false);
-		gMainWindow->UpdateSelectedObjects(SelectionChanged);
+		lcPiece* Piece = MovedPieces[PieceIdx];
+		Piece->SetFileLine(-1);
+		AddPiece(Piece);
 	}
+
+	SaveCheckpoint(tr("Showing Pieces"));
+	UpdateAllViews();
+	gMainWindow->UpdateTimeline(false, false);
+	gMainWindow->UpdateSelectedObjects(SelectionChanged);
 }
 
 void lcModel::SetSelectedPiecesStepHide(lcStep Step)
@@ -3123,7 +2939,7 @@ void lcModel::SetSelectedPiecesStepHide(lcStep Step)
 	if (Modified)
 	{
 		SaveCheckpoint(tr("Hiding Pieces"));
-		gMainWindow->UpdateAllViews();
+		UpdateAllViews();
 		gMainWindow->UpdateTimeline(false, false);
 		gMainWindow->UpdateSelectedObjects(SelectionChanged);
 	}
@@ -3138,7 +2954,7 @@ void lcModel::SetCameraOrthographic(lcCamera* Camera, bool Ortho)
 	Camera->UpdatePosition(mCurrentStep);
 
 	SaveCheckpoint(tr("Editing Camera"));
-	gMainWindow->UpdateAllViews();
+	UpdateAllViews();
 	gMainWindow->UpdatePerspective();
 }
 
@@ -3151,7 +2967,7 @@ void lcModel::SetCameraFOV(lcCamera* Camera, float FOV)
 	Camera->UpdatePosition(mCurrentStep);
 
 	SaveCheckpoint(tr("Changing FOV"));
-	gMainWindow->UpdateAllViews();
+	UpdateAllViews();
 }
 
 void lcModel::SetCameraZNear(lcCamera* Camera, float ZNear)
@@ -3163,7 +2979,7 @@ void lcModel::SetCameraZNear(lcCamera* Camera, float ZNear)
 	Camera->UpdatePosition(mCurrentStep);
 
 	SaveCheckpoint(tr("Editing Camera"));
-	gMainWindow->UpdateAllViews();
+	UpdateAllViews();
 }
 
 void lcModel::SetCameraZFar(lcCamera* Camera, float ZFar)
@@ -3175,20 +2991,19 @@ void lcModel::SetCameraZFar(lcCamera* Camera, float ZFar)
 	Camera->UpdatePosition(mCurrentStep);
 
 	SaveCheckpoint(tr("Editing Camera"));
-	gMainWindow->UpdateAllViews();
+	UpdateAllViews();
 }
 
-void lcModel::SetCameraName(lcCamera* Camera, const char* Name)
+void lcModel::SetCameraName(lcCamera* Camera, const QString& Name)
 {
-	if (!strcmp(Camera->m_strName, Name))
+	if (Camera->GetName() == Name)
 		return;
 
-	strncpy(Camera->m_strName, Name, sizeof(Camera->m_strName));
-	Camera->m_strName[sizeof(Camera->m_strName) - 1] = 0;
+	Camera->SetName(Name);
 
 	SaveCheckpoint(tr("Renaming Camera"));
 	gMainWindow->UpdateSelectedObjects(false);
-	gMainWindow->UpdateAllViews();
+	UpdateAllViews();
 	gMainWindow->UpdateCameraMenu();
 }
 
@@ -3463,6 +3278,17 @@ bool lcModel::GetPiecesBoundingBox(lcVector3& Min, lcVector3& Max) const
 	return Valid;
 }
 
+std::vector<lcVector3> lcModel::GetPiecesBoundingBoxPoints() const
+{
+	std::vector<lcVector3> Points;
+
+	for (lcPiece* Piece : mPieces)
+		if (Piece->IsVisible(mCurrentStep))
+			Piece->SubModelAddBoundingBoxPoints(lcMatrix44Identity(), Points);
+
+	return Points;
+}
+
 void lcModel::GetPartsList(int DefaultColorIndex, bool ScanSubModels, bool AddSubModels, lcPartsList& PartsList) const
 {
 	for (lcPiece* Piece : mPieces)
@@ -3470,7 +3296,7 @@ void lcModel::GetPartsList(int DefaultColorIndex, bool ScanSubModels, bool AddSu
 		if (!Piece->IsVisibleInSubModel())
 			continue;
 
-		int ColorIndex = Piece->mColorIndex;
+		int ColorIndex = Piece->GetColorIndex();
 
 		if (ColorIndex == gDefaultColor)
 			ColorIndex = DefaultColorIndex;
@@ -3486,7 +3312,7 @@ void lcModel::GetPartsListForStep(lcStep Step, int DefaultColorIndex, lcPartsLis
 		if (Piece->GetStepShow() != Step || Piece->IsHidden())
 			continue;
 
-		int ColorIndex = Piece->mColorIndex;
+		int ColorIndex = Piece->GetColorIndex();
 
 		if (ColorIndex == gDefaultColor)
 			ColorIndex = DefaultColorIndex;
@@ -3597,7 +3423,7 @@ void lcModel::GetSelectionInformation(int* Flags, lcArray<lcObject*>& Selection,
 lcArray<lcObject*> lcModel::GetSelectionModePieces(lcPiece* SelectedPiece) const
 {
 	PieceInfo* Info = SelectedPiece->mPieceInfo;
-	int ColorIndex = SelectedPiece->mColorIndex;
+	int ColorIndex = SelectedPiece->GetColorIndex();
 	lcArray<lcObject*> Pieces;
 
 	switch (gMainWindow->GetSelectionMode())
@@ -3613,13 +3439,13 @@ lcArray<lcObject*> lcModel::GetSelectionModePieces(lcPiece* SelectedPiece) const
 
 	case lcSelectionMode::Color:
 		for (lcPiece* Piece : mPieces)
-			if (Piece->IsVisible(mCurrentStep) && Piece->mColorIndex == ColorIndex && Piece != SelectedPiece)
+			if (Piece->IsVisible(mCurrentStep) && Piece->GetColorIndex() == ColorIndex && Piece != SelectedPiece)
 				Pieces.Add(Piece);
 		break;
 
 	case lcSelectionMode::PieceColor:
 		for (lcPiece* Piece : mPieces)
-			if (Piece->IsVisible(mCurrentStep) && Piece->mPieceInfo == Info && Piece->mColorIndex == ColorIndex && Piece != SelectedPiece)
+			if (Piece->IsVisible(mCurrentStep) && Piece->mPieceInfo == Info && Piece->GetColorIndex() == ColorIndex && Piece != SelectedPiece)
 				Pieces.Add(Piece);
 		break;
 	}
@@ -3641,7 +3467,7 @@ void lcModel::ClearSelection(bool UpdateInterface)
 	if (UpdateInterface)
 	{
 		gMainWindow->UpdateSelectedObjects(true);
-		gMainWindow->UpdateAllViews();
+		UpdateAllViews();
 	}
 }
 
@@ -3697,7 +3523,7 @@ void lcModel::FocusOrDeselectObject(const lcObjectSection& ObjectSection)
 	}
 
 	gMainWindow->UpdateSelectedObjects(true);
-	gMainWindow->UpdateAllViews();
+	UpdateAllViews();
 }
 
 void lcModel::ClearSelectionAndSetFocus(lcObject* Object, quint32 Section, bool EnableSelectionMode)
@@ -3721,7 +3547,7 @@ void lcModel::ClearSelectionAndSetFocus(lcObject* Object, quint32 Section, bool 
 	}
 
 	gMainWindow->UpdateSelectedObjects(true);
-	gMainWindow->UpdateAllViews();
+	UpdateAllViews();
 }
 
 void lcModel::ClearSelectionAndSetFocus(const lcObjectSection& ObjectSection, bool EnableSelectionMode)
@@ -3775,7 +3601,7 @@ void lcModel::AddToSelection(const lcArray<lcObject*>& Objects, bool EnableSelec
 	if (UpdateInterface)
 	{
 		gMainWindow->UpdateSelectedObjects(true);
-		gMainWindow->UpdateAllViews();
+		UpdateAllViews();
 	}
 }
 
@@ -3809,7 +3635,7 @@ void lcModel::RemoveFromSelection(const lcArray<lcObject*>& Objects)
 	}
 
 	gMainWindow->UpdateSelectedObjects(true);
-	gMainWindow->UpdateAllViews();
+	UpdateAllViews();
 }
 
 void lcModel::RemoveFromSelection(const lcObjectSection& ObjectSection)
@@ -3849,7 +3675,7 @@ void lcModel::RemoveFromSelection(const lcObjectSection& ObjectSection)
 	}
 
 	gMainWindow->UpdateSelectedObjects(true);
-	gMainWindow->UpdateAllViews();
+	UpdateAllViews();
 }
 
 void lcModel::SelectAllPieces()
@@ -3858,8 +3684,9 @@ void lcModel::SelectAllPieces()
 		if (Piece->IsVisible(mCurrentStep))
 			Piece->SetSelected(true);
 
-	gMainWindow->UpdateSelectedObjects(true);
-	gMainWindow->UpdateAllViews();
+	if (!mIsPreview)
+		gMainWindow->UpdateSelectedObjects(true);
+	UpdateAllViews();
 }
 
 void lcModel::InvertSelection()
@@ -3869,7 +3696,7 @@ void lcModel::InvertSelection()
 			Piece->SetSelected(!Piece->IsSelected());
 
 	gMainWindow->UpdateSelectedObjects(true);
-	gMainWindow->UpdateAllViews();
+	UpdateAllViews();
 }
 
 void lcModel::HideSelectedPieces()
@@ -3891,7 +3718,7 @@ void lcModel::HideSelectedPieces()
 
 	gMainWindow->UpdateTimeline(false, true);
 	gMainWindow->UpdateSelectedObjects(true);
-	gMainWindow->UpdateAllViews();
+	UpdateAllViews();
 
 	SaveCheckpoint(tr("Hide"));
 }
@@ -3914,7 +3741,7 @@ void lcModel::HideUnselectedPieces()
 
 	gMainWindow->UpdateTimeline(false, true);
 	gMainWindow->UpdateSelectedObjects(true);
-	gMainWindow->UpdateAllViews();
+	UpdateAllViews();
 
 	SaveCheckpoint(tr("Hide"));
 }
@@ -3937,7 +3764,7 @@ void lcModel::UnhideSelectedPieces()
 
 	gMainWindow->UpdateTimeline(false, true);
 	gMainWindow->UpdateSelectedObjects(true);
-	gMainWindow->UpdateAllViews();
+	UpdateAllViews();
 
 	SaveCheckpoint(tr("Unhide"));
 }
@@ -3960,34 +3787,65 @@ void lcModel::UnhideAllPieces()
 
 	gMainWindow->UpdateTimeline(false, true);
 	gMainWindow->UpdateSelectedObjects(true);
-	gMainWindow->UpdateAllViews();
+	UpdateAllViews();
 
 	SaveCheckpoint(tr("Unhide"));
 }
 
-void lcModel::FindPiece(bool FindFirst, bool SearchForward)
+void lcModel::FindReplacePiece(bool SearchForward, bool FindAll)
 {
 	if (mPieces.IsEmpty())
 		return;
 
-	int StartIdx = mPieces.GetSize() - 1;
-	if (!FindFirst)
+	auto PieceMatches = [](const lcPiece* Piece)
 	{
-		for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
-		{
-			lcPiece* Piece = mPieces[PieceIdx];
+		const lcFindReplaceParams& Params = lcView::GetFindReplaceParams();
 
-			if (Piece->IsFocused() && Piece->IsVisible(mCurrentStep))
+		if (Params.FindInfo && Params.FindInfo != Piece->mPieceInfo)
+			return false;
+
+		if (!Params.FindString.isEmpty() && !strcasestr(Piece->mPieceInfo->m_strDescription, Params.FindString.toLatin1()))
+			return false;
+
+		return (lcGetColorCode(Params.FindColorIndex) == LC_COLOR_NOCOLOR) || (Piece->GetColorIndex() == Params.FindColorIndex);
+	};
+
+	const lcFindReplaceParams& Params = lcView::GetFindReplaceParams();
+	int StartIdx = mPieces.GetSize() - 1;
+
+	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+	{
+		lcPiece* Piece = mPieces[PieceIdx];
+
+		if (Piece->IsFocused() && Piece->IsVisible(mCurrentStep))
+		{
+			if (PieceMatches(Piece))
 			{
-				StartIdx = PieceIdx;
-				break;
+				const bool ReplaceColor = lcGetColorCode(Params.FindColorIndex) != LC_COLOR_NOCOLOR;
+
+				if (ReplaceColor)
+					Piece->SetColorIndex(Params.ReplaceColorIndex);
+
+				if (Params.ReplacePieceInfo)
+					Piece->SetPieceInfo(Params.ReplacePieceInfo, QString(), true);
+
+				if (ReplaceColor || Params.ReplacePieceInfo)
+				{
+					SaveCheckpoint(tr("Replacing Part"));
+					gMainWindow->UpdateSelectedObjects(false);
+					UpdateAllViews();
+					gMainWindow->UpdateTimeline(false, true);
+				}
 			}
+
+			StartIdx = PieceIdx;
+			break;
 		}
 	}
 
 	int CurrentIdx = StartIdx;
-	lcObject* Focus = nullptr;
-	const lcSearchOptions& SearchOptions = gMainWindow->mSearchOptions;
+	lcPiece* Focus = nullptr;
+	lcArray<lcObject*> Selection;
 
 	for (;;)
 	{
@@ -4001,24 +3859,30 @@ void lcModel::FindPiece(bool FindFirst, bool SearchForward)
 		else if (CurrentIdx >= mPieces.GetSize())
 			CurrentIdx = 0;
 
-		if (CurrentIdx == StartIdx)
-			break;
-
 		lcPiece* Current = mPieces[CurrentIdx];
 
 		if (!Current->IsVisible(mCurrentStep))
 			continue;
 
-		if ((!SearchOptions.MatchInfo || Current->mPieceInfo == SearchOptions.Info) &&
-			(!SearchOptions.MatchColor || Current->mColorIndex == SearchOptions.ColorIndex) &&
-			(!SearchOptions.MatchName || strcasestr(Current->GetName(), SearchOptions.Name)))
+		if (PieceMatches(Current))
 		{
-			Focus = Current;
-			break;
+			if (FindAll)
+				Selection.Add(Current);
+			else
+			{
+				Focus = Current;
+				break;
+			}
 		}
+
+		if (CurrentIdx == StartIdx)
+			break;
 	}
 
-	ClearSelectionAndSetFocus(Focus, LC_PIECE_SECTION_POSITION, false);
+	if (FindAll)
+		SetSelectionAndFocus(Selection, nullptr, 0, false);
+	else
+		ClearSelectionAndSetFocus(Focus, LC_PIECE_SECTION_POSITION, false);
 }
 
 void lcModel::UndoAction()
@@ -4060,65 +3924,66 @@ void lcModel::EndMouseTool(lcTool Tool, bool Accept)
 {
 	if (!Accept)
 	{
-		LoadCheckPoint(mUndoHistory[0]);
+		if (!mUndoHistory.empty())
+			LoadCheckPoint(mUndoHistory.front());
 		return;
 	}
 
 	switch (Tool)
 	{
-	case LC_TOOL_INSERT:
-	case LC_TOOL_LIGHT:
+	case lcTool::Insert:
+	case lcTool::Light:
 		break;
 
-	case LC_TOOL_SPOTLIGHT:
+	case lcTool::SpotLight:
 		SaveCheckpoint(tr("New SpotLight"));
 		break;
 
-	case LC_TOOL_CAMERA:
+	case lcTool::Camera:
 		gMainWindow->UpdateCameraMenu();
 		SaveCheckpoint(tr("New Camera"));
 		break;
 
-	case LC_TOOL_SELECT:
+	case lcTool::Select:
 		break;
 
-	case LC_TOOL_MOVE:
+	case lcTool::Move:
 		SaveCheckpoint(tr("Move"));
 		break;
 
-	case LC_TOOL_ROTATE:
+	case lcTool::Rotate:
 		SaveCheckpoint(tr("Rotate"));
 		break;
 
-	case LC_TOOL_ERASER:
-	case LC_TOOL_PAINT:
-	case LC_TOOL_COLOR_PICKER:
+	case lcTool::Eraser:
+	case lcTool::Paint:
+	case lcTool::ColorPicker:
 		break;
 
-	case LC_TOOL_ZOOM:
-		if (!gMainWindow->GetActiveView()->mCamera->IsSimple())
+	case lcTool::Zoom:
+		if (!gMainWindow->GetActiveView()->GetCamera()->IsSimple())
 			SaveCheckpoint(tr("Zoom"));
 		break;
 
-	case LC_TOOL_PAN:
-		if (!gMainWindow->GetActiveView()->mCamera->IsSimple())
+	case lcTool::Pan:
+		if (!gMainWindow->GetActiveView()->GetCamera()->IsSimple())
 			SaveCheckpoint(tr("Pan"));
 		break;
 
-	case LC_TOOL_ROTATE_VIEW:
-		if (!gMainWindow->GetActiveView()->mCamera->IsSimple())
+	case lcTool::RotateView:
+		if (!gMainWindow->GetActiveView()->GetCamera()->IsSimple())
 			SaveCheckpoint(tr("Orbit"));
 		break;
 
-	case LC_TOOL_ROLL:
-		if (!gMainWindow->GetActiveView()->mCamera->IsSimple())
+	case lcTool::Roll:
+		if (!gMainWindow->GetActiveView()->GetCamera()->IsSimple())
 			SaveCheckpoint(tr("Roll"));
 		break;
 
-	case LC_TOOL_ZOOM_REGION:
+	case lcTool::ZoomRegion:
 		break;
 
-	case LC_NUM_TOOLS:
+	case lcTool::Count:
 		break;
 	}
 }
@@ -4167,7 +4032,7 @@ void lcModel::UpdateSpotLightTool(const lcVector3& Position)
 	mMouseToolDistance = Position;
 
 	gMainWindow->UpdateSelectedObjects(false);
-	gMainWindow->UpdateAllViews();
+	UpdateAllViews();
 }
 
 void lcModel::BeginCameraTool(const lcVector3& Position, const lcVector3& Target)
@@ -4191,7 +4056,7 @@ void lcModel::UpdateCameraTool(const lcVector3& Position)
 	mMouseToolDistance = Position;
 
 	gMainWindow->UpdateSelectedObjects(false);
-	gMainWindow->UpdateAllViews();
+	UpdateAllViews();
 }
 
 void lcModel::UpdateMoveTool(const lcVector3& Distance, bool AlternateButtonDrag)
@@ -4203,7 +4068,7 @@ void lcModel::UpdateMoveTool(const lcVector3& Distance, bool AlternateButtonDrag
 	mMouseToolDistance = Distance;
 
 	gMainWindow->UpdateSelectedObjects(false);
-	gMainWindow->UpdateAllViews();
+	UpdateAllViews();
 }
 
 void lcModel::UpdateRotateTool(const lcVector3& Angles, bool AlternateButtonDrag)
@@ -4213,7 +4078,7 @@ void lcModel::UpdateRotateTool(const lcVector3& Angles, bool AlternateButtonDrag
 	mMouseToolDistance = Angles;
 
 	gMainWindow->UpdateSelectedObjects(false);
-	gMainWindow->UpdateAllViews();
+	UpdateAllViews();
 }
 
 void lcModel::UpdateScaleTool(const float Scale)
@@ -4221,7 +4086,7 @@ void lcModel::UpdateScaleTool(const float Scale)
 	ScaleSelectedPieces(Scale, true, false);
 
 	gMainWindow->UpdateSelectedObjects(false);
-	gMainWindow->UpdateAllViews();
+	UpdateAllViews();
 }
 
 void lcModel::EraserToolClicked(lcObject* Object)
@@ -4238,11 +4103,11 @@ void lcModel::EraserToolClicked(lcObject* Object)
 
 	case lcObjectType::Camera:
 		{
-			const lcArray<View*>* Views = gMainWindow->GetViewsForModel(this);
+			const lcArray<lcView*>* Views = gMainWindow->GetViewsForModel(this);
 			for (int ViewIdx = 0; ViewIdx < Views->GetSize(); ViewIdx++)
 			{
-				View* View = (*Views)[ViewIdx];
-				lcCamera* Camera = View->mCamera;
+				lcView* View = (*Views)[ViewIdx];
+				lcCamera* Camera = View->GetCamera();
 
 				if (Camera == Object)
 					View->SetCamera(Camera, true);
@@ -4262,7 +4127,7 @@ void lcModel::EraserToolClicked(lcObject* Object)
 	delete Object;
 	gMainWindow->UpdateTimeline(false, false);
 	gMainWindow->UpdateSelectedObjects(true);
-	gMainWindow->UpdateAllViews();
+	UpdateAllViews();
 	SaveCheckpoint(tr("Deleting"));
 }
 
@@ -4273,13 +4138,13 @@ void lcModel::PaintToolClicked(lcObject* Object)
 
 	lcPiece* Piece = (lcPiece*)Object;
 
-	if (Piece->mColorIndex != gMainWindow->mColorIndex)
+	if (Piece->GetColorIndex() != gMainWindow->mColorIndex)
 	{
 		Piece->SetColorIndex(gMainWindow->mColorIndex);
 
 		SaveCheckpoint(tr("Painting"));
 		gMainWindow->UpdateSelectedObjects(false);
-		gMainWindow->UpdateAllViews();
+		UpdateAllViews();
 		gMainWindow->UpdateTimeline(false, true);
 	}
 }
@@ -4291,38 +4156,43 @@ void lcModel::ColorPickerToolClicked(lcObject* Object)
 
 	lcPiece* Piece = (lcPiece*)Object;
 
-	gMainWindow->SetColorIndex(Piece->mColorIndex);
+	gMainWindow->SetColorIndex(Piece->GetColorIndex());
 }
 
 void lcModel::UpdateZoomTool(lcCamera* Camera, float Mouse)
 {
 	Camera->Zoom(Mouse - mMouseToolDistance.x, mCurrentStep, gMainWindow->GetAddKeys());
 	mMouseToolDistance.x = Mouse;
-	gMainWindow->UpdateAllViews();
+
+	UpdateAllViews();
 }
 
 void lcModel::UpdatePanTool(lcCamera* Camera, const lcVector3& Distance)
 {
 	Camera->Pan(Distance - mMouseToolDistance, mCurrentStep, gMainWindow->GetAddKeys());
 	mMouseToolDistance = Distance;
-	gMainWindow->UpdateAllViews();
+
+	UpdateAllViews();
 }
 
 void lcModel::UpdateOrbitTool(lcCamera* Camera, float MouseX, float MouseY)
 {
 	lcVector3 Center;
 	GetSelectionCenter(Center);
+
 	Camera->Orbit(MouseX - mMouseToolDistance.x, MouseY - mMouseToolDistance.y, Center, mCurrentStep, gMainWindow->GetAddKeys());
 	mMouseToolDistance.x = MouseX;
 	mMouseToolDistance.y = MouseY;
-	gMainWindow->UpdateAllViews();
+
+	UpdateAllViews();
 }
 
 void lcModel::UpdateRollTool(lcCamera* Camera, float Mouse)
 {
 	Camera->Roll(Mouse - mMouseToolDistance.x, mCurrentStep, gMainWindow->GetAddKeys());
 	mMouseToolDistance.x = Mouse;
-	gMainWindow->UpdateAllViews();
+
+	UpdateAllViews();
 }
 
 void lcModel::ZoomRegionToolClicked(lcCamera* Camera, float AspectRatio, const lcVector3& Position, const lcVector3& TargetPosition, const lcVector3* Corners)
@@ -4330,7 +4200,7 @@ void lcModel::ZoomRegionToolClicked(lcCamera* Camera, float AspectRatio, const l
 	Camera->ZoomRegion(AspectRatio, Position, TargetPosition, Corners, mCurrentStep, gMainWindow->GetAddKeys());
 
 	gMainWindow->UpdateSelectedObjects(false);
-	gMainWindow->UpdateAllViews();
+	UpdateAllViews();
 
 	if (!Camera->IsSimple())
 		SaveCheckpoint(tr("Zoom"));
@@ -4353,7 +4223,7 @@ void lcModel::LookAt(lcCamera* Camera)
 	Camera->Center(Center, mCurrentStep, gMainWindow->GetAddKeys());
 
 	gMainWindow->UpdateSelectedObjects(false);
-	gMainWindow->UpdateAllViews();
+	UpdateAllViews();
 
 	if (!Camera->IsSimple())
 		SaveCheckpoint(tr("Look At"));
@@ -4363,7 +4233,7 @@ void lcModel::MoveCamera(lcCamera* Camera, const lcVector3& Direction)
 {
 	Camera->MoveRelative(Direction, mCurrentStep, gMainWindow->GetAddKeys());
 	gMainWindow->UpdateSelectedObjects(false);
-	gMainWindow->UpdateAllViews();
+	UpdateAllViews();
 
 	if (!Camera->IsSimple())
 		SaveCheckpoint(tr("Moving Camera"));
@@ -4371,20 +4241,26 @@ void lcModel::MoveCamera(lcCamera* Camera, const lcVector3& Direction)
 
 void lcModel::ZoomExtents(lcCamera* Camera, float Aspect)
 {
+	std::vector<lcVector3> Points = GetPiecesBoundingBoxPoints();
+
+	if (Points.empty())
+		return;
+
 	lcVector3 Min(FLT_MAX, FLT_MAX, FLT_MAX), Max(-FLT_MAX, -FLT_MAX, -FLT_MAX);
 
-	if (!GetPiecesBoundingBox(Min, Max))
-		return;
+	for (const lcVector3& Point : Points)
+	{
+		Min = lcMin(Point, Min);
+		Max = lcMax(Point, Max);
+	}
 
 	lcVector3 Center = (Min + Max) / 2.0f;
 
-	lcVector3 Points[8];
-	lcGetBoxCorners(Min, Max, Points);
+	Camera->ZoomExtents(Aspect, Center, Points, mCurrentStep, gMainWindow ? gMainWindow->GetAddKeys() : false);
 
-	Camera->ZoomExtents(Aspect, Center, Points, 8, mCurrentStep, gMainWindow->GetAddKeys());
-
-	gMainWindow->UpdateSelectedObjects(false);
-	gMainWindow->UpdateAllViews();
+	if (!mIsPreview && gMainWindow)
+		gMainWindow->UpdateSelectedObjects(false);
+	UpdateAllViews();
 
 	if (!Camera->IsSimple())
 		SaveCheckpoint(tr("Zoom"));
@@ -4393,8 +4269,10 @@ void lcModel::ZoomExtents(lcCamera* Camera, float Aspect)
 void lcModel::Zoom(lcCamera* Camera, float Amount)
 {
 	Camera->Zoom(Amount, mCurrentStep, gMainWindow->GetAddKeys());
-	gMainWindow->UpdateSelectedObjects(false);
-	gMainWindow->UpdateAllViews();
+
+	if (!mIsPreview)
+		gMainWindow->UpdateSelectedObjects(false);
+	UpdateAllViews();
 
 	if (!Camera->IsSimple())
 		SaveCheckpoint(tr("Zoom"));
@@ -4405,7 +4283,6 @@ void lcModel::ShowPropertiesDialog()
 	lcPropertiesDialogOptions Options;
 
 	Options.Properties = mProperties;
-	Options.SetDefault = false;
 
 	GetPartsList(gDefaultColor, true, false, Options.PartsList);
 
@@ -4413,15 +4290,12 @@ void lcModel::ShowPropertiesDialog()
 	if (Dialog.exec() != QDialog::Accepted)
 		return;
 
-	if (Options.SetDefault)
-		Options.Properties.SaveDefaults();
-
 	if (mProperties == Options.Properties)
 		return;
 
 	mProperties = Options.Properties;
 
-	UpdateBackgroundTexture();
+	gMainWindow->GetPreviewWidget()->UpdatePreview();
 
 	SaveCheckpoint(tr("Changing Properties"));
 }
@@ -4440,36 +4314,6 @@ void lcModel::ShowSelectByNameDialog()
 		return;
 
 	SetSelectionAndFocus(Dialog.mObjects, nullptr, 0, false);
-}
-
-void lcModel::ShowSelectByColorDialog()
-{
-	if (mPieces.IsEmpty())
-	{
-		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Nothing to select."));
-		return;
-	}
-
-	int ColorIndex = gMainWindow->mColorIndex;
-
-	lcObject* Focus = GetFocusObject();
-
-	if (Focus && Focus->IsPiece())
-		ColorIndex = ((lcPiece*)Focus)->mColorIndex;
-
-	lcSelectByColorDialog Dialog(gMainWindow, ColorIndex);
-
-	if (Dialog.exec() != QDialog::Accepted)
-		return;
-
-	ColorIndex = Dialog.mColorIndex;
-	lcArray<lcObject*> Selection;
-
-	for (lcPiece* Piece : mPieces)
-		if (Piece->IsVisible(mCurrentStep) && Piece->mColorIndex == ColorIndex)
-			Selection.Add(Piece);
-
-	SetSelectionAndFocus(Selection, nullptr, 0, false);
 }
 
 void lcModel::ShowArrayDialog()
@@ -4526,7 +4370,7 @@ void lcModel::ShowArrayDialog()
 					lcPiece* NewPiece = new lcPiece(nullptr);
 					NewPiece->SetPieceInfo(Piece->mPieceInfo, Piece->GetID(), true);
 					NewPiece->Initialize(ModelWorld, mCurrentStep);
-					NewPiece->SetColorIndex(Piece->mColorIndex);
+					NewPiece->SetColorIndex(Piece->GetColorIndex());
 
 					NewPieces.Add(NewPiece);
 				}
@@ -4548,7 +4392,7 @@ void lcModel::ShowArrayDialog()
 
 void lcModel::ShowMinifigDialog()
 {
-	lcQMinifigDialog Dialog(gMainWindow);
+	lcMinifigDialog Dialog(gMainWindow);
 
 	if (Dialog.exec() != QDialog::Accepted)
 		return;
@@ -4557,7 +4401,7 @@ void lcModel::ShowMinifigDialog()
 
 	lcGroup* Group = AddGroup(tr("Minifig #"), nullptr);
 	lcArray<lcObject*> Pieces(LC_MFW_NUMITEMS);
-	lcMinifig& Minifig = Dialog.mMinifigWidget->mMinifig;
+	lcMinifig& Minifig = Dialog.mMinifigWizard->mMinifig;
 
 	for (int PartIdx = 0; PartIdx < LC_MFW_NUMITEMS; PartIdx++)
 	{
@@ -4580,8 +4424,49 @@ void lcModel::ShowMinifigDialog()
 	SaveCheckpoint(tr("Minifig"));
 }
 
+void lcModel::SetMinifig(const lcMinifig& Minifig)
+{
+	DeleteModel();
+
+	lcArray<lcObject*> Pieces(LC_MFW_NUMITEMS);
+
+	for (int PartIdx = 0; PartIdx < LC_MFW_NUMITEMS; PartIdx++)
+	{
+		if (!Minifig.Parts[PartIdx])
+			continue;
+
+		lcPiece* Piece = new lcPiece(Minifig.Parts[PartIdx]);
+
+		Piece->Initialize(Minifig.Matrices[PartIdx], 1);
+		Piece->SetColorIndex(Minifig.Colors[PartIdx]);
+		AddPiece(Piece);
+		Piece->UpdatePosition(1);
+
+		Pieces.Add(Piece);
+	}
+
+	SetSelectionAndFocus(Pieces, nullptr, 0, false);
+}
+
+void lcModel::SetPreviewPieceInfo(PieceInfo* Info, int ColorIndex)
+{
+	DeleteModel();
+
+	lcPiece* Piece = new lcPiece(Info);
+
+	Piece->Initialize(lcMatrix44Identity(), 1);
+	Piece->SetColorIndex(ColorIndex);
+	AddPiece(Piece);
+	Piece->UpdatePosition(1);
+
+	SaveCheckpoint(QString());
+}
+
 void lcModel::UpdateInterface()
 {
+	if (!gMainWindow)
+		return;
+
 	gMainWindow->UpdateTimeline(true, false);
 	gMainWindow->UpdateUndoRedo(mUndoHistory.size() > 1 ? mUndoHistory[0]->Description : nullptr, !mRedoHistory.empty() ? mRedoHistory[0]->Description : nullptr);
 	gMainWindow->UpdatePaste(!gApplication->mClipboard.isEmpty());

@@ -1,10 +1,10 @@
-.TH LEOCAD 1 "20 July 2000"
+.TH LEOCAD 1 "26 January 2021"
 .\" NAME should be all caps, SECTION should be 1-8, maybe w/ subsection
-.\" other parms are allowed: see man(7), man(1)
+.\" other params are allowed: see man(7), man(1)
 .SH NAME
 LeoCAD \- CAD program for LEGO models.
 .SH SYNOPSIS
-\fIleocad \fR[\fI infile \fR[ \-i \fR[\fI outfile.ext \fR]\fI \fR[\fI\-w x\fR]\fI \fR[\fI\-h y\fR] ] \fR] [\fI\-l path\fR]
+\fIleocad \fR[\fIOPTIONS\fR] [\fIINFILE\fR]
 .SH "DESCRIPTION"
 \fILeoCAD \fR is a CAD program for creating virtual LEGO models. It
 has an easy to use interface and includes thousands of different
@@ -12,20 +12,23 @@ parts in its library.
 
 .SH OPTIONS
 Below is a summary of all of the options that \fILeoCAD\fR
-accepts. Most options have two equivalent names, one of
+accepts. Many options have two equivalent names, one of
 which is a single letter preceded by -, and the other of
 which is a long name preceded by --. Brackets ([ and ])
-indicate that an option takes an optional argument.
+indicate that an option takes an optional parameter.
 
 .TP
 .B infile
 Loads the project file \fIinfile\fR
 
 .TP
-.BI "\-i [" outfile.ext ]
-.ns
+\fB\-l \fIpath\fR, \fB\-\-libpath \fIpath
+.br
+Set the parts library location.
+
 .TP
-.BI "\-\-image [" outfile.ext ]
+\fB\-i \fR[\fIoutfile.ext\fR], \fB\-\-image \fR[\fIoutfile.ext\fR]
+.br
 Saves a picture to \fIoutfile.ext \fR in the image format specified
 by \fIext\fR and exits. If outfile is not given then the program will
 use a name based on \fIinfile\fR. The file format is selected by \fIext\fR
@@ -33,82 +36,168 @@ and can be gif, bmp, png or jpg (if \fIext\fR is not present then the
 default preferences format will be used).
 
 .TP
-.BI "\-w "width
-.ns
-.TP
-.BI "\-\-width "width
+\fB\-w \fIwidth\fR, \fB\-\-width \fIwidth
+.br
 Sets the width of the picture to \fIwidth\fR.
 
 .TP
-.BI "\-h "height
-.ns
-.TP
-.BI "\-\-height "height
+\fB\-h \fIheight\fR, \fB\-\-height \fIheight
+.br
 Sets the height of the picture to \fIheight\fR.
 
 .TP
-.BI "\-f "time
-.ns
-.TP
-.BI "\-\-from "time
-Start saving pictures at the step \fItime\fR.
+\fB\-f \fItime\fR, \fB\-\-from \fItime
+.br
+Start saving pictures at the step \fItime\fR. Steps start at 1.
 
 .TP
-.BI "\-t "time
-.ns
-.TP
-.BI "\-\-to "time
+\fB\-t \fItime\fR, \fB\-\-to \fItime
+.br
 Save pictures until the step \fItime\fR.
 
 .TP
-.BI "\-m "model
-.ns
-.TP
-.BI "\-\-model "model
-Sets the active submodel to \fImodel\fR.
+\fB\-s \fIsubmodel\fR, \fB\-\-submodel \fIsubmodel
+.br
+Sets the active submodel to \fIsubmodel\fR.
 
 .TP
-.BI "\-c "camera
-.ns
-.TP
-.BI "\-\-camera "camera
+\fB\-c \fIcamera\fR, \fB\-\-camera \fIcamera
+.br
 Sets the active camera to \fIcamera\fR.
 
 .TP
-.BI "\-\-viewpoint "front\ back\ left\ right\ top\ bottom\ home
-Sets the viewpoint to one of the predefined angles.
+\fB\-ss \fIid\fR,\ \fB\-\-stud\-style\ \fIid
+.br
+Set the stud style. Valid values 0=Plain, 1=Thin Lines Logo, 2=Outline Logo, 3=Sharp Top Logo, 4=Rounded Top Logo, 5=Flattened Logo, 6=High Contrast, 7=High Contrast with Logo.
+
+.TP
+\fB\-\-viewpoint \fRfront\ |\ back\ |\ left\ |\ right\ |\ top\ |\ bottom\ |\ home
+.br
+Sets the viewpoint to one of the predefined view angles.
+
+.TP
+.BI "\-\-camera\-angles " latitude " " longitude
+Set the camera angles in degrees around the model.
+
+.TP
+.BI "\-\-camera\-position " x " " y " " z "  " tx " " ty " " tz "  " ux " " uy " " uz
+Set the camera position, target and up vector using the \fILeoCAD\fR coordinate system.
+
+.TP
+.BI "\-\-camera\-position-ldraw " x " " y " " z "  " tx " " ty " " tz "  " ux " " uy " " uz
+Set the camera position, target and up vector using the \fILDraw\fR coordinate system.
 
 .TP
 .B \-\-orthographic
 Use an orthographic projection.
 
 .TP
+.BI "\-\-fov " degrees
+Set the vertical field of view used to render images.
+
+.TP
+.BI "\-\-zplanes " near " " far
+Set the near and far clipping planes used to render images (1 <= \fInear\fR < \fIfar\fR).
+
+.TP
+.B \-\-fade\-steps
+Render parts from prior steps faded.
+
+.TP
+.B \-\-no\-fade\-steps
+Do not render parts from prior steps faded.
+
+.TP
+.BI "\-\-fade\-steps\-color " color
+Color to use for rendering faded parts. (#AARRGGBB where AA, RR, GG, and BB are hexadecimal values for alpha, red, green, and blue respectively.)
+
+.TP
 .B \-\-highlight
-Adds a border around the pieces in the step they appear when saving pictures.
+Highlight parts in the steps they appear.
 
 .TP
-.BI "\-l "path
-.ns
-.TP
-.BI "\-\-libpath "path
-Use alternate parts library found in \fIpath \fR.  The Linux version
-of \fILeoCAD \fRuses /usr/share/leocad/ as the default.
+.B \-\-no\-highlight
+Do not highlight parts in the steps they appear.
 
 .TP
-.BI "\-obj [" outfile.obj ]
+.BI "\-\-highlight\-color " color
+Color to use to highlight parts, (#AARRGGBB where AA, RR, GG, and BB are hexadecimal values for alpha, red, green, and blue respectively.)
+
+.TP
+\fB\-\-shading \fRwireframe\ |\ flat\ |\ default\ |\ full
+.br
+Select shading mode for rendering.
+
+.TP
+.BI "\-\-line-width " width
+Set the with of the edge lines.
+
+.TP
+.BI "\-\-aa\-samples " count
+AntiAliasing sample size (1, 2, 4, or 8).
+
+.TP
+\fB\-scc \fI#AARRGGBB\fR,\ \fB\-\-stud\-cylinder\-color\ \fI#AARRGGBB
+.br
+High contrast stud cylinder color.
+
+.TP
+\fB\-ec \fI#AARRGGBB\fR,\ \fB\-\-edge\-color\ \fI#AARRGGBB
+.br
+High contrast edge color.
+
+.TP
+\fB\-bec \fI#AARRGGBB\fR,\ \fB\-\-black\-edge\-color\ \fI#AARRGGBB
+.br
+High contrast edge color for black parts.
+
+.TP
+\fB\-dec \fI#AARRGGBB\fR,\ \fB\-\-dark\-edge\-color\ \fI#AARRGGBB
+.br
+High contrast edge color for dark color parts.
+
+.TP
+\fB\-aec,\ \fB\-\-automate\-edge\-color
+.br
+Enable automatically adjusted edge colors.\
+
+.TP
+\fB\-cc \fIfloat\fR,\ \fB\-\-color\-contrast\ \ffloat
+.br
+Set the near and far clipping planes used to render images (1 <= \fInear\fR < \fIfar\fR).
+
+.TP
+\fB\-ldv \fIfloat\fR,\ \fB\-\-light\-dark\-value\ \ffloat
+.br
+Set the value to indicate a light or dark color.
+
+.TP
+\fB\-obj \fR[\fIoutfile.obj\fR]
+.br
 Exports the model to wavefront format.
 
 .TP
-.BI "\-3ds [" outfile.3ds ]
+\fB\-3ds \fR[\fIoutfile.3ds\fR]
+.br
 Exports the model to 3DS format.
 
 .TP
-.BI "\-dae [" outfile.dae ]
+\fB\-dae \fR[\fIoutfile.dae\fR]
+.br
 Exports the model to COLLADA DAE format.
 
 .TP
-.BI "\-html [" path ]
+\fB\-html \fR[\fIpath\fR]
+.br
 Creates an HTML page for the model.
+
+.TP
+.BR \-v ",\ " \-\-version
+Output version information and exit.
+
+.TP
+.BR \-? ",\ " \-\-help
+Display a brief usage synopsis and exit.
 
 .SH ENVIRONMENT
 ``LEOCAD_LIB'' may be set to the path of the parts library.
@@ -132,6 +221,6 @@ If you find any bugs please report them at https://github.com/leozide/leocad/iss
 \fILeoCAD \fRis written by Leonardo Zide <leozide@gmail.com>.
 You can visit the LeoCAD homepage at https://www.leocad.org/
 
-This manual page was written by Patrick Mahoney <pat7@gmx.net>,
+This manual page was originally written by Patrick Mahoney <pat7@gmx.net>,
 for the Debian GNU/Linux system (but may be used by others).
-
+It has since been edited by others.

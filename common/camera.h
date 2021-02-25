@@ -17,15 +17,16 @@
 #define LC_CAMERA_SELECTION_MASK    (LC_CAMERA_POSITION_SELECTED | LC_CAMERA_TARGET_SELECTED | LC_CAMERA_UPVECTOR_SELECTED)
 #define LC_CAMERA_FOCUS_MASK        (LC_CAMERA_POSITION_FOCUSED | LC_CAMERA_TARGET_FOCUSED | LC_CAMERA_UPVECTOR_FOCUSED)
 
-enum lcViewpoint
+enum class lcViewpoint
 {
-	LC_VIEWPOINT_FRONT,
-	LC_VIEWPOINT_BACK,
-	LC_VIEWPOINT_TOP,
-	LC_VIEWPOINT_BOTTOM,
-	LC_VIEWPOINT_LEFT,
-	LC_VIEWPOINT_RIGHT,
-	LC_VIEWPOINT_HOME
+	Front,
+	Back,
+	Top,
+	Bottom,
+	Left,
+	Right,
+	Home,
+	Count
 };
 
 enum lcCameraSection
@@ -43,15 +44,16 @@ public:
 	~lcCamera();
 
 	lcCamera(const lcCamera&) = delete;
-	lcCamera(lcCamera&&) = delete;
 	lcCamera& operator=(const lcCamera&) = delete;
-	lcCamera& operator=(lcCamera&&) = delete;
 
-	const char* GetName() const override
+	static lcViewpoint GetViewpoint(const QString& ViewpointName);
+
+	QString GetName() const override
 	{
-		return m_strName;
+		return mName;
 	}
 
+	void SetName(const QString& Name);
 	void CreateName(const lcArray<lcCamera*>& Cameras);
 
 	bool IsSimple() const
@@ -240,17 +242,17 @@ public:
 
 	void SetPosition(const lcVector3& Position, lcStep Step, bool AddKey)
 	{
-		ChangeKey(mPositionKeys, Position, Step, AddKey);
+		mPositionKeys.ChangeKey(Position, Step, AddKey);
 	}
 
 	void SetTargetPosition(const lcVector3& TargetPosition, lcStep Step, bool AddKey)
 	{
-		ChangeKey(mTargetPositionKeys, TargetPosition, Step, AddKey);
+		mTargetPositionKeys.ChangeKey(TargetPosition, Step, AddKey);
 	}
 
 	void SetUpVector(const lcVector3& UpVector, lcStep Step, bool AddKey)
 	{
-		ChangeKey(mPositionKeys, UpVector, Step, AddKey);
+		mPositionKeys.ChangeKey(UpVector, Step, AddKey);
 	}
 
 	float GetOrthoHeight() const
@@ -272,15 +274,14 @@ public:
 	void InsertTime(lcStep Start, lcStep Time);
 	void RemoveTime(lcStep Start, lcStep Time);
 
-	bool FileLoad(lcFile& file);
-	void Select(bool bSelecting, bool bFocus, bool bMultiple);
+	static bool FileLoad(lcFile& file);
 
 	void CompareBoundingBox(lcVector3& Min, lcVector3& Max);
 	void UpdatePosition(lcStep Step);
 	void CopyPosition(const lcCamera* Camera);
 	void CopySettings(const lcCamera* Camera);
 
-	void ZoomExtents(float AspectRatio, const lcVector3& Center, const lcVector3* Points, int NumPoints, lcStep Step, bool AddKey);
+	void ZoomExtents(float AspectRatio, const lcVector3& Center, const std::vector<lcVector3>& Points, lcStep Step, bool AddKey);
 	void ZoomRegion(float AspectRatio, const lcVector3& Position, const lcVector3& TargetPosition, const lcVector3* Corners, lcStep Step, bool AddKey);
 	void Zoom(float Distance, lcStep Step, bool AddKey);
 	void Pan(const lcVector3& Distance, lcStep Step, bool AddKey);
@@ -291,10 +292,9 @@ public:
 	void MoveRelative(const lcVector3& Distance, lcStep Step, bool AddKey);
 	void SetViewpoint(lcViewpoint Viewpoint);
 	void SetViewpoint(const lcVector3& Position);
+	void SetViewpoint(const lcVector3& Position, const lcVector3& Target, const lcVector3& Up);
 	void GetAngles(float& Latitude, float& Longitude, float& Distance) const;
 	void SetAngles(float Latitude, float Longitude, float Distance);
-
-	char m_strName[81];
 
 	float m_fovy;
 	float m_zNear;
@@ -306,12 +306,12 @@ public:
 	lcVector3 mUpVector;
 
 protected:
-	lcArray<lcObjectKey<lcVector3>> mPositionKeys;
-	lcArray<lcObjectKey<lcVector3>> mTargetPositionKeys;
-	lcArray<lcObjectKey<lcVector3>> mUpVectorKeys;
+	lcObjectKeyArray<lcVector3> mPositionKeys;
+	lcObjectKeyArray<lcVector3> mTargetPositionKeys;
+	lcObjectKeyArray<lcVector3> mUpVectorKeys;
 
 	void Initialize();
 
+	QString mName;
 	quint32 mState;
 };
-

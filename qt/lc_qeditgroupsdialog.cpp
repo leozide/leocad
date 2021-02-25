@@ -5,7 +5,6 @@
 #include "lc_model.h"
 #include "piece.h"
 #include "group.h"
-#include "lc_basewindow.h"
 
 lcQEditGroupsDialog::lcQEditGroupsDialog(QWidget* Parent, const QMap<lcPiece*, lcGroup*>& PieceParents, const QMap<lcGroup*, lcGroup*>& GroupParents, lcModel* Model)
 	: QDialog(Parent), mPieceParents(PieceParents), mGroupParents(GroupParents)

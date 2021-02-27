@@ -45,6 +45,13 @@ public:
 		mModel = Model;
 		mActiveView = nullptr;
 	}
+	~lcModelTabWidget()
+	{
+		for (auto View : mViews)
+		{
+			RemoveView(View);
+		}
+	}
 
 	void ResetLayout();
 	void Clear();

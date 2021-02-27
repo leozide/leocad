@@ -1654,10 +1654,10 @@ void lcMainWindow::ResetCameras()
 	if (!CurrentTab)
 		return;
 
-	const lcArray<lcView*>* Views = CurrentTab->GetViews();
+	const QList<lcViewWidget*> ViewWidgets = CurrentTab->findChildren<lcViewWidget*>();
 
-	for (int ViewIdx = 0; ViewIdx < Views->GetSize(); ViewIdx++)
-		(*Views)[ViewIdx]->SetDefaultCamera();
+	for (lcViewWidget* ViewWidget : ViewWidgets)
+		ViewWidget->GetView()->SetDefaultCamera();
 
 	lcGetActiveModel()->DeleteAllCameras();
 }
@@ -2588,6 +2588,23 @@ lcModel* lcMainWindow::GetActiveModel() const
 {
 	lcView* ActiveView = GetActiveView();
 	return ActiveView ? ActiveView->GetActiveModel() : nullptr;
+}
+
+lcModelTabWidget* lcMainWindow::GetTabForView(lcView* View) const
+{
+	QWidget* Widget = View->GetWidget();
+
+	while (Widget)
+	{
+		lcModelTabWidget* TabWidget = qobject_cast<lcModelTabWidget*>(Widget);
+
+		if (TabWidget)
+			return TabWidget;
+		else
+			Widget = Widget->parentWidget();
+	}
+
+	return nullptr;
 }
 
 void lcMainWindow::HandleCommand(lcCommandId CommandId)

@@ -40,7 +40,10 @@ lcView::lcView(lcViewType ViewType, lcModel* Model)
 	if (ActiveView)
 		SetCamera(ActiveView->mCamera, false);
 	else
-		SetDefaultCamera();
+	{
+		mCamera = new lcCamera(true);
+		mCamera->SetViewpoint(lcViewpoint::Home);
+	}
 }
 
 lcView::~lcView()
@@ -2228,6 +2231,8 @@ void lcView::SetDefaultCamera()
 		mCamera = new lcCamera(true);
 
 	mCamera->SetViewpoint(lcViewpoint::Home);
+	ZoomExtents();
+	Redraw();
 
 	emit CameraChanged();
 }

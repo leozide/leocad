@@ -98,11 +98,6 @@ public:
 		mModel = Model;
 	}
 
-	const lcArray<lcView*>* GetViews() const
-	{
-		return &mViews;
-	}
-
 protected:
 	lcModel* mModel;
 	lcView* mActiveView;
@@ -196,25 +191,12 @@ public:
 	}
 
 	lcModel* GetActiveModel() const;
+	lcModelTabWidget* GetTabForView(lcView* View) const;
 
 	lcModel* GetCurrentTabModel() const
 	{
 		const lcModelTabWidget* const CurrentTab = (lcModelTabWidget*)mModelTabWidget->currentWidget();
 		return CurrentTab ? CurrentTab->GetModel() : nullptr;
-	}
-
-	lcModelTabWidget* GetTabForView(lcView* View) const
-	{
-		for (int TabIdx = 0; TabIdx < mModelTabWidget->count(); TabIdx++)
-		{
-			lcModelTabWidget* TabWidget = (lcModelTabWidget*)mModelTabWidget->widget(TabIdx);
-
-			const int ViewIndex = TabWidget->GetViews()->FindIndex(View);
-			if (ViewIndex != -1)
-				return TabWidget;
-		}
-
-		return nullptr;
 	}
 
 	lcPartSelectionWidget* GetPartSelectionWidget() const

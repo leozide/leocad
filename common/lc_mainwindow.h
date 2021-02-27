@@ -45,12 +45,11 @@ public:
 		mModel = Model;
 		mActiveView = nullptr;
 	}
+
 	~lcModelTabWidget()
 	{
-		for (auto View : mViews)
-		{
-			RemoveView(View);
-		}
+		mActiveView = nullptr;
+		mViews.RemoveAll();
 	}
 
 	void ResetLayout();

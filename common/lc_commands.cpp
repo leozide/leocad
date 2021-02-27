@@ -976,13 +976,6 @@ const lcCommand gCommands[] =
 		QT_TRANSLATE_NOOP("Status", "Use this camera"),
 		""
 	},
-	// LC_VIEW_CAMERA_RESET
-	{
-		QT_TRANSLATE_NOOP("Action", "View.Cameras.Reset"),
-		QT_TRANSLATE_NOOP("Menu", "Reset"),
-		QT_TRANSLATE_NOOP("Status", "Reset views to their default positions"),
-		""
-	},
 	// LC_VIEW_TIME_FIRST
 	{
 		QT_TRANSLATE_NOOP("Action", "View.Time.First"),

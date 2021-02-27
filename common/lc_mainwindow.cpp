@@ -413,9 +413,6 @@ void lcMainWindow::CreateMenus()
 	for (int actionIdx = LC_VIEW_CAMERA_FIRST; actionIdx <= LC_VIEW_CAMERA_LAST; actionIdx++)
 		mCameraMenu->addAction(mActions[actionIdx]);
 
-	mCameraMenu->addSeparator();
-	mCameraMenu->addAction(mActions[LC_VIEW_CAMERA_RESET]);
-
 	mViewpointMenu = new QMenu(tr("&Viewpoints"), this);
 	mViewpointMenu->addAction(mActions[LC_VIEW_VIEWPOINT_FRONT]);
 	mViewpointMenu->addAction(mActions[LC_VIEW_VIEWPOINT_BACK]);
@@ -1645,21 +1642,6 @@ void lcMainWindow::SetCurrentModelTab(lcModel* Model)
 	ViewWidget->show();
 	ViewWidget->setFocus();
 	NewView->ZoomExtents();
-}
-
-void lcMainWindow::ResetCameras()
-{
-	lcModelTabWidget* CurrentTab = (lcModelTabWidget*)mModelTabWidget->currentWidget();
-
-	if (!CurrentTab)
-		return;
-
-	const QList<lcViewWidget*> ViewWidgets = CurrentTab->findChildren<lcViewWidget*>();
-
-	for (lcViewWidget* ViewWidget : ViewWidgets)
-		ViewWidget->GetView()->SetDefaultCamera();
-
-	lcGetActiveModel()->DeleteAllCameras();
 }
 
 void lcMainWindow::AddView(lcView* View)
@@ -3236,10 +3218,6 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 	case LC_VIEW_CAMERA16:
 		if (ActiveView)
 			ActiveView->SetCameraIndex(CommandId - LC_VIEW_CAMERA1);
-		break;
-
-	case LC_VIEW_CAMERA_RESET:
-		ResetCameras();
 		break;
 
 	case LC_MODEL_NEW:

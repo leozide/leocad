@@ -48,30 +48,34 @@ void lcTabBar::mouseReleaseEvent(QMouseEvent* Event)
 		QTabBar::mouseReleaseEvent(Event);
 }
 
-void lcModelTabWidget::ResetLayout()
+void lcModelTabWidget::ResetLayout(bool ClearView)
 {
 	QLayout* TabLayout = layout();
 	QWidget* TopWidget = TabLayout->itemAt(0)->widget();
 
-	if (TopWidget->metaObject() == &lcViewWidget::staticMetaObject)
+	if (qobject_cast<lcViewWidget*>(TopWidget))
 		return;
 
 	QWidget* Widget = GetAnyViewWidget();
 
 	TabLayout->addWidget(Widget);
-	TabLayout->removeWidget(TopWidget);
-	TopWidget->deleteLater();
+	delete TopWidget;
+
+	if (ClearView)
+	{
+		lcViewWidget* ViewWidget = qobject_cast<lcViewWidget*>(Widget);
+
+		if (ViewWidget)
+			ViewWidget->GetView()->Clear();
+	}
 
 	Widget->setFocus();
 }
 
 void lcModelTabWidget::Clear()
 {
-	ResetLayout();
+	ResetLayout(true);
 	mModel = nullptr;
-	for (lcView* View : mViews)
-		View->Clear();
-	mViews.RemoveAll();
 	mActiveView = nullptr;
 }
 
@@ -1651,8 +1655,6 @@ void lcMainWindow::AddView(lcView* View)
 	if (!TabWidget)
 		return;
 
-	TabWidget->AddView(View);
-
 	if (!TabWidget->GetActiveView())
 	{
 		TabWidget->SetActiveView(View);
@@ -1907,7 +1909,7 @@ void lcMainWindow::ResetViews()
 	if (!TabWidget)
 		return;
 
-	TabWidget->ResetLayout();
+	TabWidget->ResetLayout(false);
 	TabWidget->GetActiveView()->SetViewpoint(lcViewpoint::Home);
 }
 

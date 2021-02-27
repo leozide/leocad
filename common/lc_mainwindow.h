@@ -46,13 +46,7 @@ public:
 		mActiveView = nullptr;
 	}
 
-	~lcModelTabWidget()
-	{
-		mActiveView = nullptr;
-		mViews.RemoveAll();
-	}
-
-	void ResetLayout();
+	void ResetLayout(bool ClearView);
 	void Clear();
 
 	QWidget* GetAnyViewWidget()
@@ -75,17 +69,10 @@ public:
 		mActiveView = ActiveView;
 	}
 
-	void AddView(lcView* View)
-	{
-		mViews.Add(View);
-	}
-
 	void RemoveView(lcView* View)
 	{
 		if (View == mActiveView)
 			mActiveView = nullptr;
-
-		mViews.Remove(View);
 	}
 
 	lcModel* GetModel() const
@@ -101,7 +88,6 @@ public:
 protected:
 	lcModel* mModel;
 	lcView* mActiveView;
-	lcArray<lcView*> mViews;
 };
 
 class lcMainWindow : public QMainWindow

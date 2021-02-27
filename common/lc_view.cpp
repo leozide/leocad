@@ -62,6 +62,17 @@ lcView::~lcView()
 		delete mContext;
 }
 
+std::vector<lcView*> lcView::GetModelViews(const lcModel* Model)
+{
+	std::vector<lcView*> Views;
+
+	for (lcView* View : mViews)
+		if (View->GetModel() == Model)
+			Views.push_back(View);
+
+	return Views;
+}
+
 void lcView::UpdateProjectViews(const Project* Project)
 {
 	for (lcView* View : mViews)

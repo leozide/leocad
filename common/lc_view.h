@@ -188,6 +188,7 @@ public:
 		mBackgroundColor = BackgroundColor;
 	}
 
+	static std::vector<lcView*> GetModelViews(const lcModel* Model);
 	static void UpdateProjectViews(const Project* Project);
 	static void UpdateAllViews();
 

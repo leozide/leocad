@@ -203,12 +203,6 @@ public:
 		return CurrentTab ? CurrentTab->GetModel() : nullptr;
 	}
 
-	const lcArray<lcView*>* GetViewsForModel(const lcModel* Model) const
-	{
-		const lcModelTabWidget* const TabWidget = GetTabWidgetForModel(Model);
-		return TabWidget ? TabWidget->GetViews() : nullptr;
-	}
-
 	lcModelTabWidget* GetTabForView(lcView* View) const
 	{
 		for (int TabIdx = 0; TabIdx < mModelTabWidget->count(); TabIdx++)

@@ -190,19 +190,15 @@ void lcModel::DeleteModel()
 {
 	if (gMainWindow)
 	{
-		const lcArray<lcView*>* Views = gMainWindow->GetViewsForModel(this);
+		std::vector<lcView*> Views = lcView::GetModelViews(this);
 
 		// TODO: this is only needed to avoid a dangling pointer during undo/redo if a camera is set to a view but we should find a better solution instead
-		if (Views)
+		for (lcView* View : Views)
 		{
-			for (int ViewIdx = 0; ViewIdx < Views->GetSize(); ViewIdx++)
-			{
-				lcView* View = (*Views)[ViewIdx];
-				lcCamera* Camera = View->GetCamera();
+			lcCamera* Camera = View->GetCamera();
 
-				if (!Camera->IsSimple() && mCameras.FindIndex(Camera) != -1)
-					View->SetCamera(Camera, true);
-			}
+			if (!Camera->IsSimple() && mCameras.FindIndex(Camera) != -1)
+				View->SetCamera(Camera, true);
 		}
 	}
 
@@ -2563,14 +2559,11 @@ bool lcModel::RemoveSelectedObjects()
 
 		if (Camera->IsSelected())
 		{
-			const lcArray<lcView*>* Views = gMainWindow->GetViewsForModel(this);
-			for (int ViewIdx = 0; ViewIdx < Views->GetSize(); ViewIdx++)
-			{
-				lcView* View = (*Views)[ViewIdx];
+			std::vector<lcView*> Views = lcView::GetModelViews(this);
 
+			for (lcView* View : Views)
 				if (Camera == View->GetCamera())
 					View->SetCamera(Camera, true);
-			}
 
 			RemovedCamera = true;
 			mCameras.RemoveIndex(CameraIdx);
@@ -4103,10 +4096,10 @@ void lcModel::EraserToolClicked(lcObject* Object)
 
 	case lcObjectType::Camera:
 		{
-			const lcArray<lcView*>* Views = gMainWindow->GetViewsForModel(this);
-			for (int ViewIdx = 0; ViewIdx < Views->GetSize(); ViewIdx++)
+			std::vector<lcView*> Views = lcView::GetModelViews(this);
+
+			for (lcView* View : Views)
 			{
-				lcView* View = (*Views)[ViewIdx];
 				lcCamera* Camera = View->GetCamera();
 
 				if (Camera == Object)

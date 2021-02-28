@@ -6,6 +6,7 @@ class lcViewWidget : public QOpenGLWidget
 
 public:
 	lcViewWidget(QWidget* Parent, lcView* View);
+	~lcViewWidget();
 
 	lcView* GetView() const;
 	void SetView(lcView* View);

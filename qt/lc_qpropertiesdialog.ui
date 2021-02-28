@@ -38,7 +38,7 @@
         </widget>
        </item>
        <item row="0" column="1">
-        <widget class="QLineEdit" name="authorEdit"/>
+        <widget class="QLineEdit" name="AuthorEdit"/>
        </item>
        <item row="1" column="0">
         <widget class="QLabel" name="label_3">
@@ -48,7 +48,7 @@
         </widget>
        </item>
        <item row="1" column="1">
-        <widget class="QLineEdit" name="descriptionEdit"/>
+        <widget class="QLineEdit" name="DescriptionEdit"/>
        </item>
        <item row="2" column="0">
         <widget class="QLabel" name="label_2">
@@ -58,7 +58,7 @@
         </widget>
        </item>
        <item row="2" column="1">
-        <widget class="QTextEdit" name="commentsEdit">
+        <widget class="QTextEdit" name="CommentsEdit">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
            <horstretch>0</horstretch>
@@ -70,6 +70,20 @@
          </property>
         </widget>
        </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="label_4">
+         <property name="text">
+          <string>Measurements:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QLabel" name="MeasurementsLabel">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
       </layout>
      </widget>
      <widget class="QWidget" name="tabParts">
@@ -78,7 +92,7 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_3">
        <item>
-        <widget class="QTableWidget" name="partsTable">
+        <widget class="QTableWidget" name="PartsTable">
          <property name="editTriggers">
           <set>QAbstractItemView::NoEditTriggers</set>
          </property>
@@ -115,10 +129,10 @@
  <tabstops>
   <tabstop>tabWidget</tabstop>
   <tabstop>buttonBox</tabstop>
-  <tabstop>authorEdit</tabstop>
-  <tabstop>descriptionEdit</tabstop>
-  <tabstop>commentsEdit</tabstop>
-  <tabstop>partsTable</tabstop>
+  <tabstop>AuthorEdit</tabstop>
+  <tabstop>DescriptionEdit</tabstop>
+  <tabstop>CommentsEdit</tabstop>
+  <tabstop>PartsTable</tabstop>
  </tabstops>
  <resources/>
  <connections>

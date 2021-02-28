@@ -43,12 +43,20 @@ lcQPropertiesDialog::lcQPropertiesDialog(QWidget* Parent, lcPropertiesDialogOpti
 
 	setWindowTitle(tr("%1 Properties").arg(mOptions->Properties.mFileName));
 
-	ui->descriptionEdit->setText(mOptions->Properties.mDescription);
-	ui->authorEdit->setText(mOptions->Properties.mAuthor);
-	ui->commentsEdit->setText(mOptions->Properties.mComments);
+	ui->DescriptionEdit->setText(mOptions->Properties.mDescription);
+	ui->AuthorEdit->setText(mOptions->Properties.mAuthor);
+	ui->CommentsEdit->setText(mOptions->Properties.mComments);
+
+	const lcVector3 Dimensions = Options->BoundingBox.Max - Options->BoundingBox.Min;
+	QString Format = tr("%1 x %2 x %3 cm\n%4 x %5 x %6 inches\n%7 x %8 x %9 LDU");
+	QString Measurements = Format.arg(QString::number(Dimensions.x * 0.04, 'f', 2), QString::number(Dimensions.y * 0.04, 'f', 2), QString::number(Dimensions.z * 0.04, 'f', 2),
+	                                  QString::number(Dimensions.x / 64.0, 'f', 2), QString::number(Dimensions.y / 64.0, 'f', 2), QString::number(Dimensions.z / 64.0, 'f', 2),
+	                                  QString::number(Dimensions.x, 'f', 2), QString::number(Dimensions.y, 'f', 2), QString::number(Dimensions.z, 'f', 2));
+
+	ui->MeasurementsLabel->setText(Measurements);
 
 	const lcPartsList& PartsList = mOptions->PartsList;
-	QStringList horizontalLabels;
+	QStringList HorizontalLabels;
 
 	std::vector<bool> ColorsUsed(gColorList.size());
 
@@ -57,34 +65,34 @@ lcQPropertiesDialog::lcQPropertiesDialog(QWidget* Parent, lcPropertiesDialogOpti
 			ColorsUsed[ColorIt.first] = true;
 
 	std::vector<int> ColorColumns(gColorList.size());
-	int NumColors = 0;
+	int ColorCount = 0;
 
-	horizontalLabels.append(tr("Part"));
+	HorizontalLabels.append(tr("Part"));
 
 	for (size_t ColorIndex = 0; ColorIndex < gColorList.size(); ColorIndex++)
 	{
 		if (ColorsUsed[ColorIndex])
 		{
-			ColorColumns[ColorIndex] = NumColors++;
-			horizontalLabels.append(gColorList[ColorIndex].Name);
+			ColorColumns[ColorIndex] = ColorCount++;
+			HorizontalLabels.append(gColorList[ColorIndex].Name);
 		}
 	}
 
-	horizontalLabels.append(tr("Total"));
+	HorizontalLabels.append(tr("Total"));
 
-	QTableWidget *table = ui->partsTable;
-	table->setColumnCount(NumColors + 2);
-	table->setRowCount((int)PartsList.size() + 1);
-	table->setHorizontalHeaderLabels(horizontalLabels);
-	table->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+	QTableWidget* PartsTable = ui->PartsTable;
+	PartsTable->setColumnCount(ColorCount + 2);
+	PartsTable->setRowCount((int)PartsList.size() + 1);
+	PartsTable->setHorizontalHeaderLabels(HorizontalLabels);
+	PartsTable->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
 
 	std::vector<int> InfoTotals(PartsList.size());
-	std::vector<int> ColorTotals(NumColors);
+	std::vector<int> ColorTotals(ColorCount);
 	int Row = 0, Total = 0;
 
 	for (const auto& PartIt : PartsList)
 	{
-		table->setItem(Row, 0, new lcPartsTableWidgetItem(PartIt.first->m_strDescription));
+		PartsTable->setItem(Row, 0, new lcPartsTableWidgetItem(PartIt.first->m_strDescription));
 
 		for (const auto& ColorIt : PartIt.second)
 		{
@@ -93,43 +101,43 @@ lcQPropertiesDialog::lcQPropertiesDialog(QWidget* Parent, lcPropertiesDialogOpti
 
 			lcPartsTableWidgetItem* Item = new lcPartsTableWidgetItem(QString::number(Count));
 			Item->setTextAlignment(Qt::AlignCenter);
-			table->setItem(Row, ColorColumns[ColorIndex] + 1, Item);
+			PartsTable->setItem(Row, ColorColumns[ColorIndex] + 1, Item);
 
 			InfoTotals[Row] += Count;
 			ColorTotals[ColorColumns[ColorIndex]] += Count;
 			Total += Count;
 		}
 
-		for (int Column = 0; Column <= NumColors; Column++)
-			if (!table->item(Row, Column))
-				table->setItem(Row, Column, new lcPartsTableWidgetItem(QString()));
+		for (int Column = 0; Column <= ColorCount; Column++)
+			if (!PartsTable->item(Row, Column))
+				PartsTable->setItem(Row, Column, new lcPartsTableWidgetItem(QString()));
 
 		Row++;
 	}
 
 	lcPartsTableWidgetItem* Item = new lcPartsTableWidgetItem(tr("Total"));
 	Item->mLast = true;
-	table->setItem((int)InfoTotals.size(), 0, Item);
+	PartsTable->setItem((int)InfoTotals.size(), 0, Item);
 
 	for (Row = 0; Row < (int)InfoTotals.size(); Row++)
 	{
-		lcPartsTableWidgetItem *item = new lcPartsTableWidgetItem(QString::number(InfoTotals[Row]));
-		item->setTextAlignment(Qt::AlignCenter);
-		table->setItem(Row, NumColors + 1, item);
+		Item = new lcPartsTableWidgetItem(QString::number(InfoTotals[Row]));
+		Item->setTextAlignment(Qt::AlignCenter);
+		PartsTable->setItem(Row, ColorCount + 1, Item);
 	}
 
-	for (int colorIdx = 0; colorIdx < NumColors; colorIdx++)
+	for (int ColorIndex = 0; ColorIndex < ColorCount; ColorIndex++)
 	{
-		lcPartsTableWidgetItem *item = new lcPartsTableWidgetItem(QString::number(ColorTotals[colorIdx]));
-		item->mLast = true;
-		item->setTextAlignment(Qt::AlignCenter);
-		table->setItem((int)InfoTotals.size(), colorIdx + 1, item);
+		Item = new lcPartsTableWidgetItem(QString::number(ColorTotals[ColorIndex]));
+		Item->mLast = true;
+		Item->setTextAlignment(Qt::AlignCenter);
+		PartsTable->setItem((int)InfoTotals.size(), ColorIndex + 1, Item);
 	}
 
-	lcPartsTableWidgetItem *item = new lcPartsTableWidgetItem(QString::number(Total));
-	item->mLast = true;
-	item->setTextAlignment(Qt::AlignCenter);
-	table->setItem((int)InfoTotals.size(), NumColors + 1, item);
+	Item = new lcPartsTableWidgetItem(QString::number(Total));
+	Item->mLast = true;
+	Item->setTextAlignment(Qt::AlignCenter);
+	PartsTable->setItem((int)InfoTotals.size(), ColorCount + 1, Item);
 }
 
 lcQPropertiesDialog::~lcQPropertiesDialog()
@@ -139,9 +147,9 @@ lcQPropertiesDialog::~lcQPropertiesDialog()
 
 void lcQPropertiesDialog::accept()
 {
-	mOptions->Properties.mDescription = ui->descriptionEdit->text();
-	mOptions->Properties.mAuthor = ui->authorEdit->text();
-	mOptions->Properties.mComments = ui->commentsEdit->toPlainText();
+	mOptions->Properties.mDescription = ui->DescriptionEdit->text();
+	mOptions->Properties.mAuthor = ui->AuthorEdit->text();
+	mOptions->Properties.mComments = ui->CommentsEdit->toPlainText();
 
 	QDialog::accept();
 }

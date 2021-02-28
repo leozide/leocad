@@ -632,7 +632,7 @@ lcVector3 lcView::GetCameraLightInsertPosition() const
 	lcVector3 Min, Max;
 	lcVector3 Center;
 
-	if (ActiveModel->GetPiecesBoundingBox(Min, Max))
+	if (ActiveModel->GetVisiblePiecesBoundingBox(Min, Max))
 		Center = (Min + Max) / 2.0f;
 	else
 		Center = lcVector3(0.0f, 0.0f, 0.0f);
@@ -1875,7 +1875,7 @@ void lcView::DrawGrid()
 	int MinX, MaxX, MinY, MaxY;
 	lcVector3 Min(FLT_MAX, FLT_MAX, FLT_MAX), Max(-FLT_MAX, -FLT_MAX, -FLT_MAX);
 
-	bool GridSizeValid = mModel->GetPiecesBoundingBox(Min, Max);
+	bool GridSizeValid = mModel->GetVisiblePiecesBoundingBox(Min, Max);
 
 	if (mTrackTool == lcTrackTool::Insert)
 	{

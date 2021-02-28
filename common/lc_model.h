@@ -257,7 +257,8 @@ public:
 	bool GetFocusPosition(lcVector3& Position) const;
 	lcObject* GetFocusObject() const;
 	bool GetSelectionCenter(lcVector3& Center) const;
-	bool GetPiecesBoundingBox(lcVector3& Min, lcVector3& Max) const;
+	lcBoundingBox GetAllPiecesBoundingBox() const;
+	bool GetVisiblePiecesBoundingBox(lcVector3& Min, lcVector3& Max) const;
 	std::vector<lcVector3> GetPiecesBoundingBoxPoints() const;
 	void GetPartsList(int DefaultColorIndex, bool ScanSubModels, bool AddSubModels, lcPartsList& PartsList) const;
 	void GetPartsListForStep(lcStep Step, int DefaultColorIndex, lcPartsList& PartsList) const;

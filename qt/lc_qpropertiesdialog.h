@@ -5,8 +5,8 @@
 struct lcPropertiesDialogOptions
 {
 	lcModelProperties Properties;
-
 	lcPartsList PartsList;
+	lcBoundingBox BoundingBox;
 };
 
 namespace Ui

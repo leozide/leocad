@@ -55,7 +55,7 @@ jobs:
     script:
      - qmake -v
      - qmake PREFIX=/usr
-     - make -j$(nproc)
+     - make
     after_success:
      - cp build/release/leocad .
      - export VERSION=$(git rev-parse --short HEAD)

@@ -69,6 +69,7 @@ void lcModelTabWidget::ResetLayout(bool ClearView)
 			ViewWidget->GetView()->Clear();
 	}
 
+	Widget->show();
 	Widget->setFocus();
 }
 

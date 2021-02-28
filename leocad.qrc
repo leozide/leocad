@@ -111,6 +111,7 @@
         <file>resources/ldconfig.ldr</file>
         <file>resources/minifig.ini</file>
         <file>resources/ldraw.xml</file>
+        <file>resources/ldraw2bl.txt</file>
         <file>resources/leocad_fr.qm</file>
         <file>resources/leocad_pt.qm</file>
         <file>resources/leocad_de.qm</file>

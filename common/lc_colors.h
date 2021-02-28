@@ -53,7 +53,6 @@ extern int gDefaultColor;
 void lcLoadDefaultColors(lcStudStyle StudStyle);
 bool lcLoadColorFile(lcFile& File, lcStudStyle StudStyle);
 int lcGetColorIndex(quint32 ColorCode);
-int lcGetBrickLinkColor(int ColorIndex);
 
 inline quint32 lcGetColorCodeFromExtendedColor(int Color)
 {

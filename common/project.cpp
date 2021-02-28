@@ -16,6 +16,7 @@
 #include "lc_zipfile.h"
 #include "lc_qimagedialog.h"
 #include "lc_qmodellistdialog.h"
+#include "lc_bricklink.h"
 
 lcHTMLExportOptions::lcHTMLExportOptions(const Project* Project)
 {
@@ -1129,66 +1130,7 @@ bool Project::Export3DStudio(const QString& FileName)
 
 void Project::ExportBrickLink()
 {
-	lcPartsList PartsList;
-
-	if (!mModels.IsEmpty())
-		mModels[0]->GetPartsList(gDefaultColor, true, false, PartsList);
-
-	if (PartsList.empty())
-	{
-		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Nothing to export."));
-		return;
-	}
-
-	QString SaveFileName = GetExportFileName(QString(), "xml", tr("Export BrickLink"), tr("XML Files (*.xml);;All Files (*.*)"));
-
-	if (SaveFileName.isEmpty())
-		return;
-
-	lcDiskFile BrickLinkFile(SaveFileName);
-	char Line[1024];
-
-	if (!BrickLinkFile.Open(QIODevice::WriteOnly))
-	{
-		QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Could not open file '%1' for writing.").arg(SaveFileName));
-		return;
-	}
-
-	BrickLinkFile.WriteLine("<INVENTORY>\n");
-
-	for (const auto& PartIt : PartsList)
-	{
-		const PieceInfo* Info = PartIt.first;
-
-		for (const auto& ColorIt : PartIt.second)
-		{
-			BrickLinkFile.WriteLine("  <ITEM>\n");
-			BrickLinkFile.WriteLine("    <ITEMTYPE>P</ITEMTYPE>\n");
-
-			char FileName[LC_PIECE_NAME_LEN];
-			strcpy(FileName, Info->mFileName);
-			char* Ext = strchr(FileName, '.');
-			if (Ext)
-				*Ext = 0;
-
-			sprintf(Line, "    <ITEMID>%s</ITEMID>\n", FileName);
-			BrickLinkFile.WriteLine(Line);
-
-			sprintf(Line, "    <MINQTY>%d</MINQTY>\n", ColorIt.second);
-			BrickLinkFile.WriteLine(Line);
-
-			int Color = lcGetBrickLinkColor(ColorIt.first);
-			if (Color)
-			{
-				sprintf(Line, "    <COLOR>%d</COLOR>\n", Color);
-				BrickLinkFile.WriteLine(Line);
-			}
-
-			BrickLinkFile.WriteLine("  </ITEM>\n");
-		}
-	}
-
-	BrickLinkFile.WriteLine("</INVENTORY>\n");
+	::ExportBrickLink(*this);
 }
 
 bool Project::ExportCOLLADA(const QString& FileName)

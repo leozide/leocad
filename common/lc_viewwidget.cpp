@@ -12,16 +12,10 @@
 #include "lc_profile.h"
 #include "lc_previewwidget.h"
 
-static QList<lcViewWidget*> gWidgetList;
-
 lcViewWidget::lcViewWidget(QWidget* Parent, lcView* View)
-	: QOpenGLWidget(Parent)
+	: QOpenGLWidget(Parent), mView(View)
 {
-	mWheelAccumulator = 0;
-	mView = View;
 	mView->SetWidget(this);
-
-	gWidgetList.append(this);
 
 	setMouseTracking(true);
 
@@ -30,13 +24,6 @@ lcViewWidget::lcViewWidget(QWidget* Parent, lcView* View)
 		setFocusPolicy(Qt::StrongFocus);
 		setAcceptDrops(true);
 	}
-}
-
-lcViewWidget::~lcViewWidget()
-{
-	gWidgetList.removeOne(this);
-
-	delete mView;
 }
 
 QSize lcViewWidget::sizeHint() const
@@ -62,8 +49,7 @@ void lcViewWidget::SetView(lcView* View)
 			View->SetFocus(true);
 	}
 
-	delete mView;
-	mView = View;
+	mView = std::unique_ptr<lcView>(View);
 }
 
 void lcViewWidget::initializeGL()

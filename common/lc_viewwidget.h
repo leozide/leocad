@@ -6,11 +6,10 @@ class lcViewWidget : public QOpenGLWidget
 
 public:
 	lcViewWidget(QWidget* Parent, lcView* View);
-	~lcViewWidget();
 
 	lcView* GetView() const
 	{
-		return mView;
+		return mView.get();
 	}
 
 	void SetView(lcView* View);
@@ -44,7 +43,7 @@ protected:
 	void dragMoveEvent(QDragMoveEvent* DragMoveEvent) override;
 	void dropEvent(QDropEvent* DropEvent) override;
 
-	lcView* mView;
+	std::unique_ptr<lcView> mView;
 	QSize mPreferredSize;
-	int mWheelAccumulator;
+	int mWheelAccumulator = 0;
 };

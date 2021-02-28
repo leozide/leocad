@@ -7,11 +7,7 @@ class lcViewWidget : public QOpenGLWidget
 public:
 	lcViewWidget(QWidget* Parent, lcView* View);
 
-	lcView* GetView() const
-	{
-		return mView.get();
-	}
-
+	lcView* GetView() const;
 	void SetView(lcView* View);
 
 	QSize sizeHint() const override;

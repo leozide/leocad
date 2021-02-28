@@ -98,9 +98,9 @@ public:
 
 	void UpdatePieceInfo(PieceInfo* Info) const;
 
+protected:
 	QString GetExportFileName(const QString& FileName, const QString& DefaultExtension, const QString& DialogTitle, const QString& DialogFilter) const;
 
-protected:
 	std::vector<lcModelPartsEntry> GetModelParts();
 	void SetFileName(const QString& FileName);
 

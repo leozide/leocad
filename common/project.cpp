@@ -1130,7 +1130,23 @@ bool Project::Export3DStudio(const QString& FileName)
 
 void Project::ExportBrickLink()
 {
-	::ExportBrickLink(*this);
+	lcPartsList PartsList;
+
+	if (!mModels.IsEmpty())
+		mModels[0]->GetPartsList(gDefaultColor, true, false, PartsList);
+
+	if (PartsList.empty())
+	{
+		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Nothing to export."));
+		return;
+	}
+
+	QString SaveFileName = GetExportFileName(QString(), "xml", tr("Export BrickLink"), tr("XML Files (*.xml);;All Files (*.*)"));
+
+	if (SaveFileName.isEmpty())
+		return;
+
+	lcExportBrickLink(SaveFileName, PartsList);
 }
 
 bool Project::ExportCOLLADA(const QString& FileName)

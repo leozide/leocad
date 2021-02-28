@@ -31,6 +31,11 @@ QSize lcViewWidget::sizeHint() const
 	return mPreferredSize.isEmpty() ? QOpenGLWidget::sizeHint() : mPreferredSize;
 }
 
+lcView* lcViewWidget::GetView() const
+{
+	return mView.get();
+}
+
 void lcViewWidget::SetView(lcView* View)
 {
 	if (View)

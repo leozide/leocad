@@ -1,6 +1,3 @@
-
 #pragma once
 
-class Project;
-
-void ExportBrickLink(const Project& project);
+void lcExportBrickLink(const QString& FileName, const lcPartsList& PartsList);

@@ -48,38 +48,6 @@ void lcTabBar::mouseReleaseEvent(QMouseEvent* Event)
 		QTabBar::mouseReleaseEvent(Event);
 }
 
-void lcModelTabWidget::ResetLayout(bool ClearView)
-{
-	QLayout* TabLayout = layout();
-	QWidget* TopWidget = TabLayout->itemAt(0)->widget();
-
-	if (qobject_cast<lcViewWidget*>(TopWidget))
-		return;
-
-	QWidget* Widget = GetAnyViewWidget();
-
-	TabLayout->addWidget(Widget);
-	delete TopWidget;
-
-	if (ClearView)
-	{
-		lcViewWidget* ViewWidget = qobject_cast<lcViewWidget*>(Widget);
-
-		if (ViewWidget)
-			ViewWidget->GetView()->Clear();
-	}
-
-	Widget->show();
-	Widget->setFocus();
-}
-
-void lcModelTabWidget::Clear()
-{
-	ResetLayout(true);
-	mModel = nullptr;
-	mActiveView = nullptr;
-}
-
 lcMainWindow::lcMainWindow()
 {
 	memset(mActions, 0, sizeof(mActions));
@@ -1452,8 +1420,7 @@ void lcMainWindow::RestoreTabLayout(const QByteArray& TabLayout)
 	QString CurrentTabName;
 	DataStream >> CurrentTabName;
 
-	RemoveAllModelTabs();
-	bool ModelAdded = false;
+	mModelTabWidget->clear();
 
 	for (int TabIdx = 0; TabIdx < NumTabs; TabIdx++)
 	{
@@ -1467,7 +1434,6 @@ void lcMainWindow::RestoreTabLayout(const QByteArray& TabLayout)
 		{
 			SetCurrentModelTab(Model);
 			TabWidget = (lcModelTabWidget*)mModelTabWidget->widget(mModelTabWidget->count() - 1);
-			ModelAdded = true;
 		}
 
 		QWidget* ActiveWidget = nullptr;
@@ -1566,7 +1532,7 @@ void lcMainWindow::RestoreTabLayout(const QByteArray& TabLayout)
 			ActiveWidget->setFocus();
 	}
 
-	if (!ModelAdded)
+	if (!mModelTabWidget->count())
 		lcGetActiveProject()->SetActiveModel(0);
 	else
 		lcGetActiveProject()->SetActiveModel(CurrentTabName);
@@ -1574,17 +1540,7 @@ void lcMainWindow::RestoreTabLayout(const QByteArray& TabLayout)
 
 void lcMainWindow::RemoveAllModelTabs()
 {
-	while (mModelTabWidget->count() > 1)
-	{
-		QWidget* TabWidget = mModelTabWidget->widget(0);
-		delete TabWidget;
-	}
-
-	if (mModelTabWidget->count())
-	{
-		lcModelTabWidget* TabWidget = (lcModelTabWidget*)mModelTabWidget->widget(0);
-		TabWidget->Clear();
-	}
+	mModelTabWidget->clear();
 }
 
 void lcMainWindow::CloseCurrentModelTab()
@@ -1597,8 +1553,6 @@ void lcMainWindow::CloseCurrentModelTab()
 
 void lcMainWindow::SetCurrentModelTab(lcModel* Model)
 {
-	lcModelTabWidget* EmptyWidget = nullptr;
-
 	for (int TabIdx = 0; TabIdx < mModelTabWidget->count(); TabIdx++)
 	{
 		lcModelTabWidget* TabWidget = (lcModelTabWidget*)mModelTabWidget->widget(TabIdx);
@@ -1608,41 +1562,19 @@ void lcMainWindow::SetCurrentModelTab(lcModel* Model)
 			mModelTabWidget->setCurrentIndex(TabIdx);
 			return;
 		}
-
-		if (!TabWidget->GetModel())
-			EmptyWidget = TabWidget;
 	}
 
-	lcModelTabWidget* TabWidget;
-	lcViewWidget* ViewWidget;
-	lcView* NewView;
+	lcModelTabWidget* TabWidget = new lcModelTabWidget(Model);
+	mModelTabWidget->addTab(TabWidget, Model->GetProperties().mFileName);
 
-	if (!EmptyWidget)
-	{
-		TabWidget = new lcModelTabWidget(Model);
-		mModelTabWidget->addTab(TabWidget, Model->GetProperties().mFileName);
+	QVBoxLayout* CentralLayout = new QVBoxLayout(TabWidget);
+	CentralLayout->setContentsMargins(0, 0, 0, 0);
 
-		QVBoxLayout* CentralLayout = new QVBoxLayout(TabWidget);
-		CentralLayout->setContentsMargins(0, 0, 0, 0);
+	lcView* NewView = CreateView(Model);
+	lcViewWidget* ViewWidget = new lcViewWidget(TabWidget, NewView);
+	CentralLayout->addWidget(ViewWidget);
 
-		NewView = CreateView(Model);
-		ViewWidget = new lcViewWidget(TabWidget, NewView);
-		CentralLayout->addWidget(ViewWidget);
-
-		mModelTabWidget->setCurrentWidget(TabWidget);
-	}
-	else
-	{
-		TabWidget = EmptyWidget;
-		TabWidget->SetModel(Model);
-
-		NewView = CreateView(Model);
-		AddView(NewView);
-		ViewWidget = (lcViewWidget*)TabWidget->layout()->itemAt(0)->widget();
-		ViewWidget->SetView(NewView);
-
-		mModelTabWidget->setCurrentWidget(TabWidget);
-	}
+	mModelTabWidget->setCurrentWidget(TabWidget);
 
 	ViewWidget->show();
 	ViewWidget->setFocus();
@@ -1910,8 +1842,17 @@ void lcMainWindow::ResetViews()
 	if (!TabWidget)
 		return;
 
-	TabWidget->ResetLayout(false);
-	TabWidget->GetActiveView()->SetViewpoint(lcViewpoint::Home);
+	QLayout* TabLayout = TabWidget->layout();
+	QWidget* TopWidget = TabLayout->itemAt(0)->widget();
+	TopWidget->deleteLater();
+
+	lcView* NewView = CreateView(TabWidget->GetModel());
+	lcViewWidget* ViewWidget = new lcViewWidget(TabWidget, NewView);
+	TabLayout->addWidget(ViewWidget);
+
+	ViewWidget->show();
+	ViewWidget->setFocus();
+	NewView->ZoomExtents();
 }
 
 void lcMainWindow::ToggleDockWidget(QWidget* DockWidget)

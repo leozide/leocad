@@ -46,9 +46,6 @@ public:
 		mActiveView = nullptr;
 	}
 
-	void ResetLayout(bool ClearView);
-	void Clear();
-
 	QWidget* GetAnyViewWidget()
 	{
 		QWidget* Widget = layout()->itemAt(0)->widget();
@@ -78,11 +75,6 @@ public:
 	lcModel* GetModel() const
 	{
 		return mModel;
-	}
-
-	void SetModel(lcModel* Model)
-	{
-		mModel = Model;
 	}
 
 protected:

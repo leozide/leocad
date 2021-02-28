@@ -115,12 +115,6 @@ public:
 		return mFindReplaceParams;
 	}
 
-	void Clear()
-	{
-		mModel = nullptr;
-		mActiveSubmodelInstance = nullptr;
-	}
-
 	lcModel* GetModel() const
 	{
 		return mModel;

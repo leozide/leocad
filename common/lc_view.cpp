@@ -450,7 +450,7 @@ void lcView::ShowContextMenu() const
 
 	QAction** Actions = gMainWindow->mActions;
 
-	QMenu* Popup = new QMenu(mWidget);
+	QMenu* Popup = new QMenu();
 
 	Popup->addAction(Actions[LC_EDIT_CUT]);
 	Popup->addAction(Actions[LC_EDIT_COPY]);

@@ -1420,7 +1420,7 @@ void lcMainWindow::RestoreTabLayout(const QByteArray& TabLayout)
 	QString CurrentTabName;
 	DataStream >> CurrentTabName;
 
-	mModelTabWidget->clear();
+	RemoveAllModelTabs();
 
 	for (int TabIdx = 0; TabIdx < NumTabs; TabIdx++)
 	{
@@ -1540,7 +1540,8 @@ void lcMainWindow::RestoreTabLayout(const QByteArray& TabLayout)
 
 void lcMainWindow::RemoveAllModelTabs()
 {
-	mModelTabWidget->clear();
+	while (mModelTabWidget->count())
+		delete mModelTabWidget->widget(0);
 }
 
 void lcMainWindow::CloseCurrentModelTab()

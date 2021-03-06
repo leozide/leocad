@@ -57,6 +57,15 @@ protected:
 	void AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const lcArray<lcMatrix44>& Sections) const override;
 };
 
+class lcSynthInfoPneumaticTube : public lcSynthInfoCurved
+{
+public:
+	lcSynthInfoPneumaticTube(float Length, int NumSections);
+
+protected:
+	void AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const lcArray<lcMatrix44>& Sections) const override;
+};
+
 class lcSynthInfoRibbedHose : public lcSynthInfoCurved
 {
 public:
@@ -216,6 +225,54 @@ void lcSynthInit()
 
 		if (Info)
 			Info->SetSynthInfo(new lcSynthInfoFlexSystemHose(HoseInfo.Length, HoseInfo.NumSections));
+	}
+
+	static const struct
+	{
+		char PartID[16];
+		float Length;
+		int NumSections;
+	}
+	PneumaticTubes[] =
+	{
+		{ "21761-f1.dat",   60.0f,  10 }, // Technic Pneumatic Tube  3L
+		{ "26445-f1.dat",   80.0f,  20 }, // Technic Pneumatic Tube  4L
+		{ "14653-f1.dat",  100.0f,  20 }, // Technic Pneumatic Tube  5L
+		{ "21766-f1.dat",  120.0f,  40 }, // Technic Pneumatic Tube  6L
+		{ "14657-f1.dat",  140.0f,  40 }, // Technic Pneumatic Tube  7L
+		{ "21837-f1.dat",  160.0f,  40 }, // Technic Pneumatic Tube  8L
+		{ "21826-f1.dat",  180.0f,  40 }, // Technic Pneumatic Tube  9L
+		{ "21767-f1.dat",  200.0f,  80 }, // Technic Pneumatic Tube 10L
+		{ "63539-f1.dat",  240.0f,  80 }, // Technic Pneumatic Tube 12L
+		{ "37467-f1.dat",  260.0f,  80 }, // Technic Pneumatic Tube 13L
+		{ "37461-f1.dat",  280.0f,  80 }, // Technic Pneumatic Tube 14L
+		{ "87948-f1.dat",  320.0f,  80 }, // Technic Pneumatic Tube 16L
+		{ "53168-f1.dat",  340.0f,  80 }, // Technic Pneumatic Tube 17L
+		{ "21839-f1.dat",  380.0f, 160 }, // Technic Pneumatic Tube 19L
+		{ "87950-f1.dat",  400.0f, 160 }, // Technic Pneumatic Tube 20L
+		{ "53184-f1.dat",  420.0f, 160 }, // Technic Pneumatic Tube 21L
+		{ "26436-f1.dat",  460.0f, 160 }, // Technic Pneumatic Tube 23L
+		{ "21830-f1.dat",  540.0f, 160 }, // Technic Pneumatic Tube 27L
+		{ "21825-f1.dat",  560.0f, 160 }, // Technic Pneumatic Tube 28L
+		{ "21833-f1.dat",  600.0f, 160 }, // Technic Pneumatic Tube 30L
+		{ "26440-f1.dat",  640.0f, 160 }, // Technic Pneumatic Tube 32L
+		{ "96889-f1.dat",  660.0f, 160 }, // Technic Pneumatic Tube 33L
+		{ "87949-f1.dat",  720.0f, 320 }, // Technic Pneumatic Tube 36L
+		{ "21835-f1.dat",  740.0f, 320 }, // Technic Pneumatic Tube 37L
+		{ "14661-f1.dat",  780.0f, 320 }, // Technic Pneumatic Tube 39L
+		{ "26438-f1.dat",  800.0f, 320 }, // Technic Pneumatic Tube 40L
+		{ "44079-f1.dat",  840.0f, 320 }, // Technic Pneumatic Tube 42L
+		{ "26439-f1.dat",  960.0f, 320 }, // Technic Pneumatic Tube 48L
+		{ "96890-f1.dat", 1080.0f, 320 }, // Technic Pneumatic Tube 54L
+		{ "96891-f1.dat", 1600.0f, 320 }, // Technic Pneumatic Tube 80L
+	};
+
+	for (const auto& TubeInfo: PneumaticTubes)
+	{
+		PieceInfo* Info = Library->FindPiece(TubeInfo.PartID, nullptr, false, false);
+
+		if (Info)
+			Info->SetSynthInfo(new lcSynthInfoPneumaticTube(TubeInfo.Length, TubeInfo.NumSections));
 	}
 
 	static const struct
@@ -411,6 +468,14 @@ lcSynthInfoFlexSystemHose::lcSynthInfoFlexSystemHose(float Length, int NumSectio
 	mStart.Length = 1.0f;
 	mMiddle.Length = 2.0f;
 	mEnd.Length = 1.0f;
+}
+
+lcSynthInfoPneumaticTube::lcSynthInfoPneumaticTube(float Length, int NumSections)
+	: lcSynthInfoCurved(Length, 12.f, NumSections, true)
+{
+	mStart.Length = 0.0f;
+	mMiddle.Length = mLength / NumSections;
+	mEnd.Length = 0.0f;
 }
 
 lcSynthInfoRibbedHose::lcSynthInfoRibbedHose(float Length, int NumSections)
@@ -1012,6 +1077,38 @@ void lcSynthInfoFlexSystemHose::AddParts(lcMemFile& File, lcLibraryMeshData& Mes
 
 	AddTubeParts(MeshData, Sections, 4.0f, false);
 	AddTubeParts(MeshData, Sections, 2.0f, true);
+}
+
+void lcSynthInfoPneumaticTube::AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const lcArray<lcMatrix44>& Sections) const
+{
+	char Line[256];
+
+	{
+		const int SectionIdx = 0;
+		lcMatrix33 EdgeTransform(lcVector3(0.0f, 0.0f, -1.0f), lcVector3(0.0f, -1.0f, 0.0f), lcVector3(1.0f, 0.0f, 0.0f));
+		lcMatrix33 Transform(lcMul(lcMul(EdgeTransform, lcMatrix33Scale(lcVector3(1.0f, 1.0f, 1.0f))), lcMatrix33(Sections[SectionIdx])));
+		lcVector3 Offset = lcMul31(lcVector3(0.0f, 0.0f, 0.0f), Sections[SectionIdx]);
+
+		sprintf(Line, "1 16 %f %f %f %f %f %f %f %f %f %f %f %f 71533k02.dat\n", Offset[0], Offset[1], Offset[2], Transform[0][0], Transform[1][0], Transform[2][0],
+				Transform[0][1], Transform[1][1], Transform[2][1], Transform[0][2], Transform[1][2], Transform[2][2]);
+
+		File.WriteBuffer(Line, strlen(Line));
+	}
+
+	{
+		const int SectionIdx = Sections.GetSize() - 1;
+		lcMatrix33 EdgeTransform(lcVector3(0.0f, 0.0f, -1.0f), lcVector3(0.0f, -1.0f, 0.0f), lcVector3(1.0f, 0.0f, 0.0f));
+		lcMatrix33 Transform(lcMul(lcMul(EdgeTransform, lcMatrix33Scale(lcVector3(1.0f, -1.0f, 1.0f))), lcMatrix33(Sections[SectionIdx])));
+		lcVector3 Offset = lcMul31(lcVector3(0.0f, 0.0f, 0.0f), Sections[SectionIdx]);
+
+		sprintf(Line, "1 16 %f %f %f %f %f %f %f %f %f %f %f %f 71533k02.dat\n", Offset[0], Offset[1], Offset[2], Transform[0][0], Transform[1][0], Transform[2][0],
+				Transform[0][1], Transform[1][1], Transform[2][1], Transform[0][2], Transform[1][2], Transform[2][2]);
+
+		File.WriteBuffer(Line, strlen(Line));
+	}
+
+	AddTubeParts(MeshData, Sections, 5.0f, false);
+	AddTubeParts(MeshData, Sections, 3.0f, true);
 }
 
 void lcSynthInfoRibbedHose::AddParts(lcMemFile& File, lcLibraryMeshData&, const lcArray<lcMatrix44>& Sections) const

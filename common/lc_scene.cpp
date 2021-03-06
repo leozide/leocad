@@ -255,10 +255,15 @@ void lcScene::DrawOpaqueMeshes(lcContext* Context, bool DrawLit, int PrimitiveTy
 
 					for (int i = 0; i < Section->NumIndices; i += 4)
 					{
-						const lcVector3 p1 = lcMul31(VertexBuffer[Indices[i + 0]].Position, WorldViewProjectionMatrix);
-						const lcVector3 p2 = lcMul31(VertexBuffer[Indices[i + 1]].Position, WorldViewProjectionMatrix);
-						const lcVector3 p3 = lcMul31(VertexBuffer[Indices[i + 2]].Position, WorldViewProjectionMatrix);
-						const lcVector3 p4 = lcMul31(VertexBuffer[Indices[i + 3]].Position, WorldViewProjectionMatrix);
+						lcVector4 p1 = lcMul4(lcVector4(VertexBuffer[Indices[i + 0]].Position, 1.0f), WorldViewProjectionMatrix);
+						lcVector4 p2 = lcMul4(lcVector4(VertexBuffer[Indices[i + 1]].Position, 1.0f), WorldViewProjectionMatrix);
+						lcVector4 p3 = lcMul4(lcVector4(VertexBuffer[Indices[i + 2]].Position, 1.0f), WorldViewProjectionMatrix);
+						lcVector4 p4 = lcMul4(lcVector4(VertexBuffer[Indices[i + 3]].Position, 1.0f), WorldViewProjectionMatrix);
+
+						p1 /= p1.w;
+						p2 /= p2.w;
+						p3 /= p3.w;
+						p4 /= p4.w;
 
 						if (((p1.y - p2.y) * (p3.x - p1.x) + (p2.x - p1.x) * (p3.y - p1.y)) * ((p1.y - p2.y) * (p4.x - p1.x) + (p2.x - p1.x) * (p4.y - p1.y)) >= 0)
 							Context->DrawIndexedPrimitives(GL_LINES, 2, Mesh->mIndexType, IndexBufferOffset + Section->IndexOffset + i * sizeof(quint16));
@@ -270,10 +275,15 @@ void lcScene::DrawOpaqueMeshes(lcContext* Context, bool DrawLit, int PrimitiveTy
 
 					for (int i = 0; i < Section->NumIndices; i += 4)
 					{
-						const lcVector3 p1 = lcMul31(VertexBuffer[Indices[i + 0]].Position, WorldViewProjectionMatrix);
-						const lcVector3 p2 = lcMul31(VertexBuffer[Indices[i + 1]].Position, WorldViewProjectionMatrix);
-						const lcVector3 p3 = lcMul31(VertexBuffer[Indices[i + 2]].Position, WorldViewProjectionMatrix);
-						const lcVector3 p4 = lcMul31(VertexBuffer[Indices[i + 3]].Position, WorldViewProjectionMatrix);
+						lcVector4 p1 = lcMul4(lcVector4(VertexBuffer[Indices[i + 0]].Position, 1.0f), WorldViewProjectionMatrix);
+						lcVector4 p2 = lcMul4(lcVector4(VertexBuffer[Indices[i + 1]].Position, 1.0f), WorldViewProjectionMatrix);
+						lcVector4 p3 = lcMul4(lcVector4(VertexBuffer[Indices[i + 2]].Position, 1.0f), WorldViewProjectionMatrix);
+						lcVector4 p4 = lcMul4(lcVector4(VertexBuffer[Indices[i + 3]].Position, 1.0f), WorldViewProjectionMatrix);
+
+						p1 /= p1.w;
+						p2 /= p2.w;
+						p3 /= p3.w;
+						p4 /= p4.w;
 
 						if (((p1.y - p2.y) * (p3.x - p1.x) + (p2.x - p1.x) * (p3.y - p1.y)) * ((p1.y - p2.y) * (p4.x - p1.x) + (p2.x - p1.x) * (p4.y - p1.y)) >= 0)
 							Context->DrawIndexedPrimitives(GL_LINES, 2, Mesh->mIndexType, IndexBufferOffset + Section->IndexOffset + i * sizeof(quint32));

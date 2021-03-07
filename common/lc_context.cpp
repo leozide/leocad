@@ -323,6 +323,9 @@ void lcContext::SetGLContext(QOpenGLContext* Context, QOpenGLWidget* Widget)
 		if (!gSupportsShaderObjects && lcGetPreferences().mShadingMode == lcShadingMode::DefaultLights)
 			lcGetPreferences().mShadingMode = lcShadingMode::Flat;
 
+		if (!gSupportsShaderObjects && lcGetPreferences().mDrawConditionalLines)
+			lcGetPreferences().mDrawConditionalLines = false;
+
 		if (!gSupportsFramebufferObject)
 			gMainWindow->GetPartSelectionWidget()->DisableIconMode();
 	}

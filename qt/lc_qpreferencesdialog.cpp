@@ -86,6 +86,12 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 	ui->edgeLines->setChecked(mOptions->Preferences.mDrawEdgeLines);
 	ui->ConditionalLinesCheckBox->setChecked(mOptions->Preferences.mDrawConditionalLines);
 
+	if (!gSupportsShaderObjects)
+	{
+		ui->ConditionalLinesCheckBox->setChecked(false);
+		ui->ConditionalLinesCheckBox->setEnabled(false);
+	}
+
 #ifndef LC_OPENGLES
 	if (QSurfaceFormat::defaultFormat().samples() > 1)
 	{

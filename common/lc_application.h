@@ -43,6 +43,7 @@ public:
 	quint32 mActiveViewColor;
 	quint32 mInactiveViewColor;
 	bool mDrawEdgeLines;
+	bool mDrawConditionalLines;
 	float mLineWidth;
 	bool mAllowLOD;
 	float mMeshLODDistance;

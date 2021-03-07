@@ -70,6 +70,7 @@ public slots:
 	void on_studStyleCombo_currentIndexChanged(int index);
 	void on_antiAliasing_toggled();
 	void on_edgeLines_toggled();
+	void on_ConditionalLinesCheckBox_toggled();
 	void on_LineWidthSlider_valueChanged();
 	void on_MeshLODSlider_valueChanged();
 	void on_FadeSteps_toggled();

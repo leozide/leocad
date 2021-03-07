@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>621</width>
-    <height>658</height>
+    <height>503</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -333,132 +333,33 @@
        <item>
         <widget class="QWidget" name="widget" native="true">
          <layout class="QGridLayout" name="gridLayout">
-          <item row="11" column="0">
-           <widget class="QLabel" name="label_3">
+          <item row="13" column="2">
+           <widget class="QToolButton" name="HighContrastButton">
             <property name="text">
-             <string>Shading Mode:</string>
+             <string>Contrast Settings...</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="3">
-           <spacer name="horizontalSpacer_2">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item row="2" column="0">
-           <widget class="QCheckBox" name="edgeLines">
-            <property name="text">
-             <string>Edge lines</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="3">
-           <widget class="QLabel" name="LineWidthLabel">
-            <property name="text">
-             <string/>
-            </property>
-           </widget>
-          </item>
-          <item row="10" column="0">
-           <widget class="QLabel" name="label_24">
-            <property name="text">
-             <string>Stud Style</string>
-            </property>
-           </widget>
-          </item>
-          <item row="8" column="1">
-           <widget class="QToolButton" name="FadeStepsColor">
-            <property name="text">
-             <string/>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0">
-           <widget class="QCheckBox" name="antiAliasing">
-            <property name="text">
-             <string>Anti-aliasing</string>
-            </property>
-           </widget>
-          </item>
-          <item row="8" column="0">
-           <widget class="QCheckBox" name="FadeSteps">
-            <property name="text">
-             <string>Fade previous steps</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="0">
-           <widget class="QCheckBox" name="MeshLOD">
-            <property name="text">
-             <string>Mesh LOD</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="1">
-           <widget class="QSlider" name="MeshLODSlider">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="tickPosition">
-             <enum>QSlider::NoTicks</enum>
-            </property>
-           </widget>
-          </item>
-          <item row="9" column="1">
-           <widget class="QToolButton" name="HighlightNewPartsColor">
-            <property name="text">
-             <string/>
-            </property>
-           </widget>
-          </item>
-          <item row="9" column="0">
-           <widget class="QCheckBox" name="HighlightNewParts">
-            <property name="text">
-             <string>Highlight new parts</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QComboBox" name="antiAliasingSamples">
+          <item row="14" column="1">
+           <widget class="QComboBox" name="ShadingMode">
             <item>
              <property name="text">
-              <string>2x</string>
+              <string>Wireframe</string>
              </property>
             </item>
             <item>
              <property name="text">
-              <string>4x</string>
+              <string>Flat Shading</string>
              </property>
             </item>
             <item>
              <property name="text">
-              <string>8x</string>
+              <string>Default Lights</string>
              </property>
             </item>
            </widget>
           </item>
-          <item row="3" column="3">
-           <widget class="QLabel" name="MeshLODLabel">
-            <property name="text">
-             <string/>
-            </property>
-           </widget>
-          </item>
-          <item row="10" column="1">
+          <item row="13" column="1">
            <widget class="QComboBox" name="studStyleCombo">
             <item>
              <property name="text">
@@ -502,7 +403,161 @@
             </item>
            </widget>
           </item>
-          <item row="2" column="1">
+          <item row="14" column="0">
+           <widget class="QLabel" name="label_3">
+            <property name="text">
+             <string>Shading Mode:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="3">
+           <spacer name="horizontalSpacer_2">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item row="13" column="0">
+           <widget class="QLabel" name="label_24">
+            <property name="text">
+             <string>Stud Style</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QCheckBox" name="antiAliasing">
+            <property name="text">
+             <string>Anti-aliasing</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QComboBox" name="antiAliasingSamples">
+            <item>
+             <property name="text">
+              <string>2x</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>4x</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>8x</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="11" column="1">
+           <widget class="QToolButton" name="HighlightNewPartsColor">
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item row="11" column="0">
+           <widget class="QCheckBox" name="HighlightNewParts">
+            <property name="text">
+             <string>Highlight New Parts</string>
+            </property>
+           </widget>
+          </item>
+          <item row="12" column="0">
+           <widget class="QCheckBox" name="MeshLOD">
+            <property name="text">
+             <string>Mesh LOD</string>
+            </property>
+           </widget>
+          </item>
+          <item row="12" column="1">
+           <widget class="QSlider" name="MeshLODSlider">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="tickPosition">
+             <enum>QSlider::NoTicks</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="10" column="1">
+           <widget class="QToolButton" name="FadeStepsColor">
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item row="10" column="0">
+           <widget class="QCheckBox" name="FadeSteps">
+            <property name="text">
+             <string>Fade Previous Steps</string>
+            </property>
+           </widget>
+          </item>
+          <item row="12" column="2">
+           <widget class="QLabel" name="MeshLODLabel">
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="groupBox_8">
+         <property name="title">
+          <string>Lines</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_5">
+          <item row="3" column="2">
+           <widget class="QLabel" name="LineWidthLabel">
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QCheckBox" name="ConditionalLinesCheckBox">
+            <property name="text">
+             <string>Conditional Lines</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="3">
+           <spacer name="horizontalSpacer_9">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="label_26">
+            <property name="text">
+             <string>Line Width:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
            <widget class="QSlider" name="LineWidthSlider">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
@@ -518,44 +573,25 @@
             </property>
            </widget>
           </item>
-          <item row="7" column="1">
+          <item row="0" column="0">
+           <widget class="QCheckBox" name="edgeLines">
+            <property name="text">
+             <string>Edge Lines</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QCheckBox" name="AutomateEdgeColor">
+            <property name="text">
+             <string>Automate Edge Color</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
            <widget class="QToolButton" name="AutomateEdgeColorButton">
             <property name="text">
              <string>Settings...</string>
             </property>
-           </widget>
-          </item>
-          <item row="7" column="0">
-           <widget class="QCheckBox" name="AutomateEdgeColor">
-            <property name="text">
-             <string>Automate edge color</string>
-            </property>
-           </widget>
-          </item>
-          <item row="10" column="2">
-           <widget class="QToolButton" name="HighContrastButton">
-            <property name="text">
-             <string>Contrast Settings...</string>
-            </property>
-           </widget>
-          </item>
-          <item row="11" column="1">
-           <widget class="QComboBox" name="ShadingMode">
-            <item>
-             <property name="text">
-              <string>Wireframe</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Flat Shading</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Default Lights</string>
-             </property>
-            </item>
            </widget>
           </item>
          </layout>
@@ -1708,7 +1744,6 @@
   </layout>
  </widget>
  <tabstops>
-  <tabstop>tabWidget</tabstop>
   <tabstop>partsLibrary</tabstop>
   <tabstop>partsLibraryBrowse</tabstop>
   <tabstop>partsArchiveBrowse</tabstop>
@@ -1729,19 +1764,20 @@
   <tabstop>RestoreTabLayout</tabstop>
   <tabstop>antiAliasing</tabstop>
   <tabstop>antiAliasingSamples</tabstop>
-  <tabstop>edgeLines</tabstop>
-  <tabstop>LineWidthSlider</tabstop>
-  <tabstop>MeshLOD</tabstop>
-  <tabstop>MeshLODSlider</tabstop>
-  <tabstop>AutomateEdgeColor</tabstop>
-  <tabstop>AutomateEdgeColorButton</tabstop>
   <tabstop>FadeSteps</tabstop>
   <tabstop>FadeStepsColor</tabstop>
   <tabstop>HighlightNewParts</tabstop>
   <tabstop>HighlightNewPartsColor</tabstop>
+  <tabstop>MeshLOD</tabstop>
+  <tabstop>MeshLODSlider</tabstop>
   <tabstop>studStyleCombo</tabstop>
   <tabstop>HighContrastButton</tabstop>
   <tabstop>ShadingMode</tabstop>
+  <tabstop>edgeLines</tabstop>
+  <tabstop>ConditionalLinesCheckBox</tabstop>
+  <tabstop>AutomateEdgeColor</tabstop>
+  <tabstop>AutomateEdgeColorButton</tabstop>
+  <tabstop>LineWidthSlider</tabstop>
   <tabstop>ViewSphereSizeCombo</tabstop>
   <tabstop>ViewSphereLocationCombo</tabstop>
   <tabstop>AxisIconCheckBox</tabstop>
@@ -1758,12 +1794,12 @@
   <tabstop>BackgroundGradient1ColorButton</tabstop>
   <tabstop>BackgroundGradient2ColorButton</tabstop>
   <tabstop>ActiveViewColorButton</tabstop>
-  <tabstop>TextColorButton</tabstop>
-  <tabstop>MarqueeBorderColorButton</tabstop>
-  <tabstop>OverlayColorButton</tabstop>
   <tabstop>InactiveViewColorButton</tabstop>
+  <tabstop>TextColorButton</tabstop>
   <tabstop>AxesColorButton</tabstop>
+  <tabstop>MarqueeBorderColorButton</tabstop>
   <tabstop>MarqueeFillColorButton</tabstop>
+  <tabstop>OverlayColorButton</tabstop>
   <tabstop>gridLineColor</tabstop>
   <tabstop>gridStudColor</tabstop>
   <tabstop>ViewSphereColorButton</tabstop>
@@ -1796,6 +1832,7 @@
   <tabstop>mouseAssign</tabstop>
   <tabstop>mouseRemove</tabstop>
   <tabstop>mouseSensitivity</tabstop>
+  <tabstop>tabWidget</tabstop>
  </tabstops>
  <resources>
   <include location="../leocad.qrc"/>

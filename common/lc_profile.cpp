@@ -78,6 +78,7 @@ static lcProfileEntry gProfileEntries[LC_NUM_PROFILE_KEYS] =
 	lcProfileEntry("Settings", "ActiveViewColor", LC_RGBA(41, 128, 185, 255)),                 // LC_PROFILE_ACTIVE_VIEW_COLOR
 	lcProfileEntry("Settings", "InactiveViewColor", LC_RGBA(69, 69, 69, 255)),                 // LC_PROFILE_INACTIVE_VIEW_COLOR
 	lcProfileEntry("Settings", "DrawEdgeLines", 1),                                            // LC_PROFILE_DRAW_EDGE_LINES
+	lcProfileEntry("Settings", "DrawConditionalLines", 1),                                     // LC_PROFILE_DRAW_CONDITIONAL_LINES
 	lcProfileEntry("Settings", "GridStuds", 1),                                                // LC_PROFILE_GRID_STUDS
 	lcProfileEntry("Settings", "GridStudColor", LC_RGBA(24, 24, 24, 192)),                     // LC_PROFILE_GRID_STUD_COLOR
 	lcProfileEntry("Settings", "GridLines", 1),                                                // LC_PROFILE_GRID_LINES

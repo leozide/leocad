@@ -404,8 +404,8 @@ void lcScene::Draw(lcContext* Context) const
 	Context->SetViewMatrix(mViewMatrix);
 
 	const lcPreferences& Preferences = lcGetPreferences();
-	const bool DrawLines = Preferences.mDrawEdgeLines && Preferences.mLineWidth != 0.0f;
-	const bool DrawConditional = false;
+	const bool DrawLines = Preferences.mDrawEdgeLines && Preferences.mLineWidth > 0.0f;
+	const bool DrawConditional = Preferences.mDrawConditionalLines && Preferences.mLineWidth > 0.0f;
 
 //	lcShadingMode ShadingMode = Preferences.mShadingMode;
 //	if (ShadingMode == lcShadingMode::Wireframe && !mAllowWireframe)

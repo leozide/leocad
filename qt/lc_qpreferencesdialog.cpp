@@ -84,6 +84,7 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 	else
 		ui->antiAliasingSamples->setCurrentIndex(0);
 	ui->edgeLines->setChecked(mOptions->Preferences.mDrawEdgeLines);
+	ui->ConditionalLinesCheckBox->setChecked(mOptions->Preferences.mDrawConditionalLines);
 
 #ifndef LC_OPENGLES
 	if (QSurfaceFormat::defaultFormat().samples() > 1)
@@ -273,6 +274,7 @@ void lcQPreferencesDialog::accept()
 		mOptions->AASamples = 2;
 
 	mOptions->Preferences.mDrawEdgeLines = ui->edgeLines->isChecked();
+	mOptions->Preferences.mDrawConditionalLines = ui->ConditionalLinesCheckBox->isChecked();
 	mOptions->Preferences.mLineWidth = mLineWidthRange[0] + static_cast<float>(ui->LineWidthSlider->value()) * mLineWidthGranularity;
 	mOptions->Preferences.mAllowLOD = ui->MeshLOD->isChecked();
 	mOptions->Preferences.mMeshLODDistance = ui->MeshLODSlider->value() * mMeshLODMultiplier;
@@ -509,8 +511,18 @@ void lcQPreferencesDialog::on_antiAliasing_toggled()
 
 void lcQPreferencesDialog::on_edgeLines_toggled()
 {
-	ui->LineWidthSlider->setEnabled(ui->edgeLines->isChecked());
-	ui->LineWidthLabel->setEnabled(ui->edgeLines->isChecked());
+	const bool Enable = ui->edgeLines->isChecked() || ui->ConditionalLinesCheckBox->isChecked();
+
+	ui->LineWidthSlider->setEnabled(Enable);
+	ui->LineWidthLabel->setEnabled(Enable);
+}
+
+void lcQPreferencesDialog::on_ConditionalLinesCheckBox_toggled()
+{
+	const bool Enable = ui->edgeLines->isChecked() || ui->ConditionalLinesCheckBox->isChecked();
+
+	ui->LineWidthSlider->setEnabled(Enable);
+	ui->LineWidthLabel->setEnabled(Enable);
 }
 
 void lcQPreferencesDialog::on_LineWidthSlider_valueChanged()

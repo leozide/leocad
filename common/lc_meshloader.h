@@ -122,9 +122,9 @@ public:
 	quint32 AddVertex(const lcVector3& Position, const lcVector3& Normal, bool Optimize);
 	quint32 AddTexturedVertex(const lcVector3& Position, const lcVector2& TexCoord, bool Optimize);
 	quint32 AddTexturedVertex(const lcVector3& Position, const lcVector3& Normal, const lcVector2& TexCoord, bool Optimize);
-	quint32 AddConditionalVertex(const lcVector3* Position, bool Optimize);
+	quint32 AddConditionalVertex(const lcVector3 (&Position)[4]);
 
-	void ProcessLine(int LineType, quint32 ColorCode, bool WindingCCW, lcVector3* Vertices, bool Optimize);
+	void ProcessLine(int LineType, quint32 ColorCode, bool WindingCCW, lcVector3 (&Vertices)[4], bool Optimize);
 	void ProcessTexturedLine(int LineType, quint32 ColorCode, bool WindingCCW, const lcMeshLoaderTextureMap& Map, const lcVector3* Vertices, bool Optimize);
 
 	void AddMeshData(const lcMeshLoaderTypeData& Data, const lcMatrix44& Transform, quint32 CurrentColorCode, bool InvertWinding, bool InvertNormals, lcMeshLoaderTextureMap* TextureMap);

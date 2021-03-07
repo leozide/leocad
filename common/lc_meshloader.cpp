@@ -113,11 +113,6 @@ static bool lcCompareVertices(const lcVector3& Position1, const lcVector2& TexCo
 	return lcCompareVertices(Position1, Position2) && fabsf(TexCoord1.x - TexCoord2.x) < lcTexCoordEpsilon && fabsf(TexCoord1.y - TexCoord2.y) < lcTexCoordEpsilon;
 }
 
-static bool lcCompareConditionalVertices(const lcVector3* Position1, const lcVector3* Position2)
-{
-	return lcCompareVertices(Position1[0], Position2[0]) && lcCompareVertices(Position1[1], Position2[1]) && lcCompareVertices(Position1[2], Position2[2]) && lcCompareVertices(Position1[3], Position2[3]);
-}
-
 lcLibraryMeshSection* lcMeshLoaderTypeData::AddSection(lcMeshPrimitiveType PrimitiveType, quint32 ColorCode, lcTexture* Texture)
 {
 	for (std::unique_ptr<lcLibraryMeshSection>& Section : mSections)
@@ -293,19 +288,8 @@ quint32 lcMeshLoaderTypeData::AddTexturedVertex(const lcVector3& Position, const
 	return mVertices.GetSize() - 1;
 }
 
-quint32 lcMeshLoaderTypeData::AddConditionalVertex(const lcVector3* Position, bool Optimize)
+quint32 lcMeshLoaderTypeData::AddConditionalVertex(const lcVector3(&Position)[4])
 {
-	if (Optimize)
-	{
-		for (int VertexIdx = mConditionalVertices.GetSize() - 1; VertexIdx >= 0; VertexIdx--)
-		{
-			lcMeshLoaderConditionalVertex& Vertex = mConditionalVertices[VertexIdx];
-
-			if (lcCompareConditionalVertices(Position, Vertex.Position))
-				return VertexIdx;
-		}
-	}
-
 	lcMeshLoaderConditionalVertex& Vertex = mConditionalVertices.Add();
 
 	Vertex.Position[0] = Position[0];
@@ -316,7 +300,7 @@ quint32 lcMeshLoaderTypeData::AddConditionalVertex(const lcVector3* Position, bo
 	return mConditionalVertices.GetSize() - 1;
 }
 
-void lcMeshLoaderTypeData::ProcessLine(int LineType, quint32 ColorCode, bool WindingCCW, lcVector3* Vertices, bool Optimize)
+void lcMeshLoaderTypeData::ProcessLine(int LineType, quint32 ColorCode, bool WindingCCW, lcVector3 (&Vertices)[4], bool Optimize)
 {
 	lcMeshPrimitiveType PrimitiveTypes[4] = { LC_MESH_LINES, LC_MESH_TRIANGLES, LC_MESH_TRIANGLES, LC_MESH_CONDITIONAL_LINES };
 	lcMeshPrimitiveType PrimitiveType = PrimitiveTypes[LineType - 2];
@@ -351,9 +335,9 @@ void lcMeshLoaderTypeData::ProcessLine(int LineType, quint32 ColorCode, bool Win
 	}
 	else if (LineType == 5)
 	{
-		Indices[0] = AddConditionalVertex(Vertices, Optimize);
+		Indices[0] = AddConditionalVertex(Vertices);
 		std::swap(Vertices[0], Vertices[1]);
-		Indices[1] = AddConditionalVertex(Vertices, Optimize);
+		Indices[1] = AddConditionalVertex(Vertices);
 	}
 
 	switch (LineType)
@@ -663,7 +647,7 @@ void lcMeshLoaderTypeData::AddMeshData(const lcMeshLoaderTypeData& Data, const l
 		Position[2] = lcMul31(DataVertex.Position[2], Transform);
 		Position[3] = lcMul31(DataVertex.Position[3], Transform);
 
-		int Index = AddConditionalVertex(Position, true);
+		int Index = AddConditionalVertex(Position);
 		ConditionalRemap.Add(Index);
 	}
 

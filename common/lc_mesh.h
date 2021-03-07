@@ -76,9 +76,7 @@ public:
 	~lcMesh();
 
 	lcMesh(const lcMesh&) = delete;
-	lcMesh(lcMesh&&) = delete;
 	lcMesh& operator=(const lcMesh&) = delete;
-	lcMesh& operator=(lcMesh&&) = delete;
 
 	void Create(quint16 (&NumSections)[LC_NUM_MESH_LODS], int VertexCount, int TexturedVertexCount, int ConditionalVertexCount, int IndexCount);
 	void CreateBox();
@@ -103,6 +101,21 @@ public:
 	bool IntersectsPlanes(const lcVector4 (&Planes)[6]);
 
 	int GetLodIndex(float Distance) const;
+
+	const lcVertex* GetVertexData() const
+	{
+		return static_cast<lcVertex*>(mVertexData);
+	}
+
+	const lcVertexTextured* GetTexturedVertexData() const
+	{
+		return reinterpret_cast<lcVertexTextured*>(static_cast<char*>(mVertexData) + mNumVertices * sizeof(lcVertex));
+	}
+
+	const lcVertexConditional* GetConditionalVertexData() const
+	{
+		return reinterpret_cast<lcVertexConditional*>(static_cast<char*>(mVertexData) + mNumVertices * sizeof(lcVertex) + mNumTexturedVertices * sizeof(lcVertexTextured));
+	}
 
 	lcMeshLod mLods[LC_NUM_MESH_LODS];
 	lcBoundingBox mBoundingBox;

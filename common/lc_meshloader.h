@@ -174,6 +174,11 @@ public:
 	std::array<lcMeshLoaderTypeData, LC_NUM_MESHDATA_TYPES> mData;
 	bool mHasTextures;
 	bool mHasStyleStud;
+
+protected:
+	static void UpdateMeshBoundingBox(lcMesh* Mesh);
+	template<typename IndexType>
+	static void UpdateMeshSectionBoundingBox(lcMesh* Mesh, lcMeshSection& Section, lcVector3& SectionMin, lcVector3& SectionMax);
 };
 
 class lcMeshLoader

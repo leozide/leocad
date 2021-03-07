@@ -1275,6 +1275,13 @@ lcMesh* lcLibraryMeshData::CreateMesh()
 	if (mHasStyleStud)
 		Mesh->mFlags |= lcMeshFlag::HasStyleStud;
 
+	UpdateMeshBoundingBox(Mesh);
+
+	return Mesh;
+}
+
+void lcLibraryMeshData::UpdateMeshBoundingBox(lcMesh* Mesh)
+{
 	lcVector3 MeshMin(FLT_MAX, FLT_MAX, FLT_MAX), MeshMax(-FLT_MAX, -FLT_MAX, -FLT_MAX);
 	bool UpdatedBoundingBox = false;
 
@@ -1288,87 +1295,9 @@ lcMesh* lcLibraryMeshData::CreateMesh()
 			lcVector3 SectionMin(FLT_MAX, FLT_MAX, FLT_MAX), SectionMax(-FLT_MAX, -FLT_MAX, -FLT_MAX);
 
 			if (Mesh->mNumVertices < 0x10000)
-			{
-				const quint16* IndexBuffer = static_cast<quint16*>(Mesh->mIndexData) + Section.IndexOffset / 2;
-
-				if (!Section.Texture)
-				{
-					if (Section.PrimitiveType != LC_MESH_CONDITIONAL_LINES)
-					{
-						const lcVertex* VertexBuffer = static_cast<lcVertex*>(Mesh->mVertexData);
-
-						for (int Index = 0; Index < Section.NumIndices; Index++)
-						{
-							const lcVector3& Position = VertexBuffer[IndexBuffer[Index]].Position;
-							SectionMin = lcMin(SectionMin, Position);
-							SectionMax = lcMax(SectionMax, Position);
-						}
-					}
-					else
-					{
-						const lcVertexConditional* VertexBuffer = reinterpret_cast<lcVertexConditional*>(static_cast<char*>(Mesh->mVertexData) + Mesh->mNumVertices * sizeof(lcVertex) + Mesh->mNumTexturedVertices * sizeof(lcVertexTextured));
-
-						for (int Index = 0; Index < Section.NumIndices; Index++)
-						{
-							const lcVector3& Position = VertexBuffer[IndexBuffer[Index]].Position1;
-							SectionMin = lcMin(SectionMin, Position);
-							SectionMax = lcMax(SectionMax, Position);
-						}
-					}
-				}
-				else
-				{
-					const lcVertexTextured* VertexBuffer = reinterpret_cast<lcVertexTextured*>(static_cast<char*>(Mesh->mVertexData) + Mesh->mNumVertices * sizeof(lcVertex));
-
-					for (int Index = 0; Index < Section.NumIndices; Index++)
-					{
-						const lcVector3& Position = VertexBuffer[IndexBuffer[Index]].Position;
-						SectionMin = lcMin(SectionMin, Position);
-						SectionMax = lcMax(SectionMax, Position);
-					}
-				}
-			}
+				UpdateMeshSectionBoundingBox<quint16>(Mesh, Section, SectionMin, SectionMax);
 			else
-			{
-				const quint32* IndexBuffer = static_cast<quint32*>(Mesh->mIndexData) + Section.IndexOffset / 4;
-
-				if (!Section.Texture)
-				{
-					if (Section.PrimitiveType != LC_MESH_CONDITIONAL_LINES)
-					{
-						const lcVertex* VertexBuffer = static_cast<lcVertex*>(Mesh->mVertexData);
-
-						for (int Index = 0; Index < Section.NumIndices; Index++)
-						{
-							const lcVector3& Position = VertexBuffer[IndexBuffer[Index]].Position;
-							SectionMin = lcMin(SectionMin, Position);
-							SectionMax = lcMax(SectionMax, Position);
-						}
-					}
-					else
-					{
-						const lcVertexConditional* VertexBuffer = reinterpret_cast<lcVertexConditional*>(static_cast<char*>(Mesh->mVertexData) + Mesh->mNumVertices * sizeof(lcVertex) + Mesh->mNumTexturedVertices * sizeof(lcVertexTextured));
-
-						for (int Index = 0; Index < Section.NumIndices; Index++)
-						{
-							const lcVector3& Position = VertexBuffer[IndexBuffer[Index]].Position1;
-							SectionMin = lcMin(SectionMin, Position);
-							SectionMax = lcMax(SectionMax, Position);
-						}
-					}
-				}
-				else
-				{
-					const lcVertexTextured* VertexBuffer = static_cast<lcVertexTextured*>(Mesh->mVertexData);
-
-					for (int Index = 0; Index < Section.NumIndices; Index++)
-					{
-						const lcVector3& Position = VertexBuffer[IndexBuffer[Index]].Position;
-						SectionMin = lcMin(SectionMin, Position);
-						SectionMax = lcMax(SectionMax, Position);
-					}
-				}
-			}
+				UpdateMeshSectionBoundingBox<quint32>(Mesh, Section, SectionMin, SectionMax);
 
 			Section.BoundingBox.Max = SectionMax;
 			Section.BoundingBox.Min = SectionMin;
@@ -1389,8 +1318,49 @@ lcMesh* lcLibraryMeshData::CreateMesh()
 	Mesh->mBoundingBox.Max = MeshMax;
 	Mesh->mBoundingBox.Min = MeshMin;
 	Mesh->mRadius = lcLength((MeshMax - MeshMin) / 2.0f);
+}
 
-	return Mesh;
+template<typename IndexType>
+void lcLibraryMeshData::UpdateMeshSectionBoundingBox(lcMesh* Mesh, lcMeshSection& Section, lcVector3& SectionMin, lcVector3& SectionMax)
+{
+	const IndexType* IndexBuffer = reinterpret_cast<IndexType*>(static_cast<char*>(Mesh->mIndexData) + Section.IndexOffset);
+
+	if (!Section.Texture)
+	{
+		if (Section.PrimitiveType != LC_MESH_CONDITIONAL_LINES)
+		{
+			const lcVertex* VertexBuffer = Mesh->GetVertexData();
+
+			for (int Index = 0; Index < Section.NumIndices; Index++)
+			{
+				const lcVector3& Position = VertexBuffer[IndexBuffer[Index]].Position;
+				SectionMin = lcMin(SectionMin, Position);
+				SectionMax = lcMax(SectionMax, Position);
+			}
+		}
+		else
+		{
+			const lcVertexConditional* VertexBuffer = Mesh->GetConditionalVertexData();
+
+			for (int Index = 0; Index < Section.NumIndices; Index++)
+			{
+				const lcVector3& Position = VertexBuffer[IndexBuffer[Index]].Position1;
+				SectionMin = lcMin(SectionMin, Position);
+				SectionMax = lcMax(SectionMax, Position);
+			}
+		}
+	}
+	else
+	{
+		const lcVertexTextured* VertexBuffer = Mesh->GetTexturedVertexData();
+
+		for (int Index = 0; Index < Section.NumIndices; Index++)
+		{
+			const lcVector3& Position = VertexBuffer[IndexBuffer[Index]].Position;
+			SectionMin = lcMin(SectionMin, Position);
+			SectionMax = lcMax(SectionMax, Position);
+		}
+	}
 }
 
 lcMeshLoader::lcMeshLoader(lcLibraryMeshData& MeshData, bool Optimize, Project* CurrentProject, bool SearchProjectFolder)

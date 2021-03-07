@@ -202,7 +202,7 @@ void lcScene::DrawOpaqueMeshes(lcContext* Context, bool DrawLit, int PrimitiveTy
 					break;
 				}
 			}
-			else if (Section->PrimitiveType & LC_MESH_LINES)
+			else if (Section->PrimitiveType & (LC_MESH_LINES | LC_MESH_CONDITIONAL_LINES))
 			{
 				switch (RenderMesh.State)
 				{
@@ -239,21 +239,20 @@ void lcScene::DrawOpaqueMeshes(lcContext* Context, bool DrawLit, int PrimitiveTy
 					Context->SetEdgeColorIndexTinted(ColorIndex, mFadeColor);
 					break;
 				}
-			}
-			else if (Section->PrimitiveType == LC_MESH_CONDITIONAL_LINES)
-			{
-				int VertexBufferOffset = Mesh->mVertexCacheOffset != -1 ? Mesh->mVertexCacheOffset : 0;
-				VertexBufferOffset += Mesh->mNumVertices * sizeof(lcVertex) + Mesh->mNumTexturedVertices * sizeof(lcVertexTextured);
-				const int IndexBufferOffset = Mesh->mIndexCacheOffset != -1 ? Mesh->mIndexCacheOffset : 0;
 
-				Context->SetEdgeColorIndex(ColorIndex);
-				Context->SetMaterial(lcMaterialType::UnlitColorConditional);
-				Context->SetVertexFormatConditional(VertexBufferOffset);
+				if (Section->PrimitiveType == LC_MESH_CONDITIONAL_LINES)
+				{
+					int VertexBufferOffset = Mesh->mVertexCacheOffset != -1 ? Mesh->mVertexCacheOffset : 0;
+					VertexBufferOffset += Mesh->mNumVertices * sizeof(lcVertex) + Mesh->mNumTexturedVertices * sizeof(lcVertexTextured);
+					const int IndexBufferOffset = Mesh->mIndexCacheOffset != -1 ? Mesh->mIndexCacheOffset : 0;
 
-				const GLenum DrawPrimitiveType = Section->PrimitiveType & (LC_MESH_TRIANGLES | LC_MESH_TEXTURED_TRIANGLES) ? GL_TRIANGLES : GL_LINES;
-				Context->DrawIndexedPrimitives(DrawPrimitiveType, Section->NumIndices, Mesh->mIndexType, IndexBufferOffset + Section->IndexOffset);
+					Context->SetMaterial(lcMaterialType::UnlitColorConditional);
+					Context->SetVertexFormatConditional(VertexBufferOffset);
 
-				continue;
+					Context->DrawIndexedPrimitives(GL_LINES, Section->NumIndices, Mesh->mIndexType, IndexBufferOffset + Section->IndexOffset);
+
+					continue;
+				}
 			}
 
 			const lcTexture* const Texture = Section->Texture;

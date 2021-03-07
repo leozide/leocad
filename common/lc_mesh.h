@@ -24,6 +24,14 @@ struct lcVertexTextured
 	lcVector2 TexCoord;
 };
 
+struct lcVertexConditional
+{
+	lcVector3 Position1;
+	lcVector3 Position2;
+	lcVector3 Position3;
+	lcVector3 Position4;
+};
+
 struct lcMeshSection
 {
 	int ColorIndex;
@@ -72,7 +80,7 @@ public:
 	lcMesh& operator=(const lcMesh&) = delete;
 	lcMesh& operator=(lcMesh&&) = delete;
 
-	void Create(quint16 NumSections[LC_NUM_MESH_LODS], int NumVertices, int NumTexturedVertices, int NumIndices);
+	void Create(quint16 (&NumSections)[LC_NUM_MESH_LODS], int VertexCount, int TexturedVertexCount, int ConditionalVertexCount, int IndexCount);
 	void CreateBox();
 
 	bool FileLoad(lcMemFile& File);
@@ -110,6 +118,7 @@ public:
 
 	int mNumVertices;
 	int mNumTexturedVertices;
+	int mConditionalVertexCount;
 	int mIndexType;
 };
 

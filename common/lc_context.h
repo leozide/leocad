@@ -48,6 +48,7 @@ public:
 enum class lcMaterialType
 {
 	UnlitColor,
+	UnlitColorConditional,
 	UnlitTextureModulate,
 	UnlitTextureDecal,
 	UnlitVertexColor,
@@ -191,6 +192,7 @@ public:
 
 	void SetVertexFormat(int BufferOffset, int PositionSize, int NormalSize, int TexCoordSize, int ColorSize, bool EnableNormals);
 	void SetVertexFormatPosition(int PositionSize);
+	void SetVertexFormatConditional(int BufferOffset);
 	void DrawPrimitives(GLenum Mode, GLint First, GLsizei Count);
 	void DrawIndexedPrimitives(GLenum Mode, GLsizei Count, GLenum Type, int Offset);
 

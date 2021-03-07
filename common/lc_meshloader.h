@@ -15,13 +15,18 @@ enum lcMeshDataType
 	LC_NUM_MESHDATA_TYPES
 };
 
-struct lcLibraryMeshVertex
+struct lcMeshLoaderVertex
 {
 	lcVector3 Position;
 	lcVector3 Normal;
 	float NormalWeight;
 	lcVector2 TexCoord;
 	quint32 Usage;
+};
+
+struct lcMeshLoaderConditionalVertex
+{
+	lcVector3 Position[4];
 };
 
 class lcLibraryMeshSection
@@ -41,14 +46,14 @@ public:
 	lcArray<quint32> mIndices;
 };
 
-enum class lcLibraryTextureMapType
+enum class lcMeshLoaderTextureMapType
 {
-	PLANAR,
-	CYLINDRICAL,
-	SPHERICAL
+	Planar,
+	Cylindrical,
+	Spherical
 };
 
-struct lcLibraryTextureMap
+struct lcMeshLoaderTextureMap
 {
 	lcTexture* Texture;
 
@@ -82,9 +87,52 @@ struct lcLibraryTextureMap
 
 	float Angle1;
 	float Angle2;
-	lcLibraryTextureMapType Type;
+	lcMeshLoaderTextureMapType Type;
 	bool Fallback;
 	bool Next;
+};
+
+class lcMeshLoaderTypeData
+{
+public:
+	lcMeshLoaderTypeData()
+	{
+		mVertices.SetGrow(1024);
+		mConditionalVertices.SetGrow(1024);
+	}
+
+	lcMeshLoaderTypeData(const lcMeshLoaderTypeData&) = delete;
+	lcMeshLoaderTypeData& operator=(const lcMeshLoaderTypeData&) = delete;
+
+	bool IsEmpty() const
+	{
+		return mSections.empty();
+	}
+
+	void Clear()
+	{
+		mSections.clear();
+		mVertices.RemoveAll();
+		mConditionalVertices.RemoveAll();
+	}
+
+	lcLibraryMeshSection* AddSection(lcMeshPrimitiveType PrimitiveType, quint32 ColorCode, lcTexture* Texture);
+
+	quint32 AddVertex(const lcVector3& Position, bool Optimize);
+	quint32 AddVertex(const lcVector3& Position, const lcVector3& Normal, bool Optimize);
+	quint32 AddTexturedVertex(const lcVector3& Position, const lcVector2& TexCoord, bool Optimize);
+	quint32 AddTexturedVertex(const lcVector3& Position, const lcVector3& Normal, const lcVector2& TexCoord, bool Optimize);
+	quint32 AddConditionalVertex(const lcVector3* Position, bool Optimize);
+
+	void ProcessLine(int LineType, quint32 ColorCode, bool WindingCCW, lcVector3* Vertices, bool Optimize);
+	void ProcessTexturedLine(int LineType, quint32 ColorCode, bool WindingCCW, const lcMeshLoaderTextureMap& Map, const lcVector3* Vertices, bool Optimize);
+
+	void AddMeshData(const lcMeshLoaderTypeData& Data, const lcMatrix44& Transform, quint32 CurrentColorCode, bool InvertWinding, bool InvertNormals, lcMeshLoaderTextureMap* TextureMap);
+	void AddMeshDataNoDuplicateCheck(const lcMeshLoaderTypeData& Data, const lcMatrix44& Transform, quint32 CurrentColorCode, bool InvertWinding, bool InvertNormals, lcMeshLoaderTextureMap* TextureMap);
+
+	std::vector<std::unique_ptr<lcLibraryMeshSection>> mSections;
+	lcArray<lcMeshLoaderVertex> mVertices;
+	lcArray<lcMeshLoaderConditionalVertex> mConditionalVertices;
 };
 
 class lcLibraryMeshData
@@ -94,59 +142,36 @@ public:
 	{
 		mHasTextures = false;
 		mHasStyleStud = false;
-
-		for (int MeshDataIdx = 0; MeshDataIdx < LC_NUM_MESHDATA_TYPES; MeshDataIdx++)
-			mVertices[MeshDataIdx].SetGrow(1024);
-	}
-
-	~lcLibraryMeshData()
-	{
-		for (int MeshDataIdx = 0; MeshDataIdx < LC_NUM_MESHDATA_TYPES; MeshDataIdx++)
-			mSections[MeshDataIdx].DeleteAll();
 	}
 
 	lcLibraryMeshData(const lcLibraryMeshData&) = delete;
-	lcLibraryMeshData(lcLibraryMeshData&&) = delete;
 	lcLibraryMeshData& operator=(const lcLibraryMeshData&) = delete;
-	lcLibraryMeshData& operator=(lcLibraryMeshData&&) = delete;
 
 	bool IsEmpty() const
 	{
-		for (int MeshDataIdx = 0; MeshDataIdx < LC_NUM_MESHDATA_TYPES; MeshDataIdx++)
-			if (!mSections[MeshDataIdx].IsEmpty())
+		for (const lcMeshLoaderTypeData& Data : mData)
+			if (!Data.IsEmpty())
 				return false;
 
 		return true;
 	}
 
-	void RemoveAll()
+	void Clear()
 	{
-		for (int MeshDataIdx = 0; MeshDataIdx < LC_NUM_MESHDATA_TYPES; MeshDataIdx++)
-			mVertices[MeshDataIdx].RemoveAll();
-
-		for (int MeshDataIdx = 0; MeshDataIdx < LC_NUM_MESHDATA_TYPES; MeshDataIdx++)
-			mSections[MeshDataIdx].RemoveAll();
+		for (lcMeshLoaderTypeData& Data : mData)
+			Data.Clear();
 
 		mHasTextures = false;
+		mHasStyleStud = false;
 	}
 
 	lcMesh* CreateMesh();
-	lcLibraryMeshSection* AddSection(lcMeshDataType MeshDataType, lcMeshPrimitiveType PrimitiveType, quint32 ColorCode, lcTexture* Texture);
-	quint32 AddVertex(lcMeshDataType MeshDataType, const lcVector3& Position, bool Optimize);
-	quint32 AddVertex(lcMeshDataType MeshDataType, const lcVector3& Position, const lcVector3& Normal, bool Optimize);
-	quint32 AddTexturedVertex(lcMeshDataType MeshDataType, const lcVector3& Position, const lcVector2& TexCoord, bool Optimize);
-	quint32 AddTexturedVertex(lcMeshDataType MeshDataType, const lcVector3& Position, const lcVector3& Normal, const lcVector2& TexCoord, bool Optimize);
-	void AddVertices(lcMeshDataType MeshDataType, int VertexCount, int* BaseVertex, lcLibraryMeshVertex** VertexBuffer);
+	void AddVertices(lcMeshDataType MeshDataType, int VertexCount, int* BaseVertex, lcMeshLoaderVertex** VertexBuffer);
 	void AddIndices(lcMeshDataType MeshDataType, lcMeshPrimitiveType PrimitiveType, quint32 ColorCode, int IndexCount, quint32** IndexBuffer);
-	void AddLine(lcMeshDataType MeshDataType, int LineType, quint32 ColorCode, bool WindingCCW, const lcVector3* Vertices, bool Optimize);
-	void AddTexturedLine(lcMeshDataType MeshDataType, int LineType, quint32 ColorCode, bool WindingCCW, const lcLibraryTextureMap& Map, const lcVector3* Vertices, bool Optimize);
-	void AddMeshData(const lcLibraryMeshData& Data, const lcMatrix44& Transform, quint32 CurrentColorCode, bool InvertWinding, bool InvertNormals, lcLibraryTextureMap* TextureMap, lcMeshDataType OverrideDestIndex);
-	void AddMeshDataNoDuplicateCheck(const lcLibraryMeshData& Data, const lcMatrix44& Transform, quint32 CurrentColorCode, bool InvertWinding, bool InvertNormals, lcLibraryTextureMap* TextureMap, lcMeshDataType OverrideDestIndex);
-	void TestQuad(int* QuadIndices, const lcVector3* Vertices);
-	void ResequenceQuad(int* QuadIndices, int a, int b, int c, int d);
+	void AddMeshData(const lcLibraryMeshData& Data, const lcMatrix44& Transform, quint32 CurrentColorCode, bool InvertWinding, bool InvertNormals, lcMeshLoaderTextureMap* TextureMap, lcMeshDataType OverrideDestIndex);
+	void AddMeshDataNoDuplicateCheck(const lcLibraryMeshData& Data, const lcMatrix44& Transform, quint32 CurrentColorCode, bool InvertWinding, bool InvertNormals, lcMeshLoaderTextureMap* TextureMap, lcMeshDataType OverrideDestIndex);
 
-	lcArray<lcLibraryMeshSection*> mSections[LC_NUM_MESHDATA_TYPES];
-	lcArray<lcLibraryMeshVertex> mVertices[LC_NUM_MESHDATA_TYPES];
+	std::array<lcMeshLoaderTypeData, LC_NUM_MESHDATA_TYPES> mData;
 	bool mHasTextures;
 	bool mHasStyleStud;
 };
@@ -159,7 +184,7 @@ public:
 	bool LoadMesh(lcFile& File, lcMeshDataType MeshDataType);
 
 protected:
-	bool ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform, quint32 CurrentColorCode, bool InvertWinding, lcArray<lcLibraryTextureMap>& TextureStack, lcMeshDataType MeshDataType);
+	bool ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform, quint32 CurrentColorCode, bool InvertWinding, lcArray<lcMeshLoaderTextureMap>& TextureStack, lcMeshDataType MeshDataType);
 
 	lcLibraryMeshData& mMeshData;
 	bool mOptimize;

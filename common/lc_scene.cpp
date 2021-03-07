@@ -242,53 +242,16 @@ void lcScene::DrawOpaqueMeshes(lcContext* Context, bool DrawLit, int PrimitiveTy
 			}
 			else if (Section->PrimitiveType == LC_MESH_CONDITIONAL_LINES)
 			{
-				const lcMatrix44 WorldViewProjectionMatrix = lcMul(RenderMesh.WorldMatrix, lcMul(mViewMatrix, Context->GetProjectionMatrix()));
-				const lcVertex* const VertexBuffer = (lcVertex*)Mesh->mVertexData;
+				int VertexBufferOffset = Mesh->mVertexCacheOffset != -1 ? Mesh->mVertexCacheOffset : 0;
+				VertexBufferOffset += Mesh->mNumVertices * sizeof(lcVertex) + Mesh->mNumTexturedVertices * sizeof(lcVertexTextured);
 				const int IndexBufferOffset = Mesh->mIndexCacheOffset != -1 ? Mesh->mIndexCacheOffset : 0;
 
-				const int VertexBufferOffset = Mesh->mVertexCacheOffset != -1 ? Mesh->mVertexCacheOffset : 0;
-				Context->SetVertexFormat(VertexBufferOffset, 3, 1, 0, 0, DrawLit);
+				Context->SetEdgeColorIndex(ColorIndex);
+				Context->SetMaterial(lcMaterialType::UnlitColorConditional);
+				Context->SetVertexFormatConditional(VertexBufferOffset);
 
-				if (Mesh->mIndexType == GL_UNSIGNED_SHORT)
-				{
-					const quint16* const Indices = (quint16*)((char*)Mesh->mIndexData + Section->IndexOffset);
-
-					for (int i = 0; i < Section->NumIndices; i += 4)
-					{
-						lcVector4 p1 = lcMul4(lcVector4(VertexBuffer[Indices[i + 0]].Position, 1.0f), WorldViewProjectionMatrix);
-						lcVector4 p2 = lcMul4(lcVector4(VertexBuffer[Indices[i + 1]].Position, 1.0f), WorldViewProjectionMatrix);
-						lcVector4 p3 = lcMul4(lcVector4(VertexBuffer[Indices[i + 2]].Position, 1.0f), WorldViewProjectionMatrix);
-						lcVector4 p4 = lcMul4(lcVector4(VertexBuffer[Indices[i + 3]].Position, 1.0f), WorldViewProjectionMatrix);
-
-						p1 /= p1.w;
-						p2 /= p2.w;
-						p3 /= p3.w;
-						p4 /= p4.w;
-
-						if (((p1.y - p2.y) * (p3.x - p1.x) + (p2.x - p1.x) * (p3.y - p1.y)) * ((p1.y - p2.y) * (p4.x - p1.x) + (p2.x - p1.x) * (p4.y - p1.y)) >= 0)
-							Context->DrawIndexedPrimitives(GL_LINES, 2, Mesh->mIndexType, IndexBufferOffset + Section->IndexOffset + i * sizeof(quint16));
-					}
-				}
-				else
-				{
-					const quint32* const Indices = (quint32*)((char*)Mesh->mIndexData + Section->IndexOffset);
-
-					for (int i = 0; i < Section->NumIndices; i += 4)
-					{
-						lcVector4 p1 = lcMul4(lcVector4(VertexBuffer[Indices[i + 0]].Position, 1.0f), WorldViewProjectionMatrix);
-						lcVector4 p2 = lcMul4(lcVector4(VertexBuffer[Indices[i + 1]].Position, 1.0f), WorldViewProjectionMatrix);
-						lcVector4 p3 = lcMul4(lcVector4(VertexBuffer[Indices[i + 2]].Position, 1.0f), WorldViewProjectionMatrix);
-						lcVector4 p4 = lcMul4(lcVector4(VertexBuffer[Indices[i + 3]].Position, 1.0f), WorldViewProjectionMatrix);
-
-						p1 /= p1.w;
-						p2 /= p2.w;
-						p3 /= p3.w;
-						p4 /= p4.w;
-
-						if (((p1.y - p2.y) * (p3.x - p1.x) + (p2.x - p1.x) * (p3.y - p1.y)) * ((p1.y - p2.y) * (p4.x - p1.x) + (p2.x - p1.x) * (p4.y - p1.y)) >= 0)
-							Context->DrawIndexedPrimitives(GL_LINES, 2, Mesh->mIndexType, IndexBufferOffset + Section->IndexOffset + i * sizeof(quint32));
-					}
-				}
+				const GLenum DrawPrimitiveType = Section->PrimitiveType & (LC_MESH_TRIANGLES | LC_MESH_TEXTURED_TRIANGLES) ? GL_TRIANGLES : GL_LINES;
+				Context->DrawIndexedPrimitives(DrawPrimitiveType, Section->NumIndices, Mesh->mIndexType, IndexBufferOffset + Section->IndexOffset);
 
 				continue;
 			}
@@ -440,8 +403,9 @@ void lcScene::Draw(lcContext* Context) const
 
 	Context->SetViewMatrix(mViewMatrix);
 
-	constexpr bool DrawConditional = false;
 	const lcPreferences& Preferences = lcGetPreferences();
+	const bool DrawLines = Preferences.mDrawEdgeLines && Preferences.mLineWidth != 0.0f;
+	const bool DrawConditional = false;
 
 //	lcShadingMode ShadingMode = Preferences.mShadingMode;
 //	if (ShadingMode == lcShadingMode::Wireframe && !mAllowWireframe)
@@ -461,8 +425,6 @@ void lcScene::Draw(lcContext* Context) const
 	}
 	else if (mShadingMode == lcShadingMode::Flat)
 	{
-		const bool DrawLines = Preferences.mDrawEdgeLines && Preferences.mLineWidth != 0.0f;
-
 		int LinePrimitiveTypes = 0;
 
 		if (DrawLines)
@@ -501,8 +463,6 @@ void lcScene::Draw(lcContext* Context) const
 	}
 	else
 	{
-		const bool DrawLines = Preferences.mDrawEdgeLines && Preferences.mLineWidth != 0.0f;
-
 		int LinePrimitiveTypes = LC_MESH_LINES;
 
 		if (DrawConditional)

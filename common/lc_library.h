@@ -76,7 +76,7 @@ public:
 	void Unload()
 	{
 		mState = lcPrimitiveState::NotLoaded;
-		mMeshData.RemoveAll();
+		mMeshData.Clear();
 	}
 
 	QString mFileName;

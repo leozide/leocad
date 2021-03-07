@@ -122,6 +122,8 @@
         <file>resources/shaders/fakelit_color_vs.glsl</file>
         <file>resources/shaders/fakelit_texture_decal_ps.glsl</file>
         <file>resources/shaders/fakelit_texture_decal_vs.glsl</file>
+        <file>resources/shaders/unlit_color_conditional_ps.glsl</file>
+        <file>resources/shaders/unlit_color_conditional_vs.glsl</file>
         <file>resources/shaders/unlit_color_ps.glsl</file>
         <file>resources/shaders/unlit_color_vs.glsl</file>
         <file>resources/shaders/unlit_texture_decal_ps.glsl</file>

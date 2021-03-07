@@ -935,7 +935,7 @@ void lcSynthInfoFlexSystemHose::AddParts(lcMemFile& File, lcLibraryMeshData& Mes
 		File.WriteBuffer(Line, strlen(Line));
 	}
 
-	const lcLibraryMeshVertex OutsideSectionVertices[16] =
+	const lcMeshLoaderVertex OutsideSectionVertices[16] =
 	{
 		{ lcVector3( 4.00000f, 0.0f,  0.00000f), lcVector3( 1.000000f, 0.0f,  0.000000f), 4.0f, lcVector2(0.0f, 0.0f), 0 },
 		{ lcVector3( 3.69552f, 0.0f,  1.53073f), lcVector3( 0.923880f, 0.0f,  0.382683f), 4.0f, lcVector2(0.0f, 0.0f), 0 },
@@ -955,7 +955,7 @@ void lcSynthInfoFlexSystemHose::AddParts(lcMemFile& File, lcLibraryMeshData& Mes
 		{ lcVector3( 3.69552f, 0.0f, -1.53073f), lcVector3( 0.923880f, 0.0f, -0.382683f), 4.0f, lcVector2(0.0f, 0.0f), 0 },
 	};
 
-	const lcLibraryMeshVertex InsideSectionVertices[16] =
+	const lcMeshLoaderVertex InsideSectionVertices[16] =
 	{
 		{ lcVector3( 2.00000f, 0.0f,  0.00000f), lcVector3(-1.00000f, 0.0f,  0.00000f), 4.0f, lcVector2(0.0f, 0.0f), 0 },
 		{ lcVector3( 1.84776f, 0.0f,  0.76536f), lcVector3(-0.92388f, 0.0f, -0.38268f), 4.0f, lcVector2(0.0f, 0.0f), 0 },
@@ -975,10 +975,10 @@ void lcSynthInfoFlexSystemHose::AddParts(lcMemFile& File, lcLibraryMeshData& Mes
 		{ lcVector3( 1.84776f, 0.0f, -0.76536f), lcVector3(-0.92388f, 0.0f,  0.38268f), 4.0f, lcVector2(0.0f, 0.0f), 0 },
 	};
 
-	auto AddSectionVertices = [&MeshData, &Sections](const lcLibraryMeshVertex* SectionVertices, int NumSectionVertices)
+	auto AddSectionVertices = [&MeshData, &Sections](const lcMeshLoaderVertex* SectionVertices, int NumSectionVertices)
 	{
 		int BaseVertex;
-		lcLibraryMeshVertex* VertexBuffer;
+		lcMeshLoaderVertex* VertexBuffer;
 		quint32* IndexBuffer;
 		MeshData.AddVertices(LC_MESHDATA_SHARED, NumSectionVertices * (Sections.GetSize() - 1), &BaseVertex, &VertexBuffer);
 
@@ -1098,7 +1098,7 @@ void lcSynthInfoFlexibleAxle::AddParts(lcMemFile& File, lcLibraryMeshData& MeshD
 		File.WriteBuffer(Line, strlen(Line));
 	}
 
-	const lcLibraryMeshVertex SectionVertices[28] =
+	const lcMeshLoaderVertex SectionVertices[28] =
 	{
 		{ lcVector3(-6.000f, 0.0f,  0.000f), lcVector3(-1.000f, 0.0f,  0.000f), 2.0f, lcVector2(0.0f, 0.0f), 0 },
 		{ lcVector3(-5.602f, 0.0f,  2.000f), lcVector3(-0.942f, 0.0f,  0.336f), 4.0f, lcVector2(0.0f, 0.0f), 0 },
@@ -1133,7 +1133,7 @@ void lcSynthInfoFlexibleAxle::AddParts(lcMemFile& File, lcLibraryMeshData& MeshD
 	const int NumSectionVertices = LC_ARRAY_COUNT(SectionVertices);
 
 	int BaseVertex;
-	lcLibraryMeshVertex* VertexBuffer;
+	lcMeshLoaderVertex* VertexBuffer;
 	quint32* IndexBuffer;
 	MeshData.AddVertices(LC_MESHDATA_SHARED, NumSectionVertices * (Sections.GetSize() - 1), &BaseVertex, &VertexBuffer);
 	MeshData.AddIndices(LC_MESHDATA_SHARED, LC_MESH_LINES, 24, 2 * 12 * (Sections.GetSize() - 2), &IndexBuffer);
@@ -1217,7 +1217,7 @@ void lcSynthInfoBraidedString::AddParts(lcMemFile& File, lcLibraryMeshData& Mesh
 	};
 
 	int BaseVertex;
-	lcLibraryMeshVertex* VertexBuffer;
+	lcMeshLoaderVertex* VertexBuffer;
 	quint32* IndexBuffer;
 	MeshData.AddVertices(LC_MESHDATA_SHARED, NumBraids * ((Sections.GetSize() - 2) * NumSegments + 1), &BaseVertex, &VertexBuffer);
 	MeshData.AddIndices(LC_MESHDATA_SHARED, LC_MESH_LINES, 24, NumBraids * (Sections.GetSize() - 2) * NumSegments * 2, &IndexBuffer);
@@ -1402,7 +1402,7 @@ lcMesh* lcSynthInfo::CreateMesh(const lcArray<lcPieceControlPoint>& ControlPoint
 
 	File.WriteU8(0);
 
-	lcArray<lcLibraryTextureMap> TextureStack;
+	lcArray<lcMeshLoaderTextureMap> TextureStack;
 	File.Seek(0, SEEK_SET);
 
 	lcMeshLoader MeshLoader(MeshData, false, nullptr, false);

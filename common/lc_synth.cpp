@@ -18,6 +18,7 @@ public:
 protected:
 	float GetSectionTwist(const lcMatrix44& StartTransform, const lcMatrix44& EndTransform) const;
 	void CalculateSections(const lcArray<lcPieceControlPoint>& ControlPoints, lcArray<lcMatrix44>& Sections, SectionCallbackFunc SectionCallback) const override;
+	static void AddTubeParts(lcLibraryMeshData& MeshData, const lcArray<lcMatrix44>& Sections, float Radius, bool IsInner);
 
 	struct lcSynthComponent
 	{
@@ -909,6 +910,80 @@ void lcSynthInfoFlexibleHose::AddParts(lcMemFile& File, lcLibraryMeshData&, cons
 	}
 }
 
+void lcSynthInfoCurved::AddTubeParts(lcLibraryMeshData& MeshData, const lcArray<lcMatrix44>& Sections, float Radius, bool IsInner)
+{
+	// a unit circle
+	static const lcVector3 Vertices[16] =
+	{
+		{  1.000000f, 0.0f,  0.000000f },
+		{  0.923880f, 0.0f,  0.382683f },
+		{  0.707107f, 0.0f,  0.707107f },
+		{  0.382683f, 0.0f,  0.923880f },
+		{  0.000000f, 0.0f,  1.000000f },
+		{ -0.382683f, 0.0f,  0.923880f },
+		{ -0.707107f, 0.0f,  0.707107f },
+		{ -0.923880f, 0.0f,  0.382683f },
+		{ -1.000000f, 0.0f,  0.000000f },
+		{ -0.923879f, 0.0f, -0.382684f },
+		{ -0.707107f, 0.0f, -0.707107f },
+		{ -0.382683f, 0.0f, -0.923880f },
+		{  0.000000f, 0.0f, -1.000000f },
+		{  0.382684f, 0.0f, -0.923879f },
+		{  0.707107f, 0.0f, -0.707107f },
+		{  0.923880f, 0.0f, -0.382683f },
+	};
+	const int NumSectionVertices = LC_ARRAY_COUNT(Vertices);
+
+	int BaseVertex;
+	lcMeshLoaderVertex* VertexBuffer;
+	quint32* IndexBuffer;
+	MeshData.AddVertices(LC_MESHDATA_SHARED, NumSectionVertices * (Sections.GetSize() - 1), &BaseVertex, &VertexBuffer);
+
+	float NormalDirection = IsInner ? -1.0f : 1.0f;
+
+	for (int SectionIdx = 1; SectionIdx < Sections.GetSize(); SectionIdx++)
+	{
+		for (int VertexIdx = 0; VertexIdx < NumSectionVertices; VertexIdx++)
+		{
+			VertexBuffer->Position = lcMul31(Radius * Vertices[VertexIdx], Sections[SectionIdx]);
+			VertexBuffer->Normal = lcMul30(NormalDirection * Vertices[VertexIdx], Sections[SectionIdx]);
+			VertexBuffer->NormalWeight = 4.0f;
+			VertexBuffer++;
+		}
+	}
+
+	MeshData.AddIndices(LC_MESHDATA_SHARED, LC_MESH_TRIANGLES, 16, 6 * NumSectionVertices * (Sections.GetSize() - 2), &IndexBuffer);
+
+	int Offset1, Offset2;
+	if (IsInner)
+	{
+		Offset1 = NumSectionVertices - 1;	// -1 mod NumVertices
+		Offset2 = 0;
+	}
+	else
+	{
+		Offset1 = 0;
+		Offset2 = 1;
+	}
+
+	for (int SectionIdx = 1; SectionIdx < Sections.GetSize() - 1; SectionIdx++)
+	{
+		for (int VertexIdx = 0; VertexIdx < NumSectionVertices; VertexIdx++)
+		{
+			int Vertex1 = BaseVertex + (VertexIdx + Offset1) % NumSectionVertices;
+			int Vertex2 = BaseVertex + (VertexIdx + Offset2) % NumSectionVertices;
+
+			*IndexBuffer++ = Vertex1;
+			*IndexBuffer++ = Vertex2;
+			*IndexBuffer++ = Vertex1 + NumSectionVertices;
+			*IndexBuffer++ = Vertex2;
+			*IndexBuffer++ = Vertex2 + NumSectionVertices;
+			*IndexBuffer++ = Vertex1 + NumSectionVertices;
+		}
+		BaseVertex += NumSectionVertices;
+	}
+}
+
 void lcSynthInfoFlexSystemHose::AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const lcArray<lcMatrix44>& Sections) const
 {
 	char Line[256];
@@ -935,86 +1010,8 @@ void lcSynthInfoFlexSystemHose::AddParts(lcMemFile& File, lcLibraryMeshData& Mes
 		File.WriteBuffer(Line, strlen(Line));
 	}
 
-	const lcMeshLoaderVertex OutsideSectionVertices[16] =
-	{
-		{ lcVector3( 4.00000f, 0.0f,  0.00000f), lcVector3( 1.000000f, 0.0f,  0.000000f), 4.0f, lcVector2(0.0f, 0.0f), 0 },
-		{ lcVector3( 3.69552f, 0.0f,  1.53073f), lcVector3( 0.923880f, 0.0f,  0.382683f), 4.0f, lcVector2(0.0f, 0.0f), 0 },
-		{ lcVector3( 2.82843f, 0.0f,  2.82843f), lcVector3( 0.707107f, 0.0f,  0.707107f), 4.0f, lcVector2(0.0f, 0.0f), 0 },
-		{ lcVector3( 1.53073f, 0.0f,  3.69552f), lcVector3( 0.382683f, 0.0f,  0.923880f), 4.0f, lcVector2(0.0f, 0.0f), 0 },
-		{ lcVector3( 0.00000f, 0.0f,  4.00000f), lcVector3( 0.000000f, 0.0f,  1.000000f), 4.0f, lcVector2(0.0f, 0.0f), 0 },
-		{ lcVector3(-1.53073f, 0.0f,  3.69552f), lcVector3(-0.382683f, 0.0f,  0.923880f), 4.0f, lcVector2(0.0f, 0.0f), 0 },
-		{ lcVector3(-2.82843f, 0.0f,  2.82843f), lcVector3(-0.707107f, 0.0f,  0.707107f), 4.0f, lcVector2(0.0f, 0.0f), 0 },
-		{ lcVector3(-3.69552f, 0.0f,  1.53073f), lcVector3(-0.923880f, 0.0f,  0.382683f), 4.0f, lcVector2(0.0f, 0.0f), 0 },
-		{ lcVector3(-4.00000f, 0.0f,  0.00000f), lcVector3(-1.000000f, 0.0f,  0.000000f), 4.0f, lcVector2(0.0f, 0.0f), 0 },
-		{ lcVector3(-3.69552f, 0.0f, -1.53073f), lcVector3(-0.923879f, 0.0f, -0.382684f), 4.0f, lcVector2(0.0f, 0.0f), 0 },
-		{ lcVector3(-2.82843f, 0.0f, -2.82843f), lcVector3(-0.707107f, 0.0f, -0.707107f), 4.0f, lcVector2(0.0f, 0.0f), 0 },
-		{ lcVector3(-1.53073f, 0.0f, -3.69552f), lcVector3(-0.382683f, 0.0f, -0.923880f), 4.0f, lcVector2(0.0f, 0.0f), 0 },
-		{ lcVector3( 0.00000f, 0.0f, -4.00000f), lcVector3( 0.000000f, 0.0f, -1.000000f), 4.0f, lcVector2(0.0f, 0.0f), 0 },
-		{ lcVector3( 1.53073f, 0.0f, -3.69552f), lcVector3( 0.382684f, 0.0f, -0.923879f), 4.0f, lcVector2(0.0f, 0.0f), 0 },
-		{ lcVector3( 2.82843f, 0.0f, -2.82843f), lcVector3( 0.707107f, 0.0f, -0.707107f), 4.0f, lcVector2(0.0f, 0.0f), 0 },
-		{ lcVector3( 3.69552f, 0.0f, -1.53073f), lcVector3( 0.923880f, 0.0f, -0.382683f), 4.0f, lcVector2(0.0f, 0.0f), 0 },
-	};
-
-	const lcMeshLoaderVertex InsideSectionVertices[16] =
-	{
-		{ lcVector3( 2.00000f, 0.0f,  0.00000f), lcVector3(-1.00000f, 0.0f,  0.00000f), 4.0f, lcVector2(0.0f, 0.0f), 0 },
-		{ lcVector3( 1.84776f, 0.0f,  0.76536f), lcVector3(-0.92388f, 0.0f, -0.38268f), 4.0f, lcVector2(0.0f, 0.0f), 0 },
-		{ lcVector3( 1.41421f, 0.0f,  1.41421f), lcVector3(-0.70710f, 0.0f, -0.70710f), 4.0f, lcVector2(0.0f, 0.0f), 0 },
-		{ lcVector3( 0.76536f, 0.0f,  1.84776f), lcVector3(-0.38268f, 0.0f, -0.92388f), 4.0f, lcVector2(0.0f, 0.0f), 0 },
-		{ lcVector3( 0.00000f, 0.0f,  2.00000f), lcVector3( 0.00000f, 0.0f, -1.00000f), 4.0f, lcVector2(0.0f, 0.0f), 0 },
-		{ lcVector3(-0.76536f, 0.0f,  1.84776f), lcVector3( 0.38268f, 0.0f, -0.92388f), 4.0f, lcVector2(0.0f, 0.0f), 0 },
-		{ lcVector3(-1.41421f, 0.0f,  1.41421f), lcVector3( 0.70710f, 0.0f, -0.70710f), 4.0f, lcVector2(0.0f, 0.0f), 0 },
-		{ lcVector3(-1.84776f, 0.0f,  0.76536f), lcVector3( 0.92388f, 0.0f, -0.38268f), 4.0f, lcVector2(0.0f, 0.0f), 0 },
-		{ lcVector3(-2.00000f, 0.0f,  0.00000f), lcVector3( 1.00000f, 0.0f,  0.00000f), 4.0f, lcVector2(0.0f, 0.0f), 0 },
-		{ lcVector3(-1.84776f, 0.0f, -0.76536f), lcVector3( 0.92387f, 0.0f,  0.38268f), 4.0f, lcVector2(0.0f, 0.0f), 0 },
-		{ lcVector3(-1.41421f, 0.0f, -1.41421f), lcVector3( 0.70710f, 0.0f,  0.70710f), 4.0f, lcVector2(0.0f, 0.0f), 0 },
-		{ lcVector3(-0.76536f, 0.0f, -1.84776f), lcVector3( 0.38268f, 0.0f,  0.92388f), 4.0f, lcVector2(0.0f, 0.0f), 0 },
-		{ lcVector3( 0.00000f, 0.0f, -2.00000f), lcVector3( 0.00000f, 0.0f,  1.00000f), 4.0f, lcVector2(0.0f, 0.0f), 0 },
-		{ lcVector3( 0.76536f, 0.0f, -1.84776f), lcVector3(-0.38268f, 0.0f,  0.92387f), 4.0f, lcVector2(0.0f, 0.0f), 0 },
-		{ lcVector3( 1.41421f, 0.0f, -1.41421f), lcVector3(-0.70710f, 0.0f,  0.70710f), 4.0f, lcVector2(0.0f, 0.0f), 0 },
-		{ lcVector3( 1.84776f, 0.0f, -0.76536f), lcVector3(-0.92388f, 0.0f,  0.38268f), 4.0f, lcVector2(0.0f, 0.0f), 0 },
-	};
-
-	auto AddSectionVertices = [&MeshData, &Sections](const lcMeshLoaderVertex* SectionVertices, int NumSectionVertices)
-	{
-		int BaseVertex;
-		lcMeshLoaderVertex* VertexBuffer;
-		quint32* IndexBuffer;
-		MeshData.AddVertices(LC_MESHDATA_SHARED, NumSectionVertices * (Sections.GetSize() - 1), &BaseVertex, &VertexBuffer);
-
-		for (int SectionIdx = 1; SectionIdx < Sections.GetSize(); SectionIdx++)
-		{
-			for (int VertexIdx = 0; VertexIdx < NumSectionVertices; VertexIdx++)
-			{
-				VertexBuffer->Position = lcMul31(SectionVertices[VertexIdx].Position, Sections[SectionIdx]);
-				VertexBuffer->Normal = lcMul30(SectionVertices[VertexIdx].Normal, Sections[SectionIdx]);
-				VertexBuffer->NormalWeight = SectionVertices[VertexIdx].NormalWeight;
-				VertexBuffer++;
-			}
-		}
-
-		MeshData.AddIndices(LC_MESHDATA_SHARED, LC_MESH_TRIANGLES, 16, 6 * NumSectionVertices * (Sections.GetSize() - 2), &IndexBuffer);
-
-		for (int SectionIdx = 1; SectionIdx < Sections.GetSize() - 1; SectionIdx++)
-		{
-			for (int VertexIdx = 0; VertexIdx < NumSectionVertices; VertexIdx++)
-			{
-				int Vertex1 = BaseVertex + VertexIdx;
-				int Vertex2 = BaseVertex + (VertexIdx + 1) % NumSectionVertices;
-
-				*IndexBuffer++ = Vertex1;
-				*IndexBuffer++ = Vertex2;
-				*IndexBuffer++ = Vertex1 + NumSectionVertices;
-				*IndexBuffer++ = Vertex2;
-				*IndexBuffer++ = Vertex2 + NumSectionVertices;
-				*IndexBuffer++ = Vertex1 + NumSectionVertices;
-			}
-			BaseVertex += NumSectionVertices;
-		}
-	};
-
-	AddSectionVertices(OutsideSectionVertices, LC_ARRAY_COUNT(OutsideSectionVertices));
-	AddSectionVertices(InsideSectionVertices, LC_ARRAY_COUNT(InsideSectionVertices));
+	AddTubeParts(MeshData, Sections, 4.0f, false);
+	AddTubeParts(MeshData, Sections, 2.0f, true);
 }
 
 void lcSynthInfoRibbedHose::AddParts(lcMemFile& File, lcLibraryMeshData&, const lcArray<lcMatrix44>& Sections) const

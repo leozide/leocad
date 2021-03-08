@@ -951,7 +951,7 @@ void lcContext::SetVertexFormat(int BufferOffset, int PositionSize, int NormalSi
 		}
 		else if (mNormalEnabled)
 		{
-			glDisableClientState(GL_NORMAL_ARRAY);
+			glDisableVertexAttribArray(LC_ATTRIB_NORMAL);
 			mNormalEnabled = false;
 		}
 

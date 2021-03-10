@@ -239,6 +239,11 @@ void lcContext::CreateShaderPrograms()
 		glBindAttribLocation(Program, LC_ATTRIB_TEXCOORD, "VertexTexCoord");
 		glBindAttribLocation(Program, LC_ATTRIB_COLOR, "VertexColor");
 
+		glBindAttribLocation(Program, 0, "VertexPosition1");
+		glBindAttribLocation(Program, 1, "VertexPosition2");
+		glBindAttribLocation(Program, 2, "VertexPosition3");
+		glBindAttribLocation(Program, 3, "VertexPosition4");
+
 		glLinkProgram(Program);
 
 		glDetachShader(Program, VertexShader);

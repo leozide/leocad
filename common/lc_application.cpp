@@ -66,6 +66,7 @@ void lcPreferences::LoadDefaults()
 	mPartEdgeContrast = lcGetProfileFloat(LC_PROFILE_PART_EDGE_CONTRAST);
 	mPartColorValueLDIndex = lcGetProfileFloat(LC_PROFILE_PART_COLOR_VALUE_LD_INDEX);
 	mAutomateEdgeColor = lcGetProfileInt(LC_PROFILE_AUTOMATE_EDGE_COLOR);
+	mPreferOfficialParts = lcGetProfileInt(LC_PROFILE_PREFER_OFFICIAL_PARTS);
 }
 
 void lcPreferences::SaveDefaults()
@@ -119,6 +120,7 @@ void lcPreferences::SaveDefaults()
 	lcSetProfileFloat(LC_PROFILE_PART_EDGE_CONTRAST, mPartEdgeContrast);
 	lcSetProfileFloat(LC_PROFILE_PART_COLOR_VALUE_LD_INDEX, mPartColorValueLDIndex);
 	lcSetProfileInt(LC_PROFILE_AUTOMATE_EDGE_COLOR, mAutomateEdgeColor);
+	lcSetProfileInt(LC_PROFILE_PREFER_OFFICIAL_PARTS, mPreferOfficialParts);
 }
 
 void lcPreferences::SetInterfaceColors(lcColorTheme ColorTheme)
@@ -1228,6 +1230,7 @@ void lcApplication::ShowPreferencesDialog()
 
 	Options.AASamples = CurrentAASamples;
 	Options.StudStyle = CurrentStudStyle;
+	Options.HasUnofficialParts = mLibrary->HasUnofficialParts();
 
 	Options.Categories = gCategories;
 	Options.CategoriesModified = false;
@@ -1249,6 +1252,7 @@ void lcApplication::ShowPreferencesDialog()
 	bool ColorsChanged = Options.ColorConfigPath != lcGetProfileString(LC_PROFILE_COLOR_CONFIG);
 	bool AAChanged = CurrentAASamples != Options.AASamples;
 	bool StudStyleChanged = CurrentStudStyle != Options.StudStyle;
+	bool PreferOfficialPartsChanged = Options.Preferences.mPreferOfficialParts != mPreferences.mPreferOfficialParts;
 	bool AutomateEdgeColorChanged = Options.Preferences.mAutomateEdgeColor != mPreferences.mAutomateEdgeColor;
 	AutomateEdgeColorChanged |= Options.Preferences.mStudCylinderColor != mPreferences.mStudCylinderColor;
 	AutomateEdgeColorChanged |= Options.Preferences.mPartEdgeColor != mPreferences.mPartEdgeColor;
@@ -1272,7 +1276,7 @@ void lcApplication::ShowPreferencesDialog()
 	lcSetProfileInt(LC_PROFILE_ANTIALIASING_SAMPLES, Options.AASamples);
 	lcSetProfileInt(LC_PROFILE_STUD_STYLE, static_cast<int>(Options.StudStyle));
 
-	if (LanguageChanged || LibraryChanged || AAChanged)
+	if (LanguageChanged || LibraryChanged || AAChanged || PreferOfficialPartsChanged)
 		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Some changes will only take effect the next time you start LeoCAD."));
 
 	if (Options.CategoriesModified)

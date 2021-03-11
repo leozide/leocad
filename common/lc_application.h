@@ -81,6 +81,7 @@ public:
 	float mPartEdgeContrast;
 	float mPartColorValueLDIndex;
 	bool  mAutomateEdgeColor;
+	bool mPreferOfficialParts;
 };
 
 struct lcCommandLineOptions

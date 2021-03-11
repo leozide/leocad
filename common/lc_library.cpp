@@ -42,6 +42,7 @@ lcPiecesLibrary::lcPiecesLibrary()
 	mHasUnofficialDirectory = false;
 	mCancelLoading = false;
 	mStudStyle = static_cast<lcStudStyle>(lcGetProfileInt(LC_PROFILE_STUD_STYLE));
+	mPreferOfficialParts = lcGetProfileInt(LC_PROFILE_PREFER_OFFICIAL_PARTS);
 }
 
 lcPiecesLibrary::~lcPiecesLibrary()
@@ -446,9 +447,15 @@ bool lcPiecesLibrary::OpenArchive(std::unique_ptr<lcFile> File, lcZipFileType Zi
 					Info->mFileName[sizeof(Info->mFileName) - 1] = 0;
 
 					mPieces[Name] = Info;
-				}
 
-				Info->SetZipFile(ZipFileType, FileIdx);
+					Info->SetZipFile(ZipFileType, FileIdx);
+				}
+				else if (ZipFileType == lcZipFileType::Unofficial && Info->mZipFileType == lcZipFileType::Official && mPreferOfficialParts)
+				{
+					continue;
+				} else {
+					Info->SetZipFile(ZipFileType, FileIdx);
+				}
 			}
 			else
 				Source->Primitives[Name] = new lcLibraryPrimitive(QString(), FileInfo.file_name + (Name - NameBuffer), ZipFileType, FileIdx, false, false, true);
@@ -522,7 +529,7 @@ void lcPiecesLibrary::ReadArchiveDescriptions(const QString& OfficialFileName, c
 
 bool lcPiecesLibrary::OpenDirectory(const QDir& LibraryDir, bool ShowProgress)
 {
-	const QLatin1String BaseFolders[LC_NUM_FOLDERTYPES] = { QLatin1String("unofficial/"), QLatin1String("") };
+	const QLatin1String BaseFolders[LC_NUM_FOLDERTYPES] = { mPreferOfficialParts ? QLatin1String("") : QLatin1String("unofficial/"), mPreferOfficialParts ? QLatin1String("unofficial/") : QLatin1String("") };
 	constexpr int NumBaseFolders = LC_ARRAY_COUNT(BaseFolders);
 
 	QFileInfoList FileLists[NumBaseFolders];
@@ -697,7 +704,9 @@ void lcPiecesLibrary::ReadDirectoryDescriptions(const QFileInfoList (&FileLists)
 			}
 			*Dst = 0;
 
-			if (FolderIdx == LC_FOLDER_OFFICIAL && mHasUnofficialDirectory && mPieces.find(Name) != mPieces.end())
+			if (FolderIdx == LC_FOLDER_UNOFFICIAL && mPreferOfficialParts && mPieces.find(Name) != mPieces.end())
+				continue;
+			else if (FolderIdx == LC_FOLDER_OFFICIAL && mHasUnofficialDirectory && mPieces.find(Name) != mPieces.end())
 				continue;
 
 			PieceInfo* Info = new PieceInfo();

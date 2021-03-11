@@ -24,160 +24,6 @@
        <string>General</string>
       </attribute>
       <layout class="QFormLayout" name="formLayout">
-       <property name="fieldGrowthPolicy">
-        <enum>QFormLayout::ExpandingFieldsGrow</enum>
-       </property>
-       <item row="1" column="0" colspan="2">
-        <widget class="QGroupBox" name="ApplicationGroup">
-         <property name="title">
-          <string>Application</string>
-         </property>
-         <layout class="QGridLayout" name="gridLayout_4">
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_19">
-            <property name="text">
-             <string>Language:</string>
-            </property>
-            <property name="buddy">
-             <cstring>Language</cstring>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QComboBox" name="Language">
-            <item>
-             <property name="text">
-              <string>Default</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Czech</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Deutsch </string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>English</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Français</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Português</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Español</string>
-             </property>
-            </item>
-           </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="QComboBox" name="checkForUpdates">
-            <item>
-             <property name="text">
-              <string>Never</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Once a day</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Once a week</string>
-             </property>
-            </item>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_10">
-            <property name="text">
-             <string>Check for updates:</string>
-            </property>
-            <property name="buddy">
-             <cstring>checkForUpdates</cstring>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="2">
-           <spacer name="horizontalSpacer_8">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_25">
-            <property name="text">
-             <string>Color Theme:</string>
-            </property>
-            <property name="buddy">
-             <cstring>Language</cstring>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QComboBox" name="ColorTheme">
-            <item>
-             <property name="text">
-              <string>Dark</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>System</string>
-             </property>
-            </item>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item row="2" column="0">
-        <widget class="QLabel" name="label_4">
-         <property name="text">
-          <string>Default author name:</string>
-         </property>
-         <property name="buddy">
-          <cstring>authorName</cstring>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="1">
-        <widget class="QLineEdit" name="authorName"/>
-       </item>
-       <item row="9" column="0" colspan="2">
-        <widget class="QCheckBox" name="fixedDirectionKeys">
-         <property name="text">
-          <string>Fixed direction keys</string>
-         </property>
-        </widget>
-       </item>
-       <item row="10" column="0" colspan="2">
-        <widget class="QCheckBox" name="autoLoadMostRecent">
-         <property name="text">
-          <string>Open most recent file on startup</string>
-         </property>
-        </widget>
-       </item>
        <item row="0" column="0" colspan="2">
         <widget class="QGroupBox" name="CustomPathsGroup">
          <property name="title">
@@ -316,12 +162,192 @@
          </layout>
         </widget>
        </item>
-       <item row="11" column="0" colspan="2">
-        <widget class="QCheckBox" name="RestoreTabLayout">
+       <item row="1" column="0" colspan="2">
+        <widget class="QGroupBox" name="ApplicationGroup">
+         <property name="title">
+          <string>Application</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_4">
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_19">
+            <property name="text">
+             <string>Language:</string>
+            </property>
+            <property name="buddy">
+             <cstring>Language</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QComboBox" name="Language">
+            <item>
+             <property name="text">
+              <string>Default</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Czech</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Deutsch </string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>English</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Français</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Português</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Español</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QComboBox" name="checkForUpdates">
+            <item>
+             <property name="text">
+              <string>Never</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Once a day</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Once a week</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_10">
+            <property name="text">
+             <string>Check for updates:</string>
+            </property>
+            <property name="buddy">
+             <cstring>checkForUpdates</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2">
+           <spacer name="horizontalSpacer_8">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_25">
+            <property name="text">
+             <string>Color Theme:</string>
+            </property>
+            <property name="buddy">
+             <cstring>Language</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QComboBox" name="ColorTheme">
+            <item>
+             <property name="text">
+              <string>Dark</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>System</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="label_4">
          <property name="text">
-          <string>Restore tab layout</string>
+          <string>Default author name:</string>
+         </property>
+         <property name="buddy">
+          <cstring>authorName</cstring>
          </property>
         </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QLineEdit" name="authorName"/>
+       </item>
+       <item row="3" column="0" colspan="2">
+        <widget class="QGroupBox" name="Misc_Group">
+         <property name="title">
+          <string/>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_9">
+          <item row="0" column="0">
+           <widget class="QCheckBox" name="fixedDirectionKeys">
+            <property name="text">
+             <string>Fixed direction keys</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QCheckBox" name="autoLoadMostRecent">
+            <property name="text">
+             <string>Open most recent file on startup</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QCheckBox" name="PreferOfficialParts">
+            <property name="text">
+             <string>Prefer official parts when unofficial library is present</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QCheckBox" name="RestoreTabLayout">
+            <property name="text">
+             <string>Restore tab layout</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="4" column="0">
+        <spacer name="verticalSpacer_4">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
        </item>
       </layout>
      </widget>
@@ -612,7 +638,7 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tab">
+     <widget class="QWidget" name="tabViews">
       <attribute name="title">
        <string>Views</string>
       </attribute>
@@ -874,7 +900,7 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="ColorTab">
+     <widget class="QWidget" name="tabColors">
       <attribute name="title">
        <string>Colors</string>
       </attribute>
@@ -1744,6 +1770,7 @@
   </layout>
  </widget>
  <tabstops>
+  <tabstop>tabWidget</tabstop>
   <tabstop>partsLibrary</tabstop>
   <tabstop>partsLibraryBrowse</tabstop>
   <tabstop>partsArchiveBrowse</tabstop>
@@ -1760,8 +1787,9 @@
   <tabstop>checkForUpdates</tabstop>
   <tabstop>authorName</tabstop>
   <tabstop>fixedDirectionKeys</tabstop>
-  <tabstop>autoLoadMostRecent</tabstop>
   <tabstop>RestoreTabLayout</tabstop>
+  <tabstop>autoLoadMostRecent</tabstop>
+  <tabstop>PreferOfficialParts</tabstop>
   <tabstop>antiAliasing</tabstop>
   <tabstop>antiAliasingSamples</tabstop>
   <tabstop>FadeSteps</tabstop>
@@ -1832,7 +1860,6 @@
   <tabstop>mouseAssign</tabstop>
   <tabstop>mouseRemove</tabstop>
   <tabstop>mouseSensitivity</tabstop>
-  <tabstop>tabWidget</tabstop>
  </tabstops>
  <resources>
   <include location="../leocad.qrc"/>
@@ -1845,8 +1872,8 @@
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>261</x>
-     <y>440</y>
+     <x>270</x>
+     <y>493</y>
     </hint>
     <hint type="destinationlabel">
      <x>157</x>
@@ -1861,8 +1888,8 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>329</x>
-     <y>440</y>
+     <x>338</x>
+     <y>493</y>
     </hint>
     <hint type="destinationlabel">
      <x>286</x>

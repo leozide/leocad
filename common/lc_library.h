@@ -168,6 +168,11 @@ public:
 			mNumOfficialPieces = (int)mPieces.size();
 	}
 
+	bool HasUnofficialParts() const
+	{
+		return mZipFiles[static_cast<int>(lcZipFileType::Unofficial)] || mHasUnofficialDirectory;
+	}
+
 	bool ShouldCancelLoading() const
 	{
 		return mCancelLoading;
@@ -222,6 +227,7 @@ protected:
 	QMutex mTextureMutex;
 
 	lcStudStyle mStudStyle;
+	bool mPreferOfficialParts;
 
 	QString mCachePath;
 	qint64 mArchiveCheckSum[4];

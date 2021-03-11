@@ -85,6 +85,8 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 		ui->antiAliasingSamples->setCurrentIndex(0);
 	ui->edgeLines->setChecked(mOptions->Preferences.mDrawEdgeLines);
 	ui->ConditionalLinesCheckBox->setChecked(mOptions->Preferences.mDrawConditionalLines);
+	ui->PreferOfficialParts->setChecked(mOptions->Preferences.mPreferOfficialParts);
+	ui->PreferOfficialParts->setEnabled(mOptions->HasUnofficialParts);
 
 	if (!gSupportsShaderObjects)
 	{
@@ -259,6 +261,7 @@ void lcQPreferencesDialog::accept()
 	mOptions->Preferences.mMouseSensitivity = ui->mouseSensitivity->value();
 	mOptions->Preferences.mColorTheme = static_cast<lcColorTheme>(ui->ColorTheme->currentIndex());
 	mOptions->Preferences.mAutomateEdgeColor = ui->AutomateEdgeColor->isChecked();
+	mOptions->Preferences.mPreferOfficialParts = ui->PreferOfficialParts->isChecked();
 
 	int Language = ui->Language->currentIndex();
 	if (Language < 0 || Language > static_cast<int>(LC_ARRAY_COUNT(gLanguageLocales)))

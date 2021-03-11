@@ -24,6 +24,8 @@ struct lcPreferencesDialogOptions
 	bool CategoriesModified;
 	bool CategoriesDefault;
 
+	bool HasUnofficialParts;
+
 	lcKeyboardShortcuts KeyboardShortcuts;
 	bool KeyboardShortcutsModified;
 	bool KeyboardShortcutsDefault;

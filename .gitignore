@@ -32,5 +32,6 @@ Makefile
 library.bin
 leocad_plugin_import.cpp
 leocad_resource.*
+povray
 uic_wrapper.bat
 /tools/setup/*.exe

@@ -398,7 +398,6 @@ void lcScene::Draw(lcContext* Context) const
 {
 	// TODO: find a better place for these updates
 	lcGetPiecesLibrary()->UpdateBuffers(Context);
-	lcGetPiecesLibrary()->UploadTextures(Context);
 
 	Context->SetViewMatrix(mViewMatrix);
 

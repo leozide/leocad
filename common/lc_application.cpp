@@ -905,7 +905,7 @@ lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& Libra
 	if (Options.Exit)
 		return lcStartupMode::Success;
 
-	if (!InitializeRenderer())
+	if (!lcContext::InitializeRenderer())
 	{
 		StdErr << tr("Error creating OpenGL context.\n");
 		return lcStartupMode::Error;
@@ -1206,20 +1206,7 @@ void lcApplication::Shutdown()
 	delete mLibrary;
 	mLibrary = nullptr;
 
-	ShutdownRenderer();
-}
-
-bool lcApplication::InitializeRenderer()
-{
-	if (!lcContext::CreateOffscreenContext())
-		return false;
-
-	return true;
-}
-
-void lcApplication::ShutdownRenderer()
-{
-	lcContext::DestroyOffscreenContext();
+	lcContext::ShutdownRenderer();
 }
 
 void lcApplication::ShowPreferencesDialog()

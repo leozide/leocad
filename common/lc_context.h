@@ -99,8 +99,9 @@ public:
 	lcContext(const lcContext&) = delete;
 	lcContext& operator=(const lcContext&) = delete;
 
-	static bool CreateOffscreenContext();
-	static void DestroyOffscreenContext();
+	static bool InitializeRenderer();
+	static void ShutdownRenderer();
+	static lcContext* GetGlobalOffscreenContext();
 
 	void CreateResources();
 	void DestroyResources();
@@ -199,12 +200,14 @@ public:
 	void BindMesh(const lcMesh* Mesh);
 
 protected:
+	static bool CreateOffscreenContext();
+	static void DestroyOffscreenContext();
+
 	void CreateShaderPrograms();
 	void FlushState();
 
 	QOpenGLWidget* mWidget = nullptr;
 	QOpenGLContext* mContext = nullptr;
-	bool mValid = false;
 
 	GLuint mVertexBufferObject;
 	GLuint mIndexBufferObject;
@@ -242,9 +245,9 @@ protected:
 
 	static std::unique_ptr<QOpenGLContext> mOffscreenContext;
 	static std::unique_ptr<QOffscreenSurface> mOffscreenSurface;
+	static std::unique_ptr<lcContext> mGlobalOffscreenContext;
 
 	static lcProgram mPrograms[static_cast<int>(lcMaterialType::Count)];
-	static int mValidContexts;
 
 	Q_DECLARE_TR_FUNCTIONS(lcContext);
 };

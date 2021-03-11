@@ -159,7 +159,9 @@ void lcTexture::CreateGridTexture()
 	mRefCount = 1;
 	mFlags = LC_TEXTURE_WRAPU | LC_TEXTURE_WRAPV | LC_TEXTURE_MIPMAPS | LC_TEXTURE_ANISOTROPIC;
 
-	lcGetPiecesLibrary()->QueueTextureUpload(this);
+	lcContext* Context = lcContext::GetGlobalOffscreenContext();
+	Context->MakeCurrent();
+	Upload(Context);
 }
 
 bool lcTexture::Load()
@@ -329,7 +331,10 @@ bool lcTexture::Load(int Flags)
 		Image.ResizePow2();
 	mFlags = Flags;
 
-	lcGetPiecesLibrary()->QueueTextureUpload(this);
+	lcContext* Context = lcContext::GetGlobalOffscreenContext();
+	Context->MakeCurrent();
+	Upload(Context);
+
 	return true;
 }
 

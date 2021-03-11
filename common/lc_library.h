@@ -117,9 +117,7 @@ public:
 	~lcPiecesLibrary();
 
 	lcPiecesLibrary(const lcPiecesLibrary&) = delete;
-	lcPiecesLibrary(lcPiecesLibrary&&) = delete;
 	lcPiecesLibrary& operator=(const lcPiecesLibrary&) = delete;
-	lcPiecesLibrary& operator=(lcPiecesLibrary&&) = delete;
 
 	bool Load(const QString& LibraryPath, bool ShowProgress);
 	void LoadColors();
@@ -139,8 +137,6 @@ public:
 	lcTexture* FindTexture(const char* TextureName, Project* CurrentProject, bool SearchProjectFolder);
 	bool LoadTexture(lcTexture* Texture);
 	void ReleaseTexture(lcTexture* Texture);
-	void QueueTextureUpload(lcTexture* Texture);
-	void UploadTextures(lcContext* Context);
 
 	bool PieceInCategory(PieceInfo* Info, const char* CategoryKeywords) const;
 	void GetCategoryEntries(int CategoryIndex, bool GroupPieces, lcArray<PieceInfo*>& SinglePieces, lcArray<PieceInfo*>& GroupedPieces);
@@ -177,7 +173,6 @@ public:
 		return mCancelLoading;
 	}
 
-	void ReleaseBuffers(lcContext* Context);
 	void UpdateBuffers(lcContext* Context);
 	void UnloadUnusedParts();
 
@@ -216,6 +211,8 @@ protected:
 	static bool IsStudStylePrimitive(const char* FileName);
 	void UpdateStudStyleSource();
 
+	void ReleaseBuffers();
+
 	std::vector<std::unique_ptr<lcLibrarySource>> mSources;
 
 	QMutex mLoadMutex;
@@ -223,7 +220,6 @@ protected:
 	QList<PieceInfo*> mLoadQueue;
 
 	QMutex mTextureMutex;
-	std::vector<lcTexture*> mTextureUploads;
 
 	lcStudStyle mStudStyle;
 

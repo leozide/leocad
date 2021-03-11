@@ -26,8 +26,8 @@
 
 std::unique_ptr<QOpenGLContext> lcContext::mOffscreenContext;
 std::unique_ptr<QOffscreenSurface> lcContext::mOffscreenSurface;
+std::unique_ptr<lcContext> lcContext::mGlobalOffscreenContext;
 lcProgram lcContext::mPrograms[static_cast<int>(lcMaterialType::Count)];
-int lcContext::mValidContexts;
 
 lcContext::lcContext()
 {
@@ -74,21 +74,60 @@ lcContext::lcContext()
 
 lcContext::~lcContext()
 {
-	if (mValid)
-	{
-		mValidContexts--;
+}
 
-		if (!mValidContexts)
-		{
-			gStringCache.Reset();
-			gTexFont.Reset();
+bool lcContext::InitializeRenderer()
+{
+	if (!CreateOffscreenContext())
+		return false;
 
-			lcGetPiecesLibrary()->ReleaseBuffers(this);
-			lcView::DestroyResources(this);
-			DestroyResources();
-			lcViewSphere::DestroyResources(this);
-		}
-	}
+	mGlobalOffscreenContext = std::unique_ptr<lcContext>(new(lcContext));
+
+	lcContext* Context = mGlobalOffscreenContext.get();
+	Context->SetOffscreenContext();
+
+	lcInitializeGLExtensions(mOffscreenContext.get());
+
+	// TODO: Find a better place for the grid texture and font
+	gStringCache.Initialize(Context);
+	gTexFont.Initialize(Context);
+
+	Context->CreateResources();
+	lcView::CreateResources(Context);
+	lcViewSphere::CreateResources(Context);
+
+	if (!gSupportsShaderObjects && lcGetPreferences().mShadingMode == lcShadingMode::DefaultLights)
+		lcGetPreferences().mShadingMode = lcShadingMode::Flat;
+
+	if (!gSupportsShaderObjects && lcGetPreferences().mDrawConditionalLines)
+		lcGetPreferences().mDrawConditionalLines = false;
+
+	if (!gSupportsFramebufferObject)
+		gMainWindow->GetPartSelectionWidget()->DisableIconMode();
+
+	return true;
+}
+
+void lcContext::ShutdownRenderer()
+{
+	mGlobalOffscreenContext->MakeCurrent();
+	lcContext* Context = mGlobalOffscreenContext.get();
+
+	gStringCache.Reset();
+	gTexFont.Reset();
+
+	lcView::DestroyResources(Context);
+	Context->DestroyResources();
+	lcViewSphere::DestroyResources(Context);
+
+	mGlobalOffscreenContext.reset();
+
+	lcContext::DestroyOffscreenContext();
+}
+
+lcContext* lcContext::GetGlobalOffscreenContext()
+{
+	return mGlobalOffscreenContext.get();
 }
 
 bool lcContext::CreateOffscreenContext()
@@ -312,31 +351,6 @@ void lcContext::SetGLContext(QOpenGLContext* Context, QOpenGLWidget* Widget)
 
 	MakeCurrent();
 	initializeOpenGLFunctions();
-
-	if (!mValidContexts)
-	{
-		lcInitializeGLExtensions(Context);
-
-		// TODO: Find a better place for the grid texture and font
-		gStringCache.Initialize(this);
-		gTexFont.Initialize(this);
-
-		CreateResources();
-		lcView::CreateResources(this);
-		lcViewSphere::CreateResources(this);
-
-		if (!gSupportsShaderObjects && lcGetPreferences().mShadingMode == lcShadingMode::DefaultLights)
-			lcGetPreferences().mShadingMode = lcShadingMode::Flat;
-
-		if (!gSupportsShaderObjects && lcGetPreferences().mDrawConditionalLines)
-			lcGetPreferences().mDrawConditionalLines = false;
-
-		if (!gSupportsFramebufferObject)
-			gMainWindow->GetPartSelectionWidget()->DisableIconMode();
-	}
-
-	mValid = true;
-	mValidContexts++;
 }
 
 void lcContext::SetOffscreenContext()

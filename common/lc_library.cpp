@@ -39,7 +39,7 @@ lcPiecesLibrary::lcPiecesLibrary()
 
 	mNumOfficialPieces = 0;
 	mBuffersDirty = false;
-	mHasUnofficial = false;
+	mHasUnofficialDirectory = false;
 	mCancelLoading = false;
 	mStudStyle = static_cast<lcStudStyle>(lcGetProfileInt(LC_PROFILE_STUD_STYLE));
 }
@@ -537,7 +537,7 @@ bool lcPiecesLibrary::OpenDirectory(const QDir& LibraryDir, bool ShowProgress)
 	if (FileLists[LC_FOLDER_OFFICIAL].isEmpty())
 		return false;
 
-	mHasUnofficial = !FileLists[LC_FOLDER_UNOFFICIAL].isEmpty();
+	mHasUnofficialDirectory = !FileLists[LC_FOLDER_UNOFFICIAL].isEmpty();
 	ReadDirectoryDescriptions(FileLists, ShowProgress);
 
 	for (unsigned int BaseFolderIdx = 0; BaseFolderIdx < LC_ARRAY_COUNT(BaseFolders); BaseFolderIdx++)
@@ -583,17 +583,17 @@ bool lcPiecesLibrary::OpenDirectory(const QDir& LibraryDir, bool ShowProgress)
 				if (memcmp(Dst, ".DAT", 4))
 					continue;
 
-				if (mHasUnofficial && IsPrimitive(Name))
+				if (mHasUnofficialDirectory && IsPrimitive(Name))
 					continue;
 
 				if (BaseFolderIdx == 0)
-					mHasUnofficial = true;
+					mHasUnofficialDirectory = true;
 
 				const bool SubFile = SubFileDirectories[DirectoryIdx];
 				Source->Primitives[Name] = new lcLibraryPrimitive(std::move(FileName), strchr(FileString, '/') + 1, lcZipFileType::Count, 0, !SubFile && IsStudPrimitive(Name), IsStudStylePrimitive(Name), SubFile);
 			}
 		}
-		
+
 		mSources.push_back(std::move(Source));
 	}
 
@@ -697,7 +697,7 @@ void lcPiecesLibrary::ReadDirectoryDescriptions(const QFileInfoList (&FileLists)
 			}
 			*Dst = 0;
 
-			if (FolderIdx == LC_FOLDER_OFFICIAL && mHasUnofficial && mPieces.find(Name) != mPieces.end())
+			if (FolderIdx == LC_FOLDER_OFFICIAL && mHasUnofficialDirectory && mPieces.find(Name) != mPieces.end())
 				continue;
 
 			PieceInfo* Info = new PieceInfo();
@@ -1257,7 +1257,7 @@ bool lcPiecesLibrary::LoadPieceData(PieceInfo* Info)
 		char FileName[LC_MAXPATH];
 		lcDiskFile PieceFile;
 
-		if (mHasUnofficial)
+		if (mHasUnofficialDirectory)
 		{
 			sprintf(FileName, "unofficial/parts/%s", Info->mFileName);
 			PieceFile.SetFileName(mLibraryDir.absoluteFilePath(QLatin1String(FileName)));
@@ -1334,7 +1334,7 @@ void lcPiecesLibrary::GetPieceFile(const char* PieceName, std::function<void(lcF
 			char FileName[LC_MAXPATH];
 			bool Found = false;
 
-			if (mHasUnofficial)
+			if (mHasUnofficialDirectory)
 			{
 				sprintf(FileName, "unofficial/parts/%s", Info->mFileName);
 				IncludeFile.SetFileName(mLibraryDir.absoluteFilePath(QLatin1String(FileName)));
@@ -1367,7 +1367,7 @@ void lcPiecesLibrary::GetPieceFile(const char* PieceName, std::function<void(lcF
 				return mZipFiles[static_cast<int>(ZipFileType)]->ExtractFile(IncludeFileName, IncludeFile);
 			};
 
-			if (mHasUnofficial)
+			if (mHasUnofficialDirectory)
 			{
 				Found = LoadIncludeFile("parts/%s", lcZipFileType::Unofficial);
 
@@ -1406,7 +1406,7 @@ void lcPiecesLibrary::GetPieceFile(const char* PieceName, std::function<void(lcF
 #endif
 			};
 
-			if (mHasUnofficial)
+			if (mHasUnofficialDirectory)
 			{
 				Found = LoadIncludeFile(QLatin1String("unofficial/parts/"));
 

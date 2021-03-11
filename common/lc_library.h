@@ -226,6 +226,6 @@ protected:
 	QString mCachePath;
 	qint64 mArchiveCheckSum[4];
 	std::unique_ptr<lcZipFile> mZipFiles[static_cast<int>(lcZipFileType::Count)];
-	bool mHasUnofficial;
+	bool mHasUnofficialDirectory;
 	bool mCancelLoading;
 };

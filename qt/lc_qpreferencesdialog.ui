@@ -1744,6 +1744,7 @@
   </layout>
  </widget>
  <tabstops>
+  <tabstop>tabWidget</tabstop>
   <tabstop>partsLibrary</tabstop>
   <tabstop>partsLibraryBrowse</tabstop>
   <tabstop>partsArchiveBrowse</tabstop>
@@ -1832,7 +1833,6 @@
   <tabstop>mouseAssign</tabstop>
   <tabstop>mouseRemove</tabstop>
   <tabstop>mouseSensitivity</tabstop>
-  <tabstop>tabWidget</tabstop>
  </tabstops>
  <resources>
   <include location="../leocad.qrc"/>

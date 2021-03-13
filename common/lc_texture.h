@@ -65,6 +65,11 @@ public:
 		return mTemporary;
 	}
 
+	bool NeedsUpload() const
+	{
+		return mTexture == 0 && !mImages.empty();
+	}
+
 	int mWidth;
 	int mHeight;
 	char mName[LC_TEXTURE_NAME_LEN];

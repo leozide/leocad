@@ -331,9 +331,12 @@ bool lcTexture::Load(int Flags)
 		Image.ResizePow2();
 	mFlags = Flags;
 
-	lcContext* Context = lcContext::GetGlobalOffscreenContext();
-	Context->MakeCurrent();
-	Upload(Context);
+	if (QThread::currentThread() == qApp->thread())
+	{
+		lcContext* Context = lcContext::GetGlobalOffscreenContext();
+		Context->MakeCurrent();
+		Upload(Context);
+	}
 
 	return true;
 }

@@ -24,7 +24,7 @@
 #  define DEF_MEM_LEVEL  MAX_MEM_LEVEL
 #endif
 
-#define LC_LIBRARY_CACHE_VERSION   0x0108
+#define LC_LIBRARY_CACHE_VERSION   0x0109
 #define LC_LIBRARY_CACHE_ARCHIVE   0x0001
 #define LC_LIBRARY_CACHE_DIRECTORY 0x0002
 
@@ -462,7 +462,11 @@ bool lcPiecesLibrary::OpenArchive(std::unique_ptr<lcFile> File, lcZipFileType Zi
 	}
 
 	mZipFiles[static_cast<int>(ZipFileType)] = std::move(ZipFile);
-	mSources.insert(mSources.begin(), std::move(Source));
+
+	if (ZipFileType != lcZipFileType::StudStyle)
+		mSources.emplace_back(std::move(Source));
+	else
+		mSources.insert(mSources.begin(), std::move(Source));
 
 	return true;
 }
@@ -522,7 +526,7 @@ void lcPiecesLibrary::ReadArchiveDescriptions(const QString& OfficialFileName, c
 
 bool lcPiecesLibrary::OpenDirectory(const QDir& LibraryDir, bool ShowProgress)
 {
-	const QLatin1String BaseFolders[LC_NUM_FOLDERTYPES] = { QLatin1String("unofficial/"), QLatin1String("") };
+	const QLatin1String BaseFolders[] = { QLatin1String(""), QLatin1String("unofficial/") };
 	constexpr int NumBaseFolders = LC_ARRAY_COUNT(BaseFolders);
 
 	QFileInfoList FileLists[NumBaseFolders];
@@ -534,10 +538,10 @@ bool lcPiecesLibrary::OpenDirectory(const QDir& LibraryDir, bool ShowProgress)
 		FileLists[BaseFolderIdx] = Dir.entryInfoList();
 	}
 
-	if (FileLists[LC_FOLDER_OFFICIAL].isEmpty())
+	if (FileLists[static_cast<int>(lcLibraryFolderType::Official)].isEmpty())
 		return false;
 
-	mHasUnofficial = !FileLists[LC_FOLDER_UNOFFICIAL].isEmpty();
+	mHasUnofficial = !FileLists[static_cast<int>(lcLibraryFolderType::Unofficial)].isEmpty();
 	ReadDirectoryDescriptions(FileLists, ShowProgress);
 
 	for (unsigned int BaseFolderIdx = 0; BaseFolderIdx < LC_ARRAY_COUNT(BaseFolders); BaseFolderIdx++)
@@ -583,10 +587,10 @@ bool lcPiecesLibrary::OpenDirectory(const QDir& LibraryDir, bool ShowProgress)
 				if (memcmp(Dst, ".DAT", 4))
 					continue;
 
-				if (mHasUnofficial && IsPrimitive(Name))
+				if (BaseFolderIdx > 0 && IsPrimitive(Name))
 					continue;
 
-				if (BaseFolderIdx == 0)
+				if (BaseFolderIdx == static_cast<int>(lcLibraryFolderType::Unofficial))
 					mHasUnofficial = true;
 
 				const bool SubFile = SubFileDirectories[DirectoryIdx];
@@ -594,7 +598,7 @@ bool lcPiecesLibrary::OpenDirectory(const QDir& LibraryDir, bool ShowProgress)
 			}
 		}
 		
-		mSources.push_back(std::move(Source));
+		mSources.emplace_back(std::move(Source));
 	}
 
 	for (unsigned int BaseFolderIdx = 0; BaseFolderIdx < LC_ARRAY_COUNT(BaseFolders); BaseFolderIdx++)
@@ -645,7 +649,7 @@ bool lcPiecesLibrary::OpenDirectory(const QDir& LibraryDir, bool ShowProgress)
 	return true;
 }
 
-void lcPiecesLibrary::ReadDirectoryDescriptions(const QFileInfoList (&FileLists)[LC_NUM_FOLDERTYPES], bool ShowProgress)
+void lcPiecesLibrary::ReadDirectoryDescriptions(const QFileInfoList (&FileLists)[static_cast<int>(lcLibraryFolderType::Count)], bool ShowProgress)
 {
 	QString IndexFileName = QFileInfo(QDir(mCachePath), QLatin1String("index")).absoluteFilePath();
 	lcMemFile IndexFile;
@@ -672,7 +676,7 @@ void lcPiecesLibrary::ReadDirectoryDescriptions(const QFileInfoList (&FileLists)
 		}
 	}
 
-	for (int FolderIdx = 0; FolderIdx < LC_NUM_FOLDERTYPES; FolderIdx++)
+	for (int FolderIdx = 0; FolderIdx < static_cast<int>(lcLibraryFolderType::Count); FolderIdx++)
 	{
 		const QFileInfoList& FileList = FileLists[FolderIdx];
 
@@ -697,7 +701,7 @@ void lcPiecesLibrary::ReadDirectoryDescriptions(const QFileInfoList (&FileLists)
 			}
 			*Dst = 0;
 
-			if (FolderIdx == LC_FOLDER_OFFICIAL && mHasUnofficial && mPieces.find(Name) != mPieces.end())
+			if (FolderIdx > 0 && mPieces.find(Name) != mPieces.end())
 				continue;
 
 			PieceInfo* Info = new PieceInfo();

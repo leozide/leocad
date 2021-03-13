@@ -36,11 +36,11 @@ enum class lcZipFileType
 	Count
 };
 
-enum lcLibraryFolderType
+enum class lcLibraryFolderType
 {
-	LC_FOLDER_UNOFFICIAL,
-	LC_FOLDER_OFFICIAL,
-	LC_NUM_FOLDERTYPES
+	Official,
+	Unofficial,
+	Count
 };
 
 enum class lcPrimitiveState
@@ -196,7 +196,7 @@ protected:
 	bool OpenArchive(std::unique_ptr<lcFile> File, lcZipFileType ZipFileType);
 	bool OpenDirectory(const QDir& LibraryDir, bool ShowProgress);
 	void ReadArchiveDescriptions(const QString& OfficialFileName, const QString& UnofficialFileName);
-	void ReadDirectoryDescriptions(const QFileInfoList (&FileLists)[LC_NUM_FOLDERTYPES], bool ShowProgress);
+	void ReadDirectoryDescriptions(const QFileInfoList (&FileLists)[static_cast<int>(lcLibraryFolderType::Count)], bool ShowProgress);
 
 	bool ReadArchiveCacheFile(const QString& FileName, lcMemFile& CacheFile);
 	bool WriteArchiveCacheFile(const QString& FileName, lcMemFile& CacheFile);

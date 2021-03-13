@@ -1072,7 +1072,7 @@ lcMesh* lcLibraryMeshData::CreateMesh()
 					for (quint32& Index : Section->mIndices)
 						Index = IndexRemap[MeshDataIdx][Index];
 				}
-				else
+				else if (Section->mPrimitiveType != LC_MESH_CONDITIONAL_LINES)
 				{
 					if (!Section->mTexture)
 					{

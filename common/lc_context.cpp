@@ -313,6 +313,15 @@ void lcContext::CreateShaderPrograms()
 		mPrograms[MaterialType].LightPositionLocation = glGetUniformLocation(Program, "LightPosition");
 		mPrograms[MaterialType].EyePositionLocation = glGetUniformLocation(Program, "EyePosition");
 		mPrograms[MaterialType].HighlightParamsLocation = glGetUniformLocation(Program, "HighlightParams");
+
+		GLint TextureLocation = glGetUniformLocation(Program, "Texture");
+
+		if (TextureLocation != -1)
+		{
+			glUseProgram(Program);
+			glUniform1i(TextureLocation, 0);
+			glUseProgram(0);
+		}
 	}
 }
 

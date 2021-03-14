@@ -18,13 +18,15 @@ void main()
 	p3 /= p3.w;
 	p4 /= p4.w;
 
-	if (((p1.y - p2.y) * (p3.x - p1.x) + (p2.x - p1.x) * (p3.y - p1.y)) * ((p1.y - p2.y) * (p4.x - p1.x) + (p2.x - p1.x) * (p4.y - p1.y)) >= 0.0)
-	{
-		if (((p2.y - p1.y) * (p3.x - p2.x) + (p1.x - p2.x) * (p3.y - p2.y)) * ((p2.y - p1.y) * (p4.x - p2.x) + (p1.x - p2.x) * (p4.y - p2.y)) >= 0.0)
-			gl_Position = Position;
-		else
-			gl_Position = vec4(0.0, 0.0, 0.0, 0.0);
-	}
+	vec2 Line = p2.xy - p1.xy;
+	vec2 Cond1 = p3.xy - p1.xy;
+	vec2 Cond2 = p4.xy - p1.xy;
+
+	float Cross1 = Line.x * Cond1.y - Line.y * Cond1.x;
+	float Cross2 = Line.x * Cond2.y - Line.y * Cond2.x;
+
+	if (sign(Cross1) == sign(Cross2))
+		gl_Position = Position;
 	else
-		gl_Position = vec4(0.0, 0.0, 0.0, 0.0);
+		gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
 }

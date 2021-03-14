@@ -1261,17 +1261,14 @@ bool lcPiecesLibrary::LoadPieceData(PieceInfo* Info)
 		char FileName[LC_MAXPATH];
 		lcDiskFile PieceFile;
 
-		if (mHasUnofficial)
+		sprintf(FileName, "parts/%s", Info->mFileName);
+		PieceFile.SetFileName(mLibraryDir.absoluteFilePath(QLatin1String(FileName)));
+		if (PieceFile.Open(QIODevice::ReadOnly))
+			Loaded = MeshLoader.LoadMesh(PieceFile, LC_MESHDATA_SHARED);
+
+		if (mHasUnofficial && !Loaded)
 		{
 			sprintf(FileName, "unofficial/parts/%s", Info->mFileName);
-			PieceFile.SetFileName(mLibraryDir.absoluteFilePath(QLatin1String(FileName)));
-			if (PieceFile.Open(QIODevice::ReadOnly))
-				Loaded = MeshLoader.LoadMesh(PieceFile, LC_MESHDATA_SHARED);
-		}
-
-		if (!Loaded)
-		{
-			sprintf(FileName, "parts/%s", Info->mFileName);
 			PieceFile.SetFileName(mLibraryDir.absoluteFilePath(QLatin1String(FileName)));
 			if (PieceFile.Open(QIODevice::ReadOnly))
 				Loaded = MeshLoader.LoadMesh(PieceFile, LC_MESHDATA_SHARED);
@@ -1338,16 +1335,13 @@ void lcPiecesLibrary::GetPieceFile(const char* PieceName, std::function<void(lcF
 			char FileName[LC_MAXPATH];
 			bool Found = false;
 
-			if (mHasUnofficial)
+			sprintf(FileName, "parts/%s", Info->mFileName);
+			IncludeFile.SetFileName(mLibraryDir.absoluteFilePath(QLatin1String(FileName)));
+			Found = IncludeFile.Open(QIODevice::ReadOnly);
+
+			if (mHasUnofficial && !Found)
 			{
 				sprintf(FileName, "unofficial/parts/%s", Info->mFileName);
-				IncludeFile.SetFileName(mLibraryDir.absoluteFilePath(QLatin1String(FileName)));
-				Found = IncludeFile.Open(QIODevice::ReadOnly);
-			}
-
-			if (!Found)
-			{
-				sprintf(FileName, "parts/%s", Info->mFileName);
 				IncludeFile.SetFileName(mLibraryDir.absoluteFilePath(QLatin1String(FileName)));
 				Found = IncludeFile.Open(QIODevice::ReadOnly);
 			}
@@ -1371,20 +1365,17 @@ void lcPiecesLibrary::GetPieceFile(const char* PieceName, std::function<void(lcF
 				return mZipFiles[static_cast<int>(ZipFileType)]->ExtractFile(IncludeFileName, IncludeFile);
 			};
 
-			if (mHasUnofficial)
+			Found = LoadIncludeFile("ldraw/parts/%s", lcZipFileType::Official);
+
+			if (!Found)
+				Found = LoadIncludeFile("ldraw/p/%s", lcZipFileType::Official);
+
+			if (mHasUnofficial && !Found)
 			{
 				Found = LoadIncludeFile("parts/%s", lcZipFileType::Unofficial);
 
 				if (!Found)
 					Found = LoadIncludeFile("p/%s", lcZipFileType::Unofficial);
-			}
-
-			if (!Found)
-			{
-				Found = LoadIncludeFile("ldraw/parts/%s", lcZipFileType::Official);
-
-				if (!Found)
-					Found = LoadIncludeFile("ldraw/p/%s", lcZipFileType::Official);
 			}
 
 			if (Found)
@@ -1410,20 +1401,17 @@ void lcPiecesLibrary::GetPieceFile(const char* PieceName, std::function<void(lcF
 #endif
 			};
 
-			if (mHasUnofficial)
+			Found = LoadIncludeFile(QLatin1String("parts/"));
+
+			if (!Found)
+				Found = LoadIncludeFile(QLatin1String("p/"));
+
+			if (mHasUnofficial && !Found)
 			{
 				Found = LoadIncludeFile(QLatin1String("unofficial/parts/"));
 
 				if (!Found)
 					Found = LoadIncludeFile(QLatin1String("unofficial/p/"));
-			}
-
-			if (!Found)
-			{
-				Found = LoadIncludeFile(QLatin1String("parts/"));
-
-				if (!Found)
-					Found = LoadIncludeFile(QLatin1String("p/"));
 			}
 
 			if (Found)

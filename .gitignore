@@ -35,3 +35,5 @@ leocad_resource.*
 povray
 uic_wrapper.bat
 /tools/setup/*.exe
+appdir
+LeoCAD-Windows*.exe

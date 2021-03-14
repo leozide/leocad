@@ -25,7 +25,7 @@ void main()
 	float Cross1 = Line.x * Cond1.y - Line.y * Cond1.x;
 	float Cross2 = Line.x * Cond2.y - Line.y * Cond2.x;
 
-	if (sign(Cross1) == sign(Cross2))
+	if (Cross1 * Cross2 >= 0.0)
 		gl_Position = Position;
 	else
 		gl_Position = vec4(2.0, 2.0, 2.0, 1.0);

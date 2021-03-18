@@ -41,4 +41,6 @@ Some versions of LeoCAD will show a message that they saved a minidump file when
 
 ### Additional context
 
-Add any other context about the problem here. If you're seeing a graphical issue, adding a screenshot of the About Dialog may help.
+Add any other context about the problem here.
+
+If you're seeing a graphical issue, adding a screenshot of the *"About"* dialog (go to menu *"Help > About"*) may help.

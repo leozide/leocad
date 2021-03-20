@@ -110,6 +110,9 @@ bool lcContext::InitializeRenderer()
 
 void lcContext::ShutdownRenderer()
 {
+	if (!mGlobalOffscreenContext)
+		return;
+
 	mGlobalOffscreenContext->MakeCurrent();
 	lcContext* Context = mGlobalOffscreenContext.get();
 

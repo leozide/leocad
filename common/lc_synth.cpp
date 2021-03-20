@@ -60,10 +60,12 @@ protected:
 class lcSynthInfoPneumaticTube : public lcSynthInfoCurved
 {
 public:
-	lcSynthInfoPneumaticTube(float Length, int NumSections);
+	lcSynthInfoPneumaticTube(float Length, int NumSections, const char* EndPart);
 
 protected:
 	void AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const lcArray<lcMatrix44>& Sections) const override;
+
+	const char* mEndPart;
 };
 
 class lcSynthInfoRibbedHose : public lcSynthInfoCurved
@@ -272,7 +274,16 @@ void lcSynthInit()
 		PieceInfo* Info = Library->FindPiece(TubeInfo.PartID, nullptr, false, false);
 
 		if (Info)
-			Info->SetSynthInfo(new lcSynthInfoPneumaticTube(TubeInfo.Length, TubeInfo.NumSections));
+			Info->SetSynthInfo(new lcSynthInfoPneumaticTube(TubeInfo.Length, TubeInfo.NumSections, "71533k02.dat"));
+
+		auto RegularInfo = TubeInfo;
+		RegularInfo.PartID[7] = '2';
+		RegularInfo.Length -= 40.0f;
+
+		Info = Library->FindPiece(RegularInfo.PartID, nullptr, false, false);
+
+		if (Info)
+			Info->SetSynthInfo(new lcSynthInfoPneumaticTube(RegularInfo.Length, RegularInfo.NumSections, "71533k01.dat"));
 	}
 
 	static const struct
@@ -470,8 +481,9 @@ lcSynthInfoFlexSystemHose::lcSynthInfoFlexSystemHose(float Length, int NumSectio
 	mEnd.Length = 1.0f;
 }
 
-lcSynthInfoPneumaticTube::lcSynthInfoPneumaticTube(float Length, int NumSections)
-	: lcSynthInfoCurved(Length, 12.f, NumSections, true)
+lcSynthInfoPneumaticTube::lcSynthInfoPneumaticTube(float Length, int NumSections, const char* EndPart)
+	: lcSynthInfoCurved(Length, 12.f, NumSections, true),
+	mEndPart(EndPart)
 {
 	mStart.Length = 0.0f;
 	mMiddle.Length = mLength / NumSections;
@@ -1089,8 +1101,9 @@ void lcSynthInfoPneumaticTube::AddParts(lcMemFile& File, lcLibraryMeshData& Mesh
 		lcMatrix33 Transform(lcMul(lcMul(EdgeTransform, lcMatrix33Scale(lcVector3(1.0f, 1.0f, 1.0f))), lcMatrix33(Sections[SectionIdx])));
 		lcVector3 Offset = lcMul31(lcVector3(0.0f, 0.0f, 0.0f), Sections[SectionIdx]);
 
-		sprintf(Line, "1 16 %f %f %f %f %f %f %f %f %f %f %f %f 71533k02.dat\n", Offset[0], Offset[1], Offset[2], Transform[0][0], Transform[1][0], Transform[2][0],
-				Transform[0][1], Transform[1][1], Transform[2][1], Transform[0][2], Transform[1][2], Transform[2][2]);
+		sprintf(Line, "1 16 %f %f %f %f %f %f %f %f %f %f %f %f %s\n", Offset[0], Offset[1], Offset[2], Transform[0][0], Transform[1][0], Transform[2][0],
+				Transform[0][1], Transform[1][1], Transform[2][1], Transform[0][2], Transform[1][2], Transform[2][2],
+				mEndPart);
 
 		File.WriteBuffer(Line, strlen(Line));
 	}
@@ -1101,8 +1114,9 @@ void lcSynthInfoPneumaticTube::AddParts(lcMemFile& File, lcLibraryMeshData& Mesh
 		lcMatrix33 Transform(lcMul(lcMul(EdgeTransform, lcMatrix33Scale(lcVector3(1.0f, -1.0f, 1.0f))), lcMatrix33(Sections[SectionIdx])));
 		lcVector3 Offset = lcMul31(lcVector3(0.0f, 0.0f, 0.0f), Sections[SectionIdx]);
 
-		sprintf(Line, "1 16 %f %f %f %f %f %f %f %f %f %f %f %f 71533k02.dat\n", Offset[0], Offset[1], Offset[2], Transform[0][0], Transform[1][0], Transform[2][0],
-				Transform[0][1], Transform[1][1], Transform[2][1], Transform[0][2], Transform[1][2], Transform[2][2]);
+		sprintf(Line, "1 16 %f %f %f %f %f %f %f %f %f %f %f %f %s\n", Offset[0], Offset[1], Offset[2], Transform[0][0], Transform[1][0], Transform[2][0],
+				Transform[0][1], Transform[1][1], Transform[2][1], Transform[0][2], Transform[1][2], Transform[2][2],
+				mEndPart);
 
 		File.WriteBuffer(Line, strlen(Line));
 	}

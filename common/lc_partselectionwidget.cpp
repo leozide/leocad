@@ -436,6 +436,14 @@ void lcPartSelectionListModel::DrawPreview(int InfoIndex)
 
 	QImage Image = mView->GetRenderFramebufferImage().convertToFormat(QImage::Format_ARGB32);
 
+	if (Info->GetSynthInfo())
+	{
+		QPainter Painter(&Image);
+		QImage Icon = QImage(":/resources/flexible.png");
+		Painter.drawImage(QPoint(0, 0), Icon);
+		Painter.end();
+	}
+
 	mParts[InfoIndex].second = QPixmap::fromImage(Image).scaled(mIconSize, mIconSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 
 	lcGetPiecesLibrary()->ReleasePieceInfo(Info);

@@ -135,5 +135,6 @@
         <file>resources/shaders/unlit_view_sphere_ps.glsl</file>
         <file>resources/shaders/unlit_view_sphere_vs.glsl</file>
         <file>resources/gear_in.png</file>
+        <file>resources/flexible.png</file>
     </qresource>
 </RCC>

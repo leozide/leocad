@@ -440,6 +440,23 @@ void lcPartSelectionListModel::DrawPreview(int InfoIndex)
 	{
 		QPainter Painter(&Image);
 		QImage Icon = QImage(":/resources/flexible.png");
+		uchar* ImageBits = Icon.bits();
+		QRgb TextColor = mListView->palette().color(QPalette::WindowText).rgba();
+		int Red = qRed(TextColor);
+		int Green = qGreen(TextColor);
+		int Blue = qBlue(TextColor);
+
+		for (int y = 0; y < Icon.height(); y++)
+		{
+			for (int x = 0; x < Icon.width(); x++)
+			{
+				QRgb& Pixel = ((QRgb*)ImageBits)[x];
+				Pixel = qRgba(Red, Green, Blue, qAlpha(Pixel));
+			}
+
+			ImageBits += Icon.bytesPerLine();
+		}
+
 		Painter.drawImage(QPoint(0, 0), Icon);
 		Painter.end();
 	}

@@ -111,7 +111,7 @@ unix:!macx {
 
 	target.path = $$BIN_DIR
 	docs.path = $$DOCS_DIR
-	docs.files = docs/README.txt docs/CREDITS.txt docs/COPYING.txt
+	docs.files = docs/README.md docs/CREDITS.txt docs/COPYING.txt
 	man.path = $$MAN_DIR
 	man.files = docs/leocad.1
 	desktop.path = $$DESKTOP_DIR

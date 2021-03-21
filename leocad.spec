@@ -239,7 +239,7 @@ install -d $RPM_BUILD_ROOT%{_datadir}/icons/hicolor/scalable/mimetypes
 install -d $RPM_BUILD_ROOT%{_datadir}/icons/hicolor/scalable/apps
 install -d $RPM_BUILD_ROOT%{_mandir}/man1
 install -m 755 build/release/leocad $RPM_BUILD_ROOT%{_bindir}/leocad
-install -m 644 docs/README.txt $RPM_BUILD_ROOT%{_datadir}/leocad/README.txt
+install -m 644 docs/README.md $RPM_BUILD_ROOT%{_datadir}/leocad/README.md
 install -m 644 docs/CREDITS.txt $RPM_BUILD_ROOT%{_datadir}/leocad/CREDITS.txt
 install -m 644 docs/COPYING.txt $RPM_BUILD_ROOT%{_datadir}/leocad/COPYING.txt
 install -m 644 docs/leocad.1 $RPM_BUILD_ROOT%{_mandir}/man1/leocad.1
@@ -264,7 +264,7 @@ install -m 644 resources/leocad.svg \
 %endif
 %{_bindir}/leocad
 %dir %{_datadir}/leocad
-%doc %{_datadir}/leocad/README.txt
+%doc %{_datadir}/leocad/README.md
 %doc %{_datadir}/leocad/CREDITS.txt
 %doc %{_datadir}/leocad/COPYING.txt
 %{_datadir}/mime/packages/leocad.xml

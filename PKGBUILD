@@ -35,7 +35,7 @@ package() {
   mkdir -p ${pkgdir}/usr/bin
   mkdir -p ${pkgdir}/usr/share/leocad
   install -m 755 build/release/leocad ${pkgdir}/usr/bin
-  install -m 644 docs/README.txt  ${pkgdir}/usr/share/leocad/README.txt
+  install -m 644 docs/README.md  ${pkgdir}/usr/share/leocad/README.md
   install -m 644 docs/CREDITS.txt ${pkgdir}/usr/share/leocad/CREDITS.txt
   install -m 644 docs/COPYING.txt ${pkgdir}/usr/share/leocad/COPYING.txt
   mkdir -p ${pkgdir}/usr/share/mime/packages/

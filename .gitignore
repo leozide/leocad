@@ -37,3 +37,4 @@ uic_wrapper.bat
 /tools/setup/*.exe
 appdir
 LeoCAD-Windows*.exe
+*.snap

@@ -1,0 +1,41 @@
+name: leocad
+base: core18
+adopt-info: leocad
+version: '21.03'
+
+grade: stable
+confinement: strict
+
+apps:
+  leocad:
+    common-id: org.leocad.LeoCAD
+    command: leocad
+    plugs:
+      - home
+      - opengl
+      - network
+    extensions:
+      - kde-neon
+
+parts:
+  leocad:
+    plugin: qmake
+    build-packages:
+      - qtbase5-dev
+      - qttools5-dev-tools
+      - libqt5opengl5-dev
+      - zlib1g-dev
+    stage-packages:
+      - libqt5opengl5
+      - libqt5gui5
+      - libqt5concurrent5
+      - libqt5printsupport5
+      - libqt5xml5
+    source: https://github.com/leozide/leocad/archive/v21.03.tar.gz
+    parse-info: [usr/share/metainfo/leocad.appdata.xml]
+  library:
+    source: .
+    plugin: nil
+    override-build: |
+      mkdir -p $SNAPCRAFT_PART_INSTALL/usr/share/leocad
+      cp library.bin $SNAPCRAFT_PART_INSTALL/usr/share/leocad/library.bin

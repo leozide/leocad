@@ -540,6 +540,7 @@ void lcMainWindow::CreateMenus()
 	PieceMenu->addSeparator();
 	PieceMenu->addAction(mActions[LC_PIECE_HIDE_SELECTED]);
 	PieceMenu->addAction(mActions[LC_PIECE_HIDE_UNSELECTED]);
+	PieceMenu->addAction(mActions[LC_PIECE_UNHIDE_SELECTED]);
 	PieceMenu->addAction(mActions[LC_PIECE_UNHIDE_ALL]);
 
 	QMenu* ModelMenu = menuBar()->addMenu(tr("Sub&model"));

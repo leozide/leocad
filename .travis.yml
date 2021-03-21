@@ -10,8 +10,7 @@ jobs:
         sources:
           - sourceline: "ppa:beineri/opt-qt-5.10.1-trusty"
         packages:
-          - qtbase5-dev
-          - qttools5-dev-tools
+          - qt510base
     compiler: gcc
     script:
      - source /opt/qt*/bin/qt*-env.sh

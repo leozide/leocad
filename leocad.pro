@@ -50,7 +50,6 @@ isEmpty(QMAKE_LRELEASE) {
 	else:QMAKE_LRELEASE = $$[QT_INSTALL_BINS]/lrelease
 	unix {
 		!exists($$QMAKE_LRELEASE) { QMAKE_LRELEASE = lrelease-qt4 }
-		!exists($$QMAKE_LRELEASE) { QMAKE_LRELEASE = lrelease-qt5 }
 	} else {
 		!exists($$QMAKE_LRELEASE) { QMAKE_LRELEASE = lrelease }
 	}

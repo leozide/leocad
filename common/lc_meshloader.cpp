@@ -573,6 +573,7 @@ void lcMeshLoaderTypeData::AddMeshData(const lcMeshLoaderTypeData& Data, const l
 {
 	const lcArray<lcMeshLoaderVertex>& DataVertices = Data.mVertices;
 	lcArray<quint32> IndexRemap(DataVertices.GetSize());
+	const lcMatrix33 NormalTransform = lcMatrix33Transpose(lcMatrix33(lcMatrix44Inverse(Transform)));
 
 	if (!TextureMap)
 	{
@@ -589,7 +590,7 @@ void lcMeshLoaderTypeData::AddMeshData(const lcMeshLoaderTypeData& Data, const l
 					Index = AddVertex(Position, true);
 				else
 				{
-					lcVector3 Normal = lcNormalize(lcMul30(DataVertex.Normal, Transform));
+					lcVector3 Normal = lcNormalize(lcMul(DataVertex.Normal, NormalTransform));
 					if (InvertNormals)
 						Normal = -Normal;
 					Index = AddVertex(Position, Normal, true);
@@ -601,7 +602,7 @@ void lcMeshLoaderTypeData::AddMeshData(const lcMeshLoaderTypeData& Data, const l
 					Index = AddTexturedVertex(Position, DataVertex.TexCoord, true);
 				else
 				{
-					lcVector3 Normal = lcNormalize(lcMul30(DataVertex.Normal, Transform));
+					lcVector3 Normal = lcNormalize(lcMul(DataVertex.Normal, NormalTransform));
 					if (InvertNormals)
 						Normal = -Normal;
 					Index = AddTexturedVertex(Position, Normal, DataVertex.TexCoord, true);
@@ -625,7 +626,7 @@ void lcMeshLoaderTypeData::AddMeshData(const lcMeshLoaderTypeData& Data, const l
 				Index = AddTexturedVertex(Position, TexCoord, true);
 			else
 			{
-				lcVector3 Normal = lcNormalize(lcMul30(DataVertex.Normal, Transform));
+				lcVector3 Normal = lcNormalize(lcMul(DataVertex.Normal, NormalTransform));
 				if (InvertNormals)
 					Normal = -Normal;
 				Index = AddTexturedVertex(Position, Normal, TexCoord, true);
@@ -696,6 +697,7 @@ void lcMeshLoaderTypeData::AddMeshDataNoDuplicateCheck(const lcMeshLoaderTypeDat
 {
 	const lcArray<lcMeshLoaderVertex>& DataVertices = Data.mVertices;
 	quint32 BaseIndex;
+	const lcMatrix33 NormalTransform = lcMatrix33Transpose(lcMatrix33(lcMatrix44Inverse(Transform)));
 
 	if (!TextureMap)
 	{
@@ -709,7 +711,7 @@ void lcMeshLoaderTypeData::AddMeshDataNoDuplicateCheck(const lcMeshLoaderTypeDat
 			const lcMeshLoaderVertex& SrcVertex = DataVertices[SrcVertexIdx];
 			lcMeshLoaderVertex& DstVertex = mVertices.Add();
 			DstVertex.Position = lcMul31(SrcVertex.Position, Transform);
-			DstVertex.Normal = lcNormalize(lcMul30(SrcVertex.Normal, Transform));
+			DstVertex.Normal = lcNormalize(lcMul(SrcVertex.Normal, NormalTransform));
 			if (InvertNormals)
 				DstVertex.Normal = -DstVertex.Normal;
 			DstVertex.NormalWeight = SrcVertex.NormalWeight;
@@ -732,7 +734,7 @@ void lcMeshLoaderTypeData::AddMeshDataNoDuplicateCheck(const lcMeshLoaderTypeDat
 			lcVector2 TexCoord = lcCalculateTexCoord(Position, TextureMap);
 
 			DstVertex.Position = Position;
-			DstVertex.Normal = lcNormalize(lcMul30(SrcVertex.Normal, Transform));
+			DstVertex.Normal = lcNormalize(lcMul(SrcVertex.Normal, NormalTransform));
 			if (InvertNormals)
 				DstVertex.Normal = -DstVertex.Normal;
 			DstVertex.NormalWeight = SrcVertex.NormalWeight;
@@ -1240,7 +1242,7 @@ lcMesh* lcLibraryMeshData::CreateMesh()
 					}
 					else
 					{
-						quint16 BaseVertex = BaseConditionalVertices[LodIdx];
+						quint32 BaseVertex = BaseConditionalVertices[LodIdx];
 
 						for (int IndexIdx = 0; IndexIdx < SrcSection->mIndices.GetSize(); IndexIdx++)
 							*Index++ = BaseVertex + SrcSection->mIndices[IndexIdx];

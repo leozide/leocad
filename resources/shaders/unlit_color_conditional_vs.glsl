@@ -28,5 +28,5 @@ void main()
 	if (Cross1 * Cross2 >= 0.0)
 		gl_Position = Position;
 	else
-		gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
+		gl_Position = vec4(p1.x, p1.y, 2.0, 1.0);
 }

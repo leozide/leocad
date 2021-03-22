@@ -1,6 +1,6 @@
 # About LeoCAD
 
-LeoCAD is a CAD program for creating virtual LEGO models. It's available
+LeoCAD is a CAD program for creating virtual LEGO(R) models. It's available
 for free under the GNU Public License v2 and works on the Windows, Linux
 and macOS Operating Systems.
 
@@ -25,11 +25,13 @@ There are multiple ways to install LeoCAD on Linux.
 
 * Snap Store
   
-  You can find LeoCAD in your distribution's Snap Store. Alternatively, you can enter `sudo snap install leocad` to install it using the command line.
+  You can find LeoCAD in your distribution's Snap Store. Alternatively, you
+  can enter `sudo snap install leocad` to install it using the command line.
 
 * AppImage
 
-  Download the latest LeoCAD-Linux.AppImage, make the file executable (`chmod +x`) and run it.
+  Download the latest LeoCAD-Linux.AppImage, make the file executable
+  (`chmod +x`) and run it.
 
 * Flatpak
 

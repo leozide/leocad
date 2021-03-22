@@ -25,7 +25,7 @@ after_build:
 - 7z a symbols.zip build/release/leocad.exe build/release/leocad.pdb
 - mkdir appdir
 - copy build\release\leocad.exe appdir
-- copy docs\readme.md appdir
+- copy docs\readme.md appdir\readme.txt
 - appveyor DownloadFile https://github.com/leozide/leocad/releases/download/v19.07.1/Library-20.03.zip -FileName library.zip
 - 7z e library.zip
 - copy library.bin appdir\\library.bin

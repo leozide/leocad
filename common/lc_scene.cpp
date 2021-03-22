@@ -415,33 +415,21 @@ void lcScene::Draw(lcContext* Context) const
 
 	if (mShadingMode == lcShadingMode::Wireframe)
 	{
-		int PrimitiveTypes = LC_MESH_LINES;
+		DrawOpaqueMeshes(Context, false, LC_MESH_LINES, true, true);
 
 		if (DrawConditional)
-			PrimitiveTypes |= LC_MESH_CONDITIONAL_LINES;
-
-		DrawOpaqueMeshes(Context, false, PrimitiveTypes, true, true);
+			DrawOpaqueMeshes(Context, false, LC_MESH_CONDITIONAL_LINES, true, true);
 
 		if (mPreTranslucentCallback)
 			mPreTranslucentCallback();
 	}
 	else if (mShadingMode == lcShadingMode::Flat)
 	{
-		int LinePrimitiveTypes = 0;
-
-		if (DrawLines)
-		{
-			LinePrimitiveTypes |= LC_MESH_LINES;
-
-			if (DrawConditional)
-				LinePrimitiveTypes |= LC_MESH_CONDITIONAL_LINES;
-		}
-
-		const int SolidPrimitiveTypes = LC_MESH_TRIANGLES | LC_MESH_TEXTURED_TRIANGLES;
+		const int SolidPrimitiveTypes = LC_MESH_TRIANGLES | LC_MESH_TEXTURED_TRIANGLES | (DrawLines ? LC_MESH_LINES : 0);
 
 		if (mTranslucentFade && mHasFadedParts)
 		{
-			DrawOpaqueMeshes(Context, false, SolidPrimitiveTypes | LinePrimitiveTypes, false, true);
+			DrawOpaqueMeshes(Context, false, SolidPrimitiveTypes, false, true);
 
 			if (mPreTranslucentCallback)
 				mPreTranslucentCallback();
@@ -449,13 +437,19 @@ void lcScene::Draw(lcContext* Context) const
 			DrawTranslucentMeshes(Context, false, true, true, false);
 
 			if (DrawLines)
-				DrawOpaqueMeshes(Context, false, LinePrimitiveTypes, true, false);
+				DrawOpaqueMeshes(Context, false, LC_MESH_LINES, true, false);
+
+			if (DrawConditional)
+				DrawOpaqueMeshes(Context, false, LC_MESH_CONDITIONAL_LINES, true, false);
 
 			DrawTranslucentMeshes(Context, false, false, true, true);
 		}
 		else
 		{
-			DrawOpaqueMeshes(Context, false, SolidPrimitiveTypes | LinePrimitiveTypes, true, true);
+			DrawOpaqueMeshes(Context, false, SolidPrimitiveTypes, true, true);
+
+			if (DrawConditional)
+				DrawOpaqueMeshes(Context, false, LC_MESH_CONDITIONAL_LINES, true, true);
 
 			if (mPreTranslucentCallback)
 				mPreTranslucentCallback();
@@ -465,17 +459,15 @@ void lcScene::Draw(lcContext* Context) const
 	}
 	else
 	{
-		int LinePrimitiveTypes = LC_MESH_LINES;
-
-		if (DrawConditional)
-			LinePrimitiveTypes |= LC_MESH_CONDITIONAL_LINES;
-
 		if (mTranslucentFade && mHasFadedParts)
 		{
 			DrawOpaqueMeshes(Context, true, LC_MESH_TRIANGLES | LC_MESH_TEXTURED_TRIANGLES, false, true);
 
 			if (DrawLines)
-				DrawOpaqueMeshes(Context, false, LinePrimitiveTypes, false, true);
+				DrawOpaqueMeshes(Context, false, LC_MESH_LINES, false, true);
+
+			if (DrawConditional)
+				DrawOpaqueMeshes(Context, false, LC_MESH_CONDITIONAL_LINES, false, true);
 
 			if (mPreTranslucentCallback)
 				mPreTranslucentCallback();
@@ -483,14 +475,20 @@ void lcScene::Draw(lcContext* Context) const
 			DrawTranslucentMeshes(Context, false, true, true, false);
 
 			if (DrawLines)
-				DrawOpaqueMeshes(Context, false, LinePrimitiveTypes, true, false);
+				DrawOpaqueMeshes(Context, false, LC_MESH_LINES, true, false);
+
+			if (DrawConditional)
+				DrawOpaqueMeshes(Context, false, LC_MESH_CONDITIONAL_LINES, true, false);
 
 			DrawTranslucentMeshes(Context, true, false, true, true);
 		}
 		else
 		{
 			if (DrawLines)
-				DrawOpaqueMeshes(Context, false, LinePrimitiveTypes, true, true);
+				DrawOpaqueMeshes(Context, false, LC_MESH_LINES, true, true);
+
+			if (DrawConditional)
+				DrawOpaqueMeshes(Context, false, LC_MESH_CONDITIONAL_LINES, true, true);
 
 			DrawOpaqueMeshes(Context, true, LC_MESH_TRIANGLES | LC_MESH_TEXTURED_TRIANGLES, true, true);
 

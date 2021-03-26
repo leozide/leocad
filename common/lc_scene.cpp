@@ -113,8 +113,9 @@ void lcScene::AddMesh(lcMesh* Mesh, const lcMatrix44& WorldMatrix, int ColorInde
 
 void lcScene::DrawDebugNormals(lcContext* Context, const lcMesh* Mesh) const
 {
-	const lcVertex* const VertexBuffer = (lcVertex*)Mesh->mVertexData;
-	lcVector3* const Vertices = (lcVector3*)malloc(Mesh->mNumVertices * 2 * sizeof(lcVector3));
+	const lcVertex* const VertexBuffer = Mesh->GetVertexData();
+	const lcVertexTextured* const TexturedVertexBuffer = Mesh->GetTexturedVertexData();
+	lcVector3* const Vertices = (lcVector3*)malloc((Mesh->mNumVertices + Mesh->mNumTexturedVertices) * 2 * sizeof(lcVector3));
 
 	for (int VertexIdx = 0; VertexIdx < Mesh->mNumVertices; VertexIdx++)
 	{
@@ -122,9 +123,15 @@ void lcScene::DrawDebugNormals(lcContext* Context, const lcMesh* Mesh) const
 		Vertices[VertexIdx * 2 + 1] = VertexBuffer[VertexIdx].Position + lcUnpackNormal(VertexBuffer[VertexIdx].Normal);
 	}
 
+	for (int VertexIdx = 0; VertexIdx < Mesh->mNumTexturedVertices; VertexIdx++)
+	{
+		Vertices[(Mesh->mNumVertices + VertexIdx) * 2] = TexturedVertexBuffer[VertexIdx].Position;
+		Vertices[(Mesh->mNumVertices + VertexIdx) * 2 + 1] = TexturedVertexBuffer[VertexIdx].Position + lcUnpackNormal(TexturedVertexBuffer[VertexIdx].Normal);
+	}
+
 	Context->SetVertexBufferPointer(Vertices);
 	Context->SetVertexFormatPosition(3);
-	Context->DrawPrimitives(GL_LINES, 0, Mesh->mNumVertices * 2);
+	Context->DrawPrimitives(GL_LINES, 0, (Mesh->mNumVertices + Mesh->mNumTexturedVertices) * 2);
 	free(Vertices);
 }
 

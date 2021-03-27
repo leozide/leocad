@@ -1510,13 +1510,13 @@ bool lcPiecesLibrary::LoadTexture(lcTexture* Texture)
 	{
 		lcMemFile TextureFile;
 
-		sprintf(FileName, "parts/textures/%s.png", Texture->mName);
+		sprintf(FileName, "ldraw/parts/textures/%s.png", Texture->mName);
 
-		if (!mZipFiles[static_cast<int>(lcZipFileType::Unofficial)] || !mZipFiles[static_cast<int>(lcZipFileType::Unofficial)]->ExtractFile(FileName, TextureFile))
+		if (!mZipFiles[static_cast<int>(lcZipFileType::Official)]->ExtractFile(FileName, TextureFile))
 		{
-			sprintf(FileName, "ldraw/parts/textures/%s.png", Texture->mName);
+			sprintf(FileName, "parts/textures/%s.png", Texture->mName);
 
-			if (!mZipFiles[static_cast<int>(lcZipFileType::Official)]->ExtractFile(FileName, TextureFile))
+			if (!mZipFiles[static_cast<int>(lcZipFileType::Unofficial)] || !mZipFiles[static_cast<int>(lcZipFileType::Unofficial)]->ExtractFile(FileName, TextureFile))
 				return false;
 		}
 

@@ -1233,8 +1233,6 @@ lcMesh* lcLibraryMeshData::CreateMesh()
 
 							for (int IndexIdx = 0; IndexIdx < SrcSection->mIndices.GetSize(); IndexIdx++)
 								*Index++ = BaseVertex + SrcSection->mIndices[IndexIdx];
-
-							DstSection.NumIndices += SrcSection->mIndices.GetSize();
 						}
 						else
 							for (int IndexIdx = 0; IndexIdx < SrcSection->mIndices.GetSize(); IndexIdx++)

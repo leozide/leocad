@@ -1370,7 +1370,7 @@ void lcPiecesLibrary::GetPieceFile(const char* PieceName, std::function<void(lcF
 			if (!Found)
 				Found = LoadIncludeFile("ldraw/p/%s", lcZipFileType::Official);
 
-			if (mHasUnofficial && !Found)
+			if (mZipFiles[static_cast<int>(lcZipFileType::Unofficial)] && !Found)
 			{
 				Found = LoadIncludeFile("parts/%s", lcZipFileType::Unofficial);
 

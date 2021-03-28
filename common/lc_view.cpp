@@ -879,6 +879,22 @@ void lcView::OnDraw()
 	if (!mModel)
 		return;
 
+//#define LC_PROFILE_DRAW
+#ifdef LC_PROFILE_DRAW
+	static std::array<GLuint64, 30> QueryResults;
+	static std::array<qint64, 30> TimerResults;
+	static int FrameNumber;
+
+	QElapsedTimer Timer;
+	QOpenGLTimerQuery Query;
+
+	if (!Query.isCreated())
+		Query.create();
+
+	Query.begin();
+	Timer.start();
+#endif
+
 	const lcPreferences& Preferences = lcGetPreferences();
 	const bool DrawOverlays = mWidget != nullptr;
 	const bool DrawInterface = mWidget != nullptr && mViewType == lcViewType::View;
@@ -1027,6 +1043,46 @@ void lcView::OnDraw()
 
 		DrawViewport();
 	}
+
+#ifdef LC_PROFILE_DRAW
+	qint64 TimerElapsed = Timer.nsecsElapsed();
+	Query.end();
+
+	GLuint64 QueryElapsed = Query.waitForResult();
+	QueryResults[FrameNumber % QueryResults.size()] = QueryElapsed;
+	TimerResults[FrameNumber % TimerResults.size()] = TimerElapsed;
+	FrameNumber++;
+
+	GLuint64 QueryAverage = 0;
+	for (GLuint64 Result : QueryResults)
+		QueryAverage += Result;
+	QueryAverage /= QueryResults.size();
+
+	GLuint64 TimerAverage = 0;
+	for (GLuint64 Result : TimerResults)
+		TimerAverage += Result;
+	TimerAverage /= TimerResults.size();
+
+	mContext->SetWorldMatrix(lcMatrix44Identity());
+	mContext->SetViewMatrix(lcMatrix44Translation(lcVector3(0.375, 0.375, 0.0)));
+	mContext->SetProjectionMatrix(lcMatrix44Ortho(0.0f, mWidth, 0.0f, mHeight, -1.0f, 1.0f));
+
+	QString Line = QString("GPU: %1 CPU: %2").arg(QString::number(QueryAverage / 1000000.0, 'f', 2), QString::number(TimerAverage / 1000000.0, 'f', 2));
+
+	mContext->SetMaterial(lcMaterialType::UnlitTextureModulate);
+	mContext->SetColor(lcVector4FromColor(lcGetPreferences().mTextColor));
+	mContext->BindTexture2D(gTexFont.GetTexture());
+
+	glDisable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+
+	gTexFont.PrintText(mContext, 3.0f, (float)mHeight - 1.0f - 6.0f, 0.0f, Line.toLatin1().constData());
+
+	glDisable(GL_BLEND);
+	glEnable(GL_DEPTH_TEST);
+
+	Redraw();
+#endif
 
 	mContext->ClearResources();
 }

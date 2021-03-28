@@ -78,7 +78,44 @@ void lcViewWidget::resizeGL(int Width, int Height)
 
 void lcViewWidget::paintGL()
 {
+#ifndef LC_PROFILE_DRAW
 	mView->OnDraw();
+#else
+	static QOpenGLTimerQuery Query;
+	static std::array<GLuint64, 30> QueryResults;
+	static std::array<qint64, 30> TimerResults;
+	static int FrameNumber;
+
+	if (!Query.isCreated())
+		Query.create();
+
+	QElapsedTimer Timer;
+
+	Query.begin();
+	Timer.start();
+	mView->OnDraw();
+	qint64 TimerElapsed = Timer.nsecsElapsed();
+	Query.end();
+
+	GLuint64 QueryElapsed = Query.waitForResult();
+	QueryResults[FrameNumber % QueryResults.size()] = QueryElapsed;
+	TimerResults[FrameNumber % TimerResults.size()] = TimerElapsed;
+	FrameNumber++;
+
+	GLuint64 QueryAverage = 0;
+	for (GLuint64 Result : QueryResults)
+		QueryAverage += Result;
+	QueryAverage /= QueryResults.size();
+
+	GLuint64 TimerAverage = 0;
+	for (GLuint64 Result : TimerResults)
+		TimerAverage += Result;
+	TimerAverage /= TimerResults.size();
+
+	qDebug() << QueryAverage << TimerAverage;
+
+	update();
+#endif
 }
 
 void lcViewWidget::focusInEvent(QFocusEvent* FocusEvent)

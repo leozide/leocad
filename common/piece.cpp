@@ -631,7 +631,6 @@ void lcPiece::DrawInterface(lcContext* Context, const lcScene& Scene) const
 			Context->DrawIndexedPrimitives(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 0);
 		}
 
-		Context->EnableCullFace(false);
 		glDisable(GL_BLEND);
 	}
 }

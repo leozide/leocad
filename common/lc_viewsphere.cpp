@@ -237,7 +237,6 @@ void lcViewSphere::Draw()
 	Context->SetHighlightParams(HighlightPosition, TextColor, BackgroundColor, HighlightColor);
 	Context->DrawIndexedPrimitives(GL_TRIANGLES, mSubdivisions * mSubdivisions * 6 * 6, GL_UNSIGNED_SHORT, 0);
 
-	Context->EnableCullFace(false);
 	Context->SetDepthFunction(lcDepthFunction::LessEqual);
 
 	Context->SetViewport(0, 0, Width, Height);

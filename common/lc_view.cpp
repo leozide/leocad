@@ -1952,17 +1952,17 @@ void lcView::DrawGrid()
 			*CurVert++ = 0.0f;
 			*CurVert++ = V;
 
-			*CurVert++ = Left;
-			*CurVert++ = Bottom;
-			*CurVert++ = Z;
-			*CurVert++ = 0.0f;
-			*CurVert++ = 0.0f;
-
 			*CurVert++ = Right;
 			*CurVert++ = Top;
 			*CurVert++ = Z;
 			*CurVert++ = U;
 			*CurVert++ = V;
+
+			*CurVert++ = Left;
+			*CurVert++ = Bottom;
+			*CurVert++ = Z;
+			*CurVert++ = 0.0f;
+			*CurVert++ = 0.0f;
 
 			*CurVert++ = Right;
 			*CurVert++ = Bottom;

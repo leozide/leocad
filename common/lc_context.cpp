@@ -276,15 +276,15 @@ void lcContext::CreateShaderPrograms()
 		glAttachShader(Program, VertexShader);
 		glAttachShader(Program, FragmentShader);
 
-		glBindAttribLocation(Program, LC_ATTRIB_POSITION, "VertexPosition");
-		glBindAttribLocation(Program, LC_ATTRIB_NORMAL, "VertexNormal");
-		glBindAttribLocation(Program, LC_ATTRIB_TEXCOORD, "VertexTexCoord");
-		glBindAttribLocation(Program, LC_ATTRIB_COLOR, "VertexColor");
+		glBindAttribLocation(Program, static_cast<int>(lcProgramAttrib::Position), "VertexPosition");
+		glBindAttribLocation(Program, static_cast<int>(lcProgramAttrib::Normal), "VertexNormal");
+		glBindAttribLocation(Program, static_cast<int>(lcProgramAttrib::TexCoord), "VertexTexCoord");
+		glBindAttribLocation(Program, static_cast<int>(lcProgramAttrib::Color), "VertexColor");
 
-		glBindAttribLocation(Program, 0, "VertexPosition1");
-		glBindAttribLocation(Program, 1, "VertexPosition2");
-		glBindAttribLocation(Program, 2, "VertexPosition3");
-		glBindAttribLocation(Program, 3, "VertexPosition4");
+		glBindAttribLocation(Program, static_cast<int>(lcProgramAttrib::ControlPoint1), "VertexPosition1");
+		glBindAttribLocation(Program, static_cast<int>(lcProgramAttrib::ControlPoint2), "VertexPosition2");
+		glBindAttribLocation(Program, static_cast<int>(lcProgramAttrib::ControlPoint3), "VertexPosition3");
+		glBindAttribLocation(Program, static_cast<int>(lcProgramAttrib::ControlPoint4), "VertexPosition4");
 
 		glLinkProgram(Program);
 
@@ -394,10 +394,15 @@ void lcContext::SetDefaultState()
 
 	if (gSupportsShaderObjects)
 	{
-		glEnableVertexAttribArray(LC_ATTRIB_POSITION);
-		glDisableVertexAttribArray(LC_ATTRIB_NORMAL);
-		glDisableVertexAttribArray(LC_ATTRIB_TEXCOORD);
-		glDisableVertexAttribArray(LC_ATTRIB_COLOR);
+		SetVertexAttribPointer(lcProgramAttrib::Position, 3, GL_FLOAT, false, 0, nullptr);
+		EnableVertexAttrib(lcProgramAttrib::Position);
+
+		DisableVertexAttrib(lcProgramAttrib::Normal);
+		SetVertexAttribPointer(lcProgramAttrib::Normal, 4, GL_BYTE, true, 0, nullptr);
+		DisableVertexAttrib(lcProgramAttrib::TexCoord);
+		SetVertexAttribPointer(lcProgramAttrib::TexCoord, 2, GL_FLOAT, false, 0, nullptr);
+		DisableVertexAttrib(lcProgramAttrib::Color);
+		SetVertexAttribPointer(lcProgramAttrib::Color, 4, GL_FLOAT, false, 0, nullptr);
 	}
 	else
 	{
@@ -411,12 +416,12 @@ void lcContext::SetDefaultState()
 		glNormalPointer(GL_BYTE, 0, nullptr);
 		glTexCoordPointer(2, GL_FLOAT, 0, nullptr);
 		glColorPointer(4, GL_FLOAT, 0, nullptr);
+
+		mNormalEnabled = false;
+		mTexCoordEnabled = false;
+		mColorEnabled = false;
 #endif
 	}
-
-	mNormalEnabled = false;
-	mTexCoordEnabled = false;
-	mColorEnabled = false;
 
 	mVertexBufferObject = 0;
 	mIndexBufferObject = 0;
@@ -802,19 +807,14 @@ void lcContext::ClearVertexBuffer()
 
 	if (gSupportsShaderObjects)
 	{
-		if (mNormalEnabled)
-			glDisableVertexAttribArray(LC_ATTRIB_NORMAL);
+		SetVertexAttribPointer(lcProgramAttrib::Position, 3, GL_FLOAT, false, 0, nullptr);
 
-		if (mTexCoordEnabled)
-			glDisableVertexAttribArray(LC_ATTRIB_TEXCOORD);
-
-		if (mColorEnabled)
-			glDisableVertexAttribArray(LC_ATTRIB_COLOR);
-
-		glVertexAttribPointer(LC_ATTRIB_POSITION, 3, GL_FLOAT, false, 0, nullptr);
-		glVertexAttribPointer(LC_ATTRIB_NORMAL, 4, GL_FLOAT, false, 0, nullptr);
-		glVertexAttribPointer(LC_ATTRIB_TEXCOORD, 2, GL_FLOAT, false, 0, nullptr);
-		glVertexAttribPointer(LC_ATTRIB_COLOR, 4, GL_FLOAT, false, 0, nullptr);
+		DisableVertexAttrib(lcProgramAttrib::Normal);
+		SetVertexAttribPointer(lcProgramAttrib::Normal, 4, GL_BYTE, true, 0, nullptr);
+		DisableVertexAttrib(lcProgramAttrib::TexCoord);
+		SetVertexAttribPointer(lcProgramAttrib::TexCoord, 2, GL_FLOAT, false, 0, nullptr);
+		DisableVertexAttrib(lcProgramAttrib::Color);
+		SetVertexAttribPointer(lcProgramAttrib::Color, 4, GL_FLOAT, false, 0, nullptr);
 	}
 	else
 	{
@@ -869,36 +869,58 @@ void lcContext::SetVertexBufferPointer(const void* VertexBuffer)
 	mVertexBufferOffset = (char*)~0;
 }
 
+void lcContext::SetVertexAttribPointer(lcProgramAttrib Attrib, GLint Size, GLenum Type, GLboolean Normalized, GLsizei Stride, const void* Pointer)
+{
+	const int Index = static_cast<int>(Attrib);
+	lcVertexAttribState& State = mVertexAttribState[Index];
+
+	if (State.Size != Size || State.Type != Type || State.Normalized != Normalized || State.Stride != Stride || State.Pointer != Pointer)
+	{
+		glVertexAttribPointer(Index, Size, Type, Normalized, Stride, Pointer);
+
+		State.Size = Size;
+		State.Type = Type;
+		State.Normalized = Normalized;
+		State.Stride = Stride;
+		State.Pointer = Pointer;
+	}
+}
+
+void lcContext::EnableVertexAttrib(lcProgramAttrib Attrib)
+{
+	const int Index = static_cast<int>(Attrib);
+	lcVertexAttribState& State = mVertexAttribState[Index];
+
+	if (!State.Enabled)
+	{
+		glEnableVertexAttribArray(Index);
+		State.Enabled = true;
+	}
+}
+
+void lcContext::DisableVertexAttrib(lcProgramAttrib Attrib)
+{
+	const int Index = static_cast<int>(Attrib);
+	lcVertexAttribState& State = mVertexAttribState[Index];
+
+	if (State.Enabled)
+	{
+		glDisableVertexAttribArray(Index);
+		State.Enabled = false;
+	}
+}
+
 void lcContext::SetVertexFormatPosition(int PositionSize)
 {
 	const int VertexSize = PositionSize * sizeof(float);
-	char* VertexBufferPointer = mVertexBufferPointer;
+	const char* VertexBufferPointer = mVertexBufferPointer;
 
 	if (gSupportsShaderObjects)
 	{
-		if (mVertexBufferOffset != mVertexBufferPointer)
-		{
-			glVertexAttribPointer(LC_ATTRIB_POSITION, PositionSize, GL_FLOAT, false, VertexSize, VertexBufferPointer);
-			mVertexBufferOffset = VertexBufferPointer;
-		}
-
-		if (mNormalEnabled)
-		{
-			glDisableVertexAttribArray(LC_ATTRIB_NORMAL);
-			mNormalEnabled = false;
-		}
-
-		if (mTexCoordEnabled)
-		{
-			glDisableVertexAttribArray(LC_ATTRIB_TEXCOORD);
-			mTexCoordEnabled = false;
-		}
-
-		if (mColorEnabled)
-		{
-			glDisableVertexAttribArray(LC_ATTRIB_COLOR);
-			mColorEnabled = false;
-		}
+		SetVertexAttribPointer(lcProgramAttrib::Position, PositionSize, GL_FLOAT, false, VertexSize, VertexBufferPointer);
+		DisableVertexAttrib(lcProgramAttrib::Normal);
+		DisableVertexAttrib(lcProgramAttrib::TexCoord);
+		DisableVertexAttrib(lcProgramAttrib::Color);
 	}
 	else
 	{
@@ -931,106 +953,62 @@ void lcContext::SetVertexFormatPosition(int PositionSize)
 void lcContext::SetVertexFormatConditional(int BufferOffset)
 {
 	const int VertexSize = 12 * sizeof(float);
-	char* VertexBufferPointer = mVertexBufferPointer + BufferOffset;
+	const char* VertexBufferPointer = mVertexBufferPointer + BufferOffset;
 
 	if (gSupportsShaderObjects)
 	{
-		if (mVertexBufferOffset != VertexBufferPointer)
-		{
-			glVertexAttribPointer(0, 3, GL_FLOAT, false, VertexSize, VertexBufferPointer);
-			glVertexAttribPointer(1, 3, GL_FLOAT, false, VertexSize, VertexBufferPointer + 3 * sizeof(float));
-			glVertexAttribPointer(2, 3, GL_FLOAT, false, VertexSize, VertexBufferPointer + 6 * sizeof(float));
-			glVertexAttribPointer(3, 3, GL_FLOAT, false, VertexSize, VertexBufferPointer + 9 * sizeof(float));
-
-			mVertexBufferOffset = VertexBufferPointer;
-
-			if (!mNormalEnabled)
-			{
-				glEnableVertexAttribArray(1);
-				mNormalEnabled = true; // todo: store state using an array
-			}
-
-			if (!mTexCoordEnabled)
-			{
-				glEnableVertexAttribArray(2);
-				mTexCoordEnabled = true;
-			}
-
-			if (!mColorEnabled)
-			{
-				glEnableVertexAttribArray(3);
-				mColorEnabled = true;
-			}
-		}
+		SetVertexAttribPointer(lcProgramAttrib::ControlPoint1, 3, GL_FLOAT, false, VertexSize, VertexBufferPointer);
+		EnableVertexAttrib(lcProgramAttrib::ControlPoint1);
+		SetVertexAttribPointer(lcProgramAttrib::ControlPoint2, 3, GL_FLOAT, false, VertexSize, VertexBufferPointer + 3 * sizeof(float));
+		EnableVertexAttrib(lcProgramAttrib::ControlPoint2);
+		SetVertexAttribPointer(lcProgramAttrib::ControlPoint3, 3, GL_FLOAT, false, VertexSize, VertexBufferPointer + 6 * sizeof(float));
+		EnableVertexAttrib(lcProgramAttrib::ControlPoint3);
+		SetVertexAttribPointer(lcProgramAttrib::ControlPoint4, 3, GL_FLOAT, false, VertexSize, VertexBufferPointer + 9 * sizeof(float));
+		EnableVertexAttrib(lcProgramAttrib::ControlPoint4);
 	}
 }
 
 void lcContext::SetVertexFormat(int BufferOffset, int PositionSize, int NormalSize, int TexCoordSize, int ColorSize, bool EnableNormals)
 {
 	const int VertexSize = (PositionSize + TexCoordSize) * sizeof(float) + NormalSize * sizeof(quint32) + ColorSize;
-	char* VertexBufferPointer = mVertexBufferPointer + BufferOffset;
+	const char* VertexBufferPointer = mVertexBufferPointer + BufferOffset;
 
 	if (gSupportsShaderObjects)
 	{
-		if (mVertexBufferOffset != VertexBufferPointer)
-		{
-			glVertexAttribPointer(LC_ATTRIB_POSITION, PositionSize, GL_FLOAT, false, VertexSize, VertexBufferPointer);
-			mVertexBufferOffset = VertexBufferPointer;
-		}
+		int Offset = 0;
 
-		int Offset = PositionSize * sizeof(float);
+		SetVertexAttribPointer(lcProgramAttrib::Position, PositionSize, GL_FLOAT, false, VertexSize, VertexBufferPointer);
+		EnableVertexAttrib(lcProgramAttrib::Position);
+
+		Offset += PositionSize * sizeof(float);
 
 		if (NormalSize && EnableNormals)
 		{
-			glVertexAttribPointer(LC_ATTRIB_NORMAL, 4, GL_BYTE, true, VertexSize, VertexBufferPointer + Offset);
-
-			if (!mNormalEnabled)
-			{
-				glEnableVertexAttribArray(LC_ATTRIB_NORMAL);
-				mNormalEnabled = true;
-			}
+			SetVertexAttribPointer(lcProgramAttrib::Normal, 4, GL_BYTE, true, VertexSize, VertexBufferPointer + Offset);
+			EnableVertexAttrib(lcProgramAttrib::Normal);
 		}
-		else if (mNormalEnabled)
-		{
-			glDisableVertexAttribArray(LC_ATTRIB_NORMAL);
-			mNormalEnabled = false;
-		}
+		else
+			DisableVertexAttrib(lcProgramAttrib::Normal);
 
 		Offset += NormalSize * sizeof(quint32);
 
 		if (TexCoordSize)
 		{
-			glVertexAttribPointer(LC_ATTRIB_TEXCOORD, TexCoordSize, GL_FLOAT, false, VertexSize, VertexBufferPointer + Offset);
-
-			if (!mTexCoordEnabled)
-			{
-				glEnableVertexAttribArray(LC_ATTRIB_TEXCOORD);
-				mTexCoordEnabled = true;
-			}
-
-			Offset += 2 * sizeof(float);
+			SetVertexAttribPointer(lcProgramAttrib::TexCoord, TexCoordSize, GL_FLOAT, false, VertexSize, VertexBufferPointer + Offset);
+			EnableVertexAttrib(lcProgramAttrib::TexCoord);
 		}
-		else if (mTexCoordEnabled)
-		{
-			glDisableVertexAttribArray(LC_ATTRIB_TEXCOORD);
-			mTexCoordEnabled = false;
-		}
+		else
+			DisableVertexAttrib(lcProgramAttrib::TexCoord);
+
+		Offset += TexCoordSize * sizeof(float);
 
 		if (ColorSize)
 		{
-			glVertexAttribPointer(LC_ATTRIB_COLOR, ColorSize, GL_UNSIGNED_BYTE, true, VertexSize, VertexBufferPointer + Offset);
-
-			if (!mColorEnabled)
-			{
-				glEnableVertexAttribArray(LC_ATTRIB_COLOR);
-				mColorEnabled = true;
-			}
+			SetVertexAttribPointer(lcProgramAttrib::Color, ColorSize, GL_UNSIGNED_BYTE, true, VertexSize, VertexBufferPointer + Offset);
+			EnableVertexAttrib(lcProgramAttrib::Color);
 		}
-		else if (mColorEnabled)
-		{
-			glDisableVertexAttribArray(LC_ATTRIB_COLOR);
-			mColorEnabled = false;
-		}
+		else
+			DisableVertexAttrib(lcProgramAttrib::Color);
 	}
 	else
 	{

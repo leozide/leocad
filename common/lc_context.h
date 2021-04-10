@@ -58,12 +58,17 @@ enum class lcMaterialType
 	Count
 };
 
-enum lcProgramAttrib
+enum class lcProgramAttrib
 {
-	LC_ATTRIB_POSITION,
-	LC_ATTRIB_NORMAL,
-	LC_ATTRIB_TEXCOORD,
-	LC_ATTRIB_COLOR
+	Position,
+	Normal,
+	TexCoord,
+	Color,
+	ControlPoint1 = 0,
+	ControlPoint2,
+	ControlPoint3,
+	ControlPoint4,
+	Count
 };
 
 struct lcProgram
@@ -88,6 +93,16 @@ enum class lcDepthFunction
 {
 	LessEqual,
 	Always
+};
+
+struct lcVertexAttribState
+{
+	GLint Size = 0;
+	GLenum Type = 0;
+	GLboolean Normalized = 0;
+	bool Enabled = 0;
+	GLsizei Stride = 0;
+	const void* Pointer = nullptr;
 };
 
 class lcContext : protected QOpenGLFunctions
@@ -206,19 +221,25 @@ protected:
 	void CreateShaderPrograms();
 	void FlushState();
 
+	void SetVertexAttribPointer(lcProgramAttrib Attrib, GLint Size, GLenum Type, GLboolean Normalized, GLsizei Stride, const void* Pointer);
+	void EnableVertexAttrib(lcProgramAttrib Attrib);
+	void DisableVertexAttrib(lcProgramAttrib Attrib);
+
 	QOpenGLWidget* mWidget = nullptr;
 	QOpenGLContext* mContext = nullptr;
 
 	GLuint mVertexBufferObject;
 	GLuint mIndexBufferObject;
-	char* mVertexBufferPointer;
-	char* mIndexBufferPointer;
-	char* mVertexBufferOffset;
+	const char* mVertexBufferPointer;
+	const char* mIndexBufferPointer;
+	const char* mVertexBufferOffset;
 
 	lcMaterialType mMaterialType;
 	bool mNormalEnabled;
 	bool mTexCoordEnabled;
 	bool mColorEnabled;
+
+	lcVertexAttribState mVertexAttribState[static_cast<int>(lcProgramAttrib::Count)];
 
 	GLuint mTexture2D;
 	GLuint mTextureCubeMap;

@@ -29,10 +29,10 @@ struct lcMeshLoaderConditionalVertex
 	lcVector3 Position[4];
 };
 
-class lcLibraryMeshSection
+class lcMeshLoaderSection
 {
 public:
-	lcLibraryMeshSection(lcMeshPrimitiveType PrimitiveType, quint32 Color, lcTexture* Texture)
+	lcMeshLoaderSection(lcMeshPrimitiveType PrimitiveType, quint32 Color, lcTexture* Texture)
 		: mIndices(1024, 1024)
 	{
 		mPrimitiveType = PrimitiveType;
@@ -74,6 +74,7 @@ struct lcMeshLoaderTextureMap
 			float UpLength;
 			lcVector4 Plane1;
 			lcVector4 Plane2;
+			float Angle;
 		} Cylindrical;
 
 		struct lcTextureMapSphericalParams
@@ -82,11 +83,11 @@ struct lcMeshLoaderTextureMap
 			lcVector3 Center;
 			lcVector4 Plane1;
 			lcVector4 Plane2;
+			float Angle1;
+			float Angle2;
 		} Spherical;
 	} Params;
 
-	float Angle1;
-	float Angle2;
 	lcMeshLoaderTextureMapType Type;
 	bool Fallback;
 	bool Next;
@@ -116,7 +117,7 @@ public:
 		mConditionalVertices.RemoveAll();
 	}
 
-	lcLibraryMeshSection* AddSection(lcMeshPrimitiveType PrimitiveType, quint32 ColorCode, lcTexture* Texture);
+	lcMeshLoaderSection* AddSection(lcMeshPrimitiveType PrimitiveType, quint32 ColorCode, lcTexture* Texture);
 
 	quint32 AddVertex(const lcVector3& Position, bool Optimize);
 	quint32 AddVertex(const lcVector3& Position, const lcVector3& Normal, bool Optimize);
@@ -130,7 +131,7 @@ public:
 	void AddMeshData(const lcMeshLoaderTypeData& Data, const lcMatrix44& Transform, quint32 CurrentColorCode, bool InvertWinding, bool InvertNormals, lcMeshLoaderTextureMap* TextureMap);
 	void AddMeshDataNoDuplicateCheck(const lcMeshLoaderTypeData& Data, const lcMatrix44& Transform, quint32 CurrentColorCode, bool InvertWinding, bool InvertNormals, lcMeshLoaderTextureMap* TextureMap);
 
-	std::vector<std::unique_ptr<lcLibraryMeshSection>> mSections;
+	std::vector<std::unique_ptr<lcMeshLoaderSection>> mSections;
 	lcArray<lcMeshLoaderVertex> mVertices;
 	lcArray<lcMeshLoaderConditionalVertex> mConditionalVertices;
 };

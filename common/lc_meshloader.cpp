@@ -25,7 +25,7 @@ static lcVector2 lcCalculateTexCoord(const lcVector3& Position, const lcMeshLoad
 		float DotFrontPlane = lcDot(lcVector4(PointInPlane1, 1.0f), FrontPlane);
 		float DotPlane2 = lcDot(lcVector4(PointInPlane1, 1.0f), Plane2);
 
-		float Angle1 = atan2f(DotPlane2, DotFrontPlane) / LC_PI * TextureMap->Angle1;
+		float Angle1 = atan2f(DotPlane2, DotFrontPlane) / LC_PI * TextureMap->Params.Cylindrical.Angle;
 		TexCoord.x = lcClamp(0.5f + 0.5f * Angle1, 0.0f, 1.0f);
 
 		TexCoord.y = DotPlane1 / TextureMap->Params.Cylindrical.UpLength;
@@ -48,10 +48,10 @@ static lcVector2 lcCalculateTexCoord(const lcVector3& Position, const lcMeshLoad
 		float DotFrontPlane = lcDot(lcVector4(PointInPlane1, 1.0f), FrontPlane);
 		float DotPlane2 = lcDot(lcVector4(PointInPlane1, 1.0f), Plane2);
 
-		float Angle1 = atan2f(DotPlane2, DotFrontPlane) / LC_PI * TextureMap->Angle1;
+		float Angle1 = atan2f(DotPlane2, DotFrontPlane) / LC_PI * TextureMap->Params.Spherical.Angle1;
 		TexCoord.x = 0.5f + 0.5f * Angle1;
 
-		float Angle2 = asinf(DotPlane1 / lcLength(VertexDir)) / LC_PI * TextureMap->Angle2;
+		float Angle2 = asinf(DotPlane1 / lcLength(VertexDir)) / LC_PI * TextureMap->Params.Spherical.Angle2;
 		TexCoord.y = 0.5f - Angle2;
 
 		return TexCoord;
@@ -113,13 +113,13 @@ static bool lcCompareVertices(const lcVector3& Position1, const lcVector2& TexCo
 	return lcCompareVertices(Position1, Position2) && fabsf(TexCoord1.x - TexCoord2.x) < lcTexCoordEpsilon && fabsf(TexCoord1.y - TexCoord2.y) < lcTexCoordEpsilon;
 }
 
-lcLibraryMeshSection* lcMeshLoaderTypeData::AddSection(lcMeshPrimitiveType PrimitiveType, quint32 ColorCode, lcTexture* Texture)
+lcMeshLoaderSection* lcMeshLoaderTypeData::AddSection(lcMeshPrimitiveType PrimitiveType, quint32 ColorCode, lcTexture* Texture)
 {
-	for (std::unique_ptr<lcLibraryMeshSection>& Section : mSections)
+	for (std::unique_ptr<lcMeshLoaderSection>& Section : mSections)
 		if (Section->mColor == ColorCode && Section->mPrimitiveType == PrimitiveType && Section->mTexture == Texture)
 			return Section.get();
 
-	mSections.emplace_back(new lcLibraryMeshSection(PrimitiveType, ColorCode, Texture));
+	mSections.emplace_back(new lcMeshLoaderSection(PrimitiveType, ColorCode, Texture));
 
 	return mSections.back().get();
 }
@@ -304,7 +304,7 @@ void lcMeshLoaderTypeData::ProcessLine(int LineType, quint32 ColorCode, bool Win
 {
 	lcMeshPrimitiveType PrimitiveTypes[4] = { LC_MESH_LINES, LC_MESH_TRIANGLES, LC_MESH_TRIANGLES, LC_MESH_CONDITIONAL_LINES };
 	lcMeshPrimitiveType PrimitiveType = PrimitiveTypes[LineType - 2];
-	lcLibraryMeshSection* Section = AddSection(PrimitiveType, ColorCode, nullptr);
+	lcMeshLoaderSection* Section = AddSection(PrimitiveType, ColorCode, nullptr);
 
 	int QuadIndices[4] = { 0, 1, 2, 3 };
 	int Indices[4] = { -1, -1, -1, -1 };
@@ -399,7 +399,7 @@ void lcMeshLoaderTypeData::ProcessLine(int LineType, quint32 ColorCode, bool Win
 void lcMeshLoaderTypeData::ProcessTexturedLine(int LineType, quint32 ColorCode, bool WindingCCW, const lcMeshLoaderTextureMap& TextureMap, const lcVector3* Vertices, bool Optimize)
 {
 	lcMeshPrimitiveType PrimitiveType = LC_MESH_TEXTURED_TRIANGLES;
-	lcLibraryMeshSection* Section = AddSection(PrimitiveType, ColorCode, TextureMap.Texture);
+	lcMeshLoaderSection* Section = AddSection(PrimitiveType, ColorCode, TextureMap.Texture);
 
 	int QuadIndices[4] = { 0, 1, 2, 3 };
 	int Indices[4] = { -1, -1, -1, -1 };
@@ -652,7 +652,7 @@ void lcMeshLoaderTypeData::AddMeshData(const lcMeshLoaderTypeData& Data, const l
 		ConditionalRemap.Add(Index);
 	}
 
-	for (const std::unique_ptr<lcLibraryMeshSection>& SrcSection : Data.mSections)
+	for (const std::unique_ptr<lcMeshLoaderSection>& SrcSection : Data.mSections)
 	{
 		quint32 ColorCode = SrcSection->mColor == 16 ? CurrentColorCode : SrcSection->mColor;
 		lcTexture* Texture;
@@ -668,7 +668,7 @@ void lcMeshLoaderTypeData::AddMeshData(const lcMeshLoaderTypeData& Data, const l
 		else
 			Texture = nullptr;
 
-		lcLibraryMeshSection* DstSection = AddSection(PrimitiveType, ColorCode, Texture);
+		lcMeshLoaderSection* DstSection = AddSection(PrimitiveType, ColorCode, Texture);
 		DstSection->mIndices.AllocGrow(SrcSection->mIndices.GetSize());
 
 		if (PrimitiveType == LC_MESH_CONDITIONAL_LINES)
@@ -756,7 +756,7 @@ void lcMeshLoaderTypeData::AddMeshDataNoDuplicateCheck(const lcMeshLoaderTypeDat
 		Vertex.Position[3] = lcMul31(DataVertex.Position[3], Transform);
 	}
 
-	for (const std::unique_ptr<lcLibraryMeshSection>& SrcSection : Data.mSections)
+	for (const std::unique_ptr<lcMeshLoaderSection>& SrcSection : Data.mSections)
 	{
 		quint32 ColorCode = SrcSection->mColor == 16 ? CurrentColorCode : SrcSection->mColor;
 		lcTexture* Texture;
@@ -772,7 +772,7 @@ void lcMeshLoaderTypeData::AddMeshDataNoDuplicateCheck(const lcMeshLoaderTypeDat
 		else
 			Texture = nullptr;
 
-		lcLibraryMeshSection* DstSection = AddSection(SrcSection->mPrimitiveType, ColorCode, Texture);
+		lcMeshLoaderSection* DstSection = AddSection(SrcSection->mPrimitiveType, ColorCode, Texture);
 		DstSection->mIndices.SetGrow(lcMin(DstSection->mIndices.GetSize(), 8 * 1024 * 1024));
 		DstSection->mIndices.AllocGrow(SrcSection->mIndices.GetSize());
 
@@ -811,7 +811,7 @@ void lcLibraryMeshData::AddVertices(lcMeshDataType MeshDataType, int VertexCount
 
 void lcLibraryMeshData::AddIndices(lcMeshDataType MeshDataType, lcMeshPrimitiveType PrimitiveType, quint32 ColorCode, int IndexCount, quint32** IndexBuffer)
 {
-	lcLibraryMeshSection* Section = mData[MeshDataType].AddSection(PrimitiveType, ColorCode, nullptr);
+	lcMeshLoaderSection* Section = mData[MeshDataType].AddSection(PrimitiveType, ColorCode, nullptr);
 	lcArray<quint32>& Indices = Section->mIndices;
 	int CurrentSize = Indices.GetSize();
 
@@ -844,14 +844,14 @@ void lcLibraryMeshData::AddMeshDataNoDuplicateCheck(const lcLibraryMeshData& Dat
 
 struct lcMergeSection
 {
-	lcLibraryMeshSection* Shared;
-	lcLibraryMeshSection* Lod;
+	lcMeshLoaderSection* Shared;
+	lcMeshLoaderSection* Lod;
 };
 
 static bool lcLibraryMeshSectionCompare(const lcMergeSection& First, const lcMergeSection& Second)
 {
-	lcLibraryMeshSection* a = First.Lod ? First.Lod : First.Shared;
-	lcLibraryMeshSection* b = Second.Lod ? Second.Lod : Second.Shared;
+	lcMeshLoaderSection* a = First.Lod ? First.Lod : First.Shared;
+	lcMeshLoaderSection* b = Second.Lod ? Second.Lod : Second.Shared;
 
 	if (a->mPrimitiveType != b->mPrimitiveType)
 	{
@@ -901,9 +901,9 @@ lcMesh* lcLibraryMeshData::CreateMesh()
 	{
 		for (int MeshDataIdx = 0; MeshDataIdx < LC_NUM_MESHDATA_TYPES; MeshDataIdx++)
 		{
-			std::vector<std::unique_ptr<lcLibraryMeshSection>>& Sections = mData[MeshDataIdx].mSections;
+			std::vector<std::unique_ptr<lcMeshLoaderSection>>& Sections = mData[MeshDataIdx].mSections;
 
-			for (const std::unique_ptr<lcLibraryMeshSection>& Section : Sections)
+			for (const std::unique_ptr<lcMeshLoaderSection>& Section : Sections)
 				Section->mColor = lcGetColorIndex(Section->mColor);
 
 			BaseVertices[MeshDataIdx] = NumVertices;
@@ -916,9 +916,9 @@ lcMesh* lcLibraryMeshData::CreateMesh()
 	{
 		for (int MeshDataIdx = 0; MeshDataIdx < LC_NUM_MESHDATA_TYPES; MeshDataIdx++)
 		{
-			std::vector<std::unique_ptr<lcLibraryMeshSection>>& Sections = mData[MeshDataIdx].mSections;
+			std::vector<std::unique_ptr<lcMeshLoaderSection>>& Sections = mData[MeshDataIdx].mSections;
 
-			for (const std::unique_ptr<lcLibraryMeshSection>& Section : Sections)
+			for (const std::unique_ptr<lcMeshLoaderSection>& Section : Sections)
 				Section->mColor = lcGetColorIndex(Section->mColor);
 
 			BaseVertices[MeshDataIdx] = NumVertices;
@@ -957,10 +957,10 @@ lcMesh* lcLibraryMeshData::CreateMesh()
 
 	for (int LodIdx = 0; LodIdx < LC_NUM_MESH_LODS; LodIdx++)
 	{
-		std::vector<std::unique_ptr<lcLibraryMeshSection>>& SharedSections = mData[LC_MESHDATA_SHARED].mSections;
-		std::vector<std::unique_ptr<lcLibraryMeshSection>>& Sections = mData[LodIdx].mSections;
+		std::vector<std::unique_ptr<lcMeshLoaderSection>>& SharedSections = mData[LC_MESHDATA_SHARED].mSections;
+		std::vector<std::unique_ptr<lcMeshLoaderSection>>& Sections = mData[LodIdx].mSections;
 
-		for (std::unique_ptr<lcLibraryMeshSection>& SharedSection : SharedSections)
+		for (std::unique_ptr<lcMeshLoaderSection>& SharedSection : SharedSections)
 		{
 			NumIndices += SharedSection->mIndices.GetSize();
 
@@ -969,7 +969,7 @@ lcMesh* lcLibraryMeshData::CreateMesh()
 			MergeSection.Lod = nullptr;
 		}
 
-		for (std::unique_ptr<lcLibraryMeshSection>& Section : Sections)
+		for (std::unique_ptr<lcMeshLoaderSection>& Section : Sections)
 		{
 			bool Found = false;
 
@@ -977,7 +977,7 @@ lcMesh* lcLibraryMeshData::CreateMesh()
 
 			for (int SharedSectionIdx = 0; SharedSectionIdx < (int)SharedSections.size(); SharedSectionIdx++)
 			{
-				lcLibraryMeshSection* SharedSection = SharedSections[SharedSectionIdx].get();
+				lcMeshLoaderSection* SharedSection = SharedSections[SharedSectionIdx].get();
 
 				if (SharedSection->mColor == Section->mColor && SharedSection->mPrimitiveType == Section->mPrimitiveType && SharedSection->mTexture == Section->mTexture)
 				{
@@ -1067,7 +1067,7 @@ lcMesh* lcLibraryMeshData::CreateMesh()
 
 		for (int MeshDataIdx = 0; MeshDataIdx < LC_NUM_MESHDATA_TYPES; MeshDataIdx++)
 		{
-			for (const std::unique_ptr<lcLibraryMeshSection>& Section : mData[MeshDataIdx].mSections)
+			for (const std::unique_ptr<lcMeshLoaderSection>& Section : mData[MeshDataIdx].mSections)
 			{
 				if (Section->mPrimitiveType == LC_MESH_TRIANGLES)
 				{
@@ -1115,7 +1115,7 @@ lcMesh* lcLibraryMeshData::CreateMesh()
 			lcMergeSection& MergeSection = MergeSections[LodIdx][SectionIdx];
 			lcMeshSection& DstSection = Mesh->mLods[LodIdx].Sections[SectionIdx];
 
-			lcLibraryMeshSection* SetupSection = MergeSection.Shared ? MergeSection.Shared : MergeSection.Lod;
+			lcMeshLoaderSection* SetupSection = MergeSection.Shared ? MergeSection.Shared : MergeSection.Lod;
 
 			DstSection.ColorIndex = SetupSection->mColor;
 			DstSection.PrimitiveType = SetupSection->mPrimitiveType;
@@ -1133,7 +1133,7 @@ lcMesh* lcLibraryMeshData::CreateMesh()
 
 				if (MergeSection.Shared)
 				{
-					lcLibraryMeshSection* SrcSection = MergeSection.Shared;
+					lcMeshLoaderSection* SrcSection = MergeSection.Shared;
 
 					if (DstSection.PrimitiveType != LC_MESH_CONDITIONAL_LINES)
 					{
@@ -1161,7 +1161,7 @@ lcMesh* lcLibraryMeshData::CreateMesh()
 
 				if (MergeSection.Lod)
 				{
-					lcLibraryMeshSection* SrcSection = MergeSection.Lod;
+					lcMeshLoaderSection* SrcSection = MergeSection.Lod;
 
 					if (DstSection.PrimitiveType != LC_MESH_CONDITIONAL_LINES)
 					{
@@ -1195,7 +1195,7 @@ lcMesh* lcLibraryMeshData::CreateMesh()
 
 				if (MergeSection.Shared)
 				{
-					lcLibraryMeshSection* SrcSection = MergeSection.Shared;
+					lcMeshLoaderSection* SrcSection = MergeSection.Shared;
 
 					if (DstSection.PrimitiveType != LC_MESH_CONDITIONAL_LINES)
 					{
@@ -1223,7 +1223,7 @@ lcMesh* lcLibraryMeshData::CreateMesh()
 
 				if (MergeSection.Lod)
 				{
-					lcLibraryMeshSection* SrcSection = MergeSection.Lod;
+					lcMeshLoaderSection* SrcSection = MergeSection.Lod;
 
 					if (DstSection.PrimitiveType != LC_MESH_CONDITIONAL_LINES)
 					{
@@ -1535,7 +1535,7 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 						Map.Params.Cylindrical.UpLength = UpLength;
 						Map.Params.Cylindrical.Plane1 = lcVector4(Plane1Normal, -lcDot(Plane1Normal, Points[1]));
 						Map.Params.Cylindrical.Plane2 = lcVector4(Plane2Normal, -lcDot(Plane2Normal, Points[1]));
-						Map.Angle1 = 360.0f / Angle;
+						Map.Params.Cylindrical.Angle = 360.0f / Angle;
 					}
 					else if (!strcmp(Token, "SPHERICAL"))
 					{
@@ -1566,8 +1566,8 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 						Map.Params.Spherical.Center = Points[0];
 						Map.Params.Spherical.Plane1 = lcVector4(Plane1Normal, -lcDot(Plane1Normal, Points[0]));
 						Map.Params.Spherical.Plane2 = lcVector4(Plane2Normal, -lcDot(Plane2Normal, Points[0]));
-						Map.Angle1 = 360.0f / Angle1;
-						Map.Angle2 = 180.0f / Angle2;
+						Map.Params.Spherical.Angle1 = 360.0f / Angle1;
+						Map.Params.Spherical.Angle2 = 180.0f / Angle2;
 					}
 				}
 				else if (!strcmp(Token, "FALLBACK"))

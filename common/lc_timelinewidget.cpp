@@ -265,6 +265,14 @@ void lcTimelineWidget::UpdateCurrentStepItem()
 			QFont Font = CurrentStepItem->font(0);
 			Font.setBold(true);
 			CurrentStepItem->setFont(0, Font);
+
+			// to make as many pieces of the step as possible visible,
+			// scroll to the step's last piece
+			auto NumChildren = CurrentStepItem->childCount();
+			if (NumChildren && CurrentStepItem->isExpanded())
+				scrollToItem(CurrentStepItem->child(NumChildren - 1));
+
+			// and then scroll to the step header
 			setCurrentItem(CurrentStepItem);
 		}
 

@@ -103,6 +103,7 @@ struct lcVertexAttribState
 	bool Enabled = 0;
 	GLsizei Stride = 0;
 	const void* Pointer = nullptr;
+	GLuint VertexBufferObject = 0;
 };
 
 class lcContext : protected QOpenGLFunctions

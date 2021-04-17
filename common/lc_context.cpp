@@ -429,6 +429,9 @@ void lcContext::SetDefaultState()
 	mIndexBufferPointer = nullptr;
 	mVertexBufferOffset = (char*)~0;
 
+	for (int AttribIndex = 0; AttribIndex < static_cast<int>(lcProgramAttrib::Count); AttribIndex++)
+		mVertexAttribState[AttribIndex] = lcVertexAttribState();
+
 	glBindTexture(GL_TEXTURE_2D, 0);
 	mTexture2D = 0;
 	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
@@ -874,7 +877,7 @@ void lcContext::SetVertexAttribPointer(lcProgramAttrib Attrib, GLint Size, GLenu
 	const int Index = static_cast<int>(Attrib);
 	lcVertexAttribState& State = mVertexAttribState[Index];
 
-	if (State.Size != Size || State.Type != Type || State.Normalized != Normalized || State.Stride != Stride || State.Pointer != Pointer)
+	if (State.Size != Size || State.Type != Type || State.Normalized != Normalized || State.Stride != Stride || State.Pointer != Pointer || State.VertexBufferObject != mVertexBufferObject)
 	{
 		glVertexAttribPointer(Index, Size, Type, Normalized, Stride, Pointer);
 
@@ -883,6 +886,7 @@ void lcContext::SetVertexAttribPointer(lcProgramAttrib Attrib, GLint Size, GLenu
 		State.Normalized = Normalized;
 		State.Stride = Stride;
 		State.Pointer = Pointer;
+		State.VertexBufferObject = mVertexBufferObject;
 	}
 }
 

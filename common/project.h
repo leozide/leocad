@@ -79,7 +79,7 @@ public:
 	QString GetNewModelName(QWidget* ParentWidget, const QString& DialogTitle, const QString& CurrentName, const QStringList& ExistingModels) const;
 	void ShowModelListDialog();
 
-	bool Load(const QString& FileName);
+	bool Load(const QString& FileName, bool ShowErrors);
 	bool Save(const QString& FileName);
 	bool Save(QTextStream& Stream);
 	void Merge(Project* Other);

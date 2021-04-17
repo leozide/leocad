@@ -972,7 +972,7 @@ lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& Libra
 		{
 			Project* LoadedProject = new Project();
 
-			if (LoadedProject->Load(Options.ProjectName))
+			if (LoadedProject->Load(Options.ProjectName, false))
 			{
 				SetProject(LoadedProject);
 				ProjectLoaded = true;

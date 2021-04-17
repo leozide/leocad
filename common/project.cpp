@@ -359,7 +359,7 @@ void Project::SetFileName(const QString& FileName)
 	mFileName = FileName;
 }
 
-bool Project::Load(const QString& FileName)
+bool Project::Load(const QString& FileName, bool ShowErrors)
 {
 	QWidget *parent = nullptr;
 	if (!mIsPreview)
@@ -369,7 +369,8 @@ bool Project::Load(const QString& FileName)
 
 	if (!File.open(QIODevice::ReadOnly))
 	{
-		QMessageBox::warning(parent, tr("Error"), tr("Error reading file '%1':\n%2").arg(FileName, File.errorString()));
+		if (ShowErrors)
+			QMessageBox::warning(parent, tr("Error"), tr("Error reading file '%1':\n%2").arg(FileName, File.errorString()));
 		return false;
 	}
 
@@ -447,7 +448,8 @@ bool Project::Load(const QString& FileName)
 
 	if (mModels.IsEmpty())
 	{
-		QMessageBox::warning(parent, tr("Error"), tr("Error loading file '%1':\nFile format is not recognized.").arg(FileName));
+		if (ShowErrors)
+			QMessageBox::warning(parent, tr("Error"), tr("Error loading file '%1':\nFile format is not recognized.").arg(FileName));
 		return false;
 	}
 

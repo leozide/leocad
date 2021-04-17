@@ -174,7 +174,7 @@ PieceInfo* lcPiecesLibrary::FindPiece(const char* PieceName, Project* CurrentPro
 		{
 			Project* NewProject = new Project();
 
-			if (NewProject->Load(ProjectFile.absoluteFilePath()))
+			if (NewProject->Load(ProjectFile.absoluteFilePath(), false))
 			{
 				PieceInfo* Info = new PieceInfo();
 

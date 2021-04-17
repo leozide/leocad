@@ -774,8 +774,7 @@ void lcMainWindow::PreviewPiece(const QString& PartId, int ColorCode, bool ShowP
 	if (ShowPreview)
 		mPreviewToolBar->show();
 
-	if (!mPreviewWidget->SetCurrentPiece(PartId, ColorCode))
-		QMessageBox::information(this, tr("Error"), tr("Part preview for '%1' failed.").arg(PartId));
+	mPreviewWidget->SetCurrentPiece(PartId, ColorCode);
 }
 
 void lcMainWindow::CreatePreviewWidget()
@@ -1103,7 +1102,7 @@ void lcMainWindow::ProjectFileChanged(const QString& Path)
 	{
 		Project* NewProject = new Project;
 
-		if (NewProject->Load(Path))
+		if (NewProject->Load(Path, true))
 		{
 			QByteArray TabLayout = GetTabLayout();
 			gApplication->SetProject(NewProject);
@@ -1116,7 +1115,7 @@ void lcMainWindow::ProjectFileChanged(const QString& Path)
 		PieceInfo* Info = lcGetPiecesLibrary()->FindPiece(FileInfo.fileName().toLatin1(), CurrentProject, false, true);
 
 		if (Info && Info->IsProject())
-			Info->GetProject()->Load(Path);
+			Info->GetProject()->Load(Path, true);
 	}
 }
 
@@ -2333,7 +2332,7 @@ bool lcMainWindow::OpenProjectFile(const QString& FileName)
 {
 	Project* NewProject = new Project();
 
-	if (NewProject->Load(FileName))
+	if (NewProject->Load(FileName, true))
 	{
 		gApplication->SetProject(NewProject);
 		AddRecentFile(FileName);
@@ -2362,7 +2361,7 @@ void lcMainWindow::MergeProject()
 
 	Project* NewProject = new Project();
 
-	if (NewProject->Load(LoadFileName))
+	if (NewProject->Load(LoadFileName, true))
 	{
 		int NumModels = NewProject->GetModels().GetSize();
 

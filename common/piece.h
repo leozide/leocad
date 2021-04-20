@@ -590,8 +590,6 @@ public:
 		{
 			if (mState & LC_PIECE_PIVOT_POINT_VALID)
 				return lcMatrix33(lcMul(mModelWorld, mPivotMatrix));
-			else
-				return lcMatrix33(mModelWorld);
 		}
 		else
 		{
@@ -602,9 +600,8 @@ public:
 				const lcMatrix44& Transform = mControlPoints[ControlPointIndex].Transform;
 				return lcMatrix33(lcMul(Transform, mModelWorld));
 			}
-
-			return lcMatrix33Identity();
 		}
+		return lcMatrix33Identity();
 	}
 
 	void ResetPivotPoint()

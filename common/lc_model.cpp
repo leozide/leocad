@@ -2596,12 +2596,12 @@ bool lcModel::RemoveSelectedObjects()
 	return RemovedPiece || RemovedCamera || RemovedLight;
 }
 
-void lcModel::MoveSelectedObjects(const lcVector3& PieceDistance, const lcVector3& ObjectDistance, bool Relative, bool AlternateButtonDrag, bool Update, bool Checkpoint)
+void lcModel::MoveSelectedObjects(const lcVector3& PieceDistance, const lcVector3& ObjectDistance, bool AllowRelative, bool AlternateButtonDrag, bool Update, bool Checkpoint)
 {
 	bool Moved = false;
 	lcMatrix33 RelativeRotation;
 
-	if (Relative)
+	if (AllowRelative)
 		RelativeRotation = GetRelativeRotation();
 	else
 		RelativeRotation = lcMatrix33Identity();
@@ -4071,12 +4071,12 @@ void lcModel::UpdateCameraTool(const lcVector3& Position)
 	UpdateAllViews();
 }
 
-void lcModel::UpdateMoveTool(const lcVector3& Distance, bool AlternateButtonDrag)
+void lcModel::UpdateMoveTool(const lcVector3& Distance, bool AllowRelative, bool AlternateButtonDrag)
 {
 	lcVector3 PieceDistance = SnapPosition(Distance) - SnapPosition(mMouseToolDistance);
 	lcVector3 ObjectDistance = Distance - mMouseToolDistance;
 
-	MoveSelectedObjects(PieceDistance, ObjectDistance, true, AlternateButtonDrag, true, false);
+	MoveSelectedObjects(PieceDistance, ObjectDistance, AllowRelative, AlternateButtonDrag, true, false);
 	mMouseToolDistance = Distance;
 
 	gMainWindow->UpdateSelectedObjects(false);

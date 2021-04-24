@@ -3585,7 +3585,7 @@ void lcView::OnMouseMove()
 
 				lcVector3 Distance = Intersection - MoveStart;
 				Distance = lcMul(Distance, lcMatrix33AffineInverse(RelativeRotation));
-				ActiveModel->UpdateMoveTool(Distance, mTrackButton != lcTrackButton::Left);
+				ActiveModel->UpdateMoveTool(Distance, true, mTrackButton != lcTrackButton::Left);
 			}
 			else if (mTrackTool == lcTrackTool::MoveXY || mTrackTool == lcTrackTool::MoveXZ || mTrackTool == lcTrackTool::MoveYZ)
 			{
@@ -3610,7 +3610,7 @@ void lcView::OnMouseMove()
 					{
 						lcVector3 Distance = Intersection - MoveStart;
 						Distance = lcMul(Distance, lcMatrix33AffineInverse(RelativeRotation));
-						ActiveModel->UpdateMoveTool(Distance, mTrackButton != lcTrackButton::Left);
+						ActiveModel->UpdateMoveTool(Distance, true, mTrackButton != lcTrackButton::Left);
 					}
 				}
 			}
@@ -3618,7 +3618,7 @@ void lcView::OnMouseMove()
 			{
 				lcMatrix44 NewPosition = GetPieceInsertPosition(true, mMouseDownPiece);
 				lcVector3 Distance = NewPosition.GetTranslation() - mMouseDownPosition;
-				ActiveModel->UpdateMoveTool(Distance, mTrackButton != lcTrackButton::Left);
+				ActiveModel->UpdateMoveTool(Distance, false, mTrackButton != lcTrackButton::Left);
 			}
 			else if (mTrackTool == lcTrackTool::ScalePlus || mTrackTool == lcTrackTool::ScaleMinus)
 			{
@@ -3671,7 +3671,7 @@ void lcView::OnMouseMove()
 					if (lcLineSegmentPlaneIntersection(&MoveStart, MouseDownStart, MouseDownEnd, Plane))
 					{
 						lcVector3 Distance = Intersection - MoveStart;
-						ActiveModel->UpdateMoveTool(Distance, mTrackButton != lcTrackButton::Left);
+						ActiveModel->UpdateMoveTool(Distance, true, mTrackButton != lcTrackButton::Left);
 					}
 				}
 			}

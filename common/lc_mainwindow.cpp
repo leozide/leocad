@@ -62,7 +62,7 @@ lcMainWindow::lcMainWindow()
 	mMoveXYSnapIndex = 4;
 	mMoveZSnapIndex = 3;
 	mAngleSnapIndex = 5;
-	mRelativeTransform = true;
+	mRelativeTransform = false;
 	mLocalTransform = false;
 	mCurrentPieceInfo = nullptr;
 	mSelectionMode = lcSelectionMode::Single;

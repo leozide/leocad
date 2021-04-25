@@ -3561,9 +3561,16 @@ void lcView::OnMouseMove()
 			const lcVector3& MouseDownStart = Points[2];
 			const lcVector3& MouseDownEnd = Points[3];
 
-			lcVector3 Center;
+			lcVector3 OverlayCenter;
 			lcMatrix33 RelativeRotation;
-			ActiveModel->GetMoveRotateTransform(Center, RelativeRotation);
+			ActiveModel->GetMoveRotateTransform(OverlayCenter, RelativeRotation);
+
+			lcMatrix44 WorldMatrix = lcMatrix44(RelativeRotation, OverlayCenter);
+
+			if (ActiveModel != mModel)
+				WorldMatrix = lcMul(WorldMatrix, mActiveSubmodelTransform);
+
+			const lcVector3 Center = WorldMatrix.GetTranslation();
 
 			if (mTrackTool == lcTrackTool::MoveX || mTrackTool == lcTrackTool::MoveY || mTrackTool == lcTrackTool::MoveZ)
 			{
@@ -3575,7 +3582,7 @@ void lcView::OnMouseMove()
 				else
 					Direction = lcVector3(0.0f, 0.0f, 1.0f);
 
-				Direction = lcMul(Direction, RelativeRotation);
+				Direction = lcMul30(Direction, WorldMatrix);
 
 				lcVector3 Intersection;
 				lcClosestPointsBetweenLines(Center, Center + Direction, CurrentStart, CurrentEnd, &Intersection, nullptr);
@@ -3584,7 +3591,7 @@ void lcView::OnMouseMove()
 				lcClosestPointsBetweenLines(Center, Center + Direction, MouseDownStart, MouseDownEnd, &MoveStart, nullptr);
 
 				lcVector3 Distance = Intersection - MoveStart;
-				Distance = lcMul(Distance, lcMatrix33AffineInverse(RelativeRotation));
+				Distance = lcMul(Distance, lcMatrix33AffineInverse(lcMatrix33(WorldMatrix)));
 				ActiveModel->UpdateMoveTool(Distance, true, mTrackButton != lcTrackButton::Left);
 			}
 			else if (mTrackTool == lcTrackTool::MoveXY || mTrackTool == lcTrackTool::MoveXZ || mTrackTool == lcTrackTool::MoveYZ)

@@ -257,6 +257,11 @@ lcModel* Project::CreateNewModel(bool ShowModel)
 	if (ShowModel)
 	{
 		SetActiveModel(mModels.GetSize() - 1);
+
+		lcView* ActiveView = gMainWindow ? gMainWindow->GetActiveView() : nullptr;
+		if (ActiveView)
+			ActiveView->GetCamera()->SetViewpoint(lcViewpoint::Home);
+
 		gMainWindow->UpdateTitle();
 	}
 	else

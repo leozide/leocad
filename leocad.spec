@@ -1,4 +1,4 @@
-%define qt5 0
+%define qt5 1
 
 %if 0%{?suse_version}
 %define dist .openSUSE%(echo %{suse_version} | sed 's/0$//')
@@ -28,7 +28,7 @@ Group: Graphics
 %if 0%{?fedora} || 0%{?centos_version}
 Group: Amusements/Graphics
 %endif
-Version: 18.02
+Version: 21.03
 %if 0%{?opensuse_bs}
 Release: <CI_CNT>.<B_CNT>%{?dist}
 %else
@@ -250,9 +250,9 @@ install -m 644 qt/leocad.xml  \
 				$RPM_BUILD_ROOT%{_datadir}/mime/packages/leocad.xml
 install -m 644 qt/leocad.desktop \
 				$RPM_BUILD_ROOT%{_datadir}/applications/leocad.desktop
-install -m 644 resources/application-vnd.leocad.svg \
+install -m 644 tools/icon/scalable/mimetypes/application-vnd.leocad.svg \
 				$RPM_BUILD_ROOT%{_datadir}/icons/hicolor/scalable/mimetypes/application-vnd.leocad.svg
-install -m 644 resources/leocad.svg \
+install -m 644 tools/icon/scalable/apps/leocad.svg \
 				$RPM_BUILD_ROOT%{_datadir}/icons/hicolor/scalable/apps/leocad.svg
 %if 0%{?suse_version}
 %suse_update_desktop_file leocad Graphics
@@ -281,6 +281,11 @@ install -m 644 resources/leocad.svg \
 rm -rf $RPM_BUILD_ROOT
 
 %changelog
+* Sat May 08 2021 - sT331h0rs3 (at) gmail.com 0.91
+- Build with Qt5 by default
+- Actualize LeoCAD version
+- Fix paths to SVG files
+
 * Tue Sep 16 2016 - pbartfai (at) stardust.hu 0.90
 - Initial version
 

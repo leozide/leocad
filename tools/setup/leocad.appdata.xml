@@ -10,7 +10,9 @@
 		<p>LeoCAD is a CAD program for creating virtual LEGO models. It's available for free under the GNU Public License v2 and works on the Windows, Linux and macOS Operating Systems.</p>
 	</description>
 	<launchable type="desktop-id">leocad.desktop</launchable>
-	<url type="homepage">https://leocad.org/</url>
+	<url type="homepage">https://www.leocad.org/</url>
+  <url type="bugtracker">https://github.com/leozide/leocad/issues</url>
+  <developer_name>LeoCAD.org</developer_name>
 	<screenshots>
 		<screenshot type="default">
 			<image>https://www.leocad.org/towerbridge.png</image>

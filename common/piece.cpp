@@ -38,6 +38,7 @@ lcPiece::lcPiece(const lcPiece& Other)
 	mMesh = nullptr;
 	SetPieceInfo(Other.mPieceInfo, Other.mID, true);
 	mHidden = Other.mHidden;
+	mSelected = Other.mSelected;
 	mState = 0;
 	mColorIndex = Other.mColorIndex;
 	mColorCode = Other.mColorCode;

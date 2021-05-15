@@ -6,8 +6,6 @@ class PieceInfo;
 #include "lc_colors.h"
 #include "lc_math.h"
 
-#define LC_PIECE_HIDDEN                    0x000001
-#define LC_PIECE_PIVOT_POINT_VALID         0x000002
 #define LC_PIECE_POSITION_SELECTED         0x000004
 #define LC_PIECE_POSITION_FOCUSED          0x000008
 #define LC_PIECE_CONTROL_POINT_1_SELECTED  0x000010
@@ -352,7 +350,7 @@ public:
 		switch (Section)
 		{
 		case LC_PIECE_SECTION_POSITION:
-			if (mState & LC_PIECE_PIVOT_POINT_VALID)
+			if (mPivotPointValid)
 				return lcMul(mPivotMatrix, mModelWorld).GetTranslation();
 			else
 				return mModelWorld.GetTranslation();
@@ -419,15 +417,12 @@ public:
 
 	bool IsHidden() const
 	{
-		return (mState & LC_PIECE_HIDDEN) != 0;
+		return mHidden;
 	}
 
 	void SetHidden(bool Hidden)
 	{
-		if (Hidden)
-			mState |= LC_PIECE_HIDDEN;
-		else
-			mState &= ~LC_PIECE_HIDDEN;
+		mHidden = Hidden;
 	}
 
 	const lcArray<lcPieceControlPoint>& GetControlPoints() const
@@ -563,7 +558,7 @@ public:
 
 		if (Section == LC_PIECE_SECTION_POSITION || Section == LC_PIECE_SECTION_INVALID)
 		{
-			if (mState & LC_PIECE_PIVOT_POINT_VALID)
+			if (mPivotPointValid)
 				return lcMul31(mPivotMatrix.GetTranslation(), mModelWorld);
 			else
 				return mModelWorld.GetTranslation();
@@ -588,7 +583,7 @@ public:
 
 		if (Section == LC_PIECE_SECTION_POSITION || Section == LC_PIECE_SECTION_INVALID)
 		{
-			if (mState & LC_PIECE_PIVOT_POINT_VALID)
+			if (mPivotPointValid)
 				return lcMatrix33(lcMul(mModelWorld, mPivotMatrix));
 			else
 				return lcMatrix33(mModelWorld);
@@ -609,7 +604,7 @@ public:
 
 	void ResetPivotPoint()
 	{
-		mState &= ~LC_PIECE_PIVOT_POINT_VALID;
+		mPivotPointValid = false;
 		mPivotMatrix = lcMatrix44Identity();
 	}
 
@@ -624,7 +619,7 @@ protected:
 
 	bool IsPivotPointVisible() const
 	{
-		return (mState & LC_PIECE_PIVOT_POINT_VALID) && IsFocused();
+		return mPivotPointValid && IsFocused();
 	}
 
 	bool AreControlPointsVisible() const
@@ -646,6 +641,8 @@ protected:
 	lcStep mStepShow;
 	lcStep mStepHide;
 
+	bool mPivotPointValid = false;
+	bool mHidden = false;
 	quint32 mState;
 	lcArray<lcPieceControlPoint> mControlPoints;
 	lcMesh* mMesh;

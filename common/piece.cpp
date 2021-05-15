@@ -37,6 +37,7 @@ lcPiece::lcPiece(const lcPiece& Other)
 {
 	mMesh = nullptr;
 	SetPieceInfo(Other.mPieceInfo, Other.mID, true);
+	mHidden = Other.mHidden;
 	mState = 0;
 	mColorIndex = Other.mColorIndex;
 	mColorCode = Other.mColorCode;
@@ -46,7 +47,7 @@ lcPiece::lcPiece(const lcPiece& Other)
 	mFileLine = -1;
 
 	mPivotMatrix = Other.mPivotMatrix;
-	mState |= ( Other.mState & LC_PIECE_PIVOT_POINT_VALID );
+	mPivotPointValid = Other.mPivotPointValid;
 
 	mPositionKeys = Other.mPositionKeys;
 	mRotationKeys = Other.mRotationKeys;
@@ -109,7 +110,7 @@ void lcPiece::SaveLDraw(QTextStream& Stream) const
 	if (IsHidden())
 		Stream << QLatin1String("0 !LEOCAD PIECE HIDDEN") << LineEnding;
 
-	if (mState & LC_PIECE_PIVOT_POINT_VALID)
+	if (mPivotPointValid)
 	{
 		const float* PivotMatrix = mPivotMatrix;
 		float PivotNumbers[12] = { PivotMatrix[12], -PivotMatrix[14], PivotMatrix[13], PivotMatrix[0], -PivotMatrix[8], PivotMatrix[4], -PivotMatrix[2], PivotMatrix[10], -PivotMatrix[6], PivotMatrix[1], -PivotMatrix[9], PivotMatrix[5] };
@@ -160,7 +161,7 @@ bool lcPiece::ParseLDrawLine(QTextStream& Stream)
 								   lcVector4(-PivotNumbers[4], -PivotNumbers[10], PivotNumbers[7], 0.0f), lcVector4(PivotNumbers[0], PivotNumbers[2],  -PivotNumbers[1], 1.0f));
 
 			mPivotMatrix = PivotMatrix;
-			mState |= LC_PIECE_PIVOT_POINT_VALID;
+			mPivotPointValid = true;
 		}
 		else if (Token == QLatin1String("POSITION_KEY"))
 			mPositionKeys.LoadKeysLDraw(Stream);
@@ -346,7 +347,7 @@ bool lcPiece::FileLoad(lcFile& file)
 			quint8 Hidden;
 			file.ReadU8(&Hidden, 1);
 			if (Hidden & 1)
-				mState |= LC_PIECE_HIDDEN;
+				mHidden = true;
 			file.ReadU8(&ch, 1);
 			file.Seek(ch, SEEK_CUR);
 		}
@@ -355,7 +356,7 @@ bool lcPiece::FileLoad(lcFile& file)
 			qint32 hide;
 			file.ReadS32(&hide, 1);
 			if (hide != 0)
-				mState |= LC_PIECE_HIDDEN;
+				mHidden = true;
 			file.Seek(81, SEEK_CUR);
 		}
 
@@ -375,7 +376,7 @@ bool lcPiece::FileLoad(lcFile& file)
 
 		file.ReadU8(&ch, 1);
 		if (ch & 0x01)
-			mState |= LC_PIECE_HIDDEN;
+			mHidden = true;
 	}
 
 	return true;
@@ -797,7 +798,7 @@ void lcPiece::MovePivotPoint(const lcVector3& Distance)
 		return;
 
 	mPivotMatrix.SetTranslation(mPivotMatrix.GetTranslation() + lcMul30(Distance, lcMatrix44AffineInverse(mModelWorld)));
-	mState |= LC_PIECE_PIVOT_POINT_VALID;
+	mPivotPointValid = true;
 }
 
 void lcPiece::RotatePivotPoint(const lcMatrix33& RotationMatrix)
@@ -809,7 +810,7 @@ void lcPiece::RotatePivotPoint(const lcMatrix33& RotationMatrix)
 	NewPivotRotationMatrix.Orthonormalize();
 
 	mPivotMatrix = lcMatrix44(NewPivotRotationMatrix, mPivotMatrix.GetTranslation());
-	mState |= LC_PIECE_PIVOT_POINT_VALID;
+	mPivotPointValid = true;
 }
 
 quint32 lcPiece::GetAllowedTransforms() const
@@ -914,15 +915,12 @@ QString lcPiece::GetName() const
 
 bool lcPiece::IsVisible(lcStep Step) const
 {
-	if (mState & LC_PIECE_HIDDEN)
-		return false;
-
-	return (mStepShow <= Step) && (mStepHide > Step || mStepHide == LC_STEP_MAX);
+	return !mHidden && (mStepShow <= Step) && (mStepHide > Step || mStepHide == LC_STEP_MAX);
 }
 
 bool lcPiece::IsVisibleInSubModel() const
 {
-	return (mStepHide == LC_STEP_MAX) && !(mState & LC_PIECE_HIDDEN);
+	return (mStepHide == LC_STEP_MAX) && !mHidden;
 }
 
 void lcPiece::GetModelParts(const lcMatrix44& WorldMatrix, int DefaultColorIndex, std::vector<lcModelPartsEntry>& ModelParts) const

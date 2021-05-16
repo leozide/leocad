@@ -23,6 +23,7 @@ jobs:
      - unzip library.zip
      - mkdir -p AppDir/usr/share/leocad
      - mv library.bin AppDir/usr/share/leocad/library.bin
+     - cp qt/leocad.desktop AppDir/leocad.desktop
      - wget -c "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
      - chmod a+x linuxdeployqt*.AppImage 
      - unset QTDIR; unset QT_PLUGIN_PATH ; unset LD_LIBRARY_PATH

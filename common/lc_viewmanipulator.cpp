@@ -790,7 +790,7 @@ lcTrackTool lcViewManipulator::UpdateSelectMove()
 		quint32 Section = Piece->GetFocusSection();
 
 		if (Section >= LC_PIECE_SECTION_CONTROL_POINT_FIRST && Section <= LC_PIECE_SECTION_CONTROL_POINT_LAST)
-			ControlPointIndex = Section - LC_PIECE_SECTION_CONTROL_POINT_1;
+			ControlPointIndex = Section - LC_PIECE_SECTION_CONTROL_POINT_FIRST;
 	}
 
 	quint32 AllowedTransforms = Focus ? Focus->GetAllowedTransforms() : LC_OBJECT_TRANSFORM_MOVE_X | LC_OBJECT_TRANSFORM_MOVE_Y | LC_OBJECT_TRANSFORM_MOVE_Z | LC_OBJECT_TRANSFORM_ROTATE_X | LC_OBJECT_TRANSFORM_ROTATE_Y | LC_OBJECT_TRANSFORM_ROTATE_Z;

@@ -22,7 +22,7 @@ lcPiece::lcPiece(PieceInfo* Info)
 {
 	mMesh = nullptr;
 	SetPieceInfo(Info, QString(), true);
-	mState = 0;
+	mFocusedSection = LC_PIECE_SECTION_INVALID;
 	mColorIndex = gDefaultColor;
 	mColorCode = 16;
 	mStepShow = 1;
@@ -39,7 +39,7 @@ lcPiece::lcPiece(const lcPiece& Other)
 	SetPieceInfo(Other.mPieceInfo, Other.mID, true);
 	mHidden = Other.mHidden;
 	mSelected = Other.mSelected;
-	mState = 0;
+	mFocusedSection = LC_PIECE_SECTION_INVALID;
 	mColorIndex = Other.mColorIndex;
 	mColorCode = Other.mColorCode;
 	mStepShow = Other.mStepShow;
@@ -497,7 +497,7 @@ void lcPiece::RayTest(lcObjectRayTest& ObjectRayTest) const
 				continue;
 
 			ObjectRayTest.ObjectSection.Object = const_cast<lcPiece*>(this);
-			ObjectRayTest.ObjectSection.Section = LC_PIECE_SECTION_CONTROL_POINT_1 + ControlPointIdx;
+			ObjectRayTest.ObjectSection.Section = LC_PIECE_SECTION_CONTROL_POINT_FIRST + ControlPointIdx;
 			ObjectRayTest.Distance = Distance;
 		}
 	}
@@ -625,7 +625,7 @@ void lcPiece::DrawInterface(lcContext* Context, const lcScene& Scene) const
 			Context->SetVertexFormatPosition(3);
 			Context->SetIndexBufferPointer(Indices);
 
-			if (IsFocused(LC_PIECE_SECTION_CONTROL_POINT_1 + ControlPointIdx))
+			if (IsFocused(LC_PIECE_SECTION_CONTROL_POINT_FIRST + ControlPointIdx))
 				Context->SetInterfaceColor(LC_COLOR_CONTROL_POINT_FOCUSED);
 			else
 				Context->SetInterfaceColor(LC_COLOR_CONTROL_POINT);
@@ -736,7 +736,7 @@ void lcPiece::MoveSelected(lcStep Step, bool AddKey, const lcVector3& Distance)
 	}
 	else
 	{
-		int ControlPointIndex = Section - LC_PIECE_SECTION_CONTROL_POINT_1;
+		int ControlPointIndex = Section - LC_PIECE_SECTION_CONTROL_POINT_FIRST;
 
 		if (ControlPointIndex >= 0 && ControlPointIndex < mControlPoints.GetSize())
 		{
@@ -774,7 +774,7 @@ void lcPiece::Rotate(lcStep Step, bool AddKey, const lcMatrix33& RotationMatrix,
 	}
 	else
 	{
-		int ControlPointIndex = Section - LC_PIECE_SECTION_CONTROL_POINT_1;
+		int ControlPointIndex = Section - LC_PIECE_SECTION_CONTROL_POINT_FIRST;
 
 		if (ControlPointIndex >= 0 && ControlPointIndex < mControlPoints.GetSize())
 		{
@@ -869,7 +869,7 @@ bool lcPiece::InsertControlPoint(const lcVector3& WorldStart, const lcVector3& W
 	if (ControlPointIndex)
 	{
 		SetFocused(GetFocusSection(), false);
-		SetFocused(LC_PIECE_SECTION_CONTROL_POINT_1 + ControlPointIndex, true);
+		SetFocused(LC_PIECE_SECTION_CONTROL_POINT_FIRST + ControlPointIndex, true);
 		UpdateMesh();
 		return true;
 	}
@@ -879,7 +879,7 @@ bool lcPiece::InsertControlPoint(const lcVector3& WorldStart, const lcVector3& W
 
 bool lcPiece::RemoveFocusedControlPoint()
 {
-	int ControlPointIndex = GetFocusSection() - LC_PIECE_SECTION_CONTROL_POINT_1;
+	int ControlPointIndex = GetFocusSection() - LC_PIECE_SECTION_CONTROL_POINT_FIRST;
 
 	if (ControlPointIndex < 0 || ControlPointIndex >= mControlPoints.GetSize() || mControlPoints.GetSize() <= 2)
 		return false;

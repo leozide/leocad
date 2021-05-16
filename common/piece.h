@@ -260,43 +260,22 @@ public:
 
 	lcVector3 GetSectionPosition(quint32 Section) const override
 	{
-		switch (Section)
+		if (Section == LC_PIECE_SECTION_POSITION)
 		{
-		case LC_PIECE_SECTION_POSITION:
 			if (mPivotPointValid)
 				return lcMul(mPivotMatrix, mModelWorld).GetTranslation();
 			else
 				return mModelWorld.GetTranslation();
+		}
+		else
+		{
+			const int ControlPointIndex = Section - LC_PIECE_SECTION_CONTROL_POINT_FIRST;
 
-		case LC_PIECE_SECTION_CONTROL_POINT_1:
-			return lcMul(mControlPoints[0].Transform, mModelWorld).GetTranslation();
-
-		case LC_PIECE_SECTION_CONTROL_POINT_2:
-			return lcMul(mControlPoints[1].Transform, mModelWorld).GetTranslation();
-
-		case LC_PIECE_SECTION_CONTROL_POINT_3:
-			return lcMul(mControlPoints[2].Transform, mModelWorld).GetTranslation();
-
-		case LC_PIECE_SECTION_CONTROL_POINT_4:
-			return lcMul(mControlPoints[3].Transform, mModelWorld).GetTranslation();
-
-		case LC_PIECE_SECTION_CONTROL_POINT_5:
-			return lcMul(mControlPoints[4].Transform, mModelWorld).GetTranslation();
-
-		case LC_PIECE_SECTION_CONTROL_POINT_6:
-			return lcMul(mControlPoints[5].Transform, mModelWorld).GetTranslation();
-
-		case LC_PIECE_SECTION_CONTROL_POINT_7:
-			return lcMul(mControlPoints[6].Transform, mModelWorld).GetTranslation();
-
-		case LC_PIECE_SECTION_CONTROL_POINT_8:
-			return lcMul(mControlPoints[7].Transform, mModelWorld).GetTranslation();
-
-		case LC_PIECE_SECTION_CONTROL_POINT_9:
-			return lcMul(mControlPoints[8].Transform, mModelWorld).GetTranslation();
-
-		case LC_PIECE_SECTION_CONTROL_POINT_10:
-			return lcMul(mControlPoints[9].Transform, mModelWorld).GetTranslation();
+			if (ControlPointIndex >= 0 && ControlPointIndex < mControlPoints.GetSize())
+			{
+				const lcMatrix44& Transform = mControlPoints[ControlPointIndex].Transform;
+				return lcMul(Transform, mModelWorld).GetTranslation();
+			}
 		}
 
 		return lcVector3(0.0f, 0.0f, 0.0f);

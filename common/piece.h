@@ -6,7 +6,7 @@ class PieceInfo;
 #include "lc_colors.h"
 #include "lc_math.h"
 
-#define LC_MAX_CONTROL_POINTS 10
+#define LC_MAX_CONTROL_POINTS 1000
 
 enum lcPieceSection : quint32
 {

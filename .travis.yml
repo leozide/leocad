@@ -8,7 +8,7 @@ jobs:
     addons:
       apt:
         sources:
-          - sourceline: "ppa:beineri/opt-qt-5.10.1-trusty"
+          - sourceline: "ppa:beineri/opt-qt-5.15.2-xenial"
         packages:
           - qt510base
     compiler: gcc

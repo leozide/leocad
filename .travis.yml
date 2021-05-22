@@ -11,7 +11,7 @@ jobs:
           - sourceline: "ppa:beineri/opt-qt-5.15.2-xenial"
         packages:
           - qt515base
-          - qt5153d
+          - libqt5opengl5
     compiler: gcc
     script:
      - source /opt/qt*/bin/qt*-env.sh

@@ -4,7 +4,7 @@ jobs:
  include:
   - os: linux
     name: Linux amd64
-    dist: trusty
+    dist: xenial
     addons:
       apt:
         sources:

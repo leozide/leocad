@@ -10,7 +10,7 @@ jobs:
         sources:
           - sourceline: "ppa:beineri/opt-qt-5.15.2-xenial"
         packages:
-          - qt510base
+          - qt515base
     compiler: gcc
     script:
      - source /opt/qt*/bin/qt*-env.sh

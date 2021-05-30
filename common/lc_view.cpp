@@ -1239,7 +1239,27 @@ void lcView::DrawAxes() const
 		21, 22, 23, 21, 23, 24, 21, 24, 25, 21, 25, 26, 21, 26, 27, 21, 27, 28, 21, 28, 29, 21, 29, 22
 	};
 
-	lcMatrix44 TranslationMatrix = lcMatrix44Translation(lcVector3(30.375f, 30.375f, 0.0f));
+	lcMatrix44 TranslationMatrix;
+
+	switch (Preferences.mAxisIconLocation)
+	{
+	default:
+	case lcAxisIconLocation::BottomLeft:
+		TranslationMatrix = lcMatrix44Translation(lcVector3(32, 32, 0.0f));
+		break;
+
+	case lcAxisIconLocation::BottomRight:
+		TranslationMatrix = lcMatrix44Translation(lcVector3(mWidth - 36, 32, 0.0f));
+		break;
+
+	case lcAxisIconLocation::TopLeft:
+		TranslationMatrix = lcMatrix44Translation(lcVector3(32, mHeight - 36, 0.0f));
+		break;
+
+	case lcAxisIconLocation::TopRight:
+		TranslationMatrix = lcMatrix44Translation(lcVector3(mWidth - 36, mHeight - 36, 0.0f));
+		break;
+	}
 	lcMatrix44 WorldViewMatrix = mCamera->mWorldView;
 	WorldViewMatrix.SetTranslation(lcVector3(0, 0, 0));
 

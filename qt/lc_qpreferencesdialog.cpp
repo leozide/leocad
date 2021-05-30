@@ -121,6 +121,8 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 	ui->GridOriginCheckBox->setChecked(mOptions->Preferences.mDrawGridOrigin);
 	ui->AxisIconCheckBox->setChecked(mOptions->Preferences.mDrawAxes);
 
+	ui->AxisIconLocationCombo->setCurrentIndex((int)mOptions->Preferences.mAxisIconLocation);
+
 	if (!mOptions->Preferences.mBackgroundGradient)
 		ui->BackgroundSolidRadio->setChecked(true);
 	else
@@ -294,6 +296,7 @@ void lcQPreferencesDialog::accept()
 
 	mOptions->Preferences.mBackgroundGradient = ui->BackgroundGradientRadio->isChecked();
 	mOptions->Preferences.mDrawAxes = ui->AxisIconCheckBox->isChecked();
+	mOptions->Preferences.mAxisIconLocation = (lcAxisIconLocation)ui->AxisIconLocationCombo->currentIndex();
 	mOptions->Preferences.mViewSphereEnabled = ui->ViewSphereSizeCombo->currentIndex() > 0;
 	mOptions->Preferences.mViewSphereLocation = (lcViewSphereLocation)ui->ViewSphereLocationCombo->currentIndex();
 

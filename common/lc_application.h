@@ -21,6 +21,14 @@ enum class lcColorTheme
 	System
 };
 
+enum class lcAxisIconLocation
+{
+	TopLeft,
+	TopRight,
+	BottomLeft,
+	BottomRight
+};
+
 class lcPreferences
 {
 public:
@@ -35,6 +43,7 @@ public:
 	quint32 mBackgroundGradientColorTop;
 	quint32 mBackgroundGradientColorBottom;
 	bool mDrawAxes;
+	lcAxisIconLocation mAxisIconLocation;
 	quint32 mAxesColor;
 	quint32 mTextColor;
 	quint32 mMarqueeBorderColor;

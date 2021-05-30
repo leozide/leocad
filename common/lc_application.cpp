@@ -24,6 +24,7 @@ void lcPreferences::LoadDefaults()
 	mBackgroundGradientColorTop = lcGetProfileInt(LC_PROFILE_GRADIENT_COLOR_TOP);
 	mBackgroundGradientColorBottom = lcGetProfileInt(LC_PROFILE_GRADIENT_COLOR_BOTTOM);
 	mDrawAxes = lcGetProfileInt(LC_PROFILE_DRAW_AXES);
+	mAxisIconLocation = static_cast<lcAxisIconLocation>(lcGetProfileInt(LC_PROFILE_DRAW_AXES_LOCATION));
 	mAxesColor = lcGetProfileInt(LC_PROFILE_AXES_COLOR);
 	mTextColor = lcGetProfileInt(LC_PROFILE_TEXT_COLOR);
 	mMarqueeBorderColor = lcGetProfileInt(LC_PROFILE_MARQUEE_BORDER_COLOR);
@@ -74,6 +75,7 @@ void lcPreferences::SaveDefaults()
 	lcSetProfileInt(LC_PROFILE_MOUSE_SENSITIVITY, mMouseSensitivity);
 	lcSetProfileInt(LC_PROFILE_SHADING_MODE, static_cast<int>(mShadingMode));
 	lcSetProfileInt(LC_PROFILE_DRAW_AXES, mDrawAxes);
+	lcSetProfileInt(LC_PROFILE_DRAW_AXES_LOCATION, static_cast<int>(mAxisIconLocation));
 	lcSetProfileInt(LC_PROFILE_AXES_COLOR, mAxesColor);
 	lcSetProfileInt(LC_PROFILE_TEXT_COLOR, mTextColor);
 	lcSetProfileInt(LC_PROFILE_BACKGROUND_GRADIENT, mBackgroundGradient);

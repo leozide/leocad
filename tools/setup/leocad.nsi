@@ -36,6 +36,7 @@ SetCompressor /SOLID lzma
 ;Pages
 
 !insertmacro MUI_PAGE_WELCOME
+!insertmacro MUI_PAGE_COMPONENTS
 !insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_INSTFILES
 !define MUI_FINISHPAGE_RUN "$INSTDIR\LeoCAD.exe"
@@ -51,11 +52,12 @@ SetCompressor /SOLID lzma
 
 ;Installer Sections
 
-Section "LeoCAD" SecLeoCAD
+Section "Application Files" SecLeoCAD
 
+  SectionIn RO
   SetOutPath "$INSTDIR"
 
-  File /r "appdir\*"
+  File /r /x library.bin "appdir\*.*"
 
   ;Register file extension
   WriteRegStr HKCR ".lcd" "" "LeoCAD.Project"
@@ -81,8 +83,8 @@ Section "LeoCAD" SecLeoCAD
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\LeoCAD" "Publisher" "LeoCAD.org"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\LeoCAD" "DisplayIcon" '"$INSTDIR\LeoCAD.exe"'
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\LeoCAD" "UninstallString" '"$INSTDIR\uninstall.exe"'
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\LeoCAD" "URLUpdateInfo" "http://www.leocad.org"
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\LeoCAD" "URLInfoAbout" "http://www.leocad.org"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\LeoCAD" "URLUpdateInfo" "https://www.leocad.org"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\LeoCAD" "URLInfoAbout" "https://www.leocad.org"
   WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\LeoCAD" "NoModify" 1
   WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\LeoCAD" "NoRepair" 1
 
@@ -94,6 +96,27 @@ Section "LeoCAD" SecLeoCAD
   WriteUninstaller "$INSTDIR\Uninstall.exe"
 
 SectionEnd
+
+Section "Parts Library" SecLibrary
+
+  SetOutPath "$INSTDIR"
+
+  File "appdir\library.bin"
+
+SectionEnd
+
+;--------------------------------
+;Descriptions
+
+  ;Language strings
+  LangString DESC_SecLeoCAD ${LANG_ENGLISH} "Application Files (required)"
+  LangString DESC_SecLibrary ${LANG_ENGLISH} "Library of parts that represent those produced by the LEGO company and created by the LDraw community"
+
+  ;Assign language strings to sections
+  !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecLeoCAD} $(DESC_SecLeoCAD)
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecLibrary} $(DESC_SecLibrary)
+  !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
 ;--------------------------------
 ;Uninstaller Section

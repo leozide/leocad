@@ -55,9 +55,9 @@ char* strupr(char* string);
 
 // Version number.
 #define LC_VERSION_MAJOR 21
-#define LC_VERSION_MINOR 03
+#define LC_VERSION_MINOR 06
 #define LC_VERSION_PATCH 0
-#define LC_VERSION_TEXT "21.03"
+#define LC_VERSION_TEXT "21.06"
 
 // Forward declarations.
 class Project;

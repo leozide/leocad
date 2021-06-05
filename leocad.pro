@@ -20,7 +20,7 @@ CONFIG += precompile_header incremental c++11 force_debug_info
 
 win32 {
 	RC_ICONS = resources/leocad.ico
-	VERSION = 21.3.0.0
+	VERSION = 21.6.0.0
 	QMAKE_TARGET_COMPANY = LeoCAD Software
 	QMAKE_TARGET_DESCRIPTION = LeoCAD
 	QMAKE_TARGET_COPYRIGHT = "Copyright (C) LeoCAD.org"

@@ -22,6 +22,7 @@
 		<id>leocad.desktop</id>
 	</provides>
 	<releases>
+		<release version="21.06" date="2021-06-05" />
 		<release version="21.03" date="2021-03-14" />
 		<release version="21.01" date="2021-01-12" />
 		<release version="19.07.1" date="2019-07-14" />

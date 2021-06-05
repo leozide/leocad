@@ -1,7 +1,7 @@
 name: leocad
 base: core18
 adopt-info: leocad
-version: '21.03'
+version: '21.06'
 
 grade: stable
 confinement: strict

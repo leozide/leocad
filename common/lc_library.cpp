@@ -338,7 +338,7 @@ void lcPiecesLibrary::UpdateStudStyleSource()
 
 	const QLatin1String FileNames[] =
 	{
-		QLatin1String(),                                  // Plain
+		QLatin1String(""),                                // Plain
 		QLatin1String(":/resources/studlogo1.zip"),       // ThinLinesLogo
 		QLatin1String(":/resources/studlogo2.zip"),       // OutlineLogo
 		QLatin1String(":/resources/studlogo3.zip"),       // SharpTopLogo

@@ -842,12 +842,6 @@ void lcLibraryMeshData::AddMeshDataNoDuplicateCheck(const lcLibraryMeshData& Dat
 	mHasTextures |= (Data.mHasTextures || TextureMap);
 }
 
-struct lcMergeSection
-{
-	lcMeshLoaderSection* Shared;
-	lcMeshLoaderSection* Lod;
-};
-
 static bool lcLibraryMeshSectionCompare(const lcMergeSection& First, const lcMergeSection& Second)
 {
 	lcMeshLoaderSection* a = First.Lod ? First.Lod : First.Shared;
@@ -1106,13 +1100,29 @@ lcMesh* lcLibraryMeshData::CreateMesh()
 		}
 	}
 
-	NumIndices = 0;
+	if (Mesh->mIndexType == GL_UNSIGNED_SHORT)
+		WriteSections<quint16>(Mesh, MergeSections, BaseVertices, BaseTexturedVertices, BaseConditionalVertices);
+	else
+		WriteSections<quint32>(Mesh, MergeSections, BaseVertices, BaseTexturedVertices, BaseConditionalVertices);
+
+	if (mHasStyleStud)
+		Mesh->mFlags |= lcMeshFlag::HasStyleStud;
+
+	UpdateMeshBoundingBox(Mesh);
+
+	return Mesh;
+}
+
+template<typename IndexType>
+void lcLibraryMeshData::WriteSections(lcMesh* Mesh, const lcArray<lcMergeSection> (&MergeSections)[LC_NUM_MESH_LODS], int(&BaseVertices)[LC_NUM_MESHDATA_TYPES], int(&BaseTexturedVertices)[LC_NUM_MESHDATA_TYPES], int(&BaseConditionalVertices)[LC_NUM_MESHDATA_TYPES])
+{
+	int NumIndices = 0;
 
 	for (int LodIdx = 0; LodIdx < LC_NUM_MESH_LODS; LodIdx++)
 	{
 		for (int SectionIdx = 0; SectionIdx < MergeSections[LodIdx].GetSize(); SectionIdx++)
 		{
-			lcMergeSection& MergeSection = MergeSections[LodIdx][SectionIdx];
+			const lcMergeSection& MergeSection = MergeSections[LodIdx][SectionIdx];
 			lcMeshSection& DstSection = Mesh->mLods[LodIdx].Sections[SectionIdx];
 
 			lcMeshLoaderSection* SetupSection = MergeSection.Shared ? MergeSection.Shared : MergeSection.Lod;
@@ -1125,129 +1135,64 @@ lcMesh* lcLibraryMeshData::CreateMesh()
 			if (DstSection.Texture)
 				DstSection.Texture->AddRef();
 
-			if (Mesh->mIndexType == GL_UNSIGNED_SHORT)
+			DstSection.IndexOffset = NumIndices * sizeof(IndexType);
+
+			IndexType* Index = (IndexType*)Mesh->mIndexData + NumIndices;
+
+			if (MergeSection.Shared)
 			{
-				DstSection.IndexOffset = NumIndices * 2;
+				lcMeshLoaderSection* SrcSection = MergeSection.Shared;
 
-				quint16* Index = (quint16*)Mesh->mIndexData + NumIndices;
-
-				if (MergeSection.Shared)
+				if (DstSection.PrimitiveType != LC_MESH_CONDITIONAL_LINES)
 				{
-					lcMeshLoaderSection* SrcSection = MergeSection.Shared;
-
-					if (DstSection.PrimitiveType != LC_MESH_CONDITIONAL_LINES)
+					if (!mHasTextures)
 					{
-						if (!mHasTextures)
-						{
-							quint16 BaseVertex = DstSection.Texture ? BaseTexturedVertices[LC_MESHDATA_SHARED] : BaseVertices[LC_MESHDATA_SHARED];
-
-							for (int IndexIdx = 0; IndexIdx < SrcSection->mIndices.GetSize(); IndexIdx++)
-								*Index++ = BaseVertex + SrcSection->mIndices[IndexIdx];
-						}
-						else
-							for (int IndexIdx = 0; IndexIdx < SrcSection->mIndices.GetSize(); IndexIdx++)
-								*Index++ = SrcSection->mIndices[IndexIdx];
-					}
-					else
-					{
-						quint16 BaseVertex = BaseConditionalVertices[LC_MESHDATA_SHARED];
+						IndexType BaseVertex = DstSection.Texture ? BaseTexturedVertices[LC_MESHDATA_SHARED] : BaseVertices[LC_MESHDATA_SHARED];
 
 						for (int IndexIdx = 0; IndexIdx < SrcSection->mIndices.GetSize(); IndexIdx++)
 							*Index++ = BaseVertex + SrcSection->mIndices[IndexIdx];
 					}
-
-					DstSection.NumIndices += SrcSection->mIndices.GetSize();
-				}
-
-				if (MergeSection.Lod)
-				{
-					lcMeshLoaderSection* SrcSection = MergeSection.Lod;
-
-					if (DstSection.PrimitiveType != LC_MESH_CONDITIONAL_LINES)
-					{
-						if (!mHasTextures)
-						{
-							quint16 BaseVertex = DstSection.Texture ? BaseTexturedVertices[LodIdx] : BaseVertices[LodIdx];
-
-							for (int IndexIdx = 0; IndexIdx < SrcSection->mIndices.GetSize(); IndexIdx++)
-								*Index++ = BaseVertex + SrcSection->mIndices[IndexIdx];
-						}
-						else
-							for (int IndexIdx = 0; IndexIdx < SrcSection->mIndices.GetSize(); IndexIdx++)
-								*Index++ = SrcSection->mIndices[IndexIdx];
-					}
 					else
-					{
-						quint16 BaseVertex = BaseConditionalVertices[LodIdx];
-
 						for (int IndexIdx = 0; IndexIdx < SrcSection->mIndices.GetSize(); IndexIdx++)
-							*Index++ = BaseVertex + SrcSection->mIndices[IndexIdx];
-					}
-
-					DstSection.NumIndices += SrcSection->mIndices.GetSize();
+							*Index++ = SrcSection->mIndices[IndexIdx];
 				}
+				else
+				{
+					IndexType BaseVertex = BaseConditionalVertices[LC_MESHDATA_SHARED];
+
+					for (int IndexIdx = 0; IndexIdx < SrcSection->mIndices.GetSize(); IndexIdx++)
+						*Index++ = BaseVertex + SrcSection->mIndices[IndexIdx];
+				}
+
+				DstSection.NumIndices += SrcSection->mIndices.GetSize();
 			}
-			else
+
+			if (MergeSection.Lod)
 			{
-				DstSection.IndexOffset = NumIndices * 4;
+				lcMeshLoaderSection* SrcSection = MergeSection.Lod;
 
-				quint32* Index = (quint32*)Mesh->mIndexData + NumIndices;
-
-				if (MergeSection.Shared)
+				if (DstSection.PrimitiveType != LC_MESH_CONDITIONAL_LINES)
 				{
-					lcMeshLoaderSection* SrcSection = MergeSection.Shared;
-
-					if (DstSection.PrimitiveType != LC_MESH_CONDITIONAL_LINES)
+					if (!mHasTextures)
 					{
-						if (!mHasTextures)
-						{
-							quint32 BaseVertex = DstSection.Texture ? BaseTexturedVertices[LC_MESHDATA_SHARED] : BaseVertices[LC_MESHDATA_SHARED];
-
-							for (int IndexIdx = 0; IndexIdx < SrcSection->mIndices.GetSize(); IndexIdx++)
-								*Index++ = BaseVertex + SrcSection->mIndices[IndexIdx];
-						}
-						else
-							for (int IndexIdx = 0; IndexIdx < SrcSection->mIndices.GetSize(); IndexIdx++)
-								*Index++ = SrcSection->mIndices[IndexIdx];
-					}
-					else
-					{
-						quint32 BaseVertex = BaseConditionalVertices[LC_MESHDATA_SHARED];
+						IndexType BaseVertex = DstSection.Texture ? BaseTexturedVertices[LodIdx] : BaseVertices[LodIdx];
 
 						for (int IndexIdx = 0; IndexIdx < SrcSection->mIndices.GetSize(); IndexIdx++)
 							*Index++ = BaseVertex + SrcSection->mIndices[IndexIdx];
 					}
-
-					DstSection.NumIndices += SrcSection->mIndices.GetSize();
-				}
-
-				if (MergeSection.Lod)
-				{
-					lcMeshLoaderSection* SrcSection = MergeSection.Lod;
-
-					if (DstSection.PrimitiveType != LC_MESH_CONDITIONAL_LINES)
-					{
-						if (!mHasTextures)
-						{
-							quint32 BaseVertex = DstSection.Texture ? BaseTexturedVertices[LodIdx] : BaseVertices[LodIdx];
-
-							for (int IndexIdx = 0; IndexIdx < SrcSection->mIndices.GetSize(); IndexIdx++)
-								*Index++ = BaseVertex + SrcSection->mIndices[IndexIdx];
-						}
-						else
-							for (int IndexIdx = 0; IndexIdx < SrcSection->mIndices.GetSize(); IndexIdx++)
-								*Index++ = SrcSection->mIndices[IndexIdx];
-					}
 					else
-					{
-						quint32 BaseVertex = BaseConditionalVertices[LodIdx];
-
 						for (int IndexIdx = 0; IndexIdx < SrcSection->mIndices.GetSize(); IndexIdx++)
-							*Index++ = BaseVertex + SrcSection->mIndices[IndexIdx];
-					}
-
-					DstSection.NumIndices += SrcSection->mIndices.GetSize();
+							*Index++ = SrcSection->mIndices[IndexIdx];
 				}
+				else
+				{
+					IndexType BaseVertex = BaseConditionalVertices[LodIdx];
+
+					for (int IndexIdx = 0; IndexIdx < SrcSection->mIndices.GetSize(); IndexIdx++)
+						*Index++ = BaseVertex + SrcSection->mIndices[IndexIdx];
+				}
+
+				DstSection.NumIndices += SrcSection->mIndices.GetSize();
 			}
 
 			if (DstSection.PrimitiveType == LC_MESH_TRIANGLES || DstSection.PrimitiveType == LC_MESH_TEXTURED_TRIANGLES)
@@ -1271,13 +1216,6 @@ lcMesh* lcLibraryMeshData::CreateMesh()
 			NumIndices += DstSection.NumIndices;
 		}
 	}
-
-	if (mHasStyleStud)
-		Mesh->mFlags |= lcMeshFlag::HasStyleStud;
-
-	UpdateMeshBoundingBox(Mesh);
-
-	return Mesh;
 }
 
 void lcLibraryMeshData::UpdateMeshBoundingBox(lcMesh* Mesh)

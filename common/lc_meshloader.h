@@ -46,6 +46,12 @@ public:
 	lcArray<quint32> mIndices;
 };
 
+struct lcMergeSection
+{
+	lcMeshLoaderSection* Shared;
+	lcMeshLoaderSection* Lod;
+};
+
 enum class lcMeshLoaderTextureMapType
 {
 	Planar,
@@ -177,6 +183,9 @@ public:
 	bool mHasStyleStud;
 
 protected:
+	template<typename IndexType>
+	void WriteSections(lcMesh* Mesh, const lcArray<lcMergeSection> (&MergeSections)[LC_NUM_MESH_LODS], int (&BaseVertices)[LC_NUM_MESHDATA_TYPES], int (&BaseTexturedVertices)[LC_NUM_MESHDATA_TYPES], int (&BaseConditionalVertices)[LC_NUM_MESHDATA_TYPES]);
+
 	static void UpdateMeshBoundingBox(lcMesh* Mesh);
 	template<typename IndexType>
 	static void UpdateMeshSectionBoundingBox(lcMesh* Mesh, lcMeshSection& Section, lcVector3& SectionMin, lcVector3& SectionMax);

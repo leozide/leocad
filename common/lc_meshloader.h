@@ -190,8 +190,9 @@ public:
 	bool LoadMesh(lcFile& File, lcMeshDataType MeshDataType);
 
 protected:
-	bool ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform, quint32 CurrentColorCode, bool InvertWinding, lcArray<lcMeshLoaderTextureMap>& TextureStack, lcMeshDataType MeshDataType);
+	bool ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform, quint32 CurrentColorCode, bool InvertWinding, lcMeshDataType MeshDataType);
 
+	lcArray<lcMeshLoaderTextureMap> mTextureStack;
 	lcLibraryMeshData& mMeshData;
 	bool mOptimize;
 	Project* mCurrentProject;

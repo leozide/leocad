@@ -1370,12 +1370,10 @@ lcMeshLoader::lcMeshLoader(lcLibraryMeshData& MeshData, bool Optimize, Project* 
 
 bool lcMeshLoader::LoadMesh(lcFile& File, lcMeshDataType MeshDataType)
 {
-	lcArray<lcMeshLoaderTextureMap> TextureStack;
-
-	return ReadMeshData(File, lcMatrix44Identity(), 16, false, TextureStack, MeshDataType);
+	return ReadMeshData(File, lcMatrix44Identity(), 16, false, MeshDataType);
 }
 
-bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform, quint32 CurrentColorCode, bool InvertWinding, lcArray<lcMeshLoaderTextureMap>& TextureStack, lcMeshDataType MeshDataType)
+bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform, quint32 CurrentColorCode, bool InvertWinding, lcMeshDataType MeshDataType)
 {
 	char Buffer[1024];
 	char* Line;
@@ -1486,7 +1484,7 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 
 						CleanTextureName(FileName);
 
-						lcMeshLoaderTextureMap& Map = TextureStack.Add();
+						lcMeshLoaderTextureMap& Map = mTextureStack.Add();
 						Map.Next = false;
 						Map.Fallback = false;
 						Map.Texture = Library->FindTexture(FileName, mCurrentProject, mSearchProjectFolder);
@@ -1520,7 +1518,7 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 
 						CleanTextureName(FileName);
 
-						lcMeshLoaderTextureMap& Map = TextureStack.Add();
+						lcMeshLoaderTextureMap& Map = mTextureStack.Add();
 						Map.Next = false;
 						Map.Fallback = false;
 						Map.Texture = Library->FindTexture(FileName, mCurrentProject, mSearchProjectFolder);
@@ -1553,7 +1551,7 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 
 						CleanTextureName(FileName);
 
-						lcMeshLoaderTextureMap& Map = TextureStack.Add();
+						lcMeshLoaderTextureMap& Map = mTextureStack.Add();
 						Map.Next = false;
 						Map.Fallback = false;
 						Map.Texture = Library->FindTexture(FileName, mCurrentProject, mSearchProjectFolder);
@@ -1572,13 +1570,13 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 				}
 				else if (!strcmp(Token, "FALLBACK"))
 				{
-					if (TextureStack.GetSize())
-						TextureStack[TextureStack.GetSize() - 1].Fallback = true;
+					if (mTextureStack.GetSize())
+						mTextureStack[mTextureStack.GetSize() - 1].Fallback = true;
 				}
 				else if (!strcmp(Token, "END"))
 				{
-					if (TextureStack.GetSize())
-						TextureStack.RemoveIndex(TextureStack.GetSize() - 1);
+					if (mTextureStack.GetSize())
+						mTextureStack.RemoveIndex(mTextureStack.GetSize() - 1);
 				}
 
 				continue;
@@ -1613,7 +1611,7 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 
 				Line = Token;
 
-				if (!TextureStack.GetSize())
+				if (!mTextureStack.GetSize())
 					continue;
 			}
 			else
@@ -1639,9 +1637,9 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 
 		lcMeshLoaderTextureMap* TextureMap = nullptr;
 
-		if (TextureStack.GetSize())
+		if (mTextureStack.GetSize())
 		{
-			TextureMap = &TextureStack[TextureStack.GetSize() - 1];
+			TextureMap = &mTextureStack[mTextureStack.GetSize() - 1];
 
 			if (TextureMap->Texture)
 			{
@@ -1686,9 +1684,9 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 			IncludeTransform = lcMul(IncludeTransform, CurrentTransform);
 			bool Mirror = IncludeTransform.Determinant() < 0.0f;
 
-			auto FileCallback = [this, &IncludeTransform, &ColorCode, &Mirror, &InvertNext, &TextureStack, &MeshDataType](lcFile& File)
+			auto FileCallback = [this, &IncludeTransform, &ColorCode, &Mirror, &InvertNext, &MeshDataType](lcFile& File)
 			{
-				ReadMeshData(File, IncludeTransform, ColorCode, Mirror ^ InvertNext, TextureStack, MeshDataType);
+				ReadMeshData(File, IncludeTransform, ColorCode, Mirror ^ InvertNext, MeshDataType);
 			};
 
 			if (Primitive)
@@ -1737,7 +1735,7 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 				mMeshData.mData[MeshDataType].ProcessTexturedLine(LineType, ColorCode, WindingCCW, *TextureMap, Points, mOptimize);
 
 				if (TextureMap->Next)
-					TextureStack.RemoveIndex(TextureStack.GetSize() - 1);
+					mTextureStack.RemoveIndex(mTextureStack.GetSize() - 1);
 			}
 			else
 				mMeshData.mData[MeshDataType].ProcessLine(LineType, ColorCode, WindingCCW, Points, mOptimize);
@@ -1758,7 +1756,7 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 				mMeshData.mData[MeshDataType].ProcessTexturedLine(LineType, ColorCode, WindingCCW, *TextureMap, Points, mOptimize);
 
 				if (TextureMap->Next)
-					TextureStack.RemoveIndex(TextureStack.GetSize() - 1);
+					mTextureStack.RemoveIndex(mTextureStack.GetSize() - 1);
 			}
 			else
 				mMeshData.mData[MeshDataType].ProcessLine(LineType, ColorCode, WindingCCW, Points, mOptimize);

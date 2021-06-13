@@ -154,7 +154,8 @@ public:
 	T& Add()
 	{
 		AllocGrow(1);
-		return mData[mLength++];
+		mData[mLength++] = T();
+		return mData[mLength - 1];
 	}
 
 	T& InsertAt(int Index)

@@ -252,33 +252,9 @@ void lcMeshLoaderTypeData::ProcessLine(int LineType, lcMeshLoaderMaterial* Mater
 			const lcVector3& Position = Vertices[QuadIndices[IndexIdx]];
 			Indices[IndexIdx] = AddVertex(Position, Normal, Optimize);
 		}
-	}
-	else if (LineType == 2)
-	{
-		for (int IndexIdx = 0; IndexIdx < 2; IndexIdx++)
+
+		if (LineType == 4)
 		{
-			const lcVector3& Position = Vertices[QuadIndices[IndexIdx]];
-			Indices[IndexIdx] = AddVertex(Position, Optimize);
-		}
-	}
-	else if (LineType == 5)
-	{
-		Indices[0] = AddConditionalVertex(Vertices);
-		std::swap(Vertices[0], Vertices[1]);
-		Indices[1] = AddConditionalVertex(Vertices);
-	}
-
-	switch (LineType)
-	{
-		case 5:
-			if (Indices[0] != Indices[1])
-			{
-				Section->mIndices.Add(Indices[0]);
-				Section->mIndices.Add(Indices[1]);
-			}
-			break;
-
-		case 4:
 			if (Indices[0] != Indices[2] && Indices[0] != Indices[3] && Indices[2] != Indices[3])
 			{
 				if (WindingCCW)
@@ -294,33 +270,47 @@ void lcMeshLoaderTypeData::ProcessLine(int LineType, lcMeshLoaderMaterial* Mater
 					Section->mIndices.Add(Indices[2]);
 				}
 			}
-			Q_FALLTHROUGH();
+		}
 
-		case 3:
-			if (Indices[0] != Indices[1] && Indices[0] != Indices[2] && Indices[1] != Indices[2])
-			{
-				if (WindingCCW)
-				{
-					Section->mIndices.Add(Indices[0]);
-					Section->mIndices.Add(Indices[1]);
-					Section->mIndices.Add(Indices[2]);
-				}
-				else
-				{
-					Section->mIndices.Add(Indices[2]);
-					Section->mIndices.Add(Indices[1]);
-					Section->mIndices.Add(Indices[0]);
-				}
-			}
-			break;
-
-		case 2:
-			if (Indices[0] != Indices[1])
+		if (Indices[0] != Indices[1] && Indices[0] != Indices[2] && Indices[1] != Indices[2])
+		{
+			if (WindingCCW)
 			{
 				Section->mIndices.Add(Indices[0]);
 				Section->mIndices.Add(Indices[1]);
+				Section->mIndices.Add(Indices[2]);
 			}
-			break;
+			else
+			{
+				Section->mIndices.Add(Indices[2]);
+				Section->mIndices.Add(Indices[1]);
+				Section->mIndices.Add(Indices[0]);
+			}
+		}
+	}
+	else if (LineType == 2)
+	{
+		for (int IndexIdx = 0; IndexIdx < 2; IndexIdx++)
+		{
+			const lcVector3& Position = Vertices[QuadIndices[IndexIdx]];
+			Indices[IndexIdx] = AddVertex(Position, Optimize);
+		}
+
+		if (Indices[0] != Indices[1])
+		{
+			Section->mIndices.Add(Indices[0]);
+			Section->mIndices.Add(Indices[1]);
+		}
+	}
+	else if (LineType == 5)
+	{
+		Indices[0] = AddConditionalVertex(Vertices);
+		Section->mIndices.Add(Indices[0]);
+
+		std::swap(Vertices[0], Vertices[1]);
+
+		Indices[1] = AddConditionalVertex(Vertices);
+		Section->mIndices.Add(Indices[1]);
 	}
 }
 
@@ -607,7 +597,7 @@ static bool lcMeshLoaderFinalSectionCompare(const lcMeshLoaderFinalSection& a, c
 {
 	if (a.PrimitiveType != b.PrimitiveType)
 	{
-		int PrimitiveOrder[LC_MESH_NUM_PRIMITIVE_TYPES] =
+		const lcMeshPrimitiveType PrimitiveOrder[LC_MESH_NUM_PRIMITIVE_TYPES] =
 		{
 			LC_MESH_TRIANGLES,
 			LC_MESH_TEXTURED_TRIANGLES,
@@ -617,7 +607,7 @@ static bool lcMeshLoaderFinalSectionCompare(const lcMeshLoaderFinalSection& a, c
 
 		for (int PrimitiveType = 0; PrimitiveType < LC_MESH_NUM_PRIMITIVE_TYPES; PrimitiveType++)
 		{
-			int Primitive = PrimitiveOrder[PrimitiveType];
+			const lcMeshPrimitiveType Primitive = PrimitiveOrder[PrimitiveType];
 
 			if (a.PrimitiveType == Primitive)
 				return true;
@@ -867,7 +857,7 @@ lcMesh* lcLibraryMeshData::CreateMesh()
 
 	lcVertex* DstVerts = (lcVertex*)Mesh->mVertexData;
 
-	for (lcMeshLoaderTypeData& Data : mData)
+	for (const lcMeshLoaderTypeData& Data : mData)
 	{
 		for (const lcMeshLoaderVertex& SrcVertex : Data.mVertices)
 		{
@@ -894,7 +884,7 @@ lcMesh* lcLibraryMeshData::CreateMesh()
 
 	lcVertexConditional* DstConditionalVerts = (lcVertexConditional*)DstTexturedVerts;
 
-	for (lcMeshLoaderTypeData& Data : mData)
+	for (const lcMeshLoaderTypeData& Data : mData)
 	{
 		for (const lcMeshLoaderConditionalVertex& SrcVertex : Data.mConditionalVertices)
 		{

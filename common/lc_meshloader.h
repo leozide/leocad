@@ -224,7 +224,7 @@ public:
 protected:
 	bool ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform, quint32 CurrentColorCode, bool InvertWinding, lcMeshDataType MeshDataType);
 
-	lcArray<lcMeshLoaderTextureMap> mTextureStack;
+	std::vector<lcMeshLoaderTextureMap> mTextureStack;
 
 	lcLibraryMeshData& mMeshData;
 	bool mOptimize;

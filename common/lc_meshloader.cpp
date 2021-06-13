@@ -1206,7 +1206,8 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 					{
 						Token += 7;
 
-						lcMeshLoaderTextureMap& Map = mTextureStack.Add();
+						mTextureStack.emplace_back();
+						lcMeshLoaderTextureMap& Map = mTextureStack.back();
 						Map.Type = lcMeshLoaderMaterialType::Planar;
 
 						lcVector3 (&Points)[3] = Map.Points;
@@ -1223,7 +1224,8 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 					{
 						Token += 12;
 
-						lcMeshLoaderTextureMap& Map = mTextureStack.Add();
+						mTextureStack.emplace_back();
+						lcMeshLoaderTextureMap& Map = mTextureStack.back();
 						Map.Type = lcMeshLoaderMaterialType::Cylindrical;
 
 						lcVector3 (&Points)[3] = Map.Points;
@@ -1241,7 +1243,8 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 					{
 						Token += 10;
 
-						lcMeshLoaderTextureMap& Map = mTextureStack.Add();
+						mTextureStack.emplace_back();
+						lcMeshLoaderTextureMap& Map = mTextureStack.back();
 						Map.Type = lcMeshLoaderMaterialType::Spherical;
 
 						lcVector3(&Points)[3] = Map.Points;
@@ -1259,13 +1262,13 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 				}
 				else if (!strcmp(Token, "FALLBACK"))
 				{
-					if (mTextureStack.GetSize())
-						mTextureStack[mTextureStack.GetSize() - 1].Fallback = true;
+					if (!mTextureStack.empty())
+						mTextureStack.back().Fallback = true;
 				}
 				else if (!strcmp(Token, "END"))
 				{
-					if (mTextureStack.GetSize())
-						mTextureStack.RemoveIndex(mTextureStack.GetSize() - 1);
+					if (!mTextureStack.empty())
+						mTextureStack.pop_back();
 				}
 
 				continue;
@@ -1300,7 +1303,7 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 
 				Line = Token;
 
-				if (!mTextureStack.GetSize())
+				if (mTextureStack.empty())
 					continue;
 			}
 			else
@@ -1326,9 +1329,9 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 
 		lcMeshLoaderTextureMap* TextureMap = nullptr;
 
-		if (mTextureStack.GetSize())
+		if (!mTextureStack.empty())
 		{
-			TextureMap = &mTextureStack[mTextureStack.GetSize() - 1];
+			TextureMap = &mTextureStack.back();
 
 			// TODO: think about a way to handle the texture fallback
 //			if (TextureMap->Texture)
@@ -1427,7 +1430,7 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 				mMeshData.mData[MeshDataType].ProcessLine(LineType, mMeshData.GetTexturedMaterial(ColorCode, *TextureMap), WindingCCW, Points, mOptimize);
 
 				if (TextureMap->Next)
-					mTextureStack.RemoveIndex(mTextureStack.GetSize() - 1);
+					mTextureStack.pop_back();
 			}
 			break;
 
@@ -1448,7 +1451,7 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 				mMeshData.mData[MeshDataType].ProcessLine(LineType, mMeshData.GetTexturedMaterial(ColorCode, *TextureMap), WindingCCW, Points, mOptimize);
 
 				if (TextureMap->Next)
-					mTextureStack.RemoveIndex(mTextureStack.GetSize() - 1);
+					mTextureStack.pop_back();
 			}
 			break;
 

@@ -197,6 +197,7 @@ SOURCES += \
 	common/lc_texture.cpp \
 	common/lc_timelinewidget.cpp \
 	common/lc_view.cpp \
+	common/lc_viewsmanipulator.cpp \
 	common/lc_viewsphere.cpp \
 	common/lc_viewwidget.cpp \
 	common/lc_zipfile.cpp \
@@ -265,6 +266,7 @@ HEADERS += \
 	common/lc_synth.h \
 	common/lc_texture.h \
 	common/lc_view.h \
+	common/lc_viewsmanipulator.h \
 	common/lc_viewsphere.h \
 	common/lc_viewwidget.h \
 	common/lc_zipfile.h \

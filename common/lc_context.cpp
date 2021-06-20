@@ -9,6 +9,7 @@
 #include "texfont.h"
 #include "lc_view.h"
 #include "lc_viewsphere.h"
+#include "lc_viewmanipulator.h"
 #include "lc_stringcache.h"
 #include "lc_partselectionwidget.h"
 #include <QOpenGLFunctions_3_2_Core>
@@ -94,6 +95,7 @@ bool lcContext::InitializeRenderer()
 
 	Context->CreateResources();
 	lcView::CreateResources(Context);
+	lcViewManipulator::CreateResources(Context);
 	lcViewSphere::CreateResources(Context);
 
 	if (!gSupportsShaderObjects && lcGetPreferences().mShadingMode == lcShadingMode::DefaultLights)
@@ -121,6 +123,7 @@ void lcContext::ShutdownRenderer()
 
 	lcView::DestroyResources(Context);
 	Context->DestroyResources();
+	lcViewManipulator::DestroyResources(Context);
 	lcViewSphere::DestroyResources(Context);
 
 	mGlobalOffscreenContext.reset();

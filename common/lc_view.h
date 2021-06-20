@@ -182,6 +182,11 @@ public:
 		mBackgroundColor = BackgroundColor;
 	}
 
+	lcMatrix44 GetActiveSubmodelTransform() const
+	{
+		return mActiveSubmodelTransform;
+	}
+
 	static std::vector<lcView*> GetModelViews(const lcModel* Model);
 	static void UpdateProjectViews(const Project* Project);
 	static void UpdateAllViews();
@@ -243,12 +248,18 @@ public:
 	bool CloseFindReplaceDialog();
 	void ShowFindReplaceWidget(bool Replace);
 
+	float GetOverlayScale() const;
 	lcVector3 GetMoveDirection(const lcVector3& Direction) const;
 	lcMatrix44 GetPieceInsertPosition(bool IgnoreSelected, PieceInfo* Info) const;
 	lcVector3 GetCameraLightInsertPosition() const;
 	void GetRayUnderPointer(lcVector3& Start, lcVector3& End) const;
 	lcObjectSection FindObjectUnderPointer(bool PiecesOnly, bool IgnoreSelected) const;
 	lcArray<lcObject*> FindObjectsInBox(float x1, float y1, float x2, float y2) const;
+
+	lcVector3 ProjectPoint(const lcVector3& Point) const;
+	lcVector3 UnprojectPoint(const lcVector3& Point) const;
+	void UnprojectPoints(lcVector3* Points, int NumPoints) const;
+	lcMatrix44 GetProjectionMatrix() const;
 
 	bool BeginRenderToImage(int Width, int Height);
 	void EndRenderToImage();
@@ -266,31 +277,21 @@ signals:
 	void CameraChanged();
 
 protected:
-	static void CreateSelectMoveOverlayMesh(lcContext* Context);
-
 	void DrawBackground() const;
 	void DrawViewport() const;
 	void DrawAxes() const;
 
-	void DrawSelectMoveOverlay();
-	void DrawRotateOverlay();
 	void DrawSelectZoomRegionOverlay();
 	void DrawRotateViewOverlay();
 	void DrawGrid();
 
-	lcVector3 ProjectPoint(const lcVector3& Point) const;
-	lcVector3 UnprojectPoint(const lcVector3& Point) const;
-	void UnprojectPoints(lcVector3* Points, int NumPoints) const;
-	lcMatrix44 GetProjectionMatrix() const;
 	lcMatrix44 GetTileProjectionMatrix(int CurrentRow, int CurrentColumn, int CurrentTileWidth, int CurrentTileHeight) const;
 
 	lcCursor GetCursor() const;
 	void SetCursor(lcCursor Cursor);
 	lcTool GetCurrentTool() const;
 	void UpdateTrackTool();
-	bool IsTrackToolAllowed(lcTrackTool TrackTool, quint32 AllowedTransforms) const;
 	lcTrackTool GetOverrideTrackTool(Qt::MouseButton Button) const;
-	float GetOverlayScale() const;
 	void StartTracking(lcTrackButton TrackButton);
 	void StopTracking(bool Accept);
 	void OnButtonDown(lcTrackButton TrackButton);
@@ -324,6 +325,7 @@ protected:
 	quint32 mBackgroundColor = 0;
 
 	std::unique_ptr<lcScene> mScene;
+	std::unique_ptr<lcViewManipulator> mViewManipulator;
 	std::unique_ptr<lcViewSphere> mViewSphere;
 
 	lcModel* mModel = nullptr;
@@ -340,7 +342,4 @@ protected:
 
 	static lcView* mLastFocusedView;
 	static std::vector<lcView*> mViews;
-
-	static lcVertexBuffer mRotateMoveVertexBuffer;
-	static lcIndexBuffer mRotateMoveIndexBuffer;
 };

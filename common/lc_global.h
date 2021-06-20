@@ -97,8 +97,11 @@ struct lcRenderMesh;
 struct lcObjectSection;
 class lcTexture;
 class lcScene;
+class lcViewManipulator;
 class lcViewSphere;
 enum class lcRenderMeshState : int;
+enum class lcTrackTool;
+enum class lcTrackButton;
 
 class lcFile;
 class lcMemFile;

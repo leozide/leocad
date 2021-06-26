@@ -21,6 +21,7 @@
 #pragma warning(default : 4062) // enumerator 'identifier' in switch of enum 'enumeration' is not handled
 #pragma warning(default : 4388) // 'token' : signed/unsigned mismatch
 #pragma warning(default : 4389) // 'equality-operator' : signed/unsigned mismatch
+#pragma warning(default : 5038) // data member 'A::y' will be initialized after data member 'A::x'
 #endif
 
 #ifndef Q_FALLTHROUGH

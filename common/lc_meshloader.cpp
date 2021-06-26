@@ -1086,7 +1086,7 @@ void lcLibraryMeshData::UpdateMeshSectionBoundingBox(lcMesh* Mesh, lcMeshSection
 }
 
 lcMeshLoader::lcMeshLoader(lcLibraryMeshData& MeshData, bool Optimize, Project* CurrentProject, bool SearchProjectFolder)
-	: mMeshData(MeshData), mOptimize(Optimize), mCurrentProject(CurrentProject), mSearchProjectFolder(SearchProjectFolder)
+	: mCurrentProject(CurrentProject), mSearchProjectFolder(SearchProjectFolder), mMeshData(MeshData), mOptimize(Optimize)
 {
 	MeshData.SetMeshLoader(this);
 }

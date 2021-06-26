@@ -204,7 +204,7 @@ protected:
 	quint32 AddTexturedVertex(const lcVector3& Position, const lcVector3& Normal, const lcVector2& TexCoords);
 
 	template<typename IndexType>
-	void WriteSections(lcMesh* Mesh, const lcArray<lcMeshLoaderFinalSection> (&FinalSections)[LC_NUM_MESH_LODS], int (&BaseVertices)[LC_NUM_MESHDATA_TYPES], int (&BaseTexturedVertices)[LC_NUM_MESHDATA_TYPES], int (&BaseConditionalVertices)[LC_NUM_MESHDATA_TYPES]);
+	void WriteSections(lcMesh* Mesh, const lcArray<lcMeshLoaderFinalSection> (&FinalSections)[LC_NUM_MESH_LODS], int (&BaseVertices)[LC_NUM_MESHDATA_TYPES], int (&BaseConditionalVertices)[LC_NUM_MESHDATA_TYPES]);
 
 	static void UpdateMeshBoundingBox(lcMesh* Mesh);
 	template<typename IndexType>

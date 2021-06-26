@@ -795,7 +795,6 @@ lcMesh* lcLibraryMeshData::CreateMesh()
 	lcMesh* Mesh = new lcMesh();
 
 	int BaseVertices[LC_NUM_MESHDATA_TYPES];
-	int BaseTexturedVertices[LC_NUM_MESHDATA_TYPES];
 	int BaseConditionalVertices[LC_NUM_MESHDATA_TYPES];
 	int NumVertices = 0;
 	int ConditionalVertexCount = 0;
@@ -898,9 +897,9 @@ lcMesh* lcLibraryMeshData::CreateMesh()
 	}
 
 	if (Mesh->mIndexType == GL_UNSIGNED_SHORT)
-		WriteSections<quint16>(Mesh, FinalSections, BaseVertices, BaseTexturedVertices, BaseConditionalVertices);
+		WriteSections<quint16>(Mesh, FinalSections, BaseVertices, BaseConditionalVertices);
 	else
-		WriteSections<quint32>(Mesh, FinalSections, BaseVertices, BaseTexturedVertices, BaseConditionalVertices);
+		WriteSections<quint32>(Mesh, FinalSections, BaseVertices, BaseConditionalVertices);
 
 	if (mHasStyleStud)
 		Mesh->mFlags |= lcMeshFlag::HasStyleStud;
@@ -911,7 +910,7 @@ lcMesh* lcLibraryMeshData::CreateMesh()
 }
 
 template<typename IndexType>
-void lcLibraryMeshData::WriteSections(lcMesh* Mesh, const lcArray<lcMeshLoaderFinalSection> (&FinalSections)[LC_NUM_MESH_LODS], int(&BaseVertices)[LC_NUM_MESHDATA_TYPES], int(&BaseTexturedVertices)[LC_NUM_MESHDATA_TYPES], int(&BaseConditionalVertices)[LC_NUM_MESHDATA_TYPES])
+void lcLibraryMeshData::WriteSections(lcMesh* Mesh, const lcArray<lcMeshLoaderFinalSection> (&FinalSections)[LC_NUM_MESH_LODS], int(&BaseVertices)[LC_NUM_MESHDATA_TYPES], int(&BaseConditionalVertices)[LC_NUM_MESHDATA_TYPES])
 {
 	int NumIndices = 0;
 
@@ -943,20 +942,24 @@ void lcLibraryMeshData::WriteSections(lcMesh* Mesh, const lcArray<lcMeshLoaderFi
 
 			IndexType* Index = (IndexType*)Mesh->mIndexData + NumIndices;
 
-			auto AddSection = [this, &DstSection, &Index, &BaseVertices, &BaseTexturedVertices, &BaseConditionalVertices](lcMeshLoaderSection* SrcSection, lcMeshDataType SrcDataType)
+			auto AddSection = [this, &DstSection, &Index, &BaseVertices, &BaseConditionalVertices](lcMeshLoaderSection* SrcSection, lcMeshDataType SrcDataType)
 			{
 				if (DstSection.PrimitiveType != LC_MESH_CONDITIONAL_LINES)
 				{
 					if (!mHasTextures)
 					{
-						IndexType BaseVertex = DstSection.Texture ? BaseTexturedVertices[SrcDataType] : BaseVertices[SrcDataType];
+						const IndexType BaseVertex = BaseVertices[SrcDataType];
 
 						for (int IndexIdx = 0; IndexIdx < SrcSection->mIndices.GetSize(); IndexIdx++)
 							*Index++ = BaseVertex + SrcSection->mIndices[IndexIdx];
 					}
 					else
+					{
+						const IndexType BaseVertex = DstSection.Texture ? 0 : BaseVertices[SrcDataType];
+
 						for (int IndexIdx = 0; IndexIdx < SrcSection->mIndices.GetSize(); IndexIdx++)
-							*Index++ = SrcSection->mIndices[IndexIdx];
+							*Index++ = BaseVertex + SrcSection->mIndices[IndexIdx];
+					}
 				}
 				else
 				{

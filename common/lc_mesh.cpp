@@ -424,7 +424,9 @@ bool lcMesh::FileLoad(lcMemFile& File)
 				FileName[Length] = 0;
 
 				Section.Texture = lcGetPiecesLibrary()->FindTexture(FileName, nullptr, false);
-				Section.Texture->AddRef();
+
+				if (Section.Texture)
+					Section.Texture->AddRef();
 			}
 			else
 				Section.Texture = nullptr;

@@ -168,7 +168,7 @@ void PieceInfo::ReleaseMesh()
 				lcMeshSection& Section = mMesh->mLods[LodIdx].Sections[SectionIdx];
 
 				if (Section.Texture)
-					lcGetPiecesLibrary()->ReleaseTexture(Section.Texture);
+					Section.Texture->Release();
 			}
 		}
 

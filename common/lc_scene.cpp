@@ -262,23 +262,33 @@ void lcScene::DrawOpaqueMeshes(lcContext* Context, bool DrawLit, int PrimitiveTy
 				}
 			}
 
-			lcTexture* const Texture = Section->Texture;
 			int VertexBufferOffset = Mesh->mVertexCacheOffset != -1 ? Mesh->mVertexCacheOffset : 0;
 			const int IndexBufferOffset = Mesh->mIndexCacheOffset != -1 ? Mesh->mIndexCacheOffset : 0;
 
-			if (!Texture)
+			if (Section->PrimitiveType != LC_MESH_TEXTURED_TRIANGLES)
 			{
 				Context->SetMaterial(FlatMaterial);
 				Context->SetVertexFormat(VertexBufferOffset, 3, 1, 0, 0, DrawLit);
 			}
 			else
 			{
-				if (Texture->NeedsUpload())
-					Texture->Upload(Context);
-				Context->SetMaterial(TexturedMaterial);
+				lcTexture* const Texture = Section->Texture;
+
+				if (Texture)
+				{
+					if (Texture->NeedsUpload())
+						Texture->Upload(Context);
+
+					Context->SetMaterial(TexturedMaterial);
+					Context->BindTexture2D(Texture->mTexture);
+				}
+				else
+				{
+					Context->SetMaterial(FlatMaterial);
+				}
+
 				VertexBufferOffset += Mesh->mNumVertices * sizeof(lcVertex);
 				Context->SetVertexFormat(VertexBufferOffset, 3, 1, 2, 0, DrawLit);
-				Context->BindTexture2D(Texture->mTexture);
 			}
 
 			const GLenum DrawPrimitiveType = Section->PrimitiveType & (LC_MESH_TRIANGLES | LC_MESH_TEXTURED_TRIANGLES) ? GL_TRIANGLES : GL_LINES;

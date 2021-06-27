@@ -944,29 +944,36 @@ void lcLibraryMeshData::WriteSections(lcMesh* Mesh, const lcArray<lcMeshLoaderFi
 
 			auto AddSection = [this, &DstSection, &Index, &BaseVertices, &BaseConditionalVertices](lcMeshLoaderSection* SrcSection, lcMeshDataType SrcDataType)
 			{
-				if (DstSection.PrimitiveType != LC_MESH_CONDITIONAL_LINES)
+				switch (DstSection.PrimitiveType)
 				{
-					if (!mHasTextures)
+					case LC_MESH_LINES:
+					case LC_MESH_TRIANGLES:
 					{
 						const IndexType BaseVertex = BaseVertices[SrcDataType];
 
 						for (int IndexIdx = 0; IndexIdx < SrcSection->mIndices.GetSize(); IndexIdx++)
 							*Index++ = BaseVertex + SrcSection->mIndices[IndexIdx];
 					}
-					else
+					break;
+
+					case LC_MESH_CONDITIONAL_LINES:
 					{
-						const IndexType BaseVertex = DstSection.Texture ? 0 : BaseVertices[SrcDataType];
+						const IndexType BaseVertex = BaseConditionalVertices[SrcDataType];
 
 						for (int IndexIdx = 0; IndexIdx < SrcSection->mIndices.GetSize(); IndexIdx++)
 							*Index++ = BaseVertex + SrcSection->mIndices[IndexIdx];
 					}
-				}
-				else
-				{
-					IndexType BaseVertex = BaseConditionalVertices[SrcDataType];
+					break;
 
-					for (int IndexIdx = 0; IndexIdx < SrcSection->mIndices.GetSize(); IndexIdx++)
-						*Index++ = BaseVertex + SrcSection->mIndices[IndexIdx];
+					case LC_MESH_TEXTURED_TRIANGLES:
+					{
+						for (int IndexIdx = 0; IndexIdx < SrcSection->mIndices.GetSize(); IndexIdx++)
+							*Index++ = SrcSection->mIndices[IndexIdx];
+					}
+					break;
+
+					case LC_MESH_NUM_PRIMITIVE_TYPES:
+						break;
 				}
 
 				DstSection.NumIndices += SrcSection->mIndices.GetSize();
@@ -1050,9 +1057,10 @@ void lcLibraryMeshData::UpdateMeshSectionBoundingBox(lcMesh* Mesh, lcMeshSection
 {
 	const IndexType* IndexBuffer = reinterpret_cast<IndexType*>(static_cast<char*>(Mesh->mIndexData) + Section.IndexOffset);
 
-	if (!Section.Texture)
+	switch (Section.PrimitiveType)
 	{
-		if (Section.PrimitiveType != LC_MESH_CONDITIONAL_LINES)
+		case LC_MESH_LINES:
+		case LC_MESH_TRIANGLES:
 		{
 			const lcVertex* VertexBuffer = Mesh->GetVertexData();
 
@@ -1063,7 +1071,9 @@ void lcLibraryMeshData::UpdateMeshSectionBoundingBox(lcMesh* Mesh, lcMeshSection
 				SectionMax = lcMax(SectionMax, Position);
 			}
 		}
-		else
+		break;
+
+		case LC_MESH_CONDITIONAL_LINES:
 		{
 			const lcVertexConditional* VertexBuffer = Mesh->GetConditionalVertexData();
 
@@ -1074,17 +1084,23 @@ void lcLibraryMeshData::UpdateMeshSectionBoundingBox(lcMesh* Mesh, lcMeshSection
 				SectionMax = lcMax(SectionMax, Position);
 			}
 		}
-	}
-	else
-	{
-		const lcVertexTextured* VertexBuffer = Mesh->GetTexturedVertexData();
+		break;
 
-		for (int Index = 0; Index < Section.NumIndices; Index++)
+		case LC_MESH_TEXTURED_TRIANGLES:
 		{
-			const lcVector3& Position = VertexBuffer[IndexBuffer[Index]].Position;
-			SectionMin = lcMin(SectionMin, Position);
-			SectionMax = lcMax(SectionMax, Position);
+			const lcVertexTextured* VertexBuffer = Mesh->GetTexturedVertexData();
+
+			for (int Index = 0; Index < Section.NumIndices; Index++)
+			{
+				const lcVector3& Position = VertexBuffer[IndexBuffer[Index]].Position;
+				SectionMin = lcMin(SectionMin, Position);
+				SectionMax = lcMax(SectionMax, Position);
+			}
 		}
+		break;
+
+		case LC_MESH_NUM_PRIMITIVE_TYPES:
+			break;
 	}
 }
 

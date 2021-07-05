@@ -74,7 +74,7 @@ void lcSetsDatabaseDialog::accept()
 	ProgressDialog.show();
 
 	int KeyIndex = QTime::currentTime().msec() % mKeys.size();
-	QString DownloadUrl = QString("https://rebrickable.com/api/v3/lego/sets/%1/parts/?key=%2").arg(SetNum, mKeys[KeyIndex]);
+	QString DownloadUrl = QString("https://rebrickable.com/api/v3/lego/sets/%1/parts/?key=%2&page_size=1000").arg(SetNum, mKeys[KeyIndex]);
 
 	mInventoryReply = mHttpManager->DownloadFile(DownloadUrl);
 

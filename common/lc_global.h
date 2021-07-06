@@ -4,12 +4,13 @@
 #ifdef __cplusplus
 
 #include <QtGlobal>
-#include <QWidget>
-#include <QtOpenGL>
-#include <QGLWidget>
-#include <QtGui>
-#include <QPrinter>
+#include <QtWidgets>
 #include <QtConcurrent>
+#include <QtOpenGL>
+#include <QtGui>
+#include <QWidget>
+#include <QOpenGLWidget>
+#include <QPrinter>
 #include <map>
 #include <vector>
 #include <array>

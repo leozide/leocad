@@ -29,7 +29,9 @@
 #define LC_LIBRARY_CACHE_DIRECTORY 0x0002
 
 lcPiecesLibrary::lcPiecesLibrary()
+#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
 	: mLoadMutex(QMutex::Recursive)
+#endif
 {
 	QStringList cachePathList = QStandardPaths::standardLocations(QStandardPaths::CacheLocation);
 	mCachePath = cachePathList.first();
@@ -828,7 +830,7 @@ void lcPiecesLibrary::ReadDirectoryDescriptions(const QFileInfoList (&FileLists)
 			if (NewIndexFile.WriteBuffer(Info->m_strDescription, strlen(Info->m_strDescription) + 1) == 0)
 				return;
 
-			NewIndexFile.WriteU8(Info->mFolderType);
+			NewIndexFile.WriteU8(static_cast<quint8>(Info->mFolderType));
 
 			quint64 FileTime = FileLists[Info->mFolderType][Info->mFolderIndex].lastModified().toMSecsSinceEpoch();
 
@@ -869,7 +871,11 @@ bool lcPiecesLibrary::ReadArchiveCacheFile(const QString& FileName, lcMemFile& C
 	CacheFile.SetLength(UncompressedSize);
 	CacheFile.Seek(0, SEEK_SET);
 
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
+	constexpr qsizetype CHUNK = 16384;
+#else
 	constexpr int CHUNK = 16384;
+#endif
 	int ret;
 	unsigned have;
 	z_stream strm;

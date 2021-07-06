@@ -552,7 +552,7 @@ lcCommandLineOptions lcApplication::ParseCommandLineOptions()
 			QString LibPath;
 
 			if (ParseString(LibPath, true))
-				Options.LibraryPaths += qMakePair<QString, bool>(LibPath, false);
+				Options.LibraryPaths += QPair<QString, bool>(LibPath, false);
 		}
 		else if (Option == QLatin1String("-i") || Option == QLatin1String("--image"))
 		{

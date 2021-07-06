@@ -60,7 +60,7 @@ lcPartSelectionListModel::lcPartSelectionListModel(QObject* Parent)
 		mColorLocked = true;
 	}
 
-	connect(lcGetPiecesLibrary(), SIGNAL(PartLoaded(PieceInfo*)), this, SLOT(PartLoaded(PieceInfo*)));
+	connect(lcGetPiecesLibrary(), &lcPiecesLibrary::PartLoaded, this, &lcPartSelectionListModel::PartLoaded);
 }
 
 lcPartSelectionListModel::~lcPartSelectionListModel()

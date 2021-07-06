@@ -1170,7 +1170,7 @@ void lcModel::DuplicateSelectedPieces()
 
 			while (!GroupName.isEmpty())
 			{
-				QCharRef Last = GroupName[GroupName.size() - 1];
+				QChar Last = GroupName[GroupName.size() - 1];
 				if (Last.isDigit())
 					GroupName.chop(1);
 				else

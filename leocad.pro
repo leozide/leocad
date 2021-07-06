@@ -1,4 +1,4 @@
-QT += core gui opengl network xml concurrent
+QT += core gui widgets opengl network xml concurrent
 QT *= printsupport
 TEMPLATE = app
 
@@ -8,6 +8,13 @@ lessThan(QT_MAJOR_VERSION, 5) {
 
 equals(QT_MAJOR_VERSION, 5):lessThan(QT_MINOR_VERSION, 4) {
 	error("LeoCAD requires Qt5.4 or later.")
+}
+
+greaterThan(QT_MAJOR_VERSION, 5) {
+	QT += openglwidgets
+	win32-msvc* {
+		QMAKE_CXXFLAGS += /std:c++17
+	}
 }
 
 qtHaveModule(gamepad) {

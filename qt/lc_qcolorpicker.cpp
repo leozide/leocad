@@ -123,7 +123,12 @@ void lcQColorPicker::buttonPressed(bool toggled)
 	connect(popup, SIGNAL(hid()), SLOT(popupClosed()));
 	popup->setMinimumSize(300, 200);
 
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
+	QScreen* Screen = screen();
+	const QRect desktop = Screen ? Screen->geometry() : QRect();
+#else (QT_VERSION >= QT_VERSION_CHECK(5, 10, 0))
 	const QRect desktop = QApplication::desktop()->geometry();
+#endif
 
 	QPoint pos = mapToGlobal(rect().bottomLeft());
 	if (pos.x() < desktop.left())

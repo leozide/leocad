@@ -81,7 +81,7 @@ void lcLight::CreateName(const lcArray<lcLight*>& Lights)
 		if (LightName.startsWith(Prefix))
 		{
 			bool Ok = false;
-			int LightNumber = LightName.midRef(Prefix.size()).toInt(&Ok);
+			int LightNumber = QStringView(LightName).mid(Prefix.size()).toInt(&Ok);
 
 			if (Ok && LightNumber > MaxLightNumber)
 				MaxLightNumber = LightNumber;
@@ -464,7 +464,7 @@ void lcLight::DrawPointLight(lcContext* Context) const
 
 	*Vertex++ = lcVector3(0, 0, -Radius);
 
-	for (int i = 0; i < Slices - 1; i++ )
+	for (quint16 i = 0; i < Slices - 1; i++ )
 	{
 		*Index++ = 0;
 		*Index++ = 1 + i;
@@ -475,12 +475,12 @@ void lcLight::DrawPointLight(lcContext* Context) const
 	*Index++ = 1;
 	*Index++ = 1 + Slices - 1;
 
-	for (int i = 0; i < Slices - 2; i++ )
+	for (quint16 i = 0; i < Slices - 2; i++ )
 	{
-		int Row1 = 1 + i * Slices;
-		int Row2 = 1 + (i + 1) * Slices;
+		quint16 Row1 = 1 + i * Slices;
+		quint16 Row2 = 1 + (i + 1) * Slices;
 
-		for (int j = 0; j < Slices - 1; j++ )
+		for (quint16 j = 0; j < Slices - 1; j++ )
 		{
 			*Index++ = Row1 + j;
 			*Index++ = Row2 + j + 1;
@@ -500,7 +500,7 @@ void lcLight::DrawPointLight(lcContext* Context) const
 		*Index++ = Row1 + 0;
 	}
 
-	for (int i = 0; i < Slices - 1; i++ )
+	for (quint16 i = 0; i < Slices - 1; i++ )
 	{
 		*Index++ = (Slices - 1) * Slices + 1;
 		*Index++ = (Slices - 1) * (Slices - 1) + i;

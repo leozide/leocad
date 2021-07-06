@@ -81,7 +81,7 @@ void lcLight::CreateName(const lcArray<lcLight*>& Lights)
 		if (LightName.startsWith(Prefix))
 		{
 			bool Ok = false;
-			int LightNumber = QStringView(LightName).mid(Prefix.size()).toInt(&Ok);
+			int LightNumber = LightName.mid(Prefix.size()).toInt(&Ok);
 
 			if (Ok && LightNumber > MaxLightNumber)
 				MaxLightNumber = LightNumber;

@@ -4,7 +4,7 @@ Author, Original Design:
 Leonardo Zide <leozide@gmail.com>
 
 Contributions (in alphabetical order):
-Christian Höltje <docwhat@gerf.org>
+Christian HÃ¶ltje <docwhat@gerf.org>
 David Paleino <dapal@debian.org>
 Hubert Figuiere <hub@figuiere.net>
 Joerg Scheurich <rusmufti@helpdesk.bera.rus.uni-stuttgart.de>
@@ -14,7 +14,7 @@ Pat Mahoney <pat7@gmx.net>
 Petter Reinholdtsen <pere@hungry.com>
 Renaud Breard <renaud@islande.net>
 Rodney Rushing <leocad.reg@yenandjen.com>
-Torbjörn Söderstedt <torbjrn@gmail.com>
+TorbjÃ¶rn SÃ¶derstedt <torbjrn@gmail.com>
 
 Translations:
 Sylvain L. Sauvage <SSauvage@club-internet.fr>

@@ -7,7 +7,7 @@ platform: x64
 
 environment:
   GITHUB_TOKEN:
-    secure: +EZPzYX4wUEc6MYg4kBLx9TogAqeeeWUPgtEW3VtAJATrBtxwpuOQIHrrR4hbc7a
+    secure: p5KEQtln6gMUfQLCkLsHUOhADIxPFjH8WICuY9pZeni1S1Es1XRGz7+OoFZKj8Ev
 
 before_build:
 - call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"

@@ -2851,5 +2851,12 @@ void lcView::OnMouseMove()
 
 void lcView::OnMouseWheel(float Direction)
 {
-	mModel->Zoom(mCamera, (int)(((mMouseModifiers & Qt::ControlModifier) ? 100 : 10) * Direction));
+	float Scale = 10.0f;
+
+	if (mMouseModifiers & Qt::ControlModifier)
+		Scale = 100.0f;
+	else if (mMouseModifiers & Qt::ShiftModifier)
+		Scale = 1.0f;
+
+	mModel->Zoom(mCamera, static_cast<int>(Direction * Scale));
 }

@@ -12,6 +12,10 @@
 #include "camera.h"
 #include "lc_previewwidget.h"
 
+#ifdef Q_OS_WIN
+#include <QtPlatformHeaders\QWindowsWindowFunctions>
+#endif
+
 lcApplication* gApplication;
 
 void lcPreferences::LoadDefaults()
@@ -1192,6 +1196,10 @@ lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& Libra
 		gMainWindow->GetPartSelectionWidget()->SetDefaultPart();
 		gMainWindow->UpdateRecentFiles();
 		gMainWindow->show();
+
+#ifdef Q_OS_WIN
+		QWindowsWindowFunctions::setHasBorderInFullScreen(gMainWindow->windowHandle(), true);
+#endif
 	}
 
 	return SaveAndExit ? lcStartupMode::Success : lcStartupMode::ShowWindow;

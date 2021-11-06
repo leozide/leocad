@@ -6,57 +6,15 @@ class PieceInfo;
 #include "lc_colors.h"
 #include "lc_math.h"
 
-#define LC_PIECE_HIDDEN                    0x000001
-#define LC_PIECE_PIVOT_POINT_VALID         0x000002
-#define LC_PIECE_POSITION_SELECTED         0x000004
-#define LC_PIECE_POSITION_FOCUSED          0x000008
-#define LC_PIECE_CONTROL_POINT_1_SELECTED  0x000010
-#define LC_PIECE_CONTROL_POINT_1_FOCUSED   0x000020
-#define LC_PIECE_CONTROL_POINT_2_SELECTED  0x000040
-#define LC_PIECE_CONTROL_POINT_2_FOCUSED   0x000080
-#define LC_PIECE_CONTROL_POINT_3_SELECTED  0x000100
-#define LC_PIECE_CONTROL_POINT_3_FOCUSED   0x000200
-#define LC_PIECE_CONTROL_POINT_4_SELECTED  0x000400
-#define LC_PIECE_CONTROL_POINT_4_FOCUSED   0x000800
-#define LC_PIECE_CONTROL_POINT_5_SELECTED  0x001000
-#define LC_PIECE_CONTROL_POINT_5_FOCUSED   0x002000
-#define LC_PIECE_CONTROL_POINT_6_SELECTED  0x004000
-#define LC_PIECE_CONTROL_POINT_6_FOCUSED   0x008000
-#define LC_PIECE_CONTROL_POINT_7_SELECTED  0x010000
-#define LC_PIECE_CONTROL_POINT_7_FOCUSED   0x020000
-#define LC_PIECE_CONTROL_POINT_8_SELECTED  0x040000
-#define LC_PIECE_CONTROL_POINT_8_FOCUSED   0x080000
-#define LC_PIECE_CONTROL_POINT_9_SELECTED  0x100000
-#define LC_PIECE_CONTROL_POINT_9_FOCUSED   0x200000
-#define LC_PIECE_CONTROL_POINT_10_SELECTED 0x400000
-#define LC_PIECE_CONTROL_POINT_10_FOCUSED  0x800000
+#define LC_MAX_CONTROL_POINTS 1000
 
-#define LC_MAX_CONTROL_POINTS 10
-
-#define LC_PIECE_CONTROL_POINT_SELECTION_MASK (LC_PIECE_CONTROL_POINT_1_SELECTED | LC_PIECE_CONTROL_POINT_2_SELECTED | LC_PIECE_CONTROL_POINT_3_SELECTED | LC_PIECE_CONTROL_POINT_4_SELECTED | LC_PIECE_CONTROL_POINT_5_SELECTED | LC_PIECE_CONTROL_POINT_6_SELECTED | LC_PIECE_CONTROL_POINT_7_SELECTED | LC_PIECE_CONTROL_POINT_8_SELECTED | LC_PIECE_CONTROL_POINT_9_SELECTED | LC_PIECE_CONTROL_POINT_10_SELECTED)
-#define LC_PIECE_CONTROL_POINT_FOCUS_MASK (LC_PIECE_CONTROL_POINT_1_FOCUSED | LC_PIECE_CONTROL_POINT_2_FOCUSED | LC_PIECE_CONTROL_POINT_3_FOCUSED | LC_PIECE_CONTROL_POINT_4_FOCUSED | LC_PIECE_CONTROL_POINT_5_FOCUSED | LC_PIECE_CONTROL_POINT_6_FOCUSED | LC_PIECE_CONTROL_POINT_7_FOCUSED | LC_PIECE_CONTROL_POINT_8_FOCUSED | LC_PIECE_CONTROL_POINT_9_FOCUSED | LC_PIECE_CONTROL_POINT_10_FOCUSED)
-
-#define LC_PIECE_SELECTION_MASK     (LC_PIECE_POSITION_SELECTED | LC_PIECE_CONTROL_POINT_SELECTION_MASK)
-#define LC_PIECE_FOCUS_MASK         (LC_PIECE_POSITION_FOCUSED | LC_PIECE_CONTROL_POINT_FOCUS_MASK)
-
-enum lcPieceSection
+enum lcPieceSection : quint32
 {
-	LC_PIECE_SECTION_POSITION,
+	LC_PIECE_SECTION_INVALID = ~0U,
+	LC_PIECE_SECTION_POSITION = 0,
 	LC_PIECE_SECTION_CONTROL_POINT_FIRST,
-	LC_PIECE_SECTION_CONTROL_POINT_1 = LC_PIECE_SECTION_CONTROL_POINT_FIRST,
-	LC_PIECE_SECTION_CONTROL_POINT_2,
-	LC_PIECE_SECTION_CONTROL_POINT_3,
-	LC_PIECE_SECTION_CONTROL_POINT_4,
-	LC_PIECE_SECTION_CONTROL_POINT_5,
-	LC_PIECE_SECTION_CONTROL_POINT_6,
-	LC_PIECE_SECTION_CONTROL_POINT_7,
-	LC_PIECE_SECTION_CONTROL_POINT_8,
-	LC_PIECE_SECTION_CONTROL_POINT_9,
-	LC_PIECE_SECTION_CONTROL_POINT_10,
-	LC_PIECE_SECTION_CONTROL_POINT_LAST = LC_PIECE_SECTION_CONTROL_POINT_10
+	LC_PIECE_SECTION_CONTROL_POINT_LAST = LC_PIECE_SECTION_CONTROL_POINT_FIRST + LC_MAX_CONTROL_POINTS - 1,
 };
-
-#define LC_PIECE_SECTION_INVALID (~0U)
 
 struct lcPieceControlPoint
 {
@@ -77,315 +35,76 @@ public:
 
 	bool IsSelected() const override
 	{
-		return (mState & LC_PIECE_SELECTION_MASK) != 0;
+		return mSelected;
 	}
 
 	bool IsSelected(quint32 Section) const override
 	{
 		Q_UNUSED(Section);
 
-		return (mState & LC_PIECE_SELECTION_MASK) != 0;
+		return mSelected;
 	}
 
 	void SetSelected(bool Selected) override
 	{
-		if (Selected)
-			mState |= LC_PIECE_SELECTION_MASK;
-		else
-			mState &= ~(LC_PIECE_SELECTION_MASK | LC_PIECE_FOCUS_MASK);
+		mSelected = Selected;
+		if (!Selected)
+			mFocusedSection = LC_PIECE_SECTION_INVALID;
 	}
 
 	void SetSelected(quint32 Section, bool Selected) override
 	{
-		switch (Section)
-		{
-		case LC_PIECE_SECTION_POSITION:
-			if (Selected)
-				mState |= LC_PIECE_POSITION_SELECTED;
-			else
-				mState &= ~(LC_PIECE_POSITION_SELECTED | LC_PIECE_POSITION_FOCUSED);
-			break;
-
-		case LC_PIECE_SECTION_CONTROL_POINT_1:
-			if (Selected)
-				mState |= LC_PIECE_CONTROL_POINT_1_SELECTED;
-			else
-				mState &= ~(LC_PIECE_CONTROL_POINT_1_SELECTED | LC_PIECE_CONTROL_POINT_1_FOCUSED);
-			break;
-
-		case LC_PIECE_SECTION_CONTROL_POINT_2:
-			if (Selected)
-				mState |= LC_PIECE_CONTROL_POINT_2_SELECTED;
-			else
-				mState &= ~(LC_PIECE_CONTROL_POINT_2_SELECTED | LC_PIECE_CONTROL_POINT_2_FOCUSED);
-			break;
-
-		case LC_PIECE_SECTION_CONTROL_POINT_3:
-			if (Selected)
-				mState |= LC_PIECE_CONTROL_POINT_3_SELECTED;
-			else
-				mState &= ~(LC_PIECE_CONTROL_POINT_3_SELECTED | LC_PIECE_CONTROL_POINT_3_FOCUSED);
-			break;
-
-		case LC_PIECE_SECTION_CONTROL_POINT_4:
-			if (Selected)
-				mState |= LC_PIECE_CONTROL_POINT_4_SELECTED;
-			else
-				mState &= ~(LC_PIECE_CONTROL_POINT_4_SELECTED | LC_PIECE_CONTROL_POINT_4_FOCUSED);
-			break;
-
-		case LC_PIECE_SECTION_CONTROL_POINT_5:
-			if (Selected)
-				mState |= LC_PIECE_CONTROL_POINT_5_SELECTED;
-			else
-				mState &= ~(LC_PIECE_CONTROL_POINT_5_SELECTED | LC_PIECE_CONTROL_POINT_5_FOCUSED);
-			break;
-
-		case LC_PIECE_SECTION_CONTROL_POINT_6:
-			if (Selected)
-				mState |= LC_PIECE_CONTROL_POINT_6_SELECTED;
-			else
-				mState &= ~(LC_PIECE_CONTROL_POINT_6_SELECTED | LC_PIECE_CONTROL_POINT_6_FOCUSED);
-			break;
-
-		case LC_PIECE_SECTION_CONTROL_POINT_7:
-			if (Selected)
-				mState |= LC_PIECE_CONTROL_POINT_7_SELECTED;
-			else
-				mState &= ~(LC_PIECE_CONTROL_POINT_7_SELECTED | LC_PIECE_CONTROL_POINT_7_FOCUSED);
-			break;
-
-		case LC_PIECE_SECTION_CONTROL_POINT_8:
-			if (Selected)
-				mState |= LC_PIECE_CONTROL_POINT_8_SELECTED;
-			else
-				mState &= ~(LC_PIECE_CONTROL_POINT_8_SELECTED | LC_PIECE_CONTROL_POINT_8_FOCUSED);
-			break;
-
-		case LC_PIECE_SECTION_CONTROL_POINT_9:
-			if (Selected)
-				mState |= LC_PIECE_CONTROL_POINT_9_SELECTED;
-			else
-				mState &= ~(LC_PIECE_CONTROL_POINT_9_SELECTED | LC_PIECE_CONTROL_POINT_9_FOCUSED);
-			break;
-
-		case LC_PIECE_SECTION_CONTROL_POINT_10:
-			if (Selected)
-				mState |= LC_PIECE_CONTROL_POINT_10_SELECTED;
-			else
-				mState &= ~(LC_PIECE_CONTROL_POINT_10_SELECTED | LC_PIECE_CONTROL_POINT_10_FOCUSED);
-			break;
-		}
+		mSelected = Selected;
+		if (!Selected)
+			mFocusedSection = LC_PIECE_SECTION_INVALID;
 	}
 
 	bool IsFocused() const override
 	{
-		return (mState & LC_PIECE_FOCUS_MASK) != 0;
+		return mFocusedSection != LC_PIECE_SECTION_INVALID;
 	}
 
 	bool IsFocused(quint32 Section) const override
 	{
-		switch (Section)
-		{
-		case LC_PIECE_SECTION_POSITION:
-			return (mState & LC_PIECE_POSITION_FOCUSED) != 0;
-
-		case LC_PIECE_SECTION_CONTROL_POINT_1:
-			return (mState & LC_PIECE_CONTROL_POINT_1_FOCUSED) != 0;
-
-		case LC_PIECE_SECTION_CONTROL_POINT_2:
-			return (mState & LC_PIECE_CONTROL_POINT_2_FOCUSED) != 0;
-
-		case LC_PIECE_SECTION_CONTROL_POINT_3:
-			return (mState & LC_PIECE_CONTROL_POINT_3_FOCUSED) != 0;
-
-		case LC_PIECE_SECTION_CONTROL_POINT_4:
-			return (mState & LC_PIECE_CONTROL_POINT_4_FOCUSED) != 0;
-
-		case LC_PIECE_SECTION_CONTROL_POINT_5:
-			return (mState & LC_PIECE_CONTROL_POINT_5_FOCUSED) != 0;
-
-		case LC_PIECE_SECTION_CONTROL_POINT_6:
-			return (mState & LC_PIECE_CONTROL_POINT_6_FOCUSED) != 0;
-
-		case LC_PIECE_SECTION_CONTROL_POINT_7:
-			return (mState & LC_PIECE_CONTROL_POINT_7_FOCUSED) != 0;
-
-		case LC_PIECE_SECTION_CONTROL_POINT_8:
-			return (mState & LC_PIECE_CONTROL_POINT_8_FOCUSED) != 0;
-
-		case LC_PIECE_SECTION_CONTROL_POINT_9:
-			return (mState & LC_PIECE_CONTROL_POINT_9_FOCUSED) != 0;
-
-		case LC_PIECE_SECTION_CONTROL_POINT_10:
-			return (mState & LC_PIECE_CONTROL_POINT_10_FOCUSED) != 0;
-		}
-
-		return false;
+		return mFocusedSection == Section;
 	}
 
 	void SetFocused(quint32 Section, bool Focused) override
 	{
-		switch (Section)
+		if (Focused)
 		{
-		case LC_PIECE_SECTION_POSITION:
-			if (Focused)
-				mState |= (LC_PIECE_POSITION_SELECTED | LC_PIECE_POSITION_FOCUSED);
-			else
-				mState &= ~LC_PIECE_POSITION_FOCUSED;
-			break;
-
-		case LC_PIECE_SECTION_CONTROL_POINT_1:
-			if (Focused)
-				mState |= (LC_PIECE_CONTROL_POINT_1_SELECTED | LC_PIECE_CONTROL_POINT_1_FOCUSED);
-			else
-				mState &= ~LC_PIECE_CONTROL_POINT_1_FOCUSED;
-			break;
-
-		case LC_PIECE_SECTION_CONTROL_POINT_2:
-			if (Focused)
-				mState |= (LC_PIECE_CONTROL_POINT_2_SELECTED | LC_PIECE_CONTROL_POINT_2_FOCUSED);
-			else
-				mState &= ~LC_PIECE_CONTROL_POINT_2_FOCUSED;
-			break;
-
-		case LC_PIECE_SECTION_CONTROL_POINT_3:
-			if (Focused)
-				mState |= (LC_PIECE_CONTROL_POINT_3_SELECTED | LC_PIECE_CONTROL_POINT_3_FOCUSED);
-			else
-				mState &= ~LC_PIECE_CONTROL_POINT_3_FOCUSED;
-			break;
-
-		case LC_PIECE_SECTION_CONTROL_POINT_4:
-			if (Focused)
-				mState |= (LC_PIECE_CONTROL_POINT_4_SELECTED | LC_PIECE_CONTROL_POINT_4_FOCUSED);
-			else
-				mState &= ~LC_PIECE_CONTROL_POINT_4_FOCUSED;
-			break;
-
-		case LC_PIECE_SECTION_CONTROL_POINT_5:
-			if (Focused)
-				mState |= (LC_PIECE_CONTROL_POINT_5_SELECTED | LC_PIECE_CONTROL_POINT_5_FOCUSED);
-			else
-				mState &= ~LC_PIECE_CONTROL_POINT_5_FOCUSED;
-			break;
-
-		case LC_PIECE_SECTION_CONTROL_POINT_6:
-			if (Focused)
-				mState |= (LC_PIECE_CONTROL_POINT_6_SELECTED | LC_PIECE_CONTROL_POINT_6_FOCUSED);
-			else
-				mState &= ~LC_PIECE_CONTROL_POINT_6_FOCUSED;
-			break;
-
-		case LC_PIECE_SECTION_CONTROL_POINT_7:
-			if (Focused)
-				mState |= (LC_PIECE_CONTROL_POINT_7_SELECTED | LC_PIECE_CONTROL_POINT_7_FOCUSED);
-			else
-				mState &= ~LC_PIECE_CONTROL_POINT_7_FOCUSED;
-			break;
-
-		case LC_PIECE_SECTION_CONTROL_POINT_8:
-			if (Focused)
-				mState |= (LC_PIECE_CONTROL_POINT_8_SELECTED | LC_PIECE_CONTROL_POINT_8_FOCUSED);
-			else
-				mState &= ~LC_PIECE_CONTROL_POINT_8_FOCUSED;
-			break;
-
-		case LC_PIECE_SECTION_CONTROL_POINT_9:
-			if (Focused)
-				mState |= (LC_PIECE_CONTROL_POINT_9_SELECTED | LC_PIECE_CONTROL_POINT_9_FOCUSED);
-			else
-				mState &= ~LC_PIECE_CONTROL_POINT_9_FOCUSED;
-			break;
-
-		case LC_PIECE_SECTION_CONTROL_POINT_10:
-			if (Focused)
-				mState |= (LC_PIECE_CONTROL_POINT_10_SELECTED | LC_PIECE_CONTROL_POINT_10_FOCUSED);
-			else
-				mState &= ~LC_PIECE_CONTROL_POINT_10_FOCUSED;
-			break;
+			mFocusedSection = Section;
+			mSelected = true;
 		}
+		else
+			mFocusedSection = LC_PIECE_SECTION_INVALID;
 	}
 
 	quint32 GetFocusSection() const override
 	{
-		if (mState & LC_PIECE_POSITION_FOCUSED)
-			return LC_PIECE_SECTION_POSITION;
-
-		if (mState & LC_PIECE_CONTROL_POINT_1_FOCUSED)
-			return LC_PIECE_SECTION_CONTROL_POINT_1;
-
-		if (mState & LC_PIECE_CONTROL_POINT_2_FOCUSED)
-			return LC_PIECE_SECTION_CONTROL_POINT_2;
-
-		if (mState & LC_PIECE_CONTROL_POINT_3_FOCUSED)
-			return LC_PIECE_SECTION_CONTROL_POINT_3;
-
-		if (mState & LC_PIECE_CONTROL_POINT_4_FOCUSED)
-			return LC_PIECE_SECTION_CONTROL_POINT_4;
-
-		if (mState & LC_PIECE_CONTROL_POINT_5_FOCUSED)
-			return LC_PIECE_SECTION_CONTROL_POINT_5;
-
-		if (mState & LC_PIECE_CONTROL_POINT_6_FOCUSED)
-			return LC_PIECE_SECTION_CONTROL_POINT_6;
-
-		if (mState & LC_PIECE_CONTROL_POINT_7_FOCUSED)
-			return LC_PIECE_SECTION_CONTROL_POINT_7;
-
-		if (mState & LC_PIECE_CONTROL_POINT_8_FOCUSED)
-			return LC_PIECE_SECTION_CONTROL_POINT_8;
-
-		if (mState & LC_PIECE_CONTROL_POINT_9_FOCUSED)
-			return LC_PIECE_SECTION_CONTROL_POINT_9;
-
-		if (mState & LC_PIECE_CONTROL_POINT_10_FOCUSED)
-			return LC_PIECE_SECTION_CONTROL_POINT_10;
-
-		return LC_PIECE_SECTION_INVALID;
+		return mFocusedSection;
 	}
 
 	quint32 GetAllowedTransforms() const override;
 
 	lcVector3 GetSectionPosition(quint32 Section) const override
 	{
-		switch (Section)
+		if (Section == LC_PIECE_SECTION_POSITION)
 		{
-		case LC_PIECE_SECTION_POSITION:
-			if (mState & LC_PIECE_PIVOT_POINT_VALID)
+			if (mPivotPointValid)
 				return lcMul(mPivotMatrix, mModelWorld).GetTranslation();
 			else
 				return mModelWorld.GetTranslation();
+		}
+		else
+		{
+			const int ControlPointIndex = Section - LC_PIECE_SECTION_CONTROL_POINT_FIRST;
 
-		case LC_PIECE_SECTION_CONTROL_POINT_1:
-			return lcMul(mControlPoints[0].Transform, mModelWorld).GetTranslation();
-
-		case LC_PIECE_SECTION_CONTROL_POINT_2:
-			return lcMul(mControlPoints[1].Transform, mModelWorld).GetTranslation();
-
-		case LC_PIECE_SECTION_CONTROL_POINT_3:
-			return lcMul(mControlPoints[2].Transform, mModelWorld).GetTranslation();
-
-		case LC_PIECE_SECTION_CONTROL_POINT_4:
-			return lcMul(mControlPoints[3].Transform, mModelWorld).GetTranslation();
-
-		case LC_PIECE_SECTION_CONTROL_POINT_5:
-			return lcMul(mControlPoints[4].Transform, mModelWorld).GetTranslation();
-
-		case LC_PIECE_SECTION_CONTROL_POINT_6:
-			return lcMul(mControlPoints[5].Transform, mModelWorld).GetTranslation();
-
-		case LC_PIECE_SECTION_CONTROL_POINT_7:
-			return lcMul(mControlPoints[6].Transform, mModelWorld).GetTranslation();
-
-		case LC_PIECE_SECTION_CONTROL_POINT_8:
-			return lcMul(mControlPoints[7].Transform, mModelWorld).GetTranslation();
-
-		case LC_PIECE_SECTION_CONTROL_POINT_9:
-			return lcMul(mControlPoints[8].Transform, mModelWorld).GetTranslation();
-
-		case LC_PIECE_SECTION_CONTROL_POINT_10:
-			return lcMul(mControlPoints[9].Transform, mModelWorld).GetTranslation();
+			if (ControlPointIndex >= 0 && ControlPointIndex < mControlPoints.GetSize())
+			{
+				const lcMatrix44& Transform = mControlPoints[ControlPointIndex].Transform;
+				return lcMul(Transform, mModelWorld).GetTranslation();
+			}
 		}
 
 		return lcVector3(0.0f, 0.0f, 0.0f);
@@ -419,15 +138,12 @@ public:
 
 	bool IsHidden() const
 	{
-		return (mState & LC_PIECE_HIDDEN) != 0;
+		return mHidden;
 	}
 
 	void SetHidden(bool Hidden)
 	{
-		if (Hidden)
-			mState |= LC_PIECE_HIDDEN;
-		else
-			mState &= ~LC_PIECE_HIDDEN;
+		mHidden = Hidden;
 	}
 
 	const lcArray<lcPieceControlPoint>& GetControlPoints() const
@@ -563,14 +279,14 @@ public:
 
 		if (Section == LC_PIECE_SECTION_POSITION || Section == LC_PIECE_SECTION_INVALID)
 		{
-			if (mState & LC_PIECE_PIVOT_POINT_VALID)
+			if (mPivotPointValid)
 				return lcMul31(mPivotMatrix.GetTranslation(), mModelWorld);
 			else
 				return mModelWorld.GetTranslation();
 		}
 		else
 		{
-			const int ControlPointIndex = Section - LC_PIECE_SECTION_CONTROL_POINT_1;
+			const int ControlPointIndex = Section - LC_PIECE_SECTION_CONTROL_POINT_FIRST;
 
 			if (ControlPointIndex >= 0 && ControlPointIndex < mControlPoints.GetSize())
 			{
@@ -588,14 +304,14 @@ public:
 
 		if (Section == LC_PIECE_SECTION_POSITION || Section == LC_PIECE_SECTION_INVALID)
 		{
-			if (mState & LC_PIECE_PIVOT_POINT_VALID)
+			if (mPivotPointValid)
 				return lcMatrix33(lcMul(mModelWorld, mPivotMatrix));
 			else
 				return lcMatrix33(mModelWorld);
 		}
 		else
 		{
-			const int ControlPointIndex = Section - LC_PIECE_SECTION_CONTROL_POINT_1;
+			const int ControlPointIndex = Section - LC_PIECE_SECTION_CONTROL_POINT_FIRST;
 
 			if (ControlPointIndex >= 0 && ControlPointIndex < mControlPoints.GetSize())
 			{
@@ -609,7 +325,7 @@ public:
 
 	void ResetPivotPoint()
 	{
-		mState &= ~LC_PIECE_PIVOT_POINT_VALID;
+		mPivotPointValid = false;
 		mPivotMatrix = lcMatrix44Identity();
 	}
 
@@ -624,7 +340,7 @@ protected:
 
 	bool IsPivotPointVisible() const
 	{
-		return (mState & LC_PIECE_PIVOT_POINT_VALID) && IsFocused();
+		return mPivotPointValid && IsFocused();
 	}
 
 	bool AreControlPointsVisible() const
@@ -646,7 +362,10 @@ protected:
 	lcStep mStepShow;
 	lcStep mStepHide;
 
-	quint32 mState;
+	bool mPivotPointValid = false;
+	bool mHidden = false;
+	bool mSelected = false;
+	quint32 mFocusedSection;
 	lcArray<lcPieceControlPoint> mControlPoints;
 	lcMesh* mMesh;
 };

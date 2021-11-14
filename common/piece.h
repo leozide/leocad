@@ -54,6 +54,8 @@ public:
 
 	void SetSelected(quint32 Section, bool Selected) override
 	{
+		Q_UNUSED(Section);
+
 		mSelected = Selected;
 		if (!Selected)
 			mFocusedSection = LC_PIECE_SECTION_INVALID;

@@ -47,7 +47,7 @@ static void lcAdjustStudStyleColors(std::vector<lcColor>& Colors, lcStudStyle St
 
 	for (lcColor& Color : Colors)
 	{
-		lcVector3 LinearColor = lcSRGBToLinear(lcVector3(Color.Value));
+		const lcVector3 LinearColor = lcSRGBToLinear(lcVector3(Color.Value));
 		const float ValueLuminescence = lcLuminescence(LinearColor);
 
 		if (Preferences.mAutomateEdgeColor)

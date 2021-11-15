@@ -15,7 +15,7 @@
 #include "lc_qutils.h"
 #include "lc_synth.h"
 
-#define LC_PIECE_CONTROL_POINT_SIZE 10.0f
+constexpr float LC_PIECE_CONTROL_POINT_SIZE = 10.0f;
 
 lcPiece::lcPiece(PieceInfo* Info)
 	: lcObject(lcObjectType::Piece)
@@ -87,7 +87,7 @@ void lcPiece::SetPieceInfo(PieceInfo* Info, const QString& ID, bool Wait)
 	delete mMesh;
 	mMesh = nullptr;
 
-	lcSynthInfo* SynthInfo = mPieceInfo ? mPieceInfo->GetSynthInfo() : nullptr;
+	const lcSynthInfo* SynthInfo = mPieceInfo ? mPieceInfo->GetSynthInfo() : nullptr;
 
 	if (SynthInfo)
 	{
@@ -103,7 +103,7 @@ void lcPiece::UpdateID()
 
 void lcPiece::SaveLDraw(QTextStream& Stream) const
 {
-	QLatin1String LineEnding("\r\n");
+	const QLatin1String LineEnding("\r\n");
 
 	if (mStepHide != LC_STEP_MAX)
 		Stream << QLatin1String("0 !LEOCAD PIECE STEP_HIDE ") << mStepHide << LineEnding;
@@ -114,7 +114,7 @@ void lcPiece::SaveLDraw(QTextStream& Stream) const
 	if (mPivotPointValid)
 	{
 		const float* PivotMatrix = mPivotMatrix;
-		float PivotNumbers[12] = { PivotMatrix[12], -PivotMatrix[14], PivotMatrix[13], PivotMatrix[0], -PivotMatrix[8], PivotMatrix[4], -PivotMatrix[2], PivotMatrix[10], -PivotMatrix[6], PivotMatrix[1], -PivotMatrix[9], PivotMatrix[5] };
+		const float PivotNumbers[12] = { PivotMatrix[12], -PivotMatrix[14], PivotMatrix[13], PivotMatrix[0], -PivotMatrix[8], PivotMatrix[4], -PivotMatrix[2], PivotMatrix[10], -PivotMatrix[6], PivotMatrix[1], -PivotMatrix[9], PivotMatrix[5] };
 
 		Stream << QLatin1String("0 !LEOCAD PIECE PIVOT ");
 
@@ -133,7 +133,7 @@ void lcPiece::SaveLDraw(QTextStream& Stream) const
 	Stream << "1 " << mColorCode << ' ';
 
 	const float* Matrix = mModelWorld;
-	float Numbers[12] = { Matrix[12], -Matrix[14], Matrix[13], Matrix[0], -Matrix[8], Matrix[4], -Matrix[2], Matrix[10], -Matrix[6], Matrix[1], -Matrix[9], Matrix[5] };
+	const float Numbers[12] = { Matrix[12], -Matrix[14], Matrix[13], Matrix[0], -Matrix[8], Matrix[4], -Matrix[2], Matrix[10], -Matrix[6], Matrix[1], -Matrix[9], Matrix[5] };
 
 	for (int NumberIdx = 0; NumberIdx < 12; NumberIdx++)
 		Stream << lcFormatValue(Numbers[NumberIdx], NumberIdx < 3 ? 4 : 6) << ' ';
@@ -158,8 +158,8 @@ bool lcPiece::ParseLDrawLine(QTextStream& Stream)
 			for (int TokenIdx = 0; TokenIdx < 12; TokenIdx++)
 				Stream >> PivotNumbers[TokenIdx];
 
-			lcMatrix44 PivotMatrix(lcVector4( PivotNumbers[3],  PivotNumbers[9], -PivotNumbers[6], 0.0f), lcVector4(PivotNumbers[5], PivotNumbers[11], -PivotNumbers[8], 0.0f),
-								   lcVector4(-PivotNumbers[4], -PivotNumbers[10], PivotNumbers[7], 0.0f), lcVector4(PivotNumbers[0], PivotNumbers[2],  -PivotNumbers[1], 1.0f));
+			const lcMatrix44 PivotMatrix(lcVector4( PivotNumbers[3],  PivotNumbers[9], -PivotNumbers[6], 0.0f), lcVector4(PivotNumbers[5], PivotNumbers[11], -PivotNumbers[8], 0.0f),
+								         lcVector4(-PivotNumbers[4], -PivotNumbers[10], PivotNumbers[7], 0.0f), lcVector4(PivotNumbers[0], PivotNumbers[2],  -PivotNumbers[1], 1.0f));
 
 			mPivotMatrix = PivotMatrix;
 			mPivotPointValid = true;
@@ -463,9 +463,9 @@ void lcPiece::RemoveTime(lcStep Start, lcStep Time)
 
 void lcPiece::RayTest(lcObjectRayTest& ObjectRayTest) const
 {
-	lcMatrix44 InverseWorldMatrix = lcMatrix44AffineInverse(mModelWorld);
-	lcVector3 Start = lcMul31(ObjectRayTest.Start, InverseWorldMatrix);
-	lcVector3 End = lcMul31(ObjectRayTest.End, InverseWorldMatrix);
+	const lcMatrix44 InverseWorldMatrix = lcMatrix44AffineInverse(mModelWorld);
+	const lcVector3 Start = lcMul31(ObjectRayTest.Start, InverseWorldMatrix);
+	const lcVector3 End = lcMul31(ObjectRayTest.End, InverseWorldMatrix);
 
 	if (mMesh)
 	{
@@ -483,14 +483,14 @@ void lcPiece::RayTest(lcObjectRayTest& ObjectRayTest) const
 
 	if (AreControlPointsVisible())
 	{
-		lcVector3 Min(-LC_PIECE_CONTROL_POINT_SIZE, -LC_PIECE_CONTROL_POINT_SIZE, -LC_PIECE_CONTROL_POINT_SIZE);
-		lcVector3 Max(LC_PIECE_CONTROL_POINT_SIZE, LC_PIECE_CONTROL_POINT_SIZE, LC_PIECE_CONTROL_POINT_SIZE);
+		const lcVector3 Min(-LC_PIECE_CONTROL_POINT_SIZE, -LC_PIECE_CONTROL_POINT_SIZE, -LC_PIECE_CONTROL_POINT_SIZE);
+		const lcVector3 Max(LC_PIECE_CONTROL_POINT_SIZE, LC_PIECE_CONTROL_POINT_SIZE, LC_PIECE_CONTROL_POINT_SIZE);
 
 		for (int ControlPointIdx = 0; ControlPointIdx < mControlPoints.GetSize(); ControlPointIdx++)
 		{
-			lcMatrix44 InverseTransform = lcMatrix44AffineInverse(mControlPoints[ControlPointIdx].Transform);
-			lcVector3 PointStart = lcMul31(Start, InverseTransform);
-			lcVector3 PointEnd = lcMul31(End, InverseTransform);
+			const lcMatrix44 InverseTransform = lcMatrix44AffineInverse(mControlPoints[ControlPointIdx].Transform);
+			const lcVector3 PointStart = lcMul31(Start, InverseTransform);
+			const lcVector3 PointEnd = lcMul31(End, InverseTransform);
 
 			float Distance;
 			if (!lcBoundingBoxRayIntersectDistance(Min, Max, PointStart, PointEnd, &Distance, nullptr) || (Distance >= ObjectRayTest.Distance))
@@ -511,7 +511,7 @@ void lcPiece::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
 
 void lcPiece::DrawInterface(lcContext* Context, const lcScene& Scene) const
 {
-	float LineWidth = lcGetPreferences().mLineWidth;
+	const float LineWidth = lcGetPreferences().mLineWidth;
 	Context->SetLineWidth(2.0f * LineWidth);
 
 	const lcBoundingBox& BoundingBox = GetBoundingBox();
@@ -554,7 +554,7 @@ void lcPiece::DrawInterface(lcContext* Context, const lcScene& Scene) const
 		{ Min[0], Min[1], Min[2] }, { Min[0], Min[1], Min[2] + Edge[2] },
 	};
 
-	lcMatrix44 WorldMatrix = Scene.ApplyActiveSubmodelTransform(mModelWorld);
+	const lcMatrix44 WorldMatrix = Scene.ApplyActiveSubmodelTransform(mModelWorld);
 	Context->SetMaterial(lcMaterialType::UnlitColor);
 	Context->SetWorldMatrix(WorldMatrix);
 
@@ -570,8 +570,8 @@ void lcPiece::DrawInterface(lcContext* Context, const lcScene& Scene) const
 
 	if (IsPivotPointVisible())
 	{
-		const float Size = 5.0f;
-		const float Verts[8 * 3] =
+		constexpr float Size = 5.0f;
+		constexpr float Verts[8 * 3] =
 		{
 			-Size, -Size, -Size, -Size,  Size, -Size, Size,  Size, -Size, Size, -Size, -Size,
 			-Size, -Size,  Size, -Size,  Size,  Size, Size,  Size,  Size, Size, -Size,  Size
@@ -660,7 +660,7 @@ void lcPiece::AddMainModelRenderMeshes(lcScene* Scene, bool Highlight, bool Fade
 
 	if (Scene->GetDrawInterface())
 	{
-		lcPiece* ActiveSubmodelInstance = Scene->GetActiveSubmodelInstance();
+		const lcPiece* ActiveSubmodelInstance = Scene->GetActiveSubmodelInstance();
 
 		if (!ActiveSubmodelInstance)
 			RenderMeshState = IsFocused() ? lcRenderMeshState::Focused : (IsSelected() ? lcRenderMeshState::Selected : RenderMeshState);
@@ -686,7 +686,7 @@ void lcPiece::AddSubModelRenderMeshes(lcScene* Scene, const lcMatrix44& WorldMat
 	if (ColorIndex == gDefaultColor)
 		ColorIndex = DefaultColorIndex;
 
-	lcPiece* ActiveSubmodelInstance = Scene->GetActiveSubmodelInstance();
+	const lcPiece* ActiveSubmodelInstance = Scene->GetActiveSubmodelInstance();
 
 	if (ActiveSubmodelInstance == this)
 		RenderMeshState = lcRenderMeshState::Default;
@@ -724,11 +724,11 @@ void lcPiece::SubModelAddBoundingBoxPoints(const lcMatrix44& WorldMatrix, std::v
 
 void lcPiece::MoveSelected(lcStep Step, bool AddKey, const lcVector3& Distance)
 {
-	quint32 Section = GetFocusSection();
+	const quint32 Section = GetFocusSection();
 
 	if (Section == LC_PIECE_SECTION_POSITION || Section == LC_PIECE_SECTION_INVALID)
 	{
-		lcVector3 Position = mModelWorld.GetTranslation() + Distance;
+		const lcVector3 Position = mModelWorld.GetTranslation() + Distance;
 
 		SetPosition(Position, Step, AddKey);
 
@@ -736,11 +736,11 @@ void lcPiece::MoveSelected(lcStep Step, bool AddKey, const lcVector3& Distance)
 	}
 	else
 	{
-		int ControlPointIndex = Section - LC_PIECE_SECTION_CONTROL_POINT_FIRST;
+		const int ControlPointIndex = Section - LC_PIECE_SECTION_CONTROL_POINT_FIRST;
 
 		if (ControlPointIndex >= 0 && ControlPointIndex < mControlPoints.GetSize())
 		{
-			lcMatrix33 InverseWorldMatrix = lcMatrix33AffineInverse(lcMatrix33(mModelWorld));
+			const lcMatrix33 InverseWorldMatrix = lcMatrix33AffineInverse(lcMatrix33(mModelWorld));
 			lcMatrix44& Transform = mControlPoints[ControlPointIndex].Transform;
 
 			Transform.SetTranslation(Transform.GetTranslation() + lcMul(Distance, InverseWorldMatrix));
@@ -752,17 +752,17 @@ void lcPiece::MoveSelected(lcStep Step, bool AddKey, const lcVector3& Distance)
 
 void lcPiece::Rotate(lcStep Step, bool AddKey, const lcMatrix33& RotationMatrix, const lcVector3& Center, const lcMatrix33& RotationFrame)
 {
-	quint32 Section = GetFocusSection();
+	const quint32 Section = GetFocusSection();
 
 	if (Section == LC_PIECE_SECTION_POSITION || Section == LC_PIECE_SECTION_INVALID)
 	{
 		lcVector3 Distance = mModelWorld.GetTranslation() - Center;
-		lcMatrix33 LocalToWorldMatrix = lcMatrix33(mModelWorld);
+		const lcMatrix33 LocalToWorldMatrix = lcMatrix33(mModelWorld);
 
-		lcMatrix33 LocalToFocusMatrix = lcMul(LocalToWorldMatrix, RotationFrame);
+		const lcMatrix33 LocalToFocusMatrix = lcMul(LocalToWorldMatrix, RotationFrame);
 		lcMatrix33 NewLocalToWorldMatrix = lcMul(LocalToFocusMatrix, RotationMatrix);
 
-		lcMatrix33 WorldToLocalMatrix = lcMatrix33AffineInverse(LocalToWorldMatrix);
+		const lcMatrix33 WorldToLocalMatrix = lcMatrix33AffineInverse(LocalToWorldMatrix);
 
 		Distance = lcMul(Distance, WorldToLocalMatrix);
 		Distance = lcMul(Distance, NewLocalToWorldMatrix);
@@ -774,15 +774,15 @@ void lcPiece::Rotate(lcStep Step, bool AddKey, const lcMatrix33& RotationMatrix,
 	}
 	else
 	{
-		int ControlPointIndex = Section - LC_PIECE_SECTION_CONTROL_POINT_FIRST;
+		const int ControlPointIndex = Section - LC_PIECE_SECTION_CONTROL_POINT_FIRST;
 
 		if (ControlPointIndex >= 0 && ControlPointIndex < mControlPoints.GetSize())
 		{
 			lcMatrix44& Transform = mControlPoints[ControlPointIndex].Transform;
-			lcMatrix33 PieceWorldMatrix(mModelWorld);
-			lcMatrix33 LocalToWorldMatrix = lcMul(lcMatrix33(Transform), PieceWorldMatrix);
+			const lcMatrix33 PieceWorldMatrix(mModelWorld);
+			const lcMatrix33 LocalToWorldMatrix = lcMul(lcMatrix33(Transform), PieceWorldMatrix);
 
-			lcMatrix33 LocalToFocusMatrix = lcMul(LocalToWorldMatrix, RotationFrame);
+			const lcMatrix33 LocalToFocusMatrix = lcMul(LocalToWorldMatrix, RotationFrame);
 			lcMatrix33 NewLocalToWorldMatrix = lcMul(lcMul(LocalToFocusMatrix, RotationMatrix), lcMatrix33AffineInverse(PieceWorldMatrix));
 
 			NewLocalToWorldMatrix.Orthonormalize();
@@ -816,14 +816,15 @@ void lcPiece::RotatePivotPoint(const lcMatrix33& RotationMatrix)
 
 quint32 lcPiece::GetAllowedTransforms() const
 {
-	const quint32 Move = LC_OBJECT_TRANSFORM_MOVE_X | LC_OBJECT_TRANSFORM_MOVE_Y | LC_OBJECT_TRANSFORM_MOVE_Z;
-	const quint32 Rotate = LC_OBJECT_TRANSFORM_ROTATE_X | LC_OBJECT_TRANSFORM_ROTATE_Y | LC_OBJECT_TRANSFORM_ROTATE_Z;
-	quint32 Section = GetFocusSection();
+	constexpr quint32 Move = LC_OBJECT_TRANSFORM_MOVE_X | LC_OBJECT_TRANSFORM_MOVE_Y | LC_OBJECT_TRANSFORM_MOVE_Z;
+	constexpr quint32 Rotate = LC_OBJECT_TRANSFORM_ROTATE_X | LC_OBJECT_TRANSFORM_ROTATE_Y | LC_OBJECT_TRANSFORM_ROTATE_Z;
+	const quint32 Section = GetFocusSection();
 
 	if (Section == LC_PIECE_SECTION_POSITION || Section == LC_PIECE_SECTION_INVALID)
 		return Move | Rotate;
 
-	lcSynthInfo* SynthInfo = mPieceInfo->GetSynthInfo();
+	const lcSynthInfo* SynthInfo = mPieceInfo->GetSynthInfo();
+
 	if (SynthInfo)
 	{
 		if (SynthInfo->IsUnidirectional())
@@ -844,13 +845,13 @@ bool lcPiece::CanAddControlPoint() const
 	if (mControlPoints.GetSize() >= LC_MAX_CONTROL_POINTS)
 		return false;
 
-	lcSynthInfo* SynthInfo = mPieceInfo->GetSynthInfo();
+	const lcSynthInfo* SynthInfo = mPieceInfo->GetSynthInfo();
 	return SynthInfo && SynthInfo->CanAddControlPoints();
 }
 
 bool lcPiece::CanRemoveControlPoint() const
 {
-	quint32 Section = GetFocusSection();
+	const quint32 Section = GetFocusSection();
 	return Section >= LC_PIECE_SECTION_CONTROL_POINT_FIRST && Section <= LC_PIECE_SECTION_CONTROL_POINT_LAST && mControlPoints.GetSize() > 2;
 }
 
@@ -859,12 +860,12 @@ bool lcPiece::InsertControlPoint(const lcVector3& WorldStart, const lcVector3& W
 	if (!CanAddControlPoint())
 		return false;
 
-	lcMatrix44 InverseWorldMatrix = lcMatrix44AffineInverse(mModelWorld);
-	lcVector3 Start = lcMul31(WorldStart, InverseWorldMatrix);
-	lcVector3 End = lcMul31(WorldEnd, InverseWorldMatrix);
+	const lcMatrix44 InverseWorldMatrix = lcMatrix44AffineInverse(mModelWorld);
+	const lcVector3 Start = lcMul31(WorldStart, InverseWorldMatrix);
+	const lcVector3 End = lcMul31(WorldEnd, InverseWorldMatrix);
 
-	lcSynthInfo* SynthInfo = mPieceInfo->GetSynthInfo();
-	int ControlPointIndex = SynthInfo->InsertControlPoint(mControlPoints, Start, End);
+	const lcSynthInfo* SynthInfo = mPieceInfo->GetSynthInfo();
+	const int ControlPointIndex = SynthInfo->InsertControlPoint(mControlPoints, Start, End);
 
 	if (ControlPointIndex)
 	{
@@ -879,7 +880,7 @@ bool lcPiece::InsertControlPoint(const lcVector3& WorldStart, const lcVector3& W
 
 bool lcPiece::RemoveFocusedControlPoint()
 {
-	int ControlPointIndex = GetFocusSection() - LC_PIECE_SECTION_CONTROL_POINT_FIRST;
+	const int ControlPointIndex = GetFocusSection() - LC_PIECE_SECTION_CONTROL_POINT_FIRST;
 
 	if (ControlPointIndex < 0 || ControlPointIndex >= mControlPoints.GetSize() || mControlPoints.GetSize() <= 2)
 		return false;
@@ -895,7 +896,8 @@ bool lcPiece::RemoveFocusedControlPoint()
 
 void lcPiece::VerifyControlPoints(lcArray<lcPieceControlPoint>& ControlPoints) const
 {
-	lcSynthInfo* SynthInfo = mPieceInfo->GetSynthInfo();
+	const lcSynthInfo* SynthInfo = mPieceInfo->GetSynthInfo();
+
 	if (!SynthInfo)
 	{
 		ControlPoints.RemoveAll();
@@ -960,7 +962,7 @@ void lcPiece::CompareBoundingBox(lcVector3& Min, lcVector3& Max) const
 
 		for (int i = 0; i < 8; i++)
 		{
-			lcVector3 Point = lcMul31(Points[i], mModelWorld);
+			const lcVector3 Point = lcMul31(Points[i], mModelWorld);
 
 			Min = lcMin(Point, Min);
 			Max = lcMax(Point, Max);
@@ -975,8 +977,8 @@ lcGroup* lcPiece::GetTopGroup()
 
 void lcPiece::UpdatePosition(lcStep Step)
 {
-	lcVector3 Position = mPositionKeys.CalculateKey(Step);
-	lcMatrix33 Rotation = mRotationKeys.CalculateKey(Step);
+	const lcVector3 Position = mPositionKeys.CalculateKey(Step);
+	const lcMatrix33 Rotation = mRotationKeys.CalculateKey(Step);
 
 	mModelWorld = lcMatrix44(Rotation, Position);
 }
@@ -984,6 +986,6 @@ void lcPiece::UpdatePosition(lcStep Step)
 void lcPiece::UpdateMesh()
 {
 	delete mMesh;
-	lcSynthInfo* SynthInfo = mPieceInfo->GetSynthInfo();
+	const lcSynthInfo* SynthInfo = mPieceInfo->GetSynthInfo();
 	mMesh = SynthInfo ? SynthInfo->CreateMesh(mControlPoints) : nullptr;
 }

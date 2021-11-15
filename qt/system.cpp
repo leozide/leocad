@@ -9,7 +9,7 @@ char* strcasestr(const char *s, const char *find)
 	if ((c = *find++) != 0)
 	{
 		c = tolower((unsigned char)c);
-		int len = (int)strlen(find);
+		const int len = (int)strlen(find);
 		do
 		{
 			do

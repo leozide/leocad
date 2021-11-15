@@ -14,11 +14,11 @@ enum class lcPieceInfoType
 
 #define LC_PIECE_NAME_LEN 256
 
-enum lcPieceInfoState
+enum class lcPieceInfoState
 {
-	LC_PIECEINFO_UNLOADED,
-	LC_PIECEINFO_LOADING,
-	LC_PIECEINFO_LOADED
+	Unloaded,
+	Loading,
+	Loaded
 };
 
 struct lcModelPartsEntry

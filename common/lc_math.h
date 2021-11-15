@@ -819,10 +819,8 @@ inline lcMatrix33 lcMatrix33RotationY(const float Radians)
 
 inline lcMatrix33 lcMatrix33RotationZ(const float Radians)
 {
-	float s, c;
-
-	s = sinf(Radians);
-	c = cosf(Radians);
+	float s = sinf(Radians);
+	float c = cosf(Radians);
 
 	lcMatrix33 m;
 
@@ -835,27 +833,25 @@ inline lcMatrix33 lcMatrix33RotationZ(const float Radians)
 
 inline lcMatrix33 lcMatrix33FromAxisAngle(const lcVector3& Axis, const float Radians)
 {
-	float s, c, mag, xx, yy, zz, xy, yz, zx, xs, ys, zs, one_c;
-
-	s = sinf(Radians);
-	c = cosf(Radians);
-	mag = Axis.Length();
+	float s = sinf(Radians);
+	float c = cosf(Radians);
+	float mag = Axis.Length();
 
 	if (mag == 0.0f)
 		return lcMatrix33Identity();
 
 	lcVector3 Normal = Axis * (1.0f / mag);
 
-	xx = Normal[0] * Normal[0];
-	yy = Normal[1] * Normal[1];
-	zz = Normal[2] * Normal[2];
-	xy = Normal[0] * Normal[1];
-	yz = Normal[1] * Normal[2];
-	zx = Normal[2] * Normal[0];
-	xs = Normal[0] * s;
-	ys = Normal[1] * s;
-	zs = Normal[2] * s;
-	one_c = 1.0f - c;
+	float xx = Normal[0] * Normal[0];
+	float yy = Normal[1] * Normal[1];
+	float zz = Normal[2] * Normal[2];
+	float xy = Normal[0] * Normal[1];
+	float yz = Normal[1] * Normal[2];
+	float zx = Normal[2] * Normal[0];
+	float xs = Normal[0] * s;
+	float ys = Normal[1] * s;
+	float zs = Normal[2] * s;
+	float one_c = 1.0f - c;
 
 	lcMatrix33 m;
 

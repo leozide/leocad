@@ -208,7 +208,7 @@ protected:
 
 	static void UpdateMeshBoundingBox(lcMesh* Mesh);
 	template<typename IndexType>
-	static void UpdateMeshSectionBoundingBox(lcMesh* Mesh, lcMeshSection& Section, lcVector3& SectionMin, lcVector3& SectionMax);
+	static void UpdateMeshSectionBoundingBox(const lcMesh* Mesh, const lcMeshSection& Section, lcVector3& SectionMin, lcVector3& SectionMax);
 };
 
 class lcMeshLoader

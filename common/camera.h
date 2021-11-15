@@ -44,7 +44,9 @@ public:
 	~lcCamera();
 
 	lcCamera(const lcCamera&) = delete;
+	lcCamera(lcCamera&&) = delete;
 	lcCamera& operator=(const lcCamera&) = delete;
+	lcCamera& operator=(lcCamera&&) = delete;
 
 	static lcViewpoint GetViewpoint(const QString& ViewpointName);
 
@@ -261,7 +263,7 @@ public:
 		//                d               d
 		//   a = 2 atan(------) => ~ a = --- => d = af
 		//                2f              f
-		float f = (mPosition - mTargetPosition).Length();
+		const float f = (mPosition - mTargetPosition).Length();
 		return (m_fovy * f) * (LC_PI / 180.0f);
 	}
 

@@ -191,7 +191,7 @@ bool lcMesh::MinIntersectDist(const lcVector3& Start, const lcVector3& End, floa
 	if (!lcBoundingBoxRayIntersectDistance(mBoundingBox.Min, mBoundingBox.Max, Start, End, &Distance, nullptr) || (Distance >= MinDistance))
 		return false;
 
-	lcVertex* const Verts = (lcVertex*)mVertexData;
+	const lcVertex* const Verts = (lcVertex*)mVertexData;
 	bool Hit = false;
 	lcVector3 Intersection;
 

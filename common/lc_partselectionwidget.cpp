@@ -366,7 +366,7 @@ void lcPartSelectionListModel::RequestPreview(int InfoIndex)
 	PieceInfo* Info = mParts[InfoIndex].first;
 	lcGetPiecesLibrary()->LoadPieceInfo(Info, false, false);
 
-	if (Info->mState == LC_PIECEINFO_LOADED)
+	if (Info->mState == lcPieceInfoState::Loaded)
 		DrawPreview(InfoIndex);
 	else
 		mRequestedPreviews.push_back(InfoIndex);

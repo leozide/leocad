@@ -76,7 +76,9 @@ public:
 	~lcMesh();
 
 	lcMesh(const lcMesh&) = delete;
+	lcMesh(lcMesh&&) = delete;
 	lcMesh& operator=(const lcMesh&) = delete;
+	lcMesh& operator=(lcMesh&&) = delete;
 
 	void Create(quint16 (&NumSections)[LC_NUM_MESH_LODS], int VertexCount, int TexturedVertexCount, int ConditionalVertexCount, int IndexCount);
 	void CreateBox();

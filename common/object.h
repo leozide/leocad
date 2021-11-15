@@ -88,7 +88,9 @@ public:
 	virtual ~lcObject();
 
 	lcObject(const lcObject&) = delete;
+	lcObject(lcObject&&) = delete;
 	lcObject& operator=(const lcObject&) = delete;
+	lcObject& operator=(lcObject&&) = delete;
 
 public:
 	bool IsPiece() const

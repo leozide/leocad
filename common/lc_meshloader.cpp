@@ -12,16 +12,16 @@ static void lcCheckTexCoordsWrap(const lcVector4& Plane2, const lcVector3 (&Posi
 	lcVector2& TexCoords2 = TexCoords[1];
 	lcVector2& TexCoords3 = TexCoords[2];
 
-	float u12 = fabsf(TexCoords1.x - TexCoords2.x);
-	float u13 = fabsf(TexCoords1.x - TexCoords3.x);
-	float u23 = fabsf(TexCoords2.x - TexCoords3.x);
+	const float u12 = fabsf(TexCoords1.x - TexCoords2.x);
+	const float u13 = fabsf(TexCoords1.x - TexCoords3.x);
+	const float u23 = fabsf(TexCoords2.x - TexCoords3.x);
 
 	if (u12 < 0.5f && u13 < 0.5f && u23 < 0.5f)
 		return;
 
-	float Dot1 = fabsf(lcDot(Plane2, lcVector4(Positions[0], 1.0f)));
-	float Dot2 = fabsf(lcDot(Plane2, lcVector4(Positions[1], 1.0f)));
-	float Dot3 = fabsf(lcDot(Plane2, lcVector4(Positions[2], 1.0f)));
+	const float Dot1 = fabsf(lcDot(Plane2, lcVector4(Positions[0], 1.0f)));
+	const float Dot2 = fabsf(lcDot(Plane2, lcVector4(Positions[1], 1.0f)));
+	const float Dot3 = fabsf(lcDot(Plane2, lcVector4(Positions[2], 1.0f)));
 
 	if (Dot1 > Dot2)
 	{
@@ -89,11 +89,11 @@ static void lcCheckTexCoordsPole(const lcVector4& FrontPlane, const lcVector4& P
 	else
 		return;
 
-	lcVector3 OppositeEdge = Positions[EdgeIndex2] - Positions[EdgeIndex1];
-	lcVector3 SideEdge = Positions[PoleIndex] - Positions[EdgeIndex1];
+	const lcVector3 OppositeEdge = Positions[EdgeIndex2] - Positions[EdgeIndex1];
+	const lcVector3 SideEdge = Positions[PoleIndex] - Positions[EdgeIndex1];
 
-	float OppositeLength = lcLength(OppositeEdge);
-	float Projection = lcDot(OppositeEdge, SideEdge) / (OppositeLength * OppositeLength);
+	const float OppositeLength = lcLength(OppositeEdge);
+	const float Projection = lcDot(OppositeEdge, SideEdge) / (OppositeLength * OppositeLength);
 
 	TexCoords[PoleIndex].x = TexCoords[EdgeIndex1].x + (TexCoords[EdgeIndex2].x - TexCoords[EdgeIndex1].x) * Projection;
 }
@@ -108,18 +108,18 @@ static void lcResequenceQuad(int* Indices, int a, int b, int c, int d)
 
 static void lcTestQuad(int* QuadIndices, const lcVector3* Vertices)
 {
-	lcVector3 v01 = Vertices[1] - Vertices[0];
-	lcVector3 v02 = Vertices[2] - Vertices[0];
-	lcVector3 v03 = Vertices[3] - Vertices[0];
-	lcVector3 cp1 = lcCross(v01, v02);
-	lcVector3 cp2 = lcCross(v02, v03);
+	const lcVector3 v01 = Vertices[1] - Vertices[0];
+	const lcVector3 v02 = Vertices[2] - Vertices[0];
+	const lcVector3 v03 = Vertices[3] - Vertices[0];
+	const lcVector3 cp1 = lcCross(v01, v02);
+	const lcVector3 cp2 = lcCross(v02, v03);
 
 	if (lcDot(cp1, cp2) > 0.0f)
 		return;
 
-	lcVector3 v12 = Vertices[2] - Vertices[1];
-	lcVector3 v13 = Vertices[3] - Vertices[1];
-	lcVector3 v23 = Vertices[3] - Vertices[2];
+	const lcVector3 v12 = Vertices[2] - Vertices[1];
+	const lcVector3 v13 = Vertices[3] - Vertices[1];
+	const lcVector3 v23 = Vertices[3] - Vertices[2];
 
 	if (lcDot(lcCross(v12, v01), lcCross(v01, v13)) > 0.0f)
 	{
@@ -137,7 +137,7 @@ static void lcTestQuad(int* QuadIndices, const lcVector3* Vertices)
 	}
 }
 
-const float lcDistanceEpsilon = 0.01f; // Maximum value for 50591.dat
+constexpr float lcDistanceEpsilon = 0.01f; // Maximum value for 50591.dat
 
 static bool lcCompareVertices(const lcVector3& Position1, const lcVector3& Position2)
 {
@@ -146,7 +146,7 @@ static bool lcCompareVertices(const lcVector3& Position1, const lcVector3& Posit
 
 lcMeshLoaderSection* lcMeshLoaderTypeData::AddSection(lcMeshPrimitiveType PrimitiveType, lcMeshLoaderMaterial* Material)
 {
-	for (std::unique_ptr<lcMeshLoaderSection>& Section : mSections)
+	for (const std::unique_ptr<lcMeshLoaderSection>& Section : mSections)
 		if (Section->mMaterial == Material && Section->mPrimitiveType == PrimitiveType)
 			return Section.get();
 
@@ -226,7 +226,7 @@ quint32 lcMeshLoaderTypeData::AddConditionalVertex(const lcVector3(&Position)[4]
 
 void lcMeshLoaderTypeData::ProcessLine(int LineType, lcMeshLoaderMaterial* Material, bool WindingCCW, lcVector3 (&Vertices)[4], bool Optimize)
 {
-	lcMeshPrimitiveType PrimitiveTypes[4] = { LC_MESH_LINES, LC_MESH_TRIANGLES, LC_MESH_TRIANGLES, LC_MESH_CONDITIONAL_LINES };
+	constexpr lcMeshPrimitiveType PrimitiveTypes[4] = { LC_MESH_LINES, LC_MESH_TRIANGLES, LC_MESH_TRIANGLES, LC_MESH_CONDITIONAL_LINES };
 	lcMeshPrimitiveType PrimitiveType = PrimitiveTypes[LineType - 2];
 
 	if (Material->Type != lcMeshLoaderMaterialType::Solid && PrimitiveType == LC_MESH_TRIANGLES)
@@ -324,7 +324,7 @@ void lcMeshLoaderTypeData::AddMeshData(const lcMeshLoaderTypeData& Data, const l
 
 	for (const lcMeshLoaderVertex& DataVertex : DataVertices)
 	{
-		lcVector3 Position = lcMul31(DataVertex.Position, Transform);
+		const lcVector3 Position = lcMul31(DataVertex.Position, Transform);
 		int Index;
 
 		if (DataVertex.NormalWeight == 0.0f)
@@ -352,7 +352,7 @@ void lcMeshLoaderTypeData::AddMeshData(const lcMeshLoaderTypeData& Data, const l
 		Position[2] = lcMul31(DataVertex.Position[2], Transform);
 		Position[3] = lcMul31(DataVertex.Position[3], Transform);
 
-		int Index = AddConditionalVertex(Position);
+		const int Index = AddConditionalVertex(Position);
 		ConditionalRemap.Add(Index);
 	}
 
@@ -386,12 +386,12 @@ void lcMeshLoaderTypeData::AddMeshData(const lcMeshLoaderTypeData& Data, const l
 
 		if (PrimitiveType == LC_MESH_CONDITIONAL_LINES)
 		{
-			for (quint32 Index : SrcSection->mIndices)
+			for (const quint32 Index : SrcSection->mIndices)
 				DstSection->mIndices.Add(ConditionalRemap[Index]);
 		}
 		else if (!InvertWinding || (PrimitiveType == LC_MESH_LINES))
 		{
-			for (quint32 Index : SrcSection->mIndices)
+			for (const quint32 Index : SrcSection->mIndices)
 				DstSection->mIndices.Add(IndexRemap[Index]);
 		}
 		else
@@ -429,7 +429,7 @@ void lcMeshLoaderTypeData::AddMeshDataNoDuplicateCheck(const lcMeshLoaderTypeDat
 	}
 
 	mConditionalVertices.AllocGrow(Data.mConditionalVertices.GetSize());
-	quint32 BaseConditional = mConditionalVertices.GetSize();
+	const quint32 BaseConditional = mConditionalVertices.GetSize();
 
 	for (const lcMeshLoaderConditionalVertex& DataVertex : Data.mConditionalVertices)
 	{
@@ -472,12 +472,12 @@ void lcMeshLoaderTypeData::AddMeshDataNoDuplicateCheck(const lcMeshLoaderTypeDat
 
 		if (PrimitiveType == LC_MESH_CONDITIONAL_LINES)
 		{
-			for (quint32 Index : SrcSection->mIndices)
+			for (const quint32 Index : SrcSection->mIndices)
 				DstSection->mIndices.Add(BaseConditional + Index);
 		}
 		else if (!InvertWinding || (PrimitiveType == LC_MESH_LINES))
 		{
-			for (quint32 Index : SrcSection->mIndices)
+			for (const quint32 Index : SrcSection->mIndices)
 				DstSection->mIndices.Add(BaseIndex + Index);
 		}
 		else
@@ -507,7 +507,7 @@ void lcLibraryMeshData::AddIndices(lcMeshDataType MeshDataType, lcMeshPrimitiveT
 {
 	lcMeshLoaderSection* Section = mData[MeshDataType].AddSection(PrimitiveType, GetMaterial(ColorCode));
 	lcArray<quint32>& Indices = Section->mIndices;
-	int CurrentSize = Indices.GetSize();
+	const int CurrentSize = Indices.GetSize();
 
 	Indices.SetSize(CurrentSize + IndexCount);
 
@@ -538,7 +538,7 @@ void lcLibraryMeshData::AddMeshDataNoDuplicateCheck(const lcLibraryMeshData& Dat
 
 lcMeshLoaderMaterial* lcLibraryMeshData::GetMaterial(quint32 ColorCode)
 {
-	for (std::unique_ptr<lcMeshLoaderMaterial>& Material : mMaterials)
+	for (const std::unique_ptr<lcMeshLoaderMaterial>& Material : mMaterials)
 		if (Material->Type == lcMeshLoaderMaterialType::Solid && Material->Color == ColorCode)
 			return Material.get();
 
@@ -553,7 +553,7 @@ lcMeshLoaderMaterial* lcLibraryMeshData::GetMaterial(quint32 ColorCode)
 
 lcMeshLoaderMaterial* lcLibraryMeshData::GetTexturedMaterial(quint32 ColorCode, const lcMeshLoaderTextureMap& TextureMap)
 {
-	for (std::unique_ptr<lcMeshLoaderMaterial>& Material : mMaterials)
+	for (const std::unique_ptr<lcMeshLoaderMaterial>& Material : mMaterials)
 	{
 		if (Material->Type != TextureMap.Type || Material->Color != ColorCode)
 			continue;
@@ -617,8 +617,8 @@ static bool lcMeshLoaderFinalSectionCompare(const lcMeshLoaderFinalSection& a, c
 		}
 	}
 
-	bool TranslucentA = lcIsColorTranslucent(a.Color);
-	bool TranslucentB = lcIsColorTranslucent(b.Color);
+	const bool TranslucentA = lcIsColorTranslucent(a.Color);
+	const bool TranslucentB = lcIsColorTranslucent(b.Color);
 
 	if (TranslucentA != TranslucentB)
 		return !TranslucentA;
@@ -653,7 +653,7 @@ void lcLibraryMeshData::GeneratePlanarTexcoords(lcMeshLoaderSection* Section, co
 	for (int EdgeIdx = 0; EdgeIdx < 2; EdgeIdx++)
 	{
 		lcVector3 Normal = Material->Points[EdgeIdx + 1] - Material->Points[0];
-		float Length = lcLength(Normal);
+		const float Length = lcLength(Normal);
 		Normal /= Length;
 
 		Planes[EdgeIdx].x = Normal.x / Length;
@@ -666,7 +666,7 @@ void lcLibraryMeshData::GeneratePlanarTexcoords(lcMeshLoaderSection* Section, co
 	{
 		const lcMeshLoaderVertex& SrcVertex = Data.mVertices[Index];
 
-		lcVector2 TexCoords(lcDot3(SrcVertex.Position, Planes[0]) + Planes[0].w, lcDot3(SrcVertex.Position, Planes[1]) + Planes[1].w);
+		const lcVector2 TexCoords(lcDot3(SrcVertex.Position, Planes[0]) + Planes[0].w, lcDot3(SrcVertex.Position, Planes[1]) + Planes[1].w);
 
 		Index = AddTexturedVertex(SrcVertex.Position, SrcVertex.Normal, TexCoords);
 	}
@@ -741,12 +741,12 @@ void lcLibraryMeshData::GenerateSphericalTexcoords(lcMeshLoaderSection* Section,
 
 		for (int CornerIndex = 0; CornerIndex < 3; CornerIndex++)
 		{
-			lcVector3 VertexDir = Positions[CornerIndex] - Center;
+			const lcVector3 VertexDir = Positions[CornerIndex] - Center;
 
-			float DotPlane1 = lcDot(lcVector4(Positions[CornerIndex], 1.0f), Plane1);
-			lcVector3 PointInPlane1 = Positions[CornerIndex] - lcVector3(Plane1) * DotPlane1;
-			float DotFrontPlane = lcDot(lcVector4(PointInPlane1, 1.0f), FrontPlane);
-			float DotPlane2 = lcDot(lcVector4(PointInPlane1, 1.0f), Plane2);
+			const float DotPlane1 = lcDot(lcVector4(Positions[CornerIndex], 1.0f), Plane1);
+			const lcVector3 PointInPlane1 = Positions[CornerIndex] - lcVector3(Plane1) * DotPlane1;
+			const float DotFrontPlane = lcDot(lcVector4(PointInPlane1, 1.0f), FrontPlane);
+			const float DotPlane2 = lcDot(lcVector4(PointInPlane1, 1.0f), Plane2);
 
 			const float AngleX = atan2f(DotPlane2, DotFrontPlane) / LC_PI * Angle1;
 			TexCoords[CornerIndex].x = 0.5f + 0.5f * AngleX;
@@ -767,7 +767,7 @@ void lcLibraryMeshData::GenerateTexturedVertices()
 {
 	for (lcMeshLoaderTypeData& Data : mData)
 	{
-		for (std::unique_ptr<lcMeshLoaderSection>& Section : Data.mSections)
+		for (const std::unique_ptr<lcMeshLoaderSection>& Section : Data.mSections)
 		{
 			switch (Section->mMaterial->Type)
 			{
@@ -834,14 +834,14 @@ lcMesh* lcLibraryMeshData::CreateMesh()
 			strcpy(FinalSection.Name, Section->mMaterial->Name);
 		};
 
-		for (std::unique_ptr<lcMeshLoaderSection>& Section : mData[LC_MESHDATA_SHARED].mSections)
+		for (const std::unique_ptr<lcMeshLoaderSection>& Section : mData[LC_MESHDATA_SHARED].mSections)
 		{
 			NumIndices += Section->mIndices.GetSize();
 
 			AddFinalSection(Section.get(), FinalSections[LodIdx]);
 		}
 
-		for (std::unique_ptr<lcMeshLoaderSection>& Section : mData[LodIdx].mSections)
+		for (const std::unique_ptr<lcMeshLoaderSection>& Section : mData[LodIdx].mSections)
 		{
 			NumIndices += Section->mIndices.GetSize();
 
@@ -942,7 +942,7 @@ void lcLibraryMeshData::WriteSections(lcMesh* Mesh, const lcArray<lcMeshLoaderFi
 
 			IndexType* Index = (IndexType*)Mesh->mIndexData + NumIndices;
 
-			auto AddSection = [this, &DstSection, &Index, &BaseVertices, &BaseConditionalVertices](lcMeshLoaderSection* SrcSection, lcMeshDataType SrcDataType)
+			const auto AddSection = [this, &DstSection, &Index, &BaseVertices, &BaseConditionalVertices](lcMeshLoaderSection* SrcSection, lcMeshDataType SrcDataType)
 			{
 				switch (DstSection.PrimitiveType)
 				{
@@ -979,13 +979,13 @@ void lcLibraryMeshData::WriteSections(lcMesh* Mesh, const lcArray<lcMeshLoaderFi
 				DstSection.NumIndices += SrcSection->mIndices.GetSize();
 			};
 
-			for (std::unique_ptr<lcMeshLoaderSection>& Section : mData[LC_MESHDATA_SHARED].mSections)
+			for (const std::unique_ptr<lcMeshLoaderSection>& Section : mData[LC_MESHDATA_SHARED].mSections)
 				if (FinalSection.PrimitiveType == Section->mPrimitiveType && FinalSection.Color == Section->mMaterial->Color && !strcmp(FinalSection.Name, Section->mMaterial->Name))
 					AddSection(Section.get(), LC_MESHDATA_SHARED);
 
 			const lcMeshDataType MeshDataType = (LodIdx == LC_MESH_LOD_LOW) ? LC_MESHDATA_LOW : LC_MESHDATA_HIGH;
 
-			for (std::unique_ptr<lcMeshLoaderSection>& Section : mData[MeshDataType].mSections)
+			for (const std::unique_ptr<lcMeshLoaderSection>& Section : mData[MeshDataType].mSections)
 				if (FinalSection.PrimitiveType == Section->mPrimitiveType && FinalSection.Color == Section->mMaterial->Color && !strcmp(FinalSection.Name, Section->mMaterial->Name))
 					AddSection(Section.get(), MeshDataType);
 
@@ -1053,7 +1053,7 @@ void lcLibraryMeshData::UpdateMeshBoundingBox(lcMesh* Mesh)
 }
 
 template<typename IndexType>
-void lcLibraryMeshData::UpdateMeshSectionBoundingBox(lcMesh* Mesh, lcMeshSection& Section, lcVector3& SectionMin, lcVector3& SectionMax)
+void lcLibraryMeshData::UpdateMeshSectionBoundingBox(const lcMesh* Mesh, const lcMeshSection& Section, lcVector3& SectionMin, lcVector3& SectionMax)
 {
 	const IndexType* IndexBuffer = reinterpret_cast<IndexType*>(static_cast<char*>(Mesh->mIndexData) + Section.IndexOffset);
 
@@ -1386,7 +1386,7 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 			IncludeTransform = lcMul(IncludeTransform, CurrentTransform);
 			bool Mirror = IncludeTransform.Determinant() < 0.0f;
 
-			auto FileCallback = [this, &IncludeTransform, &ColorCode, &Mirror, &InvertNext, &MeshDataType](lcFile& File)
+			const auto FileCallback = [this, &IncludeTransform, &ColorCode, &Mirror, &InvertNext, &MeshDataType](lcFile& File)
 			{
 				ReadMeshData(File, IncludeTransform, ColorCode, Mirror ^ InvertNext, MeshDataType);
 			};

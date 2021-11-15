@@ -4,7 +4,7 @@
 
 static void CopyFromQImage(const QImage& Src, Image& Dest)
 {
-	bool Alpha = Src.hasAlphaChannel();
+	const bool Alpha = Src.hasAlphaChannel();
 	Dest.Allocate(Src.width(), Src.height(), Alpha ? LC_PIXEL_FORMAT_R8G8B8A8 : LC_PIXEL_FORMAT_R8G8B8);
 
 	quint8* Bytes = (quint8*)Dest.mData;
@@ -133,7 +133,7 @@ void Image::Resize(int width, int height)
 	unsigned char* bits = nullptr;
 
 	components = GetBPP();
-	int BufferSize = width * height * components;
+	const int BufferSize = width * height * components;
 
 	if (BufferSize)
 	{
@@ -168,8 +168,8 @@ bool Image::FileLoad(lcMemFile& File)
 {
 	QImage Image;
 
-	unsigned char* Buffer = File.mBuffer + File.mPosition;
-	size_t BufferLength = File.mFileSize - File.mPosition;
+	const unsigned char* Buffer = File.mBuffer + File.mPosition;
+	const size_t BufferLength = File.mFileSize - File.mPosition;
 
 	if (!Image.loadFromData(Buffer, (int)BufferLength))
 		return false;

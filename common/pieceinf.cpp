@@ -18,20 +18,24 @@ PieceInfo::PieceInfo()
 {
 	mZipFileType = lcZipFileType::Count;
 	mZipFileIndex = -1;
-	mState = LC_PIECEINFO_UNLOADED;
+	mFolderType = -1;
+	mFolderIndex = -1;
+	mState = lcPieceInfoState::Unloaded;
 	mRefCount = 0;
 	mType = lcPieceInfoType::Part;
 	mMesh = nullptr;
 	mModel = nullptr;
 	mProject = nullptr;
 	mSynthInfo = nullptr;
+	mFileName[0] = 0;
+	m_strDescription[0] = 0;
 }
 
 PieceInfo::~PieceInfo()
 {
 	delete mSynthInfo;
 
-	if (mState == LC_PIECEINFO_LOADED)
+	if (mState == lcPieceInfoState::Loaded)
 		Unload();
 }
 
@@ -99,7 +103,7 @@ void PieceInfo::CreateProject(Project* Project, const char* PieceName)
 	{
 		mType = lcPieceInfoType::Project;
 		mProject = Project;
-		mState = LC_PIECEINFO_LOADED;
+		mState = lcPieceInfoState::Loaded;
 	}
 
 	strncpy(mFileName, PieceName, sizeof(mFileName) - 1);
@@ -143,7 +147,7 @@ void PieceInfo::Load()
 {
 	if (!IsModel() && !IsProject())
 	{
-		mState = LC_PIECEINFO_LOADING; // todo: mutex lock when changing load state
+		mState = lcPieceInfoState::Loading; // todo: mutex lock when changing load state
 
 		if (IsPlaceholder())
 		{
@@ -154,7 +158,7 @@ void PieceInfo::Load()
 			lcGetPiecesLibrary()->LoadPieceData(this);
 	}
 
-	mState = LC_PIECEINFO_LOADED;
+	mState = lcPieceInfoState::Loaded;
 }
 
 void PieceInfo::ReleaseMesh()
@@ -180,7 +184,7 @@ void PieceInfo::ReleaseMesh()
 void PieceInfo::Unload()
 {
 	ReleaseMesh();
-	mState = LC_PIECEINFO_UNLOADED;
+	mState = lcPieceInfoState::Unloaded;
 	mModel = nullptr;
 
 	if (IsModel())
@@ -368,7 +372,7 @@ void PieceInfo::CompareBoundingBox(const lcMatrix44& WorldMatrix, lcVector3& Min
 
 		for (int i = 0; i < 8; i++)
 		{
-			lcVector3 Point = lcMul31(Points[i], WorldMatrix);
+			const lcVector3 Point = lcMul31(Points[i], WorldMatrix);
 
 			Min = lcMin(Point, Min);
 			Max = lcMax(Point, Max);

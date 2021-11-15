@@ -58,7 +58,7 @@ void lcLight::CreateName(const lcArray<lcLight*>& Lights)
 	{
 		bool Found = false;
 
-		for (lcLight* Light : Lights)
+		for (const lcLight* Light : Lights)
 		{
 			if (Light->GetName() == mName)
 			{
@@ -74,7 +74,7 @@ void lcLight::CreateName(const lcArray<lcLight*>& Lights)
 	int MaxLightNumber = 0;
 	const QLatin1String Prefix("Light ");
 
-	for (lcLight* Light : Lights)
+	for (const lcLight* Light : Lights)
 	{
 		QString LightName = Light->GetName();
 
@@ -175,7 +175,7 @@ void lcLight::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
 
 	for (int PlaneIdx = 0; PlaneIdx < 6; PlaneIdx++)
 	{
-		lcVector3 Normal = lcMul30(ObjectBoxTest.Planes[PlaneIdx], mWorldLight);
+		const lcVector3 Normal = lcMul30(ObjectBoxTest.Planes[PlaneIdx], mWorldLight);
 		LocalPlanes[PlaneIdx] = lcVector4(Normal, ObjectBoxTest.Planes[PlaneIdx][3] - lcDot3(mWorldLight[3], Normal));
 	}
 
@@ -193,7 +193,7 @@ void lcLight::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
 
 	for (int PlaneIdx = 0; PlaneIdx < 6; PlaneIdx++)
 	{
-		lcVector3 Normal = lcMul30(ObjectBoxTest.Planes[PlaneIdx], WorldTarget);
+		const lcVector3 Normal = lcMul30(ObjectBoxTest.Planes[PlaneIdx], WorldTarget);
 		LocalPlanes[PlaneIdx] = lcVector4(Normal, ObjectBoxTest.Planes[PlaneIdx][3] - lcDot3(WorldTarget[3], Normal));
 	}
 
@@ -318,7 +318,7 @@ void lcLight::DrawSpotLight(lcContext* Context) const
 	LightMatrix = lcMatrix44AffineInverse(LightMatrix);
 	LightMatrix.SetTranslation(lcVector3(0, 0, 0));
 
-	lcMatrix44 LightViewMatrix = lcMul(LightMatrix, lcMatrix44Translation(mPosition));
+	const lcMatrix44 LightViewMatrix = lcMul(LightMatrix, lcMatrix44Translation(mPosition));
 	Context->SetWorldMatrix(LightViewMatrix);
 
 	float Verts[(20 + 8 + 2 + 16) * 3];
@@ -375,7 +375,7 @@ void lcLight::DrawSpotLight(lcContext* Context) const
 	Context->SetVertexFormatPosition(3);
 	Context->SetIndexBufferPointer(Indices);
 
-	float LineWidth = lcGetPreferences().mLineWidth;
+	const float LineWidth = lcGetPreferences().mLineWidth;
 
 	if (!IsSelected())
 	{
@@ -436,10 +436,10 @@ void lcLight::DrawSpotLight(lcContext* Context) const
 
 void lcLight::DrawPointLight(lcContext* Context) const
 {
-	const int Slices = 6;
-	const int NumIndices = 3 * Slices + 6 * Slices * (Slices - 2) + 3 * Slices;
-	const int NumVertices = (Slices - 1) * Slices + 2;
-	const float Radius = LC_LIGHT_SPHERE_RADIUS;
+	constexpr int Slices = 6;
+	constexpr int NumIndices = 3 * Slices + 6 * Slices * (Slices - 2) + 3 * Slices;
+	constexpr int NumVertices = (Slices - 1) * Slices + 2;
+	constexpr float Radius = LC_LIGHT_SPHERE_RADIUS;
 	lcVector3 Vertices[NumVertices];
 	quint16 Indices[NumIndices];
 
@@ -450,13 +450,13 @@ void lcLight::DrawPointLight(lcContext* Context) const
 
 	for (int i = 1; i < Slices; i++ )
 	{
-		float r0 = Radius * sinf(i * (LC_PI / Slices));
-		float z0 = Radius * cosf(i * (LC_PI / Slices));
+		const float r0 = Radius * sinf(i * (LC_PI / Slices));
+		const float z0 = Radius * cosf(i * (LC_PI / Slices));
 
 		for (int j = 0; j < Slices; j++)
 		{
-			float x0 = r0 * sinf(j * (LC_2PI / Slices));
-			float y0 = r0 * cosf(j * (LC_2PI / Slices));
+			const float x0 = r0 * sinf(j * (LC_2PI / Slices));
+			const float y0 = r0 * cosf(j * (LC_2PI / Slices));
 
 			*Vertex++ = lcVector3(x0, y0, z0);
 		}

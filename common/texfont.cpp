@@ -115,7 +115,7 @@ bool TexFont::Initialize(lcContext* Context)
 	unsigned char ExpandedData[sizeof(TextureData) * 8 * 2];
 	for (unsigned int TexelIdx = 0; TexelIdx < sizeof(TextureData) * 8; TexelIdx++)
 	{
-		unsigned char Texel = TextureData[TexelIdx / 8] & (1 << (TexelIdx % 8)) ? 255 : 0;
+		const unsigned char Texel = TextureData[TexelIdx / 8] & (1 << (TexelIdx % 8)) ? 255 : 0;
 		ExpandedData[TexelIdx * 2] = ExpandedData[TexelIdx * 2 + 1] = Texel;
 	}
 
@@ -167,7 +167,7 @@ void TexFont::GetStringDimensions(int* cx, int* cy, const char* Text) const
 
 void TexFont::PrintText(lcContext* Context, float Left, float Top, float Z, const char* Text) const
 {
-	size_t Length = strlen(Text);
+	const size_t Length = strlen(Text);
 
 	if (!Length)
 		return;
@@ -233,13 +233,13 @@ void TexFont::GetTriangles(const lcMatrix44& Transform, const char* Text, float*
 
 	for (const char* ch = Text; *ch; ch++)
 	{
-		int Glyph = *ch;
+		const int Glyph = *ch;
 		Width += mGlyphs[Glyph].width;
 	}
 
 	float Left = -Width / 2.0f;
-	float Top = mFontHeight / 2.0f;
-	float Z = 0.0f;
+	const float Top = mFontHeight / 2.0f;
+	const float Z = 0.0f;
 
 	while (*Text)
 	{

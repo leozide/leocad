@@ -80,7 +80,9 @@ public:
 	~lcModel();
 
 	lcModel(const lcModel&) = delete;
+	lcModel(lcModel&&) = delete;
 	lcModel& operator=(const lcModel&) = delete;
+	lcModel& operator=(lcModel&&) = delete;
 
 	Project* GetProject() const
 	{
@@ -229,7 +231,7 @@ public:
 	void DuplicateSelectedPieces();
 	void PaintSelectedPieces();
 
-	void GetScene(lcScene* Scene, lcCamera* ViewCamera, bool AllowHighlight, bool AllowFade) const;
+	void GetScene(lcScene* Scene, const lcCamera* ViewCamera, bool AllowHighlight, bool AllowFade) const;
 	void AddSubModelRenderMeshes(lcScene* Scene, const lcMatrix44& WorldMatrix, int DefaultColorIndex, lcRenderMeshState RenderMeshState, bool ParentActive) const;
 	QImage GetStepImage(bool Zoom, int Width, int Height, lcStep Step);
 	QImage GetPartsListImage(int MaxWidth, lcStep Step, quint32 BackgroundColor, QFont Font, QColor TextColor) const;
@@ -264,7 +266,7 @@ public:
 	void GetPartsListForStep(lcStep Step, int DefaultColorIndex, lcPartsList& PartsList) const;
 	void GetModelParts(const lcMatrix44& WorldMatrix, int DefaultColorIndex, std::vector<lcModelPartsEntry>& ModelParts) const;
 	void GetSelectionInformation(int* Flags, lcArray<lcObject*>& Selection, lcObject** Focus) const;
-	lcArray<lcObject*> GetSelectionModePieces(lcPiece* SelectedPiece) const;
+	lcArray<lcObject*> GetSelectionModePieces(const lcPiece* SelectedPiece) const;
 
 	void FocusOrDeselectObject(const lcObjectSection& ObjectSection);
 	void ClearSelection(bool UpdateInterface);
@@ -309,7 +311,7 @@ public:
 	void UpdateScaleTool(const float Scale);
 	void EraserToolClicked(lcObject* Object);
 	void PaintToolClicked(lcObject* Object);
-	void ColorPickerToolClicked(lcObject* Object);
+	void ColorPickerToolClicked(const lcObject* Object);
 	void UpdateZoomTool(lcCamera* Camera, float Mouse);
 	void UpdatePanTool(lcCamera* Camera, const lcVector3& Distance);
 	void UpdateOrbitTool(lcCamera* Camera, float MouseX, float MouseY);

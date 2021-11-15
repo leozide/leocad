@@ -53,7 +53,9 @@ public:
 	~MinifigWizard();
 
 	MinifigWizard(const MinifigWizard&) = delete;
+	MinifigWizard(MinifigWizard&&) = delete;
 	MinifigWizard& operator=(const MinifigWizard&) = delete;
+	MinifigWizard& operator=(MinifigWizard&&) = delete;
 
 	lcModel* GetModel() const
 	{

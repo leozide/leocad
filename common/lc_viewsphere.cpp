@@ -60,7 +60,7 @@ lcMatrix44 lcViewSphere::GetProjectionMatrix() const
 
 void lcViewSphere::CreateResources(lcContext* Context)
 {
-	const int ImageSize = 128;
+	constexpr int ImageSize = 128;
 	mTexture = new lcTexture();
 
 	const QString ViewNames[6] =
@@ -120,7 +120,7 @@ void lcViewSphere::CreateResources(lcContext* Context)
 		lcMatrix44(lcVector4(1.0f,  0.0f, 0.0f, 0.0f), lcVector4(0.0f, -1.0f, 0.0f, 0.0f), lcVector4(0.0f, 0.0f, 1.0f, 0.0f), lcVector4(0.0f,  0.0f, -1.0f, 1.0f)),
 	};
 
-	const float Step = 2.0f / mSubdivisions;
+	constexpr float Step = 2.0f / mSubdivisions;
 	lcVector3* CurVert = Verts;
 
 	for (int FaceIdx = 0; FaceIdx < 6; FaceIdx++)
@@ -129,8 +129,8 @@ void lcViewSphere::CreateResources(lcContext* Context)
 		{
 			for (int x = 0; x <= mSubdivisions; x++)
 			{
-				lcVector3 Vert = lcMul31(lcVector3(Step * x - 1.0f, Step * y - 1.0f, 0.0f), Transforms[FaceIdx]);
-				lcVector3 Vert2 = Vert * Vert;
+				const lcVector3 Vert = lcMul31(lcVector3(Step * x - 1.0f, Step * y - 1.0f, 0.0f), Transforms[FaceIdx]);
+				const lcVector3 Vert2 = Vert * Vert;
 
 				*CurVert++ = lcVector3(Vert.x * sqrt(1.0 - 0.5 * (Vert2.y + Vert2.z) + Vert2.y * Vert2.z / 3.0),
 									   Vert.y * sqrt(1.0 - 0.5 * (Vert2.z + Vert2.x) + Vert2.z * Vert2.x / 3.0),

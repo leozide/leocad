@@ -138,7 +138,7 @@ void lcCamera::CreateName(const lcArray<lcCamera*>& Cameras)
 
 void lcCamera::SaveLDraw(QTextStream& Stream) const
 {
-	QLatin1String LineEnding("\r\n");
+	const QLatin1String LineEnding("\r\n");
 
 	Stream << QLatin1String("0 !LEOCAD CAMERA FOV ") << m_fovy << QLatin1String(" ZNEAR ") << m_zNear << QLatin1String(" ZFAR ") << m_zFar << LineEnding;
 
@@ -400,7 +400,7 @@ void lcCamera::MoveSelected(lcStep Step, bool AddKey, const lcVector3& Distance)
 		mUpVectorKeys.ChangeKey(mUpVector, Step, AddKey);
 	}
 
-	lcVector3 FrontVector(mTargetPosition - mPosition);
+	const lcVector3 FrontVector(mTargetPosition - mPosition);
 	lcVector3 SideVector = lcCross(FrontVector, mUpVector);
 
 	if (fabsf(lcDot(mUpVector, SideVector)) > 0.99f)
@@ -415,7 +415,7 @@ void lcCamera::MoveRelative(const lcVector3& Distance, lcStep Step, bool AddKey)
 	if (IsSimple())
 		AddKey = false;
 
-	lcVector3 Relative = lcMul30(Distance, lcMatrix44Transpose(mWorldView)) * 5.0f;
+	const lcVector3 Relative = lcMul30(Distance, lcMatrix44Transpose(mWorldView)) * 5.0f;
 
 	mPosition += Relative;
 	mPositionKeys.ChangeKey(mPosition, Step, AddKey);
@@ -435,8 +435,8 @@ void lcCamera::UpdatePosition(lcStep Step)
 		mUpVector = mUpVectorKeys.CalculateKey(Step);
 	}
 
-	lcVector3 FrontVector(mPosition - mTargetPosition);
-	lcVector3 SideVector = lcCross(FrontVector, mUpVector);
+	const lcVector3 FrontVector(mPosition - mTargetPosition);
+	const lcVector3 SideVector = lcCross(FrontVector, mUpVector);
 	mUpVector = lcNormalize(lcCross(SideVector, FrontVector));
 
 	mWorldView = lcMatrix44LookAt(mPosition, mTargetPosition, mUpVector);
@@ -472,7 +472,7 @@ void lcCamera::DrawInterface(lcContext* Context, const lcScene& Scene) const
 	lcMatrix44 ViewWorldMatrix = lcMatrix44AffineInverse(mWorldView);
 	ViewWorldMatrix.SetTranslation(lcVector3(0, 0, 0));
 
-	lcMatrix44 CameraViewMatrix = lcMul(ViewWorldMatrix, lcMatrix44Translation(mPosition));
+	const lcMatrix44 CameraViewMatrix = lcMul(ViewWorldMatrix, lcMatrix44Translation(mPosition));
 	Context->SetWorldMatrix(CameraViewMatrix);
 
 	float Verts[(12 + 8 + 8 + 3 + 4) * 3];
@@ -537,7 +537,7 @@ void lcCamera::DrawInterface(lcContext* Context, const lcScene& Scene) const
 	Context->SetVertexFormatPosition(3);
 	Context->SetIndexBufferPointer(Indices);
 
-	float LineWidth = lcGetPreferences().mLineWidth;
+	const float LineWidth = lcGetPreferences().mLineWidth;
 
 	if (!IsSelected())
 	{
@@ -655,8 +655,8 @@ void lcCamera::RayTest(lcObjectRayTest& ObjectRayTest) const
 		ObjectRayTest.Distance = Distance;
 	}
 
-	lcMatrix44 ViewWorld = lcMatrix44AffineInverse(mWorldView);
-	lcVector3 UpVectorPosition = lcMul31(lcVector3(0, 25, 0), ViewWorld);
+	const lcMatrix44 ViewWorld = lcMatrix44AffineInverse(mWorldView);
+	const lcVector3 UpVectorPosition = lcMul31(lcVector3(0, 25, 0), ViewWorld);
 
 	WorldView = mWorldView;
 	WorldView.SetTranslation(lcMul30(-UpVectorPosition, WorldView));
@@ -681,7 +681,7 @@ void lcCamera::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
 
 	for (int PlaneIdx = 0; PlaneIdx < 6; PlaneIdx++)
 	{
-		lcVector3 Normal = lcMul30(ObjectBoxTest.Planes[PlaneIdx], mWorldView);
+		const lcVector3 Normal = lcMul30(ObjectBoxTest.Planes[PlaneIdx], mWorldView);
 		LocalPlanes[PlaneIdx] = lcVector4(Normal, ObjectBoxTest.Planes[PlaneIdx][3] - lcDot3(mWorldView[3], Normal));
 	}
 
@@ -699,7 +699,7 @@ void lcCamera::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
 
 	for (int PlaneIdx = 0; PlaneIdx < 6; PlaneIdx++)
 	{
-		lcVector3 Normal = lcMul30(ObjectBoxTest.Planes[PlaneIdx], WorldView);
+		const lcVector3 Normal = lcMul30(ObjectBoxTest.Planes[PlaneIdx], WorldView);
 		LocalPlanes[PlaneIdx] = lcVector4(Normal, ObjectBoxTest.Planes[PlaneIdx][3] - lcDot3(WorldView[3], Normal));
 	}
 
@@ -709,15 +709,15 @@ void lcCamera::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
 		return;
 	}
 
-	lcMatrix44 ViewWorld = lcMatrix44AffineInverse(mWorldView);
-	lcVector3 UpVectorPosition = lcMul31(lcVector3(0, 25, 0), ViewWorld);
+	const lcMatrix44 ViewWorld = lcMatrix44AffineInverse(mWorldView);
+	const lcVector3 UpVectorPosition = lcMul31(lcVector3(0, 25, 0), ViewWorld);
 
 	WorldView = mWorldView;
 	WorldView.SetTranslation(lcMul30(-UpVectorPosition, WorldView));
 
 	for (int PlaneIdx = 0; PlaneIdx < 6; PlaneIdx++)
 	{
-		lcVector3 Normal = lcMul30(ObjectBoxTest.Planes[PlaneIdx], WorldView);
+		const lcVector3 Normal = lcMul30(ObjectBoxTest.Planes[PlaneIdx], WorldView);
 		LocalPlanes[PlaneIdx] = lcVector4(Normal, ObjectBoxTest.Planes[PlaneIdx][3] - lcDot3(WorldView[3], Normal));
 	}
 
@@ -758,23 +758,23 @@ void lcCamera::ZoomExtents(float AspectRatio, const lcVector3& Center, const std
 			MaxY = lcMax(MaxY, Point.y);
 		}
 
-		lcVector3 ViewCenter = lcMul30(Center, mWorldView);
+		const lcVector3 ViewCenter = lcMul30(Center, mWorldView);
 		float Width = qMax(fabsf(MaxX - ViewCenter.x), fabsf(ViewCenter.x - MinX)) * 2;
 		float Height = qMax(fabsf(MaxY - ViewCenter.y), fabsf(ViewCenter.y - MinY)) * 2;
 
 		if (Width > Height * AspectRatio)
 			Height = Width / AspectRatio;
 
-		float f = Height / (m_fovy * (LC_PI / 180.0f));
+		const float f = Height / (m_fovy * (LC_PI / 180.0f));
 
-		lcVector3 FrontVector(mTargetPosition - mPosition);
+		const lcVector3 FrontVector(mTargetPosition - mPosition);
 		mPosition = Center - lcNormalize(FrontVector) * f;
 		mTargetPosition = Center;
 	}
 	else
 	{
-		lcVector3 Position(mPosition + Center - mTargetPosition);
-		lcMatrix44 ProjectionMatrix = lcMatrix44Perspective(m_fovy, AspectRatio, m_zNear, m_zFar);
+		const lcVector3 Position(mPosition + Center - mTargetPosition);
+		const lcMatrix44 ProjectionMatrix = lcMatrix44Perspective(m_fovy, AspectRatio, m_zNear, m_zFar);
 
 		std::tie(mPosition, std::ignore) = lcZoomExtents(Position, mWorldView, ProjectionMatrix, Points.data(), Points.size());
 		mTargetPosition = Center;
@@ -797,7 +797,7 @@ void lcCamera::ZoomRegion(float AspectRatio, const lcVector3& Position, const lc
 
 		for (int PointIdx = 0; PointIdx < 2; PointIdx++)
 		{
-			lcVector3 Point = lcMul30(Corners[PointIdx], mWorldView);
+			const lcVector3 Point = lcMul30(Corners[PointIdx], mWorldView);
 
 			MinX = lcMin(MinX, Point.x);
 			MinY = lcMin(MinY, Point.y);
@@ -811,16 +811,16 @@ void lcCamera::ZoomRegion(float AspectRatio, const lcVector3& Position, const lc
 		if (Width > Height * AspectRatio)
 			Height = Width / AspectRatio;
 
-		float f = Height / (m_fovy * (LC_PI / 180.0f));
+		const float f = Height / (m_fovy * (LC_PI / 180.0f));
 
-		lcVector3 FrontVector(mTargetPosition - mPosition);
+		const lcVector3 FrontVector(mTargetPosition - mPosition);
 		mPosition = TargetPosition - lcNormalize(FrontVector) * f;
 		mTargetPosition = TargetPosition;
 	}
 	else
 	{
-		lcMatrix44 WorldView = lcMatrix44LookAt(Position, TargetPosition, mUpVector);
-		lcMatrix44 ProjectionMatrix = lcMatrix44Perspective(m_fovy, AspectRatio, m_zNear, m_zFar);
+		const lcMatrix44 WorldView = lcMatrix44LookAt(Position, TargetPosition, mUpVector);
+		const lcMatrix44 ProjectionMatrix = lcMatrix44Perspective(m_fovy, AspectRatio, m_zNear, m_zFar);
 
 		std::tie(mPosition, std::ignore) = lcZoomExtents(Position, WorldView, ProjectionMatrix, Corners, 2);
 		mTargetPosition = TargetPosition;
@@ -892,8 +892,8 @@ void lcCamera::Orbit(float DistanceX, float DistanceY, const lcVector3& CenterPo
 		Z[1] = -Z[1];
 	}
  
-	lcMatrix44 YRot(lcVector4(Z[0], Z[1], 0.0f, 0.0f), lcVector4(-Z[1], Z[0], 0.0f, 0.0f), lcVector4(0.0f, 0.0f, 1.0f, 0.0f), lcVector4(0.0f, 0.0f, 0.0f, 1.0f));
-	lcMatrix44 transform = lcMul(lcMul(lcMul(lcMatrix44AffineInverse(YRot), lcMatrix44RotationY(DistanceY)), YRot), lcMatrix44RotationZ(-DistanceX));
+	const lcMatrix44 YRot(lcVector4(Z[0], Z[1], 0.0f, 0.0f), lcVector4(-Z[1], Z[0], 0.0f, 0.0f), lcVector4(0.0f, 0.0f, 1.0f, 0.0f), lcVector4(0.0f, 0.0f, 0.0f, 1.0f));
+	const lcMatrix44 transform = lcMul(lcMul(lcMul(lcMatrix44AffineInverse(YRot), lcMatrix44RotationY(DistanceY)), YRot), lcMatrix44RotationZ(-DistanceX));
 
 	mPosition = lcMul31(mPosition - CenterPosition, transform) + CenterPosition;
 	mTargetPosition = lcMul31(mTargetPosition - CenterPosition, transform) + CenterPosition;
@@ -912,8 +912,8 @@ void lcCamera::Orbit(float DistanceX, float DistanceY, const lcVector3& CenterPo
 
 void lcCamera::Roll(float Distance, lcStep Step, bool AddKey)
 {
-	lcVector3 FrontVector(mPosition - mTargetPosition);
-	lcMatrix44 Rotation = lcMatrix44FromAxisAngle(FrontVector, Distance);
+	const lcVector3 FrontVector(mPosition - mTargetPosition);
+	const lcMatrix44 Rotation = lcMatrix44FromAxisAngle(FrontVector, Distance);
 
 	mUpVector = lcMul30(mUpVector, Rotation);
 
@@ -949,7 +949,7 @@ void lcCamera::Center(const lcVector3& NewCenter, lcStep Step, bool AddKey)
 	mTargetPosition = NewCenter;
 
 	lcVector3 FrontVector(mPosition - mTargetPosition);
-	lcMatrix44 Rotation = lcMatrix44FromAxisAngle(FrontVector, Roll);
+	const lcMatrix44 Rotation = lcMatrix44FromAxisAngle(FrontVector, Roll);
 
 	lcVector3 UpVector(0, 0, 1), SideVector;
 	FrontVector.Normalize();
@@ -1032,7 +1032,7 @@ void lcCamera::SetViewpoint(const lcVector3& Position, const lcVector3& Target, 
 	mPosition = Position;
 	mTargetPosition = Target;
 
-	lcVector3 Direction = Target - Position;
+	const lcVector3 Direction = Target - Position;
 	lcVector3 UpVector, SideVector;
 	SideVector = lcCross(Direction, Up);
 	UpVector = lcCross(SideVector, Direction);
@@ -1052,11 +1052,11 @@ void lcCamera::SetAngles(float Latitude, float Longitude, float Distance)
 	mTargetPosition = lcVector3(0, 0, 0);
 	mUpVector = lcVector3(0, 0, 1);
 
-	lcMatrix33 LongitudeMatrix = lcMatrix33RotationZ(LC_DTOR * Longitude);
+	const lcMatrix33 LongitudeMatrix = lcMatrix33RotationZ(LC_DTOR * Longitude);
 	mPosition = lcMul(mPosition, LongitudeMatrix);
 
-	lcVector3 SideVector = lcMul(lcVector3(-1, 0, 0), LongitudeMatrix);
-	lcMatrix33 LatitudeMatrix = lcMatrix33FromAxisAngle(SideVector, LC_DTOR * Latitude);
+	const lcVector3 SideVector = lcMul(lcVector3(-1, 0, 0), LongitudeMatrix);
+	const lcMatrix33 LatitudeMatrix = lcMatrix33FromAxisAngle(SideVector, LC_DTOR * Latitude);
 	mPosition = lcMul(mPosition, LatitudeMatrix) * Distance;
 	mUpVector = lcMul(mUpVector, LatitudeMatrix);
 
@@ -1070,14 +1070,14 @@ void lcCamera::SetAngles(float Latitude, float Longitude, float Distance)
 void lcCamera::GetAngles(float& Latitude, float& Longitude, float& Distance) const
 {
 	lcVector3 FrontVector(mPosition - mTargetPosition);
-	lcVector3 X(1, 0, 0);
-	lcVector3 Y(0, 1, 0);
-	lcVector3 Z(0, 0, 1);
+	const lcVector3 X(1, 0, 0);
+	const lcVector3 Y(0, 1, 0);
+	const lcVector3 Z(0, 0, 1);
 
 	FrontVector.Normalize();
 	Latitude = acos(lcDot(-FrontVector, Z)) * LC_RTOD - 90.0f;
 
-	lcVector3 CameraXY = -lcNormalize(lcVector3(FrontVector.x, FrontVector.y, 0.0f));
+	const lcVector3 CameraXY = -lcNormalize(lcVector3(FrontVector.x, FrontVector.y, 0.0f));
 	Longitude = acos(lcDot(CameraXY, Y)) * LC_RTOD;
 
 	if (lcDot(CameraXY, X) > 0)

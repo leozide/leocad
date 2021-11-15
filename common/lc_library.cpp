@@ -1172,7 +1172,7 @@ void lcPiecesLibrary::LoadPieceInfo(PieceInfo* Info, bool Wait, bool Priority)
 			Info->Load();
 		else
 		{
-			if (Info->mState == LC_PIECEINFO_UNLOADED)
+			if (Info->mState == lcPieceInfoState::Unloaded)
 			{
 				Info->Load();
 				emit PartLoaded(Info);
@@ -1181,7 +1181,7 @@ void lcPiecesLibrary::LoadPieceInfo(PieceInfo* Info, bool Wait, bool Priority)
 			{
 				LoadLock.unlock();
 
-				while (Info->mState != LC_PIECEINFO_LOADED)
+				while (Info->mState != lcPieceInfoState::Loaded)
 					lcSleeper::msleep(10);
 			}
 		}
@@ -1218,9 +1218,9 @@ void lcPiecesLibrary::LoadQueuedPiece()
 	{
 		Info = mLoadQueue.takeFirst();
 
-		if (Info->mState == LC_PIECEINFO_UNLOADED && Info->GetRefCount() > 0)
+		if (Info->mState == lcPieceInfoState::Unloaded && Info->GetRefCount() > 0)
 		{
-			Info->mState = LC_PIECEINFO_LOADING;
+			Info->mState = lcPieceInfoState::Loading;
 			break;
 		}
 
@@ -1502,7 +1502,7 @@ void lcPiecesLibrary::UnloadUnusedParts()
 	for (const auto& PieceIt : mPieces)
 	{
 		PieceInfo* Info = PieceIt.second;
-		if (Info->GetRefCount() == 0 && Info->mState != LC_PIECEINFO_UNLOADED)
+		if (Info->GetRefCount() == 0 && Info->mState != lcPieceInfoState::Unloaded)
 			ReleasePieceInfo(Info);
 	}
 }
@@ -1583,7 +1583,7 @@ void lcPiecesLibrary::SetStudStyle(lcStudStyle StudStyle, bool Reload)
 		{
 			PieceInfo* Info = PieceIt.second;
 
-			if (Info->mState == LC_PIECEINFO_LOADED && Info->GetMesh() && Info->GetMesh()->mFlags & lcMeshFlag::HasStyleStud)
+			if (Info->mState == lcPieceInfoState::Loaded && Info->GetMesh() && Info->GetMesh()->mFlags & lcMeshFlag::HasStyleStud)
 			{
 				Info->Unload();
 				mLoadQueue.append(Info);

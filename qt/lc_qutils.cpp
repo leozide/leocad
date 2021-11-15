@@ -7,7 +7,7 @@
 QString lcFormatValue(float Value, int Precision)
 {
 	QString String = QString::number(Value, 'f', Precision);
-	int Dot = String.indexOf('.');
+	const int Dot = String.indexOf('.');
 
 	if (Dot != -1)
 	{
@@ -54,33 +54,33 @@ lcQTreeWidgetColumnStretcher::lcQTreeWidgetColumnStretcher(QTreeWidget *treeWidg
 	lcQTreeWidgetColumnStretcher::eventFilter(parent(), &fake);
 }
 
-bool lcQTreeWidgetColumnStretcher::eventFilter(QObject *obj, QEvent *ev)
+bool lcQTreeWidgetColumnStretcher::eventFilter(QObject* Object, QEvent* Event)
 {
-	if (obj == parent())
+	if (Object == parent())
 	{
-		if (ev->type() == QEvent::Show)
+		if (Event->type() == QEvent::Show)
 		{
-			QHeaderView* HeaderView = qobject_cast<QHeaderView*>(obj);
+			QHeaderView* HeaderView = qobject_cast<QHeaderView*>(Object);
 
 			for (int i = 0; i < HeaderView->count(); ++i)
 				HeaderView->setSectionResizeMode(i, QHeaderView::Interactive);
 		}
-		else if (ev->type() == QEvent::Hide)
+		else if (Event->type() == QEvent::Hide)
 		{
-			QHeaderView* HeaderView = qobject_cast<QHeaderView*>(obj);
+			QHeaderView* HeaderView = qobject_cast<QHeaderView*>(Object);
 
 			for (int i = 0; i < HeaderView->count(); ++i)
 				HeaderView->setSectionResizeMode(i, i == m_columnToStretch ? QHeaderView::Stretch : QHeaderView::ResizeToContents);
 		}
-		else if (ev->type() == QEvent::Resize)
+		else if (Event->type() == QEvent::Resize)
 		{
-			QHeaderView* HeaderView = qobject_cast<QHeaderView*>(obj);
+			QHeaderView* HeaderView = qobject_cast<QHeaderView*>(Object);
 
 			if (HeaderView->sectionResizeMode(m_columnToStretch) == QHeaderView::Interactive)
 			{
-				QResizeEvent *re = static_cast<QResizeEvent*>(ev);
-				int diff = re->size().width() - re->oldSize().width() ;
-				HeaderView->resizeSection(m_columnToStretch, qMax(32, HeaderView->sectionSize(1) + diff));
+				const QResizeEvent* ResizeEvent = reinterpret_cast<QResizeEvent*>(Event);
+				const int Diff = ResizeEvent->size().width() - ResizeEvent->oldSize().width() ;
+				HeaderView->resizeSection(m_columnToStretch, qMax(32, HeaderView->sectionSize(1) + Diff));
 			}
 		}
 	}

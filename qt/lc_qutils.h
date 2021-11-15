@@ -28,9 +28,9 @@ public:
 		QFontMetrics FontMetrics(font());
 
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 11, 0))
-		int Width = FontMetrics.horizontalAdvance(QLatin1Char('x')) * 10;
+		const int Width = FontMetrics.horizontalAdvance(QLatin1Char('x')) * 10;
 #else
-		int Width = FontMetrics.width(QLatin1Char('x')) * 10;
+		const int Width = FontMetrics.width(QLatin1Char('x')) * 10;
 #endif
 
 		return QLineEdit::sizeHint() - QSize(Width, 0);
@@ -46,8 +46,8 @@ protected:
 	{
 		if (Event->type() == QEvent::ShortcutOverride)
 		{
-			QKeyEvent* KeyEvent = (QKeyEvent*)Event;
-			int Key = KeyEvent->key();
+			const QKeyEvent* KeyEvent = (QKeyEvent*)Event;
+			const int Key = KeyEvent->key();
 
 			if (KeyEvent->modifiers() == Qt::NoModifier && Key >= Qt::Key_A && Key <= Qt::Key_Z)
 				Event->accept();

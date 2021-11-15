@@ -320,7 +320,7 @@ void lcContext::CreateShaderPrograms()
 		mPrograms[MaterialType].EyePositionLocation = glGetUniformLocation(Program, "EyePosition");
 		mPrograms[MaterialType].HighlightParamsLocation = glGetUniformLocation(Program, "HighlightParams");
 
-		GLint TextureLocation = glGetUniformLocation(Program, "Texture");
+		const GLint TextureLocation = glGetUniformLocation(Program, "Texture");
 
 		if (TextureLocation != -1)
 		{
@@ -959,7 +959,7 @@ void lcContext::SetVertexFormatPosition(int PositionSize)
 
 void lcContext::SetVertexFormatConditional(int BufferOffset)
 {
-	const int VertexSize = 12 * sizeof(float);
+	constexpr int VertexSize = 12 * sizeof(float);
 	const char* VertexBufferPointer = mVertexBufferPointer + BufferOffset;
 
 	if (gSupportsShaderObjects)

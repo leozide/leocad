@@ -160,6 +160,11 @@ public:
 	lcApplication(int& Argc, char** Argv);
 	~lcApplication();
 
+	lcApplication(const lcApplication&) = delete;
+	lcApplication(lcApplication&&) = delete;
+	lcApplication& operator=(const lcApplication&) = delete;
+	lcApplication& operator=(lcApplication&&) = delete;
+
 	void SetProject(Project* Project);
 	static lcCommandLineOptions ParseCommandLineOptions();
 	lcStartupMode Initialize(const QList<QPair<QString, bool>>& LibraryPaths);

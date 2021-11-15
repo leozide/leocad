@@ -64,7 +64,7 @@ bool lcZipFile::OpenWrite(const QString& FileName)
 quint64 lcZipFile::SearchCentralDir()
 {
 	quint64 SizeFile, MaxBack, BackRead, PosFound;
-	const int CommentBufferSize = 1024;
+	constexpr int CommentBufferSize = 1024;
 	quint8 buf[CommentBufferSize + 4];
 
 	SizeFile = mFile->GetLength();

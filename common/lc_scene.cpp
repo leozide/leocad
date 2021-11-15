@@ -195,11 +195,11 @@ void lcScene::DrawOpaqueMeshes(lcContext* Context, bool DrawLit, int PrimitiveTy
 					break;
 
 				case lcRenderMeshState::Selected:
-					Context->SetColorIndexTinted(ColorIndex, LC_COLOR_SELECTED, 0.5f);
+					Context->SetColorIndexTinted(ColorIndex, lcInterfaceColor::Selected, 0.5f);
 					break;
 
 				case lcRenderMeshState::Focused:
-					Context->SetColorIndexTinted(ColorIndex, LC_COLOR_FOCUSED, 0.5f);
+					Context->SetColorIndexTinted(ColorIndex, lcInterfaceColor::Focused, 0.5f);
 					break;
 
 				case lcRenderMeshState::Faded:
@@ -231,11 +231,11 @@ void lcScene::DrawOpaqueMeshes(lcContext* Context, bool DrawLit, int PrimitiveTy
 					break;
 
 				case lcRenderMeshState::Selected:
-					Context->SetInterfaceColor(LC_COLOR_SELECTED);
+					Context->SetInterfaceColor(lcInterfaceColor::Selected);
 					break;
 
 				case lcRenderMeshState::Focused:
-					Context->SetInterfaceColor(LC_COLOR_FOCUSED);
+					Context->SetInterfaceColor(lcInterfaceColor::Focused);
 					break;
 
 				case lcRenderMeshState::Highlighted:
@@ -364,11 +364,11 @@ void lcScene::DrawTranslucentMeshes(lcContext* Context, bool DrawLit, bool DrawF
 			break;
 
 		case lcRenderMeshState::Selected:
-			Context->SetColorIndexTinted(ColorIndex, LC_COLOR_SELECTED, 0.5f);
+			Context->SetColorIndexTinted(ColorIndex, lcInterfaceColor::Selected, 0.5f);
 			break;
 
 		case lcRenderMeshState::Focused:
-			Context->SetColorIndexTinted(ColorIndex, LC_COLOR_FOCUSED, 0.5f);
+			Context->SetColorIndexTinted(ColorIndex, lcInterfaceColor::Focused, 0.5f);
 			break;
 
 		case lcRenderMeshState::Faded:

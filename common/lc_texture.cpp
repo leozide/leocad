@@ -53,7 +53,7 @@ void lcTexture::CreateGridTexture()
 	{
 		Image& GridImage = mImages[ImageLevel];
 		const int GridSize = 256 >> ImageLevel;
-		GridImage.Allocate(GridSize, GridSize, LC_PIXEL_FORMAT_A8);
+		GridImage.Allocate(GridSize, GridSize, lcPixelFormat::A8);
 
 		if (Previous)
 		{
@@ -254,19 +254,19 @@ void lcTexture::Upload(lcContext* Context)
 	switch (mImages[0].mFormat)
 	{
     default:
-    case LC_PIXEL_FORMAT_INVALID:
+    case lcPixelFormat::Invalid:
         Format = 0;
         break;
-    case LC_PIXEL_FORMAT_A8:
+    case lcPixelFormat::A8:
 		Format = GL_ALPHA;
 		break;
-	case LC_PIXEL_FORMAT_L8A8:
+	case lcPixelFormat::L8A8:
 		Format = GL_LUMINANCE_ALPHA;
 		break;
-	case LC_PIXEL_FORMAT_R8G8B8:
+	case lcPixelFormat::R8G8B8:
 		Format = GL_RGB;
 		break;
-	case LC_PIXEL_FORMAT_R8G8B8A8:
+	case lcPixelFormat::R8G8B8A8:
 		Format = GL_RGBA;
 		break;
 	}

@@ -4,13 +4,13 @@
 #define LC_IMAGE_TRANSPARENT	0x2000
 //#define LC_IMAGE_MASK		0x7000
 
-enum lcPixelFormat
+enum class lcPixelFormat
 {
-	LC_PIXEL_FORMAT_INVALID,
-	LC_PIXEL_FORMAT_A8,
-	LC_PIXEL_FORMAT_L8A8,
-	LC_PIXEL_FORMAT_R8G8B8,
-	LC_PIXEL_FORMAT_R8G8B8A8
+	Invalid,
+	A8,
+	L8A8,
+	R8G8B8,
+	R8G8B8A8
 };
 
 class Image

@@ -83,7 +83,7 @@ void lcViewSphere::CreateResources(lcContext* Context)
 	for (int ViewIdx = 0; ViewIdx < 6; ViewIdx++)
 	{
 		Image TextureImage;
-		TextureImage.Allocate(ImageSize, ImageSize, LC_PIXEL_FORMAT_A8);
+		TextureImage.Allocate(ImageSize, ImageSize, lcPixelFormat::A8);
 
 		Painter.begin(&PainterImage);
 		Painter.fillRect(0, 0, PainterImage.width(), PainterImage.height(), QColor(0, 0, 0));

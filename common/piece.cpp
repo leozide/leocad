@@ -559,9 +559,9 @@ void lcPiece::DrawInterface(lcContext* Context, const lcScene& Scene) const
 	Context->SetWorldMatrix(WorldMatrix);
 
 	if (IsFocused(LC_PIECE_SECTION_POSITION))
-		Context->SetInterfaceColor(LC_COLOR_FOCUSED);
+		Context->SetInterfaceColor(lcInterfaceColor::Focused);
 	else
-		Context->SetInterfaceColor(LC_COLOR_SELECTED);
+		Context->SetInterfaceColor(lcInterfaceColor::Selected);
 
 	Context->SetVertexBufferPointer(LineVerts);
 	Context->SetVertexFormatPosition(3);
@@ -626,9 +626,9 @@ void lcPiece::DrawInterface(lcContext* Context, const lcScene& Scene) const
 			Context->SetIndexBufferPointer(Indices);
 
 			if (IsFocused(LC_PIECE_SECTION_CONTROL_POINT_FIRST + ControlPointIdx))
-				Context->SetInterfaceColor(LC_COLOR_CONTROL_POINT_FOCUSED);
+				Context->SetInterfaceColor(lcInterfaceColor::ControlPointFocused);
 			else
-				Context->SetInterfaceColor(LC_COLOR_CONTROL_POINT);
+				Context->SetInterfaceColor(lcInterfaceColor::ControlPoint);
 
 			Context->DrawIndexedPrimitives(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 0);
 		}

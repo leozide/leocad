@@ -542,7 +542,7 @@ void lcCamera::DrawInterface(lcContext* Context, const lcScene& Scene) const
 	if (!IsSelected())
 	{
 		Context->SetLineWidth(LineWidth);
-		Context->SetInterfaceColor(LC_COLOR_CAMERA);
+		Context->SetInterfaceColor(lcInterfaceColor::Camera);
 
 		Context->DrawIndexedPrimitives(GL_LINES, 40 + 24 + 24 + 4, GL_UNSIGNED_SHORT, 0);
 	}
@@ -552,14 +552,14 @@ void lcCamera::DrawInterface(lcContext* Context, const lcScene& Scene) const
 		{
 			Context->SetLineWidth(2.0f * LineWidth);
 			if (IsFocused(LC_CAMERA_SECTION_POSITION))
-				Context->SetInterfaceColor(LC_COLOR_FOCUSED);
+				Context->SetInterfaceColor(lcInterfaceColor::Focused);
 			else
-				Context->SetInterfaceColor(LC_COLOR_SELECTED);
+				Context->SetInterfaceColor(lcInterfaceColor::Selected);
 		}
 		else
 		{
 			Context->SetLineWidth(LineWidth);
-			Context->SetInterfaceColor(LC_COLOR_CAMERA);
+			Context->SetInterfaceColor(lcInterfaceColor::Camera);
 		}
 
 		Context->DrawIndexedPrimitives(GL_LINES, 40, GL_UNSIGNED_SHORT, 0);
@@ -568,14 +568,14 @@ void lcCamera::DrawInterface(lcContext* Context, const lcScene& Scene) const
 		{
 			Context->SetLineWidth(2.0f * LineWidth);
 			if (IsFocused(LC_CAMERA_SECTION_TARGET))
-				Context->SetInterfaceColor(LC_COLOR_FOCUSED);
+				Context->SetInterfaceColor(lcInterfaceColor::Focused);
 			else
-				Context->SetInterfaceColor(LC_COLOR_SELECTED);
+				Context->SetInterfaceColor(lcInterfaceColor::Selected);
 		}
 		else
 		{
 			Context->SetLineWidth(LineWidth);
-			Context->SetInterfaceColor(LC_COLOR_CAMERA);
+			Context->SetInterfaceColor(lcInterfaceColor::Camera);
 		}
 
 		Context->DrawIndexedPrimitives(GL_LINES, 24, GL_UNSIGNED_SHORT, 40 * 2);
@@ -584,19 +584,19 @@ void lcCamera::DrawInterface(lcContext* Context, const lcScene& Scene) const
 		{
 			Context->SetLineWidth(2.0f * LineWidth);
 			if (IsFocused(LC_CAMERA_SECTION_UPVECTOR))
-				Context->SetInterfaceColor(LC_COLOR_FOCUSED);
+				Context->SetInterfaceColor(lcInterfaceColor::Focused);
 			else
-				Context->SetInterfaceColor(LC_COLOR_SELECTED);
+				Context->SetInterfaceColor(lcInterfaceColor::Selected);
 		}
 		else
 		{
 			Context->SetLineWidth(LineWidth);
-			Context->SetInterfaceColor(LC_COLOR_CAMERA);
+			Context->SetInterfaceColor(lcInterfaceColor::Camera);
 		}
 
 		Context->DrawIndexedPrimitives(GL_LINES, 24, GL_UNSIGNED_SHORT, (40 + 24) * 2);
 
-		Context->SetInterfaceColor(LC_COLOR_CAMERA);
+		Context->SetInterfaceColor(lcInterfaceColor::Camera);
 		Context->SetLineWidth(LineWidth);
 
 		float SizeY = tanf(LC_DTOR * m_fovy / 2) * Length;

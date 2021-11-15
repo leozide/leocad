@@ -380,7 +380,7 @@ void lcLight::DrawSpotLight(lcContext* Context) const
 	if (!IsSelected())
 	{
 		Context->SetLineWidth(LineWidth);
-		Context->SetInterfaceColor(LC_COLOR_LIGHT);
+		Context->SetInterfaceColor(lcInterfaceColor::Light);
 
 		Context->DrawIndexedPrimitives(GL_LINES, 56 + 24 + 2, GL_UNSIGNED_SHORT, 0);
 	}
@@ -390,14 +390,14 @@ void lcLight::DrawSpotLight(lcContext* Context) const
 		{
 			Context->SetLineWidth(2.0f * LineWidth);
 			if (IsFocused(LC_LIGHT_SECTION_POSITION))
-				Context->SetInterfaceColor(LC_COLOR_FOCUSED);
+				Context->SetInterfaceColor(lcInterfaceColor::Focused);
 			else
-				Context->SetInterfaceColor(LC_COLOR_SELECTED);
+				Context->SetInterfaceColor(lcInterfaceColor::Selected);
 		}
 		else
 		{
 			Context->SetLineWidth(LineWidth);
-			Context->SetInterfaceColor(LC_COLOR_LIGHT);
+			Context->SetInterfaceColor(lcInterfaceColor::Light);
 		}
 
 		Context->DrawIndexedPrimitives(GL_LINES, 56, GL_UNSIGNED_SHORT, 0);
@@ -406,20 +406,20 @@ void lcLight::DrawSpotLight(lcContext* Context) const
 		{
 			Context->SetLineWidth(2.0f * LineWidth);
 			if (IsFocused(LC_LIGHT_SECTION_TARGET))
-				Context->SetInterfaceColor(LC_COLOR_FOCUSED);
+				Context->SetInterfaceColor(lcInterfaceColor::Focused);
 			else
-				Context->SetInterfaceColor(LC_COLOR_SELECTED);
+				Context->SetInterfaceColor(lcInterfaceColor::Selected);
 		}
 		else
 		{
 			Context->SetLineWidth(LineWidth);
-			Context->SetInterfaceColor(LC_COLOR_LIGHT);
+			Context->SetInterfaceColor(lcInterfaceColor::Light);
 		}
 
 		Context->DrawIndexedPrimitives(GL_LINES, 24, GL_UNSIGNED_SHORT, 56 * 2);
 
 		Context->SetLineWidth(LineWidth);
-		Context->SetInterfaceColor(LC_COLOR_LIGHT);
+		Context->SetInterfaceColor(lcInterfaceColor::Light);
 
 		float Radius = tanf(LC_DTOR * mSpotCutoff) * Length;
 
@@ -514,11 +514,11 @@ void lcLight::DrawPointLight(lcContext* Context) const
 	Context->SetWorldMatrix(lcMatrix44Translation(mPosition));
 
 	if (IsFocused(LC_LIGHT_SECTION_POSITION))
-		Context->SetInterfaceColor(LC_COLOR_FOCUSED);
+		Context->SetInterfaceColor(lcInterfaceColor::Focused);
 	else if (IsSelected(LC_LIGHT_SECTION_POSITION))
-		Context->SetInterfaceColor(LC_COLOR_SELECTED);
+		Context->SetInterfaceColor(lcInterfaceColor::Selected);
 	else
-		Context->SetInterfaceColor(LC_COLOR_LIGHT);
+		Context->SetInterfaceColor(lcInterfaceColor::Light);
 
 	Context->SetVertexBufferPointer(Vertices);
 	Context->SetVertexFormatPosition(3);

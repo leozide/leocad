@@ -45,7 +45,7 @@ void lcStringCache::CacheStrings(const QStringList& Strings)
 		return;
 
 	Image TextureImage;
-	TextureImage.Allocate(256, 256, LC_PIXEL_FORMAT_L8A8);
+	TextureImage.Allocate(256, 256, lcPixelFormat::L8A8);
 
 	QImage Image(128, 128, QImage::Format_ARGB32);
 	QPainter Painter;

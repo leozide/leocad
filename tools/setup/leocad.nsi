@@ -78,8 +78,12 @@ Section "Application Files" SecLeoCAD
   
   CreateShortCut "$SMPROGRAMS\LeoCAD.lnk" "$INSTDIR\LeoCAD.exe"
 
-  ;Create uninstaller
+  ;Define the version which should show in the Add/Remove Programs Entry
+  !define /date PRODUCT_VERSION "%y.%m.%j"
+  
+  ;Create uninstaller 
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\LeoCAD" "DisplayName" "LeoCAD"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\LeoCAD" "DisplayVersion" "${PRODUCT_VERSION}"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\LeoCAD" "Publisher" "LeoCAD.org"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\LeoCAD" "DisplayIcon" '"$INSTDIR\LeoCAD.exe"'
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\LeoCAD" "UninstallString" '"$INSTDIR\uninstall.exe"'

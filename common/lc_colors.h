@@ -54,13 +54,13 @@ void lcLoadDefaultColors(lcStudStyle StudStyle);
 bool lcLoadColorFile(lcFile& File, lcStudStyle StudStyle);
 int lcGetColorIndex(quint32 ColorCode);
 
-constexpr quint32 lcGetColorCodeFromExtendedColor(int Color)
+inline quint32 lcGetColorCodeFromExtendedColor(int Color)
 {
 	const quint32 ConversionTable[] = { 4, 12, 2, 10, 1, 9, 14, 15, 8, 0, 6, 13, 13, 334, 36, 44, 34, 42, 33, 41, 46, 47, 7, 382, 6, 13, 11, 383 };
 	return ConversionTable[Color];
 }
 
-constexpr quint32 lcGetColorCodeFromOriginalColor(int Color)
+inline quint32 lcGetColorCodeFromOriginalColor(int Color)
 {
 	const quint32 ConversionTable[] = { 0, 2, 4, 9, 7, 6, 22, 8, 10, 11, 14, 16, 18, 9, 21, 20, 22, 8, 10, 11 };
 	return lcGetColorCodeFromExtendedColor(ConversionTable[Color]);

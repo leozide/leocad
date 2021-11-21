@@ -2,6 +2,8 @@
 #include <string.h>
 #include "texfont.h"
 #include "lc_context.h"
+#include "lc_texture.h"
+#include "image.h"
 
 static const unsigned char TextureData[2048] =
 {
@@ -93,7 +95,6 @@ TexFont gTexFont;
 
 TexFont::TexFont()
 {
-	mTexture = 0;
 	memset(&mGlyphs, 0, sizeof(mGlyphs));
 }
 
@@ -103,26 +104,22 @@ bool TexFont::Initialize(lcContext* Context)
 		return true;
 
 	mFontHeight = 16;
+	mTextureWidth = 128;
+	mTextureHeight = 128;
 
-	glGenTextures(1, &mTexture);
-	Context->BindTexture2D(mTexture);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	Image Image;
+	Image.Allocate(mTextureWidth, mTextureHeight, lcPixelFormat::L8A8);
 
-	unsigned char ExpandedData[sizeof(TextureData) * 8 * 2];
+	unsigned char* ExpandedData = Image.mData;
 	for (unsigned int TexelIdx = 0; TexelIdx < sizeof(TextureData) * 8; TexelIdx++)
 	{
 		const unsigned char Texel = TextureData[TexelIdx / 8] & (1 << (TexelIdx % 8)) ? 255 : 0;
 		ExpandedData[TexelIdx * 2] = ExpandedData[TexelIdx * 2 + 1] = Texel;
 	}
 
-	mTextureWidth = 128;
-	mTextureHeight = 128;
-
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE_ALPHA, mTextureWidth, mTextureHeight, 0, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, ExpandedData);
+	mTexture = new lcTexture();
+	mTexture->SetImage(std::move(Image), LC_TEXTURE_WRAPU | LC_TEXTURE_WRAPV | LC_TEXTURE_POINT);
+	mTexture->Upload(Context);
 
 	const unsigned char* Ptr = GlyphData;
 

@@ -167,10 +167,11 @@ public:
 	void SetDepthFunction(lcDepthFunction DepthFunction);
 	void EnableCullFace(bool Enable);
 	void SetLineWidth(float LineWidth);
-	void BindTexture2D(GLuint Texture);
-	void BindTextureCubeMap(GLuint Texture);
-	void UnbindTexture2D(GLuint Texture);
-	void UnbindTextureCubeMap(GLuint Texture);
+
+	void BindTexture2D(const lcTexture* Texture);
+	void BindTextureCubeMap(const lcTexture* Texture);
+	void ClearTexture2D();
+	void ClearTextureCubeMap();
 
 	void SetColor(const lcVector4& Color)
 	{

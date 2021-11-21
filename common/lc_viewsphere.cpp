@@ -208,7 +208,7 @@ void lcViewSphere::Draw()
 	Context->DrawIndexedPrimitives(GL_TRIANGLES, mSubdivisions * mSubdivisions * 6 * 6, GL_UNSIGNED_SHORT, 0);
 
 	Context->SetMaterial(lcMaterialType::UnlitViewSphere);
-	Context->BindTextureCubeMap(mTexture->mTexture);
+	Context->BindTextureCubeMap(mTexture);
 
 	Context->SetWorldMatrix(lcMatrix44Identity());
 	Context->SetViewMatrix(GetViewMatrix());

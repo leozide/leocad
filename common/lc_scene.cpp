@@ -280,7 +280,7 @@ void lcScene::DrawOpaqueMeshes(lcContext* Context, bool DrawLit, int PrimitiveTy
 						Texture->Upload(Context);
 
 					Context->SetMaterial(TexturedMaterial);
-					Context->BindTexture2D(Texture->mTexture);
+					Context->BindTexture2D(Texture);
 				}
 				else
 				{
@@ -300,7 +300,7 @@ void lcScene::DrawOpaqueMeshes(lcContext* Context, bool DrawLit, int PrimitiveTy
 #endif
 	}
 
-	Context->BindTexture2D(0);
+	Context->ClearTexture2D();
 	Context->SetPolygonOffset(lcPolygonOffset::None);
 }
 
@@ -392,7 +392,7 @@ void lcScene::DrawTranslucentMeshes(lcContext* Context, bool DrawLit, bool DrawF
 			Context->SetMaterial(TexturedMaterial);
 			VertexBufferOffset += Mesh->mNumVertices * sizeof(lcVertex);
 			Context->SetVertexFormat(VertexBufferOffset, 3, 1, 2, 0, DrawLit);
-			Context->BindTexture2D(Texture->mTexture);
+			Context->BindTexture2D(Texture);
 		}
 
 		const GLenum DrawPrimitiveType = Section->PrimitiveType & (LC_MESH_TRIANGLES | LC_MESH_TEXTURED_TRIANGLES) ? GL_TRIANGLES : GL_LINES;
@@ -403,7 +403,7 @@ void lcScene::DrawTranslucentMeshes(lcContext* Context, bool DrawLit, bool DrawF
 #endif
 	}
 
-	Context->BindTexture2D(0);
+	Context->ClearTexture2D();
 	Context->SetPolygonOffset(lcPolygonOffset::None);
 
 	if (!DrawFadePrepass)

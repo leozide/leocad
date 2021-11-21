@@ -7,10 +7,10 @@ public:
 
 	bool IsLoaded() const
 	{
-		return mTexture != 0;
+		return mTexture != nullptr;
 	}
 
-	GLuint GetTexture() const
+	lcTexture* GetTexture() const
 	{
 		return mTexture;
 	}
@@ -30,7 +30,7 @@ protected:
 		float left, right, top, bottom;
 	} mGlyphs[256];
 
-	GLuint mTexture;
+	lcTexture* mTexture = nullptr;
 	int mTextureWidth;
 	int mTextureHeight;
 	int mFontHeight;

@@ -485,7 +485,7 @@ void lcContext::ClearResources()
 {
 	ClearVertexBuffer();
 	ClearIndexBuffer();
-	BindTexture2D(0);
+	ClearTexture2D();
 }
 
 void lcContext::SetMaterial(lcMaterialType MaterialType)
@@ -628,36 +628,40 @@ void lcContext::SetLineWidth(float LineWidth)
 	mLineWidth = LineWidth;
 }
 
-void lcContext::BindTexture2D(GLuint Texture)
+void lcContext::BindTexture2D(const lcTexture* Texture)
 {
-	if (mTexture2D == Texture)
+	GLuint TextureObject = Texture->mTexture;
+
+	if (mTexture2D == TextureObject)
 		return;
 
-	glBindTexture(GL_TEXTURE_2D, Texture);
-	mTexture2D = Texture;
+	glBindTexture(GL_TEXTURE_2D, TextureObject);
+	mTexture2D = TextureObject;
 }
 
-void lcContext::BindTextureCubeMap(GLuint Texture)
+void lcContext::BindTextureCubeMap(const lcTexture* Texture)
 {
-	if (mTextureCubeMap == Texture)
+	GLuint TextureObject = Texture->mTexture;
+
+	if (mTextureCubeMap == TextureObject)
 		return;
 
-	glBindTexture(GL_TEXTURE_CUBE_MAP, Texture);
-	mTextureCubeMap = Texture;
+	glBindTexture(GL_TEXTURE_CUBE_MAP, TextureObject);
+	mTextureCubeMap = TextureObject;
 }
 
-void lcContext::UnbindTexture2D(GLuint Texture)
+void lcContext::ClearTexture2D()
 {
-	if (mTexture2D != Texture)
+	if (mTexture2D == 0)
 		return;
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 	mTexture2D = 0;
 }
 
-void lcContext::UnbindTextureCubeMap(GLuint Texture)
+void lcContext::ClearTextureCubeMap()
 {
-	if (mTextureCubeMap != Texture)
+	if (mTexture2D == 0)
 		return;
 
 	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);

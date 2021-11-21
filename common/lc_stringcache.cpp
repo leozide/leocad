@@ -100,7 +100,7 @@ void lcStringCache::CacheStrings(const QStringList& Strings)
 		DestHeight = qMax(DestHeight, SourceRect.height());
 	}
 
-	mTexture->SetImage(&TextureImage, LC_TEXTURE_LINEAR);
+	mTexture->SetImage(std::move(TextureImage), LC_TEXTURE_LINEAR);
 }
 
 void lcStringCache::GetStringDimensions(int* cx, int* cy, const QString& String) const
@@ -193,7 +193,7 @@ void lcStringCache::DrawStrings(lcContext* Context, const lcMatrix44* Transforms
 	Context->SetVertexBufferPointer(Verts);
 	Context->SetVertexFormat(0, 3, 0, 2, 0, false);
 
-	Context->BindTexture2D(mTexture->mTexture);
+	Context->BindTexture2D(mTexture);
 	Context->SetColor(0.0f, 0.0f, 0.0f, 1.0f);
 	Context->DrawPrimitives(GL_TRIANGLES, 0, Strings.size() * 6);
 }

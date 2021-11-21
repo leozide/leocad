@@ -32,7 +32,7 @@ public:
 
 	bool Load(const QString& FileName, int Flags = 0);
 	bool Load(lcMemFile& File, int Flags = 0);
-	void SetImage(Image* Image, int Flags = 0);
+	void SetImage(Image&& Image, int Flags = 0);
 	void SetImage(std::vector<Image>&& Images, int Flags = 0);
 	void Upload(lcContext* Context);
 	void Unload();

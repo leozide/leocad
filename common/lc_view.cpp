@@ -1451,7 +1451,7 @@ void lcView::DrawGrid()
 
 	if (Preferences.mDrawGridStuds)
 	{
-		mContext->BindTexture2D(gGridTexture->mTexture);
+		mContext->BindTexture2D(gGridTexture);
 		mContext->SetDepthWrite(false);
 		glEnable(GL_BLEND);
 

@@ -189,10 +189,11 @@ bool lcTexture::Load(lcMemFile& File, int Flags)
 	return Load(Flags);
 }
 
-void lcTexture::SetImage(Image* Image, int Flags)
+void lcTexture::SetImage(Image&& Image, int Flags)
 {
 	mImages.clear();
-	mImages.emplace_back(std::move(*Image));
+	mImages.emplace_back(std::move(Image));
+	mFlags = Flags;
 
 	Load(Flags);
 }
@@ -200,6 +201,7 @@ void lcTexture::SetImage(Image* Image, int Flags)
 void lcTexture::SetImage(std::vector<Image>&& Images, int Flags)
 {
 	mImages = std::move(Images);
+	mFlags = Flags;
 
 	Load(Flags);
 }
@@ -228,13 +230,13 @@ void lcTexture::Upload(lcContext* Context)
 	{
 		Faces = 1;
 		Target = GL_TEXTURE_2D;
-		Context->BindTexture2D(mTexture);
+		Context->BindTexture2D(this);
 	}
 	else
 	{
 		Faces = 6;
 		Target = GL_TEXTURE_CUBE_MAP;
-		Context->BindTextureCubeMap(mTexture);
+		Context->BindTextureCubeMap(this);
 	}
 
 	glTexParameteri(Target, GL_TEXTURE_WRAP_S, (mFlags & LC_TEXTURE_WRAPU) ? GL_REPEAT : GL_CLAMP_TO_EDGE);
@@ -320,9 +322,9 @@ void lcTexture::Upload(lcContext* Context)
 	}
 
 	if ((mFlags & LC_TEXTURE_CUBEMAP) == 0)
-		Context->UnbindTexture2D(mTexture);
+		Context->ClearTexture2D();
 	else
-		Context->UnbindTextureCubeMap(mTexture);
+		Context->ClearTextureCubeMap();
 }
 
 bool lcTexture::Load(int Flags)

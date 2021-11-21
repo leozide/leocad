@@ -942,7 +942,7 @@ void lcLibraryMeshData::WriteSections(lcMesh* Mesh, const lcArray<lcMeshLoaderFi
 
 			IndexType* Index = (IndexType*)Mesh->mIndexData + NumIndices;
 
-			const auto AddSection = [this, &DstSection, &Index, &BaseVertices, &BaseConditionalVertices](lcMeshLoaderSection* SrcSection, lcMeshDataType SrcDataType)
+			const auto AddSection = [&DstSection, &Index, &BaseVertices, &BaseConditionalVertices](lcMeshLoaderSection* SrcSection, lcMeshDataType SrcDataType)
 			{
 				switch (DstSection.PrimitiveType)
 				{

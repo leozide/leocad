@@ -49,7 +49,7 @@ lcContext::lcContext()
 	mDepthFunction = lcDepthFunction::LessEqual;
 	mCullFace = false;
 	mLineWidth = 1.0f;
-#ifndef LC_OPENGLES
+#if LC_FIXED_FUNCTION
 	mMatrixMode = GL_MODELVIEW;
 	mTextureEnabled = false;
 #endif
@@ -409,7 +409,7 @@ void lcContext::SetDefaultState()
 	}
 	else
 	{
-#ifndef LC_OPENGLES
+#if LC_FIXED_FUNCTION
 		glEnableClientState(GL_VERTEX_ARRAY);
 		glDisableClientState(GL_NORMAL_ARRAY);
 		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
@@ -459,7 +459,7 @@ void lcContext::SetDefaultState()
 	}
 	else
 	{
-#ifndef LC_OPENGLES
+#if LC_FIXED_FUNCTION
 		glMatrixMode(GL_MODELVIEW);
 		mMatrixMode = GL_MODELVIEW;
 		glShadeModel(GL_FLAT);
@@ -505,7 +505,7 @@ void lcContext::SetMaterial(lcMaterialType MaterialType)
 	}
 	else
 	{
-#ifndef LC_OPENGLES
+#if LC_FIXED_FUNCTION
 		switch (MaterialType)
 		{
 		case lcMaterialType::UnlitTextureModulate:
@@ -626,14 +626,6 @@ void lcContext::SetLineWidth(float LineWidth)
 
 	glLineWidth(LineWidth);
 	mLineWidth = LineWidth;
-}
-
-void lcContext::SetSmoothShading(bool Smooth)
-{
-#ifndef LC_OPENGLES
-	if (gSupportsShaderObjects)
-		glShadeModel(Smooth ? GL_SMOOTH : GL_FLAT);
-#endif
 }
 
 void lcContext::BindTexture2D(GLuint Texture)
@@ -824,7 +816,7 @@ void lcContext::ClearVertexBuffer()
 	}
 	else
 	{
-#ifndef LC_OPENGLES
+#if LC_FIXED_FUNCTION
 		if (mNormalEnabled)
 			glDisableClientState(GL_NORMAL_ARRAY);
 
@@ -931,6 +923,7 @@ void lcContext::SetVertexFormatPosition(int PositionSize)
 	}
 	else
 	{
+#if LC_FIXED_FUNCTION
 		if (mVertexBufferOffset != mVertexBufferPointer)
 		{
 			glVertexPointer(PositionSize, GL_FLOAT, VertexSize, VertexBufferPointer);
@@ -954,6 +947,7 @@ void lcContext::SetVertexFormatPosition(int PositionSize)
 			glDisableClientState(GL_COLOR_ARRAY);
 			mColorEnabled = false;
 		}
+#endif
 	}
 }
 
@@ -1019,7 +1013,7 @@ void lcContext::SetVertexFormat(int BufferOffset, int PositionSize, int NormalSi
 	}
 	else
 	{
-#ifndef LC_OPENGLES
+#if LC_FIXED_FUNCTION
 		if (mVertexBufferOffset != VertexBufferPointer)
 		{
 			glVertexPointer(PositionSize, GL_FLOAT, VertexSize, VertexBufferPointer);
@@ -1221,7 +1215,7 @@ void lcContext::FlushState()
 	}
 	else
 	{
-#ifndef LC_OPENGLES
+#if LC_FIXED_FUNCTION
 		glColor4fv(mColor);
 
 		if (mWorldMatrixDirty || mViewMatrixDirty)

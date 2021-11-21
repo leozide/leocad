@@ -969,8 +969,6 @@ void lcView::DrawBackground() const
 	mContext->SetViewMatrix(lcMatrix44Translation(lcVector3(0.375, 0.375, 0.0)));
 	mContext->SetProjectionMatrix(lcMatrix44Ortho(0.0f, ViewWidth, 0.0f, ViewHeight, -1.0f, 1.0f));
 
-	mContext->SetSmoothShading(true);
-
 	const quint32 Color1 = Preferences.mBackgroundGradientColorTop;
 	const quint32 Color2 = Preferences.mBackgroundGradientColorBottom;
 
@@ -990,8 +988,6 @@ void lcView::DrawBackground() const
 	mContext->SetVertexFormat(0, 2, 0, 0, 4, false);
 
 	mContext->DrawPrimitives(GL_TRIANGLE_FAN, 0, 4);
-
-	mContext->SetSmoothShading(false);
 
 	glEnable(GL_DEPTH_TEST);
 	mContext->SetDepthWrite(true);

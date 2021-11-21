@@ -38,8 +38,14 @@
 #define LC_ARRAY_SIZE_CHECK(a,s) static_assert(LC_ARRAY_COUNT(a) == static_cast<int>(s), QT_STRINGIFY(a) " size mismatch.")
 
 #if !defined(EGL_VERSION_1_0) && !defined(GL_ES_VERSION_2_0) && !defined(GL_ES_VERSION_3_0) && !defined(QT_OPENGL_ES)
+#ifdef Q_OS_MACOS
+#define LC_FIXED_FUNCTION 0
+#else
+#define LC_FIXED_FUNCTION 1
+#endif
 #else
 #define LC_OPENGLES 1
+#define LC_FIXED_FUNCTION 0
 #endif
 
 // Old defines and declarations.

@@ -167,7 +167,6 @@ public:
 	void SetDepthFunction(lcDepthFunction DepthFunction);
 	void EnableCullFace(bool Enable);
 	void SetLineWidth(float LineWidth);
-	void SetSmoothShading(bool Smooth);
 	void BindTexture2D(GLuint Texture);
 	void BindTextureCubeMap(GLuint Texture);
 	void UnbindTexture2D(GLuint Texture);

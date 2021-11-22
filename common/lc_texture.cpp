@@ -171,22 +171,26 @@ bool lcTexture::Load()
 
 bool lcTexture::Load(const QString& FileName, int Flags)
 {
-	mImages.resize(1);
+	Image Image;
 
-	if (!mImages[0].FileLoad(FileName))
+	if (!Image.FileLoad(FileName))
 		return false;
 
-	return Load(Flags);
+	SetImage(std::move(Image), Flags);
+
+	return true;
 }
 
 bool lcTexture::Load(lcMemFile& File, int Flags)
 {
-	mImages.resize(1);
+	Image Image;
 
-	if (!mImages[0].FileLoad(File))
+	if (!Image.FileLoad(File))
 		return false;
 
-	return Load(Flags);
+	SetImage(std::move(Image), Flags);
+
+	return true;
 }
 
 void lcTexture::SetImage(Image&& Image, int Flags)
@@ -195,7 +199,7 @@ void lcTexture::SetImage(Image&& Image, int Flags)
 	mImages.emplace_back(std::move(Image));
 	mFlags = Flags;
 
-	Load(Flags);
+	LoadImages();
 }
 
 void lcTexture::SetImage(std::vector<Image>&& Images, int Flags)
@@ -203,135 +207,26 @@ void lcTexture::SetImage(std::vector<Image>&& Images, int Flags)
 	mImages = std::move(Images);
 	mFlags = Flags;
 
-	Load(Flags);
+	LoadImages();
 }
 
 void lcTexture::Upload(lcContext* Context)
 {
+	if (!NeedsUpload())
+		return;
+
 	mWidth = mImages[0].mWidth;
 	mHeight = mImages[0].mHeight;
 
-	if (!mTexture)
-		glGenTextures(1, &mTexture);
+	Context->UploadTexture(this);
 
-	constexpr int Filters[2][5] =
-	{
-		{ GL_NEAREST_MIPMAP_NEAREST, GL_NEAREST_MIPMAP_LINEAR, GL_LINEAR_MIPMAP_NEAREST, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR_MIPMAP_LINEAR },
-		{ GL_NEAREST, GL_LINEAR, GL_LINEAR, GL_LINEAR, GL_LINEAR  },
-	};
-
-	const int FilterFlags = mFlags & LC_TEXTURE_FILTER_MASK;
-	const int FilterIndex = FilterFlags >> LC_TEXTURE_FILTER_SHIFT;
-	const int MipIndex = mFlags & LC_TEXTURE_MIPMAPS ? 0 : 1;
-
-    unsigned int Faces, Target;
-
-	if ((mFlags & LC_TEXTURE_CUBEMAP) == 0)
-	{
-		Faces = 1;
-		Target = GL_TEXTURE_2D;
-		Context->BindTexture2D(this);
-	}
-	else
-	{
-		Faces = 6;
-		Target = GL_TEXTURE_CUBE_MAP;
-		Context->BindTextureCubeMap(this);
-	}
-
-	glTexParameteri(Target, GL_TEXTURE_WRAP_S, (mFlags & LC_TEXTURE_WRAPU) ? GL_REPEAT : GL_CLAMP_TO_EDGE);
-	glTexParameteri(Target, GL_TEXTURE_WRAP_T, (mFlags & LC_TEXTURE_WRAPV) ? GL_REPEAT : GL_CLAMP_TO_EDGE);
-	glTexParameteri(Target, GL_TEXTURE_MIN_FILTER, Filters[MipIndex][FilterIndex]);
-	glTexParameteri(Target, GL_TEXTURE_MAG_FILTER, Filters[1][FilterIndex]);
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-
-	if (gSupportsAnisotropic && FilterFlags == LC_TEXTURE_ANISOTROPIC)
-		glTexParameterf(Target, GL_TEXTURE_MAX_ANISOTROPY_EXT, lcMin(4.0f, gMaxAnisotropy));
-
-	int Format;
-	switch (mImages[0].mFormat)
-	{
-    default:
-    case lcPixelFormat::Invalid:
-        Format = 0;
-        break;
-    case lcPixelFormat::A8:
-		Format = GL_ALPHA;
-		break;
-	case lcPixelFormat::L8A8:
-		Format = GL_LUMINANCE_ALPHA;
-		break;
-	case lcPixelFormat::R8G8B8:
-		Format = GL_RGB;
-		break;
-	case lcPixelFormat::R8G8B8A8:
-		Format = GL_RGBA;
-		break;
-	}
-
-	int CurrentImage = 0;
-	if (mFlags & LC_TEXTURE_CUBEMAP)
-		Target = GL_TEXTURE_CUBE_MAP_POSITIVE_X;
-
-    for (size_t FaceIdx = 0; FaceIdx < Faces; FaceIdx++)
-	{
-		void* Data = mImages[CurrentImage].mData;
-		glTexImage2D(Target, 0, Format, mWidth, mHeight, 0, Format, GL_UNSIGNED_BYTE, Data);
-
-		if (mFlags & LC_TEXTURE_MIPMAPS || FilterFlags >= LC_TEXTURE_BILINEAR)
-		{
-			int Width = mWidth;
-			int Height = mHeight;
-			int Components = mImages[CurrentImage].GetBPP();
-
-			for (int Level = 1; ((Width != 1) || (Height != 1)); Level++)
-			{
-				int RowStride = Width * Components;
-
-				Width = lcMax(1, Width >> 1);
-				Height = lcMax(1, Height >> 1);
-
-				if (mImages.size() == Faces)
-				{
-					GLubyte *Out, *In;
-
-					In = Out = (GLubyte*)Data;
-
-					for (int y = 0; y < Height; y++, In += RowStride)
-						for (int x = 0; x < Width; x++, Out += Components, In += 2 * Components)
-							for (int c = 0; c < Components; c++)
-								Out[c] = (In[c] + In[c + Components] + In[RowStride] + In[c + RowStride + Components]) / 4;
-				}
-				else
-					Data = mImages[++CurrentImage].mData;
-
-				glTexImage2D(Target, Level, Format, Width, Height, 0, Format, GL_UNSIGNED_BYTE, Data);
-			}
-
-			if (mImages.size() == Faces)
-				CurrentImage++;
-		}
-		else
-			CurrentImage++;
-
-		Target++;
-	}
-
-	if ((mFlags & LC_TEXTURE_CUBEMAP) == 0)
-		Context->ClearTexture2D();
-	else
-		Context->ClearTextureCubeMap();
+	mImages.clear();
 }
 
-bool lcTexture::Load(int Flags)
+bool lcTexture::LoadImages()
 {
 	for (Image& Image : mImages)
 		Image.ResizePow2();
-	mFlags = Flags;
 
 	if (QThread::currentThread() == qApp->thread())
 	{

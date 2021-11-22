@@ -172,6 +172,7 @@ public:
 	void BindTextureCubeMap(const lcTexture* Texture);
 	void ClearTexture2D();
 	void ClearTextureCubeMap();
+	void UploadTexture(lcTexture* Texture);
 
 	void SetColor(const lcVector4& Color)
 	{

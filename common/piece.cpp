@@ -614,7 +614,7 @@ void lcPiece::DrawInterface(lcContext* Context, const lcScene& Scene) const
 			7, 3, 2, 6, 7, 2, 0, 3, 7, 0, 7, 4, 6, 2, 1, 5, 6, 1
 		};
 
-		glEnable(GL_BLEND);
+		Context->EnableColorBlend(true);
 		Context->EnableCullFace(true);
 
 		for (int ControlPointIdx = 0; ControlPointIdx < mControlPoints.GetSize(); ControlPointIdx++)
@@ -634,7 +634,7 @@ void lcPiece::DrawInterface(lcContext* Context, const lcScene& Scene) const
 		}
 
 		Context->EnableCullFace(false);
-		glDisable(GL_BLEND);
+		Context->EnableColorBlend(false);
 	}
 }
 

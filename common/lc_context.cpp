@@ -48,6 +48,8 @@ lcContext::lcContext()
 	mDepthWrite = true;
 	mDepthFunction = lcDepthFunction::LessEqual;
 	mDepthTest = true;
+	mColorWrite = true;
+	mColorBlend = false;
 	mCullFace = false;
 	mLineWidth = 1.0f;
 #if LC_FIXED_FUNCTION
@@ -387,6 +389,12 @@ void lcContext::SetDefaultState()
 	glDepthFunc(GL_LEQUAL);
 	mDepthFunction = lcDepthFunction::LessEqual;
 
+	mColorWrite = true;
+	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+
+	mColorBlend = false;
+	glDisable(GL_BLEND);
+
 	if (gSupportsBlendFuncSeparate)
 		glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE_MINUS_DST_ALPHA, GL_ONE);
 	else
@@ -620,6 +628,32 @@ void lcContext::EnableDepthTest(bool Enable)
 		glDisable(GL_DEPTH_TEST);
 
 	mDepthTest = Enable;
+}
+
+void lcContext::EnableColorWrite(bool Enable)
+{
+	if (Enable == mColorWrite)
+		return;
+
+	if (Enable)
+		glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+	else
+		glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+
+	mColorWrite = Enable;
+}
+
+void lcContext::EnableColorBlend(bool Enable)
+{
+	if (Enable == mColorBlend)
+		return;
+
+	if (Enable)
+		glEnable(GL_BLEND);
+	else
+		glDisable(GL_BLEND);
+
+	mColorBlend = Enable;
 }
 
 void lcContext::EnableCullFace(bool Enable)

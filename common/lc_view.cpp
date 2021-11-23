@@ -926,11 +926,11 @@ void lcView::OnDraw()
 	mContext->BindTexture2D(gTexFont.GetTexture());
 
 	mContext->EnableDepthTest(false);
-	glEnable(GL_BLEND);
+	mContext->EnableColorBlend(true);
 
 	gTexFont.PrintText(mContext, 3.0f, (float)mHeight - 1.0f - 6.0f, 0.0f, Line.toLatin1().constData());
 
-	glDisable(GL_BLEND);
+	mContext->EnableColorBlend(false);
 	mContext->EnableDepthTest(true);
 
 	Redraw();
@@ -1024,11 +1024,11 @@ void lcView::DrawViewport() const
 		mContext->SetColor(lcVector4FromColor(lcGetPreferences().mTextColor));
 		mContext->BindTexture2D(gTexFont.GetTexture());
 
-		glEnable(GL_BLEND);
+		mContext->EnableColorBlend(true);
 
 		gTexFont.PrintText(mContext, 3.0f, (float)mHeight - 1.0f - 6.0f, 0.0f, CameraName.toLatin1().constData());
 
-		glDisable(GL_BLEND);
+		mContext->EnableColorBlend(false);
 	}
 
 	mContext->SetDepthWrite(true);
@@ -1127,7 +1127,7 @@ void lcView::DrawAxes() const
 	mContext->SetMaterial(lcMaterialType::UnlitTextureModulate);
 	mContext->SetViewMatrix(TranslationMatrix);
 	mContext->BindTexture2D(gTexFont.GetTexture());
-	glEnable(GL_BLEND);
+	mContext->EnableColorBlend(true);
 
 	float TextBuffer[6 * 5 * 3];
 	lcVector3 PosX = lcMul30(lcVector3(25.0f, 0.0f, 0.0f), WorldViewMatrix);
@@ -1143,7 +1143,7 @@ void lcView::DrawAxes() const
 	mContext->SetColor(lcVector4FromColor(lcGetPreferences().mAxesColor));
 	mContext->DrawPrimitives(GL_TRIANGLES, 0, 6 * 3);
 
-	glDisable(GL_BLEND);
+	mContext->EnableColorBlend(false);
 }
 
 void lcView::DrawSelectZoomRegionOverlay()
@@ -1221,10 +1221,10 @@ void lcView::DrawSelectZoomRegionOverlay()
 
 	if (LC_RGBA_ALPHA(Preferences.mMarqueeFillColor))
 	{
-		glEnable(GL_BLEND);
+		mContext->EnableColorBlend(true);
 		mContext->SetColor(lcVector4FromColor(Preferences.mMarqueeFillColor));
 		mContext->DrawPrimitives(GL_TRIANGLE_STRIP, 10, 4);
-		glDisable(GL_BLEND);
+		mContext->EnableColorBlend(false);
 	}
 
 	mContext->EnableDepthTest(true);
@@ -1453,7 +1453,7 @@ void lcView::DrawGrid()
 	{
 		mContext->BindTexture2D(gGridTexture);
 		mContext->SetDepthWrite(false);
-		glEnable(GL_BLEND);
+		mContext->EnableColorBlend(true);
 
 		mContext->SetMaterial(lcMaterialType::UnlitTextureModulate);
 		mContext->SetColor(lcVector4FromColor(Preferences.mGridStudColor));
@@ -1461,7 +1461,7 @@ void lcView::DrawGrid()
 		mContext->SetVertexFormat(0, 3, 0, 2, 0, false);
 		mContext->DrawPrimitives(GL_TRIANGLE_STRIP, 0, 4);
 
-		glDisable(GL_BLEND);
+		mContext->EnableColorBlend(false);
 		mContext->SetDepthWrite(true);
 
 		BufferOffset = 4 * 5 * sizeof(float);

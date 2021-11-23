@@ -166,6 +166,8 @@ public:
 	void SetDepthWrite(bool Enable);
 	void SetDepthFunction(lcDepthFunction DepthFunction);
 	void EnableDepthTest(bool Enable);
+	void EnableColorWrite(bool Enable);
+	void EnableColorBlend(bool Enable);
 	void EnableCullFace(bool Enable);
 	void SetLineWidth(float LineWidth);
 
@@ -252,6 +254,8 @@ protected:
 	bool mDepthWrite;
 	lcDepthFunction mDepthFunction;
 	bool mDepthTest;
+	bool mColorWrite;
+	bool mColorBlend;
 	bool mCullFace;
 	float mLineWidth;
 	int mMatrixMode;

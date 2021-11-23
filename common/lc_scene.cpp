@@ -324,11 +324,11 @@ void lcScene::DrawTranslucentMeshes(lcContext* Context, bool DrawLit, bool DrawF
 
 	if (!DrawFadePrepass)
 	{
-		glEnable(GL_BLEND);
+		Context->EnableColorBlend(true);
 		Context->SetDepthWrite(false);
 	}
 	else
-		glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+		Context->EnableColorWrite(false);
 
 	Context->SetPolygonOffset(lcPolygonOffset::Translucent);
 
@@ -409,10 +409,10 @@ void lcScene::DrawTranslucentMeshes(lcContext* Context, bool DrawLit, bool DrawF
 	if (!DrawFadePrepass)
 	{
 		Context->SetDepthWrite(true);
-		glDisable(GL_BLEND);
+		Context->EnableColorBlend(false);
 	}
 	else
-		glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+		Context->EnableColorWrite(true);
 }
 
 void lcScene::Draw(lcContext* Context) const

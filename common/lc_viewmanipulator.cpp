@@ -285,7 +285,7 @@ void lcViewManipulator::DrawSelectMove(lcTrackButton TrackButton, lcTrackTool Tr
 
 	if ((TrackTool == lcTrackTool::MoveXY) || (TrackTool == lcTrackTool::MoveXZ) || (TrackTool == lcTrackTool::MoveYZ))
 	{
-		glEnable(GL_BLEND);
+		Context->EnableColorBlend(true);
 
 		Context->SetColor(0.8f, 0.8f, 0.0f, 0.3f);
 
@@ -296,7 +296,7 @@ void lcViewManipulator::DrawSelectMove(lcTrackButton TrackButton, lcTrackTool Tr
 		else if (TrackTool == lcTrackTool::MoveYZ)
 			Context->DrawIndexedPrimitives(GL_TRIANGLE_FAN, 4, GL_UNSIGNED_SHORT, (108 + 360) * 2);
 
-		glDisable(GL_BLEND);
+		Context->EnableColorBlend(false);
 	}
 
 	if (Focus && Focus->IsPiece())
@@ -439,7 +439,7 @@ void lcViewManipulator::DrawRotate(lcTrackButton TrackButton, lcTrackTool TrackT
 
 			Context->SetWorldMatrix(RotatedWorldMatrix);
 
-			glEnable(GL_BLEND);
+			Context->EnableColorBlend(true);
 
 			lcVector3 Verts[33];
 			Verts[0] = lcVector3(0.0f, 0.0f, 0.0f);
@@ -481,7 +481,7 @@ void lcViewManipulator::DrawRotate(lcTrackButton TrackButton, lcTrackTool TrackT
 			if (NumVerts > 2)
 				Context->DrawPrimitives(GL_TRIANGLE_FAN, 0, NumVerts);
 
-			glDisable(GL_BLEND);
+			Context->EnableColorBlend(false);
 		}
 	}
 
@@ -650,7 +650,7 @@ void lcViewManipulator::DrawRotate(lcTrackButton TrackButton, lcTrackTool TrackT
 		Context->SetViewMatrix(lcMatrix44Translation(lcVector3(0.375, 0.375, 0.0)));
 		Context->SetProjectionMatrix(lcMatrix44Ortho(0.0f, mView->GetWidth(), 0.0f, mView->GetHeight(), -1.0f, 1.0f));
 		Context->BindTexture2D(gTexFont.GetTexture());
-		glEnable(GL_BLEND);
+		Context->EnableColorBlend(true);
 
 		char buf[32];
 		sprintf(buf, "[%.2f]", fabsf(Angle));
@@ -661,7 +661,7 @@ void lcViewManipulator::DrawRotate(lcTrackButton TrackButton, lcTrackTool TrackT
 		Context->SetColor(0.8f, 0.8f, 0.0f, 1.0f);
 		gTexFont.PrintText(Context, ScreenPos[0] - (cx / 2), ScreenPos[1] + (cy / 2), 0.0f, buf);
 
-		glDisable(GL_BLEND);
+		Context->EnableColorBlend(false);
 	}
 
 	Context->EnableDepthTest(true);

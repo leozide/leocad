@@ -925,13 +925,13 @@ void lcView::OnDraw()
 	mContext->SetColor(lcVector4FromColor(lcGetPreferences().mTextColor));
 	mContext->BindTexture2D(gTexFont.GetTexture());
 
-	glDisable(GL_DEPTH_TEST);
+	mContext->EnableDepthTest(false);
 	glEnable(GL_BLEND);
 
 	gTexFont.PrintText(mContext, 3.0f, (float)mHeight - 1.0f - 6.0f, 0.0f, Line.toLatin1().constData());
 
 	glDisable(GL_BLEND);
-	glEnable(GL_DEPTH_TEST);
+	mContext->EnableDepthTest(true);
 
 	Redraw();
 #endif
@@ -960,7 +960,7 @@ void lcView::DrawBackground() const
 	mContext->ClearDepth();
 
 	mContext->SetDepthWrite(false);
-	glDisable(GL_DEPTH_TEST);
+	mContext->EnableDepthTest(false);
 
 	float ViewWidth = (float)mWidth;
 	float ViewHeight = (float)mHeight;
@@ -989,7 +989,7 @@ void lcView::DrawBackground() const
 
 	mContext->DrawPrimitives(GL_TRIANGLE_FAN, 0, 4);
 
-	glEnable(GL_DEPTH_TEST);
+	mContext->EnableDepthTest(true);
 	mContext->SetDepthWrite(true);
 }
 
@@ -1001,7 +1001,7 @@ void lcView::DrawViewport() const
 	mContext->SetLineWidth(1.0f);
 
 	mContext->SetDepthWrite(false);
-	glDisable(GL_DEPTH_TEST);
+	mContext->EnableDepthTest(false);
 
 	mContext->SetMaterial(lcMaterialType::UnlitColor);
 
@@ -1032,7 +1032,7 @@ void lcView::DrawViewport() const
 	}
 
 	mContext->SetDepthWrite(true);
-	glEnable(GL_DEPTH_TEST);
+	mContext->EnableDepthTest(true);
 }
 
 void lcView::DrawAxes() const
@@ -1154,7 +1154,7 @@ void lcView::DrawSelectZoomRegionOverlay()
 	mContext->SetProjectionMatrix(lcMatrix44Ortho(0.0f, mWidth, 0.0f, mHeight, -1.0f, 1.0f));
 	mContext->SetLineWidth(1.0f);
 
-	glDisable(GL_DEPTH_TEST);
+	mContext->EnableDepthTest(false);
 
 	float pt1x = (float)mMouseDownX;
 	float pt1y = (float)mMouseDownY;
@@ -1227,7 +1227,7 @@ void lcView::DrawSelectZoomRegionOverlay()
 		glDisable(GL_BLEND);
 	}
 
-	glEnable(GL_DEPTH_TEST);
+	mContext->EnableDepthTest(true);
 }
 
 void lcView::DrawRotateViewOverlay()
@@ -1245,7 +1245,7 @@ void lcView::DrawRotateViewOverlay()
 	mContext->SetProjectionMatrix(lcMatrix44Ortho(0, w, 0, h, -1, 1));
 	mContext->SetLineWidth(1.0f);
 
-	glDisable(GL_DEPTH_TEST);
+	mContext->EnableDepthTest(false);
 	mContext->SetColor(lcVector4FromColor(lcGetPreferences().mOverlayColor));
 
 	float Verts[32 * 16 * 2];
@@ -1294,7 +1294,7 @@ void lcView::DrawRotateViewOverlay()
 	mContext->SetIndexBufferPointer(Indices);
 	mContext->DrawIndexedPrimitives(GL_LINES, 96, GL_UNSIGNED_SHORT, 0);
 
-	glEnable(GL_DEPTH_TEST);
+	mContext->EnableDepthTest(true);
 }
 
 void lcView::DrawGrid()

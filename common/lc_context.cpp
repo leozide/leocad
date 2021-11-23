@@ -47,6 +47,7 @@ lcContext::lcContext()
 	mPolygonOffset = lcPolygonOffset::None;
 	mDepthWrite = true;
 	mDepthFunction = lcDepthFunction::LessEqual;
+	mDepthTest = true;
 	mCullFace = false;
 	mLineWidth = 1.0f;
 #if LC_FIXED_FUNCTION
@@ -381,6 +382,8 @@ void lcContext::SetDefaultState()
 #endif
 
 	glEnable(GL_DEPTH_TEST);
+	mDepthTest = true;
+
 	glDepthFunc(GL_LEQUAL);
 	mDepthFunction = lcDepthFunction::LessEqual;
 
@@ -604,6 +607,19 @@ void lcContext::SetDepthFunction(lcDepthFunction DepthFunction)
 	}
 
 	mDepthFunction = DepthFunction;
+}
+
+void lcContext::EnableDepthTest(bool Enable)
+{
+	if (Enable == mDepthTest)
+		return;
+
+	if (Enable)
+		glEnable(GL_DEPTH_TEST);
+	else
+		glDisable(GL_DEPTH_TEST);
+
+	mDepthTest = Enable;
 }
 
 void lcContext::EnableCullFace(bool Enable)

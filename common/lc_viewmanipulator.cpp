@@ -179,7 +179,7 @@ void lcViewManipulator::DrawSelectMove(lcTrackButton TrackButton, lcTrackTool Tr
 	Context->SetViewMatrix(Camera->mWorldView);
 	Context->SetProjectionMatrix(mView->GetProjectionMatrix());
 
-	glDisable(GL_DEPTH_TEST);
+	Context->EnableDepthTest(false);
 
 	lcVector3 OverlayCenter;
 	lcMatrix33 RelativeRotation;
@@ -360,7 +360,7 @@ void lcViewManipulator::DrawSelectMove(lcTrackButton TrackButton, lcTrackTool Tr
 		}
 	}
 
-	glEnable(GL_DEPTH_TEST);
+	Context->EnableDepthTest(true);
 }
 
 void lcViewManipulator::DrawRotate(lcTrackButton TrackButton, lcTrackTool TrackTool)
@@ -376,7 +376,7 @@ void lcViewManipulator::DrawRotate(lcTrackButton TrackButton, lcTrackTool TrackT
 	Context->SetProjectionMatrix(mView->GetProjectionMatrix());
 	Context->SetLineWidth(1.0f);
 
-	glDisable(GL_DEPTH_TEST);
+	Context->EnableDepthTest(false);
 
 	int j;
 
@@ -664,7 +664,7 @@ void lcViewManipulator::DrawRotate(lcTrackButton TrackButton, lcTrackTool TrackT
 		glDisable(GL_BLEND);
 	}
 
-	glEnable(GL_DEPTH_TEST);
+	Context->EnableDepthTest(true);
 }
 
 bool lcViewManipulator::IsTrackToolAllowed(lcTrackTool TrackTool, quint32 AllowedTransforms)

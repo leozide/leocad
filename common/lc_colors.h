@@ -33,18 +33,6 @@ struct lcColorGroup
 	QString Name;
 };
 
-enum class lcInterfaceColor
-{
-	Selected,
-	Focused,
-	Camera,
-	Light,
-	ControlPoint,
-	ControlPointFocused,
-	Count
-};
-
-extern lcVector4 gInterfaceColors[static_cast<int>(lcInterfaceColor::Count)];
 extern std::vector<lcColor> gColorList;
 extern lcColorGroup gColorGroups[LC_NUM_COLORGROUPS];
 extern int gEdgeColor;

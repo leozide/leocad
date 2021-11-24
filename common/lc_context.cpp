@@ -847,9 +847,9 @@ void lcContext::SetColorIndex(int ColorIndex)
 	SetColor(gColorList[ColorIndex].Value);
 }
 
-void lcContext::SetColorIndexTinted(int ColorIndex, lcInterfaceColor InterfaceColor, float Weight)
+void lcContext::SetColorIndexTinted(int ColorIndex, const lcVector4& Tint, float Weight)
 {
-	const lcVector3 Color(gColorList[ColorIndex].Value * Weight + gInterfaceColors[static_cast<int>(InterfaceColor)] * (1.0f - Weight));
+	const lcVector3 Color(gColorList[ColorIndex].Value * Weight + Tint * (1.0f - Weight));
 	SetColor(lcVector4(Color, gColorList[ColorIndex].Value.w));
 }
 
@@ -866,11 +866,6 @@ void lcContext::SetEdgeColorIndex(int ColorIndex)
 void lcContext::SetEdgeColorIndexTinted(int ColorIndex, const lcVector4& Tint)
 {
 	SetColor(gColorList[ColorIndex].Edge * Tint);
-}
-
-void lcContext::SetInterfaceColor(lcInterfaceColor InterfaceColor)
-{
-	SetColor(gInterfaceColors[static_cast<int>(InterfaceColor)]);
 }
 
 lcVertexBuffer lcContext::CreateVertexBuffer(int Size, const void* Data)

@@ -45,6 +45,12 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 	connect(ui->ViewSphereColorButton, &QToolButton::clicked, this, &lcQPreferencesDialog::ColorButtonClicked);
 	connect(ui->ViewSphereTextColorButton, &QToolButton::clicked, this, &lcQPreferencesDialog::ColorButtonClicked);
 	connect(ui->ViewSphereHighlightColorButton, &QToolButton::clicked, this, &lcQPreferencesDialog::ColorButtonClicked);
+	connect(ui->ObjectSelectedColorButton, &QToolButton::clicked, this, &lcQPreferencesDialog::ColorButtonClicked);
+	connect(ui->ObjectFocusedColorButton, &QToolButton::clicked, this, &lcQPreferencesDialog::ColorButtonClicked);
+	connect(ui->CameraColorButton, &QToolButton::clicked, this, &lcQPreferencesDialog::ColorButtonClicked);
+	connect(ui->LightColorButton, &QToolButton::clicked, this, &lcQPreferencesDialog::ColorButtonClicked);
+	connect(ui->ControlPointColorButton, &QToolButton::clicked, this, &lcQPreferencesDialog::ColorButtonClicked);
+	connect(ui->ControlPointFocusedColorButton, &QToolButton::clicked, this, &lcQPreferencesDialog::ColorButtonClicked);
 	connect(ui->categoriesTree, SIGNAL(itemSelectionChanged()), this, SLOT(updateParts()));
 	ui->shortcutEdit->installEventFilter(this);
 	connect(ui->commandList, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), this, SLOT(commandChanged(QTreeWidgetItem*)));
@@ -210,6 +216,12 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 	SetButtonPixmap(mOptions->Preferences.mViewSphereColor, ui->ViewSphereColorButton);
 	SetButtonPixmap(mOptions->Preferences.mViewSphereTextColor, ui->ViewSphereTextColorButton);
 	SetButtonPixmap(mOptions->Preferences.mViewSphereHighlightColor, ui->ViewSphereHighlightColorButton);
+	SetButtonPixmap(mOptions->Preferences.mObjectSelectedColor, ui->ObjectSelectedColorButton);
+	SetButtonPixmap(mOptions->Preferences.mObjectFocusedColor, ui->ObjectFocusedColorButton);
+	SetButtonPixmap(mOptions->Preferences.mCameraColor, ui->CameraColorButton);
+	SetButtonPixmap(mOptions->Preferences.mLightColor, ui->LightColorButton);
+	SetButtonPixmap(mOptions->Preferences.mControlPointColor, ui->ControlPointColorButton);
+	SetButtonPixmap(mOptions->Preferences.mControlPointFocusedColor, ui->ControlPointFocusedColorButton);
 
 	on_studStyleCombo_currentIndexChanged(ui->studStyleCombo->currentIndex());
 	on_antiAliasing_toggled();
@@ -494,6 +506,38 @@ void lcQPreferencesDialog::ColorButtonClicked()
 	{
 		Color = &mOptions->Preferences.mViewSphereHighlightColor;
 		Title = tr("Select View Sphere Highlight Color");
+	}
+	else if (Button == ui->ObjectSelectedColorButton)
+	{
+		Color = &mOptions->Preferences.mObjectSelectedColor;
+		Title = tr("Select Objected Selected Color");
+	}
+	else if (Button == ui->ObjectFocusedColorButton)
+	{
+		Color = &mOptions->Preferences.mObjectFocusedColor;
+		Title = tr("Select Object Focused Color");
+	}
+	else if (Button == ui->CameraColorButton)
+	{
+		Color = &mOptions->Preferences.mCameraColor;
+		Title = tr("Select Camera Color");
+	}
+	else if (Button == ui->LightColorButton)
+	{
+		Color = &mOptions->Preferences.mLightColor;
+		Title = tr("Select Light Color");
+	}
+	else if (Button == ui->ControlPointColorButton)
+	{
+		Color = &mOptions->Preferences.mControlPointColor;
+		Title = tr("Select Control Point Color");
+		DialogOptions = QColorDialog::ShowAlphaChannel;
+	}
+	else if (Button == ui->ControlPointFocusedColorButton)
+	{
+		Color = &mOptions->Preferences.mControlPointFocusedColor;
+		Title = tr("Select Control Point Focused Color");
+		DialogOptions = QColorDialog::ShowAlphaChannel;
 	}
 	else
 		return;

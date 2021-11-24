@@ -71,6 +71,12 @@ void lcPreferences::LoadDefaults()
 	mPartEdgeContrast = lcGetProfileFloat(LC_PROFILE_PART_EDGE_CONTRAST);
 	mPartColorValueLDIndex = lcGetProfileFloat(LC_PROFILE_PART_COLOR_VALUE_LD_INDEX);
 	mAutomateEdgeColor = lcGetProfileInt(LC_PROFILE_AUTOMATE_EDGE_COLOR);
+	mObjectSelectedColor = lcGetProfileUInt(LC_PROFILE_OBJECT_SELECTED_COLOR);
+	mObjectFocusedColor = lcGetProfileUInt(LC_PROFILE_OBJECT_FOCUSED_COLOR);
+	mCameraColor = lcGetProfileUInt(LC_PROFILE_CAMERA_COLOR);
+	mLightColor = lcGetProfileUInt(LC_PROFILE_LIGHT_COLOR);
+	mControlPointColor = lcGetProfileUInt(LC_PROFILE_CONTROL_POINT_COLOR);
+	mControlPointFocusedColor = lcGetProfileUInt(LC_PROFILE_CONTROL_POINT_FOCUSED_COLOR);
 }
 
 void lcPreferences::SaveDefaults()
@@ -125,6 +131,12 @@ void lcPreferences::SaveDefaults()
 	lcSetProfileFloat(LC_PROFILE_PART_EDGE_CONTRAST, mPartEdgeContrast);
 	lcSetProfileFloat(LC_PROFILE_PART_COLOR_VALUE_LD_INDEX, mPartColorValueLDIndex);
 	lcSetProfileInt(LC_PROFILE_AUTOMATE_EDGE_COLOR, mAutomateEdgeColor);
+	lcSetProfileUInt(LC_PROFILE_OBJECT_SELECTED_COLOR, mObjectSelectedColor);
+	lcSetProfileUInt(LC_PROFILE_OBJECT_FOCUSED_COLOR, mObjectFocusedColor);
+	lcSetProfileUInt(LC_PROFILE_CAMERA_COLOR, mCameraColor);
+	lcSetProfileUInt(LC_PROFILE_LIGHT_COLOR, mLightColor);
+	lcSetProfileUInt(LC_PROFILE_CONTROL_POINT_COLOR, mControlPointColor);
+	lcSetProfileUInt(LC_PROFILE_CONTROL_POINT_FOCUSED_COLOR, mControlPointFocusedColor);
 }
 
 void lcPreferences::SetInterfaceColors(lcColorTheme ColorTheme)

@@ -40,6 +40,12 @@ enum LC_PROFILE_KEY
 	LC_PROFILE_VIEW_SPHERE_COLOR,
 	LC_PROFILE_VIEW_SPHERE_TEXT_COLOR,
 	LC_PROFILE_VIEW_SPHERE_HIGHLIGHT_COLOR,
+	LC_PROFILE_OBJECT_SELECTED_COLOR,
+	LC_PROFILE_OBJECT_FOCUSED_COLOR,
+	LC_PROFILE_CAMERA_COLOR,
+	LC_PROFILE_LIGHT_COLOR,
+	LC_PROFILE_CONTROL_POINT_COLOR,
+	LC_PROFILE_CONTROL_POINT_FOCUSED_COLOR,
 
 	LC_PROFILE_LANGUAGE,
 	LC_PROFILE_COLOR_THEME,
@@ -114,7 +120,7 @@ class lcProfileEntry
 {
 public:
 	lcProfileEntry(const char* Section, const char* Key, int DefaultValue);
-	lcProfileEntry(const char* Section, const char* Key, unsigned int DefaultValue);
+	lcProfileEntry(const char* Section, const char* Key, uint DefaultValue);
 	lcProfileEntry(const char* Section, const char* Key, float DefaultValue);
 	lcProfileEntry(const char* Section, const char* Key, const char* DefaultValue);
 	lcProfileEntry(const char* Section, const char* Key, const QStringList& StringList);
@@ -128,6 +134,7 @@ public:
 	union
 	{
 		int IntValue;
+		uint UIntValue;
 		float FloatValue;
 		const char* StringValue;
 	} mDefault;
@@ -135,17 +142,15 @@ public:
 
 void lcRemoveProfileKey(LC_PROFILE_KEY Key);
 
-int lcGetDefaultProfileInt(LC_PROFILE_KEY Key);
-float lcGetDefaultProfileFloat(LC_PROFILE_KEY Key);
-QString lcGetDefaultProfileString(LC_PROFILE_KEY Key);
-
 int lcGetProfileInt(LC_PROFILE_KEY Key);
+uint lcGetProfileUInt(LC_PROFILE_KEY Key);
 float lcGetProfileFloat(LC_PROFILE_KEY Key);
 QString lcGetProfileString(LC_PROFILE_KEY Key);
 QStringList lcGetProfileStringList(LC_PROFILE_KEY Key);
 QByteArray lcGetProfileBuffer(LC_PROFILE_KEY Key);
 
 void lcSetProfileInt(LC_PROFILE_KEY Key, int Value);
+void lcSetProfileUInt(LC_PROFILE_KEY Key, uint Value);
 void lcSetProfileFloat(LC_PROFILE_KEY Key, float Value);
 void lcSetProfileString(LC_PROFILE_KEY Key, const QString& Value);
 void lcSetProfileStringList(LC_PROFILE_KEY Key, const QStringList& Value);

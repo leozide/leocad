@@ -77,6 +77,13 @@ public:
 	bool mAutoLoadMostRecent;
 	bool mRestoreTabLayout;
 	lcColorTheme mColorTheme;
+	quint32 mObjectSelectedColor;
+	quint32 mObjectFocusedColor;
+	quint32 mCameraColor;
+	quint32 mLightColor;
+	quint32 mControlPointColor;
+	quint32 mControlPointFocusedColor;
+
 
 	int mPreviewViewSphereEnabled;
 	int mPreviewViewSphereSize;

@@ -10,18 +10,6 @@ lcColorGroup gColorGroups[LC_NUM_COLORGROUPS];
 int gEdgeColor;
 int gDefaultColor;
 
-lcVector4 gInterfaceColors[] = // todo: make the colors configurable and include the grid and other hardcoded colors here as well.
-{
-	lcVector4(0.898f, 0.298f, 0.400f, 1.000f), // lcInterfaceColor::Selected
-	lcVector4(0.400f, 0.298f, 0.898f, 1.000f), // lcInterfaceColor::Focused
-	lcVector4(0.500f, 0.800f, 0.500f, 1.000f), // lcInterfaceColor::Camera
-	lcVector4(0.500f, 0.800f, 0.500f, 1.000f), // lcInterfaceColor::Light
-	lcVector4(0.500f, 0.800f, 0.500f, 0.500f), // lcInterfaceColor::ControlPoint
-	lcVector4(0.400f, 0.298f, 0.898f, 0.500f), // lcInterfaceColor::ControlPointFocused
-};
-
-LC_ARRAY_SIZE_CHECK(gInterfaceColors, lcInterfaceColor::Count);
-
 static void GetToken(char*& Ptr, char* Token)
 {
 	while (*Ptr && *Ptr <= 32)

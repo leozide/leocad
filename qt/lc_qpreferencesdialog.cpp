@@ -510,7 +510,7 @@ void lcQPreferencesDialog::ColorButtonClicked()
 	else if (Button == ui->ObjectSelectedColorButton)
 	{
 		Color = &mOptions->Preferences.mObjectSelectedColor;
-		Title = tr("Select Objected Selected Color");
+		Title = tr("Select Object Selected Color");
 	}
 	else if (Button == ui->ObjectFocusedColorButton)
 	{

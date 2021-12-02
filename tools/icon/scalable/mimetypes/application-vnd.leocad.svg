@@ -5,7 +5,7 @@
    viewBox="0 0 64 64"
    version="1.1"
    id="svg9"
-   sodipodi:docname="application-white-ldr-flatery.svg"
+   sodipodi:docname="application-vnd.leocad.svg"
    inkscape:version="1.1 (c68e22c387, 2021-05-23)"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
@@ -66,15 +66,23 @@
          inkscape:export-ydpi="282.22223"
          sodipodi:nodetypes="ssssscsscssssscsssssssssscssscscssssssssssssssccscsssssscsscscccsssscssccssscscss" />
     </g>
-    <text
-       xml:space="preserve"
+    <g
+       aria-label="LCD"
+       transform="matrix(0.2919585,0,0,0.2919585,17.935003,33.337787)"
        id="text7642"
-       style="font-size:40px;line-height:0;font-family:sans-serif;white-space:pre;shape-inside:url(#rect7644)"
-       transform="matrix(0.2919585,0,0,0.2919585,17.935003,33.337787)"><tspan
-         x="7.8359375"
-         y="77.176337"
-         id="tspan14518"><tspan
-           style="font-weight:bold;font-family:'Open Sans';-inkscape-font-specification:'Open Sans Bold'"
-           id="tspan14516">LCD</tspan></tspan></text>
+       style="font-size:40px;line-height:0;white-space:pre;shape-inside:url(#rect7644)">
+      <path
+         d="M 11.429688,77.176337 V 48.62165 h 6.054687 v 23.554687 h 11.582031 v 5 z"
+         style="font-weight:bold;font-family:'Open Sans';-inkscape-font-specification:'Open Sans Bold'"
+         id="path830" />
+      <path
+         d="m 46.15625,53.250556 q -3.417969,0 -5.292969,2.578125 -1.875,2.558594 -1.875,7.148437 0,9.550782 7.167969,9.550782 3.007812,0 7.285156,-1.503907 v 5.078125 q -3.515625,1.464844 -7.851562,1.464844 -6.230469,0 -9.53125,-3.769531 -3.300782,-3.789063 -3.300782,-10.859375 0,-4.453125 1.621094,-7.792969 Q 36,51.785712 39.027344,50.008368 q 3.046875,-1.796875 7.128906,-1.796875 4.160156,0 8.359375,2.011719 L 52.5625,55.145087 Q 50.960937,54.383368 49.339844,53.816962 47.71875,53.250556 46.15625,53.250556 Z"
+         style="font-weight:bold;font-family:'Open Sans';-inkscape-font-specification:'Open Sans Bold'"
+         id="path832" />
+      <path
+         d="m 83.207031,62.625556 q 0,7.050781 -4.023437,10.800781 -4.003907,3.75 -11.582032,3.75 H 59.515625 V 48.62165 h 8.964844 q 6.992187,0 10.859375,3.691406 3.867187,3.691406 3.867187,10.3125 z m -6.289062,0.15625 q 0,-9.199219 -8.125,-9.199219 h -3.222657 v 18.59375 h 2.597657 q 8.75,0 8.75,-9.394531 z"
+         style="font-weight:bold;font-family:'Open Sans';-inkscape-font-specification:'Open Sans Bold'"
+         id="path834" />
+    </g>
   </g>
 </svg>

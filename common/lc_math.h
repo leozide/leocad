@@ -1930,6 +1930,26 @@ inline bool lcBoundingBoxRayIntersectDistance(const lcVector3& Min, const lcVect
 	return true;
 }
 
+inline bool lcSphereRayIntersection(const lcVector3& Center, float Radius, const lcVector3& Start, const lcVector3& End, lcVector3& Intersection)
+{
+	const lcVector3 RayDirection = lcNormalize(End - Start);
+	const lcVector3 RayCenter = Center - Start;
+	const float RayCenterSquared = lcDot(RayCenter, RayCenter);
+	const float ClosestApproach = lcDot(RayCenter, RayDirection);
+
+	if (ClosestApproach < 0)
+		return false;
+
+	const float HalfCordSquared = (Radius * Radius) - RayCenterSquared + (ClosestApproach * ClosestApproach);
+
+	if (HalfCordSquared < 0)
+		return false;
+
+	Intersection = Start + RayDirection * (ClosestApproach - sqrtf(HalfCordSquared));
+
+	return true;
+}
+
 inline bool lcSphereRayMinIntersectDistance(const lcVector3& Center, float Radius, const lcVector3& Start, const lcVector3& End, float* Dist)
 {
 	const lcVector3 Dir = Center - Start;

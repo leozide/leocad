@@ -799,7 +799,6 @@ lcMesh* lcLibraryMeshData::CreateMesh()
 	int NumVertices = 0;
 	int ConditionalVertexCount = 0;
 
-	// todo: I don't think we should be converting to color index here because it gets saved to the cache
 	for (const std::unique_ptr<lcMeshLoaderMaterial>& Material : mMaterials)
 		Material->Color = lcGetColorIndex(Material->Color);
 

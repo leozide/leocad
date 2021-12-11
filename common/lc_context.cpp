@@ -92,7 +92,6 @@ bool lcContext::InitializeRenderer()
 
 	lcInitializeGLExtensions(mOffscreenContext.get());
 
-	// TODO: Find a better place for the grid texture and font
 	gStringCache.Initialize(Context);
 	gTexFont.Initialize(Context);
 

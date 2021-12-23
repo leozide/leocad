@@ -106,7 +106,7 @@ static void lcResequenceQuad(int* Indices, int a, int b, int c, int d)
 	Indices[3] = d;
 }
 
-static void lcTestQuad(int* QuadIndices, const lcVector3* Vertices)
+static void lcTestQuad(int (&TriangleIndices)[2][3], const lcVector3 (&Vertices)[4])
 {
 	const lcVector3 v01 = Vertices[1] - Vertices[0];
 	const lcVector3 v02 = Vertices[2] - Vertices[0];
@@ -120,6 +120,7 @@ static void lcTestQuad(int* QuadIndices, const lcVector3* Vertices)
 	const lcVector3 v12 = Vertices[2] - Vertices[1];
 	const lcVector3 v13 = Vertices[3] - Vertices[1];
 	const lcVector3 v23 = Vertices[3] - Vertices[2];
+	int QuadIndices[4] = { 0, 1, 2, 3 };
 
 	if (lcDot(lcCross(v12, v01), lcCross(v01, v13)) > 0.0f)
 	{
@@ -135,6 +136,14 @@ static void lcTestQuad(int* QuadIndices, const lcVector3* Vertices)
 		else
 			lcResequenceQuad(QuadIndices, 1, 2, 3, 0);
 	}
+
+	TriangleIndices[0][0] = QuadIndices[0];
+	TriangleIndices[0][1] = QuadIndices[1];
+	TriangleIndices[0][2] = QuadIndices[2];
+
+	TriangleIndices[1][0] = QuadIndices[2];
+	TriangleIndices[1][1] = QuadIndices[3];
+	TriangleIndices[1][2] = QuadIndices[0];
 }
 
 constexpr float lcDistanceEpsilon = 0.01f; // Maximum value for 50591.dat
@@ -177,7 +186,7 @@ quint32 lcMeshLoaderTypeData::AddVertex(const lcVector3& Position, bool Optimize
 	return mVertices.GetSize() - 1;
 }
 
-quint32 lcMeshLoaderTypeData::AddVertex(const lcVector3& Position, const lcVector3& Normal, bool Optimize)
+quint32 lcMeshLoaderTypeData::AddVertex(const lcVector3& Position, const lcVector3& Normal, float NormalWeight, bool Optimize)
 {
 	if (Optimize)
 	{
@@ -190,13 +199,13 @@ quint32 lcMeshLoaderTypeData::AddVertex(const lcVector3& Position, const lcVecto
 				if (Vertex.NormalWeight == 0.0f)
 				{
 					Vertex.Normal = Normal;
-					Vertex.NormalWeight = 1.0f;
+					Vertex.NormalWeight = NormalWeight;
 					return VertexIdx;
 				}
-				else if (lcDot(Normal, Vertex.Normal) > 0.707f)
+				else if (lcDot(Normal, Vertex.Normal) > 0.71f)
 				{
-					Vertex.Normal = lcNormalize(Vertex.Normal * Vertex.NormalWeight + Normal);
-					Vertex.NormalWeight += 1.0f;
+					Vertex.Normal = lcNormalize(Vertex.Normal * Vertex.NormalWeight + Normal * NormalWeight);
+					Vertex.NormalWeight += NormalWeight;
 					return VertexIdx;
 				}
 			}
@@ -234,67 +243,59 @@ void lcMeshLoaderTypeData::ProcessLine(int LineType, lcMeshLoaderMaterial* Mater
 
 	lcMeshLoaderSection* Section = AddSection(PrimitiveType, Material);
 
-	int QuadIndices[4] = { 0, 1, 2, 3 };
-	int Indices[4] = { -1, -1, -1, -1 };
-
 	if (LineType == 3 || LineType == 4)
 	{
+		int TriangleIndices[2][3] = { { 0, 1, 2 }, { 2, 3, 0 } };
+
 		if (LineType == 4)
-			lcTestQuad(QuadIndices, Vertices);
+			lcTestQuad(TriangleIndices, Vertices);
 
 		lcVector3 Normal = lcNormalize(lcCross(Vertices[1] - Vertices[0], Vertices[2] - Vertices[0]));
 
 		if (!WindingCCW)
 			Normal = -Normal;
 
-		for (int IndexIdx = 0; IndexIdx < lcMin(LineType, 4); IndexIdx++)
+		for (int TriangleIndex = 0; TriangleIndex < LineType - 2; TriangleIndex++)
 		{
-			const lcVector3& Position = Vertices[QuadIndices[IndexIdx]];
-			Indices[IndexIdx] = AddVertex(Position, Normal, Optimize);
-		}
+			const lcVector3& Vertex1 = Vertices[TriangleIndices[TriangleIndex][0]];
+			const lcVector3& Vertex2 = Vertices[TriangleIndices[TriangleIndex][1]];
+			const lcVector3& Vertex3 = Vertices[TriangleIndices[TriangleIndex][2]];
+			const lcVector3 Edge1 = lcNormalize(Vertex2 - Vertex1);
+			const lcVector3 Edge2 = lcNormalize(Vertex3 - Vertex1);
+			const lcVector3 Edge3 = lcNormalize(Vertex3 - Vertex2);
+			const float Angle1 = acosf(lcDot(Edge1, Edge2));
+			const float Angle2 = acosf(lcDot(-Edge1, Edge3));
+			const float Angle3 = LC_PI - Angle1 - Angle2;
 
-		if (LineType == 4)
-		{
-			if (Indices[0] != Indices[2] && Indices[0] != Indices[3] && Indices[2] != Indices[3])
+			int Indices[3];
+
+			Indices[0] = AddVertex(Vertex1, Normal, Angle1, Optimize);
+			Indices[1] = AddVertex(Vertex2, Normal, Angle2, Optimize);
+			Indices[2] = AddVertex(Vertex3, Normal, Angle3, Optimize);
+
+			if (Indices[0] != Indices[1] && Indices[0] != Indices[2] && Indices[1] != Indices[2])
 			{
 				if (WindingCCW)
 				{
-					Section->mIndices.Add(Indices[2]);
-					Section->mIndices.Add(Indices[3]);
 					Section->mIndices.Add(Indices[0]);
+					Section->mIndices.Add(Indices[1]);
+					Section->mIndices.Add(Indices[2]);
 				}
 				else
 				{
-					Section->mIndices.Add(Indices[0]);
-					Section->mIndices.Add(Indices[3]);
 					Section->mIndices.Add(Indices[2]);
+					Section->mIndices.Add(Indices[1]);
+					Section->mIndices.Add(Indices[0]);
 				}
-			}
-		}
-
-		if (Indices[0] != Indices[1] && Indices[0] != Indices[2] && Indices[1] != Indices[2])
-		{
-			if (WindingCCW)
-			{
-				Section->mIndices.Add(Indices[0]);
-				Section->mIndices.Add(Indices[1]);
-				Section->mIndices.Add(Indices[2]);
-			}
-			else
-			{
-				Section->mIndices.Add(Indices[2]);
-				Section->mIndices.Add(Indices[1]);
-				Section->mIndices.Add(Indices[0]);
 			}
 		}
 	}
 	else if (LineType == 2)
 	{
-		for (int IndexIdx = 0; IndexIdx < 2; IndexIdx++)
-		{
-			const lcVector3& Position = Vertices[QuadIndices[IndexIdx]];
-			Indices[IndexIdx] = AddVertex(Position, Optimize);
-		}
+		int Indices[2];
+
+		Indices[0] = AddVertex(Vertices[0], Optimize);
+		Indices[1] = AddVertex(Vertices[1], Optimize);
 
 		if (Indices[0] != Indices[1])
 		{
@@ -304,6 +305,8 @@ void lcMeshLoaderTypeData::ProcessLine(int LineType, lcMeshLoaderMaterial* Mater
 	}
 	else if (LineType == 5)
 	{
+		int Indices[2];
+
 		Indices[0] = AddConditionalVertex(Vertices);
 		Section->mIndices.Add(Indices[0]);
 
@@ -334,7 +337,7 @@ void lcMeshLoaderTypeData::AddMeshData(const lcMeshLoaderTypeData& Data, const l
 			lcVector3 Normal = lcNormalize(lcMul(DataVertex.Normal, NormalTransform));
 			if (InvertNormals)
 				Normal = -Normal;
-			Index = AddVertex(Position, Normal, true);
+			Index = AddVertex(Position, Normal, DataVertex.NormalWeight, true);
 		}
 
 		IndexRemap.Add(Index);

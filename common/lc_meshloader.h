@@ -125,7 +125,7 @@ public:
 	lcMeshLoaderSection* AddSection(lcMeshPrimitiveType PrimitiveType, lcMeshLoaderMaterial* Material);
 
 	quint32 AddVertex(const lcVector3& Position, bool Optimize);
-	quint32 AddVertex(const lcVector3& Position, const lcVector3& Normal, bool Optimize);
+	quint32 AddVertex(const lcVector3& Position, const lcVector3& Normal, float NormalWeight, bool Optimize);
 	quint32 AddConditionalVertex(const lcVector3 (&Position)[4]);
 
 	void ProcessLine(int LineType, lcMeshLoaderMaterial* Material, bool WindingCCW, lcVector3 (&Vertices)[4], bool Optimize);

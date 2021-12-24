@@ -53,6 +53,13 @@ struct lcObjectSection
 	quint32 Section = 0;
 };
 
+struct lcPieceInfoRayTest
+{
+	const PieceInfo* PieceInfo = nullptr;
+	lcMatrix44 Transform;
+	lcVector3 Plane;
+};
+
 struct lcObjectRayTest
 {
 	lcCamera* ViewCamera;
@@ -62,8 +69,7 @@ struct lcObjectRayTest
 	lcVector3 End;
 	float Distance = FLT_MAX;
 	lcObjectSection ObjectSection;
-	const PieceInfo* HitPieceInfo = nullptr;
-	lcMatrix44 HitTransform;
+	lcPieceInfoRayTest PieceInfoRayTest;
 };
 
 struct lcObjectBoxTest

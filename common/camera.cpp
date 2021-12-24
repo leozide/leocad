@@ -636,11 +636,14 @@ void lcCamera::RayTest(lcObjectRayTest& ObjectRayTest) const
 	lcVector3 End = lcMul31(ObjectRayTest.End, mWorldView);
 
 	float Distance;
-	if (lcBoundingBoxRayIntersectDistance(Min, Max, Start, End, &Distance, nullptr) && (Distance < ObjectRayTest.Distance))
+	lcVector3 Plane;
+
+	if (lcBoundingBoxRayIntersectDistance(Min, Max, Start, End, &Distance, nullptr, &Plane) && (Distance < ObjectRayTest.Distance))
 	{
 		ObjectRayTest.ObjectSection.Object = const_cast<lcCamera*>(this);
 		ObjectRayTest.ObjectSection.Section = LC_CAMERA_SECTION_POSITION;
 		ObjectRayTest.Distance = Distance;
+		ObjectRayTest.PieceInfoRayTest.Plane = Plane;
 	}
 
 	Min = lcVector3(-LC_CAMERA_TARGET_EDGE, -LC_CAMERA_TARGET_EDGE, -LC_CAMERA_TARGET_EDGE);
@@ -652,11 +655,12 @@ void lcCamera::RayTest(lcObjectRayTest& ObjectRayTest) const
 	Start = lcMul31(ObjectRayTest.Start, WorldView);
 	End = lcMul31(ObjectRayTest.End, WorldView);
 
-	if (lcBoundingBoxRayIntersectDistance(Min, Max, Start, End, &Distance, nullptr) && (Distance < ObjectRayTest.Distance))
+	if (lcBoundingBoxRayIntersectDistance(Min, Max, Start, End, &Distance, nullptr, &Plane) && (Distance < ObjectRayTest.Distance))
 	{
 		ObjectRayTest.ObjectSection.Object = const_cast<lcCamera*>(this);
 		ObjectRayTest.ObjectSection.Section = LC_CAMERA_SECTION_TARGET;
 		ObjectRayTest.Distance = Distance;
+		ObjectRayTest.PieceInfoRayTest.Plane = Plane;
 	}
 
 	const lcMatrix44 ViewWorld = lcMatrix44AffineInverse(mWorldView);
@@ -668,11 +672,12 @@ void lcCamera::RayTest(lcObjectRayTest& ObjectRayTest) const
 	Start = lcMul31(ObjectRayTest.Start, WorldView);
 	End = lcMul31(ObjectRayTest.End, WorldView);
 
-	if (lcBoundingBoxRayIntersectDistance(Min, Max, Start, End, &Distance, nullptr) && (Distance < ObjectRayTest.Distance))
+	if (lcBoundingBoxRayIntersectDistance(Min, Max, Start, End, &Distance, nullptr, &Plane) && (Distance < ObjectRayTest.Distance))
 	{
 		ObjectRayTest.ObjectSection.Object = const_cast<lcCamera*>(this);
 		ObjectRayTest.ObjectSection.Section = LC_CAMERA_SECTION_UPVECTOR;
 		ObjectRayTest.Distance = Distance;
+		ObjectRayTest.PieceInfoRayTest.Plane = Plane;
 	}
 }
 

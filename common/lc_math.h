@@ -1846,7 +1846,7 @@ inline bool lcTriangleIntersectsPlanes(const float* p1, const float* p2, const f
 }
 
 // Return true if a ray intersects a bounding box, and calculates the distance from the start of the ray (adapted from Graphics Gems).
-inline bool lcBoundingBoxRayIntersectDistance(const lcVector3& Min, const lcVector3& Max, const lcVector3& Start, const lcVector3& End, float* Dist, lcVector3* Intersection)
+inline bool lcBoundingBoxRayIntersectDistance(const lcVector3& Min, const lcVector3& Max, const lcVector3& Start, const lcVector3& End, float* Dist, lcVector3* Intersection, lcVector3* Plane)
 {
 	bool MiddleQuadrant[3];
 	bool Inside = true;
@@ -1883,6 +1883,9 @@ inline bool lcBoundingBoxRayIntersectDistance(const lcVector3& Min, const lcVect
 
 		if (Intersection)
 			*Intersection = Start;
+
+		if (Plane)
+			*Plane = Start;
 
 		return true;
 	}
@@ -1926,6 +1929,12 @@ inline bool lcBoundingBoxRayIntersectDistance(const lcVector3& Min, const lcVect
 
 	if (Intersection)
 		*Intersection = Point;
+
+	if (Plane)
+	{
+		*Plane = lcVector3(0.0f, 0.0f, 0.0f);
+		(*Plane)[WhichPlane] = CandidatePlane[WhichPlane];
+	}
 
 	return true;
 }

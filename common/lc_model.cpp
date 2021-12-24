@@ -1572,7 +1572,7 @@ void lcModel::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
 			Light->BoxTest(ObjectBoxTest);
 }
 
-bool lcModel::SubModelMinIntersectDist(const lcVector3& WorldStart, const lcVector3& WorldEnd, float& MinDistance, const PieceInfo*& HitPieceInfo, lcMatrix44& HitTransform) const
+bool lcModel::SubModelMinIntersectDist(const lcVector3& WorldStart, const lcVector3& WorldEnd, float& MinDistance, lcPieceInfoRayTest& PieceInfoRayTest) const
 {
 	bool MinIntersect = false;
 
@@ -1584,10 +1584,10 @@ bool lcModel::SubModelMinIntersectDist(const lcVector3& WorldStart, const lcVect
 
 		if (Piece->IsVisibleInSubModel())
 		{
-			if (Piece->mPieceInfo->MinIntersectDist(Start, End, MinDistance, HitPieceInfo, HitTransform)) // todo: this should check for piece->mMesh first
+			if (Piece->mPieceInfo->MinIntersectDist(Start, End, MinDistance, PieceInfoRayTest)) // todo: this should check for piece->mMesh first
 			{
 				MinIntersect = true;
-				HitTransform = lcMul(HitTransform, Piece->mModelWorld);
+				PieceInfoRayTest.Transform = lcMul(PieceInfoRayTest.Transform, Piece->mModelWorld);
 			}
 		}
 	}

@@ -469,23 +469,20 @@ void lcPiece::RayTest(lcObjectRayTest& ObjectRayTest) const
 
 	if (mMesh)
 	{
-		if (mMesh->MinIntersectDist(Start, End, ObjectRayTest.Distance))
+		if (mMesh->MinIntersectDist(Start, End, ObjectRayTest.Distance, ObjectRayTest.PieceInfoRayTest.Plane))
 		{
 			ObjectRayTest.ObjectSection.Object = const_cast<lcPiece*>(this);
 			ObjectRayTest.ObjectSection.Section = LC_PIECE_SECTION_POSITION;
+			ObjectRayTest.PieceInfoRayTest.Transform = mModelWorld;
 		}
 	}
 	else
 	{
-		const PieceInfo* HitPieceInfo = nullptr;
-		lcMatrix44 HitTransform = lcMatrix44Identity();
-
-		if (mPieceInfo->MinIntersectDist(Start, End, ObjectRayTest.Distance, HitPieceInfo, HitTransform))
+		if (mPieceInfo->MinIntersectDist(Start, End, ObjectRayTest.Distance, ObjectRayTest.PieceInfoRayTest))
 		{
 			ObjectRayTest.ObjectSection.Object = const_cast<lcPiece*>(this);
 			ObjectRayTest.ObjectSection.Section = LC_PIECE_SECTION_POSITION;
-			ObjectRayTest.HitPieceInfo = HitPieceInfo;
-			ObjectRayTest.HitTransform = lcMul(HitTransform, mModelWorld);
+			ObjectRayTest.PieceInfoRayTest.Transform = lcMul(ObjectRayTest.PieceInfoRayTest.Transform, mModelWorld);
 		}
 	}
 
@@ -501,12 +498,15 @@ void lcPiece::RayTest(lcObjectRayTest& ObjectRayTest) const
 			const lcVector3 PointEnd = lcMul31(End, InverseTransform);
 
 			float Distance;
-			if (!lcBoundingBoxRayIntersectDistance(Min, Max, PointStart, PointEnd, &Distance, nullptr) || (Distance >= ObjectRayTest.Distance))
-				continue;
+			lcVector3 Plane;
 
-			ObjectRayTest.ObjectSection.Object = const_cast<lcPiece*>(this);
-			ObjectRayTest.ObjectSection.Section = LC_PIECE_SECTION_CONTROL_POINT_FIRST + ControlPointIdx;
-			ObjectRayTest.Distance = Distance;
+			if (lcBoundingBoxRayIntersectDistance(Min, Max, PointStart, PointEnd, &Distance, nullptr, &Plane))
+			{
+				ObjectRayTest.ObjectSection.Object = const_cast<lcPiece*>(this);
+				ObjectRayTest.ObjectSection.Section = LC_PIECE_SECTION_CONTROL_POINT_FIRST + ControlPointIdx;
+				ObjectRayTest.Distance = Distance;
+				ObjectRayTest.PieceInfoRayTest.Plane = Plane;
+			}
 		}
 	}
 }

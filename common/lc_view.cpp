@@ -414,21 +414,31 @@ lcMatrix44 lcView::GetPieceInsertPosition(bool IgnoreSelected, PieceInfo* Info) 
 {
 	lcModel* ActiveModel = GetActiveModel();
 
-	const PieceInfo* HitPieceInfo;
-	lcMatrix44 HitTransform;
-
-	std::tie(HitPieceInfo, HitTransform) = FindPieceInfoUnderPointer(IgnoreSelected);
+	lcPieceInfoRayTest PieceInfoRayTest = FindPieceInfoUnderPointer(IgnoreSelected);
 		
-	if (HitPieceInfo)
+	if (PieceInfoRayTest.PieceInfo)
 	{
-		lcVector3 Position(0, 0, HitPieceInfo->GetBoundingBox().Max.z - Info->GetBoundingBox().Min.z);
+		lcVector3 Position = PieceInfoRayTest.Plane;
+
+		if (Position.x > 0.0f)
+			Position.x += fabsf(Info->GetBoundingBox().Min.x);
+		else if (Position.x < 0.0f)
+			Position.x -= fabsf(Info->GetBoundingBox().Max.x);
+		else if (Position.y > 0.0f)
+			Position.y += fabsf(Info->GetBoundingBox().Min.y);
+		else if (Position.y < 0.0f)
+			Position.y -= fabsf(Info->GetBoundingBox().Max.y);
+		else if (Position.z > 0.0f)
+			Position.z += fabsf(Info->GetBoundingBox().Min.z);
+		else if (Position.z < 0.0f)
+			Position.z -= fabsf(Info->GetBoundingBox().Max.z);
 
 		if (gMainWindow->GetRelativeTransform())
-			Position = lcMul31(ActiveModel->SnapPosition(Position), HitTransform);
+			Position = lcMul31(ActiveModel->SnapPosition(Position), PieceInfoRayTest.Transform);
 		else
-			Position = ActiveModel->SnapPosition(lcMul31(Position, HitTransform));
+			Position = ActiveModel->SnapPosition(lcMul31(Position, PieceInfoRayTest.Transform));
 
-		lcMatrix44 WorldMatrix = HitTransform;
+		lcMatrix44 WorldMatrix = PieceInfoRayTest.Transform;
 		WorldMatrix.SetTranslation(Position);
 
 		return WorldMatrix;
@@ -543,7 +553,7 @@ lcObjectSection lcView::FindObjectUnderPointer(bool PiecesOnly, bool IgnoreSelec
 	return ObjectRayTest.ObjectSection;
 }
 
-std::pair<const PieceInfo*, lcMatrix44> lcView::FindPieceInfoUnderPointer(bool IgnoreSelected) const
+lcPieceInfoRayTest lcView::FindPieceInfoUnderPointer(bool IgnoreSelected) const
 {
 	lcVector3 StartEnd[2] =
 	{
@@ -573,7 +583,7 @@ std::pair<const PieceInfo*, lcMatrix44> lcView::FindPieceInfoUnderPointer(bool I
 
 	ActiveModel->RayTest(ObjectRayTest);
 
-	return { ObjectRayTest.HitPieceInfo, ObjectRayTest.HitTransform };
+	return ObjectRayTest.PieceInfoRayTest;
 }
 
 lcArray<lcObject*> lcView::FindObjectsInBox(float x1, float y1, float x2, float y2) const

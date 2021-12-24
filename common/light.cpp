@@ -132,11 +132,14 @@ void lcLight::RayTest(lcObjectRayTest& ObjectRayTest) const
 	lcVector3 End = lcMul31(ObjectRayTest.End, mWorldLight);
 
 	float Distance;
-	if (lcBoundingBoxRayIntersectDistance(Min, Max, Start, End, &Distance, nullptr) && (Distance < ObjectRayTest.Distance))
+	lcVector3 Plane;
+
+	if (lcBoundingBoxRayIntersectDistance(Min, Max, Start, End, &Distance, nullptr, &Plane) && (Distance < ObjectRayTest.Distance))
 	{
 		ObjectRayTest.ObjectSection.Object = const_cast<lcLight*>(this);
 		ObjectRayTest.ObjectSection.Section = LC_LIGHT_SECTION_POSITION;
 		ObjectRayTest.Distance = Distance;
+		ObjectRayTest.PieceInfoRayTest.Plane = Plane;
 	}
 
 	Min = lcVector3(-LC_LIGHT_TARGET_EDGE, -LC_LIGHT_TARGET_EDGE, -LC_LIGHT_TARGET_EDGE);
@@ -148,11 +151,12 @@ void lcLight::RayTest(lcObjectRayTest& ObjectRayTest) const
 	Start = lcMul31(ObjectRayTest.Start, WorldTarget);
 	End = lcMul31(ObjectRayTest.End, WorldTarget);
 
-	if (lcBoundingBoxRayIntersectDistance(Min, Max, Start, End, &Distance, nullptr) && (Distance < ObjectRayTest.Distance))
+	if (lcBoundingBoxRayIntersectDistance(Min, Max, Start, End, &Distance, nullptr, &Plane) && (Distance < ObjectRayTest.Distance))
 	{
 		ObjectRayTest.ObjectSection.Object = const_cast<lcLight*>(this);
 		ObjectRayTest.ObjectSection.Section = LC_LIGHT_SECTION_TARGET;
 		ObjectRayTest.Distance = Distance;
+		ObjectRayTest.PieceInfoRayTest.Plane = Plane;
 	}
 }
 

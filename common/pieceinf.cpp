@@ -197,40 +197,43 @@ void PieceInfo::Unload()
 	}
 }
 
-bool PieceInfo::MinIntersectDist(const lcVector3& Start, const lcVector3& End, float& MinDistance, const PieceInfo*& HitPieceInfo, lcMatrix44& HitTransform) const
+bool PieceInfo::MinIntersectDist(const lcVector3& Start, const lcVector3& End, float& MinDistance, lcPieceInfoRayTest& PieceInfoRayTest) const
 {
 	bool Intersect = false;
 
 	if (IsPlaceholder() || IsModel() || IsProject())
 	{
 		float Distance;
+		lcVector3 Plane;
 
-		if (!lcBoundingBoxRayIntersectDistance(mBoundingBox.Min, mBoundingBox.Max, Start, End, &Distance, nullptr) || (Distance >= MinDistance))
+		if (!lcBoundingBoxRayIntersectDistance(mBoundingBox.Min, mBoundingBox.Max, Start, End, &Distance, nullptr, &Plane) || (Distance >= MinDistance))
 			return false;
 
 		if (IsPlaceholder())
 		{
-			HitPieceInfo = this;
-			HitTransform = lcMatrix44Identity();
+			PieceInfoRayTest.PieceInfo = this;
+			PieceInfoRayTest.Transform = lcMatrix44Identity();
+			MinDistance = Distance;
+			PieceInfoRayTest.Plane = Plane;
 			return true;
 		}
 
 		if (IsModel())
-			Intersect |= mModel->SubModelMinIntersectDist(Start, End, MinDistance, HitPieceInfo, HitTransform);
+			Intersect |= mModel->SubModelMinIntersectDist(Start, End, MinDistance, PieceInfoRayTest);
 		else if (IsProject())
 		{
 			const lcModel* const Model = mProject->GetMainModel();
 			if (Model)
-				Intersect |= Model->SubModelMinIntersectDist(Start, End, MinDistance, HitPieceInfo, HitTransform);
+				Intersect |= Model->SubModelMinIntersectDist(Start, End, MinDistance, PieceInfoRayTest);
 		}
 	}
 
 	if (mMesh)
 	{
-		if (mMesh->MinIntersectDist(Start, End, MinDistance))
+		if (mMesh->MinIntersectDist(Start, End, MinDistance, PieceInfoRayTest.Plane))
 		{
-			HitPieceInfo = this;
-			HitTransform = lcMatrix44Identity();
+			PieceInfoRayTest.PieceInfo = this;
+			PieceInfoRayTest.Transform = lcMatrix44Identity();
 			Intersect = true;
 		}
 	}

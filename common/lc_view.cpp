@@ -412,19 +412,23 @@ lcVector3 lcView::GetMoveDirection(const lcVector3& Direction) const
 
 lcMatrix44 lcView::GetPieceInsertPosition(bool IgnoreSelected, PieceInfo* Info) const
 {
-	lcPiece* HitPiece = (lcPiece*)FindObjectUnderPointer(true, IgnoreSelected).Object;
 	lcModel* ActiveModel = GetActiveModel();
 
-	if (HitPiece)
+	const PieceInfo* HitPieceInfo;
+	lcMatrix44 HitTransform;
+
+	std::tie(HitPieceInfo, HitTransform) = FindPieceInfoUnderPointer(IgnoreSelected);
+		
+	if (HitPieceInfo)
 	{
-		lcVector3 Position(0, 0, HitPiece->GetBoundingBox().Max.z - Info->GetBoundingBox().Min.z);
+		lcVector3 Position(0, 0, HitPieceInfo->GetBoundingBox().Max.z - Info->GetBoundingBox().Min.z);
 
 		if (gMainWindow->GetRelativeTransform())
-			Position = lcMul31(ActiveModel->SnapPosition(Position), HitPiece->mModelWorld);
+			Position = lcMul31(ActiveModel->SnapPosition(Position), HitTransform);
 		else
-			Position = ActiveModel->SnapPosition(lcMul31(Position, HitPiece->mModelWorld));
+			Position = ActiveModel->SnapPosition(lcMul31(Position, HitTransform));
 
-		lcMatrix44 WorldMatrix = HitPiece->mModelWorld;
+		lcMatrix44 WorldMatrix = HitTransform;
 		WorldMatrix.SetTranslation(Position);
 
 		return WorldMatrix;
@@ -523,9 +527,6 @@ lcObjectSection lcView::FindObjectUnderPointer(bool PiecesOnly, bool IgnoreSelec
 	ObjectRayTest.ViewCamera = mCamera;
 	ObjectRayTest.Start = StartEnd[0];
 	ObjectRayTest.End = StartEnd[1];
-	ObjectRayTest.Distance = FLT_MAX;
-	ObjectRayTest.ObjectSection.Object = nullptr;
-	ObjectRayTest.ObjectSection.Section = 0;;
 
 	lcModel* ActiveModel = GetActiveModel();
 
@@ -540,6 +541,39 @@ lcObjectSection lcView::FindObjectUnderPointer(bool PiecesOnly, bool IgnoreSelec
 	ActiveModel->RayTest(ObjectRayTest);
 
 	return ObjectRayTest.ObjectSection;
+}
+
+std::pair<const PieceInfo*, lcMatrix44> lcView::FindPieceInfoUnderPointer(bool IgnoreSelected) const
+{
+	lcVector3 StartEnd[2] =
+	{
+		lcVector3((float)mMouseX, (float)mMouseY, 0.0f),
+		lcVector3((float)mMouseX, (float)mMouseY, 1.0f)
+	};
+
+	UnprojectPoints(StartEnd, 2);
+
+	lcObjectRayTest ObjectRayTest;
+
+	ObjectRayTest.PiecesOnly = true;
+	ObjectRayTest.IgnoreSelected = IgnoreSelected;
+	ObjectRayTest.ViewCamera = mCamera;
+	ObjectRayTest.Start = StartEnd[0];
+	ObjectRayTest.End = StartEnd[1];
+
+	lcModel* ActiveModel = GetActiveModel();
+
+	if (ActiveModel != mModel)
+	{
+		lcMatrix44 InverseMatrix = lcMatrix44AffineInverse(mActiveSubmodelTransform);
+
+		ObjectRayTest.Start = lcMul31(ObjectRayTest.Start, InverseMatrix);
+		ObjectRayTest.End = lcMul31(ObjectRayTest.End, InverseMatrix);
+	}
+
+	ActiveModel->RayTest(ObjectRayTest);
+
+	return { ObjectRayTest.HitPieceInfo, ObjectRayTest.HitTransform };
 }
 
 lcArray<lcObject*> lcView::FindObjectsInBox(float x1, float y1, float x2, float y2) const

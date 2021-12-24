@@ -475,10 +475,18 @@ void lcPiece::RayTest(lcObjectRayTest& ObjectRayTest) const
 			ObjectRayTest.ObjectSection.Section = LC_PIECE_SECTION_POSITION;
 		}
 	}
-	else if (mPieceInfo->MinIntersectDist(Start, End, ObjectRayTest.Distance))
+	else
 	{
-		ObjectRayTest.ObjectSection.Object = const_cast<lcPiece*>(this);
-		ObjectRayTest.ObjectSection.Section = LC_PIECE_SECTION_POSITION;
+		const PieceInfo* HitPieceInfo = nullptr;
+		lcMatrix44 HitTransform = lcMatrix44Identity();
+
+		if (mPieceInfo->MinIntersectDist(Start, End, ObjectRayTest.Distance, HitPieceInfo, HitTransform))
+		{
+			ObjectRayTest.ObjectSection.Object = const_cast<lcPiece*>(this);
+			ObjectRayTest.ObjectSection.Section = LC_PIECE_SECTION_POSITION;
+			ObjectRayTest.HitPieceInfo = HitPieceInfo;
+			ObjectRayTest.HitTransform = lcMul(HitTransform, mModelWorld);
+		}
 	}
 
 	if (AreControlPointsVisible())

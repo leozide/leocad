@@ -55,7 +55,7 @@ struct lcObjectSection
 
 struct lcPieceInfoRayTest
 {
-	const PieceInfo* PieceInfo = nullptr;
+	const PieceInfo* Info = nullptr;
 	lcMatrix44 Transform;
 	lcVector3 Plane;
 };

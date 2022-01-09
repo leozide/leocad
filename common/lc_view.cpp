@@ -416,7 +416,7 @@ lcMatrix44 lcView::GetPieceInsertPosition(bool IgnoreSelected, PieceInfo* Info) 
 
 	lcPieceInfoRayTest PieceInfoRayTest = FindPieceInfoUnderPointer(IgnoreSelected);
 		
-	if (PieceInfoRayTest.PieceInfo)
+	if (PieceInfoRayTest.Info)
 	{
 		lcVector3 Position = PieceInfoRayTest.Plane;
 

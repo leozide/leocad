@@ -211,7 +211,7 @@ bool PieceInfo::MinIntersectDist(const lcVector3& Start, const lcVector3& End, f
 
 		if (IsPlaceholder())
 		{
-			PieceInfoRayTest.PieceInfo = this;
+			PieceInfoRayTest.Info = this;
 			PieceInfoRayTest.Transform = lcMatrix44Identity();
 			MinDistance = Distance;
 			PieceInfoRayTest.Plane = Plane;
@@ -232,7 +232,7 @@ bool PieceInfo::MinIntersectDist(const lcVector3& Start, const lcVector3& End, f
 	{
 		if (mMesh->MinIntersectDist(Start, End, MinDistance, PieceInfoRayTest.Plane))
 		{
-			PieceInfoRayTest.PieceInfo = this;
+			PieceInfoRayTest.Info = this;
 			PieceInfoRayTest.Transform = lcMatrix44Identity();
 			Intersect = true;
 		}

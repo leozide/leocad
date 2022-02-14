@@ -28,7 +28,7 @@ Group: Graphics
 %if 0%{?fedora} || 0%{?centos_version}
 Group: Amusements/Graphics
 %endif
-Version: 21.03
+Version: 21.06
 %if 0%{?opensuse_bs}
 Release: <CI_CNT>.<B_CNT>%{?dist}
 %else
@@ -281,6 +281,9 @@ install -m 644 tools/icon/scalable/apps/leocad.svg \
 rm -rf $RPM_BUILD_ROOT
 
 %changelog
+* Sun Jan 30 2022 - sT331h0rs3 (at) gmail.com 0.92
+- Actualize LeoCAD version
+
 * Sat May 08 2021 - sT331h0rs3 (at) gmail.com 0.91
 - Build with Qt5 by default
 - Actualize LeoCAD version

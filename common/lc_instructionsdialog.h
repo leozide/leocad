@@ -161,10 +161,13 @@ public:
 	lcInstructionsDialog(QWidget* Parent, Project* Project);
 
 protected slots:
+	void ShowPrintDialog();
 	void UpdatePageSettings();
 	void CurrentThumbnailChanged(int Index);
 
 protected:
+	void Print(QPrinter* Printer);
+
 	Project* mProject = nullptr;
 
 	int mCurrentPageNumber;
@@ -175,6 +178,7 @@ protected:
 	lcInstructionsPropertiesWidget* mPropertiesWidget = nullptr;
 
 	QToolBar* mPageSettingsToolBar = nullptr;
+	QAction* mPrintAction = nullptr;
 	QAction* mVerticalPageAction = nullptr;
 	QAction* mHorizontalPageAction = nullptr;
 	QSpinBox* mRowsSpinBox = nullptr;

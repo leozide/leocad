@@ -133,17 +133,15 @@ void lcInstructionsPageWidget::SelectionChanged()
 	mPropertiesWidget->SelectionChanged(Focus);
 }
 
-void lcInstructionsPageWidget::SetCurrentPage(const lcInstructionsPage* Page)
+static void lcUpdateInstructionsPageScene(lcInstructions* Instructions, const lcInstructionsPage* Page, QGraphicsScene* Scene)
 {
-	QGraphicsScene* Scene = scene();
-
 	Scene->clear();
 
 	if (!Page)
 		return;
 
-	const lcInstructionsPageSetup& PageSetup = mInstructions->mPageSetup;
-//	Scene->setSceneRect(0, 0, mInstructions->mPageSetup.Width, mInstructions->mPageSetup.Height);
+	const lcInstructionsPageSetup& PageSetup = Instructions->mPageSetup;
+	//	Scene->setSceneRect(0, 0, mInstructions->mPageSetup.Width, mInstructions->mPageSetup.Height);
 
 	QGraphicsRectItem* PageItem = Scene->addRect(QRectF(0.0f, 0.0f, PageSetup.Width, PageSetup.Height), QPen(Qt::black), QBrush(Qt::white));
 	PageItem->setFlag(QGraphicsItem::ItemClipsChildrenToShape, true);
@@ -152,18 +150,25 @@ void lcInstructionsPageWidget::SetCurrentPage(const lcInstructionsPage* Page)
 
 	for (const lcInstructionsStep& Step : Page->Steps)
 	{
-		lcInstructionsStepImageItem* StepImageItem = new lcInstructionsStepImageItem(PageItem, mInstructions, Step.Model, Step.Step);
+		lcInstructionsStepImageItem* StepImageItem = new lcInstructionsStepImageItem(PageItem, Instructions, Step.Model, Step.Step);
 		StepImageItem->setPos(MarginsRect.left() + MarginsRect.width() * Step.Rect.x(), MarginsRect.top() + MarginsRect.height() * Step.Rect.y());
 		StepImageItem->SetImageSize(MarginsRect.width() * Step.Rect.width(), MarginsRect.height() * Step.Rect.height());
 		StepImageItem->Update();
 
-		lcInstructionsStepNumberItem* StepNumberItem = new lcInstructionsStepNumberItem(StepImageItem, mInstructions, Step.Model, Step.Step);
+		lcInstructionsStepNumberItem* StepNumberItem = new lcInstructionsStepNumberItem(StepImageItem, Instructions, Step.Model, Step.Step);
 		StepNumberItem->Update();
 
-		lcInstructionsPartsListItem* PartsImageItem = new lcInstructionsPartsListItem(StepImageItem, mInstructions, Step.Model, Step.Step);
+		lcInstructionsPartsListItem* PartsImageItem = new lcInstructionsPartsListItem(StepImageItem, Instructions, Step.Model, Step.Step);
 		PartsImageItem->setPos(StepNumberItem->boundingRect().topRight());
 		PartsImageItem->Update();
 	}
+}
+
+void lcInstructionsPageWidget::SetCurrentPage(const lcInstructionsPage* Page)
+{
+	QGraphicsScene* Scene = scene();
+
+	lcUpdateInstructionsPageScene(mInstructions, Page, Scene);
 }
 
 lcInstructionsPageListWidget::lcInstructionsPageListWidget(QWidget* Parent, lcInstructions* Instructions)
@@ -544,8 +549,11 @@ lcInstructionsDialog::lcInstructionsDialog(QWidget* Parent, Project* Project)
 	mPageSettingsToolBar->setFloatable(false);
 	mPageSettingsToolBar->setMovable(false);
 
+	mPrintAction = mPageSettingsToolBar->addAction(tr("Print"));
+
 	mVerticalPageAction = mPageSettingsToolBar->addAction("Vertical");
 	mVerticalPageAction->setCheckable(true);
+
 	mHorizontalPageAction = mPageSettingsToolBar->addAction("Horizontal");
 	mHorizontalPageAction->setCheckable(true);
 
@@ -565,10 +573,107 @@ lcInstructionsDialog::lcInstructionsDialog(QWidget* Parent, Project* Project)
 	connect(mPageListWidget->mThumbnailsWidget, SIGNAL(currentRowChanged(int)), this, SLOT(CurrentThumbnailChanged(int)));
 	mPageListWidget->mThumbnailsWidget->setCurrentRow(0);
 
+	connect(mPrintAction, &QAction::triggered, this, &lcInstructionsDialog::ShowPrintDialog);
 	connect(mVerticalPageAction, SIGNAL(toggled(bool)), this, SLOT(UpdatePageSettings()));
 	connect(mHorizontalPageAction, SIGNAL(toggled(bool)), this, SLOT(UpdatePageSettings()));
 	connect(mRowsSpinBox, SIGNAL(valueChanged(int)), this, SLOT(UpdatePageSettings()));
 	connect(mColumnsSpinBox, SIGNAL(valueChanged(int)), this, SLOT(UpdatePageSettings()));
+}
+
+void lcInstructionsDialog::ShowPrintDialog()
+{
+#ifndef QT_NO_PRINTER
+	int PageCount = static_cast<int>(mInstructions->mPages.size());
+
+	QPrinter Printer(QPrinter::HighResolution);
+	Printer.setFromTo(1, PageCount + 1);
+
+	QPrintDialog PrintDialog(&Printer, this);
+
+	if (PrintDialog.exec() == QDialog::Accepted)
+		Print(&Printer);
+#endif
+}
+
+void lcInstructionsDialog::Print(QPrinter* Printer)
+{
+#ifndef QT_NO_PRINTER
+	int DocCopies;
+	int PageCopies;
+
+	const int PageCount = static_cast<int>(mInstructions->mPages.size());
+
+	if (Printer->collateCopies())
+	{
+		DocCopies = 1;
+		PageCopies = Printer->supportsMultipleCopies() ? 1 : Printer->copyCount();
+	}
+	else
+	{
+		DocCopies = Printer->supportsMultipleCopies() ? 1 : Printer->copyCount();
+		PageCopies = 1;
+	}
+
+	int FromPage = Printer->fromPage();
+	int ToPage = Printer->toPage();
+	bool Ascending = true;
+
+	if (FromPage == 0 && ToPage == 0)
+	{
+		FromPage = 1;
+		ToPage = PageCount;
+	}
+
+	FromPage = qMax(1, FromPage);
+	ToPage = qMin(PageCount, ToPage);
+
+	if (ToPage < FromPage)
+		return;
+
+	if (Printer->pageOrder() == QPrinter::LastPageFirst)
+	{
+		std::swap(FromPage, ToPage);
+		Ascending = false;
+	}
+
+	QGraphicsScene* Scene = new QGraphicsScene();
+	QPainter Painter(Printer);
+	bool FirstPage = true;
+
+	for (int DocCopy = 0; DocCopy < DocCopies; DocCopy++)
+	{
+		int Page = FromPage;
+
+		for (;;)
+		{
+			for (int PageCopy = 0; PageCopy < PageCopies; PageCopy++)
+			{
+				if (Printer->printerState() == QPrinter::Aborted || Printer->printerState() == QPrinter::Error)
+					return;
+
+				if (!FirstPage)
+					Printer->newPage();
+				else
+					FirstPage = false;
+
+				const lcInstructionsPage* InstructionsPage = &mInstructions->mPages[Page - 1];
+				lcUpdateInstructionsPageScene(mInstructions, InstructionsPage, Scene);
+
+				Scene->render(&Painter);
+			}
+
+			if (Page == ToPage)
+				break;
+
+			if (Ascending)
+				Page++;
+			else
+				Page--;
+		}
+	}
+
+	delete Scene;
+#endif
 }
 
 void lcInstructionsDialog::UpdatePageSettings()

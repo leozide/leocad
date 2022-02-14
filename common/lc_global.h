@@ -11,6 +11,7 @@
 #include <QWidget>
 #include <QOpenGLWidget>
 #include <QPrinter>
+#include <QPrintDialog>
 #include <map>
 #include <vector>
 #include <array>

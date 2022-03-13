@@ -83,7 +83,7 @@ bool lcInstructions::GetBoolProperty(lcInstructionsPropertyType Type, lcModel* M
 QColor lcInstructions::GetColorProperty(lcInstructionsPropertyType Type, lcModel* Model, lcStep Step) const
 {
 	QVariant Value = GetProperty(Type, Model, Step);
-	return lcRGBAFromQColor(Value.toUInt());
+	return lcQColorFromRGBA(Value.toUInt());
 }
 
 QFont lcInstructions::GetFontProperty(lcInstructionsPropertyType Type, lcModel* Model, lcStep Step) const
@@ -186,7 +186,7 @@ void lcInstructions::AddDefaultPages(lcModel* Model, std::vector<const lcModel*>
 			{
 				lcModel* SubModel = Piece->mPieceInfo->GetModel();
 
-				if (std::find(AddedModels.begin(), AddedModels.end(), SubModel) != AddedModels.end())
+				if (std::find(AddedModels.begin(), AddedModels.end(), SubModel) == AddedModels.end())
 					StepSubModels.insert(SubModel);
 			}
 		}

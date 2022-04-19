@@ -1012,7 +1012,7 @@ void lcView::DrawBackground(int CurrentTileRow, int TotalTileRows, int CurrentTi
 	float ViewHeight = (float)mHeight;
 
 	mContext->SetWorldMatrix(lcMatrix44Identity());
-	mContext->SetViewMatrix(lcMatrix44Translation(lcVector3(0.375, 0.375, 0.0)));
+	mContext->SetViewMatrix(lcMatrix44Identity());
 	mContext->SetProjectionMatrix(lcMatrix44Ortho(0.0f, ViewWidth, 0.0f, ViewHeight, -1.0f, 1.0f));
 
 	const int TotalHeight = TotalTileRows == 1 ? mHeight : mRenderImage.height();

@@ -852,8 +852,6 @@ void lcView::OnDraw()
 			mContext->SetDefaultState();
 			mContext->SetViewport(0, 0, mWidth, mHeight);
 
-			DrawBackground();
-
 			int CurrentTileWidth, CurrentTileHeight;
 
 			if (!mRenderImage.isNull() && (TotalTileRows > 1 || TotalTileColumns > 1))
@@ -868,6 +866,8 @@ void lcView::OnDraw()
 				else
 					CurrentTileWidth = mRenderImage.width() - (TotalTileColumns - 1) * (mWidth);
 
+				DrawBackground(CurrentTileRow, TotalTileRows, CurrentTileHeight);
+
 				mContext->SetViewport(0, 0, CurrentTileWidth, CurrentTileHeight);
 				mContext->SetProjectionMatrix(GetTileProjectionMatrix(CurrentTileRow, CurrentTileColumn, CurrentTileWidth, CurrentTileHeight));
 			}
@@ -875,6 +875,8 @@ void lcView::OnDraw()
 			{
 				CurrentTileWidth = mWidth;
 				CurrentTileHeight = mHeight;
+
+				DrawBackground(CurrentTileRow, TotalTileRows, CurrentTileHeight);
 
 				mContext->SetProjectionMatrix(GetProjectionMatrix());
 			}
@@ -983,7 +985,7 @@ void lcView::OnDraw()
 	mContext->ClearResources();
 }
 
-void lcView::DrawBackground() const
+void lcView::DrawBackground(int CurrentTileRow, int TotalTileRows, int CurrentTileHeight) const
 {
 	if (mOverrideBackgroundColor)
 	{
@@ -1013,8 +1015,40 @@ void lcView::DrawBackground() const
 	mContext->SetViewMatrix(lcMatrix44Translation(lcVector3(0.375, 0.375, 0.0)));
 	mContext->SetProjectionMatrix(lcMatrix44Ortho(0.0f, ViewWidth, 0.0f, ViewHeight, -1.0f, 1.0f));
 
-	const quint32 Color1 = Preferences.mBackgroundGradientColorTop;
-	const quint32 Color2 = Preferences.mBackgroundGradientColorBottom;
+	const int TotalHeight = TotalTileRows == 1 ? mHeight : mRenderImage.height();
+	const quint32 TopY = CurrentTileRow * mHeight + CurrentTileHeight;
+
+	const double t1 = 1.0 - (double)TopY / (double)TotalHeight;
+	const double t2 = 1.0 - (double)(TopY - CurrentTileHeight) / (double)TotalHeight;
+
+	const quint32 ColorTop = Preferences.mBackgroundGradientColorTop;
+	const quint32 ColorBottom = Preferences.mBackgroundGradientColorBottom;
+
+	double TopRed = LC_RGBA_RED(ColorTop);
+	double TopGreen = LC_RGBA_GREEN(ColorTop);
+	double TopBlue = LC_RGBA_BLUE(ColorTop);
+	double TopAlpha = LC_RGBA_ALPHA(ColorTop);
+	double BottomRed = LC_RGBA_RED(ColorBottom);
+	double BottomGreen = LC_RGBA_GREEN(ColorBottom);
+	double BottomBlue = LC_RGBA_BLUE(ColorBottom);
+	double BottomAlpha = LC_RGBA_ALPHA(ColorBottom);
+	const double DeltaRed = BottomRed - TopRed;
+	const double DeltaGreen = BottomGreen - TopGreen;
+	const double DeltaBlue = BottomBlue - TopBlue;
+	const double DeltaAlpha = BottomAlpha - TopAlpha;
+
+	BottomRed = TopRed + DeltaRed * t2;
+	BottomGreen = TopGreen + DeltaGreen * t2;
+	BottomBlue = TopBlue + DeltaBlue * t2;
+	BottomAlpha = TopAlpha + DeltaAlpha * t2;
+
+	TopRed = TopRed + DeltaRed * t1;
+	TopGreen = TopGreen + DeltaGreen * t1;
+	TopBlue = TopBlue + DeltaBlue * t1;
+	TopAlpha = TopAlpha + DeltaAlpha * t1;
+
+	const quint32 Color1 = LC_RGBA(TopRed, TopGreen, TopBlue, TopAlpha);
+	const quint32 Color2 = LC_RGBA(BottomRed, BottomGreen, BottomBlue, BottomAlpha);
 
 	struct lcBackgroundVertex
 	{

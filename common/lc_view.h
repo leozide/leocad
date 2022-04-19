@@ -280,7 +280,7 @@ signals:
 	void CameraChanged();
 
 protected:
-	void DrawBackground() const;
+	void DrawBackground(int CurrentTileRow, int TotalTileRows, int CurrentTileHeight) const;
 	void DrawViewport() const;
 	void DrawAxes() const;
 

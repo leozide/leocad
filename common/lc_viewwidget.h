@@ -35,6 +35,7 @@ protected:
 	void mouseDoubleClickEvent(QMouseEvent* MouseEvent) override;
 	void mouseMoveEvent(QMouseEvent* MouseEvent) override;
 	void wheelEvent(QWheelEvent* WheelEvent) override;
+	bool event(QEvent* event) override;
 	void dragEnterEvent(QDragEnterEvent* DragEnterEvent) override;
 	void dragLeaveEvent(QDragLeaveEvent* DragLeaveEvent) override;
 	void dragMoveEvent(QDragMoveEvent* DragMoveEvent) override;
@@ -43,4 +44,7 @@ protected:
 	std::unique_ptr<lcView> mView;
 	QSize mPreferredSize;
 	int mWheelAccumulator = 0;
+	float mNativeGestureAccumulator = 0;
+	int mx0 = 0;
+	int my0 = 0;
 };

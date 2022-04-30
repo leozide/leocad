@@ -2934,3 +2934,31 @@ void lcView::OnMouseWheel(float Direction)
 
 	mModel->Zoom(mCamera, static_cast<int>(Direction * Scale));
 }
+
+void lcView::OnZoomNativeGesture(float Value)
+{
+	float Scale = 10.0f;
+
+	mModel->Zoom(mCamera, static_cast<int>(Value * Scale));
+}
+
+
+void lcView::OnRotateNativeGesture(float Value)
+{
+	lcModel* ActiveModel = GetActiveModel();
+
+	if (!ActiveModel)
+		return;
+
+	ActiveModel->UpdateRollTool(mCamera, Value * LC_DTOR);
+}
+
+void lcView::OnWheel(int x, int y)
+{
+	lcModel* ActiveModel = GetActiveModel();
+
+	if (!ActiveModel)
+		return;
+
+	ActiveModel->UpdatePanTool(mCamera, lcVector3(x, y, 0));
+}

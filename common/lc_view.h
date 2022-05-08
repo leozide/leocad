@@ -227,6 +227,9 @@ public:
 	void EndDrag(bool Accept);
 
 	void UpdateCursor();
+	void StartPanGesture();
+	void UpdatePanGesture(int dx, int dy);
+	void EndPanGesture(bool Accept);
 	void StartOrbitTracking();
 	void CancelTrackingOrClearSelection();
 
@@ -298,6 +301,8 @@ protected:
 	void StartTracking(lcTrackButton TrackButton);
 	void StopTracking(bool Accept);
 	void OnButtonDown(lcTrackButton TrackButton);
+	void StartPan(int x, int y);
+	void UpdatePan(int x, int y);
 
 	lcViewWidget* mWidget = nullptr;
 	int mWidth = 1;
@@ -321,6 +326,8 @@ protected:
 	bool mTrackToolFromOverlay;
 	lcVector3 mMouseDownPosition;
 	PieceInfo* mMouseDownPiece;
+	int mPanX = 0;
+	int mPanY = 0;
 
 	QImage mRenderImage;
 	std::unique_ptr<QOpenGLFramebufferObject> mRenderFramebuffer;

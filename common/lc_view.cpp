@@ -2178,6 +2178,73 @@ void lcView::StartOrbitTracking()
 	OnButtonDown(lcTrackButton::Left);
 }
 
+void lcView::StartPanGesture()
+{
+	lcModel* ActiveModel = GetActiveModel();
+
+	StartPan(mWidth / 2, mHeight / 2);
+	ActiveModel->BeginMouseTool();
+}
+
+void lcView::UpdatePanGesture(int dx, int dy)
+{
+	UpdatePan(mPanX + dx, mPanY + dy);
+}
+
+void lcView::StartPan(int x, int y)
+{
+	mPanX = x;
+	mPanY = y;
+}
+
+void lcView::UpdatePan(int x, int y)
+{
+	if (x == mPanX && y == mPanY)
+		return;
+
+	lcModel* ActiveModel = GetActiveModel();
+
+	lcVector3 Points[4] =
+	{
+	    lcVector3((float)x, (float)y, 0.0f),
+	    lcVector3((float)x, (float)y, 1.0f),
+	    lcVector3(mPanX, mPanY, 0.0f),
+	    lcVector3(mPanX, mPanY, 1.0f)
+	};
+
+	UnprojectPoints(Points, 4);
+
+	const lcVector3& CurrentStart = Points[0];
+	const lcVector3& CurrentEnd = Points[1];
+	const lcVector3& MouseDownStart = Points[2];
+	const lcVector3& MouseDownEnd = Points[3];
+	lcVector3 Center = ActiveModel->GetSelectionOrModelCenter();
+
+	lcVector3 PlaneNormal(mCamera->mPosition - mCamera->mTargetPosition);
+	lcVector4 Plane(PlaneNormal, -lcDot(PlaneNormal, Center));
+	lcVector3 Intersection, MoveStart;
+
+	if (!lcLineSegmentPlaneIntersection(&Intersection, CurrentStart, CurrentEnd, Plane) || !lcLineSegmentPlaneIntersection(&MoveStart, MouseDownStart, MouseDownEnd, Plane))
+	{
+		Center = MouseDownStart + lcNormalize(MouseDownEnd - MouseDownStart) * 10.0f;
+		Plane = lcVector4(PlaneNormal, -lcDot(PlaneNormal, Center));
+
+		if (!lcLineSegmentPlaneIntersection(&Intersection, CurrentStart, CurrentEnd, Plane) || !lcLineSegmentPlaneIntersection(&MoveStart, MouseDownStart, MouseDownEnd, Plane))
+			return;
+	}
+
+	mPanX = x;
+	mPanY = y;
+
+	ActiveModel->UpdatePanTool(mCamera, MoveStart - Intersection);
+}
+
+void lcView::EndPanGesture(bool Accept)
+{
+	lcModel* ActiveModel = GetActiveModel();
+
+	ActiveModel->EndMouseTool(lcTool::Pan, Accept);
+}
 
 void lcView::StartTracking(lcTrackButton TrackButton)
 {
@@ -2223,8 +2290,12 @@ void lcView::StartTracking(lcTrackButton TrackButton)
 		case lcTool::ColorPicker:
 			break;
 
-		case lcTool::Zoom:
-		case lcTool::Pan:
+	    case lcTool::Pan:
+		    StartPan(mMouseX, mMouseY);
+			ActiveModel->BeginMouseTool();
+		    break;
+
+	    case lcTool::Zoom:
 		case lcTool::RotateView:
 		case lcTool::Roll:
 			ActiveModel->BeginMouseTool();
@@ -2864,38 +2935,7 @@ void lcView::OnMouseMove()
 		break;
 
 	case lcTrackTool::Pan:
-		{
-			lcVector3 Points[4] =
-			{
-				lcVector3((float)mMouseX, (float)mMouseY, 0.0f),
-				lcVector3((float)mMouseX, (float)mMouseY, 1.0f),
-				lcVector3(mMouseDownX, mMouseDownY, 0.0f),
-				lcVector3(mMouseDownX, mMouseDownY, 1.0f)
-			};
-
-			UnprojectPoints(Points, 4);
-
-			const lcVector3& CurrentStart = Points[0];
-			const lcVector3& CurrentEnd = Points[1];
-			const lcVector3& MouseDownStart = Points[2];
-			const lcVector3& MouseDownEnd = Points[3];
-			lcVector3 Center = ActiveModel->GetSelectionOrModelCenter();
-
-			lcVector3 PlaneNormal(mCamera->mPosition - mCamera->mTargetPosition);
-			lcVector4 Plane(PlaneNormal, -lcDot(PlaneNormal, Center));
-			lcVector3 Intersection, MoveStart;
-
-			if (!lcLineSegmentPlaneIntersection(&Intersection, CurrentStart, CurrentEnd, Plane) || !lcLineSegmentPlaneIntersection(&MoveStart, MouseDownStart, MouseDownEnd, Plane))
-			{
-				Center = MouseDownStart + lcNormalize(MouseDownEnd - MouseDownStart) * 10.0f;
-				Plane = lcVector4(PlaneNormal, -lcDot(PlaneNormal, Center));
-
-				if (!lcLineSegmentPlaneIntersection(&Intersection, CurrentStart, CurrentEnd, Plane) || !lcLineSegmentPlaneIntersection(&MoveStart, MouseDownStart, MouseDownEnd, Plane))
-					break;
-			}
-
-			ActiveModel->UpdatePanTool(mCamera, MoveStart - Intersection);
-		}
+		UpdatePan(mMouseX, mMouseY);
 		break;
 
 	case lcTrackTool::OrbitX:

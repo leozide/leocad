@@ -217,6 +217,31 @@ void lcViewWidget::mouseMoveEvent(QMouseEvent* MouseEvent)
 
 void lcViewWidget::wheelEvent(QWheelEvent* WheelEvent)
 {
+	if (WheelEvent->source() == Qt::MouseEventSynthesizedBySystem)
+	{
+		switch (WheelEvent->phase())
+		{
+		case Qt::NoScrollPhase:
+			break;
+
+		case Qt::ScrollBegin:
+			mView->StartPanGesture();
+			WheelEvent->accept();
+			return;
+
+		case Qt::ScrollUpdate:
+		case Qt::ScrollMomentum:
+			mView->UpdatePanGesture(WheelEvent->pixelDelta().x(), -WheelEvent->pixelDelta().y());
+			WheelEvent->accept();
+			return;
+
+		case Qt::ScrollEnd:
+			mView->EndPanGesture(true);
+			WheelEvent->accept();
+			return;
+		}
+	}
+
 	if (WheelEvent->angleDelta().y() == 0)
 	{
 		WheelEvent->ignore();

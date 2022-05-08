@@ -4187,8 +4187,7 @@ void lcModel::UpdateZoomTool(lcCamera* Camera, float Mouse)
 
 void lcModel::UpdatePanTool(lcCamera* Camera, const lcVector3& Distance)
 {
-	Camera->Pan(Distance - mMouseToolDistance, mCurrentStep, gMainWindow->GetAddKeys());
-	mMouseToolDistance = Distance;
+	Camera->Pan(Distance, mCurrentStep, gMainWindow->GetAddKeys());
 
 	UpdateAllViews();
 }

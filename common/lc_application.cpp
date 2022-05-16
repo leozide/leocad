@@ -830,7 +830,7 @@ lcCommandLineOptions lcApplication::ParseCommandLineOptions()
 			Options.StdOut += tr("  --no-highlight: Do not highlight parts in the steps they appear.\n");
 			Options.StdOut += tr("  --highlight-color: Renderinng color for highlighted parts (#AARRGGBB).\n");
 			Options.StdOut += tr("  --shading <wireframe|flat|default|full>: Select shading mode for rendering.\n");
-			Options.StdOut += tr("  --line-width <width>: Set the with of the edge lines.\n");
+			Options.StdOut += tr("  --line-width <width>: Set the width of the edge lines.\n");
 			Options.StdOut += tr("  --aa-samples <count>: AntiAliasing sample size (1, 2, 4, or 8).\n");
 			Options.StdOut += tr("  -scc, --stud-cylinder-color <#AARRGGBB>: High contrast stud cylinder color.\n");
 			Options.StdOut += tr("  -ec, --edge-color <#AARRGGBB>: High contrast edge color.\n");

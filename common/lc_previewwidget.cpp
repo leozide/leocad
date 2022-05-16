@@ -74,10 +74,11 @@ void lcPreviewDockWidget::SetPreviewLock()
 	}
 
 	QIcon LockIcon(Locked ? ":/resources/action_preview_locked.png" : ":/resources/action_preview_unlocked.png");
-	QString State(Locked ? tr("Unlock") : tr("Lock"));
-	QString StatusTip(tr("%1 the preview display to %2 updates").arg(State).arg(Locked ? "enable" : "disable"));
+	QString StatusTip(Locked
+		? tr("Unlock the preview display to enable updates")
+		: tr("Lock the preview display to disable updates"));
 
-	mLockAction->setToolTip(tr("%1 Preview").arg(State));
+	mLockAction->setToolTip(Locked ? tr("Unlock Preview") : tr("Lock Preview"));
 	mLockAction->setIcon(LockIcon);
 	mLockAction->setStatusTip(StatusTip);
 }

@@ -899,7 +899,7 @@ void lcPartSelectionWidget::OptionsMenuAboutToShow()
 	QMenu* Menu = (QMenu*)sender();
 	Menu->clear();
 
-	Menu->addAction("Edit Palettes...", this, SLOT(EditPartPalettes()));
+	Menu->addAction(tr("Edit Palettes..."), this, SLOT(EditPartPalettes()));
 	Menu->addSeparator();
 
 	lcPartSelectionListModel* ListModel = mPartsWidget->GetListModel();

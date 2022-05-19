@@ -186,7 +186,7 @@ lcInstructionsPageListWidget::lcInstructionsPageListWidget(QWidget* Parent, lcIn
 	Layout->addLayout(ButtonsLayout);
 
 	QToolButton* PageSetupButton = new QToolButton();
-	PageSetupButton->setText("Page Setup");
+	PageSetupButton->setText(tr("Page Setup"));
 	ButtonsLayout->addWidget(PageSetupButton);
 
 	connect(PageSetupButton, SIGNAL(clicked()), this, SLOT(ShowPageSetupDialog()));
@@ -551,10 +551,10 @@ lcInstructionsDialog::lcInstructionsDialog(QWidget* Parent, Project* Project)
 
 	mPrintAction = mPageSettingsToolBar->addAction(tr("Print"));
 
-	mVerticalPageAction = mPageSettingsToolBar->addAction("Vertical");
+	mVerticalPageAction = mPageSettingsToolBar->addAction(tr("Vertical"));
 	mVerticalPageAction->setCheckable(true);
 
-	mHorizontalPageAction = mPageSettingsToolBar->addAction("Horizontal");
+	mHorizontalPageAction = mPageSettingsToolBar->addAction(tr("Horizontal"));
 	mHorizontalPageAction->setCheckable(true);
 
 	mRowsSpinBox = new QSpinBox(mPageSettingsToolBar);
@@ -568,7 +568,7 @@ lcInstructionsDialog::lcInstructionsDialog(QWidget* Parent, Project* Project)
 	PageDirectionGroup->addAction(mHorizontalPageAction);
 
 	for (size_t PageNumber = 0; PageNumber < mInstructions->mPages.size(); PageNumber++)
-		mPageListWidget->mThumbnailsWidget->addItem(QString("Page %1").arg(PageNumber + 1));
+		mPageListWidget->mThumbnailsWidget->addItem(QString(tr("Page %1")).arg(PageNumber + 1));
 
 	connect(mPageListWidget->mThumbnailsWidget, SIGNAL(currentRowChanged(int)), this, SLOT(CurrentThumbnailChanged(int)));
 	mPageListWidget->mThumbnailsWidget->setCurrentRow(0);

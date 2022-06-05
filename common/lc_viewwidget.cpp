@@ -230,7 +230,9 @@ void lcViewWidget::wheelEvent(QWheelEvent* WheelEvent)
 			return;
 
 		case Qt::ScrollUpdate:
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 12, 0))
 		case Qt::ScrollMomentum:
+#endif
 			mView->UpdatePanGesture(WheelEvent->pixelDelta().x(), -WheelEvent->pixelDelta().y());
 			WheelEvent->accept();
 			return;

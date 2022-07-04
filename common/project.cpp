@@ -2112,8 +2112,11 @@ bool Project::ExportWavefront(const QString& FileName)
 
         for (int VertexIdx = 0; VertexIdx < Mesh->mNumVertices; VertexIdx++)
         {
+            lcVector3 Normal = lcMul30(lcUnpackNormal(Verts[VertexIdx].Normal), ModelWorld);
+            sprintf(Line, "vn %.6f %.6f %.6\n", Normal[0], Normal[1], Normal[2]);
+            OBJFile.WriteLine(Line);
             lcVector3 Vertex = lcMul31(Verts[VertexIdx].Position, ModelWorld);
-            sprintf(Line, "v %.2f %.2f %.2f\n", Vertex[0], Vertex[1], Vertex[2]);
+            sprintf(Line, "v %.6f %.6f %.6f\n", Vertex[0], Vertex[1], Vertex[2]);
             OBJFile.WriteLine(Line);
         }
         OBJFile.WriteLine("#\n\n");
@@ -2128,13 +2131,13 @@ bool Project::ExportWavefront(const QString& FileName)
 //        const lcMatrix44& ModelWorld = ModelPart.WorldMatrix;
 //        lcVertex* Verts = (lcVertex*)Mesh->mVertexData;
 
-        for (int VertexIdx = 0; VertexIdx < Mesh->mNumVertices; VertexIdx++)
-        {
-            lcVector3 Normal = lcMul30(lcUnpackNormal(Verts[VertexIdx].Normal), ModelWorld);
-            sprintf(Line, "vn %.2f %.2f %.2f\n", Normal[0], Normal[1], Normal[2]);
-            OBJFile.WriteLine(Line);
-        }
-        OBJFile.WriteLine("#\n\n");
+//        for (int VertexIdx = 0; VertexIdx < Mesh->mNumVertices; VertexIdx++)
+//        {
+//            lcVector3 Normal = lcMul30(lcUnpackNormal(Verts[VertexIdx].Normal), ModelWorld);
+//            sprintf(Line, "vn %.2f %.2f %.2f\n", Normal[0], Normal[1], Normal[2]);
+//            OBJFile.WriteLine(Line);
+//        }
+//        OBJFile.WriteLine("#\n\n");
 //	}
 
         int NumPieces = 0;

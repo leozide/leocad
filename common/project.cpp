@@ -687,11 +687,36 @@ QString Project::GetExportFileName(const QString& FileName, const QString& Defau
 		SaveFileName += "." + DefaultExtension;
 	else if (Extension != DefaultExtension && SaveFileName.length() > 4)
 	{
-		SaveFileName = SaveFileName.left(SaveFileName.length() - Extension.length() - 1);
+        SaveFileName = SaveFileName.left(SaveFileName.length() - Extension.length() - 1);
 		SaveFileName += "." + DefaultExtension;
 	}
 
 	return QFileDialog::getSaveFileName(gMainWindow, DialogTitle, SaveFileName, DialogFilter);
+}
+
+QString Project::GetExportFileNames(const QString& FileName, const QString& ID_Filename, const QString& DefaultExtension, const QString& DialogTitle, const QString& DialogFilter) const
+{
+    if (!FileName.isEmpty())
+        return FileName;
+
+    QString SaveFileName;
+
+    if (!mFileName.isEmpty())
+        SaveFileName = mFileName;
+    else
+        SaveFileName = GetTitle();
+
+    QString Extension = QFileInfo(SaveFileName).suffix().toLower();
+
+    if (Extension.isEmpty())
+        SaveFileName += "." + DefaultExtension;
+    else if (Extension != DefaultExtension && SaveFileName.length() > 4)
+    {
+        SaveFileName = SaveFileName.left(SaveFileName.length() - Extension.length() - 1) + "_" + ID_Filename;
+        SaveFileName += "." + DefaultExtension;
+    }
+
+    return QFileDialog::getSaveFileName(gMainWindow, DialogTitle, SaveFileName, DialogFilter);
 }
 
 bool Project::Export3DStudio(const QString& FileName)
@@ -1166,264 +1191,280 @@ bool Project::ExportCOLLADA(const QString& FileName)
 		return false;
 	}
 
-	QString SaveFileName = GetExportFileName(FileName, "dae", tr("Export COLLADA"), tr("COLLADA Files (*.dae);;All Files (*.*)"));
+    auto GetMeshID = [](const lcModelPartsEntry& ModelPart)
+    {
+        const PieceInfo* Info = ModelPart.Info;
+        QString ID = QString(Info->mFileName).replace('.', '_');
 
-	if (SaveFileName.isEmpty())
-		return false;
+        if (ModelPart.Mesh)
+            ID += "_" + QString::number((quintptr)ModelPart.Mesh, 16);
 
-	QFile File(SaveFileName);
+        return ID;
+    };
 
-	if (!File.open(QIODevice::WriteOnly))
-	{
-		QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Could not open file '%1' for writing.").arg(SaveFileName));
-		return false;
-	}
+    for (const lcModelPartsEntry& ModelPart : ModelParts)
+    {
+        QString ID = GetMeshID(ModelPart);
 
-	QTextStream Stream(&File);
+        QString SaveFileName = GetExportFileName(ID, "dae", tr("Export COLLADA"), tr("COLLADA Files (*.dae);;All Files (*.*)"));
 
-	Stream << "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n";
-	Stream << "<COLLADA xmlns=\"http://www.collada.org/2005/11/COLLADASchema\" version=\"1.4.1\">\r\n";
+        if (SaveFileName.isEmpty())
+            return false;
 
-	Stream << "<asset>\r\n";
-	Stream << "\t<created>" << QDateTime::currentDateTime().toString(Qt::ISODate) << "</created>\r\n";
-	Stream << "\t<modified>" << QDateTime::currentDateTime().toString(Qt::ISODate) << "</modified>\r\n";
-	Stream << "<unit name=\"LeoCAD\" meter=\"0.0004\" />\r\n";
-	Stream << "\t<up_axis>Z_UP</up_axis>\r\n";
-	Stream << "</asset>\r\n";
+        QFile File(SaveFileName);
 
-	Stream << "<library_effects>\r\n";
+        if (!File.open(QIODevice::WriteOnly))
+        {
+            QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Could not open file '%1' for writing.").arg(SaveFileName));
+            return false;
+        }
+    }
 
-	for (const lcColor& Color : gColorList)
-	{
-		const char* ColorName = Color.SafeName;
+//	QTextStream Stream(&File);
 
-		Stream << QString("\t<effect id=\"%1-phong\">\r\n").arg(ColorName);
-		Stream << "\t\t<profile_COMMON>\r\n";
-		Stream << "\t\t\t<technique sid=\"phong1\">\r\n";
-		Stream << "\t\t\t\t<phong>\r\n";
-		Stream << "\t\t\t\t\t<emission>\r\n";
-		Stream << "\t\t\t\t\t\t<color>0.0 0.0 0.0 0.0</color>\r\n";
-		Stream << "\t\t\t\t\t</emission>\r\n";
-		Stream << "\t\t\t\t\t<ambient>\r\n";
-		Stream << QString("\t\t\t\t\t\t<color>%1 %2 %3 1.0</color>\r\n").arg(QString::number(Color.Value[0]), QString::number(Color.Value[1]), QString::number(Color.Value[2]));
-		Stream << "\t\t\t\t\t</ambient>\r\n";
-		Stream << "\t\t\t\t\t<diffuse>\r\n";
-		Stream << QString("\t\t\t\t\t\t<color>%1 %2 %3 1.0</color>\r\n").arg(QString::number(Color.Value[0]), QString::number(Color.Value[1]), QString::number(Color.Value[2]));
-		Stream << "\t\t\t\t\t</diffuse>\r\n";
-		Stream << "\t\t\t\t\t<specular>\r\n";
-		Stream << "\t\t\t\t\t\t<color>0.9 0.9 0.9 1.0</color>\r\n";
-		Stream << "\t\t\t\t\t</specular>\r\n";
-		Stream << "\t\t\t\t\t<shininess>\r\n";
-		Stream << "\t\t\t\t\t\t<float>20.0</float>\r\n";
-		Stream << "\t\t\t\t\t</shininess>\r\n";
-		Stream << "\t\t\t\t\t<transparent>\r\n";
-		Stream << QString("\t\t\t\t\t\t<color>%1 %2 %3 %4</color>\r\n").arg(QString::number(Color.Value[0]), QString::number(Color.Value[1]), QString::number(Color.Value[2]), QString::number(Color.Value[3]));
-		Stream << "\t\t\t\t\t</transparent>\r\n";
-		Stream << "\t\t\t\t\t<transparency>\r\n";
-		Stream << "\t\t\t\t\t\t<float>1.0</float>\r\n";
-		Stream << "\t\t\t\t\t</transparency>\r\n";
-		Stream << "\t\t\t\t</phong>\r\n";
-		Stream << "\t\t\t</technique>\r\n";
-		Stream << "\t\t</profile_COMMON>\r\n";
-		Stream << "\t</effect>\r\n";
-	}
+//	Stream << "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n";
+//	Stream << "<COLLADA xmlns=\"http://www.collada.org/2005/11/COLLADASchema\" version=\"1.4.1\">\r\n";
 
-	Stream << "</library_effects>\r\n";
-	Stream << "<library_materials>\r\n";
+//	Stream << "<asset>\r\n";
+//	Stream << "\t<created>" << QDateTime::currentDateTime().toString(Qt::ISODate) << "</created>\r\n";
+//	Stream << "\t<modified>" << QDateTime::currentDateTime().toString(Qt::ISODate) << "</modified>\r\n";
+//	Stream << "<unit name=\"LeoCAD\" meter=\"0.0004\" />\r\n";
+//	Stream << "\t<up_axis>Z_UP</up_axis>\r\n";
+//	Stream << "</asset>\r\n";
 
-	for (const lcColor& Color : gColorList)
-	{
-		const char* ColorName = Color.SafeName;
-		Stream << QString("\t<material id=\"%1-material\">\r\n").arg(ColorName);
-		Stream << QString("\t\t<instance_effect url=\"#%1-phong\" />\r\n").arg(ColorName);
-		Stream << "\t</material>\r\n";
-	}
+//	Stream << "<library_effects>\r\n";
 
-	Stream << "</library_materials>\r\n";
-	Stream << "<library_geometries>\r\n";
-	std::set<lcMesh*> AddedMeshes;
+//	for (const lcColor& Color : gColorList)
+//	{
+//		const char* ColorName = Color.SafeName;
 
-	auto GetMeshID = [](const lcModelPartsEntry& ModelPart)
-	{
-		const PieceInfo* Info = ModelPart.Info;
-		QString ID = QString(Info->mFileName).replace('.', '_');
+//		Stream << QString("\t<effect id=\"%1-phong\">\r\n").arg(ColorName);
+//		Stream << "\t\t<profile_COMMON>\r\n";
+//		Stream << "\t\t\t<technique sid=\"phong1\">\r\n";
+//		Stream << "\t\t\t\t<phong>\r\n";
+//		Stream << "\t\t\t\t\t<emission>\r\n";
+//		Stream << "\t\t\t\t\t\t<color>0.0 0.0 0.0 0.0</color>\r\n";
+//		Stream << "\t\t\t\t\t</emission>\r\n";
+//		Stream << "\t\t\t\t\t<ambient>\r\n";
+//		Stream << QString("\t\t\t\t\t\t<color>%1 %2 %3 1.0</color>\r\n").arg(QString::number(Color.Value[0]), QString::number(Color.Value[1]), QString::number(Color.Value[2]));
+//		Stream << "\t\t\t\t\t</ambient>\r\n";
+//		Stream << "\t\t\t\t\t<diffuse>\r\n";
+//		Stream << QString("\t\t\t\t\t\t<color>%1 %2 %3 1.0</color>\r\n").arg(QString::number(Color.Value[0]), QString::number(Color.Value[1]), QString::number(Color.Value[2]));
+//		Stream << "\t\t\t\t\t</diffuse>\r\n";
+//		Stream << "\t\t\t\t\t<specular>\r\n";
+//		Stream << "\t\t\t\t\t\t<color>0.9 0.9 0.9 1.0</color>\r\n";
+//		Stream << "\t\t\t\t\t</specular>\r\n";
+//		Stream << "\t\t\t\t\t<shininess>\r\n";
+//		Stream << "\t\t\t\t\t\t<float>20.0</float>\r\n";
+//		Stream << "\t\t\t\t\t</shininess>\r\n";
+//		Stream << "\t\t\t\t\t<transparent>\r\n";
+//		Stream << QString("\t\t\t\t\t\t<color>%1 %2 %3 %4</color>\r\n").arg(QString::number(Color.Value[0]), QString::number(Color.Value[1]), QString::number(Color.Value[2]), QString::number(Color.Value[3]));
+//		Stream << "\t\t\t\t\t</transparent>\r\n";
+//		Stream << "\t\t\t\t\t<transparency>\r\n";
+//		Stream << "\t\t\t\t\t\t<float>1.0</float>\r\n";
+//		Stream << "\t\t\t\t\t</transparency>\r\n";
+//		Stream << "\t\t\t\t</phong>\r\n";
+//		Stream << "\t\t\t</technique>\r\n";
+//		Stream << "\t\t</profile_COMMON>\r\n";
+//		Stream << "\t</effect>\r\n";
+//	}
 
-		if (ModelPart.Mesh)
-			ID += "_" + QString::number((quintptr)ModelPart.Mesh, 16);
+//	Stream << "</library_effects>\r\n";
+//	Stream << "<library_materials>\r\n";
 
-		return ID;
-	};
+//	for (const lcColor& Color : gColorList)
+//	{
+//		const char* ColorName = Color.SafeName;
+//		Stream << QString("\t<material id=\"%1-material\">\r\n").arg(ColorName);
+//		Stream << QString("\t\t<instance_effect url=\"#%1-phong\" />\r\n").arg(ColorName);
+//		Stream << "\t</material>\r\n";
+//	}
 
-	for (const lcModelPartsEntry& ModelPart : ModelParts)
-	{
-		lcMesh* Mesh = !ModelPart.Mesh ? ModelPart.Info->GetMesh() : ModelPart.Mesh;
+//	Stream << "</library_materials>\r\n";
+//	Stream << "<library_geometries>\r\n";
+//	std::set<lcMesh*> AddedMeshes;
 
-		if (!AddedMeshes.insert(Mesh).second)
-			continue;
+//	auto GetMeshID = [](const lcModelPartsEntry& ModelPart)
+//	{
+//		const PieceInfo* Info = ModelPart.Info;
+//		QString ID = QString(Info->mFileName).replace('.', '_');
 
-		QString ID = GetMeshID(ModelPart);
+//		if (ModelPart.Mesh)
+//			ID += "_" + QString::number((quintptr)ModelPart.Mesh, 16);
 
-		if (!Mesh)
-			continue;
+//		return ID;
+//	};
 
-		Stream << QString("\t<geometry id=\"%1\">\r\n").arg(ID);
-		Stream << "\t\t<mesh>\r\n";
+//	for (const lcModelPartsEntry& ModelPart : ModelParts)
+//	{
+//		lcMesh* Mesh = !ModelPart.Mesh ? ModelPart.Info->GetMesh() : ModelPart.Mesh;
 
-		Stream << QString("\t\t\t<source id=\"%1-pos\">\r\n").arg(ID);
-		Stream << QString("\t\t\t\t<float_array id=\"%1-pos-array\" count=\"%2\">\r\n").arg(ID, QString::number(Mesh->mNumVertices));
+//		if (!AddedMeshes.insert(Mesh).second)
+//			continue;
 
-		lcVertex* Verts = (lcVertex*)Mesh->mVertexData;
+//		QString ID = GetMeshID(ModelPart);
 
-		for (int VertexIdx = 0; VertexIdx < Mesh->mNumVertices; VertexIdx++)
-		{
-			lcVector3& Position = Verts[VertexIdx].Position;
-			Stream << QString("\t\t\t\t\t%1 %2 %3\r\n").arg(QString::number(Position.x), QString::number(Position.y), QString::number(Position.z));
-		}
+//		if (!Mesh)
+//			continue;
 
-		Stream << "\t\t\t\t</float_array>\r\n";
-		Stream << "\t\t\t\t<technique_common>\r\n";
-		Stream << QString("\t\t\t\t\t<accessor source=\"#%1-pos-array\" count=\"%2\" stride=\"3\">\r\n").arg(ID, QString::number(Mesh->mNumVertices));
-		Stream << "\t\t\t\t\t\t<param name=\"X\" type=\"float\" />\r\n";
-		Stream << "\t\t\t\t\t\t<param name=\"Y\" type=\"float\" />\r\n";
-		Stream << "\t\t\t\t\t\t<param name=\"Z\" type=\"float\" />\r\n";
-		Stream << "\t\t\t\t\t</accessor>\r\n";
-		Stream << "\t\t\t\t</technique_common>\r\n";
-		Stream << "\t\t\t</source>\r\n";
+//		Stream << QString("\t<geometry id=\"%1\">\r\n").arg(ID);
+//		Stream << "\t\t<mesh>\r\n";
 
-		Stream << QString("\t\t\t<source id=\"%1-normal\">\r\n").arg(ID);
-		Stream << QString("\t\t\t\t<float_array id=\"%1-normal-array\" count=\"%2\">\r\n").arg(ID, QString::number(Mesh->mNumVertices));
+//		Stream << QString("\t\t\t<source id=\"%1-pos\">\r\n").arg(ID);
+//		Stream << QString("\t\t\t\t<float_array id=\"%1-pos-array\" count=\"%2\">\r\n").arg(ID, QString::number(Mesh->mNumVertices));
 
-		for (int VertexIdx = 0; VertexIdx < Mesh->mNumVertices; VertexIdx++)
-		{
-			lcVector3 Normal = lcUnpackNormal(Verts[VertexIdx].Normal);
-			Stream << QString("\t\t\t\t\t%1 %2 %3\r\n").arg(QString::number(Normal.x), QString::number(Normal.y), QString::number(Normal.z));
-		}
+//		lcVertex* Verts = (lcVertex*)Mesh->mVertexData;
 
-		Stream << "\t\t\t\t</float_array>\r\n";
-		Stream << "\t\t\t\t<technique_common>\r\n";
-		Stream << QString("\t\t\t\t\t<accessor source=\"#%1-normal-array\" count=\"%2\" stride=\"3\">\r\n").arg(ID, QString::number(Mesh->mNumVertices));
-		Stream << "\t\t\t\t\t\t<param name=\"X\" type=\"float\" />\r\n";
-		Stream << "\t\t\t\t\t\t<param name=\"Y\" type=\"float\" />\r\n";
-		Stream << "\t\t\t\t\t\t<param name=\"Z\" type=\"float\" />\r\n";
-		Stream << "\t\t\t\t\t</accessor>\r\n";
-		Stream << "\t\t\t\t</technique_common>\r\n";
-		Stream << "\t\t\t</source>\r\n";
+//		for (int VertexIdx = 0; VertexIdx < Mesh->mNumVertices; VertexIdx++)
+//		{
+//			lcVector3& Position = Verts[VertexIdx].Position;
+//			Stream << QString("\t\t\t\t\t%1 %2 %3\r\n").arg(QString::number(Position.x), QString::number(Position.y), QString::number(Position.z));
+//		}
 
-		Stream << QString("\t\t\t<vertices id=\"%1-vertices\">\r\n").arg(ID);
-		Stream << QString("\t\t\t\t<input semantic=\"POSITION\" source=\"#%1-pos\"/>\r\n").arg(ID);
-		Stream << "\t\t\t</vertices>\r\n";
+//		Stream << "\t\t\t\t</float_array>\r\n";
+//		Stream << "\t\t\t\t<technique_common>\r\n";
+//		Stream << QString("\t\t\t\t\t<accessor source=\"#%1-pos-array\" count=\"%2\" stride=\"3\">\r\n").arg(ID, QString::number(Mesh->mNumVertices));
+//		Stream << "\t\t\t\t\t\t<param name=\"X\" type=\"float\" />\r\n";
+//		Stream << "\t\t\t\t\t\t<param name=\"Y\" type=\"float\" />\r\n";
+//		Stream << "\t\t\t\t\t\t<param name=\"Z\" type=\"float\" />\r\n";
+//		Stream << "\t\t\t\t\t</accessor>\r\n";
+//		Stream << "\t\t\t\t</technique_common>\r\n";
+//		Stream << "\t\t\t</source>\r\n";
 
-		for (int SectionIdx = 0; SectionIdx < Mesh->mLods[LC_MESH_LOD_HIGH].NumSections; SectionIdx++)
-		{
-			lcMeshSection* Section = &Mesh->mLods[LC_MESH_LOD_HIGH].Sections[SectionIdx];
+//		Stream << QString("\t\t\t<source id=\"%1-normal\">\r\n").arg(ID);
+//		Stream << QString("\t\t\t\t<float_array id=\"%1-normal-array\" count=\"%2\">\r\n").arg(ID, QString::number(Mesh->mNumVertices));
 
-			if (Section->PrimitiveType != LC_MESH_TRIANGLES && Section->PrimitiveType != LC_MESH_TEXTURED_TRIANGLES)
-				continue;
+//		for (int VertexIdx = 0; VertexIdx < Mesh->mNumVertices; VertexIdx++)
+//		{
+//			lcVector3 Normal = lcUnpackNormal(Verts[VertexIdx].Normal);
+//			Stream << QString("\t\t\t\t\t%1 %2 %3\r\n").arg(QString::number(Normal.x), QString::number(Normal.y), QString::number(Normal.z));
+//		}
 
-			const char* ColorName = gColorList[Section->ColorIndex].SafeName;
+//		Stream << "\t\t\t\t</float_array>\r\n";
+//		Stream << "\t\t\t\t<technique_common>\r\n";
+//		Stream << QString("\t\t\t\t\t<accessor source=\"#%1-normal-array\" count=\"%2\" stride=\"3\">\r\n").arg(ID, QString::number(Mesh->mNumVertices));
+//		Stream << "\t\t\t\t\t\t<param name=\"X\" type=\"float\" />\r\n";
+//		Stream << "\t\t\t\t\t\t<param name=\"Y\" type=\"float\" />\r\n";
+//		Stream << "\t\t\t\t\t\t<param name=\"Z\" type=\"float\" />\r\n";
+//		Stream << "\t\t\t\t\t</accessor>\r\n";
+//		Stream << "\t\t\t\t</technique_common>\r\n";
+//		Stream << "\t\t\t</source>\r\n";
 
-			if (Mesh->mIndexType == GL_UNSIGNED_SHORT)
-			{
-				quint16* Indices = (quint16*)Mesh->mIndexData + Section->IndexOffset / sizeof(quint16);
+//		Stream << QString("\t\t\t<vertices id=\"%1-vertices\">\r\n").arg(ID);
+//		Stream << QString("\t\t\t\t<input semantic=\"POSITION\" source=\"#%1-pos\"/>\r\n").arg(ID);
+//		Stream << "\t\t\t</vertices>\r\n";
 
-				Stream << QString("\t\t\t<triangles count=\"%1\" material=\"%2\">\r\n").arg(QString::number(Section->NumIndices / 3), ColorName);
-				Stream << QString("\t\t\t<input semantic=\"VERTEX\" source=\"#%1-vertices\" offset=\"0\" />\r\n").arg(ID);
-				Stream << QString("\t\t\t<input semantic=\"NORMAL\" source=\"#%1-normal\" offset=\"0\" />\r\n").arg(ID);
-				Stream << "\t\t\t<p>\r\n";
+//		for (int SectionIdx = 0; SectionIdx < Mesh->mLods[LC_MESH_LOD_HIGH].NumSections; SectionIdx++)
+//		{
+//			lcMeshSection* Section = &Mesh->mLods[LC_MESH_LOD_HIGH].Sections[SectionIdx];
 
-				for (int Idx = 0; Idx < Section->NumIndices; Idx += 3)
-				{
-					QString idx1 = QString::number(Indices[Idx + 0]);
-					QString idx2 = QString::number(Indices[Idx + 1]);
-					QString idx3 = QString::number(Indices[Idx + 2]);
+//			if (Section->PrimitiveType != LC_MESH_TRIANGLES && Section->PrimitiveType != LC_MESH_TEXTURED_TRIANGLES)
+//				continue;
 
-					Stream << QString("\t\t\t\t %1 %2 %3\r\n").arg(idx1, idx2, idx3);
-				}
-			}
-			else
-			{
-				quint32* Indices = (quint32*)Mesh->mIndexData + Section->IndexOffset / sizeof(quint32);
+//			const char* ColorName = gColorList[Section->ColorIndex].SafeName;
 
-				Stream << QString("\t\t\t<triangles count=\"%1\" material=\"%2\">\r\n").arg(QString::number(Section->NumIndices / 3), ColorName);
-				Stream << QString("\t\t\t<input semantic=\"VERTEX\" source=\"#%1-vertices\" offset=\"0\" />\r\n").arg(ID);
-				Stream << QString("\t\t\t<input semantic=\"NORMAL\" source=\"#%1-normal\" offset=\"0\" />\r\n").arg(ID);
-				Stream << "\t\t\t<p>\r\n";
+//			if (Mesh->mIndexType == GL_UNSIGNED_SHORT)
+//			{
+//				quint16* Indices = (quint16*)Mesh->mIndexData + Section->IndexOffset / sizeof(quint16);
 
-				for (int Idx = 0; Idx < Section->NumIndices; Idx += 3)
-				{
-					QString idx1 = QString::number(Indices[Idx + 0]);
-					QString idx2 = QString::number(Indices[Idx + 1]);
-					QString idx3 = QString::number(Indices[Idx + 2]);
+//				Stream << QString("\t\t\t<triangles count=\"%1\" material=\"%2\">\r\n").arg(QString::number(Section->NumIndices / 3), ColorName);
+//				Stream << QString("\t\t\t<input semantic=\"VERTEX\" source=\"#%1-vertices\" offset=\"0\" />\r\n").arg(ID);
+//				Stream << QString("\t\t\t<input semantic=\"NORMAL\" source=\"#%1-normal\" offset=\"0\" />\r\n").arg(ID);
+//				Stream << "\t\t\t<p>\r\n";
 
-					Stream << QString("\t\t\t\t %1 %2 %3\r\n").arg(idx1, idx2, idx3);
-				}
-			}
+//				for (int Idx = 0; Idx < Section->NumIndices; Idx += 3)
+//				{
+//					QString idx1 = QString::number(Indices[Idx + 0]);
+//					QString idx2 = QString::number(Indices[Idx + 1]);
+//					QString idx3 = QString::number(Indices[Idx + 2]);
 
-			Stream << "\t\t\t\t</p>\r\n";
-			Stream << "\t\t\t</triangles>\r\n";
-		}
+//					Stream << QString("\t\t\t\t %1 %2 %3\r\n").arg(idx1, idx2, idx3);
+//				}
+//			}
+//			else
+//			{
+//				quint32* Indices = (quint32*)Mesh->mIndexData + Section->IndexOffset / sizeof(quint32);
 
-		Stream << "\t\t</mesh>\r\n";
-		Stream << "\t</geometry>\r\n";
-	}
+//				Stream << QString("\t\t\t<triangles count=\"%1\" material=\"%2\">\r\n").arg(QString::number(Section->NumIndices / 3), ColorName);
+//				Stream << QString("\t\t\t<input semantic=\"VERTEX\" source=\"#%1-vertices\" offset=\"0\" />\r\n").arg(ID);
+//				Stream << QString("\t\t\t<input semantic=\"NORMAL\" source=\"#%1-normal\" offset=\"0\" />\r\n").arg(ID);
+//				Stream << "\t\t\t<p>\r\n";
 
-	Stream << "</library_geometries>\r\n";
-	Stream << "<library_visual_scenes>\r\n";
-	Stream << "\t<visual_scene id=\"DefaultScene\">\r\n";
+//				for (int Idx = 0; Idx < Section->NumIndices; Idx += 3)
+//				{
+//					QString idx1 = QString::number(Indices[Idx + 0]);
+//					QString idx2 = QString::number(Indices[Idx + 1]);
+//					QString idx3 = QString::number(Indices[Idx + 2]);
 
-	for (const lcModelPartsEntry& ModelPart : ModelParts)
-	{
-		lcMesh* Mesh = !ModelPart.Mesh ? ModelPart.Info->GetMesh() : ModelPart.Mesh;
+//					Stream << QString("\t\t\t\t %1 %2 %3\r\n").arg(idx1, idx2, idx3);
+//				}
+//			}
 
-		if (!Mesh)
-			continue;
+//			Stream << "\t\t\t\t</p>\r\n";
+//			Stream << "\t\t\t</triangles>\r\n";
+//		}
 
-		QString ID = GetMeshID(ModelPart);
+//		Stream << "\t\t</mesh>\r\n";
+//		Stream << "\t</geometry>\r\n";
+//	}
 
-		Stream << "\t\t<node>\r\n";
-		Stream << "\t\t\t<matrix>\r\n";
+//	Stream << "</library_geometries>\r\n";
+//	Stream << "<library_visual_scenes>\r\n";
+//	Stream << "\t<visual_scene id=\"DefaultScene\">\r\n";
 
-		const lcMatrix44& Matrix = ModelPart.WorldMatrix;
-		Stream << QString("\t\t\t\t%1 %2 %3 %4\r\n").arg(QString::number(Matrix[0][0]), QString::number(Matrix[1][0]), QString::number(Matrix[2][0]), QString::number(Matrix[3][0]));
-		Stream << QString("\t\t\t\t%1 %2 %3 %4\r\n").arg(QString::number(Matrix[0][1]), QString::number(Matrix[1][1]), QString::number(Matrix[2][1]), QString::number(Matrix[3][1]));
-		Stream << QString("\t\t\t\t%1 %2 %3 %4\r\n").arg(QString::number(Matrix[0][2]), QString::number(Matrix[1][2]), QString::number(Matrix[2][2]), QString::number(Matrix[3][2]));
-		Stream << QString("\t\t\t\t%1 %2 %3 %4\r\n").arg(QString::number(Matrix[0][3]), QString::number(Matrix[1][3]), QString::number(Matrix[2][3]), QString::number(Matrix[3][3]));
+//	for (const lcModelPartsEntry& ModelPart : ModelParts)
+//	{
+//		lcMesh* Mesh = !ModelPart.Mesh ? ModelPart.Info->GetMesh() : ModelPart.Mesh;
 
-		Stream << "\t\t\t</matrix>\r\n";
-		Stream << QString("\t\t\t<instance_geometry url=\"#%1\">\r\n").arg(ID);
-		Stream << "\t\t\t\t<bind_material>\r\n";
-		Stream << "\t\t\t\t\t<technique_common>\r\n";
+//		if (!Mesh)
+//			continue;
 
-		for (int SectionIdx = 0; SectionIdx < Mesh->mLods[LC_MESH_LOD_HIGH].NumSections; SectionIdx++)
-		{
-			lcMeshSection* Section = &Mesh->mLods[LC_MESH_LOD_HIGH].Sections[SectionIdx];
+//		QString ID = GetMeshID(ModelPart);
 
-			if (Section->PrimitiveType != LC_MESH_TRIANGLES && Section->PrimitiveType != LC_MESH_TEXTURED_TRIANGLES)
-				continue;
+//		Stream << "\t\t<node>\r\n";
+//		Stream << "\t\t\t<matrix>\r\n";
 
-			const char* SourceColorName = gColorList[Section->ColorIndex].SafeName;
-			const char* TargetColorName;
-			if (Section->ColorIndex == gDefaultColor)
-				TargetColorName = gColorList[ModelPart.ColorIndex].SafeName;
-			else
-				TargetColorName = gColorList[Section->ColorIndex].SafeName;
+//		const lcMatrix44& Matrix = ModelPart.WorldMatrix;
+//		Stream << QString("\t\t\t\t%1 %2 %3 %4\r\n").arg(QString::number(Matrix[0][0]), QString::number(Matrix[1][0]), QString::number(Matrix[2][0]), QString::number(Matrix[3][0]));
+//		Stream << QString("\t\t\t\t%1 %2 %3 %4\r\n").arg(QString::number(Matrix[0][1]), QString::number(Matrix[1][1]), QString::number(Matrix[2][1]), QString::number(Matrix[3][1]));
+//		Stream << QString("\t\t\t\t%1 %2 %3 %4\r\n").arg(QString::number(Matrix[0][2]), QString::number(Matrix[1][2]), QString::number(Matrix[2][2]), QString::number(Matrix[3][2]));
+//		Stream << QString("\t\t\t\t%1 %2 %3 %4\r\n").arg(QString::number(Matrix[0][3]), QString::number(Matrix[1][3]), QString::number(Matrix[2][3]), QString::number(Matrix[3][3]));
 
-			Stream << QString("\t\t\t\t\t\t<instance_material symbol=\"%1\" target=\"#%2-material\"/>\r\n").arg(SourceColorName, TargetColorName);
-		}
+//		Stream << "\t\t\t</matrix>\r\n";
+//		Stream << QString("\t\t\t<instance_geometry url=\"#%1\">\r\n").arg(ID);
+//		Stream << "\t\t\t\t<bind_material>\r\n";
+//		Stream << "\t\t\t\t\t<technique_common>\r\n";
 
-		Stream << "\t\t\t\t\t</technique_common>\r\n";
-		Stream << "\t\t\t\t</bind_material>\r\n";
-		Stream << "\t\t\t</instance_geometry>\r\n";
-		Stream << "\t\t</node>\r\n";
-	}
+//		for (int SectionIdx = 0; SectionIdx < Mesh->mLods[LC_MESH_LOD_HIGH].NumSections; SectionIdx++)
+//		{
+//			lcMeshSection* Section = &Mesh->mLods[LC_MESH_LOD_HIGH].Sections[SectionIdx];
 
-	Stream << "\t</visual_scene>\r\n";
-	Stream << "</library_visual_scenes>\r\n";
-	Stream << "<scene>\r\n";
-	Stream << "\t<instance_visual_scene url=\"#DefaultScene\"/>\r\n";
-	Stream << "</scene>\r\n";
+//			if (Section->PrimitiveType != LC_MESH_TRIANGLES && Section->PrimitiveType != LC_MESH_TEXTURED_TRIANGLES)
+//				continue;
 
-	Stream << "</COLLADA>\r\n";
+//			const char* SourceColorName = gColorList[Section->ColorIndex].SafeName;
+//			const char* TargetColorName;
+//			if (Section->ColorIndex == gDefaultColor)
+//				TargetColorName = gColorList[ModelPart.ColorIndex].SafeName;
+//			else
+//				TargetColorName = gColorList[Section->ColorIndex].SafeName;
+
+//			Stream << QString("\t\t\t\t\t\t<instance_material symbol=\"%1\" target=\"#%2-material\"/>\r\n").arg(SourceColorName, TargetColorName);
+//		}
+
+//		Stream << "\t\t\t\t\t</technique_common>\r\n";
+//		Stream << "\t\t\t\t</bind_material>\r\n";
+//		Stream << "\t\t\t</instance_geometry>\r\n";
+//		Stream << "\t\t</node>\r\n";
+//	}
+
+//	Stream << "\t</visual_scene>\r\n";
+//	Stream << "</library_visual_scenes>\r\n";
+//	Stream << "<scene>\r\n";
+//	Stream << "\t<instance_visual_scene url=\"#DefaultScene\"/>\r\n";
+//	Stream << "</scene>\r\n";
+
+//	Stream << "</COLLADA>\r\n";
 
 	return true;
 }
@@ -2019,6 +2060,8 @@ bool Project::ExportPOVRay(const QString& FileName)
 bool Project::ExportWavefront(const QString& FileName)
 {
 	std::vector<lcModelPartsEntry> ModelParts = GetModelParts();
+    char Line[1024];
+    quint32 vert = 1;
 
 	if (ModelParts.empty())
 	{
@@ -2026,102 +2069,106 @@ bool Project::ExportWavefront(const QString& FileName)
 		return false;
 	}
 
-	QString SaveFileName = GetExportFileName(FileName, QLatin1String("obj"), tr("Export Wavefront"), tr("Wavefront Files (*.obj);;All Files (*.*)"));
+    auto GetMeshID = [](const lcModelPartsEntry& ModelPart)
+    {
+        const PieceInfo* Info = ModelPart.Info;
+        QString ID = QString(Info->mFileName).replace('.', '_');
 
-	if (SaveFileName.isEmpty())
-		return false;
+        if (ModelPart.Mesh)
+            ID += "_" + QString::number((quintptr)ModelPart.Mesh, 16);
 
-	lcDiskFile OBJFile(SaveFileName);
-	char Line[1024];
+        return ID;
+    };
 
-	if (!OBJFile.Open(QIODevice::WriteOnly))
-	{
-		QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Could not open file '%1' for writing.").arg(SaveFileName));
-		return false;
-	}
+    for (const lcModelPartsEntry& ModelPart : ModelParts)
+    {
+        QString ID_FileName = GetMeshID(ModelPart);
+        QString SaveFileName = GetExportFileNames(FileName, ID_FileName, QLatin1String("obj"), tr("Export Wavefront"), tr("Wavefront Files (*.obj);;All Files (*.*)"));
+        if (SaveFileName.isEmpty())
+            return false;
 
-	quint32 vert = 1;
+        lcDiskFile OBJFile(SaveFileName);
+        if (!OBJFile.Open(QIODevice::WriteOnly))
+        {
+            QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Could not open file '%1' for writing.").arg(SaveFileName));
+            return false;
+        }
 
-	OBJFile.WriteLine("# Model exported from LeoCAD\n");
+        OBJFile.WriteLine("# Model exported from LeoCAD\n");
 
-	QFileInfo SaveInfo(SaveFileName);
-	QString MaterialFileName = QDir(SaveInfo.absolutePath()).absoluteFilePath(SaveInfo.completeBaseName() + QLatin1String(".mtl"));
+        QFileInfo SaveInfo(SaveFileName);
+        QString MaterialFileName = QDir(SaveInfo.absolutePath()).absoluteFilePath(SaveInfo.completeBaseName() + QLatin1String(".mtl"));
+        sprintf(Line, "#\n\nmtllib %s\n\n", QFileInfo(MaterialFileName).fileName().toLatin1().constData());
+        OBJFile.WriteLine(Line);
 
-	sprintf(Line, "#\n\nmtllib %s\n\n", QFileInfo(MaterialFileName).fileName().toLatin1().constData());
-	OBJFile.WriteLine(Line);
+//    	for (const lcModelPartsEntry& ModelPart : ModelParts)
+//   	{
+        lcMesh* Mesh = !ModelPart.Mesh ? ModelPart.Info->GetMesh() : ModelPart.Mesh;
+        if (!Mesh)
+            continue;
 
-	lcDiskFile MaterialFile(MaterialFileName);
-	if (!MaterialFile.Open(QIODevice::WriteOnly))
-	{
-		QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Could not open file '%1' for writing.").arg(MaterialFileName));
-		return false;
-	}
+        const lcMatrix44& ModelWorld = ModelPart.WorldMatrix;
+        lcVertex* Verts = (lcVertex*)Mesh->mVertexData;
 
-	MaterialFile.WriteLine("# Colors used by LeoCAD\n\n");
-	for (const lcColor& Color : gColorList)
-	{
-		if (Color.Translucent)
-			sprintf(Line, "newmtl %s\nKd %.2f %.2f %.2f\nD %.2f\n\n", Color.SafeName, Color.Value[0], Color.Value[1], Color.Value[2], Color.Value[3]);
-		else
-			sprintf(Line, "newmtl %s\nKd %.2f %.2f %.2f\n\n", Color.SafeName, Color.Value[0], Color.Value[1], Color.Value[2]);
-		MaterialFile.WriteLine(Line);
-	}
+        for (int VertexIdx = 0; VertexIdx < Mesh->mNumVertices; VertexIdx++)
+        {
+            lcVector3 Vertex = lcMul31(Verts[VertexIdx].Position, ModelWorld);
+            sprintf(Line, "v %.2f %.2f %.2f\n", Vertex[0], Vertex[1], Vertex[2]);
+            OBJFile.WriteLine(Line);
+        }
+        OBJFile.WriteLine("#\n\n");
+//	}
 
-	for (const lcModelPartsEntry& ModelPart : ModelParts)
-	{
-		lcMesh* Mesh = !ModelPart.Mesh ? ModelPart.Info->GetMesh() : ModelPart.Mesh;
+//	for (const lcModelPartsEntry& ModelPart : ModelParts)
+//	{
+//        lcMesh* Mesh = !ModelPart.Mesh ? ModelPart.Info->GetMesh() : ModelPart.Mesh;
+//        if (!Mesh)
+//            continue;
 
-		if (!Mesh)
-			continue;
+//        const lcMatrix44& ModelWorld = ModelPart.WorldMatrix;
+//        lcVertex* Verts = (lcVertex*)Mesh->mVertexData;
 
-		const lcMatrix44& ModelWorld = ModelPart.WorldMatrix;
-		lcVertex* Verts = (lcVertex*)Mesh->mVertexData;
+        for (int VertexIdx = 0; VertexIdx < Mesh->mNumVertices; VertexIdx++)
+        {
+            lcVector3 Normal = lcMul30(lcUnpackNormal(Verts[VertexIdx].Normal), ModelWorld);
+            sprintf(Line, "vn %.2f %.2f %.2f\n", Normal[0], Normal[1], Normal[2]);
+            OBJFile.WriteLine(Line);
+        }
+        OBJFile.WriteLine("#\n\n");
+//	}
 
-		for (int VertexIdx = 0; VertexIdx < Mesh->mNumVertices; VertexIdx++)
-		{
-			lcVector3 Vertex = lcMul31(Verts[VertexIdx].Position, ModelWorld);
-			sprintf(Line, "v %.2f %.2f %.2f\n", Vertex[0], Vertex[1], Vertex[2]);
-			OBJFile.WriteLine(Line);
-		}
+        int NumPieces = 0;
+//	for (const lcModelPartsEntry& ModelPart : ModelParts)
+//	{
+        sprintf(Line, "g Piece%.3d\n", NumPieces++);
+        OBJFile.WriteLine(Line);
 
-		OBJFile.WriteLine("#\n\n");
-	}
+//		lcMesh* Mesh = !ModelPart.Mesh ? ModelPart.Info->GetMesh() : ModelPart.Mesh;
+        if (Mesh)
+        {
+            Mesh->ExportWavefrontIndices(OBJFile, ModelPart.ColorIndex, vert);
+            vert += Mesh->mNumVertices;
+        }
 
-	for (const lcModelPartsEntry& ModelPart : ModelParts)
-	{
-		lcMesh* Mesh = !ModelPart.Mesh ? ModelPart.Info->GetMesh() : ModelPart.Mesh;
+        lcDiskFile MaterialFile(MaterialFileName);
+        if (!MaterialFile.Open(QIODevice::WriteOnly))
+        {
+            QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Could not open file '%1' for writing.").arg(MaterialFileName));
+            return false;
+        }
 
-		if (!Mesh)
-			continue;
+        MaterialFile.WriteLine("# Colors used by LeoCAD\n\n");
+        for (const lcColor& Color : gColorList)
+        {
+            if (Color.Translucent)
+                sprintf(Line, "newmtl %s\nKd %.2f %.2f %.2f\nD %.2f\n\n", Color.SafeName, Color.Value[0], Color.Value[1], Color.Value[2], Color.Value[3]);
+            else
+                sprintf(Line, "newmtl %s\nKd %.2f %.2f %.2f\n\n", Color.SafeName, Color.Value[0], Color.Value[1], Color.Value[2]);
+            MaterialFile.WriteLine(Line);
+        }
+//	}
 
-		const lcMatrix44& ModelWorld = ModelPart.WorldMatrix;
-		lcVertex* Verts = (lcVertex*)Mesh->mVertexData;
-
-		for (int VertexIdx = 0; VertexIdx < Mesh->mNumVertices; VertexIdx++)
-		{
-			lcVector3 Normal = lcMul30(lcUnpackNormal(Verts[VertexIdx].Normal), ModelWorld);
-			sprintf(Line, "vn %.2f %.2f %.2f\n", Normal[0], Normal[1], Normal[2]);
-			OBJFile.WriteLine(Line);
-		}
-
-		OBJFile.WriteLine("#\n\n");
-	}
-
-	int NumPieces = 0;
-	for (const lcModelPartsEntry& ModelPart : ModelParts)
-	{
-		sprintf(Line, "g Piece%.3d\n", NumPieces++);
-		OBJFile.WriteLine(Line);
-
-		lcMesh* Mesh = !ModelPart.Mesh ? ModelPart.Info->GetMesh() : ModelPart.Mesh;
-
-		if (Mesh)
-		{
-			Mesh->ExportWavefrontIndices(OBJFile, ModelPart.ColorIndex, vert);
-			vert += Mesh->mNumVertices;
-		}
-	}
-
+    }
 	return true;
 }
 

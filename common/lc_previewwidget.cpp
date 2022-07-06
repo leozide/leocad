@@ -93,7 +93,8 @@ lcPreview::lcPreview()
 bool lcPreview::SetCurrentPiece(const QString& PartType, int ColorCode)
 {
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
-	PieceInfo* Info = Library->FindPiece(PartType.toLatin1().constData(), nullptr, false, false);
+	Project* CurrentProject = lcGetActiveProject();
+	PieceInfo* Info = Library->FindPiece(PartType.toLatin1().constData(), CurrentProject, false, true);
 
 	if (Info)
 	{

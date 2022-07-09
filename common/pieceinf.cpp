@@ -112,6 +112,13 @@ void PieceInfo::CreateProject(Project* Project, const char* PieceName)
 	m_strDescription[sizeof(m_strDescription) - 1] = 0;
 }
 
+bool PieceInfo::IsProjectPiece() const
+{
+	if (mProject)
+		return !strcmp(m_strDescription, mProject->GetFileName().toLatin1().data());
+	return false;
+}
+
 bool PieceInfo::GetPieceWorldMatrix(lcPiece* Piece, lcMatrix44& WorldMatrix) const
 {
 	if (IsModel())
@@ -346,7 +353,7 @@ void PieceInfo::GetPartsList(int DefaultColorIndex, bool ScanSubModels, bool Add
 		if (AddSubModels)
 			PartsList[this][DefaultColorIndex]++;
 	}
-	else if (IsProject())
+	else if (IsProject() && !IsProjectPiece())
 	{
 		const lcModel* const Model = mProject->GetMainModel();
 		if (Model)

@@ -266,7 +266,7 @@ void lcPartSelectionListModel::SetFilter(const QString& Filter)
 		PieceInfo* Info = mParts[PartIdx].first;
 		bool Visible;
 
-		if (!mShowDecoratedParts && Info->IsPatterned())
+		if (!mShowDecoratedParts && Info->IsPatterned() && !Info->IsProjectPiece())
 			Visible = false;
 		else if (!mShowPartAliases && Info->m_strDescription[0] == '=')
 			Visible = false;

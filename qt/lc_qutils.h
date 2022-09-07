@@ -15,7 +15,12 @@ public:
 
 	bool eventFilter(QObject* Object, QEvent* Event) override;
 
+private slots:
+	void sectionResized(int LogicalIndex, int OldSize, int NewSize);
+
+private:
 	const int m_columnToStretch;
+	int m_stretchWidth;
 };
 
 class lcSmallLineEdit : public QLineEdit

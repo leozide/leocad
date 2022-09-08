@@ -20,6 +20,7 @@ private slots:
 
 private:
 	const int m_columnToStretch;
+	bool m_interactiveResize;
 	int m_stretchWidth;
 };
 

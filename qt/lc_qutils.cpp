@@ -47,7 +47,7 @@ float lcParseValueLocalized(const QString& Value)
 
 // Resize all columns to content except for one stretching column. (taken from QT creator)
 lcQTreeWidgetColumnStretcher::lcQTreeWidgetColumnStretcher(QTreeWidget *treeWidget, int columnToStretch)
-	: QObject(treeWidget->header()), m_columnToStretch(columnToStretch), m_stretchWidth(0)
+	: QObject(treeWidget->header()), m_columnToStretch(columnToStretch), m_interactiveResize(false), m_stretchWidth(0)
 {
 	parent()->installEventFilter(this);
 	connect(treeWidget->header(), SIGNAL(sectionResized(int, int, int)), SLOT(sectionResized(int, int, int)));
@@ -59,8 +59,15 @@ void lcQTreeWidgetColumnStretcher::sectionResized(int LogicalIndex, int OldSize,
 {
 	Q_UNUSED(OldSize)
 
-	if (LogicalIndex == m_columnToStretch)
-		m_stretchWidth = NewSize;
+	if (LogicalIndex == m_columnToStretch) 
+	{ 
+		QHeaderView* HeaderView = qobject_cast<QHeaderView*>(parent()); 
+ 
+		if (HeaderView->isVisible()) 
+			m_interactiveResize = true; 
+ 
+		m_stretchWidth = NewSize; 
+	}
 }
 
 bool lcQTreeWidgetColumnStretcher::eventFilter(QObject* Object, QEvent* Event)
@@ -79,8 +86,9 @@ bool lcQTreeWidgetColumnStretcher::eventFilter(QObject* Object, QEvent* Event)
 		}
 		else if (Event->type() == QEvent::Hide)
 		{
-			for (int i = 0; i < HeaderView->count(); ++i)
-				HeaderView->setSectionResizeMode(i, i == m_columnToStretch ? QHeaderView::Stretch : QHeaderView::ResizeToContents);
+			if (!m_interactiveResize)
+				for (int i = 0; i < HeaderView->count(); ++i)
+					HeaderView->setSectionResizeMode(i, i == m_columnToStretch ? QHeaderView::Stretch : QHeaderView::ResizeToContents);
 		}
 		else if (Event->type() == QEvent::Resize)
 		{

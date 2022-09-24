@@ -958,7 +958,7 @@ void lcPiece::GetModelParts(const lcMatrix44& WorldMatrix, int DefaultColorIndex
 	if (!mMesh)
 		mPieceInfo->GetModelParts(lcMul(mModelWorld, WorldMatrix), ColorIndex, ModelParts);
 	else
-		ModelParts.emplace_back(lcModelPartsEntry{ WorldMatrix, mPieceInfo, mMesh, DefaultColorIndex });
+		ModelParts.emplace_back(lcModelPartsEntry{ lcMul(mModelWorld, WorldMatrix), mPieceInfo, mMesh, ColorIndex });
 }
 
 const lcBoundingBox& lcPiece::GetBoundingBox() const

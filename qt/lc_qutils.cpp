@@ -47,40 +47,56 @@ float lcParseValueLocalized(const QString& Value)
 
 // Resize all columns to content except for one stretching column. (taken from QT creator)
 lcQTreeWidgetColumnStretcher::lcQTreeWidgetColumnStretcher(QTreeWidget *treeWidget, int columnToStretch)
-	: QObject(treeWidget->header()), m_columnToStretch(columnToStretch)
+	: QObject(treeWidget->header()), m_columnToStretch(columnToStretch), m_interactiveResize(false), m_stretchWidth(0)
 {
 	parent()->installEventFilter(this);
+	connect(treeWidget->header(), SIGNAL(sectionResized(int, int, int)), SLOT(sectionResized(int, int, int)));
 	QHideEvent fake;
 	lcQTreeWidgetColumnStretcher::eventFilter(parent(), &fake);
+}
+
+void lcQTreeWidgetColumnStretcher::sectionResized(int LogicalIndex, int OldSize, int NewSize)
+{
+	Q_UNUSED(OldSize)
+
+	if (LogicalIndex == m_columnToStretch) 
+	{ 
+		QHeaderView* HeaderView = qobject_cast<QHeaderView*>(parent()); 
+ 
+		if (HeaderView->isVisible()) 
+			m_interactiveResize = true; 
+ 
+		m_stretchWidth = NewSize; 
+	}
 }
 
 bool lcQTreeWidgetColumnStretcher::eventFilter(QObject* Object, QEvent* Event)
 {
 	if (Object == parent())
 	{
+		QHeaderView* HeaderView = qobject_cast<QHeaderView*>(Object);
+
 		if (Event->type() == QEvent::Show)
 		{
-			QHeaderView* HeaderView = qobject_cast<QHeaderView*>(Object);
-
 			for (int i = 0; i < HeaderView->count(); ++i)
 				HeaderView->setSectionResizeMode(i, QHeaderView::Interactive);
+
+			m_stretchWidth = HeaderView->sectionSize(m_columnToStretch);
+
 		}
 		else if (Event->type() == QEvent::Hide)
 		{
-			QHeaderView* HeaderView = qobject_cast<QHeaderView*>(Object);
-
-			for (int i = 0; i < HeaderView->count(); ++i)
-				HeaderView->setSectionResizeMode(i, i == m_columnToStretch ? QHeaderView::Stretch : QHeaderView::ResizeToContents);
+			if (!m_interactiveResize)
+				for (int i = 0; i < HeaderView->count(); ++i)
+					HeaderView->setSectionResizeMode(i, i == m_columnToStretch ? QHeaderView::Stretch : QHeaderView::ResizeToContents);
 		}
 		else if (Event->type() == QEvent::Resize)
 		{
-			QHeaderView* HeaderView = qobject_cast<QHeaderView*>(Object);
+			if (HeaderView->sectionResizeMode(m_columnToStretch) == QHeaderView::Interactive) {
 
-			if (HeaderView->sectionResizeMode(m_columnToStretch) == QHeaderView::Interactive)
-			{
-				const QResizeEvent* ResizeEvent = reinterpret_cast<QResizeEvent*>(Event);
-				const int Diff = ResizeEvent->size().width() - ResizeEvent->oldSize().width() ;
-				HeaderView->resizeSection(m_columnToStretch, qMax(32, HeaderView->sectionSize(1) + Diff));
+				const int StretchWidth = HeaderView->isVisible() ? m_stretchWidth : 32;
+
+				HeaderView->resizeSection(m_columnToStretch, StretchWidth);
 			}
 		}
 	}

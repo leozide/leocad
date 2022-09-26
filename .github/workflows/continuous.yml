@@ -8,14 +8,15 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v3
     - name: Install Qt
-      uses: jurplel/install-qt-action@v3    
+      uses: jurplel/install-qt-action@v3  
+      with:
+        cache: 'false'
     - name: init
       run: qmake PREFIX=/usr
     - name: make
-      run: qmake PREFIX=/usr
+      run: make

@@ -15,7 +15,7 @@ jobs:
     - name: Install Qt
       uses: jurplel/install-qt-action@v3  
       with:
-        cache: 'false'
+        cache: 'true'
     - name: init
       run: qmake PREFIX=/usr
     - name: make

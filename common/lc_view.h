@@ -345,7 +345,7 @@ protected:
 	lcCamera* mCamera = nullptr;
 
 	lcVertexBuffer mGridBuffer;
-	int mGridSettings[7];
+	int mGridSettings[8];
 
 	static lcFindReplaceWidget* mFindWidget;
 	static lcFindReplaceParams mFindReplaceParams;

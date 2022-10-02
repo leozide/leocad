@@ -1,4 +1,4 @@
-name: C/C++ CI
+name: LeoCAD CI
 
 on:
   push:
@@ -43,7 +43,7 @@ jobs:
         chmod a+x linuxdeployqt*.AppImage 
         unset QTDIR; unset QT_PLUGIN_PATH ; unset LD_LIBRARY_PATH
         export VERSION=$(git rev-parse --short HEAD)
-        ./linuxdeployqt*.AppImage ./AppDir/usr/share/applications/*.desktop -bundle-non-qt-libs
+        ./linuxdeployqt*.AppImage ./AppDir/usr/share/applications/*.desktop -bundle-non-qt-libs -unsupported-allow-new-glibc
         ./linuxdeployqt*.AppImage --appimage-extract
         export PATH=$(readlink -f ./squashfs-root/usr/bin/):$PATH
         ./squashfs-root/usr/bin/appimagetool AppDir/
@@ -94,3 +94,15 @@ jobs:
         chmod +x povray
     - name: Build
       run: make -j ${{ steps.cpu-cores.outputs.count }}
+    - name: Create Package
+      run: |
+        cd build/release
+        macdeployqt LeoCAD.app -dmg
+        mv LeoCAD.dmg LeoCAD-macOS-$(git rev-parse --short HEAD).dmg
+    - name: Upload Package
+        'curl -s -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/repos/leozide/leocad/commits/master -o repo.txt'
+        'export REMOTE=$(ggrep -Po ''(?<=: \")(([a-z0-9])\w+)(?=\")'' -m 1 repo.txt)'
+        export LOCAL=$(git rev-parse HEAD)
+        if [[ "$REMOTE" != "$LOCAL" ]]; then echo "Build no longer current. $REMOTE vs $LOCAL - aborting upload."; exit 0; fi;
+        wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh
+        bash upload.sh LeoCAD*.dmg*

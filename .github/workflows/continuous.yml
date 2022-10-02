@@ -3,20 +3,36 @@ name: C/C++ CI
 on:
   push:
     branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
 
 jobs:
-  build:
+  build-ubuntu:
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v3
     - name: Install Qt
       uses: jurplel/install-qt-action@v3  
       with:
         cache: 'true'
-    - name: init
+    - name: Get number of CPU cores
+      uses: SimenB/github-actions-cpu-cores@v1
+      id: cpu-cores
+    - name: Generate Makefile
       run: qmake PREFIX=/usr
-    - name: make
-      run: make
+    - name: Build
+      run: make -j ${{ steps.cpu-cores.outputs.count }}
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v3  
+      with:
+        cache: 'true'
+    - name: Get number of CPU cores
+      uses: SimenB/github-actions-cpu-cores@v1
+      id: cpu-cores
+    - name: Generate Makefile
+      run: qmake PREFIX=/usr
+    - name: Build
+      run: make -j ${{ steps.cpu-cores.outputs.count }}

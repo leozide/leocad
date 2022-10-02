@@ -39,12 +39,14 @@ jobs:
       run: |
         cp qt/leocad.desktop AppDir/leocad.desktop
         cp tools/icon/256x256/apps/leocad.png AppDir/leocad.png
-        wget -c "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
+        wget -q -c "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
         chmod a+x linuxdeployqt*.AppImage 
         unset QTDIR; unset QT_PLUGIN_PATH ; unset LD_LIBRARY_PATH
         export VERSION=$(git rev-parse --short HEAD)
         ./linuxdeployqt*.AppImage ./AppDir/usr/share/applications/*.desktop -bundle-non-qt-libs -unsupported-allow-new-glibc
+        echo done1
         ./linuxdeployqt*.AppImage --appimage-extract
+        echo done2
         export PATH=$(readlink -f ./squashfs-root/usr/bin/):$PATH
         ./squashfs-root/usr/bin/appimagetool AppDir/
         mv ./LeoCAD-$VERSION-x86_64.AppImage ./LeoCAD-Linux-$VERSION-x86_64.AppImage 
@@ -101,8 +103,8 @@ jobs:
         mv LeoCAD.dmg LeoCAD-macOS-$(git rev-parse --short HEAD).dmg
     - name: Upload Package
       run: |
-        'curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/leozide/leocad/commits/master -o repo.txt'
-        'export REMOTE=$(ggrep -Po ''(?<=: \")(([a-z0-9])\w+)(?=\")'' -m 1 repo.txt)'
+        curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/leozide/leocad/commits/master -o repo.txt
+        export REMOTE=$(ggrep -Po ''(?<=: \")(([a-z0-9])\w+)(?=\")'' -m 1 repo.txt)
         export LOCAL=$(git rev-parse HEAD)
         if [[ "$REMOTE" != "$LOCAL" ]]; then echo "Build no longer current. $REMOTE vs $LOCAL - aborting upload."; exit 0; fi;
         export TRAVIS_TAG=$GITHUB_REF_NAME

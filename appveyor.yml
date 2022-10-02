@@ -61,7 +61,7 @@ for:
         - image: Ubuntu1604
         
     before_build:
-      - export PATH=$PATH:$HOME/Qt/5.15
+      - source /opt/qt515/bin/qt515-env.sh
       - export TRAVIS_TAG=%APPVEYOR_REPO_TAG_NAME%
       - export TRAVIS_REPO_SLUG=%APPVEYOR_REPO_NAME%
       - export TRAVIS_COMMIT=%APPVEYOR_REPO_COMMIT%
@@ -87,7 +87,7 @@ for:
         - image: macos
        
     before_build:
-      - export PATH=$PATH:$HOME/Qt/5.15
+      - export PATH=$PATH:$HOME/Qt/5.15/macos/bin
       - export TRAVIS_TAG=%APPVEYOR_REPO_TAG_NAME%
       - export TRAVIS_REPO_SLUG=%APPVEYOR_REPO_NAME%
       - export TRAVIS_COMMIT=%APPVEYOR_REPO_COMMIT%

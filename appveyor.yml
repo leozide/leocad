@@ -60,6 +60,9 @@ for:
       only:
         - image: Ubuntu1604
         
+    install:
+      - sudo apt-get libqt5opengl5-dev
+      
     before_build:
       - export PATH=$HOME/Qt/5.15/gcc_64/bin:$PATH
       - export TRAVIS_TAG=$APPVEYOR_REPO_TAG_NAME
@@ -105,7 +108,7 @@ for:
       - macdeployqt LeoCAD.app -dmg
       - mv LeoCAD.dmg LeoCAD-macOS-$(git rev-parse --short HEAD).dmg
       - 'curl -s -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/repos/leozide/leocad/commits/master -o repo.txt' 
-      - 'export REMOTE=$(ggrep -Po ''(?<=: \")(([a-z0-9])\w+)(?=\")'' -m 1 repo.txt)'
+      - 'export REMOTE=$(grep -Po ''(?<=: \")(([a-z0-9])\w+)(?=\")'' -m 1 repo.txt)'
       - export LOCAL=$(git rev-parse HEAD)
       - if [[ "$REMOTE" != "$LOCAL" ]]; then echo "Build no longer current. $REMOTE vs $LOCAL - aborting upload."; exit 0; fi;
       - wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh

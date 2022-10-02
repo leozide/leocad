@@ -62,9 +62,10 @@ for:
         
     before_build:
       - source /opt/qt515/bin/qt515-env.sh
-      - export TRAVIS_TAG=%APPVEYOR_REPO_TAG_NAME%
-      - export TRAVIS_REPO_SLUG=%APPVEYOR_REPO_NAME%
-      - export TRAVIS_COMMIT=%APPVEYOR_REPO_COMMIT%
+      - export PATH=$HOME/Qt/5.15/gcc_64/bin:$PATH
+      - export TRAVIS_TAG=$APPVEYOR_REPO_TAG_NAME
+      - export TRAVIS_REPO_SLUG=$APPVEYOR_REPO_NAME
+      - export TRAVIS_COMMIT=$APPVEYOR_REPO_COMMIT
     
     build_script:
       - qmake PREFIX=/usr
@@ -87,10 +88,10 @@ for:
         - image: macos
        
     before_build:
-      - export PATH=$PATH:$HOME/Qt/5.15/macos/bin
-      - export TRAVIS_TAG=%APPVEYOR_REPO_TAG_NAME%
-      - export TRAVIS_REPO_SLUG=%APPVEYOR_REPO_NAME%
-      - export TRAVIS_COMMIT=%APPVEYOR_REPO_COMMIT%
+      - export PATH=$HOME/Qt/5.15/clang_64/bin:$PATH
+      - export TRAVIS_TAG=$APPVEYOR_REPO_TAG_NAME
+      - export TRAVIS_REPO_SLUG=$APPVEYOR_REPO_NAME
+      - export TRAVIS_COMMIT=$APPVEYOR_REPO_COMMIT
     
     build_script:
       - qmake PREFIX=/usr

@@ -61,7 +61,6 @@ for:
         - image: Ubuntu1604
         
     before_build:
-      - source /opt/qt515/bin/qt515-env.sh
       - export PATH=$HOME/Qt/5.15/gcc_64/bin:$PATH
       - export TRAVIS_TAG=$APPVEYOR_REPO_TAG_NAME
       - export TRAVIS_REPO_SLUG=$APPVEYOR_REPO_NAME
@@ -92,7 +91,11 @@ for:
       - export TRAVIS_TAG=$APPVEYOR_REPO_TAG_NAME
       - export TRAVIS_REPO_SLUG=$APPVEYOR_REPO_NAME
       - export TRAVIS_COMMIT=$APPVEYOR_REPO_COMMIT
-    
+      - appveyor DownloadFile https://github.com/leozide/povray/releases/download/continuous/povray
+      - chmod +x povray
+      - appveyor DownloadFile https://github.com/leozide/leocad/releases/download/v19.07.1/Library-20.03.zip -FileName library.zip
+      - unzip library.zip
+     
     build_script:
       - qmake PREFIX=/usr
       - make

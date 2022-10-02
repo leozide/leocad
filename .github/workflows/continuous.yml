@@ -100,6 +100,7 @@ jobs:
         macdeployqt LeoCAD.app -dmg
         mv LeoCAD.dmg LeoCAD-macOS-$(git rev-parse --short HEAD).dmg
     - name: Upload Package
+      run: |
         'curl -s -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/repos/leozide/leocad/commits/master -o repo.txt'
         'export REMOTE=$(ggrep -Po ''(?<=: \")(([a-z0-9])\w+)(?=\")'' -m 1 repo.txt)'
         export LOCAL=$(git rev-parse HEAD)

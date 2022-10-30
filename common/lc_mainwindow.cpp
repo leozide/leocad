@@ -2590,7 +2590,7 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		break;
 
 	case LC_FILE_EXPORT_CSV:
-		lcGetActiveProject()->ExportCSV();
+		lcGetActiveProject()->ExportCSV(QString());
 		break;
 
 	case LC_FILE_EXPORT_POVRAY:

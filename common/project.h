@@ -93,7 +93,7 @@ public:
 	bool Export3DStudio(const QString& FileName);
 	void ExportBrickLink();
 	bool ExportCOLLADA(const QString& FileName);
-	void ExportCSV();
+	bool ExportCSV(const QString& FileName);
 	void ExportHTML(const lcHTMLExportOptions& Options);
 	bool ExportPOVRay(const QString& FileName);
 	bool ExportWavefront(const QString& FileName);

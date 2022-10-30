@@ -354,20 +354,6 @@ lcCommandLineOptions lcApplication::ParseCommandLineOptions()
 
 	lcCommandLineOptions Options;
 
-	Options.ParseOK = true;
-	Options.Exit = false;
-	Options.SaveImage = false;
-	Options.SaveWavefront = false;
-	Options.Save3DS = false;
-	Options.SaveCOLLADA = false;
-	Options.SaveHTML = false;
-	Options.SetCameraAngles = false;
-	Options.SetCameraPosition = false;
-	Options.Orthographic = false;
-	Options.SetFoV = false;
-	Options.SetZPlanes = false;
-	Options.SetFadeStepsColor = false;
-	Options.SetHighlightColor = false;
 	Options.FadeSteps = Preferences.mFadeSteps;
 	Options.ImageHighlight = Preferences.mHighlightNewParts;
 	Options.ImageWidth = lcGetProfileInt(LC_PROFILE_IMAGE_WIDTH);
@@ -788,6 +774,11 @@ lcCommandLineOptions lcApplication::ParseCommandLineOptions()
 			Options.SaveCOLLADA = true;
 			ParseString(Options.SaveCOLLADAName, false);
 		}
+		else if (Option == QLatin1String("-csv") || Option == QLatin1String("--export-csv"))
+		{
+			Options.SaveCSV = true;
+			ParseString(Options.SaveCSVName, false);
+		}
 		else if (Option == QLatin1String("-html") || Option == QLatin1String("--export-html"))
 		{
 			Options.SaveHTML = true;
@@ -842,6 +833,7 @@ lcCommandLineOptions lcApplication::ParseCommandLineOptions()
 			Options.StdOut += tr("  -obj, --export-wavefront <outfile.obj>: Export the model to Wavefront OBJ format.\n");
 			Options.StdOut += tr("  -3ds, --export-3ds <outfile.3ds>: Export the model to 3D Studio 3DS format.\n");
 			Options.StdOut += tr("  -dae, --export-collada <outfile.dae>: Export the model to COLLADA DAE format.\n");
+			Options.StdOut += tr("  -csv, --export-csv <outfile.csv>: Export the list of parts used in csv format.\n");
 			Options.StdOut += tr("  -html, --export-html <folder>: Create an HTML page for the model.\n");
 			Options.StdOut += tr("  -v, --version: Output version information and exit.\n");
 			Options.StdOut += tr("  -?, --help: Display this help message and exit.\n");
@@ -888,7 +880,7 @@ lcCommandLineOptions lcApplication::ParseCommandLineOptions()
 			Options.StdErr += tr("--camera-position is ignored when --camera-angles is set.\n");
 	}
 
-	const bool SaveAndExit = (Options.SaveImage || Options.SaveWavefront || Options.Save3DS || Options.SaveCOLLADA || Options.SaveHTML);
+	const bool SaveAndExit = (Options.SaveImage || Options.SaveWavefront || Options.Save3DS || Options.SaveCOLLADA || Options.SaveCSV || Options.SaveHTML);
 
 	if (SaveAndExit && Options.ProjectName.isEmpty())
 	{
@@ -929,7 +921,7 @@ lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& Libra
 		return lcStartupMode::Error;
 	}
 
-	const bool SaveAndExit = (Options.SaveImage || Options.SaveWavefront || Options.Save3DS || Options.SaveCOLLADA || Options.SaveHTML);
+	const bool SaveAndExit = (Options.SaveImage || Options.SaveWavefront || Options.Save3DS || Options.SaveCOLLADA || Options.SaveCSV || Options.SaveHTML);
 
 	if (!SaveAndExit)
 	{
@@ -1188,6 +1180,31 @@ lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& Libra
 			}
 
 			if (mProject->ExportCOLLADA(FileName))
+				StdOut << tr("Saved '%1'.\n").arg(FileName);
+		}
+
+		if (Options.SaveCSV)
+		{
+			QString FileName;
+
+			if (!Options.SaveCSVName.isEmpty())
+				FileName = Options.SaveCSVName;
+			else
+				FileName = Options.ProjectName;
+
+			QString Extension = QFileInfo(FileName).suffix().toLower();
+
+			if (Extension.isEmpty())
+			{
+				FileName += ".csv";
+			}
+			else if (Extension != "csv")
+			{
+				FileName = FileName.left(FileName.length() - Extension.length() - 1);
+				FileName += ".csv";
+			}
+
+			if (mProject->ExportCSV(FileName))
 				StdOut << tr("Saved '%1'.\n").arg(FileName);
 		}
 

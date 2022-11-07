@@ -1463,7 +1463,10 @@ bool Project::ExportCSV(const QString& FileName)
 
 		for (const auto& ColorIt : PartIt.second)
 		{
-			sprintf(Line, "\"%s\",\"%s\",%d,%s,%d\n", Info->m_strDescription, gColorList[ColorIt.first].Name, ColorIt.second, Info->mFileName, gColorList[ColorIt.first].Code);
+			std::string Description = Info->m_strDescription;
+			Description.erase(std::remove(Description.begin(), Description.end(), ','), Description.end());
+
+			sprintf(Line, "\"%s\",\"%s\",%d,%s,%d\n", Description.c_str(), gColorList[ColorIt.first].Name, ColorIt.second, Info->mFileName, gColorList[ColorIt.first].Code);
 			CSVFile.WriteLine(Line);
 		}
 	}

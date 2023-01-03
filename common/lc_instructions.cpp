@@ -250,4 +250,7 @@ void lcInstructions::AddDefaultPages(lcModel* Model, std::vector<const lcModel*>
 			}
 		}
 	}
+
+	if (!Page.Steps.empty())
+		mPages.emplace_back(std::move(Page));
 }

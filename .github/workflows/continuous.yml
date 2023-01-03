@@ -1,0 +1,65 @@
+name: LeoCAD CI
+
+on:
+  push:
+    branches: [ "master" ]
+
+jobs:
+  build-ubuntu:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v3  
+      with:
+        cache: 'true'
+    - name: Get number of CPU cores
+      uses: SimenB/github-actions-cpu-cores@v1
+      id: cpu-cores
+    - name: Generate Makefile
+      run: qmake PREFIX=/usr
+    - name: Build
+      run: make -j ${{ steps.cpu-cores.outputs.count }}
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v3  
+      with:
+        cache: 'true'
+    - name: Cache Library
+      uses: actions/cache@v3
+      id: cache-library
+      with:
+        path: library.bin
+        key: library-20.03
+    - name: Download Library
+      if: steps.cache-library.outputs.cache-hit != 'true'
+      run: |
+        wget https://github.com/leozide/leocad/releases/download/v19.07.1/Library-20.03.zip -O library.zip
+        unzip library.zip
+    - name: Cache POV-Ray
+      uses: actions/cache@v3
+      id: cache-povray
+      with:
+        path: povray
+        key: povray-20.03
+    - name: Download POV-Ray
+      if: steps.cache-povray.outputs.cache-hit != 'true'
+      run: |
+        wget https://github.com/leozide/povray/releases/download/continuous/povray
+        chmod +x povray
+        curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/leozide/leocad/commits/master -o repo.txt
+        echo < repo.txt
+        echo export REMOTE=$(grep -Po '(?<=: \")(([a-z0-9])\w+)(?=\")' -m 1 repo.txt)
+        export REMOTE=$(grep -Po '(?<=: \")(([a-z0-9])\w+)(?=\")' -m 1 repo.txt)
+        echo $REMOTE        
+    - name: Get number of CPU cores
+      uses: SimenB/github-actions-cpu-cores@v1
+      id: cpu-cores
+    - name: Generate Makefile
+      run: qmake PREFIX=/usr
+    - name: Build
+      run: make -j ${{ steps.cpu-cores.outputs.count }}

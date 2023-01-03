@@ -1428,7 +1428,7 @@ bool Project::ExportCOLLADA(const QString& FileName)
 	return true;
 }
 
-void Project::ExportCSV()
+bool Project::ExportCSV(const QString& FileName)
 {
 	lcPartsList PartsList;
 
@@ -1438,13 +1438,13 @@ void Project::ExportCSV()
 	if (PartsList.empty())
 	{
 		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Nothing to export."));
-		return;
+		return false;
 	}
 
-	QString SaveFileName = GetExportFileName(QString(), "csv", tr("Export CSV"), tr("CSV Files (*.csv);;All Files (*.*)"));
+	QString SaveFileName = GetExportFileName(FileName, "csv", tr("Export CSV"), tr("CSV Files (*.csv);;All Files (*.*)"));
 
 	if (SaveFileName.isEmpty())
-		return;
+		return false;
 
 	lcDiskFile CSVFile(SaveFileName);
 	char Line[1024];
@@ -1452,7 +1452,7 @@ void Project::ExportCSV()
 	if (!CSVFile.Open(QIODevice::WriteOnly))
 	{
 		QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Could not open file '%1' for writing.").arg(SaveFileName));
-		return;
+		return false;
 	}
 
 	CSVFile.WriteLine("Part Name,Color,Quantity,Part ID,Color Code\n");
@@ -1463,10 +1463,15 @@ void Project::ExportCSV()
 
 		for (const auto& ColorIt : PartIt.second)
 		{
-			sprintf(Line, "\"%s\",\"%s\",%d,%s,%d\n", Info->m_strDescription, gColorList[ColorIt.first].Name, ColorIt.second, Info->mFileName, gColorList[ColorIt.first].Code);
+			std::string Description = Info->m_strDescription;
+			Description.erase(std::remove(Description.begin(), Description.end(), ','), Description.end());
+
+			sprintf(Line, "\"%s\",\"%s\",%d,%s,%d\n", Description.c_str(), gColorList[ColorIt.first].Name, ColorIt.second, Info->mFileName, gColorList[ColorIt.first].Code);
 			CSVFile.WriteLine(Line);
 		}
 	}
+
+	return true;
 }
 
 lcInstructions* Project::GetInstructions()

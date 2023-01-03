@@ -1,48 +1,118 @@
 version: '{branch}.{build}'
 skip_tags: true
 image:
+- Ubuntu1604
+- macos
 - Visual Studio 2019
 configuration: Release
 platform: x64
 
 environment:
   GITHUB_TOKEN:
-    secure: p5KEQtln6gMUfQLCkLsHUOhADIxPFjH8WICuY9pZeni1S1Es1XRGz7+OoFZKj8Ev
+    secure: ZaApxtWM3JA1AdJqs2pv+BCE5XIUrrVKXNy05q8f6f4zRZ7H/lMEJ6gZ1o2yp6NT
 
-before_build:
-- call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
-- set PATH=C:\Qt\5.15\msvc2019_64\bin;%PATH%
-- git rev-parse --short HEAD > version.txt
-- set /p VERSION= < version.txt
-- qmake -v
-- qmake -tp vc
+for:
+  -
+    matrix:
+      only:
+        - image: Visual Studio 2019
+        
+    before_build:
+    - call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
+    - set PATH=C:\Qt\5.15\msvc2019_64\bin;%PATH%
+    - git rev-parse --short HEAD > version.txt
+    - set /p VERSION= < version.txt
+    - qmake -v
+    - qmake -tp vc
 
-build:
-  project: leocad.vcxproj
-  verbosity: minimal
+    build:
+      project: leocad.vcxproj
+      verbosity: minimal
 
-after_build:
-- 7z a symbols.zip build/release/leocad.exe build/release/leocad.pdb
-- mkdir appdir
-- copy build\release\leocad.exe appdir
-- copy docs\readme.md appdir\readme.txt
-- appveyor DownloadFile https://github.com/leozide/leocad/releases/download/v19.07.1/Library-20.03.zip -FileName library.zip
-- 7z e library.zip
-- copy library.bin appdir\\library.bin
-- appveyor DownloadFile https://github.com/leozide/povray/releases/download/continuous/povconsole32-sse2.exe -FileName appdir\povconsole32-sse2.exe 
-- windeployqt appdir\leocad.exe
-- copy tools\setup\leocad.nsi .
-- copy tools\setup\setup.ico .
-- 'copy "%VCToolsRedistDir%\vcredist_x64.exe" appdir'
-- '"C:\Program Files (x86)\NSIS\makensis.exe" /V4 /DX64 "/XOutFile LeoCAD-Windows-%VERSION%.exe" leocad.nsi'
-- set TRAVIS_TAG=%APPVEYOR_REPO_TAG_NAME%
-- set TRAVIS_REPO_SLUG=%APPVEYOR_REPO_NAME%
-- set TRAVIS_COMMIT=%APPVEYOR_REPO_COMMIT%
-- appveyor DownloadFile https://github.com/probonopd/uploadtool/raw/master/upload.sh
-- if not defined APPVEYOR_PULL_REQUEST_NUMBER (bash upload.sh LeoCAD*.exe)
+    after_build:
+    - 7z a symbols.zip build/release/leocad.exe build/release/leocad.pdb
+    - mkdir appdir
+    - copy build\release\leocad.exe appdir
+    - copy docs\readme.md appdir\readme.txt
+    - appveyor DownloadFile https://github.com/leozide/leocad/releases/download/v19.07.1/Library-20.03.zip -FileName library.zip
+    - 7z e library.zip
+    - copy library.bin appdir\\library.bin
+    - appveyor DownloadFile https://github.com/leozide/povray/releases/download/continuous/povconsole32-sse2.exe -FileName appdir\povconsole32-sse2.exe 
+    - windeployqt appdir\leocad.exe
+    - copy tools\setup\leocad.nsi .
+    - copy tools\setup\setup.ico .
+    - 'copy "%VCToolsRedistDir%\vcredist_x64.exe" appdir'
+    - '"C:\Program Files (x86)\NSIS\makensis.exe" /V4 /DX64 "/XOutFile LeoCAD-Windows-%VERSION%.exe" leocad.nsi'
+    - set TRAVIS_TAG=%APPVEYOR_REPO_TAG_NAME%
+    - set TRAVIS_REPO_SLUG=%APPVEYOR_REPO_NAME%
+    - set TRAVIS_COMMIT=%APPVEYOR_REPO_COMMIT%
+    - appveyor DownloadFile https://github.com/probonopd/uploadtool/raw/master/upload.sh
+    - if not defined APPVEYOR_PULL_REQUEST_NUMBER (bash upload.sh LeoCAD*.exe)
 
-artifacts:
-- path: symbols.zip
-  name: symbols
-- path: LeoCAD-Windows-$(VERSION).exe
-  name: leocad
+    artifacts:
+    - path: symbols.zip
+      name: symbols
+    - path: LeoCAD-Windows-$(VERSION).exe
+      name: leocad
+      
+  -
+    matrix:
+      only:
+        - image: Ubuntu1604
+        
+    install:
+      - sudo apt-get -y install libqt5opengl5-dev
+      
+    before_build:
+      - export PATH=$HOME/Qt/5.15/gcc_64/bin:$PATH
+      - export TRAVIS_TAG=$APPVEYOR_REPO_TAG_NAME
+      - export TRAVIS_REPO_SLUG=$APPVEYOR_REPO_NAME
+      - export TRAVIS_COMMIT=$APPVEYOR_REPO_COMMIT
+    
+    build_script:
+      - qmake PREFIX=/usr
+      - make
+      
+    after_build:
+     - cp build/release/leocad .
+     - export VERSION=$(git rev-parse --short HEAD)
+     - zip LeoCAD-Linux-$VERSION-arm64.zip leocad
+     - 'curl -s -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/repos/leozide/leocad/commits/master -o repo.txt'
+     - 'export REMOTE=$(grep -Po ''(?<=: \")(([a-z0-9])\w+)(?=\")'' -m 1 repo.txt)'
+     - export LOCAL=$(git rev-parse HEAD)
+     - if [[ "$REMOTE" != "$LOCAL" ]]; then echo "Build no longer current. $REMOTE vs $LOCAL - aborting upload."; travis_terminate 0; fi;
+     - appveyor DownloadFile https://github.com/probonopd/uploadtool/raw/master/upload.sh
+     - bash upload.sh LeoCAD*.zip
+
+  -
+    matrix:
+      only:
+        - image: macos
+
+    install:
+       - brew install grep
+       
+    before_build:
+      - export PATH=$HOME/Qt/5.15/clang_64/bin:$PATH
+      - export TRAVIS_TAG=$APPVEYOR_REPO_TAG_NAME
+      - export TRAVIS_REPO_SLUG=$APPVEYOR_REPO_NAME
+      - export TRAVIS_COMMIT=$APPVEYOR_REPO_COMMIT
+      - appveyor DownloadFile https://github.com/leozide/povray/releases/download/continuous/povray
+      - chmod +x povray
+      - appveyor DownloadFile https://github.com/leozide/leocad/releases/download/v19.07.1/Library-20.03.zip -FileName library.zip
+      - unzip library.zip
+     
+    build_script:
+      - qmake PREFIX=/usr
+      - make
+    
+    after_build:
+      - cd build/release
+      - macdeployqt LeoCAD.app -dmg
+      - mv LeoCAD.dmg LeoCAD-macOS-$(git rev-parse --short HEAD).dmg
+      - 'curl -s -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/repos/leozide/leocad/commits/master -o repo.txt' 
+      - 'export REMOTE=$(ggrep -Po ''(?<=: \")(([a-z0-9])\w+)(?=\")'' -m 1 repo.txt)'
+      - export LOCAL=$(git rev-parse HEAD)
+      - if [[ "$REMOTE" != "$LOCAL" ]]; then echo "Build no longer current. $REMOTE vs $LOCAL - aborting upload."; exit 0; fi;
+      - appveyor DownloadFile https://github.com/probonopd/uploadtool/raw/master/upload.sh
+      - bash upload.sh LeoCAD*.dmg*

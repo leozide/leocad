@@ -101,23 +101,24 @@ public:
 
 struct lcCommandLineOptions
 {
-	bool ParseOK;
-	bool Exit;
-	bool SaveImage;
-	bool SaveWavefront;
-	bool Save3DS;
-	bool SaveCOLLADA;
-	bool SaveHTML;
-	bool SetCameraAngles;
-	bool SetCameraPosition;
-	bool Orthographic;
-	bool SetFoV;
-	bool SetZPlanes;
-	bool SetFadeStepsColor;
-	bool SetHighlightColor;
-	bool FadeSteps;
-	bool ImageHighlight;
-	bool AutomateEdgeColor;
+	bool ParseOK = true;
+	bool Exit = false;
+	bool SaveImage = false;
+	bool SaveWavefront = false;
+	bool Save3DS = false;
+	bool SaveCOLLADA = false;
+	bool SaveCSV = false;
+	bool SaveHTML = false;
+	bool SetCameraAngles = false;
+	bool SetCameraPosition = false;
+	bool Orthographic = false;
+	bool SetFoV = false;
+	bool SetZPlanes = false;
+	bool SetFadeStepsColor = false;
+	bool SetHighlightColor = false;
+	bool FadeSteps = false;
+	bool ImageHighlight = false;
+	bool AutomateEdgeColor = false;
 	int ImageWidth;
 	int ImageHeight;
 	int AASamples;
@@ -146,6 +147,7 @@ struct lcCommandLineOptions
 	QString SaveWavefrontName;
 	QString Save3DSName;
 	QString SaveCOLLADAName;
+	QString SaveCSVName;
 	QString SaveHTMLName;
 	QList<QPair<QString, bool>> LibraryPaths;
 	QString StdOut;

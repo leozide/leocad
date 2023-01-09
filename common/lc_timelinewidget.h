@@ -15,6 +15,8 @@ public:
 	void InsertStepAfter();
 	void RemoveStep();
 	void MoveSelection();
+	void MoveSelectionBefore();
+	void MoveSelectionAfter();
 	void SetCurrentStep();
 
 public slots:

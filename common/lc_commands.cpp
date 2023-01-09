@@ -1816,6 +1816,20 @@ const lcCommand gCommands[] =
 		QT_TRANSLATE_NOOP("Status", "Move the selected parts into this step"),
 		""
 	},
+	// LC_TIMELINE_MOVE_SELECTION_BEFORE
+	{
+		"",
+		QT_TRANSLATE_NOOP("Menu", "Move Selection Before"),
+		QT_TRANSLATE_NOOP("Status", "Move the selected parts into a new step before this"),
+		""
+	},
+	// LC_TIMELINE_MOVE_SELECTION_AFTER
+	{
+		"",
+		QT_TRANSLATE_NOOP("Menu", "Move Selection After"),
+		QT_TRANSLATE_NOOP("Status", "Move the selected parts into a new step after this"),
+		""
+	},
 	// LC_TIMELINE_SET_CURRENT
 	{
 		"",

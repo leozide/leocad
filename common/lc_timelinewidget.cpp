@@ -466,6 +466,14 @@ void lcTimelineWidget::MoveSelectionAfter()
 
 	gMainWindow->GetActiveModel()->InsertStep(Step);
 
+	for (int TopLevelItemIdx = topLevelItemCount(); TopLevelItemIdx < Step; TopLevelItemIdx++)
+	{
+		QTreeWidgetItem* StepItem = new QTreeWidgetItem(this, QStringList(tr("Step %1").arg(TopLevelItemIdx + 1)));
+		StepItem->setFlags(Qt::ItemIsEnabled | Qt::ItemIsDropEnabled);
+		addTopLevelItem(StepItem);
+		StepItem->setExpanded(true);
+	}
+
 	CurrentItem = topLevelItem(Step - 1);
 
 	for (QTreeWidgetItem* PieceItem : SelectedItems)

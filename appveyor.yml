@@ -61,7 +61,7 @@ for:
         - image: Ubuntu1604
         
     install:
-      - sudo apt-get -y install libqt5opengl5-dev
+      - sudo apt-get -y install libqt5opengl5-dev libxcb-xinerama0
       
     before_build:
       - export PATH=$HOME/Qt/5.15/gcc_64/bin:$PATH

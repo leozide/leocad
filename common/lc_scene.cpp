@@ -8,7 +8,7 @@
 #include "object.h"
 
 lcScene::lcScene()
-	: mRenderMeshes(0, 1024), mOpaqueMeshes(0, 1024), mTranslucentMeshes(0, 1024), mInterfaceObjects(0, 1024)
+	: mRenderMeshes(0), mOpaqueMeshes(0), mTranslucentMeshes(0), mInterfaceObjects(0)
 {
 	mActiveSubmodelInstance = nullptr;
 	mDrawInterface = false;

@@ -727,10 +727,28 @@ lcPartSelectionWidget::lcPartSelectionWidget(QWidget* Parent)
 	mSplitter->setOrientation(Qt::Vertical);
 	mSplitter->setChildrenCollapsible(false);
 
+	QWidget* CategoriesGroupWidget = new QWidget(mSplitter);
+
+	QVBoxLayout* CategoriesLayout = new QVBoxLayout();
+	CategoriesLayout->setContentsMargins(0, 0, 0, 0);
+	CategoriesGroupWidget->setLayout(CategoriesLayout);
+
+	QHBoxLayout* FilterCategoriesLayout = new QHBoxLayout();
+	FilterCategoriesLayout->setContentsMargins(0, 0, 6, 0);
+	CategoriesLayout->addLayout(FilterCategoriesLayout);
+
+	mFilterCategoriesWidget = new QLineEdit(CategoriesGroupWidget);
+	mFilterCategoriesWidget->setPlaceholderText(tr("Filter Categories"));
+	mFilterCategoriesAction = mFilterCategoriesWidget->addAction(QIcon(":/resources/filter.png"), QLineEdit::TrailingPosition);
+	connect(mFilterCategoriesAction, SIGNAL(triggered()), this, SLOT(FilterCategoriesTriggered()));
+	FilterCategoriesLayout->addWidget(mFilterCategoriesWidget);
+
 	mCategoriesWidget = new QTreeWidget(mSplitter);
 	mCategoriesWidget->setHeaderHidden(true);
 	mCategoriesWidget->setUniformRowHeights(true);
 	mCategoriesWidget->setRootIsDecorated(false);
+
+	CategoriesLayout->addWidget(mCategoriesWidget);
 
 	QWidget* PartsGroupWidget = new QWidget(mSplitter);
 
@@ -769,6 +787,7 @@ lcPartSelectionWidget::lcPartSelectionWidget(QWidget* Parent)
 	connect(mPartsWidget->selectionModel(), SIGNAL(currentChanged(const QModelIndex&, const QModelIndex&)), this, SLOT(PartChanged(const QModelIndex&, const QModelIndex&)));
 	connect(mFilterWidget, SIGNAL(textChanged(const QString&)), this, SLOT(FilterChanged(const QString&)));
 	connect(mCategoriesWidget, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), this, SLOT(CategoryChanged(QTreeWidgetItem*, QTreeWidgetItem*)));
+	connect(mFilterCategoriesWidget, SIGNAL(textChanged(const QString&)), this, SLOT(FilterCategoriesChanged(const QString&)));
 
 	LoadPartPalettes();
 	UpdateCategories();
@@ -855,6 +874,30 @@ void lcPartSelectionWidget::resizeEvent(QResizeEvent* Event)
 	QWidget::resizeEvent(Event);
 }
 
+void lcPartSelectionWidget::FilterCategoriesChanged(const QString& Text)
+{
+	if (mFilterCategoriesAction)
+	{
+		if (Text.isEmpty())
+			mFilterCategoriesAction->setIcon(QIcon(":/resources/filter.png"));
+		else
+			mFilterCategoriesAction->setIcon(QIcon(":/resources/parts_cancel.png"));
+	}
+
+	bool Hide = true;
+	mCategoriesWidget->setUpdatesEnabled(false);
+	for (int CategoryIdx = 0; CategoryIdx < mCategoriesWidget->topLevelItemCount(); CategoryIdx++)
+	{
+		QTreeWidgetItem* CategoryItem = mCategoriesWidget->topLevelItem(CategoryIdx);
+		Hide = false;
+		if (!CategoryItem->text(0).contains(Text, Qt::CaseInsensitive))
+			Hide = true;
+		CategoryItem->setHidden(Hide);
+	}
+	mCategoriesWidget->setUpdatesEnabled(true);
+	mCategoriesWidget->update();
+}
+
 void lcPartSelectionWidget::FilterChanged(const QString& Text)
 {
 	if (mFilterAction)
@@ -866,6 +909,11 @@ void lcPartSelectionWidget::FilterChanged(const QString& Text)
 	}
 
 	mPartsWidget->GetListModel()->SetFilter(Text);
+}
+
+void lcPartSelectionWidget::FilterCategoriesTriggered()
+{
+	mFilterCategoriesWidget->clear();
 }
 
 void lcPartSelectionWidget::FilterTriggered()

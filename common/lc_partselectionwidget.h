@@ -232,6 +232,7 @@ protected slots:
 	void FilterChanged(const QString& Text);
 	void FilterCategoriesChanged(const QString& Text);
 	void FilterTriggered();
+	void FilterCaseTriggered();
 	void FilterCategoriesTriggered();
 	void CategoryChanged(QTreeWidgetItem* Current, QTreeWidgetItem* Previous);
 	void PartChanged(const QModelIndex& Current, const QModelIndex& Previous);
@@ -248,6 +249,7 @@ protected:
 	QTreeWidget* mCategoriesWidget;
 	QLineEdit* mFilterCategoriesWidget;
 	QAction* mFilterCategoriesAction;
+	QAction* mFilterCaseAction;
 	QLineEdit* mFilterWidget;
 	QAction* mFilterAction;
 	lcPartSelectionListView* mPartsWidget;

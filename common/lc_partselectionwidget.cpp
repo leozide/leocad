@@ -734,7 +734,7 @@ lcPartSelectionWidget::lcPartSelectionWidget(QWidget* Parent)
 	CategoriesGroupWidget->setLayout(CategoriesLayout);
 
 	QHBoxLayout* FilterCategoriesLayout = new QHBoxLayout();
-	FilterCategoriesLayout->setContentsMargins(0, 0, 6, 0);
+	FilterCategoriesLayout->setContentsMargins(0, 0, 0, 0);
 	CategoriesLayout->addLayout(FilterCategoriesLayout);
 
 	mFilterCategoriesWidget = new QLineEdit(CategoriesGroupWidget);
@@ -742,6 +742,17 @@ lcPartSelectionWidget::lcPartSelectionWidget(QWidget* Parent)
 	mFilterCategoriesAction = mFilterCategoriesWidget->addAction(QIcon(":/resources/filter.png"), QLineEdit::TrailingPosition);
 	connect(mFilterCategoriesAction, SIGNAL(triggered()), this, SLOT(FilterCategoriesTriggered()));
 	FilterCategoriesLayout->addWidget(mFilterCategoriesWidget);
+
+	mFilterCaseAction = new QAction();
+	mFilterCaseAction->setIcon(QIcon(":/resources/case.png"));
+	mFilterCaseAction->setToolTip(tr("Match Case"));
+	mFilterCaseAction->setCheckable(true);
+	mFilterCaseAction->setChecked(false);
+	connect(mFilterCaseAction, SIGNAL(triggered()), this, SLOT(FilterCaseTriggered()));
+
+	QToolButton* FilterCaseButton = new QToolButton();
+	FilterCaseButton->setDefaultAction(mFilterCaseAction);
+	FilterCategoriesLayout->addWidget(FilterCaseButton);
 
 	mCategoriesWidget = new QTreeWidget(mSplitter);
 	mCategoriesWidget->setHeaderHidden(true);
@@ -885,12 +896,13 @@ void lcPartSelectionWidget::FilterCategoriesChanged(const QString& Text)
 	}
 
 	bool Hide = true;
+	Qt::CaseSensitivity MatchCase = mFilterCaseAction->isChecked() ? Qt::CaseSensitive : Qt::CaseInsensitive;
 	mCategoriesWidget->setUpdatesEnabled(false);
 	for (int CategoryIdx = 0; CategoryIdx < mCategoriesWidget->topLevelItemCount(); CategoryIdx++)
 	{
 		QTreeWidgetItem* CategoryItem = mCategoriesWidget->topLevelItem(CategoryIdx);
 		Hide = false;
-		if (!CategoryItem->text(0).contains(Text, Qt::CaseInsensitive))
+		if (!CategoryItem->text(0).contains(Text, MatchCase))
 			Hide = true;
 		CategoryItem->setHidden(Hide);
 	}
@@ -914,6 +926,12 @@ void lcPartSelectionWidget::FilterChanged(const QString& Text)
 void lcPartSelectionWidget::FilterCategoriesTriggered()
 {
 	mFilterCategoriesWidget->clear();
+}
+
+void lcPartSelectionWidget::FilterCaseTriggered()
+{
+	if (!mFilterCategoriesWidget->text().isEmpty())
+		FilterCategoriesChanged(mFilterCategoriesWidget->text());
 }
 
 void lcPartSelectionWidget::FilterTriggered()

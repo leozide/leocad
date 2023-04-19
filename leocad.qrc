@@ -78,7 +78,6 @@
         <file>resources/file_print.png</file>
         <file>resources/file_print_preview.png</file>
         <file>resources/file_save.png</file>
-        <file>resources/filter.png</file>        
         <file>resources/time_first.png</file>
         <file>resources/time_last.png</file>
         <file>resources/time_next.png</file>
@@ -135,7 +134,9 @@
         <file>resources/shaders/unlit_vertex_color_vs.glsl</file>
         <file>resources/shaders/unlit_view_sphere_ps.glsl</file>
         <file>resources/shaders/unlit_view_sphere_vs.glsl</file>
-        <file>resources/gear_in.png</file>
+        <file>resources/case.png</file>
+        <file>resources/filter.png</file>
         <file>resources/flexible.png</file>
+        <file>resources/gear_in.png</file>
     </qresource>
 </RCC>

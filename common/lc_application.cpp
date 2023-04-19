@@ -639,116 +639,28 @@ lcCommandLineOptions lcApplication::ParseCommandLineOptions()
 				Options.ParseOK = false;
 			}
 		}
-		else if (Option == QLatin1String("-dscc") || Option == QLatin1String("--disable-stud-cylinder-color"))
-		{
-			if (!lcIsHighContrast(Options.StudStyle))
-			{
-				Options.StdErr += tr("High contrast stud style is required for the '%1' option but is not enabled.\n").arg(Option);
-				Options.ParseOK = false;
-			}
-			else
-				Options.StudCylinderColorEnabled = false;
-		}
+		else if (Option == QLatin1String("-nscc") || Option == QLatin1String("--disable-stud-cylinder-color"))
+			Options.StudCylinderColorEnabled = false;
 		else if (Option == QLatin1String("-scc") || Option == QLatin1String("--stud-cylinder-color"))
-		{
-			if (ParseColor(Options.StudCylinderColor))
-			{
-				if (!lcIsHighContrast(Options.StudStyle))
-				{
-					Options.StdErr += tr("High contrast stud style is required for the '%1' option but is not enabled.\n").arg(Option);
-					Options.ParseOK = false;
-				}
-			}
-		}
+			ParseColor(Options.StudCylinderColor);
 		else if (Option == QLatin1String("-nec") || Option == QLatin1String("--disable-edge-color"))
-		{
-			if (!lcIsHighContrast(Options.StudStyle))
-			{
-				Options.StdErr += tr("High contrast stud style is required for the '%1' option but is not enabled.\n").arg(Option);
-				Options.ParseOK = false;
-			}
-			else
-				Options.PartEdgeColorEnabled = false;
-		}
+			Options.PartEdgeColorEnabled = false;
 		else if (Option == QLatin1String("-ec") || Option == QLatin1String("--edge-color"))
-		{
-			if (ParseColor(Options.PartEdgeColor))
-			{
-				if (!lcIsHighContrast(Options.StudStyle))
-				{
-					Options.StdErr += tr("High contrast stud style is required for the '%1' option but is not enabled.\n").arg(Option);
-					Options.ParseOK = false;
-				}
-			}
-		}
-		else if (Option == QLatin1String("-dbec") || Option == QLatin1String("--disable-black-edge-color"))
-		{
-			if (!lcIsHighContrast(Options.StudStyle))
-			{
-				Options.StdErr += tr("High contrast stud style is required for the '%1' option but is not enabled.\n").arg(Option);
-				Options.ParseOK = false;
-			}
-			else
-				Options.BlackEdgeColorEnabled = false;
-		}
+			ParseColor(Options.PartEdgeColor);
+		else if (Option == QLatin1String("-nbec") || Option == QLatin1String("--disable-black-edge-color"))
+			Options.BlackEdgeColorEnabled = false;
 		else if (Option == QLatin1String("-bec") || Option == QLatin1String("--black-edge-color"))
-		{
-			if (ParseColor(Options.BlackEdgeColor))
-			{
-				if (!lcIsHighContrast(Options.StudStyle))
-				{
-					Options.StdErr += tr("High contrast stud style is required for the '%1' option but is not enabled.\n").arg(Option);
-					Options.ParseOK = false;
-				}
-			}
-		}
-		else if (Option == QLatin1String("-ddec") || Option == QLatin1String("--disable-dark-edge-color"))
-		{
-			if (!lcIsHighContrast(Options.StudStyle))
-			{
-				Options.StdErr += tr("High contrast stud style is required for the '%1' option but is not enabled.\n").arg(Option);
-				Options.ParseOK = false;
-			}
-			else
-				Options.DarkEdgeColorEnabled = false;
-		}
+			ParseColor(Options.BlackEdgeColor);
+		else if (Option == QLatin1String("-ndec") || Option == QLatin1String("--disable-dark-edge-color"))
+			Options.DarkEdgeColorEnabled = false;
 		else if (Option == QLatin1String("-dec") || Option == QLatin1String("--dark-edge-color"))
-		{
-			if (ParseColor(Options.DarkEdgeColor))
-			{
-				if (!lcIsHighContrast(Options.StudStyle))
-				{
-					Options.StdErr += tr("High contrast stud style is required for the '%1' option but is not enabled.\n").arg(Option);
-					Options.ParseOK = false;
-				}
-			}
-		}
+			ParseColor(Options.DarkEdgeColor);
 		else if (Option == QLatin1String("-aec") || Option == QLatin1String("--automate-edge-color"))
-		{
 			Options.AutomateEdgeColor = true;
-		}
 		else if (Option == QLatin1String("-cc") || Option == QLatin1String("--color-contrast"))
-		{
-			if (ParseFloat(Options.PartEdgeContrast, 0.0f, 1.0f))
-			{
-				if (!Options.AutomateEdgeColor)
-				{
-					Options.StdErr += tr("Automate edge color is required for the '%1' option but is not enabled.\n").arg(Option);
-					Options.ParseOK = false;
-				}
-			}
-		}
+			ParseFloat(Options.PartEdgeContrast, 0.0f, 1.0f);
 		else if (Option == QLatin1String("-ldv") || Option == QLatin1String("--light-dark-value"))
-		{
-			if (ParseFloat(Options.PartColorValueLDIndex, 0.0f, 1.0f))
-			{
-				if (!Options.AutomateEdgeColor)
-				{
-					Options.StdErr += tr("Automate edge color is required for the '%1' option but is not enabled.\n").arg(Option);
-					Options.ParseOK = false;
-				}
-			}
-		}
+			ParseFloat(Options.PartColorValueLDIndex, 0.0f, 1.0f);
 		else if (Option == QLatin1String("--fade-steps"))
 			Options.FadeSteps = true;
 		else if (Option == QLatin1String("--no-fade-steps"))
@@ -875,9 +787,13 @@ lcCommandLineOptions lcApplication::ParseCommandLineOptions()
 			Options.StdOut += tr("  --shading <wireframe|flat|default|full>: Select shading mode for rendering.\n");
 			Options.StdOut += tr("  --line-width <width>: Set the width of the edge lines.\n");
 			Options.StdOut += tr("  --aa-samples <count>: AntiAliasing sample size (1, 2, 4, or 8).\n");
+			Options.StdOut += tr("  -nscc, --disable-stud-cylinder-color: Disable high contrast stud cylinder color.\n");
 			Options.StdOut += tr("  -scc, --stud-cylinder-color <#AARRGGBB>: High contrast stud cylinder color.\n");
+			Options.StdOut += tr("  -nec, --disable-edge-color: Disable high contrast edge color.\n");
 			Options.StdOut += tr("  -ec, --edge-color <#AARRGGBB>: High contrast edge color.\n");
+			Options.StdOut += tr("  -nbec, --disable-black-edge-color: Disable high contrast edge color for black parts.\n");
 			Options.StdOut += tr("  -bec, --black-edge-color <#AARRGGBB>: High contrast edge color for black parts.\n");
+			Options.StdOut += tr("  -ndec, --disable-dark-edge-color: Disable high contrast edge color for dark color parts.\n");
 			Options.StdOut += tr("  -dec, --dark-edge-color <#AARRGGBB>: High contrast edge color for dark color parts.\n");
 			Options.StdOut += tr("  -aec, --automate-edge-color: Enable automatically adjusted edge colors.\n");
 			Options.StdOut += tr("  -cc, --color-contrast <float>: Color contrast value between 0.0 and 1.0.\n");
@@ -902,6 +818,46 @@ lcCommandLineOptions lcApplication::ParseCommandLineOptions()
 	if (Options.AutomateEdgeColor && lcIsHighContrast(Options.StudStyle))
 	{
 		Options.StdErr += tr("High contrast stud and edge color settings are ignored when -aec or --automate-edge-color is set.\n");
+	}
+
+	if (!Options.AutomateEdgeColor && !Preferences.mAutomateEdgeColor)
+	{
+		QString const Message = tr("Automate edge color is required for the '%1' option but is not enabled.\n");
+
+		if (Options.PartEdgeContrast != Preferences.mPartEdgeContrast)
+			Options.StdErr += Message.arg(QString("--color-contrast %1").arg(Options.PartEdgeContrast));
+
+		if (Options.PartColorValueLDIndex != Preferences.mPartColorValueLDIndex)
+			Options.StdErr += Message.arg(QString("--light-dark-value %1").arg(Options.PartColorValueLDIndex));
+	}
+
+	if (!lcIsHighContrast(Options.StudStyle) && !lcIsHighContrast(static_cast<lcStudStyle>(lcGetProfileInt(LC_PROFILE_STUD_STYLE))))
+	{
+		QString const Message = tr("High contrast stud style is required for the '%1' option but is not enabled.\n");
+
+		if (Options.StudCylinderColorEnabled != Preferences.mStudCylinderColorEnabled)
+			Options.StdErr += Message.arg(QLatin1String("--disable-stud-cylinder-color"));
+
+		if (Options.StudCylinderColor != Preferences.mStudCylinderColor)
+			Options.StdErr += Message.arg(QString("--stud-cylinder-color %1").arg(Options.StudCylinderColor));
+
+		if (Options.PartEdgeColorEnabled != Preferences.mPartEdgeColorEnabled)
+			Options.StdErr += Message.arg(QLatin1String("--disable-edge-color"));
+
+		if (Options.PartEdgeColor != Preferences.mPartEdgeColor)
+			Options.StdErr += Message.arg(QString("--edge-color %1").arg(Options.PartEdgeColor));
+
+		if (Options.BlackEdgeColorEnabled != Preferences.mBlackEdgeColorEnabled)
+			Options.StdErr += Message.arg(QLatin1String("--disable-black-edge-color"));
+
+		if (Options.BlackEdgeColor != Preferences.mBlackEdgeColor)
+			Options.StdErr += Message.arg(QString("--black-edge-color %1").arg(Options.BlackEdgeColor));
+
+		if (Options.DarkEdgeColorEnabled != Preferences.mDarkEdgeColorEnabled)
+			Options.StdErr += Message.arg(QLatin1String("--disable-dark-edge-color"));
+
+		if (Options.DarkEdgeColor != Preferences.mDarkEdgeColor)
+			Options.StdErr += Message.arg(QString("--dark-edge-color %1").arg(Options.DarkEdgeColor));
 	}
 
 	if (!Options.CameraName.isEmpty())

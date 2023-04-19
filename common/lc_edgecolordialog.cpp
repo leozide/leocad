@@ -120,7 +120,7 @@ lcAutomateEdgeColorDialog::lcAutomateEdgeColorDialog(QWidget* Parent, bool ShowH
 	HighContrastColorLayout->addWidget(PartEdgeColorButton,1,1);
 	HighContrastColorLayout->addWidget(ResetPartEdgeColorButton,1,2);
 
-	BlackEdgeColorEnabledBox = new QCheckBox(tr("Black Parts Edge:"), this);
+	BlackEdgeColorEnabledBox = new QCheckBox(tr("Black Parts Edge Color:"), this);
 	BlackEdgeColorEnabledBox->setChecked(mBlackEdgeColorEnabled);
 	connect(BlackEdgeColorEnabledBox, SIGNAL(clicked()), this, SLOT(ColorCheckBoxClicked()));
 

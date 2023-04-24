@@ -6,6 +6,7 @@
 #define LC_MAX_COLOR_NAME 64
 #define LC_COLOR_DIRECT 0x80000000
 #define LC_COLOR_NOCOLOR 0xffffffff
+#define LC_STUD_CYLINDER_COLOR_CODE 4242
 
 struct lcColor
 {

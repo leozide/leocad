@@ -1,7 +1,6 @@
 #pragma once
 
 #include "lc_context.h"
-#include "lc_mesh.h"
 #include "lc_math.h"
 #include "lc_array.h"
 #include "lc_meshloader.h"
@@ -164,7 +163,7 @@ public:
 	bool LoadPrimitive(lcLibraryPrimitive* Primitive);
 
 	bool SupportsStudStyle() const;
-	void SetStudStyle(lcStudStyle StudStyle, bool Reload);
+	void SetStudStyle(lcStudStyle StudStyle, bool Reload, bool StudCylinderColorEnabled);
 
 	lcStudStyle GetStudStyle() const
 	{
@@ -235,6 +234,7 @@ protected:
 	QMutex mTextureMutex;
 
 	lcStudStyle mStudStyle;
+	bool mStudCylinderColorEnabled;
 
 	QString mCachePath;
 	qint64 mArchiveCheckSum[4];

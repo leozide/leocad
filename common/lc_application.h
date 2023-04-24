@@ -90,9 +90,13 @@ public:
 	lcViewSphereLocation mPreviewViewSphereLocation;
 	int mDrawPreviewAxis;
 
+	bool mStudCylinderColorEnabled;
 	quint32 mStudCylinderColor;
+	bool mPartEdgeColorEnabled;
 	quint32 mPartEdgeColor;
+	bool mBlackEdgeColorEnabled;
 	quint32 mBlackEdgeColor;
+	bool mDarkEdgeColorEnabled;
 	quint32 mDarkEdgeColor;
 	float mPartEdgeContrast;
 	float mPartColorValueLDIndex;
@@ -134,9 +138,13 @@ struct lcCommandLineOptions
 	float PartColorValueLDIndex;
 	lcVector2 ZPlanes;
 	lcViewpoint Viewpoint;
+	bool StudCylinderColorEnabled;
 	quint32 StudCylinderColor;
+	bool PartEdgeColorEnabled;
 	quint32 PartEdgeColor;
+	bool BlackEdgeColorEnabled;
 	quint32 BlackEdgeColor;
+	bool DarkEdgeColorEnabled;
 	quint32 DarkEdgeColor;
 	quint32 FadeStepsColor;
 	quint32	HighlightColor;

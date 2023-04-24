@@ -64,9 +64,13 @@ void lcPreferences::LoadDefaults()
 	mPreviewViewSphereSize = lcGetProfileInt(LC_PROFILE_PREVIEW_VIEW_SPHERE_SIZE);
 	mPreviewViewSphereLocation = static_cast<lcViewSphereLocation>(lcGetProfileInt(LC_PROFILE_PREVIEW_VIEW_SPHERE_LOCATION));
 	mDrawPreviewAxis = lcGetProfileInt(LC_PROFILE_PREVIEW_DRAW_AXES);
+	mStudCylinderColorEnabled = lcGetProfileInt(LC_PROFILE_STUD_CYLINDER_COLOR_ENABLED);
 	mStudCylinderColor = lcGetProfileInt(LC_PROFILE_STUD_CYLINDER_COLOR);
+	mPartEdgeColorEnabled = lcGetProfileInt(LC_PROFILE_PART_EDGE_COLOR_ENABLED);
 	mPartEdgeColor = lcGetProfileInt(LC_PROFILE_PART_EDGE_COLOR);
+	mBlackEdgeColorEnabled = lcGetProfileInt(LC_PROFILE_BLACK_EDGE_COLOR_ENABLED);
 	mBlackEdgeColor = lcGetProfileInt(LC_PROFILE_BLACK_EDGE_COLOR);
+	mDarkEdgeColorEnabled = lcGetProfileInt(LC_PROFILE_DARK_EDGE_COLOR_ENABLED);
 	mDarkEdgeColor = lcGetProfileInt(LC_PROFILE_DARK_EDGE_COLOR);
 	mPartEdgeContrast = lcGetProfileFloat(LC_PROFILE_PART_EDGE_CONTRAST);
 	mPartColorValueLDIndex = lcGetProfileFloat(LC_PROFILE_PART_COLOR_VALUE_LD_INDEX);
@@ -124,9 +128,13 @@ void lcPreferences::SaveDefaults()
 	lcSetProfileInt(LC_PROFILE_PREVIEW_VIEW_SPHERE_SIZE, mPreviewViewSphereSize);
 	lcSetProfileInt(LC_PROFILE_PREVIEW_VIEW_SPHERE_LOCATION, static_cast<int>(mPreviewViewSphereLocation));
 	lcSetProfileInt(LC_PROFILE_PREVIEW_DRAW_AXES, mDrawPreviewAxis);
+	lcSetProfileInt(LC_PROFILE_STUD_CYLINDER_COLOR_ENABLED, mStudCylinderColorEnabled);
 	lcSetProfileInt(LC_PROFILE_STUD_CYLINDER_COLOR, mStudCylinderColor);
+	lcSetProfileInt(LC_PROFILE_PART_EDGE_COLOR_ENABLED, mPartEdgeColorEnabled);
 	lcSetProfileInt(LC_PROFILE_PART_EDGE_COLOR, mPartEdgeColor);
+	lcSetProfileInt(LC_PROFILE_BLACK_EDGE_COLOR_ENABLED, mBlackEdgeColorEnabled);
 	lcSetProfileInt(LC_PROFILE_BLACK_EDGE_COLOR, mBlackEdgeColor);
+	lcSetProfileInt(LC_PROFILE_DARK_EDGE_COLOR_ENABLED, mDarkEdgeColorEnabled);
 	lcSetProfileInt(LC_PROFILE_DARK_EDGE_COLOR, mDarkEdgeColor);
 	lcSetProfileFloat(LC_PROFILE_PART_EDGE_CONTRAST, mPartEdgeContrast);
 	lcSetProfileFloat(LC_PROFILE_PART_COLOR_VALUE_LD_INDEX, mPartColorValueLDIndex);
@@ -373,9 +381,13 @@ lcCommandLineOptions lcApplication::ParseCommandLineOptions()
 	Options.Viewpoint = lcViewpoint::Count;
 	Options.FadeStepsColor = Preferences.mFadeStepsColor;
 	Options.HighlightColor = Preferences.mHighlightNewPartsColor;
+	Options.StudCylinderColorEnabled = Preferences.mStudCylinderColorEnabled;
 	Options.StudCylinderColor = Preferences.mStudCylinderColor;
+	Options.PartEdgeColorEnabled = Preferences.mPartEdgeColorEnabled;
 	Options.PartEdgeColor = Preferences.mPartEdgeColor;
+	Options.BlackEdgeColorEnabled = Preferences.mBlackEdgeColorEnabled;
 	Options.BlackEdgeColor = Preferences.mBlackEdgeColor;
+	Options.DarkEdgeColorEnabled = Preferences.mDarkEdgeColorEnabled;
 	Options.DarkEdgeColor = Preferences.mDarkEdgeColor;
 	Options.PartEdgeContrast = Preferences.mPartEdgeContrast;
 	Options.PartColorValueLDIndex = Preferences.mPartColorValueLDIndex;
@@ -627,76 +639,28 @@ lcCommandLineOptions lcApplication::ParseCommandLineOptions()
 				Options.ParseOK = false;
 			}
 		}
+		else if (Option == QLatin1String("-nscc") || Option == QLatin1String("--disable-stud-cylinder-color"))
+			Options.StudCylinderColorEnabled = false;
 		else if (Option == QLatin1String("-scc") || Option == QLatin1String("--stud-cylinder-color"))
-		{
-			if (ParseColor(Options.StudCylinderColor))
-			{
-				if (!lcIsHighContrast(Options.StudStyle))
-				{
-					Options.StdErr += tr("High contrast stud style is required for the '%1' option but is not enabled.\n").arg(Option);
-					Options.ParseOK = false;
-				}
-			}
-		}
+			ParseColor(Options.StudCylinderColor);
+		else if (Option == QLatin1String("-nec") || Option == QLatin1String("--disable-edge-color"))
+			Options.PartEdgeColorEnabled = false;
 		else if (Option == QLatin1String("-ec") || Option == QLatin1String("--edge-color"))
-		{
-			if (ParseColor(Options.PartEdgeColor))
-			{
-				if (!lcIsHighContrast(Options.StudStyle))
-				{
-					Options.StdErr += tr("High contrast stud style is required for the '%1' option but is not enabled.\n").arg(Option);
-					Options.ParseOK = false;
-				}
-			}
-		}
+			ParseColor(Options.PartEdgeColor);
+		else if (Option == QLatin1String("-nbec") || Option == QLatin1String("--disable-black-edge-color"))
+			Options.BlackEdgeColorEnabled = false;
 		else if (Option == QLatin1String("-bec") || Option == QLatin1String("--black-edge-color"))
-		{
-			if (ParseColor(Options.BlackEdgeColor))
-			{
-				if (!lcIsHighContrast(Options.StudStyle))
-				{
-					Options.StdErr += tr("High contrast stud style is required for the '%1' option but is not enabled.\n").arg(Option);
-					Options.ParseOK = false;
-				}
-			}
-		}
+			ParseColor(Options.BlackEdgeColor);
+		else if (Option == QLatin1String("-ndec") || Option == QLatin1String("--disable-dark-edge-color"))
+			Options.DarkEdgeColorEnabled = false;
 		else if (Option == QLatin1String("-dec") || Option == QLatin1String("--dark-edge-color"))
-		{
-			if (ParseColor(Options.DarkEdgeColor))
-			{
-				if (!lcIsHighContrast(Options.StudStyle))
-				{
-					Options.StdErr += tr("High contrast stud style is required for the '%1' option but is not enabled.\n").arg(Option);
-					Options.ParseOK = false;
-				}
-			}
-		}
+			ParseColor(Options.DarkEdgeColor);
 		else if (Option == QLatin1String("-aec") || Option == QLatin1String("--automate-edge-color"))
-		{
 			Options.AutomateEdgeColor = true;
-		}
 		else if (Option == QLatin1String("-cc") || Option == QLatin1String("--color-contrast"))
-		{
-			if (ParseFloat(Options.PartEdgeContrast, 0.0f, 1.0f))
-			{
-				if (!Options.AutomateEdgeColor)
-				{
-					Options.StdErr += tr("Automate edge color is required for the '%1' option but is not enabled.\n").arg(Option);
-					Options.ParseOK = false;
-				}
-			}
-		}
+			ParseFloat(Options.PartEdgeContrast, 0.0f, 1.0f);
 		else if (Option == QLatin1String("-ldv") || Option == QLatin1String("--light-dark-value"))
-		{
-			if (ParseFloat(Options.PartColorValueLDIndex, 0.0f, 1.0f))
-			{
-				if (!Options.AutomateEdgeColor)
-				{
-					Options.StdErr += tr("Automate edge color is required for the '%1' option but is not enabled.\n").arg(Option);
-					Options.ParseOK = false;
-				}
-			}
-		}
+			ParseFloat(Options.PartColorValueLDIndex, 0.0f, 1.0f);
 		else if (Option == QLatin1String("--fade-steps"))
 			Options.FadeSteps = true;
 		else if (Option == QLatin1String("--no-fade-steps"))
@@ -823,9 +787,13 @@ lcCommandLineOptions lcApplication::ParseCommandLineOptions()
 			Options.StdOut += tr("  --shading <wireframe|flat|default|full>: Select shading mode for rendering.\n");
 			Options.StdOut += tr("  --line-width <width>: Set the width of the edge lines.\n");
 			Options.StdOut += tr("  --aa-samples <count>: AntiAliasing sample size (1, 2, 4, or 8).\n");
+			Options.StdOut += tr("  -nscc, --disable-stud-cylinder-color: Disable high contrast stud cylinder color.\n");
 			Options.StdOut += tr("  -scc, --stud-cylinder-color <#AARRGGBB>: High contrast stud cylinder color.\n");
+			Options.StdOut += tr("  -nec, --disable-edge-color: Disable high contrast edge color.\n");
 			Options.StdOut += tr("  -ec, --edge-color <#AARRGGBB>: High contrast edge color.\n");
+			Options.StdOut += tr("  -nbec, --disable-black-edge-color: Disable high contrast edge color for black parts.\n");
 			Options.StdOut += tr("  -bec, --black-edge-color <#AARRGGBB>: High contrast edge color for black parts.\n");
+			Options.StdOut += tr("  -ndec, --disable-dark-edge-color: Disable high contrast edge color for dark color parts.\n");
 			Options.StdOut += tr("  -dec, --dark-edge-color <#AARRGGBB>: High contrast edge color for dark color parts.\n");
 			Options.StdOut += tr("  -aec, --automate-edge-color: Enable automatically adjusted edge colors.\n");
 			Options.StdOut += tr("  -cc, --color-contrast <float>: Color contrast value between 0.0 and 1.0.\n");
@@ -850,6 +818,46 @@ lcCommandLineOptions lcApplication::ParseCommandLineOptions()
 	if (Options.AutomateEdgeColor && lcIsHighContrast(Options.StudStyle))
 	{
 		Options.StdErr += tr("High contrast stud and edge color settings are ignored when -aec or --automate-edge-color is set.\n");
+	}
+
+	if (!Options.AutomateEdgeColor && !Preferences.mAutomateEdgeColor)
+	{
+		QString const Message = tr("Automate edge color is required for the '%1' option but is not enabled.\n");
+
+		if (Options.PartEdgeContrast != Preferences.mPartEdgeContrast)
+			Options.StdErr += Message.arg(QString("--color-contrast %1").arg(Options.PartEdgeContrast));
+
+		if (Options.PartColorValueLDIndex != Preferences.mPartColorValueLDIndex)
+			Options.StdErr += Message.arg(QString("--light-dark-value %1").arg(Options.PartColorValueLDIndex));
+	}
+
+	if (!lcIsHighContrast(Options.StudStyle) && !lcIsHighContrast(static_cast<lcStudStyle>(lcGetProfileInt(LC_PROFILE_STUD_STYLE))))
+	{
+		QString const Message = tr("High contrast stud style is required for the '%1' option but is not enabled.\n");
+
+		if (Options.StudCylinderColorEnabled != Preferences.mStudCylinderColorEnabled)
+			Options.StdErr += Message.arg(QLatin1String("--disable-stud-cylinder-color"));
+
+		if (Options.StudCylinderColor != Preferences.mStudCylinderColor)
+			Options.StdErr += Message.arg(QString("--stud-cylinder-color %1").arg(Options.StudCylinderColor));
+
+		if (Options.PartEdgeColorEnabled != Preferences.mPartEdgeColorEnabled)
+			Options.StdErr += Message.arg(QLatin1String("--disable-edge-color"));
+
+		if (Options.PartEdgeColor != Preferences.mPartEdgeColor)
+			Options.StdErr += Message.arg(QString("--edge-color %1").arg(Options.PartEdgeColor));
+
+		if (Options.BlackEdgeColorEnabled != Preferences.mBlackEdgeColorEnabled)
+			Options.StdErr += Message.arg(QLatin1String("--disable-black-edge-color"));
+
+		if (Options.BlackEdgeColor != Preferences.mBlackEdgeColor)
+			Options.StdErr += Message.arg(QString("--black-edge-color %1").arg(Options.BlackEdgeColor));
+
+		if (Options.DarkEdgeColorEnabled != Preferences.mDarkEdgeColorEnabled)
+			Options.StdErr += Message.arg(QLatin1String("--disable-dark-edge-color"));
+
+		if (Options.DarkEdgeColor != Preferences.mDarkEdgeColor)
+			Options.StdErr += Message.arg(QString("--dark-edge-color %1").arg(Options.DarkEdgeColor));
 	}
 
 	if (!Options.CameraName.isEmpty())
@@ -953,15 +961,19 @@ lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& Libra
 
 	mPreferences.mShadingMode = Options.ShadingMode;
 	mPreferences.mLineWidth = Options.LineWidth;
+	mPreferences.mStudCylinderColorEnabled = Options.StudCylinderColorEnabled;
 	mPreferences.mStudCylinderColor = Options.StudCylinderColor;
+	mPreferences.mPartEdgeColorEnabled = Options.PartEdgeColorEnabled;
 	mPreferences.mPartEdgeColor = Options.PartEdgeColor;
+	mPreferences.mBlackEdgeColorEnabled = Options.BlackEdgeColorEnabled;
 	mPreferences.mBlackEdgeColor = Options.BlackEdgeColor;
+	mPreferences.mDarkEdgeColorEnabled = Options.DarkEdgeColorEnabled;
 	mPreferences.mDarkEdgeColor = Options.DarkEdgeColor;
 	mPreferences.mPartEdgeContrast = Options.PartEdgeContrast;
 	mPreferences.mPartColorValueLDIndex = Options.PartColorValueLDIndex;
 	mPreferences.mAutomateEdgeColor = Options.AutomateEdgeColor;
 
-	lcGetPiecesLibrary()->SetStudStyle(Options.StudStyle, false);
+	lcGetPiecesLibrary()->SetStudStyle(Options.StudStyle, false, Options.StudCylinderColorEnabled);
 
 	if (!SaveAndExit)
 		gMainWindow->CreateWidgets();
@@ -1285,16 +1297,22 @@ void lcApplication::ShowPreferencesDialog()
 
 	bool LanguageChanged = Options.Language != lcGetProfileString(LC_PROFILE_LANGUAGE);
 	bool LibraryChanged = Options.LibraryPath != lcGetProfileString(LC_PROFILE_PARTS_LIBRARY);
-	bool ColorsChanged = Options.ColorConfigPath != lcGetProfileString(LC_PROFILE_COLOR_CONFIG);
+	bool ColorConfigChanged = Options.ColorConfigPath != lcGetProfileString(LC_PROFILE_COLOR_CONFIG);
 	bool AAChanged = CurrentAASamples != Options.AASamples;
 	bool StudStyleChanged = CurrentStudStyle != Options.StudStyle;
-	bool AutomateEdgeColorChanged = Options.Preferences.mAutomateEdgeColor != mPreferences.mAutomateEdgeColor;
-	AutomateEdgeColorChanged |= Options.Preferences.mStudCylinderColor != mPreferences.mStudCylinderColor;
-	AutomateEdgeColorChanged |= Options.Preferences.mPartEdgeColor != mPreferences.mPartEdgeColor;
-	AutomateEdgeColorChanged |= Options.Preferences.mBlackEdgeColor != mPreferences.mBlackEdgeColor;
-	AutomateEdgeColorChanged |= Options.Preferences.mDarkEdgeColor != mPreferences.mDarkEdgeColor;
-	AutomateEdgeColorChanged |= Options.Preferences.mPartEdgeContrast != mPreferences.mPartEdgeContrast;
-	AutomateEdgeColorChanged |= Options.Preferences.mPartColorValueLDIndex != mPreferences.mPartColorValueLDIndex;
+	bool StudCylinderColorEnabledChanged = Options.Preferences.mStudCylinderColorEnabled != mPreferences.mStudCylinderColorEnabled;
+	bool EdgeColorSettingsChanged = Options.Preferences.mAutomateEdgeColor != mPreferences.mAutomateEdgeColor;
+	EdgeColorSettingsChanged |= Options.Preferences.mPartEdgeContrast != mPreferences.mPartEdgeContrast;
+	EdgeColorSettingsChanged |= Options.Preferences.mPartColorValueLDIndex != mPreferences.mPartColorValueLDIndex;
+	EdgeColorSettingsChanged |= Options.Preferences.mStudCylinderColorEnabled != mPreferences.mStudCylinderColorEnabled;
+	EdgeColorSettingsChanged |= Options.Preferences.mStudCylinderColor != mPreferences.mStudCylinderColor;
+	EdgeColorSettingsChanged |= Options.Preferences.mPartEdgeColorEnabled != mPreferences.mPartEdgeColorEnabled;
+	EdgeColorSettingsChanged |= Options.Preferences.mPartEdgeColor != mPreferences.mPartEdgeColor;
+	EdgeColorSettingsChanged |= Options.Preferences.mBlackEdgeColorEnabled != mPreferences.mBlackEdgeColorEnabled;
+	EdgeColorSettingsChanged |= Options.Preferences.mBlackEdgeColor != mPreferences.mBlackEdgeColor;
+	EdgeColorSettingsChanged |= Options.Preferences.mDarkEdgeColorEnabled != mPreferences.mDarkEdgeColorEnabled;
+	EdgeColorSettingsChanged |= Options.Preferences.mDarkEdgeColor != mPreferences.mDarkEdgeColor;
+
 
 	mPreferences = Options.Preferences;
 
@@ -1351,15 +1369,16 @@ void lcApplication::ShowPreferencesDialog()
 		}
 	}
 
-	if (StudStyleChanged)
+	if (StudStyleChanged || StudCylinderColorEnabledChanged)
 	{
 		lcSetProfileInt(LC_PROFILE_STUD_STYLE, static_cast<int>(Options.StudStyle));
-		lcGetPiecesLibrary()->SetStudStyle(Options.StudStyle, true);
+		lcGetPiecesLibrary()->SetStudStyle(Options.StudStyle, true, Options.Preferences.mStudCylinderColorEnabled);
 	}
-	else if (ColorsChanged || AutomateEdgeColorChanged)
+	else if (ColorConfigChanged || EdgeColorSettingsChanged)
 	{
-		if (ColorsChanged)
+		if (ColorConfigChanged)
 			lcSetProfileString(LC_PROFILE_COLOR_CONFIG, Options.ColorConfigPath);
+
 		lcGetPiecesLibrary()->LoadColors();
 	}
 

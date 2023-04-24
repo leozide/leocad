@@ -7,10 +7,14 @@ class lcAutomateEdgeColorDialog : public QDialog
 	Q_OBJECT
 public:
 	lcAutomateEdgeColorDialog(QWidget *Parent, bool ShowHighContrastDialog);
+	bool mStudCylinderColorEnabled;
 	quint32 mStudCylinderColor;
+	bool mPartEdgeColorEnabled;
 	quint32 mPartEdgeColor;
-	quint32 mDarkEdgeColor;
+	bool mBlackEdgeColorEnabled;
 	quint32 mBlackEdgeColor;
+	bool mDarkEdgeColorEnabled;
+	quint32 mDarkEdgeColor;
 	float mPartEdgeContrast;
 	float mPartColorValueLDIndex;
 
@@ -18,6 +22,7 @@ protected slots:
 	void SliderValueChanged(int);
 	void ResetSliderButtonClicked();
 	void ColorButtonClicked();
+	void ColorCheckBoxClicked();
 	void ResetColorButtonClicked();
 
 protected:
@@ -29,6 +34,11 @@ protected:
 
 	QToolButton* ResetPartEdgeContrastButton;
 	QToolButton* ResetPartColorValueLDIndexButton;
+
+	QCheckBox* StudCylinderColorEnabledBox;
+	QCheckBox* PartEdgeColorEnabledBox;
+	QCheckBox* BlackEdgeColorEnabledBox;
+	QCheckBox* DarkEdgeColorEnabledBox;
 
 	QToolButton* StudCylinderColorButton;
 	QToolButton* PartEdgeColorButton;

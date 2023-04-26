@@ -2525,6 +2525,16 @@
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1822"/>
+        <source>Move Selection Before</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1829"/>
+        <source>Move Selection After</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1836"/>
         <source>Set Current Step</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2577,77 +2587,77 @@
 <context>
     <name>Mouse</name>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1832"/>
+        <location filename="../common/lc_commands.cpp" line="1846"/>
         <source>NewPiece</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1833"/>
+        <location filename="../common/lc_commands.cpp" line="1847"/>
         <source>NewPointLight</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1834"/>
+        <location filename="../common/lc_commands.cpp" line="1848"/>
         <source>NewSpotLight</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1835"/>
+        <location filename="../common/lc_commands.cpp" line="1849"/>
         <source>NewCamera</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1836"/>
+        <location filename="../common/lc_commands.cpp" line="1850"/>
         <source>Select</source>
         <translation type="unfinished">Sélectionner</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1837"/>
+        <location filename="../common/lc_commands.cpp" line="1851"/>
         <source>Move</source>
         <translation type="unfinished">Déplacer</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1838"/>
+        <location filename="../common/lc_commands.cpp" line="1852"/>
         <source>Rotate</source>
         <translation type="unfinished">Tourner</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1839"/>
+        <location filename="../common/lc_commands.cpp" line="1853"/>
         <source>Delete</source>
         <translation type="unfinished">Effacer</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1840"/>
+        <location filename="../common/lc_commands.cpp" line="1854"/>
         <source>Paint</source>
         <translation type="unfinished">Peindre</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1841"/>
+        <location filename="../common/lc_commands.cpp" line="1855"/>
         <source>ColorPicker</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1842"/>
+        <location filename="../common/lc_commands.cpp" line="1856"/>
         <source>Zoom</source>
         <translation type="unfinished">Zoomer</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1843"/>
+        <location filename="../common/lc_commands.cpp" line="1857"/>
         <source>Pan</source>
         <translation type="unfinished">Glisser</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1844"/>
+        <location filename="../common/lc_commands.cpp" line="1858"/>
         <source>Orbit</source>
         <translation type="unfinished">Orbiter</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1845"/>
+        <location filename="../common/lc_commands.cpp" line="1859"/>
         <source>Roll</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1846"/>
+        <location filename="../common/lc_commands.cpp" line="1860"/>
         <source>ZoomRegion</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2664,11 +2674,11 @@
         <location filename="../common/project.cpp" line="457"/>
         <location filename="../common/project.cpp" line="494"/>
         <location filename="../common/project.cpp" line="661"/>
-        <location filename="../common/project.cpp" line="1536"/>
-        <location filename="../common/project.cpp" line="1567"/>
-        <location filename="../common/project.cpp" line="1592"/>
-        <location filename="../common/project.cpp" line="1626"/>
-        <location filename="../common/project.cpp" line="1658"/>
+        <location filename="../common/project.cpp" line="1541"/>
+        <location filename="../common/project.cpp" line="1572"/>
+        <location filename="../common/project.cpp" line="1597"/>
+        <location filename="../common/project.cpp" line="1631"/>
+        <location filename="../common/project.cpp" line="1663"/>
         <source>Error</source>
         <translation>Erreur</translation>
     </message>
@@ -2697,13 +2707,13 @@ File format is not recognized.</source>
         <location filename="../common/project.cpp" line="1178"/>
         <location filename="../common/project.cpp" line="1440"/>
         <location filename="../common/project.cpp" line="1454"/>
-        <location filename="../common/project.cpp" line="1706"/>
-        <location filename="../common/project.cpp" line="1719"/>
-        <location filename="../common/project.cpp" line="1758"/>
-        <location filename="../common/project.cpp" line="1804"/>
-        <location filename="../common/project.cpp" line="2025"/>
-        <location filename="../common/project.cpp" line="2039"/>
-        <location filename="../common/project.cpp" line="2056"/>
+        <location filename="../common/project.cpp" line="1711"/>
+        <location filename="../common/project.cpp" line="1724"/>
+        <location filename="../common/project.cpp" line="1763"/>
+        <location filename="../common/project.cpp" line="1809"/>
+        <location filename="../common/project.cpp" line="2030"/>
+        <location filename="../common/project.cpp" line="2044"/>
+        <location filename="../common/project.cpp" line="2061"/>
         <source>LeoCAD</source>
         <translation>LeoCAD</translation>
     </message>
@@ -2712,8 +2722,8 @@ File format is not recognized.</source>
         <location filename="../common/project.cpp" line="1147"/>
         <location filename="../common/project.cpp" line="1165"/>
         <location filename="../common/project.cpp" line="1440"/>
-        <location filename="../common/project.cpp" line="1706"/>
-        <location filename="../common/project.cpp" line="2025"/>
+        <location filename="../common/project.cpp" line="1711"/>
+        <location filename="../common/project.cpp" line="2030"/>
         <source>Nothing to export.</source>
         <translation>Rien à exporter.</translation>
     </message>
@@ -2731,9 +2741,9 @@ File format is not recognized.</source>
         <location filename="../common/project.cpp" line="716"/>
         <location filename="../common/project.cpp" line="1178"/>
         <location filename="../common/project.cpp" line="1454"/>
-        <location filename="../common/project.cpp" line="1719"/>
-        <location filename="../common/project.cpp" line="2039"/>
-        <location filename="../common/project.cpp" line="2056"/>
+        <location filename="../common/project.cpp" line="1724"/>
+        <location filename="../common/project.cpp" line="2044"/>
+        <location filename="../common/project.cpp" line="2061"/>
         <source>Could not open file &apos;%1&apos; for writing.</source>
         <translation>N’a pas pu ouvrir le fichier « %1 » en écriture.</translation>
     </message>
@@ -2772,39 +2782,39 @@ File format is not recognized.</source>
         <translation type="vanished">Erreur à la création des images.</translation>
     </message>
     <message>
-        <location filename="../common/project.cpp" line="1710"/>
+        <location filename="../common/project.cpp" line="1715"/>
         <source>Export POV-Ray</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/project.cpp" line="1710"/>
+        <location filename="../common/project.cpp" line="1715"/>
         <source>POV-Ray Files (*.pov);;All Files (*.*)</source>
         <translation type="unfinished">Fichiers POV-Ray (*.pov);;Tous les fichiers (*.*)</translation>
     </message>
     <message>
-        <location filename="../common/project.cpp" line="1758"/>
-        <location filename="../common/project.cpp" line="1804"/>
+        <location filename="../common/project.cpp" line="1763"/>
+        <location filename="../common/project.cpp" line="1809"/>
         <source>Could not find LGEO files in folder &apos;%1&apos;.</source>
         <translation>N’a pas pu trouver les fichiers LGEO dans le dossier « %1 ».</translation>
     </message>
     <message>
-        <location filename="../common/project.cpp" line="2029"/>
+        <location filename="../common/project.cpp" line="2034"/>
         <source>Export Wavefront</source>
         <translation>Exporter vers Wavefront</translation>
     </message>
     <message>
-        <location filename="../common/project.cpp" line="2029"/>
+        <location filename="../common/project.cpp" line="2034"/>
         <source>Wavefront Files (*.obj);;All Files (*.*)</source>
         <translation>Fichiers Wavefront (*.obj);;Tous les fichiers (*.*)</translation>
     </message>
     <message>
         <location filename="../common/project.cpp" line="494"/>
         <location filename="../common/project.cpp" line="661"/>
-        <location filename="../common/project.cpp" line="1536"/>
-        <location filename="../common/project.cpp" line="1567"/>
-        <location filename="../common/project.cpp" line="1592"/>
-        <location filename="../common/project.cpp" line="1626"/>
-        <location filename="../common/project.cpp" line="1658"/>
+        <location filename="../common/project.cpp" line="1541"/>
+        <location filename="../common/project.cpp" line="1572"/>
+        <location filename="../common/project.cpp" line="1597"/>
+        <location filename="../common/project.cpp" line="1631"/>
+        <location filename="../common/project.cpp" line="1663"/>
         <source>Error writing to file &apos;%1&apos;:
 %2</source>
         <translation>Erreur en écrivant le fichier « %1 » :
@@ -3628,6 +3638,16 @@ File format is not recognized.</source>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1823"/>
+        <source>Move the selected parts into a new step before this</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1830"/>
+        <source>Move the selected parts into a new step after this</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1837"/>
         <source>View the model at this point in the timeline</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4012,7 +4032,7 @@ File format is not recognized.</source>
     <name>lcApplication</name>
     <message>
         <location filename="../common/lc_application.cpp" line="954"/>
-        <location filename="../common/lc_application.cpp" line="1298"/>
+        <location filename="../common/lc_application.cpp" line="1333"/>
         <source>LeoCAD</source>
         <translation>LeoCAD</translation>
     </message>
@@ -4026,337 +4046,363 @@ Please visit https://www.leocad.org for information on how to download and insta
 SVP visitez https://www.leocad.org pour apprendre comment télécharger et installer une bibliothèque.</translation>
     </message>
     <message>
-        <location filename="../common/lc_application.cpp" line="421"/>
-        <location filename="../common/lc_application.cpp" line="446"/>
-        <location filename="../common/lc_application.cpp" line="469"/>
-        <location filename="../common/lc_application.cpp" line="492"/>
-        <location filename="../common/lc_application.cpp" line="502"/>
-        <location filename="../common/lc_application.cpp" line="525"/>
-        <location filename="../common/lc_application.cpp" line="550"/>
+        <location filename="../common/lc_application.cpp" line="419"/>
+        <location filename="../common/lc_application.cpp" line="444"/>
+        <location filename="../common/lc_application.cpp" line="467"/>
+        <location filename="../common/lc_application.cpp" line="490"/>
+        <location filename="../common/lc_application.cpp" line="500"/>
+        <location filename="../common/lc_application.cpp" line="523"/>
+        <location filename="../common/lc_application.cpp" line="548"/>
         <source>Not enough parameters for the &apos;%1&apos; option.
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_application.cpp" line="443"/>
-        <location filename="../common/lc_application.cpp" line="466"/>
-        <location filename="../common/lc_application.cpp" line="489"/>
-        <location filename="../common/lc_application.cpp" line="522"/>
-        <location filename="../common/lc_application.cpp" line="547"/>
-        <location filename="../common/lc_application.cpp" line="600"/>
-        <location filename="../common/lc_application.cpp" line="754"/>
-        <location filename="../common/lc_application.cpp" line="765"/>
+        <location filename="../common/lc_application.cpp" line="441"/>
+        <location filename="../common/lc_application.cpp" line="464"/>
+        <location filename="../common/lc_application.cpp" line="487"/>
+        <location filename="../common/lc_application.cpp" line="520"/>
+        <location filename="../common/lc_application.cpp" line="545"/>
+        <location filename="../common/lc_application.cpp" line="598"/>
+        <location filename="../common/lc_application.cpp" line="704"/>
+        <location filename="../common/lc_application.cpp" line="715"/>
         <source>Invalid parameter value specified for the &apos;%1&apos; option: &apos;%2&apos;.
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_application.cpp" line="561"/>
+        <location filename="../common/lc_application.cpp" line="559"/>
         <source>The file &apos;%1&apos; is not readable.
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_application.cpp" line="609"/>
+        <location filename="../common/lc_application.cpp" line="607"/>
         <source>Invalid parameter value(s) specified for the &apos;%1&apos; option: limits are +/- 360.
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_application.cpp" line="621"/>
+        <location filename="../common/lc_application.cpp" line="619"/>
         <source>Invalid parameter value(s) specified for the &apos;%1&apos; option.
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_application.cpp" line="640"/>
+        <location filename="../common/lc_application.cpp" line="638"/>
         <source>Invalid parameter value(s) specified for the &apos;%1&apos; option: requirements are: 1 &lt;= &lt;near&gt; &lt; &lt;far&gt;.
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_application.cpp" line="650"/>
-        <location filename="../common/lc_application.cpp" line="661"/>
-        <location filename="../common/lc_application.cpp" line="672"/>
-        <location filename="../common/lc_application.cpp" line="683"/>
+        <location filename="../common/lc_application.cpp" line="836"/>
         <source>High contrast stud style is required for the &apos;%1&apos; option but is not enabled.
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_application.cpp" line="698"/>
-        <location filename="../common/lc_application.cpp" line="709"/>
+        <location filename="../common/lc_application.cpp" line="825"/>
         <source>Automate edge color is required for the &apos;%1&apos; option but is not enabled.
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_application.cpp" line="799"/>
+        <location filename="../common/lc_application.cpp" line="754"/>
         <source>LeoCAD Continuous Build %1
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_application.cpp" line="801"/>
+        <location filename="../common/lc_application.cpp" line="756"/>
         <source>LeoCAD Version %1
 </source>
         <translation type="unfinished">LeoCAD Version %1
 </translation>
     </message>
     <message>
-        <location filename="../common/lc_application.cpp" line="803"/>
+        <location filename="../common/lc_application.cpp" line="758"/>
         <source>Compiled %1
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_application.cpp" line="808"/>
+        <location filename="../common/lc_application.cpp" line="763"/>
         <source>Usage: leocad [options] [file]
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_application.cpp" line="809"/>
+        <location filename="../common/lc_application.cpp" line="764"/>
         <source>  [options] can be:
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_application.cpp" line="810"/>
+        <location filename="../common/lc_application.cpp" line="765"/>
         <source>  -l, --libpath &lt;path&gt;: Set the Parts Library location to path.
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_application.cpp" line="811"/>
+        <location filename="../common/lc_application.cpp" line="766"/>
         <source>  -i, --image &lt;outfile.ext&gt;: Save a picture in the format specified by ext and exit.
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_application.cpp" line="812"/>
+        <location filename="../common/lc_application.cpp" line="767"/>
         <source>  -w, --width &lt;width&gt;: Set the picture width.
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_application.cpp" line="813"/>
+        <location filename="../common/lc_application.cpp" line="768"/>
         <source>  -h, --height &lt;height&gt;: Set the picture height.
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_application.cpp" line="814"/>
+        <location filename="../common/lc_application.cpp" line="769"/>
         <source>  -f, --from &lt;step&gt;: Set the first step to save pictures.
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_application.cpp" line="815"/>
+        <location filename="../common/lc_application.cpp" line="770"/>
         <source>  -t, --to &lt;step&gt;: Set the last step to save pictures.
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_application.cpp" line="816"/>
+        <location filename="../common/lc_application.cpp" line="771"/>
         <source>  -s, --submodel &lt;submodel&gt;: Set the active submodel.
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_application.cpp" line="817"/>
+        <location filename="../common/lc_application.cpp" line="772"/>
         <source>  -c, --camera &lt;camera&gt;: Set the active camera.
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_application.cpp" line="818"/>
+        <location filename="../common/lc_application.cpp" line="773"/>
         <source>  -ss, --stud-style &lt;id&gt;: Set the stud style 0=No style, 1=LDraw single wire, 2=LDraw double wire, 3=LDraw raised floating, 4=LDraw raised rounded, 5=LDraw subtle rounded, 6=LEGO no logo, 7=LEGO single wire.
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_application.cpp" line="819"/>
+        <location filename="../common/lc_application.cpp" line="774"/>
         <source>  --viewpoint &lt;front|back|left|right|top|bottom|home&gt;: Set the viewpoint.
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_application.cpp" line="820"/>
+        <location filename="../common/lc_application.cpp" line="775"/>
         <source>  --camera-angles &lt;latitude&gt; &lt;longitude&gt;: Set the camera angles in degrees around the model.
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_application.cpp" line="821"/>
+        <location filename="../common/lc_application.cpp" line="776"/>
         <source>  --camera-position &lt;x&gt; &lt;y&gt; &lt;z&gt; &lt;tx&gt; &lt;ty&gt; &lt;tz&gt; &lt;ux&gt; &lt;uy&gt; &lt;uz&gt;: Set the camera position, target and up vector.
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_application.cpp" line="822"/>
+        <location filename="../common/lc_application.cpp" line="777"/>
         <source>  --camera-position-ldraw &lt;x&gt; &lt;y&gt; &lt;z&gt; &lt;tx&gt; &lt;ty&gt; &lt;tz&gt; &lt;ux&gt; &lt;uy&gt; &lt;uz&gt;: Set the camera position, target and up vector using LDraw coordinates.
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_application.cpp" line="823"/>
+        <location filename="../common/lc_application.cpp" line="778"/>
         <source>  --orthographic: Render images using an orthographic projection.
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_application.cpp" line="824"/>
+        <location filename="../common/lc_application.cpp" line="779"/>
         <source>  --fov &lt;degrees&gt;: Set the vertical field of view used to render images (&lt; 180).
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_application.cpp" line="825"/>
+        <location filename="../common/lc_application.cpp" line="780"/>
         <source>  --zplanes &lt;near&gt; &lt;far&gt;: Set the near and far clipping planes used to render images (1 &lt;= &lt;near&gt; &lt; &lt;far&gt;).
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_application.cpp" line="826"/>
+        <location filename="../common/lc_application.cpp" line="781"/>
         <source>  --fade-steps: Render parts from prior steps faded.
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_application.cpp" line="827"/>
+        <location filename="../common/lc_application.cpp" line="782"/>
         <source>  --no-fade-steps: Do not render parts from prior steps faded.
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_application.cpp" line="828"/>
+        <location filename="../common/lc_application.cpp" line="783"/>
         <source>  --fade-steps-color &lt;rgba&gt;: Renderinng color for prior step parts (#AARRGGBB).
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_application.cpp" line="829"/>
+        <location filename="../common/lc_application.cpp" line="784"/>
         <source>  --highlight: Highlight parts in the steps they appear.
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_application.cpp" line="830"/>
+        <location filename="../common/lc_application.cpp" line="785"/>
         <source>  --no-highlight: Do not highlight parts in the steps they appear.
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_application.cpp" line="831"/>
+        <location filename="../common/lc_application.cpp" line="786"/>
         <source>  --highlight-color: Renderinng color for highlighted parts (#AARRGGBB).
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_application.cpp" line="832"/>
+        <location filename="../common/lc_application.cpp" line="787"/>
         <source>  --shading &lt;wireframe|flat|default|full&gt;: Select shading mode for rendering.
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_application.cpp" line="833"/>
+        <location filename="../common/lc_application.cpp" line="788"/>
         <source>  --line-width &lt;width&gt;: Set the width of the edge lines.
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_application.cpp" line="834"/>
+        <location filename="../common/lc_application.cpp" line="789"/>
         <source>  --aa-samples &lt;count&gt;: AntiAliasing sample size (1, 2, 4, or 8).
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_application.cpp" line="835"/>
+        <location filename="../common/lc_application.cpp" line="790"/>
+        <source>  -nscc, --disable-stud-cylinder-color: Disable high contrast stud cylinder color.
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_application.cpp" line="791"/>
         <source>  -scc, --stud-cylinder-color &lt;#AARRGGBB&gt;: High contrast stud cylinder color.
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_application.cpp" line="836"/>
+        <location filename="../common/lc_application.cpp" line="792"/>
+        <source>  -nec, --disable-edge-color: Disable high contrast edge color.
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_application.cpp" line="793"/>
         <source>  -ec, --edge-color &lt;#AARRGGBB&gt;: High contrast edge color.
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_application.cpp" line="837"/>
+        <location filename="../common/lc_application.cpp" line="794"/>
+        <source>  -nbec, --disable-black-edge-color: Disable high contrast edge color for black parts.
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_application.cpp" line="795"/>
         <source>  -bec, --black-edge-color &lt;#AARRGGBB&gt;: High contrast edge color for black parts.
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_application.cpp" line="838"/>
+        <location filename="../common/lc_application.cpp" line="796"/>
+        <source>  -ndec, --disable-dark-edge-color: Disable high contrast edge color for dark color parts.
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_application.cpp" line="797"/>
         <source>  -dec, --dark-edge-color &lt;#AARRGGBB&gt;: High contrast edge color for dark color parts.
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_application.cpp" line="839"/>
+        <location filename="../common/lc_application.cpp" line="798"/>
         <source>  -aec, --automate-edge-color: Enable automatically adjusted edge colors.
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_application.cpp" line="840"/>
+        <location filename="../common/lc_application.cpp" line="799"/>
         <source>  -cc, --color-contrast &lt;float&gt;: Color contrast value between 0.0 and 1.0.
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_application.cpp" line="841"/>
+        <location filename="../common/lc_application.cpp" line="800"/>
         <source>  -ldv, --light-dark-value &lt;float&gt;: Light/Dark color value between 0.0 and 1.0.
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_application.cpp" line="842"/>
+        <location filename="../common/lc_application.cpp" line="801"/>
         <source>  -obj, --export-wavefront &lt;outfile.obj&gt;: Export the model to Wavefront OBJ format.
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_application.cpp" line="843"/>
+        <location filename="../common/lc_application.cpp" line="802"/>
         <source>  -3ds, --export-3ds &lt;outfile.3ds&gt;: Export the model to 3D Studio 3DS format.
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_application.cpp" line="844"/>
+        <location filename="../common/lc_application.cpp" line="803"/>
         <source>  -dae, --export-collada &lt;outfile.dae&gt;: Export the model to COLLADA DAE format.
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_application.cpp" line="845"/>
+        <location filename="../common/lc_application.cpp" line="804"/>
+        <source>  -csv, --export-csv &lt;outfile.csv&gt;: Export the list of parts used in csv format.
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_application.cpp" line="805"/>
         <source>  -html, --export-html &lt;folder&gt;: Create an HTML page for the model.
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_application.cpp" line="846"/>
+        <location filename="../common/lc_application.cpp" line="806"/>
         <source>  -v, --version: Output version information and exit.
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_application.cpp" line="847"/>
+        <location filename="../common/lc_application.cpp" line="807"/>
         <source>  -?, --help: Display this help message and exit.
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_application.cpp" line="853"/>
+        <location filename="../common/lc_application.cpp" line="813"/>
         <source>Unknown option: &apos;%1&apos;.
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_application.cpp" line="860"/>
+        <location filename="../common/lc_application.cpp" line="820"/>
         <source>High contrast stud and edge color settings are ignored when -aec or --automate-edge-color is set.
 </source>
         <translation type="unfinished"></translation>
@@ -4425,22 +4471,23 @@ Please visit https://www.leocad.org for information on how to download and insta
 SVP visitez https://www.leocad.org pour apprendre comment télécharger et installer une bibliothèque.</translation>
     </message>
     <message>
-        <location filename="../common/lc_application.cpp" line="1022"/>
+        <location filename="../common/lc_application.cpp" line="1026"/>
         <source>Error: model &apos;%1&apos; does not exist.
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_application.cpp" line="1113"/>
-        <location filename="../common/lc_application.cpp" line="1141"/>
-        <location filename="../common/lc_application.cpp" line="1166"/>
-        <location filename="../common/lc_application.cpp" line="1191"/>
+        <location filename="../common/lc_application.cpp" line="1117"/>
+        <location filename="../common/lc_application.cpp" line="1145"/>
+        <location filename="../common/lc_application.cpp" line="1170"/>
+        <location filename="../common/lc_application.cpp" line="1195"/>
+        <location filename="../common/lc_application.cpp" line="1220"/>
         <source>Saved &apos;%1&apos;.
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_application.cpp" line="1298"/>
+        <location filename="../common/lc_application.cpp" line="1333"/>
         <source>Some changes will only take effect the next time you start LeoCAD.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4460,107 +4507,107 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
 <context>
     <name>lcAutomateEdgeColorDialog</name>
     <message>
-        <location filename="../common/lc_edgecolordialog.cpp" line="15"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="19"/>
         <source>Color Preferences</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_edgecolordialog.cpp" line="18"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="22"/>
         <source>Edge Colors</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_edgecolordialog.cpp" line="29"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="33"/>
         <source>Contrast:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_edgecolordialog.cpp" line="34"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="38"/>
         <source>Set the amount of contrast - 0.50 is midway.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_edgecolordialog.cpp" line="39"/>
-        <location filename="../common/lc_edgecolordialog.cpp" line="60"/>
-        <location filename="../common/lc_edgecolordialog.cpp" line="89"/>
-        <location filename="../common/lc_edgecolordialog.cpp" line="102"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="43"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="64"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="97"/>
         <location filename="../common/lc_edgecolordialog.cpp" line="115"/>
-        <location filename="../common/lc_edgecolordialog.cpp" line="128"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="133"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="151"/>
         <source>Reset</source>
         <translation type="unfinished">Réinitialiser</translation>
     </message>
     <message>
-        <location filename="../common/lc_edgecolordialog.cpp" line="48"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="52"/>
         <source>Light/Dark Value:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_edgecolordialog.cpp" line="48"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="52"/>
         <source>Saturation:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_edgecolordialog.cpp" line="54"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="58"/>
         <source>Set to classify where color values are light or dark - e.g. Dark Bluish Gray (72) is light at 0.39.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_edgecolordialog.cpp" line="55"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="59"/>
         <source>Set to specify amount of edge color tint or shade from the saturation adjusted part color</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_edgecolordialog.cpp" line="68"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="72"/>
         <source>High Contrast</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_edgecolordialog.cpp" line="83"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="87"/>
         <source>Stud Cylinder Color:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_edgecolordialog.cpp" line="96"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="105"/>
         <source>Parts Edge Color:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_edgecolordialog.cpp" line="109"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="123"/>
         <source>Black Parts Edge Color:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_edgecolordialog.cpp" line="122"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="141"/>
         <source>Dark Parts Edge Color:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_edgecolordialog.cpp" line="166"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="219"/>
         <source>Select Stud Cylinder Color</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_edgecolordialog.cpp" line="171"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="224"/>
         <source>Select Part Edge Color</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_edgecolordialog.cpp" line="179"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="232"/>
         <source>Automate edge color appears to be enabled.&lt;br&gt;Black parts edge color will not be accessible.&lt;br&gt;Do you want to continue?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_edgecolordialog.cpp" line="183"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="236"/>
         <source>Select Black Edge Color</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_edgecolordialog.cpp" line="191"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="244"/>
         <source>Automate edge color appears to be enabled.&lt;br&gt;Dark parts edge color will not be accessible.&lt;br&gt;Do you want to continue?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_edgecolordialog.cpp" line="195"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="248"/>
         <source>Select Dark Edge Color</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4876,14 +4923,14 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="146"/>
-        <location filename="../common/lc_mainwindow.cpp" line="2311"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2313"/>
         <source>Open Model</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="147"/>
-        <location filename="../common/lc_mainwindow.cpp" line="2434"/>
-        <location filename="../common/lc_mainwindow.cpp" line="2463"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2436"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2465"/>
         <source>Save Model</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4960,12 +5007,12 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="1985"/>
+        <location filename="../common/lc_mainwindow.cpp" line="1987"/>
         <source>%1 (ID: %2)</source>
         <translation>%1 (ID : %2)</translation>
     </message>
     <message numerus="yes">
-        <location filename="../common/lc_mainwindow.cpp" line="1991"/>
+        <location filename="../common/lc_mainwindow.cpp" line="1993"/>
         <source>%n Object(s) selected</source>
         <translation type="unfinished">
             <numerusform></numerusform>
@@ -4973,57 +5020,57 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
         </translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="2073"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2075"/>
         <source>Rel</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="2073"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2075"/>
         <source>Abs</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="2074"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2076"/>
         <source> M: %1 %2 R: %3 %4 </source>
         <translation type="unfinished"> M : %1 %2 R : %3  {1 %2 ?} {3 %4 ?}</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="2355"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2357"/>
         <source>Merge Model</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="2371"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2373"/>
         <source>Merged 1 submodel.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="2373"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2375"/>
         <source>Merged %1 submodels.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="2386"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2388"/>
         <source>Import</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="2386"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2388"/>
         <source>LEGO Diginal Designer Files (*.lxf);;All Files (*.*)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="1995"/>
+        <location filename="../common/lc_mainwindow.cpp" line="1997"/>
         <source> - %1 (ID: %2)</source>
         <translation> - %1 (ID : %2)</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="1999"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2001"/>
         <source> in group &apos;%1&apos;</source>
         <translation> dans le groupe « %1 »</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="2037"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2039"/>
         <source>Step %1</source>
         <translation>Étape %1</translation>
     </message>
@@ -5032,34 +5079,34 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
         <translation type="vanished"> M : %1 %2 R : %3 </translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="2095"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2097"/>
         <source>&amp;Undo %1</source>
         <translation>Ann&amp;uler %1</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="2100"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2102"/>
         <source>&amp;Undo</source>
         <translation>Ann&amp;uler</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="2106"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2108"/>
         <source>&amp;Redo %1</source>
         <translation>&amp;Refaire %1</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="2111"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2113"/>
         <source>&amp;Redo</source>
         <translation>&amp;Refaire</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="2311"/>
-        <location filename="../common/lc_mainwindow.cpp" line="2355"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2313"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2357"/>
         <source>Supported Files (*.lcd *.ldr *.dat *.mpd);;All Files (*.*)</source>
         <translation>Fichiers pris en charge (*.lcd *.ldr *.dat *.mpd);;Tous les fichiers (*.*)</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="2371"/>
         <location filename="../common/lc_mainwindow.cpp" line="2373"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2375"/>
         <source>LeoCAD</source>
         <translation>LeoCAD</translation>
     </message>
@@ -5068,27 +5115,27 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
         <translation type="vanished">Erreur au chargement de « %1 ».</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="2432"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2434"/>
         <source>Supported Files (*.mpd);;All Files (*.*)</source>
         <translation>Fichiers pris en charge (*.mpd);;Tous les fichiers (*.*)</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="2432"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2434"/>
         <source>Supported Files (*.ldr *.dat *.mpd);;All Files (*.*)</source>
         <translation>Fichiers pris en charge (*.ldr *.dat *.mpd);;Tous les fichiers (*.*)</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="2444"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2446"/>
         <source>Error</source>
         <translation>Erreur</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="2444"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2446"/>
         <source>Saving files in LCD format is no longer supported, please use the LDR or MPD formats instead.</source>
         <translation>Enregistrer les fichiers sous le format LCD n’est plus possible, SVP utiliser les formats LDR ou MPD à la place.</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="2463"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2465"/>
         <source>Save changes to &apos;%1&apos;?</source>
         <translation>Enregistrer les modifications à « %1 » ?</translation>
     </message>
@@ -5292,9 +5339,9 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
         <location filename="../common/lc_model.cpp" line="1349"/>
         <location filename="../common/lc_model.cpp" line="1830"/>
         <location filename="../common/lc_model.cpp" line="2534"/>
-        <location filename="../common/lc_model.cpp" line="4326"/>
-        <location filename="../common/lc_model.cpp" line="4344"/>
-        <location filename="../common/lc_model.cpp" line="4355"/>
+        <location filename="../common/lc_model.cpp" line="4325"/>
+        <location filename="../common/lc_model.cpp" line="4343"/>
+        <location filename="../common/lc_model.cpp" line="4354"/>
         <source>LeoCAD</source>
         <translation>LeoCAD</translation>
     </message>
@@ -5316,7 +5363,7 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="1830"/>
-        <location filename="../common/lc_model.cpp" line="4344"/>
+        <location filename="../common/lc_model.cpp" line="4343"/>
         <source>No pieces selected.</source>
         <translation>Aucune pièce sélectionnée.</translation>
     </message>
@@ -5458,9 +5505,9 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="3983"/>
-        <location filename="../common/lc_model.cpp" line="4224"/>
-        <location filename="../common/lc_model.cpp" line="4284"/>
-        <location filename="../common/lc_model.cpp" line="4296"/>
+        <location filename="../common/lc_model.cpp" line="4223"/>
+        <location filename="../common/lc_model.cpp" line="4283"/>
+        <location filename="../common/lc_model.cpp" line="4295"/>
         <source>Zoom</source>
         <translation>Zoomer</translation>
     </message>
@@ -5534,42 +5581,42 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
         <translation>Renomme la caméra</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="4247"/>
+        <location filename="../common/lc_model.cpp" line="4246"/>
         <source>Look At</source>
         <translation>Viser le modèle</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="4257"/>
+        <location filename="../common/lc_model.cpp" line="4256"/>
         <source>Moving Camera</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="4319"/>
+        <location filename="../common/lc_model.cpp" line="4318"/>
         <source>Changing Properties</source>
         <translation>Change les propriétés</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="4326"/>
+        <location filename="../common/lc_model.cpp" line="4325"/>
         <source>Nothing to select.</source>
         <translation>Rien à sélectionner.</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="4355"/>
+        <location filename="../common/lc_model.cpp" line="4354"/>
         <source>Array only has 1 element or less, no pieces added.</source>
         <translation>L’arrangement a seulement un élément ou moins, aucune pièce ajoutée.</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="4409"/>
+        <location filename="../common/lc_model.cpp" line="4408"/>
         <source>Array</source>
         <translation>Arrangement</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="4421"/>
+        <location filename="../common/lc_model.cpp" line="4420"/>
         <source>Minifig #</source>
         <translation>Minifig n°</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="4443"/>
+        <location filename="../common/lc_model.cpp" line="4442"/>
         <source>Minifig</source>
         <translation>Minifig</translation>
     </message>
@@ -5717,87 +5764,97 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
 <context>
     <name>lcPartSelectionWidget</name>
     <message>
-        <location filename="../common/lc_partselectionwidget.cpp" line="746"/>
+        <location filename="../common/lc_partselectionwidget.cpp" line="741"/>
+        <source>Filter Categories</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_partselectionwidget.cpp" line="748"/>
+        <source>Match Case</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_partselectionwidget.cpp" line="775"/>
         <source>Search Parts</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_partselectionwidget.cpp" line="753"/>
+        <location filename="../common/lc_partselectionwidget.cpp" line="782"/>
         <source>Options</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_partselectionwidget.cpp" line="902"/>
+        <location filename="../common/lc_partselectionwidget.cpp" line="968"/>
         <source>Edit Palettes...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_partselectionwidget.cpp" line="911"/>
+        <location filename="../common/lc_partselectionwidget.cpp" line="977"/>
         <source>No Icons</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_partselectionwidget.cpp" line="916"/>
+        <location filename="../common/lc_partselectionwidget.cpp" line="982"/>
         <source>Small Icons</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_partselectionwidget.cpp" line="921"/>
+        <location filename="../common/lc_partselectionwidget.cpp" line="987"/>
         <source>Medium Icons</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_partselectionwidget.cpp" line="926"/>
+        <location filename="../common/lc_partselectionwidget.cpp" line="992"/>
         <source>Large Icons</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_partselectionwidget.cpp" line="931"/>
+        <location filename="../common/lc_partselectionwidget.cpp" line="997"/>
         <source>Extra Large Icons</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_partselectionwidget.cpp" line="941"/>
+        <location filename="../common/lc_partselectionwidget.cpp" line="1007"/>
         <source>Show Part Names</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_partselectionwidget.cpp" line="946"/>
+        <location filename="../common/lc_partselectionwidget.cpp" line="1012"/>
         <source>Show Decorated Parts</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_partselectionwidget.cpp" line="950"/>
+        <location filename="../common/lc_partselectionwidget.cpp" line="1016"/>
         <source>Show Part Aliases</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_partselectionwidget.cpp" line="956"/>
+        <location filename="../common/lc_partselectionwidget.cpp" line="1022"/>
         <source>List Mode</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_partselectionwidget.cpp" line="960"/>
+        <location filename="../common/lc_partselectionwidget.cpp" line="1026"/>
         <source>Lock Preview Color</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_partselectionwidget.cpp" line="1002"/>
+        <location filename="../common/lc_partselectionwidget.cpp" line="1068"/>
         <source>Favorites</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_partselectionwidget.cpp" line="1118"/>
+        <location filename="../common/lc_partselectionwidget.cpp" line="1184"/>
         <source>All Parts</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_partselectionwidget.cpp" line="1124"/>
+        <location filename="../common/lc_partselectionwidget.cpp" line="1190"/>
         <source>In Use</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_partselectionwidget.cpp" line="1130"/>
+        <location filename="../common/lc_partselectionwidget.cpp" line="1196"/>
         <source>Submodels</source>
         <translation type="unfinished"></translation>
     </message>
@@ -5805,12 +5862,12 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
 <context>
     <name>lcPiecesLibrary</name>
     <message>
-        <location filename="../common/lc_library.cpp" line="782"/>
+        <location filename="../common/lc_library.cpp" line="783"/>
         <source>Initializing</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_library.cpp" line="783"/>
+        <location filename="../common/lc_library.cpp" line="784"/>
         <source>Loading Parts Library</source>
         <translation type="unfinished"></translation>
     </message>
@@ -7392,99 +7449,99 @@ Anisotropic: %5
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="661"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="665"/>
         <source>Unassigned</source>
         <translation>Non-attribué</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="775"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="779"/>
         <source>Are you sure you want to delete the category &apos;%1&apos;?</source>
         <translation>Êtes-vous sûr de vouloir supprimer la catégorie « %1 » ?</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="788"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="792"/>
         <source>Import Categories</source>
         <translation>Importer les catégories</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="788"/>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="807"/>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1077"/>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1097"/>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1269"/>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1290"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="792"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="811"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1081"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1101"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1273"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1294"/>
         <source>Text Files (*.txt);;All Files (*.*)</source>
         <translation>Fichiers texte (*.txt);;Tous les fichiers (*.*)</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="796"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="800"/>
         <source>Error loading categories file.</source>
         <translation>Erreur au chargement du fichier des catégories.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="807"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="811"/>
         <source>Export Categories</source>
         <translation>Exporter les catégories</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="814"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="818"/>
         <source>Error saving categories file.</source>
         <translation>Erreur à l’enregistrement du fichier des catégories.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="821"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="825"/>
         <source>Are you sure you want to load the default categories?</source>
         <translation>Êtes-vous sûr de vouloir charger les catégories par défaut ?</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1022"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1026"/>
         <source>The shortcut &apos;%1&apos; is already assigned to &apos;%2&apos;. Do you want to replace it?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1077"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1081"/>
         <source>Import shortcuts</source>
         <translation>Importer les raccourcis</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1085"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1089"/>
         <source>Error loading keyboard shortcuts file.</source>
         <translation>Erreur au chargement du fichier des raccourcis clavier.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1097"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1101"/>
         <source>Export shortcuts</source>
         <translation>Exporter les raccourcis</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1104"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1108"/>
         <source>Error saving keyboard shortcuts file.</source>
         <translation>Erreur à l’enregistrement du fichier des raccourcis clavier.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1111"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1115"/>
         <source>Are you sure you want to load the default keyboard shortcuts?</source>
         <translation>Êtes-vous sûr de vouloir charger les raccourcis clavier par défaut ?</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1138"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1142"/>
         <source>Left Button</source>
         <translation>Bouton gauche</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1142"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1146"/>
         <source>Middle Button</source>
         <translation>Bouton central</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1146"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1150"/>
         <source>Right Button</source>
         <translation>Bouton droit</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1024"/>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1213"/>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1222"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1028"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1217"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1226"/>
         <source>Override Shortcut</source>
         <translation>Écraser le raccourcis</translation>
     </message>
@@ -7494,33 +7551,33 @@ Anisotropic: %5
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1213"/>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1222"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1217"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1226"/>
         <source>This shortcut is already assigned to &apos;%1&apos;, do you want to replace it?</source>
         <translation>Ce raccourcis est déjà attribué à « %1 », voulez-vous le remplacer ?</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1269"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1273"/>
         <source>Import Shortcuts</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1277"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1281"/>
         <source>Error loading mouse shortcuts file.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1290"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1294"/>
         <source>Export Shortcuts</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1296"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1300"/>
         <source>Error saving mouse shortcuts file.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1301"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1305"/>
         <source>Are you sure you want to load the default mouse shortcuts?</source>
         <translation>Êtes-vous sûr de vouloir charger les raccourcis souris par défaut ?</translation>
     </message>
@@ -8031,7 +8088,8 @@ Anisotropic: %5
 <context>
     <name>lcTimelineWidget</name>
     <message>
-        <location filename="../common/lc_timelinewidget.cpp" line="120"/>
+        <location filename="../common/lc_timelinewidget.cpp" line="125"/>
+        <location filename="../common/lc_timelinewidget.cpp" line="471"/>
         <source>Step %1</source>
         <translation>Étape %1</translation>
     </message>

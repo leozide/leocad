@@ -5917,7 +5917,7 @@ Veja https://www.leocad.org para saber como descarragar e instalar uma bibliotec
     </message>
 </context>
 <context>
-    <name>lcQAboutDialog</name>
+    <name>lcAboutDialog</name>
     <message>
         <location filename="../qt/lc_qaboutdialog.ui" line="14"/>
         <source>About LeoCAD</source>
@@ -6132,7 +6132,7 @@ Anisotropic: %5
     </message>
 </context>
 <context>
-    <name>lcQGroupDialog</name>
+    <name>lcGroupDialog</name>
     <message>
         <location filename="../qt/lc_qgroupdialog.ui" line="14"/>
         <source>Group</source>

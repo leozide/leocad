@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>lcQAboutDialog</class>
- <widget class="QDialog" name="lcQAboutDialog">
+ <class>lcAboutDialog</class>
+ <widget class="QDialog" name="lcAboutDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -110,7 +110,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>lcQAboutDialog</receiver>
+   <receiver>lcAboutDialog</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -126,7 +126,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>lcQAboutDialog</receiver>
+   <receiver>lcAboutDialog</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

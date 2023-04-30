@@ -1,14 +1,13 @@
 #include "lc_global.h"
-#include "lc_qaboutdialog.h"
-#include "ui_lc_qaboutdialog.h"
+#include "lc_aboutdialog.h"
+#include "ui_lc_aboutdialog.h"
 #include "lc_mainwindow.h"
 #include "lc_view.h"
 #include "lc_glextensions.h"
 #include "lc_viewwidget.h"
 
-lcQAboutDialog::lcQAboutDialog(QWidget *parent) :
-	QDialog(parent),
-	ui(new Ui::lcQAboutDialog)
+lcAboutDialog::lcAboutDialog(QWidget* Parent)
+	: QDialog(Parent), ui(new Ui::lcAboutDialog)
 {
 	ui->setupUi(this);
 
@@ -42,7 +41,7 @@ lcQAboutDialog::lcQAboutDialog(QWidget *parent) :
 	ui->info->setText(QtVersion + Version + Buffers + Extensions);
 }
 
-lcQAboutDialog::~lcQAboutDialog()
+lcAboutDialog::~lcAboutDialog()
 {
 	delete ui;
 }

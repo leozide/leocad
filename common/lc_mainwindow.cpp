@@ -9,7 +9,7 @@
 #include "lc_qpropertiestree.h"
 #include "lc_qutils.h"
 #include "lc_qupdatedialog.h"
-#include "lc_qaboutdialog.h"
+#include "lc_aboutdialog.h"
 #include "lc_setsdatabasedialog.h"
 #include "lc_qhtmldialog.h"
 #include "lc_renderdialog.h"
@@ -1248,7 +1248,7 @@ void lcMainWindow::ShowUpdatesDialog()
 
 void lcMainWindow::ShowAboutDialog()
 {
-	lcQAboutDialog Dialog(this);
+	lcAboutDialog Dialog(this);
 	Dialog.exec();
 }
 

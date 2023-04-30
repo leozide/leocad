@@ -172,6 +172,7 @@ SOURCES += \
 	common/object.cpp \
 	common/minifig.cpp \
 	common/light.cpp \
+	common/lc_aboutdialog.cpp \
 	common/lc_application.cpp \
 	common/lc_bricklink.cpp \
 	common/lc_category.cpp \
@@ -216,7 +217,6 @@ SOURCES += \
 	qt/qtmain.cpp \
 	qt/lc_qarraydialog.cpp \
 	qt/lc_qgroupdialog.cpp \
-	qt/lc_qaboutdialog.cpp \
 	qt/lc_qeditgroupsdialog.cpp \
 	qt/lc_qselectdialog.cpp \
 	qt/lc_qpropertiesdialog.cpp \
@@ -240,6 +240,7 @@ HEADERS += \
 	common/object.h \
 	common/minifig.h \
 	common/light.h \
+	common/lc_aboutdialog.h \
 	common/lc_application.h \
 	common/lc_array.h \
 	common/lc_bricklink.h \
@@ -285,7 +286,6 @@ HEADERS += \
 	common/camera.h \
 	qt/lc_qarraydialog.h \
 	qt/lc_qgroupdialog.h \
-	qt/lc_qaboutdialog.h \
 	qt/lc_qeditgroupsdialog.h \
 	qt/lc_qselectdialog.h \
 	qt/lc_qpropertiesdialog.h \
@@ -304,7 +304,6 @@ HEADERS += \
 FORMS += \
 	qt/lc_qarraydialog.ui \
 	qt/lc_qgroupdialog.ui \
-	qt/lc_qaboutdialog.ui \
 	qt/lc_qeditgroupsdialog.ui \
 	qt/lc_qselectdialog.ui \
 	qt/lc_qpropertiesdialog.ui \
@@ -316,6 +315,7 @@ FORMS += \
 	qt/lc_qmodellistdialog.ui \
 	qt/lc_renderdialog.ui \
 	qt/lc_setsdatabasedialog.ui \
+	common/lc_aboutdialog.ui \
 	common/lc_minifigdialog.ui \
 	common/lc_pagesetupdialog.ui \
 	common/lc_partpalettedialog.ui

@@ -196,6 +196,7 @@ SOURCES += \
 	common/lc_meshloader.cpp \
 	common/lc_minifigdialog.cpp \
 	common/lc_model.cpp \
+	common/lc_modellistdialog.cpp \
 	common/lc_pagesetupdialog.cpp \
 	common/lc_partselectionwidget.cpp \
 	common/lc_previewwidget.cpp \
@@ -228,7 +229,6 @@ SOURCES += \
 	qt/lc_qutils.cpp \
 	qt/lc_qpropertiestree.cpp \
 	qt/lc_qcolorpicker.cpp \
-	qt/lc_qmodellistdialog.cpp \
 	qt/lc_renderdialog.cpp \
 	qt/lc_setsdatabasedialog.cpp \
 	common/lc_partpalettedialog.cpp
@@ -267,6 +267,7 @@ HEADERS += \
 	common/lc_meshloader.h \
 	common/lc_minifigdialog.h \
 	common/lc_model.h \
+	common/lc_modellistdialog.h \
 	common/lc_pagesetupdialog.h \
 	common/lc_previewwidget.h \
 	common/lc_profile.h \
@@ -297,7 +298,6 @@ HEADERS += \
 	qt/lc_qutils.h \
 	qt/lc_qpropertiestree.h \
 	qt/lc_qcolorpicker.h \
-	qt/lc_qmodellistdialog.h \
 	qt/lc_renderdialog.h \
 	qt/lc_setsdatabasedialog.h \
 	common/lc_partpalettedialog.h
@@ -311,12 +311,12 @@ FORMS += \
 	qt/lc_qcategorydialog.ui \
 	qt/lc_qimagedialog.ui \
 	qt/lc_qupdatedialog.ui \
-	qt/lc_qmodellistdialog.ui \
 	qt/lc_renderdialog.ui \
 	qt/lc_setsdatabasedialog.ui \
 	common/lc_aboutdialog.ui \
 	common/lc_groupdialog.ui \
 	common/lc_minifigdialog.ui \
+	common/lc_modellistdialog.ui \
 	common/lc_pagesetupdialog.ui \
 	common/lc_partpalettedialog.ui
 OTHER_FILES +=

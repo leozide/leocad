@@ -4,7 +4,7 @@
 
 namespace Ui
 {
-	class lcQModelListDialog;
+	class lcModelListDialog;
 }
 
 struct lcModelListDialogEntry
@@ -14,13 +14,13 @@ struct lcModelListDialogEntry
 	lcModel* DuplicateSource;
 };
 
-class lcQModelListDialog : public QDialog
+class lcModelListDialog : public QDialog
 {
 	Q_OBJECT
 
 public:
-	lcQModelListDialog(QWidget* Parent, const lcArray<lcModel*> Models);
-	~lcQModelListDialog();
+	lcModelListDialog(QWidget* Parent, const lcArray<lcModel*> Models);
+	~lcModelListDialog();
 
 	int GetActiveModelIndex() const;
 	std::vector<lcModelListDialogEntry> GetResults() const;
@@ -40,6 +40,6 @@ public slots:
 private:
 	QListWidgetItem* mActiveModelItem;
 	void UpdateButtons();
-	Ui::lcQModelListDialog* ui;
+	Ui::lcModelListDialog* ui;
 };
 

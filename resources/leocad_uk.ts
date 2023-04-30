@@ -6430,7 +6430,7 @@ GL_EXT_texture_filter_anisotropic extension: %5
     </message>
 </context>
 <context>
-    <name>lcQModelListDialog</name>
+    <name>lcModelListDialog</name>
     <message>
         <location filename="../qt/lc_qmodellistdialog.ui" line="14"/>
         <source>Submodels</source>

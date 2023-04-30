@@ -1,6 +1,6 @@
 #include "lc_global.h"
-#include "lc_qmodellistdialog.h"
-#include "ui_lc_qmodellistdialog.h"
+#include "lc_modellistdialog.h"
+#include "ui_lc_modellistdialog.h"
 #include "project.h"
 #include "lc_profile.h"
 #include "lc_model.h"
@@ -11,8 +11,8 @@ enum class lcModelListRole
 	DuplicateModel
 };
 
-lcQModelListDialog::lcQModelListDialog(QWidget* Parent, const lcArray<lcModel*> Models)
-	: QDialog(Parent), ui(new Ui::lcQModelListDialog)
+lcModelListDialog::lcModelListDialog(QWidget* Parent, const lcArray<lcModel*> Models)
+	: QDialog(Parent), ui(new Ui::lcModelListDialog)
 {
 	mActiveModelItem = nullptr;
 
@@ -33,17 +33,17 @@ lcQModelListDialog::lcQModelListDialog(QWidget* Parent, const lcArray<lcModel*> 
 	UpdateButtons();
 }
 
-lcQModelListDialog::~lcQModelListDialog()
+lcModelListDialog::~lcModelListDialog()
 {
 	delete ui;
 }
 
-int lcQModelListDialog::GetActiveModelIndex() const
+int lcModelListDialog::GetActiveModelIndex() const
 {
 	return ui->ModelList->row(mActiveModelItem);
 }
 
-std::vector<lcModelListDialogEntry> lcQModelListDialog::GetResults() const
+std::vector<lcModelListDialogEntry> lcModelListDialog::GetResults() const
 {
 	std::vector<lcModelListDialogEntry> Models;
 	Models.reserve(ui->ModelList->count());
@@ -64,7 +64,7 @@ std::vector<lcModelListDialogEntry> lcQModelListDialog::GetResults() const
 	return Models;
 }
 
-void lcQModelListDialog::UpdateButtons()
+void lcModelListDialog::UpdateButtons()
 {
 	int ModelCount = ui->ModelList->count();
 
@@ -92,7 +92,7 @@ void lcQModelListDialog::UpdateButtons()
 	ui->MoveDown->setEnabled(MoveDown);
 }
 
-void lcQModelListDialog::accept()
+void lcModelListDialog::accept()
 {
 	if (ui->SetActiveModel->isChecked())
 		mActiveModelItem = ui->ModelList->currentItem();
@@ -103,7 +103,7 @@ void lcQModelListDialog::accept()
 	QDialog::accept();
 }
 
-void lcQModelListDialog::on_NewModel_clicked()
+void lcModelListDialog::on_NewModel_clicked()
 {
 	QStringList ModelNames;
 
@@ -120,7 +120,7 @@ void lcQModelListDialog::on_NewModel_clicked()
 	UpdateButtons();
 }
 
-void lcQModelListDialog::on_DeleteModel_clicked()
+void lcModelListDialog::on_DeleteModel_clicked()
 {
 	if (ui->ModelList->count() == 1)
 	{
@@ -156,7 +156,7 @@ void lcQModelListDialog::on_DeleteModel_clicked()
 	UpdateButtons();
 }
 
-void lcQModelListDialog::on_RenameModel_clicked()
+void lcModelListDialog::on_RenameModel_clicked()
 {
 	QList<QListWidgetItem*>	SelectedItems = ui->ModelList->selectedItems();
 
@@ -180,7 +180,7 @@ void lcQModelListDialog::on_RenameModel_clicked()
 	}
 }
 
-void lcQModelListDialog::on_ExportModel_clicked()
+void lcModelListDialog::on_ExportModel_clicked()
 {
 	QList<QListWidgetItem*>	SelectedItems = ui->ModelList->selectedItems();
 
@@ -239,7 +239,7 @@ void lcQModelListDialog::on_ExportModel_clicked()
 	}
 }
 
-void lcQModelListDialog::on_DuplicateModel_clicked()
+void lcModelListDialog::on_DuplicateModel_clicked()
 {
 	QList<QListWidgetItem*>	SelectedItems = ui->ModelList->selectedItems();
 
@@ -279,7 +279,7 @@ void lcQModelListDialog::on_DuplicateModel_clicked()
 	UpdateButtons();
 }
 
-void lcQModelListDialog::on_MoveUp_clicked()
+void lcModelListDialog::on_MoveUp_clicked()
 {
 	bool Blocked = ui->ModelList->blockSignals(true);
 
@@ -302,7 +302,7 @@ void lcQModelListDialog::on_MoveUp_clicked()
 	UpdateButtons();
 }
 
-void lcQModelListDialog::on_MoveDown_clicked()
+void lcModelListDialog::on_MoveDown_clicked()
 {
 	bool Blocked = ui->ModelList->blockSignals(true);
 
@@ -325,14 +325,14 @@ void lcQModelListDialog::on_MoveDown_clicked()
 	UpdateButtons();
 }
 
-void lcQModelListDialog::on_ModelList_itemDoubleClicked(QListWidgetItem* Item)
+void lcModelListDialog::on_ModelList_itemDoubleClicked(QListWidgetItem* Item)
 {
 	mActiveModelItem = Item;
 
 	accept();
 }
 
-void lcQModelListDialog::on_ModelList_itemSelectionChanged()
+void lcModelListDialog::on_ModelList_itemSelectionChanged()
 {
 	UpdateButtons();
 }

@@ -272,7 +272,7 @@ lcModel* Project::CreateNewModel(bool ShowModel)
 
 void Project::ShowModelListDialog()
 {
-	lcQModelListDialog Dialog(gMainWindow, mModels);
+	lcModelListDialog Dialog(gMainWindow, mModels);
 
 	if (Dialog.exec() != QDialog::Accepted)
 		return;

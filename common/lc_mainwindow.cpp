@@ -5,7 +5,7 @@
 #include "lc_partselectionwidget.h"
 #include "lc_timelinewidget.h"
 #include "lc_viewwidget.h"
-#include "lc_qcolorlist.h"
+#include "lc_colorlist.h"
 #include "lc_qpropertiestree.h"
 #include "lc_qutils.h"
 #include "lc_qupdatedialog.h"
@@ -674,7 +674,7 @@ void lcMainWindow::CreateToolBars()
 	mColorsToolBar->setObjectName("ColorsToolbar");
 	mColorsToolBar->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
 
-	mColorList = new lcQColorList();
+	mColorList = new lcColorList();
 	connect(mColorList, SIGNAL(colorChanged(int)), this, SLOT(ColorChanged(int)));
 
 	QWidget* ColorWidget = new QWidget(mColorsToolBar);
@@ -2083,7 +2083,7 @@ void lcMainWindow::UpdateColor()
 
 	mColorButton->setIcon(Pixmap);
 	mColorButton->setText(QString("  ") + gColorList[mColorIndex].Name);
-	mColorList->setCurrentColor(mColorIndex);
+	mColorList->SetCurrentColor(mColorIndex);
 }
 
 void lcMainWindow::UpdateUndoRedo(const QString& UndoText, const QString& RedoText)

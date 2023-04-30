@@ -1,7 +1,7 @@
 #pragma once
 
 #include <QObject>
-class lcQColorList;
+class lcColorList;
 
 class lcQColorPickerPopup : public QFrame
 {
@@ -29,7 +29,7 @@ protected:
 
 private:
 	QEventLoop* eventLoop;
-	lcQColorList* colorList;
+	lcColorList* colorList;
 };
 
 class lcQColorPicker : public QPushButton

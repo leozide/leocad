@@ -10,7 +10,7 @@ class lcPartSelectionWidget;
 class lcPreviewDockWidget;
 class PiecePreview;
 class lcQPartsTree;
-class lcQColorList;
+class lcColorList;
 class lcQPropertiesTree;
 class lcTimelineWidget;
 class lcElidedLabel;
@@ -376,7 +376,7 @@ protected:
 	QDockWidget* mTimelineToolBar;
 
 	lcPartSelectionWidget* mPartSelectionWidget;
-	lcQColorList* mColorList;
+	lcColorList* mColorList;
 	QToolButton* mColorButton;
 	lcQPropertiesTree* mPropertiesWidget;
 	lcTimelineWidget* mTimelineWidget;

@@ -1,6 +1,6 @@
 #include "lc_global.h"
 #include "lc_qcolorpicker.h"
-#include "lc_qcolorlist.h"
+#include "lc_colorlist.h"
 #include "lc_colors.h"
 
 lcQColorPickerPopup::lcQColorPickerPopup(QWidget* Parent, int ColorIndex, bool AllowNoColor)
@@ -16,13 +16,13 @@ lcQColorPickerPopup::lcQColorPickerPopup(QWidget* Parent, int ColorIndex, bool A
 	layout->setContentsMargins(0, 0, 0, 0);
 	setLayout(layout);
 
-	colorList = new lcQColorList(this, AllowNoColor);
-	connect(colorList, SIGNAL(colorChanged(int)), this, SLOT(colorChanged(int)));
-	connect(colorList, SIGNAL(colorSelected(int)), this, SLOT(colorSelected(int)));
+	colorList = new lcColorList(this, AllowNoColor);
+	connect(colorList, &lcColorList::ColorChanged, this, &lcQColorPickerPopup::colorChanged);
+	connect(colorList, &lcColorList::ColorSelected, this, &lcQColorPickerPopup::colorSelected);
 	layout->addWidget(colorList);
 
 	colorList->blockSignals(true);
-	colorList->setCurrentColor(ColorIndex);
+	colorList->SetCurrentColor(ColorIndex);
 	colorList->blockSignals(false);
 
 	eventLoop = nullptr;

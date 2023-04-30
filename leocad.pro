@@ -176,6 +176,7 @@ SOURCES += \
 	common/lc_bricklink.cpp \
 	common/lc_category.cpp \
 	common/lc_collapsiblewidget.cpp \
+	common/lc_colorlist.cpp \
 	common/lc_colors.cpp \
 	common/lc_commands.cpp \
 	common/lc_context.cpp \
@@ -227,7 +228,6 @@ SOURCES += \
 	qt/lc_qutils.cpp \
 	qt/lc_qpropertiestree.cpp \
 	qt/lc_qcolorpicker.cpp \
-	qt/lc_qcolorlist.cpp \
 	qt/lc_qmodellistdialog.cpp \
 	qt/lc_renderdialog.cpp \
 	qt/lc_setsdatabasedialog.cpp \
@@ -245,6 +245,7 @@ HEADERS += \
 	common/lc_bricklink.h \
 	common/lc_category.h \
 	common/lc_collapsiblewidget.h \
+	common/lc_colorlist.h \
 	common/lc_colors.h \
 	common/lc_commands.h \
 	common/lc_context.h \
@@ -296,7 +297,6 @@ HEADERS += \
 	qt/lc_qutils.h \
 	qt/lc_qpropertiestree.h \
 	qt/lc_qcolorpicker.h \
-	qt/lc_qcolorlist.h \
 	qt/lc_qmodellistdialog.h \
 	qt/lc_renderdialog.h \
 	qt/lc_setsdatabasedialog.h \

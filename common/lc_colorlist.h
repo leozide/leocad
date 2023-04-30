@@ -15,21 +15,21 @@ struct lcColorListGroup
 
 void lcDrawNoColorRect(QPainter& Painter, const QRect& Rect);
 
-class lcQColorList : public QWidget
+class lcColorList : public QWidget
 {
 	Q_OBJECT
 
 public:
-	lcQColorList(QWidget* Parent = nullptr, bool AllowNoColor = false);
-	~lcQColorList() = default;
+	lcColorList(QWidget* Parent = nullptr, bool AllowNoColor = false);
+	~lcColorList() = default;
 
 	QSize sizeHint() const override;
 
-	void setCurrentColor(int colorIndex);
+	void SetCurrentColor(int colorIndex);
 
 signals:
-	void colorChanged(int colorIndex);
-	void colorSelected(int colorIndex);
+	void ColorChanged(int colorIndex);
+	void ColorSelected(int colorIndex);
 
 protected slots:
 	void ColorsLoaded();

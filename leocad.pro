@@ -185,6 +185,7 @@ SOURCES += \
 	common/lc_file.cpp \
 	common/lc_findreplacewidget.cpp \
 	common/lc_glextensions.cpp \
+	common/lc_groupdialog.cpp \
 	common/lc_http.cpp \
 	common/lc_instructions.cpp \
 	common/lc_instructionsdialog.cpp \
@@ -216,7 +217,6 @@ SOURCES += \
 	qt/system.cpp \
 	qt/qtmain.cpp \
 	qt/lc_qarraydialog.cpp \
-	qt/lc_qgroupdialog.cpp \
 	qt/lc_qeditgroupsdialog.cpp \
 	qt/lc_qselectdialog.cpp \
 	qt/lc_qpropertiesdialog.cpp \
@@ -255,6 +255,7 @@ HEADERS += \
 	common/lc_findreplacewidget.h \
 	common/lc_glextensions.h \
 	common/lc_global.h \
+	common/lc_groupdialog.h \
 	common/lc_http.h \
 	common/lc_instructions.h \
 	common/lc_instructionsdialog.h \
@@ -285,7 +286,6 @@ HEADERS += \
 	common/group.h \
 	common/camera.h \
 	qt/lc_qarraydialog.h \
-	qt/lc_qgroupdialog.h \
 	qt/lc_qeditgroupsdialog.h \
 	qt/lc_qselectdialog.h \
 	qt/lc_qpropertiesdialog.h \
@@ -303,7 +303,6 @@ HEADERS += \
 	common/lc_partpalettedialog.h
 FORMS += \
 	qt/lc_qarraydialog.ui \
-	qt/lc_qgroupdialog.ui \
 	qt/lc_qeditgroupsdialog.ui \
 	qt/lc_qselectdialog.ui \
 	qt/lc_qpropertiesdialog.ui \
@@ -316,6 +315,7 @@ FORMS += \
 	qt/lc_renderdialog.ui \
 	qt/lc_setsdatabasedialog.ui \
 	common/lc_aboutdialog.ui \
+	common/lc_groupdialog.ui \
 	common/lc_minifigdialog.ui \
 	common/lc_pagesetupdialog.ui \
 	common/lc_partpalettedialog.ui

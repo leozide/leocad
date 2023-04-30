@@ -1,23 +1,22 @@
 #include "lc_global.h"
-#include "lc_qgroupdialog.h"
-#include "ui_lc_qgroupdialog.h"
+#include "lc_groupdialog.h"
+#include "ui_lc_groupdialog.h"
 #include "group.h"
 
-lcQGroupDialog::lcQGroupDialog(QWidget *parent, const QString& Name) :
-	QDialog(parent),
-	ui(new Ui::lcQGroupDialog)
+lcGroupDialog::lcGroupDialog(QWidget* Parent, const QString& Name)
+	: QDialog(Parent), ui(new Ui::lcGroupDialog)
 {
 	ui->setupUi(this);
 
 	ui->name->setText(Name);
 }
 
-lcQGroupDialog::~lcQGroupDialog()
+lcGroupDialog::~lcGroupDialog()
 {
 	delete ui;
 }
 
-void lcQGroupDialog::accept()
+void lcGroupDialog::accept()
 {
 	QString Name = ui->name->text();
 

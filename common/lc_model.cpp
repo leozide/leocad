@@ -18,7 +18,7 @@
 #include "lc_qarraydialog.h"
 #include "lc_qselectdialog.h"
 #include "lc_minifigdialog.h"
-#include "lc_qgroupdialog.h"
+#include "lc_groupdialog.h"
 #include "lc_qeditgroupsdialog.h"
 #include "lc_qpropertiesdialog.h"
 #include "lc_qutils.h"
@@ -1831,7 +1831,7 @@ void lcModel::GroupSelection()
 		return;
 	}
 
-	lcQGroupDialog Dialog(gMainWindow, GetGroupName(tr("Group #")));
+	lcGroupDialog Dialog(gMainWindow, GetGroupName(tr("Group #")));
 	if (Dialog.exec() != QDialog::Accepted)
 		return;
 

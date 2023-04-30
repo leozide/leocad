@@ -15,7 +15,7 @@
 #include "lc_file.h"
 #include "lc_zipfile.h"
 #include "lc_qimagedialog.h"
-#include "lc_qmodellistdialog.h"
+#include "lc_modellistdialog.h"
 #include "lc_bricklink.h"
 
 lcHTMLExportOptions::lcHTMLExportOptions(const Project* Project)

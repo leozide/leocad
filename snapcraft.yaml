@@ -35,7 +35,7 @@ parts:
     parse-info: [usr/share/metainfo/leocad.appdata.xml]
   library:
     source: .
-    plugin: nil
+    plugin: dump
     override-build: |
       mkdir -p $SNAPCRAFT_PART_INSTALL/usr/share/leocad
       cp library.bin $SNAPCRAFT_PART_INSTALL/usr/share/leocad/library.bin

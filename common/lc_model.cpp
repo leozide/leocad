@@ -15,7 +15,7 @@
 #include "pieceinf.h"
 #include "lc_view.h"
 #include "minifig.h"
-#include "lc_qarraydialog.h"
+#include "lc_arraydialog.h"
 #include "lc_qselectdialog.h"
 #include "lc_minifigdialog.h"
 #include "lc_groupdialog.h"

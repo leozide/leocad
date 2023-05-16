@@ -5999,37 +5999,37 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
 <context>
     <name>lcAboutDialog</name>
     <message>
-        <location filename="../qt/lc_qaboutdialog.ui" line="14"/>
+        <location filename="../qt/lc_aboutdialog.ui" line="14"/>
         <source>About LeoCAD</source>
         <translation>O LeoCADu</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qaboutdialog.ui" line="42"/>
+        <location filename="../qt/lc_aboutdialog.ui" line="42"/>
         <source>LeoCAD Version 0.00.0</source>
         <translation>LeoCAD verze 0.00.0</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qaboutdialog.ui" line="49"/>
+        <location filename="../qt/lc_aboutdialog.ui" line="49"/>
         <source>LeoCAD is a free application for creating virtual LEGO models.</source>
         <translation>LeoCAD je bezplatná aplikace pro vytváření návrhů LEGO modelů.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qaboutdialog.ui" line="73"/>
+        <location filename="../qt/lc_aboutdialog.ui" line="73"/>
         <source>System Information</source>
         <translation>Systémové informace</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qaboutdialog.cpp" line="16"/>
+        <location filename="../qt/lc_aboutdialog.cpp" line="16"/>
         <source>LeoCAD Continuous Build %1</source>
         <translation>LeoCAD průběžné sestavení %1</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qaboutdialog.cpp" line="18"/>
+        <location filename="../qt/lc_aboutdialog.cpp" line="18"/>
         <source>LeoCAD Version %1</source>
         <translation>LeoCAD verze %1</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qaboutdialog.cpp" line="26"/>
+        <location filename="../qt/lc_aboutdialog.cpp" line="26"/>
         <source>Qt Version %1 (compiled with %2)
 
 </source>
@@ -6038,7 +6038,7 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
 </translation>
     </message>
     <message>
-        <location filename="../qt/lc_qaboutdialog.cpp" line="28"/>
+        <location filename="../qt/lc_aboutdialog.cpp" line="28"/>
         <source>OpenGL Version %1 (GLSL %2)
 %3 - %4
 
@@ -6049,7 +6049,7 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
 </translation>
     </message>
     <message>
-        <location filename="../qt/lc_qaboutdialog.cpp" line="30"/>
+        <location filename="../qt/lc_aboutdialog.cpp" line="30"/>
         <source>Color Buffer: %1 bits
 Depth Buffer: %2 bits
 Stencil Buffer: %3 bits
@@ -6058,7 +6058,7 @@ Stencil Buffer: %3 bits
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qt/lc_qaboutdialog.cpp" line="33"/>
+        <location filename="../qt/lc_aboutdialog.cpp" line="33"/>
         <source>Buffers: %1
 Shaders: %2
 Framebuffers: %3
@@ -6102,24 +6102,24 @@ GL_EXT_texture_filter_anisotropic rozšíření: %5
 </translation>
     </message>
     <message>
-        <location filename="../qt/lc_qaboutdialog.cpp" line="34"/>
-        <location filename="../qt/lc_qaboutdialog.cpp" line="35"/>
-        <location filename="../qt/lc_qaboutdialog.cpp" line="36"/>
-        <location filename="../qt/lc_qaboutdialog.cpp" line="37"/>
+        <location filename="../qt/lc_aboutdialog.cpp" line="34"/>
+        <location filename="../qt/lc_aboutdialog.cpp" line="35"/>
+        <location filename="../qt/lc_aboutdialog.cpp" line="36"/>
+        <location filename="../qt/lc_aboutdialog.cpp" line="37"/>
         <source>Supported</source>
         <translation>Podporováno</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qaboutdialog.cpp" line="34"/>
-        <location filename="../qt/lc_qaboutdialog.cpp" line="35"/>
-        <location filename="../qt/lc_qaboutdialog.cpp" line="36"/>
-        <location filename="../qt/lc_qaboutdialog.cpp" line="37"/>
-        <location filename="../qt/lc_qaboutdialog.cpp" line="38"/>
+        <location filename="../qt/lc_aboutdialog.cpp" line="34"/>
+        <location filename="../qt/lc_aboutdialog.cpp" line="35"/>
+        <location filename="../qt/lc_aboutdialog.cpp" line="36"/>
+        <location filename="../qt/lc_aboutdialog.cpp" line="37"/>
+        <location filename="../qt/lc_aboutdialog.cpp" line="38"/>
         <source>Not supported</source>
         <translation>Není podporováno</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qaboutdialog.cpp" line="38"/>
+        <location filename="../qt/lc_aboutdialog.cpp" line="38"/>
         <source>Supported (max %1)</source>
         <translation>Podporováno (max %1)</translation>
     </message>
@@ -6127,27 +6127,27 @@ GL_EXT_texture_filter_anisotropic rozšíření: %5
 <context>
     <name>lcArrayDialog</name>
     <message>
-        <location filename="../qt/lc_qarraydialog.ui" line="14"/>
+        <location filename="../qt/lc_arraydialog.ui" line="14"/>
         <source>Array</source>
         <translation>Pole</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qarraydialog.ui" line="22"/>
+        <location filename="../qt/lc_arraydialog.ui" line="22"/>
         <source>Dimensions</source>
         <translation>Rozměry</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qarraydialog.ui" line="65"/>
+        <location filename="../qt/lc_arraydialog.ui" line="65"/>
         <source>Offsets</source>
         <translation>Posuny</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qarraydialog.ui" line="101"/>
+        <location filename="../qt/lc_arraydialog.ui" line="101"/>
         <source>Rotations</source>
         <translation>Otočení</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qarraydialog.cpp" line="74"/>
+        <location filename="../qt/lc_arraydialog.cpp" line="74"/>
         <source>Array is empty.</source>
         <translation>Pole je prázdné.</translation>
     </message>
@@ -6155,37 +6155,37 @@ GL_EXT_texture_filter_anisotropic rozšíření: %5
 <context>
     <name>lcCategoryDialog</name>
     <message>
-        <location filename="../qt/lc_qcategorydialog.ui" line="14"/>
+        <location filename="../qt/lc_categorydialog.ui" line="14"/>
         <source>Category</source>
         <translation>Kategorie</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qcategorydialog.ui" line="22"/>
+        <location filename="../qt/lc_categorydialog.ui" line="22"/>
         <source>Name:</source>
         <translation>Název:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qcategorydialog.ui" line="35"/>
+        <location filename="../qt/lc_categorydialog.ui" line="35"/>
         <source>Keywords:</source>
         <translation>Klíčová slova:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qcategorydialog.cpp" line="15"/>
+        <location filename="../qt/lc_categorydialog.cpp" line="15"/>
         <source>Edit Category</source>
         <translation>Upravit kategorii</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qcategorydialog.cpp" line="17"/>
+        <location filename="../qt/lc_categorydialog.cpp" line="17"/>
         <source>New Category</source>
         <translation>Nová kategorie</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qcategorydialog.cpp" line="34"/>
+        <location filename="../qt/lc_categorydialog.cpp" line="34"/>
         <source>Name cannot be empty.</source>
         <translation>Název nesmí být prázdný.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qcategorydialog.cpp" line="42"/>
+        <location filename="../qt/lc_categorydialog.cpp" line="42"/>
         <source>Keywords cannot be empty.</source>
         <translation>Klíčové slovo nesmí být prázdné.</translation>
     </message>

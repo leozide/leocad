@@ -2,7 +2,7 @@
 #include "lc_minifigdialog.h"
 #include "ui_lc_minifigdialog.h"
 #include "lc_viewwidget.h"
-#include "lc_qcolorpicker.h"
+#include "lc_colorpicker.h"
 #include "minifig.h"
 #include "lc_application.h"
 #include "pieceinf.h"

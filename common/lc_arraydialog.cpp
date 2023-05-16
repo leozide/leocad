@@ -1,6 +1,6 @@
 #include "lc_global.h"
-#include "lc_qarraydialog.h"
-#include "ui_lc_qarraydialog.h"
+#include "lc_arraydialog.h"
+#include "ui_lc_arraydialog.h"
 #include "lc_qutils.h"
 
 lcArrayDialog::lcArrayDialog(QWidget* Parent)

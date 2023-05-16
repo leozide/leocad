@@ -6067,27 +6067,27 @@ Por favor, visita https://www.leocad.org para saber cómo descargar e instalar u
 <context>
     <name>lcAboutDialog</name>
     <message>
-        <location filename="../qt/lc_qaboutdialog.ui" line="14"/>
+        <location filename="../qt/lc_aboutdialog.ui" line="14"/>
         <source>About LeoCAD</source>
         <translation>Acerca de LeoCAD</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qaboutdialog.ui" line="42"/>
+        <location filename="../qt/lc_aboutdialog.ui" line="42"/>
         <source>LeoCAD Version 0.00.0</source>
         <translation>LeoCAD Version 0.00.0</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qaboutdialog.ui" line="49"/>
+        <location filename="../qt/lc_aboutdialog.ui" line="49"/>
         <source>LeoCAD is a free application for creating virtual LEGO models.</source>
         <translation>LeoCAD es un programa libre para crear modelos virtuales de LEGO.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qaboutdialog.ui" line="73"/>
+        <location filename="../qt/lc_aboutdialog.ui" line="73"/>
         <source>System Information</source>
         <translation>Información del Sistema</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qaboutdialog.cpp" line="18"/>
+        <location filename="../qt/lc_aboutdialog.cpp" line="18"/>
         <source>LeoCAD Version %1</source>
         <translation>LeoCAD versión %1</translation>
     </message>
@@ -6098,7 +6098,7 @@ Por favor, visita https://www.leocad.org para saber cómo descargar e instalar u
 </translation>
     </message>
     <message>
-        <location filename="../qt/lc_qaboutdialog.cpp" line="28"/>
+        <location filename="../qt/lc_aboutdialog.cpp" line="28"/>
         <source>OpenGL Version %1 (GLSL %2)
 %3 - %4
 
@@ -6143,12 +6143,12 @@ GL_EXT_texture_filter_anisotropic extension: %5
 </translation>
     </message>
     <message>
-        <location filename="../qt/lc_qaboutdialog.cpp" line="16"/>
+        <location filename="../qt/lc_aboutdialog.cpp" line="16"/>
         <source>LeoCAD Continuous Build %1</source>
         <translation>LeoCAD compilación continua %1</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qaboutdialog.cpp" line="26"/>
+        <location filename="../qt/lc_aboutdialog.cpp" line="26"/>
         <source>Qt Version %1 (compiled with %2)
 
 </source>
@@ -6157,7 +6157,7 @@ GL_EXT_texture_filter_anisotropic extension: %5
 </translation>
     </message>
     <message>
-        <location filename="../qt/lc_qaboutdialog.cpp" line="30"/>
+        <location filename="../qt/lc_aboutdialog.cpp" line="30"/>
         <source>Color Buffer: %1 bits
 Depth Buffer: %2 bits
 Stencil Buffer: %3 bits
@@ -6170,7 +6170,7 @@ Stencil Búfer: %3 bits
 </translation>
     </message>
     <message>
-        <location filename="../qt/lc_qaboutdialog.cpp" line="33"/>
+        <location filename="../qt/lc_aboutdialog.cpp" line="33"/>
         <source>Buffers: %1
 Shaders: %2
 Framebuffers: %3
@@ -6185,24 +6185,24 @@ Anisotropic: %5
 </translation>
     </message>
     <message>
-        <location filename="../qt/lc_qaboutdialog.cpp" line="34"/>
-        <location filename="../qt/lc_qaboutdialog.cpp" line="35"/>
-        <location filename="../qt/lc_qaboutdialog.cpp" line="36"/>
-        <location filename="../qt/lc_qaboutdialog.cpp" line="37"/>
+        <location filename="../qt/lc_aboutdialog.cpp" line="34"/>
+        <location filename="../qt/lc_aboutdialog.cpp" line="35"/>
+        <location filename="../qt/lc_aboutdialog.cpp" line="36"/>
+        <location filename="../qt/lc_aboutdialog.cpp" line="37"/>
         <source>Supported</source>
         <translation>Soportado</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qaboutdialog.cpp" line="34"/>
-        <location filename="../qt/lc_qaboutdialog.cpp" line="35"/>
-        <location filename="../qt/lc_qaboutdialog.cpp" line="36"/>
-        <location filename="../qt/lc_qaboutdialog.cpp" line="37"/>
-        <location filename="../qt/lc_qaboutdialog.cpp" line="38"/>
+        <location filename="../qt/lc_aboutdialog.cpp" line="34"/>
+        <location filename="../qt/lc_aboutdialog.cpp" line="35"/>
+        <location filename="../qt/lc_aboutdialog.cpp" line="36"/>
+        <location filename="../qt/lc_aboutdialog.cpp" line="37"/>
+        <location filename="../qt/lc_aboutdialog.cpp" line="38"/>
         <source>Not supported</source>
         <translation>No soportado</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qaboutdialog.cpp" line="38"/>
+        <location filename="../qt/lc_aboutdialog.cpp" line="38"/>
         <source>Supported (max %1)</source>
         <translation>Soportado (máximo %1)</translation>
     </message>
@@ -6210,27 +6210,27 @@ Anisotropic: %5
 <context>
     <name>lcArrayDialog</name>
     <message>
-        <location filename="../qt/lc_qarraydialog.ui" line="14"/>
+        <location filename="../qt/lc_arraydialog.ui" line="14"/>
         <source>Array</source>
         <translation>Secuencia</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qarraydialog.ui" line="22"/>
+        <location filename="../qt/lc_arraydialog.ui" line="22"/>
         <source>Dimensions</source>
         <translation>Dimensiones</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qarraydialog.ui" line="65"/>
+        <location filename="../qt/lc_arraydialog.ui" line="65"/>
         <source>Offsets</source>
         <translation>Desplazamientos</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qarraydialog.ui" line="101"/>
+        <location filename="../qt/lc_arraydialog.ui" line="101"/>
         <source>Rotations</source>
         <translation>Rotaciones</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qarraydialog.cpp" line="74"/>
+        <location filename="../qt/lc_arraydialog.cpp" line="74"/>
         <source>Array is empty.</source>
         <translation>La secuencia está vacía.</translation>
     </message>
@@ -6238,37 +6238,37 @@ Anisotropic: %5
 <context>
     <name>lcCategoryDialog</name>
     <message>
-        <location filename="../qt/lc_qcategorydialog.ui" line="14"/>
+        <location filename="../qt/lc_categorydialog.ui" line="14"/>
         <source>Category</source>
         <translation>Categoría</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qcategorydialog.ui" line="22"/>
+        <location filename="../qt/lc_categorydialog.ui" line="22"/>
         <source>Name:</source>
         <translation>Nombre:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qcategorydialog.ui" line="35"/>
+        <location filename="../qt/lc_categorydialog.ui" line="35"/>
         <source>Keywords:</source>
         <translation>Palabras clave:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qcategorydialog.cpp" line="15"/>
+        <location filename="../qt/lc_categorydialog.cpp" line="15"/>
         <source>Edit Category</source>
         <translation>Editar categoría</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qcategorydialog.cpp" line="17"/>
+        <location filename="../qt/lc_categorydialog.cpp" line="17"/>
         <source>New Category</source>
         <translation>Nueva categoría</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qcategorydialog.cpp" line="34"/>
+        <location filename="../qt/lc_categorydialog.cpp" line="34"/>
         <source>Name cannot be empty.</source>
         <translation>El nombre no puede estar vacío.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qcategorydialog.cpp" line="42"/>
+        <location filename="../qt/lc_categorydialog.cpp" line="42"/>
         <source>Keywords cannot be empty.</source>
         <translation>El palabras clave no puede estar vacío.</translation>
     </message>

@@ -5919,32 +5919,32 @@ Veja https://www.leocad.org para saber como descarragar e instalar uma bibliotec
 <context>
     <name>lcAboutDialog</name>
     <message>
-        <location filename="../qt/lc_qaboutdialog.ui" line="14"/>
+        <location filename="../qt/lc_aboutdialog.ui" line="14"/>
         <source>About LeoCAD</source>
         <translation>Sobre LeoCAD</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qaboutdialog.ui" line="42"/>
+        <location filename="../qt/lc_aboutdialog.ui" line="42"/>
         <source>LeoCAD Version 0.00.0</source>
         <translation>LeoCAD Versão 0.00.0</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qaboutdialog.ui" line="49"/>
+        <location filename="../qt/lc_aboutdialog.ui" line="49"/>
         <source>LeoCAD is a free application for creating virtual LEGO models.</source>
         <translation>LeoCAD é um programa libre para criar modelos LEGO virtuais.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qaboutdialog.ui" line="73"/>
+        <location filename="../qt/lc_aboutdialog.ui" line="73"/>
         <source>System Information</source>
         <translation>Informações do Sistema</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qaboutdialog.cpp" line="18"/>
+        <location filename="../qt/lc_aboutdialog.cpp" line="18"/>
         <source>LeoCAD Version %1</source>
         <translation>LeoCAD Versão %1</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qaboutdialog.cpp" line="28"/>
+        <location filename="../qt/lc_aboutdialog.cpp" line="28"/>
         <source>OpenGL Version %1 (GLSL %2)
 %3 - %4
 
@@ -5975,19 +5975,19 @@ Tampão de Desenho: %5 bits
         <translation type="vanished">tampão duplo</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qaboutdialog.cpp" line="16"/>
+        <location filename="../qt/lc_aboutdialog.cpp" line="16"/>
         <source>LeoCAD Continuous Build %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qt/lc_qaboutdialog.cpp" line="26"/>
+        <location filename="../qt/lc_aboutdialog.cpp" line="26"/>
         <source>Qt Version %1 (compiled with %2)
 
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qt/lc_qaboutdialog.cpp" line="30"/>
+        <location filename="../qt/lc_aboutdialog.cpp" line="30"/>
         <source>Color Buffer: %1 bits
 Depth Buffer: %2 bits
 Stencil Buffer: %3 bits
@@ -5996,7 +5996,7 @@ Stencil Buffer: %3 bits
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qt/lc_qaboutdialog.cpp" line="33"/>
+        <location filename="../qt/lc_aboutdialog.cpp" line="33"/>
         <source>Buffers: %1
 Shaders: %2
 Framebuffers: %3
@@ -6006,24 +6006,24 @@ Anisotropic: %5
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qt/lc_qaboutdialog.cpp" line="34"/>
-        <location filename="../qt/lc_qaboutdialog.cpp" line="35"/>
-        <location filename="../qt/lc_qaboutdialog.cpp" line="36"/>
-        <location filename="../qt/lc_qaboutdialog.cpp" line="37"/>
+        <location filename="../qt/lc_aboutdialog.cpp" line="34"/>
+        <location filename="../qt/lc_aboutdialog.cpp" line="35"/>
+        <location filename="../qt/lc_aboutdialog.cpp" line="36"/>
+        <location filename="../qt/lc_aboutdialog.cpp" line="37"/>
         <source>Supported</source>
         <translation>Aceite</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qaboutdialog.cpp" line="34"/>
-        <location filename="../qt/lc_qaboutdialog.cpp" line="35"/>
-        <location filename="../qt/lc_qaboutdialog.cpp" line="36"/>
-        <location filename="../qt/lc_qaboutdialog.cpp" line="37"/>
-        <location filename="../qt/lc_qaboutdialog.cpp" line="38"/>
+        <location filename="../qt/lc_aboutdialog.cpp" line="34"/>
+        <location filename="../qt/lc_aboutdialog.cpp" line="35"/>
+        <location filename="../qt/lc_aboutdialog.cpp" line="36"/>
+        <location filename="../qt/lc_aboutdialog.cpp" line="37"/>
+        <location filename="../qt/lc_aboutdialog.cpp" line="38"/>
         <source>Not supported</source>
         <translation>Recusado</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qaboutdialog.cpp" line="38"/>
+        <location filename="../qt/lc_aboutdialog.cpp" line="38"/>
         <source>Supported (max %1)</source>
         <translation>Aceite (máximo %1)</translation>
     </message>
@@ -6031,27 +6031,27 @@ Anisotropic: %5
 <context>
     <name>lcArrayDialog</name>
     <message>
-        <location filename="../qt/lc_qarraydialog.ui" line="14"/>
+        <location filename="../qt/lc_arraydialog.ui" line="14"/>
         <source>Array</source>
         <translation>Quadro</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qarraydialog.ui" line="22"/>
+        <location filename="../qt/lc_arraydialog.ui" line="22"/>
         <source>Dimensions</source>
         <translation>Dimensões</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qarraydialog.ui" line="65"/>
+        <location filename="../qt/lc_arraydialog.ui" line="65"/>
         <source>Offsets</source>
         <translation>Espaços</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qarraydialog.ui" line="101"/>
+        <location filename="../qt/lc_arraydialog.ui" line="101"/>
         <source>Rotations</source>
         <translation>Rotações</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qarraydialog.cpp" line="74"/>
+        <location filename="../qt/lc_arraydialog.cpp" line="74"/>
         <source>Array is empty.</source>
         <translation>O quadro está vazio.</translation>
     </message>
@@ -6059,37 +6059,37 @@ Anisotropic: %5
 <context>
     <name>lcCategoryDialog</name>
     <message>
-        <location filename="../qt/lc_qcategorydialog.ui" line="14"/>
+        <location filename="../qt/lc_categorydialog.ui" line="14"/>
         <source>Category</source>
         <translation>Categoria</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qcategorydialog.ui" line="22"/>
+        <location filename="../qt/lc_categorydialog.ui" line="22"/>
         <source>Name:</source>
         <translation>Nome:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qcategorydialog.ui" line="35"/>
+        <location filename="../qt/lc_categorydialog.ui" line="35"/>
         <source>Keywords:</source>
         <translation>Palavras Chave:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qcategorydialog.cpp" line="15"/>
+        <location filename="../qt/lc_categorydialog.cpp" line="15"/>
         <source>Edit Category</source>
         <translation>Editar Categoria</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qcategorydialog.cpp" line="17"/>
+        <location filename="../qt/lc_categorydialog.cpp" line="17"/>
         <source>New Category</source>
         <translation>Nova Categoria</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qcategorydialog.cpp" line="34"/>
+        <location filename="../qt/lc_categorydialog.cpp" line="34"/>
         <source>Name cannot be empty.</source>
         <translation>O nome não pode ser vazio.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qcategorydialog.cpp" line="42"/>
+        <location filename="../qt/lc_categorydialog.cpp" line="42"/>
         <source>Keywords cannot be empty.</source>
         <translation>As palavras chave não podem ser vazias.</translation>
     </message>

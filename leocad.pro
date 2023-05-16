@@ -174,10 +174,13 @@ SOURCES += \
 	common/light.cpp \
 	common/lc_aboutdialog.cpp \
 	common/lc_application.cpp \
+	common/lc_arraydialog.cpp \
 	common/lc_bricklink.cpp \
 	common/lc_category.cpp \
+	common/lc_categorydialog.cpp \
 	common/lc_collapsiblewidget.cpp \
 	common/lc_colorlist.cpp \
+	common/lc_colorpicker.cpp \
 	common/lc_colors.cpp \
 	common/lc_commands.cpp \
 	common/lc_context.cpp \
@@ -217,18 +220,15 @@ SOURCES += \
 	common/camera.cpp \
 	qt/system.cpp \
 	qt/qtmain.cpp \
-	qt/lc_qarraydialog.cpp \
 	qt/lc_qeditgroupsdialog.cpp \
 	qt/lc_qselectdialog.cpp \
 	qt/lc_qpropertiesdialog.cpp \
 	qt/lc_qhtmldialog.cpp \
 	qt/lc_qpreferencesdialog.cpp \
-	qt/lc_qcategorydialog.cpp \
 	qt/lc_qimagedialog.cpp \
 	qt/lc_qupdatedialog.cpp \
 	qt/lc_qutils.cpp \
 	qt/lc_qpropertiestree.cpp \
-	qt/lc_qcolorpicker.cpp \
 	qt/lc_renderdialog.cpp \
 	qt/lc_setsdatabasedialog.cpp \
 	common/lc_partpalettedialog.cpp
@@ -243,10 +243,13 @@ HEADERS += \
 	common/lc_aboutdialog.h \
 	common/lc_application.h \
 	common/lc_array.h \
+	common/lc_arraydialog.h \
 	common/lc_bricklink.h \
 	common/lc_category.h \
+	common/lc_categorydialog.h \
 	common/lc_collapsiblewidget.h \
 	common/lc_colorlist.h \
+	common/lc_colorpicker.h \
 	common/lc_colors.h \
 	common/lc_commands.h \
 	common/lc_context.h \
@@ -286,34 +289,31 @@ HEADERS += \
 	common/image.h \
 	common/group.h \
 	common/camera.h \
-	qt/lc_qarraydialog.h \
 	qt/lc_qeditgroupsdialog.h \
 	qt/lc_qselectdialog.h \
 	qt/lc_qpropertiesdialog.h \
 	qt/lc_qhtmldialog.h \
 	qt/lc_qpreferencesdialog.h \
-	qt/lc_qcategorydialog.h \
 	qt/lc_qimagedialog.h \
 	qt/lc_qupdatedialog.h \
 	qt/lc_qutils.h \
 	qt/lc_qpropertiestree.h \
-	qt/lc_qcolorpicker.h \
 	qt/lc_renderdialog.h \
 	qt/lc_setsdatabasedialog.h \
 	common/lc_partpalettedialog.h
 FORMS += \
-	qt/lc_qarraydialog.ui \
 	qt/lc_qeditgroupsdialog.ui \
 	qt/lc_qselectdialog.ui \
 	qt/lc_qpropertiesdialog.ui \
 	qt/lc_qhtmldialog.ui \
 	qt/lc_qpreferencesdialog.ui \
-	qt/lc_qcategorydialog.ui \
 	qt/lc_qimagedialog.ui \
 	qt/lc_qupdatedialog.ui \
 	qt/lc_renderdialog.ui \
 	qt/lc_setsdatabasedialog.ui \
 	common/lc_aboutdialog.ui \
+	common/lc_arraydialog.ui \
+	common/lc_categorydialog.ui \
 	common/lc_groupdialog.ui \
 	common/lc_minifigdialog.ui \
 	common/lc_modellistdialog.ui \

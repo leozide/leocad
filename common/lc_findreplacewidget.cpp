@@ -1,6 +1,6 @@
 #include "lc_global.h"
 #include "lc_findreplacewidget.h"
-#include "lc_qcolorpicker.h"
+#include "lc_colorpicker.h"
 #include "lc_library.h"
 #include "lc_mainwindow.h"
 #include "pieceinf.h"

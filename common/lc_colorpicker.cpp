@@ -1,5 +1,5 @@
 #include "lc_global.h"
-#include "lc_qcolorpicker.h"
+#include "lc_colorpicker.h"
 #include "lc_colorlist.h"
 #include "lc_colors.h"
 

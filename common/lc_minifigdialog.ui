@@ -743,7 +743,7 @@
   <customwidget>
    <class>lcColorPicker</class>
    <extends>QToolButton</extends>
-   <header>lc_qcolorpicker.h</header>
+   <header>lc_colorpicker.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>

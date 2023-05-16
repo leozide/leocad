@@ -1,6 +1,6 @@
 #include "lc_global.h"
 #include "lc_qpropertiestree.h"
-#include "lc_qcolorpicker.h"
+#include "lc_colorpicker.h"
 #include "lc_application.h"
 #include "lc_model.h"
 #include "lc_mainwindow.h"

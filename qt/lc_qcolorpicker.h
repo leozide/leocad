@@ -1,26 +1,25 @@
 #pragma once
 
-#include <QObject>
 class lcColorList;
 
-class lcQColorPickerPopup : public QFrame
+class lcColorPickerPopup : public QFrame
 {
 	Q_OBJECT
 
 public:
-	lcQColorPickerPopup(QWidget* Parent = nullptr, int ColorIndex = 0, bool AllowNoColor = false);
-	~lcQColorPickerPopup();
+	lcColorPickerPopup(QWidget* Parent = nullptr, int ColorIndex = 0, bool AllowNoColor = false);
+	virtual ~lcColorPickerPopup();
 
 	void exec();
 
 signals:
-	void changed(int colorIndex);
-	void selected(int colorIndex);
-	void hid();
+	void Changed(int ColorIndex);
+	void Selected(int ColorIndex);
+	void Hid();
 
 public slots:
-	void colorChanged(int colorIndex);
-	void colorSelected(int colorIndex);
+	void ColorChanged(int ColorIndex);
+	void ColorSelected(int ColorIndex);
 
 protected:
 	void showEvent(QShowEvent* ShowEvent) override;
@@ -28,33 +27,33 @@ protected:
 	void mouseReleaseEvent(QMouseEvent* MouseEvent) override;
 
 private:
-	QEventLoop* eventLoop;
-	lcColorList* colorList;
+	QEventLoop* mEventLoop = nullptr;
+	lcColorList* mColorList = nullptr;
 };
 
-class lcQColorPicker : public QPushButton
+class lcColorPicker : public QPushButton
 {
 	Q_OBJECT
 
 public:
-	lcQColorPicker(QWidget* Parent = nullptr, bool AllowNoColor = false);
-	~lcQColorPicker();
+	lcColorPicker(QWidget* Parent = nullptr, bool AllowNoColor = false);
+	virtual ~lcColorPicker();
 
-	int currentColor() const;
-	int currentColorCode() const;
-	void setCurrentColor(int colorIndex);
-	void setCurrentColorCode(int colorCode);
+	int GetCurrentColor() const;
+	int GetCurrentColorCode() const;
+	void SetCurrentColor(int ColorIndex);
+	void SetCurrentColorCode(int ColorCode);
 
 public slots:
-	void changed(int colorIndex);
-	void selected(int colorIndex);
+	void Changed(int ColorIndex);
+	void Selected(int ColorIndex);
 
 signals:
-	void colorChanged(int colorIndex);
+	void ColorChanged(int ColorIndex);
 
 private slots:
-	void buttonPressed(bool toggled);
-	void popupClosed();
+	void ButtonPressed(bool Toggled);
+	void PopupClosed();
 
 protected:
 	void UpdateIcon();

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>lcQArrayDialog</class>
- <widget class="QDialog" name="lcQArrayDialog">
+ <class>lcArrayDialog</class>
+ <widget class="QDialog" name="lcArrayDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -174,7 +174,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>lcQArrayDialog</receiver>
+   <receiver>lcArrayDialog</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -190,7 +190,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>lcQArrayDialog</receiver>
+   <receiver>lcArrayDialog</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

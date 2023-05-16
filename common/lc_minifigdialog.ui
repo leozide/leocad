@@ -34,7 +34,7 @@
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="lcQColorPicker" name="hatsColor">
+       <widget class="lcColorPicker" name="hatsColor">
         <property name="text">
          <string/>
         </property>
@@ -95,7 +95,7 @@
        </widget>
       </item>
       <item row="0" column="5">
-       <widget class="lcQColorPicker" name="headColor">
+       <widget class="lcColorPicker" name="headColor">
         <property name="text">
          <string/>
         </property>
@@ -134,7 +134,7 @@
        </widget>
       </item>
       <item row="1" column="1">
-       <widget class="lcQColorPicker" name="hats2Color">
+       <widget class="lcColorPicker" name="hats2Color">
         <property name="text">
          <string/>
         </property>
@@ -176,14 +176,14 @@
        </widget>
       </item>
       <item row="2" column="1">
-       <widget class="lcQColorPicker" name="neckColor">
+       <widget class="lcColorPicker" name="neckColor">
         <property name="text">
          <string/>
         </property>
        </widget>
       </item>
       <item row="2" column="5">
-       <widget class="lcQColorPicker" name="bodyColor">
+       <widget class="lcColorPicker" name="bodyColor">
         <property name="text">
          <string/>
         </property>
@@ -222,7 +222,7 @@
        </widget>
       </item>
       <item row="3" column="1">
-       <widget class="lcQColorPicker" name="larmColor">
+       <widget class="lcColorPicker" name="larmColor">
         <property name="text">
          <string/>
         </property>
@@ -267,7 +267,7 @@
        </widget>
       </item>
       <item row="3" column="5">
-       <widget class="lcQColorPicker" name="rarmColor">
+       <widget class="lcColorPicker" name="rarmColor">
         <property name="text">
          <string/>
         </property>
@@ -306,7 +306,7 @@
        </widget>
       </item>
       <item row="4" column="1">
-       <widget class="lcQColorPicker" name="lhandColor">
+       <widget class="lcColorPicker" name="lhandColor">
         <property name="text">
          <string/>
         </property>
@@ -351,7 +351,7 @@
        </widget>
       </item>
       <item row="4" column="5">
-       <widget class="lcQColorPicker" name="rhandColor">
+       <widget class="lcColorPicker" name="rhandColor">
         <property name="text">
          <string/>
         </property>
@@ -390,7 +390,7 @@
        </widget>
       </item>
       <item row="5" column="1">
-       <widget class="lcQColorPicker" name="lhandaColor">
+       <widget class="lcColorPicker" name="lhandaColor">
         <property name="text">
          <string/>
         </property>
@@ -435,7 +435,7 @@
        </widget>
       </item>
       <item row="5" column="5">
-       <widget class="lcQColorPicker" name="rhandaColor">
+       <widget class="lcColorPicker" name="rhandaColor">
         <property name="text">
          <string/>
         </property>
@@ -474,14 +474,14 @@
        </widget>
       </item>
       <item row="6" column="1">
-       <widget class="lcQColorPicker" name="body2Color">
+       <widget class="lcColorPicker" name="body2Color">
         <property name="text">
          <string/>
         </property>
        </widget>
       </item>
       <item row="6" column="5">
-       <widget class="lcQColorPicker" name="body3Color">
+       <widget class="lcColorPicker" name="body3Color">
         <property name="text">
          <string/>
         </property>
@@ -520,7 +520,7 @@
        </widget>
       </item>
       <item row="7" column="1">
-       <widget class="lcQColorPicker" name="llegColor">
+       <widget class="lcColorPicker" name="llegColor">
         <property name="text">
          <string/>
         </property>
@@ -565,7 +565,7 @@
        </widget>
       </item>
       <item row="7" column="5">
-       <widget class="lcQColorPicker" name="rlegColor">
+       <widget class="lcColorPicker" name="rlegColor">
         <property name="text">
          <string/>
         </property>
@@ -604,7 +604,7 @@
        </widget>
       </item>
       <item row="8" column="1">
-       <widget class="lcQColorPicker" name="llegaColor">
+       <widget class="lcColorPicker" name="llegaColor">
         <property name="text">
          <string/>
         </property>
@@ -649,7 +649,7 @@
        </widget>
       </item>
       <item row="8" column="5">
-       <widget class="lcQColorPicker" name="rlegaColor">
+       <widget class="lcColorPicker" name="rlegaColor">
         <property name="text">
          <string/>
         </property>
@@ -741,7 +741,7 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>lcQColorPicker</class>
+   <class>lcColorPicker</class>
    <extends>QToolButton</extends>
    <header>lc_qcolorpicker.h</header>
   </customwidget>

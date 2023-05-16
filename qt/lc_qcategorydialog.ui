@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>lcQCategoryDialog</class>
- <widget class="QDialog" name="lcQCategoryDialog">
+ <class>lcCategoryDialog</class>
+ <widget class="QDialog" name="lcCategoryDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -61,7 +61,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>lcQCategoryDialog</receiver>
+   <receiver>lcCategoryDialog</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -77,7 +77,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>lcQCategoryDialog</receiver>
+   <receiver>lcCategoryDialog</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

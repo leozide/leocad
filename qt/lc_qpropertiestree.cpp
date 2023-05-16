@@ -790,8 +790,8 @@ void lcQPropertiesTree::slotColorButtonClicked()
 	if (!Button)
 		return;
 
-	lcQColorPickerPopup* Popup = new lcQColorPickerPopup(Button, ColorIndex);
-	connect(Popup, SIGNAL(selected(int)), SLOT(slotSetValue(int)));
+	lcColorPickerPopup* Popup = new lcColorPickerPopup(Button, ColorIndex);
+	connect(Popup, &lcColorPickerPopup::Selected, this, &lcQPropertiesTree::slotSetValue);
 	Popup->setMinimumSize(qMax(300, width()), qMax(200, static_cast<int>(width() * 2 / 3)));
 
 #if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))

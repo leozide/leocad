@@ -675,7 +675,7 @@ void lcMainWindow::CreateToolBars()
 	mColorsToolBar->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
 
 	mColorList = new lcColorList();
-	connect(mColorList, SIGNAL(colorChanged(int)), this, SLOT(ColorChanged(int)));
+	connect(mColorList, &lcColorList::ColorChanged, this, &lcMainWindow::ColorChanged);
 
 	QWidget* ColorWidget = new QWidget(mColorsToolBar);
 

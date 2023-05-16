@@ -3,48 +3,47 @@
 #include "ui_lc_qcategorydialog.h"
 #include "lc_category.h"
 
-lcQCategoryDialog::lcQCategoryDialog(QWidget *parent, void *data) :
-    QDialog(parent),
-    ui(new Ui::lcQCategoryDialog)
+lcCategoryDialog::lcCategoryDialog(QWidget* Parent, lcLibraryCategory* Options)
+	: QDialog(Parent), ui(new Ui::lcCategoryDialog)
 {
 	ui->setupUi(this);
 
-	options = (lcLibraryCategory*)data;
+	mOptions = Options;
 
-	if (!options->Name.isEmpty())
+	if (!mOptions->Name.isEmpty())
 		setWindowTitle(tr("Edit Category"));
 	else
 		setWindowTitle(tr("New Category"));
 
-	ui->name->setText(options->Name);
-	ui->keywords->setText(options->Keywords);
+	ui->name->setText(mOptions->Name);
+	ui->keywords->setText(mOptions->Keywords);
 }
 
-lcQCategoryDialog::~lcQCategoryDialog()
+lcCategoryDialog::~lcCategoryDialog()
 {
 	delete ui;
 }
 
-void lcQCategoryDialog::accept()
+void lcCategoryDialog::accept()
 {
-	QString name = ui->name->text();
+	QString Name = ui->name->text();
 
-	if (name.isEmpty())
+	if (Name.isEmpty())
 	{
 		QMessageBox::information(this, "LeoCAD", tr("Name cannot be empty."));
 		return;
 	}
 
-	QString keywords = ui->keywords->text();
+	QString Keywords = ui->keywords->text();
 
-	if (keywords.isEmpty())
+	if (Keywords.isEmpty())
 	{
 		QMessageBox::information(this, "LeoCAD", tr("Keywords cannot be empty."));
 		return;
 	}
 
-	options->Name = name;
-	options->Keywords = keywords.toLatin1();
+	mOptions->Name = Name;
+	mOptions->Keywords = Keywords.toLatin1();
 
 	QDialog::accept();
 }

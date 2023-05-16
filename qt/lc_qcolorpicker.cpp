@@ -3,7 +3,7 @@
 #include "lc_colorlist.h"
 #include "lc_colors.h"
 
-lcQColorPickerPopup::lcQColorPickerPopup(QWidget* Parent, int ColorIndex, bool AllowNoColor)
+lcColorPickerPopup::lcColorPickerPopup(QWidget* Parent, int ColorIndex, bool AllowNoColor)
 	: QFrame(Parent, Qt::Popup)
 {
 	setFrameStyle(QFrame::StyledPanel);
@@ -16,66 +16,68 @@ lcQColorPickerPopup::lcQColorPickerPopup(QWidget* Parent, int ColorIndex, bool A
 	layout->setContentsMargins(0, 0, 0, 0);
 	setLayout(layout);
 
-	colorList = new lcColorList(this, AllowNoColor);
-	connect(colorList, &lcColorList::ColorChanged, this, &lcQColorPickerPopup::colorChanged);
-	connect(colorList, &lcColorList::ColorSelected, this, &lcQColorPickerPopup::colorSelected);
-	layout->addWidget(colorList);
+	mColorList = new lcColorList(this, AllowNoColor);
+	connect(mColorList, &lcColorList::ColorChanged, this, &lcColorPickerPopup::ColorChanged);
+	connect(mColorList, &lcColorList::ColorSelected, this, &lcColorPickerPopup::ColorSelected);
+	layout->addWidget(mColorList);
 
-	colorList->blockSignals(true);
-	colorList->SetCurrentColor(ColorIndex);
-	colorList->blockSignals(false);
+	mColorList->blockSignals(true);
+	mColorList->SetCurrentColor(ColorIndex);
+	mColorList->blockSignals(false);
 
-	eventLoop = nullptr;
+	mEventLoop = nullptr;
 }
 
-lcQColorPickerPopup::~lcQColorPickerPopup()
+lcColorPickerPopup::~lcColorPickerPopup()
 {
-	if (eventLoop)
-		eventLoop->exit();
+	if (mEventLoop)
+		mEventLoop->exit();
 }
 
-void lcQColorPickerPopup::exec()
+void lcColorPickerPopup::exec()
 {
 	show();
 
-	QEventLoop e;
-	eventLoop = &e;
-	(void) e.exec();
-	eventLoop = nullptr;
+	QEventLoop EventLoop;
+	mEventLoop = &EventLoop;
+	(void) EventLoop.exec();
+	mEventLoop = nullptr;
 }
 
-void lcQColorPickerPopup::mouseReleaseEvent(QMouseEvent *e)
+void lcColorPickerPopup::mouseReleaseEvent(QMouseEvent* MouseEvent)
 {
-	if (!rect().contains(e->pos()))
+	if (!rect().contains(MouseEvent->pos()))
 		hide();
 }
 
-void lcQColorPickerPopup::hideEvent(QHideEvent *e)
+void lcColorPickerPopup::hideEvent(QHideEvent* HideEvent)
 {
-	if (eventLoop)
-		eventLoop->exit();
+	if (mEventLoop)
+		mEventLoop->exit();
 
-	emit hid();
-	QFrame::hideEvent(e);
+	emit Hid();
+	QFrame::hideEvent(HideEvent);
 }
 
-void lcQColorPickerPopup::colorChanged(int colorIndex)
+void lcColorPickerPopup::ColorChanged(int ColorIndex)
 {
-	emit changed(colorIndex);
+	emit Changed(ColorIndex);
 }
 
-void lcQColorPickerPopup::colorSelected(int colorIndex)
+void lcColorPickerPopup::ColorSelected(int ColorIndex)
 {
-	emit selected(colorIndex);
+	emit Selected(ColorIndex);
 	hide();
 }
 
-void lcQColorPickerPopup::showEvent(QShowEvent *)
+void lcColorPickerPopup::showEvent(QShowEvent* ShowEvent)
 {
-	colorList->setFocus();
+	Q_UNUSED(ShowEvent);
+
+	mColorList->setFocus();
 }
 
-lcQColorPicker::lcQColorPicker(QWidget* Parent, bool AllowNoColor)
+lcColorPicker::lcColorPicker(QWidget* Parent, bool AllowNoColor)
 	: QPushButton(Parent), mAllowNoColor(AllowNoColor)
 {
 	setFocusPolicy(Qt::StrongFocus);
@@ -85,71 +87,71 @@ lcQColorPicker::lcQColorPicker(QWidget* Parent, bool AllowNoColor)
 
 	UpdateIcon();
 
-	connect(this, SIGNAL(toggled(bool)), SLOT(buttonPressed(bool)));
+	connect(this, &QPushButton::toggled, this, &lcColorPicker::ButtonPressed);
 }
 
-lcQColorPicker::~lcQColorPicker()
+lcColorPicker::~lcColorPicker()
 {
 }
 
-void lcQColorPicker::setCurrentColor(int colorIndex)
+void lcColorPicker::SetCurrentColor(int ColorIndex)
 {
-	selected(colorIndex);
+	Selected(ColorIndex);
 }
 
-void lcQColorPicker::setCurrentColorCode(int colorCode)
+void lcColorPicker::SetCurrentColorCode(int ColorCode)
 {
-	setCurrentColor(lcGetColorIndex(colorCode));
+	SetCurrentColor(lcGetColorIndex(ColorCode));
 }
 
-int lcQColorPicker::currentColor() const
+int lcColorPicker::GetCurrentColor() const
 {
 	return mCurrentColorIndex;
 }
 
-int lcQColorPicker::currentColorCode() const
+int lcColorPicker::GetCurrentColorCode() const
 {
 	return gColorList[mCurrentColorIndex].Code;
 }
 
-void lcQColorPicker::buttonPressed(bool toggled)
+void lcColorPicker::ButtonPressed(bool Toggled)
 {
-	if (!toggled)
+	if (!Toggled)
 		return;
 
-	lcQColorPickerPopup *popup = new lcQColorPickerPopup(this, mCurrentColorIndex, mAllowNoColor);
-	connect(popup, SIGNAL(changed(int)), SLOT(changed(int)));
-	connect(popup, SIGNAL(selected(int)), SLOT(selected(int)));
-	connect(popup, SIGNAL(hid()), SLOT(popupClosed()));
-	popup->setMinimumSize(300, 200);
+	lcColorPickerPopup* Popup = new lcColorPickerPopup(this, mCurrentColorIndex, mAllowNoColor);
+	connect(Popup, &lcColorPickerPopup::Changed, this, &lcColorPicker::Changed);
+	connect(Popup, &lcColorPickerPopup::Selected, this, &lcColorPicker::Selected);
+	connect(Popup, &lcColorPickerPopup::Hid, this, &lcColorPicker::PopupClosed);
+	Popup->setMinimumSize(300, 200);
 
 #if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
 	QScreen* Screen = screen();
-	const QRect desktop = Screen ? Screen->geometry() : QRect();
+	const QRect Desktop = Screen ? Screen->geometry() : QRect();
 #else
-	const QRect desktop = QApplication::desktop()->geometry();
+	const QRect Desktop = QApplication::desktop()->geometry();
 #endif
 
-	QPoint pos = mapToGlobal(rect().bottomLeft());
-	if (pos.x() < desktop.left())
-		pos.setX(desktop.left());
-	if (pos.y() < desktop.top())
-		pos.setY(desktop.top());
+	QPoint Pos = mapToGlobal(rect().bottomLeft());
+	if (Pos.x() < Desktop.left())
+		Pos.setX(Desktop.left());
+	if (Pos.y() < Desktop.top())
+		Pos.setY(Desktop.top());
 
-	if ((pos.x() + popup->width()) > desktop.width())
-		pos.setX(desktop.width() - popup->width());
-	if ((pos.y() + popup->height()) > desktop.bottom())
-		pos.setY(desktop.bottom() - popup->height());
-	popup->move(pos);
+	if ((Pos.x() + Popup->width()) > Desktop.width())
+		Pos.setX(Desktop.width() - Popup->width());
+	if ((Pos.y() + Popup->height()) > Desktop.bottom())
+		Pos.setY(Desktop.bottom() - Popup->height());
+	Popup->move(Pos);
 
 	clearFocus();
 	update();
 
-	popup->setFocus();
-	popup->show();
+	Popup->setFocus();
+	Popup->show();
 }
 
-void lcQColorPicker::UpdateIcon()
+void lcColorPicker::UpdateIcon()
 {
 	const int IconSize = 14;//style()->pixelMetric(QStyle::PM_SmallIconSize);
 	QPixmap Pixmap(IconSize, IconSize);
@@ -173,30 +175,30 @@ void lcQColorPicker::UpdateIcon()
 	setIcon(QIcon(Pixmap));
 }
 
-void lcQColorPicker::popupClosed()
+void lcColorPicker::PopupClosed()
 {
 	if (mInitialColorIndex != mCurrentColorIndex)
-		changed(mInitialColorIndex);
+		Changed(mInitialColorIndex);
 
 	setChecked(false);
 	setFocus();
 }
 
-void lcQColorPicker::changed(int colorIndex)
+void lcColorPicker::Changed(int ColorIndex)
 {
-	if (colorIndex == mCurrentColorIndex)
+	if (ColorIndex == mCurrentColorIndex)
 		return;
 
-	mCurrentColorIndex = colorIndex;
+	mCurrentColorIndex = ColorIndex;
 	UpdateIcon();
 
-	repaint();
+	update();
 
-	emit colorChanged(mCurrentColorIndex);
+	emit ColorChanged(mCurrentColorIndex);
 }
 
-void lcQColorPicker::selected(int colorIndex)
+void lcColorPicker::Selected(int ColorIndex)
 {
-	mInitialColorIndex = colorIndex;
-	changed(colorIndex);
+	mInitialColorIndex = ColorIndex;
+	Changed(ColorIndex);
 }

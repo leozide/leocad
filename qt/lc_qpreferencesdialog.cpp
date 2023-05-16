@@ -727,7 +727,7 @@ void lcQPreferencesDialog::on_newCategory_clicked()
 {
 	lcLibraryCategory category;
 
-	lcQCategoryDialog dialog(this, &category);
+	lcCategoryDialog dialog(this, &category);
 	if (dialog.exec() != QDialog::Accepted)
 		return;
 
@@ -752,7 +752,7 @@ void lcQPreferencesDialog::on_editCategory_clicked()
 	if (categoryIndex == -1)
 		return;
 
-	lcQCategoryDialog dialog(this, &mOptions->Categories[categoryIndex]);
+	lcCategoryDialog dialog(this, &mOptions->Categories[categoryIndex]);
 	if (dialog.exec() != QDialog::Accepted)
 		return;
 

@@ -36,8 +36,8 @@ lcMinifigDialog::lcMinifigDialog(QWidget* Parent)
 	for (QComboBox* ComboBox : mComboBoxes)
 		connect(ComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(TypeChanged(int)));
 
-	for (lcQColorPicker* ColorPicker : mColorPickers)
-		connect(ColorPicker, SIGNAL(colorChanged(int)), this, SLOT(ColorChanged(int)));
+	for (lcColorPicker* ColorPicker : mColorPickers)
+		connect(ColorPicker, &lcColorPicker::ColorChanged, this, &lcMinifigDialog::ColorChanged);
 
 	for (QDoubleSpinBox* SpinBox : mSpinBoxes)
 		if (SpinBox)
@@ -81,10 +81,10 @@ lcMinifigDialog::lcMinifigDialog(QWidget* Parent)
 		ItemCombo->setCurrentIndex(mMinifigWizard->GetSelectionIndex(ItemIndex));
 		ItemCombo->blockSignals(false);
 
-		lcQColorPicker* ColorPicker = mColorPickers[ItemIndex];
+		lcColorPicker* ColorPicker = mColorPickers[ItemIndex];
 
 		ColorPicker->blockSignals(true);
-		ColorPicker->setCurrentColor(mMinifigWizard->mMinifig.Colors[ItemIndex]);
+		ColorPicker->SetCurrentColor(mMinifigWizard->mMinifig.Colors[ItemIndex]);
 		ColorPicker->blockSignals(false);
 	}
 
@@ -142,7 +142,7 @@ void lcMinifigDialog::on_TemplateComboBox_currentIndexChanged(const QString& Tem
 			mComboBoxes[PartIdx]->setCurrentText("None");
 		}
 
-		mColorPickers[PartIdx]->setCurrentColorCode(Template.Colors[PartIdx]);
+		mColorPickers[PartIdx]->SetCurrentColorCode(Template.Colors[PartIdx]);
 
 		QDoubleSpinBox* AngleSpinBox = mSpinBoxes[PartIdx];
 		if (AngleSpinBox)
@@ -179,7 +179,7 @@ void lcMinifigDialog::on_TemplateSaveButton_clicked()
 	for (int PartIdx = 0; PartIdx < LC_MFW_NUMITEMS; PartIdx++)
 	{
 		Template.Parts[PartIdx] = mMinifigWizard->mSettings[PartIdx][mComboBoxes[PartIdx]->currentIndex()].Info->mFileName;
-		Template.Colors[PartIdx] = mColorPickers[PartIdx]->currentColorCode();
+		Template.Colors[PartIdx] = mColorPickers[PartIdx]->GetCurrentColorCode();
 		QDoubleSpinBox* AngleSpinBox = mSpinBoxes[PartIdx];
 		Template.Angles[PartIdx] = AngleSpinBox ? AngleSpinBox->value() : 0.0f;
 	}
@@ -259,7 +259,7 @@ void lcMinifigDialog::TypeChanged(int Index)
 
 void lcMinifigDialog::ColorChanged(int Index)
 {
-	std::array<lcQColorPicker*, LC_MFW_NUMITEMS>::iterator Search = std::find(mColorPickers.begin(), mColorPickers.end(), sender());
+	std::array<lcColorPicker*, LC_MFW_NUMITEMS>::iterator Search = std::find(mColorPickers.begin(), mColorPickers.end(), sender());
 
 	if (Search == mColorPickers.end())
 		return;

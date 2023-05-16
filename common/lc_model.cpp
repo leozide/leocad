@@ -4344,7 +4344,7 @@ void lcModel::ShowArrayDialog()
 		return;
 	}
 	
-	lcQArrayDialog Dialog(gMainWindow);
+	lcArrayDialog Dialog(gMainWindow);
 
 	if (Dialog.exec() != QDialog::Accepted)
 		return;

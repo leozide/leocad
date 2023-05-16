@@ -1,26 +1,25 @@
 #pragma once
 
-#include <QDialog>
 struct lcLibraryCategory;
 
 namespace Ui {
-class lcQCategoryDialog;
+class lcCategoryDialog;
 }
 
-class lcQCategoryDialog : public QDialog
+class lcCategoryDialog : public QDialog
 {
 	Q_OBJECT
 	
 public:
-	explicit lcQCategoryDialog(QWidget *parent, void *data);
-	~lcQCategoryDialog();
+	explicit lcCategoryDialog(QWidget* Parent, lcLibraryCategory* Category);
+	virtual ~lcCategoryDialog();
 
-	lcLibraryCategory *options;
+	lcLibraryCategory* mOptions;
 
 public slots:
 	void accept() override;
 
 private:
-	Ui::lcQCategoryDialog *ui;
+	Ui::lcCategoryDialog* ui;
 };
 

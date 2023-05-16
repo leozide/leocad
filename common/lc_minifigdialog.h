@@ -1,7 +1,7 @@
 #pragma once
 
 #include "minifig.h"
-class lcQColorPicker;
+class lcColorPicker;
 
 namespace Ui
 {
@@ -35,6 +35,6 @@ protected:
 
 	lcView* mView;
 	std::array<QComboBox*, LC_MFW_NUMITEMS> mComboBoxes;
-	std::array<lcQColorPicker*, LC_MFW_NUMITEMS> mColorPickers;
+	std::array<lcColorPicker*, LC_MFW_NUMITEMS> mColorPickers;
 	std::array<QDoubleSpinBox*, LC_MFW_NUMITEMS> mSpinBoxes;
 };

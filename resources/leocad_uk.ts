@@ -6034,7 +6034,7 @@ GL_EXT_texture_filter_anisotropic extension: %5
     </message>
 </context>
 <context>
-    <name>lcQArrayDialog</name>
+    <name>lcArrayDialog</name>
     <message>
         <location filename="../qt/lc_qarraydialog.ui" line="14"/>
         <source>Array</source>
@@ -6062,7 +6062,7 @@ GL_EXT_texture_filter_anisotropic extension: %5
     </message>
 </context>
 <context>
-    <name>lcQCategoryDialog</name>
+    <name>lcCategoryDialog</name>
     <message>
         <location filename="../qt/lc_qcategorydialog.ui" line="14"/>
         <source>Category</source>

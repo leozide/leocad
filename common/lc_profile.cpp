@@ -140,8 +140,9 @@ static lcProfileEntry gProfileEntries[LC_NUM_PROFILE_KEYS] =
 
 	lcProfileEntry("POVRay", "Path", "/usr/bin/povray"),                                       // LC_PROFILE_POVRAY_PATH
 	lcProfileEntry("POVRay", "LGEOPath", ""),                                                  // LC_PROFILE_POVRAY_LGEO_PATH
-	lcProfileEntry("POVRay", "Width", 1280),                                                   // LC_PROFILE_POVRAY_WIDTH
-	lcProfileEntry("POVRay", "Height", 720),                                                   // LC_PROFILE_POVRAY_HEIGHT
+
+	lcProfileEntry("Render", "Width", 1280),                                                   // LC_PROFILE_RENDER_WIDTH
+	lcProfileEntry("Render", "Height", 720),                                                   // LC_PROFILE_RENDER_HEIGHT
 
 	lcProfileEntry("Blender", "Path", ""),                                                     // LC_PROFILE_BLENDER_PATH
 	lcProfileEntry("Blender", "LDrawConfigPath", ""),                                          // LC_PROFILE_BLENDER_LDRAW_CONFIG_PATH

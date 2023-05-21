@@ -108,11 +108,26 @@ const lcCommand gCommands[] =
 		QT_TRANSLATE_NOOP("Status", "Export the current model in Wavefront OBJ format"),
 		""
 	},
-	// LC_FILE_RENDER
+	// LC_FILE_RENDER_POVRAY
 	{
-		QT_TRANSLATE_NOOP("Action", "File.Render"),
-		QT_TRANSLATE_NOOP("Menu", "&Render..."),
+		QT_TRANSLATE_NOOP("Action", "File.Render.POVRay"),
+		QT_TRANSLATE_NOOP("Menu", "&POV-Ray Render..."),
 		QT_TRANSLATE_NOOP("Status", "Render the current model using POV-Ray"),
+		""
+	},
+	// LC_FILE_RENDER_BLENDER
+	{
+		QT_TRANSLATE_NOOP("Action", "File.Render.Blender"),
+		QT_TRANSLATE_NOOP("Menu", "&Bender Render..."),
+		QT_TRANSLATE_NOOP("Status", "Render the current model using Blender"),
+		""
+	},
+
+	// LC_FILE_RENDER_OPEN_IN_BLENDER
+	{
+		QT_TRANSLATE_NOOP("Action", "File.Render.OpenInBlender"),
+		QT_TRANSLATE_NOOP("Menu", "&Open In Blender..."),
+		QT_TRANSLATE_NOOP("Status", "Open the current model in Blender"),
 		""
 	},
 	// LC_FILE_INSTRUCTIONS

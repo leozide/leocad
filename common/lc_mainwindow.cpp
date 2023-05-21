@@ -251,6 +251,21 @@ void lcMainWindow::CreateActions()
 	EditActionPanIcon.addFile(":/resources/action_pan_16.png");
 	mActions[LC_EDIT_ACTION_PAN]->setIcon(EditActionPanIcon);
 
+	QIcon FileRenderPOVRayIcon;
+	FileRenderPOVRayIcon.addFile(":/resources/file_render_povray.png");
+	FileRenderPOVRayIcon.addFile(":/resources/file_render_povray_16.png");
+	mActions[LC_FILE_RENDER_POVRAY]->setIcon(FileRenderPOVRayIcon);
+
+	QIcon FileRenderBlenderIcon;
+	FileRenderBlenderIcon.addFile(":/resources/file_render_blender.png");
+	FileRenderBlenderIcon.addFile(":/resources/file_render_blender_16.png");
+	mActions[LC_FILE_RENDER_BLENDER]->setIcon(FileRenderBlenderIcon);
+
+	QIcon FileOpenInBlenderIcon;
+	FileOpenInBlenderIcon.addFile(":/resources/file_render_open_in_blender.png");
+	FileOpenInBlenderIcon.addFile(":/resources/file_render_open_in_blender_16.png");
+	mActions[LC_FILE_RENDER_OPEN_IN_BLENDER]->setIcon(FileOpenInBlenderIcon);
+
 	mActions[LC_EDIT_ACTION_CAMERA]->setIcon(QIcon(":/resources/action_camera.png"));
 	mActions[LC_EDIT_ACTION_ROTATE_VIEW]->setIcon(QIcon(":/resources/action_rotate_view.png"));
 	mActions[LC_EDIT_ACTION_ROLL]->setIcon(QIcon(":/resources/action_roll.png"));
@@ -443,7 +458,10 @@ void lcMainWindow::CreateMenus()
 	ExportMenu->addAction(mActions[LC_FILE_EXPORT_POVRAY]);
 	ExportMenu->addAction(mActions[LC_FILE_EXPORT_WAVEFRONT]);
 	FileMenu->addSeparator();
-	FileMenu->addAction(mActions[LC_FILE_RENDER]);
+	QMenu* RenderMenu = FileMenu->addMenu(tr("&Render"));
+	RenderMenu->addAction(mActions[LC_FILE_RENDER_POVRAY]);
+	RenderMenu->addAction(mActions[LC_FILE_RENDER_BLENDER]);
+	RenderMenu->addAction(mActions[LC_FILE_RENDER_OPEN_IN_BLENDER]);
 	FileMenu->addAction(mActions[LC_FILE_INSTRUCTIONS]);
 	FileMenu->addAction(mActions[LC_FILE_PRINT]);
 	FileMenu->addAction(mActions[LC_FILE_PRINT_PREVIEW]);
@@ -1264,9 +1282,9 @@ void lcMainWindow::ShowHTMLDialog()
 	lcGetActiveProject()->ExportHTML(Options);
 }
 
-void lcMainWindow::ShowRenderDialog()
+void lcMainWindow::ShowRenderDialog(int Command)
 {
-	lcRenderDialog Dialog(this);
+	lcRenderDialog Dialog(this, Command);
 	Dialog.exec();
 }
 
@@ -2603,8 +2621,10 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		lcGetActiveProject()->ExportWavefront(QString());
 		break;
 
-	case LC_FILE_RENDER:
-		ShowRenderDialog();
+	case LC_FILE_RENDER_POVRAY:
+	case LC_FILE_RENDER_BLENDER:
+	case LC_FILE_RENDER_OPEN_IN_BLENDER:
+		ShowRenderDialog(CommandId - LC_FILE_RENDER_POVRAY);
 		break;
 
 	case LC_FILE_INSTRUCTIONS:

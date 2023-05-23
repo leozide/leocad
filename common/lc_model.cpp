@@ -263,7 +263,7 @@ void lcModel::UpdatePieceInfo(std::vector<lcModel*>& UpdatedModels)
 	mPieceInfo->SetBoundingBox(Min, Max);
 }
 
-void lcModel::SaveLDraw(QTextStream& Stream, bool SelectedOnly) const
+void lcModel::SaveLDraw(QTextStream& Stream, bool SelectedOnly, lcStep CurrentStep) const
 {
 	const QLatin1String LineEnding("\r\n");
 
@@ -273,11 +273,15 @@ void lcModel::SaveLDraw(QTextStream& Stream, bool SelectedOnly) const
 	lcStep Step = 1;
 	int CurrentLine = 0;
 	int AddedSteps = 0;
+	bool Saved = false;
 
 	for (lcPiece* Piece : mPieces)
 	{
 		if (SelectedOnly && !Piece->IsSelected())
 			continue;
+
+		if ((Saved = CurrentStep && Piece->GetStepShow() > CurrentStep))
+			break;
 
 		while (Piece->GetFileLine() > CurrentLine && CurrentLine < mFileLines.size())
 		{
@@ -391,7 +395,7 @@ void lcModel::SaveLDraw(QTextStream& Stream, bool SelectedOnly) const
 			Stream << QLatin1String("0 !LEOCAD SYNTH END\r\n");
 	}
 
-	while (CurrentLine < mFileLines.size())
+	while ( !Saved && CurrentLine < mFileLines.size())
 	{
 		QString Line = mFileLines[CurrentLine];
 		QTextStream LineStream(&Line, QIODevice::ReadOnly);
@@ -3323,11 +3327,11 @@ void lcModel::GetPartsList(int DefaultColorIndex, bool ScanSubModels, bool AddSu
 	}
 }
 
-void lcModel::GetPartsListForStep(lcStep Step, int DefaultColorIndex, lcPartsList& PartsList) const
+void lcModel::GetPartsListForStep(lcStep Step, int DefaultColorIndex, lcPartsList& PartsList, bool Cumulative) const
 {
 	for (const lcPiece* Piece : mPieces)
 	{
-		if (Piece->GetStepShow() != Step || Piece->IsHidden())
+		if (Cumulative ? Piece->GetStepShow() > Step : Piece->GetStepShow() != Step || Piece->IsHidden())
 			continue;
 
 		int ColorIndex = Piece->GetColorIndex();

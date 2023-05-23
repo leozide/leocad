@@ -652,6 +652,109 @@ std::vector<lcModelPartsEntry> Project::GetModelParts()
 	return ModelParts;
 }
 
+bool Project::ExportCurrentStep(const QString& FileName)
+{
+	QFile File(FileName);
+
+	if (!File.open(QIODevice::WriteOnly))
+	{
+		QMessageBox::warning(gMainWindow, tr("Error"), tr("Error writing to file '%1':\n%2").arg(FileName, File.errorString()));
+		return false;
+	}
+
+	QStringList Models;
+
+	Models.append(lcGetActiveModel()->GetProperties().mFileName);
+
+	std::function<void(const QString&)> ParseStepModel = [&](const QString& ModelName)
+	{
+		Models.append(ModelName);
+
+		for (lcModel* Model : mModels)
+		{
+			if (Model->GetProperties().mFileName == ModelName)
+			{
+				lcPartsList ModelParts;
+
+				Model->GetPartsList(gDefaultColor, false, true, ModelParts);
+
+				for (const auto& PartIt : ModelParts)
+				{
+					const PieceInfo* PartInfo = PartIt.first;
+
+					if (PartInfo->IsModel())
+					{
+						ParseStepModel(PartInfo->mFileName);
+					}
+					else
+						continue;
+				}
+
+				break;
+			}
+		}
+	};
+
+	const lcStep CurrentStep = lcGetActiveModel()->GetCurrentStep();
+
+	bool MPD = mModels.GetSize() > 1;
+
+	if (MPD)
+	{
+		lcPartsList StepParts;
+
+		lcGetActiveModel()->GetPartsListForStep(CurrentStep, gDefaultColor, StepParts, true);
+
+		if (!StepParts.empty())
+		{
+			for (const auto& PartIt : StepParts)
+			{
+				const PieceInfo *PartInfo = PartIt.first;
+
+				if (PartInfo->IsModel())
+				{
+					ParseStepModel(PartInfo->mFileName);
+				}
+				else
+					continue;
+			}
+		}
+	}
+
+	QTextStream Stream(&File);
+
+	for (lcModel* Model : mModels)
+	{
+		if (!Models.contains(Model->GetProperties().mFileName))
+			continue;
+
+		const lcStep ModelStep = Model->GetCurrentStep();
+
+		if (!Model->IsActive())
+			Model->SetTemporaryStep(CurrentStep);
+
+		if (MPD)
+			Stream << QLatin1String("0 FILE ") << Model->GetProperties().mFileName << QLatin1String("\r\n");
+
+		Model->SaveLDraw(Stream, false, CurrentStep);
+
+		if (MPD)
+			Stream << QLatin1String("0 NOFILE\r\n");
+
+		if (!Model->IsActive())
+		{
+			Model->SetTemporaryStep(ModelStep);
+			Model->CalculateStep(LC_STEP_MAX);
+		}
+	}
+
+	File.close();
+
+	lcSetProfileString(LC_PROFILE_PROJECTS_PATH, QFileInfo(FileName).absolutePath());
+
+	return true;
+}
+
 bool Project::ExportModel(const QString& FileName, lcModel* Model) const
 {
 	QFile File(FileName);

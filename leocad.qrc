@@ -19,6 +19,9 @@
         <file>resources/file_open_16.png</file>
         <file>resources/file_print_16.png</file>
         <file>resources/file_print_preview_16.png</file>
+        <file>resources/file_render_blender_16.png</file>
+        <file>resources/file_render_open_in_blender_16.png</file>
+        <file>resources/file_render_povray_16.png</file>
         <file>resources/file_save_16.png</file>
         <file>resources/action_camera.png</file>
         <file>resources/action_color_picker.png</file>
@@ -77,6 +80,10 @@
         <file>resources/file_open.png</file>
         <file>resources/file_print.png</file>
         <file>resources/file_print_preview.png</file>
+        <file>resources/file_render_blender.png</file>
+        <file>resources/file_render_blender_logo_1280x720.png</file>
+        <file>resources/file_render_open_in_blender.png</file>
+        <file>resources/file_render_povray.png</file>
         <file>resources/file_save.png</file>
         <file>resources/time_first.png</file>
         <file>resources/time_last.png</file>

@@ -555,6 +555,7 @@ void lcMainWindow::CreateMenus()
 	PieceMenu->addAction(mActions[LC_PIECE_DELETE]);
 	PieceMenu->addAction(mActions[LC_PIECE_DUPLICATE]);
 	PieceMenu->addAction(mActions[LC_PIECE_PAINT_SELECTED]);
+	PieceMenu->addAction(mActions[LC_PIECE_BROWSE]);
 	PieceMenu->addAction(mActions[LC_PIECE_ARRAY]);
 	PieceMenu->addAction(mActions[LC_PIECE_MINIFIG_WIZARD]);
 	PieceMenu->addAction(mActions[LC_PIECE_RESET_PIVOT_POINT]);
@@ -2894,6 +2895,11 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 	case LC_PIECE_PAINT_SELECTED:
 		if (ActiveModel)
 			ActiveModel->PaintSelectedPieces();
+		break;
+
+	case LC_PIECE_BROWSE:
+		mPartsToolBar->setVisible(true);
+		mPartSelectionWidget->FocusFilter();
 		break;
 
 	case LC_PIECE_RESET_PIVOT_POINT:

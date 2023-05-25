@@ -224,6 +224,8 @@ public:
 		return mPartsWidget->GetListModel()->GetColorIndex();
 	}
 
+	void FocusFilter();
+
 	void SetColorIndex(int ColorIndex)
 	{
 		mPartsWidget->GetListModel()->SetColorIndex(ColorIndex);

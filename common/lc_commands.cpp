@@ -1243,6 +1243,13 @@ const lcCommand gCommands[] =
 		QT_TRANSLATE_NOOP("Status", "Create a copy of the selected pieces"),
 		"Ctrl+D"
 	},
+	// LC_PIECE_BROWSE
+	{
+		QT_TRANSLATE_NOOP("Action", "Piece.Browse"),
+		QT_TRANSLATE_NOOP("Menu", "Browse"),
+		QT_TRANSLATE_NOOP("Status", "Browse available pieces"),
+		"Ctrl+B"
+	},
 	// LC_PIECE_PAINT_SELECTED
 	{
 		QT_TRANSLATE_NOOP("Action", "Piece.PaintSelected"),

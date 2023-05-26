@@ -23,8 +23,7 @@ class QProgressBar;
 class QProcess;
 class QTimer;
 
-class QNetworkAccessManager;
-class QNetworkReply;
+class lcHttpReply;
 class lcBlenderPreferences;
 
 class lcBlenderPreferencesDialog : public QDialog
@@ -82,11 +81,6 @@ protected:
 	static void LoadDefaultParameters(QByteArray& Buffer, int Which);
 	static bool OverwriteFile(const QString& File);
 
-	// TODO - Refactor, use LeoCAD mHttpReply/HttpManager
-	static void DownloadFile(QString URL, QString Title, bool PromptRedirect = false, bool ShowProgress = true);
-	void StartRequest(QUrl Url);
-	static QByteArray GetDownloadedFile();
-
 	QString ReadStdErr(bool& Error) const;
 	void ClearGroupBox(QGroupBox* GroupBox);
 	void InitPathsAndSettings();
@@ -121,15 +115,7 @@ private slots:
 	void GetStandardOutput();
 	void ShowResult();
 	void StatusUpdate(bool, bool = true, const QString& = QString());
-
-	void HttpDownloadFinished();
-	void CancelDownload();
-	void UpdateDownloadProgress(qint64, qint64);
-	void FileLoaded(bool b)
-	{
-		mFileLoaded = true;
-		mFileLoadFail = !b;
-	}
+	void DownloadFinished(lcHttpReply*);
 
 private:
 	enum BlenderPathType
@@ -457,18 +443,8 @@ private:
 	QProgressBar* mProgressBar = nullptr;
 	QProcess* mProcess = nullptr;
 
-	// TODO - Refactor, use LeoCAD mHttpReply/HttpManager
-	QProgressDialog* mProgressDialog = nullptr;
-	QNetworkAccessManager* mHttpManager = nullptr;
-	QNetworkReply* mHttpReply = nullptr;
-	QByteArray mByteArray;
-	QString mTitle;
-	QUrl mUrl;
-	bool mPromptRedirect = false;
-	bool mHttpRequestAborted = false;
-	bool mFileLoaded = false;
-	bool mFileLoadFail = false;
-	bool mShowProgress = false;
+	lcHttpReply  *mHttpReply = nullptr;
+	QByteArray mData;
 
 	QTimer mUpdateTimer;
 

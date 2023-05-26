@@ -1358,6 +1358,23 @@ bool lcBlenderPreferences::GetBlenderAddon(const QString& BlenderDir)
 
 	auto GetBlenderAddonVersionMatch = [&]()
 	{
+		lcHttpManager* HttpManager = new lcHttpManager(gAddonPreferences);
+		connect(HttpManager, SIGNAL(DownloadFinished(lcHttpReply*)), gAddonPreferences, SLOT(DownloadFinished(lcHttpReply*)));
+		gAddonPreferences->mHttpReply = HttpManager->DownloadFile(QLatin1String(LC_BLENDER_ADDON_LATEST_URL));
+		while (gAddonPreferences->mHttpReply)
+			QApplication::processEvents();
+		if (!gAddonPreferences->mData.isEmpty())
+		{
+			QJsonDocument Json = QJsonDocument::fromJson(gAddonPreferences->mData);
+			OnlineVersion = Json.object()["tag_name"].toString();
+			gAddonPreferences->mData.clear();
+		}
+		else
+		{
+			ShowMessage(tr("Check latest addon version failed."), tr("Latest Addon"), QString(), QString(), MBB_OK, QMessageBox::Warning);
+			return true; // Reload existing archive
+		}
+
 		QByteArray Ba;
 		if (!ExtractedAddon)
 		{
@@ -1415,22 +1432,11 @@ bool lcBlenderPreferences::GetBlenderAddon(const QString& BlenderDir)
 			}
 		}
 
-		// TODO - Refactor, use LeoCAD mHttpReply/HttpManager
-		DownloadFile(LC_BLENDER_ADDON_LATEST_URL, tr("Latest Addon"),false/*promptRedirect*/,false/*showProgress*/);
-		QByteArray const &Response_Data = GetDownloadedFile();
-		if (!Response_Data.isEmpty())
-		{
-			QJsonDocument Json = QJsonDocument::fromJson(Response_Data);
-			OnlineVersion = Json.object()["tag_name"].toString();
-		}
-		else
-			ShowMessage(tr("Check latest addon version failed."), tr("Latest Addon"), QString(), QString(), MBB_OK, QMessageBox::Warning);
-
 		if (!LocalVersion.isEmpty() && !OnlineVersion.isEmpty())
 		{
-			// LocalVersion is smaller than OnlineVersion so prompt to download new archive
+			// localVersion is smaller than onlineVersion so prompt to download new archive
 			if (VersionStringCompare(LocalVersion.toStdString(), OnlineVersion.toStdString()) < 0)
-				return false;
+				return false; // Download new archive
 		}
 
 		return true; // Reload existing archive
@@ -1496,10 +1502,12 @@ bool lcBlenderPreferences::GetBlenderAddon(const QString& BlenderDir)
 	if (AddonAction == ADDON_DOWNLOAD)
 	{
 		BlenderAddonExists = false;
-		// TODO - Refactor, use LeoCAD mHttpReply/HttpManager
-		DownloadFile(LC_BLENDER_ADDON_URL, tr("Blender Addon"),false/*promptRedirect*/,false/*showProgress*/);
-		QByteArray const &Buffer = GetDownloadedFile();
-		if (!Buffer.isEmpty())
+		lcHttpManager* HttpManager = new lcHttpManager(gAddonPreferences);
+		connect(HttpManager, SIGNAL(DownloadFinished(lcHttpReply*)), gAddonPreferences, SLOT(DownloadFinished(lcHttpReply*)));
+		gAddonPreferences->mHttpReply = HttpManager->DownloadFile(QLatin1String(LC_BLENDER_ADDON_URL));
+		while (gAddonPreferences->mHttpReply)
+			QApplication::processEvents();
+		if (!gAddonPreferences->mData.isEmpty())
 		{
 			if (QFileInfo(BlenderAddonFile).exists())
 			{
@@ -1510,9 +1518,10 @@ bool lcBlenderPreferences::GetBlenderAddon(const QString& BlenderDir)
 			QFile File(BlenderAddonFile);
 			if (File.open(QIODevice::WriteOnly))
 			{
-				File.write(Buffer);
+				File.write(gAddonPreferences->mData);
 				File.close();
 				BlenderAddonExists = true;
+				gAddonPreferences->mData.clear();
 			}
 			else
 				ShowMessage(tr("Failed to open Blender addon file:<br>%1:<br>%2")
@@ -3485,134 +3494,14 @@ int lcBlenderPreferences::ShowMessage(QString const& Header, QString const& Titl
 	return Box.exec();
 }
 
-// TODO - Refactor, use LeoCAD mHttpReply/HttpManager
-void lcBlenderPreferences::DownloadFile(QString URL, QString Title, bool PromptRedirect, bool ShowProgress)
+void lcBlenderPreferences::DownloadFinished(lcHttpReply* Reply)
 {
-	gAddonPreferences->mTitle = Title;
-	gAddonPreferences->mShowProgress = ShowProgress;
-	gAddonPreferences->mPromptRedirect = PromptRedirect;
-
-	if (gAddonPreferences->mShowProgress)
-	{
-		gAddonPreferences->mProgressDialog = new QProgressDialog(nullptr);
-		connect(gAddonPreferences->mProgressDialog, SIGNAL(canceled()), gAddonPreferences, SLOT(cancelDownload()));
-
-		gAddonPreferences->mProgressDialog->setWindowTitle(tr("Downloading"));
-		gAddonPreferences->mProgressDialog->setLabelText(tr("Downloading %1").arg(gAddonPreferences->mTitle));
-		gAddonPreferences->mProgressDialog->show();
-	}
-
-	gAddonPreferences->mHttpManager   = new QNetworkAccessManager(gAddonPreferences);
-
-	gAddonPreferences->mUrl = URL;
-
-	gAddonPreferences->mHttpRequestAborted = false;
-
-	gAddonPreferences->StartRequest(gAddonPreferences->mUrl);
-
-	while (gAddonPreferences->mHttpReply)
-		QApplication::processEvents();
-}
-
-QByteArray lcBlenderPreferences::GetDownloadedFile()
-{
-	return gAddonPreferences->mByteArray;
-}
-
-void lcBlenderPreferences::StartRequest(QUrl Url)
-{
-	QNetworkRequest Request(Url);
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 6, 0))
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 15, 0))
-	if (!mPromptRedirect)
-		Request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, true);
-#else
-	if (!mPromptRedirect)
-		request.setAttribute(QNetworkRequest::FollowRedirectsAttribute, true);
-#endif
-#endif
-	mHttpReply = mHttpManager->get(Request);
-
-	connect(mHttpReply, SIGNAL(downloadProgress(qint64,qint64)),
-			this,       SLOT(UpdateDownloadProgress(qint64,qint64)));
-
-	connect(mHttpReply, SIGNAL(finished()),
-			this,       SLOT(HttpDownloadFinished()));
-}
-
-void lcBlenderPreferences::HttpDownloadFinished()
-{
-	if (mHttpRequestAborted)
-	{
-		mByteArray.clear();
-		mHttpReply->deleteLater();
-		mHttpReply = nullptr;
-		if (mShowProgress)
-			mProgressDialog->close();
-		return;
-	}
-
-	QString Message;
-	QString const MessageTitle = tr("%1 Download").arg(LC_PRODUCTNAME_STR);
-	QVariant RedirectionTarget = mHttpReply->attribute(QNetworkRequest::RedirectionTargetAttribute);
-	if (mHttpReply->error())
-	{
-		mByteArray.clear();
-		Message = tr("%1 download failed: %2.")
-					  .arg(mTitle).arg(mHttpReply->errorString());
-
-		if (Message.endsWith("not found."))
-			Message.append(tr("<br>Your internet connection may be interrupted."));
-
-		if (gMainWindow)
-			ShowMessage(Message, MessageTitle, QString(), QString(), MBB_OK, QMessageBox::Warning);
-
-	}
-	else if (!RedirectionTarget.isNull())
-	{
-		// This block should only trigger for redirects when Qt
-		// is less than 5.6.0 or if prompt redirect set to True
-		QUrl NewUrl = mUrl.resolved(RedirectionTarget.toUrl());
-		bool ProceedToRedirect = true;
-
-		if (mPromptRedirect && gMainWindow)
-			ProceedToRedirect = ShowMessage(tr("Download redirect to %1 ?").arg(NewUrl.toString()),
-											MessageTitle, QString(), QString(), MBB_YES_NO, QMessageBox::Question) == QMessageBox::Yes;
-
-		if (ProceedToRedirect)
-		{
-			mUrl = NewUrl;
-			mHttpReply->deleteLater();
-			mByteArray.resize(0);
-			StartRequest(mUrl);
-			return;
-		}
-	}
+	if (!Reply->error())
+		mData = Reply->readAll();
 	else
-		mByteArray = mHttpReply->readAll();
+		ShowMessage(tr("Addon download failed."));
 
-	if (mShowProgress)
-		mProgressDialog->close();
-
-	mHttpReply->deleteLater();
 	mHttpReply = nullptr;
-	mHttpManager = nullptr;
-}
 
-void lcBlenderPreferences::CancelDownload()
-{
-	mHttpRequestAborted = true;
-	mHttpReply->abort();
-}
-
-void lcBlenderPreferences::UpdateDownloadProgress(qint64 BytesRead, qint64 BotalBytes)
-{
-	if (mHttpRequestAborted)
-		return;
-
-	if (mShowProgress)
-	{
-		mProgressDialog->setMaximum(int(BotalBytes));
-		mProgressDialog->setValue(int(BytesRead));
-	}
+	Reply->deleteLater();
 }

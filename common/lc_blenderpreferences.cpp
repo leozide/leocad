@@ -14,6 +14,7 @@
 #include <QJsonDocument>
 #include <QJsonArray>
 #include <QJsonObject>
+#include <zlib.h>
 
 #include "lc_blenderpreferences.h"
 #include "lc_application.h"
@@ -23,6 +24,8 @@
 #include "lc_colorpicker.h"
 #include "lc_profile.h"
 #include "lc_http.h"
+#include "lc_zipfile.h"
+#include "lc_file.h"
 #include "project.h"
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
@@ -1289,15 +1292,21 @@ bool lcBlenderPreferences::ExtractBlenderAddon(const QString& BlenderDir)
 	{
 		gAddonPreferences->StatusUpdate(true, false, tr("Extract addon..."));
 		QString const BlenderAddonFile = QDir::toNativeSeparators(QString("%1/%2").arg(BlenderDir).arg(LC_BLENDER_ADDON_FILE));
-		// TODO - Replace QuaZip call to unzip addon
-		/* QStringList addonList = JlCompress::extractDir(blenderAddonFile, blenderDir);
-		if (addonList.isEmpty())
+
+		QString Result;
+		bool Success = gAddonPreferences->ExtractAddon(BlenderAddonFile, Result);
+
+		if (!Success)
 		{
-			showMessage(tr("Failed to extract %1 to %2")
-						   .arg(blenderAddonFile).arg(blenderDir), tr("Extract addon"));
-			proceed = false;
+			QString Message = tr("Failed to extract %1 to %2")
+								  .arg(LC_BLENDER_ADDON_FILE).arg(BlenderDir);
+			if (Result.size())
+				Message.append(" "+Result);
+
+			ShowMessage(Message, tr("Extract addon"));
+
+			Proceed = false;
 		}
-		*/
 	}
 
 	if (!Proceed)
@@ -1378,34 +1387,30 @@ bool lcBlenderPreferences::GetBlenderAddon(const QString& BlenderDir)
 		QByteArray Ba;
 		if (!ExtractedAddon)
 		{
-			// TODO - Replace QuaZip archive file check
-			/*
-			QuaZip Zip(BlenderAddonFile);
-			if (!Zip.open(QuaZip::mdUnzip))
+			const char* VersionFile = "addons/" LC_BLENDER_ADDON_FOLDER_STR "/__version__.py";
+
+			lcZipFile ZipFile;
+
+			if (!ZipFile.OpenRead(BlenderAddonFile))
 			{
-				QString const Result = tr("Could not open archive to check content. Return code %1.<br>"
-										  "Archive file %2 may be open in another program.")
-										  .arg(Zip.getZipError()).arg(QFileInfo(BlenderAddonFile).fileName());
-				emit gui->messageSig(LOG_WARNING, Result);
-				return false; // Download new archive
+				ShowMessage(tr("Cannot open addon archive file: %1.").arg(BlenderAddonFile));
+				return false;
 			}
 
-			QString const AddonVersionFile = QString("addons/%1/__version__.py").arg(LC_BLENDER_ADDON_FOLDER_STR);
-			Zip.setCurrentFile(AddonVersionFile);
-			QuaZipFile File(&Zip);
-			if (!File.open(QIODevice::ReadOnly))
+			lcMemFile File;
+
+			if (!ZipFile.ExtractFile(VersionFile, File))
 			{
-				ShowMessage(tr("Cannot read addon archive version file: [%1]<br>%2.")
-							   .arg(AddonVersionFile).arg(File.errorString()));
+				ShowMessage(tr("Cannot extract addon archive version file: %1.").arg(VersionFile));
+				return false;
+			}
+
+			Ba = QByteArray::fromRawData((const char*)File.mBuffer, File.GetLength());
+			if (Ba.isEmpty())
+			{
+				ShowMessage(tr("Cannot read addon archive version file: %1.").arg(VersionFile));
 				return false; // Download new archive
 			}
-			Ba = File.readAll();
-			File.close();
-			Zip.close();
-			if (Zip.getZipError() != UNZ_OK)
-				showMessage(tr("Archive close error. Return code %1.").arg(Zip.getZipError()));
-			*/
-			ShowMessage(tr("Check addon archive is not supported. Manually extract addon and continue."));
 		}
 		else
 		{
@@ -3504,4 +3509,216 @@ void lcBlenderPreferences::DownloadFinished(lcHttpReply* Reply)
 	mHttpReply = nullptr;
 
 	Reply->deleteLater();
+}
+
+namespace WindowsFileAttributes
+{
+enum
+{
+	Dir        = 0x10, // FILE_ATTRIBUTE_DIRECTORY
+	File       = 0x80, // FILE_ATTRIBUTE_NORMAL
+	TypeMask   = 0x90,
+	ReadOnly   = 0x01, // FILE_ATTRIBUTE_READONLY
+	PermMask   = 0x01
+};
+}
+
+namespace UnixFileAttributes
+{
+enum
+{
+	Dir        = 0040000, // __S_IFDIR
+	File       = 0100000, // __S_IFREG
+	SymLink    = 0120000, // __S_IFLNK
+	TypeMask   = 0170000, // __S_IFMT
+	ReadUser   = 0400,    // __S_IRUSR
+	WriteUser  = 0200,    // __S_IWUSR
+	ExeUser    = 0100,    // __S_IXUSR
+	ReadGroup  = 0040,    // __S_IRGRP
+	WriteGroup = 0020,    // __S_IWGRP
+	ExeGroup   = 0010,    // __S_IXGRP
+	ReadOther  = 0004,    // __S_IROTH
+	WriteOther = 0002,    // __S_IWOTH
+	ExeOther   = 0001,    // __S_IXOTH
+	PermMask   = 0777
+};
+}
+
+bool lcBlenderPreferences::ExtractAddon(const QString FileName, QString& Result)
+{
+	enum ZipHostOS
+	{
+		HostFAT      = 0,
+		HostUnix     = 3,
+		HostHPFS     = 6,  // filesystem used by OS/2 (and NT 3.x)
+		HostNTFS     = 11, // filesystem used by Windows NT
+		HostVFAT     = 14, // filesystem used by Windows 95, NT
+		HostOSX      = 19
+	};
+
+	struct ZipFileInfo
+	{
+		ZipFileInfo(lcZipFileInfo& FileInfo) noexcept
+			: ZipInfo(FileInfo), isDir(false), isFile(false), isSymLink(false)
+		{
+		}
+		bool IsValid() const noexcept { return isDir || isFile || isSymLink; }
+		lcZipFileInfo& ZipInfo;
+		QString filePath;
+		uint isDir : 1;
+		uint isFile : 1;
+		uint isSymLink : 1;
+		QFile::Permissions permissions;
+	};
+
+	auto ModeToPermissions = [](quint32 Mode)
+	{
+		QFile::Permissions Permissions;
+		if (Mode&  UnixFileAttributes::ReadUser)
+			Permissions |= QFile::ReadOwner | QFile::ReadUser;
+		if (Mode&  UnixFileAttributes::WriteUser)
+			Permissions |= QFile::WriteOwner | QFile::WriteUser;
+		if (Mode&  UnixFileAttributes::ExeUser)
+			Permissions |= QFile::ExeOwner | QFile::ExeUser;
+		if (Mode&  UnixFileAttributes::ReadGroup)
+			Permissions |= QFile::ReadGroup;
+		if (Mode&  UnixFileAttributes::WriteGroup)
+			Permissions |= QFile::WriteGroup;
+		if (Mode&  UnixFileAttributes::ExeGroup)
+			Permissions |= QFile::ExeGroup;
+		if (Mode&  UnixFileAttributes::ReadOther)
+			Permissions |= QFile::ReadOther;
+		if (Mode&  UnixFileAttributes::WriteOther)
+			Permissions |= QFile::WriteOther;
+		if (Mode&  UnixFileAttributes::ExeOther)
+			Permissions |= QFile::ExeOther;
+		return Permissions;
+	};
+
+	lcZipFile ZipFile;
+
+	if (!ZipFile.OpenRead(FileName))
+		return false;
+
+	QString const DestinationDir = QFileInfo(FileName).absolutePath();
+
+	bool Ok = true;
+
+	int Extracted = 0;
+
+	for (int FileIdx = 0; FileIdx < ZipFile.mFiles.GetSize(); FileIdx++)
+	{
+		ZipFileInfo FileInfo(ZipFile.mFiles[FileIdx]);
+		quint32 Mode = FileInfo.ZipInfo.external_fa;
+		const ZipHostOS HostOS = ZipHostOS(FileInfo.ZipInfo.version >> 8);
+		switch (HostOS)
+		{
+		case HostOSX:
+		case HostUnix:
+			Mode = (Mode >> 16)&  0xffff;
+			switch (Mode&  UnixFileAttributes::TypeMask)
+			{
+			case UnixFileAttributes::SymLink:
+				FileInfo.isSymLink = true;
+				break;
+			case UnixFileAttributes::Dir:
+				FileInfo.isDir = true;
+				break;
+			case UnixFileAttributes::File:
+			default:
+				FileInfo.isFile = true;
+				break;
+			}
+			FileInfo.permissions = ModeToPermissions(Mode);
+			break;
+		case HostFAT:
+		case HostNTFS:
+		case HostHPFS:
+		case HostVFAT:
+			switch (Mode&  WindowsFileAttributes::TypeMask)
+			{
+			case WindowsFileAttributes::Dir:
+				FileInfo.isDir = true;
+				break;
+			case WindowsFileAttributes::File:
+			default:
+				FileInfo.isFile = true;
+				break;
+			}
+			FileInfo.permissions |= QFile::ReadOwner | QFile::ReadUser | QFile::ReadGroup | QFile::ReadOther;
+			if ((Mode&  WindowsFileAttributes::ReadOnly) == 0)
+				FileInfo.permissions |= QFile::WriteOwner | QFile::WriteUser | QFile::WriteGroup | QFile::WriteOther;
+			if (FileInfo.isDir)
+				FileInfo.permissions |= QFile::ExeOwner | QFile::ExeUser | QFile::ExeGroup | QFile::ExeOther;
+			break;
+		default:
+			ShowMessage(tr("ZipFile entry format (HostOS %1) at index %2 is not supported. Extract terminated.")
+							.arg(HostOS).arg(FileIdx), tr("Extract Addon"), QString(), QString(), MBB_OK, QMessageBox::Warning);
+			Ok = false;
+		}
+
+		if (!Ok || !(Ok = FileInfo.IsValid()))
+			break;
+
+		// Check the file path - if broken, convert separators, eat leading and trailing ones
+		FileInfo.filePath = QDir::fromNativeSeparators(FileInfo.ZipInfo.file_name);
+		QStringRef FilePathRef(&FileInfo.filePath);
+		while (FilePathRef.startsWith(QLatin1Char('.')) || FilePathRef.startsWith(QLatin1Char('/')))
+			FilePathRef = FilePathRef.mid(1);
+		while (FilePathRef.endsWith(QLatin1Char('/')))
+			FilePathRef.chop(1);
+		FileInfo.filePath = FilePathRef.toString();
+
+		QString const AbsPath = QDir::fromNativeSeparators(DestinationDir + QDir::separator() + FileInfo.filePath);
+
+		// directories
+		if (FileInfo.isDir)
+		{
+			QDir BaseDir(DestinationDir);
+			if (!(Ok = BaseDir.mkpath(FileInfo.filePath)))
+				break;
+			if (!(Ok = QFile::setPermissions(AbsPath, FileInfo.permissions)))
+				break;
+			Extracted++;
+			continue;
+		}
+
+		lcMemFile MemFile;
+
+		ZipFile.ExtractFile(FileIdx, MemFile);
+
+		QByteArray const& ByteArray = QByteArray::fromRawData((const char*)MemFile.mBuffer, MemFile.GetLength());
+
+		// symlinks
+		if (FileInfo.isSymLink)
+		{
+			QString Destination = QFile::decodeName(ByteArray);
+			if (!(Ok = !Destination.isEmpty()))
+				break;
+			QFileInfo LinkFileInfo(AbsPath);
+			if (!QFile::exists(LinkFileInfo.absolutePath()))
+				QDir::root().mkpath(LinkFileInfo.absolutePath());
+			if (!(Ok = QFile::link(Destination, AbsPath)))
+				break;
+			Extracted++;
+			continue;
+		}
+
+		// files
+		if (FileInfo.isFile)
+		{
+			QFile File(AbsPath);
+			if(!(Ok = File.open(QIODevice::WriteOnly)))
+				break;
+			File.write(ByteArray);
+			File.setPermissions(FileInfo.permissions);
+			File.close();
+			Extracted++;
+		}
+	}
+
+	if (!Ok)
+		Result = tr("%1 of %2 files extracted.").arg(Extracted).arg(ZipFile.mFiles.GetSize());
+
+	return Ok;
 }

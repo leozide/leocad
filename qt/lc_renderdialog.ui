@@ -49,6 +49,16 @@
          <widget class="QLineEdit" name="HeightEdit"/>
         </item>
         <item>
+         <widget class="QPushButton" name="RenderSettingsButton">
+          <property name="toolTip">
+           <string>Blender addon settings</string>
+          </property>
+          <property name="text">
+           <string>Settings...</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <widget class="QLabel" name="qualityLabel">
           <property name="text">
            <string>Quality:</string>
@@ -111,9 +121,26 @@
         </widget>
        </item>
        <item>
+        <widget class="QLabel" name="renderLabel">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QPushButton" name="RenderButton">
          <property name="text">
           <string>Render</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="RenderOutputButton">
+         <property name="toolTip">
+          <string>Open the standard output log</string>
+         </property>
+         <property name="text">
+          <string>Output...</string>
          </property>
         </widget>
        </item>
@@ -135,9 +162,13 @@
   </customwidget>
  </customwidgets>
  <tabstops>
+  <tabstop>WidthEdit</tabstop>
+  <tabstop>HeightEdit</tabstop>
+  <tabstop>RenderSettingsButton</tabstop>
   <tabstop>QualityComboBox</tabstop>
   <tabstop>OutputEdit</tabstop>
   <tabstop>OutputBrowseButton</tabstop>
+  <tabstop>RenderButton</tabstop>
  </tabstops>
  <resources/>
  <connections/>

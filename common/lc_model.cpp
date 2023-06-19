@@ -263,7 +263,7 @@ void lcModel::UpdatePieceInfo(std::vector<lcModel*>& UpdatedModels)
 	mPieceInfo->SetBoundingBox(Min, Max);
 }
 
-void lcModel::SaveLDraw(QTextStream& Stream, bool SelectedOnly, lcStep CurrentStep) const
+void lcModel::SaveLDraw(QTextStream& Stream, bool SelectedOnly, lcStep LastStep) const
 {
 	const QLatin1String LineEnding("\r\n");
 
@@ -273,14 +273,14 @@ void lcModel::SaveLDraw(QTextStream& Stream, bool SelectedOnly, lcStep CurrentSt
 	lcStep Step = 1;
 	int CurrentLine = 0;
 	int AddedSteps = 0;
-	bool Saved = false;
+	bool SavedStep = false;
 
 	for (lcPiece* Piece : mPieces)
 	{
 		if (SelectedOnly && !Piece->IsSelected())
 			continue;
 
-		if ((Saved = CurrentStep && Piece->GetStepShow() > CurrentStep))
+		if (SavedStep = (LastStep != 0 && Piece->GetStepShow() > LastStep))
 			break;
 
 		while (Piece->GetFileLine() > CurrentLine && CurrentLine < mFileLines.size())
@@ -395,7 +395,7 @@ void lcModel::SaveLDraw(QTextStream& Stream, bool SelectedOnly, lcStep CurrentSt
 			Stream << QLatin1String("0 !LEOCAD SYNTH END\r\n");
 	}
 
-	while ( !Saved && CurrentLine < mFileLines.size())
+	while (!SavedStep && CurrentLine < mFileLines.size())
 	{
 		QString Line = mFileLines[CurrentLine];
 		QTextStream LineStream(&Line, QIODevice::ReadOnly);
@@ -1107,7 +1107,7 @@ void lcModel::Copy()
 	QByteArray File;
 	QTextStream Stream(&File, QIODevice::WriteOnly);
 
-	SaveLDraw(Stream, true);
+	SaveLDraw(Stream, true, 0);
 
 	gApplication->ExportClipboard(File);
 }
@@ -1301,7 +1301,7 @@ QImage lcModel::GetPartsListImage(int MaxWidth, lcStep Step, quint32 BackgroundC
 	if (Step == 0)
 		GetPartsList(gDefaultColor, true, false, PartsList);
 	else
-		GetPartsListForStep(Step, gDefaultColor, PartsList);
+		GetPartsListForStep(Step, gDefaultColor, PartsList, false);
 
 	if (PartsList.empty())
 		return QImage();
@@ -1629,7 +1629,7 @@ void lcModel::SaveCheckpoint(const QString& Description)
 	ModelHistoryEntry->Description = Description;
 
 	QTextStream Stream(&ModelHistoryEntry->File);
-	SaveLDraw(Stream, false);
+	SaveLDraw(Stream, false, 0);
 
 	mUndoHistory.insert(mUndoHistory.begin(), ModelHistoryEntry);
 	for (lcModelHistoryEntry* Entry : mRedoHistory)

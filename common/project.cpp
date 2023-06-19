@@ -299,7 +299,7 @@ void Project::ShowModelListDialog()
 				QByteArray File;
 
 				QTextStream SaveStream(&File);
-				Source->SaveLDraw(SaveStream, false);
+				Source->SaveLDraw(SaveStream, false, 0);
 				SaveStream.flush();
 
 				QBuffer Buffer(&File);
@@ -517,7 +517,7 @@ bool Project::Save(QTextStream& Stream)
 		if (MPD)
 			Stream << QLatin1String("0 FILE ") << Model->GetProperties().mFileName << QLatin1String("\r\n");
 
-		Model->SaveLDraw(Stream, false);
+		Model->SaveLDraw(Stream, false, 0);
 		Model->SetSaved();
 
 		if (MPD)
@@ -767,7 +767,7 @@ bool Project::ExportModel(const QString& FileName, lcModel* Model) const
 
 	QTextStream Stream(&File);
 
-	Model->SaveLDraw(Stream, false);
+	Model->SaveLDraw(Stream, false, 0);
 
 	return true;
 }

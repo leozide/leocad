@@ -1620,7 +1620,7 @@ void lcBlenderPreferences::ShowResult()
 		QString const& Title = tr ("%1 Blender Addon Install").arg(LC_PRODUCTNAME_STR);
 		QString const& Header =  "<b>" + tr ("Addon install failed.") + "</b>";
 		QString const& Body = tr ("LDraw addon install encountered one or more errors. See Show Details...");
-		ShowMessage(Header, Title, Body, StdErrLog, MBB_OK, QMessageBox::Critical);
+		ShowMessage(Header, Title, Body, StdErrLog, MBB_OK, QMessageBox::Warning);
 	}
 	else
 	{
@@ -1883,7 +1883,7 @@ void lcBlenderPreferences::ReadStdOut()
 		QString const StdOutLog = QDir::toNativeSeparators(QString("<br>- See %1/Blender/stdout-blender-addon-install")
 																.arg(mDataDir));
 
-		QMessageBox::Icon Icon = Error ? QMessageBox::Critical : QMessageBox::Warning;
+		QMessageBox::Icon Icon = QMessageBox::Warning;
 		QString const& Items = Error ? tr("errors%1").arg(Warning ? tr(" and warnings") : "") : Warning ? tr("warnings") : "";
 
 		QString const& Title = tr ("%1 Blender Addon Install").arg(LC_PRODUCTNAME_STR);

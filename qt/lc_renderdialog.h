@@ -6,17 +6,16 @@ namespace Ui {
 class lcRenderDialog;
 }
 
-class QProcess;
-class RenderProcess : public QProcess
+class lcRenderProcess : public QProcess
 {
 	Q_OBJECT
 
 public:
-	explicit RenderProcess(QObject* parent = nullptr)
+	explicit lcRenderProcess(QObject* parent = nullptr)
 		: QProcess(parent)
 	{
 	}
-	~RenderProcess();
+	~lcRenderProcess();
 };
 
 class lcRenderPreviewWidget : public QWidget
@@ -66,7 +65,8 @@ protected slots:
 	void UpdateElapsedTime() const;
 
 protected:
-	QString GetOutputFileName(int StdErr = 0) const;
+	QString GetStdOutFileName() const;
+	QString GetStdErrFileName() const;
 	QString GetPOVFileName() const;
 	QString ReadStdErr(bool& Error) const;
 	void CloseProcess();
@@ -76,7 +76,7 @@ protected:
 	int TerminateChildProcess(const qint64 Pid, const qint64 Ppid);
 #endif
 #ifndef QT_NO_PROCESS
-	RenderProcess* mProcess;
+	lcRenderProcess* mProcess;
 #endif
 	enum CommandType
 	{

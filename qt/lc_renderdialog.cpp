@@ -18,7 +18,7 @@
 #define LC_POVRAY_MEMORY_MAPPED_FILE 1
 #endif
 
-static inline QString ElapsedTime(const qint64 &Duration)
+static inline QString ElapsedTime(const qint64& Duration)
 {
 	qint64 Elapsed = Duration;
 	int Milliseconds = int(Elapsed % 1000);
@@ -179,11 +179,17 @@ lcRenderDialog::~lcRenderDialog()
 	delete ui;
 }
 
-QString lcRenderDialog::GetOutputFileName(int StdErr) const
+QString lcRenderDialog::GetStdOutFileName() const
 {
-	QString LogFile = mCommand == POVRAY_RENDER
-						  ? StdErr ? QLatin1String("leocad-povray-render.err") : QLatin1String("leocad-povray-render.out")
-						  : StdErr ? QLatin1String("leocad-blender-render.err") : QLatin1String("leocad-blender-render.out");
+	QString LogFile = mCommand == POVRAY_RENDER ? QLatin1String("leocad-povray-render.out") : QLatin1String("leocad-blender-render.out");
+
+	return QDir(QDir::tempPath()).absoluteFilePath(LogFile);
+}
+
+QString lcRenderDialog::GetStdErrFileName() const
+{
+	QString LogFile = mCommand == POVRAY_RENDER ? QLatin1String("leocad-povray-render.err") : QLatin1String("leocad-blender-render.err");
+
 	return QDir(QDir::tempPath()).absoluteFilePath(LogFile);
 }
 
@@ -221,7 +227,7 @@ void lcRenderDialog::CloseProcess()
 		mOutputBuffer = nullptr;
 		mOutputFile.close();
 
-		QFile::remove(GetOutputFileName());
+		QFile::remove(GetStdOutFileName());
 #endif
 
 		QFile::remove(GetPOVFileName());
@@ -322,7 +328,7 @@ void lcRenderDialog::on_RenderButton_clicked()
 		Arguments.append("-O-");
 
 #if LC_POVRAY_MEMORY_MAPPED_FILE
-		Arguments.append(QString::fromLatin1("+SM\"%1\"").arg(GetOutputFileName()));
+		Arguments.append(QString::fromLatin1("+SM\"%1\"").arg(GetStdOutFileName()));
 #endif
 
 		int Quality = ui->QualityComboBox->currentIndex();
@@ -369,15 +375,14 @@ void lcRenderDialog::on_RenderButton_clicked()
 		POVRayPath = QDir::cleanPath(QCoreApplication::applicationDirPath() + QLatin1String("/povray"));
 #endif
 
-		mProcess = new RenderProcess(this);
+		mProcess = new lcRenderProcess(this);
 #ifdef Q_OS_LINUX
 		connect(mProcess, SIGNAL(readyReadStandardError()), this, SLOT(ReadStdErr()));
 #endif
-		int const StdErr = 1;
 		QStringList POVEnv = QProcess::systemEnvironment();
 		POVEnv.prepend("POV_IGNORE_SYSCONF_MSG=1");
 		mProcess->setEnvironment(POVEnv);
-		mProcess->setStandardErrorFile(GetOutputFileName(StdErr));
+		mProcess->setStandardErrorFile(GetStdErrFileName());
 		mProcess->start(POVRayPath, Arguments);
 
 		mImage = QImage(ui->WidthEdit->text().toInt(), ui->HeightEdit->text().toInt(), QImage::Format_ARGB32);
@@ -413,7 +418,7 @@ void lcRenderDialog::on_RenderButton_clicked()
 		mBlendProgValue = 0;
 		mBlendProgMax   = 0;
 
-		QStringList const &DataPathList = QStandardPaths::standardLocations(QStandardPaths::DataLocation);
+		const QStringList DataPathList = QStandardPaths::standardLocations(QStandardPaths::DataLocation);
 		mDataPath = DataPathList.first();
 		QString const DefaultBlendFile = QString("%1/blender/config/%2").arg(mDataPath).arg(LC_BLENDER_ADDON_BLEND_FILE);
 
@@ -473,7 +478,7 @@ void lcRenderDialog::on_RenderButton_clicked()
 		ScriptCommand = QString("%1 %2").arg(lcGetProfileString(LC_PROFILE_BLENDER_PATH)).arg(Arguments.join(" "));
 
 		if (mCommand == OPEN_IN_BLENDER)
-			ScriptCommand.append(QString(" > %1").arg(QDir::toNativeSeparators(GetOutputFileName())));
+			ScriptCommand.append(QString(" > %1").arg(QDir::toNativeSeparators(GetStdOutFileName())));
 
 		const QLatin1String LineEnding("\r\n");
 
@@ -507,24 +512,23 @@ void lcRenderDialog::on_RenderButton_clicked()
 		ShellProgram = QLatin1String(LC_UNIX_SHELL);
 #endif
 
-		mProcess = new RenderProcess(this);
+		mProcess = new lcRenderProcess(this);
 
 		connect(mProcess, SIGNAL(readyReadStandardOutput()), this, SLOT(ReadStdOut()));
 
 		QString const LDrawLibPath = QFileInfo(lcGetProfileString(LC_PROFILE_PARTS_LIBRARY)).absolutePath();
 		QStringList SystemEnvironment = QProcess::systemEnvironment();
 		SystemEnvironment.prepend("LDRAW_DIRECTORY=" + LDrawLibPath);
-		int const StdErr = 1;
 
 		mProcess->setEnvironment(SystemEnvironment);
 
 		mProcess->setWorkingDirectory(QDir::toNativeSeparators(QString("%1/blender").arg(mDataPath)));
 
-		mProcess->setStandardErrorFile(GetOutputFileName(StdErr));
+		mProcess->setStandardErrorFile(GetStdErrFileName());
 
 		if (mCommand == OPEN_IN_BLENDER)
 		{
-			QFileInfo Info(GetOutputFileName());
+			QFileInfo Info(GetStdOutFileName());
 			if (Info.exists())
 				QFile::remove(Info.absoluteFilePath());
 #ifdef Q_OS_WIN
@@ -552,10 +556,10 @@ void lcRenderDialog::on_RenderButton_clicked()
 							bool const Warning = QString(Ba).contains(QRegExp("(?:\\w)*WARNING: ", Qt::CaseInsensitive));
 							if (Error || Warning)
 							{
-								QMessageBox::Icon Icon = Error ? QMessageBox::Critical : QMessageBox::Warning;
-								QString const &Items = Error ? tr("errors%1").arg(Warning ? tr(" and warnings") : "") : Warning ? tr("warnings") : "";
-								QString const &Title = tr("Open in Blender output");
-								QString const &Body = tr("Open in Blender encountered %1. See Show Details...").arg(Items);
+								QMessageBox::Icon Icon = QMessageBox::Warning;
+								const QString Items = Error ? tr("errors%1").arg(Warning ? tr(" and warnings") : "") : Warning ? tr("warnings") : "";
+								const QString Title = tr("Open in Blender output");
+								const QString Body = tr("Open in Blender encountered %1. See Show Details...").arg(Items);
 								lcBlenderPreferences::ShowMessage(Body, Title, QString(), QString(Ba), 0, Icon);
 							}
 						}
@@ -663,15 +667,14 @@ void lcRenderDialog::ReadStdOut()
 	}
 }
 
-QString lcRenderDialog::ReadStdErr(bool &HasError) const
+QString lcRenderDialog::ReadStdErr(bool& HasError) const
 {
 	HasError = mCommand == BLENDER_RENDER ? false : true;
 
 	QFile File;
 	QStringList returnLines;
 
-	int const StdErr = 1;
-	File.setFileName(GetOutputFileName(StdErr));
+	File.setFileName(GetStdErrFileName());
 
 	if (! File.open(QFile::ReadOnly | QFile::Text))
 	{
@@ -703,7 +706,7 @@ QString lcRenderDialog::ReadStdErr(bool &HasError) const
 
 void lcRenderDialog::WriteStdOut()
 {
-	QFile File(GetOutputFileName());
+	QFile File(GetStdOutFileName());
 
 	if (File.open(QFile::WriteOnly | QIODevice::Truncate | QFile::Text))
 	{
@@ -741,7 +744,7 @@ void lcRenderDialog::Update()
 #if LC_POVRAY_MEMORY_MAPPED_FILE
 		if (!mOutputBuffer)
 		{
-			mOutputFile.setFileName(GetOutputFileName());
+			mOutputFile.setFileName(GetStdOutFileName());
 
 			if (!mOutputFile.open(QFile::ReadWrite))
 				return;
@@ -817,8 +820,8 @@ void lcRenderDialog::ShowResult()
 		ui->RenderProgress->setRange(0,1);
 		ui->RenderProgress->setValue(0);
 
-		QString const &Title = mCommand == BLENDER_RENDER ? tr("Blender Render") : tr("POV-Ray Render");
-		QString const &Body  = tr ("An error occurred while rendering. See Show Details...");
+		QString const Title = mCommand == BLENDER_RENDER ? tr("Blender Render") : tr("POV-Ray Render");
+		QString const Body  = tr ("An error occurred while rendering. See Show Details...");
 		lcBlenderPreferences::ShowMessage(Body, Title, QString(), StdErrLog, 0, QMessageBox::Warning);
 		return;
 	}
@@ -891,7 +894,7 @@ void lcRenderDialog::on_OutputBrowseButton_clicked()
 void lcRenderDialog::on_RenderOutputButton_clicked()
 {
 	QString RenderType = mCommand == POVRAY_RENDER ? QLatin1String("POV-Ray") : QLatin1String("Blender");
-	QFileInfo FileInfo(GetOutputFileName());
+	QFileInfo FileInfo(GetStdOutFileName());
 	if (!FileInfo.exists())
 	{
 		QMessageBox::warning(this, tr("Error"), tr("%1 Standard output file not found: %2.")
@@ -902,8 +905,7 @@ void lcRenderDialog::on_RenderOutputButton_clicked()
 	QDesktopServices::openUrl(QUrl("file:///"+FileInfo.absoluteFilePath(), QUrl::TolerantMode));
 }
 
-
-RenderProcess::~RenderProcess()
+lcRenderProcess::~lcRenderProcess()
 {
 	if(state() == QProcess::Running || state() == QProcess::Starting)
 	{

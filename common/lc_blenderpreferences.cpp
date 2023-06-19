@@ -1405,7 +1405,7 @@ bool lcBlenderPreferences::GetBlenderAddon(const QString& BlenderDir)
 				return false;
 			}
 
-			Ba = QByteArray::fromRawData((const char*)File.mBuffer, File.GetLength());
+			Ba = QByteArray::fromRawData((const char*)File.mBuffer, (int)File.GetLength());
 			if (Ba.isEmpty())
 			{
 				ShowMessage(tr("Cannot read addon archive version file: %1.").arg(VersionFile));
@@ -3687,7 +3687,7 @@ bool lcBlenderPreferences::ExtractAddon(const QString FileName, QString& Result)
 
 		ZipFile.ExtractFile(FileIdx, MemFile);
 
-		QByteArray const& ByteArray = QByteArray::fromRawData((const char*)MemFile.mBuffer, MemFile.GetLength());
+		QByteArray const& ByteArray = QByteArray::fromRawData((const char*)MemFile.mBuffer, (int)MemFile.GetLength());
 
 		// symlinks
 		if (FileInfo.isSymLink)

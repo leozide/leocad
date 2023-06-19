@@ -118,7 +118,7 @@ const lcCommand gCommands[] =
 	// LC_FILE_RENDER_BLENDER
 	{
 		QT_TRANSLATE_NOOP("Action", "File.Render.Blender"),
-		QT_TRANSLATE_NOOP("Menu", "&Bender Render..."),
+		QT_TRANSLATE_NOOP("Menu", "&Blender Render..."),
 		QT_TRANSLATE_NOOP("Status", "Render the current model using Blender"),
 		""
 	},

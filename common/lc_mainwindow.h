@@ -326,7 +326,7 @@ protected:
 	void ShowUpdatesDialog();
 	void ShowAboutDialog();
 	void ShowHTMLDialog();
-	void ShowRenderDialog();
+	void ShowRenderDialog(int Command);
 	void ShowInstructionsDialog();
 	void ShowPrintDialog();
 	void CreatePreviewWidget();

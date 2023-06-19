@@ -89,6 +89,7 @@ public:
 	bool ImportInventory(const QByteArray& Inventory, const QString& Name, const QString& Description);
 
 	void SaveImage();
+	bool ExportCurrentStep(const QString& FileName);
 	bool ExportModel(const QString& FileName, lcModel* Model) const;
 	bool Export3DStudio(const QString& FileName);
 	void ExportBrickLink();

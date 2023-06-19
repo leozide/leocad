@@ -9,6 +9,7 @@
 #include "lc_glextensions.h"
 #include "pieceinf.h"
 #include "lc_edgecolordialog.h"
+#include "lc_blenderpreferences.h"
 
 static const char* gLanguageLocales[] =
 {
@@ -363,6 +364,23 @@ void lcQPreferencesDialog::on_partsArchiveBrowse_clicked()
 
 	if (!result.isEmpty())
 		ui->partsLibrary->setText(QDir::toNativeSeparators(result));
+}
+
+void lcQPreferencesDialog::on_BlenderAddonSettingsButton_clicked()
+{
+	int Width = 1280;
+	int Height = 720;
+	double Scale = 1.0f;
+
+	lcBlenderPreferencesDialog::GetBlenderPreferences(
+		Width,
+		Height,
+		Scale,
+		this);
+
+	Q_UNUSED(Width)
+	Q_UNUSED(Height)
+	Q_UNUSED(Scale)
 }
 
 void lcQPreferencesDialog::on_ColorConfigBrowseButton_clicked()

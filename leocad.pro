@@ -175,6 +175,7 @@ SOURCES += \
 	common/lc_aboutdialog.cpp \
 	common/lc_application.cpp \
 	common/lc_arraydialog.cpp \
+	common/lc_blenderpreferences.cpp \
 	common/lc_bricklink.cpp \
 	common/lc_category.cpp \
 	common/lc_categorydialog.cpp \
@@ -244,6 +245,7 @@ HEADERS += \
 	common/lc_application.h \
 	common/lc_array.h \
 	common/lc_arraydialog.h \
+	common/lc_blenderpreferences.h \
 	common/lc_bricklink.h \
 	common/lc_category.h \
 	common/lc_categorydialog.h \

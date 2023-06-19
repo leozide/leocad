@@ -333,10 +333,17 @@
        <item>
         <widget class="QWidget" name="widget" native="true">
          <layout class="QGridLayout" name="gridLayout">
-          <item row="13" column="2">
-           <widget class="QToolButton" name="HighContrastButton">
+          <item row="12" column="0">
+           <widget class="QCheckBox" name="MeshLOD">
             <property name="text">
-             <string>Contrast Settings...</string>
+             <string>Mesh LOD</string>
+            </property>
+           </widget>
+          </item>
+          <item row="10" column="1">
+           <widget class="QToolButton" name="FadeStepsColor">
+            <property name="text">
+             <string/>
             </property>
            </widget>
           </item>
@@ -357,6 +364,64 @@
               <string>Default Lights</string>
              </property>
             </item>
+           </widget>
+          </item>
+          <item row="10" column="0">
+           <widget class="QCheckBox" name="FadeSteps">
+            <property name="text">
+             <string>Fade Previous Steps</string>
+            </property>
+           </widget>
+          </item>
+          <item row="12" column="1">
+           <widget class="QSlider" name="MeshLODSlider">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="tickPosition">
+             <enum>QSlider::NoTicks</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="12" column="2">
+           <widget class="QLabel" name="MeshLODLabel">
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QCheckBox" name="antiAliasing">
+            <property name="text">
+             <string>Anti-aliasing</string>
+            </property>
+           </widget>
+          </item>
+          <item row="13" column="0">
+           <widget class="QLabel" name="label_24">
+            <property name="text">
+             <string>Stud Style</string>
+            </property>
+           </widget>
+          </item>
+          <item row="11" column="0">
+           <widget class="QCheckBox" name="HighlightNewParts">
+            <property name="text">
+             <string>Highlight New Parts</string>
+            </property>
+           </widget>
+          </item>
+          <item row="14" column="0">
+           <widget class="QLabel" name="label_3">
+            <property name="text">
+             <string>Shading Mode:</string>
+            </property>
            </widget>
           </item>
           <item row="13" column="1">
@@ -403,10 +468,10 @@
             </item>
            </widget>
           </item>
-          <item row="14" column="0">
-           <widget class="QLabel" name="label_3">
+          <item row="13" column="2">
+           <widget class="QToolButton" name="HighContrastButton">
             <property name="text">
-             <string>Shading Mode:</string>
+             <string>Contrast Settings...</string>
             </property>
            </widget>
           </item>
@@ -422,20 +487,6 @@
              </size>
             </property>
            </spacer>
-          </item>
-          <item row="13" column="0">
-           <widget class="QLabel" name="label_24">
-            <property name="text">
-             <string>Stud Style</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0">
-           <widget class="QCheckBox" name="antiAliasing">
-            <property name="text">
-             <string>Anti-aliasing</string>
-            </property>
-           </widget>
           </item>
           <item row="0" column="1">
            <widget class="QComboBox" name="antiAliasingSamples">
@@ -463,54 +514,17 @@
             </property>
            </widget>
           </item>
-          <item row="11" column="0">
-           <widget class="QCheckBox" name="HighlightNewParts">
+          <item row="15" column="0">
+           <widget class="QLabel" name="label_39">
             <property name="text">
-             <string>Highlight New Parts</string>
+             <string>Blender LDraw Render:</string>
             </property>
            </widget>
           </item>
-          <item row="12" column="0">
-           <widget class="QCheckBox" name="MeshLOD">
+          <item row="15" column="1">
+           <widget class="QToolButton" name="BlenderAddonSettingsButton">
             <property name="text">
-             <string>Mesh LOD</string>
-            </property>
-           </widget>
-          </item>
-          <item row="12" column="1">
-           <widget class="QSlider" name="MeshLODSlider">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="tickPosition">
-             <enum>QSlider::NoTicks</enum>
-            </property>
-           </widget>
-          </item>
-          <item row="10" column="1">
-           <widget class="QToolButton" name="FadeStepsColor">
-            <property name="text">
-             <string/>
-            </property>
-           </widget>
-          </item>
-          <item row="10" column="0">
-           <widget class="QCheckBox" name="FadeSteps">
-            <property name="text">
-             <string>Fade Previous Steps</string>
-            </property>
-           </widget>
-          </item>
-          <item row="12" column="2">
-           <widget class="QLabel" name="MeshLODLabel">
-            <property name="text">
-             <string/>
+             <string>Addon Settings...</string>
             </property>
            </widget>
           </item>
@@ -2007,6 +2021,7 @@
   <tabstop>studStyleCombo</tabstop>
   <tabstop>HighContrastButton</tabstop>
   <tabstop>ShadingMode</tabstop>
+  <tabstop>BlenderAddonSettingsButton</tabstop>
   <tabstop>edgeLines</tabstop>
   <tabstop>ConditionalLinesCheckBox</tabstop>
   <tabstop>AutomateEdgeColor</tabstop>

@@ -205,7 +205,7 @@ public:
 	void RemoveFocusPieceFromGroup();
 	void ShowEditGroupsDialog();
 
-	void SaveLDraw(QTextStream& Stream, bool SelectedOnly) const;
+	void SaveLDraw(QTextStream& Stream, bool SelectedOnly, lcStep LastStep) const;
 	void LoadLDraw(QIODevice& Device, Project* Project);
 	bool LoadBinary(lcFile* File);
 	bool LoadLDD(const QString& FileData);
@@ -263,7 +263,7 @@ public:
 	bool GetVisiblePiecesBoundingBox(lcVector3& Min, lcVector3& Max) const;
 	std::vector<lcVector3> GetPiecesBoundingBoxPoints() const;
 	void GetPartsList(int DefaultColorIndex, bool ScanSubModels, bool AddSubModels, lcPartsList& PartsList) const;
-	void GetPartsListForStep(lcStep Step, int DefaultColorIndex, lcPartsList& PartsList) const;
+	void GetPartsListForStep(lcStep Step, int DefaultColorIndex, lcPartsList& PartsList, bool Cumulative) const;
 	void GetModelParts(const lcMatrix44& WorldMatrix, int DefaultColorIndex, std::vector<lcModelPartsEntry>& ModelParts) const;
 	void GetSelectionInformation(int* Flags, lcArray<lcObject*>& Selection, lcObject** Focus) const;
 	lcArray<lcObject*> GetSelectionModePieces(const lcPiece* SelectedPiece) const;

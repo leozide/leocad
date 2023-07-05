@@ -206,6 +206,16 @@ void lcMainWindow::CreateActions()
 	EditActionLightIcon.addFile(":/resources/action_light_16.png");
 	mActions[LC_EDIT_ACTION_LIGHT]->setIcon(EditActionLightIcon);
 
+	QIcon EditActionArealightIcon;
+	EditActionArealightIcon.addFile(":/resources/action_arealight.png");
+	EditActionArealightIcon.addFile(":/resources/action_arealight_16.png");
+	mActions[LC_EDIT_ACTION_AREALIGHT]->setIcon(EditActionArealightIcon);
+
+	QIcon EditActionSunlightIcon;
+	EditActionSunlightIcon.addFile(":/resources/action_sunlight.png");
+	EditActionSunlightIcon.addFile(":/resources/action_sunlight_16.png");
+	mActions[LC_EDIT_ACTION_SUNLIGHT]->setIcon(EditActionSunlightIcon);
+
 	QIcon EditActionSpotLightIcon;
 	EditActionSpotLightIcon.addFile(":/resources/action_spotlight.png");
 	EditActionSpotLightIcon.addFile(":/resources/action_spotlight_16.png");
@@ -422,6 +432,8 @@ void lcMainWindow::CreateMenus()
 	mToolsMenu = new QMenu(tr("Tools"), this);
 	mToolsMenu->addAction(mActions[LC_EDIT_ACTION_INSERT]);
 	mToolsMenu->addAction(mActions[LC_EDIT_ACTION_LIGHT]);
+	mToolsMenu->addAction(mActions[LC_EDIT_ACTION_AREALIGHT]);
+	mToolsMenu->addAction(mActions[LC_EDIT_ACTION_SUNLIGHT]);
 	mToolsMenu->addAction(mActions[LC_EDIT_ACTION_SPOTLIGHT]);
 	mToolsMenu->addAction(mActions[LC_EDIT_ACTION_CAMERA]);
 	mToolsMenu->addSeparator();
@@ -665,6 +677,8 @@ void lcMainWindow::CreateToolBars()
 	insertToolBarBreak(mToolsToolBar);
 	mToolsToolBar->addAction(mActions[LC_EDIT_ACTION_INSERT]);
 	mToolsToolBar->addAction(mActions[LC_EDIT_ACTION_LIGHT]);
+	mToolsToolBar->addAction(mActions[LC_EDIT_ACTION_AREALIGHT]);
+	mToolsToolBar->addAction(mActions[LC_EDIT_ACTION_SUNLIGHT]);
 	mToolsToolBar->addAction(mActions[LC_EDIT_ACTION_SPOTLIGHT]);
 	mToolsToolBar->addAction(mActions[LC_EDIT_ACTION_CAMERA]);
 	mToolsToolBar->addSeparator();
@@ -3364,6 +3378,14 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 
 	case LC_EDIT_ACTION_LIGHT:
 		SetTool(lcTool::Light);
+		break;
+
+	case LC_EDIT_ACTION_AREALIGHT:
+		SetTool(lcTool::AreaLight);
+		break;
+
+	case LC_EDIT_ACTION_SUNLIGHT:
+		SetTool(lcTool::SunLight);
 		break;
 
 	case LC_EDIT_ACTION_SPOTLIGHT:

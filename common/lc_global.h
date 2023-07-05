@@ -109,6 +109,7 @@ class lcTexture;
 class lcScene;
 class lcViewManipulator;
 class lcViewSphere;
+class lcLightProps;
 enum class lcRenderMeshState : int;
 enum class lcTrackTool;
 enum class lcTrackButton;

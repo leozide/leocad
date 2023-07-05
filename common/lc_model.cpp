@@ -571,6 +571,15 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 			}
 			else if (Token == QLatin1String("LIGHT"))
 			{
+				if (!Light)
+					Light = new lcLight(0.0f, 0.0f, 0.0f);
+
+				if (Light->ParseLDrawLine(LineStream))
+				{
+					Light->CreateName(mLights);
+					mLights.Add(Light);
+					Light = nullptr;
+				}
 			}
 			else if (Token == QLatin1String("GROUP"))
 			{
@@ -2949,6 +2958,15 @@ void lcModel::SetSelectedPiecesStepHide(lcStep Step)
 	}
 }
 
+void lcModel::UpdateLight(lcLight* Light, const lcLightProps Props, int Property)
+{
+	Light->UpdateLight(mCurrentStep, Props, Property);
+
+	SaveCheckpoint(tr("Update Light"));
+	UpdateAllViews();
+	gMainWindow->UpdateSelectedObjects(false);
+}
+
 void lcModel::SetCameraOrthographic(lcCamera* Camera, bool Ortho)
 {
 	if (Camera->IsOrtho() == Ortho)
@@ -3006,6 +3024,19 @@ void lcModel::SetCameraName(lcCamera* Camera, const QString& Name)
 	Camera->SetName(Name);
 
 	SaveCheckpoint(tr("Renaming Camera"));
+	gMainWindow->UpdateSelectedObjects(false);
+	UpdateAllViews();
+	gMainWindow->UpdateCameraMenu();
+}
+
+void lcModel::SetLightName(lcLight* Light, const QString &Name)
+{
+	if (Light->GetName() == Name)
+		return;
+
+	Light->SetName(Name);
+
+	SaveCheckpoint(tr("Renaming Light"));
 	gMainWindow->UpdateSelectedObjects(false);
 	UpdateAllViews();
 	gMainWindow->UpdateCameraMenu();
@@ -3955,6 +3986,8 @@ void lcModel::EndMouseTool(lcTool Tool, bool Accept)
 	{
 	case lcTool::Insert:
 	case lcTool::Light:
+	case lcTool::AreaLight:
+	case lcTool::SunLight:
 		break;
 
 	case lcTool::SpotLight:
@@ -4034,17 +4067,20 @@ void lcModel::PointLightToolClicked(const lcVector3& Position)
 	SaveCheckpoint(tr("New Light"));
 }
 
-void lcModel::BeginSpotLightTool(const lcVector3& Position, const lcVector3& Target)
+void lcModel::BeginDirectionalLightTool(const lcVector3& Position, const lcVector3& Target, int LightType)
 {
-	lcLight* Light = new lcLight(Position[0], Position[1], Position[2], Target[0], Target[1], Target[2]);
+	lcLight* Light = new lcLight(Position[0], Position[1], Position[2], Target[0], Target[1], Target[2], LightType);
+	Light->CreateName(mLights);
 	mLights.Add(Light);
 
 	mMouseToolDistance = Target;
 
 	ClearSelectionAndSetFocus(Light, LC_LIGHT_SECTION_TARGET, false);
+	QString light(LightType == LC_AREALIGHT ? "Arealight " : LightType == LC_SUNLIGHT ? "Sunlight " : "Spotlight ");
+	SaveCheckpoint(tr("%1").arg(light));
 }
 
-void lcModel::UpdateSpotLightTool(const lcVector3& Position)
+void lcModel::UpdateDirectionalLightTool(const lcVector3& Position)
 {
 	lcLight* Light = mLights[mLights.GetSize() - 1];
 

@@ -117,13 +117,9 @@ lcRenderDialog::lcRenderDialog(QWidget* Parent, int Command)
 		}
 
 		if (BlenderConfigured)
-			mImportModule = lcGetProfileString(LC_PROFILE_BLENDER_IMPORT_MODULE) == QLatin1String("TN")
-								? tr("LDraw Import TN")
-								: tr("LDraw Import MM");
+			mImportModule = lcGetProfileString(LC_PROFILE_BLENDER_IMPORT_MODULE) == QLatin1String("TN") ? tr("LDraw Import TN") : tr("LDraw Import MM");
 
-		ui->RenderButton->setToolTip(BlenderConfigured
-										 ? tr("Render LDraw Model")
-										 : tr("Blender not configured. Use Settings... to configure."));
+		ui->RenderButton->setToolTip(BlenderConfigured ? tr("Render LDraw Model") : tr("Blender not configured. Use Settings... to configure."));
 
 		ui->RenderButton->setEnabled(BlenderConfigured);
 
@@ -134,13 +130,13 @@ lcRenderDialog::lcRenderDialog(QWidget* Parent, int Command)
 
 		if (mCommand == OPEN_IN_BLENDER)
 		{
-			mLabelMessage = tr("Open%1 in Blender using %2:")
-							   .arg(Model ? tr(" <b>STEP %1</b>").arg(Model->GetCurrentStep()) : "");
+			mLabelMessage = tr("Open%1 in Blender using %2:") .arg(Model ? tr(" <b>STEP %1</b>").arg(Model->GetCurrentStep()) : "");
 
 			ui->RenderSettingsButton->setToolTip(tr("Blender import settings"));
 
 			ui->RenderButton->setText(tr("Open in Blender"));
 			ui->RenderButton->setFixedWidth(ui->RenderButton->sizeHint().width() + 20);
+
 			if (BlenderConfigured)
 				ui->RenderButton->setToolTip(tr("Import and open LDraw model in Blender"));
 
@@ -202,14 +198,8 @@ void lcRenderDialog::UpdateElapsedTime() const
 {
 	if (mProcess && mCommand == BLENDER_RENDER)
 	{
-		QString const RenderType = lcGetProfileString(LC_PROFILE_BLENDER_VERSION).startsWith("v3")
-										? QLatin1String("Samples")
-										: QLatin1String("Tiles");
-		ui->renderLabel->setText(tr("%1: %2/%3, %4")
-									.arg(RenderType)
-									.arg(mBlendProgValue)
-									.arg(mBlendProgMax)
-									.arg(ElapsedTime(mRenderTime.elapsed())));
+		const QString RenderType = lcGetProfileString(LC_PROFILE_BLENDER_VERSION).startsWith("v3") ? QLatin1String("Samples") : QLatin1String("Tiles");
+		ui->renderLabel->setText(tr("%1: %2/%3, %4") .arg(RenderType) .arg(mBlendProgValue) .arg(mBlendProgMax) .arg(ElapsedTime(mRenderTime.elapsed())));
 	}
 }
 
@@ -260,9 +250,7 @@ bool lcRenderDialog::PromptCancel()
 				ui->RenderOutputButton->setEnabled(true);
 			}
 			if (mCommand == BLENDER_RENDER)
-				ui->renderLabel->setText(tr("Tiles: %1/%2, Render Cancelled.")
-											 .arg(mBlendProgValue)
-											 .arg(mBlendProgMax));
+				ui->renderLabel->setText(tr("Tiles: %1/%2, Render Cancelled.") .arg(mBlendProgValue) .arg(mBlendProgMax));
 		}
 		else
 			return false;
@@ -291,9 +279,7 @@ void lcRenderDialog::on_RenderSettingsButton_clicked()
 	{
 		if (mCommand == OPEN_IN_BLENDER)
 		{
-			mImportModule = lcGetProfileString(LC_PROFILE_BLENDER_IMPORT_MODULE) == QLatin1String("TN")
-								? tr("LDraw Import TN")
-								: tr("LDraw Import MM");
+			mImportModule = lcGetProfileString(LC_PROFILE_BLENDER_IMPORT_MODULE) == QLatin1String("TN") ? tr("LDraw Import TN") : tr("LDraw Import MM");
 			ui->renderLabel->setText(mLabelMessage.arg(mImportModule));
 			ui->renderLabel->setAlignment(Qt::AlignTrailing | Qt::AlignVCenter);
 		}
@@ -415,12 +401,12 @@ void lcRenderDialog::on_RenderButton_clicked()
 	}
 	else
 	{
-		QString const BlenderLDrawConfigFile = lcGetProfileString(LC_PROFILE_BLENDER_LDRAW_CONFIG_PATH);
-		QString const BlenderImportModule = lcGetProfileString(LC_PROFILE_BLENDER_IMPORT_MODULE);
+		const QString BlenderLDrawConfigFile = lcGetProfileString(LC_PROFILE_BLENDER_LDRAW_CONFIG_PATH);
+		const QString BlenderImportModule = lcGetProfileString(LC_PROFILE_BLENDER_IMPORT_MODULE);
 		if (!QFileInfo(BlenderLDrawConfigFile).isReadable() && !BlenderImportModule.isEmpty())
 			lcBlenderPreferences::SaveSettings();
 
-		QString const Option = mCommand == OPEN_IN_BLENDER ? tr("import") : tr("render");
+		 const QString Option = mCommand == OPEN_IN_BLENDER ? tr("import") : tr("render");
 
 		ui->renderLabel->setText(tr("Saving Blender %1 model...").arg(Option));
 
@@ -431,10 +417,10 @@ void lcRenderDialog::on_RenderButton_clicked()
 
 		const QStringList DataPathList = QStandardPaths::standardLocations(QStandardPaths::DataLocation);
 		mDataPath = DataPathList.first();
-		QString const DefaultBlendFile = QString("%1/blender/config/%2").arg(mDataPath).arg(LC_BLENDER_ADDON_BLEND_FILE);
+		 const QString DefaultBlendFile = QString("%1/blender/config/%2").arg(mDataPath).arg(LC_BLENDER_ADDON_BLEND_FILE);
 
 		lcModel* Model = lcGetActiveProject()->GetActiveModel();
-		QString const ModelFileName = QFileInfo(QDir(lcGetProfileString(LC_PROFILE_PROJECTS_PATH)), QString("%1_Step_%2.ldr").arg(QFileInfo(Model->GetProperties().mFileName).baseName()).arg(Model->GetCurrentStep())).absoluteFilePath();
+		const QString ModelFileName = QFileInfo(QDir(lcGetProfileString(LC_PROFILE_PROJECTS_PATH)), QString("%1_Step_%2.ldr").arg(QFileInfo(Model->GetProperties().mFileName).baseName()).arg(Model->GetCurrentStep())).absoluteFilePath();
 
 		lcGetActiveProject()->ExportCurrentStep(ModelFileName);
 
@@ -507,9 +493,7 @@ void lcRenderDialog::on_RenderButton_clicked()
 		}
 		else
 		{
-			QMessageBox::warning(this, tr("Error"), tr("Cannot write Blender render script file [%1] %2.")
-														.arg(Script.fileName())
-														.arg(Script.errorString()));
+			QMessageBox::warning(this, tr("Error"), tr("Cannot write Blender render script file [%1] %2.").arg(Script.fileName()).arg(Script.errorString()));
 
 			gMainWindow->mActions[LC_FILE_RENDER_BLENDER]->setEnabled(true);
 			return;
@@ -527,7 +511,7 @@ void lcRenderDialog::on_RenderButton_clicked()
 
 		connect(mProcess, SIGNAL(readyReadStandardOutput()), this, SLOT(ReadStdOut()));
 
-		QString const LDrawLibPath = QFileInfo(lcGetProfileString(LC_PROFILE_PARTS_LIBRARY)).absolutePath();
+		const QString LDrawLibPath = QFileInfo(lcGetProfileString(LC_PROFILE_PARTS_LIBRARY)).absolutePath();
 		QStringList SystemEnvironment = QProcess::systemEnvironment();
 		SystemEnvironment.prepend("LDRAW_DIRECTORY=" + LDrawLibPath);
 
@@ -563,8 +547,8 @@ void lcRenderDialog::on_RenderButton_clicked()
 						if (Log.open(QFile::ReadOnly | QFile::Text))
 						{
 							QByteArray Ba = Log.readAll();
-							bool const Error = QString(Ba).contains(QRegExp("(?:\\w)*ERROR: ", Qt::CaseInsensitive));
-							bool const Warning = QString(Ba).contains(QRegExp("(?:\\w)*WARNING: ", Qt::CaseInsensitive));
+							const bool Error = QString(Ba).contains(QRegExp("(?:\\w)*ERROR: ", Qt::CaseInsensitive));
+							const bool Warning = QString(Ba).contains(QRegExp("(?:\\w)*WARNING: ", Qt::CaseInsensitive));
 							if (Error || Warning)
 							{
 								QMessageBox::Icon Icon = QMessageBox::Warning;
@@ -593,8 +577,7 @@ void lcRenderDialog::on_RenderButton_clicked()
 		{
 			ui->RenderButton->setText(tr("Cancel"));
 			ui->RenderProgress->setValue(ui->RenderProgress->minimum());
-			ui->renderLabel->setText(tr("Loading LDraw model... %1")
-										 .arg(ElapsedTime(mRenderTime.elapsed())));
+			ui->renderLabel->setText(tr("Loading LDraw model... %1").arg(ElapsedTime(mRenderTime.elapsed())));
 			QApplication::processEvents();
 		}
 		else
@@ -689,9 +672,7 @@ QString lcRenderDialog::ReadStdErr(bool& HasError) const
 
 	if (! File.open(QFile::ReadOnly | QFile::Text))
 	{
-		QString message = tr("Failed to open log file: %1:\n%2")
-							  .arg(File.fileName())
-							  .arg(File.errorString());
+		const QString message = tr("Failed to open log file: %1:\n%2").arg(File.fileName()).arg(File.errorString());
 		return message;
 	}
 
@@ -810,8 +791,6 @@ void lcRenderDialog::Update()
 			ui->RenderProgress->setValue(ui->RenderProgress->maximum());
 
 		ui->preview->SetImage(mImage.scaled(mPreviewWidth, mPreviewHeight, Qt::KeepAspectRatio, Qt::SmoothTransformation));
-
-		/*ui->preview->SetImage(mImage);*/
 #endif
 	}
 }
@@ -831,8 +810,8 @@ void lcRenderDialog::ShowResult()
 		ui->RenderProgress->setRange(0,1);
 		ui->RenderProgress->setValue(0);
 
-		QString const Title = mCommand == BLENDER_RENDER ? tr("Blender Render") : tr("POV-Ray Render");
-		QString const Body  = tr ("An error occurred while rendering. See Show Details...");
+		const QString Title = mCommand == BLENDER_RENDER ? tr("Blender Render") : tr("POV-Ray Render");
+		const QString Body  = tr ("An error occurred while rendering. See Show Details...");
 		lcBlenderPreferences::ShowMessage(Body, Title, QString(), StdErrLog, 0, QMessageBox::Warning);
 		return;
 	}
@@ -886,8 +865,7 @@ void lcRenderDialog::ShowResult()
 	{
 		ui->renderLabel->setStyleSheet("QLabel { color : red; }");
 		ui->renderLabel->setText(tr("Image render failed."));
-		QString const Message = QString("%1 %2. %3").arg(RenderLabel).arg(tr("failed (unknown reason)"))
-										.arg(ElapsedTime(mRenderTime.elapsed()));
+		const QString Message = QString("%1 %2. %3").arg(RenderLabel).arg(tr("failed (unknown reason)")).arg(ElapsedTime(mRenderTime.elapsed()));
 		QMessageBox::warning(this, tr("Error"), Message);
 	}
 
@@ -896,7 +874,7 @@ void lcRenderDialog::ShowResult()
 
 void lcRenderDialog::on_OutputBrowseButton_clicked()
 {
-	QString Result = QFileDialog::getSaveFileName(this, tr("Select Output File"), ui->OutputEdit->text(), tr("Supported Image Files (*.bmp *.png *.jpg);;BMP Files (*.bmp);;PNG Files (*.png);;JPEG Files (*.jpg);;All Files (*.*)"));
+	const QString Result = QFileDialog::getSaveFileName(this, tr("Select Output File"), ui->OutputEdit->text(), tr("Supported Image Files (*.bmp *.png *.jpg);;BMP Files (*.bmp);;PNG Files (*.png);;JPEG Files (*.jpg);;All Files (*.*)"));
 
 	if (!Result.isEmpty())
 		ui->OutputEdit->setText(QDir::toNativeSeparators(Result));
@@ -904,12 +882,11 @@ void lcRenderDialog::on_OutputBrowseButton_clicked()
 
 void lcRenderDialog::on_RenderOutputButton_clicked()
 {
-	QString RenderType = mCommand == POVRAY_RENDER ? QLatin1String("POV-Ray") : QLatin1String("Blender");
+	const QString RenderType = mCommand == POVRAY_RENDER ? QLatin1String("POV-Ray") : QLatin1String("Blender");
 	QFileInfo FileInfo(GetStdOutFileName());
 	if (!FileInfo.exists())
 	{
-		QMessageBox::warning(this, tr("Error"), tr("%1 Standard output file not found: %2.")
-													.arg(RenderType).arg(FileInfo.absoluteFilePath()));
+		QMessageBox::warning(this, tr("Error"), tr("%1 Standard output file not found: %2.").arg(RenderType).arg(FileInfo.absoluteFilePath()));
 		return;
 	}
 

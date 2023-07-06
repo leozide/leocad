@@ -328,7 +328,7 @@ bool lcBlenderPreferencesDialog::GetBlenderPreferences(int& Width, int& Height, 
 
 void lcBlenderPreferencesDialog::ShowPathsGroup()
 {
-	QString const Display = mPathsButton->text().startsWith("Hide") ? tr("Show") : tr("Hide");
+	const QString Display = mPathsButton->text().startsWith("Hide") ? tr("Show") : tr("Hide");
 	mPathsButton->setText(tr("%1 Paths").arg(Display));
 	mPathsButton->setToolTip(tr("%1 addon path preferences dialog").arg(Display));
 	mPreferences->ShowPathsGroup();
@@ -517,9 +517,7 @@ lcBlenderPreferences::lcBlenderPreferences(int Width, int Height, double Scale, 
 	}
 	else
 	{
-		QString const TextColour = Preferences.mColorTheme == lcColorTheme::Dark
-									   ? QLatin1String(LC_THEME_DARK_DECORATE_QUOTED_TEXT)
-									   : QLatin1String("blue");
+		const QString TextColour = Preferences.mColorTheme == lcColorTheme::Dark ? QLatin1String(LC_THEME_DARK_DECORATE_QUOTED_TEXT) : QLatin1String("blue");
 
 		bool BlenderConfigured = !lcGetProfileString(LC_PROFILE_BLENDER_PATH).isEmpty();
 		if (!BlenderConfigured)
@@ -718,7 +716,7 @@ void lcBlenderPreferences::InitPathsAndSettings()
 		{   // QComboBoxes
 			QComboBox* ComboBox = new QComboBox(mSettingsBox);
 			ComboBox->setProperty("ControlID",QVariant(LblIdx));
-			QString const Value = mBlenderSettings[LblIdx].value;
+			const QString Value = mBlenderSettings[LblIdx].value;
 			QStringList const DataList = mComboItems[ComboBoxItemsIndex].dataList.split("|");
 			QStringList const ItemList = mComboItems[ComboBoxItemsIndex].itemList.split("|");
 			ComboBox->addItems(ItemList);
@@ -862,7 +860,7 @@ void lcBlenderPreferences::InitPathsAndSettingsMM()
 		{   // QComboBoxes
 			QComboBox* ComboBox = new QComboBox(mSettingsBox);
 			ComboBox->setProperty("ControlID",QVariant(LblIdx));
-			QString const Value = mBlenderSettingsMM[LblIdx].value;
+			const QString Value = mBlenderSettingsMM[LblIdx].value;
 			QStringList const DataList = mComboItemsMM[ComboBoxItemsIndex].dataList.split("|");
 			QStringList const ItemList = mComboItemsMM[ComboBoxItemsIndex].itemList.split("|");
 			ComboBox->addItems(ItemList);
@@ -905,7 +903,7 @@ void lcBlenderPreferences::ConfigureBlenderAddon(bool TestBlender, bool AddonUpd
 {
 	mProgressBar = nullptr;
 
-	QString const BlenderExe = QDir::toNativeSeparators(mPathLineEditList[PATH_BLENDER]->text());
+	const QString BlenderExe = QDir::toNativeSeparators(mPathLineEditList[PATH_BLENDER]->text());
 
 	if (BlenderExe.isEmpty())
 	{
@@ -921,13 +919,15 @@ void lcBlenderPreferences::ConfigureBlenderAddon(bool TestBlender, bool AddonUpd
 	if (QFileInfo(BlenderExe).isReadable())
 	{
 		enum ProcEnc
-		{ PR_OK, PR_FAIL, PR_WAIT, PR_INSTALL, PR_TEST };
-		QString const BlenderDir = QDir::toNativeSeparators(QString("%1/Blender").arg(mDataDir));
-		QString const BlenderConfigDir = QString("%1/setup/addon_setup/config").arg(BlenderDir);
-		QString const BlenderAddonDir = QDir::toNativeSeparators(QString("%1/addons").arg(BlenderDir));
-		QString const BlenderExeCompare = QDir::toNativeSeparators(lcGetProfileString(LC_PROFILE_BLENDER_PATH)).toLower();
-		QString const BlenderInstallFile = QDir::toNativeSeparators(QString("%1/%2").arg(BlenderDir).arg(LC_BLENDER_ADDON_INSTALL_FILE));
-		QString const BlenderTestString = QLatin1String("###TEST_BLENDER###");
+		{
+			PR_OK, PR_FAIL, PR_WAIT, PR_INSTALL, PR_TEST
+		};
+		const QString BlenderDir = QDir::toNativeSeparators(QString("%1/Blender").arg(mDataDir));
+		const QString BlenderConfigDir = QString("%1/setup/addon_setup/config").arg(BlenderDir);
+		const QString BlenderAddonDir = QDir::toNativeSeparators(QString("%1/addons").arg(BlenderDir));
+		const QString BlenderExeCompare = QDir::toNativeSeparators(lcGetProfileString(LC_PROFILE_BLENDER_PATH)).toLower();
+		const QString BlenderInstallFile = QDir::toNativeSeparators(QString("%1/%2").arg(BlenderDir).arg(LC_BLENDER_ADDON_INSTALL_FILE));
+		const QString BlenderTestString = QLatin1String("###TEST_BLENDER###");
 		QByteArray AddonPathsAndModuleNames;
 		QString Message, ShellProgram;
 		QStringList Arguments;
@@ -947,7 +947,7 @@ void lcBlenderPreferences::ConfigureBlenderAddon(bool TestBlender, bool AddonUpd
 			if (Action == PR_INSTALL)
 			{
 				connect(mProcess, SIGNAL(readyReadStandardOutput()), this, SLOT(ReadStdOut()));
-				QString const& LdrawLibPath = QFileInfo(lcGetProfileString(LC_PROFILE_PARTS_LIBRARY)).absolutePath();
+				const QString& LdrawLibPath = QFileInfo(lcGetProfileString(LC_PROFILE_PARTS_LIBRARY)).absolutePath();
 				QStringList SystemEnvironment = QProcess::systemEnvironment();
 				SystemEnvironment.prepend("LDRAW_DIRECTORY=" + LdrawLibPath);
 				SystemEnvironment.prepend("ADDONS_TO_LOAD=" + AddonPathsAndModuleNames);
@@ -978,9 +978,7 @@ void lcBlenderPreferences::ConfigureBlenderAddon(bool TestBlender, bool AddonUpd
 
 			if (!mProcess->waitForStarted())
 			{
-				Message = tr("Cannot start Blender %1 mProcess.\n%2")
-							  .arg(ProcessAction)
-							  .arg(QString(mProcess->readAllStandardError()));
+				Message = tr("Cannot start Blender %1 mProcess.\n%2").arg(ProcessAction).arg(QString(mProcess->readAllStandardError()));
 				delete mProcess;
 				mProcess = nullptr;
 				return PR_WAIT;
@@ -989,9 +987,7 @@ void lcBlenderPreferences::ConfigureBlenderAddon(bool TestBlender, bool AddonUpd
 			{
 				if (mProcess->exitStatus() != QProcess::NormalExit || mProcess->exitCode() != 0)
 				{
-					Message = tr("Failed to execute Blender %1.\n%2")
-								  .arg(ProcessAction)
-								  .arg(QString(mProcess->readAllStandardError()));
+					Message = tr("Failed to execute Blender %1.\n%2").arg(ProcessAction).arg(QString(mProcess->readAllStandardError()));
 					return PR_FAIL;
 				}
 			}
@@ -1005,7 +1001,7 @@ void lcBlenderPreferences::ConfigureBlenderAddon(bool TestBlender, bool AddonUpd
 						QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
 				}
 				connect(&mUpdateTimer, SIGNAL(timeout()), this, SLOT(Update()));
-				QString const StdOut = QString(mProcess->readAllStandardOutput());
+				const QString StdOut = QString(mProcess->readAllStandardOutput());
 				if (!StdOut.contains(BlenderTestString))
 				{
 					Message =  tr("A simple check to test if the selected file is Blender failed."
@@ -1085,9 +1081,7 @@ void lcBlenderPreferences::ConfigureBlenderAddon(bool TestBlender, bool AddonUpd
 				}
 				else
 				{
-					Message = tr("Cannot write Blender render script file [%1] %2.")
-								.arg(Script.fileName())
-								.arg(Script.errorString());
+					Message = tr("Cannot write Blender render script file [%1] %2.").arg(Script.fileName()).arg(Script.errorString());
 					Error = true;
 				}
 
@@ -1106,7 +1100,7 @@ void lcBlenderPreferences::ConfigureBlenderAddon(bool TestBlender, bool AddonUpd
 #endif
 				Result = ProcessCommand(PR_TEST);
 				bool TestOk = Result != PR_FAIL;
-				QString const statusLabel = TestOk ? "" : tr("Blender test failed.");
+				const QString statusLabel = TestOk ? "" : tr("Blender test failed.");
 				StatusUpdate(false, TestOk, statusLabel);
 				if (TestOk)
 				{
@@ -1115,8 +1109,8 @@ void lcBlenderPreferences::ConfigureBlenderAddon(bool TestBlender, bool AddonUpd
 				}
 				else
 				{
-					QString const& Title = tr ("%1 Blender LDraw Addon").arg(LC_PRODUCTNAME_STR);
-					QString const& Header = tr ("Blender test failed.");
+					const QString& Title = tr ("%1 Blender LDraw Addon").arg(LC_PRODUCTNAME_STR);
+					const QString& Header = tr ("Blender test failed.");
 					ShowMessage(Header, Title, Message);
 					return;
 				}
@@ -1124,11 +1118,9 @@ void lcBlenderPreferences::ConfigureBlenderAddon(bool TestBlender, bool AddonUpd
 
 			if (!mBlenderVersion.isEmpty() && !mImportMMActBox->isChecked() && !mImportActBox->isChecked())
 			{
-				QString const& Title = tr ("%1 Blender LDraw Addon Modules").arg(LC_PRODUCTNAME_STR);
-				QString const& Header = tr ("No import module enabled."
-										"If you continue, the default import module (Import TN) will be used.<br>"
-										"If you select No, all addon modules will be disabled.");
-				QString const& Body = tr ("Continue with the default import module ?");
+				const QString& Title = tr ("%1 Blender LDraw Addon Modules").arg(LC_PRODUCTNAME_STR);
+				const QString& Header = tr ("No import module enabled. If you continue, the default import module (Import TN) will be used.<br>If you select No, all addon modules will be disabled.");
+				const QString& Body = tr ("Continue with the default import module ?");
 				int Exec = ShowMessage(Header, Title, Body, QString(), MBB_YES_NO, QMessageBox::NoIcon);
 				if (Exec != QMessageBox::Yes)
 				{
@@ -1142,12 +1134,7 @@ void lcBlenderPreferences::ConfigureBlenderAddon(bool TestBlender, bool AddonUpd
 
 			if (TestBlender)
 			{
-				QString const preferredImportModule =
-					mImportActBox->isChecked()
-						? QString("TN")
-						: mImportMMActBox->isChecked()
-							? QString("MM")
-							: QString();  // disable all import modules
+				const QString preferredImportModule = mImportActBox->isChecked() ? QString("TN") : mImportMMActBox->isChecked() ? QString("MM") : QString();  // disable all import modules
 				lcSetProfileString(LC_PROFILE_BLENDER_IMPORT_MODULE, preferredImportModule);
 			}
 			else
@@ -1227,7 +1214,7 @@ void lcBlenderPreferences::ConfigureBlenderAddon(bool TestBlender, bool AddonUpd
 		{
 			QJsonArray JsonArray;
 			QStringList AddonDirs = QDir(BlenderAddonDir).entryList(QDir::NoDotAndDotDot | QDir::Dirs, QDir::SortByMask);
-			for (QString const& Addon : AddonDirs)
+			for (const QString& Addon : AddonDirs)
 			{
 				QDir Dir(QString("%1/%2").arg(BlenderAddonDir).arg(Addon));
 				Dir.setFilter(QDir::Files | QDir::NoDotAndDotDot | QDir::NoSymLinks);
@@ -1291,15 +1278,14 @@ bool lcBlenderPreferences::ExtractBlenderAddon(const QString& BlenderDir)
 	if (GetBlenderAddon(BlenderDir))
 	{
 		gAddonPreferences->StatusUpdate(true, false, tr("Extract addon..."));
-		QString const BlenderAddonFile = QDir::toNativeSeparators(QString("%1/%2").arg(BlenderDir).arg(LC_BLENDER_ADDON_FILE));
+		const QString BlenderAddonFile = QDir::toNativeSeparators(QString("%1/%2").arg(BlenderDir).arg(LC_BLENDER_ADDON_FILE));
 
 		QString Result;
 		bool Success = gAddonPreferences->ExtractAddon(BlenderAddonFile, Result);
 
 		if (!Success)
 		{
-			QString Message = tr("Failed to extract %1 to %2")
-								  .arg(LC_BLENDER_ADDON_FILE).arg(BlenderDir);
+			QString Message = tr("Failed to extract %1 to %2").arg(LC_BLENDER_ADDON_FILE).arg(BlenderDir);
 			if (Result.size())
 				Message.append(" "+Result);
 
@@ -1328,9 +1314,9 @@ bool lcBlenderPreferences::GetBlenderAddon(const QString& BlenderDir)
 		ADDON_CANCEL
 	};
 
-	QString const BlenderAddonDir = QDir::toNativeSeparators(QString("%1/addons").arg(BlenderDir));
-	QString const BlenderAddonFile = QDir::toNativeSeparators(QString("%1/%2").arg(BlenderDir).arg(LC_BLENDER_ADDON_FILE));
-	QString const AddonVersionFile = QDir::toNativeSeparators(QString("%1/%2/__version__.py").arg(BlenderAddonDir).arg(LC_BLENDER_ADDON_FOLDER_STR));
+	const QString BlenderAddonDir = QDir::toNativeSeparators(QString("%1/addons").arg(BlenderDir));
+	const QString BlenderAddonFile = QDir::toNativeSeparators(QString("%1/%2").arg(BlenderDir).arg(LC_BLENDER_ADDON_FILE));
+	const QString AddonVersionFile = QDir::toNativeSeparators(QString("%1/%2/__version__.py").arg(BlenderAddonDir).arg(LC_BLENDER_ADDON_FOLDER_STR));
 	bool ExtractedAddon = QFileInfo(AddonVersionFile).isReadable();
 	bool BlenderAddonExists = ExtractedAddon || QFileInfo(BlenderAddonFile).isReadable();
 	QString AddonStatus = tr("Installing Blender addon...");
@@ -1417,8 +1403,7 @@ bool lcBlenderPreferences::GetBlenderAddon(const QString& BlenderDir)
 			QFile File(AddonVersionFile);
 			if (!File.open(QIODevice::ReadOnly))
 			{
-				ShowMessage(tr("Cannot read addon version file: [%1]<br>%2.")
-								.arg(AddonVersionFile).arg(File.errorString()));
+				ShowMessage(tr("Cannot read addon version file: [%1]<br>%2.").arg(AddonVersionFile).arg(File.errorString()));
 				return false; // Download new archive
 			}
 			Ba = File.readAll();
@@ -1457,11 +1442,9 @@ bool lcBlenderPreferences::GetBlenderAddon(const QString& BlenderDir)
 		{
 			if (LocalVersion.isEmpty())
 				LocalVersion = gAddonPreferences->mAddonVersion;
-			QString const& Title = tr ("%1 Blender LDraw Addon").arg(LC_PRODUCTNAME_STR);
-			QString const& Header = tr ("Detected %1 Blender LDraw addon %2. A newer version %3 exists.")
-										.arg(LC_PRODUCTNAME_STR)
-										.arg(LocalVersion).arg(OnlineVersion);
-			QString const& Body  = tr ("Do you want to download version %1 ?").arg(OnlineVersion);
+			const QString& Title = tr ("%1 Blender LDraw Addon").arg(LC_PRODUCTNAME_STR);
+			const QString& Header = tr ("Detected %1 Blender LDraw addon %2. A newer version %3 exists.").arg(LC_PRODUCTNAME_STR).arg(LocalVersion).arg(OnlineVersion);
+			const QString& Body = tr ("Do you want to download version %1 ?").arg(OnlineVersion);
 			int Exec = ShowMessage(Header, Title, Body, QString(), MBB_YES, QMessageBox::NoIcon);
 			if (Exec == QMessageBox::Cancel)
 			{
@@ -1500,8 +1483,7 @@ bool lcBlenderPreferences::GetBlenderAddon(const QString& BlenderDir)
 
 		Result &= Dir.rmdir(BlenderAddonDir);
 		if (!Result)
-			ShowMessage(tr("Failed to remove Blender addon: %1").arg(BlenderAddonDir),
-						tr("Remove Existing Addon"), QString(), QString(), MBB_OK, QMessageBox::Warning);
+			ShowMessage(tr("Failed to remove Blender addon: %1").arg(BlenderAddonDir), tr("Remove Existing Addon"), QString(), QString(), MBB_OK, QMessageBox::Warning);
 	}
 
 	if (AddonAction == ADDON_DOWNLOAD)
@@ -1529,8 +1511,7 @@ bool lcBlenderPreferences::GetBlenderAddon(const QString& BlenderDir)
 				gAddonPreferences->mData.clear();
 			}
 			else
-				ShowMessage(tr("Failed to open Blender addon file:<br>%1:<br>%2")
-								.arg(BlenderAddonFile).arg(File.errorString()));
+				ShowMessage(tr("Failed to open Blender addon file:<br>%1:<br>%2").arg(BlenderAddonFile).arg(File.errorString()));
 		}
 		else
 			ShowMessage(tr("Failed to download Blender addon archive:<br>%1").arg(BlenderAddonFile));
@@ -1550,7 +1531,7 @@ bool lcBlenderPreferences::GetBlenderAddon(const QString& BlenderDir)
 void lcBlenderPreferences::StatusUpdate(bool Addon, bool Error, const QString& Message)
 {
 	QString Label, Colour;
-	QString const Which = Addon ? tr("Blender addon") : tr("Blender");
+	const QString Which = Addon ? tr("Blender addon") : tr("Blender");
 	if (mProgressBar)
 	{
 		if (Addon)
@@ -1612,19 +1593,19 @@ void lcBlenderPreferences::ShowResult()
 
 	if (mProcess->exitStatus() != QProcess::NormalExit || mProcess->exitCode() != 0 || Error)
 	{
-		QString const BlenderDir = QString("%1/Blender").arg(mDataDir);
+		const QString BlenderDir = QString("%1/Blender").arg(mDataDir);
 		Message = tr("Addon install failed. See %1/stderr-blender-addon-install for details.").arg(BlenderDir);
 		StatusUpdate(true, true,tr("%1: Addon install failed.").arg("Error"));
 		mConfigured = false;
 
-		QString const& Title = tr ("%1 Blender Addon Install").arg(LC_PRODUCTNAME_STR);
-		QString const& Header =  "<b>" + tr ("Addon install failed.") + "</b>";
-		QString const& Body = tr ("LDraw addon install encountered one or more errors. See Show Details...");
+		const QString& Title = tr ("%1 Blender Addon Install").arg(LC_PRODUCTNAME_STR);
+		const QString& Header = "<b>" + tr ("Addon install failed.") + "</b>";
+		const QString& Body = tr ("LDraw addon install encountered one or more errors. See Show Details...");
 		ShowMessage(Header, Title, Body, StdErrLog, MBB_OK, QMessageBox::Warning);
 	}
 	else
 	{
-		QString const TextColour = QString("QLabel { color : %1; }").arg(QApplication::palette().text().color().name());
+		const QString TextColour = QString("QLabel { color : %1; }").arg(QApplication::palette().text().color().name());
 		mAddonGridLayout->replaceWidget(mProgressBar, mAddonVersionEdit);
 		mConfigured = true;
 		mBlenderVersionLabel->setText(tr("Blender"));
@@ -1743,7 +1724,7 @@ void lcBlenderPreferences::PathChanged()
 
 void lcBlenderPreferences::GetStandardOutput()
 {
-	QString const LogFile = QString("%1/Blender/stdout-blender-addon-install").arg(mDataDir);
+	const QString LogFile = QString("%1/Blender/stdout-blender-addon-install").arg(mDataDir);
 	QFileInfo FileInfo(LogFile);
 	if (!FileInfo.exists())
 	{
@@ -1769,11 +1750,11 @@ void lcBlenderPreferences::ReadStdOut(const QString& StdOutput, QString& Errors)
 	QStringList Items, ErrorList;
 	QStringList StdOutLines = StdOutput.split(QRegExp("\n|\r\n|\r"));
 
-	QString const SaveAddonVersion = mAddonVersion;
-	QString const SaveVersion = mBlenderVersion;
+	const QString SaveAddonVersion = mAddonVersion;
+	const QString SaveVersion = mBlenderVersion;
 
 	int EditListItems = mPathLineEditList.size();
-	for (QString const& StdOutLine : StdOutLines)
+	for (const QString& StdOutLine : StdOutLines)
 	{
 		if (StdOutLine.isEmpty())
 			continue;
@@ -1860,7 +1841,7 @@ void lcBlenderPreferences::ReadStdOut(const QString& StdOutput, QString& Errors)
 
 void lcBlenderPreferences::ReadStdOut()
 {
-	QString const& StdOut = QString(mProcess->readAllStandardOutput());
+	const QString& StdOut = QString(mProcess->readAllStandardOutput());
 
 	mStdOutList.append(StdOut);
 
@@ -1880,15 +1861,15 @@ void lcBlenderPreferences::ReadStdOut()
 
 	if (!ErrorsAndWarnings.isEmpty())
 	{
-		QString const StdOutLog = QDir::toNativeSeparators(QString("<br>- See %1/Blender/stdout-blender-addon-install")
+		const QString StdOutLog = QDir::toNativeSeparators(QString("<br>- See %1/Blender/stdout-blender-addon-install")
 																.arg(mDataDir));
 
 		QMessageBox::Icon Icon = QMessageBox::Warning;
-		QString const& Items = Error ? tr("errors%1").arg(Warning ? tr(" and warnings") : "") : Warning ? tr("warnings") : "";
+		const QString& Items = Error ? tr("errors%1").arg(Warning ? tr(" and warnings") : "") : Warning ? tr("warnings") : "";
 
-		QString const& Title = tr ("%1 Blender Addon Install").arg(LC_PRODUCTNAME_STR);
-		QString const& Header =  "<b>" + tr ("Addon install standard output.") + "</b>";
-		QString const& Body = tr ("LDraw addon install encountered %1. See Show Details...").arg(Items);
+		const QString& Title = tr ("%1 Blender Addon Install").arg(LC_PRODUCTNAME_STR);
+		const QString& Header = "<b>" + tr ("Addon install standard output.") + "</b>";
+		const QString& Body = tr ("LDraw addon install encountered %1. See Show Details...").arg(Items);
 		ShowMessage(Header, Title, Body, ErrorsAndWarnings.append(StdOutLog), MBB_OK, Icon);
 	}
 }
@@ -1903,19 +1884,17 @@ QString lcBlenderPreferences::ReadStdErr(bool& Error) const
 	Error = false;
 	QStringList ReturnLines;
 
-	QString const BlenderDir = QString("%1/Blender").arg(mDataDir);
+	const QString BlenderDir = QString("%1/Blender").arg(mDataDir);
 	QFile File(QString("%1/stderr-blender-addon-install").arg(BlenderDir));
 	if ( ! File.open(QFile::ReadOnly | QFile::Text))
 	{
-		QString Message = tr("Failed to open log file: %1:\n%2")
-							  .arg(File.fileName())
-							  .arg(File.errorString());
+		const QString Message = tr("Failed to open log file: %1:\n%2").arg(File.fileName()).arg(File.errorString());
 		return Message;
 	}
 	QTextStream In(&File);
 	while ( ! In.atEnd())
 	{
-		QString const& Line = In.readLine(0);
+		const QString& Line = In.readLine(0);
 		ReturnLines << CleanLine(Line);
 		if (!Error)
 			Error = !Line.isEmpty();
@@ -1925,7 +1904,7 @@ QString lcBlenderPreferences::ReadStdErr(bool& Error) const
 
 void lcBlenderPreferences::WriteStdOut()
 {
-	QString const BlenderDir = QString("%1/Blender").arg(mDataDir);
+	const QString BlenderDir = QString("%1/Blender").arg(mDataDir);
 	QFile File(QString("%1/stdout-blender-addon-install").arg(BlenderDir));
 	if (File.open(QFile::WriteOnly | QIODevice::Truncate | QFile::Text))
 	{
@@ -1944,8 +1923,8 @@ bool lcBlenderPreferences::PromptCancel()
 #ifndef QT_NO_PROCESS
 	if (mProcess)
 	{
-		QString const& Title = tr ("Cancel %1 Addon Install").arg(LC_PRODUCTNAME_STR);
-		QString const& Header =  "<b>" + tr("Are you sure you want to cancel the add on install ?") + "</b>";
+		const QString& Title = tr ("Cancel %1 Addon Install").arg(LC_PRODUCTNAME_STR);
+		const QString& Header = "<b>" + tr("Are you sure you want to cancel the add on install ?") + "</b>";
 		int Exec = ShowMessage(Header, Title, QString(), QString(), MBB_YES_NO, QMessageBox::Question);
 		if (Exec == QMessageBox::Yes)
 		{
@@ -2096,7 +2075,7 @@ bool lcBlenderPreferences::SettingsModified(bool Update, const QString& Module)
 				for (int CtlIdx = 0; CtlIdx < gAddonPreferences->mComboBoxList.size(); CtlIdx++)
 				{
 					OldValue = mBlenderSettingsMM[LblIdx].value;
-					QString const Value = gAddonPreferences->mComboBoxList[CtlIdx]->itemData(gAddonPreferences->mComboBoxList[CtlIdx]->currentIndex()).toString();
+					const QString Value = gAddonPreferences->mComboBoxList[CtlIdx]->itemData(gAddonPreferences->mComboBoxList[CtlIdx]->currentIndex()).toString();
 					if (Update)
 						mBlenderSettingsMM[LblIdx].value = Value;
 					Modified |= Value != OldValue;
@@ -2208,7 +2187,7 @@ bool lcBlenderPreferences::SettingsModified(bool Update, const QString& Module)
 				for (int CtlIdx = 0; CtlIdx < gAddonPreferences->mComboBoxList.size(); CtlIdx++)
 				{
 					OldValue = mBlenderSettings[LblIdx].value;
-					QString const Value = gAddonPreferences->mComboBoxList[CtlIdx]->itemData(gAddonPreferences->mComboBoxList[CtlIdx]->currentIndex()).toString();
+					const QString Value = gAddonPreferences->mComboBoxList[CtlIdx]->itemData(gAddonPreferences->mComboBoxList[CtlIdx]->currentIndex()).toString();
 					if (Update)
 						mBlenderSettings[LblIdx].value = Value;
 					Modified |= Value != OldValue;
@@ -2222,7 +2201,7 @@ bool lcBlenderPreferences::SettingsModified(bool Update, const QString& Module)
 	for (int LblIdx = 0; LblIdx < NumPaths(); LblIdx++)
 	{
 		OldValue = mBlenderPaths[LblIdx].value;
-		QString const Value = gAddonPreferences->mPathLineEditList[LblIdx]->text();
+		const QString Value = gAddonPreferences->mPathLineEditList[LblIdx]->text();
 		if (Update)
 			mBlenderPaths[LblIdx].value = Value;
 		Modified |= Value != OldValue;
@@ -2405,9 +2384,7 @@ void lcBlenderPreferences::LoadSettings()
 
 	if (!NumPaths())
 	{
-		QString const DefaultBlendFile = QString("%1/Blender/config/%2")
-											 .arg(gAddonPreferences->mDataDir)
-											 .arg(LC_BLENDER_ADDON_BLEND_FILE);
+		const QString DefaultBlendFile = QString("%1/Blender/config/%2").arg(gAddonPreferences->mDataDir).arg(LC_BLENDER_ADDON_BLEND_FILE);
 
 		QStringList const AddonPaths = QStringList()
 		/* PATH_BLENDER      */        << lcGetProfileString(LC_PROFILE_BLENDER_PATH)
@@ -2471,8 +2448,8 @@ void lcBlenderPreferences::LoadSettings()
 		{
 			if (LblIdx == PATH_STUDIO_LDRAW)
 				continue;
-			QString const& Key = QString("%1/%2").arg(LC_BLENDER_ADDON, mBlenderPaths[LblIdx].key);
-			QString const& Value = Settings.value(Key, QString()).toString();
+			const QString& Key = QString("%1/%2").arg(LC_BLENDER_ADDON, mBlenderPaths[LblIdx].key);
+			const QString& Value = Settings.value(Key, QString()).toString();
 			if (QFileInfo(Value).exists())
 			{
 				mBlenderPaths[LblIdx].value = QDir::toNativeSeparators(Value);
@@ -2483,8 +2460,8 @@ void lcBlenderPreferences::LoadSettings()
 		{
 			if (LblIdx == PATH_LSYNTH || LblIdx == PATH_STUD_LOGO)
 				continue;
-			QString const& Key = QString("%1/%2").arg(LC_BLENDER_ADDON_MM, mBlenderPaths[LblIdx].key_mm);
-			QString const& Value = Settings.value(Key, QString()).toString();
+			const QString& Key = QString("%1/%2").arg(LC_BLENDER_ADDON_MM, mBlenderPaths[LblIdx].key_mm);
+			const QString& Value = Settings.value(Key, QString()).toString();
 			if (QFileInfo(Value).exists())
 			{
 				mBlenderPaths[LblIdx].value = QDir::toNativeSeparators(Value);
@@ -2493,37 +2470,37 @@ void lcBlenderPreferences::LoadSettings()
 
 		for (int LblIdx = 0; LblIdx < NumSettings(); LblIdx++)
 		{
-			QString const& Key = QString("%1/%2").arg(LC_BLENDER_ADDON, mBlenderSettings[LblIdx].key);
-			QString const& Value = Settings.value(Key, QString()).toString();
+			const QString& Key = QString("%1/%2").arg(LC_BLENDER_ADDON, mBlenderSettings[LblIdx].key);
+			const QString& Value = Settings.value(Key, QString()).toString();
 			if (!Value.isEmpty())
 			{
 				mBlenderSettings[LblIdx].value = Value == "True" ? "1" : Value == "False" ? "0" : Value;
 			}
 			if (LblIdx == LBL_IMAGE_WIDTH || LblIdx == LBL_IMAGE_HEIGHT || LblIdx == LBL_RENDER_PERCENTAGE)
 			{
-				QString const& Label = mDefaultSettings[LblIdx].label;
+				const QString& Label = mDefaultSettings[LblIdx].label;
 				mBlenderSettings[LblIdx].label = QString("%1 - Setting (%2)").arg(Label).arg(Value);
 			}
 		}
 
 		for (int LblIdx = 0; LblIdx < NumSettingsMM(); LblIdx++)
 		{
-			QString const& Key = QString("%1/%2").arg(LC_BLENDER_ADDON_MM, mBlenderSettingsMM[LblIdx].key);
-			QString const& Value = Settings.value(Key, QString()).toString();
+			const QString& Key = QString("%1/%2").arg(LC_BLENDER_ADDON_MM, mBlenderSettingsMM[LblIdx].key);
+			const QString& Value = Settings.value(Key, QString()).toString();
 			if (!Value.isEmpty())
 			{
 				mBlenderSettingsMM[LblIdx].value = Value == "True" ? "1" : Value == "False" ? "0" : Value;
 			}
 			if (LblIdx == LBL_RENDER_PERCENTAGE_MM || LblIdx == LBL_RESOLUTION_WIDTH || LblIdx == LBL_RESOLUTION_HEIGHT)
 			{
-				QString const& Label = mDefaultSettingsMM[LblIdx].label;
+				const QString& Label = mDefaultSettingsMM[LblIdx].label;
 				mBlenderSettingsMM[LblIdx].label = QString("%1 - Setting (%2)").arg(Label).arg(Value);
 			}
 		}
 	}
 	else
 	{
-		QString const LogFile = QString("%1/Blender/stdout-blender-addon-install").arg(gAddonPreferences->mDataDir);
+		const QString LogFile = QString("%1/Blender/stdout-blender-addon-install").arg(gAddonPreferences->mDataDir);
 		if (QFileInfo(LogFile).isReadable())
 		{
 			QFile File(LogFile);
@@ -2563,7 +2540,7 @@ void lcBlenderPreferences::SaveSettings()
 	if (!NumSettings() || !NumSettingsMM())
 		LoadSettings();
 
-	QString const BlenderConfigDir = QString("%1/Blender/setup/addon_setup/config").arg(gAddonPreferences->mDataDir);
+	const QString BlenderConfigDir = QString("%1/Blender/setup/addon_setup/config").arg(gAddonPreferences->mDataDir);
 
 	QString Key, Value = mBlenderPaths[PATH_BLENDER].value;
 	if (Value.isEmpty())
@@ -2583,9 +2560,7 @@ void lcBlenderPreferences::SaveSettings()
 
 	lcSetProfileString(LC_PROFILE_BLENDER_VERSION, Value);
 
-	Value = lcGetProfileString(LC_PROFILE_BLENDER_LDRAW_CONFIG_PATH).isEmpty()
-				? QString("%1/%2").arg(BlenderConfigDir).arg(LC_BLENDER_ADDON_CONFIG_FILE)
-				: lcGetProfileString(LC_PROFILE_BLENDER_LDRAW_CONFIG_PATH);
+	Value = lcGetProfileString(LC_PROFILE_BLENDER_LDRAW_CONFIG_PATH).isEmpty() ? QString("%1/%2").arg(BlenderConfigDir).arg(LC_BLENDER_ADDON_CONFIG_FILE) : lcGetProfileString(LC_PROFILE_BLENDER_LDRAW_CONFIG_PATH);
 	lcSetProfileString(LC_PROFILE_BLENDER_LDRAW_CONFIG_PATH, QDir::toNativeSeparators(Value));
 
 	QString searchDirectoriesKey;
@@ -2676,11 +2651,7 @@ void lcBlenderPreferences::SaveSettings()
 
 	concludeSettingsGroup();
 
-	QString const preferredImportModule =
-		gAddonPreferences->mImportActBox->isChecked()
-			? QString("TN")
-			: gAddonPreferences->mImportMMActBox->isChecked()
-				  ? QString("MM") : QString();
+	const QString preferredImportModule = gAddonPreferences->mImportActBox->isChecked() ? QString("TN") : gAddonPreferences->mImportMMActBox->isChecked() ? QString("MM") : QString();
 
 	if (preferredImportModule != lcGetProfileString(LC_PROFILE_BLENDER_IMPORT_MODULE))
 		lcSetProfileString(LC_PROFILE_BLENDER_IMPORT_MODULE, preferredImportModule);
@@ -2814,7 +2785,7 @@ void lcBlenderPreferences::BrowseBlender(bool)
 	{
 		if (sender() == mPathBrowseButtonList.at(LblIdx))
 		{
-			QString const BlenderPath = QDir::toNativeSeparators(mBlenderPaths[LblIdx].value).toLower();
+			const QString BlenderPath = QDir::toNativeSeparators(mBlenderPaths[LblIdx].value).toLower();
 			QFileDialog FileDialog(nullptr);
 			FileDialog.setWindowTitle(tr("Locate %1").arg(mBlenderPaths[LblIdx].label));
 			if (LblIdx < PATH_LDRAW)
@@ -2831,7 +2802,7 @@ void lcBlenderPreferences::BrowseBlender(bool)
 					QFileInfo  PathInfo(SelectedPathList.at(0));
 					if (PathInfo.exists())
 					{
-						QString const SelectedPath = QDir::toNativeSeparators(PathInfo.absoluteFilePath()).toLower();
+						const QString SelectedPath = QDir::toNativeSeparators(PathInfo.absoluteFilePath()).toLower();
 						mPathLineEditList[LblIdx]->setText(SelectedPathList.at(0));
 						if (LblIdx != PATH_BLENDER)
 						{
@@ -2872,7 +2843,7 @@ void lcBlenderPreferences::SizeChanged(const QString& Value)
 		{
 			disconnect(mLineEditList[Height_Edit],SIGNAL(textChanged(const QString&)), this, SLOT (SizeChanged(const QString&)));
 
-			QString const Height = QString::number(qRound(double(mImageHeight * NewValue / mImageWidth)));
+			const QString Height = QString::number(qRound(double(mImageHeight * NewValue / mImageWidth)));
 			mLineEditList[Height_Edit]->setText(Height);
 
 			Change = Settings[Height_Edit].value != Height;
@@ -2883,7 +2854,7 @@ void lcBlenderPreferences::SizeChanged(const QString& Value)
 		{
 			disconnect(mLineEditList[Width_Edit],SIGNAL(textChanged(const QString&)), this, SLOT (SizeChanged(const QString&)));
 
-			QString const Width = QString::number(qRound(double(NewValue * mImageWidth / mImageHeight)));
+			const QString Width = QString::number(qRound(double(NewValue * mImageWidth / mImageHeight)));
 			mLineEditList[Width_Edit]->setText(Width);
 
 			Change = Settings[Height_Edit].value != Width;
@@ -2909,7 +2880,7 @@ void lcBlenderPreferences::SetModelSize(bool Update)
 	const int Height_Edit = ImportMM ? int(CTL_RESOLUTION_HEIGHT_EDIT) : int(CTL_IMAGE_HEIGHT_EDIT);
 	const int Crop_Image_Label = ImportMM ? int(LBL_CROP_IMAGE_MM) : int(LBL_CROP_IMAGE);
 
-	QString const CropImageLabel = mSettingLabelList[Crop_Image_Label]->text();
+	const QString CropImageLabel = mSettingLabelList[Crop_Image_Label]->text();
 
 	int ImageWidth = mImageWidth;
 	int ImageHeight = mImageHeight;
@@ -2979,12 +2950,9 @@ void lcBlenderPreferences::SetModelSize(bool Update)
 
 		if (Conflict[0] || Conflict[1] || Conflict[2])
 		{
-			QString const& Title = tr ("LDraw Render Settings Conflict");
-			QString const& Header = "<b>" + tr ("Crop image configuration settings conflict were resolved.") + "</b>";
-			QString const& Body = QString("%1%2%3")
-									  .arg(Conflict[0] ? tr("Keep aspect ratio set to false.<br>") : "")
-									  .arg(Conflict[1] ? tr("Add environment (backdrop and base plane) set to false.<br>") : "")
-									  .arg(Conflict[2] ? tr("Transparent background set to true.<br>") : "");
+			const QString& Title = tr ("LDraw Render Settings Conflict");
+			const QString& Header = "<b>" + tr ("Crop image configuration settings conflict were resolved.") + "</b>";
+			const QString& Body = QString("%1%2%3").arg(Conflict[0] ? tr("Keep aspect ratio set to false.<br>") : "").arg(Conflict[1] ? tr("Add environment (backdrop and base plane) set to false.<br>") : "").arg(Conflict[2] ? tr("Transparent background set to true.<br>") : "");
 			ShowMessage(Header, Title, Body, QString(), MBB_OK, QMessageBox::Information);
 		}
 	}
@@ -2992,8 +2960,8 @@ void lcBlenderPreferences::SetModelSize(bool Update)
 	disconnect(mLineEditList[Width_Edit],SIGNAL(textChanged(const QString&)), this, SLOT (SizeChanged(const QString&)));
 	disconnect(mLineEditList[Height_Edit],SIGNAL(textChanged(const QString&)), this, SLOT (SizeChanged(const QString&)));
 
-	QString const Width = QString::number(CropImage ? ImageWidth : mImageWidth);
-	QString const Height = QString::number(CropImage ? ImageHeight : mImageHeight);
+	const QString Width = QString::number(CropImage ? ImageWidth : mImageWidth);
+	const QString Height = QString::number(CropImage ? ImageHeight : mImageHeight);
 
 	mLineEditList[Width_Edit]->setText(Width);
 	mLineEditList[Height_Edit]->setText(Height);
@@ -3020,11 +2988,9 @@ void lcBlenderPreferences::ValidateColourScheme(int Index)
 		BlenderSettings const* defaultSettings = ImportMM ? mDefaultSettingsMM : mDefaultSettings;
 		Settings[Color_Scheme].value = defaultSettings[Color_Scheme].value;
 
-		QString const& Title = tr ("Custom LDraw Colours");
-		QString const& Header = "<b>" + tr ("Colour scheme 'custom' cannot be enabled. Custom LDConfig file not found.") + "</b>";
-		QString const& Body = tr ("Colour scheme 'custom' selected but no LDConfig file was specified.<br>"
-								 "The default colour scheme '%1' will be used.<br>")
-								  .arg(Settings[Color_Scheme].value);
+		const QString& Title = tr ("Custom LDraw Colours");
+		const QString& Header = "<b>" + tr ("Colour scheme 'custom' cannot be enabled. Custom LDConfig file not found.") + "</b>";
+		const QString& Body = tr ("Colour scheme 'custom' selected but no LDConfig file was specified.<br>The default colour scheme '%1' will be used.<br>").arg(Settings[Color_Scheme].value);
 		ShowMessage(Header, Title, Body, QString(), MBB_OK, QMessageBox::Warning);
 	}
 	else
@@ -3037,8 +3003,8 @@ void lcBlenderPreferences::ValidateColourScheme(int Index)
 
 bool lcBlenderPreferences::PromptAccept()
 {
-	QString const& Title = tr ("Render Settings Modified");
-	QString const& Header =  "<b>" + tr("Do you want to accept the modified settings before quitting ?") + "</b>";
+	 const QString& Title = tr ("Render Settings Modified");
+	 const QString& Header = "<b>" + tr("Do you want to accept the modified settings before quitting ?") + "</b>";
 	int Exec = ShowMessage(Header, Title, QString(), QString(), MBB_YES_NO, QMessageBox::Question);
 	if (Exec == QMessageBox::Yes)
 		return true;
@@ -3316,8 +3282,8 @@ void lcBlenderPreferences::LoadDefaultParameters(QByteArray& Buffer, int Which)
 
 bool lcBlenderPreferences::ExportParameterFile()
 {
-	QString const BlenderConfigDir   = QString("%1/Blender/setup/addon_setup/config").arg(gAddonPreferences->mDataDir);
-	QString const ParameterFile = QString("%1/%2").arg(BlenderConfigDir).arg(LC_BLENDER_ADDON_PARAMS_FILE);
+	const QString BlenderConfigDir = QString("%1/Blender/setup/addon_setup/config").arg(gAddonPreferences->mDataDir);
+	const QString ParameterFile = QString("%1/%2").arg(BlenderConfigDir).arg(LC_BLENDER_ADDON_PARAMS_FILE);
 	QFile File(ParameterFile);
 
 	if (!OverwriteFile(File.fileName()))
@@ -3421,15 +3387,15 @@ bool lcBlenderPreferences::OverwriteFile(const QString& File)
 	if (!fileInfo.exists())
 		return true;
 
-	QString const& Title = tr ("Replace Existing File");
-	QString const Header = "<b>" + QMessageBox::tr ("Existing file %1 detected.").arg(fileInfo.fileName()) + "</b>";
-	QString const Body = QMessageBox::tr ("\"%1\"<br>This file already exists.<br>Replace existing file?").arg(fileInfo.fileName());
+	const QString& Title = tr ("Replace Existing File");
+	const QString Header = "<b>" + QMessageBox::tr ("Existing file %1 detected.").arg(fileInfo.fileName()) + "</b>";
+	const QString Body = QMessageBox::tr ("\"%1\"<br>This file already exists.<br>Replace existing file?").arg(fileInfo.fileName());
 	int Exec = ShowMessage(Header, Title, Body, QString(), MBB_YES, QMessageBox::NoIcon);
 
 	return (Exec == QMessageBox::Yes);
 }
 
-int lcBlenderPreferences::ShowMessage(QString const& Header, QString const& Title, QString const& Body, const QString& Detail, int const Buttons, int const Icon)
+int lcBlenderPreferences::ShowMessage(const QString& Header,  const QString& Title,  const QString& Body, const QString& Detail, int const Buttons, int const Icon)
 {
 	if (!gMainWindow)
 		return QMessageBox::Ok;
@@ -3600,7 +3566,7 @@ bool lcBlenderPreferences::ExtractAddon(const QString FileName, QString& Result)
 	if (!ZipFile.OpenRead(FileName))
 		return false;
 
-	QString const DestinationDir = QFileInfo(FileName).absolutePath();
+	const QString DestinationDir = QFileInfo(FileName).absolutePath();
 
 	bool Ok = true;
 
@@ -3652,8 +3618,7 @@ bool lcBlenderPreferences::ExtractAddon(const QString FileName, QString& Result)
 				FileInfo.permissions |= QFile::ExeOwner | QFile::ExeUser | QFile::ExeGroup | QFile::ExeOther;
 			break;
 		default:
-			ShowMessage(tr("ZipFile entry format (HostOS %1) at index %2 is not supported. Extract terminated.")
-							.arg(HostOS).arg(FileIdx), tr("Extract Addon"), QString(), QString(), MBB_OK, QMessageBox::Warning);
+			ShowMessage(tr("ZipFile entry format (HostOS %1) at index %2 is not supported. Extract terminated.").arg(HostOS).arg(FileIdx), tr("Extract Addon"), QString(), QString(), MBB_OK, QMessageBox::Warning);
 			Ok = false;
 		}
 
@@ -3669,7 +3634,7 @@ bool lcBlenderPreferences::ExtractAddon(const QString FileName, QString& Result)
 			FilePathRef.chop(1);
 		FileInfo.filePath = FilePathRef.toString();
 
-		QString const AbsPath = QDir::fromNativeSeparators(DestinationDir + QDir::separator() + FileInfo.filePath);
+		const QString AbsPath = QDir::fromNativeSeparators(DestinationDir + QDir::separator() + FileInfo.filePath);
 
 		// directories
 		if (FileInfo.isDir)

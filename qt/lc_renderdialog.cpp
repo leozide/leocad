@@ -84,11 +84,11 @@ lcRenderDialog::lcRenderDialog(QWidget* Parent, int Command)
 	ui->OutputEdit->setText(lcGetActiveProject()->GetImageFileName(false));
 
 	lcModel* Model = lcGetActiveProject()->GetActiveModel();
-	QString LabelMessage = tr("Render image:");
+	mLabelMessage = tr("Render image:");
 	if (Model)
-		LabelMessage = tr("Render <b>STEP %1</b> image:").arg(Model->GetCurrentStep());
+		mLabelMessage = tr("Render <b>STEP %1</b> image:").arg(Model->GetCurrentStep());
 
-	ui->renderLabel->setText(LabelMessage);
+	ui->renderLabel->setText(mLabelMessage);
 	ui->RenderOutputButton->setEnabled(false);
 
 	if (mCommand == POVRAY_RENDER)
@@ -134,8 +134,8 @@ lcRenderDialog::lcRenderDialog(QWidget* Parent, int Command)
 
 		if (mCommand == OPEN_IN_BLENDER)
 		{
-			LabelMessage = tr("Open%1 in Blender using %2:")
-							   .arg(Model ? tr(" <b>STEP %1</b>").arg(Model->GetCurrentStep()) : "").arg(mImportModule);
+			mLabelMessage = tr("Open%1 in Blender using %2:")
+							   .arg(Model ? tr(" <b>STEP %1</b>").arg(Model->GetCurrentStep()) : "");
 
 			ui->RenderSettingsButton->setToolTip(tr("Blender import settings"));
 
@@ -144,7 +144,7 @@ lcRenderDialog::lcRenderDialog(QWidget* Parent, int Command)
 			if (BlenderConfigured)
 				ui->RenderButton->setToolTip(tr("Import and open LDraw model in Blender"));
 
-			ui->renderLabel->setText(LabelMessage);
+			ui->renderLabel->setText(mLabelMessage.arg(mImportModule));
 			ui->renderLabel->setAlignment(Qt::AlignTrailing | Qt::AlignVCenter);
 
 			ui->outputLabel->hide();
@@ -288,7 +288,18 @@ void lcRenderDialog::on_RenderSettingsButton_clicked()
 	if (lcGetProfileString(LC_PROFILE_BLENDER_IMPORT_MODULE).isEmpty())
 		ui->RenderButton->setToolTip(tr("Blender not configured. Use Settings... to configure."));
 	else
+	{
+		if (mCommand == OPEN_IN_BLENDER)
+		{
+			mImportModule = lcGetProfileString(LC_PROFILE_BLENDER_IMPORT_MODULE) == QLatin1String("TN")
+								? tr("LDraw Import TN")
+								: tr("LDraw Import MM");
+			ui->renderLabel->setText(mLabelMessage.arg(mImportModule));
+			ui->renderLabel->setAlignment(Qt::AlignTrailing | Qt::AlignVCenter);
+		}
+
 		ui->RenderButton->setEnabled(true);
+	}
 }
 
 void lcRenderDialog::on_RenderButton_clicked()

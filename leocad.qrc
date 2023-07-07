@@ -1,6 +1,6 @@
 <RCC>
     <qresource prefix="/">
-	    <file>resources/action_arealight_16.png</file>
+        <file>resources/action_arealight_16.png</file>
         <file>resources/action_delete_16.png</file>
         <file>resources/action_insert_16.png</file>
         <file>resources/action_light_16.png</file>
@@ -10,7 +10,7 @@
         <file>resources/action_rotate_16.png</file>
         <file>resources/action_select_16.png</file>
         <file>resources/action_spotlight_16.png</file>
-		<file>resources/action_sunlight_16.png</file>
+        <file>resources/action_sunlight_16.png</file>
         <file>resources/action_zoom_16.png</file>
         <file>resources/edit_copy_16.png</file>
         <file>resources/edit_cut_16.png</file>
@@ -25,7 +25,7 @@
         <file>resources/file_render_open_in_blender_16.png</file>
         <file>resources/file_render_povray_16.png</file>
         <file>resources/file_save_16.png</file>
-		<file>resources/action_arealight.png</file>
+        <file>resources/action_arealight.png</file>
         <file>resources/action_camera.png</file>
         <file>resources/action_color_picker.png</file>
         <file>resources/action_color_picker_16.png</file>
@@ -44,11 +44,11 @@
         <file>resources/action_rotate_view.png</file>
         <file>resources/action_select.png</file>
         <file>resources/action_spotlight.png</file>
-		<file>resources/action_sunlight.png</file>
+        <file>resources/action_sunlight.png</file>
         <file>resources/action_zoom.png</file>
         <file>resources/action_zoom_extents.png</file>
         <file>resources/action_zoom_region.png</file>
-		<file>resources/cursor_arealight.png</file>
+        <file>resources/cursor_arealight.png</file>
         <file>resources/cursor_camera.png</file>
         <file>resources/cursor_color_picker.png</file>
         <file>resources/cursor_delete.png</file>
@@ -66,7 +66,7 @@
         <file>resources/cursor_select_add.png</file>
         <file>resources/cursor_select_remove.png</file>
         <file>resources/cursor_spotlight.png</file>
-		<file>resources/cursor_sunlight.png</file>
+        <file>resources/cursor_sunlight.png</file>
         <file>resources/cursor_zoom.png</file>
         <file>resources/cursor_zoom_region.png</file>
         <file>resources/edit_copy.png</file>

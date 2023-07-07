@@ -861,7 +861,7 @@ void lcQPropertiesTree::slotReturnPressed()
 				if (Item == lightPositionX)
 					Position[0] = Value;
 				else if (Item == lightPositionY)
-					Position[1] = -Value;
+					Position[1] = Value;
 				else if (Item == lightPositionZ)
 					Position[2] = Value;
 
@@ -877,7 +877,7 @@ void lcQPropertiesTree::slotReturnPressed()
 				if (Item == lightTargetX)
 					Position[0] = Value;
 				else if (Item == lightTargetY)
-					Position[1] = -Value;
+					Position[1] = Value;
 				else if (Item == lightTargetZ)
 					Position[2] = Value;
 
@@ -1495,16 +1495,16 @@ void lcQPropertiesTree::SetLight(lcObject* Focus)
 
 	lightPositionX->setText(1, lcFormatValueLocalized(Position[0]));
 	lightPositionX->setData(0, PropertyValueRole, Position[0]);
-	lightPositionY->setText(1, lcFormatValueLocalized(-Position[1]));
-	lightPositionY->setData(0, PropertyValueRole, -Position[1]);
+	lightPositionY->setText(1, lcFormatValueLocalized(Position[1]));
+	lightPositionY->setData(0, PropertyValueRole, Position[1]);
 	lightPositionZ->setText(1, lcFormatValueLocalized(Position[2]));
 	lightPositionZ->setData(0, PropertyValueRole, Position[2]);
 
 	if (LightIndex != LC_POINTLIGHT) {
 		lightTargetX->setText(1, lcFormatValueLocalized(Target[0]));
 		lightTargetX->setData(0, PropertyValueRole, Target[0]);
-		lightTargetY->setText(1, lcFormatValueLocalized(-Target[1]));
-		lightTargetY->setData(0, PropertyValueRole, -Target[1]);
+		lightTargetY->setText(1, lcFormatValueLocalized(Target[1]));
+		lightTargetY->setData(0, PropertyValueRole, Target[1]);
 		lightTargetZ->setText(1, lcFormatValueLocalized(Target[2]));
 		lightTargetZ->setData(0, PropertyValueRole, Target[2]);
 	}

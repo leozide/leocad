@@ -102,6 +102,7 @@ protected:
 	int mBlendProgMax;
 	double mScale;
 	QString mImportModule;
+	QString mLabelMessage;
 	QString mDataPath;
 
 	Ui::lcRenderDialog* ui;

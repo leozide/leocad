@@ -441,31 +441,40 @@ lcBlenderPreferences::lcBlenderPreferences(int Width, int Height, double Scale, 
 	mAddonGridLayout = new QGridLayout(BlenderAddonVersionBox);
 	BlenderAddonVersionBox->setLayout(mAddonGridLayout);
 
+	QCheckBox* AddonVersionCheck = new QCheckBox(tr("Prompt to download new addon version when available"), BlenderAddonVersionBox);
+	AddonVersionCheck->setChecked(lcGetProfileInt(LC_PROFILE_BLENDER_ADDON_VERSION_CHECK));
+	QObject::connect(AddonVersionCheck, &QCheckBox::stateChanged, [](int State)
+	{
+		 const bool VersionCheck = static_cast<Qt::CheckState>(State) == Qt::CheckState::Checked;
+		 lcSetProfileInt(LC_PROFILE_BLENDER_ADDON_VERSION_CHECK, (int)VersionCheck);
+	});
+	mAddonGridLayout->addWidget(AddonVersionCheck,0,0,1,4);
+
 	mAddonVersionLabel = new QLabel(BlenderAddonVersionBox);
-	mAddonGridLayout->addWidget(mAddonVersionLabel,0,0);
+	mAddonGridLayout->addWidget(mAddonVersionLabel,1,0);
 
 	mAddonVersionEdit = new QLineEdit(BlenderAddonVersionBox);
 	mAddonVersionEdit->setToolTip(tr("%1 Blender LDraw import and image renderer addon").arg(LC_PRODUCTNAME_STR));
 	mAddonVersionEdit->setPalette(ReadOnlyPalette);
 	mAddonVersionEdit->setReadOnly(true);
-	mAddonGridLayout->addWidget(mAddonVersionEdit,0,1);
+	mAddonGridLayout->addWidget(mAddonVersionEdit,1,1);
 	mAddonGridLayout->setColumnStretch(1,1/*1 is greater than 0 (default)*/);
 
 	mAddonUpdateButton = new QPushButton(tr("Update"), BlenderAddonVersionBox);
 	mAddonUpdateButton->setToolTip(tr("Update %1 Blender LDraw addon").arg(LC_PRODUCTNAME_STR));
-	mAddonGridLayout->addWidget(mAddonUpdateButton,0,2);
+	mAddonGridLayout->addWidget(mAddonUpdateButton,1,2);
 	connect(mAddonUpdateButton, SIGNAL(clicked(bool)), this, SLOT(UpdateBlenderAddon()));
 
 	mAddonStdOutButton = new QPushButton(tr("Output..."), BlenderAddonVersionBox);
 	mAddonStdOutButton->setToolTip(tr("Open the standrd output log"));
 	mAddonStdOutButton->setEnabled(false);
-	mAddonGridLayout->addWidget(mAddonStdOutButton,0,3);
+	mAddonGridLayout->addWidget(mAddonStdOutButton,1,3);
 	connect(mAddonStdOutButton, SIGNAL(clicked(bool)), this, SLOT(GetStandardOutput()));
 
 	mModulesBox = new QGroupBox(tr("Enabled Addon Modules"),mContent);
 	QHBoxLayout* ModulesLayout = new QHBoxLayout(mModulesBox);
 	mModulesBox->setLayout(ModulesLayout);
-	mAddonGridLayout->addWidget(mModulesBox,1,0,1,4);
+	mAddonGridLayout->addWidget(mModulesBox,2,0,1,4);
 
 	mImportActBox = new QCheckBox(tr("LDraw Import TN"),mModulesBox);
 	mImportActBox->setToolTip(tr("Enable addon import module (adapted from LDraw Import by Toby Nelson) in Blender"));
@@ -1440,18 +1449,25 @@ bool lcBlenderPreferences::GetBlenderAddon(const QString& BlenderDir)
 		}
 		else if (gMainWindow)
 		{
-			if (LocalVersion.isEmpty())
-				LocalVersion = gAddonPreferences->mAddonVersion;
-			const QString& Title = tr ("%1 Blender LDraw Addon").arg(LC_PRODUCTNAME_STR);
-			const QString& Header = tr ("Detected %1 Blender LDraw addon %2. A newer version %3 exists.").arg(LC_PRODUCTNAME_STR).arg(LocalVersion).arg(OnlineVersion);
-			const QString& Body = tr ("Do you want to download version %1 ?").arg(OnlineVersion);
-			int Exec = ShowMessage(Header, Title, Body, QString(), MBB_YES, QMessageBox::NoIcon);
-			if (Exec == QMessageBox::Cancel)
+			if (lcGetProfileInt(LC_PROFILE_BLENDER_ADDON_VERSION_CHECK))
 			{
-				AddonStatus = tr("Blender addon setup cancelled");
-				AddonAction = ADDON_CANCEL;
+				if (LocalVersion.isEmpty())
+					LocalVersion = gAddonPreferences->mAddonVersion;
+				const QString& Title = tr ("%1 Blender LDraw Addon").arg(LC_PRODUCTNAME_STR);
+				const QString& Header = tr ("Detected %1 Blender LDraw addon %2. A newer version %3 exists.").arg(LC_PRODUCTNAME_STR).arg(LocalVersion).arg(OnlineVersion);
+				const QString& Body = tr ("Do you want to download version %1 ?").arg(OnlineVersion);
+				int Exec = ShowMessage(Header, Title, Body, QString(), MBB_YES, QMessageBox::NoIcon);
+				if (Exec == QMessageBox::Cancel)
+				{
+					AddonStatus = tr("Blender addon setup cancelled");
+					AddonAction = ADDON_CANCEL;
+				}
+				else if (Exec == QMessageBox::No)
+				{
+					AddonAction = ADDON_RELOAD;
+				}
 			}
-			else if (Exec == QMessageBox::No)
+			else
 			{
 				AddonAction = ADDON_RELOAD;
 			}
@@ -3460,6 +3476,20 @@ int lcBlenderPreferences::ShowMessage(const QString& Header,  const QString& Tit
 				FixedWidth = MinimumWidth;
 			TextWidget->setFixedWidth(FixedWidth);
 		}
+	}
+
+	const bool DownloadRequest = Body.startsWith(tr("Do you want to download version "));
+
+	if (DownloadRequest){
+		QCheckBox* AddonVersionCheck = new QCheckBox(tr("Do not show download new addon version message again."));
+		Box.setCheckBox(AddonVersionCheck);
+		QObject::connect(AddonVersionCheck, &QCheckBox::stateChanged, [](int State)
+		{
+			bool VersionCheck = true;
+			if (static_cast<Qt::CheckState>(State) == Qt::CheckState::Checked)
+				VersionCheck = false;
+			lcSetProfileInt(LC_PROFILE_BLENDER_ADDON_VERSION_CHECK, (int)VersionCheck);
+		});
 	}
 
 	return Box.exec();

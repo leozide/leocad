@@ -148,6 +148,7 @@ static lcProfileEntry gProfileEntries[LC_NUM_PROFILE_KEYS] =
 	lcProfileEntry("Blender", "LDrawConfigPath", ""),                                          // LC_PROFILE_BLENDER_LDRAW_CONFIG_PATH
 	lcProfileEntry("Blender", "Version", ""),                                                  // LC_PROFILE_BLENDER_VERSION
 	lcProfileEntry("Blender", "AddonVersion", ""),                                             // LC_PROFILE_BLENDER_ADDON_VERSION
+	lcProfileEntry("Blender", "AddonVersionCheck", 1),                                         // LC_PROFILE_BLENDER_ADDON_VERSION_CHECK
 	lcProfileEntry("Blender", "ImportModule", ""),                                             // LC_PROFILE_BLENDER_IMPORT_MODULE
 
 	lcProfileEntry("Settgins", "PreviewViewSphereEnabled", 0),                                    // LC_PROFILE_PREVIEW_VIEW_SPHERE_ENABLED

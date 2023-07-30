@@ -2602,7 +2602,9 @@ void lcBlenderPreferences::SaveSettings()
 			continue;
 		Key = mBlenderPaths[LblIdx].key;
 		Value = QDir::toNativeSeparators(mBlenderPaths[LblIdx].value);
-		Settings.setValue(Key, QVariant(Value));
+
+		if (Settings.contains(Key))
+			Settings.setValue(Key, QVariant(Value));
 	}
 
 	for (int LblIdx = 0; LblIdx < NumSettings(); LblIdx++)
@@ -2624,7 +2626,9 @@ void lcBlenderPreferences::SaveSettings()
 		}
 
 		Key = mBlenderSettings[LblIdx].key;
-		Settings.setValue(Key, QVariant(Value));
+
+		if (Settings.contains(Key))
+			Settings.setValue(Key, QVariant(Value));
 	}
 
 	Settings.setValue(parameterFileKey, QVariant(QDir::toNativeSeparators(ParameterFile)));
@@ -2641,7 +2645,9 @@ void lcBlenderPreferences::SaveSettings()
 			continue;
 		Key = mBlenderPaths[LblIdx].key_mm;
 		Value = QDir::toNativeSeparators(mBlenderPaths[LblIdx].value);
-		Settings.setValue(Key, QVariant(Value));
+
+		if (Settings.contains(Key))
+			Settings.setValue(Key, QVariant(Value));
 	}
 
 	for (int LblIdx = 0; LblIdx < NumSettingsMM(); LblIdx++)
@@ -2660,7 +2666,9 @@ void lcBlenderPreferences::SaveSettings()
 		}
 
 		Key = mBlenderSettingsMM[LblIdx].key;
-		Settings.setValue(Key, QVariant(Value));
+
+		if (Settings.contains(Key))
+			Settings.setValue(Key, QVariant(Value));
 	}
 
 	searchDirectoriesKey = QLatin1String("additionalSearchPaths");

@@ -3163,7 +3163,7 @@ bool lcModel::GetMoveRotateTransform(lcVector3& Center, lcMatrix33& RelativeRota
 
 		Center += Light->GetSectionPosition(LC_LIGHT_SECTION_POSITION);
 		NumSelected++;
-		if (Light->IsSpotLight() || Light->IsDirectionalLight())
+		if (Light->IsDirectionalLight())
 		{
 			Center += Light->GetSectionPosition(LC_LIGHT_SECTION_TARGET);
 			NumSelected++;

@@ -3,6 +3,7 @@
 #include "lc_viewwidget.h"
 #include <stdlib.h>
 #include "lc_mainwindow.h"
+#include "light.h"
 #include "camera.h"
 #include "texfont.h"
 #include "lc_texture.h"
@@ -1596,6 +1597,8 @@ lcTrackTool lcView::GetOverrideTrackTool(Qt::MouseButton Button) const
 	{
 	    lcTrackTool::Insert,      // lcTool::Insert
 	    lcTrackTool::PointLight,  // lcTool::Light
+		lcTrackTool::AreaLight,   // lcTool::AreaLight
+		lcTrackTool::SunLight,    // lcTool::SunLight
 	    lcTrackTool::SpotLight,   // lcTool::SpotLight
 	    lcTrackTool::Camera,      // lcTool::Camera
 	    lcTrackTool::Select,      // lcTool::Select
@@ -1867,6 +1870,8 @@ lcCursor lcView::GetCursor() const
 		lcCursor::Select,      // lcTrackTool::None
 		lcCursor::Brick,       // lcTrackTool::Insert
 		lcCursor::Light,       // lcTrackTool::PointLight
+		lcCursor::Arealight,   // lcTrackTool::AreaLight
+		lcCursor::Sunlight,    // lcTrackTool::SunLight
 		lcCursor::Spotlight,   // lcTrackTool::SpotLight
 		lcCursor::Camera,      // lcTrackTool::Camera
 		lcCursor::Select,      // lcTrackTool::Select
@@ -1921,6 +1926,8 @@ void lcView::SetCursor(lcCursor CursorType)
 		{  0,  0, "" },                                 // lcCursor::Default
 		{  8,  3, ":/resources/cursor_insert" },        // lcCursor::Brick
 		{ 15, 15, ":/resources/cursor_light" },         // lcCursor::Light
+		{ 15, 15, ":/resources/cursor_arealight" },     // lcCursor::Arealight
+		{ 15, 15, ":/resources/cursor_sunlight" },      // lcCursor::Sunlight
 		{  7, 10, ":/resources/cursor_spotlight" },     // lcCursor::Spotlight
 		{ 15,  9, ":/resources/cursor_camera" },        // lcCursor::Camera
 		{  0,  2, ":/resources/cursor_select" },        // lcCursor::Select
@@ -1972,6 +1979,8 @@ lcTool lcView::GetCurrentTool() const
 		lcTool::Select,      // lcTrackTool::None
 		lcTool::Insert,      // lcTrackTool::Insert
 		lcTool::Light,       // lcTrackTool::PointLight
+		lcTool::AreaLight,   // lcTrackTool::AreaLight
+		lcTool::SunLight,    // lcTrackTool::SunLight
 		lcTool::SpotLight,   // lcTrackTool::SpotLight
 		lcTool::Camera,      // lcTrackTool::Camera
 		lcTool::Select,      // lcTrackTool::Select
@@ -2034,6 +2043,14 @@ void lcView::UpdateTrackTool()
 
 	case lcTool::Light:
 		NewTrackTool = lcTrackTool::PointLight;
+		break;
+
+	case lcTool::AreaLight:
+		NewTrackTool = lcTrackTool::AreaLight;;
+		break;
+
+	case lcTool::SunLight:
+		NewTrackTool = lcTrackTool::SunLight;
 		break;
 
 	case lcTool::SpotLight:
@@ -2261,11 +2278,14 @@ void lcView::StartTracking(lcTrackButton TrackButton)
 		case lcTool::Light:
 			break;
 
+		case lcTool::AreaLight:
+		case lcTool::SunLight:
 		case lcTool::SpotLight:
 		{
 			lcVector3 Position = GetCameraLightInsertPosition();
 			lcVector3 Target = Position + lcVector3(0.1f, 0.1f, 0.1f);
-			ActiveModel->BeginSpotLightTool(Position, Target);
+			int LightType = Tool == lcTool::AreaLight ? LC_AREALIGHT : Tool == lcTool::SunLight ? LC_SUNLIGHT : LC_SPOTLIGHT;
+			ActiveModel->BeginDirectionalLightTool(Position, Target, LightType);
 		}
 		break;
 
@@ -2325,6 +2345,8 @@ void lcView::StopTracking(bool Accept)
 	case lcTool::Light:
 		break;
 
+	case lcTool::AreaLight:
+	case lcTool::SunLight:
 	case lcTool::SpotLight:
 	case lcTool::Camera:
 		ActiveModel->EndMouseTool(Tool, Accept);
@@ -2452,6 +2474,8 @@ void lcView::OnButtonDown(lcTrackButton TrackButton)
 		}
 		break;
 
+	case lcTrackTool::AreaLight:
+	case lcTrackTool::SunLight:
 	case lcTrackTool::SpotLight:
 	case lcTrackTool::Camera:
 		StartTracking(TrackButton);
@@ -2689,8 +2713,10 @@ void lcView::OnMouseMove()
 	case lcTrackTool::PointLight:
 		break;
 
+	case lcTrackTool::AreaLight:
+	case lcTrackTool::SunLight:
 	case lcTrackTool::SpotLight:
-		ActiveModel->UpdateSpotLightTool(GetCameraLightInsertPosition());
+		ActiveModel->UpdateDirectionalLightTool(GetCameraLightInsertPosition());
 		break;
 
 	case lcTrackTool::Camera:

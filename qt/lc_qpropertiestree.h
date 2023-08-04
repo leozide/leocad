@@ -44,8 +44,13 @@ public:
 		PropertyGroup,
 		PropertyBool,
 		PropertyFloat,
+		PropertyFloatReadOnly,
+		PropertyFloatLightSpotSize,
 		PropertyStep,
 		PropertyString,
+		PropertyStringLightReadOnly,
+		PropertyLightShape,
+		PropertyLightColor,
 		PropertyColor,
 		PropertyPart
 	};
@@ -55,12 +60,14 @@ protected slots:
 	void slotReturnPressed();
 	void slotSetValue(int value);
 	void slotColorButtonClicked();
+	void slotSetColorValue(QColor Value);
 
 protected:
 	void keyPressEvent(QKeyEvent *event) override;
 	void mousePressEvent(QMouseEvent *event) override;
 	void drawRow(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
 	void updateColorEditor(QPushButton *editor, int value) const;
+	void updateLightColorEditor(QPushButton *editor, QColor color) const;
 
 	QTreeWidgetItem *addProperty(QTreeWidgetItem *parent, const QString& label, PropertyType propertyType);
 
@@ -71,6 +78,9 @@ protected:
 	void SetMultiple();
 
 	void getPartProperties(lcPartProperties *properties);
+
+	int mLightType;
+	int mLightShape;
 
 	lcPropertyWidgetMode mWidgetMode;
 	lcObject* mFocus;
@@ -113,6 +123,31 @@ protected:
 	QTreeWidgetItem *cameraNear;
 	QTreeWidgetItem *cameraFar;
 	QTreeWidgetItem *cameraName;
+
+	QTreeWidgetItem *lightPosition;
+	QTreeWidgetItem *lightPositionX;
+	QTreeWidgetItem *lightPositionY;
+	QTreeWidgetItem *lightPositionZ;
+	QTreeWidgetItem *lightTarget;
+	QTreeWidgetItem *lightTargetX;
+	QTreeWidgetItem *lightTargetY;
+	QTreeWidgetItem *lightTargetZ;
+	QTreeWidgetItem *lightColor;
+	QTreeWidgetItem *lightColorIcon;
+	QTreeWidgetItem *lightColorR;
+	QTreeWidgetItem *lightColorG;
+	QTreeWidgetItem *lightColorB;
+	QTreeWidgetItem *lightProperties;
+	QTreeWidgetItem *lightSpecular;
+	QTreeWidgetItem *lightCutoff;
+	QTreeWidgetItem *lightEnableCutoff;
+	QTreeWidgetItem *lightExponent;
+	QTreeWidgetItem *lightType;
+	QTreeWidgetItem *lightSpotSize;
+	QTreeWidgetItem *lightShape;
+	QTreeWidgetItem *lightFactorA;
+	QTreeWidgetItem *lightFactorB;
+	QTreeWidgetItem *lightName;
 };
 
 class lcQPropertiesTreeDelegate : public QItemDelegate

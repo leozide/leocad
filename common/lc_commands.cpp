@@ -648,6 +648,20 @@ const lcCommand gCommands[] =
 		QT_TRANSLATE_NOOP("Status", "Add new omni light sources to the model"),
 		""
 	},
+	// LC_EDIT_ACTION_AREALIGHT
+	{
+		QT_TRANSLATE_NOOP("Action", "Edit.Tool.Arealight"),
+		QT_TRANSLATE_NOOP("Menu", "Arealight"),
+		QT_TRANSLATE_NOOP("Status", "Add new arealight sources to the model - edit in Properties tab"),
+		""
+	},
+	// LC_EDIT_ACTION_SUNLIGHT
+	{
+		QT_TRANSLATE_NOOP("Action", "Edit.Tool.Sunlight"),
+		QT_TRANSLATE_NOOP("Menu", "Sunlight"),
+		QT_TRANSLATE_NOOP("Status", "Add new omnidirectional sunlight sources to the model - edit in Properties tab"),
+		""
+	},
 	// LC_EDIT_ACTION_SPOTLIGHT
 	{
 		QT_TRANSLATE_NOOP("Action", "Edit.Tool.Spotlight"),
@@ -1860,6 +1874,8 @@ const char* gToolNames[] =
 {
     QT_TRANSLATE_NOOP("Mouse", "NewPiece"),      // lcTool::Insert
     QT_TRANSLATE_NOOP("Mouse", "NewPointLight"), // lcTool::Light
+    QT_TRANSLATE_NOOP("Mouse", "NewAreaLight"),  // lcTool::AreaLight
+    QT_TRANSLATE_NOOP("Mouse", "NewSunLight"),   // lcTool::SunLight
     QT_TRANSLATE_NOOP("Mouse", "NewSpotLight"),  // lcTool::SpotLight
     QT_TRANSLATE_NOOP("Mouse", "NewCamera"),     // lcTool::Camera
     QT_TRANSLATE_NOOP("Mouse", "Select"),        // lcTool::Select

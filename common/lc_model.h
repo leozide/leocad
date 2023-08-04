@@ -302,8 +302,9 @@ public:
 	void EndMouseTool(lcTool Tool, bool Accept);
 	void InsertPieceToolClicked(const lcMatrix44& WorldMatrix);
 	void PointLightToolClicked(const lcVector3& Position);
+	void BeginDirectionalLightTool(const lcVector3& Position, const lcVector3& Target, int LightType);
+	void UpdateDirectionalLightTool(const lcVector3& Position);
 	void BeginSpotLightTool(const lcVector3& Position, const lcVector3& Target);
-	void UpdateSpotLightTool(const lcVector3& Position);
 	void BeginCameraTool(const lcVector3& Position, const lcVector3& Target);
 	void UpdateCameraTool(const lcVector3& Position);
 	void UpdateMoveTool(const lcVector3& Distance, bool AllowRelative, bool AlternateButtonDrag);
@@ -341,6 +342,8 @@ public:
 	void SetCameraZNear(lcCamera* Camera, float ZNear);
 	void SetCameraZFar(lcCamera* Camera, float ZFar);
 	void SetCameraName(lcCamera* Camera, const QString& Name);
+	void SetLightName(lcLight* Light, const QString& Name);
+	void UpdateLight(lcLight* Light, const lcLightProperties Props, int Property);
 
 	void ShowPropertiesDialog();
 	void ShowSelectByNameDialog();

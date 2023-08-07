@@ -46,9 +46,11 @@ public:
 		PropertyFloat,
 		PropertyFloatReadOnly,
 		PropertyFloatLightSpotSize,
+		PropertyFloatLightSpotFalloff,
 		PropertyStep,
 		PropertyString,
 		PropertyStringLightReadOnly,
+		PropertyLightFormat,
 		PropertyLightShape,
 		PropertyLightColor,
 		PropertyColor,
@@ -81,6 +83,7 @@ protected:
 
 	int mLightType;
 	int mLightShape;
+	bool mPOVRayLight;
 
 	lcPropertyWidgetMode mWidgetMode;
 	lcObject* mFocus;
@@ -124,6 +127,7 @@ protected:
 	QTreeWidgetItem *cameraFar;
 	QTreeWidgetItem *cameraName;
 
+	QTreeWidgetItem *lightConfiguration;
 	QTreeWidgetItem *lightPosition;
 	QTreeWidgetItem *lightPositionX;
 	QTreeWidgetItem *lightPositionY;
@@ -138,6 +142,7 @@ protected:
 	QTreeWidgetItem *lightColorG;
 	QTreeWidgetItem *lightColorB;
 	QTreeWidgetItem *lightProperties;
+	QTreeWidgetItem *lightDiffuse;
 	QTreeWidgetItem *lightSpecular;
 	QTreeWidgetItem *lightCutoff;
 	QTreeWidgetItem *lightEnableCutoff;
@@ -148,6 +153,12 @@ protected:
 	QTreeWidgetItem *lightFactorA;
 	QTreeWidgetItem *lightFactorB;
 	QTreeWidgetItem *lightName;
+	QTreeWidgetItem *lightFormat;
+	QTreeWidgetItem *lightShadowless;
+	QTreeWidgetItem *lightAreaGridRows;
+	QTreeWidgetItem *lightAreaGridColumns;
+	QTreeWidgetItem *lightSpotFalloff;
+	QTreeWidgetItem *lightSpotTightness;
 };
 
 class lcQPropertiesTreeDelegate : public QItemDelegate
@@ -196,4 +207,3 @@ private:
 	mutable QWidget *m_editedWidget;
 	mutable bool m_disablePainting;
 };
-

@@ -45,22 +45,34 @@ enum lcLightProperty
 	LC_LIGHT_COLOR,
 	LC_LIGHT_TYPE,
 	LC_LIGHT_FACTOR,
+	LC_LIGHT_DIFFUSE,
 	LC_LIGHT_SPECULAR,
+	LC_LIGHT_SHADOWLESS,
 	LC_LIGHT_EXPONENT,
+	LC_LIGHT_AREA_GRID,
 	LC_LIGHT_SPOT_SIZE,
+	LC_LIGHT_SPOT_FALLOFF,
+	LC_LIGHT_SPOT_TIGHTNESS,
 	LC_LIGHT_CUTOFF,
-	LC_LIGHT_USE_CUTOFF
+	LC_LIGHT_USE_CUTOFF,
+	LC_LIGHT_POVRAY
 };
 
 struct lcLightProperties
 {
 	lcVector3 mLightColor;
 	lcVector2 mLightFactor;
+	lcVector2 mAreaGrid;
+	float     mLightDiffuse;
 	float     mLightSpecular;
 	float     mSpotExponent;
 	float     mSpotCutoff;
+	float     mSpotFalloff;
+	float     mSpotTightness;
 	float     mSpotSize;
 	bool      mEnableCutoff;
+	bool      mShadowless;
+	bool      mPOVRayLight;
 	int       mLightShape;
 };
 
@@ -251,16 +263,21 @@ public:
 		lcLightProperties props;
 		props.mLightColor = mLightColor;
 		props.mLightFactor = mLightFactor;
+		props.mLightDiffuse = mLightDiffuse;
 		props.mLightSpecular = mLightSpecular;
 		props.mSpotExponent = mSpotExponent;
 		props.mSpotCutoff = mSpotCutoff;
+		props.mSpotFalloff = mSpotFalloff;
+		props.mSpotTightness = mSpotTightness;
 		props.mSpotSize = mSpotSize;
+		props.mPOVRayLight = mPOVRayLight;
 		props.mEnableCutoff = mEnableCutoff;
+		props.mShadowless = mShadowless;
+		props.mAreaGrid = mAreaGrid;
 		props.mLightShape = mLightShape;
 		return props;
 	}
 
-	// Temporary parameters
 	lcMatrix44 mWorldLight;
 	lcVector3 mPosition;
 	lcVector3 mTargetPosition;
@@ -270,17 +287,25 @@ public:
 	lcVector3 mAttenuation;
 	lcVector3 mLightColor;
 	lcVector2 mLightFactor;
+	lcVector2 mAreaGrid;
+	lcVector2 mAreaSize;
 	bool  mAngleSet;
 	bool  mSpotBlendSet;
 	bool  mSpotCutoffSet;
 	bool  mHeightSet;
 	bool  mEnableCutoff;
+	bool  mPOVRayLight;
+	bool  mShadowless;
 	int   mLightType;
 	int   mLightShape;
+	float mLightDiffuse;
 	float mLightSpecular;
 	float mSpotSize;
 	float mSpotCutoff;
+	float mSpotFalloff;
+	float mSpotTightness;
 	float mSpotExponent;
+	float mPOVRayExponent;
 	QString mName;
 
 protected:
@@ -292,12 +317,16 @@ protected:
 	lcObjectKeyArray<lcVector3> mAttenuationKeys;
 	lcObjectKeyArray<lcVector3> mLightColorKeys;
 	lcObjectKeyArray<lcVector2> mLightFactorKeys;
+	lcObjectKeyArray<lcVector2> mAreaGridKeys;
 	lcObjectKeyArray<int> mLightTypeKeys;
 	lcObjectKeyArray<int> mLightShapeKeys;
 	lcObjectKeyArray<float> mLightSpecularKeys;
-	lcObjectKeyArray<float> mLightSpotSizeKeys;
+	lcObjectKeyArray<float> mLightDiffuseKeys;
+	lcObjectKeyArray<float> mSpotSizeKeys;
 	lcObjectKeyArray<float> mSpotCutoffKeys;
+	lcObjectKeyArray<float> mSpotFalloffKeys;
 	lcObjectKeyArray<float> mSpotExponentKeys;
+	lcObjectKeyArray<float> mSpotTightnessKeys;
 
 	void Initialize(const lcVector3& Position, const lcVector3& TargetPosition, int LightType);
 

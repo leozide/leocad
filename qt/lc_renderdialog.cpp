@@ -882,11 +882,16 @@ void lcRenderDialog::on_OutputBrowseButton_clicked()
 
 void lcRenderDialog::on_RenderOutputButton_clicked()
 {
-	const QString RenderType = mCommand == POVRAY_RENDER ? QLatin1String("POV-Ray") : QLatin1String("Blender");
-	QFileInfo FileInfo(GetStdOutFileName());
+	QFileInfo FileInfo(GetStdErrFileName());
+	QString Message = tr("POV-Ray standard error file not found: %1.").arg(FileInfo.absoluteFilePath());
+	if (mCommand == BLENDER_RENDER)
+	{
+		FileInfo.setFile(GetStdOutFileName());
+		Message = tr("Blender standard output file not found: %1.").arg(FileInfo.absoluteFilePath());
+	}
 	if (!FileInfo.exists())
 	{
-		QMessageBox::warning(this, tr("Error"), tr("%1 Standard output file not found: %2.").arg(RenderType).arg(FileInfo.absoluteFilePath()));
+		QMessageBox::warning(this, tr("Error"), Message);
 		return;
 	}
 

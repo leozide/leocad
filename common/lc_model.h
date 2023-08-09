@@ -67,6 +67,26 @@ public:
 	lcVector3 mAmbientColor;
 };
 
+class lcPOVRayOptions
+{
+public:
+	lcPOVRayOptions();
+	void ParseLDrawLine(QTextStream& LineStream);
+	void SaveLDraw(QTextStream& Stream) const;
+
+	bool UseLGEO;
+	bool ExcludeFloor;
+	bool ExcludeBackground;
+	bool NoReflection;
+	bool NoShadow;
+	int FloorAxis;
+	float FloorAmbient;
+	float FloorDiffuse;
+	lcVector3 FloorColor;
+	QString HeaderIncludeFile;
+	QString FooterIncludeFile;
+};
+
 struct lcModelHistoryEntry
 {
 	QByteArray File;
@@ -134,6 +154,11 @@ public:
 	const lcModelProperties& GetProperties() const
 	{
 		return mProperties;
+	}
+
+	const lcPOVRayOptions& GetPOVRayOptions() const
+	{
+		return mPOVRayOptions;
 	}
 
 	void SetFileName(const QString& FileName)
@@ -366,6 +391,7 @@ protected:
 	void AddPiece(lcPiece* Piece);
 	void InsertPiece(lcPiece* Piece, int Index);
 
+	lcPOVRayOptions mPOVRayOptions;
 	lcModelProperties mProperties;
 	Project* const mProject;
 	PieceInfo* mPieceInfo;

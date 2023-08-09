@@ -107,6 +107,86 @@ void lcModelProperties::ParseLDrawLine(QTextStream& Stream)
 	}
 }
 
+lcPOVRayOptions::lcPOVRayOptions() :
+	UseLGEO(false),
+	ExcludeFloor(false),
+	ExcludeBackground(false),
+	NoReflection(false),
+	NoShadow(false),
+	FloorAxis(1),
+	FloorAmbient(0.4f),
+	FloorDiffuse(0.4f),
+	FloorColor(0.8f,0.8f,0.8f)
+{}
+
+void lcPOVRayOptions::ParseLDrawLine(QTextStream& LineStream)
+{
+	QString Token;
+	LineStream >> Token;
+
+	if (Token == QLatin1String("HEADER_INCLUDE_FILE"))
+	{
+		LineStream >> HeaderIncludeFile;
+		if (!QFileInfo(HeaderIncludeFile).isReadable())
+			HeaderIncludeFile.clear();
+	}
+	else if (Token == QLatin1String("FOOTER_INCLUDE_FILE"))
+	{
+		LineStream >> FooterIncludeFile;
+		if (!QFileInfo(FooterIncludeFile).isReadable())
+			FooterIncludeFile.clear();
+	}
+	else if (Token == QLatin1String("FLOOR_AXIS"))
+	{
+		LineStream >> FloorAxis;
+		if (FloorAxis < 0 || FloorAxis > 2)
+			FloorAxis = 1; // y
+	}
+	else if (Token == QLatin1String("FLOOR_COLOR_RGB"))
+		LineStream >> FloorColor[0] >> FloorColor[1] >> FloorColor[2];
+	else if (Token == QLatin1String("FLOOR_AMBIENT"))
+		LineStream >> FloorAmbient;
+	else if (Token == QLatin1String("FLOOR_DIFFUSE"))
+		LineStream >> FloorDiffuse;
+	else if (Token == QLatin1String("EXCLUDE_FLOOR"))
+		ExcludeFloor = true;
+	else if (Token == QLatin1String("EXCLUDE_BACKGROUND"))
+		ExcludeFloor = true;
+	else if (Token == QLatin1String("NO_REFLECTION"))
+		NoReflection = true;
+	else if (Token == QLatin1String("NO_SHADOWS"))
+		NoShadow = true;
+	else if (Token == QLatin1String("USE_LGEO"))
+		UseLGEO = true;
+}
+
+void lcPOVRayOptions::SaveLDraw(QTextStream& Stream) const
+{
+	const QLatin1String LineEnding("\r\n");
+	if (!HeaderIncludeFile.isEmpty())
+		Stream << QLatin1String("0 !LEOCAD POV_RAY HEADER_INCLUDE_FILE ") << QDir::toNativeSeparators(HeaderIncludeFile) << LineEnding;
+	if (!FooterIncludeFile.isEmpty())
+		Stream << QLatin1String("0 !LEOCAD POV_RAY FOOTER_INCLUDE_FILE ") << QDir::toNativeSeparators(FooterIncludeFile) << LineEnding;
+	if (FloorAxis != 1)
+		Stream << QLatin1String("0 !LEOCAD POV_RAY FLOOR_AXIS ") << FloorAxis << LineEnding;
+	if (FloorColor != lcVector3(0.8f,0.8f,0.8f))
+		Stream << QLatin1String("0 !LEOCAD POV_RAY FLOOR_COLOR_RGB ") << FloorColor[0] << ' ' << FloorColor[1] << ' ' << FloorColor[2] << LineEnding;
+	if (FloorAmbient != 0.4f)
+		Stream << QLatin1String("0 !LEOCAD POV_RAY FLOOR_AMBIENT ") << FloorAmbient << LineEnding;
+	if (FloorDiffuse != 0.4f)
+		Stream << QLatin1String("0 !LEOCAD POV_RAY FLOOR_DIFFUSE ") << FloorDiffuse << LineEnding;
+	if (ExcludeFloor)
+		Stream << QLatin1String("0 !LEOCAD POV_RAY EXCLUDE_FLOOR") << LineEnding;
+	if (ExcludeBackground)
+		Stream << QLatin1String("0 !LEOCAD POV_RAY EXCLUDE_BACKGROUND") << LineEnding;
+	if (NoReflection)
+		Stream << QLatin1String("0 !LEOCAD POV_RAY NO_REFLECTION") << LineEnding;
+	if (NoShadow)
+		Stream << QLatin1String("0 !LEOCAD POV_RAY NO_SHADOWS") << LineEnding;
+	if (UseLGEO)
+		Stream << QLatin1String("0 !LEOCAD POV_RAY USE_LGEO") << LineEnding;
+}
+
 lcModel::lcModel(const QString& FileName, Project* Project, bool Preview)
 	: mProject(Project), mIsPreview(Preview)
 {
@@ -580,6 +660,10 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 					mLights.Add(Light);
 					Light = nullptr;
 				}
+			}
+			else if (Token == QLatin1String("POV_RAY"))
+			{
+				mPOVRayOptions.ParseLDrawLine(LineStream);
 			}
 			else if (Token == QLatin1String("GROUP"))
 			{

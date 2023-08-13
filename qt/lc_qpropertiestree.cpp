@@ -1487,7 +1487,7 @@ void lcQPropertiesTree::SetLight(lcObject* Focus)
 			if (POVRayLight)
 			{
 				FactorALabel = tr("Radius (°)");
-					FactorAToolTip = tr("The angle between the \"hot-spot\" edge at the beam center and the center line.");
+				FactorAToolTip = tr("The angle between the \"hot-spot\" edge at the beam center and the center line.");
 				SpotSizeToolTip = tr("Angle of the spotlight beam - Read only.");
 				Factor[0] = Light->mSpotSize - Light->mSpotFalloff;
 				SpotSizeProperty = PropertyFloatReadOnly;
@@ -1500,7 +1500,7 @@ void lcQPropertiesTree::SetLight(lcObject* Focus)
 			}
 			break;
 		case lcLightType::Directional:
-			Type = tr("Sun");
+			Type = tr("Directional");
 			FactorALabel = tr("Angle (°)");
 			FactorAToolTip = tr("Angular diamater of the sun as seen from the Earth.");
 			ExponentLabel = tr("Strength");

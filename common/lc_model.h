@@ -327,7 +327,7 @@ public:
 	void EndMouseTool(lcTool Tool, bool Accept);
 	void InsertPieceToolClicked(const lcMatrix44& WorldMatrix);
 	void PointLightToolClicked(const lcVector3& Position);
-	void BeginDirectionalLightTool(const lcVector3& Position, const lcVector3& Target, int LightType);
+	void BeginDirectionalLightTool(const lcVector3& Position, const lcVector3& Target, lcLightType LightType);
 	void UpdateDirectionalLightTool(const lcVector3& Position);
 	void BeginSpotLightTool(const lcVector3& Position, const lcVector3& Target);
 	void BeginCameraTool(const lcVector3& Position, const lcVector3& Target);

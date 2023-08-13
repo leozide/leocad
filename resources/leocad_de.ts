@@ -5501,7 +5501,7 @@ Bitte lesen sie unter https://www.leocad.org nach wie man eine Bibliothek herunt
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="3957"/>
-        <source>New SpotLight</source>
+        <source>New Spotlight</source>
         <translation>Neues Scheinwerferlicht</translation>
     </message>
     <message>

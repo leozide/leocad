@@ -1859,12 +1859,6 @@ bool Project::ExportPOVRay(const QString& FileName)
 
 	POVFile.WriteLine("global_settings { assumed_gamma 1.0 }\n\n");
 
-	/* POV-Ray uses a left-handed coordinate system
-	 * - positive x-axis pointing right
-	 * - positive y-axis pointing up
-	 * - positive z-axis pointing away from you
-	 * POVRay [0]x,[1]y,[2]z = LeoCAD [1]y,[0]x,[2]z */
-
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 	std::map<const PieceInfo*, std::pair<char[LC_PIECE_NAME_LEN + 1], int>> PieceTable;
 	size_t NumColors = gColorList.size();
@@ -1930,7 +1924,7 @@ bool Project::ExportPOVRay(const QString& FileName)
 
 	for (const lcLight* Light : Lights)
 	{
-		if (Light->mLightType == LC_AREALIGHT)
+		if (Light->GetLightType() == lcLightType::Area)
 		{
 			if (FloorColor == lcVector3(0.8f,0.8f,0.8f))
 				FloorColor = {1.0f,1.0f,1.0f};
@@ -2015,16 +2009,25 @@ bool Project::ExportPOVRay(const QString& FileName)
 			"#ifndef (SkipWriteLightMacro)\n"
 			"#macro WriteLight(Type, Shadowless, Location, Target, Color, Power, SpotRadius, SpotFalloff, SpotTightness, AreaCircle, AreaWidth, AreaHeight, AreaRows, AreaColumns)\n"
 			"  #local PointLight = %i;\n"
+			"  #local Spotlight = %i;\n"
+			"  #local DirectionalLight = %i;\n"
 			"  #local AreaLight = %i;\n"
-			"  #local SunLight = %i;\n"
-			"  #local SpotLight = %i;\n"
 			"  light_source {\n"
 			"    Location\n"
 			"    color rgb Color*Power\n"
 			"    #if (Shadowless > 0)\n"
 			"      shadowless\n"
 			"    #end\n"
-			"    #if (Type = AreaLight)\n"
+			"    #if (Type = Spotlight)\n"
+			"      spotlight\n"
+			"      radius SpotRadius\n"
+			"      falloff SpotFalloff\n"
+			"      tightness SpotTightness\n"
+			"      point_at Target\n"
+			"    #elseif (Type = DirectionalLight)\n"
+			"      parallel\n"
+			"      point_at Target\n"
+			"    #elseif (Type = AreaLight)\n"
 			"      area_light AreaWidth, AreaHeight, AreaRows, AreaColumns\n"
 			"      jitter\n"
 			"      #if (AreaCircle > 0 & AreaWidth > 2 & AreaHeight > 2 & AreaRows > 1 & AreaColumns > 1 )\n"
@@ -2033,20 +2036,11 @@ bool Project::ExportPOVRay(const QString& FileName)
 			"          orient\n"
 			"        #end\n"
 			"      #end\n"
-			"    #elseif (Type = SunLight)\n"
-			"      parallel\n"
-			"      point_at Target\n"
-			"    #elseif (Type = SpotLight)\n"
-			"      spotlight\n"
-			"      radius SpotRadius\n"
-			"      falloff SpotFalloff\n"
-			"      tightness SpotTightness\n"
-			"      point_at Target\n"
 			"    #end\n"
 			"  }\n"
 			"#end\n"
 			"#end\n\n",
-			LC_POINTLIGHT, LC_AREALIGHT, LC_SUNLIGHT, LC_SPOTLIGHT);
+			lcLightType::Point, lcLightType::Spot, lcLightType::Directional, lcLightType::Area);
 	POVFile.WriteLine(Line);
 
 	for (const lcModelPartsEntry& ModelPart : ModelParts)
@@ -2147,7 +2141,8 @@ bool Project::ExportPOVRay(const QString& FileName)
 
 	lcVector3 LightTarget(0.0f, 0.0f, 0.0f), LightColor(1.0f, 1.0f, 1.0f);
 	lcVector2 AreaSize(200.0f, 200.0f), AreaGrid(10.0f, 10.0f);
-	int AreaCircle = 0, Shadowless = 0, LightType = LC_AREALIGHT;
+	int AreaCircle = 0, Shadowless = 0;
+	lcLightType LightType = lcLightType::Area;
 	float Power = 0, SpotRadius = 0, SpotFalloff = 0, SpotTightness = 0;
 	if (Lights.IsEmpty())
 	{
@@ -2178,24 +2173,24 @@ bool Project::ExportPOVRay(const QString& FileName)
 		{
 			const lcVector3& Location = Light->mPosition;
 			const QString LightName = QString(Light->mName).replace(" ","_");
-			LightType = Light->mLightType;
+			LightType = Light->GetLightType();
 			Shadowless = static_cast<int>(Light->mShadowless);
 			LightColor = Light->mLightColor;
 			Power = Light->mPOVRayExponent;
 			switch(LightType)
 			{
-			case LC_AREALIGHT:
-				AreaCircle = Light->mLightShape == LC_LIGHT_SHAPE_DISK ? 1 : 0;
-				AreaSize = Light->mAreaSize;
-				AreaGrid = Light->mAreaGrid;
-				break;
-			case LC_SUNLIGHT:
-				LightTarget = Light->mTargetPosition;
-				break;
-			case LC_SPOTLIGHT:
+			case lcLightType::Spot:
 				LightTarget = Light->mTargetPosition;
 				SpotFalloff = Light->mSpotFalloff;
 				SpotRadius = Light->mSpotSize - SpotFalloff;
+				break;
+			case lcLightType::Directional:
+				LightTarget = Light->mTargetPosition;
+				break;
+			case lcLightType::Area:
+				AreaCircle = Light->GetLightShape() == LC_LIGHT_SHAPE_DISK ? 1 : 0;
+				AreaSize = Light->mAreaSize;
+				AreaGrid = Light->mAreaGrid;
 				break;
 			default:
 				break;

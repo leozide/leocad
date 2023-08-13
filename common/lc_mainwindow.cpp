@@ -204,22 +204,22 @@ void lcMainWindow::CreateActions()
 	QIcon EditActionLightIcon;
 	EditActionLightIcon.addFile(":/resources/action_light.png");
 	EditActionLightIcon.addFile(":/resources/action_light_16.png");
-	mActions[LC_EDIT_ACTION_LIGHT]->setIcon(EditActionLightIcon);
-
-	QIcon EditActionArealightIcon;
-	EditActionArealightIcon.addFile(":/resources/action_arealight.png");
-	EditActionArealightIcon.addFile(":/resources/action_arealight_16.png");
-	mActions[LC_EDIT_ACTION_AREALIGHT]->setIcon(EditActionArealightIcon);
-
-	QIcon EditActionSunlightIcon;
-	EditActionSunlightIcon.addFile(":/resources/action_sunlight.png");
-	EditActionSunlightIcon.addFile(":/resources/action_sunlight_16.png");
-	mActions[LC_EDIT_ACTION_SUNLIGHT]->setIcon(EditActionSunlightIcon);
+	mActions[LC_EDIT_ACTION_POINT_LIGHT]->setIcon(EditActionLightIcon);
 
 	QIcon EditActionSpotLightIcon;
 	EditActionSpotLightIcon.addFile(":/resources/action_spotlight.png");
 	EditActionSpotLightIcon.addFile(":/resources/action_spotlight_16.png");
 	mActions[LC_EDIT_ACTION_SPOTLIGHT]->setIcon(EditActionSpotLightIcon);
+
+	QIcon EditActionSunlightIcon;
+	EditActionSunlightIcon.addFile(":/resources/action_sunlight.png");
+	EditActionSunlightIcon.addFile(":/resources/action_sunlight_16.png");
+	mActions[LC_EDIT_ACTION_DIRECTIONAL_LIGHT]->setIcon(EditActionSunlightIcon);
+
+	QIcon EditActionArealightIcon;
+	EditActionArealightIcon.addFile(":/resources/action_arealight.png");
+	EditActionArealightIcon.addFile(":/resources/action_arealight_16.png");
+	mActions[LC_EDIT_ACTION_AREA_LIGHT]->setIcon(EditActionArealightIcon);
 
 	QIcon EditActionSelectIcon;
 	EditActionSelectIcon.addFile(":/resources/action_select.png");
@@ -431,10 +431,10 @@ void lcMainWindow::CreateMenus()
 
 	mToolsMenu = new QMenu(tr("Tools"), this);
 	mToolsMenu->addAction(mActions[LC_EDIT_ACTION_INSERT]);
-	mToolsMenu->addAction(mActions[LC_EDIT_ACTION_LIGHT]);
-	mToolsMenu->addAction(mActions[LC_EDIT_ACTION_AREALIGHT]);
-	mToolsMenu->addAction(mActions[LC_EDIT_ACTION_SUNLIGHT]);
+	mToolsMenu->addAction(mActions[LC_EDIT_ACTION_POINT_LIGHT]);
 	mToolsMenu->addAction(mActions[LC_EDIT_ACTION_SPOTLIGHT]);
+	mToolsMenu->addAction(mActions[LC_EDIT_ACTION_DIRECTIONAL_LIGHT]);
+	mToolsMenu->addAction(mActions[LC_EDIT_ACTION_AREA_LIGHT]);
 	mToolsMenu->addAction(mActions[LC_EDIT_ACTION_CAMERA]);
 	mToolsMenu->addSeparator();
 	mToolsMenu->addAction(mActions[LC_EDIT_ACTION_SELECT]);
@@ -676,10 +676,10 @@ void lcMainWindow::CreateToolBars()
 	mToolsToolBar->setObjectName("ToolsToolbar");
 	insertToolBarBreak(mToolsToolBar);
 	mToolsToolBar->addAction(mActions[LC_EDIT_ACTION_INSERT]);
-	mToolsToolBar->addAction(mActions[LC_EDIT_ACTION_LIGHT]);
-	mToolsToolBar->addAction(mActions[LC_EDIT_ACTION_AREALIGHT]);
-	mToolsToolBar->addAction(mActions[LC_EDIT_ACTION_SUNLIGHT]);
+	mToolsToolBar->addAction(mActions[LC_EDIT_ACTION_POINT_LIGHT]);
 	mToolsToolBar->addAction(mActions[LC_EDIT_ACTION_SPOTLIGHT]);
+	mToolsToolBar->addAction(mActions[LC_EDIT_ACTION_DIRECTIONAL_LIGHT]);
+	mToolsToolBar->addAction(mActions[LC_EDIT_ACTION_AREA_LIGHT]);
 	mToolsToolBar->addAction(mActions[LC_EDIT_ACTION_CAMERA]);
 	mToolsToolBar->addSeparator();
 	mToolsToolBar->addAction(mActions[LC_EDIT_ACTION_SELECT]);
@@ -831,7 +831,7 @@ void lcMainWindow::TogglePreviewWidget(bool Visible)
 		else
 			mPreviewToolBar->hide();
 	}
-	else if (Visible) 
+	else if (Visible)
 	{
 		CreatePreviewWidget();
 	}
@@ -3376,20 +3376,20 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		SetTool(lcTool::Insert);
 		break;
 
-	case LC_EDIT_ACTION_LIGHT:
-		SetTool(lcTool::Light);
+	case LC_EDIT_ACTION_POINT_LIGHT:
+		SetTool(lcTool::PointLight);
 		break;
 
-	case LC_EDIT_ACTION_AREALIGHT:
+	case LC_EDIT_ACTION_AREA_LIGHT:
 		SetTool(lcTool::AreaLight);
 		break;
 
-	case LC_EDIT_ACTION_SUNLIGHT:
-		SetTool(lcTool::SunLight);
+	case LC_EDIT_ACTION_DIRECTIONAL_LIGHT:
+		SetTool(lcTool::DirectionalLight);
 		break;
 
 	case LC_EDIT_ACTION_SPOTLIGHT:
-		SetTool(lcTool::SpotLight);
+		SetTool(lcTool::Spotlight);
 		break;
 
 	case LC_EDIT_ACTION_CAMERA:

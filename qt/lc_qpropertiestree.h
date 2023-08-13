@@ -81,7 +81,7 @@ protected:
 
 	void getPartProperties(lcPartProperties *properties);
 
-	int mLightType;
+	lcLightType mLightType;
 	int mLightShape;
 	bool mPOVRayLight;
 

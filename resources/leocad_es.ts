@@ -5577,7 +5577,7 @@ Por favor, visita https://www.leocad.org para saber cómo descargar e instalar u
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="3957"/>
-        <source>New SpotLight</source>
+        <source>New Spotlight</source>
         <translation>nuevo foco</translation>
     </message>
     <message>

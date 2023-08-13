@@ -620,7 +620,7 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 
 			if (Token != QLatin1String("!LEOCAD"))
 			{
-				mFileLines.append(OriginalLine); 
+				mFileLines.append(OriginalLine);
 				continue;
 			}
 
@@ -652,7 +652,7 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 			else if (Token == QLatin1String("LIGHT"))
 			{
 				if (!Light)
-					Light = new lcLight(0.0f, 0.0f, 0.0f);
+					Light = new lcLight(lcVector3(0.0f, 0.0f, 0.0f), lcVector3(0.0f, 0.0f, 0.0f), lcLightType::Point);
 
 				if (Light->ParseLDrawLine(LineStream))
 				{
@@ -734,7 +734,7 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 
 			if (Library->IsPrimitive(CleanId.constData()))
 			{
-				mFileLines.append(OriginalLine); 
+				mFileLines.append(OriginalLine);
 			}
 			else
 			{
@@ -1039,7 +1039,7 @@ bool lcModel::LoadLDD(const QString& FileData)
 {
 	std::vector<lcPiece*> Pieces;
 	std::vector<std::vector<lcPiece*>> Groups;
-	
+
 	if (!lcImportLXFMLFile(FileData, Pieces, Groups))
 		return false;
 
@@ -4069,13 +4069,13 @@ void lcModel::EndMouseTool(lcTool Tool, bool Accept)
 	switch (Tool)
 	{
 	case lcTool::Insert:
-	case lcTool::Light:
+	case lcTool::PointLight:
+	case lcTool::DirectionalLight:
 	case lcTool::AreaLight:
-	case lcTool::SunLight:
 		break;
 
-	case lcTool::SpotLight:
-		SaveCheckpoint(tr("New SpotLight"));
+	case lcTool::Spotlight:
+		SaveCheckpoint(tr("New Spotlight"));
 		break;
 
 	case lcTool::Camera:
@@ -4143,25 +4143,41 @@ void lcModel::InsertPieceToolClicked(const lcMatrix44& WorldMatrix)
 
 void lcModel::PointLightToolClicked(const lcVector3& Position)
 {
-	lcLight* Light = new lcLight(Position[0], Position[1], Position[2]);
+	lcLight* Light = new lcLight(Position, lcVector3(0.0f, 0.0f, 0.0f), lcLightType::Point);
 	Light->CreateName(mLights);
 	mLights.Add(Light);
 
 	ClearSelectionAndSetFocus(Light, LC_LIGHT_SECTION_POSITION, false);
-	SaveCheckpoint(tr("New Light"));
+	SaveCheckpoint(tr("New Point Light"));
 }
 
-void lcModel::BeginDirectionalLightTool(const lcVector3& Position, const lcVector3& Target, int LightType)
+void lcModel::BeginDirectionalLightTool(const lcVector3& Position, const lcVector3& Target, lcLightType LightType)
 {
-	lcLight* Light = new lcLight(Position[0], Position[1], Position[2], Target[0], Target[1], Target[2], LightType);
+	lcLight* Light = new lcLight(Position, Target, LightType);
 	Light->CreateName(mLights);
 	mLights.Add(Light);
 
 	mMouseToolDistance = Target;
 
 	ClearSelectionAndSetFocus(Light, LC_LIGHT_SECTION_TARGET, false);
-	QString light(LightType == LC_AREALIGHT ? "Arealight " : LightType == LC_SUNLIGHT ? "Sunlight " : "Spotlight ");
-	SaveCheckpoint(tr("%1").arg(light));
+
+	switch (LightType)
+	{
+	case lcLightType::Point:
+		break;
+
+	case lcLightType::Spot:
+		SaveCheckpoint(tr("New Spot Light"));
+		break;
+
+	case lcLightType::Directional:
+		SaveCheckpoint(tr("New Directional Light"));
+		break;
+
+	case lcLightType::Area:
+		SaveCheckpoint(tr("New Area Light"));
+		break;
+	}
 }
 
 void lcModel::UpdateDirectionalLightTool(const lcVector3& Position)
@@ -4467,7 +4483,7 @@ void lcModel::ShowArrayDialog()
 		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("No pieces selected."));
 		return;
 	}
-	
+
 	lcArrayDialog Dialog(gMainWindow);
 
 	if (Dialog.exec() != QDialog::Accepted)

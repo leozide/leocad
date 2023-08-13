@@ -5,8 +5,6 @@
 
 #define LC_LIGHT_HIDDEN            0x0001
 #define LC_LIGHT_DISABLED          0x0002
-#define LC_LIGHT_SPOT              0x0004
-#define LC_LIGHT_DIRECTIONAL       0x0008
 #define LC_LIGHT_POSITION_SELECTED 0x0010
 #define LC_LIGHT_POSITION_FOCUSED  0x0020
 #define LC_LIGHT_TARGET_SELECTED   0x0040
@@ -21,14 +19,12 @@ enum lcLightSection
 	LC_LIGHT_SECTION_TARGET
 };
 
-enum lcLightType
+enum class lcLightType
 {
-	LC_UNDEFINED_LIGHT,
-	LC_POINTLIGHT,
-	LC_AREALIGHT,
-	LC_SUNLIGHT,
-	LC_SPOTLIGHT,
-	LC_NUM_LIGHT_TYPES
+	Point,
+	Spot,
+	Directional,
+	Area
 };
 
 enum lcLightProperty
@@ -66,9 +62,8 @@ public:
 class lcLight : public lcObject
 {
 public:
-	lcLight(float px, float py, float pz);
-	lcLight(float px, float py, float pz, float tx, float ty, float tz, int LightType);
-	~lcLight();
+	lcLight(const lcVector3& Position, const lcVector3& TargetPosition, lcLightType LightType);
+	virtual ~lcLight() = default;
 
 	lcLight(const lcLight&) = delete;
 	lcLight(lcLight&&) = delete;
@@ -77,17 +72,32 @@ public:
 
 	bool IsPointLight() const
 	{
-		return (mState & (LC_LIGHT_SPOT | LC_LIGHT_DIRECTIONAL)) == 0;
+		return mLightType == lcLightType::Point;
 	}
 
 	bool IsSpotLight() const
 	{
-		return (mState & LC_LIGHT_SPOT) != 0;
+		return mLightType == lcLightType::Spot;
 	}
 
 	bool IsDirectionalLight() const
 	{
-		return (mState & LC_LIGHT_DIRECTIONAL) != 0;
+		return mLightType == lcLightType::Directional;
+	}
+
+	bool IsAreaLight() const
+	{
+		return mLightType == lcLightType::Area;
+	}
+
+	lcLightType GetLightType() const
+	{
+		return mLightType;
+	}
+
+	int GetLightShape() const
+	{
+		return mLightShape;
 	}
 
 	bool IsSelected() const override
@@ -279,8 +289,6 @@ public:
 	bool  mSpotCutoffSet;
 	bool  mHeightSet;
 	bool  mEnableCutoff;
-	int   mLightType;
-	int   mLightShape;
 	float mLightSpecular;
 	float mSpotSize;
 	float mSpotCutoff;
@@ -296,19 +304,16 @@ protected:
 	lcObjectKeyArray<lcVector3> mAttenuationKeys;
 	lcObjectKeyArray<lcVector3> mLightColorKeys;
 	lcObjectKeyArray<lcVector2> mLightFactorKeys;
-	lcObjectKeyArray<int> mLightTypeKeys;
-	lcObjectKeyArray<int> mLightShapeKeys;
 	lcObjectKeyArray<float> mLightSpecularKeys;
 	lcObjectKeyArray<float> mLightSpotSizeKeys;
 	lcObjectKeyArray<float> mSpotCutoffKeys;
 	lcObjectKeyArray<float> mSpotExponentKeys;
 
-	void Initialize(const lcVector3& Position, const lcVector3& TargetPosition, int LightType);
-
 	void DrawDirectionalLight(lcContext* Context) const;
 	void DrawPointLight(lcContext* Context) const;
 	void DrawSpotLight(lcContext* Context) const;
-	void SetLightState(int LightType);
 
 	quint32 mState;
+	lcLightType mLightType;
+	int mLightShape;
 };

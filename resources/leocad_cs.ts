@@ -5602,7 +5602,7 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="3957"/>
-        <source>New SpotLight</source>
+        <source>New Spotlight</source>
         <translation>Nový zdroj osvětlení</translation>
     </message>
     <message>

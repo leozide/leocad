@@ -176,7 +176,7 @@ bool lcCamera::ParseLDrawLine(QTextStream& Stream)
 		Stream >> Token;
 
 		if (Token == QLatin1String("HIDDEN"))
-				SetHidden(true);
+			SetHidden(true);
 		else if (Token == QLatin1String("ORTHOGRAPHIC"))
 			SetOrtho(true);
 		else if (Token == QLatin1String("FOV"))

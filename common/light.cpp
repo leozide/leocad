@@ -13,63 +13,24 @@
 #define LC_LIGHT_SPHERE_RADIUS 5.0f
 #define LC_LIGHT_BASEFACE_EDGE 12.5f
 
-// New omni light.
-lcLight::lcLight(float px, float py, float pz)
-	: lcObject(lcObjectType::Light)
-{
-	Initialize(lcVector3(px, py, pz), lcVector3(0.0f, 0.0f, 0.0f), LC_POINTLIGHT);
-	UpdatePosition(1);
-}
+static const std::array<QLatin1String, 4> gLightTypes = { QLatin1String("POINT"), QLatin1String("SPOT"), QLatin1String("DIRECTIONAL"), QLatin1String("AREA") };
 
-// New directional or spot light.
-lcLight::lcLight(float px, float py, float pz, float tx, float ty, float tz, int LightType)
-	: lcObject(lcObjectType::Light)
-{
-	Initialize(lcVector3(px, py, pz), lcVector3(tx, ty, tz), LightType);
-	if (LightType == LC_SPOTLIGHT)
-		mState |= LC_LIGHT_SPOT;
-	else
-		mState |= LC_LIGHT_DIRECTIONAL;
-	UpdatePosition(1);
-}
-
-void lcLight::SetLightState(int LightType)
+lcLight::lcLight(const lcVector3& Position, const lcVector3& TargetPosition, lcLightType LightType)
+	: lcObject(lcObjectType::Light), mPosition(Position), mTargetPosition(TargetPosition), mLightType(LightType)
 {
 	mState = 0;
-
-	switch (LightType)
-	{
-	case LC_AREALIGHT:
-	case LC_SUNLIGHT:
-		mState |= LC_LIGHT_DIRECTIONAL;
-		break;
-	case LC_SPOTLIGHT:
-		mState |= LC_LIGHT_SPOT;
-		break;
-	default:
-		break;
-	}
-}
-
-void lcLight::Initialize(const lcVector3& Position, const lcVector3& TargetPosition, int LightType)
-{
-	SetLightState(LightType);
-
 	mEnableCutoff = false;
-	mPosition = Position;
-	mTargetPosition = TargetPosition;
 	mAmbientColor = lcVector4(0.0f, 0.0f, 0.0f, 1.0f);
 	mDiffuseColor = lcVector4(0.8f, 0.8f, 0.8f, 1.0f);
 	mSpecularColor = lcVector4(1.0f, 1.0f, 1.0f, 1.0f);
 	mAttenuation = lcVector3(1.0f, 0.0f, 0.0f);
 	mLightColor = lcVector3(1.0f, 1.0f, 1.0f); //RGB - White
-	mLightType = LightType ? LightType : int(LC_POINTLIGHT);
-	mLightFactor[0] = LightType ? LightType == LC_SUNLIGHT ? 11.4f : 0.25f : 0.0f;
-	mLightFactor[1] = LightType == LC_AREALIGHT ? 0.25f : LightType == LC_SPOTLIGHT ? 0.150f : 0.0f;
+	mLightFactor[0] = LightType == lcLightType::Directional ? 11.4f : 0.25f;
+	mLightFactor[1] = LightType == lcLightType::Area ? 0.25f : LightType == lcLightType::Spot ? 0.150f : 0.0f;
 	mLightSpecular = 1.0f;
 	mSpotSize = 75.0f;
 	mLightShape = 0 /*Square*/;
-	mSpotCutoff = LightType ? LightType != LC_SUNLIGHT ? 40.0f : 0.0f : 30.0f;
+	mSpotCutoff = LightType != lcLightType::Directional ? 40.0f : 0.0f;
 	mSpotExponent = 10.0f; /*Energy/Power*/
 
 	mPositionKeys.ChangeKey(mPosition, 1, true);
@@ -78,18 +39,14 @@ void lcLight::Initialize(const lcVector3& Position, const lcVector3& TargetPosit
 	mDiffuseColorKeys.ChangeKey(mDiffuseColor, 1, true);
 	mSpecularColorKeys.ChangeKey(mSpecularColor, 1, true);
 	mAttenuationKeys.ChangeKey(mAttenuation, 1, true);
-	mLightShapeKeys.ChangeKey(mLightShape, 1, true);
 	mLightColorKeys.ChangeKey(mLightColor, 1, true);
-	mLightTypeKeys.ChangeKey(mLightType, 1, true);
 	mLightFactorKeys.ChangeKey(mLightFactor, 1, true);
 	mLightSpecularKeys.ChangeKey(mLightSpecular, 1, true);
 	mSpotCutoffKeys.ChangeKey(mSpotCutoff, 1, true);
 	mSpotExponentKeys.ChangeKey(mSpotExponent, 1, true);
 	mLightSpotSizeKeys.ChangeKey(mSpotSize, 1, true);
-}
 
-lcLight::~lcLight()
-{
+	UpdatePosition(1);
 }
 
 void lcLight::SaveLDraw(QTextStream& Stream) const
@@ -116,8 +73,47 @@ void lcLight::SaveLDraw(QTextStream& Stream) const
 	else
 		Stream << QLatin1String("0 !LEOCAD LIGHT SPECULAR ") << mLightSpecular << LineEnding;
 
-	if (mLightType == LC_SUNLIGHT)
+	if (mSpotExponentKeys.GetSize() > 1)
+		mSpotExponentKeys.SaveKeysLDraw(Stream, "LIGHT POWER_KEY ");
+	else
+		Stream << QLatin1String("0 !LEOCAD LIGHT POWER ") << mSpotExponent << LineEnding;
+
+	if (mEnableCutoff)
 	{
+		if (mSpotCutoffKeys.GetSize() > 1)
+			mSpotCutoffKeys.SaveKeysLDraw(Stream, "LIGHT CUTOFF_DISTANCE_KEY ");
+		else
+			Stream << QLatin1String("0 !LEOCAD LIGHT CUTOFF_DISTANCE ") << mSpotCutoff << LineEnding;
+	}
+
+	switch (mLightType)
+	{
+	case lcLightType::Point:
+		if (mLightFactorKeys.GetSize() > 1)
+			mLightFactorKeys.SaveKeysLDraw(Stream, "LIGHT RADIUS_KEY ");
+		else
+			Stream << QLatin1String("0 !LEOCAD LIGHT RADIUS ") << mLightFactor[0] << LineEnding;
+		break;
+
+	case lcLightType::Spot:
+		if (mLightFactorKeys.GetSize() > 1)
+		{
+			mLightFactorKeys.SaveKeysLDraw(Stream, "LIGHT RADIUS_AND_SPOT_BLEND_KEY ");
+		}
+		else
+		{
+			Stream << QLatin1String("0 !LEOCAD LIGHT RADIUS ") << mLightFactor[0] << LineEnding;
+			Stream << QLatin1String("0 !LEOCAD LIGHT SPOT_BLEND ") << mLightFactor[1] << LineEnding;
+		}
+
+		if (mLightSpotSizeKeys.GetSize() > 1)
+			mLightSpotSizeKeys.SaveKeysLDraw(Stream, "LIGHT SPOT_SIZE_KEY ");
+		else
+			Stream << QLatin1String("0 !LEOCAD LIGHT SPOT_SIZE ") << mSpotSize << LineEnding;
+
+		break;
+
+	case lcLightType::Directional:
 		if (mSpotExponentKeys.GetSize() > 1)
 			mSpotExponentKeys.SaveKeysLDraw(Stream, "LIGHT STRENGTH_KEY ");
 		else
@@ -127,103 +123,45 @@ void lcLight::SaveLDraw(QTextStream& Stream) const
 			mLightFactorKeys.SaveKeysLDraw(Stream, "LIGHT ANGLE_KEY ");
 		else
 			Stream << QLatin1String("0 !LEOCAD LIGHT ANGLE ") << mLightFactor[0] << LineEnding;
-	}
-	else
-	{
-		if (mSpotExponentKeys.GetSize() > 1)
-			mSpotExponentKeys.SaveKeysLDraw(Stream, "LIGHT POWER_KEY ");
+		break;
+
+	case lcLightType::Area:
+		if (mLightFactorKeys.GetSize() > 1)
+		{
+			mLightFactorKeys.SaveKeysLDraw(Stream, "LIGHT SIZE_KEY ");
+		}
 		else
-			Stream << QLatin1String("0 !LEOCAD LIGHT POWER ") << mSpotExponent << LineEnding;
-
-		if (mEnableCutoff)
 		{
-			if (mSpotCutoffKeys.GetSize() > 1)
-				mSpotCutoffKeys.SaveKeysLDraw(Stream, "LIGHT CUTOFF_DISTANCE_KEY ");
+			if (mLightShape == LC_LIGHT_SHAPE_RECTANGLE || mLightShape == LC_LIGHT_SHAPE_ELLIPSE)
+				Stream << QLatin1String("0 !LEOCAD LIGHT WIDTH ") << mLightFactor[0] << QLatin1String(" HEIGHT ") << mLightFactor[1] << LineEnding;
 			else
-				Stream << QLatin1String("0 !LEOCAD LIGHT CUTOFF_DISTANCE ") << mSpotCutoff << LineEnding;
+				Stream << QLatin1String("0 !LEOCAD LIGHT SIZE ") << mLightFactor[0] << LineEnding;
 		}
 
-		switch (mLightType)
+		QString Shape = QLatin1String("UNDEFINED ");
+
+		switch (mLightShape)
 		{
-		case LC_POINTLIGHT:
-			if (mLightFactorKeys.GetSize() > 1)
-				mLightFactorKeys.SaveKeysLDraw(Stream, "LIGHT RADIUS_KEY ");
-			else
-				Stream << QLatin1String("0 !LEOCAD LIGHT RADIUS ") << mLightFactor[0] << LineEnding;
+		case LC_LIGHT_SHAPE_SQUARE:
+			Shape = QLatin1String("SQUARE ");
 			break;
-		case LC_SPOTLIGHT:
-			if (mLightFactorKeys.GetSize() > 1) {
-				mLightFactorKeys.SaveKeysLDraw(Stream, "LIGHT RADIUS_AND_SPOT_BLEND_KEY ");
-			} else {
-				Stream << QLatin1String("0 !LEOCAD LIGHT RADIUS ") << mLightFactor[0] << LineEnding;
-				Stream << QLatin1String("0 !LEOCAD LIGHT SPOT_BLEND ") << mLightFactor[1] << LineEnding;
-			}
-			if (mLightSpotSizeKeys.GetSize() > 1)
-				mLightSpotSizeKeys.SaveKeysLDraw(Stream, "LIGHT SPOT_SIZE_KEY ");
-			else
-				Stream << QLatin1String("0 !LEOCAD LIGHT SPOT_SIZE ") << mSpotSize << LineEnding;
+		case LC_LIGHT_SHAPE_DISK:
+			Shape = QLatin1String("DISK ");
 			break;
-		case LC_AREALIGHT:
-			if (mLightFactorKeys.GetSize() > 1) {
-				mLightFactorKeys.SaveKeysLDraw(Stream, "LIGHT SIZE_KEY ");
-			} else {
-				if (mLightShape == LC_LIGHT_SHAPE_RECTANGLE || mLightShape == LC_LIGHT_SHAPE_ELLIPSE)
-					Stream << QLatin1String("0 !LEOCAD LIGHT WIDTH ") << mLightFactor[0] << QLatin1String(" HEIGHT ") << mLightFactor[1] << LineEnding;
-				else
-					Stream << QLatin1String("0 !LEOCAD LIGHT SIZE ") << mLightFactor[0] << LineEnding;
-			}
-			if (mLightShapeKeys.GetSize() > 1) {
-				mLightShapeKeys.SaveKeysLDraw(Stream, "LIGHT SHAPE_KEY ");
-			} else {
-				Stream << QLatin1String("0 !LEOCAD LIGHT SHAPE ");
-
-				QString Shape = QLatin1String("Undefined ");
-				switch(mLightShape){
-				case LC_LIGHT_SHAPE_SQUARE:
-					Shape = QLatin1String("Square ");
-					break;
-				case LC_LIGHT_SHAPE_DISK:
-					Shape = QLatin1String("Disk ");
-					break;
-				case LC_LIGHT_SHAPE_RECTANGLE:
-					Shape = QLatin1String("Rectangle ");
-					break;
-				case LC_LIGHT_SHAPE_ELLIPSE:
-					Shape = QLatin1String("Ellipse ");
-					break;
-				}
-				Stream << QLatin1String(Shape.toLatin1()) << LineEnding;
-			}
-
+		case LC_LIGHT_SHAPE_RECTANGLE:
+			Shape = QLatin1String("RECTANGLE ");
+			break;
+		case LC_LIGHT_SHAPE_ELLIPSE:
+			Shape = QLatin1String("ELLIPSE ");
 			break;
 		}
+
+		Stream << QLatin1String("0 !LEOCAD LIGHT SHAPE ") << Shape << LineEnding;
+
+		break;
 	}
 
-	if (mLightTypeKeys.GetSize() > 1)
-	{
-		mLightTypeKeys.SaveKeysLDraw(Stream, "LIGHT TYPE_KEY ");
-	}
-	else
-	{
-		Stream << QLatin1String("0 !LEOCAD LIGHT TYPE ");
-
-		QString Type = QLatin1String("Undefined ");
-		switch(mLightType){
-		case LC_POINTLIGHT:
-			Type = QLatin1String("Point ");
-			break;
-		case LC_SUNLIGHT:
-			Type = QLatin1String("Sun ");
-			break;
-		case LC_AREALIGHT:
-			Type = QLatin1String("Area ");
-			break;
-		case LC_SPOTLIGHT:
-			Type = QLatin1String("Spot ");
-			break;
-		}
-		Stream << QLatin1String(Type.toLatin1()) << QLatin1String("NAME ") << mName << LineEnding;
-	}
+	Stream << QLatin1String("0 !LEOCAD LIGHT TYPE ") << gLightTypes[static_cast<int>(mLightType)] << QLatin1String(" NAME ") << mName << LineEnding;
 }
 
 void lcLight::CreateName(const lcArray<lcLight*>& Lights)
@@ -247,7 +185,26 @@ void lcLight::CreateName(const lcArray<lcLight*>& Lights)
 
 	int MaxLightNumber = 0;
 
-	const QLatin1String Prefix(mLightType == LC_POINTLIGHT ? "Pointlight " : mLightType == LC_AREALIGHT ? "Arealight " : mLightType == LC_SUNLIGHT ? "Sunlight " : "Spotlight ");
+	QString Prefix;
+	
+	switch (mLightType)
+	{
+	case lcLightType::Point:
+		Prefix = QLatin1String("Pointlight ");
+		break;
+
+	case lcLightType::Spot:
+		Prefix = QLatin1String("Spotlight ");
+		break;
+
+	case lcLightType::Directional:
+		Prefix = QLatin1String("Directionallight ");
+		break;
+
+	case lcLightType::Area:
+		Prefix = QLatin1String("Arealight ");
+		break;
+	}
 
 	for (const lcLight* Light : Lights)
 	{
@@ -299,16 +256,14 @@ bool lcLight::ParseLDrawLine(QTextStream& Stream)
 		{
 			QString Shape;
 			Stream >> Shape;
-			Shape.replace("\"", "");
-			if (Shape == QLatin1String("Square"))
+			if (Shape == QLatin1String("SQUARE"))
 				mLightShape = LC_LIGHT_SHAPE_SQUARE;
-			else if (Shape == QLatin1String("Disk"))
+			else if (Shape == QLatin1String("DISK"))
 				mLightShape = LC_LIGHT_SHAPE_DISK;
-			else if (Shape == QLatin1String("Rectangle"))
+			else if (Shape == QLatin1String("RECTANGLE"))
 				mLightShape = LC_LIGHT_SHAPE_RECTANGLE;
-			else if (Shape == QLatin1String("Ellipse"))
+			else if (Shape == QLatin1String("ELLIPSE"))
 				mLightShape = LC_LIGHT_SHAPE_ELLIPSE;
-			mLightShapeKeys.ChangeKey(mLightShape, 1, true);
 		}
 		else if (Token == QLatin1String("SPECULAR"))
 		{
@@ -325,17 +280,15 @@ bool lcLight::ParseLDrawLine(QTextStream& Stream)
 		{
 			QString Type;
 			Stream >> Type;
-			Type.replace("\"", "");
-			if (Type == QLatin1String("Point"))
-				mLightType = LC_POINTLIGHT;
-			else if (Type == QLatin1String("Sun"))
-				mLightType = LC_SUNLIGHT;
-			else if (Type == QLatin1String("Spot"))
-				mLightType = LC_SPOTLIGHT;
-			else if (Type == QLatin1String("Area"))
-				mLightType = LC_AREALIGHT;
-			SetLightState(mLightType);
-			mLightTypeKeys.ChangeKey(mLightType, 1, true);
+
+			for (size_t TypeIndex = 0; TypeIndex < gLightTypes.size(); TypeIndex++)
+			{
+				if (Type == gLightTypes[TypeIndex])
+				{
+					mLightType = static_cast<lcLightType>(TypeIndex);
+					break;
+				}
+			}
 		}
 		else if (Token == QLatin1String("POSITION"))
 		{
@@ -355,14 +308,10 @@ bool lcLight::ParseLDrawLine(QTextStream& Stream)
 			mLightFactorKeys.LoadKeysLDraw(Stream);
 		else if (Token == QLatin1String("SPOT_SIZE_KEY"))
 			mLightSpotSizeKeys.LoadKeysLDraw(Stream);
-		else if (Token == QLatin1String("SHAPE_KEY"))
-			mLightShapeKeys.LoadKeysLDraw(Stream);
 		else if (Token == QLatin1String("SPECULAR_KEY"))
 			mLightSpecularKeys.LoadKeysLDraw(Stream);
 		else if (Token == QLatin1String("CUTOFF_DISTANCE_KEY"))
 			mSpotCutoffKeys.LoadKeysLDraw(Stream);
-		else if (Token == QLatin1String("TYPE_KEY"))
-			mLightTypeKeys.LoadKeysLDraw(Stream);
 		else if (Token == QLatin1String("POSITION_KEY"))
 			mPositionKeys.LoadKeysLDraw(Stream);
 		else if (Token == QLatin1String("TARGET_POSITION_KEY"))
@@ -373,28 +322,45 @@ bool lcLight::ParseLDrawLine(QTextStream& Stream)
 			mName.replace("\"", "");
 
 			// Set default settings per light type
-			if (mLightType == LC_SPOTLIGHT) {
-				if (!mSpotBlendSet) {
+			switch (mLightType)
+			{
+			case lcLightType::Point:
+				break;
+
+			case lcLightType::Spot:
+				if (!mSpotBlendSet)
+				{
 					mLightFactor[1] = 0.15f;
 					mLightFactorKeys.ChangeKey(mLightFactor, 1, true);
 				}
-			}
-			if (mLightType == LC_AREALIGHT && (mLightShape == LC_LIGHT_SHAPE_RECTANGLE || mLightShape == LC_LIGHT_SHAPE_ELLIPSE)) {
-				if (!mHeightSet) {
-					mLightFactor[1] = 0.25f;
-					mLightFactorKeys.ChangeKey(mLightFactor, 1, true);
-				}
-			}
-			if (mLightType == LC_SUNLIGHT) {
-				if (!mAngleSet) {
+				break;
+
+			case lcLightType::Directional:
+				if (!mAngleSet)
+				{
 					mLightFactor[0] = 11.4f;
 					mLightFactorKeys.ChangeKey(mLightFactor, 1, true);
 				}
-				if (!mSpotCutoffSet) {
-					mSpotCutoff     = 0.0f;
+
+				if (!mSpotCutoffSet)
+				{
+					mSpotCutoff = 0.0f;
 					mSpotCutoffKeys.ChangeKey(mSpotCutoff, 1, true);
 				}
+				break;
+
+			case lcLightType::Area:
+				if (mLightShape == LC_LIGHT_SHAPE_RECTANGLE || mLightShape == LC_LIGHT_SHAPE_ELLIPSE)
+				{
+					if (!mHeightSet)
+					{
+						mLightFactor[1] = 0.25f;
+						mLightFactorKeys.ChangeKey(mLightFactor, 1, true);
+					}
+				}
+				break;
 			}
+
 			return true;
 		}
 	}
@@ -422,10 +388,10 @@ void lcLight::CompareBoundingBox(lcVector3& Min, lcVector3& Max)
 
 void lcLight::UpdateLight(lcStep Step, lcLightProps Props, int Property)
 {
-	switch(Property){
+	switch(Property)
+	{
 	case LC_LIGHT_SHAPE:
 		mLightShape = Props.mLightShape;
-		mLightShapeKeys.ChangeKey(mLightShape, Step, false);
 		break;
 	case LC_LIGHT_COLOR:
 		mLightColor = Props.mLightColor;
@@ -580,9 +546,7 @@ void lcLight::InsertTime(lcStep Start, lcStep Time)
 	mDiffuseColorKeys.InsertTime(Start, Time);
 	mSpecularColorKeys.InsertTime(Start, Time);
 	mAttenuationKeys.InsertTime(Start, Time);
-	mLightShapeKeys.InsertTime(Start, Time);
 	mLightColorKeys.InsertTime(Start, Time);
-	mLightTypeKeys.InsertTime(Start, Time);
 	mLightFactorKeys.InsertTime(Start, Time);
 	mLightSpecularKeys.InsertTime(Start, Time);
 	mLightSpotSizeKeys.InsertTime(Start, Time);
@@ -598,9 +562,7 @@ void lcLight::RemoveTime(lcStep Start, lcStep Time)
 	mDiffuseColorKeys.RemoveTime(Start, Time);
 	mSpecularColorKeys.RemoveTime(Start, Time);
 	mAttenuationKeys.RemoveTime(Start, Time);
-	mLightShapeKeys.RemoveTime(Start, Time);
 	mLightColorKeys.RemoveTime(Start, Time);
-	mLightTypeKeys.RemoveTime(Start, Time);
 	mLightFactorKeys.RemoveTime(Start, Time);
 	mLightSpecularKeys.RemoveTime(Start, Time);
 	mLightSpotSizeKeys.RemoveTime(Start, Time);
@@ -616,9 +578,7 @@ void lcLight::UpdatePosition(lcStep Step)
 	mDiffuseColor = mDiffuseColorKeys.CalculateKey(Step);
 	mSpecularColor = mSpecularColorKeys.CalculateKey(Step);
 	mAttenuation = mAttenuationKeys.CalculateKey(Step);
-	mLightShape = mLightShapeKeys.CalculateKey(Step);
 	mLightColor = mLightColorKeys.CalculateKey(Step);
-	mLightType = mLightTypeKeys.CalculateKey(Step);
 	mLightFactor = mLightFactorKeys.CalculateKey(Step);
 	mLightSpecular = mLightSpecularKeys.CalculateKey(Step);
 	mSpotSize = mLightSpotSizeKeys.CalculateKey(Step);
@@ -710,22 +670,21 @@ void lcLight::DrawDirectionalLight(lcContext* Context) const
 		*CurVert++ = -LC_LIGHT_POSITION_EDGE;
 	}
 
-	if (mLightType == LC_SUNLIGHT) {
-
+	if (mLightType == lcLightType::Directional)
+	{
 		// set base face to same size (LC_LIGHT_TARGET_EDGE) as body - was 12.5f
 		*CurVert++ = -LC_LIGHT_TARGET_EDGE; *CurVert++ = -LC_LIGHT_TARGET_EDGE; *CurVert++ = -LC_LIGHT_POSITION_EDGE;
 		*CurVert++ =  LC_LIGHT_TARGET_EDGE; *CurVert++ = -LC_LIGHT_TARGET_EDGE; *CurVert++ = -LC_LIGHT_POSITION_EDGE;
 		*CurVert++ =  LC_LIGHT_TARGET_EDGE; *CurVert++ =  LC_LIGHT_TARGET_EDGE; *CurVert++ = -LC_LIGHT_POSITION_EDGE;
 		*CurVert++ = -LC_LIGHT_TARGET_EDGE; *CurVert++ =  LC_LIGHT_TARGET_EDGE; *CurVert++ = -LC_LIGHT_POSITION_EDGE;
-
-	} else {
-
+	}
+	else
+	{
 		*CurVert++ = -LC_LIGHT_BASEFACE_EDGE; *CurVert++ = -LC_LIGHT_BASEFACE_EDGE; *CurVert++ = -LC_LIGHT_POSITION_EDGE;
 		*CurVert++ =  LC_LIGHT_BASEFACE_EDGE; *CurVert++ = -LC_LIGHT_BASEFACE_EDGE; *CurVert++ = -LC_LIGHT_POSITION_EDGE;
 		*CurVert++ =  LC_LIGHT_BASEFACE_EDGE; *CurVert++ =  LC_LIGHT_BASEFACE_EDGE; *CurVert++ = -LC_LIGHT_POSITION_EDGE;
 		*CurVert++ = -LC_LIGHT_BASEFACE_EDGE; *CurVert++ =  LC_LIGHT_BASEFACE_EDGE; *CurVert++ = -LC_LIGHT_POSITION_EDGE;
 	}
-
 
 	float Length = FrontVector.Length();
 
@@ -742,20 +701,20 @@ void lcLight::DrawDirectionalLight(lcContext* Context) const
 	*CurVert++ = 0.0f; *CurVert++ = 0.0f; *CurVert++ = -Length;
 
 	const GLushort Indices[56 + 24 + 2 + 40] =
-		{
-			// base body
-			0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
-			0, 2, 2, 4, 4, 6, 6, 8, 8, 10, 10, 12, 12, 14, 14, 0,
-			1, 3, 3, 5, 5, 7, 7, 9, 9, 11, 11, 13, 13, 15, 15, 1,
-			// base face
-			16, 17, 17, 18, 18, 19, 19, 16,
-			// targe box
-			20, 21, 21, 22, 22, 23, 23, 20,
-			24, 25, 25, 26, 26, 27, 27, 24,
-			20, 24, 21, 25, 22, 26, 23, 27,
-			// target line - from base to target
-			28, 29,
-		};
+	{
+		// base body
+		0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
+		0, 2, 2, 4, 4, 6, 6, 8, 8, 10, 10, 12, 12, 14, 14, 0,
+		1, 3, 3, 5, 5, 7, 7, 9, 9, 11, 11, 13, 13, 15, 15, 1,
+		// base face
+		16, 17, 17, 18, 18, 19, 19, 16,
+		// targe box
+		20, 21, 21, 22, 22, 23, 23, 20,
+		24, 25, 25, 26, 26, 27, 27, 24,
+		20, 24, 21, 25, 22, 26, 23, 27,
+		// target line - from base to target
+		28, 29,
+	};
 
 	Context->SetVertexBufferPointer(Verts);
 	Context->SetVertexFormatPosition(3);
@@ -1082,17 +1041,11 @@ void lcLight::RemoveKeyFrames()
 	mAttenuationKeys.RemoveAll();
 	mAttenuationKeys.ChangeKey(mAttenuation, 1, true);
 
-	mLightShapeKeys.RemoveAll();
-	mLightShapeKeys.ChangeKey(mLightShape, 1, false);
-
 	mLightColorKeys.RemoveAll();
 	mLightColorKeys.ChangeKey(mLightColor, 1, true);
 
 	mLightFactorKeys.RemoveAll();
 	mLightFactorKeys.ChangeKey(mLightFactor, 1, true);
-
-	mLightTypeKeys.RemoveAll();
-	mLightTypeKeys.ChangeKey(mLightType, 1, true);
 
 	mLightSpecularKeys.RemoveAll();
 	mLightSpecularKeys.ChangeKey(mLightSpecular, 1, true);

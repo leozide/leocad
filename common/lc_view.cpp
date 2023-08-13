@@ -1595,23 +1595,23 @@ lcTrackTool lcView::GetOverrideTrackTool(Qt::MouseButton Button) const
 
 	constexpr lcTrackTool TrackToolFromTool[] =
 	{
-	    lcTrackTool::Insert,      // lcTool::Insert
-	    lcTrackTool::PointLight,  // lcTool::Light
-		lcTrackTool::AreaLight,   // lcTool::AreaLight
-		lcTrackTool::SunLight,    // lcTool::SunLight
-	    lcTrackTool::SpotLight,   // lcTool::SpotLight
-	    lcTrackTool::Camera,      // lcTool::Camera
-	    lcTrackTool::Select,      // lcTool::Select
-	    lcTrackTool::MoveXYZ,     // lcTool::Move
-	    lcTrackTool::RotateXYZ,   // lcTool::Rotate
-	    lcTrackTool::Eraser,      // lcTool::Eraser
-	    lcTrackTool::Paint,       // lcTool::Paint
-	    lcTrackTool::ColorPicker, // lcTool::ColorPicker
-	    lcTrackTool::Zoom,        // lcTool::Zoom
-	    lcTrackTool::Pan,         // lcTool::Pan
-	    lcTrackTool::OrbitXY,     // lcTool::RotateView
-	    lcTrackTool::Roll,        // lcTool::Roll
-	    lcTrackTool::ZoomRegion   // lcTool::ZoomRegion
+	    lcTrackTool::Insert,           // lcTool::Insert
+	    lcTrackTool::PointLight,       // lcTool::PointLight
+		lcTrackTool::Spotlight,        // lcTool::Spotlight
+		lcTrackTool::DirectionalLight, // lcTool::DirectionalLight
+		lcTrackTool::AreaLight,        // lcTool::AreaLight
+		lcTrackTool::Camera,           // lcTool::Camera
+	    lcTrackTool::Select,           // lcTool::Select
+	    lcTrackTool::MoveXYZ,          // lcTool::Move
+	    lcTrackTool::RotateXYZ,        // lcTool::Rotate
+	    lcTrackTool::Eraser,           // lcTool::Eraser
+	    lcTrackTool::Paint,            // lcTool::Paint
+	    lcTrackTool::ColorPicker,      // lcTool::ColorPicker
+	    lcTrackTool::Zoom,             // lcTool::Zoom
+	    lcTrackTool::Pan,              // lcTool::Pan
+	    lcTrackTool::OrbitXY,          // lcTool::RotateView
+	    lcTrackTool::Roll,             // lcTool::Roll
+	    lcTrackTool::ZoomRegion        // lcTool::ZoomRegion
 	};
 
 	LC_ARRAY_SIZE_CHECK(TrackToolFromTool, lcTool::Count);
@@ -1867,38 +1867,38 @@ lcCursor lcView::GetCursor() const
 
 	constexpr lcCursor CursorFromTrackTool[] =
 	{
-		lcCursor::Select,      // lcTrackTool::None
-		lcCursor::Brick,       // lcTrackTool::Insert
-		lcCursor::Light,       // lcTrackTool::PointLight
-		lcCursor::Arealight,   // lcTrackTool::AreaLight
-		lcCursor::Sunlight,    // lcTrackTool::SunLight
-		lcCursor::Spotlight,   // lcTrackTool::SpotLight
-		lcCursor::Camera,      // lcTrackTool::Camera
-		lcCursor::Select,      // lcTrackTool::Select
-		lcCursor::Move,        // lcTrackTool::MoveX
-		lcCursor::Move,        // lcTrackTool::MoveY
-		lcCursor::Move,        // lcTrackTool::MoveZ
-		lcCursor::Move,        // lcTrackTool::MoveXY
-		lcCursor::Move,        // lcTrackTool::MoveXZ
-		lcCursor::Move,        // lcTrackTool::MoveYZ
-		lcCursor::Move,        // lcTrackTool::MoveXYZ
-		lcCursor::Rotate,      // lcTrackTool::RotateX
-		lcCursor::Rotate,      // lcTrackTool::RotateY
-		lcCursor::Rotate,      // lcTrackTool::RotateZ
-		lcCursor::Rotate,      // lcTrackTool::RotateXY
-		lcCursor::Rotate,      // lcTrackTool::RotateXYZ
-		lcCursor::Move,        // lcTrackTool::ScalePlus
-		lcCursor::Move,        // lcTrackTool::ScaleMinus
-		lcCursor::Delete,      // lcTrackTool::Eraser
-		lcCursor::Paint,       // lcTrackTool::Paint
-		lcCursor::ColorPicker, // lcTrackTool::ColorPicker
-		lcCursor::Zoom,        // lcTrackTool::Zoom
-		lcCursor::Pan,         // lcTrackTool::Pan
-		lcCursor::RotateX,     // lcTrackTool::OrbitX
-		lcCursor::RotateY,     // lcTrackTool::OrbitY
-		lcCursor::RotateView,  // lcTrackTool::OrbitXY
-		lcCursor::Roll,        // lcTrackTool::Roll
-		lcCursor::ZoomRegion   // lcTrackTool::ZoomRegion
+		lcCursor::Select,           // lcTrackTool::None
+		lcCursor::Brick,            // lcTrackTool::Insert
+		lcCursor::PointLight,       // lcTrackTool::PointLight
+		lcCursor::Spotlight,        // lcTrackTool::Spotlight
+		lcCursor::Directionallight, // lcTrackTool::Directionallight
+		lcCursor::Arealight,        // lcTrackTool::AreaLight
+		lcCursor::Camera,           // lcTrackTool::Camera
+		lcCursor::Select,           // lcTrackTool::Select
+		lcCursor::Move,             // lcTrackTool::MoveX
+		lcCursor::Move,             // lcTrackTool::MoveY
+		lcCursor::Move,             // lcTrackTool::MoveZ
+		lcCursor::Move,             // lcTrackTool::MoveXY
+		lcCursor::Move,             // lcTrackTool::MoveXZ
+		lcCursor::Move,             // lcTrackTool::MoveYZ
+		lcCursor::Move,             // lcTrackTool::MoveXYZ
+		lcCursor::Rotate,           // lcTrackTool::RotateX
+		lcCursor::Rotate,           // lcTrackTool::RotateY
+		lcCursor::Rotate,           // lcTrackTool::RotateZ
+		lcCursor::Rotate,           // lcTrackTool::RotateXY
+		lcCursor::Rotate,           // lcTrackTool::RotateXYZ
+		lcCursor::Move,             // lcTrackTool::ScalePlus
+		lcCursor::Move,             // lcTrackTool::ScaleMinus
+		lcCursor::Delete,           // lcTrackTool::Eraser
+		lcCursor::Paint,            // lcTrackTool::Paint
+		lcCursor::ColorPicker,      // lcTrackTool::ColorPicker
+		lcCursor::Zoom,             // lcTrackTool::Zoom
+		lcCursor::Pan,              // lcTrackTool::Pan
+		lcCursor::RotateX,          // lcTrackTool::OrbitX
+		lcCursor::RotateY,          // lcTrackTool::OrbitY
+		lcCursor::RotateView,       // lcTrackTool::OrbitXY
+		lcCursor::Roll,             // lcTrackTool::Roll
+		lcCursor::ZoomRegion        // lcTrackTool::ZoomRegion
 	};
 
 	LC_ARRAY_SIZE_CHECK(CursorFromTrackTool, lcTrackTool::Count);
@@ -1925,10 +1925,10 @@ void lcView::SetCursor(lcCursor CursorType)
 		{  0,  0, "" },                                 // lcCursor::Hidden
 		{  0,  0, "" },                                 // lcCursor::Default
 		{  8,  3, ":/resources/cursor_insert" },        // lcCursor::Brick
-		{ 15, 15, ":/resources/cursor_light" },         // lcCursor::Light
-		{ 15, 15, ":/resources/cursor_arealight" },     // lcCursor::Arealight
-		{ 15, 15, ":/resources/cursor_sunlight" },      // lcCursor::Sunlight
+		{ 15, 15, ":/resources/cursor_light" },         // lcCursor::PointLight
 		{  7, 10, ":/resources/cursor_spotlight" },     // lcCursor::Spotlight
+		{ 15, 15, ":/resources/cursor_sunlight" },      // lcCursor::Directionallight
+		{ 15, 15, ":/resources/cursor_arealight" },     // lcCursor::Arealight
 		{ 15,  9, ":/resources/cursor_camera" },        // lcCursor::Camera
 		{  0,  2, ":/resources/cursor_select" },        // lcCursor::Select
 		{  0,  2, ":/resources/cursor_select_add" },    // lcCursor::SelectAdd
@@ -1976,38 +1976,38 @@ lcTool lcView::GetCurrentTool() const
 {
 	constexpr lcTool ToolFromTrackTool[] =
 	{
-		lcTool::Select,      // lcTrackTool::None
-		lcTool::Insert,      // lcTrackTool::Insert
-		lcTool::Light,       // lcTrackTool::PointLight
-		lcTool::AreaLight,   // lcTrackTool::AreaLight
-		lcTool::SunLight,    // lcTrackTool::SunLight
-		lcTool::SpotLight,   // lcTrackTool::SpotLight
-		lcTool::Camera,      // lcTrackTool::Camera
-		lcTool::Select,      // lcTrackTool::Select
-		lcTool::Move,        // lcTrackTool::MoveX
-		lcTool::Move,        // lcTrackTool::MoveY
-		lcTool::Move,        // lcTrackTool::MoveZ
-		lcTool::Move,        // lcTrackTool::MoveXY
-		lcTool::Move,        // lcTrackTool::MoveXZ
-		lcTool::Move,        // lcTrackTool::MoveYZ
-		lcTool::Move,        // lcTrackTool::MoveXYZ
-		lcTool::Rotate,      // lcTrackTool::RotateX
-		lcTool::Rotate,      // lcTrackTool::RotateY
-		lcTool::Rotate,      // lcTrackTool::RotateZ
-		lcTool::Rotate,      // lcTrackTool::RotateXY
-		lcTool::Rotate,      // lcTrackTool::RotateXYZ
-		lcTool::Move,        // lcTrackTool::ScalePlus
-		lcTool::Move,        // lcTrackTool::ScaleMinus
-		lcTool::Eraser,      // lcTrackTool::Eraser
-		lcTool::Paint,       // lcTrackTool::Paint
-		lcTool::ColorPicker, // lcTrackTool::ColorPicker
-		lcTool::Zoom,        // lcTrackTool::Zoom
-		lcTool::Pan,         // lcTrackTool::Pan
-		lcTool::RotateView,  // lcTrackTool::OrbitX
-		lcTool::RotateView,  // lcTrackTool::OrbitY
-		lcTool::RotateView,  // lcTrackTool::OrbitXY
-		lcTool::Roll,        // lcTrackTool::Roll
-		lcTool::ZoomRegion   // lcTrackTool::ZoomRegion
+		lcTool::Select,           // lcTrackTool::None
+		lcTool::Insert,           // lcTrackTool::Insert
+		lcTool::PointLight,       // lcTrackTool::PointLight
+		lcTool::Spotlight,        // lcTrackTool::Spotlight
+		lcTool::DirectionalLight, // lcTrackTool::DirectionalLight
+		lcTool::AreaLight,        // lcTrackTool::AreaLight
+		lcTool::Camera,           // lcTrackTool::Camera
+		lcTool::Select,           // lcTrackTool::Select
+		lcTool::Move,             // lcTrackTool::MoveX
+		lcTool::Move,             // lcTrackTool::MoveY
+		lcTool::Move,             // lcTrackTool::MoveZ
+		lcTool::Move,             // lcTrackTool::MoveXY
+		lcTool::Move,             // lcTrackTool::MoveXZ
+		lcTool::Move,             // lcTrackTool::MoveYZ
+		lcTool::Move,             // lcTrackTool::MoveXYZ
+		lcTool::Rotate,           // lcTrackTool::RotateX
+		lcTool::Rotate,           // lcTrackTool::RotateY
+		lcTool::Rotate,           // lcTrackTool::RotateZ
+		lcTool::Rotate,           // lcTrackTool::RotateXY
+		lcTool::Rotate,           // lcTrackTool::RotateXYZ
+		lcTool::Move,             // lcTrackTool::ScalePlus
+		lcTool::Move,             // lcTrackTool::ScaleMinus
+		lcTool::Eraser,           // lcTrackTool::Eraser
+		lcTool::Paint,            // lcTrackTool::Paint
+		lcTool::ColorPicker,      // lcTrackTool::ColorPicker
+		lcTool::Zoom,             // lcTrackTool::Zoom
+		lcTool::Pan,              // lcTrackTool::Pan
+		lcTool::RotateView,       // lcTrackTool::OrbitX
+		lcTool::RotateView,       // lcTrackTool::OrbitY
+		lcTool::RotateView,       // lcTrackTool::OrbitXY
+		lcTool::Roll,             // lcTrackTool::Roll
+		lcTool::ZoomRegion        // lcTrackTool::ZoomRegion
 	};
 
 	LC_ARRAY_SIZE_CHECK(ToolFromTrackTool, lcTrackTool::Count);
@@ -2041,20 +2041,20 @@ void lcView::UpdateTrackTool()
 		NewTrackTool = lcTrackTool::Insert;
 		break;
 
-	case lcTool::Light:
+	case lcTool::PointLight:
 		NewTrackTool = lcTrackTool::PointLight;
+		break;
+
+	case lcTool::Spotlight:
+		NewTrackTool = lcTrackTool::Spotlight;
+		break;
+
+	case lcTool::DirectionalLight:
+		NewTrackTool = lcTrackTool::DirectionalLight;
 		break;
 
 	case lcTool::AreaLight:
 		NewTrackTool = lcTrackTool::AreaLight;;
-		break;
-
-	case lcTool::SunLight:
-		NewTrackTool = lcTrackTool::SunLight;
-		break;
-
-	case lcTool::SpotLight:
-		NewTrackTool = lcTrackTool::SpotLight;
 		break;
 
 	case lcTool::Camera:
@@ -2272,22 +2272,30 @@ void lcView::StartTracking(lcTrackButton TrackButton)
 	lcTool Tool = GetCurrentTool();
 	lcModel* ActiveModel = GetActiveModel();
 
+	auto AddLight = [this, ActiveModel](lcLightType LightType)
+	{
+		lcVector3 Position = GetCameraLightInsertPosition();
+		lcVector3 Target = Position + lcVector3(0.1f, 0.1f, 0.1f);
+		ActiveModel->BeginDirectionalLightTool(Position, Target, LightType);
+	};
+
 	switch (Tool)
 	{
 		case lcTool::Insert:
-		case lcTool::Light:
+		case lcTool::PointLight:
+			break;
+
+		case lcTool::Spotlight:
+			AddLight(lcLightType::Spot);
+			break;
+
+		case lcTool::DirectionalLight:
+			AddLight(lcLightType::Directional);
 			break;
 
 		case lcTool::AreaLight:
-		case lcTool::SunLight:
-		case lcTool::SpotLight:
-		{
-			lcVector3 Position = GetCameraLightInsertPosition();
-			lcVector3 Target = Position + lcVector3(0.1f, 0.1f, 0.1f);
-			int LightType = Tool == lcTool::AreaLight ? LC_AREALIGHT : Tool == lcTool::SunLight ? LC_SUNLIGHT : LC_SPOTLIGHT;
-			ActiveModel->BeginDirectionalLightTool(Position, Target, LightType);
-		}
-		break;
+			AddLight(lcLightType::Area);
+			break;
 
 		case lcTool::Camera:
 		{
@@ -2342,12 +2350,12 @@ void lcView::StopTracking(bool Accept)
 	switch (Tool)
 	{
 	case lcTool::Insert:
-	case lcTool::Light:
+	case lcTool::PointLight:
 		break;
 
+	case lcTool::Spotlight:
+	case lcTool::DirectionalLight:
 	case lcTool::AreaLight:
-	case lcTool::SunLight:
-	case lcTool::SpotLight:
 	case lcTool::Camera:
 		ActiveModel->EndMouseTool(Tool, Accept);
 		break;
@@ -2474,9 +2482,9 @@ void lcView::OnButtonDown(lcTrackButton TrackButton)
 		}
 		break;
 
+	case lcTrackTool::Spotlight:
+	case lcTrackTool::DirectionalLight:
 	case lcTrackTool::AreaLight:
-	case lcTrackTool::SunLight:
-	case lcTrackTool::SpotLight:
 	case lcTrackTool::Camera:
 		StartTracking(TrackButton);
 		break;
@@ -2713,9 +2721,9 @@ void lcView::OnMouseMove()
 	case lcTrackTool::PointLight:
 		break;
 
+	case lcTrackTool::Spotlight:
+	case lcTrackTool::DirectionalLight:
 	case lcTrackTool::AreaLight:
-	case lcTrackTool::SunLight:
-	case lcTrackTool::SpotLight:
 		ActiveModel->UpdateDirectionalLightTool(GetCameraLightInsertPosition());
 		break;
 

@@ -79,7 +79,7 @@ void lcLight::SaveLDraw(QTextStream& Stream) const
 	else
 		Stream << QLatin1String("0 !LEOCAD LIGHT POSITION ") << mPosition[0] << ' ' << mPosition[1] << ' ' << mPosition[2] << LineEnding;
 
-	if (mLightType != lcLightType::Point && !(mLightType == lcLightType::Area && mPOVRayLight))
+	if (mLightType != lcLightType::Point)
 	{
 		if (mTargetPositionKeys.GetSize() > 1)
 			mTargetPositionKeys.SaveKeysLDraw(Stream, "LIGHT TARGET_POSITION_KEY ");

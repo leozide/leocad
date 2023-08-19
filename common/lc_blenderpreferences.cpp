@@ -244,7 +244,7 @@ lcBlenderPreferences::BlenderSettings  lcBlenderPreferences::mDefaultSettingsMM 
 	/* 55/03 LBL_GAP_SCALE_STRATEGY               */ {"gapscalestrategy",              "constraint", QObject::tr("Gap Strategy"),             QObject::tr("Apply gap to object directly or scale and empty to adjust to gaps between parts")},
 	/* 56/04 LBL_GAP_TARGET                       */ {"gaptarget",                     "object",     QObject::tr("Gap Target"),               QObject::tr("Whether to scale the object data or mesh data")},
 	/* 57/05 LBL_RESOLUTION_MM                    */ {"resolution",                    "Standard",   QObject::tr("Resolution"),               QObject::tr("Resolution of part primitives, ie. how much geometry they have")},
-	/* 58/06 LBL_SMOOTH_TYPE                      */ {"smoothtype",                    "edge_split", QObject::tr("Smooth Type"),              QObject::tr("Use either autosmooth or an edge split modifier to smooth part faces")}
+	/* 58/06 LBL_SMOOTH_TYPE                      */ {"smoothtype",                    "bmesh_split",QObject::tr("Smooth Type"),              QObject::tr("Use either autosmooth or an edge split modifier to smooth part faces")}
 };
 
 lcBlenderPreferences::ComboItems  lcBlenderPreferences::mComboItemsMM [NUM_COMBO_ITEMS_MM] =

@@ -983,7 +983,7 @@ void lcQPropertiesTree::slotReturnPressed()
 			{
 				QString Value = Editor->text();
 
-				Model->SetLightName(Light, Value.toLocal8Bit().data());
+				Model->SetLightName(Light, Value);
 			}
 		}
 	}
@@ -1513,14 +1513,14 @@ void lcQPropertiesTree::SetLight(lcObject* Focus)
 			{
 				Factor = Light->mAreaSize;
 				FactorALabel = tr("Width");
-				FactorAToolTip = tr("The width (X direction) of the area light in units.");
-				FactorBToolTip = tr("The height (Y direction) of the area light in units.");
+				FactorAToolTip = tr("The width (X direction) of the area light.");
+				FactorBToolTip = tr("The height (Y direction) of the area light.");
 			}
 			else
 			{
-				FactorALabel = tr("Width (m)");
-				FactorAToolTip = tr("The width (X direction) of the area light in metres.");
-				FactorBToolTip = tr("The height (Y direction) of the area light in units.");
+				FactorALabel = tr("Width");
+				FactorAToolTip = tr("The width (X direction) of the area light.");
+				FactorBToolTip = tr("The height (Y direction) of the area light.");
 			}
 			break;
 		default:
@@ -1623,7 +1623,7 @@ void lcQPropertiesTree::SetLight(lcObject* Focus)
 				lightSpotTightness = addProperty(lightProperties, tr("Spot Tightness"), PropertyFloat);
 			}
 		}
-		else 		if (LightType == lcLightType::Area)
+		else if (LightType == lcLightType::Area)
 		{
 			lightShape = addProperty(lightProperties, tr("Shape"), PropertyLightShape);
 			lightFactorA = addProperty(lightProperties, FactorALabel, PropertyFloat);
@@ -1631,7 +1631,7 @@ void lcQPropertiesTree::SetLight(lcObject* Focus)
 			if (ShapeIndex == LC_LIGHT_SHAPE_RECTANGLE || ShapeIndex == LC_LIGHT_SHAPE_ELLIPSE || POVRayLight)
 				lightFactorB = addProperty(lightProperties, tr("Height"), PropertyFloat);
 			else
-				FactorAToolTip = tr("The size of the area light grid in metres.");
+				FactorAToolTip = tr("The size of the area light grid.");
 
 			if (POVRayLight)
 			{

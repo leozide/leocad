@@ -331,8 +331,16 @@ protected:
 	lcObjectKeyArray<float> mSpotExponentKeys;
 	lcObjectKeyArray<float> mSpotTightnessKeys;
 
-	void DrawDirectionalLight(lcContext* Context) const;
 	void DrawPointLight(lcContext* Context) const;
+	void DrawSpotLight(lcContext* Context) const;
+	void DrawDirectionalLight(lcContext* Context) const;
+	void DrawAreaLight(lcContext* Context) const;
+
+	float SetupLightMatrix(lcContext* Context) const;
+	void DrawSphere(lcContext* Context, float Radius) const;
+	void DrawCylinder(lcContext* Context, float Radius, float Height) const;
+	void DrawTarget(lcContext* Context, float TargetDistance) const;
+	void DrawCone(lcContext* Context, float TargetDistance) const;
 
 	quint32 mState;
 	lcLightType mLightType;

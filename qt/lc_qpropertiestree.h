@@ -62,14 +62,14 @@ protected slots:
 	void slotReturnPressed();
 	void slotSetValue(int value);
 	void slotColorButtonClicked();
-	void slotSetColorValue(QColor Value);
+	void LightColorButtonClicked();
 
 protected:
 	void keyPressEvent(QKeyEvent *event) override;
 	void mousePressEvent(QMouseEvent *event) override;
 	void drawRow(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
 	void updateColorEditor(QPushButton *editor, int value) const;
-	void updateLightColorEditor(QPushButton *editor, QColor color) const;
+	void UpdateLightColorEditor(QPushButton* Editor, QColor Color) const;
 
 	QTreeWidgetItem *addProperty(QTreeWidgetItem *parent, const QString& label, PropertyType propertyType);
 
@@ -79,8 +79,6 @@ protected:
 	void SetLight(lcObject* Focus);
 	void SetMultiple();
 
-	void getPartProperties(lcPartProperties *properties);
-
 	lcLightType mLightType;
 	int mLightShape;
 	bool mPOVRayLight;
@@ -88,7 +86,7 @@ protected:
 	lcPropertyWidgetMode mWidgetMode;
 	lcObject* mFocus;
 
-	lcQPropertiesTreeDelegate *m_delegate;
+	lcQPropertiesTreeDelegate* mDelegate;
 	QIcon m_expandIcon;
 	QIcon m_checkedIcon;
 	QIcon m_uncheckedIcon;

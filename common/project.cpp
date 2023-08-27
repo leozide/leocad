@@ -2175,7 +2175,7 @@ bool Project::ExportPOVRay(const QString& FileName)
 			const QString LightName = QString(Light->mName).replace(" ","_");
 			LightType = Light->GetLightType();
 			Shadowless = static_cast<int>(Light->mShadowless);
-			LightColor = Light->mLightColor;
+			LightColor = Light->GetColor();
 			Power = Light->mPOVRayExponent;
 			switch(LightType)
 			{

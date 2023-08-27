@@ -43,7 +43,6 @@ enum lcLightProperty
 {
 	LC_LIGHT_NONE,
 	LC_LIGHT_SHAPE,
-	LC_LIGHT_COLOR,
 	LC_LIGHT_TYPE,
 	LC_LIGHT_FACTOR,
 	LC_LIGHT_DIFFUSE,
@@ -61,7 +60,6 @@ enum lcLightProperty
 
 struct lcLightProperties
 {
-	lcVector3 mLightColor;
 	lcVector2 mLightFactor;
 	lcVector2 mAreaGrid;
 	float     mLightDiffuse;
@@ -306,7 +304,16 @@ public:
 	void RemoveTime(lcStep Start, lcStep Time);
 
 	bool IsVisible() const
-	{ return (mState & LC_LIGHT_HIDDEN) == 0; }
+	{
+		return (mState & LC_LIGHT_HIDDEN) == 0;
+	}
+
+	void SetColor(const lcVector3& Color, lcStep Step, bool AddKey);
+
+	lcVector3 GetColor() const
+	{
+		return mColor;
+	}
 
 	void SetName(const QString& Name)
 	{
@@ -327,7 +334,6 @@ public:
 	lcLightProperties GetLightProperties() const
 	{
 		lcLightProperties props;
-		props.mLightColor = mLightColor;
 		props.mLightFactor = mLightFactor;
 		props.mLightDiffuse = mLightDiffuse;
 		props.mLightSpecular = mLightSpecular;
@@ -349,11 +355,7 @@ public:
 	lcVector3 mTargetPosition;
 	lcVector3 mUpVector;
 
-	lcVector4 mAmbientColor;
-	lcVector4 mDiffuseColor;
-	lcVector4 mSpecularColor;
 	lcVector3 mAttenuation;
-	lcVector3 mLightColor;
 	lcVector2 mLightFactor;
 	lcVector2 mAreaGrid;
 	lcVector2 mAreaSize;
@@ -375,15 +377,14 @@ public:
 	QString mName;
 
 protected:
+	lcVector3 mColor;
+
 	lcObjectKeyArray<lcVector3> mPositionKeys;
 	lcObjectKeyArray<lcVector3> mTargetPositionKeys;
 	lcObjectKeyArray<lcVector3> mUpVectorKeys;
+	lcObjectKeyArray<lcVector3> mColorKeys;
 
-	lcObjectKeyArray<lcVector4> mAmbientColorKeys;
-	lcObjectKeyArray<lcVector4> mDiffuseColorKeys;
-	lcObjectKeyArray<lcVector4> mSpecularColorKeys;
 	lcObjectKeyArray<lcVector3> mAttenuationKeys;
-	lcObjectKeyArray<lcVector3> mLightColorKeys;
 	lcObjectKeyArray<lcVector2> mLightFactorKeys;
 	lcObjectKeyArray<lcVector2> mAreaGridKeys;
 	lcObjectKeyArray<float> mLightSpecularKeys;

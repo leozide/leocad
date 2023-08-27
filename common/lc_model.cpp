@@ -3113,6 +3113,19 @@ void lcModel::SetCameraName(lcCamera* Camera, const QString& Name)
 	gMainWindow->UpdateCameraMenu();
 }
 
+void lcModel::SetLightColor(lcLight* Light, const lcVector3& Color)
+{
+	if (Light->GetColor() == Color)
+		return;
+
+	Light->SetColor(Color, mCurrentStep, gMainWindow->GetAddKeys());
+	Light->UpdatePosition(mCurrentStep);
+
+	SaveCheckpoint(tr("Changing Light Color"));
+	gMainWindow->UpdateSelectedObjects(false);
+	UpdateAllViews();
+}
+
 void lcModel::SetLightName(lcLight* Light, const QString &Name)
 {
 	if (Light->GetName() == Name)

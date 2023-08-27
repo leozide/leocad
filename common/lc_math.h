@@ -649,6 +649,11 @@ inline lcVector3 lcVector3FromColor(quint32 Color)
 	return v;
 }
 
+inline lcVector3 lcVector3FromQColor(QColor Color)
+{
+	return lcVector3(Color.redF(), Color.greenF(), Color.blueF());
+}
+
 inline lcVector4 lcVector4FromColor(quint32 Color)
 {
 	lcVector4 v(LC_RGBA_RED(Color), LC_RGBA_GREEN(Color), LC_RGBA_BLUE(Color), LC_RGBA_ALPHA(Color));
@@ -659,6 +664,11 @@ inline lcVector4 lcVector4FromColor(quint32 Color)
 inline quint32 lcColorFromVector3(const lcVector3& Color)
 {
 	return LC_RGB(roundf(Color[0] * 255), roundf(Color[1] * 255), roundf(Color[2] * 255));
+}
+
+inline QColor lcQColorFromVector3(const lcVector3& Color)
+{
+	return QColor::fromRgb(roundf(Color[0] * 255), roundf(Color[1] * 255), roundf(Color[2] * 255));
 }
 
 inline float lcLuminescence(const lcVector3& Color)

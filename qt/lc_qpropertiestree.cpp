@@ -222,9 +222,9 @@ lcQPropertiesTree::lcQPropertiesTree(QWidget *parent) :
 	m_checkedIcon = drawCheckBox(true);
 	m_uncheckedIcon = drawCheckBox(false);
 
-	m_delegate = new lcQPropertiesTreeDelegate(parent);
-	m_delegate->setTreeWidget(this);
-	setItemDelegate(m_delegate);
+	mDelegate = new lcQPropertiesTreeDelegate(parent);
+	mDelegate->setTreeWidget(this);
+	setItemDelegate(mDelegate);
 
 	SetEmpty();
 
@@ -264,7 +264,7 @@ void lcQPropertiesTree::keyPressEvent(QKeyEvent *event)
 	case Qt::Key_Return:
 	case Qt::Key_Enter:
 	case Qt::Key_Space: // Trigger Edit
-		if (!m_delegate->editedItem())
+		if (!mDelegate->editedItem())
 		{
 			if (const QTreeWidgetItem *item = currentItem())
 			{
@@ -299,7 +299,7 @@ void lcQPropertiesTree::mousePressEvent(QMouseEvent *event)
 
 	if (item)
 	{
-		if ((item != m_delegate->editedItem()) && (event->button() == Qt::LeftButton) && (header()->logicalIndexAt(event->pos().x()) == 1) &&
+		if ((item != mDelegate->editedItem()) && (event->button() == Qt::LeftButton) && (header()->logicalIndexAt(event->pos().x()) == 1) &&
 			((item->flags() & (Qt::ItemIsEditable | Qt::ItemIsEnabled)) == (Qt::ItemIsEditable | Qt::ItemIsEnabled)))
 			editItem(item, 1);
 	}
@@ -567,14 +567,14 @@ QWidget *lcQPropertiesTree::createEditor(QWidget *parent, QTreeWidgetItem *item)
 
 	case PropertyLightColor:
 		{
-			QPushButton *editor = new QPushButton(parent);
-			QColor value = item->data(0, PropertyValueRole).value<QColor>();
+			QPushButton *Editor = new QPushButton(parent);
+			QColor Value = item->data(0, PropertyValueRole).value<QColor>();
 
-			updateLightColorEditor(editor, value);
+			UpdateLightColorEditor(Editor, Value);
 
-			connect(editor, SIGNAL(clicked()), this, SLOT(slotColorButtonClicked()));
+			connect(Editor, &QPushButton::clicked, this, &lcQPropertiesTree::LightColorButtonClicked);
 
-			return editor;
+			return Editor;
 		}
 
 	case PropertyColor:
@@ -649,26 +649,26 @@ void lcQPropertiesTree::updateColorEditor(QPushButton *editor, int value) const
 	editor->setText(color->Name);
 }
 
-void lcQPropertiesTree::updateLightColorEditor(QPushButton *editor, QColor color) const
+void lcQPropertiesTree::UpdateLightColorEditor(QPushButton* Editor, QColor Color) const
 {
-	QImage img(12, 12, QImage::Format_ARGB32);
-	img.fill(0);
+	QImage Image(12, 12, QImage::Format_ARGB32);
+	Image.fill(0);
 
-	QPainter painter(&img);
-	painter.setCompositionMode(QPainter::CompositionMode_Source);
-	painter.setPen(Qt::darkGray);
-	painter.setBrush(color);
-	painter.drawRect(0, 0, img.width() - 1, img.height() - 1);
-	painter.end();
+	QPainter Painter(&Image);
+	Painter.setCompositionMode(QPainter::CompositionMode_Source);
+	Painter.setPen(Qt::darkGray);
+	Painter.setBrush(Color);
+	Painter.drawRect(0, 0, Image.width() - 1, Image.height() - 1);
+	Painter.end();
 
-	editor->setStyleSheet("Text-align:left");
-	editor->setIcon(QPixmap::fromImage(img));
-	editor->setText(color.name().toUpper());
+	Editor->setStyleSheet("Text-align:left");
+	Editor->setIcon(QPixmap::fromImage(Image));
+	Editor->setText(Color.name().toUpper());
 }
 
 void lcQPropertiesTree::slotToggled(bool Value)
 {
-	QTreeWidgetItem* Item = m_delegate->editedItem();
+	QTreeWidgetItem* Item = mDelegate->editedItem();
 	lcModel* Model = gMainWindow->GetActiveModel();
 	lcObject* Focus = Model->GetFocusObject();
 
@@ -708,7 +708,7 @@ void lcQPropertiesTree::slotToggled(bool Value)
 void lcQPropertiesTree::slotReturnPressed()
 {
 	QLineEdit* Editor = (QLineEdit*)sender();
-	QTreeWidgetItem* Item = m_delegate->editedItem();
+	QTreeWidgetItem* Item = mDelegate->editedItem();
 	lcModel* Model = gMainWindow->GetActiveModel();
 
 	if (mWidgetMode == LC_PROPERTY_WIDGET_PIECE)
@@ -905,15 +905,17 @@ void lcQPropertiesTree::slotReturnPressed()
 			}
 			else if (Item == lightColorR || Item == lightColorG || Item == lightColorB)
 			{
+				lcVector3 Color = Light->GetColor();
 				float Value = lcParseValueLocalized(Editor->text());
-				if (Item == lightColorR)
-					Props.mLightColor[0] = Value;
-				else if (Item == lightColorG)
-					Props.mLightColor[2] = Value;
-				else if (Item == lightColorB)
-					Props.mLightColor[1] = Value;
 
-				Model->UpdateLight(Light, Props, LC_LIGHT_COLOR);
+				if (Item == lightColorR)
+					Color[0] = Value;
+				else if (Item == lightColorG)
+					Color[2] = Value;
+				else if (Item == lightColorB)
+					Color[1] = Value;
+
+				Model->SetLightColor(Light, Color);
 			}
 			else if (Item == lightFactorA || Item == lightFactorB)
 			{
@@ -991,7 +993,7 @@ void lcQPropertiesTree::slotReturnPressed()
 
 void lcQPropertiesTree::slotSetValue(int Value)
 {
-	QTreeWidgetItem* Item = m_delegate->editedItem();
+	QTreeWidgetItem* Item = mDelegate->editedItem();
 	lcModel* Model = gMainWindow->GetActiveModel();
 
 	if (mWidgetMode == LC_PROPERTY_WIDGET_PIECE)
@@ -1000,7 +1002,7 @@ void lcQPropertiesTree::slotSetValue(int Value)
 		{
 			Model->SetSelectedPiecesColorIndex(Value);
 
-			QPushButton *editor = (QPushButton*)m_delegate->editor();
+			QPushButton *editor = (QPushButton*)mDelegate->editor();
 			updateColorEditor(editor, Value);
 		}
 		else if (Item == partID)
@@ -1038,24 +1040,6 @@ void lcQPropertiesTree::slotSetValue(int Value)
 				Model->UpdateLight(Light, Props, LC_LIGHT_POVRAY);
 			}
 		}
-	}
-}
-
-void lcQPropertiesTree::slotSetColorValue(QColor Value)
-{
-	lcModel*  Model = gMainWindow->GetActiveModel();
-	lcObject* Focus = Model->GetFocusObject();
-	lcLight*  Light = (Focus && Focus->IsLight()) ? (lcLight*)Focus : nullptr;
-	if (Light)
-	{
-		float r = Value.red();
-		float g = Value.green();
-		float b = Value.blue();
-		lcVector3 Color(r/255, g/255, b/255);
-
-		lcLightProperties Props = Light->GetLightProperties();
-		Props.mLightColor = Color;
-		Model->UpdateLight(Light, Props, LC_LIGHT_COLOR);
 	}
 }
 
@@ -1102,6 +1086,28 @@ void lcQPropertiesTree::slotColorButtonClicked()
 	Popup->move(QPoint(x, y));
 	Popup->setFocus();
 	Popup->show();
+}
+
+void lcQPropertiesTree::LightColorButtonClicked()
+{
+	lcModel* Model = gMainWindow->GetActiveModel();
+	lcObject* Focus = Model->GetFocusObject();
+	lcLight* Light = (Focus && Focus->IsLight()) ? (lcLight*)Focus : nullptr;
+
+	if (!Light)
+		return;
+
+	QColor Color = QColorDialog::getColor(lcQColorFromVector3(Light->GetColor()), this, tr("Select Light Color"));
+
+	if (!Color.isValid())
+		return;
+
+	Model->SetLightColor(Light, lcVector3FromQColor(Color));
+
+	QPushButton* Editor = qobject_cast<QPushButton*>(mDelegate->editor());
+
+	if (Editor)
+		UpdateLightColorEditor(Editor, Color);
 }
 
 QTreeWidgetItem *lcQPropertiesTree::addProperty(QTreeWidgetItem *parent, const QString& label, PropertyType propertyType)
@@ -1452,7 +1458,7 @@ void lcQPropertiesTree::SetLight(lcObject* Focus)
 	PropertyType SpotSizeProperty = PropertyFloatLightSpotSize;
 	lcVector3 Position(0.0f, 0.0f, 0.0f);
 	lcVector3 Target(0.0f, 0.0f, 0.0f);
-	lcVector3 Color(0.0f, 0.0f, 0.0f);
+	QColor Color(Qt::white);
 	lcVector2 Factor(0.0f, 0.0f);
 	lcVector2 AreaGrid(0.0f, 0.0f);
 
@@ -1467,7 +1473,7 @@ void lcQPropertiesTree::SetLight(lcObject* Focus)
 		Shadowless = Light->mShadowless;
 		Position = Light->mPosition;
 		Target = Light->mTargetPosition;
-		Color = Light->mLightColor;
+		Color = lcQColorFromVector3(Light->GetColor());
 		Factor = Light->mLightFactor;
 		LightType = Light->GetLightType();
 
@@ -1594,9 +1600,9 @@ void lcQPropertiesTree::SetLight(lcObject* Focus)
 			lightTargetZ = addProperty(lightTarget, tr("Z"), TargetProperty);
 		}
 
-		// Light Colour
+		// Light Color
 		lightColor = addProperty(nullptr, tr("Color"), PropertyGroup);
-		lightColorIcon = addProperty(lightColor, tr("Name"), PropertyLightColor);
+		lightColorIcon = addProperty(lightColor, tr("Value"), PropertyLightColor);
 		lightColorR = addProperty(lightColor, tr("Red"), PropertyFloat);
 		lightColorG = addProperty(lightColor, tr("Green"), PropertyFloat);
 		lightColorB = addProperty(lightColor, tr("Blue"), PropertyFloat);
@@ -1679,30 +1685,28 @@ void lcQPropertiesTree::SetLight(lcObject* Focus)
 		lightTargetZ->setData(0, PropertyValueRole, Target[2]);
 	}
 
-	QImage img(16, 16, QImage::Format_ARGB32);
-	img.fill(0);
+	QImage ColorImage(16, 16, QImage::Format_ARGB32);
+	ColorImage.fill(0);
 
-	QColor RgbColor = QColor::fromRgb(int(Color[1]*255), int(Color[1]*255), int(Color[2]*255));
-
-	QPainter painter(&img);
+	QPainter painter(&ColorImage);
 	painter.setCompositionMode(QPainter::CompositionMode_Source);
 	painter.setPen(Qt::darkGray);
-	painter.setBrush(RgbColor);
-	painter.drawRect(0, 0, img.width() - 1, img.height() - 1);
+	painter.setBrush(Color);
+	painter.drawRect(0, 0, ColorImage.width() - 1, ColorImage.height() - 1);
 	painter.end();
 
-	lightColorIcon->setIcon(1, QIcon(QPixmap::fromImage(img)));
-	lightColorIcon->setText(1, RgbColor.name().toUpper());
-	lightColorIcon->setData(0, PropertyValueRole, RgbColor);
+	lightColorIcon->setIcon(1, QIcon(QPixmap::fromImage(ColorImage)));
+	lightColorIcon->setText(1, Color.name().toUpper());
+	lightColorIcon->setData(0, PropertyValueRole, Color);
 
-	lightColorR->setText(1, lcFormatValueLocalized(Color[0]));
-	lightColorR->setData(0, PropertyValueRole, Color[0]);
+	lightColorR->setText(1, lcFormatValueLocalized(Color.redF()));
+	lightColorR->setData(0, PropertyValueRole, Color.redF());
 	lightColorR->setToolTip(1, tr("Red color using 0 to 1 decimal."));
-	lightColorG->setText(1, lcFormatValueLocalized(Color[1]));
-	lightColorG->setData(0, PropertyValueRole, Color[1]);
+	lightColorG->setText(1, lcFormatValueLocalized(Color.greenF()));
+	lightColorG->setData(0, PropertyValueRole, Color.greenF());
 	lightColorG->setToolTip(1, tr("Green color using 0 to 1 decimal."));
-	lightColorB->setText(1, lcFormatValueLocalized(Color[2]));
-	lightColorB->setData(0, PropertyValueRole, Color[2]);
+	lightColorB->setText(1, lcFormatValueLocalized(Color.blueF()));
+	lightColorB->setData(0, PropertyValueRole, Color.blueF());
 	lightColorB->setToolTip(1, tr("Blue color using 0 to 1 decimal."));
 
 	lightFormat->setText(1, Format);

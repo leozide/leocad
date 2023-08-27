@@ -367,6 +367,8 @@ public:
 	void SetCameraZNear(lcCamera* Camera, float ZNear);
 	void SetCameraZFar(lcCamera* Camera, float ZFar);
 	void SetCameraName(lcCamera* Camera, const QString& Name);
+
+	void SetLightColor(lcLight* Light, const lcVector3& Color);
 	void SetLightName(lcLight* Light, const QString& Name);
 	void UpdateLight(lcLight* Light, const lcLightProperties Props, int Property);
 

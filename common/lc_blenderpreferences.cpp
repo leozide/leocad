@@ -241,10 +241,8 @@ lcBlenderPreferences::BlenderSettings  lcBlenderPreferences::mDefaultSettingsMM 
 	/* 52/00 LBL_CHOSEN_LOGO                      */ {"chosenlogo",                    "logo3",      QObject::tr("Chosen Logo"),              QObject::tr("Which logo to display. logo and logo2 aren't used and are only included for completeness")},
 	/* 53/01 LBL_COLOUR_SCHEME_MM                 */ {"usecolourscheme",               "lgeo",       QObject::tr("Colour Scheme"),            QObject::tr("Colour scheme options - Realistic (lgeo), Original (LDConfig), Alternate (LDCfgalt), Custom (User Defined)")},
 	/* 54/02 LBL_COLOUR_STRATEGY                  */ {"colorstrategy",                 "material",   QObject::tr("How To Color Parts"),       QObject::tr("Colour strategy options - Material (Default - use if exporting), Vertex colors (slightly quicker to import)")},
-	/* 55/03 LBL_GAP_SCALE_STRATEGY               */ {"gapscalestrategy",              "constraint", QObject::tr("Gap Strategy"),             QObject::tr("Apply gap to object directly or scale and empty to adjust to gaps between parts")},
-	/* 56/04 LBL_GAP_TARGET                       */ {"gaptarget",                     "object",     QObject::tr("Gap Target"),               QObject::tr("Whether to scale the object data or mesh data")},
-	/* 57/05 LBL_RESOLUTION_MM                    */ {"resolution",                    "Standard",   QObject::tr("Resolution"),               QObject::tr("Resolution of part primitives, ie. how much geometry they have")},
-	/* 58/06 LBL_SMOOTH_TYPE                      */ {"smoothtype",                    "bmesh_split",QObject::tr("Smooth Type"),              QObject::tr("Use either autosmooth or an edge split modifier to smooth part faces")}
+	/* 55/03 LBL_RESOLUTION_MM                    */ {"resolution",                    "Standard",   QObject::tr("Resolution"),               QObject::tr("Resolution of part primitives, ie. how much geometry they have")},
+	/* 56/04 LBL_SMOOTH_TYPE                      */ {"smoothtype",                    "bmesh_split",QObject::tr("Smooth Type"),              QObject::tr("Use either autosmooth or an edge split modifier to smooth part faces")}
 };
 
 lcBlenderPreferences::ComboItems  lcBlenderPreferences::mComboItemsMM [NUM_COMBO_ITEMS_MM] =
@@ -253,10 +251,8 @@ lcBlenderPreferences::ComboItems  lcBlenderPreferences::mComboItemsMM [NUM_COMBO
 	/* 00 LBL_CHOSEN_LOGO              */ {"logo3|logo4|logo5",                  QObject::tr("Raised flattened logo geometry(3)|Raised rounded logo geometry(4)|Subtle rounded logo geometry(5)")},
 	/* 01 LBL_COLOUR_SCHEME_MM         */ {"lgeo|ldraw|alt|custom",              QObject::tr("Realistic Colours|Original LDraw Colours|Alternate LDraw Colours|Custom Colours")},
 	/* 02 LBL_COLOUR_STRATEGY          */ {"material|vertex_colors",             QObject::tr("Material|Vertex Colors")},
-	/* 03 LBL_GAP_SCALE_STRATEGY       */ {"object|constraint",                  QObject::tr("Gap applied directly to object|Gap scaled to adjust to gaps between parts")},
-	/* 04 LBL_GAP_TARGET               */ {"object|mesh",                        QObject::tr("Scale object data|Scale mesh data")},
-	/* 05 LBL_RESOLUTION_MM            */ {"Low|Standard|High",                  QObject::tr("Low Resolution Primitives|Standard Primitives|High Resolution Primitives")},
-	/* 06 LBL_SMOOTH_TYPE              */ {"edge_split|auto_smooth|bmesh_split", QObject::tr("Smooth part faces with edge split modifier|Auto-smooth part faces|Split during initial mesh processing")}
+	/* 03 LBL_RESOLUTION_MM            */ {"Low|Standard|High",                  QObject::tr("Low Resolution Primitives|Standard Primitives|High Resolution Primitives")},
+	/* 04 LBL_SMOOTH_TYPE              */ {"bmesh_split|edge_split|auto_smooth", QObject::tr("Split during initial mesh processing|Smooth part faces with edge split modifier|Auto-smooth part faces")}
 };
 
 lcBlenderPreferences* gAddonPreferences;

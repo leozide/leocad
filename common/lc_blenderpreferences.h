@@ -292,10 +292,8 @@ private:
 		LBL_CHOSEN_LOGO,                           // 52/ 0 QComboBox
 		LBL_COLOUR_SCHEME_MM,                      // 53/ 1 QComboBox
 		LBL_COLOUR_STRATEGY,                       // 54/ 2 QComboBox
-		LBL_GAP_SCALE_STRATEGY,                    // 55/ 3 QComboBox
-		LBL_GAP_TARGET,                            // 56/ 4 QComboBox
-		LBL_RESOLUTION_MM,                         // 57/ 5 QComboBox
-		LBL_SMOOTH_TYPE,                           // 58/ 6 QComboBox
+		LBL_RESOLUTION_MM,                         // 55/ 3 QComboBox
+		LBL_SMOOTH_TYPE,                           // 56/ 4 QComboBox
 
 		NUM_SETTINGS_MM
 	};
@@ -314,16 +312,14 @@ private:
 		CTL_COLOUR_STRATEGY_COMBO         = CTL_BLEND_FILE_TRUSTED_BOX_MM,//  2
 		CTL_CASE_SENSITIVE_FILESYSTEM_BOX,                                //  3
 		CTL_CAMERA_BORDER_PERCENT_EDIT_MM = CTL_CASE_SENSITIVE_FILESYSTEM_BOX,// 3
-		CTL_GAP_SCALE_STRATEGY_COMBO      = CTL_CASE_SENSITIVE_FILESYSTEM_BOX,// 3
+		CTL_RESOLUTION_COMBO_MM           = CTL_CASE_SENSITIVE_FILESYSTEM_BOX,// 3
 		CTL_CROP_IMAGE_BOX_MM,                                            //  4
 		CTL_FRAMES_PER_STEP_EDIT          = CTL_CROP_IMAGE_BOX_MM,        //  4
-		CTL_GAP_TARGET_COMBO              = CTL_CROP_IMAGE_BOX_MM,        //  4
+		CTL_SMOOTH_TYPE_COMBO             = CTL_CROP_IMAGE_BOX_MM,        //  4
 		CTL_DISPLAY_LOGO_BOX,                                             //  5
 		CTL_GAP_SCALE_EDIT                = CTL_DISPLAY_LOGO_BOX,         //  5
-		CTL_RESOLUTION_COMBO_MM           = CTL_DISPLAY_LOGO_BOX,         //  5
 		CTL_IMPORT_CAMERAS_BOX_MM,                                        //  6
 		CTL_IMPORT_SCALE_EDIT             = CTL_IMPORT_CAMERAS_BOX_MM,    //  6
-		CTL_SMOOTH_TYPE_COMBO             = CTL_IMPORT_CAMERAS_BOX_MM,    //  6
 		CTL_IMPORT_EDGES_BOX,                                             //  7
 		CTL_MERGE_DISTANCE_EDIT           = CTL_IMPORT_EDGES_BOX,         //  7
 		CTL_IMPORT_LIGHTS_BOX_MM,                                         //  8

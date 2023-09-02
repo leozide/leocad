@@ -48,7 +48,6 @@ enum lcLightProperty
 	LC_LIGHT_FACTOR,
 	LC_LIGHT_DIFFUSE,
 	LC_LIGHT_SPECULAR,
-	LC_LIGHT_SHADOWLESS,
 	LC_LIGHT_EXPONENT,
 	LC_LIGHT_AREA_GRID,
 	LC_LIGHT_SPOT_SIZE,
@@ -71,7 +70,6 @@ struct lcLightProperties
 	float     mSpotTightness;
 	float     mSpotSize;
 	bool      mEnableCutoff;
-	bool      mShadowless;
 	bool      mPOVRayLight;
 	int       mLightShape;
 };
@@ -323,6 +321,13 @@ public:
 		return mColor;
 	}
 
+	void SetCastShadow(bool CastShadow);
+
+	bool GetCastShadow() const
+	{
+		return mCastShadow;
+	}
+
 	void SetName(const QString& Name)
 	{
 		mName = Name;
@@ -352,7 +357,6 @@ public:
 		props.mSpotSize = mSpotSize;
 		props.mPOVRayLight = mPOVRayLight;
 		props.mEnableCutoff = mEnableCutoff;
-		props.mShadowless = mShadowless;
 		props.mAreaGrid = mAreaGrid;
 		props.mLightShape = mLightShape;
 		return props;
@@ -367,13 +371,12 @@ public:
 	lcVector2 mLightFactor;
 	lcVector2 mAreaGrid;
 	lcVector2 mAreaSize;
-	bool  mAngleSet;
-	bool  mSpotBlendSet;
-	bool  mSpotCutoffSet;
-	bool  mHeightSet;
-	bool  mEnableCutoff;
-	bool  mPOVRayLight;
-	bool  mShadowless;
+	bool mAngleSet;
+	bool mSpotBlendSet;
+	bool mSpotCutoffSet;
+	bool mHeightSet;
+	bool mEnableCutoff;
+	bool mPOVRayLight;
 	float mLightDiffuse;
 	float mLightSpecular;
 	float mSpotSize;
@@ -385,8 +388,23 @@ public:
 	QString mName;
 
 protected:
-	lcVector3 mColor;
+	void DrawPointLight(lcContext* Context) const;
+	void DrawSpotLight(lcContext* Context) const;
+	void DrawDirectionalLight(lcContext* Context) const;
+	void DrawAreaLight(lcContext* Context) const;
 
+	float SetupLightMatrix(lcContext* Context) const;
+	void DrawSphere(lcContext* Context, float Radius) const;
+	void DrawCylinder(lcContext* Context, float Radius, float Height) const;
+	void DrawTarget(lcContext* Context, float TargetDistance) const;
+	void DrawCone(lcContext* Context, float TargetDistance) const;
+
+	quint32 mState;
+	lcLightType mLightType;
+	lcVector3 mColor = lcVector3(1.0f, 1.0f, 1.0f);
+	bool mCastShadow = true;
+
+	int mLightShape;
 	lcObjectKeyArray<lcVector3> mPositionKeys;
 	lcObjectKeyArray<lcVector3> mTargetPositionKeys;
 	lcObjectKeyArray<lcVector3> mUpVectorKeys;
@@ -402,19 +420,4 @@ protected:
 	lcObjectKeyArray<float> mSpotFalloffKeys;
 	lcObjectKeyArray<float> mSpotExponentKeys;
 	lcObjectKeyArray<float> mSpotTightnessKeys;
-
-	void DrawPointLight(lcContext* Context) const;
-	void DrawSpotLight(lcContext* Context) const;
-	void DrawDirectionalLight(lcContext* Context) const;
-	void DrawAreaLight(lcContext* Context) const;
-
-	float SetupLightMatrix(lcContext* Context) const;
-	void DrawSphere(lcContext* Context, float Radius) const;
-	void DrawCylinder(lcContext* Context, float Radius, float Height) const;
-	void DrawTarget(lcContext* Context, float TargetDistance) const;
-	void DrawCone(lcContext* Context, float TargetDistance) const;
-
-	quint32 mState;
-	lcLightType mLightType;
-	int mLightShape;
 };

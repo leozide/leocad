@@ -149,7 +149,7 @@ protected:
 	QTreeWidgetItem* lightFactorB;
 	QTreeWidgetItem* mLightNameItem;
 	QTreeWidgetItem* lightFormat;
-	QTreeWidgetItem* lightShadowless;
+	QTreeWidgetItem* mLightCastShadowItem;
 	QTreeWidgetItem* lightAreaGridRows;
 	QTreeWidgetItem* lightAreaGridColumns;
 	QTreeWidgetItem* lightSpotFalloff;

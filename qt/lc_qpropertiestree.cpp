@@ -686,16 +686,15 @@ void lcQPropertiesTree::slotToggled(bool Value)
 
 		if (Light)
 		{
-			lcLightProperties Props = Light->GetLightProperties();
 			if (Item == lightEnableCutoff)
 			{
+				lcLightProperties Props = Light->GetLightProperties();
 				Props.mEnableCutoff = Value;
 				Model->UpdateLight(Light, Props, LC_LIGHT_USE_CUTOFF);
 			}
-			else if (Item == lightShadowless)
+			else if (Item == mLightCastShadowItem)
 			{
-				Props.mShadowless = Value;
-				Model->UpdateLight(Light, Props, LC_LIGHT_SHADOWLESS);
+				Model->SetLightCastShadow(Light, Value);
 			}
 		}
 	}
@@ -1197,7 +1196,7 @@ void lcQPropertiesTree::SetEmpty()
 	lightSpotSize = nullptr;
 	lightShape = nullptr;
 	lightFormat = nullptr;
-	lightShadowless = nullptr;
+	mLightCastShadowItem = nullptr;
 	lightAreaGridRows = nullptr;
 	lightAreaGridColumns = nullptr;
 	lightSpotFalloff = nullptr;
@@ -1449,7 +1448,7 @@ void lcQPropertiesTree::SetLight(lcObject* Focus)
 	float Exponent = 0.0f;
 	bool EnableCutoff = false;
 	bool POVRayLight = false;
-	bool Shadowless = false;
+	bool CastShadow = true;
 	PropertyType TargetProperty = PropertyFloat;
 	PropertyType SpotSizeProperty = PropertyFloatLightSpotSize;
 	lcVector3 Position(0.0f, 0.0f, 0.0f);
@@ -1466,7 +1465,7 @@ void lcQPropertiesTree::SetLight(lcObject* Focus)
 		FormatIndex = static_cast<int>(POVRayLight);
 		Format = POVRayLight ? QLatin1String("POVRay") : QLatin1String("Blender");
 
-		Shadowless = Light->mShadowless;
+		CastShadow = Light->GetCastShadow();
 		Position = Light->mPosition;
 		Target = Light->mTargetPosition;
 		Color = lcQColorFromVector3(Light->GetColor());
@@ -1578,8 +1577,8 @@ void lcQPropertiesTree::SetLight(lcObject* Focus)
 		mLightNameItem = addProperty(mLightAttributesItem, tr("Name"), PropertyString);
 		mLightTypeItem = addProperty(mLightAttributesItem, tr("Type"), PropertyStringList);
 		mLightColorItem = addProperty(mLightAttributesItem, tr("Color"), PropertyColor);
+		mLightCastShadowItem = addProperty(mLightAttributesItem, tr("Cast Shadows"), PropertyBool);
 
-		lightShadowless = addProperty(mLightAttributesItem, tr("Cast Shadows"), PropertyBool);
 		lightExponent = addProperty(mLightAttributesItem, ExponentLabel, PropertyFloat);
 
 		if ((LightType == lcLightType::Point || LightType == lcLightType::Directional) && !POVRayLight)
@@ -1691,8 +1690,8 @@ void lcQPropertiesTree::SetLight(lcObject* Focus)
 	mLightTypeItem->setText(1, lcLight::GetLightTypeString(LightType));
 	mLightTypeItem->setData(0, PropertyValueRole, static_cast<int>(LightType));
 
-	lightShadowless->setCheckState(1, Shadowless ? Qt::Checked : Qt::Unchecked);
-	lightShadowless->setData(0, PropertyValueRole, Shadowless);
+	mLightCastShadowItem->setCheckState(1, CastShadow ? Qt::Checked : Qt::Unchecked);
+	mLightCastShadowItem->setData(0, PropertyValueRole, CastShadow);
 
 	lightExponent->setText(1, lcFormatValueLocalized(Exponent));
 	lightExponent->setData(0, PropertyValueRole, Exponent);

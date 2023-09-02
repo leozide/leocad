@@ -3113,6 +3113,16 @@ void lcModel::SetCameraName(lcCamera* Camera, const QString& Name)
 	gMainWindow->UpdateCameraMenu();
 }
 
+void lcModel::SetLightType(lcLight* Light, lcLightType LightType)
+{
+	Light->SetLightType(LightType);
+	Light->UpdatePosition(mCurrentStep);
+
+	SaveCheckpoint(tr("Changing Light Type"));
+	gMainWindow->UpdateSelectedObjects(false);
+	UpdateAllViews();
+}
+
 void lcModel::SetLightColor(lcLight* Light, const lcVector3& Color)
 {
 	if (Light->GetColor() == Color)
@@ -4189,6 +4199,9 @@ void lcModel::BeginDirectionalLightTool(const lcVector3& Position, const lcVecto
 
 	case lcLightType::Area:
 		SaveCheckpoint(tr("New Area Light"));
+		break;
+
+	case lcLightType::Count:
 		break;
 	}
 }

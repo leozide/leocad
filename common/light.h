@@ -27,7 +27,8 @@ enum class lcLightType
 	Point,
 	Spot,
 	Directional,
-	Area
+	Area,
+	Count
 };
 
 enum lcLightShape
@@ -86,6 +87,8 @@ public:
 	lcLight& operator=(const lcLight&) = delete;
 	lcLight& operator=(lcLight&&) = delete;
 
+	static QString GetLightTypeString(lcLightType LightType);
+
 	bool IsPointLight() const
 	{
 		return mLightType == lcLightType::Point;
@@ -110,6 +113,8 @@ public:
 	{
 		return mLightType;
 	}
+
+	void SetLightType(lcLightType LightType);
 
 	int GetLightShape() const
 	{
@@ -157,6 +162,9 @@ public:
 
 			case lcLightType::Area:
 				mState |= LC_LIGHT_POSITION_SELECTED | LC_LIGHT_TARGET_SELECTED | LC_LIGHT_UPVECTOR_SELECTED;
+				break;
+
+			case lcLightType::Count:
 				break;
 			}
 		}

@@ -524,8 +524,21 @@ QWidget *lcQPropertiesTree::createEditor(QWidget *parent, QTreeWidgetItem *item)
 			return editor;
 		}
 
-	case PropertyStringLightReadOnly:
-		return nullptr;
+	case PropertyStringList:
+	{
+		QComboBox* editor = new QComboBox(parent);
+
+		if (item == mLightTypeItem)
+			for (int LightTypeIndex = 0; LightTypeIndex < static_cast<int>(lcLightType::Count); LightTypeIndex++)
+				editor->addItem(lcLight::GetLightTypeString(static_cast<lcLightType>(LightTypeIndex)));
+
+		int value = item->data(0, PropertyValueRole).toInt();
+		editor->setCurrentIndex(value);
+
+		connect(editor, SIGNAL(currentIndexChanged(int)), this, SLOT(slotSetValue(int)));
+
+		return editor;
+	}
 
 	case PropertyLightFormat:
 		{
@@ -1023,13 +1036,17 @@ void lcQPropertiesTree::slotSetValue(int Value)
 	else if (mWidgetMode == LC_PROPERTY_WIDGET_LIGHT)
 	{
 		lcObject* Focus = Model->GetFocusObject();
-
 		lcLight* Light = (Focus && Focus->IsLight()) ? (lcLight*)Focus : nullptr;
 
 		if (Light)
 		{
 			lcLightProperties Props = Light->GetLightProperties();
-			if (Item == lightShape)
+
+			if (Item == mLightTypeItem)
+			{
+				Model->SetLightType(Light, static_cast<lcLightType>(Value));
+			}
+			else if (Item == lightShape)
 			{
 				Props.mLightShape = static_cast<lcLightShape>(Value);
 				Model->UpdateLight(Light, Props, LC_LIGHT_SHAPE);
@@ -1129,7 +1146,7 @@ QTreeWidgetItem *lcQPropertiesTree::addProperty(QTreeWidgetItem *parent, const Q
 		newItem->setIcon(0, m_expandIcon);
 	}
 
-	if (propertyType == PropertyStringLightReadOnly || propertyType == PropertyFloatReadOnly)
+	if (propertyType == PropertyFloatReadOnly)
 		newItem->setFlags(newItem->flags() & ~Qt::ItemIsEditable);
 
 	return newItem;
@@ -1193,7 +1210,7 @@ void lcQPropertiesTree::SetEmpty()
 	lightCutoff = nullptr;
 	lightEnableCutoff = nullptr;
 	lightExponent = nullptr;
-	lightType = nullptr;
+	mLightTypeItem = nullptr;
 	lightFactorA = nullptr;
 	lightFactorB = nullptr;
 	lightName = nullptr;
@@ -1439,7 +1456,6 @@ void lcQPropertiesTree::SetLight(lcObject* Focus)
 	QString Name = tr("Light");
 	QString ExponentLabel = tr("Exponent");
 	QString FactorALabel = QLatin1String("FactorA");
-	QString Type = QLatin1String("Undefined");
 	QString Format, Shape, SpotSizeToolTip, ExponentToolTip, FactorAToolTip, FactorBToolTip;
 	lcLightType LightType = lcLightType::Point;
 	lcLightShape ShapeIndex = LC_LIGHT_SHAPE_UNDEFINED;
@@ -1480,13 +1496,11 @@ void lcQPropertiesTree::SetLight(lcObject* Focus)
 		switch(LightType)
 		{
 		case lcLightType::Point:
-			Type = tr("Point");
 			FactorALabel = tr("Radius (m)");
 			FactorAToolTip = tr("The light size for shadow sampling in metres.");
 			ExponentLabel = tr("Exponent");
 			break;
 		case lcLightType::Spot:
-			Type = tr("Spot");
 			FactorBToolTip = tr("The softness of the spotlight edge.");
 			ExponentLabel = tr("Power");
 
@@ -1506,13 +1520,11 @@ void lcQPropertiesTree::SetLight(lcObject* Focus)
 			}
 			break;
 		case lcLightType::Directional:
-			Type = tr("Directional");
 			FactorALabel = tr("Angle (°)");
 			FactorAToolTip = tr("Angular diamater of the sun as seen from the Earth.");
 			ExponentLabel = tr("Strength");
 			break;
 		case lcLightType::Area:
-			Type = tr("Area");
 			ExponentLabel = tr("Power");
 
 			if (POVRayLight)
@@ -1609,7 +1621,7 @@ void lcQPropertiesTree::SetLight(lcObject* Focus)
 
 		// Properties
 		lightProperties = addProperty(nullptr, tr("Properties"), PropertyGroup);
-		lightType = addProperty(lightProperties, tr("Type"), PropertyStringLightReadOnly);
+		mLightTypeItem = addProperty(lightProperties, tr("Type"), PropertyStringList);
 		lightShadowless = addProperty(lightProperties, tr("Shadowless"), PropertyBool);
 		lightExponent = addProperty(lightProperties, ExponentLabel, PropertyFloat);
 
@@ -1712,8 +1724,8 @@ void lcQPropertiesTree::SetLight(lcObject* Focus)
 	lightFormat->setText(1, Format);
 	lightFormat->setData(0, PropertyValueRole, FormatIndex);
 
-	lightType->setText(1, Type);
-	lightType->setData(0, PropertyValueRole, Type);
+	mLightTypeItem->setText(1, lcLight::GetLightTypeString(LightType));
+	mLightTypeItem->setData(0, PropertyValueRole, static_cast<int>(LightType));
 
 	lightShadowless->setText(1, Shadowless ? "True" : "False");
 	lightShadowless->setData(0, PropertyValueRole, Shadowless);

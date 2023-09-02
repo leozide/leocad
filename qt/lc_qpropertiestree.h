@@ -49,7 +49,7 @@ public:
 		PropertyFloatLightSpotFalloff,
 		PropertyStep,
 		PropertyString,
-		PropertyStringLightReadOnly,
+		PropertyStringList,
 		PropertyLightFormat,
 		PropertyLightShape,
 		PropertyLightColor,
@@ -145,7 +145,7 @@ protected:
 	QTreeWidgetItem *lightCutoff;
 	QTreeWidgetItem *lightEnableCutoff;
 	QTreeWidgetItem *lightExponent;
-	QTreeWidgetItem *lightType;
+	QTreeWidgetItem *mLightTypeItem;
 	QTreeWidgetItem *lightSpotSize;
 	QTreeWidgetItem *lightShape;
 	QTreeWidgetItem *lightFactorA;

@@ -859,6 +859,48 @@ void lcLight::MoveSelected(lcStep Step, bool AddKey, const lcVector3& Distance)
 	}
 }
 
+void lcLight::Rotate(lcStep Step, bool AddKey, const lcMatrix33& RotationMatrix, const lcMatrix33& RotationFrame)
+{
+	if (IsPointLight())
+		return;
+
+	if (GetFocusSection() != LC_LIGHT_SECTION_POSITION)
+		return;
+
+//	lcVector3 Direction = mTargetPosition - mPosition;
+//
+//	Direction = lcMul(Direction, RotationMatrix);
+//
+//	mTargetPosition = mPosition + Direction;
+//	mTargetPositionKeys.ChangeKey(mTargetPosition, Step, AddKey);
+
+
+	const lcMatrix33 LocalToWorldMatrix = lcMatrix33AffineInverse(lcMatrix33(mWorldLight));
+
+	const lcMatrix33 LocalToFocusMatrix = lcMul(LocalToWorldMatrix, RotationFrame);
+	lcMatrix33 NewLocalToWorldMatrix = lcMul(LocalToFocusMatrix, RotationMatrix);
+
+	const lcMatrix33 WorldToLocalMatrix = lcMatrix33AffineInverse(LocalToWorldMatrix);
+
+	NewLocalToWorldMatrix.Orthonormalize();
+
+	lcVector3 Target = lcMul(lcVector3(0.0f, 0.0f, lcLength(mTargetPosition - mPosition)), NewLocalToWorldMatrix);
+	mTargetPosition = mPosition - Target;
+	mTargetPositionKeys.ChangeKey(mTargetPosition, Step, AddKey);
+
+	if (IsAreaLight())
+	{
+		const lcVector3 FrontVector(mTargetPosition - mPosition);
+		lcVector3 SideVector = lcCross(FrontVector, mUpVector);
+
+		if (fabsf(lcDot(mUpVector, SideVector)) > 0.99f)
+			SideVector = lcVector3(1, 0, 0);
+
+		mUpVector = lcCross(SideVector, FrontVector);
+		mUpVector.Normalize();
+	}
+}
+
 void lcLight::SetLightType(lcLightType LightType)
 {
 	if (static_cast<int>(LightType) < 0 || LightType >= lcLightType::Count)
@@ -937,9 +979,15 @@ void lcLight::UpdatePosition(lcStep Step)
 	}
 	else if (IsAreaLight())
 	{
-		lcVector3 FrontVector(mTargetPosition - mPosition);
-		const lcVector3 SideVector = lcCross(FrontVector, mUpVector);
-		mUpVector = lcNormalize(lcCross(SideVector, FrontVector));
+		lcVector3 UpVector(0, 0, 1), FrontVector(mPosition), SideVector;
+		FrontVector.Normalize();
+		if (fabsf(lcDot(UpVector, FrontVector)) > 0.99f)
+			SideVector = lcVector3(-1, 0, 0);
+		else
+			SideVector = lcCross(FrontVector, UpVector);
+		UpVector = lcCross(SideVector, FrontVector);
+		UpVector.Normalize();
+		mUpVector = UpVector;
 
 		mWorldLight = lcMatrix44LookAt(mPosition, mTargetPosition, mUpVector);
 	}

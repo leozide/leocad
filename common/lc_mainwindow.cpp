@@ -2931,32 +2931,32 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 
 	case LC_PIECE_ROTATE_PLUSX:
 		if (ActiveModel)
-			ActiveModel->RotateSelectedPieces(ActiveView->GetMoveDirection(lcVector3(lcMax(GetAngleSnap(), 1.0f), 0.0f, 0.0f)), true, false, true, true);
+			ActiveModel->RotateSelectedObjects(ActiveView->GetMoveDirection(lcVector3(lcMax(GetAngleSnap(), 1.0f), 0.0f, 0.0f)), true, false, true, true);
 		break;
 
 	case LC_PIECE_ROTATE_MINUSX:
 		if (ActiveModel)
-			ActiveModel->RotateSelectedPieces(ActiveView->GetMoveDirection(-lcVector3(lcMax(GetAngleSnap(), 1.0f), 0.0f, 0.0f)), true, false, true, true);
+			ActiveModel->RotateSelectedObjects(ActiveView->GetMoveDirection(-lcVector3(lcMax(GetAngleSnap(), 1.0f), 0.0f, 0.0f)), true, false, true, true);
 		break;
 
 	case LC_PIECE_ROTATE_PLUSY:
 		if (ActiveModel)
-			ActiveModel->RotateSelectedPieces(ActiveView->GetMoveDirection(lcVector3(0.0f, lcMax(GetAngleSnap(), 1.0f), 0.0f)), true, false, true, true);
+			ActiveModel->RotateSelectedObjects(ActiveView->GetMoveDirection(lcVector3(0.0f, lcMax(GetAngleSnap(), 1.0f), 0.0f)), true, false, true, true);
 		break;
 
 	case LC_PIECE_ROTATE_MINUSY:
 		if (ActiveModel)
-			ActiveModel->RotateSelectedPieces(ActiveView->GetMoveDirection(lcVector3(0.0f, -lcMax(GetAngleSnap(), 1.0f), 0.0f)), true, false, true, true);
+			ActiveModel->RotateSelectedObjects(ActiveView->GetMoveDirection(lcVector3(0.0f, -lcMax(GetAngleSnap(), 1.0f), 0.0f)), true, false, true, true);
 		break;
 
 	case LC_PIECE_ROTATE_PLUSZ:
 		if (ActiveModel)
-			ActiveModel->RotateSelectedPieces(ActiveView->GetMoveDirection(lcVector3(0.0f, 0.0f, lcMax(GetAngleSnap(), 1.0f))), true, false, true, true);
+			ActiveModel->RotateSelectedObjects(ActiveView->GetMoveDirection(lcVector3(0.0f, 0.0f, lcMax(GetAngleSnap(), 1.0f))), true, false, true, true);
 		break;
 
 	case LC_PIECE_ROTATE_MINUSZ:
 		if (ActiveModel)
-			ActiveModel->RotateSelectedPieces(ActiveView->GetMoveDirection(lcVector3(0.0f, 0.0f, -lcMax(GetAngleSnap(), 1.0f))), true, false, true, true);
+			ActiveModel->RotateSelectedObjects(ActiveView->GetMoveDirection(lcVector3(0.0f, 0.0f, -lcMax(GetAngleSnap(), 1.0f))), true, false, true, true);
 		break;
 
 	case LC_PIECE_MINIFIG_WIZARD:

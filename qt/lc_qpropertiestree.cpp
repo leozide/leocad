@@ -747,7 +747,7 @@ void lcQPropertiesTree::slotReturnPressed()
 			else if (Item == partRotationZ)
 				Rotation[2] = Value;
 
-			Model->RotateSelectedPieces(Rotation - InitialRotation, true, false, true, true);
+			Model->RotateSelectedObjects(Rotation - InitialRotation, true, false, true, true);
 		}
 		else if (Item == partShow)
 		{

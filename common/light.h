@@ -277,7 +277,32 @@ public:
 
 	quint32 GetAllowedTransforms() const override
 	{
-		return LC_OBJECT_TRANSFORM_MOVE_X | LC_OBJECT_TRANSFORM_MOVE_Y | LC_OBJECT_TRANSFORM_MOVE_Z;
+		if (IsPointLight())
+			return LC_OBJECT_TRANSFORM_MOVE_XYZ;
+
+		const quint32 Section = GetFocusSection();
+
+		if (Section == LC_LIGHT_SECTION_POSITION)
+			return LC_OBJECT_TRANSFORM_MOVE_XYZ | LC_OBJECT_TRANSFORM_ROTATE_XYZ;
+
+		if (Section == LC_LIGHT_SECTION_TARGET || Section == LC_LIGHT_SECTION_UPVECTOR)
+			return LC_OBJECT_TRANSFORM_MOVE_XYZ;
+
+		return 0;
+	}
+
+	lcMatrix33 GetRelativeRotation() const
+	{
+		const quint32 Section = GetFocusSection();
+
+		if (Section == LC_LIGHT_SECTION_POSITION)
+		{
+			return lcMatrix33AffineInverse(lcMatrix33(mWorldLight));
+		}
+		else
+		{
+			return lcMatrix33Identity();
+		}
 	}
 
 	lcVector3 GetSectionPosition(quint32 Section) const override
@@ -295,6 +320,23 @@ public:
 		}
 
 		return lcVector3(0.0f, 0.0f, 0.0f);
+	}
+
+	lcVector3 GetRotationCenter() const
+	{
+		const quint32 Section = GetFocusSection();
+
+		switch (Section)
+		{
+		case LC_LIGHT_SECTION_POSITION:
+			return mPosition;
+
+		case LC_LIGHT_SECTION_TARGET:
+		case LC_LIGHT_SECTION_UPVECTOR:
+			return mTargetPosition;
+		}
+
+		return mPosition;
 	}
 
 	void SaveLDraw(QTextStream& Stream) const;
@@ -341,6 +383,7 @@ public:
 	void CompareBoundingBox(lcVector3& Min, lcVector3& Max);
 	void UpdatePosition(lcStep Step);
 	void MoveSelected(lcStep Step, bool AddKey, const lcVector3& Distance);
+	void Rotate(lcStep Step, bool AddKey, const lcMatrix33& RotationMatrix, const lcMatrix33& RotationFrame);
 	bool Setup(int LightIndex);
 	void CreateName(const lcArray<lcLight*>& Lights);
 	void UpdateLight(lcStep Step, lcLightProperties Props, int Property);

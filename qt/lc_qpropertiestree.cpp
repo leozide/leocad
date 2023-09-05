@@ -868,9 +868,11 @@ void lcQPropertiesTree::slotReturnPressed()
 
 			if (Item == lightPositionX || Item == lightPositionY || Item == lightPositionZ)
 			{
-				lcVector3 Center = Light->mPosition;
+				lcVector3 Center = Light->GetPosition();
 				lcVector3 Position = Center;
+
 				float Value = lcParseValueLocalized(Editor->text());
+
 				if (Item == lightPositionX)
 					Position[0] = Value;
 				else if (Item == lightPositionY)
@@ -884,19 +886,19 @@ void lcQPropertiesTree::slotReturnPressed()
 			}
 			else if (Item == lightTargetX || Item == lightTargetY || Item == lightTargetZ)
 			{
-				lcVector3 Center = Light->mTargetPosition;
-				lcVector3 Position = Center;
-				float Value = lcParseValueLocalized(Editor->text());
-				if (Item == lightTargetX)
-					Position[0] = Value;
-				else if (Item == lightTargetY)
-					Position[1] = Value;
-				else if (Item == lightTargetZ)
-					Position[2] = Value;
-
-				lcVector3 Distance = Position - Center;
-
-				Model->MoveSelectedObjects(Distance, Distance, false, false, true, true);
+//				lcVector3 Center = Light->mTargetPosition;
+//				lcVector3 Position = Center;
+//				float Value = lcParseValueLocalized(Editor->text());
+//				if (Item == lightTargetX)
+//					Position[0] = Value;
+//				else if (Item == lightTargetY)
+//					Position[1] = Value;
+//				else if (Item == lightTargetZ)
+//					Position[2] = Value;
+//
+//				lcVector3 Distance = Position - Center;
+//
+//				Model->MoveSelectedObjects(Distance, Distance, false, false, true, true);
 			}
 			else if (Item == lightFactorA || Item == lightFactorB)
 			{
@@ -1466,8 +1468,8 @@ void lcQPropertiesTree::SetLight(lcObject* Focus)
 		Format = POVRayLight ? QLatin1String("POVRay") : QLatin1String("Blender");
 
 		CastShadow = Light->GetCastShadow();
-		Position = Light->mPosition;
-		Target = Light->mTargetPosition;
+		Position = Light->GetPosition();
+//		Target = Light->mTargetPosition;
 		Color = lcQColorFromVector3(Light->GetColor());
 		Factor = Light->mLightFactor;
 		LightType = Light->GetLightType();

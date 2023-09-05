@@ -2272,29 +2272,13 @@ void lcView::StartTracking(lcTrackButton TrackButton)
 	lcTool Tool = GetCurrentTool();
 	lcModel* ActiveModel = GetActiveModel();
 
-	auto AddLight = [this, ActiveModel](lcLightType LightType)
-	{
-		lcVector3 Position = GetCameraLightInsertPosition();
-		lcVector3 Target = Position + lcVector3(0.1f, 0.1f, 0.1f);
-		ActiveModel->BeginDirectionalLightTool(Position, Target, LightType);
-	};
-
 	switch (Tool)
 	{
 		case lcTool::Insert:
 		case lcTool::PointLight:
-			break;
-
 		case lcTool::Spotlight:
-			AddLight(lcLightType::Spot);
-			break;
-
 		case lcTool::DirectionalLight:
-			AddLight(lcLightType::Directional);
-			break;
-
 		case lcTool::AreaLight:
-			AddLight(lcLightType::Area);
 			break;
 
 		case lcTool::Camera:
@@ -2448,6 +2432,17 @@ void lcView::OnButtonDown(lcTrackButton TrackButton)
 	lcModel* ActiveModel = GetActiveModel();
 	mToolClicked = false;
 
+	auto AddLight = [this, ActiveModel](lcLightType LightType)
+	{
+		ActiveModel->InsertLightToolClicked(GetCameraLightInsertPosition(), LightType);
+
+		if ((mMouseModifiers & Qt::ControlModifier) == 0)
+			gMainWindow->SetTool(lcTool::Select);
+
+		mToolClicked = true;
+		UpdateTrackTool();
+	};
+
 	switch (mTrackTool)
 	{
 	case lcTrackTool::None:
@@ -2471,20 +2466,21 @@ void lcView::OnButtonDown(lcTrackButton TrackButton)
 		break;
 
 	case lcTrackTool::PointLight:
-		{
-			ActiveModel->PointLightToolClicked(GetCameraLightInsertPosition());
-
-			if ((mMouseModifiers & Qt::ControlModifier) == 0)
-				gMainWindow->SetTool(lcTool::Select);
-
-			mToolClicked = true;
-			UpdateTrackTool();
-		}
+		AddLight(lcLightType::Point);
 		break;
 
 	case lcTrackTool::Spotlight:
+		AddLight(lcLightType::Spot);
+		break;
+
 	case lcTrackTool::DirectionalLight:
+		AddLight(lcLightType::Directional);
+		break;
+
 	case lcTrackTool::AreaLight:
+		AddLight(lcLightType::Area);
+		break;
+
 	case lcTrackTool::Camera:
 		StartTracking(TrackButton);
 		break;
@@ -2719,12 +2715,9 @@ void lcView::OnMouseMove()
 	case lcTrackTool::None:
 	case lcTrackTool::Insert:
 	case lcTrackTool::PointLight:
-		break;
-
 	case lcTrackTool::Spotlight:
 	case lcTrackTool::DirectionalLight:
 	case lcTrackTool::AreaLight:
-		ActiveModel->UpdateDirectionalLightTool(GetCameraLightInsertPosition());
 		break;
 
 	case lcTrackTool::Camera:

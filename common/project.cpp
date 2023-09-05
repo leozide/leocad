@@ -2139,18 +2139,21 @@ bool Project::ExportPOVRay(const QString& FileName)
 			(CameraName.isEmpty() ? "Camera" : CameraName.toLatin1().constData()));
 	POVFile.WriteLine(Line);
 
-	lcVector3 LightTarget(0.0f, 0.0f, 0.0f), LightColor(1.0f, 1.0f, 1.0f);
 	lcVector2 AreaSize(200.0f, 200.0f), AreaGrid(10.0f, 10.0f);
 	int AreaCircle = 0, Shadowless = 0;
 	lcLightType LightType = lcLightType::Area;
 	float Power = 0, SpotRadius = 0, SpotFalloff = 0, SpotTightness = 0;
+
 	if (Lights.IsEmpty())
 	{
+		const lcVector3 LightTarget(0.0f, 0.0f, 0.0f), LightColor(1.0f, 1.0f, 1.0f);
 		lcVector3 Location[4];
+
 		Location[0] = {0.0f * Radius + Center[0], -1.5f * Radius + Center[1], -1.5f * Radius + Center[2]};
 		Location[1] = {1.5f * Radius + Center[0], -1.0f * Radius + Center[1],  0.866026f * Radius + Center[2]};
 		Location[2] = {0.0f * Radius + Center[0], -2.0f * Radius + Center[1],  0.0f * Radius + Center[2]};
 		Location[3] = {2.0f * Radius + Center[0],  0.0f * Radius + Center[1], -2.0f * Radius + Center[2]};
+
 		for (int Idx = 0; Idx < 4; Idx++)
 		{
 			Power = Idx < 2 ? 0.75f : 0.5f;
@@ -2171,21 +2174,19 @@ bool Project::ExportPOVRay(const QString& FileName)
 	{
 		for (const lcLight* Light : Lights)
 		{
-			const lcVector3& Location = Light->mPosition;
+			const lcVector3 LightPosition = Light->GetPosition();
+			const lcVector3 LightTarget = LightPosition + Light->GetDirection();
+			const lcVector3 LightColor = Light->GetColor();
 			const QString LightName = QString(Light->mName).replace(" ","_");
 			LightType = Light->GetLightType();
 			Shadowless = Light->GetCastShadow() ? 0 : 1;
-			LightColor = Light->GetColor();
 			Power = Light->mPOVRayExponent;
+
 			switch(LightType)
 			{
 			case lcLightType::Spot:
-				LightTarget = Light->mTargetPosition;
 				SpotFalloff = Light->mSpotFalloff;
 				SpotRadius = Light->mSpotSize - SpotFalloff;
-				break;
-			case lcLightType::Directional:
-				LightTarget = Light->mTargetPosition;
 				break;
 			case lcLightType::Area:
 				AreaCircle = Light->GetLightShape() == LC_LIGHT_SHAPE_DISK ? 1 : 0;
@@ -2200,7 +2201,7 @@ bool Project::ExportPOVRay(const QString& FileName)
 					LightName.toLatin1().constData(),
 					LightType,
 					Shadowless,
-					Location[1], Location[0], Location[2],
+					LightPosition[1], LightPosition[0], LightPosition[2],
 					LightTarget[1], LightTarget[0], LightTarget[2],
 					LightColor[0], LightColor[1], LightColor[2],
 					Power,

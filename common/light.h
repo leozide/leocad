@@ -7,19 +7,13 @@
 #define LC_LIGHT_DISABLED          0x0002
 #define LC_LIGHT_POSITION_SELECTED 0x0010
 #define LC_LIGHT_POSITION_FOCUSED  0x0020
-#define LC_LIGHT_TARGET_SELECTED   0x0040
-#define LC_LIGHT_TARGET_FOCUSED    0x0080
-#define LC_LIGHT_UPVECTOR_SELECTED 0x0100
-#define LC_LIGHT_UPVECTOR_FOCUSED  0x0200
 
-#define LC_LIGHT_SELECTION_MASK    (LC_LIGHT_POSITION_SELECTED | LC_LIGHT_TARGET_SELECTED | LC_LIGHT_UPVECTOR_SELECTED)
-#define LC_LIGHT_FOCUS_MASK        (LC_LIGHT_POSITION_FOCUSED | LC_LIGHT_TARGET_FOCUSED | LC_LIGHT_UPVECTOR_FOCUSED)
+#define LC_LIGHT_SELECTION_MASK    LC_LIGHT_POSITION_SELECTED
+#define LC_LIGHT_FOCUS_MASK        LC_LIGHT_POSITION_FOCUSED
 
 enum lcLightSection
 {
-	LC_LIGHT_SECTION_POSITION,
-	LC_LIGHT_SECTION_TARGET,
-	LC_LIGHT_SECTION_UPVECTOR
+	LC_LIGHT_SECTION_POSITION
 };
 
 enum class lcLightType
@@ -77,7 +71,7 @@ struct lcLightProperties
 class lcLight : public lcObject
 {
 public:
-	lcLight(const lcVector3& Position, const lcVector3& TargetPosition, lcLightType LightType);
+	lcLight(const lcVector3& Position, lcLightType LightType);
 	virtual ~lcLight() = default;
 
 	lcLight(const lcLight&) = delete;
@@ -131,41 +125,15 @@ public:
 		case LC_LIGHT_SECTION_POSITION:
 			return (mState & LC_LIGHT_POSITION_SELECTED) != 0;
 			break;
-
-		case LC_LIGHT_SECTION_TARGET:
-			return (mState & LC_LIGHT_TARGET_SELECTED) != 0;
-			break;
-
-		case LC_LIGHT_SECTION_UPVECTOR:
-			return (mState & LC_LIGHT_UPVECTOR_SELECTED) != 0;
-			break;
 		}
+
 		return false;
 	}
 
 	void SetSelected(bool Selected) override
 	{
 		if (Selected)
-		{
-			switch (mLightType)
-			{
-			case lcLightType::Point:
-				mState |= LC_LIGHT_POSITION_SELECTED;
-				break;
-
-			case lcLightType::Spot:
-			case lcLightType::Directional:
-				mState |= LC_LIGHT_POSITION_SELECTED | LC_LIGHT_TARGET_SELECTED;
-				break;
-
-			case lcLightType::Area:
-				mState |= LC_LIGHT_POSITION_SELECTED | LC_LIGHT_TARGET_SELECTED | LC_LIGHT_UPVECTOR_SELECTED;
-				break;
-
-			case lcLightType::Count:
-				break;
-			}
-		}
+			mState |= LC_LIGHT_POSITION_SELECTED;
 		else
 			mState &= ~(LC_LIGHT_SELECTION_MASK | LC_LIGHT_FOCUS_MASK);
 	}
@@ -179,26 +147,6 @@ public:
 				mState |= LC_LIGHT_POSITION_SELECTED;
 			else
 				mState &= ~(LC_LIGHT_POSITION_SELECTED | LC_LIGHT_POSITION_FOCUSED);
-			break;
-
-		case LC_LIGHT_SECTION_TARGET:
-			if (Selected)
-			{
-				if (!IsPointLight())
-					mState |= LC_LIGHT_TARGET_SELECTED;
-			}
-			else
-				mState &= ~(LC_LIGHT_TARGET_SELECTED | LC_LIGHT_TARGET_FOCUSED);
-			break;
-
-		case LC_LIGHT_SECTION_UPVECTOR:
-			if (Selected)
-			{
-				if (IsAreaLight())
-					mState |= LC_LIGHT_UPVECTOR_SELECTED;
-			}
-			else
-				mState &= ~(LC_LIGHT_UPVECTOR_SELECTED | LC_LIGHT_UPVECTOR_FOCUSED);
 			break;
 		}
 	}
@@ -214,15 +162,6 @@ public:
 		{
 		case LC_LIGHT_SECTION_POSITION:
 			return (mState & LC_LIGHT_POSITION_FOCUSED) != 0;
-			break;
-
-		case LC_LIGHT_SECTION_TARGET:
-			return (mState & LC_LIGHT_TARGET_FOCUSED) != 0;
-			break;
-
-		case LC_LIGHT_SECTION_UPVECTOR:
-			return (mState & LC_LIGHT_UPVECTOR_FOCUSED) != 0;
-			break;
 		}
 
 		return false;
@@ -238,26 +177,6 @@ public:
 			else
 				mState &= ~(LC_LIGHT_POSITION_SELECTED | LC_LIGHT_POSITION_FOCUSED);
 			break;
-
-		case LC_LIGHT_SECTION_TARGET:
-			if (Focused)
-			{
-				if (!IsPointLight())
-					mState |= LC_LIGHT_TARGET_SELECTED | LC_LIGHT_TARGET_FOCUSED;
-			}
-			else
-				mState &= ~(LC_LIGHT_TARGET_SELECTED | LC_LIGHT_TARGET_FOCUSED);
-			break;
-
-		case LC_LIGHT_SECTION_UPVECTOR:
-			if (Focused)
-			{
-				if (IsAreaLight())
-					mState |= LC_LIGHT_UPVECTOR_SELECTED | LC_LIGHT_UPVECTOR_FOCUSED;
-			}
-			else
-				mState &= ~(LC_LIGHT_UPVECTOR_SELECTED | LC_LIGHT_UPVECTOR_FOCUSED);
-			break;
 		}
 	}
 
@@ -265,12 +184,6 @@ public:
 	{
 		if (mState & LC_LIGHT_POSITION_FOCUSED)
 			return LC_LIGHT_SECTION_POSITION;
-
-		if (!IsPointLight() && (mState & LC_LIGHT_TARGET_FOCUSED))
-			return LC_LIGHT_SECTION_TARGET;
-
-		if (IsAreaLight() && (mState & LC_LIGHT_UPVECTOR_FOCUSED))
-			return LC_LIGHT_SECTION_UPVECTOR;
 
 		return ~0U;
 	}
@@ -285,9 +198,6 @@ public:
 		if (Section == LC_LIGHT_SECTION_POSITION)
 			return LC_OBJECT_TRANSFORM_MOVE_XYZ | LC_OBJECT_TRANSFORM_ROTATE_XYZ;
 
-		if (Section == LC_LIGHT_SECTION_TARGET || Section == LC_LIGHT_SECTION_UPVECTOR)
-			return LC_OBJECT_TRANSFORM_MOVE_XYZ;
-
 		return 0;
 	}
 
@@ -296,47 +206,41 @@ public:
 		const quint32 Section = GetFocusSection();
 
 		if (Section == LC_LIGHT_SECTION_POSITION)
-		{
-			return lcMatrix33AffineInverse(lcMatrix33(mWorldLight));
-		}
+			return lcMatrix33(mWorldMatrix);
 		else
-		{
 			return lcMatrix33Identity();
-		}
 	}
 
 	lcVector3 GetSectionPosition(quint32 Section) const override
 	{
-		switch (Section)
-		{
-		case LC_LIGHT_SECTION_POSITION:
-			return mPosition;
+		Q_UNUSED(Section);
 
-		case LC_LIGHT_SECTION_TARGET:
-			return mTargetPosition;
+		return mWorldMatrix.GetTranslation();
+	}
 
-		case LC_LIGHT_SECTION_UPVECTOR:
-			return lcMul31(lcVector3(0, 25, 0), lcMatrix44AffineInverse(mWorldLight));
-		}
+	void SetPosition(const lcVector3& Position, lcStep Step, bool AddKey)
+	{
+		mPositionKeys.ChangeKey(Position, Step, AddKey);
+	}
 
-		return lcVector3(0.0f, 0.0f, 0.0f);
+	void SetRotation(const lcMatrix33& Rotation, lcStep Step, bool AddKey)
+	{
+		mRotationKeys.ChangeKey(Rotation, Step, AddKey);
 	}
 
 	lcVector3 GetRotationCenter() const
 	{
-		const quint32 Section = GetFocusSection();
+		return mWorldMatrix.GetTranslation();
+	}
 
-		switch (Section)
-		{
-		case LC_LIGHT_SECTION_POSITION:
-			return mPosition;
+	lcVector3 GetPosition() const
+	{
+		return mWorldMatrix.GetTranslation();
+	}
 
-		case LC_LIGHT_SECTION_TARGET:
-		case LC_LIGHT_SECTION_UPVECTOR:
-			return mTargetPosition;
-		}
-
-		return mPosition;
+	lcVector3 GetDirection() const
+	{
+		return -lcVector3(mWorldMatrix[2]);
 	}
 
 	void SaveLDraw(QTextStream& Stream) const;
@@ -383,7 +287,7 @@ public:
 	void CompareBoundingBox(lcVector3& Min, lcVector3& Max);
 	void UpdatePosition(lcStep Step);
 	void MoveSelected(lcStep Step, bool AddKey, const lcVector3& Distance);
-	void Rotate(lcStep Step, bool AddKey, const lcMatrix33& RotationMatrix, const lcMatrix33& RotationFrame);
+	void Rotate(lcStep Step, bool AddKey, const lcMatrix33& RotationMatrix, const lcVector3& Center, const lcMatrix33& RotationFrame);
 	bool Setup(int LightIndex);
 	void CreateName(const lcArray<lcLight*>& Lights);
 	void UpdateLight(lcStep Step, lcLightProperties Props, int Property);
@@ -405,10 +309,7 @@ public:
 		return props;
 	}
 
-	lcMatrix44 mWorldLight;
-	lcVector3 mPosition;
-	lcVector3 mTargetPosition;
-	lcVector3 mUpVector;
+	lcMatrix44 mWorldMatrix;
 
 	lcVector3 mAttenuation;
 	lcVector2 mLightFactor;
@@ -436,21 +337,20 @@ protected:
 	void DrawDirectionalLight(lcContext* Context) const;
 	void DrawAreaLight(lcContext* Context) const;
 
-	float SetupLightMatrix(lcContext* Context) const;
+	void SetupLightMatrix(lcContext* Context) const;
 	void DrawSphere(lcContext* Context, float Radius) const;
 	void DrawCylinder(lcContext* Context, float Radius, float Height) const;
 	void DrawTarget(lcContext* Context, float TargetDistance) const;
 	void DrawCone(lcContext* Context, float TargetDistance) const;
 
-	quint32 mState;
+	quint32 mState = 0;
 	lcLightType mLightType;
 	lcVector3 mColor = lcVector3(1.0f, 1.0f, 1.0f);
 	bool mCastShadow = true;
 
 	int mLightShape;
 	lcObjectKeyArray<lcVector3> mPositionKeys;
-	lcObjectKeyArray<lcVector3> mTargetPositionKeys;
-	lcObjectKeyArray<lcVector3> mUpVectorKeys;
+	lcObjectKeyArray<lcMatrix33> mRotationKeys;
 	lcObjectKeyArray<lcVector3> mColorKeys;
 
 	lcObjectKeyArray<lcVector3> mAttenuationKeys;

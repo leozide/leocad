@@ -423,11 +423,11 @@ protected:
 	bool mAllowEmpty;
 };
 
-QWidget *lcQPropertiesTree::createEditor(QWidget *parent, QTreeWidgetItem *item) const
+QWidget* lcQPropertiesTree::createEditor(QWidget* Parent, QTreeWidgetItem* Item) const
 {
-	PropertyType propertyType = (PropertyType)item->data(0, lcQPropertiesTree::PropertyTypeRole).toInt();
+	lcQPropertiesTree::PropertyType PropertyType = (lcQPropertiesTree::PropertyType)Item->data(0, lcQPropertiesTree::PropertyTypeRole).toInt();
 
-	switch (propertyType)
+	switch (PropertyType)
 	{
 	case PropertyGroup:
 	case PropertyBool:
@@ -435,65 +435,40 @@ QWidget *lcQPropertiesTree::createEditor(QWidget *parent, QTreeWidgetItem *item)
 
 	case PropertyFloat:
 		{
-			QLineEdit *editor = new QLineEdit(parent);
-			float value = item->data(0, PropertyValueRole).toFloat();
+			QLineEdit* Editor = new QLineEdit(Parent);
+			float Value = Item->data(0, PropertyValueRole).toFloat();
+			QPointF Range = Item->data(0, PropertyRangeRole).toPointF();
 
-			editor->setValidator(new QDoubleValidator(editor));
-			editor->setText(lcFormatValueLocalized(value));
+			Editor->setValidator(Range.isNull() ? new QDoubleValidator(Editor) : new QDoubleValidator(Range.x(), Range.y(), 1, Editor));
+			Editor->setText(lcFormatValueLocalized(Value));
 
-			connect(editor, SIGNAL(returnPressed()), this, SLOT(slotReturnPressed()));
+			connect(Editor, &QLineEdit::returnPressed, this, &lcQPropertiesTree::slotReturnPressed);
 
-			return editor;
+			return Editor;
 		}
-
-	case PropertyFloatLightSpotSize:
-		{
-			QLineEdit *editor = new QLineEdit(parent);
-			float value = item->data(0, PropertyValueRole).toFloat();
-
-			editor->setValidator(new QDoubleValidator(1.0, 180.0,1, editor));
-			editor->setText(lcFormatValueLocalized(value));
-			editor->setToolTip(tr("Angle of the spotlight beam."));
-
-			connect(editor, SIGNAL(returnPressed()), this, SLOT(slotReturnPressed()));
-			return editor;
-		}
-
-	case PropertyFloatLightSpotFalloff:
-	{
-			QLineEdit *editor = new QLineEdit(parent);
-			float value = item->data(0, PropertyValueRole).toFloat();
-
-			editor->setValidator(new QDoubleValidator(1.0, 90.0,1, editor));
-			editor->setText(lcFormatValueLocalized(value));
-			editor->setToolTip(tr("Angle of the spotlight beam beteeen the cone edge and center line."));
-
-			connect(editor, SIGNAL(returnPressed()), this, SLOT(slotReturnPressed()));
-			return editor;
-	}
 
 	case PropertyFloatReadOnly:
 		return nullptr;
 
 	case PropertyStep:
 		{
-			QLineEdit* Editor = new QLineEdit(parent);
+			QLineEdit* Editor = new QLineEdit(Parent);
 
-			lcStep Value = item->data(0, PropertyValueRole).toUInt();
+			lcStep Value = Item->data(0, PropertyValueRole).toUInt();
 			lcStep Show = partShow->data(0, PropertyValueRole).toUInt();
 			lcStep Hide = partHide->data(0, PropertyValueRole).toUInt();
 
 			if (Show && Hide)
 			{
-				if (item == partShow)
+				if (Item == partShow)
 					Editor->setValidator(new lcStepValidator(1, Hide - 1, false));
 				else
 					Editor->setValidator(new lcStepValidator(Show + 1, LC_STEP_MAX, true));
 			}
 			else
-				Editor->setValidator(new lcStepValidator(1, LC_STEP_MAX, item == partHide));
+				Editor->setValidator(new lcStepValidator(1, LC_STEP_MAX, Item == partHide));
 
-			if (item != partHide || Value != LC_STEP_MAX)
+			if (Item != partHide || Value != LC_STEP_MAX)
 				Editor->setText(QString::number(Value));
 
 			connect(Editor, SIGNAL(returnPressed()), this, SLOT(slotReturnPressed()));
@@ -503,8 +478,8 @@ QWidget *lcQPropertiesTree::createEditor(QWidget *parent, QTreeWidgetItem *item)
 
 	case PropertyString:
 		{
-			QLineEdit *editor = new QLineEdit(parent);
-			QString value = item->data(0, PropertyValueRole).toString();
+			QLineEdit *editor = new QLineEdit(Parent);
+			QString value = Item->data(0, PropertyValueRole).toString();
 
 			editor->setText(value);
 
@@ -515,19 +490,19 @@ QWidget *lcQPropertiesTree::createEditor(QWidget *parent, QTreeWidgetItem *item)
 
 	case PropertyStringList:
 	{
-		QComboBox* editor = new QComboBox(parent);
+		QComboBox* editor = new QComboBox(Parent);
 
-		if (item == mCameraProjectionItem)
+		if (Item == mCameraProjectionItem)
 		{
 			editor->addItems( { tr("Perspective"), tr("Orthographic") } );
 		}
-		else if (item == mLightTypeItem)
+		else if (Item == mLightTypeItem)
 		{
 			for (int LightTypeIndex = 0; LightTypeIndex < static_cast<int>(lcLightType::Count); LightTypeIndex++)
 				editor->addItem(lcLight::GetLightTypeString(static_cast<lcLightType>(LightTypeIndex)));
 		}
 
-		int value = item->data(0, PropertyValueRole).toInt();
+		int value = Item->data(0, PropertyValueRole).toInt();
 		editor->setCurrentIndex(value);
 
 		connect(editor, SIGNAL(currentIndexChanged(int)), this, SLOT(slotSetValue(int)));
@@ -537,7 +512,7 @@ QWidget *lcQPropertiesTree::createEditor(QWidget *parent, QTreeWidgetItem *item)
 
 	case PropertyLightFormat:
 		{
-			QComboBox *editor = new QComboBox(parent);
+			QComboBox *editor = new QComboBox(Parent);
 
 			editor->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
 			editor->setMinimumContentsLength(1);
@@ -546,7 +521,7 @@ QWidget *lcQPropertiesTree::createEditor(QWidget *parent, QTreeWidgetItem *item)
 			for (int i = 0; i < formats.size(); i++)
 				editor->addItem(formats.at(i), QVariant::fromValue(i));
 
-			int value = item->data(0, PropertyValueRole).toInt();
+			int value = Item->data(0, PropertyValueRole).toInt();
 			editor->setCurrentIndex(value);
 
 			connect(editor, SIGNAL(currentIndexChanged(int)), this, SLOT(slotSetValue(int)));
@@ -556,7 +531,7 @@ QWidget *lcQPropertiesTree::createEditor(QWidget *parent, QTreeWidgetItem *item)
 
 	case PropertyLightShape:
 		{
-			QComboBox *editor = new QComboBox(parent);
+			QComboBox *editor = new QComboBox(Parent);
 
 			editor->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
 			editor->setMinimumContentsLength(1);
@@ -565,7 +540,7 @@ QWidget *lcQPropertiesTree::createEditor(QWidget *parent, QTreeWidgetItem *item)
 			for (int i = 0; i < shapes.size(); i++)
 				editor->addItem(shapes.at(i), QVariant::fromValue(i));
 
-			int value = item->data(0, PropertyValueRole).toInt();
+			int value = Item->data(0, PropertyValueRole).toInt();
 			editor->setCurrentIndex(value);
 
 			connect(editor, SIGNAL(currentIndexChanged(int)), this, SLOT(slotSetValue(int)));
@@ -575,8 +550,8 @@ QWidget *lcQPropertiesTree::createEditor(QWidget *parent, QTreeWidgetItem *item)
 
 	case PropertyColor:
 		{
-			QPushButton *Editor = new QPushButton(parent);
-			QColor Value = item->data(0, PropertyValueRole).value<QColor>();
+			QPushButton *Editor = new QPushButton(Parent);
+			QColor Value = Item->data(0, PropertyValueRole).value<QColor>();
 
 			UpdateLightColorEditor(Editor, Value);
 
@@ -587,8 +562,8 @@ QWidget *lcQPropertiesTree::createEditor(QWidget *parent, QTreeWidgetItem *item)
 
 	case PropertyPieceColor:
 		{
-			QPushButton *editor = new QPushButton(parent);
-			int value = item->data(0, PropertyValueRole).toInt();
+			QPushButton *editor = new QPushButton(Parent);
+			int value = Item->data(0, PropertyValueRole).toInt();
 
 			updateColorEditor(editor, value);
 
@@ -599,7 +574,7 @@ QWidget *lcQPropertiesTree::createEditor(QWidget *parent, QTreeWidgetItem *item)
 
 	case PropertyPart:
 		{
-			QComboBox *editor = new QComboBox(parent);
+			QComboBox *editor = new QComboBox(Parent);
 
 			editor->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
 			editor->setMinimumContentsLength(1);
@@ -627,7 +602,7 @@ QWidget *lcQPropertiesTree::createEditor(QWidget *parent, QTreeWidgetItem *item)
 			for (PieceInfo* Info : SortedPieces)
 				editor->addItem(Info->m_strDescription, QVariant::fromValue((void*)Info));
 
-			PieceInfo *info = (PieceInfo*)item->data(0, PropertyValueRole).value<void*>();
+			PieceInfo *info = (PieceInfo*)Item->data(0, PropertyValueRole).value<void*>();
 			editor->setCurrentIndex(editor->findData(QVariant::fromValue((void*)info)));
 
 			connect(editor, SIGNAL(currentIndexChanged(int)), this, SLOT(slotSetValue(int)));
@@ -900,6 +875,24 @@ void lcQPropertiesTree::slotReturnPressed()
 //
 //				Model->MoveSelectedObjects(Distance, Distance, false, false, true, true);
 			}
+			else if (Item == mLightSpotConeAngleItem)
+			{
+				float Value = lcParseValueLocalized(Editor->text());
+
+				Model->SetSpotLightConeAngle(Light, Value);
+			}
+			else if (Item == mLightSpotPenumbraAngleItem)
+			{
+				float Value = lcParseValueLocalized(Editor->text());
+
+				Model->SetSpotLightPenumbraAngle(Light, Value);
+			}
+			else if (Item == mLightSpotTightnessItem)
+			{
+				float Value = lcParseValueLocalized(Editor->text());
+
+				Model->SetSpotLightTightness(Light, Value);
+			}
 			else if (Item == lightFactorA || Item == lightFactorB)
 			{
 				float Value = lcParseValueLocalized(Editor->text());
@@ -933,25 +926,6 @@ void lcQPropertiesTree::slotReturnPressed()
 				Props.mSpotCutoff = lcParseValueLocalized(Editor->text());
 
 				Model->UpdateLight(Light, Props, LC_LIGHT_CUTOFF);
-			}
-			else if (Item == lightSpotSize)
-			{
-				Props.mSpotSize = lcParseValueLocalized(Editor->text());
-
-				Model->UpdateLight(Light, Props, LC_LIGHT_SPOT_SIZE);
-			}
-
-			else if (Item == lightSpotFalloff)
-			{
-				Props.mSpotFalloff = lcParseValueLocalized(Editor->text());
-
-				Model->UpdateLight(Light, Props, LC_LIGHT_SPOT_FALLOFF);
-			}
-			else if (Item == lightSpotTightness)
-			{
-				Props.mSpotTightness = lcParseValueLocalized(Editor->text());
-
-				Model->UpdateLight(Light, Props, LC_LIGHT_SPOT_TIGHTNESS);
 			}
 			else if (Item == lightAreaGridRows || Item == lightAreaGridColumns)
 			{
@@ -1195,15 +1169,15 @@ void lcQPropertiesTree::SetEmpty()
 	lightFactorA = nullptr;
 	lightFactorB = nullptr;
 	mLightNameItem = nullptr;
-	lightSpotSize = nullptr;
+	mLightSpotConeAngleItem = nullptr;
+	mLightSpotPenumbraAngleItem = nullptr;
+	mLightSpotTightnessItem = nullptr;
 	lightShape = nullptr;
 	lightFormat = nullptr;
 	mLightCastShadowItem = nullptr;
 	lightAreaGridRows = nullptr;
 	lightAreaGridColumns = nullptr;
-	lightSpotFalloff = nullptr;
-	lightSpotTightness = nullptr;
-
+	
 	mWidgetMode = LC_PROPERTY_WIDGET_EMPTY;
 	mFocus = nullptr;
 }
@@ -1437,13 +1411,10 @@ void lcQPropertiesTree::SetLight(lcObject* Focus)
 	QString Name = tr("Light");
 	QString ExponentLabel = tr("Exponent");
 	QString FactorALabel = QLatin1String("FactorA");
-	QString Format, Shape, SpotSizeToolTip, ExponentToolTip, FactorAToolTip, FactorBToolTip;
+	QString Format, Shape, ExponentToolTip, FactorAToolTip, FactorBToolTip;
 	lcLightType LightType = lcLightType::Point;
 	lcLightShape ShapeIndex = LC_LIGHT_SHAPE_UNDEFINED;
 	int FormatIndex = 0;
-	float SpotSize = 0.0f;
-	float SpotFalloff = 0.0f;
-	float SpotTightness = 0.0f;
 	float Diffuse = 0.0f;
 	float Specular = 0.0f;
 	float Cutoff = 0.0f;
@@ -1452,10 +1423,10 @@ void lcQPropertiesTree::SetLight(lcObject* Focus)
 	bool POVRayLight = false;
 	bool CastShadow = true;
 	PropertyType TargetProperty = PropertyFloat;
-	PropertyType SpotSizeProperty = PropertyFloatLightSpotSize;
 	lcVector3 Position(0.0f, 0.0f, 0.0f);
 	lcVector3 Target(0.0f, 0.0f, 0.0f);
 	QColor Color(Qt::white);
+	float SpotConeAngle = 0.0f, SpotPenumbraAngle = 0.0f, SpotTightness = 0.0f;
 	lcVector2 Factor(0.0f, 0.0f);
 	lcVector2 AreaGrid(0.0f, 0.0f);
 
@@ -1471,6 +1442,9 @@ void lcQPropertiesTree::SetLight(lcObject* Focus)
 		Position = Light->GetPosition();
 //		Target = Light->mTargetPosition;
 		Color = lcQColorFromVector3(Light->GetColor());
+		SpotConeAngle = Light->GetSpotConeAngle();
+		SpotPenumbraAngle = Light->GetSpotPenumbraAngle();
+
 		Factor = Light->mLightFactor;
 		LightType = Light->GetLightType();
 
@@ -1489,15 +1463,11 @@ void lcQPropertiesTree::SetLight(lcObject* Focus)
 			{
 				FactorALabel = tr("Radius (°)");
 				FactorAToolTip = tr("The angle between the \"hot-spot\" edge at the beam center and the center line.");
-				SpotSizeToolTip = tr("Angle of the spotlight beam - Read only.");
-				Factor[0] = Light->mSpotSize - Light->mSpotFalloff;
-				SpotSizeProperty = PropertyFloatReadOnly;
 			}
 			else
 			{
 				FactorALabel = tr("Radius (m)");
 				FactorAToolTip = tr("Shadow soft size - Light size in metres for shadow sampling.");
-				SpotSizeToolTip = tr("Angle of the spotlight beam.");
 			}
 			break;
 		case lcLightType::Directional:
@@ -1564,9 +1534,7 @@ void lcQPropertiesTree::SetLight(lcObject* Focus)
 		Cutoff = Light->mSpotCutoff;
 		EnableCutoff = Light->mEnableCutoff;
 		TargetProperty = LightType != lcLightType::Point ? PropertyFloat : PropertyFloatReadOnly;
-		SpotSize = Light->mSpotSize;
-		SpotFalloff = Light->mSpotFalloff;
-		SpotTightness = Light->mSpotTightness;
+		SpotTightness = Light->GetSpotTightness();
 		AreaGrid = Light->mAreaGrid;
 	}
 
@@ -1581,25 +1549,24 @@ void lcQPropertiesTree::SetLight(lcObject* Focus)
 		mLightColorItem = addProperty(mLightAttributesItem, tr("Color"), PropertyColor);
 		mLightCastShadowItem = addProperty(mLightAttributesItem, tr("Cast Shadows"), PropertyBool);
 
+		if (LightType == lcLightType::Spot)
+		{
+			mLightSpotConeAngleItem = addProperty(mLightAttributesItem, tr("Spot Cone Angle"), PropertyFloat);
+			mLightSpotConeAngleItem->setToolTip(1, tr("The angle (in degrees) of the spot light's beam."));
+
+			mLightSpotPenumbraAngleItem = addProperty(mLightAttributesItem, tr("Spot Penumbra Angle"), PropertyFloat);
+			mLightSpotPenumbraAngleItem->setToolTip(1, tr("The angle (in degrees) over which the intensity of the spot light falls off to zero."));
+
+			mLightSpotTightnessItem = addProperty(mLightAttributesItem, tr("Spot Tightness"), PropertyFloat);
+			mLightSpotTightnessItem->setToolTip(1, tr("Additional exponential spotlight edge softening (POV-Ray only)."));
+		}
+
 		lightExponent = addProperty(mLightAttributesItem, ExponentLabel, PropertyFloat);
 
 		if ((LightType == lcLightType::Point || LightType == lcLightType::Directional) && !POVRayLight)
 			lightFactorA = addProperty(mLightAttributesItem, FactorALabel, PropertyFloat);
 
-		if (LightType == lcLightType::Spot)
-		{
-			lightSpotSize = addProperty(mLightAttributesItem, tr("Spot Size (°)"), SpotSizeProperty);
-			lightFactorA = addProperty(mLightAttributesItem, FactorALabel, PropertyFloatLightSpotSize);
-
-			if (!POVRayLight)
-				lightFactorB = addProperty(mLightAttributesItem, tr("Spot Blend"), PropertyFloat);
-			else
-			{
-				lightSpotFalloff = addProperty(mLightAttributesItem, tr("Spot Falloff (°)"), PropertyFloatLightSpotFalloff);
-				lightSpotTightness = addProperty(mLightAttributesItem, tr("Spot Tightness"), PropertyFloat);
-			}
-		}
-		else if (LightType == lcLightType::Area)
+		if (LightType == lcLightType::Area)
 		{
 			lightShape = addProperty(mLightAttributesItem, tr("Shape"), PropertyLightShape);
 			lightFactorA = addProperty(mLightAttributesItem, FactorALabel, PropertyFloat);
@@ -1735,30 +1702,17 @@ void lcQPropertiesTree::SetLight(lcObject* Focus)
 	}
 	else if (LightType == lcLightType::Spot)
 	{
-		lightSpotSize->setText(1, lcFormatValueLocalized(SpotSize));
-		lightSpotSize->setData(0, PropertyValueRole, SpotSize);
-		lightSpotSize->setToolTip(1, SpotSizeToolTip);
+		mLightSpotConeAngleItem->setText(1, lcFormatValueLocalized(SpotConeAngle));
+		mLightSpotConeAngleItem->setData(0, PropertyValueRole, SpotConeAngle);
+		mLightSpotConeAngleItem->setData(0, PropertyRangeRole, QPointF(1.0, 180.0));
 
-		lightFactorA->setText(1, lcFormatValueLocalized(Factor[0]));
-		lightFactorA->setData(0, PropertyValueRole, Factor[0]);
-		lightFactorA->setToolTip(1, FactorAToolTip);
+		mLightSpotPenumbraAngleItem->setText(1, lcFormatValueLocalized(SpotPenumbraAngle));
+		mLightSpotPenumbraAngleItem->setData(0, PropertyValueRole, SpotPenumbraAngle);
+		mLightSpotPenumbraAngleItem->setData(0, PropertyRangeRole, QPointF(0.0, 180.0));
 
-		if (!POVRayLight)
-		{
-			lightFactorB->setText(1, lcFormatValueLocalized(Factor[1]));
-			lightFactorB->setData(0, PropertyValueRole, Factor[1]);
-			lightFactorB->setToolTip(1, FactorBToolTip);
-		}
-		else
-		{
-			lightSpotFalloff->setText(1, lcFormatValueLocalized(SpotFalloff));
-			lightSpotFalloff->setData(0, PropertyValueRole, SpotFalloff);
-			lightSpotFalloff->setToolTip(1, tr("The angle between the spot beam edge and center line."));
-
-			lightSpotTightness->setText(1, lcFormatValueLocalized(SpotTightness));
-			lightSpotTightness->setData(0, PropertyValueRole, SpotTightness);
-			lightSpotTightness->setToolTip(1, tr("Additional exponential spotlight edge softening."));
-		}
+		mLightSpotTightnessItem->setText(1, lcFormatValueLocalized(SpotTightness));
+		mLightSpotTightnessItem->setData(0, PropertyValueRole, SpotTightness);
+		mLightSpotTightnessItem->setData(0, PropertyRangeRole, QPointF(0.0, 100.0));
 	}
 
 	if (!POVRayLight)

@@ -2185,8 +2185,8 @@ bool Project::ExportPOVRay(const QString& FileName)
 			switch(LightType)
 			{
 			case lcLightType::Spot:
-				SpotFalloff = Light->mSpotFalloff;
-				SpotRadius = Light->mSpotSize - SpotFalloff;
+				SpotFalloff = Light->GetSpotConeAngle() / 2.0f;
+				SpotRadius = SpotFalloff - Light->GetSpotPenumbraAngle();
 				break;
 			case lcLightType::Area:
 				AreaCircle = Light->GetLightShape() == LC_LIGHT_SHAPE_DISK ? 1 : 0;

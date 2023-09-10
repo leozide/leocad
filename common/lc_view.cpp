@@ -1597,7 +1597,7 @@ lcTrackTool lcView::GetOverrideTrackTool(Qt::MouseButton Button) const
 	{
 	    lcTrackTool::Insert,           // lcTool::Insert
 	    lcTrackTool::PointLight,       // lcTool::PointLight
-		lcTrackTool::Spotlight,        // lcTool::Spotlight
+		lcTrackTool::SpotLight,        // lcTool::SpotLight
 		lcTrackTool::DirectionalLight, // lcTool::DirectionalLight
 		lcTrackTool::AreaLight,        // lcTool::AreaLight
 		lcTrackTool::Camera,           // lcTool::Camera
@@ -1870,7 +1870,7 @@ lcCursor lcView::GetCursor() const
 		lcCursor::Select,           // lcTrackTool::None
 		lcCursor::Brick,            // lcTrackTool::Insert
 		lcCursor::PointLight,       // lcTrackTool::PointLight
-		lcCursor::Spotlight,        // lcTrackTool::Spotlight
+		lcCursor::SpotLight,        // lcTrackTool::SpotLight
 		lcCursor::DirectionalLight, // lcTrackTool::DirectionalLight
 		lcCursor::AreaLight,        // lcTrackTool::AreaLight
 		lcCursor::Camera,           // lcTrackTool::Camera
@@ -1926,7 +1926,7 @@ void lcView::SetCursor(lcCursor CursorType)
 		{  0,  0, "" },                                 // lcCursor::Default
 		{  8,  3, ":/resources/cursor_insert" },        // lcCursor::Brick
 		{ 15, 15, ":/resources/cursor_light" },         // lcCursor::PointLight
-		{  7, 10, ":/resources/cursor_spotlight" },     // lcCursor::Spotlight
+		{  7, 10, ":/resources/cursor_spotlight" },     // lcCursor::SpotLight
 		{ 15, 15, ":/resources/cursor_sunlight" },      // lcCursor::DirectionalLight
 		{ 15, 15, ":/resources/cursor_arealight" },     // lcCursor::AreaLight
 		{ 15,  9, ":/resources/cursor_camera" },        // lcCursor::Camera
@@ -1979,7 +1979,7 @@ lcTool lcView::GetCurrentTool() const
 		lcTool::Select,           // lcTrackTool::None
 		lcTool::Insert,           // lcTrackTool::Insert
 		lcTool::PointLight,       // lcTrackTool::PointLight
-		lcTool::Spotlight,        // lcTrackTool::Spotlight
+		lcTool::SpotLight,        // lcTrackTool::SpotLight
 		lcTool::DirectionalLight, // lcTrackTool::DirectionalLight
 		lcTool::AreaLight,        // lcTrackTool::AreaLight
 		lcTool::Camera,           // lcTrackTool::Camera
@@ -2045,8 +2045,8 @@ void lcView::UpdateTrackTool()
 		NewTrackTool = lcTrackTool::PointLight;
 		break;
 
-	case lcTool::Spotlight:
-		NewTrackTool = lcTrackTool::Spotlight;
+	case lcTool::SpotLight:
+		NewTrackTool = lcTrackTool::SpotLight;
 		break;
 
 	case lcTool::DirectionalLight:
@@ -2276,7 +2276,7 @@ void lcView::StartTracking(lcTrackButton TrackButton)
 	{
 		case lcTool::Insert:
 		case lcTool::PointLight:
-		case lcTool::Spotlight:
+		case lcTool::SpotLight:
 		case lcTool::DirectionalLight:
 		case lcTool::AreaLight:
 			break;
@@ -2337,7 +2337,7 @@ void lcView::StopTracking(bool Accept)
 	case lcTool::PointLight:
 		break;
 
-	case lcTool::Spotlight:
+	case lcTool::SpotLight:
 	case lcTool::DirectionalLight:
 	case lcTool::AreaLight:
 	case lcTool::Camera:
@@ -2469,7 +2469,7 @@ void lcView::OnButtonDown(lcTrackButton TrackButton)
 		AddLight(lcLightType::Point);
 		break;
 
-	case lcTrackTool::Spotlight:
+	case lcTrackTool::SpotLight:
 		AddLight(lcLightType::Spot);
 		break;
 
@@ -2715,7 +2715,7 @@ void lcView::OnMouseMove()
 	case lcTrackTool::None:
 	case lcTrackTool::Insert:
 	case lcTrackTool::PointLight:
-	case lcTrackTool::Spotlight:
+	case lcTrackTool::SpotLight:
 	case lcTrackTool::DirectionalLight:
 	case lcTrackTool::AreaLight:
 		break;

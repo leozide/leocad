@@ -3389,7 +3389,7 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		break;
 
 	case LC_EDIT_ACTION_SPOTLIGHT:
-		SetTool(lcTool::Spotlight);
+		SetTool(lcTool::SpotLight);
 		break;
 
 	case LC_EDIT_ACTION_CAMERA:

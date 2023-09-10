@@ -301,7 +301,7 @@ enum class lcTool
 {
 	Insert,
 	PointLight,
-	Spotlight,
+	SpotLight,
 	DirectionalLight,
 	AreaLight,
 	Camera,

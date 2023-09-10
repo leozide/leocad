@@ -370,6 +370,9 @@ public:
 
 	void SetLightType(lcLight* Light, lcLightType LightType);
 	void SetLightColor(lcLight* Light, const lcVector3& Color);
+	void SetSpotLightConeAngle(lcLight* Light, float Angle);
+	void SetSpotLightPenumbraAngle(lcLight* Light, float Angle);
+	void SetSpotLightTightness(lcLight* Light, float Tightness);
 	void SetLightCastShadow(lcLight* Light, bool CastShadow);
 	void SetLightName(lcLight* Light, const QString& Name);
 	void UpdateLight(lcLight* Light, const lcLightProperties Props, int Property);

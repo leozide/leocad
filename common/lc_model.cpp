@@ -3184,6 +3184,45 @@ void lcModel::SetLightColor(lcLight* Light, const lcVector3& Color)
 	UpdateAllViews();
 }
 
+void lcModel::SetSpotLightConeAngle(lcLight* Light, float Angle)
+{
+	if (Light->GetSpotConeAngle() == Angle)
+		return;
+
+	Light->SetSpotConeAngle(Angle, mCurrentStep, gMainWindow->GetAddKeys());
+	Light->UpdatePosition(mCurrentStep);
+
+	SaveCheckpoint(tr("Changing Spot Light Cone Angle"));
+	gMainWindow->UpdateSelectedObjects(false);
+	UpdateAllViews();
+}
+
+void lcModel::SetSpotLightPenumbraAngle(lcLight* Light, float Angle)
+{
+	if (Light->GetSpotPenumbraAngle() == Angle)
+		return;
+
+	Light->SetSpotPenumbraAngle(Angle, mCurrentStep, gMainWindow->GetAddKeys());
+	Light->UpdatePosition(mCurrentStep);
+
+	SaveCheckpoint(tr("Changing Spot Light Penumbra Angle"));
+	gMainWindow->UpdateSelectedObjects(false);
+	UpdateAllViews();
+}
+
+void lcModel::SetSpotLightTightness(lcLight* Light, float Tightness)
+{
+	if (Light->GetSpotTightness() == Tightness)
+		return;
+
+	Light->SetSpotTightness(Tightness, mCurrentStep, gMainWindow->GetAddKeys());
+	Light->UpdatePosition(mCurrentStep);
+
+	SaveCheckpoint(tr("Changing Spot Light Tightness"));
+	gMainWindow->UpdateSelectedObjects(false);
+	UpdateAllViews();
+}
+
 void lcModel::SetLightCastShadow(lcLight* Light, bool CastShadow)
 {
 	if (Light->GetCastShadow() == CastShadow)
@@ -4179,12 +4218,9 @@ void lcModel::EndMouseTool(lcTool Tool, bool Accept)
 	{
 	case lcTool::Insert:
 	case lcTool::PointLight:
+	case lcTool::SpotLight:
 	case lcTool::DirectionalLight:
 	case lcTool::AreaLight:
-		break;
-
-	case lcTool::Spotlight:
-		SaveCheckpoint(tr("New Spotlight"));
 		break;
 
 	case lcTool::Camera:

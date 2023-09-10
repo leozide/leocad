@@ -44,9 +44,6 @@ enum lcLightProperty
 	LC_LIGHT_SPECULAR,
 	LC_LIGHT_EXPONENT,
 	LC_LIGHT_AREA_GRID,
-	LC_LIGHT_SPOT_SIZE,
-	LC_LIGHT_SPOT_FALLOFF,
-	LC_LIGHT_SPOT_TIGHTNESS,
 	LC_LIGHT_CUTOFF,
 	LC_LIGHT_USE_CUTOFF,
 	LC_LIGHT_POVRAY
@@ -60,9 +57,6 @@ struct lcLightProperties
 	float     mLightSpecular;
 	float     mSpotExponent;
 	float     mSpotCutoff;
-	float     mSpotFalloff;
-	float     mSpotTightness;
-	float     mSpotSize;
 	bool      mEnableCutoff;
 	bool      mPOVRayLight;
 	int       mLightShape;
@@ -86,7 +80,7 @@ public:
 		return mLightType == lcLightType::Point;
 	}
 
-	bool IsSpotlight() const
+	bool IsSpotLight() const
 	{
 		return mLightType == lcLightType::Spot;
 	}
@@ -267,6 +261,27 @@ public:
 		return mColor;
 	}
 
+	void SetSpotConeAngle(float Angle, lcStep Step, bool AddKey);
+
+	float GetSpotConeAngle() const
+	{
+		return mSpotConeAngle;
+	}
+
+	void SetSpotPenumbraAngle(float Angle, lcStep Step, bool AddKey);
+
+	float GetSpotPenumbraAngle() const
+	{
+		return mSpotPenumbraAngle;
+	}
+
+	void SetSpotTightness(float Angle, lcStep Step, bool AddKey);
+
+	float GetSpotTightness() const
+	{
+		return mSpotTightness;
+	}
+
 	void SetCastShadow(bool CastShadow);
 
 	bool GetCastShadow() const
@@ -299,9 +314,6 @@ public:
 		props.mLightSpecular = mLightSpecular;
 		props.mSpotExponent = mSpotExponent;
 		props.mSpotCutoff = mSpotCutoff;
-		props.mSpotFalloff = mSpotFalloff;
-		props.mSpotTightness = mSpotTightness;
-		props.mSpotSize = mSpotSize;
 		props.mPOVRayLight = mPOVRayLight;
 		props.mEnableCutoff = mEnableCutoff;
 		props.mAreaGrid = mAreaGrid;
@@ -323,10 +335,7 @@ public:
 	bool mPOVRayLight;
 	float mLightDiffuse;
 	float mLightSpecular;
-	float mSpotSize;
 	float mSpotCutoff;
-	float mSpotFalloff;
-	float mSpotTightness;
 	float mSpotExponent;
 	float mPOVRayExponent;
 	QString mName;
@@ -345,22 +354,25 @@ protected:
 
 	quint32 mState = 0;
 	lcLightType mLightType;
-	lcVector3 mColor = lcVector3(1.0f, 1.0f, 1.0f);
 	bool mCastShadow = true;
+	lcVector3 mColor = lcVector3(1.0f, 1.0f, 1.0f);
+	float mSpotConeAngle = 80.0f;
+	float mSpotPenumbraAngle = 0.0f;
+	float mSpotTightness = 0.0f;
 
 	int mLightShape;
 	lcObjectKeyArray<lcVector3> mPositionKeys;
 	lcObjectKeyArray<lcMatrix33> mRotationKeys;
 	lcObjectKeyArray<lcVector3> mColorKeys;
+	lcObjectKeyArray<float> mSpotConeAngleKeys;
+	lcObjectKeyArray<float> mSpotPenumbraAngleKeys;
+	lcObjectKeyArray<float> mSpotTightnessKeys;
 
 	lcObjectKeyArray<lcVector3> mAttenuationKeys;
 	lcObjectKeyArray<lcVector2> mLightFactorKeys;
 	lcObjectKeyArray<lcVector2> mAreaGridKeys;
 	lcObjectKeyArray<float> mLightSpecularKeys;
 	lcObjectKeyArray<float> mLightDiffuseKeys;
-	lcObjectKeyArray<float> mSpotSizeKeys;
 	lcObjectKeyArray<float> mSpotCutoffKeys;
-	lcObjectKeyArray<float> mSpotFalloffKeys;
 	lcObjectKeyArray<float> mSpotExponentKeys;
-	lcObjectKeyArray<float> mSpotTightnessKeys;
 };

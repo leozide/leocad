@@ -3163,7 +3163,9 @@ void lcModel::SetCameraName(lcCamera* Camera, const QString& Name)
 
 void lcModel::SetLightType(lcLight* Light, lcLightType LightType)
 {
-	Light->SetLightType(LightType);
+	if (!Light->SetLightType(LightType))
+		return;
+
 	Light->UpdatePosition(mCurrentStep);
 
 	SaveCheckpoint(tr("Changing Light Type"));
@@ -3173,9 +3175,6 @@ void lcModel::SetLightType(lcLight* Light, lcLightType LightType)
 
 void lcModel::SetLightColor(lcLight* Light, const lcVector3& Color)
 {
-	if (Light->GetColor() == Color)
-		return;
-
 	Light->SetColor(Color, mCurrentStep, gMainWindow->GetAddKeys());
 	Light->UpdatePosition(mCurrentStep);
 
@@ -3186,9 +3185,6 @@ void lcModel::SetLightColor(lcLight* Light, const lcVector3& Color)
 
 void lcModel::SetSpotLightConeAngle(lcLight* Light, float Angle)
 {
-	if (Light->GetSpotConeAngle() == Angle)
-		return;
-
 	Light->SetSpotConeAngle(Angle, mCurrentStep, gMainWindow->GetAddKeys());
 	Light->UpdatePosition(mCurrentStep);
 
@@ -3199,9 +3195,6 @@ void lcModel::SetSpotLightConeAngle(lcLight* Light, float Angle)
 
 void lcModel::SetSpotLightPenumbraAngle(lcLight* Light, float Angle)
 {
-	if (Light->GetSpotPenumbraAngle() == Angle)
-		return;
-
 	Light->SetSpotPenumbraAngle(Angle, mCurrentStep, gMainWindow->GetAddKeys());
 	Light->UpdatePosition(mCurrentStep);
 
@@ -3212,9 +3205,6 @@ void lcModel::SetSpotLightPenumbraAngle(lcLight* Light, float Angle)
 
 void lcModel::SetSpotLightTightness(lcLight* Light, float Tightness)
 {
-	if (Light->GetSpotTightness() == Tightness)
-		return;
-
 	Light->SetSpotTightness(Tightness, mCurrentStep, gMainWindow->GetAddKeys());
 	Light->UpdatePosition(mCurrentStep);
 
@@ -3223,12 +3213,33 @@ void lcModel::SetSpotLightTightness(lcLight* Light, float Tightness)
 	UpdateAllViews();
 }
 
-void lcModel::SetLightCastShadow(lcLight* Light, bool CastShadow)
+void lcModel::SetAreaLightShape(lcLight* Light, lcLightAreaShape LightAreaShape)
 {
-	if (Light->GetCastShadow() == CastShadow)
+	if (!Light->SetAreaShape(LightAreaShape))
 		return;
 
-	Light->SetCastShadow(CastShadow);
+	Light->UpdatePosition(mCurrentStep);
+
+	SaveCheckpoint(tr("Changing Area Light Shape"));
+	gMainWindow->UpdateSelectedObjects(false);
+	UpdateAllViews();
+}
+
+void lcModel::SetAreaLightSize(lcLight* Light, lcVector2 LightAreaSize)
+{
+	Light->SetAreaSize(LightAreaSize, mCurrentStep, gMainWindow->GetAddKeys());
+	Light->UpdatePosition(mCurrentStep);
+
+	SaveCheckpoint(tr("Changing Area Light Size"));
+	gMainWindow->UpdateSelectedObjects(false);
+	UpdateAllViews();
+}
+
+void lcModel::SetLightCastShadow(lcLight* Light, bool CastShadow)
+{
+	if (!Light->SetCastShadow(CastShadow))
+		return;
+
 	Light->UpdatePosition(mCurrentStep);
 
 	SaveCheckpoint(tr("Changing Light Shadow"));

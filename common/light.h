@@ -25,20 +25,17 @@ enum class lcLightType
 	Count
 };
 
-enum lcLightShape
+enum class lcLightAreaShape
 {
-	LC_LIGHT_SHAPE_UNDEFINED = -1,
-	LC_LIGHT_SHAPE_SQUARE,
-	LC_LIGHT_SHAPE_DISK,
-	LC_LIGHT_SHAPE_RECTANGLE,
-	LC_LIGHT_SHAPE_ELLIPSE
+	Rectangle,
+	Square,
+	Disk,
+	Ellipse,
+	Count
 };
 
 enum lcLightProperty
 {
-	LC_LIGHT_NONE,
-	LC_LIGHT_SHAPE,
-	LC_LIGHT_TYPE,
 	LC_LIGHT_FACTOR,
 	LC_LIGHT_DIFFUSE,
 	LC_LIGHT_SPECULAR,
@@ -59,7 +56,6 @@ struct lcLightProperties
 	float     mSpotCutoff;
 	bool      mEnableCutoff;
 	bool      mPOVRayLight;
-	int       mLightShape;
 };
 
 class lcLight : public lcObject
@@ -73,7 +69,8 @@ public:
 	lcLight& operator=(const lcLight&) = delete;
 	lcLight& operator=(lcLight&&) = delete;
 
-	static QString GetLightTypeString(lcLightType LightType);
+	static QString GetTypeString(lcLightType LightType);
+	static QString GetAreaShapeString(lcLightAreaShape LightAreaShape);
 
 	bool IsPointLight() const
 	{
@@ -100,11 +97,11 @@ public:
 		return mLightType;
 	}
 
-	void SetLightType(lcLightType LightType);
+	bool SetLightType(lcLightType LightType);
 
-	int GetLightShape() const
+	lcLightAreaShape GetLightShape() const
 	{
-		return mLightShape;
+		return mAreaShape;
 	}
 
 	bool IsSelected() const override
@@ -282,7 +279,21 @@ public:
 		return mSpotTightness;
 	}
 
-	void SetCastShadow(bool CastShadow);
+	bool SetAreaShape(lcLightAreaShape LightAreaShape);
+
+	lcLightAreaShape GetAreaShape() const
+	{
+		return mAreaShape;
+	}
+
+	void SetAreaSize(lcVector2 AreaSize, lcStep Step, bool AddKey);
+
+	lcVector2 GetAreaSize() const
+	{
+		return mAreaSize;
+	}
+
+	bool SetCastShadow(bool CastShadow);
 
 	bool GetCastShadow() const
 	{
@@ -306,6 +317,7 @@ public:
 	bool Setup(int LightIndex);
 	void CreateName(const lcArray<lcLight*>& Lights);
 	void UpdateLight(lcStep Step, lcLightProperties Props, int Property);
+
 	lcLightProperties GetLightProperties() const
 	{
 		lcLightProperties props;
@@ -317,7 +329,6 @@ public:
 		props.mPOVRayLight = mPOVRayLight;
 		props.mEnableCutoff = mEnableCutoff;
 		props.mAreaGrid = mAreaGrid;
-		props.mLightShape = mLightShape;
 		return props;
 	}
 
@@ -326,11 +337,9 @@ public:
 	lcVector3 mAttenuation;
 	lcVector2 mLightFactor;
 	lcVector2 mAreaGrid;
-	lcVector2 mAreaSize;
 	bool mAngleSet;
 	bool mSpotBlendSet;
 	bool mSpotCutoffSet;
-	bool mHeightSet;
 	bool mEnableCutoff;
 	bool mPOVRayLight;
 	float mLightDiffuse;
@@ -353,20 +362,22 @@ protected:
 	void DrawCone(lcContext* Context, float TargetDistance) const;
 
 	quint32 mState = 0;
-	lcLightType mLightType;
+	lcLightType mLightType = lcLightType::Point;
 	bool mCastShadow = true;
 	lcVector3 mColor = lcVector3(1.0f, 1.0f, 1.0f);
 	float mSpotConeAngle = 80.0f;
 	float mSpotPenumbraAngle = 0.0f;
 	float mSpotTightness = 0.0f;
+	lcLightAreaShape mAreaShape = lcLightAreaShape::Rectangle;
+	lcVector2 mAreaSize = lcVector2(200.0f, 200.0f);
 
-	int mLightShape;
 	lcObjectKeyArray<lcVector3> mPositionKeys;
 	lcObjectKeyArray<lcMatrix33> mRotationKeys;
 	lcObjectKeyArray<lcVector3> mColorKeys;
 	lcObjectKeyArray<float> mSpotConeAngleKeys;
 	lcObjectKeyArray<float> mSpotPenumbraAngleKeys;
 	lcObjectKeyArray<float> mSpotTightnessKeys;
+	lcObjectKeyArray<lcVector2> mAreaSizeKeys;
 
 	lcObjectKeyArray<lcVector3> mAttenuationKeys;
 	lcObjectKeyArray<lcVector2> mLightFactorKeys;

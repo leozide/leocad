@@ -2177,23 +2177,31 @@ bool Project::ExportPOVRay(const QString& FileName)
 			const lcVector3 LightPosition = Light->GetPosition();
 			const lcVector3 LightTarget = LightPosition + Light->GetDirection();
 			const lcVector3 LightColor = Light->GetColor();
-			const QString LightName = QString(Light->mName).replace(" ","_");
+			const QString LightName = QString(Light->mName).replace(" ", "_");
 			LightType = Light->GetLightType();
 			Shadowless = Light->GetCastShadow() ? 0 : 1;
 			Power = Light->mPOVRayExponent;
 
-			switch(LightType)
+			switch (LightType)
 			{
+			case lcLightType::Point:
+				break;
+
 			case lcLightType::Spot:
 				SpotFalloff = Light->GetSpotConeAngle() / 2.0f;
 				SpotRadius = SpotFalloff - Light->GetSpotPenumbraAngle();
 				break;
+
+			case lcLightType::Directional:
+				break;
+
 			case lcLightType::Area:
-				AreaCircle = Light->GetLightShape() == LC_LIGHT_SHAPE_DISK ? 1 : 0;
-				AreaSize = Light->mAreaSize;
+				AreaCircle = (Light->GetLightShape() == lcLightAreaShape::Disk || Light->GetLightShape() == lcLightAreaShape::Ellipse) ? 1 : 0;
+				AreaSize = Light->GetAreaSize();
 				AreaGrid = Light->mAreaGrid;
 				break;
-			default:
+
+			case lcLightType::Count:
 				break;
 			}
 

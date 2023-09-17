@@ -373,6 +373,8 @@ public:
 	void SetSpotLightConeAngle(lcLight* Light, float Angle);
 	void SetSpotLightPenumbraAngle(lcLight* Light, float Angle);
 	void SetSpotLightTightness(lcLight* Light, float Tightness);
+	void SetAreaLightShape(lcLight* Light, lcLightAreaShape LightAreaShape);
+	void SetAreaLightSize(lcLight* Light, lcVector2 LightAreaSize);
 	void SetLightCastShadow(lcLight* Light, bool CastShadow);
 	void SetLightName(lcLight* Light, const QString& Name);
 	void UpdateLight(lcLight* Light, const lcLightProperties Props, int Property);

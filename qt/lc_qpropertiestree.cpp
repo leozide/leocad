@@ -499,7 +499,7 @@ QWidget* lcQPropertiesTree::createEditor(QWidget* Parent, QTreeWidgetItem* Item)
 		else if (Item == mLightTypeItem)
 		{
 			for (int LightTypeIndex = 0; LightTypeIndex < static_cast<int>(lcLightType::Count); LightTypeIndex++)
-				editor->addItem(lcLight::GetTypeString(static_cast<lcLightType>(LightTypeIndex)));
+				editor->addItem(lcLight::GetLightTypeString(static_cast<lcLightType>(LightTypeIndex)));
 		}
 		else if (Item == mLightAreaShapeItem)
 		{
@@ -879,27 +879,19 @@ void lcQPropertiesTree::slotReturnPressed()
 
 				Model->SetSpotLightTightness(Light, Value);
 			}
-			else if (Item == mLightAreaSizeXItem)
+			else if (Item == mLightSizeXItem)
 			{
-				lcVector2 Value = Light->GetAreaSize();
+				lcVector2 Value = Light->GetSize();
 				Value[0] = lcParseValueLocalized(Editor->text());
 
-				Model->SetAreaLightSize(Light, Value);
+				Model->SetLightSize(Light, Value);
 			}
-			else if (Item == mLightAreaSizeYItem)
+			else if (Item == mLightSizeYItem)
 			{
-				lcVector2 Value = Light->GetAreaSize();
+				lcVector2 Value = Light->GetSize();
 				Value[1] = lcParseValueLocalized(Editor->text());
 
-				Model->SetAreaLightSize(Light, Value);
-			}
-			else if (Item == lightFactorA)
-			{
-				float Value = lcParseValueLocalized(Editor->text());
-				if (Item == lightFactorA)
-					Props.mLightFactor[0] = Value;
-
-				Model->UpdateLight(Light, Props, LC_LIGHT_FACTOR);
+				Model->SetLightSize(Light, Value);
 			}
 			else if (Item == lightDiffuse)
 			{
@@ -1162,14 +1154,13 @@ void lcQPropertiesTree::SetEmpty()
 	lightEnableCutoff = nullptr;
 	lightExponent = nullptr;
 	mLightTypeItem = nullptr;
-	lightFactorA = nullptr;
 	mLightNameItem = nullptr;
 	mLightSpotConeAngleItem = nullptr;
 	mLightSpotPenumbraAngleItem = nullptr;
 	mLightSpotTightnessItem = nullptr;
 	mLightAreaShapeItem = nullptr;
-	mLightAreaSizeXItem = nullptr;
-	mLightAreaSizeYItem = nullptr;
+	mLightSizeXItem = nullptr;
+	mLightSizeYItem = nullptr;
 	lightFormat = nullptr;
 	mLightCastShadowItem = nullptr;
 	lightAreaGridRows = nullptr;
@@ -1411,7 +1402,7 @@ void lcQPropertiesTree::SetLight(lcObject* Focus)
 	QString Format, ExponentToolTip, FactorAToolTip, FactorBToolTip;
 	lcLightType LightType = lcLightType::Point;
 	lcLightAreaShape LightAreaShape = lcLightAreaShape::Rectangle;
-	lcVector2 LightAreaSize(0.0f, 0.0f);
+	lcVector2 LightSize(0.0f, 0.0f);
 	int FormatIndex = 0;
 	float Diffuse = 0.0f;
 	float Specular = 0.0f;
@@ -1425,7 +1416,6 @@ void lcQPropertiesTree::SetLight(lcObject* Focus)
 	lcVector3 Target(0.0f, 0.0f, 0.0f);
 	QColor Color(Qt::white);
 	float SpotConeAngle = 0.0f, SpotPenumbraAngle = 0.0f, SpotTightness = 0.0f;
-	lcVector2 Factor(0.0f, 0.0f);
 	lcVector2 AreaGrid(0.0f, 0.0f);
 
 	if (Light)
@@ -1443,38 +1433,22 @@ void lcQPropertiesTree::SetLight(lcObject* Focus)
 		SpotConeAngle = Light->GetSpotConeAngle();
 		SpotPenumbraAngle = Light->GetSpotPenumbraAngle();
 
-		Factor = Light->mLightFactor;
 		LightType = Light->GetLightType();
 		LightAreaShape = Light->GetAreaShape();
-		LightAreaSize = Light->GetAreaSize();
+		LightSize = Light->GetSize();
 
 		switch (LightType)
 		{
 		case lcLightType::Point:
-			FactorALabel = tr("Radius (m)");
-			FactorAToolTip = tr("The light size for shadow sampling in metres.");
 			ExponentLabel = tr("Exponent");
 			break;
 
 		case lcLightType::Spot:
 			FactorBToolTip = tr("The softness of the spotlight edge.");
 			ExponentLabel = tr("Power");
-
-			if (POVRayLight)
-			{
-				FactorALabel = tr("Radius (°)");
-				FactorAToolTip = tr("The angle between the \"hot-spot\" edge at the beam center and the center line.");
-			}
-			else
-			{
-				FactorALabel = tr("Radius (m)");
-				FactorAToolTip = tr("Shadow soft size - Light size in metres for shadow sampling.");
-			}
 			break;
 
 		case lcLightType::Directional:
-			FactorALabel = tr("Angle (°)");
-			FactorAToolTip = tr("Angular diamater of the sun as seen from the Earth.");
 			ExponentLabel = tr("Strength");
 			break;
 
@@ -1522,57 +1496,60 @@ void lcQPropertiesTree::SetLight(lcObject* Focus)
 		switch (LightType)
 		{
 		case lcLightType::Point:
+			mLightSizeXItem = addProperty(mLightAttributesItem, tr("Radius"), PropertyFloat);
+			mLightSizeXItem->setToolTip(1, tr("Shadow soft size (Blender only)."));
 			break;
 
 		case lcLightType::Spot:
-			{
-				mLightSpotConeAngleItem = addProperty(mLightAttributesItem, tr("Spot Cone Angle"), PropertyFloat);
-				mLightSpotConeAngleItem->setToolTip(1, tr("The angle (in degrees) of the spot light's beam."));
+			mLightSpotConeAngleItem = addProperty(mLightAttributesItem, tr("Spot Cone Angle"), PropertyFloat);
+			mLightSpotConeAngleItem->setToolTip(1, tr("The angle (in degrees) of the spot light's beam."));
 
-				mLightSpotPenumbraAngleItem = addProperty(mLightAttributesItem, tr("Spot Penumbra Angle"), PropertyFloat);
-				mLightSpotPenumbraAngleItem->setToolTip(1, tr("The angle (in degrees) over which the intensity of the spot light falls off to zero."));
+			mLightSpotPenumbraAngleItem = addProperty(mLightAttributesItem, tr("Spot Penumbra Angle"), PropertyFloat);
+			mLightSpotPenumbraAngleItem->setToolTip(1, tr("The angle (in degrees) over which the intensity of the spot light falls off to zero."));
 
-				mLightSpotTightnessItem = addProperty(mLightAttributesItem, tr("Spot Tightness"), PropertyFloat);
-				mLightSpotTightnessItem->setToolTip(1, tr("Additional exponential spot light edge softening (POV-Ray only)."));
-			}
+			mLightSpotTightnessItem = addProperty(mLightAttributesItem, tr("Spot Tightness"), PropertyFloat);
+			mLightSpotTightnessItem->setToolTip(1, tr("Additional exponential spot light edge softening (POV-Ray only)."));
+
+			mLightSizeXItem = addProperty(mLightAttributesItem, tr("Radius"), PropertyFloat);
+			mLightSizeXItem->setToolTip(1, tr("Shadow soft size (Blender only)."));
 			break;
 
 		case lcLightType::Directional:
+			mLightSizeXItem = addProperty(mLightAttributesItem, tr("Angle"), PropertyFloat);
+			mLightSizeXItem->setToolTip(1, tr("Angular diameter of the light (Blender only)."));
 			break;
 
 		case lcLightType::Area:
+			mLightAreaShapeItem = addProperty(mLightAttributesItem, tr("Area Shape"), PropertyStringList);
+			mLightAreaShapeItem->setToolTip(1, tr("The shape of the area light."));
+
+			switch (LightAreaShape)
 			{
-				mLightAreaShapeItem = addProperty(mLightAttributesItem, tr("Area Shape"), PropertyStringList);
-				mLightAreaShapeItem->setToolTip(1, tr("The shape of the area light."));
+			case lcLightAreaShape::Rectangle:
+			case lcLightAreaShape::Ellipse:
+				mLightSizeXItem = addProperty(mLightAttributesItem, tr("Area Width"), PropertyFloat);
+				mLightSizeXItem->setToolTip(1, tr("The width (X direction) of the area light."));
 
-				switch (LightAreaShape)
-				{
-				case lcLightAreaShape::Rectangle:
-				case lcLightAreaShape::Ellipse:
-					mLightAreaSizeXItem = addProperty(mLightAttributesItem, tr("Area Width"), PropertyFloat);
-					mLightAreaSizeXItem->setToolTip(1, tr("The width (X direction) of the area light."));
+				mLightSizeYItem = addProperty(mLightAttributesItem, tr("Area Height"), PropertyFloat);
+				mLightSizeYItem->setToolTip(1, tr("The height (Y direction) of the area light."));
+				break;
 
-					mLightAreaSizeYItem = addProperty(mLightAttributesItem, tr("Area Height"), PropertyFloat);
-					mLightAreaSizeYItem->setToolTip(1, tr("The height (Y direction) of the area light."));
-					break;
+			case lcLightAreaShape::Square:
+			case lcLightAreaShape::Disk:
+				mLightSizeXItem = addProperty(mLightAttributesItem, tr("Area Size"), PropertyFloat);
+				mLightSizeXItem->setToolTip(1, tr("The size of the area light."));
 
-				case lcLightAreaShape::Square:
-				case lcLightAreaShape::Disk:
-					mLightAreaSizeXItem = addProperty(mLightAttributesItem, tr("Area Size"), PropertyFloat);
-					mLightAreaSizeXItem->setToolTip(1, tr("The size of the area light."));
+				mLightSizeYItem = nullptr;
+				break;
 
-					mLightAreaSizeYItem = nullptr;
-					break;
+			case lcLightAreaShape::Count:
+				break;
+			}
 
-				case lcLightAreaShape::Count:
-					break;
-				}
-
-				if (POVRayLight)
-				{
-					lightAreaGridRows = addProperty(mLightAttributesItem, tr("Grid Rows"), PropertyFloat);
-					lightAreaGridColumns = addProperty(mLightAttributesItem, tr("Grid Columns"), PropertyFloat);
-				}
+			if (POVRayLight)
+			{
+				lightAreaGridRows = addProperty(mLightAttributesItem, tr("Grid Rows"), PropertyFloat);
+				lightAreaGridColumns = addProperty(mLightAttributesItem, tr("Grid Columns"), PropertyFloat);
 			}
 			break;
 
@@ -1581,9 +1558,6 @@ void lcQPropertiesTree::SetLight(lcObject* Focus)
 		}
 
 		lightExponent = addProperty(mLightAttributesItem, ExponentLabel, PropertyFloat);
-
-		if ((LightType == lcLightType::Point || LightType == lcLightType::Directional) && !POVRayLight)
-			lightFactorA = addProperty(mLightAttributesItem, FactorALabel, PropertyFloat);
 
 		if (!POVRayLight)
 		{
@@ -1658,49 +1632,31 @@ void lcQPropertiesTree::SetLight(lcObject* Focus)
 	lightFormat->setText(1, Format);
 	lightFormat->setData(0, PropertyValueRole, FormatIndex);
 
-	mLightTypeItem->setText(1, lcLight::GetTypeString(LightType));
+	mLightTypeItem->setText(1, lcLight::GetLightTypeString(LightType));
 	mLightTypeItem->setData(0, PropertyValueRole, static_cast<int>(LightType));
 
 	mLightCastShadowItem->setCheckState(1, CastShadow ? Qt::Checked : Qt::Unchecked);
 	mLightCastShadowItem->setData(0, PropertyValueRole, CastShadow);
 
+	mLightSizeXItem->setText(1, lcFormatValueLocalized(LightSize[0]));
+	mLightSizeXItem->setData(0, PropertyValueRole, LightSize[0]);
+
+	if (mLightSizeYItem)
+	{
+		mLightSizeYItem->setText(1, lcFormatValueLocalized(LightSize[1]));
+		mLightSizeYItem->setData(0, PropertyValueRole, LightSize[1]);
+	}
+
 	lightExponent->setText(1, lcFormatValueLocalized(Exponent));
 	lightExponent->setData(0, PropertyValueRole, Exponent);
 	lightExponent->setToolTip(1, ExponentToolTip);
 
-	if ((LightType == lcLightType::Point || LightType == lcLightType::Directional) && !POVRayLight)
+	switch (LightType)
 	{
-		lightFactorA->setText(1, lcFormatValueLocalized(Factor[0]));
-		lightFactorA->setData(0, PropertyValueRole, Factor[0]);
-		lightFactorA->setToolTip(1, FactorAToolTip);
-	}
-	else if (LightType == lcLightType::Area)
-	{
-		mLightAreaShapeItem->setText(1, lcLight::GetAreaShapeString(LightAreaShape));
-		mLightAreaShapeItem->setData(0, PropertyValueRole, static_cast<int>(LightAreaShape));
+	case lcLightType::Point:
+		break;
 
-		mLightAreaSizeXItem->setText(1, lcFormatValueLocalized(LightAreaSize[0]));
-		mLightAreaSizeXItem->setData(0, PropertyValueRole, LightAreaSize[0]);
-
-		if (mLightAreaSizeYItem)
-		{
-			mLightAreaSizeYItem->setText(1, lcFormatValueLocalized(LightAreaSize[1]));
-			mLightAreaSizeYItem->setData(0, PropertyValueRole, LightAreaSize[1]);
-		}
-
-		if (POVRayLight)
-		{
-			lightAreaGridRows->setText(1, lcFormatValueLocalized(AreaGrid[0]));
-			lightAreaGridRows->setData(0, PropertyValueRole, AreaGrid[0]);
-			lightAreaGridRows->setToolTip(1, tr("The number of sample rows in the area light."));
-
-			lightAreaGridColumns->setText(1, lcFormatValueLocalized(AreaGrid[1]));
-			lightAreaGridColumns->setData(0, PropertyValueRole, AreaGrid[1]);
-			lightAreaGridColumns->setToolTip(1, tr("The number of sample columns in the area light."));
-		}
-	}
-	else if (LightType == lcLightType::Spot)
-	{
+	case lcLightType::Spot:
 		mLightSpotConeAngleItem->setText(1, lcFormatValueLocalized(SpotConeAngle));
 		mLightSpotConeAngleItem->setData(0, PropertyValueRole, SpotConeAngle);
 		mLightSpotConeAngleItem->setData(0, PropertyRangeRole, QPointF(1.0, 180.0));
@@ -1712,6 +1668,29 @@ void lcQPropertiesTree::SetLight(lcObject* Focus)
 		mLightSpotTightnessItem->setText(1, lcFormatValueLocalized(SpotTightness));
 		mLightSpotTightnessItem->setData(0, PropertyValueRole, SpotTightness);
 		mLightSpotTightnessItem->setData(0, PropertyRangeRole, QPointF(0.0, 100.0));
+		break;
+
+	case lcLightType::Directional:
+		break;
+
+	case lcLightType::Area:
+		mLightAreaShapeItem->setText(1, lcLight::GetAreaShapeString(LightAreaShape));
+		mLightAreaShapeItem->setData(0, PropertyValueRole, static_cast<int>(LightAreaShape));
+
+		if (POVRayLight)
+		{
+			lightAreaGridRows->setText(1, lcFormatValueLocalized(AreaGrid[0]));
+			lightAreaGridRows->setData(0, PropertyValueRole, AreaGrid[0]);
+			lightAreaGridRows->setToolTip(1, tr("The number of sample rows in the area light."));
+
+			lightAreaGridColumns->setText(1, lcFormatValueLocalized(AreaGrid[1]));
+			lightAreaGridColumns->setData(0, PropertyValueRole, AreaGrid[1]);
+			lightAreaGridColumns->setToolTip(1, tr("The number of sample columns in the area light."));
+		}
+		break;
+
+	case lcLightType::Count:
+		break;
 	}
 
 	if (!POVRayLight)

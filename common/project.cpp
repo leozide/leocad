@@ -2177,7 +2177,7 @@ bool Project::ExportPOVRay(const QString& FileName)
 			const lcVector3 LightPosition = Light->GetPosition();
 			const lcVector3 LightTarget = LightPosition + Light->GetDirection();
 			const lcVector3 LightColor = Light->GetColor();
-			const QString LightName = QString(Light->mName).replace(" ", "_");
+			const QString LightName = QString(Light->GetName()).replace(" ", "_");
 			LightType = Light->GetLightType();
 			Shadowless = Light->GetCastShadow() ? 0 : 1;
 			Power = Light->mPOVRayExponent;
@@ -2196,8 +2196,8 @@ bool Project::ExportPOVRay(const QString& FileName)
 				break;
 
 			case lcLightType::Area:
-				AreaCircle = (Light->GetLightShape() == lcLightAreaShape::Disk || Light->GetLightShape() == lcLightAreaShape::Ellipse) ? 1 : 0;
-				AreaSize = Light->GetAreaSize();
+				AreaCircle = (Light->GetAreaShape() == lcLightAreaShape::Disk || Light->GetAreaShape() == lcLightAreaShape::Ellipse) ? 1 : 0;
+				AreaSize = Light->GetSize();
 				AreaGrid = Light->mAreaGrid;
 				break;
 

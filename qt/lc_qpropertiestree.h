@@ -145,10 +145,8 @@ protected:
 	QTreeWidgetItem* mLightSpotPenumbraAngleItem;
 	QTreeWidgetItem* mLightSpotTightnessItem;
 	QTreeWidgetItem* mLightAreaShapeItem;
-	QTreeWidgetItem* mLightAreaSizeXItem;
-	QTreeWidgetItem* mLightAreaSizeYItem;
-	QTreeWidgetItem* lightFactorA;
-	QTreeWidgetItem* lightFactorB;
+	QTreeWidgetItem* mLightSizeXItem;
+	QTreeWidgetItem* mLightSizeYItem;
 	QTreeWidgetItem* mLightNameItem;
 	QTreeWidgetItem* lightFormat;
 	QTreeWidgetItem* mLightCastShadowItem;

@@ -3225,12 +3225,12 @@ void lcModel::SetAreaLightShape(lcLight* Light, lcLightAreaShape LightAreaShape)
 	UpdateAllViews();
 }
 
-void lcModel::SetAreaLightSize(lcLight* Light, lcVector2 LightAreaSize)
+void lcModel::SetLightSize(lcLight* Light, lcVector2 LightAreaSize)
 {
-	Light->SetAreaSize(LightAreaSize, mCurrentStep, gMainWindow->GetAddKeys());
+	Light->SetSize(LightAreaSize, mCurrentStep, gMainWindow->GetAddKeys());
 	Light->UpdatePosition(mCurrentStep);
 
-	SaveCheckpoint(tr("Changing Area Light Size"));
+	SaveCheckpoint(tr("Changing Light Size"));
 	gMainWindow->UpdateSelectedObjects(false);
 	UpdateAllViews();
 }

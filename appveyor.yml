@@ -8,7 +8,7 @@ platform: x64
 
 environment:
   GITHUB_TOKEN:
-    secure: ZaApxtWM3JA1AdJqs2pv+BCE5XIUrrVKXNy05q8f6f4zRZ7H/lMEJ6gZ1o2yp6NT
+    secure: WuBhTS6ZgIcyYgmDtFj3sqAnDz+9K8qQNchX0/RgYJfC7fBK9ShT8zEU3O3VNg1e
 
 for:
   -

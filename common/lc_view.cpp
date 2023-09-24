@@ -2054,7 +2054,7 @@ void lcView::UpdateTrackTool()
 		break;
 
 	case lcTool::AreaLight:
-		NewTrackTool = lcTrackTool::AreaLight;;
+		NewTrackTool = lcTrackTool::AreaLight;
 		break;
 
 	case lcTool::Camera:

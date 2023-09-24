@@ -348,12 +348,12 @@ public:
 	void ZoomExtents(lcCamera* Camera, float Aspect);
 	void Zoom(lcCamera* Camera, float Amount);
 
-	void MoveSelectedObjects(const lcVector3& Distance, bool AllowRelative, bool AlternateButtonDrag, bool Update, bool Checkpoint)
+	void MoveSelectedObjects(const lcVector3& Distance, bool AllowRelative, bool AlternateButtonDrag, bool Update, bool Checkpoint, bool FirstMove)
 	{
-		MoveSelectedObjects(Distance, Distance, AllowRelative, AlternateButtonDrag, Update, Checkpoint);
+		MoveSelectedObjects(Distance, Distance, AllowRelative, AlternateButtonDrag, Update, Checkpoint, FirstMove);
 	}
 
-	void MoveSelectedObjects(const lcVector3& PieceDistance, const lcVector3& ObjectDistance, bool AllowRelative, bool AlternateButtonDrag, bool Update, bool Checkpoint);
+	void MoveSelectedObjects(const lcVector3& PieceDistance, const lcVector3& ObjectDistance, bool AllowRelative, bool AlternateButtonDrag, bool Update, bool Checkpoint, bool FirstMove);
 	void RotateSelectedObjects(const lcVector3& Angles, bool Relative, bool RotatePivotPoint, bool Update, bool Checkpoint);
 	void ScaleSelectedPieces(const float Scale, bool Update, bool Checkpoint);
 	void TransformSelectedObjects(lcTransformType TransformType, const lcVector3& Transform);
@@ -409,6 +409,7 @@ protected:
 	bool mActive;
 	lcStep mCurrentStep;
 	lcVector3 mMouseToolDistance;
+	bool mMouseToolFirstMove;
 
 	lcArray<lcPiece*> mPieces;
 	lcArray<lcCamera*> mCameras;

@@ -280,6 +280,13 @@ public:
 		return mSize;
 	}
 
+	void SetPower(float Power, lcStep Step, bool AddKey);
+
+	float GetPower() const
+	{
+		return mPower;
+	}
+
 	bool SetCastShadow(bool CastShadow);
 
 	bool GetCastShadow() const
@@ -351,6 +358,7 @@ protected:
 	bool mCastShadow = true;
 	lcVector3 mColor = lcVector3(1.0f, 1.0f, 1.0f);
 	lcVector2 mSize = lcVector2(0.0f, 0.0f);
+	float mPower = 1.0f;
 	float mSpotConeAngle = 80.0f;
 	float mSpotPenumbraAngle = 0.0f;
 	float mSpotTightness = 0.0f;
@@ -365,6 +373,7 @@ protected:
 	lcObjectKeyArray<lcMatrix33> mRotationKeys;
 	lcObjectKeyArray<lcVector3> mColorKeys;
 	lcObjectKeyArray<lcVector2> mSizeKeys;
+	lcObjectKeyArray<float> mPowerKeys;
 	lcObjectKeyArray<float> mSpotConeAngleKeys;
 	lcObjectKeyArray<float> mSpotPenumbraAngleKeys;
 	lcObjectKeyArray<float> mSpotTightnessKeys;

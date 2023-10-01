@@ -40,6 +40,7 @@ lcLight::lcLight(const lcVector3& Position, lcLightType LightType)
 	mPositionKeys.ChangeKey(mWorldMatrix.GetTranslation(), 1, true);
 	mRotationKeys.ChangeKey(lcMatrix33(mWorldMatrix), 1, true);
 	mColorKeys.ChangeKey(mColor, 1, true);
+	mPowerKeys.ChangeKey(mPower, 1, true);
 	mSpotConeAngleKeys.ChangeKey(mSpotConeAngle, 1, true);
 	mSpotPenumbraAngleKeys.ChangeKey(mSpotPenumbraAngle, 1, true);
 	mSpotTightnessKeys.ChangeKey(mSpotTightness, 1, true);
@@ -785,6 +786,11 @@ void lcLight::SetSize(lcVector2 Size, lcStep Step, bool AddKey)
 	mSizeKeys.ChangeKey(Size, Step, AddKey);
 }
 
+void lcLight::SetPower(float Power, lcStep Step, bool AddKey)
+{
+	mPowerKeys.ChangeKey(Power, Step, AddKey);
+}
+
 bool lcLight::SetCastShadow(bool CastShadow)
 {
 	if (mCastShadow != CastShadow)
@@ -805,6 +811,7 @@ void lcLight::InsertTime(lcStep Start, lcStep Time)
 	mSpotPenumbraAngleKeys.InsertTime(Start, Time);
 	mSpotTightnessKeys.InsertTime(Start, Time);
 	mSizeKeys.InsertTime(Start, Time);
+	mPowerKeys.InsertTime(Start, Time);
 
 	mAttenuationKeys.InsertTime(Start, Time);
 	mLightDiffuseKeys.InsertTime(Start, Time);
@@ -823,6 +830,7 @@ void lcLight::RemoveTime(lcStep Start, lcStep Time)
 	mSpotPenumbraAngleKeys.RemoveTime(Start, Time);
 	mSpotTightnessKeys.RemoveTime(Start, Time);
 	mSizeKeys.RemoveTime(Start, Time);
+	mPowerKeys.RemoveTime(Start, Time);
 
 	mAttenuationKeys.RemoveTime(Start, Time);
 	mLightDiffuseKeys.RemoveTime(Start, Time);
@@ -852,6 +860,7 @@ void lcLight::UpdatePosition(lcStep Step)
 	mSpotPenumbraAngle = mSpotPenumbraAngleKeys.CalculateKey(Step);
 	mSpotTightness = mSpotTightnessKeys.CalculateKey(Step);
 	mSize = mSizeKeys.CalculateKey(Step);
+	mPower = mPowerKeys.CalculateKey(Step);
 
 	mAttenuation = mAttenuationKeys.CalculateKey(Step);
 	mLightDiffuse = mLightDiffuseKeys.CalculateKey(Step);
@@ -1291,6 +1300,9 @@ void lcLight::RemoveKeyFrames()
 
 	mSizeKeys.RemoveAll();
 	mSizeKeys.ChangeKey(mSize, 1, true);
+
+	mPowerKeys.RemoveAll();
+	mPowerKeys.ChangeKey(mPower, 1, true);
 
 	mAttenuationKeys.RemoveAll();
 	mAttenuationKeys.ChangeKey(mAttenuation, 1, true);

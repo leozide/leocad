@@ -45,7 +45,6 @@ public:
 		PropertyGroup,
 		PropertyBool,
 		PropertyFloat,
-		PropertyFloatReadOnly,
 		PropertyStep,
 		PropertyString,
 		PropertyStringList,
@@ -117,6 +116,7 @@ protected:
 
 	QTreeWidgetItem* lightConfiguration;
 	QTreeWidgetItem* mLightColorItem;
+	QTreeWidgetItem* mLightPowerItem;
 	QTreeWidgetItem* mLightAttributesItem;
 	QTreeWidgetItem* lightDiffuse;
 	QTreeWidgetItem* lightSpecular;

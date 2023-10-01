@@ -3237,6 +3237,16 @@ void lcModel::SetLightSize(lcLight* Light, lcVector2 LightAreaSize)
 	UpdateAllViews();
 }
 
+void lcModel::SetLightPower(lcLight* Light, float Power)
+{
+	Light->SetPower(Power, mCurrentStep, gMainWindow->GetAddKeys());
+	Light->UpdatePosition(mCurrentStep);
+
+	SaveCheckpoint(tr("Changing Light Power"));
+	gMainWindow->UpdateSelectedObjects(false);
+	UpdateAllViews();
+}
+
 void lcModel::SetLightCastShadow(lcLight* Light, bool CastShadow)
 {
 	if (!Light->SetCastShadow(CastShadow))

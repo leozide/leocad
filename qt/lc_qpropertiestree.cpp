@@ -447,9 +447,6 @@ QWidget* lcQPropertiesTree::createEditor(QWidget* Parent, QTreeWidgetItem* Item)
 			return Editor;
 		}
 
-	case PropertyFloatReadOnly:
-		return nullptr;
-
 	case PropertyStep:
 		{
 			QLineEdit* Editor = new QLineEdit(Parent);
@@ -859,6 +856,12 @@ void lcQPropertiesTree::slotReturnPressed()
 
 				Model->SetLightSize(Light, Value);
 			}
+			else if (Item == mLightPowerItem)
+			{
+				float Value = lcParseValueLocalized(Editor->text());
+
+				Model->SetLightPower(Light, Value);
+			}
 			else if (Item == lightDiffuse)
 			{
 				Props.mLightDiffuse = lcParseValueLocalized(Editor->text());
@@ -1049,10 +1052,7 @@ QTreeWidgetItem *lcQPropertiesTree::addProperty(QTreeWidgetItem *parent, const Q
 		newItem = new QTreeWidgetItem(this, QStringList(label));
 
 	newItem->setData(0, PropertyTypeRole, QVariant(propertyType));
-
-	if (propertyType != PropertyFloatReadOnly)
-		newItem->setFlags(newItem->flags() | Qt::ItemIsEditable);
-
+	newItem->setFlags(newItem->flags() | Qt::ItemIsEditable);
 	newItem->setExpanded(true);
 
 	if (propertyType == PropertyGroup)
@@ -1097,6 +1097,7 @@ void lcQPropertiesTree::SetEmpty()
 
 	lightConfiguration = nullptr;
 	mLightColorItem = nullptr;
+	mLightPowerItem = nullptr;
 	mLightAttributesItem = nullptr;
 	lightDiffuse = nullptr;
 	lightSpecular = nullptr;
@@ -1366,6 +1367,7 @@ void lcQPropertiesTree::SetLight(lcObject* Focus)
 	lcLightType LightType = lcLightType::Point;
 	lcLightAreaShape LightAreaShape = lcLightAreaShape::Rectangle;
 	lcVector2 LightSize(0.0f, 0.0f);
+	float Power = 0.0f;
 	int FormatIndex = 0;
 	float Diffuse = 0.0f;
 	float Specular = 0.0f;
@@ -1390,6 +1392,7 @@ void lcQPropertiesTree::SetLight(lcObject* Focus)
 		CastShadow = Light->GetCastShadow();
 		Position = Light->GetPosition();
 		Color = lcQColorFromVector3(Light->GetColor());
+		Power = Light->GetPower();
 		SpotConeAngle = Light->GetSpotConeAngle();
 		SpotPenumbraAngle = Light->GetSpotPenumbraAngle();
 
@@ -1418,7 +1421,6 @@ void lcQPropertiesTree::SetLight(lcObject* Focus)
 		default:
 			break;
 		}
-
 
 		Diffuse = Light->mLightDiffuse;
 		Specular = Light->mLightSpecular;
@@ -1449,7 +1451,13 @@ void lcQPropertiesTree::SetLight(lcObject* Focus)
 		mLightAttributesItem = addProperty(nullptr, tr("Light Attributes"), PropertyGroup);
 		mLightNameItem = addProperty(mLightAttributesItem, tr("Name"), PropertyString);
 		mLightTypeItem = addProperty(mLightAttributesItem, tr("Type"), PropertyStringList);
+
 		mLightColorItem = addProperty(mLightAttributesItem, tr("Color"), PropertyColor);
+		mLightColorItem->setToolTip(1, tr("Color of the emitted light."));
+
+		mLightPowerItem = addProperty(mLightAttributesItem, tr("Power"), PropertyFloat);
+		mLightPowerItem->setToolTip(1, tr("Power of the light in Watts (Blender only)."));
+
 		mLightCastShadowItem = addProperty(mLightAttributesItem, tr("Cast Shadows"), PropertyBool);
 
 		switch (LightType)
@@ -1591,6 +1599,9 @@ void lcQPropertiesTree::SetLight(lcObject* Focus)
 	mLightColorItem->setIcon(1, QIcon(QPixmap::fromImage(ColorImage)));
 	mLightColorItem->setText(1, Color.name().toUpper());
 	mLightColorItem->setData(0, PropertyValueRole, Color);
+
+	mLightPowerItem->setText(1, lcFormatValueLocalized(Power));
+	mLightPowerItem->setData(0, PropertyValueRole, Power);
 
 	lightFormat->setText(1, Format);
 	lightFormat->setData(0, PropertyValueRole, FormatIndex);

@@ -36,7 +36,7 @@ public:
 		mKeys.clear();
 	}
 
-	void SaveKeysLDraw(QTextStream& Stream, const char* KeyName) const;
+	void SaveKeysLDraw(QTextStream& Stream, const char* ObjectName, const char* VariableName) const;
 	void LoadKeysLDraw(QTextStream& Stream);
 	const T& CalculateKey(lcStep Step) const;
 	void ChangeKey(const T& Value, lcStep Step, bool AddKey);
@@ -141,7 +141,12 @@ public:
 	virtual void RemoveKeyFrames() = 0;
 	virtual QString GetName() const = 0;
 
+protected:
+	template<typename T>
+	void SaveAttribute(QTextStream& Stream, const T& Variable, const lcObjectKeyArray<T>& Keys, const char* ObjectName, const char* VariableName) const;
+	template<typename T>
+	bool LoadAttribute(QTextStream& Stream, const QString& Token, T& Variable, lcObjectKeyArray<T>& Keys, const char* VariableName);
+
 private:
 	lcObjectType mObjectType;
 };
-

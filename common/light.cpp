@@ -144,52 +144,33 @@ void lcLight::SaveLDraw(QTextStream& Stream) const
 	const float Numbers[12] = { Matrix[12], -Matrix[14], Matrix[13], Matrix[0], -Matrix[8], Matrix[4], -Matrix[2], Matrix[10], -Matrix[6], Matrix[1], -Matrix[9], Matrix[5] };
 
 	if (mPositionKeys.GetSize() > 1)
-		mPositionKeys.SaveKeysLDraw(Stream, "LIGHT POSITION_KEY ");
+		mPositionKeys.SaveKeysLDraw(Stream, "LIGHT", "POSITION");
 	else
 		Stream << QLatin1String("0 !LEOCAD LIGHT POSITION ") << Numbers[0] << ' ' << Numbers[1] << ' ' << Numbers[2] << LineEnding;
 
 	if (!IsPointLight())
 	{
 		if (mRotationKeys.GetSize() > 1)
-			mRotationKeys.SaveKeysLDraw(Stream, "LIGHT ROTATION_KEY ");
+			mRotationKeys.SaveKeysLDraw(Stream, "LIGHT", "ROTATION");
 		else
 			Stream << QLatin1String("0 !LEOCAD LIGHT ROTATION ") << Numbers[3] << ' ' << Numbers[4] << ' ' << Numbers[5] << ' ' << Numbers[6] << ' ' << Numbers[7] << ' ' << Numbers[8] << ' ' << Numbers[9] << ' ' << Numbers[10] << ' ' << Numbers[11] << LineEnding;
 	}
 
-	if (mColorKeys.GetSize() > 1)
-		mColorKeys.SaveKeysLDraw(Stream, "LIGHT COLOR_KEY ");
-	else
-		Stream << QLatin1String("0 !LEOCAD LIGHT COLOR ") << mColor[0] << ' ' << mColor[1] << ' ' << mColor[2] << LineEnding;
-
-	if (mSizeKeys.GetSize() > 1)
-		mSizeKeys.SaveKeysLDraw(Stream, "LIGHT SIZE_KEY ");
-	else
-		Stream << QLatin1String("0 !LEOCAD LIGHT SIZE ") << mSize[0] << mSize[1] << LineEnding;
+	SaveAttribute(Stream, mColor, mColorKeys, "LIGHT", "COLOR");
+	SaveAttribute(Stream, mSize, mSizeKeys, "LIGHT", "SIZE");
+	SaveAttribute(Stream, mPower, mPowerKeys, "LIGHT", "POWER");
 
 	if (!mPOVRayLight)
 	{
-		if (mLightDiffuseKeys.GetSize() > 1)
-			mLightDiffuseKeys.SaveKeysLDraw(Stream, "LIGHT DIFFUSE_KEY ");
-		else
-			Stream << QLatin1String("0 !LEOCAD LIGHT DIFFUSE ") << mLightDiffuse << LineEnding;
-
-		if (mLightSpecularKeys.GetSize() > 1)
-			mLightSpecularKeys.SaveKeysLDraw(Stream, "LIGHT SPECULAR_KEY ");
-		else
-			Stream << QLatin1String("0 !LEOCAD LIGHT SPECULAR ") << mLightSpecular << LineEnding;
+		SaveAttribute(Stream, mLightDiffuse, mLightDiffuseKeys, "LIGHT", "DIFFUSE");
+		SaveAttribute(Stream, mLightSpecular, mLightSpecularKeys, "LIGHT", "SPECULAR");
 	}
 
-	if (mSpotExponentKeys.GetSize() > 1)
-		mSpotExponentKeys.SaveKeysLDraw(Stream, "LIGHT POWER_KEY ");
-	else
-		Stream << QLatin1String("0 !LEOCAD LIGHT POWER ") << (mPOVRayLight ? mPOVRayExponent : mSpotExponent) << LineEnding;
+//	SaveAttribute(Stream, (mPOVRayLight ? mPOVRayExponent : mSpotExponent), mSpotExponentKeys, "LIGHT", "POWER");
 
 	if (mEnableCutoff && !mPOVRayLight)
 	{
-		if (mSpotCutoffKeys.GetSize() > 1)
-			mSpotCutoffKeys.SaveKeysLDraw(Stream, "LIGHT CUTOFF_DISTANCE_KEY ");
-		else
-			Stream << QLatin1String("0 !LEOCAD LIGHT CUTOFF_DISTANCE ") << mSpotCutoff << LineEnding;
+		SaveAttribute(Stream, mSpotCutoff, mSpotCutoffKeys, "LIGHT", "CUTOFF_DISTANCE");
 	}
 
 	switch (mLightType)
@@ -199,39 +180,18 @@ void lcLight::SaveLDraw(QTextStream& Stream) const
 		break;
 
 	case lcLightType::Spot:
-		if (mSpotConeAngleKeys.GetSize() > 1)
-			mSpotConeAngleKeys.SaveKeysLDraw(Stream, "LIGHT SPOT_CONE_ANGLE_KEY ");
-		else
-			Stream << QLatin1String("0 !LEOCAD LIGHT SPOT_CONE_ANGLE ") << mSpotConeAngle << LineEnding;
-
-		if (mSpotPenumbraAngleKeys.GetSize() > 1)
-			mSpotPenumbraAngleKeys.SaveKeysLDraw(Stream, "LIGHT SPOT_PENUMBRA_ANGLE_KEY ");
-		else
-			Stream << QLatin1String("0 !LEOCAD LIGHT SPOT_PENUMBRA_ANGLE ") << mSpotPenumbraAngle << LineEnding;
-
-		if (mSpotTightnessKeys.GetSize() > 1)
-			mSpotTightnessKeys.SaveKeysLDraw(Stream, "SPOT_TIGHTNESS_KEY ");
-		else
-			Stream << QLatin1String("0 !LEOCAD LIGHT SPOT_TIGHTNESS ") << mSpotTightness << LineEnding;
-
+		SaveAttribute(Stream, mSpotConeAngle, mSpotConeAngleKeys, "LIGHT", "SPOT_CONE_ANGLE");
+		SaveAttribute(Stream, mSpotPenumbraAngle, mSpotPenumbraAngleKeys, "LIGHT", "SPOT_PENUMBRA_ANGLE");
+		SaveAttribute(Stream, mSpotTightness, mSpotTightnessKeys, "LIGHT", "SPOT_TIGHTNESS");
 		break;
 
 	case lcLightType::Directional:
-		if (mSpotExponentKeys.GetSize() > 1)
-			mSpotExponentKeys.SaveKeysLDraw(Stream, "LIGHT STRENGTH_KEY ");
-		else
-			Stream << QLatin1String("0 !LEOCAD LIGHT STRENGTH ") << mSpotExponent << LineEnding;
-
+		SaveAttribute(Stream, mSpotExponent, mSpotExponentKeys, "LIGHT", "STRENGTH");
 		break;
 
 	case lcLightType::Area:
 		if (mPOVRayLight)
-		{
-			if (mAreaGridKeys.GetSize() > 1)
-				mAreaGridKeys.SaveKeysLDraw(Stream, "LIGHT AREA_GRID_KEY ");
-			else
-				Stream << QLatin1String("0 !LEOCAD LIGHT AREA_ROWS ") << mAreaGrid[0] << QLatin1String(" AREA_COLUMNS ") << mAreaGrid[1] << LineEnding;
-		}
+			SaveAttribute(Stream, mAreaGrid, mAreaGridKeys, "LIGHT", "AREA_GRID");
 
 		Stream << QLatin1String("0 !LEOCAD LIGHT AREA_SHAPE ") << gLightAreaShapes[static_cast<int>(mAreaShape)] << LineEnding;
 
@@ -344,35 +304,18 @@ bool lcLight::ParseLDrawLine(QTextStream& Stream)
 		}
 		else if (Token == QLatin1String("ROTATION_KEY"))
 			mRotationKeys.LoadKeysLDraw(Stream); // todo: convert from ldraw
-		else if (Token == QLatin1String("COLOR"))
-		{
-			Stream >> mColor[0] >> mColor[1] >> mColor[2];
-			mColorKeys.ChangeKey(mColor, 1, true);
-		}
-		else if (Token == QLatin1String("COLOR_KEY"))
-			mColorKeys.LoadKeysLDraw(Stream);
-		else if (Token == QLatin1String("SPOT_CONE_ANGLE"))
-		{
-			Stream >> mSpotConeAngle;
-			mSpotConeAngleKeys.ChangeKey(mSpotConeAngle, 1, true);
-		}
-		else if (Token == QLatin1String("SPOT_CONE_ANGLE_KEY"))
-			mSpotConeAngleKeys.LoadKeysLDraw(Stream);
-		else if (Token == QLatin1String("SPOT_PENUMBRA_ANGLE"))
-		{
-			Stream >> mSpotPenumbraAngle;
-			mSpotPenumbraAngleKeys.ChangeKey(mSpotPenumbraAngle, 1, true);
-		}
-		else if (Token == QLatin1String("SPOT_PENUMBRA_ANGLE_KEY"))
-			mSpotPenumbraAngleKeys.LoadKeysLDraw(Stream);
-		else if (Token == QLatin1String("SPOT_TIGHTNESS"))
-		{
-			mPOVRayLight = true;
-			Stream >> mSpotTightness;
-			mSpotTightnessKeys.ChangeKey(mSpotTightness, 1, true);
-		}
-		else if (Token == QLatin1String("SPOT_TIGHTNESS_KEY"))
-			mSpotTightnessKeys.LoadKeysLDraw(Stream);
+		else if (LoadAttribute(Stream, Token, mColor, mColorKeys, "COLOR"))
+			continue;
+		else if (LoadAttribute(Stream, Token, mSize, mSizeKeys, "SIZE"))
+			continue;
+		else if (LoadAttribute(Stream, Token, mPower, mPowerKeys, "POWER"))
+			continue;
+		else if (LoadAttribute(Stream, Token, mSpotConeAngle, mSpotConeAngleKeys, "SPOT_CONE_ANGLE"))
+			continue;
+		else if (LoadAttribute(Stream, Token, mSpotPenumbraAngle, mSpotPenumbraAngleKeys, "SPOT_PENUMBRA_ANGLE"))
+			continue;
+		else if (LoadAttribute(Stream, Token, mSpotTightness, mSpotTightnessKeys, "SPOT_TIGHTNESS"))
+			continue;
 		else if (Token == QLatin1String("AREA_SHAPE"))
 		{
 			QString AreaShape;
@@ -387,27 +330,20 @@ bool lcLight::ParseLDrawLine(QTextStream& Stream)
 				}
 			}
 		}
-		else if (Token == QLatin1String("SIZE"))
-		{
-			Stream >> mSize[0] >> mSize[1];
-			mSizeKeys.ChangeKey(mSize, 1, true);
-		}
-		else if (Token == QLatin1String("SIZE_KEY"))
-			mSizeKeys.LoadKeysLDraw(Stream);
 
-		else if (Token == QLatin1String("POWER") || Token == QLatin1String("STRENGTH"))
-		{
-			if (mPOVRayLight)
-			{
-				Stream >> mPOVRayExponent;
-				mSpotExponentKeys.ChangeKey(mPOVRayExponent, 1, true);
-			}
-			else
-			{
-				Stream >> mSpotExponent;
-				mSpotExponentKeys.ChangeKey(mSpotExponent, 1, true);
-			}
-		}
+//		else if (Token == QLatin1String("POWER") || Token == QLatin1String("STRENGTH"))
+//		{
+//			if (mPOVRayLight)
+//			{
+//				Stream >> mPOVRayExponent;
+//				mSpotExponentKeys.ChangeKey(mPOVRayExponent, 1, true);
+//			}
+//			else
+//			{
+//				Stream >> mSpotExponent;
+//				mSpotExponentKeys.ChangeKey(mSpotExponent, 1, true);
+//			}
+//		}
 		else if (Token == QLatin1String("AREA_ROWS"))
 		{
 			mPOVRayLight = true;

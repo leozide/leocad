@@ -142,20 +142,9 @@ void lcCamera::SaveLDraw(QTextStream& Stream) const
 
 	Stream << QLatin1String("0 !LEOCAD CAMERA FOV ") << m_fovy << QLatin1String(" ZNEAR ") << m_zNear << QLatin1String(" ZFAR ") << m_zFar << LineEnding;
 
-	if (mPositionKeys.GetSize() > 1)
-		mPositionKeys.SaveKeysLDraw(Stream, "CAMERA POSITION_KEY ");
-	else
-		Stream << QLatin1String("0 !LEOCAD CAMERA POSITION ") << mPosition[0] << ' ' << mPosition[1] << ' ' << mPosition[2] << LineEnding;
-
-	if (mTargetPositionKeys.GetSize() > 1)
-		mTargetPositionKeys.SaveKeysLDraw(Stream, "CAMERA TARGET_POSITION_KEY ");
-	else
-		Stream << QLatin1String("0 !LEOCAD CAMERA TARGET_POSITION ") << mTargetPosition[0] << ' ' << mTargetPosition[1] << ' ' << mTargetPosition[2] << LineEnding;
-
-	if (mUpVectorKeys.GetSize() > 1)
-		mUpVectorKeys.SaveKeysLDraw(Stream, "CAMERA UP_VECTOR_KEY ");
-	else
-		Stream << QLatin1String("0 !LEOCAD CAMERA UP_VECTOR ") << mUpVector[0] << ' ' << mUpVector[1] << ' ' << mUpVector[2] << LineEnding;
+	SaveAttribute(Stream, mPosition, mPositionKeys, "CAMERA", "POSITION");
+	SaveAttribute(Stream, mTargetPosition, mTargetPositionKeys, "CAMERA", "TARGET_POSITION");
+	SaveAttribute(Stream, mUpVector, mUpVectorKeys, "CAMERA", "UP_VECTOR");
 
 	Stream << QLatin1String("0 !LEOCAD CAMERA ");
 
@@ -176,7 +165,7 @@ bool lcCamera::ParseLDrawLine(QTextStream& Stream)
 		Stream >> Token;
 
 		if (Token == QLatin1String("HIDDEN"))
-				SetHidden(true);
+			SetHidden(true);
 		else if (Token == QLatin1String("ORTHOGRAPHIC"))
 			SetOrtho(true);
 		else if (Token == QLatin1String("FOV"))
@@ -185,27 +174,12 @@ bool lcCamera::ParseLDrawLine(QTextStream& Stream)
 			Stream >> m_zNear;
 		else if (Token == QLatin1String("ZFAR"))
 			Stream >> m_zFar;
-		else if (Token == QLatin1String("POSITION"))
-		{
-			Stream >> mPosition[0] >> mPosition[1] >> mPosition[2];
-			mPositionKeys.ChangeKey(mPosition, 1, true);
-		}
-		else if (Token == QLatin1String("TARGET_POSITION"))
-		{
-			Stream >> mTargetPosition[0] >> mTargetPosition[1] >> mTargetPosition[2];
-			mTargetPositionKeys.ChangeKey(mTargetPosition, 1, true);
-		}
-		else if (Token == QLatin1String("UP_VECTOR"))
-		{
-			Stream >> mUpVector[0] >> mUpVector[1] >> mUpVector[2];
-			mUpVectorKeys.ChangeKey(mUpVector, 1, true);
-		}
-		else if (Token == QLatin1String("POSITION_KEY"))
-			mPositionKeys.LoadKeysLDraw(Stream);
-		else if (Token == QLatin1String("TARGET_POSITION_KEY"))
-			mTargetPositionKeys.LoadKeysLDraw(Stream);
-		else if (Token == QLatin1String("UP_VECTOR_KEY"))
-			mUpVectorKeys.LoadKeysLDraw(Stream);
+		else if (LoadAttribute(Stream, Token, mPosition, mPositionKeys, "POSITION"))
+			continue;
+		else if (LoadAttribute(Stream, Token, mTargetPosition, mTargetPositionKeys, "TARGET_POSITION"))
+			continue;
+		else if (LoadAttribute(Stream, Token, mUpVector, mUpVectorKeys, "UP_VECTOR"))
+			continue;
 		else if (Token == QLatin1String("NAME"))
 		{
 			mName = Stream.readAll().trimmed();

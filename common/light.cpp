@@ -33,7 +33,6 @@ lcLight::lcLight(const lcVector3& Position, lcLightType LightType)
 	mSpotExponent = 10.0f;
 	mPOVRayExponent = 1.0f;
 	mSpotCutoff = LightType != lcLightType::Directional ? 40.0f : 0.0f;
-	mAreaGrid = lcVector2(10.0f, 10.0f);
 	
 	UpdateLightType();
 
@@ -50,7 +49,6 @@ lcLight::lcLight(const lcVector3& Position, lcLightType LightType)
 	mLightSpecularKeys.ChangeKey(mLightSpecular, 1, true);
 	mSpotCutoffKeys.ChangeKey(mSpotCutoff, 1, true);
 	mSpotExponentKeys.ChangeKey(mSpotExponent, 1, true);
-	mAreaGridKeys.ChangeKey(mAreaGrid, 1, true);
 
 	UpdatePosition(1);
 }
@@ -190,11 +188,7 @@ void lcLight::SaveLDraw(QTextStream& Stream) const
 		break;
 
 	case lcLightType::Area:
-		if (mPOVRayLight)
-			SaveAttribute(Stream, mAreaGrid, mAreaGridKeys, "LIGHT", "AREA_GRID");
-
 		Stream << QLatin1String("0 !LEOCAD LIGHT AREA_SHAPE ") << gLightAreaShapes[static_cast<int>(mAreaShape)] << LineEnding;
-
 		break;
 	}
 
@@ -344,18 +338,6 @@ bool lcLight::ParseLDrawLine(QTextStream& Stream)
 //				mSpotExponentKeys.ChangeKey(mSpotExponent, 1, true);
 //			}
 //		}
-		else if (Token == QLatin1String("AREA_ROWS"))
-		{
-			mPOVRayLight = true;
-			Stream >> mAreaGrid[0];
-			mAreaGridKeys.ChangeKey(mAreaGrid, 1, true);
-		}
-		else if (Token == QLatin1String("AREA_COLUMNS"))
-		{
-			mPOVRayLight = true;
-			Stream >> mAreaGrid[1];
-			mAreaGridKeys.ChangeKey(mAreaGrid, 1, true);
-		}
 		else if (Token == QLatin1String("DIFFUSE"))
 		{
 			Stream >>mLightDiffuse;
@@ -396,8 +378,6 @@ bool lcLight::ParseLDrawLine(QTextStream& Stream)
 		}
 		else if ((Token == QLatin1String("POWER_KEY")) || (Token == QLatin1String("STRENGTH_KEY")))
 			mSpotExponentKeys.LoadKeysLDraw(Stream);
-		else if (Token == QLatin1String("AREA_GRID_KEY"))
-			mAreaGridKeys.LoadKeysLDraw(Stream);
 		else if (Token == QLatin1String("DIFFUSE_KEY"))
 			mLightDiffuseKeys.LoadKeysLDraw(Stream);
 		else if (Token == QLatin1String("SPECULAR_KEY"))
@@ -469,10 +449,6 @@ void lcLight::UpdateLight(lcStep Step, lcLightProperties Props, int Property)
 			mSpotExponent = Props.mSpotExponent;
 			mSpotExponentKeys.ChangeKey(mSpotExponent, Step, false);
 		}
-		break;
-	case LC_LIGHT_AREA_GRID:
-		mAreaGrid = Props.mAreaGrid;
-		mAreaGridKeys.ChangeKey(mAreaGrid, Step, false);
 		break;
 	case LC_LIGHT_CUTOFF:
 		mSpotCutoff = Props.mSpotCutoff;
@@ -754,7 +730,6 @@ void lcLight::InsertTime(lcStep Start, lcStep Time)
 	mLightSpecularKeys.InsertTime(Start, Time);
 	mSpotCutoffKeys.InsertTime(Start, Time);
 	mSpotExponentKeys.InsertTime(Start, Time);
-	mAreaGridKeys.InsertTime(Start, Time);
 }
 
 void lcLight::RemoveTime(lcStep Start, lcStep Time)
@@ -773,7 +748,6 @@ void lcLight::RemoveTime(lcStep Start, lcStep Time)
 	mLightSpecularKeys.RemoveTime(Start, Time);
 	mSpotCutoffKeys.RemoveTime(Start, Time);
 	mSpotExponentKeys.RemoveTime(Start, Time);
-	mAreaGridKeys.RemoveTime(Start, Time);
 }
 
 void lcLight::UpdatePosition(lcStep Step)
@@ -803,7 +777,6 @@ void lcLight::UpdatePosition(lcStep Step)
 	mLightSpecular = mLightSpecularKeys.CalculateKey(Step);
 	mSpotCutoff = mSpotCutoffKeys.CalculateKey(Step);
 	mSpotExponent = mSpotExponentKeys.CalculateKey(Step);
-	mAreaGrid = mAreaGridKeys.CalculateKey(Step);
 }
 
 void lcLight::DrawInterface(lcContext* Context, const lcScene& Scene) const
@@ -1254,9 +1227,6 @@ void lcLight::RemoveKeyFrames()
 
 	mSpotExponentKeys.RemoveAll();
 	mSpotExponentKeys.ChangeKey(mSpotExponent, 1, true);
-
-	mAreaGridKeys.RemoveAll();
-	mAreaGridKeys.ChangeKey(mAreaGrid, 1, true);
 }
 
 bool lcLight::Setup(int LightIndex)

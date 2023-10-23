@@ -133,8 +133,6 @@ protected:
 	QTreeWidgetItem* mLightNameItem;
 	QTreeWidgetItem* lightFormat;
 	QTreeWidgetItem* mLightCastShadowItem;
-	QTreeWidgetItem* lightAreaGridRows;
-	QTreeWidgetItem* lightAreaGridColumns;
 
 	QTreeWidgetItem* mPositionItem;
 	QTreeWidgetItem* mPositionXItem;

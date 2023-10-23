@@ -2139,7 +2139,8 @@ bool Project::ExportPOVRay(const QString& FileName)
 			(CameraName.isEmpty() ? "Camera" : CameraName.toLatin1().constData()));
 	POVFile.WriteLine(Line);
 
-	lcVector2 AreaSize(200.0f, 200.0f), AreaGrid(10.0f, 10.0f);
+	lcVector3 AreaX(1.0f, 0.0f, 0.0f), AreaY(0.0f, 1.0f, 0.0f);
+	lcVector2 AreaSize(200.0f, 200.0f);
 	int AreaCircle = 0, Shadowless = 0;
 	lcLightType LightType = lcLightType::Area;
 	float Power = 0, SpotRadius = 0, SpotFalloff = 0, SpotTightness = 0;
@@ -2157,7 +2158,7 @@ bool Project::ExportPOVRay(const QString& FileName)
 		for (int Idx = 0; Idx < 4; Idx++)
 		{
 			Power = Idx < 2 ? 0.75f : 0.5f;
-			sprintf(Line,"#ifndef (SkipLight%i)\nWriteLight(%i, %i, <%g, %g, %g>, <%g, %g, %g>, <%g, %g, %g>, %g, %g, %g, %g, %i, %i, %i, %i, %i)\n#end\n\n",
+			sprintf(Line,"#ifndef (SkipLight%i)\nWriteLight(%i, %i, <%g, %g, %g>, <%g, %g, %g>, <%g, %g, %g>, %g, %g, %g, %g, %i, <%g, %g, %g>, <%g, %g, %g>, %i, %i)\n#end\n\n",
 					Idx,
 					LightType,
 					Shadowless,
@@ -2166,7 +2167,7 @@ bool Project::ExportPOVRay(const QString& FileName)
 					LightColor[0], LightColor[1], LightColor[2],
 					Power,
 					SpotRadius, SpotFalloff, SpotTightness,
-					AreaCircle, (int)AreaSize[0], (int)AreaSize[1], (int)AreaGrid[0], (int)AreaGrid[1]);
+					AreaCircle, AreaX[0], AreaX[1], AreaX[2], AreaY[0], AreaY[1], AreaY[2], (int)AreaSize[0], (int)AreaSize[1]);
 			POVFile.WriteLine(Line);
 		}
 	}
@@ -2198,14 +2199,15 @@ bool Project::ExportPOVRay(const QString& FileName)
 			case lcLightType::Area:
 				AreaCircle = (Light->GetAreaShape() == lcLightAreaShape::Disk || Light->GetAreaShape() == lcLightAreaShape::Ellipse) ? 1 : 0;
 				AreaSize = Light->GetSize();
-				AreaGrid = Light->mAreaGrid;
+				AreaX = lcVector3(Light->GetWorldMatrix()[0]);
+				AreaY = lcVector3(Light->GetWorldMatrix()[1]);
 				break;
 
 			case lcLightType::Count:
 				break;
 			}
 
-			sprintf(Line,"#ifndef (Skip%s)\n  WriteLight(%i, %i, <%g, %g, %g>, <%g, %g, %g>, <%g, %g, %g>, %g, %g, %g, %g, %i, %i, %i, %i, %i)\n#end\n\n",
+			sprintf(Line,"#ifndef (Skip%s)\n  WriteLight(%i, %i, <%g, %g, %g>, <%g, %g, %g>, <%g, %g, %g>, %g, %g, %g, %g, %i, <%g, %g, %g>, <%g, %g, %g>, %i, %i)\n#end\n\n",
 					LightName.toLatin1().constData(),
 					LightType,
 					Shadowless,
@@ -2214,7 +2216,7 @@ bool Project::ExportPOVRay(const QString& FileName)
 					LightColor[0], LightColor[1], LightColor[2],
 					Power,
 					SpotRadius, SpotFalloff, SpotTightness,
-					AreaCircle, (int)AreaSize[0], (int)AreaSize[1], (int)AreaGrid[0], (int)AreaGrid[1]);
+					AreaCircle, AreaX[0], AreaX[1], AreaX[2], AreaY[0], AreaY[1], AreaY[2], (int)AreaSize[0], (int)AreaSize[1]);
 			POVFile.WriteLine(Line);
 		}
 	}

@@ -886,16 +886,6 @@ void lcQPropertiesTree::slotReturnPressed()
 
 				Model->UpdateLight(Light, Props, LC_LIGHT_CUTOFF);
 			}
-			else if (Item == lightAreaGridRows || Item == lightAreaGridColumns)
-			{
-				float Value = lcParseValueLocalized(Editor->text());
-				if (Item == lightAreaGridRows)
-					Props.mAreaGrid[0] = Value;
-				else if (Item == lightAreaGridColumns)
-					Props.mAreaGrid[1] = Value;
-
-				Model->UpdateLight(Light, Props, LC_LIGHT_AREA_GRID);
-			}
 			else if (Item == mLightNameItem)
 			{
 				QString Value = Editor->text();
@@ -1114,8 +1104,6 @@ void lcQPropertiesTree::SetEmpty()
 	mLightSizeYItem = nullptr;
 	lightFormat = nullptr;
 	mLightCastShadowItem = nullptr;
-	lightAreaGridRows = nullptr;
-	lightAreaGridColumns = nullptr;
 	
 	mPositionItem = nullptr;
 	mPositionXItem = nullptr;
@@ -1379,7 +1367,6 @@ void lcQPropertiesTree::SetLight(lcObject* Focus)
 	lcVector3 Position(0.0f, 0.0f, 0.0f);
 	QColor Color(Qt::white);
 	float SpotConeAngle = 0.0f, SpotPenumbraAngle = 0.0f, SpotTightness = 0.0f;
-	lcVector2 AreaGrid(0.0f, 0.0f);
 
 	if (Light)
 	{
@@ -1440,7 +1427,6 @@ void lcQPropertiesTree::SetLight(lcObject* Focus)
 		Cutoff = Light->mSpotCutoff;
 		EnableCutoff = Light->mEnableCutoff;
 		SpotTightness = Light->GetSpotTightness();
-		AreaGrid = Light->mAreaGrid;
 	}
 
 	if (mWidgetMode != LC_PROPERTY_WIDGET_LIGHT || mLightType != LightType || mPOVRayLight != POVRayLight)
@@ -1511,12 +1497,6 @@ void lcQPropertiesTree::SetLight(lcObject* Focus)
 
 			case lcLightAreaShape::Count:
 				break;
-			}
-
-			if (POVRayLight)
-			{
-				lightAreaGridRows = addProperty(mLightAttributesItem, tr("Grid Rows"), PropertyFloat);
-				lightAreaGridColumns = addProperty(mLightAttributesItem, tr("Grid Columns"), PropertyFloat);
 			}
 			break;
 
@@ -1650,17 +1630,6 @@ void lcQPropertiesTree::SetLight(lcObject* Focus)
 	case lcLightType::Area:
 		mLightAreaShapeItem->setText(1, lcLight::GetAreaShapeString(LightAreaShape));
 		mLightAreaShapeItem->setData(0, PropertyValueRole, static_cast<int>(LightAreaShape));
-
-		if (POVRayLight)
-		{
-			lightAreaGridRows->setText(1, lcFormatValueLocalized(AreaGrid[0]));
-			lightAreaGridRows->setData(0, PropertyValueRole, AreaGrid[0]);
-			lightAreaGridRows->setToolTip(1, tr("The number of sample rows in the area light."));
-
-			lightAreaGridColumns->setText(1, lcFormatValueLocalized(AreaGrid[1]));
-			lightAreaGridColumns->setData(0, PropertyValueRole, AreaGrid[1]);
-			lightAreaGridColumns->setToolTip(1, tr("The number of sample columns in the area light."));
-		}
 		break;
 
 	case lcLightType::Count:

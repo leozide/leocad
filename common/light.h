@@ -36,7 +36,6 @@ enum lcLightProperty
 	LC_LIGHT_DIFFUSE,
 	LC_LIGHT_SPECULAR,
 	LC_LIGHT_EXPONENT,
-	LC_LIGHT_AREA_GRID,
 	LC_LIGHT_CUTOFF,
 	LC_LIGHT_USE_CUTOFF,
 	LC_LIGHT_POVRAY
@@ -44,7 +43,6 @@ enum lcLightProperty
 
 struct lcLightProperties
 {
-	lcVector2 mAreaGrid;
 	float     mLightDiffuse;
 	float     mLightSpecular;
 	float     mSpotExponent;
@@ -221,6 +219,11 @@ public:
 		return -lcVector3(mWorldMatrix[2]);
 	}
 
+	const lcMatrix44& GetWorldMatrix() const
+	{
+		return mWorldMatrix;
+	}
+
 	void SaveLDraw(QTextStream& Stream) const;
 	bool ParseLDrawLine(QTextStream& Stream);
 
@@ -321,14 +324,12 @@ public:
 		props.mSpotCutoff = mSpotCutoff;
 		props.mPOVRayLight = mPOVRayLight;
 		props.mEnableCutoff = mEnableCutoff;
-		props.mAreaGrid = mAreaGrid;
 		return props;
 	}
 
 	lcMatrix44 mWorldMatrix;
 
 	lcVector3 mAttenuation;
-	lcVector2 mAreaGrid;
 	bool mSpotBlendSet;
 	bool mSpotCutoffSet;
 	bool mEnableCutoff;
@@ -379,7 +380,6 @@ protected:
 	lcObjectKeyArray<float> mSpotTightnessKeys;
 
 	lcObjectKeyArray<lcVector3> mAttenuationKeys;
-	lcObjectKeyArray<lcVector2> mAreaGridKeys;
 	lcObjectKeyArray<float> mLightSpecularKeys;
 	lcObjectKeyArray<float> mLightDiffuseKeys;
 	lcObjectKeyArray<float> mSpotCutoffKeys;

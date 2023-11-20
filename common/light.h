@@ -276,6 +276,13 @@ public:
 		return mAreaShape;
 	}
 
+	bool SetAreaGrid(lcVector2i AreaGrid, lcStep Step, bool AddKey);
+
+	lcVector2i GetAreaGrid() const
+	{
+		return mAreaGrid;
+	}
+
 	void SetSize(lcVector2 Size, lcStep Step, bool AddKey);
 
 	lcVector2 GetSize() const
@@ -364,6 +371,7 @@ protected:
 	float mSpotPenumbraAngle = 0.0f;
 	float mSpotTightness = 0.0f;
 	lcLightAreaShape mAreaShape = lcLightAreaShape::Rectangle;
+	lcVector2i mAreaGrid = lcVector2i(2, 2);
 
 	quint32 mState = 0;
 	bool mSelected = false;
@@ -378,6 +386,7 @@ protected:
 	lcObjectKeyArray<float> mSpotConeAngleKeys;
 	lcObjectKeyArray<float> mSpotPenumbraAngleKeys;
 	lcObjectKeyArray<float> mSpotTightnessKeys;
+	lcObjectKeyArray<lcVector2i> mAreaGridKeys;
 
 	lcObjectKeyArray<lcVector3> mAttenuationKeys;
 	lcObjectKeyArray<float> mLightSpecularKeys;

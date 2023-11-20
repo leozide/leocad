@@ -12,6 +12,7 @@
 	template bool lcObject::LoadAttribute<T>(QTextStream& Stream, const QString& Token, T& Variable, lcObjectKeyArray<T>& Keys, const char* VariableName)
 
 LC_OBJECT_ATTRIBUTE(float);
+LC_OBJECT_ATTRIBUTE(lcVector2i);
 LC_OBJECT_ATTRIBUTE(lcVector2);
 LC_OBJECT_ATTRIBUTE(lcVector3);
 LC_OBJECT_ATTRIBUTE(lcVector4);

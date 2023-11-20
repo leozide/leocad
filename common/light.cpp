@@ -43,6 +43,7 @@ lcLight::lcLight(const lcVector3& Position, lcLightType LightType)
 	mSpotConeAngleKeys.ChangeKey(mSpotConeAngle, 1, true);
 	mSpotPenumbraAngleKeys.ChangeKey(mSpotPenumbraAngle, 1, true);
 	mSpotTightnessKeys.ChangeKey(mSpotTightness, 1, true);
+	mAreaGridKeys.ChangeKey(mAreaGrid, 1, true);
 
 	mAttenuationKeys.ChangeKey(mAttenuation, 1, true);
 	mLightDiffuseKeys.ChangeKey(mLightDiffuse, 1, true);
@@ -189,6 +190,7 @@ void lcLight::SaveLDraw(QTextStream& Stream) const
 
 	case lcLightType::Area:
 		Stream << QLatin1String("0 !LEOCAD LIGHT AREA_SHAPE ") << gLightAreaShapes[static_cast<int>(mAreaShape)] << LineEnding;
+		SaveAttribute(Stream, mAreaGrid, mAreaGridKeys, "LIGHT", "AREA_GRID");
 		break;
 	}
 
@@ -324,6 +326,8 @@ bool lcLight::ParseLDrawLine(QTextStream& Stream)
 				}
 			}
 		}
+		else if (LoadAttribute(Stream, Token, mAreaGrid, mAreaGridKeys, "AREA_GRID"))
+			continue;
 
 //		else if (Token == QLatin1String("POWER") || Token == QLatin1String("STRENGTH"))
 //		{
@@ -690,6 +694,13 @@ bool lcLight::SetAreaShape(lcLightAreaShape AreaShape)
 	return false;
 }
 
+bool lcLight::SetAreaGrid(lcVector2i AreaGrid, lcStep Step, bool AddKey)
+{
+	mAreaGridKeys.ChangeKey(AreaGrid, Step, AddKey);
+
+	return true;
+}
+
 void lcLight::SetSize(lcVector2 Size, lcStep Step, bool AddKey)
 {
 	if (mLightType == lcLightType::Area && (mAreaShape == lcLightAreaShape::Square || mAreaShape == lcLightAreaShape::Disk))
@@ -722,6 +733,7 @@ void lcLight::InsertTime(lcStep Start, lcStep Time)
 	mSpotConeAngleKeys.InsertTime(Start, Time);
 	mSpotPenumbraAngleKeys.InsertTime(Start, Time);
 	mSpotTightnessKeys.InsertTime(Start, Time);
+	mAreaGridKeys.InsertTime(Start, Time);
 	mSizeKeys.InsertTime(Start, Time);
 	mPowerKeys.InsertTime(Start, Time);
 
@@ -740,6 +752,7 @@ void lcLight::RemoveTime(lcStep Start, lcStep Time)
 	mSpotConeAngleKeys.RemoveTime(Start, Time);
 	mSpotPenumbraAngleKeys.RemoveTime(Start, Time);
 	mSpotTightnessKeys.RemoveTime(Start, Time);
+	mAreaGridKeys.RemoveTime(Start, Time);
 	mSizeKeys.RemoveTime(Start, Time);
 	mPowerKeys.RemoveTime(Start, Time);
 
@@ -769,6 +782,7 @@ void lcLight::UpdatePosition(lcStep Step)
 	mSpotConeAngle = mSpotConeAngleKeys.CalculateKey(Step);
 	mSpotPenumbraAngle = mSpotPenumbraAngleKeys.CalculateKey(Step);
 	mSpotTightness = mSpotTightnessKeys.CalculateKey(Step);
+	mAreaGrid = mAreaGridKeys.CalculateKey(Step);
 	mSize = mSizeKeys.CalculateKey(Step);
 	mPower = mPowerKeys.CalculateKey(Step);
 
@@ -1206,6 +1220,9 @@ void lcLight::RemoveKeyFrames()
 
 	mSpotTightnessKeys.RemoveAll();
 	mSpotTightnessKeys.ChangeKey(mSpotTightness, 1, true);
+
+	mAreaGridKeys.RemoveAll();
+	mAreaGridKeys.ChangeKey(mAreaGrid, 1, true);
 
 	mSizeKeys.RemoveAll();
 	mSizeKeys.ChangeKey(mSize, 1, true);

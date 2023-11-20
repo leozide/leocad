@@ -51,6 +51,21 @@ inline T lcClamp(const T& Value, const T& Min, const T& Max)
 		return Value;
 }
 
+class lcVector2i
+{
+public:
+	lcVector2i()
+	{
+	}
+
+	constexpr lcVector2i(const int _x, const int _y)
+		: x(_x), y(_y)
+	{
+	}
+
+	int x, y;
+};
+
 class lcVector2
 {
 public:

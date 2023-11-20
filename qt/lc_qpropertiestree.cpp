@@ -447,6 +447,20 @@ QWidget* lcQPropertiesTree::createEditor(QWidget* Parent, QTreeWidgetItem* Item)
 			return Editor;
 		}
 
+	case PropertyInteger:
+	{
+		QLineEdit* Editor = new QLineEdit(Parent);
+		int Value = Item->data(0, PropertyValueRole).toInt();
+		QPoint Range = Item->data(0, PropertyRangeRole).toPoint();
+
+		Editor->setValidator(Range.isNull() ? new QIntValidator(Editor) : new QIntValidator(Range.x(), Range.y(), Editor));
+		Editor->setText(QString::number(Value));
+
+		connect(Editor, &QLineEdit::returnPressed, this, &lcQPropertiesTree::slotReturnPressed);
+
+		return Editor;
+	}
+
 	case PropertyStep:
 		{
 			QLineEdit* Editor = new QLineEdit(Parent);
@@ -842,6 +856,20 @@ void lcQPropertiesTree::slotReturnPressed()
 
 				Model->SetSpotLightTightness(Light, Value);
 			}
+			else if (Item == mLightAreaGridXItem)
+			{
+				lcVector2i AreaGrid = Light->GetAreaGrid();
+				AreaGrid.x = Editor->text().toInt();
+
+				Model->SetLightAreaGrid(Light, AreaGrid);
+			}
+			else if (Item == mLightAreaGridYItem)
+			{
+				lcVector2i AreaGrid = Light->GetAreaGrid();
+				AreaGrid.y = Editor->text().toInt();
+
+				Model->SetLightAreaGrid(Light, AreaGrid);
+			}
 			else if (Item == mLightSizeXItem)
 			{
 				lcVector2 Value = Light->GetSize();
@@ -954,7 +982,7 @@ void lcQPropertiesTree::slotSetValue(int Value)
 			}
 			else if (Item == mLightAreaShapeItem)
 			{
-				Model->SetAreaLightShape(Light, static_cast<lcLightAreaShape>(Value));
+				Model->SetLightAreaShape(Light, static_cast<lcLightAreaShape>(Value));
 			}
 			else if (Item == lightFormat)
 			{
@@ -1100,6 +1128,8 @@ void lcQPropertiesTree::SetEmpty()
 	mLightSpotPenumbraAngleItem = nullptr;
 	mLightSpotTightnessItem = nullptr;
 	mLightAreaShapeItem = nullptr;
+	mLightAreaGridXItem = nullptr;
+	mLightAreaGridYItem = nullptr;
 	mLightSizeXItem = nullptr;
 	mLightSizeYItem = nullptr;
 	lightFormat = nullptr;
@@ -1355,6 +1385,7 @@ void lcQPropertiesTree::SetLight(lcObject* Focus)
 	lcLightType LightType = lcLightType::Point;
 	lcLightAreaShape LightAreaShape = lcLightAreaShape::Rectangle;
 	lcVector2 LightSize(0.0f, 0.0f);
+	lcVector2i AreaGrid(2, 2);
 	float Power = 0.0f;
 	int FormatIndex = 0;
 	float Diffuse = 0.0f;
@@ -1386,6 +1417,7 @@ void lcQPropertiesTree::SetLight(lcObject* Focus)
 		LightType = Light->GetLightType();
 		LightAreaShape = Light->GetAreaShape();
 		LightSize = Light->GetSize();
+		AreaGrid = Light->GetAreaGrid();
 
 		switch (LightType)
 		{
@@ -1498,6 +1530,15 @@ void lcQPropertiesTree::SetLight(lcObject* Focus)
 			case lcLightAreaShape::Count:
 				break;
 			}
+
+			mLightAreaGridXItem = addProperty(mLightAttributesItem, tr("Area Grid X"), PropertyInteger);
+			mLightAreaGridXItem->setToolTip(1, tr("Number of point sources along the X axis (POV-Ray only)."));
+			mLightAreaGridXItem->setData(0, PropertyRangeRole, QPointF(1, INT_MAX));
+
+			mLightAreaGridYItem = addProperty(mLightAttributesItem, tr("Area Grid Y"), PropertyInteger);
+			mLightAreaGridYItem->setToolTip(1, tr("Number of point sources along the Y axis (POV-Ray only)."));
+			mLightAreaGridYItem->setData(0, PropertyRangeRole, QPointF(1, INT_MAX));
+
 			break;
 
 		case lcLightType::Count:
@@ -1630,6 +1671,12 @@ void lcQPropertiesTree::SetLight(lcObject* Focus)
 	case lcLightType::Area:
 		mLightAreaShapeItem->setText(1, lcLight::GetAreaShapeString(LightAreaShape));
 		mLightAreaShapeItem->setData(0, PropertyValueRole, static_cast<int>(LightAreaShape));
+
+		mLightAreaGridXItem->setText(1, QString::number(AreaGrid.x));
+		mLightAreaGridXItem->setData(0, PropertyValueRole, AreaGrid.x);
+
+		mLightAreaGridYItem->setText(1, QString::number(AreaGrid.y));
+		mLightAreaGridYItem->setData(0, PropertyValueRole, AreaGrid.y);
 		break;
 
 	case lcLightType::Count:

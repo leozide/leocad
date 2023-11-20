@@ -3215,7 +3215,7 @@ void lcModel::SetSpotLightTightness(lcLight* Light, float Tightness)
 	UpdateAllViews();
 }
 
-void lcModel::SetAreaLightShape(lcLight* Light, lcLightAreaShape LightAreaShape)
+void lcModel::SetLightAreaShape(lcLight* Light, lcLightAreaShape LightAreaShape)
 {
 	if (!Light->SetAreaShape(LightAreaShape))
 		return;
@@ -3223,6 +3223,18 @@ void lcModel::SetAreaLightShape(lcLight* Light, lcLightAreaShape LightAreaShape)
 	Light->UpdatePosition(mCurrentStep);
 
 	SaveCheckpoint(tr("Changing Area Light Shape"));
+	gMainWindow->UpdateSelectedObjects(false);
+	UpdateAllViews();
+}
+
+void lcModel::SetLightAreaGrid(lcLight* Light, lcVector2i AreaGrid)
+{
+	if (!Light->SetAreaGrid(AreaGrid, mCurrentStep, gMainWindow->GetAddKeys()))
+		return;
+
+	Light->UpdatePosition(mCurrentStep);
+
+	SaveCheckpoint(tr("Changing Area Light Size"));
 	gMainWindow->UpdateSelectedObjects(false);
 	UpdateAllViews();
 }

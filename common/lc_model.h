@@ -373,7 +373,8 @@ public:
 	void SetSpotLightConeAngle(lcLight* Light, float Angle);
 	void SetSpotLightPenumbraAngle(lcLight* Light, float Angle);
 	void SetSpotLightTightness(lcLight* Light, float Tightness);
-	void SetAreaLightShape(lcLight* Light, lcLightAreaShape LightAreaShape);
+	void SetLightAreaShape(lcLight* Light, lcLightAreaShape LightAreaShape);
+	void SetLightAreaGrid(lcLight* Light, lcVector2i AreaGrid);
 	void SetLightSize(lcLight* Light, lcVector2 LightAreaSize);
 	void SetLightPower(lcLight* Light, float Power);
 	void SetLightCastShadow(lcLight* Light, bool CastShadow);

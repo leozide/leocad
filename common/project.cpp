@@ -2140,7 +2140,7 @@ bool Project::ExportPOVRay(const QString& FileName)
 	POVFile.WriteLine(Line);
 
 	lcVector3 AreaX(1.0f, 0.0f, 0.0f), AreaY(0.0f, 1.0f, 0.0f);
-	lcVector2 AreaSize(200.0f, 200.0f);
+	lcVector2i AreaGrid(1, 1);
 	int AreaCircle = 0, Shadowless = 0;
 	lcLightType LightType = lcLightType::Area;
 	float Power = 0, SpotRadius = 0, SpotFalloff = 0, SpotTightness = 0;
@@ -2167,7 +2167,7 @@ bool Project::ExportPOVRay(const QString& FileName)
 					LightColor[0], LightColor[1], LightColor[2],
 					Power,
 					SpotRadius, SpotFalloff, SpotTightness,
-					AreaCircle, AreaX[0], AreaX[1], AreaX[2], AreaY[0], AreaY[1], AreaY[2], (int)AreaSize[0], (int)AreaSize[1]);
+					AreaCircle, AreaX[0], AreaX[1], AreaX[2], AreaY[0], AreaY[1], AreaY[2], AreaGrid.x, AreaGrid.y);
 			POVFile.WriteLine(Line);
 		}
 	}
@@ -2198,9 +2198,9 @@ bool Project::ExportPOVRay(const QString& FileName)
 
 			case lcLightType::Area:
 				AreaCircle = (Light->GetAreaShape() == lcLightAreaShape::Disk || Light->GetAreaShape() == lcLightAreaShape::Ellipse) ? 1 : 0;
-				AreaSize = Light->GetSize();
-				AreaX = lcVector3(Light->GetWorldMatrix()[0]);
-				AreaY = lcVector3(Light->GetWorldMatrix()[1]);
+				AreaX = lcVector3(Light->GetWorldMatrix()[0]) * Light->GetSize().x;
+				AreaY = lcVector3(Light->GetWorldMatrix()[1]) * Light->GetSize().y;
+				AreaGrid = Light->GetAreaGrid();
 				break;
 
 			case lcLightType::Count:
@@ -2216,7 +2216,7 @@ bool Project::ExportPOVRay(const QString& FileName)
 					LightColor[0], LightColor[1], LightColor[2],
 					Power,
 					SpotRadius, SpotFalloff, SpotTightness,
-					AreaCircle, AreaX[0], AreaX[1], AreaX[2], AreaY[0], AreaY[1], AreaY[2], (int)AreaSize[0], (int)AreaSize[1]);
+					AreaCircle, AreaX[0], AreaX[1], AreaX[2], AreaY[0], AreaY[1], AreaY[2], AreaGrid.x, AreaGrid.y);
 			POVFile.WriteLine(Line);
 		}
 	}

@@ -45,6 +45,7 @@ public:
 		PropertyGroup,
 		PropertyBool,
 		PropertyFloat,
+		PropertyInteger,
 		PropertyStep,
 		PropertyString,
 		PropertyStringList,
@@ -128,6 +129,8 @@ protected:
 	QTreeWidgetItem* mLightSpotPenumbraAngleItem;
 	QTreeWidgetItem* mLightSpotTightnessItem;
 	QTreeWidgetItem* mLightAreaShapeItem;
+	QTreeWidgetItem* mLightAreaGridXItem;
+	QTreeWidgetItem* mLightAreaGridYItem;
 	QTreeWidgetItem* mLightSizeXItem;
 	QTreeWidgetItem* mLightSizeYItem;
 	QTreeWidgetItem* mLightNameItem;

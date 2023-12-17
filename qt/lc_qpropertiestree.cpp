@@ -838,7 +838,19 @@ void lcQPropertiesTree::slotReturnPressed()
 		{
 			lcLightProperties Props = Light->GetLightProperties();
 
-			if (Item == mLightSpotConeAngleItem)
+			if (Item == mLightAttenuationDistanceItem)
+			{
+				float Value = lcParseValueLocalized(Editor->text());
+
+				Model->SetLightAttenuationDistance(Light, Value);
+			}
+			else if (Item == mLightAttenuationPowerItem)
+			{
+				float Value = lcParseValueLocalized(Editor->text());
+
+				Model->SetLightAttenuationPower(Light, Value);
+			}
+			else if (Item == mLightSpotConeAngleItem)
 			{
 				float Value = lcParseValueLocalized(Editor->text());
 
@@ -1124,6 +1136,8 @@ void lcQPropertiesTree::SetEmpty()
 	lightExponent = nullptr;
 	mLightTypeItem = nullptr;
 	mLightNameItem = nullptr;
+	mLightAttenuationDistanceItem = nullptr;
+	mLightAttenuationPowerItem = nullptr;
 	mLightSpotConeAngleItem = nullptr;
 	mLightSpotPenumbraAngleItem = nullptr;
 	mLightSpotTightnessItem = nullptr;
@@ -1387,6 +1401,8 @@ void lcQPropertiesTree::SetLight(lcObject* Focus)
 	lcVector2 LightSize(0.0f, 0.0f);
 	lcVector2i AreaGrid(2, 2);
 	float Power = 0.0f;
+	float AttenuationDistance = 0.0f;
+	float AttenuationPower = 0.0f;
 	int FormatIndex = 0;
 	float Diffuse = 0.0f;
 	float Specular = 0.0f;
@@ -1411,6 +1427,8 @@ void lcQPropertiesTree::SetLight(lcObject* Focus)
 		Position = Light->GetPosition();
 		Color = lcQColorFromVector3(Light->GetColor());
 		Power = Light->GetPower();
+		AttenuationDistance = Light->GetAttenuationDistance();
+		AttenuationPower = Light->GetAttenuationPower();
 		SpotConeAngle = Light->GetSpotConeAngle();
 		SpotPenumbraAngle = Light->GetSpotPenumbraAngle();
 
@@ -1477,6 +1495,12 @@ void lcQPropertiesTree::SetLight(lcObject* Focus)
 		mLightPowerItem->setToolTip(1, tr("Power of the light in Watts (Blender only)."));
 
 		mLightCastShadowItem = addProperty(mLightAttributesItem, tr("Cast Shadows"), PropertyBool);
+
+		mLightAttenuationDistanceItem = addProperty(mLightAttributesItem, tr("Attenuation Distance"), PropertyFloat);
+		mLightAttenuationDistanceItem->setToolTip(1, tr("The distance at which the full light intensity arrives (POV-Ray only)."));
+
+		mLightAttenuationPowerItem = addProperty(mLightAttributesItem, tr("Attenuation Power"), PropertyFloat);
+		mLightAttenuationPowerItem->setToolTip(1, tr("Light falloff rate (POV-Ray only)."));
 
 		switch (LightType)
 		{
@@ -1623,6 +1647,14 @@ void lcQPropertiesTree::SetLight(lcObject* Focus)
 
 	mLightPowerItem->setText(1, lcFormatValueLocalized(Power));
 	mLightPowerItem->setData(0, PropertyValueRole, Power);
+
+	mLightAttenuationDistanceItem->setText(1, lcFormatValueLocalized(AttenuationDistance));
+	mLightAttenuationDistanceItem->setData(0, PropertyValueRole, AttenuationDistance);
+	mLightAttenuationDistanceItem->setData(0, PropertyRangeRole, QPointF(0.0, FLT_MAX));
+
+	mLightAttenuationPowerItem->setText(1, lcFormatValueLocalized(AttenuationPower));
+	mLightAttenuationPowerItem->setData(0, PropertyValueRole, AttenuationPower);
+	mLightAttenuationPowerItem->setData(0, PropertyRangeRole, QPointF(0.0, FLT_MAX));
 
 	lightFormat->setText(1, Format);
 	lightFormat->setData(0, PropertyValueRole, FormatIndex);

@@ -3185,6 +3185,26 @@ void lcModel::SetLightColor(lcLight* Light, const lcVector3& Color)
 	UpdateAllViews();
 }
 
+void lcModel::SetLightAttenuationDistance(lcLight* Light, float Distance)
+{
+	Light->SetAttenuationDistance(Distance, mCurrentStep, gMainWindow->GetAddKeys());
+	Light->UpdatePosition(mCurrentStep);
+
+	SaveCheckpoint(tr("Changing Light Attenuation Distance"));
+	gMainWindow->UpdateSelectedObjects(false);
+	UpdateAllViews();
+}
+
+void lcModel::SetLightAttenuationPower(lcLight* Light, float Power)
+{
+	Light->SetAttenuationPower(Power, mCurrentStep, gMainWindow->GetAddKeys());
+	Light->UpdatePosition(mCurrentStep);
+
+	SaveCheckpoint(tr("Changing Light Attenuation Power"));
+	gMainWindow->UpdateSelectedObjects(false);
+	UpdateAllViews();
+}
+
 void lcModel::SetSpotLightConeAngle(lcLight* Light, float Angle)
 {
 	Light->SetSpotConeAngle(Angle, mCurrentStep, gMainWindow->GetAddKeys());

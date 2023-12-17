@@ -2007,7 +2007,7 @@ bool Project::ExportPOVRay(const QString& FileName)
 
 	sprintf(Line,
 			"#ifndef (SkipWriteLightMacro)\n"
-			"#macro WriteLight(Type, Shadowless, Location, Target, Color, Power, SpotRadius, SpotFalloff, SpotTightness, AreaCircle, AreaWidth, AreaHeight, AreaRows, AreaColumns)\n"
+			"#macro WriteLight(Type, Shadowless, Location, Target, Color, Power, FadeDistance, FadePower, SpotRadius, SpotFalloff, SpotTightness, AreaCircle, AreaWidth, AreaHeight, AreaRows, AreaColumns)\n"
 			"  #local PointLight = %i;\n"
 			"  #local Spotlight = %i;\n"
 			"  #local DirectionalLight = %i;\n"
@@ -2017,6 +2017,12 @@ bool Project::ExportPOVRay(const QString& FileName)
 			"    color rgb Color*Power\n"
 			"    #if (Shadowless > 0)\n"
 			"      shadowless\n"
+			"    #end\n"
+			"    #if (FadeDistance > 0)\n"
+			"    fade_distance FadeDistance\n"
+			"    #end\n"
+			"    #if (FadePower > 0)\n"
+			"    fade_power FadePower\n"
 			"    #end\n"
 			"    #if (Type = Spotlight)\n"
 			"      spotlight\n"
@@ -2143,7 +2149,7 @@ bool Project::ExportPOVRay(const QString& FileName)
 	lcVector2i AreaGrid(1, 1);
 	int AreaCircle = 0, Shadowless = 0;
 	lcLightType LightType = lcLightType::Area;
-	float Power = 0, SpotRadius = 0, SpotFalloff = 0, SpotTightness = 0;
+	float Power = 0.0f, FadeDistance = 0.0f, FadePower = 0.0f, SpotRadius = 0.0f, SpotFalloff = 0.0f, SpotTightness = 0.0f;
 
 	if (Lights.IsEmpty())
 	{
@@ -2158,7 +2164,7 @@ bool Project::ExportPOVRay(const QString& FileName)
 		for (int Idx = 0; Idx < 4; Idx++)
 		{
 			Power = Idx < 2 ? 0.75f : 0.5f;
-			sprintf(Line,"#ifndef (SkipLight%i)\nWriteLight(%i, %i, <%g, %g, %g>, <%g, %g, %g>, <%g, %g, %g>, %g, %g, %g, %g, %i, <%g, %g, %g>, <%g, %g, %g>, %i, %i)\n#end\n\n",
+			sprintf(Line,"#ifndef (SkipLight%i)\nWriteLight(%i, %i, <%g, %g, %g>, <%g, %g, %g>, <%g, %g, %g>, %g, %g, %g, %g, %g, %g, %i, <%g, %g, %g>, <%g, %g, %g>, %i, %i)\n#end\n\n",
 					Idx,
 					LightType,
 					Shadowless,
@@ -2166,6 +2172,7 @@ bool Project::ExportPOVRay(const QString& FileName)
 					LightTarget[0], LightTarget[1], LightTarget[2],
 					LightColor[0], LightColor[1], LightColor[2],
 					Power,
+					FadeDistance, FadePower,
 					SpotRadius, SpotFalloff, SpotTightness,
 					AreaCircle, AreaX[0], AreaX[1], AreaX[2], AreaY[0], AreaY[1], AreaY[2], AreaGrid.x, AreaGrid.y);
 			POVFile.WriteLine(Line);
@@ -2182,6 +2189,8 @@ bool Project::ExportPOVRay(const QString& FileName)
 			LightType = Light->GetLightType();
 			Shadowless = Light->GetCastShadow() ? 0 : 1;
 			Power = Light->mPOVRayExponent;
+			FadeDistance = Light->GetAttenuationDistance();
+			FadePower = Light->GetAttenuationPower();
 
 			switch (LightType)
 			{
@@ -2207,7 +2216,7 @@ bool Project::ExportPOVRay(const QString& FileName)
 				break;
 			}
 
-			sprintf(Line,"#ifndef (Skip%s)\n  WriteLight(%i, %i, <%g, %g, %g>, <%g, %g, %g>, <%g, %g, %g>, %g, %g, %g, %g, %i, <%g, %g, %g>, <%g, %g, %g>, %i, %i)\n#end\n\n",
+			sprintf(Line,"#ifndef (Skip%s)\n  WriteLight(%i, %i, <%g, %g, %g>, <%g, %g, %g>, <%g, %g, %g>, %g, %g, %g, %g, %g, %g, %i, <%g, %g, %g>, <%g, %g, %g>, %i, %i)\n#end\n\n",
 					LightName.toLatin1().constData(),
 					LightType,
 					Shadowless,
@@ -2215,6 +2224,7 @@ bool Project::ExportPOVRay(const QString& FileName)
 					LightTarget[1], LightTarget[0], LightTarget[2],
 					LightColor[0], LightColor[1], LightColor[2],
 					Power,
+					FadeDistance, FadePower,
 					SpotRadius, SpotFalloff, SpotTightness,
 					AreaCircle, AreaX[0], AreaX[1], AreaX[2], AreaY[0], AreaY[1], AreaY[2], AreaGrid.x, AreaGrid.y);
 			POVFile.WriteLine(Line);

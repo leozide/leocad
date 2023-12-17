@@ -125,6 +125,8 @@ protected:
 	QTreeWidgetItem* lightEnableCutoff;
 	QTreeWidgetItem* lightExponent;
 	QTreeWidgetItem* mLightTypeItem;
+	QTreeWidgetItem* mLightAttenuationDistanceItem;
+	QTreeWidgetItem* mLightAttenuationPowerItem;
 	QTreeWidgetItem* mLightSpotConeAngleItem;
 	QTreeWidgetItem* mLightSpotPenumbraAngleItem;
 	QTreeWidgetItem* mLightSpotTightnessItem;

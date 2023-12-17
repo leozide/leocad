@@ -27,7 +27,6 @@ lcLight::lcLight(const lcVector3& Position, lcLightType LightType)
 
 	mPOVRayLight = false;
 	mEnableCutoff = false;
-	mAttenuation = lcVector3(1.0f, 0.0f, 0.0f);
 	mLightDiffuse = 1.0f;
 	mLightSpecular = 1.0f;
 	mSpotExponent = 10.0f;
@@ -40,12 +39,13 @@ lcLight::lcLight(const lcVector3& Position, lcLightType LightType)
 	mRotationKeys.ChangeKey(lcMatrix33(mWorldMatrix), 1, true);
 	mColorKeys.ChangeKey(mColor, 1, true);
 	mPowerKeys.ChangeKey(mPower, 1, true);
+	mAttenuationDistanceKeys.ChangeKey(mAttenuationDistance, 1, true);
+	mAttenuationPowerKeys.ChangeKey(mAttenuationPower, 1, true);
 	mSpotConeAngleKeys.ChangeKey(mSpotConeAngle, 1, true);
 	mSpotPenumbraAngleKeys.ChangeKey(mSpotPenumbraAngle, 1, true);
 	mSpotTightnessKeys.ChangeKey(mSpotTightness, 1, true);
 	mAreaGridKeys.ChangeKey(mAreaGrid, 1, true);
 
-	mAttenuationKeys.ChangeKey(mAttenuation, 1, true);
 	mLightDiffuseKeys.ChangeKey(mLightDiffuse, 1, true);
 	mLightSpecularKeys.ChangeKey(mLightSpecular, 1, true);
 	mSpotCutoffKeys.ChangeKey(mSpotCutoff, 1, true);
@@ -158,6 +158,8 @@ void lcLight::SaveLDraw(QTextStream& Stream) const
 	SaveAttribute(Stream, mColor, mColorKeys, "LIGHT", "COLOR");
 	SaveAttribute(Stream, mSize, mSizeKeys, "LIGHT", "SIZE");
 	SaveAttribute(Stream, mPower, mPowerKeys, "LIGHT", "POWER");
+	SaveAttribute(Stream, mAttenuationDistance, mAttenuationDistanceKeys, "LIGHT", "ATTENUATION_DISTANCE");
+	SaveAttribute(Stream, mAttenuationPower, mAttenuationPowerKeys, "LIGHT", "ATTENUATION_POWER");
 
 	if (!mPOVRayLight)
 	{
@@ -305,6 +307,10 @@ bool lcLight::ParseLDrawLine(QTextStream& Stream)
 		else if (LoadAttribute(Stream, Token, mSize, mSizeKeys, "SIZE"))
 			continue;
 		else if (LoadAttribute(Stream, Token, mPower, mPowerKeys, "POWER"))
+			continue;
+		else if (LoadAttribute(Stream, Token, mAttenuationDistance, mAttenuationDistanceKeys, "ATTENUATION_DISTANCE"))
+			continue;
+		else if (LoadAttribute(Stream, Token, mAttenuationPower, mAttenuationPowerKeys, "ATTENUATION_POWER"))
 			continue;
 		else if (LoadAttribute(Stream, Token, mSpotConeAngle, mSpotConeAngleKeys, "SPOT_CONE_ANGLE"))
 			continue;
@@ -665,6 +671,16 @@ void lcLight::SetColor(const lcVector3& Color, lcStep Step, bool AddKey)
 	mColorKeys.ChangeKey(Color, Step, AddKey);
 }
 
+void lcLight::SetAttenuationDistance(float Distance, lcStep Step, bool AddKey)
+{
+	mAttenuationDistanceKeys.ChangeKey(Distance, Step, AddKey);
+}
+
+void lcLight::SetAttenuationPower(float Power, lcStep Step, bool AddKey)
+{
+	mAttenuationPowerKeys.ChangeKey(Power, Step, AddKey);
+}
+
 void lcLight::SetSpotConeAngle(float Angle, lcStep Step, bool AddKey)
 {
 	mSpotConeAngleKeys.ChangeKey(Angle, Step, AddKey);
@@ -736,8 +752,9 @@ void lcLight::InsertTime(lcStep Start, lcStep Time)
 	mAreaGridKeys.InsertTime(Start, Time);
 	mSizeKeys.InsertTime(Start, Time);
 	mPowerKeys.InsertTime(Start, Time);
+	mAttenuationDistanceKeys.InsertTime(Start, Time);
+	mAttenuationPowerKeys.InsertTime(Start, Time);
 
-	mAttenuationKeys.InsertTime(Start, Time);
 	mLightDiffuseKeys.InsertTime(Start, Time);
 	mLightSpecularKeys.InsertTime(Start, Time);
 	mSpotCutoffKeys.InsertTime(Start, Time);
@@ -755,8 +772,9 @@ void lcLight::RemoveTime(lcStep Start, lcStep Time)
 	mAreaGridKeys.RemoveTime(Start, Time);
 	mSizeKeys.RemoveTime(Start, Time);
 	mPowerKeys.RemoveTime(Start, Time);
+	mAttenuationDistanceKeys.RemoveTime(Start, Time);
+	mAttenuationPowerKeys.RemoveTime(Start, Time);
 
-	mAttenuationKeys.RemoveTime(Start, Time);
 	mLightDiffuseKeys.RemoveTime(Start, Time);
 	mLightSpecularKeys.RemoveTime(Start, Time);
 	mSpotCutoffKeys.RemoveTime(Start, Time);
@@ -785,8 +803,9 @@ void lcLight::UpdatePosition(lcStep Step)
 	mAreaGrid = mAreaGridKeys.CalculateKey(Step);
 	mSize = mSizeKeys.CalculateKey(Step);
 	mPower = mPowerKeys.CalculateKey(Step);
+	mAttenuationDistance = mAttenuationDistanceKeys.CalculateKey(Step);
+	mAttenuationPower = mAttenuationPowerKeys.CalculateKey(Step);
 
-	mAttenuation = mAttenuationKeys.CalculateKey(Step);
 	mLightDiffuse = mLightDiffuseKeys.CalculateKey(Step);
 	mLightSpecular = mLightSpecularKeys.CalculateKey(Step);
 	mSpotCutoff = mSpotCutoffKeys.CalculateKey(Step);
@@ -1230,8 +1249,11 @@ void lcLight::RemoveKeyFrames()
 	mPowerKeys.RemoveAll();
 	mPowerKeys.ChangeKey(mPower, 1, true);
 
-	mAttenuationKeys.RemoveAll();
-	mAttenuationKeys.ChangeKey(mAttenuation, 1, true);
+	mAttenuationDistanceKeys.RemoveAll();
+	mAttenuationDistanceKeys.ChangeKey(mAttenuationDistance, 1, true);
+
+	mAttenuationPowerKeys.RemoveAll();
+	mAttenuationPowerKeys.ChangeKey(mAttenuationPower, 1, true);
 
 	mLightDiffuseKeys.RemoveAll();
 	mLightDiffuseKeys.ChangeKey(mLightDiffuse, 1, true);

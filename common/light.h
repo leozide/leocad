@@ -248,6 +248,20 @@ public:
 		return mColor;
 	}
 
+	void SetAttenuationDistance(float Distance, lcStep Step, bool AddKey);
+
+	float GetAttenuationDistance() const
+	{
+		return mAttenuationDistance;
+	}
+
+	void SetAttenuationPower(float Power, lcStep Step, bool AddKey);
+
+	float GetAttenuationPower() const
+	{
+		return mAttenuationPower;
+	}
+
 	void SetSpotConeAngle(float Angle, lcStep Step, bool AddKey);
 
 	float GetSpotConeAngle() const
@@ -336,7 +350,6 @@ public:
 
 	lcMatrix44 mWorldMatrix;
 
-	lcVector3 mAttenuation;
 	bool mSpotBlendSet;
 	bool mSpotCutoffSet;
 	bool mEnableCutoff;
@@ -367,6 +380,8 @@ protected:
 	lcVector3 mColor = lcVector3(1.0f, 1.0f, 1.0f);
 	lcVector2 mSize = lcVector2(0.0f, 0.0f);
 	float mPower = 1.0f;
+	float mAttenuationDistance = 0.0f;
+	float mAttenuationPower = 0.0f;
 	float mSpotConeAngle = 80.0f;
 	float mSpotPenumbraAngle = 0.0f;
 	float mSpotTightness = 0.0f;
@@ -383,12 +398,13 @@ protected:
 	lcObjectKeyArray<lcVector3> mColorKeys;
 	lcObjectKeyArray<lcVector2> mSizeKeys;
 	lcObjectKeyArray<float> mPowerKeys;
+	lcObjectKeyArray<float> mAttenuationDistanceKeys;
+	lcObjectKeyArray<float> mAttenuationPowerKeys;
 	lcObjectKeyArray<float> mSpotConeAngleKeys;
 	lcObjectKeyArray<float> mSpotPenumbraAngleKeys;
 	lcObjectKeyArray<float> mSpotTightnessKeys;
 	lcObjectKeyArray<lcVector2i> mAreaGridKeys;
 
-	lcObjectKeyArray<lcVector3> mAttenuationKeys;
 	lcObjectKeyArray<float> mLightSpecularKeys;
 	lcObjectKeyArray<float> mLightDiffuseKeys;
 	lcObjectKeyArray<float> mSpotCutoffKeys;

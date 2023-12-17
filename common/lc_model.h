@@ -370,6 +370,8 @@ public:
 
 	void SetLightType(lcLight* Light, lcLightType LightType);
 	void SetLightColor(lcLight* Light, const lcVector3& Color);
+	void SetLightAttenuationDistance(lcLight* Light, float Distance);
+	void SetLightAttenuationPower(lcLight* Light, float Power);
 	void SetSpotLightConeAngle(lcLight* Light, float Angle);
 	void SetSpotLightPenumbraAngle(lcLight* Light, float Angle);
 	void SetSpotLightTightness(lcLight* Light, float Tightness);

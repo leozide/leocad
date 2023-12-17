@@ -658,13 +658,7 @@ void lcQPropertiesTree::slotToggled(bool Value)
 
 		if (Light)
 		{
-			if (Item == lightEnableCutoff)
-			{
-				lcLightProperties Props = Light->GetLightProperties();
-				Props.mEnableCutoff = Value;
-				Model->UpdateLight(Light, Props, LC_LIGHT_USE_CUTOFF);
-			}
-			else if (Item == mLightCastShadowItem)
+			if (Item == mLightCastShadowItem)
 			{
 				Model->SetLightCastShadow(Light, Value);
 			}
@@ -902,29 +896,11 @@ void lcQPropertiesTree::slotReturnPressed()
 
 				Model->SetLightPower(Light, Value);
 			}
-			else if (Item == lightDiffuse)
-			{
-				Props.mLightDiffuse = lcParseValueLocalized(Editor->text());
-
-				Model->UpdateLight(Light, Props, LC_LIGHT_DIFFUSE);
-			}
-			else if (Item == lightSpecular)
-			{
-				Props.mLightSpecular = lcParseValueLocalized(Editor->text());
-
-				Model->UpdateLight(Light, Props, LC_LIGHT_SPECULAR);
-			}
 			else if (Item == lightExponent)
 			{
 				Props.mSpotExponent = lcParseValueLocalized(Editor->text());
 
 				Model->UpdateLight(Light, Props, LC_LIGHT_EXPONENT);
-			}
-			else if (Item == lightCutoff)
-			{
-				Props.mSpotCutoff = lcParseValueLocalized(Editor->text());
-
-				Model->UpdateLight(Light, Props, LC_LIGHT_CUTOFF);
 			}
 			else if (Item == mLightNameItem)
 			{
@@ -1129,10 +1105,6 @@ void lcQPropertiesTree::SetEmpty()
 	mLightColorItem = nullptr;
 	mLightPowerItem = nullptr;
 	mLightAttributesItem = nullptr;
-	lightDiffuse = nullptr;
-	lightSpecular = nullptr;
-	lightCutoff = nullptr;
-	lightEnableCutoff = nullptr;
 	lightExponent = nullptr;
 	mLightTypeItem = nullptr;
 	mLightNameItem = nullptr;
@@ -1394,8 +1366,7 @@ void lcQPropertiesTree::SetLight(lcObject* Focus)
 
 	QString Name = tr("Light");
 	QString ExponentLabel = tr("Exponent");
-	QString FactorALabel = QLatin1String("FactorA");
-	QString Format, ExponentToolTip, FactorAToolTip, FactorBToolTip;
+	QString Format, ExponentToolTip;
 	lcLightType LightType = lcLightType::Point;
 	lcLightAreaShape LightAreaShape = lcLightAreaShape::Rectangle;
 	lcVector2 LightSize(0.0f, 0.0f);
@@ -1404,8 +1375,6 @@ void lcQPropertiesTree::SetLight(lcObject* Focus)
 	float AttenuationDistance = 0.0f;
 	float AttenuationPower = 0.0f;
 	int FormatIndex = 0;
-	float Diffuse = 0.0f;
-	float Specular = 0.0f;
 	float Cutoff = 0.0f;
 	float Exponent = 0.0f;
 	bool EnableCutoff = false;
@@ -1444,7 +1413,6 @@ void lcQPropertiesTree::SetLight(lcObject* Focus)
 			break;
 
 		case lcLightType::Spot:
-			FactorBToolTip = tr("The softness of the spotlight edge.");
 			ExponentLabel = tr("Power");
 			break;
 
@@ -1459,9 +1427,6 @@ void lcQPropertiesTree::SetLight(lcObject* Focus)
 			break;
 		}
 
-		Diffuse = Light->mLightDiffuse;
-		Specular = Light->mLightSpecular;
-
 		if (POVRayLight)
 		{
 			Exponent = Light->mPOVRayExponent;
@@ -1474,8 +1439,6 @@ void lcQPropertiesTree::SetLight(lcObject* Focus)
 		}
 
 		ExponentLabel = LightType == lcLightType::Directional ? tr("Strength") : tr("Power");
-		Cutoff = Light->mSpotCutoff;
-		EnableCutoff = Light->mEnableCutoff;
 		SpotTightness = Light->GetSpotTightness();
 	}
 
@@ -1570,18 +1533,6 @@ void lcQPropertiesTree::SetLight(lcObject* Focus)
 		}
 
 		lightExponent = addProperty(mLightAttributesItem, ExponentLabel, PropertyFloat);
-
-		if (!POVRayLight)
-		{
-			if (LightType != lcLightType::Directional)
-			{
-				lightEnableCutoff = addProperty(mLightAttributesItem, tr("Cutoff"), PropertyBool);
-				lightCutoff = addProperty(mLightAttributesItem, tr("Cutoff Distance"), PropertyFloat);
-			}
-
-			lightDiffuse = addProperty(mLightAttributesItem, tr("Diffuse"), PropertyFloat);
-			lightSpecular = addProperty(mLightAttributesItem, tr("Specular"), PropertyFloat);
-		}
 
 		// Configuration
 		lightConfiguration = addProperty(nullptr, tr("Configuration"), PropertyGroup);
@@ -1713,27 +1664,6 @@ void lcQPropertiesTree::SetLight(lcObject* Focus)
 
 	case lcLightType::Count:
 		break;
-	}
-
-	if (!POVRayLight)
-	{
-		if (LightType != lcLightType::Directional)
-		{
-			lightEnableCutoff->setCheckState(1, EnableCutoff ? Qt::Checked : Qt::Unchecked);
-			lightEnableCutoff->setData(0, PropertyValueRole, EnableCutoff);
-
-			lightCutoff->setText(1, lcFormatValueLocalized(Cutoff));
-			lightCutoff->setData(0, PropertyValueRole, Cutoff);
-			lightCutoff->setToolTip(1, tr("Distance at which the light influence will be set to 0."));
-		}
-
-		lightDiffuse->setText(1, lcFormatValueLocalized(Diffuse));
-		lightDiffuse->setData(0, PropertyValueRole, Diffuse);
-		lightDiffuse->setToolTip(1, tr("Diffuse reflection multiplier factor."));
-
-		lightSpecular->setText(1, lcFormatValueLocalized(Specular));
-		lightSpecular->setData(0, PropertyValueRole, Specular);
-		lightSpecular->setToolTip(1, tr("Specular reflection multiplier factor."));
 	}
 
 	mLightNameItem->setText(1, Name);

@@ -119,10 +119,6 @@ protected:
 	QTreeWidgetItem* mLightColorItem;
 	QTreeWidgetItem* mLightPowerItem;
 	QTreeWidgetItem* mLightAttributesItem;
-	QTreeWidgetItem* lightDiffuse;
-	QTreeWidgetItem* lightSpecular;
-	QTreeWidgetItem* lightCutoff;
-	QTreeWidgetItem* lightEnableCutoff;
 	QTreeWidgetItem* lightExponent;
 	QTreeWidgetItem* mLightTypeItem;
 	QTreeWidgetItem* mLightAttenuationDistanceItem;

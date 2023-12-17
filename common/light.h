@@ -33,21 +33,13 @@ enum class lcLightAreaShape
 
 enum lcLightProperty
 {
-	LC_LIGHT_DIFFUSE,
-	LC_LIGHT_SPECULAR,
 	LC_LIGHT_EXPONENT,
-	LC_LIGHT_CUTOFF,
-	LC_LIGHT_USE_CUTOFF,
 	LC_LIGHT_POVRAY
 };
 
 struct lcLightProperties
 {
-	float     mLightDiffuse;
-	float     mLightSpecular;
 	float     mSpotExponent;
-	float     mSpotCutoff;
-	bool      mEnableCutoff;
 	bool      mPOVRayLight;
 };
 
@@ -339,24 +331,14 @@ public:
 	lcLightProperties GetLightProperties() const
 	{
 		lcLightProperties props;
-		props.mLightDiffuse = mLightDiffuse;
-		props.mLightSpecular = mLightSpecular;
 		props.mSpotExponent = mSpotExponent;
-		props.mSpotCutoff = mSpotCutoff;
 		props.mPOVRayLight = mPOVRayLight;
-		props.mEnableCutoff = mEnableCutoff;
 		return props;
 	}
 
 	lcMatrix44 mWorldMatrix;
 
-	bool mSpotBlendSet;
-	bool mSpotCutoffSet;
-	bool mEnableCutoff;
 	bool mPOVRayLight;
-	float mLightDiffuse;
-	float mLightSpecular;
-	float mSpotCutoff;
 	float mSpotExponent;
 	float mPOVRayExponent;
 
@@ -405,9 +387,6 @@ protected:
 	lcObjectKeyArray<float> mSpotTightnessKeys;
 	lcObjectKeyArray<lcVector2i> mAreaGridKeys;
 
-	lcObjectKeyArray<float> mLightSpecularKeys;
-	lcObjectKeyArray<float> mLightDiffuseKeys;
-	lcObjectKeyArray<float> mSpotCutoffKeys;
 	lcObjectKeyArray<float> mSpotExponentKeys;
 
 	static constexpr float mTargetDistance = 50.0f;

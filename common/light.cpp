@@ -26,12 +26,8 @@ lcLight::lcLight(const lcVector3& Position, lcLightType LightType)
 	mWorldMatrix = lcMatrix44Translation(Position);
 
 	mPOVRayLight = false;
-	mEnableCutoff = false;
-	mLightDiffuse = 1.0f;
-	mLightSpecular = 1.0f;
 	mSpotExponent = 10.0f;
 	mPOVRayExponent = 1.0f;
-	mSpotCutoff = LightType != lcLightType::Directional ? 40.0f : 0.0f;
 	
 	UpdateLightType();
 
@@ -46,9 +42,6 @@ lcLight::lcLight(const lcVector3& Position, lcLightType LightType)
 	mSpotTightnessKeys.ChangeKey(mSpotTightness, 1, true);
 	mAreaGridKeys.ChangeKey(mAreaGrid, 1, true);
 
-	mLightDiffuseKeys.ChangeKey(mLightDiffuse, 1, true);
-	mLightSpecularKeys.ChangeKey(mLightSpecular, 1, true);
-	mSpotCutoffKeys.ChangeKey(mSpotCutoff, 1, true);
 	mSpotExponentKeys.ChangeKey(mSpotExponent, 1, true);
 
 	UpdatePosition(1);
@@ -161,18 +154,7 @@ void lcLight::SaveLDraw(QTextStream& Stream) const
 	SaveAttribute(Stream, mAttenuationDistance, mAttenuationDistanceKeys, "LIGHT", "ATTENUATION_DISTANCE");
 	SaveAttribute(Stream, mAttenuationPower, mAttenuationPowerKeys, "LIGHT", "ATTENUATION_POWER");
 
-	if (!mPOVRayLight)
-	{
-		SaveAttribute(Stream, mLightDiffuse, mLightDiffuseKeys, "LIGHT", "DIFFUSE");
-		SaveAttribute(Stream, mLightSpecular, mLightSpecularKeys, "LIGHT", "SPECULAR");
-	}
-
 //	SaveAttribute(Stream, (mPOVRayLight ? mPOVRayExponent : mSpotExponent), mSpotExponentKeys, "LIGHT", "POWER");
-
-	if (mEnableCutoff && !mPOVRayLight)
-	{
-		SaveAttribute(Stream, mSpotCutoff, mSpotCutoffKeys, "LIGHT", "CUTOFF_DISTANCE");
-	}
 
 	switch (mLightType)
 	{
@@ -348,22 +330,6 @@ bool lcLight::ParseLDrawLine(QTextStream& Stream)
 //				mSpotExponentKeys.ChangeKey(mSpotExponent, 1, true);
 //			}
 //		}
-		else if (Token == QLatin1String("DIFFUSE"))
-		{
-			Stream >>mLightDiffuse;
-			mLightDiffuseKeys.ChangeKey(mLightDiffuse, 1, true);
-		}
-		else if (Token == QLatin1String("SPECULAR"))
-		{
-			Stream >>mLightSpecular;
-			mLightSpecularKeys.ChangeKey(mLightSpecular, 1, true);
-		}
-		else if ((mSpotCutoffSet = Token == QLatin1String("CUTOFF_DISTANCE")))
-		{
-			mEnableCutoff = true;
-			Stream >> mSpotCutoff;
-			mSpotCutoffKeys.ChangeKey(mSpotCutoff, 1, true);
-		}
 		else if (Token == QLatin1String("TYPE"))
 		{
 			QString Type;
@@ -388,36 +354,10 @@ bool lcLight::ParseLDrawLine(QTextStream& Stream)
 		}
 		else if ((Token == QLatin1String("POWER_KEY")) || (Token == QLatin1String("STRENGTH_KEY")))
 			mSpotExponentKeys.LoadKeysLDraw(Stream);
-		else if (Token == QLatin1String("DIFFUSE_KEY"))
-			mLightDiffuseKeys.LoadKeysLDraw(Stream);
-		else if (Token == QLatin1String("SPECULAR_KEY"))
-			mLightSpecularKeys.LoadKeysLDraw(Stream);
-		else if (Token == QLatin1String("CUTOFF_DISTANCE_KEY"))
-			mSpotCutoffKeys.LoadKeysLDraw(Stream);
 		else if (Token == QLatin1String("NAME"))
 		{
 			mName = Stream.readAll().trimmed();
 			mName.replace("\"", "");
-
-			// Set default settings per light type
-			switch (mLightType)
-			{
-			case lcLightType::Point:
-			case lcLightType::Spot:
-				break;
-
-			case lcLightType::Directional:
-				if (!mSpotCutoffSet)
-				{
-					mSpotCutoff = 0.0f;
-					mSpotCutoffKeys.ChangeKey(mSpotCutoff, 1, true);
-				}
-				break;
-
-			case lcLightType::Area:
-			case lcLightType::Count:
-				break;
-			}
 
 			return true;
 		}
@@ -440,14 +380,6 @@ void lcLight::UpdateLight(lcStep Step, lcLightProperties Props, int Property)
 {
 	switch(Property)
 	{
-	case LC_LIGHT_DIFFUSE:
-		mLightDiffuse = Props.mLightDiffuse;
-		mLightDiffuseKeys.ChangeKey(mLightDiffuse, Step, false);
-		break;
-	case LC_LIGHT_SPECULAR:
-		mLightSpecular = Props.mLightSpecular;
-		mLightSpecularKeys.ChangeKey(mLightSpecular, Step, false);
-		break;
 	case LC_LIGHT_EXPONENT:
 		if (Props.mPOVRayLight)
 		{
@@ -459,13 +391,6 @@ void lcLight::UpdateLight(lcStep Step, lcLightProperties Props, int Property)
 			mSpotExponent = Props.mSpotExponent;
 			mSpotExponentKeys.ChangeKey(mSpotExponent, Step, false);
 		}
-		break;
-	case LC_LIGHT_CUTOFF:
-		mSpotCutoff = Props.mSpotCutoff;
-		mSpotCutoffKeys.ChangeKey(mSpotCutoff, Step, false);
-		break;
-	case LC_LIGHT_USE_CUTOFF:
-		mEnableCutoff = Props.mEnableCutoff;
 		break;
 	case LC_LIGHT_POVRAY:
 		mPOVRayLight = Props.mPOVRayLight;
@@ -755,9 +680,6 @@ void lcLight::InsertTime(lcStep Start, lcStep Time)
 	mAttenuationDistanceKeys.InsertTime(Start, Time);
 	mAttenuationPowerKeys.InsertTime(Start, Time);
 
-	mLightDiffuseKeys.InsertTime(Start, Time);
-	mLightSpecularKeys.InsertTime(Start, Time);
-	mSpotCutoffKeys.InsertTime(Start, Time);
 	mSpotExponentKeys.InsertTime(Start, Time);
 }
 
@@ -775,9 +697,6 @@ void lcLight::RemoveTime(lcStep Start, lcStep Time)
 	mAttenuationDistanceKeys.RemoveTime(Start, Time);
 	mAttenuationPowerKeys.RemoveTime(Start, Time);
 
-	mLightDiffuseKeys.RemoveTime(Start, Time);
-	mLightSpecularKeys.RemoveTime(Start, Time);
-	mSpotCutoffKeys.RemoveTime(Start, Time);
 	mSpotExponentKeys.RemoveTime(Start, Time);
 }
 
@@ -806,9 +725,6 @@ void lcLight::UpdatePosition(lcStep Step)
 	mAttenuationDistance = mAttenuationDistanceKeys.CalculateKey(Step);
 	mAttenuationPower = mAttenuationPowerKeys.CalculateKey(Step);
 
-	mLightDiffuse = mLightDiffuseKeys.CalculateKey(Step);
-	mLightSpecular = mLightSpecularKeys.CalculateKey(Step);
-	mSpotCutoff = mSpotCutoffKeys.CalculateKey(Step);
 	mSpotExponent = mSpotExponentKeys.CalculateKey(Step);
 }
 
@@ -1254,15 +1170,6 @@ void lcLight::RemoveKeyFrames()
 
 	mAttenuationPowerKeys.RemoveAll();
 	mAttenuationPowerKeys.ChangeKey(mAttenuationPower, 1, true);
-
-	mLightDiffuseKeys.RemoveAll();
-	mLightDiffuseKeys.ChangeKey(mLightDiffuse, 1, true);
-
-	mLightSpecularKeys.RemoveAll();
-	mLightSpecularKeys.ChangeKey(mLightSpecular, 1, true);
-
-	mSpotCutoffKeys.RemoveAll();
-	mSpotCutoffKeys.ChangeKey(mSpotCutoff, 1, true);
 
 	mSpotExponentKeys.RemoveAll();
 	mSpotExponentKeys.ChangeKey(mSpotExponent, 1, true);

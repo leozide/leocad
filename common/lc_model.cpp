@@ -4481,6 +4481,7 @@ void lcModel::SetPreviewPieceInfo(PieceInfo* Info, int ColorIndex)
 	AddPiece(Piece);
 	Piece->UpdatePosition(1);
 
+	SetCurrentStep(LC_STEP_MAX);
 	SaveCheckpoint(QString());
 }
 

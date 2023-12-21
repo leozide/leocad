@@ -49,7 +49,6 @@ public:
 		PropertyStep,
 		PropertyString,
 		PropertyStringList,
-		PropertyLightFormat,
 		PropertyColor,
 		PropertyPieceColor,
 		PropertyPart
@@ -78,7 +77,6 @@ protected:
 	void SetMultiple();
 
 	lcLightType mLightType;
-	bool mPOVRayLight;
 
 	lcPropertyWidgetMode mWidgetMode;
 	lcObject* mFocus;
@@ -115,11 +113,9 @@ protected:
 	QTreeWidgetItem* cameraFar;
 	QTreeWidgetItem* mCameraNameItem;
 
-	QTreeWidgetItem* lightConfiguration;
 	QTreeWidgetItem* mLightColorItem;
 	QTreeWidgetItem* mLightPowerItem;
 	QTreeWidgetItem* mLightAttributesItem;
-	QTreeWidgetItem* lightExponent;
 	QTreeWidgetItem* mLightTypeItem;
 	QTreeWidgetItem* mLightAttenuationDistanceItem;
 	QTreeWidgetItem* mLightAttenuationPowerItem;
@@ -132,7 +128,6 @@ protected:
 	QTreeWidgetItem* mLightSizeXItem;
 	QTreeWidgetItem* mLightSizeYItem;
 	QTreeWidgetItem* mLightNameItem;
-	QTreeWidgetItem* lightFormat;
 	QTreeWidgetItem* mLightCastShadowItem;
 
 	QTreeWidgetItem* mPositionItem;

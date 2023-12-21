@@ -2188,7 +2188,7 @@ bool Project::ExportPOVRay(const QString& FileName)
 			const QString LightName = QString(Light->GetName()).replace(" ", "_");
 			LightType = Light->GetLightType();
 			Shadowless = Light->GetCastShadow() ? 0 : 1;
-			Power = Light->mPOVRayExponent;
+			Power = Light->GetPower();
 			FadeDistance = Light->GetAttenuationDistance();
 			FadePower = Light->GetAttenuationPower();
 

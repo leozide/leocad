@@ -31,18 +31,6 @@ enum class lcLightAreaShape
 	Count
 };
 
-enum lcLightProperty
-{
-	LC_LIGHT_EXPONENT,
-	LC_LIGHT_POVRAY
-};
-
-struct lcLightProperties
-{
-	float     mSpotExponent;
-	bool      mPOVRayLight;
-};
-
 class lcLight : public lcObject
 {
 public:
@@ -326,21 +314,8 @@ public:
 	void Rotate(lcStep Step, bool AddKey, const lcMatrix33& RotationMatrix, const lcVector3& Center, const lcMatrix33& RotationFrame);
 	bool Setup(int LightIndex);
 	void CreateName(const lcArray<lcLight*>& Lights);
-	void UpdateLight(lcStep Step, lcLightProperties Props, int Property);
-
-	lcLightProperties GetLightProperties() const
-	{
-		lcLightProperties props;
-		props.mSpotExponent = mSpotExponent;
-		props.mPOVRayLight = mPOVRayLight;
-		return props;
-	}
 
 	lcMatrix44 mWorldMatrix;
-
-	bool mPOVRayLight;
-	float mSpotExponent;
-	float mPOVRayExponent;
 
 protected:
 	void UpdateLightType();
@@ -386,8 +361,6 @@ protected:
 	lcObjectKeyArray<float> mSpotPenumbraAngleKeys;
 	lcObjectKeyArray<float> mSpotTightnessKeys;
 	lcObjectKeyArray<lcVector2i> mAreaGridKeys;
-
-	lcObjectKeyArray<float> mSpotExponentKeys;
 
 	static constexpr float mTargetDistance = 50.0f;
 };

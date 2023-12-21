@@ -526,25 +526,6 @@ QWidget* lcQPropertiesTree::createEditor(QWidget* Parent, QTreeWidgetItem* Item)
 		return editor;
 	}
 
-	case PropertyLightFormat:
-		{
-			QComboBox *editor = new QComboBox(Parent);
-
-			editor->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
-			editor->setMinimumContentsLength(1);
-
-			QStringList formats = { QLatin1String("Blender"), QLatin1String("POVRay") };
-			for (int i = 0; i < formats.size(); i++)
-				editor->addItem(formats.at(i), QVariant::fromValue(i));
-
-			int value = Item->data(0, PropertyValueRole).toInt();
-			editor->setCurrentIndex(value);
-
-			connect(editor, SIGNAL(currentIndexChanged(int)), this, SLOT(slotSetValue(int)));
-
-			return editor;
-		}
-
 	case PropertyColor:
 		{
 			QPushButton *Editor = new QPushButton(Parent);
@@ -830,8 +811,6 @@ void lcQPropertiesTree::slotReturnPressed()
 	{
 		if (Light)
 		{
-			lcLightProperties Props = Light->GetLightProperties();
-
 			if (Item == mLightAttenuationDistanceItem)
 			{
 				float Value = lcParseValueLocalized(Editor->text());
@@ -896,12 +875,6 @@ void lcQPropertiesTree::slotReturnPressed()
 
 				Model->SetLightPower(Light, Value);
 			}
-			else if (Item == lightExponent)
-			{
-				Props.mSpotExponent = lcParseValueLocalized(Editor->text());
-
-				Model->UpdateLight(Light, Props, LC_LIGHT_EXPONENT);
-			}
 			else if (Item == mLightNameItem)
 			{
 				QString Value = Editor->text();
@@ -962,8 +935,6 @@ void lcQPropertiesTree::slotSetValue(int Value)
 
 		if (Light)
 		{
-			lcLightProperties Props = Light->GetLightProperties();
-
 			if (Item == mLightTypeItem)
 			{
 				Model->SetLightType(Light, static_cast<lcLightType>(Value));
@@ -971,11 +942,6 @@ void lcQPropertiesTree::slotSetValue(int Value)
 			else if (Item == mLightAreaShapeItem)
 			{
 				Model->SetLightAreaShape(Light, static_cast<lcLightAreaShape>(Value));
-			}
-			else if (Item == lightFormat)
-			{
-				Props.mPOVRayLight =  Value;
-				Model->UpdateLight(Light, Props, LC_LIGHT_POVRAY);
 			}
 		}
 	}
@@ -1101,11 +1067,9 @@ void lcQPropertiesTree::SetEmpty()
 	cameraFar = nullptr;
 	mCameraNameItem = nullptr;
 
-	lightConfiguration = nullptr;
 	mLightColorItem = nullptr;
 	mLightPowerItem = nullptr;
 	mLightAttributesItem = nullptr;
-	lightExponent = nullptr;
 	mLightTypeItem = nullptr;
 	mLightNameItem = nullptr;
 	mLightAttenuationDistanceItem = nullptr;
@@ -1118,7 +1082,6 @@ void lcQPropertiesTree::SetEmpty()
 	mLightAreaGridYItem = nullptr;
 	mLightSizeXItem = nullptr;
 	mLightSizeYItem = nullptr;
-	lightFormat = nullptr;
 	mLightCastShadowItem = nullptr;
 	
 	mPositionItem = nullptr;
@@ -1365,8 +1328,6 @@ void lcQPropertiesTree::SetLight(lcObject* Focus)
 	lcLight* Light = (Focus && Focus->IsLight()) ? (lcLight*)Focus : nullptr;
 
 	QString Name = tr("Light");
-	QString ExponentLabel = tr("Exponent");
-	QString Format, ExponentToolTip;
 	lcLightType LightType = lcLightType::Point;
 	lcLightAreaShape LightAreaShape = lcLightAreaShape::Rectangle;
 	lcVector2 LightSize(0.0f, 0.0f);
@@ -1374,11 +1335,6 @@ void lcQPropertiesTree::SetLight(lcObject* Focus)
 	float Power = 0.0f;
 	float AttenuationDistance = 0.0f;
 	float AttenuationPower = 0.0f;
-	int FormatIndex = 0;
-	float Cutoff = 0.0f;
-	float Exponent = 0.0f;
-	bool EnableCutoff = false;
-	bool POVRayLight = false;
 	bool CastShadow = true;
 	lcVector3 Position(0.0f, 0.0f, 0.0f);
 	QColor Color(Qt::white);
@@ -1388,10 +1344,6 @@ void lcQPropertiesTree::SetLight(lcObject* Focus)
 	{
 		Name = Light->GetName();
 
-		POVRayLight = Light->mPOVRayLight;
-		FormatIndex = static_cast<int>(POVRayLight);
-		Format = POVRayLight ? QLatin1String("POVRay") : QLatin1String("Blender");
-
 		CastShadow = Light->GetCastShadow();
 		Position = Light->GetPosition();
 		Color = lcQColorFromVector3(Light->GetColor());
@@ -1400,49 +1352,15 @@ void lcQPropertiesTree::SetLight(lcObject* Focus)
 		AttenuationPower = Light->GetAttenuationPower();
 		SpotConeAngle = Light->GetSpotConeAngle();
 		SpotPenumbraAngle = Light->GetSpotPenumbraAngle();
+		SpotTightness = Light->GetSpotTightness();
 
 		LightType = Light->GetLightType();
 		LightAreaShape = Light->GetAreaShape();
 		LightSize = Light->GetSize();
 		AreaGrid = Light->GetAreaGrid();
-
-		switch (LightType)
-		{
-		case lcLightType::Point:
-			ExponentLabel = tr("Exponent");
-			break;
-
-		case lcLightType::Spot:
-			ExponentLabel = tr("Power");
-			break;
-
-		case lcLightType::Directional:
-			ExponentLabel = tr("Strength");
-			break;
-
-		case lcLightType::Area:
-			ExponentLabel = tr("Power");
-			break;
-		default:
-			break;
-		}
-
-		if (POVRayLight)
-		{
-			Exponent = Light->mPOVRayExponent;
-			ExponentToolTip = tr("Intensity of the light with typical range of 0 to 1.0.");
-		}
-		else
-		{
-			Exponent = Light->mSpotExponent;
-			ExponentToolTip = tr("Intensity of the light in watts.");
-		}
-
-		ExponentLabel = LightType == lcLightType::Directional ? tr("Strength") : tr("Power");
-		SpotTightness = Light->GetSpotTightness();
 	}
 
-	if (mWidgetMode != LC_PROPERTY_WIDGET_LIGHT || mLightType != LightType || mPOVRayLight != POVRayLight)
+	if (mWidgetMode != LC_PROPERTY_WIDGET_LIGHT || mLightType != LightType)
 	{
 		SetEmpty();
 
@@ -1455,7 +1373,7 @@ void lcQPropertiesTree::SetLight(lcObject* Focus)
 		mLightColorItem->setToolTip(1, tr("Color of the emitted light."));
 
 		mLightPowerItem = addProperty(mLightAttributesItem, tr("Power"), PropertyFloat);
-		mLightPowerItem->setToolTip(1, tr("Power of the light in Watts (Blender only)."));
+		mLightPowerItem->setToolTip(1, tr("Power of the light (Watts in Blender)."));
 
 		mLightCastShadowItem = addProperty(mLightAttributesItem, tr("Cast Shadows"), PropertyBool);
 
@@ -1532,12 +1450,6 @@ void lcQPropertiesTree::SetLight(lcObject* Focus)
 			break;
 		}
 
-		lightExponent = addProperty(mLightAttributesItem, ExponentLabel, PropertyFloat);
-
-		// Configuration
-		lightConfiguration = addProperty(nullptr, tr("Configuration"), PropertyGroup);
-		lightFormat = addProperty(lightConfiguration, tr("Format"), PropertyLightFormat);
-
 		mPositionItem = addProperty(nullptr, tr("Position"), PropertyGroup);
 		mPositionXItem = addProperty(mPositionItem, tr("X"), PropertyFloat);
 		mPositionYItem = addProperty(mPositionItem, tr("Y"), PropertyFloat);
@@ -1553,7 +1465,6 @@ void lcQPropertiesTree::SetLight(lcObject* Focus)
 
 		mWidgetMode = LC_PROPERTY_WIDGET_LIGHT;
 		mLightType = LightType;
-		mPOVRayLight = POVRayLight;
 	}
 
 	mFocus = Light;
@@ -1607,9 +1518,6 @@ void lcQPropertiesTree::SetLight(lcObject* Focus)
 	mLightAttenuationPowerItem->setData(0, PropertyValueRole, AttenuationPower);
 	mLightAttenuationPowerItem->setData(0, PropertyRangeRole, QPointF(0.0, FLT_MAX));
 
-	lightFormat->setText(1, Format);
-	lightFormat->setData(0, PropertyValueRole, FormatIndex);
-
 	mLightTypeItem->setText(1, lcLight::GetLightTypeString(LightType));
 	mLightTypeItem->setData(0, PropertyValueRole, static_cast<int>(LightType));
 
@@ -1624,10 +1532,6 @@ void lcQPropertiesTree::SetLight(lcObject* Focus)
 		mLightSizeYItem->setText(1, lcFormatValueLocalized(LightSize[1]));
 		mLightSizeYItem->setData(0, PropertyValueRole, LightSize[1]);
 	}
-
-	lightExponent->setText(1, lcFormatValueLocalized(Exponent));
-	lightExponent->setData(0, PropertyValueRole, Exponent);
-	lightExponent->setToolTip(1, ExponentToolTip);
 
 	switch (LightType)
 	{

@@ -107,7 +107,6 @@ struct lcMeshSection;
 struct lcRenderMesh;
 struct lcObjectSection;
 struct lcPieceInfoRayTest;
-struct lcLightProperties;
 class lcTexture;
 class lcScene;
 class lcViewManipulator;

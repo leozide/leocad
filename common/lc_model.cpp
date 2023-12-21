@@ -3092,15 +3092,6 @@ void lcModel::SetSelectedPiecesStepHide(lcStep Step)
 	}
 }
 
-void lcModel::UpdateLight(lcLight* Light, const lcLightProperties Props, int Property)
-{
-	Light->UpdateLight(mCurrentStep, Props, Property);
-
-	SaveCheckpoint(tr("Update Light"));
-	UpdateAllViews();
-	gMainWindow->UpdateSelectedObjects(false);
-}
-
 void lcModel::SetCameraOrthographic(lcCamera* Camera, bool Ortho)
 {
 	if (Camera->IsOrtho() == Ortho)

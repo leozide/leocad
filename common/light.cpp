@@ -25,10 +25,6 @@ lcLight::lcLight(const lcVector3& Position, lcLightType LightType)
 {
 	mWorldMatrix = lcMatrix44Translation(Position);
 
-	mPOVRayLight = false;
-	mSpotExponent = 10.0f;
-	mPOVRayExponent = 1.0f;
-	
 	UpdateLightType();
 
 	mPositionKeys.ChangeKey(mWorldMatrix.GetTranslation(), 1, true);
@@ -41,8 +37,6 @@ lcLight::lcLight(const lcVector3& Position, lcLightType LightType)
 	mSpotPenumbraAngleKeys.ChangeKey(mSpotPenumbraAngle, 1, true);
 	mSpotTightnessKeys.ChangeKey(mSpotTightness, 1, true);
 	mAreaGridKeys.ChangeKey(mAreaGrid, 1, true);
-
-	mSpotExponentKeys.ChangeKey(mSpotExponent, 1, true);
 
 	UpdatePosition(1);
 }
@@ -126,9 +120,6 @@ void lcLight::SaveLDraw(QTextStream& Stream) const
 {
 	const QLatin1String LineEnding("\r\n");
 
-	if (mPOVRayLight)
-		Stream << QLatin1String("0 !LEOCAD LIGHT POV_RAY") << LineEnding;
-
 	if (!mCastShadow)
 		Stream << QLatin1String("0 !LEOCAD LIGHT SHADOWLESS") << LineEnding;
 
@@ -154,8 +145,6 @@ void lcLight::SaveLDraw(QTextStream& Stream) const
 	SaveAttribute(Stream, mAttenuationDistance, mAttenuationDistanceKeys, "LIGHT", "ATTENUATION_DISTANCE");
 	SaveAttribute(Stream, mAttenuationPower, mAttenuationPowerKeys, "LIGHT", "ATTENUATION_POWER");
 
-//	SaveAttribute(Stream, (mPOVRayLight ? mPOVRayExponent : mSpotExponent), mSpotExponentKeys, "LIGHT", "POWER");
-
 	switch (mLightType)
 	{
 	case lcLightType::Count:
@@ -169,7 +158,6 @@ void lcLight::SaveLDraw(QTextStream& Stream) const
 		break;
 
 	case lcLightType::Directional:
-		SaveAttribute(Stream, mSpotExponent, mSpotExponentKeys, "LIGHT", "STRENGTH");
 		break;
 
 	case lcLightType::Area:
@@ -316,20 +304,6 @@ bool lcLight::ParseLDrawLine(QTextStream& Stream)
 		}
 		else if (LoadAttribute(Stream, Token, mAreaGrid, mAreaGridKeys, "AREA_GRID"))
 			continue;
-
-//		else if (Token == QLatin1String("POWER") || Token == QLatin1String("STRENGTH"))
-//		{
-//			if (mPOVRayLight)
-//			{
-//				Stream >> mPOVRayExponent;
-//				mSpotExponentKeys.ChangeKey(mPOVRayExponent, 1, true);
-//			}
-//			else
-//			{
-//				Stream >> mSpotExponent;
-//				mSpotExponentKeys.ChangeKey(mSpotExponent, 1, true);
-//			}
-//		}
 		else if (Token == QLatin1String("TYPE"))
 		{
 			QString Type;
@@ -344,16 +318,10 @@ bool lcLight::ParseLDrawLine(QTextStream& Stream)
 				}
 			}
 		}
-		else if (Token == QLatin1String("POV_RAY"))
-		{
-			mPOVRayLight = true;
-		}
 		else if (Token == QLatin1String("SHADOWLESS"))
 		{
 			mCastShadow = false;
 		}
-		else if ((Token == QLatin1String("POWER_KEY")) || (Token == QLatin1String("STRENGTH_KEY")))
-			mSpotExponentKeys.LoadKeysLDraw(Stream);
 		else if (Token == QLatin1String("NAME"))
 		{
 			mName = Stream.readAll().trimmed();
@@ -374,29 +342,6 @@ void lcLight::CompareBoundingBox(lcVector3& Min, lcVector3& Max)
 
 	Min = lcMin(Point, Min);
 	Max = lcMax(Point, Max);
-}
-
-void lcLight::UpdateLight(lcStep Step, lcLightProperties Props, int Property)
-{
-	switch(Property)
-	{
-	case LC_LIGHT_EXPONENT:
-		if (Props.mPOVRayLight)
-		{
-			mPOVRayExponent = Props.mSpotExponent;
-			mSpotExponentKeys.ChangeKey(mPOVRayExponent, Step, false);
-		}
-		else
-		{
-			mSpotExponent = Props.mSpotExponent;
-			mSpotExponentKeys.ChangeKey(mSpotExponent, Step, false);
-		}
-		break;
-	case LC_LIGHT_POVRAY:
-		mPOVRayLight = Props.mPOVRayLight;
-		break;
-	}
-	UpdatePosition(Step);
 }
 
 void lcLight::RayTest(lcObjectRayTest& ObjectRayTest) const
@@ -679,8 +624,6 @@ void lcLight::InsertTime(lcStep Start, lcStep Time)
 	mPowerKeys.InsertTime(Start, Time);
 	mAttenuationDistanceKeys.InsertTime(Start, Time);
 	mAttenuationPowerKeys.InsertTime(Start, Time);
-
-	mSpotExponentKeys.InsertTime(Start, Time);
 }
 
 void lcLight::RemoveTime(lcStep Start, lcStep Time)
@@ -696,8 +639,6 @@ void lcLight::RemoveTime(lcStep Start, lcStep Time)
 	mPowerKeys.RemoveTime(Start, Time);
 	mAttenuationDistanceKeys.RemoveTime(Start, Time);
 	mAttenuationPowerKeys.RemoveTime(Start, Time);
-
-	mSpotExponentKeys.RemoveTime(Start, Time);
 }
 
 void lcLight::UpdatePosition(lcStep Step)
@@ -724,8 +665,6 @@ void lcLight::UpdatePosition(lcStep Step)
 	mPower = mPowerKeys.CalculateKey(Step);
 	mAttenuationDistance = mAttenuationDistanceKeys.CalculateKey(Step);
 	mAttenuationPower = mAttenuationPowerKeys.CalculateKey(Step);
-
-	mSpotExponent = mSpotExponentKeys.CalculateKey(Step);
 }
 
 void lcLight::DrawInterface(lcContext* Context, const lcScene& Scene) const
@@ -1170,9 +1109,6 @@ void lcLight::RemoveKeyFrames()
 
 	mAttenuationPowerKeys.RemoveAll();
 	mAttenuationPowerKeys.ChangeKey(mAttenuationPower, 1, true);
-
-	mSpotExponentKeys.RemoveAll();
-	mSpotExponentKeys.ChangeKey(mSpotExponent, 1, true);
 }
 
 bool lcLight::Setup(int LightIndex)

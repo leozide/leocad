@@ -333,46 +333,46 @@ const lcCommand gCommands[] =
 		QT_TRANSLATE_NOOP("Status", "Select all pieces of the same type and color"),
 		""
 	},
-    // LC_EDIT_TRANSFORM_RELATIVE
-    {
-        QT_TRANSLATE_NOOP("Action", "Edit.TransformRelative"),
-        QT_TRANSLATE_NOOP("Menu", "Relative Transforms"),
-        QT_TRANSLATE_NOOP("Status", "Move and rotate objects relative to the one that has focus"),
-        ""
-    },
-    // LC_EDIT_TRANSFORM_ABSOLUTE
-    {
-        QT_TRANSLATE_NOOP("Action", "Edit.TransformAbsolute"),
-        QT_TRANSLATE_NOOP("Menu", "Absolute Transforms"),
-        QT_TRANSLATE_NOOP("Status", "Move and rotate objects in absolute coordinates"),
-        ""
-    },
-    // LC_EDIT_TRANSFORM_TOGGLE_RELATIVE
-    {
-        QT_TRANSLATE_NOOP("Action", "Edit.TransformToggleRelative"),
-        QT_TRANSLATE_NOOP("Menu", "Toggle Relative Transforms"),
-        QT_TRANSLATE_NOOP("Status", "Toggle moving and rotating objects relative to the one that has focus"),
+	// LC_EDIT_TRANSFORM_RELATIVE
+	{
+		QT_TRANSLATE_NOOP("Action", "Edit.TransformRelative"),
+		QT_TRANSLATE_NOOP("Menu", "Relative Transforms"),
+		QT_TRANSLATE_NOOP("Status", "Move and rotate objects relative to the one that has focus"),
 		""
 	},
-    // LC_EDIT_TRANSFORM_SEPARATELY
-    {
-        QT_TRANSLATE_NOOP("Action", "Edit.TransformSeparately"),
-        QT_TRANSLATE_NOOP("Menu", "Rotate Separately"),
-        QT_TRANSLATE_NOOP("Status", "Rotate selected pieces separately"),
-        ""
-    },
-    // LC_EDIT_TRANSFORM_TOGETHER
-    {
-        QT_TRANSLATE_NOOP("Action", "Edit.TransformTogether"),
-        QT_TRANSLATE_NOOP("Menu", "Rotate Together"),
-        QT_TRANSLATE_NOOP("Status", "Rotate selected pieces together"),
-        ""
-    },
-    // LC_EDIT_TRANSFORM_TOGGLE_SEPARATE
+	// LC_EDIT_TRANSFORM_ABSOLUTE
 	{
-        QT_TRANSLATE_NOOP("Action", "Edit.TransformToggleSeparate"),
-        QT_TRANSLATE_NOOP("Menu", "Toggle Separate Transforms"),
-        QT_TRANSLATE_NOOP("Status", "Toggle rotating selected pieces separately"),
+		QT_TRANSLATE_NOOP("Action", "Edit.TransformAbsolute"),
+		QT_TRANSLATE_NOOP("Menu", "Absolute Transforms"),
+		QT_TRANSLATE_NOOP("Status", "Move and rotate objects in absolute coordinates"),
+		""
+	},
+	// LC_EDIT_TRANSFORM_TOGGLE_RELATIVE
+	{
+		QT_TRANSLATE_NOOP("Action", "Edit.TransformToggleRelative"),
+		QT_TRANSLATE_NOOP("Menu", "Toggle Relative Transforms"),
+		QT_TRANSLATE_NOOP("Status", "Toggle moving and rotating objects relative to the one that has focus"),
+		""
+	},
+	// LC_EDIT_TRANSFORM_SEPARATELY
+	{
+		QT_TRANSLATE_NOOP("Action", "Edit.TransformSeparately"),
+		QT_TRANSLATE_NOOP("Menu", "Rotate Separately"),
+		QT_TRANSLATE_NOOP("Status", "Rotate selected pieces separately"),
+		""
+	},
+	// LC_EDIT_TRANSFORM_TOGETHER
+	{
+		QT_TRANSLATE_NOOP("Action", "Edit.TransformTogether"),
+		QT_TRANSLATE_NOOP("Menu", "Rotate Together"),
+		QT_TRANSLATE_NOOP("Status", "Rotate selected pieces together"),
+		""
+	},
+	// LC_EDIT_TRANSFORM_TOGGLE_SEPARATE
+	{
+		QT_TRANSLATE_NOOP("Action", "Edit.TransformToggleSeparate"),
+		QT_TRANSLATE_NOOP("Menu", "Toggle Separate Transforms"),
+		QT_TRANSLATE_NOOP("Status", "Toggle rotating selected pieces separately"),
 		""
 	},
 	// LC_EDIT_SNAP_MOVE_TOGGLE
@@ -641,18 +641,32 @@ const lcCommand gCommands[] =
 		QT_TRANSLATE_NOOP("Status", "Add new pieces to the model"),
 		""
 	},
-	// LC_EDIT_ACTION_LIGHT
+	// LC_EDIT_ACTION_POINT_LIGHT
 	{
-		QT_TRANSLATE_NOOP("Action", "Edit.Tool.Light"),
-		QT_TRANSLATE_NOOP("Menu", "Light"),
-		QT_TRANSLATE_NOOP("Status", "Add new omni light sources to the model"),
+		QT_TRANSLATE_NOOP("Action", "Edit.Tool.PointLight"),
+		QT_TRANSLATE_NOOP("Menu", "Point Light"),
+		QT_TRANSLATE_NOOP("Status", "Add new point light sources to the model"),
 		""
 	},
 	// LC_EDIT_ACTION_SPOTLIGHT
 	{
-		QT_TRANSLATE_NOOP("Action", "Edit.Tool.Spotlight"),
-		QT_TRANSLATE_NOOP("Menu", "Spotlight"),
-		QT_TRANSLATE_NOOP("Status", "Add new spotlights to the model"),
+		QT_TRANSLATE_NOOP("Action", "Edit.Tool.SpotLight"),
+		QT_TRANSLATE_NOOP("Menu", "Spot Light"),
+		QT_TRANSLATE_NOOP("Status", "Add new spot lights to the model"),
+		""
+	},
+	// LC_EDIT_ACTION_DIRECTIONAL_LIGHT
+	{
+		QT_TRANSLATE_NOOP("Action", "Edit.Tool.DirectionalLight"),
+		QT_TRANSLATE_NOOP("Menu", "Directional Light"),
+		QT_TRANSLATE_NOOP("Status", "Add new omnidirectional light sources to the model"),
+		""
+	},
+	// LC_EDIT_ACTION_AREA_LIGHT
+	{
+		QT_TRANSLATE_NOOP("Action", "Edit.Tool.AreaLight"),
+		QT_TRANSLATE_NOOP("Menu", "Area Light"),
+		QT_TRANSLATE_NOOP("Status", "Add new area light sources to the model"),
 		""
 	},
 	// LC_EDIT_ACTION_CAMERA
@@ -1362,7 +1376,7 @@ const lcCommand gCommands[] =
 		QT_TRANSLATE_NOOP("Status", "Make copies of the selected pieces"),
 		""
 	},
-	// 	LC_PIECE_VIEW_SELECTED_MODEL
+	//  LC_PIECE_VIEW_SELECTED_MODEL
 	{
 		QT_TRANSLATE_NOOP("Action", "Piece.ViewSelectedModel"),
 		QT_TRANSLATE_NOOP("Menu", "Open Selected Model"),
@@ -1858,21 +1872,23 @@ LC_ARRAY_SIZE_CHECK(gCommands, LC_NUM_COMMANDS);
 
 const char* gToolNames[] =
 {
-    QT_TRANSLATE_NOOP("Mouse", "NewPiece"),      // lcTool::Insert
-    QT_TRANSLATE_NOOP("Mouse", "NewPointLight"), // lcTool::Light
-    QT_TRANSLATE_NOOP("Mouse", "NewSpotLight"),  // lcTool::SpotLight
-    QT_TRANSLATE_NOOP("Mouse", "NewCamera"),     // lcTool::Camera
-    QT_TRANSLATE_NOOP("Mouse", "Select"),        // lcTool::Select
-    QT_TRANSLATE_NOOP("Mouse", "Move"),          // lcTool::Move
-    QT_TRANSLATE_NOOP("Mouse", "Rotate"),        // lcTool::Rotate
-    QT_TRANSLATE_NOOP("Mouse", "Delete"),        // lcTool::Eraser
-    QT_TRANSLATE_NOOP("Mouse", "Paint"),         // lcTool::Paint
-    QT_TRANSLATE_NOOP("Mouse", "ColorPicker"),   // lcTool::ColorPicker
-    QT_TRANSLATE_NOOP("Mouse", "Zoom"),          // lcTool::Zoom
-    QT_TRANSLATE_NOOP("Mouse", "Pan"),           // lcTool::Pan
-    QT_TRANSLATE_NOOP("Mouse", "Orbit"),         // lcTool::RotateView
-    QT_TRANSLATE_NOOP("Mouse", "Roll"),          // lcTool::Roll
-    QT_TRANSLATE_NOOP("Mouse", "ZoomRegion")     // lcTool::ZoomRegion
+	QT_TRANSLATE_NOOP("Mouse", "NewPiece"),            // lcTool::Insert
+	QT_TRANSLATE_NOOP("Mouse", "NewPointLight"),       // lcTool::PointLight
+	QT_TRANSLATE_NOOP("Mouse", "NewSpotLight"),        // lcTool::SpotLight
+	QT_TRANSLATE_NOOP("Mouse", "NewDirectionalLight"), // lcTool::DirectionalLight
+	QT_TRANSLATE_NOOP("Mouse", "NewAreaLight"),        // lcTool::AreaLight
+	QT_TRANSLATE_NOOP("Mouse", "NewCamera"),           // lcTool::Camera
+	QT_TRANSLATE_NOOP("Mouse", "Select"),              // lcTool::Select
+	QT_TRANSLATE_NOOP("Mouse", "Move"),                // lcTool::Move
+	QT_TRANSLATE_NOOP("Mouse", "Rotate"),              // lcTool::Rotate
+	QT_TRANSLATE_NOOP("Mouse", "Delete"),              // lcTool::Eraser
+	QT_TRANSLATE_NOOP("Mouse", "Paint"),               // lcTool::Paint
+	QT_TRANSLATE_NOOP("Mouse", "ColorPicker"),         // lcTool::ColorPicker
+	QT_TRANSLATE_NOOP("Mouse", "Zoom"),                // lcTool::Zoom
+	QT_TRANSLATE_NOOP("Mouse", "Pan"),                 // lcTool::Pan
+	QT_TRANSLATE_NOOP("Mouse", "Orbit"),               // lcTool::RotateView
+	QT_TRANSLATE_NOOP("Mouse", "Roll"),                // lcTool::Roll
+	QT_TRANSLATE_NOOP("Mouse", "ZoomRegion")           // lcTool::ZoomRegion
 };
 
 LC_ARRAY_SIZE_CHECK(gToolNames, lcTool::Count);

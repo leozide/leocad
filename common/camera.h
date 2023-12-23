@@ -202,7 +202,7 @@ public:
 
 	quint32 GetAllowedTransforms() const override
 	{
-		return LC_OBJECT_TRANSFORM_MOVE_X | LC_OBJECT_TRANSFORM_MOVE_Y | LC_OBJECT_TRANSFORM_MOVE_Z;
+		return LC_OBJECT_TRANSFORM_MOVE_XYZ;
 	}
 
 	lcVector3 GetSectionPosition(quint32 Section) const override

@@ -107,6 +107,86 @@ void lcModelProperties::ParseLDrawLine(QTextStream& Stream)
 	}
 }
 
+lcPOVRayOptions::lcPOVRayOptions() :
+	UseLGEO(false),
+	ExcludeFloor(false),
+	ExcludeBackground(false),
+	NoReflection(false),
+	NoShadow(false),
+	FloorAxis(1),
+	FloorAmbient(0.4f),
+	FloorDiffuse(0.4f),
+	FloorColor(0.8f,0.8f,0.8f)
+{}
+
+void lcPOVRayOptions::ParseLDrawLine(QTextStream& LineStream)
+{
+	QString Token;
+	LineStream >> Token;
+
+	if (Token == QLatin1String("HEADER_INCLUDE_FILE"))
+	{
+		LineStream >> HeaderIncludeFile;
+		if (!QFileInfo(HeaderIncludeFile).isReadable())
+			HeaderIncludeFile.clear();
+	}
+	else if (Token == QLatin1String("FOOTER_INCLUDE_FILE"))
+	{
+		LineStream >> FooterIncludeFile;
+		if (!QFileInfo(FooterIncludeFile).isReadable())
+			FooterIncludeFile.clear();
+	}
+	else if (Token == QLatin1String("FLOOR_AXIS"))
+	{
+		LineStream >> FloorAxis;
+		if (FloorAxis < 0 || FloorAxis > 2)
+			FloorAxis = 1; // y
+	}
+	else if (Token == QLatin1String("FLOOR_COLOR_RGB"))
+		LineStream >> FloorColor[0] >> FloorColor[1] >> FloorColor[2];
+	else if (Token == QLatin1String("FLOOR_AMBIENT"))
+		LineStream >> FloorAmbient;
+	else if (Token == QLatin1String("FLOOR_DIFFUSE"))
+		LineStream >> FloorDiffuse;
+	else if (Token == QLatin1String("EXCLUDE_FLOOR"))
+		ExcludeFloor = true;
+	else if (Token == QLatin1String("EXCLUDE_BACKGROUND"))
+		ExcludeFloor = true;
+	else if (Token == QLatin1String("NO_REFLECTION"))
+		NoReflection = true;
+	else if (Token == QLatin1String("NO_SHADOWS"))
+		NoShadow = true;
+	else if (Token == QLatin1String("USE_LGEO"))
+		UseLGEO = true;
+}
+
+void lcPOVRayOptions::SaveLDraw(QTextStream& Stream) const
+{
+	const QLatin1String LineEnding("\r\n");
+	if (!HeaderIncludeFile.isEmpty())
+		Stream << QLatin1String("0 !LEOCAD POV_RAY HEADER_INCLUDE_FILE ") << QDir::toNativeSeparators(HeaderIncludeFile) << LineEnding;
+	if (!FooterIncludeFile.isEmpty())
+		Stream << QLatin1String("0 !LEOCAD POV_RAY FOOTER_INCLUDE_FILE ") << QDir::toNativeSeparators(FooterIncludeFile) << LineEnding;
+	if (FloorAxis != 1)
+		Stream << QLatin1String("0 !LEOCAD POV_RAY FLOOR_AXIS ") << FloorAxis << LineEnding;
+	if (FloorColor != lcVector3(0.8f,0.8f,0.8f))
+		Stream << QLatin1String("0 !LEOCAD POV_RAY FLOOR_COLOR_RGB ") << FloorColor[0] << ' ' << FloorColor[1] << ' ' << FloorColor[2] << LineEnding;
+	if (FloorAmbient != 0.4f)
+		Stream << QLatin1String("0 !LEOCAD POV_RAY FLOOR_AMBIENT ") << FloorAmbient << LineEnding;
+	if (FloorDiffuse != 0.4f)
+		Stream << QLatin1String("0 !LEOCAD POV_RAY FLOOR_DIFFUSE ") << FloorDiffuse << LineEnding;
+	if (ExcludeFloor)
+		Stream << QLatin1String("0 !LEOCAD POV_RAY EXCLUDE_FLOOR") << LineEnding;
+	if (ExcludeBackground)
+		Stream << QLatin1String("0 !LEOCAD POV_RAY EXCLUDE_BACKGROUND") << LineEnding;
+	if (NoReflection)
+		Stream << QLatin1String("0 !LEOCAD POV_RAY NO_REFLECTION") << LineEnding;
+	if (NoShadow)
+		Stream << QLatin1String("0 !LEOCAD POV_RAY NO_SHADOWS") << LineEnding;
+	if (UseLGEO)
+		Stream << QLatin1String("0 !LEOCAD POV_RAY USE_LGEO") << LineEnding;
+}
+
 lcModel::lcModel(const QString& FileName, Project* Project, bool Preview)
 	: mProject(Project), mIsPreview(Preview)
 {
@@ -540,7 +620,7 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 
 			if (Token != QLatin1String("!LEOCAD"))
 			{
-				mFileLines.append(OriginalLine); 
+				mFileLines.append(OriginalLine);
 				continue;
 			}
 
@@ -571,6 +651,19 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 			}
 			else if (Token == QLatin1String("LIGHT"))
 			{
+				if (!Light)
+					Light = new lcLight(lcVector3(0.0f, 0.0f, 0.0f), lcLightType::Point);
+
+				if (Light->ParseLDrawLine(LineStream))
+				{
+					Light->CreateName(mLights);
+					mLights.Add(Light);
+					Light = nullptr;
+				}
+			}
+			else if (Token == QLatin1String("POV_RAY"))
+			{
+				mPOVRayOptions.ParseLDrawLine(LineStream);
 			}
 			else if (Token == QLatin1String("GROUP"))
 			{
@@ -641,7 +734,7 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 
 			if (Library->IsPrimitive(CleanId.constData()))
 			{
-				mFileLines.append(OriginalLine); 
+				mFileLines.append(OriginalLine);
 			}
 			else
 			{
@@ -946,7 +1039,7 @@ bool lcModel::LoadLDD(const QString& FileData)
 {
 	std::vector<lcPiece*> Pieces;
 	std::vector<std::vector<lcPiece*>> Groups;
-	
+
 	if (!lcImportLXFMLFile(FileData, Pieces, Groups))
 		return false;
 
@@ -2131,8 +2224,14 @@ lcMatrix33 lcModel::GetRelativeRotation() const
 	{
 		const lcObject* Focus = GetFocusObject();
 
-		if (Focus && Focus->IsPiece())
-			return ((lcPiece*)Focus)->GetRelativeRotation();
+		if (Focus)
+		{
+			if (Focus->IsPiece())
+				return ((lcPiece*)Focus)->GetRelativeRotation();
+
+			if (Focus->IsLight())
+				return ((lcLight*)Focus)->GetRelativeRotation();
+		}
 	}
 
 	return lcMatrix33Identity();
@@ -2606,7 +2705,7 @@ bool lcModel::RemoveSelectedObjects()
 	return RemovedPiece || RemovedCamera || RemovedLight;
 }
 
-void lcModel::MoveSelectedObjects(const lcVector3& PieceDistance, const lcVector3& ObjectDistance, bool AllowRelative, bool AlternateButtonDrag, bool Update, bool Checkpoint)
+void lcModel::MoveSelectedObjects(const lcVector3& PieceDistance, const lcVector3& ObjectDistance, bool AllowRelative, bool AlternateButtonDrag, bool Update, bool Checkpoint, bool FirstMove)
 {
 	bool Moved = false;
 	lcMatrix33 RelativeRotation;
@@ -2667,7 +2766,7 @@ void lcModel::MoveSelectedObjects(const lcVector3& PieceDistance, const lcVector
 		{
 			if (Light->IsSelected())
 			{
-				Light->MoveSelected(mCurrentStep, gMainWindow->GetAddKeys(), TransformedObjectDistance);
+				Light->MoveSelected(mCurrentStep, gMainWindow->GetAddKeys(), TransformedObjectDistance, FirstMove);
 				Light->UpdatePosition(mCurrentStep);
 				Moved = true;
 			}
@@ -2677,13 +2776,15 @@ void lcModel::MoveSelectedObjects(const lcVector3& PieceDistance, const lcVector
 	if (Moved && Update)
 	{
 		UpdateAllViews();
+
 		if (Checkpoint)
 			SaveCheckpoint(tr("Moving"));
+
 		gMainWindow->UpdateSelectedObjects(false);
 	}
 }
 
-void lcModel::RotateSelectedPieces(const lcVector3& Angles, bool Relative, bool RotatePivotPoint, bool Update, bool Checkpoint)
+void lcModel::RotateSelectedObjects(const lcVector3& Angles, bool Relative, bool RotatePivotPoint, bool Update, bool Checkpoint)
 {
 	if (Angles.LengthSquared() < 0.001f)
 		return;
@@ -2712,6 +2813,12 @@ void lcModel::RotateSelectedPieces(const lcVector3& Angles, bool Relative, bool 
 	}
 	else
 	{
+		int Flags;
+		lcArray<lcObject*> Selection;
+		lcObject* Focus;
+
+		GetSelectionInformation(&Flags, Selection, &Focus);
+
 		if (!gMainWindow->GetSeparateTransform())
 		{
 			lcVector3 Center;
@@ -2729,42 +2836,78 @@ void lcModel::RotateSelectedPieces(const lcVector3& Angles, bool Relative, bool 
 			else
 				WorldToFocusMatrix = lcMatrix33Identity();
 
-			for (lcPiece* Piece : mPieces)
+			for (lcObject* Object : Selection)
 			{
-				if (!Piece->IsSelected())
-					continue;
+				if (Object->IsPiece())
+				{
+					lcPiece* Piece = (lcPiece*)Object;
 
-				Piece->Rotate(mCurrentStep, gMainWindow->GetAddKeys(), RotationMatrix, Center, WorldToFocusMatrix);
-				Piece->UpdatePosition(mCurrentStep);
-				Rotated = true;
+					Piece->Rotate(mCurrentStep, gMainWindow->GetAddKeys(), RotationMatrix, Center, WorldToFocusMatrix);
+					Piece->UpdatePosition(mCurrentStep);
+					Rotated = true;
+				}
+				else if (Object->IsLight())
+				{
+					lcLight* Light = (lcLight*)Object;
+
+					Light->Rotate(mCurrentStep, gMainWindow->GetAddKeys(), RotationMatrix, Center, WorldToFocusMatrix);
+					Light->UpdatePosition(mCurrentStep);
+					Rotated = true;
+				}
 			}
 		}
 		else
 		{
-			for (lcPiece* Piece : mPieces)
+			for (lcObject* Object : Selection)
 			{
-				if (!Piece->IsSelected())
-					continue;
-
-				const lcVector3 Center = Piece->GetRotationCenter();
-				lcMatrix33 WorldToFocusMatrix;
-				lcMatrix33 RelativeRotationMatrix;
-
-				if (Relative)
+				if (Object->IsPiece())
 				{
-					const lcMatrix33 RelativeRotation = Piece->GetRelativeRotation();
-					WorldToFocusMatrix = lcMatrix33AffineInverse(RelativeRotation);
-					RelativeRotationMatrix = lcMul(RotationMatrix, RelativeRotation);
-				}
-				else
-				{
-					WorldToFocusMatrix = lcMatrix33Identity();
-					RelativeRotationMatrix = RotationMatrix;
-				}
+					lcPiece* Piece = (lcPiece*)Object;
 
-				Piece->Rotate(mCurrentStep, gMainWindow->GetAddKeys(), RelativeRotationMatrix, Center, WorldToFocusMatrix);
-				Piece->UpdatePosition(mCurrentStep);
-				Rotated = true;
+					const lcVector3 Center = Piece->GetRotationCenter();
+					lcMatrix33 WorldToFocusMatrix;
+					lcMatrix33 RelativeRotationMatrix;
+
+					if (Relative)
+					{
+						const lcMatrix33 RelativeRotation = Piece->GetRelativeRotation();
+						WorldToFocusMatrix = lcMatrix33AffineInverse(RelativeRotation);
+						RelativeRotationMatrix = lcMul(RotationMatrix, RelativeRotation);
+					}
+					else
+					{
+						WorldToFocusMatrix = lcMatrix33Identity();
+						RelativeRotationMatrix = RotationMatrix;
+					}
+
+					Piece->Rotate(mCurrentStep, gMainWindow->GetAddKeys(), RelativeRotationMatrix, Center, WorldToFocusMatrix);
+					Piece->UpdatePosition(mCurrentStep);
+					Rotated = true;
+				}
+				else if (Object->IsLight())
+				{
+					lcLight* Light = (lcLight*)Object;
+
+					const lcVector3 Center = Light->GetRotationCenter();
+					lcMatrix33 WorldToFocusMatrix;
+					lcMatrix33 RelativeRotationMatrix;
+
+					if (Relative)
+					{
+						const lcMatrix33 RelativeRotation = Light->GetRelativeRotation();
+						WorldToFocusMatrix = lcMatrix33AffineInverse(RelativeRotation);
+						RelativeRotationMatrix = lcMul(RotationMatrix, RelativeRotation);
+					}
+					else
+					{
+						WorldToFocusMatrix = lcMatrix33Identity();
+						RelativeRotationMatrix = RotationMatrix;
+					}
+
+					Light->Rotate(mCurrentStep, gMainWindow->GetAddKeys(), RotationMatrix, Center, WorldToFocusMatrix);
+					Light->UpdatePosition(mCurrentStep);
+					Rotated = true;
+				}
 			}
 		}
 	}
@@ -2810,19 +2953,19 @@ void lcModel::TransformSelectedObjects(lcTransformType TransformType, const lcVe
 	switch (TransformType)
 	{
 	case lcTransformType::AbsoluteTranslation:
-		MoveSelectedObjects(Transform, false, false, true, true);
+		MoveSelectedObjects(Transform, false, false, true, true, true);
 		break;
 
 	case lcTransformType::RelativeTranslation:
-		MoveSelectedObjects(Transform, true, false, true, true);
+		MoveSelectedObjects(Transform, true, false, true, true, true);
 		break;
 
 	case lcTransformType::AbsoluteRotation:
-		RotateSelectedPieces(Transform, false, false, true, true);
+		RotateSelectedObjects(Transform, false, false, true, true);
 		break;
 
 	case lcTransformType::RelativeRotation:
-		RotateSelectedPieces(Transform, true, false, true, true);
+		RotateSelectedObjects(Transform, true, false, true, true);
 		break;
 
 	case lcTransformType::Count:
@@ -3011,6 +3154,147 @@ void lcModel::SetCameraName(lcCamera* Camera, const QString& Name)
 	gMainWindow->UpdateCameraMenu();
 }
 
+void lcModel::SetLightType(lcLight* Light, lcLightType LightType)
+{
+	if (!Light->SetLightType(LightType))
+		return;
+
+	Light->UpdatePosition(mCurrentStep);
+
+	SaveCheckpoint(tr("Changing Light Type"));
+	gMainWindow->UpdateSelectedObjects(false);
+	UpdateAllViews();
+}
+
+void lcModel::SetLightColor(lcLight* Light, const lcVector3& Color)
+{
+	Light->SetColor(Color, mCurrentStep, gMainWindow->GetAddKeys());
+	Light->UpdatePosition(mCurrentStep);
+
+	SaveCheckpoint(tr("Changing Light Color"));
+	gMainWindow->UpdateSelectedObjects(false);
+	UpdateAllViews();
+}
+
+void lcModel::SetLightAttenuationDistance(lcLight* Light, float Distance)
+{
+	Light->SetAttenuationDistance(Distance, mCurrentStep, gMainWindow->GetAddKeys());
+	Light->UpdatePosition(mCurrentStep);
+
+	SaveCheckpoint(tr("Changing Light Attenuation Distance"));
+	gMainWindow->UpdateSelectedObjects(false);
+	UpdateAllViews();
+}
+
+void lcModel::SetLightAttenuationPower(lcLight* Light, float Power)
+{
+	Light->SetAttenuationPower(Power, mCurrentStep, gMainWindow->GetAddKeys());
+	Light->UpdatePosition(mCurrentStep);
+
+	SaveCheckpoint(tr("Changing Light Attenuation Power"));
+	gMainWindow->UpdateSelectedObjects(false);
+	UpdateAllViews();
+}
+
+void lcModel::SetSpotLightConeAngle(lcLight* Light, float Angle)
+{
+	Light->SetSpotConeAngle(Angle, mCurrentStep, gMainWindow->GetAddKeys());
+	Light->UpdatePosition(mCurrentStep);
+
+	SaveCheckpoint(tr("Changing Spot Light Cone Angle"));
+	gMainWindow->UpdateSelectedObjects(false);
+	UpdateAllViews();
+}
+
+void lcModel::SetSpotLightPenumbraAngle(lcLight* Light, float Angle)
+{
+	Light->SetSpotPenumbraAngle(Angle, mCurrentStep, gMainWindow->GetAddKeys());
+	Light->UpdatePosition(mCurrentStep);
+
+	SaveCheckpoint(tr("Changing Spot Light Penumbra Angle"));
+	gMainWindow->UpdateSelectedObjects(false);
+	UpdateAllViews();
+}
+
+void lcModel::SetSpotLightTightness(lcLight* Light, float Tightness)
+{
+	Light->SetSpotTightness(Tightness, mCurrentStep, gMainWindow->GetAddKeys());
+	Light->UpdatePosition(mCurrentStep);
+
+	SaveCheckpoint(tr("Changing Spot Light Tightness"));
+	gMainWindow->UpdateSelectedObjects(false);
+	UpdateAllViews();
+}
+
+void lcModel::SetLightAreaShape(lcLight* Light, lcLightAreaShape LightAreaShape)
+{
+	if (!Light->SetAreaShape(LightAreaShape))
+		return;
+
+	Light->UpdatePosition(mCurrentStep);
+
+	SaveCheckpoint(tr("Changing Area Light Shape"));
+	gMainWindow->UpdateSelectedObjects(false);
+	UpdateAllViews();
+}
+
+void lcModel::SetLightAreaGrid(lcLight* Light, lcVector2i AreaGrid)
+{
+	if (!Light->SetAreaGrid(AreaGrid, mCurrentStep, gMainWindow->GetAddKeys()))
+		return;
+
+	Light->UpdatePosition(mCurrentStep);
+
+	SaveCheckpoint(tr("Changing Area Light Size"));
+	gMainWindow->UpdateSelectedObjects(false);
+	UpdateAllViews();
+}
+
+void lcModel::SetLightSize(lcLight* Light, lcVector2 LightAreaSize)
+{
+	Light->SetSize(LightAreaSize, mCurrentStep, gMainWindow->GetAddKeys());
+	Light->UpdatePosition(mCurrentStep);
+
+	SaveCheckpoint(tr("Changing Light Size"));
+	gMainWindow->UpdateSelectedObjects(false);
+	UpdateAllViews();
+}
+
+void lcModel::SetLightPower(lcLight* Light, float Power)
+{
+	Light->SetPower(Power, mCurrentStep, gMainWindow->GetAddKeys());
+	Light->UpdatePosition(mCurrentStep);
+
+	SaveCheckpoint(tr("Changing Light Power"));
+	gMainWindow->UpdateSelectedObjects(false);
+	UpdateAllViews();
+}
+
+void lcModel::SetLightCastShadow(lcLight* Light, bool CastShadow)
+{
+	if (!Light->SetCastShadow(CastShadow))
+		return;
+
+	Light->UpdatePosition(mCurrentStep);
+
+	SaveCheckpoint(tr("Changing Light Shadow"));
+	gMainWindow->UpdateSelectedObjects(false);
+	UpdateAllViews();
+}
+
+void lcModel::SetLightName(lcLight* Light, const QString &Name)
+{
+	if (Light->GetName() == Name)
+		return;
+
+	Light->SetName(Name);
+
+	SaveCheckpoint(tr("Renaming Light"));
+	gMainWindow->UpdateSelectedObjects(false);
+	UpdateAllViews();
+	gMainWindow->UpdateCameraMenu();
+}
+
 bool lcModel::AnyPiecesSelected() const
 {
 	for (const lcPiece* Piece : mPieces)
@@ -3123,26 +3407,51 @@ bool lcModel::GetMoveRotateTransform(lcVector3& Center, lcMatrix33& RelativeRota
 		if (!Light->IsSelected())
 			continue;
 
-		if (Light->IsFocused() && Relative)
+		if (Light->IsFocused())
 		{
-			Center = Light->GetSectionPosition(Light->GetFocusSection());
-//			RelativeRotation = Piece->GetRelativeRotation();
+			Center = Light->GetRotationCenter();
+
+			if (Relative)
+				RelativeRotation = Light->GetRelativeRotation();
+
 			return true;
 		}
 
 		Center += Light->GetSectionPosition(LC_LIGHT_SECTION_POSITION);
 		NumSelected++;
-		if (Light->IsSpotLight() || Light->IsDirectionalLight())
-		{
-			Center += Light->GetSectionPosition(LC_LIGHT_SECTION_TARGET);
-			NumSelected++;
-		}
 	}
 
 	if (NumSelected)
 	{
 		Center /= NumSelected;
 		return true;
+	}
+
+	return false;
+}
+
+bool lcModel::CanRotateSelection() const
+{
+	int Flags;
+	lcArray<lcObject*> Selection;
+	lcObject* Focus;
+
+	GetSelectionInformation(&Flags, Selection, &Focus);
+
+	if (Flags & LC_SEL_PIECE)
+	{
+		if ((Flags & (LC_SEL_CAMERA | LC_SEL_LIGHT)) == 0)
+			return true;
+	}
+
+	if ((Flags & (LC_SEL_PIECE | LC_SEL_CAMERA)) == 0)
+	{
+		if (Focus && Focus->IsLight())
+		{
+			lcLight* Light = (lcLight*)Focus;
+
+			return (Light->GetAllowedTransforms() & LC_OBJECT_TRANSFORM_ROTATE_XYZ) != 0;
+		}
 	}
 
 	return false;
@@ -3422,7 +3731,7 @@ void lcModel::GetSelectionInformation(int* Flags, lcArray<lcObject*>& Selection,
 		if (Camera->IsSelected())
 		{
 			Selection.Add(Camera);
-			*Flags |= LC_SEL_SELECTED;
+			*Flags |= LC_SEL_SELECTED | LC_SEL_CAMERA;
 
 			if (Camera->IsFocused())
 				*Focus = Camera;
@@ -3434,7 +3743,7 @@ void lcModel::GetSelectionInformation(int* Flags, lcArray<lcObject*>& Selection,
 		if (Light->IsSelected())
 		{
 			Selection.Add(Light);
-			*Flags |= LC_SEL_SELECTED;
+			*Flags |= LC_SEL_SELECTED | LC_SEL_LIGHT;
 
 			if (Light->IsFocused())
 				*Focus = Light;
@@ -3940,6 +4249,7 @@ void lcModel::RedoAction()
 void lcModel::BeginMouseTool()
 {
 	mMouseToolDistance = lcVector3(0.0f, 0.0f, 0.0f);
+	mMouseToolFirstMove = true;
 }
 
 void lcModel::EndMouseTool(lcTool Tool, bool Accept)
@@ -3954,11 +4264,10 @@ void lcModel::EndMouseTool(lcTool Tool, bool Accept)
 	switch (Tool)
 	{
 	case lcTool::Insert:
-	case lcTool::Light:
-		break;
-
+	case lcTool::PointLight:
 	case lcTool::SpotLight:
-		SaveCheckpoint(tr("New SpotLight"));
+	case lcTool::DirectionalLight:
+	case lcTool::AreaLight:
 		break;
 
 	case lcTool::Camera:
@@ -4024,37 +4333,35 @@ void lcModel::InsertPieceToolClicked(const lcMatrix44& WorldMatrix)
 	SaveCheckpoint(tr("Insert"));
 }
 
-void lcModel::PointLightToolClicked(const lcVector3& Position)
+void lcModel::InsertLightToolClicked(const lcVector3& Position, lcLightType LightType)
 {
-	lcLight* Light = new lcLight(Position[0], Position[1], Position[2]);
+	lcLight* Light = new lcLight(Position, LightType);
 	Light->CreateName(mLights);
 	mLights.Add(Light);
 
 	ClearSelectionAndSetFocus(Light, LC_LIGHT_SECTION_POSITION, false);
-	SaveCheckpoint(tr("New Light"));
-}
 
-void lcModel::BeginSpotLightTool(const lcVector3& Position, const lcVector3& Target)
-{
-	lcLight* Light = new lcLight(Position[0], Position[1], Position[2], Target[0], Target[1], Target[2]);
-	mLights.Add(Light);
+	switch (LightType)
+	{
+	case lcLightType::Point:
+		SaveCheckpoint(tr("New Point Light"));
+		break;
 
-	mMouseToolDistance = Target;
+	case lcLightType::Spot:
+		SaveCheckpoint(tr("New Spot Light"));
+		break;
 
-	ClearSelectionAndSetFocus(Light, LC_LIGHT_SECTION_TARGET, false);
-}
+	case lcLightType::Directional:
+		SaveCheckpoint(tr("New Directional Light"));
+		break;
 
-void lcModel::UpdateSpotLightTool(const lcVector3& Position)
-{
-	lcLight* Light = mLights[mLights.GetSize() - 1];
+	case lcLightType::Area:
+		SaveCheckpoint(tr("New Area Light"));
+		break;
 
-	Light->MoveSelected(1, false, Position - mMouseToolDistance);
-	Light->UpdatePosition(1);
-
-	mMouseToolDistance = Position;
-
-	gMainWindow->UpdateSelectedObjects(false);
-	UpdateAllViews();
+	case lcLightType::Count:
+		break;
+	}
 }
 
 void lcModel::BeginCameraTool(const lcVector3& Position, const lcVector3& Target)
@@ -4064,6 +4371,7 @@ void lcModel::BeginCameraTool(const lcVector3& Position, const lcVector3& Target
 	mCameras.Add(Camera);
 
 	mMouseToolDistance = Position;
+	mMouseToolFirstMove = false;
 
 	ClearSelectionAndSetFocus(Camera, LC_CAMERA_SECTION_TARGET, false);
 }
@@ -4076,6 +4384,7 @@ void lcModel::UpdateCameraTool(const lcVector3& Position)
 	Camera->UpdatePosition(1);
 
 	mMouseToolDistance = Position;
+	mMouseToolFirstMove = false;
 
 	gMainWindow->UpdateSelectedObjects(false);
 	UpdateAllViews();
@@ -4086,8 +4395,10 @@ void lcModel::UpdateMoveTool(const lcVector3& Distance, bool AllowRelative, bool
 	const lcVector3 PieceDistance = SnapPosition(Distance) - SnapPosition(mMouseToolDistance);
 	const lcVector3 ObjectDistance = Distance - mMouseToolDistance;
 
-	MoveSelectedObjects(PieceDistance, ObjectDistance, AllowRelative, AlternateButtonDrag, true, false);
+	MoveSelectedObjects(PieceDistance, ObjectDistance, AllowRelative, AlternateButtonDrag, true, false, mMouseToolFirstMove);
+
 	mMouseToolDistance = Distance;
+	mMouseToolFirstMove = false;
 
 	gMainWindow->UpdateSelectedObjects(false);
 	UpdateAllViews();
@@ -4096,8 +4407,10 @@ void lcModel::UpdateMoveTool(const lcVector3& Distance, bool AllowRelative, bool
 void lcModel::UpdateRotateTool(const lcVector3& Angles, bool AlternateButtonDrag)
 {
 	const lcVector3 Delta = SnapRotation(Angles) - SnapRotation(mMouseToolDistance);
-	RotateSelectedPieces(Delta, true, AlternateButtonDrag, false, false);
+	RotateSelectedObjects(Delta, true, AlternateButtonDrag, false, false);
+
 	mMouseToolDistance = Angles;
+	mMouseToolFirstMove = false;
 
 	gMainWindow->UpdateSelectedObjects(false);
 	UpdateAllViews();
@@ -4347,7 +4660,7 @@ void lcModel::ShowArrayDialog()
 		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("No pieces selected."));
 		return;
 	}
-	
+
 	lcArrayDialog Dialog(gMainWindow);
 
 	if (Dialog.exec() != QDialog::Accepted)

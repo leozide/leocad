@@ -51,6 +51,21 @@ inline T lcClamp(const T& Value, const T& Min, const T& Max)
 		return Value;
 }
 
+class lcVector2i
+{
+public:
+	lcVector2i()
+	{
+	}
+
+	constexpr lcVector2i(const int _x, const int _y)
+		: x(_x), y(_y)
+	{
+	}
+
+	int x, y;
+};
+
 class lcVector2
 {
 public:
@@ -649,6 +664,11 @@ inline lcVector3 lcVector3FromColor(quint32 Color)
 	return v;
 }
 
+inline lcVector3 lcVector3FromQColor(QColor Color)
+{
+	return lcVector3(Color.redF(), Color.greenF(), Color.blueF());
+}
+
 inline lcVector4 lcVector4FromColor(quint32 Color)
 {
 	lcVector4 v(LC_RGBA_RED(Color), LC_RGBA_GREEN(Color), LC_RGBA_BLUE(Color), LC_RGBA_ALPHA(Color));
@@ -659,6 +679,11 @@ inline lcVector4 lcVector4FromColor(quint32 Color)
 inline quint32 lcColorFromVector3(const lcVector3& Color)
 {
 	return LC_RGB(roundf(Color[0] * 255), roundf(Color[1] * 255), roundf(Color[2] * 255));
+}
+
+inline QColor lcQColorFromVector3(const lcVector3& Color)
+{
+	return QColor::fromRgb(roundf(Color[0] * 255), roundf(Color[1] * 255), roundf(Color[2] * 255));
 }
 
 inline float lcLuminescence(const lcVector3& Color)
@@ -1989,6 +2014,125 @@ inline bool lcSphereRayMinIntersectDistance(const lcVector3& Center, float Radiu
 
 		return false;
 	}
+}
+
+inline bool lcConeRayMinIntersectDistance(const lcVector3& Tip, const lcVector3& Direction, float Radius, float Height, const lcVector3& Start, const lcVector3& End, float* Dist)
+{
+	const lcVector3 v = End - Start;
+	const lcVector3 h = Direction;
+	const lcVector3 w = Start - Tip;
+	const float vh = lcDot(v, h);
+	const float wh = lcDot(w, h);
+	const float m = (Radius * Radius) / (Height * Height);
+
+	const float a = lcDot(v, v) - m * vh * vh - vh * vh;
+	const float b = 2 * (lcDot(v, w) - m * vh * wh - vh * wh);
+	const float c = lcDot(w, w) - m * wh * wh - wh * wh;
+
+	const float delta = b * b - 4 * a * c;
+
+	if (delta < 0.0f)
+		return false;
+
+	float ts[2] = { (-b - sqrtf(delta)) / (2 * a), (-b + sqrtf(delta)) / (2 * a) };
+
+	for (int ti = 0; ti < 2; ti++)
+	{
+		float t = ts[ti];
+		lcVector3 Intersection = Start + v * t;
+
+		float ConeD = lcDot(Intersection - Tip, Direction);
+
+		if (ConeD < 0.0f)
+			continue;
+
+		if (ConeD < Height)
+		{
+			*Dist = lcLength(Intersection - Start);
+
+			return true;
+		}
+
+		lcVector3 Center(Tip + Direction * Height);
+		lcVector4 Plane(Direction, -lcDot(Direction, Center));
+
+		if (lcLineSegmentPlaneIntersection(&Intersection, Start, End, Plane))
+		{
+			if (lcLengthSquared(Center - Intersection) < Radius * Radius)
+			{
+				*Dist = lcLength(Intersection - Start);
+
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
+inline bool lcCylinderRayMinIntersectDistance(float Radius, float Height, const lcVector3& Start, const lcVector3& End, float* Dist)
+{
+	lcVector4 BottomPlane(0.0f, 0.0f, 1.0f, 0.0f);
+	lcVector3 Intersection;
+	float MinDistance = FLT_MAX;
+
+	if (lcLineSegmentPlaneIntersection(&Intersection, Start, End, BottomPlane))
+	{
+		if (Intersection.x * Intersection.x + Intersection.y * Intersection.y < Radius * Radius)
+		{
+			float Distance = lcLength(Intersection - Start);
+
+			if (Distance < MinDistance)
+				MinDistance = Distance;
+		}
+	}
+
+	lcVector4 TopPlane(0.0f, 0.0f, 1.0f, -Height);
+
+	if (lcLineSegmentPlaneIntersection(&Intersection, Start, End, TopPlane))
+	{
+		if (Intersection.x * Intersection.x + Intersection.y * Intersection.y < Radius * Radius)
+		{
+			float Distance = lcLength(Intersection - Start);
+
+			if (Distance < MinDistance)
+				MinDistance = Distance;
+		}
+	}
+
+	lcVector3 Direction = End - Start;
+
+	float a = (Direction.x * Direction.x) + (Direction.y * Direction.y);
+	float b = 2 * (Direction.x * Start.x + Direction.y * Start.y);
+	float c = (Start.x * Start.x) + (Start.y * Start.y) - (Radius * Radius);
+
+	float delta = b * b - 4 * (a * c);
+
+	if (delta > 0.0f)
+	{
+		float ts[2] = { (-b - sqrtf(delta)) / (2 * a), (-b + sqrtf(delta)) / (2 * a) };
+
+		for (int ti = 0; ti < 2; ti++)
+		{
+			float t = ts[ti];
+			Intersection = Start + Direction * t;
+
+			if (Intersection.z < 0.0f || Intersection.z > Height)
+				continue;
+
+			float Distance = lcLength(Intersection - Start);
+
+			if (Distance < MinDistance)
+				MinDistance = Distance;
+		}
+	}
+
+	if (MinDistance == FLT_MAX)
+		return false;
+
+	*Dist = MinDistance;
+
+	return true;
 }
 
 inline lcVector3 lcRayPointClosestPoint(const lcVector3& Point, const lcVector3& Start, const lcVector3& End)

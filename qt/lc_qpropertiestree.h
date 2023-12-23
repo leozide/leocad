@@ -36,7 +36,8 @@ public:
 	enum
 	{
 		PropertyTypeRole = Qt::UserRole,
-		PropertyValueRole
+		PropertyValueRole,
+		PropertyRangeRole
 	};
 
 	enum PropertyType
@@ -44,9 +45,12 @@ public:
 		PropertyGroup,
 		PropertyBool,
 		PropertyFloat,
+		PropertyInteger,
 		PropertyStep,
 		PropertyString,
+		PropertyStringList,
 		PropertyColor,
+		PropertyPieceColor,
 		PropertyPart
 	};
 
@@ -55,12 +59,14 @@ protected slots:
 	void slotReturnPressed();
 	void slotSetValue(int value);
 	void slotColorButtonClicked();
+	void LightColorButtonClicked();
 
 protected:
 	void keyPressEvent(QKeyEvent *event) override;
 	void mousePressEvent(QMouseEvent *event) override;
 	void drawRow(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
 	void updateColorEditor(QPushButton *editor, int value) const;
+	void UpdateLightColorEditor(QPushButton* Editor, QColor Color) const;
 
 	QTreeWidgetItem *addProperty(QTreeWidgetItem *parent, const QString& label, PropertyType propertyType);
 
@@ -70,49 +76,68 @@ protected:
 	void SetLight(lcObject* Focus);
 	void SetMultiple();
 
-	void getPartProperties(lcPartProperties *properties);
+	lcLightType mLightType;
 
 	lcPropertyWidgetMode mWidgetMode;
 	lcObject* mFocus;
 
-	lcQPropertiesTreeDelegate *m_delegate;
+	lcQPropertiesTreeDelegate* mDelegate;
 	QIcon m_expandIcon;
 	QIcon m_checkedIcon;
 	QIcon m_uncheckedIcon;
 
-	QTreeWidgetItem *partPosition;
-	QTreeWidgetItem *partPositionX;
-	QTreeWidgetItem *partPositionY;
-	QTreeWidgetItem *partPositionZ;
-	QTreeWidgetItem *partRotation;
-	QTreeWidgetItem *partRotationX;
-	QTreeWidgetItem *partRotationY;
-	QTreeWidgetItem *partRotationZ;
-	QTreeWidgetItem *partVisibility;
-	QTreeWidgetItem *partShow;
-	QTreeWidgetItem *partHide;
-	QTreeWidgetItem *partAppearance;
-	QTreeWidgetItem *partColor;
-	QTreeWidgetItem *partID;
+	QTreeWidgetItem* mPieceAttributesItem;
+	QTreeWidgetItem* partVisibility;
+	QTreeWidgetItem* partShow;
+	QTreeWidgetItem* partHide;
+	QTreeWidgetItem* partAppearance;
+	QTreeWidgetItem* mPieceColorItem;
+	QTreeWidgetItem* mPieceIdItem;
 
-	QTreeWidgetItem *cameraPosition;
-	QTreeWidgetItem *cameraPositionX;
-	QTreeWidgetItem *cameraPositionY;
-	QTreeWidgetItem *cameraPositionZ;
-	QTreeWidgetItem *cameraTarget;
-	QTreeWidgetItem *cameraTargetX;
-	QTreeWidgetItem *cameraTargetY;
-	QTreeWidgetItem *cameraTargetZ;
-	QTreeWidgetItem *cameraUp;
-	QTreeWidgetItem *cameraUpX;
-	QTreeWidgetItem *cameraUpY;
-	QTreeWidgetItem *cameraUpZ;
-	QTreeWidgetItem *cameraSettings;
-	QTreeWidgetItem *cameraOrtho;
-	QTreeWidgetItem *cameraFOV;
-	QTreeWidgetItem *cameraNear;
-	QTreeWidgetItem *cameraFar;
-	QTreeWidgetItem *cameraName;
+	QTreeWidgetItem* cameraPosition;
+	QTreeWidgetItem* cameraPositionX;
+	QTreeWidgetItem* cameraPositionY;
+	QTreeWidgetItem* cameraPositionZ;
+	QTreeWidgetItem* cameraTarget;
+	QTreeWidgetItem* cameraTargetX;
+	QTreeWidgetItem* cameraTargetY;
+	QTreeWidgetItem* cameraTargetZ;
+	QTreeWidgetItem* cameraUp;
+	QTreeWidgetItem* cameraUpX;
+	QTreeWidgetItem* cameraUpY;
+	QTreeWidgetItem* cameraUpZ;
+	QTreeWidgetItem* mCameraAttributesItem;
+	QTreeWidgetItem* mCameraProjectionItem;
+	QTreeWidgetItem* cameraFOV;
+	QTreeWidgetItem* cameraNear;
+	QTreeWidgetItem* cameraFar;
+	QTreeWidgetItem* mCameraNameItem;
+
+	QTreeWidgetItem* mLightColorItem;
+	QTreeWidgetItem* mLightPowerItem;
+	QTreeWidgetItem* mLightAttributesItem;
+	QTreeWidgetItem* mLightTypeItem;
+	QTreeWidgetItem* mLightAttenuationDistanceItem;
+	QTreeWidgetItem* mLightAttenuationPowerItem;
+	QTreeWidgetItem* mLightSpotConeAngleItem;
+	QTreeWidgetItem* mLightSpotPenumbraAngleItem;
+	QTreeWidgetItem* mLightSpotTightnessItem;
+	QTreeWidgetItem* mLightAreaShapeItem;
+	QTreeWidgetItem* mLightAreaGridXItem;
+	QTreeWidgetItem* mLightAreaGridYItem;
+	QTreeWidgetItem* mLightSizeXItem;
+	QTreeWidgetItem* mLightSizeYItem;
+	QTreeWidgetItem* mLightNameItem;
+	QTreeWidgetItem* mLightCastShadowItem;
+
+	QTreeWidgetItem* mPositionItem;
+	QTreeWidgetItem* mPositionXItem;
+	QTreeWidgetItem* mPositionYItem;
+	QTreeWidgetItem* mPositionZItem;
+	QTreeWidgetItem* mRotationItem;
+	QTreeWidgetItem* mRotationXItem;
+	QTreeWidgetItem* mRotationYItem;
+	QTreeWidgetItem* mRotationZItem;
 };
 
 class lcQPropertiesTreeDelegate : public QItemDelegate
@@ -161,4 +186,3 @@ private:
 	mutable QWidget *m_editedWidget;
 	mutable bool m_disablePainting;
 };
-

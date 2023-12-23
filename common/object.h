@@ -36,7 +36,7 @@ public:
 		mKeys.clear();
 	}
 
-	void SaveKeysLDraw(QTextStream& Stream, const char* KeyName) const;
+	void SaveKeysLDraw(QTextStream& Stream, const char* ObjectName, const char* VariableName) const;
 	void LoadKeysLDraw(QTextStream& Stream);
 	const T& CalculateKey(lcStep Step) const;
 	void ChangeKey(const T& Value, lcStep Step, bool AddKey);
@@ -79,15 +79,18 @@ struct lcObjectBoxTest
 	lcArray<lcObject*> Objects;
 };
 
-#define LC_OBJECT_TRANSFORM_MOVE_X   0x001
-#define LC_OBJECT_TRANSFORM_MOVE_Y   0x002
-#define LC_OBJECT_TRANSFORM_MOVE_Z   0x004
-#define LC_OBJECT_TRANSFORM_ROTATE_X 0x010
-#define LC_OBJECT_TRANSFORM_ROTATE_Y 0x020
-#define LC_OBJECT_TRANSFORM_ROTATE_Z 0x040
-#define LC_OBJECT_TRANSFORM_SCALE_X  0x100
-#define LC_OBJECT_TRANSFORM_SCALE_Y  0x200
-#define LC_OBJECT_TRANSFORM_SCALE_Z  0x400
+#define LC_OBJECT_TRANSFORM_MOVE_X    0x001
+#define LC_OBJECT_TRANSFORM_MOVE_Y    0x002
+#define LC_OBJECT_TRANSFORM_MOVE_Z    0x004
+#define LC_OBJECT_TRANSFORM_MOVE_XYZ (LC_OBJECT_TRANSFORM_MOVE_X | LC_OBJECT_TRANSFORM_MOVE_Y | LC_OBJECT_TRANSFORM_MOVE_Z)
+#define LC_OBJECT_TRANSFORM_ROTATE_X  0x010
+#define LC_OBJECT_TRANSFORM_ROTATE_Y  0x020
+#define LC_OBJECT_TRANSFORM_ROTATE_Z  0x040
+#define LC_OBJECT_TRANSFORM_ROTATE_XYZ (LC_OBJECT_TRANSFORM_ROTATE_X | LC_OBJECT_TRANSFORM_ROTATE_Y | LC_OBJECT_TRANSFORM_ROTATE_Z)
+#define LC_OBJECT_TRANSFORM_SCALE_X   0x100
+#define LC_OBJECT_TRANSFORM_SCALE_Y   0x200
+#define LC_OBJECT_TRANSFORM_SCALE_Z   0x400
+#define LC_OBJECT_TRANSFORM_SCALE_XYZ (LC_OBJECT_TRANSFORM_SCALE_X | LC_OBJECT_TRANSFORM_SCALE_Y | LC_OBJECT_TRANSFORM_SCALE_Z)
 
 class lcObject
 {
@@ -138,7 +141,12 @@ public:
 	virtual void RemoveKeyFrames() = 0;
 	virtual QString GetName() const = 0;
 
+protected:
+	template<typename T>
+	void SaveAttribute(QTextStream& Stream, const T& Variable, const lcObjectKeyArray<T>& Keys, const char* ObjectName, const char* VariableName) const;
+	template<typename T>
+	bool LoadAttribute(QTextStream& Stream, const QString& Token, T& Variable, lcObjectKeyArray<T>& Keys, const char* VariableName);
+
 private:
 	lcObjectType mObjectType;
 };
-

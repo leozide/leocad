@@ -348,14 +348,6 @@ void lcRenderDialog::on_RenderButton_clicked()
 			break;
 		}
 
-		/*
-		if (!LGEOPath.isEmpty())
-		{
-			Arguments.append(QString::fromLatin1("+L%1lg/").arg(LGEOPath));
-			Arguments.append(QString::fromLatin1("+L%1ar/").arg(LGEOPath));
-		}
-		*/
-
 		QString POVRayPath;
 
 #ifdef Q_OS_WIN
@@ -371,6 +363,29 @@ void lcRenderDialog::on_RenderButton_clicked()
 #ifdef Q_OS_MACOS
 		POVRayPath = QDir::cleanPath(QCoreApplication::applicationDirPath() + QLatin1String("/povray"));
 #endif
+
+		const QString POVRayDir = QFileInfo(POVRayPath).absolutePath();
+		const QString IncludePath = QDir::cleanPath(POVRayDir + "/include");
+		if (QFileInfo(IncludePath).exists())
+			Arguments.append(QString("+L\"%1\"").arg(IncludePath));
+		const QString IniPath = QDir::cleanPath(POVRayDir + "/ini");
+		if (QFileInfo(IniPath).exists())
+			Arguments.append(QString("+L\"%1\"").arg(IniPath));
+		if (lcGetActiveProject()->GetModels()[0]->GetPOVRayOptions().UseLGEO) {
+			const QString LGEOPath = lcGetProfileString(LC_PROFILE_POVRAY_LGEO_PATH);
+			if (QFileInfo(LGEOPath).exists())
+			{
+				const QString LgPath = QDir::cleanPath(LGEOPath + "/lg");
+				if (QFileInfo(LgPath).exists())
+					Arguments.append(QString("+L\"%1\"").arg(LgPath));
+				const QString ArPath = QDir::cleanPath(LGEOPath + "/ar");
+				if (QFileInfo(ArPath).exists())
+					Arguments.append(QString("+L\"%1\"").arg(ArPath));
+				const QString StlPath = QDir::cleanPath(LGEOPath + "/stl");
+				if (QFileInfo(StlPath).exists())
+					Arguments.append(QString("+L\"%1\"").arg(StlPath));
+			}
+		}
 
 		mProcess = new lcRenderProcess(this);
 #ifdef Q_OS_LINUX
@@ -882,11 +897,16 @@ void lcRenderDialog::on_OutputBrowseButton_clicked()
 
 void lcRenderDialog::on_RenderOutputButton_clicked()
 {
-	const QString RenderType = mCommand == POVRAY_RENDER ? QLatin1String("POV-Ray") : QLatin1String("Blender");
-	QFileInfo FileInfo(GetStdOutFileName());
+	QFileInfo FileInfo(GetStdErrFileName());
+	QString Message = tr("POV-Ray standard error file not found: %1.").arg(FileInfo.absoluteFilePath());
+	if (mCommand == BLENDER_RENDER)
+	{
+		FileInfo.setFile(GetStdOutFileName());
+		Message = tr("Blender standard output file not found: %1.").arg(FileInfo.absoluteFilePath());
+	}
 	if (!FileInfo.exists())
 	{
-		QMessageBox::warning(this, tr("Error"), tr("%1 Standard output file not found: %2.").arg(RenderType).arg(FileInfo.absoluteFilePath()));
+		QMessageBox::warning(this, tr("Error"), Message);
 		return;
 	}
 

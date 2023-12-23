@@ -5,18 +5,20 @@
 #include "lc_array.h"
 
 #define LC_SEL_NO_PIECES                0x0001 // No pieces in model
-#define LC_SEL_PIECE                    0x0002 // At last 1 piece selected
-#define LC_SEL_SELECTED                 0x0004 // At last 1 object selected
-#define LC_SEL_UNSELECTED               0x0008 // At least 1 piece unselected
-#define LC_SEL_HIDDEN                   0x0010 // At least one piece hidden
-#define LC_SEL_HIDDEN_SELECTED          0x0020 // At least one piece selected is hidden
-#define LC_SEL_VISIBLE_SELECTED         0x0040 // At least one piece selected is not hidden
-#define LC_SEL_GROUPED                  0x0080 // At least one piece selected is grouped
-#define LC_SEL_FOCUS_GROUPED            0x0100 // Focused piece is grouped
-#define LC_SEL_CAN_GROUP                0x0200 // Can make a new group
-#define LC_SEL_MODEL_SELECTED           0x0400 // At least one model reference is selected
-#define LC_SEL_CAN_ADD_CONTROL_POINT    0x0800 // Can add control points to focused piece
-#define LC_SEL_CAN_REMOVE_CONTROL_POINT 0x1000 // Can remove control points from focused piece
+#define LC_SEL_PIECE                    0x0002 // At least 1 piece selected
+#define LC_SEL_CAMERA                   0x0004 // At least 1 camera selected
+#define LC_SEL_LIGHT                    0x0008 // At least 1 light selected
+#define LC_SEL_SELECTED                 0x0010 // At least 1 object selected
+#define LC_SEL_UNSELECTED               0x0020 // At least 1 piece unselected
+#define LC_SEL_HIDDEN                   0x0040 // At least one piece hidden
+#define LC_SEL_HIDDEN_SELECTED          0x0080 // At least one piece selected is hidden
+#define LC_SEL_VISIBLE_SELECTED         0x0100 // At least one piece selected is not hidden
+#define LC_SEL_GROUPED                  0x0200 // At least one piece selected is grouped
+#define LC_SEL_FOCUS_GROUPED            0x0400 // Focused piece is grouped
+#define LC_SEL_CAN_GROUP                0x0800 // Can make a new group
+#define LC_SEL_MODEL_SELECTED           0x1000 // At least one model reference is selected
+#define LC_SEL_CAN_ADD_CONTROL_POINT    0x2000 // Can add control points to focused piece
+#define LC_SEL_CAN_REMOVE_CONTROL_POINT 0x4000 // Can remove control points from focused piece
 
 enum class lcSelectionMode
 {
@@ -65,6 +67,26 @@ public:
 	QString mComments;
 
 	lcVector3 mAmbientColor;
+};
+
+class lcPOVRayOptions
+{
+public:
+	lcPOVRayOptions();
+	void ParseLDrawLine(QTextStream& LineStream);
+	void SaveLDraw(QTextStream& Stream) const;
+
+	bool UseLGEO;
+	bool ExcludeFloor;
+	bool ExcludeBackground;
+	bool NoReflection;
+	bool NoShadow;
+	int FloorAxis;
+	float FloorAmbient;
+	float FloorDiffuse;
+	lcVector3 FloorColor;
+	QString HeaderIncludeFile;
+	QString FooterIncludeFile;
 };
 
 struct lcModelHistoryEntry
@@ -134,6 +156,11 @@ public:
 	const lcModelProperties& GetProperties() const
 	{
 		return mProperties;
+	}
+
+	const lcPOVRayOptions& GetPOVRayOptions() const
+	{
+		return mPOVRayOptions;
 	}
 
 	void SetFileName(const QString& FileName)
@@ -254,6 +281,7 @@ public:
 	lcModel* GetFirstSelectedSubmodel() const;
 	void GetSubModels(lcArray<lcModel*>& SubModels) const;
 	bool GetMoveRotateTransform(lcVector3& Center, lcMatrix33& RelativeRotation) const;
+	bool CanRotateSelection() const;
 	bool GetPieceFocusOrSelectionCenter(lcVector3& Center) const;
 	lcVector3 GetSelectionOrModelCenter() const;
 	bool GetFocusPosition(lcVector3& Position) const;
@@ -301,9 +329,7 @@ public:
 	void BeginMouseTool();
 	void EndMouseTool(lcTool Tool, bool Accept);
 	void InsertPieceToolClicked(const lcMatrix44& WorldMatrix);
-	void PointLightToolClicked(const lcVector3& Position);
-	void BeginSpotLightTool(const lcVector3& Position, const lcVector3& Target);
-	void UpdateSpotLightTool(const lcVector3& Position);
+	void InsertLightToolClicked(const lcVector3& Position, lcLightType LightType);
 	void BeginCameraTool(const lcVector3& Position, const lcVector3& Target);
 	void UpdateCameraTool(const lcVector3& Position);
 	void UpdateMoveTool(const lcVector3& Distance, bool AllowRelative, bool AlternateButtonDrag);
@@ -322,13 +348,13 @@ public:
 	void ZoomExtents(lcCamera* Camera, float Aspect);
 	void Zoom(lcCamera* Camera, float Amount);
 
-	void MoveSelectedObjects(const lcVector3& Distance, bool AllowRelative, bool AlternateButtonDrag, bool Update, bool Checkpoint)
+	void MoveSelectedObjects(const lcVector3& Distance, bool AllowRelative, bool AlternateButtonDrag, bool Update, bool Checkpoint, bool FirstMove)
 	{
-		MoveSelectedObjects(Distance, Distance, AllowRelative, AlternateButtonDrag, Update, Checkpoint);
+		MoveSelectedObjects(Distance, Distance, AllowRelative, AlternateButtonDrag, Update, Checkpoint, FirstMove);
 	}
 
-	void MoveSelectedObjects(const lcVector3& PieceDistance, const lcVector3& ObjectDistance, bool AllowRelative, bool AlternateButtonDrag, bool Update, bool Checkpoint);
-	void RotateSelectedPieces(const lcVector3& Angles, bool Relative, bool RotatePivotPoint, bool Update, bool Checkpoint);
+	void MoveSelectedObjects(const lcVector3& PieceDistance, const lcVector3& ObjectDistance, bool AllowRelative, bool AlternateButtonDrag, bool Update, bool Checkpoint, bool FirstMove);
+	void RotateSelectedObjects(const lcVector3& Angles, bool Relative, bool RotatePivotPoint, bool Update, bool Checkpoint);
 	void ScaleSelectedPieces(const float Scale, bool Update, bool Checkpoint);
 	void TransformSelectedObjects(lcTransformType TransformType, const lcVector3& Transform);
 	void SetSelectedPiecesColorIndex(int ColorIndex);
@@ -341,6 +367,20 @@ public:
 	void SetCameraZNear(lcCamera* Camera, float ZNear);
 	void SetCameraZFar(lcCamera* Camera, float ZFar);
 	void SetCameraName(lcCamera* Camera, const QString& Name);
+
+	void SetLightType(lcLight* Light, lcLightType LightType);
+	void SetLightColor(lcLight* Light, const lcVector3& Color);
+	void SetLightAttenuationDistance(lcLight* Light, float Distance);
+	void SetLightAttenuationPower(lcLight* Light, float Power);
+	void SetSpotLightConeAngle(lcLight* Light, float Angle);
+	void SetSpotLightPenumbraAngle(lcLight* Light, float Angle);
+	void SetSpotLightTightness(lcLight* Light, float Tightness);
+	void SetLightAreaShape(lcLight* Light, lcLightAreaShape LightAreaShape);
+	void SetLightAreaGrid(lcLight* Light, lcVector2i AreaGrid);
+	void SetLightSize(lcLight* Light, lcVector2 LightAreaSize);
+	void SetLightPower(lcLight* Light, float Power);
+	void SetLightCastShadow(lcLight* Light, bool CastShadow);
+	void SetLightName(lcLight* Light, const QString& Name);
 
 	void ShowPropertiesDialog();
 	void ShowSelectByNameDialog();
@@ -363,6 +403,7 @@ protected:
 	void AddPiece(lcPiece* Piece);
 	void InsertPiece(lcPiece* Piece, int Index);
 
+	lcPOVRayOptions mPOVRayOptions;
 	lcModelProperties mProperties;
 	Project* const mProject;
 	PieceInfo* mPieceInfo;
@@ -371,6 +412,7 @@ protected:
 	bool mActive;
 	lcStep mCurrentStep;
 	lcVector3 mMouseToolDistance;
+	bool mMouseToolFirstMove;
 
 	lcArray<lcPiece*> mPieces;
 	lcArray<lcCamera*> mCameras;

@@ -160,7 +160,7 @@ void lcQPropertiesTreeDelegate::paint(QPainter *painter, const QStyleOptionViewI
 	QColor color = static_cast<QRgb>(QApplication::style()->styleHint(QStyle::SH_Table_GridLineColor, &opt));
 	painter->save();
 	painter->setPen(QPen(color));
- 
+
 	if (!m_treeWidget || (!m_treeWidget->lastColumn(index.column()) && hasValue))
 	{
 		int right = (option.direction == Qt::LeftToRight) ? option.rect.right() : option.rect.left();
@@ -222,9 +222,9 @@ lcQPropertiesTree::lcQPropertiesTree(QWidget *parent) :
 	m_checkedIcon = drawCheckBox(true);
 	m_uncheckedIcon = drawCheckBox(false);
 
-	m_delegate = new lcQPropertiesTreeDelegate(parent);
-	m_delegate->setTreeWidget(this);
-	setItemDelegate(m_delegate);
+	mDelegate = new lcQPropertiesTreeDelegate(parent);
+	mDelegate->setTreeWidget(this);
+	setItemDelegate(mDelegate);
 
 	SetEmpty();
 
@@ -264,7 +264,7 @@ void lcQPropertiesTree::keyPressEvent(QKeyEvent *event)
 	case Qt::Key_Return:
 	case Qt::Key_Enter:
 	case Qt::Key_Space: // Trigger Edit
-		if (!m_delegate->editedItem())
+		if (!mDelegate->editedItem())
 		{
 			if (const QTreeWidgetItem *item = currentItem())
 			{
@@ -299,8 +299,8 @@ void lcQPropertiesTree::mousePressEvent(QMouseEvent *event)
 
 	if (item)
 	{
-		if ((item != m_delegate->editedItem()) && (event->button() == Qt::LeftButton) && (header()->logicalIndexAt(event->pos().x()) == 1) &&
-		    ((item->flags() & (Qt::ItemIsEditable | Qt::ItemIsEnabled)) == (Qt::ItemIsEditable | Qt::ItemIsEnabled)))
+		if ((item != mDelegate->editedItem()) && (event->button() == Qt::LeftButton) && (header()->logicalIndexAt(event->pos().x()) == 1) &&
+			((item->flags() & (Qt::ItemIsEditable | Qt::ItemIsEnabled)) == (Qt::ItemIsEditable | Qt::ItemIsEnabled)))
 			editItem(item, 1);
 	}
 }
@@ -423,59 +423,63 @@ protected:
 	bool mAllowEmpty;
 };
 
-QWidget *lcQPropertiesTree::createEditor(QWidget *parent, QTreeWidgetItem *item) const
+QWidget* lcQPropertiesTree::createEditor(QWidget* Parent, QTreeWidgetItem* Item) const
 {
-	PropertyType propertyType = (PropertyType)item->data(0, lcQPropertiesTree::PropertyTypeRole).toInt();
+	lcQPropertiesTree::PropertyType PropertyType = (lcQPropertiesTree::PropertyType)Item->data(0, lcQPropertiesTree::PropertyTypeRole).toInt();
 
-	switch (propertyType)
+	switch (PropertyType)
 	{
 	case PropertyGroup:
-		return nullptr;
-
 	case PropertyBool:
-		{
-			QCheckBox *editor = new QCheckBox(parent);
-			bool value = item->data(0, PropertyValueRole).toBool();
-
-			editor->setChecked(value);
-
-			connect(editor, SIGNAL(toggled(bool)), this, SLOT(slotToggled(bool)));
-
-			return editor;
-		}
+		return nullptr;
 
 	case PropertyFloat:
 		{
-			QLineEdit *editor = new QLineEdit(parent);
-			float value = item->data(0, PropertyValueRole).toFloat();
+			QLineEdit* Editor = new QLineEdit(Parent);
+			float Value = Item->data(0, PropertyValueRole).toFloat();
+			QPointF Range = Item->data(0, PropertyRangeRole).toPointF();
 
-			editor->setValidator(new QDoubleValidator(editor));
-			editor->setText(lcFormatValueLocalized(value));
+			Editor->setValidator(Range.isNull() ? new QDoubleValidator(Editor) : new QDoubleValidator(Range.x(), Range.y(), 1, Editor));
+			Editor->setText(lcFormatValueLocalized(Value));
 
-			connect(editor, SIGNAL(returnPressed()), this, SLOT(slotReturnPressed()));
+			connect(Editor, &QLineEdit::returnPressed, this, &lcQPropertiesTree::slotReturnPressed);
 
-			return editor;
+			return Editor;
 		}
+
+	case PropertyInteger:
+	{
+		QLineEdit* Editor = new QLineEdit(Parent);
+		int Value = Item->data(0, PropertyValueRole).toInt();
+		QPoint Range = Item->data(0, PropertyRangeRole).toPoint();
+
+		Editor->setValidator(Range.isNull() ? new QIntValidator(Editor) : new QIntValidator(Range.x(), Range.y(), Editor));
+		Editor->setText(QString::number(Value));
+
+		connect(Editor, &QLineEdit::returnPressed, this, &lcQPropertiesTree::slotReturnPressed);
+
+		return Editor;
+	}
 
 	case PropertyStep:
 		{
-			QLineEdit* Editor = new QLineEdit(parent);
+			QLineEdit* Editor = new QLineEdit(Parent);
 
-			lcStep Value = item->data(0, PropertyValueRole).toUInt();
+			lcStep Value = Item->data(0, PropertyValueRole).toUInt();
 			lcStep Show = partShow->data(0, PropertyValueRole).toUInt();
 			lcStep Hide = partHide->data(0, PropertyValueRole).toUInt();
 
 			if (Show && Hide)
 			{
-				if (item == partShow)
+				if (Item == partShow)
 					Editor->setValidator(new lcStepValidator(1, Hide - 1, false));
 				else
 					Editor->setValidator(new lcStepValidator(Show + 1, LC_STEP_MAX, true));
 			}
 			else
-				Editor->setValidator(new lcStepValidator(1, LC_STEP_MAX, item == partHide));
+				Editor->setValidator(new lcStepValidator(1, LC_STEP_MAX, Item == partHide));
 
-			if (item != partHide || Value != LC_STEP_MAX)
+			if (Item != partHide || Value != LC_STEP_MAX)
 				Editor->setText(QString::number(Value));
 
 			connect(Editor, SIGNAL(returnPressed()), this, SLOT(slotReturnPressed()));
@@ -485,8 +489,8 @@ QWidget *lcQPropertiesTree::createEditor(QWidget *parent, QTreeWidgetItem *item)
 
 	case PropertyString:
 		{
-			QLineEdit *editor = new QLineEdit(parent);
-			QString value = item->data(0, PropertyValueRole).toString();
+			QLineEdit *editor = new QLineEdit(Parent);
+			QString value = Item->data(0, PropertyValueRole).toString();
 
 			editor->setText(value);
 
@@ -495,10 +499,49 @@ QWidget *lcQPropertiesTree::createEditor(QWidget *parent, QTreeWidgetItem *item)
 			return editor;
 		}
 
+	case PropertyStringList:
+	{
+		QComboBox* editor = new QComboBox(Parent);
+
+		if (Item == mCameraProjectionItem)
+		{
+			editor->addItems( { tr("Perspective"), tr("Orthographic") } );
+		}
+		else if (Item == mLightTypeItem)
+		{
+			for (int LightTypeIndex = 0; LightTypeIndex < static_cast<int>(lcLightType::Count); LightTypeIndex++)
+				editor->addItem(lcLight::GetLightTypeString(static_cast<lcLightType>(LightTypeIndex)));
+		}
+		else if (Item == mLightAreaShapeItem)
+		{
+			for (int LightAreaShapeIndex = 0; LightAreaShapeIndex < static_cast<int>(lcLightAreaShape::Count); LightAreaShapeIndex++)
+				editor->addItem(lcLight::GetAreaShapeString(static_cast<lcLightAreaShape>(LightAreaShapeIndex)));
+		}
+
+		int value = Item->data(0, PropertyValueRole).toInt();
+		editor->setCurrentIndex(value);
+
+		connect(editor, SIGNAL(currentIndexChanged(int)), this, SLOT(slotSetValue(int)));
+
+		return editor;
+	}
+
 	case PropertyColor:
 		{
-			QPushButton *editor = new QPushButton(parent);
-			int value = item->data(0, PropertyValueRole).toInt();
+			QPushButton *Editor = new QPushButton(Parent);
+			QColor Value = Item->data(0, PropertyValueRole).value<QColor>();
+
+			UpdateLightColorEditor(Editor, Value);
+
+			connect(Editor, &QPushButton::clicked, this, &lcQPropertiesTree::LightColorButtonClicked);
+
+			return Editor;
+		}
+
+	case PropertyPieceColor:
+		{
+			QPushButton *editor = new QPushButton(Parent);
+			int value = Item->data(0, PropertyValueRole).toInt();
 
 			updateColorEditor(editor, value);
 
@@ -509,7 +552,7 @@ QWidget *lcQPropertiesTree::createEditor(QWidget *parent, QTreeWidgetItem *item)
 
 	case PropertyPart:
 		{
-			QComboBox *editor = new QComboBox(parent);
+			QComboBox *editor = new QComboBox(Parent);
 
 			editor->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
 			editor->setMinimumContentsLength(1);
@@ -537,7 +580,7 @@ QWidget *lcQPropertiesTree::createEditor(QWidget *parent, QTreeWidgetItem *item)
 			for (PieceInfo* Info : SortedPieces)
 				editor->addItem(Info->m_strDescription, QVariant::fromValue((void*)Info));
 
-			PieceInfo *info = (PieceInfo*)item->data(0, PropertyValueRole).value<void*>();
+			PieceInfo *info = (PieceInfo*)Item->data(0, PropertyValueRole).value<void*>();
 			editor->setCurrentIndex(editor->findData(QVariant::fromValue((void*)info)));
 
 			connect(editor, SIGNAL(currentIndexChanged(int)), this, SLOT(slotSetValue(int)));
@@ -567,22 +610,38 @@ void lcQPropertiesTree::updateColorEditor(QPushButton *editor, int value) const
 	editor->setText(color->Name);
 }
 
+void lcQPropertiesTree::UpdateLightColorEditor(QPushButton* Editor, QColor Color) const
+{
+	QImage Image(12, 12, QImage::Format_ARGB32);
+	Image.fill(0);
+
+	QPainter Painter(&Image);
+	Painter.setCompositionMode(QPainter::CompositionMode_Source);
+	Painter.setPen(Qt::darkGray);
+	Painter.setBrush(Color);
+	Painter.drawRect(0, 0, Image.width() - 1, Image.height() - 1);
+	Painter.end();
+
+	Editor->setStyleSheet("Text-align:left");
+	Editor->setIcon(QPixmap::fromImage(Image));
+	Editor->setText(Color.name().toUpper());
+}
+
 void lcQPropertiesTree::slotToggled(bool Value)
 {
-	QTreeWidgetItem* Item = m_delegate->editedItem();
+	QTreeWidgetItem* Item = mDelegate->editedItem();
 	lcModel* Model = gMainWindow->GetActiveModel();
+	lcObject* Focus = Model->GetFocusObject();
 
-	if (mWidgetMode == LC_PROPERTY_WIDGET_CAMERA)
+	if (mWidgetMode == LC_PROPERTY_WIDGET_LIGHT)
 	{
-		lcObject* Focus = Model->GetFocusObject();
+		lcLight* Light = (Focus && Focus->IsLight()) ? (lcLight*)Focus : nullptr;
 
-		if (Focus && Focus->IsCamera())
+		if (Light)
 		{
-			lcCamera* Camera = (lcCamera*)Focus;
-
-			if (Item == cameraOrtho)
+			if (Item == mLightCastShadowItem)
 			{
-				Model->SetCameraOrthographic(Camera, Value);
+				Model->SetLightCastShadow(Light, Value);
 			}
 		}
 	}
@@ -591,53 +650,57 @@ void lcQPropertiesTree::slotToggled(bool Value)
 void lcQPropertiesTree::slotReturnPressed()
 {
 	QLineEdit* Editor = (QLineEdit*)sender();
-	QTreeWidgetItem* Item = m_delegate->editedItem();
+	QTreeWidgetItem* Item = mDelegate->editedItem();
 	lcModel* Model = gMainWindow->GetActiveModel();
+
+	lcPiece* Piece = (mFocus && mFocus->IsPiece()) ? (lcPiece*)mFocus : nullptr;
+	lcLight* Light = (mFocus && mFocus->IsLight()) ? (lcLight*)mFocus : nullptr;
+
+	if (Item == mPositionXItem || Item == mPositionYItem || Item == mPositionZItem)
+	{
+		lcVector3 Center;
+		lcMatrix33 RelativeRotation;
+		Model->GetMoveRotateTransform(Center, RelativeRotation);
+		lcVector3 Position = Center;
+		float Value = lcParseValueLocalized(Editor->text());
+
+		if (Item == mPositionXItem)
+			Position[0] = Value;
+		else if (Item == mPositionYItem)
+			Position[1] = Value;
+		else if (Item == mPositionZItem)
+			Position[2] = Value;
+
+		lcVector3 Distance = Position - Center;
+
+		Model->MoveSelectedObjects(Distance, Distance, false, true, true, true);
+	}
+	else if (Item == mRotationXItem || Item == mRotationYItem || Item == mRotationZItem)
+	{
+		lcVector3 InitialRotation(0.0f, 0.0f, 0.0f);
+
+		if (Piece)
+			InitialRotation = lcMatrix44ToEulerAngles(Piece->mModelWorld) * LC_RTOD;
+		else if (Light)
+			InitialRotation = lcMatrix44ToEulerAngles(Light->mWorldMatrix) * LC_RTOD;
+
+		lcVector3 Rotation = InitialRotation;
+
+		float Value = lcParseValueLocalized(Editor->text());
+
+		if (Item == mRotationXItem)
+			Rotation[0] = Value;
+		else if (Item == mRotationYItem)
+			Rotation[1] = Value;
+		else if (Item == mRotationZItem)
+			Rotation[2] = Value;
+
+		Model->RotateSelectedObjects(Rotation - InitialRotation, true, false, true, true);
+	}
 
 	if (mWidgetMode == LC_PROPERTY_WIDGET_PIECE)
 	{
-		lcPiece* Piece = (mFocus && mFocus->IsPiece()) ? (lcPiece*)mFocus : nullptr;
-
-		if (Item == partPositionX || Item == partPositionY || Item == partPositionZ)
-		{
-			lcVector3 Center;
-			lcMatrix33 RelativeRotation;
-			Model->GetMoveRotateTransform(Center, RelativeRotation);
-			lcVector3 Position = Center;
-			float Value = lcParseValueLocalized(Editor->text());
-
-			if (Item == partPositionX)
-				Position[0] = Value;
-			else if (Item == partPositionY)
-				Position[1] = Value;
-			else if (Item == partPositionZ)
-				Position[2] = Value;
-
-			lcVector3 Distance = Position - Center;
-
-			Model->MoveSelectedObjects(Distance, Distance, false, false, true, true);
-		}
-		else if (Item == partRotationX || Item == partRotationY || Item == partRotationZ)
-		{
-			lcVector3 InitialRotation;
-			if (Piece)
-				InitialRotation = lcMatrix44ToEulerAngles(Piece->mModelWorld) * LC_RTOD;
-			else
-				InitialRotation = lcVector3(0.0f, 0.0f, 0.0f);
-			lcVector3 Rotation = InitialRotation;
-
-			float Value = lcParseValueLocalized(Editor->text());
-
-			if (Item == partRotationX)
-				Rotation[0] = Value;
-			else if (Item == partRotationY)
-				Rotation[1] = Value;
-			else if (Item == partRotationZ)
-				Rotation[2] = Value;
-
-			Model->RotateSelectedPieces(Rotation - InitialRotation, true, false, true, true);
-		}
-		else if (Item == partShow)
+		if (Item == partShow)
 		{
 			bool Ok = false;
 			lcStep Step = Editor->text().toUInt(&Ok);
@@ -736,7 +799,7 @@ void lcQPropertiesTree::slotReturnPressed()
 
 				Model->SetCameraZFar(Camera, Value);
 			}
-			else if (Item == cameraName)
+			else if (Item == mCameraNameItem)
 			{
 				QString Value = Editor->text();
 
@@ -744,23 +807,99 @@ void lcQPropertiesTree::slotReturnPressed()
 			}
 		}
 	}
+	else if (mWidgetMode == LC_PROPERTY_WIDGET_LIGHT)
+	{
+		if (Light)
+		{
+			if (Item == mLightAttenuationDistanceItem)
+			{
+				float Value = lcParseValueLocalized(Editor->text());
+
+				Model->SetLightAttenuationDistance(Light, Value);
+			}
+			else if (Item == mLightAttenuationPowerItem)
+			{
+				float Value = lcParseValueLocalized(Editor->text());
+
+				Model->SetLightAttenuationPower(Light, Value);
+			}
+			else if (Item == mLightSpotConeAngleItem)
+			{
+				float Value = lcParseValueLocalized(Editor->text());
+
+				Model->SetSpotLightConeAngle(Light, Value);
+			}
+			else if (Item == mLightSpotPenumbraAngleItem)
+			{
+				float Value = lcParseValueLocalized(Editor->text());
+
+				Model->SetSpotLightPenumbraAngle(Light, Value);
+			}
+			else if (Item == mLightSpotTightnessItem)
+			{
+				float Value = lcParseValueLocalized(Editor->text());
+
+				Model->SetSpotLightTightness(Light, Value);
+			}
+			else if (Item == mLightAreaGridXItem)
+			{
+				lcVector2i AreaGrid = Light->GetAreaGrid();
+				AreaGrid.x = Editor->text().toInt();
+
+				Model->SetLightAreaGrid(Light, AreaGrid);
+			}
+			else if (Item == mLightAreaGridYItem)
+			{
+				lcVector2i AreaGrid = Light->GetAreaGrid();
+				AreaGrid.y = Editor->text().toInt();
+
+				Model->SetLightAreaGrid(Light, AreaGrid);
+			}
+			else if (Item == mLightSizeXItem)
+			{
+				lcVector2 Value = Light->GetSize();
+				Value[0] = lcParseValueLocalized(Editor->text());
+
+				Model->SetLightSize(Light, Value);
+			}
+			else if (Item == mLightSizeYItem)
+			{
+				lcVector2 Value = Light->GetSize();
+				Value[1] = lcParseValueLocalized(Editor->text());
+
+				Model->SetLightSize(Light, Value);
+			}
+			else if (Item == mLightPowerItem)
+			{
+				float Value = lcParseValueLocalized(Editor->text());
+
+				Model->SetLightPower(Light, Value);
+			}
+			else if (Item == mLightNameItem)
+			{
+				QString Value = Editor->text();
+
+				Model->SetLightName(Light, Value);
+			}
+		}
+	}
 }
 
 void lcQPropertiesTree::slotSetValue(int Value)
 {
-	QTreeWidgetItem* Item = m_delegate->editedItem();
+	QTreeWidgetItem* Item = mDelegate->editedItem();
 	lcModel* Model = gMainWindow->GetActiveModel();
 
 	if (mWidgetMode == LC_PROPERTY_WIDGET_PIECE)
 	{
-		if (Item == partColor)
+		if (Item == mPieceColorItem)
 		{
 			Model->SetSelectedPiecesColorIndex(Value);
 
-			QPushButton *editor = (QPushButton*)m_delegate->editor();
+			QPushButton *editor = (QPushButton*)mDelegate->editor();
 			updateColorEditor(editor, Value);
 		}
-		else if (Item == partID)
+		else if (Item == mPieceIdItem)
 		{
 			QComboBox *editor = (QComboBox*)sender();
 
@@ -773,6 +912,37 @@ void lcQPropertiesTree::slotSetValue(int Value)
 				ColorIndex = ((lcPiece*)Focus)->GetColorIndex();
 			quint32 ColorCode = lcGetColorCode(ColorIndex);
 			gMainWindow->PreviewPiece(Info->mFileName, ColorCode, false);
+		}
+	}
+	else if (mWidgetMode == LC_PROPERTY_WIDGET_CAMERA)
+	{
+		lcObject* Focus = Model->GetFocusObject();
+
+		if (Focus && Focus->IsCamera())
+		{
+			lcCamera* Camera = (lcCamera*)Focus;
+
+			if (Item == mCameraProjectionItem)
+			{
+				Model->SetCameraOrthographic(Camera, Value == 1);
+			}
+		}
+	}
+	else if (mWidgetMode == LC_PROPERTY_WIDGET_LIGHT)
+	{
+		lcObject* Focus = Model->GetFocusObject();
+		lcLight* Light = (Focus && Focus->IsLight()) ? (lcLight*)Focus : nullptr;
+
+		if (Light)
+		{
+			if (Item == mLightTypeItem)
+			{
+				Model->SetLightType(Light, static_cast<lcLightType>(Value));
+			}
+			else if (Item == mLightAreaShapeItem)
+			{
+				Model->SetLightAreaShape(Light, static_cast<lcLightAreaShape>(Value));
+			}
 		}
 	}
 }
@@ -822,6 +992,28 @@ void lcQPropertiesTree::slotColorButtonClicked()
 	Popup->show();
 }
 
+void lcQPropertiesTree::LightColorButtonClicked()
+{
+	lcModel* Model = gMainWindow->GetActiveModel();
+	lcObject* Focus = Model->GetFocusObject();
+	lcLight* Light = (Focus && Focus->IsLight()) ? (lcLight*)Focus : nullptr;
+
+	if (!Light)
+		return;
+
+	QColor Color = QColorDialog::getColor(lcQColorFromVector3(Light->GetColor()), this, tr("Select Light Color"));
+
+	if (!Color.isValid())
+		return;
+
+	Model->SetLightColor(Light, lcVector3FromQColor(Color));
+
+	QPushButton* Editor = qobject_cast<QPushButton*>(mDelegate->editor());
+
+	if (Editor)
+		UpdateLightColorEditor(Editor, Color);
+}
+
 QTreeWidgetItem *lcQPropertiesTree::addProperty(QTreeWidgetItem *parent, const QString& label, PropertyType propertyType)
 {
 	QTreeWidgetItem *newItem;
@@ -848,20 +1040,13 @@ void lcQPropertiesTree::SetEmpty()
 {
 	clear();
 
-	partPosition = nullptr;
-	partPositionX = nullptr;
-	partPositionY = nullptr;
-	partPositionZ = nullptr;
-	partRotation = nullptr;
-	partRotationX = nullptr;
-	partRotationY = nullptr;
-	partRotationZ = nullptr;
+	mPieceAttributesItem = nullptr;
 	partVisibility = nullptr;
 	partShow = nullptr;
 	partHide = nullptr;
 	partAppearance = nullptr;
-	partColor = nullptr;
-	partID = nullptr;
+	mPieceColorItem = nullptr;
+	mPieceIdItem = nullptr;
 
 	cameraPosition = nullptr;
 	cameraPositionX = nullptr;
@@ -875,12 +1060,38 @@ void lcQPropertiesTree::SetEmpty()
 	cameraUpX = nullptr;
 	cameraUpY = nullptr;
 	cameraUpZ = nullptr;
-	cameraSettings = nullptr;
-	cameraOrtho = nullptr;
+	mCameraAttributesItem = nullptr;
+	mCameraProjectionItem = nullptr;
 	cameraFOV = nullptr;
 	cameraNear = nullptr;
 	cameraFar = nullptr;
-	cameraName = nullptr;
+	mCameraNameItem = nullptr;
+
+	mLightColorItem = nullptr;
+	mLightPowerItem = nullptr;
+	mLightAttributesItem = nullptr;
+	mLightTypeItem = nullptr;
+	mLightNameItem = nullptr;
+	mLightAttenuationDistanceItem = nullptr;
+	mLightAttenuationPowerItem = nullptr;
+	mLightSpotConeAngleItem = nullptr;
+	mLightSpotPenumbraAngleItem = nullptr;
+	mLightSpotTightnessItem = nullptr;
+	mLightAreaShapeItem = nullptr;
+	mLightAreaGridXItem = nullptr;
+	mLightAreaGridYItem = nullptr;
+	mLightSizeXItem = nullptr;
+	mLightSizeYItem = nullptr;
+	mLightCastShadowItem = nullptr;
+	
+	mPositionItem = nullptr;
+	mPositionXItem = nullptr;
+	mPositionYItem = nullptr;
+	mPositionZItem = nullptr;
+	mRotationItem = nullptr;
+	mRotationXItem = nullptr;
+	mRotationYItem = nullptr;
+	mRotationZItem = nullptr;
 
 	mWidgetMode = LC_PROPERTY_WIDGET_EMPTY;
 	mFocus = nullptr;
@@ -892,23 +1103,23 @@ void lcQPropertiesTree::SetPiece(const lcArray<lcObject*>& Selection, lcObject* 
 	{
 		SetEmpty();
 
-		partPosition = addProperty(nullptr, tr("Position"), PropertyGroup);
-		partPositionX = addProperty(partPosition, tr("X"), PropertyFloat);
-		partPositionY = addProperty(partPosition, tr("Y"), PropertyFloat);
-		partPositionZ = addProperty(partPosition, tr("Z"), PropertyFloat);
-
-		partRotation = addProperty(nullptr, tr("Rotation"), PropertyGroup);
-		partRotationX = addProperty(partRotation, tr("X"), PropertyFloat);
-		partRotationY = addProperty(partRotation, tr("Y"), PropertyFloat);
-		partRotationZ = addProperty(partRotation, tr("Z"), PropertyFloat);
+		mPieceAttributesItem = addProperty(nullptr, tr("Piece Attributes"), PropertyGroup);
+		mPieceIdItem = addProperty(mPieceAttributesItem, tr("Part"), PropertyPart);
+		mPieceColorItem = addProperty(mPieceAttributesItem, tr("Color"), PropertyPieceColor);
 
 		partVisibility = addProperty(nullptr, tr("Visible Steps"), PropertyGroup);
 		partShow = addProperty(partVisibility, tr("Show"), PropertyStep);
 		partHide = addProperty(partVisibility, tr("Hide"), PropertyStep);
 
-		partAppearance = addProperty(nullptr, tr("Appearance"), PropertyGroup);
-		partColor = addProperty(partAppearance, tr("Color"), PropertyColor);
-		partID = addProperty(partAppearance, tr("Part"), PropertyPart);
+		mPositionItem = addProperty(nullptr, tr("Position"), PropertyGroup);
+		mPositionXItem = addProperty(mPositionItem, tr("X"), PropertyFloat);
+		mPositionYItem = addProperty(mPositionItem, tr("Y"), PropertyFloat);
+		mPositionZItem = addProperty(mPositionItem, tr("Z"), PropertyFloat);
+
+		mRotationItem = addProperty(nullptr, tr("Rotation"), PropertyGroup);
+		mRotationXItem = addProperty(mRotationItem, tr("X"), PropertyFloat);
+		mRotationYItem = addProperty(mRotationItem, tr("Y"), PropertyFloat);
+		mRotationZItem = addProperty(mRotationItem, tr("Z"), PropertyFloat);
 
 		mWidgetMode = LC_PROPERTY_WIDGET_PIECE;
 	}
@@ -919,25 +1130,29 @@ void lcQPropertiesTree::SetPiece(const lcArray<lcObject*>& Selection, lcObject* 
 
 	lcVector3 Position;
 	lcMatrix33 RelativeRotation;
+
 	Model->GetMoveRotateTransform(Position, RelativeRotation);
-	partPositionX->setText(1, lcFormatValueLocalized(Position[0]));
-	partPositionX->setData(0, PropertyValueRole, Position[0]);
-	partPositionY->setText(1, lcFormatValueLocalized(Position[1]));
-	partPositionY->setData(0, PropertyValueRole, Position[1]);
-	partPositionZ->setText(1, lcFormatValueLocalized(Position[2]));
-	partPositionZ->setData(0, PropertyValueRole, Position[2]);
+
+	mPositionXItem->setText(1, lcFormatValueLocalized(Position[0]));
+	mPositionXItem->setData(0, PropertyValueRole, Position[0]);
+	mPositionYItem->setText(1, lcFormatValueLocalized(Position[1]));
+	mPositionYItem->setData(0, PropertyValueRole, Position[1]);
+	mPositionZItem->setText(1, lcFormatValueLocalized(Position[2]));
+	mPositionZItem->setData(0, PropertyValueRole, Position[2]);
 
 	lcVector3 Rotation;
+
 	if (Piece)
 		Rotation = lcMatrix44ToEulerAngles(Piece->mModelWorld) * LC_RTOD;
 	else
 		Rotation = lcVector3(0.0f, 0.0f, 0.0f);
-	partRotationX->setText(1, lcFormatValueLocalized(Rotation[0]));
-	partRotationX->setData(0, PropertyValueRole, Rotation[0]);
-	partRotationY->setText(1, lcFormatValueLocalized(Rotation[1]));
-	partRotationY->setData(0, PropertyValueRole, Rotation[1]);
-	partRotationZ->setText(1, lcFormatValueLocalized(Rotation[2]));
-	partRotationZ->setData(0, PropertyValueRole, Rotation[2]);
+
+	mRotationXItem->setText(1, lcFormatValueLocalized(Rotation[0]));
+	mRotationXItem->setData(0, PropertyValueRole, Rotation[0]);
+	mRotationYItem->setText(1, lcFormatValueLocalized(Rotation[1]));
+	mRotationYItem->setData(0, PropertyValueRole, Rotation[1]);
+	mRotationZItem->setText(1, lcFormatValueLocalized(Rotation[2]));
+	mRotationZItem->setData(0, PropertyValueRole, Rotation[2]);
 
 	lcStep Show = 0;
 	lcStep Hide = 0;
@@ -1008,14 +1223,14 @@ void lcQPropertiesTree::SetPiece(const lcArray<lcObject*>& Selection, lcObject* 
 	painter.drawRect(0, 0, img.width() - 1, img.height() - 1);
 	painter.end();
 
-	partColor->setIcon(1, QIcon(QPixmap::fromImage(img)));
-	partColor->setText(1, color->Name);
-	partColor->setData(0, PropertyValueRole, ColorIndex);
+	mPieceColorItem->setIcon(1, QIcon(QPixmap::fromImage(img)));
+	mPieceColorItem->setText(1, color->Name);
+	mPieceColorItem->setData(0, PropertyValueRole, ColorIndex);
 
 	QString text = Info ? Info->m_strDescription : QString();
-	partID->setText(1, text);
-	partID->setToolTip(1, text);
-	partID->setData(0, PropertyValueRole, QVariant::fromValue((void*)Info));
+	mPieceIdItem->setText(1, text);
+	mPieceIdItem->setToolTip(1, text);
+	mPieceIdItem->setData(0, PropertyValueRole, QVariant::fromValue((void*)Info));
 }
 
 void lcQPropertiesTree::SetCamera(lcObject* Focus)
@@ -1023,6 +1238,13 @@ void lcQPropertiesTree::SetCamera(lcObject* Focus)
 	if (mWidgetMode != LC_PROPERTY_WIDGET_CAMERA)
 	{
 		SetEmpty();
+
+		mCameraAttributesItem = addProperty(nullptr, tr("Camera Attributes"), PropertyGroup);
+		mCameraNameItem = addProperty(mCameraAttributesItem, tr("Name"), PropertyString);
+		mCameraProjectionItem = addProperty(mCameraAttributesItem, tr("Projection"), PropertyStringList);
+		cameraFOV = addProperty(mCameraAttributesItem, tr("FOV"), PropertyFloat);
+		cameraNear = addProperty(mCameraAttributesItem, tr("Near"), PropertyFloat);
+		cameraFar = addProperty(mCameraAttributesItem, tr("Far"), PropertyFloat);
 
 		cameraPosition = addProperty(nullptr, tr("Position"), PropertyGroup);
 		cameraPositionX = addProperty(cameraPosition, tr("X"), PropertyFloat);
@@ -1038,13 +1260,6 @@ void lcQPropertiesTree::SetCamera(lcObject* Focus)
 		cameraUpX = addProperty(cameraUp, tr("X"), PropertyFloat);
 		cameraUpY = addProperty(cameraUp, tr("Y"), PropertyFloat);
 		cameraUpZ = addProperty(cameraUp, tr("Z"), PropertyFloat);
-
-		cameraSettings = addProperty(nullptr, tr("Up"), PropertyGroup);
-		cameraOrtho = addProperty(cameraSettings, tr("Orthographic"), PropertyBool);
-		cameraFOV = addProperty(cameraSettings, tr("FOV"), PropertyFloat);
-		cameraNear = addProperty(cameraSettings, tr("Near"), PropertyFloat);
-		cameraFar = addProperty(cameraSettings, tr("Far"), PropertyFloat);
-		cameraName = addProperty(cameraSettings, tr("Name"), PropertyString);
 
 		mWidgetMode = LC_PROPERTY_WIDGET_CAMERA;
 	}
@@ -1095,8 +1310,8 @@ void lcQPropertiesTree::SetCamera(lcObject* Focus)
 	cameraUpZ->setText(1, lcFormatValueLocalized(UpVector[2]));
 	cameraUpZ->setData(0, PropertyValueRole, UpVector[2]);
 
-	cameraOrtho->setText(1, Ortho ? "True" : "False");
-	cameraOrtho->setData(0, PropertyValueRole, Ortho);
+	mCameraProjectionItem->setText(1, Ortho ? tr("Orthographic") : tr("Perspective"));
+	mCameraProjectionItem->setData(0, PropertyValueRole, Ortho);
 	cameraFOV->setText(1, lcFormatValueLocalized(FoV));
 	cameraFOV->setData(0, PropertyValueRole, FoV);
 	cameraNear->setText(1, lcFormatValueLocalized(ZNear));
@@ -1104,18 +1319,259 @@ void lcQPropertiesTree::SetCamera(lcObject* Focus)
 	cameraFar->setText(1, lcFormatValueLocalized(ZFar));
 	cameraFar->setData(0, PropertyValueRole, ZFar);
 
-	cameraName->setText(1, Name);
-	cameraName->setData(0, PropertyValueRole, Name);
+	mCameraNameItem->setText(1, Name);
+	mCameraNameItem->setData(0, PropertyValueRole, Name);
 }
 
 void lcQPropertiesTree::SetLight(lcObject* Focus)
 {
-	Q_UNUSED(Focus);
+	lcLight* Light = (Focus && Focus->IsLight()) ? (lcLight*)Focus : nullptr;
 
-	SetEmpty();
-	mFocus = nullptr;
+	QString Name = tr("Light");
+	lcLightType LightType = lcLightType::Point;
+	lcLightAreaShape LightAreaShape = lcLightAreaShape::Rectangle;
+	lcVector2 LightSize(0.0f, 0.0f);
+	lcVector2i AreaGrid(2, 2);
+	float Power = 0.0f;
+	float AttenuationDistance = 0.0f;
+	float AttenuationPower = 0.0f;
+	bool CastShadow = true;
+	lcVector3 Position(0.0f, 0.0f, 0.0f);
+	QColor Color(Qt::white);
+	float SpotConeAngle = 0.0f, SpotPenumbraAngle = 0.0f, SpotTightness = 0.0f;
 
-	// todo: light properties
+	if (Light)
+	{
+		Name = Light->GetName();
+
+		CastShadow = Light->GetCastShadow();
+		Position = Light->GetPosition();
+		Color = lcQColorFromVector3(Light->GetColor());
+		Power = Light->GetPower();
+		AttenuationDistance = Light->GetAttenuationDistance();
+		AttenuationPower = Light->GetAttenuationPower();
+		SpotConeAngle = Light->GetSpotConeAngle();
+		SpotPenumbraAngle = Light->GetSpotPenumbraAngle();
+		SpotTightness = Light->GetSpotTightness();
+
+		LightType = Light->GetLightType();
+		LightAreaShape = Light->GetAreaShape();
+		LightSize = Light->GetSize();
+		AreaGrid = Light->GetAreaGrid();
+	}
+
+	if (mWidgetMode != LC_PROPERTY_WIDGET_LIGHT || mLightType != LightType)
+	{
+		SetEmpty();
+
+		// Attributes
+		mLightAttributesItem = addProperty(nullptr, tr("Light Attributes"), PropertyGroup);
+		mLightNameItem = addProperty(mLightAttributesItem, tr("Name"), PropertyString);
+		mLightTypeItem = addProperty(mLightAttributesItem, tr("Type"), PropertyStringList);
+
+		mLightColorItem = addProperty(mLightAttributesItem, tr("Color"), PropertyColor);
+		mLightColorItem->setToolTip(1, tr("Color of the emitted light."));
+
+		mLightPowerItem = addProperty(mLightAttributesItem, tr("Power"), PropertyFloat);
+		mLightPowerItem->setToolTip(1, tr("Power of the light (Watts in Blender)."));
+
+		mLightCastShadowItem = addProperty(mLightAttributesItem, tr("Cast Shadows"), PropertyBool);
+
+		mLightAttenuationDistanceItem = addProperty(mLightAttributesItem, tr("Attenuation Distance"), PropertyFloat);
+		mLightAttenuationDistanceItem->setToolTip(1, tr("The distance at which the full light intensity arrives (POV-Ray only)."));
+
+		mLightAttenuationPowerItem = addProperty(mLightAttributesItem, tr("Attenuation Power"), PropertyFloat);
+		mLightAttenuationPowerItem->setToolTip(1, tr("Light falloff rate (POV-Ray only)."));
+
+		switch (LightType)
+		{
+		case lcLightType::Point:
+			mLightSizeXItem = addProperty(mLightAttributesItem, tr("Radius"), PropertyFloat);
+			mLightSizeXItem->setToolTip(1, tr("Shadow soft size (Blender only)."));
+			break;
+
+		case lcLightType::Spot:
+			mLightSpotConeAngleItem = addProperty(mLightAttributesItem, tr("Spot Cone Angle"), PropertyFloat);
+			mLightSpotConeAngleItem->setToolTip(1, tr("The angle (in degrees) of the spot light's beam."));
+
+			mLightSpotPenumbraAngleItem = addProperty(mLightAttributesItem, tr("Spot Penumbra Angle"), PropertyFloat);
+			mLightSpotPenumbraAngleItem->setToolTip(1, tr("The angle (in degrees) over which the intensity of the spot light falls off to zero."));
+
+			mLightSpotTightnessItem = addProperty(mLightAttributesItem, tr("Spot Tightness"), PropertyFloat);
+			mLightSpotTightnessItem->setToolTip(1, tr("Additional exponential spot light edge softening (POV-Ray only)."));
+
+			mLightSizeXItem = addProperty(mLightAttributesItem, tr("Radius"), PropertyFloat);
+			mLightSizeXItem->setToolTip(1, tr("Shadow soft size (Blender only)."));
+			break;
+
+		case lcLightType::Directional:
+			mLightSizeXItem = addProperty(mLightAttributesItem, tr("Angle"), PropertyFloat);
+			mLightSizeXItem->setToolTip(1, tr("Angular diameter of the light (Blender only)."));
+			break;
+
+		case lcLightType::Area:
+			mLightAreaShapeItem = addProperty(mLightAttributesItem, tr("Area Shape"), PropertyStringList);
+			mLightAreaShapeItem->setToolTip(1, tr("The shape of the area light."));
+
+			switch (LightAreaShape)
+			{
+			case lcLightAreaShape::Rectangle:
+			case lcLightAreaShape::Ellipse:
+				mLightSizeXItem = addProperty(mLightAttributesItem, tr("Area Width"), PropertyFloat);
+				mLightSizeXItem->setToolTip(1, tr("The width (X direction) of the area light."));
+
+				mLightSizeYItem = addProperty(mLightAttributesItem, tr("Area Height"), PropertyFloat);
+				mLightSizeYItem->setToolTip(1, tr("The height (Y direction) of the area light."));
+				break;
+
+			case lcLightAreaShape::Square:
+			case lcLightAreaShape::Disk:
+				mLightSizeXItem = addProperty(mLightAttributesItem, tr("Area Size"), PropertyFloat);
+				mLightSizeXItem->setToolTip(1, tr("The size of the area light."));
+
+				mLightSizeYItem = nullptr;
+				break;
+
+			case lcLightAreaShape::Count:
+				break;
+			}
+
+			mLightAreaGridXItem = addProperty(mLightAttributesItem, tr("Area Grid X"), PropertyInteger);
+			mLightAreaGridXItem->setToolTip(1, tr("Number of point sources along the X axis (POV-Ray only)."));
+			mLightAreaGridXItem->setData(0, PropertyRangeRole, QPointF(1, INT_MAX));
+
+			mLightAreaGridYItem = addProperty(mLightAttributesItem, tr("Area Grid Y"), PropertyInteger);
+			mLightAreaGridYItem->setToolTip(1, tr("Number of point sources along the Y axis (POV-Ray only)."));
+			mLightAreaGridYItem->setData(0, PropertyRangeRole, QPointF(1, INT_MAX));
+
+			break;
+
+		case lcLightType::Count:
+			break;
+		}
+
+		mPositionItem = addProperty(nullptr, tr("Position"), PropertyGroup);
+		mPositionXItem = addProperty(mPositionItem, tr("X"), PropertyFloat);
+		mPositionYItem = addProperty(mPositionItem, tr("Y"), PropertyFloat);
+		mPositionZItem = addProperty(mPositionItem, tr("Z"), PropertyFloat);
+
+		if (LightType != lcLightType::Point)
+		{
+			mRotationItem = addProperty(nullptr, tr("Rotation"), PropertyGroup);
+			mRotationXItem = addProperty(mRotationItem, tr("X"), PropertyFloat);
+			mRotationYItem = addProperty(mRotationItem, tr("Y"), PropertyFloat);
+			mRotationZItem = addProperty(mRotationItem, tr("Z"), PropertyFloat);
+		}
+
+		mWidgetMode = LC_PROPERTY_WIDGET_LIGHT;
+		mLightType = LightType;
+	}
+
+	mFocus = Light;
+
+	mPositionXItem->setText(1, lcFormatValueLocalized(Position[0]));
+	mPositionXItem->setData(0, PropertyValueRole, Position[0]);
+	mPositionYItem->setText(1, lcFormatValueLocalized(Position[1]));
+	mPositionYItem->setData(0, PropertyValueRole, Position[1]);
+	mPositionZItem->setText(1, lcFormatValueLocalized(Position[2]));
+	mPositionZItem->setData(0, PropertyValueRole, Position[2]);
+
+	if (LightType != lcLightType::Point)
+	{
+		lcVector3 Rotation;
+
+		if (Light)
+			Rotation = lcMatrix44ToEulerAngles(Light->mWorldMatrix) * LC_RTOD;
+		else
+			Rotation = lcVector3(0.0f, 0.0f, 0.0f);
+
+		mRotationXItem->setText(1, lcFormatValueLocalized(Rotation[0]));
+		mRotationXItem->setData(0, PropertyValueRole, Rotation[0]);
+		mRotationYItem->setText(1, lcFormatValueLocalized(Rotation[1]));
+		mRotationYItem->setData(0, PropertyValueRole, Rotation[1]);
+		mRotationZItem->setText(1, lcFormatValueLocalized(Rotation[2]));
+		mRotationZItem->setData(0, PropertyValueRole, Rotation[2]);
+	}
+
+	QImage ColorImage(16, 16, QImage::Format_ARGB32);
+	ColorImage.fill(0);
+
+	QPainter painter(&ColorImage);
+	painter.setCompositionMode(QPainter::CompositionMode_Source);
+	painter.setPen(Qt::darkGray);
+	painter.setBrush(Color);
+	painter.drawRect(0, 0, ColorImage.width() - 1, ColorImage.height() - 1);
+	painter.end();
+
+	mLightColorItem->setIcon(1, QIcon(QPixmap::fromImage(ColorImage)));
+	mLightColorItem->setText(1, Color.name().toUpper());
+	mLightColorItem->setData(0, PropertyValueRole, Color);
+
+	mLightPowerItem->setText(1, lcFormatValueLocalized(Power));
+	mLightPowerItem->setData(0, PropertyValueRole, Power);
+
+	mLightAttenuationDistanceItem->setText(1, lcFormatValueLocalized(AttenuationDistance));
+	mLightAttenuationDistanceItem->setData(0, PropertyValueRole, AttenuationDistance);
+	mLightAttenuationDistanceItem->setData(0, PropertyRangeRole, QPointF(0.0, FLT_MAX));
+
+	mLightAttenuationPowerItem->setText(1, lcFormatValueLocalized(AttenuationPower));
+	mLightAttenuationPowerItem->setData(0, PropertyValueRole, AttenuationPower);
+	mLightAttenuationPowerItem->setData(0, PropertyRangeRole, QPointF(0.0, FLT_MAX));
+
+	mLightTypeItem->setText(1, lcLight::GetLightTypeString(LightType));
+	mLightTypeItem->setData(0, PropertyValueRole, static_cast<int>(LightType));
+
+	mLightCastShadowItem->setCheckState(1, CastShadow ? Qt::Checked : Qt::Unchecked);
+	mLightCastShadowItem->setData(0, PropertyValueRole, CastShadow);
+
+	mLightSizeXItem->setText(1, lcFormatValueLocalized(LightSize[0]));
+	mLightSizeXItem->setData(0, PropertyValueRole, LightSize[0]);
+
+	if (mLightSizeYItem)
+	{
+		mLightSizeYItem->setText(1, lcFormatValueLocalized(LightSize[1]));
+		mLightSizeYItem->setData(0, PropertyValueRole, LightSize[1]);
+	}
+
+	switch (LightType)
+	{
+	case lcLightType::Point:
+		break;
+
+	case lcLightType::Spot:
+		mLightSpotConeAngleItem->setText(1, lcFormatValueLocalized(SpotConeAngle));
+		mLightSpotConeAngleItem->setData(0, PropertyValueRole, SpotConeAngle);
+		mLightSpotConeAngleItem->setData(0, PropertyRangeRole, QPointF(1.0, 180.0));
+
+		mLightSpotPenumbraAngleItem->setText(1, lcFormatValueLocalized(SpotPenumbraAngle));
+		mLightSpotPenumbraAngleItem->setData(0, PropertyValueRole, SpotPenumbraAngle);
+		mLightSpotPenumbraAngleItem->setData(0, PropertyRangeRole, QPointF(0.0, 180.0));
+
+		mLightSpotTightnessItem->setText(1, lcFormatValueLocalized(SpotTightness));
+		mLightSpotTightnessItem->setData(0, PropertyValueRole, SpotTightness);
+		mLightSpotTightnessItem->setData(0, PropertyRangeRole, QPointF(0.0, 100.0));
+		break;
+
+	case lcLightType::Directional:
+		break;
+
+	case lcLightType::Area:
+		mLightAreaShapeItem->setText(1, lcLight::GetAreaShapeString(LightAreaShape));
+		mLightAreaShapeItem->setData(0, PropertyValueRole, static_cast<int>(LightAreaShape));
+
+		mLightAreaGridXItem->setText(1, QString::number(AreaGrid.x));
+		mLightAreaGridXItem->setData(0, PropertyValueRole, AreaGrid.x);
+
+		mLightAreaGridYItem->setText(1, QString::number(AreaGrid.y));
+		mLightAreaGridYItem->setData(0, PropertyValueRole, AreaGrid.y);
+		break;
+
+	case lcLightType::Count:
+		break;
+	}
+
+	mLightNameItem->setText(1, Name);
+	mLightNameItem->setData(0, PropertyValueRole, QVariant::fromValue(Name));
 }
 
 void lcQPropertiesTree::SetMultiple()

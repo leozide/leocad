@@ -125,10 +125,10 @@ void lcPiece::SaveLDraw(QTextStream& Stream) const
 	}
 
 	if (mPositionKeys.GetSize() > 1)
-		mPositionKeys.SaveKeysLDraw(Stream, "PIECE POSITION_KEY ");
+		mPositionKeys.SaveKeysLDraw(Stream, "PIECE", "POSITION");
 
 	if (mRotationKeys.GetSize() > 1)
-		mRotationKeys.SaveKeysLDraw(Stream, "PIECE ROTATION_KEY ");
+		mRotationKeys.SaveKeysLDraw(Stream, "PIECE", "ROTATION");
 
 	Stream << "1 " << mColorCode << ' ';
 
@@ -835,12 +835,10 @@ void lcPiece::RotatePivotPoint(const lcMatrix33& RotationMatrix)
 
 quint32 lcPiece::GetAllowedTransforms() const
 {
-	constexpr quint32 Move = LC_OBJECT_TRANSFORM_MOVE_X | LC_OBJECT_TRANSFORM_MOVE_Y | LC_OBJECT_TRANSFORM_MOVE_Z;
-	constexpr quint32 Rotate = LC_OBJECT_TRANSFORM_ROTATE_X | LC_OBJECT_TRANSFORM_ROTATE_Y | LC_OBJECT_TRANSFORM_ROTATE_Z;
 	const quint32 Section = GetFocusSection();
 
 	if (Section == LC_PIECE_SECTION_POSITION || Section == LC_PIECE_SECTION_INVALID)
-		return Move | Rotate;
+		return LC_OBJECT_TRANSFORM_MOVE_XYZ | LC_OBJECT_TRANSFORM_ROTATE_XYZ;
 
 	const lcSynthInfo* SynthInfo = mPieceInfo->GetSynthInfo();
 
@@ -850,10 +848,10 @@ quint32 lcPiece::GetAllowedTransforms() const
 			return LC_OBJECT_TRANSFORM_MOVE_Z;
 
 		if (SynthInfo->IsCurve())
-			return Move | Rotate | LC_OBJECT_TRANSFORM_SCALE_X;
+			return LC_OBJECT_TRANSFORM_MOVE_XYZ | LC_OBJECT_TRANSFORM_ROTATE_XYZ | LC_OBJECT_TRANSFORM_SCALE_X;
 
 		if (SynthInfo->IsNondirectional())
-			return Move;
+			return LC_OBJECT_TRANSFORM_MOVE_XYZ;
 	}
 
 	return 0;

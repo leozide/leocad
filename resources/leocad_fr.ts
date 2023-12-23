@@ -5485,7 +5485,7 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="3957"/>
-        <source>New SpotLight</source>
+        <source>New Spotlight</source>
         <translation>Nouvelle lumière projecteur</translation>
     </message>
     <message>

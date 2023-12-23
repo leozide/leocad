@@ -48,6 +48,7 @@ public:
 	void SetSelected(bool Selected) override
 	{
 		mSelected = Selected;
+
 		if (!Selected)
 			mFocusedSection = LC_PIECE_SECTION_INVALID;
 	}
@@ -57,6 +58,7 @@ public:
 		Q_UNUSED(Section);
 
 		mSelected = Selected;
+
 		if (!Selected)
 			mFocusedSection = LC_PIECE_SECTION_INVALID;
 	}

@@ -28,7 +28,7 @@ lcObject::~lcObject()
 }
 
 template<typename T>
-static void SaveFloatValue(QTextStream& Stream, const T& Value)
+static void SaveValue(QTextStream& Stream, const T& Value)
 {
 	constexpr int Count = sizeof(T) / sizeof(float);
 
@@ -36,13 +36,31 @@ static void SaveFloatValue(QTextStream& Stream, const T& Value)
 		Stream << ((const float*)&Value)[ValueIndex] << ' ';
 }
 
+template<>
+void SaveValue(QTextStream& Stream, const lcVector2i& Value)
+{
+	constexpr int Count = sizeof(lcVector2i) / sizeof(int);
+
+	for (int ValueIndex = 0; ValueIndex < Count; ValueIndex++)
+		Stream << ((const int*)&Value)[ValueIndex] << ' ';
+}
+
 template<typename T>
-static void LoadFloatValue(QTextStream& Stream, T& Value)
+static void LoadValue(QTextStream& Stream, T& Value)
 {
 	constexpr int Count = sizeof(T) / sizeof(float);
 
 	for (int ValueIdx = 0; ValueIdx < Count; ValueIdx++)
 		Stream >> ((float*)&Value)[ValueIdx];
+}
+
+template<>
+void LoadValue(QTextStream& Stream, lcVector2i& Value)
+{
+	constexpr int Count = sizeof(lcVector2i) / sizeof(int);
+
+	for (int ValueIdx = 0; ValueIdx < Count; ValueIdx++)
+		Stream >> ((int*)&Value)[ValueIdx];
 }
 
 template<typename T>
@@ -52,7 +70,7 @@ void lcObjectKeyArray<T>::SaveKeysLDraw(QTextStream& Stream, const char* ObjectN
 	{
 		Stream << QLatin1String("0 !LEOCAD ") << ObjectName << ' ' << VariableName << "_KEY " << Key.Step << ' ';
 
-		SaveFloatValue(Stream, Key.Value);
+		SaveValue(Stream, Key.Value);
 
 		Stream << QLatin1String("\r\n");
 	}
@@ -180,7 +198,7 @@ void lcObject::SaveAttribute(QTextStream& Stream, const T& Variable, const lcObj
 	{
 		Stream << QLatin1String("0 !LEOCAD ") << ObjectName << ' ' << VariableName << ' ';
 
-		SaveFloatValue(Stream, Variable);
+		SaveValue(Stream, Variable);
 
 		Stream << QLatin1String("\r\n");
 	}
@@ -193,7 +211,7 @@ bool lcObject::LoadAttribute(QTextStream& Stream, const QString& Token, T& Varia
 {
 	if (Token == VariableName)
 	{
-		LoadFloatValue(Stream, Variable);
+		LoadValue(Stream, Variable);
 		Keys.ChangeKey(Variable, 1, true);
 
 		return true;

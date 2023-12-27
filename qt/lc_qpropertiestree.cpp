@@ -682,7 +682,7 @@ void lcQPropertiesTree::slotReturnPressed()
 		if (Piece)
 			InitialRotation = lcMatrix44ToEulerAngles(Piece->mModelWorld) * LC_RTOD;
 		else if (Light)
-			InitialRotation = lcMatrix44ToEulerAngles(Light->mWorldMatrix) * LC_RTOD;
+			InitialRotation = lcMatrix44ToEulerAngles(Light->GetWorldMatrix()) * LC_RTOD;
 
 		lcVector3 Rotation = InitialRotation;
 
@@ -1481,7 +1481,7 @@ void lcQPropertiesTree::SetLight(lcObject* Focus)
 		lcVector3 Rotation;
 
 		if (Light)
-			Rotation = lcMatrix44ToEulerAngles(Light->mWorldMatrix) * LC_RTOD;
+			Rotation = lcMatrix44ToEulerAngles(Light->GetWorldMatrix()) * LC_RTOD;
 		else
 			Rotation = lcVector3(0.0f, 0.0f, 0.0f);
 

@@ -8,6 +8,8 @@
 	template void lcObjectKeyArray<T>::ChangeKey(const T& Value, lcStep Step, bool AddKey); \
 	template void lcObjectKeyArray<T>::InsertTime(lcStep Start, lcStep Time); \
 	template void lcObjectKeyArray<T>::RemoveTime(lcStep Start, lcStep Time); \
+	template void lcObjectProperty<T>::Save(QTextStream& Stream, const char* ObjectName, const char* VariableName) const; \
+	template bool lcObjectProperty<T>::Load(QTextStream& Stream, const QString& Token, const char* VariableName); \
 	template void lcObject::SaveAttribute<T>(QTextStream& Stream, const T& Variable, const lcObjectKeyArray<T>& Keys, const char* ObjectName, const char* VariableName) const; \
 	template bool lcObject::LoadAttribute<T>(QTextStream& Stream, const QString& Token, T& Variable, lcObjectKeyArray<T>& Keys, const char* VariableName)
 
@@ -190,6 +192,43 @@ void lcObjectKeyArray<T>::RemoveTime(lcStep Start, lcStep Time)
 		KeyIt++;
 	}
 }
+
+template<typename T>
+void lcObjectProperty<T>::Save(QTextStream& Stream, const char* ObjectName, const char* VariableName) const
+{
+	if (GetSize() == 1)
+	{
+		Stream << QLatin1String("0 !LEOCAD ") << ObjectName << ' ' << VariableName << ' ';
+
+		SaveValue(Stream, mValue);
+
+		Stream << QLatin1String("\r\n");
+	}
+	else
+		SaveKeysLDraw(Stream, ObjectName, VariableName);
+}
+
+template<typename T>
+bool lcObjectProperty<T>::Load(QTextStream& Stream, const QString& Token, const char* VariableName)
+{
+	if (Token == VariableName)
+	{
+		LoadValue(Stream, mValue);
+		ChangeKey(mValue, 1, true);
+
+		return true;
+	}
+
+	if (Token.endsWith(QLatin1String("_KEY")) && Token.leftRef(Token.size() - 4) == VariableName)
+	{
+		LoadKeysLDraw(Stream);
+
+		return true;
+	}
+
+	return false;
+}
+
 
 template<typename T>
 void lcObject::SaveAttribute(QTextStream& Stream, const T& Variable, const lcObjectKeyArray<T>& Keys, const char* ObjectName, const char* VariableName) const

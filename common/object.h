@@ -48,6 +48,61 @@ protected:
 	std::vector<lcObjectKey<T>> mKeys;
 };
 
+template<typename T>
+class lcObjectProperty : public lcObjectKeyArray<T>
+{
+public:
+	lcObjectProperty(const T& DefaultValue)
+		: mValue(DefaultValue)
+	{
+		ChangeKey(mValue, 1, true);
+	}
+
+	lcObjectProperty(const lcObjectProperty&) = delete;
+	lcObjectProperty(lcObjectProperty&&) = delete;
+	lcObjectProperty& operator=(const lcObjectProperty&) = delete;
+	lcObjectProperty& operator=(lcObjectProperty&&) = delete;
+
+	operator const T&() const
+	{
+		return mValue;
+	}
+
+	const T& GetValue() const
+	{
+		return mValue;
+	}
+
+	void SetValue(const T& Value, lcStep Step, bool AddKey)
+	{
+		mValue = Value;
+		ChangeKey(Value, Step, AddKey);
+	}
+
+	void Update(lcStep Step)
+	{
+		mValue = CalculateKey(Step);
+	}
+
+	void Reset()
+	{
+		mKeys.clear();
+		ChangeKey(mValue, 1, true);
+	}
+
+	void Reset(const T& Value)
+	{
+		mValue = Value;
+		Reset();
+	}
+
+	void Save(QTextStream& Stream, const char* ObjectName, const char* VariableName) const;
+	bool Load(QTextStream& Stream, const QString& Token, const char* VariableName);
+
+protected:
+	T mValue;
+};
+
 struct lcObjectSection
 {
 	lcObject* Object = nullptr;

@@ -167,12 +167,12 @@ public:
 
 	void SetPosition(const lcVector3& Position, lcStep Step, bool AddKey)
 	{
-		mPositionKeys.ChangeKey(Position, Step, AddKey);
+		mPosition.SetValue(Position, Step, AddKey);
 	}
 
 	void SetRotation(const lcMatrix33& Rotation, lcStep Step, bool AddKey)
 	{
-		mRotationKeys.ChangeKey(Rotation, Step, AddKey);
+		mRotation.SetValue(Rotation, Step, AddKey);
 	}
 
 	lcVector3 GetRotationCenter() const
@@ -314,8 +314,6 @@ public:
 	void Rotate(lcStep Step, bool AddKey, const lcMatrix33& RotationMatrix, const lcVector3& Center, const lcMatrix33& RotationFrame);
 	void CreateName(const lcArray<lcLight*>& Lights);
 
-	lcMatrix44 mWorldMatrix;
-
 protected:
 	void UpdateLightType();
 
@@ -333,33 +331,24 @@ protected:
 	QString mName;
 	lcLightType mLightType = lcLightType::Point;
 	bool mCastShadow = true;
-	lcVector3 mColor = lcVector3(1.0f, 1.0f, 1.0f);
-	lcVector2 mSize = lcVector2(0.0f, 0.0f);
-	float mPower = 1.0f;
-	float mAttenuationDistance = 0.0f;
-	float mAttenuationPower = 0.0f;
-	float mSpotConeAngle = 80.0f;
-	float mSpotPenumbraAngle = 0.0f;
-	float mSpotTightness = 0.0f;
+	lcObjectProperty<lcVector3> mPosition = lcVector3(0.0f, 0.0f, 0.0f);
+	lcObjectProperty<lcMatrix33> mRotation = lcMatrix33Identity();
+	lcObjectProperty<lcVector3> mColor = lcVector3(1.0f, 1.0f, 1.0f);
+	lcObjectProperty<lcVector2> mSize = lcVector2(0.0f, 0.0f);
+	lcObjectProperty<float> mPower = 1.0f;
+	lcObjectProperty<float> mAttenuationDistance = 0.0f;
+	lcObjectProperty<float> mAttenuationPower = 0.0f;
+	lcObjectProperty<float> mSpotConeAngle = 80.0f;
+	lcObjectProperty<float> mSpotPenumbraAngle = 0.0f;
+	lcObjectProperty<float> mSpotTightness = 0.0f;
+	lcObjectProperty<lcVector2i> mAreaGrid = lcVector2i(2, 2);
 	lcLightAreaShape mAreaShape = lcLightAreaShape::Rectangle;
-	lcVector2i mAreaGrid = lcVector2i(2, 2);
 
 	quint32 mState = 0;
 	bool mSelected = false;
 	quint32 mFocusedSection = LC_LIGHT_SECTION_INVALID;
 	lcVector3 mTargetMovePosition = lcVector3(0.0f, 0.0f, 0.0f);
-
-	lcObjectKeyArray<lcVector3> mPositionKeys;
-	lcObjectKeyArray<lcMatrix33> mRotationKeys;
-	lcObjectKeyArray<lcVector3> mColorKeys;
-	lcObjectKeyArray<lcVector2> mSizeKeys;
-	lcObjectKeyArray<float> mPowerKeys;
-	lcObjectKeyArray<float> mAttenuationDistanceKeys;
-	lcObjectKeyArray<float> mAttenuationPowerKeys;
-	lcObjectKeyArray<float> mSpotConeAngleKeys;
-	lcObjectKeyArray<float> mSpotPenumbraAngleKeys;
-	lcObjectKeyArray<float> mSpotTightnessKeys;
-	lcObjectKeyArray<lcVector2i> mAreaGridKeys;
+	lcMatrix44 mWorldMatrix;
 
 	static constexpr float mTargetDistance = 50.0f;
 };

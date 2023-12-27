@@ -659,11 +659,8 @@ void lcPiece::DrawInterface(lcContext* Context, const lcScene& Scene) const
 
 void lcPiece::RemoveKeyFrames()
 {
-	mPositionKeys.RemoveAll();
-	mPositionKeys.ChangeKey(mModelWorld.GetTranslation(), 1, true);
-
-	mRotationKeys.RemoveAll();
-	mRotationKeys.ChangeKey(lcMatrix33(mModelWorld), 1, true);
+	mPositionKeys.Reset(mModelWorld.GetTranslation());
+	mRotationKeys.Reset(lcMatrix33(mModelWorld));
 }
 
 void lcPiece::AddMainModelRenderMeshes(lcScene* Scene, bool Highlight, bool Fade) const

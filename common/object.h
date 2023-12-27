@@ -31,9 +31,10 @@ public:
 		return mKeys.empty();
 	}
 
-	void RemoveAll()
+	void Reset(const T& Value)
 	{
 		mKeys.clear();
+		ChangeKey(Value, 1, true);
 	}
 
 	void SaveKeysLDraw(QTextStream& Stream, const char* ObjectName, const char* VariableName) const;

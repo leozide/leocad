@@ -312,7 +312,6 @@ public:
 	void UpdatePosition(lcStep Step);
 	void MoveSelected(lcStep Step, bool AddKey, const lcVector3& Distance, bool FirstMove);
 	void Rotate(lcStep Step, bool AddKey, const lcMatrix33& RotationMatrix, const lcVector3& Center, const lcMatrix33& RotationFrame);
-	bool Setup(int LightIndex);
 	void CreateName(const lcArray<lcLight*>& Lights);
 
 	lcMatrix44 mWorldMatrix;

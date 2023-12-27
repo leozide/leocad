@@ -43,8 +43,6 @@ lcLight::lcLight(const lcVector3& Position, lcLightType LightType)
 
 void lcLight::UpdateLightType()
 {
-	mSizeKeys.RemoveAll();
-
 	switch (mLightType)
 	{
 	case lcLightType::Point:
@@ -67,7 +65,7 @@ void lcLight::UpdateLightType()
 		break;
 	}
 
-	mSizeKeys.ChangeKey(mSize, 1, true);
+	mSizeKeys.Reset(mSize);
 }
 
 QString lcLight::GetLightTypeString(lcLightType LightType)
@@ -1077,43 +1075,15 @@ void lcLight::DrawCone(lcContext* Context, float TargetDistance) const
 
 void lcLight::RemoveKeyFrames()
 {
-	mPositionKeys.RemoveAll();
-	mPositionKeys.ChangeKey(mWorldMatrix.GetTranslation(), 1, true);
-
-	mRotationKeys.RemoveAll();
-	mRotationKeys.ChangeKey(lcMatrix33(mWorldMatrix), 1, true);
-
-	mColorKeys.RemoveAll();
-	mColorKeys.ChangeKey(mColor, 1, true);
-
-	mSpotConeAngleKeys.RemoveAll();
-	mSpotConeAngleKeys.ChangeKey(mSpotConeAngle, 1, false);
-
-	mSpotPenumbraAngleKeys.RemoveAll();
-	mSpotPenumbraAngleKeys.ChangeKey(mSpotPenumbraAngle, 1, true);
-
-	mSpotTightnessKeys.RemoveAll();
-	mSpotTightnessKeys.ChangeKey(mSpotTightness, 1, true);
-
-	mAreaGridKeys.RemoveAll();
-	mAreaGridKeys.ChangeKey(mAreaGrid, 1, true);
-
-	mSizeKeys.RemoveAll();
-	mSizeKeys.ChangeKey(mSize, 1, true);
-
-	mPowerKeys.RemoveAll();
-	mPowerKeys.ChangeKey(mPower, 1, true);
-
-	mAttenuationDistanceKeys.RemoveAll();
-	mAttenuationDistanceKeys.ChangeKey(mAttenuationDistance, 1, true);
-
-	mAttenuationPowerKeys.RemoveAll();
-	mAttenuationPowerKeys.ChangeKey(mAttenuationPower, 1, true);
-}
-
-bool lcLight::Setup(int LightIndex)
-{
-	Q_UNUSED(LightIndex);
-
-	return true;
+	mPositionKeys.Reset(mWorldMatrix.GetTranslation());
+	mRotationKeys.Reset(lcMatrix33(mWorldMatrix));
+	mColorKeys.Reset(mColor);
+	mSpotConeAngleKeys.Reset(mSpotConeAngle);
+	mSpotPenumbraAngleKeys.Reset(mSpotPenumbraAngle);
+	mSpotTightnessKeys.Reset(mSpotTightness);
+	mAreaGridKeys.Reset(mAreaGrid);
+	mSizeKeys.Reset(mSize);
+	mPowerKeys.Reset(mPower);
+	mAttenuationDistanceKeys.Reset(mAttenuationDistance);
+	mAttenuationPowerKeys.Reset(mAttenuationPower);
 }

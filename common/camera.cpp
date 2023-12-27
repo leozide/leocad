@@ -591,14 +591,9 @@ void lcCamera::DrawInterface(lcContext* Context, const lcScene& Scene) const
 
 void lcCamera::RemoveKeyFrames()
 {
-	mPositionKeys.RemoveAll();
-	mPositionKeys.ChangeKey(mPosition, 1, true);
-
-	mTargetPositionKeys.RemoveAll();
-	mTargetPositionKeys.ChangeKey(mTargetPosition, 1, true);
-
-	mUpVectorKeys.RemoveAll();
-	mUpVectorKeys.ChangeKey(mUpVector, 1, true);
+	mPositionKeys.Reset(mPosition);
+	mTargetPositionKeys.Reset(mTargetPosition);
+	mUpVectorKeys.Reset(mUpVector);
 }
 
 void lcCamera::RayTest(lcObjectRayTest& ObjectRayTest) const

@@ -63,17 +63,6 @@ public:
 		return mValue;
 	}
 
-	const T& GetValue() const
-	{
-		return mValue;
-	}
-
-	void SetValue(const T& Value, lcStep Step, bool AddKey)
-	{
-		mValue = Value;
-		ChangeKey(Value, Step, AddKey);
-	}
-
 	void Update(lcStep Step)
 	{
 		mValue = CalculateKey(Step);

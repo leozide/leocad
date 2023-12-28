@@ -484,32 +484,32 @@ bool lcLight::SetLightType(lcLightType LightType)
 
 void lcLight::SetColor(const lcVector3& Color, lcStep Step, bool AddKey)
 {
-	mColor.SetValue(Color, Step, AddKey);
+	mColor.ChangeKey(Color, Step, AddKey);
 }
 
 void lcLight::SetAttenuationDistance(float Distance, lcStep Step, bool AddKey)
 {
-	mAttenuationDistance.SetValue(Distance, Step, AddKey);
+	mAttenuationDistance.ChangeKey(Distance, Step, AddKey);
 }
 
 void lcLight::SetAttenuationPower(float Power, lcStep Step, bool AddKey)
 {
-	mAttenuationPower.SetValue(Power, Step, AddKey);
+	mAttenuationPower.ChangeKey(Power, Step, AddKey);
 }
 
 void lcLight::SetSpotConeAngle(float Angle, lcStep Step, bool AddKey)
 {
-	mSpotConeAngle.SetValue(Angle, Step, AddKey);
+	mSpotConeAngle.ChangeKey(Angle, Step, AddKey);
 }
 
 void lcLight::SetSpotPenumbraAngle(float Angle, lcStep Step, bool AddKey)
 {
-	mSpotPenumbraAngle.SetValue(Angle, Step, AddKey);
+	mSpotPenumbraAngle.ChangeKey(Angle, Step, AddKey);
 }
 
 void lcLight::SetSpotTightness(float Tightness, lcStep Step, bool AddKey)
 {
-	mSpotTightness.SetValue(Tightness, Step, AddKey);
+	mSpotTightness.ChangeKey(Tightness, Step, AddKey);
 }
 
 bool lcLight::SetAreaShape(lcLightAreaShape AreaShape)
@@ -528,7 +528,7 @@ bool lcLight::SetAreaShape(lcLightAreaShape AreaShape)
 
 bool lcLight::SetAreaGrid(lcVector2i AreaGrid, lcStep Step, bool AddKey)
 {
-	mAreaGrid.SetValue(AreaGrid, Step, AddKey);
+	mAreaGrid.ChangeKey(AreaGrid, Step, AddKey);
 
 	return true;
 }
@@ -538,12 +538,12 @@ void lcLight::SetSize(lcVector2 Size, lcStep Step, bool AddKey)
 	if (mLightType == lcLightType::Area && (mAreaShape == lcLightAreaShape::Square || mAreaShape == lcLightAreaShape::Disk))
 		Size[1] = Size[0];
 
-	mSize.SetValue(Size, Step, AddKey);
+	mSize.ChangeKey(Size, Step, AddKey);
 }
 
 void lcLight::SetPower(float Power, lcStep Step, bool AddKey)
 {
-	mPower.SetValue(Power, Step, AddKey);
+	mPower.ChangeKey(Power, Step, AddKey);
 }
 
 bool lcLight::SetCastShadow(bool CastShadow)

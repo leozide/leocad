@@ -167,12 +167,12 @@ public:
 
 	void SetPosition(const lcVector3& Position, lcStep Step, bool AddKey)
 	{
-		mPosition.SetValue(Position, Step, AddKey);
+		mPosition.ChangeKey(Position, Step, AddKey);
 	}
 
 	void SetRotation(const lcMatrix33& Rotation, lcStep Step, bool AddKey)
 	{
-		mRotation.SetValue(Rotation, Step, AddKey);
+		mRotation.ChangeKey(Rotation, Step, AddKey);
 	}
 
 	lcVector3 GetRotationCenter() const

@@ -381,10 +381,8 @@ void lcPiece::Initialize(const lcMatrix44& WorldMatrix, lcStep Step)
 {
 	mStepShow = Step;
 
-	if (mPosition.IsEmpty())
-		mPosition.ChangeKey(WorldMatrix.GetTranslation(), 1, true);
-	if (mRotation.IsEmpty())
-		mRotation.ChangeKey(lcMatrix33(WorldMatrix), 1, true);
+	mPosition.Reset(WorldMatrix.GetTranslation());
+	mRotation.Reset(lcMatrix33(WorldMatrix));
 
 	UpdatePosition(Step);
 }

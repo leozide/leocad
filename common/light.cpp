@@ -32,16 +32,12 @@ lcLight::lcLight(const lcVector3& Position, lcLightType LightType)
 
 void lcLight::UpdateLightType()
 {
-	lcVector2 Size;
+	lcVector2 Size(0.0f, 0.0f);
 
 	switch (mLightType)
 	{
 	case lcLightType::Point:
-		Size = lcVector2(0.0f, 0.0f);
-		break;
-
 	case lcLightType::Spot:
-		Size = lcVector2(0.0f, 0.0f);
 		break;
 
 	case lcLightType::Directional:

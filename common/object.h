@@ -52,16 +52,11 @@ template<typename T>
 class lcObjectProperty : public lcObjectKeyArray<T>
 {
 public:
-	lcObjectProperty(const T& DefaultValue)
+	explicit lcObjectProperty(const T& DefaultValue)
 		: mValue(DefaultValue)
 	{
 		ChangeKey(mValue, 1, true);
 	}
-
-	lcObjectProperty(const lcObjectProperty&) = delete;
-	lcObjectProperty(lcObjectProperty&&) = delete;
-	lcObjectProperty& operator=(const lcObjectProperty&) = delete;
-	lcObjectProperty& operator=(lcObjectProperty&&) = delete;
 
 	operator const T&() const
 	{

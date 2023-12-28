@@ -254,7 +254,7 @@ public:
 
 	void SetUpVector(const lcVector3& UpVector, lcStep Step, bool AddKey)
 	{
-		mPositionKeys.ChangeKey(UpVector, Step, AddKey);
+		mUpVectorKeys.ChangeKey(UpVector, Step, AddKey);
 	}
 
 	float GetOrthoHeight() const

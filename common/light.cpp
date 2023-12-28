@@ -112,22 +112,8 @@ void lcLight::SaveLDraw(QTextStream& Stream) const
 	if (!mCastShadow)
 		Stream << QLatin1String("0 !LEOCAD LIGHT SHADOWLESS") << LineEnding;
 
-	const float* Matrix = mWorldMatrix;
-	const float Numbers[12] = { Matrix[12], -Matrix[14], Matrix[13], Matrix[0], -Matrix[8], Matrix[4], -Matrix[2], Matrix[10], -Matrix[6], Matrix[1], -Matrix[9], Matrix[5] };
-
-	if (mPosition.GetSize() > 1)
-		mPosition.SaveKeysLDraw(Stream, "LIGHT", "POSITION");
-	else
-		Stream << QLatin1String("0 !LEOCAD LIGHT POSITION ") << Numbers[0] << ' ' << Numbers[1] << ' ' << Numbers[2] << LineEnding;
-
-	if (!IsPointLight())
-	{
-		if (mRotation.GetSize() > 1)
-			mRotation.SaveKeysLDraw(Stream, "LIGHT", "ROTATION");
-		else
-			Stream << QLatin1String("0 !LEOCAD LIGHT ROTATION ") << Numbers[3] << ' ' << Numbers[4] << ' ' << Numbers[5] << ' ' << Numbers[6] << ' ' << Numbers[7] << ' ' << Numbers[8] << ' ' << Numbers[9] << ' ' << Numbers[10] << ' ' << Numbers[11] << LineEnding;
-	}
-
+	mPosition.Save(Stream, "LIGHT", "POSITION");
+	mRotation.Save(Stream, "LIGHT", "ROTATION");
 	mColor.Save(Stream, "LIGHT", "COLOR");
 	mSize.Save(Stream, "LIGHT", "SIZE");
 	mPower.Save(Stream, "LIGHT", "POWER");
@@ -227,40 +213,10 @@ bool lcLight::ParseLDrawLine(QTextStream& Stream)
 		QString Token;
 		Stream >> Token;
 
-		if (Token == QLatin1String("POSITION"))
-		{
-			lcVector3 Position;
-			Stream >> Position[0] >> Position[1] >> Position[2];
-
-			Position = lcVector3LDrawToLeoCAD(Position);
-			mWorldMatrix.SetTranslation(Position);
-			mPosition.ChangeKey(Position, 1, true);
-		}
-		else if (Token == QLatin1String("POSITION_KEY"))
-			mPosition.LoadKeysLDraw(Stream); // todo: convert from ldraw
-		else if (Token == QLatin1String("ROTATION"))
-		{
-			float Numbers[9];
-
-			for (int TokenIdx = 0; TokenIdx < 9; TokenIdx++)
-				Stream >> Numbers[TokenIdx];
-
-			float* Matrix = mWorldMatrix;
-
-			Matrix[0] =  Numbers[0];
-			Matrix[8] = -Numbers[1];
-			Matrix[4] =  Numbers[2];
-			Matrix[2] = -Numbers[3];
-			Matrix[10] = Numbers[4];
-			Matrix[6] = -Numbers[5];
-			Matrix[1] =  Numbers[6];
-			Matrix[9] = -Numbers[7];
-			Matrix[5] =  Numbers[8];
-		
-			mRotation.ChangeKey(lcMatrix33(mWorldMatrix), 1, true);
-		}
-		else if (Token == QLatin1String("ROTATION_KEY"))
-			mRotation.LoadKeysLDraw(Stream); // todo: convert from ldraw
+		if (mPosition.Load(Stream, Token, "POSITION"))
+			continue;
+		else if (mRotation.Load(Stream, Token, "ROTATION"))
+			continue;
 		else if (mColor.Load(Stream, Token, "COLOR"))
 			continue;
 		else if (mSize.Load(Stream, Token, "SIZE"))

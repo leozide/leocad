@@ -20,38 +20,32 @@ constexpr float LC_PIECE_CONTROL_POINT_SIZE = 10.0f;
 lcPiece::lcPiece(PieceInfo* Info)
 	: lcObject(lcObjectType::Piece)
 {
-	mMesh = nullptr;
 	SetPieceInfo(Info, QString(), true);
-	mFocusedSection = LC_PIECE_SECTION_INVALID;
 	mColorIndex = gDefaultColor;
 	mColorCode = 16;
 	mStepShow = 1;
 	mStepHide = LC_STEP_MAX;
 	mGroup = nullptr;
-	mFileLine = -1;
 	mPivotMatrix = lcMatrix44Identity();
 }
 
 lcPiece::lcPiece(const lcPiece& Other)
 	: lcObject(lcObjectType::Piece)
 {
-	mMesh = nullptr;
 	SetPieceInfo(Other.mPieceInfo, Other.mID, true);
 	mHidden = Other.mHidden;
 	mSelected = Other.mSelected;
-	mFocusedSection = LC_PIECE_SECTION_INVALID;
 	mColorIndex = Other.mColorIndex;
 	mColorCode = Other.mColorCode;
 	mStepShow = Other.mStepShow;
 	mStepHide = Other.mStepHide;
 	mGroup = Other.mGroup;
-	mFileLine = -1;
 
 	mPivotMatrix = Other.mPivotMatrix;
 	mPivotPointValid = Other.mPivotPointValid;
 
-	mPositionKeys = Other.mPositionKeys;
-	mRotationKeys = Other.mRotationKeys;
+	mPosition = Other.mPosition;
+	mRotation = Other.mRotation;
 	mControlPoints = Other.mControlPoints;
 
 	UpdateMesh();
@@ -124,11 +118,11 @@ void lcPiece::SaveLDraw(QTextStream& Stream) const
 		Stream << LineEnding;
 	}
 
-	if (mPositionKeys.GetSize() > 1)
-		mPositionKeys.SaveKeysLDraw(Stream, "PIECE", "POSITION");
+	if (mPosition.GetSize() > 1)
+		mPosition.SaveKeysLDraw(Stream, "PIECE", "POSITION");
 
-	if (mRotationKeys.GetSize() > 1)
-		mRotationKeys.SaveKeysLDraw(Stream, "PIECE", "ROTATION");
+	if (mRotation.GetSize() > 1)
+		mRotation.SaveKeysLDraw(Stream, "PIECE", "ROTATION");
 
 	Stream << "1 " << mColorCode << ' ';
 
@@ -165,9 +159,9 @@ bool lcPiece::ParseLDrawLine(QTextStream& Stream)
 			mPivotPointValid = true;
 		}
 		else if (Token == QLatin1String("POSITION_KEY"))
-			mPositionKeys.LoadKeysLDraw(Stream);
+			mPosition.LoadKeysLDraw(Stream);
 		else if (Token == QLatin1String("ROTATION_KEY"))
-			mRotationKeys.LoadKeysLDraw(Stream);
+			mRotation.LoadKeysLDraw(Stream);
 	}
 
 	return false;
@@ -202,9 +196,9 @@ bool lcPiece::FileLoad(lcFile& file)
 			file.ReadU8(&type, 1);
 
 			if (type == 0)
-				mPositionKeys.ChangeKey(lcVector3(param[0], param[1], param[2]) * PositionScale, time, true);
+				mPosition.ChangeKey(lcVector3(param[0], param[1], param[2]) * PositionScale, time, true);
 			else if (type == 1)
-				mRotationKeys.ChangeKey(lcMatrix33FromAxisAngle(lcVector3(param[0], param[1], param[2]), param[3] * LC_DTOR), time, true);
+				mRotation.ChangeKey(lcMatrix33FromAxisAngle(lcVector3(param[0], param[1], param[2]), param[3] * LC_DTOR), time, true);
 		}
 
 		file.ReadU32(&n, 1);
@@ -234,9 +228,9 @@ bool lcPiece::FileLoad(lcFile& file)
 				file.ReadU8(&type, 1);
 
 				if (type == 0)
-					mPositionKeys.ChangeKey(lcVector3(param[0], param[1], param[2]) * PositionScale, time, true);
+					mPosition.ChangeKey(lcVector3(param[0], param[1], param[2]) * PositionScale, time, true);
 				else if (type == 1)
-					mRotationKeys.ChangeKey(lcMatrix33FromAxisAngle(lcVector3(param[0], param[1], param[2]), param[3] * LC_DTOR), time, true);
+					mRotation.ChangeKey(lcMatrix33FromAxisAngle(lcVector3(param[0], param[1], param[2]), param[3] * LC_DTOR), time, true);
 			}
 
 			file.ReadU32(&keys, 1);
@@ -275,8 +269,8 @@ bool lcPiece::FileLoad(lcFile& file)
 					file.ReadU8(&b, 1);
 					time = b;
 
-					mPositionKeys.ChangeKey(ModelWorld.GetTranslation() * PositionScale, 1, true);
-					mRotationKeys.ChangeKey(lcMatrix33(ModelWorld), time, true);
+					mPosition.ChangeKey(ModelWorld.GetTranslation() * PositionScale, 1, true);
+					mRotation.ChangeKey(lcMatrix33(ModelWorld), time, true);
 
 					qint32 bl;
 					file.ReadS32(&bl, 1);
@@ -291,8 +285,8 @@ bool lcPiece::FileLoad(lcFile& file)
 				lcMatrix44 ModelWorld = lcMatrix44Translation(Translation);
 				ModelWorld = lcMul(lcMatrix44RotationZ(Rotation[2] * LC_DTOR), lcMul(lcMatrix44RotationY(Rotation[1] * LC_DTOR), lcMul(lcMatrix44RotationX(Rotation[0] * LC_DTOR), ModelWorld)));
 
-				mPositionKeys.ChangeKey(lcVector3(ModelWorld.r[3][0], ModelWorld.r[3][1], ModelWorld.r[3][2]) * PositionScale, 1, true);
-				mRotationKeys.ChangeKey(lcMatrix33(ModelWorld), 1, true);
+				mPosition.ChangeKey(lcVector3(ModelWorld.r[3][0], ModelWorld.r[3][1], ModelWorld.r[3][2]) * PositionScale, 1, true);
+				mRotation.ChangeKey(lcMatrix33(ModelWorld), 1, true);
 			}
 		}
 	}
@@ -387,10 +381,10 @@ void lcPiece::Initialize(const lcMatrix44& WorldMatrix, lcStep Step)
 {
 	mStepShow = Step;
 
-	if (mPositionKeys.IsEmpty())
-		mPositionKeys.ChangeKey(WorldMatrix.GetTranslation(), 1, true);
-	if (mRotationKeys.IsEmpty())
-		mRotationKeys.ChangeKey(lcMatrix33(WorldMatrix), 1, true);
+	if (mPosition.IsEmpty())
+		mPosition.ChangeKey(WorldMatrix.GetTranslation(), 1, true);
+	if (mRotation.IsEmpty())
+		mRotation.ChangeKey(lcMatrix33(WorldMatrix), 1, true);
 
 	UpdatePosition(Step);
 }
@@ -424,8 +418,8 @@ void lcPiece::InsertTime(lcStep Start, lcStep Time)
 		}
 	}
 
-	mPositionKeys.InsertTime(Start, Time);
-	mRotationKeys.InsertTime(Start, Time);
+	mPosition.InsertTime(Start, Time);
+	mRotation.InsertTime(Start, Time);
 }
 
 void lcPiece::RemoveTime(lcStep Start, lcStep Time)
@@ -457,8 +451,8 @@ void lcPiece::RemoveTime(lcStep Start, lcStep Time)
 		}
 	}
 
-	mPositionKeys.RemoveTime(Start, Time);
-	mRotationKeys.RemoveTime(Start, Time);
+	mPosition.RemoveTime(Start, Time);
+	mRotation.RemoveTime(Start, Time);
 }
 
 void lcPiece::RayTest(lcObjectRayTest& ObjectRayTest) const
@@ -659,8 +653,8 @@ void lcPiece::DrawInterface(lcContext* Context, const lcScene& Scene) const
 
 void lcPiece::RemoveKeyFrames()
 {
-	mPositionKeys.Reset(mModelWorld.GetTranslation());
-	mRotationKeys.Reset(lcMatrix33(mModelWorld));
+	mPosition.Reset();
+	mRotation.Reset();
 }
 
 void lcPiece::AddMainModelRenderMeshes(lcScene* Scene, bool Highlight, bool Fade) const
@@ -991,10 +985,10 @@ lcGroup* lcPiece::GetTopGroup()
 
 void lcPiece::UpdatePosition(lcStep Step)
 {
-	const lcVector3 Position = mPositionKeys.CalculateKey(Step);
-	const lcMatrix33 Rotation = mRotationKeys.CalculateKey(Step);
+	mPosition.Update(Step);
+	mRotation.Update(Step);
 
-	mModelWorld = lcMatrix44(Rotation, Position);
+	mModelWorld = lcMatrix44(mRotation, mPosition);
 }
 
 void lcPiece::UpdateMesh()

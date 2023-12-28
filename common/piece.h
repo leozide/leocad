@@ -269,12 +269,12 @@ public:
 
 	void SetPosition(const lcVector3& Position, lcStep Step, bool AddKey)
 	{
-		mPositionKeys.ChangeKey(Position, Step, AddKey);
+		mPosition.SetValue(Position, Step, AddKey);
 	}
 
 	void SetRotation(const lcMatrix33& Rotation, lcStep Step, bool AddKey)
 	{
-		mRotationKeys.ChangeKey(Rotation, Step, AddKey);
+		mRotation.SetValue(Rotation, Step, AddKey);
 	}
 
 	lcVector3 GetRotationCenter() const
@@ -352,10 +352,10 @@ protected:
 		return IsSelected();
 	}
 
-	lcObjectKeyArray<lcVector3> mPositionKeys;
-	lcObjectKeyArray<lcMatrix33> mRotationKeys;
+	lcObjectProperty<lcVector3> mPosition = lcObjectProperty<lcVector3>(lcVector3(0.0f, 0.0f, 0.0f));
+	lcObjectProperty<lcMatrix33> mRotation = lcObjectProperty<lcMatrix33>(lcMatrix33Identity());
 
-	int mFileLine;
+	int mFileLine = -1;
 	QString mID;
 
 	lcGroup* mGroup;
@@ -369,7 +369,7 @@ protected:
 	bool mPivotPointValid = false;
 	bool mHidden = false;
 	bool mSelected = false;
-	quint32 mFocusedSection;
+	quint32 mFocusedSection = LC_PIECE_SECTION_INVALID;
 	lcArray<lcPieceControlPoint> mControlPoints;
-	lcMesh* mMesh;
+	lcMesh* mMesh = nullptr;
 };

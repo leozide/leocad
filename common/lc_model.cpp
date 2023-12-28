@@ -360,7 +360,7 @@ void lcModel::SaveLDraw(QTextStream& Stream, bool SelectedOnly, lcStep LastStep)
 		if (SelectedOnly && !Piece->IsSelected())
 			continue;
 
-		if (SavedStep = (LastStep != 0 && Piece->GetStepShow() > LastStep))
+		if ((SavedStep = (LastStep != 0 && Piece->GetStepShow() > LastStep)))
 			break;
 
 		while (Piece->GetFileLine() > CurrentLine && CurrentLine < mFileLines.size())

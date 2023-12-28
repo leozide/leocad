@@ -2166,7 +2166,7 @@ bool Project::ExportPOVRay(const QString& FileName)
 			Power = Idx < 2 ? 0.75f : 0.5f;
 			sprintf(Line,"#ifndef (SkipLight%i)\nWriteLight(%i, %i, <%g, %g, %g>, <%g, %g, %g>, <%g, %g, %g>, %g, %g, %g, %g, %g, %g, %i, <%g, %g, %g>, <%g, %g, %g>, %i, %i)\n#end\n\n",
 					Idx,
-					LightType,
+					static_cast<int>(LightType),
 					Shadowless,
 					Location[Idx][0], Location[Idx][1], Location[Idx][2],
 					LightTarget[0], LightTarget[1], LightTarget[2],

@@ -172,7 +172,7 @@ public:
 
 	void SetRotation(const lcMatrix33& Rotation, lcStep Step, bool AddKey)
 	{
-		mRotation.SetValue(Rotation, Step, AddKey);
+		this->mRotation.SetValue(Rotation, Step, AddKey);
 	}
 
 	lcVector3 GetRotationCenter() const
@@ -331,17 +331,17 @@ protected:
 	QString mName;
 	lcLightType mLightType = lcLightType::Point;
 	bool mCastShadow = true;
-	lcObjectProperty<lcVector3> mPosition = lcVector3(0.0f, 0.0f, 0.0f);
-	lcObjectProperty<lcMatrix33> mRotation = lcMatrix33Identity();
-	lcObjectProperty<lcVector3> mColor = lcVector3(1.0f, 1.0f, 1.0f);
-	lcObjectProperty<lcVector2> mSize = lcVector2(0.0f, 0.0f);
-	lcObjectProperty<float> mPower = 1.0f;
-	lcObjectProperty<float> mAttenuationDistance = 0.0f;
-	lcObjectProperty<float> mAttenuationPower = 0.0f;
-	lcObjectProperty<float> mSpotConeAngle = 80.0f;
-	lcObjectProperty<float> mSpotPenumbraAngle = 0.0f;
-	lcObjectProperty<float> mSpotTightness = 0.0f;
-	lcObjectProperty<lcVector2i> mAreaGrid = lcVector2i(2, 2);
+	lcObjectProperty<lcVector3> mPosition = { lcVector3(0.0f, 0.0f, 0.0f) };
+	lcObjectProperty<lcMatrix33> mRotation = { lcMatrix33Identity() };
+	lcObjectProperty<lcVector3> mColor = { lcVector3(1.0f, 1.0f, 1.0f) };
+	lcObjectProperty<lcVector2> mSize = { lcVector2(0.0f, 0.0f) };
+	lcObjectProperty<float> mPower = { 1.0f };
+	lcObjectProperty<float> mAttenuationDistance = { 0.0f };
+	lcObjectProperty<float> mAttenuationPower = { 0.0f };
+	lcObjectProperty<float> mSpotConeAngle = { 80.0f };
+	lcObjectProperty<float> mSpotPenumbraAngle = { 0.0f };
+	lcObjectProperty<float> mSpotTightness = { 0.0f };
+	lcObjectProperty<lcVector2i> mAreaGrid = { lcVector2i(2, 2) };
 	lcLightAreaShape mAreaShape = lcLightAreaShape::Rectangle;
 
 	quint32 mState = 0;

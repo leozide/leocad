@@ -55,7 +55,7 @@ public:
 	lcObjectProperty(const T& DefaultValue)
 		: mValue(DefaultValue)
 	{
-		ChangeKey(mValue, 1, true);
+		lcObjectKeyArray<T>::ChangeKey(mValue, 1, true);
 	}
 
 	lcObjectProperty(const lcObjectProperty&) = delete;
@@ -76,18 +76,18 @@ public:
 	void SetValue(const T& Value, lcStep Step, bool AddKey)
 	{
 		mValue = Value;
-		ChangeKey(Value, Step, AddKey);
+		lcObjectKeyArray<T>::ChangeKey(Value, Step, AddKey);
 	}
 
 	void Update(lcStep Step)
 	{
-		mValue = CalculateKey(Step);
+		mValue = lcObjectKeyArray<T>::CalculateKey(Step);
 	}
 
 	void Reset()
 	{
-		mKeys.clear();
-		ChangeKey(mValue, 1, true);
+		this->mKeys.clear();
+		lcObjectKeyArray<T>::ChangeKey(mValue, 1, true);
 	}
 
 	void Reset(const T& Value)

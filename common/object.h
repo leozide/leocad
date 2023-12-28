@@ -18,38 +18,7 @@ struct lcObjectKey
 };
 
 template<typename T>
-class lcObjectKeyArray
-{
-public:
-	int GetSize() const
-	{
-		return static_cast<int>(mKeys.size());
-	}
-
-	bool IsEmpty() const
-	{
-		return mKeys.empty();
-	}
-
-	void Reset(const T& Value)
-	{
-		mKeys.clear();
-		ChangeKey(Value, 1, true);
-	}
-
-	void SaveKeysLDraw(QTextStream& Stream, const char* ObjectName, const char* VariableName) const;
-	void LoadKeysLDraw(QTextStream& Stream);
-	const T& CalculateKey(lcStep Step) const;
-	void ChangeKey(const T& Value, lcStep Step, bool AddKey);
-	void InsertTime(lcStep Start, lcStep Time);
-	void RemoveTime(lcStep Start, lcStep Time);
-
-protected:
-	std::vector<lcObjectKey<T>> mKeys;
-};
-
-template<typename T>
-class lcObjectProperty : public lcObjectKeyArray<T>
+class lcObjectProperty
 {
 public:
 	explicit lcObjectProperty(const T& DefaultValue)
@@ -61,6 +30,16 @@ public:
 	operator const T&() const
 	{
 		return mValue;
+	}
+
+	int GetSize() const
+	{
+		return static_cast<int>(mKeys.size());
+	}
+
+	bool IsEmpty() const
+	{
+		return mKeys.empty();
 	}
 
 	void Update(lcStep Step)
@@ -80,11 +59,20 @@ public:
 		Reset();
 	}
 
+	void ChangeKey(const T& Value, lcStep Step, bool AddKey);
+	void InsertTime(lcStep Start, lcStep Time);
+	void RemoveTime(lcStep Start, lcStep Time);
+
 	void Save(QTextStream& Stream, const char* ObjectName, const char* VariableName) const;
 	bool Load(QTextStream& Stream, const QString& Token, const char* VariableName);
+	void SaveKeysLDraw(QTextStream& Stream, const char* ObjectName, const char* VariableName) const;
+	void LoadKeysLDraw(QTextStream& Stream);
 
 protected:
+	const T& CalculateKey(lcStep Step) const;
+
 	T mValue;
+	std::vector<lcObjectKey<T>> mKeys;
 };
 
 struct lcObjectSection
@@ -180,12 +168,6 @@ public:
 	virtual void DrawInterface(lcContext* Context, const lcScene& Scene) const = 0;
 	virtual void RemoveKeyFrames() = 0;
 	virtual QString GetName() const = 0;
-
-protected:
-	template<typename T>
-	void SaveAttribute(QTextStream& Stream, const T& Variable, const lcObjectKeyArray<T>& Keys, const char* ObjectName, const char* VariableName) const;
-	template<typename T>
-	bool LoadAttribute(QTextStream& Stream, const QString& Token, T& Variable, lcObjectKeyArray<T>& Keys, const char* VariableName);
 
 private:
 	lcObjectType mObjectType;

@@ -244,17 +244,17 @@ public:
 
 	void SetPosition(const lcVector3& Position, lcStep Step, bool AddKey)
 	{
-		mPositionKeys.ChangeKey(Position, Step, AddKey);
+		mPosition.ChangeKey(Position, Step, AddKey);
 	}
 
 	void SetTargetPosition(const lcVector3& TargetPosition, lcStep Step, bool AddKey)
 	{
-		mTargetPositionKeys.ChangeKey(TargetPosition, Step, AddKey);
+		mTargetPosition.ChangeKey(TargetPosition, Step, AddKey);
 	}
 
 	void SetUpVector(const lcVector3& UpVector, lcStep Step, bool AddKey)
 	{
-		mUpVectorKeys.ChangeKey(UpVector, Step, AddKey);
+		mUpVector.ChangeKey(UpVector, Step, AddKey);
 	}
 
 	float GetOrthoHeight() const
@@ -303,15 +303,11 @@ public:
 	float m_zFar;
 
 	lcMatrix44 mWorldView;
-	lcVector3 mPosition;
-	lcVector3 mTargetPosition;
-	lcVector3 mUpVector;
+	lcObjectProperty<lcVector3> mPosition = lcObjectProperty<lcVector3>(lcVector3(0.0f, 0.0f, 0.0f));
+	lcObjectProperty<lcVector3> mTargetPosition = lcObjectProperty<lcVector3>(lcVector3(0.0f, 0.0f, 0.0f));
+	lcObjectProperty<lcVector3> mUpVector = lcObjectProperty<lcVector3>(lcVector3(0.0f, 0.0f, 0.0f));
 
 protected:
-	lcObjectKeyArray<lcVector3> mPositionKeys;
-	lcObjectKeyArray<lcVector3> mTargetPositionKeys;
-	lcObjectKeyArray<lcVector3> mUpVectorKeys;
-
 	void Initialize();
 
 	QString mName;

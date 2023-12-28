@@ -24,13 +24,9 @@ lcCamera::lcCamera(bool Simple)
 		mState |= LC_CAMERA_SIMPLE;
 	else
 	{
-		mPosition = lcVector3(-250.0f, -250.0f, 75.0f);
-		mTargetPosition = lcVector3(0.0f, 0.0f, 0.0f);
-		mUpVector = lcVector3(-0.2357f, -0.2357f, 0.94281f);
-
-		mPositionKeys.ChangeKey(mPosition, 1, true);
-		mTargetPositionKeys.ChangeKey(mTargetPosition, 1, true);
-		mUpVectorKeys.ChangeKey(mUpVector, 1, true);
+		mPosition.Reset(lcVector3(-250.0f, -250.0f, 75.0f));
+		mTargetPosition.Reset(lcVector3(0.0f, 0.0f, 0.0f));
+		mUpVector.Reset(lcVector3(-0.2357f, -0.2357f, 0.94281f));
 
 		UpdatePosition(1);
 	}
@@ -51,9 +47,9 @@ lcCamera::lcCamera(float ex, float ey, float ez, float tx, float ty, float tz)
 
 	Initialize();
 
-	mPositionKeys.ChangeKey(lcVector3(ex, ey, ez), 1, true);
-	mTargetPositionKeys.ChangeKey(lcVector3(tx, ty, tz), 1, true);
-	mUpVectorKeys.ChangeKey(UpVector, 1, true);
+	mPosition.Reset(lcVector3(ex, ey, ez));
+	mTargetPosition.Reset(lcVector3(tx, ty, tz));
+	mUpVector.Reset(UpVector);
 
 	UpdatePosition(1);
 }
@@ -142,9 +138,9 @@ void lcCamera::SaveLDraw(QTextStream& Stream) const
 
 	Stream << QLatin1String("0 !LEOCAD CAMERA FOV ") << m_fovy << QLatin1String(" ZNEAR ") << m_zNear << QLatin1String(" ZFAR ") << m_zFar << LineEnding;
 
-	SaveAttribute(Stream, mPosition, mPositionKeys, "CAMERA", "POSITION");
-	SaveAttribute(Stream, mTargetPosition, mTargetPositionKeys, "CAMERA", "TARGET_POSITION");
-	SaveAttribute(Stream, mUpVector, mUpVectorKeys, "CAMERA", "UP_VECTOR");
+	mPosition.Save(Stream, "CAMERA", "POSITION");
+	mTargetPosition.Save(Stream, "CAMERA", "TARGET_POSITION");
+	mUpVector.Save(Stream, "CAMERA", "UP_VECTOR");
 
 	Stream << QLatin1String("0 !LEOCAD CAMERA ");
 
@@ -174,11 +170,11 @@ bool lcCamera::ParseLDrawLine(QTextStream& Stream)
 			Stream >> m_zNear;
 		else if (Token == QLatin1String("ZFAR"))
 			Stream >> m_zFar;
-		else if (LoadAttribute(Stream, Token, mPosition, mPositionKeys, "POSITION"))
+		else if (mPosition.Load(Stream, Token, "POSITION"))
 			continue;
-		else if (LoadAttribute(Stream, Token, mTargetPosition, mTargetPositionKeys, "TARGET_POSITION"))
+		else if (mTargetPosition.Load(Stream, Token, "TARGET_POSITION"))
 			continue;
-		else if (LoadAttribute(Stream, Token, mUpVector, mUpVectorKeys, "UP_VECTOR"))
+		else if (mUpVector.Load(Stream, Token, "UP_VECTOR"))
 			continue;
 		else if (Token == QLatin1String("NAME"))
 		{
@@ -358,30 +354,17 @@ void lcCamera::MoveSelected(lcStep Step, bool AddKey, const lcVector3& Distance)
 
 	if (IsSelected(LC_CAMERA_SECTION_POSITION))
 	{
-		mPosition += Distance;
-		mPositionKeys.ChangeKey(mPosition, Step, AddKey);
+		mPosition.ChangeKey(mPosition + Distance, Step, AddKey);
 	}
 
 	if (IsSelected(LC_CAMERA_SECTION_TARGET))
 	{
-		mTargetPosition += Distance;
-		mTargetPositionKeys.ChangeKey(mTargetPosition, Step, AddKey);
+		mTargetPosition.ChangeKey(mTargetPosition + Distance, Step, AddKey);
 	}
 	else if (IsSelected(LC_CAMERA_SECTION_UPVECTOR))
 	{
-		mUpVector += Distance;
-		mUpVector.Normalize();
-		mUpVectorKeys.ChangeKey(mUpVector, Step, AddKey);
+		mUpVector.ChangeKey(lcNormalize(mUpVector + Distance), Step, AddKey);
 	}
-
-	const lcVector3 FrontVector(mTargetPosition - mPosition);
-	lcVector3 SideVector = lcCross(FrontVector, mUpVector);
-
-	if (fabsf(lcDot(mUpVector, SideVector)) > 0.99f)
-		SideVector = lcVector3(1, 0, 0);
-
-	mUpVector = lcCross(SideVector, FrontVector);
-	mUpVector.Normalize();
 }
 
 void lcCamera::MoveRelative(const lcVector3& Distance, lcStep Step, bool AddKey)
@@ -391,29 +374,23 @@ void lcCamera::MoveRelative(const lcVector3& Distance, lcStep Step, bool AddKey)
 
 	const lcVector3 Relative = lcMul30(Distance, lcMatrix44Transpose(mWorldView)) * 5.0f;
 
-	mPosition += Relative;
-	mPositionKeys.ChangeKey(mPosition, Step, AddKey);
-
-	mTargetPosition += Relative;
-	mTargetPositionKeys.ChangeKey(mTargetPosition, Step, AddKey);
+	mPosition.ChangeKey(mPosition + Relative, Step, AddKey);
+	mTargetPosition.ChangeKey(mTargetPosition + Relative, Step, AddKey);
 
 	UpdatePosition(Step);
 }
 
 void lcCamera::UpdatePosition(lcStep Step)
 {
-	if (!IsSimple())
-	{
-		mPosition = mPositionKeys.CalculateKey(Step);
-		mTargetPosition = mTargetPositionKeys.CalculateKey(Step);
-		mUpVector = mUpVectorKeys.CalculateKey(Step);
-	}
+	mPosition.Update(Step);
+	mTargetPosition.Update(Step);
+	mUpVector.Update(Step);
 
 	const lcVector3 FrontVector(mPosition - mTargetPosition);
 	const lcVector3 SideVector = lcCross(FrontVector, mUpVector);
-	mUpVector = lcNormalize(lcCross(SideVector, FrontVector));
+	const lcVector3 UpVector = lcNormalize(lcCross(SideVector, FrontVector));
 
-	mWorldView = lcMatrix44LookAt(mPosition, mTargetPosition, mUpVector);
+	mWorldView = lcMatrix44LookAt(mPosition, mTargetPosition, UpVector);
 }
 
 void lcCamera::CopyPosition(const lcCamera* Camera)
@@ -591,9 +568,9 @@ void lcCamera::DrawInterface(lcContext* Context, const lcScene& Scene) const
 
 void lcCamera::RemoveKeyFrames()
 {
-	mPositionKeys.Reset(mPosition);
-	mTargetPositionKeys.Reset(mTargetPosition);
-	mUpVectorKeys.Reset(mUpVector);
+	mPosition.Reset();
+	mTargetPosition.Reset();
+	mUpVector.Reset();
 }
 
 void lcCamera::RayTest(lcObjectRayTest& ObjectRayTest) const
@@ -708,20 +685,22 @@ void lcCamera::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
 
 void lcCamera::InsertTime(lcStep Start, lcStep Time)
 {
-	mPositionKeys.InsertTime(Start, Time);
-	mTargetPositionKeys.InsertTime(Start, Time);
-	mUpVectorKeys.InsertTime(Start, Time);
+	mPosition.InsertTime(Start, Time);
+	mTargetPosition.InsertTime(Start, Time);
+	mUpVector.InsertTime(Start, Time);
 }
 
 void lcCamera::RemoveTime(lcStep Start, lcStep Time)
 {
-	mPositionKeys.RemoveTime(Start, Time);
-	mTargetPositionKeys.RemoveTime(Start, Time);
-	mUpVectorKeys.RemoveTime(Start, Time);
+	mPosition.RemoveTime(Start, Time);
+	mTargetPosition.RemoveTime(Start, Time);
+	mUpVector.RemoveTime(Start, Time);
 }
 
 void lcCamera::ZoomExtents(float AspectRatio, const lcVector3& Center, const std::vector<lcVector3>& Points, lcStep Step, bool AddKey)
 {
+	lcVector3 Position, TargetPosition;
+
 	if (IsOrtho())
 	{
 		float MinX = FLT_MAX, MaxX = -FLT_MAX, MinY = FLT_MAX, MaxY = -FLT_MAX;
@@ -746,29 +725,31 @@ void lcCamera::ZoomExtents(float AspectRatio, const lcVector3& Center, const std
 		const float f = Height / (m_fovy * (LC_PI / 180.0f));
 
 		const lcVector3 FrontVector(mTargetPosition - mPosition);
-		mPosition = Center - lcNormalize(FrontVector) * f;
-		mTargetPosition = Center;
+		Position = Center - lcNormalize(FrontVector) * f;
+		TargetPosition = Center;
 	}
 	else
 	{
-		const lcVector3 Position(mPosition + Center - mTargetPosition);
+		const lcVector3 CenterPosition(mPosition + Center - mTargetPosition);
 		const lcMatrix44 ProjectionMatrix = lcMatrix44Perspective(m_fovy, AspectRatio, m_zNear, m_zFar);
 
-		std::tie(mPosition, std::ignore) = lcZoomExtents(Position, mWorldView, ProjectionMatrix, Points.data(), Points.size());
-		mTargetPosition = Center;
+		std::tie(Position, std::ignore) = lcZoomExtents(CenterPosition, mWorldView, ProjectionMatrix, Points.data(), Points.size());
+		TargetPosition = Center;
 	}
 
 	if (IsSimple())
 		AddKey = false;
 
-	mPositionKeys.ChangeKey(mPosition, Step, AddKey);
-	mTargetPositionKeys.ChangeKey(mTargetPosition, Step, AddKey);
+	mPosition.ChangeKey(Position, Step, AddKey);
+	mTargetPosition.ChangeKey(TargetPosition, Step, AddKey);
 
 	UpdatePosition(Step);
 }
 
 void lcCamera::ZoomRegion(float AspectRatio, const lcVector3& Position, const lcVector3& TargetPosition, const lcVector3* Corners, lcStep Step, bool AddKey)
 {
+	lcVector3 NewPosition;
+
 	if (IsOrtho())
 	{
 		float MinX = FLT_MAX, MaxX = -FLT_MAX, MinY = FLT_MAX, MaxY = -FLT_MAX;
@@ -792,23 +773,21 @@ void lcCamera::ZoomRegion(float AspectRatio, const lcVector3& Position, const lc
 		const float f = Height / (m_fovy * (LC_PI / 180.0f));
 
 		const lcVector3 FrontVector(mTargetPosition - mPosition);
-		mPosition = TargetPosition - lcNormalize(FrontVector) * f;
-		mTargetPosition = TargetPosition;
+		NewPosition = TargetPosition - lcNormalize(FrontVector) * f;
 	}
 	else
 	{
 		const lcMatrix44 WorldView = lcMatrix44LookAt(Position, TargetPosition, mUpVector);
 		const lcMatrix44 ProjectionMatrix = lcMatrix44Perspective(m_fovy, AspectRatio, m_zNear, m_zFar);
 
-		std::tie(mPosition, std::ignore) = lcZoomExtents(Position, WorldView, ProjectionMatrix, Corners, 2);
-		mTargetPosition = TargetPosition;
+		std::tie(NewPosition, std::ignore) = lcZoomExtents(Position, WorldView, ProjectionMatrix, Corners, 2);
 	}
 
 	if (IsSimple())
 		AddKey = false;
 
-	mPositionKeys.ChangeKey(mPosition, Step, AddKey);
-	mTargetPositionKeys.ChangeKey(mTargetPosition, Step, AddKey);
+	mPosition.ChangeKey(NewPosition, Step, AddKey);
+	mTargetPosition.ChangeKey(TargetPosition, Step, AddKey);
 
 	UpdatePosition(Step);
 }
@@ -824,34 +803,26 @@ void lcCamera::Zoom(float Distance, lcStep Step, bool AddKey)
 	{
 		if ((Distance > 0) && (lcDot(mPosition + FrontVector - mTargetPosition, mPosition - mTargetPosition) <= 0))
 			return;
-
-		mPosition += FrontVector;
-	}
-	else
-	{
-		mPosition += FrontVector;
-		mTargetPosition += FrontVector;
 	}
 
 	if (IsSimple())
 		AddKey = false;
 
-	mPositionKeys.ChangeKey(mPosition, Step, AddKey);
-	mTargetPositionKeys.ChangeKey(mTargetPosition, Step, AddKey);
+	mPosition.ChangeKey(mPosition + FrontVector, Step, AddKey);
+
+	if (!IsOrtho())
+		mTargetPosition.ChangeKey(mTargetPosition + FrontVector, Step, AddKey);
 
 	UpdatePosition(Step);
 }
 
 void lcCamera::Pan(const lcVector3& Distance, lcStep Step, bool AddKey)
 {
-	mPosition += Distance;
-	mTargetPosition += Distance;
-
 	if (IsSimple())
 		AddKey = false;
 
-	mPositionKeys.ChangeKey(mPosition, Step, AddKey);
-	mTargetPositionKeys.ChangeKey(mTargetPosition, Step, AddKey);
+	mPosition.ChangeKey(mPosition + Distance, Step, AddKey);
+	mTargetPosition.ChangeKey(mTargetPosition + Distance, Step, AddKey);
 
 	UpdatePosition(Step);
 }
@@ -859,31 +830,31 @@ void lcCamera::Pan(const lcVector3& Distance, lcStep Step, bool AddKey)
 void lcCamera::Orbit(float DistanceX, float DistanceY, const lcVector3& CenterPosition, lcStep Step, bool AddKey)
 {
 	lcVector3 FrontVector(mPosition - mTargetPosition);
+	lcVector3 UpVector = mUpVector;
 
 	lcVector3 Z(lcNormalize(lcVector3(FrontVector[0], FrontVector[1], 0)));
 	if (qIsNaN(Z[0]) || qIsNaN(Z[1]))
-		Z = lcNormalize(lcVector3(mUpVector[0], mUpVector[1], 0));
+		Z = lcNormalize(lcVector3(UpVector[0], UpVector[1], 0));
 
-	if (mUpVector[2] < 0)
+	if (UpVector[2] < 0)
 	{
 		Z[0] = -Z[0];
 		Z[1] = -Z[1];
 	}
  
 	const lcMatrix44 YRot(lcVector4(Z[0], Z[1], 0.0f, 0.0f), lcVector4(-Z[1], Z[0], 0.0f, 0.0f), lcVector4(0.0f, 0.0f, 1.0f, 0.0f), lcVector4(0.0f, 0.0f, 0.0f, 1.0f));
-	const lcMatrix44 transform = lcMul(lcMul(lcMul(lcMatrix44AffineInverse(YRot), lcMatrix44RotationY(DistanceY)), YRot), lcMatrix44RotationZ(-DistanceX));
+	const lcMatrix44 Transform = lcMul(lcMul(lcMul(lcMatrix44AffineInverse(YRot), lcMatrix44RotationY(DistanceY)), YRot), lcMatrix44RotationZ(-DistanceX));
 
-	mPosition = lcMul31(mPosition - CenterPosition, transform) + CenterPosition;
-	mTargetPosition = lcMul31(mTargetPosition - CenterPosition, transform) + CenterPosition;
-
-	mUpVector = lcMul31(mUpVector, transform);
+	lcVector3 Position = lcMul31(mPosition - CenterPosition, Transform) + CenterPosition;
+	lcVector3 TargetPosition = lcMul31(mTargetPosition - CenterPosition, Transform) + CenterPosition;
+	UpVector = lcMul31(mUpVector, Transform);
 
 	if (IsSimple())
 		AddKey = false;
 
-	mPositionKeys.ChangeKey(mPosition, Step, AddKey);
-	mTargetPositionKeys.ChangeKey(mTargetPosition, Step, AddKey);
-	mUpVectorKeys.ChangeKey(mUpVector, Step, AddKey);
+	mPosition.ChangeKey(Position, Step, AddKey);
+	mTargetPosition.ChangeKey(TargetPosition, Step, AddKey);
+	mUpVector.ChangeKey(UpVector, Step, AddKey);
 
 	UpdatePosition(Step);
 }
@@ -893,12 +864,12 @@ void lcCamera::Roll(float Distance, lcStep Step, bool AddKey)
 	const lcVector3 FrontVector(mPosition - mTargetPosition);
 	const lcMatrix44 Rotation = lcMatrix44FromAxisAngle(FrontVector, Distance);
 
-	mUpVector = lcMul30(mUpVector, Rotation);
+	const lcVector3 UpVector = lcMul30(mUpVector, Rotation);
 
 	if (IsSimple())
 		AddKey = false;
 
-	mUpVectorKeys.ChangeKey(mUpVector, Step, AddKey);
+	mUpVector.ChangeKey(UpVector, Step, AddKey);
 
 	UpdatePosition(Step);
 }
@@ -924,9 +895,7 @@ void lcCamera::Center(const lcVector3& NewCenter, lcStep Step, bool AddKey)
 		Roll = atan2f(Inverse[0][1], Inverse[1][1]);
 	}
 
-	mTargetPosition = NewCenter;
-
-	lcVector3 FrontVector(mPosition - mTargetPosition);
+	lcVector3 FrontVector(mPosition - NewCenter);
 	const lcMatrix44 Rotation = lcMatrix44FromAxisAngle(FrontVector, Roll);
 
 	lcVector3 UpVector(0, 0, 1), SideVector;
@@ -937,20 +906,20 @@ void lcCamera::Center(const lcVector3& NewCenter, lcStep Step, bool AddKey)
 		SideVector = lcCross(FrontVector, UpVector);
 	UpVector = lcCross(SideVector, FrontVector);
 	UpVector.Normalize();
-	mUpVector = lcMul30(UpVector, Rotation);
+	UpVector = lcMul30(UpVector, Rotation);
 
 	if (IsSimple())
 		AddKey = false;
 
-	mTargetPositionKeys.ChangeKey(mTargetPosition, Step, AddKey);
-	mUpVectorKeys.ChangeKey(mUpVector, Step, AddKey);
+	mTargetPosition.ChangeKey(NewCenter, Step, AddKey);
+	mUpVector.ChangeKey(UpVector, Step, AddKey);
 
 	UpdatePosition(Step);
 }
 
 void lcCamera::SetViewpoint(lcViewpoint Viewpoint)
 {
-	lcVector3 Positions[] =
+	const lcVector3 Positions[] =
 	{
 		lcVector3(    0.0f, -1250.0f,     0.0f), // lcViewpoint::Front
 		lcVector3(    0.0f,  1250.0f,     0.0f), // lcViewpoint::Back
@@ -961,7 +930,7 @@ void lcCamera::SetViewpoint(lcViewpoint Viewpoint)
 		lcVector3(  375.0f,  -375.0f,   187.5f)  // lcViewpoint::Home
 	};
 
-	lcVector3 Ups[] =
+	const lcVector3 Ups[] =
 	{
 		lcVector3(0.0f, 0.0f, 1.0f),
 		lcVector3(0.0f, 0.0f, 1.0f),
@@ -972,22 +941,15 @@ void lcCamera::SetViewpoint(lcViewpoint Viewpoint)
 		lcVector3(0.2357f, -0.2357f, 0.94281f)
 	};
 
-	mPosition = Positions[static_cast<int>(Viewpoint)];
-	mTargetPosition = lcVector3(0, 0, 0);
-	mUpVector = Ups[static_cast<int>(Viewpoint)];
-
-	mPositionKeys.ChangeKey(mPosition, 1, false);
-	mTargetPositionKeys.ChangeKey(mTargetPosition, 1, false);
-	mUpVectorKeys.ChangeKey(mUpVector, 1, false);
+	mPosition.ChangeKey(Positions[static_cast<int>(Viewpoint)], 1, false);
+	mTargetPosition.ChangeKey(lcVector3(0, 0, 0), 1, false);
+	mUpVector.ChangeKey(Ups[static_cast<int>(Viewpoint)], 1, false);
 
 	UpdatePosition(1);
 }
 
 void lcCamera::SetViewpoint(const lcVector3& Position)
 {
-	mPosition = Position;
-	mTargetPosition = lcVector3(0, 0, 0);
-
 	lcVector3 UpVector(0, 0, 1), FrontVector(Position), SideVector;
 	FrontVector.Normalize();
 	if (fabsf(lcDot(UpVector, FrontVector)) > 0.99f)
@@ -996,51 +958,46 @@ void lcCamera::SetViewpoint(const lcVector3& Position)
 		SideVector = lcCross(FrontVector, UpVector);
 	UpVector = lcCross(SideVector, FrontVector);
 	UpVector.Normalize();
-	mUpVector = UpVector;
 
-	mPositionKeys.ChangeKey(mPosition, 1, false);
-	mTargetPositionKeys.ChangeKey(mTargetPosition, 1, false);
-	mUpVectorKeys.ChangeKey(mUpVector, 1, false);
+	mPosition.ChangeKey(Position, 1, false);
+	mTargetPosition.ChangeKey(lcVector3(0, 0, 0), 1, false);
+	mUpVector.ChangeKey(UpVector, 1, false);
 
 	UpdatePosition(1);
 }
 
-void lcCamera::SetViewpoint(const lcVector3& Position, const lcVector3& Target, const lcVector3& Up)
+void lcCamera::SetViewpoint(const lcVector3& Position, const lcVector3& TargetPosition, const lcVector3& Up)
 {
-	mPosition = Position;
-	mTargetPosition = Target;
-
-	const lcVector3 Direction = Target - Position;
+	const lcVector3 Direction = TargetPosition - Position;
 	lcVector3 UpVector, SideVector;
 	SideVector = lcCross(Direction, Up);
 	UpVector = lcCross(SideVector, Direction);
 	UpVector.Normalize();
-	mUpVector = UpVector;
 
-	mPositionKeys.ChangeKey(mPosition, 1, false);
-	mTargetPositionKeys.ChangeKey(mTargetPosition, 1, false);
-	mUpVectorKeys.ChangeKey(mUpVector, 1, false);
+	mPosition.ChangeKey(Position, 1, false);
+	mTargetPosition.ChangeKey(TargetPosition, 1, false);
+	mUpVector.ChangeKey(UpVector, 1, false);
 
 	UpdatePosition(1);
 }
 
 void lcCamera::SetAngles(float Latitude, float Longitude, float Distance)
 {
-	mPosition = lcVector3(0, -1, 0);
-	mTargetPosition = lcVector3(0, 0, 0);
-	mUpVector = lcVector3(0, 0, 1);
+	lcVector3 Position = lcVector3(0, -1, 0);
+	lcVector3 TargetPosition = lcVector3(0, 0, 0);
+	lcVector3 UpVector = lcVector3(0, 0, 1);
 
 	const lcMatrix33 LongitudeMatrix = lcMatrix33RotationZ(LC_DTOR * Longitude);
-	mPosition = lcMul(mPosition, LongitudeMatrix);
+	Position = lcMul(Position, LongitudeMatrix);
 
 	const lcVector3 SideVector = lcMul(lcVector3(-1, 0, 0), LongitudeMatrix);
 	const lcMatrix33 LatitudeMatrix = lcMatrix33FromAxisAngle(SideVector, LC_DTOR * Latitude);
-	mPosition = lcMul(mPosition, LatitudeMatrix) * Distance;
-	mUpVector = lcMul(mUpVector, LatitudeMatrix);
+	Position = lcMul(Position, LatitudeMatrix) * Distance;
+	UpVector = lcMul(UpVector, LatitudeMatrix);
 
-	mPositionKeys.ChangeKey(mPosition, 1, false);
-	mTargetPositionKeys.ChangeKey(mTargetPosition, 1, false);
-	mUpVectorKeys.ChangeKey(mUpVector, 1, false);
+	mPosition.ChangeKey(Position, 1, false);
+	mTargetPosition.ChangeKey(TargetPosition, 1, false);
+	mUpVector.ChangeKey(UpVector, 1, false);
 
 	UpdatePosition(1);
 }

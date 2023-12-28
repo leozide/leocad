@@ -1514,9 +1514,9 @@ void lcMainWindow::RestoreTabLayout(const QByteArray& TabLayout)
 							Camera->m_zFar = ZFar;
 						if (!Position.IsNan() && !TargetPosition.IsNan() && !UpVector.IsNan())
 						{
-							Camera->mPosition = Position;
-							Camera->mTargetPosition = TargetPosition;
-							Camera->mUpVector = UpVector;
+							Camera->SetPosition(Position, 1, false);
+							Camera->SetTargetPosition(TargetPosition, 1, false);
+							Camera->SetUpVector(UpVector, 1, false);
 						}
 						Camera->UpdatePosition(1);
 					}

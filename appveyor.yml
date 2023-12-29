@@ -1,4 +1,5 @@
 version: '{branch}.{build}'
+skip_tags: true
 image:
 - Ubuntu1604
 - macos

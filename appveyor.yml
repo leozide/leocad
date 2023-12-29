@@ -11,7 +11,7 @@ environment:
     secure: WuBhTS6ZgIcyYgmDtFj3sqAnDz+9K8qQNchX0/RgYJfC7fBK9ShT8zEU3O3VNg1e
 
 matrix:
-  - fast_finish: true
+  fast_finish: true
 
 for:
   -

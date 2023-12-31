@@ -2,6 +2,7 @@
 #include "lc_qutils.h"
 #include "lc_application.h"
 #include "lc_library.h"
+#include "lc_model.h"
 #include "pieceinf.h"
 
 QString lcFormatValue(float Value, int Precision)
@@ -101,4 +102,148 @@ bool lcQTreeWidgetColumnStretcher::eventFilter(QObject* Object, QEvent* Event)
 		}
 	}
 	return false;
+}
+
+lcPieceIdStringModel::lcPieceIdStringModel(lcModel* Model, QObject* Parent)
+	: QAbstractListModel(Parent)
+{
+	lcPiecesLibrary* Library = lcGetPiecesLibrary();
+	mSortedPieces.reserve(Library->mPieces.size());
+
+	for (const auto& PartIt : Library->mPieces)
+	{
+		PieceInfo* Info = PartIt.second;
+
+		if (!Info->IsModel() || !Info->GetModel()->IncludesModel(Model))
+			mSortedPieces.push_back(PartIt.second);
+	}
+
+	auto PieceCompare = [](PieceInfo* Info1, PieceInfo* Info2)
+	{
+		return strcmp(Info1->m_strDescription, Info2->m_strDescription) < 0;
+	};
+
+	std::sort(mSortedPieces.begin(), mSortedPieces.end(), PieceCompare);
+}
+
+QModelIndex lcPieceIdStringModel::Index(PieceInfo* Info) const
+{
+	for (size_t PieceInfoIndex = 0; PieceInfoIndex < mSortedPieces.size(); PieceInfoIndex++)
+		if (mSortedPieces[PieceInfoIndex] == Info)
+			return index(static_cast<int>(PieceInfoIndex), 0);
+
+	return QModelIndex();
+}
+
+std::vector<bool> lcPieceIdStringModel::GetFilteredRows(const QString& FilterText) const
+{
+	const std::string Text = FilterText.toStdString();
+	std::vector<bool> FilteredRows(mSortedPieces.size());
+
+	for (size_t PieceInfoIndex = 0; PieceInfoIndex < mSortedPieces.size(); PieceInfoIndex++)
+	{
+		const PieceInfo* Info = mSortedPieces[PieceInfoIndex];
+
+		FilteredRows[PieceInfoIndex] = (strcasestr(Info->m_strDescription, Text.c_str()) || strcasestr(Info->mFileName, Text.c_str()));
+	}
+
+	return FilteredRows;
+}
+
+int lcPieceIdStringModel::rowCount(const QModelIndex& Parent) const
+{
+	Q_UNUSED(Parent);
+
+	return static_cast<int>(mSortedPieces.size());
+}
+
+QVariant lcPieceIdStringModel::data(const QModelIndex& Index, int Role) const
+{
+	if (Index.row() < static_cast<int>(mSortedPieces.size()))
+	{
+		if (Role == Qt::DisplayRole)
+			return QString::fromLatin1(mSortedPieces[Index.row()]->m_strDescription);
+		else if (Role == Qt::UserRole)
+			return QVariant::fromValue(reinterpret_cast<void*>(mSortedPieces[Index.row()]));
+	}
+
+	return QVariant();
+}
+
+lcPieceIdPickerPopup::lcPieceIdPickerPopup(lcModel* Model, PieceInfo* Current, QWidget* Parent)
+	: QWidget(Parent)
+{
+	QVBoxLayout* Layout = new QVBoxLayout(this);
+	Layout->setContentsMargins(0, 0, 0, 0);
+
+	mListView = new QListView(this);
+	mListView->setEditTriggers(QAbstractItemView::NoEditTriggers);
+	mListView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	mListView->setSelectionBehavior(QAbstractItemView::SelectRows);
+	mListView->setSelectionMode(QAbstractItemView::SingleSelection);
+	mListView->setUniformItemSizes(true);
+
+	mListView->installEventFilter(this);
+//	QShortcut* EnterShortcut = new QShortcut(QKeySequence(Qt::Key_Enter), this, this, &lcPieceIdPickerPopup::ListViewEnterPressed);
+
+	lcPieceIdStringModel* StringModel = new lcPieceIdStringModel(Model, mListView);
+	mListView->setModel(StringModel);
+
+	if (Current)
+		mListView->setCurrentIndex(StringModel->Index(Current));
+
+	Layout->addWidget(mListView);
+
+	connect(mListView, &QListView::doubleClicked, this, &lcPieceIdPickerPopup::ListViewDoubleClicked);
+
+	mFilterEdit = new QLineEdit(this);
+	Layout->addWidget(mFilterEdit);
+
+	connect(mFilterEdit, &QLineEdit::textEdited, this, &lcPieceIdPickerPopup::FilterEdited);
+}
+
+bool lcPieceIdPickerPopup::eventFilter(QObject* Object, QEvent* Event)
+{
+	if (Object == mListView && Event->type() == QEvent::KeyPress)
+	{
+		EmitSelectedEvent(mListView->currentIndex());
+		return true;
+	}
+
+	return QWidget::eventFilter(Object, Event);
+}
+
+void lcPieceIdPickerPopup::EmitSelectedEvent(const QModelIndex& Index)
+{
+	if (!Index.isValid())
+		return;
+
+	lcPieceIdStringModel* StringModel = qobject_cast<lcPieceIdStringModel*>(mListView->model());
+	QVariant Variant = StringModel->data(Index, Qt::UserRole);
+
+	if (Variant.isValid())
+	{
+		emit PieceIdSelected(static_cast<PieceInfo*>(Variant.value<void*>()));
+	}
+
+	QMenu* Menu = qobject_cast<QMenu*>(parent());
+	Menu->close();
+}
+
+void lcPieceIdPickerPopup::ListViewDoubleClicked(const QModelIndex& Index)
+{
+	EmitSelectedEvent(Index);
+}
+
+void lcPieceIdPickerPopup::FilterEdited(const QString& Text)
+{
+	lcPieceIdStringModel* StringModel = qobject_cast<lcPieceIdStringModel*>(mListView->model());
+	std::vector<bool> FilteredRows = StringModel->GetFilteredRows(Text);
+
+	mListView->setUpdatesEnabled(false);
+
+	for (int Row = 0; Row < static_cast<int>(FilteredRows.size()); Row++)
+		mListView->setRowHidden(Row, !FilteredRows[Row]);
+
+	mListView->setUpdatesEnabled(true);
 }

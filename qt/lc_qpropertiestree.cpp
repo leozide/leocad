@@ -395,34 +395,6 @@ void lcQPropertiesTree::Update(const lcArray<lcObject*>& Selection, lcObject* Fo
 	}
 }
 
-class lcStepValidator : public QIntValidator
-{
-public:
-	lcStepValidator(lcStep Min, lcStep Max, bool AllowEmpty)
-		: QIntValidator(1, INT_MAX), mMin(Min), mMax(Max), mAllowEmpty(AllowEmpty)
-	{
-	}
-
-	QValidator::State validate(QString& Input, int& Pos) const override
-	{
-		if (mAllowEmpty && Input.isEmpty())
-			return Acceptable;
-
-		bool Ok;
-		lcStep Step = Input.toUInt(&Ok);
-
-		if (Ok)
-			return (Step >= mMin && Step <= mMax) ? Acceptable : Invalid;
-
-		return QIntValidator::validate(Input, Pos);
-	}
-
-protected:
-	lcStep mMin;
-	lcStep mMax;
-	bool mAllowEmpty;
-};
-
 QWidget* lcQPropertiesTree::createEditor(QWidget* Parent, QTreeWidgetItem* Item) const
 {
 	lcQPropertiesTree::PropertyType PropertyType = (lcQPropertiesTree::PropertyType)Item->data(0, lcQPropertiesTree::PropertyTypeRole).toInt();
@@ -472,12 +444,12 @@ QWidget* lcQPropertiesTree::createEditor(QWidget* Parent, QTreeWidgetItem* Item)
 			if (Show && Hide)
 			{
 				if (Item == partShow)
-					Editor->setValidator(new lcStepValidator(1, Hide - 1, false));
+					Editor->setValidator(new lcStepValidator(1, Hide - 1, false, Editor));
 				else
-					Editor->setValidator(new lcStepValidator(Show + 1, LC_STEP_MAX, true));
+					Editor->setValidator(new lcStepValidator(Show + 1, LC_STEP_MAX, true, Editor));
 			}
 			else
-				Editor->setValidator(new lcStepValidator(1, LC_STEP_MAX, Item == partHide));
+				Editor->setValidator(new lcStepValidator(1, LC_STEP_MAX, Item == partHide, Editor));
 
 			if (Item != partHide || Value != LC_STEP_MAX)
 				Editor->setText(QString::number(Value));

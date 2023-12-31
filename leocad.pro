@@ -205,6 +205,7 @@ SOURCES += \
 	common/lc_partselectionwidget.cpp \
 	common/lc_previewwidget.cpp \
 	common/lc_profile.cpp \
+	common/lc_propertieswidget.cpp \
 	common/lc_scene.cpp \
 	common/lc_shortcuts.cpp \
 	common/lc_stringcache.cpp \
@@ -276,6 +277,7 @@ HEADERS += \
 	common/lc_pagesetupdialog.h \
 	common/lc_previewwidget.h \
 	common/lc_profile.h \
+	common/lc_propertieswidget.h \
 	common/lc_scene.h \
 	common/lc_shortcuts.h \
 	common/lc_stringcache.h \

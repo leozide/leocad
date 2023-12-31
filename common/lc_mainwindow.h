@@ -11,7 +11,7 @@ class lcPreviewDockWidget;
 class PiecePreview;
 class lcQPartsTree;
 class lcColorList;
-class lcQPropertiesTree;
+class lcPropertiesWidget;
 class lcTimelineWidget;
 class lcElidedLabel;
 #ifdef QT_NO_PRINTER
@@ -378,7 +378,7 @@ protected:
 	lcPartSelectionWidget* mPartSelectionWidget;
 	lcColorList* mColorList;
 	QToolButton* mColorButton;
-	lcQPropertiesTree* mPropertiesWidget;
+	lcPropertiesWidget* mPropertiesWidget;
 	lcTimelineWidget* mTimelineWidget;
 	QLineEdit* mTransformXEdit;
 	QLineEdit* mTransformYEdit;

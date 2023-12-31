@@ -60,22 +60,32 @@ QString lcLight::GetLightTypeString(lcLightType LightType)
 	switch (LightType)
 	{
 	case lcLightType::Point:
-		return QT_TRANSLATE_NOOP("Light Names", "Point Light");
+		return QT_TRANSLATE_NOOP("Light Types", "Point Light");
 
 	case lcLightType::Spot:
-		return QT_TRANSLATE_NOOP("Light Names", "Spot Light");
+		return QT_TRANSLATE_NOOP("Light Types", "Spot Light");
 
 	case lcLightType::Directional:
-		return QT_TRANSLATE_NOOP("Light Names", "Directional Light");
+		return QT_TRANSLATE_NOOP("Light Types", "Directional Light");
 
 	case lcLightType::Area:
-		return QT_TRANSLATE_NOOP("Light Names", "Area Light");
+		return QT_TRANSLATE_NOOP("Light Types", "Area Light");
 
 	case lcLightType::Count:
 		break;
 	}
 
 	return QString();
+}
+
+QStringList lcLight::GetLightTypeStrings()
+{
+	QStringList LightTypes;
+
+	for (int LightTypeIndex = 0; LightTypeIndex < static_cast<int>(lcLightType::Count); LightTypeIndex++)
+		LightTypes.push_back(GetLightTypeString(static_cast<lcLightType>(LightTypeIndex)));
+
+	return LightTypes;
 }
 
 QString lcLight::GetAreaShapeString(lcLightAreaShape LightAreaShape)
@@ -99,6 +109,16 @@ QString lcLight::GetAreaShapeString(lcLightAreaShape LightAreaShape)
 	}
 
 	return QString();
+}
+
+QStringList lcLight::GetAreaShapeStrings()
+{
+	QStringList AreaShapes;
+
+	for (int AreaShapeIndex = 0; AreaShapeIndex < static_cast<int>(lcLightAreaShape::Count); AreaShapeIndex++)
+		AreaShapes.push_back(GetAreaShapeString(static_cast<lcLightAreaShape>(AreaShapeIndex)));
+
+	return AreaShapes;
 }
 
 void lcLight::SaveLDraw(QTextStream& Stream) const

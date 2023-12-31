@@ -3,10 +3,10 @@
 #include <QPrintDialog>
 #include <QPrintPreviewDialog>
 #include "lc_partselectionwidget.h"
+#include "lc_propertieswidget.h"
 #include "lc_timelinewidget.h"
 #include "lc_viewwidget.h"
 #include "lc_colorlist.h"
-#include "lc_qpropertiestree.h"
 #include "lc_qutils.h"
 #include "lc_qupdatedialog.h"
 #include "lc_aboutdialog.h"
@@ -738,8 +738,12 @@ void lcMainWindow::CreateToolBars()
 	QVBoxLayout* PropertiesLayout = new QVBoxLayout(PropertiesWidget);
 	PropertiesLayout->setContentsMargins(0, 0, 0, 0);
 
-	mPropertiesWidget = new lcQPropertiesTree(PropertiesWidget);
-	PropertiesLayout->addWidget(mPropertiesWidget);
+	QScrollArea* PropertiesScrollArea = new QScrollArea(PropertiesWidget);
+	PropertiesScrollArea->setWidgetResizable(true);
+	PropertiesLayout->addWidget(PropertiesScrollArea);
+
+	mPropertiesWidget = new lcPropertiesWidget(PropertiesScrollArea);
+	PropertiesScrollArea->setWidget(mPropertiesWidget);
 
 	QHBoxLayout* TransformLayout = new QHBoxLayout;
 	QWidget* TransformWidget = new QWidget();

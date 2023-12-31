@@ -79,3 +79,111 @@ protected:
 		return QLineEdit::event(Event);
 	}
 };
+
+class lcStepValidator : public QIntValidator
+{
+	Q_OBJECT
+
+public:
+	lcStepValidator(lcStep Min, lcStep Max, bool AllowEmpty, QObject* Parent)
+		: QIntValidator(1, INT_MAX, Parent), mMin(Min), mMax(Max), mAllowEmpty(AllowEmpty)
+	{
+	}
+
+	QValidator::State validate(QString& Input, int& Pos) const override
+	{
+		if (mAllowEmpty && Input.isEmpty())
+			return Acceptable;
+
+		bool Ok;
+		lcStep Step = Input.toUInt(&Ok);
+
+		if (Ok)
+			return (Step >= mMin && Step <= mMax) ? Acceptable : Invalid;
+
+		return QIntValidator::validate(Input, Pos);
+	}
+
+protected:
+	lcStep mMin;
+	lcStep mMax;
+	bool mAllowEmpty;
+};
+
+class lcElidableToolButton : public QToolButton
+{
+	Q_OBJECT
+
+public:
+	lcElidableToolButton(QWidget* Parent)
+		: QToolButton(Parent)
+	{
+	}
+
+	QSize sizeHint() const override
+	{
+		QSize Size = QToolButton::sizeHint();
+
+		Size.setWidth(0);
+
+		return Size;
+	}
+
+protected:
+	void paintEvent(QPaintEvent*)
+	{
+		QStylePainter Painter(this);
+		QStyleOptionToolButton Option;
+		initStyleOption(&Option);
+
+		QRect Button = style()->subControlRect(QStyle::CC_ToolButton, &Option, QStyle::SC_ToolButton, this);
+		int Frame = style()->proxy()->pixelMetric(QStyle::PixelMetric::PM_DefaultFrameWidth, &Option, this);
+		Button = Button.adjusted(Frame, Frame, -Frame, -Frame);
+
+		QFontMetrics Metrics(font());
+		QString ElidedText = Metrics.elidedText(text(), Qt::ElideMiddle, Button.width());
+
+		Option.text = ElidedText;
+		Painter.drawComplexControl(QStyle::CC_ToolButton, Option);
+	}
+};
+
+class lcPieceIdStringModel : public QAbstractListModel
+{
+	Q_OBJECT
+
+public:
+	lcPieceIdStringModel(lcModel* Model, QObject* Parent);
+
+	QModelIndex Index(PieceInfo* Info) const;
+	std::vector<bool> GetFilteredRows(const QString& FilterText) const;
+
+	int rowCount(const QModelIndex& Parent = QModelIndex()) const override;
+	QVariant data(const QModelIndex& Index, int Role = Qt::DisplayRole) const override;
+
+protected:
+	std::vector<PieceInfo*> mSortedPieces;
+};
+
+class lcPieceIdPickerPopup : public QWidget
+{
+	Q_OBJECT
+
+public:
+	lcPieceIdPickerPopup(lcModel* Model, PieceInfo* Current, QWidget* Parent);
+
+	bool eventFilter(QObject* Object, QEvent* Event) override;
+
+signals:
+	void PieceIdSelected(PieceInfo* Info);
+
+protected slots:
+	void ListViewDoubleClicked(const QModelIndex& Index);
+	void FilterEdited(const QString& Text);
+
+protected:
+	void EmitSelectedEvent(const QModelIndex& Index);
+
+	QListView* mListView = nullptr;
+	QLineEdit* mFilterEdit = nullptr;
+};

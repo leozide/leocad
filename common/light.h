@@ -43,7 +43,9 @@ public:
 	lcLight& operator=(lcLight&&) = delete;
 
 	static QString GetLightTypeString(lcLightType LightType);
+	static QStringList GetLightTypeStrings();
 	static QString GetAreaShapeString(lcLightAreaShape LightAreaShape);
+	static QStringList GetAreaShapeStrings();
 
 	bool IsPointLight() const
 	{

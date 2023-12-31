@@ -184,7 +184,6 @@ lcPieceIdPickerPopup::lcPieceIdPickerPopup(lcModel* Model, PieceInfo* Current, Q
 	mListView->setUniformItemSizes(true);
 
 	mListView->installEventFilter(this);
-//	QShortcut* EnterShortcut = new QShortcut(QKeySequence(Qt::Key_Enter), this, this, &lcPieceIdPickerPopup::ListViewEnterPressed);
 
 	lcPieceIdStringModel* StringModel = new lcPieceIdStringModel(Model, mListView);
 	mListView->setModel(StringModel);
@@ -197,6 +196,7 @@ lcPieceIdPickerPopup::lcPieceIdPickerPopup(lcModel* Model, PieceInfo* Current, Q
 	connect(mListView, &QListView::doubleClicked, this, &lcPieceIdPickerPopup::ListViewDoubleClicked);
 
 	mFilterEdit = new QLineEdit(this);
+	mFilterEdit->setPlaceholderText(tr("Filter"));
 	Layout->addWidget(mFilterEdit);
 
 	connect(mFilterEdit, &QLineEdit::textEdited, this, &lcPieceIdPickerPopup::FilterEdited);

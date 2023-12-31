@@ -1,55 +1,29 @@
 #include "lc_global.h"
 #include "lc_collapsiblewidget.h"
 
-QImage lcCollapsibleWidget::mExpandedIcon;
-QImage lcCollapsibleWidget::mCollapsedIcon;
+QImage lcCollapsibleWidgetButton::mExpandedIcon;
+QImage lcCollapsibleWidgetButton::mCollapsedIcon;
 
-lcCollapsibleWidget::lcCollapsibleWidget(const QString& Title, QWidget* Parent)
-	: QWidget(Parent)
+lcCollapsibleWidgetButton::lcCollapsibleWidgetButton(const QString& Title, QWidget* Parent)
+	: QToolButton(Parent)
 {
-	QVBoxLayout* Layout = new QVBoxLayout(this);
-//	Layout->setSpacing(0);
-	Layout->setContentsMargins(0, 0, 0, 0);
-
-	QHBoxLayout* TitleLayout = new QHBoxLayout();
-	TitleLayout->setContentsMargins(0, 0, 0, 0);
-	Layout->addLayout(TitleLayout);
-
-	mTitleButton = new QToolButton(this);
-	mTitleButton->setText(Title);
-	mTitleButton->setAutoRaise(true);
-	mTitleButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-	mTitleButton->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Maximum);
-	TitleLayout->addWidget(mTitleButton);
-
-	connect(mTitleButton, SIGNAL(clicked()), this, SLOT(TitleClicked()));
-
-	mChildWidget = new QWidget(this);
-	Layout->addWidget(mChildWidget);
+	setText(Title);
+	setAutoRaise(true);
+	setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+	setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Maximum);
 
 	UpdateIcon();
+
+	connect(this, &QToolButton::clicked, this, &lcCollapsibleWidgetButton::Clicked);
 }
 
-void lcCollapsibleWidget::TitleClicked()
-{
-	mExpanded = !mExpanded;
-	mChildWidget->setVisible(mExpanded);
-	UpdateIcon();
-}
-
-void lcCollapsibleWidget::Collapse()
+void lcCollapsibleWidgetButton::Collapse()
 {
 	if (mExpanded)
-		TitleClicked();
+		Clicked();
 }
 
-void lcCollapsibleWidget::SetChildLayout(QLayout* Layout)
-{
-	Layout->setContentsMargins(12, 0, 0, 0);
-	mChildWidget->setLayout(Layout);
-}
-
-void lcCollapsibleWidget::UpdateIcon()
+void lcCollapsibleWidgetButton::UpdateIcon()
 {
 	if (mExpanded)
 	{
@@ -66,7 +40,7 @@ void lcCollapsibleWidget::UpdateIcon()
 			mExpandedIcon = Image;
 		}
 
-		mTitleButton->setIcon(QPixmap::fromImage(mExpandedIcon));
+		setIcon(QPixmap::fromImage(mExpandedIcon));
 	}
 	else
 	{
@@ -83,6 +57,50 @@ void lcCollapsibleWidget::UpdateIcon()
 			mCollapsedIcon = Image;
 		}
 
-		mTitleButton->setIcon(QPixmap::fromImage(mCollapsedIcon));
+		setIcon(QPixmap::fromImage(mCollapsedIcon));
 	}
+}
+
+void lcCollapsibleWidgetButton::Clicked()
+{
+	mExpanded = !mExpanded;
+	UpdateIcon();
+
+	emit StateChanged(mExpanded);
+}
+
+lcCollapsibleWidget::lcCollapsibleWidget(const QString& Title, QWidget* Parent)
+	: QWidget(Parent)
+{
+	QVBoxLayout* Layout = new QVBoxLayout(this);
+//	Layout->setSpacing(0);
+	Layout->setContentsMargins(0, 0, 0, 0);
+
+	QHBoxLayout* TitleLayout = new QHBoxLayout();
+	TitleLayout->setContentsMargins(0, 0, 0, 0);
+	Layout->addLayout(TitleLayout);
+
+	mTitleButton = new lcCollapsibleWidgetButton(Title, this);
+	TitleLayout->addWidget(mTitleButton);
+
+	connect(mTitleButton, &lcCollapsibleWidgetButton::StateChanged, this, &lcCollapsibleWidget::ButtonStateChanged);
+
+	mChildWidget = new QWidget(this);
+	Layout->addWidget(mChildWidget);
+}
+
+void lcCollapsibleWidget::ButtonStateChanged(bool Expanded)
+{
+	mChildWidget->setVisible(Expanded);
+}
+
+void lcCollapsibleWidget::Collapse()
+{
+	mTitleButton->Collapse();
+}
+
+void lcCollapsibleWidget::SetChildLayout(QLayout* Layout)
+{
+	Layout->setContentsMargins(12, 0, 0, 0);
+	mChildWidget->setLayout(Layout);
 }

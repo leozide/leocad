@@ -29,41 +29,60 @@ lcPropertiesWidget::PropertyIndex lcPropertiesWidget::GetWidgetIndex(QWidget* Wi
 	return PropertyIndex::Count;
 }
 
-QGridLayout* lcPropertiesWidget::AddPropertyCategory(const QString& Title, QVBoxLayout* Layout)
+void lcPropertiesWidget::CategoryStateChanged(bool Expanded)
 {
-	lcCollapsibleWidget* CategoryWidget = new lcCollapsibleWidget(Title);
+	QObject* Button = sender();
 
-	mCategoryWidgets.push_back(CategoryWidget);
-	Layout->addWidget(CategoryWidget);
+	for (const std::unique_ptr<CategoryWidgets>& Category : mCategories)
+	{
+		if (Category->Button == Button)
+		{
+			for (QWidget* Widget : Category->Widgets)
+				Widget->setVisible(Expanded);
 
-	QGridLayout* CategoryLayout = new QGridLayout();
-	CategoryLayout->setContentsMargins(0, 0, 0, 0);
-	CategoryLayout->setColumnMinimumWidth(0, 10);
-	CategoryLayout->setVerticalSpacing(1);
-	CategoryWidget->SetChildLayout(CategoryLayout);
+			for (int Row : Category->SpacingRows)
+				mLayout->setRowMinimumHeight(Row, Expanded ? 5 : 0);
 
-	return CategoryLayout;
+			break;
+		}
+	}
 }
 
-void lcPropertiesWidget::AddSpacing(QGridLayout* Layout, int& Row)
+void lcPropertiesWidget::AddPropertyCategory(const QString& Title)
 {
-	Layout->setRowMinimumHeight(Row, 5);
-	Row++;
+	mCurrentCategory = new CategoryWidgets();
+	mCategories.emplace_back(std::unique_ptr<CategoryWidgets>(mCurrentCategory));
+
+	lcCollapsibleWidgetButton* CategoryButton = new lcCollapsibleWidgetButton(Title);
+
+	mLayout->addWidget(CategoryButton, mLayoutRow, 0, 1, -1);
+	mCurrentCategory->Button = CategoryButton;
+
+	connect(CategoryButton, &lcCollapsibleWidgetButton::StateChanged, this, &lcPropertiesWidget::CategoryStateChanged);
+
+	mLayoutRow++;
 }
 
-void lcPropertiesWidget::AddLabel(const QString& Text, const QString& ToolTip, QGridLayout* Layout, int Row)
+void lcPropertiesWidget::AddSpacing()
+{
+	mLayout->setRowMinimumHeight(mLayoutRow, 5);
+	mCurrentCategory->SpacingRows.push_back(mLayoutRow);
+	mLayoutRow++;
+}
+
+void lcPropertiesWidget::AddLabel(const QString& Text, const QString& ToolTip)
 {
 	QLabel* Label = new QLabel(Text, this);
 	Label->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-//	Label->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	Label->setToolTip(ToolTip);
 
-	Layout->addWidget(Label, Row, 1);
+	mLayout->addWidget(Label, mLayoutRow, 1);
+	mCurrentCategory->Widgets.push_back(Label);
 }
 
-void lcPropertiesWidget::AddBoolProperty(PropertyIndex Index, const QString& Text, const QString& ToolTip, QGridLayout* Layout, int& Row)
+void lcPropertiesWidget::AddBoolProperty(PropertyIndex Index, const QString& Text, const QString& ToolTip)
 {
-	AddLabel(Text, ToolTip, Layout, Row);
+	AddLabel(Text, ToolTip);
 
 	QCheckBox* Widget = new QCheckBox(this);
 	Widget->setToolTip(ToolTip);
@@ -73,11 +92,12 @@ void lcPropertiesWidget::AddBoolProperty(PropertyIndex Index, const QString& Tex
 
 //	connect(editor, SIGNAL(clicked()), this, SLOT(slotColorButtonClicked()));
 
-	Layout->addWidget(Widget, Row, 2);
+	mLayout->addWidget(Widget, mLayoutRow, 2);
+	mCurrentCategory->Widgets.push_back(Widget);
 
 	mPropertyWidgets[static_cast<int>(Index)] = Widget;
 
-	Row++;
+	mLayoutRow++;
 }
 
 void lcPropertiesWidget::FloatChanged()
@@ -147,9 +167,9 @@ void lcPropertiesWidget::UpdateFloat(PropertyIndex Index, float Value)
 	}
 }
 
-void lcPropertiesWidget::AddFloatProperty(PropertyIndex Index, const QString& Text, const QString& ToolTip, float Min, float Max, QGridLayout* Layout, int& Row)
+void lcPropertiesWidget::AddFloatProperty(PropertyIndex Index, const QString& Text, const QString& ToolTip, float Min, float Max)
 {
-	AddLabel(Text, ToolTip, Layout, Row);
+	AddLabel(Text, ToolTip);
 
 	QLineEdit* Widget = new QLineEdit(this);
 	Widget->setToolTip(ToolTip);
@@ -158,26 +178,28 @@ void lcPropertiesWidget::AddFloatProperty(PropertyIndex Index, const QString& Te
 
 	connect(Widget, &QLineEdit::editingFinished, this, &lcPropertiesWidget::FloatChanged);
 
-	Layout->addWidget(Widget, Row, 2);
+	mLayout->addWidget(Widget, mLayoutRow, 2);
+	mCurrentCategory->Widgets.push_back(Widget);
 
 	mPropertyWidgets[static_cast<int>(Index)] = Widget;
 
-	Row++;
+	mLayoutRow++;
 }
 
-void lcPropertiesWidget::AddIntegerProperty(PropertyIndex Index, const QString& Text, const QString& ToolTip, int Min, int Max, QGridLayout* Layout, int& Row)
+void lcPropertiesWidget::AddIntegerProperty(PropertyIndex Index, const QString& Text, const QString& ToolTip, int Min, int Max)
 {
-	AddLabel(Text, ToolTip, Layout, Row);
+	AddLabel(Text, ToolTip);
 
 	QSpinBox* Widget = new QSpinBox(this);
 	Widget->setRange(Min, Max);
 	Widget->setToolTip(ToolTip);
 
-	Layout->addWidget(Widget, Row, 2);
+	mLayout->addWidget(Widget, mLayoutRow, 2);
+	mCurrentCategory->Widgets.push_back(Widget);
 
 	mPropertyWidgets[static_cast<int>(Index)] = Widget;
 
-	Row++;
+	mLayoutRow++;
 }
 
 void lcPropertiesWidget::StepNumberChanged()
@@ -223,39 +245,41 @@ void lcPropertiesWidget::UpdateStepNumber(PropertyIndex Index, lcStep Step, lcSt
 	}
 }
 
-void lcPropertiesWidget::AddStepNumberProperty(PropertyIndex Index, const QString& Text, const QString& ToolTip, QGridLayout* Layout, int& Row)
+void lcPropertiesWidget::AddStepNumberProperty(PropertyIndex Index, const QString& Text, const QString& ToolTip)
 {
-	AddLabel(Text, ToolTip, Layout, Row);
+	AddLabel(Text, ToolTip);
 
 	QLineEdit* Widget = new QLineEdit(this);
 	Widget->setToolTip(ToolTip);
 
 	connect(Widget, &QLineEdit::editingFinished, this, &lcPropertiesWidget::StepNumberChanged);
 
-	Layout->addWidget(Widget, Row, 2);
+	mLayout->addWidget(Widget, mLayoutRow, 2);
+	mCurrentCategory->Widgets.push_back(Widget);
 
 	mPropertyWidgets[static_cast<int>(Index)] = Widget;
 
-	Row++;
+	mLayoutRow++;
 }
 
-void lcPropertiesWidget::AddStringProperty(PropertyIndex Index, const QString& Text, const QString& ToolTip, QGridLayout* Layout, int& Row)
+void lcPropertiesWidget::AddStringProperty(PropertyIndex Index, const QString& Text, const QString& ToolTip)
 {
-	AddLabel(Text, ToolTip, Layout, Row);
+	AddLabel(Text, ToolTip);
 
 	QLineEdit* Widget = new QLineEdit(this);
 	Widget->setToolTip(ToolTip);
 
-	Layout->addWidget(Widget, Row, 2);
+	mLayout->addWidget(Widget, mLayoutRow, 2);
+	mCurrentCategory->Widgets.push_back(Widget);
 
 	mPropertyWidgets[static_cast<int>(Index)] = Widget;
 
-	Row++;
+	mLayoutRow++;
 }
 
-void lcPropertiesWidget::AddStringListProperty(PropertyIndex Index, const QString& Text, const QString& ToolTip, const QStringList& Strings, QGridLayout* Layout, int& Row)
+void lcPropertiesWidget::AddStringListProperty(PropertyIndex Index, const QString& Text, const QString& ToolTip, const QStringList& Strings)
 {
-	AddLabel(Text, ToolTip, Layout, Row);
+	AddLabel(Text, ToolTip);
 
 	QComboBox* Widget = new QComboBox(this);
 	Widget->setToolTip(ToolTip);
@@ -266,16 +290,17 @@ void lcPropertiesWidget::AddStringListProperty(PropertyIndex Index, const QStrin
 
 	//	connect(editor, SIGNAL(clicked()), this, SLOT(slotColorButtonClicked()));
 
-	Layout->addWidget(Widget, Row, 2);
+	mLayout->addWidget(Widget, mLayoutRow, 2);
+	mCurrentCategory->Widgets.push_back(Widget);
 
 	mPropertyWidgets[static_cast<int>(Index)] = Widget;
 
-	Row++;
+	mLayoutRow++;
 }
 
-void lcPropertiesWidget::AddColorProperty(PropertyIndex Index, const QString& Text, const QString& ToolTip, QGridLayout* Layout, int& Row)
+void lcPropertiesWidget::AddColorProperty(PropertyIndex Index, const QString& Text, const QString& ToolTip)
 {
-	AddLabel(Text, ToolTip, Layout, Row);
+	AddLabel(Text, ToolTip);
 
 	QPushButton* Widget = new QPushButton(this);
 	Widget->setToolTip(ToolTip);
@@ -285,11 +310,12 @@ void lcPropertiesWidget::AddColorProperty(PropertyIndex Index, const QString& Te
 
 //	connect(editor, SIGNAL(clicked()), this, SLOT(slotColorButtonClicked()));
 
-	Layout->addWidget(Widget, Row, 2);
+	mLayout->addWidget(Widget, mLayoutRow, 2);
+	mCurrentCategory->Widgets.push_back(Widget);
 
 	mPropertyWidgets[static_cast<int>(Index)] = Widget;
 
-	Row++;
+	mLayoutRow++;
 }
 
 void lcPropertiesWidget::PieceColorChanged(int ColorIndex)
@@ -356,9 +382,9 @@ void lcPropertiesWidget::UpdatePieceColor(PropertyIndex Index, int ColorIndex)
 	ColorButton->setText(QString("  ") + gColorList[ColorIndex].Name);
 }
 
-void lcPropertiesWidget::AddPieceColorProperty(PropertyIndex Index, const QString& Text, const QString& ToolTip, QGridLayout* Layout, int& Row)
+void lcPropertiesWidget::AddPieceColorProperty(PropertyIndex Index, const QString& Text, const QString& ToolTip)
 {
-	AddLabel(Text, ToolTip, Layout, Row);
+	AddLabel(Text, ToolTip);
 
 	QToolButton* Widget = new QToolButton(this);
 	Widget->setToolTip(ToolTip);
@@ -368,11 +394,12 @@ void lcPropertiesWidget::AddPieceColorProperty(PropertyIndex Index, const QStrin
 
 	connect(Widget, &QToolButton::clicked, this, &lcPropertiesWidget::PieceColorButtonClicked);
 
-	Layout->addWidget(Widget, Row, 2);
+	mLayout->addWidget(Widget, mLayoutRow, 2);
+	mCurrentCategory->Widgets.push_back(Widget);
 
 	mPropertyWidgets[static_cast<int>(Index)] = Widget;
 
-	Row++;
+	mLayoutRow++;
 }
 
 void lcPropertiesWidget::UpdatePieceId(PropertyIndex Index, const QString& Name)
@@ -424,9 +451,9 @@ void lcPropertiesWidget::PieceIdChanged(PieceInfo* Info)
 //	gMainWindow->PreviewPiece(Info->mFileName, ColorCode, false);
 }
 
-void lcPropertiesWidget::AddPieceIdProperty(PropertyIndex Index, const QString& Text, const QString& ToolTip, QGridLayout* Layout, int& Row)
+void lcPropertiesWidget::AddPieceIdProperty(PropertyIndex Index, const QString& Text, const QString& ToolTip)
 {
-	AddLabel(Text, ToolTip, Layout, Row);
+	AddLabel(Text, ToolTip);
 
 	lcElidableToolButton* Widget = new lcElidableToolButton(this);
 	Widget->setToolTip(ToolTip);
@@ -440,38 +467,45 @@ void lcPropertiesWidget::AddPieceIdProperty(PropertyIndex Index, const QString& 
 
 	connect(Widget, &QToolButton::clicked, this, &lcPropertiesWidget::PieceIdButtonClicked);
 
-	Layout->addWidget(Widget, Row, 2);
+	mLayout->addWidget(Widget, mLayoutRow, 2);
+	mCurrentCategory->Widgets.push_back(Widget);
 
 	mPropertyWidgets[static_cast<int>(Index)] = Widget;
 
-	Row++;
+	mLayoutRow++;
 }
 
 void lcPropertiesWidget::ClearLayout()
 {
-	for (lcCollapsibleWidget* CategoryWidget : mCategoryWidgets)
-		delete CategoryWidget;
+	for (const std::unique_ptr<CategoryWidgets>& Category : mCategories)
+	{
+		delete Category->Button;
+		qDeleteAll(Category->Widgets);
+	}
 
-	mCategoryWidgets.clear();
+	mCategories.clear();
 	mPropertyWidgets.fill(nullptr);
 
-	delete layout();
+	delete mLayout;
+	mLayout = new QGridLayout(this);
+	mLayout->setVerticalSpacing(1);
+	mLayoutRow = 0;
+	mCurrentCategory = nullptr;
 }
 
-void lcPropertiesWidget::AddTransformCategory(QVBoxLayout* Layout)
+void lcPropertiesWidget::AddTransformCategory()
 {
-	QGridLayout* TransformLayout = AddPropertyCategory(tr("Transform"), Layout);
-	int TransformRow = 0;
+	AddPropertyCategory(tr("Transform"));
 
-	AddFloatProperty(PropertyIndex::ObjectPositionX, tr("Position X"), tr("Position of the object"), -FLT_MAX, FLT_MAX, TransformLayout, TransformRow);
-	AddFloatProperty(PropertyIndex::ObjectPositionY, tr("Y"), tr("Position of the object"), -FLT_MAX, FLT_MAX, TransformLayout, TransformRow);
-	AddFloatProperty(PropertyIndex::ObjectPositionZ, tr("Z"), tr("Position of the object"), -FLT_MAX, FLT_MAX, TransformLayout, TransformRow);
-	AddSpacing(TransformLayout, TransformRow);
-	AddFloatProperty(PropertyIndex::ObjectRotationX, tr("Rotation X"), tr("Rotation of the object in degrees"), -FLT_MAX, FLT_MAX, TransformLayout, TransformRow);
-	AddFloatProperty(PropertyIndex::ObjectRotationY, tr("Y"), tr("Rotation of the object in degrees"), -FLT_MAX, FLT_MAX, TransformLayout, TransformRow);
-	AddFloatProperty(PropertyIndex::ObjectRotationZ, tr("Z"), tr("Rotation of the object in degrees"), -FLT_MAX, FLT_MAX, TransformLayout, TransformRow);
+	AddFloatProperty(PropertyIndex::ObjectPositionX, tr("Position X"), tr("Position of the object"), -FLT_MAX, FLT_MAX);
+	AddFloatProperty(PropertyIndex::ObjectPositionY, tr("Y"), tr("Position of the object"), -FLT_MAX, FLT_MAX);
+	AddFloatProperty(PropertyIndex::ObjectPositionZ, tr("Z"), tr("Position of the object"), -FLT_MAX, FLT_MAX);
+	AddSpacing();
+	AddFloatProperty(PropertyIndex::ObjectRotationX, tr("Rotation X"), tr("Rotation of the object in degrees"), -FLT_MAX, FLT_MAX);
+	AddFloatProperty(PropertyIndex::ObjectRotationY, tr("Y"), tr("Rotation of the object in degrees"), -FLT_MAX, FLT_MAX);
+	AddFloatProperty(PropertyIndex::ObjectRotationZ, tr("Z"), tr("Rotation of the object in degrees"), -FLT_MAX, FLT_MAX);
 
-	Layout->addStretch(1);
+	mLayout->setRowStretch(mLayout->rowCount(), 1);
 }
 
 void lcPropertiesWidget::SetEmpty()
@@ -489,20 +523,17 @@ void lcPropertiesWidget::SetPieceLayout()
 
 	ClearLayout();
 
-	QVBoxLayout* Layout = new QVBoxLayout(this);
+	AddPropertyCategory(tr("Piece"));
 
-	QGridLayout* PieceLayout = AddPropertyCategory(tr("Piece"), Layout);
-	int PieceRow = 0;
+	AddPieceIdProperty(PropertyIndex::PieceId, tr("Part"), tr("Part Id"));
+	AddPieceColorProperty(PropertyIndex::PieceColor, tr("Color"), tr("Piece color"));
 
-	AddPieceIdProperty(PropertyIndex::PieceId, tr("Part"), tr("Part Id"), PieceLayout, PieceRow);
-	AddPieceColorProperty(PropertyIndex::PieceColor, tr("Color"), tr("Piece color"), PieceLayout, PieceRow);
+	AddSpacing();
 
-	AddSpacing(PieceLayout, PieceRow);
+	AddStepNumberProperty(PropertyIndex::PieceStepShow, tr("Show"), tr("Step when piece is added to the model"));
+	AddStepNumberProperty(PropertyIndex::PieceStepHide, tr("Hide"), tr("Step when piece is hidden"));
 
-	AddStepNumberProperty(PropertyIndex::PieceStepShow, tr("Show"), tr("Step when piece is added to the model"), PieceLayout, PieceRow);
-	AddStepNumberProperty(PropertyIndex::PieceStepHide, tr("Hide"), tr("Step when piece is hidden"), PieceLayout, PieceRow);
-
-	AddTransformCategory(Layout);
+	AddTransformCategory();
 
 	mLayoutMode = LayoutMode::Piece;
 }
@@ -601,32 +632,28 @@ void lcPropertiesWidget::SetCameraLayout()
 
 	ClearLayout();
 
-	QVBoxLayout* Layout = new QVBoxLayout(this);
+	AddPropertyCategory(tr("Camera"));
+	
+	AddStringProperty(PropertyIndex::CameraName, tr("Name"), tr("Camera name"));
+	AddStringListProperty(PropertyIndex::CameraType, tr("Type"), tr("Camera type"), { tr("Perspective"), tr("Orthographic") });
+	AddSpacing();
+	AddFloatProperty(PropertyIndex::CameraFOV, tr("FOV"), tr("Field of view in degrees"), 0.1f, 179.9f);
+	AddFloatProperty(PropertyIndex::CameraNear, tr("Near"), tr("Near clipping distance"), 0.001f, FLT_MAX);
+	AddFloatProperty(PropertyIndex::CameraFar, tr("Far"), tr("Far clipping distance"), 0.001f, FLT_MAX);
 
-	QGridLayout* CameraLayout = AddPropertyCategory(tr("Camera"), Layout);
-	int CameraRow = 0;
+	AddPropertyCategory(tr("Transform"));
 
-	AddStringProperty(PropertyIndex::CameraName, tr("Name"), tr("Camera name"), CameraLayout, CameraRow);
-	AddStringListProperty(PropertyIndex::CameraType, tr("Type"), tr("Camera type"), { tr("Perspective"), tr("Orthographic") }, CameraLayout, CameraRow);
-	AddSpacing(CameraLayout, CameraRow);
-	AddFloatProperty(PropertyIndex::CameraFOV, tr("FOV"), tr("Field of view in degrees"), 0.1f, 179.9f, CameraLayout, CameraRow);
-	AddFloatProperty(PropertyIndex::CameraNear, tr("Near"), tr("Near clipping distance"), 0.001f, FLT_MAX, CameraLayout, CameraRow);
-	AddFloatProperty(PropertyIndex::CameraFar, tr("Far"), tr("Far clipping distance"), 0.001f, FLT_MAX, CameraLayout, CameraRow);
-
-	QGridLayout* TransformLayout = AddPropertyCategory(tr("Transform"), Layout);
-	int TransformRow = 0;
-
-	AddFloatProperty(PropertyIndex::CameraPositionX, tr("Position X"), tr("Camera position"), -FLT_MAX, FLT_MAX, TransformLayout, TransformRow);
-	AddFloatProperty(PropertyIndex::CameraPositionY, tr("Y"), tr("Camera position"), -FLT_MAX, FLT_MAX, TransformLayout, TransformRow);
-	AddFloatProperty(PropertyIndex::CameraPositionZ, tr("Z"), tr("Camera position"), -FLT_MAX, FLT_MAX, TransformLayout, TransformRow);
-	AddSpacing(TransformLayout, TransformRow);
-	AddFloatProperty(PropertyIndex::CameraTargetX, tr("Target X"), tr("Camera target position"), -FLT_MAX, FLT_MAX, TransformLayout, TransformRow);
-	AddFloatProperty(PropertyIndex::CameraTargetY, tr("Y"), tr("Camera target position"), -FLT_MAX, FLT_MAX, TransformLayout, TransformRow);
-	AddFloatProperty(PropertyIndex::CameraTargetZ, tr("Z"), tr("Camera target position"), -FLT_MAX, FLT_MAX, TransformLayout, TransformRow);
-	AddSpacing(TransformLayout, TransformRow);
-	AddFloatProperty(PropertyIndex::CameraUpX, tr("Up X"), tr("Camera up direction"), -FLT_MAX, FLT_MAX, TransformLayout, TransformRow);
-	AddFloatProperty(PropertyIndex::CameraUpY, tr("Y"), tr("Camera up direction"), -FLT_MAX, FLT_MAX, TransformLayout, TransformRow);
-	AddFloatProperty(PropertyIndex::CameraUpZ, tr("Z"), tr("Camera up direction"), -FLT_MAX, FLT_MAX, TransformLayout, TransformRow);
+	AddFloatProperty(PropertyIndex::CameraPositionX, tr("Position X"), tr("Camera position"), -FLT_MAX, FLT_MAX);
+	AddFloatProperty(PropertyIndex::CameraPositionY, tr("Y"), tr("Camera position"), -FLT_MAX, FLT_MAX);
+	AddFloatProperty(PropertyIndex::CameraPositionZ, tr("Z"), tr("Camera position"), -FLT_MAX, FLT_MAX);
+	AddSpacing();
+	AddFloatProperty(PropertyIndex::CameraTargetX, tr("Target X"), tr("Camera target position"), -FLT_MAX, FLT_MAX);
+	AddFloatProperty(PropertyIndex::CameraTargetY, tr("Y"), tr("Camera target position"), -FLT_MAX, FLT_MAX);
+	AddFloatProperty(PropertyIndex::CameraTargetZ, tr("Z"), tr("Camera target position"), -FLT_MAX, FLT_MAX);
+	AddSpacing();
+	AddFloatProperty(PropertyIndex::CameraUpX, tr("Up X"), tr("Camera up direction"), -FLT_MAX, FLT_MAX);
+	AddFloatProperty(PropertyIndex::CameraUpY, tr("Y"), tr("Camera up direction"), -FLT_MAX, FLT_MAX);
+	AddFloatProperty(PropertyIndex::CameraUpZ, tr("Z"), tr("Camera up direction"), -FLT_MAX, FLT_MAX);
 
 //	AddTransformCategory(Layout);
 
@@ -645,66 +672,63 @@ void lcPropertiesWidget::SetLightLayout(lcLightType LightType, lcLightAreaShape 
 
 	ClearLayout();
 
-	QVBoxLayout* Layout = new QVBoxLayout(this);
+	AddPropertyCategory(tr("Light"));
 
-	QGridLayout* LightLayout = AddPropertyCategory(tr("Light"), Layout);
-	int LightRow = 0;
-
-	AddStringProperty(PropertyIndex::LightName, tr("Name"), tr("Light name"), LightLayout, LightRow);
-	AddStringListProperty(PropertyIndex::LightType, tr("Type"), tr("Light type"), lcLight::GetLightTypeStrings(), LightLayout, LightRow);
-	AddColorProperty(PropertyIndex::LightColor, tr("Color"), tr("Light color"), LightLayout, LightRow);
-	AddFloatProperty(PropertyIndex::LightPower, tr("Power"), tr("Power of the light (Watts in Blender, multiplicative factor in POV-Ray)"), 0.0f, FLT_MAX, LightLayout, LightRow);
-	AddBoolProperty(PropertyIndex::LightCastShadow, tr("Cast Shadow"), tr("Cast a shadow from this light"), LightLayout, LightRow);
-	AddFloatProperty(PropertyIndex::LightAttenuationDistance, tr("Fade Distance"), tr("The distance at which the full light intensity arrives (POV-Ray only)"), 0.0f, FLT_MAX, LightLayout, LightRow);
-	AddFloatProperty(PropertyIndex::LightAttenuationPower, tr("Fade Power"), tr("Light falloff rate (POV-Ray only)"), 0.0f, FLT_MAX, LightLayout, LightRow);
+	AddStringProperty(PropertyIndex::LightName, tr("Name"), tr("Light name"));
+	AddStringListProperty(PropertyIndex::LightType, tr("Type"), tr("Light type"), lcLight::GetLightTypeStrings());
+	AddColorProperty(PropertyIndex::LightColor, tr("Color"), tr("Light color"));
+	AddFloatProperty(PropertyIndex::LightPower, tr("Power"), tr("Power of the light (Watts in Blender, multiplicative factor in POV-Ray)"), 0.0f, FLT_MAX);
+	AddBoolProperty(PropertyIndex::LightCastShadow, tr("Cast Shadow"), tr("Cast a shadow from this light"));
+	AddFloatProperty(PropertyIndex::LightAttenuationDistance, tr("Fade Distance"), tr("The distance at which the full light intensity arrives (POV-Ray only)"), 0.0f, FLT_MAX);
+	AddFloatProperty(PropertyIndex::LightAttenuationPower, tr("Fade Power"), tr("Light falloff rate (POV-Ray only)"), 0.0f, FLT_MAX);
 //	AddSpacing(LightLayout, LightRow);
 
 	switch (LightType)
 	{
 	case lcLightType::Point:
-		AddFloatProperty(PropertyIndex::LightSizeX, tr("Radius"), tr("Shadow soft size (Blender only)"), 0.0f, FLT_MAX, LightLayout, LightRow);
+		AddFloatProperty(PropertyIndex::LightSizeX, tr("Radius"), tr("Shadow soft size (Blender only)"), 0.0f, FLT_MAX);
 		break;
 
 	case lcLightType::Spot:
-		AddFloatProperty(PropertyIndex::LightSizeX, tr("Radius"), tr("Shadow soft size (Blender only)"), 0.0f, FLT_MAX, LightLayout, LightRow);
-		AddFloatProperty(PropertyIndex::LightSpotConeAngle, tr("Spot Cone Angle"), tr("Angle in degrees of the spot light's beam"), 0.0f, 179.9f, LightLayout, LightRow);
-		AddFloatProperty(PropertyIndex::LightSpotPenumbraAngle, tr("Spot Penumbra Angle"), tr("Angle in degrees over which the intensity of the spot light falls off to zero"), 0.0f, 179.9f, LightLayout, LightRow);
-		AddFloatProperty(PropertyIndex::LightSpotTightness, tr("Spot Tightness"), tr("Additional exponential spot light edge softening (POV-Ray only)"), 0.0f, FLT_MAX, LightLayout, LightRow);
+		AddFloatProperty(PropertyIndex::LightSizeX, tr("Radius"), tr("Shadow soft size (Blender only)"), 0.0f, FLT_MAX);
+		AddFloatProperty(PropertyIndex::LightSpotConeAngle, tr("Spot Cone Angle"), tr("Angle in degrees of the spot light's beam"), 0.0f, 179.9f);
+		AddFloatProperty(PropertyIndex::LightSpotPenumbraAngle, tr("Spot Penumbra Angle"), tr("Angle in degrees over which the intensity of the spot light falls off to zero"), 0.0f, 179.9f);
+		AddFloatProperty(PropertyIndex::LightSpotTightness, tr("Spot Tightness"), tr("Additional exponential spot light edge softening (POV-Ray only)"), 0.0f, FLT_MAX);
 		break;
 
 	case lcLightType::Directional:
-		AddFloatProperty(PropertyIndex::LightSizeX, tr("Angle"), tr("Angular diameter of the light (Blender only)"), 0.0f, 180.0f, LightLayout, LightRow);
+		AddFloatProperty(PropertyIndex::LightSizeX, tr("Angle"), tr("Angular diameter of the light (Blender only)"), 0.0f, 180.0f);
 		break;
 
 	case lcLightType::Area:
-		AddStringListProperty(PropertyIndex::LightAreaShape, tr("Area Shape"), tr("The shape of the area light"), lcLight::GetAreaShapeStrings(), LightLayout, LightRow);
+		AddStringListProperty(PropertyIndex::LightAreaShape, tr("Area Shape"), tr("The shape of the area light"), lcLight::GetAreaShapeStrings());
 
 		switch (LightAreaShape)
 		{
 		case lcLightAreaShape::Rectangle:
 		case lcLightAreaShape::Ellipse:
-			AddFloatProperty(PropertyIndex::LightSizeX, tr("Size X"), tr("The width of the area light"), 0.0f, FLT_MAX, LightLayout, LightRow);
-			AddFloatProperty(PropertyIndex::LightSizeY, tr("Y"), tr("The height of the area light"), 0.0f, FLT_MAX, LightLayout, LightRow);
+			AddFloatProperty(PropertyIndex::LightSizeX, tr("Size X"), tr("The width of the area light"), 0.0f, FLT_MAX);
+			AddFloatProperty(PropertyIndex::LightSizeY, tr("Y"), tr("The height of the area light"), 0.0f, FLT_MAX);
 			break;
 
 		case lcLightAreaShape::Square:
 		case lcLightAreaShape::Disk:
-			AddFloatProperty(PropertyIndex::LightSizeX, tr("Size"), tr("The size of the area light"), 0.0f, FLT_MAX, LightLayout, LightRow);
+			AddFloatProperty(PropertyIndex::LightSizeX, tr("Size"), tr("The size of the area light"), 0.0f, FLT_MAX);
 			break;
 
 		case lcLightAreaShape::Count:
 			break;
 		}
 
-		AddIntegerProperty(PropertyIndex::LightAreaGridX, tr("Grid X"), tr("Number of point sources along the X axis (POV-Ray only)"), 1, INT_MAX, LightLayout, LightRow);
-		AddIntegerProperty(PropertyIndex::LightAreaGridY, tr("Y"), tr("Number of point sources along the Y axis (POV-Ray only)"), 1, INT_MAX, LightLayout, LightRow);
+		AddIntegerProperty(PropertyIndex::LightAreaGridX, tr("Grid X"), tr("Number of point sources along the X axis (POV-Ray only)"), 1, INT_MAX);
+		AddIntegerProperty(PropertyIndex::LightAreaGridY, tr("Y"), tr("Number of point sources along the Y axis (POV-Ray only)"), 1, INT_MAX);
 		break;
 
 	case lcLightType::Count:
 		break;
 	}
 
-	AddTransformCategory(Layout);
+	AddTransformCategory();
 
 	mLayoutLightType = LightType;
 	mLayoutMode = LayoutMode::Light;

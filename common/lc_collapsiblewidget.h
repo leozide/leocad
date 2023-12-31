@@ -1,5 +1,29 @@
 #pragma once
 
+class lcCollapsibleWidgetButton : public QToolButton
+{
+	Q_OBJECT
+
+public:
+	lcCollapsibleWidgetButton(const QString& Title, QWidget* Parent = nullptr);
+
+	void Collapse();
+
+signals:
+	void StateChanged(bool Expanded);
+
+protected slots:
+	void Clicked();
+
+protected:
+	void UpdateIcon();
+
+	bool mExpanded = true;
+
+	static QImage mExpandedIcon;
+	static QImage mCollapsedIcon;
+};
+
 class lcCollapsibleWidget : public QWidget
 {
 	Q_OBJECT
@@ -11,15 +35,9 @@ public:
 	void SetChildLayout(QLayout* Layout);
 
 protected slots:
-	void TitleClicked();
+	void ButtonStateChanged(bool Expanded);
 
 protected:
-	void UpdateIcon();
-
-	QToolButton* mTitleButton = nullptr;
+	lcCollapsibleWidgetButton* mTitleButton = nullptr;
 	QWidget* mChildWidget = nullptr;
-	bool mExpanded = true;
-
-	static QImage mExpandedIcon;
-	static QImage mCollapsedIcon;
 };

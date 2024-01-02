@@ -1748,11 +1748,18 @@ void lcModel::LoadCheckPoint(lcModelHistoryEntry* CheckPoint)
 		LoadedInfos.push_back(Info);
 	}
 
+	// Remember the current step
+	const lcStep CurrentStep = mCurrentStep;
+
 	DeleteModel();
 
 	QBuffer Buffer(&CheckPoint->File);
 	Buffer.open(QIODevice::ReadOnly);
 	LoadLDraw(Buffer, lcGetActiveProject());
+
+	// Reset the current step
+	mCurrentStep = CurrentStep;
+	CalculateStep(CurrentStep);
 
 	gMainWindow->UpdateTimeline(true, false);
 	gMainWindow->UpdateCameraMenu();

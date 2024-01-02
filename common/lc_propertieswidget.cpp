@@ -110,48 +110,116 @@ void lcPropertiesWidget::FloatChanged()
 
 	lcModel* Model = gMainWindow->GetActiveModel();
 	lcPiece* Piece = dynamic_cast<lcPiece*>(mFocusObject);
+	lcCamera* Camera = dynamic_cast<lcCamera*>(mFocusObject);
 	lcLight* Light = dynamic_cast<lcLight*>(mFocusObject);
 	float Value = lcParseValueLocalized(Widget->text());
 
 	// todo: mouse drag
 
-	if (Index == PropertyIndex::ObjectPositionX || Index == PropertyIndex::ObjectPositionY || Index == PropertyIndex::ObjectPositionZ)
+	if (Piece || Light)
 	{
-		lcVector3 Center;
-		lcMatrix33 RelativeRotation;
-		Model->GetMoveRotateTransform(Center, RelativeRotation);
-		lcVector3 Position = Center;
+		if (Index == PropertyIndex::ObjectPositionX || Index == PropertyIndex::ObjectPositionY || Index == PropertyIndex::ObjectPositionZ)
+		{
+			lcVector3 Center;
+			lcMatrix33 RelativeRotation;
+			Model->GetMoveRotateTransform(Center, RelativeRotation);
+			lcVector3 Position = Center;
 
-		if (Index == PropertyIndex::ObjectPositionX)
-			Position[0] = Value;
-		else if (Index == PropertyIndex::ObjectPositionY)
-			Position[1] = Value;
-		else if (Index == PropertyIndex::ObjectPositionZ)
-			Position[2] = Value;
+			if (Index == PropertyIndex::ObjectPositionX)
+				Position[0] = Value;
+			else if (Index == PropertyIndex::ObjectPositionY)
+				Position[1] = Value;
+			else if (Index == PropertyIndex::ObjectPositionZ)
+				Position[2] = Value;
 
-		lcVector3 Distance = Position - Center;
+			lcVector3 Distance = Position - Center;
 
-		Model->MoveSelectedObjects(Distance, Distance, false, true, true, true);
+			Model->MoveSelectedObjects(Distance, Distance, false, true, true, true);
+		}
+		else if (Index == PropertyIndex::ObjectRotationX || Index == PropertyIndex::ObjectRotationY || Index == PropertyIndex::ObjectRotationZ)
+		{
+			lcVector3 InitialRotation(0.0f, 0.0f, 0.0f);
+
+			if (Piece)
+				InitialRotation = lcMatrix44ToEulerAngles(Piece->mModelWorld) * LC_RTOD;
+			else if (Light)
+				InitialRotation = lcMatrix44ToEulerAngles(Light->GetWorldMatrix()) * LC_RTOD;
+
+			lcVector3 Rotation = InitialRotation;
+
+			if (Index == PropertyIndex::ObjectRotationX)
+				Rotation[0] = Value;
+			else if (Index == PropertyIndex::ObjectRotationY)
+				Rotation[1] = Value;
+			else if (Index == PropertyIndex::ObjectRotationZ)
+				Rotation[2] = Value;
+
+			Model->RotateSelectedObjects(Rotation - InitialRotation, true, false, true, true);
+		}
 	}
-	else if (Index == PropertyIndex::ObjectRotationX || Index == PropertyIndex::ObjectRotationY || Index == PropertyIndex::ObjectRotationZ)
+
+	if (Camera)
 	{
-		lcVector3 InitialRotation(0.0f, 0.0f, 0.0f);
+		if (Index == PropertyIndex::CameraPositionX || Index == PropertyIndex::CameraPositionY || Index == PropertyIndex::CameraPositionZ)
+		{
+			lcVector3 Center = Camera->mPosition;
+			lcVector3 Position = Center;
 
-		if (Piece)
-			InitialRotation = lcMatrix44ToEulerAngles(Piece->mModelWorld) * LC_RTOD;
-		else if (Light)
-			InitialRotation = lcMatrix44ToEulerAngles(Light->GetWorldMatrix()) * LC_RTOD;
+			if (Index == PropertyIndex::CameraPositionX)
+				Position[0] = Value;
+			else if (Index == PropertyIndex::CameraPositionY)
+				Position[1] = Value;
+			else if (Index == PropertyIndex::CameraPositionZ)
+				Position[2] = Value;
 
-		lcVector3 Rotation = InitialRotation;
+			lcVector3 Distance = Position - Center;
 
-		if (Index == PropertyIndex::ObjectRotationX)
-			Rotation[0] = Value;
-		else if (Index == PropertyIndex::ObjectRotationY)
-			Rotation[1] = Value;
-		else if (Index == PropertyIndex::ObjectRotationZ)
-			Rotation[2] = Value;
+			Model->MoveSelectedObjects(Distance, Distance, false, false, true, true);
+		}
+		else if (Index == PropertyIndex::CameraTargetX || Index == PropertyIndex::CameraTargetY || Index == PropertyIndex::CameraTargetZ)
+		{
+			lcVector3 Center = Camera->mTargetPosition;
+			lcVector3 Position = Center;
 
-		Model->RotateSelectedObjects(Rotation - InitialRotation, true, false, true, true);
+			if (Index == PropertyIndex::CameraTargetX)
+				Position[0] = Value;
+			else if (Index == PropertyIndex::CameraTargetY)
+				Position[1] = Value;
+			else if (Index == PropertyIndex::CameraTargetZ)
+				Position[2] = Value;
+
+			lcVector3 Distance = Position - Center;
+
+			Model->MoveSelectedObjects(Distance, Distance, false, false, true, true);
+		}
+		else if (Index == PropertyIndex::CameraUpX || Index == PropertyIndex::CameraUpY || Index == PropertyIndex::CameraUpZ)
+		{
+			lcVector3 Center = Camera->mUpVector;
+			lcVector3 Position = Center;
+
+			if (Index == PropertyIndex::CameraUpX)
+				Position[0] = Value;
+			else if (Index == PropertyIndex::CameraUpY)
+				Position[1] = Value;
+			else if (Index == PropertyIndex::CameraUpZ)
+				Position[2] = Value;
+
+			lcVector3 Distance = Position - Center;
+
+			Model->MoveSelectedObjects(Distance, Distance, false, false, true, true);
+		}
+		else if (Index == PropertyIndex::CameraFOV)
+		{
+			Model->SetCameraFOV(Camera, Value);
+		}
+		else if (Index == PropertyIndex::CameraNear)
+		{
+			Model->SetCameraZNear(Camera, Value);
+		}
+		else if (Index == PropertyIndex::CameraFar)
+		{
+			Model->SetCameraZFar(Camera, Value);
+		}
 	}
 }
 
@@ -262,12 +330,48 @@ void lcPropertiesWidget::AddStepNumberProperty(PropertyIndex Index, const QStrin
 	mLayoutRow++;
 }
 
+void lcPropertiesWidget::StringChanged()
+{
+	QLineEdit* Widget = qobject_cast<QLineEdit*>(sender());
+	PropertyIndex Index = GetWidgetIndex(Widget);
+
+	if (Index == PropertyIndex::Count)
+		return;
+
+	lcModel* Model = gMainWindow->GetActiveModel();
+	lcCamera* Camera = dynamic_cast<lcCamera*>(mFocusObject);
+
+	if (!Model || !Camera)
+		return;
+
+	QString Text = Widget->text();
+
+	if (Index == PropertyIndex::CameraName)
+	{
+		Model->SetCameraName(Camera, Text);
+	}
+}
+
+void lcPropertiesWidget::UpdateString(PropertyIndex Index, const QString& Text)
+{
+	QLineEdit* Widget = qobject_cast<QLineEdit*>(mPropertyWidgets[static_cast<int>(Index)]);
+
+	if (Widget)
+	{
+		QSignalBlocker Blocker(Widget);
+
+		Widget->setText(Text);
+	}
+}
+
 void lcPropertiesWidget::AddStringProperty(PropertyIndex Index, const QString& Text, const QString& ToolTip)
 {
 	AddLabel(Text, ToolTip);
 
 	QLineEdit* Widget = new QLineEdit(this);
 	Widget->setToolTip(ToolTip);
+
+	connect(Widget, &QLineEdit::editingFinished, this, &lcPropertiesWidget::StringChanged);
 
 	mLayout->addWidget(Widget, mLayoutRow, 2);
 	mCurrentCategory->Widgets.push_back(Widget);
@@ -277,6 +381,38 @@ void lcPropertiesWidget::AddStringProperty(PropertyIndex Index, const QString& T
 	mLayoutRow++;
 }
 
+void lcPropertiesWidget::StringListChanged(int Value)
+{
+	QComboBox* Widget = qobject_cast<QComboBox*>(sender());
+	PropertyIndex Index = GetWidgetIndex(Widget);
+
+	if (Index == PropertyIndex::Count)
+		return;
+
+	lcModel* Model = gMainWindow->GetActiveModel();
+	lcCamera* Camera = dynamic_cast<lcCamera*>(mFocusObject);
+
+	if (!Model || !Camera)
+		return;
+
+	if (Index == PropertyIndex::CameraType)
+	{
+		Model->SetCameraOrthographic(Camera, Value == 1);
+	}
+}
+
+void lcPropertiesWidget::UpdateStringList(PropertyIndex Index, int ListIndex)
+{
+	QComboBox* Widget = qobject_cast<QComboBox*>(mPropertyWidgets[static_cast<int>(Index)]);
+
+	if (Widget)
+	{
+		QSignalBlocker Blocker(Widget);
+
+		Widget->setCurrentIndex(ListIndex);
+	}
+}
+
 void lcPropertiesWidget::AddStringListProperty(PropertyIndex Index, const QString& Text, const QString& ToolTip, const QStringList& Strings)
 {
 	AddLabel(Text, ToolTip);
@@ -284,11 +420,8 @@ void lcPropertiesWidget::AddStringListProperty(PropertyIndex Index, const QStrin
 	QComboBox* Widget = new QComboBox(this);
 	Widget->setToolTip(ToolTip);
 	Widget->addItems(Strings);
-	//	int value = Item->data(0, PropertyValueRole).toInt();
 
-	//	updateColorEditor(editor, value);
-
-	//	connect(editor, SIGNAL(clicked()), this, SLOT(slotColorButtonClicked()));
+	connect(Widget, qOverload<int>(&QComboBox::currentIndexChanged), this, &lcPropertiesWidget::StringListChanged);
 
 	mLayout->addWidget(Widget, mLayoutRow, 2);
 	mCurrentCategory->Widgets.push_back(Widget);
@@ -663,6 +796,50 @@ void lcPropertiesWidget::SetCameraLayout()
 void lcPropertiesWidget::SetCamera(lcObject* Focus)
 {
 	SetCameraLayout();
+
+	lcCamera* Camera = dynamic_cast<lcCamera*>(Focus);
+	mFocusObject = Camera;
+
+	lcVector3 Position(0.0f, 0.0f, 0.0f);
+	lcVector3 Target(0.0f, 0.0f, 0.0f);
+	lcVector3 UpVector(0.0f, 0.0f, 0.0f);
+	bool Ortho = false;
+	float FoV = 60.0f;
+	float ZNear = 1.0f;
+	float ZFar = 100.0f;
+	QString Name;
+
+	if (Camera)
+	{
+		Position = Camera->mPosition;
+		Target = Camera->mTargetPosition;
+		UpVector = Camera->mUpVector;
+
+		Ortho = Camera->IsOrtho();
+		FoV = Camera->m_fovy;
+		ZNear = Camera->m_zNear;
+		ZFar = Camera->m_zFar;
+		Name = Camera->GetName();
+	}
+
+	UpdateString(PropertyIndex::CameraName, Name);
+	UpdateStringList(PropertyIndex::CameraType, Ortho ? 1 : 0);
+
+	UpdateFloat(PropertyIndex::CameraFOV, FoV);
+	UpdateFloat(PropertyIndex::CameraNear, ZNear);
+	UpdateFloat(PropertyIndex::CameraFar, ZFar);
+
+	UpdateFloat(PropertyIndex::CameraPositionX, Position[0]);
+	UpdateFloat(PropertyIndex::CameraPositionY, Position[1]);
+	UpdateFloat(PropertyIndex::CameraPositionZ, Position[2]);
+
+	UpdateFloat(PropertyIndex::CameraTargetX, Target[0]);
+	UpdateFloat(PropertyIndex::CameraTargetY, Target[1]);
+	UpdateFloat(PropertyIndex::CameraTargetZ, Target[2]);
+
+	UpdateFloat(PropertyIndex::CameraUpX, UpVector[0]);
+	UpdateFloat(PropertyIndex::CameraUpY, UpVector[1]);
+	UpdateFloat(PropertyIndex::CameraUpZ, UpVector[2]);
 }
 
 void lcPropertiesWidget::SetLightLayout(lcLightType LightType, lcLightAreaShape LightAreaShape)

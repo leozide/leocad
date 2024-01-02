@@ -17,6 +17,8 @@ protected slots:
 	void CategoryStateChanged(bool Expanded);
 	void FloatChanged();
 	void StepNumberChanged();
+	void StringChanged();
+	void StringListChanged(int Index);
 	void PieceColorButtonClicked();
 	void PieceColorChanged(int ColorIndex);
 	void PieceIdButtonClicked();
@@ -106,6 +108,8 @@ protected:
 
 	void UpdateFloat(PropertyIndex Index, float Value);
 	void UpdateStepNumber(PropertyIndex Index, lcStep Step, lcStep Min, lcStep Max);
+	void UpdateString(PropertyIndex Index, const QString& Text);
+	void UpdateStringList(PropertyIndex Index, int ListIndex);
 	void UpdatePieceColor(PropertyIndex Index, int ColorIndex);
 	void UpdatePieceId(PropertyIndex Index, const QString& Name);
 

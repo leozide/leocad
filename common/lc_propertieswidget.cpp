@@ -421,7 +421,7 @@ void lcPropertiesWidget::AddStringListProperty(PropertyIndex Index, const QStrin
 	Widget->setToolTip(ToolTip);
 	Widget->addItems(Strings);
 
-	connect(Widget, qOverload<int>(&QComboBox::currentIndexChanged), this, &lcPropertiesWidget::StringListChanged);
+	connect(Widget, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &lcPropertiesWidget::StringListChanged);
 
 	mLayout->addWidget(Widget, mLayoutRow, 2);
 	mCurrentCategory->Widgets.push_back(Widget);

@@ -230,7 +230,6 @@ SOURCES += \
 	qt/lc_qimagedialog.cpp \
 	qt/lc_qupdatedialog.cpp \
 	qt/lc_qutils.cpp \
-	qt/lc_qpropertiestree.cpp \
 	qt/lc_renderdialog.cpp \
 	qt/lc_setsdatabasedialog.cpp \
 	common/lc_partpalettedialog.cpp
@@ -301,7 +300,6 @@ HEADERS += \
 	qt/lc_qimagedialog.h \
 	qt/lc_qupdatedialog.h \
 	qt/lc_qutils.h \
-	qt/lc_qpropertiestree.h \
 	qt/lc_renderdialog.h \
 	qt/lc_setsdatabasedialog.h \
 	common/lc_partpalettedialog.h

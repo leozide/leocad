@@ -80,17 +80,51 @@ void lcPropertiesWidget::AddLabel(const QString& Text, const QString& ToolTip)
 	mCurrentCategory->Widgets.push_back(Label);
 }
 
+void lcPropertiesWidget::BoolChanged()
+{
+	QCheckBox* Widget = qobject_cast<QCheckBox*>(sender());
+	PropertyIndex Index = GetWidgetIndex(Widget);
+
+	if (Index == PropertyIndex::Count)
+		return;
+
+	lcModel* Model = gMainWindow->GetActiveModel();
+
+	if (!Model)
+		return;
+
+	lcLight* Light = dynamic_cast<lcLight*>(mFocusObject);
+	bool Value = Widget->isChecked();
+
+	if (Light)
+	{
+		if (Index == PropertyIndex::LightCastShadow)
+		{
+			Model->SetLightCastShadow(Light, Value);
+		}
+	}
+}
+
+void lcPropertiesWidget::UpdateBool(PropertyIndex Index, bool Value)
+{
+	QCheckBox* Widget = qobject_cast<QCheckBox*>(mPropertyWidgets[static_cast<int>(Index)]);
+
+	if (Widget)
+	{
+		QSignalBlocker Blocker(Widget);
+
+		Widget->setChecked(Value);
+	}
+}
+
 void lcPropertiesWidget::AddBoolProperty(PropertyIndex Index, const QString& Text, const QString& ToolTip)
 {
 	AddLabel(Text, ToolTip);
 
 	QCheckBox* Widget = new QCheckBox(this);
 	Widget->setToolTip(ToolTip);
-	//	int value = Item->data(0, PropertyValueRole).toInt();
 
-//	updateColorEditor(editor, value);
-
-//	connect(editor, SIGNAL(clicked()), this, SLOT(slotColorButtonClicked()));
+	connect(Widget, &QCheckBox::toggled, this, &lcPropertiesWidget::BoolChanged);
 
 	mLayout->addWidget(Widget, mLayoutRow, 2);
 	mCurrentCategory->Widgets.push_back(Widget);
@@ -109,6 +143,10 @@ void lcPropertiesWidget::FloatChanged()
 		return;
 
 	lcModel* Model = gMainWindow->GetActiveModel();
+
+	if (!Model)
+		return;
+
 	lcPiece* Piece = dynamic_cast<lcPiece*>(mFocusObject);
 	lcCamera* Camera = dynamic_cast<lcCamera*>(mFocusObject);
 	lcLight* Light = dynamic_cast<lcLight*>(mFocusObject);
@@ -221,6 +259,48 @@ void lcPropertiesWidget::FloatChanged()
 			Model->SetCameraZFar(Camera, Value);
 		}
 	}
+
+	if (Light)
+	{
+		if (Index == PropertyIndex::LightPower)
+		{
+			Model->SetLightPower(Light, Value);
+		}
+		else if (Index == PropertyIndex::LightAttenuationDistance)
+		{
+			Model->SetLightAttenuationDistance(Light, Value);
+		}
+		else if (Index == PropertyIndex::LightAttenuationPower)
+		{
+			Model->SetLightAttenuationPower(Light, Value);
+		}
+		else if (Index == PropertyIndex::LightSizeX)
+		{
+			lcVector2 LightSize = Light->GetSize();
+			LightSize[0] = Value;
+
+			Model->SetLightSize(Light, LightSize);
+		}
+		else if (Index == PropertyIndex::LightSizeY)
+		{
+			lcVector2 LightSize = Light->GetSize();
+			LightSize[1] = Value;
+
+			Model->SetLightSize(Light, LightSize);
+		}
+		else if (Index == PropertyIndex::LightSpotConeAngle)
+		{
+			Model->SetSpotLightConeAngle(Light, Value);
+		}
+		else if (Index == PropertyIndex::LightSpotPenumbraAngle)
+		{
+			Model->SetSpotLightPenumbraAngle(Light, Value);
+		}
+		else if (Index == PropertyIndex::LightSpotTightness)
+		{
+			Model->SetSpotLightTightness(Light, Value);
+		}
+	}
 }
 
 void lcPropertiesWidget::UpdateFloat(PropertyIndex Index, float Value)
@@ -254,13 +334,65 @@ void lcPropertiesWidget::AddFloatProperty(PropertyIndex Index, const QString& Te
 	mLayoutRow++;
 }
 
+void lcPropertiesWidget::IntegerChanged()
+{
+	QLineEdit* Widget = qobject_cast<QLineEdit*>(sender());
+	PropertyIndex Index = GetWidgetIndex(Widget);
+
+	if (Index == PropertyIndex::Count)
+		return;
+
+	lcModel* Model = gMainWindow->GetActiveModel();
+
+	if (!Model)
+		return;
+
+	lcLight* Light = dynamic_cast<lcLight*>(mFocusObject);
+	int Value = Widget->text().toInt();
+
+	// todo: mouse drag
+
+	if (Light)
+	{
+		if (Index == PropertyIndex::LightAreaGridX)
+		{
+			lcVector2i AreaGrid = Light->GetAreaGrid();
+			AreaGrid.x = Value;
+
+			Model->SetLightAreaGrid(Light, AreaGrid);
+		}
+		else if (Index == PropertyIndex::LightAreaGridY)
+		{
+			lcVector2i AreaGrid = Light->GetAreaGrid();
+			AreaGrid.y = Value;
+
+			Model->SetLightAreaGrid(Light, AreaGrid);
+		}
+	}
+}
+
+void lcPropertiesWidget::UpdateInteger(PropertyIndex Index, int Value)
+{
+	QLineEdit* Widget = qobject_cast<QLineEdit*>(mPropertyWidgets[static_cast<int>(Index)]);
+
+	if (Widget)
+	{
+		QSignalBlocker Blocker(Widget);
+
+		Widget->setText(lcFormatValueLocalized(Value));
+	}
+}
+
 void lcPropertiesWidget::AddIntegerProperty(PropertyIndex Index, const QString& Text, const QString& ToolTip, int Min, int Max)
 {
 	AddLabel(Text, ToolTip);
 
-	QSpinBox* Widget = new QSpinBox(this);
-	Widget->setRange(Min, Max);
+	QLineEdit* Widget = new QLineEdit(this);
 	Widget->setToolTip(ToolTip);
+
+	Widget->setValidator(new QIntValidator(Min, Max, Widget));
+
+	connect(Widget, &QLineEdit::editingFinished, this, &lcPropertiesWidget::IntegerChanged);
 
 	mLayout->addWidget(Widget, mLayoutRow, 2);
 	mCurrentCategory->Widgets.push_back(Widget);
@@ -339,16 +471,27 @@ void lcPropertiesWidget::StringChanged()
 		return;
 
 	lcModel* Model = gMainWindow->GetActiveModel();
-	lcCamera* Camera = dynamic_cast<lcCamera*>(mFocusObject);
 
-	if (!Model || !Camera)
+	if (!Model)
 		return;
 
+	lcCamera* Camera = dynamic_cast<lcCamera*>(mFocusObject);
+	lcLight* Light = dynamic_cast<lcLight*>(mFocusObject);
 	QString Text = Widget->text();
 
-	if (Index == PropertyIndex::CameraName)
+	if (Camera)
 	{
-		Model->SetCameraName(Camera, Text);
+		if (Index == PropertyIndex::CameraName)
+		{
+			Model->SetCameraName(Camera, Text);
+		}
+	}
+	else if (Light)
+	{
+		if (Index == PropertyIndex::LightName)
+		{
+			Model->SetLightName(Light, Text);
+		}
 	}
 }
 
@@ -390,14 +533,30 @@ void lcPropertiesWidget::StringListChanged(int Value)
 		return;
 
 	lcModel* Model = gMainWindow->GetActiveModel();
-	lcCamera* Camera = dynamic_cast<lcCamera*>(mFocusObject);
 
-	if (!Model || !Camera)
+	if (!Model)
 		return;
 
-	if (Index == PropertyIndex::CameraType)
+	lcCamera* Camera = dynamic_cast<lcCamera*>(mFocusObject);
+	lcLight* Light = dynamic_cast<lcLight*>(mFocusObject);
+
+	if (Camera)
 	{
-		Model->SetCameraOrthographic(Camera, Value == 1);
+		if (Index == PropertyIndex::CameraType)
+		{
+			Model->SetCameraOrthographic(Camera, Value == 1);
+		}
+	}
+	else if (Light)
+	{
+		if (Index == PropertyIndex::LightType)
+		{
+			Model->SetLightType(Light, static_cast<lcLightType>(Value));
+		}
+		else if (Index == PropertyIndex::LightAreaShape)
+		{
+			Model->SetLightAreaShape(Light, static_cast<lcLightAreaShape>(Value));
+		}
 	}
 }
 
@@ -431,17 +590,48 @@ void lcPropertiesWidget::AddStringListProperty(PropertyIndex Index, const QStrin
 	mLayoutRow++;
 }
 
+void lcPropertiesWidget::ColorButtonClicked()
+{
+	lcLight* Light = dynamic_cast<lcLight*>(mFocusObject);
+	QToolButton* ColorButton = qobject_cast<QToolButton*>(sender());
+	lcModel* Model = gMainWindow->GetActiveModel();
+
+	if (!ColorButton || !Light || !Model)
+		return;
+
+	QColor Color = QColorDialog::getColor(lcQColorFromVector3(Light->GetColor()), this, tr("Select Light Color"));
+
+	if (!Color.isValid())
+		return;
+
+	Model->SetLightColor(Light, lcVector3FromQColor(Color));
+}
+
+void lcPropertiesWidget::UpdateColor(PropertyIndex Index, QColor Color)
+{
+	QToolButton* ColorButton = qobject_cast<QToolButton*>(mPropertyWidgets[static_cast<int>(Index)]);
+
+	if (!ColorButton)
+		return;
+
+	QPixmap Pixmap(14, 14);
+	Pixmap.fill(Color);
+
+	ColorButton->setIcon(Pixmap);
+	ColorButton->setText(QString("  ") + Color.name());
+}
+
 void lcPropertiesWidget::AddColorProperty(PropertyIndex Index, const QString& Text, const QString& ToolTip)
 {
 	AddLabel(Text, ToolTip);
 
-	QPushButton* Widget = new QPushButton(this);
+	QToolButton* Widget = new QToolButton(this);
 	Widget->setToolTip(ToolTip);
-	//	int value = Item->data(0, PropertyValueRole).toInt();
+	Widget->setAutoRaise(true);
+	Widget->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+	Widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
-//	updateColorEditor(editor, value);
-
-//	connect(editor, SIGNAL(clicked()), this, SLOT(slotColorButtonClicked()));
+	connect(Widget, &QToolButton::clicked, this, &lcPropertiesWidget::ColorButtonClicked);
 
 	mLayout->addWidget(Widget, mLayoutRow, 2);
 	mCurrentCategory->Widgets.push_back(Widget);
@@ -575,13 +765,6 @@ void lcPropertiesWidget::PieceIdChanged(PieceInfo* Info)
 		return;
 
 	Model->SetSelectedPiecesPieceInfo(Info);
-
-//	int ColorIndex = gDefaultColor;
-//	lcObject* Focus = gMainWindow->GetActiveModel()->GetFocusObject();
-//	if (Focus && Focus->IsPiece())
-//		ColorIndex = ((lcPiece*)Focus)->GetColorIndex();
-//	quint32 ColorCode = lcGetColorCode(ColorIndex);
-//	gMainWindow->PreviewPiece(Info->mFileName, ColorCode, false);
 }
 
 void lcPropertiesWidget::AddPieceIdProperty(PropertyIndex Index, const QString& Text, const QString& ToolTip)
@@ -710,8 +893,6 @@ void lcPropertiesWidget::SetPiece(const lcArray<lcObject*>& Selection, lcObject*
 		StepHide = Piece->GetStepHide();
 		ColorIndex = Piece->GetColorIndex();
 		Info = Piece->mPieceInfo;
-//		quint32 ColorCode = lcGetColorCode(ColorIndex);
-//		gMainWindow->PreviewPiece(Info->mFileName, ColorCode, false);
 	}
 	else
 	{
@@ -844,21 +1025,25 @@ void lcPropertiesWidget::SetCamera(lcObject* Focus)
 
 void lcPropertiesWidget::SetLightLayout(lcLightType LightType, lcLightAreaShape LightAreaShape)
 {
-	if (mLayoutMode == LayoutMode::Light && mLayoutLightType == LightType)
+	if (mLayoutMode == LayoutMode::Light && mLayoutLightType == LightType) // && LightAreaShape
 		return;
 
-	ClearLayout();
+	ClearLayout(); // todo: this causes a crash when changing light type
 
 	AddPropertyCategory(tr("Light"));
 
 	AddStringProperty(PropertyIndex::LightName, tr("Name"), tr("Light name"));
 	AddStringListProperty(PropertyIndex::LightType, tr("Type"), tr("Light type"), lcLight::GetLightTypeStrings());
+
+	AddSpacing();
+
 	AddColorProperty(PropertyIndex::LightColor, tr("Color"), tr("Light color"));
 	AddFloatProperty(PropertyIndex::LightPower, tr("Power"), tr("Power of the light (Watts in Blender, multiplicative factor in POV-Ray)"), 0.0f, FLT_MAX);
-	AddBoolProperty(PropertyIndex::LightCastShadow, tr("Cast Shadow"), tr("Cast a shadow from this light"));
 	AddFloatProperty(PropertyIndex::LightAttenuationDistance, tr("Fade Distance"), tr("The distance at which the full light intensity arrives (POV-Ray only)"), 0.0f, FLT_MAX);
 	AddFloatProperty(PropertyIndex::LightAttenuationPower, tr("Fade Power"), tr("Light falloff rate (POV-Ray only)"), 0.0f, FLT_MAX);
-//	AddSpacing(LightLayout, LightRow);
+	AddBoolProperty(PropertyIndex::LightCastShadow, tr("Cast Shadow"), tr("Cast a shadow from this light"));
+
+	AddSpacing();
 
 	switch (LightType)
 	{
@@ -913,16 +1098,93 @@ void lcPropertiesWidget::SetLightLayout(lcLightType LightType, lcLightAreaShape 
 
 void lcPropertiesWidget::SetLight(lcObject* Focus)
 {
-	lcLight* Light = (Focus && Focus->IsLight()) ? (lcLight*)Focus : nullptr;
+	lcLight* Light = dynamic_cast<lcLight*>(Focus);
+	mFocusObject = Light;
 
 	if (Light)
 		SetLightLayout(Light->GetLightType(), Light->GetAreaShape());
 	else
 		SetLightLayout(lcLightType::Count, lcLightAreaShape::Count);
-}
 
-void lcPropertiesWidget::SetMultiple()
-{
+	QString Name;
+	lcLightType LightType = lcLightType::Point;
+	QColor Color(Qt::white);
+	lcLightAreaShape LightAreaShape = lcLightAreaShape::Rectangle;
+	lcVector2 LightSize(0.0f, 0.0f);
+	lcVector2i AreaGrid(2, 2);
+	float Power = 0.0f;
+	float AttenuationDistance = 0.0f;
+	float AttenuationPower = 0.0f;
+	bool CastShadow = true;
+	lcVector3 Position(0.0f, 0.0f, 0.0f);
+	lcVector3 Rotation = lcVector3(0.0f, 0.0f, 0.0f);
+	float SpotConeAngle = 0.0f, SpotPenumbraAngle = 0.0f, SpotTightness = 0.0f;
+
+	if (Light)
+	{
+		Name = Light->GetName();
+		LightType = Light->GetLightType();
+		Color = lcQColorFromVector3(Light->GetColor());
+
+		CastShadow = Light->GetCastShadow();
+		Position = Light->GetPosition();
+		Rotation = lcMatrix44ToEulerAngles(Light->GetWorldMatrix()) * LC_RTOD;
+		Power = Light->GetPower();
+		AttenuationDistance = Light->GetAttenuationDistance();
+		AttenuationPower = Light->GetAttenuationPower();
+		SpotConeAngle = Light->GetSpotConeAngle();
+		SpotPenumbraAngle = Light->GetSpotPenumbraAngle();
+		SpotTightness = Light->GetSpotTightness();
+
+		LightAreaShape = Light->GetAreaShape();
+		LightSize = Light->GetSize();
+		AreaGrid = Light->GetAreaGrid();
+	}
+
+	UpdateString(PropertyIndex::LightName, Name);
+	UpdateStringList(PropertyIndex::LightType, static_cast<int>(LightType));
+	UpdateColor(PropertyIndex::LightColor, Color);
+
+	UpdateFloat(PropertyIndex::LightPower, Power);
+	UpdateBool(PropertyIndex::LightCastShadow, CastShadow);
+
+	UpdateFloat(PropertyIndex::LightAttenuationDistance, AttenuationDistance);
+	UpdateFloat(PropertyIndex::LightAttenuationPower, AttenuationPower);
+
+	UpdateFloat(PropertyIndex::LightSizeX, LightSize.x);
+	UpdateFloat(PropertyIndex::LightSizeY, LightSize.y);
+
+	switch (LightType)
+	{
+	case lcLightType::Point:
+		break;
+
+	case lcLightType::Spot:
+		UpdateFloat(PropertyIndex::LightSpotConeAngle, SpotConeAngle);
+		UpdateFloat(PropertyIndex::LightSpotPenumbraAngle, SpotPenumbraAngle);
+		UpdateFloat(PropertyIndex::LightSpotTightness, SpotTightness);
+		break;
+
+	case lcLightType::Directional:
+		break;
+
+	case lcLightType::Area:
+		UpdateStringList(PropertyIndex::LightAreaShape, static_cast<int>(LightAreaShape));
+		UpdateInteger(PropertyIndex::LightAreaGridX, AreaGrid.x);
+		UpdateInteger(PropertyIndex::LightAreaGridY, AreaGrid.y);
+		break;
+
+	case lcLightType::Count:
+		break;
+	}
+
+	UpdateFloat(PropertyIndex::ObjectPositionX, Position[0]);
+	UpdateFloat(PropertyIndex::ObjectPositionY, Position[1]);
+	UpdateFloat(PropertyIndex::ObjectPositionZ, Position[2]);
+
+	UpdateFloat(PropertyIndex::ObjectRotationX, Rotation[0]);
+	UpdateFloat(PropertyIndex::ObjectRotationY, Rotation[1]);
+	UpdateFloat(PropertyIndex::ObjectRotationZ, Rotation[2]);
 }
 
 void lcPropertiesWidget::Update(const lcArray<lcObject*>& Selection, lcObject* Focus)
@@ -994,6 +1256,7 @@ void lcPropertiesWidget::Update(const lcArray<lcObject*>& Selection, lcObject* F
 	switch (Mode)
 	{
 	case LayoutMode::Empty:
+	case LayoutMode::Multiple:
 		SetEmpty();
 		break;
 
@@ -1007,10 +1270,6 @@ void lcPropertiesWidget::Update(const lcArray<lcObject*>& Selection, lcObject* F
 
 	case LayoutMode::Light:
 		SetLight(Focus);
-		break;
-
-	case LayoutMode::Multiple:
-		SetMultiple();
 		break;
 	}
 }

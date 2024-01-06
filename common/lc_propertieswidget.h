@@ -15,10 +15,13 @@ public:
 
 protected slots:
 	void CategoryStateChanged(bool Expanded);
+	void BoolChanged();
 	void FloatChanged();
+	void IntegerChanged();
 	void StepNumberChanged();
 	void StringChanged();
 	void StringListChanged(int Index);
+	void ColorButtonClicked();
 	void PieceColorButtonClicked();
 	void PieceColorChanged(int ColorIndex);
 	void PieceIdButtonClicked();
@@ -106,10 +109,13 @@ protected:
 	void AddPieceColorProperty(PropertyIndex Index, const QString& Text, const QString& ToolTip);
 	void AddPieceIdProperty(PropertyIndex Index, const QString& Text, const QString& ToolTip);
 
+	void UpdateBool(PropertyIndex Index, bool Value);
 	void UpdateFloat(PropertyIndex Index, float Value);
+	void UpdateInteger(PropertyIndex Index, int Value);
 	void UpdateStepNumber(PropertyIndex Index, lcStep Step, lcStep Min, lcStep Max);
 	void UpdateString(PropertyIndex Index, const QString& Text);
 	void UpdateStringList(PropertyIndex Index, int ListIndex);
+	void UpdateColor(PropertyIndex Index, QColor Color);
 	void UpdatePieceColor(PropertyIndex Index, int ColorIndex);
 	void UpdatePieceId(PropertyIndex Index, const QString& Name);
 
@@ -117,7 +123,6 @@ protected:
 	void SetPiece(const lcArray<lcObject*>& Selection, lcObject* Focus);
 	void SetCamera(lcObject* Focus);
 	void SetLight(lcObject* Focus);
-	void SetMultiple();
 
 	void ClearLayout();
 	void AddTransformCategory();

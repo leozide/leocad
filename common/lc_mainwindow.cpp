@@ -2015,6 +2015,15 @@ void lcMainWindow::UpdateSelectedObjects(bool SelectionChanged)
 
 	mPropertiesWidget->Update(Selection, Focus);
 
+	if (Focus && Focus->IsPiece())
+	{
+		lcPiece* Piece = (lcPiece*)Focus;
+		int ColorIndex = Piece->GetColorIndex();
+		quint32 ColorCode = lcGetColorCode(ColorIndex);
+
+		PreviewPiece(Piece->mPieceInfo->mFileName, ColorCode, false);
+	}
+
 	QString Message;
 
 	if ((Selection.GetSize() == 1) && Focus)

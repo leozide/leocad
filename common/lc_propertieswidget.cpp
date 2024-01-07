@@ -71,7 +71,6 @@ void lcPropertiesWidget::AddLabel(PropertyIndex Index, const QString& Text, cons
 	Label->setToolTip(ToolTip);
 
 	mLayout->addWidget(Label, mLayoutRow, 1);
-	mCurrentCategory->Widgets.push_back(Label);
 
 	mPropertyWidgets[static_cast<int>(Index)].Label = Label;
 }
@@ -123,8 +122,8 @@ void lcPropertiesWidget::AddBoolProperty(PropertyIndex Index, const QString& Tex
 	connect(Widget, &QCheckBox::toggled, this, &lcPropertiesWidget::BoolChanged);
 
 	mLayout->addWidget(Widget, mLayoutRow, 2);
-	mCurrentCategory->Widgets.push_back(Widget);
 
+	mCurrentCategory->Properties.push_back(Index);
 	mPropertyWidgets[static_cast<int>(Index)].Widget = Widget;
 
 	mLayoutRow++;
@@ -323,8 +322,8 @@ void lcPropertiesWidget::AddFloatProperty(PropertyIndex Index, const QString& Te
 	connect(Widget, &QLineEdit::editingFinished, this, &lcPropertiesWidget::FloatChanged);
 
 	mLayout->addWidget(Widget, mLayoutRow, 2);
-	mCurrentCategory->Widgets.push_back(Widget);
 
+	mCurrentCategory->Properties.push_back(Index);
 	mPropertyWidgets[static_cast<int>(Index)].Widget = Widget;
 
 	mLayoutRow++;
@@ -391,8 +390,8 @@ void lcPropertiesWidget::AddIntegerProperty(PropertyIndex Index, const QString& 
 	connect(Widget, &QLineEdit::editingFinished, this, &lcPropertiesWidget::IntegerChanged);
 
 	mLayout->addWidget(Widget, mLayoutRow, 2);
-	mCurrentCategory->Widgets.push_back(Widget);
 
+	mCurrentCategory->Properties.push_back(Index);
 	mPropertyWidgets[static_cast<int>(Index)].Widget = Widget;
 
 	mLayoutRow++;
@@ -451,8 +450,8 @@ void lcPropertiesWidget::AddStepNumberProperty(PropertyIndex Index, const QStrin
 	connect(Widget, &QLineEdit::editingFinished, this, &lcPropertiesWidget::StepNumberChanged);
 
 	mLayout->addWidget(Widget, mLayoutRow, 2);
-	mCurrentCategory->Widgets.push_back(Widget);
 
+	mCurrentCategory->Properties.push_back(Index);
 	mPropertyWidgets[static_cast<int>(Index)].Widget = Widget;
 
 	mLayoutRow++;
@@ -513,8 +512,8 @@ void lcPropertiesWidget::AddStringProperty(PropertyIndex Index, const QString& T
 	connect(Widget, &QLineEdit::editingFinished, this, &lcPropertiesWidget::StringChanged);
 
 	mLayout->addWidget(Widget, mLayoutRow, 2);
-	mCurrentCategory->Widgets.push_back(Widget);
 
+	mCurrentCategory->Properties.push_back(Index);
 	mPropertyWidgets[static_cast<int>(Index)].Widget = Widget;
 
 	mLayoutRow++;
@@ -579,8 +578,8 @@ void lcPropertiesWidget::AddStringListProperty(PropertyIndex Index, const QStrin
 	connect(Widget, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &lcPropertiesWidget::StringListChanged);
 
 	mLayout->addWidget(Widget, mLayoutRow, 2);
-	mCurrentCategory->Widgets.push_back(Widget);
 
+	mCurrentCategory->Properties.push_back(Index);
 	mPropertyWidgets[static_cast<int>(Index)].Widget = Widget;
 
 	mLayoutRow++;
@@ -630,8 +629,8 @@ void lcPropertiesWidget::AddColorProperty(PropertyIndex Index, const QString& Te
 	connect(Widget, &QToolButton::clicked, this, &lcPropertiesWidget::ColorButtonClicked);
 
 	mLayout->addWidget(Widget, mLayoutRow, 2);
-	mCurrentCategory->Widgets.push_back(Widget);
 
+	mCurrentCategory->Properties.push_back(Index);
 	mPropertyWidgets[static_cast<int>(Index)].Widget = Widget;
 
 	mLayoutRow++;
@@ -714,8 +713,8 @@ void lcPropertiesWidget::AddPieceColorProperty(PropertyIndex Index, const QStrin
 	connect(Widget, &QToolButton::clicked, this, &lcPropertiesWidget::PieceColorButtonClicked);
 
 	mLayout->addWidget(Widget, mLayoutRow, 2);
-	mCurrentCategory->Widgets.push_back(Widget);
 
+	mCurrentCategory->Properties.push_back(Index);
 	mPropertyWidgets[static_cast<int>(Index)].Widget = Widget;
 
 	mLayoutRow++;
@@ -780,8 +779,8 @@ void lcPropertiesWidget::AddPieceIdProperty(PropertyIndex Index, const QString& 
 	connect(Widget, &QToolButton::clicked, this, &lcPropertiesWidget::PieceIdButtonClicked);
 
 	mLayout->addWidget(Widget, mLayoutRow, 2);
-	mCurrentCategory->Widgets.push_back(Widget);
 
+	mCurrentCategory->Properties.push_back(Index);
 	mPropertyWidgets[static_cast<int>(Index)].Widget = Widget;
 
 	mLayoutRow++;
@@ -896,8 +895,8 @@ void lcPropertiesWidget::SetLayoutMode(LayoutMode Mode)
 
 void lcPropertiesWidget::SetCategoryWidgetsVisible(CategoryWidgets& Category, bool Visible)
 {
-	for (QWidget* Widget : Category.Widgets)
-		Widget->setVisible(Visible);
+	for (PropertyIndex Index : Category.Properties)
+		SetPropertyVisible(Index, Visible);
 
 	for (int Row : Category.SpacingRows)
 		mLayout->setRowMinimumHeight(Row, Visible ? 5 : 0);
@@ -1120,51 +1119,48 @@ void lcPropertiesWidget::SetLight(lcObject* Focus)
 	const bool IsPointLight = Light && Light->IsPointLight();
 	SetPropertyVisible(PropertyIndex::LightPointSize, IsPointLight);
 
+	if (IsPointLight)
+		UpdateFloat(PropertyIndex::LightPointSize, LightSize.x);
+
 	const bool IsSpotLight = Light && Light->IsSpotLight();
 	SetPropertyVisible(PropertyIndex::LightSpotSize, IsSpotLight);
 	SetPropertyVisible(PropertyIndex::LightSpotConeAngle, IsSpotLight);
 	SetPropertyVisible(PropertyIndex::LightSpotPenumbraAngle, IsSpotLight);
 	SetPropertyVisible(PropertyIndex::LightSpotTightness, IsSpotLight);
 
+	if (IsSpotLight)
+	{
+		UpdateFloat(PropertyIndex::LightSpotSize, LightSize.x);
+		UpdateFloat(PropertyIndex::LightSpotConeAngle, SpotConeAngle);
+		UpdateFloat(PropertyIndex::LightSpotPenumbraAngle, SpotPenumbraAngle);
+		UpdateFloat(PropertyIndex::LightSpotTightness, SpotTightness);
+	}
+
 	const bool IsDirectionalLight = Light && Light->IsDirectionalLight();
 	SetPropertyVisible(PropertyIndex::LightDirectionalSize, IsDirectionalLight);
+
+	if (IsDirectionalLight)
+		UpdateFloat(PropertyIndex::LightDirectionalSize, LightSize.x);
 
 	const bool IsAreaLight = Light && Light->IsAreaLight();
 	SetPropertyVisible(PropertyIndex::LightAreaShape, IsAreaLight);
 
 	const bool IsSquare = IsAreaLight && (LightAreaShape == lcLightAreaShape::Square || LightAreaShape == lcLightAreaShape::Disk);
-	SetPropertyVisible(PropertyIndex::LightAreaSize, !IsSquare);
-	SetPropertyVisible(PropertyIndex::LightAreaSizeX, IsSquare);
-	SetPropertyVisible(PropertyIndex::LightAreaSizeY, IsSquare);
+	SetPropertyVisible(PropertyIndex::LightAreaSize, IsSquare);
+	SetPropertyVisible(PropertyIndex::LightAreaSizeX, !IsSquare);
+	SetPropertyVisible(PropertyIndex::LightAreaSizeY, !IsSquare);
 
 	SetPropertyVisible(PropertyIndex::LightAreaGridX, IsAreaLight);
 	SetPropertyVisible(PropertyIndex::LightAreaGridY, IsAreaLight);
 
-	switch (LightType)
+	if (IsAreaLight)
 	{
-	case lcLightType::Point:
-		UpdateFloat(PropertyIndex::LightPointSize, LightSize.x);
-		break;
-
-	case lcLightType::Spot:
-		UpdateFloat(PropertyIndex::LightSpotSize, LightSize.x);
-		UpdateFloat(PropertyIndex::LightSpotConeAngle, SpotConeAngle);
-		UpdateFloat(PropertyIndex::LightSpotPenumbraAngle, SpotPenumbraAngle);
-		UpdateFloat(PropertyIndex::LightSpotTightness, SpotTightness);
-		break;
-
-	case lcLightType::Directional:
-		UpdateFloat(PropertyIndex::LightDirectionalSize, LightSize.x);
-		break;
-
-	case lcLightType::Area:
 		UpdateStringList(PropertyIndex::LightAreaShape, static_cast<int>(LightAreaShape));
+		UpdateFloat(PropertyIndex::LightAreaSize, LightSize.x);
+		UpdateFloat(PropertyIndex::LightAreaSizeX, LightSize.x);
+		UpdateFloat(PropertyIndex::LightAreaSizeY, LightSize.y);
 		UpdateInteger(PropertyIndex::LightAreaGridX, AreaGrid.x);
 		UpdateInteger(PropertyIndex::LightAreaGridY, AreaGrid.y);
-		break;
-
-	case lcLightType::Count:
-		break;
 	}
 
 	UpdateFloat(PropertyIndex::ObjectPositionX, Position[0]);

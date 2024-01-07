@@ -112,7 +112,7 @@ protected:
 	struct CategoryWidgets
 	{
 		lcCollapsibleWidgetButton* Button = nullptr;
-		std::vector<QWidget*> Widgets;
+		std::vector<PropertyIndex> Properties;
 		std::vector<int> SpacingRows;
 	};
 
